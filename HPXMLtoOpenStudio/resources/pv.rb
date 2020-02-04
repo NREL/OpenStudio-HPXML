@@ -33,15 +33,14 @@ class PV
   end
 
   def self.get_default_inv_eff()
-    return 0.96  # PVWatts default inverter efficiency
+    return 0.96 # PVWatts default inverter efficiency
   end
 
   def self.get_default_system_losses(year_modules_manufactured = nil)
     if not year_modules_manufactured.nil?
       return calc_losses_fraction_from_year(year_modules_manufactured)
     else
-      return 0.14  # PVWatts default system losses
+      return 0.14 # PVWatts default system losses
     end
   end
-
 end

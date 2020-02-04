@@ -41,7 +41,7 @@ class EnergyPlusValidator
         "/HPXML/Building/BuildingDetails/BuildingSummary/Site/extension/ShelterCoefficient" => zero_or_one, # Uses ERI assumption if not provided
         "/HPXML/Building/BuildingDetails/BuildingSummary/Site/extension/DisableNaturalVentilation" => zero_or_one,
         "/HPXML/Building/BuildingDetails/BuildingSummary/BuildingOccupancy/NumberofResidents" => zero_or_one, # Uses ERI assumption if not provided
-        "/HPXML/Building/BuildingDetails/BuildingSummary/BuildingConstruction" => one,   # See [BuildingConstruction]
+        "/HPXML/Building/BuildingDetails/BuildingSummary/BuildingConstruction" => one, # See [BuildingConstruction]
         "/HPXML/Building/BuildingDetails/BuildingSummary/Site/extension/Neighbors" => zero_or_one, # See [Neighbors]
 
         "/HPXML/Building/BuildingDetails/ClimateandRiskZones/WeatherStation" => one, # See [WeatherStation]
@@ -605,12 +605,12 @@ class EnergyPlusValidator
       "/HPXML/Building/BuildingDetails/Appliances/ClothesWasher" => {
         "SystemIdentifier" => one, # Required by HPXML schema
         "[Location='living space' or Location='basement - conditioned' or Location='basement - unconditioned' or Location='garage']" => one,
-        "ModifiedEnergyFactor | IntegratedModifiedEnergyFactor" => zero_or_one,  # See [ClothesWasher=ModifiedEnergyFactor] or [ClothesWasher=IntegratedModifiedEnergyFactor]
-        "RatedAnnualkWh" => zero_or_one,  # See [ClothesWasher=RatedAnnualkWh]
-        "LabelElectricRate" => zero_or_one,  # See [ClothesWasher=LabelElectricRate]
-        "LabelGasRate" => zero_or_one,  # See [ClothesWasher=LabelGasRate]
-        "LabelAnnualGasCost" => zero_or_one,  # See [ClothesWasher=LabelAnnualGasCost]
-        "Capacity" => zero_or_one,  # See [ClothesWasher=Capacity]
+        "ModifiedEnergyFactor | IntegratedModifiedEnergyFactor" => zero_or_one, # See [ClothesWasher=ModifiedEnergyFactor] or [ClothesWasher=IntegratedModifiedEnergyFactor]
+        "RatedAnnualkWh" => zero_or_one, # See [ClothesWasher=RatedAnnualkWh]
+        "LabelElectricRate" => zero_or_one, # See [ClothesWasher=LabelElectricRate]
+        "LabelGasRate" => zero_or_one, # See [ClothesWasher=LabelGasRate]
+        "LabelAnnualGasCost" => zero_or_one, # See [ClothesWasher=LabelAnnualGasCost]
+        "Capacity" => zero_or_one, # See [ClothesWasher=Capacity]
       },
 
       ## [ClothesWasher=ModifiedEnergyFactor]
@@ -700,7 +700,7 @@ class EnergyPlusValidator
       "/HPXML/Building/BuildingDetails/Appliances/Dishwasher" => {
         "SystemIdentifier" => one, # Required by HPXML schema
         "EnergyFactor | RatedAnnualkWh" => zero_or_one, # See [Dishwasher=EnergyFactor] or [Dishwasher=RatedAnnualkWh]
-        "PlaceSettingCapacity" => zero_or_one,  # See [Dishwasher=PlaceSettingCapacity]
+        "PlaceSettingCapacity" => zero_or_one, # See [Dishwasher=PlaceSettingCapacity]
       },
 
       ## [Dishwasher=EnergyFactor]
@@ -728,7 +728,7 @@ class EnergyPlusValidator
         "SystemIdentifier" => one, # Required by HPXML schema
         "[FuelType='natural gas' or FuelType='fuel oil' or FuelType='propane' or FuelType='electricity' or FuelType='wood']" => one,
         "IsInduction" => zero_or_one, # See [CookingRange=IsInduction]
-        "../Oven/IsConvection" => zero_or_one,  # See [Oven=IsConvection]
+        "../Oven/IsConvection" => zero_or_one, # See [Oven=IsConvection]
       },
 
       ## [CookingRange=IsInduction]

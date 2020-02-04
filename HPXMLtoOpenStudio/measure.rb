@@ -1921,7 +1921,7 @@ class OSModel
       cw_agc = clothes_washer_values[:label_annual_gas_cost]
       cw_cap = clothes_washer_values[:capacity]
       cw_mef = clothes_washer_values[:modified_energy_factor]
-      
+
       # use default values for all optional variables if any of the optional variables are not provided
       if cw_ler.nil? or cw_elec_rate.nil? or cw_gas_rate.nil? or cw_agc.nil? or cw_cap.nil? or cw_mef.nil?
         cw_ler = HotWaterAndAppliances.get_clothes_washer_reference_ler()
@@ -1952,7 +1952,7 @@ class OSModel
         cd_control = HotWaterAndAppliances.get_clothes_dryer_reference_control()
         if clothes_dryer_values[:combined_energy_factor].nil?
           cd_ef = HotWaterAndAppliances.calc_clothes_dryer_ef_from_cef(HotWaterAndAppliances.get_clothes_dryer_reference_cef(cd_fuel))
-        else 
+        else
           cd_ef = HotWaterAndAppliances.calc_clothes_dryer_ef_from_cef(clothes_dryer_values[:combined_energy_factor])
         end
       end
@@ -3361,7 +3361,7 @@ class OSModel
       else
         inv_eff = pv_system_values[:inverter_efficiency]
       end
-      
+
       # System loss fraction
       year_modules_manufactured = pv_system_values[:year_modules_manufactured]
       if pv_system_values[:system_losses_fraction].nil?

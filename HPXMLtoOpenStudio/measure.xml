@@ -2,8 +2,8 @@
   <schema_version>3.0</schema_version>
   <name>hpxm_lto_openstudio</name>
   <uid>b1543b30-9465-45ff-ba04-1d1f85e763bc</uid>
-  <version_id>034a5c38-1f15-4d99-9804-bc42d6bbea77</version_id>
-  <version_modified>20200204T001928Z</version_modified>
+  <version_id>f0acaf88-3ff0-4101-8877-19c67a7cf331</version_id>
+  <version_modified>20200204T173027Z</version_modified>
   <xml_checksum>D8922A73</xml_checksum>
   <class_name>HPXMLtoOpenStudio</class_name>
   <display_name>HPXML to OpenStudio Translator</display_name>
@@ -277,12 +277,6 @@
       <checksum>4650FB17</checksum>
     </file>
     <file>
-      <filename>pv.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>F8E698D4</checksum>
-    </file>
-    <file>
       <filename>meta_measure.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
@@ -359,12 +353,6 @@
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
       <checksum>5115C10B</checksum>
-    </file>
-    <file>
-      <filename>EPvalidator.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>2A7B4816</checksum>
     </file>
     <file>
       <filename>airflow.rb</filename>
@@ -1687,6 +1675,18 @@
       <checksum>5E98FAA4</checksum>
     </file>
     <file>
+      <filename>pv.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>8B5F0A97</checksum>
+    </file>
+    <file>
+      <filename>EPvalidator.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>C831D437</checksum>
+    </file>
+    <file>
       <version>
         <software_program>OpenStudio</software_program>
         <identifier>2.1.1</identifier>
@@ -1695,7 +1695,127 @@
       <filename>measure.rb</filename>
       <filetype>rb</filetype>
       <usage_type>script</usage_type>
-      <checksum>4C2DBF65</checksum>
+      <checksum>4F04C829</checksum>
+    </file>
+    <file>
+      <filename>base-pv-array-1axis-testing-yrManufactured.xml</filename>
+      <filetype>xml</filetype>
+      <usage_type>test</usage_type>
+      <checksum>BB73A54F</checksum>
+    </file>
+    <file>
+      <filename>base-pv-array-1axis-testing.xml</filename>
+      <filetype>xml</filetype>
+      <usage_type>test</usage_type>
+      <checksum>E9CA79C6</checksum>
+    </file>
+    <file>
+      <filename>base-testing-avgCeilingHeight-condBldgVol.xml</filename>
+      <filetype>xml</filetype>
+      <usage_type>test</usage_type>
+      <checksum>BCCE60FD</checksum>
+    </file>
+    <file>
+      <filename>base-testing-avgCeilingHeight.xml</filename>
+      <filetype>xml</filetype>
+      <usage_type>test</usage_type>
+      <checksum>DB2680B0</checksum>
+    </file>
+    <file>
+      <filename>base-testing-cloDryer-incompleteInput.xml</filename>
+      <filetype>xml</filetype>
+      <usage_type>test</usage_type>
+      <checksum>2CFDCA1A</checksum>
+    </file>
+    <file>
+      <filename>base-testing-cloDryer-Ref.xml</filename>
+      <filetype>xml</filetype>
+      <usage_type>test</usage_type>
+      <checksum>A37FF9CD</checksum>
+    </file>
+    <file>
+      <filename>base-testing-cloDryer.xml</filename>
+      <filetype>xml</filetype>
+      <usage_type>test</usage_type>
+      <checksum>14487014</checksum>
+    </file>
+    <file>
+      <filename>base-testing-cloWasher-incompleteInput.xml</filename>
+      <filetype>xml</filetype>
+      <usage_type>test</usage_type>
+      <checksum>1AF646C7</checksum>
+    </file>
+    <file>
+      <filename>base-testing-cloWasher-Ref.xml</filename>
+      <filetype>xml</filetype>
+      <usage_type>test</usage_type>
+      <checksum>B7A9D4DE</checksum>
+    </file>
+    <file>
+      <filename>base-testing-cloWasher.xml</filename>
+      <filetype>xml</filetype>
+      <usage_type>test</usage_type>
+      <checksum>FBCE0160</checksum>
+    </file>
+    <file>
+      <filename>base-testing-condBldgVol.xml</filename>
+      <filetype>xml</filetype>
+      <usage_type>test</usage_type>
+      <checksum>AB38A415</checksum>
+    </file>
+    <file>
+      <filename>base-testing-cookingRange-incompleteInput.xml</filename>
+      <filetype>xml</filetype>
+      <usage_type>test</usage_type>
+      <checksum>B5FCD6CF</checksum>
+    </file>
+    <file>
+      <filename>base-testing-cookingRange-Ref.xml</filename>
+      <filetype>xml</filetype>
+      <usage_type>test</usage_type>
+      <checksum>AB38A415</checksum>
+    </file>
+    <file>
+      <filename>base-testing-cookingRange.xml</filename>
+      <filetype>xml</filetype>
+      <usage_type>test</usage_type>
+      <checksum>32D2A4D7</checksum>
+    </file>
+    <file>
+      <filename>base-testing-dishWasher-incompleteInput.xml</filename>
+      <filetype>xml</filetype>
+      <usage_type>test</usage_type>
+      <checksum>8A4C7293</checksum>
+    </file>
+    <file>
+      <filename>base-testing-dishWasher-Ref.xml</filename>
+      <filetype>xml</filetype>
+      <usage_type>test</usage_type>
+      <checksum>84B0BDB2</checksum>
+    </file>
+    <file>
+      <filename>base-testing-dishWasher.xml</filename>
+      <filetype>xml</filetype>
+      <usage_type>test</usage_type>
+      <checksum>B0655415</checksum>
+    </file>
+    <file>
+      <filename>base-testing-refrigerator-incompleteInput.xml</filename>
+      <filetype>xml</filetype>
+      <usage_type>test</usage_type>
+      <checksum>16ED3C92</checksum>
+    </file>
+    <file>
+      <filename>base-testing-refrigerator-Ref.xml</filename>
+      <filetype>xml</filetype>
+      <usage_type>test</usage_type>
+      <checksum>AD25DA41</checksum>
+    </file>
+    <file>
+      <filename>base-testing-refrigerator.xml</filename>
+      <filetype>xml</filetype>
+      <usage_type>test</usage_type>
+      <checksum>16ED3C92</checksum>
     </file>
   </files>
 </measure>
