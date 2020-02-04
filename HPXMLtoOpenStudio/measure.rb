@@ -24,10 +24,10 @@ require_relative "resources/xmlhelper"
 require_relative "resources/hpxml"
 
 # start the measure
-class HPXMLTranslator < OpenStudio::Measure::ModelMeasure
+class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
   # human readable name
   def name
-    return "HPXML Translator"
+    return "HPXML to OpenStudio Translator"
   end
 
   # human readable description
@@ -55,12 +55,6 @@ class HPXMLTranslator < OpenStudio::Measure::ModelMeasure
     arg.setDefaultValue("weather")
     args << arg
 
-    arg = OpenStudio::Measure::OSArgument.makeStringArgument("schemas_dir", false)
-    arg.setDisplayName("HPXML Schemas Directory")
-    arg.setDescription("Absolute/relative path of the hpxml schemas directory.")
-    arg.setDefaultValue("hpxml_schemas")
-    args << arg
-
     arg = OpenStudio::Measure::OSArgument.makeStringArgument("epw_output_path", false)
     arg.setDisplayName("EPW Output File Path")
     arg.setDescription("Absolute/relative path of the output EPW file.")
@@ -69,11 +63,6 @@ class HPXMLTranslator < OpenStudio::Measure::ModelMeasure
     arg = OpenStudio::Measure::OSArgument.makeStringArgument("osm_output_path", false)
     arg.setDisplayName("OSM Output File Path")
     arg.setDescription("Absolute/relative path of the output OSM file.")
-    args << arg
-
-    arg = OpenStudio::Measure::OSArgument.makeStringArgument("map_tsv_dir", false)
-    arg.setDisplayName("Map TSV Directory")
-    arg.setDescription("Creates TSV files in the specified directory that map some HPXML object names to EnergyPlus object names. Required for ERI calculation.")
     args << arg
 
     return args
@@ -97,10 +86,8 @@ class HPXMLTranslator < OpenStudio::Measure::ModelMeasure
     # assign the user inputs to variables
     hpxml_path = runner.getStringArgumentValue("hpxml_path", user_arguments)
     weather_dir = runner.getStringArgumentValue("weather_dir", user_arguments)
-    schemas_dir = runner.getOptionalStringArgumentValue("schemas_dir", user_arguments)
     epw_output_path = runner.getOptionalStringArgumentValue("epw_output_path", user_arguments)
     osm_output_path = runner.getOptionalStringArgumentValue("osm_output_path", user_arguments)
-    map_tsv_dir = runner.getOptionalStringArgumentValue("map_tsv_dir", user_arguments)
 
     unless (Pathname.new hpxml_path).absolute?
       hpxml_path = File.expand_path(File.join(File.dirname(__FILE__), hpxml_path))
@@ -109,16 +96,18 @@ class HPXMLTranslator < OpenStudio::Measure::ModelMeasure
       fail "'#{hpxml_path}' does not exist or is not an .xml file."
     end
 
+    model.getBuilding.additionalProperties.setFeature("hpxml_path", hpxml_path)
+
     hpxml_doc = XMLHelper.parse_file(hpxml_path)
 
-    if not validate_hpxml(runner, hpxml_path, hpxml_doc, schemas_dir)
+    if not validate_hpxml(runner, hpxml_path, hpxml_doc)
       return false
     end
 
     begin
       # Weather file
       unless (Pathname.new weather_dir).absolute?
-        weather_dir = File.expand_path(File.join(File.dirname(__FILE__), weather_dir))
+        weather_dir = File.expand_path(File.join(File.dirname(__FILE__), "..", weather_dir))
       end
       climate_and_risk_zones_values = HPXML.get_climate_and_risk_zones_values(climate_and_risk_zones: hpxml_doc.elements["/HPXML/Building/BuildingDetails/ClimateandRiskZones"])
       epw_path = climate_and_risk_zones_values[:weather_station_epw_filename]
@@ -162,7 +151,7 @@ class HPXMLTranslator < OpenStudio::Measure::ModelMeasure
       weather = Location.apply(model, runner, epw_path, cache_path, "NA", "NA")
 
       # Create OpenStudio model
-      OSModel.create(hpxml_doc, runner, model, weather, map_tsv_dir, hpxml_path)
+      OSModel.create(hpxml_doc, runner, model, weather, hpxml_path)
     rescue Exception => e
       # Report exception
       runner.registerError("#{e.message}\n#{e.backtrace.join("\n")}")
@@ -177,31 +166,17 @@ class HPXMLTranslator < OpenStudio::Measure::ModelMeasure
     return true
   end
 
-  def validate_hpxml(runner, hpxml_path, hpxml_doc, schemas_dir)
-    if schemas_dir.is_initialized
-      schemas_dir = schemas_dir.get
-      unless (Pathname.new schemas_dir).absolute?
-        schemas_dir = File.expand_path(File.join(File.dirname(__FILE__), schemas_dir))
-      end
-      unless Dir.exists?(schemas_dir)
-        fail "'#{schemas_dir}' does not exist."
-      end
-    else
-      schemas_dir = nil
-    end
+  def validate_hpxml(runner, hpxml_path, hpxml_doc)
+    schemas_dir = File.join(File.dirname(__FILE__), "resources")
 
     is_valid = true
 
     # Validate input HPXML against schema
-    if not schemas_dir.nil?
-      XMLHelper.validate(hpxml_doc.to_s, File.join(schemas_dir, "HPXML.xsd"), runner).each do |error|
-        runner.registerError("#{hpxml_path}: #{error.to_s}")
-        is_valid = false
-      end
-      runner.registerInfo("#{hpxml_path}: Validated against HPXML schema.")
-    else
-      runner.registerWarning("#{hpxml_path}: No schema dir provided, no HPXML validation performed.")
+    XMLHelper.validate(hpxml_doc.to_s, File.join(schemas_dir, "HPXML.xsd"), runner).each do |error|
+      runner.registerError("#{hpxml_path}: #{error.to_s}")
+      is_valid = false
     end
+    runner.registerInfo("#{hpxml_path}: Validated against HPXML schema.")
 
     # Validate input HPXML against EnergyPlus Use Case
     errors = EnergyPlusValidator.run_validator(hpxml_doc)
@@ -216,7 +191,7 @@ class HPXMLTranslator < OpenStudio::Measure::ModelMeasure
 end
 
 class OSModel
-  def self.create(hpxml_doc, runner, model, weather, map_tsv_dir, hpxml_path)
+  def self.create(hpxml_doc, runner, model, weather, hpxml_path)
     @hpxml_path = hpxml_path
     hpxml = hpxml_doc.elements["HPXML"]
     hpxml_values = HPXML.get_hpxml_values(hpxml: hpxml)
@@ -306,7 +281,7 @@ class OSModel
     add_hvac_sizing(runner, model, weather)
     add_fuel_heating_eae(runner, model, building)
     add_photovoltaics(runner, model, building)
-    add_outputs(runner, model, map_tsv_dir)
+    add_outputs(runner, model)
   end
 
   private
@@ -2146,14 +2121,15 @@ class OSModel
             related_hvac_list << heating_source_id
             boiler_sys = get_boiler_and_plant_loop(@hvac_map, heating_source_id, sys_id)
             boiler_fuel_type = Waterheater.get_combi_system_fuel(heating_source_id, building.elements["BuildingDetails"])
+            boiler_afue = Waterheater.get_combi_system_afue(heating_source_id, building.elements["BuildingDetails"])
           else
             fail "RelatedHVACSystem '#{heating_source_id}' for water heating system '#{sys_id}' is already attached to another water heating system."
           end
           @dhw_map[sys_id] << boiler_sys['boiler']
 
-          Waterheater.apply_indirect(model, runner, space, vol, setpoint_temp, ec_adj, @nbeds,
-                                     boiler_sys['boiler'], boiler_sys['plant_loop'], boiler_fuel_type,
-                                     @dhw_map, sys_id, wh_type, jacket_r, standby_loss)
+          Waterheater.apply_combi(model, runner, space, vol, setpoint_temp, ec_adj, @nbeds,
+                                  boiler_sys['boiler'], boiler_sys['plant_loop'], boiler_fuel_type,
+                                  boiler_afue, @dhw_map, sys_id, wh_type, jacket_r, standby_loss)
 
         else
 
@@ -3346,165 +3322,24 @@ class OSModel
     end
   end
 
-  def self.add_outputs(runner, model, map_tsv_dir)
-    add_output_variables(runner, model, map_tsv_dir)
-    add_output_meters(runner, model)
+  def self.add_outputs(runner, model)
+    # Store some data for use in reporting measure
+    model.getBuilding.additionalProperties.setFeature("hvac_map", map_to_string(@hvac_map))
+    model.getBuilding.additionalProperties.setFeature("dhw_map", map_to_string(@dhw_map))
+
     add_component_loads_output(runner, model)
   end
 
-  def self.add_output_variables(runner, model, map_tsv_dir)
-    hvac_output_vars = [OutputVars.SpaceHeatingElectricity,
-                        OutputVars.SpaceHeatingNaturalGas,
-                        OutputVars.SpaceHeatingFuelOil,
-                        OutputVars.SpaceHeatingPropane,
-                        OutputVars.SpaceHeatingDFHPPrimaryLoad,
-                        OutputVars.SpaceHeatingDFHPBackupLoad,
-                        OutputVars.SpaceCoolingElectricity]
-
-    dhw_output_vars = [OutputVars.WaterHeatingElectricity,
-                       OutputVars.WaterHeatingElectricityRecircPump,
-                       OutputVars.WaterHeatingElectricitySolarThermalPump,
-                       OutputVars.WaterHeatingCombiBoilerHeatExchanger, # Needed to disaggregate hot water energy from heating energy
-                       OutputVars.WaterHeatingCombiBoiler,              # Needed to disaggregate hot water energy from heating energy
-                       OutputVars.WaterHeatingNaturalGas,
-                       OutputVars.WaterHeatingFuelOil,
-                       OutputVars.WaterHeatingPropane,
-                       OutputVars.WaterHeatingLoad,
-                       OutputVars.WaterHeatingLoadTankLosses,
-                       OutputVars.WaterHeaterLoadDesuperheater,
-                       OutputVars.WaterHeaterLoadSolarThermal]
-
-    # Remove objects that are not referenced by output vars and are not
-    # EMS output vars.
-    { @hvac_map => hvac_output_vars,
-      @dhw_map => dhw_output_vars }.each do |map, vars|
-      all_vars = vars.reduce({}, :merge)
-      map.each do |sys_id, objects|
-        objects_to_delete = []
-        objects.each do |object|
-          next if object.is_a? OpenStudio::Model::EnergyManagementSystemOutputVariable
-          next unless all_vars[object.class.to_s].nil? # Referenced?
-
-          objects_to_delete << object
-        end
-        objects_to_delete.uniq.each do |object|
-          map[sys_id].delete object
-        end
+  def self.map_to_string(map)
+    map_str = {}
+    map.each do |sys_id, objects|
+      object_name_list = []
+      objects.uniq.each do |object|
+        object_name_list << object.name.to_s
       end
+      map_str[sys_id] = object_name_list if object_name_list.size > 0
     end
-
-    # Add output variables to model
-    ems_objects = []
-    @hvac_map.each do |sys_id, hvac_objects|
-      hvac_objects.each do |hvac_object|
-        if hvac_object.is_a? OpenStudio::Model::EnergyManagementSystemOutputVariable
-          ems_objects << hvac_object
-        else
-          hvac_output_vars.each do |hvac_output_var|
-            add_output_variable(model, hvac_output_var, hvac_object)
-          end
-        end
-      end
-    end
-    @dhw_map.each do |sys_id, dhw_objects|
-      dhw_objects.each do |dhw_object|
-        if dhw_object.is_a? OpenStudio::Model::EnergyManagementSystemOutputVariable
-          ems_objects << dhw_object
-        else
-          dhw_output_vars.each do |dhw_output_var|
-            add_output_variable(model, dhw_output_var, dhw_object)
-          end
-        end
-      end
-    end
-
-    # Add EMS output variables to model
-    ems_objects.uniq.each do |ems_object|
-      add_output_variable(model, nil, ems_object)
-    end
-
-    if map_tsv_dir.is_initialized
-      # Write maps to file
-      map_tsv_dir = map_tsv_dir.get
-      write_mapping(@hvac_map, File.join(map_tsv_dir, "map_hvac.tsv"))
-      write_mapping(@dhw_map, File.join(map_tsv_dir, "map_water_heating.tsv"))
-    end
-  end
-
-  def self.add_output_variable(model, vars, object)
-    if object.is_a? OpenStudio::Model::EnergyManagementSystemOutputVariable
-      outputVariable = OpenStudio::Model::OutputVariable.new(object.name.to_s, model)
-      outputVariable.setReportingFrequency('runperiod')
-      outputVariable.setKeyValue('*')
-    else
-      return if vars[object.class.to_s].nil?
-
-      vars[object.class.to_s].each do |object_var|
-        outputVariable = OpenStudio::Model::OutputVariable.new(object_var, model)
-        outputVariable.setReportingFrequency('runperiod')
-        outputVariable.setKeyValue(object.name.to_s)
-      end
-    end
-  end
-
-  def self.write_mapping(map, map_tsv_path)
-    # Write simple mapping TSV file for use by ERI calculation. Mapping file correlates
-    # EnergyPlus object name to a HPXML object name.
-
-    CSV.open(map_tsv_path, 'w', col_sep: "\t") do |tsv|
-      # Header
-      tsv << ["HPXML Name", "E+ Name(s)"]
-
-      map.each do |sys_id, objects|
-        out_data = [sys_id]
-        objects.uniq.each do |object|
-          out_data << object.name.to_s
-        end
-        tsv << out_data if out_data.size > 1
-      end
-    end
-  end
-
-  def self.add_output_meters(runner, model)
-    # Add annual output meters to increase precision of outputs relative to, e.g., ABUPS report
-    meter_names = ["Electricity:Facility",
-                   "Gas:Facility",
-                   "FuelOil#1:Facility",
-                   "Propane:Facility",
-                   "Heating:EnergyTransfer",
-                   "Cooling:EnergyTransfer",
-                   "Heating:DistrictHeating",
-                   "Cooling:DistrictCooling",
-                   "#{Constants.ObjectNameInteriorLighting}:InteriorLights:Electricity",
-                   "#{Constants.ObjectNameGarageLighting}:InteriorLights:Electricity",
-                   "ExteriorLights:Electricity",
-                   "InteriorEquipment:Electricity",
-                   "InteriorEquipment:Gas",
-                   "InteriorEquipment:FuelOil#1",
-                   "InteriorEquipment:Propane",
-                   "#{Constants.ObjectNameRefrigerator}:InteriorEquipment:Electricity",
-                   "#{Constants.ObjectNameDishwasher}:InteriorEquipment:Electricity",
-                   "#{Constants.ObjectNameClothesWasher}:InteriorEquipment:Electricity",
-                   "#{Constants.ObjectNameClothesDryer}:InteriorEquipment:Electricity",
-                   "#{Constants.ObjectNameClothesDryer}:InteriorEquipment:Gas",
-                   "#{Constants.ObjectNameClothesDryer}:InteriorEquipment:FuelOil#1",
-                   "#{Constants.ObjectNameClothesDryer}:InteriorEquipment:Propane",
-                   "#{Constants.ObjectNameMiscPlugLoads}:InteriorEquipment:Electricity",
-                   "#{Constants.ObjectNameMiscTelevision}:InteriorEquipment:Electricity",
-                   "#{Constants.ObjectNameCookingRange}:InteriorEquipment:Electricity",
-                   "#{Constants.ObjectNameCookingRange}:InteriorEquipment:Gas",
-                   "#{Constants.ObjectNameCookingRange}:InteriorEquipment:FuelOil#1",
-                   "#{Constants.ObjectNameCookingRange}:InteriorEquipment:Propane",
-                   "#{Constants.ObjectNameCeilingFan}:InteriorEquipment:Electricity",
-                   "#{Constants.ObjectNameMechanicalVentilation} house fan:InteriorEquipment:Electricity",
-                   "#{Constants.ObjectNameWholeHouseFan}:InteriorEquipment:Electricity",
-                   "ElectricityProduced:Facility"]
-
-    meter_names.each do |meter_name|
-      output_meter = OpenStudio::Model::OutputMeter.new(model)
-      output_meter.setName(meter_name)
-      output_meter.setReportingFrequency('runperiod')
-    end
+    return map_str.to_s
   end
 
   def self.add_component_loads_output(runner, model)
@@ -3865,7 +3700,7 @@ class OSModel
 
     # EMS program
     program = OpenStudio::Model::EnergyManagementSystemProgram.new(model)
-    program.setName("component loads program")
+    program.setName(Constants.ObjectNameComponentLoadsProgram)
 
     # EMS program: Surfaces
     surfaces_sensors.each do |k, surface_sensors|
@@ -3972,38 +3807,9 @@ class OSModel
       program.addLine("Set #{prev_hr_setpoint_vars[mode].name} = #{setpoint_sensors[mode].name}")
     end
 
-    # EMS output variables
-    [:htg, :clg].each do |mode|
-      surfaces_sensors.keys.each do |k|
-        ems_output_var = OpenStudio::Model::EnergyManagementSystemOutputVariable.new(model, "#{mode}_#{k.to_s}")
-        ems_output_var.setName("#{mode}_#{k.to_s}_outvar")
-        ems_output_var.setTypeOfDataInVariable("Summed")
-        ems_output_var.setUpdateFrequency("ZoneTimestep")
-        ems_output_var.setEMSProgramOrSubroutineName(program)
-        ems_output_var.setUnits("J")
-
-        output_var = OpenStudio::Model::OutputVariable.new(ems_output_var.name.to_s, model)
-        output_var.setReportingFrequency('runperiod')
-        output_var.setKeyValue('*')
-      end
-
-      nonsurf_names.each do |k|
-        ems_output_var = OpenStudio::Model::EnergyManagementSystemOutputVariable.new(model, "#{mode}_#{k}")
-        ems_output_var.setName("#{mode}_#{k}_outvar")
-        ems_output_var.setTypeOfDataInVariable("Summed")
-        ems_output_var.setUpdateFrequency("ZoneTimestep")
-        ems_output_var.setEMSProgramOrSubroutineName(program)
-        ems_output_var.setUnits("J")
-
-        output_var = OpenStudio::Model::OutputVariable.new(ems_output_var.name.to_s, model)
-        output_var.setReportingFrequency('runperiod')
-        output_var.setKeyValue('*')
-      end
-    end
-
     # EMS calling manager
     program_calling_manager = OpenStudio::Model::EnergyManagementSystemProgramCallingManager.new(model)
-    program_calling_manager.setName("component loads program calling manager")
+    program_calling_manager.setName("#{program.name.to_s} calling manager")
     program_calling_manager.setCallingPoint("EndOfZoneTimestepAfterZoneReporting")
     program_calling_manager.addProgram(program)
   end
@@ -4538,6 +4344,45 @@ class OSModel
     end
     return kiva_fnd_walls.product(kiva_slabs)
   end
+
+  def self.get_foundation_and_walls_top(building)
+    foundation_top = 0
+    building.elements.each("BuildingDetails/Enclosure/FoundationWalls/FoundationWall") do |fnd_wall|
+      fnd_wall_values = HPXML.get_foundation_wall_values(foundation_wall: fnd_wall)
+      top = -1 * fnd_wall_values[:depth_below_grade] + fnd_wall_values[:height]
+      foundation_top = top if top > foundation_top
+    end
+    walls_top = foundation_top + 8.0 * @ncfl_ag
+    return foundation_top, walls_top
+  end
+
+  def self.get_ac_num_speeds(seer)
+    if seer <= 15
+      return "1-Speed"
+    elsif seer <= 21
+      return "2-Speed"
+    elsif seer > 21
+      return "Variable-Speed"
+    end
+  end
+
+  def self.get_ashp_num_speeds_by_seer(seer)
+    if seer <= 15
+      return "1-Speed"
+    elsif seer <= 21
+      return "2-Speed"
+    elsif seer > 21
+      return "Variable-Speed"
+    end
+  end
+
+  def self.get_fan_power_installed(seer)
+    if seer <= 15
+      return 0.365 # W/cfm
+    else
+      return 0.14 # W/cfm
+    end
+  end
 end
 
 class WoodStudConstructionSet
@@ -4627,72 +4472,5 @@ class GenericConstructionSet
   attr_accessor(:rigid_r, :osb_thick_in, :drywall_thick_in, :exterior_material)
 end
 
-def is_thermal_boundary(surface_values)
-  if ["other housing unit", "other housing unit above", "other housing unit below"].include? surface_values[:exterior_adjacent_to]
-    return false # adiabatic
-  end
-
-  interior_conditioned = is_adjacent_to_conditioned(surface_values[:interior_adjacent_to])
-  exterior_conditioned = is_adjacent_to_conditioned(surface_values[:exterior_adjacent_to])
-  return (interior_conditioned != exterior_conditioned)
-end
-
-def is_adjacent_to_conditioned(adjacent_to)
-  if ["living space", "basement - conditioned"].include? adjacent_to
-    return true
-  end
-
-  return false
-end
-
-def hpxml_framefloor_is_ceiling(floor_interior_adjacent_to, floor_exterior_adjacent_to)
-  if ["attic - vented", "attic - unvented"].include? floor_interior_adjacent_to
-    return true
-  elsif ["attic - vented", "attic - unvented", "other housing unit above"].include? floor_exterior_adjacent_to
-    return true
-  end
-
-  return false
-end
-
-def get_foundation_and_walls_top(building)
-  foundation_top = 0
-  building.elements.each("BuildingDetails/Enclosure/FoundationWalls/FoundationWall") do |fnd_wall|
-    fnd_wall_values = HPXML.get_foundation_wall_values(foundation_wall: fnd_wall)
-    top = -1 * fnd_wall_values[:depth_below_grade] + fnd_wall_values[:height]
-    foundation_top = top if top > foundation_top
-  end
-  walls_top = foundation_top + 8.0 * @ncfl_ag
-  return foundation_top, walls_top
-end
-
-def get_ac_num_speeds(seer)
-  if seer <= 15
-    return "1-Speed"
-  elsif seer <= 21
-    return "2-Speed"
-  elsif seer > 21
-    return "Variable-Speed"
-  end
-end
-
-def get_ashp_num_speeds_by_seer(seer)
-  if seer <= 15
-    return "1-Speed"
-  elsif seer <= 21
-    return "2-Speed"
-  elsif seer > 21
-    return "Variable-Speed"
-  end
-end
-
-def get_fan_power_installed(seer)
-  if seer <= 15
-    return 0.365 # W/cfm
-  else
-    return 0.14 # W/cfm
-  end
-end
-
 # register the measure to be used by the application
-HPXMLTranslator.new.registerWithApplication
+HPXMLtoOpenStudio.new.registerWithApplication

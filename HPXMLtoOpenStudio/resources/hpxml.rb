@@ -7,6 +7,7 @@ class HPXML
                         software_program_used: nil,
                         software_program_version: nil,
                         eri_calculation_version: nil,
+                        eri_design: nil,
                         building_id:,
                         event_type:)
     doc = XMLHelper.create_doc(version = "1.0", encoding = "UTF-8")
@@ -26,7 +27,8 @@ class HPXML
     XMLHelper.add_element(software_info, "SoftwareProgramUsed", software_program_used) unless software_program_used.nil?
     XMLHelper.add_element(software_info, "SoftwareProgramVersion", software_program_version) unless software_program_version.nil?
     HPXML.add_extension(parent: software_info,
-                        extensions: { "ERICalculation/Version": eri_calculation_version })
+                        extensions: { "ERICalculation/Version": eri_calculation_version,
+                                      "ERICalculation/Design": eri_design })
 
     building = XMLHelper.add_element(hpxml, "Building")
     building_building_id = XMLHelper.add_element(building, "BuildingID")
@@ -49,6 +51,7 @@ class HPXML
     vals[:software_program_used] = XMLHelper.get_value(hpxml, "SoftwareInfo/SoftwareProgramUsed")
     vals[:software_program_version] = XMLHelper.get_value(hpxml, "SoftwareInfo/SoftwareProgramVersion")
     vals[:eri_calculation_version] = XMLHelper.get_value(hpxml, "SoftwareInfo/extension/ERICalculation/Version")
+    vals[:eri_design] = XMLHelper.get_value(hpxml, "SoftwareInfo/extension/ERICalculation/Design")
     vals[:building_id] = HPXML.get_id(hpxml, "Building/BuildingID")
     vals[:event_type] = XMLHelper.get_value(hpxml, "Building/ProjectStatus/EventType")
     return vals
@@ -2088,4 +2091,34 @@ class HPXML
 
     return Boolean(value)
   end
+end
+
+# Helper methods
+
+def is_thermal_boundary(surface_values)
+  if ["other housing unit", "other housing unit above", "other housing unit below"].include? surface_values[:exterior_adjacent_to]
+    return false # adiabatic
+  end
+
+  interior_conditioned = is_adjacent_to_conditioned(surface_values[:interior_adjacent_to])
+  exterior_conditioned = is_adjacent_to_conditioned(surface_values[:exterior_adjacent_to])
+  return (interior_conditioned != exterior_conditioned)
+end
+
+def is_adjacent_to_conditioned(adjacent_to)
+  if ["living space", "basement - conditioned"].include? adjacent_to
+    return true
+  end
+
+  return false
+end
+
+def hpxml_framefloor_is_ceiling(floor_interior_adjacent_to, floor_exterior_adjacent_to)
+  if ["attic - vented", "attic - unvented"].include? floor_interior_adjacent_to
+    return true
+  elsif ["attic - vented", "attic - unvented", "other housing unit above"].include? floor_exterior_adjacent_to
+    return true
+  end
+
+  return false
 end

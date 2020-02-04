@@ -1,15 +1,105 @@
-HPXML Generation
-================
+HPXMLtoOpenStudio Measure
+=========================
 
-The OpenStudio-HPXML measure requires a building description in an `HPXML file <https://hpxml.nrel.gov/>`_ format.
+The HPXMLtoOpenStudio measure requires a building description in an `HPXML file <https://hpxml.nrel.gov/>`_ format.
 HPXML is an open data standard for collecting and transferring home energy data. 
 Using HPXML files reduces the complexity and effort for software developers to leverage the EnergyPlus simulation engine.
 
-The `HPXML Toolbox website <https://hpxml.nrel.gov/>`_ provides several resources for software developers, including:
+Capabilities
+------------
 
-#. An interactive schema validator
-#. A data dictionary
-#. An implementation guide
+The following building features/technologies are available for modeling via the HPXMLtoOpenStudio measure:
+
+- Enclosure
+
+  - Attics
+  
+    - Vented
+    - Unvented
+    - Conditioned
+    - Radiant Barriers
+    
+  - Foundations
+  
+    - Slab
+    - Unconditioned Basement
+    - Conditioned Basement
+    - Vented Crawlspace
+    - Unvented Crawlspace
+    - Ambient
+    
+  - Garages
+  - Windows & Overhangs
+  - Skylights
+  - Doors
+  
+- HVAC
+
+  - Heating Systems
+  
+    - Electric Resistance
+    - Furnaces
+    - Wall Furnaces & Stoves
+    - Boilers
+    - Portable Heaters
+    
+  - Cooling Systems
+  
+    - Central Air Conditioners
+    - Room Air Conditioners
+    - Evaporative Coolers
+    
+  - Heat Pumps
+  
+    - Air Source Heat Pumps
+    - Mini Split Heat Pumps
+    - Ground Source Heat Pumps
+    - Dual-Fuel Heat Pumps
+    
+  - Setpoints
+  - Ducts
+  
+- Water Heating
+
+  - Water Heaters
+  
+    - Storage Tank
+    - Instantaneous Tankless
+    - Heat Pump Water Heater
+    - Indirect Water Heater (Combination Boiler)
+    - Tankless Coil (Combination Boiler)
+
+  - Solar Hot Water
+  - Desuperheaters
+  - Hot Water Distribution
+  
+    - Recirculation
+    
+  - Drain Water Heat Recovery
+  - Low-Flow Fixtures
+  
+- Mechanical Ventilation
+
+  - Exhaust Only
+  - Supply Only
+  - Balanced
+  - Energy Recovery Ventilator
+  - Heat Recovery Ventilator
+  - Central Fan Integrated Supply
+  
+- Whole House Fan
+- Photovoltaics
+- Appliances
+
+  - Clothes Washer
+  - Clothes Dryer
+  - Dishwasher
+  - Refrigerator
+  - Cooking Range/Oven
+  
+- Lighting
+- Ceiling Fans
+- Plug Loads
 
 EnergyPlus Use Case for HPXML
 -----------------------------
@@ -17,7 +107,13 @@ EnergyPlus Use Case for HPXML
 HPXML is an flexible and extensible format, where nearly all elements in the schema are optional and custom elements can be included.
 Because of this, an EnergyPlus Use Case for HPXML has been developed that specifies the HPXML elements or enumeration choices required to run the measure.
 
-Software developers should use the `EnergyPlus Use Case <https://github.com/NREL/OpenStudio-HPXML/blob/master/resources/EPvalidator.rb>`_ (defined as a set of conditional XPath expressions) as well as the `HPXML schema <https://github.com/NREL/OpenStudio-HPXML/tree/master/hpxml_schemas>`_ to construct valid HPXML files for EnergyPlus simulations.
+Software developers should use the EnergyPlus Use Case (found at ``HPXMLtoOpenStudio/resources/EPvalidator.rb``, which defines sets of conditional XPath expressions) as well as the HPXML schema (HPXML.xsd) to construct valid HPXML files for EnergyPlus simulations.
+
+The `HPXML Toolbox website <https://hpxml.nrel.gov/>`_ also provides several resources for software developers, including:
+
+#. An interactive schema validator
+#. A data dictionary
+#. An implementation guide
 
 Building Details
 ~~~~~~~~~~~~~~~~
@@ -60,7 +156,7 @@ Weather File
 The ``ClimateandRiskZones/WeatherStation`` element specifies the EnergyPlus weather file (EPW) to be used in the simulation.
 The weather file can be entered in one of two ways:
 
-#. Using the ``WeatherStation/WMO``, which must be one of the acceptable TMY3 WMO station numbers found in the `weather/data.csv <https://github.com/NREL/OpenStudio-HPXML/blob/master/weather/data.csv>`_ file.
+#. Using the ``WeatherStation/WMO``, which must be one of the acceptable TMY3 WMO station numbers found in the ``weather/data.csv`` file.
    The full set of U.S. TMY3 weather files can be `downloaded here <http://s3.amazonaws.com/epwweatherfiles/tmy3s-cache-csv.zip>`_.
 #. Using the ``WeatherStation/extension/EPWFileName``.
 
