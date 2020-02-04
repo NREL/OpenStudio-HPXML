@@ -1,0 +1,112 @@
+<measure>
+  <schema_version>3.0</schema_version>
+  <name>he_score_measure</name>
+  <uid>013ca589-73ab-451f-afae-dbeb5304dea8</uid>
+  <version_id>cefe4a52-9714-49ee-9e89-6bcf7f570d53</version_id>
+  <version_modified>20200204T014552Z</version_modified>
+  <xml_checksum>2AF3A68E</xml_checksum>
+  <class_name>HEScoreMeasure</class_name>
+  <display_name>Apply Home Energy Score Ruleset</display_name>
+  <description>TODO</description>
+  <modeler_description>TODO</modeler_description>
+  <arguments>
+    <argument>
+      <name>hpxml_path</name>
+      <display_name>HPXML File Path</display_name>
+      <description>Absolute (or relative) path of the HPXML file.</description>
+      <type>String</type>
+      <required>true</required>
+      <model_dependent>false</model_dependent>
+    </argument>
+    <argument>
+      <name>hpxml_output_path</name>
+      <display_name>HPXML Output File Path</display_name>
+      <description>Absolute (or relative) path of the output HPXML file.</description>
+      <type>String</type>
+      <required>false</required>
+      <model_dependent>false</model_dependent>
+    </argument>
+  </arguments>
+  <outputs/>
+  <provenances/>
+  <tags>
+    <tag>Envelope.Form</tag>
+  </tags>
+  <attributes>
+    <attribute>
+      <name>Measure Type</name>
+      <value>ModelMeasure</value>
+      <datatype>string</datatype>
+    </attribute>
+    <attribute>
+      <name>Intended Software Tool</name>
+      <value>Apply Measure Now</value>
+      <datatype>string</datatype>
+    </attribute>
+    <attribute>
+      <name>Intended Software Tool</name>
+      <value>OpenStudio Application</value>
+      <datatype>string</datatype>
+    </attribute>
+    <attribute>
+      <name>Intended Software Tool</name>
+      <value>Parametric Analysis Tool</value>
+      <datatype>string</datatype>
+    </attribute>
+  </attributes>
+  <files>
+    <file>
+      <filename>test_hescore_ruleset.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>test</usage_type>
+      <checksum>C314D8BE</checksum>
+    </file>
+    <file>
+      <version>
+        <software_program>OpenStudio</software_program>
+        <identifier>2.7.0</identifier>
+        <min_compatible>2.7.0</min_compatible>
+      </version>
+      <filename>measure.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>script</usage_type>
+      <checksum>33491387</checksum>
+    </file>
+    <file>
+      <filename>HESruleset.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>07EF6063</checksum>
+    </file>
+    <file>
+      <filename>lu_es_furnace_region.csv</filename>
+      <filetype>csv</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>F98E711A</checksum>
+    </file>
+    <file>
+      <filename>lu_hvac_equipment_efficiency.csv</filename>
+      <filetype>csv</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>F3F667EE</checksum>
+    </file>
+    <file>
+      <filename>lu_roof_eff_rvalue.csv</filename>
+      <filetype>csv</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>B3D09D4A</checksum>
+    </file>
+    <file>
+      <filename>lu_wall_eff_rvalue.csv</filename>
+      <filetype>csv</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>A662085D</checksum>
+    </file>
+    <file>
+      <filename>lu_water_heater_efficiency.csv</filename>
+      <filetype>csv</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>FBD37897</checksum>
+    </file>
+  </files>
+</measure>

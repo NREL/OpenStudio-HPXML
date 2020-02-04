@@ -12,7 +12,7 @@ jobs:
       - run: 
           name: Run tests
           command: |
-            rake test:all
+            rake test_all
       - persist_to_workspace:
           root: workflow
           paths:

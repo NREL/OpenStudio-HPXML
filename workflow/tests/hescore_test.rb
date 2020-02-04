@@ -3,8 +3,8 @@ require 'openstudio/ruleset/ShowRunnerOutput'
 require 'minitest/autorun'
 require 'fileutils'
 require 'json'
-require_relative '../../measures/HPXMLtoOpenStudio/measure'
-require_relative '../../measures/HPXMLtoOpenStudio/resources/xmlhelper'
+require_relative '../../hpxml-measures/HPXMLtoOpenStudio/measure'
+require_relative '../../hpxml-measures/HPXMLtoOpenStudio/resources/xmlhelper'
 require_relative '../hescore_lib'
 
 class HEScoreTest < Minitest::Unit::TestCase
@@ -84,7 +84,7 @@ class HEScoreTest < Minitest::Unit::TestCase
       assert(File.exists?(results_json))
 
       # Check HPXMLs are valid
-      schemas_dir = File.absolute_path(File.join(parent_dir, "..", "measures", "HPXMLtoOpenStudio", "hpxml_schemas"))
+      schemas_dir = File.absolute_path(File.join(parent_dir, "..", "hpxml-measures", "HPXMLtoOpenStudio", "resources"))
       _test_schema_validation(parent_dir, xml, schemas_dir)
       _test_schema_validation(parent_dir, hes_hpxml, schemas_dir)
 

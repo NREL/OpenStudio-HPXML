@@ -3,8 +3,8 @@ start_time = Time.now
 require 'fileutils'
 require 'optparse'
 require 'pathname'
-require_relative "../measures/HPXMLtoOpenStudio/resources/meta_measure"
-require_relative "../measures/HPXMLtoOpenStudio/resources/unit_conversions"
+require_relative "../hpxml-measures/HPXMLtoOpenStudio/resources/meta_measure"
+require_relative "../hpxml-measures/HPXMLtoOpenStudio/resources/unit_conversions"
 require_relative "hescore_lib"
 
 basedir = File.expand_path(File.dirname(__FILE__))
@@ -50,12 +50,12 @@ def create_idf(design, basedir, designdir, resultsdir, hpxml, debug, skip_simula
 
   model = OpenStudio::Model::Model.new
   runner = OpenStudio::Measure::OSRunner.new(OpenStudio::WorkflowJSON.new)
-  measures_dir = File.join(basedir, "..", "measures")
+  measures_dir = File.join(basedir, "..")
 
   measures = {}
 
   # Add HEScore measure to workflow
-  measure_subdir = "HEScoreRuleset"
+  measure_subdir = "rulesets/HEScoreRuleset"
   args = {}
   args['hpxml_path'] = hpxml
   args['hpxml_output_path'] = output_hpxml_path
@@ -63,7 +63,7 @@ def create_idf(design, basedir, designdir, resultsdir, hpxml, debug, skip_simula
 
   if not skip_simulation
     # Add HPXML translator measure to workflow
-    measure_subdir = "HPXMLtoOpenStudio"
+    measure_subdir = "hpxml-measures/HPXMLtoOpenStudio"
     args = {}
     args['hpxml_path'] = output_hpxml_path
     args['weather_dir'] = File.absolute_path(File.join(basedir, "..", "weather"))
