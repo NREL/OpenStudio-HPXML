@@ -1,6 +1,6 @@
 def create_hpxmls
   this_dir = File.dirname(__FILE__)
-  tests_dir = File.join(this_dir, "HPXMLtoOpenStudio/tests")
+  tests_dir = File.join(this_dir, "workflow/tests")
 
   # Hash of HPXML -> Parent HPXML
   hpxmls_files = {

@@ -1,17 +1,17 @@
-require_relative 'minitest_helper'
+require_relative '../../HPXMLtoOpenStudio/resources/minitest_helper'
 require 'openstudio'
 require 'openstudio/ruleset/ShowRunnerOutput'
 require 'minitest/autorun'
-require_relative '../measure.rb'
 require 'fileutils'
 require 'rexml/document'
 require 'rexml/xpath'
-require_relative '../resources/constants'
-require_relative '../resources/meta_measure'
-require_relative '../resources/unit_conversions'
-require_relative '../resources/xmlhelper'
+require_relative '../../HPXMLtoOpenStudio/measure.rb'
+require_relative '../../HPXMLtoOpenStudio/resources/constants'
+require_relative '../../HPXMLtoOpenStudio/resources/meta_measure'
+require_relative '../../HPXMLtoOpenStudio/resources/unit_conversions'
+require_relative '../../HPXMLtoOpenStudio/resources/xmlhelper'
 
-class HPXMLtoOpenStudioTest < MiniTest::Test
+class HPXMLTest < MiniTest::Test
   @@simulation_runtime_key = "Simulation Runtime"
   @@workflow_runtime_key = "Workflow Runtime"
 
@@ -73,7 +73,7 @@ class HPXMLtoOpenStudioTest < MiniTest::Test
   def test_run_simulation_rb
     # Check that simulation works using run_simulation.rb script
     os_cli = OpenStudio.getOpenStudioCLI
-    rb_path = File.join(File.dirname(__FILE__), "..", "..", "workflow", "run_simulation.rb")
+    rb_path = File.join(File.dirname(__FILE__), "..", "run_simulation.rb")
     xml = File.join(File.dirname(__FILE__), "base.xml")
     command = "#{os_cli} #{rb_path} -x #{xml}"
     system(command, :err => File::NULL)
@@ -84,7 +84,7 @@ class HPXMLtoOpenStudioTest < MiniTest::Test
   def test_template_osw
     # Check that simulation works using template.osw
     os_cli = OpenStudio.getOpenStudioCLI
-    osw_path = File.join(File.dirname(__FILE__), "..", "..", "workflow", "template.osw")
+    osw_path = File.join(File.dirname(__FILE__), "..", "template.osw")
     if Dir.exists? File.join(File.dirname(__FILE__), "..", "..", "project")
       # CI checks out the repo as "project", so need to update the OSW
       osw_path_ci = osw_path.gsub('.osw', '2.osw')
@@ -413,6 +413,7 @@ class HPXMLtoOpenStudioTest < MiniTest::Test
 
   def _test_simulation(this_dir, xml, rundir, expect_error, expect_error_msgs)
     # Uses meta_measure workflow for faster simulations
+    # TODO: Merge code with workflow/run_simulation.rb
 
     # Setup
     _rm_path(rundir)
@@ -421,20 +422,31 @@ class HPXMLtoOpenStudioTest < MiniTest::Test
     workflow_start = Time.now
     model = OpenStudio::Model::Model.new
     runner = OpenStudio::Measure::OSRunner.new(OpenStudio::WorkflowJSON.new)
+    measures_dir = File.join(this_dir, "..", "..")
 
+    measures = {}
+
+    # Add HPXML translator measure to workflow
+    measure_subdir = "HPXMLtoOpenStudio"
     args = {}
-    args['epw_output_path'] = File.absolute_path(File.join(rundir, "in.epw"))
-    args['osm_output_path'] = File.absolute_path(File.join(rundir, "in.osm"))
     args['hpxml_path'] = xml
     args['weather_dir'] = "weather"
+    args['epw_output_path'] = File.absolute_path(File.join(rundir, "in.epw"))
+    args['osm_output_path'] = File.absolute_path(File.join(rundir, "in.osm"))
+    update_args_hash(measures, measure_subdir, args)
 
-    # Add measure to workflow
-    measures = {}
-    measure_subdir = File.absolute_path(File.join(this_dir, "..")).split('/')[-1]
+    # Add reporting measure to workflow
+    measure_subdir = "SimulationOutputReport"
+    args = {}
+    args['timeseries_frequency'] = 'hourly'
+    args['include_timeseries_zone_temperatures'] = true
+    args['include_timeseries_fuel_consumptions'] = true
+    args['include_timeseries_end_use_consumptions'] = true
+    args['include_timeseries_total_loads'] = true
+    args['include_timeseries_component_loads'] = true
     update_args_hash(measures, measure_subdir, args)
 
     # Apply measure
-    measures_dir = File.join(this_dir, "../../")
     success = apply_measures(measures_dir, measures, runner, model)
 
     # Report warnings/errors
@@ -451,7 +463,7 @@ class HPXMLtoOpenStudioTest < MiniTest::Test
       assert_equal(false, success)
 
       if expect_error_msgs.nil?
-        flunk "No error message defined for #{File.basename(args['hpxml_path'])}."
+        flunk "No error message defined for #{File.basename(xml)}."
       else
         run_log = File.readlines(File.join(rundir, "run.log")).map(&:strip)
         expect_error_msgs.each do |error_msg|
@@ -546,25 +558,39 @@ class HPXMLtoOpenStudioTest < MiniTest::Test
       output_var.setKeyValue(hx.name.to_s)
     end
 
-    # Write model to IDF
+    # Translate model to IDF
     forward_translator = OpenStudio::EnergyPlus::ForwardTranslator.new
     forward_translator.setExcludeLCCObjects(true)
     model_idf = forward_translator.translateModel(model)
+
+    # Apply reporting measure output requests
+    apply_energyplus_output_requests(measures_dir, measures, runner, model, model_idf)
+
+    # Write IDF to file
     File.open(File.join(rundir, "in.idf"), 'w') { |f| f << model_idf.to_s }
 
     # Run EnergyPlus
+    # getEnergyPlusDirectory can be unreliable, using getOpenStudioCLI instead
     ep_path = File.absolute_path(File.join(OpenStudio.getOpenStudioCLI.to_s, '..', '..', 'EnergyPlus', 'energyplus'))
     command = "cd #{rundir} && #{ep_path} -w in.epw in.idf > stdout-energyplus"
     simulation_start = Time.now
     system(command, :err => File::NULL)
     sim_time = (Time.now - simulation_start).round(1)
     workflow_time = (Time.now - workflow_start).round(1)
-    puts "Completed #{File.basename(args['hpxml_path'])} simulation in #{sim_time}, workflow in #{workflow_time}s."
+    puts "Completed #{File.basename(xml)} simulation in #{sim_time}, workflow in #{workflow_time}s."
+
+    # Apply reporting measures
+    runner.setLastEnergyPlusSqlFilePath(File.join(rundir, "eplusout.sql"))
+    success = apply_measures(measures_dir, measures, runner, model, true, "OpenStudio::Measure::ReportingMeasure")
+    runner.resetLastEnergyPlusSqlFilePath
+    assert_equal(true, success)
+    assert(File.exists? File.join(rundir, "results_annual.csv"))
+    assert(File.exists? File.join(rundir, "results_timeseries.csv"))
 
     results, compload_results = _get_results(rundir, sim_time, workflow_time)
 
     # Verify simulation outputs
-    _verify_simulation_outputs(runner, rundir, args['hpxml_path'], results)
+    _verify_simulation_outputs(runner, rundir, xml, results)
 
     # Get HVAC sizing outputs
     sizing_results = _get_sizing_results(runner)

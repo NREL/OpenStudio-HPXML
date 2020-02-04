@@ -288,6 +288,8 @@ class SimulationOutputReport < OpenStudio::Measure::ReportingMeasure
                                     include_timeseries_total_loads,
                                     include_timeseries_component_loads)
 
+    @sqlFile.close()
+
     return true
   end
 
@@ -585,8 +587,12 @@ class SimulationOutputReport < OpenStudio::Measure::ReportingMeasure
 
     # Calculate aggregated values from per-system values as needed
     (@end_uses.values + @loads.values).each do |obj|
-      if obj.annual_output.nil? and not obj.annual_output_by_system.empty?
-        obj.annual_output = obj.annual_output_by_system.values.inject(0, :+)
+      if obj.annual_output.nil?
+        if not obj.annual_output_by_system.empty?
+          obj.annual_output = obj.annual_output_by_system.values.inject(0, :+)
+        else
+          obj.annual_output = 0.0
+        end
       end
       if obj.timeseries_output.empty? and not obj.timeseries_output_by_system.empty?
         obj.timeseries_output = obj.timeseries_output_by_system.values[0]
