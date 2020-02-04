@@ -13,6 +13,37 @@ jobs:
           name: Run tests
           command: |
             rake test_all
+      - persist_to_workspace:
+          root: workflow
+          paths:
+            - test_results/*
       - store_artifacts:
           path: workflow/test_results
           destination: results
+  makeplots:
+    docker:
+      - image: continuumio/miniconda3
+    steps:
+      - checkout
+      - attach_workspace:
+          at: /tmp/data
+      - run:
+          name: Install plotting packages
+          command: |
+            conda install -y bokeh pandas lxml
+      - run:
+          name: Plot comparison
+          command: |
+            python plots/make_comparison_plots.py /tmp/data/test_results/results.csv
+      - store_artifacts:
+          path: plots/plots
+          destination: plots
+
+workflows:
+  version: 2
+  oshpxml:
+    jobs:
+      - build
+      - makeplots:
+          requires:
+            - build
