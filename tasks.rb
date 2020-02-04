@@ -606,7 +606,7 @@ def create_hpxmls
   abs_hpxml_files = []
   dirs = [nil]
   hpxmls_files.keys.each do |hpxml_file|
-    abs_hpxml_files << File.join(tests_dir, hpxml_file)
+    abs_hpxml_files << File.absolute_path(File.join(tests_dir, hpxml_file))
     next unless hpxml_file.include? '/'
 
     dirs << hpxml_file.split('/')[0] + '/'
