@@ -1049,7 +1049,7 @@ class SimulationOutputReport < OpenStudio::Measure::ReportingMeasure
       value = XMLHelper.get_value(dhw_system, "EnergyFactor")
       wh_type = XMLHelper.get_value(dhw_system, "WaterHeaterType")
       if wh_type == "instantaneous water heater"
-        cycling_derate = Float(XMLHelper.get_value(dhw_system, "PerformanceAdjustment"))
+        cycling_derate = XMLHelper.get_value(dhw_system, "PerformanceAdjustment").to_f
         value_adj = 1.0 - cycling_derate
       else
         value_adj = 1.0

@@ -583,6 +583,17 @@ class HPXMLTest < MiniTest::Test
     runner.setLastEnergyPlusSqlFilePath(File.join(rundir, "eplusout.sql"))
     success = apply_measures(measures_dir, measures, runner, model, true, "OpenStudio::Measure::ReportingMeasure")
     runner.resetLastEnergyPlusSqlFilePath
+
+    # Report warnings/errors
+    File.open(File.join(rundir, 'run.log'), 'a') do |f|
+      runner.result.stepWarnings.each do |s|
+        f << "Warning: #{s}\n"
+      end
+      runner.result.stepErrors.each do |s|
+        f << "Error: #{s}\n"
+      end
+    end
+
     assert_equal(true, success)
     assert(File.exists? File.join(rundir, "results_annual.csv"))
     assert(File.exists? File.join(rundir, "results_timeseries.csv"))
