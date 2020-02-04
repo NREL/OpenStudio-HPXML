@@ -2,15 +2,15 @@ require_relative 'minitest_helper'
 require 'openstudio'
 require 'openstudio/ruleset/ShowRunnerOutput'
 require 'minitest/autorun'
-require_relative '../BuildResidentialHPXML/measure.rb'
+require_relative '../measure.rb'
 require 'fileutils'
 require 'rexml/document'
 require 'rexml/xpath'
-require_relative '../HPXMLtoOpenStudio/resources/constants'
-require_relative '../HPXMLtoOpenStudio/resources/meta_measure'
-require_relative '../HPXMLtoOpenStudio/tests/hpxml_translator_test'
+require_relative '../../HPXMLtoOpenStudio/resources/constants'
+require_relative '../../HPXMLtoOpenStudio/resources/meta_measure'
+require_relative '../../HPXMLtoOpenStudio/tests/hpxml_translator_test'
 
-class HPXMLExporterTest < MiniTest::Test
+class BuildResidentialHPXMLTest < MiniTest::Test
   def test_workflows
     require 'json'
 
@@ -20,7 +20,7 @@ class HPXMLExporterTest < MiniTest::Test
     test_dirs = [this_dir,
                  hvac_partial_dir]
 
-    measures_dir = File.join(this_dir, "../")
+    measures_dir = File.join(this_dir, "../..")
 
     osws = []
     test_dirs.each do |test_dir|
@@ -29,10 +29,10 @@ class HPXMLExporterTest < MiniTest::Test
       end
     end
 
-    tests_dir = File.expand_path(File.join(File.dirname(__FILE__), "../HPXMLtoOpenStudio/tests"))
+    tests_dir = File.expand_path(File.join(File.dirname(__FILE__), "../../HPXMLtoOpenStudio/tests"))
     results_dir = File.join(tests_dir, "results")
     _rm_path(results_dir)
-    built_dir = File.join(tests_dir, "build_res_hpxml")
+    built_dir = File.join(tests_dir, "built_residential_hpxml")
     unless Dir.exists?(built_dir)
       Dir.mkdir(built_dir)
     end
@@ -41,12 +41,12 @@ class HPXMLExporterTest < MiniTest::Test
     all_results = {}
     all_compload_results = {}
     all_sizing_results = {}
-    hpxml_translator_test = HPXMLTranslatorTest.new(nil)
+    hpxml_translator_test = HPXMLtoOpenStudioTest.new(nil)
     measures = {}
     osws.each do |osw|
       puts "\nTesting #{File.basename(osw)}..."
 
-      _setup(this_dir)
+      _setup(tests_dir)
       osw_hash = JSON.parse(File.read(osw))
       osw_hash["steps"].each do |step|
         measures[step["measure_dir_name"]] = [step["arguments"]]

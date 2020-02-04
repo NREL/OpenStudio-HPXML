@@ -1,4 +1,12 @@
 class Constants
+  def self.Auto
+    return 'auto'
+  end
+
+  def self.SizingAuto
+    return 'autosize'
+  end
+
   # Numbers --------------------
 
   def self.MaxNumWaterHeaters

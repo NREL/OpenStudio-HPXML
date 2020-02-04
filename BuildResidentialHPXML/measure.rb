@@ -2,21 +2,14 @@
 # http://nrel.github.io/OpenStudio-user-documentation/reference/measure_writing_guide/
 
 require 'openstudio'
-require_relative "../HPXMLtoOpenStudio/measure"
-require_relative "../HPXMLtoOpenStudio/resources/EPvalidator"
-require_relative "../HPXMLtoOpenStudio/resources/constructions"
-require_relative "../HPXMLtoOpenStudio/resources/hpxml"
-require_relative "../HPXMLtoOpenStudio/resources/schedules"
-require_relative "../HPXMLtoOpenStudio/resources/waterheater"
-
-require_relative "../BuildResidentialHPXML/resources/geometry"
-require_relative "../BuildResidentialHPXML/resources/schedules"
-require_relative "../BuildResidentialHPXML/resources/waterheater"
-require_relative "../BuildResidentialHPXML/resources/constants"
-require_relative "../BuildResidentialHPXML/resources/location"
+require_relative "resources/geometry"
+require_relative "resources/schedules"
+require_relative "resources/waterheater"
+require_relative "resources/constants"
+require_relative "resources/location"
 
 # start the measure
-class HPXMLExporter < OpenStudio::Measure::ModelMeasure
+class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
   # human readable name
   def name
     return "HPXML Exporter"
@@ -1781,6 +1774,13 @@ class HPXMLExporter < OpenStudio::Measure::ModelMeasure
       return false
     end
 
+    require_relative "../HPXMLtoOpenStudio/measure"
+    require_relative "../HPXMLtoOpenStudio/resources/EPvalidator"
+    require_relative "../HPXMLtoOpenStudio/resources/constructions"
+    require_relative "../HPXMLtoOpenStudio/resources/hpxml"
+    require_relative "../HPXMLtoOpenStudio/resources/schedules"
+    require_relative "../HPXMLtoOpenStudio/resources/waterheater"
+
     # Check for correct versions of OS
     os_version = "2.9.1"
     if OpenStudio.openStudioVersion != os_version
@@ -2016,7 +2016,7 @@ class HPXMLExporter < OpenStudio::Measure::ModelMeasure
     end
 
     # Check for invalid HPXML file
-    schemas_dir = File.join(File.dirname(__FILE__), "../HPXMLtoOpenStudio/hpxml_schemas")
+    schemas_dir = File.join(File.dirname(__FILE__), "../HPXMLtoOpenStudio/resources")
     skip_validation = false
     if not skip_validation
       if not validate_hpxml(runner, hpxml_path, hpxml_doc, schemas_dir)
@@ -3449,4 +3449,4 @@ class HPXMLFile
 end
 
 # register the measure to be used by the application
-HPXMLExporter.new.registerWithApplication
+BuildResidentialHPXML.new.registerWithApplication
