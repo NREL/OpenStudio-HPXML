@@ -12,6 +12,7 @@ OpenStudio-HPXML documentation
 
    intro
    getting_started
+   build_residential_hpxml
    hpxml_to_openstudio
    simulation_output_report
 

@@ -6,8 +6,9 @@ The OpenStudio-HPXML repository consists of residential `OpenStudio measures <ht
 Measures
 --------
 
-This repository contains two OpenStudio measures:
+This repository contains three OpenStudio measures:
 
+#. ``BuildResidentialHPXML``: A measure that translates a set of building unit argument values to an HPXML file.
 #. ``HPXMLtoOpenStudio``: A measure that translates an HPXML file to an OpenStudio model.
 #. ``SimulationOutputReport``: A reporting measure that generates a variety of annual/timeseries outputs for a residential HPXML-based model.
 
