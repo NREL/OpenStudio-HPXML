@@ -4344,6 +4344,45 @@ class OSModel
     end
     return kiva_fnd_walls.product(kiva_slabs)
   end
+
+  def self.get_foundation_and_walls_top(building)
+    foundation_top = 0
+    building.elements.each("BuildingDetails/Enclosure/FoundationWalls/FoundationWall") do |fnd_wall|
+      fnd_wall_values = HPXML.get_foundation_wall_values(foundation_wall: fnd_wall)
+      top = -1 * fnd_wall_values[:depth_below_grade] + fnd_wall_values[:height]
+      foundation_top = top if top > foundation_top
+    end
+    walls_top = foundation_top + 8.0 * @ncfl_ag
+    return foundation_top, walls_top
+  end
+
+  def self.get_ac_num_speeds(seer)
+    if seer <= 15
+      return "1-Speed"
+    elsif seer <= 21
+      return "2-Speed"
+    elsif seer > 21
+      return "Variable-Speed"
+    end
+  end
+
+  def self.get_ashp_num_speeds_by_seer(seer)
+    if seer <= 15
+      return "1-Speed"
+    elsif seer <= 21
+      return "2-Speed"
+    elsif seer > 21
+      return "Variable-Speed"
+    end
+  end
+
+  def self.get_fan_power_installed(seer)
+    if seer <= 15
+      return 0.365 # W/cfm
+    else
+      return 0.14 # W/cfm
+    end
+  end
 end
 
 class WoodStudConstructionSet
@@ -4431,73 +4470,6 @@ class GenericConstructionSet
     @exterior_material = exterior_material
   end
   attr_accessor(:rigid_r, :osb_thick_in, :drywall_thick_in, :exterior_material)
-end
-
-def is_thermal_boundary(surface_values)
-  if ["other housing unit", "other housing unit above", "other housing unit below"].include? surface_values[:exterior_adjacent_to]
-    return false # adiabatic
-  end
-
-  interior_conditioned = is_adjacent_to_conditioned(surface_values[:interior_adjacent_to])
-  exterior_conditioned = is_adjacent_to_conditioned(surface_values[:exterior_adjacent_to])
-  return (interior_conditioned != exterior_conditioned)
-end
-
-def is_adjacent_to_conditioned(adjacent_to)
-  if ["living space", "basement - conditioned"].include? adjacent_to
-    return true
-  end
-
-  return false
-end
-
-def hpxml_framefloor_is_ceiling(floor_interior_adjacent_to, floor_exterior_adjacent_to)
-  if ["attic - vented", "attic - unvented"].include? floor_interior_adjacent_to
-    return true
-  elsif ["attic - vented", "attic - unvented", "other housing unit above"].include? floor_exterior_adjacent_to
-    return true
-  end
-
-  return false
-end
-
-def get_foundation_and_walls_top(building)
-  foundation_top = 0
-  building.elements.each("BuildingDetails/Enclosure/FoundationWalls/FoundationWall") do |fnd_wall|
-    fnd_wall_values = HPXML.get_foundation_wall_values(foundation_wall: fnd_wall)
-    top = -1 * fnd_wall_values[:depth_below_grade] + fnd_wall_values[:height]
-    foundation_top = top if top > foundation_top
-  end
-  walls_top = foundation_top + 8.0 * @ncfl_ag
-  return foundation_top, walls_top
-end
-
-def get_ac_num_speeds(seer)
-  if seer <= 15
-    return "1-Speed"
-  elsif seer <= 21
-    return "2-Speed"
-  elsif seer > 21
-    return "Variable-Speed"
-  end
-end
-
-def get_ashp_num_speeds_by_seer(seer)
-  if seer <= 15
-    return "1-Speed"
-  elsif seer <= 21
-    return "2-Speed"
-  elsif seer > 21
-    return "Variable-Speed"
-  end
-end
-
-def get_fan_power_installed(seer)
-  if seer <= 15
-    return 0.365 # W/cfm
-  else
-    return 0.14 # W/cfm
-  end
 end
 
 # register the measure to be used by the application

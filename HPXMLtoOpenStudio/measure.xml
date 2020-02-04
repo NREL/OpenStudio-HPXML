@@ -2,8 +2,8 @@
   <schema_version>3.0</schema_version>
   <name>hpxm_lto_openstudio</name>
   <uid>b1543b30-9465-45ff-ba04-1d1f85e763bc</uid>
-  <version_id>8eef8eae-4508-42fd-a893-85e7a7c21a5e</version_id>
-  <version_modified>20200203T191207Z</version_modified>
+  <version_id>034a5c38-1f15-4d99-9804-bc42d6bbea77</version_id>
+  <version_modified>20200204T001928Z</version_modified>
   <xml_checksum>D8922A73</xml_checksum>
   <class_name>HPXMLtoOpenStudio</class_name>
   <display_name>HPXML to OpenStudio Translator</display_name>
@@ -365,12 +365,6 @@
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
       <checksum>2A7B4816</checksum>
-    </file>
-    <file>
-      <filename>hpxml.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>ABB1981D</checksum>
     </file>
     <file>
       <filename>airflow.rb</filename>
@@ -1687,6 +1681,12 @@
       <checksum>61869CED</checksum>
     </file>
     <file>
+      <filename>hpxml.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>5E98FAA4</checksum>
+    </file>
+    <file>
       <version>
         <software_program>OpenStudio</software_program>
         <identifier>2.1.1</identifier>
@@ -1695,7 +1695,7 @@
       <filename>measure.rb</filename>
       <filetype>rb</filetype>
       <usage_type>script</usage_type>
-      <checksum>B44BB991</checksum>
+      <checksum>4C2DBF65</checksum>
     </file>
   </files>
 </measure>
