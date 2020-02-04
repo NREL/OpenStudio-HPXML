@@ -3308,7 +3308,7 @@ if ARGV[0].to_sym == :update_measures
   # Update measures XMLs
   command = "#{OpenStudio.getOpenStudioCLI} measure -t '#{File.dirname(__FILE__)}'"
   puts "Updating measure.xmls..."
-  log = `#{command}`
+  system(command, [:out, :err] => File::NULL)
 
   create_hpxmls
 

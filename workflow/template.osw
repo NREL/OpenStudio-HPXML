@@ -21,5 +21,10 @@
       },
       "measure_dir_name": "SimulationOutputReport"
     }
-  ]
+  ],
+  "run_options": {
+    "fast": true,
+    "skip_expand_objects": true,
+    "skip_energyplus_preprocess": true
+  }
 }
