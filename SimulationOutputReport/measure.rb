@@ -986,7 +986,7 @@ class SimulationOutputReport < OpenStudio::Measure::ReportingMeasure
     @hp_htgs.each do |heat_pump|
       sys_ids << get_system_or_seed_id(heat_pump)
       if is_dfhp(heat_pump)
-        sys_ids << dfhp_backup_sys_id(sys_id)
+        sys_ids << dfhp_backup_sys_id(sys_ids[-1])
       end
     end
 
