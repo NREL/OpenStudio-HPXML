@@ -252,7 +252,7 @@
               <ElectricAuxiliaryEnergy>66.66666666666667</ElectricAuxiliaryEnergy>
             </HeatingSystem>
             <HeatingSystem>
-              <SystemIdentifier id='SpaceHeat_ID2'/>
+              <SystemIdentifier id='HeatingSystem2'/>
               <HeatingSystemType>
                 <Stove/>
               </HeatingSystemType>
@@ -266,7 +266,7 @@
               <ElectricAuxiliaryEnergy>66.66666666666667</ElectricAuxiliaryEnergy>
             </HeatingSystem>
             <HeatingSystem>
-              <SystemIdentifier id='SpaceHeat_ID3'/>
+              <SystemIdentifier id='HeatingSystem3'/>
               <HeatingSystemType>
                 <Stove/>
               </HeatingSystemType>

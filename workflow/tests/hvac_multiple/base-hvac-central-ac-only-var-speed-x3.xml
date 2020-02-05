@@ -250,7 +250,7 @@
               </AnnualCoolingEfficiency>
             </CoolingSystem>
             <CoolingSystem>
-              <SystemIdentifier id='SpaceCool_ID2'/>
+              <SystemIdentifier id='CoolingSystem2'/>
               <DistributionSystem idref='HVACDistribution2'/>
               <CoolingSystemType>central air conditioner</CoolingSystemType>
               <CoolingSystemFuel>electricity</CoolingSystemFuel>
@@ -262,7 +262,7 @@
               </AnnualCoolingEfficiency>
             </CoolingSystem>
             <CoolingSystem>
-              <SystemIdentifier id='SpaceCool_ID3'/>
+              <SystemIdentifier id='CoolingSystem3'/>
               <DistributionSystem idref='HVACDistribution3'/>
               <CoolingSystemType>central air conditioner</CoolingSystemType>
               <CoolingSystemFuel>electricity</CoolingSystemFuel>

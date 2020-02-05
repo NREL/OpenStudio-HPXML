@@ -244,13 +244,13 @@
               <FractionCoolLoadServed>0.333</FractionCoolLoadServed>
             </CoolingSystem>
             <CoolingSystem>
-              <SystemIdentifier id='SpaceCool_ID2'/>
+              <SystemIdentifier id='CoolingSystem2'/>
               <CoolingSystemType>evaporative cooler</CoolingSystemType>
               <CoolingSystemFuel>electricity</CoolingSystemFuel>
               <FractionCoolLoadServed>0.333</FractionCoolLoadServed>
             </CoolingSystem>
             <CoolingSystem>
-              <SystemIdentifier id='SpaceCool_ID3'/>
+              <SystemIdentifier id='CoolingSystem3'/>
               <CoolingSystemType>evaporative cooler</CoolingSystemType>
               <CoolingSystemFuel>electricity</CoolingSystemFuel>
               <FractionCoolLoadServed>0.333</FractionCoolLoadServed>

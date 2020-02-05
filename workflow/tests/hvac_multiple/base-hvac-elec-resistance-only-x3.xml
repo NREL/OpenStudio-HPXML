@@ -251,7 +251,7 @@
               <FractionHeatLoadServed>0.333</FractionHeatLoadServed>
             </HeatingSystem>
             <HeatingSystem>
-              <SystemIdentifier id='SpaceHeat_ID2'/>
+              <SystemIdentifier id='HeatingSystem2'/>
               <HeatingSystemType>
                 <ElectricResistance/>
               </HeatingSystemType>
@@ -264,7 +264,7 @@
               <FractionHeatLoadServed>0.333</FractionHeatLoadServed>
             </HeatingSystem>
             <HeatingSystem>
-              <SystemIdentifier id='SpaceHeat_ID3'/>
+              <SystemIdentifier id='HeatingSystem3'/>
               <HeatingSystemType>
                 <ElectricResistance/>
               </HeatingSystemType>

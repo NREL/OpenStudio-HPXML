@@ -1899,10 +1899,10 @@ def get_hpxml_file_heating_systems_values(hpxml_file, heating_systems_values)
     heating_systems_values[0][:fraction_heat_load_served] = 0.333
     heating_systems_values[0][:electric_auxiliary_energy] /= 3.0 unless heating_systems_values[0][:electric_auxiliary_energy].nil?
     heating_systems_values << heating_systems_values[0].dup
-    heating_systems_values[1][:id] = "SpaceHeat_ID2"
+    heating_systems_values[1][:id] = "HeatingSystem2"
     heating_systems_values[1][:distribution_system_idref] = "HVACDistribution2" unless heating_systems_values[1][:distribution_system_idref].nil?
     heating_systems_values << heating_systems_values[0].dup
-    heating_systems_values[2][:id] = "SpaceHeat_ID3"
+    heating_systems_values[2][:id] = "HeatingSystem3"
     heating_systems_values[2][:distribution_system_idref] = "HVACDistribution3" unless heating_systems_values[2][:distribution_system_idref].nil?
   elsif hpxml_file.include? 'hvac_partial' and not heating_systems_values.nil? and heating_systems_values.size > 0
     heating_systems_values[0][:heating_capacity] /= 3.0
@@ -2007,10 +2007,10 @@ def get_hpxml_file_cooling_systems_values(hpxml_file, cooling_systems_values)
     cooling_systems_values[0][:cooling_capacity] /= 3.0 unless cooling_systems_values[0][:cooling_capacity].nil?
     cooling_systems_values[0][:fraction_cool_load_served] = 0.333
     cooling_systems_values << cooling_systems_values[0].dup
-    cooling_systems_values[1][:id] = "SpaceCool_ID2"
+    cooling_systems_values[1][:id] = "CoolingSystem2"
     cooling_systems_values[1][:distribution_system_idref] = "HVACDistribution2" unless cooling_systems_values[1][:distribution_system_idref].nil?
     cooling_systems_values << cooling_systems_values[0].dup
-    cooling_systems_values[2][:id] = "SpaceCool_ID3"
+    cooling_systems_values[2][:id] = "CoolingSystem3"
     cooling_systems_values[2][:distribution_system_idref] = "HVACDistribution3" unless cooling_systems_values[2][:distribution_system_idref].nil?
   elsif hpxml_file.include? 'hvac_partial' and not cooling_systems_values.nil? and cooling_systems_values.size > 0
     cooling_systems_values[0][:cooling_capacity] /= 3.0 unless cooling_systems_values[0][:cooling_capacity].nil?
@@ -2200,10 +2200,10 @@ def get_hpxml_file_heat_pumps_values(hpxml_file, heat_pumps_values)
     heat_pumps_values[0][:fraction_heat_load_served] = 0.333
     heat_pumps_values[0][:fraction_cool_load_served] = 0.333
     heat_pumps_values << heat_pumps_values[0].dup
-    heat_pumps_values[1][:id] = "SpaceHeatPump_ID2"
+    heat_pumps_values[1][:id] = "HeatPump2"
     heat_pumps_values[1][:distribution_system_idref] = "HVACDistribution2" unless heat_pumps_values[1][:distribution_system_idref].nil?
     heat_pumps_values << heat_pumps_values[0].dup
-    heat_pumps_values[2][:id] = "SpaceHeatPump_ID3"
+    heat_pumps_values[2][:id] = "HeatPump3"
     heat_pumps_values[2][:distribution_system_idref] = "HVACDistribution3" unless heat_pumps_values[2][:distribution_system_idref].nil?
   elsif hpxml_file.include? 'hvac_partial' and not heat_pumps_values.nil? and heat_pumps_values.size > 0
     heat_pumps_values[0][:cooling_capacity] /= 3.0
@@ -2858,8 +2858,8 @@ def get_hpxml_file_water_heating_system_values(hpxml_file, water_heating_systems
     water_heating_systems_values << water_heating_systems_values[0].dup
     water_heating_systems_values[2][:id] = "WaterHeater3"
     if hpxml_file.include? 'combi'
-      water_heating_systems_values[1][:related_hvac] = "SpaceHeat_ID2"
-      water_heating_systems_values[2][:related_hvac] = "SpaceHeat_ID3"
+      water_heating_systems_values[1][:related_hvac] = "HeatingSystem2"
+      water_heating_systems_values[2][:related_hvac] = "HeatingSystem3"
     end
   end
   return water_heating_systems_values

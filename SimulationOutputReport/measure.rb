@@ -1311,10 +1311,11 @@ class SimulationOutputReport < OpenStudio::Measure::ReportingMeasure
     dfhp_backup = false
     @hpxml_doc.elements.each("/HPXML/Building/BuildingDetails/Systems/HVAC/HVACPlant/HeatingSystem |
                              /HPXML/Building/BuildingDetails/Systems/HVAC/HVACPlant/HeatPump") do |system|
+      # This is super ugly. Can we simplify it?
       if is_dfhp(system)
-        if dfhp_primary_sys_id(sys_id) == sys_id
+        if dfhp_primary_sys_id(sys_id) == sys_id and [XMLHelper.get_value(system, "extension/SeedId"), system.elements["SystemIdentifier"].attributes["id"]].include? sys_id
           dfhp_primary = true
-        else
+        elsif [XMLHelper.get_value(system, "extension/SeedId"), system.elements["SystemIdentifier"].attributes["id"]].include? dfhp_primary_sys_id(sys_id)
           dfhp_backup = true
           sys_id = dfhp_primary_sys_id(sys_id)
         end
@@ -1324,6 +1325,8 @@ class SimulationOutputReport < OpenStudio::Measure::ReportingMeasure
       sys_id = system.elements["SystemIdentifier"].attributes["id"]
       break
     end
+
+    fail "Unexpected result." if dfhp_primary and dfhp_backup
 
     output_names = @hvac_map[sys_id].dup
 

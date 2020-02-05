@@ -253,7 +253,7 @@
               <ElectricAuxiliaryEnergy>66.66666666666667</ElectricAuxiliaryEnergy>
             </HeatingSystem>
             <HeatingSystem>
-              <SystemIdentifier id='SpaceHeat_ID2'/>
+              <SystemIdentifier id='HeatingSystem2'/>
               <DistributionSystem idref='HVACDistribution2'/>
               <HeatingSystemType>
                 <Boiler/>
@@ -268,7 +268,7 @@
               <ElectricAuxiliaryEnergy>66.66666666666667</ElectricAuxiliaryEnergy>
             </HeatingSystem>
             <HeatingSystem>
-              <SystemIdentifier id='SpaceHeat_ID3'/>
+              <SystemIdentifier id='HeatingSystem3'/>
               <DistributionSystem idref='HVACDistribution3'/>
               <HeatingSystemType>
                 <Boiler/>
@@ -321,14 +321,14 @@
             <WaterHeaterType>space-heating boiler with tankless coil</WaterHeaterType>
             <Location>living space</Location>
             <FractionDHWLoadServed>0.333</FractionDHWLoadServed>
-            <RelatedHVACSystem idref='SpaceHeat_ID2'/>
+            <RelatedHVACSystem idref='HeatingSystem2'/>
           </WaterHeatingSystem>
           <WaterHeatingSystem>
             <SystemIdentifier id='WaterHeater3'/>
             <WaterHeaterType>space-heating boiler with tankless coil</WaterHeaterType>
             <Location>living space</Location>
             <FractionDHWLoadServed>0.333</FractionDHWLoadServed>
-            <RelatedHVACSystem idref='SpaceHeat_ID3'/>
+            <RelatedHVACSystem idref='HeatingSystem3'/>
           </WaterHeatingSystem>
           <HotWaterDistribution>
             <SystemIdentifier id='HotWaterDstribution'/>

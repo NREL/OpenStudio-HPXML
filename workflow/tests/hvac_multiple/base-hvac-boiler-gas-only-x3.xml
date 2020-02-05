@@ -253,7 +253,7 @@
               <ElectricAuxiliaryEnergy>66.66666666666667</ElectricAuxiliaryEnergy>
             </HeatingSystem>
             <HeatingSystem>
-              <SystemIdentifier id='SpaceHeat_ID2'/>
+              <SystemIdentifier id='HeatingSystem2'/>
               <DistributionSystem idref='HVACDistribution2'/>
               <HeatingSystemType>
                 <Boiler/>
@@ -268,7 +268,7 @@
               <ElectricAuxiliaryEnergy>66.66666666666667</ElectricAuxiliaryEnergy>
             </HeatingSystem>
             <HeatingSystem>
-              <SystemIdentifier id='SpaceHeat_ID3'/>
+              <SystemIdentifier id='HeatingSystem3'/>
               <DistributionSystem idref='HVACDistribution3'/>
               <HeatingSystemType>
                 <Boiler/>
