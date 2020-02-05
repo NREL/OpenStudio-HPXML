@@ -328,7 +328,7 @@ class HPXMLTest < MiniTest::Test
     results[new_key] = sqlFile.execAndReturnFirstDouble(query).get.round(2)
 
     # Disaggregate any crankcase and defrost energy from results
-    query = "SELECT SUM(Value)/1000000000 FROM ReportData WHERE ReportDataDictionaryIndex IN (SELECT ReportDataDictionaryIndex FROM ReportDataDictionary WHERE Name='Cooling Coil Crankcase Heater Electric Energy')"
+    query = "SELECT SUM(Value)/1000000000 FROM ReportData WHERE ReportDataDictionaryIndex IN (SELECT ReportDataDictionaryIndex FROM ReportDataDictionary WHERE Name='Cooling Coil Crankcase Heater Electric Energy' AND ReportingFrequency='Run Period')"
     sql_value = sqlFile.execAndReturnFirstDouble(query)
     if sql_value.is_initialized
       cooling_crankcase = sql_value.get.round(2)
@@ -337,7 +337,7 @@ class HPXMLTest < MiniTest::Test
         results[["Electricity", "Cooling", "Crankcase", "GJ"]] = cooling_crankcase
       end
     end
-    query = "SELECT SUM(Value)/1000000000 FROM ReportData WHERE ReportDataDictionaryIndex IN (SELECT ReportDataDictionaryIndex FROM ReportDataDictionary WHERE Name='Heating Coil Crankcase Heater Electric Energy')"
+    query = "SELECT SUM(Value)/1000000000 FROM ReportData WHERE ReportDataDictionaryIndex IN (SELECT ReportDataDictionaryIndex FROM ReportDataDictionary WHERE Name='Heating Coil Crankcase Heater Electric Energy' AND ReportingFrequency='Run Period')"
     sql_value = sqlFile.execAndReturnFirstDouble(query)
     if sql_value.is_initialized
       heating_crankcase = sql_value.get.round(2)
@@ -346,7 +346,7 @@ class HPXMLTest < MiniTest::Test
         results[["Electricity", "Heating", "Crankcase", "GJ"]] = heating_crankcase
       end
     end
-    query = "SELECT SUM(Value)/1000000000 FROM ReportData WHERE ReportDataDictionaryIndex IN (SELECT ReportDataDictionaryIndex FROM ReportDataDictionary WHERE Name='Heating Coil Defrost Electric Energy')"
+    query = "SELECT SUM(Value)/1000000000 FROM ReportData WHERE ReportDataDictionaryIndex IN (SELECT ReportDataDictionaryIndex FROM ReportDataDictionary WHERE Name='Heating Coil Defrost Electric Energy' AND ReportingFrequency='Run Period')"
     sql_value = sqlFile.execAndReturnFirstDouble(query)
     if sql_value.is_initialized
       heating_defrost = sql_value.get.round(2)
@@ -357,7 +357,7 @@ class HPXMLTest < MiniTest::Test
     end
 
     # Obtain hot water use
-    query = "SELECT SUM(VariableValue) FROM ReportVariableData WHERE ReportVariableDataDictionaryIndex IN (SELECT ReportVariableDataDictionaryIndex FROM ReportVariableDataDictionary WHERE VariableName='Water Use Equipment Hot Water Volume' AND VariableUnits='m3')"
+    query = "SELECT SUM(VariableValue) FROM ReportVariableData WHERE ReportVariableDataDictionaryIndex IN (SELECT ReportVariableDataDictionaryIndex FROM ReportVariableDataDictionary WHERE VariableName='Water Use Equipment Hot Water Volume' AND VariableUnits='m3' AND ReportingFrequency='Run Period')"
     results[["Volume", "Hot Water", "General", "gal"]] = UnitConversions.convert(sqlFile.execAndReturnFirstDouble(query).get, "m^3", "gal").round(2)
 
     # Obtain HVAC capacities
@@ -1122,13 +1122,13 @@ class HPXMLTest < MiniTest::Test
       if XMLHelper.get_value(mv, "FanType") == 'central fan integrated supply'
         # Fan power
         hpxml_value = Float(XMLHelper.get_value(mv, "FanPower"))
-        query = "SELECT Value FROM ReportData WHERE ReportDataDictionaryIndex IN (SELECT ReportDataDictionaryIndex FROM ReportDataDictionary WHERE Name= '#{@cfis_fan_power_output_var.variableName}')"
+        query = "SELECT Value FROM ReportData WHERE ReportDataDictionaryIndex IN (SELECT ReportDataDictionaryIndex FROM ReportDataDictionary WHERE Name='#{@cfis_fan_power_output_var.variableName}' AND ReportingFrequency='Run Period')"
         sql_value = sqlFile.execAndReturnFirstDouble(query).get
         assert_in_delta(hpxml_value, sql_value, 0.01)
 
         # Flow rate
         hpxml_value = Float(XMLHelper.get_value(mv, "TestedFlowRate")) * Float(XMLHelper.get_value(mv, "HoursInOperation")) / 24.0
-        query = "SELECT Value FROM ReportData WHERE ReportDataDictionaryIndex IN (SELECT ReportDataDictionaryIndex FROM ReportDataDictionary WHERE Name= '#{@cfis_flow_rate_output_var.variableName}')"
+        query = "SELECT Value FROM ReportData WHERE ReportDataDictionaryIndex IN (SELECT ReportDataDictionaryIndex FROM ReportDataDictionary WHERE Name='#{@cfis_flow_rate_output_var.variableName}' AND ReportingFrequency='Run Period')"
         sql_value = UnitConversions.convert(sqlFile.execAndReturnFirstDouble(query).get, "m^3/s", "cfm")
         assert_in_delta(hpxml_value, sql_value, 0.01)
       end
