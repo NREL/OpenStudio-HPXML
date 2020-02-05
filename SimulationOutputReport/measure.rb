@@ -316,12 +316,14 @@ class SimulationOutputReport < OpenStudio::Measure::ReportingMeasure
 
     # HPXML Systems
     set_hpxml_systems()
-    outputs[:hpxml_eec_heats] = get_hpxml_eec_heats()
-    outputs[:hpxml_eec_cools] = get_hpxml_eec_cools()
-    outputs[:hpxml_eec_dhws] = get_hpxml_eec_dhws()
-    outputs[:hpxml_heat_sys_ids] = outputs[:hpxml_eec_heats].keys
-    outputs[:hpxml_cool_sys_ids] = outputs[:hpxml_eec_cools].keys
-    outputs[:hpxml_dhw_sys_ids] = outputs[:hpxml_eec_dhws].keys
+    if not @eri_design.nil?
+      outputs[:hpxml_eec_heats] = get_hpxml_eec_heats()
+      outputs[:hpxml_eec_cools] = get_hpxml_eec_cools()
+      outputs[:hpxml_eec_dhws] = get_hpxml_eec_dhws()
+    end
+    outputs[:hpxml_heat_sys_ids] = get_hpxml_heat_sys_ids()
+    outputs[:hpxml_cool_sys_ids] = get_hpxml_cool_sys_ids()
+    outputs[:hpxml_dhw_sys_ids] = get_hpxml_dhw_sys_ids()
     outputs[:hpxml_dse_heats] = get_hpxml_dse_heats(outputs[:hpxml_heat_sys_ids])
     outputs[:hpxml_dse_cools] = get_hpxml_dse_cools(outputs[:hpxml_cool_sys_ids])
     outputs[:hpxml_heat_fuels] = get_hpxml_heat_fuels()
@@ -975,6 +977,45 @@ class SimulationOutputReport < OpenStudio::Measure::ReportingMeasure
     return dhw_fuels
   end
 
+  def get_hpxml_heat_sys_ids()
+    sys_ids = []
+
+    @htgs.each do |htg_system|
+      sys_ids << get_system_or_seed_id(htg_system)
+    end
+    @hp_htgs.each do |heat_pump|
+      sys_ids << get_system_or_seed_id(heat_pump)
+      if is_dfhp(heat_pump)
+        sys_ids << dfhp_backup_sys_id(sys_id)
+      end
+    end
+
+    return sys_ids
+  end
+
+  def get_hpxml_cool_sys_ids()
+    sys_ids = []
+
+    @clgs.each do |clg_system|
+      sys_ids << get_system_or_seed_id(clg_system)
+    end
+    @hp_clgs.each do |heat_pump|
+      sys_ids << get_system_or_seed_id(heat_pump)
+    end
+
+    return sys_ids
+  end
+
+  def get_hpxml_dhw_sys_ids()
+    sys_ids = []
+
+    @dhws.each do |dhw_system|
+      sys_ids << dhw_system.elements["SystemIdentifier"].attributes["id"]
+    end
+
+    return sys_ids
+  end
+
   def get_hpxml_eec_heats()
     eec_heats = {}
 
@@ -1049,7 +1090,7 @@ class SimulationOutputReport < OpenStudio::Measure::ReportingMeasure
       value = XMLHelper.get_value(dhw_system, "EnergyFactor")
       wh_type = XMLHelper.get_value(dhw_system, "WaterHeaterType")
       if wh_type == "instantaneous water heater"
-        cycling_derate = XMLHelper.get_value(dhw_system, "PerformanceAdjustment").to_f
+        cycling_derate = Float(XMLHelper.get_value(dhw_system, "PerformanceAdjustment"))
         value_adj = 1.0 - cycling_derate
       else
         value_adj = 1.0
