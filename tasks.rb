@@ -1505,25 +1505,25 @@ end
 def get_hpxml_file_windows_values(hpxml_file, windows_values)
   if ['base.xml'].include? hpxml_file
     windows_values = [{ :id => "WindowNorth",
-                        :area => 54,
+                        :area => 108,
                         :azimuth => 0,
                         :ufactor => 0.33,
                         :shgc => 0.45,
                         :wall_idref => "Wall" },
                       { :id => "WindowSouth",
-                        :area => 54,
+                        :area => 108,
                         :azimuth => 180,
                         :ufactor => 0.33,
                         :shgc => 0.45,
                         :wall_idref => "Wall" },
                       { :id => "WindowEast",
-                        :area => 36,
+                        :area => 72,
                         :azimuth => 90,
                         :ufactor => 0.33,
                         :shgc => 0.45,
                         :wall_idref => "Wall" },
                       { :id => "WindowWest",
-                        :area => 36,
+                        :area => 72,
                         :azimuth => 270,
                         :ufactor => 0.33,
                         :shgc => 0.45,
@@ -1555,10 +1555,10 @@ def get_hpxml_file_windows_values(hpxml_file, windows_values)
   elsif ['invalid_files/net-area-negative-wall.xml'].include? hpxml_file
     windows_values[0][:area] = 1000
   elsif ['base-atticroof-conditioned.xml'].include? hpxml_file
-    windows_values[0][:area] = 54
-    windows_values[1][:area] = 54
-    windows_values[2][:area] = 54
-    windows_values[3][:area] = 54
+    windows_values[0][:area] = 108
+    windows_values[1][:area] = 108
+    windows_values[2][:area] = 108
+    windows_values[3][:area] = 108
     windows_values << { :id => "AtticGableWindowEast",
                         :area => 12,
                         :azimuth => 90,
@@ -1572,10 +1572,10 @@ def get_hpxml_file_windows_values(hpxml_file, windows_values)
                         :shgc => 0.45,
                         :wall_idref => "WallAtticGableCond" }
   elsif ['base-atticroof-cathedral.xml'].include? hpxml_file
-    windows_values[0][:area] = 54
-    windows_values[1][:area] = 54
-    windows_values[2][:area] = 54
-    windows_values[3][:area] = 54
+    windows_values[0][:area] = 108
+    windows_values[1][:area] = 108
+    windows_values[2][:area] = 108
+    windows_values[3][:area] = 108
     windows_values << { :id => "AtticGableWindowEast",
                         :area => 12,
                         :azimuth => 90,
@@ -1597,15 +1597,15 @@ def get_hpxml_file_windows_values(hpxml_file, windows_values)
                         :shgc => 0.45,
                         :wall_idref => "WallGarageExterior" }
   elsif ['base-enclosure-2stories.xml'].include? hpxml_file
-    windows_values[0][:area] = 108
-    windows_values[1][:area] = 108
-    windows_values[2][:area] = 72
-    windows_values[3][:area] = 72
+    windows_values[0][:area] = 216
+    windows_values[1][:area] = 216
+    windows_values[2][:area] = 144
+    windows_values[3][:area] = 144
   elsif ['base-enclosure-2stories-garage'].include? hpxml_file
-    windows_values[0][:area] = 84
-    windows_values[1][:area] = 108
-    windows_values[2][:area] = 72
-    windows_values[3][:area] = 48
+    windows_values[0][:area] = 168
+    windows_values[1][:area] = 216
+    windows_values[2][:area] = 144
+    windows_values[3][:area] = 96
   elsif ['base-foundation-unconditioned-basement-above-grade.xml'].include? hpxml_file
     windows_values << { :id => "FoundationWindowNorth",
                         :area => 20,
@@ -1650,13 +1650,13 @@ end
 def get_hpxml_file_skylights_values(hpxml_file, skylights_values)
   if ['base-enclosure-skylights.xml'].include? hpxml_file
     skylights_values << { :id => "SkylightNorth",
-                          :area => 15,
+                          :area => 45,
                           :azimuth => 0,
                           :ufactor => 0.33,
                           :shgc => 0.45,
                           :roof_idref => "Roof" }
     skylights_values << { :id => "SkylightSouth",
-                          :area => 15,
+                          :area => 45,
                           :azimuth => 180,
                           :ufactor => 0.35,
                           :shgc => 0.47,

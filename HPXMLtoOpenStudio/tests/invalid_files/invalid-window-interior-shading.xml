@@ -186,7 +186,7 @@
         <Windows>
           <Window>
             <SystemIdentifier id='WindowNorth'/>
-            <Area>54.0</Area>
+            <Area>108.0</Area>
             <Azimuth>0</Azimuth>
             <UFactor>0.33</UFactor>
             <SHGC>0.45</SHGC>
@@ -199,7 +199,7 @@
           </Window>
           <Window>
             <SystemIdentifier id='WindowSouth'/>
-            <Area>54.0</Area>
+            <Area>108.0</Area>
             <Azimuth>180</Azimuth>
             <UFactor>0.33</UFactor>
             <SHGC>0.45</SHGC>
@@ -207,7 +207,7 @@
           </Window>
           <Window>
             <SystemIdentifier id='WindowEast'/>
-            <Area>36.0</Area>
+            <Area>72.0</Area>
             <Azimuth>90</Azimuth>
             <UFactor>0.33</UFactor>
             <SHGC>0.45</SHGC>
@@ -215,7 +215,7 @@
           </Window>
           <Window>
             <SystemIdentifier id='WindowWest'/>
-            <Area>36.0</Area>
+            <Area>72.0</Area>
             <Azimuth>270</Azimuth>
             <UFactor>0.33</UFactor>
             <SHGC>0.45</SHGC>
