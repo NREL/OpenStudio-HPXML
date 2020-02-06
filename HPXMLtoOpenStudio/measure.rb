@@ -1706,7 +1706,11 @@ class OSModel
 
   def self.add_interior_shading_schedule(runner, model, weather)
     heating_season, cooling_season = HVAC.calc_heating_and_cooling_seasons(model, weather)
-    @cool_season_sch = MonthWeekdayWeekendSchedule.new(model, "interior shading schedule", Array.new(24, 1), Array.new(24, 1), cooling_season, 1.0, 1.0, true, true, Constants.ScheduleTypeLimitsFraction)
+    @clg_season_sch = MonthWeekdayWeekendSchedule.new(model, "interior shading schedule", Array.new(24, 1), Array.new(24, 1), cooling_season, 1.0, 1.0, true, true, Constants.ScheduleTypeLimitsFraction)
+
+    @clg_ssn_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, "Schedule Value")
+    @clg_ssn_sensor.setName("cool_season")
+    @clg_ssn_sensor.setKeyName(@clg_season_sch.schedule.name.to_s)
   end
 
   def self.add_windows(runner, model, building, spaces, weather)
@@ -1776,7 +1780,7 @@ class OSModel
 
       Constructions.apply_window(model, [sub_surface],
                                  "WindowConstruction",
-                                 weather, @cool_season_sch, ufactor, shgc,
+                                 weather, @clg_season_sch, ufactor, shgc,
                                  heat_shade_mult, cool_shade_mult)
     end
 
@@ -1836,7 +1840,7 @@ class OSModel
       heat_shade_mult = 1.0
       Constructions.apply_skylight(model, [sub_surface],
                                    "SkylightConstruction",
-                                   weather, @cool_season_sch, ufactor, shgc,
+                                   weather, @clg_season_sch, ufactor, shgc,
                                    heat_shade_mult, cool_shade_mult)
     end
 
@@ -2993,7 +2997,7 @@ class OSModel
     nv_max_oa_hr = 0.0115
     nv_max_oa_rh = 0.7
     nat_vent = NaturalVentilation.new(nv_frac_windows_open, nv_frac_window_area_openable, nv_max_oa_hr, nv_max_oa_rh, nv_num_days_per_week,
-                                      @htg_weekday_setpoints, @htg_weekend_setpoints, @clg_weekday_setpoints, @clg_weekend_setpoints)
+                                      @htg_weekday_setpoints, @htg_weekend_setpoints, @clg_weekday_setpoints, @clg_weekend_setpoints, @clg_ssn_sensor)
 
     # Ducts
     duct_systems = {}
@@ -3690,11 +3694,6 @@ class OSModel
       intgains_dhw_sensors[dhw_sensor] = [offcycle_loss, oncycle_loss, dhw_rtf_sensor]
     end
 
-    # EMS Sensors: Cooling season
-    cool_ssn_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, "Schedule Value")
-    cool_ssn_sensor.setName("cool_season")
-    cool_ssn_sensor.setKeyName(@cool_season_sch.schedule.name.to_s)
-
     nonsurf_names = ["intgains", "infil", "mechvent", "natvent", "whf", "ducts"]
 
     # EMS program
@@ -3765,7 +3764,7 @@ class OSModel
     program.addLine("  Set htg_mode = 1")
     program.addLine("ElseIf (#{liv_load_sensors[:clg].name} > 0) || (hr_natvent <> 0) || (hr_whf <> 0)") # Assign hour to cooling if cooling load or cooling need met by natural ventilation or whole house fan
     program.addLine("  Set clg_mode = 1")
-    program.addLine("ElseIf (#{cool_ssn_sensor.name} > 0)") # No load, assign hour to cooling if in cooling season definition
+    program.addLine("ElseIf (#{@clg_ssn_sensor.name} > 0)") # No load, assign hour to cooling if in cooling season definition
     program.addLine("  Set clg_mode = 1")
     program.addLine("Else") # No load, assign hour to heating if not in cooling season definition
     program.addLine("  Set htg_mode = 1")
