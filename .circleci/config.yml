@@ -14,5 +14,5 @@ jobs:
           command: |
             rake test_all
       - store_artifacts:
-          path: HPXMLtoOpenStudio/tests/results
+          path: workflow/tests/results
           destination: results
