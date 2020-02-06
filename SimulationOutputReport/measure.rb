@@ -288,6 +288,8 @@ class SimulationOutputReport < OpenStudio::Measure::ReportingMeasure
                                     include_timeseries_total_loads,
                                     include_timeseries_component_loads)
 
+    @sqlFile.close()
+
     return true
   end
 
@@ -314,12 +316,14 @@ class SimulationOutputReport < OpenStudio::Measure::ReportingMeasure
 
     # HPXML Systems
     set_hpxml_systems()
-    outputs[:hpxml_eec_heats] = get_hpxml_eec_heats()
-    outputs[:hpxml_eec_cools] = get_hpxml_eec_cools()
-    outputs[:hpxml_eec_dhws] = get_hpxml_eec_dhws()
-    outputs[:hpxml_heat_sys_ids] = outputs[:hpxml_eec_heats].keys
-    outputs[:hpxml_cool_sys_ids] = outputs[:hpxml_eec_cools].keys
-    outputs[:hpxml_dhw_sys_ids] = outputs[:hpxml_eec_dhws].keys
+    if not @eri_design.nil?
+      outputs[:hpxml_eec_heats] = get_hpxml_eec_heats()
+      outputs[:hpxml_eec_cools] = get_hpxml_eec_cools()
+      outputs[:hpxml_eec_dhws] = get_hpxml_eec_dhws()
+    end
+    outputs[:hpxml_heat_sys_ids] = get_hpxml_heat_sys_ids()
+    outputs[:hpxml_cool_sys_ids] = get_hpxml_cool_sys_ids()
+    outputs[:hpxml_dhw_sys_ids] = get_hpxml_dhw_sys_ids()
     outputs[:hpxml_dse_heats] = get_hpxml_dse_heats(outputs[:hpxml_heat_sys_ids])
     outputs[:hpxml_dse_cools] = get_hpxml_dse_cools(outputs[:hpxml_cool_sys_ids])
     outputs[:hpxml_heat_fuels] = get_hpxml_heat_fuels()
@@ -585,8 +589,12 @@ class SimulationOutputReport < OpenStudio::Measure::ReportingMeasure
 
     # Calculate aggregated values from per-system values as needed
     (@end_uses.values + @loads.values).each do |obj|
-      if obj.annual_output.nil? and not obj.annual_output_by_system.empty?
-        obj.annual_output = obj.annual_output_by_system.values.inject(0, :+)
+      if obj.annual_output.nil?
+        if not obj.annual_output_by_system.empty?
+          obj.annual_output = obj.annual_output_by_system.values.inject(0, :+)
+        else
+          obj.annual_output = 0.0
+        end
       end
       if obj.timeseries_output.empty? and not obj.timeseries_output_by_system.empty?
         obj.timeseries_output = obj.timeseries_output_by_system.values[0]
@@ -969,6 +977,45 @@ class SimulationOutputReport < OpenStudio::Measure::ReportingMeasure
     return dhw_fuels
   end
 
+  def get_hpxml_heat_sys_ids()
+    sys_ids = []
+
+    @htgs.each do |htg_system|
+      sys_ids << get_system_or_seed_id(htg_system)
+    end
+    @hp_htgs.each do |heat_pump|
+      sys_ids << get_system_or_seed_id(heat_pump)
+      if is_dfhp(heat_pump)
+        sys_ids << dfhp_backup_sys_id(sys_ids[-1])
+      end
+    end
+
+    return sys_ids
+  end
+
+  def get_hpxml_cool_sys_ids()
+    sys_ids = []
+
+    @clgs.each do |clg_system|
+      sys_ids << get_system_or_seed_id(clg_system)
+    end
+    @hp_clgs.each do |heat_pump|
+      sys_ids << get_system_or_seed_id(heat_pump)
+    end
+
+    return sys_ids
+  end
+
+  def get_hpxml_dhw_sys_ids()
+    sys_ids = []
+
+    @dhws.each do |dhw_system|
+      sys_ids << dhw_system.elements["SystemIdentifier"].attributes["id"]
+    end
+
+    return sys_ids
+  end
+
   def get_hpxml_eec_heats()
     eec_heats = {}
 
@@ -1264,10 +1311,11 @@ class SimulationOutputReport < OpenStudio::Measure::ReportingMeasure
     dfhp_backup = false
     @hpxml_doc.elements.each("/HPXML/Building/BuildingDetails/Systems/HVAC/HVACPlant/HeatingSystem |
                              /HPXML/Building/BuildingDetails/Systems/HVAC/HVACPlant/HeatPump") do |system|
+      # This is super ugly. Can we simplify it?
       if is_dfhp(system)
-        if dfhp_primary_sys_id(sys_id) == sys_id
+        if dfhp_primary_sys_id(sys_id) == sys_id and [XMLHelper.get_value(system, "extension/SeedId"), system.elements["SystemIdentifier"].attributes["id"]].include? sys_id
           dfhp_primary = true
-        else
+        elsif [XMLHelper.get_value(system, "extension/SeedId"), system.elements["SystemIdentifier"].attributes["id"]].include? dfhp_primary_sys_id(sys_id)
           dfhp_backup = true
           sys_id = dfhp_primary_sys_id(sys_id)
         end
@@ -1277,6 +1325,8 @@ class SimulationOutputReport < OpenStudio::Measure::ReportingMeasure
       sys_id = system.elements["SystemIdentifier"].attributes["id"]
       break
     end
+
+    fail "Unexpected result." if dfhp_primary and dfhp_backup
 
     output_names = @hvac_map[sys_id].dup
 

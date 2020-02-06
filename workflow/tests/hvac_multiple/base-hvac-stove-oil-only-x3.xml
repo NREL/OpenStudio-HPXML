@@ -237,78 +237,48 @@
       <Systems>
         <HVAC>
           <HVACPlant>
-            <HeatPump>
-              <SystemIdentifier id='HeatPump'/>
-              <DistributionSystem idref='HVACDistribution'/>
-              <HeatPumpType>air-to-air</HeatPumpType>
-              <HeatPumpFuel>electricity</HeatPumpFuel>
-              <HeatingCapacity>14000.0</HeatingCapacity>
-              <CoolingCapacity>16000.0</CoolingCapacity>
-              <BackupSystemFuel>electricity</BackupSystemFuel>
-              <BackupAnnualHeatingEfficiency>
-                <Units>Percent</Units>
-                <Value>1.0</Value>
-              </BackupAnnualHeatingEfficiency>
-              <BackupHeatingCapacity>11373.666666666666</BackupHeatingCapacity>
-              <FractionHeatLoadServed>0.333</FractionHeatLoadServed>
-              <FractionCoolLoadServed>0.333</FractionCoolLoadServed>
-              <AnnualCoolingEfficiency>
-                <Units>SEER</Units>
-                <Value>22.0</Value>
-              </AnnualCoolingEfficiency>
+            <HeatingSystem>
+              <SystemIdentifier id='HeatingSystem'/>
+              <HeatingSystemType>
+                <Stove/>
+              </HeatingSystemType>
+              <HeatingSystemFuel>fuel oil</HeatingSystemFuel>
+              <HeatingCapacity>21333.333333333332</HeatingCapacity>
               <AnnualHeatingEfficiency>
-                <Units>HSPF</Units>
-                <Value>10.0</Value>
-              </AnnualHeatingEfficiency>
-            </HeatPump>
-            <HeatPump>
-              <SystemIdentifier id='SpaceHeatPump_ID2'/>
-              <DistributionSystem idref='HVACDistribution2'/>
-              <HeatPumpType>air-to-air</HeatPumpType>
-              <HeatPumpFuel>electricity</HeatPumpFuel>
-              <HeatingCapacity>14000.0</HeatingCapacity>
-              <CoolingCapacity>16000.0</CoolingCapacity>
-              <BackupSystemFuel>electricity</BackupSystemFuel>
-              <BackupAnnualHeatingEfficiency>
                 <Units>Percent</Units>
-                <Value>1.0</Value>
-              </BackupAnnualHeatingEfficiency>
-              <BackupHeatingCapacity>11373.666666666666</BackupHeatingCapacity>
-              <FractionHeatLoadServed>0.333</FractionHeatLoadServed>
-              <FractionCoolLoadServed>0.333</FractionCoolLoadServed>
-              <AnnualCoolingEfficiency>
-                <Units>SEER</Units>
-                <Value>22.0</Value>
-              </AnnualCoolingEfficiency>
-              <AnnualHeatingEfficiency>
-                <Units>HSPF</Units>
-                <Value>10.0</Value>
+                <Value>0.8</Value>
               </AnnualHeatingEfficiency>
-            </HeatPump>
-            <HeatPump>
-              <SystemIdentifier id='SpaceHeatPump_ID3'/>
-              <DistributionSystem idref='HVACDistribution3'/>
-              <HeatPumpType>air-to-air</HeatPumpType>
-              <HeatPumpFuel>electricity</HeatPumpFuel>
-              <HeatingCapacity>14000.0</HeatingCapacity>
-              <CoolingCapacity>16000.0</CoolingCapacity>
-              <BackupSystemFuel>electricity</BackupSystemFuel>
-              <BackupAnnualHeatingEfficiency>
+              <FractionHeatLoadServed>0.333</FractionHeatLoadServed>
+              <ElectricAuxiliaryEnergy>66.66666666666667</ElectricAuxiliaryEnergy>
+            </HeatingSystem>
+            <HeatingSystem>
+              <SystemIdentifier id='HeatingSystem2'/>
+              <HeatingSystemType>
+                <Stove/>
+              </HeatingSystemType>
+              <HeatingSystemFuel>fuel oil</HeatingSystemFuel>
+              <HeatingCapacity>21333.333333333332</HeatingCapacity>
+              <AnnualHeatingEfficiency>
                 <Units>Percent</Units>
-                <Value>1.0</Value>
-              </BackupAnnualHeatingEfficiency>
-              <BackupHeatingCapacity>11373.666666666666</BackupHeatingCapacity>
-              <FractionHeatLoadServed>0.333</FractionHeatLoadServed>
-              <FractionCoolLoadServed>0.333</FractionCoolLoadServed>
-              <AnnualCoolingEfficiency>
-                <Units>SEER</Units>
-                <Value>22.0</Value>
-              </AnnualCoolingEfficiency>
-              <AnnualHeatingEfficiency>
-                <Units>HSPF</Units>
-                <Value>10.0</Value>
+                <Value>0.8</Value>
               </AnnualHeatingEfficiency>
-            </HeatPump>
+              <FractionHeatLoadServed>0.333</FractionHeatLoadServed>
+              <ElectricAuxiliaryEnergy>66.66666666666667</ElectricAuxiliaryEnergy>
+            </HeatingSystem>
+            <HeatingSystem>
+              <SystemIdentifier id='HeatingSystem3'/>
+              <HeatingSystemType>
+                <Stove/>
+              </HeatingSystemType>
+              <HeatingSystemFuel>fuel oil</HeatingSystemFuel>
+              <HeatingCapacity>21333.333333333332</HeatingCapacity>
+              <AnnualHeatingEfficiency>
+                <Units>Percent</Units>
+                <Value>0.8</Value>
+              </AnnualHeatingEfficiency>
+              <FractionHeatLoadServed>0.333</FractionHeatLoadServed>
+              <ElectricAuxiliaryEnergy>66.66666666666667</ElectricAuxiliaryEnergy>
+            </HeatingSystem>
           </HVACPlant>
           <HVACControl>
             <SystemIdentifier id='HVACControl'/>
@@ -316,75 +286,6 @@
             <SetpointTempHeatingSeason>68.0</SetpointTempHeatingSeason>
             <SetpointTempCoolingSeason>78.0</SetpointTempCoolingSeason>
           </HVACControl>
-          <HVACDistribution>
-            <SystemIdentifier id='HVACDistribution'/>
-            <DistributionSystemType>
-              <AirDistribution>
-                <DuctLeakageMeasurement>
-                  <DuctType>supply</DuctType>
-                  <DuctLeakage>
-                    <Units>CFM25</Units>
-                    <Value>0.0</Value>
-                    <TotalOrToOutside>to outside</TotalOrToOutside>
-                  </DuctLeakage>
-                </DuctLeakageMeasurement>
-                <DuctLeakageMeasurement>
-                  <DuctType>return</DuctType>
-                  <DuctLeakage>
-                    <Units>CFM25</Units>
-                    <Value>0.0</Value>
-                    <TotalOrToOutside>to outside</TotalOrToOutside>
-                  </DuctLeakage>
-                </DuctLeakageMeasurement>
-              </AirDistribution>
-            </DistributionSystemType>
-          </HVACDistribution>
-          <HVACDistribution>
-            <SystemIdentifier id='HVACDistribution2'/>
-            <DistributionSystemType>
-              <AirDistribution>
-                <DuctLeakageMeasurement>
-                  <DuctType>supply</DuctType>
-                  <DuctLeakage>
-                    <Units>CFM25</Units>
-                    <Value>0.0</Value>
-                    <TotalOrToOutside>to outside</TotalOrToOutside>
-                  </DuctLeakage>
-                </DuctLeakageMeasurement>
-                <DuctLeakageMeasurement>
-                  <DuctType>return</DuctType>
-                  <DuctLeakage>
-                    <Units>CFM25</Units>
-                    <Value>0.0</Value>
-                    <TotalOrToOutside>to outside</TotalOrToOutside>
-                  </DuctLeakage>
-                </DuctLeakageMeasurement>
-              </AirDistribution>
-            </DistributionSystemType>
-          </HVACDistribution>
-          <HVACDistribution>
-            <SystemIdentifier id='HVACDistribution3'/>
-            <DistributionSystemType>
-              <AirDistribution>
-                <DuctLeakageMeasurement>
-                  <DuctType>supply</DuctType>
-                  <DuctLeakage>
-                    <Units>CFM25</Units>
-                    <Value>0.0</Value>
-                    <TotalOrToOutside>to outside</TotalOrToOutside>
-                  </DuctLeakage>
-                </DuctLeakageMeasurement>
-                <DuctLeakageMeasurement>
-                  <DuctType>return</DuctType>
-                  <DuctLeakage>
-                    <Units>CFM25</Units>
-                    <Value>0.0</Value>
-                    <TotalOrToOutside>to outside</TotalOrToOutside>
-                  </DuctLeakage>
-                </DuctLeakageMeasurement>
-              </AirDistribution>
-            </DistributionSystemType>
-          </HVACDistribution>
         </HVAC>
         <WaterHeating>
           <WaterHeatingSystem>

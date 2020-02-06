@@ -1,17 +1,17 @@
-require_relative 'minitest_helper'
+require_relative '../../HPXMLtoOpenStudio/resources/minitest_helper'
 require 'openstudio'
 require 'openstudio/ruleset/ShowRunnerOutput'
 require 'minitest/autorun'
-require_relative '../measure.rb'
 require 'fileutils'
 require 'rexml/document'
 require 'rexml/xpath'
-require_relative '../resources/constants'
-require_relative '../resources/meta_measure'
-require_relative '../resources/unit_conversions'
-require_relative '../resources/xmlhelper'
+require_relative '../../HPXMLtoOpenStudio/measure.rb'
+require_relative '../../HPXMLtoOpenStudio/resources/constants'
+require_relative '../../HPXMLtoOpenStudio/resources/meta_measure'
+require_relative '../../HPXMLtoOpenStudio/resources/unit_conversions'
+require_relative '../../HPXMLtoOpenStudio/resources/xmlhelper'
 
-class HPXMLtoOpenStudioTest < MiniTest::Test
+class HPXMLTest < MiniTest::Test
   @@simulation_runtime_key = "Simulation Runtime"
   @@workflow_runtime_key = "Workflow Runtime"
 
@@ -23,21 +23,17 @@ class HPXMLtoOpenStudioTest < MiniTest::Test
     results_dir = File.join(this_dir, "results")
     _rm_path(results_dir)
 
-    cfis_dir = File.absolute_path(File.join(this_dir, "cfis"))
     hvac_base_dir = File.absolute_path(File.join(this_dir, "hvac_base"))
     hvac_multiple_dir = File.absolute_path(File.join(this_dir, "hvac_multiple"))
     hvac_partial_dir = File.absolute_path(File.join(this_dir, "hvac_partial"))
     hvac_load_fracs_dir = File.absolute_path(File.join(this_dir, "hvac_load_fracs"))
-    water_heating_multiple_dir = File.absolute_path(File.join(this_dir, "water_heating_multiple"))
     autosize_dir = File.absolute_path(File.join(this_dir, "hvac_autosizing"))
 
     test_dirs = [this_dir,
-                 cfis_dir,
                  hvac_base_dir,
                  hvac_multiple_dir,
                  hvac_partial_dir,
                  hvac_load_fracs_dir,
-                 water_heating_multiple_dir,
                  autosize_dir]
 
     xmls = []
@@ -63,7 +59,6 @@ class HPXMLtoOpenStudioTest < MiniTest::Test
 
     # Cross simulation tests
     _test_multiple_hvac(xmls, hvac_multiple_dir, hvac_base_dir, all_results)
-    _test_multiple_water_heaters(xmls, water_heating_multiple_dir, all_results)
     _test_partial_hvac(xmls, hvac_partial_dir, hvac_base_dir, all_results)
     _test_hrv_erv_inputs(this_dir, all_results)
     _test_heating_cooling_loads(xmls, hvac_base_dir, all_results)
@@ -73,7 +68,7 @@ class HPXMLtoOpenStudioTest < MiniTest::Test
   def test_run_simulation_rb
     # Check that simulation works using run_simulation.rb script
     os_cli = OpenStudio.getOpenStudioCLI
-    rb_path = File.join(File.dirname(__FILE__), "..", "..", "workflow", "run_simulation.rb")
+    rb_path = File.join(File.dirname(__FILE__), "..", "run_simulation.rb")
     xml = File.join(File.dirname(__FILE__), "base.xml")
     command = "#{os_cli} #{rb_path} -x #{xml}"
     system(command, :err => File::NULL)
@@ -84,7 +79,7 @@ class HPXMLtoOpenStudioTest < MiniTest::Test
   def test_template_osw
     # Check that simulation works using template.osw
     os_cli = OpenStudio.getOpenStudioCLI
-    osw_path = File.join(File.dirname(__FILE__), "..", "..", "workflow", "template.osw")
+    osw_path = File.join(File.dirname(__FILE__), "..", "template.osw")
     if Dir.exists? File.join(File.dirname(__FILE__), "..", "..", "project")
       # CI checks out the repo as "project", so need to update the OSW
       osw_path_ci = osw_path.gsub('.osw', '2.osw')
@@ -328,7 +323,7 @@ class HPXMLtoOpenStudioTest < MiniTest::Test
     results[new_key] = sqlFile.execAndReturnFirstDouble(query).get.round(2)
 
     # Disaggregate any crankcase and defrost energy from results
-    query = "SELECT SUM(Value)/1000000000 FROM ReportData WHERE ReportDataDictionaryIndex IN (SELECT ReportDataDictionaryIndex FROM ReportDataDictionary WHERE Name='Cooling Coil Crankcase Heater Electric Energy')"
+    query = "SELECT SUM(Value)/1000000000 FROM ReportData WHERE ReportDataDictionaryIndex IN (SELECT ReportDataDictionaryIndex FROM ReportDataDictionary WHERE Name='Cooling Coil Crankcase Heater Electric Energy' AND ReportingFrequency='Run Period')"
     sql_value = sqlFile.execAndReturnFirstDouble(query)
     if sql_value.is_initialized
       cooling_crankcase = sql_value.get.round(2)
@@ -337,7 +332,7 @@ class HPXMLtoOpenStudioTest < MiniTest::Test
         results[["Electricity", "Cooling", "Crankcase", "GJ"]] = cooling_crankcase
       end
     end
-    query = "SELECT SUM(Value)/1000000000 FROM ReportData WHERE ReportDataDictionaryIndex IN (SELECT ReportDataDictionaryIndex FROM ReportDataDictionary WHERE Name='Heating Coil Crankcase Heater Electric Energy')"
+    query = "SELECT SUM(Value)/1000000000 FROM ReportData WHERE ReportDataDictionaryIndex IN (SELECT ReportDataDictionaryIndex FROM ReportDataDictionary WHERE Name='Heating Coil Crankcase Heater Electric Energy' AND ReportingFrequency='Run Period')"
     sql_value = sqlFile.execAndReturnFirstDouble(query)
     if sql_value.is_initialized
       heating_crankcase = sql_value.get.round(2)
@@ -346,7 +341,7 @@ class HPXMLtoOpenStudioTest < MiniTest::Test
         results[["Electricity", "Heating", "Crankcase", "GJ"]] = heating_crankcase
       end
     end
-    query = "SELECT SUM(Value)/1000000000 FROM ReportData WHERE ReportDataDictionaryIndex IN (SELECT ReportDataDictionaryIndex FROM ReportDataDictionary WHERE Name='Heating Coil Defrost Electric Energy')"
+    query = "SELECT SUM(Value)/1000000000 FROM ReportData WHERE ReportDataDictionaryIndex IN (SELECT ReportDataDictionaryIndex FROM ReportDataDictionary WHERE Name='Heating Coil Defrost Electric Energy' AND ReportingFrequency='Run Period')"
     sql_value = sqlFile.execAndReturnFirstDouble(query)
     if sql_value.is_initialized
       heating_defrost = sql_value.get.round(2)
@@ -357,7 +352,7 @@ class HPXMLtoOpenStudioTest < MiniTest::Test
     end
 
     # Obtain hot water use
-    query = "SELECT SUM(VariableValue) FROM ReportVariableData WHERE ReportVariableDataDictionaryIndex IN (SELECT ReportVariableDataDictionaryIndex FROM ReportVariableDataDictionary WHERE VariableName='Water Use Equipment Hot Water Volume' AND VariableUnits='m3')"
+    query = "SELECT SUM(VariableValue) FROM ReportVariableData WHERE ReportVariableDataDictionaryIndex IN (SELECT ReportVariableDataDictionaryIndex FROM ReportVariableDataDictionary WHERE VariableName='Water Use Equipment Hot Water Volume' AND VariableUnits='m3' AND ReportingFrequency='Run Period')"
     results[["Volume", "Hot Water", "General", "gal"]] = UnitConversions.convert(sqlFile.execAndReturnFirstDouble(query).get, "m^3", "gal").round(2)
 
     # Obtain HVAC capacities
@@ -414,6 +409,7 @@ class HPXMLtoOpenStudioTest < MiniTest::Test
 
   def _test_simulation(this_dir, xml, rundir, expect_error, expect_error_msgs)
     # Uses meta_measure workflow for faster simulations
+    # TODO: Merge code with workflow/run_simulation.rb
 
     # Setup
     _rm_path(rundir)
@@ -422,20 +418,31 @@ class HPXMLtoOpenStudioTest < MiniTest::Test
     workflow_start = Time.now
     model = OpenStudio::Model::Model.new
     runner = OpenStudio::Measure::OSRunner.new(OpenStudio::WorkflowJSON.new)
+    measures_dir = File.join(this_dir, "..", "..")
 
+    measures = {}
+
+    # Add HPXML translator measure to workflow
+    measure_subdir = "HPXMLtoOpenStudio"
     args = {}
-    args['epw_output_path'] = File.absolute_path(File.join(rundir, "in.epw"))
-    args['osm_output_path'] = File.absolute_path(File.join(rundir, "in.osm"))
     args['hpxml_path'] = xml
     args['weather_dir'] = "weather"
+    args['epw_output_path'] = File.absolute_path(File.join(rundir, "in.epw"))
+    args['osm_output_path'] = File.absolute_path(File.join(rundir, "in.osm"))
+    update_args_hash(measures, measure_subdir, args)
 
-    # Add measure to workflow
-    measures = {}
-    measure_subdir = File.absolute_path(File.join(this_dir, "..")).split('/')[-1]
+    # Add reporting measure to workflow
+    measure_subdir = "SimulationOutputReport"
+    args = {}
+    args['timeseries_frequency'] = 'hourly'
+    args['include_timeseries_zone_temperatures'] = true
+    args['include_timeseries_fuel_consumptions'] = true
+    args['include_timeseries_end_use_consumptions'] = true
+    args['include_timeseries_total_loads'] = true
+    args['include_timeseries_component_loads'] = true
     update_args_hash(measures, measure_subdir, args)
 
     # Apply measure
-    measures_dir = File.join(this_dir, "../../")
     success = apply_measures(measures_dir, measures, runner, model)
 
     # Report warnings/errors
@@ -452,7 +459,7 @@ class HPXMLtoOpenStudioTest < MiniTest::Test
       assert_equal(false, success)
 
       if expect_error_msgs.nil?
-        flunk "No error message defined for #{File.basename(args['hpxml_path'])}."
+        flunk "No error message defined for #{File.basename(xml)}."
       else
         run_log = File.readlines(File.join(rundir, "run.log")).map(&:strip)
         expect_error_msgs.each do |error_msg|
@@ -547,25 +554,50 @@ class HPXMLtoOpenStudioTest < MiniTest::Test
       output_var.setKeyValue(hx.name.to_s)
     end
 
-    # Write model to IDF
+    # Translate model to IDF
     forward_translator = OpenStudio::EnergyPlus::ForwardTranslator.new
     forward_translator.setExcludeLCCObjects(true)
     model_idf = forward_translator.translateModel(model)
+
+    # Apply reporting measure output requests
+    apply_energyplus_output_requests(measures_dir, measures, runner, model, model_idf)
+
+    # Write IDF to file
     File.open(File.join(rundir, "in.idf"), 'w') { |f| f << model_idf.to_s }
 
     # Run EnergyPlus
+    # getEnergyPlusDirectory can be unreliable, using getOpenStudioCLI instead
     ep_path = File.absolute_path(File.join(OpenStudio.getOpenStudioCLI.to_s, '..', '..', 'EnergyPlus', 'energyplus'))
     command = "cd #{rundir} && #{ep_path} -w in.epw in.idf > stdout-energyplus"
     simulation_start = Time.now
     system(command, :err => File::NULL)
     sim_time = (Time.now - simulation_start).round(1)
     workflow_time = (Time.now - workflow_start).round(1)
-    puts "Completed #{File.basename(args['hpxml_path'])} simulation in #{sim_time}, workflow in #{workflow_time}s."
+    puts "Completed #{File.basename(xml)} simulation in #{sim_time}, workflow in #{workflow_time}s."
+
+    # Apply reporting measures
+    runner.setLastEnergyPlusSqlFilePath(File.join(rundir, "eplusout.sql"))
+    success = apply_measures(measures_dir, measures, runner, model, true, "OpenStudio::Measure::ReportingMeasure")
+    runner.resetLastEnergyPlusSqlFilePath
+
+    # Report warnings/errors
+    File.open(File.join(rundir, 'run.log'), 'a') do |f|
+      runner.result.stepWarnings.each do |s|
+        f << "Warning: #{s}\n"
+      end
+      runner.result.stepErrors.each do |s|
+        f << "Error: #{s}\n"
+      end
+    end
+
+    assert_equal(true, success)
+    assert(File.exists? File.join(rundir, "results_annual.csv"))
+    assert(File.exists? File.join(rundir, "results_timeseries.csv"))
 
     results, compload_results = _get_results(rundir, sim_time, workflow_time)
 
     # Verify simulation outputs
-    _verify_simulation_outputs(runner, rundir, args['hpxml_path'], results)
+    _verify_simulation_outputs(runner, rundir, xml, results)
 
     # Get HVAC sizing outputs
     sizing_results = _get_sizing_results(runner)
@@ -1086,13 +1118,13 @@ class HPXMLtoOpenStudioTest < MiniTest::Test
       if XMLHelper.get_value(mv, "FanType") == 'central fan integrated supply'
         # Fan power
         hpxml_value = Float(XMLHelper.get_value(mv, "FanPower"))
-        query = "SELECT Value FROM ReportData WHERE ReportDataDictionaryIndex IN (SELECT ReportDataDictionaryIndex FROM ReportDataDictionary WHERE Name= '#{@cfis_fan_power_output_var.variableName}')"
+        query = "SELECT Value FROM ReportData WHERE ReportDataDictionaryIndex IN (SELECT ReportDataDictionaryIndex FROM ReportDataDictionary WHERE Name='#{@cfis_fan_power_output_var.variableName}' AND ReportingFrequency='Run Period')"
         sql_value = sqlFile.execAndReturnFirstDouble(query).get
         assert_in_delta(hpxml_value, sql_value, 0.01)
 
         # Flow rate
         hpxml_value = Float(XMLHelper.get_value(mv, "TestedFlowRate")) * Float(XMLHelper.get_value(mv, "HoursInOperation")) / 24.0
-        query = "SELECT Value FROM ReportData WHERE ReportDataDictionaryIndex IN (SELECT ReportDataDictionaryIndex FROM ReportDataDictionary WHERE Name= '#{@cfis_flow_rate_output_var.variableName}')"
+        query = "SELECT Value FROM ReportData WHERE ReportDataDictionaryIndex IN (SELECT ReportDataDictionaryIndex FROM ReportDataDictionary WHERE Name='#{@cfis_flow_rate_output_var.variableName}' AND ReportingFrequency='Run Period')"
         sql_value = UnitConversions.convert(sqlFile.execAndReturnFirstDouble(query).get, "m^3/s", "cfm")
         assert_in_delta(hpxml_value, sql_value, 0.01)
       end
@@ -1308,7 +1340,7 @@ class HPXMLtoOpenStudioTest < MiniTest::Test
 
   def _test_schema_validation(this_dir, xml)
     # TODO: Remove this when schema validation is included with CLI calls
-    schemas_dir = File.absolute_path(File.join(this_dir, "..", "resources"))
+    schemas_dir = File.absolute_path(File.join(this_dir, "..", "..", "HPXMLtoOpenStudio", "resources"))
     hpxml_doc = REXML::Document.new(File.read(xml))
     errors = XMLHelper.validate(hpxml_doc.to_s, File.join(schemas_dir, "HPXML.xsd"), nil)
     if errors.size > 0
@@ -1401,41 +1433,6 @@ class HPXMLtoOpenStudioTest < MiniTest::Test
         _display_result_epsilon(xml, result_x1, result_x3, k)
         if result_x1 > 1.0
           assert_in_epsilon(result_x1, result_x3, 0.12)
-        else
-          assert_in_delta(result_x1, result_x3, 0.1)
-        end
-      end
-    end
-  end
-
-  def _test_multiple_water_heaters(xmls, water_heating_multiple_dir, all_results)
-    # Compare end use results for three tankless water heaters to results for one tankless water heater.
-    puts "Multiple water heater test results:"
-    xmls.sort.each do |xml|
-      next if not xml.include? water_heating_multiple_dir
-
-      xml_x3 = File.absolute_path(xml)
-      xml_x1 = File.absolute_path(File.join(File.dirname(xml), "..", File.basename(xml.gsub("-x3.xml", ".xml"))))
-
-      results_x3 = all_results[xml_x3]
-      results_x1 = all_results[xml_x1]
-      next if results_x1.nil?
-
-      # Compare results
-      results_x3.keys.each do |k|
-        next if [@@simulation_runtime_key, @@workflow_runtime_key].include? k
-
-        result_x1 = results_x1[k].to_f
-        result_x3 = results_x3[k].to_f
-        next if result_x1 == 0.0 and result_x3 == 0.0
-
-        _display_result_delta(xml, result_x1, result_x3, k)
-        if k[0] == "Volume"
-          # Annual hot water volumes are large, use epsilon
-          assert_in_epsilon(result_x1, result_x3, 0.002)
-        elsif xml_x3.include? 'combi' and k == ["Natural Gas", "Heating", "General", "GJ"]
-          # use epsilon for combi system energy check
-          assert_in_epsilon(result_x1, result_x3, 0.01)
         else
           assert_in_delta(result_x1, result_x3, 0.1)
         end

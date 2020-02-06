@@ -239,42 +239,45 @@
           <HVACPlant>
             <HeatingSystem>
               <SystemIdentifier id='HeatingSystem'/>
+              <DistributionSystem idref='HVACDistribution'/>
               <HeatingSystemType>
-                <Stove/>
+                <Boiler/>
               </HeatingSystemType>
-              <HeatingSystemFuel>fuel oil</HeatingSystemFuel>
+              <HeatingSystemFuel>natural gas</HeatingSystemFuel>
               <HeatingCapacity>21333.333333333332</HeatingCapacity>
               <AnnualHeatingEfficiency>
-                <Units>Percent</Units>
-                <Value>0.8</Value>
+                <Units>AFUE</Units>
+                <Value>0.92</Value>
               </AnnualHeatingEfficiency>
               <FractionHeatLoadServed>0.333</FractionHeatLoadServed>
               <ElectricAuxiliaryEnergy>66.66666666666667</ElectricAuxiliaryEnergy>
             </HeatingSystem>
             <HeatingSystem>
-              <SystemIdentifier id='SpaceHeat_ID2'/>
+              <SystemIdentifier id='HeatingSystem2'/>
+              <DistributionSystem idref='HVACDistribution2'/>
               <HeatingSystemType>
-                <Stove/>
+                <Boiler/>
               </HeatingSystemType>
-              <HeatingSystemFuel>fuel oil</HeatingSystemFuel>
+              <HeatingSystemFuel>natural gas</HeatingSystemFuel>
               <HeatingCapacity>21333.333333333332</HeatingCapacity>
               <AnnualHeatingEfficiency>
-                <Units>Percent</Units>
-                <Value>0.8</Value>
+                <Units>AFUE</Units>
+                <Value>0.92</Value>
               </AnnualHeatingEfficiency>
               <FractionHeatLoadServed>0.333</FractionHeatLoadServed>
               <ElectricAuxiliaryEnergy>66.66666666666667</ElectricAuxiliaryEnergy>
             </HeatingSystem>
             <HeatingSystem>
-              <SystemIdentifier id='SpaceHeat_ID3'/>
+              <SystemIdentifier id='HeatingSystem3'/>
+              <DistributionSystem idref='HVACDistribution3'/>
               <HeatingSystemType>
-                <Stove/>
+                <Boiler/>
               </HeatingSystemType>
-              <HeatingSystemFuel>fuel oil</HeatingSystemFuel>
+              <HeatingSystemFuel>natural gas</HeatingSystemFuel>
               <HeatingCapacity>21333.333333333332</HeatingCapacity>
               <AnnualHeatingEfficiency>
-                <Units>Percent</Units>
-                <Value>0.8</Value>
+                <Units>AFUE</Units>
+                <Value>0.92</Value>
               </AnnualHeatingEfficiency>
               <FractionHeatLoadServed>0.333</FractionHeatLoadServed>
               <ElectricAuxiliaryEnergy>66.66666666666667</ElectricAuxiliaryEnergy>
@@ -286,6 +289,24 @@
             <SetpointTempHeatingSeason>68.0</SetpointTempHeatingSeason>
             <SetpointTempCoolingSeason>78.0</SetpointTempCoolingSeason>
           </HVACControl>
+          <HVACDistribution>
+            <SystemIdentifier id='HVACDistribution'/>
+            <DistributionSystemType>
+              <HydronicDistribution/>
+            </DistributionSystemType>
+          </HVACDistribution>
+          <HVACDistribution>
+            <SystemIdentifier id='HVACDistribution2'/>
+            <DistributionSystemType>
+              <HydronicDistribution/>
+            </DistributionSystemType>
+          </HVACDistribution>
+          <HVACDistribution>
+            <SystemIdentifier id='HVACDistribution3'/>
+            <DistributionSystemType>
+              <HydronicDistribution/>
+            </DistributionSystemType>
+          </HVACDistribution>
         </HVAC>
         <WaterHeating>
           <WaterHeatingSystem>
