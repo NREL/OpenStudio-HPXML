@@ -2,8 +2,8 @@
   <schema_version>3.0</schema_version>
   <name>hpxm_lto_openstudio</name>
   <uid>b1543b30-9465-45ff-ba04-1d1f85e763bc</uid>
-  <version_id>5200ac77-8e8c-4943-9722-0668afa190a1</version_id>
-  <version_modified>20200206T201450Z</version_modified>
+  <version_id>5db216f0-c08e-42e1-9ba2-0751567b959d</version_id>
+  <version_modified>20200206T201707Z</version_modified>
   <xml_checksum>D8922A73</xml_checksum>
   <class_name>HPXMLtoOpenStudio</class_name>
   <display_name>HPXML to OpenStudio Translator</display_name>
@@ -460,42 +460,6 @@
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
       <checksum>45CD0C6C</checksum>
-    </file>
-    <file>
-      <filename>base-appliances-dishwasher-ef.xml</filename>
-      <filetype>xml</filetype>
-      <usage_type>test</usage_type>
-      <checksum>8EA85FDF</checksum>
-    </file>
-    <file>
-      <filename>base-appliances-refrigerator-adjusted.xml</filename>
-      <filetype>xml</filetype>
-      <usage_type>test</usage_type>
-      <checksum>62DA40B1</checksum>
-    </file>
-    <file>
-      <filename>base-appliances-washer-imef.xml</filename>
-      <filetype>xml</filetype>
-      <usage_type>test</usage_type>
-      <checksum>50FE8D3C</checksum>
-    </file>
-    <file>
-      <filename>base-hvac-dual-fuel-air-to-air-heat-pump-1-speed-oil.xml</filename>
-      <filetype>xml</filetype>
-      <usage_type>test</usage_type>
-      <checksum>CDCC0923</checksum>
-    </file>
-    <file>
-      <filename>base-hvac-dual-fuel-air-to-air-heat-pump-1-speed-propane.xml</filename>
-      <filetype>xml</filetype>
-      <usage_type>test</usage_type>
-      <checksum>A5B99C8E</checksum>
-    </file>
-    <file>
-      <filename>base-mechvent-cfis-24hrs.xml</filename>
-      <filetype>xml</filetype>
-      <usage_type>test</usage_type>
-      <checksum>4604D9FF</checksum>
     </file>
     <file>
       <filename>minitest_helper.rb</filename>
