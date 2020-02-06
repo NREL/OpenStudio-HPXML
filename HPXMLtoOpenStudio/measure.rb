@@ -3403,7 +3403,9 @@ class OSModel
         else
           vars = { "Surface Inside Face Convection Heat Gain Energy" => "ss_conv",
                    "Surface Inside Face Internal Gains Radiation Heat Gain Energy" => "ss_ig",
-                   "Surface Inside Face Net Surface Thermal Radiation Heat Gain Energy" => "ss_surf" }
+                   "Surface Inside Face Net Surface Thermal Radiation Heat Gain Energy" => "ss_surf",
+                   "Surface Inside Face Solar Radiation Heat Gain Energy" => "ss_sol",
+                   "Surface Inside Face Lights Radiation Heat Gain Energy" => "ss_lgt"}
         end
 
         surfaces_sensors[key] << []
