@@ -1631,6 +1631,10 @@ def get_hpxml_file_windows_values(hpxml_file, windows_values)
                         :ufactor => 0.33,
                         :shgc => 0.45,
                         :wall_idref => "FoundationWall" }
+  elsif ['base-enclosure-adiabatic-surfaces.xml'].include? hpxml_file
+    for n in 1..windows_values.size
+      windows_values[n - 1][:area] *= 0.35
+    end
   elsif ['invalid_files/unattached-window.xml'].include? hpxml_file
     windows_values[0][:wall_idref] = "foobar"
   elsif ['base-enclosure-split-surfaces.xml'].include? hpxml_file

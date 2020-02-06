@@ -403,8 +403,8 @@ class HPXMLtoOpenStudioTest < MiniTest::Test
     sqlFile.close
 
     # FIXME: Temporarily commented out
-    #assert_operator(compload_results["Heating - Residual"], :<, 0.25)
-    #assert_operator(compload_results["Cooling - Residual"], :<, 0.25)
+    # assert_operator(compload_results["Heating - Residual"], :<, 0.25)
+    # assert_operator(compload_results["Cooling - Residual"], :<, 0.25)
 
     results[@@simulation_runtime_key] = sim_time
     results[@@workflow_runtime_key] = workflow_time
