@@ -1091,6 +1091,12 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     arg.setDefaultValue(24)
     args << arg
 
+    arg = OpenStudio::Measure::OSArgument::makeBoolArgument("mech_vent_used_for_seasonal_cooling_load_reduction", true)
+    arg.setDisplayName("Mechanical Ventilation: Used for Seasonal Cooling Load Reduction")
+    arg.setDescription("TODO.")
+    arg.setDefaultValue(false)
+    args << arg
+
     arg = OpenStudio::Measure::OSArgument::makeDoubleArgument("mech_vent_total_recovery_efficiency", true)
     arg.setDisplayName("Mechanical Ventilation: Total Recovery Efficiency")
     arg.setDescription("The total recovery efficiency of the mechanical ventilation.")
@@ -1916,6 +1922,7 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
              :mech_vent_tested_flow_rate => runner.getDoubleArgumentValue("mech_vent_tested_flow_rate", user_arguments),
              :mech_vent_rated_flow_rate => runner.getDoubleArgumentValue("mech_vent_rated_flow_rate", user_arguments),
              :mech_vent_hours_in_operation => runner.getDoubleArgumentValue("mech_vent_hours_in_operation", user_arguments),
+             :mech_vent_used_for_seasonal_cooling_load_reduction => runner.getBoolArgumentValue("mech_vent_used_for_seasonal_cooling_load_reduction", user_arguments),
              :mech_vent_total_recovery_efficiency => runner.getDoubleArgumentValue("mech_vent_total_recovery_efficiency", user_arguments),
              :mech_vent_adjusted_total_recovery_efficiency => runner.getDoubleArgumentValue("mech_vent_adjusted_total_recovery_efficiency", user_arguments),
              :mech_vent_sensible_recovery_efficiency => runner.getDoubleArgumentValue("mech_vent_adjusted_sensible_recovery_efficiency", user_arguments),
@@ -3008,12 +3015,17 @@ class HPXMLFile
     duct_leakage_measurements_values = []
     hvac_distributions_values.each_with_index do |hvac_distribution_values, i|
       if hvac_distribution_values[:distribution_system_type] == "AirDistribution"
-        duct_leakage_measurements_values << [{ :duct_type => "supply",
-                                               :duct_leakage_units => args[:supply_duct_leakage_units],
-                                               :duct_leakage_value => args[:supply_duct_leakage_value] },
-                                             { :duct_type => "return",
+        duct_leakage_measurement_values = [{ :duct_type => "supply",
+                                             :duct_leakage_units => args[:supply_duct_leakage_units],
+                                             :duct_leakage_value => args[:supply_duct_leakage_value] }]
+
+        if args[:cooling_system_type] != "evaporative cooler"
+          duct_leakage_measurement_values << { :duct_type => "return",
                                                :duct_leakage_units => args[:return_duct_leakage_units],
-                                               :duct_leakage_value => args[:return_duct_leakage_value] }]
+                                               :duct_leakage_value => args[:return_duct_leakage_value] }
+        end
+
+        duct_leakage_measurements_values << duct_leakage_measurement_values
       else
         duct_leakage_measurements_values << []
       end
@@ -3036,14 +3048,19 @@ class HPXMLFile
           return_duct_location = "living space" # FIXME
         end
 
-        ducts_values << [{ :duct_type => "supply",
-                           :duct_insulation_r_value => args[:supply_duct_insulation_r_value],
-                           :duct_location => supply_duct_location,
-                           :duct_surface_area => args[:supply_duct_surface_area] },
-                         { :duct_type => "return",
+        duct_values = [{ :duct_type => "supply",
+                         :duct_insulation_r_value => args[:supply_duct_insulation_r_value],
+                         :duct_location => supply_duct_location,
+                         :duct_surface_area => args[:supply_duct_surface_area] }]
+                         
+        if args[:cooling_system_type] != "evaporative cooler"
+          duct_values << { :duct_type => "return",
                            :duct_insulation_r_value => args[:return_duct_insulation_r_value],
                            :duct_location => return_duct_location,
-                           :duct_surface_area => args[:return_duct_surface_area] }]
+                           :duct_surface_area => args[:return_duct_surface_area] }
+        end
+
+        ducts_values << duct_values
       else
         ducts_values << []
       end
@@ -3052,12 +3069,28 @@ class HPXMLFile
   end
 
   def self.get_ventilation_fan_values(runner, args, hvac_distributions_values)
-    return [] if args[:mech_vent_fan_type] == "none"
+    if args[:mech_vent_fan_type] == "none" and not args[:mech_vent_used_for_seasonal_cooling_load_reduction]
+      return []
+    end
+
+    fan_type = args[:mech_vent_fan_type]
+    if fan_type == "none"
+      fan_type = nil
+    end
 
     tested_flow_rate = args[:mech_vent_tested_flow_rate]
     if args[:mech_vent_rated_flow_rate] > 0
       rated_flow_rate = args[:mech_vent_rated_flow_rate]
       tested_flow_rate = nil
+    end
+
+    hours_in_operation = args[:mech_vent_hours_in_operation]
+    if fan_type.nil?
+      hours_in_operation = nil
+    end
+
+    if args[:mech_vent_used_for_seasonal_cooling_load_reduction]
+      used_for_seasonal_cooling_load_reduction = args[:mech_vent_used_for_seasonal_cooling_load_reduction]
     end
 
     if args[:mech_vent_fan_type].include? "recovery ventilator"
@@ -3085,10 +3118,11 @@ class HPXMLFile
     end
 
     ventilation_fans_values = [{ :id => "MechanicalVentilation",
-                                 :fan_type => args[:mech_vent_fan_type],
+                                 :fan_type => fan_type,
                                  :tested_flow_rate => tested_flow_rate,
                                  :rated_flow_rate => rated_flow_rate,
-                                 :hours_in_operation => args[:mech_vent_hours_in_operation],
+                                 :hours_in_operation => hours_in_operation,
+                                 :used_for_seasonal_cooling_load_reduction => used_for_seasonal_cooling_load_reduction,
                                  :total_recovery_efficiency => total_recovery_efficiency,
                                  :total_recovery_efficiency_adjusted => total_recovery_efficiency_adjusted,
                                  :sensible_recovery_efficiency => sensible_recovery_efficiency,
