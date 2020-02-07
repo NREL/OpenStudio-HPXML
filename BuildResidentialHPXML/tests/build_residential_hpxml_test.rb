@@ -8,7 +8,7 @@ require 'rexml/document'
 require 'rexml/xpath'
 require_relative '../../HPXMLtoOpenStudio/resources/constants'
 require_relative '../../HPXMLtoOpenStudio/resources/meta_measure'
-require_relative '../../HPXMLtoOpenStudio/tests/hpxml_translator_test'
+require_relative '../../workflow/tests/hpxml_translator_test'
 
 class BuildResidentialHPXMLTest < MiniTest::Test
   def test_workflows
@@ -29,7 +29,7 @@ class BuildResidentialHPXMLTest < MiniTest::Test
       end
     end
 
-    tests_dir = File.expand_path(File.join(File.dirname(__FILE__), "../../HPXMLtoOpenStudio/tests"))
+    tests_dir = File.expand_path(File.join(File.dirname(__FILE__), "../../workflow/tests"))
     results_dir = File.join(tests_dir, "results")
     _rm_path(results_dir)
     built_dir = File.join(tests_dir, "built_residential_hpxml")
@@ -41,7 +41,7 @@ class BuildResidentialHPXMLTest < MiniTest::Test
     all_results = {}
     all_compload_results = {}
     all_sizing_results = {}
-    hpxml_translator_test = HPXMLtoOpenStudioTest.new(nil)
+    hpxml_translator_test = HPXMLTest.new(nil)
     measures = {}
     osws.each do |osw|
       puts "\nTesting #{File.basename(osw)}..."

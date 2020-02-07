@@ -299,11 +299,11 @@ def create_osws
 end
 
 def get_values(osw_file, step)
-  step.setArgument("hpxml_path", "../HPXMLtoOpenStudio/tests/built_residential_hpxml/#{File.basename(osw_file, ".*")}.xml")
+  step.setArgument("hpxml_path", "../workflow/tests/built_residential_hpxml/#{File.basename(osw_file, ".*")}.xml")
 
   if ['base.osw'].include? osw_file
     step.setArgument("weather_station_epw_filename", "USA_CO_Denver.Intl.AP.725650_TMY3.epw")
-    step.setArgument("schedules_output_path", "HPXMLtoOpenStudio/tests/run/schedules.csv")
+    step.setArgument("schedules_output_path", "workflow/tests/run/schedules.csv")
     step.setArgument("unit_type", "single-family detached")
     step.setArgument("unit_multiplier", 1)
     step.setArgument("cfa", 2700.0)
