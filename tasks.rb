@@ -680,6 +680,8 @@ def get_values(osw_file, step)
     step.setArgument("water_heater_jacket_rvalue_1", 10.0)
   elsif ['base-dhw-jacket-hpwh.osw'].include? osw_file
     step.setArgument("water_heater_type_1", "heat pump water heater")
+    step.setArgument("water_heater_tank_volume_1", 80.0)
+    step.setArgument("water_heater_energy_factor_1", 2.3)
     step.setArgument("water_heater_jacket_rvalue_1", 10.0)
   elsif ['base-dhw-jacket-indirect.osw'].include? osw_file
     step.setArgument("heating_system_type", "Boiler")
