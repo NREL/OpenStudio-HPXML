@@ -8,14 +8,11 @@ def create_osws
     'base-single-family-attached.osw' => 'base.osw',
     'base-multifamily.osw' => 'base.osw',
 
-    'base-appliances-dishwasher-ef.osw' => 'base.osw',
-    'base-appliances-dryer-cef.osw' => 'base.osw',
     'base-appliances-gas.osw' => 'base.osw',
+    'base-appliances-modified.osw' => 'base.osw',
     'base-appliances-none.osw' => 'base.osw',
     'base-appliances-oil.osw' => 'base.osw',
     'base-appliances-propane.osw' => 'base.osw',
-    'base-appliances-refrigerator-adjusted.osw' => 'base.osw',
-    'base-appliances-washer-imef.osw' => 'base.osw',
     'base-appliances-wood.osw' => 'base.osw',
 
     'base-atticroof-cathedral.osw' => 'base.osw',
@@ -140,8 +137,6 @@ def create_osws
     'base-hvac-dse.osw' => 'base.osw',
     'base-hvac-dual-fuel-air-to-air-heat-pump-1-speed.osw' => 'base.osw',
     'base-hvac-dual-fuel-air-to-air-heat-pump-1-speed-electric.osw' => 'base.osw',
-    'base-hvac-dual-fuel-air-to-air-heat-pump-1-speed-oil.osw' => 'base.osw',
-    'base-hvac-dual-fuel-air-to-air-heat-pump-1-speed-propane.osw' => 'base.osw',
     'base-hvac-dual-fuel-air-to-air-heat-pump-2-speed.osw' => 'base.osw',
     'base-hvac-dual-fuel-air-to-air-heat-pump-var-speed.osw' => 'base.osw',
     'base-hvac-dual-fuel-mini-split-heat-pump-ducted.osw' => 'base.osw',
@@ -199,7 +194,7 @@ def create_osws
 
     'base-mechvent-balanced.osw' => 'base.osw',
     'base-mechvent-cfis.osw' => 'base.osw',
-    'base-mechvent-cfis-24hrs.osw' => 'base.osw',
+    'base-mechvent-cfis-evap-cooler-only-ducted.osw' => 'base.osw',
     'base-mechvent-erv.osw' => 'base.osw',
     'base-mechvent-erv-atre-asre.osw' => 'base.osw',
     'base-mechvent-exhaust.osw' => 'base.osw',
@@ -212,6 +207,7 @@ def create_osws
     'base-misc-lighting-none.osw' => 'base.osw',
     'base-misc-loads-detailed.osw' => 'base.osw',
     'base-misc-number-of-occupants.osw' => 'base.osw',
+    'base-misc-whole-house-fan.osw' => 'base.osw',
 
     'base-pv-array-1axis.osw' => 'base.osw',
     'base-pv-array-1axis-backtracked.osw' => 'base.osw',
@@ -444,6 +440,7 @@ def get_values(osw_file, step)
     step.setArgument("mech_vent_tested_flow_rate", 110)
     step.setArgument("mech_vent_rated_flow_rate", 0)
     step.setArgument("mech_vent_hours_in_operation", 24)
+    step.setArgument("mech_vent_used_for_seasonal_cooling_load_reduction", false)
     step.setArgument("mech_vent_total_recovery_efficiency", 0.48)
     step.setArgument("mech_vent_adjusted_total_recovery_efficiency", 0)
     step.setArgument("mech_vent_sensible_recovery_efficiency", 0.72)
@@ -556,17 +553,18 @@ def get_values(osw_file, step)
     step.setArgument("return_duct_leakage_value", 0)
     step.setArgument("supply_duct_location", Constants.Auto)
     step.setArgument("return_duct_location", Constants.Auto)
-  elsif ['base-appliances-dishwasher-ef.osw'].include? osw_file
-    step.setArgument("dishwasher_energy_factor", 0.5)
-    step.setArgument("dishwasher_rated_annual_kwh", 0)
-  elsif ['base-appliances-dryer-cef.osw'].include? osw_file
-    step.setArgument("clothes_dryer_energy_factor", 0)
-    step.setArgument("clothes_dryer_combined_energy_factor", 2.62)
-    step.setArgument("clothes_dryer_control_type", "moisture")
   elsif ['base-appliances-gas.osw'].include? osw_file
     step.setArgument("clothes_dryer_fuel_type", "natural gas")
     step.setArgument("clothes_dryer_energy_factor", 2.67)
     step.setArgument("clothes_dryer_control_type", "moisture")
+  elsif ['base-appliances-modified.osw'].include? osw_file
+    step.setArgument("clothes_washer_integrated_modified_energy_factor", 0.73)
+    step.setArgument("clothes_dryer_energy_factor", 0)
+    step.setArgument("clothes_dryer_combined_energy_factor", 2.62)
+    step.setArgument("clothes_dryer_control_type", "moisture")
+    step.setArgument("dishwasher_energy_factor", 0.5)
+    step.setArgument("dishwasher_rated_annual_kwh", 0)
+    step.setArgument("refrigerator_adjusted_annual_kwh", 600.0)
   elsif ['base-appliances-none.osw'].include? osw_file
     step.setArgument("has_clothes_washer", false)
     step.setArgument("has_clothes_dryer", false)
@@ -582,10 +580,6 @@ def get_values(osw_file, step)
     step.setArgument("clothes_dryer_fuel_type", "propane")
     step.setArgument("clothes_dryer_energy_factor", 2.67)
     step.setArgument("clothes_dryer_control_type", "moisture")
-  elsif ['base-appliances-refrigerator-adjusted.osw'].include? osw_file
-    step.setArgument("refrigerator_adjusted_annual_kwh", 600.0)
-  elsif ['base-appliances-washer-imef.osw'].include? osw_file
-    step.setArgument("clothes_washer_integrated_modified_energy_factor", 0.73)
   elsif ['base-appliances-wood.osw'].include? osw_file
     step.setArgument("clothes_dryer_fuel_type", "wood")
     step.setArgument("clothes_dryer_energy_factor", 2.67)
@@ -1037,24 +1031,6 @@ def get_values(osw_file, step)
     step.setArgument("cooling_system_type", "air-to-air")
     step.setArgument("heat_pump_backup_fuel", "electricity")
     step.setArgument("heat_pump_backup_heating_capacity", 36000.0)
-  elsif ['base-hvac-dual-fuel-air-to-air-heat-pump-1-speed-oil.osw'].include? osw_file
-    step.setArgument("heating_system_type", "air-to-air")
-    step.setArgument("heating_system_fuel", "electricity")
-    step.setArgument("heating_system_heating_efficiency", 7.7)
-    step.setArgument("heating_system_heating_capacity", 42000.0)
-    step.setArgument("cooling_system_type", "air-to-air")
-    step.setArgument("heat_pump_backup_fuel", "fuel oil")
-    step.setArgument("heat_pump_backup_heating_efficiency", 0.95)
-    step.setArgument("heat_pump_backup_heating_capacity", 36000.0)
-  elsif ['base-hvac-dual-fuel-air-to-air-heat-pump-1-speed-propane.osw'].include? osw_file
-    step.setArgument("heating_system_type", "air-to-air")
-    step.setArgument("heating_system_fuel", "electricity")
-    step.setArgument("heating_system_heating_efficiency", 7.7)
-    step.setArgument("heating_system_heating_capacity", 42000.0)
-    step.setArgument("cooling_system_type", "air-to-air")
-    step.setArgument("heat_pump_backup_fuel", "propane")
-    step.setArgument("heat_pump_backup_heating_efficiency", 0.95)
-    step.setArgument("heat_pump_backup_heating_capacity", 36000.0)
   elsif ['base-hvac-dual-fuel-air-to-air-heat-pump-2-speed.osw'].include? osw_file
     step.setArgument("heating_system_type", "air-to-air")
     step.setArgument("heating_system_fuel", "electricity")
@@ -1279,9 +1255,13 @@ def get_values(osw_file, step)
     step.setArgument("mech_vent_tested_flow_rate", 330)
     step.setArgument("mech_vent_hours_in_operation", 8)
     step.setArgument("mech_vent_fan_power", 300)
-  elsif ['base-mechvent-cfis-24hrs.osw'].include? osw_file
+  elsif ['base-mechvent-cfis-evap-cooler-only-ducted.osw'].include? osw_file
+    step.setArgument("heating_system_type", "none")
+    step.setArgument("cooling_system_type", "evaporative cooler")
+    step.setArgument("evap_cooler_is_ducted", true)
     step.setArgument("mech_vent_fan_type", "central fan integrated supply")
     step.setArgument("mech_vent_tested_flow_rate", 330)
+    step.setArgument("mech_vent_hours_in_operation", 8)
     step.setArgument("mech_vent_fan_power", 300)
   elsif ['base-mechvent-erv.osw'].include? osw_file
     step.setArgument("mech_vent_fan_type", "energy recovery ventilator")
@@ -1317,6 +1297,10 @@ def get_values(osw_file, step)
     step.setArgument("plug_loads_annual_kwh_2", 400.0)
   elsif ['base-misc-number-of-occupants.osw'].include? osw_file
     step.setArgument("num_occupants", 5.0)
+  elsif ['base-misc-whole-house-fan.osw'].include? osw_file
+    step.setArgument("mech_vent_rated_flow_rate", 4500.0)
+    step.setArgument("mech_vent_used_for_seasonal_cooling_load_reduction", true)
+    step.setArgument("mech_vent_fan_power", 300)
   elsif ['base-pv-array-1axis.osw'].include? osw_file
     step.setArgument("pv_system_module_type", "standard")
     step.setArgument("pv_system_location", "ground")
