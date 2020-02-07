@@ -24,7 +24,7 @@ class BuildResidentialHPXMLTest < MiniTest::Test
 
     osws = []
     test_dirs.each do |test_dir|
-      Dir["#{test_dir}/base*.osw"].sort.each do |osw|
+      Dir["#{test_dir}/base.osw"].sort.each do |osw|
         osws << File.absolute_path(osw)
       end
     end
@@ -80,6 +80,12 @@ class BuildResidentialHPXMLTest < MiniTest::Test
     hpxml_translator_test._write_summary_results(results_dir, all_results)
     hpxml_translator_test._write_component_load_results(results_dir, all_compload_results)
     hpxml_translator_test._write_hvac_sizing_results(results_dir, all_sizing_results)
+
+    FileUtils.mv(results_dir, this_dir, :force => true)
+    zip = OpenStudio::ZipFile.new(File.join(this_dir, "results", "built-residential-hpxml.zip"), false)
+    Dir["#{built_dir}/*.xml"].each do |file|
+      zip.addFile(file, File.basename(file))
+    end
   end
 
   private
