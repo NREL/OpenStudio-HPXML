@@ -2092,3 +2092,33 @@ class HPXML
     return Boolean(value)
   end
 end
+
+# Helper methods
+
+def is_thermal_boundary(surface_values)
+  if ["other housing unit", "other housing unit above", "other housing unit below"].include? surface_values[:exterior_adjacent_to]
+    return false # adiabatic
+  end
+
+  interior_conditioned = is_adjacent_to_conditioned(surface_values[:interior_adjacent_to])
+  exterior_conditioned = is_adjacent_to_conditioned(surface_values[:exterior_adjacent_to])
+  return (interior_conditioned != exterior_conditioned)
+end
+
+def is_adjacent_to_conditioned(adjacent_to)
+  if ["living space", "basement - conditioned"].include? adjacent_to
+    return true
+  end
+
+  return false
+end
+
+def hpxml_framefloor_is_ceiling(floor_interior_adjacent_to, floor_exterior_adjacent_to)
+  if ["attic - vented", "attic - unvented"].include? floor_interior_adjacent_to
+    return true
+  elsif ["attic - vented", "attic - unvented", "other housing unit above"].include? floor_exterior_adjacent_to
+    return true
+  end
+
+  return false
+end
