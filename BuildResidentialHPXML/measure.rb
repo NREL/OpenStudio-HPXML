@@ -3052,7 +3052,7 @@ class HPXMLFile
                          :duct_insulation_r_value => args[:supply_duct_insulation_r_value],
                          :duct_location => supply_duct_location,
                          :duct_surface_area => args[:supply_duct_surface_area] }]
-                         
+
         if args[:cooling_system_type] != "evaporative cooler"
           duct_values << { :duct_type => "return",
                            :duct_insulation_r_value => args[:return_duct_insulation_r_value],
