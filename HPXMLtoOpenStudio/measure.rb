@@ -1706,7 +1706,7 @@ class OSModel
 
   def self.add_interior_shading_schedule(runner, model, weather)
     heating_season, cooling_season = HVAC.calc_heating_and_cooling_seasons(model, weather)
-    @clg_season_sch = MonthWeekdayWeekendSchedule.new(model, "interior shading schedule", Array.new(24, 1), Array.new(24, 1), cooling_season, 1.0, 1.0, true, true, Constants.ScheduleTypeLimitsFraction)
+    @clg_season_sch = MonthWeekdayWeekendSchedule.new(model, "cooling season schedule", Array.new(24, 1), Array.new(24, 1), cooling_season, 1.0, 1.0, true, true, Constants.ScheduleTypeLimitsFraction)
 
     @clg_ssn_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, "Schedule Value")
     @clg_ssn_sensor.setName("cool_season")
@@ -3397,13 +3397,12 @@ class OSModel
                 "Skylight" => :skylights }[surface_type]
         fail "Unexpected subsurface for component loads: '#{ss.name}'." if key.nil?
 
-        vars = {}
         if surface_type == "Window" or surface_type == "Skylight"
-          vars["Surface Window Net Heat Transfer Energy"] = "ss_net"
-          vars["Surface Inside Face Internal Gains Radiation Heat Gain Energy"] = "ss_ig"
-          vars["Surface Window Total Glazing Layers Absorbed Shortwave Radiation Rate"] = "ss_sw_abs"
-          vars["Surface Window Total Glazing Layers Absorbed Solar Radiation Energy"] = "ss_sol_abs"
-          vars["Surface Inside Face Initial Transmitted Diffuse Transmitted Out Window Solar Radiation Rate"] = "ss_sol_out"
+          vars = { "Surface Window Net Heat Transfer Energy" => "ss_net",
+                   "Surface Inside Face Internal Gains Radiation Heat Gain Energy" => "ss_ig",
+                   "Surface Window Total Glazing Layers Absorbed Shortwave Radiation Rate" => "ss_sw_abs",
+                   "Surface Window Total Glazing Layers Absorbed Solar Radiation Energy" => "ss_sol_abs",
+                   "Surface Inside Face Initial Transmitted Diffuse Transmitted Out Window Solar Radiation Rate" => "ss_sol_out" }
         else
           vars = { "Surface Inside Face Convection Heat Gain Energy" => "ss_conv",
                    "Surface Inside Face Internal Gains Radiation Heat Gain Energy" => "ss_ig",
@@ -3762,9 +3761,9 @@ class OSModel
     program.addLine("Set clg_mode = 0")
     program.addLine("If (#{liv_load_sensors[:htg].name} > 0)") # Assign hour to heating if heating load
     program.addLine("  Set htg_mode = 1")
-    program.addLine("ElseIf (#{liv_load_sensors[:clg].name} > 0) || (hr_natvent <> 0) || (hr_whf <> 0)") # Assign hour to cooling if cooling load or cooling need met by natural ventilation or whole house fan
+    program.addLine("ElseIf (#{liv_load_sensors[:clg].name} > 0)") # Assign hour to cooling if cooling load
     program.addLine("  Set clg_mode = 1")
-    program.addLine("ElseIf (#{@clg_ssn_sensor.name} > 0)") # No load, assign hour to cooling if in cooling season definition
+    program.addLine("ElseIf (#{@clg_ssn_sensor.name} > 0)") # No load, assign hour to cooling if in cooling season definition (Note: natural ventilation & whole house fan only operate during the cooling season)
     program.addLine("  Set clg_mode = 1")
     program.addLine("Else") # No load, assign hour to heating if not in cooling season definition
     program.addLine("  Set htg_mode = 1")

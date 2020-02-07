@@ -387,8 +387,8 @@ class HPXMLTest < MiniTest::Test
 
     sqlFile.close
 
-    # assert_operator(compload_results["Heating - Residual"].abs, :<, 0.65)
-    # assert_operator(compload_results["Cooling - Residual"].abs, :<, 0.65)
+    assert_operator(compload_results["Heating - Residual"].abs, :<, 0.45)
+    assert_operator(compload_results["Cooling - Residual"].abs, :<, 0.45)
 
     results[@@simulation_runtime_key] = sim_time
     results[@@workflow_runtime_key] = workflow_time
