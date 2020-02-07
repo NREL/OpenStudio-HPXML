@@ -292,6 +292,23 @@ def create_osws
   end
 
   puts "\n"
+
+  # Print warnings about extra files
+  abs_osw_files = []
+  dirs = [nil]
+  osws_files.keys.each do |osw_file|
+    abs_osw_files << File.absolute_path(File.join(tests_dir, osw_file))
+    next unless osw_file.include? '/'
+
+    dirs << osw_file.split('/')[0] + '/'
+  end
+  dirs.uniq.each do |dir|
+    Dir["#{tests_dir}/#{dir}*.osw"].each do |osw|
+      next if abs_osw_files.include? File.absolute_path(osw)
+
+      puts "Warning: Extra OSW file found at #{File.absolute_path(osw)}"
+    end
+  end
 end
 
 def get_values(osw_file, step)
@@ -440,12 +457,14 @@ def get_values(osw_file, step)
     step.setArgument("mech_vent_tested_flow_rate", 110)
     step.setArgument("mech_vent_rated_flow_rate", 0)
     step.setArgument("mech_vent_hours_in_operation", 24)
-    step.setArgument("mech_vent_used_for_seasonal_cooling_load_reduction", false)
     step.setArgument("mech_vent_total_recovery_efficiency", 0.48)
     step.setArgument("mech_vent_adjusted_total_recovery_efficiency", 0)
     step.setArgument("mech_vent_sensible_recovery_efficiency", 0.72)
     step.setArgument("mech_vent_adjusted_sensible_recovery_efficiency", 0)
     step.setArgument("mech_vent_fan_power", 30)
+    step.setArgument("has_whole_house_fan", false)
+    step.setArgument("whole_house_fan_rated_flow_rate", 4500)
+    step.setArgument("whole_house_fan_power", 300)
     step.setArgument("water_heater_type_1", "storage water heater")
     step.setArgument("water_heater_fuel_type_1", "electricity")
     step.setArgument("water_heater_location_1", "living space")
@@ -1298,9 +1317,7 @@ def get_values(osw_file, step)
   elsif ['base-misc-number-of-occupants.osw'].include? osw_file
     step.setArgument("num_occupants", 5.0)
   elsif ['base-misc-whole-house-fan.osw'].include? osw_file
-    step.setArgument("mech_vent_rated_flow_rate", 4500.0)
-    step.setArgument("mech_vent_used_for_seasonal_cooling_load_reduction", true)
-    step.setArgument("mech_vent_fan_power", 300)
+    step.setArgument("has_whole_house_fan", true)
   elsif ['base-pv-array-1axis.osw'].include? osw_file
     step.setArgument("pv_system_module_type", "standard")
     step.setArgument("pv_system_location", "ground")

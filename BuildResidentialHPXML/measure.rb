@@ -1091,12 +1091,6 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     arg.setDefaultValue(24)
     args << arg
 
-    arg = OpenStudio::Measure::OSArgument::makeBoolArgument("mech_vent_used_for_seasonal_cooling_load_reduction", true)
-    arg.setDisplayName("Mechanical Ventilation: Used for Seasonal Cooling Load Reduction")
-    arg.setDescription("TODO.")
-    arg.setDefaultValue(false)
-    args << arg
-
     arg = OpenStudio::Measure::OSArgument::makeDoubleArgument("mech_vent_total_recovery_efficiency", true)
     arg.setDisplayName("Mechanical Ventilation: Total Recovery Efficiency")
     arg.setDescription("The total recovery efficiency of the mechanical ventilation.")
@@ -1130,6 +1124,26 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     arg.setDescription("The fan power of the mechanical ventilation.")
     arg.setUnits("W")
     arg.setDefaultValue(30)
+    args << arg
+
+    arg = OpenStudio::Measure::OSArgument::makeBoolArgument("has_whole_house_fan", true)
+    arg.setDisplayName("Whole House Fan: Has")
+    arg.setDescription("Whether there is a whole house fan.")
+    arg.setDefaultValue(false)
+    args << arg
+
+    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument("whole_house_fan_rated_flow_rate", true)
+    arg.setDisplayName("Whole House Fan: Rated Flow Rate")
+    arg.setDescription("The rated flow rate of the whole house fan.")
+    arg.setUnits("CFM")
+    arg.setDefaultValue(4500)
+    args << arg
+
+    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument("whole_house_fan_power", true)
+    arg.setDisplayName("Whole House Fan: Fan Power")
+    arg.setDescription("The fan power of the whole house fan.")
+    arg.setUnits("W")
+    arg.setDefaultValue(300)
     args << arg
 
     water_heater_type_choices = OpenStudio::StringVector.new
@@ -1922,12 +1936,14 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
              :mech_vent_tested_flow_rate => runner.getDoubleArgumentValue("mech_vent_tested_flow_rate", user_arguments),
              :mech_vent_rated_flow_rate => runner.getDoubleArgumentValue("mech_vent_rated_flow_rate", user_arguments),
              :mech_vent_hours_in_operation => runner.getDoubleArgumentValue("mech_vent_hours_in_operation", user_arguments),
-             :mech_vent_used_for_seasonal_cooling_load_reduction => runner.getBoolArgumentValue("mech_vent_used_for_seasonal_cooling_load_reduction", user_arguments),
              :mech_vent_total_recovery_efficiency => runner.getDoubleArgumentValue("mech_vent_total_recovery_efficiency", user_arguments),
              :mech_vent_adjusted_total_recovery_efficiency => runner.getDoubleArgumentValue("mech_vent_adjusted_total_recovery_efficiency", user_arguments),
              :mech_vent_sensible_recovery_efficiency => runner.getDoubleArgumentValue("mech_vent_adjusted_sensible_recovery_efficiency", user_arguments),
              :mech_vent_adjusted_sensible_recovery_efficiency => runner.getDoubleArgumentValue("mech_vent_sensible_recovery_efficiency", user_arguments),
              :mech_vent_fan_power => runner.getDoubleArgumentValue("mech_vent_fan_power", user_arguments),
+             :has_whole_house_fan => runner.getBoolArgumentValue("has_whole_house_fan", user_arguments),
+             :whole_house_fan_rated_flow_rate => runner.getDoubleArgumentValue("whole_house_fan_rated_flow_rate", user_arguments),
+             :whole_house_fan_power => runner.getDoubleArgumentValue("whole_house_fan_power", user_arguments),
              :water_heater_type => (1..Constants.MaxNumWaterHeaters).to_a.map { |n| runner.getStringArgumentValue("water_heater_type_#{n}", user_arguments) },
              :water_heater_fuel_type => (1..Constants.MaxNumWaterHeaters).to_a.map { |n| runner.getStringArgumentValue("water_heater_fuel_type_#{n}", user_arguments) },
              :water_heater_location => (1..Constants.MaxNumWaterHeaters).to_a.map { |n| runner.getStringArgumentValue("water_heater_location_#{n}", user_arguments) },
@@ -3069,67 +3085,62 @@ class HPXMLFile
   end
 
   def self.get_ventilation_fan_values(runner, args, hvac_distributions_values)
-    if args[:mech_vent_fan_type] == "none" and not args[:mech_vent_used_for_seasonal_cooling_load_reduction]
-      return []
-    end
+    return [] if args[:mech_vent_fan_type] == "none" and not args[:has_whole_house_fan]
 
-    fan_type = args[:mech_vent_fan_type]
-    if fan_type == "none"
-      fan_type = nil
-    end
+    ventilations_fans_values = []
+    if args[:mech_vent_fan_type] != "none"
+      tested_flow_rate = args[:mech_vent_tested_flow_rate]
+      if args[:mech_vent_rated_flow_rate] > 0
+        rated_flow_rate = args[:mech_vent_rated_flow_rate]
+        tested_flow_rate = nil
+      end
 
-    tested_flow_rate = args[:mech_vent_tested_flow_rate]
-    if args[:mech_vent_rated_flow_rate] > 0
-      rated_flow_rate = args[:mech_vent_rated_flow_rate]
-      tested_flow_rate = nil
-    end
-
-    hours_in_operation = args[:mech_vent_hours_in_operation]
-    if fan_type.nil?
-      hours_in_operation = nil
-    end
-
-    if args[:mech_vent_used_for_seasonal_cooling_load_reduction]
-      used_for_seasonal_cooling_load_reduction = args[:mech_vent_used_for_seasonal_cooling_load_reduction]
-    end
-
-    if args[:mech_vent_fan_type].include? "recovery ventilator"
-      if args[:mech_vent_fan_type].include? "energy"
-        total_recovery_efficiency = args[:mech_vent_total_recovery_efficiency]
-        if args[:mech_vent_adjusted_total_recovery_efficiency] > 0
-          total_recovery_efficiency_adjusted = args[:mech_vent_adjusted_total_recovery_efficiency]
-          total_recovery_efficiency = nil
+      if args[:mech_vent_fan_type].include? "recovery ventilator"
+        if args[:mech_vent_fan_type].include? "energy"
+          total_recovery_efficiency = args[:mech_vent_total_recovery_efficiency]
+          if args[:mech_vent_adjusted_total_recovery_efficiency] > 0
+            total_recovery_efficiency_adjusted = args[:mech_vent_adjusted_total_recovery_efficiency]
+            total_recovery_efficiency = nil
+          end
+        end
+        sensible_recovery_efficiency = args[:mech_vent_sensible_recovery_efficiency]
+        if args[:mech_vent_adjusted_sensible_recovery_efficiency] > 0
+          sensible_recovery_efficiency_adjusted = args[:mech_vent_adjusted_sensible_recovery_efficiency]
+          sensible_recovery_efficiency = nil
         end
       end
-      sensible_recovery_efficiency = args[:mech_vent_sensible_recovery_efficiency]
-      if args[:mech_vent_adjusted_sensible_recovery_efficiency] > 0
-        sensible_recovery_efficiency_adjusted = args[:mech_vent_adjusted_sensible_recovery_efficiency]
-        sensible_recovery_efficiency = nil
+
+      distribution_system_idref = nil
+      if args[:mech_vent_fan_type] == "central fan integrated supply"
+        hvac_distributions_values.each do |hvac_distribution_values|
+          next unless hvac_distribution_values[:distribution_system_type] == "AirDistribution"
+
+          distribution_system_idref = hvac_distribution_values[:id]
+        end
       end
+
+      ventilations_fans_values << { :id => "MechanicalVentilation",
+                                    :fan_type => args[:mech_vent_fan_type],
+                                    :tested_flow_rate => tested_flow_rate,
+                                    :rated_flow_rate => rated_flow_rate,
+                                    :hours_in_operation => args[:mech_vent_hours_in_operation],
+                                    :used_for_whole_building_ventilation => true,
+                                    :total_recovery_efficiency => total_recovery_efficiency,
+                                    :total_recovery_efficiency_adjusted => total_recovery_efficiency_adjusted,
+                                    :sensible_recovery_efficiency => sensible_recovery_efficiency,
+                                    :sensible_recovery_efficiency_adjusted => sensible_recovery_efficiency_adjusted,
+                                    :fan_power => args[:mech_vent_fan_power],
+                                    :distribution_system_idref => distribution_system_idref }
     end
 
-    distribution_system_idref = nil
-    if args[:mech_vent_fan_type] == "central fan integrated supply"
-      hvac_distributions_values.each do |hvac_distribution_values|
-        next unless hvac_distribution_values[:distribution_system_type] == "AirDistribution"
-
-        distribution_system_idref = hvac_distribution_values[:id]
-      end
+    if args[:has_whole_house_fan]
+      ventilations_fans_values << { :id => "WholeHouseFan",
+                                    :rated_flow_rate => args[:whole_house_fan_rated_flow_rate],
+                                    :used_for_seasonal_cooling_load_reduction => true,
+                                    :fan_power => args[:whole_house_fan_power] }
     end
 
-    ventilation_fans_values = [{ :id => "MechanicalVentilation",
-                                 :fan_type => fan_type,
-                                 :tested_flow_rate => tested_flow_rate,
-                                 :rated_flow_rate => rated_flow_rate,
-                                 :hours_in_operation => hours_in_operation,
-                                 :used_for_seasonal_cooling_load_reduction => used_for_seasonal_cooling_load_reduction,
-                                 :total_recovery_efficiency => total_recovery_efficiency,
-                                 :total_recovery_efficiency_adjusted => total_recovery_efficiency_adjusted,
-                                 :sensible_recovery_efficiency => sensible_recovery_efficiency,
-                                 :sensible_recovery_efficiency_adjusted => sensible_recovery_efficiency_adjusted,
-                                 :fan_power => args[:mech_vent_fan_power],
-                                 :distribution_system_idref => distribution_system_idref }]
-    return ventilation_fans_values
+    return ventilations_fans_values
   end
 
   def self.get_water_heating_system_values(runner, args, heating_systems_values, cooling_systems_values, heat_pumps_values)
