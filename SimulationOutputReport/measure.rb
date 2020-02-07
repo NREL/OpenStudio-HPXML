@@ -122,9 +122,6 @@ class SimulationOutputReport < OpenStudio::Measure::ReportingMeasure
     @end_uses.each do |key, end_use|
       meters << end_use.meter
     end
-    @loads.each do |load_type, load|
-      meters << load.meter
-    end
     @unmet_loads.each do |load_type, unmet_load|
       meters << unmet_load.meter
     end
@@ -143,6 +140,12 @@ class SimulationOutputReport < OpenStudio::Measure::ReportingMeasure
     @component_loads.each do |key, comp_load|
       result << OpenStudio::IdfObject.load("EnergyManagementSystem:OutputVariable,#{comp_load.ems_variable}_annual_outvar,#{comp_load.ems_variable},Summed,ZoneTimestep,#{loads_program.name},J;").get
       result << OpenStudio::IdfObject.load("Output:Variable,*,#{comp_load.ems_variable}_annual_outvar,runperiod;").get
+    end
+    @loads.each do |load_type, load|
+      next if load.ems_variable.nil?
+
+      result << OpenStudio::IdfObject.load("EnergyManagementSystem:OutputVariable,#{load.ems_variable}_annual_outvar,#{load.ems_variable},Summed,ZoneTimestep,#{loads_program.name},J;").get
+      result << OpenStudio::IdfObject.load("Output:Variable,*,#{load.ems_variable}_annual_outvar,runperiod;").get
     end
 
     # Add individual HVAC/DHW system variables
@@ -190,9 +193,10 @@ class SimulationOutputReport < OpenStudio::Measure::ReportingMeasure
 
     if include_timeseries_total_loads
       @loads.each do |load_type, load|
-        next if load.meter.nil?
+        next if load.ems_variable.nil?
 
-        result << OpenStudio::IdfObject.load("Output:Meter,#{load.meter},#{timeseries_frequency};").get
+        result << OpenStudio::IdfObject.load("EnergyManagementSystem:OutputVariable,#{load.ems_variable}_timeseries_outvar,#{load.ems_variable},Summed,ZoneTimestep,#{loads_program.name},J;").get
+        result << OpenStudio::IdfObject.load("Output:Variable,*,#{load.ems_variable}_timeseries_outvar,#{timeseries_frequency};").get
       end
     end
 
@@ -342,13 +346,13 @@ class SimulationOutputReport < OpenStudio::Measure::ReportingMeasure
       peak_fuel.annual_output = get_tabular_data_value(peak_fuel.report.upcase, "Meter", "Custom Monthly Report", "Maximum of Months", "ELECTRICITY:FACILITY {MAX FOR HOURS SHOWN", peak_fuel.annual_units)
     end
 
-    # Total loads (total heating/cooling energy delivered including backup ideal air system)
+    # Total loads
     @loads.each do |load_type, load|
-      next if load.meter.nil?
+      next if load.ems_variable.nil?
 
-      load.annual_output = get_report_meter_data_annual_mbtu(load.meter)
+      load.annual_output = get_report_variable_data_annual_mbtu(["EMS"], ["#{load.ems_variable}_annual_outvar"])
       if include_timeseries_total_loads
-        load.timeseries_output = get_report_meter_data_timeseries("", load.meter, UnitConversions.convert(1.0, "J", load.timeseries_units), 0, timeseries_frequency)
+        load.timeseries_output = get_report_variable_data_timeseries(["EMS"], ["#{load.ems_variable}_timeseries_outvar"], UnitConversions.convert(1.0, 'J', load.timeseries_units), 0, timeseries_frequency)
       end
     end
 
@@ -482,12 +486,7 @@ class SimulationOutputReport < OpenStudio::Measure::ReportingMeasure
       end
 
       # Loads
-      @loads.each do |load_type, load|
-        next unless [LT::HotWaterDelivered].include? load_type
-        next if load.variable.nil?
-
-        load.annual_output_by_system[sys_id] = get_report_variable_data_annual_mbtu(keys, get_all_var_keys(load.variable))
-      end
+      @loads[LT::HotWaterDelivered].annual_output_by_system[sys_id] = get_report_variable_data_annual_mbtu(keys, get_all_var_keys(@loads[LT::HotWaterDelivered].variable))
 
       # Combi boiler water system
       hvac_id = get_combi_hvac_id(sys_id)
@@ -626,7 +625,7 @@ class SimulationOutputReport < OpenStudio::Measure::ReportingMeasure
   def check_for_errors(runner, outputs)
     all_total = @fuels.values.map { |f| f.annual_output }.inject(:+)
     if all_total == 0
-      runner.registerError("Processing output unsuccessful.")
+      runner.registerError("Simulation unsuccessful.")
       return false
     end
 
@@ -1521,14 +1520,14 @@ class SimulationOutputReport < OpenStudio::Measure::ReportingMeasure
   end
 
   class Load < BaseOutput
-    def initialize(meter: nil, variable: nil)
+    def initialize(variable: nil, ems_variable: nil)
       super()
-      @meter = meter
       @variable = variable
+      @ems_variable = ems_variable
       @timeseries_output_by_system = {}
       @annual_output_by_system = {}
     end
-    attr_accessor(:meter, :variable, :annual_output_by_system, :timeseries_output_by_system)
+    attr_accessor(:variable, :ems_variable, :annual_output_by_system, :timeseries_output_by_system)
   end
 
   class ComponentLoad < BaseOutput
@@ -1646,8 +1645,8 @@ class SimulationOutputReport < OpenStudio::Measure::ReportingMeasure
     # Loads
 
     @loads = {
-      LT::Heating => Load.new(meter: "Heating:EnergyTransfer"),
-      LT::Cooling => Load.new(meter: "Cooling:EnergyTransfer"),
+      LT::Heating => Load.new(ems_variable: "loads_htg_tot"),
+      LT::Cooling => Load.new(ems_variable: "loads_clg_tot"),
       LT::HotWaterDelivered => Load.new(variable: OutputVars.WaterHeatingLoad),
       LT::HotWaterTankLosses => Load.new(),
       LT::HotWaterDesuperheater => Load.new(),
@@ -1663,40 +1662,40 @@ class SimulationOutputReport < OpenStudio::Measure::ReportingMeasure
     # Component Loads
 
     @component_loads = {
-      [LT::Heating, CLT::Roofs] => ComponentLoad.new(ems_variable: "htg_roofs"),
-      [LT::Heating, CLT::Ceilings] => ComponentLoad.new(ems_variable: "htg_ceilings"),
-      [LT::Heating, CLT::Walls] => ComponentLoad.new(ems_variable: "htg_walls"),
-      [LT::Heating, CLT::RimJoists] => ComponentLoad.new(ems_variable: "htg_rim_joists"),
-      [LT::Heating, CLT::FoundationWalls] => ComponentLoad.new(ems_variable: "htg_foundation_walls"),
-      [LT::Heating, CLT::Doors] => ComponentLoad.new(ems_variable: "htg_doors"),
-      [LT::Heating, CLT::Windows] => ComponentLoad.new(ems_variable: "htg_windows"),
-      [LT::Heating, CLT::Skylights] => ComponentLoad.new(ems_variable: "htg_skylights"),
-      [LT::Heating, CLT::Floors] => ComponentLoad.new(ems_variable: "htg_floors"),
-      [LT::Heating, CLT::Slabs] => ComponentLoad.new(ems_variable: "htg_slabs"),
-      [LT::Heating, CLT::InternalMass] => ComponentLoad.new(ems_variable: "htg_internal_mass"),
-      [LT::Heating, CLT::Infiltration] => ComponentLoad.new(ems_variable: "htg_infil"),
-      [LT::Heating, CLT::NaturalVentilation] => ComponentLoad.new(ems_variable: "htg_natvent"),
-      [LT::Heating, CLT::MechanicalVentilation] => ComponentLoad.new(ems_variable: "htg_mechvent"),
-      [LT::Heating, CLT::WholeHouseFan] => ComponentLoad.new(ems_variable: "htg_whf"),
-      [LT::Heating, CLT::Ducts] => ComponentLoad.new(ems_variable: "htg_ducts"),
-      [LT::Heating, CLT::InternalGains] => ComponentLoad.new(ems_variable: "htg_intgains"),
-      [LT::Cooling, CLT::Roofs] => ComponentLoad.new(ems_variable: "clg_roofs"),
-      [LT::Cooling, CLT::Ceilings] => ComponentLoad.new(ems_variable: "clg_ceilings"),
-      [LT::Cooling, CLT::Walls] => ComponentLoad.new(ems_variable: "clg_walls"),
-      [LT::Cooling, CLT::RimJoists] => ComponentLoad.new(ems_variable: "clg_rim_joists"),
-      [LT::Cooling, CLT::FoundationWalls] => ComponentLoad.new(ems_variable: "clg_foundation_walls"),
-      [LT::Cooling, CLT::Doors] => ComponentLoad.new(ems_variable: "clg_doors"),
-      [LT::Cooling, CLT::Windows] => ComponentLoad.new(ems_variable: "clg_windows"),
-      [LT::Cooling, CLT::Skylights] => ComponentLoad.new(ems_variable: "clg_skylights"),
-      [LT::Cooling, CLT::Floors] => ComponentLoad.new(ems_variable: "clg_floors"),
-      [LT::Cooling, CLT::Slabs] => ComponentLoad.new(ems_variable: "clg_slabs"),
-      [LT::Cooling, CLT::InternalMass] => ComponentLoad.new(ems_variable: "clg_internal_mass"),
-      [LT::Cooling, CLT::Infiltration] => ComponentLoad.new(ems_variable: "clg_infil"),
-      [LT::Cooling, CLT::NaturalVentilation] => ComponentLoad.new(ems_variable: "clg_natvent"),
-      [LT::Cooling, CLT::MechanicalVentilation] => ComponentLoad.new(ems_variable: "clg_mechvent"),
-      [LT::Cooling, CLT::WholeHouseFan] => ComponentLoad.new(ems_variable: "clg_whf"),
-      [LT::Cooling, CLT::Ducts] => ComponentLoad.new(ems_variable: "clg_ducts"),
-      [LT::Cooling, CLT::InternalGains] => ComponentLoad.new(ems_variable: "clg_intgains"),
+      [LT::Heating, CLT::Roofs] => ComponentLoad.new(ems_variable: "loads_htg_roofs"),
+      [LT::Heating, CLT::Ceilings] => ComponentLoad.new(ems_variable: "loads_htg_ceilings"),
+      [LT::Heating, CLT::Walls] => ComponentLoad.new(ems_variable: "loads_htg_walls"),
+      [LT::Heating, CLT::RimJoists] => ComponentLoad.new(ems_variable: "loads_htg_rim_joists"),
+      [LT::Heating, CLT::FoundationWalls] => ComponentLoad.new(ems_variable: "loads_htg_foundation_walls"),
+      [LT::Heating, CLT::Doors] => ComponentLoad.new(ems_variable: "loads_htg_doors"),
+      [LT::Heating, CLT::Windows] => ComponentLoad.new(ems_variable: "loads_htg_windows"),
+      [LT::Heating, CLT::Skylights] => ComponentLoad.new(ems_variable: "loads_htg_skylights"),
+      [LT::Heating, CLT::Floors] => ComponentLoad.new(ems_variable: "loads_htg_floors"),
+      [LT::Heating, CLT::Slabs] => ComponentLoad.new(ems_variable: "loads_htg_slabs"),
+      [LT::Heating, CLT::InternalMass] => ComponentLoad.new(ems_variable: "loads_htg_internal_mass"),
+      [LT::Heating, CLT::Infiltration] => ComponentLoad.new(ems_variable: "loads_htg_infil"),
+      [LT::Heating, CLT::NaturalVentilation] => ComponentLoad.new(ems_variable: "loads_htg_natvent"),
+      [LT::Heating, CLT::MechanicalVentilation] => ComponentLoad.new(ems_variable: "loads_htg_mechvent"),
+      [LT::Heating, CLT::WholeHouseFan] => ComponentLoad.new(ems_variable: "loads_htg_whf"),
+      [LT::Heating, CLT::Ducts] => ComponentLoad.new(ems_variable: "loads_htg_ducts"),
+      [LT::Heating, CLT::InternalGains] => ComponentLoad.new(ems_variable: "loads_htg_intgains"),
+      [LT::Cooling, CLT::Roofs] => ComponentLoad.new(ems_variable: "loads_clg_roofs"),
+      [LT::Cooling, CLT::Ceilings] => ComponentLoad.new(ems_variable: "loads_clg_ceilings"),
+      [LT::Cooling, CLT::Walls] => ComponentLoad.new(ems_variable: "loads_clg_walls"),
+      [LT::Cooling, CLT::RimJoists] => ComponentLoad.new(ems_variable: "loads_clg_rim_joists"),
+      [LT::Cooling, CLT::FoundationWalls] => ComponentLoad.new(ems_variable: "loads_clg_foundation_walls"),
+      [LT::Cooling, CLT::Doors] => ComponentLoad.new(ems_variable: "loads_clg_doors"),
+      [LT::Cooling, CLT::Windows] => ComponentLoad.new(ems_variable: "loads_clg_windows"),
+      [LT::Cooling, CLT::Skylights] => ComponentLoad.new(ems_variable: "loads_clg_skylights"),
+      [LT::Cooling, CLT::Floors] => ComponentLoad.new(ems_variable: "loads_clg_floors"),
+      [LT::Cooling, CLT::Slabs] => ComponentLoad.new(ems_variable: "loads_clg_slabs"),
+      [LT::Cooling, CLT::InternalMass] => ComponentLoad.new(ems_variable: "loads_clg_internal_mass"),
+      [LT::Cooling, CLT::Infiltration] => ComponentLoad.new(ems_variable: "loads_clg_infil"),
+      [LT::Cooling, CLT::NaturalVentilation] => ComponentLoad.new(ems_variable: "loads_clg_natvent"),
+      [LT::Cooling, CLT::MechanicalVentilation] => ComponentLoad.new(ems_variable: "loads_clg_mechvent"),
+      [LT::Cooling, CLT::WholeHouseFan] => ComponentLoad.new(ems_variable: "loads_clg_whf"),
+      [LT::Cooling, CLT::Ducts] => ComponentLoad.new(ems_variable: "loads_clg_ducts"),
+      [LT::Cooling, CLT::InternalGains] => ComponentLoad.new(ems_variable: "loads_clg_intgains"),
     }
 
     @component_loads.each do |key, comp_load|
