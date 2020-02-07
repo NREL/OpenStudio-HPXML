@@ -362,22 +362,12 @@ class HPXMLTest < MiniTest::Test
     query = "SELECT SUM(Value) FROM ComponentSizes WHERE CompType LIKE 'Coil:Cooling:%' AND Description LIKE '%User-Specified%Total%Capacity' AND Units='W'"
     results[["Capacity", "Cooling", "General", "W"]] = sqlFile.execAndReturnFirstDouble(query).get.round(2)
 
-    # Obtain Heating/Cooling loads
-    query = "SELECT Value FROM TabularDataWithStrings WHERE ReportName='EnergyMeters' AND ReportForString='Entire Facility' AND TableName='Annual and Peak Values - Other' AND RowName='Heating:EnergyTransfer' AND ColumnName='Annual Value' AND Units='GJ'"
-    results[["Load", "Heating", "General", "GJ"]] = sqlFile.execAndReturnFirstDouble(query).get.round(2)
-
-    query = "SELECT Value FROM TabularDataWithStrings WHERE ReportName='EnergyMeters' AND ReportForString='Entire Facility' AND TableName='Annual and Peak Values - Other' AND RowName='Cooling:EnergyTransfer' AND ColumnName='Annual Value' AND Units='GJ'"
-    results[["Load", "Cooling", "General", "GJ"]] = sqlFile.execAndReturnFirstDouble(query).get.round(2)
-
-    # Obtain component loads
+    # Obtain loads
     # TODO: Move to reporting measure tests or workflow tests (and remove temporary components() method)
 
     compload_results = {}
 
     { "Heating" => "htg", "Cooling" => "clg" }.each do |mode, mode_var|
-      query = "SELECT VariableValue/1000000000 FROM ReportMeterData WHERE ReportMeterDataDictionaryIndex = (SELECT ReportMeterDataDictionaryIndex FROM ReportMeterDataDictionary WHERE VariableName='#{mode}:EnergyTransfer' AND ReportingFrequency='Run Period' AND VariableUnits='J')"
-      compload_results["#{mode} - Total"] = sqlFile.execAndReturnFirstDouble(query).get
-
       query = "SELECT SUM(VariableValue/1000000000) FROM ReportMeterData WHERE ReportMeterDataDictionaryIndex = (SELECT ReportMeterDataDictionaryIndex FROM ReportMeterDataDictionary WHERE VariableName='#{mode}:District#{mode}' AND ReportingFrequency='Run Period' AND VariableUnits='J')"
       compload_results["#{mode} - Unmet"] = sqlFile.execAndReturnFirstDouble(query).get
     end
@@ -385,20 +375,20 @@ class HPXMLTest < MiniTest::Test
     { "Heating" => "htg", "Cooling" => "clg" }.each do |mode, mode_var|
       compload_results["#{mode} - Sum"] = 0
       components.each do |component, component_var|
-        query = "SELECT VariableValue/1000000000 FROM ReportVariableData WHERE ReportVariableDataDictionaryIndex = (SELECT ReportVariableDataDictionaryIndex FROM ReportVariableDataDictionary WHERE VariableType='Sum' AND KeyValue='EMS' AND VariableName='#{mode_var}_#{component_var}_outvar' AND ReportingFrequency='Run Period' AND VariableUnits='J')"
+        query = "SELECT VariableValue/1000000000 FROM ReportVariableData WHERE ReportVariableDataDictionaryIndex = (SELECT ReportVariableDataDictionaryIndex FROM ReportVariableDataDictionary WHERE VariableType='Sum' AND KeyValue='EMS' AND VariableName='loads_#{mode_var}_#{component_var}_outvar' AND ReportingFrequency='Run Period' AND VariableUnits='J')"
         compload_results["#{mode} - #{component}"] = sqlFile.execAndReturnFirstDouble(query).get
-        compload_results["#{mode} - Sum"] += compload_results["#{mode} - #{component}"]
+        compload_results["#{mode} - Sum"] += compload_results["#{mode} - #{component}"] unless component == "Total"
       end
     end
 
     # Discrepancy between total and sum of components
-    compload_results["Heating - Residual"] = (compload_results["Heating - Total"] - compload_results["Heating - Sum"]).abs
-    compload_results["Cooling - Residual"] = (compload_results["Cooling - Total"] - compload_results["Cooling - Sum"]).abs
+    compload_results["Heating - Residual"] = compload_results["Heating - Total"] - compload_results["Heating - Sum"]
+    compload_results["Cooling - Residual"] = compload_results["Cooling - Total"] - compload_results["Cooling - Sum"]
 
     sqlFile.close
 
-    assert_operator(compload_results["Heating - Residual"], :<, 0.65)
-    assert_operator(compload_results["Cooling - Residual"], :<, 0.65)
+    assert_operator(compload_results["Heating - Residual"].abs, :<, 0.45)
+    assert_operator(compload_results["Cooling - Residual"].abs, :<, 0.45)
 
     results[@@simulation_runtime_key] = sim_time
     results[@@workflow_runtime_key] = workflow_time
@@ -525,8 +515,8 @@ class HPXMLTest < MiniTest::Test
     loads_program = model.getModelObjectByName(Constants.ObjectNameComponentLoadsProgram.gsub(' ', '_')).get.to_EnergyManagementSystemProgram.get
     { "Heating" => "htg", "Cooling" => "clg" }.each do |mode, mode_var|
       components.each do |component, component_var|
-        ems_output_var = OpenStudio::Model::EnergyManagementSystemOutputVariable.new(model, "#{mode_var}_#{component_var}")
-        ems_output_var.setName("#{mode_var}_#{component_var}_outvar")
+        ems_output_var = OpenStudio::Model::EnergyManagementSystemOutputVariable.new(model, "loads_#{mode_var}_#{component_var}")
+        ems_output_var.setName("loads_#{mode_var}_#{component_var}_outvar")
         ems_output_var.setTypeOfDataInVariable("Summed")
         ems_output_var.setUpdateFrequency("ZoneTimestep")
         ems_output_var.setEMSProgramOrSubroutineName(loads_program)
@@ -1016,7 +1006,7 @@ class HPXMLTest < MiniTest::Test
     if htg_load_frac == 0
       found_htg_energy = false
       results.keys.each do |k|
-        next unless k[1] == 'Heating' and k[0] != 'Capacity' and k[0] != "Load"
+        next unless k[1] == 'Heating' and k[0] != 'Capacity'
 
         found_htg_energy = true
       end
@@ -1025,7 +1015,7 @@ class HPXMLTest < MiniTest::Test
     if clg_load_frac == 0
       found_clg_energy = false
       results.keys.each do |k|
-        next unless k[1] == 'Cooling' and k[0] != 'Capacity' and k[0] != "Load"
+        next unless k[1] == 'Cooling' and k[0] != 'Capacity'
 
         found_clg_energy = true
       end
@@ -1063,7 +1053,7 @@ class HPXMLTest < MiniTest::Test
       combi_htg_load = sqlFile.execAndReturnFirstDouble(query).get.round(2)
       if combi_htg_load > 0 and combi_hx_load > 0
         results.keys.each do |k|
-          next unless k[0] != "Load" and k[1] == "Heating" and k[3] == "GJ"
+          next unless k[1] == "Heating" and k[3] == "GJ"
 
           water_heater_energy += (results[k] * combi_hx_load / combi_htg_load)
         end
@@ -1393,7 +1383,6 @@ class HPXMLTest < MiniTest::Test
       # Compare results
       results_compare.keys.each do |k|
         next if not ["Heating", "Cooling"].include? k[1]
-        next if not ["Load"].include? k[0]
 
         result_base = results_base[k].to_f
         result_compare = results_compare[k].to_f
@@ -1423,7 +1412,6 @@ class HPXMLTest < MiniTest::Test
       results_x3.keys.each do |k|
         next unless ["Heating", "Cooling"].include? k[1]
         next unless ["General"].include? k[2] # Exclude crankcase/defrost
-        next if k[0] == "Load"
 
         result_x1 = results_x1[k].to_f
         result_x3 = results_x3[k].to_f
@@ -1457,7 +1445,6 @@ class HPXMLTest < MiniTest::Test
       results_33.keys.each do |k|
         next unless ["Heating", "Cooling"].include? k[1]
         next unless ["General"].include? k[2] # Exclude crankcase/defrost
-        next if k[0] == "Load"
 
         result_33 = results_33[k].to_f
         result_100 = results_100[k].to_f
@@ -1509,7 +1496,8 @@ class HPXMLTest < MiniTest::Test
 end
 
 def components
-  return { "Roofs" => "roofs",
+  return { "Total" => "tot",
+           "Roofs" => "roofs",
            "Ceilings" => "ceilings",
            "Walls" => "walls",
            "Rim Joists" => "rim_joists",
