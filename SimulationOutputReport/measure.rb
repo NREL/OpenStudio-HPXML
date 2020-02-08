@@ -607,7 +607,8 @@ class SimulationOutputReport < OpenStudio::Measure::ReportingMeasure
   end
 
   def check_for_errors(runner, outputs)
-    all_total = @fuels.values.map { |f| f.annual_output }.inject(:+)
+    all_total = @fuels.values.map { |x| x.annual_output }.inject(:+)
+    all_total += @unmet_loads.values.map { |x| x.annual_output }.inject(:+)
     if all_total == 0
       runner.registerError("Simulation unsuccessful.")
       return false
