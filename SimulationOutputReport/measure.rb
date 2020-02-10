@@ -398,28 +398,21 @@ class SimulationOutputReport < OpenStudio::Measure::ReportingMeasure
       ep_output_names, dfhp_primary, dfhp_backup = get_ep_output_names_for_hvac_heating(sys_id)
       keys = ep_output_names.map(&:upcase)
 
-      # End Uses
+      # End Use
       @fuels.each do |fuel_type, fuel|
-        [EUT::Heating].each do |end_use_type|
-          end_use = @end_uses[[fuel_type, end_use_type]]
-          next if end_use.nil?
-
-          vars = get_all_var_keys(end_use.variable)
-
-          end_use.annual_output_by_system[sys_id] = get_report_variable_data_annual_mbtu(keys, vars)
-          if include_timeseries_end_use_consumptions
-            end_use.timeseries_output_by_system[sys_id] = get_report_variable_data_timeseries(keys, vars, UnitConversions.convert(1.0, 'J', end_use.timeseries_units), 0, timeseries_frequency)
-          end
-
-          if fuel_type == FT::Elec
-            # Disaggregated Fan/Pump Energy Use
-            end_use.annual_output_by_system[sys_id] += get_report_variable_data_annual_mbtu(["EMS"], ep_output_names.select { |name| name.end_with? Constants.ObjectNameFanPumpDisaggregatePrimaryHeat or name.end_with? Constants.ObjectNameFanPumpDisaggregateBackupHeat })
-            if include_timeseries_end_use_consumptions
-              timeseries_output = get_report_variable_data_timeseries(["EMS"], ep_output_names.select { |name| name.end_with? Constants.ObjectNameFanPumpDisaggregatePrimaryHeat or name.end_with? Constants.ObjectNameFanPumpDisaggregateBackupHeat }, UnitConversions.convert(1.0, 'J', end_use.timeseries_units), 0, timeseries_frequency)
-              end_use.timeseries_output_by_system[sys_id] = end_use.timeseries_output_by_system[sys_id].zip(timeseries_output).map { |x, y| x + y }
-            end
-          end
+        end_use = @end_uses[[fuel_type, EUT::Heating]]
+        vars = get_all_var_keys(end_use.variable)
+        end_use.annual_output_by_system[sys_id] = get_report_variable_data_annual_mbtu(keys, vars)
+        if include_timeseries_end_use_consumptions
+          end_use.timeseries_output_by_system[sys_id] = get_report_variable_data_timeseries(keys, vars, UnitConversions.convert(1.0, 'J', end_use.timeseries_units), 0, timeseries_frequency)
         end
+      end
+
+      # Disaggregated Fan/Pump Energy Use
+      end_use = @end_uses[[FT::Elec, EUT::HeatingFanPump]]
+      end_use.annual_output_by_system[sys_id] = get_report_variable_data_annual_mbtu(["EMS"], ep_output_names.select { |name| name.end_with? Constants.ObjectNameFanPumpDisaggregatePrimaryHeat or name.end_with? Constants.ObjectNameFanPumpDisaggregateBackupHeat })
+      if include_timeseries_end_use_consumptions
+        end_use.timeseries_output_by_system[sys_id] = get_report_variable_data_timeseries(["EMS"], ep_output_names.select { |name| name.end_with? Constants.ObjectNameFanPumpDisaggregatePrimaryHeat or name.end_with? Constants.ObjectNameFanPumpDisaggregateBackupHeat }, UnitConversions.convert(1.0, 'J', end_use.timeseries_units), 0, timeseries_frequency)
       end
 
       # Reference Load
@@ -434,27 +427,18 @@ class SimulationOutputReport < OpenStudio::Measure::ReportingMeasure
       keys = ep_output_names.map(&:upcase)
 
       # End Uses
-      @fuels.each do |fuel_type, fuel|
-        [EUT::Cooling].each do |end_use_type|
-          end_use = @end_uses[[fuel_type, end_use_type]]
-          next if end_use.nil?
+      end_use = @end_uses[[FT::Elec, EUT::Cooling]]
+      vars = get_all_var_keys(end_use.variable)
+      end_use.annual_output_by_system[sys_id] = get_report_variable_data_annual_mbtu(keys, vars)
+      if include_timeseries_end_use_consumptions
+        end_use.timeseries_output_by_system[sys_id] = get_report_variable_data_timeseries(keys, vars, UnitConversions.convert(1.0, 'J', end_use.timeseries_units), 0, timeseries_frequency)
+      end
 
-          vars = get_all_var_keys(end_use.variable)
-
-          end_use.annual_output_by_system[sys_id] = get_report_variable_data_annual_mbtu(keys, vars)
-          if include_timeseries_end_use_consumptions
-            end_use.timeseries_output_by_system[sys_id] = get_report_variable_data_timeseries(keys, vars, UnitConversions.convert(1.0, 'J', end_use.timeseries_units), 0, timeseries_frequency)
-          end
-
-          if fuel_type == FT::Elec
-            # Disaggregated Fan/Pump Energy Use
-            end_use.annual_output_by_system[sys_id] += get_report_variable_data_annual_mbtu(["EMS"], ep_output_names.select { |name| name.end_with? Constants.ObjectNameFanPumpDisaggregateCool })
-            if include_timeseries_end_use_consumptions
-              timeseries_output = get_report_variable_data_timeseries(["EMS"], ep_output_names.select { |name| name.end_with? Constants.ObjectNameFanPumpDisaggregateCool }, UnitConversions.convert(1.0, 'J', end_use.timeseries_units), 0, timeseries_frequency)
-              end_use.timeseries_output_by_system[sys_id] = end_use.timeseries_output_by_system[sys_id].zip(timeseries_output).map { |x, y| x + y }
-            end
-          end
-        end
+      # Disaggregated Fan/Pump Energy Use
+      end_use = @end_uses[[FT::Elec, EUT::CoolingFanPump]]
+      end_use.annual_output_by_system[sys_id] = get_report_variable_data_annual_mbtu(["EMS"], ep_output_names.select { |name| name.end_with? Constants.ObjectNameFanPumpDisaggregateCool })
+      if include_timeseries_end_use_consumptions
+        end_use.timeseries_output_by_system[sys_id] = get_report_variable_data_timeseries(["EMS"], ep_output_names.select { |name| name.end_with? Constants.ObjectNameFanPumpDisaggregateCool }, UnitConversions.convert(1.0, 'J', end_use.timeseries_units), 0, timeseries_frequency)
       end
 
       # Reference Load
@@ -470,7 +454,7 @@ class SimulationOutputReport < OpenStudio::Measure::ReportingMeasure
       ep_output_names = get_ep_output_names_for_water_heating(sys_id)
       keys = ep_output_names.map(&:upcase)
 
-      # End Uses
+      # End Use
       @fuels.each do |fuel_type, fuel|
         [EUT::HotWater, EUT::HotWaterRecircPump, EUT::HotWaterSolarThermalPump].each do |end_use_type|
           end_use = @end_uses[[fuel_type, end_use_type]]
@@ -1591,7 +1575,9 @@ class SimulationOutputReport < OpenStudio::Measure::ReportingMeasure
     # output variables so that we can have more control.
     @end_uses = {
       [FT::Elec, EUT::Heating] => EndUse.new(variable: OutputVars.SpaceHeatingElectricity),
+      [FT::Elec, EUT::HeatingFanPump] => EndUse.new(),
       [FT::Elec, EUT::Cooling] => EndUse.new(variable: OutputVars.SpaceCoolingElectricity),
+      [FT::Elec, EUT::CoolingFanPump] => EndUse.new(),
       [FT::Elec, EUT::HotWater] => EndUse.new(variable: OutputVars.WaterHeatingElectricity),
       [FT::Elec, EUT::HotWaterRecircPump] => EndUse.new(variable: OutputVars.WaterHeatingElectricityRecircPump),
       [FT::Elec, EUT::HotWaterSolarThermalPump] => EndUse.new(variable: OutputVars.WaterHeatingElectricitySolarThermalPump),
