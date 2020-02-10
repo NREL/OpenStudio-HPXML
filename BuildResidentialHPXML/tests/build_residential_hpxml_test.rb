@@ -6,9 +6,7 @@ require_relative '../measure.rb'
 require 'fileutils'
 require 'rexml/document'
 require 'rexml/xpath'
-require_relative '../../HPXMLtoOpenStudio/resources/constants'
 require_relative '../../HPXMLtoOpenStudio/resources/meta_measure'
-require_relative '../../workflow/tests/hpxml_translator_test'
 
 class BuildResidentialHPXMLTest < MiniTest::Test
   def test_workflows
@@ -24,24 +22,19 @@ class BuildResidentialHPXMLTest < MiniTest::Test
 
     osws = []
     test_dirs.each do |test_dir|
-      Dir["#{test_dir}/base*.osw"].sort.each do |osw|
+      Dir["#{test_dir}/base.osw"].sort.each do |osw|
         osws << File.absolute_path(osw)
       end
     end
 
-    tests_dir = File.expand_path(File.join(File.dirname(__FILE__), "../../workflow/tests"))
-    results_dir = File.join(tests_dir, "results")
-    _rm_path(results_dir)
+    workflow_dir = File.expand_path(File.join(File.dirname(__FILE__), "../../workflow/tests"))
+    tests_dir = File.expand_path(File.join(File.dirname(__FILE__), "../../BuildResidentialHPXML/tests"))
     built_dir = File.join(tests_dir, "built_residential_hpxml")
     unless Dir.exists?(built_dir)
       Dir.mkdir(built_dir)
     end
 
     puts "Running #{osws.size} OSW files..."
-    all_results = {}
-    all_compload_results = {}
-    all_sizing_results = {}
-    hpxml_translator_test = HPXMLTest.new(nil)
     measures = {}
     osws.each do |osw|
       puts "\nTesting #{File.basename(osw)}..."
@@ -70,25 +63,107 @@ class BuildResidentialHPXMLTest < MiniTest::Test
           next # FIXME: should this be temporary?
         end
 
-        # Translate the hpxml to osm
-        xml = "#{File.join(built_dir, File.basename(osw, ".*"))}.xml"
-        all_results[xml], all_compload_results[xml], all_sizing_results[xml] = hpxml_translator_test._run_xml(xml, tests_dir)
+        # Compare the hpxml to the manually created one
+        hpxml_path = step["arguments"]["hpxml_path"]
+        begin
+          _check_hpxmls(workflow_dir, built_dir, hpxml_path)
+        rescue Exception => e
+          flunk e
+        end
       end
-    end
-
-    Dir.mkdir(results_dir)
-    hpxml_translator_test._write_summary_results(results_dir, all_results)
-    hpxml_translator_test._write_component_load_results(results_dir, all_compload_results)
-    hpxml_translator_test._write_hvac_sizing_results(results_dir, all_sizing_results)
-
-    FileUtils.mv(results_dir, this_dir, :force => true)
-    zip = OpenStudio::ZipFile.new(File.join(this_dir, "results", "built-residential-hpxml.zip"), false)
-    Dir["#{built_dir}/*.xml"].each do |file|
-      zip.addFile(file, File.basename(file))
     end
   end
 
   private
+
+  def _check_hpxmls(workflow_dir, built_dir, hpxml_path)
+    err = ""
+
+    hpxml_path = {
+      "Rakefile" => File.join(workflow_dir, File.basename(hpxml_path)),
+      "BuildResidentialHPXML" => File.join(built_dir, File.basename(hpxml_path))
+    }
+
+    hpxml_doc = {
+      "Rakefile" => XMLHelper.parse_file(hpxml_path["Rakefile"]),
+      "BuildResidentialHPXML" => XMLHelper.parse_file(hpxml_path["BuildResidentialHPXML"])
+    }
+
+    building = {
+      "Rakefile" => hpxml_doc["Rakefile"].elements["/HPXML/Building"],
+      "BuildResidentialHPXML" => hpxml_doc["BuildResidentialHPXML"].elements["/HPXML/Building"]
+    }
+
+    building_details = {
+      "Rakefile" => building["Rakefile"].elements["BuildingDetails"],
+      "BuildResidentialHPXML" => building["BuildResidentialHPXML"].elements["BuildingDetails"]
+    }
+
+    enclosure = {
+      "Rakefile" => building_details["Rakefile"].elements["Enclosure"],
+      "BuildResidentialHPXML" => building_details["BuildResidentialHPXML"].elements["Enclosure"]
+    }
+
+    HPXML.collapse_enclosure(enclosure["BuildResidentialHPXML"])
+
+    building_construction = {
+      "Rakefile" => building_details["Rakefile"].elements["BuildingSummary/BuildingConstruction"],
+      "BuildResidentialHPXML" => building_details["BuildResidentialHPXML"].elements["BuildingSummary/BuildingConstruction"]
+    }
+
+    building_construction_values = {
+      "Rakefile" => [HPXML.get_building_construction_values(building_construction: building_construction["Rakefile"])],
+      "BuildResidentialHPXML" => [HPXML.get_building_construction_values(building_construction: building_construction["BuildResidentialHPXML"])]
+    }
+
+    err = _check_elements(building_construction_values, err)
+
+    air_infiltration_measurement = {
+      "Rakefile" => enclosure["Rakefile"].elements["AirInfiltration/AirInfiltrationMeasurement"],
+      "BuildResidentialHPXML" => enclosure["BuildResidentialHPXML"].elements["AirInfiltration/AirInfiltrationMeasurement"]
+    }
+
+    air_infiltration_measurement_values = {
+      "Rakefile" => [HPXML.get_air_infiltration_measurement_values(air_infiltration_measurement: air_infiltration_measurement["Rakefile"])],
+      "BuildResidentialHPXML" => [HPXML.get_air_infiltration_measurement_values(air_infiltration_measurement: air_infiltration_measurement["BuildResidentialHPXML"])]
+    }
+
+    err = _check_elements(air_infiltration_measurement_values, err)
+
+    roof_values = {
+      "Rakefile" => [],
+      "BuildResidentialHPXML" => []
+    }
+
+    enclosure["Rakefile"].elements.each("Roofs/Roof") do |roof|
+      roof_values["Rakefile"] << HPXML.get_roof_values(roof: roof)
+    end
+
+    enclosure["BuildResidentialHPXML"].elements.each("Roofs/Roof") do |roof|
+      roof_values["BuildResidentialHPXML"] << HPXML.get_roof_values(roof: roof)
+    end
+
+    err = _check_elements(roof_values, err)
+
+    if not err.empty?
+      raise err
+    end
+  end
+
+  def _check_elements(valuess, err)
+    valuess["Rakefile"].each_with_index do |values, i|
+      values.each do |key, value1|
+        value2 = valuess["BuildResidentialHPXML"][i][key]
+        next if value1 == value2
+
+        value1 = "nil" if value1.nil?
+        value2 = "nil" if value2.nil?
+
+        err += "ERROR: #{key}: #{value1} != #{value2}.\n"
+      end
+    end
+    return err
+  end
 
   def _setup(this_dir)
     rundir = File.join(this_dir, "run")
