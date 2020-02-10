@@ -12,7 +12,7 @@ jobs:
       - run: 
           name: Run tests
           command: |
-            ruby tests/hpxml_translator_test.rb
+            rake test_all
       - store_artifacts:
-          path: tests/results
+          path: workflow/tests/results
           destination: results
