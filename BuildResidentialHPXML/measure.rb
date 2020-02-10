@@ -403,10 +403,10 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     arg.setDefaultValue(3)
     args << arg
 
-    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument("num_bathrooms", true)
+    arg = OpenStudio::Measure::OSArgument::makeStringArgument("num_bathrooms", true)
     arg.setDisplayName("Geometry: Number of Bathrooms")
     arg.setDescription("Specify the number of bathrooms.")
-    arg.setDefaultValue(2)
+    arg.setDefaultValue(Constants.Auto)
     args << arg
 
     arg = OpenStudio::Measure::OSArgument::makeStringArgument("num_occupants", true)
@@ -1855,7 +1855,7 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
              :roof_radiant_barrier => runner.getBoolArgumentValue("roof_radiant_barrier", user_arguments),
              :eaves_depth => runner.getDoubleArgumentValue("eaves_depth", user_arguments),
              :num_bedrooms => runner.getDoubleArgumentValue("num_bedrooms", user_arguments),
-             :num_bathrooms => runner.getDoubleArgumentValue("num_bathrooms", user_arguments),
+             :num_bathrooms => runner.getStringArgumentValue("num_bathrooms", user_arguments),
              :num_occupants => runner.getStringArgumentValue("num_occupants", user_arguments),
              :neighbor_distance => [runner.getDoubleArgumentValue("neighbor_front_distance", user_arguments), runner.getDoubleArgumentValue("neighbor_back_distance", user_arguments), runner.getDoubleArgumentValue("neighbor_left_distance", user_arguments), runner.getDoubleArgumentValue("neighbor_right_distance", user_arguments)],
              :neighbor_height => [runner.getDoubleArgumentValue("neighbor_front_height", user_arguments), runner.getDoubleArgumentValue("neighbor_back_height", user_arguments), runner.getDoubleArgumentValue("neighbor_left_height", user_arguments), runner.getDoubleArgumentValue("neighbor_right_height", user_arguments)],
@@ -2349,15 +2349,22 @@ class HPXMLFile
 
   def self.get_building_construction_values(runner, args)
     number_of_conditioned_floors_above_grade = args[:num_floors]
+
     number_of_conditioned_floors = number_of_conditioned_floors_above_grade
     if args[:foundation_type] == "basement - conditioned"
       number_of_conditioned_floors += 1
     end
+
+    if args[:num_bathrooms] != Constants.Auto
+      number_of_bathrooms = args[:num_bathrooms]
+    end
+
     conditioned_building_volume = args[:cfa] * args[:wall_height]
+
     building_construction_values = { :number_of_conditioned_floors => number_of_conditioned_floors,
                                      :number_of_conditioned_floors_above_grade => number_of_conditioned_floors_above_grade,
                                      :number_of_bedrooms => args[:num_bedrooms],
-                                     :number_of_bathrooms => args[:num_bathrooms],
+                                     :number_of_bathrooms => number_of_bathrooms,
                                      :conditioned_floor_area => args[:cfa],
                                      :conditioned_building_volume => conditioned_building_volume }
     return building_construction_values
@@ -2469,7 +2476,7 @@ class HPXMLFile
 
       roof_values = { :id => surface.name.to_s,
                       :interior_adjacent_to => get_adjacent_to(model, surface),
-                      :area => UnitConversions.convert(surface.netArea, "m^2", "ft^2"),
+                      :area => UnitConversions.convert(surface.netArea, "m^2", "ft^2").round(1),
                       :azimuth => nil, # FIXME: Get from model
                       :solar_absorptance => args[:roof_solar_absorptance],
                       :emittance => args[:roof_emittance],
@@ -3162,11 +3169,15 @@ class HPXMLFile
         location = "living space" # FIXME
       end
 
-      tank_volume = Waterheater.calc_nom_tankvol(args[:water_heater_tank_volume][i], fuel_type, args[:num_bedrooms], args[:num_bathrooms])
+      num_bathrooms = args[:num_bathrooms]
+      if num_bathrooms == Constants.Auto
+        num_bathrooms = 2 # FIXME
+      end
+      tank_volume = Waterheater.calc_nom_tankvol(args[:water_heater_tank_volume][i], fuel_type, args[:num_bedrooms], num_bathrooms)
 
       heating_capacity = args[:water_heater_heating_capacity][i]
       if heating_capacity == Constants.SizingAuto
-        heating_capacity = Waterheater.calc_water_heater_capacity(fuel_type, args[:num_bedrooms], num_water_heaters, args[:num_bathrooms])
+        heating_capacity = Waterheater.calc_water_heater_capacity(fuel_type, args[:num_bedrooms], num_water_heaters, num_bathrooms)
       else
         heating_capacity = Float(heating_capacity)
       end
