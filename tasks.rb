@@ -248,6 +248,8 @@ def create_hpxmls
     'base-version-2014A.xml' => 'base.xml',
     'base-version-2014AE.xml' => 'base.xml',
     'base-version-2014AEG.xml' => 'base.xml',
+    'base-version-2019.xml' => 'base.xml',
+    'base-version-2019A.xml' => 'base.xml',
     'base-version-latest.xml' => 'base.xml',
 
     'hvac_autosizing/base-autosize.xml' => 'base.xml',
@@ -604,6 +606,10 @@ def get_hpxml_file_hpxml_values(hpxml_file, hpxml_values)
     hpxml_values[:eri_calculation_version] = "2014AE"
   elsif ['base-version-2014AEG.xml'].include? hpxml_file
     hpxml_values[:eri_calculation_version] = "2014AEG"
+  elsif ['base-version-2019.xml'].include? hpxml_file
+    hpxml_values[:eri_calculation_version] = "2019"
+  elsif ['base-version-2019A.xml'].include? hpxml_file
+    hpxml_values[:eri_calculation_version] = "2019A"
   elsif ['base-version-latest.xml'].include? hpxml_file
     hpxml_values[:eri_calculation_version] = 'latest'
   end
