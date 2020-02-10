@@ -6,6 +6,7 @@ require_relative '../measure.rb'
 require 'fileutils'
 require 'rexml/document'
 require 'rexml/xpath'
+require 'nokogiri/diff'
 require_relative '../../HPXMLtoOpenStudio/resources/meta_measure'
 
 class BuildResidentialHPXMLTest < MiniTest::Test
@@ -22,7 +23,7 @@ class BuildResidentialHPXMLTest < MiniTest::Test
 
     osws = []
     test_dirs.each do |test_dir|
-      Dir["#{test_dir}/base*.osw"].sort.each do |osw|
+      Dir["#{test_dir}/base.osw"].sort.each do |osw|
         osws << File.absolute_path(osw)
       end
     end
@@ -65,11 +66,11 @@ class BuildResidentialHPXMLTest < MiniTest::Test
 
         # Compare the hpxml to the manually created one
         hpxml_path = step["arguments"]["hpxml_path"]
-        begin
+        # begin
           _check_hpxmls(workflow_dir, built_dir, hpxml_path)
-        rescue Exception => e
-          puts e
-        end
+        # rescue Exception => e
+          # puts e
+        # end
       end
     end
   end
@@ -77,8 +78,6 @@ class BuildResidentialHPXMLTest < MiniTest::Test
   private
 
   def _check_hpxmls(workflow_dir, built_dir, hpxml_path)
-    err = ""
-
     hpxml_path = {
       "Rakefile" => File.join(workflow_dir, File.basename(hpxml_path)),
       "BuildResidentialHPXML" => File.join(built_dir, File.basename(hpxml_path))
@@ -86,87 +85,24 @@ class BuildResidentialHPXMLTest < MiniTest::Test
 
     hpxml_doc = {
       "Rakefile" => XMLHelper.parse_file(hpxml_path["Rakefile"]),
-      "BuildResidentialHPXML" => XMLHelper.parse_file(hpxml_path["BuildResidentialHPXML"])
-    }
-
-    building = {
-      "Rakefile" => hpxml_doc["Rakefile"].elements["/HPXML/Building"],
-      "BuildResidentialHPXML" => hpxml_doc["BuildResidentialHPXML"].elements["/HPXML/Building"]
-    }
-
-    building_details = {
-      "Rakefile" => building["Rakefile"].elements["BuildingDetails"],
-      "BuildResidentialHPXML" => building["BuildResidentialHPXML"].elements["BuildingDetails"]
+      "BuildResidentialHPXML" => XMLHelper.parse_file(hpxml_path["Rakefile"])
     }
 
     enclosure = {
-      "Rakefile" => building_details["Rakefile"].elements["Enclosure"],
-      "BuildResidentialHPXML" => building_details["BuildResidentialHPXML"].elements["Enclosure"]
+      "Rakefile" => hpxml_doc["Rakefile"].elements["HPXML/Building/BuildingDetails/Enclosure"],
+      "BuildResidentialHPXML" => hpxml_doc["BuildResidentialHPXML"].elements["HPXML/Building/BuildingDetails/Enclosure"]
     }
 
     HPXML.collapse_enclosure(enclosure["BuildResidentialHPXML"])
 
-    building_construction = {
-      "Rakefile" => building_details["Rakefile"].elements["BuildingSummary/BuildingConstruction"],
-      "BuildResidentialHPXML" => building_details["BuildResidentialHPXML"].elements["BuildingSummary/BuildingConstruction"]
+    hpxml_doc = {
+      "Rakefile" => Nokogiri::XML(hpxml_doc["Rakefile"].to_s).remove_namespaces!,
+      "BuildResidentialHPXML" => Nokogiri::XML(hpxml_doc["BuildResidentialHPXML"].to_s).remove_namespaces!
     }
 
-    building_construction_values = {
-      "Rakefile" => [HPXML.get_building_construction_values(building_construction: building_construction["Rakefile"])],
-      "BuildResidentialHPXML" => [HPXML.get_building_construction_values(building_construction: building_construction["BuildResidentialHPXML"])]
-    }
-
-    air_infiltration_measurement = {
-      "Rakefile" => enclosure["Rakefile"].elements["AirInfiltration/AirInfiltrationMeasurement"],
-      "BuildResidentialHPXML" => enclosure["BuildResidentialHPXML"].elements["AirInfiltration/AirInfiltrationMeasurement"]
-    }
-
-    air_infiltration_measurement_values = {
-      "Rakefile" => [HPXML.get_air_infiltration_measurement_values(air_infiltration_measurement: air_infiltration_measurement["Rakefile"])],
-      "BuildResidentialHPXML" => [HPXML.get_air_infiltration_measurement_values(air_infiltration_measurement: air_infiltration_measurement["BuildResidentialHPXML"])]
-    }
-
-    roof_values = {
-      "Rakefile" => [],
-      "BuildResidentialHPXML" => []
-    }
-
-    enclosure["Rakefile"].elements.each("Roofs/Roof") do |roof|
-      roof_values["Rakefile"] << HPXML.get_roof_values(roof: roof)
+    hpxml_doc["Rakefile"].diff(hpxml_doc["BuildResidentialHPXML"]) do |change, node|
+      puts "#{change} #{node.to_xml}".ljust(30) + node.parent.path
     end
-
-    enclosure["BuildResidentialHPXML"].elements.each("Roofs/Roof") do |roof|
-      roof_values["BuildResidentialHPXML"] << HPXML.get_roof_values(roof: roof)
-    end
-
-    err = _check_elements(building_construction_values, err)
-    err = _check_elements(air_infiltration_measurement_values, err)
-    err = _check_elements(roof_values, err)
-
-    if not err.empty?
-      raise err
-    end
-  end
-
-  def _check_elements(valuess, err)
-    valuess["Rakefile"].each_with_index do |values, i|
-      values.each do |key, value1|
-        next if key.to_s.include? "id"
-
-        value2 = valuess["BuildResidentialHPXML"][i][key]
-        next if value1 == value2
-
-        if value1.is_a? Numeric and value2.is_a? Numeric
-          next if (value1 - value2).abs < 1.0
-        end
-
-        value1 = "nil" if value1.nil?
-        value2 = "nil" if value2.nil?
-
-        err += "ERROR: #{key}: #{value1} != #{value2}.\n"
-      end
-    end
-    return err
   end
 
   def _setup(this_dir)
