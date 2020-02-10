@@ -531,7 +531,7 @@ class SimulationOutputReport < OpenStudio::Measure::ReportingMeasure
     # Apply Heating/Cooling DSEs
     outputs[:hpxml_heat_sys_ids].each do |sys_id|
       @fuels.each do |fuel_type, fuel|
-        [EUT::Heating].each do |end_use_type|
+        [EUT::Heating, EUT::HeatingFanPump].each do |end_use_type|
           end_use = @end_uses[[fuel_type, end_use_type]]
           next if end_use.nil?
 
@@ -541,7 +541,7 @@ class SimulationOutputReport < OpenStudio::Measure::ReportingMeasure
     end
     outputs[:hpxml_cool_sys_ids].each do |sys_id|
       @fuels.each do |fuel_type, fuel|
-        [EUT::Cooling].each do |end_use_type|
+        [EUT::Cooling, EUT::CoolingFanPump].each do |end_use_type|
           end_use = @end_uses[[fuel_type, end_use_type]]
           next if end_use.nil?
 
