@@ -6,7 +6,7 @@ require_relative '../measure.rb'
 require 'fileutils'
 require 'rexml/document'
 require 'rexml/xpath'
-require 'nokogiri/diff'
+require 'compare-xml'
 require_relative '../../HPXMLtoOpenStudio/resources/meta_measure'
 
 class BuildResidentialHPXMLTest < MiniTest::Test
@@ -23,7 +23,7 @@ class BuildResidentialHPXMLTest < MiniTest::Test
 
     osws = []
     test_dirs.each do |test_dir|
-      Dir["#{test_dir}/base.osw"].sort.each do |osw|
+      Dir["#{test_dir}/base*.osw"].sort.each do |osw|
         osws << File.absolute_path(osw)
       end
     end
@@ -37,6 +37,7 @@ class BuildResidentialHPXMLTest < MiniTest::Test
 
     puts "Running #{osws.size} OSW files..."
     measures = {}
+    fail = false
     osws.each do |osw|
       puts "\nTesting #{File.basename(osw)}..."
 
@@ -66,13 +67,16 @@ class BuildResidentialHPXMLTest < MiniTest::Test
 
         # Compare the hpxml to the manually created one
         hpxml_path = step["arguments"]["hpxml_path"]
-        # begin
+        begin
           _check_hpxmls(workflow_dir, built_dir, hpxml_path)
-        # rescue Exception => e
-          # puts e
-        # end
+        rescue Exception => e
+          puts e
+          fail = true
+        end
       end
     end
+
+    assert false if fail
   end
 
   private
@@ -83,25 +87,59 @@ class BuildResidentialHPXMLTest < MiniTest::Test
       "BuildResidentialHPXML" => File.join(built_dir, File.basename(hpxml_path))
     }
 
-    hpxml_doc = {
+    hpxml_docs = {
       "Rakefile" => XMLHelper.parse_file(hpxml_path["Rakefile"]),
-      "BuildResidentialHPXML" => XMLHelper.parse_file(hpxml_path["Rakefile"])
+      "BuildResidentialHPXML" => XMLHelper.parse_file(hpxml_path["BuildResidentialHPXML"])
     }
 
     enclosure = {
-      "Rakefile" => hpxml_doc["Rakefile"].elements["HPXML/Building/BuildingDetails/Enclosure"],
-      "BuildResidentialHPXML" => hpxml_doc["BuildResidentialHPXML"].elements["HPXML/Building/BuildingDetails/Enclosure"]
+      "Rakefile" => hpxml_docs["Rakefile"].elements["HPXML/Building/BuildingDetails/Enclosure"],
+      "BuildResidentialHPXML" => hpxml_docs["BuildResidentialHPXML"].elements["HPXML/Building/BuildingDetails/Enclosure"]
     }
 
     HPXML.collapse_enclosure(enclosure["BuildResidentialHPXML"])
 
-    hpxml_doc = {
-      "Rakefile" => Nokogiri::XML(hpxml_doc["Rakefile"].to_s).remove_namespaces!,
-      "BuildResidentialHPXML" => Nokogiri::XML(hpxml_doc["BuildResidentialHPXML"].to_s).remove_namespaces!
+    _delete_elements(hpxml_docs, "HPXML/XMLTransactionHeaderInformation")
+    _delete_elements(hpxml_docs, "HPXML/Building/BuildingDetails/BuildingSummary/Site")
+    _delete_elements(hpxml_docs, "HPXML/Building/BuildingDetails/BuildingSummary/BuildingOccupancy")
+    _delete_elements(hpxml_docs, "HPXML/Building/BuildingDetails/ClimateandRiskZones")
+    _delete_elements(hpxml_docs, "HPXML/Building/BuildingDetails/Enclosure/Attics")
+    _delete_elements(hpxml_docs, "HPXML/Building/BuildingDetails/Enclosure/Foundations")
+    _delete_elements(hpxml_docs, "HPXML/Building/BuildingDetails/Enclosure/RimJoists")
+    _delete_elements(hpxml_docs, "HPXML/Building/BuildingDetails/Enclosure/Windows")
+    _delete_elements(hpxml_docs, "HPXML/Building/BuildingDetails/Enclosure/Doors")
+    _delete_elements(hpxml_docs, "HPXML/Building/BuildingDetails/Appliances/Refrigerator/extension")
+    _delete_elements(hpxml_docs, "HPXML/Building/BuildingDetails/extension")
+
+    hpxml_docs = {
+      "Rakefile" => Nokogiri::XML(hpxml_docs["Rakefile"].to_s).remove_namespaces!,
+      "BuildResidentialHPXML" => Nokogiri::XML(hpxml_docs["BuildResidentialHPXML"].to_s).remove_namespaces!
     }
 
-    hpxml_doc["Rakefile"].diff(hpxml_doc["BuildResidentialHPXML"]) do |change, node|
-      puts "#{change} #{node.to_xml}".ljust(30) + node.parent.path
+    opts = { verbose: true }
+    compare_xml = CompareXML.equivalent?(hpxml_docs["Rakefile"], hpxml_docs["BuildResidentialHPXML"], opts)
+    discrepancies = ""
+    compare_xml.each do |discrepancy|
+      next if discrepancy[:node1].attributes.keys.include? "id"
+      next if discrepancy[:node1].attributes.keys.include? "idref"
+
+      parent = discrepancy[:node1].parent
+      parent_id = parent.xpath("SystemIdentifier").attribute("id")
+
+      child = discrepancy[:node2].parent
+      child_id = child.xpath("SystemIdentifier").attribute("id")
+
+      discrepancies << "#{parent_id}: #{discrepancy[:diff1]}, #{child_id}: #{discrepancy[:diff2]}\n"
+    end
+
+    unless discrepancies.empty?
+      raise discrepancies
+    end
+  end
+
+  def _delete_elements(hpxml_docs, element)
+    hpxml_docs.each do |key, hpxml_doc|
+      XMLHelper.delete_element(hpxml_doc, element)
     end
   end
 
@@ -146,8 +184,6 @@ class BuildResidentialHPXMLTest < MiniTest::Test
 
     # assert that it ran correctly
     assert_equal("Success", result.value.valueName)
-
-    # TODO: get the hpxml and check its elements
   end
 
   def _rm_path(path)
