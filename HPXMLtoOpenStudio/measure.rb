@@ -1706,6 +1706,17 @@ class OSModel
 
   def self.add_interior_shading_schedule(runner, model, weather)
     heating_season, cooling_season = HVAC.calc_heating_and_cooling_seasons(model, weather)
+    
+    # If seasons overlap, prioritize cooling
+    non_cooling_season = []
+    cooling_season.each do |clg_month|
+      if clg_month > 0
+        non_cooling_season << 0.0
+      else
+        non_cooling_season << 1.0
+      end
+    end
+    @htg_season_sch = MonthWeekdayWeekendSchedule.new(model, "heating season schedule", Array.new(24, 1), Array.new(24, 1), non_cooling_season, 1.0, 1.0, true, true, Constants.ScheduleTypeLimitsFraction)
     @clg_season_sch = MonthWeekdayWeekendSchedule.new(model, "cooling season schedule", Array.new(24, 1), Array.new(24, 1), cooling_season, 1.0, 1.0, true, true, Constants.ScheduleTypeLimitsFraction)
 
     @clg_ssn_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, "Schedule Value")
@@ -1780,7 +1791,7 @@ class OSModel
 
       Constructions.apply_window(model, [sub_surface],
                                  "WindowConstruction",
-                                 weather, @clg_season_sch, ufactor, shgc,
+                                 weather, @htg_season_sch, @clg_season_sch, ufactor, shgc,
                                  heat_shade_mult, cool_shade_mult)
     end
 
@@ -1840,7 +1851,7 @@ class OSModel
       heat_shade_mult = 1.0
       Constructions.apply_skylight(model, [sub_surface],
                                    "SkylightConstruction",
-                                   weather, @clg_season_sch, ufactor, shgc,
+                                   weather, @htg_season_sch, @clg_season_sch, ufactor, shgc,
                                    heat_shade_mult, cool_shade_mult)
     end
 
