@@ -1441,7 +1441,7 @@ class Constructions
 
       # Add shading controls
       subsurfaces.each do |subsurface|
-        subsurface.setShadingControl(sc)
+        subsurface.setShadingControl(sc) # FIXME: Doesn't work, simply overrides the original shading control assignment.
       end
     end
 

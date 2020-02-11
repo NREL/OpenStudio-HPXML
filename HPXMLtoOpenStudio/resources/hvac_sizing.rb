@@ -1900,6 +1900,7 @@ class HVACSizing
     simple_glazing = get_window_simple_glazing(surface)
     shgc_with_interior_shade_heat = simple_glazing.solarHeatGainCoefficient
 
+    # FIXME: Need to update when surface can have multiple shadingControls
     int_shade_heat_to_cool_ratio = 1.0
     if surface.shadingControl.is_initialized
       shading_control = surface.shadingControl.get
