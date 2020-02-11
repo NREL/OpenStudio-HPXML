@@ -10,4 +10,4 @@ gem 'simplecov'
 gem 'codecov'
 gem 'minitest-reporters'
 gem 'minitest-ci' # For CircleCI Automatic test metadata collection
-gem 'nokogiri-diff'
+gem 'compare-xml'
