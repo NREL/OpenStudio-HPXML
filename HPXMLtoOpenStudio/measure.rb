@@ -643,7 +643,8 @@ class OSModel
 
     all_surfaces.each do |surface|
       if @cond_bsmnt_surfaces.include? surface or
-         ((@cond_bsmnt_surfaces.include? surface.internalMassDefinition) if surface.is_a? OpenStudio::Model::InternalMass)
+         ((@cond_bsmnt_surfaces.include? surface.internalMassDefinition) if surface.is_a? OpenStudio::Model::InternalMass) or
+         ((@cond_bsmnt_surfaces.include? surface.surface.get) if surface.is_a? OpenStudio::Model::SubSurface)
         cond_base_surfaces << surface
       else
         lv_surfaces << surface
