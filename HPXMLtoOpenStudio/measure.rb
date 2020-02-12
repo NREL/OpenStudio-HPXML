@@ -3344,12 +3344,12 @@ class OSModel
     end
     return map_str.to_s
   end
-  
+
   def add_output_diagnostics(model)
     output_diagnostics = OpenStudio::Model::OutputDiagnostics.new(model)
     output_diagnostics.addKey("DisplayAdvancedReportVariables")
   end
-  
+
   def self.add_component_loads_output(runner, model)
     # Prevent certain objects (e.g., OtherEquipment) from being counted towards both, e.g., ducts and internal gains
     objects_already_processed = []
@@ -3407,7 +3407,7 @@ class OSModel
                 "Door" => :doors,
                 "Skylight" => :skylights }[surface_type]
         fail "Unexpected subsurface for component loads: '#{ss.name}'." if key.nil?
-        
+
         if output_diagnostics
           vars = { "Surface Inside Face Convection Heat Gain Energy" => "ss_conv",
                    "Surface Inside Face Internal Gains Radiation Heat Gain Energy" => "ss_ig",
@@ -3424,19 +3424,19 @@ class OSModel
             vars["ss_lgt"] = "Surface Inside Face Lights Radiation Heat Gain Energy"
           end
         else
-            if surface_type == "Window" or surface_type == "Skylight"
-              vars = { "Surface Window Net Heat Transfer Energy" => "ss_net",
-                       "Surface Inside Face Internal Gains Radiation Heat Gain Energy" => "ss_ig",
-                       "Surface Window Total Glazing Layers Absorbed Shortwave Radiation Rate" => "ss_sw_abs",
-                       "Surface Window Total Glazing Layers Absorbed Solar Radiation Energy" => "ss_sol_abs",
-                       "Surface Inside Face Initial Transmitted Diffuse Transmitted Out Window Solar Radiation Rate" => "ss_trans_out" }
-            else
-              vars = { "Surface Inside Face Convection Heat Gain Energy" => "ss_conv",
-                       "Surface Inside Face Internal Gains Radiation Heat Gain Energy" => "ss_ig",
-                       "Surface Inside Face Net Surface Thermal Radiation Heat Gain Energy" => "ss_surf",
-                       "Surface Inside Face Solar Radiation Heat Gain Energy" => "ss_sol",
-                       "Surface Inside Face Lights Radiation Heat Gain Energy" => "ss_lgt" }
-            end
+          if surface_type == "Window" or surface_type == "Skylight"
+            vars = { "Surface Window Net Heat Transfer Energy" => "ss_net",
+                     "Surface Inside Face Internal Gains Radiation Heat Gain Energy" => "ss_ig",
+                     "Surface Window Total Glazing Layers Absorbed Shortwave Radiation Rate" => "ss_sw_abs",
+                     "Surface Window Total Glazing Layers Absorbed Solar Radiation Energy" => "ss_sol_abs",
+                     "Surface Inside Face Initial Transmitted Diffuse Transmitted Out Window Solar Radiation Rate" => "ss_trans_out" }
+          else
+            vars = { "Surface Inside Face Convection Heat Gain Energy" => "ss_conv",
+                     "Surface Inside Face Internal Gains Radiation Heat Gain Energy" => "ss_ig",
+                     "Surface Inside Face Net Surface Thermal Radiation Heat Gain Energy" => "ss_surf",
+                     "Surface Inside Face Solar Radiation Heat Gain Energy" => "ss_sol",
+                     "Surface Inside Face Lights Radiation Heat Gain Energy" => "ss_lgt" }
+          end
         end
 
         surfaces_sensors[key] << []
@@ -3734,9 +3734,9 @@ class OSModel
         s = "Set hr_#{k.to_s} = hr_#{k.to_s}"
         sensors.each do |sensor|
           # remove ss_net if switch
-          if sensor.name.to_s.start_with? ("ss_net", "ss_sol_abs", "ss_trans")
+          if sensor.name.to_s.start_with?("ss_net", "ss_sol_abs", "ss_trans")
             s += " - #{sensor.name}"
-          elsif sensor.name.to_s.start_with? ("ss_sw_abs", "ss_trans_out", "ss_back_out")
+          elsif sensor.name.to_s.start_with?("ss_sw_abs", "ss_trans_out", "ss_back_out")
             s += " + #{sensor.name} * ZoneTimestep * 3600"
           else
             s += " + #{sensor.name}"
