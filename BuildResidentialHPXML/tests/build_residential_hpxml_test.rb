@@ -127,8 +127,10 @@ class BuildResidentialHPXMLTest < MiniTest::Test
     compare_xml = CompareXML.equivalent?(hpxml_docs["Rakefile"], hpxml_docs["BuildResidentialHPXML"], opts)
     discrepancies = ""
     compare_xml.each do |discrepancy|
-      next if discrepancy[:node1].attributes.keys.include? "id"
-      next if discrepancy[:node1].attributes.keys.include? "idref"
+      unless discrepancy[:node1].nil?
+        next if discrepancy[:node1].attributes.keys.include? "id"
+        next if discrepancy[:node1].attributes.keys.include? "idref"
+      end
 
       parent_id = "nil"
       parent_element = "nil"

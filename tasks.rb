@@ -1297,9 +1297,9 @@ def get_values(osw_file, step)
     step.setArgument("mech_vent_fan_power", 60)
   elsif ['base-mechvent-erv-atre-asre.osw'].include? osw_file
     step.setArgument("mech_vent_fan_type", "energy recovery ventilator")
-    step.setArgument("mech_vent_total_recovery_efficiency_type", "unadjusted")
+    step.setArgument("mech_vent_total_recovery_efficiency_type", "Adjusted")
     step.setArgument("mech_vent_total_recovery_efficiency", 0.526)
-    step.setArgument("mech_vent_sensible_recovery_efficiency_type", "unadjusted")
+    step.setArgument("mech_vent_sensible_recovery_efficiency_type", "Adjusted")
     step.setArgument("mech_vent_sensible_recovery_efficiency", 0.79)
     step.setArgument("mech_vent_fan_power", 60)
   elsif ['base-mechvent-exhaust.osw'].include? osw_file
