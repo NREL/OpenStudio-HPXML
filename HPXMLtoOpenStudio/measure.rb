@@ -3414,7 +3414,7 @@ class OSModel
                    "Surface Inside Face Net Surface Thermal Radiation Heat Gain Energy" => "ss_surf" }
 
           if surface_type == "Window" or surface_type == "Skylight"
-            vars["ss_trans"] = "Surface Window Transmitted Solar Radiation Energy"
+            vars["ss_trans_in"] = "Surface Window Transmitted Solar Radiation Energy"
             vars["ss_back_out"] = "Surface Window Shortwave from Zone Back Out Window Heat Transfer Rate"
             vars["ss_sw_abs"] = "Surface Window Total Glazing Layers Absorbed Shortwave Radiation Rate"
             vars["ss_sol_abs"] = "Surface Window Total Glazing Layers Absorbed Solar Radiation Energy"
@@ -3734,7 +3734,7 @@ class OSModel
         s = "Set hr_#{k.to_s} = hr_#{k.to_s}"
         sensors.each do |sensor|
           # remove ss_net if switch
-          if sensor.name.to_s.start_with?("ss_net", "ss_sol_abs", "ss_trans")
+          if sensor.name.to_s.start_with?("ss_net", "ss_sol_abs", "ss_trans_in")
             s += " - #{sensor.name}"
           elsif sensor.name.to_s.start_with?("ss_sw_abs", "ss_trans_out", "ss_back_out")
             s += " + #{sensor.name} * ZoneTimestep * 3600"
