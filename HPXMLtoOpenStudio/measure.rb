@@ -679,6 +679,7 @@ class OSModel
   def self.calc_approximate_view_factor(runner, model, all_surfaces)
     # calculate approximate view factor using E+ approach
     # used for recalculating single thermal zone view factor matrix
+    return {} if all_surfaces.size == 0
     if all_surfaces.size <= 3
       fail "less than three surfaces in conditioned space. Please double check."
     end
