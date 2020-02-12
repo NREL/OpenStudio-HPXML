@@ -474,7 +474,7 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     arg = OpenStudio::Measure::OSArgument::makeDoubleArgument("orientation", true)
     arg.setDisplayName("Geometry: Azimuth")
     arg.setUnits("degrees")
-    arg.setDescription("The house's azimuth is measured clockwise from due south when viewed from above (e.g., South=0, West=90, North=180, East=270).")
+    arg.setDescription("The house's azimuth is measured clockwise from due south when viewed from above (e.g., North=0, East=90, South=180, West=270).")
     arg.setDefaultValue(180.0)
     args << arg
 
@@ -2364,23 +2364,18 @@ class HPXMLFile
   end
 
   def self.get_site_neighbors_values(runner, args)
-    # FIXME: Need to incorporate building orientation
-    neighbor_front_distance = args[:neighbor_distance][0]
-    neighbor_back_distance = args[:neighbor_distance][1]
-    neighbor_left_distance = args[:neighbor_distance][2]
-    neighbor_right_distance = args[:neighbor_distance][3]
-
     site_neighbors_values = []
     args[:neighbor_distance].each_with_index do |distance, i|
       next if distance == 0
 
-      azimuth = 0
-      if i == 1
-        azimuth = 180
-      elsif i == 2
-        azimuth = 90
-      elsif i == 3
-        azimuth == 270
+      if i == 0 # front
+        azimuth = Geometry.get_abs_azimuth(Constants.CoordRelative, 0, args[:orientation], 0)
+      elsif i == 1 # back
+        azimuth = Geometry.get_abs_azimuth(Constants.CoordRelative, 180, args[:orientation], 0)
+      elsif i == 2 # left
+        azimuth = Geometry.get_abs_azimuth(Constants.CoordRelative, 90, args[:orientation], 0)
+      elsif i == 3 # right
+        azimuth = Geometry.get_abs_azimuth(Constants.CoordRelative, 270, args[:orientation], 0)
       end
 
       if distance > 0
@@ -2536,10 +2531,9 @@ class HPXMLFile
         pitch = 0.0
       end
 
-      roof_values = { :id => surface.name.to_s,
+      roof_values = { :id => "#{surface.name}",
                       :interior_adjacent_to => get_adjacent_to(model, surface),
                       :area => UnitConversions.convert(surface.grossArea, "m^2", "ft^2").round,
-                      :azimuth => nil, # FIXME: Get from model
                       :solar_absorptance => args[:roof_solar_absorptance],
                       :emittance => args[:roof_emittance],
                       :pitch => pitch,
@@ -2589,12 +2583,11 @@ class HPXMLFile
         wall_type = "WoodStud"
       end
 
-      wall_values = { :id => surface.name.to_s,
+      wall_values = { :id => "#{surface.name}",
                       :exterior_adjacent_to => exterior_adjacent_to,
                       :interior_adjacent_to => interior_adjacent_to,
                       :wall_type => wall_type,
                       :area => UnitConversions.convert(surface.grossArea, "m^2", "ft^2").round,
-                      :azimuth => nil, # FIXME: Get from model
                       :solar_absorptance => args[:wall_solar_absorptance],
                       :emittance => args[:wall_emittance] }
 
@@ -2623,12 +2616,11 @@ class HPXMLFile
       next unless ["Foundation"].include? surface.outsideBoundaryCondition
       next if surface.surfaceType != "Wall"
 
-      foundation_walls_values << { :id => surface.name.to_s,
+      foundation_walls_values << { :id => "#{surface.name}",
                                    :exterior_adjacent_to => "ground",
                                    :interior_adjacent_to => get_adjacent_to(model, surface),
                                    :height => args[:foundation_height],
                                    :area => UnitConversions.convert(surface.grossArea, "m^2", "ft^2").round,
-                                   :azimuth => nil, # FIXME: Get from model
                                    :thickness => 8,
                                    :depth_below_grade => args[:foundation_wall_depth_below_grade],
                                    :insulation_interior_r_value => 0,
@@ -2665,7 +2657,7 @@ class HPXMLFile
       next if surface.surfaceType == "RoofCeiling" and exterior_adjacent_to == "outside"
       next if ["living space", "basement - conditioned"].include? exterior_adjacent_to
 
-      framefloor_values = { :id => surface.name.to_s,
+      framefloor_values = { :id => "#{surface.name}",
                             :exterior_adjacent_to => exterior_adjacent_to,
                             :interior_adjacent_to => interior_adjacent_to,
                             :area => UnitConversions.convert(surface.grossArea, "m^2", "ft^2").round }
@@ -2722,7 +2714,7 @@ class HPXMLFile
         under_slab_insulation_spans_entire_slab = true
       end
 
-      slabs_values << { :id => surface.name.to_s,
+      slabs_values << { :id => "#{surface.name}",
                         :interior_adjacent_to => interior_adjacent_to,
                         :area => UnitConversions.convert(surface.grossArea, "m^2", "ft^2").round,
                         :thickness => 4,
@@ -2778,9 +2770,9 @@ class HPXMLFile
           overhangs_distance_to_bottom_of_window = overhangs_distance_to_top_of_window + sub_surface_height
         end
 
-        window_values = { :id => sub_surface.name.to_s,
+        window_values = { :id => "#{sub_surface.name}_#{sub_surface_facade}",
                           :area => UnitConversions.convert(sub_surface.grossArea, "m^2", "ft^2").round,
-                          :azimuth => 0, # FIXME: Get from model
+                          :azimuth => UnitConversions.convert(sub_surface.azimuth, "rad", "deg").round,
                           :ufactor => args[:window_ufactor],
                           :shgc => args[:window_shgc],
                           :overhangs_depth => overhangs_depth,
@@ -2807,9 +2799,11 @@ class HPXMLFile
       surface.subSurfaces.each do |sub_surface|
         next if sub_surface.subSurfaceType != "Skylight"
 
-        skylights_values << { :id => sub_surface.name.to_s,
+        sub_surface_facade = Geometry.get_facade_for_surface(sub_surface)
+
+        skylights_values << { :id => "#{sub_surface.name}_#{sub_surface_facade}",
                               :area => UnitConversions.convert(sub_surface.grossArea, "m^2", "ft^2").round,
-                              :azimuth => 0, # FIXME: Get from model
+                              :azimuth => UnitConversions.convert(sub_surface.azimuth, "rad", "deg").round,
                               :ufactor => args[:skylight_ufactor],
                               :shgc => args[:skylight_shgc],
                               :roof_idref => surface.name }
@@ -2824,10 +2818,12 @@ class HPXMLFile
       surface.subSurfaces.each do |sub_surface|
         next if sub_surface.subSurfaceType != "Door"
 
-        doors_values << { :id => sub_surface.name.to_s,
+        sub_surface_facade = Geometry.get_facade_for_surface(sub_surface)
+
+        doors_values << { :id => "#{sub_surface.name}_#{sub_surface_facade}",
                           :wall_idref => surface.name,
                           :area => UnitConversions.convert(sub_surface.grossArea, "m^2", "ft^2").round,
-                          :azimuth => 0, # FIXME: Get from model
+                          :azimuth => args[:orientation],
                           :r_value => args[:door_rvalue] }
       end
     end
@@ -3286,7 +3282,9 @@ class HPXMLFile
         end
       end
 
-      if water_heater_type == "space-heating boiler with tankless coil"
+      if water_heater_type == "instantaneous water heater"
+        tank_volume = nil
+      elsif water_heater_type == "space-heating boiler with tankless coil"
         fuel_type = nil
         tank_volume = nil
         heating_capacity = nil
@@ -3404,6 +3402,7 @@ class HPXMLFile
                                         :storage_volume => storage_volume,
                                         :water_heating_system_idref => water_heating_system_values[:id],
                                         :solar_fraction => solar_fraction }
+      break # FIXME: allow only one solar thermal system even if there are more than one water heaters?
     end
     return solar_thermal_systems_values
   end
