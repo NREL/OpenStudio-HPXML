@@ -454,8 +454,8 @@ def get_values(osw_file, step)
     step.setArgument("return_duct_leakage_value", 25.0)
     step.setArgument("supply_duct_insulation_r_value", 4.0)
     step.setArgument("return_duct_insulation_r_value", 0.0)
-    step.setArgument("supply_duct_location", "attic - unvented")
-    step.setArgument("return_duct_location", "attic - unvented")
+    step.setArgument("supply_duct_location", Constants.Auto)
+    step.setArgument("return_duct_location", Constants.Auto)
     step.setArgument("supply_duct_surface_area", 150.0)
     step.setArgument("return_duct_surface_area", 50.0)
     step.setArgument("mech_vent_fan_type", "none")
@@ -524,7 +524,7 @@ def get_values(osw_file, step)
     step.setArgument("pv_system_inverter_efficiency", 0.96)
     step.setArgument("pv_system_system_losses_fraction", 0.14)
     step.setArgument("has_clothes_washer", true)
-    step.setArgument("clothes_washer_location", Constants.Auto)
+    step.setArgument("clothes_washer_location", "living space")
     step.setArgument("clothes_washer_efficiency_type", "ModifiedEnergyFactor")
     step.setArgument("clothes_washer_efficiency", 0.8)
     step.setArgument("clothes_washer_rated_annual_kwh", 700.0)
@@ -575,8 +575,6 @@ def get_values(osw_file, step)
     step.setArgument("cfa", 900.0)
     step.setArgument("supply_duct_leakage_value", 0)
     step.setArgument("return_duct_leakage_value", 0)
-    step.setArgument("supply_duct_location", Constants.Auto)
-    step.setArgument("return_duct_location", Constants.Auto)
   elsif ['base-appliances-gas.osw'].include? osw_file
     step.setArgument("clothes_dryer_fuel_type", "natural gas")
     step.setArgument("clothes_dryer_efficiency", 2.67)
@@ -616,28 +614,26 @@ def get_values(osw_file, step)
   elsif ['base-atticroof-cathedral.osw'].include? osw_file
     step.setArgument("attic_type", "attic - conditioned")
     step.setArgument("roof_ceiling_r", 25.8)
-    step.setArgument("supply_duct_location", Constants.Auto)
-    step.setArgument("return_duct_location", Constants.Auto)
+    step.setArgument("supply_duct_location", "living space")
+    step.setArgument("return_duct_location", "living space")
   elsif ['base-atticroof-conditioned.osw'].include? osw_file
     step.setArgument("cfa", 3600.0)
     step.setArgument("num_floors", 2)
     step.setArgument("attic_type", "attic - conditioned")
     step.setArgument("roof_ceiling_r", 25.8)
-    step.setArgument("supply_duct_location", Constants.Auto)
-    step.setArgument("return_duct_location", Constants.Auto)
+    step.setArgument("supply_duct_location", "living space")
+    step.setArgument("return_duct_location", "living space")
   elsif ['base-atticroof-flat.osw'].include? osw_file
     step.setArgument("roof_type", "flat")
     step.setArgument("roof_ceiling_r", 25.8)
-    step.setArgument("supply_duct_location", Constants.Auto)
-    step.setArgument("return_duct_location", Constants.Auto)
+    step.setArgument("supply_duct_leakage_value", 0.0)
+    step.setArgument("return_duct_leakage_value", 0.0)
   elsif ['base-atticroof-radiant-barrier.osw'].include? osw_file
     step.setArgument("roof_radiant_barrier", true)
   elsif ['base-atticroof-unvented-insulated-roof.osw'].include? osw_file
     step.setArgument("roof_ceiling_r", 25.8)
   elsif ['base-atticroof-vented.osw'].include? osw_file
     step.setArgument("attic_type", "attic - vented")
-    step.setArgument("supply_duct_location", "attic - vented")
-    step.setArgument("return_duct_location", "attic - vented")
   elsif ['base-dhw-combi-tankless.osw'].include? osw_file
     step.setArgument("heating_system_type", "Boiler")
     step.setArgument("heating_system_electric_auxiliary_energy", 200.0)
@@ -854,8 +850,8 @@ def get_values(osw_file, step)
     step.setArgument("horizontal_location", "Middle")
     step.setArgument("supply_duct_leakage_value", 0)
     step.setArgument("return_duct_leakage_value", 0)
-    step.setArgument("supply_duct_location", Constants.Auto)
-    step.setArgument("return_duct_location", Constants.Auto)
+    step.setArgument("supply_duct_location", "living space")
+    step.setArgument("return_duct_location", "living space")
   elsif ['base-enclosure-beds-1.osw'].include? osw_file
     step.setArgument("num_bedrooms", 1)
   elsif ['base-enclosure-beds-2.osw'].include? osw_file
@@ -883,6 +879,7 @@ def get_values(osw_file, step)
 
   elsif ['base-enclosure-walltype-cmu.osw'].include? osw_file
     step.setArgument("wall_type", "ConcreteMasonryUnit")
+    step.setArgument("wall_conditioned_r", 12)
   elsif ['base-enclosure-walltype-doublestud.osw'].include? osw_file
     step.setArgument("wall_type", "DoubleWoodStud")
   elsif ['base-enclosure-walltype-icf.osw'].include? osw_file
@@ -939,10 +936,16 @@ def get_values(osw_file, step)
     step.setArgument("foundation_wall_r", 0)
     step.setArgument("foundation_wall_distance_to_bottom", 0)
   elsif ['base-foundation-unconditioned-basement-above-grade.osw'].include? osw_file
+    step.setArgument("cfa", 1350.0)
     step.setArgument("foundation_type", "basement - unconditioned")
     step.setArgument("foundation_wall_r", 0)
     step.setArgument("foundation_wall_distance_to_bottom", 0)
     step.setArgument("foundation_wall_depth_below_grade", 4.0)
+    step.setArgument("supply_duct_location", "basement - unconditioned")
+    step.setArgument("return_duct_location", "basement - unconditioned")
+    step.setArgument("water_heater_location_1", Constants.Auto)
+    step.setArgument("clothes_dryer_location", Constants.Auto)
+    step.setArgument("refrigerator_location", "basement - unconditioned")
   elsif ['base-foundation-unconditioned-basement-assembly-r.osw'].include? osw_file
 
   elsif ['base-foundation-unconditioned-basement-wall-insulation.osw'].include? osw_file
@@ -1101,8 +1104,8 @@ def get_values(osw_file, step)
   elsif ['base-hvac-ducts-in-conditioned-space.osw'].include? osw_file
     step.setArgument("supply_duct_leakage_value", 1.5)
     step.setArgument("return_duct_leakage_value", 1.5)
-    step.setArgument("supply_duct_location", Constants.Auto)
-    step.setArgument("return_duct_location", Constants.Auto)
+    step.setArgument("supply_duct_location", "living space")
+    step.setArgument("return_duct_location", "living space")
   elsif ['base-hvac-ducts-leakage-percent.osw'].include? osw_file
     step.setArgument("supply_duct_leakage_units", "Percent")
     step.setArgument("return_duct_leakage_units", "Percent")
@@ -1111,8 +1114,6 @@ def get_values(osw_file, step)
   elsif ['base-hvac-ducts-locations.osw'].include? osw_file
     step.setArgument("cfa", 1350.0)
     step.setArgument("foundation_type", "crawlspace - vented")
-    step.setArgument("supply_duct_location", "crawlspace - vented")
-    step.setArgument("water_heater_location_1", "crawlspace - vented")
   elsif ['base-hvac-ducts-multiple.osw'].include? osw_file
 
   elsif ['base-hvac-ducts-outside.osw'].include? osw_file

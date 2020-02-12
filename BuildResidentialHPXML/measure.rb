@@ -2299,6 +2299,9 @@ class HPXMLFile
     success = remove_geometry_envelope(model)
     return false if not success
 
+    enclosure = hpxml_doc.elements["HPXML/Building/BuildingDetails/Enclosure"]
+    HPXML.collapse_enclosure(enclosure)
+
     return hpxml_doc
   end
 
@@ -2529,6 +2532,9 @@ class HPXMLFile
       interior_adjacent_to = get_adjacent_to(model, surface)
 
       pitch = args[:roof_pitch] * 12.0
+      if args[:roof_type] == "flat"
+        pitch = 0.0
+      end
 
       roof_values = { :id => surface.name.to_s,
                       :interior_adjacent_to => get_adjacent_to(model, surface),
@@ -2578,10 +2584,15 @@ class HPXMLFile
       next if interior_adjacent_to == exterior_adjacent_to
       next if ["living space", "basement - conditioned"].include? exterior_adjacent_to
 
+      wall_type = args[:wall_type]
+      if ["attic - unvented", "attic - vented"].include? interior_adjacent_to
+        wall_type = "WoodStud"
+      end
+
       wall_values = { :id => surface.name.to_s,
                       :exterior_adjacent_to => exterior_adjacent_to,
                       :interior_adjacent_to => interior_adjacent_to,
-                      :wall_type => args[:wall_type],
+                      :wall_type => wall_type,
                       :area => UnitConversions.convert(surface.grossArea, "m^2", "ft^2").round,
                       :azimuth => nil, # FIXME: Get from model
                       :solar_absorptance => args[:wall_solar_absorptance],
@@ -3096,6 +3107,31 @@ class HPXMLFile
     return duct_leakage_measurements_values
   end
 
+  def self.get_duct_location_auto(args) # FIXME
+    if args[:roof_type] != "flat" and ["attic - vented", "attic - unvented"].include? args[:attic_type]
+      location = args[:attic_type]
+    elsif args[:foundation_type].include? "basement" or args[:foundation_type].include? "crawlspace"
+      location = args[:foundation_type]
+    else
+      location = "living space"
+    end
+    return location
+  end
+
+  def self.get_kitchen_appliance_location_auto(args) # FIXME
+    location = "living space"
+    return location
+  end
+
+  def self.get_other_appliance_location_auto(args) # FIXME
+    if args[:foundation_type].include? "basement" or args[:foundation_type].include? "crawlspace"
+      location = args[:foundation_type]
+    else
+      location = "living space"
+    end
+    return location
+  end
+
   def self.get_ducts_values(runner, args, hvac_distributions_values)
     ducts_values = []
     hvac_distributions_values.each_with_index do |hvac_distribution_values, i|
@@ -3103,12 +3139,12 @@ class HPXMLFile
 
         supply_duct_location = args[:supply_duct_location]
         if supply_duct_location == Constants.Auto
-          supply_duct_location = "living space" # FIXME
+          supply_duct_location = get_duct_location_auto(args)
         end
 
         return_duct_location = args[:return_duct_location]
         if return_duct_location == Constants.Auto
-          return_duct_location = "living space" # FIXME
+          return_duct_location = get_duct_location_auto(args)
         end
 
         duct_values = [{ :duct_type => "supply",
@@ -3205,7 +3241,7 @@ class HPXMLFile
 
       location = args[:water_heater_location][i]
       if location == Constants.Auto
-        location = "living space" # FIXME
+        location = get_other_appliance_location_auto(args)
       end
 
       num_bathrooms = args[:num_bathrooms]
@@ -3392,7 +3428,7 @@ class HPXMLFile
 
     location = args[:clothes_washer_location]
     if location == Constants.Auto
-      location = "living space" # FIXME
+      location = get_other_appliance_location_auto(args)
     end
 
     if args[:clothes_washer_efficiency_type] == "ModifiedEnergyFactor"
@@ -3424,7 +3460,7 @@ class HPXMLFile
 
     location = args[:clothes_dryer_location]
     if location == Constants.Auto
-      location = "living space" # FIXME
+      location = get_other_appliance_location_auto(args)
     end
 
     clothes_dryer_values = { :id => "ClothesDryer",
@@ -3457,7 +3493,7 @@ class HPXMLFile
 
     location = args[:refrigerator_location]
     if location == Constants.Auto
-      location = "living space" # FIXME
+      location = get_kitchen_appliance_location_auto(args)
     end
 
     if args[:refrigerator_adjusted_annual_kwh] > 0
