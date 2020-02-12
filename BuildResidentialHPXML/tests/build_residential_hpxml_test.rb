@@ -99,13 +99,6 @@ class BuildResidentialHPXMLTest < MiniTest::Test
       "BuildResidentialHPXML" => XMLHelper.parse_file(hpxml_path["BuildResidentialHPXML"])
     }
 
-    enclosure = {
-      "Rakefile" => hpxml_docs["Rakefile"].elements["HPXML/Building/BuildingDetails/Enclosure"],
-      "BuildResidentialHPXML" => hpxml_docs["BuildResidentialHPXML"].elements["HPXML/Building/BuildingDetails/Enclosure"]
-    }
-
-    HPXML.collapse_enclosure(enclosure["BuildResidentialHPXML"])
-
     _delete_elements(hpxml_docs, "HPXML/XMLTransactionHeaderInformation")
     _delete_elements(hpxml_docs, "HPXML/Building/BuildingDetails/BuildingSummary/Site")
     _delete_elements(hpxml_docs, "HPXML/Building/BuildingDetails/BuildingSummary/BuildingOccupancy")
