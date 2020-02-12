@@ -3,6 +3,10 @@ class Constants
     return 'auto'
   end
 
+  def self.CoordRelative
+    return 'relative'
+  end
+
   def self.SizingAuto
     return 'autosize'
   end

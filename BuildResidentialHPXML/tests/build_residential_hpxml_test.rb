@@ -25,7 +25,7 @@ class BuildResidentialHPXMLTest < MiniTest::Test
 
     osws = []
     test_dirs.each do |test_dir|
-      Dir["#{test_dir}/base*.osw"].sort.each do |osw|
+      Dir["#{test_dir}/base*osw"].sort.each do |osw|
         osws << File.absolute_path(osw)
       end
     end
@@ -106,7 +106,6 @@ class BuildResidentialHPXMLTest < MiniTest::Test
     _delete_elements(hpxml_docs, "HPXML/Building/BuildingDetails/Enclosure/Attics")
     _delete_elements(hpxml_docs, "HPXML/Building/BuildingDetails/Enclosure/Foundations")
     _delete_elements(hpxml_docs, "HPXML/Building/BuildingDetails/Enclosure/RimJoists")
-    _delete_elements(hpxml_docs, "HPXML/Building/BuildingDetails/Enclosure/Windows")
     _delete_elements(hpxml_docs, "HPXML/Building/BuildingDetails/Enclosure/Doors")
     _delete_elements(hpxml_docs, "HPXML/Building/BuildingDetails/Appliances/Refrigerator/extension")
     _delete_elements(hpxml_docs, "HPXML/Building/BuildingDetails/extension")
@@ -136,8 +135,6 @@ class BuildResidentialHPXMLTest < MiniTest::Test
         end
       end
       parent_text = discrepancy[:diff1]
-
-      next if parent_id.include? "WallAtticGable" # FIXME
 
       child_id = "nil"
       child_element = "nil"
