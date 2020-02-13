@@ -18,7 +18,7 @@ class BuildResidentialHPXMLTest < MiniTest::Test
     hvac_partial_dir = File.absolute_path(File.join(this_dir, "hvac_partial"))
     test_dirs = [
       this_dir,
-      hvac_partial_dir
+      # hvac_partial_dir
     ]
 
     measures_dir = File.join(this_dir, "../..")
@@ -101,6 +101,8 @@ class BuildResidentialHPXMLTest < MiniTest::Test
 
     # Sort elements so we can diff them
     _sort_wall_elements(hpxml_docs)
+    _sort_fwall_elements(hpxml_docs)
+    _sort_floor_elements(hpxml_docs)
     _sort_window_elements(hpxml_docs)
 
     # Delete elements that we aren't going to diff
@@ -140,7 +142,8 @@ class BuildResidentialHPXMLTest < MiniTest::Test
         end
       end
       parent_text = discrepancy[:diff1]
-      next if parent_id == "WallAtticGable" # FIXME
+
+      next if parent_id == "WallAtticGable" and parent_element == "Area" # FIXME
 
       child_id = "nil"
       child_element = "nil"
@@ -190,6 +193,58 @@ class BuildResidentialHPXMLTest < MiniTest::Test
           wall_values.delete(key)
         end
         HPXML.add_wall(hpxml: hpxml_docs[version].elements["HPXML"], **wall_values)
+      end
+    end
+  end
+
+  def _sort_fwall_elements(hpxml_docs)
+    sorted_elements = {}
+    ["Rakefile", "BuildResidentialHPXML"].each do |version|
+      elements = {}
+      hpxml_docs[version].elements.each("HPXML/Building/BuildingDetails/Enclosure/FoundationWalls/FoundationWall") do |foundation_wall|
+        fwall_values = HPXML.get_foundation_wall_values(foundation_wall: foundation_wall)
+        elements[fwall_values[:area]] = fwall_values
+      end
+      sorted_elements[version] = elements.sort_by { |area, fwall| area }
+    end
+
+    _delete_elements(hpxml_docs, "HPXML/Building/BuildingDetails/Enclosure/FoundationWalls")
+
+    sorted_elements.each do |version, elements|
+      elements.each do |wall|
+        fwall_values = wall[1]
+        fwall_values.each do |key, value|
+          next unless value.nil?
+
+          fwall_values.delete(key)
+        end
+        HPXML.add_foundation_wall(hpxml: hpxml_docs[version].elements["HPXML"], **fwall_values)
+      end
+    end
+  end
+
+  def _sort_floor_elements(hpxml_docs)
+    sorted_elements = {}
+    ["Rakefile", "BuildResidentialHPXML"].each do |version|
+      elements = {}
+      hpxml_docs[version].elements.each("HPXML/Building/BuildingDetails/Enclosure/FrameFloors/FrameFloor") do |framefloor|
+        framefloor_values = HPXML.get_framefloor_values(framefloor: framefloor)
+        elements[framefloor_values[:exterior_adjacent_to]] = framefloor_values
+      end
+      sorted_elements[version] = elements.sort_by { |exterior_adjacent_to, floor| exterior_adjacent_to }
+    end
+
+    _delete_elements(hpxml_docs, "HPXML/Building/BuildingDetails/Enclosure/FrameFloors")
+
+    sorted_elements.each do |version, elements|
+      elements.each do |floor|
+        framefloor_values = floor[1]
+        framefloor_values.each do |key, value|
+          next unless value.nil?
+
+          framefloor_values.delete(key)
+        end
+        HPXML.add_framefloor(hpxml: hpxml_docs[version].elements["HPXML"], **framefloor_values)
       end
     end
   end

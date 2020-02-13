@@ -15,8 +15,8 @@ def create_osws
     'base-appliances-propane.osw' => 'base.osw',
     'base-appliances-wood.osw' => 'base.osw',
 
-    'base-atticroof-cathedral.osw' => 'base.osw',
-    'base-atticroof-conditioned.osw' => 'base.osw',
+    # 'base-atticroof-cathedral.osw' => 'base.osw',
+    # 'base-atticroof-conditioned.osw' => 'base.osw',
     'base-atticroof-flat.osw' => 'base.osw',
     'base-atticroof-radiant-barrier.osw' => 'base.osw',
     'base-atticroof-unvented-insulated-roof.osw' => 'base.osw',
@@ -75,18 +75,18 @@ def create_osws
     'base-dhw-uef.osw' => 'base.osw',
 
     'base-enclosure-2stories.osw' => 'base.osw',
-    'base-enclosure-2stories-garage.osw' => 'base.osw',
-    'base-enclosure-adiabatic-surfaces.osw' => 'base.osw',
+    # 'base-enclosure-2stories-garage.osw' => 'base.osw',
+    # 'base-enclosure-adiabatic-surfaces.osw' => 'base.osw',
     'base-enclosure-beds-1.osw' => 'base.osw',
     'base-enclosure-beds-2.osw' => 'base.osw',
     'base-enclosure-beds-4.osw' => 'base.osw',
     'base-enclosure-beds-5.osw' => 'base.osw',
-    'base-enclosure-garage.osw' => 'base.osw',
+    # 'base-enclosure-garage.osw' => 'base.osw',
     'base-enclosure-infil-cfm50.osw' => 'base.osw',
     # 'base-enclosure-no-natural-ventilation.osw' => 'base.osw',
-    'base-enclosure-overhangs.osw' => 'base.osw',
+    # 'base-enclosure-overhangs.osw' => 'base.osw', # TODO: change DistanceToBottomOfWindow from 7.0 to 6.0
     # 'base-enclosure-skylights.osw' => 'base.osw', # There are no front roof surfaces, but 15.0 ft^2 of skylights were specified.
-    'base-enclosure-split-surfaces.osw' => 'base.osw',
+    # 'base-enclosure-split-surfaces.osw' => 'base.osw',
     'base-enclosure-walltype-cmu.osw' => 'base.osw',
     'base-enclosure-walltype-doublestud.osw' => 'base.osw',
     'base-enclosure-walltype-icf.osw' => 'base.osw',
@@ -103,13 +103,13 @@ def create_osws
     'base-foundation-ambient.osw' => 'base.osw',
     # 'base-foundation-complex.osw' => 'base.osw', # 1 kiva object instead of 10
     'base-foundation-conditioned-basement-slab-insulation.osw' => 'base.osw',
-    'base-foundation-conditioned-basement-wall-interior-insulation.osw' => 'base.osw',
+    # 'base-foundation-conditioned-basement-wall-interior-insulation.osw' => 'base.osw',
     # 'base-foundation-multiple.osw' => 'base.osw', # 1 kiva object instead of 2
     'base-foundation-slab.osw' => 'base.osw',
     'base-foundation-unconditioned-basement.osw' => 'base.osw',
-    'base-foundation-unconditioned-basement-above-grade.osw' => 'base.osw',
+    # 'base-foundation-unconditioned-basement-above-grade.osw' => 'base.osw',
     # 'base-foundation-unconditioned-basement-assembly-r.osw' => 'base.osw',
-    'base-foundation-unconditioned-basement-wall-insulation.osw' => 'base.osw',
+    # 'base-foundation-unconditioned-basement-wall-insulation.osw' => 'base.osw',
     'base-foundation-unvented-crawlspace.osw' => 'base.osw',
     'base-foundation-vented-crawlspace.osw' => 'base.osw',
     # 'base-foundation-walkout-basement.osw' => 'base.osw', # 1 kiva object instead of 4
@@ -136,7 +136,7 @@ def create_osws
     'base-hvac-central-ac-plus-air-to-air-heat-pump-heating.osw' => 'base.osw',
     'base-hvac-dse.osw' => 'base.osw',
     'base-hvac-dual-fuel-air-to-air-heat-pump-1-speed.osw' => 'base.osw',
-    'base-hvac-dual-fuel-air-to-air-heat-pump-1-speed-electric.osw' => 'base.osw',
+    # 'base-hvac-dual-fuel-air-to-air-heat-pump-1-speed-electric.osw' => 'base.osw', # TODO: change AFUE to Percent
     'base-hvac-dual-fuel-air-to-air-heat-pump-2-speed.osw' => 'base.osw',
     'base-hvac-dual-fuel-air-to-air-heat-pump-var-speed.osw' => 'base.osw',
     'base-hvac-dual-fuel-mini-split-heat-pump-ducted.osw' => 'base.osw',
@@ -146,7 +146,7 @@ def create_osws
     # 'base-hvac-ducts-multiple.osw' => 'base.osw', TODO: not sure how to do multiple ducts
     'base-hvac-ducts-outside.osw' => 'base.osw',
     'base-hvac-elec-resistance-only.osw' => 'base.osw',
-    'base-hvac-evap-cooler-furnace-gas.osw' => 'base.osw',
+    # 'base-hvac-evap-cooler-furnace-gas.osw' => 'base.osw', # TODO: need to remove return ducts
     'base-hvac-evap-cooler-only.osw' => 'base.osw',
     'base-hvac-evap-cooler-only-ducted.osw' => 'base.osw',
     # 'base-hvac-flowrate.osw' => 'base.osw',
@@ -198,7 +198,7 @@ def create_osws
     'base-mechvent-erv.osw' => 'base.osw',
     'base-mechvent-erv-atre-asre.osw' => 'base.osw',
     'base-mechvent-exhaust.osw' => 'base.osw',
-    'base-mechvent-exhaust-rated-flow-rate.osw' => 'base.osw',
+    # 'base-mechvent-exhaust-rated-flow-rate.osw' => 'base.osw', # TODO: setting all flow rates on TestedFlowRate
     'base-mechvent-hrv.osw' => 'base.osw',
     'base-mechvent-hrv-asre.osw' => 'base.osw',
     'base-mechvent-supply.osw' => 'base.osw',
@@ -209,14 +209,7 @@ def create_osws
     'base-misc-number-of-occupants.osw' => 'base.osw',
     'base-misc-whole-house-fan.osw' => 'base.osw',
 
-    'base-pv-array-1axis.osw' => 'base.osw',
-    'base-pv-array-1axis-backtracked.osw' => 'base.osw',
-    'base-pv-array-2axis.osw' => 'base.osw',
-    'base-pv-array-fixed-open-rack.osw' => 'base.osw',
-    'base-pv-array-module-premium.osw' => 'base.osw',
-    'base-pv-array-module-standard.osw' => 'base.osw',
-    'base-pv-array-module-thinfilm.osw' => 'base.osw',
-    # 'base-pv-multiple.osw' => 'base.osw',
+    'base-pv.osw' => 'base.osw',
 
     'base-site-neighbors.osw' => 'base.osw',
 
@@ -388,19 +381,22 @@ def get_values(osw_file, step)
     step.setArgument("window_aspect_ratio", 1.333)
     step.setArgument("window_ufactor", 0.33)
     step.setArgument("window_shgc", 0.45)
-    step.setArgument("winter_shading_coefficient_front_facade", 1)
-    step.setArgument("summer_shading_coefficient_front_facade", 1)
-    step.setArgument("winter_shading_coefficient_back_facade", 1)
-    step.setArgument("summer_shading_coefficient_back_facade", 1)
-    step.setArgument("winter_shading_coefficient_left_facade", 1)
-    step.setArgument("summer_shading_coefficient_left_facade", 1)
-    step.setArgument("winter_shading_coefficient_right_facade", 1)
-    step.setArgument("summer_shading_coefficient_right_facade", 1)
-    step.setArgument("overhangs_front_facade", false)
-    step.setArgument("overhangs_back_facade", false)
-    step.setArgument("overhangs_left_facade", false)
-    step.setArgument("overhangs_right_facade", false)
-    step.setArgument("overhangs_depth", 0.0)
+    step.setArgument("winter_shading_coefficient_front_facade", 0)
+    step.setArgument("summer_shading_coefficient_front_facade", 0)
+    step.setArgument("winter_shading_coefficient_back_facade", 0)
+    step.setArgument("summer_shading_coefficient_back_facade", 0)
+    step.setArgument("winter_shading_coefficient_left_facade", 0)
+    step.setArgument("summer_shading_coefficient_left_facade", 0)
+    step.setArgument("winter_shading_coefficient_right_facade", 0)
+    step.setArgument("summer_shading_coefficient_right_facade", 0)
+    step.setArgument("overhangs_front_depth", 0)
+    step.setArgument("overhangs_front_distance_to_top_of_window", 0)
+    step.setArgument("overhangs_back_depth", 0)
+    step.setArgument("overhangs_back_distance_to_top_of_window", 0)
+    step.setArgument("overhangs_left_depth", 0)
+    step.setArgument("overhangs_left_distance_to_top_of_window", 0)
+    step.setArgument("overhangs_right_depth", 0)
+    step.setArgument("overhangs_right_distance_to_top_of_window", 0)
     step.setArgument("front_skylight_area", 0)
     step.setArgument("back_skylight_area", 0)
     step.setArgument("left_skylight_area", 0)
@@ -459,7 +455,7 @@ def get_values(osw_file, step)
     step.setArgument("supply_duct_surface_area", 150.0)
     step.setArgument("return_duct_surface_area", 50.0)
     step.setArgument("mech_vent_fan_type", "none")
-    step.setArgument("mech_vent_rated_flow_rate", 0)
+    step.setArgument("mech_vent_flow_rate", 110)
     step.setArgument("mech_vent_hours_in_operation", 24)
     step.setArgument("mech_vent_total_recovery_efficiency_type", "Unadjusted")
     step.setArgument("mech_vent_total_recovery_efficiency", 0.48)
@@ -467,7 +463,7 @@ def get_values(osw_file, step)
     step.setArgument("mech_vent_sensible_recovery_efficiency", 0.72)
     step.setArgument("mech_vent_fan_power", 30)
     step.setArgument("has_whole_house_fan", false)
-    step.setArgument("whole_house_fan_rated_flow_rate", 4500)
+    step.setArgument("whole_house_fan_flow_rate", 4500)
     step.setArgument("whole_house_fan_power", 300)
     step.setArgument("water_heater_type_1", "storage water heater")
     step.setArgument("water_heater_fuel_type_1", "electricity")
@@ -515,14 +511,22 @@ def get_values(osw_file, step)
     step.setArgument("solar_thermal_collector_rated_thermal_losses", 0.2799)
     step.setArgument("solar_thermal_storage_volume", Constants.Auto)
     step.setArgument("solar_thermal_solar_fraction", 0)
-    step.setArgument("pv_system_module_type", "none")
-    step.setArgument("pv_system_location", "roof")
-    step.setArgument("pv_system_tracking", "fixed")
-    step.setArgument("pv_system_array_azimuth", 180)
-    step.setArgument("pv_system_array_tilt", 20)
-    step.setArgument("pv_system_max_power_output", 4000)
-    step.setArgument("pv_system_inverter_efficiency", 0.96)
-    step.setArgument("pv_system_system_losses_fraction", 0.14)
+    step.setArgument("pv_system_module_type_1", "none")
+    step.setArgument("pv_system_location_1", "roof")
+    step.setArgument("pv_system_tracking_1", "fixed")
+    step.setArgument("pv_system_array_azimuth_1", 180)
+    step.setArgument("pv_system_array_tilt_1", 20)
+    step.setArgument("pv_system_max_power_output_1", 4000)
+    step.setArgument("pv_system_inverter_efficiency_1", 0.96)
+    step.setArgument("pv_system_system_losses_fraction_1", 0.14)
+    step.setArgument("pv_system_module_type_2", "none")
+    step.setArgument("pv_system_location_2", "roof")
+    step.setArgument("pv_system_tracking_2", "fixed")
+    step.setArgument("pv_system_array_azimuth_2", 180)
+    step.setArgument("pv_system_array_tilt_2", 20)
+    step.setArgument("pv_system_max_power_output_2", 4000)
+    step.setArgument("pv_system_inverter_efficiency_2", 0.96)
+    step.setArgument("pv_system_system_losses_fraction_2", 0.14)
     step.setArgument("has_clothes_washer", true)
     step.setArgument("clothes_washer_location", "living space")
     step.setArgument("clothes_washer_efficiency_type", "ModifiedEnergyFactor")
@@ -570,9 +574,25 @@ def get_values(osw_file, step)
   elsif ['base-single-family-attached.osw'].include? osw_file
     step.setArgument("unit_type", "single-family attached")
     step.setArgument("cfa", 900.0)
+    step.setArgument("front_wwr", 0.18)
+    step.setArgument("back_wwr", 0.18)
+    step.setArgument("left_wwr", 0.18)
+    step.setArgument("right_wwr", 0.18)
+    step.setArgument("front_window_area", 0)
+    step.setArgument("back_window_area", 0)
+    step.setArgument("left_window_area", 0)
+    step.setArgument("right_window_area", 0)
   elsif ['base-multifamily.osw'].include? osw_file
     step.setArgument("unit_type", "multifamily")
     step.setArgument("cfa", 900.0)
+    step.setArgument("front_wwr", 0.18)
+    step.setArgument("back_wwr", 0.18)
+    step.setArgument("left_wwr", 0.18)
+    step.setArgument("right_wwr", 0.18)
+    step.setArgument("front_window_area", 0)
+    step.setArgument("back_window_area", 0)
+    step.setArgument("left_window_area", 0)
+    step.setArgument("right_window_area", 0)
     step.setArgument("supply_duct_leakage_value", 0)
     step.setArgument("return_duct_leakage_value", 0)
   elsif ['base-appliances-gas.osw'].include? osw_file
@@ -616,6 +636,8 @@ def get_values(osw_file, step)
     step.setArgument("roof_ceiling_r", 25.8)
     step.setArgument("supply_duct_location", "living space")
     step.setArgument("return_duct_location", "living space")
+    step.setArgument("supply_duct_leakage_value", 0.0)
+    step.setArgument("return_duct_leakage_value", 0.0)
   elsif ['base-atticroof-conditioned.osw'].include? osw_file
     step.setArgument("cfa", 3600.0)
     step.setArgument("num_floors", 2)
@@ -623,6 +645,8 @@ def get_values(osw_file, step)
     step.setArgument("roof_ceiling_r", 25.8)
     step.setArgument("supply_duct_location", "living space")
     step.setArgument("return_duct_location", "living space")
+    step.setArgument("supply_duct_leakage_value", 0.0)
+    step.setArgument("return_duct_leakage_value", 0.0)
     step.setArgument("water_heater_location_1", Constants.Auto)
     step.setArgument("clothes_washer_location", Constants.Auto)
     step.setArgument("clothes_dryer_location", Constants.Auto)
@@ -635,7 +659,9 @@ def get_values(osw_file, step)
   elsif ['base-atticroof-radiant-barrier.osw'].include? osw_file
     step.setArgument("roof_radiant_barrier", true)
   elsif ['base-atticroof-unvented-insulated-roof.osw'].include? osw_file
-    step.setArgument("roof_ceiling_r", 25.8)
+    step.setArgument("attic_floor_conditioned_r", 2.1)
+    step.setArgument("attic_ceiling_r", 25.8)
+    step.setArgument("wall_unconditioned_r", 23)
   elsif ['base-atticroof-vented.osw'].include? osw_file
     step.setArgument("attic_type", "attic - vented")
     step.setArgument("water_heater_location_1", "attic - vented")
@@ -827,9 +853,11 @@ def get_values(osw_file, step)
   elsif ['base-dhw-tankless-gas.osw'].include? osw_file
     step.setArgument("water_heater_type_1", "instantaneous water heater")
     step.setArgument("water_heater_fuel_type_1", "natural gas")
+    step.setArgument("water_heater_efficiency_1", 0.82)
   elsif ['base-dhw-tankless-gas-with-solar.osw'].include? osw_file
     step.setArgument("water_heater_type_1", "instantaneous water heater")
     step.setArgument("water_heater_fuel_type_1", "natural gas")
+    step.setArgument("water_heater_efficiency_1", 0.82)
     step.setArgument("solar_thermal_system_type", "hot water")
     step.setArgument("solar_thermal_collector_loop_type", "liquid indirect")
     step.setArgument("solar_thermal_collector_type", "single glazing black")
@@ -915,11 +943,11 @@ def get_values(osw_file, step)
   elsif ['base-enclosure-no-natural-ventilation.osw'].include? osw_file
 
   elsif ['base-enclosure-overhangs.osw'].include? osw_file
-    step.setArgument("overhangs_depth", 2.0)
-    step.setArgument("overhangs_front_facade", true)
-    step.setArgument("overhangs_back_facade", true)
-    step.setArgument("overhangs_left_facade", true)
-    step.setArgument("overhangs_right_facade", true)
+    step.setArgument("overhangs_back_depth", 2.5)
+    step.setArgument("overhangs_left_depth", 1.5)
+    step.setArgument("overhangs_left_distance_to_top_of_window", 2.0)
+    step.setArgument("overhangs_right_depth", 1.5)
+    step.setArgument("overhangs_right_distance_to_top_of_window", 2.0)
   elsif ['base-enclosure-skylights.osw'].include? osw_file
     step.setArgument("front_skylight_area", 15)
     step.setArgument("back_skylight_area", 15)
@@ -930,37 +958,47 @@ def get_values(osw_file, step)
     step.setArgument("wall_conditioned_r", 12)
   elsif ['base-enclosure-walltype-doublestud.osw'].include? osw_file
     step.setArgument("wall_type", "DoubleWoodStud")
+    step.setArgument("wall_conditioned_r", 28.7)
   elsif ['base-enclosure-walltype-icf.osw'].include? osw_file
     step.setArgument("wall_type", "InsulatedConcreteForms")
+    step.setArgument("wall_conditioned_r", 21.0)
   elsif ['base-enclosure-walltype-log.osw'].include? osw_file
     step.setArgument("wall_type", "LogWall")
+    step.setArgument("wall_conditioned_r", 7.1)
   elsif ['base-enclosure-walltype-sip.osw'].include? osw_file
     step.setArgument("wall_type", "StructurallyInsulatedPanel")
+    step.setArgument("wall_conditioned_r", 16.1)
   elsif ['base-enclosure-walltype-solidconcrete.osw'].include? osw_file
     step.setArgument("wall_type", "SolidConcrete")
+    step.setArgument("wall_conditioned_r", 1.35)
   elsif ['base-enclosure-walltype-steelstud.osw'].include? osw_file
     step.setArgument("wall_type", "SteelFrame")
+    step.setArgument("wall_conditioned_r", 8.1)
   elsif ['base-enclosure-walltype-stone.osw'].include? osw_file
     step.setArgument("wall_type", "Stone")
+    step.setArgument("wall_conditioned_r", 5.4)
   elsif ['base-enclosure-walltype-strawbale.osw'].include? osw_file
     step.setArgument("wall_type", "StrawBale")
+    step.setArgument("wall_conditioned_r", 58.8)
   elsif ['base-enclosure-walltype-structuralbrick.osw'].include? osw_file
     step.setArgument("wall_type", "StructuralBrick")
+    step.setArgument("wall_conditioned_r", 7.9)
   elsif ['base-enclosure-windows-interior-shading.osw'].include? osw_file
-    step.setArgument("winter_shading_coefficient_front_facade", 0.85)
-    step.setArgument("summer_shading_coefficient_front_facade", 0.7)
+    step.setArgument("winter_shading_coefficient_front_facade", 0.99)
+    step.setArgument("summer_shading_coefficient_front_facade", 0.01)
     step.setArgument("winter_shading_coefficient_back_facade", 0.85)
     step.setArgument("summer_shading_coefficient_back_facade", 0.7)
-    step.setArgument("winter_shading_coefficient_left_facade", 0.85)
-    step.setArgument("summer_shading_coefficient_left_facade", 0.7)
-    step.setArgument("winter_shading_coefficient_right_facade", 0.85)
-    step.setArgument("summer_shading_coefficient_right_facade", 0.7)
+    step.setArgument("winter_shading_coefficient_left_facade", 1.0)
+    step.setArgument("summer_shading_coefficient_left_facade", 1.0)
+    step.setArgument("winter_shading_coefficient_right_facade", 0.5)
+    step.setArgument("summer_shading_coefficient_right_facade", 0.0)
   elsif ['base-enclosure-windows-none.osw'].include? osw_file
     step.setArgument("front_window_area", 0)
     step.setArgument("back_window_area", 0)
     step.setArgument("left_window_area", 0)
     step.setArgument("right_window_area", 0)
   elsif ['base-foundation-ambient.osw'].include? osw_file
+    step.setArgument("cfa", 1350.0)
     step.setArgument("foundation_type", "ambient")
     step.setArgument("foundation_ceiling_r", 18.7)
   elsif ['base-foundation-complex.osw'].include? osw_file
@@ -973,6 +1011,7 @@ def get_values(osw_file, step)
   elsif ['base-foundation-multiple.osw'].include? osw_file
 
   elsif ['base-foundation-slab.osw'].include? osw_file
+    step.setArgument("cfa", 1350.0)
     step.setArgument("foundation_type", "slab")
     step.setArgument("foundation_wall_depth_below_grade", 0.0)
     step.setArgument("slab_under_r", 5)
@@ -980,9 +1019,17 @@ def get_values(osw_file, step)
     step.setArgument("carpet_fraction", 1.0)
     step.setArgument("carpet_r_value", 2.5)
   elsif ['base-foundation-unconditioned-basement.osw'].include? osw_file
+    step.setArgument("cfa", 1350.0)
     step.setArgument("foundation_type", "basement - unconditioned")
+    step.setArgument("foundation_ceiling_r", 18.7)
     step.setArgument("foundation_wall_r", 0)
     step.setArgument("foundation_wall_distance_to_bottom", 0)
+    step.setArgument("supply_duct_location", "basement - unconditioned")
+    step.setArgument("return_duct_location", "basement - unconditioned")
+    step.setArgument("water_heater_location_1", Constants.Auto)
+    step.setArgument("clothes_washer_location", Constants.Auto)
+    step.setArgument("clothes_dryer_location", Constants.Auto)
+    step.setArgument("refrigerator_location", "basement - unconditioned")
   elsif ['base-foundation-unconditioned-basement-above-grade.osw'].include? osw_file
     step.setArgument("cfa", 1350.0)
     step.setArgument("foundation_type", "basement - unconditioned")
@@ -992,28 +1039,44 @@ def get_values(osw_file, step)
     step.setArgument("supply_duct_location", "basement - unconditioned")
     step.setArgument("return_duct_location", "basement - unconditioned")
     step.setArgument("water_heater_location_1", Constants.Auto)
+    step.setArgument("clothes_washer_location", Constants.Auto)
     step.setArgument("clothes_dryer_location", Constants.Auto)
     step.setArgument("refrigerator_location", "basement - unconditioned")
   elsif ['base-foundation-unconditioned-basement-assembly-r.osw'].include? osw_file
 
   elsif ['base-foundation-unconditioned-basement-wall-insulation.osw'].include? osw_file
+    step.setArgument("cfa", 1350.0)
     step.setArgument("foundation_type", "basement - unconditioned")
     step.setArgument("foundation_ceiling_r", 2.1)
     step.setArgument("foundation_wall_distance_to_bottom", 4)
+    step.setArgument("supply_duct_location", "basement - unconditioned")
+    step.setArgument("return_duct_location", "basement - unconditioned")
+    step.setArgument("water_heater_location_1", Constants.Auto)
+    step.setArgument("clothes_washer_location", Constants.Auto)
+    step.setArgument("clothes_dryer_location", Constants.Auto)
+    step.setArgument("refrigerator_location", "basement - unconditioned")
   elsif ['base-foundation-unvented-crawlspace.osw'].include? osw_file
+    step.setArgument("cfa", 1350.0)
     step.setArgument("foundation_type", "crawlspace - unvented")
-    step.setArgument("foundation_height", 3.0)
+    step.setArgument("foundation_height", 4.0)
     step.setArgument("foundation_ceiling_r", 18.7)
     step.setArgument("foundation_wall_distance_to_bottom", 4.0)
     step.setArgument("foundation_wall_depth_below_grade", 3.0)
     step.setArgument("carpet_r_value", 2.5)
+    step.setArgument("supply_duct_location", "crawlspace - unvented")
+    step.setArgument("return_duct_location", "crawlspace - unvented")
+    step.setArgument("water_heater_location_1", Constants.Auto)
   elsif ['base-foundation-vented-crawlspace.osw'].include? osw_file
+    step.setArgument("cfa", 1350.0)
     step.setArgument("foundation_type", "crawlspace - vented")
-    step.setArgument("foundation_height", 3.0)
+    step.setArgument("foundation_height", 4.0)
     step.setArgument("foundation_ceiling_r", 18.7)
     step.setArgument("foundation_wall_distance_to_bottom", 4.0)
     step.setArgument("foundation_wall_depth_below_grade", 3.0)
     step.setArgument("carpet_r_value", 2.5)
+    step.setArgument("supply_duct_location", "crawlspace - vented")
+    step.setArgument("return_duct_location", "crawlspace - vented")
+    step.setArgument("water_heater_location_1", Constants.Auto)
   elsif ['base-foundation-walkout-basement.osw'].include? osw_file
     step.setArgument("foundation_wall_distance_to_bottom", 4.0)
     step.setArgument("foundation_wall_depth_below_grade", 3.0)
@@ -1162,8 +1225,13 @@ def get_values(osw_file, step)
   elsif ['base-hvac-ducts-locations.osw'].include? osw_file
     step.setArgument("cfa", 1350.0)
     step.setArgument("foundation_type", "crawlspace - vented")
+    step.setArgument("foundation_height", 4.0)
+    step.setArgument("foundation_ceiling_r", 18.7)
+    step.setArgument("foundation_wall_distance_to_bottom", 4.0)
+    step.setArgument("foundation_wall_depth_below_grade", 3.0)
+    step.setArgument("carpet_r_value", 2.5)
     step.setArgument("supply_duct_location", "crawlspace - vented")
-    step.setArgument("return_duct_location", "crawlspace - vented")
+    step.setArgument("return_duct_location", "attic - unvented")
     step.setArgument("water_heater_location_1", Constants.Auto)
   elsif ['base-hvac-ducts-multiple.osw'].include? osw_file
 
@@ -1177,6 +1245,7 @@ def get_values(osw_file, step)
     step.setArgument("cooling_system_type", "none")
   elsif ['base-hvac-evap-cooler-furnace-gas.osw'].include? osw_file
     step.setArgument("cooling_system_type", "evaporative cooler")
+    step.setArgument("evap_cooler_is_ducted", true)
   elsif ['base-hvac-evap-cooler-only.osw'].include? osw_file
     step.setArgument("heating_system_type", "none")
     step.setArgument("cooling_system_type", "evaporative cooler")
@@ -1229,8 +1298,10 @@ def get_values(osw_file, step)
     step.setArgument("heating_system_type", "none")
     step.setArgument("cooling_system_type", "none")
     step.setArgument("heat_pump_type", "mini-split")
+    step.setArgument("heat_pump_heating_capacity", 52000.0)
     step.setArgument("heat_pump_heating_efficiency", 10.0)
     step.setArgument("heat_pump_cooling_efficiency", 19.0)
+    step.setArgument("heat_pump_backup_fuel", "electricity")
     step.setArgument("mini_split_is_ducted", true)
     step.setArgument("supply_duct_leakage_value", 15.0)
     step.setArgument("return_duct_leakage_value", 5.0)
@@ -1243,6 +1314,7 @@ def get_values(osw_file, step)
     step.setArgument("heating_system_type", "none")
     step.setArgument("cooling_system_type", "none")
     step.setArgument("heat_pump_type", "mini-split")
+    step.setArgument("heat_pump_heating_capacity", 52000.0)
     step.setArgument("heat_pump_heating_efficiency", 10.0)
     step.setArgument("heat_pump_cooling_efficiency", 19.0)
     step.setArgument("heat_pump_backup_fuel", "electricity")
@@ -1264,7 +1336,7 @@ def get_values(osw_file, step)
     step.setArgument("heating_system_type", "PortableHeater")
     step.setArgument("heating_system_fuel", "electricity")
     step.setArgument("heating_system_heating_efficiency", 1.0)
-    step.setArgument("cooling_system_type", "none")
+    # step.setArgument("cooling_system_type", "none")
   elsif ['base-hvac-programmable-thermostat.osw'].include? osw_file
     step.setArgument("heating_setback_temp", 66)
     step.setArgument("heating_setback_hours_per_week", 49)
@@ -1344,7 +1416,7 @@ def get_values(osw_file, step)
     step.setArgument("mech_vent_fan_power", 60)
   elsif ['base-mechvent-cfis.osw'].include? osw_file
     step.setArgument("mech_vent_fan_type", "central fan integrated supply")
-    step.setArgument("mech_vent_rated_flow_rate", 330)
+    step.setArgument("mech_vent_flow_rate", 330)
     step.setArgument("mech_vent_hours_in_operation", 8)
     step.setArgument("mech_vent_fan_power", 300)
   elsif ['base-mechvent-cfis-evap-cooler-only-ducted.osw'].include? osw_file
@@ -1352,7 +1424,7 @@ def get_values(osw_file, step)
     step.setArgument("cooling_system_type", "evaporative cooler")
     step.setArgument("evap_cooler_is_ducted", true)
     step.setArgument("mech_vent_fan_type", "central fan integrated supply")
-    step.setArgument("mech_vent_rated_flow_rate", 330)
+    step.setArgument("mech_vent_flow_rate", 330)
     step.setArgument("mech_vent_hours_in_operation", 8)
     step.setArgument("mech_vent_fan_power", 300)
   elsif ['base-mechvent-erv.osw'].include? osw_file
@@ -1369,19 +1441,19 @@ def get_values(osw_file, step)
     step.setArgument("mech_vent_fan_type", "exhaust only")
   elsif ['base-mechvent-exhaust-rated-flow-rate.osw'].include? osw_file
     step.setArgument("mech_vent_fan_type", "exhaust only")
-    step.setArgument("mech_vent_rated_flow_rate", 110)
   elsif ['base-mechvent-hrv.osw'].include? osw_file
     step.setArgument("mech_vent_fan_type", "heat recovery ventilator")
     step.setArgument("mech_vent_fan_power", 60)
   elsif ['base-mechvent-hrv-asre.osw'].include? osw_file
     step.setArgument("mech_vent_fan_type", "heat recovery ventilator")
-    step.setArgument("mech_vent_sensible_recovery_efficiency_type", "Unadjusted")
+    step.setArgument("mech_vent_sensible_recovery_efficiency_type", "Adjusted")
     step.setArgument("mech_vent_sensible_recovery_efficiency", 0.79)
     step.setArgument("mech_vent_fan_power", 60)
   elsif ['base-mechvent-supply.osw'].include? osw_file
     step.setArgument("mech_vent_fan_type", "supply only")
   elsif ['base-misc-ceiling-fans.osw'].include? osw_file
     step.setArgument("ceiling_fan_cooling_setpoint_temp_offset", 0.5)
+    step.setArgument("ceiling_fan_quantity", 2)
   elsif ['base-misc-lighting-none.osw'].include? osw_file
     step.setArgument("has_lighting", false)
   elsif ['base-misc-loads-detailed.osw'].include? osw_file
@@ -1390,33 +1462,18 @@ def get_values(osw_file, step)
     step.setArgument("plug_loads_frac_sensible_1", 0.82)
     step.setArgument("plug_loads_frac_latent_1", 0.18)
     step.setArgument("plug_loads_annual_kwh_2", 400.0)
+    step.setArgument("plug_loads_weekday_fractions", "0.020, 0.020, 0.020, 0.020, 0.020, 0.034, 0.043, 0.085, 0.050, 0.030, 0.030, 0.041, 0.030, 0.025, 0.026, 0.026, 0.039, 0.042, 0.045, 0.070, 0.070, 0.073, 0.073, 0.066")
+    step.setArgument("plug_loads_weekend_fractions", "0.020, 0.020, 0.020, 0.020, 0.020, 0.034, 0.043, 0.085, 0.050, 0.030, 0.030, 0.041, 0.030, 0.025, 0.026, 0.026, 0.039, 0.042, 0.045, 0.070, 0.070, 0.073, 0.073, 0.066")
+    step.setArgument("plug_loads_monthly_multipliers", "1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0")
   elsif ['base-misc-number-of-occupants.osw'].include? osw_file
     step.setArgument("num_occupants", 5.0)
   elsif ['base-misc-whole-house-fan.osw'].include? osw_file
     step.setArgument("has_whole_house_fan", true)
-  elsif ['base-pv-array-1axis.osw'].include? osw_file
-    step.setArgument("pv_system_module_type", "standard")
-    step.setArgument("pv_system_location", "ground")
-    step.setArgument("pv_system_tracking", "1-axis")
-  elsif ['base-pv-array-1axis-backtracked.osw'].include? osw_file
-    step.setArgument("pv_system_module_type", "standard")
-    step.setArgument("pv_system_location", "ground")
-    step.setArgument("pv_system_tracking", "1-axis backtracked")
-  elsif ['base-pv-array-2axis.osw'].include? osw_file
-    step.setArgument("pv_system_module_type", "standard")
-    step.setArgument("pv_system_location", "ground")
-    step.setArgument("pv_system_tracking", "2-axis")
-  elsif ['base-pv-array-fixed-open-rack.osw'].include? osw_file
-    step.setArgument("pv_system_module_type", "standard")
-    step.setArgument("pv_system_location", "ground")
-  elsif ['base-pv-array-module-premium.osw'].include? osw_file
-    step.setArgument("pv_system_module_type", "standard")
-  elsif ['base-pv-array-module-standard.osw'].include? osw_file
-    step.setArgument("pv_system_module_type", "standard")
-  elsif ['base-pv-array-module-thinfilm.osw'].include? osw_file
-    step.setArgument("pv_system_module_type", "thin film")
-  elsif ['base-pv-multiple.osw'].include? osw_file
-
+  elsif ['base-pv.osw'].include? osw_file
+    step.setArgument("pv_system_module_type_1", "standard")
+    step.setArgument("pv_system_module_type_2", "premium")
+    step.setArgument("pv_system_array_azimuth_2", 90)
+    step.setArgument("pv_system_max_power_output_2", 1500)
   elsif ['base-site-neighbors.osw'].include? osw_file
     step.setArgument("neighbor_back_distance", 10)
     step.setArgument("neighbor_front_distance", 15)

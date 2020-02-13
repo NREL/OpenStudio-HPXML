@@ -638,35 +638,52 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     arg.setDefaultValue(1)
     args << arg
 
-    arg = OpenStudio::Measure::OSArgument::makeBoolArgument("overhangs_front_facade", true)
-    arg.setDisplayName("Overhang: Front Facade")
-    arg.setDescription("Overhangs: Specifies the presence of overhangs for windows on the front facade.")
-    arg.setDefaultValue(true)
+    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument("overhangs_front_depth", true)
+    arg.setDisplayName("Overhangs: Front Facade Depth")
+    arg.setDescription("Specifies the depth of overhangs for windows on the front facade.")
+    arg.setDefaultValue(0)
     args << arg
 
-    arg = OpenStudio::Measure::OSArgument::makeBoolArgument("overhangs_back_facade", true)
-    arg.setDisplayName("Overhang: Back Facade")
-    arg.setDescription("Overhangs: Specifies the presence of overhangs for windows on the back facade.")
-    arg.setDefaultValue(true)
+    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument("overhangs_front_distance_to_top_of_window", true)
+    arg.setDisplayName("Overhangs: Front Facade Distance to Top of Window")
+    arg.setDescription("Specifies the distance to the top of window of overhangs for windows on the front facade.")
+    arg.setDefaultValue(0)
     args << arg
 
-    arg = OpenStudio::Measure::OSArgument::makeBoolArgument("overhangs_left_facade", true)
-    arg.setDisplayName("Overhang: Left Facade")
-    arg.setDescription("Overhangs: Specifies the presence of overhangs for windows on the left facade.")
-    arg.setDefaultValue(true)
+    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument("overhangs_back_depth", true)
+    arg.setDisplayName("Overhangs: Back Facade Depth")
+    arg.setDescription("Specifies the depth of overhangs for windows on the back facade.")
+    arg.setDefaultValue(0)
     args << arg
 
-    arg = OpenStudio::Measure::OSArgument::makeBoolArgument("overhangs_right_facade", true)
-    arg.setDisplayName("Overhang: Right Facade")
-    arg.setDescription("Overhangs: Specifies the presence of overhangs for windows on the right facade.")
-    arg.setDefaultValue(true)
+    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument("overhangs_back_distance_to_top_of_window", true)
+    arg.setDisplayName("Overhangs: Back Facade Distance to Top of Window")
+    arg.setDescription("Specifies the distance to the top of window of overhangs for windows on the back facade.")
+    arg.setDefaultValue(0)
     args << arg
 
-    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument("overhangs_depth", true)
-    arg.setDisplayName("Overhangs: Depth")
-    arg.setUnits("ft")
-    arg.setDescription("Depth of the overhang. The distance from the wall surface in the direction normal to the wall surface.")
-    arg.setDefaultValue(2.0)
+    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument("overhangs_left_depth", true)
+    arg.setDisplayName("Overhangs: Left Facade Depth")
+    arg.setDescription("Specifies the depth of overhangs for windows on the left facade.")
+    arg.setDefaultValue(0)
+    args << arg
+
+    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument("overhangs_left_distance_to_top_of_window", true)
+    arg.setDisplayName("Overhangs: Left Facade Distance to Top of Window")
+    arg.setDescription("Specifies the distance to the top of window of overhangs for windows on the left facade.")
+    arg.setDefaultValue(0)
+    args << arg
+
+    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument("overhangs_right_depth", true)
+    arg.setDisplayName("Overhangs: Right Facade Depth")
+    arg.setDescription("Specifies the depth of overhangs for windows on the right facade.")
+    arg.setDefaultValue(0)
+    args << arg
+
+    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument("overhangs_right_distance_to_top_of_window", true)
+    arg.setDisplayName("Overhangs: Right Facade Distance to Top of Window")
+    arg.setDescription("Specifies the distance to the top of window of overhangs for windows on the right facade.")
+    arg.setDefaultValue(0)
     args << arg
 
     arg = OpenStudio::Measure::OSArgument::makeDoubleArgument("front_skylight_area", true)
@@ -1113,9 +1130,9 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     arg.setDefaultValue("none")
     args << arg
 
-    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument("mech_vent_rated_flow_rate", true)
-    arg.setDisplayName("Mechanical Ventilation: Rated Flow Rate")
-    arg.setDescription("The rated flow rate of the mechanical ventilation.")
+    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument("mech_vent_flow_rate", true)
+    arg.setDisplayName("Mechanical Ventilation: Flow Rate")
+    arg.setDescription("The flow rate of the mechanical ventilation.")
     arg.setUnits("CFM")
     arg.setDefaultValue(110)
     args << arg
@@ -1166,9 +1183,9 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     arg.setDefaultValue(false)
     args << arg
 
-    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument("whole_house_fan_rated_flow_rate", true)
-    arg.setDisplayName("Whole House Fan: Rated Flow Rate")
-    arg.setDescription("The rated flow rate of the whole house fan.")
+    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument("whole_house_fan_flow_rate", true)
+    arg.setDisplayName("Whole House Fan: Flow Rate")
+    arg.setDescription("The flow rate of the whole house fan.")
     arg.setUnits("CFM")
     arg.setDefaultValue(4500)
     args << arg
@@ -1486,58 +1503,60 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     pv_system_tracking_choices << "1-axis backtracked"
     pv_system_tracking_choices << "2-axis"
 
-    arg = OpenStudio::Measure::OSArgument::makeChoiceArgument("pv_system_module_type", pv_system_module_type_choices, true)
-    arg.setDisplayName("Photovoltaics: Module Type")
-    arg.setDescription("Module type of the PV system.")
-    arg.setDefaultValue("none")
-    args << arg
+    (1..Constants.MaxNumPhotovoltaics).to_a.each do |n|
+      arg = OpenStudio::Measure::OSArgument::makeChoiceArgument("pv_system_module_type_#{n}", pv_system_module_type_choices, true)
+      arg.setDisplayName("Photovoltaics #{n}: Module Type")
+      arg.setDescription("Module type of the PV system #{n}.")
+      arg.setDefaultValue("none")
+      args << arg
 
-    arg = OpenStudio::Measure::OSArgument::makeChoiceArgument("pv_system_location", pv_system_location_choices, true)
-    arg.setDisplayName("Photovoltaics: Location")
-    arg.setDescription("Location of the PV system.")
-    arg.setDefaultValue("roof")
-    args << arg
+      arg = OpenStudio::Measure::OSArgument::makeChoiceArgument("pv_system_location_#{n}", pv_system_location_choices, true)
+      arg.setDisplayName("Photovoltaics #{n}: Location")
+      arg.setDescription("Location of the PV system #{n}.")
+      arg.setDefaultValue("roof")
+      args << arg
 
-    arg = OpenStudio::Measure::OSArgument::makeChoiceArgument("pv_system_tracking", pv_system_tracking_choices, true)
-    arg.setDisplayName("Photovoltaics: Tracking")
-    arg.setDescription("Tracking of the PV system.")
-    arg.setDefaultValue("fixed")
-    args << arg
+      arg = OpenStudio::Measure::OSArgument::makeChoiceArgument("pv_system_tracking_#{n}", pv_system_tracking_choices, true)
+      arg.setDisplayName("Photovoltaics #{n}: Tracking")
+      arg.setDescription("Tracking of the PV system #{n}.")
+      arg.setDefaultValue("fixed")
+      args << arg
 
-    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument("pv_system_array_azimuth", true)
-    arg.setDisplayName("Photovoltaics: Array Azimuth")
-    arg.setUnits("degrees")
-    arg.setDescription("Array azimuth of the PV system.")
-    arg.setDefaultValue(180)
-    args << arg
+      arg = OpenStudio::Measure::OSArgument::makeDoubleArgument("pv_system_array_azimuth_#{n}", true)
+      arg.setDisplayName("Photovoltaics #{n}: Array Azimuth")
+      arg.setUnits("degrees")
+      arg.setDescription("Array azimuth of the PV system #{n}.")
+      arg.setDefaultValue(180)
+      args << arg
 
-    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument("pv_system_array_tilt", true)
-    arg.setDisplayName("Photovoltaics: Array Tilt")
-    arg.setUnits("degrees")
-    arg.setDescription("Array tilt of the PV system.")
-    arg.setDefaultValue(20)
-    args << arg
+      arg = OpenStudio::Measure::OSArgument::makeDoubleArgument("pv_system_array_tilt_#{n}", true)
+      arg.setDisplayName("Photovoltaics #{n}: Array Tilt")
+      arg.setUnits("degrees")
+      arg.setDescription("Array tilt of the PV system #{n}.")
+      arg.setDefaultValue(20)
+      args << arg
 
-    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument("pv_system_max_power_output", true)
-    arg.setDisplayName("Photovoltaics: Maximum Power Output")
-    arg.setUnits("W")
-    arg.setDescription("Maximum power output of the PV system.")
-    arg.setDefaultValue(4000)
-    args << arg
+      arg = OpenStudio::Measure::OSArgument::makeDoubleArgument("pv_system_max_power_output_#{n}", true)
+      arg.setDisplayName("Photovoltaics #{n}: Maximum Power Output")
+      arg.setUnits("W")
+      arg.setDescription("Maximum power output of the PV system #{n}.")
+      arg.setDefaultValue(4000)
+      args << arg
 
-    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument("pv_system_inverter_efficiency", true)
-    arg.setDisplayName("Photovoltaics: Inverter Efficiency")
-    arg.setUnits("Frac")
-    arg.setDescription("Inverter efficiency of the PV system.")
-    arg.setDefaultValue(0.96)
-    args << arg
+      arg = OpenStudio::Measure::OSArgument::makeDoubleArgument("pv_system_inverter_efficiency_#{n}", true)
+      arg.setDisplayName("Photovoltaics #{n}: Inverter Efficiency")
+      arg.setUnits("Frac")
+      arg.setDescription("Inverter efficiency of the PV system #{n}.")
+      arg.setDefaultValue(0.96)
+      args << arg
 
-    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument("pv_system_system_losses_fraction", true)
-    arg.setDisplayName("Photovoltaics: System Losses Fraction")
-    arg.setUnits("Frac")
-    arg.setDescription("System losses fraction of the PV system.")
-    arg.setDefaultValue(0.14)
-    args << arg
+      arg = OpenStudio::Measure::OSArgument::makeDoubleArgument("pv_system_system_losses_fraction_#{n}", true)
+      arg.setDisplayName("Photovoltaics #{n}: System Losses Fraction")
+      arg.setUnits("Frac")
+      arg.setDescription("System losses fraction of the PV system #{n}.")
+      arg.setDefaultValue(0.14)
+      args << arg
+    end
 
     arg = OpenStudio::Measure::OSArgument::makeBoolArgument("has_clothes_washer", true)
     arg.setDisplayName("Clothes Washer: Has")
@@ -1931,10 +1950,22 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
              :window_aspect_ratio => runner.getDoubleArgumentValue("window_aspect_ratio", user_arguments),
              :window_ufactor => runner.getDoubleArgumentValue("window_ufactor", user_arguments),
              :window_shgc => runner.getDoubleArgumentValue("window_shgc", user_arguments),
-             :interior_shading_factor_winter => [runner.getDoubleArgumentValue("winter_shading_coefficient_front_facade", user_arguments)],
-             :interior_shading_factor_summer => [runner.getDoubleArgumentValue("summer_shading_coefficient_front_facade", user_arguments)],
-             :overhangs => [runner.getBoolArgumentValue("overhangs_front_facade", user_arguments), runner.getBoolArgumentValue("overhangs_back_facade", user_arguments), runner.getBoolArgumentValue("overhangs_left_facade", user_arguments), runner.getBoolArgumentValue("overhangs_right_facade", user_arguments)],
-             :overhangs_depth => runner.getDoubleArgumentValue("overhangs_depth", user_arguments),
+             :interior_shading_front_factor_winter => runner.getDoubleArgumentValue("winter_shading_coefficient_front_facade", user_arguments),
+             :interior_shading_front_factor_summer => runner.getDoubleArgumentValue("summer_shading_coefficient_front_facade", user_arguments),
+             :interior_shading_back_factor_winter => runner.getDoubleArgumentValue("winter_shading_coefficient_back_facade", user_arguments),
+             :interior_shading_back_factor_summer => runner.getDoubleArgumentValue("summer_shading_coefficient_back_facade", user_arguments),
+             :interior_shading_left_factor_winter => runner.getDoubleArgumentValue("winter_shading_coefficient_left_facade", user_arguments),
+             :interior_shading_left_factor_summer => runner.getDoubleArgumentValue("summer_shading_coefficient_left_facade", user_arguments),
+             :interior_shading_right_factor_winter => runner.getDoubleArgumentValue("winter_shading_coefficient_right_facade", user_arguments),
+             :interior_shading_right_factor_summer => runner.getDoubleArgumentValue("summer_shading_coefficient_right_facade", user_arguments),
+             :overhangs_front_depth => runner.getDoubleArgumentValue("overhangs_front_depth", user_arguments),
+             :overhangs_front_distance_to_top_of_window => runner.getDoubleArgumentValue("overhangs_front_distance_to_top_of_window", user_arguments),
+             :overhangs_back_depth => runner.getDoubleArgumentValue("overhangs_back_depth", user_arguments),
+             :overhangs_back_distance_to_top_of_window => runner.getDoubleArgumentValue("overhangs_back_distance_to_top_of_window", user_arguments),
+             :overhangs_left_depth => runner.getDoubleArgumentValue("overhangs_left_depth", user_arguments),
+             :overhangs_left_distance_to_top_of_window => runner.getDoubleArgumentValue("overhangs_left_distance_to_top_of_window", user_arguments),
+             :overhangs_right_depth => runner.getDoubleArgumentValue("overhangs_right_depth", user_arguments),
+             :overhangs_right_distance_to_top_of_window => runner.getDoubleArgumentValue("overhangs_right_distance_to_top_of_window", user_arguments),
              :front_skylight_area => runner.getDoubleArgumentValue("front_skylight_area", user_arguments),
              :back_skylight_area => runner.getDoubleArgumentValue("back_skylight_area", user_arguments),
              :left_skylight_area => runner.getDoubleArgumentValue("left_skylight_area", user_arguments),
@@ -1993,7 +2024,7 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
              :supply_duct_surface_area => runner.getDoubleArgumentValue("supply_duct_surface_area", user_arguments),
              :return_duct_surface_area => runner.getDoubleArgumentValue("return_duct_surface_area", user_arguments),
              :mech_vent_fan_type => runner.getStringArgumentValue("mech_vent_fan_type", user_arguments),
-             :mech_vent_rated_flow_rate => runner.getDoubleArgumentValue("mech_vent_rated_flow_rate", user_arguments),
+             :mech_vent_flow_rate => runner.getDoubleArgumentValue("mech_vent_flow_rate", user_arguments),
              :mech_vent_hours_in_operation => runner.getDoubleArgumentValue("mech_vent_hours_in_operation", user_arguments),
              :mech_vent_total_recovery_efficiency_type => runner.getStringArgumentValue("mech_vent_total_recovery_efficiency_type", user_arguments),
              :mech_vent_total_recovery_efficiency => runner.getDoubleArgumentValue("mech_vent_total_recovery_efficiency", user_arguments),
@@ -2001,7 +2032,7 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
              :mech_vent_sensible_recovery_efficiency => runner.getDoubleArgumentValue("mech_vent_sensible_recovery_efficiency", user_arguments),
              :mech_vent_fan_power => runner.getDoubleArgumentValue("mech_vent_fan_power", user_arguments),
              :has_whole_house_fan => runner.getBoolArgumentValue("has_whole_house_fan", user_arguments),
-             :whole_house_fan_rated_flow_rate => runner.getDoubleArgumentValue("whole_house_fan_rated_flow_rate", user_arguments),
+             :whole_house_fan_flow_rate => runner.getDoubleArgumentValue("whole_house_fan_flow_rate", user_arguments),
              :whole_house_fan_power => runner.getDoubleArgumentValue("whole_house_fan_power", user_arguments),
              :water_heater_type => (1..Constants.MaxNumWaterHeaters).to_a.map { |n| runner.getStringArgumentValue("water_heater_type_#{n}", user_arguments) },
              :water_heater_fuel_type => (1..Constants.MaxNumWaterHeaters).to_a.map { |n| runner.getStringArgumentValue("water_heater_fuel_type_#{n}", user_arguments) },
@@ -2037,14 +2068,14 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
              :solar_thermal_collector_rated_thermal_losses => runner.getDoubleArgumentValue("solar_thermal_collector_rated_thermal_losses", user_arguments),
              :solar_thermal_storage_volume => runner.getStringArgumentValue("solar_thermal_storage_volume", user_arguments),
              :solar_thermal_solar_fraction => runner.getDoubleArgumentValue("solar_thermal_solar_fraction", user_arguments),
-             :pv_system_module_type => runner.getStringArgumentValue("pv_system_module_type", user_arguments),
-             :pv_system_location => runner.getStringArgumentValue("pv_system_location", user_arguments),
-             :pv_system_tracking => runner.getStringArgumentValue("pv_system_tracking", user_arguments),
-             :pv_system_array_azimuth => runner.getDoubleArgumentValue("pv_system_array_azimuth", user_arguments),
-             :pv_system_array_tilt => runner.getDoubleArgumentValue("pv_system_array_tilt", user_arguments),
-             :pv_system_max_power_output => runner.getDoubleArgumentValue("pv_system_max_power_output", user_arguments),
-             :pv_system_inverter_efficiency => runner.getDoubleArgumentValue("pv_system_inverter_efficiency", user_arguments),
-             :pv_system_system_losses_fraction => runner.getDoubleArgumentValue("pv_system_system_losses_fraction", user_arguments),
+             :pv_system_module_type => (1..Constants.MaxNumPlugLoads).to_a.map { |n| runner.getStringArgumentValue("pv_system_module_type_#{n}", user_arguments) },
+             :pv_system_location => (1..Constants.MaxNumPlugLoads).to_a.map { |n| runner.getStringArgumentValue("pv_system_location_#{n}", user_arguments) },
+             :pv_system_tracking => (1..Constants.MaxNumPlugLoads).to_a.map { |n| runner.getStringArgumentValue("pv_system_tracking_#{n}", user_arguments) },
+             :pv_system_array_azimuth => (1..Constants.MaxNumPlugLoads).to_a.map { |n| runner.getDoubleArgumentValue("pv_system_array_azimuth_#{n}", user_arguments) },
+             :pv_system_array_tilt => (1..Constants.MaxNumPlugLoads).to_a.map { |n| runner.getDoubleArgumentValue("pv_system_array_tilt_#{n}", user_arguments) },
+             :pv_system_max_power_output => (1..Constants.MaxNumPlugLoads).to_a.map { |n| runner.getDoubleArgumentValue("pv_system_max_power_output_#{n}", user_arguments) },
+             :pv_system_inverter_efficiency => (1..Constants.MaxNumPlugLoads).to_a.map { |n| runner.getDoubleArgumentValue("pv_system_inverter_efficiency_#{n}", user_arguments) },
+             :pv_system_system_losses_fraction => (1..Constants.MaxNumPlugLoads).to_a.map { |n| runner.getDoubleArgumentValue("pv_system_system_losses_fraction_#{n}", user_arguments) },
              :has_clothes_washer => runner.getBoolArgumentValue("has_clothes_washer", user_arguments),
              :clothes_washer_location => runner.getStringArgumentValue("clothes_washer_location", user_arguments),
              :clothes_washer_efficiency_type => runner.getStringArgumentValue("clothes_washer_efficiency_type", user_arguments),
@@ -2197,7 +2228,7 @@ class HPXMLFile
     hot_water_distribution_values = get_hot_water_distribution_values(runner, args)
     water_fixtures_values = get_water_fixtures_values(runner, args)
     solar_thermal_systems_values = get_solar_thermal_values(runner, args, water_heating_systems_values)
-    pv_system_values = get_pv_system_values(runner, args)
+    pv_systems_values = get_pv_system_values(runner, args)
     clothes_washer_values = get_clothes_washer_values(runner, args)
     clothes_dryer_values = get_clothes_dryer_values(runner, args)
     dishwasher_values = get_dishwasher_values(runner, args)
@@ -2281,7 +2312,9 @@ class HPXMLFile
     solar_thermal_systems_values.each do |solar_thermal_system_values|
       HPXML.add_solar_thermal_system(hpxml: hpxml, **solar_thermal_system_values)
     end
-    HPXML.add_pv_system(hpxml: hpxml, **pv_system_values) unless pv_system_values.empty?
+    pv_systems_values.each do |pv_system_values|
+      HPXML.add_pv_system(hpxml: hpxml, **pv_system_values)
+    end
     HPXML.add_clothes_washer(hpxml: hpxml, **clothes_washer_values) unless clothes_washer_values.empty?
     HPXML.add_clothes_dryer(hpxml: hpxml, **clothes_dryer_values) unless clothes_dryer_values.empty?
     HPXML.add_dishwasher(hpxml: hpxml, **dishwasher_values) unless dishwasher_values.empty?
@@ -2484,6 +2517,7 @@ class HPXMLFile
       infiltration_volume = args[:cfa] * args[:wall_height]
     elsif args[:living_air_leakage_units] == "ConstantACHnatural"
       constant_ach_natural = args[:living_air_leakage_value]
+      infiltration_volume = args[:cfa] * args[:wall_height]
     end
 
     air_infiltration_measurement_values = { :id => "InfiltrationMeasurement",
@@ -2723,10 +2757,15 @@ class HPXMLFile
         under_slab_insulation_spans_entire_slab = true
       end
 
+      thickness = 4.0
+      if interior_adjacent_to.include? "crawlspace"
+        thickness = 0.0
+      end
+
       slabs_values << { :id => "#{surface.name}",
                         :interior_adjacent_to => interior_adjacent_to,
                         :area => UnitConversions.convert(surface.grossArea, "m^2", "ft^2").round,
-                        :thickness => 4,
+                        :thickness => thickness,
                         :exposed_perimeter => exposed_perimeter,
                         :perimeter_insulation_depth => args[:perimeter_insulation_depth],
                         :under_slab_insulation_width => under_slab_insulation_width,
@@ -2750,15 +2789,22 @@ class HPXMLFile
         sub_surface_height = Geometry.get_surface_height(sub_surface)
         sub_surface_facade = Geometry.get_facade_for_surface(sub_surface)
 
-        if args[:overhangs_depth] > 0
-          if ((sub_surface_facade == Constants.FacadeFront and args[:overhangs][0]) or
-               (sub_surface_facade == Constants.FacadeBack and args[:overhangs][1]) or
-               (sub_surface_facade == Constants.FacadeLeft and args[:overhangs][2]) or
-               (sub_surface_facade == Constants.FacadeRight and args[:overhangs][3]))
-            overhangs_depth = args[:overhangs_depth]
-            overhangs_distance_to_top_of_window = 0.0
-            overhangs_distance_to_bottom_of_window = sub_surface_height.round
-          end
+        if sub_surface_facade == Constants.FacadeFront and args[:overhangs_front_depth] > 0
+          overhangs_depth = args[:overhangs_front_depth]
+          overhangs_distance_to_top_of_window = args[:overhangs_front_distance_to_top_of_window]
+          overhangs_distance_to_bottom_of_window = (overhangs_distance_to_top_of_window + sub_surface_height).round
+        elsif sub_surface_facade == Constants.FacadeBack and args[:overhangs_back_depth] > 0
+          overhangs_depth = args[:overhangs_back_depth]
+          overhangs_distance_to_top_of_window = args[:overhangs_back_distance_to_top_of_window]
+          overhangs_distance_to_bottom_of_window = (overhangs_distance_to_top_of_window + sub_surface_height).round
+        elsif sub_surface_facade == Constants.FacadeLeft and args[:overhangs_left_depth] > 0
+          overhangs_depth = args[:overhangs_left_depth]
+          overhangs_distance_to_top_of_window = args[:overhangs_left_distance_to_top_of_window]
+          overhangs_distance_to_bottom_of_window = (overhangs_distance_to_top_of_window + sub_surface_height).round
+        elsif sub_surface_facade == Constants.FacadeRight and args[:overhangs_right_depth] > 0
+          overhangs_depth = args[:overhangs_right_depth]
+          overhangs_distance_to_top_of_window = args[:overhangs_right_distance_to_top_of_window]
+          overhangs_distance_to_bottom_of_window = (overhangs_distance_to_top_of_window + sub_surface_height).round
         elsif args[:eaves_depth] > 0
           eaves_z = args[:wall_height] * args[:num_floors]
           if args[:foundation_type] == "ambient"
@@ -2779,6 +2825,33 @@ class HPXMLFile
           overhangs_distance_to_bottom_of_window = (overhangs_distance_to_top_of_window + sub_surface_height).round
         end
 
+        if sub_surface_facade == Constants.FacadeFront and args[:interior_shading_front_factor_winter] > 0
+          interior_shading_factor_winter = args[:interior_shading_front_factor_winter]
+        elsif sub_surface_facade == Constants.FacadeBack and args[:interior_shading_back_factor_winter] > 0
+          interior_shading_factor_winter = args[:interior_shading_back_factor_winter]
+        elsif sub_surface_facade == Constants.FacadeLeft and args[:interior_shading_left_factor_winter] > 0
+          interior_shading_factor_winter = args[:interior_shading_left_factor_winter]
+        elsif sub_surface_facade == Constants.FacadeRight and args[:interior_shading_right_factor_winter] > 0
+          interior_shading_factor_winter = args[:interior_shading_right_factor_winter]
+        end
+
+        if sub_surface_facade == Constants.FacadeFront and args[:interior_shading_front_factor_summer] > 0
+          interior_shading_factor_summer = args[:interior_shading_front_factor_summer]
+        elsif sub_surface_facade == Constants.FacadeBack and args[:interior_shading_back_factor_summer] > 0
+          interior_shading_factor_summer = args[:interior_shading_back_factor_summer]
+        elsif sub_surface_facade == Constants.FacadeLeft and args[:interior_shading_left_factor_summer] > 0
+          interior_shading_factor_summer = args[:interior_shading_left_factor_summer]
+        elsif sub_surface_facade == Constants.FacadeRight and args[:interior_shading_right_factor_summer] > 0
+          interior_shading_factor_summer = args[:interior_shading_right_factor_summer]
+        end
+
+        if not interior_shading_factor_winter.nil? and interior_shading_factor_summer.nil?
+          interior_shading_factor_summer = 0.0
+        end
+        if not interior_shading_factor_summer.nil? and interior_shading_factor_winter.nil?
+          interior_shading_factor_winter = 0.0
+        end
+
         window_values = { :id => "#{sub_surface.name}_#{sub_surface_facade}",
                           :area => UnitConversions.convert(sub_surface.grossArea, "m^2", "ft^2").round,
                           :azimuth => UnitConversions.convert(sub_surface.azimuth, "rad", "deg").round,
@@ -2787,14 +2860,9 @@ class HPXMLFile
                           :overhangs_depth => overhangs_depth,
                           :overhangs_distance_to_top_of_window => overhangs_distance_to_top_of_window,
                           :overhangs_distance_to_bottom_of_window => overhangs_distance_to_bottom_of_window,
+                          :interior_shading_factor_winter => interior_shading_factor_winter,
+                          :interior_shading_factor_summer => interior_shading_factor_summer,
                           :wall_idref => surface.name }
-
-        if args[:interior_shading_factor_winter][0] != 1
-          window_values[:interior_shading_factor_winter] = args[:interior_shading_factor_winter][0]
-        end
-        if args[:interior_shading_factor_summer][0] != 1
-          window_values[:interior_shading_factor_summer] = args[:interior_shading_factor_summer][0]
-        end
 
         windows_values << window_values
       end
@@ -2987,10 +3055,6 @@ class HPXMLFile
       end
       backup_heating_capacity = Float(backup_heating_capacity)
 
-      if backup_heating_capacity != -1
-        backup_heating_capacity *= heat_pump_fraction_heat_load_served
-      end
-
       if backup_heating_fuel == "electricity"
         backup_heating_efficiency_percent = args[:heat_pump_backup_heating_efficiency]
       else
@@ -3033,6 +3097,8 @@ class HPXMLFile
   end
 
   def self.get_hvac_control_values(runner, args)
+    return {} if args[:heating_system_type] == "none" and args[:cooling_system_type] == "none" and args[:heat_pump_type] == "none"
+
     control_type = "manual thermostat"
     if (args[:heating_setpoint_temp] != args[:heating_setback_temp] and args[:heating_setback_hours_per_week] > 0) or
        (args[:cooling_setpoint_temp] != args[:cooling_setup_temp] and args[:cooling_setup_hours_per_week] > 0)
@@ -3189,7 +3255,7 @@ class HPXMLFile
 
       ventilations_fans_values << { :id => "MechanicalVentilation",
                                     :fan_type => args[:mech_vent_fan_type],
-                                    :rated_flow_rate => args[:mech_vent_rated_flow_rate],
+                                    :tested_flow_rate => args[:mech_vent_flow_rate],
                                     :hours_in_operation => args[:mech_vent_hours_in_operation],
                                     :used_for_whole_building_ventilation => true,
                                     :total_recovery_efficiency => total_recovery_efficiency,
@@ -3202,7 +3268,7 @@ class HPXMLFile
 
     if args[:has_whole_house_fan]
       ventilations_fans_values << { :id => "WholeHouseFan",
-                                    :rated_flow_rate => args[:whole_house_fan_rated_flow_rate],
+                                    :rated_flow_rate => args[:whole_house_fan_flow_rate],
                                     :used_for_seasonal_cooling_load_reduction => true,
                                     :fan_power => args[:whole_house_fan_power] }
     end
@@ -3399,18 +3465,21 @@ class HPXMLFile
   end
 
   def self.get_pv_system_values(runner, args)
-    return {} if args[:pv_system_module_type] == "none"
+    pv_systems_values = []
+    args[:pv_system_module_type].each_with_index do |module_type, i|
+      next if module_type == "none"
 
-    pv_system_values = { :id => "PVSystem",
-                         :location => args[:pv_system_location],
-                         :module_type => args[:pv_system_module_type],
-                         :tracking => args[:pv_system_tracking],
-                         :array_azimuth => args[:pv_system_array_azimuth],
-                         :array_tilt => args[:pv_system_array_tilt],
-                         :max_power_output => args[:pv_system_max_power_output],
-                         :inverter_efficiency => args[:pv_system_inverter_efficiency],
-                         :system_losses_fraction => args[:pv_system_system_losses_fraction] }
-    return pv_system_values
+      pv_systems_values << { :id => "PVSystem#{i + 1}",
+                             :location => args[:pv_system_location][i],
+                             :module_type => module_type,
+                             :tracking => args[:pv_system_tracking][i],
+                             :array_azimuth => args[:pv_system_array_azimuth][i],
+                             :array_tilt => args[:pv_system_array_tilt][i],
+                             :max_power_output => args[:pv_system_max_power_output][i],
+                             :inverter_efficiency => args[:pv_system_inverter_efficiency][i],
+                             :system_losses_fraction => args[:pv_system_system_losses_fraction][i] }
+    end
+    return pv_systems_values
   end
 
   def self.get_clothes_washer_values(runner, args)
