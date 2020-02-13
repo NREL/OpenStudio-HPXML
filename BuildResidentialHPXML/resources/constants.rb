@@ -17,6 +17,10 @@ class Constants
     return 2
   end
 
+  def self.MaxNumPhotovoltaics
+    return 2
+  end
+
   def self.MaxNumPlugLoads
     return 2
   end
