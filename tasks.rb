@@ -39,7 +39,7 @@ def create_osws
     'base-dhw-jacket-hpwh.osw' => 'base.osw',
     'base-dhw-jacket-indirect.osw' => 'base.osw',
     'base-dhw-low-flow-fixtures.osw' => 'base.osw',
-    'base-dhw-multiple.osw' => 'base.osw',
+    # 'base-dhw-multiple.osw' => 'base.osw',
     'base-dhw-none.osw' => 'base.osw',
     'base-dhw-recirc-demand.osw' => 'base.osw',
     'base-dhw-recirc-manual.osw' => 'base.osw',
@@ -83,7 +83,7 @@ def create_osws
     'base-enclosure-beds-5.osw' => 'base.osw',
     'base-enclosure-garage.osw' => 'base.osw',
     'base-enclosure-infil-cfm50.osw' => 'base.osw',
-    'base-enclosure-no-natural-ventilation.osw' => 'base.osw',
+    # 'base-enclosure-no-natural-ventilation.osw' => 'base.osw',
     'base-enclosure-overhangs.osw' => 'base.osw',
     # 'base-enclosure-skylights.osw' => 'base.osw', # There are no front roof surfaces, but 15.0 ft^2 of skylights were specified.
     'base-enclosure-split-surfaces.osw' => 'base.osw',
@@ -409,8 +409,8 @@ def get_values(osw_file, step)
     step.setArgument("skylight_shgc", 0.45)
     step.setArgument("door_area", 40.0)
     step.setArgument("door_rvalue", 4.4)
-    step.setArgument("living_ach_50", 3)
-    step.setArgument("living_constant_ach_natural", 0)
+    step.setArgument("living_air_leakage_units", "ACH50")
+    step.setArgument("living_air_leakage_value", 3)
     step.setArgument("vented_crawlspace_sla", 0.00667)
     step.setArgument("shelter_coefficient", Constants.Auto)
     step.setArgument("heating_system_type", "Furnace")
@@ -669,6 +669,7 @@ def get_values(osw_file, step)
   elsif ['base-dhw-desuperheater-tankless.osw'].include? osw_file
     step.setArgument("heating_system_type", "none")
     step.setArgument("water_heater_type_1", "instantaneous water heater")
+    step.setArgument("water_heater_efficiency_1", 0.99)
     step.setArgument("water_heater_uses_desuperheater_1", true)
   elsif ['base-dhw-desuperheater-var-speed.osw'].include? osw_file
     step.setArgument("heating_system_type", "none")
@@ -725,14 +726,7 @@ def get_values(osw_file, step)
   elsif ['base-dhw-low-flow-fixtures.osw'].include? osw_file
     step.setArgument("sink_low_flow", true)
   elsif ['base-dhw-multiple.osw'].include? osw_file
-    step.setArgument("heating_system_type", "Boiler")
-    step.setArgument("heating_system_electric_auxiliary_energy", 200.0)
-    step.setArgument("cooling_system_type", "none")
-    step.setArgument("water_heater_type_2", "storage water heater")
-    step.setArgument("water_heater_fuel_type_2", "natural gas")
-    step.setArgument("water_heater_fraction_dhw_load_served_1", 0.5)
-    step.setArgument("water_heater_fraction_dhw_load_served_2", 0.5)
-    step.setArgument("solar_thermal_system_type", "hot water")
+
   elsif ['base-dhw-none.osw'].include? osw_file
     step.setArgument("water_heater_type_1", "none")
   elsif ['base-dhw-recirc-demand.osw'].include? osw_file
@@ -825,9 +819,11 @@ def get_values(osw_file, step)
     step.setArgument("solar_thermal_solar_fraction", 0.65)
   elsif ['base-dhw-tankless-electric.osw'].include? osw_file
     step.setArgument("water_heater_type_1", "instantaneous water heater")
+    step.setArgument("water_heater_efficiency_1", 0.99)
   elsif ['base-dhw-tankless-electric-outside.osw'].include? osw_file
     step.setArgument("water_heater_type_1", "instantaneous water heater")
     step.setArgument("water_heater_location_1", "other exterior")
+    step.setArgument("water_heater_efficiency_1", 0.99)
   elsif ['base-dhw-tankless-gas.osw'].include? osw_file
     step.setArgument("water_heater_type_1", "instantaneous water heater")
     step.setArgument("water_heater_fuel_type_1", "natural gas")
@@ -842,17 +838,21 @@ def get_values(osw_file, step)
   elsif ['base-dhw-tankless-gas-with-solar-fraction.osw'].include? osw_file
     step.setArgument("water_heater_type_1", "instantaneous water heater")
     step.setArgument("water_heater_fuel_type_1", "natural gas")
+    step.setArgument("water_heater_efficiency_1", 0.82)
     step.setArgument("solar_thermal_system_type", "hot water")
     step.setArgument("solar_thermal_solar_fraction", 0.65)
   elsif ['base-dhw-tankless-oil.osw'].include? osw_file
     step.setArgument("water_heater_type_1", "instantaneous water heater")
     step.setArgument("water_heater_fuel_type_1", "fuel oil")
+    step.setArgument("water_heater_efficiency_1", 0.82)
   elsif ['base-dhw-tankless-propane.osw'].include? osw_file
     step.setArgument("water_heater_type_1", "instantaneous water heater")
     step.setArgument("water_heater_fuel_type_1", "propane")
+    step.setArgument("water_heater_efficiency_1", 0.82)
   elsif ['base-dhw-tankless-wood.osw'].include? osw_file
     step.setArgument("water_heater_type_1", "instantaneous water heater")
     step.setArgument("water_heater_fuel_type_1", "wood")
+    step.setArgument("water_heater_efficiency_1", 0.82)
   elsif ['base-dhw-tank-oil.osw'].include? osw_file
     step.setArgument("water_heater_fuel_type_1", "fuel oil")
     step.setArgument("water_heater_tank_volume_1", 50)
@@ -871,31 +871,47 @@ def get_values(osw_file, step)
   elsif ['base-enclosure-2stories.osw'].include? osw_file
     step.setArgument("cfa", 4050.0)
     step.setArgument("num_floors", 2)
+    step.setArgument("front_window_area", 216.0)
+    step.setArgument("back_window_area", 216.0)
+    step.setArgument("left_window_area", 144.0)
+    step.setArgument("right_window_area", 144.0)
   elsif ['base-enclosure-2stories-garage.osw'].include? osw_file
     step.setArgument("cfa", 4050.0)
     step.setArgument("num_floors", 2)
     step.setArgument("garage_width", 12.0)
+    step.setArgument("front_window_area", 216.0)
+    step.setArgument("back_window_area", 216.0)
+    step.setArgument("left_window_area", 144.0)
+    step.setArgument("right_window_area", 144.0)
   elsif ['base-enclosure-adiabatic-surfaces.osw'].include? osw_file
     step.setArgument("unit_type", "multifamily")
     step.setArgument("cfa", 1350.0)
     step.setArgument("level", "Middle")
     step.setArgument("horizontal_location", "Middle")
+    step.setArgument("front_window_area", 37.8)
+    step.setArgument("back_window_area", 37.8)
+    step.setArgument("left_window_area", 25.2)
+    step.setArgument("right_window_area", 25.2)
     step.setArgument("supply_duct_leakage_value", 0)
     step.setArgument("return_duct_leakage_value", 0)
     step.setArgument("supply_duct_location", "living space")
     step.setArgument("return_duct_location", "living space")
   elsif ['base-enclosure-beds-1.osw'].include? osw_file
     step.setArgument("num_bedrooms", 1)
+    step.setArgument("water_heater_heating_capacity_1", 18.767)
   elsif ['base-enclosure-beds-2.osw'].include? osw_file
     step.setArgument("num_bedrooms", 2)
+    step.setArgument("water_heater_heating_capacity_1", 18.767)
   elsif ['base-enclosure-beds-4.osw'].include? osw_file
     step.setArgument("num_bedrooms", 4)
   elsif ['base-enclosure-beds-5.osw'].include? osw_file
     step.setArgument("num_bedrooms", 5)
   elsif ['base-enclosure-garage.osw'].include? osw_file
     step.setArgument("garage_width", 12.0)
+    step.setArgument("right_window_area", 12.0)
   elsif ['base-enclosure-infil-cfm50.osw'].include? osw_file
-
+    step.setArgument("living_air_leakage_units", "CFM50")
+    step.setArgument("living_air_leakage_value", 1080)
   elsif ['base-enclosure-no-natural-ventilation.osw'].include? osw_file
 
   elsif ['base-enclosure-overhangs.osw'].include? osw_file
@@ -1146,6 +1162,9 @@ def get_values(osw_file, step)
   elsif ['base-hvac-ducts-locations.osw'].include? osw_file
     step.setArgument("cfa", 1350.0)
     step.setArgument("foundation_type", "crawlspace - vented")
+    step.setArgument("supply_duct_location", "crawlspace - vented")
+    step.setArgument("return_duct_location", "crawlspace - vented")
+    step.setArgument("water_heater_location_1", Constants.Auto)
   elsif ['base-hvac-ducts-multiple.osw'].include? osw_file
 
   elsif ['base-hvac-ducts-outside.osw'].include? osw_file
@@ -1200,6 +1219,8 @@ def get_values(osw_file, step)
     step.setArgument("heat_pump_type", "ground-to-air")
     step.setArgument("heat_pump_heating_efficiency", 3.6)
     step.setArgument("heat_pump_cooling_efficiency", 16.6)
+    step.setArgument("heat_pump_heating_capacity", 42000.0)
+    step.setArgument("heat_pump_backup_fuel", "electricity")
   elsif ['base-hvac-ground-to-air-heat-pump-detailed.osw'].include? osw_file
 
   elsif ['base-hvac-ideal-air.osw'].include? osw_file
@@ -1211,6 +1232,11 @@ def get_values(osw_file, step)
     step.setArgument("heat_pump_heating_efficiency", 10.0)
     step.setArgument("heat_pump_cooling_efficiency", 19.0)
     step.setArgument("mini_split_is_ducted", true)
+    step.setArgument("supply_duct_leakage_value", 15.0)
+    step.setArgument("return_duct_leakage_value", 5.0)
+    step.setArgument("supply_duct_insulation_r_value", 0.0)
+    step.setArgument("supply_duct_surface_area", 30.0)
+    step.setArgument("return_duct_surface_area", 10.0)
   elsif ['base-hvac-mini-split-heat-pump-ducted-detailed.osw'].include? osw_file
 
   elsif ['base-hvac-mini-split-heat-pump-ductless.osw'].include? osw_file
@@ -1219,13 +1245,14 @@ def get_values(osw_file, step)
     step.setArgument("heat_pump_type", "mini-split")
     step.setArgument("heat_pump_heating_efficiency", 10.0)
     step.setArgument("heat_pump_cooling_efficiency", 19.0)
+    step.setArgument("heat_pump_backup_fuel", "electricity")
   elsif ['base-hvac-mini-split-heat-pump-ductless-no-backup.osw'].include? osw_file
     step.setArgument("heating_system_type", "none")
     step.setArgument("cooling_system_type", "none")
     step.setArgument("heat_pump_type", "mini-split")
     step.setArgument("heat_pump_heating_efficiency", 10.0)
     step.setArgument("heat_pump_cooling_efficiency", 19.0)
-    step.setArgument("heat_pump_backup_fuel", "none")
+    step.setArgument("heat_pump_heating_capacity", 52000.0)
   elsif ['base-hvac-multiple.osw'].include? osw_file
 
   elsif ['base-hvac-none.osw'].include? osw_file
@@ -1274,6 +1301,8 @@ def get_values(osw_file, step)
   elsif ['base-hvac-undersized.osw'].include? osw_file
     step.setArgument("heating_system_heating_capacity", 6400.0)
     step.setArgument("cooling_system_cooling_capacity", 4800.0)
+    step.setArgument("supply_duct_leakage_value", 7.5)
+    step.setArgument("return_duct_leakage_value", 2.5)
   elsif ['base-hvac-wall-furnace-elec-only.osw'].include? osw_file
     step.setArgument("heating_system_type", "WallFurnace")
     step.setArgument("heating_system_fuel", "electricity")
@@ -1298,7 +1327,8 @@ def get_values(osw_file, step)
     step.setArgument("heating_system_electric_auxiliary_energy", 200.0)
     step.setArgument("cooling_system_type", "none")
   elsif ['base-infiltration-ach-natural.osw'].include? osw_file
-    step.setArgument("living_constant_ach_natural", 0.67)
+    step.setArgument("living_air_leakage_units", "ConstantACHnatural")
+    step.setArgument("living_air_leakage_value", 0.67)
   elsif ['base-location-baltimore-md.osw'].include? osw_file
     step.setArgument("weather_station_epw_filename", "USA_MD_Baltimore-Washington.Intl.AP.724060_TMY3.epw")
   elsif ['base-location-dallas-tx.osw'].include? osw_file
@@ -1345,7 +1375,7 @@ def get_values(osw_file, step)
     step.setArgument("mech_vent_fan_power", 60)
   elsif ['base-mechvent-hrv-asre.osw'].include? osw_file
     step.setArgument("mech_vent_fan_type", "heat recovery ventilator")
-    step.setArgument("mech_vent_sensible_recovery_efficiency_type", "unadjusted")
+    step.setArgument("mech_vent_sensible_recovery_efficiency_type", "Unadjusted")
     step.setArgument("mech_vent_sensible_recovery_efficiency", 0.79)
     step.setArgument("mech_vent_fan_power", 60)
   elsif ['base-mechvent-supply.osw'].include? osw_file

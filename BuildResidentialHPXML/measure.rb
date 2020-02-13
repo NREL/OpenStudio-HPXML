@@ -720,17 +720,21 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     arg.setDefaultValue(5.0)
     args << arg
 
-    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument("living_ach_50", true)
-    arg.setDisplayName("Air Leakage: Above-Grade Living ACH50")
-    arg.setUnits("1/hr")
-    arg.setDescription("Air exchange rate, in Air Changes per Hour at 50 Pascals (ACH50), for above-grade living space (including conditioned attic).")
-    arg.setDefaultValue(3)
+    living_air_leakage_units_choices = OpenStudio::StringVector.new
+    living_air_leakage_units_choices << "ACH50"
+    living_air_leakage_units_choices << "CFM50"
+    living_air_leakage_units_choices << "ConstantACHnatural"
+
+    arg = OpenStudio::Measure::OSArgument::makeChoiceArgument("living_air_leakage_units", living_air_leakage_units_choices, true)
+    arg.setDisplayName("Air Leakage: Above-Grade Living Unit of Measure")
+    arg.setDescription("The unit of measure for the above-grade living air leakage.")
+    arg.setDefaultValue("ACH50")
     args << arg
 
-    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument("living_constant_ach_natural", true)
-    arg.setDisplayName("Air Leakage: Above-Grade Living Constant ACH Natural")
-    arg.setDescription("Air exchange rate, in constant natural Air Changes per Hour, for above-grade living space (including conditioned attic).")
-    arg.setDefaultValue(0)
+    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument("living_air_leakage_value", true)
+    arg.setDisplayName("Air Leakage: Above-Grade Living Value")
+    arg.setDescription("ACH50=Air exchange rate, in Air Changes per Hour at 50 Pascals (ACH50), for above-grade living space (including conditioned attic). CFM50= Air exchange rate, in CFM at 50 Pascals (CFM50), for above-grade living space (including conditioned attic). ConstantACHnatural=Air exchange rate, in constant natural Air Changes per Hour, for above-grade living space (including conditioned attic).")
+    arg.setDefaultValue(3)
     args << arg
 
     arg = OpenStudio::Measure::OSArgument::makeDoubleArgument("vented_crawlspace_sla", true)
@@ -1939,8 +1943,8 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
              :skylight_shgc => runner.getDoubleArgumentValue("skylight_shgc", user_arguments),
              :door_area => runner.getDoubleArgumentValue("door_area", user_arguments),
              :door_rvalue => runner.getDoubleArgumentValue("door_rvalue", user_arguments),
-             :living_ach_50 => runner.getDoubleArgumentValue("living_ach_50", user_arguments),
-             :living_constant_ach_natural => runner.getDoubleArgumentValue("living_constant_ach_natural", user_arguments),
+             :living_air_leakage_units => runner.getStringArgumentValue("living_air_leakage_units", user_arguments),
+             :living_air_leakage_value => runner.getDoubleArgumentValue("living_air_leakage_value", user_arguments),
              :vented_crawlspace_sla => runner.getDoubleArgumentValue("vented_crawlspace_sla", user_arguments),
              :shelter_coefficient => runner.getStringArgumentValue("shelter_coefficient", user_arguments),
              :heating_system_type => runner.getStringArgumentValue("heating_system_type", user_arguments),
@@ -2468,13 +2472,18 @@ class HPXMLFile
   end
 
   def self.get_air_infiltration_measurement_values(runner, args)
-    if args[:living_constant_ach_natural] > 0
-      constant_ach_natural = args[:living_constant_ach_natural]
-    else
-      house_pressure = 50.0
+    if args[:living_air_leakage_units] == "ACH50"
+      house_pressure = 50
       unit_of_measure = "ACH"
-      air_leakage = args[:living_ach_50]
+      air_leakage = args[:living_air_leakage_value]
       infiltration_volume = args[:cfa] * args[:wall_height]
+    elsif args[:living_air_leakage_units] == "CFM50"
+      house_pressure = 50
+      unit_of_measure = "CFM"
+      air_leakage = args[:living_air_leakage_value]
+      infiltration_volume = args[:cfa] * args[:wall_height]
+    elsif args[:living_air_leakage_units] == "ConstantACHnatural"
+      constant_ach_natural = args[:living_air_leakage_value]
     end
 
     air_infiltration_measurement_values = { :id => "InfiltrationMeasurement",
@@ -2748,7 +2757,7 @@ class HPXMLFile
                (sub_surface_facade == Constants.FacadeRight and args[:overhangs][3]))
             overhangs_depth = args[:overhangs_depth]
             overhangs_distance_to_top_of_window = 0.0
-            overhangs_distance_to_bottom_of_window = sub_surface_height
+            overhangs_distance_to_bottom_of_window = sub_surface_height.round
           end
         elsif args[:eaves_depth] > 0
           eaves_z = args[:wall_height] * args[:num_floors]
@@ -2767,7 +2776,7 @@ class HPXMLFile
           sub_surface_z = UnitConversions.convert(sub_surface_z, "m", "ft")
           overhangs_depth = args[:eaves_depth]
           overhangs_distance_to_top_of_window = eaves_z - sub_surface_z
-          overhangs_distance_to_bottom_of_window = overhangs_distance_to_top_of_window + sub_surface_height
+          overhangs_distance_to_bottom_of_window = (overhangs_distance_to_top_of_window + sub_surface_height).round
         end
 
         window_values = { :id => "#{sub_surface.name}_#{sub_surface_facade}",
@@ -2888,11 +2897,6 @@ class HPXMLFile
     end
     heating_capacity = Float(heating_capacity)
 
-    fraction_heat_load_served = args[:heating_system_fraction_heat_load_served]
-    if heating_capacity != -1
-      heating_capacity *= fraction_heat_load_served
-    end
-
     if args[:heating_system_electric_auxiliary_energy] > 0
       electric_auxiliary_energy = args[:heating_system_electric_auxiliary_energy]
     end
@@ -2902,7 +2906,7 @@ class HPXMLFile
                               :distribution_system_idref => distribution_system_idref,
                               :heating_system_fuel => args[:heating_system_fuel],
                               :heating_capacity => heating_capacity,
-                              :fraction_heat_load_served => fraction_heat_load_served,
+                              :fraction_heat_load_served => args[:heating_system_fraction_heat_load_served],
                               :electric_auxiliary_energy => electric_auxiliary_energy }
 
     if ["Furnace", "WallFurnace", "Boiler"].include? heating_system_type
@@ -2933,11 +2937,6 @@ class HPXMLFile
     end
     cooling_capacity = Float(cooling_capacity)
 
-    fraction_cool_load_served = args[:cooling_system_fraction_cool_load_served]
-    if cooling_capacity != -1
-      cooling_capacity *= fraction_cool_load_served
-    end
-
     if cooling_system_type == "evaporative cooler"
       cooling_capacity = nil
     end
@@ -2947,7 +2946,7 @@ class HPXMLFile
                               :distribution_system_idref => distribution_system_idref,
                               :cooling_system_fuel => args[:cooling_system_fuel],
                               :cooling_capacity => cooling_capacity,
-                              :fraction_cool_load_served => fraction_cool_load_served }
+                              :fraction_cool_load_served => args[:cooling_system_fraction_cool_load_served] }
 
     if ["central air conditioner"].include? cooling_system_type
       cooling_system_values[:cooling_efficiency_seer] = args[:cooling_system_cooling_efficiency]
@@ -2979,11 +2978,6 @@ class HPXMLFile
     end
     heating_capacity = Float(heating_capacity)
 
-    heat_pump_fraction_heat_load_served = args[:heat_pump_fraction_heat_load_served]
-    if heating_capacity != -1
-      heating_capacity *= heat_pump_fraction_heat_load_served
-    end
-
     if args[:heat_pump_backup_fuel] != "none"
       backup_heating_fuel = args[:heat_pump_backup_fuel]
 
@@ -3011,19 +3005,14 @@ class HPXMLFile
     end
     cooling_capacity = Float(cooling_capacity)
 
-    heat_pump_fraction_cool_load_served = args[:heat_pump_fraction_cool_load_served]
-    if cooling_capacity != -1
-      cooling_capacity *= heat_pump_fraction_cool_load_served
-    end
-
     heat_pump_values = { :id => "HeatPump",
                          :heat_pump_type => heat_pump_type,
                          :distribution_system_idref => distribution_system_idref,
                          :heat_pump_fuel => heat_pump_fuel,
                          :heating_capacity => heating_capacity,
                          :cooling_capacity => cooling_capacity,
-                         :fraction_heat_load_served => heat_pump_fraction_heat_load_served,
-                         :fraction_cool_load_served => heat_pump_fraction_cool_load_served,
+                         :fraction_heat_load_served => args[:heat_pump_fraction_heat_load_served],
+                         :fraction_cool_load_served => args[:heat_pump_fraction_cool_load_served],
                          :backup_heating_fuel => backup_heating_fuel,
                          :backup_heating_capacity => backup_heating_capacity,
                          :backup_heating_efficiency_afue => backup_heating_efficiency_afue,
@@ -3050,13 +3039,13 @@ class HPXMLFile
       control_type = "programmable thermostat"
     end
 
-    if args[:heating_setpoint_temp] != args[:heating_setback_temp]
+    if args[:heating_setpoint_temp] != args[:heating_setback_temp] and args[:heating_setback_hours_per_week] > 0
       heating_setback_temp = args[:heating_setback_temp]
       heating_setback_hours_per_week = args[:heating_setback_hours_per_week]
       heating_setback_start_hour = args[:heating_setback_start_hour]
     end
 
-    if args[:cooling_setpoint_temp] != args[:cooling_setup_temp]
+    if args[:cooling_setpoint_temp] != args[:cooling_setup_temp] and args[:cooling_setup_hours_per_week] > 0
       cooling_setup_temp = args[:cooling_setup_temp]
       cooling_setup_hours_per_week = args[:cooling_setup_hours_per_week]
       cooling_setup_start_hour = args[:cooling_setup_start_hour]
@@ -3246,7 +3235,7 @@ class HPXMLFile
       end
       num_bathrooms = Float(num_bathrooms)
 
-      tank_volume = Waterheater.calc_nom_tankvol(args[:water_heater_tank_volume][i], fuel_type, args[:num_bedrooms], num_bathrooms)
+      tank_volume = Waterheater.calc_nom_tankvol(args[:water_heater_tank_volume][i], fuel_type, args[:num_bedrooms], num_bathrooms).round
 
       heating_capacity = args[:water_heater_heating_capacity][i]
       if heating_capacity == Constants.SizingAuto
@@ -3262,7 +3251,7 @@ class HPXMLFile
 
       if args[:water_heater_efficiency_type][i] == "EnergyFactor"
         energy_factor = args[:water_heater_efficiency][i]
-        energy_factor = Waterheater.calc_ef(energy_factor, tank_volume, fuel_type)
+        energy_factor = Waterheater.calc_ef(energy_factor, tank_volume, fuel_type).round(2)
       elsif args[:water_heater_efficiency_type][i] == "UniformEnergyFactor"
         uniform_energy_factor = args[:water_heater_efficiency][i]
       end
@@ -3284,6 +3273,8 @@ class HPXMLFile
 
       if water_heater_type == "instantaneous water heater"
         tank_volume = nil
+        heating_capacity = nil
+        recovery_efficiency = nil
       elsif water_heater_type == "space-heating boiler with tankless coil"
         fuel_type = nil
         tank_volume = nil
