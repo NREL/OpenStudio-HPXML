@@ -1847,6 +1847,17 @@ def get_hpxml_file_heating_systems_values(hpxml_file, heating_systems_values)
       heating_systems_values[i][:heating_capacity] /= 3.0
       heating_systems_values[i][:fraction_heat_load_served] = 0.333
     end
+  elsif ['hvac_multiple/base-hvac-boiler-gas-only-x3.xml'].include? hpxml_file
+    heating_systems_values[0][:heating_capacity] /= 3.0
+    heating_systems_values[0][:fraction_heat_load_served] = 0.333
+    heating_systems_values[0][:electric_auxiliary_energy] /= 3.0
+    heating_systems_values << heating_systems_values[0].dup
+    heating_systems_values[1][:id] = "HeatingSystem2"
+    heating_systems_values[1][:distribution_system_idref] = "HVACDistribution2"
+    heating_systems_values << heating_systems_values[0].dup
+    heating_systems_values[2][:id] = "HeatingSystem3"
+    heating_systems_values[2][:fraction_heat_load_served] = 0.335
+    heating_systems_values[2][:distribution_system_idref] = "HVACDistribution3"
   elsif ['invalid_files/unattached-hvac-distribution.xml'].include? hpxml_file
     heating_systems_values[0][:distribution_system_idref] = "foobar"
   elsif ['invalid_files/hvac-invalid-distribution-system-type.xml'].include? hpxml_file
