@@ -2378,7 +2378,7 @@ class OSModel
 
         load_frac = heating_system_values[:fraction_heat_load_served]
         if @total_frac_remaining_heat_load_served > 0
-          if (load_frac - @total_frac_remaining_heat_load_served).abs <= 0.01
+          if (load_frac - @total_frac_remaining_heat_load_served).abs <= 0.010001
             # Last equipment to handle all the remaining load (within 0.01 tolerance)
             load_frac = @total_frac_remaining_heat_load_served
             sequential_load_frac = 1.0 # Fraction of remaining load served by this system
