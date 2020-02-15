@@ -2,8 +2,8 @@
   <schema_version>3.0</schema_version>
   <name>hpxm_lto_openstudio</name>
   <uid>b1543b30-9465-45ff-ba04-1d1f85e763bc</uid>
-  <version_id>7e24fafe-8f39-4699-918a-70a73e875067</version_id>
-  <version_modified>20200207T144708Z</version_modified>
+  <version_id>24f8ec69-07b3-4f81-b0a9-41a8a011d578</version_id>
+  <version_modified>20200215T003004Z</version_modified>
   <xml_checksum>D8922A73</xml_checksum>
   <class_name>HPXMLtoOpenStudio</class_name>
   <display_name>HPXML to OpenStudio Translator</display_name>
@@ -465,7 +465,31 @@
       <filename>measure.rb</filename>
       <filetype>rb</filetype>
       <usage_type>script</usage_type>
-      <checksum>5BCE5339</checksum>
+      <checksum>B783818C</checksum>
+    </file>
+    <file>
+      <filename>ERIRatedHome.csv</filename>
+      <filetype>csv</filetype>
+      <usage_type>test</usage_type>
+      <checksum>0101290A</checksum>
+    </file>
+    <file>
+      <filename>ERIRatedHome.xml</filename>
+      <filetype>xml</filetype>
+      <usage_type>test</usage_type>
+      <checksum>A2750A6C</checksum>
+    </file>
+    <file>
+      <filename>ERIRatedHome_ERI.csv</filename>
+      <filetype>csv</filetype>
+      <usage_type>test</usage_type>
+      <checksum>6AF95BD3</checksum>
+    </file>
+    <file>
+      <filename>hpxml_translator_test.rb~Updated upstream</filename>
+      <filetype>rb~Updated upstream</filetype>
+      <usage_type>test</usage_type>
+      <checksum>79CE093D</checksum>
     </file>
   </files>
 </measure>

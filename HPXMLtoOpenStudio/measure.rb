@@ -1288,6 +1288,8 @@ class OSModel
   def self.add_foundation_walls_slabs(runner, model, building, spaces)
     # Get foundation types
     foundation_types = []
+    fndwall_slab_size = 0
+    fndwall_size = building.elements["BuildingDetails/Enclosure/FoundationWalls"].elements.size
     building.elements.each("BuildingDetails/Enclosure/Slabs/Slab/InteriorAdjacentTo") do |int_adjacent_to|
       next if foundation_types.include? int_adjacent_to.text
 
@@ -1300,6 +1302,7 @@ class OSModel
       slabs = []
       building.elements.each("BuildingDetails/Enclosure/FoundationWalls/FoundationWall[InteriorAdjacentTo='#{foundation_type}']") do |fnd_wall|
         fnd_walls << fnd_wall
+        fndwall_slab_size += 1
       end
       building.elements.each("BuildingDetails/Enclosure/Slabs/Slab[InteriorAdjacentTo='#{foundation_type}']") do |slab|
         slabs << slab
@@ -1446,6 +1449,9 @@ class OSModel
         apply_wall_construction(runner, model, [surface], fnd_wall_values[:id], wall_type, assembly_r,
                                 drywall_thick_in, film_r, mat_ext_finish)
       end
+    end
+    if fndwall_slab_size < fndwall_size
+      fail "There existing foundation wall(s) not attached to any slab. Please double check."
     end
   end
 
