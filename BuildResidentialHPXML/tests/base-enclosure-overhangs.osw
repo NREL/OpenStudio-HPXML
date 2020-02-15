@@ -136,6 +136,7 @@
         "num_bedrooms": 3,
         "num_floors": 1,
         "num_occupants": "auto",
+        "num_units": 1,
         "orientation": 180,
         "oven_is_convection": false,
         "overhangs_back_depth": 2.5,

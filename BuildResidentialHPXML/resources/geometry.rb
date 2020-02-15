@@ -1470,6 +1470,8 @@ class Geometry
                               model:,
                               cfa:,
                               wall_height:,
+                              num_units:,
+                              num_floors:,
                               aspect_ratio:,
                               level:,
                               horizontal_location:,
@@ -1482,14 +1484,12 @@ class Geometry
                               foundation_type:,
                               foundation_height:,
                               **remainder)
-    num_units = 9 # FIXME
-    num_floors = 3 # FIXME
     corridor_position = "None" # FIXME
     if foundation_type == "basement - conditioned"
       foundation_type = "basement - unconditioned" # FIXME
     end
 
-    if foundation_type == "slab"
+    if ["slab", "other housing unit below"].include? foundation_type
       foundation_height = 0.0
     elsif foundation_type == "basement - unconditioned"
       foundation_height = 8.0
@@ -1497,9 +1497,9 @@ class Geometry
     num_units_per_floor = num_units / num_floors
     num_units_per_floor_actual = num_units_per_floor
 
-    if (num_floors > 1) and (level != "Bottom")
+    if (num_floors > 1) and (level != "Bottom") and foundation_height != 0.0
       runner.registerWarning("Unit is not on the bottom floor, setting foundation height to 0.")
-      foundation_height = 0
+      foundation_height = 0.0
     end
 
     if (num_units_per_floor % 2 == 0) and (corridor_position == "Double-Loaded Interior" or corridor_position == "Double Exterior")
@@ -1517,10 +1517,10 @@ class Geometry
       runner.registerError("Starting model is not empty.")
       return false
     end
-    # if foundation_type.include? "crawlspace" and (foundation_height < 1.5 or foundation_height > 5.0)
-    #   runner.registerError("The crawlspace height can be set between 1.5 and 5 ft.")
-    #   return false
-    # end
+    if foundation_type.include? "crawlspace" and (foundation_height < 1.5 or foundation_height > 5.0)
+      runner.registerError("The crawlspace height can be set between 1.5 and 5 ft.")
+      return false
+    end
     if num_units % num_floors != 0
       runner.registerError("The number of units must be divisible by the number of floors.")
       return false
