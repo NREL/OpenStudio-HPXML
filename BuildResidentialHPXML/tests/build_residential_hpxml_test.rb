@@ -100,9 +100,11 @@ class BuildResidentialHPXMLTest < MiniTest::Test
     }
 
     # Sort elements so we can diff them
+    _sort_roof_elements(hpxml_docs)
     _sort_wall_elements(hpxml_docs)
     _sort_fwall_elements(hpxml_docs)
     _sort_floor_elements(hpxml_docs)
+    _sort_slab_elements(hpxml_docs)
     _sort_window_elements(hpxml_docs)
 
     # Delete elements that we aren't going to diff
@@ -169,6 +171,33 @@ class BuildResidentialHPXMLTest < MiniTest::Test
   def _delete_elements(hpxml_docs, element)
     hpxml_docs.each do |key, hpxml_doc|
       XMLHelper.delete_element(hpxml_doc, element)
+    end
+  end
+
+  def _sort_roof_elements(hpxml_docs)
+    sorted_elements = {}
+    ["Rakefile", "BuildResidentialHPXML"].each do |version|
+      elements = {}
+      hpxml_docs[version].elements.each("HPXML/Building/BuildingDetails/Enclosure/Roofs/Roof") do |roof|
+        roof_values = HPXML.get_roof_values(roof: roof)
+        roof_values.delete(:exterior_adjacent_to)
+        elements[roof_values[:area]] = roof_values
+      end
+      sorted_elements[version] = elements.sort_by { |area, roof| area }
+    end
+
+    _delete_elements(hpxml_docs, "HPXML/Building/BuildingDetails/Enclosure/Roofs")
+
+    sorted_elements.each do |version, elements|
+      elements.each do |roof|
+        roof_values = roof[1]
+        roof_values.each do |key, value|
+          next unless value.nil?
+
+          roof_values.delete(key)
+        end
+        HPXML.add_roof(hpxml: hpxml_docs[version].elements["HPXML"], **roof_values)
+      end
     end
   end
 
@@ -246,6 +275,33 @@ class BuildResidentialHPXMLTest < MiniTest::Test
           framefloor_values.delete(key)
         end
         HPXML.add_framefloor(hpxml: hpxml_docs[version].elements["HPXML"], **framefloor_values)
+      end
+    end
+  end
+
+  def _sort_slab_elements(hpxml_docs)
+    sorted_elements = {}
+    ["Rakefile", "BuildResidentialHPXML"].each do |version|
+      elements = {}
+      hpxml_docs[version].elements.each("HPXML/Building/BuildingDetails/Enclosure/Slabs/Slab") do |slab|
+        slab_values = HPXML.get_slab_values(slab: slab)
+        slab_values.delete(:exterior_adjacent_to)
+        elements[slab_values[:area]] = slab_values
+      end
+      sorted_elements[version] = elements.sort_by { |area, slab| area }
+    end
+
+    _delete_elements(hpxml_docs, "HPXML/Building/BuildingDetails/Enclosure/Slabs")
+
+    sorted_elements.each do |version, elements|
+      elements.each do |slab|
+        slab_values = slab[1]
+        slab_values.each do |key, value|
+          next unless value.nil?
+
+          slab_values.delete(key)
+        end
+        HPXML.add_slab(hpxml: hpxml_docs[version].elements["HPXML"], **slab_values)
       end
     end
   end

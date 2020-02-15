@@ -109,7 +109,7 @@ def create_osws
     'base-foundation-unconditioned-basement.osw' => 'base.osw',
     # 'base-foundation-unconditioned-basement-above-grade.osw' => 'base.osw',
     # 'base-foundation-unconditioned-basement-assembly-r.osw' => 'base.osw',
-    # 'base-foundation-unconditioned-basement-wall-insulation.osw' => 'base.osw',
+    'base-foundation-unconditioned-basement-wall-insulation.osw' => 'base.osw',
     'base-foundation-unvented-crawlspace.osw' => 'base.osw',
     'base-foundation-vented-crawlspace.osw' => 'base.osw',
     # 'base-foundation-walkout-basement.osw' => 'base.osw', # 1 kiva object instead of 4
@@ -314,6 +314,7 @@ def get_values(osw_file, step)
     step.setArgument("unit_multiplier", 1)
     step.setArgument("cfa", 2700.0)
     step.setArgument("wall_height", 8.0)
+    step.setArgument("num_units", 1)
     step.setArgument("num_floors", 1)
     step.setArgument("aspect_ratio", 1.5)
     step.setArgument("level", "Bottom")
@@ -914,6 +915,8 @@ def get_values(osw_file, step)
   elsif ['base-enclosure-adiabatic-surfaces.osw'].include? osw_file
     step.setArgument("unit_type", "multifamily")
     step.setArgument("cfa", 1350.0)
+    step.setArgument("num_units", 9)
+    step.setArgument("num_floors", 3)
     step.setArgument("level", "Middle")
     step.setArgument("horizontal_location", "Middle")
     step.setArgument("front_window_area", 37.8)
@@ -935,8 +938,15 @@ def get_values(osw_file, step)
   elsif ['base-enclosure-beds-5.osw'].include? osw_file
     step.setArgument("num_bedrooms", 5)
   elsif ['base-enclosure-garage.osw'].include? osw_file
-    step.setArgument("garage_width", 12.0)
+    step.setArgument("garage_width", 20.0)
+    step.setArgument("garage_protrusion", 0.5)
     step.setArgument("right_window_area", 12.0)
+    step.setArgument("supply_duct_location", "garage")
+    step.setArgument("return_duct_location", "garage")
+    step.setArgument("water_heater_location_1", "garage")
+    step.setArgument("clothes_washer_location", "garage")
+    step.setArgument("clothes_dryer_location", "garage")
+    step.setArgument("refrigerator_location", "garage")
   elsif ['base-enclosure-infil-cfm50.osw'].include? osw_file
     step.setArgument("living_air_leakage_units", "CFM50")
     step.setArgument("living_air_leakage_value", 1080)
@@ -1008,6 +1018,7 @@ def get_values(osw_file, step)
     step.setArgument("slab_under_width", 4)
   elsif ['base-foundation-conditioned-basement-wall-interior-insulation.osw'].include? osw_file
     step.setArgument("foundation_wall_r", 18.9)
+    step.setArgument("foundation_wall_distance_to_top", 1.0)
   elsif ['base-foundation-multiple.osw'].include? osw_file
 
   elsif ['base-foundation-slab.osw'].include? osw_file

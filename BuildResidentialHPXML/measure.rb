@@ -77,10 +77,17 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     arg.setDefaultValue(8.0)
     args << arg
 
+    arg = OpenStudio::Measure::OSArgument::makeIntegerArgument("num_units", true)
+    arg.setDisplayName("Geometry: Number of Units")
+    arg.setUnits("#")
+    arg.setDescription("The number of units in the building.")
+    arg.setDefaultValue(1)
+    args << arg
+
     arg = OpenStudio::Measure::OSArgument::makeIntegerArgument("num_floors", true)
     arg.setDisplayName("Geometry: Number of Floors")
     arg.setUnits("#")
-    arg.setDescription("The number of floors above grade.")
+    arg.setDescription("The number of floors above grade (in the unit if single-family, and in the building if multifamily).")
     arg.setDefaultValue(2)
     args << arg
 
@@ -1889,6 +1896,7 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
              :unit_multiplier => runner.getIntegerArgumentValue("unit_multiplier", user_arguments),
              :cfa => runner.getDoubleArgumentValue("cfa", user_arguments),
              :wall_height => runner.getDoubleArgumentValue("wall_height", user_arguments),
+             :num_units => runner.getIntegerArgumentValue("num_units", user_arguments),
              :num_floors => runner.getIntegerArgumentValue("num_floors", user_arguments),
              :aspect_ratio => runner.getDoubleArgumentValue("aspect_ratio", user_arguments),
              :level => runner.getStringArgumentValue("level", user_arguments),
@@ -2343,6 +2351,11 @@ class HPXMLFile
   end
 
   def self.create_geometry_envelope(runner, model, args)
+    if args[:unit_type] == "multifamily" and args[:level] != "Bottom"
+      args[:foundation_type] = "other housing unit below"
+      args[:foundation_height] = 0.0
+    end
+
     if args[:unit_type] == "single-family detached"
       success = Geometry.create_single_family_detached(runner: runner, model: model, **args)
     elsif args[:unit_type] == "single-family attached"
@@ -2745,7 +2758,7 @@ class HPXMLFile
       if ["crawlspace - vented", "crawlspace - unvented", "basement - unconditioned", "basement - conditioned", "ambient"].include? interior_adjacent_to
         has_foundation_walls = true
       end
-      exposed_perimeter = Geometry.calculate_exposed_perimeter(model, [surface], has_foundation_walls)
+      exposed_perimeter = Geometry.calculate_exposed_perimeter(model, [surface], has_foundation_walls).round
 
       if ["living space", "garage"].include? interior_adjacent_to
         depth_below_grade = 0
