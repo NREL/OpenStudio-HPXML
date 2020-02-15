@@ -1289,7 +1289,7 @@ class OSModel
     # Get foundation types
     foundation_types = []
     fndwall_slab_size = 0
-    fndwall_size = building.elements["BuildingDetails/Enclosure/FoundationWalls"].elements.size
+    fndwall_size = (building.elements["BuildingDetails/Enclosure/FoundationWalls"].nil?) ? 0 : building.elements["BuildingDetails/Enclosure/FoundationWalls"].elements.size
     building.elements.each("BuildingDetails/Enclosure/Slabs/Slab/InteriorAdjacentTo") do |int_adjacent_to|
       next if foundation_types.include? int_adjacent_to.text
 
