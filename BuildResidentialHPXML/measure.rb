@@ -2125,6 +2125,15 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
              :plug_loads_weekend_fractions => runner.getStringArgumentValue("plug_loads_weekend_fractions", user_arguments),
              :plug_loads_monthly_multipliers => runner.getStringArgumentValue("plug_loads_monthly_multipliers", user_arguments) }
 
+    # Argument error checks
+    errors = check_for_argument_errors(args)
+    unless errors.empty?
+      errors.each do |error|
+        runner.registerError(error)
+      end
+      return false
+    end
+
     # Create HPXML file
     hpxml_doc = HPXMLFile.create(runner, model, args)
     if not hpxml_doc
@@ -2148,6 +2157,18 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
 
     XMLHelper.write_file(hpxml_doc, hpxml_path)
     runner.registerInfo("Wrote file: #{hpxml_path}")
+  end
+
+  def check_for_argument_errors(args)
+    errors = []
+
+    error = (["heat pump water heater"].include? args[:water_heater_type][0] and args[:water_heater_fuel_type][0] != "electricity")
+    errors << "water_heater_type_1=#{args[:water_heater_type][0]} and water_heater_fuel_type_1=#{args[:water_heater_fuel_type][0]}" if error
+
+    error = (["heat pump water heater"].include? args[:water_heater_type][1] and args[:water_heater_fuel_type][1] != "electricity")
+    errors << "water_heater_type_2=#{args[:water_heater_type][1]} and water_heater_fuel_type_2=#{args[:water_heater_fuel_type][1]}" if error
+
+    return errors
   end
 
   def validate_hpxml(runner, hpxml_path, hpxml_doc, schemas_dir)
