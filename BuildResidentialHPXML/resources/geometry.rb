@@ -582,7 +582,7 @@ class Geometry
             garage_attic_space.setThermalZone(living_zone)
           else
             if num_floors > 1
-              garage_attic_space_type_name = "vented attic"
+              garage_attic_space_type_name = attic_space_type_name
               garage_attic_space.setThermalZone(attic_zone)
             else
               garage_attic_space_type_name = "garage"
