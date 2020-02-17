@@ -15,8 +15,8 @@ def create_osws
     'base-appliances-propane.osw' => 'base.osw',
     'base-appliances-wood.osw' => 'base.osw',
 
-    # 'base-atticroof-cathedral.osw' => 'base.osw',
-    # 'base-atticroof-conditioned.osw' => 'base.osw',
+    # 'base-atticroof-cathedral.osw' => 'base.osw', # TODO: conditioned attic ceiling heights are greater than wall height
+    # 'base-atticroof-conditioned.osw' => 'base.osw', # TODO: has both conditioned and unconditioned attics
     'base-atticroof-flat.osw' => 'base.osw',
     'base-atticroof-radiant-barrier.osw' => 'base.osw',
     'base-atticroof-unvented-insulated-roof.osw' => 'base.osw',
@@ -81,7 +81,7 @@ def create_osws
     'base-enclosure-beds-2.osw' => 'base.osw',
     'base-enclosure-beds-4.osw' => 'base.osw',
     'base-enclosure-beds-5.osw' => 'base.osw',
-    # 'base-enclosure-garage.osw' => 'base.osw',
+    # 'base-enclosure-garage.osw' => 'base.osw', TODO: should garage attic be of type garage or attic?
     'base-enclosure-infil-cfm50.osw' => 'base.osw',
     # 'base-enclosure-no-natural-ventilation.osw' => 'base.osw',
     'base-enclosure-overhangs.osw' => 'base.osw',
@@ -107,7 +107,7 @@ def create_osws
     # 'base-foundation-multiple.osw' => 'base.osw', # 1 kiva object instead of 2
     'base-foundation-slab.osw' => 'base.osw',
     'base-foundation-unconditioned-basement.osw' => 'base.osw',
-    # 'base-foundation-unconditioned-basement-above-grade.osw' => 'base.osw',
+    # 'base-foundation-unconditioned-basement-above-grade.osw' => 'base.osw', # TODO: add foundation wall windows
     # 'base-foundation-unconditioned-basement-assembly-r.osw' => 'base.osw',
     'base-foundation-unconditioned-basement-wall-insulation.osw' => 'base.osw',
     'base-foundation-unvented-crawlspace.osw' => 'base.osw',
@@ -938,8 +938,8 @@ def get_values(osw_file, step)
   elsif ['base-enclosure-beds-5.osw'].include? osw_file
     step.setArgument("num_bedrooms", 5)
   elsif ['base-enclosure-garage.osw'].include? osw_file
-    step.setArgument("garage_width", 20.0)
-    step.setArgument("garage_protrusion", 0.5)
+    step.setArgument("garage_width", 30.0)
+    step.setArgument("garage_protrusion", 1.0)
     step.setArgument("right_window_area", 12.0)
     step.setArgument("supply_duct_location", "garage")
     step.setArgument("return_duct_location", "garage")
