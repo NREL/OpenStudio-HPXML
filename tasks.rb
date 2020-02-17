@@ -232,7 +232,9 @@ def create_osws
     'hvac_partial/base-hvac-mini-split-heat-pump-ducted-33percent.osw' => 'base-hvac-mini-split-heat-pump-ducted.osw',
     'hvac_partial/base-hvac-room-ac-only-33percent.osw' => 'base-hvac-room-ac-only.osw',
     'hvac_partial/base-hvac-stove-oil-only-33percent.osw' => 'base-hvac-stove-oil-only.osw',
-    'hvac_partial/base-hvac-wall-furnace-propane-only-33percent.osw' => 'base-hvac-wall-furnace-propane-only.osw'
+    'hvac_partial/base-hvac-wall-furnace-propane-only-33percent.osw' => 'base-hvac-wall-furnace-propane-only.osw',
+
+    'invalid_files/non-electric-heat-pump-water-heater.osw' => 'base.osw'
   }
 
   puts "Generating #{osws_files.size} OSW files..."
@@ -1538,6 +1540,9 @@ def get_values(osw_file, step)
     step.setArgument("heating_system_fraction_heat_load_served", 0.33333)
   elsif ['hvac_partial/base-hvac-wall-furnace-propane-only-33percent.osw'].include? osw_file
     step.setArgument("heating_system_fraction_heat_load_served", 0.33333)
+  elsif ['invalid_files/non-electric-heat-pump-water-heater.osw'].include? osw_file
+    step.setArgument("water_heater_type_1", "heat pump water heater")
+    step.setArgument("water_heater_fuel_type_1", "natural gas")
   end
   return step
 end
