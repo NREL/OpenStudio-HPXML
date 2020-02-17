@@ -82,6 +82,42 @@ class BuildResidentialHPXMLTest < MiniTest::Test
     assert false if fail
   end
 
+  def test_invalid_workflows
+    this_dir = File.dirname(__FILE__)
+    measures_dir = File.join(this_dir, "../..")
+
+    expected_error_msgs = {
+      'non-electric-heat-pump-water-heater.osw' => "water_heater_type_1=heat pump water heater and water_heater_fuel_type_1=natural gas"
+    }
+
+    measures = {}
+    Dir["#{this_dir}/invalid_files/*.osw"].sort.each do |osw|
+      puts "\nTesting #{File.basename(osw)}..."
+
+      _setup(this_dir)
+      osw_hash = JSON.parse(File.read(osw))
+      osw_hash["steps"].each do |step|
+        measures[step["measure_dir_name"]] = [step["arguments"]]
+        model = OpenStudio::Model::Model.new
+        runner = OpenStudio::Measure::OSRunner.new(OpenStudio::WorkflowJSON.new)
+
+        # Apply measure
+        success = apply_measures(measures_dir, measures, runner, model)
+
+        # Report warnings/errors
+        runner.result.stepWarnings.each do |s|
+          puts "Warning: #{s}"
+        end
+        runner.result.stepErrors.each do |s|
+          puts "Error: #{s}"
+          assert_equal(s, expected_error_msgs[File.basename(osw)])
+        end
+
+        assert(!success)
+      end
+    end
+  end
+
   private
 
   def _check_hpxmls(workflow_dir, built_dir, test_dir, hpxml_path)
