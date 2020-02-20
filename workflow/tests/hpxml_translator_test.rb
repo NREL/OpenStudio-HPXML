@@ -615,11 +615,13 @@ class HPXMLTest < MiniTest::Test
 
   def _verify_simulation_outputs(runner, rundir, hpxml_path, results)
     # Check that eplusout.err has no lines that include "Blank Schedule Type Limits Name input"
+    # Check that eplusout.err has no lines that include "FixViewFactors: View factors not complete"
     File.readlines(File.join(rundir, "eplusout.err")).each do |err_line|
       next if err_line.include? 'Schedule:Constant="ALWAYS ON CONTINUOUS", Blank Schedule Type Limits Name input'
       next if err_line.include? 'Schedule:Constant="ALWAYS OFF DISCRETE", Blank Schedule Type Limits Name input'
 
       assert_equal(err_line.include?("Blank Schedule Type Limits Name input"), false)
+      assert_equal(err_line.include?("FixViewFactors: View factors not complete"), false)
     end
 
     sql_path = File.join(rundir, "eplusout.sql")
