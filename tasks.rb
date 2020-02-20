@@ -1254,6 +1254,10 @@ def get_hpxml_file_foundation_walls_values(hpxml_file, foundation_walls_values)
         foundation_walls_values[-1][:id] += i.to_s
       end
     end
+  elsif ['invalid_files/unattached-foundation-wall.xml'].include? hpxml_file
+    foundation_walls_values << foundation_walls_values[0].dup
+    foundation_walls_values[1][:id] = "FoundationWall2"
+    foundation_walls_values[1][:interior_adjacent_to] = "garage"
   end
   return foundation_walls_values
 end

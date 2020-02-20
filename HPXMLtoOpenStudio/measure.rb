@@ -1288,8 +1288,13 @@ class OSModel
   def self.add_foundation_walls_slabs(runner, model, building, spaces)
     # Get foundation types
     foundation_types = []
-    fndwall_slab_size = 0
-    fndwall_size = (building.elements["BuildingDetails/Enclosure/FoundationWalls"].nil?) ? 0 : building.elements["BuildingDetails/Enclosure/FoundationWalls"].elements.size
+    # Used to check foundation wall attachment
+    all_fndwalls = []
+    slab_fndwalls = []
+    building.elements.each("BuildingDetails/Enclosure/FoundationWalls/FoundationWall") do |fnd_wall|
+      all_fndwalls << fnd_wall
+    end
+
     building.elements.each("BuildingDetails/Enclosure/Slabs/Slab/InteriorAdjacentTo") do |int_adjacent_to|
       next if foundation_types.include? int_adjacent_to.text
 
@@ -1302,7 +1307,7 @@ class OSModel
       slabs = []
       building.elements.each("BuildingDetails/Enclosure/FoundationWalls/FoundationWall[InteriorAdjacentTo='#{foundation_type}']") do |fnd_wall|
         fnd_walls << fnd_wall
-        fndwall_slab_size += 1
+        slab_fndwalls << fnd_wall
       end
       building.elements.each("BuildingDetails/Enclosure/Slabs/Slab[InteriorAdjacentTo='#{foundation_type}']") do |slab|
         slabs << slab
@@ -1450,8 +1455,15 @@ class OSModel
                                 drywall_thick_in, film_r, mat_ext_finish)
       end
     end
-    if fndwall_slab_size < fndwall_size
-      fail "There existing foundation wall(s) not attached to any slab. Please double check."
+    if slab_fndwalls.size < all_fndwalls.size
+      error_msg = ""
+      (all_fndwalls - slab_fndwalls).each do |single_fnd_wall|
+        single_fnd_wall_values = HPXML.get_foundation_wall_values(foundation_wall: single_fnd_wall)
+        wall_id = single_fnd_wall_values[:id]
+        adjacent_to = single_fnd_wall_values[:interior_adjacent_to]
+        error_msg += "Foundation wall: '#{wall_id}' is adjacent to '#{adjacent_to}' but no corresponding slab was found adjacent to '#{adjacent_to}'. Please double check.\n"
+      end
+      fail error_msg
     end
   end
 
