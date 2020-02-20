@@ -2231,6 +2231,23 @@ class OSModel
     end
   end
 
+  def self.calc_load_fraction(load_fraction, remaining_fraction)
+    if remaining_fraction > 0
+      if (load_fraction - remaining_fraction).abs <= 0.010001
+        # Last equipment to handle all the remaining load (within 0.01 tolerance)
+        load_fraction = remaining_fraction
+        sequential_load_frac = 1.0 # Fraction of remaining load served by this system
+      else
+        sequential_load_frac = load_fraction / remaining_fraction # Fraction of remaining load served by this system
+      end
+    else
+      sequential_load_frac = 0.0
+    end
+    remaining_fraction -= load_fraction
+
+    return sequential_load_frac
+  end
+
   def self.add_cooling_system(runner, model, building)
     return if @use_only_ideal_air
 
@@ -2247,18 +2264,7 @@ class OSModel
       end
 
       load_frac = cooling_system_values[:fraction_cool_load_served]
-      if @total_frac_remaining_cool_load_served > 0
-        if (load_frac - @total_frac_remaining_cool_load_served).abs <= 0.010001
-          # Last equipment to handle all the remaining load (within 0.01 tolerance)
-          load_frac = @total_frac_remaining_cool_load_served
-          sequential_load_frac = 1.0 # Fraction of remaining load served by this system
-        else
-          sequential_load_frac = load_frac / @total_frac_remaining_cool_load_served # Fraction of remaining load served by this system
-        end
-      else
-        sequential_load_frac = 0.0
-      end
-      @total_frac_remaining_cool_load_served -= load_frac
+      sequential_load_frac = calc_load_fraction(load_frac, @total_frac_remaining_cool_load_served)
 
       sys_id = cooling_system_values[:id]
 
@@ -2377,18 +2383,7 @@ class OSModel
         end
 
         load_frac = heating_system_values[:fraction_heat_load_served]
-        if @total_frac_remaining_heat_load_served > 0
-          if (load_frac - @total_frac_remaining_heat_load_served).abs <= 0.010001
-            # Last equipment to handle all the remaining load (within 0.01 tolerance)
-            load_frac = @total_frac_remaining_heat_load_served
-            sequential_load_frac = 1.0 # Fraction of remaining load served by this system
-          else
-            sequential_load_frac = load_frac / @total_frac_remaining_heat_load_served # Fraction of remaining load served by this system
-          end
-        else
-          sequential_load_frac = 0.0
-        end
-        @total_frac_remaining_heat_load_served -= load_frac
+        sequential_load_frac = calc_load_fraction(load_frac, @total_frac_remaining_heat_load_served)
 
         @hvac_map[sys_id] = []
 
@@ -2481,32 +2476,10 @@ class OSModel
       end
 
       load_frac_heat = heat_pump_values[:fraction_heat_load_served]
-      if @total_frac_remaining_heat_load_served > 0
-        if (load_frac_heat - @total_frac_remaining_heat_load_served).abs <= 0.010001
-          # Last equipment to handle all the remaining load (within 0.01 tolerance)
-          load_frac_heat = @total_frac_remaining_heat_load_served
-          sequential_load_frac_heat = 1.0 # Fraction of remaining load served by this system
-        else
-          sequential_load_frac_heat = load_frac_heat / @total_frac_remaining_heat_load_served # Fraction of remaining load served by this system
-        end
-      else
-        sequential_load_frac_heat = 0.0
-      end
-      @total_frac_remaining_heat_load_served -= load_frac_heat
+      sequential_load_frac_heat = calc_load_fraction(load_frac_heat, @total_frac_remaining_heat_load_served)
 
       load_frac_cool = heat_pump_values[:fraction_cool_load_served]
-      if @total_frac_remaining_cool_load_served > 0
-        if (load_frac_cool - @total_frac_remaining_cool_load_served).abs <= 0.010001
-          # Last equipment to handle all the remaining load (within 0.01 tolerance)
-          load_frac_cool = @total_frac_remaining_cool_load_served
-          sequential_load_frac_cool = 1.0 # Fraction of remaining load served by this system
-        else
-          sequential_load_frac_cool = load_frac_cool / @total_frac_remaining_cool_load_served # Fraction of remaining load served by this system
-        end
-      else
-        sequential_load_frac_cool = 0.0
-      end
-      @total_frac_remaining_cool_load_served -= load_frac_cool
+      sequential_load_frac_cool = calc_load_fraction(load_frac_cool, @total_frac_remaining_cool_load_served)
 
       backup_heat_fuel = heat_pump_values[:backup_heating_fuel]
       if not backup_heat_fuel.nil?
