@@ -1301,6 +1301,7 @@ class OSModel
       foundation_types << int_adjacent_to.text
     end
 
+    error_msg = ""
     foundation_types.each do |foundation_type|
       # Get attached foundation walls/slabs
       fnd_walls = []
@@ -1311,6 +1312,16 @@ class OSModel
       end
       building.elements.each("BuildingDetails/Enclosure/Slabs/Slab[InteriorAdjacentTo='#{foundation_type}']") do |slab|
         slabs << slab
+      end
+
+      # Check for slabs without corresponding foundation walls
+      if fnd_walls.size == 0 and foundation_type != "living space"
+        slabs.each do |slab|
+          slab_values = HPXML.get_slab_values(slab: slab)
+          slab_id = slab_values[:id]
+          adjacent_to = slab_values[:interior_adjacent_to]
+          error_msg += "Slab '#{slab_id}' is adjacent to '#{adjacent_to}' but no corresponding foundation walls were found adjacent to '#{adjacent_to}'.\n"
+        end
       end
 
       # Calculate combinations of slabs/walls for each Kiva instance
@@ -1455,16 +1466,17 @@ class OSModel
                                 drywall_thick_in, film_r, mat_ext_finish)
       end
     end
+
+    # Check for foundation walls without corresponding slabs
     if slab_fndwalls.size < all_fndwalls.size
-      error_msg = ""
       (all_fndwalls - slab_fndwalls).each do |single_fnd_wall|
         single_fnd_wall_values = HPXML.get_foundation_wall_values(foundation_wall: single_fnd_wall)
         wall_id = single_fnd_wall_values[:id]
         adjacent_to = single_fnd_wall_values[:interior_adjacent_to]
-        error_msg += "Foundation wall: '#{wall_id}' is adjacent to '#{adjacent_to}' but no corresponding slab was found adjacent to '#{adjacent_to}'. Please double check.\n"
+        error_msg += "Foundation wall '#{wall_id}' is adjacent to '#{adjacent_to}' but no corresponding slab was found adjacent to '#{adjacent_to}'.\n"
       end
-      fail error_msg
     end
+    fail error_msg unless error_msg.empty?
   end
 
   def self.add_foundation_wall(runner, model, spaces, fnd_wall_values, slab_frac,
