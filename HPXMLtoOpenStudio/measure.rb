@@ -2263,11 +2263,14 @@ class OSModel
       if clg_type == "central air conditioner"
 
         seer = cooling_system_values[:cooling_efficiency_seer]
-        num_speeds = get_ac_num_speeds(seer)
+        compressor_type = cooling_system_values[:compressor_type]
+        if compressor_type.nil?
+          compressor_type = get_compressor_type(seer)
+        end
         crankcase_kw = 0.05 # From RESNET Publication No. 002-2017
         crankcase_temp = 50.0 # From RESNET Publication No. 002-2017
 
-        if num_speeds == "1-Speed"
+        if compressor_type == "single stage"
 
           if cooling_system_values[:cooling_shr].nil?
             shrs = [0.73]
@@ -2281,7 +2284,7 @@ class OSModel
                                        cool_capacity_btuh, airflow_rate, load_frac,
                                        sequential_load_frac, @living_zone,
                                        @hvac_map, sys_id)
-        elsif num_speeds == "2-Speed"
+        elsif compressor_type == "two stage"
 
           if cooling_system_values[:cooling_shr].nil?
             shrs = [0.71, 0.73]
@@ -2295,7 +2298,7 @@ class OSModel
                                        cool_capacity_btuh, load_frac,
                                        sequential_load_frac, @living_zone,
                                        @hvac_map, sys_id)
-        elsif num_speeds == "Variable-Speed"
+        elsif compressor_type == "variable speed"
 
           if cooling_system_values[:cooling_shr].nil?
             shrs = [0.87, 0.80, 0.79, 0.78]
@@ -2309,10 +2312,6 @@ class OSModel
                                        cool_capacity_btuh, load_frac,
                                        sequential_load_frac, @living_zone,
                                        @hvac_map, sys_id)
-        else
-
-          fail "Unexpected number of speeds (#{num_speeds}) for cooling system."
-
         end
 
       elsif clg_type == "room air conditioner"
@@ -2532,12 +2531,15 @@ class OSModel
         seer = heat_pump_values[:cooling_efficiency_seer]
         hspf = heat_pump_values[:heating_efficiency_hspf]
 
-        num_speeds = get_ashp_num_speeds_by_seer(seer)
+        compressor_type = heat_pump_values[:compressor_type]
+        if compressor_type.nil?
+          compressor_type = get_compressor_type(seer)
+        end
 
         crankcase_kw = 0.05 # From RESNET Publication No. 002-2017
         crankcase_temp = 50.0 # From RESNET Publication No. 002-2017
 
-        if num_speeds == "1-Speed"
+        if compressor_type == "single stage"
 
           if heat_pump_values[:cooling_shr].nil?
             shrs = [0.73]
@@ -2553,7 +2555,7 @@ class OSModel
                                          load_frac_heat, load_frac_cool,
                                          sequential_load_frac_heat, sequential_load_frac_cool,
                                          @living_zone, @hvac_map, sys_id)
-        elsif num_speeds == "2-Speed"
+        elsif compressor_type == "two stage"
 
           if heat_pump_values[:cooling_shr].nil?
             shrs = [0.71, 0.724]
@@ -2569,7 +2571,7 @@ class OSModel
                                          load_frac_heat, load_frac_cool,
                                          sequential_load_frac_heat, sequential_load_frac_cool,
                                          @living_zone, @hvac_map, sys_id)
-        elsif num_speeds == "Variable-Speed"
+        elsif compressor_type == "variable speed"
 
           if heat_pump_values[:cooling_shr].nil?
             shrs = [0.87, 0.80, 0.79, 0.78]
@@ -2585,10 +2587,6 @@ class OSModel
                                          load_frac_heat, load_frac_cool,
                                          sequential_load_frac_heat, sequential_load_frac_cool,
                                          @living_zone, @hvac_map, sys_id)
-        else
-
-          fail "Unexpected number of speeds (#{num_speeds}) for heat pump system."
-
         end
 
       elsif hp_type == "mini-split"
@@ -2639,6 +2637,7 @@ class OSModel
                         supp_htg_max_outdoor_temp, load_frac_heat, load_frac_cool,
                         sequential_load_frac_heat, sequential_load_frac_cool,
                         @living_zone, @hvac_map, sys_id)
+
       elsif hp_type == "ground-to-air"
 
         eer = heat_pump_values[:cooling_efficiency_eer]
@@ -4341,23 +4340,13 @@ class OSModel
     return foundation_top, walls_top
   end
 
-  def self.get_ac_num_speeds(seer)
+  def self.get_compressor_type(seer)
     if seer <= 15
-      return "1-Speed"
+      return "single stage"
     elsif seer <= 21
-      return "2-Speed"
+      return "two stage"
     elsif seer > 21
-      return "Variable-Speed"
-    end
-  end
-
-  def self.get_ashp_num_speeds_by_seer(seer)
-    if seer <= 15
-      return "1-Speed"
-    elsif seer <= 21
-      return "2-Speed"
-    elsif seer > 21
-      return "Variable-Speed"
+      return "variable speed"
     end
   end
 
