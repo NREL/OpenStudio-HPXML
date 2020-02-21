@@ -1288,21 +1288,40 @@ class OSModel
   def self.add_foundation_walls_slabs(runner, model, building, spaces)
     # Get foundation types
     foundation_types = []
+    # Used to check foundation wall attachment
+    all_fndwalls = []
+    slab_fndwalls = []
+    building.elements.each("BuildingDetails/Enclosure/FoundationWalls/FoundationWall") do |fnd_wall|
+      all_fndwalls << fnd_wall
+    end
+
     building.elements.each("BuildingDetails/Enclosure/Slabs/Slab/InteriorAdjacentTo") do |int_adjacent_to|
       next if foundation_types.include? int_adjacent_to.text
 
       foundation_types << int_adjacent_to.text
     end
 
+    error_msg = ""
     foundation_types.each do |foundation_type|
       # Get attached foundation walls/slabs
       fnd_walls = []
       slabs = []
       building.elements.each("BuildingDetails/Enclosure/FoundationWalls/FoundationWall[InteriorAdjacentTo='#{foundation_type}']") do |fnd_wall|
         fnd_walls << fnd_wall
+        slab_fndwalls << fnd_wall
       end
       building.elements.each("BuildingDetails/Enclosure/Slabs/Slab[InteriorAdjacentTo='#{foundation_type}']") do |slab|
         slabs << slab
+      end
+
+      # Check for slabs without corresponding foundation walls
+      if fnd_walls.size == 0 and not ["living space", "garage"].include? foundation_type
+        slabs.each do |slab|
+          slab_values = HPXML.get_slab_values(slab: slab)
+          slab_id = slab_values[:id]
+          adjacent_to = slab_values[:interior_adjacent_to]
+          error_msg += "Slab '#{slab_id}' is adjacent to '#{adjacent_to}' but no corresponding foundation walls were found adjacent to '#{adjacent_to}'.\n"
+        end
       end
 
       # Calculate combinations of slabs/walls for each Kiva instance
@@ -1447,6 +1466,17 @@ class OSModel
                                 drywall_thick_in, film_r, mat_ext_finish)
       end
     end
+
+    # Check for foundation walls without corresponding slabs
+    if slab_fndwalls.size < all_fndwalls.size
+      (all_fndwalls - slab_fndwalls).each do |single_fnd_wall|
+        single_fnd_wall_values = HPXML.get_foundation_wall_values(foundation_wall: single_fnd_wall)
+        wall_id = single_fnd_wall_values[:id]
+        adjacent_to = single_fnd_wall_values[:interior_adjacent_to]
+        error_msg += "Foundation wall '#{wall_id}' is adjacent to '#{adjacent_to}' but no corresponding slab was found adjacent to '#{adjacent_to}'.\n"
+      end
+    end
+    fail error_msg unless error_msg.empty?
   end
 
   def self.add_foundation_wall(runner, model, spaces, fnd_wall_values, slab_frac,
