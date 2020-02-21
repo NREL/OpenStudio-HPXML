@@ -110,6 +110,7 @@ def create_hpxmls
     'base-dhw-tankless-oil.xml' => 'base.xml',
     'base-dhw-tankless-propane.xml' => 'base.xml',
     'base-dhw-tankless-wood.xml' => 'base.xml',
+    'base-dhw-temperature.xml' => 'base.xml',
     'base-dhw-uef.xml' => 'base.xml',
     'base-dhw-jacket-electric.xml' => 'base.xml',
     'base-dhw-jacket-gas.xml' => 'base-dhw-tank-gas.xml',
@@ -2790,6 +2791,8 @@ def get_hpxml_file_water_heating_system_values(hpxml_file, water_heating_systems
     water_heating_systems_values[1][:id] = "WaterHeater2"
   elsif ['base-enclosure-garage.xml'].include? hpxml_file
     water_heating_systems_values[0][:location] = "garage"
+  elsif ['base-dhw-temperature.xml'].include? hpxml_file
+    water_heating_systems_values[0][:temperature] = 130.0
   elsif ['base-dhw-none.xml'].include? hpxml_file
     water_heating_systems_values = []
   end
