@@ -1315,7 +1315,7 @@ class OSModel
       end
 
       # Check for slabs without corresponding foundation walls
-      if fnd_walls.size == 0 and foundation_type != "living space"
+      if fnd_walls.size == 0 and not ["living space", "garage"].include? foundation_type
         slabs.each do |slab|
           slab_values = HPXML.get_slab_values(slab: slab)
           slab_id = slab_values[:id]
