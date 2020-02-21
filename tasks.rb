@@ -30,10 +30,12 @@ def create_hpxmls
     'invalid_files/invalid-relatedhvac-dhw-indirect.xml' => 'base-dhw-indirect.xml',
     'invalid_files/invalid-relatedhvac-desuperheater.xml' => 'base-hvac-central-ac-only-1-speed.xml',
     'invalid_files/invalid-window-interior-shading.xml' => 'base.xml',
+    'invalid_files/mismatched-slab-and-foundation-wall.xml' => 'base.xml',
     'invalid_files/missing-elements.xml' => 'base.xml',
     'invalid_files/missing-surfaces.xml' => 'base.xml',
     'invalid_files/net-area-negative-roof.xml' => 'base-enclosure-skylights.xml',
     'invalid_files/net-area-negative-wall.xml' => 'base.xml',
+    'invalid_files/orphaned-hvac-distribution.xml' => 'base-hvac-furnace-gas-room-ac.xml',
     'invalid_files/refrigerator-location.xml' => 'base.xml',
     'invalid_files/refrigerator-location-other.xml' => 'base.xml',
     'invalid_files/repeated-relatedhvac-dhw-indirect.xml' => 'base-dhw-indirect.xml',
@@ -44,7 +46,6 @@ def create_hpxmls
     'invalid_files/unattached-cfis.xml' => 'base.xml',
     'invalid_files/unattached-door.xml' => 'base.xml',
     'invalid_files/unattached-hvac-distribution.xml' => 'base.xml',
-    'invalid_files/orphaned-hvac-distribution.xml' => 'base-hvac-furnace-gas-room-ac.xml',
     'invalid_files/unattached-skylight.xml' => 'base-enclosure-skylights.xml',
     'invalid_files/unattached-solar-thermal-system.xml' => 'base-dhw-solar-indirect-flat-plate.xml',
     'invalid_files/unattached-window.xml' => 'base.xml',
@@ -1253,6 +1254,10 @@ def get_hpxml_file_foundation_walls_values(hpxml_file, foundation_walls_values)
         foundation_walls_values[-1][:id] += i.to_s
       end
     end
+  elsif ['invalid_files/mismatched-slab-and-foundation-wall.xml'].include? hpxml_file
+    foundation_walls_values << foundation_walls_values[0].dup
+    foundation_walls_values[1][:id] = "FoundationWall2"
+    foundation_walls_values[1][:interior_adjacent_to] = "garage"
   end
   return foundation_walls_values
 end
@@ -1464,6 +1469,9 @@ def get_hpxml_file_slabs_values(hpxml_file, slabs_values)
         slabs_values[-1][:id] += i.to_s
       end
     end
+  elsif ['invalid_files/mismatched-slab-and-foundation-wall.xml'].include? hpxml_file
+    slabs_values[0][:interior_adjacent_to] = "basement - unconditioned"
+    slabs_values[0][:depth_below_grade] = 7.0
   end
   return slabs_values
 end
