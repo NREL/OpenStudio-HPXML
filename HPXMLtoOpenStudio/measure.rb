@@ -2034,6 +2034,7 @@ class OSModel
     dhw_loop_fracs = {}
     water_heater_spaces = {}
     combi_sys_id_list = []
+    avg_setpoint_temp = 0.0 # Weighted average by fraction DHW load served
     if not wh.nil?
       wh.elements.each("WaterHeatingSystem") do |dhw|
         water_heating_system_values = HPXML.get_water_heating_system_values(water_heating_system: dhw)
@@ -2043,7 +2044,11 @@ class OSModel
 
         space = get_space_from_location(water_heating_system_values[:location], "WaterHeatingSystem", model, spaces)
         water_heater_spaces[sys_id] = space
-        setpoint_temp = Waterheater.get_default_hot_water_temperature(@eri_version)
+        setpoint_temp = water_heating_system_values[:temperature]
+        if setpoint_temp.nil?
+          setpoint_temp = Waterheater.get_default_hot_water_temperature(@eri_version)
+        end
+        avg_setpoint_temp += setpoint_temp * water_heating_system_values[:fraction_dhw_load_served]
         wh_type = water_heating_system_values[:water_heater_type]
         fuel = water_heating_system_values[:fuel_type]
         jacket_r = water_heating_system_values[:jacket_r_value]
@@ -2144,9 +2149,8 @@ class OSModel
       end
     end
 
-    wh_setpoint = Waterheater.get_default_hot_water_temperature(@eri_version)
     HotWaterAndAppliances.apply(model, weather, @living_space,
-                                @cfa, @nbeds, @ncfl, @has_uncond_bsmnt, wh_setpoint,
+                                @cfa, @nbeds, @ncfl, @has_uncond_bsmnt, avg_setpoint_temp,
                                 cw_mef, cw_ler, cw_elec_rate, cw_gas_rate,
                                 cw_agc, cw_cap, cw_space, cd_fuel, cd_ef, cd_control,
                                 cd_space, dw_ef, dw_cap, fridge_annual_kwh, fridge_space,
