@@ -1464,6 +1464,7 @@ class HPXML
                                     recovery_efficiency: nil,
                                     uses_desuperheater: nil,
                                     jacket_r_value: nil,
+                                    temperature: nil,
                                     related_hvac: nil,
                                     standby_loss: nil)
     water_heating = XMLHelper.create_elements_as_needed(hpxml, ["Building", "BuildingDetails", "Systems", "WaterHeating"])
@@ -1485,6 +1486,7 @@ class HPXML
       jacket = XMLHelper.add_element(water_heater_insulation, "Jacket")
       XMLHelper.add_element(jacket, "JacketRValue", jacket_r_value)
     end
+    XMLHelper.add_element(water_heating_system, "HotWaterTemperature", Float(temperature)) unless temperature.nil?
     XMLHelper.add_element(water_heating_system, "UsesDesuperheater", Boolean(uses_desuperheater)) unless uses_desuperheater.nil?
     unless related_hvac.nil?
       related_hvac_el = XMLHelper.add_element(water_heating_system, "RelatedHVACSystem")
@@ -1516,6 +1518,7 @@ class HPXML
     vals[:related_hvac] = HPXML.get_idref(water_heating_system, "RelatedHVACSystem")
     vals[:energy_star] = XMLHelper.get_values(water_heating_system, "ThirdPartyCertification").include?("Energy Star")
     vals[:standby_loss] = to_float_or_nil(XMLHelper.get_value(water_heating_system, "extension/StandbyLoss"))
+    vals[:temperature] = to_float_or_nil(XMLHelper.get_value(water_heating_system, "HotWaterTemperature"))
     return vals
   end
 
