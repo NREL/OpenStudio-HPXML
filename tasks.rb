@@ -151,7 +151,6 @@ def create_hpxmls
     'base-foundation-unvented-crawlspace.xml' => 'base.xml',
     'base-foundation-vented-crawlspace.xml' => 'base.xml',
     'base-foundation-walkout-basement.xml' => 'base.xml',
-    'base-foundation-walkout-basement-window.xml' => 'base-foundation-walkout-basement.xml',
     'base-foundation-complex.xml' => 'base.xml',
     'base-hvac-air-to-air-heat-pump-1-speed.xml' => 'base.xml',
     'base-hvac-air-to-air-heat-pump-1-speed-detailed.xml' => 'base-hvac-air-to-air-heat-pump-1-speed.xml',
@@ -1614,7 +1613,7 @@ def get_hpxml_file_windows_values(hpxml_file, windows_values)
         windows_values[-1][:wall_idref] += i.to_s
       end
     end
-  elsif ['base-foundation-walkout-basement-window.xml'].include? hpxml_file
+  elsif ['base-foundation-walkout-basement.xml'].include? hpxml_file
     windows_values << { :id => "FoundationWindow",
                         :area => 20,
                         :azimuth => 0,
