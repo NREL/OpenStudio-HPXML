@@ -272,6 +272,14 @@
             <SHGC>0.45</SHGC>
             <AttachedToWall idref='Wall'/>
           </Window>
+          <Window>
+            <SystemIdentifier id='FoundationWindow'/>
+            <Area>20.0</Area>
+            <Azimuth>0</Azimuth>
+            <UFactor>0.33</UFactor>
+            <SHGC>0.45</SHGC>
+            <AttachedToWall idref='FoundationWall3'/>
+          </Window>
         </Windows>
         <Doors>
           <Door>
