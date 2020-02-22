@@ -481,6 +481,7 @@ Water Heaters
 
 Each water heater should be entered as a ``Systems/WaterHeating/WaterHeatingSystem``.
 Inputs including ``WaterHeaterType``, ``Location``, and ``FractionDHWLoadServed`` must be provided.
+The setpoint temperature may be provided as ``HotWaterTemperature``; if not provided, 125 deg-F is assumed.
 
 Depending on the type of water heater specified, additional elements are required/available:
 
