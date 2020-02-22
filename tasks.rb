@@ -1622,6 +1622,13 @@ def get_hpxml_file_windows_values(hpxml_file, windows_values)
         windows_values[-1][:wall_idref] += i.to_s
       end
     end
+  elsif ['base-foundation-walkout-basement.xml'].include? hpxml_file
+    windows_values << { :id => "FoundationWindow",
+                        :area => 20,
+                        :azimuth => 0,
+                        :ufactor => 0.33,
+                        :shgc => 0.45,
+                        :wall_idref => "FoundationWall3" }
   end
   return windows_values
 end
