@@ -23,13 +23,14 @@ class HPXMLTest < MiniTest::Test
     results_dir = File.join(this_dir, "results")
     _rm_path(results_dir)
 
-    hvac_base_dir = File.absolute_path(File.join(this_dir, "hvac_base"))
-    hvac_multiple_dir = File.absolute_path(File.join(this_dir, "hvac_multiple"))
-    hvac_partial_dir = File.absolute_path(File.join(this_dir, "hvac_partial"))
-    hvac_load_fracs_dir = File.absolute_path(File.join(this_dir, "hvac_load_fracs"))
-    autosize_dir = File.absolute_path(File.join(this_dir, "hvac_autosizing"))
+    sample_files_dir = File.absolute_path(File.join(this_dir, "..", "sample_files"))
+    hvac_base_dir = File.absolute_path(File.join(this_dir, "..", "sample_files", "hvac_base"))
+    hvac_multiple_dir = File.absolute_path(File.join(this_dir, "..", "sample_files", "hvac_multiple"))
+    hvac_partial_dir = File.absolute_path(File.join(this_dir, "..", "sample_files", "hvac_partial"))
+    hvac_load_fracs_dir = File.absolute_path(File.join(this_dir, "..", "sample_files", "hvac_load_fracs"))
+    autosize_dir = File.absolute_path(File.join(this_dir, "..", "sample_files", "hvac_autosizing"))
 
-    test_dirs = [this_dir,
+    test_dirs = [sample_files_dir,
                  hvac_base_dir,
                  hvac_multiple_dir,
                  hvac_partial_dir,
@@ -60,16 +61,16 @@ class HPXMLTest < MiniTest::Test
     # Cross simulation tests
     _test_multiple_hvac(xmls, hvac_multiple_dir, hvac_base_dir, all_results)
     _test_partial_hvac(xmls, hvac_partial_dir, hvac_base_dir, all_results)
-    _test_hrv_erv_inputs(this_dir, all_results)
+    _test_hrv_erv_inputs(sample_files_dir, all_results)
     _test_heating_cooling_loads(xmls, hvac_base_dir, all_results)
-    _test_collapsed_surfaces(all_results, this_dir)
+    _test_collapsed_surfaces(all_results, sample_files_dir)
   end
 
   def test_run_simulation_rb
     # Check that simulation works using run_simulation.rb script
     os_cli = OpenStudio.getOpenStudioCLI
     rb_path = File.join(File.dirname(__FILE__), "..", "run_simulation.rb")
-    xml = File.join(File.dirname(__FILE__), "base.xml")
+    xml = File.join(File.dirname(__FILE__), "..", "sample_files", "base.xml")
     command = "#{os_cli} #{rb_path} -x #{xml}"
     system(command, :err => File::NULL)
     sql_path = File.join(File.dirname(xml), "run", "eplusout.sql")
@@ -103,12 +104,13 @@ class HPXMLTest < MiniTest::Test
     cache_orig = File.join(this_dir, "..", "..", "weather", "USA_CO_Denver.Intl.AP.725650_TMY3-cache.csv")
     cache_bak = cache_orig + ".bak"
     File.rename(cache_orig, cache_bak)
-    _run_xml(File.absolute_path(File.join(this_dir, "base.xml")), this_dir)
+    _run_xml(File.absolute_path(File.join(this_dir, "..", "sample_files", "base.xml")), this_dir)
     File.rename(cache_bak, cache_orig) # Put original file back
   end
 
   def test_invalid
     this_dir = File.dirname(__FILE__)
+    sample_files_dir = File.join(this_dir, "..", "sample_files")
 
     expected_error_msgs = { 'bad-wmo.xml' => ["Weather station WMO '999999' could not be found in weather/data.csv."],
                             'bad-site-neighbor-azimuth.xml' => ["A neighbor building has an azimuth (145) not equal to the azimuth of any wall."],
@@ -161,7 +163,7 @@ class HPXMLTest < MiniTest::Test
                                                                           "Slab 'Slab' is adjacent to 'basement - unconditioned' but no corresponding foundation walls were found adjacent to"] }
 
     # Test simulations
-    Dir["#{this_dir}/invalid_files/*.xml"].sort.each do |xml|
+    Dir["#{sample_files_dir}/invalid_files/*.xml"].sort.each do |xml|
       _run_xml(File.absolute_path(xml), this_dir, true, expected_error_msgs[File.basename(xml)])
     end
   end
@@ -1343,16 +1345,16 @@ class HPXMLTest < MiniTest::Test
     assert_equal(0, errors.size)
   end
 
-  def _test_hrv_erv_inputs(test_dir, all_results)
+  def _test_hrv_erv_inputs(sample_files_dir, all_results)
     # Compare HRV and ERV results that use different inputs
     ["hrv", "erv"].each do |mv_type|
       puts "#{mv_type.upcase} test results:"
 
-      base_xml = "#{test_dir}/base-mechvent-#{mv_type}.xml"
+      base_xml = "#{sample_files_dir}/base-mechvent-#{mv_type}.xml"
       results_base = all_results[base_xml]
       next if results_base.nil?
 
-      Dir["#{test_dir}/base-mechvent-#{mv_type}-*.xml"].sort.each do |xml|
+      Dir["#{sample_files_dir}/base-mechvent-#{mv_type}-*.xml"].sort.each do |xml|
         results = all_results[xml]
         next if results.nil?
 
@@ -1465,9 +1467,9 @@ class HPXMLTest < MiniTest::Test
     end
   end
 
-  def _test_collapsed_surfaces(all_results, this_dir)
-    results_base = all_results[File.absolute_path("#{this_dir}/base-enclosure-skylights.xml")]
-    results_collapsed = all_results[File.absolute_path("#{this_dir}/base-enclosure-split-surfaces.xml")]
+  def _test_collapsed_surfaces(all_results, sample_files_dir)
+    results_base = all_results[File.absolute_path("#{sample_files_dir}/base-enclosure-skylights.xml")]
+    results_collapsed = all_results[File.absolute_path("#{sample_files_dir}/base-enclosure-split-surfaces.xml")]
     return if results_base.nil? or results_collapsed.nil?
 
     # Compare results

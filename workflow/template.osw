@@ -6,7 +6,7 @@
   "steps": [
     {
       "arguments": {
-        "hpxml_path": "../workflow/tests/base.xml"
+        "hpxml_path": "../workflow/sample_files/base.xml"
       },
       "measure_dir_name": "HPXMLtoOpenStudio"
     },
