@@ -1,6 +1,6 @@
 def create_hpxmls
   this_dir = File.dirname(__FILE__)
-  tests_dir = File.join(this_dir, "workflow/tests")
+  sample_files_dir = File.join(this_dir, "workflow/sample_files")
 
   # Hash of HPXML -> Parent HPXML
   hpxmls_files = {
@@ -551,7 +551,7 @@ def create_hpxmls
         hpxml.elements["Building/BuildingDetails/BuildingSummary/BuildingConstruction"].elements.delete("ConditionedFloorArea")
       end
 
-      hpxml_path = File.join(tests_dir, derivative)
+      hpxml_path = File.join(sample_files_dir, derivative)
 
       # Validate file against HPXML schema
       schemas_dir = File.absolute_path(File.join(File.dirname(__FILE__), "HPXMLtoOpenStudio/resources"))
@@ -574,13 +574,13 @@ def create_hpxmls
   abs_hpxml_files = []
   dirs = [nil]
   hpxmls_files.keys.each do |hpxml_file|
-    abs_hpxml_files << File.absolute_path(File.join(tests_dir, hpxml_file))
+    abs_hpxml_files << File.absolute_path(File.join(sample_files_dir, hpxml_file))
     next unless hpxml_file.include? '/'
 
     dirs << hpxml_file.split('/')[0] + '/'
   end
   dirs.uniq.each do |dir|
-    Dir["#{tests_dir}/#{dir}*.xml"].each do |xml|
+    Dir["#{sample_files_dir}/#{dir}*.xml"].each do |xml|
       next if abs_hpxml_files.include? File.absolute_path(xml)
 
       puts "Warning: Extra HPXML file found at #{File.absolute_path(xml)}"
@@ -3302,12 +3302,29 @@ end
 if ARGV[0].to_sym == :create_release_zips
   require 'openstudio'
 
+  # Generate documentation
+  puts "Generating documentation..."
+  command = "sphinx-build -b singlehtml docs/source documentation"
+  begin
+    `#{command}`
+    if not File.exists? File.join(File.dirname(__FILE__), "documentation", "index.html")
+      puts "Documentation was not successfully generated. Aborting..."
+      exit!
+    end
+  rescue
+    puts "Command failed: '#{command}'. Perhaps sphinx needs to be installed?"
+    exit!
+  end
+
   files = ["HPXMLtoOpenStudio/measure.*",
            "HPXMLtoOpenStudio/resources/*.*",
            "SimulationOutputReport/measure.*",
            "SimulationOutputReport/resources/*.*",
            "weather/*.*",
-           "workflow/*.*"]
+           "workflow/*.*",
+           "workflow/sample_files/*.xml",
+           "documentation/index.html",
+           "documentation/_static/**/*.*"]
 
   # Only include files under git version control
   command = "git ls-files"
@@ -3349,7 +3366,9 @@ if ARGV[0].to_sym == :create_release_zips
     zip = OpenStudio::ZipFile.new(zip_path, false)
     files.each do |f|
       Dir[f].each do |file|
-        if include_all_epws
+        if file.start_with? "documentation"
+          # always include
+        elsif include_all_epws
           if not git_files.include? file and not file.start_with? "weather"
             next
           end
@@ -3364,6 +3383,9 @@ if ARGV[0].to_sym == :create_release_zips
     end
     puts "Wrote file at #{zip_path}."
   end
+
+  # Cleanup
+  FileUtils.rm_r(File.join(File.dirname(__FILE__), "documentation"))
 
   puts "Done."
 end
