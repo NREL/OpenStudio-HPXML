@@ -1,0 +1,29 @@
+Warning: Could not load nokogiri, no HPXML validation performed.
+Error: Slab 'Slab' is adjacent to 'basement - unconditioned' but no corresponding foundation walls were found adjacent to 'basement - unconditioned'.
+Foundation wall 'FoundationWall' is adjacent to 'basement - conditioned' but no corresponding slab was found adjacent to 'basement - conditioned'.
+Foundation wall 'FoundationWall2' is adjacent to 'garage' but no corresponding slab was found adjacent to 'garage'.
+
+C:/GitHub/OpenStudio-HPXML/HPXMLtoOpenStudio/measure.rb:1479:in `add_foundation_walls_slabs'
+C:/GitHub/OpenStudio-HPXML/HPXMLtoOpenStudio/measure.rb:321:in `add_geometry_envelope'
+C:/GitHub/OpenStudio-HPXML/HPXMLtoOpenStudio/measure.rb:251:in `create'
+C:/GitHub/OpenStudio-HPXML/HPXMLtoOpenStudio/measure.rb:154:in `run'
+C:/GitHub/OpenStudio-HPXML/HPXMLtoOpenStudio/resources/meta_measure.rb:164:in `run_measure'
+C:/GitHub/OpenStudio-HPXML/HPXMLtoOpenStudio/resources/meta_measure.rb:20:in `block (2 levels) in apply_measures'
+C:/GitHub/OpenStudio-HPXML/HPXMLtoOpenStudio/resources/meta_measure.rb:12:in `each'
+C:/GitHub/OpenStudio-HPXML/HPXMLtoOpenStudio/resources/meta_measure.rb:12:in `block in apply_measures'
+C:/GitHub/OpenStudio-HPXML/HPXMLtoOpenStudio/resources/meta_measure.rb:7:in `each'
+C:/GitHub/OpenStudio-HPXML/HPXMLtoOpenStudio/resources/meta_measure.rb:7:in `apply_measures'
+C:/GitHub/OpenStudio-HPXML/workflow/run_simulation.rb:56:in `run_workflow'
+C:/GitHub/OpenStudio-HPXML/workflow/run_simulation.rb:194:in `<top (required)>'
+eval:107:in `require'
+eval:107:in `require'
+:/ruby/2.2.0/rubygems/core_ext/kernel_require.rb:54:in `require'
+:/openstudio_cli.rb:1511:in `execute'
+:/openstudio_cli.rb:763:in `execute'
+:/openstudio_cli.rb:1746:in `<main>'
+eval:116:in `eval'
+eval:116:in `require_embedded_absolute'
+eval:101:in `block in require'
+eval:95:in `each'
+eval:95:in `require'
+eval:3:in `<main>'
