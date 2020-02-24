@@ -385,7 +385,7 @@ class SimulationOutputReportTest < MiniTest::Test
     expected_timeseries_cols = ["Timestep"] + TimeseriesColsFuels + TimeseriesColsEndUses + TimeseriesColsTotalLoads + TimeseriesColsComponentLoads + TimeseriesColsTemperatures
     actual_timeseries_cols = File.readlines(timeseries_csv)[0].strip.split(",")
     assert_equal(expected_timeseries_cols.sort, actual_timeseries_cols.sort)
-    assert_equal(8760, File.readlines(timeseries_csv).size - 2) # TODO: Use a model w/ a sub-hourly timestep
+    assert_equal(52560, File.readlines(timeseries_csv).size - 2) # TODO: Use a model w/ a sub-hourly timestep
   end
 
   def test_eri_designs
