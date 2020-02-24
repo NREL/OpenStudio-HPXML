@@ -291,7 +291,7 @@ class OSModel
     sim.setRunSimulationforSizingPeriods(false)
 
     tstep = model.getTimestep
-    tstep.setNumberOfTimestepsPerHour(1)
+    tstep.setNumberOfTimestepsPerHour(6)
 
     shad = model.getShadowCalculation
     shad.setCalculationFrequency(20)
