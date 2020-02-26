@@ -1419,7 +1419,7 @@ class Airflow
           duct_program.addLine("  Set #{duct_actuators["cfis_return_cond_to_dz"].name} = #{duct_vars["return_cond_to_dz"].name}")
           duct_program.addLine("  Set #{duct_actuators["cfis_supply_cond_to_dz"].name} = #{duct_vars["supply_cond_to_dz"].name}")
           duct_program.addLine("  Set #{duct_actuators["cfis_supply_sens_lk_to_dz"].name} = #{duct_vars["supply_sens_lk_to_dz"].name}")
-          duct_program.addLine("  Set #{duct_actuators["cfis_supply_lat_lk_to_dz"].name} = #{duct_vars["supply_lat_lk_to_dz"].name}")          
+          duct_program.addLine("  Set #{duct_actuators["cfis_supply_lat_lk_to_dz"].name} = #{duct_vars["supply_lat_lk_to_dz"].name}")
           if not duct_actuators["dz_to_liv_flow_rate"].nil?
             duct_program.addLine("  Set #{duct_actuators["cfis_dz_to_liv_flow_rate"].name} = #{duct_vars["dz_to_liv_flow_rate"].name}")
           end
@@ -1436,7 +1436,7 @@ class Airflow
           duct_program.addLine("  Set #{duct_actuators["cfis_return_cond_to_dz"].name} = 0")
           duct_program.addLine("  Set #{duct_actuators["cfis_supply_cond_to_dz"].name} = 0")
           duct_program.addLine("  Set #{duct_actuators["cfis_supply_sens_lk_to_dz"].name} = 0")
-          duct_program.addLine("  Set #{duct_actuators["cfis_supply_lat_lk_to_dz"].name} = 0")  
+          duct_program.addLine("  Set #{duct_actuators["cfis_supply_lat_lk_to_dz"].name} = 0")
           duct_program.addLine("EndIf")
 
         end
