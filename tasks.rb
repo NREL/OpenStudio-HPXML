@@ -1,6 +1,6 @@
 def create_hpxmls
   this_dir = File.dirname(__FILE__)
-  tests_dir = File.join(this_dir, "workflow/tests")
+  sample_files_dir = File.join(this_dir, "workflow/sample_files")
 
   # Hash of HPXML -> Parent HPXML
   hpxmls_files = {
@@ -551,7 +551,7 @@ def create_hpxmls
         hpxml.elements["Building/BuildingDetails/BuildingSummary/BuildingConstruction"].elements.delete("ConditionedFloorArea")
       end
 
-      hpxml_path = File.join(tests_dir, derivative)
+      hpxml_path = File.join(sample_files_dir, derivative)
 
       # Validate file against HPXML schema
       schemas_dir = File.absolute_path(File.join(File.dirname(__FILE__), "HPXMLtoOpenStudio/resources"))
@@ -574,13 +574,13 @@ def create_hpxmls
   abs_hpxml_files = []
   dirs = [nil]
   hpxmls_files.keys.each do |hpxml_file|
-    abs_hpxml_files << File.absolute_path(File.join(tests_dir, hpxml_file))
+    abs_hpxml_files << File.absolute_path(File.join(sample_files_dir, hpxml_file))
     next unless hpxml_file.include? '/'
 
     dirs << hpxml_file.split('/')[0] + '/'
   end
   dirs.uniq.each do |dir|
-    Dir["#{tests_dir}/#{dir}*.xml"].each do |xml|
+    Dir["#{sample_files_dir}/#{dir}*.xml"].each do |xml|
       next if abs_hpxml_files.include? File.absolute_path(xml)
 
       puts "Warning: Extra HPXML file found at #{File.absolute_path(xml)}"
@@ -1622,6 +1622,13 @@ def get_hpxml_file_windows_values(hpxml_file, windows_values)
         windows_values[-1][:wall_idref] += i.to_s
       end
     end
+  elsif ['base-foundation-walkout-basement.xml'].include? hpxml_file
+    windows_values << { :id => "FoundationWindow",
+                        :area => 20,
+                        :azimuth => 0,
+                        :ufactor => 0.33,
+                        :shgc => 0.45,
+                        :wall_idref => "FoundationWall3" }
   end
   return windows_values
 end
@@ -1883,6 +1890,12 @@ def get_hpxml_file_heating_systems_values(hpxml_file, heating_systems_values)
     heating_systems_values << heating_systems_values[0].dup
     heating_systems_values[2][:id] = "HeatingSystem3"
     heating_systems_values[2][:distribution_system_idref] = "HVACDistribution3" unless heating_systems_values[2][:distribution_system_idref].nil?
+    if ['hvac_multiple/base-hvac-boiler-gas-only-x3.xml'].include? hpxml_file
+      # Test a file where sum is slightly greater than 1
+      heating_systems_values[0][:fraction_heat_load_served] = 0.33
+      heating_systems_values[1][:fraction_heat_load_served] = 0.33
+      heating_systems_values[2][:fraction_heat_load_served] = 0.35
+    end
   elsif hpxml_file.include? 'hvac_partial' and not heating_systems_values.nil? and heating_systems_values.size > 0
     heating_systems_values[0][:heating_capacity] /= 3.0
     heating_systems_values[0][:fraction_heat_load_served] = 0.333
@@ -3215,7 +3228,7 @@ def download_epws
   exit!
 end
 
-command_list = [:update_measures, :cache_weather, :create_release_zips, :download_weather]
+command_list = [:update_measures, :cache_weather, :create_release_zips, :update_version, :download_weather]
 
 def display_usage(command_list)
   puts "Usage: openstudio #{File.basename(__FILE__)} [COMMAND]\nCommands:\n  " + command_list.join("\n  ")
@@ -3284,15 +3297,49 @@ if ARGV[0].to_sym == :download_weather
   download_epws
 end
 
+if ARGV[0].to_sym == :update_version
+  version_change = { :from => "0.7.0",
+                     :to => "0.8.0" }
+
+  file_names = ['workflow/run_simulation.rb']
+
+  file_names.each do |file_name|
+    text = File.read(file_name)
+    new_contents = text.gsub(version_change[:from], version_change[:to])
+
+    # To write changes to the file, use:
+    File.open(file_name, "w") { |file| file.puts new_contents }
+  end
+
+  puts "Done. Now check all changed files before committing."
+end
+
 if ARGV[0].to_sym == :create_release_zips
   require 'openstudio'
+
+  # Generate documentation
+  puts "Generating documentation..."
+  command = "sphinx-build -b singlehtml docs/source documentation"
+  begin
+    `#{command}`
+    if not File.exists? File.join(File.dirname(__FILE__), "documentation", "index.html")
+      puts "Documentation was not successfully generated. Aborting..."
+      exit!
+    end
+  rescue
+    puts "Command failed: '#{command}'. Perhaps sphinx needs to be installed?"
+    exit!
+  end
 
   files = ["HPXMLtoOpenStudio/measure.*",
            "HPXMLtoOpenStudio/resources/*.*",
            "SimulationOutputReport/measure.*",
            "SimulationOutputReport/resources/*.*",
            "weather/*.*",
-           "workflow/*.*"]
+           "workflow/*.*",
+           "workflow/sample_files/*.xml",
+           "documentation/index.html",
+           "documentation/_static/**/*.*"]
 
   # Only include files under git version control
   command = "git ls-files"
@@ -3334,7 +3381,9 @@ if ARGV[0].to_sym == :create_release_zips
     zip = OpenStudio::ZipFile.new(zip_path, false)
     files.each do |f|
       Dir[f].each do |file|
-        if include_all_epws
+        if file.start_with? "documentation"
+          # always include
+        elsif include_all_epws
           if not git_files.include? file and not file.start_with? "weather"
             next
           end
@@ -3349,6 +3398,9 @@ if ARGV[0].to_sym == :create_release_zips
     end
     puts "Wrote file at #{zip_path}."
   end
+
+  # Cleanup
+  FileUtils.rm_r(File.join(File.dirname(__FILE__), "documentation"))
 
   puts "Done."
 end

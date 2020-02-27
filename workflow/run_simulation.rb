@@ -149,6 +149,11 @@ OptionParser.new do |opts|
     options[:hourly_outputs] << t
   end
 
+  options[:version] = false
+  opts.on('-v', '--version', 'Reports the version') do |t|
+    options[:version] = true
+  end
+  
   options[:debug] = false
   opts.on('-d', '--debug') do |t|
     options[:debug] = true
@@ -159,6 +164,12 @@ OptionParser.new do |opts|
     exit!
   end
 end.parse!
+
+if options[:version]
+  workflow_version = "0.8.0"
+  puts "OpenStudio-HPXML v#{workflow_version}"
+  exit!
+end
 
 if options[:hourly_outputs].include? "ALL"
   options[:hourly_outputs] = hourly_types[1..-1]
