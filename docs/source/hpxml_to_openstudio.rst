@@ -481,6 +481,7 @@ Water Heaters
 
 Each water heater should be entered as a ``Systems/WaterHeating/WaterHeatingSystem``.
 Inputs including ``WaterHeaterType``, ``Location``, and ``FractionDHWLoadServed`` must be provided.
+The setpoint temperature may be provided as ``HotWaterTemperature``; if not provided, 125 deg-F is assumed.
 
 Depending on the type of water heater specified, additional elements are required/available:
 
@@ -660,7 +661,7 @@ Contact us if you can't figure out the cause of an error.
 Sample Files
 ------------
 
-Dozens of sample HPXML files are included in the tests directory.
+Dozens of sample HPXML files are included in the workflow/sample_files directory.
 The sample files help to illustrate how different building components are described in HPXML.
 
 Each sample file generally makes one isolated change relative to the base HPXML (base.xml) building.
