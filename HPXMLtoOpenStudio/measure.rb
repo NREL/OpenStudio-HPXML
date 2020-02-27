@@ -172,11 +172,11 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
     is_valid = true
 
     # Validate input HPXML against schema
-      XMLHelper.validate(hpxml_doc.to_s, File.join(schemas_dir, "HPXML.xsd"), runner).each do |error|
-        runner.registerError("#{hpxml_path}: #{error.to_s}")
-        is_valid = false
-      end
-      runner.registerInfo("#{hpxml_path}: Validated against HPXML schema.")
+    XMLHelper.validate(hpxml_doc.to_s, File.join(schemas_dir, "HPXML.xsd"), runner).each do |error|
+      runner.registerError("#{hpxml_path}: #{error.to_s}")
+      is_valid = false
+    end
+    runner.registerInfo("#{hpxml_path}: Validated against HPXML schema.")
 
     # Validate input HPXML against EnergyPlus Use Case
     errors = EnergyPlusValidator.run_validator(hpxml_doc)
@@ -2083,7 +2083,7 @@ class OSModel
         water_heater_spaces[sys_id] = space
         setpoint_temp = water_heating_system_values[:temperature]
         if setpoint_temp.nil?
-        setpoint_temp = Waterheater.get_default_hot_water_temperature(@eri_version)
+          setpoint_temp = Waterheater.get_default_hot_water_temperature(@eri_version)
         end
         avg_setpoint_temp += setpoint_temp * water_heating_system_values[:fraction_dhw_load_served]
         wh_type = water_heating_system_values[:water_heater_type]
@@ -2173,7 +2173,7 @@ class OSModel
           @dhw_map[sys_id] << boiler_sys['boiler']
 
           Waterheater.apply_combi(model, runner, space, vol, setpoint_temp, ec_adj, @nbeds,
-                                     boiler_sys['boiler'], boiler_sys['plant_loop'], boiler_fuel_type,
+                                  boiler_sys['boiler'], boiler_sys['plant_loop'], boiler_fuel_type,
                                   boiler_afue, @dhw_map, sys_id, wh_type, jacket_r, standby_loss)
 
         else
@@ -3391,11 +3391,11 @@ class OSModel
 
   def self.map_to_string(map)
     map_str = {}
-      map.each do |sys_id, objects|
+    map.each do |sys_id, objects|
       object_name_list = []
-        objects.uniq.each do |object|
+      objects.uniq.each do |object|
         object_name_list << object.name.to_s
-        end
+      end
       map_str[sys_id] = object_name_list if object_name_list.size > 0
     end
     return map_str.to_s
@@ -3460,8 +3460,8 @@ class OSModel
                    "Surface Window Total Glazing Layers Absorbed Solar Radiation Energy" => "ss_sol_abs",
                    "Surface Inside Face Initial Transmitted Diffuse Transmitted Out Window Solar Radiation Rate" => "ss_sol_out" }
         else
-        vars = { "Surface Inside Face Convection Heat Gain Energy" => "ss_conv",
-                 "Surface Inside Face Internal Gains Radiation Heat Gain Energy" => "ss_ig",
+          vars = { "Surface Inside Face Convection Heat Gain Energy" => "ss_conv",
+                   "Surface Inside Face Internal Gains Radiation Heat Gain Energy" => "ss_ig",
                    "Surface Inside Face Net Surface Thermal Radiation Heat Gain Energy" => "ss_surf",
                    "Surface Inside Face Solar Radiation Heat Gain Energy" => "ss_sol",
                    "Surface Inside Face Lights Radiation Heat Gain Energy" => "ss_lgt" }
@@ -3802,7 +3802,7 @@ class OSModel
     # EMS program: Infiltration, Natural Ventilation, Mechanical Ventilation
     program.addLine("Set hr_airflow_rate = #{infil_flow_actuator.name} + #{imbal_mechvent_flow_actuator.name} + #{natvent_flow_actuator.name} + #{whf_flow_actuator.name}")
     program.addLine("Set hr_infil = (#{air_loss_sensor.name} - #{air_gain_sensor.name}) * #{infil_flow_actuator.name} / hr_airflow_rate") # Airflow heat attributed to infiltration
-      program.addLine("Set hr_natvent = (#{air_loss_sensor.name} - #{air_gain_sensor.name}) * #{natvent_flow_actuator.name} / hr_airflow_rate") # Airflow heat attributed to natural ventilation
+    program.addLine("Set hr_natvent = (#{air_loss_sensor.name} - #{air_gain_sensor.name}) * #{natvent_flow_actuator.name} / hr_airflow_rate") # Airflow heat attributed to natural ventilation
     program.addLine("Set hr_whf = (#{air_loss_sensor.name} - #{air_gain_sensor.name}) * #{whf_flow_actuator.name} / hr_airflow_rate") # Airflow heat attributed to whole house fan
     program.addLine("Set hr_mechvent = ((#{air_loss_sensor.name} - #{air_gain_sensor.name}) * #{imbal_mechvent_flow_actuator.name} / hr_airflow_rate)") # Airflow heat attributed to imbalanced mech vent
     s = "Set hr_mechvent = hr_mechvent"
@@ -3849,7 +3849,7 @@ class OSModel
       nonsurf_names.each do |nonsurf_name|
         program.addLine("Set loads_#{mode}_#{nonsurf_name} = #{sign}hr_#{nonsurf_name} * #{mode}_mode")
       end
-      end
+    end
 
     # EMS program: Total loads
     program.addLine("Set loads_htg_tot = 0")
@@ -3858,7 +3858,7 @@ class OSModel
     program.addLine("  Set loads_htg_tot = #{tot_load_sensors[:htg].name} - #{tot_load_sensors[:clg].name}")
     program.addLine("ElseIf #{liv_load_sensors[:clg].name} > 0")
     program.addLine("  Set loads_clg_tot = #{tot_load_sensors[:clg].name} - #{tot_load_sensors[:htg].name}")
-      program.addLine("EndIf")
+    program.addLine("EndIf")
 
     # EMS calling manager
     program_calling_manager = OpenStudio::Model::EnergyManagementSystemProgramCallingManager.new(model)
