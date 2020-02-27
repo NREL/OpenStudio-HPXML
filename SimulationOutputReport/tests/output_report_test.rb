@@ -237,7 +237,7 @@ class SimulationOutputReportTest < MiniTest::Test
   ]
 
   def test_annual_only
-    args_hash = { 'hpxml_path' => '../workflow/tests/base.xml',
+    args_hash = { 'hpxml_path' => '../workflow/sample_files/base.xml',
                   'timeseries_frequency' => 'hourly',
                   'include_timeseries_zone_temperatures' => false,
                   'include_timeseries_fuel_consumptions' => false,
@@ -253,7 +253,7 @@ class SimulationOutputReportTest < MiniTest::Test
   end
 
   def test_timeseries_hourly_temperatures
-    args_hash = { 'hpxml_path' => '../workflow/tests/base.xml',
+    args_hash = { 'hpxml_path' => '../workflow/sample_files/base.xml',
                   'timeseries_frequency' => 'hourly',
                   'include_timeseries_zone_temperatures' => true,
                   'include_timeseries_fuel_consumptions' => false,
@@ -270,7 +270,7 @@ class SimulationOutputReportTest < MiniTest::Test
   end
 
   def test_timeseries_hourly_fuels
-    args_hash = { 'hpxml_path' => '../workflow/tests/base.xml',
+    args_hash = { 'hpxml_path' => '../workflow/sample_files/base.xml',
                   'timeseries_frequency' => 'hourly',
                   'include_timeseries_zone_temperatures' => false,
                   'include_timeseries_fuel_consumptions' => true,
@@ -287,7 +287,7 @@ class SimulationOutputReportTest < MiniTest::Test
   end
 
   def test_timeseries_hourly_enduses
-    args_hash = { 'hpxml_path' => '../workflow/tests/base.xml',
+    args_hash = { 'hpxml_path' => '../workflow/sample_files/base.xml',
                   'timeseries_frequency' => 'hourly',
                   'include_timeseries_zone_temperatures' => false,
                   'include_timeseries_fuel_consumptions' => false,
@@ -304,7 +304,7 @@ class SimulationOutputReportTest < MiniTest::Test
   end
 
   def test_timeseries_hourly_loads
-    args_hash = { 'hpxml_path' => '../workflow/tests/base.xml',
+    args_hash = { 'hpxml_path' => '../workflow/sample_files/base.xml',
                   'timeseries_frequency' => 'hourly',
                   'include_timeseries_zone_temperatures' => false,
                   'include_timeseries_fuel_consumptions' => false,
@@ -321,7 +321,7 @@ class SimulationOutputReportTest < MiniTest::Test
   end
 
   def test_timeseries_hourly_componentloads
-    args_hash = { 'hpxml_path' => '../workflow/tests/base.xml',
+    args_hash = { 'hpxml_path' => '../workflow/sample_files/base.xml',
                   'timeseries_frequency' => 'hourly',
                   'include_timeseries_zone_temperatures' => false,
                   'include_timeseries_fuel_consumptions' => false,
@@ -338,7 +338,7 @@ class SimulationOutputReportTest < MiniTest::Test
   end
 
   def test_timeseries_hourly_ALL
-    args_hash = { 'hpxml_path' => '../workflow/tests/base.xml',
+    args_hash = { 'hpxml_path' => '../workflow/sample_files/base.xml',
                   'timeseries_frequency' => 'hourly',
                   'include_timeseries_zone_temperatures' => true,
                   'include_timeseries_fuel_consumptions' => true,
@@ -355,7 +355,7 @@ class SimulationOutputReportTest < MiniTest::Test
   end
 
   def test_timeseries_daily_ALL
-    args_hash = { 'hpxml_path' => '../workflow/tests/base.xml',
+    args_hash = { 'hpxml_path' => '../workflow/sample_files/base.xml',
                   'timeseries_frequency' => 'daily',
                   'include_timeseries_zone_temperatures' => true,
                   'include_timeseries_fuel_consumptions' => true,
@@ -372,7 +372,7 @@ class SimulationOutputReportTest < MiniTest::Test
   end
 
   def test_timeseries_timestep_ALL
-    args_hash = { 'hpxml_path' => '../workflow/tests/base.xml',
+    args_hash = { 'hpxml_path' => '../workflow/sample_files/base.xml',
                   'timeseries_frequency' => 'timestep',
                   'include_timeseries_zone_temperatures' => true,
                   'include_timeseries_fuel_consumptions' => true,
@@ -393,16 +393,16 @@ class SimulationOutputReportTest < MiniTest::Test
     require 'fileutils'
     require_relative '../../HPXMLtoOpenStudio/resources/xmlhelper.rb'
     require_relative '../../HPXMLtoOpenStudio/resources/constants.rb'
-    old_hpxml_path = File.join(File.dirname(__FILE__), '../../workflow/tests/base.xml')
+    old_hpxml_path = File.join(File.dirname(__FILE__), '../../workflow/sample_files/base.xml')
     [Constants.CalcTypeERIReferenceHome, Constants.CalcTypeERIReferenceHome].each do |eri_design|
-      new_hpxml_path = File.join(File.dirname(__FILE__), '../../workflow/tests/base-eri.xml')
+      new_hpxml_path = File.join(File.dirname(__FILE__), '../../workflow/sample_files/base-eri.xml')
       FileUtils.cp(old_hpxml_path, new_hpxml_path)
       hpxml_doc = XMLHelper.parse_file(new_hpxml_path)
       XMLHelper.add_element(hpxml_doc.elements["/HPXML/SoftwareInfo"], "extension/ERICalculation/Design", eri_design)
       XMLHelper.write_file(hpxml_doc, new_hpxml_path)
 
       # Run tests
-      args_hash = { 'hpxml_path' => '../workflow/tests/base-eri.xml',
+      args_hash = { 'hpxml_path' => '../workflow/sample_files/base-eri.xml',
                     'timeseries_frequency' => 'hourly',
                     'include_timeseries_zone_temperatures' => true,
                     'include_timeseries_fuel_consumptions' => true,

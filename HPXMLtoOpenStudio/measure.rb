@@ -643,7 +643,8 @@ class OSModel
 
     all_surfaces.each do |surface|
       if @cond_bsmnt_surfaces.include? surface or
-         ((@cond_bsmnt_surfaces.include? surface.internalMassDefinition) if surface.is_a? OpenStudio::Model::InternalMass)
+         ((@cond_bsmnt_surfaces.include? surface.internalMassDefinition) if surface.is_a? OpenStudio::Model::InternalMass) or
+         ((@cond_bsmnt_surfaces.include? surface.surface.get) if surface.is_a? OpenStudio::Model::SubSurface)
         cond_base_surfaces << surface
       else
         lv_surfaces << surface
@@ -678,6 +679,11 @@ class OSModel
   def self.calc_approximate_view_factor(runner, model, all_surfaces)
     # calculate approximate view factor using E+ approach
     # used for recalculating single thermal zone view factor matrix
+    return {} if all_surfaces.size == 0
+    if all_surfaces.size <= 3
+      fail "less than three surfaces in conditioned space. Please double check."
+    end
+
     s_azimuths = {}
     s_tilts = {}
     s_types = {}
@@ -1288,21 +1294,40 @@ class OSModel
   def self.add_foundation_walls_slabs(runner, model, building, spaces)
     # Get foundation types
     foundation_types = []
+    # Used to check foundation wall attachment
+    all_fndwalls = []
+    slab_fndwalls = []
+    building.elements.each("BuildingDetails/Enclosure/FoundationWalls/FoundationWall") do |fnd_wall|
+      all_fndwalls << fnd_wall
+    end
+
     building.elements.each("BuildingDetails/Enclosure/Slabs/Slab/InteriorAdjacentTo") do |int_adjacent_to|
       next if foundation_types.include? int_adjacent_to.text
 
       foundation_types << int_adjacent_to.text
     end
 
+    error_msg = ""
     foundation_types.each do |foundation_type|
       # Get attached foundation walls/slabs
       fnd_walls = []
       slabs = []
       building.elements.each("BuildingDetails/Enclosure/FoundationWalls/FoundationWall[InteriorAdjacentTo='#{foundation_type}']") do |fnd_wall|
         fnd_walls << fnd_wall
+        slab_fndwalls << fnd_wall
       end
       building.elements.each("BuildingDetails/Enclosure/Slabs/Slab[InteriorAdjacentTo='#{foundation_type}']") do |slab|
         slabs << slab
+      end
+
+      # Check for slabs without corresponding foundation walls
+      if fnd_walls.size == 0 and not ["living space", "garage"].include? foundation_type
+        slabs.each do |slab|
+          slab_values = HPXML.get_slab_values(slab: slab)
+          slab_id = slab_values[:id]
+          adjacent_to = slab_values[:interior_adjacent_to]
+          error_msg += "Slab '#{slab_id}' is adjacent to '#{adjacent_to}' but no corresponding foundation walls were found adjacent to '#{adjacent_to}'.\n"
+        end
       end
 
       # Calculate combinations of slabs/walls for each Kiva instance
@@ -1447,6 +1472,17 @@ class OSModel
                                 drywall_thick_in, film_r, mat_ext_finish)
       end
     end
+
+    # Check for foundation walls without corresponding slabs
+    if slab_fndwalls.size < all_fndwalls.size
+      (all_fndwalls - slab_fndwalls).each do |single_fnd_wall|
+        single_fnd_wall_values = HPXML.get_foundation_wall_values(foundation_wall: single_fnd_wall)
+        wall_id = single_fnd_wall_values[:id]
+        adjacent_to = single_fnd_wall_values[:interior_adjacent_to]
+        error_msg += "Foundation wall '#{wall_id}' is adjacent to '#{adjacent_to}' but no corresponding slab was found adjacent to '#{adjacent_to}'.\n"
+      end
+    end
+    fail error_msg unless error_msg.empty?
   end
 
   def self.add_foundation_wall(runner, model, spaces, fnd_wall_values, slab_frac,
@@ -2034,6 +2070,7 @@ class OSModel
     dhw_loop_fracs = {}
     water_heater_spaces = {}
     combi_sys_id_list = []
+    avg_setpoint_temp = 0.0 # Weighted average by fraction DHW load served
     if not wh.nil?
       wh.elements.each("WaterHeatingSystem") do |dhw|
         water_heating_system_values = HPXML.get_water_heating_system_values(water_heating_system: dhw)
@@ -2043,7 +2080,11 @@ class OSModel
 
         space = get_space_from_location(water_heating_system_values[:location], "WaterHeatingSystem", model, spaces)
         water_heater_spaces[sys_id] = space
-        setpoint_temp = Waterheater.get_default_hot_water_temperature(@eri_version)
+        setpoint_temp = water_heating_system_values[:temperature]
+        if setpoint_temp.nil?
+          setpoint_temp = Waterheater.get_default_hot_water_temperature(@eri_version)
+        end
+        avg_setpoint_temp += setpoint_temp * water_heating_system_values[:fraction_dhw_load_served]
         wh_type = water_heating_system_values[:water_heater_type]
         fuel = water_heating_system_values[:fuel_type]
         jacket_r = water_heating_system_values[:jacket_r_value]
@@ -2144,9 +2185,8 @@ class OSModel
       end
     end
 
-    wh_setpoint = Waterheater.get_default_hot_water_temperature(@eri_version)
     HotWaterAndAppliances.apply(model, weather, @living_space,
-                                @cfa, @nbeds, @ncfl, @has_uncond_bsmnt, wh_setpoint,
+                                @cfa, @nbeds, @ncfl, @has_uncond_bsmnt, avg_setpoint_temp,
                                 cw_mef, cw_ler, cw_elec_rate, cw_gas_rate,
                                 cw_agc, cw_cap, cw_space, cd_fuel, cd_ef, cd_control,
                                 cd_space, dw_ef, dw_cap, fridge_annual_kwh, fridge_space,
