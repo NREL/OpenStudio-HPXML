@@ -2299,7 +2299,7 @@ class OSModel
         seer = cooling_system_values[:cooling_efficiency_seer]
         compressor_type = cooling_system_values[:compressor_type]
         if compressor_type.nil?
-          compressor_type = get_compressor_type(seer)
+          compressor_type = HVAC.get_default_compressor_type(seer)
         end
         crankcase_kw = 0.05 # From RESNET Publication No. 002-2017
         crankcase_temp = 50.0 # From RESNET Publication No. 002-2017
@@ -2311,10 +2311,9 @@ class OSModel
           else
             shrs = [cooling_system_values[:cooling_shr]]
           end
-          fan_power_installed = get_fan_power_installed(seer)
           airflow_rate = cooling_system_values[:cooling_cfm] # Hidden feature; used only for HERS DSE test
           HVAC.apply_central_ac_1speed(model, runner, seer, shrs,
-                                       fan_power_installed, crankcase_kw, crankcase_temp,
+                                       crankcase_kw, crankcase_temp,
                                        cool_capacity_btuh, airflow_rate, load_frac,
                                        sequential_load_frac, @living_zone,
                                        @hvac_map, sys_id)
@@ -2326,9 +2325,8 @@ class OSModel
             # TODO: is the following assumption correct (revisit Dylan's data?)? OR should value from HPXML be used for both stages
             shrs = [cooling_system_values[:cooling_shr] - 0.02, cooling_system_values[:cooling_shr]]
           end
-          fan_power_installed = get_fan_power_installed(seer)
           HVAC.apply_central_ac_2speed(model, runner, seer, shrs,
-                                       fan_power_installed, crankcase_kw, crankcase_temp,
+                                       crankcase_kw, crankcase_temp,
                                        cool_capacity_btuh, load_frac,
                                        sequential_load_frac, @living_zone,
                                        @hvac_map, sys_id)
@@ -2340,9 +2338,8 @@ class OSModel
             var_sp_shr_mult = [1.115, 1.026, 1.013, 1.0]
             shrs = var_sp_shr_mult.map { |m| cooling_system_values[:cooling_shr] * m }
           end
-          fan_power_installed = get_fan_power_installed(seer)
           HVAC.apply_central_ac_4speed(model, runner, seer, shrs,
-                                       fan_power_installed, crankcase_kw, crankcase_temp,
+                                       crankcase_kw, crankcase_temp,
                                        cool_capacity_btuh, load_frac,
                                        sequential_load_frac, @living_zone,
                                        @hvac_map, sys_id)
@@ -2567,7 +2564,7 @@ class OSModel
 
         compressor_type = heat_pump_values[:compressor_type]
         if compressor_type.nil?
-          compressor_type = get_compressor_type(seer)
+          compressor_type = HVAC.get_default_compressor_type(seer)
         end
 
         crankcase_kw = 0.05 # From RESNET Publication No. 002-2017
@@ -2581,9 +2578,8 @@ class OSModel
             shrs = [heat_pump_values[:cooling_shr]]
           end
 
-          fan_power_installed = get_fan_power_installed(seer)
           HVAC.apply_central_ashp_1speed(model, runner, seer, hspf, shrs,
-                                         fan_power_installed, hp_compressor_min_temp, crankcase_kw, crankcase_temp,
+                                         hp_compressor_min_temp, crankcase_kw, crankcase_temp,
                                          cool_capacity_btuh, heat_capacity_btuh, heat_capacity_btuh_17F,
                                          backup_heat_fuel, backup_heat_efficiency, backup_heat_capacity_btuh, supp_htg_max_outdoor_temp,
                                          load_frac_heat, load_frac_cool,
@@ -2597,9 +2593,8 @@ class OSModel
             # TODO: is the following assumption correct (revisit Dylan's data?)? OR should value from HPXML be used for both stages?
             shrs = [heat_pump_values[:cooling_shr] - 0.014, heat_pump_values[:cooling_shr]]
           end
-          fan_power_installed = get_fan_power_installed(seer)
           HVAC.apply_central_ashp_2speed(model, runner, seer, hspf, shrs,
-                                         fan_power_installed, hp_compressor_min_temp, crankcase_kw, crankcase_temp,
+                                         hp_compressor_min_temp, crankcase_kw, crankcase_temp,
                                          cool_capacity_btuh, heat_capacity_btuh, heat_capacity_btuh_17F,
                                          backup_heat_fuel, backup_heat_efficiency, backup_heat_capacity_btuh, supp_htg_max_outdoor_temp,
                                          load_frac_heat, load_frac_cool,
@@ -2613,9 +2608,8 @@ class OSModel
             var_sp_shr_mult = [1.115, 1.026, 1.013, 1.0]
             shrs = var_sp_shr_mult.map { |m| heat_pump_values[:cooling_shr] * m }
           end
-          fan_power_installed = get_fan_power_installed(seer)
           HVAC.apply_central_ashp_4speed(model, runner, seer, hspf, shrs,
-                                         fan_power_installed, hp_compressor_min_temp, crankcase_kw, crankcase_temp,
+                                         hp_compressor_min_temp, crankcase_kw, crankcase_temp,
                                          cool_capacity_btuh, heat_capacity_btuh, heat_capacity_btuh_17F,
                                          backup_heat_fuel, backup_heat_efficiency, backup_heat_capacity_btuh, supp_htg_max_outdoor_temp,
                                          load_frac_heat, load_frac_cool,
@@ -4372,24 +4366,6 @@ class OSModel
     end
     walls_top = foundation_top + 8.0 * @ncfl_ag
     return foundation_top, walls_top
-  end
-
-  def self.get_compressor_type(seer)
-    if seer <= 15
-      return "single stage"
-    elsif seer <= 21
-      return "two stage"
-    elsif seer > 21
-      return "variable speed"
-    end
-  end
-
-  def self.get_fan_power_installed(seer)
-    if seer <= 15
-      return 0.365 # W/cfm
-    else
-      return 0.14 # W/cfm
-    end
   end
 end
 
