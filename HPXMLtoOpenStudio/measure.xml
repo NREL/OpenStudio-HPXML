@@ -2,8 +2,8 @@
   <schema_version>3.0</schema_version>
   <name>hpxm_lto_openstudio</name>
   <uid>b1543b30-9465-45ff-ba04-1d1f85e763bc</uid>
-  <version_id>791a276e-7b74-44a0-8780-ef828fa7dd1f</version_id>
-  <version_modified>20200228T191335Z</version_modified>
+  <version_id>c7cb25e6-e3aa-4008-920f-d0746d18abf2</version_id>
+  <version_modified>20200228T192617Z</version_modified>
   <xml_checksum>D8922A73</xml_checksum>
   <class_name>HPXMLtoOpenStudio</class_name>
   <display_name>HPXML to OpenStudio Translator</display_name>
@@ -439,16 +439,22 @@
       <checksum>ED54D750</checksum>
     </file>
     <file>
-      <filename>airflow.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>0D69D4B3</checksum>
-    </file>
-    <file>
       <filename>EPvalidator.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
       <checksum>047DDC09</checksum>
+    </file>
+    <file>
+      <filename>hpxml.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>774B7317</checksum>
+    </file>
+    <file>
+      <filename>airflow.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>01F25D4A</checksum>
     </file>
     <file>
       <version>
@@ -459,31 +465,7 @@
       <filename>measure.rb</filename>
       <filetype>rb</filetype>
       <usage_type>script</usage_type>
-      <checksum>37120B41</checksum>
-    </file>
-    <file>
-      <filename>hpxml.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>774B7317</checksum>
-    </file>
-    <file>
-      <filename>airflow.rb.bak</filename>
-      <filetype>bak</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>DC994D41</checksum>
-    </file>
-    <file>
-      <filename>EPvalidator.rb.bak</filename>
-      <filetype>bak</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>653A8EAE</checksum>
-    </file>
-    <file>
-      <filename>hpxml.rb.bak</filename>
-      <filetype>bak</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>CFCE66CB</checksum>
+      <checksum>02C4E37E</checksum>
     </file>
   </files>
 </measure>
