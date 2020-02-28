@@ -46,7 +46,7 @@ class EnergyPlusValidator
         "/HPXML/Building/BuildingDetails/BuildingSummary/BuildingConstruction/NumberofBedrooms" => one,
         "/HPXML/Building/BuildingDetails/BuildingSummary/BuildingConstruction/ConditionedFloorArea" => one,
         "/HPXML/Building/BuildingDetails/BuildingSummary/BuildingConstruction/ConditionedBuildingVolume" => one,
-        "/HPXML/Building/BuildingDetails/BuildingSummary/BuildingConstruction/extension/FractionWindowAreaOperable" => zero_or_one,
+        "/HPXML/Building/BuildingDetails/BuildingSummary/BuildingConstruction/extension/FractionofOperableWindowArea" => zero_or_one,
         "/HPXML/Building/BuildingDetails/BuildingSummary/Site/extension/Neighbors" => zero_or_one, # See [Neighbors]
 
         "/HPXML/Building/BuildingDetails/ClimateandRiskZones/WeatherStation" => one, # See [WeatherStation]

@@ -154,7 +154,7 @@ class Airflow
     return 0.5 # Table 4.2.2(1)(g)
   end
 
-  def self.get_default_fraction_window_area_operable()
+  def self.get_default_fraction_of_operable_window_area()
     return 0.33 # 33% per Building America assumption
   end
 

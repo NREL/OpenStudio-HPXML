@@ -226,7 +226,7 @@ class OSModel
     if @nbaths.nil?
       @nbaths = Waterheater.get_default_num_bathrooms(@nbeds)
     end
-    @frac_window_area_operable = construction_values[:fraction_window_area_operable]
+    @frac_window_area_operable = construction_values[:fraction_of_operable_window_area]
     @has_uncond_bsmnt = !enclosure.elements["*/*[InteriorAdjacentTo='basement - unconditioned' or ExteriorAdjacentTo='basement - unconditioned']"].nil?
     @has_vented_attic = !enclosure.elements["*/*[InteriorAdjacentTo='attic - vented' or ExteriorAdjacentTo='attic - vented']"].nil?
     @has_vented_crawl = !enclosure.elements["*/*[InteriorAdjacentTo='crawlspace - vented' or ExteriorAdjacentTo='crawlspace - vented']"].nil?
@@ -3023,7 +3023,7 @@ class OSModel
 
     # Natural Ventilation
     if @frac_window_area_operable.nil?
-      @frac_window_area_operable = Airflow.get_default_fraction_window_area_operable()
+      @frac_window_area_operable = Airflow.get_default_fraction_of_operable_window_area()
     end
     if @frac_window_area_operable < 0 or @frac_window_area_operable > 1
       fail "Fraction window area operable (#{@frac_window_area_operable}) must be between 0 and 1."
