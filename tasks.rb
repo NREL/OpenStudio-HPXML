@@ -125,7 +125,6 @@ def create_hpxmls
     'base-enclosure-beds-5.xml' => 'base.xml',
     'base-enclosure-garage.xml' => 'base.xml',
     'base-enclosure-infil-cfm50.xml' => 'base.xml',
-    'base-enclosure-no-natural-ventilation.xml' => 'base.xml',
     'base-enclosure-overhangs.xml' => 'base.xml',
     'base-enclosure-skylights.xml' => 'base.xml',
     'base-enclosure-split-surfaces.xml' => 'base-enclosure-skylights.xml',
@@ -139,6 +138,7 @@ def create_hpxmls
     'base-enclosure-walltype-stone.xml' => 'base.xml',
     'base-enclosure-walltype-strawbale.xml' => 'base.xml',
     'base-enclosure-walltype-structuralbrick.xml' => 'base.xml',
+    'base-enclosure-windows-inoperable.xml' => 'base.xml',
     'base-enclosure-windows-interior-shading.xml' => 'base.xml',
     'base-enclosure-windows-none.xml' => 'base.xml',
     'base-foundation-multiple.xml' => 'base-foundation-unconditioned-basement.xml',
@@ -617,8 +617,6 @@ def get_hpxml_file_site_values(hpxml_file, site_values)
     site_values = { :fuels => ["electricity", "natural gas"] }
   elsif ['base-hvac-none-no-fuel-access.xml'].include? hpxml_file
     site_values[:fuels] = ["electricity"]
-  elsif ['base-enclosure-no-natural-ventilation.xml'].include? hpxml_file
-    site_values[:disable_natural_ventilation] = true
   end
   return site_values
 end
@@ -649,7 +647,8 @@ def get_hpxml_file_building_construction_values(hpxml_file, building_constructio
                                      :number_of_conditioned_floors_above_grade => 1,
                                      :number_of_bedrooms => 3,
                                      :conditioned_floor_area => 2700,
-                                     :conditioned_building_volume => 2700 * 8 }
+                                     :conditioned_building_volume => 2700 * 8,
+                                     :fraction_of_operable_window_area => 0.33 }
   elsif ['base-enclosure-beds-1.xml'].include? hpxml_file
     building_construction_values[:number_of_bedrooms] = 1
   elsif ['base-enclosure-beds-2.xml'].include? hpxml_file
@@ -680,6 +679,8 @@ def get_hpxml_file_building_construction_values(hpxml_file, building_constructio
     building_construction_values[:number_of_conditioned_floors_above_grade] += 1
     building_construction_values[:conditioned_floor_area] += 1350
     building_construction_values[:conditioned_building_volume] += 1350 * 8
+  elsif ['base-enclosure-windows-inoperable.xml'].include? hpxml_file
+    building_construction_values[:fraction_of_operable_window_area] = 0.0
   end
   return building_construction_values
 end

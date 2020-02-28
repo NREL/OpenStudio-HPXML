@@ -226,6 +226,7 @@ class OSModel
     if @nbaths.nil?
       @nbaths = Waterheater.get_default_num_bathrooms(@nbeds)
     end
+    @frac_window_area_operable = construction_values[:fraction_of_operable_window_area]
     @has_uncond_bsmnt = !enclosure.elements["*/*[InteriorAdjacentTo='basement - unconditioned' or ExteriorAdjacentTo='basement - unconditioned']"].nil?
     @has_vented_attic = !enclosure.elements["*/*[InteriorAdjacentTo='attic - vented' or ExteriorAdjacentTo='attic - vented']"].nil?
     @has_vented_crawl = !enclosure.elements["*/*[InteriorAdjacentTo='crawlspace - vented' or ExteriorAdjacentTo='crawlspace - vented']"].nil?
@@ -2954,7 +2955,6 @@ class OSModel
   def self.add_airflow(runner, model, building, weather, spaces)
     site_values = HPXML.get_site_values(site: building.elements["BuildingDetails/BuildingSummary/Site"])
     shelter_coef = site_values[:shelter_coefficient]
-    disable_nat_vent = site_values[:disable_natural_ventilation]
 
     # Infiltration
     infil_ach50 = nil
@@ -3015,18 +3015,17 @@ class OSModel
                              vented_attic_sla, unvented_attic_sla, vented_attic_const_ach, unconditioned_basement_ach, has_flue_chimney, terrain)
 
     # Natural Ventilation
-    if not disable_nat_vent.nil? and disable_nat_vent
-      nv_frac_windows_open = 0.0
-      nv_frac_window_area_openable = 0.0
-      nv_num_days_per_week = 0
-    else
-      nv_frac_windows_open = 0.33
-      nv_frac_window_area_openable = 0.2
-      nv_num_days_per_week = 7
+    if @frac_window_area_operable.nil?
+      @frac_window_area_operable = Airflow.get_default_fraction_of_operable_window_area()
     end
+    if @frac_window_area_operable < 0 or @frac_window_area_operable > 1
+      fail "Fraction window area operable (#{@frac_window_area_operable}) must be between 0 and 1."
+    end
+    nv_frac_window_area_open = @frac_window_area_operable * 0.20 # Assume 20% of operable window area is open
+    nv_num_days_per_week = 7
     nv_max_oa_hr = 0.0115
     nv_max_oa_rh = 0.7
-    nat_vent = NaturalVentilation.new(nv_frac_windows_open, nv_frac_window_area_openable, nv_max_oa_hr, nv_max_oa_rh, nv_num_days_per_week,
+    nat_vent = NaturalVentilation.new(nv_frac_window_area_open, nv_max_oa_hr, nv_max_oa_rh, nv_num_days_per_week,
                                       @htg_weekday_setpoints, @htg_weekend_setpoints, @clg_weekday_setpoints, @clg_weekend_setpoints, @clg_ssn_sensor)
 
     # Ducts

@@ -24,6 +24,9 @@
           <NumberofConditionedFloorsAboveGrade>1</NumberofConditionedFloorsAboveGrade>
           <NumberofBedrooms>3</NumberofBedrooms>
           <ConditionedBuildingVolume>21600.0</ConditionedBuildingVolume>
+          <extension>
+            <FractionofOperableWindowArea>0.33</FractionofOperableWindowArea>
+          </extension>
         </BuildingConstruction>
       </BuildingSummary>
       <ClimateandRiskZones>
