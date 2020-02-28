@@ -26,6 +26,9 @@
           <NumberofBedrooms>3</NumberofBedrooms>
           <ConditionedFloorArea>2700.0</ConditionedFloorArea>
           <ConditionedBuildingVolume>21600.0</ConditionedBuildingVolume>
+          <extension>
+            <FractionWindowAreaOperable>0.33</FractionWindowAreaOperable>
+          </extension>
         </BuildingConstruction>
       </BuildingSummary>
       <ClimateandRiskZones>
@@ -251,75 +254,35 @@
         </Slabs>
         <Windows>
           <Window>
-            <SystemIdentifier id='WindowNorthOperable'/>
-            <Area>35.64</Area>
+            <SystemIdentifier id='WindowNorth'/>
+            <Area>108.0</Area>
             <Azimuth>0</Azimuth>
             <UFactor>0.33</UFactor>
             <SHGC>0.45</SHGC>
-            <Operable>true</Operable>
             <AttachedToWall idref='Wall'/>
           </Window>
           <Window>
-            <SystemIdentifier id='WindowSouthOperable'/>
-            <Area>35.64</Area>
+            <SystemIdentifier id='WindowSouth'/>
+            <Area>108.0</Area>
             <Azimuth>180</Azimuth>
             <UFactor>0.33</UFactor>
             <SHGC>0.45</SHGC>
-            <Operable>true</Operable>
             <AttachedToWall idref='Wall'/>
           </Window>
           <Window>
-            <SystemIdentifier id='WindowWestOperable'/>
-            <Area>23.76</Area>
+            <SystemIdentifier id='WindowWest'/>
+            <Area>72.0</Area>
             <Azimuth>270</Azimuth>
             <UFactor>0.33</UFactor>
             <SHGC>0.45</SHGC>
-            <Operable>true</Operable>
             <AttachedToWall idref='Wall'/>
           </Window>
           <Window>
-            <SystemIdentifier id='WindowNorthInoperable'/>
-            <Area>72.36</Area>
-            <Azimuth>0</Azimuth>
-            <UFactor>0.33</UFactor>
-            <SHGC>0.45</SHGC>
-            <Operable>false</Operable>
-            <AttachedToWall idref='Wall'/>
-          </Window>
-          <Window>
-            <SystemIdentifier id='WindowSouthInoperable'/>
-            <Area>72.36</Area>
-            <Azimuth>180</Azimuth>
-            <UFactor>0.33</UFactor>
-            <SHGC>0.45</SHGC>
-            <Operable>false</Operable>
-            <AttachedToWall idref='Wall'/>
-          </Window>
-          <Window>
-            <SystemIdentifier id='WindowEastInoperable'/>
-            <Area>48.24</Area>
+            <SystemIdentifier id='GarageWindowEast'/>
+            <Area>12.0</Area>
             <Azimuth>90</Azimuth>
             <UFactor>0.33</UFactor>
             <SHGC>0.45</SHGC>
-            <Operable>false</Operable>
-            <AttachedToWall idref='Wall'/>
-          </Window>
-          <Window>
-            <SystemIdentifier id='GarageWindowEastOperable'/>
-            <Area>3.96</Area>
-            <Azimuth>90</Azimuth>
-            <UFactor>0.33</UFactor>
-            <SHGC>0.45</SHGC>
-            <Operable>true</Operable>
-            <AttachedToWall idref='WallGarageExterior'/>
-          </Window>
-          <Window>
-            <SystemIdentifier id='GarageWindowEastInoperable'/>
-            <Area>8.040000000000001</Area>
-            <Azimuth>90</Azimuth>
-            <UFactor>0.33</UFactor>
-            <SHGC>0.45</SHGC>
-            <Operable>false</Operable>
             <AttachedToWall idref='WallGarageExterior'/>
           </Window>
         </Windows>

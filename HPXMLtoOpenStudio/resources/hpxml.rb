@@ -130,6 +130,7 @@ class HPXML
                                      number_of_bathrooms: nil,
                                      conditioned_floor_area:,
                                      conditioned_building_volume:,
+                                     fraction_window_area_operable: nil,
                                      use_only_ideal_air_system: nil)
     building_construction = XMLHelper.create_elements_as_needed(hpxml, ["Building", "BuildingDetails", "BuildingSummary", "BuildingConstruction"])
     XMLHelper.add_element(building_construction, "NumberofConditionedFloors", Integer(number_of_conditioned_floors))
@@ -139,7 +140,8 @@ class HPXML
     XMLHelper.add_element(building_construction, "ConditionedFloorArea", Float(conditioned_floor_area))
     XMLHelper.add_element(building_construction, "ConditionedBuildingVolume", Float(conditioned_building_volume))
     add_extension(parent: building_construction,
-                  extensions: { "UseOnlyIdealAirSystem" => to_bool_or_nil(use_only_ideal_air_system) })
+                  extensions: { "FractionWindowAreaOperable" => to_float_or_nil(fraction_window_area_operable),
+                                "UseOnlyIdealAirSystem" => to_bool_or_nil(use_only_ideal_air_system) })
 
     return building_construction
   end
@@ -158,6 +160,7 @@ class HPXML
     vals[:conditioned_building_volume] = to_float_or_nil(XMLHelper.get_value(building_construction, "ConditionedBuildingVolume"))
     vals[:use_only_ideal_air_system] = to_bool_or_nil(XMLHelper.get_value(building_construction, "extension/UseOnlyIdealAirSystem"))
     vals[:residential_facility_type] = XMLHelper.get_value(building_construction, "ResidentialFacilityType")
+    vals[:fraction_window_area_operable] = to_float_or_nil(XMLHelper.get_value(building_construction, "extension/FractionWindowAreaOperable"))
     return vals
   end
 
@@ -884,7 +887,6 @@ class HPXML
                       overhangs_depth: nil,
                       overhangs_distance_to_top_of_window: nil,
                       overhangs_distance_to_bottom_of_window: nil,
-                      operable: nil,
                       interior_shading_factor_summer: nil,
                       interior_shading_factor_winter: nil,
                       wall_idref:)
@@ -909,7 +911,6 @@ class HPXML
       XMLHelper.add_element(overhangs, "DistanceToTopOfWindow", Float(overhangs_distance_to_top_of_window))
       XMLHelper.add_element(overhangs, "DistanceToBottomOfWindow", Float(overhangs_distance_to_bottom_of_window))
     end
-    XMLHelper.add_element(window, "Operable", Boolean(operable)) unless operable.nil?
     attached_to_wall = XMLHelper.add_element(window, "AttachedToWall")
     XMLHelper.add_attribute(attached_to_wall, "idref", wall_idref)
 
@@ -937,7 +938,6 @@ class HPXML
     vals[:overhangs_depth] = to_float_or_nil(XMLHelper.get_value(window, "Overhangs/Depth"))
     vals[:overhangs_distance_to_top_of_window] = to_float_or_nil(XMLHelper.get_value(window, "Overhangs/DistanceToTopOfWindow"))
     vals[:overhangs_distance_to_bottom_of_window] = to_float_or_nil(XMLHelper.get_value(window, "Overhangs/DistanceToBottomOfWindow"))
-    vals[:operable] = to_bool_or_nil(XMLHelper.get_value(window, "Operable"))
     vals[:wall_idref] = get_idref(window, "AttachedToWall")
     return vals
   end
