@@ -195,6 +195,7 @@
               <DistanceToTopOfWindow>0.0</DistanceToTopOfWindow>
               <DistanceToBottomOfWindow>4.0</DistanceToBottomOfWindow>
             </Overhangs>
+            <Operable>true</Operable>
             <AttachedToWall idref='Wall'/>
           </Window>
           <Window>
@@ -203,6 +204,7 @@
             <Azimuth>180</Azimuth>
             <UFactor>0.33</UFactor>
             <SHGC>0.45</SHGC>
+            <Operable>true</Operable>
             <AttachedToWall idref='Wall'/>
           </Window>
           <Window>
@@ -216,6 +218,7 @@
               <DistanceToTopOfWindow>2.0</DistanceToTopOfWindow>
               <DistanceToBottomOfWindow>6.0</DistanceToBottomOfWindow>
             </Overhangs>
+            <Operable>true</Operable>
             <AttachedToWall idref='Wall'/>
           </Window>
           <Window>
@@ -229,6 +232,7 @@
               <DistanceToTopOfWindow>2.0</DistanceToTopOfWindow>
               <DistanceToBottomOfWindow>7.0</DistanceToBottomOfWindow>
             </Overhangs>
+            <Operable>true</Operable>
             <AttachedToWall idref='Wall'/>
           </Window>
         </Windows>

@@ -1270,6 +1270,7 @@
             <Azimuth>0</Azimuth>
             <UFactor>0.33</UFactor>
             <SHGC>0.45</SHGC>
+            <Operable>true</Operable>
             <AttachedToWall idref='Wall'/>
           </Window>
           <Window>
@@ -1278,6 +1279,7 @@
             <Azimuth>180</Azimuth>
             <UFactor>0.33</UFactor>
             <SHGC>0.45</SHGC>
+            <Operable>true</Operable>
             <AttachedToWall idref='Wall'/>
           </Window>
           <Window>
@@ -1286,6 +1288,7 @@
             <Azimuth>90</Azimuth>
             <UFactor>0.33</UFactor>
             <SHGC>0.45</SHGC>
+            <Operable>true</Operable>
             <AttachedToWall idref='Wall'/>
           </Window>
           <Window>
@@ -1294,6 +1297,7 @@
             <Azimuth>270</Azimuth>
             <UFactor>0.33</UFactor>
             <SHGC>0.45</SHGC>
+            <Operable>true</Operable>
             <AttachedToWall idref='Wall'/>
           </Window>
           <Window>
@@ -1302,6 +1306,7 @@
             <Azimuth>0</Azimuth>
             <UFactor>0.33</UFactor>
             <SHGC>0.45</SHGC>
+            <Operable>true</Operable>
             <AttachedToWall idref='Wall2'/>
           </Window>
           <Window>
@@ -1310,6 +1315,7 @@
             <Azimuth>0</Azimuth>
             <UFactor>0.33</UFactor>
             <SHGC>0.45</SHGC>
+            <Operable>true</Operable>
             <AttachedToWall idref='Wall3'/>
           </Window>
           <Window>
@@ -1318,6 +1324,7 @@
             <Azimuth>0</Azimuth>
             <UFactor>0.33</UFactor>
             <SHGC>0.45</SHGC>
+            <Operable>true</Operable>
             <AttachedToWall idref='Wall4'/>
           </Window>
           <Window>
@@ -1326,6 +1333,7 @@
             <Azimuth>0</Azimuth>
             <UFactor>0.33</UFactor>
             <SHGC>0.45</SHGC>
+            <Operable>true</Operable>
             <AttachedToWall idref='Wall5'/>
           </Window>
           <Window>
@@ -1334,6 +1342,7 @@
             <Azimuth>0</Azimuth>
             <UFactor>0.33</UFactor>
             <SHGC>0.45</SHGC>
+            <Operable>true</Operable>
             <AttachedToWall idref='Wall6'/>
           </Window>
           <Window>
@@ -1342,6 +1351,7 @@
             <Azimuth>0</Azimuth>
             <UFactor>0.33</UFactor>
             <SHGC>0.45</SHGC>
+            <Operable>true</Operable>
             <AttachedToWall idref='Wall7'/>
           </Window>
           <Window>
@@ -1350,6 +1360,7 @@
             <Azimuth>0</Azimuth>
             <UFactor>0.33</UFactor>
             <SHGC>0.45</SHGC>
+            <Operable>true</Operable>
             <AttachedToWall idref='Wall8'/>
           </Window>
           <Window>
@@ -1358,6 +1369,7 @@
             <Azimuth>0</Azimuth>
             <UFactor>0.33</UFactor>
             <SHGC>0.45</SHGC>
+            <Operable>true</Operable>
             <AttachedToWall idref='Wall9'/>
           </Window>
           <Window>
@@ -1366,6 +1378,7 @@
             <Azimuth>0</Azimuth>
             <UFactor>0.33</UFactor>
             <SHGC>0.45</SHGC>
+            <Operable>true</Operable>
             <AttachedToWall idref='Wall10'/>
           </Window>
           <Window>
@@ -1374,6 +1387,7 @@
             <Azimuth>180</Azimuth>
             <UFactor>0.33</UFactor>
             <SHGC>0.45</SHGC>
+            <Operable>true</Operable>
             <AttachedToWall idref='Wall2'/>
           </Window>
           <Window>
@@ -1382,6 +1396,7 @@
             <Azimuth>180</Azimuth>
             <UFactor>0.33</UFactor>
             <SHGC>0.45</SHGC>
+            <Operable>true</Operable>
             <AttachedToWall idref='Wall3'/>
           </Window>
           <Window>
@@ -1390,6 +1405,7 @@
             <Azimuth>180</Azimuth>
             <UFactor>0.33</UFactor>
             <SHGC>0.45</SHGC>
+            <Operable>true</Operable>
             <AttachedToWall idref='Wall4'/>
           </Window>
           <Window>
@@ -1398,6 +1414,7 @@
             <Azimuth>180</Azimuth>
             <UFactor>0.33</UFactor>
             <SHGC>0.45</SHGC>
+            <Operable>true</Operable>
             <AttachedToWall idref='Wall5'/>
           </Window>
           <Window>
@@ -1406,6 +1423,7 @@
             <Azimuth>180</Azimuth>
             <UFactor>0.33</UFactor>
             <SHGC>0.45</SHGC>
+            <Operable>true</Operable>
             <AttachedToWall idref='Wall6'/>
           </Window>
           <Window>
@@ -1414,6 +1432,7 @@
             <Azimuth>180</Azimuth>
             <UFactor>0.33</UFactor>
             <SHGC>0.45</SHGC>
+            <Operable>true</Operable>
             <AttachedToWall idref='Wall7'/>
           </Window>
           <Window>
@@ -1422,6 +1441,7 @@
             <Azimuth>180</Azimuth>
             <UFactor>0.33</UFactor>
             <SHGC>0.45</SHGC>
+            <Operable>true</Operable>
             <AttachedToWall idref='Wall8'/>
           </Window>
           <Window>
@@ -1430,6 +1450,7 @@
             <Azimuth>180</Azimuth>
             <UFactor>0.33</UFactor>
             <SHGC>0.45</SHGC>
+            <Operable>true</Operable>
             <AttachedToWall idref='Wall9'/>
           </Window>
           <Window>
@@ -1438,6 +1459,7 @@
             <Azimuth>180</Azimuth>
             <UFactor>0.33</UFactor>
             <SHGC>0.45</SHGC>
+            <Operable>true</Operable>
             <AttachedToWall idref='Wall10'/>
           </Window>
           <Window>
@@ -1446,6 +1468,7 @@
             <Azimuth>90</Azimuth>
             <UFactor>0.33</UFactor>
             <SHGC>0.45</SHGC>
+            <Operable>true</Operable>
             <AttachedToWall idref='Wall2'/>
           </Window>
           <Window>
@@ -1454,6 +1477,7 @@
             <Azimuth>90</Azimuth>
             <UFactor>0.33</UFactor>
             <SHGC>0.45</SHGC>
+            <Operable>true</Operable>
             <AttachedToWall idref='Wall3'/>
           </Window>
           <Window>
@@ -1462,6 +1486,7 @@
             <Azimuth>90</Azimuth>
             <UFactor>0.33</UFactor>
             <SHGC>0.45</SHGC>
+            <Operable>true</Operable>
             <AttachedToWall idref='Wall4'/>
           </Window>
           <Window>
@@ -1470,6 +1495,7 @@
             <Azimuth>90</Azimuth>
             <UFactor>0.33</UFactor>
             <SHGC>0.45</SHGC>
+            <Operable>true</Operable>
             <AttachedToWall idref='Wall5'/>
           </Window>
           <Window>
@@ -1478,6 +1504,7 @@
             <Azimuth>90</Azimuth>
             <UFactor>0.33</UFactor>
             <SHGC>0.45</SHGC>
+            <Operable>true</Operable>
             <AttachedToWall idref='Wall6'/>
           </Window>
           <Window>
@@ -1486,6 +1513,7 @@
             <Azimuth>90</Azimuth>
             <UFactor>0.33</UFactor>
             <SHGC>0.45</SHGC>
+            <Operable>true</Operable>
             <AttachedToWall idref='Wall7'/>
           </Window>
           <Window>
@@ -1494,6 +1522,7 @@
             <Azimuth>90</Azimuth>
             <UFactor>0.33</UFactor>
             <SHGC>0.45</SHGC>
+            <Operable>true</Operable>
             <AttachedToWall idref='Wall8'/>
           </Window>
           <Window>
@@ -1502,6 +1531,7 @@
             <Azimuth>90</Azimuth>
             <UFactor>0.33</UFactor>
             <SHGC>0.45</SHGC>
+            <Operable>true</Operable>
             <AttachedToWall idref='Wall9'/>
           </Window>
           <Window>
@@ -1510,6 +1540,7 @@
             <Azimuth>90</Azimuth>
             <UFactor>0.33</UFactor>
             <SHGC>0.45</SHGC>
+            <Operable>true</Operable>
             <AttachedToWall idref='Wall10'/>
           </Window>
           <Window>
@@ -1518,6 +1549,7 @@
             <Azimuth>270</Azimuth>
             <UFactor>0.33</UFactor>
             <SHGC>0.45</SHGC>
+            <Operable>true</Operable>
             <AttachedToWall idref='Wall2'/>
           </Window>
           <Window>
@@ -1526,6 +1558,7 @@
             <Azimuth>270</Azimuth>
             <UFactor>0.33</UFactor>
             <SHGC>0.45</SHGC>
+            <Operable>true</Operable>
             <AttachedToWall idref='Wall3'/>
           </Window>
           <Window>
@@ -1534,6 +1567,7 @@
             <Azimuth>270</Azimuth>
             <UFactor>0.33</UFactor>
             <SHGC>0.45</SHGC>
+            <Operable>true</Operable>
             <AttachedToWall idref='Wall4'/>
           </Window>
           <Window>
@@ -1542,6 +1576,7 @@
             <Azimuth>270</Azimuth>
             <UFactor>0.33</UFactor>
             <SHGC>0.45</SHGC>
+            <Operable>true</Operable>
             <AttachedToWall idref='Wall5'/>
           </Window>
           <Window>
@@ -1550,6 +1585,7 @@
             <Azimuth>270</Azimuth>
             <UFactor>0.33</UFactor>
             <SHGC>0.45</SHGC>
+            <Operable>true</Operable>
             <AttachedToWall idref='Wall6'/>
           </Window>
           <Window>
@@ -1558,6 +1594,7 @@
             <Azimuth>270</Azimuth>
             <UFactor>0.33</UFactor>
             <SHGC>0.45</SHGC>
+            <Operable>true</Operable>
             <AttachedToWall idref='Wall7'/>
           </Window>
           <Window>
@@ -1566,6 +1603,7 @@
             <Azimuth>270</Azimuth>
             <UFactor>0.33</UFactor>
             <SHGC>0.45</SHGC>
+            <Operable>true</Operable>
             <AttachedToWall idref='Wall8'/>
           </Window>
           <Window>
@@ -1574,6 +1612,7 @@
             <Azimuth>270</Azimuth>
             <UFactor>0.33</UFactor>
             <SHGC>0.45</SHGC>
+            <Operable>true</Operable>
             <AttachedToWall idref='Wall9'/>
           </Window>
           <Window>
@@ -1582,6 +1621,7 @@
             <Azimuth>270</Azimuth>
             <UFactor>0.33</UFactor>
             <SHGC>0.45</SHGC>
+            <Operable>true</Operable>
             <AttachedToWall idref='Wall10'/>
           </Window>
         </Windows>
