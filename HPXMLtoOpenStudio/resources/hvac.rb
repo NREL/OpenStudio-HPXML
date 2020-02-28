@@ -7,13 +7,14 @@ require_relative "schedules"
 
 class HVAC
   def self.apply_central_ac_1speed(model, runner, seer, shrs,
-                                   fan_power_installed, crankcase_kw, crankcase_temp,
+                                   crankcase_kw, crankcase_temp,
                                    capacity, airflow_rate, frac_cool_load_served,
                                    sequential_cool_load_frac, control_zone,
                                    hvac_map, sys_id)
 
     num_speeds = 1
     fan_power_rated = get_fan_power_rated(seer)
+    fan_power_installed = get_fan_power_installed(seer)
     capacity_ratios = HVAC.one_speed_capacity_ratios
     fan_speed_ratios = HVAC.one_speed_fan_speed_ratios
 
@@ -117,13 +118,14 @@ class HVAC
   end
 
   def self.apply_central_ac_2speed(model, runner, seer, shrs,
-                                   fan_power_installed, crankcase_kw, crankcase_temp,
+                                   crankcase_kw, crankcase_temp,
                                    capacity, frac_cool_load_served,
                                    sequential_cool_load_frac, control_zone,
                                    hvac_map, sys_id)
 
     num_speeds = 2
     fan_power_rated = get_fan_power_rated(seer)
+    fan_power_installed = get_fan_power_installed(seer)
     capacity_ratios = HVAC.two_speed_capacity_ratios
     fan_speed_ratios = HVAC.two_speed_fan_speed_ratios_cooling
 
@@ -229,13 +231,14 @@ class HVAC
   end
 
   def self.apply_central_ac_4speed(model, runner, seer, shrs,
-                                   fan_power_installed, crankcase_kw, crankcase_temp,
+                                   crankcase_kw, crankcase_temp,
                                    capacity, frac_cool_load_served,
                                    sequential_cool_load_frac, control_zone,
                                    hvac_map, sys_id)
 
     num_speeds = 4
     fan_power_rated = get_fan_power_rated(seer)
+    fan_power_installed = get_fan_power_installed(seer)
     capacity_ratios = HVAC.variable_speed_capacity_ratios_cooling
     fan_speed_ratios = HVAC.variable_speed_fan_speed_ratios_cooling
 
@@ -425,7 +428,7 @@ class HVAC
   end
 
   def self.apply_central_ashp_1speed(model, runner, seer, hspf, shrs,
-                                     fan_power_installed, min_temp, crankcase_kw, crankcase_temp,
+                                     min_temp, crankcase_kw, crankcase_temp,
                                      heat_pump_capacity_cool, heat_pump_capacity_heat, heat_pump_capacity_heat_17F,
                                      supplemental_fuel_type, supplemental_efficiency, supplemental_capacity, supp_htg_max_outdoor_temp,
                                      frac_heat_load_served, frac_cool_load_served,
@@ -434,6 +437,7 @@ class HVAC
 
     num_speeds = 1
     fan_power_rated = get_fan_power_rated(seer)
+    fan_power_installed = get_fan_power_installed(seer)
     capacity_ratios = HVAC.one_speed_capacity_ratios
     fan_speed_ratios = HVAC.one_speed_fan_speed_ratios
 
@@ -571,7 +575,7 @@ class HVAC
   end
 
   def self.apply_central_ashp_2speed(model, runner, seer, hspf, shrs,
-                                     fan_power_installed, min_temp, crankcase_kw, crankcase_temp,
+                                     min_temp, crankcase_kw, crankcase_temp,
                                      heat_pump_capacity_cool, heat_pump_capacity_heat, heat_pump_capacity_heat_17F,
                                      supplemental_fuel_type, supplemental_efficiency, supplemental_capacity, supp_htg_max_outdoor_temp,
                                      frac_heat_load_served, frac_cool_load_served,
@@ -580,6 +584,7 @@ class HVAC
 
     num_speeds = 2
     fan_power_rated = get_fan_power_rated(seer)
+    fan_power_installed = get_fan_power_installed(seer)
     capacity_ratios = HVAC.two_speed_capacity_ratios
     fan_speed_ratios_heating = HVAC.two_speed_fan_speed_ratios_heating
     fan_speed_ratios_cooling = HVAC.two_speed_fan_speed_ratios_cooling
@@ -724,7 +729,7 @@ class HVAC
   end
 
   def self.apply_central_ashp_4speed(model, runner, seer, hspf, shrs,
-                                     fan_power_installed, min_temp, crankcase_kw, crankcase_temp,
+                                     min_temp, crankcase_kw, crankcase_temp,
                                      heat_pump_capacity_cool, heat_pump_capacity_heat, heat_pump_capacity_heat_17F,
                                      supplemental_fuel_type, supplemental_efficiency, supplemental_capacity, supp_htg_max_outdoor_temp,
                                      frac_heat_load_served, frac_cool_load_served,
@@ -733,6 +738,7 @@ class HVAC
 
     num_speeds = 4
     fan_power_rated = get_fan_power_rated(seer)
+    fan_power_installed = get_fan_power_installed(seer)
     capacity_ratios_heating = HVAC.variable_speed_capacity_ratios_heating
     capacity_ratios_cooling = HVAC.variable_speed_capacity_ratios_cooling
     fan_speed_ratios_heating = HVAC.variable_speed_fan_speed_ratios_heating
@@ -2091,6 +2097,16 @@ class HVAC
       fail "Unexpected control type #{control_type}."
     end
     return clg_sp, clg_setup_sp, clg_setup_hrs_per_week, clg_setup_start_hr
+  end
+
+  def self.get_default_compressor_type(seer)
+    if seer <= 15
+      return "single stage"
+    elsif seer <= 21
+      return "two stage"
+    elsif seer > 21
+      return "variable speed"
+    end
   end
 
   def self.apply_dehumidifier(model, runner, energy_factor, integrated_energy_factor, water_removal_rate,
@@ -3743,6 +3759,14 @@ class HVAC
   end
 
   def self.get_fan_power_rated(seer)
+    if seer <= 15
+      return 0.365 # W/cfm
+    else
+      return 0.14 # W/cfm
+    end
+  end
+
+  def self.get_fan_power_installed(seer)
     if seer <= 15
       return 0.365 # W/cfm
     else

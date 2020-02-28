@@ -325,6 +325,7 @@ class EnergyPlusValidator
         "../../HVACDistribution[DistributionSystemType/AirDistribution | DistributionSystemType[Other='DSE']]" => one_or_more, # See [HVACDistribution]
         "DistributionSystem" => one,
         "CoolingCapacity" => one, # Use -1 for autosizing
+        "[CompressorType='single stage' or CompressorType='two stage' or CompressorType='variable speed']" => zero_or_one,
         "AnnualCoolingEfficiency[Units='SEER']/Value" => one,
       },
 
@@ -360,6 +361,7 @@ class EnergyPlusValidator
       "/HPXML/Building/BuildingDetails/Systems/HVAC/HVACPlant/HeatPump[HeatPumpType='air-to-air']" => {
         "../../HVACDistribution[DistributionSystemType/AirDistribution | DistributionSystemType[Other='DSE']]" => one_or_more, # See [HVACDistribution]
         "DistributionSystem" => one,
+        "[CompressorType='single stage' or CompressorType='two stage' or CompressorType='variable speed']" => zero_or_one,
         "AnnualCoolingEfficiency[Units='SEER']/Value" => one,
         "AnnualHeatingEfficiency[Units='HSPF']/Value" => one,
         "HeatingCapacity17F" => zero_or_one
@@ -517,7 +519,7 @@ class EnergyPlusValidator
         "RelatedHVACSystem" => one, # HeatingSystem (boiler)
         "TankVolume" => one,
         "WaterHeaterInsulation/Jacket/JacketRValue" => zero_or_one, # Capable to model tank wrap insulation
-        "extension/StandbyLoss" => zero_or_one, # deg-F/h, refer to https://www.ahridirectory.org/NewSearch?programId=28&searchTypeId=3
+        "StandbyLoss" => zero_or_one, # Refer to https://www.ahridirectory.org/NewSearch?programId=28&searchTypeId=3
       },
 
       ## [WHType=CombiTankless]
