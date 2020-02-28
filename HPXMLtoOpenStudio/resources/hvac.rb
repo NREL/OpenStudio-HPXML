@@ -2137,7 +2137,7 @@ class HVAC
     zone_hvac.addToThermalZone(control_zone)
     # Only one dehumidifier allowed in current workflow.
     # If more than one allowed in the future, should remove this EMS program to avoid duplication
-    hvac_map[sys_id] = add_dehumidified_load_outvars(model, zone_hvac, control_zone)
+    hvac_map[sys_id] << zone_hvac
   end
 
   def self.add_dehumidified_load_outvars(model, dehumidifier, control_zone)
