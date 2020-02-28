@@ -1437,6 +1437,12 @@ class Airflow
           duct_program.addLine("  Set #{duct_actuators["cfis_supply_cond_to_dz"].name} = 0")
           duct_program.addLine("  Set #{duct_actuators["cfis_supply_sens_lk_to_dz"].name} = 0")
           duct_program.addLine("  Set #{duct_actuators["cfis_supply_lat_lk_to_dz"].name} = 0")
+          if not duct_actuators["dz_to_liv_flow_rate"].nil?
+            duct_program.addLine("  Set #{duct_actuators["cfis_dz_to_liv_flow_rate"].name} = 0")
+          end
+          if not duct_actuators["liv_to_dz_flow_rate"].nil?
+            duct_program.addLine("  Set #{duct_actuators["cfis_liv_to_dz_flow_rate"].name} = 0")
+          end
           duct_program.addLine("EndIf")
 
         end
