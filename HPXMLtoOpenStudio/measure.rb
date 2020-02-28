@@ -3727,6 +3727,16 @@ class OSModel
     model.getZoneHVACDehumidifierDXs.each do |e|
       next unless e.thermalZone.get.name.to_s == @living_zone.name.to_s
 
+      model.getEnergyManagementSystemGlobalVariables.each do |ems_global_var|
+        next unless ems_global_var.name.to_s.include? "dehumidified"
+
+        if ems_global_var.name.to_s.include? "htg"
+          liv_load_sensors[:htg] = ems_global_var
+        elsif ems_global_var.name.to_s.include? "clg"
+          liv_load_sensors[:clg] = ems_global_var
+        end
+      end
+
       intgains_sensors << []
       { "Zone Dehumidifier Sensible Heating Energy" => "ig_dehumidifier" }.each do |var, name|
         intgain_dehumidifier = OpenStudio::Model::EnergyManagementSystemSensor.new(model, var)
