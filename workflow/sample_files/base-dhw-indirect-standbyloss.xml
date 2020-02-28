@@ -276,10 +276,8 @@
             <Location>living space</Location>
             <TankVolume>50.0</TankVolume>
             <FractionDHWLoadServed>1.0</FractionDHWLoadServed>
+            <StandbyLoss>1.0</StandbyLoss>
             <RelatedHVACSystem idref='HeatingSystem'/>
-            <extension>
-              <StandbyLoss>1.0</StandbyLoss>
-            </extension>
           </WaterHeatingSystem>
           <HotWaterDistribution>
             <SystemIdentifier id='HotWaterDstribution'/>
