@@ -39,7 +39,6 @@ class EnergyPlusValidator
         "/HPXML/Building/ProjectStatus/EventType" => one, # Required by HPXML schema
 
         "/HPXML/Building/BuildingDetails/BuildingSummary/Site/extension/ShelterCoefficient" => zero_or_one, # Uses ERI assumption if not provided
-        "/HPXML/Building/BuildingDetails/BuildingSummary/Site/extension/DisableNaturalVentilation" => zero_or_one,
         "/HPXML/Building/BuildingDetails/BuildingSummary/BuildingOccupancy/NumberofResidents" => zero_or_one, # Uses ERI assumption if not provided
         "/HPXML/Building/BuildingDetails/BuildingSummary/BuildingConstruction/NumberofConditionedFloors" => one,
         "/HPXML/Building/BuildingDetails/BuildingSummary/BuildingConstruction/NumberofConditionedFloorsAboveGrade" => one,
@@ -226,6 +225,7 @@ class EnergyPlusValidator
         "InteriorShading/SummerShadingCoefficient" => zero_or_one, # Uses ERI assumption if not provided
         "InteriorShading/WinterShadingCoefficient" => zero_or_one, # Uses ERI assumption if not provided
         "Overhangs" => zero_or_one, # See [WindowOverhang]
+        "Operable" => zero_or_one,
         "AttachedToWall" => one,
       },
 

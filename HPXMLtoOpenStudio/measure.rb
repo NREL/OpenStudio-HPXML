@@ -1751,6 +1751,8 @@ class OSModel
 
   def self.add_windows(runner, model, building, spaces, weather)
     surfaces = []
+    total_window_area = 0.0
+    operable_window_area = 0.0
     building.elements.each("BuildingDetails/Enclosure/Windows/Window") do |window|
       window_values = HPXML.get_window_values(window: window)
 
@@ -1769,6 +1771,13 @@ class OSModel
       window_width = window_area / window_height
       z_origin = @foundation_top
       window_azimuth = window_values[:azimuth]
+
+      total_window_area += window_area
+      if window_values[:operable].nil?
+        operable_window_area += 0.33 * window_area # Not provided; assume 33% of window area is operable
+      elsif window_values[:operable]
+        operable_window_area += window_area
+      end
 
       # Create parent surface slightly bigger than window
       surface = OpenStudio::Model::Surface.new(add_wall_polygon(window_width, window_height, z_origin,
@@ -1821,6 +1830,13 @@ class OSModel
     end
 
     apply_adiabatic_construction(runner, model, surfaces, "wall")
+
+    # Calculate fraction of window area that is operable
+    if total_window_area > 0
+      @frac_window_area_operable = operable_window_area / total_window_area
+    else
+      @frac_window_area_operable = 0.0
+    end
   end
 
   def self.add_skylights(runner, model, building, spaces, weather)
@@ -2271,6 +2287,23 @@ class OSModel
     end
   end
 
+  def self.calc_sequential_load_fraction(load_fraction, remaining_fraction)
+    if remaining_fraction > 0
+      if (load_fraction - remaining_fraction).abs <= 0.010001
+        # Last equipment to handle all the remaining load (within 0.01 tolerance)
+        load_fraction = remaining_fraction
+        sequential_load_frac = 1.0 # Fraction of remaining load served by this system
+      else
+        sequential_load_frac = load_fraction / remaining_fraction # Fraction of remaining load served by this system
+      end
+    else
+      sequential_load_frac = 0.0
+    end
+    remaining_fraction -= load_fraction
+
+    return sequential_load_frac, remaining_fraction, load_fraction
+  end
+
   def self.add_cooling_system(runner, model, building)
     return if @use_only_ideal_air
 
@@ -2287,12 +2320,7 @@ class OSModel
       end
 
       load_frac = cooling_system_values[:fraction_cool_load_served]
-      if @total_frac_remaining_cool_load_served > 0
-        sequential_load_frac = load_frac / @total_frac_remaining_cool_load_served # Fraction of remaining load served by this system
-      else
-        sequential_load_frac = 0.0
-      end
-      @total_frac_remaining_cool_load_served -= load_frac
+      sequential_load_frac, @total_frac_remaining_cool_load_served, load_frac = calc_sequential_load_fraction(load_frac, @total_frac_remaining_cool_load_served)
 
       sys_id = cooling_system_values[:id]
 
@@ -2411,12 +2439,7 @@ class OSModel
         end
 
         load_frac = heating_system_values[:fraction_heat_load_served]
-        if @total_frac_remaining_heat_load_served > 0
-          sequential_load_frac = load_frac / @total_frac_remaining_heat_load_served # Fraction of remaining load served by this system
-        else
-          sequential_load_frac = 0.0
-        end
-        @total_frac_remaining_heat_load_served -= load_frac
+        sequential_load_frac, @total_frac_remaining_heat_load_served, load_frac = calc_sequential_load_fraction(load_frac, @total_frac_remaining_heat_load_served)
 
         @hvac_map[sys_id] = []
 
@@ -2509,20 +2532,10 @@ class OSModel
       end
 
       load_frac_heat = heat_pump_values[:fraction_heat_load_served]
-      if @total_frac_remaining_heat_load_served > 0
-        sequential_load_frac_heat = load_frac_heat / @total_frac_remaining_heat_load_served # Fraction of remaining load served by this system
-      else
-        sequential_load_frac_heat = 0.0
-      end
-      @total_frac_remaining_heat_load_served -= load_frac_heat
+      sequential_load_frac_heat, @total_frac_remaining_heat_load_served, load_frac_heat = calc_sequential_load_fraction(load_frac_heat, @total_frac_remaining_heat_load_served)
 
       load_frac_cool = heat_pump_values[:fraction_cool_load_served]
-      if @total_frac_remaining_cool_load_served > 0
-        sequential_load_frac_cool = load_frac_cool / @total_frac_remaining_cool_load_served # Fraction of remaining load served by this system
-      else
-        sequential_load_frac_cool = 0.0
-      end
-      @total_frac_remaining_cool_load_served -= load_frac_cool
+      sequential_load_frac_cool, @total_frac_remaining_cool_load_served, load_frac_cool = calc_sequential_load_fraction(load_frac_cool, @total_frac_remaining_cool_load_served)
 
       backup_heat_fuel = heat_pump_values[:backup_heating_fuel]
       if not backup_heat_fuel.nil?
@@ -2964,7 +2977,6 @@ class OSModel
   def self.add_airflow(runner, model, building, weather, spaces)
     site_values = HPXML.get_site_values(site: building.elements["BuildingDetails/BuildingSummary/Site"])
     shelter_coef = site_values[:shelter_coefficient]
-    disable_nat_vent = site_values[:disable_natural_ventilation]
 
     # Infiltration
     infil_ach50 = nil
@@ -3025,18 +3037,11 @@ class OSModel
                              vented_attic_sla, unvented_attic_sla, vented_attic_const_ach, unconditioned_basement_ach, has_flue_chimney, terrain)
 
     # Natural Ventilation
-    if not disable_nat_vent.nil? and disable_nat_vent
-      nv_frac_windows_open = 0.0
-      nv_frac_window_area_openable = 0.0
-      nv_num_days_per_week = 0
-    else
-      nv_frac_windows_open = 0.33
-      nv_frac_window_area_openable = 0.2
-      nv_num_days_per_week = 7
-    end
+    nv_frac_window_area_open = @frac_window_area_operable * 0.20 # Assume 20% of operable window area is open
+    nv_num_days_per_week = 7
     nv_max_oa_hr = 0.0115
     nv_max_oa_rh = 0.7
-    nat_vent = NaturalVentilation.new(nv_frac_windows_open, nv_frac_window_area_openable, nv_max_oa_hr, nv_max_oa_rh, nv_num_days_per_week,
+    nat_vent = NaturalVentilation.new(nv_frac_window_area_open, nv_max_oa_hr, nv_max_oa_rh, nv_num_days_per_week,
                                       @htg_weekday_setpoints, @htg_weekend_setpoints, @clg_weekday_setpoints, @clg_weekend_setpoints, @clg_ssn_sensor)
 
     # Ducts

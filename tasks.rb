@@ -140,6 +140,7 @@ def create_hpxmls
     'base-enclosure-walltype-strawbale.xml' => 'base.xml',
     'base-enclosure-walltype-structuralbrick.xml' => 'base.xml',
     'base-enclosure-windows-interior-shading.xml' => 'base.xml',
+    'base-enclosure-windows-operable.xml' => 'base.xml',
     'base-enclosure-windows-none.xml' => 'base.xml',
     'base-foundation-multiple.xml' => 'base-foundation-unconditioned-basement.xml',
     'base-foundation-ambient.xml' => 'base.xml',
@@ -623,8 +624,6 @@ def get_hpxml_file_site_values(hpxml_file, site_values)
     site_values = { :fuels => ["electricity", "natural gas"] }
   elsif ['base-hvac-none-no-fuel-access.xml'].include? hpxml_file
     site_values[:fuels] = ["electricity"]
-  elsif ['base-enclosure-no-natural-ventilation.xml'].include? hpxml_file
-    site_values[:disable_natural_ventilation] = true
   end
   return site_values
 end
@@ -1635,6 +1634,10 @@ def get_hpxml_file_windows_values(hpxml_file, windows_values)
                         :ufactor => 0.33,
                         :shgc => 0.45,
                         :wall_idref => "FoundationWall3" }
+  elsif ['base-enclosure-windows-operable.xml'].include? hpxml_file
+    for n in 1..windows_values.size
+      windows_values[n - 1][:operable] = (n > 2)
+    end
   end
   return windows_values
 end
@@ -1896,6 +1899,12 @@ def get_hpxml_file_heating_systems_values(hpxml_file, heating_systems_values)
     heating_systems_values << heating_systems_values[0].dup
     heating_systems_values[2][:id] = "HeatingSystem3"
     heating_systems_values[2][:distribution_system_idref] = "HVACDistribution3" unless heating_systems_values[2][:distribution_system_idref].nil?
+    if ['hvac_multiple/base-hvac-boiler-gas-only-x3.xml'].include? hpxml_file
+      # Test a file where sum is slightly greater than 1
+      heating_systems_values[0][:fraction_heat_load_served] = 0.33
+      heating_systems_values[1][:fraction_heat_load_served] = 0.33
+      heating_systems_values[2][:fraction_heat_load_served] = 0.35
+    end
   elsif hpxml_file.include? 'hvac_partial' and not heating_systems_values.nil? and heating_systems_values.size > 0
     heating_systems_values[0][:heating_capacity] /= 3.0
     heating_systems_values[0][:fraction_heat_load_served] = 0.333

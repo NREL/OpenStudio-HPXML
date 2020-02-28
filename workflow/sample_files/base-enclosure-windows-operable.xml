@@ -190,6 +190,7 @@
             <Azimuth>0</Azimuth>
             <UFactor>0.33</UFactor>
             <SHGC>0.45</SHGC>
+            <Operable>false</Operable>
             <AttachedToWall idref='Wall'/>
           </Window>
           <Window>
@@ -198,6 +199,7 @@
             <Azimuth>180</Azimuth>
             <UFactor>0.33</UFactor>
             <SHGC>0.45</SHGC>
+            <Operable>false</Operable>
             <AttachedToWall idref='Wall'/>
           </Window>
           <Window>
@@ -206,6 +208,7 @@
             <Azimuth>90</Azimuth>
             <UFactor>0.33</UFactor>
             <SHGC>0.45</SHGC>
+            <Operable>true</Operable>
             <AttachedToWall idref='Wall'/>
           </Window>
           <Window>
@@ -214,6 +217,7 @@
             <Azimuth>270</Azimuth>
             <UFactor>0.33</UFactor>
             <SHGC>0.45</SHGC>
+            <Operable>true</Operable>
             <AttachedToWall idref='Wall'/>
           </Window>
         </Windows>
@@ -241,47 +245,28 @@
               <SystemIdentifier id='HeatingSystem'/>
               <DistributionSystem idref='HVACDistribution'/>
               <HeatingSystemType>
-                <Boiler/>
+                <Furnace/>
               </HeatingSystemType>
               <HeatingSystemFuel>natural gas</HeatingSystemFuel>
-              <HeatingCapacity>21333.333333333332</HeatingCapacity>
+              <HeatingCapacity>64000.0</HeatingCapacity>
               <AnnualHeatingEfficiency>
                 <Units>AFUE</Units>
                 <Value>0.92</Value>
               </AnnualHeatingEfficiency>
-              <FractionHeatLoadServed>0.33</FractionHeatLoadServed>
-              <ElectricAuxiliaryEnergy>66.66666666666667</ElectricAuxiliaryEnergy>
+              <FractionHeatLoadServed>1.0</FractionHeatLoadServed>
             </HeatingSystem>
-            <HeatingSystem>
-              <SystemIdentifier id='HeatingSystem2'/>
-              <DistributionSystem idref='HVACDistribution2'/>
-              <HeatingSystemType>
-                <Boiler/>
-              </HeatingSystemType>
-              <HeatingSystemFuel>natural gas</HeatingSystemFuel>
-              <HeatingCapacity>21333.333333333332</HeatingCapacity>
-              <AnnualHeatingEfficiency>
-                <Units>AFUE</Units>
-                <Value>0.92</Value>
-              </AnnualHeatingEfficiency>
-              <FractionHeatLoadServed>0.33</FractionHeatLoadServed>
-              <ElectricAuxiliaryEnergy>66.66666666666667</ElectricAuxiliaryEnergy>
-            </HeatingSystem>
-            <HeatingSystem>
-              <SystemIdentifier id='HeatingSystem3'/>
-              <DistributionSystem idref='HVACDistribution3'/>
-              <HeatingSystemType>
-                <Boiler/>
-              </HeatingSystemType>
-              <HeatingSystemFuel>natural gas</HeatingSystemFuel>
-              <HeatingCapacity>21333.333333333332</HeatingCapacity>
-              <AnnualHeatingEfficiency>
-                <Units>AFUE</Units>
-                <Value>0.92</Value>
-              </AnnualHeatingEfficiency>
-              <FractionHeatLoadServed>0.35</FractionHeatLoadServed>
-              <ElectricAuxiliaryEnergy>66.66666666666667</ElectricAuxiliaryEnergy>
-            </HeatingSystem>
+            <CoolingSystem>
+              <SystemIdentifier id='CoolingSystem'/>
+              <DistributionSystem idref='HVACDistribution'/>
+              <CoolingSystemType>central air conditioner</CoolingSystemType>
+              <CoolingSystemFuel>electricity</CoolingSystemFuel>
+              <CoolingCapacity>48000.0</CoolingCapacity>
+              <FractionCoolLoadServed>1.0</FractionCoolLoadServed>
+              <AnnualCoolingEfficiency>
+                <Units>SEER</Units>
+                <Value>13.0</Value>
+              </AnnualCoolingEfficiency>
+            </CoolingSystem>
           </HVACPlant>
           <HVACControl>
             <SystemIdentifier id='HVACControl'/>
@@ -292,19 +277,36 @@
           <HVACDistribution>
             <SystemIdentifier id='HVACDistribution'/>
             <DistributionSystemType>
-              <HydronicDistribution/>
-            </DistributionSystemType>
-          </HVACDistribution>
-          <HVACDistribution>
-            <SystemIdentifier id='HVACDistribution2'/>
-            <DistributionSystemType>
-              <HydronicDistribution/>
-            </DistributionSystemType>
-          </HVACDistribution>
-          <HVACDistribution>
-            <SystemIdentifier id='HVACDistribution3'/>
-            <DistributionSystemType>
-              <HydronicDistribution/>
+              <AirDistribution>
+                <DuctLeakageMeasurement>
+                  <DuctType>supply</DuctType>
+                  <DuctLeakage>
+                    <Units>CFM25</Units>
+                    <Value>75.0</Value>
+                    <TotalOrToOutside>to outside</TotalOrToOutside>
+                  </DuctLeakage>
+                </DuctLeakageMeasurement>
+                <DuctLeakageMeasurement>
+                  <DuctType>return</DuctType>
+                  <DuctLeakage>
+                    <Units>CFM25</Units>
+                    <Value>25.0</Value>
+                    <TotalOrToOutside>to outside</TotalOrToOutside>
+                  </DuctLeakage>
+                </DuctLeakageMeasurement>
+                <Ducts>
+                  <DuctType>supply</DuctType>
+                  <DuctInsulationRValue>4.0</DuctInsulationRValue>
+                  <DuctLocation>attic - unvented</DuctLocation>
+                  <DuctSurfaceArea>150.0</DuctSurfaceArea>
+                </Ducts>
+                <Ducts>
+                  <DuctType>return</DuctType>
+                  <DuctInsulationRValue>0.0</DuctInsulationRValue>
+                  <DuctLocation>attic - unvented</DuctLocation>
+                  <DuctSurfaceArea>50.0</DuctSurfaceArea>
+                </Ducts>
+              </AirDistribution>
             </DistributionSystemType>
           </HVACDistribution>
         </HVAC>

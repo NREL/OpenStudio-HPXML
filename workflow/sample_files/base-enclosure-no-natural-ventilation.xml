@@ -19,9 +19,6 @@
             <Fuel>electricity</Fuel>
             <Fuel>natural gas</Fuel>
           </FuelTypesAvailable>
-          <extension>
-            <DisableNaturalVentilation>true</DisableNaturalVentilation>
-          </extension>
         </Site>
         <BuildingConstruction>
           <NumberofConditionedFloors>2</NumberofConditionedFloors>
