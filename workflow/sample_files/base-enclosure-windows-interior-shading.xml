@@ -195,6 +195,7 @@
               <SummerShadingCoefficient>0.7</SummerShadingCoefficient>
               <WinterShadingCoefficient>0.85</WinterShadingCoefficient>
             </InteriorShading>
+            <Operable>true</Operable>
             <AttachedToWall idref='Wall'/>
           </Window>
           <Window>
@@ -208,6 +209,7 @@
               <SummerShadingCoefficient>0.01</SummerShadingCoefficient>
               <WinterShadingCoefficient>0.99</WinterShadingCoefficient>
             </InteriorShading>
+            <Operable>true</Operable>
             <AttachedToWall idref='Wall'/>
           </Window>
           <Window>
@@ -221,6 +223,7 @@
               <SummerShadingCoefficient>0.0</SummerShadingCoefficient>
               <WinterShadingCoefficient>0.5</WinterShadingCoefficient>
             </InteriorShading>
+            <Operable>true</Operable>
             <AttachedToWall idref='Wall'/>
           </Window>
           <Window>
@@ -234,6 +237,7 @@
               <SummerShadingCoefficient>1.0</SummerShadingCoefficient>
               <WinterShadingCoefficient>1.0</WinterShadingCoefficient>
             </InteriorShading>
+            <Operable>true</Operable>
             <AttachedToWall idref='Wall'/>
           </Window>
         </Windows>
