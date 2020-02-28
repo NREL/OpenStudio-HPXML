@@ -370,11 +370,9 @@
         </Refrigerator>
         <Dehumidifier>
           <SystemIdentifier id='Dehumidifier'/>
-          <extension>
-            <Capacity>40.0</Capacity>
-            <IntegratedEnergyFactor>1.5</IntegratedEnergyFactor>
-            <DehumidistatSetpoint>0.5</DehumidistatSetpoint>
-          </extension>
+          <Capacity>40</Capacity>
+          <IntegratedEnergyFactor>1.5</IntegratedEnergyFactor>
+          <DehumidistatSetpoint>0.5</DehumidistatSetpoint>
         </Dehumidifier>
         <CookingRange>
           <SystemIdentifier id='Range'/>

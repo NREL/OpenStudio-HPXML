@@ -1864,11 +1864,10 @@ class HPXML
     dehumidifier = XMLHelper.add_element(appliances, "Dehumidifier")
     sys_id = XMLHelper.add_element(dehumidifier, "SystemIdentifier")
     XMLHelper.add_attribute(sys_id, "id", id)
-    HPXML.add_extension(parent: dehumidifier,
-                        extensions: { "Capacity": to_float_or_nil(capacity),
-                                      "EnergyFactor": to_float_or_nil(energy_factor),
-                                      "IntegratedEnergyFactor": to_float_or_nil(integrated_energy_factor),
-                                      "DehumidistatSetpoint": to_float_or_nil(rh_setpoint) })
+    XMLHelper.add_element(dehumidifier, "Capacity", capacity)
+    XMLHelper.add_element(dehumidifier, "EnergyFactor", Float(energy_factor)) unless energy_factor.nil?
+    XMLHelper.add_element(dehumidifier, "IntegratedEnergyFactor", Float(integrated_energy_factor)) unless integrated_energy_factor.nil?
+    XMLHelper.add_element(dehumidifier, "DehumidistatSetpoint", rh_setpoint)
   end
 
   def self.get_dehumidifier_values(dehumidifier:)
@@ -1876,10 +1875,10 @@ class HPXML
 
     vals = {}
     vals[:id] = HPXML.get_id(dehumidifier)
-    vals[:capacity] = to_float_or_nil(XMLHelper.get_value(dehumidifier, "extension/Capacity"))
-    vals[:energy_factor] = to_float_or_nil(XMLHelper.get_value(dehumidifier, "extension/EnergyFactor"))
-    vals[:integrated_energy_factor] = to_float_or_nil(XMLHelper.get_value(dehumidifier, "extension/IntegratedEnergyFactor"))
-    vals[:rh_setpoint] = to_float_or_nil(XMLHelper.get_value(dehumidifier, "extension/DehumidistatSetpoint"))
+    vals[:capacity] = to_float_or_nil(XMLHelper.get_value(dehumidifier, "Capacity"))
+    vals[:energy_factor] = to_float_or_nil(XMLHelper.get_value(dehumidifier, "EnergyFactor"))
+    vals[:integrated_energy_factor] = to_float_or_nil(XMLHelper.get_value(dehumidifier, "IntegratedEnergyFactor"))
+    vals[:rh_setpoint] = to_float_or_nil(XMLHelper.get_value(dehumidifier, "DehumidistatSetpoint"))
     return vals
   end
 

@@ -639,9 +639,9 @@ class EnergyPlusValidator
       "/HPXML/Building/BuildingDetails/Appliances/Dehumidifier" => {
         "SystemIdentifier" => one, # Required by HPXML schema
         # TODO: "[Location='living space' or Location='basement']" => one,
-        "extension/Capacity" => one, # pints/day
-        "extension/EnergyFactor | extension/IntegratedEnergyFactor" => one, # liters/kWh
-        "extension/DehumidistatSetpoint" => one, # RH, fraction
+        "Capacity" => one, # pints/day
+        "EnergyFactor | IntegratedEnergyFactor" => one, # liters/kWh
+        "DehumidistatSetpoint" => one, # RH, fraction
       },
 
       # [CookingRange]
