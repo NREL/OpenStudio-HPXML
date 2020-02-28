@@ -147,8 +147,9 @@ Shelter Coefficient  Description
 
 The terrain surrounding the building is assumed to be suburban.
 
-Finally, natural ventilation can be disabled by setting true for ``Site/extension/DisableNaturalVentilation``.
-If not specified, natural ventilation is assumed to be available year-round to reduce space cooling, with airflow influenced by the amount of window area.
+The fraction of window area that is operable can be provided as ``BuildingConstruction/extension/FractionofOperableWindowArea`` and is used for the calculation of natural ventilation.
+If not provided, it is assumed that 33% of the building's window area is operable.
+Of this operable window area, 20% is assumed to be open whenever there are favorable outdoor conditions for cooling.
 
 Weather File
 ~~~~~~~~~~~~
@@ -377,6 +378,12 @@ room air conditioner                                        electricity        E
 evaporative cooler       AirDistribution or DSE (optional)  electricity
 =======================  =================================  =================  =======================  ====================
 
+Central air conditioners can also have the ``CompressorType`` specified; if not provided, it is assumed as follows:
+
+- "single stage": SEER <= 15
+- "two stage": 15 < SEER <= 21
+- "variable speed": SEER > 21
+
 Heat Pumps
 **********
 
@@ -393,6 +400,12 @@ air-to-air     AirDistribution or DSE             electricity   SEER            
 mini-split     AirDistribution or DSE (optional)  electricity   SEER                     HSPF                     (optional)                   (optional)
 ground-to-air  AirDistribution or DSE             electricity   EER                      COP                      (optional)
 =============  =================================  ============  =======================  =======================  ===========================  ==================
+
+Air-to-air heat pumps can also have the ``CompressorType`` specified; if not provided, it is assumed as follows:
+
+- "single stage": SEER <= 15
+- "two stage": 15 < SEER <= 21
+- "variable speed": SEER > 21
 
 If the heat pump has backup heating, it can be specified with ``BackupSystemFuel``, ``BackupAnnualHeatingEfficiency``, and ``BackupHeatingCapacity``.
 If the heat pump has a switchover temperature (e.g., dual-fuel heat pump) where the heat pump stops operating and the backup heating system starts running, it can be specified with ``BackupHeatingSwitchoverTemperature``.
@@ -499,7 +512,7 @@ For tankless water heaters, an annual energy derate due to cycling inefficiencie
 If not provided, a value of 0.08 (8%) will be assumed.
 
 For combi boiler systems, the ``RelatedHVACSystem`` must point to a ``HeatingSystem`` of type "Boiler".
-For combi boiler systems with a storage tank, the storage tank losses (deg-F/hr) can be entered as ``extension/StandbyLoss``; if not provided, an average value will be used.
+For combi boiler systems with a storage tank, the storage tank losses (deg-F/hr) can be entered as ``StandbyLoss``; if not provided, an average value will be used.
 
 For water heaters that are connected to a desuperheater, the ``RelatedHVACSystem`` must either point to a ``HeatPump`` or a ``CoolingSystem``.
 

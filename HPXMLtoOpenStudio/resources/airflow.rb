@@ -154,6 +154,10 @@ class Airflow
     return 0.5 # Table 4.2.2(1)(g)
   end
 
+  def self.get_default_fraction_of_operable_window_area()
+    return 0.33 # 33% per Building America assumption
+  end
+
   def self.get_default_vented_attic_sla()
     return 1.0 / 300.0 # Table 4.2.2(1) - Attics
   end
@@ -843,7 +847,7 @@ class Airflow
     whf_elec_actuator = OpenStudio::Model::EnergyManagementSystemActuator.new(whf_equip, "ElectricEquipment", "Electric Power Level")
     whf_elec_actuator.setName("#{whf_equip.name} act")
 
-    area = 0.6 * building.window_area * nat_vent.frac_windows_open * nat_vent.frac_window_area_openable # ft^2 (For S-G, this is 0.6*(open window area))
+    area = 0.6 * building.window_area * nat_vent.nv_frac_window_area_open # ft^2, For Sherman-Grimsrud, this is 0.6*(open window area)
     max_rate = 20.0 # Air Changes per hour
     max_flow_rate = max_rate * building.infilvolume / UnitConversions.convert(1.0, "hr", "min")
     neutral_level = 0.5
@@ -1904,10 +1908,9 @@ class Infiltration
 end
 
 class NaturalVentilation
-  def initialize(frac_windows_open, frac_window_area_openable, max_oa_hr, max_oa_rh, nv_num_days_per_week,
+  def initialize(nv_frac_window_area_open, max_oa_hr, max_oa_rh, nv_num_days_per_week,
                  htg_weekday_setpoints, htg_weekend_setpoints, clg_weekday_setpoints, clg_weekend_setpoints, clg_ssn_sensor)
-    @frac_windows_open = frac_windows_open
-    @frac_window_area_openable = frac_window_area_openable
+    @nv_frac_window_area_open = nv_frac_window_area_open
     @max_oa_hr = max_oa_hr
     @max_oa_rh = max_oa_rh
     @nv_num_days_per_week = nv_num_days_per_week
@@ -1917,7 +1920,7 @@ class NaturalVentilation
     @clg_weekend_setpoints = clg_weekend_setpoints
     @clg_ssn_sensor = clg_ssn_sensor
   end
-  attr_accessor(:frac_windows_open, :frac_window_area_openable, :max_oa_hr, :max_oa_rh, :nv_num_days_per_week,
+  attr_accessor(:nv_frac_window_area_open, :max_oa_hr, :max_oa_rh, :nv_num_days_per_week,
                 :htg_weekday_setpoints, :htg_weekend_setpoints, :clg_weekday_setpoints, :clg_weekend_setpoints, :clg_ssn_sensor)
 end
 
