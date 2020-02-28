@@ -147,8 +147,9 @@ Shelter Coefficient  Description
 
 The terrain surrounding the building is assumed to be suburban.
 
-Finally, natural ventilation can be disabled by setting true for ``Site/extension/DisableNaturalVentilation``.
-If not specified, natural ventilation is assumed to be available year-round to reduce space cooling, with airflow influenced by the amount of window area.
+The fraction of window area that is operable can be provided as ``BuildingConstruction/extension/FractionofOperableWindowArea`` and is used for the calculation of natural ventilation.
+If not provided, it is assumed that 33% of the building's window area is operable.
+Of this operable window area, 20% is assumed to be open whenever there are favorable outdoor conditions for cooling.
 
 Weather File
 ~~~~~~~~~~~~

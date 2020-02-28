@@ -2,8 +2,8 @@
   <schema_version>3.0</schema_version>
   <name>hpxm_lto_openstudio</name>
   <uid>b1543b30-9465-45ff-ba04-1d1f85e763bc</uid>
-  <version_id>3477be0a-632b-420a-b214-559a5aa56fc2</version_id>
-  <version_modified>20200227T232620Z</version_modified>
+  <version_id>382c7a9a-af8f-443b-966e-d0d7def3a597</version_id>
+  <version_modified>20200228T231607Z</version_modified>
   <xml_checksum>D8922A73</xml_checksum>
   <class_name>HPXMLtoOpenStudio</class_name>
   <display_name>HPXML to OpenStudio Translator</display_name>
@@ -409,16 +409,22 @@
       <checksum>5BC1705E</checksum>
     </file>
     <file>
-      <filename>airflow.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>6182C16C</checksum>
-    </file>
-    <file>
       <filename>minitest_helper.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
       <checksum>ED54D750</checksum>
+    </file>
+    <file>
+      <filename>airflow.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>1D3BB04C</checksum>
+    </file>
+    <file>
+      <filename>hvac.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>C69243AA</checksum>
     </file>
     <file>
       <filename>BaseElements.xsd</filename>
@@ -439,22 +445,10 @@
       <checksum>AC0D4F57</checksum>
     </file>
     <file>
-      <filename>EPvalidator.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>002A7365</checksum>
-    </file>
-    <file>
       <filename>hpxml.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>A3A8AF16</checksum>
-    </file>
-    <file>
-      <filename>hvac.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>C69243AA</checksum>
+      <checksum>BDB6D89C</checksum>
     </file>
     <file>
       <version>
@@ -465,7 +459,13 @@
       <filename>measure.rb</filename>
       <filetype>rb</filetype>
       <usage_type>script</usage_type>
-      <checksum>0632F4A9</checksum>
+      <checksum>435E7FDC</checksum>
+    </file>
+    <file>
+      <filename>EPvalidator.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>A530A125</checksum>
     </file>
   </files>
 </measure>
