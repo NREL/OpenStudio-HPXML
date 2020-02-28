@@ -1085,6 +1085,7 @@ class HPXML
                               distribution_system_idref: nil,
                               cooling_system_type:,
                               cooling_system_fuel:,
+                              compressor_type: nil,
                               cooling_capacity: nil,
                               fraction_cool_load_served:,
                               cooling_efficiency_seer: nil,
@@ -1102,6 +1103,7 @@ class HPXML
     XMLHelper.add_element(cooling_system, "CoolingSystemType", cooling_system_type)
     XMLHelper.add_element(cooling_system, "CoolingSystemFuel", cooling_system_fuel)
     XMLHelper.add_element(cooling_system, "CoolingCapacity", Float(cooling_capacity)) unless cooling_capacity.nil?
+    XMLHelper.add_element(cooling_system, "CompressorType", compressor_type) unless compressor_type.nil?
     XMLHelper.add_element(cooling_system, "FractionCoolLoadServed", Float(fraction_cool_load_served))
 
     efficiency_units = nil
@@ -1136,6 +1138,7 @@ class HPXML
     vals[:cooling_system_type] = XMLHelper.get_value(cooling_system, "CoolingSystemType")
     vals[:cooling_system_fuel] = XMLHelper.get_value(cooling_system, "CoolingSystemFuel")
     vals[:cooling_capacity] = to_float_or_nil(XMLHelper.get_value(cooling_system, "CoolingCapacity"))
+    vals[:compressor_type] = XMLHelper.get_value(cooling_system, "CompressorType")
     vals[:fraction_cool_load_served] = to_float_or_nil(XMLHelper.get_value(cooling_system, "FractionCoolLoadServed"))
     vals[:cooling_efficiency_seer] = to_float_or_nil(XMLHelper.get_value(cooling_system, "[CoolingSystemType='central air conditioner']AnnualCoolingEfficiency[Units='SEER']/Value"))
     vals[:cooling_efficiency_eer] = to_float_or_nil(XMLHelper.get_value(cooling_system, "[CoolingSystemType='room air conditioner']AnnualCoolingEfficiency[Units='EER']/Value"))
@@ -1150,6 +1153,7 @@ class HPXML
                          distribution_system_idref: nil,
                          heat_pump_type:,
                          heat_pump_fuel:,
+                         compressor_type: nil,
                          heating_capacity: nil,
                          heating_capacity_17F: nil,
                          cooling_capacity:,
@@ -1178,6 +1182,7 @@ class HPXML
     XMLHelper.add_element(heat_pump, "HeatingCapacity", Float(heating_capacity)) unless heating_capacity.nil?
     XMLHelper.add_element(heat_pump, "HeatingCapacity17F", Float(heating_capacity_17F)) unless heating_capacity_17F.nil?
     XMLHelper.add_element(heat_pump, "CoolingCapacity", Float(cooling_capacity))
+    XMLHelper.add_element(heat_pump, "CompressorType", compressor_type) unless compressor_type.nil?
     XMLHelper.add_element(heat_pump, "CoolingSensibleHeatFraction", Float(cooling_shr)) unless cooling_shr.nil?
     if not backup_heating_fuel.nil?
       XMLHelper.add_element(heat_pump, "BackupSystemFuel", backup_heating_fuel)
@@ -1237,6 +1242,7 @@ class HPXML
     vals[:heating_capacity] = to_float_or_nil(XMLHelper.get_value(heat_pump, "HeatingCapacity"))
     vals[:heating_capacity_17F] = to_float_or_nil(XMLHelper.get_value(heat_pump, "HeatingCapacity17F"))
     vals[:cooling_capacity] = to_float_or_nil(XMLHelper.get_value(heat_pump, "CoolingCapacity"))
+    vals[:compressor_type] = XMLHelper.get_value(heat_pump, "CompressorType")
     vals[:cooling_shr] = to_float_or_nil(XMLHelper.get_value(heat_pump, "CoolingSensibleHeatFraction"))
     vals[:backup_heating_fuel] = XMLHelper.get_value(heat_pump, "BackupSystemFuel")
     vals[:backup_heating_capacity] = to_float_or_nil(XMLHelper.get_value(heat_pump, "BackupHeatingCapacity"))
@@ -1486,13 +1492,13 @@ class HPXML
       jacket = XMLHelper.add_element(water_heater_insulation, "Jacket")
       XMLHelper.add_element(jacket, "JacketRValue", jacket_r_value)
     end
+    XMLHelper.add_element(water_heating_system, "StandbyLoss", Float(standby_loss)) unless standby_loss.nil?
     XMLHelper.add_element(water_heating_system, "HotWaterTemperature", Float(temperature)) unless temperature.nil?
     XMLHelper.add_element(water_heating_system, "UsesDesuperheater", Boolean(uses_desuperheater)) unless uses_desuperheater.nil?
     unless related_hvac.nil?
       related_hvac_el = XMLHelper.add_element(water_heating_system, "RelatedHVACSystem")
       XMLHelper.add_attribute(related_hvac_el, "idref", related_hvac)
     end
-    HPXML.add_extension(parent: water_heating_system, extensions: { "StandbyLoss": to_float_or_nil(standby_loss) })
 
     return water_heating_system
   end
@@ -1517,7 +1523,7 @@ class HPXML
     vals[:jacket_r_value] = to_float_or_nil(XMLHelper.get_value(water_heating_system, "WaterHeaterInsulation/Jacket/JacketRValue"))
     vals[:related_hvac] = HPXML.get_idref(water_heating_system, "RelatedHVACSystem")
     vals[:energy_star] = XMLHelper.get_values(water_heating_system, "ThirdPartyCertification").include?("Energy Star")
-    vals[:standby_loss] = to_float_or_nil(XMLHelper.get_value(water_heating_system, "extension/StandbyLoss"))
+    vals[:standby_loss] = to_float_or_nil(XMLHelper.get_value(water_heating_system, "StandbyLoss"))
     vals[:temperature] = to_float_or_nil(XMLHelper.get_value(water_heating_system, "HotWaterTemperature"))
     return vals
   end

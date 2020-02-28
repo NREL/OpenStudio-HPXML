@@ -1938,10 +1938,16 @@ def get_hpxml_file_cooling_systems_values(hpxml_file, cooling_systems_values)
          'base-hvac-wall-furnace-propane-only.xml',
          'base-hvac-wall-furnace-wood-only.xml'].include? hpxml_file
     cooling_systems_values = []
-  elsif ['base-hvac-central-ac-only-1-speed-detailed.xml',
-         'base-hvac-central-ac-only-2-speed-detailed.xml',
-         'base-hvac-central-ac-only-var-speed-detailed.xml',
-         'base-hvac-room-ac-only-detailed.xml'].include? hpxml_file
+  elsif ['base-hvac-central-ac-only-1-speed-detailed.xml'].include? hpxml_file
+    cooling_systems_values[0][:cooling_shr] = 0.7
+    cooling_systems_values[0][:compressor_type] = "single stage"
+  elsif ['base-hvac-central-ac-only-2-speed-detailed.xml'].include? hpxml_file
+    cooling_systems_values[0][:cooling_shr] = 0.7
+    cooling_systems_values[0][:compressor_type] = "two stage"
+  elsif ['base-hvac-central-ac-only-var-speed-detailed.xml'].include? hpxml_file
+    cooling_systems_values[0][:cooling_shr] = 0.7
+    cooling_systems_values[0][:compressor_type] = "variable speed"
+  elsif ['base-hvac-room-ac-only-detailed.xml'].include? hpxml_file
     cooling_systems_values[0][:cooling_shr] = 0.7
   elsif ['base-hvac-boiler-gas-central-ac-1-speed.xml'].include? hpxml_file
     cooling_systems_values[0][:distribution_system_idref] = "HVACDistribution2"
@@ -2103,12 +2109,15 @@ def get_hpxml_file_heat_pumps_values(hpxml_file, heat_pumps_values)
   elsif ['base-hvac-air-to-air-heat-pump-1-speed-detailed.xml'].include? hpxml_file
     heat_pumps_values[0][:heating_capacity_17F] = heat_pumps_values[0][:heating_capacity] * 0.630 # Based on OAT slope of default curves
     heat_pumps_values[0][:cooling_shr] = 0.7
+    heat_pumps_values[0][:compressor_type] = "single stage"
   elsif ['base-hvac-air-to-air-heat-pump-2-speed-detailed.xml'].include? hpxml_file
     heat_pumps_values[0][:heating_capacity_17F] = heat_pumps_values[0][:heating_capacity] * 0.590 # Based on OAT slope of default curves
     heat_pumps_values[0][:cooling_shr] = 0.7
+    heat_pumps_values[0][:compressor_type] = "two stage"
   elsif ['base-hvac-air-to-air-heat-pump-var-speed-detailed.xml'].include? hpxml_file
     heat_pumps_values[0][:heating_capacity_17F] = heat_pumps_values[0][:heating_capacity] * 0.640 # Based on OAT slope of default curves
     heat_pumps_values[0][:cooling_shr] = 0.7
+    heat_pumps_values[0][:compressor_type] = "variable speed"
   elsif ['base-hvac-mini-split-heat-pump-ducted-detailed.xml'].include? hpxml_file
     f = 1.0 - (1.0 - 0.25) / (47.0 + 5.0) * (47.0 - 17.0)
     heat_pumps_values[0][:heating_capacity_17F] = heat_pumps_values[0][:heating_capacity] * f
