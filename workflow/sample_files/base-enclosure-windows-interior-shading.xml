@@ -185,13 +185,13 @@
         </Slabs>
         <Windows>
           <Window>
-            <SystemIdentifier id='WindowNorth'/>
-            <Area>108.0</Area>
+            <SystemIdentifier id='WindowNorthOperable'/>
+            <Area>35.64</Area>
             <Azimuth>0</Azimuth>
             <UFactor>0.33</UFactor>
             <SHGC>0.45</SHGC>
             <InteriorShading>
-              <SystemIdentifier id='WindowNorthInteriorShading'/>
+              <SystemIdentifier id='WindowNorthOperableInteriorShading'/>
               <SummerShadingCoefficient>0.7</SummerShadingCoefficient>
               <WinterShadingCoefficient>0.85</WinterShadingCoefficient>
             </InteriorShading>
@@ -199,13 +199,13 @@
             <AttachedToWall idref='Wall'/>
           </Window>
           <Window>
-            <SystemIdentifier id='WindowSouth'/>
-            <Area>108.0</Area>
+            <SystemIdentifier id='WindowSouthOperable'/>
+            <Area>35.64</Area>
             <Azimuth>180</Azimuth>
             <UFactor>0.33</UFactor>
             <SHGC>0.45</SHGC>
             <InteriorShading>
-              <SystemIdentifier id='WindowSouthInteriorShading'/>
+              <SystemIdentifier id='WindowSouthOperableInteriorShading'/>
               <SummerShadingCoefficient>0.01</SummerShadingCoefficient>
               <WinterShadingCoefficient>0.99</WinterShadingCoefficient>
             </InteriorShading>
@@ -213,13 +213,13 @@
             <AttachedToWall idref='Wall'/>
           </Window>
           <Window>
-            <SystemIdentifier id='WindowEast'/>
-            <Area>72.0</Area>
+            <SystemIdentifier id='WindowEastOperable'/>
+            <Area>23.76</Area>
             <Azimuth>90</Azimuth>
             <UFactor>0.33</UFactor>
             <SHGC>0.45</SHGC>
             <InteriorShading>
-              <SystemIdentifier id='WindowEastInteriorShading'/>
+              <SystemIdentifier id='WindowEastOperableInteriorShading'/>
               <SummerShadingCoefficient>0.0</SummerShadingCoefficient>
               <WinterShadingCoefficient>0.5</WinterShadingCoefficient>
             </InteriorShading>
@@ -227,17 +227,73 @@
             <AttachedToWall idref='Wall'/>
           </Window>
           <Window>
-            <SystemIdentifier id='WindowWest'/>
-            <Area>72.0</Area>
+            <SystemIdentifier id='WindowWestOperable'/>
+            <Area>23.76</Area>
             <Azimuth>270</Azimuth>
             <UFactor>0.33</UFactor>
             <SHGC>0.45</SHGC>
             <InteriorShading>
-              <SystemIdentifier id='WindowWestInteriorShading'/>
+              <SystemIdentifier id='WindowWestOperableInteriorShading'/>
               <SummerShadingCoefficient>1.0</SummerShadingCoefficient>
               <WinterShadingCoefficient>1.0</WinterShadingCoefficient>
             </InteriorShading>
             <Operable>true</Operable>
+            <AttachedToWall idref='Wall'/>
+          </Window>
+          <Window>
+            <SystemIdentifier id='WindowNorthInoperable'/>
+            <Area>72.36</Area>
+            <Azimuth>0</Azimuth>
+            <UFactor>0.33</UFactor>
+            <SHGC>0.45</SHGC>
+            <InteriorShading>
+              <SystemIdentifier id='WindowNorthInoperableInteriorShading'/>
+              <SummerShadingCoefficient>0.7</SummerShadingCoefficient>
+              <WinterShadingCoefficient>0.85</WinterShadingCoefficient>
+            </InteriorShading>
+            <Operable>false</Operable>
+            <AttachedToWall idref='Wall'/>
+          </Window>
+          <Window>
+            <SystemIdentifier id='WindowSouthInoperable'/>
+            <Area>72.36</Area>
+            <Azimuth>180</Azimuth>
+            <UFactor>0.33</UFactor>
+            <SHGC>0.45</SHGC>
+            <InteriorShading>
+              <SystemIdentifier id='WindowSouthInoperableInteriorShading'/>
+              <SummerShadingCoefficient>0.01</SummerShadingCoefficient>
+              <WinterShadingCoefficient>0.99</WinterShadingCoefficient>
+            </InteriorShading>
+            <Operable>false</Operable>
+            <AttachedToWall idref='Wall'/>
+          </Window>
+          <Window>
+            <SystemIdentifier id='WindowEastInoperable'/>
+            <Area>48.24</Area>
+            <Azimuth>90</Azimuth>
+            <UFactor>0.33</UFactor>
+            <SHGC>0.45</SHGC>
+            <InteriorShading>
+              <SystemIdentifier id='WindowEastInoperableInteriorShading'/>
+              <SummerShadingCoefficient>0.0</SummerShadingCoefficient>
+              <WinterShadingCoefficient>0.5</WinterShadingCoefficient>
+            </InteriorShading>
+            <Operable>false</Operable>
+            <AttachedToWall idref='Wall'/>
+          </Window>
+          <Window>
+            <SystemIdentifier id='WindowWestInoperable'/>
+            <Area>48.24</Area>
+            <Azimuth>270</Azimuth>
+            <UFactor>0.33</UFactor>
+            <SHGC>0.45</SHGC>
+            <InteriorShading>
+              <SystemIdentifier id='WindowWestInoperableInteriorShading'/>
+              <SummerShadingCoefficient>1.0</SummerShadingCoefficient>
+              <WinterShadingCoefficient>1.0</WinterShadingCoefficient>
+            </InteriorShading>
+            <Operable>false</Operable>
             <AttachedToWall idref='Wall'/>
           </Window>
         </Windows>

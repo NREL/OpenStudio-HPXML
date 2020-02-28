@@ -1478,53 +1478,95 @@ end
 
 def get_hpxml_file_windows_values(hpxml_file, windows_values)
   if ['base.xml'].include? hpxml_file
-    windows_values = [{ :id => "WindowNorth",
-                        :area => 108,
+    windows_values = [{ :id => "WindowNorthOperable",
+                        :area => 108 * 0.33,
                         :azimuth => 0,
                         :ufactor => 0.33,
                         :shgc => 0.45,
                         :operable => true,
                         :wall_idref => "Wall" },
-                      { :id => "WindowSouth",
-                        :area => 108,
+                      { :id => "WindowSouthOperable",
+                        :area => 108 * 0.33,
                         :azimuth => 180,
                         :ufactor => 0.33,
                         :shgc => 0.45,
                         :operable => true,
                         :wall_idref => "Wall" },
-                      { :id => "WindowEast",
-                        :area => 72,
+                      { :id => "WindowEastOperable",
+                        :area => 72 * 0.33,
                         :azimuth => 90,
                         :ufactor => 0.33,
                         :shgc => 0.45,
                         :operable => true,
                         :wall_idref => "Wall" },
-                      { :id => "WindowWest",
-                        :area => 72,
+                      { :id => "WindowWestOperable",
+                        :area => 72 * 0.33,
                         :azimuth => 270,
                         :ufactor => 0.33,
                         :shgc => 0.45,
                         :operable => true,
+                        :wall_idref => "Wall" },
+                      { :id => "WindowNorthInoperable",
+                        :area => 108 * 0.67,
+                        :azimuth => 0,
+                        :ufactor => 0.33,
+                        :shgc => 0.45,
+                        :operable => false,
+                        :wall_idref => "Wall" },
+                      { :id => "WindowSouthInoperable",
+                        :area => 108 * 0.67,
+                        :azimuth => 180,
+                        :ufactor => 0.33,
+                        :shgc => 0.45,
+                        :operable => false,
+                        :wall_idref => "Wall" },
+                      { :id => "WindowEastInoperable",
+                        :area => 72 * 0.67,
+                        :azimuth => 90,
+                        :ufactor => 0.33,
+                        :shgc => 0.45,
+                        :operable => false,
+                        :wall_idref => "Wall" },
+                      { :id => "WindowWestInoperable",
+                        :area => 72 * 0.67,
+                        :azimuth => 270,
+                        :ufactor => 0.33,
+                        :shgc => 0.45,
+                        :operable => false,
                         :wall_idref => "Wall" }]
   elsif ['base-enclosure-overhangs.xml'].include? hpxml_file
-    windows_values[0][:overhangs_depth] = 2.5
-    windows_values[0][:overhangs_distance_to_top_of_window] = 0
-    windows_values[0][:overhangs_distance_to_bottom_of_window] = 4
-    windows_values[2][:overhangs_depth] = 1.5
-    windows_values[2][:overhangs_distance_to_top_of_window] = 2
-    windows_values[2][:overhangs_distance_to_bottom_of_window] = 6
-    windows_values[3][:overhangs_depth] = 1.5
-    windows_values[3][:overhangs_distance_to_top_of_window] = 2
-    windows_values[3][:overhangs_distance_to_bottom_of_window] = 7
+    for n in [0, 4]
+      windows_values[n][:overhangs_depth] = 2.5
+      windows_values[n][:overhangs_distance_to_top_of_window] = 0
+      windows_values[n][:overhangs_distance_to_bottom_of_window] = 4
+    end
+    for n in [2, 6]
+      windows_values[n][:overhangs_depth] = 1.5
+      windows_values[n][:overhangs_distance_to_top_of_window] = 2
+      windows_values[n][:overhangs_distance_to_bottom_of_window] = 6
+    end
+    for n in [3, 7]
+      windows_values[n][:overhangs_depth] = 1.5
+      windows_values[n][:overhangs_distance_to_top_of_window] = 2
+      windows_values[n][:overhangs_distance_to_bottom_of_window] = 7
+    end
   elsif ['base-enclosure-windows-interior-shading.xml'].include? hpxml_file
-    windows_values[0][:interior_shading_factor_summer] = 0.7
-    windows_values[0][:interior_shading_factor_winter] = 0.85
-    windows_values[1][:interior_shading_factor_summer] = 0.01
-    windows_values[1][:interior_shading_factor_winter] = 0.99
-    windows_values[2][:interior_shading_factor_summer] = 0.0
-    windows_values[2][:interior_shading_factor_winter] = 0.5
-    windows_values[3][:interior_shading_factor_summer] = 1.0
-    windows_values[3][:interior_shading_factor_winter] = 1.0
+    for n in [0, 4]
+      windows_values[n][:interior_shading_factor_summer] = 0.7
+      windows_values[n][:interior_shading_factor_winter] = 0.85
+    end
+    for n in [1, 5]
+      windows_values[n][:interior_shading_factor_summer] = 0.01
+      windows_values[n][:interior_shading_factor_winter] = 0.99
+    end
+    for n in [2, 6]
+      windows_values[n][:interior_shading_factor_summer] = 0.0
+      windows_values[n][:interior_shading_factor_winter] = 0.5
+    end
+    for n in [3, 7]
+      windows_values[n][:interior_shading_factor_summer] = 1.0
+      windows_values[n][:interior_shading_factor_winter] = 1.0
+    end
   elsif ['invalid_files/invalid-window-interior-shading.xml'].include? hpxml_file
     windows_values[0][:interior_shading_factor_summer] = 0.85
     windows_values[0][:interior_shading_factor_winter] = 0.7
@@ -1532,91 +1574,143 @@ def get_hpxml_file_windows_values(hpxml_file, windows_values)
     windows_values = []
   elsif ['invalid_files/net-area-negative-wall.xml'].include? hpxml_file
     windows_values[0][:area] = 1000
-  elsif ['base-atticroof-conditioned.xml'].include? hpxml_file
-    windows_values[0][:area] = 108
-    windows_values[1][:area] = 108
-    windows_values[2][:area] = 108
-    windows_values[3][:area] = 108
-    windows_values << { :id => "AtticGableWindowEast",
-                        :area => 12,
+  elsif ['base-atticroof-conditioned.xml',
+         'base-atticroof-cathedral.xml'].include? hpxml_file
+    for n in [0, 1, 2, 3]
+      windows_values[n][:area] = 108 * 0.33
+    end
+    for n in [4, 5, 6, 7]
+      windows_values[n][:area] = 108 * 0.67
+    end
+    if hpxml_file == 'base-atticroof-cathedral.xml'
+      wall_idref = "WallAtticGable"
+    else
+      wall_idref = "WallAtticGableCond"
+    end
+    windows_values << { :id => "AtticGableWindowEastOperable",
+                        :area => 12 * 0.33,
                         :azimuth => 90,
                         :ufactor => 0.33,
                         :shgc => 0.45,
                         :operable => true,
-                        :wall_idref => "WallAtticGableCond" }
-    windows_values << { :id => "AtticGableWindowWest",
-                        :area => 62,
+                        :wall_idref => wall_idref }
+    windows_values << { :id => "AtticGableWindowEastInoperable",
+                        :area => 12 * 0.67,
+                        :azimuth => 90,
+                        :ufactor => 0.33,
+                        :shgc => 0.45,
+                        :operable => false,
+                        :wall_idref => wall_idref }
+    windows_values << { :id => "AtticGableWindowWestOperable",
+                        :area => 62 * 0.33,
                         :azimuth => 270,
                         :ufactor => 0.3,
                         :shgc => 0.45,
                         :operable => true,
-                        :wall_idref => "WallAtticGableCond" }
-  elsif ['base-atticroof-cathedral.xml'].include? hpxml_file
-    windows_values[0][:area] = 108
-    windows_values[1][:area] = 108
-    windows_values[2][:area] = 108
-    windows_values[3][:area] = 108
-    windows_values << { :id => "AtticGableWindowEast",
-                        :area => 12,
-                        :azimuth => 90,
-                        :ufactor => 0.33,
-                        :shgc => 0.45,
-                        :operable => true,
-                        :wall_idref => "WallAtticGable" }
-    windows_values << { :id => "AtticGableWindowWest",
-                        :area => 12,
+                        :wall_idref => wall_idref }
+    windows_values << { :id => "AtticGableWindowWestInoperable",
+                        :area => 62 * 0.67,
                         :azimuth => 270,
-                        :ufactor => 0.33,
+                        :ufactor => 0.3,
                         :shgc => 0.45,
-                        :operable => true,
-                        :wall_idref => "WallAtticGable" }
+                        :operable => false,
+                        :wall_idref => wall_idref }
   elsif ['base-enclosure-garage.xml'].include? hpxml_file
-    windows_values.delete_at(2)
-    windows_values << { :id => "GarageWindowEast",
-                        :area => 12,
+    for n in [2, 6]
+      windows_values.delete_at(n)
+    end
+    windows_values << { :id => "GarageWindowEastOperable",
+                        :area => 12 * 0.33,
                         :azimuth => 90,
                         :ufactor => 0.33,
                         :shgc => 0.45,
                         :operable => true,
                         :wall_idref => "WallGarageExterior" }
+    windows_values << { :id => "GarageWindowEastInoperable",
+                        :area => 12 * 0.67,
+                        :azimuth => 90,
+                        :ufactor => 0.33,
+                        :shgc => 0.45,
+                        :operable => false,
+                        :wall_idref => "WallGarageExterior" }
   elsif ['base-enclosure-2stories.xml'].include? hpxml_file
-    windows_values[0][:area] = 216
-    windows_values[1][:area] = 216
-    windows_values[2][:area] = 144
-    windows_values[3][:area] = 144
+    for n in [0, 1]
+      windows_values[n][:area] = 216 * 0.33
+    end
+    for n in [4, 5]
+      windows_values[n][:area] = 216 * 0.67
+    end
+    for n in [2, 3]
+      windows_values[n][:area] = 144 * 0.33
+    end
+    for n in [6, 7]
+      windows_values[n][:area] = 144 * 0.67
+    end
   elsif ['base-enclosure-2stories-garage'].include? hpxml_file
-    windows_values[0][:area] = 168
-    windows_values[1][:area] = 216
-    windows_values[2][:area] = 144
-    windows_values[3][:area] = 96
+    windows_values[0][:area] = 168 * 0.33
+    windows_values[1][:area] = 216 * 0.33
+    windows_values[2][:area] = 144 * 0.33
+    windows_values[3][:area] = 96 * 0.33
+    windows_values[4][:area] = 168 * 0.67
+    windows_values[5][:area] = 216 * 0.67
+    windows_values[6][:area] = 144 * 0.67
+    windows_values[7][:area] = 96 * 0.67
   elsif ['base-foundation-unconditioned-basement-above-grade.xml'].include? hpxml_file
-    windows_values << { :id => "FoundationWindowNorth",
-                        :area => 20,
+    windows_values << { :id => "FoundationWindowNorthOperable",
+                        :area => 20 * 0.33,
                         :azimuth => 0,
                         :ufactor => 0.33,
                         :shgc => 0.45,
                         :operable => true,
                         :wall_idref => "FoundationWall" }
-    windows_values << { :id => "FoundationWindowSouth",
-                        :area => 20,
+    windows_values << { :id => "FoundationWindowNorthInoperable",
+                        :area => 20 * 0.67,
+                        :azimuth => 0,
+                        :ufactor => 0.33,
+                        :shgc => 0.45,
+                        :operable => false,
+                        :wall_idref => "FoundationWall" }
+    windows_values << { :id => "FoundationWindowSouthOperable",
+                        :area => 20 * 0.33,
                         :azimuth => 180,
                         :ufactor => 0.33,
                         :shgc => 0.45,
                         :operable => true,
                         :wall_idref => "FoundationWall" }
-    windows_values << { :id => "FoundationWindowEast",
-                        :area => 10,
+    windows_values << { :id => "FoundationWindowSouthInoperable",
+                        :area => 20 * 0.67,
+                        :azimuth => 180,
+                        :ufactor => 0.33,
+                        :shgc => 0.45,
+                        :operable => false,
+                        :wall_idref => "FoundationWall" }
+    windows_values << { :id => "FoundationWindowEastOperable",
+                        :area => 10 * 0.33,
                         :azimuth => 90,
                         :ufactor => 0.33,
                         :shgc => 0.45,
                         :operable => true,
                         :wall_idref => "FoundationWall" }
-    windows_values << { :id => "FoundationWindowWest",
-                        :area => 10,
+    windows_values << { :id => "FoundationWindowEastInoperable",
+                        :area => 10 * 0.67,
+                        :azimuth => 90,
+                        :ufactor => 0.33,
+                        :shgc => 0.45,
+                        :operable => false,
+                        :wall_idref => "FoundationWall" }
+    windows_values << { :id => "FoundationWindowWestOperable",
+                        :area => 10 * 0.33,
                         :azimuth => 270,
                         :ufactor => 0.33,
                         :shgc => 0.45,
                         :operable => true,
+                        :wall_idref => "FoundationWall" }
+    windows_values << { :id => "FoundationWindowWestInoperable",
+                        :area => 10 * 0.67,
+                        :azimuth => 270,
+                        :ufactor => 0.33,
+                        :shgc => 0.45,
+                        :operable => false,
                         :wall_idref => "FoundationWall" }
   elsif ['base-enclosure-adiabatic-surfaces.xml'].include? hpxml_file
     for n in 1..windows_values.size
@@ -1635,16 +1729,23 @@ def get_hpxml_file_windows_values(hpxml_file, windows_values)
       end
     end
   elsif ['base-foundation-walkout-basement.xml'].include? hpxml_file
-    windows_values << { :id => "FoundationWindow",
-                        :area => 20,
+    windows_values << { :id => "FoundationWindowOperable",
+                        :area => 20 * 0.33,
                         :azimuth => 0,
                         :ufactor => 0.33,
                         :shgc => 0.45,
                         :operable => true,
                         :wall_idref => "FoundationWall3" }
+    windows_values << { :id => "FoundationWindowInoperable",
+                        :area => 20 * 0.67,
+                        :azimuth => 0,
+                        :ufactor => 0.33,
+                        :shgc => 0.45,
+                        :operable => false,
+                        :wall_idref => "FoundationWall3" }
   elsif ['base-enclosure-windows-inoperable.xml'].include? hpxml_file
     for n in 1..windows_values.size
-      windows_values[n - 1][:operable] = (n > 2)
+      windows_values[n - 1][:operable] = false
     end
   end
   return windows_values

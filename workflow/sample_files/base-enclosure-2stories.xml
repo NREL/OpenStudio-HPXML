@@ -197,8 +197,8 @@
         </Slabs>
         <Windows>
           <Window>
-            <SystemIdentifier id='WindowNorth'/>
-            <Area>216.0</Area>
+            <SystemIdentifier id='WindowNorthOperable'/>
+            <Area>71.28</Area>
             <Azimuth>0</Azimuth>
             <UFactor>0.33</UFactor>
             <SHGC>0.45</SHGC>
@@ -206,8 +206,8 @@
             <AttachedToWall idref='Wall'/>
           </Window>
           <Window>
-            <SystemIdentifier id='WindowSouth'/>
-            <Area>216.0</Area>
+            <SystemIdentifier id='WindowSouthOperable'/>
+            <Area>71.28</Area>
             <Azimuth>180</Azimuth>
             <UFactor>0.33</UFactor>
             <SHGC>0.45</SHGC>
@@ -215,8 +215,8 @@
             <AttachedToWall idref='Wall'/>
           </Window>
           <Window>
-            <SystemIdentifier id='WindowEast'/>
-            <Area>144.0</Area>
+            <SystemIdentifier id='WindowEastOperable'/>
+            <Area>47.52</Area>
             <Azimuth>90</Azimuth>
             <UFactor>0.33</UFactor>
             <SHGC>0.45</SHGC>
@@ -224,12 +224,48 @@
             <AttachedToWall idref='Wall'/>
           </Window>
           <Window>
-            <SystemIdentifier id='WindowWest'/>
-            <Area>144.0</Area>
+            <SystemIdentifier id='WindowWestOperable'/>
+            <Area>47.52</Area>
             <Azimuth>270</Azimuth>
             <UFactor>0.33</UFactor>
             <SHGC>0.45</SHGC>
             <Operable>true</Operable>
+            <AttachedToWall idref='Wall'/>
+          </Window>
+          <Window>
+            <SystemIdentifier id='WindowNorthInoperable'/>
+            <Area>144.72</Area>
+            <Azimuth>0</Azimuth>
+            <UFactor>0.33</UFactor>
+            <SHGC>0.45</SHGC>
+            <Operable>false</Operable>
+            <AttachedToWall idref='Wall'/>
+          </Window>
+          <Window>
+            <SystemIdentifier id='WindowSouthInoperable'/>
+            <Area>144.72</Area>
+            <Azimuth>180</Azimuth>
+            <UFactor>0.33</UFactor>
+            <SHGC>0.45</SHGC>
+            <Operable>false</Operable>
+            <AttachedToWall idref='Wall'/>
+          </Window>
+          <Window>
+            <SystemIdentifier id='WindowEastInoperable'/>
+            <Area>96.48</Area>
+            <Azimuth>90</Azimuth>
+            <UFactor>0.33</UFactor>
+            <SHGC>0.45</SHGC>
+            <Operable>false</Operable>
+            <AttachedToWall idref='Wall'/>
+          </Window>
+          <Window>
+            <SystemIdentifier id='WindowWestInoperable'/>
+            <Area>96.48</Area>
+            <Azimuth>270</Azimuth>
+            <UFactor>0.33</UFactor>
+            <SHGC>0.45</SHGC>
+            <Operable>false</Operable>
             <AttachedToWall idref='Wall'/>
           </Window>
         </Windows>
