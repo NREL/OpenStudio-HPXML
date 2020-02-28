@@ -154,6 +154,10 @@ class Airflow
     return 0.5 # Table 4.2.2(1)(g)
   end
 
+  def self.get_default_fraction_window_area_operable()
+    return 0.33 # 33% per Building America assumption
+  end
+
   def self.get_default_vented_attic_sla()
     return 1.0 / 300.0 # Table 4.2.2(1) - Attics
   end

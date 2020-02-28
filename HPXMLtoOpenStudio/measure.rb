@@ -3023,7 +3023,10 @@ class OSModel
 
     # Natural Ventilation
     if @frac_window_area_operable.nil?
-      @frac_window_area_operable = 0.33 # Default Building America assumption
+      @frac_window_area_operable = Airflow.get_default_fraction_window_area_operable()
+    end
+    if @frac_window_area_operable < 0 or @frac_window_area_operable > 1
+      fail "Fraction window area operable (#{@frac_window_area_operable}) must be between 0 and 1."
     end
     nv_frac_window_area_open = @frac_window_area_operable * 0.20 # Assume 20% of operable window area is open
     nv_num_days_per_week = 7
