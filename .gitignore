@@ -2014,3 +2014,5 @@
 /workflow/out.osw
 /workflow/tests/results
 /workflow/tests/run
+/workflow/sample_files/results
+/workflow/sample_files/run

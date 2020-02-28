@@ -226,6 +226,7 @@ class OSModel
     if @nbaths.nil?
       @nbaths = Waterheater.get_default_num_bathrooms(@nbeds)
     end
+    @frac_window_area_operable = construction_values[:fraction_window_area_operable]
     @has_uncond_bsmnt = !enclosure.elements["*/*[InteriorAdjacentTo='basement - unconditioned' or ExteriorAdjacentTo='basement - unconditioned']"].nil?
     @has_vented_attic = !enclosure.elements["*/*[InteriorAdjacentTo='attic - vented' or ExteriorAdjacentTo='attic - vented']"].nil?
     @has_vented_crawl = !enclosure.elements["*/*[InteriorAdjacentTo='crawlspace - vented' or ExteriorAdjacentTo='crawlspace - vented']"].nil?
@@ -1751,8 +1752,6 @@ class OSModel
 
   def self.add_windows(runner, model, building, spaces, weather)
     surfaces = []
-    total_window_area = 0.0
-    operable_window_area = 0.0
     building.elements.each("BuildingDetails/Enclosure/Windows/Window") do |window|
       window_values = HPXML.get_window_values(window: window)
 
@@ -1771,13 +1770,6 @@ class OSModel
       window_width = window_area / window_height
       z_origin = @foundation_top
       window_azimuth = window_values[:azimuth]
-
-      total_window_area += window_area
-      if window_values[:operable].nil?
-        operable_window_area += 0.33 * window_area # Not provided; assume 33% of window area is operable
-      elsif window_values[:operable]
-        operable_window_area += window_area
-      end
 
       # Create parent surface slightly bigger than window
       surface = OpenStudio::Model::Surface.new(add_wall_polygon(window_width, window_height, z_origin,
@@ -1830,13 +1822,6 @@ class OSModel
     end
 
     apply_adiabatic_construction(runner, model, surfaces, "wall")
-
-    # Calculate fraction of window area that is operable
-    if total_window_area > 0
-      @frac_window_area_operable = operable_window_area / total_window_area
-    else
-      @frac_window_area_operable = 0.0
-    end
   end
 
   def self.add_skylights(runner, model, building, spaces, weather)
@@ -3037,6 +3022,9 @@ class OSModel
                              vented_attic_sla, unvented_attic_sla, vented_attic_const_ach, unconditioned_basement_ach, has_flue_chimney, terrain)
 
     # Natural Ventilation
+    if @frac_window_area_operable.nil?
+      @frac_window_area_operable = 0.33 # Default Building America assumption
+    end
     nv_frac_window_area_open = @frac_window_area_operable * 0.20 # Assume 20% of operable window area is open
     nv_num_days_per_week = 7
     nv_max_oa_hr = 0.0115
