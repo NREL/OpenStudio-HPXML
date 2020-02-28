@@ -33,7 +33,7 @@
           <ConditionedFloorArea>2700.0</ConditionedFloorArea>
           <ConditionedBuildingVolume>21600.0</ConditionedBuildingVolume>
           <extension>
-            <FractionWindowAreaOperable>0.33</FractionWindowAreaOperable>
+            <FractionofOperableWindowArea>0.33</FractionofOperableWindowArea>
           </extension>
         </BuildingConstruction>
       </BuildingSummary>

@@ -655,7 +655,7 @@ def get_hpxml_file_building_construction_values(hpxml_file, building_constructio
                                      :number_of_bedrooms => 3,
                                      :conditioned_floor_area => 2700,
                                      :conditioned_building_volume => 2700 * 8,
-                                     :fraction_window_area_operable => 0.33 }
+                                     :fraction_of_operable_window_area => 0.33 }
   elsif ['base-enclosure-beds-1.xml'].include? hpxml_file
     building_construction_values[:number_of_bedrooms] = 1
   elsif ['base-enclosure-beds-2.xml'].include? hpxml_file
@@ -687,7 +687,7 @@ def get_hpxml_file_building_construction_values(hpxml_file, building_constructio
     building_construction_values[:conditioned_floor_area] += 1350
     building_construction_values[:conditioned_building_volume] += 1350 * 8
   elsif ['base-enclosure-windows-inoperable.xml'].include? hpxml_file
-    building_construction_values[:fraction_window_area_operable] = 0.0
+    building_construction_values[:fraction_of_operable_window_area] = 0.0
   end
   return building_construction_values
 end

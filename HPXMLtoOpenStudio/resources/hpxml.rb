@@ -130,7 +130,7 @@ class HPXML
                                      number_of_bathrooms: nil,
                                      conditioned_floor_area:,
                                      conditioned_building_volume:,
-                                     fraction_window_area_operable: nil,
+                                     fraction_of_operable_window_area: nil,
                                      use_only_ideal_air_system: nil)
     building_construction = XMLHelper.create_elements_as_needed(hpxml, ["Building", "BuildingDetails", "BuildingSummary", "BuildingConstruction"])
     XMLHelper.add_element(building_construction, "NumberofConditionedFloors", Integer(number_of_conditioned_floors))
@@ -140,7 +140,7 @@ class HPXML
     XMLHelper.add_element(building_construction, "ConditionedFloorArea", Float(conditioned_floor_area))
     XMLHelper.add_element(building_construction, "ConditionedBuildingVolume", Float(conditioned_building_volume))
     add_extension(parent: building_construction,
-                  extensions: { "FractionWindowAreaOperable" => to_float_or_nil(fraction_window_area_operable),
+                  extensions: { "FractionofOperableWindowArea" => to_float_or_nil(fraction_of_operable_window_area),
                                 "UseOnlyIdealAirSystem" => to_bool_or_nil(use_only_ideal_air_system) })
 
     return building_construction
@@ -160,7 +160,7 @@ class HPXML
     vals[:conditioned_building_volume] = to_float_or_nil(XMLHelper.get_value(building_construction, "ConditionedBuildingVolume"))
     vals[:use_only_ideal_air_system] = to_bool_or_nil(XMLHelper.get_value(building_construction, "extension/UseOnlyIdealAirSystem"))
     vals[:residential_facility_type] = XMLHelper.get_value(building_construction, "ResidentialFacilityType")
-    vals[:fraction_window_area_operable] = to_float_or_nil(XMLHelper.get_value(building_construction, "extension/FractionWindowAreaOperable"))
+    vals[:fraction_of_operable_window_area] = to_float_or_nil(XMLHelper.get_value(building_construction, "extension/FractionofOperableWindowArea"))
     return vals
   end
 
