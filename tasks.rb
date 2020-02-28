@@ -140,6 +140,7 @@ def create_hpxmls
     'base-enclosure-walltype-strawbale.xml' => 'base.xml',
     'base-enclosure-walltype-structuralbrick.xml' => 'base.xml',
     'base-enclosure-windows-interior-shading.xml' => 'base.xml',
+    'base-enclosure-windows-operable.xml' => 'base.xml',
     'base-enclosure-windows-none.xml' => 'base.xml',
     'base-foundation-multiple.xml' => 'base-foundation-unconditioned-basement.xml',
     'base-foundation-ambient.xml' => 'base.xml',
@@ -617,8 +618,6 @@ def get_hpxml_file_site_values(hpxml_file, site_values)
     site_values = { :fuels => ["electricity", "natural gas"] }
   elsif ['base-hvac-none-no-fuel-access.xml'].include? hpxml_file
     site_values[:fuels] = ["electricity"]
-  elsif ['base-enclosure-no-natural-ventilation.xml'].include? hpxml_file
-    site_values[:disable_natural_ventilation] = true
   end
   return site_values
 end
@@ -1629,6 +1628,10 @@ def get_hpxml_file_windows_values(hpxml_file, windows_values)
                         :ufactor => 0.33,
                         :shgc => 0.45,
                         :wall_idref => "FoundationWall3" }
+  elsif ['base-enclosure-windows-operable.xml'].include? hpxml_file
+    for n in 1..windows_values.size
+      windows_values[n - 1][:operable] = (n > 2)
+    end
   end
   return windows_values
 end
