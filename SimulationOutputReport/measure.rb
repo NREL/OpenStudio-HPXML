@@ -229,17 +229,21 @@ class SimulationOutputReport < OpenStudio::Measure::ReportingMeasure
     # get the last model and sql file
     model = runner.lastOpenStudioModel
     if model.empty?
-      runner.registerError("Cannot find last model.")
+      runner.registerError("Cannot find OpenStudio model.")
       return false
     end
     @model = model.get
 
     sqlFile = runner.lastEnergyPlusSqlFile
     if sqlFile.empty?
-      runner.registerError("Cannot find last sql file.")
+      runner.registerError("Cannot find EnergyPlus sql file.")
       return false
     end
     @sqlFile = sqlFile.get
+    if not @sqlFile.connectionOpen
+      runner.registerError("EnergyPlus simulation failed.")
+      return false
+    end
     @model.setSqlFile(@sqlFile)
 
     setup_outputs

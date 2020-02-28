@@ -2,8 +2,8 @@
   <schema_version>3.0</schema_version>
   <name>hpxm_lto_openstudio</name>
   <uid>b1543b30-9465-45ff-ba04-1d1f85e763bc</uid>
-  <version_id>3aa50d09-ada8-462f-ade9-6a5441bc878d</version_id>
-  <version_modified>20200222T211803Z</version_modified>
+  <version_id>3477be0a-632b-420a-b214-559a5aa56fc2</version_id>
+  <version_modified>20200227T232620Z</version_modified>
   <xml_checksum>D8922A73</xml_checksum>
   <class_name>HPXMLtoOpenStudio</class_name>
   <display_name>HPXML to OpenStudio Translator</display_name>
@@ -391,28 +391,10 @@
       <checksum>28BD9ADB</checksum>
     </file>
     <file>
-      <filename>hvac.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>746B81DB</checksum>
-    </file>
-    <file>
-      <filename>BaseElements.xsd</filename>
-      <filetype>xsd</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>F5B8005D</checksum>
-    </file>
-    <file>
       <filename>HPXML.xsd</filename>
       <filetype>xsd</filetype>
       <usage_type>resource</usage_type>
       <checksum>8B1ACB99</checksum>
-    </file>
-    <file>
-      <filename>HPXMLDataTypes.xsd</filename>
-      <filetype>xsd</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>1932812A</checksum>
     </file>
     <file>
       <filename>hvac_sizing.rb</filename>
@@ -433,28 +415,46 @@
       <checksum>6182C16C</checksum>
     </file>
     <file>
-      <filename>waterheater.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>45CD0C6C</checksum>
-    </file>
-    <file>
       <filename>minitest_helper.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
       <checksum>ED54D750</checksum>
     </file>
     <file>
+      <filename>BaseElements.xsd</filename>
+      <filetype>xsd</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>B2150856</checksum>
+    </file>
+    <file>
+      <filename>HPXMLDataTypes.xsd</filename>
+      <filetype>xsd</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>913AC5AE</checksum>
+    </file>
+    <file>
+      <filename>waterheater.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>AC0D4F57</checksum>
+    </file>
+    <file>
       <filename>EPvalidator.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>D763A831</checksum>
+      <checksum>002A7365</checksum>
     </file>
     <file>
       <filename>hpxml.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>D45005E7</checksum>
+      <checksum>A3A8AF16</checksum>
+    </file>
+    <file>
+      <filename>hvac.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>C69243AA</checksum>
     </file>
     <file>
       <version>
@@ -465,7 +465,7 @@
       <filename>measure.rb</filename>
       <filetype>rb</filetype>
       <usage_type>script</usage_type>
-      <checksum>BA046B24</checksum>
+      <checksum>0632F4A9</checksum>
     </file>
   </files>
 </measure>
