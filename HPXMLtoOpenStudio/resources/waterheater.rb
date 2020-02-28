@@ -1223,7 +1223,7 @@ class Waterheater
       standby_loss = 2.9721 * sqft_by_gal - 0.4732 # linear equation assuming a constant u, F/hr
     end
     if standby_loss <= 0
-      fail "Indirect water heater standby loss is negative, double check TankVolume to be <829 gal or /extension/StandbyLoss to be >0.0 F/hr."
+      fail "Indirect water heater standby loss is negative, double check TankVolume to be <829 gal or StandbyLoss to be >0.0 F/hr."
     end
 
     return standby_loss
