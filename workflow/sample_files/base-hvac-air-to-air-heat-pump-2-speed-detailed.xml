@@ -26,6 +26,9 @@
           <NumberofBedrooms>3</NumberofBedrooms>
           <ConditionedFloorArea>2700.0</ConditionedFloorArea>
           <ConditionedBuildingVolume>21600.0</ConditionedBuildingVolume>
+          <extension>
+            <FractionofOperableWindowArea>0.33</FractionofOperableWindowArea>
+          </extension>
         </BuildingConstruction>
       </BuildingSummary>
       <ClimateandRiskZones>
@@ -245,6 +248,7 @@
               <HeatingCapacity>42000.0</HeatingCapacity>
               <HeatingCapacity17F>24780.0</HeatingCapacity17F>
               <CoolingCapacity>48000.0</CoolingCapacity>
+              <CompressorType>two stage</CompressorType>
               <CoolingSensibleHeatFraction>0.7</CoolingSensibleHeatFraction>
               <BackupSystemFuel>electricity</BackupSystemFuel>
               <BackupAnnualHeatingEfficiency>

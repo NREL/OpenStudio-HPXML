@@ -153,7 +153,7 @@ OptionParser.new do |opts|
   opts.on('-v', '--version', 'Reports the version') do |t|
     options[:version] = true
   end
-  
+
   options[:debug] = false
   opts.on('-d', '--debug') do |t|
     options[:debug] = true

@@ -26,6 +26,9 @@
           <NumberofBedrooms>3</NumberofBedrooms>
           <ConditionedFloorArea>2700.0</ConditionedFloorArea>
           <ConditionedBuildingVolume>21600.0</ConditionedBuildingVolume>
+          <extension>
+            <FractionofOperableWindowArea>0.33</FractionofOperableWindowArea>
+          </extension>
         </BuildingConstruction>
       </BuildingSummary>
       <ClimateandRiskZones>
@@ -273,10 +276,8 @@
             <Location>living space</Location>
             <TankVolume>50.0</TankVolume>
             <FractionDHWLoadServed>1.0</FractionDHWLoadServed>
+            <StandbyLoss>1.0</StandbyLoss>
             <RelatedHVACSystem idref='HeatingSystem'/>
-            <extension>
-              <StandbyLoss>1.0</StandbyLoss>
-            </extension>
           </WaterHeatingSystem>
           <HotWaterDistribution>
             <SystemIdentifier id='HotWaterDstribution'/>

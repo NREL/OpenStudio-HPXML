@@ -26,6 +26,9 @@
           <NumberofBedrooms>3</NumberofBedrooms>
           <ConditionedFloorArea>2700.0</ConditionedFloorArea>
           <ConditionedBuildingVolume>21600.0</ConditionedBuildingVolume>
+          <extension>
+            <FractionofOperableWindowArea>0.33</FractionofOperableWindowArea>
+          </extension>
         </BuildingConstruction>
       </BuildingSummary>
       <ClimateandRiskZones>
@@ -249,7 +252,7 @@
                 <Units>AFUE</Units>
                 <Value>0.92</Value>
               </AnnualHeatingEfficiency>
-              <FractionHeatLoadServed>0.333</FractionHeatLoadServed>
+              <FractionHeatLoadServed>0.33</FractionHeatLoadServed>
               <ElectricAuxiliaryEnergy>66.66666666666667</ElectricAuxiliaryEnergy>
             </HeatingSystem>
             <HeatingSystem>
@@ -264,7 +267,7 @@
                 <Units>AFUE</Units>
                 <Value>0.92</Value>
               </AnnualHeatingEfficiency>
-              <FractionHeatLoadServed>0.333</FractionHeatLoadServed>
+              <FractionHeatLoadServed>0.33</FractionHeatLoadServed>
               <ElectricAuxiliaryEnergy>66.66666666666667</ElectricAuxiliaryEnergy>
             </HeatingSystem>
             <HeatingSystem>
@@ -279,7 +282,7 @@
                 <Units>AFUE</Units>
                 <Value>0.92</Value>
               </AnnualHeatingEfficiency>
-              <FractionHeatLoadServed>0.333</FractionHeatLoadServed>
+              <FractionHeatLoadServed>0.35</FractionHeatLoadServed>
               <ElectricAuxiliaryEnergy>66.66666666666667</ElectricAuxiliaryEnergy>
             </HeatingSystem>
           </HVACPlant>

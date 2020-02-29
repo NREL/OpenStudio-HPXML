@@ -125,7 +125,6 @@ def create_hpxmls
     'base-enclosure-beds-5.xml' => 'base.xml',
     'base-enclosure-garage.xml' => 'base.xml',
     'base-enclosure-infil-cfm50.xml' => 'base.xml',
-    'base-enclosure-no-natural-ventilation.xml' => 'base.xml',
     'base-enclosure-overhangs.xml' => 'base.xml',
     'base-enclosure-skylights.xml' => 'base.xml',
     'base-enclosure-split-surfaces.xml' => 'base-enclosure-skylights.xml',
@@ -139,6 +138,7 @@ def create_hpxmls
     'base-enclosure-walltype-stone.xml' => 'base.xml',
     'base-enclosure-walltype-strawbale.xml' => 'base.xml',
     'base-enclosure-walltype-structuralbrick.xml' => 'base.xml',
+    'base-enclosure-windows-inoperable.xml' => 'base.xml',
     'base-enclosure-windows-interior-shading.xml' => 'base.xml',
     'base-enclosure-windows-none.xml' => 'base.xml',
     'base-foundation-multiple.xml' => 'base-foundation-unconditioned-basement.xml',
@@ -617,8 +617,6 @@ def get_hpxml_file_site_values(hpxml_file, site_values)
     site_values = { :fuels => ["electricity", "natural gas"] }
   elsif ['base-hvac-none-no-fuel-access.xml'].include? hpxml_file
     site_values[:fuels] = ["electricity"]
-  elsif ['base-enclosure-no-natural-ventilation.xml'].include? hpxml_file
-    site_values[:disable_natural_ventilation] = true
   end
   return site_values
 end
@@ -649,7 +647,8 @@ def get_hpxml_file_building_construction_values(hpxml_file, building_constructio
                                      :number_of_conditioned_floors_above_grade => 1,
                                      :number_of_bedrooms => 3,
                                      :conditioned_floor_area => 2700,
-                                     :conditioned_building_volume => 2700 * 8 }
+                                     :conditioned_building_volume => 2700 * 8,
+                                     :fraction_of_operable_window_area => 0.33 }
   elsif ['base-enclosure-beds-1.xml'].include? hpxml_file
     building_construction_values[:number_of_bedrooms] = 1
   elsif ['base-enclosure-beds-2.xml'].include? hpxml_file
@@ -680,6 +679,8 @@ def get_hpxml_file_building_construction_values(hpxml_file, building_constructio
     building_construction_values[:number_of_conditioned_floors_above_grade] += 1
     building_construction_values[:conditioned_floor_area] += 1350
     building_construction_values[:conditioned_building_volume] += 1350 * 8
+  elsif ['base-enclosure-windows-inoperable.xml'].include? hpxml_file
+    building_construction_values[:fraction_of_operable_window_area] = 0.0
   end
   return building_construction_values
 end
@@ -1890,6 +1891,12 @@ def get_hpxml_file_heating_systems_values(hpxml_file, heating_systems_values)
     heating_systems_values << heating_systems_values[0].dup
     heating_systems_values[2][:id] = "HeatingSystem3"
     heating_systems_values[2][:distribution_system_idref] = "HVACDistribution3" unless heating_systems_values[2][:distribution_system_idref].nil?
+    if ['hvac_multiple/base-hvac-boiler-gas-only-x3.xml'].include? hpxml_file
+      # Test a file where sum is slightly greater than 1
+      heating_systems_values[0][:fraction_heat_load_served] = 0.33
+      heating_systems_values[1][:fraction_heat_load_served] = 0.33
+      heating_systems_values[2][:fraction_heat_load_served] = 0.35
+    end
   elsif hpxml_file.include? 'hvac_partial' and not heating_systems_values.nil? and heating_systems_values.size > 0
     heating_systems_values[0][:heating_capacity] /= 3.0
     heating_systems_values[0][:fraction_heat_load_served] = 0.333
@@ -1932,10 +1939,16 @@ def get_hpxml_file_cooling_systems_values(hpxml_file, cooling_systems_values)
          'base-hvac-wall-furnace-propane-only.xml',
          'base-hvac-wall-furnace-wood-only.xml'].include? hpxml_file
     cooling_systems_values = []
-  elsif ['base-hvac-central-ac-only-1-speed-detailed.xml',
-         'base-hvac-central-ac-only-2-speed-detailed.xml',
-         'base-hvac-central-ac-only-var-speed-detailed.xml',
-         'base-hvac-room-ac-only-detailed.xml'].include? hpxml_file
+  elsif ['base-hvac-central-ac-only-1-speed-detailed.xml'].include? hpxml_file
+    cooling_systems_values[0][:cooling_shr] = 0.7
+    cooling_systems_values[0][:compressor_type] = "single stage"
+  elsif ['base-hvac-central-ac-only-2-speed-detailed.xml'].include? hpxml_file
+    cooling_systems_values[0][:cooling_shr] = 0.7
+    cooling_systems_values[0][:compressor_type] = "two stage"
+  elsif ['base-hvac-central-ac-only-var-speed-detailed.xml'].include? hpxml_file
+    cooling_systems_values[0][:cooling_shr] = 0.7
+    cooling_systems_values[0][:compressor_type] = "variable speed"
+  elsif ['base-hvac-room-ac-only-detailed.xml'].include? hpxml_file
     cooling_systems_values[0][:cooling_shr] = 0.7
   elsif ['base-hvac-boiler-gas-central-ac-1-speed.xml'].include? hpxml_file
     cooling_systems_values[0][:distribution_system_idref] = "HVACDistribution2"
@@ -2097,12 +2110,15 @@ def get_hpxml_file_heat_pumps_values(hpxml_file, heat_pumps_values)
   elsif ['base-hvac-air-to-air-heat-pump-1-speed-detailed.xml'].include? hpxml_file
     heat_pumps_values[0][:heating_capacity_17F] = heat_pumps_values[0][:heating_capacity] * 0.630 # Based on OAT slope of default curves
     heat_pumps_values[0][:cooling_shr] = 0.7
+    heat_pumps_values[0][:compressor_type] = "single stage"
   elsif ['base-hvac-air-to-air-heat-pump-2-speed-detailed.xml'].include? hpxml_file
     heat_pumps_values[0][:heating_capacity_17F] = heat_pumps_values[0][:heating_capacity] * 0.590 # Based on OAT slope of default curves
     heat_pumps_values[0][:cooling_shr] = 0.7
+    heat_pumps_values[0][:compressor_type] = "two stage"
   elsif ['base-hvac-air-to-air-heat-pump-var-speed-detailed.xml'].include? hpxml_file
     heat_pumps_values[0][:heating_capacity_17F] = heat_pumps_values[0][:heating_capacity] * 0.640 # Based on OAT slope of default curves
     heat_pumps_values[0][:cooling_shr] = 0.7
+    heat_pumps_values[0][:compressor_type] = "variable speed"
   elsif ['base-hvac-mini-split-heat-pump-ducted-detailed.xml'].include? hpxml_file
     f = 1.0 - (1.0 - 0.25) / (47.0 + 5.0) * (47.0 - 17.0)
     heat_pumps_values[0][:heating_capacity_17F] = heat_pumps_values[0][:heating_capacity] * f
