@@ -2014,5 +2014,7 @@
 /workflow/out.osw
 /workflow/tests/results
 /workflow/tests/run
+/workflow/sample_files/results
+/workflow/sample_files/run
 /BuildResidentialHPXML/tests/run
 /BuildResidentialHPXML/tests/built_residential_hpxml
