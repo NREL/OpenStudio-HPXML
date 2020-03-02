@@ -136,7 +136,7 @@ class EnergyPlusValidator
       # [Wall]
       "/HPXML/Building/BuildingDetails/Enclosure/Walls/Wall" => {
         "SystemIdentifier" => one, # Required by HPXML schema
-        "[ExteriorAdjacentTo='outside' or ExteriorAdjacentTo='attic - vented' or ExteriorAdjacentTo='attic - unvented' or ExteriorAdjacentTo='basement - conditioned' or ExteriorAdjacentTo='basement - unconditioned' or ExteriorAdjacentTo='crawlspace - vented' or ExteriorAdjacentTo='crawlspace - unvented' or ExteriorAdjacentTo='garage' or ExteriorAdjacentTo='other housing unit']" => one,
+        "[ExteriorAdjacentTo='outside' or ExteriorAdjacentTo='attic - vented' or ExteriorAdjacentTo='attic - unvented' or ExteriorAdjacentTo='basement - conditioned' or ExteriorAdjacentTo='basement - unconditioned' or ExteriorAdjacentTo='crawlspace - vented' or ExteriorAdjacentTo='crawlspace - unvented' or ExteriorAdjacentTo='garage' or ExteriorAdjacentTo='other housing unit' or ExteriorAdjacentTo='other heated space' or ExteriorAdjacentTo='other multifamily buffer space' or ExteriorAdjacentTo='other non-freezing space']" => one,
         "[InteriorAdjacentTo='living space' or InteriorAdjacentTo='attic - vented' or InteriorAdjacentTo='attic - unvented' or InteriorAdjacentTo='basement - conditioned' or InteriorAdjacentTo='basement - unconditioned' or InteriorAdjacentTo='crawlspace - vented' or InteriorAdjacentTo='crawlspace - unvented' or InteriorAdjacentTo='garage']" => one,
         "WallType[WoodStud | DoubleWoodStud | ConcreteMasonryUnit | StructurallyInsulatedPanel | InsulatedConcreteForms | SteelFrame | SolidConcrete | StructuralBrick | StrawBale | Stone | LogWall]" => one,
         "Area" => one,

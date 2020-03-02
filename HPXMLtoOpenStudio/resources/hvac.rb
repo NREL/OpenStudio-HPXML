@@ -2108,7 +2108,7 @@ class HVAC
       return "variable speed"
     end
   end
-  
+
   def self.apply_dehumidifier(model, runner, energy_factor, water_removal_rate,
                               air_flow_rate, humidity_setpoint, control_zone)
 

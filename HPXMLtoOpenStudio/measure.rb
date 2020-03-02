@@ -1128,6 +1128,7 @@ class OSModel
         end
         surface.setSurfaceType("Wall")
         set_surface_interior(model, spaces, surface, wall_values[:id], wall_values[:interior_adjacent_to])
+        puts wall_values[:exterior_adjacent_to]
         set_surface_exterior(model, spaces, surface, wall_values[:id], wall_values[:exterior_adjacent_to])
         if wall_values[:exterior_adjacent_to] != "outside"
           surface.setSunExposure("NoSun")
@@ -3021,6 +3022,7 @@ class OSModel
     if @frac_window_area_operable < 0 or @frac_window_area_operable > 1
       fail "Fraction window area operable (#{@frac_window_area_operable}) must be between 0 and 1."
     end
+
     nv_frac_window_area_open = @frac_window_area_operable * 0.20 # Assume 20% of operable window area is open
     nv_num_days_per_week = 7
     nv_max_oa_hr = 0.0115
@@ -4245,8 +4247,37 @@ class OSModel
     elsif ['basement - conditioned'].include? exterior_adjacent_to
       surface.createAdjacentSurface(create_or_get_space(model, spaces, 'living space'))
       @cond_bsmnt_surfaces << surface
+    elsif ['other heated space', 'other multifamily buffer space', 'other non-freezing space'].include? exterior_adjacent_to
+      add_otherside_coefficients(surface, exterior_adjacent_to, model, spaces)
     else
       surface.createAdjacentSurface(create_or_get_space(model, spaces, exterior_adjacent_to))
+    end
+  end
+
+  def self.add_otherside_coefficients(surface, exterior_adjacent_to, model, spaces)
+    if spaces[exterior_adjacent_to].nil?
+      otherside_object = OpenStudio::Model::SurfacePropertyOtherSideCoefficients.new(model)
+      if exterior_adjacent_to == 'other heated space'
+        temp_min = UnitConversions.convert(68, "F", "C")
+        indoor_weight = 0.5
+        outdoor_weight = 0.5
+      elsif exterior_adjacent_to == 'other multifamily buffer space'
+        temp_min = UnitConversions.convert(50, "F", "C")
+        indoor_weight = 0.5
+        outdoor_weight = 0.5
+      elsif exterior_adjacent_to == 'other non-freezing space'
+        temp_min = UnitConversions.convert(40, "F", "C")
+        indoor_weight = 0.0
+        outdoor_weight = 1.0
+      end
+      otherside_object.setName(exterior_adjacent_to)
+      otherside_object.setMinimumOtherSideTemperatureLimit(temp_min)
+      otherside_object.setZoneAirTemperatureCoefficient(indoor_weight)
+      otherside_object.setExternalDryBulbTemperatureCoefficient(outdoor_weight)
+      surface.setSurfacePropertyOtherSideCoefficients(otherside_object)
+      spaces[exterior_adjacent_to] = otherside_object
+    else
+      surface.setSurfacePropertyOtherSideCoefficients(spaces[exterior_adjacent_to])
     end
   end
 

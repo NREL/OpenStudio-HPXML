@@ -141,6 +141,9 @@ def create_hpxmls
     'base-enclosure-windows-inoperable.xml' => 'base.xml',
     'base-enclosure-windows-interior-shading.xml' => 'base.xml',
     'base-enclosure-windows-none.xml' => 'base.xml',
+    'base-enclosure-wall-unrated-heated-space.xml' => 'base.xml',
+    'base-enclosure-two-wall-multifamily-buffer.xml' => 'base.xml',
+    'base-enclosure-wall-non-freezing-space.xml' => 'base.xml',
     'base-foundation-multiple.xml' => 'base-foundation-unconditioned-basement.xml',
     'base-foundation-ambient.xml' => 'base.xml',
     'base-foundation-conditioned-basement-slab-insulation.xml' => 'base.xml',
@@ -949,6 +952,15 @@ def get_hpxml_file_walls_values(hpxml_file, walls_values)
                       :solar_absorptance => 0.7,
                       :emittance => 0.92,
                       :insulation_assembly_r_value => 4.0 }
+  elsif ['base-enclosure-wall-unrated-heated-space.xml'].include? hpxml_file
+    walls_values[0][:exterior_adjacent_to] = "other heated space"
+  elsif ['base-enclosure-two-wall-multifamily-buffer.xml'].include? hpxml_file
+    walls_values[0][:exterior_adjacent_to] = "other multifamily buffer space"
+    walls_values << walls_values[0].dup
+    walls_values[-1][:id] = "Wall2"
+    walls_values[-1][:insulation_assembly_r_value] = 4.0
+  elsif ['base-enclosure-wall-non-freezing-space.xml'].include? hpxml_file
+    walls_values[0][:exterior_adjacent_to] = "other non-freezing space"
   elsif ['base-enclosure-walltype-cmu.xml'].include? hpxml_file
     walls_values[0][:wall_type] = "ConcreteMasonryUnit"
     walls_values[0][:insulation_assembly_r_value] = 12
