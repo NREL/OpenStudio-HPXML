@@ -51,6 +51,7 @@ def create_hpxmls
     'invalid_files/unattached-window.xml' => 'base.xml',
     'invalid_files/water-heater-location.xml' => 'base.xml',
     'invalid_files/water-heater-location-other.xml' => 'base.xml',
+    'invalid_files/slab-zero-exposed-perimeter.xml' => 'base.xml',
 
     'base-appliances-gas.xml' => 'base.xml',
     'base-appliances-wood.xml' => 'base.xml',
@@ -1474,6 +1475,8 @@ def get_hpxml_file_slabs_values(hpxml_file, slabs_values)
   elsif ['invalid_files/mismatched-slab-and-foundation-wall.xml'].include? hpxml_file
     slabs_values[0][:interior_adjacent_to] = "basement - unconditioned"
     slabs_values[0][:depth_below_grade] = 7.0
+  elsif ['invalid_files/slab-zero-exposed-perimeter.xml'].include? hpxml_file
+    slabs_values[0][:exposed_perimeter] = 0
   end
   return slabs_values
 end
