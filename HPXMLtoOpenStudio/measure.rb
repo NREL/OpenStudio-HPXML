@@ -1128,7 +1128,6 @@ class OSModel
         end
         surface.setSurfaceType("Wall")
         set_surface_interior(model, spaces, surface, wall_values[:id], wall_values[:interior_adjacent_to])
-        puts wall_values[:exterior_adjacent_to]
         set_surface_exterior(model, spaces, surface, wall_values[:id], wall_values[:exterior_adjacent_to])
         if wall_values[:exterior_adjacent_to] != "outside"
           surface.setSunExposure("NoSun")
