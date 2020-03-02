@@ -226,6 +226,7 @@ class OSModel
     if @nbaths.nil?
       @nbaths = Waterheater.get_default_num_bathrooms(@nbeds)
     end
+    @frac_window_area_operable = construction_values[:fraction_of_operable_window_area]
     @has_uncond_bsmnt = !enclosure.elements["*/*[InteriorAdjacentTo='basement - unconditioned' or ExteriorAdjacentTo='basement - unconditioned']"].nil?
     @has_vented_attic = !enclosure.elements["*/*[InteriorAdjacentTo='attic - vented' or ExteriorAdjacentTo='attic - vented']"].nil?
     @has_vented_crawl = !enclosure.elements["*/*[InteriorAdjacentTo='crawlspace - vented' or ExteriorAdjacentTo='crawlspace - vented']"].nil?
@@ -643,7 +644,8 @@ class OSModel
 
     all_surfaces.each do |surface|
       if @cond_bsmnt_surfaces.include? surface or
-         ((@cond_bsmnt_surfaces.include? surface.internalMassDefinition) if surface.is_a? OpenStudio::Model::InternalMass)
+         ((@cond_bsmnt_surfaces.include? surface.internalMassDefinition) if surface.is_a? OpenStudio::Model::InternalMass) or
+         ((@cond_bsmnt_surfaces.include? surface.surface.get) if surface.is_a? OpenStudio::Model::SubSurface)
         cond_base_surfaces << surface
       else
         lv_surfaces << surface
@@ -678,6 +680,11 @@ class OSModel
   def self.calc_approximate_view_factor(runner, model, all_surfaces)
     # calculate approximate view factor using E+ approach
     # used for recalculating single thermal zone view factor matrix
+    return {} if all_surfaces.size == 0
+    if all_surfaces.size <= 3
+      fail "less than three surfaces in conditioned space. Please double check."
+    end
+
     s_azimuths = {}
     s_tilts = {}
     s_types = {}
@@ -1288,21 +1295,40 @@ class OSModel
   def self.add_foundation_walls_slabs(runner, model, building, spaces)
     # Get foundation types
     foundation_types = []
+    # Used to check foundation wall attachment
+    all_fndwalls = []
+    slab_fndwalls = []
+    building.elements.each("BuildingDetails/Enclosure/FoundationWalls/FoundationWall") do |fnd_wall|
+      all_fndwalls << fnd_wall
+    end
+
     building.elements.each("BuildingDetails/Enclosure/Slabs/Slab/InteriorAdjacentTo") do |int_adjacent_to|
       next if foundation_types.include? int_adjacent_to.text
 
       foundation_types << int_adjacent_to.text
     end
 
+    error_msg = ""
     foundation_types.each do |foundation_type|
       # Get attached foundation walls/slabs
       fnd_walls = []
       slabs = []
       building.elements.each("BuildingDetails/Enclosure/FoundationWalls/FoundationWall[InteriorAdjacentTo='#{foundation_type}']") do |fnd_wall|
         fnd_walls << fnd_wall
+        slab_fndwalls << fnd_wall
       end
       building.elements.each("BuildingDetails/Enclosure/Slabs/Slab[InteriorAdjacentTo='#{foundation_type}']") do |slab|
         slabs << slab
+      end
+
+      # Check for slabs without corresponding foundation walls
+      if fnd_walls.size == 0 and not ["living space", "garage"].include? foundation_type
+        slabs.each do |slab|
+          slab_values = HPXML.get_slab_values(slab: slab)
+          slab_id = slab_values[:id]
+          adjacent_to = slab_values[:interior_adjacent_to]
+          error_msg += "Slab '#{slab_id}' is adjacent to '#{adjacent_to}' but no corresponding foundation walls were found adjacent to '#{adjacent_to}'.\n"
+        end
       end
 
       # Calculate combinations of slabs/walls for each Kiva instance
@@ -1322,6 +1348,9 @@ class OSModel
         slab_values = HPXML.get_slab_values(slab: slab)
         slab_exp_perims[slab] = slab_values[:exposed_perimeter]
         slab_areas[slab] = slab_values[:area]
+        if slab_exp_perims[slab] <= 0
+          fail "Exposed perimeter for Slab '#{slab_values[:id]}' must be greater than zero."
+        end
       end
       total_slab_exp_perim = slab_exp_perims.values.inject(0, :+)
       total_slab_area = slab_areas.values.inject(0, :+)
@@ -1447,6 +1476,17 @@ class OSModel
                                 drywall_thick_in, film_r, mat_ext_finish)
       end
     end
+
+    # Check for foundation walls without corresponding slabs
+    if slab_fndwalls.size < all_fndwalls.size
+      (all_fndwalls - slab_fndwalls).each do |single_fnd_wall|
+        single_fnd_wall_values = HPXML.get_foundation_wall_values(foundation_wall: single_fnd_wall)
+        wall_id = single_fnd_wall_values[:id]
+        adjacent_to = single_fnd_wall_values[:interior_adjacent_to]
+        error_msg += "Foundation wall '#{wall_id}' is adjacent to '#{adjacent_to}' but no corresponding slab was found adjacent to '#{adjacent_to}'.\n"
+      end
+    end
+    fail error_msg unless error_msg.empty?
   end
 
   def self.add_foundation_wall(runner, model, spaces, fnd_wall_values, slab_frac,
@@ -2034,6 +2074,7 @@ class OSModel
     dhw_loop_fracs = {}
     water_heater_spaces = {}
     combi_sys_id_list = []
+    avg_setpoint_temp = 0.0 # Weighted average by fraction DHW load served
     if not wh.nil?
       wh.elements.each("WaterHeatingSystem") do |dhw|
         water_heating_system_values = HPXML.get_water_heating_system_values(water_heating_system: dhw)
@@ -2043,7 +2084,11 @@ class OSModel
 
         space = get_space_from_location(water_heating_system_values[:location], "WaterHeatingSystem", model, spaces)
         water_heater_spaces[sys_id] = space
-        setpoint_temp = Waterheater.get_default_hot_water_temperature(@eri_version)
+        setpoint_temp = water_heating_system_values[:temperature]
+        if setpoint_temp.nil?
+          setpoint_temp = Waterheater.get_default_hot_water_temperature(@eri_version)
+        end
+        avg_setpoint_temp += setpoint_temp * water_heating_system_values[:fraction_dhw_load_served]
         wh_type = water_heating_system_values[:water_heater_type]
         fuel = water_heating_system_values[:fuel_type]
         jacket_r = water_heating_system_values[:jacket_r_value]
@@ -2144,9 +2189,8 @@ class OSModel
       end
     end
 
-    wh_setpoint = Waterheater.get_default_hot_water_temperature(@eri_version)
     HotWaterAndAppliances.apply(model, weather, @living_space,
-                                @cfa, @nbeds, @ncfl, @has_uncond_bsmnt, wh_setpoint,
+                                @cfa, @nbeds, @ncfl, @has_uncond_bsmnt, avg_setpoint_temp,
                                 cw_mef, cw_ler, cw_elec_rate, cw_gas_rate,
                                 cw_agc, cw_cap, cw_space, cd_fuel, cd_ef, cd_control,
                                 cd_space, dw_ef, dw_cap, fridge_annual_kwh, fridge_space,
@@ -2231,6 +2275,23 @@ class OSModel
     end
   end
 
+  def self.calc_sequential_load_fraction(load_fraction, remaining_fraction)
+    if remaining_fraction > 0
+      if (load_fraction - remaining_fraction).abs <= 0.010001
+        # Last equipment to handle all the remaining load (within 0.01 tolerance)
+        load_fraction = remaining_fraction
+        sequential_load_frac = 1.0 # Fraction of remaining load served by this system
+      else
+        sequential_load_frac = load_fraction / remaining_fraction # Fraction of remaining load served by this system
+      end
+    else
+      sequential_load_frac = 0.0
+    end
+    remaining_fraction -= load_fraction
+
+    return sequential_load_frac, remaining_fraction, load_fraction
+  end
+
   def self.add_cooling_system(runner, model, building)
     return if @use_only_ideal_air
 
@@ -2247,12 +2308,7 @@ class OSModel
       end
 
       load_frac = cooling_system_values[:fraction_cool_load_served]
-      if @total_frac_remaining_cool_load_served > 0
-        sequential_load_frac = load_frac / @total_frac_remaining_cool_load_served # Fraction of remaining load served by this system
-      else
-        sequential_load_frac = 0.0
-      end
-      @total_frac_remaining_cool_load_served -= load_frac
+      sequential_load_frac, @total_frac_remaining_cool_load_served, load_frac = calc_sequential_load_fraction(load_frac, @total_frac_remaining_cool_load_served)
 
       sys_id = cooling_system_values[:id]
 
@@ -2263,25 +2319,27 @@ class OSModel
       if clg_type == "central air conditioner"
 
         seer = cooling_system_values[:cooling_efficiency_seer]
-        num_speeds = get_ac_num_speeds(seer)
+        compressor_type = cooling_system_values[:compressor_type]
+        if compressor_type.nil?
+          compressor_type = HVAC.get_default_compressor_type(seer)
+        end
         crankcase_kw = 0.05 # From RESNET Publication No. 002-2017
         crankcase_temp = 50.0 # From RESNET Publication No. 002-2017
 
-        if num_speeds == "1-Speed"
+        if compressor_type == "single stage"
 
           if cooling_system_values[:cooling_shr].nil?
             shrs = [0.73]
           else
             shrs = [cooling_system_values[:cooling_shr]]
           end
-          fan_power_installed = get_fan_power_installed(seer)
           airflow_rate = cooling_system_values[:cooling_cfm] # Hidden feature; used only for HERS DSE test
           HVAC.apply_central_ac_1speed(model, runner, seer, shrs,
-                                       fan_power_installed, crankcase_kw, crankcase_temp,
+                                       crankcase_kw, crankcase_temp,
                                        cool_capacity_btuh, airflow_rate, load_frac,
                                        sequential_load_frac, @living_zone,
                                        @hvac_map, sys_id)
-        elsif num_speeds == "2-Speed"
+        elsif compressor_type == "two stage"
 
           if cooling_system_values[:cooling_shr].nil?
             shrs = [0.71, 0.73]
@@ -2289,13 +2347,12 @@ class OSModel
             # TODO: is the following assumption correct (revisit Dylan's data?)? OR should value from HPXML be used for both stages
             shrs = [cooling_system_values[:cooling_shr] - 0.02, cooling_system_values[:cooling_shr]]
           end
-          fan_power_installed = get_fan_power_installed(seer)
           HVAC.apply_central_ac_2speed(model, runner, seer, shrs,
-                                       fan_power_installed, crankcase_kw, crankcase_temp,
+                                       crankcase_kw, crankcase_temp,
                                        cool_capacity_btuh, load_frac,
                                        sequential_load_frac, @living_zone,
                                        @hvac_map, sys_id)
-        elsif num_speeds == "Variable-Speed"
+        elsif compressor_type == "variable speed"
 
           if cooling_system_values[:cooling_shr].nil?
             shrs = [0.87, 0.80, 0.79, 0.78]
@@ -2303,16 +2360,11 @@ class OSModel
             var_sp_shr_mult = [1.115, 1.026, 1.013, 1.0]
             shrs = var_sp_shr_mult.map { |m| cooling_system_values[:cooling_shr] * m }
           end
-          fan_power_installed = get_fan_power_installed(seer)
           HVAC.apply_central_ac_4speed(model, runner, seer, shrs,
-                                       fan_power_installed, crankcase_kw, crankcase_temp,
+                                       crankcase_kw, crankcase_temp,
                                        cool_capacity_btuh, load_frac,
                                        sequential_load_frac, @living_zone,
                                        @hvac_map, sys_id)
-        else
-
-          fail "Unexpected number of speeds (#{num_speeds}) for cooling system."
-
         end
 
       elsif clg_type == "room air conditioner"
@@ -2371,12 +2423,7 @@ class OSModel
         end
 
         load_frac = heating_system_values[:fraction_heat_load_served]
-        if @total_frac_remaining_heat_load_served > 0
-          sequential_load_frac = load_frac / @total_frac_remaining_heat_load_served # Fraction of remaining load served by this system
-        else
-          sequential_load_frac = 0.0
-        end
-        @total_frac_remaining_heat_load_served -= load_frac
+        sequential_load_frac, @total_frac_remaining_heat_load_served, load_frac = calc_sequential_load_fraction(load_frac, @total_frac_remaining_heat_load_served)
 
         @hvac_map[sys_id] = []
 
@@ -2469,20 +2516,10 @@ class OSModel
       end
 
       load_frac_heat = heat_pump_values[:fraction_heat_load_served]
-      if @total_frac_remaining_heat_load_served > 0
-        sequential_load_frac_heat = load_frac_heat / @total_frac_remaining_heat_load_served # Fraction of remaining load served by this system
-      else
-        sequential_load_frac_heat = 0.0
-      end
-      @total_frac_remaining_heat_load_served -= load_frac_heat
+      sequential_load_frac_heat, @total_frac_remaining_heat_load_served, load_frac_heat = calc_sequential_load_fraction(load_frac_heat, @total_frac_remaining_heat_load_served)
 
       load_frac_cool = heat_pump_values[:fraction_cool_load_served]
-      if @total_frac_remaining_cool_load_served > 0
-        sequential_load_frac_cool = load_frac_cool / @total_frac_remaining_cool_load_served # Fraction of remaining load served by this system
-      else
-        sequential_load_frac_cool = 0.0
-      end
-      @total_frac_remaining_cool_load_served -= load_frac_cool
+      sequential_load_frac_cool, @total_frac_remaining_cool_load_served, load_frac_cool = calc_sequential_load_fraction(load_frac_cool, @total_frac_remaining_cool_load_served)
 
       backup_heat_fuel = heat_pump_values[:backup_heating_fuel]
       if not backup_heat_fuel.nil?
@@ -2532,12 +2569,15 @@ class OSModel
         seer = heat_pump_values[:cooling_efficiency_seer]
         hspf = heat_pump_values[:heating_efficiency_hspf]
 
-        num_speeds = get_ashp_num_speeds_by_seer(seer)
+        compressor_type = heat_pump_values[:compressor_type]
+        if compressor_type.nil?
+          compressor_type = HVAC.get_default_compressor_type(seer)
+        end
 
         crankcase_kw = 0.05 # From RESNET Publication No. 002-2017
         crankcase_temp = 50.0 # From RESNET Publication No. 002-2017
 
-        if num_speeds == "1-Speed"
+        if compressor_type == "single stage"
 
           if heat_pump_values[:cooling_shr].nil?
             shrs = [0.73]
@@ -2545,15 +2585,14 @@ class OSModel
             shrs = [heat_pump_values[:cooling_shr]]
           end
 
-          fan_power_installed = get_fan_power_installed(seer)
           HVAC.apply_central_ashp_1speed(model, runner, seer, hspf, shrs,
-                                         fan_power_installed, hp_compressor_min_temp, crankcase_kw, crankcase_temp,
+                                         hp_compressor_min_temp, crankcase_kw, crankcase_temp,
                                          cool_capacity_btuh, heat_capacity_btuh, heat_capacity_btuh_17F,
                                          backup_heat_fuel, backup_heat_efficiency, backup_heat_capacity_btuh, supp_htg_max_outdoor_temp,
                                          load_frac_heat, load_frac_cool,
                                          sequential_load_frac_heat, sequential_load_frac_cool,
                                          @living_zone, @hvac_map, sys_id)
-        elsif num_speeds == "2-Speed"
+        elsif compressor_type == "two stage"
 
           if heat_pump_values[:cooling_shr].nil?
             shrs = [0.71, 0.724]
@@ -2561,15 +2600,14 @@ class OSModel
             # TODO: is the following assumption correct (revisit Dylan's data?)? OR should value from HPXML be used for both stages?
             shrs = [heat_pump_values[:cooling_shr] - 0.014, heat_pump_values[:cooling_shr]]
           end
-          fan_power_installed = get_fan_power_installed(seer)
           HVAC.apply_central_ashp_2speed(model, runner, seer, hspf, shrs,
-                                         fan_power_installed, hp_compressor_min_temp, crankcase_kw, crankcase_temp,
+                                         hp_compressor_min_temp, crankcase_kw, crankcase_temp,
                                          cool_capacity_btuh, heat_capacity_btuh, heat_capacity_btuh_17F,
                                          backup_heat_fuel, backup_heat_efficiency, backup_heat_capacity_btuh, supp_htg_max_outdoor_temp,
                                          load_frac_heat, load_frac_cool,
                                          sequential_load_frac_heat, sequential_load_frac_cool,
                                          @living_zone, @hvac_map, sys_id)
-        elsif num_speeds == "Variable-Speed"
+        elsif compressor_type == "variable speed"
 
           if heat_pump_values[:cooling_shr].nil?
             shrs = [0.87, 0.80, 0.79, 0.78]
@@ -2577,18 +2615,13 @@ class OSModel
             var_sp_shr_mult = [1.115, 1.026, 1.013, 1.0]
             shrs = var_sp_shr_mult.map { |m| heat_pump_values[:cooling_shr] * m }
           end
-          fan_power_installed = get_fan_power_installed(seer)
           HVAC.apply_central_ashp_4speed(model, runner, seer, hspf, shrs,
-                                         fan_power_installed, hp_compressor_min_temp, crankcase_kw, crankcase_temp,
+                                         hp_compressor_min_temp, crankcase_kw, crankcase_temp,
                                          cool_capacity_btuh, heat_capacity_btuh, heat_capacity_btuh_17F,
                                          backup_heat_fuel, backup_heat_efficiency, backup_heat_capacity_btuh, supp_htg_max_outdoor_temp,
                                          load_frac_heat, load_frac_cool,
                                          sequential_load_frac_heat, sequential_load_frac_cool,
                                          @living_zone, @hvac_map, sys_id)
-        else
-
-          fail "Unexpected number of speeds (#{num_speeds}) for heat pump system."
-
         end
 
       elsif hp_type == "mini-split"
@@ -2639,6 +2672,7 @@ class OSModel
                         supp_htg_max_outdoor_temp, load_frac_heat, load_frac_cool,
                         sequential_load_frac_heat, sequential_load_frac_cool,
                         @living_zone, @hvac_map, sys_id)
+
       elsif hp_type == "ground-to-air"
 
         eer = heat_pump_values[:cooling_efficiency_eer]
@@ -2924,7 +2958,6 @@ class OSModel
   def self.add_airflow(runner, model, building, weather, spaces)
     site_values = HPXML.get_site_values(site: building.elements["BuildingDetails/BuildingSummary/Site"])
     shelter_coef = site_values[:shelter_coefficient]
-    disable_nat_vent = site_values[:disable_natural_ventilation]
 
     # Infiltration
     infil_ach50 = nil
@@ -2985,18 +3018,17 @@ class OSModel
                              vented_attic_sla, unvented_attic_sla, vented_attic_const_ach, unconditioned_basement_ach, has_flue_chimney, terrain)
 
     # Natural Ventilation
-    if not disable_nat_vent.nil? and disable_nat_vent
-      nv_frac_windows_open = 0.0
-      nv_frac_window_area_openable = 0.0
-      nv_num_days_per_week = 0
-    else
-      nv_frac_windows_open = 0.33
-      nv_frac_window_area_openable = 0.2
-      nv_num_days_per_week = 7
+    if @frac_window_area_operable.nil?
+      @frac_window_area_operable = Airflow.get_default_fraction_of_operable_window_area()
     end
+    if @frac_window_area_operable < 0 or @frac_window_area_operable > 1
+      fail "Fraction window area operable (#{@frac_window_area_operable}) must be between 0 and 1."
+    end
+    nv_frac_window_area_open = @frac_window_area_operable * 0.20 # Assume 20% of operable window area is open
+    nv_num_days_per_week = 7
     nv_max_oa_hr = 0.0115
     nv_max_oa_rh = 0.7
-    nat_vent = NaturalVentilation.new(nv_frac_windows_open, nv_frac_window_area_openable, nv_max_oa_hr, nv_max_oa_rh, nv_num_days_per_week,
+    nat_vent = NaturalVentilation.new(nv_frac_window_area_open, nv_max_oa_hr, nv_max_oa_rh, nv_num_days_per_week,
                                       @htg_weekday_setpoints, @htg_weekend_setpoints, @clg_weekday_setpoints, @clg_weekend_setpoints, @clg_ssn_sensor)
 
     # Ducts
@@ -4339,34 +4371,6 @@ class OSModel
     end
     walls_top = foundation_top + 8.0 * @ncfl_ag
     return foundation_top, walls_top
-  end
-
-  def self.get_ac_num_speeds(seer)
-    if seer <= 15
-      return "1-Speed"
-    elsif seer <= 21
-      return "2-Speed"
-    elsif seer > 21
-      return "Variable-Speed"
-    end
-  end
-
-  def self.get_ashp_num_speeds_by_seer(seer)
-    if seer <= 15
-      return "1-Speed"
-    elsif seer <= 21
-      return "2-Speed"
-    elsif seer > 21
-      return "Variable-Speed"
-    end
-  end
-
-  def self.get_fan_power_installed(seer)
-    if seer <= 15
-      return 0.365 # W/cfm
-    else
-      return 0.14 # W/cfm
-    end
   end
 end
 

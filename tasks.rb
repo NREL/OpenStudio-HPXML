@@ -1,6 +1,6 @@
 def create_hpxmls
   this_dir = File.dirname(__FILE__)
-  tests_dir = File.join(this_dir, "workflow/tests")
+  sample_files_dir = File.join(this_dir, "workflow/sample_files")
 
   # Hash of HPXML -> Parent HPXML
   hpxmls_files = {
@@ -30,10 +30,12 @@ def create_hpxmls
     'invalid_files/invalid-relatedhvac-dhw-indirect.xml' => 'base-dhw-indirect.xml',
     'invalid_files/invalid-relatedhvac-desuperheater.xml' => 'base-hvac-central-ac-only-1-speed.xml',
     'invalid_files/invalid-window-interior-shading.xml' => 'base.xml',
+    'invalid_files/mismatched-slab-and-foundation-wall.xml' => 'base.xml',
     'invalid_files/missing-elements.xml' => 'base.xml',
     'invalid_files/missing-surfaces.xml' => 'base.xml',
     'invalid_files/net-area-negative-roof.xml' => 'base-enclosure-skylights.xml',
     'invalid_files/net-area-negative-wall.xml' => 'base.xml',
+    'invalid_files/orphaned-hvac-distribution.xml' => 'base-hvac-furnace-gas-room-ac.xml',
     'invalid_files/refrigerator-location.xml' => 'base.xml',
     'invalid_files/refrigerator-location-other.xml' => 'base.xml',
     'invalid_files/repeated-relatedhvac-dhw-indirect.xml' => 'base-dhw-indirect.xml',
@@ -44,12 +46,12 @@ def create_hpxmls
     'invalid_files/unattached-cfis.xml' => 'base.xml',
     'invalid_files/unattached-door.xml' => 'base.xml',
     'invalid_files/unattached-hvac-distribution.xml' => 'base.xml',
-    'invalid_files/orphaned-hvac-distribution.xml' => 'base-hvac-furnace-gas-room-ac.xml',
     'invalid_files/unattached-skylight.xml' => 'base-enclosure-skylights.xml',
     'invalid_files/unattached-solar-thermal-system.xml' => 'base-dhw-solar-indirect-flat-plate.xml',
     'invalid_files/unattached-window.xml' => 'base.xml',
     'invalid_files/water-heater-location.xml' => 'base.xml',
     'invalid_files/water-heater-location-other.xml' => 'base.xml',
+    'invalid_files/slab-zero-exposed-perimeter.xml' => 'base.xml',
 
     'base-appliances-gas.xml' => 'base.xml',
     'base-appliances-wood.xml' => 'base.xml',
@@ -109,6 +111,7 @@ def create_hpxmls
     'base-dhw-tankless-oil.xml' => 'base.xml',
     'base-dhw-tankless-propane.xml' => 'base.xml',
     'base-dhw-tankless-wood.xml' => 'base.xml',
+    'base-dhw-temperature.xml' => 'base.xml',
     'base-dhw-uef.xml' => 'base.xml',
     'base-dhw-jacket-electric.xml' => 'base.xml',
     'base-dhw-jacket-gas.xml' => 'base-dhw-tank-gas.xml',
@@ -123,7 +126,6 @@ def create_hpxmls
     'base-enclosure-beds-5.xml' => 'base.xml',
     'base-enclosure-garage.xml' => 'base.xml',
     'base-enclosure-infil-cfm50.xml' => 'base.xml',
-    'base-enclosure-no-natural-ventilation.xml' => 'base.xml',
     'base-enclosure-overhangs.xml' => 'base.xml',
     'base-enclosure-skylights.xml' => 'base.xml',
     'base-enclosure-split-surfaces.xml' => 'base-enclosure-skylights.xml',
@@ -137,6 +139,7 @@ def create_hpxmls
     'base-enclosure-walltype-stone.xml' => 'base.xml',
     'base-enclosure-walltype-strawbale.xml' => 'base.xml',
     'base-enclosure-walltype-structuralbrick.xml' => 'base.xml',
+    'base-enclosure-windows-inoperable.xml' => 'base.xml',
     'base-enclosure-windows-interior-shading.xml' => 'base.xml',
     'base-enclosure-windows-none.xml' => 'base.xml',
     'base-foundation-multiple.xml' => 'base-foundation-unconditioned-basement.xml',
@@ -551,7 +554,7 @@ def create_hpxmls
         hpxml.elements["Building/BuildingDetails/BuildingSummary/BuildingConstruction"].elements.delete("ConditionedFloorArea")
       end
 
-      hpxml_path = File.join(tests_dir, derivative)
+      hpxml_path = File.join(sample_files_dir, derivative)
 
       # Validate file against HPXML schema
       schemas_dir = File.absolute_path(File.join(File.dirname(__FILE__), "HPXMLtoOpenStudio/resources"))
@@ -574,13 +577,13 @@ def create_hpxmls
   abs_hpxml_files = []
   dirs = [nil]
   hpxmls_files.keys.each do |hpxml_file|
-    abs_hpxml_files << File.absolute_path(File.join(tests_dir, hpxml_file))
+    abs_hpxml_files << File.absolute_path(File.join(sample_files_dir, hpxml_file))
     next unless hpxml_file.include? '/'
 
     dirs << hpxml_file.split('/')[0] + '/'
   end
   dirs.uniq.each do |dir|
-    Dir["#{tests_dir}/#{dir}*.xml"].each do |xml|
+    Dir["#{sample_files_dir}/#{dir}*.xml"].each do |xml|
       next if abs_hpxml_files.include? File.absolute_path(xml)
 
       puts "Warning: Extra HPXML file found at #{File.absolute_path(xml)}"
@@ -621,8 +624,6 @@ def get_hpxml_file_site_values(hpxml_file, site_values)
     site_values = { :fuels => ["electricity", "natural gas"] }
   elsif ['base-hvac-none-no-fuel-access.xml'].include? hpxml_file
     site_values[:fuels] = ["electricity"]
-  elsif ['base-enclosure-no-natural-ventilation.xml'].include? hpxml_file
-    site_values[:disable_natural_ventilation] = true
   end
   return site_values
 end
@@ -653,7 +654,8 @@ def get_hpxml_file_building_construction_values(hpxml_file, building_constructio
                                      :number_of_conditioned_floors_above_grade => 1,
                                      :number_of_bedrooms => 3,
                                      :conditioned_floor_area => 2700,
-                                     :conditioned_building_volume => 2700 * 8 }
+                                     :conditioned_building_volume => 2700 * 8,
+                                     :fraction_of_operable_window_area => 0.33 }
   elsif ['base-enclosure-beds-1.xml'].include? hpxml_file
     building_construction_values[:number_of_bedrooms] = 1
   elsif ['base-enclosure-beds-2.xml'].include? hpxml_file
@@ -684,6 +686,8 @@ def get_hpxml_file_building_construction_values(hpxml_file, building_constructio
     building_construction_values[:number_of_conditioned_floors_above_grade] += 1
     building_construction_values[:conditioned_floor_area] += 1350
     building_construction_values[:conditioned_building_volume] += 1350 * 8
+  elsif ['base-enclosure-windows-inoperable.xml'].include? hpxml_file
+    building_construction_values[:fraction_of_operable_window_area] = 0.0
   end
   return building_construction_values
 end
@@ -1259,6 +1263,10 @@ def get_hpxml_file_foundation_walls_values(hpxml_file, foundation_walls_values)
         foundation_walls_values[-1][:id] += i.to_s
       end
     end
+  elsif ['invalid_files/mismatched-slab-and-foundation-wall.xml'].include? hpxml_file
+    foundation_walls_values << foundation_walls_values[0].dup
+    foundation_walls_values[1][:id] = "FoundationWall2"
+    foundation_walls_values[1][:interior_adjacent_to] = "garage"
   end
   return foundation_walls_values
 end
@@ -1470,6 +1478,11 @@ def get_hpxml_file_slabs_values(hpxml_file, slabs_values)
         slabs_values[-1][:id] += i.to_s
       end
     end
+  elsif ['invalid_files/mismatched-slab-and-foundation-wall.xml'].include? hpxml_file
+    slabs_values[0][:interior_adjacent_to] = "basement - unconditioned"
+    slabs_values[0][:depth_below_grade] = 7.0
+  elsif ['invalid_files/slab-zero-exposed-perimeter.xml'].include? hpxml_file
+    slabs_values[0][:exposed_perimeter] = 0
   end
   return slabs_values
 end
@@ -1619,6 +1632,13 @@ def get_hpxml_file_windows_values(hpxml_file, windows_values)
         windows_values[-1][:wall_idref] += i.to_s
       end
     end
+  elsif ['base-foundation-walkout-basement.xml'].include? hpxml_file
+    windows_values << { :id => "FoundationWindow",
+                        :area => 20,
+                        :azimuth => 0,
+                        :ufactor => 0.33,
+                        :shgc => 0.45,
+                        :wall_idref => "FoundationWall3" }
   end
   return windows_values
 end
@@ -1880,6 +1900,12 @@ def get_hpxml_file_heating_systems_values(hpxml_file, heating_systems_values)
     heating_systems_values << heating_systems_values[0].dup
     heating_systems_values[2][:id] = "HeatingSystem3"
     heating_systems_values[2][:distribution_system_idref] = "HVACDistribution3" unless heating_systems_values[2][:distribution_system_idref].nil?
+    if ['hvac_multiple/base-hvac-boiler-gas-only-x3.xml'].include? hpxml_file
+      # Test a file where sum is slightly greater than 1
+      heating_systems_values[0][:fraction_heat_load_served] = 0.33
+      heating_systems_values[1][:fraction_heat_load_served] = 0.33
+      heating_systems_values[2][:fraction_heat_load_served] = 0.35
+    end
   elsif hpxml_file.include? 'hvac_partial' and not heating_systems_values.nil? and heating_systems_values.size > 0
     heating_systems_values[0][:heating_capacity] /= 3.0
     heating_systems_values[0][:fraction_heat_load_served] = 0.333
@@ -1922,10 +1948,16 @@ def get_hpxml_file_cooling_systems_values(hpxml_file, cooling_systems_values)
          'base-hvac-wall-furnace-propane-only.xml',
          'base-hvac-wall-furnace-wood-only.xml'].include? hpxml_file
     cooling_systems_values = []
-  elsif ['base-hvac-central-ac-only-1-speed-detailed.xml',
-         'base-hvac-central-ac-only-2-speed-detailed.xml',
-         'base-hvac-central-ac-only-var-speed-detailed.xml',
-         'base-hvac-room-ac-only-detailed.xml'].include? hpxml_file
+  elsif ['base-hvac-central-ac-only-1-speed-detailed.xml'].include? hpxml_file
+    cooling_systems_values[0][:cooling_shr] = 0.7
+    cooling_systems_values[0][:compressor_type] = "single stage"
+  elsif ['base-hvac-central-ac-only-2-speed-detailed.xml'].include? hpxml_file
+    cooling_systems_values[0][:cooling_shr] = 0.7
+    cooling_systems_values[0][:compressor_type] = "two stage"
+  elsif ['base-hvac-central-ac-only-var-speed-detailed.xml'].include? hpxml_file
+    cooling_systems_values[0][:cooling_shr] = 0.7
+    cooling_systems_values[0][:compressor_type] = "variable speed"
+  elsif ['base-hvac-room-ac-only-detailed.xml'].include? hpxml_file
     cooling_systems_values[0][:cooling_shr] = 0.7
   elsif ['base-hvac-boiler-gas-central-ac-1-speed.xml'].include? hpxml_file
     cooling_systems_values[0][:distribution_system_idref] = "HVACDistribution2"
@@ -2087,12 +2119,15 @@ def get_hpxml_file_heat_pumps_values(hpxml_file, heat_pumps_values)
   elsif ['base-hvac-air-to-air-heat-pump-1-speed-detailed.xml'].include? hpxml_file
     heat_pumps_values[0][:heating_capacity_17F] = heat_pumps_values[0][:heating_capacity] * 0.630 # Based on OAT slope of default curves
     heat_pumps_values[0][:cooling_shr] = 0.7
+    heat_pumps_values[0][:compressor_type] = "single stage"
   elsif ['base-hvac-air-to-air-heat-pump-2-speed-detailed.xml'].include? hpxml_file
     heat_pumps_values[0][:heating_capacity_17F] = heat_pumps_values[0][:heating_capacity] * 0.590 # Based on OAT slope of default curves
     heat_pumps_values[0][:cooling_shr] = 0.7
+    heat_pumps_values[0][:compressor_type] = "two stage"
   elsif ['base-hvac-air-to-air-heat-pump-var-speed-detailed.xml'].include? hpxml_file
     heat_pumps_values[0][:heating_capacity_17F] = heat_pumps_values[0][:heating_capacity] * 0.640 # Based on OAT slope of default curves
     heat_pumps_values[0][:cooling_shr] = 0.7
+    heat_pumps_values[0][:compressor_type] = "variable speed"
   elsif ['base-hvac-mini-split-heat-pump-ducted-detailed.xml'].include? hpxml_file
     f = 1.0 - (1.0 - 0.25) / (47.0 + 5.0) * (47.0 - 17.0)
     heat_pumps_values[0][:heating_capacity_17F] = heat_pumps_values[0][:heating_capacity] * f
@@ -2788,6 +2823,8 @@ def get_hpxml_file_water_heating_system_values(hpxml_file, water_heating_systems
     water_heating_systems_values[1][:id] = "WaterHeater2"
   elsif ['base-enclosure-garage.xml'].include? hpxml_file
     water_heating_systems_values[0][:location] = "garage"
+  elsif ['base-dhw-temperature.xml'].include? hpxml_file
+    water_heating_systems_values[0][:temperature] = 130.0
   elsif ['base-dhw-none.xml'].include? hpxml_file
     water_heating_systems_values = []
   end
@@ -3201,7 +3238,7 @@ def download_epws
   exit!
 end
 
-command_list = [:update_measures, :cache_weather, :create_release_zips, :download_weather]
+command_list = [:update_measures, :cache_weather, :create_release_zips, :update_version, :download_weather]
 
 def display_usage(command_list)
   puts "Usage: openstudio #{File.basename(__FILE__)} [COMMAND]\nCommands:\n  " + command_list.join("\n  ")
@@ -3270,15 +3307,49 @@ if ARGV[0].to_sym == :download_weather
   download_epws
 end
 
+if ARGV[0].to_sym == :update_version
+  version_change = { :from => "0.7.0",
+                     :to => "0.8.0" }
+
+  file_names = ['workflow/run_simulation.rb']
+
+  file_names.each do |file_name|
+    text = File.read(file_name)
+    new_contents = text.gsub(version_change[:from], version_change[:to])
+
+    # To write changes to the file, use:
+    File.open(file_name, "w") { |file| file.puts new_contents }
+  end
+
+  puts "Done. Now check all changed files before committing."
+end
+
 if ARGV[0].to_sym == :create_release_zips
   require 'openstudio'
+
+  # Generate documentation
+  puts "Generating documentation..."
+  command = "sphinx-build -b singlehtml docs/source documentation"
+  begin
+    `#{command}`
+    if not File.exists? File.join(File.dirname(__FILE__), "documentation", "index.html")
+      puts "Documentation was not successfully generated. Aborting..."
+      exit!
+    end
+  rescue
+    puts "Command failed: '#{command}'. Perhaps sphinx needs to be installed?"
+    exit!
+  end
 
   files = ["HPXMLtoOpenStudio/measure.*",
            "HPXMLtoOpenStudio/resources/*.*",
            "SimulationOutputReport/measure.*",
            "SimulationOutputReport/resources/*.*",
            "weather/*.*",
-           "workflow/*.*"]
+           "workflow/*.*",
+           "workflow/sample_files/*.xml",
+           "documentation/index.html",
+           "documentation/_static/**/*.*"]
 
   # Only include files under git version control
   command = "git ls-files"
@@ -3320,7 +3391,9 @@ if ARGV[0].to_sym == :create_release_zips
     zip = OpenStudio::ZipFile.new(zip_path, false)
     files.each do |f|
       Dir[f].each do |file|
-        if include_all_epws
+        if file.start_with? "documentation"
+          # always include
+        elsif include_all_epws
           if not git_files.include? file and not file.start_with? "weather"
             next
           end
@@ -3335,6 +3408,9 @@ if ARGV[0].to_sym == :create_release_zips
     end
     puts "Wrote file at #{zip_path}."
   end
+
+  # Cleanup
+  FileUtils.rm_r(File.join(File.dirname(__FILE__), "documentation"))
 
   puts "Done."
 end
