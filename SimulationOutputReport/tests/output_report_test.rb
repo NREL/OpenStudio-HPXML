@@ -371,8 +371,8 @@ class SimulationOutputReportTest < MiniTest::Test
     assert_equal(365, File.readlines(timeseries_csv).size - 2)
   end
 
-  def test_timeseries_timestep_ALL
-    args_hash = { 'hpxml_path' => '../workflow/sample_files/base.xml',
+  def test_timeseries_timestep_ALL_60min
+    args_hash = { 'hpxml_path' => '../workflow/sample_files/base-misc-timestep-60-mins.xml',
                   'timeseries_frequency' => 'timestep',
                   'include_timeseries_zone_temperatures' => true,
                   'include_timeseries_fuel_consumptions' => true,
@@ -385,7 +385,24 @@ class SimulationOutputReportTest < MiniTest::Test
     expected_timeseries_cols = ["Timestep"] + TimeseriesColsFuels + TimeseriesColsEndUses + TimeseriesColsTotalLoads + TimeseriesColsComponentLoads + TimeseriesColsTemperatures
     actual_timeseries_cols = File.readlines(timeseries_csv)[0].strip.split(",")
     assert_equal(expected_timeseries_cols.sort, actual_timeseries_cols.sort)
-    assert_equal(52560, File.readlines(timeseries_csv).size - 2) # TODO: Use a model w/ a sub-hourly timestep
+    assert_equal(8760, File.readlines(timeseries_csv).size - 2)
+  end
+
+  def test_timeseries_timestep_ALL_10min
+    args_hash = { 'hpxml_path' => '../workflow/sample_files/base-misc-timestep-10-mins.xml',
+                  'timeseries_frequency' => 'timestep',
+                  'include_timeseries_zone_temperatures' => true,
+                  'include_timeseries_fuel_consumptions' => true,
+                  'include_timeseries_end_use_consumptions' => true,
+                  'include_timeseries_total_loads' => true,
+                  'include_timeseries_component_loads' => true }
+    annual_csv, timeseries_csv, eri_csv = _test_measure(args_hash)
+    assert(File.exists?(annual_csv))
+    assert(File.exists?(timeseries_csv))
+    expected_timeseries_cols = ["Timestep"] + TimeseriesColsFuels + TimeseriesColsEndUses + TimeseriesColsTotalLoads + TimeseriesColsComponentLoads + TimeseriesColsTemperatures
+    actual_timeseries_cols = File.readlines(timeseries_csv)[0].strip.split(",")
+    assert_equal(expected_timeseries_cols.sort, actual_timeseries_cols.sort)
+    assert_equal(52560, File.readlines(timeseries_csv).size - 2)
   end
 
   def test_eri_designs

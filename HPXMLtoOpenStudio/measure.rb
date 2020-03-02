@@ -205,6 +205,8 @@ class OSModel
     HPXML.collapse_enclosure(enclosure)
 
     # Global variables
+    @timestep = hpxml_values[:timestep]
+    @timestep = 60 if @timestep.nil?
     construction_values = HPXML.get_building_construction_values(building_construction: building.elements["BuildingDetails/BuildingSummary/BuildingConstruction"])
     @cfa = construction_values[:conditioned_floor_area]
     @cfa_ag = @cfa
@@ -292,7 +294,11 @@ class OSModel
     sim.setRunSimulationforSizingPeriods(false)
 
     tstep = model.getTimestep
-    tstep.setNumberOfTimestepsPerHour(6)
+    valid_tsteps = [60, 30, 20, 15, 12, 10, 6, 5, 4, 3, 2, 1]
+    if not valid_tsteps.include? @timestep
+      fail "Timestep (#{@timestep}) must be one of: #{valid_tsteps.join(', ')}."
+    end
+    tstep.setNumberOfTimestepsPerHour(60 / @timestep)
 
     shad = model.getShadowCalculation
     shad.setCalculationFrequency(20)
