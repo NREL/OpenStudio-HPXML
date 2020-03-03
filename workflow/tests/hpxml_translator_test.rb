@@ -636,8 +636,19 @@ class HPXMLTest < MiniTest::Test
     sqlFile = OpenStudio::SqlFile.new(sql_path, false)
     hpxml_doc = REXML::Document.new(File.read(hpxml_path))
 
-    bldg_details = hpxml_doc.elements['/HPXML/Building/BuildingDetails']
+    # Timestep
+    timestep = hpxml_doc.elements['/HPXML/SoftwareInfo/extension/SimulationControl/Timestep']
+    if timestep.nil?
+      timestep = 60
+    else
+      timestep = Integer(timestep.text)
+    end
+    query = "SELECT NumTimestepsPerHour FROM Simulations"
+    sql_value = sqlFile.execAndReturnFirstDouble(query).get
+    assert_equal(60 / timestep, sql_value)
 
+    bldg_details = hpxml_doc.elements['/HPXML/Building/BuildingDetails']
+    
     # Conditioned Floor Area
     sum_hvac_load_frac = (bldg_details.elements['sum(Systems/HVAC/HVACPlant/CoolingSystem/FractionCoolLoadServed)'] +
                           bldg_details.elements['sum(Systems/HVAC/HVACPlant/HeatingSystem/FractionHeatLoadServed)'] +
