@@ -30,7 +30,7 @@ class BuildResidentialHPXMLTest < MiniTest::Test
       end
     end
 
-    workflow_dir = File.expand_path(File.join(File.dirname(__FILE__), "../../workflow/tests"))
+    workflow_dir = File.expand_path(File.join(File.dirname(__FILE__), "../../workflow/sample_files"))
     tests_dir = File.expand_path(File.join(File.dirname(__FILE__), "../../BuildResidentialHPXML/tests"))
     built_dir = File.join(tests_dir, "built_residential_hpxml")
     unless Dir.exists?(built_dir)

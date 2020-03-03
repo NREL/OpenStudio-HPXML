@@ -264,6 +264,7 @@
         "whole_house_fan_flow_rate": 4500,
         "whole_house_fan_power": 300,
         "window_aspect_ratio": 1.333,
+        "window_fraction_of_operable_area": 0.33,
         "window_shgc": 0.45,
         "window_ufactor": 0.33,
         "winter_shading_coefficient_back_facade": 0,
