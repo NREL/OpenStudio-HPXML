@@ -759,8 +759,7 @@ def get_hpxml_file_attic_values(hpxml_file, attic_values)
   elsif ['base-atticroof-vented.xml'].include? hpxml_file
     attic_values = { :id => "VentedAttic",
                      :attic_type => "VentedAttic",
-                     :vented_attic_sla => 0.003,
-                     :within_infiltration_volume => false }
+                     :vented_attic_sla => 0.003 }
   end
   return attic_values
 end
@@ -771,8 +770,7 @@ def get_hpxml_file_foundation_values(hpxml_file, foundation_values)
   elsif ['base-foundation-vented-crawlspace.xml'].include? hpxml_file
     foundation_values = { :id => "VentedCrawlspace",
                           :foundation_type => "VentedCrawlspace",
-                          :vented_crawlspace_sla => 0.00667,
-                          :within_infiltration_volume => false }
+                          :vented_crawlspace_sla => 0.00667 }
   elsif ['base-foundation-unvented-crawlspace.xml',
          'base-foundation-multiple.xml'].include? hpxml_file
     foundation_values = { :id => "UnventedCrawlspace",

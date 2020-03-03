@@ -66,7 +66,6 @@
               <UnitofMeasure>SLA</UnitofMeasure>
               <Value>0.003</Value>
             </VentilationRate>
-            <WithinInfiltrationVolume>false</WithinInfiltrationVolume>
           </Attic>
         </Attics>
         <Roofs>
