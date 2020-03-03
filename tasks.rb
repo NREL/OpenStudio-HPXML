@@ -29,6 +29,7 @@ def create_hpxmls
     'invalid_files/hvac-frac-load-served.xml' => 'base-hvac-multiple.xml',
     'invalid_files/invalid-relatedhvac-dhw-indirect.xml' => 'base-dhw-indirect.xml',
     'invalid_files/invalid-relatedhvac-desuperheater.xml' => 'base-hvac-central-ac-only-1-speed.xml',
+    'invalid_files/invalid-window-height.xml' => 'base-enclosure-overhangs.xml',
     'invalid_files/invalid-window-interior-shading.xml' => 'base.xml',
     'invalid_files/mismatched-slab-and-foundation-wall.xml' => 'base.xml',
     'invalid_files/missing-elements.xml' => 'base.xml',
@@ -1633,6 +1634,8 @@ def get_hpxml_file_windows_values(hpxml_file, windows_values)
                         :ufactor => 0.33,
                         :shgc => 0.45,
                         :wall_idref => "FoundationWall3" }
+  elsif ['invalid_files/invalid-window-height.xml'].include? hpxml_file
+    windows_values[2][:overhangs_distance_to_bottom_of_window] = windows_values[2][:overhangs_distance_to_top_of_window]
   end
   return windows_values
 end
