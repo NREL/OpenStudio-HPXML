@@ -1348,6 +1348,9 @@ class OSModel
         slab_values = HPXML.get_slab_values(slab: slab)
         slab_exp_perims[slab] = slab_values[:exposed_perimeter]
         slab_areas[slab] = slab_values[:area]
+        if slab_exp_perims[slab] <= 0
+          fail "Exposed perimeter for Slab '#{slab_values[:id]}' must be greater than zero."
+        end
       end
       total_slab_exp_perim = slab_exp_perims.values.inject(0, :+)
       total_slab_area = slab_areas.values.inject(0, :+)

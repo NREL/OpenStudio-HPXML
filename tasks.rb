@@ -51,6 +51,7 @@ def create_hpxmls
     'invalid_files/unattached-window.xml' => 'base.xml',
     'invalid_files/water-heater-location.xml' => 'base.xml',
     'invalid_files/water-heater-location-other.xml' => 'base.xml',
+    'invalid_files/slab-zero-exposed-perimeter.xml' => 'base.xml',
 
     'base-appliances-gas.xml' => 'base.xml',
     'base-appliances-wood.xml' => 'base.xml',
@@ -748,11 +749,18 @@ end
 
 def get_hpxml_file_attic_values(hpxml_file, attic_values)
   if ['base.xml'].include? hpxml_file
+    attic_values = { :id => "UnventedAttic",
+                     :attic_type => "UnventedAttic",
+                     :within_infiltration_volume => false }
+  elsif ['base-atticroof-cathedral.xml',
+         'base-atticroof-conditioned.xml',
+         'base-atticroof-flat.xml'].include? hpxml_file
     attic_values = {}
   elsif ['base-atticroof-vented.xml'].include? hpxml_file
     attic_values = { :id => "VentedAttic",
                      :attic_type => "VentedAttic",
-                     :vented_attic_sla => 0.003 }
+                     :vented_attic_sla => 0.003,
+                     :within_infiltration_volume => false }
   end
   return attic_values
 end
@@ -763,15 +771,23 @@ def get_hpxml_file_foundation_values(hpxml_file, foundation_values)
   elsif ['base-foundation-vented-crawlspace.xml'].include? hpxml_file
     foundation_values = { :id => "VentedCrawlspace",
                           :foundation_type => "VentedCrawlspace",
-                          :vented_crawlspace_sla => 0.00667 }
+                          :vented_crawlspace_sla => 0.00667,
+                          :within_infiltration_volume => false }
+  elsif ['base-foundation-unvented-crawlspace.xml',
+         'base-foundation-multiple.xml'].include? hpxml_file
+    foundation_values = { :id => "UnventedCrawlspace",
+                          :foundation_type => "UnventedCrawlspace",
+                          :within_infiltration_volume => false }
   elsif ['base-foundation-unconditioned-basement.xml'].include? hpxml_file
     foundation_values = { :id => "UnconditionedBasement",
                           :foundation_type => "UnconditionedBasement",
-                          :unconditioned_basement_thermal_boundary => "frame floor" }
+                          :unconditioned_basement_thermal_boundary => "frame floor",
+                          :within_infiltration_volume => false }
   elsif ['base-foundation-unconditioned-basement-wall-insulation.xml'].include? hpxml_file
     foundation_values = { :id => "UnconditionedBasement",
                           :foundation_type => "UnconditionedBasement",
-                          :unconditioned_basement_thermal_boundary => "foundation wall" }
+                          :unconditioned_basement_thermal_boundary => "foundation wall",
+                          :within_infiltration_volume => false }
   end
   return foundation_values
 end
@@ -1480,6 +1496,8 @@ def get_hpxml_file_slabs_values(hpxml_file, slabs_values)
   elsif ['invalid_files/mismatched-slab-and-foundation-wall.xml'].include? hpxml_file
     slabs_values[0][:interior_adjacent_to] = "basement - unconditioned"
     slabs_values[0][:depth_below_grade] = 7.0
+  elsif ['invalid_files/slab-zero-exposed-perimeter.xml'].include? hpxml_file
+    slabs_values[0][:exposed_perimeter] = 0
   end
   return slabs_values
 end

@@ -54,15 +54,26 @@
             <InfiltrationVolume>10800.0</InfiltrationVolume>
           </AirInfiltrationMeasurement>
         </AirInfiltration>
+        <Attics>
+          <Attic>
+            <SystemIdentifier id='UnventedAttic'/>
+            <AtticType>
+              <Attic>
+                <Vented>false</Vented>
+              </Attic>
+            </AtticType>
+            <WithinInfiltrationVolume>false</WithinInfiltrationVolume>
+          </Attic>
+        </Attics>
         <Foundations>
           <Foundation>
-            <SystemIdentifier id='UnconditionedBasement'/>
+            <SystemIdentifier id='UnventedCrawlspace'/>
             <FoundationType>
-              <Basement>
-                <Conditioned>false</Conditioned>
-              </Basement>
+              <Crawlspace>
+                <Vented>false</Vented>
+              </Crawlspace>
             </FoundationType>
-            <ThermalBoundary>frame floor</ThermalBoundary>
+            <WithinInfiltrationVolume>false</WithinInfiltrationVolume>
           </Foundation>
         </Foundations>
         <Roofs>

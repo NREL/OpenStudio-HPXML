@@ -384,7 +384,8 @@ class HPXML
                      id:,
                      attic_type:,
                      vented_attic_sla: nil,
-                     vented_attic_constant_ach: nil)
+                     vented_attic_constant_ach: nil,
+                     within_infiltration_volume: nil)
     attics = XMLHelper.create_elements_as_needed(hpxml, ["Building", "BuildingDetails", "Enclosure", "Attics"])
     attic = XMLHelper.add_element(attics, "Attic")
     sys_id = XMLHelper.add_element(attic, "SystemIdentifier")
@@ -410,6 +411,7 @@ class HPXML
         fail "Unhandled attic type '#{attic_type}'."
       end
     end
+    XMLHelper.add_element(attic, "WithinInfiltrationVolume", Boolean(within_infiltration_volume)) unless within_infiltration_volume.nil?
 
     return attic
   end
@@ -432,6 +434,7 @@ class HPXML
     end
     vals[:vented_attic_sla] = to_float_or_nil(XMLHelper.get_value(attic, "[AtticType/Attic[Vented='true']]VentilationRate[UnitofMeasure='SLA']/Value"))
     vals[:vented_attic_constant_ach] = to_float_or_nil(XMLHelper.get_value(attic, "[AtticType/Attic[Vented='true']]extension/ConstantACHnatural"))
+    vals[:within_infiltration_volume] = to_bool_or_nil(XMLHelper.get_value(attic, "WithinInfiltrationVolume"))
     return vals
   end
 
@@ -439,7 +442,8 @@ class HPXML
                           id:,
                           foundation_type:,
                           vented_crawlspace_sla: nil,
-                          unconditioned_basement_thermal_boundary: nil)
+                          unconditioned_basement_thermal_boundary: nil,
+                          within_infiltration_volume: nil)
     foundations = XMLHelper.create_elements_as_needed(hpxml, ["Building", "BuildingDetails", "Enclosure", "Foundations"])
     foundation = XMLHelper.add_element(foundations, "Foundation")
     sys_id = XMLHelper.add_element(foundation, "SystemIdentifier")
@@ -470,6 +474,7 @@ class HPXML
         fail "Unhandled foundation type '#{foundation_type}'."
       end
     end
+    XMLHelper.add_element(foundation, "WithinInfiltrationVolume", Boolean(within_infiltration_volume)) unless within_infiltration_volume.nil?
 
     return foundation
   end
@@ -494,6 +499,7 @@ class HPXML
     end
     vals[:vented_crawlspace_sla] = to_float_or_nil(XMLHelper.get_value(foundation, "[FoundationType/Crawlspace[Vented='true']]VentilationRate[UnitofMeasure='SLA']/Value"))
     vals[:unconditioned_basement_thermal_boundary] = XMLHelper.get_value(foundation, "[FoundationType/Basement[Conditioned='false']]ThermalBoundary")
+    vals[:within_infiltration_volume] = to_bool_or_nil(XMLHelper.get_value(foundation, "WithinInfiltrationVolume"))
     return vals
   end
 
