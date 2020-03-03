@@ -749,11 +749,18 @@ end
 
 def get_hpxml_file_attic_values(hpxml_file, attic_values)
   if ['base.xml'].include? hpxml_file
+    attic_values = { :id => "UnventedAttic",
+                     :attic_type => "UnventedAttic",
+                     :within_infiltration_volume => false }
+  elsif ['base-atticroof-cathedral.xml',
+         'base-atticroof-conditioned.xml',
+         'base-atticroof-flat.xml'].include? hpxml_file
     attic_values = {}
   elsif ['base-atticroof-vented.xml'].include? hpxml_file
     attic_values = { :id => "VentedAttic",
                      :attic_type => "VentedAttic",
-                     :vented_attic_sla => 0.003 }
+                     :vented_attic_sla => 0.003,
+                     :within_infiltration_volume => false }
   end
   return attic_values
 end
@@ -764,15 +771,23 @@ def get_hpxml_file_foundation_values(hpxml_file, foundation_values)
   elsif ['base-foundation-vented-crawlspace.xml'].include? hpxml_file
     foundation_values = { :id => "VentedCrawlspace",
                           :foundation_type => "VentedCrawlspace",
-                          :vented_crawlspace_sla => 0.00667 }
+                          :vented_crawlspace_sla => 0.00667,
+                          :within_infiltration_volume => false }
+  elsif ['base-foundation-unvented-crawlspace.xml',
+         'base-foundation-multiple.xml'].include? hpxml_file
+    foundation_values = { :id => "UnventedCrawlspace",
+                          :foundation_type => "UnventedCrawlspace",
+                          :within_infiltration_volume => false }
   elsif ['base-foundation-unconditioned-basement.xml'].include? hpxml_file
     foundation_values = { :id => "UnconditionedBasement",
                           :foundation_type => "UnconditionedBasement",
-                          :unconditioned_basement_thermal_boundary => "frame floor" }
+                          :unconditioned_basement_thermal_boundary => "frame floor",
+                          :within_infiltration_volume => false }
   elsif ['base-foundation-unconditioned-basement-wall-insulation.xml'].include? hpxml_file
     foundation_values = { :id => "UnconditionedBasement",
                           :foundation_type => "UnconditionedBasement",
-                          :unconditioned_basement_thermal_boundary => "foundation wall" }
+                          :unconditioned_basement_thermal_boundary => "foundation wall",
+                          :within_infiltration_volume => false }
   end
   return foundation_values
 end
