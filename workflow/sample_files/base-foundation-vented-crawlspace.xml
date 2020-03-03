@@ -77,7 +77,6 @@
               <UnitofMeasure>SLA</UnitofMeasure>
               <Value>0.00667</Value>
             </VentilationRate>
-            <WithinInfiltrationVolume>false</WithinInfiltrationVolume>
           </Foundation>
         </Foundations>
         <Roofs>
