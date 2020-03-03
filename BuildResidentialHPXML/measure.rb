@@ -584,6 +584,12 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     arg.setDefaultValue(1.333)
     args << arg
 
+    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument("window_fraction_of_operable_area", true)
+    arg.setDisplayName("Windows: Fraction of Operable Area")
+    arg.setDescription("Fraction of operable window area.")
+    arg.setDefaultValue(0.33)
+    args << arg
+
     arg = OpenStudio::Measure::OSArgument::makeDoubleArgument("window_ufactor", true)
     arg.setDisplayName("Windows: U-Factor")
     arg.setUnits("Btu/hr-ft^2-R")
@@ -1956,6 +1962,7 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
              :left_window_area => runner.getDoubleArgumentValue("left_window_area", user_arguments),
              :right_window_area => runner.getDoubleArgumentValue("right_window_area", user_arguments),
              :window_aspect_ratio => runner.getDoubleArgumentValue("window_aspect_ratio", user_arguments),
+             :window_fraction_of_operable_area => runner.getDoubleArgumentValue("window_fraction_of_operable_area", user_arguments),
              :window_ufactor => runner.getDoubleArgumentValue("window_ufactor", user_arguments),
              :window_shgc => runner.getDoubleArgumentValue("window_shgc", user_arguments),
              :interior_shading_front_factor_winter => runner.getDoubleArgumentValue("winter_shading_coefficient_front_facade", user_arguments),
@@ -2486,12 +2493,15 @@ class HPXMLFile
 
     conditioned_building_volume = args[:cfa] * args[:wall_height]
 
+    fraction_of_operable_window_area = args[:window_fraction_of_operable_area]
+
     building_construction_values = { :number_of_conditioned_floors => number_of_conditioned_floors,
                                      :number_of_conditioned_floors_above_grade => number_of_conditioned_floors_above_grade,
                                      :number_of_bedrooms => args[:num_bedrooms],
                                      :number_of_bathrooms => number_of_bathrooms,
                                      :conditioned_floor_area => args[:cfa],
-                                     :conditioned_building_volume => conditioned_building_volume }
+                                     :conditioned_building_volume => conditioned_building_volume,
+                                     :fraction_of_operable_window_area => fraction_of_operable_window_area }
     return building_construction_values
   end
 
