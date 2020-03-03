@@ -141,9 +141,7 @@ def create_hpxmls
     'base-enclosure-windows-inoperable.xml' => 'base.xml',
     'base-enclosure-windows-interior-shading.xml' => 'base.xml',
     'base-enclosure-windows-none.xml' => 'base.xml',
-    'base-enclosure-wall-unrated-heated-space.xml' => 'base.xml',
-    'base-enclosure-two-wall-multifamily-buffer.xml' => 'base.xml',
-    'base-enclosure-wall-non-freezing-space.xml' => 'base.xml',
+    'base-enclosure-attached-multifamily.xml' => 'base.xml',
     'base-foundation-multiple.xml' => 'base-foundation-unconditioned-basement.xml',
     'base-foundation-ambient.xml' => 'base.xml',
     'base-foundation-conditioned-basement-slab-insulation.xml' => 'base.xml',
@@ -855,6 +853,8 @@ def get_hpxml_file_rim_joists_values(hpxml_file, rim_joists_values)
   elsif ['base-foundation-ambient.xml',
          'base-foundation-slab.xml'].include? hpxml_file
     rim_joists_values = []
+  elsif ['base-enclosure-attached-multifamily.xml'].include? hpxml_file
+    rim_joists_values[0][:exterior_adjacent_to] = "other non-freezing space"
   elsif ['base-foundation-unconditioned-basement.xml'].include? hpxml_file
     for i in 0..rim_joists_values.size - 1
       rim_joists_values[i][:interior_adjacent_to] = "basement - unconditioned"
@@ -952,15 +952,31 @@ def get_hpxml_file_walls_values(hpxml_file, walls_values)
                       :solar_absorptance => 0.7,
                       :emittance => 0.92,
                       :insulation_assembly_r_value => 4.0 }
-  elsif ['base-enclosure-wall-unrated-heated-space.xml'].include? hpxml_file
-    walls_values[0][:exterior_adjacent_to] = "other heated space"
-  elsif ['base-enclosure-two-wall-multifamily-buffer.xml'].include? hpxml_file
-    walls_values[0][:exterior_adjacent_to] = "other multifamily buffer space"
-    walls_values << walls_values[0].dup
-    walls_values[-1][:id] = "Wall2"
-    walls_values[-1][:insulation_assembly_r_value] = 4.0
-  elsif ['base-enclosure-wall-non-freezing-space.xml'].include? hpxml_file
-    walls_values[0][:exterior_adjacent_to] = "other non-freezing space"
+  elsif ['base-enclosure-attached-multifamily.xml'].include? hpxml_file
+    walls_values << { :id => "WallUnratedHeatedSpace",
+                      :exterior_adjacent_to => "other heated space",
+                      :interior_adjacent_to => "living space",
+                      :wall_type => "WoodStud",
+                      :area => 100,
+                      :solar_absorptance => 0.7,
+                      :emittance => 0.92,
+                      :insulation_assembly_r_value => 23.0 }
+    walls_values << { :id => "WallMultifamilyBuffer",
+                      :exterior_adjacent_to => "other multifamily buffer space",
+                      :interior_adjacent_to => "living space",
+                      :wall_type => "WoodStud",
+                      :area => 100,
+                      :solar_absorptance => 0.7,
+                      :emittance => 0.92,
+                      :insulation_assembly_r_value => 22.3 }
+    walls_values << { :id => "WallNonFreezingSpace",
+                      :exterior_adjacent_to => "other non-freezing space",
+                      :interior_adjacent_to => "living space",
+                      :wall_type => "WoodStud",
+                      :area => 100,
+                      :solar_absorptance => 0.7,
+                      :emittance => 0.92,
+                      :insulation_assembly_r_value => 23.0 }
   elsif ['base-enclosure-walltype-cmu.xml'].include? hpxml_file
     walls_values[0][:wall_type] = "ConcreteMasonryUnit"
     walls_values[0][:insulation_assembly_r_value] = 12
@@ -1089,6 +1105,46 @@ def get_hpxml_file_foundation_walls_values(hpxml_file, foundation_walls_values)
                                  :insulation_exterior_distance_to_top => 0,
                                  :insulation_exterior_distance_to_bottom => 8,
                                  :insulation_exterior_r_value => 8.9 }]
+  elsif ['base-enclosure-attached-multifamily.xml'].include? hpxml_file
+    foundation_walls_values << { :id => "FoundationWall1",
+                                 :exterior_adjacent_to => "other non-freezing space",
+                                 :interior_adjacent_to => "basement - conditioned",
+                                 :height => 8,
+                                 :area => 480,
+                                 :thickness => 8,
+                                 :depth_below_grade => 7,
+                                 :insulation_interior_r_value => 0,
+                                 :insulation_interior_distance_to_top => 0,
+                                 :insulation_interior_distance_to_bottom => 0,
+                                 :insulation_exterior_distance_to_top => 0,
+                                 :insulation_exterior_distance_to_bottom => 8,
+                                 :insulation_exterior_r_value => 8.9 }
+    foundation_walls_values << { :id => "FoundationWall2",
+                                 :exterior_adjacent_to => "other multifamily buffer space",
+                                 :interior_adjacent_to => "basement - conditioned",
+                                 :height => 4,
+                                 :area => 120,
+                                 :thickness => 8,
+                                 :depth_below_grade => 3,
+                                 :insulation_interior_r_value => 0,
+                                 :insulation_interior_distance_to_top => 0,
+                                 :insulation_interior_distance_to_bottom => 0,
+                                 :insulation_exterior_distance_to_top => 0,
+                                 :insulation_exterior_distance_to_bottom => 4,
+                                 :insulation_exterior_r_value => 8.9 }
+    foundation_walls_values << { :id => "FoundationWall3",
+                                 :exterior_adjacent_to => "other heated space",
+                                 :interior_adjacent_to => "basement - conditioned",
+                                 :height => 2,
+                                 :area => 60,
+                                 :thickness => 8,
+                                 :depth_below_grade => 1,
+                                 :insulation_interior_r_value => 0,
+                                 :insulation_interior_distance_to_top => 0,
+                                 :insulation_interior_distance_to_bottom => 0,
+                                 :insulation_exterior_distance_to_top => 0,
+                                 :insulation_exterior_distance_to_bottom => 2,
+                                 :insulation_exterior_r_value => 8.9 }
   elsif ['base-foundation-conditioned-basement-wall-interior-insulation.xml'].include? hpxml_file
     foundation_walls_values[0][:insulation_interior_distance_to_top] = 0
     foundation_walls_values[0][:insulation_interior_distance_to_bottom] = 8
@@ -1348,6 +1404,22 @@ def get_hpxml_file_framefloors_values(hpxml_file, framefloors_values)
                             :interior_adjacent_to => "living space",
                             :area => 1350,
                             :insulation_assembly_r_value => 2.1 }]
+  elsif ['base-enclosure-attached-multifamily.xml'].include? hpxml_file
+    framefloors_values << { :id => "FloorNonFreezingSpace",
+                            :exterior_adjacent_to => "other non-freezing space",
+                            :interior_adjacent_to => "living space",
+                            :area => 1000,
+                            :insulation_assembly_r_value => 2.1 }
+    framefloors_values << { :id => "FloorMultifamilyBuffer",
+                            :exterior_adjacent_to => "other multifamily buffer space",
+                            :interior_adjacent_to => "living space",
+                            :area => 200,
+                            :insulation_assembly_r_value => 2.1 }
+    framefloors_values << { :id => "FloorUnratedHeatedSpace",
+                            :exterior_adjacent_to => "other heated space",
+                            :interior_adjacent_to => "living space",
+                            :area => 150,
+                            :insulation_assembly_r_value => 2.1 }
   elsif ['base-enclosure-split-surfaces.xml'].include? hpxml_file
     for n in 1..framefloors_values.size
       framefloors_values[n - 1][:area] /= 10.0

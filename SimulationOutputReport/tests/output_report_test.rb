@@ -185,6 +185,12 @@ class SimulationOutputReportTest < MiniTest::Test
     "Temperature: Living Space",
   ]
 
+  TimeseriesColsTemperaturesOtherSide = [
+    "Temperature: Other Multifamily Buffer Space",
+    "Temperature: Other Non-freezing Space",
+    "Temperature: Other Heated Space"
+  ]
+
   ERIRows = [
     "hpxml_eec_heats",
     "hpxml_eec_cools",
@@ -264,6 +270,23 @@ class SimulationOutputReportTest < MiniTest::Test
     assert(File.exists?(annual_csv))
     assert(File.exists?(timeseries_csv))
     expected_timeseries_cols = ["Hour"] + TimeseriesColsTemperatures
+    actual_timeseries_cols = File.readlines(timeseries_csv)[0].strip.split(",")
+    assert_equal(expected_timeseries_cols.sort, actual_timeseries_cols.sort)
+    assert_equal(8760, File.readlines(timeseries_csv).size - 2)
+  end
+
+  def test_timeseries_otherside_hourly_temperatures
+    args_hash = { 'hpxml_path' => '../workflow/sample_files/base-enclosure-attached-multifamily.xml',
+                  'timeseries_frequency' => 'hourly',
+                  'include_timeseries_zone_temperatures' => true,
+                  'include_timeseries_fuel_consumptions' => false,
+                  'include_timeseries_end_use_consumptions' => false,
+                  'include_timeseries_total_loads' => false,
+                  'include_timeseries_component_loads' => false }
+    annual_csv, timeseries_csv, eri_csv = _test_measure(args_hash)
+    assert(File.exists?(annual_csv))
+    assert(File.exists?(timeseries_csv))
+    expected_timeseries_cols = ["Hour"] + TimeseriesColsTemperatures + TimeseriesColsTemperaturesOtherSide
     actual_timeseries_cols = File.readlines(timeseries_csv)[0].strip.split(",")
     assert_equal(expected_timeseries_cols.sort, actual_timeseries_cols.sort)
     assert_equal(8760, File.readlines(timeseries_csv).size - 2)

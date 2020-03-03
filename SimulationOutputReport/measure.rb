@@ -171,6 +171,7 @@ class SimulationOutputReport < OpenStudio::Measure::ReportingMeasure
 
     if include_timeseries_zone_temperatures
       result << OpenStudio::IdfObject.load("Output:Variable,*,Zone Mean Air Temperature,#{timeseries_frequency};").get
+      result << OpenStudio::IdfObject.load("Output:Variable,*,Surface Other Side Coefficients Exterior Air Drybulb Temperature,#{timeseries_frequency};").get
     end
 
     if include_timeseries_fuel_consumptions
@@ -594,16 +595,26 @@ class SimulationOutputReport < OpenStudio::Measure::ReportingMeasure
     # Get zone temperatures
     if include_timeseries_zone_temperatures
       zone_names = []
+      other_side_obj_names = []
       @model.getThermalZones.each do |zone|
         if zone.floorArea > 1
           zone_names << zone.name.to_s.upcase
         end
+      end
+      @model.getSurfacePropertyOtherSideCoefficientss.each do |otherside_obj|
+        other_side_obj_names << otherside_obj.name.to_s.upcase
       end
       zone_names.sort.each do |zone_name|
         @zone_temps[zone_name] = ZoneTemp.new
         @zone_temps[zone_name].name = "Temperature: #{zone_name.split.map(&:capitalize).join(' ')}"
         @zone_temps[zone_name].timeseries_units = "F"
         @zone_temps[zone_name].timeseries_output = get_report_variable_data_timeseries([zone_name], ["Zone Mean Air Temperature"], 9.0 / 5.0, 32.0, timeseries_frequency)
+      end
+      other_side_obj_names.sort.each do |obj_name|
+        @zone_temps[obj_name] = ZoneTemp.new
+        @zone_temps[obj_name].name = "Temperature: #{obj_name.split.map(&:capitalize).join(' ')}"
+        @zone_temps[obj_name].timeseries_units = "F"
+        @zone_temps[obj_name].timeseries_output = get_report_variable_data_timeseries([obj_name], ["Surface Other Side Coefficients Exterior Air Drybulb Temperature"], 9.0 / 5.0, 32.0, timeseries_frequency)
       end
     end
 

@@ -4270,6 +4270,7 @@ class OSModel
         outdoor_weight = 1.0
       end
       otherside_object.setName(exterior_adjacent_to)
+      otherside_object.setCombinedConvectiveRadiativeFilmCoefficient(30)
       otherside_object.setMinimumOtherSideTemperatureLimit(temp_min)
       otherside_object.setZoneAirTemperatureCoefficient(indoor_weight)
       otherside_object.setExternalDryBulbTemperatureCoefficient(outdoor_weight)
