@@ -1766,6 +1766,9 @@ class OSModel
         overhang_depth = window_values[:overhangs_depth]
         overhang_distance_to_top = window_values[:overhangs_distance_to_top_of_window]
         overhang_distance_to_bottom = window_values[:overhangs_distance_to_bottom_of_window]
+        if overhang_distance_to_bottom <= overhang_distance_to_top
+          fail "For Window '#{window_id}', overhangs distance to bottom (#{overhang_distance_to_bottom}) must be greater than distance to top (#{overhang_distance_to_top})."
+        end
         window_height = overhang_distance_to_bottom - overhang_distance_to_top
       end
 
