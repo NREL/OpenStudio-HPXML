@@ -4272,8 +4272,33 @@ class OSModel
       otherside_object.setName(exterior_adjacent_to)
       otherside_object.setCombinedConvectiveRadiativeFilmCoefficient(30)
       otherside_object.setMinimumOtherSideTemperatureLimit(temp_min)
-      otherside_object.setZoneAirTemperatureCoefficient(indoor_weight)
+      otherside_object.setConstantTemperatureCoefficient(indoor_weight)
       otherside_object.setExternalDryBulbTemperatureCoefficient(outdoor_weight)
+
+      if @other_side_indoor_sch.nil?
+        # Ems to actuate schedule
+        @other_side_indoor_sch = OpenStudio::Model::ScheduleConstant.new(model)
+        @other_side_indoor_sch.setName("Other Side Indoor Air Sch EMS")
+        @other_side_indoor_sch.setValue(23) # override later by EMS
+        Schedule.set_schedule_type_limits(model, @other_side_indoor_sch, Constants.ScheduleTypeLimitsTemperature)
+
+        sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, "Zone Air Temperature")
+        sensor.setName("cond_zone_temp")
+        sensor.setKeyName("living space")
+        actuator = OpenStudio::Model::EnergyManagementSystemActuator.new(@other_side_indoor_sch, "Schedule:Constant", "Schedule Value")
+        actuator.setName("other_side_indoor_temp")
+
+        program = OpenStudio::Model::EnergyManagementSystemProgram.new(model)
+        program.setName("Other Side Indoor Temperature Program")
+        program.addLine("Set #{actuator.name} = #{sensor.name}")
+
+        program_cm = OpenStudio::Model::EnergyManagementSystemProgramCallingManager.new(model)
+        program_cm.setName("#{program.name.to_s} calling manager")
+        program_cm.setCallingPoint("EndOfSystemTimestepAfterHVACReporting")
+        program_cm.addProgram(program)
+
+      end
+      otherside_object.setPointer(9, @other_side_indoor_sch.handle)
       surface.setSurfacePropertyOtherSideCoefficients(otherside_object)
       spaces[exterior_adjacent_to] = otherside_object
     else
