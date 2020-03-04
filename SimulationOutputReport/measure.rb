@@ -331,7 +331,7 @@ class SimulationOutputReport < OpenStudio::Measure::ReportingMeasure
     end
     outputs[:hpxml_heat_sys_ids] = get_hpxml_heat_sys_ids()
     outputs[:hpxml_cool_sys_ids] = get_hpxml_cool_sys_ids()
-    outputs[:hpxml_dehumidifier_ids] = get_hpxml_dehumidifier_ids()
+    outputs[:hpxml_dehumidifier_id] = get_hpxml_dehumidifier_id()
     outputs[:hpxml_dhw_sys_ids] = get_hpxml_dhw_sys_ids()
     outputs[:hpxml_dse_heats] = get_hpxml_dse_heats(outputs[:hpxml_heat_sys_ids])
     outputs[:hpxml_dse_cools] = get_hpxml_dse_cools(outputs[:hpxml_cool_sys_ids])
@@ -453,15 +453,13 @@ class SimulationOutputReport < OpenStudio::Measure::ReportingMeasure
     end
 
     # Dehumidifier
-    outputs[:hpxml_dehumidifier_ids].each do |sys_id|
-      end_use = @end_uses[[FT::Elec, EUT::Dehumidifier]]
-      vars = get_all_var_keys(end_use.variable)
-      ep_output_names = @hvac_map[sys_id]
-      keys = ep_output_names.map(&:upcase)
-      end_use.annual_output_by_system[sys_id] = get_report_variable_data_annual_mbtu(keys, vars)
-      if include_timeseries_end_use_consumptions
-        end_use.timeseries_output_by_system[sys_id] = get_report_variable_data_timeseries(keys, vars, UnitConversions.convert(1.0, 'J', end_use.timeseries_units), 0, timeseries_frequency)
-      end
+    end_use = @end_uses[[FT::Elec, EUT::Dehumidifier]]
+    vars = get_all_var_keys(end_use.variable)
+    ep_output_names = @hvac_map[outputs[:hpxml_dehumidifier_id]]
+    keys = ep_output_names.map(&:upcase)
+    end_use.annual_output[outputs[:hpxml_dehumidifier_id]] = get_report_variable_data_annual_mbtu(keys, vars)
+    if include_timeseries_end_use_consumptions
+      end_use.timeseries_output[outputs[:hpxml_dehumidifier_id]] = get_report_variable_data_timeseries(keys, vars, UnitConversions.convert(1.0, 'J', end_use.timeseries_units), 0, timeseries_frequency)
     end
 
     # Water Heating (by System)
@@ -850,7 +848,6 @@ class SimulationOutputReport < OpenStudio::Measure::ReportingMeasure
     @hp_htgs = []
     @hp_clgs = []
     @dhws = []
-    @dehumidifiers = []
 
     @hpxml_doc.elements.each("/HPXML/Building/BuildingDetails/Systems/HVAC/HVACPlant/HeatingSystem[FractionHeatLoadServed > 0]") do |htg_system|
       @htgs << htg_system
@@ -864,9 +861,9 @@ class SimulationOutputReport < OpenStudio::Measure::ReportingMeasure
     @hpxml_doc.elements.each("/HPXML/Building/BuildingDetails/Systems/HVAC/HVACPlant/HeatPump[FractionCoolLoadServed > 0]") do |heat_pump|
       @hp_clgs << heat_pump
     end
-    @hpxml_doc.elements.each("/HPXML/Building/BuildingDetails/Appliances/Dehumidifier") do |dehumidifier|
-      @dehumidifiers << dehumidifier
-    end
+    
+    @dehumidifier = @hpxml_doc.elements["/HPXML/Building/BuildingDetails/Appliances/Dehumidifier"]
+    
     @hpxml_doc.elements.each("/HPXML/Building/BuildingDetails/Systems/WaterHeating/WaterHeatingSystem[FractionDHWLoadServed > 0]") do |dhw_system|
       @dhws << dhw_system
     end
@@ -1010,14 +1007,8 @@ class SimulationOutputReport < OpenStudio::Measure::ReportingMeasure
     return sys_ids
   end
 
-  def get_hpxml_dehumidifier_ids()
-    sys_ids = []
-
-    @dehumidifiers.each do |dehumidifier|
-      sys_ids << get_system_id(dehumidifier)
-    end
-
-    return sys_ids
+  def get_hpxml_dehumidifier_id()
+    return get_system_id(@dehumidifier)
   end
 
   def get_hpxml_dhw_sys_ids()
