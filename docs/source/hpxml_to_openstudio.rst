@@ -115,6 +115,15 @@ The `HPXML Toolbox website <https://hpxml.nrel.gov/>`_ also provides several res
 #. A data dictionary
 #. An implementation guide
 
+Simulation Controls
+~~~~~~~~~~~~~~~~~~~
+
+EnergyPlus simulation controls can be entered in ``/HPXML/SoftwareInfo/extension/SimulationControl``.
+
+The only simulation control currently offered is the timestep.
+It can be optionally provided as ``Timestep``, where the value is in minutes and must be a divisor of 60.
+If not provided, the default value of 60 is used.
+
 Building Details
 ~~~~~~~~~~~~~~~~
 

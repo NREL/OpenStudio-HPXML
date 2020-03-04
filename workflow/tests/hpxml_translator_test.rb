@@ -136,6 +136,7 @@ class HPXMLTest < MiniTest::Test
                             'hvac-distribution-return-duct-leakage-missing.xml' => ["Return ducts exist but leakage was not specified for distribution system 'HVACDistribution'."],
                             'invalid-relatedhvac-dhw-indirect.xml' => ["RelatedHVACSystem 'HeatingSystem_bad' not found for water heating system 'WaterHeater'"],
                             'invalid-relatedhvac-desuperheater.xml' => ["RelatedHVACSystem 'CoolingSystem_bad' not found for water heating system 'WaterHeater'."],
+                            'invalid-timestep.xml' => ["Timestep (45) must be one of: 60, 30, 20, 15, 12, 10, 6, 5, 4, 3, 2, 1."],
                             'invalid-window-height.xml' => ["For Window 'WindowEast', overhangs distance to bottom (2.0) must be greater than distance to top (2.0)."],
                             'invalid-window-interior-shading.xml' => ["SummerShadingCoefficient (0.85) must be less than or equal to WinterShadingCoefficient (0.7) for window 'WindowNorth'."],
                             'missing-elements.xml' => ["Expected [1] element(s) but found 0 element(s) for xpath: /HPXML/Building/BuildingDetails/BuildingSummary/BuildingConstruction/NumberofConditionedFloors",
@@ -637,8 +638,19 @@ class HPXMLTest < MiniTest::Test
     sqlFile = OpenStudio::SqlFile.new(sql_path, false)
     hpxml_doc = REXML::Document.new(File.read(hpxml_path))
 
-    bldg_details = hpxml_doc.elements['/HPXML/Building/BuildingDetails']
+    # Timestep
+    timestep = hpxml_doc.elements['/HPXML/SoftwareInfo/extension/SimulationControl/Timestep']
+    if timestep.nil?
+      timestep = 60
+    else
+      timestep = Integer(timestep.text)
+    end
+    query = "SELECT NumTimestepsPerHour FROM Simulations"
+    sql_value = sqlFile.execAndReturnFirstDouble(query).get
+    assert_equal(60 / timestep, sql_value)
 
+    bldg_details = hpxml_doc.elements['/HPXML/Building/BuildingDetails']
+    
     # Conditioned Floor Area
     sum_hvac_load_frac = (bldg_details.elements['sum(Systems/HVAC/HVACPlant/CoolingSystem/FractionCoolLoadServed)'] +
                           bldg_details.elements['sum(Systems/HVAC/HVACPlant/HeatingSystem/FractionHeatLoadServed)'] +

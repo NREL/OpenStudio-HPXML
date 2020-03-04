@@ -29,6 +29,7 @@ def create_hpxmls
     'invalid_files/hvac-frac-load-served.xml' => 'base-hvac-multiple.xml',
     'invalid_files/invalid-relatedhvac-dhw-indirect.xml' => 'base-dhw-indirect.xml',
     'invalid_files/invalid-relatedhvac-desuperheater.xml' => 'base-hvac-central-ac-only-1-speed.xml',
+    'invalid_files/invalid-timestep.xml' => 'base.xml',
     'invalid_files/invalid-window-height.xml' => 'base-enclosure-overhangs.xml',
     'invalid_files/invalid-window-interior-shading.xml' => 'base.xml',
     'invalid_files/mismatched-slab-and-foundation-wall.xml' => 'base.xml',
@@ -245,6 +246,8 @@ def create_hpxmls
     'base-misc-lighting-none.xml' => 'base.xml',
     'base-misc-loads-detailed.xml' => 'base.xml',
     'base-misc-number-of-occupants.xml' => 'base.xml',
+    'base-misc-timestep-10-mins.xml' => 'base.xml',
+    'base-misc-timestep-60-mins.xml' => 'base.xml',
     'base-misc-whole-house-fan.xml' => 'base.xml',
     'base-pv.xml' => 'base.xml',
     'base-site-neighbors.xml' => 'base.xml',
@@ -610,6 +613,12 @@ def get_hpxml_file_hpxml_values(hpxml_file, hpxml_values)
     hpxml_values[:eri_calculation_version] = "2014AEG"
   elsif ['base-version-latest.xml'].include? hpxml_file
     hpxml_values[:eri_calculation_version] = 'latest'
+  elsif ['base-misc-timestep-10-mins.xml'].include? hpxml_file
+    hpxml_values[:timestep] = 10
+  elsif ['base-misc-timestep-60-mins.xml'].include? hpxml_file
+    hpxml_values[:timestep] = 60
+  elsif ['invalid_files/invalid-timestep.xml'].include? hpxml_file
+    hpxml_values[:timestep] = 45
   end
   return hpxml_values
 end
