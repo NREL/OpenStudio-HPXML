@@ -755,7 +755,8 @@ def get_hpxml_file_attic_values(hpxml_file, attic_values)
                      :within_infiltration_volume => false }
   elsif ['base-atticroof-cathedral.xml',
          'base-atticroof-conditioned.xml',
-         'base-atticroof-flat.xml'].include? hpxml_file
+         'base-atticroof-flat.xml',
+         'base-enclosure-adiabatic-surfaces.xml'].include? hpxml_file
     attic_values = {}
   elsif ['base-atticroof-vented.xml'].include? hpxml_file
     attic_values = { :id => "VentedAttic",
