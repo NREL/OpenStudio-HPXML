@@ -1376,24 +1376,6 @@ class Waterheater
     return 120.0
   end
 
-  def self.get_combi_system_fuel(idref, orig_details)
-    orig_details.elements.each("Systems/HVAC/HVACPlant/HeatingSystem") do |heating_system|
-      heating_system_values = HPXML.get_heating_system_values(heating_system: heating_system)
-      next unless heating_system_values[:id] == idref
-
-      return heating_system_values[:heating_system_fuel]
-    end
-  end
-
-  def self.get_combi_system_afue(idref, orig_details)
-    orig_details.elements.each("Systems/HVAC/HVACPlant/HeatingSystem") do |heating_system|
-      heating_system_values = HPXML.get_heating_system_values(heating_system: heating_system)
-      next unless heating_system_values[:id] == idref
-
-      return heating_system_values[:heating_efficiency_afue]
-    end
-  end
-
   def self.get_tankless_cycling_derate()
     return 0.08
   end

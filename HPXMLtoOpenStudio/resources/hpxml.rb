@@ -1,16 +1,189 @@
 require_relative 'xmlhelper'
 
 class HPXML
-  def self.create_hpxml(xml_type:,
-                        xml_generated_by:,
-                        transaction:,
-                        software_program_used: nil,
-                        software_program_version: nil,
-                        eri_calculation_version: nil,
-                        eri_design: nil,
-                        timestep: nil,
-                        building_id:,
-                        event_type:)
+  @data = nil
+
+  def initialize(hpxml_path: nil, hpxml_data: nil)
+    if not hpxml_path.nil?
+      @data = _convert_file_to_data(hpxml_path)
+    elsif not hpxml_data.nil?
+      @data = hpxml_data
+    else
+      @data = _convert_file_to_data(nil)
+    end
+  end
+
+  def method_missing(method_name, *args, &block)
+    # TODO: Allow "add_foo" methods
+    if @data.keys.include? method_name
+      return @data[method_name.to_sym]
+    else
+      super
+    end
+  end
+
+  def collapse_enclosure()
+    # TODO: Always do this automatically in initialize?
+    _collapse_enclosure()
+  end
+
+  def to_object()
+    return _convert_data_to_object()
+  end
+
+  private
+
+  def _convert_file_to_data(hpxml_path)
+    data = {}
+
+    hpxml = nil
+    if not hpxml_path.nil?
+      hpxml = XMLHelper.parse_file(hpxml_path).elements['/HPXML']
+    end
+
+    data[:header] = _get_object_header_values(hpxml: hpxml)
+    data[:site] = _get_object_site_values(hpxml: hpxml)
+    data[:neighbor_buildings] = _get_object_neighbor_buildings_values(hpxml: hpxml)
+    data[:building_occupants] = _get_object_building_occupancy_values(hpxml: hpxml)
+    data[:building_construction] = _get_object_building_construction_values(hpxml: hpxml)
+    data[:climate_and_risk_zones] = _get_object_climate_and_risk_zones_values(hpxml: hpxml)
+    data[:air_infiltration_measurements] = _get_object_air_infiltration_measurements_values(hpxml: hpxml)
+    data[:attics] = _get_object_attics_values(hpxml: hpxml)
+    data[:foundations] = _get_object_foundations_values(hpxml: hpxml)
+    data[:roofs] = _get_object_roofs_values(hpxml: hpxml)
+    data[:rim_joists] = _get_object_rim_joists_values(hpxml: hpxml)
+    data[:walls] = _get_object_walls_values(hpxml: hpxml)
+    data[:foundation_walls] = _get_object_foundation_walls_values(hpxml: hpxml)
+    data[:frame_floors] = _get_object_frame_floors_values(hpxml: hpxml)
+    data[:slabs] = _get_object_slabs_values(hpxml: hpxml)
+    data[:windows] = _get_object_windows_values(hpxml: hpxml)
+    data[:skylights] = _get_object_skylights_values(hpxml: hpxml)
+    data[:doors] = _get_object_doors_values(hpxml: hpxml)
+    data[:heating_systems] = _get_object_heating_systems_values(hpxml: hpxml)
+    data[:cooling_systems] = _get_object_cooling_systems_values(hpxml: hpxml)
+    data[:heat_pumps] = _get_object_heat_pumps_values(hpxml: hpxml)
+    data[:hvac_control] = _get_object_hvac_control_values(hpxml: hpxml)
+    data[:hvac_distributions] = _get_object_hvac_distributions_values(hpxml: hpxml)
+    data[:ventilation_fans] = _get_object_ventilation_fans_values(hpxml: hpxml)
+    data[:water_heating_systems] = _get_object_water_heating_systems_values(hpxml: hpxml)
+    data[:hot_water_distribution] = _get_object_hot_water_distribution_values(hpxml: hpxml)
+    data[:water_fixtures] = _get_object_water_fixtures_values(hpxml: hpxml)
+    data[:solar_thermal_system] = _get_object_solar_thermal_system_values(hpxml: hpxml)
+    data[:pv_systems] = _get_object_pv_systems_values(hpxml: hpxml)
+    data[:clothes_washer] = _get_object_clothes_washer_values(hpxml: hpxml)
+    data[:clothes_dryer] = _get_object_clothes_dryer_values(hpxml: hpxml)
+    data[:dishwasher] = _get_object_dishwasher_values(hpxml: hpxml)
+    data[:refrigerator] = _get_object_refrigerator_values(hpxml: hpxml)
+    data[:cooking_range] = _get_object_cooking_range_values(hpxml: hpxml)
+    data[:oven] = _get_object_oven_values(hpxml: hpxml)
+    data[:lighting] = _get_object_lighting_values(hpxml: hpxml)
+    data[:ceiling_fans] = _get_object_ceiling_fans_values(hpxml: hpxml)
+    data[:plug_loads] = _get_object_plug_loads_values(hpxml: hpxml)
+    data[:misc_load_schedule] = _get_object_misc_loads_schedule_values(hpxml: hpxml)
+
+    return data
+  end
+
+  def _convert_data_to_object()
+    @object = _create_object(**@data[:header])
+    _add_object_site(**@data[:site]) unless @data[:site].nil?
+    @data[:neighbor_buildings].each do |neighbor_building_values|
+      _add_object_neighbor_building(**neighbor_building_values)
+    end
+    _add_object_building_occupancy(**@data[:building_occupants]) unless @data[:building_occupants].empty?
+    _add_object_building_construction(**@data[:building_construction])
+    _add_object_climate_and_risk_zones(**@data[:climate_and_risk_zones])
+    @data[:air_infiltration_measurements].each do |air_infiltration_measurement_values|
+      _add_object_air_infiltration_measurement(**air_infiltration_measurement_values)
+    end
+    @data[:attics].each do |attic_values|
+      _add_object_attic(**attic_values)
+    end
+    @data[:foundations].each do |foundation_values|
+      _add_object_foundation(**foundation_values)
+    end
+    @data[:roofs].each do |roof_values|
+      _add_object_roof(**roof_values)
+    end
+    @data[:rim_joists].each do |rim_joist_values|
+      _add_object_rim_joist(**rim_joist_values)
+    end
+    @data[:walls].each do |wall_values|
+      _add_object_wall(**wall_values)
+    end
+    @data[:foundation_walls].each do |foundation_wall_values|
+      _add_object_foundation_wall(**foundation_wall_values)
+    end
+    @data[:frame_floors].each do |frame_floor_values|
+      _add_object_frame_floor(**frame_floor_values)
+    end
+    @data[:slabs].each do |slab_values|
+      _add_object_slab(**slab_values)
+    end
+    @data[:windows].each do |window_values|
+      _add_object_window(**window_values)
+    end
+    @data[:skylights].each do |skylight_values|
+      _add_object_skylight(**skylight_values)
+    end
+    @data[:doors].each do |door_values|
+      _add_object_door(**door_values)
+    end
+    @data[:heating_systems].each do |heating_system_values|
+      _add_object_heating_system(**heating_system_values)
+    end
+    @data[:cooling_systems].each do |cooling_system_values|
+      _add_object_cooling_system(**cooling_system_values)
+    end
+    @data[:heat_pumps].each do |heat_pump_values|
+      _add_object_heat_pump(**heat_pump_values)
+    end
+    _add_object_hvac_control(**@data[:hvac_control]) unless @data[:hvac_control].empty?
+    @data[:hvac_distributions].each_with_index do |hvac_distribution_values, i|
+      hvac_distribution = _add_object_hvac_distribution(**hvac_distribution_values)
+    end
+    @data[:ventilation_fans].each do |ventilation_fan_values|
+      _add_object_ventilation_fan(**ventilation_fan_values)
+    end
+    @data[:water_heating_systems].each do |water_heating_system_values|
+      _add_object_water_heating_system(**water_heating_system_values)
+    end
+    _add_object_hot_water_distribution(**@data[:hot_water_distribution]) unless @data[:hot_water_distribution].empty?
+    @data[:water_fixtures].each do |water_fixture_values|
+      _add_object_water_fixture(**water_fixture_values)
+    end
+    _add_object_solar_thermal_system(**@data[:solar_thermal_system]) unless @data[:solar_thermal_system].empty?
+    @data[:pv_systems].each do |pv_system_values|
+      _add_object_pv_system(**pv_system_values)
+    end
+    _add_object_clothes_washer(**@data[:clothes_washer]) unless @data[:clothes_washer].empty?
+    _add_object_clothes_dryer(**@data[:clothes_dryer]) unless @data[:clothes_dryer].empty?
+    _add_object_dishwasher(**@data[:dishwasher]) unless @data[:dishwasher].empty?
+    _add_object_refrigerator(**@data[:refrigerator]) unless @data[:refrigerator].empty?
+    _add_object_cooking_range(**@data[:cooking_range]) unless @data[:cooking_range].empty?
+    _add_object_oven(**@data[:oven]) unless @data[:oven].empty?
+    _add_object_lighting(**@data[:lighting]) unless @data[:lighting].empty?
+    @data[:ceiling_fans].each do |ceiling_fan_values|
+      _add_object_ceiling_fan(**ceiling_fan_values)
+    end
+    @data[:plug_loads].each do |plug_load_values|
+      _add_object_plug_load(**plug_load_values)
+    end
+    _add_object_misc_loads_schedule(**@data[:misc_load_schedule]) unless @data[:misc_load_schedule].empty?
+    return @object
+  end
+
+  def _create_object(xml_type:,
+                     xml_generated_by:,
+                     transaction:,
+                     software_program_used: nil,
+                     software_program_version: nil,
+                     eri_calculation_version: nil,
+                     eri_design: nil,
+                     timestep: nil,
+                     building_id:,
+                     event_type:,
+                     created_date_and_time: nil)
     doc = XMLHelper.create_doc(version = "1.0", encoding = "UTF-8")
     hpxml = XMLHelper.add_element(doc, "HPXML")
     XMLHelper.add_attribute(hpxml, "xmlns", "http://hpxmlonline.com/2019/10")
@@ -21,16 +194,20 @@ class HPXML
     header = XMLHelper.add_element(hpxml, "XMLTransactionHeaderInformation")
     XMLHelper.add_element(header, "XMLType", xml_type)
     XMLHelper.add_element(header, "XMLGeneratedBy", xml_generated_by)
-    XMLHelper.add_element(header, "CreatedDateAndTime", Time.now.strftime("%Y-%m-%dT%H:%M:%S%:z"))
+    if not created_date_and_time.nil?
+      XMLHelper.add_element(header, "CreatedDateAndTime", created_date_and_time)
+    else
+      XMLHelper.add_element(header, "CreatedDateAndTime", Time.now.strftime("%Y-%m-%dT%H:%M:%S%:z"))
+    end
     XMLHelper.add_element(header, "Transaction", transaction)
 
     software_info = XMLHelper.add_element(hpxml, "SoftwareInfo")
     XMLHelper.add_element(software_info, "SoftwareProgramUsed", software_program_used) unless software_program_used.nil?
     XMLHelper.add_element(software_info, "SoftwareProgramVersion", software_program_version) unless software_program_version.nil?
-    add_extension(parent: software_info,
-                  extensions: { "ERICalculation/Version" => eri_calculation_version,
-                                "ERICalculation/Design" => eri_design,
-                                "SimulationControl/Timestep" => to_integer_or_nil(timestep) })
+    _add_object_extension(parent: software_info,
+                          extensions: { "ERICalculation/Version" => eri_calculation_version,
+                                        "ERICalculation/Design" => eri_design,
+                                        "SimulationControl/Timestep" => _to_integer_or_nil(timestep) })
 
     building = XMLHelper.add_element(hpxml, "Building")
     building_building_id = XMLHelper.add_element(building, "BuildingID")
@@ -41,8 +218,8 @@ class HPXML
     return doc
   end
 
-  def self.get_hpxml_values(hpxml:)
-    return nil if hpxml.nil?
+  def _get_object_header_values(hpxml:)
+    return {} if hpxml.nil?
 
     vals = {}
     vals[:schema_version] = hpxml.attributes["schemaVersion"]
@@ -54,44 +231,45 @@ class HPXML
     vals[:software_program_version] = XMLHelper.get_value(hpxml, "SoftwareInfo/SoftwareProgramVersion")
     vals[:eri_calculation_version] = XMLHelper.get_value(hpxml, "SoftwareInfo/extension/ERICalculation/Version")
     vals[:eri_design] = XMLHelper.get_value(hpxml, "SoftwareInfo/extension/ERICalculation/Design")
-    vals[:timestep] = to_integer_or_nil(XMLHelper.get_value(hpxml, "SoftwareInfo/extension/SimulationControl/Timestep"))
-    vals[:building_id] = get_id(hpxml, "Building/BuildingID")
+    vals[:timestep] = _to_integer_or_nil(XMLHelper.get_value(hpxml, "SoftwareInfo/extension/SimulationControl/Timestep"))
+    vals[:building_id] = _get_object_id(hpxml, "Building/BuildingID")
     vals[:event_type] = XMLHelper.get_value(hpxml, "Building/ProjectStatus/EventType")
     return vals
   end
 
-  def self.add_site(hpxml:,
-                    fuels: [],
-                    shelter_coefficient: nil)
-    site = XMLHelper.create_elements_as_needed(hpxml, ["Building", "BuildingDetails", "BuildingSummary", "Site"])
+  def _add_object_site(fuels: [],
+                       shelter_coefficient: nil)
+    site = XMLHelper.create_elements_as_needed(@object, ["HPXML", "Building", "BuildingDetails", "BuildingSummary", "Site"])
     unless fuels.empty?
       fuel_types_available = XMLHelper.add_element(site, "FuelTypesAvailable")
       fuels.each do |fuel|
         XMLHelper.add_element(fuel_types_available, "Fuel", fuel)
       end
     end
-    add_extension(parent: site,
-                  extensions: { "ShelterCoefficient" => to_float_or_nil(shelter_coefficient) })
+    _add_object_extension(parent: site,
+                          extensions: { "ShelterCoefficient" => _to_float_or_nil(shelter_coefficient) })
 
     return site
   end
 
-  def self.get_site_values(site:)
-    return nil if site.nil?
-
+  def _get_object_site_values(hpxml:)
     vals = {}
+    return vals if hpxml.nil?
+
+    site = hpxml.elements["Building/BuildingDetails/BuildingSummary/Site"]
+    return vals if site.nil?
+
     vals[:surroundings] = XMLHelper.get_value(site, "Surroundings")
     vals[:orientation_of_front_of_home] = XMLHelper.get_value(site, "OrientationOfFrontOfHome")
     vals[:fuels] = XMLHelper.get_values(site, "FuelTypesAvailable/Fuel")
-    vals[:shelter_coefficient] = to_float_or_nil(XMLHelper.get_value(site, "extension/ShelterCoefficient"))
+    vals[:shelter_coefficient] = _to_float_or_nil(XMLHelper.get_value(site, "extension/ShelterCoefficient"))
     return vals
   end
 
-  def self.add_site_neighbor(hpxml:,
-                             azimuth:,
-                             distance:,
-                             height: nil)
-    neighbors = XMLHelper.create_elements_as_needed(hpxml, ["Building", "BuildingDetails", "BuildingSummary", "Site", "extension", "Neighbors"])
+  def _add_object_neighbor_building(azimuth:,
+                                    distance:,
+                                    height: nil)
+    neighbors = XMLHelper.create_elements_as_needed(@object, ["HPXML", "Building", "BuildingDetails", "BuildingSummary", "Site", "extension", "Neighbors"])
     neighbor_building = XMLHelper.add_element(neighbors, "NeighborBuilding")
     XMLHelper.add_element(neighbor_building, "Azimuth", Integer(azimuth))
     XMLHelper.add_element(neighbor_building, "Distance", Float(distance))
@@ -100,81 +278,88 @@ class HPXML
     return neighbor_building
   end
 
-  def self.get_neighbor_building_values(neighbor_building:)
-    return nil if neighbor_building.nil?
+  def _get_object_neighbor_buildings_values(hpxml:)
+    vals = []
+    return vals if hpxml.nil?
 
-    vals = {}
-    vals[:azimuth] = to_integer_or_nil(XMLHelper.get_value(neighbor_building, "Azimuth"))
-    vals[:distance] = to_float_or_nil(XMLHelper.get_value(neighbor_building, "Distance"))
-    vals[:height] = to_float_or_nil(XMLHelper.get_value(neighbor_building, "Height"))
+    hpxml.elements.each("Building/BuildingDetails/BuildingSummary/Site/extension/Neighbors/NeighborBuilding") do |neighbor_building|
+      child_vals = {}
+      child_vals[:azimuth] = _to_integer_or_nil(XMLHelper.get_value(neighbor_building, "Azimuth"))
+      child_vals[:distance] = _to_float_or_nil(XMLHelper.get_value(neighbor_building, "Distance"))
+      child_vals[:height] = _to_float_or_nil(XMLHelper.get_value(neighbor_building, "Height"))
+      vals << child_vals
+    end
     return vals
   end
 
-  def self.add_building_occupancy(hpxml:,
-                                  number_of_residents: nil)
-    building_occupancy = XMLHelper.create_elements_as_needed(hpxml, ["Building", "BuildingDetails", "BuildingSummary", "BuildingOccupancy"])
+  def _add_object_building_occupancy(number_of_residents: nil)
+    building_occupancy = XMLHelper.create_elements_as_needed(@object, ["HPXML", "Building", "BuildingDetails", "BuildingSummary", "BuildingOccupancy"])
     XMLHelper.add_element(building_occupancy, "NumberofResidents", Float(number_of_residents)) unless number_of_residents.nil?
 
     return building_occupancy
   end
 
-  def self.get_building_occupancy_values(building_occupancy:)
-    return nil if building_occupancy.nil?
-
+  def _get_object_building_occupancy_values(hpxml:)
     vals = {}
-    vals[:number_of_residents] = to_float_or_nil(XMLHelper.get_value(building_occupancy, "NumberofResidents"))
+    return vals if hpxml.nil?
+
+    building_occupancy = hpxml.elements["Building/BuildingDetails/BuildingSummary/BuildingOccupancy"]
+    return vals if building_occupancy.nil?
+
+    vals[:number_of_residents] = _to_float_or_nil(XMLHelper.get_value(building_occupancy, "NumberofResidents"))
     return vals
   end
 
-  def self.add_building_construction(hpxml:,
-                                     number_of_conditioned_floors:,
-                                     number_of_conditioned_floors_above_grade:,
-                                     number_of_bedrooms:,
-                                     number_of_bathrooms: nil,
-                                     conditioned_floor_area:,
-                                     conditioned_building_volume:,
-                                     fraction_of_operable_window_area: nil,
-                                     use_only_ideal_air_system: nil)
-    building_construction = XMLHelper.create_elements_as_needed(hpxml, ["Building", "BuildingDetails", "BuildingSummary", "BuildingConstruction"])
+  def _add_object_building_construction(number_of_conditioned_floors:,
+                                        number_of_conditioned_floors_above_grade:,
+                                        number_of_bedrooms:,
+                                        number_of_bathrooms: nil,
+                                        conditioned_floor_area:,
+                                        conditioned_building_volume:,
+                                        fraction_of_operable_window_area: nil,
+                                        use_only_ideal_air_system: nil)
+    building_construction = XMLHelper.create_elements_as_needed(@object, ["HPXML", "Building", "BuildingDetails", "BuildingSummary", "BuildingConstruction"])
     XMLHelper.add_element(building_construction, "NumberofConditionedFloors", Integer(number_of_conditioned_floors))
     XMLHelper.add_element(building_construction, "NumberofConditionedFloorsAboveGrade", Integer(number_of_conditioned_floors_above_grade))
     XMLHelper.add_element(building_construction, "NumberofBedrooms", Integer(number_of_bedrooms))
     XMLHelper.add_element(building_construction, "NumberofBathrooms", Integer(number_of_bathrooms)) unless number_of_bathrooms.nil?
     XMLHelper.add_element(building_construction, "ConditionedFloorArea", Float(conditioned_floor_area))
     XMLHelper.add_element(building_construction, "ConditionedBuildingVolume", Float(conditioned_building_volume))
-    add_extension(parent: building_construction,
-                  extensions: { "FractionofOperableWindowArea" => to_float_or_nil(fraction_of_operable_window_area),
-                                "UseOnlyIdealAirSystem" => to_bool_or_nil(use_only_ideal_air_system) })
+    _add_object_extension(parent: building_construction,
+                          extensions: { "FractionofOperableWindowArea" => _to_float_or_nil(fraction_of_operable_window_area),
+                                        "UseOnlyIdealAirSystem" => _to_bool_or_nil(use_only_ideal_air_system) })
 
     return building_construction
   end
 
-  def self.get_building_construction_values(building_construction:)
-    return nil if building_construction.nil?
-
+  def _get_object_building_construction_values(hpxml:)
     vals = {}
-    vals[:year_built] = to_integer_or_nil(XMLHelper.get_value(building_construction, "YearBuilt"))
-    vals[:number_of_conditioned_floors] = to_integer_or_nil(XMLHelper.get_value(building_construction, "NumberofConditionedFloors"))
-    vals[:number_of_conditioned_floors_above_grade] = to_integer_or_nil(XMLHelper.get_value(building_construction, "NumberofConditionedFloorsAboveGrade"))
-    vals[:average_ceiling_height] = to_float_or_nil(XMLHelper.get_value(building_construction, "AverageCeilingHeight"))
-    vals[:number_of_bedrooms] = to_integer_or_nil(XMLHelper.get_value(building_construction, "NumberofBedrooms"))
-    vals[:number_of_bathrooms] = to_integer_or_nil(XMLHelper.get_value(building_construction, "NumberofBathrooms"))
-    vals[:conditioned_floor_area] = to_float_or_nil(XMLHelper.get_value(building_construction, "ConditionedFloorArea"))
-    vals[:conditioned_building_volume] = to_float_or_nil(XMLHelper.get_value(building_construction, "ConditionedBuildingVolume"))
-    vals[:use_only_ideal_air_system] = to_bool_or_nil(XMLHelper.get_value(building_construction, "extension/UseOnlyIdealAirSystem"))
+    return vals if hpxml.nil?
+
+    building_construction = hpxml.elements["Building/BuildingDetails/BuildingSummary/BuildingConstruction"]
+    return vals if building_construction.nil?
+
+    vals[:year_built] = _to_integer_or_nil(XMLHelper.get_value(building_construction, "YearBuilt"))
+    vals[:number_of_conditioned_floors] = _to_integer_or_nil(XMLHelper.get_value(building_construction, "NumberofConditionedFloors"))
+    vals[:number_of_conditioned_floors_above_grade] = _to_integer_or_nil(XMLHelper.get_value(building_construction, "NumberofConditionedFloorsAboveGrade"))
+    vals[:average_ceiling_height] = _to_float_or_nil(XMLHelper.get_value(building_construction, "AverageCeilingHeight"))
+    vals[:number_of_bedrooms] = _to_integer_or_nil(XMLHelper.get_value(building_construction, "NumberofBedrooms"))
+    vals[:number_of_bathrooms] = _to_integer_or_nil(XMLHelper.get_value(building_construction, "NumberofBathrooms"))
+    vals[:conditioned_floor_area] = _to_float_or_nil(XMLHelper.get_value(building_construction, "ConditionedFloorArea"))
+    vals[:conditioned_building_volume] = _to_float_or_nil(XMLHelper.get_value(building_construction, "ConditionedBuildingVolume"))
+    vals[:use_only_ideal_air_system] = _to_bool_or_nil(XMLHelper.get_value(building_construction, "extension/UseOnlyIdealAirSystem"))
     vals[:residential_facility_type] = XMLHelper.get_value(building_construction, "ResidentialFacilityType")
-    vals[:fraction_of_operable_window_area] = to_float_or_nil(XMLHelper.get_value(building_construction, "extension/FractionofOperableWindowArea"))
+    vals[:fraction_of_operable_window_area] = _to_float_or_nil(XMLHelper.get_value(building_construction, "extension/FractionofOperableWindowArea"))
     return vals
   end
 
-  def self.add_climate_and_risk_zones(hpxml:,
-                                      iecc2006: nil,
-                                      iecc2012: nil,
-                                      weather_station_id:,
-                                      weather_station_name:,
-                                      weather_station_wmo: nil,
-                                      weather_station_epw_filename: nil)
-    climate_and_risk_zones = XMLHelper.create_elements_as_needed(hpxml, ["Building", "BuildingDetails", "ClimateandRiskZones"])
+  def _add_object_climate_and_risk_zones(iecc2006: nil,
+                                         iecc2012: nil,
+                                         weather_station_id:,
+                                         weather_station_name:,
+                                         weather_station_wmo: nil,
+                                         weather_station_epw_filename: nil)
+    climate_and_risk_zones = XMLHelper.create_elements_as_needed(@object, ["HPXML", "Building", "BuildingDetails", "ClimateandRiskZones"])
 
     climate_zones = { 2006 => iecc2006,
                       2012 => iecc2012 }
@@ -191,21 +376,24 @@ class HPXML
     XMLHelper.add_attribute(sys_id, "id", weather_station_id)
     XMLHelper.add_element(weather_station, "Name", weather_station_name)
     XMLHelper.add_element(weather_station, "WMO", weather_station_wmo) unless weather_station_wmo.nil?
-    add_extension(parent: weather_station,
-                  extensions: { "EPWFileName" => weather_station_epw_filename })
+    _add_object_extension(parent: weather_station,
+                          extensions: { "EPWFileName" => weather_station_epw_filename })
 
     return climate_and_risk_zones
   end
 
-  def self.get_climate_and_risk_zones_values(climate_and_risk_zones:)
-    return nil if climate_and_risk_zones.nil?
-
+  def _get_object_climate_and_risk_zones_values(hpxml:)
     vals = {}
+    return vals if hpxml.nil?
+
+    climate_and_risk_zones = hpxml.elements["Building/BuildingDetails/ClimateandRiskZones"]
+    return vals if climate_and_risk_zones.nil?
+
     vals[:iecc2006] = XMLHelper.get_value(climate_and_risk_zones, "ClimateZoneIECC[Year=2006]/ClimateZone")
     vals[:iecc2012] = XMLHelper.get_value(climate_and_risk_zones, "ClimateZoneIECC[Year=2012]/ClimateZone")
     weather_station = climate_and_risk_zones.elements["WeatherStation"]
     if not weather_station.nil?
-      vals[:weather_station_id] = get_id(weather_station)
+      vals[:weather_station_id] = _get_object_id(weather_station)
       vals[:weather_station_name] = XMLHelper.get_value(weather_station, "Name")
       vals[:weather_station_wmo] = XMLHelper.get_value(weather_station, "WMO")
       vals[:weather_station_epw_filename] = XMLHelper.get_value(weather_station, "extension/EPWFileName")
@@ -213,20 +401,20 @@ class HPXML
     return vals
   end
 
-  def self.collapse_enclosure(enclosure)
+  def _collapse_enclosure()
     # Collapses like surfaces into a single surface with, e.g., aggregate surface area.
     # This can significantly speed up performance for HPXML files with lots of individual
     # surfaces (e.g., windows).
 
-    surf_types = ['Roof',
-                  'Wall',
-                  'RimJoist',
-                  'FoundationWall',
-                  'FrameFloor',
-                  'Slab',
-                  'Window',
-                  'Skylight',
-                  'Door']
+    surf_types = [:roofs,
+                  :walls,
+                  :rim_joists,
+                  :foundation_walls,
+                  :frame_floors,
+                  :slabs,
+                  :windows,
+                  :skylights,
+                  :doors]
 
     keys_to_ignore = [:id,
                       :insulation_id,
@@ -235,56 +423,28 @@ class HPXML
                       :area,
                       :exposed_perimeter]
 
-    # Populate surf_type_values
-    surf_type_values = {} # Surface values (hashes)
-    surfs = {} # Surface objects
-    surf_types.each do |surf_type|
-      surf_type_values[surf_type] = []
-      enclosure.elements.each("#{surf_type}s/#{surf_type}") do |surf|
-        if surf_type == 'Roof'
-          surf_type_values[surf_type] << get_roof_values(roof: surf)
-        elsif surf_type == 'Wall'
-          surf_type_values[surf_type] << get_wall_values(wall: surf)
-        elsif surf_type == 'RimJoist'
-          surf_type_values[surf_type] << get_rim_joist_values(rim_joist: surf)
-        elsif surf_type == 'FoundationWall'
-          surf_type_values[surf_type] << get_foundation_wall_values(foundation_wall: surf)
-        elsif surf_type == 'FrameFloor'
-          surf_type_values[surf_type] << get_framefloor_values(framefloor: surf)
-        elsif surf_type == 'Slab'
-          surf_type_values[surf_type] << get_slab_values(slab: surf)
-        elsif surf_type == 'Window'
-          surf_type_values[surf_type] << get_window_values(window: surf)
-        elsif surf_type == 'Skylight'
-          surf_type_values[surf_type] << get_skylight_values(skylight: surf)
-        elsif surf_type == 'Door'
-          surf_type_values[surf_type] << get_door_values(door: surf)
-        end
-
-        surfs[surf_type_values[surf_type][-1][:id]] = surf
-      end
-    end
-
     # Look for pairs of surfaces that can be collapsed
     area_adjustments = {}
     exposed_perimeter_adjustments = {}
     surf_types.each do |surf_type|
-      for i in 0..surf_type_values[surf_type].size - 1
-        surf_values = surf_type_values[surf_type][i]
+      area_adjustments[surf_type] = {}
+      exposed_perimeter_adjustments[surf_type] = {}
+      for i in 0..@data[surf_type].size - 1
+        surf_values = @data[surf_type][i]
         next if surf_values.nil?
 
-        area_adjustments[surf_values[:id]] = 0
-        exposed_perimeter_adjustments[surf_values[:id]] = 0
+        area_adjustments[surf_type][i] = 0
+        exposed_perimeter_adjustments[surf_type][i] = 0
 
-        for j in (surf_type_values[surf_type].size - 1).downto(i + 1)
-          surf_values2 = surf_type_values[surf_type][j]
+        for j in (@data[surf_type].size - 1).downto(i + 1)
+          surf_values2 = @data[surf_type][j]
           next if surf_values2.nil?
           next unless surf_values.keys.sort == surf_values2.keys.sort
 
           match = true
           surf_values.keys.each do |key|
             next if keys_to_ignore.include? key
-            next if surf_type == 'FoundationWall' and key == :azimuth # Azimuth of foundation walls is irrelevant
+            next if surf_type == :foundation_walls and key == :azimuth # Azimuth of foundation walls is irrelevant
             next if surf_values[key] == surf_values2[key]
 
             match = false
@@ -292,65 +452,60 @@ class HPXML
           next unless match
 
           # Update Area/ExposedPerimeter
-          area_adjustments[surf_values[:id]] += surf_values2[:area]
+          area_adjustments[surf_type][i] += surf_values2[:area]
           if not surf_values[:exposed_perimeter].nil?
-            exposed_perimeter_adjustments[surf_values[:id]] += surf_values2[:exposed_perimeter]
+            exposed_perimeter_adjustments[surf_type][i] += surf_values2[:exposed_perimeter]
           end
 
           # Update subsurface idrefs as appropriate
-          if ['Wall', 'FoundationWall'].include? surf_type
-            ['Window', 'Door'].each do |subsurf_type|
-              surf_type_values[subsurf_type].each do |subsurf_values|
-                subsurf = surfs[subsurf_values[:id]]
+          if [:walls, :foundation_walls].include? surf_type
+            [:windows, :doors].each do |subsurf_type|
+              @data[subsurf_type].each_with_index do |subsurf_values, idx|
                 next unless subsurf_values[:wall_idref] == surf_values2[:id]
 
-                subsurf_values[:wall_idref] = surf_values[:id]
-                subsurf.elements["AttachedToWall"].attributes["idref"] = surf_values[:id]
+                @data[subsurf_type][idx][:wall_idref] = surf_values[:id]
               end
             end
-          elsif ['Roof'].include? surf_type
-            ['Skylight'].each do |subsurf_type|
-              surf_type_values[subsurf_type].each do |subsurf_values|
-                subsurf = surfs[subsurf_values[:id]]
+          elsif [:roofs].include? surf_type
+            [:skylights].each do |subsurf_type|
+              @data[subsurf_type].each_with_index do |subsurf_values, idx|
                 next unless subsurf_values[:roof_idref] == surf_values2[:id]
 
-                subsurf_values[:roof_idref] = surf_values[:id]
-                subsurf.elements["AttachedToRoof"].attributes["idref"] = surf_values[:id]
+                @data[subsurf_type][idx][:roof_idref] = surf_values[:id]
               end
             end
           end
 
           # Remove old surface
-          surf2 = surfs[surf_values2[:id]]
-          surf2.parent.elements.delete surf2
-          surf_type_values[surf_type].delete_at(j)
+          @data[surf_type].delete_at(j)
         end
       end
     end
 
-    area_adjustments.each do |surf_id, area_adjustment|
-      next unless area_adjustment > 0
+    area_adjustments.keys.each do |surf_type|
+      area_adjustments[surf_type].each do |idx, area_adjustment|
+        next unless area_adjustment > 0
 
-      surf = surfs[surf_id]
-      surf.elements["Area"].text = Float(surf.elements["Area"].text) + area_adjustment
+        @data[surf_type][idx][:area] += area_adjustment
+      end
     end
-    exposed_perimeter_adjustments.each do |surf_id, exposed_perimeter_adjustment|
-      next unless exposed_perimeter_adjustment > 0
+    exposed_perimeter_adjustments.keys.each do |surf_type|
+      exposed_perimeter_adjustments[surf_type].each do |idx, exposed_perimeter_adjustment|
+        next unless exposed_perimeter_adjustment > 0
 
-      surf = surfs[surf_id]
-      surf.elements["ExposedPerimeter"].text = Float(surf.elements["ExposedPerimeter"].text) + exposed_perimeter_adjustment
+        @data[surf_type][idx][:exposed_perimeter] += exposed_perimeter_adjustment
+      end
     end
   end
 
-  def self.add_air_infiltration_measurement(hpxml:,
-                                            id:,
-                                            house_pressure: nil,
-                                            unit_of_measure: nil,
-                                            air_leakage: nil,
-                                            effective_leakage_area: nil,
-                                            constant_ach_natural: nil,
-                                            infiltration_volume: nil)
-    air_infiltration = XMLHelper.create_elements_as_needed(hpxml, ["Building", "BuildingDetails", "Enclosure", "AirInfiltration"])
+  def _add_object_air_infiltration_measurement(id:,
+                                               house_pressure: nil,
+                                               unit_of_measure: nil,
+                                               air_leakage: nil,
+                                               effective_leakage_area: nil,
+                                               constant_ach_natural: nil,
+                                               infiltration_volume: nil)
+    air_infiltration = XMLHelper.create_elements_as_needed(@object, ["HPXML", "Building", "BuildingDetails", "Enclosure", "AirInfiltration"])
     air_infiltration_measurement = XMLHelper.add_element(air_infiltration, "AirInfiltrationMeasurement")
     sys_id = XMLHelper.add_element(air_infiltration_measurement, "SystemIdentifier")
     XMLHelper.add_attribute(sys_id, "id", id)
@@ -362,33 +517,36 @@ class HPXML
     end
     XMLHelper.add_element(air_infiltration_measurement, "EffectiveLeakageArea", Float(effective_leakage_area)) unless effective_leakage_area.nil?
     XMLHelper.add_element(air_infiltration_measurement, "InfiltrationVolume", Float(infiltration_volume)) unless infiltration_volume.nil?
-    add_extension(parent: air_infiltration_measurement,
-                  extensions: { "ConstantACHnatural" => to_float_or_nil(constant_ach_natural) })
+    _add_object_extension(parent: air_infiltration_measurement,
+                          extensions: { "ConstantACHnatural" => _to_float_or_nil(constant_ach_natural) })
 
     return air_infiltration_measurement
   end
 
-  def self.get_air_infiltration_measurement_values(air_infiltration_measurement:)
-    return nil if air_infiltration_measurement.nil?
+  def _get_object_air_infiltration_measurements_values(hpxml:)
+    vals = []
+    return vals if hpxml.nil?
 
-    vals = {}
-    vals[:id] = get_id(air_infiltration_measurement)
-    vals[:house_pressure] = to_float_or_nil(XMLHelper.get_value(air_infiltration_measurement, "HousePressure"))
-    vals[:unit_of_measure] = XMLHelper.get_value(air_infiltration_measurement, "BuildingAirLeakage/UnitofMeasure")
-    vals[:air_leakage] = to_float_or_nil(XMLHelper.get_value(air_infiltration_measurement, "BuildingAirLeakage/AirLeakage"))
-    vals[:effective_leakage_area] = to_float_or_nil(XMLHelper.get_value(air_infiltration_measurement, "EffectiveLeakageArea"))
-    vals[:infiltration_volume] = to_float_or_nil(XMLHelper.get_value(air_infiltration_measurement, "InfiltrationVolume"))
-    vals[:constant_ach_natural] = to_float_or_nil(XMLHelper.get_value(air_infiltration_measurement, "extension/ConstantACHnatural"))
-    vals[:leakiness_description] = XMLHelper.get_value(air_infiltration_measurement, "LeakinessDescription")
+    hpxml.elements.each("Building/BuildingDetails/Enclosure/AirInfiltration/AirInfiltrationMeasurement") do |air_infiltration_measurement|
+      child_vals = {}
+      child_vals[:id] = _get_object_id(air_infiltration_measurement)
+      child_vals[:house_pressure] = _to_float_or_nil(XMLHelper.get_value(air_infiltration_measurement, "HousePressure"))
+      child_vals[:unit_of_measure] = XMLHelper.get_value(air_infiltration_measurement, "BuildingAirLeakage/UnitofMeasure")
+      child_vals[:air_leakage] = _to_float_or_nil(XMLHelper.get_value(air_infiltration_measurement, "BuildingAirLeakage/AirLeakage"))
+      child_vals[:effective_leakage_area] = _to_float_or_nil(XMLHelper.get_value(air_infiltration_measurement, "EffectiveLeakageArea"))
+      child_vals[:infiltration_volume] = _to_float_or_nil(XMLHelper.get_value(air_infiltration_measurement, "InfiltrationVolume"))
+      child_vals[:constant_ach_natural] = _to_float_or_nil(XMLHelper.get_value(air_infiltration_measurement, "extension/ConstantACHnatural"))
+      child_vals[:leakiness_description] = XMLHelper.get_value(air_infiltration_measurement, "LeakinessDescription")
+      vals << child_vals
+    end
     return vals
   end
 
-  def self.add_attic(hpxml:,
-                     id:,
-                     attic_type:,
-                     vented_attic_sla: nil,
-                     vented_attic_constant_ach: nil)
-    attics = XMLHelper.create_elements_as_needed(hpxml, ["Building", "BuildingDetails", "Enclosure", "Attics"])
+  def _add_object_attic(id:,
+                        attic_type:,
+                        vented_attic_sla: nil,
+                        vented_attic_constant_ach: nil)
+    attics = XMLHelper.create_elements_as_needed(@object, ["HPXML", "Building", "BuildingDetails", "Enclosure", "Attics"])
     attic = XMLHelper.add_element(attics, "Attic")
     sys_id = XMLHelper.add_element(attic, "SystemIdentifier")
     XMLHelper.add_attribute(sys_id, "id", id)
@@ -417,33 +575,36 @@ class HPXML
     return attic
   end
 
-  def self.get_attic_values(attic:)
-    return nil if attic.nil?
+  def _get_object_attics_values(hpxml:)
+    vals = []
+    return vals if hpxml.nil?
 
-    vals = {}
-    vals[:id] = get_id(attic)
-    if XMLHelper.has_element(attic, "AtticType/Attic[Vented='false']")
-      vals[:attic_type] = "UnventedAttic"
-    elsif XMLHelper.has_element(attic, "AtticType/Attic[Vented='true']")
-      vals[:attic_type] = "VentedAttic"
-    elsif XMLHelper.has_element(attic, "AtticType/Attic[Conditioned='true']")
-      vals[:attic_type] = "ConditionedAttic"
-    elsif XMLHelper.has_element(attic, "AtticType/FlatRoof")
-      vals[:attic_type] = "FlatRoof"
-    elsif XMLHelper.has_element(attic, "AtticType/CathedralCeiling")
-      vals[:attic_type] = "CathedralCeiling"
+    hpxml.elements.each("Building/BuildingDetails/Enclosure/Attics/Attic") do |attic|
+      child_vals = {}
+      child_vals[:id] = _get_object_id(attic)
+      if XMLHelper.has_element(attic, "AtticType/Attic[Vented='false']")
+        child_vals[:attic_type] = "UnventedAttic"
+      elsif XMLHelper.has_element(attic, "AtticType/Attic[Vented='true']")
+        child_vals[:attic_type] = "VentedAttic"
+      elsif XMLHelper.has_element(attic, "AtticType/Attic[Conditioned='true']")
+        child_vals[:attic_type] = "ConditionedAttic"
+      elsif XMLHelper.has_element(attic, "AtticType/FlatRoof")
+        child_vals[:attic_type] = "FlatRoof"
+      elsif XMLHelper.has_element(attic, "AtticType/CathedralCeiling")
+        child_vals[:attic_type] = "CathedralCeiling"
+      end
+      child_vals[:vented_attic_sla] = _to_float_or_nil(XMLHelper.get_value(attic, "[AtticType/Attic[Vented='true']]VentilationRate[UnitofMeasure='SLA']/Value"))
+      child_vals[:vented_attic_constant_ach] = _to_float_or_nil(XMLHelper.get_value(attic, "[AtticType/Attic[Vented='true']]extension/ConstantACHnatural"))
+      vals << child_vals
     end
-    vals[:vented_attic_sla] = to_float_or_nil(XMLHelper.get_value(attic, "[AtticType/Attic[Vented='true']]VentilationRate[UnitofMeasure='SLA']/Value"))
-    vals[:vented_attic_constant_ach] = to_float_or_nil(XMLHelper.get_value(attic, "[AtticType/Attic[Vented='true']]extension/ConstantACHnatural"))
     return vals
   end
 
-  def self.add_foundation(hpxml:,
-                          id:,
-                          foundation_type:,
-                          vented_crawlspace_sla: nil,
-                          unconditioned_basement_thermal_boundary: nil)
-    foundations = XMLHelper.create_elements_as_needed(hpxml, ["Building", "BuildingDetails", "Enclosure", "Foundations"])
+  def _add_object_foundation(id:,
+                             foundation_type:,
+                             vented_crawlspace_sla: nil,
+                             unconditioned_basement_thermal_boundary: nil)
+    foundations = XMLHelper.create_elements_as_needed(@object, ["HPXML", "Building", "BuildingDetails", "Enclosure", "Foundations"])
     foundation = XMLHelper.add_element(foundations, "Foundation")
     sys_id = XMLHelper.add_element(foundation, "SystemIdentifier")
     XMLHelper.add_attribute(sys_id, "id", id)
@@ -477,41 +638,44 @@ class HPXML
     return foundation
   end
 
-  def self.get_foundation_values(foundation:)
-    return nil if foundation.nil?
+  def _get_object_foundations_values(hpxml:)
+    vals = []
+    return vals if hpxml.nil?
 
-    vals = {}
-    vals[:id] = get_id(foundation)
-    if XMLHelper.has_element(foundation, "FoundationType/SlabOnGrade")
-      vals[:foundation_type] = "SlabOnGrade"
-    elsif XMLHelper.has_element(foundation, "FoundationType/Basement[Conditioned='false']")
-      vals[:foundation_type] = "UnconditionedBasement"
-    elsif XMLHelper.has_element(foundation, "FoundationType/Basement[Conditioned='true']")
-      vals[:foundation_type] = "ConditionedBasement"
-    elsif XMLHelper.has_element(foundation, "FoundationType/Crawlspace[Vented='false']")
-      vals[:foundation_type] = "UnventedCrawlspace"
-    elsif XMLHelper.has_element(foundation, "FoundationType/Crawlspace[Vented='true']")
-      vals[:foundation_type] = "VentedCrawlspace"
-    elsif XMLHelper.has_element(foundation, "FoundationType/Ambient")
-      vals[:foundation_type] = "Ambient"
+    hpxml.elements.each("Building/BuildingDetails/Enclosure/Foundations/Foundation") do |foundation|
+      child_vals = {}
+      child_vals[:id] = _get_object_id(foundation)
+      if XMLHelper.has_element(foundation, "FoundationType/SlabOnGrade")
+        child_vals[:foundation_type] = "SlabOnGrade"
+      elsif XMLHelper.has_element(foundation, "FoundationType/Basement[Conditioned='false']")
+        child_vals[:foundation_type] = "UnconditionedBasement"
+      elsif XMLHelper.has_element(foundation, "FoundationType/Basement[Conditioned='true']")
+        child_vals[:foundation_type] = "ConditionedBasement"
+      elsif XMLHelper.has_element(foundation, "FoundationType/Crawlspace[Vented='false']")
+        child_vals[:foundation_type] = "UnventedCrawlspace"
+      elsif XMLHelper.has_element(foundation, "FoundationType/Crawlspace[Vented='true']")
+        child_vals[:foundation_type] = "VentedCrawlspace"
+      elsif XMLHelper.has_element(foundation, "FoundationType/Ambient")
+        child_vals[:foundation_type] = "Ambient"
+      end
+      child_vals[:vented_crawlspace_sla] = _to_float_or_nil(XMLHelper.get_value(foundation, "[FoundationType/Crawlspace[Vented='true']]VentilationRate[UnitofMeasure='SLA']/Value"))
+      child_vals[:unconditioned_basement_thermal_boundary] = XMLHelper.get_value(foundation, "[FoundationType/Basement[Conditioned='false']]ThermalBoundary")
+      vals << child_vals
     end
-    vals[:vented_crawlspace_sla] = to_float_or_nil(XMLHelper.get_value(foundation, "[FoundationType/Crawlspace[Vented='true']]VentilationRate[UnitofMeasure='SLA']/Value"))
-    vals[:unconditioned_basement_thermal_boundary] = XMLHelper.get_value(foundation, "[FoundationType/Basement[Conditioned='false']]ThermalBoundary")
     return vals
   end
 
-  def self.add_roof(hpxml:,
-                    id:,
-                    interior_adjacent_to:,
-                    area:,
-                    azimuth: nil,
-                    solar_absorptance:,
-                    emittance:,
-                    pitch:,
-                    radiant_barrier:,
-                    insulation_id: nil,
-                    insulation_assembly_r_value:)
-    roofs = XMLHelper.create_elements_as_needed(hpxml, ["Building", "BuildingDetails", "Enclosure", "Roofs"])
+  def _add_object_roof(id:,
+                       interior_adjacent_to:,
+                       area:,
+                       azimuth: nil,
+                       solar_absorptance:,
+                       emittance:,
+                       pitch:,
+                       radiant_barrier:,
+                       insulation_id: nil,
+                       insulation_assembly_r_value:)
+    roofs = XMLHelper.create_elements_as_needed(@object, ["HPXML", "Building", "BuildingDetails", "Enclosure", "Roofs"])
     roof = XMLHelper.add_element(roofs, "Roof")
     sys_id = XMLHelper.add_element(roof, "SystemIdentifier")
     XMLHelper.add_attribute(sys_id, "id", id)
@@ -534,42 +698,45 @@ class HPXML
     return roof
   end
 
-  def self.get_roof_values(roof:)
-    return nil if roof.nil?
+  def _get_object_roofs_values(hpxml:)
+    vals = []
+    return vals if hpxml.nil?
 
-    vals = {}
-    vals[:id] = get_id(roof)
-    vals[:exterior_adjacent_to] = "outside"
-    vals[:interior_adjacent_to] = XMLHelper.get_value(roof, "InteriorAdjacentTo")
-    vals[:area] = to_float_or_nil(XMLHelper.get_value(roof, "Area"))
-    vals[:azimuth] = to_integer_or_nil(XMLHelper.get_value(roof, "Azimuth"))
-    vals[:roof_type] = XMLHelper.get_value(roof, "RoofType")
-    vals[:roof_color] = XMLHelper.get_value(roof, "RoofColor")
-    vals[:solar_absorptance] = to_float_or_nil(XMLHelper.get_value(roof, "SolarAbsorptance"))
-    vals[:emittance] = to_float_or_nil(XMLHelper.get_value(roof, "Emittance"))
-    vals[:pitch] = to_float_or_nil(XMLHelper.get_value(roof, "Pitch"))
-    vals[:radiant_barrier] = to_bool_or_nil(XMLHelper.get_value(roof, "RadiantBarrier"))
-    insulation = roof.elements["Insulation"]
-    if not insulation.nil?
-      vals[:insulation_id] = get_id(insulation)
-      vals[:insulation_assembly_r_value] = to_float_or_nil(XMLHelper.get_value(insulation, "AssemblyEffectiveRValue"))
-      vals[:insulation_cavity_r_value] = to_float_or_nil(XMLHelper.get_value(insulation, "Layer[InstallationType='cavity']/NominalRValue"))
-      vals[:insulation_continuous_r_value] = to_float_or_nil(XMLHelper.get_value(insulation, "Layer[InstallationType='continuous']/NominalRValue"))
+    hpxml.elements.each("Building/BuildingDetails/Enclosure/Roofs/Roof") do |roof|
+      child_vals = {}
+      child_vals[:id] = _get_object_id(roof)
+      child_vals[:exterior_adjacent_to] = "outside"
+      child_vals[:interior_adjacent_to] = XMLHelper.get_value(roof, "InteriorAdjacentTo")
+      child_vals[:area] = _to_float_or_nil(XMLHelper.get_value(roof, "Area"))
+      child_vals[:azimuth] = _to_integer_or_nil(XMLHelper.get_value(roof, "Azimuth"))
+      child_vals[:roof_type] = XMLHelper.get_value(roof, "RoofType")
+      child_vals[:roof_color] = XMLHelper.get_value(roof, "RoofColor")
+      child_vals[:solar_absorptance] = _to_float_or_nil(XMLHelper.get_value(roof, "SolarAbsorptance"))
+      child_vals[:emittance] = _to_float_or_nil(XMLHelper.get_value(roof, "Emittance"))
+      child_vals[:pitch] = _to_float_or_nil(XMLHelper.get_value(roof, "Pitch"))
+      child_vals[:radiant_barrier] = _to_bool_or_nil(XMLHelper.get_value(roof, "RadiantBarrier"))
+      insulation = roof.elements["Insulation"]
+      if not insulation.nil?
+        child_vals[:insulation_id] = _get_object_id(insulation)
+        child_vals[:insulation_assembly_r_value] = _to_float_or_nil(XMLHelper.get_value(insulation, "AssemblyEffectiveRValue"))
+        child_vals[:insulation_cavity_r_value] = _to_float_or_nil(XMLHelper.get_value(insulation, "Layer[InstallationType='cavity']/NominalRValue"))
+        child_vals[:insulation_continuous_r_value] = _to_float_or_nil(XMLHelper.get_value(insulation, "Layer[InstallationType='continuous']/NominalRValue"))
+      end
+      vals << child_vals
     end
     return vals
   end
 
-  def self.add_rim_joist(hpxml:,
-                         id:,
-                         exterior_adjacent_to:,
-                         interior_adjacent_to:,
-                         area:,
-                         azimuth: nil,
-                         solar_absorptance:,
-                         emittance:,
-                         insulation_id: nil,
-                         insulation_assembly_r_value:)
-    rim_joists = XMLHelper.create_elements_as_needed(hpxml, ["Building", "BuildingDetails", "Enclosure", "RimJoists"])
+  def _add_object_rim_joist(id:,
+                            exterior_adjacent_to:,
+                            interior_adjacent_to:,
+                            area:,
+                            azimuth: nil,
+                            solar_absorptance:,
+                            emittance:,
+                            insulation_id: nil,
+                            insulation_assembly_r_value:)
+    rim_joists = XMLHelper.create_elements_as_needed(@object, ["HPXML", "Building", "BuildingDetails", "Enclosure", "RimJoists"])
     rim_joist = XMLHelper.add_element(rim_joists, "RimJoist")
     sys_id = XMLHelper.add_element(rim_joist, "SystemIdentifier")
     XMLHelper.add_attribute(sys_id, "id", id)
@@ -591,37 +758,40 @@ class HPXML
     return rim_joist
   end
 
-  def self.get_rim_joist_values(rim_joist:)
-    return nil if rim_joist.nil?
+  def _get_object_rim_joists_values(hpxml:)
+    vals = []
+    return vals if hpxml.nil?
 
-    vals = {}
-    vals[:id] = get_id(rim_joist)
-    vals[:exterior_adjacent_to] = XMLHelper.get_value(rim_joist, "ExteriorAdjacentTo")
-    vals[:interior_adjacent_to] = XMLHelper.get_value(rim_joist, "InteriorAdjacentTo")
-    vals[:area] = to_float_or_nil(XMLHelper.get_value(rim_joist, "Area"))
-    vals[:azimuth] = to_integer_or_nil(XMLHelper.get_value(rim_joist, "Azimuth"))
-    vals[:solar_absorptance] = to_float_or_nil(XMLHelper.get_value(rim_joist, "SolarAbsorptance"))
-    vals[:emittance] = to_float_or_nil(XMLHelper.get_value(rim_joist, "Emittance"))
-    insulation = rim_joist.elements["Insulation"]
-    if not insulation.nil?
-      vals[:insulation_id] = get_id(insulation)
-      vals[:insulation_assembly_r_value] = to_float_or_nil(XMLHelper.get_value(insulation, "AssemblyEffectiveRValue"))
+    hpxml.elements.each("Building/BuildingDetails/Enclosure/RimJoists/RimJoist") do |rim_joist|
+      child_vals = {}
+      child_vals[:id] = _get_object_id(rim_joist)
+      child_vals[:exterior_adjacent_to] = XMLHelper.get_value(rim_joist, "ExteriorAdjacentTo")
+      child_vals[:interior_adjacent_to] = XMLHelper.get_value(rim_joist, "InteriorAdjacentTo")
+      child_vals[:area] = _to_float_or_nil(XMLHelper.get_value(rim_joist, "Area"))
+      child_vals[:azimuth] = _to_integer_or_nil(XMLHelper.get_value(rim_joist, "Azimuth"))
+      child_vals[:solar_absorptance] = _to_float_or_nil(XMLHelper.get_value(rim_joist, "SolarAbsorptance"))
+      child_vals[:emittance] = _to_float_or_nil(XMLHelper.get_value(rim_joist, "Emittance"))
+      insulation = rim_joist.elements["Insulation"]
+      if not insulation.nil?
+        child_vals[:insulation_id] = _get_object_id(insulation)
+        child_vals[:insulation_assembly_r_value] = _to_float_or_nil(XMLHelper.get_value(insulation, "AssemblyEffectiveRValue"))
+      end
+      vals << child_vals
     end
     return vals
   end
 
-  def self.add_wall(hpxml:,
-                    id:,
-                    exterior_adjacent_to:,
-                    interior_adjacent_to:,
-                    wall_type:,
-                    area:,
-                    azimuth: nil,
-                    solar_absorptance:,
-                    emittance:,
-                    insulation_id: nil,
-                    insulation_assembly_r_value:)
-    walls = XMLHelper.create_elements_as_needed(hpxml, ["Building", "BuildingDetails", "Enclosure", "Walls"])
+  def _add_object_wall(id:,
+                       exterior_adjacent_to:,
+                       interior_adjacent_to:,
+                       wall_type:,
+                       area:,
+                       azimuth: nil,
+                       solar_absorptance:,
+                       emittance:,
+                       insulation_id: nil,
+                       insulation_assembly_r_value:)
+    walls = XMLHelper.create_elements_as_needed(@object, ["HPXML", "Building", "BuildingDetails", "Enclosure", "Walls"])
     wall = XMLHelper.add_element(walls, "Wall")
     sys_id = XMLHelper.add_element(wall, "SystemIdentifier")
     XMLHelper.add_attribute(sys_id, "id", id)
@@ -645,49 +815,52 @@ class HPXML
     return wall
   end
 
-  def self.get_wall_values(wall:)
-    return nil if wall.nil?
+  def _get_object_walls_values(hpxml:)
+    vals = []
+    return vals if hpxml.nil?
 
-    vals = {}
-    vals[:id] = get_id(wall)
-    vals[:exterior_adjacent_to] = XMLHelper.get_value(wall, "ExteriorAdjacentTo")
-    vals[:interior_adjacent_to] = XMLHelper.get_value(wall, "InteriorAdjacentTo")
-    vals[:wall_type] = XMLHelper.get_child_name(wall, "WallType")
-    vals[:optimum_value_engineering] = to_bool_or_nil(XMLHelper.get_value(wall, "WallType/WoodStud/OptimumValueEngineering"))
-    vals[:area] = to_float_or_nil(XMLHelper.get_value(wall, "Area"))
-    vals[:orientation] = XMLHelper.get_value(wall, "Orientation")
-    vals[:azimuth] = to_integer_or_nil(XMLHelper.get_value(wall, "Azimuth"))
-    vals[:siding] = XMLHelper.get_value(wall, "Siding")
-    vals[:solar_absorptance] = to_float_or_nil(XMLHelper.get_value(wall, "SolarAbsorptance"))
-    vals[:emittance] = to_float_or_nil(XMLHelper.get_value(wall, "Emittance"))
-    insulation = wall.elements["Insulation"]
-    if not insulation.nil?
-      vals[:insulation_id] = get_id(insulation)
-      vals[:insulation_assembly_r_value] = to_float_or_nil(XMLHelper.get_value(insulation, "AssemblyEffectiveRValue"))
-      vals[:insulation_cavity_r_value] = to_float_or_nil(XMLHelper.get_value(insulation, "Layer[InstallationType='cavity']/NominalRValue"))
-      vals[:insulation_continuous_r_value] = to_float_or_nil(XMLHelper.get_value(insulation, "Layer[InstallationType='continuous']/NominalRValue"))
+    hpxml.elements.each("Building/BuildingDetails/Enclosure/Walls/Wall") do |wall|
+      child_vals = {}
+      child_vals[:id] = _get_object_id(wall)
+      child_vals[:exterior_adjacent_to] = XMLHelper.get_value(wall, "ExteriorAdjacentTo")
+      child_vals[:interior_adjacent_to] = XMLHelper.get_value(wall, "InteriorAdjacentTo")
+      child_vals[:wall_type] = XMLHelper.get_child_name(wall, "WallType")
+      child_vals[:optimum_value_engineering] = _to_bool_or_nil(XMLHelper.get_value(wall, "WallType/WoodStud/OptimumValueEngineering"))
+      child_vals[:area] = _to_float_or_nil(XMLHelper.get_value(wall, "Area"))
+      child_vals[:orientation] = XMLHelper.get_value(wall, "Orientation")
+      child_vals[:azimuth] = _to_integer_or_nil(XMLHelper.get_value(wall, "Azimuth"))
+      child_vals[:siding] = XMLHelper.get_value(wall, "Siding")
+      child_vals[:solar_absorptance] = _to_float_or_nil(XMLHelper.get_value(wall, "SolarAbsorptance"))
+      child_vals[:emittance] = _to_float_or_nil(XMLHelper.get_value(wall, "Emittance"))
+      insulation = wall.elements["Insulation"]
+      if not insulation.nil?
+        child_vals[:insulation_id] = _get_object_id(insulation)
+        child_vals[:insulation_assembly_r_value] = _to_float_or_nil(XMLHelper.get_value(insulation, "AssemblyEffectiveRValue"))
+        child_vals[:insulation_cavity_r_value] = _to_float_or_nil(XMLHelper.get_value(insulation, "Layer[InstallationType='cavity']/NominalRValue"))
+        child_vals[:insulation_continuous_r_value] = _to_float_or_nil(XMLHelper.get_value(insulation, "Layer[InstallationType='continuous']/NominalRValue"))
+      end
+      vals << child_vals
     end
     return vals
   end
 
-  def self.add_foundation_wall(hpxml:,
-                               id:,
-                               exterior_adjacent_to:,
-                               interior_adjacent_to:,
-                               height:,
-                               area:,
-                               azimuth: nil,
-                               thickness:,
-                               depth_below_grade:,
-                               insulation_id: nil,
-                               insulation_interior_r_value: nil,
-                               insulation_interior_distance_to_top: nil,
-                               insulation_interior_distance_to_bottom: nil,
-                               insulation_exterior_r_value: nil,
-                               insulation_exterior_distance_to_top: nil,
-                               insulation_exterior_distance_to_bottom: nil,
-                               insulation_assembly_r_value: nil)
-    foundation_walls = XMLHelper.create_elements_as_needed(hpxml, ["Building", "BuildingDetails", "Enclosure", "FoundationWalls"])
+  def _add_object_foundation_wall(id:,
+                                  exterior_adjacent_to:,
+                                  interior_adjacent_to:,
+                                  height:,
+                                  area:,
+                                  azimuth: nil,
+                                  thickness:,
+                                  depth_below_grade:,
+                                  insulation_id: nil,
+                                  insulation_interior_r_value: nil,
+                                  insulation_interior_distance_to_top: nil,
+                                  insulation_interior_distance_to_bottom: nil,
+                                  insulation_exterior_r_value: nil,
+                                  insulation_exterior_distance_to_top: nil,
+                                  insulation_exterior_distance_to_bottom: nil,
+                                  insulation_assembly_r_value: nil)
+    foundation_walls = XMLHelper.create_elements_as_needed(@object, ["HPXML", "Building", "BuildingDetails", "Enclosure", "FoundationWalls"])
     foundation_wall = XMLHelper.add_element(foundation_walls, "FoundationWall")
     sys_id = XMLHelper.add_element(foundation_wall, "SystemIdentifier")
     XMLHelper.add_attribute(sys_id, "id", id)
@@ -710,64 +883,67 @@ class HPXML
       layer = XMLHelper.add_element(insulation, "Layer")
       XMLHelper.add_element(layer, "InstallationType", "continuous - exterior")
       XMLHelper.add_element(layer, "NominalRValue", Float(insulation_exterior_r_value))
-      add_extension(parent: layer,
-                    extensions: { "DistanceToTopOfInsulation" => to_float_or_nil(insulation_exterior_distance_to_top),
-                                  "DistanceToBottomOfInsulation" => to_float_or_nil(insulation_exterior_distance_to_bottom) })
+      _add_object_extension(parent: layer,
+                            extensions: { "DistanceToTopOfInsulation" => _to_float_or_nil(insulation_exterior_distance_to_top),
+                                          "DistanceToBottomOfInsulation" => _to_float_or_nil(insulation_exterior_distance_to_bottom) })
     end
     unless insulation_interior_r_value.nil?
       layer = XMLHelper.add_element(insulation, "Layer")
       XMLHelper.add_element(layer, "InstallationType", "continuous - interior")
       XMLHelper.add_element(layer, "NominalRValue", Float(insulation_interior_r_value))
-      add_extension(parent: layer,
-                    extensions: { "DistanceToTopOfInsulation" => to_float_or_nil(insulation_interior_distance_to_top),
-                                  "DistanceToBottomOfInsulation" => to_float_or_nil(insulation_interior_distance_to_bottom) })
+      _add_object_extension(parent: layer,
+                            extensions: { "DistanceToTopOfInsulation" => _to_float_or_nil(insulation_interior_distance_to_top),
+                                          "DistanceToBottomOfInsulation" => _to_float_or_nil(insulation_interior_distance_to_bottom) })
     end
 
     return foundation_wall
   end
 
-  def self.get_foundation_wall_values(foundation_wall:)
-    return nil if foundation_wall.nil?
+  def _get_object_foundation_walls_values(hpxml:)
+    vals = []
+    return vals if hpxml.nil?
 
-    vals = {}
-    vals[:id] = get_id(foundation_wall)
-    vals[:exterior_adjacent_to] = XMLHelper.get_value(foundation_wall, "ExteriorAdjacentTo")
-    vals[:interior_adjacent_to] = XMLHelper.get_value(foundation_wall, "InteriorAdjacentTo")
-    vals[:height] = to_float_or_nil(XMLHelper.get_value(foundation_wall, "Height"))
-    vals[:area] = to_float_or_nil(XMLHelper.get_value(foundation_wall, "Area"))
-    vals[:azimuth] = to_integer_or_nil(XMLHelper.get_value(foundation_wall, "Azimuth"))
-    vals[:thickness] = to_float_or_nil(XMLHelper.get_value(foundation_wall, "Thickness"))
-    vals[:depth_below_grade] = to_float_or_nil(XMLHelper.get_value(foundation_wall, "DepthBelowGrade"))
-    insulation = foundation_wall.elements["Insulation"]
-    if not insulation.nil?
-      vals[:insulation_id] = get_id(insulation)
-      vals[:insulation_r_value] = to_float_or_nil(XMLHelper.get_value(insulation, "Layer[InstallationType='continuous']/NominalRValue"))
-      vals[:insulation_interior_r_value] = to_float_or_nil(XMLHelper.get_value(insulation, "Layer[InstallationType='continuous - interior']/NominalRValue"))
-      vals[:insulation_interior_distance_to_top] = to_float_or_nil(XMLHelper.get_value(insulation, "Layer[InstallationType='continuous - interior']/extension/DistanceToTopOfInsulation"))
-      vals[:insulation_interior_distance_to_bottom] = to_float_or_nil(XMLHelper.get_value(insulation, "Layer[InstallationType='continuous - interior']/extension/DistanceToBottomOfInsulation"))
-      vals[:insulation_exterior_r_value] = to_float_or_nil(XMLHelper.get_value(insulation, "Layer[InstallationType='continuous - exterior']/NominalRValue"))
-      vals[:insulation_exterior_distance_to_top] = to_float_or_nil(XMLHelper.get_value(insulation, "Layer[InstallationType='continuous - exterior']/extension/DistanceToTopOfInsulation"))
-      vals[:insulation_exterior_distance_to_bottom] = to_float_or_nil(XMLHelper.get_value(insulation, "Layer[InstallationType='continuous - exterior']/extension/DistanceToBottomOfInsulation"))
-      vals[:insulation_assembly_r_value] = to_float_or_nil(XMLHelper.get_value(insulation, "AssemblyEffectiveRValue"))
+    hpxml.elements.each("Building/BuildingDetails/Enclosure/FoundationWalls/FoundationWall") do |foundation_wall|
+      child_vals = {}
+      child_vals[:id] = _get_object_id(foundation_wall)
+      child_vals[:exterior_adjacent_to] = XMLHelper.get_value(foundation_wall, "ExteriorAdjacentTo")
+      child_vals[:interior_adjacent_to] = XMLHelper.get_value(foundation_wall, "InteriorAdjacentTo")
+      child_vals[:height] = _to_float_or_nil(XMLHelper.get_value(foundation_wall, "Height"))
+      child_vals[:area] = _to_float_or_nil(XMLHelper.get_value(foundation_wall, "Area"))
+      child_vals[:azimuth] = _to_integer_or_nil(XMLHelper.get_value(foundation_wall, "Azimuth"))
+      child_vals[:thickness] = _to_float_or_nil(XMLHelper.get_value(foundation_wall, "Thickness"))
+      child_vals[:depth_below_grade] = _to_float_or_nil(XMLHelper.get_value(foundation_wall, "DepthBelowGrade"))
+      insulation = foundation_wall.elements["Insulation"]
+      if not insulation.nil?
+        child_vals[:insulation_id] = _get_object_id(insulation)
+        child_vals[:insulation_r_value] = _to_float_or_nil(XMLHelper.get_value(insulation, "Layer[InstallationType='continuous']/NominalRValue"))
+        child_vals[:insulation_interior_r_value] = _to_float_or_nil(XMLHelper.get_value(insulation, "Layer[InstallationType='continuous - interior']/NominalRValue"))
+        child_vals[:insulation_interior_distance_to_top] = _to_float_or_nil(XMLHelper.get_value(insulation, "Layer[InstallationType='continuous - interior']/extension/DistanceToTopOfInsulation"))
+        child_vals[:insulation_interior_distance_to_bottom] = _to_float_or_nil(XMLHelper.get_value(insulation, "Layer[InstallationType='continuous - interior']/extension/DistanceToBottomOfInsulation"))
+        child_vals[:insulation_exterior_r_value] = _to_float_or_nil(XMLHelper.get_value(insulation, "Layer[InstallationType='continuous - exterior']/NominalRValue"))
+        child_vals[:insulation_exterior_distance_to_top] = _to_float_or_nil(XMLHelper.get_value(insulation, "Layer[InstallationType='continuous - exterior']/extension/DistanceToTopOfInsulation"))
+        child_vals[:insulation_exterior_distance_to_bottom] = _to_float_or_nil(XMLHelper.get_value(insulation, "Layer[InstallationType='continuous - exterior']/extension/DistanceToBottomOfInsulation"))
+        child_vals[:insulation_assembly_r_value] = _to_float_or_nil(XMLHelper.get_value(insulation, "AssemblyEffectiveRValue"))
+      end
+      vals << child_vals
     end
     return vals
   end
 
-  def self.add_framefloor(hpxml:,
-                          id:,
-                          exterior_adjacent_to:,
-                          interior_adjacent_to:,
-                          area:,
-                          insulation_id: nil,
-                          insulation_assembly_r_value:)
-    framefloors = XMLHelper.create_elements_as_needed(hpxml, ["Building", "BuildingDetails", "Enclosure", "FrameFloors"])
-    framefloor = XMLHelper.add_element(framefloors, "FrameFloor")
-    sys_id = XMLHelper.add_element(framefloor, "SystemIdentifier")
+  def _add_object_frame_floor(id:,
+                              exterior_adjacent_to:,
+                              interior_adjacent_to:,
+                              area:,
+                              insulation_id: nil,
+                              insulation_assembly_r_value:)
+    frame_floors = XMLHelper.create_elements_as_needed(@object, ["HPXML", "Building", "BuildingDetails", "Enclosure", "FrameFloors"])
+    frame_floor = XMLHelper.add_element(frame_floors, "FrameFloor")
+    sys_id = XMLHelper.add_element(frame_floor, "SystemIdentifier")
     XMLHelper.add_attribute(sys_id, "id", id)
-    XMLHelper.add_element(framefloor, "ExteriorAdjacentTo", exterior_adjacent_to)
-    XMLHelper.add_element(framefloor, "InteriorAdjacentTo", interior_adjacent_to)
-    XMLHelper.add_element(framefloor, "Area", Float(area))
-    insulation = XMLHelper.add_element(framefloor, "Insulation")
+    XMLHelper.add_element(frame_floor, "ExteriorAdjacentTo", exterior_adjacent_to)
+    XMLHelper.add_element(frame_floor, "InteriorAdjacentTo", interior_adjacent_to)
+    XMLHelper.add_element(frame_floor, "Area", Float(area))
+    insulation = XMLHelper.add_element(frame_floor, "Insulation")
     sys_id = XMLHelper.add_element(insulation, "SystemIdentifier")
     unless insulation_id.nil?
       XMLHelper.add_attribute(sys_id, "id", insulation_id)
@@ -776,44 +952,47 @@ class HPXML
     end
     XMLHelper.add_element(insulation, "AssemblyEffectiveRValue", Float(insulation_assembly_r_value))
 
-    return framefloor
+    return frame_floor
   end
 
-  def self.get_framefloor_values(framefloor:)
-    return nil if framefloor.nil?
+  def _get_object_frame_floors_values(hpxml:)
+    vals = []
+    return vals if hpxml.nil?
 
-    vals = {}
-    vals[:id] = get_id(framefloor)
-    vals[:exterior_adjacent_to] = XMLHelper.get_value(framefloor, "ExteriorAdjacentTo")
-    vals[:interior_adjacent_to] = XMLHelper.get_value(framefloor, "InteriorAdjacentTo")
-    vals[:area] = to_float_or_nil(XMLHelper.get_value(framefloor, "Area"))
-    insulation = framefloor.elements["Insulation"]
-    if not insulation.nil?
-      vals[:insulation_id] = get_id(insulation)
-      vals[:insulation_assembly_r_value] = to_float_or_nil(XMLHelper.get_value(insulation, "AssemblyEffectiveRValue"))
-      vals[:insulation_cavity_r_value] = to_float_or_nil(XMLHelper.get_value(insulation, "Layer[InstallationType='cavity']/NominalRValue"))
-      vals[:insulation_continuous_r_value] = to_float_or_nil(XMLHelper.get_value(insulation, "Layer[InstallationType='continuous']/NominalRValue"))
+    hpxml.elements.each("Building/BuildingDetails/Enclosure/FrameFloors/FrameFloor") do |frame_floor|
+      child_vals = {}
+      child_vals[:id] = _get_object_id(frame_floor)
+      child_vals[:exterior_adjacent_to] = XMLHelper.get_value(frame_floor, "ExteriorAdjacentTo")
+      child_vals[:interior_adjacent_to] = XMLHelper.get_value(frame_floor, "InteriorAdjacentTo")
+      child_vals[:area] = _to_float_or_nil(XMLHelper.get_value(frame_floor, "Area"))
+      insulation = frame_floor.elements["Insulation"]
+      if not insulation.nil?
+        child_vals[:insulation_id] = _get_object_id(insulation)
+        child_vals[:insulation_assembly_r_value] = _to_float_or_nil(XMLHelper.get_value(insulation, "AssemblyEffectiveRValue"))
+        child_vals[:insulation_cavity_r_value] = _to_float_or_nil(XMLHelper.get_value(insulation, "Layer[InstallationType='cavity']/NominalRValue"))
+        child_vals[:insulation_continuous_r_value] = _to_float_or_nil(XMLHelper.get_value(insulation, "Layer[InstallationType='continuous']/NominalRValue"))
+      end
+      vals << child_vals
     end
     return vals
   end
 
-  def self.add_slab(hpxml:,
-                    id:,
-                    interior_adjacent_to:,
-                    area:,
-                    thickness:,
-                    exposed_perimeter:,
-                    perimeter_insulation_depth:,
-                    under_slab_insulation_width: nil,
-                    under_slab_insulation_spans_entire_slab: nil,
-                    depth_below_grade: nil,
-                    carpet_fraction:,
-                    carpet_r_value:,
-                    perimeter_insulation_id: nil,
-                    perimeter_insulation_r_value:,
-                    under_slab_insulation_id: nil,
-                    under_slab_insulation_r_value:)
-    slabs = foundation_walls = XMLHelper.create_elements_as_needed(hpxml, ["Building", "BuildingDetails", "Enclosure", "Slabs"])
+  def _add_object_slab(id:,
+                       interior_adjacent_to:,
+                       area:,
+                       thickness:,
+                       exposed_perimeter:,
+                       perimeter_insulation_depth:,
+                       under_slab_insulation_width: nil,
+                       under_slab_insulation_spans_entire_slab: nil,
+                       depth_below_grade: nil,
+                       carpet_fraction:,
+                       carpet_r_value:,
+                       perimeter_insulation_id: nil,
+                       perimeter_insulation_r_value:,
+                       under_slab_insulation_id: nil,
+                       under_slab_insulation_r_value:)
+    slabs = foundation_walls = XMLHelper.create_elements_as_needed(@object, ["HPXML", "Building", "BuildingDetails", "Enclosure", "Slabs"])
     slab = XMLHelper.add_element(slabs, "Slab")
     sys_id = XMLHelper.add_element(slab, "SystemIdentifier")
     XMLHelper.add_attribute(sys_id, "id", id)
@@ -845,55 +1024,58 @@ class HPXML
     layer = XMLHelper.add_element(insulation, "Layer")
     XMLHelper.add_element(layer, "InstallationType", "continuous")
     XMLHelper.add_element(layer, "NominalRValue", Float(under_slab_insulation_r_value))
-    add_extension(parent: slab,
-                  extensions: { "CarpetFraction" => to_float_or_nil(carpet_fraction),
-                                "CarpetRValue" => to_float_or_nil(carpet_r_value) })
+    _add_object_extension(parent: slab,
+                          extensions: { "CarpetFraction" => _to_float_or_nil(carpet_fraction),
+                                        "CarpetRValue" => _to_float_or_nil(carpet_r_value) })
 
     return slab
   end
 
-  def self.get_slab_values(slab:)
-    return nil if slab.nil?
+  def _get_object_slabs_values(hpxml:)
+    vals = []
+    return vals if hpxml.nil?
 
-    vals = {}
-    vals[:id] = get_id(slab)
-    vals[:interior_adjacent_to] = XMLHelper.get_value(slab, "InteriorAdjacentTo")
-    vals[:exterior_adjacent_to] = "outside"
-    vals[:area] = to_float_or_nil(XMLHelper.get_value(slab, "Area"))
-    vals[:thickness] = to_float_or_nil(XMLHelper.get_value(slab, "Thickness"))
-    vals[:exposed_perimeter] = to_float_or_nil(XMLHelper.get_value(slab, "ExposedPerimeter"))
-    vals[:perimeter_insulation_depth] = to_float_or_nil(XMLHelper.get_value(slab, "PerimeterInsulationDepth"))
-    vals[:under_slab_insulation_width] = to_float_or_nil(XMLHelper.get_value(slab, "UnderSlabInsulationWidth"))
-    vals[:under_slab_insulation_spans_entire_slab] = to_bool_or_nil(XMLHelper.get_value(slab, "UnderSlabInsulationSpansEntireSlab"))
-    vals[:depth_below_grade] = to_float_or_nil(XMLHelper.get_value(slab, "DepthBelowGrade"))
-    vals[:carpet_fraction] = to_float_or_nil(XMLHelper.get_value(slab, "extension/CarpetFraction"))
-    vals[:carpet_r_value] = to_float_or_nil(XMLHelper.get_value(slab, "extension/CarpetRValue"))
-    perimeter_insulation = slab.elements["PerimeterInsulation"]
-    if not perimeter_insulation.nil?
-      vals[:perimeter_insulation_id] = get_id(perimeter_insulation)
-      vals[:perimeter_insulation_r_value] = to_float_or_nil(XMLHelper.get_value(perimeter_insulation, "Layer[InstallationType='continuous']/NominalRValue"))
-    end
-    under_slab_insulation = slab.elements["UnderSlabInsulation"]
-    if not under_slab_insulation.nil?
-      vals[:under_slab_insulation_id] = get_id(under_slab_insulation)
-      vals[:under_slab_insulation_r_value] = to_float_or_nil(XMLHelper.get_value(under_slab_insulation, "Layer[InstallationType='continuous']/NominalRValue"))
+    hpxml.elements.each("Building/BuildingDetails/Enclosure/Slabs/Slab") do |slab|
+      child_vals = {}
+      child_vals[:id] = _get_object_id(slab)
+      child_vals[:interior_adjacent_to] = XMLHelper.get_value(slab, "InteriorAdjacentTo")
+      child_vals[:exterior_adjacent_to] = "outside"
+      child_vals[:area] = _to_float_or_nil(XMLHelper.get_value(slab, "Area"))
+      child_vals[:thickness] = _to_float_or_nil(XMLHelper.get_value(slab, "Thickness"))
+      child_vals[:exposed_perimeter] = _to_float_or_nil(XMLHelper.get_value(slab, "ExposedPerimeter"))
+      child_vals[:perimeter_insulation_depth] = _to_float_or_nil(XMLHelper.get_value(slab, "PerimeterInsulationDepth"))
+      child_vals[:under_slab_insulation_width] = _to_float_or_nil(XMLHelper.get_value(slab, "UnderSlabInsulationWidth"))
+      child_vals[:under_slab_insulation_spans_entire_slab] = _to_bool_or_nil(XMLHelper.get_value(slab, "UnderSlabInsulationSpansEntireSlab"))
+      child_vals[:depth_below_grade] = _to_float_or_nil(XMLHelper.get_value(slab, "DepthBelowGrade"))
+      child_vals[:carpet_fraction] = _to_float_or_nil(XMLHelper.get_value(slab, "extension/CarpetFraction"))
+      child_vals[:carpet_r_value] = _to_float_or_nil(XMLHelper.get_value(slab, "extension/CarpetRValue"))
+      perimeter_insulation = slab.elements["PerimeterInsulation"]
+      if not perimeter_insulation.nil?
+        child_vals[:perimeter_insulation_id] = _get_object_id(perimeter_insulation)
+        child_vals[:perimeter_insulation_r_value] = _to_float_or_nil(XMLHelper.get_value(perimeter_insulation, "Layer[InstallationType='continuous']/NominalRValue"))
+      end
+      under_slab_insulation = slab.elements["UnderSlabInsulation"]
+      if not under_slab_insulation.nil?
+        child_vals[:under_slab_insulation_id] = _get_object_id(under_slab_insulation)
+        child_vals[:under_slab_insulation_r_value] = _to_float_or_nil(XMLHelper.get_value(under_slab_insulation, "Layer[InstallationType='continuous']/NominalRValue"))
+      end
+      vals << child_vals
     end
     return vals
   end
 
-  def self.add_window(hpxml:,
-                      id:,
-                      area:,
-                      azimuth:,
-                      ufactor:,
-                      shgc:,
-                      overhangs_depth: nil,
-                      overhangs_distance_to_top_of_window: nil,
-                      overhangs_distance_to_bottom_of_window: nil,
-                      interior_shading_factor_summer: nil,
-                      interior_shading_factor_winter: nil,
-                      wall_idref:)
-    windows = XMLHelper.create_elements_as_needed(hpxml, ["Building", "BuildingDetails", "Enclosure", "Windows"])
+  def _add_object_window(id:,
+                         area:,
+                         azimuth:,
+                         ufactor:,
+                         shgc:,
+                         overhangs_depth: nil,
+                         overhangs_distance_to_top_of_window: nil,
+                         overhangs_distance_to_bottom_of_window: nil,
+                         interior_shading_factor_summer: nil,
+                         interior_shading_factor_winter: nil,
+                         wall_idref:)
+    windows = XMLHelper.create_elements_as_needed(@object, ["HPXML", "Building", "BuildingDetails", "Enclosure", "Windows"])
     window = XMLHelper.add_element(windows, "Window")
     sys_id = XMLHelper.add_element(window, "SystemIdentifier")
     XMLHelper.add_attribute(sys_id, "id", id)
@@ -920,39 +1102,42 @@ class HPXML
     return window
   end
 
-  def self.get_window_values(window:)
-    return nil if window.nil?
+  def _get_object_windows_values(hpxml:)
+    vals = []
+    return vals if hpxml.nil?
 
-    vals = {}
-    vals[:id] = get_id(window)
-    vals[:area] = to_float_or_nil(XMLHelper.get_value(window, "Area"))
-    vals[:azimuth] = to_integer_or_nil(XMLHelper.get_value(window, "Azimuth"))
-    vals[:orientation] = XMLHelper.get_value(window, "Orientation")
-    vals[:frame_type] = XMLHelper.get_child_name(window, "FrameType")
-    vals[:aluminum_thermal_break] = to_bool_or_nil(XMLHelper.get_value(window, "FrameType/Aluminum/ThermalBreak"))
-    vals[:glass_layers] = XMLHelper.get_value(window, "GlassLayers")
-    vals[:glass_type] = XMLHelper.get_value(window, "GlassType")
-    vals[:gas_fill] = XMLHelper.get_value(window, "GasFill")
-    vals[:ufactor] = to_float_or_nil(XMLHelper.get_value(window, "UFactor"))
-    vals[:shgc] = to_float_or_nil(XMLHelper.get_value(window, "SHGC"))
-    vals[:interior_shading_factor_summer] = to_float_or_nil(XMLHelper.get_value(window, "InteriorShading/SummerShadingCoefficient"))
-    vals[:interior_shading_factor_winter] = to_float_or_nil(XMLHelper.get_value(window, "InteriorShading/WinterShadingCoefficient"))
-    vals[:exterior_shading] = XMLHelper.get_value(window, "ExteriorShading/Type")
-    vals[:overhangs_depth] = to_float_or_nil(XMLHelper.get_value(window, "Overhangs/Depth"))
-    vals[:overhangs_distance_to_top_of_window] = to_float_or_nil(XMLHelper.get_value(window, "Overhangs/DistanceToTopOfWindow"))
-    vals[:overhangs_distance_to_bottom_of_window] = to_float_or_nil(XMLHelper.get_value(window, "Overhangs/DistanceToBottomOfWindow"))
-    vals[:wall_idref] = get_idref(window, "AttachedToWall")
+    hpxml.elements.each("Building/BuildingDetails/Enclosure/Windows/Window") do |window|
+      child_vals = {}
+      child_vals[:id] = _get_object_id(window)
+      child_vals[:area] = _to_float_or_nil(XMLHelper.get_value(window, "Area"))
+      child_vals[:azimuth] = _to_integer_or_nil(XMLHelper.get_value(window, "Azimuth"))
+      child_vals[:orientation] = XMLHelper.get_value(window, "Orientation")
+      child_vals[:frame_type] = XMLHelper.get_child_name(window, "FrameType")
+      child_vals[:aluminum_thermal_break] = _to_bool_or_nil(XMLHelper.get_value(window, "FrameType/Aluminum/ThermalBreak"))
+      child_vals[:glass_layers] = XMLHelper.get_value(window, "GlassLayers")
+      child_vals[:glass_type] = XMLHelper.get_value(window, "GlassType")
+      child_vals[:gas_fill] = XMLHelper.get_value(window, "GasFill")
+      child_vals[:ufactor] = _to_float_or_nil(XMLHelper.get_value(window, "UFactor"))
+      child_vals[:shgc] = _to_float_or_nil(XMLHelper.get_value(window, "SHGC"))
+      child_vals[:interior_shading_factor_summer] = _to_float_or_nil(XMLHelper.get_value(window, "InteriorShading/SummerShadingCoefficient"))
+      child_vals[:interior_shading_factor_winter] = _to_float_or_nil(XMLHelper.get_value(window, "InteriorShading/WinterShadingCoefficient"))
+      child_vals[:exterior_shading] = XMLHelper.get_value(window, "ExteriorShading/Type")
+      child_vals[:overhangs_depth] = _to_float_or_nil(XMLHelper.get_value(window, "Overhangs/Depth"))
+      child_vals[:overhangs_distance_to_top_of_window] = _to_float_or_nil(XMLHelper.get_value(window, "Overhangs/DistanceToTopOfWindow"))
+      child_vals[:overhangs_distance_to_bottom_of_window] = _to_float_or_nil(XMLHelper.get_value(window, "Overhangs/DistanceToBottomOfWindow"))
+      child_vals[:wall_idref] = _get_object_idref(window, "AttachedToWall")
+      vals << child_vals
+    end
     return vals
   end
 
-  def self.add_skylight(hpxml:,
-                        id:,
-                        area:,
-                        azimuth:,
-                        ufactor:,
-                        shgc:,
-                        roof_idref:)
-    skylights = XMLHelper.create_elements_as_needed(hpxml, ["Building", "BuildingDetails", "Enclosure", "Skylights"])
+  def _add_object_skylight(id:,
+                           area:,
+                           azimuth:,
+                           ufactor:,
+                           shgc:,
+                           roof_idref:)
+    skylights = XMLHelper.create_elements_as_needed(@object, ["HPXML", "Building", "BuildingDetails", "Enclosure", "Skylights"])
     skylight = XMLHelper.add_element(skylights, "Skylight")
     sys_id = XMLHelper.add_element(skylight, "SystemIdentifier")
     XMLHelper.add_attribute(sys_id, "id", id)
@@ -966,33 +1151,36 @@ class HPXML
     return skylight
   end
 
-  def self.get_skylight_values(skylight:)
-    return nil if skylight.nil?
+  def _get_object_skylights_values(hpxml:)
+    vals = []
+    return vals if hpxml.nil?
 
-    vals = {}
-    vals[:id] = get_id(skylight)
-    vals[:area] = to_float_or_nil(XMLHelper.get_value(skylight, "Area"))
-    vals[:azimuth] = to_integer_or_nil(XMLHelper.get_value(skylight, "Azimuth"))
-    vals[:orientation] = XMLHelper.get_value(skylight, "Orientation")
-    vals[:frame_type] = XMLHelper.get_child_name(skylight, "FrameType")
-    vals[:aluminum_thermal_break] = to_bool_or_nil(XMLHelper.get_value(skylight, "FrameType/Aluminum/ThermalBreak"))
-    vals[:glass_layers] = XMLHelper.get_value(skylight, "GlassLayers")
-    vals[:glass_type] = XMLHelper.get_value(skylight, "GlassType")
-    vals[:gas_fill] = XMLHelper.get_value(skylight, "GasFill")
-    vals[:ufactor] = to_float_or_nil(XMLHelper.get_value(skylight, "UFactor"))
-    vals[:shgc] = to_float_or_nil(XMLHelper.get_value(skylight, "SHGC"))
-    vals[:exterior_shading] = XMLHelper.get_value(skylight, "ExteriorShading/Type")
-    vals[:roof_idref] = get_idref(skylight, "AttachedToRoof")
+    hpxml.elements.each("Building/BuildingDetails/Enclosure/Skylights/Skylight") do |skylight|
+      child_vals = {}
+      child_vals[:id] = _get_object_id(skylight)
+      child_vals[:area] = _to_float_or_nil(XMLHelper.get_value(skylight, "Area"))
+      child_vals[:azimuth] = _to_integer_or_nil(XMLHelper.get_value(skylight, "Azimuth"))
+      child_vals[:orientation] = XMLHelper.get_value(skylight, "Orientation")
+      child_vals[:frame_type] = XMLHelper.get_child_name(skylight, "FrameType")
+      child_vals[:aluminum_thermal_break] = _to_bool_or_nil(XMLHelper.get_value(skylight, "FrameType/Aluminum/ThermalBreak"))
+      child_vals[:glass_layers] = XMLHelper.get_value(skylight, "GlassLayers")
+      child_vals[:glass_type] = XMLHelper.get_value(skylight, "GlassType")
+      child_vals[:gas_fill] = XMLHelper.get_value(skylight, "GasFill")
+      child_vals[:ufactor] = _to_float_or_nil(XMLHelper.get_value(skylight, "UFactor"))
+      child_vals[:shgc] = _to_float_or_nil(XMLHelper.get_value(skylight, "SHGC"))
+      child_vals[:exterior_shading] = XMLHelper.get_value(skylight, "ExteriorShading/Type")
+      child_vals[:roof_idref] = _get_object_idref(skylight, "AttachedToRoof")
+      vals << child_vals
+    end
     return vals
   end
 
-  def self.add_door(hpxml:,
-                    id:,
-                    wall_idref:,
-                    area:,
-                    azimuth:,
-                    r_value:)
-    doors = XMLHelper.create_elements_as_needed(hpxml, ["Building", "BuildingDetails", "Enclosure", "Doors"])
+  def _add_object_door(id:,
+                       wall_idref:,
+                       area:,
+                       azimuth:,
+                       r_value:)
+    doors = XMLHelper.create_elements_as_needed(@object, ["HPXML", "Building", "BuildingDetails", "Enclosure", "Doors"])
     door = XMLHelper.add_element(doors, "Door")
     sys_id = XMLHelper.add_element(door, "SystemIdentifier")
     XMLHelper.add_attribute(sys_id, "id", id)
@@ -1005,30 +1193,33 @@ class HPXML
     return door
   end
 
-  def self.get_door_values(door:)
-    return nil if door.nil?
+  def _get_object_doors_values(hpxml:)
+    vals = []
+    return vals if hpxml.nil?
 
-    vals = {}
-    vals[:id] = get_id(door)
-    vals[:wall_idref] = get_idref(door, "AttachedToWall")
-    vals[:area] = to_float_or_nil(XMLHelper.get_value(door, "Area"))
-    vals[:azimuth] = to_integer_or_nil(XMLHelper.get_value(door, "Azimuth"))
-    vals[:r_value] = to_float_or_nil(XMLHelper.get_value(door, "RValue"))
+    hpxml.elements.each("Building/BuildingDetails/Enclosure/Doors/Door") do |door|
+      child_vals = {}
+      child_vals[:id] = _get_object_id(door)
+      child_vals[:wall_idref] = _get_object_idref(door, "AttachedToWall")
+      child_vals[:area] = _to_float_or_nil(XMLHelper.get_value(door, "Area"))
+      child_vals[:azimuth] = _to_integer_or_nil(XMLHelper.get_value(door, "Azimuth"))
+      child_vals[:r_value] = _to_float_or_nil(XMLHelper.get_value(door, "RValue"))
+      vals << child_vals
+    end
     return vals
   end
 
-  def self.add_heating_system(hpxml:,
-                              id:,
-                              distribution_system_idref: nil,
-                              heating_system_type:,
-                              heating_system_fuel:,
-                              heating_capacity:,
-                              heating_efficiency_afue: nil,
-                              heating_efficiency_percent: nil,
-                              fraction_heat_load_served:,
-                              electric_auxiliary_energy: nil,
-                              heating_cfm: nil)
-    hvac_plant = XMLHelper.create_elements_as_needed(hpxml, ["Building", "BuildingDetails", "Systems", "HVAC", "HVACPlant"])
+  def _add_object_heating_system(id:,
+                                 distribution_system_idref: nil,
+                                 heating_system_type:,
+                                 heating_system_fuel:,
+                                 heating_capacity:,
+                                 heating_efficiency_afue: nil,
+                                 heating_efficiency_percent: nil,
+                                 fraction_heat_load_served:,
+                                 electric_auxiliary_energy: nil,
+                                 heating_cfm: nil)
+    hvac_plant = XMLHelper.create_elements_as_needed(@object, ["HPXML", "Building", "BuildingDetails", "Systems", "HVAC", "HVACPlant"])
     heating_system = XMLHelper.add_element(hvac_plant, "HeatingSystem")
     sys_id = XMLHelper.add_element(heating_system, "SystemIdentifier")
     XMLHelper.add_attribute(sys_id, "id", id)
@@ -1058,44 +1249,47 @@ class HPXML
 
     XMLHelper.add_element(heating_system, "FractionHeatLoadServed", Float(fraction_heat_load_served))
     XMLHelper.add_element(heating_system, "ElectricAuxiliaryEnergy", Float(electric_auxiliary_energy)) unless electric_auxiliary_energy.nil?
-    add_extension(parent: heating_system,
-                  extensions: { "HeatingFlowRate" => to_float_or_nil(heating_cfm) })
+    _add_object_extension(parent: heating_system,
+                          extensions: { "HeatingFlowRate" => _to_float_or_nil(heating_cfm) })
 
     return heating_system
   end
 
-  def self.get_heating_system_values(heating_system:)
-    return nil if heating_system.nil?
+  def _get_object_heating_systems_values(hpxml:)
+    vals = []
+    return vals if hpxml.nil?
 
-    vals = {}
-    vals[:id] = get_id(heating_system)
-    vals[:distribution_system_idref] = get_idref(heating_system, "DistributionSystem")
-    vals[:year_installed] = to_integer_or_nil(XMLHelper.get_value(heating_system, "YearInstalled"))
-    vals[:heating_system_type] = XMLHelper.get_child_name(heating_system, "HeatingSystemType")
-    vals[:heating_system_fuel] = XMLHelper.get_value(heating_system, "HeatingSystemFuel")
-    vals[:heating_capacity] = to_float_or_nil(XMLHelper.get_value(heating_system, "HeatingCapacity"))
-    vals[:heating_efficiency_afue] = to_float_or_nil(XMLHelper.get_value(heating_system, "[HeatingSystemType[Furnace | WallFurnace | Boiler]]AnnualHeatingEfficiency[Units='AFUE']/Value"))
-    vals[:heating_efficiency_percent] = to_float_or_nil(XMLHelper.get_value(heating_system, "[HeatingSystemType[ElectricResistance | Stove | PortableHeater]]AnnualHeatingEfficiency[Units='Percent']/Value"))
-    vals[:fraction_heat_load_served] = to_float_or_nil(XMLHelper.get_value(heating_system, "FractionHeatLoadServed"))
-    vals[:electric_auxiliary_energy] = to_float_or_nil(XMLHelper.get_value(heating_system, "ElectricAuxiliaryEnergy"))
-    vals[:heating_cfm] = to_float_or_nil(XMLHelper.get_value(heating_system, "extension/HeatingFlowRate"))
-    vals[:energy_star] = XMLHelper.get_values(heating_system, "ThirdPartyCertification").include?("Energy Star")
+    hpxml.elements.each("Building/BuildingDetails/Systems/HVAC/HVACPlant/HeatingSystem") do |heating_system|
+      child_vals = {}
+      child_vals[:id] = _get_object_id(heating_system)
+      child_vals[:distribution_system_idref] = _get_object_idref(heating_system, "DistributionSystem")
+      child_vals[:year_installed] = _to_integer_or_nil(XMLHelper.get_value(heating_system, "YearInstalled"))
+      child_vals[:heating_system_type] = XMLHelper.get_child_name(heating_system, "HeatingSystemType")
+      child_vals[:heating_system_fuel] = XMLHelper.get_value(heating_system, "HeatingSystemFuel")
+      child_vals[:heating_capacity] = _to_float_or_nil(XMLHelper.get_value(heating_system, "HeatingCapacity"))
+      child_vals[:heating_efficiency_afue] = _to_float_or_nil(XMLHelper.get_value(heating_system, "[HeatingSystemType[Furnace | WallFurnace | Boiler]]AnnualHeatingEfficiency[Units='AFUE']/Value"))
+      child_vals[:heating_efficiency_percent] = _to_float_or_nil(XMLHelper.get_value(heating_system, "[HeatingSystemType[ElectricResistance | Stove | PortableHeater]]AnnualHeatingEfficiency[Units='Percent']/Value"))
+      child_vals[:fraction_heat_load_served] = _to_float_or_nil(XMLHelper.get_value(heating_system, "FractionHeatLoadServed"))
+      child_vals[:electric_auxiliary_energy] = _to_float_or_nil(XMLHelper.get_value(heating_system, "ElectricAuxiliaryEnergy"))
+      child_vals[:heating_cfm] = _to_float_or_nil(XMLHelper.get_value(heating_system, "extension/HeatingFlowRate"))
+      child_vals[:energy_star] = XMLHelper.get_values(heating_system, "ThirdPartyCertification").include?("Energy Star")
+      vals << child_vals
+    end
     return vals
   end
 
-  def self.add_cooling_system(hpxml:,
-                              id:,
-                              distribution_system_idref: nil,
-                              cooling_system_type:,
-                              cooling_system_fuel:,
-                              compressor_type: nil,
-                              cooling_capacity: nil,
-                              fraction_cool_load_served:,
-                              cooling_efficiency_seer: nil,
-                              cooling_efficiency_eer: nil,
-                              cooling_shr: nil,
-                              cooling_cfm: nil)
-    hvac_plant = XMLHelper.create_elements_as_needed(hpxml, ["Building", "BuildingDetails", "Systems", "HVAC", "HVACPlant"])
+  def _add_object_cooling_system(id:,
+                                 distribution_system_idref: nil,
+                                 cooling_system_type:,
+                                 cooling_system_fuel:,
+                                 compressor_type: nil,
+                                 cooling_capacity: nil,
+                                 fraction_cool_load_served:,
+                                 cooling_efficiency_seer: nil,
+                                 cooling_efficiency_eer: nil,
+                                 cooling_shr: nil,
+                                 cooling_cfm: nil)
+    hvac_plant = XMLHelper.create_elements_as_needed(@object, ["HPXML", "Building", "BuildingDetails", "Systems", "HVAC", "HVACPlant"])
     cooling_system = XMLHelper.add_element(hvac_plant, "CoolingSystem")
     sys_id = XMLHelper.add_element(cooling_system, "SystemIdentifier")
     XMLHelper.add_attribute(sys_id, "id", id)
@@ -1125,54 +1319,57 @@ class HPXML
     end
 
     XMLHelper.add_element(cooling_system, "SensibleHeatFraction", Float(cooling_shr)) unless cooling_shr.nil?
-    add_extension(parent: cooling_system,
-                  extensions: { "CoolingFlowRate" => to_float_or_nil(cooling_cfm) })
+    _add_object_extension(parent: cooling_system,
+                          extensions: { "CoolingFlowRate" => _to_float_or_nil(cooling_cfm) })
 
     return cooling_system
   end
 
-  def self.get_cooling_system_values(cooling_system:)
-    return nil if cooling_system.nil?
+  def _get_object_cooling_systems_values(hpxml:)
+    vals = []
+    return vals if hpxml.nil?
 
-    vals = {}
-    vals[:id] = get_id(cooling_system)
-    vals[:distribution_system_idref] = get_idref(cooling_system, "DistributionSystem")
-    vals[:year_installed] = to_integer_or_nil(XMLHelper.get_value(cooling_system, "YearInstalled"))
-    vals[:cooling_system_type] = XMLHelper.get_value(cooling_system, "CoolingSystemType")
-    vals[:cooling_system_fuel] = XMLHelper.get_value(cooling_system, "CoolingSystemFuel")
-    vals[:cooling_capacity] = to_float_or_nil(XMLHelper.get_value(cooling_system, "CoolingCapacity"))
-    vals[:compressor_type] = XMLHelper.get_value(cooling_system, "CompressorType")
-    vals[:fraction_cool_load_served] = to_float_or_nil(XMLHelper.get_value(cooling_system, "FractionCoolLoadServed"))
-    vals[:cooling_efficiency_seer] = to_float_or_nil(XMLHelper.get_value(cooling_system, "[CoolingSystemType='central air conditioner']AnnualCoolingEfficiency[Units='SEER']/Value"))
-    vals[:cooling_efficiency_eer] = to_float_or_nil(XMLHelper.get_value(cooling_system, "[CoolingSystemType='room air conditioner']AnnualCoolingEfficiency[Units='EER']/Value"))
-    vals[:cooling_shr] = to_float_or_nil(XMLHelper.get_value(cooling_system, "SensibleHeatFraction"))
-    vals[:cooling_cfm] = to_float_or_nil(XMLHelper.get_value(cooling_system, "extension/CoolingFlowRate"))
-    vals[:energy_star] = XMLHelper.get_values(cooling_system, "ThirdPartyCertification").include?("Energy Star")
+    hpxml.elements.each("Building/BuildingDetails/Systems/HVAC/HVACPlant/CoolingSystem") do |cooling_system|
+      child_vals = {}
+      child_vals[:id] = _get_object_id(cooling_system)
+      child_vals[:distribution_system_idref] = _get_object_idref(cooling_system, "DistributionSystem")
+      child_vals[:year_installed] = _to_integer_or_nil(XMLHelper.get_value(cooling_system, "YearInstalled"))
+      child_vals[:cooling_system_type] = XMLHelper.get_value(cooling_system, "CoolingSystemType")
+      child_vals[:cooling_system_fuel] = XMLHelper.get_value(cooling_system, "CoolingSystemFuel")
+      child_vals[:cooling_capacity] = _to_float_or_nil(XMLHelper.get_value(cooling_system, "CoolingCapacity"))
+      child_vals[:compressor_type] = XMLHelper.get_value(cooling_system, "CompressorType")
+      child_vals[:fraction_cool_load_served] = _to_float_or_nil(XMLHelper.get_value(cooling_system, "FractionCoolLoadServed"))
+      child_vals[:cooling_efficiency_seer] = _to_float_or_nil(XMLHelper.get_value(cooling_system, "[CoolingSystemType='central air conditioner']AnnualCoolingEfficiency[Units='SEER']/Value"))
+      child_vals[:cooling_efficiency_eer] = _to_float_or_nil(XMLHelper.get_value(cooling_system, "[CoolingSystemType='room air conditioner']AnnualCoolingEfficiency[Units='EER']/Value"))
+      child_vals[:cooling_shr] = _to_float_or_nil(XMLHelper.get_value(cooling_system, "SensibleHeatFraction"))
+      child_vals[:cooling_cfm] = _to_float_or_nil(XMLHelper.get_value(cooling_system, "extension/CoolingFlowRate"))
+      child_vals[:energy_star] = XMLHelper.get_values(cooling_system, "ThirdPartyCertification").include?("Energy Star")
+      vals << child_vals
+    end
     return vals
   end
 
-  def self.add_heat_pump(hpxml:,
-                         id:,
-                         distribution_system_idref: nil,
-                         heat_pump_type:,
-                         heat_pump_fuel:,
-                         compressor_type: nil,
-                         heating_capacity: nil,
-                         heating_capacity_17F: nil,
-                         cooling_capacity:,
-                         cooling_shr: nil,
-                         backup_heating_fuel: nil,
-                         backup_heating_capacity: nil,
-                         backup_heating_efficiency_percent: nil,
-                         backup_heating_efficiency_afue: nil,
-                         backup_heating_switchover_temp: nil,
-                         fraction_heat_load_served:,
-                         fraction_cool_load_served:,
-                         cooling_efficiency_seer: nil,
-                         cooling_efficiency_eer: nil,
-                         heating_efficiency_hspf: nil,
-                         heating_efficiency_cop: nil)
-    hvac_plant = XMLHelper.create_elements_as_needed(hpxml, ["Building", "BuildingDetails", "Systems", "HVAC", "HVACPlant"])
+  def _add_object_heat_pump(id:,
+                            distribution_system_idref: nil,
+                            heat_pump_type:,
+                            heat_pump_fuel:,
+                            compressor_type: nil,
+                            heating_capacity: nil,
+                            heating_capacity_17F: nil,
+                            cooling_capacity:,
+                            cooling_shr: nil,
+                            backup_heating_fuel: nil,
+                            backup_heating_capacity: nil,
+                            backup_heating_efficiency_percent: nil,
+                            backup_heating_efficiency_afue: nil,
+                            backup_heating_switchover_temp: nil,
+                            fraction_heat_load_served:,
+                            fraction_cool_load_served:,
+                            cooling_efficiency_seer: nil,
+                            cooling_efficiency_eer: nil,
+                            heating_efficiency_hspf: nil,
+                            heating_efficiency_cop: nil)
+    hvac_plant = XMLHelper.create_elements_as_needed(@object, ["HPXML", "Building", "BuildingDetails", "Systems", "HVAC", "HVACPlant"])
     heat_pump = XMLHelper.add_element(hvac_plant, "HeatPump")
     sys_id = XMLHelper.add_element(heat_pump, "SystemIdentifier")
     XMLHelper.add_attribute(sys_id, "id", id)
@@ -1233,48 +1430,51 @@ class HPXML
     return heat_pump
   end
 
-  def self.get_heat_pump_values(heat_pump:)
-    return nil if heat_pump.nil?
+  def _get_object_heat_pumps_values(hpxml:)
+    vals = []
+    return vals if hpxml.nil?
 
-    vals = {}
-    vals[:id] = get_id(heat_pump)
-    vals[:distribution_system_idref] = get_idref(heat_pump, "DistributionSystem")
-    vals[:year_installed] = to_integer_or_nil(XMLHelper.get_value(heat_pump, "YearInstalled"))
-    vals[:heat_pump_type] = XMLHelper.get_value(heat_pump, "HeatPumpType")
-    vals[:heat_pump_fuel] = XMLHelper.get_value(heat_pump, "HeatPumpFuel")
-    vals[:heating_capacity] = to_float_or_nil(XMLHelper.get_value(heat_pump, "HeatingCapacity"))
-    vals[:heating_capacity_17F] = to_float_or_nil(XMLHelper.get_value(heat_pump, "HeatingCapacity17F"))
-    vals[:cooling_capacity] = to_float_or_nil(XMLHelper.get_value(heat_pump, "CoolingCapacity"))
-    vals[:compressor_type] = XMLHelper.get_value(heat_pump, "CompressorType")
-    vals[:cooling_shr] = to_float_or_nil(XMLHelper.get_value(heat_pump, "CoolingSensibleHeatFraction"))
-    vals[:backup_heating_fuel] = XMLHelper.get_value(heat_pump, "BackupSystemFuel")
-    vals[:backup_heating_capacity] = to_float_or_nil(XMLHelper.get_value(heat_pump, "BackupHeatingCapacity"))
-    vals[:backup_heating_efficiency_percent] = to_float_or_nil(XMLHelper.get_value(heat_pump, "BackupAnnualHeatingEfficiency[Units='Percent']/Value"))
-    vals[:backup_heating_efficiency_afue] = to_float_or_nil(XMLHelper.get_value(heat_pump, "BackupAnnualHeatingEfficiency[Units='AFUE']/Value"))
-    vals[:backup_heating_switchover_temp] = to_float_or_nil(XMLHelper.get_value(heat_pump, "BackupHeatingSwitchoverTemperature"))
-    vals[:fraction_heat_load_served] = to_float_or_nil(XMLHelper.get_value(heat_pump, "FractionHeatLoadServed"))
-    vals[:fraction_cool_load_served] = to_float_or_nil(XMLHelper.get_value(heat_pump, "FractionCoolLoadServed"))
-    vals[:cooling_efficiency_seer] = to_float_or_nil(XMLHelper.get_value(heat_pump, "[HeatPumpType='air-to-air' or HeatPumpType='mini-split']AnnualCoolingEfficiency[Units='SEER']/Value"))
-    vals[:cooling_efficiency_eer] = to_float_or_nil(XMLHelper.get_value(heat_pump, "[HeatPumpType='ground-to-air']AnnualCoolingEfficiency[Units='EER']/Value"))
-    vals[:heating_efficiency_hspf] = to_float_or_nil(XMLHelper.get_value(heat_pump, "[HeatPumpType='air-to-air' or HeatPumpType='mini-split']AnnualHeatingEfficiency[Units='HSPF']/Value"))
-    vals[:heating_efficiency_cop] = to_float_or_nil(XMLHelper.get_value(heat_pump, "[HeatPumpType='ground-to-air']AnnualHeatingEfficiency[Units='COP']/Value"))
-    vals[:energy_star] = XMLHelper.get_values(heat_pump, "ThirdPartyCertification").include?("Energy Star")
+    hpxml.elements.each("Building/BuildingDetails/Systems/HVAC/HVACPlant/HeatPump") do |heat_pump|
+      child_vals = {}
+      child_vals[:id] = _get_object_id(heat_pump)
+      child_vals[:distribution_system_idref] = _get_object_idref(heat_pump, "DistributionSystem")
+      child_vals[:year_installed] = _to_integer_or_nil(XMLHelper.get_value(heat_pump, "YearInstalled"))
+      child_vals[:heat_pump_type] = XMLHelper.get_value(heat_pump, "HeatPumpType")
+      child_vals[:heat_pump_fuel] = XMLHelper.get_value(heat_pump, "HeatPumpFuel")
+      child_vals[:heating_capacity] = _to_float_or_nil(XMLHelper.get_value(heat_pump, "HeatingCapacity"))
+      child_vals[:heating_capacity_17F] = _to_float_or_nil(XMLHelper.get_value(heat_pump, "HeatingCapacity17F"))
+      child_vals[:cooling_capacity] = _to_float_or_nil(XMLHelper.get_value(heat_pump, "CoolingCapacity"))
+      child_vals[:compressor_type] = XMLHelper.get_value(heat_pump, "CompressorType")
+      child_vals[:cooling_shr] = _to_float_or_nil(XMLHelper.get_value(heat_pump, "CoolingSensibleHeatFraction"))
+      child_vals[:backup_heating_fuel] = XMLHelper.get_value(heat_pump, "BackupSystemFuel")
+      child_vals[:backup_heating_capacity] = _to_float_or_nil(XMLHelper.get_value(heat_pump, "BackupHeatingCapacity"))
+      child_vals[:backup_heating_efficiency_percent] = _to_float_or_nil(XMLHelper.get_value(heat_pump, "BackupAnnualHeatingEfficiency[Units='Percent']/Value"))
+      child_vals[:backup_heating_efficiency_afue] = _to_float_or_nil(XMLHelper.get_value(heat_pump, "BackupAnnualHeatingEfficiency[Units='AFUE']/Value"))
+      child_vals[:backup_heating_switchover_temp] = _to_float_or_nil(XMLHelper.get_value(heat_pump, "BackupHeatingSwitchoverTemperature"))
+      child_vals[:fraction_heat_load_served] = _to_float_or_nil(XMLHelper.get_value(heat_pump, "FractionHeatLoadServed"))
+      child_vals[:fraction_cool_load_served] = _to_float_or_nil(XMLHelper.get_value(heat_pump, "FractionCoolLoadServed"))
+      child_vals[:cooling_efficiency_seer] = _to_float_or_nil(XMLHelper.get_value(heat_pump, "[HeatPumpType='air-to-air' or HeatPumpType='mini-split']AnnualCoolingEfficiency[Units='SEER']/Value"))
+      child_vals[:cooling_efficiency_eer] = _to_float_or_nil(XMLHelper.get_value(heat_pump, "[HeatPumpType='ground-to-air']AnnualCoolingEfficiency[Units='EER']/Value"))
+      child_vals[:heating_efficiency_hspf] = _to_float_or_nil(XMLHelper.get_value(heat_pump, "[HeatPumpType='air-to-air' or HeatPumpType='mini-split']AnnualHeatingEfficiency[Units='HSPF']/Value"))
+      child_vals[:heating_efficiency_cop] = _to_float_or_nil(XMLHelper.get_value(heat_pump, "[HeatPumpType='ground-to-air']AnnualHeatingEfficiency[Units='COP']/Value"))
+      child_vals[:energy_star] = XMLHelper.get_values(heat_pump, "ThirdPartyCertification").include?("Energy Star")
+      vals << child_vals
+    end
     return vals
   end
 
-  def self.add_hvac_control(hpxml:,
-                            id:,
-                            control_type: nil,
-                            heating_setpoint_temp: nil,
-                            heating_setback_temp: nil,
-                            heating_setback_hours_per_week: nil,
-                            heating_setback_start_hour: nil,
-                            cooling_setpoint_temp: nil,
-                            cooling_setup_temp: nil,
-                            cooling_setup_hours_per_week: nil,
-                            cooling_setup_start_hour: nil,
-                            ceiling_fan_cooling_setpoint_temp_offset: nil)
-    hvac = XMLHelper.create_elements_as_needed(hpxml, ["Building", "BuildingDetails", "Systems", "HVAC"])
+  def _add_object_hvac_control(id:,
+                               control_type: nil,
+                               heating_setpoint_temp: nil,
+                               heating_setback_temp: nil,
+                               heating_setback_hours_per_week: nil,
+                               heating_setback_start_hour: nil,
+                               cooling_setpoint_temp: nil,
+                               cooling_setup_temp: nil,
+                               cooling_setup_hours_per_week: nil,
+                               cooling_setup_start_hour: nil,
+                               ceiling_fan_cooling_setpoint_temp_offset: nil)
+    hvac = XMLHelper.create_elements_as_needed(@object, ["HPXML", "Building", "BuildingDetails", "Systems", "HVAC"])
     hvac_control = XMLHelper.add_element(hvac, "HVACControl")
     sys_id = XMLHelper.add_element(hvac_control, "SystemIdentifier")
     XMLHelper.add_attribute(sys_id, "id", id)
@@ -1285,38 +1485,42 @@ class HPXML
     XMLHelper.add_element(hvac_control, "SetupTempCoolingSeason", Float(cooling_setup_temp)) unless cooling_setup_temp.nil?
     XMLHelper.add_element(hvac_control, "SetpointTempCoolingSeason", Float(cooling_setpoint_temp)) unless cooling_setpoint_temp.nil?
     XMLHelper.add_element(hvac_control, "TotalSetupHoursperWeekCooling", Integer(cooling_setup_hours_per_week)) unless cooling_setup_hours_per_week.nil?
-    add_extension(parent: hvac_control,
-                  extensions: { "SetbackStartHourHeating" => to_integer_or_nil(heating_setback_start_hour),
-                                "SetupStartHourCooling" => to_integer_or_nil(cooling_setup_start_hour),
-                                "CeilingFanSetpointTempCoolingSeasonOffset" => to_float_or_nil(ceiling_fan_cooling_setpoint_temp_offset) })
+    _add_object_extension(parent: hvac_control,
+                          extensions: { "SetbackStartHourHeating" => _to_integer_or_nil(heating_setback_start_hour),
+                                        "SetupStartHourCooling" => _to_integer_or_nil(cooling_setup_start_hour),
+                                        "CeilingFanSetpointTempCoolingSeasonOffset" => _to_float_or_nil(ceiling_fan_cooling_setpoint_temp_offset) })
 
     return hvac_control
   end
 
-  def self.get_hvac_control_values(hvac_control:)
-    return nil if hvac_control.nil?
-
+  def _get_object_hvac_control_values(hpxml:)
     vals = {}
-    vals[:id] = get_id(hvac_control)
+    return vals if hpxml.nil?
+
+    hvac_control = hpxml.elements["Building/BuildingDetails/Systems/HVAC/HVACControl"]
+    return vals if hvac_control.nil?
+
+    vals[:id] = _get_object_id(hvac_control)
     vals[:control_type] = XMLHelper.get_value(hvac_control, "ControlType")
-    vals[:heating_setpoint_temp] = to_float_or_nil(XMLHelper.get_value(hvac_control, "SetpointTempHeatingSeason"))
-    vals[:heating_setback_temp] = to_float_or_nil(XMLHelper.get_value(hvac_control, "SetbackTempHeatingSeason"))
-    vals[:heating_setback_hours_per_week] = to_integer_or_nil(XMLHelper.get_value(hvac_control, "TotalSetbackHoursperWeekHeating"))
-    vals[:heating_setback_start_hour] = to_integer_or_nil(XMLHelper.get_value(hvac_control, "extension/SetbackStartHourHeating"))
-    vals[:cooling_setpoint_temp] = to_float_or_nil(XMLHelper.get_value(hvac_control, "SetpointTempCoolingSeason"))
-    vals[:cooling_setup_temp] = to_float_or_nil(XMLHelper.get_value(hvac_control, "SetupTempCoolingSeason"))
-    vals[:cooling_setup_hours_per_week] = to_integer_or_nil(XMLHelper.get_value(hvac_control, "TotalSetupHoursperWeekCooling"))
-    vals[:cooling_setup_start_hour] = to_integer_or_nil(XMLHelper.get_value(hvac_control, "extension/SetupStartHourCooling"))
-    vals[:ceiling_fan_cooling_setpoint_temp_offset] = to_float_or_nil(XMLHelper.get_value(hvac_control, "extension/CeilingFanSetpointTempCoolingSeasonOffset"))
+    vals[:heating_setpoint_temp] = _to_float_or_nil(XMLHelper.get_value(hvac_control, "SetpointTempHeatingSeason"))
+    vals[:heating_setback_temp] = _to_float_or_nil(XMLHelper.get_value(hvac_control, "SetbackTempHeatingSeason"))
+    vals[:heating_setback_hours_per_week] = _to_integer_or_nil(XMLHelper.get_value(hvac_control, "TotalSetbackHoursperWeekHeating"))
+    vals[:heating_setback_start_hour] = _to_integer_or_nil(XMLHelper.get_value(hvac_control, "extension/SetbackStartHourHeating"))
+    vals[:cooling_setpoint_temp] = _to_float_or_nil(XMLHelper.get_value(hvac_control, "SetpointTempCoolingSeason"))
+    vals[:cooling_setup_temp] = _to_float_or_nil(XMLHelper.get_value(hvac_control, "SetupTempCoolingSeason"))
+    vals[:cooling_setup_hours_per_week] = _to_integer_or_nil(XMLHelper.get_value(hvac_control, "TotalSetupHoursperWeekCooling"))
+    vals[:cooling_setup_start_hour] = _to_integer_or_nil(XMLHelper.get_value(hvac_control, "extension/SetupStartHourCooling"))
+    vals[:ceiling_fan_cooling_setpoint_temp_offset] = _to_float_or_nil(XMLHelper.get_value(hvac_control, "extension/CeilingFanSetpointTempCoolingSeasonOffset"))
     return vals
   end
 
-  def self.add_hvac_distribution(hpxml:,
-                                 id:,
-                                 distribution_system_type:,
-                                 annual_heating_dse: nil,
-                                 annual_cooling_dse: nil)
-    hvac = XMLHelper.create_elements_as_needed(hpxml, ["Building", "BuildingDetails", "Systems", "HVAC"])
+  def _add_object_hvac_distribution(id:,
+                                    distribution_system_type:,
+                                    annual_heating_dse: nil,
+                                    annual_cooling_dse: nil,
+                                    duct_leakage_measurements:,
+                                    ducts:)
+    hvac = XMLHelper.create_elements_as_needed(@object, ["HPXML", "Building", "BuildingDetails", "Systems", "HVAC"])
     hvac_distribution = XMLHelper.add_element(hvac, "HVACDistribution")
     sys_id = XMLHelper.add_element(hvac_distribution, "SystemIdentifier")
     XMLHelper.add_attribute(sys_id, "id", id)
@@ -1331,92 +1535,86 @@ class HPXML
       fail "Unexpected distribution_system_type '#{distribution_system_type}'."
     end
 
+    air_distribution = hvac_distribution.elements["DistributionSystemType/AirDistribution"]
+    return hvac_distribution if air_distribution.nil?
+
+    duct_leakage_measurements.each do |duct_leakage_measurement_values|
+      duct_leakage_measurement_el = XMLHelper.add_element(air_distribution, "DuctLeakageMeasurement")
+      XMLHelper.add_element(duct_leakage_measurement_el, "DuctType", duct_leakage_measurement_values[:duct_type])
+      duct_leakage_el = XMLHelper.add_element(duct_leakage_measurement_el, "DuctLeakage")
+      XMLHelper.add_element(duct_leakage_el, "Units", duct_leakage_measurement_values[:duct_leakage_units])
+      XMLHelper.add_element(duct_leakage_el, "Value", Float(duct_leakage_measurement_values[:duct_leakage_value]))
+      XMLHelper.add_element(duct_leakage_el, "TotalOrToOutside", "to outside")
+    end
+
+    ducts.each do |duct_values|
+      ducts_el = XMLHelper.add_element(air_distribution, "Ducts")
+      XMLHelper.add_element(ducts_el, "DuctType", duct_values[:duct_type])
+      XMLHelper.add_element(ducts_el, "DuctInsulationRValue", Float(duct_values[:duct_insulation_r_value]))
+      XMLHelper.add_element(ducts_el, "DuctLocation", duct_values[:duct_location])
+      XMLHelper.add_element(ducts_el, "DuctSurfaceArea", Float(duct_values[:duct_surface_area]))
+    end
+
     return hvac_distribution
   end
 
-  def self.get_hvac_distribution_values(hvac_distribution:)
-    return nil if hvac_distribution.nil?
+  def _get_object_hvac_distributions_values(hpxml:)
+    vals = []
+    return vals if hpxml.nil?
 
-    vals = {}
-    vals[:id] = get_id(hvac_distribution)
-    vals[:distribution_system_type] = XMLHelper.get_child_name(hvac_distribution, "DistributionSystemType")
-    if vals[:distribution_system_type] == "Other"
-      vals[:distribution_system_type] = XMLHelper.get_value(hvac_distribution.elements["DistributionSystemType"], "Other")
+    hpxml.elements.each("Building/BuildingDetails/Systems/HVAC/HVACDistribution") do |hvac_distribution|
+      child_vals = {}
+      child_vals[:id] = _get_object_id(hvac_distribution)
+      child_vals[:distribution_system_type] = XMLHelper.get_child_name(hvac_distribution, "DistributionSystemType")
+      if child_vals[:distribution_system_type] == "Other"
+        child_vals[:distribution_system_type] = XMLHelper.get_value(hvac_distribution.elements["DistributionSystemType"], "Other")
+      end
+      child_vals[:annual_heating_dse] = _to_float_or_nil(XMLHelper.get_value(hvac_distribution, "AnnualHeatingDistributionSystemEfficiency"))
+      child_vals[:annual_cooling_dse] = _to_float_or_nil(XMLHelper.get_value(hvac_distribution, "AnnualCoolingDistributionSystemEfficiency"))
+      child_vals[:duct_system_sealed] = _to_bool_or_nil(XMLHelper.get_value(hvac_distribution, "HVACDistributionImprovement/DuctSystemSealed"))
+
+      child_vals[:duct_leakage_measurements] = []
+      hvac_distribution.elements.each("DistributionSystemType/AirDistribution/DuctLeakageMeasurement") do |duct_leakage_measurement|
+        child2_vals = {}
+        child2_vals[:duct_type] = XMLHelper.get_value(duct_leakage_measurement, "DuctType")
+        child2_vals[:duct_leakage_test_method] = XMLHelper.get_value(duct_leakage_measurement, "DuctLeakageTestMethod")
+        child2_vals[:duct_leakage_units] = XMLHelper.get_value(duct_leakage_measurement, "DuctLeakage/Units")
+        child2_vals[:duct_leakage_value] = _to_float_or_nil(XMLHelper.get_value(duct_leakage_measurement, "DuctLeakage/Value"))
+        child2_vals[:duct_leakage_total_or_to_outside] = XMLHelper.get_value(duct_leakage_measurement, "DuctLeakage/TotalOrToOutside")
+        child_vals[:duct_leakage_measurements] << child2_vals
+      end
+
+      child_vals[:ducts] = []
+      hvac_distribution.elements.each("DistributionSystemType/AirDistribution/Ducts") do |ducts|
+        child2_vals = {}
+        child2_vals[:duct_type] = XMLHelper.get_value(ducts, "DuctType")
+        child2_vals[:duct_insulation_r_value] = _to_float_or_nil(XMLHelper.get_value(ducts, "DuctInsulationRValue"))
+        child2_vals[:duct_insulation_material] = XMLHelper.get_child_name(ducts, "DuctInsulationMaterial")
+        child2_vals[:duct_location] = XMLHelper.get_value(ducts, "DuctLocation")
+        child2_vals[:duct_fraction_area] = _to_float_or_nil(XMLHelper.get_value(ducts, "FractionDuctArea"))
+        child2_vals[:duct_surface_area] = _to_float_or_nil(XMLHelper.get_value(ducts, "DuctSurfaceArea"))
+        child_vals[:ducts] << child2_vals
+      end
+
+      vals << child_vals
     end
-    vals[:annual_heating_dse] = to_float_or_nil(XMLHelper.get_value(hvac_distribution, "AnnualHeatingDistributionSystemEfficiency"))
-    vals[:annual_cooling_dse] = to_float_or_nil(XMLHelper.get_value(hvac_distribution, "AnnualCoolingDistributionSystemEfficiency"))
-    vals[:duct_system_sealed] = to_bool_or_nil(XMLHelper.get_value(hvac_distribution, "HVACDistributionImprovement/DuctSystemSealed"))
     return vals
   end
 
-  def self.add_duct_leakage_measurement(air_distribution:,
-                                        duct_type:,
-                                        duct_leakage_units:,
-                                        duct_leakage_value:)
-    duct_leakage_measurement = XMLHelper.add_element(air_distribution, "DuctLeakageMeasurement")
-    XMLHelper.add_element(duct_leakage_measurement, "DuctType", duct_type)
-    duct_leakage = XMLHelper.add_element(duct_leakage_measurement, "DuctLeakage")
-    XMLHelper.add_element(duct_leakage, "Units", duct_leakage_units)
-    XMLHelper.add_element(duct_leakage, "Value", Float(duct_leakage_value))
-    XMLHelper.add_element(duct_leakage, "TotalOrToOutside", "to outside")
-
-    return duct_leakage_measurement
-  end
-
-  def self.get_duct_leakage_measurement_values(duct_leakage_measurement:)
-    return nil if duct_leakage_measurement.nil?
-
-    vals = {}
-    vals[:duct_type] = XMLHelper.get_value(duct_leakage_measurement, "DuctType")
-    vals[:duct_leakage_test_method] = XMLHelper.get_value(duct_leakage_measurement, "DuctLeakageTestMethod")
-    vals[:duct_leakage_units] = XMLHelper.get_value(duct_leakage_measurement, "DuctLeakage/Units")
-    vals[:duct_leakage_value] = to_float_or_nil(XMLHelper.get_value(duct_leakage_measurement, "DuctLeakage/Value"))
-    vals[:duct_leakage_total_or_to_outside] = XMLHelper.get_value(duct_leakage_measurement, "DuctLeakage/TotalOrToOutside")
-    return vals
-  end
-
-  def self.add_ducts(air_distribution:,
-                     duct_type:,
-                     duct_insulation_r_value:,
-                     duct_location:,
-                     duct_surface_area:)
-    ducts = XMLHelper.add_element(air_distribution, "Ducts")
-    XMLHelper.add_element(ducts, "DuctType", duct_type)
-    XMLHelper.add_element(ducts, "DuctInsulationRValue", Float(duct_insulation_r_value))
-    XMLHelper.add_element(ducts, "DuctLocation", duct_location)
-    XMLHelper.add_element(ducts, "DuctSurfaceArea", Float(duct_surface_area))
-
-    return ducts
-  end
-
-  def self.get_ducts_values(ducts:)
-    return nil if ducts.nil?
-
-    vals = {}
-    vals[:duct_type] = XMLHelper.get_value(ducts, "DuctType")
-    vals[:duct_insulation_r_value] = to_float_or_nil(XMLHelper.get_value(ducts, "DuctInsulationRValue"))
-    vals[:duct_insulation_material] = XMLHelper.get_child_name(ducts, "DuctInsulationMaterial")
-    vals[:duct_location] = XMLHelper.get_value(ducts, "DuctLocation")
-    vals[:duct_fraction_area] = to_float_or_nil(XMLHelper.get_value(ducts, "FractionDuctArea"))
-    vals[:duct_surface_area] = to_float_or_nil(XMLHelper.get_value(ducts, "DuctSurfaceArea"))
-    return vals
-  end
-
-  def self.add_ventilation_fan(hpxml:,
-                               id:,
-                               fan_type: nil,
-                               rated_flow_rate: nil,
-                               tested_flow_rate: nil,
-                               hours_in_operation: nil,
-                               used_for_whole_building_ventilation: nil,
-                               used_for_seasonal_cooling_load_reduction: nil,
-                               total_recovery_efficiency: nil,
-                               total_recovery_efficiency_adjusted: nil,
-                               sensible_recovery_efficiency: nil,
-                               sensible_recovery_efficiency_adjusted: nil,
-                               fan_power: nil,
-                               distribution_system_idref: nil)
-    ventilation_fans = XMLHelper.create_elements_as_needed(hpxml, ["Building", "BuildingDetails", "Systems", "MechanicalVentilation", "VentilationFans"])
+  def _add_object_ventilation_fan(id:,
+                                  fan_type: nil,
+                                  rated_flow_rate: nil,
+                                  tested_flow_rate: nil,
+                                  hours_in_operation: nil,
+                                  used_for_whole_building_ventilation: nil,
+                                  used_for_seasonal_cooling_load_reduction: nil,
+                                  total_recovery_efficiency: nil,
+                                  total_recovery_efficiency_adjusted: nil,
+                                  sensible_recovery_efficiency: nil,
+                                  sensible_recovery_efficiency_adjusted: nil,
+                                  fan_power: nil,
+                                  distribution_system_idref: nil)
+    ventilation_fans = XMLHelper.create_elements_as_needed(@object, ["HPXML", "Building", "BuildingDetails", "Systems", "MechanicalVentilation", "VentilationFans"])
     ventilation_fan = XMLHelper.add_element(ventilation_fans, "VentilationFan")
     sys_id = XMLHelper.add_element(ventilation_fan, "SystemIdentifier")
     XMLHelper.add_attribute(sys_id, "id", id)
@@ -1439,44 +1637,47 @@ class HPXML
     return ventilation_fan
   end
 
-  def self.get_ventilation_fan_values(ventilation_fan:)
-    return nil if ventilation_fan.nil?
+  def _get_object_ventilation_fans_values(hpxml:)
+    vals = []
+    return vals if hpxml.nil?
 
-    vals = {}
-    vals[:id] = get_id(ventilation_fan)
-    vals[:fan_type] = XMLHelper.get_value(ventilation_fan, "FanType")
-    vals[:rated_flow_rate] = to_float_or_nil(XMLHelper.get_value(ventilation_fan, "RatedFlowRate"))
-    vals[:tested_flow_rate] = to_float_or_nil(XMLHelper.get_value(ventilation_fan, "TestedFlowRate"))
-    vals[:hours_in_operation] = to_float_or_nil(XMLHelper.get_value(ventilation_fan, "HoursInOperation"))
-    vals[:used_for_whole_building_ventilation] = to_bool_or_nil(XMLHelper.get_value(ventilation_fan, "UsedForWholeBuildingVentilation"))
-    vals[:used_for_seasonal_cooling_load_reduction] = to_bool_or_nil(XMLHelper.get_value(ventilation_fan, "UsedForSeasonalCoolingLoadReduction"))
-    vals[:total_recovery_efficiency] = to_float_or_nil(XMLHelper.get_value(ventilation_fan, "TotalRecoveryEfficiency"))
-    vals[:total_recovery_efficiency_adjusted] = to_float_or_nil(XMLHelper.get_value(ventilation_fan, "AdjustedTotalRecoveryEfficiency"))
-    vals[:sensible_recovery_efficiency] = to_float_or_nil(XMLHelper.get_value(ventilation_fan, "SensibleRecoveryEfficiency"))
-    vals[:sensible_recovery_efficiency_adjusted] = to_float_or_nil(XMLHelper.get_value(ventilation_fan, "AdjustedSensibleRecoveryEfficiency"))
-    vals[:fan_power] = to_float_or_nil(XMLHelper.get_value(ventilation_fan, "FanPower"))
-    vals[:distribution_system_idref] = get_idref(ventilation_fan, "AttachedToHVACDistributionSystem")
+    hpxml.elements.each("Building/BuildingDetails/Systems/MechanicalVentilation/VentilationFans/VentilationFan") do |ventilation_fan|
+      child_vals = {}
+      child_vals[:id] = _get_object_id(ventilation_fan)
+      child_vals[:fan_type] = XMLHelper.get_value(ventilation_fan, "FanType")
+      child_vals[:rated_flow_rate] = _to_float_or_nil(XMLHelper.get_value(ventilation_fan, "RatedFlowRate"))
+      child_vals[:tested_flow_rate] = _to_float_or_nil(XMLHelper.get_value(ventilation_fan, "TestedFlowRate"))
+      child_vals[:hours_in_operation] = _to_float_or_nil(XMLHelper.get_value(ventilation_fan, "HoursInOperation"))
+      child_vals[:used_for_whole_building_ventilation] = _to_bool_or_nil(XMLHelper.get_value(ventilation_fan, "UsedForWholeBuildingVentilation"))
+      child_vals[:used_for_seasonal_cooling_load_reduction] = _to_bool_or_nil(XMLHelper.get_value(ventilation_fan, "UsedForSeasonalCoolingLoadReduction"))
+      child_vals[:total_recovery_efficiency] = _to_float_or_nil(XMLHelper.get_value(ventilation_fan, "TotalRecoveryEfficiency"))
+      child_vals[:total_recovery_efficiency_adjusted] = _to_float_or_nil(XMLHelper.get_value(ventilation_fan, "AdjustedTotalRecoveryEfficiency"))
+      child_vals[:sensible_recovery_efficiency] = _to_float_or_nil(XMLHelper.get_value(ventilation_fan, "SensibleRecoveryEfficiency"))
+      child_vals[:sensible_recovery_efficiency_adjusted] = _to_float_or_nil(XMLHelper.get_value(ventilation_fan, "AdjustedSensibleRecoveryEfficiency"))
+      child_vals[:fan_power] = _to_float_or_nil(XMLHelper.get_value(ventilation_fan, "FanPower"))
+      child_vals[:distribution_system_idref] = _get_object_idref(ventilation_fan, "AttachedToHVACDistributionSystem")
+      vals << child_vals
+    end
     return vals
   end
 
-  def self.add_water_heating_system(hpxml:,
-                                    id:,
-                                    fuel_type: nil,
-                                    water_heater_type:,
-                                    location:,
-                                    performance_adjustment: nil,
-                                    tank_volume: nil,
-                                    fraction_dhw_load_served:,
-                                    heating_capacity: nil,
-                                    energy_factor: nil,
-                                    uniform_energy_factor: nil,
-                                    recovery_efficiency: nil,
-                                    uses_desuperheater: nil,
-                                    jacket_r_value: nil,
-                                    temperature: nil,
-                                    related_hvac: nil,
-                                    standby_loss: nil)
-    water_heating = XMLHelper.create_elements_as_needed(hpxml, ["Building", "BuildingDetails", "Systems", "WaterHeating"])
+  def _add_object_water_heating_system(id:,
+                                       fuel_type: nil,
+                                       water_heater_type:,
+                                       location:,
+                                       performance_adjustment: nil,
+                                       tank_volume: nil,
+                                       fraction_dhw_load_served:,
+                                       heating_capacity: nil,
+                                       energy_factor: nil,
+                                       uniform_energy_factor: nil,
+                                       recovery_efficiency: nil,
+                                       uses_desuperheater: nil,
+                                       jacket_r_value: nil,
+                                       temperature: nil,
+                                       related_hvac: nil,
+                                       standby_loss: nil)
+    water_heating = XMLHelper.create_elements_as_needed(@object, ["HPXML", "Building", "BuildingDetails", "Systems", "WaterHeating"])
     water_heating_system = XMLHelper.add_element(water_heating, "WaterHeatingSystem")
     sys_id = XMLHelper.add_element(water_heating_system, "SystemIdentifier")
     XMLHelper.add_attribute(sys_id, "id", id)
@@ -1506,44 +1707,47 @@ class HPXML
     return water_heating_system
   end
 
-  def self.get_water_heating_system_values(water_heating_system:)
-    return nil if water_heating_system.nil?
+  def _get_object_water_heating_systems_values(hpxml:)
+    vals = []
+    return vals if hpxml.nil?
 
-    vals = {}
-    vals[:id] = get_id(water_heating_system)
-    vals[:year_installed] = to_integer_or_nil(XMLHelper.get_value(water_heating_system, "YearInstalled"))
-    vals[:fuel_type] = XMLHelper.get_value(water_heating_system, "FuelType")
-    vals[:water_heater_type] = XMLHelper.get_value(water_heating_system, "WaterHeaterType")
-    vals[:location] = XMLHelper.get_value(water_heating_system, "Location")
-    vals[:performance_adjustment] = to_float_or_nil(XMLHelper.get_value(water_heating_system, "PerformanceAdjustment"))
-    vals[:tank_volume] = to_float_or_nil(XMLHelper.get_value(water_heating_system, "TankVolume"))
-    vals[:fraction_dhw_load_served] = to_float_or_nil(XMLHelper.get_value(water_heating_system, "FractionDHWLoadServed"))
-    vals[:heating_capacity] = to_float_or_nil(XMLHelper.get_value(water_heating_system, "HeatingCapacity"))
-    vals[:energy_factor] = to_float_or_nil(XMLHelper.get_value(water_heating_system, "EnergyFactor"))
-    vals[:uniform_energy_factor] = to_float_or_nil(XMLHelper.get_value(water_heating_system, "UniformEnergyFactor"))
-    vals[:recovery_efficiency] = to_float_or_nil(XMLHelper.get_value(water_heating_system, "RecoveryEfficiency"))
-    vals[:uses_desuperheater] = to_bool_or_nil(XMLHelper.get_value(water_heating_system, "UsesDesuperheater"))
-    vals[:jacket_r_value] = to_float_or_nil(XMLHelper.get_value(water_heating_system, "WaterHeaterInsulation/Jacket/JacketRValue"))
-    vals[:related_hvac] = get_idref(water_heating_system, "RelatedHVACSystem")
-    vals[:energy_star] = XMLHelper.get_values(water_heating_system, "ThirdPartyCertification").include?("Energy Star")
-    vals[:standby_loss] = to_float_or_nil(XMLHelper.get_value(water_heating_system, "StandbyLoss"))
-    vals[:temperature] = to_float_or_nil(XMLHelper.get_value(water_heating_system, "HotWaterTemperature"))
+    hpxml.elements.each("Building/BuildingDetails/Systems/WaterHeating/WaterHeatingSystem") do |water_heating_system|
+      child_vals = {}
+      child_vals[:id] = _get_object_id(water_heating_system)
+      child_vals[:year_installed] = _to_integer_or_nil(XMLHelper.get_value(water_heating_system, "YearInstalled"))
+      child_vals[:fuel_type] = XMLHelper.get_value(water_heating_system, "FuelType")
+      child_vals[:water_heater_type] = XMLHelper.get_value(water_heating_system, "WaterHeaterType")
+      child_vals[:location] = XMLHelper.get_value(water_heating_system, "Location")
+      child_vals[:performance_adjustment] = _to_float_or_nil(XMLHelper.get_value(water_heating_system, "PerformanceAdjustment"))
+      child_vals[:tank_volume] = _to_float_or_nil(XMLHelper.get_value(water_heating_system, "TankVolume"))
+      child_vals[:fraction_dhw_load_served] = _to_float_or_nil(XMLHelper.get_value(water_heating_system, "FractionDHWLoadServed"))
+      child_vals[:heating_capacity] = _to_float_or_nil(XMLHelper.get_value(water_heating_system, "HeatingCapacity"))
+      child_vals[:energy_factor] = _to_float_or_nil(XMLHelper.get_value(water_heating_system, "EnergyFactor"))
+      child_vals[:uniform_energy_factor] = _to_float_or_nil(XMLHelper.get_value(water_heating_system, "UniformEnergyFactor"))
+      child_vals[:recovery_efficiency] = _to_float_or_nil(XMLHelper.get_value(water_heating_system, "RecoveryEfficiency"))
+      child_vals[:uses_desuperheater] = _to_bool_or_nil(XMLHelper.get_value(water_heating_system, "UsesDesuperheater"))
+      child_vals[:jacket_r_value] = _to_float_or_nil(XMLHelper.get_value(water_heating_system, "WaterHeaterInsulation/Jacket/JacketRValue"))
+      child_vals[:related_hvac] = _get_object_idref(water_heating_system, "RelatedHVACSystem")
+      child_vals[:energy_star] = XMLHelper.get_values(water_heating_system, "ThirdPartyCertification").include?("Energy Star")
+      child_vals[:standby_loss] = _to_float_or_nil(XMLHelper.get_value(water_heating_system, "StandbyLoss"))
+      child_vals[:temperature] = _to_float_or_nil(XMLHelper.get_value(water_heating_system, "HotWaterTemperature"))
+      vals << child_vals
+    end
     return vals
   end
 
-  def self.add_hot_water_distribution(hpxml:,
-                                      id:,
-                                      system_type:,
-                                      pipe_r_value:,
-                                      standard_piping_length: nil,
-                                      recirculation_control_type: nil,
-                                      recirculation_piping_length: nil,
-                                      recirculation_branch_piping_length: nil,
-                                      recirculation_pump_power: nil,
-                                      dwhr_facilities_connected: nil,
-                                      dwhr_equal_flow: nil,
-                                      dwhr_efficiency: nil)
-    water_heating = XMLHelper.create_elements_as_needed(hpxml, ["Building", "BuildingDetails", "Systems", "WaterHeating"])
+  def _add_object_hot_water_distribution(id:,
+                                         system_type:,
+                                         pipe_r_value:,
+                                         standard_piping_length: nil,
+                                         recirculation_control_type: nil,
+                                         recirculation_piping_length: nil,
+                                         recirculation_branch_piping_length: nil,
+                                         recirculation_pump_power: nil,
+                                         dwhr_facilities_connected: nil,
+                                         dwhr_equal_flow: nil,
+                                         dwhr_efficiency: nil)
+    water_heating = XMLHelper.create_elements_as_needed(@object, ["HPXML", "Building", "BuildingDetails", "Systems", "WaterHeating"])
     hot_water_distribution = XMLHelper.add_element(water_heating, "HotWaterDistribution")
     sys_id = XMLHelper.add_element(hot_water_distribution, "SystemIdentifier")
     XMLHelper.add_attribute(sys_id, "id", id)
@@ -1572,29 +1776,31 @@ class HPXML
     return hot_water_distribution
   end
 
-  def self.get_hot_water_distribution_values(hot_water_distribution:)
-    return nil if hot_water_distribution.nil?
-
+  def _get_object_hot_water_distribution_values(hpxml:)
     vals = {}
-    vals[:id] = get_id(hot_water_distribution)
+    return vals if hpxml.nil?
+
+    hot_water_distribution = hpxml.elements["Building/BuildingDetails/Systems/WaterHeating/HotWaterDistribution"]
+    return vals if hot_water_distribution.nil?
+
+    vals[:id] = _get_object_id(hot_water_distribution)
     vals[:system_type] = XMLHelper.get_child_name(hot_water_distribution, "SystemType")
-    vals[:pipe_r_value] = to_float_or_nil(XMLHelper.get_value(hot_water_distribution, "PipeInsulation/PipeRValue"))
-    vals[:standard_piping_length] = to_float_or_nil(XMLHelper.get_value(hot_water_distribution, "SystemType/Standard/PipingLength"))
+    vals[:pipe_r_value] = _to_float_or_nil(XMLHelper.get_value(hot_water_distribution, "PipeInsulation/PipeRValue"))
+    vals[:standard_piping_length] = _to_float_or_nil(XMLHelper.get_value(hot_water_distribution, "SystemType/Standard/PipingLength"))
     vals[:recirculation_control_type] = XMLHelper.get_value(hot_water_distribution, "SystemType/Recirculation/ControlType")
-    vals[:recirculation_piping_length] = to_float_or_nil(XMLHelper.get_value(hot_water_distribution, "SystemType/Recirculation/RecirculationPipingLoopLength"))
-    vals[:recirculation_branch_piping_length] = to_float_or_nil(XMLHelper.get_value(hot_water_distribution, "SystemType/Recirculation/BranchPipingLoopLength"))
-    vals[:recirculation_pump_power] = to_float_or_nil(XMLHelper.get_value(hot_water_distribution, "SystemType/Recirculation/PumpPower"))
+    vals[:recirculation_piping_length] = _to_float_or_nil(XMLHelper.get_value(hot_water_distribution, "SystemType/Recirculation/RecirculationPipingLoopLength"))
+    vals[:recirculation_branch_piping_length] = _to_float_or_nil(XMLHelper.get_value(hot_water_distribution, "SystemType/Recirculation/BranchPipingLoopLength"))
+    vals[:recirculation_pump_power] = _to_float_or_nil(XMLHelper.get_value(hot_water_distribution, "SystemType/Recirculation/PumpPower"))
     vals[:dwhr_facilities_connected] = XMLHelper.get_value(hot_water_distribution, "DrainWaterHeatRecovery/FacilitiesConnected")
-    vals[:dwhr_equal_flow] = to_bool_or_nil(XMLHelper.get_value(hot_water_distribution, "DrainWaterHeatRecovery/EqualFlow"))
-    vals[:dwhr_efficiency] = to_float_or_nil(XMLHelper.get_value(hot_water_distribution, "DrainWaterHeatRecovery/Efficiency"))
+    vals[:dwhr_equal_flow] = _to_bool_or_nil(XMLHelper.get_value(hot_water_distribution, "DrainWaterHeatRecovery/EqualFlow"))
+    vals[:dwhr_efficiency] = _to_float_or_nil(XMLHelper.get_value(hot_water_distribution, "DrainWaterHeatRecovery/Efficiency"))
     return vals
   end
 
-  def self.add_water_fixture(hpxml:,
-                             id:,
-                             water_fixture_type:,
-                             low_flow:)
-    water_heating = XMLHelper.create_elements_as_needed(hpxml, ["Building", "BuildingDetails", "Systems", "WaterHeating"])
+  def _add_object_water_fixture(id:,
+                                water_fixture_type:,
+                                low_flow:)
+    water_heating = XMLHelper.create_elements_as_needed(@object, ["HPXML", "Building", "BuildingDetails", "Systems", "WaterHeating"])
     water_fixture = XMLHelper.add_element(water_heating, "WaterFixture")
     sys_id = XMLHelper.add_element(water_fixture, "SystemIdentifier")
     XMLHelper.add_attribute(sys_id, "id", id)
@@ -1604,31 +1810,34 @@ class HPXML
     return water_fixture
   end
 
-  def self.get_water_fixture_values(water_fixture:)
-    return nil if water_fixture.nil?
+  def _get_object_water_fixtures_values(hpxml:)
+    vals = []
+    return vals if hpxml.nil?
 
-    vals = {}
-    vals[:id] = get_id(water_fixture)
-    vals[:water_fixture_type] = XMLHelper.get_value(water_fixture, "WaterFixtureType")
-    vals[:low_flow] = to_bool_or_nil(XMLHelper.get_value(water_fixture, "LowFlow"))
+    hpxml.elements.each("BuildingDetails/Systems/WaterHeating/WaterFixture") do |water_fixture|
+      child_vals = {}
+      child_vals[:id] = _get_object_id(water_fixture)
+      child_vals[:water_fixture_type] = XMLHelper.get_value(water_fixture, "WaterFixtureType")
+      child_vals[:low_flow] = _to_bool_or_nil(XMLHelper.get_value(water_fixture, "LowFlow"))
+      vals << child_vals
+    end
     return vals
   end
 
-  def self.add_solar_thermal_system(hpxml:,
-                                    id:,
-                                    system_type:,
-                                    collector_area: nil,
-                                    collector_loop_type: nil,
-                                    collector_azimuth: nil,
-                                    collector_type: nil,
-                                    collector_tilt: nil,
-                                    collector_frta: nil,
-                                    collector_frul: nil,
-                                    storage_volume: nil,
-                                    water_heating_system_idref:,
-                                    solar_fraction: nil)
+  def _add_object_solar_thermal_system(id:,
+                                       system_type:,
+                                       collector_area: nil,
+                                       collector_loop_type: nil,
+                                       collector_azimuth: nil,
+                                       collector_type: nil,
+                                       collector_tilt: nil,
+                                       collector_frta: nil,
+                                       collector_frul: nil,
+                                       storage_volume: nil,
+                                       water_heating_system_idref:,
+                                       solar_fraction: nil)
 
-    solar_thermal = XMLHelper.create_elements_as_needed(hpxml, ["Building", "BuildingDetails", "Systems", "SolarThermal"])
+    solar_thermal = XMLHelper.create_elements_as_needed(@object, ["HPXML", "Building", "BuildingDetails", "Systems", "SolarThermal"])
     solar_thermal_system = XMLHelper.add_element(solar_thermal, "SolarThermalSystem")
     sys_id = XMLHelper.add_element(solar_thermal_system, "SystemIdentifier")
     XMLHelper.add_attribute(sys_id, "id", id)
@@ -1648,36 +1857,38 @@ class HPXML
     return solar_thermal_system
   end
 
-  def self.get_solar_thermal_system_values(solar_thermal_system:)
-    return nil if solar_thermal_system.nil?
-
+  def _get_object_solar_thermal_system_values(hpxml:)
     vals = {}
-    vals[:id] = get_id(solar_thermal_system)
+    return vals if hpxml.nil?
+
+    solar_thermal_system = hpxml.elements["Building/BuildingDetails/Systems/SolarThermal/SolarThermalSystem"]
+    return vals if solar_thermal_system.nil?
+
+    vals[:id] = _get_object_id(solar_thermal_system)
     vals[:system_type] = XMLHelper.get_value(solar_thermal_system, "SystemType")
-    vals[:collector_area] = to_float_or_nil(XMLHelper.get_value(solar_thermal_system, "CollectorArea"))
+    vals[:collector_area] = _to_float_or_nil(XMLHelper.get_value(solar_thermal_system, "CollectorArea"))
     vals[:collector_loop_type] = XMLHelper.get_value(solar_thermal_system, "CollectorLoopType")
-    vals[:collector_azimuth] = to_integer_or_nil(XMLHelper.get_value(solar_thermal_system, "CollectorAzimuth"))
+    vals[:collector_azimuth] = _to_integer_or_nil(XMLHelper.get_value(solar_thermal_system, "CollectorAzimuth"))
     vals[:collector_type] = XMLHelper.get_value(solar_thermal_system, "CollectorType")
-    vals[:collector_tilt] = to_float_or_nil(XMLHelper.get_value(solar_thermal_system, "CollectorTilt"))
-    vals[:collector_frta] = to_float_or_nil(XMLHelper.get_value(solar_thermal_system, "CollectorRatedOpticalEfficiency"))
-    vals[:collector_frul] = to_float_or_nil(XMLHelper.get_value(solar_thermal_system, "CollectorRatedThermalLosses"))
-    vals[:storage_volume] = to_float_or_nil(XMLHelper.get_value(solar_thermal_system, "StorageVolume"))
-    vals[:water_heating_system_idref] = get_idref(solar_thermal_system, "ConnectedTo")
-    vals[:solar_fraction] = to_float_or_nil(XMLHelper.get_value(solar_thermal_system, "SolarFraction"))
+    vals[:collector_tilt] = _to_float_or_nil(XMLHelper.get_value(solar_thermal_system, "CollectorTilt"))
+    vals[:collector_frta] = _to_float_or_nil(XMLHelper.get_value(solar_thermal_system, "CollectorRatedOpticalEfficiency"))
+    vals[:collector_frul] = _to_float_or_nil(XMLHelper.get_value(solar_thermal_system, "CollectorRatedThermalLosses"))
+    vals[:storage_volume] = _to_float_or_nil(XMLHelper.get_value(solar_thermal_system, "StorageVolume"))
+    vals[:water_heating_system_idref] = _get_object_idref(solar_thermal_system, "ConnectedTo")
+    vals[:solar_fraction] = _to_float_or_nil(XMLHelper.get_value(solar_thermal_system, "SolarFraction"))
     return vals
   end
 
-  def self.add_pv_system(hpxml:,
-                         id:,
-                         location:,
-                         module_type:,
-                         tracking:,
-                         array_azimuth:,
-                         array_tilt:,
-                         max_power_output:,
-                         inverter_efficiency:,
-                         system_losses_fraction:)
-    photovoltaics = XMLHelper.create_elements_as_needed(hpxml, ["Building", "BuildingDetails", "Systems", "Photovoltaics"])
+  def _add_object_pv_system(id:,
+                            location:,
+                            module_type:,
+                            tracking:,
+                            array_azimuth:,
+                            array_tilt:,
+                            max_power_output:,
+                            inverter_efficiency:,
+                            system_losses_fraction:)
+    photovoltaics = XMLHelper.create_elements_as_needed(@object, ["HPXML", "Building", "BuildingDetails", "Systems", "Photovoltaics"])
     pv_system = XMLHelper.add_element(photovoltaics, "PVSystem")
     sys_id = XMLHelper.add_element(pv_system, "SystemIdentifier")
     XMLHelper.add_attribute(sys_id, "id", id)
@@ -1693,36 +1904,39 @@ class HPXML
     return pv_system
   end
 
-  def self.get_pv_system_values(pv_system:)
-    return nil if pv_system.nil?
+  def _get_object_pv_systems_values(hpxml:)
+    vals = []
+    return vals if hpxml.nil?
 
-    vals = {}
-    vals[:id] = get_id(pv_system)
-    vals[:location] = XMLHelper.get_value(pv_system, "Location")
-    vals[:module_type] = XMLHelper.get_value(pv_system, "ModuleType")
-    vals[:tracking] = XMLHelper.get_value(pv_system, "Tracking")
-    vals[:array_orientation] = XMLHelper.get_value(pv_system, "ArrayOrientation")
-    vals[:array_azimuth] = to_integer_or_nil(XMLHelper.get_value(pv_system, "ArrayAzimuth"))
-    vals[:array_tilt] = to_float_or_nil(XMLHelper.get_value(pv_system, "ArrayTilt"))
-    vals[:max_power_output] = to_float_or_nil(XMLHelper.get_value(pv_system, "MaxPowerOutput"))
-    vals[:inverter_efficiency] = to_float_or_nil(XMLHelper.get_value(pv_system, "InverterEfficiency"))
-    vals[:system_losses_fraction] = to_float_or_nil(XMLHelper.get_value(pv_system, "SystemLossesFraction"))
-    vals[:number_of_panels] = to_integer_or_nil(XMLHelper.get_value(pv_system, "NumberOfPanels"))
-    vals[:year_modules_manufactured] = to_integer_or_nil(XMLHelper.get_value(pv_system, "YearModulesManufactured"))
+    hpxml.elements.each("Building/BuildingDetails/Systems/Photovoltaics/PVSystem") do |pv_system|
+      child_vals = {}
+      child_vals[:id] = _get_object_id(pv_system)
+      child_vals[:location] = XMLHelper.get_value(pv_system, "Location")
+      child_vals[:module_type] = XMLHelper.get_value(pv_system, "ModuleType")
+      child_vals[:tracking] = XMLHelper.get_value(pv_system, "Tracking")
+      child_vals[:array_orientation] = XMLHelper.get_value(pv_system, "ArrayOrientation")
+      child_vals[:array_azimuth] = _to_integer_or_nil(XMLHelper.get_value(pv_system, "ArrayAzimuth"))
+      child_vals[:array_tilt] = _to_float_or_nil(XMLHelper.get_value(pv_system, "ArrayTilt"))
+      child_vals[:max_power_output] = _to_float_or_nil(XMLHelper.get_value(pv_system, "MaxPowerOutput"))
+      child_vals[:inverter_efficiency] = _to_float_or_nil(XMLHelper.get_value(pv_system, "InverterEfficiency"))
+      child_vals[:system_losses_fraction] = _to_float_or_nil(XMLHelper.get_value(pv_system, "SystemLossesFraction"))
+      child_vals[:number_of_panels] = _to_integer_or_nil(XMLHelper.get_value(pv_system, "NumberOfPanels"))
+      child_vals[:year_modules_manufactured] = _to_integer_or_nil(XMLHelper.get_value(pv_system, "YearModulesManufactured"))
+      vals << child_vals
+    end
     return vals
   end
 
-  def self.add_clothes_washer(hpxml:,
-                              id:,
-                              location:,
-                              modified_energy_factor: nil,
-                              integrated_modified_energy_factor: nil,
-                              rated_annual_kwh:,
-                              label_electric_rate:,
-                              label_gas_rate:,
-                              label_annual_gas_cost:,
-                              capacity:)
-    appliances = XMLHelper.create_elements_as_needed(hpxml, ["Building", "BuildingDetails", "Appliances"])
+  def _add_object_clothes_washer(id:,
+                                 location:,
+                                 modified_energy_factor: nil,
+                                 integrated_modified_energy_factor: nil,
+                                 rated_annual_kwh:,
+                                 label_electric_rate:,
+                                 label_gas_rate:,
+                                 label_annual_gas_cost:,
+                                 capacity:)
+    appliances = XMLHelper.create_elements_as_needed(@object, ["HPXML", "Building", "BuildingDetails", "Appliances"])
     clothes_washer = XMLHelper.add_element(appliances, "ClothesWasher")
     sys_id = XMLHelper.add_element(clothes_washer, "SystemIdentifier")
     XMLHelper.add_attribute(sys_id, "id", id)
@@ -1743,30 +1957,32 @@ class HPXML
     return clothes_washer
   end
 
-  def self.get_clothes_washer_values(clothes_washer:)
-    return nil if clothes_washer.nil?
-
+  def _get_object_clothes_washer_values(hpxml:)
     vals = {}
-    vals[:id] = get_id(clothes_washer)
+    return vals if hpxml.nil?
+
+    clothes_washer = hpxml.elements["Building/BuildingDetails/Appliances/ClothesWasher"]
+    return vals if clothes_washer.nil?
+
+    vals[:id] = _get_object_id(clothes_washer)
     vals[:location] = XMLHelper.get_value(clothes_washer, "Location")
-    vals[:modified_energy_factor] = to_float_or_nil(XMLHelper.get_value(clothes_washer, "ModifiedEnergyFactor"))
-    vals[:integrated_modified_energy_factor] = to_float_or_nil(XMLHelper.get_value(clothes_washer, "IntegratedModifiedEnergyFactor"))
-    vals[:rated_annual_kwh] = to_float_or_nil(XMLHelper.get_value(clothes_washer, "RatedAnnualkWh"))
-    vals[:label_electric_rate] = to_float_or_nil(XMLHelper.get_value(clothes_washer, "LabelElectricRate"))
-    vals[:label_gas_rate] = to_float_or_nil(XMLHelper.get_value(clothes_washer, "LabelGasRate"))
-    vals[:label_annual_gas_cost] = to_float_or_nil(XMLHelper.get_value(clothes_washer, "LabelAnnualGasCost"))
-    vals[:capacity] = to_float_or_nil(XMLHelper.get_value(clothes_washer, "Capacity"))
+    vals[:modified_energy_factor] = _to_float_or_nil(XMLHelper.get_value(clothes_washer, "ModifiedEnergyFactor"))
+    vals[:integrated_modified_energy_factor] = _to_float_or_nil(XMLHelper.get_value(clothes_washer, "IntegratedModifiedEnergyFactor"))
+    vals[:rated_annual_kwh] = _to_float_or_nil(XMLHelper.get_value(clothes_washer, "RatedAnnualkWh"))
+    vals[:label_electric_rate] = _to_float_or_nil(XMLHelper.get_value(clothes_washer, "LabelElectricRate"))
+    vals[:label_gas_rate] = _to_float_or_nil(XMLHelper.get_value(clothes_washer, "LabelGasRate"))
+    vals[:label_annual_gas_cost] = _to_float_or_nil(XMLHelper.get_value(clothes_washer, "LabelAnnualGasCost"))
+    vals[:capacity] = _to_float_or_nil(XMLHelper.get_value(clothes_washer, "Capacity"))
     return vals
   end
 
-  def self.add_clothes_dryer(hpxml:,
-                             id:,
-                             location:,
-                             fuel_type:,
-                             energy_factor: nil,
-                             combined_energy_factor: nil,
-                             control_type:)
-    appliances = XMLHelper.create_elements_as_needed(hpxml, ["Building", "BuildingDetails", "Appliances"])
+  def _add_object_clothes_dryer(id:,
+                                location:,
+                                fuel_type:,
+                                energy_factor: nil,
+                                combined_energy_factor: nil,
+                                control_type:)
+    appliances = XMLHelper.create_elements_as_needed(@object, ["HPXML", "Building", "BuildingDetails", "Appliances"])
     clothes_dryer = XMLHelper.add_element(appliances, "ClothesDryer")
     sys_id = XMLHelper.add_element(clothes_dryer, "SystemIdentifier")
     XMLHelper.add_attribute(sys_id, "id", id)
@@ -1784,25 +2000,27 @@ class HPXML
     return clothes_dryer
   end
 
-  def self.get_clothes_dryer_values(clothes_dryer:)
-    return nil if clothes_dryer.nil?
-
+  def _get_object_clothes_dryer_values(hpxml:)
     vals = {}
-    vals[:id] = get_id(clothes_dryer)
+    return vals if hpxml.nil?
+
+    clothes_dryer = hpxml.elements["Building/BuildingDetails/Appliances/ClothesDryer"]
+    return vals if clothes_dryer.nil?
+
+    vals[:id] = _get_object_id(clothes_dryer)
     vals[:location] = XMLHelper.get_value(clothes_dryer, "Location")
     vals[:fuel_type] = XMLHelper.get_value(clothes_dryer, "FuelType")
-    vals[:energy_factor] = to_float_or_nil(XMLHelper.get_value(clothes_dryer, "EnergyFactor"))
-    vals[:combined_energy_factor] = to_float_or_nil(XMLHelper.get_value(clothes_dryer, "CombinedEnergyFactor"))
+    vals[:energy_factor] = _to_float_or_nil(XMLHelper.get_value(clothes_dryer, "EnergyFactor"))
+    vals[:combined_energy_factor] = _to_float_or_nil(XMLHelper.get_value(clothes_dryer, "CombinedEnergyFactor"))
     vals[:control_type] = XMLHelper.get_value(clothes_dryer, "ControlType")
     return vals
   end
 
-  def self.add_dishwasher(hpxml:,
-                          id:,
-                          energy_factor: nil,
-                          rated_annual_kwh: nil,
-                          place_setting_capacity:)
-    appliances = XMLHelper.create_elements_as_needed(hpxml, ["Building", "BuildingDetails", "Appliances"])
+  def _add_object_dishwasher(id:,
+                             energy_factor: nil,
+                             rated_annual_kwh: nil,
+                             place_setting_capacity:)
+    appliances = XMLHelper.create_elements_as_needed(@object, ["HPXML", "Building", "BuildingDetails", "Appliances"])
     dishwasher = XMLHelper.add_element(appliances, "Dishwasher")
     sys_id = XMLHelper.add_element(dishwasher, "SystemIdentifier")
     XMLHelper.add_attribute(sys_id, "id", id)
@@ -1818,50 +2036,54 @@ class HPXML
     return dishwasher
   end
 
-  def self.get_dishwasher_values(dishwasher:)
-    return nil if dishwasher.nil?
-
+  def _get_object_dishwasher_values(hpxml:)
     vals = {}
-    vals[:id] = get_id(dishwasher)
-    vals[:energy_factor] = to_float_or_nil(XMLHelper.get_value(dishwasher, "EnergyFactor"))
-    vals[:rated_annual_kwh] = to_float_or_nil(XMLHelper.get_value(dishwasher, "RatedAnnualkWh"))
-    vals[:place_setting_capacity] = to_integer_or_nil(XMLHelper.get_value(dishwasher, "PlaceSettingCapacity"))
+    return vals if hpxml.nil?
+
+    dishwasher = hpxml.elements["Building/BuildingDetails/Appliances/Dishwasher"]
+    return vals if dishwasher.nil?
+
+    vals[:id] = _get_object_id(dishwasher)
+    vals[:energy_factor] = _to_float_or_nil(XMLHelper.get_value(dishwasher, "EnergyFactor"))
+    vals[:rated_annual_kwh] = _to_float_or_nil(XMLHelper.get_value(dishwasher, "RatedAnnualkWh"))
+    vals[:place_setting_capacity] = _to_integer_or_nil(XMLHelper.get_value(dishwasher, "PlaceSettingCapacity"))
     return vals
   end
 
-  def self.add_refrigerator(hpxml:,
-                            id:,
-                            location:,
-                            rated_annual_kwh: nil,
-                            adjusted_annual_kwh: nil)
-    appliances = XMLHelper.create_elements_as_needed(hpxml, ["Building", "BuildingDetails", "Appliances"])
+  def _add_object_refrigerator(id:,
+                               location:,
+                               rated_annual_kwh: nil,
+                               adjusted_annual_kwh: nil)
+    appliances = XMLHelper.create_elements_as_needed(@object, ["HPXML", "Building", "BuildingDetails", "Appliances"])
     refrigerator = XMLHelper.add_element(appliances, "Refrigerator")
     sys_id = XMLHelper.add_element(refrigerator, "SystemIdentifier")
     XMLHelper.add_attribute(sys_id, "id", id)
     XMLHelper.add_element(refrigerator, "Location", location)
     XMLHelper.add_element(refrigerator, "RatedAnnualkWh", Float(rated_annual_kwh)) unless rated_annual_kwh.nil?
-    add_extension(parent: refrigerator,
-                  extensions: { "AdjustedAnnualkWh" => to_float_or_nil(adjusted_annual_kwh) })
+    _add_object_extension(parent: refrigerator,
+                          extensions: { "AdjustedAnnualkWh" => _to_float_or_nil(adjusted_annual_kwh) })
 
     return refrigerator
   end
 
-  def self.get_refrigerator_values(refrigerator:)
-    return nil if refrigerator.nil?
-
+  def _get_object_refrigerator_values(hpxml:)
     vals = {}
-    vals[:id] = get_id(refrigerator)
+    return vals if hpxml.nil?
+
+    refrigerator = hpxml.elements["Building/BuildingDetails/Appliances/Refrigerator"]
+    return vals if refrigerator.nil?
+
+    vals[:id] = _get_object_id(refrigerator)
     vals[:location] = XMLHelper.get_value(refrigerator, "Location")
-    vals[:rated_annual_kwh] = to_float_or_nil(XMLHelper.get_value(refrigerator, "RatedAnnualkWh"))
-    vals[:adjusted_annual_kwh] = to_float_or_nil(XMLHelper.get_value(refrigerator, "extension/AdjustedAnnualkWh"))
+    vals[:rated_annual_kwh] = _to_float_or_nil(XMLHelper.get_value(refrigerator, "RatedAnnualkWh"))
+    vals[:adjusted_annual_kwh] = _to_float_or_nil(XMLHelper.get_value(refrigerator, "extension/AdjustedAnnualkWh"))
     return vals
   end
 
-  def self.add_cooking_range(hpxml:,
-                             id:,
-                             fuel_type:,
-                             is_induction:)
-    appliances = XMLHelper.create_elements_as_needed(hpxml, ["Building", "BuildingDetails", "Appliances"])
+  def _add_object_cooking_range(id:,
+                                fuel_type:,
+                                is_induction:)
+    appliances = XMLHelper.create_elements_as_needed(@object, ["HPXML", "Building", "BuildingDetails", "Appliances"])
     cooking_range = XMLHelper.add_element(appliances, "CookingRange")
     sys_id = XMLHelper.add_element(cooking_range, "SystemIdentifier")
     XMLHelper.add_attribute(sys_id, "id", id)
@@ -1871,20 +2093,22 @@ class HPXML
     return cooking_range
   end
 
-  def self.get_cooking_range_values(cooking_range:)
-    return nil if cooking_range.nil?
-
+  def _get_object_cooking_range_values(hpxml:)
     vals = {}
-    vals[:id] = get_id(cooking_range)
+    return vals if hpxml.nil?
+
+    cooking_range = hpxml.elements["Building/BuildingDetails/Appliances/CookingRange"]
+    return vals if cooking_range.nil?
+
+    vals[:id] = _get_object_id(cooking_range)
     vals[:fuel_type] = XMLHelper.get_value(cooking_range, "FuelType")
-    vals[:is_induction] = to_bool_or_nil(XMLHelper.get_value(cooking_range, "IsInduction"))
+    vals[:is_induction] = _to_bool_or_nil(XMLHelper.get_value(cooking_range, "IsInduction"))
     return vals
   end
 
-  def self.add_oven(hpxml:,
-                    id:,
-                    is_convection:)
-    appliances = XMLHelper.create_elements_as_needed(hpxml, ["Building", "BuildingDetails", "Appliances"])
+  def _add_object_oven(id:,
+                       is_convection:)
+    appliances = XMLHelper.create_elements_as_needed(@object, ["HPXML", "Building", "BuildingDetails", "Appliances"])
     oven = XMLHelper.add_element(appliances, "Oven")
     sys_id = XMLHelper.add_element(oven, "SystemIdentifier")
     XMLHelper.add_attribute(sys_id, "id", id)
@@ -1893,23 +2117,25 @@ class HPXML
     return oven
   end
 
-  def self.get_oven_values(oven:)
-    return nil if oven.nil?
-
+  def _get_object_oven_values(hpxml:)
     vals = {}
-    vals[:id] = get_id(oven)
-    vals[:is_convection] = to_bool_or_nil(XMLHelper.get_value(oven, "IsConvection"))
+    return vals if hpxml.nil?
+
+    oven = hpxml.elements["Building/BuildingDetails/Appliances/Oven"]
+    return vals if oven.nil?
+
+    vals[:id] = _get_object_id(oven)
+    vals[:is_convection] = _to_bool_or_nil(XMLHelper.get_value(oven, "IsConvection"))
     return vals
   end
 
-  def self.add_lighting(hpxml:,
-                        fraction_tier_i_interior:,
-                        fraction_tier_i_exterior:,
-                        fraction_tier_i_garage:,
-                        fraction_tier_ii_interior:,
-                        fraction_tier_ii_exterior:,
-                        fraction_tier_ii_garage:)
-    lighting = XMLHelper.create_elements_as_needed(hpxml, ["Building", "BuildingDetails", "Lighting"])
+  def _add_object_lighting(fraction_tier_i_interior:,
+                           fraction_tier_i_exterior:,
+                           fraction_tier_i_garage:,
+                           fraction_tier_ii_interior:,
+                           fraction_tier_ii_exterior:,
+                           fraction_tier_ii_garage:)
+    lighting = XMLHelper.create_elements_as_needed(@object, ["HPXML", "Building", "BuildingDetails", "Lighting"])
 
     lighting_group = XMLHelper.add_element(lighting, "LightingGroup")
     sys_id = XMLHelper.add_element(lighting_group, "SystemIdentifier")
@@ -1956,24 +2182,26 @@ class HPXML
     return lighting_group
   end
 
-  def self.get_lighting_values(lighting:)
-    return nil if lighting.nil?
-
+  def _get_object_lighting_values(hpxml:)
     vals = {}
-    vals[:fraction_tier_i_interior] = to_float_or_nil(XMLHelper.get_value(lighting, "LightingGroup[ThirdPartyCertification='ERI Tier I' and Location='interior']/FractionofUnitsInLocation"))
-    vals[:fraction_tier_i_exterior] = to_float_or_nil(XMLHelper.get_value(lighting, "LightingGroup[ThirdPartyCertification='ERI Tier I' and Location='exterior']/FractionofUnitsInLocation"))
-    vals[:fraction_tier_i_garage] = to_float_or_nil(XMLHelper.get_value(lighting, "LightingGroup[ThirdPartyCertification='ERI Tier I' and Location='garage']/FractionofUnitsInLocation"))
-    vals[:fraction_tier_ii_interior] = to_float_or_nil(XMLHelper.get_value(lighting, "LightingGroup[ThirdPartyCertification='ERI Tier II' and Location='interior']/FractionofUnitsInLocation"))
-    vals[:fraction_tier_ii_exterior] = to_float_or_nil(XMLHelper.get_value(lighting, "LightingGroup[ThirdPartyCertification='ERI Tier II' and Location='exterior']/FractionofUnitsInLocation"))
-    vals[:fraction_tier_ii_garage] = to_float_or_nil(XMLHelper.get_value(lighting, "LightingGroup[ThirdPartyCertification='ERI Tier II' and Location='garage']/FractionofUnitsInLocation"))
+    return vals if hpxml.nil?
+
+    lighting = hpxml.elements["Building/BuildingDetails/Lighting"]
+    return vals if lighting.nil?
+
+    vals[:fraction_tier_i_interior] = _to_float_or_nil(XMLHelper.get_value(lighting, "LightingGroup[ThirdPartyCertification='ERI Tier I' and Location='interior']/FractionofUnitsInLocation"))
+    vals[:fraction_tier_i_exterior] = _to_float_or_nil(XMLHelper.get_value(lighting, "LightingGroup[ThirdPartyCertification='ERI Tier I' and Location='exterior']/FractionofUnitsInLocation"))
+    vals[:fraction_tier_i_garage] = _to_float_or_nil(XMLHelper.get_value(lighting, "LightingGroup[ThirdPartyCertification='ERI Tier I' and Location='garage']/FractionofUnitsInLocation"))
+    vals[:fraction_tier_ii_interior] = _to_float_or_nil(XMLHelper.get_value(lighting, "LightingGroup[ThirdPartyCertification='ERI Tier II' and Location='interior']/FractionofUnitsInLocation"))
+    vals[:fraction_tier_ii_exterior] = _to_float_or_nil(XMLHelper.get_value(lighting, "LightingGroup[ThirdPartyCertification='ERI Tier II' and Location='exterior']/FractionofUnitsInLocation"))
+    vals[:fraction_tier_ii_garage] = _to_float_or_nil(XMLHelper.get_value(lighting, "LightingGroup[ThirdPartyCertification='ERI Tier II' and Location='garage']/FractionofUnitsInLocation"))
     return vals
   end
 
-  def self.add_ceiling_fan(hpxml:,
-                           id:,
-                           efficiency: nil,
-                           quantity: nil)
-    lighting = XMLHelper.create_elements_as_needed(hpxml, ["Building", "BuildingDetails", "Lighting"])
+  def _add_object_ceiling_fan(id:,
+                              efficiency: nil,
+                              quantity: nil)
+    lighting = XMLHelper.create_elements_as_needed(@object, ["HPXML", "Building", "BuildingDetails", "Lighting"])
     ceiling_fan = XMLHelper.add_element(lighting, "CeilingFan")
     sys_id = XMLHelper.add_element(ceiling_fan, "SystemIdentifier")
     XMLHelper.add_attribute(sys_id, "id", id)
@@ -1987,23 +2215,26 @@ class HPXML
     return ceiling_fan
   end
 
-  def self.get_ceiling_fan_values(ceiling_fan:)
-    return nil if ceiling_fan.nil?
+  def _get_object_ceiling_fans_values(hpxml:)
+    vals = []
+    return vals if hpxml.nil?
 
-    vals = {}
-    vals[:id] = get_id(ceiling_fan)
-    vals[:efficiency] = to_float_or_nil(XMLHelper.get_value(ceiling_fan, "Airflow[FanSpeed='medium']/Efficiency"))
-    vals[:quantity] = to_integer_or_nil(XMLHelper.get_value(ceiling_fan, "Quantity"))
+    hpxml.elements.each("Building/BuildingDetails/Lighting/CeilingFan") do |ceiling_fan|
+      child_vals = {}
+      child_vals[:id] = _get_object_id(ceiling_fan)
+      child_vals[:efficiency] = _to_float_or_nil(XMLHelper.get_value(ceiling_fan, "Airflow[FanSpeed='medium']/Efficiency"))
+      child_vals[:quantity] = _to_integer_or_nil(XMLHelper.get_value(ceiling_fan, "Quantity"))
+      vals << child_vals
+    end
     return vals
   end
 
-  def self.add_plug_load(hpxml:,
-                         id:,
-                         plug_load_type: nil,
-                         kWh_per_year: nil,
-                         frac_sensible: nil,
-                         frac_latent: nil)
-    misc_loads = XMLHelper.create_elements_as_needed(hpxml, ["Building", "BuildingDetails", "MiscLoads"])
+  def _add_object_plug_load(id:,
+                            plug_load_type: nil,
+                            kWh_per_year: nil,
+                            frac_sensible: nil,
+                            frac_latent: nil)
+    misc_loads = XMLHelper.create_elements_as_needed(@object, ["HPXML", "Building", "BuildingDetails", "MiscLoads"])
     plug_load = XMLHelper.add_element(misc_loads, "PlugLoad")
     sys_id = XMLHelper.add_element(plug_load, "SystemIdentifier")
     XMLHelper.add_attribute(sys_id, "id", id)
@@ -2013,52 +2244,56 @@ class HPXML
       XMLHelper.add_element(load, "Units", "kWh/year")
       XMLHelper.add_element(load, "Value", Float(kWh_per_year))
     end
-    add_extension(parent: plug_load,
-                  extensions: { "FracSensible" => to_float_or_nil(frac_sensible),
-                                "FracLatent" => to_float_or_nil(frac_latent) })
+    _add_object_extension(parent: plug_load,
+                          extensions: { "FracSensible" => _to_float_or_nil(frac_sensible),
+                                        "FracLatent" => _to_float_or_nil(frac_latent) })
 
     return plug_load
   end
 
-  def self.get_plug_load_values(plug_load:)
-    return nil if plug_load.nil?
+  def _get_object_plug_loads_values(hpxml:)
+    vals = []
+    return vals if hpxml.nil?
 
-    vals = {}
-    vals[:id] = get_id(plug_load)
-    vals[:plug_load_type] = XMLHelper.get_value(plug_load, "PlugLoadType")
-    vals[:kWh_per_year] = to_float_or_nil(XMLHelper.get_value(plug_load, "Load[Units='kWh/year']/Value"))
-    vals[:frac_sensible] = to_float_or_nil(XMLHelper.get_value(plug_load, "extension/FracSensible"))
-    vals[:frac_latent] = to_float_or_nil(XMLHelper.get_value(plug_load, "extension/FracLatent"))
+    hpxml.elements.each("Building/BuildingDetails/MiscLoads/PlugLoad") do |plug_load|
+      child_vals = {}
+      child_vals[:id] = _get_object_id(plug_load)
+      child_vals[:plug_load_type] = XMLHelper.get_value(plug_load, "PlugLoadType")
+      child_vals[:kWh_per_year] = _to_float_or_nil(XMLHelper.get_value(plug_load, "Load[Units='kWh/year']/Value"))
+      child_vals[:frac_sensible] = _to_float_or_nil(XMLHelper.get_value(plug_load, "extension/FracSensible"))
+      child_vals[:frac_latent] = _to_float_or_nil(XMLHelper.get_value(plug_load, "extension/FracLatent"))
+      vals << child_vals
+    end
     return vals
   end
 
-  def self.add_misc_loads_schedule(hpxml:,
-                                   weekday_fractions: nil,
-                                   weekend_fractions: nil,
-                                   monthly_multipliers: nil)
-    misc_loads = XMLHelper.create_elements_as_needed(hpxml, ["Building", "BuildingDetails", "MiscLoads"])
-    add_extension(parent: misc_loads,
-                  extensions: { "WeekdayScheduleFractions" => weekday_fractions,
-                                "WeekendScheduleFractions" => weekend_fractions,
-                                "MonthlyScheduleMultipliers" => monthly_multipliers })
+  def _add_object_misc_loads_schedule(weekday_fractions: nil,
+                                      weekend_fractions: nil,
+                                      monthly_multipliers: nil)
+    misc_loads = XMLHelper.create_elements_as_needed(@object, ["HPXML", "Building", "BuildingDetails", "MiscLoads"])
+    _add_object_extension(parent: misc_loads,
+                          extensions: { "WeekdayScheduleFractions" => weekday_fractions,
+                                        "WeekendScheduleFractions" => weekend_fractions,
+                                        "MonthlyScheduleMultipliers" => monthly_multipliers })
 
     return misc_loads
   end
 
-  def self.get_misc_loads_schedule_values(misc_loads:)
-    return nil if misc_loads.nil?
-
+  def _get_object_misc_loads_schedule_values(hpxml:)
     vals = {}
+    return vals if hpxml.nil?
+
+    misc_loads = hpxml.elements["Building/BuildingDetails/MiscLoads"]
+    return vals if misc_loads.nil?
+
     vals[:weekday_fractions] = XMLHelper.get_value(misc_loads, "extension/WeekdayScheduleFractions")
     vals[:weekend_fractions] = XMLHelper.get_value(misc_loads, "extension/WeekendScheduleFractions")
     vals[:monthly_multipliers] = XMLHelper.get_value(misc_loads, "extension/MonthlyScheduleMultipliers")
     return vals
   end
 
-  private
-
-  def self.add_extension(parent:,
-                         extensions: {})
+  def _add_object_extension(parent:,
+                            extensions: {})
     extension = nil
     unless extensions.empty?
       extensions.each do |name, value|
@@ -2075,30 +2310,30 @@ class HPXML
     return extension
   end
 
-  def self.get_id(parent, element_name = "SystemIdentifier")
+  def _get_object_id(parent, element_name = "SystemIdentifier")
     return parent.elements[element_name].attributes["id"]
   end
 
-  def self.get_idref(parent, element_name)
+  def _get_object_idref(parent, element_name)
     element = parent.elements[element_name]
     return if element.nil?
 
     return element.attributes["idref"]
   end
 
-  def self.to_float_or_nil(value)
+  def _to_float_or_nil(value)
     return nil if value.nil?
 
     return Float(value)
   end
 
-  def self.to_integer_or_nil(value)
+  def _to_integer_or_nil(value)
     return nil if value.nil?
 
     return Integer(Float(value))
   end
 
-  def self.to_bool_or_nil(value)
+  def _to_bool_or_nil(value)
     return nil if value.nil?
 
     return Boolean(value)
@@ -2125,7 +2360,7 @@ def is_adjacent_to_conditioned(adjacent_to)
   return false
 end
 
-def hpxml_framefloor_is_ceiling(floor_interior_adjacent_to, floor_exterior_adjacent_to)
+def hpxml_frame_floor_is_ceiling(floor_interior_adjacent_to, floor_exterior_adjacent_to)
   if ["attic - vented", "attic - unvented"].include? floor_interior_adjacent_to
     return true
   elsif ["attic - vented", "attic - unvented", "other housing unit above"].include? floor_exterior_adjacent_to
