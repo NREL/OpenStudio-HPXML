@@ -205,6 +205,8 @@ class OSModel
     HPXML.collapse_enclosure(enclosure)
 
     # Global variables
+    @timestep = hpxml_values[:timestep]
+    @timestep = 60 if @timestep.nil?
     construction_values = HPXML.get_building_construction_values(building_construction: building.elements["BuildingDetails/BuildingSummary/BuildingConstruction"])
     @cfa = construction_values[:conditioned_floor_area]
     @cfa_ag = @cfa
@@ -292,7 +294,11 @@ class OSModel
     sim.setRunSimulationforSizingPeriods(false)
 
     tstep = model.getTimestep
-    tstep.setNumberOfTimestepsPerHour(1)
+    valid_tsteps = [60, 30, 20, 15, 12, 10, 6, 5, 4, 3, 2, 1]
+    if not valid_tsteps.include? @timestep
+      fail "Timestep (#{@timestep}) must be one of: #{valid_tsteps.join(', ')}."
+    end
+    tstep.setNumberOfTimestepsPerHour(60 / @timestep)
 
     shad = model.getShadowCalculation
     shad.setCalculationFrequency(20)
@@ -1348,6 +1354,9 @@ class OSModel
         slab_values = HPXML.get_slab_values(slab: slab)
         slab_exp_perims[slab] = slab_values[:exposed_perimeter]
         slab_areas[slab] = slab_values[:area]
+        if slab_exp_perims[slab] <= 0
+          fail "Exposed perimeter for Slab '#{slab_values[:id]}' must be greater than zero."
+        end
       end
       total_slab_exp_perim = slab_exp_perims.values.inject(0, :+)
       total_slab_area = slab_areas.values.inject(0, :+)
@@ -1763,6 +1772,9 @@ class OSModel
         overhang_depth = window_values[:overhangs_depth]
         overhang_distance_to_top = window_values[:overhangs_distance_to_top_of_window]
         overhang_distance_to_bottom = window_values[:overhangs_distance_to_bottom_of_window]
+        if overhang_distance_to_bottom <= overhang_distance_to_top
+          fail "For Window '#{window_id}', overhangs distance to bottom (#{overhang_distance_to_bottom}) must be greater than distance to top (#{overhang_distance_to_top})."
+        end
         window_height = overhang_distance_to_bottom - overhang_distance_to_top
       end
 
