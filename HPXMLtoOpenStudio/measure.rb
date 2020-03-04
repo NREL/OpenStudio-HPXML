@@ -4296,8 +4296,9 @@ class OSModel
         program_cm.setName("#{program.name.to_s} calling manager")
         program_cm.setCallingPoint("EndOfSystemTimestepAfterHVACReporting")
         program_cm.addProgram(program)
-
       end
+
+      # FIXME: wait for new OS release with bugfix of https://github.com/NREL/OpenStudio/issues/3848
       otherside_object.setPointer(9, @other_side_indoor_sch.handle)
       surface.setSurfacePropertyOtherSideCoefficients(otherside_object)
       spaces[exterior_adjacent_to] = otherside_object
