@@ -3116,7 +3116,7 @@ class OSModel
         cfis_sys_ids = []
         (@hpxml.heating_systems + @hpxml.cooling_systems + @hpxml.heat_pumps).each do |hvac_system|
           next if hvac_system[:distribution_system_idref].nil?
-          next unless hvac_distribution[:distribution_system_type] == hvac_system[:distribution_system_idref]
+          next unless hvac_distribution[:id] == hvac_system[:distribution_system_idref]
 
           cfis_sys_ids << hvac_system[:id]
         end

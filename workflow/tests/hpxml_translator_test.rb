@@ -848,7 +848,7 @@ class HPXMLTest < MiniTest::Test
         query = "SELECT Value FROM TabularDataWithStrings WHERE ReportName='EnvelopeSummary' AND ReportForString='Entire Facility' AND TableName='Exterior Fenestration' AND RowName='#{subsurface_id}' AND ColumnName='Tilt' AND Units='deg'"
         sql_value = sqlFile.execAndReturnFirstDouble(query).get
         assert_in_epsilon(90.0, sql_value, 0.01)
-      elsif subsurface[:roof_idref].nil?
+      elsif not subsurface[:roof_idref].nil?
         hpxml_value = nil
         hpxml.roofs.each do |roof|
           next if roof[:id] != subsurface[:roof_idref]
@@ -961,7 +961,7 @@ class HPXMLTest < MiniTest::Test
         hp_cap_clg *= 1.20 # TODO: Generalize this
         hp_cap_htg *= 1.20 # TODO: Generalize this
       end
-      supp_hp_cap = heat_pump[:backup_heating_capacity]
+      supp_hp_cap = heat_pump[:backup_heating_capacity].to_f
       if hp_cap_clg > 0
         clg_cap = 0 if clg_cap.nil?
         clg_cap += hp_cap_clg

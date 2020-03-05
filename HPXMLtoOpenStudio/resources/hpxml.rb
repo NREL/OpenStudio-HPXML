@@ -225,9 +225,9 @@ class HPXML
   end
 
   def _get_object_header_values(hpxml:)
-    return {} if hpxml.nil?
-
     vals = {}
+    return vals if hpxml.nil?
+
     vals[:schema_version] = hpxml.attributes["schemaVersion"]
     vals[:xml_type] = XMLHelper.get_value(hpxml, "XMLTransactionHeaderInformation/XMLType")
     vals[:xml_generated_by] = XMLHelper.get_value(hpxml, "XMLTransactionHeaderInformation/XMLGeneratedBy")
