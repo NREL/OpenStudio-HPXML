@@ -2133,7 +2133,7 @@ class OSModel
             boiler_afue = nil
             boiler_fuel_type = nil
             @hpxml.heating_systems.each do |heating_system|
-              next unless heating_system[:id] == idref
+              next unless heating_system[:id] == water_heating_system[:related_hvac]
 
               boiler_afue = heating_system[:heating_efficiency_afue]
               boiler_fuel_type = heating_system[:heating_system_fuel]
@@ -2208,9 +2208,9 @@ class OSModel
           fail "Attached water heating system '#{dhw_system_idref}' not found for solar thermal system '#{@hpxml.solar_thermal_system[:id]}'."
         end
 
-        Waterheater.apply_ @hpxml.solar_thermal_system(model, space, collector_area, frta, frul, storage_vol,
-                                                       azimuth, tilt, collector_type, loop_type, dhw_loop, @dhw_map,
-                                                       dhw_system_idref)
+        Waterheater.apply_solar_thermal(model, space, collector_area, frta, frul, storage_vol,
+                                        azimuth, tilt, collector_type, loop_type, dhw_loop, @dhw_map,
+                                        dhw_system_idref)
       end
     end
 
@@ -3049,36 +3049,36 @@ class OSModel
     @hpxml.ventilation_fans.each do |vent_fan_values|
       next unless vent_fan_values[:used_for_whole_building_ventilation]
 
-      mech_vent_id = mech_vent_fan_values[:id]
-      mech_vent_type = mech_vent_fan_values[:fan_type]
+      mech_vent_id = vent_fan_values[:id]
+      mech_vent_type = vent_fan_values[:fan_type]
       if mech_vent_type == 'energy recovery ventilator' or mech_vent_type == 'heat recovery ventilator'
-        if mech_vent_fan_values[:sensible_recovery_efficiency_adjusted].nil?
-          mech_vent_sens_eff = mech_vent_fan_values[:sensible_recovery_efficiency]
+        if vent_fan_values[:sensible_recovery_efficiency_adjusted].nil?
+          mech_vent_sens_eff = vent_fan_values[:sensible_recovery_efficiency]
         else
-          mech_vent_sens_eff_adj = mech_vent_fan_values[:sensible_recovery_efficiency_adjusted]
+          mech_vent_sens_eff_adj = vent_fan_values[:sensible_recovery_efficiency_adjusted]
         end
       end
       if mech_vent_type == 'energy recovery ventilator'
-        if mech_vent_fan_values[:total_recovery_efficiency_adjusted].nil?
-          mech_vent_total_eff = mech_vent_fan_values[:total_recovery_efficiency]
+        if vent_fan_values[:total_recovery_efficiency_adjusted].nil?
+          mech_vent_total_eff = vent_fan_values[:total_recovery_efficiency]
         else
-          mech_vent_total_eff_adj = mech_vent_fan_values[:total_recovery_efficiency_adjusted]
+          mech_vent_total_eff_adj = vent_fan_values[:total_recovery_efficiency_adjusted]
         end
       end
-      mech_vent_cfm = mech_vent_fan_values[:tested_flow_rate]
+      mech_vent_cfm = vent_fan_values[:tested_flow_rate]
       if mech_vent_cfm.nil?
-        mech_vent_cfm = mech_vent_fan_values[:rated_flow_rate]
+        mech_vent_cfm = vent_fan_values[:rated_flow_rate]
       end
-      mech_vent_fan_w = mech_vent_fan_values[:fan_power]
+      mech_vent_fan_w = vent_fan_values[:fan_power]
       if mech_vent_type == 'central fan integrated supply'
         # CFIS: Specify minimum open time in minutes
-        cfis_open_time = [mech_vent_fan_values[:hours_in_operation] / 24.0 * 60.0, 59.999].min
+        cfis_open_time = [vent_fan_values[:hours_in_operation] / 24.0 * 60.0, 59.999].min
       else
         # Other: Adjust constant CFM/power based on hours per day of operation
-        mech_vent_cfm *= (mech_vent_fan_values[:hours_in_operation] / 24.0)
-        mech_vent_fan_w *= (mech_vent_fan_values[:hours_in_operation] / 24.0)
+        mech_vent_cfm *= (vent_fan_values[:hours_in_operation] / 24.0)
+        mech_vent_fan_w *= (vent_fan_values[:hours_in_operation] / 24.0)
       end
-      mech_vent_attached_dist_system = mech_vent_fan_values[:distribution_system_idref]
+      mech_vent_attached_dist_system = vent_fan_values[:distribution_system_idref]
     end
     cfis_airflow_frac = 1.0
     clothes_dryer_exhaust = 0.0

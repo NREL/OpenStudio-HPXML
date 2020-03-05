@@ -1093,8 +1093,8 @@ class SimulationOutputReport < OpenStudio::Measure::ReportingMeasure
   def get_system_or_seed_id(sys)
     if [Constants.CalcTypeERIReferenceHome,
         Constants.CalcTypeERIIndexAdjustmentReferenceHome].include? @eri_design
-      if XMLHelper.has_element(sys, "extension/SeedId")
-        return XMLHelper.get_value(sys, "extension/SeedId")
+      if not sys[:seed_id].nil?
+        return sys[:seed_id]
       end
     end
     return sys[:id]
@@ -1177,7 +1177,7 @@ class SimulationOutputReport < OpenStudio::Measure::ReportingMeasure
       next unless sys_id == dhw_system[:id]
       next unless ['space-heating boiler with tankless coil', 'space-heating boiler with storage tank'].include? dhw_system[:water_heater_type]
 
-      return water_heater_type[:related_hvac]
+      return dhw_system[:related_hvac]
     end
 
     return nil
@@ -1211,7 +1211,7 @@ class SimulationOutputReport < OpenStudio::Measure::ReportingMeasure
       next unless htg_system[:fraction_heat_load_served] > 0
       next unless get_system_or_seed_id(htg_system) == sys_id
 
-      return bldg_load * Float(XMLHelper.get_value(htg_system, "FractionHeatLoadServed"))
+      return bldg_load * htg_system[:fraction_heat_load_served]
     end
     @hpxml.heat_pumps.each do |heat_pump|
       next unless heat_pump[:fraction_heat_load_served] > 0
@@ -1226,7 +1226,7 @@ class SimulationOutputReport < OpenStudio::Measure::ReportingMeasure
       end
       next unless get_system_or_seed_id(heat_pump) == sys_id
 
-      return bldg_load * Float(XMLHelper.get_value(heat_pump, "FractionHeatLoadServed")) * load_fraction
+      return bldg_load * heat_pump[:fraction_heat_load_served] * load_fraction
     end
   end
 
@@ -1235,13 +1235,13 @@ class SimulationOutputReport < OpenStudio::Measure::ReportingMeasure
       next unless clg_system[:fraction_cool_load_served] > 0
       next unless get_system_or_seed_id(clg_system) == sys_id
 
-      return bldg_load * Float(XMLHelper.get_value(clg_system, "FractionCoolLoadServed"))
+      return bldg_load * clg_system[:fraction_cool_load_served]
     end
     @hpxml.heat_pumps.each do |heat_pump|
       next unless heat_pump[:fraction_cool_load_served] > 0
       next unless get_system_or_seed_id(heat_pump) == sys_id
 
-      return bldg_load * Float(XMLHelper.get_value(heat_pump, "FractionCoolLoadServed"))
+      return bldg_load * heat_pump[:fraction_cool_load_served]
     end
   end
 
@@ -1254,7 +1254,7 @@ class SimulationOutputReport < OpenStudio::Measure::ReportingMeasure
   end
 
   def is_dfhp(system)
-    if not XMLHelper.get_value(system, "BackupHeatingSwitchoverTemperature").nil? and XMLHelper.get_value(system, "BackupSystemFuel") != "electricity"
+    if not system[:backup_heating_switchover_temp].nil? and system[:backup_heating_fuel] != "electricity"
       return true
     end
 
