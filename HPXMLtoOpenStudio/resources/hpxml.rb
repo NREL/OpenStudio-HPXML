@@ -1279,6 +1279,7 @@ class HPXML
       child_vals[:electric_auxiliary_energy] = _to_float_or_nil(XMLHelper.get_value(heating_system, "ElectricAuxiliaryEnergy"))
       child_vals[:heating_cfm] = _to_float_or_nil(XMLHelper.get_value(heating_system, "extension/HeatingFlowRate"))
       child_vals[:energy_star] = XMLHelper.get_values(heating_system, "ThirdPartyCertification").include?("Energy Star")
+      child_vals[:seed_id] = XMLHelper.get_value(heating_system, "extension/SeedId")
       vals << child_vals
     end
     return vals
@@ -1350,6 +1351,7 @@ class HPXML
       child_vals[:cooling_shr] = _to_float_or_nil(XMLHelper.get_value(cooling_system, "SensibleHeatFraction"))
       child_vals[:cooling_cfm] = _to_float_or_nil(XMLHelper.get_value(cooling_system, "extension/CoolingFlowRate"))
       child_vals[:energy_star] = XMLHelper.get_values(cooling_system, "ThirdPartyCertification").include?("Energy Star")
+      child_vals[:seed_id] = XMLHelper.get_value(cooling_system, "extension/SeedId")
       vals << child_vals
     end
     return vals
@@ -1464,6 +1466,7 @@ class HPXML
       child_vals[:heating_efficiency_hspf] = _to_float_or_nil(XMLHelper.get_value(heat_pump, "[HeatPumpType='air-to-air' or HeatPumpType='mini-split']AnnualHeatingEfficiency[Units='HSPF']/Value"))
       child_vals[:heating_efficiency_cop] = _to_float_or_nil(XMLHelper.get_value(heat_pump, "[HeatPumpType='ground-to-air']AnnualHeatingEfficiency[Units='COP']/Value"))
       child_vals[:energy_star] = XMLHelper.get_values(heat_pump, "ThirdPartyCertification").include?("Energy Star")
+      child_vals[:seed_id] = XMLHelper.get_value(heat_pump, "extension/SeedId")
       vals << child_vals
     end
     return vals
