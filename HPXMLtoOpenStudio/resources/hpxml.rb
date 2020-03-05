@@ -1,7 +1,11 @@
 require_relative 'xmlhelper'
 
+# TODO: Replace hashes with structures
+# TODO: Replace .empty? with .nil?
+
 class HPXML
   @data = nil
+  @doc = nil
 
   def initialize(hpxml_path: nil, hpxml_data: nil)
     if not hpxml_path.nil?
@@ -14,7 +18,6 @@ class HPXML
   end
 
   def method_missing(method_name, *args, &block)
-    # TODO: Allow "add_foo" methods
     if @data.keys.include? method_name
       return @data[method_name.to_sym]
     else
@@ -31,6 +34,8 @@ class HPXML
     return _convert_data_to_object()
   end
 
+  attr_accessor(:doc)
+
   private
 
   def _convert_file_to_data(hpxml_path)
@@ -38,7 +43,8 @@ class HPXML
 
     hpxml = nil
     if not hpxml_path.nil?
-      hpxml = XMLHelper.parse_file(hpxml_path).elements['/HPXML']
+      @doc = XMLHelper.parse_file(hpxml_path)
+      hpxml = @doc.elements['/HPXML']
     end
 
     data[:header] = _get_object_header_values(hpxml: hpxml)
