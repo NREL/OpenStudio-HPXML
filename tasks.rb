@@ -3191,7 +3191,7 @@ def download_epws
 
   tmpfile = Tempfile.new("epw")
 
-  url = URI.parse("http://s3.amazonaws.com/epwweatherfiles/tmy3s-cache-csv.zip")
+  url = URI.parse("https://data.nrel.gov/files/128/tmy3s-cache-csv.zip")
   http = Net::HTTP.new(url.host, url.port)
 
   params = { 'User-Agent' => 'curl/7.43.0', 'Accept-Encoding' => 'identity' }
