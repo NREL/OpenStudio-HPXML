@@ -54,6 +54,7 @@ def create_hpxmls
     'invalid_files/water-heater-location.xml' => 'base.xml',
     'invalid_files/water-heater-location-other.xml' => 'base.xml',
     'invalid_files/slab-zero-exposed-perimeter.xml' => 'base.xml',
+    'invalid_files/attached-multifamily-window-outside-condition.xml' => 'base-enclosure-attached-multifamily.xml',
 
     'base-appliances-gas.xml' => 'base.xml',
     'base-appliances-wood.xml' => 'base.xml',
@@ -988,6 +989,14 @@ def get_hpxml_file_walls_values(hpxml_file, walls_values)
                       :solar_absorptance => 0.7,
                       :emittance => 0.92,
                       :insulation_assembly_r_value => 23.0 }
+    walls_values << { :id => "WallAdiabatic",
+                      :exterior_adjacent_to => "other housing unit",
+                      :interior_adjacent_to => "living space",
+                      :wall_type => "WoodStud",
+                      :area => 100,
+                      :solar_absorptance => 0.7,
+                      :emittance => 0.92,
+                      :insulation_assembly_r_value => 4.0 }
   elsif ['base-enclosure-walltype-cmu.xml'].include? hpxml_file
     walls_values[0][:wall_type] = "ConcreteMasonryUnit"
     walls_values[0][:insulation_assembly_r_value] = 12
@@ -1601,6 +1610,9 @@ def get_hpxml_file_windows_values(hpxml_file, windows_values)
                         :ufactor => 0.33,
                         :shgc => 0.45,
                         :wall_idref => "Wall" }]
+  elsif ['invalid_files/attached-multifamily-window-outside-condition.xml'].include? hpxml_file
+    windows_values[0][:area] = 50
+    windows_values[0][:wall_idref] = "WallMultifamilyBuffer"
   elsif ['base-enclosure-overhangs.xml'].include? hpxml_file
     windows_values[0][:overhangs_depth] = 2.5
     windows_values[0][:overhangs_distance_to_top_of_window] = 0
@@ -1782,6 +1794,22 @@ def get_hpxml_file_doors_values(hpxml_file, doors_values)
                       :wall_idref => "WallGarageExterior",
                       :area => 70,
                       :azimuth => 180,
+                      :r_value => 4.4 }
+  elsif ['base-enclosure-attached-multifamily.xml'].include? hpxml_file
+    doors_values << { :id => "DoorOnUnratedHeatedSpace",
+                      :wall_idref => "WallUnratedHeatedSpace",
+                      :area => 40,
+                      :azimuth => 0,
+                      :r_value => 4.4 }
+    doors_values << { :id => "DoorOnNonFreezingFndWall",
+                      :wall_idref => "FoundationWall1",
+                      :area => 40,
+                      :azimuth => 0,
+                      :r_value => 4.4 }
+    doors_values << { :id => "DoorOnOtherUnit",
+                      :wall_idref => "WallAdiabatic",
+                      :area => 40,
+                      :azimuth => 0,
                       :r_value => 4.4 }
   elsif ['invalid_files/unattached-door.xml'].include? hpxml_file
     doors_values[0][:wall_idref] = "foobar"

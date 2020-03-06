@@ -298,6 +298,7 @@ class OSModel
     if not valid_tsteps.include? @timestep
       fail "Timestep (#{@timestep}) must be one of: #{valid_tsteps.join(', ')}."
     end
+
     tstep.setNumberOfTimestepsPerHour(60 / @timestep)
 
     shad = model.getShadowCalculation
@@ -1775,6 +1776,7 @@ class OSModel
         if overhang_distance_to_bottom <= overhang_distance_to_top
           fail "For Window '#{window_id}', overhangs distance to bottom (#{overhang_distance_to_bottom}) must be greater than distance to top (#{overhang_distance_to_top})."
         end
+
         window_height = overhang_distance_to_bottom - overhang_distance_to_top
       end
 
@@ -1793,8 +1795,8 @@ class OSModel
       surface.additionalProperties.setFeature("SurfaceType", "Window")
       surface.setName("surface #{window_id}")
       surface.setSurfaceType("Wall")
-      assign_space_to_subsurface(surface, window_id, window_values[:wall_idref], building, spaces, model, "window")
-      surface.setOutsideBoundaryCondition("Outdoors") # cannot be adiabatic because subsurfaces won't be created
+      wall_surface_values = assign_space_to_subsurface(surface, window_id, window_values[:wall_idref], building, spaces, model, "window")
+      assign_outside_boundary_condition_to_subsurface(surface, window_id, spaces, model, wall_surface_values, "window")
       surfaces << surface
 
       sub_surface = OpenStudio::Model::SubSurface.new(add_wall_polygon(window_width, window_height, z_origin,
@@ -1919,8 +1921,11 @@ class OSModel
       surface.additionalProperties.setFeature("SurfaceType", "Door")
       surface.setName("surface #{door_id}")
       surface.setSurfaceType("Wall")
-      assign_space_to_subsurface(surface, door_id, door_values[:wall_idref], building, spaces, model, "door")
-      surface.setOutsideBoundaryCondition("Outdoors") # cannot be adiabatic because subsurfaces won't be created
+      wall_surface_values = assign_space_to_subsurface(surface, door_id, door_values[:wall_idref], building, spaces, model, "door")
+      if assign_outside_boundary_condition_to_subsurface(surface, door_id, spaces, model, wall_surface_values, "door")
+        surface.remove
+        next
+      end
       surfaces << surface
 
       sub_surface = OpenStudio::Model::SubSurface.new(add_wall_polygon(door_width, door_height, z_origin,
@@ -4269,19 +4274,23 @@ class OSModel
     if spaces[exterior_adjacent_to].nil?
       otherside_object = OpenStudio::Model::SurfacePropertyOtherSideCoefficients.new(model)
       if exterior_adjacent_to == 'other heated space'
+        # Average of indoor/outdoor temperatures with minimum of 68 deg-F
         temp_min = UnitConversions.convert(68, "F", "C")
         indoor_weight = 0.5
         outdoor_weight = 0.5
       elsif exterior_adjacent_to == 'other multifamily buffer space'
+        # Average of indoor/outdoor temperatures with minimum of 50 deg-F
         temp_min = UnitConversions.convert(50, "F", "C")
         indoor_weight = 0.5
         outdoor_weight = 0.5
       elsif exterior_adjacent_to == 'other non-freezing space'
+        # Floating with outdoor air temperature with minimum of 40 deg-F
         temp_min = UnitConversions.convert(40, "F", "C")
         indoor_weight = 0.0
         outdoor_weight = 1.0
       end
       otherside_object.setName(exterior_adjacent_to)
+      # Fixme: assumption the same as SurfacePropertyConvectionCoefficients of return air plenum
       otherside_object.setCombinedConvectiveRadiativeFilmCoefficient(30)
       otherside_object.setMinimumOtherSideTemperatureLimit(temp_min)
       otherside_object.setConstantTemperatureCoefficient(indoor_weight)
@@ -4291,12 +4300,11 @@ class OSModel
         # Ems to actuate schedule
         @other_side_indoor_sch = OpenStudio::Model::ScheduleConstant.new(model)
         @other_side_indoor_sch.setName("Other Side Indoor Air Sch EMS")
-        @other_side_indoor_sch.setValue(23) # override later by EMS
         Schedule.set_schedule_type_limits(model, @other_side_indoor_sch, Constants.ScheduleTypeLimitsTemperature)
 
         sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, "Zone Air Temperature")
         sensor.setName("cond_zone_temp")
-        sensor.setKeyName("living space")
+        sensor.setKeyName(create_or_get_space(model, spaces, 'living space').name.to_s)
         actuator = OpenStudio::Model::EnergyManagementSystemActuator.new(@other_side_indoor_sch, "Schedule:Constant", "Schedule Value")
         actuator.setName("other_side_indoor_temp")
 
@@ -4366,7 +4374,7 @@ class OSModel
       next unless wall_values[:id] == wall_idref
 
       set_surface_interior(model, spaces, surface, subsurface_id, wall_values[:interior_adjacent_to])
-      return
+      return wall_values
     end
 
     # Check foundation walls
@@ -4375,12 +4383,30 @@ class OSModel
       next unless fnd_wall_values[:id] == wall_idref
 
       set_surface_interior(model, spaces, surface, subsurface_id, fnd_wall_values[:interior_adjacent_to])
-      return
+      return fnd_wall_values
     end
 
     if not surface.space.is_initialized
       fail "Attached wall '#{wall_idref}' not found for #{subsurface_type} '#{subsurface_id}'."
     end
+  end
+
+  def self.assign_outside_boundary_condition_to_subsurface(surface, subsurface_id, spaces, model, wall_surface_values, subsurface_type)
+    # Check walls
+    wall_id = wall_surface_values[:id]
+    wall_exterior_adjacent_to = wall_surface_values[:exterior_adjacent_to]
+    to_ignore = false
+
+    if ['other heated space', 'other multifamily buffer space', 'other non-freezing space', 'other housing unit', 'other housing unit above', 'other housing unit below'].include? wall_exterior_adjacent_to and subsurface_type == "window"
+      fail "Window '#{subsurface_id}' cannot be adjacent to '#{wall_exterior_adjacent_to}'. Check wall: '#{wall_id}'."
+    end
+
+    if ['other housing unit', 'other housing unit above', 'other housing unit below'].include? wall_exterior_adjacent_to
+      to_ignore = true
+    end
+
+    set_surface_exterior(model, spaces, surface, subsurface_id, wall_exterior_adjacent_to)
+    return to_ignore
   end
 
   def self.get_infiltration_volume(building)

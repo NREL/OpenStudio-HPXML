@@ -163,7 +163,8 @@ class HPXMLTest < MiniTest::Test
                             'water-heater-location-other.xml' => ["Expected [1] element(s) but found 0 element(s) for xpath: /HPXML/Building/BuildingDetails/Systems/WaterHeating/WaterHeatingSystem[Location="],
                             'mismatched-slab-and-foundation-wall.xml' => ["Foundation wall 'FoundationWall' is adjacent to 'basement - conditioned' but no corresponding slab was found adjacent to",
                                                                           "Foundation wall 'FoundationWall2' is adjacent to 'garage' but no corresponding slab was found adjacent to",
-                                                                          "Slab 'Slab' is adjacent to 'basement - unconditioned' but no corresponding foundation walls were found adjacent to"] }
+                                                                          "Slab 'Slab' is adjacent to 'basement - unconditioned' but no corresponding foundation walls were found adjacent to"],
+                            'attached-multifamily-window-outside-condition.xml' => ["Window 'WindowNorth' cannot be adjacent to 'other multifamily buffer space'. Check wall: 'WallMultifamilyBuffer'"] }
 
     # Test simulations
     Dir["#{sample_files_dir}/invalid_files/*.xml"].sort.each do |xml|
@@ -650,7 +651,7 @@ class HPXMLTest < MiniTest::Test
     assert_equal(60 / timestep, sql_value)
 
     bldg_details = hpxml_doc.elements['/HPXML/Building/BuildingDetails']
-    
+
     # Conditioned Floor Area
     sum_hvac_load_frac = (bldg_details.elements['sum(Systems/HVAC/HVACPlant/CoolingSystem/FractionCoolLoadServed)'] +
                           bldg_details.elements['sum(Systems/HVAC/HVACPlant/HeatingSystem/FractionHeatLoadServed)'] +
@@ -873,6 +874,11 @@ class HPXMLTest < MiniTest::Test
     # Enclosure Doors
     enclosure.elements.each('Doors/Door') do |door|
       door_id = door.elements["SystemIdentifier"].attributes["id"].upcase
+      door_wall_id = door.elements["AttachedToWall"].attributes["idref"]
+      wall_exterior_adjacent_to = enclosure.elements["Walls/Wall[SystemIdentifier/@id='#{door_wall_id}'] or FoundationWalls/FoundationWall[SystemIdentifier/@id='#{door_wall_id}']"].elements["ExteriorAdjacentTo"].text
+
+      # only outdoor doors will appear on the exterior door table
+      next unless wall_exterior_adjacent_to.downcase == "outdoors"
 
       # Area
       door_area = XMLHelper.get_value(door, 'Area')
