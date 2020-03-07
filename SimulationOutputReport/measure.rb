@@ -255,7 +255,7 @@ class SimulationOutputReport < OpenStudio::Measure::ReportingMeasure
     get_object_maps()
 
     # Set paths
-    @eri_design = @hpxml.header[:eri_design]
+    @eri_design = @hpxml.header.eri_design
     if not @eri_design.nil?
       # ERI run, store files in a particular location
       output_dir = File.dirname(hpxml_path)
@@ -318,9 +318,9 @@ class SimulationOutputReport < OpenStudio::Measure::ReportingMeasure
     end
 
     # HPXML Summary
-    outputs[:hpxml_cfa] = @hpxml.building_construction[:conditioned_floor_area]
-    outputs[:hpxml_nbr] = @hpxml.building_construction[:number_of_bedrooms]
-    outputs[:hpxml_nst] = @hpxml.building_construction[:number_of_conditioned_floors_above_grade]
+    outputs[:hpxml_cfa] = @hpxml.building_construction.conditioned_floor_area
+    outputs[:hpxml_nbr] = @hpxml.building_construction.number_of_bedrooms
+    outputs[:hpxml_nst] = @hpxml.building_construction.number_of_conditioned_floors_above_grade
 
     # HPXML Systems
     if not @eri_design.nil?
@@ -838,24 +838,24 @@ class SimulationOutputReport < OpenStudio::Measure::ReportingMeasure
     end
 
     @hpxml.hvac_distributions.each do |hvac_dist|
-      dist_id = hvac_dist[:id]
-      next if hvac_dist[:annual_heating_dse].nil?
+      dist_id = hvac_dist.id
+      next if hvac_dist.annual_heating_dse.nil?
 
-      dse_heat = hvac_dist[:annual_heating_dse]
+      dse_heat = hvac_dist.annual_heating_dse
 
       # Get all HVAC systems attached to it
       @hpxml.heating_systems.each do |htg_system|
-        next unless htg_system[:fraction_heat_load_served] > 0
-        next if htg_system[:distribution_system_idref].nil?
-        next unless dist_id == htg_system[:distribution_system_idref]
+        next unless htg_system.fraction_heat_load_served > 0
+        next if htg_system.distribution_system_idref.nil?
+        next unless dist_id == htg_system.distribution_system_idref
 
         sys_id = get_system_or_seed_id(htg_system)
         dse_heats[sys_id] = dse_heat
       end
       @hpxml.heat_pumps.each do |heat_pump|
-        next unless heat_pump[:fraction_heat_load_served] > 0
-        next if heat_pump[:distribution_system_idref].nil?
-        next unless dist_id == heat_pump[:distribution_system_idref]
+        next unless heat_pump.fraction_heat_load_served > 0
+        next if heat_pump.distribution_system_idref.nil?
+        next unless dist_id == heat_pump.distribution_system_idref
 
         sys_id = get_system_or_seed_id(heat_pump)
         dse_heats[sys_id] = dse_heat
@@ -879,24 +879,24 @@ class SimulationOutputReport < OpenStudio::Measure::ReportingMeasure
     end
 
     @hpxml.hvac_distributions.each do |hvac_dist|
-      dist_id = hvac_dist[:id]
-      next if hvac_dist[:annual_cooling_dse].nil?
+      dist_id = hvac_dist.id
+      next if hvac_dist.annual_cooling_dse.nil?
 
-      dse_cool = hvac_dist[:annual_cooling_dse]
+      dse_cool = hvac_dist.annual_cooling_dse
 
       # Get all HVAC systems attached to it
       @hpxml.cooling_systems.each do |clg_system|
-        next unless clg_system[:fraction_cool_load_served] > 0
-        next if clg_system[:distribution_system_idref].nil?
-        next unless dist_id == clg_system[:distribution_system_idref]
+        next unless clg_system.fraction_cool_load_served > 0
+        next if clg_system.distribution_system_idref.nil?
+        next unless dist_id == clg_system.distribution_system_idref
 
         sys_id = get_system_or_seed_id(clg_system)
         dse_cools[sys_id] = dse_cool
       end
       @hpxml.heat_pumps.each do |heat_pump|
-        next unless heat_pump[:fraction_cool_load_served] > 0
-        next if heat_pump[:distribution_system_idref].nil?
-        next unless dist_id == heat_pump[:distribution_system_idref]
+        next unless heat_pump.fraction_cool_load_served > 0
+        next if heat_pump.distribution_system_idref.nil?
+        next unless dist_id == heat_pump.distribution_system_idref
 
         sys_id = get_system_or_seed_id(heat_pump)
         dse_cools[sys_id] = dse_cool
@@ -910,16 +910,16 @@ class SimulationOutputReport < OpenStudio::Measure::ReportingMeasure
     heat_fuels = {}
 
     @hpxml.heating_systems.each do |htg_system|
-      next unless htg_system[:fraction_heat_load_served] > 0
+      next unless htg_system.fraction_heat_load_served > 0
       sys_id = get_system_or_seed_id(htg_system)
-      heat_fuels[sys_id] = htg_system[:heating_system_fuel]
+      heat_fuels[sys_id] = htg_system.heating_system_fuel
     end
     @hpxml.heat_pumps.each do |heat_pump|
-      next unless heat_pump[:fraction_heat_load_served] > 0
+      next unless heat_pump.fraction_heat_load_served > 0
       sys_id = get_system_or_seed_id(heat_pump)
-      heat_fuels[sys_id] = heat_pump[:heat_pump_fuel]
+      heat_fuels[sys_id] = heat_pump.heat_pump_fuel
       if is_dfhp(heat_pump)
-        heat_fuels[dfhp_backup_sys_id(sys_id)] = heat_pump[:backup_heating_fuel]
+        heat_fuels[dfhp_backup_sys_id(sys_id)] = heat_pump.backup_heating_fuel
       end
     end
 
@@ -930,16 +930,16 @@ class SimulationOutputReport < OpenStudio::Measure::ReportingMeasure
     dhw_fuels = {}
 
     @hpxml.water_heating_systems.each do |dhw_system|
-      next unless dhw_system[:fraction_dhw_load_served] > 0
-      sys_id = dhw_system[:id]
-      if ['space-heating boiler with tankless coil', 'space-heating boiler with storage tank'].include? dhw_system[:water_heater_type]
+      next unless dhw_system.fraction_dhw_load_served > 0
+      sys_id = dhw_system.id
+      if ['space-heating boiler with tankless coil', 'space-heating boiler with storage tank'].include? dhw_system.water_heater_type
         @hpxml.heating_systems.each do |heating_system|
-          next unless dhw_system[:related_hvac] == heating_system[:id]
+          next unless dhw_system.related_hvac == heating_system.id
           
-          dhw_fuels[sys_id] = heating_system[:heating_system_fuel]
+          dhw_fuels[sys_id] = heating_system.heating_system_fuel
         end
       else
-        dhw_fuels[sys_id] = dhw_system[:fuel_type]
+        dhw_fuels[sys_id] = dhw_system.fuel_type
       end
     end
 
@@ -950,11 +950,11 @@ class SimulationOutputReport < OpenStudio::Measure::ReportingMeasure
     sys_ids = []
 
     @hpxml.heating_systems.each do |htg_system|
-      next unless htg_system[:fraction_heat_load_served] > 0
+      next unless htg_system.fraction_heat_load_served > 0
       sys_ids << get_system_or_seed_id(htg_system)
     end
     @hpxml.heat_pumps.each do |heat_pump|
-      next unless heat_pump[:fraction_heat_load_served] > 0
+      next unless heat_pump.fraction_heat_load_served > 0
       sys_ids << get_system_or_seed_id(heat_pump)
       if is_dfhp(heat_pump)
         sys_ids << dfhp_backup_sys_id(sys_ids[-1])
@@ -968,11 +968,11 @@ class SimulationOutputReport < OpenStudio::Measure::ReportingMeasure
     sys_ids = []
 
     @hpxml.cooling_systems.each do |clg_system|
-      next unless clg_system[:fraction_cool_load_served] > 0
+      next unless clg_system.fraction_cool_load_served > 0
       sys_ids << get_system_or_seed_id(clg_system)
     end
     @hpxml.heat_pumps.each do |heat_pump|
-      next unless heat_pump[:fraction_cool_load_served] > 0
+      next unless heat_pump.fraction_cool_load_served > 0
       sys_ids << get_system_or_seed_id(heat_pump)
     end
 
@@ -983,8 +983,8 @@ class SimulationOutputReport < OpenStudio::Measure::ReportingMeasure
     sys_ids = []
 
     @hpxml.water_heating_systems.each do |dhw_system|
-      next unless dhw_system[:fraction_dhw_load_served] > 0
-      sys_ids << dhw_system[:id]
+      next unless dhw_system.fraction_dhw_load_served > 0
+      sys_ids << dhw_system.id
     end
 
     return sys_ids
@@ -994,27 +994,27 @@ class SimulationOutputReport < OpenStudio::Measure::ReportingMeasure
     eec_heats = {}
 
     @hpxml.heating_systems.each do |htg_system|
-      next unless htg_system[:fraction_heat_load_served] > 0
+      next unless htg_system.fraction_heat_load_served > 0
       sys_id = get_system_or_seed_id(htg_system)
-      if not htg_system[:heating_efficiency_afue].nil?
-        eec_heats[sys_id] = get_eri_eec_value_numerator('AFUE') / htg_system[:heating_efficiency_afue]
-      elsif not htg_system[:heating_efficiency_percent].nil?
-        eec_heats[sys_id] = get_eri_eec_value_numerator('Percent') / htg_system[:heating_efficiency_afue]
+      if not htg_system.heating_efficiency_afue.nil?
+        eec_heats[sys_id] = get_eri_eec_value_numerator('AFUE') / htg_system.heating_efficiency_afue
+      elsif not htg_system.heating_efficiency_percent.nil?
+        eec_heats[sys_id] = get_eri_eec_value_numerator('Percent') / htg_system.heating_efficiency_afue
       end
     end
     @hpxml.heat_pumps.each do |heat_pump|
-      next unless heat_pump[:fraction_heat_load_served] > 0
+      next unless heat_pump.fraction_heat_load_served > 0
       sys_id = get_system_or_seed_id(heat_pump)
-      if not heat_pump[:heating_efficiency_hspf].nil?
-        eec_heats[sys_id] = get_eri_eec_value_numerator('HSPF') / heat_pump[:heating_efficiency_hspf]
-      elsif not heat_pump[:heating_efficiency_cop].nil?
-        eec_heats[sys_id] = get_eri_eec_value_numerator('COP') / heat_pump[:heating_efficiency_cop]
+      if not heat_pump.heating_efficiency_hspf.nil?
+        eec_heats[sys_id] = get_eri_eec_value_numerator('HSPF') / heat_pump.heating_efficiency_hspf
+      elsif not heat_pump.heating_efficiency_cop.nil?
+        eec_heats[sys_id] = get_eri_eec_value_numerator('COP') / heat_pump.heating_efficiency_cop
       end
       if is_dfhp(heat_pump)
-        if not heat_pump[:backup_heating_efficiency_afue].nil?
-          eec_heats[dfhp_backup_sys_id(sys_id)] = get_eri_eec_value_numerator('AFUE') / heat_pump[:backup_heating_efficiency_afue]
-        elsif not heat_pump[:backup_heating_efficiency_percent].nil?
-          eec_heats[dfhp_backup_sys_id(sys_id)] = get_eri_eec_value_numerator('Percent') / heat_pump[:backup_heating_efficiency_percent]
+        if not heat_pump.backup_heating_efficiency_afue.nil?
+          eec_heats[dfhp_backup_sys_id(sys_id)] = get_eri_eec_value_numerator('AFUE') / heat_pump.backup_heating_efficiency_afue
+        elsif not heat_pump.backup_heating_efficiency_percent.nil?
+          eec_heats[dfhp_backup_sys_id(sys_id)] = get_eri_eec_value_numerator('Percent') / heat_pump.backup_heating_efficiency_percent
         end
       end
     end
@@ -1026,25 +1026,25 @@ class SimulationOutputReport < OpenStudio::Measure::ReportingMeasure
     eec_cools = {}
 
     @hpxml.cooling_systems.each do |clg_system|
-      next unless clg_system[:fraction_cool_load_served] > 0
+      next unless clg_system.fraction_cool_load_served > 0
       sys_id = get_system_or_seed_id(clg_system)
-      if not clg_system[:cooling_efficiency_seer].nil?
-        eec_cools[sys_id] = get_eri_eec_value_numerator('SEER') / clg_system[:cooling_efficiency_seer]
-      elsif not clg_system[:cooling_efficiency_eer].nil?
-        eec_cools[sys_id] = get_eri_eec_value_numerator('EER') / clg_system[:cooling_efficiency_eer]
+      if not clg_system.cooling_efficiency_seer.nil?
+        eec_cools[sys_id] = get_eri_eec_value_numerator('SEER') / clg_system.cooling_efficiency_seer
+      elsif not clg_system.cooling_efficiency_eer.nil?
+        eec_cools[sys_id] = get_eri_eec_value_numerator('EER') / clg_system.cooling_efficiency_eer
       end
 
-      if clg_system[:cooling_system_type] == "evaporative cooler"
+      if clg_system.cooling_system_type == "evaporative cooler"
         eec_cools[sys_id] = get_eri_eec_value_numerator("SEER") / 15.0 # Arbitrary
       end
     end
     @hpxml.heat_pumps.each do |heat_pump|
-      next unless heat_pump[:fraction_cool_load_served] > 0
+      next unless heat_pump.fraction_cool_load_served > 0
       sys_id = get_system_or_seed_id(heat_pump)
-      if not heat_pump[:cooling_efficiency_seer].nil?
-        eec_cools[sys_id] = get_eri_eec_value_numerator('SEER') / heat_pump[:cooling_efficiency_seer]
-      elsif not heat_pump[:cooling_efficiency_eer].nil?
-        eec_cools[sys_id] = get_eri_eec_value_numerator('EER') / heat_pump[:cooling_efficiency_eer]
+      if not heat_pump.cooling_efficiency_seer.nil?
+        eec_cools[sys_id] = get_eri_eec_value_numerator('SEER') / heat_pump.cooling_efficiency_seer
+      elsif not heat_pump.cooling_efficiency_eer.nil?
+        eec_cools[sys_id] = get_eri_eec_value_numerator('EER') / heat_pump.cooling_efficiency_eer
       end
     end
 
@@ -1055,12 +1055,12 @@ class SimulationOutputReport < OpenStudio::Measure::ReportingMeasure
     eec_dhws = {}
 
     @hpxml.water_heating_systems.each do |dhw_system|
-      next unless dhw_system[:fraction_dhw_load_served] > 0
-      sys_id = dhw_system[:id]
-      value = dhw_system[:energy_factor]
-      wh_type = dhw_system[:water_heater_type]
+      next unless dhw_system.fraction_dhw_load_served > 0
+      sys_id = dhw_system.id
+      value = dhw_system.energy_factor
+      wh_type = dhw_system.water_heater_type
       if wh_type == "instantaneous water heater"
-        cycling_derate = dhw_system[:performance_adjustment]
+        cycling_derate = dhw_system.performance_adjustment
         value_adj = 1.0 - cycling_derate
       else
         value_adj = 1.0
@@ -1093,11 +1093,11 @@ class SimulationOutputReport < OpenStudio::Measure::ReportingMeasure
   def get_system_or_seed_id(sys)
     if [Constants.CalcTypeERIReferenceHome,
         Constants.CalcTypeERIIndexAdjustmentReferenceHome].include? @eri_design
-      if not sys[:seed_id].nil?
-        return sys[:seed_id]
+      if not sys.seed_id.nil?
+        return sys.seed_id
       end
     end
-    return sys[:id]
+    return sys.id
   end
 
   def get_report_meter_data_annual_mbtu(variable)
@@ -1173,11 +1173,11 @@ class SimulationOutputReport < OpenStudio::Measure::ReportingMeasure
 
   def get_combi_hvac_id(sys_id)
     @hpxml.water_heating_systems.each do |dhw_system|
-      next unless dhw_system[:fraction_dhw_load_served] > 0
-      next unless sys_id == dhw_system[:id]
-      next unless ['space-heating boiler with tankless coil', 'space-heating boiler with storage tank'].include? dhw_system[:water_heater_type]
+      next unless dhw_system.fraction_dhw_load_served > 0
+      next unless sys_id == dhw_system.id
+      next unless ['space-heating boiler with tankless coil', 'space-heating boiler with storage tank'].include? dhw_system.water_heater_type
 
-      return dhw_system[:related_hvac]
+      return dhw_system.related_hvac
     end
 
     return nil
@@ -1208,13 +1208,13 @@ class SimulationOutputReport < OpenStudio::Measure::ReportingMeasure
 
   def split_htg_load_to_system_by_fraction(sys_id, bldg_load, dfhp_loads)
     @hpxml.heating_systems.each do |htg_system|
-      next unless htg_system[:fraction_heat_load_served] > 0
+      next unless htg_system.fraction_heat_load_served > 0
       next unless get_system_or_seed_id(htg_system) == sys_id
 
-      return bldg_load * htg_system[:fraction_heat_load_served]
+      return bldg_load * htg_system.fraction_heat_load_served
     end
     @hpxml.heat_pumps.each do |heat_pump|
-      next unless heat_pump[:fraction_heat_load_served] > 0
+      next unless heat_pump.fraction_heat_load_served > 0
       load_fraction = 1.0
       if is_dfhp(heat_pump)
         if dfhp_primary_sys_id(sys_id) == sys_id
@@ -1226,22 +1226,22 @@ class SimulationOutputReport < OpenStudio::Measure::ReportingMeasure
       end
       next unless get_system_or_seed_id(heat_pump) == sys_id
 
-      return bldg_load * heat_pump[:fraction_heat_load_served] * load_fraction
+      return bldg_load * heat_pump.fraction_heat_load_served * load_fraction
     end
   end
 
   def split_clg_load_to_system_by_fraction(sys_id, bldg_load)
     @hpxml.cooling_systems.each do |clg_system|
-      next unless clg_system[:fraction_cool_load_served] > 0
+      next unless clg_system.fraction_cool_load_served > 0
       next unless get_system_or_seed_id(clg_system) == sys_id
 
-      return bldg_load * clg_system[:fraction_cool_load_served]
+      return bldg_load * clg_system.fraction_cool_load_served
     end
     @hpxml.heat_pumps.each do |heat_pump|
-      next unless heat_pump[:fraction_cool_load_served] > 0
+      next unless heat_pump.fraction_cool_load_served > 0
       next unless get_system_or_seed_id(heat_pump) == sys_id
 
-      return bldg_load * heat_pump[:fraction_cool_load_served]
+      return bldg_load * heat_pump.fraction_cool_load_served
     end
   end
 
@@ -1254,10 +1254,12 @@ class SimulationOutputReport < OpenStudio::Measure::ReportingMeasure
   end
 
   def is_dfhp(system)
-    if not system[:backup_heating_switchover_temp].nil? and system[:backup_heating_fuel] != "electricity"
+    if system.class.to_s != "HeatPump"
+      return false
+    end
+    if not system.backup_heating_switchover_temp.nil? and system.backup_heating_fuel != "electricity"
       return true
     end
-
     return false
   end
 
@@ -1273,9 +1275,9 @@ class SimulationOutputReport < OpenStudio::Measure::ReportingMeasure
 
   def get_dhw_solar_fraction(sys_id)
     solar_fraction = 0.0
-    if not @hpxml.solar_thermal_system.empty?
-      if @hpxml.solar_thermal_system[:water_heating_system_idref] == sys_id
-        solar_fraction = @hpxml.solar_thermal_system[:solar_fraction].to_f
+    if not @hpxml.solar_thermal_system.nil?
+      if @hpxml.solar_thermal_system.water_heating_system_idref == sys_id
+        solar_fraction = @hpxml.solar_thermal_system.solar_fraction.to_f
       end
     end
     return solar_fraction
@@ -1287,16 +1289,16 @@ class SimulationOutputReport < OpenStudio::Measure::ReportingMeasure
     (@hpxml.heating_systems + @hpxml.heat_pumps).each do |system|
       # This is super ugly. Can we simplify it?
       if is_dfhp(system)
-        if dfhp_primary_sys_id(sys_id) == sys_id and [system[:seed_id], system[:id]].include? sys_id
+        if dfhp_primary_sys_id(sys_id) == sys_id and [system.seed_id, system.id].include? sys_id
           dfhp_primary = true
-        elsif [system[:seed_id], system[:id]].include? dfhp_primary_sys_id(sys_id)
+        elsif [system.seed_id, system.id].include? dfhp_primary_sys_id(sys_id)
           dfhp_backup = true
           sys_id = dfhp_primary_sys_id(sys_id)
         end
       end
-      next unless system[:seed_id] == sys_id
+      next unless system.seed_id == sys_id
 
-      sys_id = system[:id]
+      sys_id = system.id
       break
     end
 
@@ -1321,9 +1323,9 @@ class SimulationOutputReport < OpenStudio::Measure::ReportingMeasure
 
   def get_ep_output_names_for_hvac_cooling(sys_id)
     (@hpxml.cooling_systems + @hpxml.heat_pumps).each do |system|
-      next unless system[:seed_id] == sys_id
+      next unless system.seed_id == sys_id
 
-      sys_id = system[:id]
+      sys_id = system.id
       break
     end
 

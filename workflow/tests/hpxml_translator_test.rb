@@ -633,10 +633,9 @@ class HPXMLTest < MiniTest::Test
 
     sqlFile = OpenStudio::SqlFile.new(sql_path, false)
     hpxml = HPXML.new(hpxml_path: hpxml_path)
-    hpxml.collapse_enclosure()
 
     # Timestep
-    timestep = hpxml.header[:timestep]
+    timestep = hpxml.header.timestep
     if timestep.nil?
       timestep = 60
     end
@@ -646,12 +645,14 @@ class HPXMLTest < MiniTest::Test
 
     # Conditioned Floor Area
     sum_hvac_load_frac = 0.0
-    (hpxml.heating_systems + hpxml.cooling_systems + hpxml.heat_pumps).each do |hvac_system_values|
-      sum_hvac_load_frac += hvac_system_values[:fraction_heat_load_served].to_f
-      sum_hvac_load_frac += hvac_system_values[:fraction_cool_load_served].to_f
+    (hpxml.heating_systems + hpxml.heat_pumps).each do |heating_system|
+      sum_hvac_load_frac += heating_system.fraction_heat_load_served.to_f
+    end
+    (hpxml.cooling_systems + hpxml.heat_pumps).each do |cooling_system|
+      sum_hvac_load_frac += cooling_system.fraction_cool_load_served.to_f
     end
     if sum_hvac_load_frac > 0 # EnergyPlus will only report conditioned floor area if there is an HVAC system
-      hpxml_value = hpxml.building_construction[:conditioned_floor_area]
+      hpxml_value = hpxml.building_construction.conditioned_floor_area
       query = "SELECT Value FROM TabularDataWithStrings WHERE ReportName='InputVerificationandResultsSummary' AND ReportForString='Entire Facility' AND TableName='Zone Summary' AND RowName='Conditioned Total' AND ColumnName='Area' AND Units='m2'"
       sql_value = UnitConversions.convert(sqlFile.execAndReturnFirstDouble(query).get, 'm^2', 'ft^2')
       # Subtract duct return plenum conditioned floor area
@@ -662,40 +663,40 @@ class HPXMLTest < MiniTest::Test
 
     # Enclosure Roofs
     hpxml.roofs.each do |roof|
-      roof_id = roof[:id].upcase
+      roof_id = roof.id.upcase
 
       # R-value
-      hpxml_value = roof[:insulation_assembly_r_value]
+      hpxml_value = roof.insulation_assembly_r_value
       query = "SELECT AVG(Value) FROM TabularDataWithStrings WHERE ReportName='EnvelopeSummary' AND ReportForString='Entire Facility' AND TableName='Opaque Exterior' AND (RowName='#{roof_id}' OR RowName LIKE '#{roof_id}:%') AND ColumnName='U-Factor with Film' AND Units='W/m2-K'"
       sql_value = 1.0 / UnitConversions.convert(sqlFile.execAndReturnFirstDouble(query).get, 'W/(m^2*K)', 'Btu/(hr*ft^2*F)')
       assert_in_epsilon(hpxml_value, sql_value, 0.1) # TODO: Higher due to outside air film?
 
       # Net area
-      hpxml_value = roof[:area]
+      hpxml_value = roof.area
       hpxml.skylights.each do |subsurface|
-        next if subsurface[:roof_idref].upcase != roof_id
+        next if subsurface.roof_idref.upcase != roof_id
 
-        hpxml_value -= subsurface[:area]
+        hpxml_value -= subsurface.area
       end
       query = "SELECT SUM(Value) FROM TabularDataWithStrings WHERE ReportName='EnvelopeSummary' AND ReportForString='Entire Facility' AND TableName='Opaque Exterior' AND (RowName='#{roof_id}' OR RowName LIKE '#{roof_id}:%') AND ColumnName='Net Area' AND Units='m2'"
       sql_value = UnitConversions.convert(sqlFile.execAndReturnFirstDouble(query).get, 'm^2', 'ft^2')
       assert_in_epsilon(hpxml_value, sql_value, 0.01)
 
       # Solar absorptance
-      hpxml_value = roof[:solar_absorptance]
+      hpxml_value = roof.solar_absorptance
       query = "SELECT AVG(Value) FROM TabularDataWithStrings WHERE ReportName='EnvelopeSummary' AND ReportForString='Entire Facility' AND TableName='Opaque Exterior' AND (RowName='#{roof_id}' OR RowName LIKE '#{roof_id}:%') AND ColumnName='Reflectance'"
       sql_value = 1.0 - sqlFile.execAndReturnFirstDouble(query).get
       assert_in_epsilon(hpxml_value, sql_value, 0.01)
 
       # Tilt
-      hpxml_value = UnitConversions.convert(Math.atan(roof[:pitch] / 12.0), "rad", "deg")
+      hpxml_value = UnitConversions.convert(Math.atan(roof.pitch / 12.0), "rad", "deg")
       query = "SELECT AVG(Value) FROM TabularDataWithStrings WHERE ReportName='EnvelopeSummary' AND ReportForString='Entire Facility' AND TableName='Opaque Exterior' AND (RowName='#{roof_id}' OR RowName LIKE '#{roof_id}:%') AND ColumnName='Tilt' AND Units='deg'"
       sql_value = sqlFile.execAndReturnFirstDouble(query).get
       assert_in_epsilon(hpxml_value, sql_value, 0.01)
 
       # Azimuth
-      if not roof[:azimuth].nil? and Float(roof[:pitch]) > 0
-        hpxml_value = roof[:azimuth]
+      if not roof.azimuth.nil? and Float(roof.pitch) > 0
+        hpxml_value = roof.azimuth
         query = "SELECT AVG(Value) FROM TabularDataWithStrings WHERE ReportName='EnvelopeSummary' AND ReportForString='Entire Facility' AND TableName='Opaque Exterior' AND (RowName='#{roof_id}' OR RowName LIKE '#{roof_id}:%') AND ColumnName='Azimuth' AND Units='deg'"
         sql_value = sqlFile.execAndReturnFirstDouble(query).get
         assert_in_epsilon(hpxml_value, sql_value, 0.01)
@@ -732,10 +733,10 @@ class HPXMLTest < MiniTest::Test
     num_slabs = hpxml.slabs.size
     if num_slabs <= 1 and num_kiva_instances <= 1 # The slab surfaces may be combined in these situations, so skip tests
       hpxml.slabs.each do |slab|
-        slab_id = slab[:id].upcase
+        slab_id = slab.id.upcase
 
         # Exposed Area
-        hpxml_value = Float(slab[:area])
+        hpxml_value = Float(slab.area)
         query = "SELECT Value FROM TabularDataWithStrings WHERE ReportName='EnvelopeSummary' AND ReportForString='Entire Facility' AND TableName='Opaque Exterior' AND RowName='#{slab_id}' AND ColumnName='Gross Area' AND Units='m2'"
         sql_value = UnitConversions.convert(sqlFile.execAndReturnFirstDouble(query).get, 'm^2', 'ft^2')
         assert_in_epsilon(hpxml_value, sql_value, 0.01)
@@ -749,40 +750,40 @@ class HPXMLTest < MiniTest::Test
 
     # Enclosure Walls/RimJoists/FoundationWalls
     (hpxml.walls + hpxml.rim_joists + hpxml.foundation_walls).each do |wall|
-      next unless ['outside', 'ground'].include? wall[:exterior_adjacent_to]
-      wall_id = wall[:id].upcase
+      next unless ['outside', 'ground'].include? wall.exterior_adjacent_to
+      wall_id = wall.id.upcase
 
       # R-value
-      if not wall[:insulation_assembly_r_value].nil? and not hpxml_path.include? "base-foundation-unconditioned-basement-assembly-r.xml" # This file uses Foundation:Kiva for insulation, so skip it
-        hpxml_value = wall[:insulation_assembly_r_value]
+      if not wall.insulation_assembly_r_value.nil? and not hpxml_path.include? "base-foundation-unconditioned-basement-assembly-r.xml" # This file uses Foundation:Kiva for insulation, so skip it
+        hpxml_value = wall.insulation_assembly_r_value
         query = "SELECT AVG(Value) FROM TabularDataWithStrings WHERE ReportName='EnvelopeSummary' AND ReportForString='Entire Facility' AND TableName='Opaque Exterior' AND (RowName='#{wall_id}' OR RowName LIKE '#{wall_id}:%') AND ColumnName='U-Factor with Film' AND Units='W/m2-K'"
         sql_value = 1.0 / UnitConversions.convert(sqlFile.execAndReturnFirstDouble(query).get, 'W/(m^2*K)', 'Btu/(hr*ft^2*F)')
         assert_in_epsilon(hpxml_value, sql_value, 0.03)
       end
 
       # Net area
-      hpxml_value = wall[:area]
+      hpxml_value = wall.area
       (hpxml.windows + hpxml.doors).each do |subsurface|
-        next if subsurface[:wall_idref].upcase != wall_id
+        next if subsurface.wall_idref.upcase != wall_id
 
-        hpxml_value -= subsurface[:area]
+        hpxml_value -= subsurface.area
       end
-      if wall[:exterior_adjacent_to] == "ground"
+      if wall.exterior_adjacent_to == "ground"
         # Calculate total length of walls
         wall_total_length = 0
         hpxml.foundation_walls.each do |foundation_wall|
-          next unless foundation_wall[:exterior_adjacent_to] == 'ground'
-          next unless wall[:interior_adjacent_to] == foundation_wall[:interior_adjacent_to]
+          next unless foundation_wall.exterior_adjacent_to == 'ground'
+          next unless wall.interior_adjacent_to == foundation_wall.interior_adjacent_to
 
-          wall_total_length += foundation_wall[:area] / foundation_wall[:height]
+          wall_total_length += foundation_wall.area / foundation_wall.height
         end
 
         # Calculate total slab exposed perimeter
         slab_exposed_length = 0
         hpxml.slabs.each do |slab|
-          next unless wall[:interior_adjacent_to] == slab[:interior_adjacent_to]
+          next unless wall.interior_adjacent_to == slab.interior_adjacent_to
 
-          slab_exposed_length += slab[:exposed_perimeter]
+          slab_exposed_length += slab.exposed_perimeter
         end
 
         # Calculate exposed foundation wall area
@@ -795,8 +796,8 @@ class HPXMLTest < MiniTest::Test
       assert_in_epsilon(hpxml_value, sql_value, 0.01)
 
       # Solar absorptance
-      if not wall[:solar_absorptance].nil?
-        hpxml_value = wall[:solar_absorptance]
+      if wall.respond_to? :solar_absorptance
+        hpxml_value = wall.solar_absorptance
         query = "SELECT AVG(Value) FROM TabularDataWithStrings WHERE ReportName='EnvelopeSummary' AND ReportForString='Entire Facility' AND TableName='Opaque Exterior' AND (RowName='#{wall_id}' OR RowName LIKE '#{wall_id}:%') AND ColumnName='Reflectance'"
         sql_value = 1.0 - sqlFile.execAndReturnFirstDouble(query).get
         assert_in_epsilon(hpxml_value, sql_value, 0.01)
@@ -808,8 +809,8 @@ class HPXMLTest < MiniTest::Test
       assert_in_epsilon(90.0, sql_value, 0.01)
 
       # Azimuth
-      if not wall[:azimuth].nil?
-        hpxml_value = wall[:azimuth]
+      if not wall.azimuth.nil?
+        hpxml_value = wall.azimuth
         query = "SELECT AVG(Value) FROM TabularDataWithStrings WHERE ReportName='EnvelopeSummary' AND ReportForString='Entire Facility' AND TableName='Opaque Exterior' AND (RowName='#{wall_id}' OR RowName LIKE '#{wall_id}:%') AND ColumnName='Azimuth' AND Units='deg'"
         sql_value = sqlFile.execAndReturnFirstDouble(query).get
         assert_in_epsilon(hpxml_value, sql_value, 0.01)
@@ -820,16 +821,16 @@ class HPXMLTest < MiniTest::Test
 
     # Enclosure Windows/Skylights
     (hpxml.windows + hpxml.skylights).each do |subsurface|
-      subsurface_id = subsurface[:id].upcase
+      subsurface_id = subsurface.id.upcase
 
       # Area
-      hpxml_value = subsurface[:area]
+      hpxml_value = subsurface.area
       query = "SELECT Value FROM TabularDataWithStrings WHERE ReportName='EnvelopeSummary' AND ReportForString='Entire Facility' AND TableName='Exterior Fenestration' AND RowName='#{subsurface_id}' AND ColumnName='Area of Multiplied Openings' AND Units='m2'"
       sql_value = UnitConversions.convert(sqlFile.execAndReturnFirstDouble(query).get, 'm^2', 'ft^2')
       assert_in_epsilon(hpxml_value, sql_value, 0.01)
 
       # U-Factor
-      hpxml_value = subsurface[:ufactor]
+      hpxml_value = subsurface.ufactor
       query = "SELECT Value FROM TabularDataWithStrings WHERE ReportName='EnvelopeSummary' AND ReportForString='Entire Facility' AND TableName='Exterior Fenestration' AND RowName='#{subsurface_id}' AND ColumnName='Glass U-Factor' AND Units='W/m2-K'"
       sql_value = UnitConversions.convert(sqlFile.execAndReturnFirstDouble(query).get, 'W/(m^2*K)', 'Btu/(hr*ft^2*F)')
       assert_in_epsilon(hpxml_value, sql_value, 0.01)
@@ -838,22 +839,22 @@ class HPXMLTest < MiniTest::Test
       # TODO: Affected by interior shading
 
       # Azimuth
-      hpxml_value = subsurface[:azimuth]
+      hpxml_value = subsurface.azimuth
       query = "SELECT Value FROM TabularDataWithStrings WHERE ReportName='EnvelopeSummary' AND ReportForString='Entire Facility' AND TableName='Exterior Fenestration' AND RowName='#{subsurface_id}' AND ColumnName='Azimuth' AND Units='deg'"
       sql_value = sqlFile.execAndReturnFirstDouble(query).get
       assert_in_epsilon(hpxml_value, sql_value, 0.01)
 
       # Tilt
-      if not subsurface[:wall_idref].nil?
+      if subsurface.respond_to? :wall_idref
         query = "SELECT Value FROM TabularDataWithStrings WHERE ReportName='EnvelopeSummary' AND ReportForString='Entire Facility' AND TableName='Exterior Fenestration' AND RowName='#{subsurface_id}' AND ColumnName='Tilt' AND Units='deg'"
         sql_value = sqlFile.execAndReturnFirstDouble(query).get
         assert_in_epsilon(90.0, sql_value, 0.01)
-      elsif not subsurface[:roof_idref].nil?
+      elsif subsurface.respond_to? :roof_idref
         hpxml_value = nil
         hpxml.roofs.each do |roof|
-          next if roof[:id] != subsurface[:roof_idref]
+          next if roof.id != subsurface.roof_idref
 
-          hpxml_value = UnitConversions.convert(Math.atan(roof[:pitch] / 12.0), "rad", "deg")
+          hpxml_value = UnitConversions.convert(Math.atan(roof.pitch / 12.0), "rad", "deg")
         end
         query = "SELECT Value FROM TabularDataWithStrings WHERE ReportName='EnvelopeSummary' AND ReportForString='Entire Facility' AND TableName='Exterior Fenestration' AND RowName='#{subsurface_id}' AND ColumnName='Tilt' AND Units='deg'"
         sql_value = sqlFile.execAndReturnFirstDouble(query).get
@@ -865,19 +866,19 @@ class HPXMLTest < MiniTest::Test
 
     # Enclosure Doors
     hpxml.doors.each do |door|
-      door_id = door[:id].upcase
+      door_id = door.id.upcase
 
       # Area
-      if not door[:area].nil?
-        hpxml_value = door[:area]
+      if not door.area.nil?
+        hpxml_value = door.area
         query = "SELECT Value FROM TabularDataWithStrings WHERE ReportName='EnvelopeSummary' AND ReportForString='Entire Facility' AND TableName='Exterior Door' AND RowName='#{door_id}' AND ColumnName='Gross Area' AND Units='m2'"
         sql_value = UnitConversions.convert(sqlFile.execAndReturnFirstDouble(query).get, 'm^2', 'ft^2')
         assert_in_epsilon(hpxml_value, sql_value, 0.01)
       end
 
       # R-Value
-      if not door[:r_value].nil?
-        hpxml_value = door[:r_value]
+      if not door.r_value.nil?
+        hpxml_value = door.r_value
         query = "SELECT Value FROM TabularDataWithStrings WHERE ReportName='EnvelopeSummary' AND ReportForString='Entire Facility' AND TableName='Exterior Door' AND RowName='#{door_id}' AND ColumnName='U-Factor with Film' AND Units='W/m2-K'"
         sql_value = 1.0 / UnitConversions.convert(sqlFile.execAndReturnFirstDouble(query).get, 'W/(m^2*K)', 'Btu/(hr*ft^2*F)')
         assert_in_epsilon(hpxml_value, sql_value, 0.02)
@@ -888,17 +889,17 @@ class HPXMLTest < MiniTest::Test
     
     num_htg_sys = hpxml.heating_systems.size
     hpxml.heating_systems.each do |heating_system|
-      htg_sys_type = heating_system[:heating_system_type]
-      htg_sys_fuel = heating_system[:heating_system_fuel]
-      htg_load_frac = heating_system[:fraction_heat_load_served]
+      htg_sys_type = heating_system.heating_system_type
+      htg_sys_fuel = heating_system.heating_system_fuel
+      htg_load_frac = heating_system.fraction_heat_load_served
 
       if htg_load_frac > 0
 
         # Electric Auxiliary Energy
         # For now, skip if multiple equipment
         if num_htg_sys == 1 and ['Furnace', 'Boiler', 'WallFurnace', 'Stove'].include? htg_sys_type and htg_sys_fuel != 'electricity'
-          if not heating_system[:electric_auxiliary_energy].nil?
-            hpxml_value = heating_system[:electric_auxiliary_energy] / 2.08
+          if not heating_system.electric_auxiliary_energy.nil?
+            hpxml_value = heating_system.electric_auxiliary_energy / 2.08
           else
             furnace_capacity_kbtuh = nil
             if htg_sys_type == 'Furnace'
@@ -940,28 +941,28 @@ class HPXMLTest < MiniTest::Test
     has_multispeed_dx_heating_coil = false # FIXME: Remove this when https://github.com/NREL/EnergyPlus/issues/7381 is fixed
     has_gshp_coil = false # FIXME: Remove this when https://github.com/NREL/EnergyPlus/issues/7381 is fixed
     hpxml.heating_systems.each do |heating_system|
-      htg_sys_cap = heating_system[:heating_capacity]
+      htg_sys_cap = heating_system.heating_capacity
       if htg_sys_cap > 0
         htg_cap = 0 if htg_cap.nil?
         htg_cap += htg_sys_cap
       end
     end
     hpxml.cooling_systems.each do |cooling_system|
-      clg_sys_cap = cooling_system[:cooling_capacity]
+      clg_sys_cap = cooling_system.cooling_capacity
       if not clg_sys_cap.nil? and Float(clg_sys_cap) > 0
         clg_cap = 0 if clg_cap.nil?
         clg_cap += Float(clg_sys_cap)
       end
     end
     hpxml.heat_pumps.each do |heat_pump|
-      hp_type = heat_pump[:heat_pump_type]
-      hp_cap_clg = heat_pump[:cooling_capacity]
-      hp_cap_htg = heat_pump[:heating_capacity]
+      hp_type = heat_pump.heat_pump_type
+      hp_cap_clg = heat_pump.cooling_capacity
+      hp_cap_htg = heat_pump.heating_capacity
       if hp_type == "mini-split"
         hp_cap_clg *= 1.20 # TODO: Generalize this
         hp_cap_htg *= 1.20 # TODO: Generalize this
       end
-      supp_hp_cap = heat_pump[:backup_heating_capacity].to_f
+      supp_hp_cap = heat_pump.backup_heating_capacity.to_f
       if hp_cap_clg > 0
         clg_cap = 0 if clg_cap.nil?
         clg_cap += hp_cap_clg
@@ -974,7 +975,7 @@ class HPXMLTest < MiniTest::Test
         htg_cap = 0 if htg_cap.nil?
         htg_cap += supp_hp_cap
       end
-      if heat_pump[:cooling_efficiency_seer].to_f > 15
+      if heat_pump.cooling_efficiency_seer.to_f > 15
         has_multispeed_dx_heating_coil = true
       end
       if hp_type == "ground-to-air"
@@ -1005,9 +1006,11 @@ class HPXMLTest < MiniTest::Test
     # HVAC Load Fractions
     htg_load_frac = 0.0
     clg_load_frac = 0.0
-    (hpxml.heating_systems + hpxml.cooling_systems + hpxml.heat_pumps).each do |hvac_system|
-      htg_load_frac += hvac_system[:fraction_heat_load_served].to_f
-      clg_load_frac += hvac_system[:fraction_cool_load_served].to_f
+    (hpxml.heating_systems + hpxml.heat_pumps).each do |heating_system|
+      htg_load_frac += heating_system.fraction_heat_load_served.to_f
+    end
+    (hpxml.cooling_systems + hpxml.heat_pumps).each do |cooling_system|
+      clg_load_frac += cooling_system.fraction_cool_load_served.to_f
     end
     if htg_load_frac == 0
       found_htg_energy = false
@@ -1082,7 +1085,7 @@ class HPXMLTest < MiniTest::Test
 
     # Mechanical Ventilation
     hpxml.ventilation_fans.each do |ventilation_fan|
-      next unless ventilation_fan[:used_for_whole_building_ventilation]
+      next unless ventilation_fan.used_for_whole_building_ventilation
 
       mv_energy = 0.0
       results.keys.each do |k|
@@ -1090,9 +1093,9 @@ class HPXMLTest < MiniTest::Test
 
         mv_energy = results[k]
       end
-      fan_w = ventilation_fan[:fan_power]
-      hrs_per_day = ventilation_fan[:hours_in_operation]
-      if not ventilation_fan[:distribution_system_idref].nil?
+      fan_w = ventilation_fan.fan_power
+      hrs_per_day = ventilation_fan.hours_in_operation
+      if not ventilation_fan.distribution_system_idref.nil?
         # CFIS, check for positive mech vent energy that is less than the energy if it had run 24/7
         fan_kwhs = UnitConversions.convert(fan_w * hrs_per_day * 365.0, 'Wh', 'GJ')
         if fan_kwhs > 0
@@ -1108,7 +1111,7 @@ class HPXMLTest < MiniTest::Test
       end
 
       # CFIS
-      if ventilation_fan[:fan_type] == 'central fan integrated supply'
+      if ventilation_fan.fan_type == 'central fan integrated supply'
         # Fan power
         hpxml_value = fan_w
         query = "SELECT Value FROM ReportData WHERE ReportDataDictionaryIndex IN (SELECT ReportDataDictionaryIndex FROM ReportDataDictionary WHERE Name='#{@cfis_fan_power_output_var.variableName}' AND ReportingFrequency='Run Period')"
@@ -1116,7 +1119,7 @@ class HPXMLTest < MiniTest::Test
         assert_in_delta(hpxml_value, sql_value, 0.01)
 
         # Flow rate
-        hpxml_value = ventilation_fan[:tested_flow_rate] * hrs_per_day / 24.0
+        hpxml_value = ventilation_fan.tested_flow_rate * hrs_per_day / 24.0
         query = "SELECT Value FROM ReportData WHERE ReportDataDictionaryIndex IN (SELECT ReportDataDictionaryIndex FROM ReportDataDictionary WHERE Name='#{@cfis_flow_rate_output_var.variableName}' AND ReportingFrequency='Run Period')"
         sql_value = UnitConversions.convert(sqlFile.execAndReturnFirstDouble(query).get, "m^3/s", "cfm")
         assert_in_delta(hpxml_value, sql_value, 0.01)
@@ -1125,9 +1128,9 @@ class HPXMLTest < MiniTest::Test
     end
 
     # Clothes Washer
-    if not hpxml.clothes_washer.empty? and hpxml.water_heating_systems.size > 0
+    if not hpxml.clothes_washer.nil? and hpxml.water_heating_systems.size > 0
       # Location
-      hpxml_value = hpxml.clothes_washer[:location]
+      hpxml_value = hpxml.clothes_washer.location
       if hpxml_value.nil? or hpxml_value == 'basement - conditioned'
         hpxml_value = 'living space'
       end
@@ -1138,9 +1141,9 @@ class HPXMLTest < MiniTest::Test
     end
 
     # Clothes Dryer
-    if not hpxml.clothes_dryer.empty? and hpxml.water_heating_systems.size > 0
+    if not hpxml.clothes_dryer.nil? and hpxml.water_heating_systems.size > 0
       # Location
-      hpxml_value = hpxml.clothes_dryer[:location]
+      hpxml_value = hpxml.clothes_dryer.location
       if hpxml_value.nil? or hpxml_value == 'basement - conditioned'
         hpxml_value = 'living space'
       end
@@ -1151,9 +1154,9 @@ class HPXMLTest < MiniTest::Test
     end
 
     # Refrigerator
-    if not hpxml.refrigerator.empty? and hpxml.water_heating_systems.size > 0
+    if not hpxml.refrigerator.nil?
       # Location
-      hpxml_value = hpxml.refrigerator[:location]
+      hpxml_value = hpxml.refrigerator.location
       if hpxml_value.nil? or hpxml_value == 'basement - conditioned'
         hpxml_value = 'living space'
       end
@@ -1170,19 +1173,19 @@ class HPXMLTest < MiniTest::Test
 
       found_ltg_energy = true
     end
-    assert_equal(!hpxml.lighting.empty?, found_ltg_energy)
+    assert_equal(!hpxml.lighting.nil?, found_ltg_energy)
 
     # Get fuels
     htg_fuels = []
     hpxml.heating_systems.each do |heating_system|
-      htg_fuels << heating_system[:heating_system_fuel]
+      htg_fuels << heating_system.heating_system_fuel
     end
     hpxml.heat_pumps.each do |heat_pump|
-      htg_fuels << heat_pump[:backup_heating_fuel]
+      htg_fuels << heat_pump.backup_heating_fuel
     end
     wh_fuels = []
     hpxml.water_heating_systems.each do |water_heating_system|
-      wh_fuels << water_heating_system[:fuel_type]
+      wh_fuels << water_heating_system.fuel_type
     end
 
     # Natural Gas check
@@ -1200,12 +1203,12 @@ class HPXMLTest < MiniTest::Test
     else
       assert_equal(ng_dhw, 0)
     end
-    if not hpxml.clothes_dryer.empty? and hpxml.clothes_dryer[:fuel_type] == 'natural gas'
+    if not hpxml.clothes_dryer.nil? and hpxml.clothes_dryer.fuel_type == 'natural gas'
       assert_operator(ng_cd, :>, 0)
     else
       assert_equal(ng_cd, 0)
     end
-    if not hpxml.cooking_range.empty? and hpxml.cooking_range[:fuel_type] == 'natural gas'
+    if not hpxml.cooking_range.nil? and hpxml.cooking_range.fuel_type == 'natural gas'
       assert_operator(ng_cr, :>, 0)
     else
       assert_equal(ng_cr, 0)
@@ -1226,12 +1229,12 @@ class HPXMLTest < MiniTest::Test
     else
       assert_equal(af_dhw, 0)
     end
-    if not hpxml.clothes_dryer.empty? and ['fuel oil', 'propane', 'wood'].include? hpxml.clothes_dryer[:fuel_type]
+    if not hpxml.clothes_dryer.nil? and ['fuel oil', 'propane', 'wood'].include? hpxml.clothes_dryer.fuel_type
       assert_operator(af_cd, :>, 0)
     else
       assert_equal(af_cd, 0)
     end
-    if not hpxml.cooking_range.empty? and ['fuel oil', 'propane', 'wood'].include? hpxml.cooking_range[:fuel_type]
+    if not hpxml.cooking_range.nil? and ['fuel oil', 'propane', 'wood'].include? hpxml.cooking_range.fuel_type
       assert_operator(af_cr, :>, 0)
     else
       assert_equal(af_cr, 0)
