@@ -168,10 +168,6 @@ class HPXML < Object
   class BaseElement
     def initialize(hash = nil, hpxml = nil)
       if not hash.nil?
-        # Reset all attributes to nil
-        self.class::ATTRS.each do |attribute|
-          self.send(attribute.to_s + "=", nil)
-        end
         # Set values from hash
         hash.each do |k, v|
           self.send(k.to_s + "=", v)

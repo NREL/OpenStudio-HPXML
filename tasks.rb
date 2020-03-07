@@ -2085,7 +2085,7 @@ def set_hpxml_hvac_control(hpxml_file, hpxml)
                              :heating_setpoint_temp => 68,
                              :cooling_setpoint_temp => 78 })
   elsif ['base-hvac-none.xml'].include? hpxml_file
-    hpxml.set_hvac_control({})
+    hpxml.set_hvac_control(nil)
   elsif ['base-hvac-programmable-thermostat.xml'].include? hpxml_file
     hpxml.hvac_control.control_type = "programmable thermostat"
     hpxml.hvac_control.heating_setback_temp = 66
@@ -2687,7 +2687,7 @@ def set_hpxml_hot_water_distribution(hpxml_file, hpxml)
     hpxml.hot_water_distribution.recirculation_branch_piping_length = 50
     hpxml.hot_water_distribution.recirculation_pump_power = 50
   elsif ['base-dhw-none.xml'].include? hpxml_file
-    hpxml.set_hot_water_distribution({})
+    hpxml.set_hot_water_distribution(nil)
   end
 end
 
@@ -2816,7 +2816,7 @@ def set_hpxml_clothes_washer(hpxml_file, hpxml)
                                :label_annual_gas_cost => 25.0,
                                :capacity => 3.0 })
   elsif ['base-appliances-none.xml'].include? hpxml_file
-    hpxml.set_clothes_washer({})
+    hpxml.set_clothes_washer(nil)
   elsif ['base-appliances-modified.xml'].include? hpxml_file
     hpxml.clothes_washer.modified_energy_factor = nil
     hpxml.clothes_washer.integrated_modified_energy_factor = 0.73
@@ -2840,7 +2840,7 @@ def set_hpxml_clothes_dryer(hpxml_file, hpxml)
                               :energy_factor => 2.95,
                               :control_type => "timer" })
   elsif ['base-appliances-none.xml'].include? hpxml_file
-    hpxml.set_clothes_dryer({})
+    hpxml.set_clothes_dryer(nil)
   elsif ['base-appliances-modified.xml'].include? hpxml_file
     hpxml.set_clothes_dryer({ :id => "ClothesDryer",
                               :location => "living space",
@@ -2885,7 +2885,7 @@ def set_hpxml_dishwasher(hpxml_file, hpxml)
                            :rated_annual_kwh => 450,
                            :place_setting_capacity => 12 })
   elsif ['base-appliances-none.xml'].include? hpxml_file
-    hpxml.set_dishwasher({})
+    hpxml.set_dishwasher(nil)
   elsif ['base-appliances-modified.xml'].include? hpxml_file
     hpxml.set_dishwasher({ :id => "Dishwasher",
                            :energy_factor => 0.5,
@@ -2901,7 +2901,7 @@ def set_hpxml_refrigerator(hpxml_file, hpxml)
   elsif ['base-appliances-modified.xml'].include? hpxml_file
     hpxml.refrigerator.adjusted_annual_kwh = 600
   elsif ['base-appliances-none.xml'].include? hpxml_file
-    hpxml.set_refrigerator({})
+    hpxml.set_refrigerator(nil)
   elsif ['base-foundation-unconditioned-basement.xml'].include? hpxml_file
     hpxml.refrigerator.location = "basement - unconditioned"
   elsif ['base-atticroof-conditioned.xml'].include? hpxml_file
@@ -2920,7 +2920,7 @@ def set_hpxml_cooking_range(hpxml_file, hpxml)
                               :fuel_type => "electricity",
                               :is_induction => false })
   elsif ['base-appliances-none.xml'].include? hpxml_file
-    hpxml.set_cooking_range({})
+    hpxml.set_cooking_range(nil)
   elsif ['base-appliances-gas.xml'].include? hpxml_file
     hpxml.cooking_range.fuel_type = "natural gas"
     hpxml.cooking_range.is_induction = false
@@ -2940,7 +2940,7 @@ def set_hpxml_oven(hpxml_file, hpxml)
     hpxml.set_oven({ :id => "Oven",
                      :is_convection => false })
   elsif ['base-appliances-none.xml'].include? hpxml_file
-    hpxml.set_oven({})
+    hpxml.set_oven(nil)
   end
 end
 
@@ -2953,7 +2953,7 @@ def set_hpxml_lighting(hpxml_file, hpxml)
                          :fraction_tier_ii_exterior => 0.25,
                          :fraction_tier_ii_garage => 0.25 })
   elsif ['base-misc-lighting-none.xml'].include? hpxml_file
-    hpxml.set_lighting({})
+    hpxml.set_lighting(nil)
   end
 end
 
@@ -3067,14 +3067,14 @@ if ARGV[0].to_sym == :update_measures
   ENV['HOMEDRIVE'] = 'C:\\' if !ENV['HOMEDRIVE'].nil? and ENV['HOMEDRIVE'].start_with? 'U:'
 
   # Apply rubocop
-  #command = "rubocop --auto-correct --format simple --only Layout"
-  #puts "Applying rubocop style to measures..."
-  #system(command)
+  command = "rubocop --auto-correct --format simple --only Layout"
+  puts "Applying rubocop style to measures..."
+  system(command)
 
   # Update measures XMLs
-  #command = "#{OpenStudio.getOpenStudioCLI} measure -t '#{File.dirname(__FILE__)}'"
-  #puts "Updating measure.xmls..."
-  #system(command, [:out, :err] => File::NULL)
+  command = "#{OpenStudio.getOpenStudioCLI} measure -t '#{File.dirname(__FILE__)}'"
+  puts "Updating measure.xmls..."
+  system(command, [:out, :err] => File::NULL)
 
   create_hpxmls
 
