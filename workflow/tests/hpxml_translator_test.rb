@@ -23,13 +23,14 @@ class HPXMLTest < MiniTest::Test
     results_dir = File.join(this_dir, "results")
     _rm_path(results_dir)
 
-    hvac_base_dir = File.absolute_path(File.join(this_dir, "hvac_base"))
-    hvac_multiple_dir = File.absolute_path(File.join(this_dir, "hvac_multiple"))
-    hvac_partial_dir = File.absolute_path(File.join(this_dir, "hvac_partial"))
-    hvac_load_fracs_dir = File.absolute_path(File.join(this_dir, "hvac_load_fracs"))
-    autosize_dir = File.absolute_path(File.join(this_dir, "hvac_autosizing"))
+    sample_files_dir = File.absolute_path(File.join(this_dir, "..", "sample_files"))
+    hvac_base_dir = File.absolute_path(File.join(this_dir, "..", "sample_files", "hvac_base"))
+    hvac_multiple_dir = File.absolute_path(File.join(this_dir, "..", "sample_files", "hvac_multiple"))
+    hvac_partial_dir = File.absolute_path(File.join(this_dir, "..", "sample_files", "hvac_partial"))
+    hvac_load_fracs_dir = File.absolute_path(File.join(this_dir, "..", "sample_files", "hvac_load_fracs"))
+    autosize_dir = File.absolute_path(File.join(this_dir, "..", "sample_files", "hvac_autosizing"))
 
-    test_dirs = [this_dir,
+    test_dirs = [sample_files_dir,
                  hvac_base_dir,
                  hvac_multiple_dir,
                  hvac_partial_dir,
@@ -60,16 +61,16 @@ class HPXMLTest < MiniTest::Test
     # Cross simulation tests
     _test_multiple_hvac(xmls, hvac_multiple_dir, hvac_base_dir, all_results)
     _test_partial_hvac(xmls, hvac_partial_dir, hvac_base_dir, all_results)
-    _test_hrv_erv_inputs(this_dir, all_results)
+    _test_hrv_erv_inputs(sample_files_dir, all_results)
     _test_heating_cooling_loads(xmls, hvac_base_dir, all_results)
-    _test_collapsed_surfaces(all_results, this_dir)
+    _test_collapsed_surfaces(all_results, sample_files_dir)
   end
 
   def test_run_simulation_rb
     # Check that simulation works using run_simulation.rb script
     os_cli = OpenStudio.getOpenStudioCLI
     rb_path = File.join(File.dirname(__FILE__), "..", "run_simulation.rb")
-    xml = File.join(File.dirname(__FILE__), "base.xml")
+    xml = File.join(File.dirname(__FILE__), "..", "sample_files", "base.xml")
     command = "#{os_cli} #{rb_path} -x #{xml}"
     system(command, :err => File::NULL)
     sql_path = File.join(File.dirname(xml), "run", "eplusout.sql")
@@ -103,12 +104,13 @@ class HPXMLTest < MiniTest::Test
     cache_orig = File.join(this_dir, "..", "..", "weather", "USA_CO_Denver.Intl.AP.725650_TMY3-cache.csv")
     cache_bak = cache_orig + ".bak"
     File.rename(cache_orig, cache_bak)
-    _run_xml(File.absolute_path(File.join(this_dir, "base.xml")), this_dir)
+    _run_xml(File.absolute_path(File.join(this_dir, "..", "sample_files", "base.xml")), this_dir)
     File.rename(cache_bak, cache_orig) # Put original file back
   end
 
   def test_invalid
     this_dir = File.dirname(__FILE__)
+    sample_files_dir = File.join(this_dir, "..", "sample_files")
 
     expected_error_msgs = { 'bad-wmo.xml' => ["Weather station WMO '999999' could not be found in weather/data.csv."],
                             'bad-site-neighbor-azimuth.xml' => ["A neighbor building has an azimuth (145) not equal to the azimuth of any wall."],
@@ -134,6 +136,8 @@ class HPXMLTest < MiniTest::Test
                             'hvac-distribution-return-duct-leakage-missing.xml' => ["Return ducts exist but leakage was not specified for distribution system 'HVACDistribution'."],
                             'invalid-relatedhvac-dhw-indirect.xml' => ["RelatedHVACSystem 'HeatingSystem_bad' not found for water heating system 'WaterHeater'"],
                             'invalid-relatedhvac-desuperheater.xml' => ["RelatedHVACSystem 'CoolingSystem_bad' not found for water heating system 'WaterHeater'."],
+                            'invalid-timestep.xml' => ["Timestep (45) must be one of: 60, 30, 20, 15, 12, 10, 6, 5, 4, 3, 2, 1."],
+                            'invalid-window-height.xml' => ["For Window 'WindowEast', overhangs distance to bottom (2.0) must be greater than distance to top (2.0)."],
                             'invalid-window-interior-shading.xml' => ["SummerShadingCoefficient (0.85) must be less than or equal to WinterShadingCoefficient (0.7) for window 'WindowNorth'."],
                             'missing-elements.xml' => ["Expected [1] element(s) but found 0 element(s) for xpath: /HPXML/Building/BuildingDetails/BuildingSummary/BuildingConstruction/NumberofConditionedFloors",
                                                        "Expected [1] element(s) but found 0 element(s) for xpath: /HPXML/Building/BuildingDetails/BuildingSummary/BuildingConstruction/ConditionedFloorArea"],
@@ -145,6 +149,7 @@ class HPXMLTest < MiniTest::Test
                             'refrigerator-location-other.xml' => ["Expected [1] element(s) but found 0 element(s) for xpath: /HPXML/Building/BuildingDetails/Appliances/Refrigerator[Location="],
                             'repeated-relatedhvac-dhw-indirect.xml' => ["RelatedHVACSystem 'HeatingSystem' for water heating system 'WaterHeater2' is already attached to another water heating system."],
                             'repeated-relatedhvac-desuperheater.xml' => ["RelatedHVACSystem 'CoolingSystem' for water heating system 'WaterHeater2' is already attached to another water heating system."],
+                            'slab-zero-exposed-perimeter.xml' => ["Exposed perimeter for Slab 'Slab' must be greater than zero."],
                             'solar-thermal-system-with-combi-tankless.xml' => ["Water heating system 'WaterHeater' connected to solar thermal system 'SolarThermalSystem' cannot be a space-heating boiler."],
                             'solar-thermal-system-with-desuperheater.xml' => ["Water heating system 'WaterHeater' connected to solar thermal system 'SolarThermalSystem' cannot be attached to a desuperheater."],
                             'solar-thermal-system-with-dhw-indirect.xml' => ["Water heating system 'WaterHeater' connected to solar thermal system 'SolarThermalSystem' cannot be a space-heating boiler."],
@@ -155,10 +160,13 @@ class HPXMLTest < MiniTest::Test
                             'unattached-solar-thermal-system.xml' => ["Attached water heating system 'foobar' not found for solar thermal system 'SolarThermalSystem'."],
                             'unattached-window.xml' => ["Attached wall 'foobar' not found for window 'WindowNorth'."],
                             'water-heater-location.xml' => ["WaterHeatingSystem location is 'crawlspace - vented' but building does not have this location specified."],
-                            'water-heater-location-other.xml' => ["Expected [1] element(s) but found 0 element(s) for xpath: /HPXML/Building/BuildingDetails/Systems/WaterHeating/WaterHeatingSystem[Location="] }
+                            'water-heater-location-other.xml' => ["Expected [1] element(s) but found 0 element(s) for xpath: /HPXML/Building/BuildingDetails/Systems/WaterHeating/WaterHeatingSystem[Location="],
+                            'mismatched-slab-and-foundation-wall.xml' => ["Foundation wall 'FoundationWall' is adjacent to 'basement - conditioned' but no corresponding slab was found adjacent to",
+                                                                          "Foundation wall 'FoundationWall2' is adjacent to 'garage' but no corresponding slab was found adjacent to",
+                                                                          "Slab 'Slab' is adjacent to 'basement - unconditioned' but no corresponding foundation walls were found adjacent to"] }
 
     # Test simulations
-    Dir["#{this_dir}/invalid_files/*.xml"].sort.each do |xml|
+    Dir["#{sample_files_dir}/invalid_files/*.xml"].sort.each do |xml|
       _run_xml(File.absolute_path(xml), this_dir, true, expected_error_msgs[File.basename(xml)])
     end
   end
@@ -615,11 +623,13 @@ class HPXMLTest < MiniTest::Test
 
   def _verify_simulation_outputs(runner, rundir, hpxml_path, results)
     # Check that eplusout.err has no lines that include "Blank Schedule Type Limits Name input"
+    # Check that eplusout.err has no lines that include "FixViewFactors: View factors not complete"
     File.readlines(File.join(rundir, "eplusout.err")).each do |err_line|
       next if err_line.include? 'Schedule:Constant="ALWAYS ON CONTINUOUS", Blank Schedule Type Limits Name input'
       next if err_line.include? 'Schedule:Constant="ALWAYS OFF DISCRETE", Blank Schedule Type Limits Name input'
 
       assert_equal(err_line.include?("Blank Schedule Type Limits Name input"), false)
+      assert_equal(err_line.include?("FixViewFactors: View factors not complete"), false)
     end
 
     sql_path = File.join(rundir, "eplusout.sql")
@@ -628,8 +638,19 @@ class HPXMLTest < MiniTest::Test
     sqlFile = OpenStudio::SqlFile.new(sql_path, false)
     hpxml_doc = REXML::Document.new(File.read(hpxml_path))
 
-    bldg_details = hpxml_doc.elements['/HPXML/Building/BuildingDetails']
+    # Timestep
+    timestep = hpxml_doc.elements['/HPXML/SoftwareInfo/extension/SimulationControl/Timestep']
+    if timestep.nil?
+      timestep = 60
+    else
+      timestep = Integer(timestep.text)
+    end
+    query = "SELECT NumTimestepsPerHour FROM Simulations"
+    sql_value = sqlFile.execAndReturnFirstDouble(query).get
+    assert_equal(60 / timestep, sql_value)
 
+    bldg_details = hpxml_doc.elements['/HPXML/Building/BuildingDetails']
+    
     # Conditioned Floor Area
     sum_hvac_load_frac = (bldg_details.elements['sum(Systems/HVAC/HVACPlant/CoolingSystem/FractionCoolLoadServed)'] +
                           bldg_details.elements['sum(Systems/HVAC/HVACPlant/HeatingSystem/FractionHeatLoadServed)'] +
@@ -1338,16 +1359,16 @@ class HPXMLTest < MiniTest::Test
     assert_equal(0, errors.size)
   end
 
-  def _test_hrv_erv_inputs(test_dir, all_results)
+  def _test_hrv_erv_inputs(sample_files_dir, all_results)
     # Compare HRV and ERV results that use different inputs
     ["hrv", "erv"].each do |mv_type|
       puts "#{mv_type.upcase} test results:"
 
-      base_xml = "#{test_dir}/base-mechvent-#{mv_type}.xml"
+      base_xml = "#{sample_files_dir}/base-mechvent-#{mv_type}.xml"
       results_base = all_results[base_xml]
       next if results_base.nil?
 
-      Dir["#{test_dir}/base-mechvent-#{mv_type}-*.xml"].sort.each do |xml|
+      Dir["#{sample_files_dir}/base-mechvent-#{mv_type}-*.xml"].sort.each do |xml|
         results = all_results[xml]
         next if results.nil?
 
@@ -1460,9 +1481,9 @@ class HPXMLTest < MiniTest::Test
     end
   end
 
-  def _test_collapsed_surfaces(all_results, this_dir)
-    results_base = all_results[File.absolute_path("#{this_dir}/base-enclosure-skylights.xml")]
-    results_collapsed = all_results[File.absolute_path("#{this_dir}/base-enclosure-split-surfaces.xml")]
+  def _test_collapsed_surfaces(all_results, sample_files_dir)
+    results_base = all_results[File.absolute_path("#{sample_files_dir}/base-enclosure-skylights.xml")]
+    results_collapsed = all_results[File.absolute_path("#{sample_files_dir}/base-enclosure-split-surfaces.xml")]
     return if results_base.nil? or results_collapsed.nil?
 
     # Compare results
