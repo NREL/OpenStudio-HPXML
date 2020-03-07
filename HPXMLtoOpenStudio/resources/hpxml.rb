@@ -10,68 +10,68 @@ class HPXML < Object
     end
   end
 
-  def set_header(hash)
-    @header = Header.new(hash)
+  def set_header(**kwargs)
+    @header = Header.new(**kwargs)
   end
 
-  def set_site(hash)
-    @site = Site.new(hash)
+  def set_site(**kwargs)
+    @site = Site.new(**kwargs)
   end
 
-  def set_building_occupancy(hash)
-    @building_occupancy = BuildingOccupancy.new(hash)
+  def set_building_occupancy(**kwargs)
+    @building_occupancy = BuildingOccupancy.new(**kwargs)
   end
 
-  def set_building_construction(hash)
-    @building_construction = BuildingConstruction.new(hash)
+  def set_building_construction(**kwargs)
+    @building_construction = BuildingConstruction.new(**kwargs)
   end
 
-  def set_climate_and_risk_zones(hash)
-    @climate_and_risk_zones = ClimateandRiskZones.new(hash)
+  def set_climate_and_risk_zones(**kwargs)
+    @climate_and_risk_zones = ClimateandRiskZones.new(**kwargs)
   end
 
-  def set_hvac_control(hash)
-    @hvac_control = HVACControl.new(hash)
+  def set_hvac_control(**kwargs)
+    @hvac_control = HVACControl.new(**kwargs)
   end
 
-  def set_hot_water_distribution(hash)
-    @hot_water_distribution = HotWaterDistribution.new(hash)
+  def set_hot_water_distribution(**kwargs)
+    @hot_water_distribution = HotWaterDistribution.new(**kwargs)
   end
 
-  def set_solar_thermal_system(hash)
-    @solar_thermal_system = SolarThermalSystem.new(hash)
+  def set_solar_thermal_system(**kwargs)
+    @solar_thermal_system = SolarThermalSystem.new(**kwargs)
   end
 
-  def set_clothes_washer(hash)
-    @clothes_washer = ClothesWasher.new(hash)
+  def set_clothes_washer(**kwargs)
+    @clothes_washer = ClothesWasher.new(**kwargs)
   end
 
-  def set_clothes_dryer(hash)
-    @clothes_dryer = ClothesDryer.new(hash)
+  def set_clothes_dryer(**kwargs)
+    @clothes_dryer = ClothesDryer.new(**kwargs)
   end
 
-  def set_dishwasher(hash)
-    @dishwasher = Dishwasher.new(hash)
+  def set_dishwasher(**kwargs)
+    @dishwasher = Dishwasher.new(**kwargs)
   end
 
-  def set_refrigerator(hash)
-    @refrigerator = Refrigerator.new(hash)
+  def set_refrigerator(**kwargs)
+    @refrigerator = Refrigerator.new(**kwargs)
   end
 
-  def set_cooking_range(hash)
-    @cooking_range = CookingRange.new(hash)
+  def set_cooking_range(**kwargs)
+    @cooking_range = CookingRange.new(**kwargs)
   end
 
-  def set_oven(hash)
-    @oven = Oven.new(hash)
+  def set_oven(**kwargs)
+    @oven = Oven.new(**kwargs)
   end
 
-  def set_lighting(hash)
-    @lighting = Lighting.new(hash)
+  def set_lighting(**kwargs)
+    @lighting = Lighting.new(**kwargs)
   end
 
-  def set_misc_loads_schedule(hash)
-    @misc_loads_schedule = MiscLoadsSchedule.new(hash)
+  def set_misc_loads_schedule(**kwargs)
+    @misc_loads_schedule = MiscLoadsSchedule.new(**kwargs)
   end
 
   def to_rexml()
@@ -124,57 +124,57 @@ class HPXML < Object
       @doc = XMLHelper.parse_file(hpxml_path)
       hpxml = @doc.elements['/HPXML']
     end
-    @header = Header.new(nil, hpxml)
-    @site = Site.new(nil, hpxml)
-    @neighbor_buildings = NeighborBuildings.new(nil, hpxml)
-    @building_occupancy = BuildingOccupancy.new(nil, hpxml)
-    @building_construction = BuildingConstruction.new(nil, hpxml)
-    @climate_and_risk_zones = ClimateandRiskZones.new(nil, hpxml)
-    @air_infiltration_measurements = AirInfiltrationMeasurements.new(nil, hpxml)
-    @attics = Attics.new(nil, hpxml)
-    @foundations = Foundations.new(nil, hpxml)
-    @roofs = Roofs.new(nil, hpxml)
-    @rim_joists = RimJoists.new(nil, hpxml)
-    @walls = Walls.new(nil, hpxml)
-    @foundation_walls = FoundationWalls.new(nil, hpxml)
-    @frame_floors = FrameFloors.new(nil, hpxml)
-    @slabs = Slabs.new(nil, hpxml)
-    @windows = Windows.new(nil, hpxml)
-    @skylights = Skylights.new(nil, hpxml)
-    @doors = Doors.new(nil, hpxml)
-    @heating_systems = HeatingSystems.new(nil, hpxml)
-    @cooling_systems = CoolingSystems.new(nil, hpxml)
-    @heat_pumps = HeatPumps.new(nil, hpxml)
-    @hvac_control = HVACControl.new(nil, hpxml)
-    @hvac_distributions = HVACDistributions.new(nil, hpxml)
-    @ventilation_fans = VentilationFans.new(nil, hpxml)
-    @water_heating_systems = WaterHeatingSystems.new(nil, hpxml)
-    @hot_water_distribution = HotWaterDistribution.new(nil, hpxml)
-    @water_fixtures = WaterFixtures.new(nil, hpxml)
-    @solar_thermal_system = SolarThermalSystem.new(nil, hpxml)
-    @pv_systems = PVSystems.new(nil, hpxml)
-    @clothes_washer = ClothesWasher.new(nil, hpxml)
-    @clothes_dryer = ClothesDryer.new(nil, hpxml)
-    @dishwasher = Dishwasher.new(nil, hpxml)
-    @refrigerator = Refrigerator.new(nil, hpxml)
-    @cooking_range = CookingRange.new(nil, hpxml)
-    @oven = Oven.new(nil, hpxml)
-    @lighting = Lighting.new(nil, hpxml)
-    @ceiling_fans = CeilingFans.new(nil, hpxml)
-    @plug_loads = PlugLoads.new(nil, hpxml)
-    @misc_loads_schedule = MiscLoadsSchedule.new(nil, hpxml)
+    @header = Header.new(hpxml: hpxml)
+    @site = Site.new(hpxml: hpxml)
+    @neighbor_buildings = NeighborBuildings.new(hpxml: hpxml)
+    @building_occupancy = BuildingOccupancy.new(hpxml: hpxml)
+    @building_construction = BuildingConstruction.new(hpxml: hpxml)
+    @climate_and_risk_zones = ClimateandRiskZones.new(hpxml: hpxml)
+    @air_infiltration_measurements = AirInfiltrationMeasurements.new(hpxml: hpxml)
+    @attics = Attics.new(hpxml: hpxml)
+    @foundations = Foundations.new(hpxml: hpxml)
+    @roofs = Roofs.new(hpxml: hpxml)
+    @rim_joists = RimJoists.new(hpxml: hpxml)
+    @walls = Walls.new(hpxml: hpxml)
+    @foundation_walls = FoundationWalls.new(hpxml: hpxml)
+    @frame_floors = FrameFloors.new(hpxml: hpxml)
+    @slabs = Slabs.new(hpxml: hpxml)
+    @windows = Windows.new(hpxml: hpxml)
+    @skylights = Skylights.new(hpxml: hpxml)
+    @doors = Doors.new(hpxml: hpxml)
+    @heating_systems = HeatingSystems.new(hpxml: hpxml)
+    @cooling_systems = CoolingSystems.new(hpxml: hpxml)
+    @heat_pumps = HeatPumps.new(hpxml: hpxml)
+    @hvac_control = HVACControl.new(hpxml: hpxml)
+    @hvac_distributions = HVACDistributions.new(hpxml: hpxml)
+    @ventilation_fans = VentilationFans.new(hpxml: hpxml)
+    @water_heating_systems = WaterHeatingSystems.new(hpxml: hpxml)
+    @hot_water_distribution = HotWaterDistribution.new(hpxml: hpxml)
+    @water_fixtures = WaterFixtures.new(hpxml: hpxml)
+    @solar_thermal_system = SolarThermalSystem.new(hpxml: hpxml)
+    @pv_systems = PVSystems.new(hpxml: hpxml)
+    @clothes_washer = ClothesWasher.new(hpxml: hpxml)
+    @clothes_dryer = ClothesDryer.new(hpxml: hpxml)
+    @dishwasher = Dishwasher.new(hpxml: hpxml)
+    @refrigerator = Refrigerator.new(hpxml: hpxml)
+    @cooking_range = CookingRange.new(hpxml: hpxml)
+    @oven = Oven.new(hpxml: hpxml)
+    @lighting = Lighting.new(hpxml: hpxml)
+    @ceiling_fans = CeilingFans.new(hpxml: hpxml)
+    @plug_loads = PlugLoads.new(hpxml: hpxml)
+    @misc_loads_schedule = MiscLoadsSchedule.new(hpxml: hpxml)
   end
 
   class BaseElement
-    def initialize(hash = nil, hpxml = nil)
-      if not hash.nil?
-        # Set values from hash
-        hash.each do |k, v|
-          self.send(k.to_s + "=", v)
-        end
-      elsif not hpxml.nil?
+    def initialize(hpxml: nil, **kwargs)
+      if not hpxml.nil?
         # Set values from HPXML object
         from_hpxml(hpxml)
+      else
+        # Set values from **kwargs
+        kwargs.each do |k, v|
+          self.send(k.to_s + "=", v)
+        end
       end
     end
 
@@ -200,7 +200,7 @@ class HPXML < Object
   end
 
   class BaseArrayElement < Array
-    def initialize(hash = nil, hpxml = nil)
+    def initialize(hpxml: nil)
       if not hpxml.nil?
         # Set values from HPXML object
         from_hpxml(hpxml)
@@ -298,15 +298,15 @@ class HPXML < Object
   end
 
   class NeighborBuildings < BaseArrayElement
-    def add(hash)
-      self << NeighborBuilding.new(hash)
+    def add(**kwargs)
+      self << NeighborBuilding.new(**kwargs)
     end
 
     def from_hpxml(hpxml)
       return if hpxml.nil?
 
       hpxml.elements.each("Building/BuildingDetails/BuildingSummary/Site/extension/Neighbors/NeighborBuilding") do |neighbor_building|
-        self << NeighborBuilding.new(nil, neighbor_building)
+        self << NeighborBuilding.new(hpxml: neighbor_building)
       end
     end
   end
@@ -443,15 +443,15 @@ class HPXML < Object
   end
 
   class AirInfiltrationMeasurements < BaseArrayElement
-    def add(hash)
-      self << AirInfiltrationMeasurement.new(hash)
+    def add(**kwargs)
+      self << AirInfiltrationMeasurement.new(**kwargs)
     end
 
     def from_hpxml(hpxml)
       return if hpxml.nil?
 
       hpxml.elements.each("Building/BuildingDetails/Enclosure/AirInfiltration/AirInfiltrationMeasurement") do |air_infiltration_measurement|
-        self << AirInfiltrationMeasurement.new(nil, air_infiltration_measurement)
+        self << AirInfiltrationMeasurement.new(hpxml: air_infiltration_measurement)
       end
     end
   end
@@ -494,15 +494,15 @@ class HPXML < Object
   end
 
   class Attics < BaseArrayElement
-    def add(hash)
-      self << Attic.new(hash)
+    def add(**kwargs)
+      self << Attic.new(**kwargs)
     end
 
     def from_hpxml(hpxml)
       return if hpxml.nil?
 
       hpxml.elements.each("Building/BuildingDetails/Enclosure/Attics/Attic") do |attic|
-        self << Attic.new(nil, attic)
+        self << Attic.new(hpxml: attic)
       end
     end
   end
@@ -562,15 +562,15 @@ class HPXML < Object
   end
 
   class Foundations < BaseArrayElement
-    def add(hash)
-      self << Foundation.new(hash)
+    def add(**kwargs)
+      self << Foundation.new(**kwargs)
     end
 
     def from_hpxml(hpxml)
       return if hpxml.nil?
 
       hpxml.elements.each("Building/BuildingDetails/Enclosure/Foundations/Foundation") do |foundation|
-        self << Foundation.new(nil, foundation)
+        self << Foundation.new(hpxml: foundation)
       end
     end
   end
@@ -636,15 +636,15 @@ class HPXML < Object
   end
 
   class Roofs < BaseArrayElement
-    def add(hash)
-      self << Roof.new(hash)
+    def add(**kwargs)
+      self << Roof.new(**kwargs)
     end
 
     def from_hpxml(hpxml)
       return if hpxml.nil?
 
       hpxml.elements.each("Building/BuildingDetails/Enclosure/Roofs/Roof") do |roof|
-        self << Roof.new(nil, roof)
+        self << Roof.new(hpxml: roof)
       end
     end
   end
@@ -704,15 +704,15 @@ class HPXML < Object
   end
 
   class RimJoists < BaseArrayElement
-    def add(hash)
-      self << RimJoist.new(hash)
+    def add(**kwargs)
+      self << RimJoist.new(**kwargs)
     end
 
     def from_hpxml(hpxml)
       return if hpxml.nil?
 
       hpxml.elements.each("Building/BuildingDetails/Enclosure/RimJoists/RimJoist") do |rim_joist|
-        self << RimJoist.new(nil, rim_joist)
+        self << RimJoist.new(hpxml: rim_joist)
       end
     end
   end
@@ -763,15 +763,15 @@ class HPXML < Object
   end
 
   class Walls < BaseArrayElement
-    def add(hash)
-      self << Wall.new(hash)
+    def add(**kwargs)
+      self << Wall.new(**kwargs)
     end
 
     def from_hpxml(hpxml)
       return if hpxml.nil?
 
       hpxml.elements.each("Building/BuildingDetails/Enclosure/Walls/Wall") do |wall|
-        self << Wall.new(nil, wall)
+        self << Wall.new(hpxml: wall)
       end
     end
   end
@@ -833,15 +833,15 @@ class HPXML < Object
   end
 
   class FoundationWalls < BaseArrayElement
-    def add(hash)
-      self << FoundationWall.new(hash)
+    def add(**kwargs)
+      self << FoundationWall.new(**kwargs)
     end
 
     def from_hpxml(hpxml)
       return if hpxml.nil?
 
       hpxml.elements.each("Building/BuildingDetails/Enclosure/FoundationWalls/FoundationWall") do |foundation_wall|
-        self << FoundationWall.new(nil, foundation_wall)
+        self << FoundationWall.new(hpxml: foundation_wall)
       end
     end
   end
@@ -920,15 +920,15 @@ class HPXML < Object
   end
 
   class FrameFloors < BaseArrayElement
-    def add(hash)
-      self << FrameFloor.new(hash)
+    def add(**kwargs)
+      self << FrameFloor.new(**kwargs)
     end
 
     def from_hpxml(hpxml)
       return if hpxml.nil?
 
       hpxml.elements.each("Building/BuildingDetails/Enclosure/FrameFloors/FrameFloor") do |frame_floor|
-        self << FrameFloor.new(nil, frame_floor)
+        self << FrameFloor.new(hpxml: frame_floor)
       end
     end
   end
@@ -972,7 +972,7 @@ class HPXML < Object
         @insulation_continuous_r_value = _to_float_or_nil(XMLHelper.get_value(insulation, "Layer[InstallationType='continuous']/NominalRValue"))
       end
     end
-    
+
     def is_ceiling
       if ["attic - vented", "attic - unvented"].include? @interior_adjacent_to
         return true
@@ -982,22 +982,22 @@ class HPXML < Object
 
       return false
     end
-    
+
     def is_floor
       !is_ceiling
     end
   end
 
   class Slabs < BaseArrayElement
-    def add(hash)
-      self << Slab.new(hash)
+    def add(**kwargs)
+      self << Slab.new(**kwargs)
     end
 
     def from_hpxml(hpxml)
       return if hpxml.nil?
 
       hpxml.elements.each("Building/BuildingDetails/Enclosure/Slabs/Slab") do |slab|
-        self << Slab.new(nil, slab)
+        self << Slab.new(hpxml: slab)
       end
     end
   end
@@ -1078,15 +1078,15 @@ class HPXML < Object
   end
 
   class Windows < BaseArrayElement
-    def add(hash)
-      self << Window.new(hash)
+    def add(**kwargs)
+      self << Window.new(**kwargs)
     end
 
     def from_hpxml(hpxml)
       return if hpxml.nil?
 
       hpxml.elements.each("Building/BuildingDetails/Enclosure/Windows/Window") do |window|
-        self << Window.new(nil, window)
+        self << Window.new(hpxml: window)
       end
     end
   end
@@ -1153,15 +1153,15 @@ class HPXML < Object
   end
 
   class Skylights < BaseArrayElement
-    def add(hash)
-      self << Skylight.new(hash)
+    def add(**kwargs)
+      self << Skylight.new(**kwargs)
     end
 
     def from_hpxml(hpxml)
       return if hpxml.nil?
 
       hpxml.elements.each("Building/BuildingDetails/Enclosure/Skylights/Skylight") do |skylight|
-        self << Skylight.new(nil, skylight)
+        self << Skylight.new(hpxml: skylight)
       end
     end
   end
@@ -1207,15 +1207,15 @@ class HPXML < Object
   end
 
   class Doors < BaseArrayElement
-    def add(hash)
-      self << Door.new(hash)
+    def add(**kwargs)
+      self << Door.new(**kwargs)
     end
 
     def from_hpxml(hpxml)
       return if hpxml.nil?
 
       hpxml.elements.each("Building/BuildingDetails/Enclosure/Doors/Door") do |door|
-        self << Door.new(nil, door)
+        self << Door.new(hpxml: door)
       end
     end
   end
@@ -1251,15 +1251,15 @@ class HPXML < Object
   end
 
   class HeatingSystems < BaseArrayElement
-    def add(hash)
-      self << HeatingSystem.new(hash)
+    def add(**kwargs)
+      self << HeatingSystem.new(**kwargs)
     end
 
     def from_hpxml(hpxml)
       return if hpxml.nil?
 
       hpxml.elements.each("Building/BuildingDetails/Systems/HVAC/HVACPlant/HeatingSystem") do |heating_system|
-        self << HeatingSystem.new(nil, heating_system)
+        self << HeatingSystem.new(hpxml: heating_system)
       end
     end
   end
@@ -1329,15 +1329,15 @@ class HPXML < Object
   end
 
   class CoolingSystems < BaseArrayElement
-    def add(hash)
-      self << CoolingSystem.new(hash)
+    def add(**kwargs)
+      self << CoolingSystem.new(**kwargs)
     end
 
     def from_hpxml(hpxml)
       return if hpxml.nil?
 
       hpxml.elements.each("Building/BuildingDetails/Systems/HVAC/HVACPlant/CoolingSystem") do |cooling_system|
-        self << CoolingSystem.new(nil, cooling_system)
+        self << CoolingSystem.new(hpxml: cooling_system)
       end
     end
   end
@@ -1406,15 +1406,15 @@ class HPXML < Object
   end
 
   class HeatPumps < BaseArrayElement
-    def add(hash)
-      self << HeatPump.new(hash)
+    def add(**kwargs)
+      self << HeatPump.new(**kwargs)
     end
 
     def from_hpxml(hpxml)
       return if hpxml.nil?
 
       hpxml.elements.each("Building/BuildingDetails/Systems/HVAC/HVACPlant/HeatPump") do |heat_pump|
-        self << HeatPump.new(nil, heat_pump)
+        self << HeatPump.new(hpxml: heat_pump)
       end
     end
   end
@@ -1566,15 +1566,15 @@ class HPXML < Object
   end
 
   class HVACDistributions < BaseArrayElement
-    def add(hash)
-      self << HVACDistribution.new(hash)
+    def add(**kwargs)
+      self << HVACDistribution.new(**kwargs)
     end
 
     def from_hpxml(hpxml)
       return if hpxml.nil?
 
       hpxml.elements.each("Building/BuildingDetails/Systems/HVAC/HVACDistribution") do |hvac_distribution|
-        self << HVACDistribution.new(nil, hvac_distribution)
+        self << HVACDistribution.new(hpxml: hvac_distribution)
       end
     end
   end
@@ -1632,15 +1632,15 @@ class HPXML < Object
   end
 
   class DuctLeakageMeasurements < BaseArrayElement
-    def add(hash)
-      self << DuctLeakageMeasurement.new(hash)
+    def add(**kwargs)
+      self << DuctLeakageMeasurement.new(**kwargs)
     end
 
     def from_hpxml(hvac_distribution)
       return if hvac_distribution.nil?
 
       hvac_distribution.elements.each("DistributionSystemType/AirDistribution/DuctLeakageMeasurement") do |duct_leakage_measurement|
-        self << DuctLeakageMeasurement.new(nil, duct_leakage_measurement)
+        self << DuctLeakageMeasurement.new(hpxml: duct_leakage_measurement)
       end
     end
   end
@@ -1673,15 +1673,15 @@ class HPXML < Object
   end
 
   class Ducts < BaseArrayElement
-    def add(hash)
-      self << Duct.new(hash)
+    def add(**kwargs)
+      self << Duct.new(**kwargs)
     end
 
     def from_hpxml(hvac_distribution)
       return if hvac_distribution.nil?
 
       hvac_distribution.elements.each("DistributionSystemType/AirDistribution/Ducts") do |duct|
-        self << Duct.new(nil, duct)
+        self << Duct.new(hpxml: duct)
       end
     end
   end
@@ -1712,15 +1712,15 @@ class HPXML < Object
   end
 
   class VentilationFans < BaseArrayElement
-    def add(hash)
-      self << VentilationFan.new(hash)
+    def add(**kwargs)
+      self << VentilationFan.new(**kwargs)
     end
 
     def from_hpxml(hpxml)
       return if hpxml.nil?
 
       hpxml.elements.each("Building/BuildingDetails/Systems/MechanicalVentilation/VentilationFans/VentilationFan") do |ventilation_fan|
-        self << VentilationFan.new(nil, ventilation_fan)
+        self << VentilationFan.new(hpxml: ventilation_fan)
       end
     end
   end
@@ -1776,15 +1776,15 @@ class HPXML < Object
   end
 
   class WaterHeatingSystems < BaseArrayElement
-    def add(hash)
-      self << WaterHeatingSystem.new(hash)
+    def add(**kwargs)
+      self << WaterHeatingSystem.new(**kwargs)
     end
 
     def from_hpxml(hpxml)
       return if hpxml.nil?
 
       hpxml.elements.each("Building/BuildingDetails/Systems/WaterHeating/WaterHeatingSystem") do |water_heating_system|
-        self << WaterHeatingSystem.new(nil, water_heating_system)
+        self << WaterHeatingSystem.new(hpxml: water_heating_system)
       end
     end
   end
@@ -1911,15 +1911,15 @@ class HPXML < Object
   end
 
   class WaterFixtures < BaseArrayElement
-    def add(hash)
-      self << WaterFixture.new(hash)
+    def add(**kwargs)
+      self << WaterFixture.new(**kwargs)
     end
 
     def from_hpxml(hpxml)
       return if hpxml.nil?
 
       hpxml.elements.each("BuildingDetails/Systems/WaterHeating/WaterFixture") do |water_fixture|
-        self << WaterFixture.new(nil, water_fixture)
+        self << WaterFixture.new(hpxml: water_fixture)
       end
     end
   end
@@ -1997,15 +1997,15 @@ class HPXML < Object
   end
 
   class PVSystems < BaseArrayElement
-    def add(hash)
-      self << PVSystem.new(hash)
+    def add(**kwargs)
+      self << PVSystem.new(**kwargs)
     end
 
     def from_hpxml(hpxml)
       return if hpxml.nil?
 
       hpxml.elements.each("Building/BuildingDetails/Systems/Photovoltaics/PVSystem") do |pv_system|
-        self << PVSystem.new(nil, pv_system)
+        self << PVSystem.new(hpxml: pv_system)
       end
     end
   end
@@ -2313,15 +2313,15 @@ class HPXML < Object
   end
 
   class CeilingFans < BaseArrayElement
-    def add(hash)
-      self << CeilingFan.new(hash)
+    def add(**kwargs)
+      self << CeilingFan.new(**kwargs)
     end
 
     def from_hpxml(hpxml)
       return if hpxml.nil?
 
       hpxml.elements.each("Building/BuildingDetails/Lighting/CeilingFan") do |ceiling_fan|
-        self << CeilingFan.new(nil, ceiling_fan)
+        self << CeilingFan.new(hpxml: ceiling_fan)
       end
     end
   end
@@ -2352,15 +2352,15 @@ class HPXML < Object
   end
 
   class PlugLoads < BaseArrayElement
-    def add(hash)
-      self << PlugLoad.new(hash)
+    def add(**kwargs)
+      self << PlugLoad.new(**kwargs)
     end
 
     def from_hpxml(hpxml)
       return if hpxml.nil?
 
       hpxml.elements.each("Building/BuildingDetails/MiscLoads/PlugLoad") do |plug_load|
-        self << PlugLoad.new(nil, plug_load)
+        self << PlugLoad.new(hpxml: plug_load)
       end
     end
   end
