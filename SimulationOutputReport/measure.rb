@@ -936,7 +936,7 @@ class SimulationOutputReport < OpenStudio::Measure::ReportingMeasure
       if ['space-heating boiler with tankless coil', 'space-heating boiler with storage tank'].include? dhw_system.water_heater_type
         @hpxml.heating_systems.each do |heating_system|
           next unless dhw_system.related_hvac == heating_system.id
-          
+
           dhw_fuels[sys_id] = heating_system.heating_system_fuel
         end
       else
