@@ -1,15 +1,6 @@
 require_relative 'xmlhelper'
 
 class HPXML < Object
-  attr_accessor(:header, :site, :neighbor_buildings, :building_occupancy, :building_construction,
-                :climate_and_risk_zones, :air_infiltration_measurements, :attics, :foundations,
-                :roofs, :rim_joists, :walls, :foundation_walls, :frame_floors, :slabs, :windows,
-                :skylights, :doors, :heating_systems, :cooling_systems, :heat_pumps, :hvac_control,
-                :hvac_distributions, :ventilation_fans, :water_heating_systems, :hot_water_distribution,
-                :water_fixtures, :solar_thermal_system, :pv_systems, :clothes_washer, :clothes_dryer,
-                :dishwasher, :refrigerator, :cooking_range, :oven, :lighting, :ceiling_fans,
-                :plug_loads, :misc_load_schedule, :doc)
-
   def initialize(hpxml_path: nil, collapse_enclosure: true)
     @doc = nil
     @hpxml_path = hpxml_path
@@ -19,50 +10,111 @@ class HPXML < Object
     end
   end
 
-  # TODO: Create classes for Array elements (e.g., Walls, HeatingSystems, etc.) to simplify code.
+  def set_header(hash)
+    @header = Header.new(hash)
+  end
+
+  def set_site(hash)
+    @site = Site.new(hash)
+  end
+
+  def set_building_occupancy(hash)
+    @building_occupancy = BuildingOccupancy.new(hash)
+  end
+
+  def set_building_construction(hash)
+    @building_construction = BuildingConstruction.new(hash)
+  end
+
+  def set_climate_and_risk_zones(hash)
+    @climate_and_risk_zones = ClimateandRiskZones.new(hash)
+  end
+
+  def set_hvac_control(hash)
+    @hvac_control = HVACControl.new(hash)
+  end
+
+  def set_hot_water_distribution(hash)
+    @hot_water_distribution = HotWaterDistribution.new(hash)
+  end
+
+  def set_solar_thermal_system(hash)
+    @solar_thermal_system = SolarThermalSystem.new(hash)
+  end
+
+  def set_clothes_washer(hash)
+    @clothes_washer = ClothesWasher.new(hash)
+  end
+
+  def set_clothes_dryer(hash)
+    @clothes_dryer = ClothesDryer.new(hash)
+  end
+
+  def set_dishwasher(hash)
+    @dishwasher = Dishwasher.new(hash)
+  end
+
+  def set_refrigerator(hash)
+    @refrigerator = Refrigerator.new(hash)
+  end
+
+  def set_cooking_range(hash)
+    @cooking_range = CookingRange.new(hash)
+  end
+
+  def set_oven(hash)
+    @oven = Oven.new(hash)
+  end
+
+  def set_lighting(hash)
+    @lighting = Lighting.new(hash)
+  end
+
+  def set_misc_loads_schedule(hash)
+    @misc_loads_schedule = MiscLoadsSchedule.new(hash)
+  end
 
   def to_rexml()
-    # Note: In HPXML, order of elements matters.
     @doc = _create_rexml_document()
-    @header.to_rexml(doc) unless @header.nil?
-    @site.to_rexml(@doc) unless @site.nil?
-    @neighbor_buildings.each { |o| o.to_rexml(@doc) }
-    @building_occupancy.to_rexml(@doc) unless @building_occupancy.nil?
-    @building_construction.to_rexml(@doc) unless @building_construction.nil?
-    @climate_and_risk_zones.to_rexml(@doc) unless @climate_and_risk_zones.nil?
-    @air_infiltration_measurements.each { |o| o.to_rexml(@doc) }
-    @attics.each { |o| o.to_rexml(@doc) }
-    @foundations.each { |o| o.to_rexml(@doc) }
-    @roofs.each { |o| o.to_rexml(@doc) }
-    @rim_joists.each { |o| o.to_rexml(@doc) }
-    @walls.each { |o| o.to_rexml(@doc) }
-    @foundation_walls.each { |o| o.to_rexml(@doc) }
-    @frame_floors.each { |o| o.to_rexml(@doc) }
-    @slabs.each { |o| o.to_rexml(@doc) }
-    @windows.each { |o| o.to_rexml(@doc) }
-    @skylights.each { |o| o.to_rexml(@doc) }
-    @doors.each { |o| o.to_rexml(@doc) }
-    @heating_systems.each { |o| o.to_rexml(@doc) }
-    @cooling_systems.each { |o| o.to_rexml(@doc) }
-    @heat_pumps.each { |o| o.to_rexml(@doc) }
-    @hvac_control.to_rexml(@doc) unless @hvac_control.nil?
-    @hvac_distributions.each { |o| o.to_rexml(@doc) }
-    @ventilation_fans.each { |o| o.to_rexml(@doc) }
-    @water_heating_systems.each { |o| o.to_rexml(@doc) }
-    @hot_water_distribution.to_rexml(@doc) unless @hot_water_distribution.nil?
-    @water_fixtures.each { |o| o.to_rexml(@doc) }
-    @solar_thermal_system.to_rexml(@doc) unless @solar_thermal_system.nil?
-    @pv_systems.each { |o| o.to_rexml(@doc) }
-    @clothes_washer.to_rexml(@doc) unless @clothes_washer.nil?
-    @clothes_dryer.to_rexml(@doc) unless @clothes_dryer.nil?
-    @dishwasher.to_rexml(@doc) unless @dishwasher.nil?
-    @refrigerator.to_rexml(@doc) unless @refrigerator.nil?
-    @cooking_range.to_rexml(@doc) unless @cooking_range.nil?
-    @oven.to_rexml(@doc) unless @oven.nil?
-    @lighting.to_rexml(@doc) unless @lighting.nil?
-    @ceiling_fans.each { |o| o.to_rexml(@doc) }
-    @plug_loads.each { |o| o.to_rexml(@doc) }
-    @misc_load_schedule.to_rexml(@doc) unless @misc_load_schedule.nil?
+    @header.to_rexml(@doc)
+    @site.to_rexml(@doc)
+    @neighbor_buildings.to_rexml(@doc)
+    @building_occupancy.to_rexml(@doc)
+    @building_construction.to_rexml(@doc)
+    @climate_and_risk_zones.to_rexml(@doc)
+    @air_infiltration_measurements.to_rexml(@doc)
+    @attics.to_rexml(@doc)
+    @foundations.to_rexml(@doc)
+    @roofs.to_rexml(@doc)
+    @rim_joists.to_rexml(@doc)
+    @walls.to_rexml(@doc)
+    @foundation_walls.to_rexml(@doc)
+    @frame_floors.to_rexml(@doc)
+    @slabs.to_rexml(@doc)
+    @windows.to_rexml(@doc)
+    @skylights.to_rexml(@doc)
+    @doors.to_rexml(@doc)
+    @heating_systems.to_rexml(@doc)
+    @cooling_systems.to_rexml(@doc)
+    @heat_pumps.to_rexml(@doc)
+    @hvac_control.to_rexml(@doc)
+    @hvac_distributions.to_rexml(@doc)
+    @ventilation_fans.to_rexml(@doc)
+    @water_heating_systems.to_rexml(@doc)
+    @hot_water_distribution.to_rexml(@doc)
+    @water_fixtures.to_rexml(@doc)
+    @solar_thermal_system.to_rexml(@doc)
+    @pv_systems.to_rexml(@doc)
+    @clothes_washer.to_rexml(@doc)
+    @clothes_dryer.to_rexml(@doc)
+    @dishwasher.to_rexml(@doc)
+    @refrigerator.to_rexml(@doc)
+    @cooking_range.to_rexml(@doc)
+    @oven.to_rexml(@doc)
+    @lighting.to_rexml(@doc)
+    @ceiling_fans.to_rexml(@doc)
+    @plug_loads.to_rexml(@doc)
+    @misc_loads_schedule.to_rexml(@doc)
     return @doc
   end
 
@@ -72,16 +124,35 @@ class HPXML < Object
       @doc = XMLHelper.parse_file(hpxml_path)
       hpxml = @doc.elements['/HPXML']
     end
-
-    # Single elements
     @header = Header.new(nil, hpxml)
     @site = Site.new(nil, hpxml)
+    @neighbor_buildings = NeighborBuildings.new(nil, hpxml)
     @building_occupancy = BuildingOccupancy.new(nil, hpxml)
     @building_construction = BuildingConstruction.new(nil, hpxml)
     @climate_and_risk_zones = ClimateandRiskZones.new(nil, hpxml)
+    @air_infiltration_measurements = AirInfiltrationMeasurements.new(nil, hpxml)
+    @attics = Attics.new(nil, hpxml)
+    @foundations = Foundations.new(nil, hpxml)
+    @roofs = Roofs.new(nil, hpxml)
+    @rim_joists = RimJoists.new(nil, hpxml)
+    @walls = Walls.new(nil, hpxml)
+    @foundation_walls = FoundationWalls.new(nil, hpxml)
+    @frame_floors = FrameFloors.new(nil, hpxml)
+    @slabs = Slabs.new(nil, hpxml)
+    @windows = Windows.new(nil, hpxml)
+    @skylights = Skylights.new(nil, hpxml)
+    @doors = Doors.new(nil, hpxml)
+    @heating_systems = HeatingSystems.new(nil, hpxml)
+    @cooling_systems = CoolingSystems.new(nil, hpxml)
+    @heat_pumps = HeatPumps.new(nil, hpxml)
     @hvac_control = HVACControl.new(nil, hpxml)
+    @hvac_distributions = HVACDistributions.new(nil, hpxml)
+    @ventilation_fans = VentilationFans.new(nil, hpxml)
+    @water_heating_systems = WaterHeatingSystems.new(nil, hpxml)
     @hot_water_distribution = HotWaterDistribution.new(nil, hpxml)
+    @water_fixtures = WaterFixtures.new(nil, hpxml)
     @solar_thermal_system = SolarThermalSystem.new(nil, hpxml)
+    @pv_systems = PVSystems.new(nil, hpxml)
     @clothes_washer = ClothesWasher.new(nil, hpxml)
     @clothes_dryer = ClothesDryer.new(nil, hpxml)
     @dishwasher = Dishwasher.new(nil, hpxml)
@@ -89,103 +160,9 @@ class HPXML < Object
     @cooking_range = CookingRange.new(nil, hpxml)
     @oven = Oven.new(nil, hpxml)
     @lighting = Lighting.new(nil, hpxml)
-    @misc_load_schedule = MiscLoads.new(nil, hpxml)
-
-    # Arrays
-    @neighbor_buildings = []
-    @air_infiltration_measurements = []
-    @attics = []
-    @foundations = []
-    @roofs = []
-    @rim_joists = []
-    @walls = []
-    @foundation_walls = []
-    @frame_floors = []
-    @slabs = []
-    @windows = []
-    @skylights = []
-    @doors = []
-    @heating_systems = []
-    @cooling_systems = []
-    @heat_pumps = []
-    @hvac_distributions = []
-    @ventilation_fans = []
-    @water_heating_systems = []
-    @water_fixtures = []
-    @pv_systems = []
-    @ceiling_fans = []
-    @plug_loads = []
-    if not hpxml.nil?
-      hpxml.elements.each("Building/BuildingDetails/BuildingSummary/Site/extension/Neighbors/NeighborBuilding") do |neighbor_building|
-        @neighbor_buildings << NeighborBuilding.new(nil, neighbor_building)
-      end
-      hpxml.elements.each("Building/BuildingDetails/Enclosure/AirInfiltration/AirInfiltrationMeasurement") do |air_infiltration_measurement|
-        @air_infiltration_measurements << AirInfiltrationMeasurement.new(nil, air_infiltration_measurement)
-      end
-      hpxml.elements.each("Building/BuildingDetails/Enclosure/Attics/Attic") do |attic|
-        @attics << Attic.new(nil, attic)
-      end
-      hpxml.elements.each("Building/BuildingDetails/Enclosure/Foundations/Foundation") do |foundation|
-        @foundations << Foundation.new(nil, foundation)
-      end
-      hpxml.elements.each("Building/BuildingDetails/Enclosure/Roofs/Roof") do |roof|
-        @roofs << Roof.new(nil, roof)
-      end
-      hpxml.elements.each("Building/BuildingDetails/Enclosure/RimJoists/RimJoist") do |rim_joist|
-        @rim_joists << RimJoist.new(nil, rim_joist)
-      end
-      hpxml.elements.each("Building/BuildingDetails/Enclosure/Walls/Wall") do |wall|
-        @walls << Wall.new(nil, wall)
-      end
-      hpxml.elements.each("Building/BuildingDetails/Enclosure/FoundationWalls/FoundationWall") do |foundation_wall|
-        @foundation_walls << FoundationWall.new(nil, foundation_wall)
-      end
-      hpxml.elements.each("Building/BuildingDetails/Enclosure/FrameFloors/FrameFloor") do |frame_floor|
-        @frame_floors << FrameFloor.new(nil, frame_floor)
-      end
-      hpxml.elements.each("Building/BuildingDetails/Enclosure/Slabs/Slab") do |slab|
-        @slabs << Slab.new(nil, slab)
-      end
-      hpxml.elements.each("Building/BuildingDetails/Enclosure/Windows/Window") do |window|
-        @windows << Window.new(nil, window)
-      end
-      hpxml.elements.each("Building/BuildingDetails/Enclosure/Skylights/Skylight") do |skylight|
-        @skylights << Skylight.new(nil, skylight)
-      end
-      hpxml.elements.each("Building/BuildingDetails/Enclosure/Doors/Door") do |door|
-        @doors << Door.new(nil, door)
-      end
-      hpxml.elements.each("Building/BuildingDetails/Systems/HVAC/HVACPlant/HeatingSystem") do |heating_system|
-        @heating_systems << HeatingSystem.new(nil, heating_system)
-      end
-      hpxml.elements.each("Building/BuildingDetails/Systems/HVAC/HVACPlant/CoolingSystem") do |cooling_system|
-        @cooling_systems << CoolingSystem.new(nil, cooling_system)
-      end
-      hpxml.elements.each("Building/BuildingDetails/Systems/HVAC/HVACPlant/HeatPump") do |heat_pump|
-        @heat_pumps << HeatPump.new(nil, heat_pump)
-      end
-      hpxml.elements.each("Building/BuildingDetails/Systems/HVAC/HVACDistribution") do |hvac_distribution|
-        @hvac_distributions << HVACDistribution.new(nil, hvac_distribution)
-      end
-      hpxml.elements.each("Building/BuildingDetails/Systems/MechanicalVentilation/VentilationFans/VentilationFan") do |ventilation_fan|
-        @ventilation_fans << VentilationFan.new(nil, ventilation_fan)
-      end
-      hpxml.elements.each("Building/BuildingDetails/Systems/WaterHeating/WaterHeatingSystem") do |water_heating_system|
-        @water_heating_systems << WaterHeatingSystem.new(nil, water_heating_system)
-      end
-      hpxml.elements.each("BuildingDetails/Systems/WaterHeating/WaterFixture") do |water_fixture|
-        @water_fixtures << WaterFixture.new(nil, water_fixture)
-      end
-      hpxml.elements.each("Building/BuildingDetails/Systems/Photovoltaics/PVSystem") do |pv_system|
-        @pv_systems << PVSystem.new(nil, pv_system)
-      end
-      hpxml.elements.each("Building/BuildingDetails/Lighting/CeilingFan") do |ceiling_fan|
-        @ceiling_fans << CeilingFan.new(nil, ceiling_fan)
-      end
-      hpxml.elements.each("Building/BuildingDetails/MiscLoads/PlugLoad") do |plug_load|
-        @plug_loads << PlugLoad.new(nil, plug_load)
-      end
-    end
+    @ceiling_fans = CeilingFans.new(nil, hpxml)
+    @plug_loads = PlugLoads.new(nil, hpxml)
+    @misc_loads_schedule = MiscLoadsSchedule.new(nil, hpxml)
   end
 
   class BaseElement
@@ -214,7 +191,7 @@ class HPXML < Object
     end
 
     def to_s
-      puts to_h.to_s
+      return to_h.to_s
     end
 
     def nil?
@@ -226,6 +203,21 @@ class HPXML < Object
     end
   end
 
+  class BaseArrayElement < Array
+    def initialize(hash = nil, hpxml = nil)
+      if not hpxml.nil?
+        # Set values from HPXML object
+        from_hpxml(hpxml)
+      end
+    end
+
+    def to_rexml(doc)
+      self.each do |child|
+        child.to_rexml(doc)
+      end
+    end
+  end
+
   class Header < BaseElement
     ATTRS = [:xml_type, :xml_generated_by, :created_date_and_time, :transaction,
              :software_program_used, :software_program_version, :eri_calculation_version,
@@ -233,6 +225,8 @@ class HPXML < Object
     attr_accessor(*ATTRS)
 
     def to_rexml(doc)
+      return if self.nil?
+
       hpxml = doc.elements["/HPXML"]
       header = XMLHelper.add_element(hpxml, "XMLTransactionHeaderInformation")
       XMLHelper.add_element(header, "XMLType", @xml_type)
@@ -281,6 +275,8 @@ class HPXML < Object
     attr_accessor(*ATTRS)
 
     def to_rexml(doc)
+      return if self.nil?
+
       site = XMLHelper.create_elements_as_needed(doc, ["HPXML", "Building", "BuildingDetails", "BuildingSummary", "Site"])
       if not @fuels.empty?
         fuel_types_available = XMLHelper.add_element(site, "FuelTypesAvailable")
@@ -305,11 +301,26 @@ class HPXML < Object
     end
   end
 
+  class NeighborBuildings < BaseArrayElement
+    def add(hash)
+      self << NeighborBuilding.new(hash)
+    end
+
+    def from_hpxml(hpxml)
+      return if hpxml.nil?
+
+      hpxml.elements.each("Building/BuildingDetails/BuildingSummary/Site/extension/Neighbors/NeighborBuilding") do |neighbor_building|
+        self << NeighborBuilding.new(nil, neighbor_building)
+      end
+    end
+  end
+
   class NeighborBuilding < BaseElement
     ATTRS = [:azimuth, :distance, :height]
     attr_accessor(*ATTRS)
 
     def to_rexml(doc)
+      return if self.nil?
       neighbors = XMLHelper.create_elements_as_needed(doc, ["HPXML", "Building", "BuildingDetails", "BuildingSummary", "Site", "extension", "Neighbors"])
       neighbor_building = XMLHelper.add_element(neighbors, "NeighborBuilding")
       XMLHelper.add_element(neighbor_building, "Azimuth", Integer(@azimuth)) unless @azimuth.nil?
@@ -331,6 +342,7 @@ class HPXML < Object
     attr_accessor(*ATTRS)
 
     def to_rexml(doc)
+      return if self.nil?
       building_occupancy = XMLHelper.create_elements_as_needed(doc, ["HPXML", "Building", "BuildingDetails", "BuildingSummary", "BuildingOccupancy"])
       XMLHelper.add_element(building_occupancy, "NumberofResidents", Float(@number_of_residents)) unless @number_of_residents.nil?
     end
@@ -353,6 +365,7 @@ class HPXML < Object
     attr_accessor(*ATTRS)
 
     def to_rexml(doc)
+      return if self.nil?
       building_construction = XMLHelper.create_elements_as_needed(doc, ["HPXML", "Building", "BuildingDetails", "BuildingSummary", "BuildingConstruction"])
       XMLHelper.add_element(building_construction, "NumberofConditionedFloors", Integer(@number_of_conditioned_floors)) unless @number_of_conditioned_floors.nil?
       XMLHelper.add_element(building_construction, "NumberofConditionedFloorsAboveGrade", Integer(@number_of_conditioned_floors_above_grade)) unless @number_of_conditioned_floors_above_grade.nil?
@@ -391,6 +404,7 @@ class HPXML < Object
     attr_accessor(*ATTRS)
 
     def to_rexml(doc)
+      return if self.nil?
       climate_and_risk_zones = XMLHelper.create_elements_as_needed(doc, ["HPXML", "Building", "BuildingDetails", "ClimateandRiskZones"])
 
       climate_zones = { 2006 => @iecc2006,
@@ -432,12 +446,27 @@ class HPXML < Object
     end
   end
 
+  class AirInfiltrationMeasurements < BaseArrayElement
+    def add(hash)
+      self << AirInfiltrationMeasurement.new(hash)
+    end
+
+    def from_hpxml(hpxml)
+      return if hpxml.nil?
+
+      hpxml.elements.each("Building/BuildingDetails/Enclosure/AirInfiltration/AirInfiltrationMeasurement") do |air_infiltration_measurement|
+        self << AirInfiltrationMeasurement.new(nil, air_infiltration_measurement)
+      end
+    end
+  end
+
   class AirInfiltrationMeasurement < BaseElement
     ATTRS = [:id, :house_pressure, :unit_of_measure, :air_leakage, :effective_leakage_area,
              :infiltration_volume, :constant_ach_natural, :leakiness_description]
     attr_accessor(*ATTRS)
 
     def to_rexml(doc)
+      return if self.nil?
       air_infiltration = XMLHelper.create_elements_as_needed(doc, ["HPXML", "Building", "BuildingDetails", "Enclosure", "AirInfiltration"])
       air_infiltration_measurement = XMLHelper.add_element(air_infiltration, "AirInfiltrationMeasurement")
       sys_id = XMLHelper.add_element(air_infiltration_measurement, "SystemIdentifier")
@@ -468,11 +497,26 @@ class HPXML < Object
     end
   end
 
+  class Attics < BaseArrayElement
+    def add(hash)
+      self << Attic.new(hash)
+    end
+
+    def from_hpxml(hpxml)
+      return if hpxml.nil?
+
+      hpxml.elements.each("Building/BuildingDetails/Enclosure/Attics/Attic") do |attic|
+        self << Attic.new(nil, attic)
+      end
+    end
+  end
+
   class Attic < BaseElement
     ATTRS = [:id, :attic_type, :vented_attic_sla, :vented_attic_constant_ach]
     attr_accessor(*ATTRS)
 
     def to_rexml(doc)
+      return if self.nil?
       attics = XMLHelper.create_elements_as_needed(doc, ["HPXML", "Building", "BuildingDetails", "Enclosure", "Attics"])
       attic = XMLHelper.add_element(attics, "Attic")
       sys_id = XMLHelper.add_element(attic, "SystemIdentifier")
@@ -521,11 +565,26 @@ class HPXML < Object
     end
   end
 
+  class Foundations < BaseArrayElement
+    def add(hash)
+      self << Foundation.new(hash)
+    end
+
+    def from_hpxml(hpxml)
+      return if hpxml.nil?
+
+      hpxml.elements.each("Building/BuildingDetails/Enclosure/Foundations/Foundation") do |foundation|
+        self << Foundation.new(nil, foundation)
+      end
+    end
+  end
+
   class Foundation < BaseElement
     ATTRS = [:id, :foundation_type, :vented_crawlspace_sla, :unconditioned_basement_thermal_boundary]
     attr_accessor(*ATTRS)
 
     def to_rexml(doc)
+      return if self.nil?
       foundations = XMLHelper.create_elements_as_needed(doc, ["HPXML", "Building", "BuildingDetails", "Enclosure", "Foundations"])
       foundation = XMLHelper.add_element(foundations, "Foundation")
       sys_id = XMLHelper.add_element(foundation, "SystemIdentifier")
@@ -580,6 +639,20 @@ class HPXML < Object
     end
   end
 
+  class Roofs < BaseArrayElement
+    def add(hash)
+      self << Roof.new(hash)
+    end
+
+    def from_hpxml(hpxml)
+      return if hpxml.nil?
+
+      hpxml.elements.each("Building/BuildingDetails/Enclosure/Roofs/Roof") do |roof|
+        self << Roof.new(nil, roof)
+      end
+    end
+  end
+
   class Roof < BaseElement
     ATTRS = [:id, :exterior_adjacent_to, :interior_adjacent_to, :area, :azimuth, :roof_type,
              :roof_color, :solar_absorptance, :emittance, :pitch, :radiant_barrier,
@@ -588,6 +661,7 @@ class HPXML < Object
     attr_accessor(*ATTRS)
 
     def to_rexml(doc)
+      return if self.nil?
       roofs = XMLHelper.create_elements_as_needed(doc, ["HPXML", "Building", "BuildingDetails", "Enclosure", "Roofs"])
       roof = XMLHelper.add_element(roofs, "Roof")
       sys_id = XMLHelper.add_element(roof, "SystemIdentifier")
@@ -633,12 +707,27 @@ class HPXML < Object
     end
   end
 
+  class RimJoists < BaseArrayElement
+    def add(hash)
+      self << RimJoist.new(hash)
+    end
+
+    def from_hpxml(hpxml)
+      return if hpxml.nil?
+
+      hpxml.elements.each("Building/BuildingDetails/Enclosure/RimJoists/RimJoist") do |rim_joist|
+        self << RimJoist.new(nil, rim_joist)
+      end
+    end
+  end
+
   class RimJoist < BaseElement
     ATTRS = [:id, :exterior_adjacent_to, :interior_adjacent_to, :area, :azimuth, :solar_absorptance,
              :emittance, :insulation_id, :insulation_assembly_r_value]
     attr_accessor(*ATTRS)
 
     def to_rexml(doc)
+      return if self.nil?
       rim_joists = XMLHelper.create_elements_as_needed(doc, ["HPXML", "Building", "BuildingDetails", "Enclosure", "RimJoists"])
       rim_joist = XMLHelper.add_element(rim_joists, "RimJoist")
       sys_id = XMLHelper.add_element(rim_joist, "SystemIdentifier")
@@ -677,6 +766,20 @@ class HPXML < Object
     end
   end
 
+  class Walls < BaseArrayElement
+    def add(hash)
+      self << Wall.new(hash)
+    end
+
+    def from_hpxml(hpxml)
+      return if hpxml.nil?
+
+      hpxml.elements.each("Building/BuildingDetails/Enclosure/Walls/Wall") do |wall|
+        self << Wall.new(nil, wall)
+      end
+    end
+  end
+
   class Wall < BaseElement
     ATTRS = [:id, :exterior_adjacent_to, :interior_adjacent_to, :wall_type, :optimum_value_engineering,
              :area, :orientation, :azimuth, :siding, :solar_absorptance, :emittance, :insulation_id,
@@ -684,6 +787,7 @@ class HPXML < Object
     attr_accessor(*ATTRS)
 
     def to_rexml(doc)
+      return if self.nil?
       walls = XMLHelper.create_elements_as_needed(doc, ["HPXML", "Building", "BuildingDetails", "Enclosure", "Walls"])
       wall = XMLHelper.add_element(walls, "Wall")
       sys_id = XMLHelper.add_element(wall, "SystemIdentifier")
@@ -732,6 +836,20 @@ class HPXML < Object
     end
   end
 
+  class FoundationWalls < BaseArrayElement
+    def add(hash)
+      self << FoundationWall.new(hash)
+    end
+
+    def from_hpxml(hpxml)
+      return if hpxml.nil?
+
+      hpxml.elements.each("Building/BuildingDetails/Enclosure/FoundationWalls/FoundationWall") do |foundation_wall|
+        self << FoundationWall.new(nil, foundation_wall)
+      end
+    end
+  end
+
   class FoundationWall < BaseElement
     ATTRS = [:id, :exterior_adjacent_to, :interior_adjacent_to, :height, :area, :azimuth, :thickness,
              :depth_below_grade, :insulation_id, :insulation_r_value, :insulation_interior_r_value,
@@ -741,6 +859,7 @@ class HPXML < Object
     attr_accessor(*ATTRS)
 
     def to_rexml(doc)
+      return if self.nil?
       foundation_walls = XMLHelper.create_elements_as_needed(doc, ["HPXML", "Building", "BuildingDetails", "Enclosure", "FoundationWalls"])
       foundation_wall = XMLHelper.add_element(foundation_walls, "FoundationWall")
       sys_id = XMLHelper.add_element(foundation_wall, "SystemIdentifier")
@@ -804,12 +923,27 @@ class HPXML < Object
     end
   end
 
+  class FrameFloors < BaseArrayElement
+    def add(hash)
+      self << FrameFloor.new(hash)
+    end
+
+    def from_hpxml(hpxml)
+      return if hpxml.nil?
+
+      hpxml.elements.each("Building/BuildingDetails/Enclosure/FrameFloors/FrameFloor") do |frame_floor|
+        self << FrameFloor.new(nil, frame_floor)
+      end
+    end
+  end
+
   class FrameFloor < BaseElement
     ATTRS = [:id, :exterior_adjacent_to, :interior_adjacent_to, :area, :insulation_id,
              :insulation_assembly_r_value, :insulation_cavity_r_value, :insulation_continuous_r_value]
     attr_accessor(*ATTRS)
 
     def to_rexml(doc)
+      return if self.nil?
       frame_floors = XMLHelper.create_elements_as_needed(doc, ["HPXML", "Building", "BuildingDetails", "Enclosure", "FrameFloors"])
       frame_floor = XMLHelper.add_element(frame_floors, "FrameFloor")
       sys_id = XMLHelper.add_element(frame_floor, "SystemIdentifier")
@@ -842,6 +976,34 @@ class HPXML < Object
         @insulation_continuous_r_value = _to_float_or_nil(XMLHelper.get_value(insulation, "Layer[InstallationType='continuous']/NominalRValue"))
       end
     end
+    
+    def is_ceiling
+      if ["attic - vented", "attic - unvented"].include? @interior_adjacent_to
+        return true
+      elsif ["attic - vented", "attic - unvented", "other housing unit above"].include? @exterior_adjacent_to
+        return true
+      end
+
+      return false
+    end
+    
+    def is_floor
+      !is_ceiling
+    end
+  end
+
+  class Slabs < BaseArrayElement
+    def add(hash)
+      self << Slab.new(hash)
+    end
+
+    def from_hpxml(hpxml)
+      return if hpxml.nil?
+
+      hpxml.elements.each("Building/BuildingDetails/Enclosure/Slabs/Slab") do |slab|
+        self << Slab.new(nil, slab)
+      end
+    end
   end
 
   class Slab < BaseElement
@@ -853,6 +1015,7 @@ class HPXML < Object
     attr_accessor(*ATTRS)
 
     def to_rexml(doc)
+      return if self.nil?
       slabs = XMLHelper.create_elements_as_needed(doc, ["HPXML", "Building", "BuildingDetails", "Enclosure", "Slabs"])
       slab = XMLHelper.add_element(slabs, "Slab")
       sys_id = XMLHelper.add_element(slab, "SystemIdentifier")
@@ -918,6 +1081,20 @@ class HPXML < Object
     end
   end
 
+  class Windows < BaseArrayElement
+    def add(hash)
+      self << Window.new(hash)
+    end
+
+    def from_hpxml(hpxml)
+      return if hpxml.nil?
+
+      hpxml.elements.each("Building/BuildingDetails/Enclosure/Windows/Window") do |window|
+        self << Window.new(nil, window)
+      end
+    end
+  end
+
   class Window < BaseElement
     ATTRS = [:id, :area, :azimuth, :orientation, :frame_type, :aluminum_thermal_break, :glass_layers,
              :glass_type, :gas_fill, :ufactor, :shgc, :interior_shading_factor_summer,
@@ -927,6 +1104,7 @@ class HPXML < Object
     attr_accessor(*ATTRS)
 
     def to_rexml(doc)
+      return if self.nil?
       windows = XMLHelper.create_elements_as_needed(doc, ["HPXML", "Building", "BuildingDetails", "Enclosure", "Windows"])
       window = XMLHelper.add_element(windows, "Window")
       sys_id = XMLHelper.add_element(window, "SystemIdentifier")
@@ -978,12 +1156,27 @@ class HPXML < Object
     end
   end
 
+  class Skylights < BaseArrayElement
+    def add(hash)
+      self << Skylight.new(hash)
+    end
+
+    def from_hpxml(hpxml)
+      return if hpxml.nil?
+
+      hpxml.elements.each("Building/BuildingDetails/Enclosure/Skylights/Skylight") do |skylight|
+        self << Skylight.new(nil, skylight)
+      end
+    end
+  end
+
   class Skylight < BaseElement
     ATTRS = [:id, :area, :azimuth, :orientation, :frame_type, :aluminum_thermal_break, :glass_layers,
              :glass_type, :gas_fill, :ufactor, :shgc, :exterior_shading, :roof_idref]
     attr_accessor(*ATTRS)
 
     def to_rexml(doc)
+      return if self.nil?
       skylights = XMLHelper.create_elements_as_needed(doc, ["HPXML", "Building", "BuildingDetails", "Enclosure", "Skylights"])
       skylight = XMLHelper.add_element(skylights, "Skylight")
       sys_id = XMLHelper.add_element(skylight, "SystemIdentifier")
@@ -1017,11 +1210,26 @@ class HPXML < Object
     end
   end
 
+  class Doors < BaseArrayElement
+    def add(hash)
+      self << Door.new(hash)
+    end
+
+    def from_hpxml(hpxml)
+      return if hpxml.nil?
+
+      hpxml.elements.each("Building/BuildingDetails/Enclosure/Doors/Door") do |door|
+        self << Door.new(nil, door)
+      end
+    end
+  end
+
   class Door < BaseElement
     ATTRS = [:id, :wall_idref, :area, :azimuth, :r_value]
     attr_accessor(*ATTRS)
 
     def to_rexml(doc)
+      return if self.nil?
       doors = XMLHelper.create_elements_as_needed(doc, ["HPXML", "Building", "BuildingDetails", "Enclosure", "Doors"])
       door = XMLHelper.add_element(doors, "Door")
       sys_id = XMLHelper.add_element(door, "SystemIdentifier")
@@ -1046,6 +1254,20 @@ class HPXML < Object
     end
   end
 
+  class HeatingSystems < BaseArrayElement
+    def add(hash)
+      self << HeatingSystem.new(hash)
+    end
+
+    def from_hpxml(hpxml)
+      return if hpxml.nil?
+
+      hpxml.elements.each("Building/BuildingDetails/Systems/HVAC/HVACPlant/HeatingSystem") do |heating_system|
+        self << HeatingSystem.new(nil, heating_system)
+      end
+    end
+  end
+
   class HeatingSystem < BaseElement
     ATTRS = [:id, :distribution_system_idref, :year_installed, :heating_system_type,
              :heating_system_fuel, :heating_capacity, :heating_efficiency_afue,
@@ -1054,6 +1276,7 @@ class HPXML < Object
     attr_accessor(*ATTRS)
 
     def to_rexml(doc)
+      return if self.nil?
       hvac_plant = XMLHelper.create_elements_as_needed(doc, ["HPXML", "Building", "BuildingDetails", "Systems", "HVAC", "HVACPlant"])
       heating_system = XMLHelper.add_element(hvac_plant, "HeatingSystem")
       sys_id = XMLHelper.add_element(heating_system, "SystemIdentifier")
@@ -1109,6 +1332,20 @@ class HPXML < Object
     end
   end
 
+  class CoolingSystems < BaseArrayElement
+    def add(hash)
+      self << CoolingSystem.new(hash)
+    end
+
+    def from_hpxml(hpxml)
+      return if hpxml.nil?
+
+      hpxml.elements.each("Building/BuildingDetails/Systems/HVAC/HVACPlant/CoolingSystem") do |cooling_system|
+        self << CoolingSystem.new(nil, cooling_system)
+      end
+    end
+  end
+
   class CoolingSystem < BaseElement
     ATTRS = [:id, :distribution_system_idref, :year_installed, :cooling_system_type,
              :cooling_system_fuel, :cooling_capacity, :compressor_type, :fraction_cool_load_served,
@@ -1117,6 +1354,7 @@ class HPXML < Object
     attr_accessor(*ATTRS)
 
     def to_rexml(doc)
+      return if self.nil?
       hvac_plant = XMLHelper.create_elements_as_needed(doc, ["HPXML", "Building", "BuildingDetails", "Systems", "HVAC", "HVACPlant"])
       cooling_system = XMLHelper.add_element(hvac_plant, "CoolingSystem")
       sys_id = XMLHelper.add_element(cooling_system, "SystemIdentifier")
@@ -1171,6 +1409,20 @@ class HPXML < Object
     end
   end
 
+  class HeatPumps < BaseArrayElement
+    def add(hash)
+      self << HeatPump.new(hash)
+    end
+
+    def from_hpxml(hpxml)
+      return if hpxml.nil?
+
+      hpxml.elements.each("Building/BuildingDetails/Systems/HVAC/HVACPlant/HeatPump") do |heat_pump|
+        self << HeatPump.new(nil, heat_pump)
+      end
+    end
+  end
+
   class HeatPump < BaseElement
     ATTRS = [:id, :distribution_system_idref, :year_installed, :heat_pump_type, :heat_pump_fuel,
              :heating_capacity, :heating_capacity_17F, :cooling_capacity, :compressor_type,
@@ -1182,6 +1434,7 @@ class HPXML < Object
     attr_accessor(*ATTRS)
 
     def to_rexml(doc)
+      return if self.nil?
       hvac_plant = XMLHelper.create_elements_as_needed(doc, ["HPXML", "Building", "BuildingDetails", "Systems", "HVAC", "HVACPlant"])
       heat_pump = XMLHelper.add_element(hvac_plant, "HeatPump")
       sys_id = XMLHelper.add_element(heat_pump, "SystemIdentifier")
@@ -1278,6 +1531,7 @@ class HPXML < Object
     attr_accessor(*ATTRS)
 
     def to_rexml(doc)
+      return if self.nil?
       hvac = XMLHelper.create_elements_as_needed(doc, ["HPXML", "Building", "BuildingDetails", "Systems", "HVAC"])
       hvac_control = XMLHelper.add_element(hvac, "HVACControl")
       sys_id = XMLHelper.add_element(hvac_control, "SystemIdentifier")
@@ -1315,12 +1569,33 @@ class HPXML < Object
     end
   end
 
+  class HVACDistributions < BaseArrayElement
+    def add(hash)
+      self << HVACDistribution.new(hash)
+    end
+
+    def from_hpxml(hpxml)
+      return if hpxml.nil?
+
+      hpxml.elements.each("Building/BuildingDetails/Systems/HVAC/HVACDistribution") do |hvac_distribution|
+        self << HVACDistribution.new(nil, hvac_distribution)
+      end
+    end
+  end
+
   class HVACDistribution < BaseElement
+    def initialize(*args)
+      @duct_leakage_measurements = DuctLeakageMeasurements.new if @duct_leakage_measurements.nil?
+      @ducts = Ducts.new if @ducts.nil?
+      super(*args)
+    end
     ATTRS = [:id, :distribution_system_type, :distribution_system_type, :annual_heating_dse,
-             :annual_cooling_dse, :duct_system_sealed, :duct_leakage_measurements, :ducts]
+             :annual_cooling_dse, :duct_system_sealed]
     attr_accessor(*ATTRS)
+    attr_reader(:duct_leakage_measurements, :ducts)
 
     def to_rexml(doc)
+      return if self.nil?
       hvac = XMLHelper.create_elements_as_needed(doc, ["HPXML", "Building", "BuildingDetails", "Systems", "HVAC"])
       hvac_distribution = XMLHelper.add_element(hvac, "HVACDistribution")
       sys_id = XMLHelper.add_element(hvac_distribution, "SystemIdentifier")
@@ -1339,13 +1614,8 @@ class HPXML < Object
       air_distribution = hvac_distribution.elements["DistributionSystemType/AirDistribution"]
       return if air_distribution.nil?
 
-      @duct_leakage_measurements.each do |duct_leakage_measurement|
-        duct_leakage_measurement.to_rexml(air_distribution)
-      end
-
-      @ducts.each do |duct|
-        duct.to_rexml(air_distribution)
-      end
+      @duct_leakage_measurements.to_rexml(air_distribution)
+      @ducts.to_rexml(air_distribution)
     end
 
     def from_hpxml(hvac_distribution)
@@ -1360,14 +1630,21 @@ class HPXML < Object
       @annual_cooling_dse = _to_float_or_nil(XMLHelper.get_value(hvac_distribution, "AnnualCoolingDistributionSystemEfficiency"))
       @duct_system_sealed = _to_bool_or_nil(XMLHelper.get_value(hvac_distribution, "HVACDistributionImprovement/DuctSystemSealed"))
 
-      @duct_leakage_measurements = []
-      hvac_distribution.elements.each("DistributionSystemType/AirDistribution/DuctLeakageMeasurement") do |duct_leakage_measurement|
-        @duct_leakage_measurements << DuctLeakageMeasurement.new(nil, duct_leakage_measurement)
-      end
+      @duct_leakage_measurements.from_hpxml(hvac_distribution)
+      @ducts.from_hpxml(hvac_distribution)
+    end
+  end
 
-      @ducts = []
-      hvac_distribution.elements.each("DistributionSystemType/AirDistribution/Ducts") do |duct|
-        @ducts << Duct.new(nil, duct)
+  class DuctLeakageMeasurements < BaseArrayElement
+    def add(hash)
+      self << DuctLeakageMeasurement.new(hash)
+    end
+
+    def from_hpxml(hvac_distribution)
+      return if hvac_distribution.nil?
+
+      hvac_distribution.elements.each("DistributionSystemType/AirDistribution/DuctLeakageMeasurement") do |duct_leakage_measurement|
+        self << DuctLeakageMeasurement.new(nil, duct_leakage_measurement)
       end
     end
   end
@@ -1399,6 +1676,20 @@ class HPXML < Object
     end
   end
 
+  class Ducts < BaseArrayElement
+    def add(hash)
+      self << Duct.new(hash)
+    end
+
+    def from_hpxml(hvac_distribution)
+      return if hvac_distribution.nil?
+
+      hvac_distribution.elements.each("DistributionSystemType/AirDistribution/Ducts") do |duct|
+        self << Duct.new(nil, duct)
+      end
+    end
+  end
+
   class Duct < BaseElement
     ATTRS = [:duct_type, :duct_insulation_r_value, :duct_insulation_material, :duct_location,
              :duct_fraction_area, :duct_surface_area]
@@ -1424,6 +1715,20 @@ class HPXML < Object
     end
   end
 
+  class VentilationFans < BaseArrayElement
+    def add(hash)
+      self << VentilationFan.new(hash)
+    end
+
+    def from_hpxml(hpxml)
+      return if hpxml.nil?
+
+      hpxml.elements.each("Building/BuildingDetails/Systems/MechanicalVentilation/VentilationFans/VentilationFan") do |ventilation_fan|
+        self << VentilationFan.new(nil, ventilation_fan)
+      end
+    end
+  end
+
   class VentilationFan < BaseElement
     ATTRS = [:id, :fan_type, :rated_flow_rate, :tested_flow_rate, :hours_in_operation,
              :used_for_whole_building_ventilation, :used_for_seasonal_cooling_load_reduction,
@@ -1433,6 +1738,7 @@ class HPXML < Object
     attr_accessor(*ATTRS)
 
     def to_rexml(doc)
+      return if self.nil?
       ventilation_fans = XMLHelper.create_elements_as_needed(doc, ["HPXML", "Building", "BuildingDetails", "Systems", "MechanicalVentilation", "VentilationFans"])
       ventilation_fan = XMLHelper.add_element(ventilation_fans, "VentilationFan")
       sys_id = XMLHelper.add_element(ventilation_fan, "SystemIdentifier")
@@ -1473,6 +1779,20 @@ class HPXML < Object
     end
   end
 
+  class WaterHeatingSystems < BaseArrayElement
+    def add(hash)
+      self << WaterHeatingSystem.new(hash)
+    end
+
+    def from_hpxml(hpxml)
+      return if hpxml.nil?
+
+      hpxml.elements.each("Building/BuildingDetails/Systems/WaterHeating/WaterHeatingSystem") do |water_heating_system|
+        self << WaterHeatingSystem.new(nil, water_heating_system)
+      end
+    end
+  end
+
   class WaterHeatingSystem < BaseElement
     ATTRS = [:id, :year_installed, :fuel_type, :water_heater_type, :location, :performance_adjustment,
              :tank_volume, :fraction_dhw_load_served, :heating_capacity, :energy_factor,
@@ -1481,6 +1801,7 @@ class HPXML < Object
     attr_accessor(*ATTRS)
 
     def to_rexml(doc)
+      return if self.nil?
       water_heating = XMLHelper.create_elements_as_needed(doc, ["HPXML", "Building", "BuildingDetails", "Systems", "WaterHeating"])
       water_heating_system = XMLHelper.add_element(water_heating, "WaterHeatingSystem")
       sys_id = XMLHelper.add_element(water_heating_system, "SystemIdentifier")
@@ -1541,6 +1862,7 @@ class HPXML < Object
     attr_accessor(*ATTRS)
 
     def to_rexml(doc)
+      return if self.nil?
       water_heating = XMLHelper.create_elements_as_needed(doc, ["HPXML", "Building", "BuildingDetails", "Systems", "WaterHeating"])
       hot_water_distribution = XMLHelper.add_element(water_heating, "HotWaterDistribution")
       sys_id = XMLHelper.add_element(hot_water_distribution, "SystemIdentifier")
@@ -1592,11 +1914,26 @@ class HPXML < Object
     end
   end
 
+  class WaterFixtures < BaseArrayElement
+    def add(hash)
+      self << WaterFixture.new(hash)
+    end
+
+    def from_hpxml(hpxml)
+      return if hpxml.nil?
+
+      hpxml.elements.each("BuildingDetails/Systems/WaterHeating/WaterFixture") do |water_fixture|
+        self << WaterFixture.new(nil, water_fixture)
+      end
+    end
+  end
+
   class WaterFixture < BaseElement
     ATTRS = [:id, :water_fixture_type, :low_flow]
     attr_accessor(*ATTRS)
 
     def to_rexml(doc)
+      return if self.nil?
       water_heating = XMLHelper.create_elements_as_needed(doc, ["HPXML", "Building", "BuildingDetails", "Systems", "WaterHeating"])
       water_fixture = XMLHelper.add_element(water_heating, "WaterFixture")
       sys_id = XMLHelper.add_element(water_fixture, "SystemIdentifier")
@@ -1621,6 +1958,7 @@ class HPXML < Object
     attr_accessor(*ATTRS)
 
     def to_rexml(doc)
+      return if self.nil?
       solar_thermal = XMLHelper.create_elements_as_needed(doc, ["HPXML", "Building", "BuildingDetails", "Systems", "SolarThermal"])
       solar_thermal_system = XMLHelper.add_element(solar_thermal, "SolarThermalSystem")
       sys_id = XMLHelper.add_element(solar_thermal_system, "SystemIdentifier")
@@ -1662,6 +2000,20 @@ class HPXML < Object
     end
   end
 
+  class PVSystems < BaseArrayElement
+    def add(hash)
+      self << PVSystem.new(hash)
+    end
+
+    def from_hpxml(hpxml)
+      return if hpxml.nil?
+
+      hpxml.elements.each("Building/BuildingDetails/Systems/Photovoltaics/PVSystem") do |pv_system|
+        self << PVSystem.new(nil, pv_system)
+      end
+    end
+  end
+
   class PVSystem < BaseElement
     ATTRS = [:id, :location, :module_type, :tracking, :array_orientation, :array_azimuth, :array_tilt,
              :max_power_output, :inverter_efficiency, :system_losses_fraction, :number_of_panels,
@@ -1669,6 +2021,7 @@ class HPXML < Object
     attr_accessor(*ATTRS)
 
     def to_rexml(doc)
+      return if self.nil?
       photovoltaics = XMLHelper.create_elements_as_needed(doc, ["HPXML", "Building", "BuildingDetails", "Systems", "Photovoltaics"])
       pv_system = XMLHelper.add_element(photovoltaics, "PVSystem")
       sys_id = XMLHelper.add_element(pv_system, "SystemIdentifier")
@@ -1708,6 +2061,7 @@ class HPXML < Object
     attr_accessor(*ATTRS)
 
     def to_rexml(doc)
+      return if self.nil?
       appliances = XMLHelper.create_elements_as_needed(doc, ["HPXML", "Building", "BuildingDetails", "Appliances"])
       clothes_washer = XMLHelper.add_element(appliances, "ClothesWasher")
       sys_id = XMLHelper.add_element(clothes_washer, "SystemIdentifier")
@@ -1745,6 +2099,7 @@ class HPXML < Object
     attr_accessor(*ATTRS)
 
     def to_rexml(doc)
+      return if self.nil?
       appliances = XMLHelper.create_elements_as_needed(doc, ["HPXML", "Building", "BuildingDetails", "Appliances"])
       clothes_dryer = XMLHelper.add_element(appliances, "ClothesDryer")
       sys_id = XMLHelper.add_element(clothes_dryer, "SystemIdentifier")
@@ -1776,6 +2131,7 @@ class HPXML < Object
     attr_accessor(*ATTRS)
 
     def to_rexml(doc)
+      return if self.nil?
       appliances = XMLHelper.create_elements_as_needed(doc, ["HPXML", "Building", "BuildingDetails", "Appliances"])
       dishwasher = XMLHelper.add_element(appliances, "Dishwasher")
       sys_id = XMLHelper.add_element(dishwasher, "SystemIdentifier")
@@ -1803,6 +2159,7 @@ class HPXML < Object
     attr_accessor(*ATTRS)
 
     def to_rexml(doc)
+      return if self.nil?
       appliances = XMLHelper.create_elements_as_needed(doc, ["HPXML", "Building", "BuildingDetails", "Appliances"])
       refrigerator = XMLHelper.add_element(appliances, "Refrigerator")
       sys_id = XMLHelper.add_element(refrigerator, "SystemIdentifier")
@@ -1831,6 +2188,7 @@ class HPXML < Object
     attr_accessor(*ATTRS)
 
     def to_rexml(doc)
+      return if self.nil?
       appliances = XMLHelper.create_elements_as_needed(doc, ["HPXML", "Building", "BuildingDetails", "Appliances"])
       cooking_range = XMLHelper.add_element(appliances, "CookingRange")
       sys_id = XMLHelper.add_element(cooking_range, "SystemIdentifier")
@@ -1856,6 +2214,7 @@ class HPXML < Object
     attr_accessor(*ATTRS)
 
     def to_rexml(doc)
+      return if self.nil?
       appliances = XMLHelper.create_elements_as_needed(doc, ["HPXML", "Building", "BuildingDetails", "Appliances"])
       oven = XMLHelper.add_element(appliances, "Oven")
       sys_id = XMLHelper.add_element(oven, "SystemIdentifier")
@@ -1880,6 +2239,7 @@ class HPXML < Object
     attr_accessor(*ATTRS)
 
     def to_rexml(doc)
+      return if self.nil?
       if not @fraction_tier_i_interior.nil?
         lighting = XMLHelper.create_elements_as_needed(doc, ["HPXML", "Building", "BuildingDetails", "Lighting"])
         lighting_group = XMLHelper.add_element(lighting, "LightingGroup")
@@ -1956,11 +2316,26 @@ class HPXML < Object
     end
   end
 
+  class CeilingFans < BaseArrayElement
+    def add(hash)
+      self << CeilingFan.new(hash)
+    end
+
+    def from_hpxml(hpxml)
+      return if hpxml.nil?
+
+      hpxml.elements.each("Building/BuildingDetails/Lighting/CeilingFan") do |ceiling_fan|
+        self << CeilingFan.new(nil, ceiling_fan)
+      end
+    end
+  end
+
   class CeilingFan < BaseElement
     ATTRS = [:id, :efficiency, :quantity]
     attr_accessor(*ATTRS)
 
     def to_rexml(doc)
+      return if self.nil?
       lighting = XMLHelper.create_elements_as_needed(doc, ["HPXML", "Building", "BuildingDetails", "Lighting"])
       ceiling_fan = XMLHelper.add_element(lighting, "CeilingFan")
       sys_id = XMLHelper.add_element(ceiling_fan, "SystemIdentifier")
@@ -1980,11 +2355,26 @@ class HPXML < Object
     end
   end
 
+  class PlugLoads < BaseArrayElement
+    def add(hash)
+      self << PlugLoad.new(hash)
+    end
+
+    def from_hpxml(hpxml)
+      return if hpxml.nil?
+
+      hpxml.elements.each("Building/BuildingDetails/MiscLoads/PlugLoad") do |plug_load|
+        self << PlugLoad.new(nil, plug_load)
+      end
+    end
+  end
+
   class PlugLoad < BaseElement
     ATTRS = [:id, :plug_load_type, :kWh_per_year, :frac_sensible, :frac_latent]
     attr_accessor(*ATTRS)
 
     def to_rexml(doc)
+      return if self.nil?
       misc_loads = XMLHelper.create_elements_as_needed(doc, ["HPXML", "Building", "BuildingDetails", "MiscLoads"])
       plug_load = XMLHelper.add_element(misc_loads, "PlugLoad")
       sys_id = XMLHelper.add_element(plug_load, "SystemIdentifier")
@@ -2009,11 +2399,12 @@ class HPXML < Object
     end
   end
 
-  class MiscLoads < BaseElement
+  class MiscLoadsSchedule < BaseElement
     ATTRS = [:weekday_fractions, :weekend_fractions, :monthly_multipliers]
     attr_accessor(*ATTRS)
 
     def to_rexml(doc)
+      return if self.nil?
       misc_loads = XMLHelper.create_elements_as_needed(doc, ["HPXML", "Building", "BuildingDetails", "MiscLoads"])
       _add_extension(parent: misc_loads,
                      extensions: { "WeekdayScheduleFractions" => @weekday_fractions,
@@ -2066,17 +2457,10 @@ class HPXML < Object
                        :exposed_perimeter]
 
     # Look for pairs of surfaces that can be collapsed
-    area_adjustments = {}
-    exposed_perimeter_adjustments = {}
     surf_types.each do |surf_type, surfaces|
-      area_adjustments[surf_type] = {}
-      exposed_perimeter_adjustments[surf_type] = {}
       for i in 0..surfaces.size - 1
         surf = surfaces[i]
         next if surf.nil?
-
-        area_adjustments[surf_type][i] = 0
-        exposed_perimeter_adjustments[surf_type][i] = 0
 
         for j in (surfaces.size - 1).downto(i + 1)
           surf2 = surfaces[j]
@@ -2093,26 +2477,26 @@ class HPXML < Object
           next unless match
 
           # Update Area/ExposedPerimeter
-          area_adjustments[surf_type][i] += surf2.area
+          surf.area += surf2.area
           if surf_type == :slabs
-            exposed_perimeter_adjustments[surf_type][i] += surf2.exposed_perimeter
+            surf.exposed_perimeter += surf2.exposed_perimeter
           end
 
           # Update subsurface idrefs as appropriate
           if [:walls, :foundation_walls].include? surf_type
             [:windows, :doors].each do |subsurf_type|
-              surf_types[subsurf_type].each_with_index do |subsurf, idx|
+              surf_types[subsurf_type].each do |subsurf, idx|
                 next unless subsurf.wall_idref == surf2.id
 
-                surf_types[subsurf_type][idx].wall_idref = surf.id
+                subsurf.wall_idref = surf.id
               end
             end
           elsif [:roofs].include? surf_type
             [:skylights].each do |subsurf_type|
-              surf_types[subsurf_type].each_with_index do |subsurf, idx|
+              surf_types[subsurf_type].each do |subsurf|
                 next unless subsurf.roof_idref == surf2.id
 
-                surf_types[subsurf_type][idx].roof_idref = surf.id
+                subsurf.roof_idref = surf.id
               end
             end
           end
@@ -2122,22 +2506,16 @@ class HPXML < Object
         end
       end
     end
-
-    area_adjustments.keys.each do |surf_type|
-      area_adjustments[surf_type].each do |idx, area_adjustment|
-        next unless area_adjustment > 0
-
-        surf_types[surf_type][idx].area += area_adjustment
-      end
-    end
-    exposed_perimeter_adjustments.keys.each do |surf_type|
-      exposed_perimeter_adjustments[surf_type].each do |idx, exposed_perimeter_adjustment|
-        next unless exposed_perimeter_adjustment > 0
-
-        surf_types[surf_type][idx].exposed_perimeter += exposed_perimeter_adjustment
-      end
-    end
   end
+
+  attr_reader(:header, :site, :neighbor_buildings, :building_occupancy, :building_construction,
+              :climate_and_risk_zones, :air_infiltration_measurements, :attics, :foundations,
+              :roofs, :rim_joists, :walls, :foundation_walls, :frame_floors, :slabs, :windows,
+              :skylights, :doors, :heating_systems, :cooling_systems, :heat_pumps, :hvac_control,
+              :hvac_distributions, :ventilation_fans, :water_heating_systems, :hot_water_distribution,
+              :water_fixtures, :solar_thermal_system, :pv_systems, :clothes_washer, :clothes_dryer,
+              :dishwasher, :refrigerator, :cooking_range, :oven, :lighting, :ceiling_fans,
+              :plug_loads, :misc_loads_schedule, :doc)
 end
 
 # Helper methods
@@ -2189,7 +2567,16 @@ def _to_bool_or_nil(value)
   return Boolean(value)
 end
 
+# TODO: Move into appropriate class above
 def is_thermal_boundary(surface)
+  def is_adjacent_to_conditioned(adjacent_to)
+    if ["living space", "basement - conditioned"].include? adjacent_to
+      return true
+    end
+
+    return false
+  end
+
   if surface.exterior_adjacent_to.start_with? "other housing unit"
     return false # adiabatic
   end
@@ -2197,22 +2584,4 @@ def is_thermal_boundary(surface)
   interior_conditioned = is_adjacent_to_conditioned(surface.interior_adjacent_to)
   exterior_conditioned = is_adjacent_to_conditioned(surface.exterior_adjacent_to)
   return (interior_conditioned != exterior_conditioned)
-end
-
-def is_adjacent_to_conditioned(adjacent_to)
-  if ["living space", "basement - conditioned"].include? adjacent_to
-    return true
-  end
-
-  return false
-end
-
-def hpxml_frame_floor_is_ceiling(interior_adjacent_to, exterior_adjacent_to)
-  if ["attic - vented", "attic - unvented"].include? interior_adjacent_to
-    return true
-  elsif ["attic - vented", "attic - unvented", "other housing unit above"].include? exterior_adjacent_to
-    return true
-  end
-
-  return false
 end
