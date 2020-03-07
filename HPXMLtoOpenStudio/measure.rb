@@ -1249,7 +1249,7 @@ class OSModel
         z_origin = @foundation_top
       end
 
-      if hpxml_frame_floor_is_ceiling(frame_floor.interior_adjacent_to, frame_floor.exterior_adjacent_to)
+      if frame_floor.is_ceiling
         surface = OpenStudio::Model::Surface.new(add_ceiling_polygon(length, width, z_origin), model)
         surface.additionalProperties.setFeature("SurfaceType", "Ceiling")
       else
@@ -2854,17 +2854,17 @@ class OSModel
         misc_lat_frac = MiscLoads.get_residual_mels_values(@cfa)[2]
       end
 
-      misc_weekday_sch = @hpxml.misc_load_schedule.weekday_fractions
+      misc_weekday_sch = @hpxml.misc_loads_schedule.weekday_fractions
       if misc_weekday_sch.nil?
         misc_weekday_sch = "0.04, 0.037, 0.037, 0.036, 0.033, 0.036, 0.043, 0.047, 0.034, 0.023, 0.024, 0.025, 0.024, 0.028, 0.031, 0.032, 0.039, 0.053, 0.063, 0.067, 0.071, 0.069, 0.059, 0.05"
       end
 
-      misc_weekend_sch = @hpxml.misc_load_schedule.weekend_fractions
+      misc_weekend_sch = @hpxml.misc_loads_schedule.weekend_fractions
       if misc_weekend_sch.nil?
         misc_weekend_sch = "0.04, 0.037, 0.037, 0.036, 0.033, 0.036, 0.043, 0.047, 0.034, 0.023, 0.024, 0.025, 0.024, 0.028, 0.031, 0.032, 0.039, 0.053, 0.063, 0.067, 0.071, 0.069, 0.059, 0.05"
       end
 
-      misc_monthly_sch = @hpxml.misc_load_schedule.monthly_multipliers
+      misc_monthly_sch = @hpxml.misc_loads_schedule.monthly_multipliers
       if misc_monthly_sch.nil?
         misc_monthly_sch = "1.248, 1.257, 0.993, 0.989, 0.993, 0.827, 0.821, 0.821, 0.827, 0.99, 0.987, 1.248"
       end

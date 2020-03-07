@@ -383,9 +383,9 @@ def create_hpxmls
         set_hpxml_building_occupancy(hpxml_file, hpxml)
         set_hpxml_building_construction(hpxml_file, hpxml)
         set_hpxml_climate_and_risk_zones(hpxml_file, hpxml)
+        set_hpxml_air_infiltration_measurements(hpxml_file, hpxml)
         set_hpxml_attics(hpxml_file, hpxml)
         set_hpxml_foundations(hpxml_file, hpxml)
-        set_hpxml_air_infiltration_measurements(hpxml_file, hpxml)
         set_hpxml_roofs(hpxml_file, hpxml)
         set_hpxml_rim_joists(hpxml_file, hpxml)
         set_hpxml_walls(hpxml_file, hpxml)
@@ -464,12 +464,12 @@ end
 
 def set_hpxml_header(hpxml_file, hpxml)
   if ['base.xml'].include? hpxml_file
-    hpxml.header = HPXML::Header.new({ :xml_type => "HPXML",
-                                       :xml_generated_by => "Rakefile",
-                                       :transaction => "create",
-                                       :building_id => "MyBuilding",
-                                       :event_type => "proposed workscope",
-                                       :created_date_and_time => Time.new(2000, 1, 1).strftime("%Y-%m-%dT%H:%M:%S%:z") }) # Hard-code to prevent diffs
+    hpxml.set_header({ :xml_type => "HPXML",
+                       :xml_generated_by => "Rakefile",
+                       :transaction => "create",
+                       :building_id => "MyBuilding",
+                       :event_type => "proposed workscope",
+                       :created_date_and_time => Time.new(2000, 1, 1).strftime("%Y-%m-%dT%H:%M:%S%:z") }) # Hard-code to prevent diffs
   elsif ['base-version-2014.xml'].include? hpxml_file
     hpxml.header.eri_calculation_version = "2014"
   elsif ['base-version-2014A.xml'].include? hpxml_file
@@ -491,42 +491,38 @@ end
 
 def set_hpxml_site(hpxml_file, hpxml)
   if ['base.xml'].include? hpxml_file
-    hpxml.site = HPXML::Site.new({ :fuels => ["electricity", "natural gas"] })
+    hpxml.set_site({ :fuels => ["electricity", "natural gas"] })
   elsif ['base-hvac-none-no-fuel-access.xml'].include? hpxml_file
     hpxml.site.fuels = ["electricity"]
   end
 end
 
 def set_hpxml_neighbor_buildings(hpxml_file, hpxml)
-  if ['base.xml'].include? hpxml_file
-    hpxml.neighbor_buildings = []
-  elsif ['base-site-neighbors.xml'].include? hpxml_file
-    hpxml.neighbor_buildings << HPXML::NeighborBuilding.new({ :azimuth => 0,
-                                                              :distance => 10 })
-    hpxml.neighbor_buildings << HPXML::NeighborBuilding.new({ :azimuth => 180,
-                                                              :distance => 15,
-                                                              :height => 12 })
+  if ['base-site-neighbors.xml'].include? hpxml_file
+    hpxml.neighbor_buildings.add({ :azimuth => 0,
+                                   :distance => 10 })
+    hpxml.neighbor_buildings.add({ :azimuth => 180,
+                                   :distance => 15,
+                                   :height => 12 })
   elsif ['invalid_files/bad-site-neighbor-azimuth.xml'].include? hpxml_file
     hpxml.neighbor_buildings[0].azimuth = 145
   end
 end
 
 def set_hpxml_building_occupancy(hpxml_file, hpxml)
-  if ['base.xml'].include? hpxml_file
-    hpxml.building_occupancy = nil
-  elsif ['base-misc-number-of-occupants.xml'].include? hpxml_file
-    hpxml.building_occupancy = HPXML::BuildingOccupancy.new({ :number_of_residents => 5 })
+  if ['base-misc-number-of-occupants.xml'].include? hpxml_file
+    hpxml.set_building_occupancy({ :number_of_residents => 5 })
   end
 end
 
 def set_hpxml_building_construction(hpxml_file, hpxml)
   if ['base.xml'].include? hpxml_file
-    hpxml.building_construction = HPXML::BuildingConstruction.new({ :number_of_conditioned_floors => 2,
-                                                                    :number_of_conditioned_floors_above_grade => 1,
-                                                                    :number_of_bedrooms => 3,
-                                                                    :conditioned_floor_area => 2700,
-                                                                    :conditioned_building_volume => 2700 * 8,
-                                                                    :fraction_of_operable_window_area => 0.33 })
+    hpxml.set_building_construction({ :number_of_conditioned_floors => 2,
+                                      :number_of_conditioned_floors_above_grade => 1,
+                                      :number_of_bedrooms => 3,
+                                      :conditioned_floor_area => 2700,
+                                      :conditioned_building_volume => 2700 * 8,
+                                      :fraction_of_operable_window_area => 0.33 })
   elsif ['base-enclosure-beds-1.xml'].include? hpxml_file
     hpxml.building_construction.number_of_bedrooms = 1
   elsif ['base-enclosure-beds-2.xml'].include? hpxml_file
@@ -564,30 +560,30 @@ end
 
 def set_hpxml_climate_and_risk_zones(hpxml_file, hpxml)
   if ['base.xml'].include? hpxml_file
-    hpxml.climate_and_risk_zones = HPXML::ClimateandRiskZones.new({ :iecc2006 => "5B",
-                                                                    :weather_station_id => "WeatherStation",
-                                                                    :weather_station_name => "Denver, CO",
-                                                                    :weather_station_wmo => "725650" })
+    hpxml.set_climate_and_risk_zones({ :iecc2006 => "5B",
+                                       :weather_station_id => "WeatherStation",
+                                       :weather_station_name => "Denver, CO",
+                                       :weather_station_wmo => "725650" })
   elsif ['base-location-baltimore-md.xml'].include? hpxml_file
-    hpxml.climate_and_risk_zones = HPXML::ClimateandRiskZones.new({ :iecc2006 => "4A",
-                                                                    :weather_station_id => "WeatherStation",
-                                                                    :weather_station_name => "Baltimore, MD",
-                                                                    :weather_station_wmo => "724060" })
+    hpxml.set_climate_and_risk_zones({ :iecc2006 => "4A",
+                                       :weather_station_id => "WeatherStation",
+                                       :weather_station_name => "Baltimore, MD",
+                                       :weather_station_wmo => "724060" })
   elsif ['base-location-dallas-tx.xml'].include? hpxml_file
-    hpxml.climate_and_risk_zones = HPXML::ClimateandRiskZones.new({ :iecc2006 => "3A",
-                                                                    :weather_station_id => "WeatherStation",
-                                                                    :weather_station_name => "Dallas, TX",
-                                                                    :weather_station_wmo => "722590" })
+    hpxml.set_climate_and_risk_zones({ :iecc2006 => "3A",
+                                       :weather_station_id => "WeatherStation",
+                                       :weather_station_name => "Dallas, TX",
+                                       :weather_station_wmo => "722590" })
   elsif ['base-location-duluth-mn.xml'].include? hpxml_file
-    hpxml.climate_and_risk_zones = HPXML::ClimateandRiskZones.new({ :iecc2006 => "7",
-                                                                    :weather_station_id => "WeatherStation",
-                                                                    :weather_station_name => "Duluth, MN",
-                                                                    :weather_station_wmo => "727450" })
+    hpxml.set_climate_and_risk_zones({ :iecc2006 => "7",
+                                       :weather_station_id => "WeatherStation",
+                                       :weather_station_name => "Duluth, MN",
+                                       :weather_station_wmo => "727450" })
   elsif ['base-location-miami-fl.xml'].include? hpxml_file
-    hpxml.climate_and_risk_zones = HPXML::ClimateandRiskZones.new({ :iecc2006 => "1A",
-                                                                    :weather_station_id => "WeatherStation",
-                                                                    :weather_station_name => "Miami, FL",
-                                                                    :weather_station_wmo => "722020" })
+    hpxml.set_climate_and_risk_zones({ :iecc2006 => "1A",
+                                       :weather_station_id => "WeatherStation",
+                                       :weather_station_name => "Miami, FL",
+                                       :weather_station_wmo => "722020" })
   elsif ['base-location-epw-filename.xml'].include? hpxml_file
     hpxml.climate_and_risk_zones.weather_station_wmo = nil
     hpxml.climate_and_risk_zones.weather_station_epw_filename = "USA_CO_Denver.Intl.AP.725650_TMY3.epw"
@@ -599,43 +595,41 @@ end
 def set_hpxml_air_infiltration_measurements(hpxml_file, hpxml)
   infil_volume = hpxml.building_construction.conditioned_building_volume
   if ['base.xml'].include? hpxml_file
-    hpxml.air_infiltration_measurements = [HPXML::AirInfiltrationMeasurement.new({ :id => "InfiltrationMeasurement",
-                                                                                   :house_pressure => 50,
-                                                                                   :unit_of_measure => "ACH",
-                                                                                   :air_leakage => 3.0 })]
+    hpxml.air_infiltration_measurements.add({ :id => "InfiltrationMeasurement",
+                                              :house_pressure => 50,
+                                              :unit_of_measure => "ACH",
+                                              :air_leakage => 3.0 })
   elsif ['base-infiltration-ach-natural.xml'].include? hpxml_file
-    hpxml.air_infiltration_measurements = [HPXML::AirInfiltrationMeasurement.new({ :id => "InfiltrationMeasurement",
-                                                                                   :constant_ach_natural => 0.67 })]
+    hpxml.air_infiltration_measurements.clear
+    hpxml.air_infiltration_measurements.add({ :id => "InfiltrationMeasurement",
+                                              :constant_ach_natural => 0.67 })
   elsif ['base-enclosure-infil-cfm50.xml'].include? hpxml_file
-    hpxml.air_infiltration_measurements = [HPXML::AirInfiltrationMeasurement.new({ :id => "InfiltrationMeasurement",
-                                                                                   :house_pressure => 50,
-                                                                                   :unit_of_measure => "CFM",
-                                                                                   :air_leakage => 3.0 / 60.0 * infil_volume })]
+    hpxml.air_infiltration_measurements.clear
+    hpxml.air_infiltration_measurements.add({ :id => "InfiltrationMeasurement",
+                                              :house_pressure => 50,
+                                              :unit_of_measure => "CFM",
+                                              :air_leakage => 3.0 / 60.0 * infil_volume })
   end
   hpxml.air_infiltration_measurements[0].infiltration_volume = infil_volume
 end
 
 def set_hpxml_attics(hpxml_file, hpxml)
-  if ['base.xml'].include? hpxml_file
-    hpxml.attics = []
-  elsif ['base-atticroof-vented.xml'].include? hpxml_file
-    hpxml.attics << HPXML::Attic.new({ :id => "VentedAttic",
-                                       :attic_type => "VentedAttic",
-                                       :vented_attic_sla => 0.003 })
+  if ['base-atticroof-vented.xml'].include? hpxml_file
+    hpxml.attics.add({ :id => "VentedAttic",
+                       :attic_type => "VentedAttic",
+                       :vented_attic_sla => 0.003 })
   end
 end
 
 def set_hpxml_foundations(hpxml_file, hpxml)
-  if ['base.xml'].include? hpxml_file
-    hpxml.foundations = []
-  elsif ['base-foundation-vented-crawlspace.xml'].include? hpxml_file
-    hpxml.foundations << HPXML::Foundation.new({ :id => "VentedCrawlspace",
-                                                 :foundation_type => "VentedCrawlspace",
-                                                 :vented_crawlspace_sla => 0.00667 })
+  if ['base-foundation-vented-crawlspace.xml'].include? hpxml_file
+    hpxml.foundations.add({ :id => "VentedCrawlspace",
+                            :foundation_type => "VentedCrawlspace",
+                            :vented_crawlspace_sla => 0.00667 })
   elsif ['base-foundation-unconditioned-basement.xml'].include? hpxml_file
-    hpxml.foundations << HPXML::Foundation.new({ :id => "UnconditionedBasement",
-                                                 :foundation_type => "UnconditionedBasement",
-                                                 :unconditioned_basement_thermal_boundary => "frame floor" })
+    hpxml.foundations.add({ :id => "UnconditionedBasement",
+                            :foundation_type => "UnconditionedBasement",
+                            :unconditioned_basement_thermal_boundary => "frame floor" })
   elsif ['base-foundation-unconditioned-basement-wall-insulation.xml'].include? hpxml_file
     hpxml.foundations[0].unconditioned_basement_thermal_boundary = "foundation wall"
   end
@@ -643,58 +637,60 @@ end
 
 def set_hpxml_roofs(hpxml_file, hpxml)
   if ['base.xml'].include? hpxml_file
-    hpxml.roofs = [HPXML::Roof.new({ :id => "Roof",
-                                     :interior_adjacent_to => "attic - unvented",
-                                     :area => 1510,
-                                     :solar_absorptance => 0.7,
-                                     :emittance => 0.92,
-                                     :pitch => 6,
-                                     :radiant_barrier => false,
-                                     :insulation_assembly_r_value => 2.3 })]
+    hpxml.roofs.add({ :id => "Roof",
+                      :interior_adjacent_to => "attic - unvented",
+                      :area => 1510,
+                      :solar_absorptance => 0.7,
+                      :emittance => 0.92,
+                      :pitch => 6,
+                      :radiant_barrier => false,
+                      :insulation_assembly_r_value => 2.3 })
   elsif ['base-atticroof-flat.xml'].include? hpxml_file
-    hpxml.roofs = [HPXML::Roof.new({ :id => "Roof",
-                                     :interior_adjacent_to => "living space",
-                                     :area => 1350,
-                                     :solar_absorptance => 0.7,
-                                     :emittance => 0.92,
-                                     :pitch => 0,
-                                     :radiant_barrier => false,
-                                     :insulation_assembly_r_value => 25.8 })]
+    hpxml.roofs.clear
+    hpxml.roofs.add({ :id => "Roof",
+                      :interior_adjacent_to => "living space",
+                      :area => 1350,
+                      :solar_absorptance => 0.7,
+                      :emittance => 0.92,
+                      :pitch => 0,
+                      :radiant_barrier => false,
+                      :insulation_assembly_r_value => 25.8 })
   elsif ['base-atticroof-conditioned.xml'].include? hpxml_file
-    hpxml.roofs = [HPXML::Roof.new({ :id => "RoofCond",
-                                     :interior_adjacent_to => "living space",
-                                     :area => 1006,
-                                     :solar_absorptance => 0.7,
-                                     :emittance => 0.92,
-                                     :pitch => 6,
-                                     :radiant_barrier => false,
-                                     :insulation_assembly_r_value => 25.8 }),
-                   HPXML::Roof.new({ :id => "RoofUncond",
-                                     :interior_adjacent_to => "attic - unvented",
-                                     :area => 504,
-                                     :solar_absorptance => 0.7,
-                                     :emittance => 0.92,
-                                     :pitch => 6,
-                                     :radiant_barrier => false,
-                                     :insulation_assembly_r_value => 2.3 })]
+    hpxml.roofs.clear
+    hpxml.roofs.add({ :id => "RoofCond",
+                      :interior_adjacent_to => "living space",
+                      :area => 1006,
+                      :solar_absorptance => 0.7,
+                      :emittance => 0.92,
+                      :pitch => 6,
+                      :radiant_barrier => false,
+                      :insulation_assembly_r_value => 25.8 })
+    hpxml.roofs.add({ :id => "RoofUncond",
+                      :interior_adjacent_to => "attic - unvented",
+                      :area => 504,
+                      :solar_absorptance => 0.7,
+                      :emittance => 0.92,
+                      :pitch => 6,
+                      :radiant_barrier => false,
+                      :insulation_assembly_r_value => 2.3 })
   elsif ['base-atticroof-vented.xml'].include? hpxml_file
     hpxml.roofs[0].interior_adjacent_to = "attic - vented"
   elsif ['base-atticroof-cathedral.xml'].include? hpxml_file
     hpxml.roofs[0].interior_adjacent_to = "living space"
     hpxml.roofs[0].insulation_assembly_r_value = 25.8
   elsif ['base-enclosure-garage.xml'].include? hpxml_file
-    hpxml.roofs << HPXML::Roof.new({ :id => "RoofGarage",
-                                     :interior_adjacent_to => "garage",
-                                     :area => 670,
-                                     :solar_absorptance => 0.7,
-                                     :emittance => 0.92,
-                                     :pitch => 6,
-                                     :radiant_barrier => false,
-                                     :insulation_assembly_r_value => 2.3 })
+    hpxml.roofs.add({ :id => "RoofGarage",
+                      :interior_adjacent_to => "garage",
+                      :area => 670,
+                      :solar_absorptance => 0.7,
+                      :emittance => 0.92,
+                      :pitch => 6,
+                      :radiant_barrier => false,
+                      :insulation_assembly_r_value => 2.3 })
   elsif ['base-atticroof-unvented-insulated-roof.xml'].include? hpxml_file
     hpxml.roofs[0].insulation_assembly_r_value = 25.8
   elsif ['base-enclosure-adiabatic-surfaces.xml'].include? hpxml_file
-    hpxml.roofs = []
+    hpxml.roofs.clear
   elsif ['base-enclosure-split-surfaces.xml'].include? hpxml_file
     for n in 1..hpxml.roofs.size
       hpxml.roofs[n - 1].area /= 10.0
@@ -712,16 +708,16 @@ def set_hpxml_rim_joists(hpxml_file, hpxml)
   if ['base.xml'].include? hpxml_file
     # TODO: Other geometry values (e.g., building volume) assume
     # no rim joists.
-    hpxml.rim_joists = [HPXML::RimJoist.new({ :id => "RimJoistFoundation",
-                                              :exterior_adjacent_to => "outside",
-                                              :interior_adjacent_to => "basement - conditioned",
-                                              :area => 116,
-                                              :solar_absorptance => 0.7,
-                                              :emittance => 0.92,
-                                              :insulation_assembly_r_value => 23.0 })]
+    hpxml.rim_joists.add({ :id => "RimJoistFoundation",
+                           :exterior_adjacent_to => "outside",
+                           :interior_adjacent_to => "basement - conditioned",
+                           :area => 116,
+                           :solar_absorptance => 0.7,
+                           :emittance => 0.92,
+                           :insulation_assembly_r_value => 23.0 })
   elsif ['base-foundation-ambient.xml',
          'base-foundation-slab.xml'].include? hpxml_file
-    hpxml.rim_joists = []
+    hpxml.rim_joists.clear
   elsif ['base-foundation-unconditioned-basement.xml'].include? hpxml_file
     for i in 0..hpxml.rim_joists.size - 1
       hpxml.rim_joists[i].interior_adjacent_to = "basement - unconditioned"
@@ -741,21 +737,21 @@ def set_hpxml_rim_joists(hpxml_file, hpxml)
     end
   elsif ['base-foundation-multiple.xml'].include? hpxml_file
     hpxml.rim_joists[0].exterior_adjacent_to = "crawlspace - unvented"
-    hpxml.rim_joists << HPXML::RimJoist.new({ :id => "RimJoistCrawlspace",
-                                              :exterior_adjacent_to => "outside",
-                                              :interior_adjacent_to => "crawlspace - unvented",
-                                              :area => 81,
-                                              :solar_absorptance => 0.7,
-                                              :emittance => 0.92,
-                                              :insulation_assembly_r_value => 2.3 })
+    hpxml.rim_joists.add({ :id => "RimJoistCrawlspace",
+                           :exterior_adjacent_to => "outside",
+                           :interior_adjacent_to => "crawlspace - unvented",
+                           :area => 81,
+                           :solar_absorptance => 0.7,
+                           :emittance => 0.92,
+                           :insulation_assembly_r_value => 2.3 })
   elsif ['base-enclosure-2stories.xml'].include? hpxml_file
-    hpxml.rim_joists << HPXML::RimJoist.new({ :id => "RimJoist2ndStory",
-                                              :exterior_adjacent_to => "outside",
-                                              :interior_adjacent_to => "living space",
-                                              :area => 116,
-                                              :solar_absorptance => 0.7,
-                                              :emittance => 0.92,
-                                              :insulation_assembly_r_value => 23.0 })
+    hpxml.rim_joists.add({ :id => "RimJoist2ndStory",
+                           :exterior_adjacent_to => "outside",
+                           :interior_adjacent_to => "living space",
+                           :area => 116,
+                           :solar_absorptance => 0.7,
+                           :emittance => 0.92,
+                           :insulation_assembly_r_value => 23.0 })
   elsif ['base-enclosure-split-surfaces.xml'].include? hpxml_file
     for n in 1..hpxml.rim_joists.size
       hpxml.rim_joists[n - 1].area /= 10.0
@@ -769,22 +765,22 @@ end
 
 def set_hpxml_walls(hpxml_file, hpxml)
   if ['base.xml'].include? hpxml_file
-    hpxml.walls = [HPXML::Wall.new({ :id => "Wall",
-                                     :exterior_adjacent_to => "outside",
-                                     :interior_adjacent_to => "living space",
-                                     :wall_type => "WoodStud",
-                                     :area => 1200,
-                                     :solar_absorptance => 0.7,
-                                     :emittance => 0.92,
-                                     :insulation_assembly_r_value => 23 }),
-                   HPXML::Wall.new({ :id => "WallAtticGable",
-                                     :exterior_adjacent_to => "outside",
-                                     :interior_adjacent_to => "attic - unvented",
-                                     :wall_type => "WoodStud",
-                                     :area => 290,
-                                     :solar_absorptance => 0.7,
-                                     :emittance => 0.92,
-                                     :insulation_assembly_r_value => 4.0 })]
+    hpxml.walls.add({ :id => "Wall",
+                      :exterior_adjacent_to => "outside",
+                      :interior_adjacent_to => "living space",
+                      :wall_type => "WoodStud",
+                      :area => 1200,
+                      :solar_absorptance => 0.7,
+                      :emittance => 0.92,
+                      :insulation_assembly_r_value => 23 })
+    hpxml.walls.add({ :id => "WallAtticGable",
+                      :exterior_adjacent_to => "outside",
+                      :interior_adjacent_to => "attic - unvented",
+                      :wall_type => "WoodStud",
+                      :area => 290,
+                      :solar_absorptance => 0.7,
+                      :emittance => 0.92,
+                      :insulation_assembly_r_value => 4.0 })
   elsif ['base-atticroof-flat.xml'].include? hpxml_file
     hpxml.walls.delete_at(1)
   elsif ['base-atticroof-vented.xml'].include? hpxml_file
@@ -794,30 +790,30 @@ def set_hpxml_walls(hpxml_file, hpxml)
     hpxml.walls[1].insulation_assembly_r_value = 23.0
   elsif ['base-atticroof-conditioned.xml'].include? hpxml_file
     hpxml.walls.delete_at(1)
-    hpxml.walls << HPXML::Wall.new({ :id => "WallAtticKneeWall",
-                                     :exterior_adjacent_to => "attic - unvented",
-                                     :interior_adjacent_to => "living space",
-                                     :wall_type => "WoodStud",
-                                     :area => 316,
-                                     :solar_absorptance => 0.7,
-                                     :emittance => 0.92,
-                                     :insulation_assembly_r_value => 23.0 })
-    hpxml.walls << HPXML::Wall.new({ :id => "WallAtticGableCond",
-                                     :exterior_adjacent_to => "outside",
-                                     :interior_adjacent_to => "living space",
-                                     :wall_type => "WoodStud",
-                                     :area => 240,
-                                     :solar_absorptance => 0.7,
-                                     :emittance => 0.92,
-                                     :insulation_assembly_r_value => 22.3 })
-    hpxml.walls << HPXML::Wall.new({ :id => "WallAtticGableUncond",
-                                     :exterior_adjacent_to => "outside",
-                                     :interior_adjacent_to => "attic - unvented",
-                                     :wall_type => "WoodStud",
-                                     :area => 50,
-                                     :solar_absorptance => 0.7,
-                                     :emittance => 0.92,
-                                     :insulation_assembly_r_value => 4.0 })
+    hpxml.walls.add({ :id => "WallAtticKneeWall",
+                      :exterior_adjacent_to => "attic - unvented",
+                      :interior_adjacent_to => "living space",
+                      :wall_type => "WoodStud",
+                      :area => 316,
+                      :solar_absorptance => 0.7,
+                      :emittance => 0.92,
+                      :insulation_assembly_r_value => 23.0 })
+    hpxml.walls.add({ :id => "WallAtticGableCond",
+                      :exterior_adjacent_to => "outside",
+                      :interior_adjacent_to => "living space",
+                      :wall_type => "WoodStud",
+                      :area => 240,
+                      :solar_absorptance => 0.7,
+                      :emittance => 0.92,
+                      :insulation_assembly_r_value => 22.3 })
+    hpxml.walls.add({ :id => "WallAtticGableUncond",
+                      :exterior_adjacent_to => "outside",
+                      :interior_adjacent_to => "attic - unvented",
+                      :wall_type => "WoodStud",
+                      :area => 50,
+                      :solar_absorptance => 0.7,
+                      :emittance => 0.92,
+                      :insulation_assembly_r_value => 4.0 })
   elsif ['base-enclosure-walltype-cmu.xml'].include? hpxml_file
     hpxml.walls[0].wall_type = "ConcreteMasonryUnit"
     hpxml.walls[0].insulation_assembly_r_value = 12
@@ -849,66 +845,68 @@ def set_hpxml_walls(hpxml_file, hpxml)
     hpxml.walls[0].wall_type = "StructuralBrick"
     hpxml.walls[0].insulation_assembly_r_value = 7.9
   elsif ['invalid_files/missing-surfaces.xml'].include? hpxml_file
-    hpxml.walls << HPXML::Wall.new({ :id => "WallGarage",
-                                     :exterior_adjacent_to => "garage",
-                                     :interior_adjacent_to => "living space",
-                                     :wall_type => "WoodStud",
-                                     :area => 100,
-                                     :solar_absorptance => 0.7,
-                                     :emittance => 0.92,
-                                     :insulation_assembly_r_value => 4 })
+    hpxml.walls.add({ :id => "WallGarage",
+                      :exterior_adjacent_to => "garage",
+                      :interior_adjacent_to => "living space",
+                      :wall_type => "WoodStud",
+                      :area => 100,
+                      :solar_absorptance => 0.7,
+                      :emittance => 0.92,
+                      :insulation_assembly_r_value => 4 })
   elsif ['base-enclosure-2stories.xml'].include? hpxml_file
     hpxml.walls[0].area *= 2.0
   elsif ['base-enclosure-2stories-garage.xml'].include? hpxml_file
-    hpxml.walls = [HPXML::Wall.new({ :id => "Wall",
-                                     :exterior_adjacent_to => "outside",
-                                     :interior_adjacent_to => "living space",
-                                     :wall_type => "WoodStud",
-                                     :area => 880,
-                                     :solar_absorptance => 0.7,
-                                     :emittance => 0.92,
-                                     :insulation_assembly_r_value => 23 }),
-                   HPXML::Wall.new({ :id => "WallGarageInterior",
-                                     :exterior_adjacent_to => "garage",
-                                     :interior_adjacent_to => "living space",
-                                     :wall_type => "WoodStud",
-                                     :area => 320,
-                                     :solar_absorptance => 0.7,
-                                     :emittance => 0.92,
-                                     :insulation_assembly_r_value => 23 }),
-                   HPXML::Wall.new({ :id => "WallGarageExterior",
-                                     :exterior_adjacent_to => "outside",
-                                     :interior_adjacent_to => "garage",
-                                     :wall_type => "WoodStud",
-                                     :area => 800,
-                                     :solar_absorptance => 0.7,
-                                     :emittance => 0.92,
-                                     :insulation_assembly_r_value => 4 })]
+    hpxml.walls.clear
+    hpxml.walls.add({ :id => "Wall",
+                      :exterior_adjacent_to => "outside",
+                      :interior_adjacent_to => "living space",
+                      :wall_type => "WoodStud",
+                      :area => 880,
+                      :solar_absorptance => 0.7,
+                      :emittance => 0.92,
+                      :insulation_assembly_r_value => 23 })
+    hpxml.walls.add({ :id => "WallGarageInterior",
+                      :exterior_adjacent_to => "garage",
+                      :interior_adjacent_to => "living space",
+                      :wall_type => "WoodStud",
+                      :area => 320,
+                      :solar_absorptance => 0.7,
+                      :emittance => 0.92,
+                      :insulation_assembly_r_value => 23 })
+    hpxml.walls.add({ :id => "WallGarageExterior",
+                      :exterior_adjacent_to => "outside",
+                      :interior_adjacent_to => "garage",
+                      :wall_type => "WoodStud",
+                      :area => 800,
+                      :solar_absorptance => 0.7,
+                      :emittance => 0.92,
+                      :insulation_assembly_r_value => 4 })
   elsif ['base-enclosure-garage.xml'].include? hpxml_file
-    hpxml.walls = [HPXML::Wall.new({ :id => "Wall",
-                                     :exterior_adjacent_to => "outside",
-                                     :interior_adjacent_to => "living space",
-                                     :wall_type => "WoodStud",
-                                     :area => 960,
-                                     :solar_absorptance => 0.7,
-                                     :emittance => 0.92,
-                                     :insulation_assembly_r_value => 23 }),
-                   HPXML::Wall.new({ :id => "WallGarageInterior",
-                                     :exterior_adjacent_to => "garage",
-                                     :interior_adjacent_to => "living space",
-                                     :wall_type => "WoodStud",
-                                     :area => 240,
-                                     :solar_absorptance => 0.7,
-                                     :emittance => 0.92,
-                                     :insulation_assembly_r_value => 23 }),
-                   HPXML::Wall.new({ :id => "WallGarageExterior",
-                                     :exterior_adjacent_to => "outside",
-                                     :interior_adjacent_to => "garage",
-                                     :wall_type => "WoodStud",
-                                     :area => 560,
-                                     :solar_absorptance => 0.7,
-                                     :emittance => 0.92,
-                                     :insulation_assembly_r_value => 4 })]
+    hpxml.walls.clear
+    hpxml.walls.add({ :id => "Wall",
+                      :exterior_adjacent_to => "outside",
+                      :interior_adjacent_to => "living space",
+                      :wall_type => "WoodStud",
+                      :area => 960,
+                      :solar_absorptance => 0.7,
+                      :emittance => 0.92,
+                      :insulation_assembly_r_value => 23 })
+    hpxml.walls.add({ :id => "WallGarageInterior",
+                      :exterior_adjacent_to => "garage",
+                      :interior_adjacent_to => "living space",
+                      :wall_type => "WoodStud",
+                      :area => 240,
+                      :solar_absorptance => 0.7,
+                      :emittance => 0.92,
+                      :insulation_assembly_r_value => 23 })
+    hpxml.walls.add({ :id => "WallGarageExterior",
+                      :exterior_adjacent_to => "outside",
+                      :interior_adjacent_to => "garage",
+                      :wall_type => "WoodStud",
+                      :area => 560,
+                      :solar_absorptance => 0.7,
+                      :emittance => 0.92,
+                      :insulation_assembly_r_value => 4 })
   elsif ['base-atticroof-unvented-insulated-roof.xml'].include? hpxml_file
     hpxml.walls[1].insulation_assembly_r_value = 23
   elsif ['base-enclosure-adiabatic-surfaces.xml'].include? hpxml_file
@@ -932,19 +930,19 @@ end
 
 def set_hpxml_foundation_walls(hpxml_file, hpxml)
   if ['base.xml'].include? hpxml_file
-    hpxml.foundation_walls = [HPXML::FoundationWall.new({ :id => "FoundationWall",
-                                                          :exterior_adjacent_to => "ground",
-                                                          :interior_adjacent_to => "basement - conditioned",
-                                                          :height => 8,
-                                                          :area => 1200,
-                                                          :thickness => 8,
-                                                          :depth_below_grade => 7,
-                                                          :insulation_interior_r_value => 0,
-                                                          :insulation_interior_distance_to_top => 0,
-                                                          :insulation_interior_distance_to_bottom => 0,
-                                                          :insulation_exterior_distance_to_top => 0,
-                                                          :insulation_exterior_distance_to_bottom => 8,
-                                                          :insulation_exterior_r_value => 8.9 })]
+    hpxml. foundation_walls.add({ :id => "FoundationWall",
+                                  :exterior_adjacent_to => "ground",
+                                  :interior_adjacent_to => "basement - conditioned",
+                                  :height => 8,
+                                  :area => 1200,
+                                  :thickness => 8,
+                                  :depth_below_grade => 7,
+                                  :insulation_interior_r_value => 0,
+                                  :insulation_interior_distance_to_top => 0,
+                                  :insulation_interior_distance_to_bottom => 0,
+                                  :insulation_exterior_distance_to_top => 0,
+                                  :insulation_exterior_distance_to_bottom => 8,
+                                  :insulation_exterior_r_value => 8.9 })
   elsif ['base-foundation-conditioned-basement-wall-interior-insulation.xml'].include? hpxml_file
     hpxml.foundation_walls[0].insulation_interior_distance_to_top = 0
     hpxml.foundation_walls[0].insulation_interior_distance_to_bottom = 8
@@ -981,141 +979,143 @@ def set_hpxml_foundation_walls(hpxml_file, hpxml)
     hpxml.foundation_walls[0].insulation_exterior_distance_to_bottom -= 4
   elsif ['base-foundation-multiple.xml'].include? hpxml_file
     hpxml.foundation_walls[0].area = 600
-    hpxml.foundation_walls << HPXML::FoundationWall.new({ :id => "FoundationWallInterior",
-                                                          :exterior_adjacent_to => "crawlspace - unvented",
-                                                          :interior_adjacent_to => "basement - unconditioned",
-                                                          :height => 8,
-                                                          :area => 360,
-                                                          :thickness => 8,
-                                                          :depth_below_grade => 4,
-                                                          :insulation_interior_r_value => 0,
-                                                          :insulation_interior_distance_to_top => 0,
-                                                          :insulation_interior_distance_to_bottom => 0,
-                                                          :insulation_exterior_distance_to_top => 0,
-                                                          :insulation_exterior_distance_to_bottom => 0,
-                                                          :insulation_exterior_r_value => 0 })
-    hpxml.foundation_walls << HPXML::FoundationWall.new({ :id => "FoundationWallCrawlspace",
-                                                          :exterior_adjacent_to => "ground",
-                                                          :interior_adjacent_to => "crawlspace - unvented",
-                                                          :height => 4,
-                                                          :area => 600,
-                                                          :thickness => 8,
-                                                          :depth_below_grade => 3,
-                                                          :insulation_interior_r_value => 0,
-                                                          :insulation_interior_distance_to_top => 0,
-                                                          :insulation_interior_distance_to_bottom => 0,
-                                                          :insulation_exterior_distance_to_top => 0,
-                                                          :insulation_exterior_distance_to_bottom => 0,
-                                                          :insulation_exterior_r_value => 0 })
+    hpxml.foundation_walls.add({ :id => "FoundationWallInterior",
+                                 :exterior_adjacent_to => "crawlspace - unvented",
+                                 :interior_adjacent_to => "basement - unconditioned",
+                                 :height => 8,
+                                 :area => 360,
+                                 :thickness => 8,
+                                 :depth_below_grade => 4,
+                                 :insulation_interior_r_value => 0,
+                                 :insulation_interior_distance_to_top => 0,
+                                 :insulation_interior_distance_to_bottom => 0,
+                                 :insulation_exterior_distance_to_top => 0,
+                                 :insulation_exterior_distance_to_bottom => 0,
+                                 :insulation_exterior_r_value => 0 })
+    hpxml.foundation_walls.add({ :id => "FoundationWallCrawlspace",
+                                 :exterior_adjacent_to => "ground",
+                                 :interior_adjacent_to => "crawlspace - unvented",
+                                 :height => 4,
+                                 :area => 600,
+                                 :thickness => 8,
+                                 :depth_below_grade => 3,
+                                 :insulation_interior_r_value => 0,
+                                 :insulation_interior_distance_to_top => 0,
+                                 :insulation_interior_distance_to_bottom => 0,
+                                 :insulation_exterior_distance_to_top => 0,
+                                 :insulation_exterior_distance_to_bottom => 0,
+                                 :insulation_exterior_r_value => 0 })
   elsif ['base-foundation-ambient.xml',
          'base-foundation-slab.xml'].include? hpxml_file
-    hpxml.foundation_walls = []
+    hpxml.foundation_walls.clear
   elsif ['base-foundation-walkout-basement.xml'].include? hpxml_file
-    hpxml.foundation_walls = [HPXML::FoundationWall.new({ :id => "FoundationWall1",
-                                                          :exterior_adjacent_to => "ground",
-                                                          :interior_adjacent_to => "basement - conditioned",
-                                                          :height => 8,
-                                                          :area => 480,
-                                                          :thickness => 8,
-                                                          :depth_below_grade => 7,
-                                                          :insulation_interior_r_value => 0,
-                                                          :insulation_interior_distance_to_top => 0,
-                                                          :insulation_interior_distance_to_bottom => 0,
-                                                          :insulation_exterior_distance_to_top => 0,
-                                                          :insulation_exterior_distance_to_bottom => 8,
-                                                          :insulation_exterior_r_value => 8.9 }),
-                              HPXML::FoundationWall.new({ :id => "FoundationWall2",
-                                                          :exterior_adjacent_to => "ground",
-                                                          :interior_adjacent_to => "basement - conditioned",
-                                                          :height => 4,
-                                                          :area => 120,
-                                                          :thickness => 8,
-                                                          :depth_below_grade => 3,
-                                                          :insulation_interior_r_value => 0,
-                                                          :insulation_interior_distance_to_top => 0,
-                                                          :insulation_interior_distance_to_bottom => 0,
-                                                          :insulation_exterior_distance_to_top => 0,
-                                                          :insulation_exterior_distance_to_bottom => 4,
-                                                          :insulation_exterior_r_value => 8.9 }),
-                              HPXML::FoundationWall.new({ :id => "FoundationWall3",
-                                                          :exterior_adjacent_to => "ground",
-                                                          :interior_adjacent_to => "basement - conditioned",
-                                                          :height => 2,
-                                                          :area => 60,
-                                                          :thickness => 8,
-                                                          :depth_below_grade => 1,
-                                                          :insulation_interior_r_value => 0,
-                                                          :insulation_interior_distance_to_top => 0,
-                                                          :insulation_interior_distance_to_bottom => 0,
-                                                          :insulation_exterior_distance_to_top => 0,
-                                                          :insulation_exterior_distance_to_bottom => 2,
-                                                          :insulation_exterior_r_value => 8.9 })]
+    hpxml.foundation_walls.clear
+    hpxml.foundation_walls.add({ :id => "FoundationWall1",
+                                 :exterior_adjacent_to => "ground",
+                                 :interior_adjacent_to => "basement - conditioned",
+                                 :height => 8,
+                                 :area => 480,
+                                 :thickness => 8,
+                                 :depth_below_grade => 7,
+                                 :insulation_interior_r_value => 0,
+                                 :insulation_interior_distance_to_top => 0,
+                                 :insulation_interior_distance_to_bottom => 0,
+                                 :insulation_exterior_distance_to_top => 0,
+                                 :insulation_exterior_distance_to_bottom => 8,
+                                 :insulation_exterior_r_value => 8.9 })
+    hpxml.foundation_walls.add({ :id => "FoundationWall2",
+                                 :exterior_adjacent_to => "ground",
+                                 :interior_adjacent_to => "basement - conditioned",
+                                 :height => 4,
+                                 :area => 120,
+                                 :thickness => 8,
+                                 :depth_below_grade => 3,
+                                 :insulation_interior_r_value => 0,
+                                 :insulation_interior_distance_to_top => 0,
+                                 :insulation_interior_distance_to_bottom => 0,
+                                 :insulation_exterior_distance_to_top => 0,
+                                 :insulation_exterior_distance_to_bottom => 4,
+                                 :insulation_exterior_r_value => 8.9 })
+    hpxml.foundation_walls.add({ :id => "FoundationWall3",
+                                 :exterior_adjacent_to => "ground",
+                                 :interior_adjacent_to => "basement - conditioned",
+                                 :height => 2,
+                                 :area => 60,
+                                 :thickness => 8,
+                                 :depth_below_grade => 1,
+                                 :insulation_interior_r_value => 0,
+                                 :insulation_interior_distance_to_top => 0,
+                                 :insulation_interior_distance_to_bottom => 0,
+                                 :insulation_exterior_distance_to_top => 0,
+                                 :insulation_exterior_distance_to_bottom => 2,
+                                 :insulation_exterior_r_value => 8.9 })
   elsif ['base-foundation-complex.xml'].include? hpxml_file
-    hpxml.foundation_walls = [HPXML::FoundationWall.new({ :id => "FoundationWall1",
-                                                          :exterior_adjacent_to => "ground",
-                                                          :interior_adjacent_to => "basement - conditioned",
-                                                          :height => 8,
-                                                          :area => 160,
-                                                          :thickness => 8,
-                                                          :depth_below_grade => 7,
-                                                          :insulation_interior_r_value => 0,
-                                                          :insulation_interior_distance_to_top => 0,
-                                                          :insulation_interior_distance_to_bottom => 0,
-                                                          :insulation_exterior_distance_to_top => 0,
-                                                          :insulation_exterior_distance_to_bottom => 0,
-                                                          :insulation_exterior_r_value => 0.0 }),
-                              HPXML::FoundationWall.new({ :id => "FoundationWall2",
-                                                          :exterior_adjacent_to => "ground",
-                                                          :interior_adjacent_to => "basement - conditioned",
-                                                          :height => 8,
-                                                          :area => 240,
-                                                          :thickness => 8,
-                                                          :depth_below_grade => 7,
-                                                          :insulation_interior_r_value => 0,
-                                                          :insulation_interior_distance_to_top => 0,
-                                                          :insulation_interior_distance_to_bottom => 0,
-                                                          :insulation_exterior_distance_to_top => 0,
-                                                          :insulation_exterior_distance_to_bottom => 8,
-                                                          :insulation_exterior_r_value => 8.9 }),
-                              HPXML::FoundationWall.new({ :id => "FoundationWall3",
-                                                          :exterior_adjacent_to => "ground",
-                                                          :interior_adjacent_to => "basement - conditioned",
-                                                          :height => 4,
-                                                          :area => 160,
-                                                          :thickness => 8,
-                                                          :depth_below_grade => 3,
-                                                          :insulation_interior_r_value => 0,
-                                                          :insulation_interior_distance_to_top => 0,
-                                                          :insulation_interior_distance_to_bottom => 0,
-                                                          :insulation_exterior_distance_to_top => 0,
-                                                          :insulation_exterior_distance_to_bottom => 0,
-                                                          :insulation_exterior_r_value => 0.0 }),
-                              HPXML::FoundationWall.new({ :id => "FoundationWall4",
-                                                          :exterior_adjacent_to => "ground",
-                                                          :interior_adjacent_to => "basement - conditioned",
-                                                          :height => 4,
-                                                          :area => 120,
-                                                          :thickness => 8,
-                                                          :depth_below_grade => 3,
-                                                          :insulation_interior_r_value => 0,
-                                                          :insulation_interior_distance_to_top => 0,
-                                                          :insulation_interior_distance_to_bottom => 0,
-                                                          :insulation_exterior_distance_to_top => 0,
-                                                          :insulation_exterior_distance_to_bottom => 4,
-                                                          :insulation_exterior_r_value => 8.9 }),
-                              HPXML::FoundationWall.new({ :id => "FoundationWall5",
-                                                          :exterior_adjacent_to => "ground",
-                                                          :interior_adjacent_to => "basement - conditioned",
-                                                          :height => 4,
-                                                          :area => 80,
-                                                          :thickness => 8,
-                                                          :depth_below_grade => 3,
-                                                          :insulation_interior_r_value => 0,
-                                                          :insulation_interior_distance_to_top => 0,
-                                                          :insulation_interior_distance_to_bottom => 0,
-                                                          :insulation_exterior_distance_to_top => 0,
-                                                          :insulation_exterior_distance_to_bottom => 4,
-                                                          :insulation_exterior_r_value => 8.9 })]
+    hpxml.foundation_walls.clear
+    hpxml.foundation_walls.add({ :id => "FoundationWall1",
+                                 :exterior_adjacent_to => "ground",
+                                 :interior_adjacent_to => "basement - conditioned",
+                                 :height => 8,
+                                 :area => 160,
+                                 :thickness => 8,
+                                 :depth_below_grade => 7,
+                                 :insulation_interior_r_value => 0,
+                                 :insulation_interior_distance_to_top => 0,
+                                 :insulation_interior_distance_to_bottom => 0,
+                                 :insulation_exterior_distance_to_top => 0,
+                                 :insulation_exterior_distance_to_bottom => 0,
+                                 :insulation_exterior_r_value => 0.0 })
+    hpxml.foundation_walls.add({ :id => "FoundationWall2",
+                                 :exterior_adjacent_to => "ground",
+                                 :interior_adjacent_to => "basement - conditioned",
+                                 :height => 8,
+                                 :area => 240,
+                                 :thickness => 8,
+                                 :depth_below_grade => 7,
+                                 :insulation_interior_r_value => 0,
+                                 :insulation_interior_distance_to_top => 0,
+                                 :insulation_interior_distance_to_bottom => 0,
+                                 :insulation_exterior_distance_to_top => 0,
+                                 :insulation_exterior_distance_to_bottom => 8,
+                                 :insulation_exterior_r_value => 8.9 })
+    hpxml.foundation_walls.add({ :id => "FoundationWall3",
+                                 :exterior_adjacent_to => "ground",
+                                 :interior_adjacent_to => "basement - conditioned",
+                                 :height => 4,
+                                 :area => 160,
+                                 :thickness => 8,
+                                 :depth_below_grade => 3,
+                                 :insulation_interior_r_value => 0,
+                                 :insulation_interior_distance_to_top => 0,
+                                 :insulation_interior_distance_to_bottom => 0,
+                                 :insulation_exterior_distance_to_top => 0,
+                                 :insulation_exterior_distance_to_bottom => 0,
+                                 :insulation_exterior_r_value => 0.0 })
+    hpxml.foundation_walls.add({ :id => "FoundationWall4",
+                                 :exterior_adjacent_to => "ground",
+                                 :interior_adjacent_to => "basement - conditioned",
+                                 :height => 4,
+                                 :area => 120,
+                                 :thickness => 8,
+                                 :depth_below_grade => 3,
+                                 :insulation_interior_r_value => 0,
+                                 :insulation_interior_distance_to_top => 0,
+                                 :insulation_interior_distance_to_bottom => 0,
+                                 :insulation_exterior_distance_to_top => 0,
+                                 :insulation_exterior_distance_to_bottom => 4,
+                                 :insulation_exterior_r_value => 8.9 })
+    hpxml.foundation_walls.add({ :id => "FoundationWall5",
+                                 :exterior_adjacent_to => "ground",
+                                 :interior_adjacent_to => "basement - conditioned",
+                                 :height => 4,
+                                 :area => 80,
+                                 :thickness => 8,
+                                 :depth_below_grade => 3,
+                                 :insulation_interior_r_value => 0,
+                                 :insulation_interior_distance_to_top => 0,
+                                 :insulation_interior_distance_to_bottom => 0,
+                                 :insulation_exterior_distance_to_top => 0,
+                                 :insulation_exterior_distance_to_bottom => 4,
+                                 :insulation_exterior_r_value => 8.9 })
   elsif ['base-enclosure-split-surfaces.xml'].include? hpxml_file
     for n in 1..hpxml.foundation_walls.size
       hpxml.foundation_walls[n - 1].area /= 10.0
@@ -1133,11 +1133,11 @@ end
 
 def set_hpxml_frame_floors(hpxml_file, hpxml)
   if ['base.xml'].include? hpxml_file
-    hpxml.frame_floors = [HPXML::FrameFloor.new({ :id => "FloorBelowAttic",
-                                                  :exterior_adjacent_to => "attic - unvented",
-                                                  :interior_adjacent_to => "living space",
-                                                  :area => 1350,
-                                                  :insulation_assembly_r_value => 39.3 })]
+    hpxml.frame_floors.add({ :id => "FloorBelowAttic",
+                             :exterior_adjacent_to => "attic - unvented",
+                             :interior_adjacent_to => "living space",
+                             :area => 1350,
+                             :insulation_assembly_r_value => 39.3 })
   elsif ['base-atticroof-flat.xml',
          'base-atticroof-cathedral.xml'].include? hpxml_file
     hpxml.frame_floors.delete_at(0)
@@ -1146,63 +1146,64 @@ def set_hpxml_frame_floors(hpxml_file, hpxml)
   elsif ['base-atticroof-conditioned.xml'].include? hpxml_file
     hpxml.frame_floors[0].area = 450
   elsif ['base-enclosure-garage.xml'].include? hpxml_file
-    hpxml.frame_floors << HPXML::FrameFloor.new({ :id => "FloorBetweenAtticGarage",
-                                                  :exterior_adjacent_to => "attic - unvented",
-                                                  :interior_adjacent_to => "garage",
-                                                  :area => 600,
-                                                  :insulation_assembly_r_value => 2.1 })
+    hpxml.frame_floors.add({ :id => "FloorBetweenAtticGarage",
+                             :exterior_adjacent_to => "attic - unvented",
+                             :interior_adjacent_to => "garage",
+                             :area => 600,
+                             :insulation_assembly_r_value => 2.1 })
   elsif ['base-foundation-ambient.xml'].include? hpxml_file
-    hpxml.frame_floors << HPXML::FrameFloor.new({ :id => "FloorAboveAmbient",
-                                                  :exterior_adjacent_to => "outside",
-                                                  :interior_adjacent_to => "living space",
-                                                  :area => 1350,
-                                                  :insulation_assembly_r_value => 18.7 })
+    hpxml.frame_floors.add({ :id => "FloorAboveAmbient",
+                             :exterior_adjacent_to => "outside",
+                             :interior_adjacent_to => "living space",
+                             :area => 1350,
+                             :insulation_assembly_r_value => 18.7 })
   elsif ['base-foundation-unconditioned-basement.xml'].include? hpxml_file
-    hpxml.frame_floors << HPXML::FrameFloor.new({ :id => "FloorAboveUncondBasement",
-                                                  :exterior_adjacent_to => "basement - unconditioned",
-                                                  :interior_adjacent_to => "living space",
-                                                  :area => 1350,
-                                                  :insulation_assembly_r_value => 18.7 })
+    hpxml.frame_floors.add({ :id => "FloorAboveUncondBasement",
+                             :exterior_adjacent_to => "basement - unconditioned",
+                             :interior_adjacent_to => "living space",
+                             :area => 1350,
+                             :insulation_assembly_r_value => 18.7 })
   elsif ['base-foundation-unconditioned-basement-wall-insulation.xml'].include? hpxml_file
     hpxml.frame_floors[1].insulation_assembly_r_value = 2.1
   elsif ['base-foundation-unvented-crawlspace.xml'].include? hpxml_file
-    hpxml.frame_floors << HPXML::FrameFloor.new({ :id => "FloorAboveUnventedCrawl",
-                                                  :exterior_adjacent_to => "crawlspace - unvented",
-                                                  :interior_adjacent_to => "living space",
-                                                  :area => 1350,
-                                                  :insulation_assembly_r_value => 18.7 })
+    hpxml.frame_floors.add({ :id => "FloorAboveUnventedCrawl",
+                             :exterior_adjacent_to => "crawlspace - unvented",
+                             :interior_adjacent_to => "living space",
+                             :area => 1350,
+                             :insulation_assembly_r_value => 18.7 })
   elsif ['base-foundation-vented-crawlspace.xml'].include? hpxml_file
-    hpxml.frame_floors << HPXML::FrameFloor.new({ :id => "FloorAboveVentedCrawl",
-                                                  :exterior_adjacent_to => "crawlspace - vented",
-                                                  :interior_adjacent_to => "living space",
-                                                  :area => 1350,
-                                                  :insulation_assembly_r_value => 18.7 })
+    hpxml.frame_floors.add({ :id => "FloorAboveVentedCrawl",
+                             :exterior_adjacent_to => "crawlspace - vented",
+                             :interior_adjacent_to => "living space",
+                             :area => 1350,
+                             :insulation_assembly_r_value => 18.7 })
   elsif ['base-foundation-multiple.xml'].include? hpxml_file
     hpxml.frame_floors[1].area = 675
-    hpxml.frame_floors << HPXML::FrameFloor.new({ :id => "FloorAboveUnventedCrawlspace",
-                                                  :exterior_adjacent_to => "crawlspace - unvented",
-                                                  :interior_adjacent_to => "living space",
-                                                  :area => 675,
-                                                  :insulation_assembly_r_value => 18.7 })
+    hpxml.frame_floors.add({ :id => "FloorAboveUnventedCrawlspace",
+                             :exterior_adjacent_to => "crawlspace - unvented",
+                             :interior_adjacent_to => "living space",
+                             :area => 675,
+                             :insulation_assembly_r_value => 18.7 })
   elsif ['base-enclosure-2stories-garage.xml'].include? hpxml_file
-    hpxml.frame_floors << HPXML::FrameFloor.new({ :id => "FloorAboveGarage",
-                                                  :exterior_adjacent_to => "garage",
-                                                  :interior_adjacent_to => "living space",
-                                                  :area => 400,
-                                                  :insulation_assembly_r_value => 18.7 })
+    hpxml.frame_floors.add({ :id => "FloorAboveGarage",
+                             :exterior_adjacent_to => "garage",
+                             :interior_adjacent_to => "living space",
+                             :area => 400,
+                             :insulation_assembly_r_value => 18.7 })
   elsif ['base-atticroof-unvented-insulated-roof.xml'].include? hpxml_file
     hpxml.frame_floors[0].insulation_assembly_r_value = 2.1
   elsif ['base-enclosure-adiabatic-surfaces.xml'].include? hpxml_file
-    hpxml.frame_floors = [HPXML::FrameFloor.new({ :id => "FloorAboveAdiabatic",
-                                                  :exterior_adjacent_to => "other housing unit below",
-                                                  :interior_adjacent_to => "living space",
-                                                  :area => 1350,
-                                                  :insulation_assembly_r_value => 2.1 }),
-                          HPXML::FrameFloor.new({ :id => "FloorBelowAdiabatic",
-                                                  :exterior_adjacent_to => "other housing unit above",
-                                                  :interior_adjacent_to => "living space",
-                                                  :area => 1350,
-                                                  :insulation_assembly_r_value => 2.1 })]
+    hpxml.frame_floors.clear
+    hpxml.frame_floors.add({ :id => "FloorAboveAdiabatic",
+                             :exterior_adjacent_to => "other housing unit below",
+                             :interior_adjacent_to => "living space",
+                             :area => 1350,
+                             :insulation_assembly_r_value => 2.1 })
+    hpxml.frame_floors.add({ :id => "FloorBelowAdiabatic",
+                             :exterior_adjacent_to => "other housing unit above",
+                             :interior_adjacent_to => "living space",
+                             :area => 1350,
+                             :insulation_assembly_r_value => 2.1 })
   elsif ['base-enclosure-split-surfaces.xml'].include? hpxml_file
     for n in 1..hpxml.frame_floors.size
       hpxml.frame_floors[n - 1].area /= 10.0
@@ -1216,17 +1217,17 @@ end
 
 def set_hpxml_slabs(hpxml_file, hpxml)
   if ['base.xml'].include? hpxml_file
-    hpxml.slabs = [HPXML::Slab.new({ :id => "Slab",
-                                     :interior_adjacent_to => "basement - conditioned",
-                                     :area => 1350,
-                                     :thickness => 4,
-                                     :exposed_perimeter => 150,
-                                     :perimeter_insulation_depth => 0,
-                                     :under_slab_insulation_width => 0,
-                                     :perimeter_insulation_r_value => 0,
-                                     :under_slab_insulation_r_value => 0,
-                                     :carpet_fraction => 0,
-                                     :carpet_r_value => 0 })]
+    hpxml.slabs.add({ :id => "Slab",
+                      :interior_adjacent_to => "basement - conditioned",
+                      :area => 1350,
+                      :thickness => 4,
+                      :exposed_perimeter => 150,
+                      :perimeter_insulation_depth => 0,
+                      :under_slab_insulation_width => 0,
+                      :perimeter_insulation_r_value => 0,
+                      :under_slab_insulation_r_value => 0,
+                      :carpet_fraction => 0,
+                      :carpet_r_value => 0 })
   elsif ['base-foundation-unconditioned-basement.xml'].include? hpxml_file
     hpxml.slabs[0].interior_adjacent_to = "basement - unconditioned"
   elsif ['base-foundation-conditioned-basement-slab-insulation.xml'].include? hpxml_file
@@ -1252,82 +1253,83 @@ def set_hpxml_slabs(hpxml_file, hpxml)
   elsif ['base-foundation-multiple.xml'].include? hpxml_file
     hpxml.slabs[0].area = 675
     hpxml.slabs[0].exposed_perimeter = 75
-    hpxml.slabs << HPXML::Slab.new({ :id => "SlabUnderCrawlspace",
-                                     :interior_adjacent_to => "crawlspace - unvented",
-                                     :area => 675,
-                                     :thickness => 0,
-                                     :exposed_perimeter => 75,
-                                     :perimeter_insulation_depth => 0,
-                                     :under_slab_insulation_width => 0,
-                                     :perimeter_insulation_r_value => 0,
-                                     :under_slab_insulation_r_value => 0,
-                                     :carpet_fraction => 0,
-                                     :carpet_r_value => 0 })
+    hpxml.slabs.add({ :id => "SlabUnderCrawlspace",
+                      :interior_adjacent_to => "crawlspace - unvented",
+                      :area => 675,
+                      :thickness => 0,
+                      :exposed_perimeter => 75,
+                      :perimeter_insulation_depth => 0,
+                      :under_slab_insulation_width => 0,
+                      :perimeter_insulation_r_value => 0,
+                      :under_slab_insulation_r_value => 0,
+                      :carpet_fraction => 0,
+                      :carpet_r_value => 0 })
   elsif ['base-foundation-ambient.xml'].include? hpxml_file
-    hpxml.slabs = []
+    hpxml.slabs.clear
   elsif ['base-enclosure-2stories-garage.xml'].include? hpxml_file
     hpxml.slabs[0].area -= 400
     hpxml.slabs[0].exposed_perimeter -= 40
-    hpxml.slabs << HPXML::Slab.new({ :id => "SlabUnderGarage",
-                                     :interior_adjacent_to => "garage",
-                                     :area => 400,
-                                     :thickness => 4,
-                                     :exposed_perimeter => 40,
-                                     :perimeter_insulation_depth => 0,
-                                     :under_slab_insulation_width => 0,
-                                     :depth_below_grade => 0,
-                                     :perimeter_insulation_r_value => 0,
-                                     :under_slab_insulation_r_value => 0,
-                                     :carpet_fraction => 0,
-                                     :carpet_r_value => 0 })
+    hpxml.slabs.add({ :id => "SlabUnderGarage",
+                      :interior_adjacent_to => "garage",
+                      :area => 400,
+                      :thickness => 4,
+                      :exposed_perimeter => 40,
+                      :perimeter_insulation_depth => 0,
+                      :under_slab_insulation_width => 0,
+                      :depth_below_grade => 0,
+                      :perimeter_insulation_r_value => 0,
+                      :under_slab_insulation_r_value => 0,
+                      :carpet_fraction => 0,
+                      :carpet_r_value => 0 })
   elsif ['base-enclosure-garage.xml'].include? hpxml_file
     hpxml.slabs[0].exposed_perimeter -= 30
-    hpxml.slabs << HPXML::Slab.new({ :id => "SlabUnderGarage",
-                                     :interior_adjacent_to => "garage",
-                                     :area => 600,
-                                     :thickness => 4,
-                                     :exposed_perimeter => 70,
-                                     :perimeter_insulation_depth => 0,
-                                     :under_slab_insulation_width => 0,
-                                     :depth_below_grade => 0,
-                                     :perimeter_insulation_r_value => 0,
-                                     :under_slab_insulation_r_value => 0,
-                                     :carpet_fraction => 0,
-                                     :carpet_r_value => 0 })
+    hpxml.slabs.add({ :id => "SlabUnderGarage",
+                      :interior_adjacent_to => "garage",
+                      :area => 600,
+                      :thickness => 4,
+                      :exposed_perimeter => 70,
+                      :perimeter_insulation_depth => 0,
+                      :under_slab_insulation_width => 0,
+                      :depth_below_grade => 0,
+                      :perimeter_insulation_r_value => 0,
+                      :under_slab_insulation_r_value => 0,
+                      :carpet_fraction => 0,
+                      :carpet_r_value => 0 })
   elsif ['base-foundation-complex.xml'].include? hpxml_file
-    hpxml.slabs = [HPXML::Slab.new({ :id => "Slab1",
-                                     :interior_adjacent_to => "basement - conditioned",
-                                     :area => 675,
-                                     :thickness => 4,
-                                     :exposed_perimeter => 75,
-                                     :perimeter_insulation_depth => 0,
-                                     :under_slab_insulation_width => 0,
-                                     :perimeter_insulation_r_value => 0,
-                                     :under_slab_insulation_r_value => 0,
-                                     :carpet_fraction => 0,
-                                     :carpet_r_value => 0 }),
-                   HPXML::Slab.new({ :id => "Slab2",
-                                     :interior_adjacent_to => "basement - conditioned",
-                                     :area => 405,
-                                     :thickness => 4,
-                                     :exposed_perimeter => 45,
-                                     :perimeter_insulation_depth => 1,
-                                     :under_slab_insulation_width => 0,
-                                     :perimeter_insulation_r_value => 5,
-                                     :under_slab_insulation_r_value => 0,
-                                     :carpet_fraction => 0,
-                                     :carpet_r_value => 0 }),
-                   HPXML::Slab.new({ :id => "Slab3",
-                                     :interior_adjacent_to => "basement - conditioned",
-                                     :area => 270,
-                                     :thickness => 4,
-                                     :exposed_perimeter => 30,
-                                     :perimeter_insulation_depth => 1,
-                                     :under_slab_insulation_width => 0,
-                                     :perimeter_insulation_r_value => 5,
-                                     :under_slab_insulation_r_value => 0,
-                                     :carpet_fraction => 0,
-                                     :carpet_r_value => 0 })]
+    hpxml.slabs.clear
+    hpxml.slabs.add({ :id => "Slab1",
+                      :interior_adjacent_to => "basement - conditioned",
+                      :area => 675,
+                      :thickness => 4,
+                      :exposed_perimeter => 75,
+                      :perimeter_insulation_depth => 0,
+                      :under_slab_insulation_width => 0,
+                      :perimeter_insulation_r_value => 0,
+                      :under_slab_insulation_r_value => 0,
+                      :carpet_fraction => 0,
+                      :carpet_r_value => 0 })
+    hpxml.slabs.add({ :id => "Slab2",
+                      :interior_adjacent_to => "basement - conditioned",
+                      :area => 405,
+                      :thickness => 4,
+                      :exposed_perimeter => 45,
+                      :perimeter_insulation_depth => 1,
+                      :under_slab_insulation_width => 0,
+                      :perimeter_insulation_r_value => 5,
+                      :under_slab_insulation_r_value => 0,
+                      :carpet_fraction => 0,
+                      :carpet_r_value => 0 })
+    hpxml.slabs.add({ :id => "Slab3",
+                      :interior_adjacent_to => "basement - conditioned",
+                      :area => 270,
+                      :thickness => 4,
+                      :exposed_perimeter => 30,
+                      :perimeter_insulation_depth => 1,
+                      :under_slab_insulation_width => 0,
+                      :perimeter_insulation_r_value => 5,
+                      :under_slab_insulation_r_value => 0,
+                      :carpet_fraction => 0,
+                      :carpet_r_value => 0 })
   elsif ['base-enclosure-split-surfaces.xml'].include? hpxml_file
     for n in 1..hpxml.slabs.size
       hpxml.slabs[n - 1].area /= 10.0
@@ -1347,30 +1349,30 @@ end
 
 def set_hpxml_windows(hpxml_file, hpxml)
   if ['base.xml'].include? hpxml_file
-    hpxml.windows = [HPXML::Window.new({ :id => "WindowNorth",
-                                         :area => 108,
-                                         :azimuth => 0,
-                                         :ufactor => 0.33,
-                                         :shgc => 0.45,
-                                         :wall_idref => "Wall" }),
-                     HPXML::Window.new({ :id => "WindowSouth",
-                                         :area => 108,
-                                         :azimuth => 180,
-                                         :ufactor => 0.33,
-                                         :shgc => 0.45,
-                                         :wall_idref => "Wall" }),
-                     HPXML::Window.new({ :id => "WindowEast",
-                                         :area => 72,
-                                         :azimuth => 90,
-                                         :ufactor => 0.33,
-                                         :shgc => 0.45,
-                                         :wall_idref => "Wall" }),
-                     HPXML::Window.new({ :id => "WindowWest",
-                                         :area => 72,
-                                         :azimuth => 270,
-                                         :ufactor => 0.33,
-                                         :shgc => 0.45,
-                                         :wall_idref => "Wall" })]
+    hpxml.windows.add({ :id => "WindowNorth",
+                        :area => 108,
+                        :azimuth => 0,
+                        :ufactor => 0.33,
+                        :shgc => 0.45,
+                        :wall_idref => "Wall" })
+    hpxml.windows.add({ :id => "WindowSouth",
+                        :area => 108,
+                        :azimuth => 180,
+                        :ufactor => 0.33,
+                        :shgc => 0.45,
+                        :wall_idref => "Wall" })
+    hpxml.windows.add({ :id => "WindowEast",
+                        :area => 72,
+                        :azimuth => 90,
+                        :ufactor => 0.33,
+                        :shgc => 0.45,
+                        :wall_idref => "Wall" })
+    hpxml.windows.add({ :id => "WindowWest",
+                        :area => 72,
+                        :azimuth => 270,
+                        :ufactor => 0.33,
+                        :shgc => 0.45,
+                        :wall_idref => "Wall" })
   elsif ['base-enclosure-overhangs.xml'].include? hpxml_file
     hpxml.windows[0].overhangs_depth = 2.5
     hpxml.windows[0].overhangs_distance_to_top_of_window = 0
@@ -1394,7 +1396,7 @@ def set_hpxml_windows(hpxml_file, hpxml)
     hpxml.windows[0].interior_shading_factor_summer = 0.85
     hpxml.windows[0].interior_shading_factor_winter = 0.7
   elsif ['base-enclosure-windows-none.xml'].include? hpxml_file
-    hpxml.windows = []
+    hpxml.windows.clear
   elsif ['invalid_files/net-area-negative-wall.xml'].include? hpxml_file
     hpxml.windows[0].area = 1000
   elsif ['base-atticroof-conditioned.xml'].include? hpxml_file
@@ -1402,43 +1404,43 @@ def set_hpxml_windows(hpxml_file, hpxml)
     hpxml.windows[1].area = 108
     hpxml.windows[2].area = 108
     hpxml.windows[3].area = 108
-    hpxml.windows << HPXML::Window.new({ :id => "AtticGableWindowEast",
-                                         :area => 12,
-                                         :azimuth => 90,
-                                         :ufactor => 0.33,
-                                         :shgc => 0.45,
-                                         :wall_idref => "WallAtticGableCond" })
-    hpxml.windows << HPXML::Window.new({ :id => "AtticGableWindowWest",
-                                         :area => 62,
-                                         :azimuth => 270,
-                                         :ufactor => 0.3,
-                                         :shgc => 0.45,
-                                         :wall_idref => "WallAtticGableCond" })
+    hpxml.windows.add({ :id => "AtticGableWindowEast",
+                        :area => 12,
+                        :azimuth => 90,
+                        :ufactor => 0.33,
+                        :shgc => 0.45,
+                        :wall_idref => "WallAtticGableCond" })
+    hpxml.windows.add({ :id => "AtticGableWindowWest",
+                        :area => 62,
+                        :azimuth => 270,
+                        :ufactor => 0.3,
+                        :shgc => 0.45,
+                        :wall_idref => "WallAtticGableCond" })
   elsif ['base-atticroof-cathedral.xml'].include? hpxml_file
     hpxml.windows[0].area = 108
     hpxml.windows[1].area = 108
     hpxml.windows[2].area = 108
     hpxml.windows[3].area = 108
-    hpxml.windows << HPXML::Window.new({ :id => "AtticGableWindowEast",
-                                         :area => 12,
-                                         :azimuth => 90,
-                                         :ufactor => 0.33,
-                                         :shgc => 0.45,
-                                         :wall_idref => "WallAtticGable" })
-    hpxml.windows << HPXML::Window.new({ :id => "AtticGableWindowWest",
-                                         :area => 12,
-                                         :azimuth => 270,
-                                         :ufactor => 0.33,
-                                         :shgc => 0.45,
-                                         :wall_idref => "WallAtticGable" })
+    hpxml.windows.add({ :id => "AtticGableWindowEast",
+                        :area => 12,
+                        :azimuth => 90,
+                        :ufactor => 0.33,
+                        :shgc => 0.45,
+                        :wall_idref => "WallAtticGable" })
+    hpxml.windows.add({ :id => "AtticGableWindowWest",
+                        :area => 12,
+                        :azimuth => 270,
+                        :ufactor => 0.33,
+                        :shgc => 0.45,
+                        :wall_idref => "WallAtticGable" })
   elsif ['base-enclosure-garage.xml'].include? hpxml_file
     hpxml.windows.delete_at(2)
-    hpxml.windows << HPXML::Window.new({ :id => "GarageWindowEast",
-                                         :area => 12,
-                                         :azimuth => 90,
-                                         :ufactor => 0.33,
-                                         :shgc => 0.45,
-                                         :wall_idref => "WallGarageExterior" })
+    hpxml.windows.add({ :id => "GarageWindowEast",
+                        :area => 12,
+                        :azimuth => 90,
+                        :ufactor => 0.33,
+                        :shgc => 0.45,
+                        :wall_idref => "WallGarageExterior" })
   elsif ['base-enclosure-2stories.xml'].include? hpxml_file
     hpxml.windows[0].area = 216
     hpxml.windows[1].area = 216
@@ -1450,30 +1452,30 @@ def set_hpxml_windows(hpxml_file, hpxml)
     hpxml.windows[2].area = 144
     hpxml.windows[3].area = 96
   elsif ['base-foundation-unconditioned-basement-above-grade.xml'].include? hpxml_file
-    hpxml.windows << HPXML::Window.new({ :id => "FoundationWindowNorth",
-                                         :area => 20,
-                                         :azimuth => 0,
-                                         :ufactor => 0.33,
-                                         :shgc => 0.45,
-                                         :wall_idref => "FoundationWall" })
-    hpxml.windows << HPXML::Window.new({ :id => "FoundationWindowSouth",
-                                         :area => 20,
-                                         :azimuth => 180,
-                                         :ufactor => 0.33,
-                                         :shgc => 0.45,
-                                         :wall_idref => "FoundationWall" })
-    hpxml.windows << HPXML::Window.new({ :id => "FoundationWindowEast",
-                                         :area => 10,
-                                         :azimuth => 90,
-                                         :ufactor => 0.33,
-                                         :shgc => 0.45,
-                                         :wall_idref => "FoundationWall" })
-    hpxml.windows << HPXML::Window.new({ :id => "FoundationWindowWest",
-                                         :area => 10,
-                                         :azimuth => 270,
-                                         :ufactor => 0.33,
-                                         :shgc => 0.45,
-                                         :wall_idref => "FoundationWall" })
+    hpxml.windows.add({ :id => "FoundationWindowNorth",
+                        :area => 20,
+                        :azimuth => 0,
+                        :ufactor => 0.33,
+                        :shgc => 0.45,
+                        :wall_idref => "FoundationWall" })
+    hpxml.windows.add({ :id => "FoundationWindowSouth",
+                        :area => 20,
+                        :azimuth => 180,
+                        :ufactor => 0.33,
+                        :shgc => 0.45,
+                        :wall_idref => "FoundationWall" })
+    hpxml.windows.add({ :id => "FoundationWindowEast",
+                        :area => 10,
+                        :azimuth => 90,
+                        :ufactor => 0.33,
+                        :shgc => 0.45,
+                        :wall_idref => "FoundationWall" })
+    hpxml.windows.add({ :id => "FoundationWindowWest",
+                        :area => 10,
+                        :azimuth => 270,
+                        :ufactor => 0.33,
+                        :shgc => 0.45,
+                        :wall_idref => "FoundationWall" })
   elsif ['base-enclosure-adiabatic-surfaces.xml'].include? hpxml_file
     for n in 1..hpxml.windows.size
       hpxml.windows[n - 1].area *= 0.35
@@ -1491,33 +1493,31 @@ def set_hpxml_windows(hpxml_file, hpxml)
       end
     end
   elsif ['base-foundation-walkout-basement.xml'].include? hpxml_file
-    hpxml.windows << HPXML::Window.new({ :id => "FoundationWindow",
-                                         :area => 20,
-                                         :azimuth => 0,
-                                         :ufactor => 0.33,
-                                         :shgc => 0.45,
-                                         :wall_idref => "FoundationWall3" })
+    hpxml.windows.add({ :id => "FoundationWindow",
+                        :area => 20,
+                        :azimuth => 0,
+                        :ufactor => 0.33,
+                        :shgc => 0.45,
+                        :wall_idref => "FoundationWall3" })
   elsif ['invalid_files/invalid-window-height.xml'].include? hpxml_file
     hpxml.windows[2].overhangs_distance_to_bottom_of_window = hpxml.windows[2].overhangs_distance_to_top_of_window
   end
 end
 
 def set_hpxml_skylights(hpxml_file, hpxml)
-  if ['base.xml'].include? hpxml_file
-    hpxml.skylights = []
-  elsif ['base-enclosure-skylights.xml'].include? hpxml_file
-    hpxml.skylights << HPXML::Skylight.new({ :id => "SkylightNorth",
-                                             :area => 45,
-                                             :azimuth => 0,
-                                             :ufactor => 0.33,
-                                             :shgc => 0.45,
-                                             :roof_idref => "Roof" })
-    hpxml.skylights << HPXML::Skylight.new({ :id => "SkylightSouth",
-                                             :area => 45,
-                                             :azimuth => 180,
-                                             :ufactor => 0.35,
-                                             :shgc => 0.47,
-                                             :roof_idref => "Roof" })
+  if ['base-enclosure-skylights.xml'].include? hpxml_file
+    hpxml.skylights.add({ :id => "SkylightNorth",
+                          :area => 45,
+                          :azimuth => 0,
+                          :ufactor => 0.33,
+                          :shgc => 0.45,
+                          :roof_idref => "Roof" })
+    hpxml.skylights.add({ :id => "SkylightSouth",
+                          :area => 45,
+                          :azimuth => 180,
+                          :ufactor => 0.35,
+                          :shgc => 0.47,
+                          :roof_idref => "Roof" })
   elsif ['invalid_files/net-area-negative-roof.xml'].include? hpxml_file
     hpxml.skylights[0].area = 4000
   elsif ['invalid_files/unattached-skylight.xml'].include? hpxml_file
@@ -1536,16 +1536,16 @@ end
 
 def set_hpxml_doors(hpxml_file, hpxml)
   if ['base.xml'].include? hpxml_file
-    hpxml.doors = [HPXML::Door.new({ :id => "DoorNorth",
-                                     :wall_idref => "Wall",
-                                     :area => 40,
-                                     :azimuth => 0,
-                                     :r_value => 4.4 }),
-                   HPXML::Door.new({ :id => "DoorSouth",
-                                     :wall_idref => "Wall",
-                                     :area => 40,
-                                     :azimuth => 180,
-                                     :r_value => 4.4 })]
+    hpxml.doors.add({ :id => "DoorNorth",
+                      :wall_idref => "Wall",
+                      :area => 40,
+                      :azimuth => 0,
+                      :r_value => 4.4 })
+    hpxml.doors.add({ :id => "DoorSouth",
+                      :wall_idref => "Wall",
+                      :area => 40,
+                      :azimuth => 180,
+                      :r_value => 4.4 })
   elsif ['base-enclosure-garage.xml',
          'base-enclosure-2stories-garage.xml'].include? hpxml_file
     hpxml.doors << HPXML::Door.new({ :id => "GarageDoorSouth",
@@ -1570,13 +1570,13 @@ end
 
 def set_hpxml_heating_systems(hpxml_file, hpxml)
   if ['base.xml'].include? hpxml_file
-    hpxml.heating_systems = [HPXML::HeatingSystem.new({ :id => "HeatingSystem",
-                                                        :distribution_system_idref => "HVACDistribution",
-                                                        :heating_system_type => "Furnace",
-                                                        :heating_system_fuel => "natural gas",
-                                                        :heating_capacity => 64000,
-                                                        :heating_efficiency_afue => 0.92,
-                                                        :fraction_heat_load_served => 1 })]
+    hpxml.heating_systems.add({ :id => "HeatingSystem",
+                                :distribution_system_idref => "HVACDistribution",
+                                :heating_system_type => "Furnace",
+                                :heating_system_fuel => "natural gas",
+                                :heating_capacity => 64000,
+                                :heating_efficiency_afue => 0.92,
+                                :fraction_heat_load_served => 1 })
   elsif ['base-hvac-air-to-air-heat-pump-1-speed.xml',
          'base-hvac-air-to-air-heat-pump-2-speed.xml',
          'base-hvac-air-to-air-heat-pump-var-speed.xml',
@@ -1592,7 +1592,7 @@ def set_hpxml_heating_systems(hpxml_file, hpxml)
          'base-hvac-none.xml',
          'base-hvac-room-ac-only.xml',
          'invalid_files/orphaned-hvac-distribution.xml'].include? hpxml_file
-    hpxml.heating_systems = []
+    hpxml.heating_systems.clear
   elsif ['base-hvac-boiler-elec-only.xml'].include? hpxml_file
     hpxml.heating_systems[0].heating_system_type = "Boiler"
     hpxml.heating_systems[0].heating_system_fuel = "electricity"
@@ -1638,49 +1638,49 @@ def set_hpxml_heating_systems(hpxml_file, hpxml)
     hpxml.heating_systems[0].heating_efficiency_afue = 1
     hpxml.heating_systems[0].fraction_heat_load_served = 0.1
     hpxml.heating_systems[0].heating_capacity *= 0.1
-    hpxml.heating_systems << HPXML::HeatingSystem.new({ :id => "HeatingSystem2",
-                                                        :distribution_system_idref => "HVACDistribution2",
-                                                        :heating_system_type => "Boiler",
-                                                        :heating_system_fuel => "natural gas",
-                                                        :heating_capacity => 6400,
-                                                        :heating_efficiency_afue => 0.92,
-                                                        :fraction_heat_load_served => 0.1,
-                                                        :electric_auxiliary_energy => 200 })
-    hpxml.heating_systems << HPXML::HeatingSystem.new({ :id => "HeatingSystem3",
-                                                        :heating_system_type => "ElectricResistance",
-                                                        :heating_system_fuel => "electricity",
-                                                        :heating_capacity => 6400,
-                                                        :heating_efficiency_percent => 1,
-                                                        :fraction_heat_load_served => 0.1 })
-    hpxml.heating_systems << HPXML::HeatingSystem.new({ :id => "HeatingSystem4",
-                                                        :distribution_system_idref => "HVACDistribution3",
-                                                        :heating_system_type => "Furnace",
-                                                        :heating_system_fuel => "electricity",
-                                                        :heating_capacity => 6400,
-                                                        :heating_efficiency_afue => 1,
-                                                        :fraction_heat_load_served => 0.1 })
-    hpxml.heating_systems << HPXML::HeatingSystem.new({ :id => "HeatingSystem5",
-                                                        :distribution_system_idref => "HVACDistribution4",
-                                                        :heating_system_type => "Furnace",
-                                                        :heating_system_fuel => "natural gas",
-                                                        :heating_capacity => 6400,
-                                                        :heating_efficiency_afue => 0.92,
-                                                        :fraction_heat_load_served => 0.1,
-                                                        :electric_auxiliary_energy => 700 })
-    hpxml.heating_systems << HPXML::HeatingSystem.new({ :id => "HeatingSystem6",
-                                                        :heating_system_type => "Stove",
-                                                        :heating_system_fuel => "fuel oil",
-                                                        :heating_capacity => 6400,
-                                                        :heating_efficiency_percent => 0.8,
-                                                        :fraction_heat_load_served => 0.1,
-                                                        :electric_auxiliary_energy => 200 })
-    hpxml.heating_systems << HPXML::HeatingSystem.new({ :id => "HeatingSystem7",
-                                                        :heating_system_type => "WallFurnace",
-                                                        :heating_system_fuel => "propane",
-                                                        :heating_capacity => 6400,
-                                                        :heating_efficiency_afue => 0.8,
-                                                        :fraction_heat_load_served => 0.1,
-                                                        :electric_auxiliary_energy => 200 })
+    hpxml.heating_systems.add({ :id => "HeatingSystem2",
+                                :distribution_system_idref => "HVACDistribution2",
+                                :heating_system_type => "Boiler",
+                                :heating_system_fuel => "natural gas",
+                                :heating_capacity => 6400,
+                                :heating_efficiency_afue => 0.92,
+                                :fraction_heat_load_served => 0.1,
+                                :electric_auxiliary_energy => 200 })
+    hpxml.heating_systems.add({ :id => "HeatingSystem3",
+                                :heating_system_type => "ElectricResistance",
+                                :heating_system_fuel => "electricity",
+                                :heating_capacity => 6400,
+                                :heating_efficiency_percent => 1,
+                                :fraction_heat_load_served => 0.1 })
+    hpxml.heating_systems.add({ :id => "HeatingSystem4",
+                                :distribution_system_idref => "HVACDistribution3",
+                                :heating_system_type => "Furnace",
+                                :heating_system_fuel => "electricity",
+                                :heating_capacity => 6400,
+                                :heating_efficiency_afue => 1,
+                                :fraction_heat_load_served => 0.1 })
+    hpxml.heating_systems.add({ :id => "HeatingSystem5",
+                                :distribution_system_idref => "HVACDistribution4",
+                                :heating_system_type => "Furnace",
+                                :heating_system_fuel => "natural gas",
+                                :heating_capacity => 6400,
+                                :heating_efficiency_afue => 0.92,
+                                :fraction_heat_load_served => 0.1,
+                                :electric_auxiliary_energy => 700 })
+    hpxml.heating_systems.add({ :id => "HeatingSystem6",
+                                :heating_system_type => "Stove",
+                                :heating_system_fuel => "fuel oil",
+                                :heating_capacity => 6400,
+                                :heating_efficiency_percent => 0.8,
+                                :fraction_heat_load_served => 0.1,
+                                :electric_auxiliary_energy => 200 })
+    hpxml.heating_systems.add({ :id => "HeatingSystem7",
+                                :heating_system_type => "WallFurnace",
+                                :heating_system_fuel => "propane",
+                                :heating_capacity => 6400,
+                                :heating_efficiency_afue => 0.8,
+                                :fraction_heat_load_served => 0.1,
+                                :electric_auxiliary_energy => 200 })
   elsif ['invalid_files/hvac-frac-load-served.xml'].include? hpxml_file
     hpxml.heating_systems[0].fraction_heat_load_served += 0.1
   elsif ['base-hvac-portable-heater-electric-only.xml'].include? hpxml_file
@@ -1774,13 +1774,13 @@ end
 
 def set_hpxml_cooling_systems(hpxml_file, hpxml)
   if ['base.xml'].include? hpxml_file
-    hpxml.cooling_systems = [HPXML::CoolingSystem.new({ :id => "CoolingSystem",
-                                                        :distribution_system_idref => "HVACDistribution",
-                                                        :cooling_system_type => "central air conditioner",
-                                                        :cooling_system_fuel => "electricity",
-                                                        :cooling_capacity => 48000,
-                                                        :fraction_cool_load_served => 1,
-                                                        :cooling_efficiency_seer => 13 })]
+    hpxml.cooling_systems.add({ :id => "CoolingSystem",
+                                :distribution_system_idref => "HVACDistribution",
+                                :cooling_system_type => "central air conditioner",
+                                :cooling_system_fuel => "electricity",
+                                :cooling_capacity => 48000,
+                                :fraction_cool_load_served => 1,
+                                :cooling_efficiency_seer => 13 })
   elsif ['base-hvac-air-to-air-heat-pump-1-speed.xml',
          'base-hvac-air-to-air-heat-pump-2-speed.xml',
          'base-hvac-air-to-air-heat-pump-var-speed.xml',
@@ -1805,7 +1805,7 @@ def set_hpxml_cooling_systems(hpxml_file, hpxml)
          'base-hvac-wall-furnace-elec-only.xml',
          'base-hvac-wall-furnace-propane-only.xml',
          'base-hvac-wall-furnace-wood-only.xml'].include? hpxml_file
-    hpxml.cooling_systems = []
+    hpxml.cooling_systems.clear
   elsif ['base-hvac-central-ac-only-1-speed-detailed.xml'].include? hpxml_file
     hpxml.cooling_systems[0].cooling_shr = 0.7
     hpxml.cooling_systems[0].compressor_type = "single stage"
@@ -1848,12 +1848,12 @@ def set_hpxml_cooling_systems(hpxml_file, hpxml)
     hpxml.cooling_systems[0].distribution_system_idref = "HVACDistribution4"
     hpxml.cooling_systems[0].fraction_cool_load_served = 0.2
     hpxml.cooling_systems[0].cooling_capacity *= 0.2
-    hpxml.cooling_systems << HPXML::CoolingSystem.new({ :id => "CoolingSystem2",
-                                                        :cooling_system_type => "room air conditioner",
-                                                        :cooling_system_fuel => "electricity",
-                                                        :cooling_capacity => 9600,
-                                                        :fraction_cool_load_served => 0.2,
-                                                        :cooling_efficiency_eer => 8.5 })
+    hpxml.cooling_systems.add({ :id => "CoolingSystem2",
+                                :cooling_system_type => "room air conditioner",
+                                :cooling_system_fuel => "electricity",
+                                :cooling_capacity => 9600,
+                                :fraction_cool_load_served => 0.2,
+                                :cooling_efficiency_eer => 8.5 })
   elsif ['invalid_files/hvac-frac-load-served.xml'].include? hpxml_file
     hpxml.cooling_systems[0].fraction_cool_load_served += 0.2
   elsif ['invalid_files/hvac-dse-multiple-attached-cooling.xml'].include? hpxml_file
@@ -1885,82 +1885,80 @@ def set_hpxml_cooling_systems(hpxml_file, hpxml)
 end
 
 def set_hpxml_heat_pumps(hpxml_file, hpxml)
-  if ['base.xml'].include? hpxml_file
-    hpxml.heat_pumps = []
-  elsif ['base-hvac-air-to-air-heat-pump-1-speed.xml',
-         'base-hvac-central-ac-plus-air-to-air-heat-pump-heating.xml'].include? hpxml_file
-    hpxml.heat_pumps << HPXML::HeatPump.new({ :id => "HeatPump",
-                                              :distribution_system_idref => "HVACDistribution",
-                                              :heat_pump_type => "air-to-air",
-                                              :heat_pump_fuel => "electricity",
-                                              :heating_capacity => 42000,
-                                              :cooling_capacity => 48000,
-                                              :backup_heating_fuel => "electricity",
-                                              :backup_heating_capacity => 34121,
-                                              :backup_heating_efficiency_percent => 1.0,
-                                              :fraction_heat_load_served => 1,
-                                              :fraction_cool_load_served => 1,
-                                              :heating_efficiency_hspf => 7.7,
-                                              :cooling_efficiency_seer => 13 })
+  if ['base-hvac-air-to-air-heat-pump-1-speed.xml',
+      'base-hvac-central-ac-plus-air-to-air-heat-pump-heating.xml'].include? hpxml_file
+    hpxml.heat_pumps.add({ :id => "HeatPump",
+                           :distribution_system_idref => "HVACDistribution",
+                           :heat_pump_type => "air-to-air",
+                           :heat_pump_fuel => "electricity",
+                           :heating_capacity => 42000,
+                           :cooling_capacity => 48000,
+                           :backup_heating_fuel => "electricity",
+                           :backup_heating_capacity => 34121,
+                           :backup_heating_efficiency_percent => 1.0,
+                           :fraction_heat_load_served => 1,
+                           :fraction_cool_load_served => 1,
+                           :heating_efficiency_hspf => 7.7,
+                           :cooling_efficiency_seer => 13 })
     if hpxml_file == 'base-hvac-central-ac-plus-air-to-air-heat-pump-heating.xml'
       hpxml.heat_pumps[0].fraction_cool_load_served = 0
     end
   elsif ['base-hvac-air-to-air-heat-pump-2-speed.xml'].include? hpxml_file
-    hpxml.heat_pumps << HPXML::HeatPump.new({ :id => "HeatPump",
-                                              :distribution_system_idref => "HVACDistribution",
-                                              :heat_pump_type => "air-to-air",
-                                              :heat_pump_fuel => "electricity",
-                                              :heating_capacity => 42000,
-                                              :cooling_capacity => 48000,
-                                              :backup_heating_fuel => "electricity",
-                                              :backup_heating_capacity => 34121,
-                                              :backup_heating_efficiency_percent => 1.0,
-                                              :fraction_heat_load_served => 1,
-                                              :fraction_cool_load_served => 1,
-                                              :heating_efficiency_hspf => 9.3,
-                                              :cooling_efficiency_seer => 18 })
+    hpxml.heat_pumps.add({ :id => "HeatPump",
+                           :distribution_system_idref => "HVACDistribution",
+                           :heat_pump_type => "air-to-air",
+                           :heat_pump_fuel => "electricity",
+                           :heating_capacity => 42000,
+                           :cooling_capacity => 48000,
+                           :backup_heating_fuel => "electricity",
+                           :backup_heating_capacity => 34121,
+                           :backup_heating_efficiency_percent => 1.0,
+                           :fraction_heat_load_served => 1,
+                           :fraction_cool_load_served => 1,
+                           :heating_efficiency_hspf => 9.3,
+                           :cooling_efficiency_seer => 18 })
   elsif ['base-hvac-air-to-air-heat-pump-var-speed.xml'].include? hpxml_file
-    hpxml.heat_pumps << HPXML::HeatPump.new({ :id => "HeatPump",
-                                              :distribution_system_idref => "HVACDistribution",
-                                              :heat_pump_type => "air-to-air",
-                                              :heat_pump_fuel => "electricity",
-                                              :heating_capacity => 42000,
-                                              :cooling_capacity => 48000,
-                                              :backup_heating_fuel => "electricity",
-                                              :backup_heating_capacity => 34121,
-                                              :backup_heating_efficiency_percent => 1.0,
-                                              :fraction_heat_load_served => 1,
-                                              :fraction_cool_load_served => 1,
-                                              :heating_efficiency_hspf => 10,
-                                              :cooling_efficiency_seer => 22 })
+    hpxml.heat_pumps.add({ :id => "HeatPump",
+                           :distribution_system_idref => "HVACDistribution",
+                           :heat_pump_type => "air-to-air",
+                           :heat_pump_fuel => "electricity",
+                           :heating_capacity => 42000,
+                           :cooling_capacity => 48000,
+                           :backup_heating_fuel => "electricity",
+                           :backup_heating_capacity => 34121,
+                           :backup_heating_efficiency_percent => 1.0,
+                           :fraction_heat_load_served => 1,
+                           :fraction_cool_load_served => 1,
+                           :heating_efficiency_hspf => 10,
+                           :cooling_efficiency_seer => 22 })
   elsif ['base-hvac-ground-to-air-heat-pump.xml'].include? hpxml_file
-    hpxml.heat_pumps << HPXML::HeatPump.new({ :id => "HeatPump",
-                                              :distribution_system_idref => "HVACDistribution",
-                                              :heat_pump_type => "ground-to-air",
-                                              :heat_pump_fuel => "electricity",
-                                              :heating_capacity => 42000,
-                                              :cooling_capacity => 48000,
-                                              :backup_heating_fuel => "electricity",
-                                              :backup_heating_capacity => 34121,
-                                              :backup_heating_efficiency_percent => 1.0,
-                                              :fraction_heat_load_served => 1,
-                                              :fraction_cool_load_served => 1,
-                                              :heating_efficiency_cop => 3.6,
-                                              :cooling_efficiency_eer => 16.6 })
+    hpxml.heat_pumps.add({ :id => "HeatPump",
+                           :distribution_system_idref => "HVACDistribution",
+                           :heat_pump_type => "ground-to-air",
+                           :heat_pump_fuel => "electricity",
+                           :heating_capacity => 42000,
+                           :cooling_capacity => 48000,
+                           :backup_heating_fuel => "electricity",
+                           :backup_heating_capacity => 34121,
+                           :backup_heating_efficiency_percent => 1.0,
+                           :fraction_heat_load_served => 1,
+                           :fraction_cool_load_served => 1,
+                           :heating_efficiency_cop => 3.6,
+                           :cooling_efficiency_eer => 16.6 })
   elsif ['base-hvac-mini-split-heat-pump-ducted.xml'].include? hpxml_file
-    hpxml.heat_pumps << HPXML::HeatPump.new({ :id => "HeatPump",
-                                              :distribution_system_idref => "HVACDistribution",
-                                              :heat_pump_type => "mini-split",
-                                              :heat_pump_fuel => "electricity",
-                                              :heating_capacity => 52000,
-                                              :cooling_capacity => 48000,
-                                              :backup_heating_fuel => "electricity",
-                                              :backup_heating_capacity => 34121,
-                                              :backup_heating_efficiency_percent => 1.0,
-                                              :fraction_heat_load_served => 1,
-                                              :fraction_cool_load_served => 1,
-                                              :heating_efficiency_hspf => 10,
-                                              :cooling_efficiency_seer => 19 })
+    hpxml.heat_pumps.add({ :id => "HeatPump",
+                           :distribution_system_idref => "HVACDistribution",
+                           :heat_pump_type => "mini-split",
+                           :heat_pump_fuel => "electricity",
+                           :heating_capacity => 52000,
+                           :cooling_capacity => 48000,
+                           :backup_heating_fuel => "electricity",
+                           :backup_heating_capacity => 34121,
+                           :backup_heating_efficiency_percent => 1.0,
+                           :fraction_heat_load_served => 1,
+                           :fraction_cool_load_served => 1,
+                           :heating_efficiency_hspf => 10,
+                           :cooling_efficiency_seer => 19 })
   elsif ['base-hvac-mini-split-heat-pump-ductless.xml'].include? hpxml_file
     hpxml.heat_pumps[0].distribution_system_idref = nil
   elsif ['base-hvac-mini-split-heat-pump-ductless-no-backup.xml'].include? hpxml_file
@@ -1994,44 +1992,44 @@ def set_hpxml_heat_pumps(hpxml_file, hpxml)
   elsif ['base-hvac-ground-to-air-heat-pump-detailed.xml'].include? hpxml_file
     hpxml.heat_pumps[0].cooling_shr = 0.7
   elsif ['base-hvac-multiple.xml'].include? hpxml_file
-    hpxml.heat_pumps << HPXML::HeatPump.new({ :id => "HeatPump",
-                                              :distribution_system_idref => "HVACDistribution5",
-                                              :heat_pump_type => "air-to-air",
-                                              :heat_pump_fuel => "electricity",
-                                              :heating_capacity => 4800,
-                                              :cooling_capacity => 4800,
-                                              :backup_heating_fuel => "electricity",
-                                              :backup_heating_capacity => 3412,
-                                              :backup_heating_efficiency_percent => 1.0,
-                                              :fraction_heat_load_served => 0.1,
-                                              :fraction_cool_load_served => 0.2,
-                                              :heating_efficiency_hspf => 7.7,
-                                              :cooling_efficiency_seer => 13 })
-    hpxml.heat_pumps << HPXML::HeatPump.new({ :id => "HeatPump2",
-                                              :distribution_system_idref => "HVACDistribution6",
-                                              :heat_pump_type => "ground-to-air",
-                                              :heat_pump_fuel => "electricity",
-                                              :heating_capacity => 4800,
-                                              :cooling_capacity => 4800,
-                                              :backup_heating_fuel => "electricity",
-                                              :backup_heating_capacity => 3412,
-                                              :backup_heating_efficiency_percent => 1.0,
-                                              :fraction_heat_load_served => 0.1,
-                                              :fraction_cool_load_served => 0.2,
-                                              :heating_efficiency_cop => 3.6,
-                                              :cooling_efficiency_eer => 16.6 })
-    hpxml.heat_pumps << HPXML::HeatPump.new({ :id => "HeatPump3",
-                                              :heat_pump_type => "mini-split",
-                                              :heat_pump_fuel => "electricity",
-                                              :heating_capacity => 4800,
-                                              :cooling_capacity => 4800,
-                                              :backup_heating_fuel => "electricity",
-                                              :backup_heating_capacity => 3412,
-                                              :backup_heating_efficiency_percent => 1.0,
-                                              :fraction_heat_load_served => 0.1,
-                                              :fraction_cool_load_served => 0.2,
-                                              :heating_efficiency_hspf => 10,
-                                              :cooling_efficiency_seer => 19 })
+    hpxml.heat_pumps.add({ :id => "HeatPump",
+                           :distribution_system_idref => "HVACDistribution5",
+                           :heat_pump_type => "air-to-air",
+                           :heat_pump_fuel => "electricity",
+                           :heating_capacity => 4800,
+                           :cooling_capacity => 4800,
+                           :backup_heating_fuel => "electricity",
+                           :backup_heating_capacity => 3412,
+                           :backup_heating_efficiency_percent => 1.0,
+                           :fraction_heat_load_served => 0.1,
+                           :fraction_cool_load_served => 0.2,
+                           :heating_efficiency_hspf => 7.7,
+                           :cooling_efficiency_seer => 13 })
+    hpxml.heat_pumps.add({ :id => "HeatPump2",
+                           :distribution_system_idref => "HVACDistribution6",
+                           :heat_pump_type => "ground-to-air",
+                           :heat_pump_fuel => "electricity",
+                           :heating_capacity => 4800,
+                           :cooling_capacity => 4800,
+                           :backup_heating_fuel => "electricity",
+                           :backup_heating_capacity => 3412,
+                           :backup_heating_efficiency_percent => 1.0,
+                           :fraction_heat_load_served => 0.1,
+                           :fraction_cool_load_served => 0.2,
+                           :heating_efficiency_cop => 3.6,
+                           :cooling_efficiency_eer => 16.6 })
+    hpxml.heat_pumps.add({ :id => "HeatPump3",
+                           :heat_pump_type => "mini-split",
+                           :heat_pump_fuel => "electricity",
+                           :heating_capacity => 4800,
+                           :cooling_capacity => 4800,
+                           :backup_heating_fuel => "electricity",
+                           :backup_heating_capacity => 3412,
+                           :backup_heating_efficiency_percent => 1.0,
+                           :fraction_heat_load_served => 0.1,
+                           :fraction_cool_load_served => 0.2,
+                           :heating_efficiency_hspf => 10,
+                           :cooling_efficiency_seer => 19 })
   elsif ['invalid_files/hvac-distribution-multiple-attached-heating.xml'].include? hpxml_file
     hpxml.heat_pumps[0].distribution_system_idref = "HVACDistribution3"
   elsif ['invalid_files/hvac-distribution-multiple-attached-cooling.xml'].include? hpxml_file
@@ -2082,12 +2080,12 @@ end
 
 def set_hpxml_hvac_control(hpxml_file, hpxml)
   if ['base.xml'].include? hpxml_file
-    hpxml.hvac_control = HPXML::HVACControl.new({ :id => "HVACControl",
-                                                  :control_type => "manual thermostat",
-                                                  :heating_setpoint_temp => 68,
-                                                  :cooling_setpoint_temp => 78 })
+    hpxml.set_hvac_control({ :id => "HVACControl",
+                             :control_type => "manual thermostat",
+                             :heating_setpoint_temp => 68,
+                             :cooling_setpoint_temp => 78 })
   elsif ['base-hvac-none.xml'].include? hpxml_file
-    hpxml.hvac_control = nil
+    hpxml.set_hvac_control({})
   elsif ['base-hvac-programmable-thermostat.xml'].include? hpxml_file
     hpxml.hvac_control.control_type = "programmable thermostat"
     hpxml.hvac_control.heating_setback_temp = 66
@@ -2106,50 +2104,50 @@ end
 
 def set_hpxml_hvac_distributions(hpxml_file, hpxml)
   if ['base.xml'].include? hpxml_file
-    hpxml.hvac_distributions = [HPXML::HVACDistribution.new({ :id => "HVACDistribution",
-                                                              :distribution_system_type => "AirDistribution" })]
-    hpxml.hvac_distributions[0].duct_leakage_measurements = [HPXML::DuctLeakageMeasurement.new({ :duct_type => "supply",
-                                                                                                 :duct_leakage_units => "CFM25",
-                                                                                                 :duct_leakage_value => 75 }),
-                                                             HPXML::DuctLeakageMeasurement.new({ :duct_type => "return",
-                                                                                                 :duct_leakage_units => "CFM25",
-                                                                                                 :duct_leakage_value => 25 })]
-    hpxml.hvac_distributions[0].ducts = [HPXML::Duct.new({ :duct_type => "supply",
-                                                           :duct_insulation_r_value => 4,
-                                                           :duct_location => "attic - unvented",
-                                                           :duct_surface_area => 150 }),
-                                         HPXML::Duct.new({ :duct_type => "return",
-                                                           :duct_insulation_r_value => 0,
-                                                           :duct_location => "attic - unvented",
-                                                           :duct_surface_area => 50 })]
+    hpxml.hvac_distributions.add({ :id => "HVACDistribution",
+                                   :distribution_system_type => "AirDistribution" })
+    hpxml.hvac_distributions[0].duct_leakage_measurements.add({ :duct_type => "supply",
+                                                                :duct_leakage_units => "CFM25",
+                                                                :duct_leakage_value => 75 })
+    hpxml.hvac_distributions[0].duct_leakage_measurements.add({ :duct_type => "return",
+                                                                :duct_leakage_units => "CFM25",
+                                                                :duct_leakage_value => 25 })
+    hpxml.hvac_distributions[0].ducts.add({ :duct_type => "supply",
+                                            :duct_insulation_r_value => 4,
+                                            :duct_location => "attic - unvented",
+                                            :duct_surface_area => 150 })
+    hpxml.hvac_distributions[0].ducts.add({ :duct_type => "return",
+                                            :duct_insulation_r_value => 0,
+                                            :duct_location => "attic - unvented",
+                                            :duct_surface_area => 50 })
   elsif ['base-hvac-boiler-elec-only.xml',
          'base-hvac-boiler-gas-only.xml',
          'base-hvac-boiler-oil-only.xml',
          'base-hvac-boiler-propane-only.xml',
          'base-hvac-boiler-wood-only.xml'].include? hpxml_file
     hpxml.hvac_distributions[0].distribution_system_type = "HydronicDistribution"
-    hpxml.hvac_distributions[0].duct_leakage_measurements = []
-    hpxml.hvac_distributions[0].ducts = []
+    hpxml.hvac_distributions[0].duct_leakage_measurements.clear
+    hpxml.hvac_distributions[0].ducts.clear
   elsif ['base-hvac-boiler-gas-central-ac-1-speed.xml'].include? hpxml_file
     hpxml.hvac_distributions[0].distribution_system_type = "HydronicDistribution"
-    hpxml.hvac_distributions[0].duct_leakage_measurements = []
-    hpxml.hvac_distributions[0].ducts = []
-    hpxml.hvac_distributions << HPXML::HVACDistribution.new({ :id => "HVACDistribution2",
-                                                              :distribution_system_type => "AirDistribution" })
-    hpxml.hvac_distributions[-1].duct_leakage_measurements = [HPXML::DuctLeakageMeasurement.new({ :duct_type => "supply",
-                                                                                                  :duct_leakage_units => "CFM25",
-                                                                                                  :duct_leakage_value => 75 }),
-                                                              HPXML::DuctLeakageMeasurement.new({ :duct_type => "return",
-                                                                                                  :duct_leakage_units => "CFM25",
-                                                                                                  :duct_leakage_value => 25 })]
-    hpxml.hvac_distributions[-1].ducts = [HPXML::Duct.new({ :duct_type => "supply",
-                                                            :duct_insulation_r_value => 4,
-                                                            :duct_location => "attic - unvented",
-                                                            :duct_surface_area => 150 }),
-                                          HPXML::Duct.new({ :duct_type => "return",
-                                                            :duct_insulation_r_value => 0,
-                                                            :duct_location => "attic - unvented",
-                                                            :duct_surface_area => 50 })]
+    hpxml.hvac_distributions[0].duct_leakage_measurements.clear
+    hpxml.hvac_distributions[0].ducts.clear
+    hpxml.hvac_distributions.add({ :id => "HVACDistribution2",
+                                   :distribution_system_type => "AirDistribution" })
+    hpxml.hvac_distributions[-1].duct_leakage_measurements.add({ :duct_type => "supply",
+                                                                 :duct_leakage_units => "CFM25",
+                                                                 :duct_leakage_value => 75 })
+    hpxml.hvac_distributions[-1].duct_leakage_measurements.add({ :duct_type => "return",
+                                                                 :duct_leakage_units => "CFM25",
+                                                                 :duct_leakage_value => 25 })
+    hpxml.hvac_distributions[-1].ducts.add({ :duct_type => "supply",
+                                             :duct_insulation_r_value => 4,
+                                             :duct_location => "attic - unvented",
+                                             :duct_surface_area => 150 })
+    hpxml.hvac_distributions[-1].ducts.add({ :duct_type => "return",
+                                             :duct_insulation_r_value => 0,
+                                             :duct_location => "attic - unvented",
+                                             :duct_surface_area => 50 })
   elsif ['base-hvac-none.xml',
          'base-hvac-elec-resistance-only.xml',
          'base-hvac-evap-cooler-only.xml',
@@ -2161,79 +2159,77 @@ def set_hpxml_hvac_distributions(hpxml_file, hpxml)
          'base-hvac-wall-furnace-elec-only.xml',
          'base-hvac-wall-furnace-propane-only.xml',
          'base-hvac-wall-furnace-wood-only.xml'].include? hpxml_file
-    hpxml.hvac_distributions = []
+    hpxml.hvac_distributions.clear
   elsif ['base-hvac-multiple.xml'].include? hpxml_file
     hpxml.hvac_distributions[0].distribution_system_type = "HydronicDistribution"
-    hpxml.hvac_distributions[0].duct_leakage_measurements = []
-    hpxml.hvac_distributions[0].ducts = []
-    hpxml.hvac_distributions << HPXML::HVACDistribution.new({ :id => "HVACDistribution2",
-                                                              :distribution_system_type => "HydronicDistribution",
-                                                              :duct_leakage_measurements => [],
-                                                              :ducts => [] })
-    hpxml.hvac_distributions << HPXML::HVACDistribution.new({ :id => "HVACDistribution3",
-                                                              :distribution_system_type => "AirDistribution" })
-    hpxml.hvac_distributions[-1].duct_leakage_measurements = [HPXML::DuctLeakageMeasurement.new({ :duct_type => "supply",
-                                                                                                  :duct_leakage_units => "CFM25",
-                                                                                                  :duct_leakage_value => 75 }),
-                                                              HPXML::DuctLeakageMeasurement.new({ :duct_type => "return",
-                                                                                                  :duct_leakage_units => "CFM25",
-                                                                                                  :duct_leakage_value => 25 })]
-    hpxml.hvac_distributions[-1].ducts = [HPXML::Duct.new({ :duct_type => "supply",
-                                                            :duct_insulation_r_value => 4,
-                                                            :duct_location => "attic - unvented",
-                                                            :duct_surface_area => 150 }),
-                                          HPXML::Duct.new({ :duct_type => "return",
-                                                            :duct_insulation_r_value => 0,
-                                                            :duct_location => "attic - unvented",
-                                                            :duct_surface_area => 50 })]
-    hpxml.hvac_distributions << HPXML::HVACDistribution.new({ :id => "HVACDistribution4",
-                                                              :distribution_system_type => "AirDistribution" })
-    hpxml.hvac_distributions[-1].duct_leakage_measurements = [HPXML::DuctLeakageMeasurement.new({ :duct_type => "supply",
-                                                                                                  :duct_leakage_units => "CFM25",
-                                                                                                  :duct_leakage_value => 75 }),
-                                                              HPXML::DuctLeakageMeasurement.new({ :duct_type => "return",
-                                                                                                  :duct_leakage_units => "CFM25",
-                                                                                                  :duct_leakage_value => 25 })]
-    hpxml.hvac_distributions[-1].ducts = [HPXML::Duct.new({ :duct_type => "supply",
-                                                            :duct_insulation_r_value => 4,
-                                                            :duct_location => "attic - unvented",
-                                                            :duct_surface_area => 150 }),
-                                          HPXML::Duct.new({ :duct_type => "return",
-                                                            :duct_insulation_r_value => 0,
-                                                            :duct_location => "attic - unvented",
-                                                            :duct_surface_area => 50 })]
-    hpxml.hvac_distributions << HPXML::HVACDistribution.new({ :id => "HVACDistribution5",
-                                                              :distribution_system_type => "AirDistribution" })
-    hpxml.hvac_distributions[-1].duct_leakage_measurements = [HPXML::DuctLeakageMeasurement.new({ :duct_type => "supply",
-                                                                                                  :duct_leakage_units => "CFM25",
-                                                                                                  :duct_leakage_value => 75 }),
-                                                              HPXML::DuctLeakageMeasurement.new({ :duct_type => "return",
-                                                                                                  :duct_leakage_units => "CFM25",
-                                                                                                  :duct_leakage_value => 25 })]
-    hpxml.hvac_distributions[-1].ducts = [HPXML::Duct.new({ :duct_type => "supply",
-                                                            :duct_insulation_r_value => 4,
-                                                            :duct_location => "attic - unvented",
-                                                            :duct_surface_area => 150 }),
-                                          HPXML::Duct.new({ :duct_type => "return",
-                                                            :duct_insulation_r_value => 0,
-                                                            :duct_location => "attic - unvented",
-                                                            :duct_surface_area => 50 })]
-    hpxml.hvac_distributions << HPXML::HVACDistribution.new({ :id => "HVACDistribution6",
-                                                              :distribution_system_type => "AirDistribution" })
-    hpxml.hvac_distributions[-1].duct_leakage_measurements = [HPXML::DuctLeakageMeasurement.new({ :duct_type => "supply",
-                                                                                                  :duct_leakage_units => "CFM25",
-                                                                                                  :duct_leakage_value => 75 }),
-                                                              HPXML::DuctLeakageMeasurement.new({ :duct_type => "return",
-                                                                                                  :duct_leakage_units => "CFM25",
-                                                                                                  :duct_leakage_value => 25 })]
-    hpxml.hvac_distributions[-1].ducts = [HPXML::Duct.new({ :duct_type => "supply",
-                                                            :duct_insulation_r_value => 4,
-                                                            :duct_location => "attic - unvented",
-                                                            :duct_surface_area => 150 }),
-                                          HPXML::Duct.new({ :duct_type => "return",
-                                                            :duct_insulation_r_value => 0,
-                                                            :duct_location => "attic - unvented",
-                                                            :duct_surface_area => 50 })]
+    hpxml.hvac_distributions[0].duct_leakage_measurements.clear
+    hpxml.hvac_distributions[0].ducts.clear
+    hpxml.hvac_distributions.add({ :id => "HVACDistribution2",
+                                   :distribution_system_type => "HydronicDistribution" })
+    hpxml.hvac_distributions.add({ :id => "HVACDistribution3",
+                                   :distribution_system_type => "AirDistribution" })
+    hpxml.hvac_distributions[-1].duct_leakage_measurements.add({ :duct_type => "supply",
+                                                                 :duct_leakage_units => "CFM25",
+                                                                 :duct_leakage_value => 75 })
+    hpxml.hvac_distributions[-1].duct_leakage_measurements.add({ :duct_type => "return",
+                                                                 :duct_leakage_units => "CFM25",
+                                                                 :duct_leakage_value => 25 })
+    hpxml.hvac_distributions[-1].ducts.add({ :duct_type => "supply",
+                                             :duct_insulation_r_value => 4,
+                                             :duct_location => "attic - unvented",
+                                             :duct_surface_area => 150 })
+    hpxml.hvac_distributions[-1].ducts.add({ :duct_type => "return",
+                                             :duct_insulation_r_value => 0,
+                                             :duct_location => "attic - unvented",
+                                             :duct_surface_area => 50 })
+    hpxml.hvac_distributions.add({ :id => "HVACDistribution4",
+                                   :distribution_system_type => "AirDistribution" })
+    hpxml.hvac_distributions[-1].duct_leakage_measurements.add({ :duct_type => "supply",
+                                                                 :duct_leakage_units => "CFM25",
+                                                                 :duct_leakage_value => 75 })
+    hpxml.hvac_distributions[-1].duct_leakage_measurements.add({ :duct_type => "return",
+                                                                 :duct_leakage_units => "CFM25",
+                                                                 :duct_leakage_value => 25 })
+    hpxml.hvac_distributions[-1].ducts.add({ :duct_type => "supply",
+                                             :duct_insulation_r_value => 4,
+                                             :duct_location => "attic - unvented",
+                                             :duct_surface_area => 150 })
+    hpxml.hvac_distributions[-1].ducts.add({ :duct_type => "return",
+                                             :duct_insulation_r_value => 0,
+                                             :duct_location => "attic - unvented",
+                                             :duct_surface_area => 50 })
+    hpxml.hvac_distributions.add({ :id => "HVACDistribution5",
+                                   :distribution_system_type => "AirDistribution" })
+    hpxml.hvac_distributions[-1].duct_leakage_measurements.add({ :duct_type => "supply",
+                                                                 :duct_leakage_units => "CFM25",
+                                                                 :duct_leakage_value => 75 })
+    hpxml.hvac_distributions[-1].duct_leakage_measurements.add({ :duct_type => "return",
+                                                                 :duct_leakage_units => "CFM25",
+                                                                 :duct_leakage_value => 25 })
+    hpxml.hvac_distributions[-1].ducts.add({ :duct_type => "supply",
+                                             :duct_insulation_r_value => 4,
+                                             :duct_location => "attic - unvented",
+                                             :duct_surface_area => 150 })
+    hpxml.hvac_distributions[-1].ducts.add({ :duct_type => "return",
+                                             :duct_insulation_r_value => 0,
+                                             :duct_location => "attic - unvented",
+                                             :duct_surface_area => 50 })
+    hpxml.hvac_distributions.add({ :id => "HVACDistribution6",
+                                   :distribution_system_type => "AirDistribution" })
+    hpxml.hvac_distributions[-1].duct_leakage_measurements.add({ :duct_type => "supply",
+                                                                 :duct_leakage_units => "CFM25",
+                                                                 :duct_leakage_value => 75 })
+    hpxml.hvac_distributions[-1].duct_leakage_measurements.add({ :duct_type => "return",
+                                                                 :duct_leakage_units => "CFM25",
+                                                                 :duct_leakage_value => 25 })
+    hpxml.hvac_distributions[-1].ducts.add({ :duct_type => "supply",
+                                             :duct_insulation_r_value => 4,
+                                             :duct_location => "attic - unvented",
+                                             :duct_surface_area => 150 })
+    hpxml.hvac_distributions[-1].ducts.add({ :duct_type => "return",
+                                             :duct_insulation_r_value => 0,
+                                             :duct_location => "attic - unvented",
+                                             :duct_surface_area => 50 })
   elsif ['base-hvac-dse.xml',
          'base-dhw-indirect-dse.xml'].include? hpxml_file
     hpxml.hvac_distributions[0].distribution_system_type = "DSE"
@@ -2259,12 +2255,13 @@ def set_hpxml_hvac_distributions(hpxml_file, hpxml)
     hpxml.hvac_distributions[0].duct_leakage_measurements.pop
     hpxml.hvac_distributions[0].ducts.pop
   elsif ['base-hvac-ducts-leakage-percent.xml'].include? hpxml_file
-    hpxml.hvac_distributions[0].duct_leakage_measurements = [HPXML::DuctLeakageMeasurement.new({ :duct_type => "supply",
-                                                                                                 :duct_leakage_units => "Percent",
-                                                                                                 :duct_leakage_value => 0.1 }),
-                                                             HPXML::DuctLeakageMeasurement.new({ :duct_type => "return",
-                                                                                                 :duct_leakage_units => "Percent",
-                                                                                                 :duct_leakage_value => 0.05 })]
+    hpxml.hvac_distributions[0].duct_leakage_measurements.clear
+    hpxml.hvac_distributions[0].duct_leakage_measurements.add({ :duct_type => "supply",
+                                                                :duct_leakage_units => "Percent",
+                                                                :duct_leakage_value => 0.1 })
+    hpxml.hvac_distributions[0].duct_leakage_measurements.add({ :duct_type => "return",
+                                                                :duct_leakage_units => "Percent",
+                                                                :duct_leakage_value => 0.05 })
   elsif ['base-hvac-undersized.xml'].include? hpxml_file
     hpxml.hvac_distributions[0].duct_leakage_measurements[0].duct_leakage_value /= 10.0
     hpxml.hvac_distributions[0].duct_leakage_measurements[1].duct_leakage_value /= 10.0
@@ -2298,22 +2295,22 @@ def set_hpxml_hvac_distributions(hpxml_file, hpxml)
   elsif ['base-hvac-ducts-locations.xml'].include? hpxml_file
     hpxml.hvac_distributions[0].ducts[1].duct_location = "attic - unvented"
   elsif ['base-hvac-ducts-multiple.xml'].include? hpxml_file
-    hpxml.hvac_distributions[0].ducts << HPXML::Duct.new({ :duct_type => "supply",
-                                                           :duct_insulation_r_value => 8,
-                                                           :duct_location => "attic - unvented",
-                                                           :duct_surface_area => 300 })
-    hpxml.hvac_distributions[0].ducts << HPXML::Duct.new({ :duct_type => "supply",
-                                                           :duct_insulation_r_value => 8,
-                                                           :duct_location => "outside",
-                                                           :duct_surface_area => 300 })
-    hpxml.hvac_distributions[0].ducts << HPXML::Duct.new({ :duct_type => "return",
-                                                           :duct_insulation_r_value => 4,
-                                                           :duct_location => "attic - unvented",
-                                                           :duct_surface_area => 100 })
-    hpxml.hvac_distributions[0].ducts << HPXML::Duct.new({ :duct_type => "return",
-                                                           :duct_insulation_r_value => 4,
-                                                           :duct_location => "outside",
-                                                           :duct_surface_area => 100 })
+    hpxml.hvac_distributions[0].ducts.add({ :duct_type => "supply",
+                                            :duct_insulation_r_value => 8,
+                                            :duct_location => "attic - unvented",
+                                            :duct_surface_area => 300 })
+    hpxml.hvac_distributions[0].ducts.add({ :duct_type => "supply",
+                                            :duct_insulation_r_value => 8,
+                                            :duct_location => "outside",
+                                            :duct_surface_area => 300 })
+    hpxml.hvac_distributions[0].ducts.add({ :duct_type => "return",
+                                            :duct_insulation_r_value => 4,
+                                            :duct_location => "attic - unvented",
+                                            :duct_surface_area => 100 })
+    hpxml.hvac_distributions[0].ducts.add({ :duct_type => "return",
+                                            :duct_insulation_r_value => 4,
+                                            :duct_location => "outside",
+                                            :duct_surface_area => 100 })
   elsif ['base-atticroof-conditioned.xml',
          'base-enclosure-adiabatic-surfaces.xml',
          'base-atticroof-cathedral.xml',
@@ -2335,9 +2332,9 @@ def set_hpxml_hvac_distributions(hpxml_file, hpxml)
       hpxml.hvac_distributions[0].duct_leakage_measurements[0].duct_leakage_value = 0.0
       hpxml.hvac_distributions[0].duct_leakage_measurements[1].duct_leakage_value = 0.0
     end
-    hpxml.hvac_distributions[0].ducts = []
+    hpxml.hvac_distributions[0].ducts.clear
   elsif hpxml_file.include? 'hvac_multiple' and not hpxml.hvac_distributions.empty?
-    hpxml.hvac_distributions[0].ducts = []
+    hpxml.hvac_distributions[0].ducts.clear
     if not hpxml.hvac_distributions[0].duct_leakage_measurements.empty?
       hpxml.hvac_distributions[0].duct_leakage_measurements[0].duct_leakage_value = 0.0
       hpxml.hvac_distributions[0].duct_leakage_measurements[1].duct_leakage_value = 0.0
@@ -2347,10 +2344,8 @@ def set_hpxml_hvac_distributions(hpxml_file, hpxml)
     hpxml.hvac_distributions << hpxml.hvac_distributions[0].dup
     hpxml.hvac_distributions[2].id = "HVACDistribution3"
   elsif ['invalid_files/hvac-invalid-distribution-system-type.xml'].include? hpxml_file
-    hpxml.hvac_distributions << HPXML::HVACDistribution.new({ :id => "HVACDistribution2",
-                                                              :distribution_system_type => "HydronicDistribution",
-                                                              :duct_leakage_measurements => [],
-                                                              :ducts => [] })
+    hpxml.hvac_distributions.add({ :id => "HVACDistribution2",
+                                   :distribution_system_type => "HydronicDistribution" })
   elsif ['invalid_files/hvac-distribution-return-duct-leakage-missing.xml'].include? hpxml_file
     hpxml.hvac_distributions[0].ducts << HPXML::Duct.new({ :duct_type => "return",
                                                            :duct_insulation_r_value => 0,
@@ -2360,138 +2355,136 @@ def set_hpxml_hvac_distributions(hpxml_file, hpxml)
 end
 
 def set_hpxml_ventilation_fans(hpxml_file, hpxml)
-  if ['base.xml'].include? hpxml_file
-    hpxml.ventilation_fans = []
-  elsif ['base-mechvent-balanced.xml'].include? hpxml_file
-    hpxml.ventilation_fans << HPXML::VentilationFan.new({ :id => "MechanicalVentilation",
-                                                          :fan_type => "balanced",
-                                                          :tested_flow_rate => 110,
-                                                          :hours_in_operation => 24,
-                                                          :fan_power => 60,
-                                                          :used_for_whole_building_ventilation => true })
+  if ['base-mechvent-balanced.xml'].include? hpxml_file
+    hpxml.ventilation_fans.add({ :id => "MechanicalVentilation",
+                                 :fan_type => "balanced",
+                                 :tested_flow_rate => 110,
+                                 :hours_in_operation => 24,
+                                 :fan_power => 60,
+                                 :used_for_whole_building_ventilation => true })
   elsif ['invalid_files/unattached-cfis.xml',
          'invalid_files/cfis-with-hydronic-distribution.xml',
          'base-mechvent-cfis.xml',
          'base-mechvent-cfis-evap-cooler-only-ducted.xml'].include? hpxml_file
-    hpxml.ventilation_fans << HPXML::VentilationFan.new({ :id => "MechanicalVentilation",
-                                                          :fan_type => "central fan integrated supply",
-                                                          :tested_flow_rate => 330,
-                                                          :hours_in_operation => 8,
-                                                          :fan_power => 300,
-                                                          :used_for_whole_building_ventilation => true,
-                                                          :distribution_system_idref => "HVACDistribution" })
+    hpxml.ventilation_fans.add({ :id => "MechanicalVentilation",
+                                 :fan_type => "central fan integrated supply",
+                                 :tested_flow_rate => 330,
+                                 :hours_in_operation => 8,
+                                 :fan_power => 300,
+                                 :used_for_whole_building_ventilation => true,
+                                 :distribution_system_idref => "HVACDistribution" })
     if ['invalid_files/unattached-cfis.xml'].include? hpxml_file
       hpxml.ventilation_fans[0].distribution_system_idref = "foobar"
     end
   elsif ['base-mechvent-erv.xml'].include? hpxml_file
-    hpxml.ventilation_fans << HPXML::VentilationFan.new({ :id => "MechanicalVentilation",
-                                                          :fan_type => "energy recovery ventilator",
-                                                          :tested_flow_rate => 110,
-                                                          :hours_in_operation => 24,
-                                                          :total_recovery_efficiency => 0.48,
-                                                          :sensible_recovery_efficiency => 0.72,
-                                                          :fan_power => 60,
-                                                          :used_for_whole_building_ventilation => true })
+    hpxml.ventilation_fans.add({ :id => "MechanicalVentilation",
+                                 :fan_type => "energy recovery ventilator",
+                                 :tested_flow_rate => 110,
+                                 :hours_in_operation => 24,
+                                 :total_recovery_efficiency => 0.48,
+                                 :sensible_recovery_efficiency => 0.72,
+                                 :fan_power => 60,
+                                 :used_for_whole_building_ventilation => true })
   elsif ['base-mechvent-erv-atre-asre.xml'].include? hpxml_file
-    hpxml.ventilation_fans << HPXML::VentilationFan.new({ :id => "MechanicalVentilation",
-                                                          :fan_type => "energy recovery ventilator",
-                                                          :tested_flow_rate => 110,
-                                                          :hours_in_operation => 24,
-                                                          :total_recovery_efficiency_adjusted => 0.526,
-                                                          :sensible_recovery_efficiency_adjusted => 0.79,
-                                                          :fan_power => 60,
-                                                          :used_for_whole_building_ventilation => true })
+    hpxml.ventilation_fans.add({ :id => "MechanicalVentilation",
+                                 :fan_type => "energy recovery ventilator",
+                                 :tested_flow_rate => 110,
+                                 :hours_in_operation => 24,
+                                 :total_recovery_efficiency_adjusted => 0.526,
+                                 :sensible_recovery_efficiency_adjusted => 0.79,
+                                 :fan_power => 60,
+                                 :used_for_whole_building_ventilation => true })
   elsif ['base-mechvent-exhaust.xml'].include? hpxml_file
-    hpxml.ventilation_fans << HPXML::VentilationFan.new({ :id => "MechanicalVentilation",
-                                                          :fan_type => "exhaust only",
-                                                          :tested_flow_rate => 110,
-                                                          :hours_in_operation => 24,
-                                                          :fan_power => 30,
-                                                          :used_for_whole_building_ventilation => true })
+    hpxml.ventilation_fans.add({ :id => "MechanicalVentilation",
+                                 :fan_type => "exhaust only",
+                                 :tested_flow_rate => 110,
+                                 :hours_in_operation => 24,
+                                 :fan_power => 30,
+                                 :used_for_whole_building_ventilation => true })
   elsif ['base-mechvent-exhaust-rated-flow-rate.xml'].include? hpxml_file
-    hpxml.ventilation_fans << HPXML::VentilationFan.new({ :id => "MechanicalVentilation",
-                                                          :fan_type => "exhaust only",
-                                                          :rated_flow_rate => 110,
-                                                          :hours_in_operation => 24,
-                                                          :fan_power => 30,
-                                                          :used_for_whole_building_ventilation => true })
+    hpxml.ventilation_fans.add({ :id => "MechanicalVentilation",
+                                 :fan_type => "exhaust only",
+                                 :rated_flow_rate => 110,
+                                 :hours_in_operation => 24,
+                                 :fan_power => 30,
+                                 :used_for_whole_building_ventilation => true })
   elsif ['base-mechvent-hrv.xml'].include? hpxml_file
-    hpxml.ventilation_fans << HPXML::VentilationFan.new({ :id => "MechanicalVentilation",
-                                                          :fan_type => "heat recovery ventilator",
-                                                          :tested_flow_rate => 110,
-                                                          :hours_in_operation => 24,
-                                                          :sensible_recovery_efficiency => 0.72,
-                                                          :fan_power => 60,
-                                                          :used_for_whole_building_ventilation => true })
+    hpxml.ventilation_fans.add({ :id => "MechanicalVentilation",
+                                 :fan_type => "heat recovery ventilator",
+                                 :tested_flow_rate => 110,
+                                 :hours_in_operation => 24,
+                                 :sensible_recovery_efficiency => 0.72,
+                                 :fan_power => 60,
+                                 :used_for_whole_building_ventilation => true })
   elsif ['base-mechvent-hrv-asre.xml'].include? hpxml_file
-    hpxml.ventilation_fans << HPXML::VentilationFan.new({ :id => "MechanicalVentilation",
-                                                          :fan_type => "heat recovery ventilator",
-                                                          :tested_flow_rate => 110,
-                                                          :hours_in_operation => 24,
-                                                          :sensible_recovery_efficiency_adjusted => 0.790,
-                                                          :fan_power => 60,
-                                                          :used_for_whole_building_ventilation => true })
+    hpxml.ventilation_fans.add({ :id => "MechanicalVentilation",
+                                 :fan_type => "heat recovery ventilator",
+                                 :tested_flow_rate => 110,
+                                 :hours_in_operation => 24,
+                                 :sensible_recovery_efficiency_adjusted => 0.790,
+                                 :fan_power => 60,
+                                 :used_for_whole_building_ventilation => true })
   elsif ['base-mechvent-supply.xml'].include? hpxml_file
-    hpxml.ventilation_fans << HPXML::VentilationFan.new({ :id => "MechanicalVentilation",
-                                                          :fan_type => "supply only",
-                                                          :tested_flow_rate => 110,
-                                                          :hours_in_operation => 24,
-                                                          :fan_power => 30,
-                                                          :used_for_whole_building_ventilation => true })
+    hpxml.ventilation_fans.add({ :id => "MechanicalVentilation",
+                                 :fan_type => "supply only",
+                                 :tested_flow_rate => 110,
+                                 :hours_in_operation => 24,
+                                 :fan_power => 30,
+                                 :used_for_whole_building_ventilation => true })
   elsif ['base-misc-whole-house-fan.xml'].include? hpxml_file
-    hpxml.ventilation_fans << HPXML::VentilationFan.new({ :id => "WholeHouseFan",
-                                                          :rated_flow_rate => 4500,
-                                                          :fan_power => 300,
-                                                          :used_for_seasonal_cooling_load_reduction => true })
+    hpxml.ventilation_fans.add({ :id => "WholeHouseFan",
+                                 :rated_flow_rate => 4500,
+                                 :fan_power => 300,
+                                 :used_for_seasonal_cooling_load_reduction => true })
   end
 end
 
 def set_hpxml_water_heating_systems(hpxml_file, hpxml)
   if ['base.xml'].include? hpxml_file
-    hpxml.water_heating_systems = [HPXML::WaterHeatingSystem.new({ :id => "WaterHeater",
-                                                                   :fuel_type => "electricity",
-                                                                   :water_heater_type => "storage water heater",
-                                                                   :location => "living space",
-                                                                   :tank_volume => 40,
-                                                                   :fraction_dhw_load_served => 1,
-                                                                   :heating_capacity => 18767,
-                                                                   :energy_factor => 0.95 })]
+    hpxml.water_heating_systems.add({ :id => "WaterHeater",
+                                      :fuel_type => "electricity",
+                                      :water_heater_type => "storage water heater",
+                                      :location => "living space",
+                                      :tank_volume => 40,
+                                      :fraction_dhw_load_served => 1,
+                                      :heating_capacity => 18767,
+                                      :energy_factor => 0.95 })
   elsif ['base-dhw-multiple.xml'].include? hpxml_file
     hpxml.water_heating_systems[0].fraction_dhw_load_served = 0.2
-    hpxml.water_heating_systems << HPXML::WaterHeatingSystem.new({ :id => "WaterHeater2",
-                                                                   :fuel_type => "natural gas",
-                                                                   :water_heater_type => "storage water heater",
-                                                                   :location => "living space",
-                                                                   :tank_volume => 50,
-                                                                   :fraction_dhw_load_served => 0.2,
-                                                                   :heating_capacity => 40000,
-                                                                   :energy_factor => 0.59,
-                                                                   :recovery_efficiency => 0.76 })
-    hpxml.water_heating_systems << HPXML::WaterHeatingSystem.new({ :id => "WaterHeater3",
-                                                                   :fuel_type => "electricity",
-                                                                   :water_heater_type => "heat pump water heater",
-                                                                   :location => "living space",
-                                                                   :tank_volume => 80,
-                                                                   :fraction_dhw_load_served => 0.2,
-                                                                   :energy_factor => 2.3 })
-    hpxml.water_heating_systems << HPXML::WaterHeatingSystem.new({ :id => "WaterHeater4",
-                                                                   :fuel_type => "electricity",
-                                                                   :water_heater_type => "instantaneous water heater",
-                                                                   :location => "living space",
-                                                                   :fraction_dhw_load_served => 0.2,
-                                                                   :energy_factor => 0.99 })
-    hpxml.water_heating_systems << HPXML::WaterHeatingSystem.new({ :id => "WaterHeater5",
-                                                                   :fuel_type => "natural gas",
-                                                                   :water_heater_type => "instantaneous water heater",
-                                                                   :location => "living space",
-                                                                   :fraction_dhw_load_served => 0.1,
-                                                                   :energy_factor => 0.82 })
-    hpxml.water_heating_systems << HPXML::WaterHeatingSystem.new({ :id => "WaterHeater6",
-                                                                   :water_heater_type => "space-heating boiler with storage tank",
-                                                                   :location => "living space",
-                                                                   :tank_volume => 50,
-                                                                   :fraction_dhw_load_served => 0.1,
-                                                                   :related_hvac => "HeatingSystem" })
+    hpxml.water_heating_systems.add({ :id => "WaterHeater2",
+                                      :fuel_type => "natural gas",
+                                      :water_heater_type => "storage water heater",
+                                      :location => "living space",
+                                      :tank_volume => 50,
+                                      :fraction_dhw_load_served => 0.2,
+                                      :heating_capacity => 40000,
+                                      :energy_factor => 0.59,
+                                      :recovery_efficiency => 0.76 })
+    hpxml.water_heating_systems.add({ :id => "WaterHeater3",
+                                      :fuel_type => "electricity",
+                                      :water_heater_type => "heat pump water heater",
+                                      :location => "living space",
+                                      :tank_volume => 80,
+                                      :fraction_dhw_load_served => 0.2,
+                                      :energy_factor => 2.3 })
+    hpxml.water_heating_systems.add({ :id => "WaterHeater4",
+                                      :fuel_type => "electricity",
+                                      :water_heater_type => "instantaneous water heater",
+                                      :location => "living space",
+                                      :fraction_dhw_load_served => 0.2,
+                                      :energy_factor => 0.99 })
+    hpxml.water_heating_systems.add({ :id => "WaterHeater5",
+                                      :fuel_type => "natural gas",
+                                      :water_heater_type => "instantaneous water heater",
+                                      :location => "living space",
+                                      :fraction_dhw_load_served => 0.1,
+                                      :energy_factor => 0.82 })
+    hpxml.water_heating_systems.add({ :id => "WaterHeater6",
+                                      :water_heater_type => "space-heating boiler with storage tank",
+                                      :location => "living space",
+                                      :tank_volume => 50,
+                                      :fraction_dhw_load_served => 0.1,
+                                      :related_hvac => "HeatingSystem" })
   elsif ['invalid_files/dhw-frac-load-served.xml'].include? hpxml_file
     hpxml.water_heating_systems[0].fraction_dhw_load_served += 0.15
   elsif ['base-dhw-tank-gas.xml',
@@ -2647,16 +2640,16 @@ def set_hpxml_water_heating_systems(hpxml_file, hpxml)
   elsif ['base-dhw-temperature.xml'].include? hpxml_file
     hpxml.water_heating_systems[0].temperature = 130.0
   elsif ['base-dhw-none.xml'].include? hpxml_file
-    hpxml.water_heating_systems = []
+    hpxml.water_heating_systems.clear
   end
 end
 
 def set_hpxml_hot_water_distribution(hpxml_file, hpxml)
   if ['base.xml'].include? hpxml_file
-    hpxml.hot_water_distribution = HPXML::HotWaterDistribution.new({ :id => "HotWaterDstribution",
-                                                                     :system_type => "Standard",
-                                                                     :standard_piping_length => 50, # Chosen to test a negative EC_adj
-                                                                     :pipe_r_value => 0.0 })
+    hpxml.set_hot_water_distribution({ :id => "HotWaterDstribution",
+                                       :system_type => "Standard",
+                                       :standard_piping_length => 50, # Chosen to test a negative EC_adj
+                                       :pipe_r_value => 0.0 })
   elsif ['base-dhw-dwhr.xml'].include? hpxml_file
     hpxml.hot_water_distribution.dwhr_facilities_connected = "all"
     hpxml.hot_water_distribution.dwhr_equal_flow = true
@@ -2694,54 +2687,52 @@ def set_hpxml_hot_water_distribution(hpxml_file, hpxml)
     hpxml.hot_water_distribution.recirculation_branch_piping_length = 50
     hpxml.hot_water_distribution.recirculation_pump_power = 50
   elsif ['base-dhw-none.xml'].include? hpxml_file
-    hpxml.hot_water_distribution = nil
+    hpxml.set_hot_water_distribution({})
   end
 end
 
 def set_hpxml_water_fixtures(hpxml_file, hpxml)
   if ['base.xml'].include? hpxml_file
-    hpxml.water_fixtures = [HPXML::WaterFixture.new({ :id => "WaterFixture",
-                                                      :water_fixture_type => "shower head",
-                                                      :low_flow => true }),
-                            HPXML::WaterFixture.new({ :id => "WaterFixture2",
-                                                      :water_fixture_type => "faucet",
-                                                      :low_flow => false })]
+    hpxml.water_fixtures.add({ :id => "WaterFixture",
+                               :water_fixture_type => "shower head",
+                               :low_flow => true })
+    hpxml.water_fixtures.add({ :id => "WaterFixture2",
+                               :water_fixture_type => "faucet",
+                               :low_flow => false })
   elsif ['base-dhw-low-flow-fixtures.xml'].include? hpxml_file
     hpxml.water_fixtures[1].low_flow = true
   elsif ['base-dhw-none.xml'].include? hpxml_file
-    hpxml.water_fixtures = []
+    hpxml.water_fixtures.clear
   end
 end
 
 def set_hpxml_solar_thermal_system(hpxml_file, hpxml)
-  if ['base.xml'].include? hpxml_file
-    hpxml.solar_thermal_system = nil
-  elsif ['base-dhw-solar-fraction.xml',
-         'base-dhw-multiple.xml',
-         'base-dhw-tank-heat-pump-with-solar-fraction.xml',
-         'base-dhw-tankless-gas-with-solar-fraction.xml',
-         'invalid_files/solar-thermal-system-with-combi-tankless.xml',
-         'invalid_files/solar-thermal-system-with-desuperheater.xml',
-         'invalid_files/solar-thermal-system-with-dhw-indirect.xml'].include? hpxml_file
-    hpxml.solar_thermal_system = HPXML::SolarThermalSystem.new({ :id => "SolarThermalSystem",
-                                                                 :system_type => "hot water",
-                                                                 :water_heating_system_idref => "WaterHeater",
-                                                                 :solar_fraction => 0.65 })
+  if ['base-dhw-solar-fraction.xml',
+      'base-dhw-multiple.xml',
+      'base-dhw-tank-heat-pump-with-solar-fraction.xml',
+      'base-dhw-tankless-gas-with-solar-fraction.xml',
+      'invalid_files/solar-thermal-system-with-combi-tankless.xml',
+      'invalid_files/solar-thermal-system-with-desuperheater.xml',
+      'invalid_files/solar-thermal-system-with-dhw-indirect.xml'].include? hpxml_file
+    hpxml.set_solar_thermal_system({ :id => "SolarThermalSystem",
+                                     :system_type => "hot water",
+                                     :water_heating_system_idref => "WaterHeater",
+                                     :solar_fraction => 0.65 })
   elsif ['base-dhw-solar-direct-flat-plate.xml',
          'base-dhw-solar-indirect-flat-plate.xml',
          'base-dhw-solar-thermosyphon-flat-plate.xml',
          'base-dhw-tank-heat-pump-with-solar.xml',
          'base-dhw-tankless-gas-with-solar.xml'].include? hpxml_file
-    hpxml.solar_thermal_system = HPXML::SolarThermalSystem.new({ :id => "SolarThermalSystem",
-                                                                 :system_type => "hot water",
-                                                                 :collector_area => 40,
-                                                                 :collector_type => "single glazing black",
-                                                                 :collector_azimuth => 180,
-                                                                 :collector_tilt => 20,
-                                                                 :collector_frta => 0.77,
-                                                                 :collector_frul => 0.793,
-                                                                 :storage_volume => 60,
-                                                                 :water_heating_system_idref => "WaterHeater" })
+    hpxml.set_solar_thermal_system({ :id => "SolarThermalSystem",
+                                     :system_type => "hot water",
+                                     :collector_area => 40,
+                                     :collector_type => "single glazing black",
+                                     :collector_azimuth => 180,
+                                     :collector_tilt => 20,
+                                     :collector_frta => 0.77,
+                                     :collector_frul => 0.793,
+                                     :storage_volume => 60,
+                                     :water_heating_system_idref => "WaterHeater" })
     if hpxml_file == 'base-dhw-solar-direct-flat-plate.xml'
       hpxml.solar_thermal_system.collector_loop_type = "liquid direct"
     elsif hpxml_file == 'base-dhw-solar-thermosyphon-flat-plate.xml'
@@ -2752,16 +2743,16 @@ def set_hpxml_solar_thermal_system(hpxml_file, hpxml)
   elsif ['base-dhw-solar-indirect-evacuated-tube.xml',
          'base-dhw-solar-direct-evacuated-tube.xml',
          'base-dhw-solar-thermosyphon-evacuated-tube.xml'].include? hpxml_file
-    hpxml.solar_thermal_system = HPXML::SolarThermalSystem.new({ :id => "SolarThermalSystem",
-                                                                 :system_type => "hot water",
-                                                                 :collector_area => 40,
-                                                                 :collector_type => "evacuated tube",
-                                                                 :collector_azimuth => 180,
-                                                                 :collector_tilt => 20,
-                                                                 :collector_frta => 0.50,
-                                                                 :collector_frul => 0.2799,
-                                                                 :storage_volume => 60,
-                                                                 :water_heating_system_idref => "WaterHeater" })
+    hpxml.set_solar_thermal_system({ :id => "SolarThermalSystem",
+                                     :system_type => "hot water",
+                                     :collector_area => 40,
+                                     :collector_type => "evacuated tube",
+                                     :collector_azimuth => 180,
+                                     :collector_tilt => 20,
+                                     :collector_frta => 0.50,
+                                     :collector_frul => 0.2799,
+                                     :storage_volume => 60,
+                                     :water_heating_system_idref => "WaterHeater" })
     if hpxml_file == 'base-dhw-solar-direct-evacuated-tube.xml'
       hpxml.solar_thermal_system.collector_loop_type = "liquid direct"
     elsif hpxml_file == 'base-dhw-solar-thermosyphon-evacuated-tube.xml'
@@ -2771,16 +2762,16 @@ def set_hpxml_solar_thermal_system(hpxml_file, hpxml)
     end
   elsif ['base-dhw-solar-direct-ics.xml',
          'base-dhw-solar-thermosyphon-ics.xml'].include? hpxml_file
-    hpxml.solar_thermal_system = HPXML::SolarThermalSystem.new({ :id => "SolarThermalSystem",
-                                                                 :system_type => "hot water",
-                                                                 :collector_area => 40,
-                                                                 :collector_type => "integrated collector storage",
-                                                                 :collector_azimuth => 180,
-                                                                 :collector_tilt => 20,
-                                                                 :collector_frta => 0.77,
-                                                                 :collector_frul => 0.793,
-                                                                 :storage_volume => 60,
-                                                                 :water_heating_system_idref => "WaterHeater" })
+    hpxml.set_solar_thermal_system({ :id => "SolarThermalSystem",
+                                     :system_type => "hot water",
+                                     :collector_area => 40,
+                                     :collector_type => "integrated collector storage",
+                                     :collector_azimuth => 180,
+                                     :collector_tilt => 20,
+                                     :collector_frta => 0.77,
+                                     :collector_frul => 0.793,
+                                     :storage_volume => 60,
+                                     :water_heating_system_idref => "WaterHeater" })
     if hpxml_file == 'base-dhw-solar-direct-ics.xml'
       hpxml.solar_thermal_system.collector_loop_type = "liquid direct"
     elsif hpxml_file == 'base-dhw-solar-thermosyphon-ics.xml'
@@ -2792,42 +2783,40 @@ def set_hpxml_solar_thermal_system(hpxml_file, hpxml)
 end
 
 def set_hpxml_pv_systems(hpxml_file, hpxml)
-  if ['base.xml'].include? hpxml_file
-    hpxml.pv_systems = []
-  elsif ['base-pv.xml'].include? hpxml_file
-    hpxml.pv_systems << HPXML::PVSystem.new({ :id => "PVSystem",
-                                              :module_type => "standard",
-                                              :location => "roof",
-                                              :tracking => "fixed",
-                                              :array_azimuth => 180,
-                                              :array_tilt => 20,
-                                              :max_power_output => 4000,
-                                              :inverter_efficiency => 0.96,
-                                              :system_losses_fraction => 0.14 })
-    hpxml.pv_systems << HPXML::PVSystem.new({ :id => "PVSystem2",
-                                              :module_type => "premium",
-                                              :location => "roof",
-                                              :tracking => "fixed",
-                                              :array_azimuth => 90,
-                                              :array_tilt => 20,
-                                              :max_power_output => 1500,
-                                              :inverter_efficiency => 0.96,
-                                              :system_losses_fraction => 0.14 })
+  if ['base-pv.xml'].include? hpxml_file
+    hpxml.pv_systems.add({ :id => "PVSystem",
+                           :module_type => "standard",
+                           :location => "roof",
+                           :tracking => "fixed",
+                           :array_azimuth => 180,
+                           :array_tilt => 20,
+                           :max_power_output => 4000,
+                           :inverter_efficiency => 0.96,
+                           :system_losses_fraction => 0.14 })
+    hpxml.pv_systems.add({ :id => "PVSystem2",
+                           :module_type => "premium",
+                           :location => "roof",
+                           :tracking => "fixed",
+                           :array_azimuth => 90,
+                           :array_tilt => 20,
+                           :max_power_output => 1500,
+                           :inverter_efficiency => 0.96,
+                           :system_losses_fraction => 0.14 })
   end
 end
 
 def set_hpxml_clothes_washer(hpxml_file, hpxml)
   if ['base.xml'].include? hpxml_file
-    hpxml.clothes_washer = HPXML::ClothesWasher.new({ :id => "ClothesWasher",
-                                                      :location => "living space",
-                                                      :modified_energy_factor => 0.8,
-                                                      :rated_annual_kwh => 700.0,
-                                                      :label_electric_rate => 0.10,
-                                                      :label_gas_rate => 0.60,
-                                                      :label_annual_gas_cost => 25.0,
-                                                      :capacity => 3.0 })
+    hpxml.set_clothes_washer({ :id => "ClothesWasher",
+                               :location => "living space",
+                               :modified_energy_factor => 0.8,
+                               :rated_annual_kwh => 700.0,
+                               :label_electric_rate => 0.10,
+                               :label_gas_rate => 0.60,
+                               :label_annual_gas_cost => 25.0,
+                               :capacity => 3.0 })
   elsif ['base-appliances-none.xml'].include? hpxml_file
-    hpxml.clothes_washer = nil
+    hpxml.set_clothes_washer({})
   elsif ['base-appliances-modified.xml'].include? hpxml_file
     hpxml.clothes_washer.modified_energy_factor = nil
     hpxml.clothes_washer.integrated_modified_energy_factor = 0.73
@@ -2845,26 +2834,26 @@ end
 
 def set_hpxml_clothes_dryer(hpxml_file, hpxml)
   if ['base.xml'].include? hpxml_file
-    hpxml.clothes_dryer = HPXML::ClothesDryer.new({ :id => "ClothesDryer",
-                                                    :location => "living space",
-                                                    :fuel_type => "electricity",
-                                                    :energy_factor => 2.95,
-                                                    :control_type => "timer" })
+    hpxml.set_clothes_dryer({ :id => "ClothesDryer",
+                              :location => "living space",
+                              :fuel_type => "electricity",
+                              :energy_factor => 2.95,
+                              :control_type => "timer" })
   elsif ['base-appliances-none.xml'].include? hpxml_file
-    hpxml.clothes_dryer = nil
+    hpxml.set_clothes_dryer({})
   elsif ['base-appliances-modified.xml'].include? hpxml_file
-    hpxml.clothes_dryer = HPXML::ClothesDryer.new({ :id => "ClothesDryer",
-                                                    :location => "living space",
-                                                    :fuel_type => "electricity",
-                                                    :combined_energy_factor => 2.62,
-                                                    :control_type => "moisture" })
+    hpxml.set_clothes_dryer({ :id => "ClothesDryer",
+                              :location => "living space",
+                              :fuel_type => "electricity",
+                              :combined_energy_factor => 2.62,
+                              :control_type => "moisture" })
   elsif ['base-appliances-gas.xml',
          'base-appliances-propane.xml',
          'base-appliances-oil.xml'].include? hpxml_file
-    hpxml.clothes_dryer = HPXML::ClothesDryer.new({ :id => "ClothesDryer",
-                                                    :location => "living space",
-                                                    :energy_factor => 2.67,
-                                                    :control_type => "moisture" })
+    hpxml.set_clothes_dryer({ :id => "ClothesDryer",
+                              :location => "living space",
+                              :energy_factor => 2.67,
+                              :control_type => "moisture" })
     if hpxml_file == 'base-appliances-gas.xml'
       hpxml.clothes_dryer.fuel_type = "natural gas"
     elsif hpxml_file == 'base-appliances-propane.xml'
@@ -2873,11 +2862,11 @@ def set_hpxml_clothes_dryer(hpxml_file, hpxml)
       hpxml.clothes_dryer.fuel_type = "fuel oil"
     end
   elsif ['base-appliances-wood.xml'].include? hpxml_file
-    hpxml.clothes_dryer = HPXML::ClothesDryer.new({ :id => "ClothesDryer",
-                                                    :location => "living space",
-                                                    :fuel_type => "wood",
-                                                    :energy_factor => 2.67,
-                                                    :control_type => "moisture" })
+    hpxml.set_clothes_dryer({ :id => "ClothesDryer",
+                              :location => "living space",
+                              :fuel_type => "wood",
+                              :energy_factor => 2.67,
+                              :control_type => "moisture" })
   elsif ['base-foundation-unconditioned-basement.xml'].include? hpxml_file
     hpxml.clothes_dryer.location = "basement - unconditioned"
   elsif ['base-atticroof-conditioned.xml'].include? hpxml_file
@@ -2892,27 +2881,27 @@ end
 
 def set_hpxml_dishwasher(hpxml_file, hpxml)
   if ['base.xml'].include? hpxml_file
-    hpxml.dishwasher = HPXML::Dishwasher.new({ :id => "Dishwasher",
-                                               :rated_annual_kwh => 450,
-                                               :place_setting_capacity => 12 })
+    hpxml.set_dishwasher({ :id => "Dishwasher",
+                           :rated_annual_kwh => 450,
+                           :place_setting_capacity => 12 })
   elsif ['base-appliances-none.xml'].include? hpxml_file
-    hpxml.dishwasher = nil
+    hpxml.set_dishwasher({})
   elsif ['base-appliances-modified.xml'].include? hpxml_file
-    hpxml.dishwasher = HPXML::Dishwasher.new({ :id => "Dishwasher",
-                                               :energy_factor => 0.5,
-                                               :place_setting_capacity => 12 })
+    hpxml.set_dishwasher({ :id => "Dishwasher",
+                           :energy_factor => 0.5,
+                           :place_setting_capacity => 12 })
   end
 end
 
 def set_hpxml_refrigerator(hpxml_file, hpxml)
   if ['base.xml'].include? hpxml_file
-    hpxml.refrigerator = HPXML::Refrigerator.new({ :id => "Refrigerator",
-                                                   :location => "living space",
-                                                   :rated_annual_kwh => 650 })
+    hpxml.set_refrigerator({ :id => "Refrigerator",
+                             :location => "living space",
+                             :rated_annual_kwh => 650 })
   elsif ['base-appliances-modified.xml'].include? hpxml_file
     hpxml.refrigerator.adjusted_annual_kwh = 600
   elsif ['base-appliances-none.xml'].include? hpxml_file
-    hpxml.refrigerator = nil
+    hpxml.set_refrigerator({})
   elsif ['base-foundation-unconditioned-basement.xml'].include? hpxml_file
     hpxml.refrigerator.location = "basement - unconditioned"
   elsif ['base-atticroof-conditioned.xml'].include? hpxml_file
@@ -2927,11 +2916,11 @@ end
 
 def set_hpxml_cooking_range(hpxml_file, hpxml)
   if ['base.xml'].include? hpxml_file
-    hpxml.cooking_range = HPXML::CookingRange.new({ :id => "Range",
-                                                    :fuel_type => "electricity",
-                                                    :is_induction => false })
+    hpxml.set_cooking_range({ :id => "Range",
+                              :fuel_type => "electricity",
+                              :is_induction => false })
   elsif ['base-appliances-none.xml'].include? hpxml_file
-    hpxml.cooking_range = nil
+    hpxml.set_cooking_range({})
   elsif ['base-appliances-gas.xml'].include? hpxml_file
     hpxml.cooking_range.fuel_type = "natural gas"
     hpxml.cooking_range.is_induction = false
@@ -2948,61 +2937,58 @@ end
 
 def set_hpxml_oven(hpxml_file, hpxml)
   if ['base.xml'].include? hpxml_file
-    hpxml.oven = HPXML::Oven.new({ :id => "Oven",
-                                   :is_convection => false })
+    hpxml.set_oven({ :id => "Oven",
+                     :is_convection => false })
   elsif ['base-appliances-none.xml'].include? hpxml_file
-    hpxml.oven = nil
+    hpxml.set_oven({})
   end
 end
 
 def set_hpxml_lighting(hpxml_file, hpxml)
   if ['base.xml'].include? hpxml_file
-    hpxml.lighting = HPXML::Lighting.new({ :fraction_tier_i_interior => 0.5,
-                                           :fraction_tier_i_exterior => 0.5,
-                                           :fraction_tier_i_garage => 0.5,
-                                           :fraction_tier_ii_interior => 0.25,
-                                           :fraction_tier_ii_exterior => 0.25,
-                                           :fraction_tier_ii_garage => 0.25 })
+    hpxml.set_lighting({ :fraction_tier_i_interior => 0.5,
+                         :fraction_tier_i_exterior => 0.5,
+                         :fraction_tier_i_garage => 0.5,
+                         :fraction_tier_ii_interior => 0.25,
+                         :fraction_tier_ii_exterior => 0.25,
+                         :fraction_tier_ii_garage => 0.25 })
   elsif ['base-misc-lighting-none.xml'].include? hpxml_file
-    hpxml.lighting = nil
+    hpxml.set_lighting({})
   end
 end
 
 def set_hpxml_ceiling_fans(hpxml_file, hpxml)
-  if ['base.xml'].include? hpxml_file
-    hpxml.ceiling_fans = []
-  elsif ['base-misc-ceiling-fans.xml'].include? hpxml_file
-    hpxml.ceiling_fans << HPXML::CeilingFan.new({ :id => "CeilingFan",
-                                                  :efficiency => 100,
-                                                  :quantity => 2 })
+  if ['base-misc-ceiling-fans.xml'].include? hpxml_file
+    hpxml.ceiling_fans.add({ :id => "CeilingFan",
+                             :efficiency => 100,
+                             :quantity => 2 })
   end
 end
 
 def set_hpxml_plug_loads(hpxml_file, hpxml)
-  if ['base-misc-loads-detailed.xml'].include? hpxml_file
-    hpxml.plug_loads = [HPXML::PlugLoad.new({ :id => "PlugLoadMisc",
-                                              :plug_load_type => "other",
-                                              :kWh_per_year => 7302,
-                                              :frac_sensible => 0.82,
-                                              :frac_latent => 0.18 }),
-                        HPXML::PlugLoad.new({ :id => "PlugLoadMisc2",
-                                              :plug_load_type => "TV other",
-                                              :kWh_per_year => 400 })]
-  else
-    hpxml.plug_loads = [HPXML::PlugLoad.new({ :id => "PlugLoadMisc",
-                                              :plug_load_type => "other" }),
-                        HPXML::PlugLoad.new({ :id => "PlugLoadMisc2",
-                                              :plug_load_type => "TV other" })]
+  if ['base.xml'].include? hpxml_file
+    hpxml.plug_loads.add({ :id => "PlugLoadMisc",
+                           :plug_load_type => "other" })
+    hpxml.plug_loads.add({ :id => "PlugLoadMisc2",
+                           :plug_load_type => "TV other" })
+  elsif ['base-misc-loads-detailed.xml'].include? hpxml_file
+    hpxml.plug_loads.clear
+    hpxml.plug_loads.add({ :id => "PlugLoadMisc",
+                           :plug_load_type => "other",
+                           :kWh_per_year => 7302,
+                           :frac_sensible => 0.82,
+                           :frac_latent => 0.18 })
+    hpxml.plug_loads.add({ :id => "PlugLoadMisc2",
+                           :plug_load_type => "TV other",
+                           :kWh_per_year => 400 })
   end
 end
 
 def set_hpxml_misc_load_schedule(hpxml_file, hpxml)
-  if ['base.xml'].include? hpxml_file
-    hpxml.misc_load_schedule = nil
-  elsif ['base-misc-loads-detailed.xml'].include? hpxml_file
-    hpxml.misc_load_schedule = HPXML::MiscLoads.new({ :weekday_fractions => "0.020, 0.020, 0.020, 0.020, 0.020, 0.034, 0.043, 0.085, 0.050, 0.030, 0.030, 0.041, 0.030, 0.025, 0.026, 0.026, 0.039, 0.042, 0.045, 0.070, 0.070, 0.073, 0.073, 0.066",
-                                                      :weekend_fractions => "0.020, 0.020, 0.020, 0.020, 0.020, 0.034, 0.043, 0.085, 0.050, 0.030, 0.030, 0.041, 0.030, 0.025, 0.026, 0.026, 0.039, 0.042, 0.045, 0.070, 0.070, 0.073, 0.073, 0.066",
-                                                      :monthly_multipliers => "1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0" })
+  if ['base-misc-loads-detailed.xml'].include? hpxml_file
+    hpxml.set_misc_loads_schedule({ :weekday_fractions => "0.020, 0.020, 0.020, 0.020, 0.020, 0.034, 0.043, 0.085, 0.050, 0.030, 0.030, 0.041, 0.030, 0.025, 0.026, 0.026, 0.039, 0.042, 0.045, 0.070, 0.070, 0.073, 0.073, 0.066",
+                                    :weekend_fractions => "0.020, 0.020, 0.020, 0.020, 0.020, 0.034, 0.043, 0.085, 0.050, 0.030, 0.030, 0.041, 0.030, 0.025, 0.026, 0.026, 0.039, 0.042, 0.045, 0.070, 0.070, 0.073, 0.073, 0.066",
+                                    :monthly_multipliers => "1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0" })
   end
 end
 
@@ -3081,14 +3067,14 @@ if ARGV[0].to_sym == :update_measures
   ENV['HOMEDRIVE'] = 'C:\\' if !ENV['HOMEDRIVE'].nil? and ENV['HOMEDRIVE'].start_with? 'U:'
 
   # Apply rubocop
-  command = "rubocop --auto-correct --format simple --only Layout"
-  puts "Applying rubocop style to measures..."
-  system(command)
+  #command = "rubocop --auto-correct --format simple --only Layout"
+  #puts "Applying rubocop style to measures..."
+  #system(command)
 
   # Update measures XMLs
-  command = "#{OpenStudio.getOpenStudioCLI} measure -t '#{File.dirname(__FILE__)}'"
-  puts "Updating measure.xmls..."
-  system(command, [:out, :err] => File::NULL)
+  #command = "#{OpenStudio.getOpenStudioCLI} measure -t '#{File.dirname(__FILE__)}'"
+  #puts "Updating measure.xmls..."
+  #system(command, [:out, :err] => File::NULL)
 
   create_hpxmls
 
