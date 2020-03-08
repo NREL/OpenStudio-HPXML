@@ -33,19 +33,20 @@ class EnergyPlusValidator
         "/HPXML/XMLTransactionHeaderInformation/XMLGeneratedBy" => one, # Required by HPXML schema
         "/HPXML/XMLTransactionHeaderInformation/CreatedDateAndTime" => one, # Required by HPXML schema
         "/HPXML/XMLTransactionHeaderInformation/Transaction" => one, # Required by HPXML schema
+        "/HPXML/SoftwareInfo/extension/SimulationControl" => zero_or_one, # See [SimulationControl]
 
         "/HPXML/Building" => one,
         "/HPXML/Building/BuildingID" => one, # Required by HPXML schema
         "/HPXML/Building/ProjectStatus/EventType" => one, # Required by HPXML schema
 
         "/HPXML/Building/BuildingDetails/BuildingSummary/Site/extension/ShelterCoefficient" => zero_or_one, # Uses ERI assumption if not provided
-        "/HPXML/Building/BuildingDetails/BuildingSummary/Site/extension/DisableNaturalVentilation" => zero_or_one,
         "/HPXML/Building/BuildingDetails/BuildingSummary/BuildingOccupancy/NumberofResidents" => zero_or_one, # Uses ERI assumption if not provided
         "/HPXML/Building/BuildingDetails/BuildingSummary/BuildingConstruction/NumberofConditionedFloors" => one,
         "/HPXML/Building/BuildingDetails/BuildingSummary/BuildingConstruction/NumberofConditionedFloorsAboveGrade" => one,
         "/HPXML/Building/BuildingDetails/BuildingSummary/BuildingConstruction/NumberofBedrooms" => one,
         "/HPXML/Building/BuildingDetails/BuildingSummary/BuildingConstruction/ConditionedFloorArea" => one,
         "/HPXML/Building/BuildingDetails/BuildingSummary/BuildingConstruction/ConditionedBuildingVolume" => one,
+        "/HPXML/Building/BuildingDetails/BuildingSummary/BuildingConstruction/extension/FractionofOperableWindowArea" => zero_or_one,
         "/HPXML/Building/BuildingDetails/BuildingSummary/Site/extension/Neighbors" => zero_or_one, # See [Neighbors]
 
         "/HPXML/Building/BuildingDetails/ClimateandRiskZones/WeatherStation" => one, # See [WeatherStation]
@@ -87,6 +88,11 @@ class EnergyPlusValidator
 
         "/HPXML/Building/BuildingDetails/MiscLoads/PlugLoad[PlugLoadType='other']" => zero_or_one, # See [PlugLoads]
         "/HPXML/Building/BuildingDetails/MiscLoads/PlugLoad[PlugLoadType='TV other']" => zero_or_one, # See [Television]
+      },
+
+      # [SimulationControl]
+      "/HPXML/SoftwareInfo/extension/SimulationControl" => {
+        "Timestep" => zero_or_one, # minutes; must be a divisor of 60
       },
 
       # [Neighbors]
@@ -324,6 +330,7 @@ class EnergyPlusValidator
         "../../HVACDistribution[DistributionSystemType/AirDistribution | DistributionSystemType[Other='DSE']]" => one_or_more, # See [HVACDistribution]
         "DistributionSystem" => one,
         "CoolingCapacity" => one, # Use -1 for autosizing
+        "[CompressorType='single stage' or CompressorType='two stage' or CompressorType='variable speed']" => zero_or_one,
         "AnnualCoolingEfficiency[Units='SEER']/Value" => one,
       },
 
@@ -359,6 +366,7 @@ class EnergyPlusValidator
       "/HPXML/Building/BuildingDetails/Systems/HVAC/HVACPlant/HeatPump[HeatPumpType='air-to-air']" => {
         "../../HVACDistribution[DistributionSystemType/AirDistribution | DistributionSystemType[Other='DSE']]" => one_or_more, # See [HVACDistribution]
         "DistributionSystem" => one,
+        "[CompressorType='single stage' or CompressorType='two stage' or CompressorType='variable speed']" => zero_or_one,
         "AnnualCoolingEfficiency[Units='SEER']/Value" => one,
         "AnnualHeatingEfficiency[Units='HSPF']/Value" => one,
         "HeatingCapacity17F" => zero_or_one
@@ -478,6 +486,7 @@ class EnergyPlusValidator
         "[WaterHeaterType='storage water heater' or WaterHeaterType='instantaneous water heater' or WaterHeaterType='heat pump water heater' or WaterHeaterType='space-heating boiler with storage tank' or WaterHeaterType='space-heating boiler with tankless coil']" => one, # See [WHType=Tank] or [WHType=Tankless] or [WHType=HeatPump] or [WHType=Indirect] or [WHType=CombiTankless]
         "[Location='living space' or Location='basement - unconditioned' or Location='basement - conditioned' or Location='attic - unvented' or Location='attic - vented' or Location='garage' or Location='crawlspace - unvented' or Location='crawlspace - vented' or Location='other exterior']" => one,
         "FractionDHWLoadServed" => one,
+        "HotWaterTemperature" => zero_or_one,
         "UsesDesuperheater" => zero_or_one, # See [Desuperheater]
       },
 
@@ -515,7 +524,7 @@ class EnergyPlusValidator
         "RelatedHVACSystem" => one, # HeatingSystem (boiler)
         "TankVolume" => one,
         "WaterHeaterInsulation/Jacket/JacketRValue" => zero_or_one, # Capable to model tank wrap insulation
-        "extension/StandbyLoss" => zero_or_one, # deg-F/h, refer to https://www.ahridirectory.org/NewSearch?programId=28&searchTypeId=3
+        "StandbyLoss" => zero_or_one, # Refer to https://www.ahridirectory.org/NewSearch?programId=28&searchTypeId=3
       },
 
       ## [WHType=CombiTankless]
