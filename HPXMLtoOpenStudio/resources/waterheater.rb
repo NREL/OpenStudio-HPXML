@@ -876,7 +876,6 @@ class Waterheater
     alternate_stp_sch.setName("#{obj_name_combi} Alt Spt")
     alt_temp = UnitConversions.convert(t_set, "F", "C") + deadband(tank_type) / 2.0
     alternate_stp_sch.setValue(alt_temp)
-    new_heater.setSourceSideFlowControlMode("IndirectHeatAlternateSetpoint")
     new_heater.setIndirectAlternateSetpointTemperatureSchedule(alternate_stp_sch)
 
     # Create hx setpoint schedule to specify source side temperature
@@ -1224,7 +1223,7 @@ class Waterheater
       standby_loss = 2.9721 * sqft_by_gal - 0.4732 # linear equation assuming a constant u, F/hr
     end
     if standby_loss <= 0
-      fail "Indirect water heater standby loss is negative, double check TankVolume to be <829 gal or /extension/StandbyLoss to be >0.0 F/hr."
+      fail "Indirect water heater standby loss is negative, double check TankVolume to be <829 gal or StandbyLoss to be >0.0 F/hr."
     end
 
     return standby_loss
@@ -1375,24 +1374,6 @@ class Waterheater
     end
 
     return 120.0
-  end
-
-  def self.get_combi_system_fuel(idref, orig_details)
-    orig_details.elements.each("Systems/HVAC/HVACPlant/HeatingSystem") do |heating_system|
-      heating_system_values = HPXML.get_heating_system_values(heating_system: heating_system)
-      next unless heating_system_values[:id] == idref
-
-      return heating_system_values[:heating_system_fuel]
-    end
-  end
-
-  def self.get_combi_system_afue(idref, orig_details)
-    orig_details.elements.each("Systems/HVAC/HVACPlant/HeatingSystem") do |heating_system|
-      heating_system_values = HPXML.get_heating_system_values(heating_system: heating_system)
-      next unless heating_system_values[:id] == idref
-
-      return heating_system_values[:heating_efficiency_afue]
-    end
   end
 
   def self.get_tankless_cycling_derate()
