@@ -225,7 +225,7 @@ class HPXML < Object
   class Header < BaseElement
     ATTRS = [:xml_type, :xml_generated_by, :created_date_and_time, :transaction,
              :software_program_used, :software_program_version, :eri_calculation_version,
-             :eri_design, :timestep, :building_id, :event_type]
+             :eri_design, :timestep, :building_id, :event_type, :state_code]
     attr_accessor(*ATTRS)
 
     def to_rexml(doc)
@@ -271,6 +271,7 @@ class HPXML < Object
       @timestep = _to_integer_or_nil(XMLHelper.get_value(hpxml, "SoftwareInfo/extension/SimulationControl/Timestep"))
       @building_id = _get_id(hpxml, "Building/BuildingID")
       @event_type = XMLHelper.get_value(hpxml, "Building/ProjectStatus/EventType")
+      @state_code = XMLHelper.get_value(hpxml, "Building/Site/Address/StateCode")
     end
   end
 
@@ -516,7 +517,8 @@ class HPXML < Object
   end
 
   class Attic < BaseElement
-    ATTRS = [:id, :attic_type, :vented_attic_sla, :vented_attic_constant_ach]
+    ATTRS = [:id, :attic_type, :vented_attic_sla, :vented_attic_constant_ach,
+             :attached_to_roofs, :attached_to_frame_floors]
     attr_accessor(*ATTRS)
 
     def to_rexml(doc)
@@ -566,6 +568,14 @@ class HPXML < Object
       end
       @vented_attic_sla = _to_float_or_nil(XMLHelper.get_value(attic, "[AtticType/Attic[Vented='true']]VentilationRate[UnitofMeasure='SLA']/Value"))
       @vented_attic_constant_ach = _to_float_or_nil(XMLHelper.get_value(attic, "[AtticType/Attic[Vented='true']]extension/ConstantACHnatural"))
+      @attached_to_roofs = []
+      attic.elements.each("AttachedToRoof") do |roof|
+        @attached_to_roofs << _get_idref(roof)
+      end
+      @attached_to_frame_floors = []
+      attic.elements.each("AttachedToFrameFloor") do |frame_floor|
+        @attached_to_frame_floors << _get_idref(frame_floor)
+      end
     end
   end
 
@@ -584,7 +594,8 @@ class HPXML < Object
   end
 
   class Foundation < BaseElement
-    ATTRS = [:id, :foundation_type, :vented_crawlspace_sla, :unconditioned_basement_thermal_boundary]
+    ATTRS = [:id, :foundation_type, :vented_crawlspace_sla, :unconditioned_basement_thermal_boundary,
+             :attached_to_slabs, :attached_to_frame_floors, :attached_to_foundation_walls]
     attr_accessor(*ATTRS)
 
     def to_rexml(doc)
@@ -640,6 +651,18 @@ class HPXML < Object
       end
       @vented_crawlspace_sla = _to_float_or_nil(XMLHelper.get_value(foundation, "[FoundationType/Crawlspace[Vented='true']]VentilationRate[UnitofMeasure='SLA']/Value"))
       @unconditioned_basement_thermal_boundary = XMLHelper.get_value(foundation, "[FoundationType/Basement[Conditioned='false']]ThermalBoundary")
+      @attached_to_slabs = []
+      foundation.elements.each("AttachedToSlab") do |slab|
+        @attached_to_slabs << _get_idref(slab)
+      end
+      @attached_to_frame_floors = []
+      foundation.elements.each("AttachedToFrameFloor") do |frame_floor|
+        @attached_to_frame_floors << _get_idref(frame_floor)
+      end
+      @attached_to_foundation_walls = []
+      foundation.elements.each("AttachedToFoundationWall") do |foundation_wall|
+        @attached_to_foundation_walls << _get_idref(foundation_wall)
+      end
     end
   end
 
@@ -1162,7 +1185,7 @@ class HPXML < Object
       @overhangs_depth = _to_float_or_nil(XMLHelper.get_value(window, "Overhangs/Depth"))
       @overhangs_distance_to_top_of_window = _to_float_or_nil(XMLHelper.get_value(window, "Overhangs/DistanceToTopOfWindow"))
       @overhangs_distance_to_bottom_of_window = _to_float_or_nil(XMLHelper.get_value(window, "Overhangs/DistanceToBottomOfWindow"))
-      @wall_idref = _get_idref(window, "AttachedToWall")
+      @wall_idref = _get_idref(window.elements["AttachedToWall"])
     end
   end
 
@@ -1216,7 +1239,7 @@ class HPXML < Object
       @ufactor = _to_float_or_nil(XMLHelper.get_value(skylight, "UFactor"))
       @shgc = _to_float_or_nil(XMLHelper.get_value(skylight, "SHGC"))
       @exterior_shading = XMLHelper.get_value(skylight, "ExteriorShading/Type")
-      @roof_idref = _get_idref(skylight, "AttachedToRoof")
+      @roof_idref = _get_idref(skylight.elements["AttachedToRoof"])
     end
   end
 
@@ -1257,7 +1280,7 @@ class HPXML < Object
       return if door.nil?
 
       @id = _get_id(door)
-      @wall_idref = _get_idref(door, "AttachedToWall")
+      @wall_idref = _get_idref(door.elements["AttachedToWall"])
       @area = _to_float_or_nil(XMLHelper.get_value(door, "Area"))
       @azimuth = _to_integer_or_nil(XMLHelper.get_value(door, "Azimuth"))
       @r_value = _to_float_or_nil(XMLHelper.get_value(door, "RValue"))
@@ -1327,7 +1350,7 @@ class HPXML < Object
       return if heating_system.nil?
 
       @id = _get_id(heating_system)
-      @distribution_system_idref = _get_idref(heating_system, "DistributionSystem")
+      @distribution_system_idref = _get_idref(heating_system.elements["DistributionSystem"])
       @year_installed = _to_integer_or_nil(XMLHelper.get_value(heating_system, "YearInstalled"))
       @heating_system_type = XMLHelper.get_child_name(heating_system, "HeatingSystemType")
       @heating_system_fuel = XMLHelper.get_value(heating_system, "HeatingSystemFuel")
@@ -1403,7 +1426,7 @@ class HPXML < Object
       return if cooling_system.nil?
 
       @id = _get_id(cooling_system)
-      @distribution_system_idref = _get_idref(cooling_system, "DistributionSystem")
+      @distribution_system_idref = _get_idref(cooling_system.elements["DistributionSystem"])
       @year_installed = _to_integer_or_nil(XMLHelper.get_value(cooling_system, "YearInstalled"))
       @cooling_system_type = XMLHelper.get_value(cooling_system, "CoolingSystemType")
       @cooling_system_fuel = XMLHelper.get_value(cooling_system, "CoolingSystemFuel")
@@ -1508,7 +1531,7 @@ class HPXML < Object
       return if heat_pump.nil?
 
       @id = _get_id(heat_pump)
-      @distribution_system_idref = _get_idref(heat_pump, "DistributionSystem")
+      @distribution_system_idref = _get_idref(heat_pump.elements["DistributionSystem"])
       @year_installed = _to_integer_or_nil(XMLHelper.get_value(heat_pump, "YearInstalled"))
       @heat_pump_type = XMLHelper.get_value(heat_pump, "HeatPumpType")
       @heat_pump_fuel = XMLHelper.get_value(heat_pump, "HeatPumpFuel")
@@ -1785,7 +1808,7 @@ class HPXML < Object
       @sensible_recovery_efficiency = _to_float_or_nil(XMLHelper.get_value(ventilation_fan, "SensibleRecoveryEfficiency"))
       @sensible_recovery_efficiency_adjusted = _to_float_or_nil(XMLHelper.get_value(ventilation_fan, "AdjustedSensibleRecoveryEfficiency"))
       @fan_power = _to_float_or_nil(XMLHelper.get_value(ventilation_fan, "FanPower"))
-      @distribution_system_idref = _get_idref(ventilation_fan, "AttachedToHVACDistributionSystem")
+      @distribution_system_idref = _get_idref(ventilation_fan.elements["AttachedToHVACDistributionSystem"])
     end
   end
 
@@ -1857,7 +1880,7 @@ class HPXML < Object
       @recovery_efficiency = _to_float_or_nil(XMLHelper.get_value(water_heating_system, "RecoveryEfficiency"))
       @uses_desuperheater = _to_bool_or_nil(XMLHelper.get_value(water_heating_system, "UsesDesuperheater"))
       @jacket_r_value = _to_float_or_nil(XMLHelper.get_value(water_heating_system, "WaterHeaterInsulation/Jacket/JacketRValue"))
-      @related_hvac = _get_idref(water_heating_system, "RelatedHVACSystem")
+      @related_hvac = _get_idref(water_heating_system.elements["RelatedHVACSystem"])
       @energy_star = XMLHelper.get_values(water_heating_system, "ThirdPartyCertification").include?("Energy Star")
       @standby_loss = _to_float_or_nil(XMLHelper.get_value(water_heating_system, "StandbyLoss"))
       @temperature = _to_float_or_nil(XMLHelper.get_value(water_heating_system, "HotWaterTemperature"))
@@ -2005,7 +2028,7 @@ class HPXML < Object
       @collector_frta = _to_float_or_nil(XMLHelper.get_value(solar_thermal_system, "CollectorRatedOpticalEfficiency"))
       @collector_frul = _to_float_or_nil(XMLHelper.get_value(solar_thermal_system, "CollectorRatedThermalLosses"))
       @storage_volume = _to_float_or_nil(XMLHelper.get_value(solar_thermal_system, "StorageVolume"))
-      @water_heating_system_idref = _get_idref(solar_thermal_system, "ConnectedTo")
+      @water_heating_system_idref = _get_idref(solar_thermal_system.elements["ConnectedTo"])
       @solar_fraction = _to_float_or_nil(XMLHelper.get_value(solar_thermal_system, "SolarFraction"))
     end
   end
@@ -2552,8 +2575,7 @@ def _get_id(parent, element_name = "SystemIdentifier")
   return parent.elements[element_name].attributes["id"]
 end
 
-def _get_idref(parent, element_name)
-  element = parent.elements[element_name]
+def _get_idref(element)
   return if element.nil?
 
   return element.attributes["idref"]

@@ -886,7 +886,7 @@ class HPXMLTest < MiniTest::Test
     end
 
     # HVAC Heating Systems
-    
+
     num_htg_sys = hpxml.heating_systems.size
     hpxml.heating_systems.each do |heating_system|
       htg_sys_type = heating_system.heating_system_type
@@ -1124,7 +1124,6 @@ class HPXMLTest < MiniTest::Test
         sql_value = UnitConversions.convert(sqlFile.execAndReturnFirstDouble(query).get, "m^3/s", "cfm")
         assert_in_delta(hpxml_value, sql_value, 0.01)
       end
-
     end
 
     # Clothes Washer
