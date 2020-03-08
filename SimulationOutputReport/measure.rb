@@ -1000,7 +1000,7 @@ class SimulationOutputReport < OpenStudio::Measure::ReportingMeasure
       if not htg_system.heating_efficiency_afue.nil?
         eec_heats[sys_id] = get_eri_eec_value_numerator('AFUE') / htg_system.heating_efficiency_afue
       elsif not htg_system.heating_efficiency_percent.nil?
-        eec_heats[sys_id] = get_eri_eec_value_numerator('Percent') / htg_system.heating_efficiency_afue
+        eec_heats[sys_id] = get_eri_eec_value_numerator('Percent') / htg_system.heating_efficiency_percent
       end
     end
     @hpxml.heat_pumps.each do |heat_pump|
