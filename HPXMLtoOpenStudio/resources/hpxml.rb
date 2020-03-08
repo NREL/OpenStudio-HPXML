@@ -683,7 +683,6 @@ class HPXML < Object
       return if roof.nil?
 
       @id = _get_id(roof)
-      @exterior_adjacent_to = "outside"
       @interior_adjacent_to = XMLHelper.get_value(roof, "InteriorAdjacentTo")
       @area = _to_float_or_nil(XMLHelper.get_value(roof, "Area"))
       @azimuth = _to_integer_or_nil(XMLHelper.get_value(roof, "Azimuth"))
@@ -700,6 +699,10 @@ class HPXML < Object
         @insulation_cavity_r_value = _to_float_or_nil(XMLHelper.get_value(insulation, "Layer[InstallationType='cavity']/NominalRValue"))
         @insulation_continuous_r_value = _to_float_or_nil(XMLHelper.get_value(insulation, "Layer[InstallationType='continuous']/NominalRValue"))
       end
+    end
+
+    def exterior_adjacent_to
+      return "outside"
     end
   end
 
@@ -1054,7 +1057,6 @@ class HPXML < Object
 
       @id = _get_id(slab)
       @interior_adjacent_to = XMLHelper.get_value(slab, "InteriorAdjacentTo")
-      @exterior_adjacent_to = "outside"
       @area = _to_float_or_nil(XMLHelper.get_value(slab, "Area"))
       @thickness = _to_float_or_nil(XMLHelper.get_value(slab, "Thickness"))
       @exposed_perimeter = _to_float_or_nil(XMLHelper.get_value(slab, "ExposedPerimeter"))
@@ -1074,6 +1076,10 @@ class HPXML < Object
         under_slab_insulation_id = _get_id(under_slab_insulation)
         @under_slab_insulation_r_value = _to_float_or_nil(XMLHelper.get_value(under_slab_insulation, "Layer[InstallationType='continuous']/NominalRValue"))
       end
+    end
+
+    def exterior_adjacent_to
+      return "outside" # FIXME: Switch to ground?
     end
   end
 
@@ -1918,7 +1924,7 @@ class HPXML < Object
     def from_hpxml(hpxml)
       return if hpxml.nil?
 
-      hpxml.elements.each("BuildingDetails/Systems/WaterHeating/WaterFixture") do |water_fixture|
+      hpxml.elements.each("Building/BuildingDetails/Systems/WaterHeating/WaterFixture") do |water_fixture|
         self << WaterFixture.new(hpxml: water_fixture)
       end
     end
