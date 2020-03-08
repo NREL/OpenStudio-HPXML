@@ -610,7 +610,8 @@ class SimulationOutputReport < OpenStudio::Measure::ReportingMeasure
   end
 
   def check_for_errors(runner, outputs)
-    all_total = @fuels.values.map { |f| f.annual_output }.inject(:+)
+    all_total = @fuels.values.map { |x| x.annual_output }.inject(:+)
+    all_total += @unmet_loads.values.map { |x| x.annual_output }.inject(:+)
     if all_total == 0
       runner.registerError("Simulation unsuccessful.")
       return false
@@ -935,7 +936,7 @@ class SimulationOutputReport < OpenStudio::Measure::ReportingMeasure
       if ['space-heating boiler with tankless coil', 'space-heating boiler with storage tank'].include? dhw_system.water_heater_type
         @hpxml.heating_systems.each do |heating_system|
           next unless dhw_system.related_hvac == heating_system.id
-          
+
           dhw_fuels[sys_id] = heating_system.heating_system_fuel
         end
       else
@@ -999,7 +1000,7 @@ class SimulationOutputReport < OpenStudio::Measure::ReportingMeasure
       if not htg_system.heating_efficiency_afue.nil?
         eec_heats[sys_id] = get_eri_eec_value_numerator('AFUE') / htg_system.heating_efficiency_afue
       elsif not htg_system.heating_efficiency_percent.nil?
-        eec_heats[sys_id] = get_eri_eec_value_numerator('Percent') / htg_system.heating_efficiency_afue
+        eec_heats[sys_id] = get_eri_eec_value_numerator('Percent') / htg_system.heating_efficiency_percent
       end
     end
     @hpxml.heat_pumps.each do |heat_pump|
