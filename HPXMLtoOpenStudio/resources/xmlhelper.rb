@@ -147,7 +147,7 @@ class XMLHelper
     formatter = REXML::Formatters::Pretty.new(2)
     formatter.compact = true
     formatter.width = 1000
-    File.open(out_path, 'w') do |f|
+    File.open(out_path, 'w', newline: :crlf) do |f|
       formatter.write(doc, f)
     end
   end
