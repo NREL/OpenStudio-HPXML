@@ -10,18 +10,18 @@ require_relative '../hescore_lib'
 class HEScoreTest < Minitest::Unit::TestCase
   def before_setup
     # Download weather files
-    this_dir = File.absolute_path(File.join(File.dirname(__FILE__), ".."))
-    cli_path = OpenStudio.getOpenStudioCLI
-    command = "\"#{cli_path}\" --no-ssl \"#{File.join(File.dirname(__FILE__), "..", "run_simulation.rb")}\" --download-weather"
-    system(command)
+    # this_dir = File.absolute_path(File.join(File.dirname(__FILE__), ".."))
+    # cli_path = OpenStudio.getOpenStudioCLI
+    # command = "\"#{cli_path}\" --no-ssl \"#{File.join(File.dirname(__FILE__), "..", "run_simulation.rb")}\" --download-weather"
+    # system(command)
 
-    num_epws_expected = File.readlines(File.join(this_dir, "..", "weather", "data.csv")).size - 1
-    num_epws_actual = Dir[File.join(this_dir, "..", "weather", "*.epw")].count
-    assert_equal(num_epws_expected, num_epws_actual)
+    # num_epws_expected = File.readlines(File.join(this_dir, "..", "weather", "data.csv")).size - 1
+    # num_epws_actual = Dir[File.join(this_dir, "..", "weather", "*.epw")].count
+    # assert_equal(num_epws_expected, num_epws_actual)
 
-    num_cache_expected = File.readlines(File.join(this_dir, "..", "weather", "data.csv")).size - 1
-    num_cache_actual = Dir[File.join(this_dir, "..", "weather", "*-cache.csv")].count
-    assert_equal(num_cache_expected, num_cache_actual)
+    # num_cache_expected = File.readlines(File.join(this_dir, "..", "weather", "data.csv")).size - 1
+    # num_cache_actual = Dir[File.join(this_dir, "..", "weather", "*-cache.csv")].count
+    # assert_equal(num_cache_expected, num_cache_actual)
 
     # Prepare results dir for CI storage
     @results_dir = File.absolute_path(File.join(File.dirname(__FILE__), "..", 'test_results'))
