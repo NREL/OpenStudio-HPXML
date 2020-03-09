@@ -3386,7 +3386,7 @@ class OSModel
     return map_str.to_s
   end
 
-  def add_output_diagnostics(model)
+  def self.add_output_diagnostics(model)
     output_diagnostics = OpenStudio::Model::OutputDiagnostics.new(model)
     output_diagnostics.addKey("DisplayAdvancedReportVariables")
   end
@@ -3430,7 +3430,7 @@ class OSModel
     # flag to switch to reading advanced variables for window component load calculation
     output_diagnostics = false
     if output_diagnostics
-      add_output_diagnostics(model)
+    add_output_diagnostics(model)
     end
 
     model.getSurfaces.sort.each_with_index do |s, idx|
