@@ -115,6 +115,15 @@ The `HPXML Toolbox website <https://hpxml.nrel.gov/>`_ also provides several res
 #. A data dictionary
 #. An implementation guide
 
+Simulation Controls
+~~~~~~~~~~~~~~~~~~~
+
+EnergyPlus simulation controls can be entered in ``/HPXML/SoftwareInfo/extension/SimulationControl``.
+
+The only simulation control currently offered is the timestep.
+It can be optionally provided as ``Timestep``, where the value is in minutes and must be a divisor of 60.
+If not provided, the default value of 60 is used.
+
 Building Details
 ~~~~~~~~~~~~~~~~
 
@@ -147,8 +156,9 @@ Shelter Coefficient  Description
 
 The terrain surrounding the building is assumed to be suburban.
 
-Finally, natural ventilation can be disabled by setting true for ``Site/extension/DisableNaturalVentilation``.
-If not specified, natural ventilation is assumed to be available year-round to reduce space cooling, with airflow influenced by the amount of window area.
+The fraction of window area that is operable can be provided as ``BuildingConstruction/extension/FractionofOperableWindowArea`` and is used for the calculation of natural ventilation.
+If not provided, it is assumed that 33% of the building's window area is operable.
+Of this operable window area, 20% is assumed to be open whenever there are favorable outdoor conditions for cooling.
 
 Weather File
 ~~~~~~~~~~~~
@@ -157,7 +167,7 @@ The ``ClimateandRiskZones/WeatherStation`` element specifies the EnergyPlus weat
 The weather file can be entered in one of two ways:
 
 #. Using the ``WeatherStation/WMO``, which must be one of the acceptable TMY3 WMO station numbers found in the ``weather/data.csv`` file.
-   The full set of U.S. TMY3 weather files can be `downloaded here <http://s3.amazonaws.com/epwweatherfiles/tmy3s-cache-csv.zip>`_.
+   The full set of U.S. TMY3 weather files can be `downloaded here <https://data.nrel.gov/files/128/tmy3s-cache-csv.zip>`_.
 #. Using the ``WeatherStation/extension/EPWFileName``.
 
 Enclosure
