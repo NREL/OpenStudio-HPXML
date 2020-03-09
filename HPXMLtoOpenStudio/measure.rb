@@ -3103,7 +3103,6 @@ class OSModel
     cfis_airloop = nil
     if mech_vent_type == 'central fan integrated supply'
       # Get HVAC distribution system CFIS is attached to
-      cfis_hvac_dist = nil
       @hpxml.hvac_distributions.each do |hvac_distribution|
         next unless hvac_distribution.id == mech_vent_attached_dist_system
 
