@@ -1255,7 +1255,7 @@ class SimulationOutputReport < OpenStudio::Measure::ReportingMeasure
   end
 
   def is_dfhp(system)
-    if system.class.to_s != "HeatPump"
+    if system.class != HPXML::HeatPump
       return false
     end
     if not system.backup_heating_switchover_temp.nil? and system.backup_heating_fuel != "electricity"
