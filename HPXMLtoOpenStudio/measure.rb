@@ -4405,7 +4405,13 @@ class OSModel
       to_ignore = true
     end
 
-    set_surface_exterior(model, spaces, surface, subsurface_id, wall_exterior_adjacent_to)
+    # Subsurface on foundationwalls, set it to be adjacent to outdoors
+    if wall_exterior_adjacent_to == "ground"
+      surface.setOutsideBoundaryCondition('Outdoors')
+    else
+      set_surface_exterior(model, spaces, surface, subsurface_id, wall_exterior_adjacent_to)
+    end
+
     return to_ignore
   end
 
