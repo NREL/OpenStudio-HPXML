@@ -1,12 +1,39 @@
 require_relative 'xmlhelper'
 
-# TODO: Move various calculations/code blocks into these classes
-# Some examples:
-# - wall.windows or indirect_water_heater.related_hvac (idrefs)
-# - wall.is_thermal_boundary and wall.is_exterior_thermal_boundary
-# - wall.above_grade_boundary_area
-# - hpxml.predominant_heating_fuel
-# - hpxml.has_space_type
+'''
+
+Example Usage:
+
+-----------------
+Reading from file
+-----------------
+
+hpxml = HPXML.new(hpxml_path: ...)
+
+# Singleton elements
+puts hpxml.building_construction.number_of_bedrooms
+
+# Array elements
+hpxml.walls.each do |wall|
+  puts wall.area
+end
+puts hpxml.walls[0].area
+
+---------------------
+Creating from scratch
+---------------------
+
+hpxml = HPXML.new()
+
+# Singleton elements
+hpxml.set_building_construction(:number_of_bedrooms => 3)
+
+# Array elements
+hpxml.walls.add(:id => "WallNorth", :area => 500)
+hpxml.walls.add(:id => "WallSouth", :area => 500)
+hpxml.walls.delete_at(1)
+
+'''
 
 class HPXML < Object
   def initialize(hpxml_path: nil, collapse_enclosure: true)
