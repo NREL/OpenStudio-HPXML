@@ -26,7 +26,11 @@ Creating from scratch
 hpxml = HPXML.new()
 
 # Singleton elements
-hpxml.set_building_construction(:number_of_bedrooms => 3)
+hpxml.set_clothes_washer(:id => "MyClothesWasher",
+                         :modified_energy_factor => 0.83)
+if not hpxml.clothes_washer.nil?
+  puts hpxml.clothes_washer.to_s
+end
 
 # Array elements
 hpxml.walls.add(:id => "WallNorth", :area => 500)
