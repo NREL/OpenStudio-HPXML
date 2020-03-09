@@ -1370,7 +1370,8 @@ class HPXML < Object
       XMLHelper.add_element(heating_system, "FractionHeatLoadServed", Float(@fraction_heat_load_served)) unless @fraction_heat_load_served.nil?
       XMLHelper.add_element(heating_system, "ElectricAuxiliaryEnergy", Float(@electric_auxiliary_energy)) unless @electric_auxiliary_energy.nil?
       _add_extension(parent: heating_system,
-                     extensions: { "HeatingFlowRate" => _to_float_or_nil(@heating_cfm) })
+                     extensions: { "HeatingFlowRate" => _to_float_or_nil(@heating_cfm),
+                                   "SeedId" => @seed_id })
     end
 
     def from_hpxml(heating_system)
@@ -1446,7 +1447,8 @@ class HPXML < Object
 
       XMLHelper.add_element(cooling_system, "SensibleHeatFraction", Float(@cooling_shr)) unless @cooling_shr.nil?
       _add_extension(parent: cooling_system,
-                     extensions: { "CoolingFlowRate" => _to_float_or_nil(@cooling_cfm) })
+                     extensions: { "CoolingFlowRate" => _to_float_or_nil(@cooling_cfm),
+                                   "SeedId" => @seed_id })
     end
 
     def from_hpxml(cooling_system)
@@ -1552,6 +1554,9 @@ class HPXML < Object
         XMLHelper.add_element(annual_efficiency, "Units", htg_efficiency_units)
         XMLHelper.add_element(annual_efficiency, "Value", Float(htg_efficiency_value))
       end
+
+      _add_extension(parent: heat_pump,
+                     extensions: { "SeedId" => @seed_id })
     end
 
     def from_hpxml(heat_pump)
