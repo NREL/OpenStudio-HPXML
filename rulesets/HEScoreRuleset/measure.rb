@@ -64,10 +64,10 @@ class HEScoreMeasure < OpenStudio::Measure::ModelMeasure
       return false
     end
 
-    hpxml_doc = REXML::Document.new(File.read(hpxml_path))
+    hpxml = HPXML.new(hpxml_path: hpxml_path, collapse_enclosure: false)
 
     begin
-      new_hpxml_doc = HEScoreRuleset.apply_ruleset(hpxml_doc)
+      new_hpxml = HEScoreRuleset.apply_ruleset(hpxml)
     rescue Exception => e
       runner.registerError("#{e.message}\n#{e.backtrace.join("\n")}")
       return false
@@ -75,7 +75,7 @@ class HEScoreMeasure < OpenStudio::Measure::ModelMeasure
 
     # Write new HPXML file
     if hpxml_output_path.is_initialized
-      XMLHelper.write_file(new_hpxml_doc, hpxml_output_path.get)
+      XMLHelper.write_file(new_hpxml.to_rexml, hpxml_output_path.get)
       runner.registerInfo("Wrote file: #{hpxml_output_path.get}")
     end
 

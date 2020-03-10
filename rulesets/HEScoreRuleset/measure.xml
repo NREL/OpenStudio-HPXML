@@ -2,8 +2,8 @@
   <schema_version>3.0</schema_version>
   <name>he_score_measure</name>
   <uid>013ca589-73ab-451f-afae-dbeb5304dea8</uid>
-  <version_id>cefe4a52-9714-49ee-9e89-6bcf7f570d53</version_id>
-  <version_modified>20200204T014552Z</version_modified>
+  <version_id>301fba8a-2dbd-4990-837c-09cf03817a92</version_id>
+  <version_modified>20200308T204121Z</version_modified>
   <xml_checksum>2AF3A68E</xml_checksum>
   <class_name>HEScoreMeasure</class_name>
   <display_name>Apply Home Energy Score Ruleset</display_name>
@@ -56,29 +56,6 @@
   </attributes>
   <files>
     <file>
-      <filename>test_hescore_ruleset.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>test</usage_type>
-      <checksum>C314D8BE</checksum>
-    </file>
-    <file>
-      <version>
-        <software_program>OpenStudio</software_program>
-        <identifier>2.7.0</identifier>
-        <min_compatible>2.7.0</min_compatible>
-      </version>
-      <filename>measure.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>script</usage_type>
-      <checksum>33491387</checksum>
-    </file>
-    <file>
-      <filename>HESruleset.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>07EF6063</checksum>
-    </file>
-    <file>
       <filename>lu_es_furnace_region.csv</filename>
       <filetype>csv</filetype>
       <usage_type>resource</usage_type>
@@ -107,6 +84,29 @@
       <filetype>csv</filetype>
       <usage_type>resource</usage_type>
       <checksum>FBD37897</checksum>
+    </file>
+    <file>
+      <filename>test_hescore_ruleset.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>test</usage_type>
+      <checksum>52B0675B</checksum>
+    </file>
+    <file>
+      <version>
+        <software_program>OpenStudio</software_program>
+        <identifier>2.7.0</identifier>
+        <min_compatible>2.7.0</min_compatible>
+      </version>
+      <filename>measure.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>script</usage_type>
+      <checksum>6EE4FC60</checksum>
+    </file>
+    <file>
+      <filename>HESruleset.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>DACF4F30</checksum>
     </file>
   </files>
 </measure>
