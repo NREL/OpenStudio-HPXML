@@ -115,6 +115,15 @@ The `HPXML Toolbox website <https://hpxml.nrel.gov/>`_ also provides several res
 #. A data dictionary
 #. An implementation guide
 
+Simulation Controls
+~~~~~~~~~~~~~~~~~~~
+
+EnergyPlus simulation controls can be entered in ``/HPXML/SoftwareInfo/extension/SimulationControl``.
+
+The only simulation control currently offered is the timestep.
+It can be optionally provided as ``Timestep``, where the value is in minutes and must be a divisor of 60.
+If not provided, the default value of 60 is used.
+
 Building Details
 ~~~~~~~~~~~~~~~~
 
@@ -147,8 +156,9 @@ Shelter Coefficient  Description
 
 The terrain surrounding the building is assumed to be suburban.
 
-Finally, natural ventilation can be disabled by setting true for ``Site/extension/DisableNaturalVentilation``.
-If not specified, natural ventilation is assumed to be available year-round to reduce space cooling, with airflow influenced by the amount of window area.
+The fraction of window area that is operable can be provided as ``BuildingConstruction/extension/FractionofOperableWindowArea`` and is used for the calculation of natural ventilation.
+If not provided, it is assumed that 33% of the building's window area is operable.
+Of this operable window area, 20% is assumed to be open whenever there are favorable outdoor conditions for cooling.
 
 Weather File
 ~~~~~~~~~~~~
@@ -157,7 +167,7 @@ The ``ClimateandRiskZones/WeatherStation`` element specifies the EnergyPlus weat
 The weather file can be entered in one of two ways:
 
 #. Using the ``WeatherStation/WMO``, which must be one of the acceptable TMY3 WMO station numbers found in the ``weather/data.csv`` file.
-   The full set of U.S. TMY3 weather files can be `downloaded here <http://s3.amazonaws.com/epwweatherfiles/tmy3s-cache-csv.zip>`_.
+   The full set of U.S. TMY3 weather files can be `downloaded here <https://data.nrel.gov/files/128/tmy3s-cache-csv.zip>`_.
 #. Using the ``WeatherStation/extension/EPWFileName``.
 
 Enclosure
@@ -377,6 +387,12 @@ room air conditioner                                        electricity        E
 evaporative cooler       AirDistribution or DSE (optional)  electricity
 =======================  =================================  =================  =======================  ====================
 
+Central air conditioners can also have the ``CompressorType`` specified; if not provided, it is assumed as follows:
+
+- "single stage": SEER <= 15
+- "two stage": 15 < SEER <= 21
+- "variable speed": SEER > 21
+
 Heat Pumps
 **********
 
@@ -393,6 +409,12 @@ air-to-air     AirDistribution or DSE             electricity   SEER            
 mini-split     AirDistribution or DSE (optional)  electricity   SEER                     HSPF                     (optional)                   (optional)
 ground-to-air  AirDistribution or DSE             electricity   EER                      COP                      (optional)
 =============  =================================  ============  =======================  =======================  ===========================  ==================
+
+Air-to-air heat pumps can also have the ``CompressorType`` specified; if not provided, it is assumed as follows:
+
+- "single stage": SEER <= 15
+- "two stage": 15 < SEER <= 21
+- "variable speed": SEER > 21
 
 If the heat pump has backup heating, it can be specified with ``BackupSystemFuel``, ``BackupAnnualHeatingEfficiency``, and ``BackupHeatingCapacity``.
 If the heat pump has a switchover temperature (e.g., dual-fuel heat pump) where the heat pump stops operating and the backup heating system starts running, it can be specified with ``BackupHeatingSwitchoverTemperature``.
@@ -481,6 +503,7 @@ Water Heaters
 
 Each water heater should be entered as a ``Systems/WaterHeating/WaterHeatingSystem``.
 Inputs including ``WaterHeaterType``, ``Location``, and ``FractionDHWLoadServed`` must be provided.
+The setpoint temperature may be provided as ``HotWaterTemperature``; if not provided, 125 deg-F is assumed.
 
 Depending on the type of water heater specified, additional elements are required/available:
 
@@ -498,7 +521,7 @@ For tankless water heaters, an annual energy derate due to cycling inefficiencie
 If not provided, a value of 0.08 (8%) will be assumed.
 
 For combi boiler systems, the ``RelatedHVACSystem`` must point to a ``HeatingSystem`` of type "Boiler".
-For combi boiler systems with a storage tank, the storage tank losses (deg-F/hr) can be entered as ``extension/StandbyLoss``; if not provided, an average value will be used.
+For combi boiler systems with a storage tank, the storage tank losses (deg-F/hr) can be entered as ``StandbyLoss``; if not provided, an average value will be used.
 
 For water heaters that are connected to a desuperheater, the ``RelatedHVACSystem`` must either point to a ``HeatPump`` or a ``CoolingSystem``.
 
@@ -660,7 +683,7 @@ Contact us if you can't figure out the cause of an error.
 Sample Files
 ------------
 
-Dozens of sample HPXML files are included in the tests directory.
+Dozens of sample HPXML files are included in the workflow/sample_files directory.
 The sample files help to illustrate how different building components are described in HPXML.
 
 Each sample file generally makes one isolated change relative to the base HPXML (base.xml) building.
