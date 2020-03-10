@@ -33,6 +33,7 @@ class EnergyPlusValidator
         "/HPXML/XMLTransactionHeaderInformation/XMLGeneratedBy" => one, # Required by HPXML schema
         "/HPXML/XMLTransactionHeaderInformation/CreatedDateAndTime" => one, # Required by HPXML schema
         "/HPXML/XMLTransactionHeaderInformation/Transaction" => one, # Required by HPXML schema
+        "/HPXML/SoftwareInfo/extension/SimulationControl" => zero_or_one, # See [SimulationControl]
 
         "/HPXML/Building" => one,
         "/HPXML/Building/BuildingID" => one, # Required by HPXML schema
@@ -87,6 +88,11 @@ class EnergyPlusValidator
 
         "/HPXML/Building/BuildingDetails/MiscLoads/PlugLoad[PlugLoadType='other']" => zero_or_one, # See [PlugLoads]
         "/HPXML/Building/BuildingDetails/MiscLoads/PlugLoad[PlugLoadType='TV other']" => zero_or_one, # See [Television]
+      },
+
+      # [SimulationControl]
+      "/HPXML/SoftwareInfo/extension/SimulationControl" => {
+        "Timestep" => zero_or_one, # minutes; must be a divisor of 60
       },
 
       # [Neighbors]

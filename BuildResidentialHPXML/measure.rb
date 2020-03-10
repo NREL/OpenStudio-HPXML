@@ -12,12 +12,12 @@ require_relative "resources/location"
 class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
   # human readable name
   def name
-    return "HPXML Exporter"
+    return "HPXML Builder"
   end
 
   # human readable description
   def description
-    return "Exports residential modeling arguments to HPXML file"
+    return "Builds a residential HPXML file."
   end
 
   # human readable description of modeling approach
@@ -974,24 +974,6 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     arg.setDefaultValue(false)
     args << arg
 
-    arg = OpenStudio::Measure::OSArgument::makeBoolArgument("hvac_distribution_system_type_dse", true)
-    arg.setDisplayName("HVAC Distribution: Uses Distibution System Efficiency")
-    arg.setDescription("Whether the HVAC distribution system type is distribution system efficiency.")
-    arg.setDefaultValue(false)
-    args << arg
-
-    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument("annual_heating_dse", true)
-    arg.setDisplayName("HVAC Distribution: Annual Heating Distribution System Efficiency")
-    arg.setDescription("The annual heating efficiency of the distribution system.")
-    arg.setDefaultValue(0.8)
-    args << arg
-
-    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument("annual_cooling_dse", true)
-    arg.setDisplayName("HVAC Distribution: Annual Cooling Distribution System Efficiency")
-    arg.setDescription("The annual cooling efficiency of the distribution system.")
-    arg.setDefaultValue(0.7)
-    args << arg
-
     arg = OpenStudio::Measure::OSArgument::makeDoubleArgument("heating_setpoint_temp", true)
     arg.setDisplayName("Heating Setpoint Temperature")
     arg.setDescription("Specify the heating setpoint temperature.")
@@ -1241,90 +1223,70 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     water_heater_efficiency_type_choices << "EnergyFactor"
     water_heater_efficiency_type_choices << "UniformEnergyFactor"
 
-    (1..Constants.MaxNumWaterHeaters).to_a.each do |n|
-      water_heater_type = "none"
-      if n == 1
-        water_heater_type = "storage water heater"
-      end
+    arg = OpenStudio::Measure::OSArgument::makeChoiceArgument("water_heater_type", water_heater_type_choices, true)
+    arg.setDisplayName("Water Heater: Type")
+    arg.setDescription("The type of water heater.")
+    arg.setDefaultValue("storage water heater")
+    args << arg
 
-      arg = OpenStudio::Measure::OSArgument::makeChoiceArgument("water_heater_type_#{n}", water_heater_type_choices, true)
-      arg.setDisplayName("Water Heater #{n}: Type")
-      arg.setDescription("The type of water heater #{n}.")
-      arg.setDefaultValue(water_heater_type)
-      args << arg
+    arg = OpenStudio::Measure::OSArgument::makeChoiceArgument("water_heater_fuel_type", water_heater_fuel_choices, true)
+    arg.setDisplayName("Water Heater: Fuel Type")
+    arg.setDescription("The fuel type of water heater.")
+    arg.setDefaultValue("electricity")
+    args << arg
 
-      arg = OpenStudio::Measure::OSArgument::makeChoiceArgument("water_heater_fuel_type_#{n}", water_heater_fuel_choices, true)
-      arg.setDisplayName("Water Heater #{n}: Fuel Type")
-      arg.setDescription("The fuel type of water heater #{n}.")
-      arg.setDefaultValue("electricity")
-      args << arg
+    arg = OpenStudio::Measure::OSArgument::makeChoiceArgument("water_heater_location", location_choices, true)
+    arg.setDisplayName("Water Heater: Location")
+    arg.setDescription("The location of water heater.")
+    arg.setDefaultValue(Constants.Auto)
+    args << arg
 
-      arg = OpenStudio::Measure::OSArgument::makeChoiceArgument("water_heater_location_#{n}", location_choices, true)
-      arg.setDisplayName("Water Heater #{n}: Location")
-      arg.setDescription("The location of water heater #{n}.")
-      arg.setDefaultValue(Constants.Auto)
-      args << arg
+    arg = OpenStudio::Measure::OSArgument::makeStringArgument("water_heater_tank_volume", true)
+    arg.setDisplayName("Water Heater: Tank Volume")
+    arg.setDescription("Nominal volume of water heater tank. Set to #{Constants.Auto} to have volume autosized.")
+    arg.setUnits("gal")
+    arg.setDefaultValue(Constants.Auto)
+    args << arg
 
-      arg = OpenStudio::Measure::OSArgument::makeStringArgument("water_heater_tank_volume_#{n}", true)
-      arg.setDisplayName("Water Heater #{n}: Tank Volume")
-      arg.setDescription("Nominal volume of water heater tank #{n}. Set to #{Constants.Auto} to have volume autosized.")
-      arg.setUnits("gal")
-      arg.setDefaultValue(Constants.Auto)
-      args << arg
+    arg = OpenStudio::Measure::OSArgument::makeStringArgument("water_heater_heating_capacity", true)
+    arg.setDisplayName("Water Heater: Input Capacity")
+    arg.setDescription("The maximum energy input rating of water heater. Set to #{Constants.SizingAuto} to have this field autosized.")
+    arg.setUnits("Btu/hr")
+    arg.setDefaultValue(Constants.SizingAuto)
+    args << arg
 
-      arg = OpenStudio::Measure::OSArgument::makeDoubleArgument("water_heater_fraction_dhw_load_served_#{n}", true)
-      arg.setDisplayName("Water Heater #{n}: Fraction DHW Load Served")
-      arg.setDescription("The dhw load served fraction of water heater #{n}.")
-      arg.setUnits("Frac")
-      arg.setDefaultValue(1)
-      args << arg
+    arg = OpenStudio::Measure::OSArgument::makeChoiceArgument("water_heater_efficiency_type", water_heater_efficiency_type_choices, true)
+    arg.setDisplayName("Water Heater: Efficiency Type")
+    arg.setDescription("The efficiency type of water heater.")
+    arg.setDefaultValue("EnergyFactor")
+    args << arg
 
-      arg = OpenStudio::Measure::OSArgument::makeStringArgument("water_heater_heating_capacity_#{n}", true)
-      arg.setDisplayName("Water Heater #{n}: Input Capacity")
-      arg.setDescription("The maximum energy input rating of water heater #{n}. Set to #{Constants.SizingAuto} to have this field autosized.")
-      arg.setUnits("Btu/hr")
-      arg.setDefaultValue(Constants.SizingAuto)
-      args << arg
+    arg = OpenStudio::Measure::OSArgument::makeStringArgument("water_heater_efficiency", true)
+    arg.setDisplayName("Water Heater: Efficiency")
+    arg.setDescription("EnergyFactor=Ratio of useful energy output from water heater to the total amount of energy delivered from the water heater. UniformEnergyFactor=The uniform energy factor of water heater.")
+    arg.setDefaultValue(Constants.Auto)
+    args << arg
 
-      arg = OpenStudio::Measure::OSArgument::makeChoiceArgument("water_heater_efficiency_type_#{n}", water_heater_efficiency_type_choices, true)
-      arg.setDisplayName("Water Heater #{n}: Efficiency Type")
-      arg.setDescription("The efficiency type of water heater #{n}.")
-      arg.setDefaultValue("EnergyFactor")
-      args << arg
+    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument("water_heater_recovery_efficiency", true)
+    arg.setDisplayName("Water Heater: Recovery Efficiency")
+    arg.setDescription("Ratio of energy delivered to water heater to the energy content of the fuel consumed by the water heater. Only used for non-electric water heaters.")
+    arg.setUnits("Frac")
+    arg.setDefaultValue(0.76)
+    args << arg
 
-      arg = OpenStudio::Measure::OSArgument::makeStringArgument("water_heater_efficiency_#{n}", true)
-      arg.setDisplayName("Water Heater #{n}: Efficiency")
-      arg.setDescription("EnergyFactor=Ratio of useful energy output from water heater #{n} to the total amount of energy delivered from the water heater. UniformEnergyFactor=The uniform energy factor of water heater #{n}.")
-      arg.setDefaultValue(Constants.Auto)
-      args << arg
+    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument("water_heater_standby_loss", true)
+    arg.setDisplayName("Water Heater: Standby Loss")
+    arg.setDescription("The standby loss of water heater.")
+    arg.setUnits("Frac")
+    arg.setDefaultValue(0)
+    args << arg
 
-      arg = OpenStudio::Measure::OSArgument::makeDoubleArgument("water_heater_recovery_efficiency_#{n}", true)
-      arg.setDisplayName("Water Heater #{n}: Recovery Efficiency")
-      arg.setDescription("Ratio of energy delivered to water heater #{n} to the energy content of the fuel consumed by the water heater. Only used for non-electric water heaters.")
-      arg.setUnits("Frac")
-      arg.setDefaultValue(0.76)
-      args << arg
-
-      arg = OpenStudio::Measure::OSArgument::makeBoolArgument("water_heater_uses_desuperheater_#{n}", true)
-      arg.setDisplayName("Water Heater #{n}: Uses Desuperheater")
-      arg.setDescription("Whether water heater #{n} uses desuperheater.")
-      arg.setDefaultValue(false)
-      args << arg
-
-      arg = OpenStudio::Measure::OSArgument::makeDoubleArgument("water_heater_standby_loss_#{n}", true)
-      arg.setDisplayName("Water Heater #{n}: Standby Loss")
-      arg.setDescription("The standby loss of water heater #{n}.")
-      arg.setUnits("Frac")
-      arg.setDefaultValue(0)
-      args << arg
-
-      arg = OpenStudio::Measure::OSArgument::makeDoubleArgument("water_heater_jacket_rvalue_#{n}", true)
-      arg.setDisplayName("Water Heater #{n}: Jacket R-value")
-      arg.setDescription("The jacket R-value of water heater #{n}.")
-      arg.setUnits("h-ft^2-R/Btu")
-      arg.setDefaultValue(0)
-      args << arg
-    end
+    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument("water_heater_jacket_rvalue", true)
+    arg.setDisplayName("Water Heater: Jacket R-value")
+    arg.setDescription("The jacket R-value of water heater.")
+    arg.setUnits("h-ft^2-R/Btu")
+    arg.setDefaultValue(0)
+    args << arg
 
     hot_water_distribution_system_type_choices = OpenStudio::StringVector.new
     hot_water_distribution_system_type_choices << "Standard"
@@ -2015,11 +1977,8 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
              :heat_pump_backup_fuel => runner.getStringArgumentValue("heat_pump_backup_fuel", user_arguments),
              :heat_pump_backup_heating_efficiency => runner.getStringArgumentValue("heat_pump_backup_heating_efficiency", user_arguments),
              :heat_pump_backup_heating_capacity => runner.getStringArgumentValue("heat_pump_backup_heating_capacity", user_arguments),
-             :hvac_distribution_system_type_dse => runner.getBoolArgumentValue("hvac_distribution_system_type_dse", user_arguments),
              :mini_split_is_ducted => runner.getBoolArgumentValue("mini_split_is_ducted", user_arguments),
              :evap_cooler_is_ducted => runner.getBoolArgumentValue("evap_cooler_is_ducted", user_arguments),
-             :annual_heating_dse => runner.getDoubleArgumentValue("annual_heating_dse", user_arguments),
-             :annual_cooling_dse => runner.getDoubleArgumentValue("annual_cooling_dse", user_arguments),
              :heating_setpoint_temp => runner.getDoubleArgumentValue("heating_setpoint_temp", user_arguments),
              :heating_setback_temp => runner.getDoubleArgumentValue("heating_setback_temp", user_arguments),
              :heating_setback_hours_per_week => runner.getDoubleArgumentValue("heating_setback_hours_per_week", user_arguments),
@@ -2049,18 +2008,16 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
              :has_whole_house_fan => runner.getBoolArgumentValue("has_whole_house_fan", user_arguments),
              :whole_house_fan_flow_rate => runner.getDoubleArgumentValue("whole_house_fan_flow_rate", user_arguments),
              :whole_house_fan_power => runner.getDoubleArgumentValue("whole_house_fan_power", user_arguments),
-             :water_heater_type => (1..Constants.MaxNumWaterHeaters).to_a.map { |n| runner.getStringArgumentValue("water_heater_type_#{n}", user_arguments) },
-             :water_heater_fuel_type => (1..Constants.MaxNumWaterHeaters).to_a.map { |n| runner.getStringArgumentValue("water_heater_fuel_type_#{n}", user_arguments) },
-             :water_heater_location => (1..Constants.MaxNumWaterHeaters).to_a.map { |n| runner.getStringArgumentValue("water_heater_location_#{n}", user_arguments) },
-             :water_heater_tank_volume => (1..Constants.MaxNumWaterHeaters).to_a.map { |n| runner.getStringArgumentValue("water_heater_tank_volume_#{n}", user_arguments) },
-             :water_heater_fraction_dhw_load_served => (1..Constants.MaxNumWaterHeaters).to_a.map { |n| runner.getDoubleArgumentValue("water_heater_fraction_dhw_load_served_#{n}", user_arguments) },
-             :water_heater_heating_capacity => (1..Constants.MaxNumWaterHeaters).to_a.map { |n| runner.getStringArgumentValue("water_heater_heating_capacity_#{n}", user_arguments) },
-             :water_heater_efficiency_type => (1..Constants.MaxNumWaterHeaters).to_a.map { |n| runner.getStringArgumentValue("water_heater_efficiency_type_#{n}", user_arguments) },
-             :water_heater_efficiency => (1..Constants.MaxNumWaterHeaters).to_a.map { |n| runner.getStringArgumentValue("water_heater_efficiency_#{n}", user_arguments) },
-             :water_heater_recovery_efficiency => (1..Constants.MaxNumWaterHeaters).to_a.map { |n| runner.getDoubleArgumentValue("water_heater_recovery_efficiency_#{n}", user_arguments) },
-             :water_heater_uses_desuperheater => (1..Constants.MaxNumWaterHeaters).to_a.map { |n| runner.getBoolArgumentValue("water_heater_uses_desuperheater_#{n}", user_arguments) },
-             :water_heater_standby_loss => (1..Constants.MaxNumWaterHeaters).to_a.map { |n| runner.getDoubleArgumentValue("water_heater_standby_loss_#{n}", user_arguments) },
-             :water_heater_jacket_rvalue => (1..Constants.MaxNumWaterHeaters).to_a.map { |n| runner.getDoubleArgumentValue("water_heater_jacket_rvalue_#{n}", user_arguments) },
+             :water_heater_type => runner.getStringArgumentValue("water_heater_type", user_arguments),
+             :water_heater_fuel_type => runner.getStringArgumentValue("water_heater_fuel_type", user_arguments),
+             :water_heater_location => runner.getStringArgumentValue("water_heater_location", user_arguments),
+             :water_heater_tank_volume => runner.getStringArgumentValue("water_heater_tank_volume", user_arguments),
+             :water_heater_heating_capacity => runner.getStringArgumentValue("water_heater_heating_capacity", user_arguments),
+             :water_heater_efficiency_type => runner.getStringArgumentValue("water_heater_efficiency_type", user_arguments),
+             :water_heater_efficiency => runner.getStringArgumentValue("water_heater_efficiency", user_arguments),
+             :water_heater_recovery_efficiency => runner.getDoubleArgumentValue("water_heater_recovery_efficiency", user_arguments),
+             :water_heater_standby_loss => runner.getDoubleArgumentValue("water_heater_standby_loss", user_arguments),
+             :water_heater_jacket_rvalue => runner.getDoubleArgumentValue("water_heater_jacket_rvalue", user_arguments),
              :hot_water_distribution_system_type => runner.getStringArgumentValue("hot_water_distribution_system_type", user_arguments),
              :standard_piping_length => runner.getStringArgumentValue("standard_piping_length", user_arguments),
              :recirculation_control_type => runner.getStringArgumentValue("recirculation_control_type", user_arguments),
@@ -2169,11 +2126,8 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
   def check_for_argument_errors(args)
     errors = []
 
-    error = (["heat pump water heater"].include? args[:water_heater_type][0] and args[:water_heater_fuel_type][0] != "electricity")
-    errors << "water_heater_type_1=#{args[:water_heater_type][0]} and water_heater_fuel_type_1=#{args[:water_heater_fuel_type][0]}" if error
-
-    error = (["heat pump water heater"].include? args[:water_heater_type][1] and args[:water_heater_fuel_type][1] != "electricity")
-    errors << "water_heater_type_2=#{args[:water_heater_type][1]} and water_heater_fuel_type_2=#{args[:water_heater_fuel_type][1]}" if error
+    error = (["heat pump water heater"].include? args[:water_heater_type] and args[:water_heater_fuel_type] != "electricity")
+    errors << "water_heater_type_1=#{args[:water_heater_type]} and water_heater_fuel_type_1=#{args[:water_heater_fuel_type]}" if error
 
     return errors
   end
@@ -2220,160 +2174,60 @@ end
 
 class HPXMLFile
   def self.create(runner, model, args)
-    hpxml_values = { :xml_type => "HPXML",
-                     :xml_generated_by => "BuildResidentialHPXML",
-                     :transaction => "create",
-                     :building_id => "MyBuilding",
-                     :event_type => "proposed workscope" }
-
-    hpxml_doc = HPXML.create_hpxml(**hpxml_values)
-    hpxml = hpxml_doc.elements["HPXML"]
-
     success = create_geometry_envelope(runner, model, args)
     return false if not success
 
     success = create_schedules(runner, model, args)
     return false if not success
 
-    site_values = get_site_values(runner, args)
-    site_neighbors_values = get_site_neighbors_values(runner, args)
-    building_occupancy_values = get_building_occupancy_values(runner, args)
-    building_construction_values = get_building_construction_values(runner, args)
-    climate_and_risk_zones_values = get_climate_and_risk_zones_values(runner, args)
-    air_infiltration_measurement_values = get_air_infiltration_measurement_values(runner, args)
-    attic_values = get_attic_values(runner, model, args)
-    foundation_values = get_foundation_values(runner, model, args)
-    roofs_values = get_roofs_values(runner, model, args)
-    rim_joists_values = get_rim_joists_values(runner, model, args)
-    walls_values = get_walls_values(runner, model, args)
-    foundation_walls_values = get_foundation_walls_values(runner, model, args)
-    framefloors_values = get_framefloors_values(runner, model, args)
-    slabs_values = get_slabs_values(runner, model, args)
-    windows_values = get_windows_values(runner, model, args)
-    skylights_values = get_skylights_values(runner, model, args)
-    doors_values = get_doors_values(runner, model, args)
-    hvac_distributions_values = []
-    heating_systems_values, hvac_distributions_values = get_heating_systems_values(runner, args, hvac_distributions_values)
-    cooling_systems_values, hvac_distributions_values = get_cooling_systems_values(runner, args, hvac_distributions_values)
-    heat_pumps_values, hvac_distributions_values = get_heat_pumps_values(runner, args, hvac_distributions_values)
-    hvac_control_values = get_hvac_control_values(runner, args)
-    duct_leakage_measurements_values = get_duct_leakage_measurements_values(runner, args, hvac_distributions_values)
-    ducts_values = get_ducts_values(runner, args, hvac_distributions_values)
-    ventilation_fans_values = get_ventilation_fan_values(runner, args, hvac_distributions_values)
-    water_heating_systems_values = get_water_heating_system_values(runner, args, heating_systems_values, cooling_systems_values, heat_pumps_values)
-    hot_water_distribution_values = get_hot_water_distribution_values(runner, args)
-    water_fixtures_values = get_water_fixtures_values(runner, args)
-    solar_thermal_systems_values = get_solar_thermal_values(runner, args, water_heating_systems_values)
-    pv_systems_values = get_pv_system_values(runner, args)
-    clothes_washer_values = get_clothes_washer_values(runner, args)
-    clothes_dryer_values = get_clothes_dryer_values(runner, args)
-    dishwasher_values = get_dishwasher_values(runner, args)
-    refrigerator_values = get_refrigerator_values(runner, args)
-    cooking_range_values = get_cooking_range_values(runner, args)
-    oven_values = get_oven_values(runner, args)
-    lighting_values = get_lighting_values(runner, args)
-    ceiling_fans_values = get_ceiling_fan_values(runner, args)
-    plug_loads_values = get_plug_loads_values(runner, args)
-    misc_load_schedule_values = get_misc_load_schedule_values(runner, args)
+    hpxml = HPXML.new
 
-    HPXML.add_site(hpxml: hpxml, **site_values) unless site_values.nil?
-    site_neighbors_values.each do |site_neighbor_values|
-      HPXML.add_site_neighbor(hpxml: hpxml, **site_neighbor_values)
-    end
-    HPXML.add_building_occupancy(hpxml: hpxml, **building_occupancy_values) unless building_occupancy_values.empty?
-    HPXML.add_building_construction(hpxml: hpxml, **building_construction_values)
-    HPXML.add_climate_and_risk_zones(hpxml: hpxml, **climate_and_risk_zones_values)
-    HPXML.add_air_infiltration_measurement(hpxml: hpxml, **air_infiltration_measurement_values)
-    HPXML.add_attic(hpxml: hpxml, **attic_values) unless attic_values.empty?
-    HPXML.add_foundation(hpxml: hpxml, **foundation_values) unless foundation_values.empty?
-    roofs_values.each do |roof_values|
-      HPXML.add_roof(hpxml: hpxml, **roof_values)
-    end
-    rim_joists_values.each do |rim_joist_values|
-      HPXML.add_rim_joist(hpxml: hpxml, **rim_joist_values)
-    end
-    walls_values.each do |wall_values|
-      HPXML.add_wall(hpxml: hpxml, **wall_values)
-    end
-    foundation_walls_values.each do |foundation_wall_values|
-      HPXML.add_foundation_wall(hpxml: hpxml, **foundation_wall_values)
-    end
-    framefloors_values.each do |framefloor_values|
-      HPXML.add_framefloor(hpxml: hpxml, **framefloor_values)
-    end
-    slabs_values.each do |slab_values|
-      HPXML.add_slab(hpxml: hpxml, **slab_values)
-    end
-    windows_values.each do |window_values|
-      HPXML.add_window(hpxml: hpxml, **window_values)
-    end
-    skylights_values.each do |skylight_values|
-      HPXML.add_skylight(hpxml: hpxml, **skylight_values)
-    end
-    doors_values.each do |door_values|
-      HPXML.add_door(hpxml: hpxml, **door_values)
-    end
-    heating_systems_values.each do |heating_system_values|
-      HPXML.add_heating_system(hpxml: hpxml, **heating_system_values)
-    end
-    cooling_systems_values.each do |cooling_system_values|
-      HPXML.add_cooling_system(hpxml: hpxml, **cooling_system_values)
-    end
-    heat_pumps_values.each do |heat_pump_values|
-      HPXML.add_heat_pump(hpxml: hpxml, **heat_pump_values)
-    end
-    HPXML.add_hvac_control(hpxml: hpxml, **hvac_control_values) unless hvac_control_values.empty?
-    hvac_distributions_values.each_with_index do |hvac_distribution_values, i|
-      hvac_distribution = HPXML.add_hvac_distribution(hpxml: hpxml, **hvac_distribution_values)
-      air_distribution = hvac_distribution.elements["DistributionSystemType/AirDistribution"]
-      next if air_distribution.nil?
-
-      duct_leakage_measurements_values[i].each do |duct_leakage_measurement_values|
-        HPXML.add_duct_leakage_measurement(air_distribution: air_distribution, **duct_leakage_measurement_values)
-      end
-      ducts_values[i].each do |duct_values|
-        HPXML.add_ducts(air_distribution: air_distribution, **duct_values)
-      end
-    end
-    ventilation_fans_values.each do |ventilation_fan_values|
-      HPXML.add_ventilation_fan(hpxml: hpxml, **ventilation_fan_values)
-    end
-    water_heating_systems_values.each do |water_heating_system_values|
-      HPXML.add_water_heating_system(hpxml: hpxml, **water_heating_system_values)
-    end
-    HPXML.add_hot_water_distribution(hpxml: hpxml, **hot_water_distribution_values) unless hot_water_distribution_values.empty?
-    water_fixtures_values.each do |water_fixture_values|
-      HPXML.add_water_fixture(hpxml: hpxml, **water_fixture_values)
-    end
-    solar_thermal_systems_values.each do |solar_thermal_system_values|
-      HPXML.add_solar_thermal_system(hpxml: hpxml, **solar_thermal_system_values)
-    end
-    pv_systems_values.each do |pv_system_values|
-      HPXML.add_pv_system(hpxml: hpxml, **pv_system_values)
-    end
-    HPXML.add_clothes_washer(hpxml: hpxml, **clothes_washer_values) unless clothes_washer_values.empty?
-    HPXML.add_clothes_dryer(hpxml: hpxml, **clothes_dryer_values) unless clothes_dryer_values.empty?
-    HPXML.add_dishwasher(hpxml: hpxml, **dishwasher_values) unless dishwasher_values.empty?
-    HPXML.add_refrigerator(hpxml: hpxml, **refrigerator_values) unless refrigerator_values.empty?
-    HPXML.add_cooking_range(hpxml: hpxml, **cooking_range_values) unless cooking_range_values.empty?
-    HPXML.add_oven(hpxml: hpxml, **oven_values) unless oven_values.empty?
-    HPXML.add_lighting(hpxml: hpxml, **lighting_values) unless lighting_values.empty?
-    ceiling_fans_values.each do |ceiling_fan_values|
-      HPXML.add_ceiling_fan(hpxml: hpxml, **ceiling_fan_values)
-    end
-    plug_loads_values.each do |plug_load_values|
-      HPXML.add_plug_load(hpxml: hpxml, **plug_load_values)
-    end
-    HPXML.add_misc_loads_schedule(hpxml: hpxml, **misc_load_schedule_values) unless misc_load_schedule_values.empty?
-
-    HPXML.add_extension(parent: hpxml_doc.elements["/HPXML/Building/BuildingDetails"],
-                        extensions: { "UnitMultiplier": args[:unit_multiplier] })
+    set_header(hpxml, runner, args)
+    set_site(hpxml, runner, args)
+    set_neighbor_buildings(hpxml, runner, args)
+    set_building_occupancy(hpxml, runner, args)
+    set_building_construction(hpxml, runner, args)
+    set_climate_and_risk_zones(hpxml, runner, args)
+    set_air_infiltration_measurements(hpxml, runner, args)
+    set_attics(hpxml, runner, model, args)
+    set_foundations(hpxml, runner, model, args)
+    set_roofs(hpxml, runner, model, args)
+    set_rim_joists(hpxml, runner, model, args)
+    set_walls(hpxml, runner, model, args)
+    set_foundation_walls(hpxml, runner, model, args)
+    set_frame_floors(hpxml, runner, model, args)
+    set_slabs(hpxml, runner, model, args)
+    set_windows(hpxml, runner, model, args)
+    set_skylights(hpxml, runner, model, args)
+    set_doors(hpxml, runner, model, args)
+    set_heating_systems(hpxml, runner, args)
+    set_cooling_systems(hpxml, runner, args)
+    set_heat_pumps(hpxml, runner, args)
+    set_hvac_distribution(hpxml, runner, args)
+    set_hvac_control(hpxml, runner, args)
+    set_ventilation_fans(hpxml, runner, args)
+    set_water_heating_systems(hpxml, runner, args)
+    set_hot_water_distribution(hpxml, runner, args)
+    set_water_fixtures(hpxml, runner, args)
+    set_solar_thermal(hpxml, runner, args)
+    set_pv_systems(hpxml, runner, args)
+    set_clothes_washer(hpxml, runner, args)
+    set_clothes_dryer(hpxml, runner, args)
+    set_dishwasher(hpxml, runner, args)
+    set_refrigerator(hpxml, runner, args)
+    set_cooking_range(hpxml, runner, args)
+    set_oven(hpxml, runner, args)
+    set_lighting(hpxml, runner, args)
+    set_ceiling_fans(hpxml, runner, args)
+    set_plug_loads(hpxml, runner, args)
+    set_misc_loads_schedule(hpxml, runner, args)
 
     success = remove_geometry_envelope(model)
     return false if not success
 
-    enclosure = hpxml_doc.elements["HPXML/Building/BuildingDetails/Enclosure"]
-    HPXML.collapse_enclosure(enclosure)
+    hpxml_doc = hpxml.to_rexml()
+    _add_extension(parent: hpxml_doc.elements["/HPXML/Building/BuildingDetails"],
+                   extensions: { "UnitMultiplier": args[:unit_multiplier] })
 
     return hpxml_doc
   end
@@ -2434,15 +2288,21 @@ class HPXMLFile
     return true
   end
 
-  def self.get_site_values(runner, args)
-    return {} if args[:shelter_coefficient] == Constants.Auto
-
-    site_values = { :shelter_coefficient => args[:shelter_coefficient] }
-    return site_values
+  def self.set_header(hpxml, runner, args)
+    hpxml.set_header(:xml_type => "HPXML",
+                     :xml_generated_by => "BuildResidentialHPXML",
+                     :transaction => "create",
+                     :building_id => "MyBuilding",
+                     :event_type => "proposed workscope")
   end
 
-  def self.get_site_neighbors_values(runner, args)
-    site_neighbors_values = []
+  def self.set_site(hpxml, runner, args)
+    return if args[:shelter_coefficient] == Constants.Auto
+
+    hpxml.site.shelter_coefficient = args[:shelter_coefficient]
+  end
+
+  def self.set_neighbor_buildings(hpxml, runner, args)
     args[:neighbor_distance].each_with_index do |distance, i|
       next if distance == 0
 
@@ -2456,30 +2316,28 @@ class HPXMLFile
         azimuth = Geometry.get_abs_azimuth(Constants.CoordRelative, 270, args[:orientation], 0)
       end
 
+      height = nil
       if distance > 0
         if args[:neighbor_height][i] > 0
           height = args[:neighbor_height][i]
         end
       end
 
-      site_neighbors_values << { :azimuth => azimuth,
-                                 :distance => distance,
-                                 :height => height }
+      hpxml.neighbor_buildings.add(:azimuth => azimuth,
+                                   :distance => distance,
+                                   :height => height)
     end
-    return site_neighbors_values
   end
 
-  def self.get_building_occupancy_values(runner, args)
-    building_occupancy_values = {}
+  def self.set_building_occupancy(hpxml, runner, args)
     unless args[:num_occupants] == Constants.Auto
-      building_occupancy_values = { :number_of_residents => args[:num_occupants] }
+      hpxml.building_occupancy.number_of_residents = args[:num_occupants]
     end
-    building_occupancy_values[:schedules_output_path] = args[:schedules_output_path]
-    building_occupancy_values[:schedules_column_name] = "occupants"
-    return building_occupancy_values
+    hpxml.building_occupancy.schedules_output_path = args[:schedules_output_path]
+    hpxml.building_occupancy.schedules_column_name = "occupants"
   end
 
-  def self.get_building_construction_values(runner, args)
+  def self.set_building_construction(hpxml, runner, args)
     number_of_conditioned_floors_above_grade = args[:num_floors]
 
     number_of_conditioned_floors = number_of_conditioned_floors_above_grade
@@ -2495,60 +2353,59 @@ class HPXMLFile
 
     fraction_of_operable_window_area = args[:window_fraction_of_operable_area]
 
-    building_construction_values = { :number_of_conditioned_floors => number_of_conditioned_floors,
-                                     :number_of_conditioned_floors_above_grade => number_of_conditioned_floors_above_grade,
-                                     :number_of_bedrooms => args[:num_bedrooms],
-                                     :number_of_bathrooms => number_of_bathrooms,
-                                     :conditioned_floor_area => args[:cfa],
-                                     :conditioned_building_volume => conditioned_building_volume,
-                                     :fraction_of_operable_window_area => fraction_of_operable_window_area }
-    return building_construction_values
+    hpxml.set_building_construction(:number_of_conditioned_floors => number_of_conditioned_floors,
+                                    :number_of_conditioned_floors_above_grade => number_of_conditioned_floors_above_grade,
+                                    :number_of_bedrooms => args[:num_bedrooms],
+                                    :number_of_bathrooms => number_of_bathrooms,
+                                    :conditioned_floor_area => args[:cfa],
+                                    :conditioned_building_volume => conditioned_building_volume,
+                                    :fraction_of_operable_window_area => fraction_of_operable_window_area)
   end
 
-  def self.get_climate_and_risk_zones_values(runner, args)
-    climate_and_risk_zones_values = { :weather_station_id => "WeatherStation",
-                                      :weather_station_name => args[:weather_station_epw_filename].gsub(".epw", ""),
-                                      :weather_station_epw_filename => args[:weather_station_epw_filename] }
-    return climate_and_risk_zones_values
+  def self.set_climate_and_risk_zones(hpxml, runner, args)
+    hpxml.set_climate_and_risk_zones(:weather_station_id => "WeatherStation",
+                                     :weather_station_name => args[:weather_station_epw_filename].gsub(".epw", ""),
+                                     :weather_station_epw_filename => args[:weather_station_epw_filename])
   end
 
-  def self.get_attic_values(runner, model, args)
-    return {} if args[:unit_type] == "multifamily"
+  def self.set_attics(hpxml, runner, model, args)
+    return if args[:unit_type] == "multifamily"
 
-    attic_values = {}
     if args[:attic_type] == "attic - vented"
-      attic_values[:attic_type] = "VentedAttic"
+      hpxml.attics.add(:id => "VentedAttic",
+                       :attic_type => "VentedAttic")
     elsif args[:attic_type] == "attic - unvented"
-      attic_values[:attic_type] = "UnventedAttic"
+      hpxml.attics.add(:id => "UnventedAttic",
+                       :attic_type => "UnventedAttic")
     end
-    attic_values[:id] = attic_values[:attic_type] unless attic_values[:attic_type].nil?
-    return attic_values
   end
 
-  def self.get_foundation_values(runner, model, args)
-    return {} if args[:unit_type] == "multifamily"
+  def self.set_foundations(hpxml, runner, model, args)
+    return if args[:unit_type] == "multifamily"
 
-    foundation_values = {}
     if args[:foundation_type] == "slab"
-      foundation_values[:foundation_type] = "SlabOnGrade"
+      hpxml.foundations.add(:id => "SlabOnGrade",
+                            :foundation_type => "SlabOnGrade")
     elsif args[:foundation_type] == "crawlspace - vented"
-      foundation_values[:foundation_type] = "VentedCrawlspace"
-      foundation_values[:vented_crawlspace_sla] = args[:vented_crawlspace_sla]
+      hpxml.foundations.add(:id => "VentedCrawlspace",
+                            :foundation_type => "VentedCrawlspace",
+                            :vented_crawlspace_sla => args[:vented_crawlspace_sla])
     elsif args[:foundation_type] == "crawlspace - unvented"
-      foundation_values[:foundation_type] = "UnventedCrawlspace"
+      hpxml.foundations.add(:id => "UnventedCrawlspace",
+                            :foundation_type => "UnventedCrawlspace")
     elsif args[:foundation_type] == "basement - unconditioned"
-      foundation_values[:foundation_type] = "UnconditionedBasement"
-      foundation_values[:unconditioned_basement_thermal_boundary] = "frame floor" # FIXME: Calculate
+      hpxml.foundations.add(:id => "UnconditionedBasement",
+                            :foundation_type => "UnconditionedBasement")
     elsif args[:foundation_type] == "basement - conditioned"
-      foundation_values[:foundation_type] = "ConditionedBasement"
+      hpxml.foundations.add(:id => "ConditionedBasement",
+                            :foundation_type => "ConditionedBasement")
     elsif args[:foundation_type] == "ambient"
-      foundation_values[:foundation_type] = "Ambient"
+      hpxml.foundations.add(:id => "Ambient",
+                            :foundation_type => "Ambient")
     end
-    foundation_values[:id] = foundation_values[:foundation_type]
-    return foundation_values
   end
 
-  def self.get_air_infiltration_measurement_values(runner, args)
+  def self.set_air_infiltration_measurements(hpxml, runner, args)
     if args[:living_air_leakage_units] == "ACH50"
       house_pressure = 50
       unit_of_measure = "ACH"
@@ -2564,13 +2421,12 @@ class HPXMLFile
       infiltration_volume = args[:cfa] * args[:wall_height]
     end
 
-    air_infiltration_measurement_values = { :id => "InfiltrationMeasurement",
+    hpxml.air_infiltration_measurements.add(:id => "InfiltrationMeasurement",
                                             :house_pressure => house_pressure,
                                             :unit_of_measure => unit_of_measure,
                                             :air_leakage => air_leakage,
                                             :constant_ach_natural => constant_ach_natural,
-                                            :infiltration_volume => infiltration_volume }
-    return air_infiltration_measurement_values
+                                            :infiltration_volume => infiltration_volume)
   end
 
   def self.get_adjacent_to(model, surface)
@@ -2605,8 +2461,7 @@ class HPXMLFile
     end
   end
 
-  def self.get_roofs_values(runner, model, args)
-    roofs_values = []
+  def self.set_roofs(hpxml, runner, model, args)
     model.getSurfaces.each do |surface|
       next unless ["Outdoors"].include? surface.outsideBoundaryCondition
       next if surface.surfaceType != "RoofCeiling"
@@ -2618,37 +2473,31 @@ class HPXMLFile
         pitch = 0.0
       end
 
-      roof_values = { :id => "#{surface.name}",
+      hpxml.roofs.add(:id => "#{surface.name}",
                       :interior_adjacent_to => get_adjacent_to(model, surface),
                       :area => UnitConversions.convert(surface.grossArea, "m^2", "ft^2").round,
                       :solar_absorptance => args[:roof_solar_absorptance],
                       :emittance => args[:roof_emittance],
                       :pitch => pitch,
-                      :radiant_barrier => args[:roof_radiant_barrier] }
+                      :radiant_barrier => args[:roof_radiant_barrier])
 
       if interior_adjacent_to.include? "attic"
-        roof_values[:insulation_assembly_r_value] = args[:attic_ceiling_r] # FIXME: Calculate
+        hpxml.roofs[-1].insulation_assembly_r_value = args[:attic_ceiling_r] # FIXME: Calculate
       elsif interior_adjacent_to == "living space"
-        roof_values[:insulation_assembly_r_value] = args[:roof_ceiling_r] # FIXME: Calculate
+        hpxml.roofs[-1].insulation_assembly_r_value = args[:roof_ceiling_r] # FIXME: Calculate
       elsif interior_adjacent_to == "garage"
-        roof_values[:insulation_assembly_r_value] = args[:attic_ceiling_r] # FIXME: Calculate
+        hpxml.roofs[-1].insulation_assembly_r_value = args[:attic_ceiling_r] # FIXME: Calculate
       end
-
-      roofs_values << roof_values
     end
-    return roofs_values
   end
 
-  def self.get_rim_joists_values(runner, model, args)
-    rim_joists_values = []
+  def self.set_rim_joists(hpxml, runner, model, args)
     model.getSurfaces.each do |surface|
       # TODO
     end
-    return rim_joists_values
   end
 
-  def self.get_walls_values(runner, model, args)
-    walls_values = []
+  def self.set_walls(hpxml, runner, model, args)
     model.getSurfaces.each do |surface|
       next if surface.surfaceType != "Wall"
       next if ["ambient"].include? surface.space.get.spaceType.get.standardsSpaceType.get # FIXME
@@ -2670,58 +2519,52 @@ class HPXMLFile
         wall_type = "WoodStud"
       end
 
-      wall_values = { :id => "#{surface.name}",
+      hpxml.walls.add(:id => "#{surface.name}",
                       :exterior_adjacent_to => exterior_adjacent_to,
                       :interior_adjacent_to => interior_adjacent_to,
                       :wall_type => wall_type,
                       :area => UnitConversions.convert(surface.grossArea, "m^2", "ft^2").round,
                       :solar_absorptance => args[:wall_solar_absorptance],
-                      :emittance => args[:wall_emittance] }
+                      :emittance => args[:wall_emittance])
 
       if interior_adjacent_to == "living space" and exterior_adjacent_to == "outside"
-        wall_values[:insulation_assembly_r_value] = args[:wall_conditioned_r]
+        hpxml.walls[-1].insulation_assembly_r_value = args[:wall_conditioned_r]
       elsif interior_adjacent_to == "living space" and exterior_adjacent_to == "garage"
-        wall_values[:insulation_assembly_r_value] = args[:wall_conditioned_r]
+        hpxml.walls[-1].insulation_assembly_r_value = args[:wall_conditioned_r]
       elsif interior_adjacent_to == "living space" and exterior_adjacent_to == "attic - unvented"
-        wall_values[:insulation_assembly_r_value] = args[:wall_unconditioned_r]
+        hpxml.walls[-1].insulation_assembly_r_value = args[:wall_unconditioned_r]
       elsif interior_adjacent_to == "living space" and exterior_adjacent_to == "attic - vented"
-        wall_values[:insulation_assembly_r_value] = args[:wall_unconditioned_r]
+        hpxml.walls[-1].insulation_assembly_r_value = args[:wall_unconditioned_r]
       elsif interior_adjacent_to == "living space" and exterior_adjacent_to == "other housing unit"
-        wall_values[:insulation_assembly_r_value] = args[:wall_unconditioned_r]
+        hpxml.walls[-1].insulation_assembly_r_value = args[:wall_unconditioned_r]
       elsif ["attic - unvented", "attic - vented", "garage"].include? interior_adjacent_to
-        wall_values[:insulation_assembly_r_value] = args[:wall_unconditioned_r]
+        hpxml.walls[-1].insulation_assembly_r_value = args[:wall_unconditioned_r]
       end
-
-      walls_values << wall_values
     end
-    return walls_values
   end
 
-  def self.get_foundation_walls_values(runner, model, args)
-    foundation_walls_values = []
+  def self.set_foundation_walls(hpxml, runner, model, args)
     model.getSurfaces.each do |surface|
       next unless ["Foundation"].include? surface.outsideBoundaryCondition
       next if surface.surfaceType != "Wall"
 
-      foundation_walls_values << { :id => "#{surface.name}",
-                                   :exterior_adjacent_to => "ground",
-                                   :interior_adjacent_to => get_adjacent_to(model, surface),
-                                   :height => args[:foundation_height],
-                                   :area => UnitConversions.convert(surface.grossArea, "m^2", "ft^2").round,
-                                   :thickness => 8,
-                                   :depth_below_grade => args[:foundation_wall_depth_below_grade],
-                                   :insulation_interior_r_value => 0,
-                                   :insulation_interior_distance_to_top => 0,
-                                   :insulation_interior_distance_to_bottom => 0,
-                                   :insulation_exterior_r_value => args[:foundation_wall_r],
-                                   :insulation_exterior_distance_to_top => args[:foundation_wall_distance_to_top],
-                                   :insulation_exterior_distance_to_bottom => args[:foundation_wall_distance_to_bottom] }
+      hpxml.foundation_walls.add(:id => "#{surface.name}",
+                                 :exterior_adjacent_to => "ground",
+                                 :interior_adjacent_to => get_adjacent_to(model, surface),
+                                 :height => args[:foundation_height],
+                                 :area => UnitConversions.convert(surface.grossArea, "m^2", "ft^2").round,
+                                 :thickness => 8,
+                                 :depth_below_grade => args[:foundation_wall_depth_below_grade],
+                                 :insulation_interior_r_value => 0,
+                                 :insulation_interior_distance_to_top => 0,
+                                 :insulation_interior_distance_to_bottom => 0,
+                                 :insulation_exterior_r_value => args[:foundation_wall_r],
+                                 :insulation_exterior_distance_to_top => args[:foundation_wall_distance_to_top],
+                                 :insulation_exterior_distance_to_bottom => args[:foundation_wall_distance_to_bottom])
     end
-    return foundation_walls_values
   end
 
-  def self.get_framefloors_values(runner, model, args)
-    framefloors_values = []
+  def self.set_frame_floors(hpxml, runner, model, args)
     model.getSurfaces.each do |surface|
       next if surface.outsideBoundaryCondition == "Foundation"
       next unless ["Floor", "RoofCeiling"].include? surface.surfaceType
@@ -2744,40 +2587,36 @@ class HPXMLFile
       next if surface.surfaceType == "RoofCeiling" and exterior_adjacent_to == "outside"
       next if ["living space", "basement - conditioned"].include? exterior_adjacent_to
 
-      framefloor_values = { :id => "#{surface.name}",
-                            :exterior_adjacent_to => exterior_adjacent_to,
-                            :interior_adjacent_to => interior_adjacent_to,
-                            :area => UnitConversions.convert(surface.grossArea, "m^2", "ft^2").round }
+      hpxml.frame_floors.add(:id => "#{surface.name}",
+                             :exterior_adjacent_to => exterior_adjacent_to,
+                             :interior_adjacent_to => interior_adjacent_to,
+                             :area => UnitConversions.convert(surface.grossArea, "m^2", "ft^2").round)
 
       if interior_adjacent_to == "living space" and exterior_adjacent_to.include? "attic - unvented"
-        framefloor_values[:insulation_assembly_r_value] = args[:attic_floor_conditioned_r]
+        hpxml.frame_floors[-1].insulation_assembly_r_value = args[:attic_floor_conditioned_r]
       elsif interior_adjacent_to == "living space" and exterior_adjacent_to.include? "attic - vented"
-        framefloor_values[:insulation_assembly_r_value] = args[:attic_floor_conditioned_r]
+        hpxml.frame_floors[-1].insulation_assembly_r_value = args[:attic_floor_conditioned_r]
       elsif interior_adjacent_to == "living space" and exterior_adjacent_to.include? "crawlspace"
-        framefloor_values[:insulation_assembly_r_value] = args[:foundation_ceiling_r]
+        hpxml.frame_floors[-1].insulation_assembly_r_value = args[:foundation_ceiling_r]
       elsif interior_adjacent_to == "living space" and exterior_adjacent_to.include? "basement - unconditioned"
-        framefloor_values[:insulation_assembly_r_value] = args[:foundation_ceiling_r]
+        hpxml.frame_floors[-1].insulation_assembly_r_value = args[:foundation_ceiling_r]
       elsif interior_adjacent_to == "living space" and exterior_adjacent_to.include? "outside"
-        framefloor_values[:insulation_assembly_r_value] = args[:foundation_ceiling_r]
+        hpxml.frame_floors[-1].insulation_assembly_r_value = args[:foundation_ceiling_r]
       elsif interior_adjacent_to == "garage" and exterior_adjacent_to == "attic - unvented"
-        framefloor_values[:insulation_assembly_r_value] = args[:attic_floor_unconditioned_r]
+        hpxml.frame_floors[-1].insulation_assembly_r_value = args[:attic_floor_unconditioned_r]
       elsif interior_adjacent_to == "garage" and exterior_adjacent_to == "attic - vented"
-        framefloor_values[:insulation_assembly_r_value] = args[:attic_floor_unconditioned_r]
+        hpxml.frame_floors[-1].insulation_assembly_r_value = args[:attic_floor_unconditioned_r]
       elsif interior_adjacent_to == "living space" and exterior_adjacent_to == "garage"
-        framefloor_values[:insulation_assembly_r_value] = args[:attic_floor_conditioned_r]
+        hpxml.frame_floors[-1].insulation_assembly_r_value = args[:attic_floor_conditioned_r]
       elsif interior_adjacent_to == "living space" and exterior_adjacent_to == "other housing unit below"
-        framefloor_values[:insulation_assembly_r_value] = args[:attic_floor_unconditioned_r]
+        hpxml.frame_floors[-1].insulation_assembly_r_value = args[:attic_floor_unconditioned_r]
       elsif interior_adjacent_to == "living space" and exterior_adjacent_to == "other housing unit above"
-        framefloor_values[:insulation_assembly_r_value] = args[:attic_floor_unconditioned_r]
+        hpxml.frame_floors[-1].insulation_assembly_r_value = args[:attic_floor_unconditioned_r]
       end
-
-      framefloors_values << framefloor_values
     end
-    return framefloors_values
   end
 
-  def self.get_slabs_values(runner, model, args)
-    slabs_values = []
+  def self.set_slabs(hpxml, runner, model, args)
     model.getSurfaces.each do |surface|
       next unless ["Foundation"].include? surface.outsideBoundaryCondition
       next if surface.surfaceType != "Floor"
@@ -2806,26 +2645,23 @@ class HPXMLFile
         thickness = 0.0
       end
 
-      slabs_values << { :id => "#{surface.name}",
-                        :interior_adjacent_to => interior_adjacent_to,
-                        :area => UnitConversions.convert(surface.grossArea, "m^2", "ft^2").round,
-                        :thickness => thickness,
-                        :exposed_perimeter => exposed_perimeter,
-                        :perimeter_insulation_depth => args[:perimeter_insulation_depth],
-                        :under_slab_insulation_width => under_slab_insulation_width,
-                        :perimeter_insulation_r_value => args[:perimeter_insulation_r_value],
-                        :under_slab_insulation_r_value => args[:under_slab_insulation_r_value],
-                        :under_slab_insulation_spans_entire_slab => under_slab_insulation_spans_entire_slab,
-                        :depth_below_grade => depth_below_grade,
-                        :carpet_fraction => args[:carpet_fraction],
-                        :carpet_r_value => args[:carpet_r_value] }
+      hpxml.slabs.add(:id => "#{surface.name}",
+                      :interior_adjacent_to => interior_adjacent_to,
+                      :area => UnitConversions.convert(surface.grossArea, "m^2", "ft^2").round,
+                      :thickness => thickness,
+                      :exposed_perimeter => exposed_perimeter,
+                      :perimeter_insulation_depth => args[:perimeter_insulation_depth],
+                      :under_slab_insulation_width => under_slab_insulation_width,
+                      :perimeter_insulation_r_value => args[:perimeter_insulation_r_value],
+                      :under_slab_insulation_r_value => args[:under_slab_insulation_r_value],
+                      :under_slab_insulation_spans_entire_slab => under_slab_insulation_spans_entire_slab,
+                      :depth_below_grade => depth_below_grade,
+                      :carpet_fraction => args[:carpet_fraction],
+                      :carpet_r_value => args[:carpet_r_value])
     end
-    return slabs_values
   end
 
-  def self.get_windows_values(runner, model, args)
-    windows_values = []
-
+  def self.set_windows(hpxml, runner, model, args)
     model.getSurfaces.each do |surface|
       surface.subSurfaces.each do |sub_surface|
         next if sub_surface.subSurfaceType != "FixedWindow"
@@ -2896,7 +2732,7 @@ class HPXMLFile
           interior_shading_factor_winter = 0.0
         end
 
-        window_values = { :id => "#{sub_surface.name}_#{sub_surface_facade}",
+        hpxml.windows.add(:id => "#{sub_surface.name}_#{sub_surface_facade}",
                           :area => UnitConversions.convert(sub_surface.grossArea, "m^2", "ft^2").round,
                           :azimuth => UnitConversions.convert(sub_surface.azimuth, "rad", "deg").round,
                           :ufactor => args[:window_ufactor],
@@ -2906,102 +2742,48 @@ class HPXMLFile
                           :overhangs_distance_to_bottom_of_window => overhangs_distance_to_bottom_of_window,
                           :interior_shading_factor_winter => interior_shading_factor_winter,
                           :interior_shading_factor_summer => interior_shading_factor_summer,
-                          :wall_idref => surface.name }
-
-        windows_values << window_values
+                          :wall_idref => surface.name)
       end
     end
-    return windows_values
   end
 
-  def self.get_skylights_values(runner, model, args)
-    skylights_values = []
+  def self.set_skylights(hpxml, runner, model, args)
     model.getSurfaces.each do |surface|
       surface.subSurfaces.each do |sub_surface|
         next if sub_surface.subSurfaceType != "Skylight"
 
         sub_surface_facade = Geometry.get_facade_for_surface(sub_surface)
 
-        skylights_values << { :id => "#{sub_surface.name}_#{sub_surface_facade}",
-                              :area => UnitConversions.convert(sub_surface.grossArea, "m^2", "ft^2").round,
-                              :azimuth => UnitConversions.convert(sub_surface.azimuth, "rad", "deg").round,
-                              :ufactor => args[:skylight_ufactor],
-                              :shgc => args[:skylight_shgc],
-                              :roof_idref => surface.name }
+        hpxml.skylights.add(:id => "#{sub_surface.name}_#{sub_surface_facade}",
+                            :area => UnitConversions.convert(sub_surface.grossArea, "m^2", "ft^2").round,
+                            :azimuth => UnitConversions.convert(sub_surface.azimuth, "rad", "deg").round,
+                            :ufactor => args[:skylight_ufactor],
+                            :shgc => args[:skylight_shgc],
+                            :roof_idref => surface.name)
       end
     end
-    return skylights_values
   end
 
-  def self.get_doors_values(runner, model, args)
-    doors_values = []
+  def self.set_doors(hpxml, runner, model, args)
     model.getSurfaces.each do |surface|
       surface.subSurfaces.each do |sub_surface|
         next if sub_surface.subSurfaceType != "Door"
 
         sub_surface_facade = Geometry.get_facade_for_surface(sub_surface)
 
-        doors_values << { :id => "#{sub_surface.name}_#{sub_surface_facade}",
-                          :wall_idref => surface.name,
-                          :area => UnitConversions.convert(sub_surface.grossArea, "m^2", "ft^2").round,
-                          :azimuth => args[:orientation],
-                          :r_value => args[:door_rvalue] }
+        hpxml.doors.add(:id => "#{sub_surface.name}_#{sub_surface_facade}",
+                        :wall_idref => surface.name,
+                        :area => UnitConversions.convert(sub_surface.grossArea, "m^2", "ft^2").round,
+                        :azimuth => args[:orientation],
+                        :r_value => args[:door_rvalue])
       end
     end
-    return doors_values
   end
 
-  def self.distribution_system_types
-    return {
-      "Furnace" => "AirDistribution",
-      "WallFurnace" => nil,
-      "Boiler" => "HydronicDistribution",
-      "ElectricResistance" => nil,
-      "Stove" => nil,
-      "PortableHeater" => nil,
-      "central air conditioner" => "AirDistribution",
-      "room air conditioner" => nil,
-      "evaporative cooler" => nil,
-      "air-to-air" => "AirDistribution",
-      "mini-split" => nil,
-      "ground-to-air" => "AirDistribution"
-    }
-  end
-
-  def self.get_hvac_distribution(runner, args, hvac_distributions_values, system_type)
-    distribution_system_type = distribution_system_types[system_type]
-    if system_type == "mini-split" and args[:mini_split_is_ducted]
-      distribution_system_type = "AirDistribution"
-    elsif system_type == "evaporative cooler" and args[:evap_cooler_is_ducted]
-      distribution_system_type = "AirDistribution"
-    end
-    if args[:hvac_distribution_system_type_dse]
-      distribution_system_type = "DSE"
-      annual_heating_dse = args[:annual_heating_dse]
-      annual_cooling_dse = args[:annual_cooling_dse]
-    end
-    unless distribution_system_type.nil?
-      distribution_system_idref = "HVAC#{distribution_system_type}"
-      unless hvac_distributions_values.any? { |hvac_distribution_values| hvac_distribution_values[:id] == distribution_system_idref }
-        hvac_distributions_values << { :id => distribution_system_idref,
-                                       :distribution_system_type => distribution_system_type,
-                                       :annual_heating_dse => annual_heating_dse,
-                                       :annual_cooling_dse => annual_cooling_dse }
-      end
-    end
-    return hvac_distributions_values, distribution_system_idref
-  end
-
-  def self.get_heating_systems_values(runner, args, hvac_distributions_values)
-    heating_systems_values = []
-
+  def self.set_heating_systems(hpxml, runner, args)
     heating_system_type = args[:heating_system_type]
 
-    unless ["Furnace", "WallFurnace", "Boiler", "ElectricResistance", "Stove", "PortableHeater"].include? heating_system_type
-      return heating_systems_values, hvac_distributions_values
-    end
-
-    hvac_distributions_values, distribution_system_idref = get_hvac_distribution(runner, args, hvac_distributions_values, heating_system_type)
+    return if heating_system_type == "none"
 
     heating_capacity = args[:heating_system_heating_capacity]
     if heating_capacity == Constants.SizingAuto
@@ -3013,35 +2795,24 @@ class HPXMLFile
       electric_auxiliary_energy = args[:heating_system_electric_auxiliary_energy]
     end
 
-    heating_system_values = { :id => "HeatingSystem",
+    hpxml.heating_systems.add(:id => "HeatingSystem",
                               :heating_system_type => heating_system_type,
-                              :distribution_system_idref => distribution_system_idref,
                               :heating_system_fuel => args[:heating_system_fuel],
                               :heating_capacity => heating_capacity,
                               :fraction_heat_load_served => args[:heating_system_fraction_heat_load_served],
-                              :electric_auxiliary_energy => electric_auxiliary_energy }
+                              :electric_auxiliary_energy => electric_auxiliary_energy)
 
     if ["Furnace", "WallFurnace", "Boiler"].include? heating_system_type
-      heating_system_values[:heating_efficiency_afue] = args[:heating_system_heating_efficiency]
+      hpxml.heating_systems[-1].heating_efficiency_afue = args[:heating_system_heating_efficiency]
     elsif ["ElectricResistance", "Stove", "PortableHeater"]
-      heating_system_values[:heating_efficiency_percent] = args[:heating_system_heating_efficiency]
+      hpxml.heating_systems[-1].heating_efficiency_percent = args[:heating_system_heating_efficiency]
     end
-
-    heating_systems_values << heating_system_values
-
-    return heating_systems_values, hvac_distributions_values
   end
 
-  def self.get_cooling_systems_values(runner, args, hvac_distributions_values)
-    cooling_systems_values = []
-
+  def self.set_cooling_systems(hpxml, runner, args)
     cooling_system_type = args[:cooling_system_type]
 
-    unless ["central air conditioner", "room air conditioner", "evaporative cooler"].include? cooling_system_type
-      return cooling_systems_values, hvac_distributions_values
-    end
-
-    hvac_distributions_values, distribution_system_idref = get_hvac_distribution(runner, args, hvac_distributions_values, cooling_system_type)
+    return if cooling_system_type == "none"
 
     cooling_capacity = args[:cooling_system_cooling_capacity]
     if cooling_capacity == Constants.SizingAuto
@@ -3053,34 +2824,23 @@ class HPXMLFile
       cooling_capacity = nil
     end
 
-    cooling_system_values = { :id => "CoolingSystem",
+    hpxml.cooling_systems.add(:id => "CoolingSystem",
                               :cooling_system_type => cooling_system_type,
-                              :distribution_system_idref => distribution_system_idref,
                               :cooling_system_fuel => args[:cooling_system_fuel],
                               :cooling_capacity => cooling_capacity,
-                              :fraction_cool_load_served => args[:cooling_system_fraction_cool_load_served] }
+                              :fraction_cool_load_served => args[:cooling_system_fraction_cool_load_served])
 
     if ["central air conditioner"].include? cooling_system_type
-      cooling_system_values[:cooling_efficiency_seer] = args[:cooling_system_cooling_efficiency]
+      hpxml.cooling_systems[-1].cooling_efficiency_seer = args[:cooling_system_cooling_efficiency]
     elsif ["room air conditioner"].include? cooling_system_type
-      cooling_system_values[:cooling_efficiency_eer] = args[:cooling_system_cooling_efficiency]
+      hpxml.cooling_systems[-1].cooling_efficiency_eer = args[:cooling_system_cooling_efficiency]
     end
-
-    cooling_systems_values << cooling_system_values
-
-    return cooling_systems_values, hvac_distributions_values
   end
 
-  def self.get_heat_pumps_values(runner, args, hvac_distributions_values)
-    heat_pumps_values = []
-
+  def self.set_heat_pumps(hpxml, runner, args)
     heat_pump_type = args[:heat_pump_type]
 
-    if not ["air-to-air", "mini-split", "ground-to-air"].include? heat_pump_type
-      return heat_pumps_values, hvac_distributions_values
-    end
-
-    hvac_distributions_values, distribution_system_idref = get_hvac_distribution(runner, args, hvac_distributions_values, heat_pump_type)
+    return if heat_pump_type == "none"
 
     heat_pump_fuel = args[:heat_pump_fuel]
 
@@ -3113,9 +2873,8 @@ class HPXMLFile
     end
     cooling_capacity = Float(cooling_capacity)
 
-    heat_pump_values = { :id => "HeatPump",
+    hpxml.heat_pumps.add(:id => "HeatPump",
                          :heat_pump_type => heat_pump_type,
-                         :distribution_system_idref => distribution_system_idref,
                          :heat_pump_fuel => heat_pump_fuel,
                          :heating_capacity => heating_capacity,
                          :cooling_capacity => cooling_capacity,
@@ -3125,23 +2884,95 @@ class HPXMLFile
                          :backup_heating_capacity => backup_heating_capacity,
                          :backup_heating_efficiency_afue => backup_heating_efficiency_afue,
                          :backup_heating_efficiency_percent => backup_heating_efficiency_percent,
-                         :backup_heating_switchover_temp => backup_heating_switchover_temp }
+                         :backup_heating_switchover_temp => backup_heating_switchover_temp)
 
     if ["air-to-air", "mini-split"].include? heat_pump_type
-      heat_pump_values[:heating_efficiency_hspf] = args[:heat_pump_heating_efficiency]
-      heat_pump_values[:cooling_efficiency_seer] = args[:heat_pump_cooling_efficiency]
+      hpxml.heat_pumps[-1].heating_efficiency_hspf = args[:heat_pump_heating_efficiency]
+      hpxml.heat_pumps[-1].cooling_efficiency_seer = args[:heat_pump_cooling_efficiency]
     elsif ["ground-to-air"].include? heat_pump_type
-      heat_pump_values[:heating_efficiency_cop] = args[:heat_pump_heating_efficiency]
-      heat_pump_values[:cooling_efficiency_eer] = args[:heat_pump_cooling_efficiency]
+      hpxml.heat_pumps[-1].heating_efficiency_cop = args[:heat_pump_heating_efficiency]
+      hpxml.heat_pumps[-1].cooling_efficiency_eer = args[:heat_pump_cooling_efficiency]
     end
-
-    heat_pumps_values << heat_pump_values
-
-    return heat_pumps_values, hvac_distributions_values
   end
 
-  def self.get_hvac_control_values(runner, args)
-    return {} if args[:heating_system_type] == "none" and args[:cooling_system_type] == "none" and args[:heat_pump_type] == "none"
+  def self.set_hvac_distribution(hpxml, runner, args)
+    # HydronicDistribution?
+    hpxml.heating_systems.each do |heating_system|
+      next unless ["Boiler"].include? heating_system.heating_system_type
+
+      hpxml.hvac_distributions.add(:id => "HydronicDistribution",
+                                   :distribution_system_type => "HydronicDistribution")
+      heating_system.distribution_system_idref = hpxml.hvac_distributions[-1].id
+      break
+    end
+
+    # AirDistribution?
+    air_distribution_systems = []
+    hpxml.heating_systems.each do |heating_system|
+      if ["Furnace"].include? heating_system.heating_system_type
+        air_distribution_systems << heating_system
+      end
+    end
+    hpxml.cooling_systems.each do |cooling_system|
+      if ["central air conditioner"].include? cooling_system.cooling_system_type
+        air_distribution_systems << cooling_system
+      elsif ["evaporative cooler"].include? cooling_system.cooling_system_type and args[:evap_cooler_is_ducted]
+        air_distribution_systems << cooling_system
+      end
+    end
+    hpxml.heat_pumps.each do |heat_pump|
+      if ["air-to-air", "ground-to-air"].include? heat_pump.heat_pump_type
+        air_distribution_systems << heat_pump
+      elsif ["mini-split"].include? heat_pump.heat_pump_type and args[:mini_split_is_ducted]
+        air_distribution_systems << heat_pump
+      end
+    end
+    return unless air_distribution_systems.size > 0
+
+    hpxml.hvac_distributions.add(:id => "AirDistribution",
+                                 :distribution_system_type => "AirDistribution")
+
+    air_distribution_systems.each do |hvac_system|
+      hvac_system.distribution_system_idref = hpxml.hvac_distributions[-1].id
+    end
+
+    # Duct Leakage
+    hpxml.hvac_distributions[-1].duct_leakage_measurements.add(:duct_type => "supply",
+                                                               :duct_leakage_units => args[:supply_duct_leakage_units],
+                                                               :duct_leakage_value => args[:supply_duct_leakage_value])
+
+    if not (args[:cooling_system_type] == "evaporative cooler" and args[:evap_cooler_is_ducted])
+      hpxml.hvac_distributions[-1].duct_leakage_measurements.add(:duct_type => "return",
+                                                                 :duct_leakage_units => args[:return_duct_leakage_units],
+                                                                 :duct_leakage_value => args[:return_duct_leakage_value])
+    end
+
+    # Ducts
+    supply_duct_location = args[:supply_duct_location]
+    if supply_duct_location == Constants.Auto
+      supply_duct_location = get_duct_location_auto(args)
+    end
+
+    return_duct_location = args[:return_duct_location]
+    if return_duct_location == Constants.Auto
+      return_duct_location = get_duct_location_auto(args)
+    end
+
+    hpxml.hvac_distributions[-1].ducts.add(:duct_type => "supply",
+                                           :duct_insulation_r_value => args[:supply_duct_insulation_r_value],
+                                           :duct_location => supply_duct_location,
+                                           :duct_surface_area => args[:supply_duct_surface_area])
+
+    if not (args[:cooling_system_type] == "evaporative cooler" and args[:evap_cooler_is_ducted])
+      hpxml.hvac_distributions[-1].ducts.add(:duct_type => "return",
+                                             :duct_insulation_r_value => args[:return_duct_insulation_r_value],
+                                             :duct_location => return_duct_location,
+                                             :duct_surface_area => args[:return_duct_surface_area])
+    end
+  end
+
+  def self.set_hvac_control(hpxml, runner, args)
+    return if args[:heating_system_type] == "none" and args[:cooling_system_type] == "none" and args[:heat_pump_type] == "none"
 
     control_type = "manual thermostat"
     if (args[:heating_setpoint_temp] != args[:heating_setback_temp] and args[:heating_setback_hours_per_week] > 0) or
@@ -3165,41 +2996,17 @@ class HPXMLFile
       ceiling_fan_cooling_setpoint_temp_offset = args[:ceiling_fan_cooling_setpoint_temp_offset]
     end
 
-    hvac_control_values = { :id => "HVACControl",
-                            :control_type => control_type,
-                            :heating_setpoint_temp => args[:heating_setpoint_temp],
-                            :cooling_setpoint_temp => args[:cooling_setpoint_temp],
-                            :heating_setback_temp => heating_setback_temp,
-                            :heating_setback_hours_per_week => heating_setback_hours_per_week,
-                            :heating_setback_start_hour => heating_setback_start_hour,
-                            :cooling_setup_temp => cooling_setup_temp,
-                            :cooling_setup_hours_per_week => cooling_setup_hours_per_week,
-                            :cooling_setup_start_hour => cooling_setup_start_hour,
-                            :ceiling_fan_cooling_setpoint_temp_offset => ceiling_fan_cooling_setpoint_temp_offset }
-
-    return hvac_control_values
-  end
-
-  def self.get_duct_leakage_measurements_values(runner, args, hvac_distributions_values)
-    duct_leakage_measurements_values = []
-    hvac_distributions_values.each_with_index do |hvac_distribution_values, i|
-      if hvac_distribution_values[:distribution_system_type] == "AirDistribution"
-        duct_leakage_measurement_values = [{ :duct_type => "supply",
-                                             :duct_leakage_units => args[:supply_duct_leakage_units],
-                                             :duct_leakage_value => args[:supply_duct_leakage_value] }]
-
-        if not (args[:cooling_system_type] == "evaporative cooler" and args[:evap_cooler_is_ducted])
-          duct_leakage_measurement_values << { :duct_type => "return",
-                                               :duct_leakage_units => args[:return_duct_leakage_units],
-                                               :duct_leakage_value => args[:return_duct_leakage_value] }
-        end
-
-        duct_leakage_measurements_values << duct_leakage_measurement_values
-      else
-        duct_leakage_measurements_values << []
-      end
-    end
-    return duct_leakage_measurements_values
+    hpxml.set_hvac_control(:id => "HVACControl",
+                           :control_type => control_type,
+                           :heating_setpoint_temp => args[:heating_setpoint_temp],
+                           :cooling_setpoint_temp => args[:cooling_setpoint_temp],
+                           :heating_setback_temp => heating_setback_temp,
+                           :heating_setback_hours_per_week => heating_setback_hours_per_week,
+                           :heating_setback_start_hour => heating_setback_start_hour,
+                           :cooling_setup_temp => cooling_setup_temp,
+                           :cooling_setup_hours_per_week => cooling_setup_hours_per_week,
+                           :cooling_setup_start_hour => cooling_setup_start_hour,
+                           :ceiling_fan_cooling_setpoint_temp_offset => ceiling_fan_cooling_setpoint_temp_offset)
   end
 
   def self.get_duct_location_auto(args) # FIXME
@@ -3227,45 +3034,9 @@ class HPXMLFile
     return location
   end
 
-  def self.get_ducts_values(runner, args, hvac_distributions_values)
-    ducts_values = []
-    hvac_distributions_values.each_with_index do |hvac_distribution_values, i|
-      if hvac_distribution_values[:distribution_system_type] == "AirDistribution"
+  def self.set_ventilation_fans(hpxml, runner, args)
+    return if args[:mech_vent_fan_type] == "none" and not args[:has_whole_house_fan]
 
-        supply_duct_location = args[:supply_duct_location]
-        if supply_duct_location == Constants.Auto
-          supply_duct_location = get_duct_location_auto(args)
-        end
-
-        return_duct_location = args[:return_duct_location]
-        if return_duct_location == Constants.Auto
-          return_duct_location = get_duct_location_auto(args)
-        end
-
-        duct_values = [{ :duct_type => "supply",
-                         :duct_insulation_r_value => args[:supply_duct_insulation_r_value],
-                         :duct_location => supply_duct_location,
-                         :duct_surface_area => args[:supply_duct_surface_area] }]
-
-        if not (args[:cooling_system_type] == "evaporative cooler" and args[:evap_cooler_is_ducted])
-          duct_values << { :duct_type => "return",
-                           :duct_insulation_r_value => args[:return_duct_insulation_r_value],
-                           :duct_location => return_duct_location,
-                           :duct_surface_area => args[:return_duct_surface_area] }
-        end
-
-        ducts_values << duct_values
-      else
-        ducts_values << []
-      end
-    end
-    return ducts_values
-  end
-
-  def self.get_ventilation_fan_values(runner, args, hvac_distributions_values)
-    return [] if args[:mech_vent_fan_type] == "none" and not args[:has_whole_house_fan]
-
-    ventilations_fans_values = []
     if args[:mech_vent_fan_type] != "none"
 
       if args[:mech_vent_fan_type].include? "recovery ventilator"
@@ -3290,144 +3061,123 @@ class HPXMLFile
 
       distribution_system_idref = nil
       if args[:mech_vent_fan_type] == "central fan integrated supply"
-        hvac_distributions_values.each do |hvac_distribution_values|
-          next unless hvac_distribution_values[:distribution_system_type] == "AirDistribution"
+        hpxml.hvac_distributions.each do |hvac_distribution|
+          next unless hvac_distribution.distribution_system_type == "AirDistribution"
 
-          distribution_system_idref = hvac_distribution_values[:id]
+          distribution_system_idref = hvac_distribution.id
         end
       end
 
-      ventilations_fans_values << { :id => "MechanicalVentilation",
-                                    :fan_type => args[:mech_vent_fan_type],
-                                    :tested_flow_rate => args[:mech_vent_flow_rate],
-                                    :hours_in_operation => args[:mech_vent_hours_in_operation],
-                                    :used_for_whole_building_ventilation => true,
-                                    :total_recovery_efficiency => total_recovery_efficiency,
-                                    :total_recovery_efficiency_adjusted => total_recovery_efficiency_adjusted,
-                                    :sensible_recovery_efficiency => sensible_recovery_efficiency,
-                                    :sensible_recovery_efficiency_adjusted => sensible_recovery_efficiency_adjusted,
-                                    :fan_power => args[:mech_vent_fan_power],
-                                    :distribution_system_idref => distribution_system_idref }
+      hpxml.ventilation_fans.add(:id => "MechanicalVentilation",
+                                 :fan_type => args[:mech_vent_fan_type],
+                                 :tested_flow_rate => args[:mech_vent_flow_rate],
+                                 :hours_in_operation => args[:mech_vent_hours_in_operation],
+                                 :used_for_whole_building_ventilation => true,
+                                 :total_recovery_efficiency => total_recovery_efficiency,
+                                 :total_recovery_efficiency_adjusted => total_recovery_efficiency_adjusted,
+                                 :sensible_recovery_efficiency => sensible_recovery_efficiency,
+                                 :sensible_recovery_efficiency_adjusted => sensible_recovery_efficiency_adjusted,
+                                 :fan_power => args[:mech_vent_fan_power],
+                                 :distribution_system_idref => distribution_system_idref)
     end
 
     if args[:has_whole_house_fan]
-      ventilations_fans_values << { :id => "WholeHouseFan",
-                                    :rated_flow_rate => args[:whole_house_fan_flow_rate],
-                                    :used_for_seasonal_cooling_load_reduction => true,
-                                    :fan_power => args[:whole_house_fan_power] }
+      hpxml.ventilation_fans.add(:id => "WholeHouseFan",
+                                 :rated_flow_rate => args[:whole_house_fan_flow_rate],
+                                 :used_for_seasonal_cooling_load_reduction => true,
+                                 :fan_power => args[:whole_house_fan_power])
     end
-
-    return ventilations_fans_values
   end
 
-  def self.get_water_heating_system_values(runner, args, heating_systems_values, cooling_systems_values, heat_pumps_values)
-    num_water_heaters = 0
-    args[:water_heater_type].each do |water_heater_type|
-      next if water_heater_type == "none"
+  def self.set_water_heating_systems(hpxml, runner, args)
+    water_heater_type = args[:water_heater_type]
+    return if water_heater_type == "none"
 
-      num_water_heaters += 1
+    fuel_type = args[:water_heater_fuel_type]
+
+    location = args[:water_heater_location]
+    if location == Constants.Auto
+      location = get_other_appliance_location_auto(args)
     end
 
-    water_heating_systems_values = []
-    args[:water_heater_type].each_with_index do |water_heater_type, i|
-      next if water_heater_type == "none"
-
-      fuel_type = args[:water_heater_fuel_type][i]
-
-      location = args[:water_heater_location][i]
-      if location == Constants.Auto
-        location = get_other_appliance_location_auto(args)
-      end
-
-      num_bathrooms = args[:num_bathrooms]
-      if num_bathrooms == Constants.Auto
-        num_bathrooms = 2 # FIXME
-      end
-      num_bathrooms = Float(num_bathrooms)
-
-      tank_volume = Waterheater.calc_nom_tankvol(args[:water_heater_tank_volume][i], fuel_type, args[:num_bedrooms], num_bathrooms).round
-
-      heating_capacity = args[:water_heater_heating_capacity][i]
-      if heating_capacity == Constants.SizingAuto
-        heating_capacity = Waterheater.calc_water_heater_capacity(fuel_type, args[:num_bedrooms], num_water_heaters, num_bathrooms)
-      else
-        heating_capacity = Float(heating_capacity)
-      end
-      heating_capacity = UnitConversions.convert(heating_capacity, "kBtu/hr", "Btu/hr").round
-
-      if water_heater_type == "heat pump water heater"
-        heating_capacity = nil
-      end
-
-      if args[:water_heater_efficiency_type][i] == "EnergyFactor"
-        energy_factor = args[:water_heater_efficiency][i]
-        energy_factor = Waterheater.calc_ef(energy_factor, tank_volume, fuel_type).round(2)
-      elsif args[:water_heater_efficiency_type][i] == "UniformEnergyFactor"
-        uniform_energy_factor = args[:water_heater_efficiency][i]
-      end
-
-      recovery_efficiency = args[:water_heater_recovery_efficiency][i]
-      if fuel_type == "electricity"
-        recovery_efficiency = nil
-      end
-
-      if args[:water_heater_uses_desuperheater][i]
-        uses_desuperheater = args[:water_heater_uses_desuperheater][i]
-        unless cooling_systems_values[i].nil?
-          related_hvac = cooling_systems_values[i][:id]
-        end
-        unless heat_pumps_values[i].nil?
-          related_hvac = heat_pumps_values[i][:id]
-        end
-      end
-
-      if water_heater_type == "instantaneous water heater"
-        tank_volume = nil
-        heating_capacity = nil
-        recovery_efficiency = nil
-      elsif water_heater_type == "space-heating boiler with tankless coil"
-        fuel_type = nil
-        tank_volume = nil
-        heating_capacity = nil
-        energy_factor = nil
-        related_hvac = heating_systems_values[i][:id]
-      elsif water_heater_type == "space-heating boiler with storage tank"
-        fuel_type = nil
-        heating_capacity = nil
-        energy_factor = nil
-        related_hvac = heating_systems_values[i][:id]
-      end
-
-      standby_loss = nil
-      if args[:water_heater_standby_loss][i] > 0
-        standby_loss = args[:water_heater_standby_loss][i]
-      end
-
-      jacket_r_value = nil
-      if args[:water_heater_jacket_rvalue][i] > 0
-        jacket_r_value = args[:water_heater_jacket_rvalue][i]
-      end
-
-      water_heating_systems_values << { :id => "WaterHeater#{i + 1}",
-                                        :water_heater_type => water_heater_type,
-                                        :fuel_type => fuel_type,
-                                        :location => location,
-                                        :tank_volume => tank_volume,
-                                        :fraction_dhw_load_served => args[:water_heater_fraction_dhw_load_served][i],
-                                        :heating_capacity => heating_capacity,
-                                        :energy_factor => energy_factor,
-                                        :uniform_energy_factor => uniform_energy_factor,
-                                        :recovery_efficiency => recovery_efficiency,
-                                        :uses_desuperheater => uses_desuperheater,
-                                        :related_hvac => related_hvac,
-                                        :standby_loss => standby_loss,
-                                        :jacket_r_value => jacket_r_value }
+    num_bathrooms = args[:num_bathrooms]
+    if num_bathrooms == Constants.Auto
+      num_bathrooms = 2 # FIXME
     end
-    return water_heating_systems_values
+    num_bathrooms = Float(num_bathrooms)
+
+    tank_volume = Waterheater.calc_nom_tankvol(args[:water_heater_tank_volume], fuel_type, args[:num_bedrooms], num_bathrooms).round
+
+    heating_capacity = args[:water_heater_heating_capacity]
+    if heating_capacity == Constants.SizingAuto
+      heating_capacity = Waterheater.calc_water_heater_capacity(fuel_type, args[:num_bedrooms], 1, num_bathrooms)
+    else
+      heating_capacity = Float(heating_capacity)
+    end
+    heating_capacity = UnitConversions.convert(heating_capacity, "kBtu/hr", "Btu/hr").round
+
+    if water_heater_type == "heat pump water heater"
+      heating_capacity = nil
+    end
+
+    if args[:water_heater_efficiency_type] == "EnergyFactor"
+      energy_factor = args[:water_heater_efficiency]
+      energy_factor = Waterheater.calc_ef(energy_factor, tank_volume, fuel_type).round(2)
+    elsif args[:water_heater_efficiency_type] == "UniformEnergyFactor"
+      uniform_energy_factor = args[:water_heater_efficiency]
+    end
+
+    recovery_efficiency = args[:water_heater_recovery_efficiency]
+    if fuel_type == "electricity"
+      recovery_efficiency = nil
+    end
+
+    if ["instantaneous water heater"].include? water_heater_type
+      tank_volume = nil
+      heating_capacity = nil
+      recovery_efficiency = nil
+    elsif ["space-heating boiler with tankless coil", "space-heating boiler with storage tank"].include? water_heater_type
+      if water_heater_type == "space-heating boiler with tankless coil"
+        tank_volume = nil
+      end
+      fuel_type = nil
+      heating_capacity = nil
+      energy_factor = nil
+
+      if hpxml.heating_systems.size == 0
+        fail "Combi boiler water heater specified but no heating system found."
+      end
+
+      related_hvac = hpxml.heating_systems[0].id
+    end
+
+    standby_loss = nil
+    if args[:water_heater_standby_loss] > 0
+      standby_loss = args[:water_heater_standby_loss]
+    end
+
+    jacket_r_value = nil
+    if args[:water_heater_jacket_rvalue] > 0
+      jacket_r_value = args[:water_heater_jacket_rvalue]
+    end
+
+    hpxml.water_heating_systems.add(:id => "WaterHeater",
+                                    :water_heater_type => water_heater_type,
+                                    :fuel_type => fuel_type,
+                                    :location => location,
+                                    :tank_volume => tank_volume,
+                                    :fraction_dhw_load_served => 1.0,
+                                    :heating_capacity => heating_capacity,
+                                    :energy_factor => energy_factor,
+                                    :uniform_energy_factor => uniform_energy_factor,
+                                    :recovery_efficiency => recovery_efficiency,
+                                    :related_hvac => related_hvac,
+                                    :standby_loss => standby_loss,
+                                    :jacket_r_value => jacket_r_value)
   end
 
-  def self.get_hot_water_distribution_values(runner, args)
-    return {} if args[:water_heater_type][0] == "none" and args[:water_heater_type][1] == "none"
+  def self.set_hot_water_distribution(hpxml, runner, args)
+    return if args[:water_heater_type] == "none"
 
     if args[:dwhr_facilities_connected] != "none"
       dwhr_facilities_connected = args[:dwhr_facilities_connected]
@@ -3435,99 +3185,94 @@ class HPXMLFile
       dwhr_efficiency = args[:dwhr_efficiency]
     end
 
-    hot_water_distribution_values = { :id => "HotWaterDistribution",
-                                      :system_type => args[:hot_water_distribution_system_type],
-                                      :standard_piping_length => args[:standard_piping_length],
-                                      :recirculation_control_type => args[:recirculation_control_type],
-                                      :recirculation_piping_length => args[:recirculation_piping_length],
-                                      :recirculation_branch_piping_length => args[:recirculation_branch_piping_length],
-                                      :recirculation_pump_power => args[:recirculation_pump_power],
-                                      :pipe_r_value => args[:hot_water_distribution_pipe_r_value],
-                                      :dwhr_facilities_connected => dwhr_facilities_connected,
-                                      :dwhr_equal_flow => dwhr_equal_flow,
-                                      :dwhr_efficiency => dwhr_efficiency }
-    return hot_water_distribution_values
+    hpxml.set_hot_water_distribution(:id => "HotWaterDistribution",
+                                     :system_type => args[:hot_water_distribution_system_type],
+                                     :standard_piping_length => args[:standard_piping_length],
+                                     :recirculation_control_type => args[:recirculation_control_type],
+                                     :recirculation_piping_length => args[:recirculation_piping_length],
+                                     :recirculation_branch_piping_length => args[:recirculation_branch_piping_length],
+                                     :recirculation_pump_power => args[:recirculation_pump_power],
+                                     :pipe_r_value => args[:hot_water_distribution_pipe_r_value],
+                                     :dwhr_facilities_connected => dwhr_facilities_connected,
+                                     :dwhr_equal_flow => dwhr_equal_flow,
+                                     :dwhr_efficiency => dwhr_efficiency)
   end
 
-  def self.get_water_fixtures_values(runer, args)
-    return {} if args[:water_heater_type][0] == "none" and args[:water_heater_type][1] == "none"
+  def self.set_water_fixtures(hpxml, runer, args)
+    return if args[:water_heater_type] == "none"
 
-    water_fixtures_values = [{ :id => "ShowerFixture",
-                               :water_fixture_type => "shower head",
-                               :low_flow => args[:shower_low_flow], },
-                             { :id => "SinkFixture",
-                               :water_fixture_type => "faucet",
-                               :low_flow => args[:sink_low_flow] }]
-    return water_fixtures_values
+    hpxml.water_fixtures.add(:id => "ShowerFixture",
+                             :water_fixture_type => "shower head",
+                             :low_flow => args[:shower_low_flow])
+    hpxml.water_fixtures.add(:id => "SinkFixture",
+                             :water_fixture_type => "faucet",
+                             :low_flow => args[:sink_low_flow])
   end
 
-  def self.get_solar_thermal_values(runner, args, water_heating_systems_values)
-    return [] if args[:solar_thermal_system_type] == "none"
+  def self.set_solar_thermal(hpxml, runner, args)
+    return if args[:solar_thermal_system_type] == "none"
 
-    solar_thermal_systems_values = []
-    water_heating_systems_values.each do |water_heating_system_values|
-      collector_area = args[:solar_thermal_collector_area]
-      collector_loop_type = args[:solar_thermal_collector_loop_type]
-      collector_type = args[:solar_thermal_collector_type]
-      collector_azimuth = args[:solar_thermal_collector_azimuth]
-      collector_tilt = args[:solar_thermal_collector_tilt]
-      collector_frta = args[:solar_thermal_collector_rated_optical_efficiency]
-      collector_frul = args[:solar_thermal_collector_rated_thermal_losses]
+    collector_area = args[:solar_thermal_collector_area]
+    collector_loop_type = args[:solar_thermal_collector_loop_type]
+    collector_type = args[:solar_thermal_collector_type]
+    collector_azimuth = args[:solar_thermal_collector_azimuth]
+    collector_tilt = args[:solar_thermal_collector_tilt]
+    collector_frta = args[:solar_thermal_collector_rated_optical_efficiency]
+    collector_frul = args[:solar_thermal_collector_rated_thermal_losses]
 
-      storage_volume = args[:solar_thermal_storage_volume]
-      if storage_volume == Constants.Auto
-        storage_volume = 60 # FIXME
-      end
-
-      if args[:solar_thermal_solar_fraction] > 0
-        collector_area = nil
-        collector_loop_type = nil
-        collector_type = nil
-        collector_azimuth = nil
-        collector_tilt = nil
-        collector_frta = nil
-        collector_frul = nil
-        storage_volume = nil
-        solar_fraction = args[:solar_thermal_solar_fraction]
-      end
-
-      solar_thermal_systems_values << { :id => "SolarThermalSystem",
-                                        :system_type => args[:solar_thermal_system_type],
-                                        :collector_area => collector_area,
-                                        :collector_loop_type => collector_loop_type,
-                                        :collector_type => collector_type,
-                                        :collector_azimuth => collector_azimuth,
-                                        :collector_tilt => collector_tilt,
-                                        :collector_frta => collector_frta,
-                                        :collector_frul => collector_frul,
-                                        :storage_volume => storage_volume,
-                                        :water_heating_system_idref => water_heating_system_values[:id],
-                                        :solar_fraction => solar_fraction }
-      break # FIXME: allow only one solar thermal system even if there are more than one water heaters?
+    storage_volume = args[:solar_thermal_storage_volume]
+    if storage_volume == Constants.Auto
+      storage_volume = 60 # FIXME
     end
-    return solar_thermal_systems_values
+
+    if args[:solar_thermal_solar_fraction] > 0
+      collector_area = nil
+      collector_loop_type = nil
+      collector_type = nil
+      collector_azimuth = nil
+      collector_tilt = nil
+      collector_frta = nil
+      collector_frul = nil
+      storage_volume = nil
+      solar_fraction = args[:solar_thermal_solar_fraction]
+    end
+
+    if hpxml.water_heating_systems.size == 0
+      fail "Solar thermal system specified but no water heater found."
+    end
+
+    hpxml.set_solar_thermal_system(:id => "SolarThermalSystem",
+                                   :system_type => args[:solar_thermal_system_type],
+                                   :collector_area => collector_area,
+                                   :collector_loop_type => collector_loop_type,
+                                   :collector_type => collector_type,
+                                   :collector_azimuth => collector_azimuth,
+                                   :collector_tilt => collector_tilt,
+                                   :collector_frta => collector_frta,
+                                   :collector_frul => collector_frul,
+                                   :storage_volume => storage_volume,
+                                   :water_heating_system_idref => hpxml.water_heating_systems[0].id,
+                                   :solar_fraction => solar_fraction)
   end
 
-  def self.get_pv_system_values(runner, args)
-    pv_systems_values = []
+  def self.set_pv_systems(hpxml, runner, args)
     args[:pv_system_module_type].each_with_index do |module_type, i|
       next if module_type == "none"
 
-      pv_systems_values << { :id => "PVSystem#{i + 1}",
-                             :location => args[:pv_system_location][i],
-                             :module_type => module_type,
-                             :tracking => args[:pv_system_tracking][i],
-                             :array_azimuth => args[:pv_system_array_azimuth][i],
-                             :array_tilt => args[:pv_system_array_tilt][i],
-                             :max_power_output => args[:pv_system_max_power_output][i],
-                             :inverter_efficiency => args[:pv_system_inverter_efficiency][i],
-                             :system_losses_fraction => args[:pv_system_system_losses_fraction][i] }
+      hpxml.pv_systems.add(:id => "PVSystem#{i + 1}",
+                           :location => args[:pv_system_location][i],
+                           :module_type => module_type,
+                           :tracking => args[:pv_system_tracking][i],
+                           :array_azimuth => args[:pv_system_array_azimuth][i],
+                           :array_tilt => args[:pv_system_array_tilt][i],
+                           :max_power_output => args[:pv_system_max_power_output][i],
+                           :inverter_efficiency => args[:pv_system_inverter_efficiency][i],
+                           :system_losses_fraction => args[:pv_system_system_losses_fraction][i])
     end
-    return pv_systems_values
   end
 
-  def self.get_clothes_washer_values(runner, args)
-    return {} unless args[:has_clothes_washer]
+  def self.set_clothes_washer(hpxml, runner, args)
+    return unless args[:has_clothes_washer]
 
     location = args[:clothes_washer_location]
     if location == Constants.Auto
@@ -3540,20 +3285,19 @@ class HPXMLFile
       integrated_modified_energy_factor = args[:clothes_washer_efficiency]
     end
 
-    clothes_washer_values = { :id => "ClothesWasher",
-                              :location => location,
-                              :modified_energy_factor => modified_energy_factor,
-                              :integrated_modified_energy_factor => integrated_modified_energy_factor,
-                              :rated_annual_kwh => args[:clothes_washer_rated_annual_kwh],
-                              :label_electric_rate => args[:clothes_washer_label_electric_rate],
-                              :label_gas_rate => args[:clothes_washer_label_gas_rate],
-                              :label_annual_gas_cost => args[:clothes_washer_label_annual_gas_cost],
-                              :capacity => args[:clothes_washer_capacity] }
-    return clothes_washer_values
+    hpxml.set_clothes_washer(:id => "ClothesWasher",
+                             :location => location,
+                             :modified_energy_factor => modified_energy_factor,
+                             :integrated_modified_energy_factor => integrated_modified_energy_factor,
+                             :rated_annual_kwh => args[:clothes_washer_rated_annual_kwh],
+                             :label_electric_rate => args[:clothes_washer_label_electric_rate],
+                             :label_gas_rate => args[:clothes_washer_label_gas_rate],
+                             :label_annual_gas_cost => args[:clothes_washer_label_annual_gas_cost],
+                             :capacity => args[:clothes_washer_capacity])
   end
 
-  def self.get_clothes_dryer_values(runner, args)
-    return {} unless args[:has_clothes_dryer]
+  def self.set_clothes_dryer(hpxml, runner, args)
+    return unless args[:has_clothes_dryer]
 
     if args[:clothes_dryer_efficiency_type] == "EnergyFactor"
       energy_factor = args[:clothes_dryer_efficiency]
@@ -3566,17 +3310,16 @@ class HPXMLFile
       location = get_other_appliance_location_auto(args)
     end
 
-    clothes_dryer_values = { :id => "ClothesDryer",
-                             :location => location,
-                             :fuel_type => args[:clothes_dryer_fuel_type],
-                             :energy_factor => energy_factor,
-                             :combined_energy_factor => combined_energy_factor,
-                             :control_type => args[:clothes_dryer_control_type] }
-    return clothes_dryer_values
+    hpxml.set_clothes_dryer(:id => "ClothesDryer",
+                            :location => location,
+                            :fuel_type => args[:clothes_dryer_fuel_type],
+                            :energy_factor => energy_factor,
+                            :combined_energy_factor => combined_energy_factor,
+                            :control_type => args[:clothes_dryer_control_type])
   end
 
-  def self.get_dishwasher_values(runner, args)
-    return {} unless args[:has_dishwasher]
+  def self.set_dishwasher(hpxml, runner, args)
+    return unless args[:has_dishwasher]
 
     if args[:dishwasher_efficiency_type] == "RatedAnnualkWh"
       rated_annual_kwh = args[:dishwasher_efficiency]
@@ -3584,15 +3327,14 @@ class HPXMLFile
       energy_factor = args[:dishwasher_efficiency]
     end
 
-    dishwasher_values = { :id => "Dishwasher",
-                          :rated_annual_kwh => rated_annual_kwh,
-                          :energy_factor => energy_factor,
-                          :place_setting_capacity => args[:dishwasher_place_setting_capacity] }
-    return dishwasher_values
+    hpxml.set_dishwasher(:id => "Dishwasher",
+                         :rated_annual_kwh => rated_annual_kwh,
+                         :energy_factor => energy_factor,
+                         :place_setting_capacity => args[:dishwasher_place_setting_capacity])
   end
 
-  def self.get_refrigerator_values(runner, args)
-    return {} unless args[:has_refrigerator]
+  def self.set_refrigerator(hpxml, runner, args)
+    return unless args[:has_refrigerator]
 
     location = args[:refrigerator_location]
     if location == Constants.Auto
@@ -3603,54 +3345,49 @@ class HPXMLFile
       adjusted_annual_kwh = args[:refrigerator_adjusted_annual_kwh]
     end
 
-    refrigerator_values = { :id => "Refrigerator",
-                            :location => location,
-                            :rated_annual_kwh => args[:refrigerator_rated_annual_kwh],
-                            :adjusted_annual_kwh => adjusted_annual_kwh,
-                            :schedules_output_path => args[:schedules_output_path],
-                            :schedules_column_name => "refrigerator" }
-    return refrigerator_values
+    hpxml.set_refrigerator(:id => "Refrigerator",
+                           :location => location,
+                           :rated_annual_kwh => args[:refrigerator_rated_annual_kwh],
+                           :adjusted_annual_kwh => adjusted_annual_kwh,
+                           :schedules_output_path => args[:schedules_output_path],
+                           :schedules_column_name => "refrigerator")
   end
 
-  def self.get_cooking_range_values(runner, args)
-    return {} unless args[:has_cooking_range]
+  def self.set_cooking_range(hpxml, runner, args)
+    return unless args[:has_cooking_range]
 
-    cooking_range_values = { :id => "CookingRange",
-                             :fuel_type => args[:cooking_range_fuel_type],
-                             :is_induction => args[:cooking_range_is_induction] }
-    return cooking_range_values
+    hpxml.set_cooking_range(:id => "CookingRange",
+                            :fuel_type => args[:cooking_range_fuel_type],
+                            :is_induction => args[:cooking_range_is_induction])
   end
 
-  def self.get_oven_values(runner, args)
-    return {} unless args[:has_oven]
+  def self.set_oven(hpxml, runner, args)
+    return unless args[:has_oven]
 
-    oven_values = { :id => "Oven",
-                    :is_convection => args[:oven_is_convection] }
-    return oven_values
+    hpxml.set_oven(:id => "Oven",
+                   :is_convection => args[:oven_is_convection])
   end
 
-  def self.get_lighting_values(runner, args)
-    return {} unless args[:has_lighting]
+  def self.set_lighting(hpxml, runner, args)
+    return unless args[:has_lighting]
 
-    lighting_values = { :fraction_tier_i_interior => 0.5,
-                        :fraction_tier_i_exterior => 0.5,
-                        :fraction_tier_i_garage => 0.5,
-                        :fraction_tier_ii_interior => 0.25,
-                        :fraction_tier_ii_exterior => 0.25,
-                        :fraction_tier_ii_garage => 0.25 }
-    return lighting_values
+    hpxml.set_lighting(:fraction_tier_i_interior => 0.5,
+                       :fraction_tier_i_exterior => 0.5,
+                       :fraction_tier_i_garage => 0.5,
+                       :fraction_tier_ii_interior => 0.25,
+                       :fraction_tier_ii_exterior => 0.25,
+                       :fraction_tier_ii_garage => 0.25)
   end
 
-  def self.get_ceiling_fan_values(runner, args)
-    return [] if args[:ceiling_fan_quantity] == 0
+  def self.set_ceiling_fans(hpxml, runner, args)
+    return if args[:ceiling_fan_quantity] == 0
 
-    ceiling_fans_values = [{ :id => "CeilingFan",
-                             :efficiency => args[:ceiling_fan_efficiency],
-                             :quantity => args[:ceiling_fan_quantity] }]
-    return ceiling_fans_values
+    hpxml.ceiling_fans.add(:id => "CeilingFan",
+                           :efficiency => args[:ceiling_fan_efficiency],
+                           :quantity => args[:ceiling_fan_quantity])
   end
 
-  def self.get_plug_loads_values(runner, args)
+  def self.set_plug_loads(hpxml, runner, args)
     plug_loads_values = []
     args[:plug_loads_plug_load_type].each_with_index do |plug_load_type, i|
       next if plug_load_type == "none"
@@ -3667,22 +3404,20 @@ class HPXMLFile
         frac_latent = args[:plug_loads_frac_latent][i]
       end
 
-      plug_loads_values << { :id => "PlugLoadMisc#{i + 1}",
-                             :plug_load_type => plug_load_type,
-                             :kWh_per_year => kWh_per_year,
-                             :frac_sensible => frac_sensible,
-                             :frac_latent => frac_latent }
+      hpxml.plug_loads.add(:id => "PlugLoadMisc#{i + 1}",
+                           :plug_load_type => plug_load_type,
+                           :kWh_per_year => kWh_per_year,
+                           :frac_sensible => frac_sensible,
+                           :frac_latent => frac_latent)
     end
-    return plug_loads_values
   end
 
-  def self.get_misc_load_schedule_values(runner, args)
-    return {} unless args[:plug_loads_schedule_values]
+  def self.set_misc_loads_schedule(hpxml, runner, args)
+    return unless args[:plug_loads_schedule_values]
 
-    misc_load_schedule_values = { :weekday_fractions => args[:plug_loads_weekday_fractions],
+    hpxml.set_misc_loads_schedule(:weekday_fractions => args[:plug_loads_weekday_fractions],
                                   :weekend_fractions => args[:plug_loads_weekend_fractions],
-                                  :monthly_multipliers => args[:plug_loads_monthly_multipliers] }
-    return misc_load_schedule_values
+                                  :monthly_multipliers => args[:plug_loads_monthly_multipliers])
   end
 end
 

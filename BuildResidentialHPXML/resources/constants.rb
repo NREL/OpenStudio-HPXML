@@ -13,10 +13,6 @@ class Constants
 
   # Numbers --------------------
 
-  def self.MaxNumWaterHeaters
-    return 2
-  end
-
   def self.MaxNumPhotovoltaics
     return 2
   end

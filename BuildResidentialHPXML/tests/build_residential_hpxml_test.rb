@@ -1,4 +1,4 @@
-require_relative 'minitest_helper'
+require_relative '../../HPXMLtoOpenStudio/resources/minitest_helper'
 require 'openstudio'
 require 'openstudio/ruleset/ShowRunnerOutput'
 require 'minitest/autorun'
@@ -8,6 +8,7 @@ require 'rexml/document'
 require 'rexml/xpath'
 require 'compare-xml'
 require_relative '../../HPXMLtoOpenStudio/resources/meta_measure'
+require_relative '../../HPXMLtoOpenStudio/resources/hpxml'
 
 class BuildResidentialHPXMLTest < MiniTest::Test
   def test_workflows
@@ -73,7 +74,7 @@ class BuildResidentialHPXMLTest < MiniTest::Test
         begin
           _check_hpxmls(workflow_dir, built_dir, test_dir, hpxml_path)
         rescue Exception => e
-          puts e
+          puts "#{e}\n#{e.backtrace.join('\n')}"
           fail = true
         end
       end
@@ -87,7 +88,7 @@ class BuildResidentialHPXMLTest < MiniTest::Test
     measures_dir = File.join(this_dir, "../..")
 
     expected_error_msgs = {
-      'non-electric-heat-pump-water-heater.osw' => "water_heater_type_1=heat pump water heater and water_heater_fuel_type_1=natural gas"
+      'non-electric-heat-pump-water-heater.osw' => "water_heater_type=heat pump water heater and water_heater_fuel_type=natural gas"
     }
 
     measures = {}
@@ -130,30 +131,42 @@ class BuildResidentialHPXMLTest < MiniTest::Test
       "BuildResidentialHPXML" => File.join(built_dir, File.basename(hpxml_path))
     }
 
-    hpxml_docs = {
-      "Rakefile" => XMLHelper.parse_file(hpxml_path["Rakefile"]),
-      "BuildResidentialHPXML" => XMLHelper.parse_file(hpxml_path["BuildResidentialHPXML"])
+    hpxml_objs = {
+      "Rakefile" => HPXML.new(hpxml_path: hpxml_path["Rakefile"]),
+      "BuildResidentialHPXML" => HPXML.new(hpxml_path: hpxml_path["BuildResidentialHPXML"])
     }
 
-    # Sort elements so we can diff them
-    _sort_roof_elements(hpxml_docs)
-    _sort_wall_elements(hpxml_docs)
-    _sort_fwall_elements(hpxml_docs)
-    _sort_floor_elements(hpxml_docs)
-    _sort_slab_elements(hpxml_docs)
-    _sort_window_elements(hpxml_docs)
+    hpxml_objs.each do |version, hpxml|
+      # Sort elements so we can diff them
+      hpxml.neighbor_buildings.sort_by! { |neighbor_building| neighbor_building.azimuth }
+      hpxml.roofs.sort_by! { |roof| roof.area }
+      hpxml.walls.sort_by! { |wall| wall.area }
+      hpxml.foundation_walls.sort_by! { |foundation_wall| foundation_wall.area }
+      hpxml.frame_floors.sort_by! { |frame_floor| frame_floor.exterior_adjacent_to }
+      hpxml.slabs.sort_by! { |slab| slab.area }
+      hpxml.windows.sort_by! { |window| window.azimuth }
 
-    # Delete elements that we aren't going to diff
-    _delete_elements(hpxml_docs, "HPXML/XMLTransactionHeaderInformation")
-    _delete_elements(hpxml_docs, "HPXML/Building/BuildingDetails/BuildingSummary/Site")
-    _delete_elements(hpxml_docs, "HPXML/Building/BuildingDetails/BuildingSummary/BuildingOccupancy")
-    _delete_elements(hpxml_docs, "HPXML/Building/BuildingDetails/ClimateandRiskZones")
-    _delete_elements(hpxml_docs, "HPXML/Building/BuildingDetails/Enclosure/Attics")
-    _delete_elements(hpxml_docs, "HPXML/Building/BuildingDetails/Enclosure/Foundations")
-    _delete_elements(hpxml_docs, "HPXML/Building/BuildingDetails/Enclosure/RimJoists")
-    _delete_elements(hpxml_docs, "HPXML/Building/BuildingDetails/Enclosure/Doors")
-    _delete_elements(hpxml_docs, "HPXML/Building/BuildingDetails/Appliances/Refrigerator/extension")
-    _delete_elements(hpxml_docs, "HPXML/Building/BuildingDetails/extension")
+      # Delete elements that we aren't going to diff
+      hpxml.header.xml_type = nil
+      hpxml.header.xml_generated_by = nil
+      hpxml.header.created_date_and_time = Time.new(2000, 1, 1).strftime("%Y-%m-%dT%H:%M:%S%:z")
+      hpxml.set_site()
+      hpxml.set_building_occupancy()
+      hpxml.set_climate_and_risk_zones()
+      hpxml.attics.clear()
+      hpxml.foundations.clear()
+      hpxml.rim_joists.clear()
+      hpxml.doors.clear()
+      hpxml.refrigerator.adjusted_annual_kwh = nil
+      hpxml.refrigerator.schedules_output_path = nil
+      hpxml.refrigerator.schedules_column_name = nil
+    end
+
+    # Convert to REXML docs
+    hpxml_docs = {}
+    hpxml_objs.each do |version, hpxml|
+      hpxml_docs[version] = hpxml.to_rexml()
+    end
 
     hpxml_docs = {
       "Rakefile" => Nokogiri::XML(hpxml_docs["Rakefile"].to_s).remove_namespaces!,
@@ -201,170 +214,6 @@ class BuildResidentialHPXMLTest < MiniTest::Test
 
     unless discrepancies.empty?
       raise discrepancies
-    end
-  end
-
-  def _delete_elements(hpxml_docs, element)
-    hpxml_docs.each do |key, hpxml_doc|
-      XMLHelper.delete_element(hpxml_doc, element)
-    end
-  end
-
-  def _sort_roof_elements(hpxml_docs)
-    sorted_elements = {}
-    ["Rakefile", "BuildResidentialHPXML"].each do |version|
-      elements = {}
-      hpxml_docs[version].elements.each("HPXML/Building/BuildingDetails/Enclosure/Roofs/Roof") do |roof|
-        roof_values = HPXML.get_roof_values(roof: roof)
-        roof_values.delete(:exterior_adjacent_to)
-        elements[roof_values[:area]] = roof_values
-      end
-      sorted_elements[version] = elements.sort_by { |area, roof| area }
-    end
-
-    _delete_elements(hpxml_docs, "HPXML/Building/BuildingDetails/Enclosure/Roofs")
-
-    sorted_elements.each do |version, elements|
-      elements.each do |roof|
-        roof_values = roof[1]
-        roof_values.each do |key, value|
-          next unless value.nil?
-
-          roof_values.delete(key)
-        end
-        HPXML.add_roof(hpxml: hpxml_docs[version].elements["HPXML"], **roof_values)
-      end
-    end
-  end
-
-  def _sort_wall_elements(hpxml_docs)
-    sorted_elements = {}
-    ["Rakefile", "BuildResidentialHPXML"].each do |version|
-      elements = {}
-      hpxml_docs[version].elements.each("HPXML/Building/BuildingDetails/Enclosure/Walls/Wall") do |wall|
-        wall_values = HPXML.get_wall_values(wall: wall)
-        elements[wall_values[:area]] = wall_values
-      end
-      sorted_elements[version] = elements.sort_by { |area, wall| area }
-    end
-
-    _delete_elements(hpxml_docs, "HPXML/Building/BuildingDetails/Enclosure/Walls")
-
-    sorted_elements.each do |version, elements|
-      elements.each do |wall|
-        wall_values = wall[1]
-        wall_values.each do |key, value|
-          next unless value.nil?
-
-          wall_values.delete(key)
-        end
-        HPXML.add_wall(hpxml: hpxml_docs[version].elements["HPXML"], **wall_values)
-      end
-    end
-  end
-
-  def _sort_fwall_elements(hpxml_docs)
-    sorted_elements = {}
-    ["Rakefile", "BuildResidentialHPXML"].each do |version|
-      elements = {}
-      hpxml_docs[version].elements.each("HPXML/Building/BuildingDetails/Enclosure/FoundationWalls/FoundationWall") do |foundation_wall|
-        fwall_values = HPXML.get_foundation_wall_values(foundation_wall: foundation_wall)
-        elements[fwall_values[:area]] = fwall_values
-      end
-      sorted_elements[version] = elements.sort_by { |area, fwall| area }
-    end
-
-    _delete_elements(hpxml_docs, "HPXML/Building/BuildingDetails/Enclosure/FoundationWalls")
-
-    sorted_elements.each do |version, elements|
-      elements.each do |wall|
-        fwall_values = wall[1]
-        fwall_values.each do |key, value|
-          next unless value.nil?
-
-          fwall_values.delete(key)
-        end
-        HPXML.add_foundation_wall(hpxml: hpxml_docs[version].elements["HPXML"], **fwall_values)
-      end
-    end
-  end
-
-  def _sort_floor_elements(hpxml_docs)
-    sorted_elements = {}
-    ["Rakefile", "BuildResidentialHPXML"].each do |version|
-      elements = {}
-      hpxml_docs[version].elements.each("HPXML/Building/BuildingDetails/Enclosure/FrameFloors/FrameFloor") do |framefloor|
-        framefloor_values = HPXML.get_framefloor_values(framefloor: framefloor)
-        elements[framefloor_values[:exterior_adjacent_to]] = framefloor_values
-      end
-      sorted_elements[version] = elements.sort_by { |exterior_adjacent_to, floor| exterior_adjacent_to }
-    end
-
-    _delete_elements(hpxml_docs, "HPXML/Building/BuildingDetails/Enclosure/FrameFloors")
-
-    sorted_elements.each do |version, elements|
-      elements.each do |floor|
-        framefloor_values = floor[1]
-        framefloor_values.each do |key, value|
-          next unless value.nil?
-
-          framefloor_values.delete(key)
-        end
-        HPXML.add_framefloor(hpxml: hpxml_docs[version].elements["HPXML"], **framefloor_values)
-      end
-    end
-  end
-
-  def _sort_slab_elements(hpxml_docs)
-    sorted_elements = {}
-    ["Rakefile", "BuildResidentialHPXML"].each do |version|
-      elements = {}
-      hpxml_docs[version].elements.each("HPXML/Building/BuildingDetails/Enclosure/Slabs/Slab") do |slab|
-        slab_values = HPXML.get_slab_values(slab: slab)
-        slab_values.delete(:exterior_adjacent_to)
-        elements[slab_values[:area]] = slab_values
-      end
-      sorted_elements[version] = elements.sort_by { |area, slab| area }
-    end
-
-    _delete_elements(hpxml_docs, "HPXML/Building/BuildingDetails/Enclosure/Slabs")
-
-    sorted_elements.each do |version, elements|
-      elements.each do |slab|
-        slab_values = slab[1]
-        slab_values.each do |key, value|
-          next unless value.nil?
-
-          slab_values.delete(key)
-        end
-        HPXML.add_slab(hpxml: hpxml_docs[version].elements["HPXML"], **slab_values)
-      end
-    end
-  end
-
-  def _sort_window_elements(hpxml_docs)
-    sorted_elements = {}
-    ["Rakefile", "BuildResidentialHPXML"].each do |version|
-      elements = {}
-      hpxml_docs[version].elements.each("HPXML/Building/BuildingDetails/Enclosure/Windows/Window") do |window|
-        window_values = HPXML.get_window_values(window: window)
-        elements[window_values[:azimuth]] = window_values
-      end
-      sorted_elements[version] = elements.sort_by { |azimuth, window| azimuth }
-    end
-
-    _delete_elements(hpxml_docs, "HPXML/Building/BuildingDetails/Enclosure/Windows")
-
-    sorted_elements.each do |version, elements|
-      elements.each do |window|
-        window_values = window[1]
-        window_values.each do |key, value|
-          next unless value.nil?
-
-          window_values.delete(key)
-        end
-        HPXML.add_window(hpxml: hpxml_docs[version].elements["HPXML"], **window_values)
-      end
     end
   end
 

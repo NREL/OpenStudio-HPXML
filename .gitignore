@@ -1,6 +1,10 @@
 /.rubocop.yml
 /coverage
+/BuildResidentialHPXML/tests/run
+/BuildResidentialHPXML/tests/built_residential_hpxml
 /docs/_build
+/results
+/run
 /weather/USA_AK_Adak.NAS.704540_TMY3-cache.csv
 /weather/USA_AK_Adak.NAS.704540_TMY3.epw
 /weather/USA_AK_Ambler.701718_TMY3-cache.csv
@@ -2016,5 +2020,5 @@
 /workflow/tests/run
 /workflow/sample_files/results
 /workflow/sample_files/run
-/BuildResidentialHPXML/tests/run
-/BuildResidentialHPXML/tests/built_residential_hpxml
+/workflow/sample_files/invalid_files/results
+/workflow/sample_files/invalid_files/run

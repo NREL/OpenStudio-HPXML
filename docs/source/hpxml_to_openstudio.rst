@@ -115,6 +115,15 @@ The `HPXML Toolbox website <https://hpxml.nrel.gov/>`_ also provides several res
 #. A data dictionary
 #. An implementation guide
 
+Simulation Controls
+~~~~~~~~~~~~~~~~~~~
+
+EnergyPlus simulation controls can be entered in ``/HPXML/SoftwareInfo/extension/SimulationControl``.
+
+The only simulation control currently offered is the timestep.
+It can be optionally provided as ``Timestep``, where the value is in minutes and must be a divisor of 60.
+If not provided, the default value of 60 is used.
+
 Building Details
 ~~~~~~~~~~~~~~~~
 
@@ -158,7 +167,7 @@ The ``ClimateandRiskZones/WeatherStation`` element specifies the EnergyPlus weat
 The weather file can be entered in one of two ways:
 
 #. Using the ``WeatherStation/WMO``, which must be one of the acceptable TMY3 WMO station numbers found in the ``weather/data.csv`` file.
-   The full set of U.S. TMY3 weather files can be `downloaded here <http://s3.amazonaws.com/epwweatherfiles/tmy3s-cache-csv.zip>`_.
+   The full set of U.S. TMY3 weather files can be `downloaded here <https://data.nrel.gov/files/128/tmy3s-cache-csv.zip>`_.
 #. Using the ``WeatherStation/extension/EPWFileName``.
 
 Enclosure
