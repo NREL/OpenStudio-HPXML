@@ -299,6 +299,7 @@ class OSModel
     if not valid_tsteps.include? @timestep
       fail "Timestep (#{@timestep}) must be one of: #{valid_tsteps.join(', ')}."
     end
+
     tstep.setNumberOfTimestepsPerHour(60 / @timestep)
 
     shad = model.getShadowCalculation
@@ -1316,17 +1317,10 @@ class OSModel
 
     # Get foundation types
     foundation_types = []
-    # Used to check foundation wall attachment
-    all_fndwalls = []
-    slab_fndwalls = []
-    building.elements.each("BuildingDetails/Enclosure/FoundationWalls/FoundationWall") do |fnd_wall|
-      all_fndwalls << fnd_wall
-    end
+    @hpxml.slabs.each do |slab|
+      next if foundation_types.include? slab.interior_adjacent_to
 
-    building.elements.each("BuildingDetails/Enclosure/Slabs/Slab/InteriorAdjacentTo") do |int_adjacent_to|
-      next if foundation_types.include? int_adjacent_to.text
-
-      foundation_types << int_adjacent_to.text
+      foundation_types << slab.interior_adjacent_to
     end
 
     foundation_types.each do |foundation_type|
@@ -1752,6 +1746,7 @@ class OSModel
         if overhang_distance_to_bottom <= overhang_distance_to_top
           fail "For Window '#{window_id}', overhangs distance to bottom (#{overhang_distance_to_bottom}) must be greater than distance to top (#{overhang_distance_to_top})."
         end
+
         window_height = overhang_distance_to_bottom - overhang_distance_to_top
       end
 
@@ -2268,12 +2263,10 @@ class OSModel
   def self.add_cooling_system(runner, model)
     return if @use_only_ideal_air
 
-    building.elements.each("BuildingDetails/Systems/HVAC/HVACPlant/CoolingSystem") do |clgsys|
-      cooling_system_values = HPXML.get_cooling_system_values(cooling_system: clgsys)
+    @hpxml.cooling_systems.each do |cooling_system|
+      clg_type = cooling_system.cooling_system_type
 
-      clg_type = cooling_system_values[:cooling_system_type]
-
-      cool_capacity_btuh = cooling_system_values[:cooling_capacity]
+      cool_capacity_btuh = cooling_system.cooling_capacity
       if not cool_capacity_btuh.nil?
         if cool_capacity_btuh < 0
           cool_capacity_btuh = Constants.SizingAuto
@@ -2372,15 +2365,13 @@ class OSModel
     # such that the sequential load heating fraction is properly applied.
 
     [true, false].each do |only_furnaces_attached_to_cooling|
-      building.elements.each("BuildingDetails/Systems/HVAC/HVACPlant/HeatingSystem") do |htgsys|
-        heating_system_values = HPXML.get_heating_system_values(heating_system: htgsys)
+      @hpxml.heating_systems.each do |heating_system|
+        htg_type = heating_system.heating_system_type
+        sys_id = heating_system.id
 
-        htg_type = heating_system_values[:heating_system_type]
-        sys_id = heating_system_values[:id]
+        check_distribution_system(heating_system.distribution_system_idref, sys_id, htg_type)
 
-        check_distribution_system(building, heating_system_values[:distribution_system_idref], sys_id, htg_type)
-
-        attached_clg_system = get_attached_clg_system(heating_system_values, building)
+        attached_clg_system = get_attached_clg_system(heating_system)
 
         if only_furnaces_attached_to_cooling
           next unless htg_type == "Furnace" and not attached_clg_system.nil?
@@ -2769,6 +2760,7 @@ class OSModel
 
   def self.add_ceiling_fans(runner, model, weather)
     return if @hpxml.ceiling_fans.size == 0
+
     ceiling_fan = @hpxml.ceiling_fans[0]
 
     monthly_sch = HVAC.get_ceiling_fan_operation_months(weather)
@@ -2794,15 +2786,14 @@ class OSModel
   end
 
   def self.add_dehumidifier(runner, model)
-    dehumidifier_values = HPXML.get_dehumidifier_values(dehumidifier: building.elements["BuildingDetails/Appliances/Dehumidifier"])
-    return if dehumidifier_values.nil?
+    return if @hpxml.dehumidifier.nil?
 
-    sys_id = dehumidifier_values[:id]
+    sys_id = @hpxml.dehumidifier.id
     @hvac_map[sys_id] = []
-    water_removal_rate = dehumidifier_values[:capacity]
-    energy_factor = dehumidifier_values[:energy_factor]
-    integrated_energy_factor = dehumidifier_values[:integrated_energy_factor]
-    humidity_setpoint = dehumidifier_values[:rh_setpoint]
+    water_removal_rate = @hpxml.dehumidifier.capacity
+    energy_factor = @hpxml.dehumidifier.energy_factor
+    integrated_energy_factor = @hpxml.dehumidifier.integrated_energy_factor
+    humidity_setpoint = @hpxml.dehumidifier.rh_setpoint
 
     # Calculate air flow rate by assuming 2.75 cfm/pint/day (based on experimental test data)
     air_flow_rate = 2.75 * water_removal_rate
@@ -2979,6 +2970,7 @@ class OSModel
     if @has_vented_crawl
       @hpxml.foundations.each do |foundation|
         next unless foundation.foundation_type == "VentedCrawlspace"
+
         vented_crawl_sla = foundation.vented_crawlspace_sla
       end
       if vented_crawl_sla.nil?
@@ -3009,8 +3001,9 @@ class OSModel
     if @frac_window_area_operable < 0 or @frac_window_area_operable > 1
       fail "Fraction window area operable (#{@frac_window_area_operable}) must be between 0 and 1."
     end
+
     nv_frac_window_area_open = @frac_window_area_operable * 0.20 # Assume 20% of operable window area is open
-      nv_num_days_per_week = 7
+    nv_num_days_per_week = 7
     nv_max_oa_hr = 0.0115
     nv_max_oa_rh = 0.7
     nat_vent = NaturalVentilation.new(nv_frac_window_area_open, nv_max_oa_hr, nv_max_oa_rh, nv_num_days_per_week,
@@ -3049,20 +3042,20 @@ class OSModel
         next if hvac_system.distribution_system_idref.nil? or dist_id != hvac_system.distribution_system_idref
 
         sys_id = hvac_system.id
-          @hvac_map[sys_id].each do |loop|
-            next unless loop.is_a? OpenStudio::Model::AirLoopHVAC
+        @hvac_map[sys_id].each do |loop|
+          next unless loop.is_a? OpenStudio::Model::AirLoopHVAC
 
-            if duct_systems[air_ducts].nil?
-              duct_systems[air_ducts] = loop
-            elsif duct_systems[air_ducts] != loop
-              # Multiple air loops associated with this duct system, treat
-              # as separate duct systems.
+          if duct_systems[air_ducts].nil?
+            duct_systems[air_ducts] = loop
+          elsif duct_systems[air_ducts] != loop
+            # Multiple air loops associated with this duct system, treat
+            # as separate duct systems.
             air_ducts2 = self.create_ducts(hvac_distribution, model, spaces, dist_id)
-              duct_systems[air_ducts2] = loop
-            end
+            duct_systems[air_ducts2] = loop
           end
         end
       end
+    end
 
     # Mechanical Ventilation
     mech_vent_id = nil
@@ -3117,9 +3110,9 @@ class OSModel
     bathroom_exhaust_hour = 5
 
     # Whole house fan
-      whole_house_fan_w = 0.0
-      whole_house_fan_cfm = 0.0
-      whf_num_days_per_week = 0
+    whole_house_fan_w = 0.0
+    whole_house_fan_cfm = 0.0
+    whf_num_days_per_week = 0
     @hpxml.ventilation_fans.each do |ventilation_fan|
       next unless ventilation_fan.used_for_seasonal_cooling_load_reduction
 
@@ -3133,44 +3126,36 @@ class OSModel
     cfis_airloop = nil
     if mech_vent_type == 'central fan integrated supply'
       # Get HVAC distribution system CFIS is attached to
-      cfis_hvac_dist = nil
-      building.elements.each("BuildingDetails/Systems/HVAC/HVACDistribution") do |hvac_dist|
-        next unless hvac_dist.elements["SystemIdentifier"].attributes["id"] == mech_vent_fan.elements["AttachedToHVACDistributionSystem"].attributes["idref"]
+      @hpxml.hvac_distributions.each do |hvac_distribution|
+        next unless hvac_distribution.id == mech_vent_attached_dist_system
 
-        cfis_hvac_dist = hvac_dist
-      end
-      if cfis_hvac_dist.nil?
-        fail "Attached HVAC distribution system '#{mech_vent_fan.elements['AttachedToHVACDistributionSystem'].attributes['idref']}' not found for mechanical ventilation '#{mech_vent_fan.elements["SystemIdentifier"].attributes["id"]}'."
-      end
+        if hvac_distribution.distribution_system_type == 'HydronicDistribution'
+          fail "Attached HVAC distribution system '#{mech_vent_attached_dist_system}' cannot be hydronic for mechanical ventilation '#{mech_vent_id}'."
+        end
 
-      cfis_hvac_dist_values = HPXML.get_hvac_distribution_values(hvac_distribution: cfis_hvac_dist)
-      if cfis_hvac_dist_values[:distribution_system_type] == 'HydronicDistribution'
-        fail "Attached HVAC distribution system '#{mech_vent_fan.elements['AttachedToHVACDistributionSystem'].attributes['idref']}' cannot be hydronic for mechanical ventilation '#{mech_vent_fan.elements["SystemIdentifier"].attributes["id"]}'."
-      end
-
-      # Get HVAC systems attached to this distribution system
-      cfis_sys_ids = []
+        # Get HVAC systems attached to this distribution system
+        cfis_sys_ids = []
         (@hpxml.heating_systems + @hpxml.cooling_systems + @hpxml.heat_pumps).each do |hvac_system|
           next if hvac_system.distribution_system_idref.nil?
           next unless hvac_distribution.id == hvac_system.distribution_system_idref
 
           cfis_sys_ids << hvac_system.id
-      end
+        end
 
-      # Get AirLoopHVACs associated with these HVAC systems
-      @hvac_map.each do |sys_id, hvacs|
-        next unless cfis_sys_ids.include? sys_id
+        # Get AirLoopHVACs associated with these HVAC systems
+        @hvac_map.each do |sys_id, hvacs|
+          next unless cfis_sys_ids.include? sys_id
 
-        hvacs.each do |loop|
-          next unless loop.is_a? OpenStudio::Model::AirLoopHVAC
-          next if cfis_airloop == loop # already assigned
+          hvacs.each do |loop|
+            next unless loop.is_a? OpenStudio::Model::AirLoopHVAC
+            next if cfis_airloop == loop # already assigned
 
-          fail "Two airloops found for CFIS. Aborting..." unless cfis_airloop.nil?
+            fail "Two airloops found for CFIS. Aborting..." unless cfis_airloop.nil?
 
-          cfis_airloop = loop
+            cfis_airloop = loop
+          end
         end
       end
-    end
       if cfis_airloop.nil?
         fail "Attached HVAC distribution system '#{mech_vent_attached_dist_system}' not found for mechanical ventilation '#{mech_vent_id}'."
       end
@@ -4318,9 +4303,9 @@ class OSModel
       next unless (is_ach50 or is_cfm50 or is_constant_nach)
 
       infilvolume = measurement.infiltration_volume
-    if infilvolume.nil?
-      infilvolume = @cvolume
-    end
+      if infilvolume.nil?
+        infilvolume = @cvolume
+      end
     end
     return infilvolume
   end

@@ -37,7 +37,7 @@ class HPXMLTest < MiniTest::Test
 
     xmls = []
     test_dirs.each do |test_dir|
-      Dir["#{test_dir}/base*.xml"].sort.each do |xml|
+      Dir["#{test_dir}/base.xml"].sort.each do |xml|
         xmls << File.absolute_path(xml)
       end
     end
@@ -760,6 +760,7 @@ class HPXMLTest < MiniTest::Test
     # Enclosure Walls/RimJoists/FoundationWalls
     (hpxml.walls + hpxml.rim_joists + hpxml.foundation_walls).each do |wall|
       next unless ['outside', 'ground'].include? wall.exterior_adjacent_to
+
       wall_id = wall.id.upcase
 
       # R-value
