@@ -1,4 +1,4 @@
-require_relative '../../../hpxml-measures/HPXMLtoOpenStudio/tests/minitest_helper'
+require_relative '../../../hpxml-measures/HPXMLtoOpenStudio/resources/minitest_helper'
 require_relative '../../../hpxml-measures/HPXMLtoOpenStudio/resources/xmlhelper.rb'
 require_relative '../resources/HESruleset.rb'
 require_relative '../../../hpxml-measures/HPXMLtoOpenStudio/resources/hpxml.rb'
@@ -10,7 +10,7 @@ require 'fileutils'
 require 'rexml/xpath'
 
 class HEScoreRulesetTest < MiniTest::Test
-  def test_valid_simulations
+  def test_sample_files
     this_dir = File.dirname(__FILE__)
 
     args_hash = {}
@@ -42,13 +42,14 @@ class HEScoreRulesetTest < MiniTest::Test
 
     _test_measure(args_hash)
 
-    hpxml_doc = XMLHelper.parse_file(args_hash["hpxml_output_path"])
+    hpxml = HPXML.new(hpxml_path: args_hash["hpxml_output_path"])
 
-    hpxml_doc.elements.each("HPXML/Building/BuildingDetails/BuildingSummary/Site/extension/Neighbors/NeighborBuilding") do |neighbor_building|
-      neighbor_values = HPXML.get_neighbor_building_values(neighbor_building: neighbor_building)
-      assert_in_epsilon(neighbor_values[:distance], 20.0, 0.000001)
-      assert([90, 270].include?(neighbor_values[:azimuth]))
-      assert_in_epsilon(neighbor_values[:height], 12.0, 0.000001)
+    assert_equal(2, hpxml.neighbor_buildings.size)
+
+    hpxml.neighbor_buildings.each do |neighbor_building|
+      assert_in_epsilon(neighbor_building.distance, 20.0, 0.000001)
+      assert([90, 270].include?(neighbor_building.azimuth))
+      assert_in_epsilon(neighbor_building.height, 12.0, 0.000001)
     end
 
     FileUtils.rm_f(args_hash['hpxml_output_path']) # Cleanup
@@ -265,31 +266,23 @@ class HEScoreRulesetTest < MiniTest::Test
   def test_foundation_area_lookup
     this_dir = File.dirname(__FILE__)
     xml = File.absolute_path("#{this_dir}/../../../workflow/sample_files/Floor2_conditioned_basement_hpxml.xml")
-    hpxml_doc = XMLHelper.parse_file(xml)
-    hpxml = hpxml_doc.root
 
-    orig_details = hpxml_doc.elements["/HPXML/Building/BuildingDetails"]
-    hpxml_values = HPXML.get_hpxml_values(hpxml: hpxml_doc.elements["/HPXML"])
-    hpxml_doc2 = HPXML.create_hpxml(xml_type: hpxml_values[:xml_type],
-                                    xml_generated_by: hpxml_values[:xml_generated_by],
-                                    transaction: hpxml_values[:transaction],
-                                    eri_calculation_version: "2014AEG",
-                                    building_id: hpxml_values[:building_id],
-                                    event_type: hpxml_values[:event_type])
-    hpxml2 = hpxml_doc.elements["HPXML"]
-    HEScoreRuleset.set_summary(orig_details, hpxml2)
+    orig_hpxml = HPXML.new(hpxml_path: xml)
+    new_hpxml = HPXML.new()
+
+    HEScoreRuleset.set_summary(orig_hpxml, new_hpxml)
     bldg_length_side = HEScoreRuleset.instance_variable_get(:@bldg_length_side)
     bldg_length_front = HEScoreRuleset.instance_variable_get(:@bldg_length_front)
 
-    slab_foundation = hpxml.elements['//Foundation[1]']
-    slab_area = get_foundation_area(slab_foundation)
+    slab_foundation = orig_hpxml.foundations[0]
+    slab_area = get_foundation_area(orig_hpxml, slab_foundation)
     assert_in_epsilon(slab_area, 600.0, 0.01)
-    basement_foundation = hpxml.elements['//Foundation[2]']
-    basement_area = get_foundation_area(basement_foundation)
+    basement_foundation = orig_hpxml.foundations[1]
+    basement_area = get_foundation_area(orig_hpxml, basement_foundation)
     assert_in_epsilon(basement_area, 400.0, 0.01)
 
-    slab_perimeter = HEScoreRuleset.get_foundation_perimeter(slab_foundation)
-    basement_perimeter = HEScoreRuleset.get_foundation_perimeter(basement_foundation)
+    slab_perimeter = HEScoreRuleset.get_foundation_perimeter(orig_hpxml, slab_foundation)
+    basement_perimeter = HEScoreRuleset.get_foundation_perimeter(orig_hpxml, basement_foundation)
     total_area = slab_area + basement_area
     slab_area_frac = slab_area / total_area
     bsmt_area_frac = basement_area / total_area
@@ -462,7 +455,7 @@ class HEScoreRulesetTest < MiniTest::Test
     result = runner.result
 
     # show the output
-    # show_output(result)
+    show_output(result) unless result.value.valueName == 'Success'
 
     # assert that it ran correctly
     assert_equal("Success", result.value.valueName)

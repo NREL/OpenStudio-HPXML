@@ -1164,9 +1164,12 @@
 			<xs:enumeration value="ground"/>
 			<xs:enumeration value="living space"/>
 			<xs:enumeration value="other"/>
+			<xs:enumeration value="other heated space"/>
 			<xs:enumeration value="other housing unit"/>
 			<xs:enumeration value="other housing unit above"/>
 			<xs:enumeration value="other housing unit below"/>
+			<xs:enumeration value="other multifamily buffer space"/>
+			<xs:enumeration value="other non-freezing space"/>
 			<xs:enumeration value="outside"/>
 			<xs:enumeration value="unconditioned space"/>
 		</xs:restriction>
@@ -4526,6 +4529,33 @@
 	<xs:complexType name="SolarThermalSystemEnergyFactor">
 		<xs:simpleContent>
 			<xs:extension base="SolarThermalSystemEnergyFactor_simple">
+				<xs:attribute name="dataSource" type="DataSource"/>
+			</xs:extension>
+		</xs:simpleContent>
+	</xs:complexType>
+	<xs:simpleType name="DehumidifierType_simple">
+		<xs:restriction base="xs:string">
+			<xs:enumeration value="portable"/>
+			<xs:enumeration value="whole-home"/>
+		</xs:restriction>
+	</xs:simpleType>
+	<xs:complexType name="DehumidifierType">
+		<xs:simpleContent>
+			<xs:extension base="DehumidifierType_simple">
+				<xs:attribute name="dataSource" type="DataSource"/>
+			</xs:extension>
+		</xs:simpleContent>
+	</xs:complexType>
+	<xs:simpleType name="CompressorType_simple">
+		<xs:restriction base="xs:string">
+			<xs:enumeration value="single stage"/>
+			<xs:enumeration value="two stage"/>
+			<xs:enumeration value="variable speed"/>
+		</xs:restriction>
+	</xs:simpleType>
+	<xs:complexType name="CompressorType">
+		<xs:simpleContent>
+			<xs:extension base="CompressorType_simple">
 				<xs:attribute name="dataSource" type="DataSource"/>
 			</xs:extension>
 		</xs:simpleContent>
