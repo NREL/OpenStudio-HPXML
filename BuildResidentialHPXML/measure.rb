@@ -2127,7 +2127,7 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     errors = []
 
     error = (["heat pump water heater"].include? args[:water_heater_type] and args[:water_heater_fuel_type] != "electricity")
-    errors << "water_heater_type_1=#{args[:water_heater_type]} and water_heater_fuel_type_1=#{args[:water_heater_fuel_type]}" if error
+    errors << "water_heater_type=#{args[:water_heater_type]} and water_heater_fuel_type=#{args[:water_heater_fuel_type]}" if error
 
     return errors
   end
