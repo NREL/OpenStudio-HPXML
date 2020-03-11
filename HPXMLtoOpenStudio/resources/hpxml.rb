@@ -78,6 +78,41 @@ class HPXML < Object
     @misc_loads_schedule = MiscLoadsSchedule.new(self, **kwargs)
   end
 
+  def has_space_type(space_type)
+    # Look for surfaces attached to this space type
+    (@roofs + @rim_joists + @walls + @foundation_walls + @frame_floors + @slabs).each do |surface|
+      return true if surface.interior_adjacent_to == space_type
+      return true if surface.exterior_adjacent_to == space_type
+    end
+    return false
+  end
+
+  def has_fuel_access
+    @site.fuels.each do |fuel|
+      if fuel != "electricity"
+        return true
+      end
+    end
+    return false
+  end
+
+  def predominant_heating_fuel
+    fuel_fracs = {}
+    @heating_systems.each do |heating_system|
+      fuel = heating_system.heating_system_fuel
+      fuel_fracs[fuel] = 0.0 if fuel_fracs[fuel].nil?
+      fuel_fracs[fuel] += heating_system.fraction_heat_load_served
+    end
+    @heat_pumps.each do |heat_pump|
+      fuel = heat_pump.heat_pump_fuel
+      fuel_fracs[fuel] = 0.0 if fuel_fracs[fuel].nil?
+      fuel_fracs[fuel] += heat_pump.fraction_heat_load_served
+    end
+    return "electricity" if fuel_fracs.empty?
+
+    return fuel_fracs.key(fuel_fracs.values.max)
+  end
+
   def to_rexml()
     @doc = _create_rexml_document()
     @header.to_rexml(@doc)
