@@ -3357,6 +3357,8 @@ class OSModel
     tot_load_sensors[:clg] = OpenStudio::Model::EnergyManagementSystemSensor.new(model, "Cooling:EnergyTransfer")
     tot_load_sensors[:clg].setName("clg_load_tot")
 
+    load_adj_sensors = {} # Sensors used to adjust E+ EnergyTransfer meter, eg. dehumidifier as load in our program, but included in Heating:EnergyTransfer as HVAC equipment
+
     # EMS Sensors: Surfaces, SubSurfaces, InternalMass
 
     surfaces_sensors = { :walls => [],
@@ -3661,21 +3663,12 @@ class OSModel
     model.getZoneHVACDehumidifierDXs.each do |e|
       next unless e.thermalZone.get.name.to_s == @living_zone.name.to_s
 
-      model.getEnergyManagementSystemGlobalVariables.each do |ems_global_var|
-        next unless ems_global_var.name.to_s.include? "dehumidified"
-
-        if ems_global_var.name.to_s.include? "htg"
-          liv_load_sensors[:htg] = ems_global_var
-        elsif ems_global_var.name.to_s.include? "clg"
-          liv_load_sensors[:clg] = ems_global_var
-        end
-      end
-
       intgains_sensors << []
       { "Zone Dehumidifier Sensible Heating Energy" => "ig_dehumidifier" }.each do |var, name|
         intgain_dehumidifier = OpenStudio::Model::EnergyManagementSystemSensor.new(model, var)
         intgain_dehumidifier.setName(name)
         intgain_dehumidifier.setKeyName(e.name.to_s)
+        load_adj_sensors[:dehumidifier] = intgain_dehumidifier
         intgains_sensors[-1] << intgain_dehumidifier
       end
     end
@@ -3799,9 +3792,21 @@ class OSModel
     program.addLine("Set loads_htg_tot = 0")
     program.addLine("Set loads_clg_tot = 0")
     program.addLine("If #{liv_load_sensors[:htg].name} > 0")
-    program.addLine("  Set loads_htg_tot = #{tot_load_sensors[:htg].name} - #{tot_load_sensors[:clg].name}")
+    s = "  Set loads_htg_tot = #{tot_load_sensors[:htg].name} - #{tot_load_sensors[:clg].name}"
+    load_adj_sensors.each do |key, adj_sensor|
+      if ["dehumidifier"].include? key.to_s
+        s += " - #{adj_sensor.name}"
+      end
+    end
+    program.addLine(s)
     program.addLine("ElseIf #{liv_load_sensors[:clg].name} > 0")
-    program.addLine("  Set loads_clg_tot = #{tot_load_sensors[:clg].name} - #{tot_load_sensors[:htg].name}")
+    s = "  Set loads_clg_tot = #{tot_load_sensors[:clg].name} - #{tot_load_sensors[:htg].name}"
+    load_adj_sensors.each do |key, adj_sensor|
+      if ["dehumidifier"].include? key.to_s
+        s += " + #{adj_sensor.name}"
+      end
+    end
+    program.addLine(s)
     program.addLine("EndIf")
 
     # EMS calling manager

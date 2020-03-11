@@ -2156,55 +2156,6 @@ class HVAC
     hvac_map[sys_id] << zone_hvac
   end
 
-  def self.add_dehumidified_load_outvars(model, dehumidifier, control_zone)
-    # sensors
-    liv_to_htg_load_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, "Zone Predicted Sensible Load to Heating Setpoint Heat Transfer Rate")
-    liv_to_htg_load_sensor.setName("to_htg_load_w")
-    liv_to_htg_load_sensor.setKeyName("#{control_zone.name.to_s}")
-    liv_to_clg_load_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, "Zone Predicted Sensible Load to Cooling Setpoint Heat Transfer Rate")
-    liv_to_clg_load_sensor.setName("to_clg_load_w")
-    liv_to_clg_load_sensor.setKeyName("#{control_zone.name.to_s}")
-    dehumidifier_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, "Zone Dehumidifier Sensible Heating Energy")
-    dehumidifier_sensor.setName("dehumidifier_sens_htg")
-    dehumidifier_sensor.setKeyName("#{dehumidifier.name.to_s}")
-
-    # Global variables, also used for component load program
-    dh_htg_load = OpenStudio::Model::EnergyManagementSystemGlobalVariable.new(model, "dehumidified_htg_load")
-    dh_clg_load = OpenStudio::Model::EnergyManagementSystemGlobalVariable.new(model, "dehumidified_clg_load")
-
-    # program
-    program = OpenStudio::Model::EnergyManagementSystemProgram.new(model)
-    program.setName("Dehumidified load program")
-    program.addLine("Set #{dh_htg_load.name} = 0")
-    program.addLine("Set #{dh_clg_load.name} = 0")
-    program.addLine("Set htg_load = #{liv_to_htg_load_sensor.name} * ZoneTimeStep * 3600 - #{dehumidifier_sensor.name}")
-    program.addLine("Set clg_load = #{liv_to_clg_load_sensor.name} * ZoneTimeStep * 3600 - #{dehumidifier_sensor.name}")
-    program.addLine("If htg_load > 0 && clg_load > 0")
-    program.addLine("  Set #{dh_htg_load.name} = htg_load")
-    program.addLine("ElseIf htg_load < 0 && clg_load < 0")
-    program.addLine("  Set #{dh_clg_load.name} = - clg_load")
-    program.addLine("EndIf")
-
-    # calling manager
-    program_calling_manager = OpenStudio::Model::EnergyManagementSystemProgramCallingManager.new(model)
-    program_calling_manager.setName("Dehumidified load program calling manager")
-    program_calling_manager.setCallingPoint("EndOfSystemTimestepBeforeHVACReporting")
-    program_calling_manager.addProgram(program)
-
-    # output vars
-    ems_outvars = []
-    ["htg", "clg"].each do |mode|
-      dehumidified_load_output_var = OpenStudio::Model::EnergyManagementSystemOutputVariable.new(model, "dehumidified_#{mode}_load")
-      dehumidified_load_output_var.setName("dehumidified #{mode} load")
-      dehumidified_load_output_var.setTypeOfDataInVariable("Summed")
-      dehumidified_load_output_var.setUpdateFrequency("SystemTimestep")
-      dehumidified_load_output_var.setEMSProgramOrSubroutineName(program)
-      dehumidified_load_output_var.setUnits("J")
-      ems_outvars << dehumidified_load_output_var
-    end
-    return ems_outvars
-  end
-
   def self.dehumidifier_ief_to_ef_inputs(w_coeff, ef_coeff, ief, water_removal_rate)
     # Shift inputs under IEF test conditions to E+ supported EF test conditions
     # test conditions
