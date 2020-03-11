@@ -1548,11 +1548,11 @@ def set_hpxml_doors(hpxml_file, hpxml)
                     :r_value => 4.4)
   elsif ['base-enclosure-garage.xml',
          'base-enclosure-2stories-garage.xml'].include? hpxml_file
-    hpxml.doors << HPXML::Door.new(:id => "GarageDoorSouth",
-                                   :wall_idref => "WallGarageExterior",
-                                   :area => 70,
-                                   :azimuth => 180,
-                                   :r_value => 4.4)
+    hpxml.doors.add(:id => "GarageDoorSouth",
+                    :wall_idref => "WallGarageExterior",
+                    :area => 70,
+                    :azimuth => 180,
+                    :r_value => 4.4)
   elsif ['invalid_files/unattached-door.xml'].include? hpxml_file
     hpxml.doors[0].wall_idref = "foobar"
   elsif ['base-enclosure-split-surfaces.xml'].include? hpxml_file
@@ -2080,25 +2080,25 @@ end
 
 def set_hpxml_hvac_control(hpxml_file, hpxml)
   if ['base.xml'].include? hpxml_file
-    hpxml.set_hvac_control(:id => "HVACControl",
-                           :control_type => "manual thermostat",
-                           :heating_setpoint_temp => 68,
-                           :cooling_setpoint_temp => 78)
+    hpxml.hvac_controls.add(:id => "HVACControl",
+                            :control_type => "manual thermostat",
+                            :heating_setpoint_temp => 68,
+                            :cooling_setpoint_temp => 78)
   elsif ['base-hvac-none.xml'].include? hpxml_file
-    hpxml.set_hvac_control()
+    hpxml.hvac_controls.clear()
   elsif ['base-hvac-programmable-thermostat.xml'].include? hpxml_file
-    hpxml.hvac_control.control_type = "programmable thermostat"
-    hpxml.hvac_control.heating_setback_temp = 66
-    hpxml.hvac_control.heating_setback_hours_per_week = 7 * 7
-    hpxml.hvac_control.heating_setback_start_hour = 23 # 11pm
-    hpxml.hvac_control.cooling_setup_temp = 80
-    hpxml.hvac_control.cooling_setup_hours_per_week = 6 * 7
-    hpxml.hvac_control.cooling_setup_start_hour = 9 # 9am
+    hpxml.hvac_controls[0].control_type = "programmable thermostat"
+    hpxml.hvac_controls[0].heating_setback_temp = 66
+    hpxml.hvac_controls[0].heating_setback_hours_per_week = 7 * 7
+    hpxml.hvac_controls[0].heating_setback_start_hour = 23 # 11pm
+    hpxml.hvac_controls[0].cooling_setup_temp = 80
+    hpxml.hvac_controls[0].cooling_setup_hours_per_week = 6 * 7
+    hpxml.hvac_controls[0].cooling_setup_start_hour = 9 # 9am
   elsif ['base-hvac-setpoints.xml'].include? hpxml_file
-    hpxml.hvac_control.heating_setpoint_temp = 60
-    hpxml.hvac_control.cooling_setpoint_temp = 80
+    hpxml.hvac_controls[0].heating_setpoint_temp = 60
+    hpxml.hvac_controls[0].cooling_setpoint_temp = 80
   elsif ['base-misc-ceiling-fans.xml'].include? hpxml_file
-    hpxml.hvac_control.ceiling_fan_cooling_setpoint_temp_offset = 0.5
+    hpxml.hvac_controls[0].ceiling_fan_cooling_setpoint_temp_offset = 0.5
   end
 end
 
@@ -2347,10 +2347,10 @@ def set_hpxml_hvac_distributions(hpxml_file, hpxml)
     hpxml.hvac_distributions.add(:id => "HVACDistribution2",
                                  :distribution_system_type => "HydronicDistribution")
   elsif ['invalid_files/hvac-distribution-return-duct-leakage-missing.xml'].include? hpxml_file
-    hpxml.hvac_distributions[0].ducts << HPXML::Duct.new(:duct_type => "return",
-                                                         :duct_insulation_r_value => 0,
-                                                         :duct_location => "attic - unvented",
-                                                         :duct_surface_area => 50)
+    hpxml.hvac_distributions[0].ducts.add(:duct_type => "return",
+                                          :duct_insulation_r_value => 0,
+                                          :duct_location => "attic - unvented",
+                                          :duct_surface_area => 50)
   end
 end
 
@@ -2484,7 +2484,7 @@ def set_hpxml_water_heating_systems(hpxml_file, hpxml)
                                     :location => "living space",
                                     :tank_volume => 50,
                                     :fraction_dhw_load_served => 0.1,
-                                    :related_hvac => "HeatingSystem")
+                                    :related_hvac_idref => "HeatingSystem")
   elsif ['invalid_files/dhw-frac-load-served.xml'].include? hpxml_file
     hpxml.water_heating_systems[0].fraction_dhw_load_served += 0.15
   elsif ['base-dhw-tank-gas.xml',
@@ -2562,23 +2562,23 @@ def set_hpxml_water_heating_systems(hpxml_file, hpxml)
     hpxml.water_heating_systems[0].uniform_energy_factor = 0.93
   elsif ['base-dhw-desuperheater.xml'].include? hpxml_file
     hpxml.water_heating_systems[0].uses_desuperheater = true
-    hpxml.water_heating_systems[0].related_hvac = "CoolingSystem"
+    hpxml.water_heating_systems[0].related_hvac_idref = "CoolingSystem"
   elsif ['base-dhw-desuperheater-tankless.xml'].include? hpxml_file
     hpxml.water_heating_systems[0].water_heater_type = "instantaneous water heater"
     hpxml.water_heating_systems[0].tank_volume = nil
     hpxml.water_heating_systems[0].heating_capacity = nil
     hpxml.water_heating_systems[0].energy_factor = 0.99
     hpxml.water_heating_systems[0].uses_desuperheater = true
-    hpxml.water_heating_systems[0].related_hvac = "CoolingSystem"
+    hpxml.water_heating_systems[0].related_hvac_idref = "CoolingSystem"
   elsif ['base-dhw-desuperheater-2-speed.xml'].include? hpxml_file
     hpxml.water_heating_systems[0].uses_desuperheater = true
-    hpxml.water_heating_systems[0].related_hvac = "CoolingSystem"
+    hpxml.water_heating_systems[0].related_hvac_idref = "CoolingSystem"
   elsif ['base-dhw-desuperheater-var-speed.xml'].include? hpxml_file
     hpxml.water_heating_systems[0].uses_desuperheater = true
-    hpxml.water_heating_systems[0].related_hvac = "CoolingSystem"
+    hpxml.water_heating_systems[0].related_hvac_idref = "CoolingSystem"
   elsif ['base-dhw-desuperheater-gshp.xml'].include? hpxml_file
     hpxml.water_heating_systems[0].uses_desuperheater = true
-    hpxml.water_heating_systems[0].related_hvac = "HeatPump"
+    hpxml.water_heating_systems[0].related_hvac_idref = "HeatPump"
   elsif ['base-dhw-jacket-electric.xml',
          'base-dhw-jacket-indirect.xml',
          'base-dhw-jacket-gas.xml',
@@ -2591,7 +2591,7 @@ def set_hpxml_water_heating_systems(hpxml_file, hpxml)
     hpxml.water_heating_systems[0].heating_capacity = nil
     hpxml.water_heating_systems[0].energy_factor = nil
     hpxml.water_heating_systems[0].fuel_type = nil
-    hpxml.water_heating_systems[0].related_hvac = "HeatingSystem"
+    hpxml.water_heating_systems[0].related_hvac_idref = "HeatingSystem"
     if hpxml_file == 'base-dhw-indirect-outside.xml'
       hpxml.water_heating_systems[0].location = "other exterior"
     end
@@ -2622,15 +2622,15 @@ def set_hpxml_water_heating_systems(hpxml_file, hpxml)
     hpxml.water_heating_systems[0].location = "unconditioned space"
   elsif ['invalid_files/invalid-relatedhvac-desuperheater.xml'].include? hpxml_file
     hpxml.water_heating_systems[0].uses_desuperheater = true
-    hpxml.water_heating_systems[0].related_hvac = "CoolingSystem_bad"
+    hpxml.water_heating_systems[0].related_hvac_idref = "CoolingSystem_bad"
   elsif ['invalid_files/repeated-relatedhvac-desuperheater.xml'].include? hpxml_file
     hpxml.water_heating_systems[0].fraction_dhw_load_served = 0.5
     hpxml.water_heating_systems[0].uses_desuperheater = true
-    hpxml.water_heating_systems[0].related_hvac = "CoolingSystem"
+    hpxml.water_heating_systems[0].related_hvac_idref = "CoolingSystem"
     hpxml.water_heating_systems << hpxml.water_heating_systems[0].dup
     hpxml.water_heating_systems[1].id = "WaterHeater2"
   elsif ['invalid_files/invalid-relatedhvac-dhw-indirect.xml'].include? hpxml_file
-    hpxml.water_heating_systems[0].related_hvac = "HeatingSystem_bad"
+    hpxml.water_heating_systems[0].related_hvac_idref = "HeatingSystem_bad"
   elsif ['invalid_files/repeated-relatedhvac-dhw-indirect.xml'].include? hpxml_file
     hpxml.water_heating_systems[0].fraction_dhw_load_served = 0.5
     hpxml.water_heating_systems << hpxml.water_heating_systems[0].dup
@@ -2646,48 +2646,48 @@ end
 
 def set_hpxml_hot_water_distribution(hpxml_file, hpxml)
   if ['base.xml'].include? hpxml_file
-    hpxml.set_hot_water_distribution(:id => "HotWaterDstribution",
-                                     :system_type => "Standard",
-                                     :standard_piping_length => 50, # Chosen to test a negative EC_adj
-                                     :pipe_r_value => 0.0)
+    hpxml.hot_water_distributions.add(:id => "HotWaterDstribution",
+                                      :system_type => "Standard",
+                                      :standard_piping_length => 50, # Chosen to test a negative EC_adj
+                                      :pipe_r_value => 0.0)
   elsif ['base-dhw-dwhr.xml'].include? hpxml_file
-    hpxml.hot_water_distribution.dwhr_facilities_connected = "all"
-    hpxml.hot_water_distribution.dwhr_equal_flow = true
-    hpxml.hot_water_distribution.dwhr_efficiency = 0.55
+    hpxml.hot_water_distributions[0].dwhr_facilities_connected = "all"
+    hpxml.hot_water_distributions[0].dwhr_equal_flow = true
+    hpxml.hot_water_distributions[0].dwhr_efficiency = 0.55
   elsif ['base-dhw-recirc-demand.xml'].include? hpxml_file
-    hpxml.hot_water_distribution.system_type = "Recirculation"
-    hpxml.hot_water_distribution.recirculation_control_type = "presence sensor demand control"
-    hpxml.hot_water_distribution.recirculation_piping_length = 50
-    hpxml.hot_water_distribution.recirculation_branch_piping_length = 50
-    hpxml.hot_water_distribution.recirculation_pump_power = 50
-    hpxml.hot_water_distribution.pipe_r_value = 3
+    hpxml.hot_water_distributions[0].system_type = "Recirculation"
+    hpxml.hot_water_distributions[0].recirculation_control_type = "presence sensor demand control"
+    hpxml.hot_water_distributions[0].recirculation_piping_length = 50
+    hpxml.hot_water_distributions[0].recirculation_branch_piping_length = 50
+    hpxml.hot_water_distributions[0].recirculation_pump_power = 50
+    hpxml.hot_water_distributions[0].pipe_r_value = 3
   elsif ['base-dhw-recirc-manual.xml'].include? hpxml_file
-    hpxml.hot_water_distribution.system_type = "Recirculation"
-    hpxml.hot_water_distribution.recirculation_control_type = "manual demand control"
-    hpxml.hot_water_distribution.recirculation_piping_length = 50
-    hpxml.hot_water_distribution.recirculation_branch_piping_length = 50
-    hpxml.hot_water_distribution.recirculation_pump_power = 50
-    hpxml.hot_water_distribution.pipe_r_value = 3
+    hpxml.hot_water_distributions[0].system_type = "Recirculation"
+    hpxml.hot_water_distributions[0].recirculation_control_type = "manual demand control"
+    hpxml.hot_water_distributions[0].recirculation_piping_length = 50
+    hpxml.hot_water_distributions[0].recirculation_branch_piping_length = 50
+    hpxml.hot_water_distributions[0].recirculation_pump_power = 50
+    hpxml.hot_water_distributions[0].pipe_r_value = 3
   elsif ['base-dhw-recirc-nocontrol.xml'].include? hpxml_file
-    hpxml.hot_water_distribution.system_type = "Recirculation"
-    hpxml.hot_water_distribution.recirculation_control_type = "no control"
-    hpxml.hot_water_distribution.recirculation_piping_length = 50
-    hpxml.hot_water_distribution.recirculation_branch_piping_length = 50
-    hpxml.hot_water_distribution.recirculation_pump_power = 50
+    hpxml.hot_water_distributions[0].system_type = "Recirculation"
+    hpxml.hot_water_distributions[0].recirculation_control_type = "no control"
+    hpxml.hot_water_distributions[0].recirculation_piping_length = 50
+    hpxml.hot_water_distributions[0].recirculation_branch_piping_length = 50
+    hpxml.hot_water_distributions[0].recirculation_pump_power = 50
   elsif ['base-dhw-recirc-temperature.xml'].include? hpxml_file
-    hpxml.hot_water_distribution.system_type = "Recirculation"
-    hpxml.hot_water_distribution.recirculation_control_type = "temperature"
-    hpxml.hot_water_distribution.recirculation_piping_length = 50
-    hpxml.hot_water_distribution.recirculation_branch_piping_length = 50
-    hpxml.hot_water_distribution.recirculation_pump_power = 50
+    hpxml.hot_water_distributions[0].system_type = "Recirculation"
+    hpxml.hot_water_distributions[0].recirculation_control_type = "temperature"
+    hpxml.hot_water_distributions[0].recirculation_piping_length = 50
+    hpxml.hot_water_distributions[0].recirculation_branch_piping_length = 50
+    hpxml.hot_water_distributions[0].recirculation_pump_power = 50
   elsif ['base-dhw-recirc-timer.xml'].include? hpxml_file
-    hpxml.hot_water_distribution.system_type = "Recirculation"
-    hpxml.hot_water_distribution.recirculation_control_type = "timer"
-    hpxml.hot_water_distribution.recirculation_piping_length = 50
-    hpxml.hot_water_distribution.recirculation_branch_piping_length = 50
-    hpxml.hot_water_distribution.recirculation_pump_power = 50
+    hpxml.hot_water_distributions[0].system_type = "Recirculation"
+    hpxml.hot_water_distributions[0].recirculation_control_type = "timer"
+    hpxml.hot_water_distributions[0].recirculation_piping_length = 50
+    hpxml.hot_water_distributions[0].recirculation_branch_piping_length = 50
+    hpxml.hot_water_distributions[0].recirculation_pump_power = 50
   elsif ['base-dhw-none.xml'].include? hpxml_file
-    hpxml.set_hot_water_distribution()
+    hpxml.hot_water_distributions.clear()
   end
 end
 
@@ -2714,71 +2714,71 @@ def set_hpxml_solar_thermal_system(hpxml_file, hpxml)
       'invalid_files/solar-thermal-system-with-combi-tankless.xml',
       'invalid_files/solar-thermal-system-with-desuperheater.xml',
       'invalid_files/solar-thermal-system-with-dhw-indirect.xml'].include? hpxml_file
-    hpxml.set_solar_thermal_system(:id => "SolarThermalSystem",
-                                   :system_type => "hot water",
-                                   :water_heating_system_idref => "WaterHeater",
-                                   :solar_fraction => 0.65)
+    hpxml.solar_thermal_systems.add(:id => "SolarThermalSystem",
+                                    :system_type => "hot water",
+                                    :water_heating_system_idref => "WaterHeater",
+                                    :solar_fraction => 0.65)
   elsif ['base-dhw-solar-direct-flat-plate.xml',
          'base-dhw-solar-indirect-flat-plate.xml',
          'base-dhw-solar-thermosyphon-flat-plate.xml',
          'base-dhw-tank-heat-pump-with-solar.xml',
          'base-dhw-tankless-gas-with-solar.xml'].include? hpxml_file
-    hpxml.set_solar_thermal_system(:id => "SolarThermalSystem",
-                                   :system_type => "hot water",
-                                   :collector_area => 40,
-                                   :collector_type => "single glazing black",
-                                   :collector_azimuth => 180,
-                                   :collector_tilt => 20,
-                                   :collector_frta => 0.77,
-                                   :collector_frul => 0.793,
-                                   :storage_volume => 60,
-                                   :water_heating_system_idref => "WaterHeater")
+    hpxml.solar_thermal_systems.add(:id => "SolarThermalSystem",
+                                    :system_type => "hot water",
+                                    :collector_area => 40,
+                                    :collector_type => "single glazing black",
+                                    :collector_azimuth => 180,
+                                    :collector_tilt => 20,
+                                    :collector_frta => 0.77,
+                                    :collector_frul => 0.793,
+                                    :storage_volume => 60,
+                                    :water_heating_system_idref => "WaterHeater")
     if hpxml_file == 'base-dhw-solar-direct-flat-plate.xml'
-      hpxml.solar_thermal_system.collector_loop_type = "liquid direct"
+      hpxml.solar_thermal_systems[0].collector_loop_type = "liquid direct"
     elsif hpxml_file == 'base-dhw-solar-thermosyphon-flat-plate.xml'
-      hpxml.solar_thermal_system.collector_loop_type = "passive thermosyphon"
+      hpxml.solar_thermal_systems[0].collector_loop_type = "passive thermosyphon"
     else
-      hpxml.solar_thermal_system.collector_loop_type = "liquid indirect"
+      hpxml.solar_thermal_systems[0].collector_loop_type = "liquid indirect"
     end
   elsif ['base-dhw-solar-indirect-evacuated-tube.xml',
          'base-dhw-solar-direct-evacuated-tube.xml',
          'base-dhw-solar-thermosyphon-evacuated-tube.xml'].include? hpxml_file
-    hpxml.set_solar_thermal_system(:id => "SolarThermalSystem",
-                                   :system_type => "hot water",
-                                   :collector_area => 40,
-                                   :collector_type => "evacuated tube",
-                                   :collector_azimuth => 180,
-                                   :collector_tilt => 20,
-                                   :collector_frta => 0.50,
-                                   :collector_frul => 0.2799,
-                                   :storage_volume => 60,
-                                   :water_heating_system_idref => "WaterHeater")
+    hpxml.solar_thermal_systems.add(:id => "SolarThermalSystem",
+                                    :system_type => "hot water",
+                                    :collector_area => 40,
+                                    :collector_type => "evacuated tube",
+                                    :collector_azimuth => 180,
+                                    :collector_tilt => 20,
+                                    :collector_frta => 0.50,
+                                    :collector_frul => 0.2799,
+                                    :storage_volume => 60,
+                                    :water_heating_system_idref => "WaterHeater")
     if hpxml_file == 'base-dhw-solar-direct-evacuated-tube.xml'
-      hpxml.solar_thermal_system.collector_loop_type = "liquid direct"
+      hpxml.solar_thermal_systems[0].collector_loop_type = "liquid direct"
     elsif hpxml_file == 'base-dhw-solar-thermosyphon-evacuated-tube.xml'
-      hpxml.solar_thermal_system.collector_loop_type = "passive thermosyphon"
+      hpxml.solar_thermal_systems[0].collector_loop_type = "passive thermosyphon"
     else
-      hpxml.solar_thermal_system.collector_loop_type = "liquid indirect"
+      hpxml.solar_thermal_systems[0].collector_loop_type = "liquid indirect"
     end
   elsif ['base-dhw-solar-direct-ics.xml',
          'base-dhw-solar-thermosyphon-ics.xml'].include? hpxml_file
-    hpxml.set_solar_thermal_system(:id => "SolarThermalSystem",
-                                   :system_type => "hot water",
-                                   :collector_area => 40,
-                                   :collector_type => "integrated collector storage",
-                                   :collector_azimuth => 180,
-                                   :collector_tilt => 20,
-                                   :collector_frta => 0.77,
-                                   :collector_frul => 0.793,
-                                   :storage_volume => 60,
-                                   :water_heating_system_idref => "WaterHeater")
+    hpxml.solar_thermal_systems.add(:id => "SolarThermalSystem",
+                                    :system_type => "hot water",
+                                    :collector_area => 40,
+                                    :collector_type => "integrated collector storage",
+                                    :collector_azimuth => 180,
+                                    :collector_tilt => 20,
+                                    :collector_frta => 0.77,
+                                    :collector_frul => 0.793,
+                                    :storage_volume => 60,
+                                    :water_heating_system_idref => "WaterHeater")
     if hpxml_file == 'base-dhw-solar-direct-ics.xml'
-      hpxml.solar_thermal_system.collector_loop_type = "liquid direct"
+      hpxml.solar_thermal_systems[0].collector_loop_type = "liquid direct"
     elsif hpxml_file == 'base-dhw-solar-thermosyphon-ics.xml'
-      hpxml.solar_thermal_system.collector_loop_type = "passive thermosyphon"
+      hpxml.solar_thermal_systems[0].collector_loop_type = "passive thermosyphon"
     end
   elsif ['invalid_files/unattached-solar-thermal-system.xml'].include? hpxml_file
-    hpxml.solar_thermal_system.water_heating_system_idref = "foobar"
+    hpxml.solar_thermal_systems[0].water_heating_system_idref = "foobar"
   end
 end
 
@@ -2807,153 +2807,175 @@ end
 
 def set_hpxml_clothes_washer(hpxml_file, hpxml)
   if ['base.xml'].include? hpxml_file
-    hpxml.set_clothes_washer(:id => "ClothesWasher",
-                             :location => "living space",
-                             :modified_energy_factor => 0.8,
-                             :rated_annual_kwh => 700.0,
-                             :label_electric_rate => 0.10,
-                             :label_gas_rate => 0.60,
-                             :label_annual_gas_cost => 25.0,
-                             :capacity => 3.0)
+    hpxml.clothes_washers.add(:id => "ClothesWasher",
+                              :location => "living space",
+                              :modified_energy_factor => 0.8,
+                              :rated_annual_kwh => 700.0,
+                              :label_electric_rate => 0.10,
+                              :label_gas_rate => 0.60,
+                              :label_annual_gas_cost => 25.0,
+                              :capacity => 3.0)
   elsif ['base-appliances-none.xml'].include? hpxml_file
-    hpxml.set_clothes_washer()
+    hpxml.clothes_washers.clear()
   elsif ['base-appliances-modified.xml'].include? hpxml_file
-    hpxml.clothes_washer.modified_energy_factor = nil
-    hpxml.clothes_washer.integrated_modified_energy_factor = 0.73
+    hpxml.clothes_washers[0].modified_energy_factor = nil
+    hpxml.clothes_washers[0].integrated_modified_energy_factor = 0.73
   elsif ['base-foundation-unconditioned-basement.xml'].include? hpxml_file
-    hpxml.clothes_washer.location = "basement - unconditioned"
+    hpxml.clothes_washers[0].location = "basement - unconditioned"
   elsif ['base-atticroof-conditioned.xml'].include? hpxml_file
-    hpxml.clothes_washer.location = "basement - conditioned"
+    hpxml.clothes_washers[0].location = "basement - conditioned"
   elsif ['base-enclosure-garage.xml',
          'invalid_files/clothes-washer-location.xml'].include? hpxml_file
-    hpxml.clothes_washer.location = "garage"
+    hpxml.clothes_washers[0].location = "garage"
   elsif ['invalid_files/clothes-washer-location-other.xml'].include? hpxml_file
-    hpxml.clothes_washer.location = "other"
+    hpxml.clothes_washers[0].location = "other"
   end
 end
 
 def set_hpxml_clothes_dryer(hpxml_file, hpxml)
   if ['base.xml'].include? hpxml_file
-    hpxml.set_clothes_dryer(:id => "ClothesDryer",
-                            :location => "living space",
-                            :fuel_type => "electricity",
-                            :energy_factor => 2.95,
-                            :control_type => "timer")
+    hpxml.clothes_dryers.add(:id => "ClothesDryer",
+                             :location => "living space",
+                             :fuel_type => "electricity",
+                             :energy_factor => 2.95,
+                             :control_type => "timer")
   elsif ['base-appliances-none.xml'].include? hpxml_file
-    hpxml.set_clothes_dryer()
+    hpxml.clothes_dryers.clear()
   elsif ['base-appliances-modified.xml'].include? hpxml_file
-    hpxml.set_clothes_dryer(:id => "ClothesDryer",
-                            :location => "living space",
-                            :fuel_type => "electricity",
-                            :combined_energy_factor => 2.62,
-                            :control_type => "moisture")
+    hpxml.clothes_dryers.clear()
+    hpxml.clothes_dryers.add(:id => "ClothesDryer",
+                             :location => "living space",
+                             :fuel_type => "electricity",
+                             :combined_energy_factor => 2.62,
+                             :control_type => "moisture")
   elsif ['base-appliances-gas.xml',
          'base-appliances-propane.xml',
          'base-appliances-oil.xml'].include? hpxml_file
-    hpxml.set_clothes_dryer(:id => "ClothesDryer",
-                            :location => "living space",
-                            :energy_factor => 2.67,
-                            :control_type => "moisture")
+    hpxml.clothes_dryers.clear()
+    hpxml.clothes_dryers.add(:id => "ClothesDryer",
+                             :location => "living space",
+                             :energy_factor => 2.67,
+                             :control_type => "moisture")
     if hpxml_file == 'base-appliances-gas.xml'
-      hpxml.clothes_dryer.fuel_type = "natural gas"
+      hpxml.clothes_dryers[0].fuel_type = "natural gas"
     elsif hpxml_file == 'base-appliances-propane.xml'
-      hpxml.clothes_dryer.fuel_type = "propane"
+      hpxml.clothes_dryers[0].fuel_type = "propane"
     elsif hpxml_file == 'base-appliances-oil.xml'
-      hpxml.clothes_dryer.fuel_type = "fuel oil"
+      hpxml.clothes_dryers[0].fuel_type = "fuel oil"
     end
   elsif ['base-appliances-wood.xml'].include? hpxml_file
-    hpxml.set_clothes_dryer(:id => "ClothesDryer",
-                            :location => "living space",
-                            :fuel_type => "wood",
-                            :energy_factor => 2.67,
-                            :control_type => "moisture")
+    hpxml.clothes_dryers.clear()
+    hpxml.clothes_dryers.add(:id => "ClothesDryer",
+                             :location => "living space",
+                             :fuel_type => "wood",
+                             :energy_factor => 2.67,
+                             :control_type => "moisture")
   elsif ['base-foundation-unconditioned-basement.xml'].include? hpxml_file
-    hpxml.clothes_dryer.location = "basement - unconditioned"
+    hpxml.clothes_dryers[0].location = "basement - unconditioned"
   elsif ['base-atticroof-conditioned.xml'].include? hpxml_file
-    hpxml.clothes_dryer.location = "basement - conditioned"
+    hpxml.clothes_dryers[0].location = "basement - conditioned"
   elsif ['base-enclosure-garage.xml',
          'invalid_files/clothes-dryer-location.xml'].include? hpxml_file
-    hpxml.clothes_dryer.location = "garage"
+    hpxml.clothes_dryers[0].location = "garage"
   elsif ['invalid_files/clothes-dryer-location-other.xml'].include? hpxml_file
-    hpxml.clothes_dryer.location = "other"
+    hpxml.clothes_dryers[0].location = "other"
   end
 end
 
 def set_hpxml_dishwasher(hpxml_file, hpxml)
   if ['base.xml'].include? hpxml_file
-    hpxml.set_dishwasher(:id => "Dishwasher",
-                         :rated_annual_kwh => 450,
-                         :place_setting_capacity => 12)
+    hpxml.dishwashers.add(:id => "Dishwasher",
+                          :rated_annual_kwh => 450,
+                          :place_setting_capacity => 12)
   elsif ['base-appliances-none.xml'].include? hpxml_file
-    hpxml.set_dishwasher()
+    hpxml.dishwashers.clear()
   elsif ['base-appliances-modified.xml'].include? hpxml_file
-    hpxml.set_dishwasher(:id => "Dishwasher",
-                         :energy_factor => 0.5,
-                         :place_setting_capacity => 12)
+    hpxml.dishwashers.clear()
+    hpxml.dishwashers.add(:id => "Dishwasher",
+                          :energy_factor => 0.5,
+                          :place_setting_capacity => 12)
   end
 end
 
 def set_hpxml_refrigerator(hpxml_file, hpxml)
   if ['base.xml'].include? hpxml_file
-    hpxml.set_refrigerator(:id => "Refrigerator",
-                           :location => "living space",
-                           :rated_annual_kwh => 650)
+    hpxml.refrigerators.add(:id => "Refrigerator",
+                            :location => "living space",
+                            :rated_annual_kwh => 650)
   elsif ['base-appliances-modified.xml'].include? hpxml_file
-    hpxml.refrigerator.adjusted_annual_kwh = 600
+    hpxml.refrigerators[0].adjusted_annual_kwh = 600
   elsif ['base-appliances-none.xml'].include? hpxml_file
-    hpxml.set_refrigerator()
+    hpxml.refrigerators.clear()
   elsif ['base-foundation-unconditioned-basement.xml'].include? hpxml_file
-    hpxml.refrigerator.location = "basement - unconditioned"
+    hpxml.refrigerators[0].location = "basement - unconditioned"
   elsif ['base-atticroof-conditioned.xml'].include? hpxml_file
-    hpxml.refrigerator.location = "basement - conditioned"
+    hpxml.refrigerators[0].location = "basement - conditioned"
   elsif ['base-enclosure-garage.xml',
          'invalid_files/refrigerator-location.xml'].include? hpxml_file
-    hpxml.refrigerator.location = "garage"
+    hpxml.refrigerators[0].location = "garage"
   elsif ['invalid_files/refrigerator-location-other.xml'].include? hpxml_file
-    hpxml.refrigerator.location = "other"
+    hpxml.refrigerators[0].location = "other"
   end
 end
 
 def set_hpxml_cooking_range(hpxml_file, hpxml)
   if ['base.xml'].include? hpxml_file
-    hpxml.set_cooking_range(:id => "Range",
-                            :fuel_type => "electricity",
-                            :is_induction => false)
+    hpxml.cooking_ranges.add(:id => "Range",
+                             :fuel_type => "electricity",
+                             :is_induction => false)
   elsif ['base-appliances-none.xml'].include? hpxml_file
-    hpxml.set_cooking_range()
+    hpxml.cooking_ranges.clear()
   elsif ['base-appliances-gas.xml'].include? hpxml_file
-    hpxml.cooking_range.fuel_type = "natural gas"
-    hpxml.cooking_range.is_induction = false
+    hpxml.cooking_ranges[0].fuel_type = "natural gas"
+    hpxml.cooking_ranges[0].is_induction = false
   elsif ['base-appliances-propane.xml'].include? hpxml_file
-    hpxml.cooking_range.fuel_type = "propane"
-    hpxml.cooking_range.is_induction = false
+    hpxml.cooking_ranges[0].fuel_type = "propane"
+    hpxml.cooking_ranges[0].is_induction = false
   elsif ['base-appliances-oil.xml'].include? hpxml_file
-    hpxml.cooking_range.fuel_type = "fuel oil"
+    hpxml.cooking_ranges[0].fuel_type = "fuel oil"
   elsif ['base-appliances-wood.xml'].include? hpxml_file
-    hpxml.cooking_range.fuel_type = "wood"
-    hpxml.cooking_range.is_induction = false
+    hpxml.cooking_ranges[0].fuel_type = "wood"
+    hpxml.cooking_ranges[0].is_induction = false
   end
 end
 
 def set_hpxml_oven(hpxml_file, hpxml)
   if ['base.xml'].include? hpxml_file
-    hpxml.set_oven(:id => "Oven",
-                   :is_convection => false)
+    hpxml.ovens.add(:id => "Oven",
+                    :is_convection => false)
   elsif ['base-appliances-none.xml'].include? hpxml_file
-    hpxml.set_oven()
+    hpxml.ovens.clear()
   end
 end
 
 def set_hpxml_lighting(hpxml_file, hpxml)
   if ['base.xml'].include? hpxml_file
-    hpxml.set_lighting(:fraction_tier_i_interior => 0.5,
-                       :fraction_tier_i_exterior => 0.5,
-                       :fraction_tier_i_garage => 0.5,
-                       :fraction_tier_ii_interior => 0.25,
-                       :fraction_tier_ii_exterior => 0.25,
-                       :fraction_tier_ii_garage => 0.25)
+    hpxml.lighting_groups.add(:id => "Lighting_TierI_Interior",
+                              :location => "interior",
+                              :fration_of_units_in_location => 0.5,
+                              :third_party_certification => "ERI Tier I")
+    hpxml.lighting_groups.add(:id => "Lighting_TierI_Exterior",
+                              :location => "exterior",
+                              :fration_of_units_in_location => 0.5,
+                              :third_party_certification => "ERI Tier I")
+    hpxml.lighting_groups.add(:id => "Lighting_TierI_Garage",
+                              :location => "garage",
+                              :fration_of_units_in_location => 0.5,
+                              :third_party_certification => "ERI Tier I")
+    hpxml.lighting_groups.add(:id => "Lighting_TierII_Interior",
+                              :location => "interior",
+                              :fration_of_units_in_location => 0.25,
+                              :third_party_certification => "ERI Tier II")
+    hpxml.lighting_groups.add(:id => "Lighting_TierII_Exterior",
+                              :location => "exterior",
+                              :fration_of_units_in_location => 0.25,
+                              :third_party_certification => "ERI Tier II")
+    hpxml.lighting_groups.add(:id => "Lighting_TierII_Garage",
+                              :location => "garage",
+                              :fration_of_units_in_location => 0.25,
+                              :third_party_certification => "ERI Tier II")
   elsif ['base-misc-lighting-none.xml'].include? hpxml_file
-    hpxml.set_lighting()
+    hpxml.lighting_groups.clear()
   end
 end
 

@@ -232,7 +232,6 @@ class OSModel
       @has_vented_attic = true if surface.interior_adjacent_to == 'attic - vented'
       @has_vented_crawl = true if surface.interior_adjacent_to == 'crawlspace - vented'
     end
-    @subsurface_areas_by_surface = calc_subsurface_areas_by_surface()
     @min_neighbor_distance = get_min_neighbor_distance()
     @default_azimuths = get_default_azimuths()
     @cond_bsmnt_surfaces = [] # list of surfaces in conditioned basement, used for modification of some surface properties, eg. solar absorptance, view factor, etc.
@@ -298,6 +297,7 @@ class OSModel
     if not valid_tsteps.include? @timestep
       fail "Timestep (#{@timestep}) must be one of: #{valid_tsteps.join(', ')}."
     end
+
     tstep.setNumberOfTimestepsPerHour(60 / @timestep)
 
     shad = model.getShadowCalculation
@@ -899,19 +899,6 @@ class OSModel
     return OpenStudio::reverse(add_floor_polygon(x, y, z))
   end
 
-  def self.net_surface_area(gross_area, surface_id)
-    net_area = gross_area
-    if not @subsurface_areas_by_surface[surface_id].nil?
-      net_area -= @subsurface_areas_by_surface[surface_id]
-    end
-
-    if net_area < 0
-      fail "Calculated a negative net surface area for surface '#{surface_id}'."
-    end
-
-    return net_area
-  end
-
   def self.add_num_occupants(model, hpxml, runner)
     # Occupants
     num_occ = Geometry.get_occupancy_default_num(@nbeds)
@@ -932,36 +919,6 @@ class OSModel
       monthly_sch = "1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0"
       Geometry.process_occupants(model, num_occ, occ_gain, sens_frac, lat_frac, weekday_sch, weekend_sch, monthly_sch, @cfa, @nbeds, @living_space)
     end
-  end
-
-  def self.calc_subsurface_areas_by_surface()
-    # Returns a hash with the amount of subsurface (window/skylight/door)
-    # area for each surface. Used to convert gross surface area to net surface
-    # area for a given surface.
-    subsurface_areas = {}
-
-    # Windows
-    @hpxml.windows.each do |window|
-      wall_id = window.wall_idref
-      subsurface_areas[wall_id] = 0 if subsurface_areas[wall_id].nil?
-      subsurface_areas[wall_id] += window.area
-    end
-
-    # Skylights
-    @hpxml.skylights.each do |skylight|
-      roof_id = skylight.roof_idref
-      subsurface_areas[roof_id] = 0 if subsurface_areas[roof_id].nil?
-      subsurface_areas[roof_id] += skylight.area
-    end
-
-    # Doors
-    @hpxml.doors.each do |door|
-      wall_id = door.wall_idref
-      subsurface_areas[wall_id] = 0 if subsurface_areas[wall_id].nil?
-      subsurface_areas[wall_id] += door.area
-    end
-
-    return subsurface_areas
   end
 
   def self.get_default_azimuths()
@@ -1018,11 +975,10 @@ class OSModel
       surfaces = []
 
       azimuths.each do |azimuth|
-        net_area = net_surface_area(roof.area, roof.id)
-        next if net_area < 0.1
+        next if roof.net_area < 0.1
 
-        width = Math::sqrt(net_area)
-        length = (net_area / width) / azimuths.size
+        width = Math::sqrt(roof.net_area)
+        length = (roof.net_area / width) / azimuths.size
         tilt = roof.pitch / 12.0
         z_origin = @walls_top + 0.5 * Math.sin(Math.atan(tilt)) * width
 
@@ -1040,7 +996,7 @@ class OSModel
         end
         surface.setSurfaceType("RoofCeiling")
         surface.setOutsideBoundaryCondition("Outdoors")
-        set_surface_interior(model, spaces, surface, roof.id, roof.interior_adjacent_to)
+        set_surface_interior(model, spaces, surface, roof.interior_adjacent_to)
       end
 
       next if surfaces.empty?
@@ -1108,11 +1064,10 @@ class OSModel
       surfaces = []
 
       azimuths.each do |azimuth|
-        net_area = net_surface_area(wall.area, wall.id)
-        next if net_area < 0.1
+        next if wall.net_area < 0.1
 
         height = 8.0 * @ncfl_ag
-        length = (net_area / height) / azimuths.size
+        length = (wall.net_area / height) / azimuths.size
         z_origin = @foundation_top
 
         surface = OpenStudio::Model::Surface.new(add_wall_polygon(length, height, z_origin, azimuth), model)
@@ -1127,8 +1082,8 @@ class OSModel
           surface.setName(wall.id)
         end
         surface.setSurfaceType("Wall")
-        set_surface_interior(model, spaces, surface, wall.id, wall.interior_adjacent_to)
-        set_surface_exterior(model, spaces, surface, wall.id, wall.exterior_adjacent_to)
+        set_surface_interior(model, spaces, surface, wall.interior_adjacent_to)
+        set_surface_exterior(model, spaces, surface, wall.exterior_adjacent_to)
         if wall.exterior_adjacent_to != "outside"
           surface.setSunExposure("NoSun")
           surface.setWindExposure("NoWind")
@@ -1193,8 +1148,8 @@ class OSModel
           surface.setName(rim_joist.id)
         end
         surface.setSurfaceType("Wall")
-        set_surface_interior(model, spaces, surface, rim_joist.id, rim_joist.interior_adjacent_to)
-        set_surface_exterior(model, spaces, surface, rim_joist.id, rim_joist.exterior_adjacent_to)
+        set_surface_interior(model, spaces, surface, rim_joist.interior_adjacent_to)
+        set_surface_exterior(model, spaces, surface, rim_joist.exterior_adjacent_to)
         if rim_joist.exterior_adjacent_to != "outside"
           surface.setSunExposure("NoSun")
           surface.setWindExposure("NoWind")
@@ -1256,8 +1211,8 @@ class OSModel
         surface = OpenStudio::Model::Surface.new(add_floor_polygon(length, width, z_origin), model)
         surface.additionalProperties.setFeature("SurfaceType", "Floor")
       end
-      set_surface_interior(model, spaces, surface, frame_floor.id, frame_floor.interior_adjacent_to)
-      set_surface_exterior(model, spaces, surface, frame_floor.id, frame_floor.exterior_adjacent_to)
+      set_surface_interior(model, spaces, surface, frame_floor.interior_adjacent_to)
+      set_surface_exterior(model, spaces, surface, frame_floor.exterior_adjacent_to)
       surface.setName(frame_floor.id)
       surface.setSunExposure("NoSun")
       surface.setWindExposure("NoWind")
@@ -1420,7 +1375,7 @@ class OSModel
         next unless foundation_wall.exterior_adjacent_to != "ground"
 
         ag_height = foundation_wall.height - foundation_wall.depth_below_grade
-        ag_net_area = net_surface_area(foundation_wall.area, foundation_wall.id) * ag_height / foundation_wall.height
+        ag_net_area = foundation_wall.net_area * ag_height / foundation_wall.height
         next if ag_net_area < 0.1
 
         length = ag_net_area / ag_height
@@ -1438,8 +1393,8 @@ class OSModel
         surface.additionalProperties.setFeature("SurfaceType", "FoundationWall")
         surface.setName(foundation_wall.id)
         surface.setSurfaceType("Wall")
-        set_surface_interior(model, spaces, surface, foundation_wall.id, foundation_wall.interior_adjacent_to)
-        set_surface_exterior(model, spaces, surface, foundation_wall.id, foundation_wall.exterior_adjacent_to)
+        set_surface_interior(model, spaces, surface, foundation_wall.interior_adjacent_to)
+        set_surface_exterior(model, spaces, surface, foundation_wall.exterior_adjacent_to)
         surface.setSunExposure("NoSun")
         surface.setWindExposure("NoWind")
 
@@ -1470,7 +1425,7 @@ class OSModel
   def self.add_foundation_wall(runner, model, spaces, foundation_wall, slab_frac,
                                total_fnd_wall_length, total_slab_exp_perim)
 
-    net_area = net_surface_area(foundation_wall.area, foundation_wall.id) * slab_frac
+    net_area = foundation_wall.net_area * slab_frac
     gross_area = foundation_wall.area * slab_frac
     height = foundation_wall.height
     height_ag = height - foundation_wall.depth_below_grade
@@ -1502,8 +1457,8 @@ class OSModel
     surface.additionalProperties.setFeature("SurfaceType", "FoundationWall")
     surface.setName(foundation_wall.id)
     surface.setSurfaceType("Wall")
-    set_surface_interior(model, spaces, surface, foundation_wall.id, foundation_wall.interior_adjacent_to)
-    set_surface_exterior(model, spaces, surface, foundation_wall.id, foundation_wall.exterior_adjacent_to)
+    set_surface_interior(model, spaces, surface, foundation_wall.interior_adjacent_to)
+    set_surface_exterior(model, spaces, surface, foundation_wall.exterior_adjacent_to)
 
     if is_thermal_boundary(foundation_wall)
       drywall_thick_in = 0.5
@@ -1569,7 +1524,7 @@ class OSModel
     surface.setSurfaceType("Floor")
     surface.setOutsideBoundaryCondition("Foundation")
     surface.additionalProperties.setFeature("SurfaceType", "Slab")
-    set_surface_interior(model, spaces, surface, slab.id, slab.interior_adjacent_to)
+    set_surface_interior(model, spaces, surface, slab.interior_adjacent_to)
     surface.setSunExposure("NoSun")
     surface.setWindExposure("NoWind")
 
@@ -1744,6 +1699,7 @@ class OSModel
         if overhang_distance_to_bottom <= overhang_distance_to_top
           fail "For Window '#{window_id}', overhangs distance to bottom (#{overhang_distance_to_bottom}) must be greater than distance to top (#{overhang_distance_to_top})."
         end
+
         window_height = overhang_distance_to_bottom - overhang_distance_to_top
       end
 
@@ -1762,7 +1718,7 @@ class OSModel
       surface.additionalProperties.setFeature("SurfaceType", "Window")
       surface.setName("surface #{window_id}")
       surface.setSurfaceType("Wall")
-      assign_space_to_subsurface(surface, window_id, window.wall_idref, spaces, model, "window")
+      set_surface_interior(model, spaces, surface, window.wall.interior_adjacent_to)
       surface.setOutsideBoundaryCondition("Outdoors") # cannot be adiabatic because subsurfaces won't be created
       surfaces << surface
 
@@ -1811,15 +1767,7 @@ class OSModel
       skylight_id = skylight.id
 
       # Obtain skylight tilt from attached roof
-      skylight_tilt = nil
-      @hpxml.roofs.each do |roof|
-        next unless roof.id == skylight.roof_idref
-
-        skylight_tilt = roof.pitch / 12.0
-      end
-      if skylight_tilt.nil?
-        fail "Attached roof '#{skylight.roof_idref}' not found for skylight '#{skylight_id}'."
-      end
+      skylight_tilt = skylight.roof.pitch / 12.0
 
       skylight_area = skylight.area
       skylight_height = Math::sqrt(skylight_area)
@@ -1884,7 +1832,7 @@ class OSModel
       surface.additionalProperties.setFeature("SurfaceType", "Door")
       surface.setName("surface #{door_id}")
       surface.setSurfaceType("Wall")
-      assign_space_to_subsurface(surface, door_id, door.wall_idref, spaces, model, "door")
+      set_surface_interior(model, spaces, surface, door.wall.interior_adjacent_to)
       surface.setOutsideBoundaryCondition("Outdoors") # cannot be adiabatic because subsurfaces won't be created
       surfaces << surface
 
@@ -1925,61 +1873,67 @@ class OSModel
 
   def self.add_hot_water_and_appliances(runner, model, weather, spaces)
     # Clothes Washer
-    if not @hpxml.clothes_washer.nil?
-      cw_space = get_space_from_location(@hpxml.clothes_washer.location, "ClothesWasher", model, spaces)
-      cw_ler = @hpxml.clothes_washer.rated_annual_kwh
-      cw_elec_rate = @hpxml.clothes_washer.label_electric_rate
-      cw_gas_rate = @hpxml.clothes_washer.label_gas_rate
-      cw_agc = @hpxml.clothes_washer.label_annual_gas_cost
-      cw_cap = @hpxml.clothes_washer.capacity
-      cw_mef = @hpxml.clothes_washer.modified_energy_factor
+    if @hpxml.clothes_washers.size > 0
+      clothes_washer = @hpxml.clothes_washers[0]
+      cw_space = get_space_from_location(clothes_washer.location, "ClothesWasher", model, spaces)
+      cw_ler = clothes_washer.rated_annual_kwh
+      cw_elec_rate = clothes_washer.label_electric_rate
+      cw_gas_rate = clothes_washer.label_gas_rate
+      cw_agc = clothes_washer.label_annual_gas_cost
+      cw_cap = clothes_washer.capacity
+      cw_mef = clothes_washer.modified_energy_factor
       if cw_mef.nil?
-        cw_mef = HotWaterAndAppliances.calc_clothes_washer_mef_from_imef(@hpxml.clothes_washer.integrated_modified_energy_factor)
+        cw_mef = HotWaterAndAppliances.calc_clothes_washer_mef_from_imef(clothes_washer.integrated_modified_energy_factor)
       end
     else
       cw_mef = cw_ler = cw_elec_rate = cw_gas_rate = cw_agc = cw_cap = cw_space = nil
     end
 
     # Clothes Dryer
-    if not @hpxml.clothes_dryer.nil?
-      cd_space = get_space_from_location(@hpxml.clothes_dryer.location, "ClothesDryer", model, spaces)
-      cd_fuel = @hpxml.clothes_dryer.fuel_type
-      cd_control = @hpxml.clothes_dryer.control_type
-      cd_ef = @hpxml.clothes_dryer.energy_factor
+    if @hpxml.clothes_dryers.size > 0
+      clothes_dryer = @hpxml.clothes_dryers[0]
+      cd_space = get_space_from_location(clothes_dryer.location, "ClothesDryer", model, spaces)
+      cd_fuel = clothes_dryer.fuel_type
+      cd_control = clothes_dryer.control_type
+      cd_ef = clothes_dryer.energy_factor
       if cd_ef.nil?
-        cd_ef = HotWaterAndAppliances.calc_clothes_dryer_ef_from_cef(@hpxml.clothes_dryer.combined_energy_factor)
+        cd_ef = HotWaterAndAppliances.calc_clothes_dryer_ef_from_cef(clothes_dryer.combined_energy_factor)
       end
     else
       cd_ef = cd_control = cd_fuel = cd_space = nil
     end
 
     # Dishwasher
-    if not @hpxml.dishwasher.nil?
-      dw_cap = @hpxml.dishwasher.place_setting_capacity
-      dw_ef = @hpxml.dishwasher.energy_factor
+    if @hpxml.dishwashers.size > 0
+      dishwasher = @hpxml.dishwashers[0]
+      dw_cap = dishwasher.place_setting_capacity
+      dw_ef = dishwasher.energy_factor
       if dw_ef.nil?
-        dw_ef = HotWaterAndAppliances.calc_dishwasher_ef_from_annual_kwh(@hpxml.dishwasher.rated_annual_kwh)
+        dw_ef = HotWaterAndAppliances.calc_dishwasher_ef_from_annual_kwh(dishwasher.rated_annual_kwh)
       end
     else
       dw_ef = dw_cap = nil
     end
 
     # Refrigerator
-    if not @hpxml.refrigerator.nil?
-      fridge_space = get_space_from_location(@hpxml.refrigerator.location, "Refrigerator", model, spaces)
-      fridge_annual_kwh = @hpxml.refrigerator.adjusted_annual_kwh
+    if @hpxml.refrigerators.size > 0
+      refrigerator = @hpxml.refrigerators[0]
+      fridge_space = get_space_from_location(refrigerator.location, "Refrigerator", model, spaces)
+      fridge_annual_kwh = refrigerator.adjusted_annual_kwh
       if fridge_annual_kwh.nil?
-        fridge_annual_kwh = @hpxml.refrigerator.rated_annual_kwh
+        fridge_annual_kwh = refrigerator.rated_annual_kwh
       end
     else
       fridge_annual_kwh = fridge_space = nil
     end
 
     # Cooking Range/Oven
-    if not @hpxml.cooking_range.nil? and not @hpxml.oven.nil?
-      cook_fuel_type = @hpxml.cooking_range.fuel_type
-      cook_is_induction = @hpxml.cooking_range.is_induction
-      oven_is_convection = @hpxml.oven.is_convection
+    if @hpxml.cooking_ranges.size > 0 and @hpxml.ovens.size > 0
+      cooking_range = @hpxml.cooking_ranges[0]
+      oven = @hpxml.ovens[0]
+      cook_fuel_type = cooking_range.fuel_type
+      cook_is_induction = cooking_range.is_induction
+      oven_is_convection = oven.is_convection
     else
       cook_fuel_type = cook_is_induction = oven_is_convection = nil
     end
@@ -2001,21 +1955,22 @@ class OSModel
 
     # Distribution
     if @hpxml.water_heating_systems.size > 0
-      dist_type = @hpxml.hot_water_distribution.system_type.downcase
+      hot_water_distribution = @hpxml.hot_water_distributions[0]
+      dist_type = hot_water_distribution.system_type.downcase
       if dist_type == "standard"
-        std_pipe_length = @hpxml.hot_water_distribution.standard_piping_length
+        std_pipe_length = hot_water_distribution.standard_piping_length
         recirc_loop_length = nil
         recirc_branch_length = nil
         recirc_control_type = nil
         recirc_pump_power = nil
       elsif dist_type == "recirculation"
-        recirc_loop_length = @hpxml.hot_water_distribution.recirculation_piping_length
-        recirc_branch_length = @hpxml.hot_water_distribution.recirculation_branch_piping_length
-        recirc_control_type = @hpxml.hot_water_distribution.recirculation_control_type
-        recirc_pump_power = @hpxml.hot_water_distribution.recirculation_pump_power
+        recirc_loop_length = hot_water_distribution.recirculation_piping_length
+        recirc_branch_length = hot_water_distribution.recirculation_branch_piping_length
+        recirc_control_type = hot_water_distribution.recirculation_control_type
+        recirc_pump_power = hot_water_distribution.recirculation_pump_power
         std_pipe_length = nil
       end
-      pipe_r = @hpxml.hot_water_distribution.pipe_r_value
+      pipe_r = hot_water_distribution.pipe_r_value
     end
 
     # Drain Water Heat Recovery
@@ -2024,16 +1979,17 @@ class OSModel
     dwhr_is_equal_flow = nil
     dwhr_efficiency = nil
     if @hpxml.water_heating_systems.size > 0
-      if not @hpxml.hot_water_distribution.dwhr_efficiency.nil?
+      hot_water_distribution = @hpxml.hot_water_distributions[0]
+      if not hot_water_distribution.dwhr_efficiency.nil?
         dwhr_present = true
-        dwhr_facilities_connected = @hpxml.hot_water_distribution.dwhr_facilities_connected
-        dwhr_is_equal_flow = @hpxml.hot_water_distribution.dwhr_equal_flow
-        dwhr_efficiency = @hpxml.hot_water_distribution.dwhr_efficiency
+        dwhr_facilities_connected = hot_water_distribution.dwhr_facilities_connected
+        dwhr_is_equal_flow = hot_water_distribution.dwhr_equal_flow
+        dwhr_efficiency = hot_water_distribution.dwhr_efficiency
       end
     end
 
     # Water Heater
-    related_hvac_list = [] # list of heating systems referred in water heating system "RelatedHVACSystem" element
+    related_hvac_idref_list = [] # list of heating systems referred in water heating system "RelatedHVACSystem" element
     dhw_loop_fracs = {}
     water_heater_spaces = {}
     combi_sys_id_list = []
@@ -2055,11 +2011,11 @@ class OSModel
         jacket_r = water_heating_system.jacket_r_value
 
         uses_desuperheater = water_heating_system.uses_desuperheater
-        relatedhvac = water_heating_system.related_hvac
+        relatedhvac = water_heating_system.related_hvac_idref
 
         if uses_desuperheater
-          if not related_hvac_list.include? relatedhvac
-            related_hvac_list << relatedhvac
+          if not related_hvac_idref_list.include? relatedhvac
+            related_hvac_idref_list << relatedhvac
             desuperheater_clg_coil = get_desuperheatercoil(@hvac_map, relatedhvac, sys_id)
           else
             fail "RelatedHVACSystem '#{relatedhvac}' for water heating system '#{sys_id}' is already attached to another water heating system."
@@ -2079,8 +2035,8 @@ class OSModel
         # Solar fraction is used to adjust water heater's tank losses and hot water use, because it is
         # the portion of the total conventional hot water heating load (delivered energy + tank losses).
         solar_fraction = nil
-        if not @hpxml.solar_thermal_system.nil? and @hpxml.solar_thermal_system.water_heating_system_idref == sys_id
-          solar_fraction = @hpxml.solar_thermal_system.solar_fraction
+        if @hpxml.solar_thermal_systems.size > 0 and water_heating_system.id == @hpxml.solar_thermal_systems[0].water_heating_system.id
+          solar_fraction = @hpxml.solar_thermal_systems[0].solar_fraction
         end
         solar_fraction = 0.0 if solar_fraction.nil?
 
@@ -2122,17 +2078,17 @@ class OSModel
         elsif wh_type == "space-heating boiler with storage tank" or wh_type == "space-heating boiler with tankless coil"
 
           combi_sys_id_list << sys_id
-          heating_source_id = water_heating_system.related_hvac
+          heating_source_id = water_heating_system.related_hvac_idref
           standby_loss = water_heating_system.standby_loss
           vol = water_heating_system.tank_volume
-          if not related_hvac_list.include? heating_source_id
-            related_hvac_list << heating_source_id
+          if not related_hvac_idref_list.include? heating_source_id
+            related_hvac_idref_list << heating_source_id
             boiler_sys = get_boiler_and_plant_loop(@hvac_map, heating_source_id, sys_id)
 
             boiler_afue = nil
             boiler_fuel_type = nil
             @hpxml.heating_systems.each do |heating_system|
-              next unless heating_system.id == water_heating_system.related_hvac
+              next unless heating_system.id == water_heating_system.related_hvac_idref
 
               boiler_afue = heating_system.heating_efficiency_afue
               boiler_fuel_type = heating_system.heating_system_fuel
@@ -2170,46 +2126,41 @@ class OSModel
                                 dwhr_efficiency, dhw_loop_fracs, @eri_version,
                                 @dhw_map, @hpxml_path)
 
-    if not @hpxml.solar_thermal_system.nil?
-      collector_area = @hpxml.solar_thermal_system.collector_area
-      dhw_system_idref = @hpxml.solar_thermal_system.water_heating_system_idref
+    if @hpxml.solar_thermal_systems.size > 0
+      solar_thermal_system = @hpxml.solar_thermal_systems[0]
+      water_heater = solar_thermal_system.water_heating_system
 
-      @hpxml.water_heating_systems.each do |water_heating_system|
-        next unless water_heating_system.id == dhw_system_idref
-
-        if ['space-heating boiler with storage tank', 'space-heating boiler with tankless coil'].include? water_heating_system.water_heater_type
-          fail "Water heating system '#{dhw_system_idref}' connected to solar thermal system '#{@hpxml.solar_thermal_system.id}' cannot be a space-heating boiler."
-        end
-
-        if water_heating_system.uses_desuperheater
-          fail "Water heating system '#{dhw_system_idref}' connected to solar thermal system '#{@hpxml.solar_thermal_system.id}' cannot be attached to a desuperheater."
-        end
+      if ['space-heating boiler with storage tank', 'space-heating boiler with tankless coil'].include? water_heater.water_heater_type
+        fail "Water heating system '#{water_heater.id}' connected to solar thermal system '#{solar_thermal_system.id}' cannot be a space-heating boiler."
       end
 
+      if water_heater.uses_desuperheater
+        fail "Water heating system '#{water_heater.id}' connected to solar thermal system '#{solar_thermal_system.id}' cannot be attached to a desuperheater."
+      end
+
+      collector_area = solar_thermal_system.collector_area
       if not collector_area.nil? # Detailed solar water heater
-        frta = @hpxml.solar_thermal_system.collector_frta
-        frul = @hpxml.solar_thermal_system.collector_frul
-        storage_vol = @hpxml.solar_thermal_system.storage_volume
-        loop_type = @hpxml.solar_thermal_system.collector_loop_type
-        azimuth = Float(@hpxml.solar_thermal_system.collector_azimuth)
-        tilt = @hpxml.solar_thermal_system.collector_tilt
-        collector_type = @hpxml.solar_thermal_system.collector_type
-        space = water_heater_spaces[dhw_system_idref]
+        frta = solar_thermal_system.collector_frta
+        frul = solar_thermal_system.collector_frul
+        storage_vol = solar_thermal_system.storage_volume
+        loop_type = solar_thermal_system.collector_loop_type
+        azimuth = Float(solar_thermal_system.collector_azimuth)
+        tilt = solar_thermal_system.collector_tilt
+        collector_type = solar_thermal_system.collector_type
+        space = water_heater_spaces[water_heater.id]
 
         dhw_loop = nil
-        if @dhw_map.keys.include? dhw_system_idref
-          @dhw_map[dhw_system_idref].each do |dhw_object|
+        if @dhw_map.keys.include? water_heater.id
+          @dhw_map[water_heater.id].each do |dhw_object|
             next unless dhw_object.is_a? OpenStudio::Model::PlantLoop
 
             dhw_loop = dhw_object
           end
-        else
-          fail "Attached water heating system '#{dhw_system_idref}' not found for solar thermal system '#{@hpxml.solar_thermal_system.id}'."
         end
 
         Waterheater.apply_solar_thermal(model, space, collector_area, frta, frul, storage_vol,
                                         azimuth, tilt, collector_type, loop_type, dhw_loop, @dhw_map,
-                                        dhw_system_idref)
+                                        water_heater.id)
       end
     end
 
@@ -2704,17 +2655,19 @@ class OSModel
   end
 
   def self.add_setpoints(runner, model, weather)
-    return if @hpxml.hvac_control.nil?
+    return if @hpxml.hvac_controls.size == 0
+
+    hvac_control = @hpxml.hvac_controls[0]
 
     # Base heating setpoint
-    htg_setpoint = @hpxml.hvac_control.heating_setpoint_temp
+    htg_setpoint = hvac_control.heating_setpoint_temp
     @htg_weekday_setpoints = [[htg_setpoint] * 24] * 12
 
     # Apply heating setback?
-    htg_setback = @hpxml.hvac_control.heating_setback_temp
+    htg_setback = hvac_control.heating_setback_temp
     if not htg_setback.nil?
-      htg_setback_hrs_per_week = @hpxml.hvac_control.heating_setback_hours_per_week
-      htg_setback_start_hr = @hpxml.hvac_control.heating_setback_start_hour
+      htg_setback_hrs_per_week = hvac_control.heating_setback_hours_per_week
+      htg_setback_start_hr = hvac_control.heating_setback_start_hour
       for m in 1..12
         for hr in htg_setback_start_hr..htg_setback_start_hr + Integer(htg_setback_hrs_per_week / 7.0) - 1
           @htg_weekday_setpoints[m - 1][hr % 24] = htg_setback
@@ -2724,14 +2677,14 @@ class OSModel
     @htg_weekend_setpoints = @htg_weekday_setpoints
 
     # Base cooling setpoint
-    clg_setpoint = @hpxml.hvac_control.cooling_setpoint_temp
+    clg_setpoint = hvac_control.cooling_setpoint_temp
     @clg_weekday_setpoints = [[clg_setpoint] * 24] * 12
 
     # Apply cooling setup?
-    clg_setup = @hpxml.hvac_control.cooling_setup_temp
+    clg_setup = hvac_control.cooling_setup_temp
     if not clg_setup.nil?
-      clg_setup_hrs_per_week = @hpxml.hvac_control.cooling_setup_hours_per_week
-      clg_setup_start_hr = @hpxml.hvac_control.cooling_setup_start_hour
+      clg_setup_hrs_per_week = hvac_control.cooling_setup_hours_per_week
+      clg_setup_start_hr = hvac_control.cooling_setup_start_hour
       for m in 1..12
         for hr in clg_setup_start_hr..clg_setup_start_hr + Integer(clg_setup_hrs_per_week / 7.0) - 1
           @clg_weekday_setpoints[m - 1][hr % 24] = clg_setup
@@ -2740,7 +2693,7 @@ class OSModel
     end
 
     # Apply cooling setpoint offset due to ceiling fan?
-    clg_ceiling_fan_offset = @hpxml.hvac_control.ceiling_fan_cooling_setpoint_temp_offset
+    clg_ceiling_fan_offset = hvac_control.ceiling_fan_cooling_setpoint_temp_offset
     if not clg_ceiling_fan_offset.nil?
       HVAC.get_ceiling_fan_operation_months(weather).each_with_index do |operation, m|
         next unless operation == 1
@@ -2757,6 +2710,7 @@ class OSModel
 
   def self.add_ceiling_fans(runner, model, weather)
     return if @hpxml.ceiling_fans.size == 0
+
     ceiling_fan = @hpxml.ceiling_fans[0]
 
     monthly_sch = HVAC.get_ceiling_fan_operation_months(weather)
@@ -2887,25 +2841,30 @@ class OSModel
   end
 
   def self.add_lighting(runner, model, weather, spaces)
-    return if @hpxml.lighting.nil? # Either all or none of the values are nil
+    return if @hpxml.lighting_groups.size == 0
 
-    if @hpxml.lighting.fraction_tier_i_interior + @hpxml.lighting.fraction_tier_ii_interior > 1
-      fail "Fraction of qualifying interior lighting fixtures #{@hpxml.lighting.fraction_tier_i_interior + @hpxml.lighting.fraction_tier_ii_interior} is greater than 1."
+    fractions = {}
+    @hpxml.lighting_groups.each do |lg|
+      fractions[[lg.location, lg.third_party_certification]] = lg.fration_of_units_in_location
     end
-    if @hpxml.lighting.fraction_tier_i_exterior + @hpxml.lighting.fraction_tier_ii_exterior > 1
-      fail "Fraction of qualifying exterior lighting fixtures #{@hpxml.lighting.fraction_tier_i_exterior + @hpxml.lighting.fraction_tier_ii_exterior} is greater than 1."
+
+    if fractions[["interior", "ERI Tier I"]] + fractions[["interior", "ERI Tier II"]] > 1
+      fail "Fraction of qualifying interior lighting fixtures #{fractions[["interior", "ERI Tier I"]] + fractions[["interior", "ERI Tier II"]]} is greater than 1."
     end
-    if @hpxml.lighting.fraction_tier_i_garage + @hpxml.lighting.fraction_tier_ii_garage > 1
-      fail "Fraction of qualifying garage lighting fixtures #{@hpxml.lighting.fraction_tier_i_garage + @hpxml.lighting.fraction_tier_ii_garage} is greater than 1."
+    if fractions[["exterior", "ERI Tier I"]] + fractions[["exterior", "ERI Tier II"]] > 1
+      fail "Fraction of qualifying exterior lighting fixtures #{fractions[["exterior", "ERI Tier I"]] + fractions[["exterior", "ERI Tier II"]]} is greater than 1."
+    end
+    if fractions[["garage", "ERI Tier I"]] + fractions[["garage", "ERI Tier II"]] > 1
+      fail "Fraction of qualifying garage lighting fixtures #{fractions[["garage", "ERI Tier I"]] + fractions[["garage", "ERI Tier II"]]} is greater than 1."
     end
 
     int_kwh, ext_kwh, grg_kwh = Lighting.calc_lighting_energy(@eri_version, @cfa, @gfa,
-                                                              @hpxml.lighting.fraction_tier_i_interior,
-                                                              @hpxml.lighting.fraction_tier_i_exterior,
-                                                              @hpxml.lighting.fraction_tier_i_garage,
-                                                              @hpxml.lighting.fraction_tier_ii_interior,
-                                                              @hpxml.lighting.fraction_tier_ii_exterior,
-                                                              @hpxml.lighting.fraction_tier_ii_garage)
+                                                              fractions[["interior", "ERI Tier I"]],
+                                                              fractions[["exterior", "ERI Tier I"]],
+                                                              fractions[["garage", "ERI Tier I"]],
+                                                              fractions[["interior", "ERI Tier II"]],
+                                                              fractions[["exterior", "ERI Tier II"]],
+                                                              fractions[["garage", "ERI Tier II"]])
 
     garage_space = get_space_of_type(spaces, 'garage')
     Lighting.apply(model, weather, int_kwh, grg_kwh, ext_kwh, @cfa, @gfa,
@@ -2949,6 +2908,7 @@ class OSModel
     if @has_vented_crawl
       @hpxml.foundations.each do |foundation|
         next unless foundation.foundation_type == "VentedCrawlspace"
+
         vented_crawl_sla = foundation.vented_crawlspace_sla
       end
       if vented_crawl_sla.nil?
@@ -2979,6 +2939,7 @@ class OSModel
     if @frac_window_area_operable < 0 or @frac_window_area_operable > 1
       fail "Fraction window area operable (#{@frac_window_area_operable}) must be between 0 and 1."
     end
+
     nv_frac_window_area_open = @frac_window_area_operable * 0.20 # Assume 20% of operable window area is open
     nv_num_days_per_week = 7
     nv_max_oa_hr = 0.0115
@@ -3077,7 +3038,7 @@ class OSModel
         mech_vent_cfm *= (ventilation_fan.hours_in_operation / 24.0)
         mech_vent_fan_w *= (ventilation_fan.hours_in_operation / 24.0)
       end
-      mech_vent_attached_dist_system = ventilation_fan.distribution_system_idref
+      mech_vent_attached_dist_system = ventilation_fan.distribution_system
     end
     cfis_airflow_frac = 1.0
     clothes_dryer_exhaust = 0.0
@@ -3102,39 +3063,20 @@ class OSModel
     # Get AirLoop associated with CFIS
     cfis_airloop = nil
     if mech_vent_type == 'central fan integrated supply'
-      # Get HVAC distribution system CFIS is attached to
-      @hpxml.hvac_distributions.each do |hvac_distribution|
-        next unless hvac_distribution.id == mech_vent_attached_dist_system
+      cfis_sys_ids = mech_vent_attached_dist_system.hvac_systems.map { |system| system.id }
 
-        if hvac_distribution.distribution_system_type == 'HydronicDistribution'
-          fail "Attached HVAC distribution system '#{mech_vent_attached_dist_system}' cannot be hydronic for mechanical ventilation '#{mech_vent_id}'."
+      # Get AirLoopHVACs associated with these HVAC systems
+      @hvac_map.each do |sys_id, hvacs|
+        next unless cfis_sys_ids.include? sys_id
+
+        hvacs.each do |loop|
+          next unless loop.is_a? OpenStudio::Model::AirLoopHVAC
+          next if cfis_airloop == loop # already assigned
+
+          fail "Two airloops found for CFIS. Aborting..." unless cfis_airloop.nil?
+
+          cfis_airloop = loop
         end
-
-        # Get HVAC systems attached to this distribution system
-        cfis_sys_ids = []
-        (@hpxml.heating_systems + @hpxml.cooling_systems + @hpxml.heat_pumps).each do |hvac_system|
-          next if hvac_system.distribution_system_idref.nil?
-          next unless hvac_distribution.id == hvac_system.distribution_system_idref
-
-          cfis_sys_ids << hvac_system.id
-        end
-
-        # Get AirLoopHVACs associated with these HVAC systems
-        @hvac_map.each do |sys_id, hvacs|
-          next unless cfis_sys_ids.include? sys_id
-
-          hvacs.each do |loop|
-            next unless loop.is_a? OpenStudio::Model::AirLoopHVAC
-            next if cfis_airloop == loop # already assigned
-
-            fail "Two airloops found for CFIS. Aborting..." unless cfis_airloop.nil?
-
-            cfis_airloop = loop
-          end
-        end
-      end
-      if cfis_airloop.nil?
-        fail "Attached HVAC distribution system '#{mech_vent_attached_dist_system}' not found for mechanical ventilation '#{mech_vent_id}'."
       end
     end
 
@@ -4163,7 +4105,7 @@ class OSModel
     return nil
   end
 
-  def self.set_surface_interior(model, spaces, surface, surface_id, interior_adjacent_to)
+  def self.set_surface_interior(model, spaces, surface, interior_adjacent_to)
     if ['basement - conditioned'].include? interior_adjacent_to
       surface.setSpace(create_or_get_space(model, spaces, 'living space'))
       @cond_bsmnt_surfaces << surface
@@ -4172,7 +4114,7 @@ class OSModel
     end
   end
 
-  def self.set_surface_exterior(model, spaces, surface, surface_id, exterior_adjacent_to)
+  def self.set_surface_exterior(model, spaces, surface, exterior_adjacent_to)
     if ['outside'].include? exterior_adjacent_to
       surface.setOutsideBoundaryCondition('Outdoors')
     elsif ['ground'].include? exterior_adjacent_to
@@ -4225,28 +4167,6 @@ class OSModel
     end
 
     return nil
-  end
-
-  def self.assign_space_to_subsurface(surface, subsurface_id, wall_idref, spaces, model, subsurface_type)
-    # Check walls
-    @hpxml.walls.each do |wall|
-      next unless wall.id == wall_idref
-
-      set_surface_interior(model, spaces, surface, subsurface_id, wall.interior_adjacent_to)
-      return
-    end
-
-    # Check foundation walls
-    @hpxml.foundation_walls.each do |foundation_wall|
-      next unless foundation_wall.id == wall_idref
-
-      set_surface_interior(model, spaces, surface, subsurface_id, foundation_wall.interior_adjacent_to)
-      return
-    end
-
-    if not surface.space.is_initialized
-      fail "Attached wall '#{wall_idref}' not found for #{subsurface_type} '#{subsurface_id}'."
-    end
   end
 
   def self.get_infiltration_volume()
