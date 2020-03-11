@@ -34,7 +34,6 @@ def make_comparison_plots(df_doe2, df_os):
     df_os2 = df_os.rename(columns=rename_col)
     df_os2['address'] = df_os2['HPXML'].map(get_address_from_hpxml_file)
     df = df_doe2.merge(df_os2, on='address', suffixes=('_doe2', '_os'))
-    df.to_csv(os.path.join(plots_dir, 'results_os_doe2.csv'))
     cols_to_diff_against_base = list(filter(re.compile(r'_(doe2|os)$').search, df.columns.values))
     df_diff = df[cols_to_diff_against_base].subtract(df[df['HPXML'] == 'Base_hpxml.xml'][cols_to_diff_against_base].values, axis=1)
     df2 = df.merge(df_diff, left_index=True, right_index=True, suffixes=('', '_basediff'))
@@ -42,6 +41,7 @@ def make_comparison_plots(df_doe2, df_os):
     plots_dir = os.path.join(here, 'plots')
     if not os.path.exists(plots_dir):
         os.makedirs(plots_dir)
+    df.to_csv(os.path.join(plots_dir, 'results_os_doe2.csv'))
     bio.output_file(os.path.join(plots_dir, 'comparison_plots.html'))
     data_source = ColumnDataSource(df2)
     figures = []
