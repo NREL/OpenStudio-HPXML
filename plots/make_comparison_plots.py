@@ -41,6 +41,7 @@ def make_comparison_plots(df_doe2, df_os):
     plots_dir = os.path.join(here, 'plots')
     if not os.path.exists(plots_dir):
         os.makedirs(plots_dir)
+    df.to_csv(os.path.join(plots_dir, 'results_os_doe2.csv'))
     bio.output_file(os.path.join(plots_dir, 'comparison_plots.html'))
     data_source = ColumnDataSource(df2)
     figures = []
