@@ -935,7 +935,7 @@ class SimulationOutputReport < OpenStudio::Measure::ReportingMeasure
       sys_id = dhw_system.id
       if ['space-heating boiler with tankless coil', 'space-heating boiler with storage tank'].include? dhw_system.water_heater_type
         @hpxml.heating_systems.each do |heating_system|
-          next unless dhw_system.related_hvac == heating_system.id
+          next unless dhw_system.related_hvac_idref == heating_system.id
 
           dhw_fuels[sys_id] = heating_system.heating_system_fuel
         end
@@ -1178,7 +1178,7 @@ class SimulationOutputReport < OpenStudio::Measure::ReportingMeasure
       next unless sys_id == dhw_system.id
       next unless ['space-heating boiler with tankless coil', 'space-heating boiler with storage tank'].include? dhw_system.water_heater_type
 
-      return dhw_system.related_hvac
+      return dhw_system.related_hvac_idref
     end
 
     return nil
@@ -1276,9 +1276,9 @@ class SimulationOutputReport < OpenStudio::Measure::ReportingMeasure
 
   def get_dhw_solar_fraction(sys_id)
     solar_fraction = 0.0
-    if not @hpxml.solar_thermal_system.nil?
-      if @hpxml.solar_thermal_system.water_heating_system_idref == sys_id
-        solar_fraction = @hpxml.solar_thermal_system.solar_fraction.to_f
+    if @hpxml.solar_thermal_systems.size > 0
+      if @hpxml.solar_thermal_systems[0].water_heating_system_idref == sys_id
+        solar_fraction = @hpxml.solar_thermal_systems[0].solar_fraction.to_f
       end
     end
     return solar_fraction

@@ -1127,9 +1127,9 @@ class HPXMLTest < MiniTest::Test
     end
 
     # Clothes Washer
-    if not hpxml.clothes_washer.nil? and hpxml.water_heating_systems.size > 0
+    if hpxml.clothes_washers.size > 0 and hpxml.water_heating_systems.size > 0
       # Location
-      hpxml_value = hpxml.clothes_washer.location
+      hpxml_value = hpxml.clothes_washers[0].location
       if hpxml_value.nil? or hpxml_value == 'basement - conditioned'
         hpxml_value = 'living space'
       end
@@ -1140,9 +1140,9 @@ class HPXMLTest < MiniTest::Test
     end
 
     # Clothes Dryer
-    if not hpxml.clothes_dryer.nil? and hpxml.water_heating_systems.size > 0
+    if hpxml.clothes_dryers.size > 0 and hpxml.water_heating_systems.size > 0
       # Location
-      hpxml_value = hpxml.clothes_dryer.location
+      hpxml_value = hpxml.clothes_dryers[0].location
       if hpxml_value.nil? or hpxml_value == 'basement - conditioned'
         hpxml_value = 'living space'
       end
@@ -1153,9 +1153,9 @@ class HPXMLTest < MiniTest::Test
     end
 
     # Refrigerator
-    if not hpxml.refrigerator.nil?
+    if hpxml.refrigerators.size > 0
       # Location
-      hpxml_value = hpxml.refrigerator.location
+      hpxml_value = hpxml.refrigerators[0].location
       if hpxml_value.nil? or hpxml_value == 'basement - conditioned'
         hpxml_value = 'living space'
       end
@@ -1172,7 +1172,7 @@ class HPXMLTest < MiniTest::Test
 
       found_ltg_energy = true
     end
-    assert_equal(!hpxml.lighting.nil?, found_ltg_energy)
+    assert_equal(hpxml.lighting_groups.size > 0, found_ltg_energy)
 
     # Get fuels
     htg_fuels = []
@@ -1202,12 +1202,12 @@ class HPXMLTest < MiniTest::Test
     else
       assert_equal(ng_dhw, 0)
     end
-    if not hpxml.clothes_dryer.nil? and hpxml.clothes_dryer.fuel_type == 'natural gas'
+    if hpxml.clothes_dryers.size > 0 and hpxml.clothes_dryers[0].fuel_type == 'natural gas'
       assert_operator(ng_cd, :>, 0)
     else
       assert_equal(ng_cd, 0)
     end
-    if not hpxml.cooking_range.nil? and hpxml.cooking_range.fuel_type == 'natural gas'
+    if hpxml.cooking_ranges.size > 0 and hpxml.cooking_ranges[0].fuel_type == 'natural gas'
       assert_operator(ng_cr, :>, 0)
     else
       assert_equal(ng_cr, 0)
@@ -1228,12 +1228,12 @@ class HPXMLTest < MiniTest::Test
     else
       assert_equal(af_dhw, 0)
     end
-    if not hpxml.clothes_dryer.nil? and ['fuel oil', 'propane', 'wood'].include? hpxml.clothes_dryer.fuel_type
+    if hpxml.clothes_dryers.size > 0 and ['fuel oil', 'propane', 'wood'].include? hpxml.clothes_dryers[0].fuel_type
       assert_operator(af_cd, :>, 0)
     else
       assert_equal(af_cd, 0)
     end
-    if not hpxml.cooking_range.nil? and ['fuel oil', 'propane', 'wood'].include? hpxml.cooking_range.fuel_type
+    if hpxml.cooking_ranges.size > 0 and ['fuel oil', 'propane', 'wood'].include? hpxml.cooking_ranges[0].fuel_type
       assert_operator(af_cr, :>, 0)
     else
       assert_equal(af_cr, 0)
