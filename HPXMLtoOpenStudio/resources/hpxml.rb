@@ -357,6 +357,7 @@ class HPXML < Object
 
     def to_rexml(doc)
       return if self.nil?
+
       neighbors = XMLHelper.create_elements_as_needed(doc, ["HPXML", "Building", "BuildingDetails", "BuildingSummary", "Site", "extension", "Neighbors"])
       neighbor_building = XMLHelper.add_element(neighbors, "NeighborBuilding")
       XMLHelper.add_element(neighbor_building, "Azimuth", Integer(@azimuth)) unless @azimuth.nil?
@@ -379,6 +380,7 @@ class HPXML < Object
 
     def to_rexml(doc)
       return if self.nil?
+
       building_occupancy = XMLHelper.create_elements_as_needed(doc, ["HPXML", "Building", "BuildingDetails", "BuildingSummary", "BuildingOccupancy"])
       XMLHelper.add_element(building_occupancy, "NumberofResidents", Float(@number_of_residents)) unless @number_of_residents.nil?
     end
@@ -402,6 +404,7 @@ class HPXML < Object
 
     def to_rexml(doc)
       return if self.nil?
+
       building_construction = XMLHelper.create_elements_as_needed(doc, ["HPXML", "Building", "BuildingDetails", "BuildingSummary", "BuildingConstruction"])
       XMLHelper.add_element(building_construction, "NumberofConditionedFloors", Integer(@number_of_conditioned_floors)) unless @number_of_conditioned_floors.nil?
       XMLHelper.add_element(building_construction, "NumberofConditionedFloorsAboveGrade", Integer(@number_of_conditioned_floors_above_grade)) unless @number_of_conditioned_floors_above_grade.nil?
@@ -441,6 +444,7 @@ class HPXML < Object
 
     def to_rexml(doc)
       return if self.nil?
+
       climate_and_risk_zones = XMLHelper.create_elements_as_needed(doc, ["HPXML", "Building", "BuildingDetails", "ClimateandRiskZones"])
 
       climate_zones = { 2006 => @iecc2006,
@@ -503,6 +507,7 @@ class HPXML < Object
 
     def to_rexml(doc)
       return if self.nil?
+
       air_infiltration = XMLHelper.create_elements_as_needed(doc, ["HPXML", "Building", "BuildingDetails", "Enclosure", "AirInfiltration"])
       air_infiltration_measurement = XMLHelper.add_element(air_infiltration, "AirInfiltrationMeasurement")
       sys_id = XMLHelper.add_element(air_infiltration_measurement, "SystemIdentifier")
@@ -554,6 +559,7 @@ class HPXML < Object
 
     def to_rexml(doc)
       return if self.nil?
+
       attics = XMLHelper.create_elements_as_needed(doc, ["HPXML", "Building", "BuildingDetails", "Enclosure", "Attics"])
       attic = XMLHelper.add_element(attics, "Attic")
       sys_id = XMLHelper.add_element(attic, "SystemIdentifier")
@@ -631,6 +637,7 @@ class HPXML < Object
 
     def to_rexml(doc)
       return if self.nil?
+
       foundations = XMLHelper.create_elements_as_needed(doc, ["HPXML", "Building", "BuildingDetails", "Enclosure", "Foundations"])
       foundation = XMLHelper.add_element(foundations, "Foundation")
       sys_id = XMLHelper.add_element(foundation, "SystemIdentifier")
@@ -720,6 +727,7 @@ class HPXML < Object
 
     def to_rexml(doc)
       return if self.nil?
+
       roofs = XMLHelper.create_elements_as_needed(doc, ["HPXML", "Building", "BuildingDetails", "Enclosure", "Roofs"])
       roof = XMLHelper.add_element(roofs, "Roof")
       sys_id = XMLHelper.add_element(roof, "SystemIdentifier")
@@ -789,6 +797,7 @@ class HPXML < Object
 
     def to_rexml(doc)
       return if self.nil?
+
       rim_joists = XMLHelper.create_elements_as_needed(doc, ["HPXML", "Building", "BuildingDetails", "Enclosure", "RimJoists"])
       rim_joist = XMLHelper.add_element(rim_joists, "RimJoist")
       sys_id = XMLHelper.add_element(rim_joist, "SystemIdentifier")
@@ -849,6 +858,7 @@ class HPXML < Object
 
     def to_rexml(doc)
       return if self.nil?
+
       walls = XMLHelper.create_elements_as_needed(doc, ["HPXML", "Building", "BuildingDetails", "Enclosure", "Walls"])
       wall = XMLHelper.add_element(walls, "Wall")
       sys_id = XMLHelper.add_element(wall, "SystemIdentifier")
@@ -921,6 +931,7 @@ class HPXML < Object
 
     def to_rexml(doc)
       return if self.nil?
+
       foundation_walls = XMLHelper.create_elements_as_needed(doc, ["HPXML", "Building", "BuildingDetails", "Enclosure", "FoundationWalls"])
       foundation_wall = XMLHelper.add_element(foundation_walls, "FoundationWall")
       sys_id = XMLHelper.add_element(foundation_wall, "SystemIdentifier")
@@ -1005,6 +1016,7 @@ class HPXML < Object
 
     def to_rexml(doc)
       return if self.nil?
+
       frame_floors = XMLHelper.create_elements_as_needed(doc, ["HPXML", "Building", "BuildingDetails", "Enclosure", "FrameFloors"])
       frame_floor = XMLHelper.add_element(frame_floors, "FrameFloor")
       sys_id = XMLHelper.add_element(frame_floor, "SystemIdentifier")
@@ -1077,6 +1089,7 @@ class HPXML < Object
 
     def to_rexml(doc)
       return if self.nil?
+
       slabs = XMLHelper.create_elements_as_needed(doc, ["HPXML", "Building", "BuildingDetails", "Enclosure", "Slabs"])
       slab = XMLHelper.add_element(slabs, "Slab")
       sys_id = XMLHelper.add_element(slab, "SystemIdentifier")
@@ -1169,6 +1182,7 @@ class HPXML < Object
 
     def to_rexml(doc)
       return if self.nil?
+
       windows = XMLHelper.create_elements_as_needed(doc, ["HPXML", "Building", "BuildingDetails", "Enclosure", "Windows"])
       window = XMLHelper.add_element(windows, "Window")
       sys_id = XMLHelper.add_element(window, "SystemIdentifier")
@@ -1241,6 +1255,7 @@ class HPXML < Object
 
     def to_rexml(doc)
       return if self.nil?
+
       skylights = XMLHelper.create_elements_as_needed(doc, ["HPXML", "Building", "BuildingDetails", "Enclosure", "Skylights"])
       skylight = XMLHelper.add_element(skylights, "Skylight")
       sys_id = XMLHelper.add_element(skylight, "SystemIdentifier")
@@ -1294,6 +1309,7 @@ class HPXML < Object
 
     def to_rexml(doc)
       return if self.nil?
+
       doors = XMLHelper.create_elements_as_needed(doc, ["HPXML", "Building", "BuildingDetails", "Enclosure", "Doors"])
       door = XMLHelper.add_element(doors, "Door")
       sys_id = XMLHelper.add_element(door, "SystemIdentifier")
@@ -1341,6 +1357,7 @@ class HPXML < Object
 
     def to_rexml(doc)
       return if self.nil?
+
       hvac_plant = XMLHelper.create_elements_as_needed(doc, ["HPXML", "Building", "BuildingDetails", "Systems", "HVAC", "HVACPlant"])
       heating_system = XMLHelper.add_element(hvac_plant, "HeatingSystem")
       sys_id = XMLHelper.add_element(heating_system, "SystemIdentifier")
@@ -1420,6 +1437,7 @@ class HPXML < Object
 
     def to_rexml(doc)
       return if self.nil?
+
       hvac_plant = XMLHelper.create_elements_as_needed(doc, ["HPXML", "Building", "BuildingDetails", "Systems", "HVAC", "HVACPlant"])
       cooling_system = XMLHelper.add_element(hvac_plant, "CoolingSystem")
       sys_id = XMLHelper.add_element(cooling_system, "SystemIdentifier")
@@ -1501,6 +1519,7 @@ class HPXML < Object
 
     def to_rexml(doc)
       return if self.nil?
+
       hvac_plant = XMLHelper.create_elements_as_needed(doc, ["HPXML", "Building", "BuildingDetails", "Systems", "HVAC", "HVACPlant"])
       heat_pump = XMLHelper.add_element(hvac_plant, "HeatPump")
       sys_id = XMLHelper.add_element(heat_pump, "SystemIdentifier")
@@ -1601,6 +1620,7 @@ class HPXML < Object
 
     def to_rexml(doc)
       return if self.nil?
+
       hvac = XMLHelper.create_elements_as_needed(doc, ["HPXML", "Building", "BuildingDetails", "Systems", "HVAC"])
       hvac_control = XMLHelper.add_element(hvac, "HVACControl")
       sys_id = XMLHelper.add_element(hvac_control, "SystemIdentifier")
@@ -1665,6 +1685,7 @@ class HPXML < Object
 
     def to_rexml(doc)
       return if self.nil?
+
       hvac = XMLHelper.create_elements_as_needed(doc, ["HPXML", "Building", "BuildingDetails", "Systems", "HVAC"])
       hvac_distribution = XMLHelper.add_element(hvac, "HVACDistribution")
       sys_id = XMLHelper.add_element(hvac_distribution, "SystemIdentifier")
@@ -1808,6 +1829,7 @@ class HPXML < Object
 
     def to_rexml(doc)
       return if self.nil?
+
       ventilation_fans = XMLHelper.create_elements_as_needed(doc, ["HPXML", "Building", "BuildingDetails", "Systems", "MechanicalVentilation", "VentilationFans"])
       ventilation_fan = XMLHelper.add_element(ventilation_fans, "VentilationFan")
       sys_id = XMLHelper.add_element(ventilation_fan, "SystemIdentifier")
@@ -1871,6 +1893,7 @@ class HPXML < Object
 
     def to_rexml(doc)
       return if self.nil?
+
       water_heating = XMLHelper.create_elements_as_needed(doc, ["HPXML", "Building", "BuildingDetails", "Systems", "WaterHeating"])
       water_heating_system = XMLHelper.add_element(water_heating, "WaterHeatingSystem")
       sys_id = XMLHelper.add_element(water_heating_system, "SystemIdentifier")
@@ -1932,6 +1955,7 @@ class HPXML < Object
 
     def to_rexml(doc)
       return if self.nil?
+
       water_heating = XMLHelper.create_elements_as_needed(doc, ["HPXML", "Building", "BuildingDetails", "Systems", "WaterHeating"])
       hot_water_distribution = XMLHelper.add_element(water_heating, "HotWaterDistribution")
       sys_id = XMLHelper.add_element(hot_water_distribution, "SystemIdentifier")
@@ -2003,6 +2027,7 @@ class HPXML < Object
 
     def to_rexml(doc)
       return if self.nil?
+
       water_heating = XMLHelper.create_elements_as_needed(doc, ["HPXML", "Building", "BuildingDetails", "Systems", "WaterHeating"])
       water_fixture = XMLHelper.add_element(water_heating, "WaterFixture")
       sys_id = XMLHelper.add_element(water_fixture, "SystemIdentifier")
@@ -2028,6 +2053,7 @@ class HPXML < Object
 
     def to_rexml(doc)
       return if self.nil?
+
       solar_thermal = XMLHelper.create_elements_as_needed(doc, ["HPXML", "Building", "BuildingDetails", "Systems", "SolarThermal"])
       solar_thermal_system = XMLHelper.add_element(solar_thermal, "SolarThermalSystem")
       sys_id = XMLHelper.add_element(solar_thermal_system, "SystemIdentifier")
@@ -2091,6 +2117,7 @@ class HPXML < Object
 
     def to_rexml(doc)
       return if self.nil?
+
       photovoltaics = XMLHelper.create_elements_as_needed(doc, ["HPXML", "Building", "BuildingDetails", "Systems", "Photovoltaics"])
       pv_system = XMLHelper.add_element(photovoltaics, "PVSystem")
       sys_id = XMLHelper.add_element(pv_system, "SystemIdentifier")
@@ -2131,6 +2158,7 @@ class HPXML < Object
 
     def to_rexml(doc)
       return if self.nil?
+
       appliances = XMLHelper.create_elements_as_needed(doc, ["HPXML", "Building", "BuildingDetails", "Appliances"])
       clothes_washer = XMLHelper.add_element(appliances, "ClothesWasher")
       sys_id = XMLHelper.add_element(clothes_washer, "SystemIdentifier")
@@ -2169,6 +2197,7 @@ class HPXML < Object
 
     def to_rexml(doc)
       return if self.nil?
+
       appliances = XMLHelper.create_elements_as_needed(doc, ["HPXML", "Building", "BuildingDetails", "Appliances"])
       clothes_dryer = XMLHelper.add_element(appliances, "ClothesDryer")
       sys_id = XMLHelper.add_element(clothes_dryer, "SystemIdentifier")
@@ -2201,6 +2230,7 @@ class HPXML < Object
 
     def to_rexml(doc)
       return if self.nil?
+
       appliances = XMLHelper.create_elements_as_needed(doc, ["HPXML", "Building", "BuildingDetails", "Appliances"])
       dishwasher = XMLHelper.add_element(appliances, "Dishwasher")
       sys_id = XMLHelper.add_element(dishwasher, "SystemIdentifier")
@@ -2229,6 +2259,7 @@ class HPXML < Object
 
     def to_rexml(doc)
       return if self.nil?
+
       appliances = XMLHelper.create_elements_as_needed(doc, ["HPXML", "Building", "BuildingDetails", "Appliances"])
       refrigerator = XMLHelper.add_element(appliances, "Refrigerator")
       sys_id = XMLHelper.add_element(refrigerator, "SystemIdentifier")
@@ -2258,6 +2289,7 @@ class HPXML < Object
 
     def to_rexml(doc)
       return if self.nil?
+
       appliances = XMLHelper.create_elements_as_needed(doc, ["HPXML", "Building", "BuildingDetails", "Appliances"])
       cooking_range = XMLHelper.add_element(appliances, "CookingRange")
       sys_id = XMLHelper.add_element(cooking_range, "SystemIdentifier")
@@ -2284,6 +2316,7 @@ class HPXML < Object
 
     def to_rexml(doc)
       return if self.nil?
+
       appliances = XMLHelper.create_elements_as_needed(doc, ["HPXML", "Building", "BuildingDetails", "Appliances"])
       oven = XMLHelper.add_element(appliances, "Oven")
       sys_id = XMLHelper.add_element(oven, "SystemIdentifier")
@@ -2309,6 +2342,7 @@ class HPXML < Object
 
     def to_rexml(doc)
       return if self.nil?
+
       if not @fraction_tier_i_interior.nil?
         lighting = XMLHelper.create_elements_as_needed(doc, ["HPXML", "Building", "BuildingDetails", "Lighting"])
         lighting_group = XMLHelper.add_element(lighting, "LightingGroup")
@@ -2405,6 +2439,7 @@ class HPXML < Object
 
     def to_rexml(doc)
       return if self.nil?
+
       lighting = XMLHelper.create_elements_as_needed(doc, ["HPXML", "Building", "BuildingDetails", "Lighting"])
       ceiling_fan = XMLHelper.add_element(lighting, "CeilingFan")
       sys_id = XMLHelper.add_element(ceiling_fan, "SystemIdentifier")
@@ -2444,6 +2479,7 @@ class HPXML < Object
 
     def to_rexml(doc)
       return if self.nil?
+
       misc_loads = XMLHelper.create_elements_as_needed(doc, ["HPXML", "Building", "BuildingDetails", "MiscLoads"])
       plug_load = XMLHelper.add_element(misc_loads, "PlugLoad")
       sys_id = XMLHelper.add_element(plug_load, "SystemIdentifier")
@@ -2474,6 +2510,7 @@ class HPXML < Object
 
     def to_rexml(doc)
       return if self.nil?
+
       misc_loads = XMLHelper.create_elements_as_needed(doc, ["HPXML", "Building", "BuildingDetails", "MiscLoads"])
       _add_extension(parent: misc_loads,
                      extensions: { "WeekdayScheduleFractions" => @weekday_fractions,

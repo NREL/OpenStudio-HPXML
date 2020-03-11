@@ -752,6 +752,7 @@ class HPXMLTest < MiniTest::Test
     # Enclosure Walls/RimJoists/FoundationWalls
     (hpxml.walls + hpxml.rim_joists + hpxml.foundation_walls).each do |wall|
       next unless ['outside', 'ground'].include? wall.exterior_adjacent_to
+
       wall_id = wall.id.upcase
 
       # R-value
@@ -869,13 +870,11 @@ class HPXMLTest < MiniTest::Test
     hpxml.doors.each do |door|
       door_id = door.id.upcase
       door_wall_id = door.wall_idref
-      hpxml.walls.each do |wall|
+      wall_exterior_adjacent_to = ""
+      (hpxml.walls + hpxml.foundation_walls).each do |wall|
         next unless wall.id == door_wall_id
+
         wall_exterior_adjacent_to = wall.exterior_adjacent_to
-      end
-      hpxml.foundation_walls.each do |fnd_wall|
-        next unless fnd_wall.id == door_wall_id
-        wall_exterior_adjacent_to = fnd_wall.exterior_adjacent_to
       end
 
       # only outdoor doors will appear on the exterior door table
@@ -1019,15 +1018,11 @@ class HPXMLTest < MiniTest::Test
     # HVAC Load Fractions
     htg_load_frac = 0.0
     clg_load_frac = 0.0
-    bldg_details.elements.each('Systems/HVAC/HVACPlant/HeatingSystem') do |htg_sys|
-      htg_load_frac += Float(XMLHelper.get_value(htg_sys, "FractionHeatLoadServed"))
+    (hpxml.heating_systems + hpxml.heat_pumps).each do |heating_system|
+      htg_load_frac += heating_system.fraction_heat_load_served.to_f
     end
-    bldg_details.elements.each('Systems/HVAC/HVACPlant/CoolingSystem') do |clg_sys|
-      clg_load_frac += Float(XMLHelper.get_value(clg_sys, "FractionCoolLoadServed"))
-    end
-    bldg_details.elements.each('Systems/HVAC/HVACPlant/HeatPump') do |hp|
-      htg_load_frac += Float(XMLHelper.get_value(hp, "FractionHeatLoadServed"))
-      clg_load_frac += Float(XMLHelper.get_value(hp, "FractionCoolLoadServed"))
+    (hpxml.cooling_systems + hpxml.heat_pumps).each do |cooling_system|
+      clg_load_frac += cooling_system.fraction_cool_load_served.to_f
     end
     if htg_load_frac == 0
       found_htg_energy = false

@@ -2762,6 +2762,7 @@ class OSModel
 
   def self.add_ceiling_fans(runner, model, weather)
     return if @hpxml.ceiling_fans.size == 0
+
     ceiling_fan = @hpxml.ceiling_fans[0]
 
     monthly_sch = HVAC.get_ceiling_fan_operation_months(weather)
@@ -2954,6 +2955,7 @@ class OSModel
     if @has_vented_crawl
       @hpxml.foundations.each do |foundation|
         next unless foundation.foundation_type == "VentedCrawlspace"
+
         vented_crawl_sla = foundation.vented_crawlspace_sla
       end
       if vented_crawl_sla.nil?
@@ -3025,20 +3027,20 @@ class OSModel
         next if hvac_system.distribution_system_idref.nil? or dist_id != hvac_system.distribution_system_idref
 
         sys_id = hvac_system.id
-          @hvac_map[sys_id].each do |loop|
-            next unless loop.is_a? OpenStudio::Model::AirLoopHVAC
+        @hvac_map[sys_id].each do |loop|
+          next unless loop.is_a? OpenStudio::Model::AirLoopHVAC
 
-            if duct_systems[air_ducts].nil?
-              duct_systems[air_ducts] = loop
-            elsif duct_systems[air_ducts] != loop
-              # Multiple air loops associated with this duct system, treat
-              # as separate duct systems.
+          if duct_systems[air_ducts].nil?
+            duct_systems[air_ducts] = loop
+          elsif duct_systems[air_ducts] != loop
+            # Multiple air loops associated with this duct system, treat
+            # as separate duct systems.
             air_ducts2 = self.create_ducts(hvac_distribution, model, spaces, dist_id)
-              duct_systems[air_ducts2] = loop
-            end
+            duct_systems[air_ducts2] = loop
           end
         end
       end
+    end
 
     # Mechanical Ventilation
     mech_vent_id = nil
@@ -3093,9 +3095,9 @@ class OSModel
     bathroom_exhaust_hour = 5
 
     # Whole house fan
-      whole_house_fan_w = 0.0
-      whole_house_fan_cfm = 0.0
-      whf_num_days_per_week = 0
+    whole_house_fan_w = 0.0
+    whole_house_fan_cfm = 0.0
+    whf_num_days_per_week = 0
     @hpxml.ventilation_fans.each do |ventilation_fan|
       next unless ventilation_fan.used_for_seasonal_cooling_load_reduction
 
@@ -3114,31 +3116,31 @@ class OSModel
 
         if hvac_distribution.distribution_system_type == 'HydronicDistribution'
           fail "Attached HVAC distribution system '#{mech_vent_attached_dist_system}' cannot be hydronic for mechanical ventilation '#{mech_vent_id}'."
-      end
+        end
 
-      # Get HVAC systems attached to this distribution system
-      cfis_sys_ids = []
+        # Get HVAC systems attached to this distribution system
+        cfis_sys_ids = []
         (@hpxml.heating_systems + @hpxml.cooling_systems + @hpxml.heat_pumps).each do |hvac_system|
           next if hvac_system.distribution_system_idref.nil?
           next unless hvac_distribution.id == hvac_system.distribution_system_idref
 
           cfis_sys_ids << hvac_system.id
-      end
+        end
 
-      # Get AirLoopHVACs associated with these HVAC systems
-      @hvac_map.each do |sys_id, hvacs|
-        next unless cfis_sys_ids.include? sys_id
+        # Get AirLoopHVACs associated with these HVAC systems
+        @hvac_map.each do |sys_id, hvacs|
+          next unless cfis_sys_ids.include? sys_id
 
-        hvacs.each do |loop|
-          next unless loop.is_a? OpenStudio::Model::AirLoopHVAC
-          next if cfis_airloop == loop # already assigned
+          hvacs.each do |loop|
+            next unless loop.is_a? OpenStudio::Model::AirLoopHVAC
+            next if cfis_airloop == loop # already assigned
 
-          fail "Two airloops found for CFIS. Aborting..." unless cfis_airloop.nil?
+            fail "Two airloops found for CFIS. Aborting..." unless cfis_airloop.nil?
 
-          cfis_airloop = loop
+            cfis_airloop = loop
+          end
         end
       end
-    end
       if cfis_airloop.nil?
         fail "Attached HVAC distribution system '#{mech_vent_attached_dist_system}' not found for mechanical ventilation '#{mech_vent_id}'."
       end
