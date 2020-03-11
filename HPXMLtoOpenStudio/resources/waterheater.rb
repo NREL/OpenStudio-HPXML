@@ -1254,7 +1254,7 @@ class Waterheater
   def self.add_ec_adj(model, heater, ec_adj, space, fuel_type, wh_type, combi_boiler = nil, combi_hx = nil)
     adjustment = ec_adj - 1.0
 
-    if space.nil? # WH is outdoors, set the other equipment to be in a random space
+    if not space.is_a? OpenStudio::Model::Space # WH is not in conditioned zone, set the other equipment to be in a random space
       space = model.getSpaces[0]
     end
 
@@ -1578,6 +1578,8 @@ class Waterheater
 
     if space.nil? # Located outside
       new_heater.setAmbientTemperatureIndicator("Outdoors")
+    elsif space.is_a? OpenStudio::Model::ScheduleConstant # Temperature schedule indicator
+      new_heater.setAmbientTemperatureSchedule(space)
     else
       new_heater.setAmbientTemperatureIndicator("ThermalZone")
       new_heater.setAmbientTemperatureThermalZone(space.thermalZone.get)

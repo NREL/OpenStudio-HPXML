@@ -4199,54 +4199,16 @@ class OSModel
 
   def self.add_otherside_coefficients(surface, exterior_adjacent_to, model, spaces)
     if spaces[exterior_adjacent_to].nil?
+
+      # Create E+ other side coefficient object
       otherside_object = OpenStudio::Model::SurfacePropertyOtherSideCoefficients.new(model)
-      if exterior_adjacent_to == 'other heated space'
-        # Average of indoor/outdoor temperatures with minimum of 68 deg-F
-        temp_min = UnitConversions.convert(68, "F", "C")
-        indoor_weight = 0.5
-        outdoor_weight = 0.5
-      elsif exterior_adjacent_to == 'other multifamily buffer space'
-        # Average of indoor/outdoor temperatures with minimum of 50 deg-F
-        temp_min = UnitConversions.convert(50, "F", "C")
-        indoor_weight = 0.5
-        outdoor_weight = 0.5
-      elsif exterior_adjacent_to == 'other non-freezing space'
-        # Floating with outdoor air temperature with minimum of 40 deg-F
-        temp_min = UnitConversions.convert(40, "F", "C")
-        indoor_weight = 0.0
-        outdoor_weight = 1.0
-      end
       otherside_object.setName(exterior_adjacent_to)
       # Fixme: assumption the same as SurfacePropertyConvectionCoefficients of return air plenum
       otherside_object.setCombinedConvectiveRadiativeFilmCoefficient(30)
-      otherside_object.setMinimumOtherSideTemperatureLimit(temp_min)
-      otherside_object.setConstantTemperatureCoefficient(indoor_weight)
-      otherside_object.setExternalDryBulbTemperatureCoefficient(outdoor_weight)
-
-      if @other_side_indoor_sch.nil?
-        # Ems to actuate schedule
-        @other_side_indoor_sch = OpenStudio::Model::ScheduleConstant.new(model)
-        @other_side_indoor_sch.setName("Other Side Indoor Air Sch EMS")
-        Schedule.set_schedule_type_limits(model, @other_side_indoor_sch, Constants.ScheduleTypeLimitsTemperature)
-
-        sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, "Zone Air Temperature")
-        sensor.setName("cond_zone_temp")
-        sensor.setKeyName(create_or_get_space(model, spaces, 'living space').name.to_s)
-        actuator = OpenStudio::Model::EnergyManagementSystemActuator.new(@other_side_indoor_sch, "Schedule:Constant", "Schedule Value")
-        actuator.setName("other_side_indoor_temp")
-
-        program = OpenStudio::Model::EnergyManagementSystemProgram.new(model)
-        program.setName("Other Side Indoor Temperature Program")
-        program.addLine("Set #{actuator.name} = #{sensor.name}")
-
-        program_cm = OpenStudio::Model::EnergyManagementSystemProgramCallingManager.new(model)
-        program_cm.setName("#{program.name.to_s} calling manager")
-        program_cm.setCallingPoint("EndOfSystemTimestepAfterHVACReporting")
-        program_cm.addProgram(program)
-      end
-
+      # Schedule of space temperature, can be shared with water heater/appliances
+      otherside_schedule = create_or_get_outside_boundary_schedule(model, exterior_adjacent_to)
       # FIXME: wait for new OS release with bugfix of https://github.com/NREL/OpenStudio/issues/3848
-      otherside_object.setPointer(9, @other_side_indoor_sch.handle)
+      otherside_object.setPointer(9, otherside_schedule.handle)
       surface.setSurfacePropertyOtherSideCoefficients(otherside_object)
       spaces[exterior_adjacent_to] = otherside_object
     else
@@ -4254,10 +4216,97 @@ class OSModel
     end
   end
 
+  def self.create_or_get_outside_boundary_schedule(model, outside_space)
+    if outside_space == 'other heated space'
+      # Average of indoor/outdoor temperatures with minimum of 68 deg-F
+      temp_min = UnitConversions.convert(68, "F", "C")
+      indoor_weight = 0.5
+      outdoor_weight = 0.5
+    elsif outside_space == 'other multifamily buffer space'
+      # Average of indoor/outdoor temperatures with minimum of 50 deg-F
+      temp_min = UnitConversions.convert(50, "F", "C")
+      indoor_weight = 0.5
+      outdoor_weight = 0.5
+    elsif outside_space == 'other non-freezing space'
+      # Floating with outdoor air temperature with minimum of 40 deg-F
+      temp_min = UnitConversions.convert(40, "F", "C")
+      indoor_weight = 0.0
+      outdoor_weight = 1.0
+    end
+
+    actuated_schedule = nil
+    if outside_space == 'other heated space'
+      if not @heated_space_temp_sch.nil?
+        return @heated_space_temp_sch
+      else
+        @heated_space_temp_sch = OpenStudio::Model::ScheduleConstant.new(model)
+        @heated_space_temp_sch.setName("#{outside_space} sch EMS")
+        Schedule.set_schedule_type_limits(model, @heated_space_temp_sch, Constants.ScheduleTypeLimitsTemperature)
+        actuated_schedule = @heated_space_temp_sch
+      end
+    elsif outside_space == 'other housing unit'
+      if not @other_housing_unit_temp_sch.nil?
+        return @other_housing_unit_temp_sch
+      else
+        @other_housing_unit_temp_sch = OpenStudio::Model::ScheduleConstant.new(model)
+        @other_housing_unit_temp_sch.setName("#{outside_space} sch EMS")
+        Schedule.set_schedule_type_limits(model, @other_housing_unit_temp_sch, Constants.ScheduleTypeLimitsTemperature)
+        actuated_schedule = @other_housing_unit_temp_sch
+      end
+    elsif outside_space == 'other multifamily buffer space'
+      if not @multifamily_buffer_space_temp_sch.nil?
+        return @multifamily_buffer_space_temp_sch
+      else
+        @multifamily_buffer_space_temp_sch = OpenStudio::Model::ScheduleConstant.new(model)
+        @multifamily_buffer_space_temp_sch.setName("#{outside_space} sch EMS")
+        Schedule.set_schedule_type_limits(model, @multifamily_buffer_space_temp_sch, Constants.ScheduleTypeLimitsTemperature)
+        actuated_schedule = @multifamily_buffer_space_temp_sch
+      end
+    elsif outside_space == 'other non-freezing space'
+      if not @non_freezing_space_temp_sch.nil?
+        return @non_freezing_space_temp_sch
+      else
+        @non_freezing_space_temp_sch = OpenStudio::Model::ScheduleConstant.new(model)
+        @non_freezing_space_temp_sch.setName("#{outside_space} sch EMS")
+        Schedule.set_schedule_type_limits(model, @non_freezing_space_temp_sch, Constants.ScheduleTypeLimitsTemperature)
+        actuated_schedule = @non_freezing_space_temp_sch
+      end
+    end
+    
+    # Ems to actuate schedule
+    if @sensor_ia.nil?
+      @sensor_ia = OpenStudio::Model::EnergyManagementSystemSensor.new(model, "Zone Air Temperature")
+      @sensor_ia.setName("cond_zone_temp")
+      @sensor_ia.setKeyName(create_or_get_space(model, spaces, 'living space').name.to_s)
+    end
+    if @sensor_oa.nil?
+      @sensor_oa = OpenStudio::Model::EnergyManagementSystemSensor.new(model, "Site Outdoor Air Drybulb Temperature")
+      @sensor_oa.setName("oa_temp")
+    end
+    actuator = OpenStudio::Model::EnergyManagementSystemActuator.new(actuated_schedule, "Schedule:Constant", "Schedule Value")
+    actuator.setName("#{outside_space.gsub(' ', '_')}_temp_sch")
+
+    program = OpenStudio::Model::EnergyManagementSystemProgram.new(model)
+    program.setName("Other Side Indoor Temperature Program")
+    program.addLine("Set #{actuator.name} = #{@sensor_ia.name} * #{indoor_weight} + #{@sensor_oa.name} * #{outdoor_weight}")
+    program.addLine("If #{actuator.name} < #{temp_min}")
+    program.addLine("Set #{actuator.name} = #{temp_min}")
+
+    program_cm = OpenStudio::Model::EnergyManagementSystemProgramCallingManager.new(model)
+    program_cm.setName("#{program.name.to_s} calling manager")
+    program_cm.setCallingPoint("EndOfSystemTimestepAfterHVACReporting")
+    program_cm.addProgram(program)
+    
+    return actuated_schedule
+  end
+  
   # Returns an OS:Space, or nil if the location is outside the building
   def self.get_space_from_location(location, object_name, model, spaces)
     if location == 'other exterior' or location == 'outside'
       return nil
+    elsif ['other heated space', 'other housing unit', 'other multifamily buffer space', 'other non-freezing space'].include? location
+      schedule = create_or_get_outside_boundary_schedule(model, location)
+      return schedule
     end
 
     num_orig_spaces = spaces.size
