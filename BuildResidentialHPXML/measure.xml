@@ -3,8 +3,8 @@
   <error>uninitialized constant BuildResidentialHPXML::HPXML</error>
   <name>build_residential_hpxml</name>
   <uid>a13a8983-2b01-4930-8af2-42030b6e4233</uid>
-  <version_id>ed1cd112-0848-4851-afc4-4bfbec17adda</version_id>
-  <version_modified>20200312T205402Z</version_modified>
+  <version_id>e9d9eb42-fcbb-4220-8840-0ec1b1c5e704</version_id>
+  <version_modified>20200312T205538Z</version_modified>
   <xml_checksum>2C38F48B</xml_checksum>
   <class_name>BuildResidentialHPXML</class_name>
   <display_name>HPXML Builder</display_name>
@@ -4572,7 +4572,7 @@
       <filename>measure.rb</filename>
       <filetype>rb</filetype>
       <usage_type>script</usage_type>
-      <checksum>8646ED82</checksum>
+      <checksum>93B470BE</checksum>
     </file>
   </files>
 </measure>
