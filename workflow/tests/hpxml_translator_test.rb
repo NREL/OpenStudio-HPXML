@@ -750,7 +750,8 @@ class HPXMLTest < MiniTest::Test
 
     # Enclosure Walls/RimJoists/FoundationWalls
     (hpxml.walls + hpxml.rim_joists + hpxml.foundation_walls).each do |wall|
-      next unless ['outside', 'ground'].include? wall.exterior_adjacent_to
+      next unless [HPXML::LocationOutside, HPXML::LocationGround].include? wall.exterior_adjacent_to
+
       wall_id = wall.id.upcase
 
       # R-value
@@ -768,11 +769,11 @@ class HPXMLTest < MiniTest::Test
 
         hpxml_value -= subsurface.area
       end
-      if wall.exterior_adjacent_to == "ground"
+      if wall.exterior_adjacent_to == HPXML::LocationGround
         # Calculate total length of walls
         wall_total_length = 0
         hpxml.foundation_walls.each do |foundation_wall|
-          next unless foundation_wall.exterior_adjacent_to == 'ground'
+          next unless foundation_wall.exterior_adjacent_to == HPXML::LocationGround
           next unless wall.interior_adjacent_to == foundation_wall.interior_adjacent_to
 
           wall_total_length += foundation_wall.area / foundation_wall.height
@@ -897,22 +898,22 @@ class HPXMLTest < MiniTest::Test
 
         # Electric Auxiliary Energy
         # For now, skip if multiple equipment
-        if num_htg_sys == 1 and ['Furnace', 'Boiler', 'WallFurnace', 'Stove'].include? htg_sys_type and htg_sys_fuel != 'electricity'
+        if num_htg_sys == 1 and [HPXML::HVACTypeFurnace, HPXML::HVACTypeBoiler, HPXML::HVACTypeWallFurnace, HPXML::HVACTypeStove].include? htg_sys_type and htg_sys_fuel != HPXML::FuelTypeElectricity
           if not heating_system.electric_auxiliary_energy.nil?
             hpxml_value = heating_system.electric_auxiliary_energy / 2.08
           else
             furnace_capacity_kbtuh = nil
-            if htg_sys_type == 'Furnace'
+            if htg_sys_type == HPXML::HVACTypeFurnace
               query = "SELECT Value FROM TabularDataWithStrings WHERE ReportName='EquipmentSummary' AND ReportForString='Entire Facility' AND TableName='Heating Coils' AND RowName LIKE '%#{Constants.ObjectNameFurnace.upcase}%' AND ColumnName='Nominal Total Capacity' AND Units='W'"
               furnace_capacity_kbtuh = UnitConversions.convert(sqlFile.execAndReturnFirstDouble(query).get, 'W', 'kBtu/hr')
             end
             hpxml_value = HVAC.get_default_eae(htg_sys_type, htg_sys_fuel, htg_load_frac, furnace_capacity_kbtuh) / 2.08
           end
 
-          if htg_sys_type == 'Boiler'
+          if htg_sys_type == HPXML::HVACTypeBoiler
             query = "SELECT Value FROM TabularDataWithStrings WHERE ReportName='EquipmentSummary' AND ReportForString='Entire Facility' AND TableName='Pumps' AND RowName LIKE '%#{Constants.ObjectNameBoiler.upcase}%' AND ColumnName='Electric Power' AND Units='W'"
             sql_value = sqlFile.execAndReturnFirstDouble(query).get
-          elsif htg_sys_type == 'Furnace'
+          elsif htg_sys_type == HPXML::HVACTypeFurnace
 
             # Ratio fan power based on heating airflow rate divided by fan airflow rate since the
             # fan is sized based on cooling.
@@ -923,7 +924,7 @@ class HPXMLTest < MiniTest::Test
             sql_value_fan_airflow = sqlFile.execAndReturnFirstDouble(query_fan_airflow).get
             sql_value_htg_airflow = sqlFile.execAndReturnFirstDouble(query_htg_airflow).get
             sql_value *= sql_value_htg_airflow / sql_value_fan_airflow
-          elsif htg_sys_type == 'Stove' or htg_sys_type == 'WallFurnace'
+          elsif htg_sys_type == HPXML::HVACTypeStove or htg_sys_type == HPXML::HVACTypeWallFurnace
             query = "SELECT AVG(Value) FROM TabularDataWithStrings WHERE ReportName='EquipmentSummary' AND ReportForString='Entire Facility' AND TableName='Fans' AND RowName LIKE '%#{Constants.ObjectNameUnitHeater.upcase}%' AND ColumnName='Rated Electric Power' AND Units='W'"
             sql_value = sqlFile.execAndReturnFirstDouble(query).get
           else
@@ -958,7 +959,7 @@ class HPXMLTest < MiniTest::Test
       hp_type = heat_pump.heat_pump_type
       hp_cap_clg = heat_pump.cooling_capacity
       hp_cap_htg = heat_pump.heating_capacity
-      if hp_type == "mini-split"
+      if hp_type == HPXML::HVACTypeHeatPumpMiniSplit
         hp_cap_clg *= 1.20 # TODO: Generalize this
         hp_cap_htg *= 1.20 # TODO: Generalize this
       end
@@ -978,7 +979,7 @@ class HPXMLTest < MiniTest::Test
       if heat_pump.cooling_efficiency_seer.to_f > 15
         has_multispeed_dx_heating_coil = true
       end
-      if hp_type == "ground-to-air"
+      if hp_type == HPXML::HVACTypeHeatPumpGroundToAir
         has_gshp_coil = true
       end
     end
@@ -1111,7 +1112,7 @@ class HPXMLTest < MiniTest::Test
       end
 
       # CFIS
-      if ventilation_fan.fan_type == 'central fan integrated supply'
+      if ventilation_fan.fan_type == HPXML::MechVentTypeCFIS
         # Fan power
         hpxml_value = fan_w
         query = "SELECT Value FROM ReportData WHERE ReportDataDictionaryIndex IN (SELECT ReportDataDictionaryIndex FROM ReportDataDictionary WHERE Name='#{@cfis_fan_power_output_var.variableName}' AND ReportingFrequency='Run Period')"
@@ -1130,39 +1131,36 @@ class HPXMLTest < MiniTest::Test
     if hpxml.clothes_washers.size > 0 and hpxml.water_heating_systems.size > 0
       # Location
       hpxml_value = hpxml.clothes_washers[0].location
-      if hpxml_value.nil? or hpxml_value == 'basement - conditioned'
-        hpxml_value = 'living space'
+      if hpxml_value.nil? or hpxml_value == HPXML::LocationBasementCond
+        hpxml_value = HPXML::LocationLivingSpace
       end
-      hpxml_value.upcase!
       query = "SELECT Value FROM TabularDataWithStrings WHERE TableName='ElectricEquipment Internal Gains Nominal' AND ColumnName='Zone Name' AND RowName=(SELECT RowName FROM TabularDataWithStrings WHERE TableName='ElectricEquipment Internal Gains Nominal' AND ColumnName='Name' AND Value='#{Constants.ObjectNameClothesWasher.upcase}')"
       sql_value = sqlFile.execAndReturnFirstString(query).get
-      assert_equal(hpxml_value, sql_value)
+      assert_equal(hpxml_value.upcase, sql_value)
     end
 
     # Clothes Dryer
     if hpxml.clothes_dryers.size > 0 and hpxml.water_heating_systems.size > 0
       # Location
       hpxml_value = hpxml.clothes_dryers[0].location
-      if hpxml_value.nil? or hpxml_value == 'basement - conditioned'
-        hpxml_value = 'living space'
+      if hpxml_value.nil? or hpxml_value == HPXML::LocationBasementCond
+        hpxml_value = HPXML::LocationLivingSpace
       end
-      hpxml_value.upcase!
       query = "SELECT Value FROM TabularDataWithStrings WHERE TableName='ElectricEquipment Internal Gains Nominal' AND ColumnName='Zone Name' AND RowName=(SELECT RowName FROM TabularDataWithStrings WHERE TableName='ElectricEquipment Internal Gains Nominal' AND ColumnName='Name' AND Value='#{Constants.ObjectNameClothesDryer.upcase}')"
       sql_value = sqlFile.execAndReturnFirstString(query).get
-      assert_equal(hpxml_value, sql_value)
+      assert_equal(hpxml_value.upcase, sql_value)
     end
 
     # Refrigerator
     if hpxml.refrigerators.size > 0
       # Location
       hpxml_value = hpxml.refrigerators[0].location
-      if hpxml_value.nil? or hpxml_value == 'basement - conditioned'
-        hpxml_value = 'living space'
+      if hpxml_value.nil? or hpxml_value == HPXML::LocationBasementCond
+        hpxml_value = HPXML::LocationLivingSpace
       end
-      hpxml_value.upcase!
       query = "SELECT Value FROM TabularDataWithStrings WHERE TableName='ElectricEquipment Internal Gains Nominal' AND ColumnName='Zone Name' AND RowName=(SELECT RowName FROM TabularDataWithStrings WHERE TableName='ElectricEquipment Internal Gains Nominal' AND ColumnName='Name' AND Value='#{Constants.ObjectNameRefrigerator.upcase}')"
       sql_value = sqlFile.execAndReturnFirstString(query).get
-      assert_equal(hpxml_value, sql_value)
+      assert_equal(hpxml_value.upcase, sql_value)
     end
 
     # Lighting
@@ -1192,22 +1190,22 @@ class HPXMLTest < MiniTest::Test
     ng_dhw = results.fetch(["Natural Gas", "Water Systems", "General", "GJ"], 0)
     ng_cd = results.fetch(["Natural Gas", "Interior Equipment", "clothes dryer", "GJ"], 0)
     ng_cr = results.fetch(["Natural Gas", "Interior Equipment", "cooking range", "GJ"], 0)
-    if not hpxml_path.include? "location-miami" and htg_fuels.include? 'natural gas'
+    if not hpxml_path.include? "location-miami" and htg_fuels.include? HPXML::FuelTypeNaturalGas
       assert_operator(ng_htg, :>, 0)
     else
       assert_equal(ng_htg, 0)
     end
-    if wh_fuels.include? 'natural gas'
+    if wh_fuels.include? HPXML::FuelTypeNaturalGas
       assert_operator(ng_dhw, :>, 0)
     else
       assert_equal(ng_dhw, 0)
     end
-    if hpxml.clothes_dryers.size > 0 and hpxml.clothes_dryers[0].fuel_type == 'natural gas'
+    if hpxml.clothes_dryers.size > 0 and hpxml.clothes_dryers[0].fuel_type == HPXML::FuelTypeNaturalGas
       assert_operator(ng_cd, :>, 0)
     else
       assert_equal(ng_cd, 0)
     end
-    if hpxml.cooking_ranges.size > 0 and hpxml.cooking_ranges[0].fuel_type == 'natural gas'
+    if hpxml.cooking_ranges.size > 0 and hpxml.cooking_ranges[0].fuel_type == HPXML::FuelTypeNaturalGas
       assert_operator(ng_cr, :>, 0)
     else
       assert_equal(ng_cr, 0)
@@ -1218,22 +1216,22 @@ class HPXMLTest < MiniTest::Test
     af_dhw = results.fetch(["Additional Fuel", "Water Systems", "General", "GJ"], 0)
     af_cd = results.fetch(["Additional Fuel", "Interior Equipment", "clothes dryer", "GJ"], 0)
     af_cr = results.fetch(["Additional Fuel", "Interior Equipment", "cooking range", "GJ"], 0)
-    if not hpxml_path.include? "location-miami" and (htg_fuels.include? 'fuel oil' or htg_fuels.include? 'propane' or htg_fuels.include? 'wood')
+    if not hpxml_path.include? "location-miami" and (htg_fuels.include? HPXML::FuelTypeOil or htg_fuels.include? HPXML::FuelTypePropane or htg_fuels.include? HPXML::FuelTypeWood or htg_fuels.include? HPXML::FuelTypeWoodPellets)
       assert_operator(af_htg, :>, 0)
     else
       assert_equal(af_htg, 0)
     end
-    if wh_fuels.include? 'fuel oil' or wh_fuels.include? 'propane' or wh_fuels.include? 'wood'
+    if wh_fuels.include? HPXML::FuelTypeOil or wh_fuels.include? HPXML::FuelTypePropane or wh_fuels.include? HPXML::FuelTypeWood or wh_fuels.include? HPXML::FuelTypeWoodPellets
       assert_operator(af_dhw, :>, 0)
     else
       assert_equal(af_dhw, 0)
     end
-    if hpxml.clothes_dryers.size > 0 and ['fuel oil', 'propane', 'wood'].include? hpxml.clothes_dryers[0].fuel_type
+    if hpxml.clothes_dryers.size > 0 and [HPXML::FuelTypeOil, HPXML::FuelTypePropane, HPXML::FuelTypeWood, HPXML::FuelTypeWoodPellets].include? hpxml.clothes_dryers[0].fuel_type
       assert_operator(af_cd, :>, 0)
     else
       assert_equal(af_cd, 0)
     end
-    if hpxml.cooking_ranges.size > 0 and ['fuel oil', 'propane', 'wood'].include? hpxml.cooking_ranges[0].fuel_type
+    if hpxml.cooking_ranges.size > 0 and [HPXML::FuelTypeOil, HPXML::FuelTypePropane, HPXML::FuelTypeWood, HPXML::FuelTypeWoodPellets].include? hpxml.cooking_ranges[0].fuel_type
       assert_operator(af_cr, :>, 0)
     else
       assert_equal(af_cr, 0)

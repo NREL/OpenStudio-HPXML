@@ -1468,7 +1468,7 @@ class HVAC
 
     # _processSystemHeatingCoil
 
-    if fuel_type == 'electricity'
+    if fuel_type == HPXML::FuelTypeElectricity
       htg_coil = OpenStudio::Model::CoilHeatingElectric.new(model)
       htg_coil.setEfficiency(afue)
     else
@@ -1786,7 +1786,7 @@ class HVAC
 
     # _processSystemHeatingCoil
 
-    if fuel_type == 'electricity'
+    if fuel_type == HPXML::FuelTypeElectricity
       htg_coil = OpenStudio::Model::CoilHeatingElectric.new(model)
       htg_coil.setEfficiency(efficiency)
     else
@@ -2074,11 +2074,11 @@ class HVAC
     htg_setback_sp = nil
     htg_setback_hrs_per_week = nil
     htg_setback_start_hr = nil
-    if control_type == "programmable thermostat"
+    if control_type == HPXML::HVACControlTypeProgrammable
       htg_setback_sp = 66 # F
       htg_setback_hrs_per_week = 7 * 7 # 11 p.m. to 5:59 a.m., 7 days a week
       htg_setback_start_hr = 23 # 11 p.m.
-    elsif control_type != "manual thermostat"
+    elsif control_type != HPXML::HVACControlTypeManual
       fail "Unexpected control type #{control_type}."
     end
     return htg_sp, htg_setback_sp, htg_setback_hrs_per_week, htg_setback_start_hr
@@ -2089,11 +2089,11 @@ class HVAC
     clg_setup_sp = nil
     clg_setup_hrs_per_week = nil
     clg_setup_start_hr = nil
-    if control_type == "programmable thermostat"
+    if control_type == HPXML::HVACControlTypeProgrammable
       clg_setup_sp = 80 # F
       clg_setup_hrs_per_week = 6 * 7 # 9 a.m. to 2:59 p.m., 7 days a week
       clg_setup_start_hr = 9 # 9 a.m.
-    elsif control_type != "manual thermostat"
+    elsif control_type != HPXML::HVACControlTypeManual
       fail "Unexpected control type #{control_type}."
     end
     return clg_sp, clg_setup_sp, clg_setup_hrs_per_week, clg_setup_start_hr
@@ -2101,11 +2101,11 @@ class HVAC
 
   def self.get_default_compressor_type(seer)
     if seer <= 15
-      return "single stage"
+      return HPXML::HVACCompressorTypeSingleStage
     elsif seer <= 21
-      return "two stage"
+      return HPXML::HVACCompressorTypeTwoStage
     elsif seer > 21
-      return "variable speed"
+      return HPXML::HVACCompressorTypeVariableSpeed
     end
   end
 
@@ -2213,7 +2213,7 @@ class HVAC
   def self.apply_eae_to_heating_fan(runner, eae_hvacs, eae, fuel, load_frac, htg_type)
     # Applies Electric Auxiliary Energy (EAE) for fuel heating equipment to fan power.
 
-    if htg_type == 'Boiler'
+    if htg_type == HPXML::HVACTypeBoiler
 
       if eae.nil?
         eae = get_default_eae(htg_type, fuel, load_frac, nil)
@@ -2283,16 +2283,16 @@ class HVAC
 
   def self.get_default_eae(htg_type, fuel, load_frac, furnace_capacity_kbtuh)
     # From ANSI/RESNET/ICC 301 Standard
-    if htg_type == 'Boiler'
-      if fuel == 'natural gas' or fuel == 'propane'
+    if htg_type == HPXML::HVACTypeBoiler
+      if fuel == HPXML::FuelTypeNaturalGas or fuel == HPXML::FuelTypePropane
         return 170.0 * load_frac # kWh/yr
-      elsif fuel == 'fuel oil'
+      elsif fuel == HPXML::FuelTypeOil
         return 330.0 * load_frac # kWh/yr
       end
-    elsif htg_type == 'Furnace'
-      if fuel == 'natural gas' or fuel == 'propane'
+    elsif htg_type == HPXML::HVACTypeFurnace
+      if fuel == HPXML::FuelTypeNaturalGas or fuel == HPXML::FuelTypePropane
         return (149.0 + 10.3 * furnace_capacity_kbtuh) * load_frac # kWh/yr
-      elsif fuel == 'fuel oil'
+      elsif fuel == HPXML::FuelTypeOil
         return (439.0 + 5.5 * furnace_capacity_kbtuh) * load_frac # kWh/yr
       end
     end
@@ -2523,7 +2523,7 @@ class HVAC
   private
 
   def self.apply_supplemental_htg_coil(model, obj_name, fuel_type, supplemental_efficiency, supplemental_capacity)
-    if fuel_type == 'electricity'
+    if fuel_type == HPXML::FuelTypeElectricity
       htg_supp_coil = OpenStudio::Model::CoilHeatingElectric.new(model, model.alwaysOnDiscreteSchedule)
       htg_supp_coil.setEfficiency(supplemental_efficiency)
     else

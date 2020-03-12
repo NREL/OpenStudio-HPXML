@@ -1212,7 +1212,7 @@ class HVACSizing
       dse_As, dse_Ar = calc_ducts_areas(hvac.Ducts)
       supply_r, return_r = calc_ducts_rvalues(hvac.Ducts)
 
-      design_temp_values = { Constants.DuctSideSupply => @heat_design_temps, Constants.DuctSideReturn => @heat_design_temps }
+      design_temp_values = { HPXML::DuctTypeSupply => @heat_design_temps, HPXML::DuctTypeReturn => @heat_design_temps }
       dse_Tamb_heating_s, dse_Tamb_heating_r = calc_ducts_area_weighted_average(hvac.Ducts, design_temp_values)
 
       # ASHRAE 152 6.5.2
@@ -1222,7 +1222,7 @@ class HVACSizing
       hvac.Ducts.each do |duct|
         dse_Fregains[duct.LocationSpace] = get_duct_regain_factor(duct)
       end
-      fregain_values = { Constants.DuctSideSupply => dse_Fregains, Constants.DuctSideReturn => dse_Fregains }
+      fregain_values = { HPXML::DuctTypeSupply => dse_Fregains, HPXML::DuctTypeReturn => dse_Fregains }
       dse_Fregain_s, dse_Fregain_r = calc_ducts_area_weighted_average(hvac.Ducts, fregain_values)
 
       # Initialize for the iteration
@@ -1272,7 +1272,7 @@ class HVACSizing
       dse_As, dse_Ar = calc_ducts_areas(hvac.Ducts)
       supply_r, return_r = calc_ducts_rvalues(hvac.Ducts)
 
-      design_temp_values = { Constants.DuctSideSupply => @cool_design_temps, Constants.DuctSideReturn => @cool_design_temps }
+      design_temp_values = { HPXML::DuctTypeSupply => @cool_design_temps, HPXML::DuctTypeReturn => @cool_design_temps }
       dse_Tamb_cooling_s, dse_Tamb_cooling_r = calc_ducts_area_weighted_average(hvac.Ducts, design_temp_values)
 
       # ASHRAE 152 6.5.2
@@ -1282,7 +1282,7 @@ class HVACSizing
       hvac.Ducts.each do |duct|
         dse_Fregains[duct.LocationSpace] = get_duct_regain_factor(duct)
       end
-      fregain_values = { Constants.DuctSideSupply => dse_Fregains, Constants.DuctSideReturn => dse_Fregains }
+      fregain_values = { HPXML::DuctTypeSupply => dse_Fregains, HPXML::DuctTypeReturn => dse_Fregains }
       dse_Fregain_s, dse_Fregain_r = calc_ducts_area_weighted_average(hvac.Ducts, fregain_values)
 
       # Calculate the air enthalpy in the return duct location for DSE calculations
@@ -1880,9 +1880,9 @@ class HVACSizing
     q_bal_Sens = 0.0
     q_bal_Lat = 0.0
 
-    if ['exhaust only', 'supply only', 'central fan integrated supply'].include? mechVentType
+    if [HPXML::MechVentTypeExhaust, HPXML::MechVentTypeSupply, HPXML::MechVentTypeCFIS].include? mechVentType
       q_unb = mechVentWholeHouseRate
-    elsif ['balanced', 'energy recovery ventilator', 'heat recovery ventilator'].include? mechVentType
+    elsif [HPXML::MechVentTypeBalanced, HPXML::MechVentTypeERV, HPXML::MechVentTypeHRV].include? mechVentType
       totalEfficiency = get_feature(model.getBuilding, Constants.SizingInfoMechVentTotalEfficiency, 'double')
       apparentSensibleEffectiveness = get_feature(model.getBuilding, Constants.SizingInfoMechVentApparentSensibleEffectiveness, 'double')
       latentEffectiveness = get_feature(model.getBuilding, Constants.SizingInfoMechVentLatentEffectiveness, 'double')
@@ -2040,7 +2040,7 @@ class HVACSizing
     location_spaces = []
     thermal_zones = Geometry.get_thermal_zones_from_spaces(@model_spaces)
     locations.each do |location|
-      if location == "outside"
+      if location == HPXML::LocationOutside
         location_spaces << nil
         next
       end
@@ -2081,14 +2081,14 @@ class HVACSizing
     '''
     Calculate area-weighted average values for unconditioned duct(s)
     '''
-    uncond_area = { Constants.DuctSideSupply => 0.0, Constants.DuctSideReturn => 0.0 }
+    uncond_area = { HPXML::DuctTypeSupply => 0.0, HPXML::DuctTypeReturn => 0.0 }
     ducts.each do |duct|
       next if Geometry.is_living(duct.LocationSpace)
 
       uncond_area[duct.Side] += duct.Area
     end
 
-    value = { Constants.DuctSideSupply => 0.0, Constants.DuctSideReturn => 0.0 }
+    value = { HPXML::DuctTypeSupply => 0.0, HPXML::DuctTypeReturn => 0.0 }
     ducts.each do |duct|
       next if Geometry.is_living(duct.LocationSpace)
 
@@ -2099,7 +2099,7 @@ class HVACSizing
       end
     end
 
-    return value[Constants.DuctSideSupply], value[Constants.DuctSideReturn]
+    return value[HPXML::DuctTypeSupply], value[HPXML::DuctTypeReturn]
   end
 
   def self.calc_ducts_areas(ducts)
@@ -2107,14 +2107,14 @@ class HVACSizing
     Calculate total supply & return duct areas in unconditioned space
     '''
 
-    areas = { Constants.DuctSideSupply => 0.0, Constants.DuctSideReturn => 0.0 }
+    areas = { HPXML::DuctTypeSupply => 0.0, HPXML::DuctTypeReturn => 0.0 }
     ducts.each do |duct|
       next if Geometry.is_living(duct.LocationSpace)
 
       areas[duct.Side] += duct.Area
     end
 
-    return areas[Constants.DuctSideSupply], areas[Constants.DuctSideReturn]
+    return areas[HPXML::DuctTypeSupply], areas[HPXML::DuctTypeReturn]
   end
 
   def self.calc_ducts_leakages(ducts, system_cfm)
@@ -2122,7 +2122,7 @@ class HVACSizing
     Calculate total supply & return duct leakage in cfm.
     '''
 
-    cfms = { Constants.DuctSideSupply => 0.0, Constants.DuctSideReturn => 0.0 }
+    cfms = { HPXML::DuctTypeSupply => 0.0, HPXML::DuctTypeReturn => 0.0 }
     ducts.each do |duct|
       next if Geometry.is_living(duct.LocationSpace)
 
@@ -2133,7 +2133,7 @@ class HVACSizing
       end
     end
 
-    return cfms[Constants.DuctSideSupply], cfms[Constants.DuctSideReturn]
+    return cfms[HPXML::DuctTypeSupply], cfms[HPXML::DuctTypeReturn]
   end
 
   def self.calc_ducts_rvalues(ducts)
@@ -2141,7 +2141,7 @@ class HVACSizing
     Calculate UA-weighted average R-value for supply & return ducts.
     '''
 
-    u_factors = { Constants.DuctSideSupply => {}, Constants.DuctSideReturn => {} }
+    u_factors = { HPXML::DuctTypeSupply => {}, HPXML::DuctTypeReturn => {} }
     ducts.each do |duct|
       next if Geometry.is_living(duct.LocationSpace)
 
@@ -2613,7 +2613,7 @@ class HVACSizing
 
     # The following correlations were estimated by analyzing MJ8 construction tables. This is likely a better
     # approach than including the Group Number.
-    if ['WoodStud', 'SteelStud'].include?(wall_type)
+    if [HPXML::WallTypeWoodStud, HPXML::WallTypeSteelStud].include?(wall_type)
       cavity_r = get_feature(wall, Constants.SizingInfoStudWallCavityRvalue, 'double')
 
       wallGroup = get_wallgroup_wood_or_steel_stud(cavity_r)
@@ -2642,13 +2642,13 @@ class HVACSizing
         end
       end
 
-    elsif wall_type == 'DoubleWoodStud'
+    elsif wall_type == HPXML::WallTypeDoubleWoodStud
       wallGroup = 10 # J (assumed since MJ8 does not include double stud constructions)
       if exteriorFinishDensity >= 100
         wallGroup = 11 # K
       end
 
-    elsif wall_type == 'SIP'
+    elsif wall_type == HPXML::WallTypeSIP
       rigid_thick_in = get_feature(wall, Constants.SizingInfoWallRigidInsThickness, 'double', false)
       sip_ins_thick_in = get_feature(wall, Constants.SizingInfoSIPWallInsThickness, 'double')
 
@@ -2664,7 +2664,7 @@ class HVACSizing
         wallGroup = wallGroup + 3
       end
 
-    elsif wall_type == 'CMU'
+    elsif wall_type == HPXML::WallTypeCMU
       cmu_furring_ins_r = get_feature(wall, Constants.SizingInfoCMUWallFurringInsRvalue, 'double', false)
 
       # Manual J uses the same wall group for filled or hollow block
@@ -2686,7 +2686,7 @@ class HVACSizing
       # This is an estimate based on Table 4A - Construction Number 13
       wallGroup = wallGroup + (rigid_r / 3.0).floor # Group is increased by approximately 1 letter for each R3
 
-    elsif wall_type == 'ICF'
+    elsif wall_type == HPXML::WallTypeICF
       wallGroup = 11 # K
 
     elsif wall_type == 'Generic'
