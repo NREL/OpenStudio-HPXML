@@ -85,7 +85,7 @@ class Airflow
     process_infiltration_for_conditioned_zones(model, infil, wind_speed, building, weather)
     process_mech_vent(model, mech_vent, building, weather, infil)
 
-    if mech_vent.type == 'central fan integrated supply'
+    if mech_vent.type == HPXML::MechVentTypeCFIS
       cfis_program = create_cfis_objects(model, building, mech_vent)
     end
 
@@ -334,7 +334,7 @@ class Airflow
                                      :fan_mfr_max_var => fan_mfr_max_var,
                                      :fan_mfr_sensor => fan_mfr_sensor }
 
-      if mech_vent.type == 'central fan integrated supply' and air_loop == mech_vent.cfis_air_loop
+      if mech_vent.type == HPXML::MechVentTypeCFIS and air_loop == mech_vent.cfis_air_loop
         mech_vent.cfis_fan_rtf_sensor = fan_rtf_sensor.name
         mech_vent.cfis_fan_mfr_max_var = fan_mfr_max_var.name
       end
@@ -532,7 +532,7 @@ class Airflow
   end
 
   def self.process_mech_vent(model, mech_vent, building, weather, infil)
-    if mech_vent.type == 'central fan integrated supply'
+    if mech_vent.type == HPXML::MechVentTypeCFIS
       if not HVAC.has_ducted_equipment(model, mech_vent.cfis_air_loop)
         fail "A CFIS ventilation system has been specified but the building does not have central, forced air equipment."
       end
@@ -544,11 +544,11 @@ class Airflow
     range_hood_exhaust_operation = 60.0 # min/day, per HSP
 
     # Fraction of fan heat that goes to the space
-    if ['exhaust only'].include? mech_vent.type
+    if [HPXML::MechVentTypeExhaust].include? mech_vent.type
       frac_fan_heat = 0.0 # Fan heat does not enter space
-    elsif ['supply only', 'central fan integrated supply'].include? mech_vent.type
+    elsif [HPXML::MechVentTypeSupply, HPXML::MechVentTypeCFIS].include? mech_vent.type
       frac_fan_heat = 1.0 # Fan heat does enter space
-    elsif ['balanced', 'energy recovery ventilator', 'heat recovery ventilator'].include? mech_vent.type
+    elsif [HPXML::MechVentTypeBalanced, HPXML::MechVentTypeERV, HPXML::MechVentTypeHRV].include? mech_vent.type
       frac_fan_heat = 0.5 # Assumes supply fan heat enters space
     else
       frac_fan_heat = 0.0
@@ -588,7 +588,7 @@ class Airflow
     sensible_effectiveness = 0.0
     latent_effectiveness = 0.0
 
-    if ['energy recovery ventilator', 'heat recovery ventilator'].include? mech_vent.type and mech_vent.cfm > 0
+    if [HPXML::MechVentTypeERV, HPXML::MechVentTypeHRV].include? mech_vent.type and mech_vent.cfm > 0
       # Must assume an operating condition (HVI seems to use CSA 439)
       t_sup_in = 0.0
       w_sup_in = 0.0028
@@ -717,7 +717,7 @@ class Airflow
       duct.rvalue = get_duct_insulation_rvalue(duct.rvalue, duct.side) # Convert from nominal to actual R-value
       if duct.space.nil? # Outside
         duct.zone = nil
-        duct.zone_handle = "outside"
+        duct.zone_handle = HPXML::LocationOutside
       else
         duct.zone = duct.space.thermalZone.get
         duct.zone_handle = duct.zone.handle.to_s
@@ -1139,7 +1139,7 @@ class Airflow
         duct_actuators = {}
         [false, true].each do |is_cfis|
           if is_cfis
-            next unless (mech_vent.type == 'central fan integrated supply' and air_loop == mech_vent.cfis_air_loop)
+            next unless (mech_vent.type == HPXML::MechVentTypeCFIS and air_loop == mech_vent.cfis_air_loop)
 
             prefix = "cfis_"
           else
@@ -1182,7 +1182,7 @@ class Airflow
 
         [false, true].each do |is_cfis|
           if is_cfis
-            next unless (mech_vent.type == 'central fan integrated supply' and air_loop == mech_vent.cfis_air_loop)
+            next unless (mech_vent.type == HPXML::MechVentTypeCFIS and air_loop == mech_vent.cfis_air_loop)
 
             prefix = "cfis_"
           else
@@ -1212,9 +1212,9 @@ class Airflow
         duct_lks[air_loop_name_idx] = [duct_lk_supply_fan_equiv_var, duct_lk_exhaust_fan_equiv_var]
 
         # Obtain aggregate values for all ducts in the current duct location
-        leakage_fracs = { Constants.DuctSideSupply => nil, Constants.DuctSideReturn => nil }
-        leakage_cfm25s = { Constants.DuctSideSupply => nil, Constants.DuctSideReturn => nil }
-        ua_values = { Constants.DuctSideSupply => 0, Constants.DuctSideReturn => 0 }
+        leakage_fracs = { HPXML::DuctTypeSupply => nil, HPXML::DuctTypeReturn => nil }
+        leakage_cfm25s = { HPXML::DuctTypeSupply => nil, HPXML::DuctTypeReturn => nil }
+        ua_values = { HPXML::DuctTypeSupply => 0, HPXML::DuctTypeReturn => 0 }
         ducts.each do |duct|
           next unless (duct_zone.nil? and duct.zone.nil?) or (!duct_zone.nil? and !duct.zone.nil? and duct.zone.name.to_s == duct_zone.name.to_s)
 
@@ -1260,17 +1260,17 @@ class Airflow
         duct_subroutine.addLine("  Set h_DZ = (@HFnTdbW DZ_T DZ_W)") # J/kg
         duct_subroutine.addLine("  Set air_cp = 1006.0") # J/kg-C
 
-        if not leakage_fracs[Constants.DuctSideSupply].nil?
-          duct_subroutine.addLine("  Set f_sup = #{leakage_fracs[Constants.DuctSideSupply]}") # frac
-        elsif not leakage_cfm25s[Constants.DuctSideSupply].nil?
-          duct_subroutine.addLine("  Set f_sup = #{UnitConversions.convert(leakage_cfm25s[Constants.DuctSideSupply], "cfm", "m^3/s").round(6)} / (#{fan_mfr_max_var.name} * 1.0135)") # frac
+        if not leakage_fracs[HPXML::DuctTypeSupply].nil?
+          duct_subroutine.addLine("  Set f_sup = #{leakage_fracs[HPXML::DuctTypeSupply]}") # frac
+        elsif not leakage_cfm25s[HPXML::DuctTypeSupply].nil?
+          duct_subroutine.addLine("  Set f_sup = #{UnitConversions.convert(leakage_cfm25s[HPXML::DuctTypeSupply], "cfm", "m^3/s").round(6)} / (#{fan_mfr_max_var.name} * 1.0135)") # frac
         else
           duct_subroutine.addLine("  Set f_sup = 0.0") # frac
         end
-        if not leakage_fracs[Constants.DuctSideReturn].nil?
-          duct_subroutine.addLine("  Set f_ret = #{leakage_fracs[Constants.DuctSideReturn]}") # frac
-        elsif not leakage_cfm25s[Constants.DuctSideReturn].nil?
-          duct_subroutine.addLine("  Set f_ret = #{UnitConversions.convert(leakage_cfm25s[Constants.DuctSideReturn], "cfm", "m^3/s").round(6)} / (#{fan_mfr_max_var.name} * 1.0135)") # frac
+        if not leakage_fracs[HPXML::DuctTypeReturn].nil?
+          duct_subroutine.addLine("  Set f_ret = #{leakage_fracs[HPXML::DuctTypeReturn]}") # frac
+        elsif not leakage_cfm25s[HPXML::DuctTypeReturn].nil?
+          duct_subroutine.addLine("  Set f_ret = #{UnitConversions.convert(leakage_cfm25s[HPXML::DuctTypeReturn], "cfm", "m^3/s").round(6)} / (#{fan_mfr_max_var.name} * 1.0135)") # frac
         else
           duct_subroutine.addLine("  Set f_ret = 0.0") # frac
         end
@@ -1283,7 +1283,7 @@ class Airflow
         duct_subroutine.addLine("  Set SupSensLkToLv = SupTotLkToLiv-SupLatLkToLv") # W
 
         # Supply conduction
-        supply_ua = UnitConversions.convert(ua_values[Constants.DuctSideSupply], "Btu/(hr*F)", "W/K")
+        supply_ua = UnitConversions.convert(ua_values[HPXML::DuctTypeSupply], "Btu/(hr*F)", "W/K")
         duct_subroutine.addLine("  Set eTm = (Fan_RTF/(AH_MFR*air_cp))*#{supply_ua.round(3)}")
         duct_subroutine.addLine("  Set eTm = 0-eTm")
         duct_subroutine.addLine("  Set t_sup = DZ_T+((AH_Tout-DZ_T)*(@Exp eTm))") # deg-C
@@ -1291,7 +1291,7 @@ class Airflow
         duct_subroutine.addLine("  Set SupCondToDZ = 0-SupCondToLv") # W
 
         # Return conduction
-        return_ua = UnitConversions.convert(ua_values[Constants.DuctSideReturn], "Btu/(hr*F)", "W/K")
+        return_ua = UnitConversions.convert(ua_values[HPXML::DuctTypeReturn], "Btu/(hr*F)", "W/K")
         duct_subroutine.addLine("  Set eTm = (Fan_RTF/(AH_MFR*air_cp))*#{return_ua.round(3)}")
         duct_subroutine.addLine("  Set eTm = 0-eTm")
         duct_subroutine.addLine("  Set t_ret = DZ_T+((RA_T-DZ_T)*(@Exp eTm))") # deg-C
@@ -1399,7 +1399,7 @@ class Airflow
           duct_program.addLine("Set #{duct_actuators["liv_to_dz_flow_rate"].name} = #{duct_vars["liv_to_dz_flow_rate"].name}")
         end
 
-        if mech_vent.type == 'central fan integrated supply' and air_loop == mech_vent.cfis_air_loop
+        if mech_vent.type == HPXML::MechVentTypeCFIS and air_loop == mech_vent.cfis_air_loop
 
           # Calculate CFIS duct losses
 
@@ -1599,7 +1599,7 @@ class Airflow
       infil_program.addLine("Set Qn = #{building.living.ACH * UnitConversions.convert(building.infilvolume, "ft^3", "m^3") / UnitConversions.convert(1.0, "hr", "s")}")
     end
 
-    if ['balanced', 'energy recovery ventilator', 'heat recovery ventilator'].include? mech_vent.type and mech_vent.cfm > 0
+    if [HPXML::MechVentTypeBalanced, HPXML::MechVentTypeERV, HPXML::MechVentTypeHRV].include? mech_vent.type and mech_vent.cfm > 0
       # ERV/HRV/Balanced EMS load model
       # E+ ERV model is using standard density for MFR calculation, caused discrepancy with other system types.
       # E+ ERV model also does not meet setpoint perfectly.
@@ -1656,7 +1656,7 @@ class Airflow
 
     end
 
-    if mech_vent.type == 'central fan integrated supply'
+    if mech_vent.type == HPXML::MechVentTypeCFIS
 
       infil_program.addLine("Set fan_rtf_hvac = #{mech_vent.cfis_fan_rtf_sensor}")
       if mech_vent.fan_power_w.nil?
@@ -1754,13 +1754,13 @@ class Airflow
     end
     infil_program.addLine("Set Qout = Qrange+Qbath+Qdryer+QhpwhOut+QductsOut")
     infil_program.addLine("Set Qin = QhpwhIn+QductsIn")
-    if mech_vent.type == 'exhaust only'
+    if mech_vent.type == HPXML::MechVentTypeExhaust
       infil_program.addLine("Set Qout = Qout+QWHV")
-    elsif mech_vent.type == 'supply only' or mech_vent.type == 'central fan integrated supply'
+    elsif mech_vent.type == HPXML::MechVentTypeSupply or mech_vent.type == HPXML::MechVentTypeCFIS
       infil_program.addLine("Set Qin = Qin+QWHV")
     end
     infil_program.addLine("Set Qu = (@Abs (Qout-Qin))")
-    if mech_vent.type != 'central fan integrated supply'
+    if mech_vent.type != HPXML::MechVentTypeCFIS
       if mech_vent.cfm > 0
         infil_program.addLine("Set #{mech_vent_fan_actuator.name} = QWHV * #{mech_vent.fan_power_w} / #{UnitConversions.convert(mech_vent.cfm, "cfm", "m^3/s")}")
       else
@@ -1773,7 +1773,7 @@ class Airflow
     infil_program.addLine("Set Q_acctd_for_elsewhere = QhpwhOut+QhpwhIn+QductsOut+QductsIn")
     infil_program.addLine("Set Q_tot_flow = (((Qu^2)+(Qn^2))^0.5)-Q_acctd_for_elsewhere")
     infil_program.addLine("Set Q_tot_flow = (@Max Q_tot_flow 0)")
-    if not ['balanced', 'energy recovery ventilator', 'heat recovery ventilator'].include? mech_vent.type
+    if not [HPXML::MechVentTypeBalanced, HPXML::MechVentTypeERV, HPXML::MechVentTypeHRV].include? mech_vent.type
       infil_program.addLine("Set #{infil_flow_actuator.name} = Q_tot_flow - QWHV")
       infil_program.addLine("Set #{imbal_mechvent_flow_actuator.name} = QWHV")
     else
@@ -1858,9 +1858,9 @@ class Airflow
     if nominal_rvalue <= 0
       return 1.7
     end
-    if side == Constants.DuctSideSupply
+    if side == HPXML::DuctTypeSupply
       return 2.2438 + 0.5619 * nominal_rvalue
-    elsif side == Constants.DuctSideReturn
+    elsif side == HPXML::DuctTypeReturn
       return 2.0388 + 0.7053 * nominal_rvalue
     end
   end
