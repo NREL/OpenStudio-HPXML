@@ -629,7 +629,7 @@ def set_hpxml_foundations(hpxml_file, hpxml)
                           :vented_crawlspace_sla => 0.00667)
   elsif ['base-foundation-unconditioned-basement.xml'].include? hpxml_file
     hpxml.foundations.add(:id => "UnconditionedBasement",
-                          :foundation_type => HPXML::FoundationTypeBasementUncond,
+                          :foundation_type => HPXML::FoundationTypeBasementUnconditioned,
                           :unconditioned_basement_thermal_boundary => HPXML::FoundationThermalBoundaryFloor)
   elsif ['base-foundation-unconditioned-basement-wall-insulation.xml'].include? hpxml_file
     hpxml.foundations[0].unconditioned_basement_thermal_boundary = HPXML::FoundationThermalBoundaryWall
@@ -711,7 +711,7 @@ def set_hpxml_rim_joists(hpxml_file, hpxml)
     # no rim joists.
     hpxml.rim_joists.add(:id => "RimJoistFoundation",
                          :exterior_adjacent_to => HPXML::LocationOutside,
-                         :interior_adjacent_to => HPXML::LocationBasementCond,
+                         :interior_adjacent_to => HPXML::LocationBasementConditioned,
                          :area => 116,
                          :solar_absorptance => 0.7,
                          :emittance => 0.92,
@@ -721,7 +721,7 @@ def set_hpxml_rim_joists(hpxml_file, hpxml)
     hpxml.rim_joists.clear()
   elsif ['base-foundation-unconditioned-basement.xml'].include? hpxml_file
     for i in 0..hpxml.rim_joists.size - 1
-      hpxml.rim_joists[i].interior_adjacent_to = HPXML::LocationBasementUncond
+      hpxml.rim_joists[i].interior_adjacent_to = HPXML::LocationBasementUnconditioned
       hpxml.rim_joists[i].insulation_assembly_r_value = 2.3
     end
   elsif ['base-foundation-unconditioned-basement-wall-insulation.xml'].include? hpxml_file
@@ -933,7 +933,7 @@ def set_hpxml_foundation_walls(hpxml_file, hpxml)
   if ['base.xml'].include? hpxml_file
     hpxml. foundation_walls.add(:id => "FoundationWall",
                                 :exterior_adjacent_to => HPXML::LocationGround,
-                                :interior_adjacent_to => HPXML::LocationBasementCond,
+                                :interior_adjacent_to => HPXML::LocationBasementConditioned,
                                 :height => 8,
                                 :area => 1200,
                                 :thickness => 8,
@@ -951,7 +951,7 @@ def set_hpxml_foundation_walls(hpxml_file, hpxml)
     hpxml.foundation_walls[0].insulation_exterior_distance_to_top = 1
     hpxml.foundation_walls[0].insulation_exterior_distance_to_bottom = 8
   elsif ['base-foundation-unconditioned-basement.xml'].include? hpxml_file
-    hpxml.foundation_walls[0].interior_adjacent_to = HPXML::LocationBasementUncond
+    hpxml.foundation_walls[0].interior_adjacent_to = HPXML::LocationBasementUnconditioned
     hpxml.foundation_walls[0].insulation_exterior_distance_to_bottom = 0
     hpxml.foundation_walls[0].insulation_exterior_r_value = 0
   elsif ['base-foundation-unconditioned-basement-wall-insulation.xml'].include? hpxml_file
@@ -982,7 +982,7 @@ def set_hpxml_foundation_walls(hpxml_file, hpxml)
     hpxml.foundation_walls[0].area = 600
     hpxml.foundation_walls.add(:id => "FoundationWallInterior",
                                :exterior_adjacent_to => HPXML::LocationCrawlspaceUnvented,
-                               :interior_adjacent_to => HPXML::LocationBasementUncond,
+                               :interior_adjacent_to => HPXML::LocationBasementUnconditioned,
                                :height => 8,
                                :area => 360,
                                :thickness => 8,
@@ -1013,7 +1013,7 @@ def set_hpxml_foundation_walls(hpxml_file, hpxml)
     hpxml.foundation_walls.clear()
     hpxml.foundation_walls.add(:id => "FoundationWall1",
                                :exterior_adjacent_to => HPXML::LocationGround,
-                               :interior_adjacent_to => HPXML::LocationBasementCond,
+                               :interior_adjacent_to => HPXML::LocationBasementConditioned,
                                :height => 8,
                                :area => 480,
                                :thickness => 8,
@@ -1026,7 +1026,7 @@ def set_hpxml_foundation_walls(hpxml_file, hpxml)
                                :insulation_exterior_r_value => 8.9)
     hpxml.foundation_walls.add(:id => "FoundationWall2",
                                :exterior_adjacent_to => HPXML::LocationGround,
-                               :interior_adjacent_to => HPXML::LocationBasementCond,
+                               :interior_adjacent_to => HPXML::LocationBasementConditioned,
                                :height => 4,
                                :area => 120,
                                :thickness => 8,
@@ -1039,7 +1039,7 @@ def set_hpxml_foundation_walls(hpxml_file, hpxml)
                                :insulation_exterior_r_value => 8.9)
     hpxml.foundation_walls.add(:id => "FoundationWall3",
                                :exterior_adjacent_to => HPXML::LocationGround,
-                               :interior_adjacent_to => HPXML::LocationBasementCond,
+                               :interior_adjacent_to => HPXML::LocationBasementConditioned,
                                :height => 2,
                                :area => 60,
                                :thickness => 8,
@@ -1054,7 +1054,7 @@ def set_hpxml_foundation_walls(hpxml_file, hpxml)
     hpxml.foundation_walls.clear()
     hpxml.foundation_walls.add(:id => "FoundationWall1",
                                :exterior_adjacent_to => HPXML::LocationGround,
-                               :interior_adjacent_to => HPXML::LocationBasementCond,
+                               :interior_adjacent_to => HPXML::LocationBasementConditioned,
                                :height => 8,
                                :area => 160,
                                :thickness => 8,
@@ -1067,7 +1067,7 @@ def set_hpxml_foundation_walls(hpxml_file, hpxml)
                                :insulation_exterior_r_value => 0.0)
     hpxml.foundation_walls.add(:id => "FoundationWall2",
                                :exterior_adjacent_to => HPXML::LocationGround,
-                               :interior_adjacent_to => HPXML::LocationBasementCond,
+                               :interior_adjacent_to => HPXML::LocationBasementConditioned,
                                :height => 8,
                                :area => 240,
                                :thickness => 8,
@@ -1080,7 +1080,7 @@ def set_hpxml_foundation_walls(hpxml_file, hpxml)
                                :insulation_exterior_r_value => 8.9)
     hpxml.foundation_walls.add(:id => "FoundationWall3",
                                :exterior_adjacent_to => HPXML::LocationGround,
-                               :interior_adjacent_to => HPXML::LocationBasementCond,
+                               :interior_adjacent_to => HPXML::LocationBasementConditioned,
                                :height => 4,
                                :area => 160,
                                :thickness => 8,
@@ -1093,7 +1093,7 @@ def set_hpxml_foundation_walls(hpxml_file, hpxml)
                                :insulation_exterior_r_value => 0.0)
     hpxml.foundation_walls.add(:id => "FoundationWall4",
                                :exterior_adjacent_to => HPXML::LocationGround,
-                               :interior_adjacent_to => HPXML::LocationBasementCond,
+                               :interior_adjacent_to => HPXML::LocationBasementConditioned,
                                :height => 4,
                                :area => 120,
                                :thickness => 8,
@@ -1106,7 +1106,7 @@ def set_hpxml_foundation_walls(hpxml_file, hpxml)
                                :insulation_exterior_r_value => 8.9)
     hpxml.foundation_walls.add(:id => "FoundationWall5",
                                :exterior_adjacent_to => HPXML::LocationGround,
-                               :interior_adjacent_to => HPXML::LocationBasementCond,
+                               :interior_adjacent_to => HPXML::LocationBasementConditioned,
                                :height => 4,
                                :area => 80,
                                :thickness => 8,
@@ -1160,7 +1160,7 @@ def set_hpxml_frame_floors(hpxml_file, hpxml)
                            :insulation_assembly_r_value => 18.7)
   elsif ['base-foundation-unconditioned-basement.xml'].include? hpxml_file
     hpxml.frame_floors.add(:id => "FloorAboveUncondBasement",
-                           :exterior_adjacent_to => HPXML::LocationBasementUncond,
+                           :exterior_adjacent_to => HPXML::LocationBasementUnconditioned,
                            :interior_adjacent_to => HPXML::LocationLivingSpace,
                            :area => 1350,
                            :insulation_assembly_r_value => 18.7)
@@ -1219,7 +1219,7 @@ end
 def set_hpxml_slabs(hpxml_file, hpxml)
   if ['base.xml'].include? hpxml_file
     hpxml.slabs.add(:id => "Slab",
-                    :interior_adjacent_to => HPXML::LocationBasementCond,
+                    :interior_adjacent_to => HPXML::LocationBasementConditioned,
                     :area => 1350,
                     :thickness => 4,
                     :exposed_perimeter => 150,
@@ -1230,7 +1230,7 @@ def set_hpxml_slabs(hpxml_file, hpxml)
                     :carpet_fraction => 0,
                     :carpet_r_value => 0)
   elsif ['base-foundation-unconditioned-basement.xml'].include? hpxml_file
-    hpxml.slabs[0].interior_adjacent_to = HPXML::LocationBasementUncond
+    hpxml.slabs[0].interior_adjacent_to = HPXML::LocationBasementUnconditioned
   elsif ['base-foundation-conditioned-basement-slab-insulation.xml'].include? hpxml_file
     hpxml.slabs[0].under_slab_insulation_width = 4
     hpxml.slabs[0].under_slab_insulation_r_value = 10
@@ -1299,7 +1299,7 @@ def set_hpxml_slabs(hpxml_file, hpxml)
   elsif ['base-foundation-complex.xml'].include? hpxml_file
     hpxml.slabs.clear()
     hpxml.slabs.add(:id => "Slab1",
-                    :interior_adjacent_to => HPXML::LocationBasementCond,
+                    :interior_adjacent_to => HPXML::LocationBasementConditioned,
                     :area => 675,
                     :thickness => 4,
                     :exposed_perimeter => 75,
@@ -1310,7 +1310,7 @@ def set_hpxml_slabs(hpxml_file, hpxml)
                     :carpet_fraction => 0,
                     :carpet_r_value => 0)
     hpxml.slabs.add(:id => "Slab2",
-                    :interior_adjacent_to => HPXML::LocationBasementCond,
+                    :interior_adjacent_to => HPXML::LocationBasementConditioned,
                     :area => 405,
                     :thickness => 4,
                     :exposed_perimeter => 45,
@@ -1321,7 +1321,7 @@ def set_hpxml_slabs(hpxml_file, hpxml)
                     :carpet_fraction => 0,
                     :carpet_r_value => 0)
     hpxml.slabs.add(:id => "Slab3",
-                    :interior_adjacent_to => HPXML::LocationBasementCond,
+                    :interior_adjacent_to => HPXML::LocationBasementConditioned,
                     :area => 270,
                     :thickness => 4,
                     :exposed_perimeter => 30,
@@ -1341,7 +1341,7 @@ def set_hpxml_slabs(hpxml_file, hpxml)
       end
     end
   elsif ['invalid_files/mismatched-slab-and-foundation-wall.xml'].include? hpxml_file
-    hpxml.slabs[0].interior_adjacent_to = HPXML::LocationBasementUncond
+    hpxml.slabs[0].interior_adjacent_to = HPXML::LocationBasementUnconditioned
     hpxml.slabs[0].depth_below_grade = 7.0
   elsif ['invalid_files/slab-zero-exposed-perimeter.xml'].include? hpxml_file
     hpxml.slabs[0].exposed_perimeter = 0
@@ -2269,8 +2269,8 @@ def set_hpxml_hvac_distributions(hpxml_file, hpxml)
     hpxml.hvac_distributions[0].duct_leakage_measurements[0].duct_leakage_value /= 10.0
     hpxml.hvac_distributions[0].duct_leakage_measurements[1].duct_leakage_value /= 10.0
   elsif ['base-foundation-unconditioned-basement.xml'].include? hpxml_file
-    hpxml.hvac_distributions[0].ducts[0].duct_location = HPXML::LocationBasementUncond
-    hpxml.hvac_distributions[0].ducts[1].duct_location = HPXML::LocationBasementUncond
+    hpxml.hvac_distributions[0].ducts[0].duct_location = HPXML::LocationBasementUnconditioned
+    hpxml.hvac_distributions[0].ducts[1].duct_location = HPXML::LocationBasementUnconditioned
   elsif ['base-foundation-unvented-crawlspace.xml'].include? hpxml_file
     hpxml.hvac_distributions[0].ducts[0].duct_location = HPXML::LocationCrawlspaceUnvented
     hpxml.hvac_distributions[0].ducts[1].duct_location = HPXML::LocationCrawlspaceUnvented
@@ -2280,8 +2280,8 @@ def set_hpxml_hvac_distributions(hpxml_file, hpxml)
   elsif ['base-atticroof-flat.xml'].include? hpxml_file
     hpxml.hvac_distributions[0].duct_leakage_measurements[0].duct_leakage_value = 0.0
     hpxml.hvac_distributions[0].duct_leakage_measurements[1].duct_leakage_value = 0.0
-    hpxml.hvac_distributions[0].ducts[0].duct_location = HPXML::LocationBasementCond
-    hpxml.hvac_distributions[0].ducts[1].duct_location = HPXML::LocationBasementCond
+    hpxml.hvac_distributions[0].ducts[0].duct_location = HPXML::LocationBasementConditioned
+    hpxml.hvac_distributions[0].ducts[1].duct_location = HPXML::LocationBasementConditioned
   elsif ['base-atticroof-vented.xml'].include? hpxml_file
     hpxml.hvac_distributions[0].ducts[0].duct_location = HPXML::LocationAtticVented
     hpxml.hvac_distributions[0].ducts[1].duct_location = HPXML::LocationAtticVented
@@ -2608,7 +2608,7 @@ def set_hpxml_water_heating_systems(hpxml_file, hpxml)
       hpxml.water_heating_systems[0].location = HPXML::LocationOtherExterior
     end
   elsif ['base-foundation-unconditioned-basement.xml'].include? hpxml_file
-    hpxml.water_heating_systems[0].location = HPXML::LocationBasementUncond
+    hpxml.water_heating_systems[0].location = HPXML::LocationBasementUnconditioned
   elsif ['base-foundation-unvented-crawlspace.xml'].include? hpxml_file
     hpxml.water_heating_systems[0].location = HPXML::LocationCrawlspaceUnvented
   elsif ['base-foundation-vented-crawlspace.xml'].include? hpxml_file
@@ -2618,7 +2618,7 @@ def set_hpxml_water_heating_systems(hpxml_file, hpxml)
   elsif ['base-atticroof-vented.xml'].include? hpxml_file
     hpxml.water_heating_systems[0].location = HPXML::LocationAtticVented
   elsif ['base-atticroof-conditioned.xml'].include? hpxml_file
-    hpxml.water_heating_systems[0].location = HPXML::LocationBasementCond
+    hpxml.water_heating_systems[0].location = HPXML::LocationBasementConditioned
   elsif ['invalid_files/water-heater-location.xml'].include? hpxml_file
     hpxml.water_heating_systems[0].location = HPXML::LocationCrawlspaceVented
   elsif ['invalid_files/water-heater-location-other.xml'].include? hpxml_file
@@ -2824,9 +2824,9 @@ def set_hpxml_clothes_washer(hpxml_file, hpxml)
     hpxml.clothes_washers[0].modified_energy_factor = nil
     hpxml.clothes_washers[0].integrated_modified_energy_factor = 0.73
   elsif ['base-foundation-unconditioned-basement.xml'].include? hpxml_file
-    hpxml.clothes_washers[0].location = HPXML::LocationBasementUncond
+    hpxml.clothes_washers[0].location = HPXML::LocationBasementUnconditioned
   elsif ['base-atticroof-conditioned.xml'].include? hpxml_file
-    hpxml.clothes_washers[0].location = HPXML::LocationBasementCond
+    hpxml.clothes_washers[0].location = HPXML::LocationBasementConditioned
   elsif ['base-enclosure-garage.xml',
          'invalid_files/clothes-washer-location.xml'].include? hpxml_file
     hpxml.clothes_washers[0].location = HPXML::LocationGarage
@@ -2874,9 +2874,9 @@ def set_hpxml_clothes_dryer(hpxml_file, hpxml)
                              :energy_factor => 2.67,
                              :control_type => HPXML::ClothesDryerControlTypeMoisture)
   elsif ['base-foundation-unconditioned-basement.xml'].include? hpxml_file
-    hpxml.clothes_dryers[0].location = HPXML::LocationBasementUncond
+    hpxml.clothes_dryers[0].location = HPXML::LocationBasementUnconditioned
   elsif ['base-atticroof-conditioned.xml'].include? hpxml_file
-    hpxml.clothes_dryers[0].location = HPXML::LocationBasementCond
+    hpxml.clothes_dryers[0].location = HPXML::LocationBasementConditioned
   elsif ['base-enclosure-garage.xml',
          'invalid_files/clothes-dryer-location.xml'].include? hpxml_file
     hpxml.clothes_dryers[0].location = HPXML::LocationGarage
@@ -2910,9 +2910,9 @@ def set_hpxml_refrigerator(hpxml_file, hpxml)
   elsif ['base-appliances-none.xml'].include? hpxml_file
     hpxml.refrigerators.clear()
   elsif ['base-foundation-unconditioned-basement.xml'].include? hpxml_file
-    hpxml.refrigerators[0].location = HPXML::LocationBasementUncond
+    hpxml.refrigerators[0].location = HPXML::LocationBasementUnconditioned
   elsif ['base-atticroof-conditioned.xml'].include? hpxml_file
-    hpxml.refrigerators[0].location = HPXML::LocationBasementCond
+    hpxml.refrigerators[0].location = HPXML::LocationBasementConditioned
   elsif ['base-enclosure-garage.xml',
          'invalid_files/refrigerator-location.xml'].include? hpxml_file
     hpxml.refrigerators[0].location = HPXML::LocationGarage

@@ -1131,7 +1131,7 @@ class HPXMLTest < MiniTest::Test
     if hpxml.clothes_washers.size > 0 and hpxml.water_heating_systems.size > 0
       # Location
       hpxml_value = hpxml.clothes_washers[0].location
-      if hpxml_value.nil? or hpxml_value == HPXML::LocationBasementCond
+      if hpxml_value.nil? or hpxml_value == HPXML::LocationBasementConditioned
         hpxml_value = HPXML::LocationLivingSpace
       end
       query = "SELECT Value FROM TabularDataWithStrings WHERE TableName='ElectricEquipment Internal Gains Nominal' AND ColumnName='Zone Name' AND RowName=(SELECT RowName FROM TabularDataWithStrings WHERE TableName='ElectricEquipment Internal Gains Nominal' AND ColumnName='Name' AND Value='#{Constants.ObjectNameClothesWasher.upcase}')"
@@ -1143,7 +1143,7 @@ class HPXMLTest < MiniTest::Test
     if hpxml.clothes_dryers.size > 0 and hpxml.water_heating_systems.size > 0
       # Location
       hpxml_value = hpxml.clothes_dryers[0].location
-      if hpxml_value.nil? or hpxml_value == HPXML::LocationBasementCond
+      if hpxml_value.nil? or hpxml_value == HPXML::LocationBasementConditioned
         hpxml_value = HPXML::LocationLivingSpace
       end
       query = "SELECT Value FROM TabularDataWithStrings WHERE TableName='ElectricEquipment Internal Gains Nominal' AND ColumnName='Zone Name' AND RowName=(SELECT RowName FROM TabularDataWithStrings WHERE TableName='ElectricEquipment Internal Gains Nominal' AND ColumnName='Name' AND Value='#{Constants.ObjectNameClothesDryer.upcase}')"
@@ -1155,7 +1155,7 @@ class HPXMLTest < MiniTest::Test
     if hpxml.refrigerators.size > 0
       # Location
       hpxml_value = hpxml.refrigerators[0].location
-      if hpxml_value.nil? or hpxml_value == HPXML::LocationBasementCond
+      if hpxml_value.nil? or hpxml_value == HPXML::LocationBasementConditioned
         hpxml_value = HPXML::LocationLivingSpace
       end
       query = "SELECT Value FROM TabularDataWithStrings WHERE TableName='ElectricEquipment Internal Gains Nominal' AND ColumnName='Zone Name' AND RowName=(SELECT RowName FROM TabularDataWithStrings WHERE TableName='ElectricEquipment Internal Gains Nominal' AND ColumnName='Name' AND Value='#{Constants.ObjectNameRefrigerator.upcase}')"
