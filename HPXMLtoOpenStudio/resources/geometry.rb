@@ -73,7 +73,7 @@ class Geometry
   end
 
   def self.is_conditioned_space_type(space_type)
-    if ['living space'].include? space_type
+    if [HPXML::LocationLivingSpace].include? space_type
       return true
     end
 
@@ -201,31 +201,31 @@ class Geometry
 
   # TODO: Remove these methods
   def self.is_living(space_or_zone)
-    return self.space_or_zone_is_of_type(space_or_zone, 'living space')
+    return self.space_or_zone_is_of_type(space_or_zone, HPXML::LocationLivingSpace)
   end
 
   def self.is_vented_crawl(space_or_zone)
-    return self.space_or_zone_is_of_type(space_or_zone, 'crawlspace - vented')
+    return self.space_or_zone_is_of_type(space_or_zone, HPXML::LocationCrawlspaceVented)
   end
 
   def self.is_unvented_crawl(space_or_zone)
-    return self.space_or_zone_is_of_type(space_or_zone, 'crawlspace - unvented')
+    return self.space_or_zone_is_of_type(space_or_zone, HPXML::LocationCrawlspaceUnvented)
   end
 
   def self.is_unconditioned_basement(space_or_zone)
-    return self.space_or_zone_is_of_type(space_or_zone, 'basement - unconditioned')
+    return self.space_or_zone_is_of_type(space_or_zone, HPXML::LocationBasementUnconditioned)
   end
 
   def self.is_vented_attic(space_or_zone)
-    return self.space_or_zone_is_of_type(space_or_zone, 'attic - vented')
+    return self.space_or_zone_is_of_type(space_or_zone, HPXML::LocationAtticVented)
   end
 
   def self.is_unvented_attic(space_or_zone)
-    return self.space_or_zone_is_of_type(space_or_zone, 'attic - unvented')
+    return self.space_or_zone_is_of_type(space_or_zone, HPXML::LocationAtticUnvented)
   end
 
   def self.is_garage(space_or_zone)
-    return self.space_or_zone_is_of_type(space_or_zone, 'garage')
+    return self.space_or_zone_is_of_type(space_or_zone, HPXML::LocationGarage)
   end
 
   def self.space_or_zone_is_of_type(space_or_zone, space_type)
