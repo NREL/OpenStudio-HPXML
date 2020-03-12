@@ -36,7 +36,7 @@ class Geometry
                                          roof_pitch:,
                                          roof_structure:,
                                          **remainder)
-    if foundation_type == "slab"
+    if foundation_type == HPXML::FoundationTypeSlab
       foundation_height = 0.0
     end
 
@@ -49,7 +49,7 @@ class Geometry
       runner.registerError("Invalid aspect ratio entered.")
       return false
     end
-    if foundation_type == "ambient" and (foundation_height <= 0.0)
+    if foundation_type == HPXML::FoundationTypeAmbient and (foundation_height <= 0.0)
       runner.registerError("The ambient foundation height must be greater than 0 ft.")
       return false
     end
@@ -84,7 +84,7 @@ class Geometry
       runner.registerError("Cannot handle protruding garage and attic ridge running from front to back.")
       return false
     end
-    if foundation_type == "ambient" and has_garage
+    if foundation_type == HPXML::FoundationTypeAmbient and has_garage
       runner.registerError("Cannot handle garages with an ambient foundation type.")
       return false
     end
@@ -95,11 +95,11 @@ class Geometry
       garage_area_inside_footprint = garage_area * (1.0 - garage_protrusion)
     end
     bonus_area_above_garage = garage_area * garage_protrusion
-    if foundation_type == "basement - conditioned" and attic_type == "attic - conditioned"
+    if foundation_type == HPXML::FoundationTypeBasementConditioned and attic_type == HPXML::AtticTypeConditioned
       footprint = (cfa + 2 * garage_area_inside_footprint - (num_floors) * bonus_area_above_garage) / (num_floors + 2)
-    elsif foundation_type == "basement - conditioned"
+    elsif foundation_type == HPXML::FoundationTypeBasementConditioned
       footprint = (cfa + 2 * garage_area_inside_footprint - (num_floors - 1) * bonus_area_above_garage) / (num_floors + 1)
-    elsif attic_type == "attic - conditioned"
+    elsif attic_type == HPXML::AtticTypeConditioned
       footprint = (cfa + garage_area_inside_footprint - (num_floors) * bonus_area_above_garage) / (num_floors + 1)
     else
       footprint = (cfa + garage_area_inside_footprint - (num_floors - 1) * bonus_area_above_garage) / num_floors
@@ -123,7 +123,7 @@ class Geometry
     living_zone.setName("living zone")
 
     foundation_offset = 0.0
-    if foundation_type == "ambient"
+    if foundation_type == HPXML::FoundationTypeAmbient
       foundation_offset = foundation_height
     end
 
@@ -261,15 +261,15 @@ class Geometry
       if floor > 0
         living_space_name = "living space|story #{floor + 1}"
       else
-        living_space_name = "living space"
+        living_space_name = HPXML::LocationLivingSpace
       end
       living_space.setName(living_space_name)
-      if space_types_hash.keys.include? "living space"
-        living_space_type = space_types_hash["living space"]
+      if space_types_hash.keys.include? HPXML::LocationLivingSpace
+        living_space_type = space_types_hash[HPXML::LocationLivingSpace]
       else
         living_space_type = OpenStudio::Model::SpaceType.new(model)
-        living_space_type.setStandardsSpaceType("living space")
-        space_types_hash["living space"] = living_space_type
+        living_space_type.setStandardsSpaceType(HPXML::LocationLivingSpace)
+        space_types_hash[HPXML::LocationLivingSpace] = living_space_type
       end
       living_space.setSpaceType(living_space_type)
       runner.registerInfo("Set #{living_space_name}.")
@@ -368,17 +368,17 @@ class Geometry
       surface_e_wall.setSpace(attic_space)
 
       # set these to the attic zone
-      if attic_type == "attic - vented" or attic_type == "attic - unvented"
+      if attic_type == HPXML::AtticTypeVented or attic_type == HPXML::AtticTypeUnvented
         # create attic zone
         attic_zone = OpenStudio::Model::ThermalZone.new(model)
         attic_zone.setName("#{attic_type} zone")
         attic_space.setThermalZone(attic_zone)
-        if attic_type == "attic - vented"
+        if attic_type == HPXML::AtticTypeVented
           attic_space_type_name = "vented attic"
         else
           attic_space_type_name = "unvented attic"
         end
-      elsif attic_type == "attic - conditioned"
+      elsif attic_type == HPXML::AtticTypeConditioned
         attic_space.setThermalZone(living_zone)
         attic_space_type_name = "living space"
       end
@@ -403,7 +403,7 @@ class Geometry
     end
 
     # Foundation
-    if ["crawlspace - vented", "crawlspace - unvented", "basement - unconditioned", "basement - conditioned", "ambient"].include? foundation_type
+    if [HPXML::FoundationTypeCrawlspaceVented, HPXML::FoundationTypeCrawlspaceUnvented, HPXML::FoundationTypeBasementUnconditioned, HPXML::FoundationTypeBasementConditioned, HPXML::FoundationTypeAmbient].include? foundation_type
 
       z = -foundation_height + foundation_offset
 
@@ -422,16 +422,16 @@ class Geometry
       # make space
       foundation_space = OpenStudio::Model::Space::fromFloorPrint(foundation_polygon, foundation_height, model)
       foundation_space = foundation_space.get
-      if foundation_type == "crawlspace - vented"
+      if foundation_type == HPXML::FoundationTypeCrawlspaceVented
         foundation_space_type_name = "vented crawlspace"
-      elsif foundation_type == "crawlspace - unvented"
+      elsif foundation_type == HPXML::FoundationTypeCrawlspaceUnvented
         foundation_space_type_name = "unvented crawlspace"
-      elsif foundation_type == "basement - unconditioned"
+      elsif foundation_type == HPXML::FoundationTypeBasementUnconditioned
         foundation_space_type_name = "unconditioned basement"
-      elsif foundation_type == "basement - conditioned"
+      elsif foundation_type == HPXML::FoundationTypeBasementConditioned
         foundation_space_type_name = "living space"
-      elsif foundation_type == "ambient"
-        foundation_space_type_name = foundation_type
+      elsif foundation_type == HPXML::FoundationTypeAmbient
+        foundation_space_type_name = "ambient"
       end
       foundation_space_name = "#{foundation_type} space"
       foundation_space.setName(foundation_space_name)
@@ -512,7 +512,7 @@ class Geometry
           end
 
           if num_floors == 1
-            if not attic_type == "attic - conditioned"
+            if not attic_type == HPXML::AtticTypeConditioned
               nw_point = OpenStudio::Point3d.new(nw_point.x, nw_point.y, living_space.zOrigin + nw_point.z)
               ne_point = OpenStudio::Point3d.new(ne_point.x, ne_point.y, living_space.zOrigin + ne_point.z)
               sw_point = OpenStudio::Point3d.new(sw_point.x, sw_point.y, living_space.zOrigin + sw_point.z)
@@ -540,7 +540,7 @@ class Geometry
           end
 
           if num_floors == 1
-            if not attic_type == "attic - conditioned"
+            if not attic_type == HPXML::AtticTypeConditioned
               roof_n_point = OpenStudio::Point3d.new((nw_point.x + ne_point.x) / 2, nw_point.y + garage_attic_height / roof_pitch, living_space.zOrigin + wall_height + garage_attic_height)
               roof_s_point = OpenStudio::Point3d.new((sw_point.x + se_point.x) / 2, sw_point.y, living_space.zOrigin + wall_height + garage_attic_height)
             else
@@ -577,7 +577,7 @@ class Geometry
           wall_n.setSpace(garage_attic_space)
           wall_s.setSpace(garage_attic_space)
 
-          if attic_type == "attic - conditioned"
+          if attic_type == HPXML::AtticTypeConditioned
             garage_attic_space_type_name = "living space"
             garage_attic_space.setThermalZone(living_zone)
           else
@@ -625,7 +625,7 @@ class Geometry
           end
 
           garage_attic_space.surfaces.each do |surface|
-            if num_floors > 1 or attic_type == "attic - conditioned"
+            if num_floors > 1 or attic_type == HPXML::AtticTypeConditioned
               m = initialize_transformation_matrix(OpenStudio::Matrix.new(4, 4, 0))
               m[2, 3] = -attic_space.zOrigin
               transformation = OpenStudio::Transformation.new(m)
@@ -635,7 +635,7 @@ class Geometry
             end
           end
 
-          if num_floors > 1 or attic_type == "attic - conditioned"
+          if num_floors > 1 or attic_type == HPXML::AtticTypeConditioned
             garage_attic_space.remove
           end
 
@@ -1485,13 +1485,13 @@ class Geometry
                               foundation_height:,
                               **remainder)
     corridor_position = "None" # FIXME
-    if foundation_type == "basement - conditioned"
-      foundation_type = "basement - unconditioned" # FIXME
+    if foundation_type == HPXML::FoundationTypeBasementConditioned
+      foundation_type = HPXML::FoundationTypeBasementUnconditioned # FIXME
     end
 
-    if ["slab", "other housing unit below"].include? foundation_type
+    if [HPXML::FoundationTypeSlab, HPXML::LocationOtherHousingUnitBelow].include? foundation_type
       foundation_height = 0.0
-    elsif foundation_type == "basement - unconditioned"
+    elsif foundation_type == HPXML::FoundationTypeBasementUnconditioned
       foundation_height = 8.0
     end
     num_units_per_floor = num_units / num_floors
@@ -1517,7 +1517,7 @@ class Geometry
       runner.registerError("Starting model is not empty.")
       return false
     end
-    if foundation_type.include? "crawlspace" and (foundation_height < 1.5 or foundation_height > 5.0)
+    if foundation_type.downcase.include? "crawlspace" and (foundation_height < 1.5 or foundation_height > 5.0)
       runner.registerError("The crawlspace height can be set between 1.5 and 5 ft.")
       return false
     end
@@ -1624,13 +1624,13 @@ class Geometry
     living_spaces_front = []
     living_space = OpenStudio::Model::Space::fromFloorPrint(living_polygon, wall_height, model)
     living_space = living_space.get
-    living_space.setName("living space")
-    if space_types_hash.keys.include? "living space"
-      living_space_type = space_types_hash["living space"]
+    living_space.setName(HPXML::LocationLivingSpace)
+    if space_types_hash.keys.include? HPXML::LocationLivingSpace
+      living_space_type = space_types_hash[HPXML::LocationLivingSpace]
     else
       living_space_type = OpenStudio::Model::SpaceType.new(model)
-      living_space_type.setStandardsSpaceType("living space")
-      space_types_hash["living space"] = living_space_type
+      living_space_type.setStandardsSpaceType(HPXML::LocationLivingSpace)
+      space_types_hash[HPXML::LocationLivingSpace] = living_space_type
     end
     living_space.setSpaceType(living_space_type)
     living_space.setThermalZone(living_zone)
@@ -1783,19 +1783,19 @@ class Geometry
       OpenStudio::Model.intersectSurfaces(spaces)
       OpenStudio::Model.matchSurfaces(spaces)
 
-      if (["crawlspace - vented", "crawlspace - unvented", "basement - unconditioned"].include? foundation_type)
+      if ([HPXML::FoundationTypeCrawlspaceVented, HPXML::FoundationTypeCrawlspaceUnvented, HPXML::FoundationTypeBasementUnconditioned].include? foundation_type)
         foundation_space = make_one_space_from_multiple_spaces(model, foundation_spaces)
-        if foundation_type == "crawlspace - vented" or foundation_type == "crawlspace - unvented"
+        if foundation_type == HPXML::FoundationTypeCrawlspaceVented or foundation_type == HPXML::FoundationTypeCrawlspaceUnvented
           foundation_space.setName("#{foundation_type} space")
           foundation_zone = OpenStudio::Model::ThermalZone.new(model)
           foundation_zone.setName("#{foundation_type} zone")
           foundation_space.setThermalZone(foundation_zone)
-          if foundation_type == "crawlspace - vented"
+          if foundation_type == HPXML::FoundationTypeCrawlspaceVented
             foundation_space_type_name = "vented crawlspace"
           else
             foundation_space_type_name = "unvented crawlspace"
           end
-        elsif foundation_type == "basement - unconditioned"
+        elsif foundation_type == HPXML::FoundationTypeBasementUnconditioned
           foundation_space.setName("#{foundation_type} space")
           foundation_zone = OpenStudio::Model::ThermalZone.new(model)
           foundation_zone.setName("#{foundation_type} zone")

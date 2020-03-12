@@ -107,14 +107,6 @@ class Constants
     return 'Building America'
   end
 
-  def self.DuctSideReturn
-    return 'return'
-  end
-
-  def self.DuctSideSupply
-    return 'supply'
-  end
-
   def self.ERIVersions
     return ['2014', '2014A', '2014AE', '2014AEG']
   end

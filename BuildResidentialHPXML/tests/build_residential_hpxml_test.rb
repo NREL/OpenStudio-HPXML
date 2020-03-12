@@ -78,6 +78,7 @@ class BuildResidentialHPXMLTest < MiniTest::Test
           fail = true
         end
       end
+      break if fail # FIXME: Temporary
     end
 
     assert false if fail
@@ -157,9 +158,11 @@ class BuildResidentialHPXMLTest < MiniTest::Test
       hpxml.foundations.clear()
       hpxml.rim_joists.clear()
       hpxml.doors.clear()
-      hpxml.refrigerator.adjusted_annual_kwh = nil
-      hpxml.refrigerator.schedules_output_path = nil
-      hpxml.refrigerator.schedules_column_name = nil
+      hpxml.refrigerators.each do |refrigerator|
+        refrigerator.adjusted_annual_kwh = nil
+        refrigerator.schedules_output_path = nil
+        refrigerator.schedules_column_name = nil
+      end
     end
 
     # Convert to REXML docs
