@@ -936,7 +936,7 @@ class SimulationOutputReport < OpenStudio::Measure::ReportingMeasure
       next unless dhw_system.fraction_dhw_load_served > 0
 
       sys_id = dhw_system.id
-      if ['space-heating boiler with tankless coil', 'space-heating boiler with storage tank'].include? dhw_system.water_heater_type
+      if [HPXML::WaterHeaterTypeCombiTankless, HPXML::WaterHeaterTypeCombiStorage].include? dhw_system.water_heater_type
         @hpxml.heating_systems.each do |heating_system|
           next unless dhw_system.related_hvac_idref == heating_system.id
 
@@ -1046,7 +1046,7 @@ class SimulationOutputReport < OpenStudio::Measure::ReportingMeasure
         eec_cools[sys_id] = get_eri_eec_value_numerator('EER') / clg_system.cooling_efficiency_eer
       end
 
-      if clg_system.cooling_system_type == "evaporative cooler"
+      if clg_system.cooling_system_type == HPXML::HVACTypeEvaporativeCooler
         eec_cools[sys_id] = get_eri_eec_value_numerator("SEER") / 15.0 # Arbitrary
       end
     end
@@ -1073,7 +1073,7 @@ class SimulationOutputReport < OpenStudio::Measure::ReportingMeasure
       sys_id = dhw_system.id
       value = dhw_system.energy_factor
       wh_type = dhw_system.water_heater_type
-      if wh_type == "instantaneous water heater"
+      if wh_type == HPXML::WaterHeaterTypeTankless
         cycling_derate = dhw_system.performance_adjustment
         value_adj = 1.0 - cycling_derate
       else
@@ -1189,7 +1189,7 @@ class SimulationOutputReport < OpenStudio::Measure::ReportingMeasure
     @hpxml.water_heating_systems.each do |dhw_system|
       next unless dhw_system.fraction_dhw_load_served > 0
       next unless sys_id == dhw_system.id
-      next unless ['space-heating boiler with tankless coil', 'space-heating boiler with storage tank'].include? dhw_system.water_heater_type
+      next unless [HPXML::WaterHeaterTypeCombiTankless, HPXML::WaterHeaterTypeCombiStorage].include? dhw_system.water_heater_type
 
       return dhw_system.related_hvac_idref
     end
@@ -1272,7 +1272,7 @@ class SimulationOutputReport < OpenStudio::Measure::ReportingMeasure
     if system.class != HPXML::HeatPump
       return false
     end
-    if not system.backup_heating_switchover_temp.nil? and system.backup_heating_fuel != "electricity"
+    if not system.backup_heating_switchover_temp.nil? and system.backup_heating_fuel != HPXML::FuelTypeElectricity
       return true
     end
 

@@ -3,17 +3,17 @@ require_relative "unit_conversions"
 
 class HelperMethods
   def self.eplus_fuel_map(fuel)
-    if fuel == 'electricity'
+    if fuel == HPXML::FuelTypeElectricity
       return 'electricity'
-    elsif fuel == 'natural gas'
+    elsif fuel == HPXML::FuelTypeNaturalGas
       return "NaturalGas"
-    elsif fuel == 'fuel oil'
+    elsif fuel == HPXML::FuelTypeOil
       return "FuelOil#1"
-    elsif fuel == 'propane'
+    elsif fuel == HPXML::FuelTypePropane
       return "PropaneGas"
-    elsif fuel == 'wood'
+    elsif fuel == HPXML::FuelTypeWood
       return "OtherFuel1"
-    elsif fuel == 'wood pellets'
+    elsif fuel == HPXML::FuelTypeWoodPellets
       return "OtherFuel2"
     end
   end
