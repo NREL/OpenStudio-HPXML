@@ -229,7 +229,7 @@ class HotWaterAndAppliances
     else
       oven_ef = 1.0
     end
-    if fuel_type != 'electricity'
+    if fuel_type != HPXML::FuelTypeElectricity
       annual_kwh = 22.6 + 2.7 * nbeds
       annual_therm = oven_ef * (22.6 + 2.7 * nbeds)
       tot_btu = UnitConversions.convert(annual_kwh, "kWh", "Btu") + UnitConversions.convert(annual_therm, "therm", "Btu")
@@ -286,7 +286,7 @@ class HotWaterAndAppliances
   end
 
   def self.get_clothes_dryer_reference_cef(fuel_type)
-    if fuel_type == 'electricity'
+    if fuel_type == HPXML::FuelTypeElectricity
       return 2.62
     else
       return 2.32
@@ -300,12 +300,12 @@ class HotWaterAndAppliances
   def self.calc_clothes_dryer_energy(nbeds, fuel_type, ef, control_type, cw_ler, cw_cap, cw_mef)
     # Eq 4.2-6 (FU)
     field_util_factor = nil
-    if control_type == 'timer'
+    if control_type == HPXML::ClothesDryerControlTypeTimer
       field_util_factor = 1.18
-    elsif control_type == 'moisture'
+    elsif control_type == HPXML::ClothesDryerControlTypeMoisture
       field_util_factor = 1.04
     end
-    if fuel_type == 'electricity'
+    if fuel_type == HPXML::FuelTypeElectricity
       annual_kwh = 12.5 * (164.0 + 46.5 * nbeds) * (field_util_factor / ef) * ((cw_cap / cw_mef) - cw_ler / 392.0) / (0.2184 * (cw_cap * 4.08 + 0.24)) # Eq 4.2-6
       annual_therm = 0.0
     else
@@ -315,7 +315,7 @@ class HotWaterAndAppliances
     end
     tot_btu = UnitConversions.convert(annual_kwh, "kWh", "Btu") + UnitConversions.convert(annual_therm, "therm", "Btu")
 
-    if fuel_type != 'electricity'
+    if fuel_type != HPXML::FuelTypeElectricity
       gains_sens = (738.0 + 209.0 * nbeds) * 365 # Btu
       gains_lat = (91.0 + 26.0 * nbeds) * 365 # Btu
     else
@@ -395,9 +395,9 @@ class HotWaterAndAppliances
     ocd_eff = 0.0
     sew_fact = ew_fact - oew_fact
     ref_pipe_l = get_default_std_pipe_length(has_uncond_bsmnt, cfa, ncfl)
-    if dist_type == "standard"
+    if dist_type == HPXML::DHWDistTypeStandard
       pe_ratio = std_pipe_length / ref_pipe_l
-    elsif dist_type == "recirculation"
+    elsif dist_type == HPXML::DHWDistTypeRecirc
       ref_loop_l = get_default_recirc_loop_length(ref_pipe_l)
       pe_ratio = recirc_loop_length / ref_loop_l
     end
@@ -489,9 +489,9 @@ class HotWaterAndAppliances
 
     iFrac = 0.56 + 0.015 * nbeds - 0.0004 * nbeds**2 # fraction of hot water use impacted by DWHR
 
-    if dist_type == "recirculation"
+    if dist_type == HPXML::DHWDistTypeRecirc
       pLength = recirc_branch_length
-    elsif dist_type == "standard"
+    elsif dist_type == HPXML::DHWDistTypeStandard
       pLength = std_pipe_length
     end
     plc = 1 - 0.0002 * pLength # piping loss coefficient
@@ -504,9 +504,9 @@ class HotWaterAndAppliances
     end
 
     # Fixture Factor
-    if facilities_connected == "all"
+    if facilities_connected == HPXML::DWHRFacilitiesConnectedAll
       fixF = 1.0
-    elsif facilities_connected == "one"
+    elsif facilities_connected == HPXML::DWHRFacilitiesConnectedOne
       fixF = 0.5
     end
 
@@ -551,17 +551,17 @@ class HotWaterAndAppliances
     # ANSI/RESNET 301-2014 Addendum A-2015
     # Amendment on Domestic Hot Water (DHW) Systems
     # Table 4.2.2.5.2.11(5) Annual electricity consumption factor for hot water recirculation system pumps
-    if dist_type == "recirculation"
-      if recirc_control_type == "no control" or recirc_control_type == "timer"
+    if dist_type == HPXML::DHWDistTypeRecirc
+      if recirc_control_type == HPXML::DHWRecirControlTypeNone or recirc_control_type == "timer"
         return 8.76 * recirc_pump_power
-      elsif recirc_control_type == "temperature"
+      elsif recirc_control_type == HPXML::DHWRecirControlTypeTemperature
         return 1.46 * recirc_pump_power
-      elsif recirc_control_type == "presence sensor demand control"
+      elsif recirc_control_type == HPXML::DHWRecirControlTypeSensor
         return 0.15 * recirc_pump_power
-      elsif recirc_control_type == "manual demand control"
+      elsif recirc_control_type == HPXML::DHWRecirControlTypeManual
         return 0.10 * recirc_pump_power
       end
-    elsif dist_type == "standard"
+    elsif dist_type == HPXML::DHWDistTypeStandard
       return 0.0
     end
     fail "Unexpected hot water distribution system."
@@ -607,13 +607,13 @@ class HotWaterAndAppliances
 
     # Table 4.2.2.5.2.11(2) Hot Water Distribution System Insulation Factors
     sys_factor = nil
-    if dist_type == "recirculation" and pipe_r < 3.0
+    if dist_type == HPXML::DHWDistTypeRecirc and pipe_r < 3.0
       sys_factor = 1.11
-    elsif dist_type == "recirculation" and pipe_r >= 3.0
+    elsif dist_type == HPXML::DHWDistTypeRecirc and pipe_r >= 3.0
       sys_factor = 1.0
-    elsif dist_type == "standard" and pipe_r >= 3.0
+    elsif dist_type == HPXML::DHWDistTypeStandard and pipe_r >= 3.0
       sys_factor = 0.90
-    elsif dist_type == "standard" and pipe_r < 3.0
+    elsif dist_type == HPXML::DHWDistTypeStandard and pipe_r < 3.0
       sys_factor = 1.0
     end
 
@@ -621,9 +621,9 @@ class HotWaterAndAppliances
     o_frac = 0.25
     o_cd_eff = 0.0
 
-    if dist_type == "recirculation"
+    if dist_type == HPXML::DHWDistTypeRecirc
       p_ratio = recirc_branch_length / 10.0
-    elsif dist_type == "standard"
+    elsif dist_type == HPXML::DHWDistTypeStandard
       ref_pipe_l = get_default_std_pipe_length(has_uncond_bsmnt, cfa, ncfl)
       p_ratio = std_pipe_length / ref_pipe_l
     end
@@ -632,9 +632,9 @@ class HotWaterAndAppliances
     s_w_gpd = (ref_w_gpd - ref_w_gpd * o_frac) * p_ratio * sys_factor # Eq. 4.2-13
 
     # Table 4.2.2.5.2.11(3) Distribution system water use effectiveness
-    if dist_type == "recirculation"
+    if dist_type == HPXML::DHWDistTypeRecirc
       wd_eff = 0.1
-    elsif dist_type == "standard"
+    elsif dist_type == HPXML::DHWDistTypeStandard
       wd_eff = 1.0
     end
 
@@ -649,33 +649,33 @@ class HotWaterAndAppliances
     # ANSI/RESNET 301-2014 Addendum A-2015
     # Amendment on Domestic Hot Water (DHW) Systems
     # Table 4.2.2.5.2.11(6) Hot water distribution system relative annual energy waste factors
-    if dist_type == "recirculation"
-      if recirc_control_type == "no control" or recirc_control_type == "timer"
+    if dist_type == HPXML::DHWDistTypeRecirc
+      if recirc_control_type == HPXML::DHWRecirControlTypeNone or recirc_control_type == "timer"
         if pipe_r < 3.0
           return 500.0
         else
           return 250.0
         end
-      elsif recirc_control_type == "temperature"
+      elsif recirc_control_type == HPXML::DHWRecirControlTypeTemperature
         if pipe_r < 3.0
           return 375.0
         else
           return 187.5
         end
-      elsif recirc_control_type == "presence sensor demand control"
+      elsif recirc_control_type == HPXML::DHWRecirControlTypeSensor
         if pipe_r < 3.0
           return 64.8
         else
           return 43.2
         end
-      elsif recirc_control_type == "manual demand control"
+      elsif recirc_control_type == HPXML::DHWRecirControlTypeManual
         if pipe_r < 3.0
           return 43.2
         else
           return 28.8
         end
       end
-    elsif dist_type == "standard"
+    elsif dist_type == HPXML::DHWDistTypeStandard
       if pipe_r < 3.0
         return 32.0
       else

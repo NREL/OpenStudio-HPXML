@@ -587,8 +587,8 @@ class EnergyPlusValidator
         "[CollectorType='single glazing black' or CollectorType='double glazing black' or CollectorType='evacuated tube' or CollectorType='integrated collector storage']" => one,
         "CollectorAzimuth" => one,
         "CollectorTilt" => one,
-        "CollectorRatedOpticalEfficiency" => one, # FRTA (y-intercept); see Directory of SRCC Certified Solar Collector Ratings
-        "CollectorRatedThermalLosses" => one, # FRUL (slope, in units of Btu/hr-ft^2-R); see Directory of SRCC Certified Solar Collector Ratings
+        "CollectorRatedOpticalEfficiency" => one,
+        "CollectorRatedThermalLosses" => one,
         "StorageVolume" => one,
       },
 

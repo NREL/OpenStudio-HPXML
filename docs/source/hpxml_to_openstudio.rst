@@ -167,7 +167,7 @@ The ``ClimateandRiskZones/WeatherStation`` element specifies the EnergyPlus weat
 The weather file can be entered in one of two ways:
 
 #. Using the ``WeatherStation/WMO``, which must be one of the acceptable TMY3 WMO station numbers found in the ``weather/data.csv`` file.
-   The full set of U.S. TMY3 weather files can be `downloaded here <http://s3.amazonaws.com/epwweatherfiles/tmy3s-cache-csv.zip>`_.
+   The full set of U.S. TMY3 weather files can be `downloaded here <https://data.nrel.gov/files/128/tmy3s-cache-csv.zip>`_.
 #. Using the ``WeatherStation/extension/EPWFileName``.
 
 Enclosure
@@ -567,16 +567,17 @@ Solar hot water systems can be described with either simple or detailed inputs.
 
 If using simple inputs, the following element is required:
 
-- ``SolarFraction``
+- ``SolarFraction``: Portion of total conventional hot water heating load (delivered energy and tank standby losses). Can be obtained from Directory of SRCC OG-300 Solar Water Heating System Ratings or NREL's `System Advisor Model <https://sam.nrel.gov/>`_ or equivalent.
 
 If using detailed inputs, the following elements are required:
 
+- ``CollectorArea``
 - ``CollectorLoopType``: 'liquid indirect' or 'liquid direct' or 'passive thermosyphon'
 - ``CollectorType``: 'single glazing black' or 'double glazing black' or 'evacuated tube' or 'integrated collector storage'
 - ``CollectorAzimuth``
 - ``CollectorTilt``
-- ``CollectorRatedOpticalEfficiency``: FRTA (y-intercept); see Directory of SRCC Certified Solar Collector Ratings
-- ``CollectorRatedThermalLosses``: FRUL (slope, in units of Btu/hr-ft^2-R); see Directory of SRCC Certified Solar Collector Ratings
+- ``CollectorRatedOpticalEfficiency``: FRTA (y-intercept); see Directory of SRCC OG-100 Certified Solar Collector Ratings
+- ``CollectorRatedThermalLosses``: FRUL (slope, in units of Btu/hr-ft^2-R); see Directory of SRCC OG-100 Certified Solar Collector Ratings
 - ``StorageVolume``
 
 Photovoltaics
