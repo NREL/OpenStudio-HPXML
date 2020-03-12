@@ -68,8 +68,8 @@ class HPXML < Object
   FoundationThermalBoundaryFloor = "frame floor"
   FoundationThermalBoundaryWall = "foundation wall"
   FoundationTypeAmbient = "Ambient"
-  FoundationTypeBasementCond = "ConditionedBasement"
-  FoundationTypeBasementUncond = "UnconditionedBasement"
+  FoundationTypeBasementConditioned = "ConditionedBasement"
+  FoundationTypeBasementUnconditioned = "UnconditionedBasement"
   FoundationTypeCrawlspaceUnvented = "UnventedCrawlspace"
   FoundationTypeCrawlspaceVented = "VentedCrawlspace"
   FoundationTypeSlab = "SlabOnGrade"
@@ -103,8 +103,8 @@ class HPXML < Object
   LightingTypeTierII = "ERI Tier II"
   LocationAtticUnvented = "attic - unvented"
   LocationAtticVented = "attic - vented"
-  LocationBasementCond = "basement - conditioned"
-  LocationBasementUncond = "basement - unconditioned"
+  LocationBasementConditioned = "basement - conditioned"
+  LocationBasementUnconditioned = "basement - unconditioned"
   LocationCrawlspaceUnvented = "crawlspace - unvented"
   LocationCrawlspaceVented = "crawlspace - vented"
   LocationExterior = "exterior"
@@ -141,6 +141,7 @@ class HPXML < Object
   SolarThermalTypeICS = "integrated collector storage"
   SolarThermalTypeSingleGlazing = "single glazing black"
   UnitsACH = "ACH"
+  UnitsACHNatural = "ACHnatural"
   UnitsCFM = "CFM"
   UnitsCFM25 = "CFM25"
   UnitsPercent = "Percent"
@@ -831,10 +832,10 @@ class HPXML < Object
         foundation_type_e = XMLHelper.add_element(foundation, "FoundationType")
         if [FoundationTypeSlab, FoundationTypeAmbient].include? @foundation_type
           XMLHelper.add_element(foundation_type_e, @foundation_type)
-        elsif @foundation_type == FoundationTypeBasementCond
+        elsif @foundation_type == FoundationTypeBasementConditioned
           basement = XMLHelper.add_element(foundation_type_e, "Basement")
           XMLHelper.add_element(basement, "Conditioned", true)
-        elsif @foundation_type == FoundationTypeBasementUncond
+        elsif @foundation_type == FoundationTypeBasementUnconditioned
           basement = XMLHelper.add_element(foundation_type_e, "Basement")
           XMLHelper.add_element(basement, "Conditioned", false)
           XMLHelper.add_element(foundation, "ThermalBoundary", @unconditioned_basement_thermal_boundary) unless @unconditioned_basement_thermal_boundary.nil?
@@ -862,9 +863,9 @@ class HPXML < Object
       if XMLHelper.has_element(foundation, "FoundationType/SlabOnGrade")
         @foundation_type = FoundationTypeSlab
       elsif XMLHelper.has_element(foundation, "FoundationType/Basement[Conditioned='false']")
-        @foundation_type = FoundationTypeBasementUncond
+        @foundation_type = FoundationTypeBasementUnconditioned
       elsif XMLHelper.has_element(foundation, "FoundationType/Basement[Conditioned='true']")
-        @foundation_type = FoundationTypeBasementCond
+        @foundation_type = FoundationTypeBasementConditioned
       elsif XMLHelper.has_element(foundation, "FoundationType/Crawlspace[Vented='false']")
         @foundation_type = FoundationTypeCrawlspaceUnvented
       elsif XMLHelper.has_element(foundation, "FoundationType/Crawlspace[Vented='true']")
@@ -3027,7 +3028,7 @@ end
 # TODO: Move into appropriate class above
 def is_thermal_boundary(surface)
   def is_adjacent_to_conditioned(adjacent_to)
-    if [HPXML::LocationLivingSpace, HPXML::LocationBasementCond].include? adjacent_to
+    if [HPXML::LocationLivingSpace, HPXML::LocationBasementConditioned].include? adjacent_to
       return true
     end
 

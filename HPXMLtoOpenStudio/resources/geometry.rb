@@ -213,7 +213,7 @@ class Geometry
   end
 
   def self.is_unconditioned_basement(space_or_zone)
-    return self.space_or_zone_is_of_type(space_or_zone, HPXML::LocationBasementUncond)
+    return self.space_or_zone_is_of_type(space_or_zone, HPXML::LocationBasementUnconditioned)
   end
 
   def self.is_vented_attic(space_or_zone)

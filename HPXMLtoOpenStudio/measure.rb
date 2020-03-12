@@ -202,7 +202,7 @@ class OSModel
     @cfa = @hpxml.building_construction.conditioned_floor_area
     @cfa_ag = @cfa
     @hpxml.slabs.each do |slab|
-      next unless slab.interior_adjacent_to == HPXML::LocationBasementCond
+      next unless slab.interior_adjacent_to == HPXML::LocationBasementConditioned
 
       @cfa_ag -= slab.area
     end
@@ -216,7 +216,7 @@ class OSModel
     @ncfl = @hpxml.building_construction.number_of_conditioned_floors
     @ncfl_ag = @hpxml.building_construction.number_of_conditioned_floors_above_grade
     @nbeds = @hpxml.building_construction.number_of_bedrooms
-    @has_uncond_bsmnt = @hpxml.has_space_type(HPXML::LocationBasementUncond)
+    @has_uncond_bsmnt = @hpxml.has_space_type(HPXML::LocationBasementUnconditioned)
     @has_vented_attic = @hpxml.has_space_type(HPXML::LocationAtticVented)
     @has_vented_crawl = @hpxml.has_space_type(HPXML::LocationCrawlspaceVented)
     @min_neighbor_distance = get_min_neighbor_distance()
@@ -3087,7 +3087,7 @@ class OSModel
     total_unconditioned_duct_area = { HPXML::DuctTypeSupply => 0.0,
                                       HPXML::DuctTypeReturn => 0.0 }
     hvac_distribution.ducts.each do |ducts|
-      next if [HPXML::LocationLivingSpace, HPXML::LocationBasementCond].include? ducts.duct_location
+      next if [HPXML::LocationLivingSpace, HPXML::LocationBasementConditioned].include? ducts.duct_location
 
       # Calculate total duct area in unconditioned spaces
       next if ducts.duct_type.nil?
@@ -3097,7 +3097,7 @@ class OSModel
 
     # Create duct objects
     hvac_distribution.ducts.each do |ducts|
-      next if [HPXML::LocationLivingSpace, HPXML::LocationBasementCond].include? ducts.duct_location
+      next if [HPXML::LocationLivingSpace, HPXML::LocationBasementConditioned].include? ducts.duct_location
 
       next if ducts.duct_type.nil?
 
@@ -4073,7 +4073,7 @@ class OSModel
   end
 
   def self.set_surface_interior(model, spaces, surface, interior_adjacent_to)
-    if [HPXML::LocationBasementCond].include? interior_adjacent_to
+    if [HPXML::LocationBasementConditioned].include? interior_adjacent_to
       surface.setSpace(create_or_get_space(model, spaces, HPXML::LocationLivingSpace))
       @cond_bsmnt_surfaces << surface
     else
@@ -4088,7 +4088,7 @@ class OSModel
       surface.setOutsideBoundaryCondition('Foundation')
     elsif [HPXML::LocationOtherHousingUnit, HPXML::LocationOtherHousingUnitAbove, HPXML::LocationOtherHousingUnitBelow].include? exterior_adjacent_to
       surface.setOutsideBoundaryCondition("Adiabatic")
-    elsif [HPXML::LocationBasementCond].include? exterior_adjacent_to
+    elsif [HPXML::LocationBasementConditioned].include? exterior_adjacent_to
       surface.createAdjacentSurface(create_or_get_space(model, spaces, HPXML::LocationLivingSpace))
       @cond_bsmnt_surfaces << surface
     else
@@ -4104,7 +4104,7 @@ class OSModel
 
     num_orig_spaces = spaces.size
 
-    if location == HPXML::LocationBasementCond
+    if location == HPXML::LocationBasementConditioned
       space = create_or_get_space(model, spaces, HPXML::LocationLivingSpace)
     else
       space = create_or_get_space(model, spaces, location)
