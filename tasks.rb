@@ -2751,6 +2751,8 @@ def set_hpxml_water_heating_systems(hpxml_file, hpxml)
     hpxml.water_heating_systems[0].location = "garage"
   elsif ['base-dhw-temperature.xml'].include? hpxml_file
     hpxml.water_heating_systems[0].temperature = 130.0
+  elsif ['base-enclosure-attached-multifamily.xml'].include? hpxml_file
+    hpxml.water_heating_systems[0].location = "other multifamily buffer space"
   elsif ['base-dhw-none.xml'].include? hpxml_file
     hpxml.water_heating_systems.clear
   end

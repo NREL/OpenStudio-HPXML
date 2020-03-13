@@ -110,6 +110,8 @@ class Waterheater
     alt = weather.header.Altitude
     if space.nil? # Located outside
       water_heater_tz = nil
+    elsif space.is_a? OpenStudio::Model::ScheduleConstant
+      water_heater_tz = space
     else
       water_heater_tz = space.thermalZone.get
     end
@@ -366,6 +368,15 @@ class Waterheater
       amb_rh_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, "Site Outdoor Air Relative Humidity")
       amb_rh_sensor.setName("#{obj_name_hpwh} amb rh")
       amb_rh_sensor.setKeyName("Environment")
+    elsif water_heater_tz.is_a? OpenStudio::Model::ScheduleConstant
+      amb_temp_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, "Schedule Value")
+      amb_temp_sensor.setName("#{obj_name_hpwh} amb temp")
+      amb_temp_sensor.setKeyName(water_heater_tz.name.to_s)
+
+      # FIXME: Outdoor air humidity? Indoor air humidity? Average?
+      amb_rh_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, "Site Outdoor Air Relative Humidity")
+      amb_rh_sensor.setName("#{obj_name_hpwh} amb rh")
+      amb_rh_sensor.setKeyName("Environment")
     else
       amb_temp_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, "Zone Mean Air Temperature")
       amb_temp_sensor.setName("#{obj_name_hpwh} amb temp")
@@ -482,7 +493,7 @@ class Waterheater
         hpwh_ducting_program.addLine("Set T_hpwh_inlet = #{amb_temp_sensor.name}")
       end
     end
-    if space.nil? # If located outside
+    if space.nil? or space.is_a? OpenStudio::Model::ScheduleConstant # If not located in rated conditioned space
       hpwh_ducting_program.addLine("Set #{tamb_act_actuator.name} = #{amb_temp_sensor.name}")
       hpwh_ducting_program.addLine("Set #{rhamb_act_actuator.name} = #{amb_rh_sensor.name}/100")
     else
@@ -760,8 +771,7 @@ class Waterheater
     storage_tank.setHeaterFuelType('Electricity')
     storage_tank.setHeaterThermalEfficiency(1)
     storage_tank.ambientTemperatureSchedule.get.remove
-    storage_tank.setAmbientTemperatureThermalZone(space.thermalZone.get)
-    storage_tank.setAmbientTemperatureIndicator('ThermalZone')
+    set_wh_ambient(space, model, storage_tank)
     if fluid_type == Constants.FluidWater # Direct, make the storage tank a dummy tank with 0 tank losses
       storage_tank.setUniformSkinLossCoefficientperUnitAreatoAmbientTemperature(0.0)
     else
@@ -1514,6 +1524,7 @@ class Waterheater
 
   def self.create_new_heater(name, cap, fuel, act_vol, ef, t_set, space, oncycle_p, offcycle_p, wh_type, nbeds, model, ua, eta_c)
     new_heater = OpenStudio::Model::WaterHeaterMixed.new(model)
+    puts space
     new_heater.setName(name)
     new_heater.setHeaterThermalEfficiency(eta_c) unless eta_c.nil?
     new_heater.setHeaterFuelType(HelperMethods.eplus_fuel_map(fuel)) unless fuel.nil?
@@ -1575,23 +1586,30 @@ class Waterheater
     end
     new_heater.setOffCycleLossFractiontoThermalZone(skinlossfrac)
     new_heater.setOnCycleLossFractiontoThermalZone(1.0)
+    set_wh_ambient(space, model, new_heater)
 
-    if space.nil? # Located outside
-      new_heater.setAmbientTemperatureIndicator("Outdoors")
-    elsif space.is_a? OpenStudio::Model::ScheduleConstant # Temperature schedule indicator
-      new_heater.setAmbientTemperatureSchedule(space)
-    else
-      new_heater.setAmbientTemperatureIndicator("ThermalZone")
-      new_heater.setAmbientTemperatureThermalZone(space.thermalZone.get)
-    end
-    if new_heater.ambientTemperatureSchedule.is_initialized
-      new_heater.ambientTemperatureSchedule.get.remove
-    end
     ua_w_k = UnitConversions.convert(ua, "Btu/(hr*F)", "W/K")
     new_heater.setOnCycleLossCoefficienttoAmbientTemperature(ua_w_k)
     new_heater.setOffCycleLossCoefficienttoAmbientTemperature(ua_w_k)
 
     return new_heater
+  end
+
+  def self.set_wh_ambient(space, model, wh_obj)
+    if wh_obj.ambientTemperatureSchedule.is_initialized
+      wh_obj.ambientTemperatureSchedule.get.remove
+    end
+    wh_obj.resetAmbientTemperatureSchedule
+    if space.is_a? OpenStudio::Model::ScheduleConstant # Temperature schedule indicator
+      wh_obj.setAmbientTemperatureIndicator("Schedule")
+      puts wh_obj.setAmbientTemperatureSchedule(space)
+      puts wh_obj
+    elsif space.nil? # Located outside
+      wh_obj.setAmbientTemperatureIndicator("Outdoors")
+    else
+      wh_obj.setAmbientTemperatureIndicator("ThermalZone")
+      wh_obj.setAmbientTemperatureThermalZone(space.thermalZone.get)
+    end
   end
 
   def self.configure_setpoint_schedule(new_heater, t_set, wh_type, model)
