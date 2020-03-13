@@ -1524,7 +1524,6 @@ class Waterheater
 
   def self.create_new_heater(name, cap, fuel, act_vol, ef, t_set, space, oncycle_p, offcycle_p, wh_type, nbeds, model, ua, eta_c)
     new_heater = OpenStudio::Model::WaterHeaterMixed.new(model)
-    puts space
     new_heater.setName(name)
     new_heater.setHeaterThermalEfficiency(eta_c) unless eta_c.nil?
     new_heater.setHeaterFuelType(HelperMethods.eplus_fuel_map(fuel)) unless fuel.nil?
@@ -1602,8 +1601,6 @@ class Waterheater
     wh_obj.resetAmbientTemperatureSchedule
     if space.is_a? OpenStudio::Model::ScheduleConstant # Temperature schedule indicator
       wh_obj.setAmbientTemperatureIndicator("Schedule")
-      puts wh_obj.setAmbientTemperatureSchedule(space)
-      puts wh_obj
     elsif space.nil? # Located outside
       wh_obj.setAmbientTemperatureIndicator("Outdoors")
     else
