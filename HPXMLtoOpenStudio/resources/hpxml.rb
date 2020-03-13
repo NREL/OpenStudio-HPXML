@@ -60,6 +60,8 @@ class HPXML < Object
   DHWRecirControlTypeTimer = "timer"
   DHWDistTypeRecirc = "Recirculation"
   DHWDistTypeStandard = "Standard"
+  DuctInsulationMaterialUnknown = "Unknown"
+  DuctInsulationMaterialNone = "None"
   DuctTypeReturn = "return"
   DuctTypeSupply = "supply"
   DWHRFacilitiesConnectedAll = "all"
@@ -98,8 +100,11 @@ class HPXML < Object
   HVACTypeRoomAirConditioner = "room air conditioner"
   HVACTypeStove = "Stove"
   HVACTypeWallFurnace = "WallFurnace"
+  LeakinessTight = "tight"
+  LeakinessAverage = "average"
   LightingTypeTierI = "ERI Tier I"
   LightingTypeTierII = "ERI Tier II"
+  LocationAtticUnconditioned = "attic - unconditioned"
   LocationAtticUnvented = "attic - unvented"
   LocationAtticVented = "attic - vented"
   LocationBasementConditioned = "basement - conditioned"
@@ -123,6 +128,14 @@ class HPXML < Object
   MechVentTypeExhaust = "exhaust only"
   MechVentTypeHRV = "heat recovery ventilator"
   MechVentTypeSupply = "supply only"
+  OrientationEast = "east"
+  OrientationNorth = "north"
+  OrientationNortheast = "northeast"
+  OrientationNorthwest = "northwest"
+  OrientationSouth = "south"
+  OrientationSoutheast = "southeast"
+  OrientationSouthwest = "southwest"
+  OrientationWest = "west"
   PlugLoadTypeOther = "other"
   PlugLoadTypeTelevision = "TV other"
   PVModuleTypePremium = "premium"
@@ -132,6 +145,20 @@ class HPXML < Object
   PVTrackingType1Axis = "1-axis"
   PVTrackingType1AxisBacktracked = "1-axis backtracked"
   PVTrackingType2Axis = "2-axis"
+  RoofColorDark = "dark"
+  RoofColorLight = "light"
+  RoofColorMedium = "medium"
+  RoofColorMediumDark = "medium dark"
+  RoofMaterialAsphaltShingles = "asphalt or fiberglass shingles"
+  RoofMaterialConcrete = "concrete"
+  RoofMaterialClayTile = "slate or tile shingles"
+  RoofMaterialPlasticRubber = "plastic/rubber/synthetic sheeting"
+  RoofMaterialWoodShingles = "wood shingles or shakes"
+  SidingTypeAluminum = "aluminum siding"
+  SidingTypeBrick = "brick veneer"
+  SidingTypeStucco = "stucco"
+  SidingTypeVinyl = "vinyl siding"
+  SidingTypeWood = "wood siding"
   SolarThermalLoopTypeDirect = "liquid direct"
   SolarThermalLoopTypeIndirect = "liquid indirect"
   SolarThermalLoopTypeThermosyphon = "passive thermosyphon"
@@ -162,6 +189,16 @@ class HPXML < Object
   WaterHeaterTypeHeatPump = "heat pump water heater"
   WaterHeaterTypeTankless = "instantaneous water heater"
   WaterHeaterTypeStorage = "storage water heater"
+  WindowFrameTypeAluminum = "Aluminum"
+  WindowFrameTypeWood = "Wood"
+  WindowGasAir = "air"
+  WindowGasArgon = "argon"
+  WindowGlazingLowE = "low-e"
+  WindowGlazingReflective = "reflective"
+  WindowGlazingTintedReflective = "tinted/reflective"
+  WindowLayersDoublePane = "double-pane"
+  WindowLayersSinglePane = "single-pane"
+  WindowLayersTriplePane = "triple-pane"
 
   def initialize(hpxml_path: nil, collapse_enclosure: true)
     @doc = nil
@@ -712,6 +749,22 @@ class HPXML < Object
       return list
     end
 
+    def to_location
+      if @attic_type == AtticTypeCathedral
+        return LocationLivingSpace
+      elsif @attic_type == AtticTypeConditioned
+        return LocationLivingSpace
+      elsif @attic_type == AtticTypeFlatRoof
+        return LocationLivingSpace
+      elsif @attic_type == AtticTypeUnvented
+        return LocationAtticUnvented
+      elsif @attic_type == AtticTypeVented
+        return LocationAtticVented
+      else
+        fail "Unexpected attic type: '#{@attic_type}'."
+      end
+    end
+
     def to_rexml(doc)
       return if self.nil?
 
@@ -818,6 +871,39 @@ class HPXML < Object
       end
 
       return list
+    end
+
+    def to_location
+      if @foundation_type == FoundationTypeAmbient
+        return LocationOutside
+      elsif @foundation_type == FoundationTypeBasementConditioned
+        return LocationBasementConditioned
+      elsif @foundation_type == FoundationTypeBasementUnconditioned
+        return LocationBasementUnconditioned
+      elsif @foundation_type == FoundationTypeCrawlspaceUnvented
+        return LocationCrawlspaceUnvented
+      elsif @foundation_type == FoundationTypeCrawlspaceVented
+        return LocationCrawlspaceVented
+      elsif @foundation_type == FoundationTypeSlab
+        return LocationLivingSpace
+      else
+        fail "Unexpected foundation type: '#{@foundation_type}'."
+      end
+    end
+
+    def area
+      sum_area = 0.0
+      # Check Slabs first
+      attached_slabs.each do |slab|
+        sum_area += slab.area
+      end
+      if sum_area <= 0
+        # Check FrameFloors next
+        attached_frame_floors.each do |frame_floor|
+          sum_area += frame_floor.area
+        end
+      end
+      return sum_area
     end
 
     def to_rexml(doc)
