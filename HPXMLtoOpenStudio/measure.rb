@@ -1696,13 +1696,13 @@ class OSModel
                                                                 window.azimuth, [0, 0.0001, 0.0001, 0.0001]), model)
 
       surface.additionalProperties.setFeature("Length", window_width)
-      surface.additionalProperties.setFeature("Azimuth", window_azimuth)
+      surface.additionalProperties.setFeature("Azimuth", window.azimuth)
       surface.additionalProperties.setFeature("Tilt", 90.0)
       surface.additionalProperties.setFeature("SurfaceType", "Window")
-      surface.setName("surface #{window_id}")
+      surface.setName("surface #{window.id}")
       surface.setSurfaceType("Wall")
       set_surface_interior(model, spaces, surface, window.wall.interior_adjacent_to)
-      assign_outside_boundary_condition_to_subsurface(surface, window_id, spaces, model, window.wall, "window")
+      assign_outside_boundary_condition_to_subsurface(surface, window, spaces, model)
       surfaces << surface
 
       sub_surface = OpenStudio::Model::SubSurface.new(add_wall_polygon(window_width, window_height, z_origin,
@@ -1808,13 +1808,13 @@ class OSModel
                                                                 door.azimuth, [0, 0.0001, 0.0001, 0.0001]), model)
 
       surface.additionalProperties.setFeature("Length", door_width)
-      surface.additionalProperties.setFeature("Azimuth", door_azimuth)
+      surface.additionalProperties.setFeature("Azimuth", door.azimuth)
       surface.additionalProperties.setFeature("Tilt", 90.0)
       surface.additionalProperties.setFeature("SurfaceType", "Door")
-      surface.setName("surface #{door_id}")
+      surface.setName("surface #{door.id}")
       surface.setSurfaceType("Wall")
       set_surface_interior(model, spaces, surface, door.wall.interior_adjacent_to)
-      if assign_outside_boundary_condition_to_subsurface(surface, door_id, spaces, model, door.wall, "door")
+      if not assign_outside_boundary_condition_to_subsurface(surface, door, spaces, model)
         surface.remove
         next
       end
@@ -4258,27 +4258,27 @@ class OSModel
     return
   end
 
-  def self.assign_outside_boundary_condition_to_subsurface(surface, subsurface_id, spaces, model, wall_surface, subsurface_type)
+  def self.assign_outside_boundary_condition_to_subsurface(surface, subsurface_class, spaces, model)
     # Check walls
-    wall_exterior_adjacent_to = wall_surface.exterior_adjacent_to
-    to_ignore = false
+    wall_exterior_adjacent_to = subsurface_class.wall.exterior_adjacent_to
 
-    if ['other heated space', 'other multifamily buffer space', 'other non-freezing space', 'other housing unit', 'other housing unit above', 'other housing unit below'].include? wall_exterior_adjacent_to and subsurface_type == "window"
-      fail "Window '#{subsurface_id}' cannot be adjacent to '#{wall_exterior_adjacent_to}'. Check wall: '#{wall_surface.id}'."
-    end
-
-    if ['other housing unit', 'other housing unit above', 'other housing unit below'].include? wall_exterior_adjacent_to
-      to_ignore = true
+    if [HPXML::LocationOtherHeatedSpace, HPXML::LocationOtherMultifamilyBufferSpace,HPXML::LocationOtherNonFreezingSpace, HPXML::LocationOtherHousingUnit, HPXML::LocationOtherHousingUnitAbove, HPXML::LocationOtherHousingUnitBelow].include? wall_exterior_adjacent_to
+      if subsurface_class.is_a? HPXML::Window
+        fail "Window '#{subsurface_class.id}' cannot be adjacent to '#{wall_exterior_adjacent_to}'. Check wall: '#{subsurface_class.wall.id}'."
+      elsif [HPXML::LocationOtherHousingUnit, HPXML::LocationOtherHousingUnitAbove, HPXML::LocationOtherHousingUnitBelow].include? wall_exterior_adjacent_to
+        # subsurface with adiabatic outside boundary condition, ignore it
+        return false
+      end
     end
 
     # Subsurface on foundationwalls, set it to be adjacent to outdoors
-    if wall_exterior_adjacent_to == "ground"
+    if wall_exterior_adjacent_to == HPXML::LocationGround
       surface.setOutsideBoundaryCondition('Outdoors')
     else
-      set_surface_exterior(model, spaces, surface, subsurface_id, wall_exterior_adjacent_to)
+      set_surface_exterior(model, spaces, surface, wall_exterior_adjacent_to)
     end
 
-    return to_ignore
+    return true
   end
 
   def self.get_infiltration_volume()
