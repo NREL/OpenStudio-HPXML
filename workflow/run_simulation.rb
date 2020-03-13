@@ -3,18 +3,18 @@ start_time = Time.now
 require 'fileutils'
 require 'optparse'
 require 'pathname'
-require_relative "../hpxml-measures/HPXMLtoOpenStudio/resources/meta_measure"
-require_relative "../hpxml-measures/HPXMLtoOpenStudio/resources/unit_conversions"
-require_relative "hescore_lib"
+require_relative '../hpxml-measures/HPXMLtoOpenStudio/resources/meta_measure'
+require_relative '../hpxml-measures/HPXMLtoOpenStudio/resources/unit_conversions'
+require_relative 'hescore_lib'
 
 basedir = File.expand_path(File.dirname(__FILE__))
 
 def rm_path(path)
-  if Dir.exists?(path)
+  if Dir.exist?(path)
     FileUtils.rm_r(path)
   end
   while true
-    break if not Dir.exists?(path)
+    break if not Dir.exist?(path)
 
     sleep(0.01)
   end
@@ -25,16 +25,16 @@ def get_designdir(output_dir, design)
 end
 
 def get_output_hpxml_path(resultsdir, designdir)
-  return File.join(resultsdir, File.basename(designdir) + ".xml")
+  return File.join(resultsdir, File.basename(designdir) + '.xml')
 end
 
 def run_design(basedir, designdir, design, resultsdir, hpxml, debug, skip_simulation)
-  puts "Creating input..."
+  puts 'Creating input...'
   create_idf(design, basedir, designdir, resultsdir, hpxml, debug, skip_simulation)
 
   return if skip_simulation
 
-  puts "Running simulation..."
+  puts 'Running simulation...'
   run_energyplus(design, designdir)
 
   # Create output
@@ -50,12 +50,12 @@ def create_idf(design, basedir, designdir, resultsdir, hpxml, debug, skip_simula
 
   model = OpenStudio::Model::Model.new
   runner = OpenStudio::Measure::OSRunner.new(OpenStudio::WorkflowJSON.new)
-  measures_dir = File.join(basedir, "..")
+  measures_dir = File.join(basedir, '..')
 
   measures = {}
 
   # Add HEScore measure to workflow
-  measure_subdir = "rulesets/HEScoreRuleset"
+  measure_subdir = 'rulesets/HEScoreRuleset'
   args = {}
   args['hpxml_path'] = hpxml
   args['hpxml_output_path'] = output_hpxml_path
@@ -63,13 +63,13 @@ def create_idf(design, basedir, designdir, resultsdir, hpxml, debug, skip_simula
 
   if not skip_simulation
     # Add HPXML translator measure to workflow
-    measure_subdir = "hpxml-measures/HPXMLtoOpenStudio"
+    measure_subdir = 'hpxml-measures/HPXMLtoOpenStudio'
     args = {}
     args['hpxml_path'] = output_hpxml_path
-    args['weather_dir'] = File.absolute_path(File.join(basedir, "..", "weather"))
-    args['epw_output_path'] = File.join(designdir, "in.epw")
+    args['weather_dir'] = File.absolute_path(File.join(basedir, '..', 'weather'))
+    args['epw_output_path'] = File.join(designdir, 'in.epw')
     if debug
-      args['osm_output_path'] = File.join(designdir, "in.osm")
+      args['osm_output_path'] = File.join(designdir, 'in.osm')
     end
     update_args_hash(measures, measure_subdir, args)
   end
@@ -128,21 +128,21 @@ def create_idf(design, basedir, designdir, resultsdir, hpxml, debug, skip_simula
   end
 
   # Write IDF to file
-  File.open(File.join(designdir, "in.idf"), 'w') { |f| f << model_idf.to_s }
+  File.open(File.join(designdir, 'in.idf'), 'w') { |f| f << model_idf.to_s }
 end
 
 def run_energyplus(design, rundir)
   # getEnergyPlusDirectory can be unreliable, using getOpenStudioCLI instead
   ep_path = File.absolute_path(File.join(OpenStudio.getOpenStudioCLI.to_s, '..', '..', 'EnergyPlus', 'energyplus'))
   command = "cd #{rundir} && #{ep_path} -w in.epw in.idf > stdout-energyplus"
-  system(command, :err => File::NULL)
+  system(command, err: File::NULL)
 end
 
 def create_output(designdir, resultsdir)
-  puts "Compiling outputs..."
-  sql_path = File.join(designdir, "eplusout.sql")
-  if not File.exists?(sql_path)
-    fail "Processing output unsuccessful."
+  puts 'Compiling outputs...'
+  sql_path = File.join(designdir, 'eplusout.sql')
+  if not File.exist?(sql_path)
+    fail 'Processing output unsuccessful.'
   end
 
   sqlFile = OpenStudio::SqlFile.new(sql_path, false)
@@ -169,26 +169,26 @@ def create_output(designdir, resultsdir)
       for i in 1..12
         next if sql_result[i - 1].nil?
 
-        result = UnitConversions.convert(sql_result[i - 1], "J", to_units) # convert from J to site energy units
+        result = UnitConversions.convert(sql_result[i - 1], 'J', to_units) # convert from J to site energy units
         result_gj = sql_result[i - 1] / 1000000000.0 # convert from J to GJ
 
         results[hes_key][i - 1] += result
         results_gj[hes_key][i - 1] += result_gj
 
-        if hes_end_use == "large_appliance"
-          # Subtract out from small appliance end use
-          results[["small_appliance", hes_resource_type]][i - 1] -= result
-          results_gj[["small_appliance", hes_resource_type]][i - 1] -= result_gj
-        end
+        next unless hes_end_use == 'large_appliance'
+
+        # Subtract out from small appliance end use
+        results[['small_appliance', hes_resource_type]][i - 1] -= result
+        results_gj[['small_appliance', hes_resource_type]][i - 1] -= result_gj
       end
     end
   end
 
   # Subtract out disaggregated heating/cooling fan and pump energy from hot water electricity end use
-  hes_resource_type = "electric"
+  hes_resource_type = 'electric'
   to_units = get_fuel_site_units(hes_resource_type)
-  hes_end_uses = { "heating" => [Constants.ObjectNameFanPumpDisaggregatePrimaryHeat, Constants.ObjectNameFanPumpDisaggregateBackupHeat],
-                   "cooling" => [Constants.ObjectNameFanPumpDisaggregateCool] }
+  hes_end_uses = { 'heating' => [Constants.ObjectNameFanPumpDisaggregatePrimaryHeat, Constants.ObjectNameFanPumpDisaggregateBackupHeat],
+                   'cooling' => [Constants.ObjectNameFanPumpDisaggregateCool] }
   hes_end_uses.each do |hes_end_use, var_names|
     for i in 1..12
       total = 0.0
@@ -200,7 +200,7 @@ def create_output(designdir, resultsdir)
         total += sql_result.get
       end
 
-      result = UnitConversions.convert(total, "J", to_units) # convert from J to site energy units
+      result = UnitConversions.convert(total, 'J', to_units) # convert from J to site energy units
       result_gj = total / 1000000000.0 # convert from J to GJ
 
       # Add to heating/cooling end use
@@ -208,14 +208,14 @@ def create_output(designdir, resultsdir)
       results_gj[[hes_end_use, hes_resource_type]][i - 1] += result_gj
 
       # Subtract from hot water end use
-      results[["hot_water", hes_resource_type]][i - 1] -= result
-      results_gj[["hot_water", hes_resource_type]][i - 1] -= result_gj
+      results[['hot_water', hes_resource_type]][i - 1] -= result
+      results_gj[['hot_water', hes_resource_type]][i - 1] -= result_gj
     end
   end
 
   # Add hot water volume output
-  hes_end_use = "hot_water"
-  hes_resource_type = "hot_water"
+  hes_end_use = 'hot_water'
+  hes_resource_type = 'hot_water'
   to_units = get_fuel_site_units(hes_resource_type)
   for i in 1..12
     query = "SELECT SUM(VariableValue) FROM ReportVariableData WHERE ReportVariableDataDictionaryIndex IN (SELECT ReportVariableDataDictionaryIndex FROM ReportVariableDataDictionary WHERE VariableName='Water Use Equipment Hot Water Volume' AND ReportingFrequency='Monthly' AND VariableUnits='m3') AND TimeIndex='#{i}'"
@@ -224,7 +224,7 @@ def create_output(designdir, resultsdir)
 
     sql_result = sql_result.get
 
-    result = UnitConversions.convert(sql_result, "m^3", "gal")
+    result = UnitConversions.convert(sql_result, 'm^3', 'gal')
 
     results[[hes_end_use, hes_resource_type]][i - 1] = result
   end
@@ -234,7 +234,7 @@ def create_output(designdir, resultsdir)
   sum_energy_gj = 0
   results_gj.each do |hes_key, values|
     hes_end_use, hes_resource_type = hes_key
-    if hes_end_use == "generation"
+    if hes_end_use == 'generation'
       sum_energy_gj -= values.inject(0, :+)
     else
       sum_energy_gj += values.inject(0, :+)
@@ -247,7 +247,7 @@ def create_output(designdir, resultsdir)
   sqlFile.close
 
   # Write results to JSON
-  data = { "end_use" => [] }
+  data = { 'end_use' => [] }
   results.each do |hes_key, values|
     hes_end_use, hes_resource_type = hes_key
     to_units = get_fuel_site_units(hes_resource_type)
@@ -255,41 +255,41 @@ def create_output(designdir, resultsdir)
     next if annual_value <= 0.01
 
     values.each_with_index do |value, idx|
-      end_use = { "quantity" => value,
-                  "period_type" => "month",
-                  "period_number" => (idx + 1).to_s,
-                  "end_use" => hes_end_use,
-                  "resource_type" => hes_resource_type,
-                  "units" => to_units }
-      data["end_use"] << end_use
+      end_use = { 'quantity' => value,
+                  'period_type' => 'month',
+                  'period_number' => (idx + 1).to_s,
+                  'end_use' => hes_end_use,
+                  'resource_type' => hes_resource_type,
+                  'units' => to_units }
+      data['end_use'] << end_use
     end
   end
 
-  File.open(File.join(resultsdir, "results.json"), "w") do |f|
-    f.write(data.to_s.gsub("=>", ":")) # Much faster than requiring JSON to use pretty_generate
+  File.open(File.join(resultsdir, 'results.json'), 'w') do |f|
+    f.write(data.to_s.gsub('=>', ':')) # Much faster than requiring JSON to use pretty_generate
   end
 end
 
 def download_epws
-  weather_dir = File.join(File.dirname(__FILE__), "..", "weather")
+  weather_dir = File.join(File.dirname(__FILE__), '..', 'weather')
 
-  num_epws_expected = File.readlines(File.join(weather_dir, "data.csv")).size - 1
-  num_epws_actual = Dir[File.join(weather_dir, "*.epw")].count
+  num_epws_expected = File.readlines(File.join(weather_dir, 'data.csv')).size - 1
+  num_epws_actual = Dir[File.join(weather_dir, '*.epw')].count
   num_cache_expcted = num_epws_expected
-  num_cache_actual = Dir[File.join(weather_dir, "*-cache.csv")].count
-  if num_epws_actual == num_epws_expected and num_cache_actual == num_cache_expcted
-    puts "Weather directory is already up-to-date."
+  num_cache_actual = Dir[File.join(weather_dir, '*-cache.csv')].count
+  if (num_epws_actual == num_epws_expected) && (num_cache_actual == num_cache_expcted)
+    puts 'Weather directory is already up-to-date.'
     puts "#{num_epws_actual} weather files are available in the weather directory."
-    puts "Completed."
+    puts 'Completed.'
     exit!
   end
 
   require 'net/http'
   require 'tempfile'
 
-  tmpfile = Tempfile.new("epw")
+  tmpfile = Tempfile.new('epw')
 
-  url = URI.parse("https://data.nrel.gov/files/128/tmy3s-cache-csv.zip")
+  url = URI.parse('https://data.nrel.gov/files/128/tmy3s-cache-csv.zip')
   http = Net::HTTP.new(url.host, url.port)
   http.use_ssl = true
   http.verify_mode = OpenSSL::SSL::VERIFY_NONE
@@ -299,9 +299,9 @@ def download_epws
   request.content_type = 'application/zip, application/octet-stream'
 
   http.request request do |response|
-    total = response.header["Content-Length"].to_i
+    total = response.header['Content-Length'].to_i
     if total == 0
-      fail "Did not successfully download zip file."
+      fail 'Did not successfully download zip file.'
     end
 
     size = 0
@@ -312,20 +312,20 @@ def download_epws
         size += chunk.size
         new_progress = (size * 100) / total
         unless new_progress == progress
-          puts "Downloading %s (%3d%%) " % [url.path, new_progress]
+          puts 'Downloading %s (%3d%%) ' % [url.path, new_progress]
         end
         progress = new_progress
       end
     end
   end
 
-  puts "Extracting weather files..."
+  puts 'Extracting weather files...'
   unzip_file = OpenStudio::UnzipFile.new(tmpfile.path.to_s)
   unzip_file.extractAllFiles(OpenStudio::toPath(weather_dir))
 
-  num_epws_actual = Dir[File.join(weather_dir, "*.epw")].count
+  num_epws_actual = Dir[File.join(weather_dir, '*.epw')].count
   puts "#{num_epws_actual} weather files are available in the weather directory."
-  puts "Completed."
+  puts 'Completed.'
   exit!
 end
 
@@ -372,12 +372,12 @@ end
 unless (Pathname.new options[:hpxml]).absolute?
   options[:hpxml] = File.expand_path(options[:hpxml])
 end
-unless File.exists?(options[:hpxml]) and options[:hpxml].downcase.end_with? ".xml"
+unless File.exist?(options[:hpxml]) && options[:hpxml].downcase.end_with?('.xml')
   fail "'#{options[:hpxml]}' does not exist or is not an .xml file."
 end
 
 # Check for correct versions of OS
-os_version = "2.9.1"
+os_version = '2.9.1'
 if OpenStudio.openStudioVersion != os_version
   fail "OpenStudio version #{os_version} is required."
 end
@@ -387,18 +387,18 @@ if options[:output_dir].nil?
 end
 options[:output_dir] = File.expand_path(options[:output_dir])
 
-unless Dir.exists?(options[:output_dir])
+unless Dir.exist?(options[:output_dir])
   FileUtils.mkdir_p(options[:output_dir])
 end
 
 # Create results dir
-resultsdir = File.join(options[:output_dir], "results")
+resultsdir = File.join(options[:output_dir], 'results')
 rm_path(resultsdir)
 Dir.mkdir(resultsdir)
 
 # Run design
 puts "HPXML: #{options[:hpxml]}"
-design = "HEScoreDesign"
+design = 'HEScoreDesign'
 designdir = get_designdir(options[:output_dir], design)
 rm_path(designdir)
 rundir = run_design(basedir, designdir, design, resultsdir, options[:hpxml], options[:debug], options[:skip_simulation])

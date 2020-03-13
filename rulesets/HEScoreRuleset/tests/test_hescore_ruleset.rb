@@ -36,13 +36,13 @@ class HEScoreRulesetTest < MiniTest::Test
     xml = File.absolute_path("#{this_dir}/../../../workflow/sample_files/Base_hpxml.xml")
 
     args_hash = {
-      "hpxml_path" => xml,
-      "hpxml_output_path" => xml.gsub('.xml', '.xml.out')
+      'hpxml_path' => xml,
+      'hpxml_output_path' => xml.gsub('.xml', '.xml.out')
     }
 
     _test_measure(args_hash)
 
-    hpxml = HPXML.new(hpxml_path: args_hash["hpxml_output_path"])
+    hpxml = HPXML.new(hpxml_path: args_hash['hpxml_output_path'])
 
     assert_equal(2, hpxml.neighbor_buildings.size)
 
@@ -131,11 +131,11 @@ class HEScoreRulesetTest < MiniTest::Test
     ncfl_ag = 2
     ceil_height = 8.0
     cvolume = cfa * ceil_height
-    desc = "average"
+    desc = 'average'
     year_built = 1975
-    iecc_cz = "3B"
-    fnd_types = { "living space" => 1000.0 }
-    ducts = [[1.0, 1.0, "attic - unconditioned"]]
+    iecc_cz = '3B'
+    fnd_types = { 'living space' => 1000.0 }
+    ducts = [[1.0, 1.0, 'attic - unconditioned']]
     ach50 = calc_ach50(ncfl_ag, cfa, ceil_height, cvolume, desc, year_built, iecc_cz, fnd_types, ducts)
     assert_in_epsilon(9.7, ach50, 0.01)
 
@@ -144,11 +144,11 @@ class HEScoreRulesetTest < MiniTest::Test
     ncfl_ag = 2
     ceil_height = 8.0
     cvolume = cfa * ceil_height
-    desc = "average"
+    desc = 'average'
     year_built = 1975
-    iecc_cz = "3B"
-    fnd_types = { "living space" => 1000.0 }
-    ducts = [[1.0, 1.0, "attic - unconditioned"]]
+    iecc_cz = '3B'
+    fnd_types = { 'living space' => 1000.0 }
+    ducts = [[1.0, 1.0, 'attic - unconditioned']]
     ach50 = calc_ach50(ncfl_ag, cfa, ceil_height, cvolume, desc, year_built, iecc_cz, fnd_types, ducts)
     assert_in_epsilon(11.8, ach50, 0.01)
 
@@ -157,11 +157,11 @@ class HEScoreRulesetTest < MiniTest::Test
     ncfl_ag = 1
     ceil_height = 8.0
     cvolume = cfa * ceil_height
-    desc = "average"
+    desc = 'average'
     year_built = 1975
-    iecc_cz = "3B"
-    fnd_types = { "living space" => 2000.0 }
-    ducts = [[1.0, 1.0, "attic - unconditioned"]]
+    iecc_cz = '3B'
+    fnd_types = { 'living space' => 2000.0 }
+    ducts = [[1.0, 1.0, 'attic - unconditioned']]
     ach50 = calc_ach50(ncfl_ag, cfa, ceil_height, cvolume, desc, year_built, iecc_cz, fnd_types, ducts)
     assert_in_epsilon(10.2, ach50, 0.01)
 
@@ -170,11 +170,11 @@ class HEScoreRulesetTest < MiniTest::Test
     ncfl_ag = 2
     ceil_height = 12.0
     cvolume = cfa * ceil_height
-    desc = "average"
+    desc = 'average'
     year_built = 1975
-    iecc_cz = "3B"
-    fnd_types = { "living space" => 1000.0 }
-    ducts = [[1.0, 1.0, "attic - unconditioned"]]
+    iecc_cz = '3B'
+    fnd_types = { 'living space' => 1000.0 }
+    ducts = [[1.0, 1.0, 'attic - unconditioned']]
     ach50 = calc_ach50(ncfl_ag, cfa, ceil_height, cvolume, desc, year_built, iecc_cz, fnd_types, ducts)
     assert_in_epsilon(7.6, ach50, 0.01)
 
@@ -183,11 +183,11 @@ class HEScoreRulesetTest < MiniTest::Test
     ncfl_ag = 2
     ceil_height = 8.0
     cvolume = cfa * ceil_height
-    desc = "average"
+    desc = 'average'
     year_built = 2013
-    iecc_cz = "3B"
-    fnd_types = { "living space" => 1000.0 }
-    ducts = [[1.0, 1.0, "attic - unconditioned"]]
+    iecc_cz = '3B'
+    fnd_types = { 'living space' => 1000.0 }
+    ducts = [[1.0, 1.0, 'attic - unconditioned']]
     ach50 = calc_ach50(ncfl_ag, cfa, ceil_height, cvolume, desc, year_built, iecc_cz, fnd_types, ducts)
     assert_in_epsilon(5.3, ach50, 0.01)
 
@@ -196,11 +196,11 @@ class HEScoreRulesetTest < MiniTest::Test
     ncfl_ag = 2
     ceil_height = 8.0
     cvolume = cfa * ceil_height
-    desc = "average"
+    desc = 'average'
     year_built = 1975
-    iecc_cz = "4C"
-    fnd_types = { "living space" => 1000.0 }
-    ducts = [[1.0, 1.0, "attic - unconditioned"]]
+    iecc_cz = '4C'
+    fnd_types = { 'living space' => 1000.0 }
+    ducts = [[1.0, 1.0, 'attic - unconditioned']]
     ach50 = calc_ach50(ncfl_ag, cfa, ceil_height, cvolume, desc, year_built, iecc_cz, fnd_types, ducts)
     assert_in_epsilon(13.1, ach50, 0.01)
 
@@ -209,11 +209,11 @@ class HEScoreRulesetTest < MiniTest::Test
     ncfl_ag = 2
     ceil_height = 8.0
     cvolume = cfa * ceil_height
-    desc = "average"
+    desc = 'average'
     year_built = 1975
-    iecc_cz = "3B"
-    fnd_types = { "basement - conditioned" => 1000.0 }
-    ducts = [[1.0, 1.0, "attic - unconditioned"]]
+    iecc_cz = '3B'
+    fnd_types = { 'basement - conditioned' => 1000.0 }
+    ducts = [[1.0, 1.0, 'attic - unconditioned']]
     ach50 = calc_ach50(ncfl_ag, cfa, ceil_height, cvolume, desc, year_built, iecc_cz, fnd_types, ducts)
     assert_in_epsilon(11.2, ach50, 0.01)
 
@@ -222,11 +222,11 @@ class HEScoreRulesetTest < MiniTest::Test
     ncfl_ag = 2
     ceil_height = 8.0
     cvolume = cfa * ceil_height
-    desc = "average"
+    desc = 'average'
     year_built = 1975
-    iecc_cz = "3B"
-    fnd_types = { "living space" => 1000.0 }
-    ducts = [[1.0, 1.0, "living space"]]
+    iecc_cz = '3B'
+    fnd_types = { 'living space' => 1000.0 }
+    ducts = [[1.0, 1.0, 'living space']]
     ach50 = calc_ach50(ncfl_ag, cfa, ceil_height, cvolume, desc, year_built, iecc_cz, fnd_types, ducts)
     assert_in_epsilon(8.0, ach50, 0.01)
 
@@ -235,11 +235,11 @@ class HEScoreRulesetTest < MiniTest::Test
     ncfl_ag = 2
     ceil_height = 8.0
     cvolume = cfa * ceil_height
-    desc = "tight"
+    desc = 'tight'
     year_built = 1975
-    iecc_cz = "3B"
-    fnd_types = { "living space" => 1000.0 }
-    ducts = [[1.0, 1.0, "attic - unconditioned"]]
+    iecc_cz = '3B'
+    fnd_types = { 'living space' => 1000.0 }
+    ducts = [[1.0, 1.0, 'attic - unconditioned']]
     ach50 = calc_ach50(ncfl_ag, cfa, ceil_height, cvolume, desc, year_built, iecc_cz, fnd_types, ducts)
     assert_in_epsilon(7.3, ach50, 0.01)
 
@@ -248,17 +248,17 @@ class HEScoreRulesetTest < MiniTest::Test
     ncfl_ag = 2
     ceil_height = 8.0
     cvolume = cfa * ceil_height
-    desc = "average"
+    desc = 'average'
     year_built = 1975
-    iecc_cz = "3B"
-    fnd_types = { "living space" => 600.0,
-                  "basement - conditioned" => 400.0 }
-    ducts = [[0.75, 0.5, "attic - unconditioned"],
-             [0.75, 0.25, "living space"],
-             [0.75, 0.25, "crawlspace - vented"],
-             [0.25, 0.5, "crawlspace - unvented"],
-             [0.25, 0.3, "attic - unconditioned"],
-             [0.25, 0.2, "crawlspace - vented"]]
+    iecc_cz = '3B'
+    fnd_types = { 'living space' => 600.0,
+                  'basement - conditioned' => 400.0 }
+    ducts = [[0.75, 0.5, 'attic - unconditioned'],
+             [0.75, 0.25, 'living space'],
+             [0.75, 0.25, 'crawlspace - vented'],
+             [0.25, 0.5, 'crawlspace - unvented'],
+             [0.25, 0.3, 'attic - unconditioned'],
+             [0.25, 0.2, 'crawlspace - vented']]
     ach50 = calc_ach50(ncfl_ag, cfa, ceil_height, cvolume, desc, year_built, iecc_cz, fnd_types, ducts)
     assert_in_epsilon(10.2, ach50, 0.01)
   end
@@ -293,118 +293,118 @@ class HEScoreRulesetTest < MiniTest::Test
 
   def test_hvac_lookup
     small_number = 0.00000000001
-    eff1 = lookup_hvac_efficiency(2010, "central air conditioner", "electricity", "SEER")
+    eff1 = lookup_hvac_efficiency(2010, 'central air conditioner', 'electricity', 'SEER')
     assert_in_epsilon(eff1, 13.76, small_number)
 
-    eff2 = lookup_hvac_efficiency(nil, "Furnace", "natural gas", "AFUE", "energy_star", "CO")
+    eff2 = lookup_hvac_efficiency(nil, 'Furnace', 'natural gas', 'AFUE', 'energy_star', 'CO')
     assert_in_epsilon(eff2, 0.95, small_number)
 
-    eff3 = lookup_hvac_efficiency(nil, "Furnace", "natural gas", "AFUE", "energy_star", "GA")
+    eff3 = lookup_hvac_efficiency(nil, 'Furnace', 'natural gas', 'AFUE', 'energy_star', 'GA')
     assert_in_epsilon(eff3, 0.9, small_number)
 
     err4 = assert_raises RuntimeError do
-      lookup_hvac_efficiency(nil, "Furnace", "natural gas", "AFUE", "energy_star")
+      lookup_hvac_efficiency(nil, 'Furnace', 'natural gas', 'AFUE', 'energy_star')
     end
     assert_match(/state_code required/, err4.message)
 
     err5 = assert_raises RuntimeError do
-      lookup_hvac_efficiency(1997, "Furnace", "unicorn tears", "AFUE")
+      lookup_hvac_efficiency(1997, 'Furnace', 'unicorn tears', 'AFUE')
     end
     assert_match(/Unexpected fuel_type/, err5.message)
 
     err6 = assert_raises RuntimeError do
-      lookup_hvac_efficiency(1997, "some invalid hvac_type", "electricity", "SEER")
+      lookup_hvac_efficiency(1997, 'some invalid hvac_type', 'electricity', 'SEER')
     end
     assert_match(/Unexpected hvac_type/, err6.message)
 
     err7 = assert_raises RuntimeError do
-      lookup_hvac_efficiency(2010, "central air conditioner", "electricity", "EER")
+      lookup_hvac_efficiency(2010, 'central air conditioner', 'electricity', 'EER')
     end
     assert_match(/Could not lookup default HVAC efficiency/, err7.message)
 
     err8 = assert_raises RuntimeError do
-      lookup_hvac_efficiency(nil, "Furnace", "natural gas", "AFUE", "energy_star", "ON")
+      lookup_hvac_efficiency(nil, 'Furnace', 'natural gas', 'AFUE', 'energy_star', 'ON')
     end
     assert_match(/Could not lookup Energy Star furnace region for state/, err8.message)
 
-    eff9 = lookup_hvac_efficiency(nil, "Boiler", "natural gas", "AFUE", "energy_star")
+    eff9 = lookup_hvac_efficiency(nil, 'Boiler', 'natural gas', 'AFUE', 'energy_star')
     assert_in_epsilon(eff9, 0.85, small_number)
 
-    eff10 = lookup_hvac_efficiency(nil, "air-to-air", "electricity", "SEER", "energy_star")
+    eff10 = lookup_hvac_efficiency(nil, 'air-to-air', 'electricity', 'SEER', 'energy_star')
     assert_in_epsilon(eff10, 14.0, small_number)
 
-    eff11 = lookup_hvac_efficiency(nil, "air-to-air", "electricity", "HSPF", "energy_star")
+    eff11 = lookup_hvac_efficiency(nil, 'air-to-air', 'electricity', 'HSPF', 'energy_star')
     assert_in_epsilon(eff11, 8.2, small_number)
 
     err12 = assert_raises RuntimeError do
-      lookup_hvac_efficiency(2010, "central air conditioner", "electricity", "SEER", "bogus_performance_id")
+      lookup_hvac_efficiency(2010, 'central air conditioner', 'electricity', 'SEER', 'bogus_performance_id')
     end
     assert_match(/Invalid performance_id for HVAC lookup/, err12.message)
 
     assert_in_epsilon(
-      lookup_hvac_efficiency(2010, "air-to-air", "electricity", "SEER"),
-      lookup_hvac_efficiency(2011, "air-to-air", "electricity", "SEER"),
+      lookup_hvac_efficiency(2010, 'air-to-air', 'electricity', 'SEER'),
+      lookup_hvac_efficiency(2011, 'air-to-air', 'electricity', 'SEER'),
       small_number
     )
 
     assert_in_epsilon(
-      lookup_hvac_efficiency(2010, "Furnace", "natural gas", "AFUE"),
-      lookup_hvac_efficiency(2020, "Furnace", "natural gas", "AFUE"),
+      lookup_hvac_efficiency(2010, 'Furnace', 'natural gas', 'AFUE'),
+      lookup_hvac_efficiency(2020, 'Furnace', 'natural gas', 'AFUE'),
       small_number
     )
 
     assert_in_epsilon(
-      lookup_hvac_efficiency(1969, "Boiler", "fuel oil", "AFUE"),
-      lookup_hvac_efficiency(1970, "Boiler", "fuel oil", "AFUE"),
+      lookup_hvac_efficiency(1969, 'Boiler', 'fuel oil', 'AFUE'),
+      lookup_hvac_efficiency(1970, 'Boiler', 'fuel oil', 'AFUE'),
       small_number
     )
 
     assert_in_epsilon(
-      lookup_hvac_efficiency(1955, "central air conditioner", "electricity", "SEER"),
-      lookup_hvac_efficiency(1970, "central air conditioner", "electricity", "SEER"),
+      lookup_hvac_efficiency(1955, 'central air conditioner', 'electricity', 'SEER'),
+      lookup_hvac_efficiency(1970, 'central air conditioner', 'electricity', 'SEER'),
       small_number
     )
   end
 
   def test_dhw_lookup
     small_number = 0.00000000001
-    eff1 = lookup_water_heater_efficiency(2006, "electricity")
+    eff1 = lookup_water_heater_efficiency(2006, 'electricity')
     assert_in_epsilon(eff1, 0.9, small_number)
 
-    eff2 = lookup_water_heater_efficiency(1998, "natural gas")
+    eff2 = lookup_water_heater_efficiency(1998, 'natural gas')
     assert_in_epsilon(eff2, 0.501, small_number)
 
-    eff3 = lookup_water_heater_efficiency(2007, "propane")
+    eff3 = lookup_water_heater_efficiency(2007, 'propane')
     assert_in_epsilon(eff3, 0.55, small_number)
 
-    eff4 = lookup_water_heater_efficiency(1989, "fuel oil")
+    eff4 = lookup_water_heater_efficiency(1989, 'fuel oil')
     assert_in_epsilon(eff4, 0.54, small_number)
 
-    eff5 = lookup_water_heater_efficiency(nil, "natural gas", "energy_star")
+    eff5 = lookup_water_heater_efficiency(nil, 'natural gas', 'energy_star')
     assert_in_epsilon(eff5, 0.67, small_number)
 
-    eff6 = lookup_water_heater_efficiency(nil, "propane", "energy_star")
+    eff6 = lookup_water_heater_efficiency(nil, 'propane', 'energy_star')
     assert_in_epsilon(eff6, 0.67, small_number)
 
-    eff7 = lookup_water_heater_efficiency(nil, "electricity", "energy_star")
+    eff7 = lookup_water_heater_efficiency(nil, 'electricity', 'energy_star')
     assert_in_epsilon(eff7, 2.76, small_number)
 
     err8 = assert_raises RuntimeError do
-      lookup_water_heater_efficiency(2006, "unicorn tears")
+      lookup_water_heater_efficiency(2006, 'unicorn tears')
     end
     assert_match(/Unexpected fuel_type/, err8.message)
 
     err9 = assert_raises RuntimeError do
-      lookup_water_heater_efficiency(2006, "electricity", "bogus performance_id")
+      lookup_water_heater_efficiency(2006, 'electricity', 'bogus performance_id')
     end
     assert_match(/Invalid performance_id/, err9.message)
 
     err10 = assert_raises RuntimeError do
-      lookup_water_heater_efficiency(nil, "fuel oil", "energy_star")
+      lookup_water_heater_efficiency(nil, 'fuel oil', 'energy_star')
     end
     assert_match(/Could not lookup default water heating efficiency/, err10.message)
 
-    ["natural gas", "electricity", "propane", "fuel oil"].each do |fuel_type|
+    ['natural gas', 'electricity', 'propane', 'fuel oil'].each do |fuel_type|
       assert_in_epsilon(
         lookup_water_heater_efficiency(2010, fuel_type),
         lookup_water_heater_efficiency(2011, fuel_type),
@@ -458,16 +458,16 @@ class HEScoreRulesetTest < MiniTest::Test
     show_output(result) unless result.value.valueName == 'Success'
 
     # assert that it ran correctly
-    assert_equal("Success", result.value.valueName)
+    assert_equal('Success', result.value.valueName)
   end
 
   def _test_schema_validation(parent_dir, xml)
     # TODO: Remove this when schema validation is included with CLI calls
-    schemas_dir = File.absolute_path(File.join(parent_dir, "..", "..", "..", "hpxml-measures", "HPXMLtoOpenStudio", "resources"))
+    schemas_dir = File.absolute_path(File.join(parent_dir, '..', '..', '..', 'hpxml-measures', 'HPXMLtoOpenStudio', 'resources'))
     hpxml_doc = REXML::Document.new(File.read(xml))
-    errors = XMLHelper.validate(hpxml_doc.to_s, File.join(schemas_dir, "HPXML.xsd"), nil)
+    errors = XMLHelper.validate(hpxml_doc.to_s, File.join(schemas_dir, 'HPXML.xsd'), nil)
     if errors.size > 0
-      puts "#{xml}: #{errors.to_s}"
+      puts "#{xml}: #{errors}"
     end
     assert_equal(0, errors.size)
   end
@@ -477,29 +477,29 @@ class HEScoreRulesetTest < MiniTest::Test
     out_doc = REXML::Document.new(File.read(args_hash['hpxml_output_path']))
 
     wall_code_by_id = {}
-    in_doc.elements.each("HPXML/Building/BuildingDetails/Enclosure/Walls/Wall") do |wall|
-      wall_code = XMLHelper.get_value(wall, "extension/hescore_wall_code")
-      wallid = wall.elements["SystemIdentifier"].attribute('id').value
+    in_doc.elements.each('HPXML/Building/BuildingDetails/Enclosure/Walls/Wall') do |wall|
+      wall_code = XMLHelper.get_value(wall, 'extension/hescore_wall_code')
+      wallid = wall.elements['SystemIdentifier'].attribute('id').value
       wall_code_by_id[wallid] = wall_code
     end
 
-    out_doc.elements.each("HPXML/Building/BuildingDetails/Enclosure/Walls/Wall") do |wall|
-      eff_rvalue = Float(XMLHelper.get_value(wall, "Insulation/AssemblyEffectiveRValue"))
-      wallid = wall.elements["SystemIdentifier"].attribute('id').value
+    out_doc.elements.each('HPXML/Building/BuildingDetails/Enclosure/Walls/Wall') do |wall|
+      eff_rvalue = Float(XMLHelper.get_value(wall, 'Insulation/AssemblyEffectiveRValue'))
+      wallid = wall.elements['SystemIdentifier'].attribute('id').value
       next if wall_code_by_id[wallid].nil?
 
       assert_in_epsilon(eff_rvalue, get_wall_effective_r_from_doe2code(wall_code_by_id[wallid]), 0.01)
     end
 
     roof_code_by_id = {}
-    in_doc.elements.each("HPXML/Building/BuildingDetails/Enclosure/Roofs/Roof") do |roof|
-      roofid = roof.elements["SystemIdentifier"].attribute('id').value
-      roof_code_by_id[roofid] = XMLHelper.get_value(roof, "extension/roof_assembly_code")
+    in_doc.elements.each('HPXML/Building/BuildingDetails/Enclosure/Roofs/Roof') do |roof|
+      roofid = roof.elements['SystemIdentifier'].attribute('id').value
+      roof_code_by_id[roofid] = XMLHelper.get_value(roof, 'extension/roof_assembly_code')
     end
 
-    out_doc.elements.each("HPXML/Building/BuildingDetails/Enclosure/Roofs/Roof") do |roof|
-      roofid = roof.elements["SystemIdentifier"].attribute('id').value
-      eff_rvalue = Float(XMLHelper.get_value(roof, "Insulation/AssemblyEffectiveRValue"))
+    out_doc.elements.each('HPXML/Building/BuildingDetails/Enclosure/Roofs/Roof') do |roof|
+      roofid = roof.elements['SystemIdentifier'].attribute('id').value
+      eff_rvalue = Float(XMLHelper.get_value(roof, 'Insulation/AssemblyEffectiveRValue'))
       assert_in_epsilon(eff_rvalue, get_roof_effective_r_from_doe2code(roof_code_by_id[roofid.split('_')[0]]), 0.01)
     end
   end
@@ -513,13 +513,13 @@ class HEScoreRulesetTest < MiniTest::Test
     cbv = Float(XMLHelper.get_value(out_doc, 'HPXML/Building/BuildingDetails/BuildingSummary/BuildingConstruction/ConditionedBuildingVolume'))
 
     has_conditioned_attic = XMLHelper.has_element(in_doc, "HPXML/Building/BuildingDetails/Enclosure/Attics/Attic/AtticType/Attic[Conditioned='true']")
-    has_cathedral_ceiling = XMLHelper.has_element(in_doc, "HPXML/Building/BuildingDetails/Enclosure/Attics/Attic/AtticType/CathedralCeiling")
+    has_cathedral_ceiling = XMLHelper.has_element(in_doc, 'HPXML/Building/BuildingDetails/Enclosure/Attics/Attic/AtticType/CathedralCeiling')
 
-    if not (has_cathedral_ceiling or has_conditioned_attic)
+    if not (has_cathedral_ceiling || has_conditioned_attic)
       assert_in_epsilon(cfa * ceil_height, cbv, 0.01)
-    elsif has_cathedral_ceiling and not has_conditioned_attic
+    elsif has_cathedral_ceiling && (not has_conditioned_attic)
       assert(cfa * ceil_height < cbv)
-    elsif not has_cathedral_ceiling and has_conditioned_attic
+    elsif (not has_cathedral_ceiling) && has_conditioned_attic
       assert(cfa * ceil_height > cbv)
     end
   end
