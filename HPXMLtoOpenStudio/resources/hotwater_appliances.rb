@@ -650,11 +650,7 @@ class HotWaterAndAppliances
     # Amendment on Domestic Hot Water (DHW) Systems
     # Table 4.2.2.5.2.11(6) Hot water distribution system relative annual energy waste factors
     if dist_type == HPXML::DHWDistTypeRecirc
-<<<<<<< HEAD
-      if recirc_control_type == HPXML::DHWRecirControlTypeNone or recirc_control_type == HPXML::DHWRecirControlTypeTimer
-=======
-      if (recirc_control_type == HPXML::DHWRecirControlTypeNone) || (recirc_control_type == 'timer')
->>>>>>> 72c9b9af892d85e357e511ed0aabd74dc0a34aa3
+      if (recirc_control_type == HPXML::DHWRecirControlTypeNone) || (recirc_control_type == HPXML::DHWRecirControlTypeTimer)
         if pipe_r < 3.0
           return 500.0
         else
