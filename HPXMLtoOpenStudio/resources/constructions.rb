@@ -105,7 +105,7 @@ class Constructions
     stud_frac = 1.5 / framing_spacing
     misc_framing_factor = framing_factor - stud_frac
     if misc_framing_factor < 0
-      fail "Framing Factor (#{framing_factor.to_s}) is less than the framing solely provided by the studs (#{stud_frac.to_s})."
+      fail "Framing Factor (#{framing_factor}) is less than the framing solely provided by the studs (#{stud_frac})."
     end
 
     dsGapFactor = self.get_gap_factor(install_grade, framing_factor, cavity_r)
@@ -955,7 +955,7 @@ class Constructions
     if addtl_surface_area_lv > 0
       # Add remaining partition walls within spaces (those without geometric representation)
       # as internal mass object.
-      obj_name = "#{living_space.name.to_s} Living Partition"
+      obj_name = "#{living_space.name} Living Partition"
       imdef = create_os_int_mass_and_def(model, obj_name, living_space, addtl_surface_area_lv)
       imdefs << imdef
     end
@@ -963,7 +963,7 @@ class Constructions
     if addtl_surface_area_base > 0
       # Add remaining partition walls within spaces (those without geometric representation)
       # as internal mass object.
-      obj_name = "#{living_space.name.to_s} Basement Partition"
+      obj_name = "#{living_space.name} Basement Partition"
       imdef = create_os_int_mass_and_def(model, obj_name, living_space, addtl_surface_area_base)
       cond_base_surfaces << imdef
       imdefs << imdef
@@ -996,9 +996,9 @@ class Constructions
       next if furnAreaFraction <= 0
       next if space.floorArea <= 0
 
-      mat_obj_name_space = "#{Constants.ObjectNameFurniture} material #{space.name.to_s}"
-      constr_obj_name_space = "#{Constants.ObjectNameFurniture} construction #{space.name.to_s}"
-      mass_obj_name_space = "#{Constants.ObjectNameFurniture} mass #{space.name.to_s}"
+      mat_obj_name_space = "#{Constants.ObjectNameFurniture} material #{space.name}"
+      constr_obj_name_space = "#{Constants.ObjectNameFurniture} construction #{space.name}"
+      mass_obj_name_space = "#{Constants.ObjectNameFurniture} mass #{space.name}"
 
       furnThickness = UnitConversions.convert(furnMass / (furnDensity * furnAreaFraction), 'ft', 'in')
 
@@ -1628,13 +1628,13 @@ class Construction
   def validate
     # Check that sum of path fracs equal 1
     if @sum_path_fracs <= 0.999 or @sum_path_fracs >= 1.001
-      fail "Invalid construction: Sum of path fractions (#{@sum_path_fracs.to_s}) is not 1."
+      fail "Invalid construction: Sum of path fractions (#{@sum_path_fracs}) is not 1."
     end
 
     # Check that all path fractions are not negative
     @path_fracs.each do |path_frac|
       if path_frac < 0
-        fail "Invalid construction: Path fraction (#{path_frac.to_s}) must be greater than or equal to 0."
+        fail "Invalid construction: Path fraction (#{path_frac}) must be greater than or equal to 0."
       end
     end
 

@@ -310,15 +310,15 @@ class Airflow
       end
 
       # Supply fan runtime fraction
-      fan_rtf_var = OpenStudio::Model::EnergyManagementSystemGlobalVariable.new(model, "#{air_loop.name.to_s} Fan RTF".gsub(" ", "_"))
+      fan_rtf_var = OpenStudio::Model::EnergyManagementSystemGlobalVariable.new(model, "#{air_loop.name} Fan RTF".gsub(" ", "_"))
       if supply_fan.to_FanOnOff.is_initialized
         fan_rtf_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, "Fan Runtime Fraction")
         fan_rtf_sensor.setName("#{fan_rtf_var.name} s")
         fan_rtf_sensor.setKeyName(supply_fan.name.to_s)
       elsif supply_fan.to_FanVariableVolume.is_initialized
         fan_mfr_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, "Fan Air Mass Flow Rate")
-        fan_mfr_sensor.setName("#{supply_fan.name.to_s} air MFR")
-        fan_mfr_sensor.setKeyName("#{supply_fan.name.to_s}")
+        fan_mfr_sensor.setName("#{supply_fan.name} air MFR")
+        fan_mfr_sensor.setKeyName("#{supply_fan.name}")
         fan_rtf_sensor = OpenStudio::Model::EnergyManagementSystemGlobalVariable.new(model, "#{fan_rtf_var.name}_s")
       else
         fail "Unexpected fan: #{supply_fan.name}"
@@ -326,7 +326,7 @@ class Airflow
 
       # Supply fan maximum mass flow rate
       fan_mfr_max_var = OpenStudio::Model::EnergyManagementSystemInternalVariable.new(model, "Fan Maximum Mass Flow Rate")
-      fan_mfr_max_var.setName("#{air_loop.name.to_s} max sup fan mfr")
+      fan_mfr_max_var.setName("#{air_loop.name} max sup fan mfr")
       fan_mfr_max_var.setInternalDataIndexKeyName(supply_fan.name.to_s)
 
       air_loop_objects[air_loop] = { :fan_rtf_var => fan_rtf_var,
@@ -998,31 +998,31 @@ class Airflow
       # -- Sensors --
 
       # Air handler mass flow rate
-      ah_mfr_var = OpenStudio::Model::EnergyManagementSystemGlobalVariable.new(model, "#{air_loop.name.to_s} AH MFR".gsub(" ", "_"))
+      ah_mfr_var = OpenStudio::Model::EnergyManagementSystemGlobalVariable.new(model, "#{air_loop.name} AH MFR".gsub(" ", "_"))
       ah_mfr_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, "System Node Mass Flow Rate")
       ah_mfr_sensor.setName("#{ah_mfr_var.name} s")
       ah_mfr_sensor.setKeyName(air_demand_inlet_node.name.to_s)
 
       # Air handler volume flow rate
-      ah_vfr_var = OpenStudio::Model::EnergyManagementSystemGlobalVariable.new(model, "#{air_loop.name.to_s} AH VFR".gsub(" ", "_"))
+      ah_vfr_var = OpenStudio::Model::EnergyManagementSystemGlobalVariable.new(model, "#{air_loop.name} AH VFR".gsub(" ", "_"))
       ah_vfr_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, "System Node Current Density Volume Flow Rate")
       ah_vfr_sensor.setName("#{ah_vfr_var.name} s")
       ah_vfr_sensor.setKeyName(air_demand_inlet_node.name.to_s)
 
       # Air handler outlet temperature
-      ah_tout_var = OpenStudio::Model::EnergyManagementSystemGlobalVariable.new(model, "#{air_loop.name.to_s} AH Tout".gsub(" ", "_"))
+      ah_tout_var = OpenStudio::Model::EnergyManagementSystemGlobalVariable.new(model, "#{air_loop.name} AH Tout".gsub(" ", "_"))
       ah_tout_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, "System Node Temperature")
       ah_tout_sensor.setName("#{ah_tout_var.name} s")
       ah_tout_sensor.setKeyName(air_demand_inlet_node.name.to_s)
 
       # Air handler outlet humidity ratio
-      ah_wout_var = OpenStudio::Model::EnergyManagementSystemGlobalVariable.new(model, "#{air_loop.name.to_s} AH Wout".gsub(" ", "_"))
+      ah_wout_var = OpenStudio::Model::EnergyManagementSystemGlobalVariable.new(model, "#{air_loop.name} AH Wout".gsub(" ", "_"))
       ah_wout_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, "System Node Humidity Ratio")
       ah_wout_sensor.setName("#{ah_wout_var.name} s")
       ah_wout_sensor.setKeyName(air_demand_inlet_node.name.to_s)
 
       # Return air temperature
-      ra_t_var = OpenStudio::Model::EnergyManagementSystemGlobalVariable.new(model, "#{air_loop.name.to_s} RA T".gsub(" ", "_"))
+      ra_t_var = OpenStudio::Model::EnergyManagementSystemGlobalVariable.new(model, "#{air_loop.name} RA T".gsub(" ", "_"))
       if not living_zone_return_air_node.nil?
         ra_t_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, "System Node Temperature")
         ra_t_sensor.setName("#{ra_t_var.name} s")
@@ -1032,7 +1032,7 @@ class Airflow
       end
 
       # Return air humidity ratio
-      ra_w_var = OpenStudio::Model::EnergyManagementSystemGlobalVariable.new(model, "#{air_loop.name.to_s} Ra W".gsub(" ", "_"))
+      ra_w_var = OpenStudio::Model::EnergyManagementSystemGlobalVariable.new(model, "#{air_loop.name} Ra W".gsub(" ", "_"))
       if not living_zone_return_air_node.nil?
         ra_w_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, "System Node Humidity Ratio")
         ra_w_sensor.setName("#{ra_w_var.name} s")
@@ -1045,7 +1045,7 @@ class Airflow
 
       # Living zone humidity ratio
       win_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, "Zone Mean Air Humidity Ratio")
-      win_sensor.setName("#{air_loop.name.to_s} win s")
+      win_sensor.setName("#{air_loop.name} win s")
       win_sensor.setKeyName(building.living.zone.name.to_s)
 
       fan_mfr_max_var = air_loop_objects[air_loop][:fan_mfr_max_var]
@@ -1060,7 +1060,7 @@ class Airflow
 
         air_loop_name_idx = air_loop.name.to_s
         if i > 0
-          air_loop_name_idx = "#{air_loop.name.to_s}_#{i}"
+          air_loop_name_idx = "#{air_loop.name}_#{i}"
         end
 
         # -- Sensors --

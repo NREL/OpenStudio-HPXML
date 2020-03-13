@@ -1194,7 +1194,7 @@ class HVACSizing
       dse_Fregain = 1.0
 
     else
-      fail "Unexpected duct location: #{duct.LocationSpace.name.to_s}"
+      fail "Unexpected duct location: #{duct.LocationSpace.name}"
     end
 
     return dse_Fregain
@@ -1909,7 +1909,7 @@ class HVACSizing
           shade = shading_material.to_Shade.get
           int_shade_heat_to_cool_ratio = shade.solarTransmittance
         else
-          fail "Unhandled shading material: #{shading_material.name.to_s}."
+          fail "Unhandled shading material: #{shading_material.name}."
         end
       end
     end
@@ -2248,14 +2248,14 @@ class HVACSizing
         hvac.CapacityRatioCooling = capacityRatioCooling.split(",").map(&:to_f)
 
         if not equip.designSpecificationMultispeedObject.is_initialized
-          fail "DesignSpecificationMultispeedObject not set for #{equip.name.to_s}."
+          fail "DesignSpecificationMultispeedObject not set for #{equip.name}."
         end
 
         perf = equip.designSpecificationMultispeedObject.get
         hvac.FanspeedRatioCooling = []
         perf.supplyAirflowRatioFields.each do |airflowRatioField|
           if not airflowRatioField.coolingRatio.is_initialized
-            fail "Cooling airflow ratio not set for #{perf.name.to_s}"
+            fail "Cooling airflow ratio not set for #{perf.name}"
           end
 
           hvac.FanspeedRatioCooling << airflowRatioField.coolingRatio.get
@@ -2503,7 +2503,7 @@ class HVACSizing
 
   def self.get_space_ua_values(space, weather)
     if Geometry.space_is_conditioned(space)
-      fail "Method should not be called for a conditioned space: '#{space.name.to_s}'."
+      fail "Method should not be called for a conditioned space: '#{space.name}'."
     end
 
     space_UAs = { "foundation" => 0.0, "outdoors" => 0.0, "surface" => 0.0 }
@@ -3090,7 +3090,7 @@ class HVACSizing
 
     # Get wall insulation R-value/height from Kiva:Foundation object
     if not surface.adjacentFoundation.is_initialized
-      fail "Could not get foundation object for wall '#{surface.name.to_s}'."
+      fail "Could not get foundation object for wall '#{surface.name}'."
     end
 
     foundation = surface.adjacentFoundation.get
@@ -3471,7 +3471,7 @@ class HVACSizing
       return UnitConversions.convert(simple_glazing.uFactor, "W/(m^2*K)", "Btu/(hr*ft^2*F)")
     else
       if not surface.construction.is_initialized
-        fail "Construction not assigned to '#{surface.name.to_s}'."
+        fail "Construction not assigned to '#{surface.name}'."
       end
 
       ufactor = UnitConversions.convert(surface.uFactor.get, "W/(m^2*K)", "Btu/(hr*ft^2*F)")
@@ -3479,7 +3479,7 @@ class HVACSizing
         # Use average u-factor of adjacent surface, as OpenStudio returns
         # two different values for, e.g., floor vs adjacent roofceiling
         if not surface.adjacentSurface.get.construction.is_initialized
-          fail "Construction not assigned to '#{surface.adjacentSurface.get.name.to_s}'."
+          fail "Construction not assigned to '#{surface.adjacentSurface.get.name}'."
         end
 
         adjacent_ufactor = UnitConversions.convert(surface.adjacentSurface.get.uFactor.get, "W/(m^2*K)", "Btu/(hr*ft^2*F)")
@@ -3491,17 +3491,17 @@ class HVACSizing
 
   def self.get_window_simple_glazing(surface)
     if not surface.construction.is_initialized
-      fail "Construction not assigned to '#{surface.name.to_s}'."
+      fail "Construction not assigned to '#{surface.name}'."
     end
 
     construction = surface.construction.get
     if not construction.to_LayeredConstruction.is_initialized
-      fail "Expected LayeredConstruction for '#{surface.name.to_s}'."
+      fail "Expected LayeredConstruction for '#{surface.name}'."
     end
 
     window_layered_construction = construction.to_LayeredConstruction.get
     if not window_layered_construction.getLayer(0).to_SimpleGlazing.is_initialized
-      fail "Expected SimpleGlazing for '#{surface.name.to_s}'."
+      fail "Expected SimpleGlazing for '#{surface.name}'."
     end
 
     simple_glazing = window_layered_construction.getLayer(0).to_SimpleGlazing.get
@@ -3509,7 +3509,7 @@ class HVACSizing
   end
 
   def self.display_zone_loads(zone_loads)
-    s = "Zone Loads for #{@cond_zone.name.to_s}:"
+    s = "Zone Loads for #{@cond_zone.name}:"
     properties = [
       :Heat_Windows, :Heat_Skylights,
       :Heat_Doors, :Heat_Walls,
@@ -3522,13 +3522,13 @@ class HVACSizing
       :Cool_IntGains_Sens, :Cool_IntGains_Lat,
     ]
     properties.each do |property|
-      s += "\n#{property.to_s.gsub("_", " ")} = #{zone_loads.send(property).round(0).to_s} Btu/hr"
+      s += "\n#{property.to_s.gsub("_", " ")} = #{zone_loads.send(property).round(0)} Btu/hr"
     end
     @runner.registerInfo("#{s}\n")
   end
 
   def self.display_hvac_final_values_results(hvac_final_values, hvac)
-    s = "Final Results for #{hvac.Objects[0].name.to_s}:"
+    s = "Final Results for #{hvac.Objects[0].name}:"
     loads = [
       :Heat_Load, :Heat_Load_Ducts,
       :Cool_Load_Lat, :Cool_Load_Sens,
@@ -3542,13 +3542,13 @@ class HVACSizing
       :Cool_Airflow, :Heat_Airflow,
     ]
     loads.each do |load|
-      s += "\n#{load.to_s.gsub("_", " ")} = #{hvac_final_values.send(load).round(0).to_s} Btu/hr"
+      s += "\n#{load.to_s.gsub("_", " ")} = #{hvac_final_values.send(load).round(0)} Btu/hr"
     end
     caps.each do |cap|
-      s += "\n#{cap.to_s.gsub("_", " ")} = #{hvac_final_values.send(cap).round(0).to_s} Btu/hr"
+      s += "\n#{cap.to_s.gsub("_", " ")} = #{hvac_final_values.send(cap).round(0)} Btu/hr"
     end
     airflows.each do |airflow|
-      s += "\n#{airflow.to_s.gsub("_", " ")} = #{hvac_final_values.send(airflow).round(0).to_s} cfm"
+      s += "\n#{airflow.to_s.gsub("_", " ")} = #{hvac_final_values.send(airflow).round(0)} cfm"
     end
     @runner.registerInfo("#{s}\n")
   end

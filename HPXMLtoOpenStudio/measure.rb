@@ -172,7 +172,7 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
 
     # Validate input HPXML against schema
     XMLHelper.validate(hpxml.doc.to_s, File.join(schemas_dir, "HPXML.xsd"), runner).each do |error|
-      runner.registerError("#{hpxml_path}: #{error.to_s}")
+      runner.registerError("#{hpxml_path}: #{error}")
       is_valid = false
     end
     runner.registerInfo("#{hpxml_path}: Validated against HPXML schema.")
@@ -3577,9 +3577,9 @@ class OSModel
 
     # EMS program: Surfaces
     surfaces_sensors.each do |k, surface_sensors|
-      program.addLine("Set hr_#{k.to_s} = 0")
+      program.addLine("Set hr_#{k} = 0")
       surface_sensors.each do |sensors|
-        s = "Set hr_#{k.to_s} = hr_#{k.to_s}"
+        s = "Set hr_#{k} = hr_#{k}"
         sensors.each do |sensor|
           if sensor.name.to_s.start_with? "ss_net" or sensor.name.to_s.start_with? "ss_sol_abs"
             s += " - #{sensor.name}"
@@ -3652,7 +3652,7 @@ class OSModel
         sign = "-"
       end
       surfaces_sensors.keys.each do |k|
-        program.addLine("Set loads_#{mode}_#{k.to_s} = #{sign}hr_#{k.to_s} * #{mode}_mode")
+        program.addLine("Set loads_#{mode}_#{k} = #{sign}hr_#{k} * #{mode}_mode")
       end
       nonsurf_names.each do |nonsurf_name|
         program.addLine("Set loads_#{mode}_#{nonsurf_name} = #{sign}hr_#{nonsurf_name} * #{mode}_mode")
@@ -3670,7 +3670,7 @@ class OSModel
 
     # EMS calling manager
     program_calling_manager = OpenStudio::Model::EnergyManagementSystemProgramCallingManager.new(model)
-    program_calling_manager.setName("#{program.name.to_s} calling manager")
+    program_calling_manager.setName("#{program.name} calling manager")
     program_calling_manager.setCallingPoint("EndOfZoneTimestepAfterZoneReporting")
     program_calling_manager.addProgram(program)
   end
@@ -4041,9 +4041,9 @@ class OSModel
 
       if (assembly_r - constr_r).abs > 0.1
         if match
-          fail "Construction R-value (#{constr_r}) does not match Assembly R-value (#{assembly_r}) for '#{surface.name.to_s}'."
+          fail "Construction R-value (#{constr_r}) does not match Assembly R-value (#{assembly_r}) for '#{surface.name}'."
         else
-          runner.registerWarning("Assembly R-value (#{assembly_r}) for '#{surface.name.to_s}' below minimum expected value. Construction R-value increased to #{constr_r.round(2)}.")
+          runner.registerWarning("Assembly R-value (#{assembly_r}) for '#{surface.name}' below minimum expected value. Construction R-value increased to #{constr_r.round(2)}.")
         end
       end
     end

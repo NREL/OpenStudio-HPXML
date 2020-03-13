@@ -823,7 +823,7 @@ class SimulationOutputReport < OpenStudio::Measure::ReportingMeasure
       n_elements << data_array.size
     end
     if n_elements.uniq.size > 1
-      fail "Inconsistent number of array elements: #{n_elements.uniq.to_s}."
+      fail "Inconsistent number of array elements: #{n_elements.uniq}."
     end
 
     # Write file
@@ -1410,7 +1410,7 @@ class SimulationOutputReport < OpenStudio::Measure::ReportingMeasure
 
     def add_output_variables(vars, object, timeseries_frequency)
       if object.to_EnergyManagementSystemOutputVariable.is_initialized
-        return [OpenStudio::IdfObject.load("Output:Variable,*,#{object.name.to_s},#{timeseries_frequency};").get]
+        return [OpenStudio::IdfObject.load("Output:Variable,*,#{object.name},#{timeseries_frequency};").get]
       else
         obj_class = nil
         vars.keys.each do |k|
@@ -1424,7 +1424,7 @@ class SimulationOutputReport < OpenStudio::Measure::ReportingMeasure
 
         results = []
         vars[obj_class].each do |object_var|
-          results << OpenStudio::IdfObject.load("Output:Variable,#{object.name.to_s},#{object_var},#{timeseries_frequency};").get
+          results << OpenStudio::IdfObject.load("Output:Variable,#{object.name},#{object_var},#{timeseries_frequency};").get
         end
         return results
       end

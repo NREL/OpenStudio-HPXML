@@ -948,13 +948,13 @@ class Waterheater
           equipment_peaks[wu.name.to_s] = wu_peak
           # mfr fraction schedule sensors
           wu_sch_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, "Schedule Value")
-          wu_sch_sensor.setName("#{wu.name.to_s} sch value")
+          wu_sch_sensor.setName("#{wu.name} sch value")
           wu_sch_sensor.setKeyName(wu.flowRateFractionSchedule.get.name.to_s)
           equipment_sch_sensors[wu.name.to_s] = wu_sch_sensor
           # water use equipment target temperature schedule sensors
           target_temp_sch = wu.waterUseEquipmentDefinition.targetTemperatureSchedule.get
           target_temp_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, "Schedule Value")
-          target_temp_sensor.setName("#{wu.name.to_s} target temp")
+          target_temp_sensor.setName("#{wu.name} target temp")
           target_temp_sensor.setKeyName(target_temp_sch.name.to_s)
           equipment_target_temp_sensors[wu.name.to_s] = target_temp_sensor
         end

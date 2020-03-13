@@ -1343,7 +1343,7 @@ class HPXMLTest < MiniTest::Test
     hpxml_doc = REXML::Document.new(File.read(xml))
     errors = XMLHelper.validate(hpxml_doc.to_s, File.join(schemas_dir, "HPXML.xsd"), nil)
     if errors.size > 0
-      puts "#{xml}: #{errors.to_s}"
+      puts "#{xml}: #{errors}"
     end
     assert_equal(0, errors.size)
   end

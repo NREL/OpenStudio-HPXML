@@ -39,7 +39,7 @@ class HourlyByMonthSchedule
   private
 
   def validateValues(vals, num_outter_values, num_inner_values)
-    err_msg = "A #{num_outter_values.to_s}-element array with #{num_inner_values.to_s}-element arrays of numbers must be entered for the schedule."
+    err_msg = "A #{num_outter_values}-element array with #{num_inner_values}-element arrays of numbers must be entered for the schedule."
     if not vals.is_a?(Array)
       fail err_msg
     end
@@ -222,7 +222,7 @@ class MonthWeekdayWeekendSchedule
   private
 
   def validateValues(values, num_values, sch_name)
-    err_msg = "A comma-separated string of #{num_values.to_s} numbers must be entered for the #{sch_name} schedule."
+    err_msg = "A comma-separated string of #{num_values} numbers must be entered for the #{sch_name} schedule."
     if values.is_a?(Array)
       if values.length != num_values
         fail err_msg
