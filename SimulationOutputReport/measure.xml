@@ -2,8 +2,8 @@
   <schema_version>3.0</schema_version>
   <name>simulation_output_report</name>
   <uid>df9d170c-c21a-4130-866d-0d46b06073fd</uid>
-  <version_id>3b127ed6-2410-4a30-8898-bc7fa14c8500</version_id>
-  <version_modified>20200312T010328Z</version_modified>
+  <version_id>e7d67eb7-2d56-47b1-8e05-8d637eceb6aa</version_id>
+  <version_modified>20200313T190140Z</version_modified>
   <xml_checksum>9BF1E6AC</xml_checksum>
   <class_name>SimulationOutputReport</class_name>
   <display_name>HPXML Simulation Output Report</display_name>
@@ -155,6 +155,20 @@
       <name>Propane: Total MBtu</name>
       <display_name>Propane: Total MBtu</display_name>
       <short_name>Propane: Total MBtu</short_name>
+      <type>Double</type>
+      <model_dependent>false</model_dependent>
+    </output>
+    <output>
+      <name>Wood: Total MBtu</name>
+      <display_name>Wood: Total MBtu</display_name>
+      <short_name>Wood: Total MBtu</short_name>
+      <type>Double</type>
+      <model_dependent>false</model_dependent>
+    </output>
+    <output>
+      <name>Wood Pellets: Total MBtu</name>
+      <display_name>Wood Pellets: Total MBtu</display_name>
+      <short_name>Wood Pellets: Total MBtu</short_name>
       <type>Double</type>
       <model_dependent>false</model_dependent>
     </output>
@@ -389,6 +403,41 @@
       <type>Double</type>
       <model_dependent>false</model_dependent>
     </output>
+    <output>
+      <name>Wood: Heating MBtu</name>
+      <display_name>Wood: Heating MBtu</display_name>
+      <short_name>Wood: Heating MBtu</short_name>
+      <type>Double</type>
+      <model_dependent>false</model_dependent>
+    </output>
+    <output>
+      <name>Wood: Hot Water MBtu</name>
+      <display_name>Wood: Hot Water MBtu</display_name>
+      <short_name>Wood: Hot Water MBtu</short_name>
+      <type>Double</type>
+      <model_dependent>false</model_dependent>
+    </output>
+    <output>
+      <name>Wood: Clothes Dryer MBtu</name>
+      <display_name>Wood: Clothes Dryer MBtu</display_name>
+      <short_name>Wood: Clothes Dryer MBtu</short_name>
+      <type>Double</type>
+      <model_dependent>false</model_dependent>
+    </output>
+    <output>
+      <name>Wood: Range/Oven MBtu</name>
+      <display_name>Wood: Range/Oven MBtu</display_name>
+      <short_name>Wood: Range/Oven MBtu</short_name>
+      <type>Double</type>
+      <model_dependent>false</model_dependent>
+    </output>
+    <output>
+      <name>Wood Pellets: Heating MBtu</name>
+      <display_name>Wood Pellets: Heating MBtu</display_name>
+      <short_name>Wood Pellets: Heating MBtu</short_name>
+      <type>Double</type>
+      <model_dependent>false</model_dependent>
+    </output>
   </outputs>
   <provenances/>
   <tags>
@@ -427,13 +476,13 @@
       <filename>measure.rb</filename>
       <filetype>rb</filetype>
       <usage_type>script</usage_type>
-      <checksum>2CB19DD0</checksum>
+      <checksum>198C29BF</checksum>
     </file>
     <file>
       <filename>constants.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>C760B156</checksum>
+      <checksum>5E8B1308</checksum>
     </file>
   </files>
 </measure>

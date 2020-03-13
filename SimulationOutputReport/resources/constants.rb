@@ -4,7 +4,8 @@ class FT
   Gas = "Natural Gas"
   Oil = "Fuel Oil"
   Propane = "Propane"
-  # FIXME: Wood and Wood Pellets
+  Wood = "Wood"
+  WoodPellets = "Wood Pellets"
 end
 
 class EUT

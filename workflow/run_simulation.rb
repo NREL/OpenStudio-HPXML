@@ -97,7 +97,7 @@ def run_workflow(basedir, rundir, hpxml, debug, hourly_outputs)
   end
 
   if not success
-    puts "Processing output unsuccessful."
+    fail "Processing output unsuccessful."
   end
 end
 
