@@ -552,7 +552,7 @@ class HotWaterAndAppliances
     # Amendment on Domestic Hot Water (DHW) Systems
     # Table 4.2.2.5.2.11(5) Annual electricity consumption factor for hot water recirculation system pumps
     if dist_type == HPXML::DHWDistTypeRecirc
-      if (recirc_control_type == HPXML::DHWRecirControlTypeNone) || (recirc_control_type == 'timer')
+      if (recirc_control_type == HPXML::DHWRecirControlTypeNone) || (recirc_control_type == HPXML::DHWRecirControlTypeTimer)
         return 8.76 * recirc_pump_power
       elsif recirc_control_type == HPXML::DHWRecirControlTypeTemperature
         return 1.46 * recirc_pump_power
