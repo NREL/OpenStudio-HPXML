@@ -817,7 +817,7 @@ class HEScoreRuleset
 
     new_hpxml.pv_systems.add(id: 'PVSystem',
                              location: HPXML::LocationRoof,
-                             module_type: HPXML::DHWDistTypeStandard, # From https =>//docs.google.com/spreadsheets/d/1YeoVOwu9DU-50fxtT_KRh_BJLlchF7nls85Ebe9fDkI
+                             module_type: HPXML::PVModuleTypeStandard, # From https =>//docs.google.com/spreadsheets/d/1YeoVOwu9DU-50fxtT_KRh_BJLlchF7nls85Ebe9fDkI
                              tracking: HPXML::PVTrackingTypeFixed,
                              array_azimuth: orientation_to_azimuth(orig_pv_system.array_orientation),
                              array_tilt: @roof_angle,
