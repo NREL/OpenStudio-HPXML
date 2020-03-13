@@ -369,12 +369,12 @@ class Waterheater
       amb_rh_sensor.setName("#{obj_name_hpwh} amb rh")
       amb_rh_sensor.setKeyName('Environment')
     elsif water_heater_tz.is_a? OpenStudio::Model::ScheduleConstant
-      amb_temp_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, "Schedule Value")
+      amb_temp_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Schedule Value')
       amb_temp_sensor.setName("#{obj_name_hpwh} amb temp")
       amb_temp_sensor.setKeyName(water_heater_tz.name.to_s)
 
       # FIXME: Outdoor air humidity? Indoor air humidity? Average?
-      amb_rh_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, "Site Outdoor Air Relative Humidity")
+      amb_rh_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Site Outdoor Air Relative Humidity')
       amb_rh_sensor.setName("#{obj_name_hpwh} amb rh")
       amb_rh_sensor.setKeyName('Environment')
     else
@@ -1587,7 +1587,7 @@ class Waterheater
     new_heater.setOnCycleLossFractiontoThermalZone(1.0)
     set_wh_ambient(space, model, new_heater)
 
-    ua_w_k = UnitConversions.convert(ua, "Btu/(hr*F)", "W/K")
+    ua_w_k = UnitConversions.convert(ua, 'Btu/(hr*F)', 'W/K')
     new_heater.setOnCycleLossCoefficienttoAmbientTemperature(ua_w_k)
     new_heater.setOffCycleLossCoefficienttoAmbientTemperature(ua_w_k)
 

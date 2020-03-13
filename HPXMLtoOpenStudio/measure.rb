@@ -347,21 +347,21 @@ class OSModel
       next unless Geometry.is_unconditioned_basement(thermal_zone) || Geometry.is_unvented_crawl(thermal_zone) ||
                   Geometry.is_vented_crawl(thermal_zone) || Geometry.is_garage(thermal_zone)
 
-        zones_updated += 1
+      zones_updated += 1
 
-        zone_floor_area = 0.0
-        thermal_zone.spaces.each do |space|
-          space.surfaces.each do |surface|
+      zone_floor_area = 0.0
+      thermal_zone.spaces.each do |space|
+        space.surfaces.each do |surface|
           if surface.surfaceType.downcase == 'floor'
             zone_floor_area += UnitConversions.convert(surface.grossArea, 'm^2', 'ft^2')
-            end
           end
         end
+      end
 
-        zone_volume = Geometry.get_height_of_spaces(thermal_zone.spaces) * zone_floor_area
-        if zone_volume <= 0
-          fail "Calculated volume for #{thermal_zone.name} zone (#{zone_volume}) is not greater than zero."
-        end
+      zone_volume = Geometry.get_height_of_spaces(thermal_zone.spaces) * zone_floor_area
+      if zone_volume <= 0
+        fail "Calculated volume for #{thermal_zone.name} zone (#{zone_volume}) is not greater than zero."
+      end
 
       thermal_zone.setVolume(UnitConversions.convert(zone_volume, 'ft^3', 'm^3'))
     end
@@ -378,23 +378,23 @@ class OSModel
     thermal_zones.each do |thermal_zone|
       next unless Geometry.is_vented_attic(thermal_zone) || Geometry.is_unvented_attic(thermal_zone)
 
-        zones_updated += 1
+      zones_updated += 1
 
-        zone_surfaces = []
-        zone_floor_area = 0.0
-        thermal_zone.spaces.each do |space|
-          space.surfaces.each do |surface|
-            zone_surfaces << surface
+      zone_surfaces = []
+      zone_floor_area = 0.0
+      thermal_zone.spaces.each do |space|
+        space.surfaces.each do |surface|
+          zone_surfaces << surface
           if surface.surfaceType.downcase == 'floor'
             zone_floor_area += UnitConversions.convert(surface.grossArea, 'm^2', 'ft^2')
-            end
           end
         end
+      end
 
-        # Assume square hip roof for volume calculations; energy results are very insensitive to actual volume
-        zone_length = zone_floor_area**0.5
+      # Assume square hip roof for volume calculations; energy results are very insensitive to actual volume
+      zone_length = zone_floor_area**0.5
       zone_height = Math.tan(UnitConversions.convert(Geometry.get_roof_pitch(zone_surfaces), 'deg', 'rad')) * zone_length / 2.0
-        zone_volume = [zone_floor_area * zone_height / 3.0, 0.01].max
+      zone_volume = [zone_floor_area * zone_height / 3.0, 0.01].max
       thermal_zone.setVolume(UnitConversions.convert(zone_volume, 'ft^3', 'm^3'))
     end
 
@@ -1695,12 +1695,12 @@ class OSModel
       surface = OpenStudio::Model::Surface.new(add_wall_polygon(window_width, window_height, z_origin,
                                                                 window.azimuth, [0, 0.0001, 0.0001, 0.0001]), model)
 
-      surface.additionalProperties.setFeature("Length", window_width)
-      surface.additionalProperties.setFeature("Azimuth", window.azimuth)
-      surface.additionalProperties.setFeature("Tilt", 90.0)
-      surface.additionalProperties.setFeature("SurfaceType", "Window")
+      surface.additionalProperties.setFeature('Length', window_width)
+      surface.additionalProperties.setFeature('Azimuth', window.azimuth)
+      surface.additionalProperties.setFeature('Tilt', 90.0)
+      surface.additionalProperties.setFeature('SurfaceType', 'Window')
       surface.setName("surface #{window.id}")
-      surface.setSurfaceType("Wall")
+      surface.setSurfaceType('Wall')
       set_surface_interior(model, spaces, surface, window.wall.interior_adjacent_to)
       assign_outside_boundary_condition_to_subsurface(surface, window, spaces, model)
       surfaces << surface
@@ -1807,12 +1807,12 @@ class OSModel
       surface = OpenStudio::Model::Surface.new(add_wall_polygon(door_width, door_height, z_origin,
                                                                 door.azimuth, [0, 0.0001, 0.0001, 0.0001]), model)
 
-      surface.additionalProperties.setFeature("Length", door_width)
-      surface.additionalProperties.setFeature("Azimuth", door.azimuth)
-      surface.additionalProperties.setFeature("Tilt", 90.0)
-      surface.additionalProperties.setFeature("SurfaceType", "Door")
+      surface.additionalProperties.setFeature('Length', door_width)
+      surface.additionalProperties.setFeature('Azimuth', door.azimuth)
+      surface.additionalProperties.setFeature('Tilt', 90.0)
+      surface.additionalProperties.setFeature('SurfaceType', 'Door')
       surface.setName("surface #{door.id}")
-      surface.setSurfaceType("Wall")
+      surface.setSurfaceType('Wall')
       set_surface_interior(model, spaces, surface, door.wall.interior_adjacent_to)
       if not assign_outside_boundary_condition_to_subsurface(surface, door, spaces, model)
         surface.remove
@@ -2116,7 +2116,7 @@ class OSModel
 
       if [HPXML::WaterHeaterTypeCombiStorage, HPXML::WaterHeaterTypeCombiTankless].include? water_heater.water_heater_type
         fail "Water heating system '#{water_heater.id}' connected to solar thermal system '#{solar_thermal_system.id}' cannot be a space-heating boiler."
-        end
+      end
 
       if water_heater.uses_desuperheater
         fail "Water heating system '#{water_heater.id}' connected to solar thermal system '#{solar_thermal_system.id}' cannot be attached to a desuperheater."
@@ -3046,20 +3046,20 @@ class OSModel
     if mech_vent_type == HPXML::MechVentTypeCFIS
       cfis_sys_ids = mech_vent_attached_dist_system.hvac_systems.map { |system| system.id }
 
-        # Get AirLoopHVACs associated with these HVAC systems
-        @hvac_map.each do |sys_id, hvacs|
-          next unless cfis_sys_ids.include? sys_id
+      # Get AirLoopHVACs associated with these HVAC systems
+      @hvac_map.each do |sys_id, hvacs|
+        next unless cfis_sys_ids.include? sys_id
 
-          hvacs.each do |loop|
-            next unless loop.is_a? OpenStudio::Model::AirLoopHVAC
-            next if cfis_airloop == loop # already assigned
+        hvacs.each do |loop|
+          next unless loop.is_a? OpenStudio::Model::AirLoopHVAC
+          next if cfis_airloop == loop # already assigned
 
           fail 'Two airloops found for CFIS. Aborting...' unless cfis_airloop.nil?
 
-            cfis_airloop = loop
-          end
+          cfis_airloop = loop
         end
       end
+    end
 
     mech_vent = MechanicalVentilation.new(mech_vent_type, mech_vent_total_eff, mech_vent_total_eff_adj, mech_vent_cfm,
                                           mech_vent_fan_w, mech_vent_sens_eff, mech_vent_sens_eff_adj,
@@ -4133,7 +4133,7 @@ class OSModel
     actuated_schedule = nil
     if outside_space == HPXML::LocationOtherHeatedSpace
       # Average of indoor/outdoor temperatures with minimum of 68 deg-F
-      temp_min = UnitConversions.convert(68, "F", "C")
+      temp_min = UnitConversions.convert(68, 'F', 'C')
       indoor_weight = 0.5
       outdoor_weight = 0.5
       if not @heated_space_temp_sch.nil?
@@ -4145,7 +4145,7 @@ class OSModel
       end
     elsif outside_space == HPXML::LocationOtherMultifamilyBufferSpace
       # Average of indoor/outdoor temperatures with minimum of 50 deg-F
-      temp_min = UnitConversions.convert(50, "F", "C")
+      temp_min = UnitConversions.convert(50, 'F', 'C')
       indoor_weight = 0.5
       outdoor_weight = 0.5
       if not @multifamily_buffer_space_temp_sch.nil?
@@ -4157,7 +4157,7 @@ class OSModel
       end
     elsif outside_space == HPXML::LocationOtherNonFreezingSpace
       # Floating with outdoor air temperature with minimum of 40 deg-F
-      temp_min = UnitConversions.convert(40, "F", "C")
+      temp_min = UnitConversions.convert(40, 'F', 'C')
       indoor_weight = 0.0
       outdoor_weight = 1.0
       if not @non_freezing_space_temp_sch.nil?
@@ -4170,7 +4170,7 @@ class OSModel
     elsif outside_space == HPXML::LocationOtherHousingUnit
       # For water heater, duct, appliances, etc.
       # Indoor air temperature
-      temp_min = UnitConversions.convert(40, "F", "C")
+      temp_min = UnitConversions.convert(40, 'F', 'C')
       indoor_weight = 1.0
       outdoor_weight = 0.0
       if not @other_housing_unit_temp_sch.nil?
@@ -4184,32 +4184,32 @@ class OSModel
 
     # Schedule type limits compatible
     schedule_type_limits = OpenStudio::Model::ScheduleTypeLimits.new(model)
-    schedule_type_limits.setUnitType("Temperature")
+    schedule_type_limits.setUnitType('Temperature')
     actuated_schedule.setScheduleTypeLimits(schedule_type_limits)
 
     # Ems to actuate schedule
     if @sensor_ia.nil?
-      @sensor_ia = OpenStudio::Model::EnergyManagementSystemSensor.new(model, "Zone Air Temperature")
-      @sensor_ia.setName("cond_zone_temp")
+      @sensor_ia = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Zone Air Temperature')
+      @sensor_ia.setName('cond_zone_temp')
       @sensor_ia.setKeyName(create_or_get_space(model, spaces, 'living space').name.to_s)
     end
     if @sensor_oa.nil?
-      @sensor_oa = OpenStudio::Model::EnergyManagementSystemSensor.new(model, "Site Outdoor Air Drybulb Temperature")
-      @sensor_oa.setName("oa_temp")
+      @sensor_oa = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Site Outdoor Air Drybulb Temperature')
+      @sensor_oa.setName('oa_temp')
     end
-    actuator = OpenStudio::Model::EnergyManagementSystemActuator.new(actuated_schedule, "Schedule:Constant", "Schedule Value")
+    actuator = OpenStudio::Model::EnergyManagementSystemActuator.new(actuated_schedule, 'Schedule:Constant', 'Schedule Value')
     actuator.setName("#{outside_space.gsub(' ', '_').gsub('-', '_')}_temp_sch")
 
     program = OpenStudio::Model::EnergyManagementSystemProgram.new(model)
-    program.setName("Other Side Indoor Temperature Program")
+    program.setName('Other Side Indoor Temperature Program')
     program.addLine("Set #{actuator.name} = #{@sensor_ia.name} * #{indoor_weight} + #{@sensor_oa.name} * #{outdoor_weight}")
     program.addLine("If #{actuator.name} < #{temp_min}")
     program.addLine("Set #{actuator.name} = #{temp_min}")
-    program.addLine("EndIf")
+    program.addLine('EndIf')
 
     program_cm = OpenStudio::Model::EnergyManagementSystemProgramCallingManager.new(model)
-    program_cm.setName("#{program.name.to_s} calling manager")
-    program_cm.setCallingPoint("EndOfSystemTimestepAfterHVACReporting")
+    program_cm.setName("#{program.name} calling manager")
+    program_cm.setCallingPoint('EndOfSystemTimestepAfterHVACReporting')
     program_cm.addProgram(program)
 
     return actuated_schedule
@@ -4262,7 +4262,7 @@ class OSModel
     # Check walls
     wall_exterior_adjacent_to = subsurface_class.wall.exterior_adjacent_to
 
-    if [HPXML::LocationOtherHeatedSpace, HPXML::LocationOtherMultifamilyBufferSpace,HPXML::LocationOtherNonFreezingSpace, HPXML::LocationOtherHousingUnit, HPXML::LocationOtherHousingUnitAbove, HPXML::LocationOtherHousingUnitBelow].include? wall_exterior_adjacent_to
+    if [HPXML::LocationOtherHeatedSpace, HPXML::LocationOtherMultifamilyBufferSpace, HPXML::LocationOtherNonFreezingSpace, HPXML::LocationOtherHousingUnit, HPXML::LocationOtherHousingUnitAbove, HPXML::LocationOtherHousingUnitBelow].include? wall_exterior_adjacent_to
       if subsurface_class.is_a? HPXML::Window
         fail "Window '#{subsurface_class.id}' cannot be adjacent to '#{wall_exterior_adjacent_to}'. Check wall: '#{subsurface_class.wall.id}'."
       elsif [HPXML::LocationOtherHousingUnit, HPXML::LocationOtherHousingUnitAbove, HPXML::LocationOtherHousingUnitBelow].include? wall_exterior_adjacent_to

@@ -204,7 +204,7 @@ class HPXML < Object
     (@roofs + @rim_joists + @walls + @foundation_walls + @frame_floors + @slabs).each do |surface|
       return true if surface.interior_adjacent_to == space_type
       return true if surface.exterior_adjacent_to == space_type
-  end
+    end
     return false
   end
 
@@ -212,8 +212,8 @@ class HPXML < Object
     @site.fuels.each do |fuel|
       if fuel != FuelTypeElectricity
         return true
-  end
-  end
+      end
+    end
     return false
   end
 
@@ -228,7 +228,7 @@ class HPXML < Object
       fuel = heat_pump.heat_pump_fuel
       fuel_fracs[fuel] = 0.0 if fuel_fracs[fuel].nil?
       fuel_fracs[fuel] += heat_pump.fraction_heat_load_served
-  end
+    end
     return FuelTypeElectricity if fuel_fracs.empty?
 
     return fuel_fracs.key(fuel_fracs.values.max)
@@ -2755,8 +2755,8 @@ class HPXML < Object
       hpxml.elements.each('Building/BuildingDetails/Lighting/LightingGroup') do |lighting_group|
         self << LightingGroup.new(@hpxml_object, lighting_group)
       end
-      end
-      end
+    end
+  end
 
   class LightingGroup < BaseElement
     ATTRS = [:id, :location, :fration_of_units_in_location, :third_party_certification]

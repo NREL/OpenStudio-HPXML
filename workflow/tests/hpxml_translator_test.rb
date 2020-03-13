@@ -698,11 +698,11 @@ class HPXMLTest < MiniTest::Test
       # Azimuth
       next unless (not roof.azimuth.nil?) && (Float(roof.pitch) > 0)
 
-        hpxml_value = roof.azimuth
-        query = "SELECT AVG(Value) FROM TabularDataWithStrings WHERE ReportName='EnvelopeSummary' AND ReportForString='Entire Facility' AND TableName='Opaque Exterior' AND (RowName='#{roof_id}' OR RowName LIKE '#{roof_id}:%') AND ColumnName='Azimuth' AND Units='deg'"
-        sql_value = sqlFile.execAndReturnFirstDouble(query).get
-        assert_in_epsilon(hpxml_value, sql_value, 0.01)
-      end
+      hpxml_value = roof.azimuth
+      query = "SELECT AVG(Value) FROM TabularDataWithStrings WHERE ReportName='EnvelopeSummary' AND ReportForString='Entire Facility' AND TableName='Opaque Exterior' AND (RowName='#{roof_id}' OR RowName LIKE '#{roof_id}:%') AND ColumnName='Azimuth' AND Units='deg'"
+      sql_value = sqlFile.execAndReturnFirstDouble(query).get
+      assert_in_epsilon(hpxml_value, sql_value, 0.01)
+    end
 
     # Enclosure Foundations
     # Ensure Kiva instances have perimeter fraction of 1.0 as we explicitly define them to end up this way.
@@ -711,10 +711,10 @@ class HPXMLTest < MiniTest::Test
       next unless eio_line.downcase.start_with? 'foundation kiva'
 
       kiva_perim_frac = Float(eio_line.split(',')[5])
-        assert_equal(1.0, kiva_perim_frac)
+      assert_equal(1.0, kiva_perim_frac)
 
-        num_kiva_instances += 1
-      end
+      num_kiva_instances += 1
+    end
 
     num_expected_kiva_instances = { 'base-foundation-ambient.xml' => 0,               # no foundation in contact w/ ground
                                     'base-foundation-multiple.xml' => 2,              # additional instance for 2nd foundation type
@@ -813,11 +813,11 @@ class HPXMLTest < MiniTest::Test
       # Azimuth
       next unless not wall.azimuth.nil?
 
-        hpxml_value = wall.azimuth
-        query = "SELECT AVG(Value) FROM TabularDataWithStrings WHERE ReportName='EnvelopeSummary' AND ReportForString='Entire Facility' AND TableName='Opaque Exterior' AND (RowName='#{wall_id}' OR RowName LIKE '#{wall_id}:%') AND ColumnName='Azimuth' AND Units='deg'"
-        sql_value = sqlFile.execAndReturnFirstDouble(query).get
-        assert_in_epsilon(hpxml_value, sql_value, 0.01)
-      end
+      hpxml_value = wall.azimuth
+      query = "SELECT AVG(Value) FROM TabularDataWithStrings WHERE ReportName='EnvelopeSummary' AND ReportForString='Entire Facility' AND TableName='Opaque Exterior' AND (RowName='#{wall_id}' OR RowName LIKE '#{wall_id}:%') AND ColumnName='Azimuth' AND Units='deg'"
+      sql_value = sqlFile.execAndReturnFirstDouble(query).get
+      assert_in_epsilon(hpxml_value, sql_value, 0.01)
+    end
 
     # TODO: Enclosure FrameFloors
 
@@ -869,16 +869,9 @@ class HPXMLTest < MiniTest::Test
     # Enclosure Doors
     hpxml.doors.each do |door|
       door_id = door.id.upcase
-      door_wall_id = door.wall_idref
-      wall_exterior_adjacent_to = ""
-      (hpxml.walls + hpxml.foundation_walls).each do |wall|
-        next unless wall.id == door_wall_id
-
-        wall_exterior_adjacent_to = wall.exterior_adjacent_to
-      end
 
       # only outdoor doors will appear on the exterior door table
-      next unless wall_exterior_adjacent_to.downcase == "outdoors"
+      next unless [HPXML::LocationOutside, HPXML::LocationGround].include? door.wall.exterior_adjacent_to
 
       # Area
       if not door.area.nil?
@@ -891,11 +884,11 @@ class HPXMLTest < MiniTest::Test
       # R-Value
       next unless not door.r_value.nil?
 
-        hpxml_value = door.r_value
-        query = "SELECT Value FROM TabularDataWithStrings WHERE ReportName='EnvelopeSummary' AND ReportForString='Entire Facility' AND TableName='Exterior Door' AND RowName='#{door_id}' AND ColumnName='U-Factor with Film' AND Units='W/m2-K'"
-        sql_value = 1.0 / UnitConversions.convert(sqlFile.execAndReturnFirstDouble(query).get, 'W/(m^2*K)', 'Btu/(hr*ft^2*F)')
-        assert_in_epsilon(hpxml_value, sql_value, 0.02)
-      end
+      hpxml_value = door.r_value
+      query = "SELECT Value FROM TabularDataWithStrings WHERE ReportName='EnvelopeSummary' AND ReportForString='Entire Facility' AND TableName='Exterior Door' AND RowName='#{door_id}' AND ColumnName='U-Factor with Film' AND Units='W/m2-K'"
+      sql_value = 1.0 / UnitConversions.convert(sqlFile.execAndReturnFirstDouble(query).get, 'W/(m^2*K)', 'Btu/(hr*ft^2*F)')
+      assert_in_epsilon(hpxml_value, sql_value, 0.02)
+    end
 
     # HVAC Heating Systems
 
@@ -907,43 +900,43 @@ class HPXMLTest < MiniTest::Test
 
       next unless htg_load_frac > 0
 
-        # Electric Auxiliary Energy
-        # For now, skip if multiple equipment
+      # Electric Auxiliary Energy
+      # For now, skip if multiple equipment
       next unless (num_htg_sys == 1) && [HPXML::HVACTypeFurnace, HPXML::HVACTypeBoiler, HPXML::HVACTypeWallFurnace, HPXML::HVACTypeStove].include?(htg_sys_type) && (htg_sys_fuel != HPXML::FuelTypeElectricity)
 
-          if not heating_system.electric_auxiliary_energy.nil?
-            hpxml_value = heating_system.electric_auxiliary_energy / 2.08
-          else
-            furnace_capacity_kbtuh = nil
+      if not heating_system.electric_auxiliary_energy.nil?
+        hpxml_value = heating_system.electric_auxiliary_energy / 2.08
+      else
+        furnace_capacity_kbtuh = nil
         if htg_sys_type == HPXML::HVACTypeFurnace
-              query = "SELECT Value FROM TabularDataWithStrings WHERE ReportName='EquipmentSummary' AND ReportForString='Entire Facility' AND TableName='Heating Coils' AND RowName LIKE '%#{Constants.ObjectNameFurnace.upcase}%' AND ColumnName='Nominal Total Capacity' AND Units='W'"
-              furnace_capacity_kbtuh = UnitConversions.convert(sqlFile.execAndReturnFirstDouble(query).get, 'W', 'kBtu/hr')
-            end
-            hpxml_value = HVAC.get_default_eae(htg_sys_type, htg_sys_fuel, htg_load_frac, furnace_capacity_kbtuh) / 2.08
-          end
+          query = "SELECT Value FROM TabularDataWithStrings WHERE ReportName='EquipmentSummary' AND ReportForString='Entire Facility' AND TableName='Heating Coils' AND RowName LIKE '%#{Constants.ObjectNameFurnace.upcase}%' AND ColumnName='Nominal Total Capacity' AND Units='W'"
+          furnace_capacity_kbtuh = UnitConversions.convert(sqlFile.execAndReturnFirstDouble(query).get, 'W', 'kBtu/hr')
+        end
+        hpxml_value = HVAC.get_default_eae(htg_sys_type, htg_sys_fuel, htg_load_frac, furnace_capacity_kbtuh) / 2.08
+      end
 
       if htg_sys_type == HPXML::HVACTypeBoiler
-            query = "SELECT Value FROM TabularDataWithStrings WHERE ReportName='EquipmentSummary' AND ReportForString='Entire Facility' AND TableName='Pumps' AND RowName LIKE '%#{Constants.ObjectNameBoiler.upcase}%' AND ColumnName='Electric Power' AND Units='W'"
-            sql_value = sqlFile.execAndReturnFirstDouble(query).get
+        query = "SELECT Value FROM TabularDataWithStrings WHERE ReportName='EquipmentSummary' AND ReportForString='Entire Facility' AND TableName='Pumps' AND RowName LIKE '%#{Constants.ObjectNameBoiler.upcase}%' AND ColumnName='Electric Power' AND Units='W'"
+        sql_value = sqlFile.execAndReturnFirstDouble(query).get
       elsif htg_sys_type == HPXML::HVACTypeFurnace
 
-            # Ratio fan power based on heating airflow rate divided by fan airflow rate since the
-            # fan is sized based on cooling.
-            query = "SELECT Value FROM TabularDataWithStrings WHERE ReportName='EquipmentSummary' AND ReportForString='Entire Facility' AND TableName='Fans' AND RowName LIKE '%#{Constants.ObjectNameFurnace.upcase}%' AND ColumnName='Rated Electric Power' AND Units='W'"
-            query_fan_airflow = "SELECT Value FROM TabularDataWithStrings WHERE ReportName='ComponentSizingSummary' AND ReportForString='Entire Facility' AND TableName='Fan:OnOff' AND RowName LIKE '%#{Constants.ObjectNameFurnace.upcase}%' AND ColumnName='User-Specified Maximum Flow Rate' AND Units='m3/s'"
-            query_htg_airflow = "SELECT Value FROM TabularDataWithStrings WHERE ReportName='ComponentSizingSummary' AND ReportForString='Entire Facility' AND TableName='AirLoopHVAC:UnitarySystem' AND RowName LIKE '%#{Constants.ObjectNameFurnace.upcase}%' AND ColumnName='User-Specified Heating Supply Air Flow Rate' AND Units='m3/s'"
-            sql_value = sqlFile.execAndReturnFirstDouble(query).get
-            sql_value_fan_airflow = sqlFile.execAndReturnFirstDouble(query_fan_airflow).get
-            sql_value_htg_airflow = sqlFile.execAndReturnFirstDouble(query_htg_airflow).get
-            sql_value *= sql_value_htg_airflow / sql_value_fan_airflow
+        # Ratio fan power based on heating airflow rate divided by fan airflow rate since the
+        # fan is sized based on cooling.
+        query = "SELECT Value FROM TabularDataWithStrings WHERE ReportName='EquipmentSummary' AND ReportForString='Entire Facility' AND TableName='Fans' AND RowName LIKE '%#{Constants.ObjectNameFurnace.upcase}%' AND ColumnName='Rated Electric Power' AND Units='W'"
+        query_fan_airflow = "SELECT Value FROM TabularDataWithStrings WHERE ReportName='ComponentSizingSummary' AND ReportForString='Entire Facility' AND TableName='Fan:OnOff' AND RowName LIKE '%#{Constants.ObjectNameFurnace.upcase}%' AND ColumnName='User-Specified Maximum Flow Rate' AND Units='m3/s'"
+        query_htg_airflow = "SELECT Value FROM TabularDataWithStrings WHERE ReportName='ComponentSizingSummary' AND ReportForString='Entire Facility' AND TableName='AirLoopHVAC:UnitarySystem' AND RowName LIKE '%#{Constants.ObjectNameFurnace.upcase}%' AND ColumnName='User-Specified Heating Supply Air Flow Rate' AND Units='m3/s'"
+        sql_value = sqlFile.execAndReturnFirstDouble(query).get
+        sql_value_fan_airflow = sqlFile.execAndReturnFirstDouble(query_fan_airflow).get
+        sql_value_htg_airflow = sqlFile.execAndReturnFirstDouble(query_htg_airflow).get
+        sql_value *= sql_value_htg_airflow / sql_value_fan_airflow
       elsif (htg_sys_type == HPXML::HVACTypeStove) || (htg_sys_type == HPXML::HVACTypeWallFurnace)
-            query = "SELECT AVG(Value) FROM TabularDataWithStrings WHERE ReportName='EquipmentSummary' AND ReportForString='Entire Facility' AND TableName='Fans' AND RowName LIKE '%#{Constants.ObjectNameUnitHeater.upcase}%' AND ColumnName='Rated Electric Power' AND Units='W'"
-            sql_value = sqlFile.execAndReturnFirstDouble(query).get
-          else
-            flunk "Unexpected heating system type '#{htg_sys_type}'."
-          end
-          assert_in_epsilon(hpxml_value, sql_value, 0.01)
-        end
+        query = "SELECT AVG(Value) FROM TabularDataWithStrings WHERE ReportName='EquipmentSummary' AND ReportForString='Entire Facility' AND TableName='Fans' AND RowName LIKE '%#{Constants.ObjectNameUnitHeater.upcase}%' AND ColumnName='Rated Electric Power' AND Units='W'"
+        sql_value = sqlFile.execAndReturnFirstDouble(query).get
+      else
+        flunk "Unexpected heating system type '#{htg_sys_type}'."
+      end
+      assert_in_epsilon(hpxml_value, sql_value, 0.01)
+    end
 
     # HVAC Capacities
     htg_cap = nil
@@ -1123,18 +1116,18 @@ class HPXMLTest < MiniTest::Test
       # CFIS
       next unless ventilation_fan.fan_type == HPXML::MechVentTypeCFIS
 
-        # Fan power
-        hpxml_value = fan_w
-        query = "SELECT Value FROM ReportData WHERE ReportDataDictionaryIndex IN (SELECT ReportDataDictionaryIndex FROM ReportDataDictionary WHERE Name='#{@cfis_fan_power_output_var.variableName}' AND ReportingFrequency='Run Period')"
-        sql_value = sqlFile.execAndReturnFirstDouble(query).get
-        assert_in_delta(hpxml_value, sql_value, 0.01)
+      # Fan power
+      hpxml_value = fan_w
+      query = "SELECT Value FROM ReportData WHERE ReportDataDictionaryIndex IN (SELECT ReportDataDictionaryIndex FROM ReportDataDictionary WHERE Name='#{@cfis_fan_power_output_var.variableName}' AND ReportingFrequency='Run Period')"
+      sql_value = sqlFile.execAndReturnFirstDouble(query).get
+      assert_in_delta(hpxml_value, sql_value, 0.01)
 
-        # Flow rate
-        hpxml_value = ventilation_fan.tested_flow_rate * hrs_per_day / 24.0
-        query = "SELECT Value FROM ReportData WHERE ReportDataDictionaryIndex IN (SELECT ReportDataDictionaryIndex FROM ReportDataDictionary WHERE Name='#{@cfis_flow_rate_output_var.variableName}' AND ReportingFrequency='Run Period')"
+      # Flow rate
+      hpxml_value = ventilation_fan.tested_flow_rate * hrs_per_day / 24.0
+      query = "SELECT Value FROM ReportData WHERE ReportDataDictionaryIndex IN (SELECT ReportDataDictionaryIndex FROM ReportDataDictionary WHERE Name='#{@cfis_flow_rate_output_var.variableName}' AND ReportingFrequency='Run Period')"
       sql_value = UnitConversions.convert(sqlFile.execAndReturnFirstDouble(query).get, 'm^3/s', 'cfm')
-        assert_in_delta(hpxml_value, sql_value, 0.01)
-      end
+      assert_in_delta(hpxml_value, sql_value, 0.01)
+    end
 
     # Clothes Washer
     if (hpxml.clothes_washers.size > 0) && (hpxml.water_heating_systems.size > 0)

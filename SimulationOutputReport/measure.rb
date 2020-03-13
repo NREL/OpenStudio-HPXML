@@ -612,8 +612,8 @@ class SimulationOutputReport < OpenStudio::Measure::ReportingMeasure
       other_side_obj_names.sort.each do |obj_name|
         @zone_temps[obj_name] = ZoneTemp.new
         @zone_temps[obj_name].name = "Temperature: #{obj_name.split.map(&:capitalize).join(' ')}"
-        @zone_temps[obj_name].timeseries_units = "F"
-        @zone_temps[obj_name].timeseries_output = get_report_variable_data_timeseries([obj_name], ["Surface Other Side Coefficients Exterior Air Drybulb Temperature"], 9.0 / 5.0, 32.0, timeseries_frequency)
+        @zone_temps[obj_name].timeseries_units = 'F'
+        @zone_temps[obj_name].timeseries_output = get_report_variable_data_timeseries([obj_name], ['Surface Other Side Coefficients Exterior Air Drybulb Temperature'], 9.0 / 5.0, 32.0, timeseries_frequency)
       end
     end
 

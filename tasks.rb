@@ -372,11 +372,11 @@ def create_hpxmls
       while not parent.nil?
         next unless hpxmls_files.keys.include? parent
 
-          unless hpxmls_files[parent].nil?
-            hpxml_files.unshift(hpxmls_files[parent])
-          end
-          parent = hpxmls_files[parent]
+        unless hpxmls_files[parent].nil?
+          hpxml_files.unshift(hpxmls_files[parent])
         end
+        parent = hpxmls_files[parent]
+      end
 
       hpxml = HPXML.new
       hpxml_files.each do |hpxml_file|
@@ -722,7 +722,7 @@ def set_hpxml_rim_joists(hpxml_file, hpxml)
          'base-foundation-slab.xml'].include? hpxml_file
     hpxml.rim_joists.clear()
   elsif ['base-enclosure-attached-multifamily.xml'].include? hpxml_file
-    hpxml.rim_joists[0].exterior_adjacent_to = "other non-freezing space"
+    hpxml.rim_joists[0].exterior_adjacent_to = 'other non-freezing space'
   elsif ['base-foundation-unconditioned-basement.xml'].include? hpxml_file
     for i in 0..hpxml.rim_joists.size - 1
       hpxml.rim_joists[i].interior_adjacent_to = HPXML::LocationBasementUnconditioned
@@ -995,7 +995,7 @@ def set_hpxml_foundation_walls(hpxml_file, hpxml)
                                insulation_exterior_distance_to_top: 0,
                                insulation_exterior_distance_to_bottom: 8,
                                insulation_exterior_r_value: 8.9)
-    hpxml.foundation_walls.add(id: 'FoundationWall12',
+    hpxml.foundation_walls.add(id: 'FoundationWall2',
                                exterior_adjacent_to: 'other multifamily buffer space',
                                interior_adjacent_to: 'basement - conditioned',
                                height: 4,
@@ -1008,7 +1008,7 @@ def set_hpxml_foundation_walls(hpxml_file, hpxml)
                                insulation_exterior_distance_to_top: 0,
                                insulation_exterior_distance_to_bottom: 4,
                                insulation_exterior_r_value: 8.9)
-    hpxml.foundation_walls.add(id: 'FoundationWall13',
+    hpxml.foundation_walls.add(id: 'FoundationWall3',
                                exterior_adjacent_to: 'other heated space',
                                interior_adjacent_to: 'basement - conditioned',
                                height: 2,
@@ -1469,7 +1469,7 @@ def set_hpxml_windows(hpxml_file, hpxml)
                       wall_idref: 'Wall')
   elsif ['invalid_files/attached-multifamily-window-outside-condition.xml'].include? hpxml_file
     hpxml.windows[0].area = 50
-    hpxml.windows[0].wall_idref = "WallMultifamilyBuffer"
+    hpxml.windows[0].wall_idref = 'WallMultifamilyBuffer'
   elsif ['base-enclosure-overhangs.xml'].include? hpxml_file
     hpxml.windows[0].overhangs_depth = 2.5
     hpxml.windows[0].overhangs_distance_to_top_of_window = 0
@@ -2755,7 +2755,7 @@ def set_hpxml_water_heating_systems(hpxml_file, hpxml)
   elsif ['base-dhw-temperature.xml'].include? hpxml_file
     hpxml.water_heating_systems[0].temperature = 130.0
   elsif ['base-enclosure-attached-multifamily.xml'].include? hpxml_file
-    hpxml.water_heating_systems[0].location = "other multifamily buffer space"
+    hpxml.water_heating_systems[0].location = 'other multifamily buffer space'
   elsif ['base-dhw-none.xml'].include? hpxml_file
     hpxml.water_heating_systems.clear()
   end

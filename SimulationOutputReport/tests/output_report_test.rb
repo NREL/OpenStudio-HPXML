@@ -186,9 +186,9 @@ class SimulationOutputReportTest < MiniTest::Test
   ]
 
   TimeseriesColsTemperaturesOtherSide = [
-    "Temperature: Other Multifamily Buffer Space",
-    "Temperature: Other Non-freezing Space",
-    "Temperature: Other Heated Space"
+    'Temperature: Other Multifamily Buffer Space',
+    'Temperature: Other Non-freezing Space',
+    'Temperature: Other Heated Space'
   ]
 
   ERIRows = [
@@ -284,10 +284,10 @@ class SimulationOutputReportTest < MiniTest::Test
                   'include_timeseries_total_loads' => false,
                   'include_timeseries_component_loads' => false }
     annual_csv, timeseries_csv, eri_csv = _test_measure(args_hash)
-    assert(File.exists?(annual_csv))
-    assert(File.exists?(timeseries_csv))
-    expected_timeseries_cols = ["Hour"] + TimeseriesColsTemperatures + TimeseriesColsTemperaturesOtherSide
-    actual_timeseries_cols = File.readlines(timeseries_csv)[0].strip.split(",")
+    assert(File.exist?(annual_csv))
+    assert(File.exist?(timeseries_csv))
+    expected_timeseries_cols = ['Hour'] + TimeseriesColsTemperatures + TimeseriesColsTemperaturesOtherSide
+    actual_timeseries_cols = File.readlines(timeseries_csv)[0].strip.split(',')
     assert_equal(expected_timeseries_cols.sort, actual_timeseries_cols.sort)
     assert_equal(8760, File.readlines(timeseries_csv).size - 2)
   end
