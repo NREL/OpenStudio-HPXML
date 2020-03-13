@@ -275,10 +275,10 @@ class HEScoreRulesetTest < MiniTest::Test
     bldg_length_front = HEScoreRuleset.instance_variable_get(:@bldg_length_front)
 
     slab_foundation = orig_hpxml.foundations[0]
-    slab_area = get_foundation_area(orig_hpxml, slab_foundation)
+    slab_area = slab_foundation.area
     assert_in_epsilon(slab_area, 600.0, 0.01)
     basement_foundation = orig_hpxml.foundations[1]
-    basement_area = get_foundation_area(orig_hpxml, basement_foundation)
+    basement_area = basement_foundation.area
     assert_in_epsilon(basement_area, 400.0, 0.01)
 
     slab_perimeter = HEScoreRuleset.get_foundation_perimeter(orig_hpxml, slab_foundation)

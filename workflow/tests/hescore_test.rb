@@ -140,12 +140,12 @@ class HEScoreTest < Minitest::Unit::TestCase
   def _test_results(xml, results)
     hpxml_doc = REXML::Document.new(File.read(xml))
 
-    fuel_map = { 'electricity' => 'electric',
-                 'natural gas' => 'natural_gas',
-                 'fuel oil' => 'fuel_oil',
-                 'propane' => 'lpg',
-                 'wood' => 'cord_wood',
-                 'wood pellets' => 'pellet_wood' }
+    fuel_map = { HPXML::FuelTypeElectricity => 'electric',
+                 HPXML::FuelTypeNaturalGas => 'natural_gas',
+                 HPXML::FuelTypeOil => 'fuel_oil',
+                 HPXML::FuelTypePropane => 'lpg',
+                 HPXML::FuelTypeWood => 'cord_wood',
+                 HPXML::FuelTypeWoodPellets => 'pellet_wood' }
 
     # Get HPXML values for Building Summary
     cfa = Float(XMLHelper.get_value(hpxml_doc, '/HPXML/Building/BuildingDetails/BuildingSummary/BuildingConstruction/ConditionedFloorArea'))

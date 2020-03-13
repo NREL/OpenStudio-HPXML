@@ -69,17 +69,17 @@ class HEScoreRuleset
     @nbeds = orig_hpxml.building_construction.number_of_bedrooms
     @cfa = orig_hpxml.building_construction.conditioned_floor_area # ft^2
     @is_townhouse = (orig_hpxml.building_construction.residential_facility_type == 'single-family attached')
-    @fnd_types = get_foundation_details(orig_hpxml)
+    @fnd_areas = get_foundation_areas(orig_hpxml)
     @ducts = get_ducts_details(orig_hpxml)
-    @cfa_basement = @fnd_types['basement - conditioned']
+    @cfa_basement = @fnd_areas[HPXML::LocationBasementConditioned]
     @cfa_basement = 0 if @cfa_basement.nil?
     @ncfl_ag = orig_hpxml.building_construction.number_of_conditioned_floors_above_grade
     @ceil_height = orig_hpxml.building_construction.average_ceiling_height # ft
 
     # Calculate geometry
     # http://hes-documentation.lbl.gov/calculation-methodology/calculation-of-energy-consumption/heating-and-cooling-calculation/building-envelope
-    @has_cond_bsmnt = @fnd_types.keys.include?('basement - conditioned')
-    @has_uncond_bsmnt = @fnd_types.keys.include?('basement - unconditioned')
+    @has_cond_bsmnt = @fnd_areas.key?(HPXML::LocationBasementConditioned)
+    @has_uncond_bsmnt = @fnd_areas.key?(HPXML::LocationBasementUnconditioned)
     @ncfl = @ncfl_ag + (@has_cond_bsmnt ? 1 : 0)
     @nfl = @ncfl + (@has_uncond_bsmnt ? 1 : 0)
     @bldg_footprint = (@cfa - @cfa_basement) / @ncfl_ag # ft^2
@@ -93,7 +93,7 @@ class HEScoreRuleset
     @roof_angle_rad = UnitConversions.convert(@roof_angle, 'deg', 'rad') # radians
     @cvolume = calc_conditioned_volume(orig_hpxml)
 
-    new_hpxml.set_site(fuels: ['electricity'], # TODO Check if changing this would ever influence results; if it does, talk to Leo
+    new_hpxml.set_site(fuels: [HPXML::FuelTypeElectricity], # TODO Check if changing this would ever influence results; if it does, talk to Leo
                        shelter_coefficient: Airflow.get_default_shelter_coefficient())
 
     # Neighboring buildings to left/right, 12ft offset, same height as building.
@@ -130,23 +130,21 @@ class HEScoreRuleset
       if not cfm50.nil?
         ach50 = cfm50 * 60.0 / @cvolume
       else
-        ach50 = calc_ach50(@ncfl_ag, @cfa, @ceil_height, @cvolume, desc, @year_built, @iecc_zone, @fnd_types, @ducts)
+        ach50 = calc_ach50(@ncfl_ag, @cfa, @ceil_height, @cvolume, desc, @year_built, @iecc_zone, @fnd_areas, @ducts)
       end
 
       new_hpxml.air_infiltration_measurements.add(id: orig_infil_measurement.id,
                                                   house_pressure: 50,
-                                                  unit_of_measure: 'ACH',
+                                                  unit_of_measure: HPXML::UnitsACH,
                                                   air_leakage: ach50)
     end
   end
 
   def self.set_enclosure_roofs(orig_hpxml, new_hpxml)
     orig_hpxml.attics.each do |orig_attic|
-      attic_adjacent = get_attic_adjacent(orig_attic)
+      attic_location = orig_attic.to_location
 
-      orig_hpxml.roofs.each do |orig_roof|
-        next unless orig_attic.attached_to_roofs.include? orig_roof.id
-
+      orig_attic.attached_roofs.each do |orig_roof|
         # Roof: Two surfaces per HES zone_roof
         roof_area = orig_roof.area
         roof_solar_abs = orig_roof.solar_absorptance
@@ -158,9 +156,7 @@ class HEScoreRuleset
                                      orig_roof.roof_type,
                                      orig_roof.radiant_barrier)
         if roof_area.nil?
-          orig_hpxml.frame_floors.each do |orig_frame_floor|
-            next unless orig_attic.attached_to_frame_floors.include? orig_frame_floor.id
-
+          orig_attic.attached_frame_floors.each do |orig_frame_floor|
             roof_area = orig_frame_floor.area / (2. * Math.cos(@roof_angle_rad))
           end
         end
@@ -171,7 +167,7 @@ class HEScoreRuleset
         end
         roof_azimuths.each_with_index do |roof_azimuth, idx|
           new_hpxml.roofs.add(id: "#{orig_roof.id}_#{idx}",
-                              interior_adjacent_to: attic_adjacent,
+                              interior_adjacent_to: attic_location,
                               area: roof_area / 2.0,
                               azimuth: sanitize_azimuth(roof_azimuth),
                               solar_absorptance: roof_solar_abs,
@@ -198,25 +194,25 @@ class HEScoreRuleset
         wall_area = @ceil_height * @bldg_length_side * @ncfl_ag # FIXME: Verify
       end
 
-      if orig_wall.wall_type == 'WoodStud'
+      if orig_wall.wall_type == HPXML::WallTypeWoodStud
         wall_r = get_wood_stud_wall_assembly_r(orig_wall.insulation_cavity_r_value,
                                                orig_wall.insulation_continuous_r_value,
                                                orig_wall.siding,
                                                orig_wall.optimum_value_engineering)
-      elsif orig_wall.wall_type == 'StructuralBrick'
+      elsif orig_wall.wall_type == HPXML::WallTypeBrick
         wall_r = get_structural_block_wall_assembly_r(orig_wall.insulation_continuous_r_value)
-      elsif orig_wall.wall_type == 'ConcreteMasonryUnit'
+      elsif orig_wall.wall_type == HPXML::WallTypeCMU
         wall_r = get_concrete_block_wall_assembly_r(orig_wall.insulation_cavity_r_value,
                                                     orig_wall.siding)
-      elsif orig_wall.wall_type == 'StrawBale'
+      elsif orig_wall.wall_type == HPXML::WallTypeStrawBale
         wall_r = get_straw_bale_wall_assembly_r(orig_wall.siding)
       else
         fail "Unexpected wall type '#{orig_wall.wall_type}'."
       end
 
       new_hpxml.walls.add(id: orig_wall.id,
-                          exterior_adjacent_to: 'outside',
-                          interior_adjacent_to: 'living space',
+                          exterior_adjacent_to: HPXML::LocationOutside,
+                          interior_adjacent_to: HPXML::LocationLivingSpace,
                           wall_type: orig_wall.wall_type,
                           area: wall_area,
                           azimuth: orientation_to_azimuth(orig_wall.orientation),
@@ -226,45 +222,23 @@ class HEScoreRuleset
     end
   end
 
-  def self.get_foundation_perimeter(orig_hpxml, foundation)
-    n_foundations = orig_hpxml.foundations.size
-    if n_foundations == 1
-      return @bldg_perimeter
-    elsif n_foundations == 2
-      fnd_area = get_foundation_area(orig_hpxml, foundation)
-      long_side = [@bldg_length_front, @bldg_length_side].max
-      short_side = [@bldg_length_front, @bldg_length_side].min
-      total_foundation_area = 0
-      orig_hpxml.foundations.each do |a_foundation|
-        total_foundation_area += get_foundation_area(orig_hpxml, a_foundation)
-      end
-      fnd_frac = fnd_area / total_foundation_area
-      return short_side + 2 * long_side * fnd_frac
-    else
-      fail 'Only one or two foundations is allowed.'
-    end
-  end
-
   def self.set_enclosure_foundation_walls(orig_hpxml, new_hpxml)
     orig_hpxml.foundations.each do |orig_foundation|
-      fnd_adjacent = get_foundation_adjacent(orig_foundation)
-      fnd_area = get_foundation_area(orig_hpxml, orig_foundation)
+      fnd_location = orig_foundation.to_location
+      fnd_area = orig_foundation.area
+      next unless [HPXML::LocationBasementUnconditioned, HPXML::LocationBasementConditioned, HPXML::LocationCrawlspaceVented, HPXML::LocationCrawlspaceUnvented].include? fnd_location
 
-      next unless ['basement - unconditioned', 'basement - conditioned', 'crawlspace - vented', 'crawlspace - unvented'].include? fnd_adjacent
-
-      orig_hpxml.foundation_walls.each do |orig_foundation_wall|
-        next unless orig_foundation.attached_to_foundation_walls.include? orig_foundation_wall.id
-
+      orig_foundation.attached_foundation_walls.each do |orig_foundation_wall|
         # http://hes-documentation.lbl.gov/calculation-methodology/calculation-of-energy-consumption/heating-and-cooling-calculation/doe2-inputs-assumptions-and-calculations/the-doe2-model
-        if ['basement - unconditioned', 'basement - conditioned'].include? fnd_adjacent
+        if [HPXML::LocationBasementUnconditioned, HPXML::LocationBasementConditioned].include? fnd_location
           fndwall_height = 8.0
         else
           fndwall_height = 2.5
         end
 
         new_hpxml.foundation_walls.add(id: orig_foundation_wall.id,
-                                       exterior_adjacent_to: 'ground',
-                                       interior_adjacent_to: fnd_adjacent,
+                                       exterior_adjacent_to: HPXML::LocationGround,
+                                       interior_adjacent_to: fnd_location,
                                        height: fndwall_height,
                                        area: fndwall_height * get_foundation_perimeter(orig_hpxml, orig_foundation),
                                        thickness: 10,
@@ -282,16 +256,15 @@ class HEScoreRuleset
   def self.set_enclosure_framefloors(orig_hpxml, new_hpxml)
     # Floors above foundation
     orig_hpxml.foundations.each do |orig_foundation|
-      fnd_adjacent = get_foundation_adjacent(orig_foundation)
-      orig_hpxml.frame_floors.each do |orig_frame_floor|
-        next unless orig_foundation.attached_to_frame_floors.include? orig_frame_floor.id
-        next unless ['basement - unconditioned', 'crawlspace - vented', 'crawlspace - unvented'].include? fnd_adjacent
+      fnd_location = orig_foundation.to_location
+      orig_foundation.attached_frame_floors.each do |orig_frame_floor|
+        next unless [HPXML::LocationBasementUnconditioned, HPXML::LocationCrawlspaceVented, HPXML::LocationCrawlspaceUnvented].include? fnd_location
 
         framefloor_r = get_floor_assembly_r(orig_frame_floor.insulation_cavity_r_value)
 
         new_hpxml.frame_floors.add(id: orig_frame_floor.id,
-                                   exterior_adjacent_to: fnd_adjacent,
-                                   interior_adjacent_to: 'living space',
+                                   exterior_adjacent_to: fnd_location,
+                                   interior_adjacent_to: HPXML::LocationLivingSpace,
                                    area: orig_frame_floor.area,
                                    insulation_assembly_r_value: framefloor_r)
       end
@@ -299,18 +272,16 @@ class HEScoreRuleset
 
     # Floors below attic
     orig_hpxml.attics.each do |orig_attic|
-      attic_adjacent = get_attic_adjacent(orig_attic)
-      fail "Unvented attics shouldn't exist in HEScore." if attic_adjacent == 'attic - unvented'
-      next unless attic_adjacent == 'attic - vented'
+      attic_location = orig_attic.to_location
+      fail "Unvented attics shouldn't exist in HEScore." if attic_location == HPXML::LocationAtticUnvented
+      next unless attic_location == HPXML::LocationAtticVented
 
-      orig_hpxml.frame_floors.each do |orig_frame_floor|
-        next unless orig_attic.attached_to_frame_floors.include? orig_frame_floor.id
-
+      orig_attic.attached_frame_floors.each do |orig_frame_floor|
         framefloor_r = get_ceiling_assembly_r(orig_frame_floor.insulation_cavity_r_value)
 
         new_hpxml.frame_floors.add(id: orig_frame_floor.id,
-                                   exterior_adjacent_to: attic_adjacent,
-                                   interior_adjacent_to: 'living space',
+                                   exterior_adjacent_to: attic_location,
+                                   interior_adjacent_to: HPXML::LocationLivingSpace,
                                    area: orig_frame_floor.area,
                                    insulation_assembly_r_value: framefloor_r)
       end
@@ -319,9 +290,9 @@ class HEScoreRuleset
 
   def self.set_enclosure_slabs(orig_hpxml, new_hpxml)
     orig_hpxml.foundations.each do |orig_foundation|
-      fnd_adjacent = get_foundation_adjacent(orig_foundation)
+      fnd_location = orig_foundation.to_location
       fnd_type = orig_foundation.foundation_type
-      fnd_area = get_foundation_area(orig_hpxml, orig_foundation)
+      fnd_area = orig_foundation.area
 
       # Slab
       slab_id = nil
@@ -329,10 +300,8 @@ class HEScoreRuleset
       slab_thickness = nil
       slab_depth_below_grade = nil
       slab_perimeter_insulation_r_value = nil
-      if fnd_type == 'SlabOnGrade'
-        orig_hpxml.slabs.each do |orig_slab|
-          next unless orig_foundation.attached_to_slabs.include? orig_slab.id
-
+      if fnd_type == HPXML::FoundationTypeSlab
+        orig_foundation.attached_slabs.each do |orig_slab|
           slab_id = orig_slab.id
           slab_area = orig_slab.area
           slab_perimeter_insulation_r_value = orig_slab.perimeter_insulation_r_value
@@ -340,13 +309,11 @@ class HEScoreRuleset
           slab_thickness = 4
         end
       elsif fnd_type.include?('Basement') || fnd_type.include?('Crawlspace')
-        orig_hpxml.frame_floors.each do |orig_frame_floor|
-          next unless orig_foundation.attached_to_frame_floors.include? orig_frame_floor.id
-
+        orig_foundation.attached_frame_floors.each do |orig_frame_floor|
           slab_id = "#{orig_foundation.id}_slab"
           slab_area = orig_frame_floor.area
           slab_perimeter_insulation_r_value = 0
-          if fnd_type == 'Basement'
+          if fnd_type.include?('Basement')
             slab_thickness = 4
           else
             slab_thickness = 0
@@ -357,7 +324,7 @@ class HEScoreRuleset
       end
 
       new_hpxml.slabs.add(id: slab_id,
-                          interior_adjacent_to: fnd_adjacent,
+                          interior_adjacent_to: fnd_location,
                           area: slab_area,
                           thickness: slab_thickness,
                           exposed_perimeter: get_foundation_perimeter(orig_hpxml, orig_foundation),
@@ -377,10 +344,8 @@ class HEScoreRuleset
       shgc = orig_window.shgc
       if ufactor.nil?
         window_frame_type = orig_window.frame_type
-        if (window_frame_type == 'Aluminum') && orig_window.aluminum_thermal_break
-          window_frame_type = 'AluminumThermalBreak'
-        end
         ufactor, shgc = get_window_ufactor_shgc(window_frame_type,
+                                                orig_window.aluminum_thermal_break,
                                                 orig_window.glass_layers,
                                                 orig_window.glass_type,
                                                 orig_window.gas_fill)
@@ -412,10 +377,8 @@ class HEScoreRuleset
       shgc = orig_skylight.shgc
       if ufactor.nil?
         skylight_frame_type = orig_skylight.frame_type
-        if (skylight_frame_type == 'Aluminum') && orig_skylight.aluminum_thermal_break
-          skylight_frame_type = 'AluminumThermalBreak'
-        end
         ufactor, shgc = get_skylight_ufactor_shgc(skylight_frame_type,
+                                                  orig_skylight.aluminum_thermal_break,
                                                   orig_skylight.glass_layers,
                                                   orig_skylight.glass_type,
                                                   orig_skylight.gas_fill)
@@ -473,17 +436,17 @@ class HEScoreRuleset
       fraction_heat_load_served = orig_heating.fraction_heat_load_served
 
       # Need to create hydronic distribution system?
-      if (heating_system_type == 'Boiler') && distribution_system_idref.nil?
+      if (heating_system_type == HPXML::HVACTypeBoiler) && distribution_system_idref.nil?
         distribution_system_idref = orig_heating.id + '_dist'
         additional_hydronic_ids << distribution_system_idref
       end
 
-      if ['Furnace', 'WallFurnace'].include? heating_system_type
+      if [HPXML::HVACTypeFurnace, HPXML::HVACTypeWallFurnace].include? heating_system_type
         if not heating_efficiency_afue.nil?
           # Do nothing, we already have the AFUE
-        elsif heating_system_fuel == 'electricity'
+        elsif heating_system_fuel == HPXML::FuelTypeElectricity
           heating_efficiency_afue = 0.98
-        elsif energy_star && (heating_system_type == 'Furnace')
+        elsif energy_star && (heating_system_type == HPXML::HVACTypeFurnace)
           heating_efficiency_afue = lookup_hvac_efficiency(year_installed,
                                                            heating_system_type,
                                                            heating_system_fuel,
@@ -497,10 +460,10 @@ class HEScoreRuleset
                                                            'AFUE')
         end
 
-      elsif heating_system_type == 'Boiler'
+      elsif heating_system_type == HPXML::HVACTypeBoiler
         if not heating_efficiency_afue.nil?
           # Do nothing, we already have the AFUE
-        elsif heating_system_fuel == 'electricity'
+        elsif heating_system_fuel == HPXML::FuelTypeElectricity
           heating_efficiency_afue = 0.98
         elsif energy_star
           heating_efficiency_afue = lookup_hvac_efficiency(year_installed,
@@ -515,17 +478,17 @@ class HEScoreRuleset
                                                            'AFUE')
         end
 
-      elsif heating_system_type == 'ElectricResistance'
+      elsif heating_system_type == HPXML::HVACTypeElectricResistance
         if heating_efficiency_percent.nil?
           heating_efficiency_percent = 0.98
         end
 
-      elsif heating_system_type == 'Stove'
+      elsif heating_system_type == HPXML::HVACTypeStove
         if not heating_efficiency_percent.nil?
           # Do nothing, we already have the heating efficiency percent
-        elsif heating_system_fuel == 'wood'
+        elsif heating_system_fuel == HPXML::FuelTypeWood
           heating_efficiency_percent = 0.60
-        elsif heating_system_fuel == 'wood pellets'
+        elsif heating_system_fuel == HPXML::FuelTypeWoodPellets
           heating_efficiency_percent = 0.78
         end
       end
@@ -544,18 +507,18 @@ class HEScoreRuleset
     orig_hpxml.cooling_systems.each do |orig_cooling|
       distribution_system_idref = orig_cooling.distribution_system_idref
       cooling_system_type = orig_cooling.cooling_system_type
-      cooling_system_fuel = 'electricity'
+      cooling_system_fuel = HPXML::FuelTypeElectricity
       cooling_efficiency_seer = orig_cooling.cooling_efficiency_seer
       cooling_efficiency_eer = orig_cooling.cooling_efficiency_eer
       year_installed = orig_cooling.year_installed
       energy_star = orig_cooling.energy_star
       fraction_cool_load_served = orig_cooling.fraction_cool_load_served
       cooling_capacity = nil
-      if cooling_system_type != 'evaporative cooler'
+      if cooling_system_type != HPXML::HVACTypeEvaporativeCooler
         cooling_capacity = -1 # Use Manual J auto-sizing
       end
 
-      if cooling_system_type == 'central air conditioner'
+      if cooling_system_type == HPXML::HVACTypeCentralAirConditioner
         if not cooling_efficiency_seer.nil?
           # Do nothing, we already have the SEER
         elsif energy_star
@@ -571,7 +534,7 @@ class HEScoreRuleset
                                                            'SEER')
         end
 
-      elsif cooling_system_type == 'room air conditioner'
+      elsif cooling_system_type == HPXML::HVACTypeRoomAirConditioner
         if not cooling_efficiency_eer.nil?
           # Do nothing, we already have the EER
         elsif energy_star
@@ -600,10 +563,10 @@ class HEScoreRuleset
 
     # HeatPump
     orig_hpxml.heat_pumps.each do |orig_hp|
-      heat_pump_fuel = 'electricity'
+      heat_pump_fuel = HPXML::FuelTypeElectricity
       cooling_capacity = -1 # Use Manual J auto-sizing
       heating_capacity = -1 # Use Manual J auto-sizing
-      backup_heating_fuel = 'electricity'
+      backup_heating_fuel = HPXML::FuelTypeElectricity
       backup_heating_capacity = -1 # Use Manual J auto-sizing
       backup_heating_efficiency_percent = 1.0
       heat_pump_type = orig_hp.heat_pump_type
@@ -617,7 +580,7 @@ class HEScoreRuleset
       fraction_cool_load_served = orig_hp.fraction_cool_load_served
       fraction_heat_load_served = orig_hp.fraction_heat_load_served
 
-      if heat_pump_type == 'air-to-air'
+      if heat_pump_type == HPXML::HVACTypeHeatPumpAirToAir
         if not cooling_efficiency_seer.nil?
           # Do nothing, we have the SEER
         elsif energy_star
@@ -650,14 +613,14 @@ class HEScoreRuleset
 
       # If heat pump has no cooling/heating load served, assign arbitrary value for cooling/heating efficiency value
       if (fraction_cool_load_served == 0) && cooling_efficiency_seer.nil? && cooling_efficiency_eer.nil?
-        if heat_pump_type == 'ground-to-air'
+        if heat_pump_type == HPXML::HVACTypeHeatPumpGroundToAir
           cooling_efficiency_eer = 16.6
         else
           cooling_efficiency_seer = 13.0
         end
       end
       if (fraction_heat_load_served == 0) && heating_efficiency_hspf.nil? && heating_efficiency_cop.nil?
-        if heat_pump_type == 'ground-to-air'
+        if heat_pump_type == HPXML::HVACTypeHeatPumpGroundToAir
           heating_efficiency_cop = 3.6
         else
           heating_efficiency_hspf = 7.7
@@ -682,22 +645,22 @@ class HEScoreRuleset
     end
 
     # HVACControl
-    control_type = 'manual thermostat'
+    control_type = HPXML::HVACControlTypeManual
     htg_sp, htg_setback_sp, htg_setback_hrs_per_week, htg_setback_start_hr = HVAC.get_default_heating_setpoint(control_type)
     clg_sp, clg_setup_sp, clg_setup_hrs_per_week, clg_setup_start_hr = HVAC.get_default_cooling_setpoint(control_type)
-    new_hpxml.set_hvac_control(id: 'HVACControl',
-                               control_type: control_type,
-                               heating_setpoint_temp: htg_sp,
-                               cooling_setpoint_temp: clg_sp)
+    new_hpxml.hvac_controls.add(id: 'HVACControl',
+                                control_type: control_type,
+                                heating_setpoint_temp: htg_sp,
+                                cooling_setpoint_temp: clg_sp)
 
     # HVACDistribution
     orig_hpxml.hvac_distributions.each do |orig_dist|
       new_hpxml.hvac_distributions.add(id: orig_dist.id,
-                                       distribution_system_type: 'AirDistribution')
+                                       distribution_system_type: HPXML::HVACDistributionTypeAir)
 
       frac_inside = 0.0
       orig_dist.ducts.each do |orig_duct|
-        next unless orig_duct.duct_location == 'living space'
+        next unless orig_duct.duct_location == HPXML::LocationLivingSpace
 
         frac_inside += orig_duct.duct_fraction_area
       end
@@ -706,25 +669,25 @@ class HEScoreRuleset
       lto_s, lto_r, uncond_area_s, uncond_area_r = calc_duct_values(@ncfl_ag, @cfa, sealed, frac_inside)
 
       # Supply duct leakage to the outside
-      new_hpxml.hvac_distributions[-1].duct_leakage_measurements.add(duct_type: 'supply',
-                                                                     duct_leakage_units: 'Percent',
+      new_hpxml.hvac_distributions[-1].duct_leakage_measurements.add(duct_type: HPXML::DuctTypeSupply,
+                                                                     duct_leakage_units: HPXML::UnitsPercent,
                                                                      duct_leakage_value: lto_s)
 
       # Return duct leakage to the outside
-      new_hpxml.hvac_distributions[-1].duct_leakage_measurements.add(duct_type: 'return',
-                                                                     duct_leakage_units: 'Percent',
+      new_hpxml.hvac_distributions[-1].duct_leakage_measurements.add(duct_type: HPXML::DuctTypeReturn,
+                                                                     duct_leakage_units: HPXML::UnitsPercent,
                                                                      duct_leakage_value: lto_r)
 
       orig_dist.ducts.each do |orig_duct|
-        next if orig_duct.duct_location == 'living space'
+        next if orig_duct.duct_location == HPXML::LocationLivingSpace
 
-        if orig_duct.duct_location == 'attic - unconditioned'
-          orig_duct.duct_location = 'attic - vented'
+        if orig_duct.duct_location == HPXML::LocationAtticUnconditioned
+          orig_duct.duct_location = HPXML::LocationAtticVented
         end
 
-        if orig_duct.duct_insulation_material == 'Unknown'
+        if orig_duct.duct_insulation_material == HPXML::DuctInsulationMaterialUnknown
           duct_rvalue = 6
-        elsif orig_duct.duct_insulation_material == 'None'
+        elsif orig_duct.duct_insulation_material == HPXML::DuctInsulationMaterialNone
           duct_rvalue = 0
         else
           fail "Unexpected duct insulation material '#{orig_duct.duct_insulation_material}'."
@@ -734,13 +697,13 @@ class HEScoreRuleset
         return_duct_surface_area = uncond_area_r * orig_duct.duct_fraction_area / (1.0 - frac_inside)
 
         # Supply duct
-        new_hpxml.hvac_distributions[-1].ducts.add(duct_type: 'supply',
+        new_hpxml.hvac_distributions[-1].ducts.add(duct_type: HPXML::DuctTypeSupply,
                                                    duct_insulation_r_value: duct_rvalue,
                                                    duct_location: orig_duct.duct_location,
                                                    duct_surface_area: supply_duct_surface_area)
 
         # Return duct
-        new_hpxml.hvac_distributions[-1].ducts.add(duct_type: 'return',
+        new_hpxml.hvac_distributions[-1].ducts.add(duct_type: HPXML::DuctTypeReturn,
                                                    duct_insulation_r_value: duct_rvalue,
                                                    duct_location: orig_duct.duct_location,
                                                    duct_surface_area: return_duct_surface_area)
@@ -749,7 +712,7 @@ class HEScoreRuleset
 
     additional_hydronic_ids.each do |hydronic_id|
       new_hpxml.hvac_distributions.add(id: hydronic_id,
-                                       distribution_system_type: 'HydronicDistribution')
+                                       distribution_system_type: HPXML::HVACDistributionTypeHydronic)
     end
   end
 
@@ -778,14 +741,14 @@ class HEScoreRuleset
       end
 
       fail 'Water Heater Type must be provided' if water_heater_type.nil?
-      fail 'Electric water heaters must be heat pump water heaters to be Energy Star qualified' if energy_star && (fuel_type == 'electricity') && (water_heater_type != 'heat pump water heater')
+      fail 'Electric water heaters must be heat pump water heaters to be Energy Star qualified' if energy_star && (fuel_type == HPXML::FuelTypeElectricity) && (water_heater_type != HPXML::WaterHeaterTypeHeatPump)
 
       heating_capacity = nil
-      if water_heater_type == 'storage water heater'
+      if water_heater_type == HPXML::WaterHeaterTypeStorage
         heating_capacity = get_default_water_heater_capacity(fuel_type)
       end
       recovery_efficiency = nil
-      if (water_heater_type == 'storage water heater') && (fuel_type != 'electricity')
+      if (water_heater_type == HPXML::WaterHeaterTypeStorage) && (fuel_type != HPXML::FuelTypeElectricity)
         ef = energy_factor
         if ef.nil?
           ef = 0.9066 * uniform_energy_factor + 0.0711 # RESNET equation for Consumer Gas-Fired Water Heater
@@ -793,20 +756,20 @@ class HEScoreRuleset
         recovery_efficiency = get_default_water_heater_re(fuel_type, ef)
       end
       tank_volume = nil
-      if water_heater_type == 'space-heating boiler with storage tank'
-        tank_volume = get_default_water_heater_volume('electricity')
+      if water_heater_type == HPXML::WaterHeaterTypeCombiStorage
+        tank_volume = get_default_water_heater_volume(HPXML::FuelTypeElectricity)
       # Set default fuel_type to call function : get_default_water_heater_volume, not passing this input to EP-HPXML
-      elsif (water_heater_type != 'instantaneous water heater') && (water_heater_type != 'space-heating boiler with tankless coil')
+      elsif (water_heater_type != HPXML::WaterHeaterTypeTankless) && (water_heater_type != HPXML::WaterHeaterTypeCombiTankless)
         tank_volume = get_default_water_heater_volume(fuel_type)
       end
 
       # Water heater location
       if @has_cond_bsmnt
-        water_heater_location = 'basement - conditioned'
+        water_heater_location = HPXML::LocationBasementConditioned
       elsif @has_uncond_bsmnt
-        water_heater_location = 'basement - unconditioned'
+        water_heater_location = HPXML::LocationBasementUnconditioned
       else
-        water_heater_location = 'living space'
+        water_heater_location = HPXML::LocationLivingSpace
       end
 
       new_hpxml.water_heating_systems.add(id: orig_water_heater.id,
@@ -819,7 +782,7 @@ class HEScoreRuleset
                                           energy_factor: energy_factor,
                                           uniform_energy_factor: uniform_energy_factor,
                                           recovery_efficiency: recovery_efficiency,
-                                          related_hvac: orig_water_heater.related_hvac)
+                                          related_hvac_idref: orig_water_heater.related_hvac_idref)
     end
   end
 
@@ -827,13 +790,13 @@ class HEScoreRuleset
     # Hot water piping length
     piping_length = HotWaterAndAppliances.get_default_std_pipe_length(@has_uncond_bsmnt, @cfa, @ncfl)
 
-    new_hpxml.set_hot_water_distribution(id: 'HotWaterDistribution',
-                                         system_type: 'Standard',
-                                         pipe_r_value: 0,
-                                         standard_piping_length: piping_length)
+    new_hpxml.hot_water_distributions.add(id: 'HotWaterDistribution',
+                                          system_type: HPXML::DHWDistTypeStandard,
+                                          pipe_r_value: 0,
+                                          standard_piping_length: piping_length)
 
     new_hpxml.water_fixtures.add(id: 'ShowerHead',
-                                 water_fixture_type: 'shower head',
+                                 water_fixture_type: HPXML::WaterFixtureTypeShowerhead,
                                  low_flow: false)
   end
 
@@ -853,9 +816,9 @@ class HEScoreRuleset
     losses_fraction = PV.calc_losses_fraction_from_year(orig_pv_system.year_modules_manufactured)
 
     new_hpxml.pv_systems.add(id: 'PVSystem',
-                             location: 'roof',
-                             module_type: 'standard', # From https =>//docs.google.com/spreadsheets/d/1YeoVOwu9DU-50fxtT_KRh_BJLlchF7nls85Ebe9fDkI
-                             tracking: 'fixed',
+                             location: HPXML::LocationRoof,
+                             module_type: HPXML::DHWDistTypeStandard, # From https =>//docs.google.com/spreadsheets/d/1YeoVOwu9DU-50fxtT_KRh_BJLlchF7nls85Ebe9fDkI
+                             tracking: HPXML::PVTrackingTypeFixed,
                              array_azimuth: orientation_to_azimuth(orig_pv_system.array_orientation),
                              array_tilt: @roof_angle,
                              max_power_output: max_power_output,
@@ -864,53 +827,72 @@ class HEScoreRuleset
   end
 
   def self.set_appliances_clothes_washer(orig_hpxml, new_hpxml)
-    new_hpxml.set_clothes_washer(id: 'ClothesWasher',
-                                 location: 'living space',
-                                 integrated_modified_energy_factor: HotWaterAndAppliances.get_clothes_washer_reference_imef(),
-                                 rated_annual_kwh: HotWaterAndAppliances.get_clothes_washer_reference_ler(),
-                                 label_electric_rate: HotWaterAndAppliances.get_clothes_washer_reference_elec_rate(),
-                                 label_gas_rate: HotWaterAndAppliances.get_clothes_washer_reference_gas_rate(),
-                                 label_annual_gas_cost: HotWaterAndAppliances.get_clothes_washer_reference_agc(),
-                                 capacity: HotWaterAndAppliances.get_clothes_washer_reference_cap())
+    new_hpxml.clothes_washers.add(id: 'ClothesWasher',
+                                  location: HPXML::LocationLivingSpace,
+                                  integrated_modified_energy_factor: HotWaterAndAppliances.get_clothes_washer_reference_imef(),
+                                  rated_annual_kwh: HotWaterAndAppliances.get_clothes_washer_reference_ler(),
+                                  label_electric_rate: HotWaterAndAppliances.get_clothes_washer_reference_elec_rate(),
+                                  label_gas_rate: HotWaterAndAppliances.get_clothes_washer_reference_gas_rate(),
+                                  label_annual_gas_cost: HotWaterAndAppliances.get_clothes_washer_reference_agc(),
+                                  capacity: HotWaterAndAppliances.get_clothes_washer_reference_cap())
   end
 
   def self.set_appliances_clothes_dryer(orig_hpxml, new_hpxml)
-    new_hpxml.set_clothes_dryer(id: 'ClothesDryer',
-                                location: 'living space',
-                                fuel_type: 'electricity',
-                                combined_energy_factor: HotWaterAndAppliances.get_clothes_dryer_reference_cef('electricity'),
-                                control_type: HotWaterAndAppliances.get_clothes_dryer_reference_control())
+    new_hpxml.clothes_dryers.add(id: 'ClothesDryer',
+                                 location: HPXML::LocationLivingSpace,
+                                 fuel_type: HPXML::FuelTypeElectricity,
+                                 combined_energy_factor: HotWaterAndAppliances.get_clothes_dryer_reference_cef(HPXML::FuelTypeElectricity),
+                                 control_type: HotWaterAndAppliances.get_clothes_dryer_reference_control())
   end
 
   def self.set_appliances_dishwasher(orig_hpxml, new_hpxml)
-    new_hpxml.set_dishwasher(id: 'Dishwasher',
-                             energy_factor: HotWaterAndAppliances.get_dishwasher_reference_ef(),
-                             place_setting_capacity: HotWaterAndAppliances.get_dishwasher_reference_cap())
+    new_hpxml.dishwashers.add(id: 'Dishwasher',
+                              energy_factor: HotWaterAndAppliances.get_dishwasher_reference_ef(),
+                              place_setting_capacity: HotWaterAndAppliances.get_dishwasher_reference_cap())
   end
 
   def self.set_appliances_refrigerator(orig_hpxml, new_hpxml)
-    new_hpxml.set_refrigerator(id: 'Refrigerator',
-                               location: 'living space',
-                               rated_annual_kwh: HotWaterAndAppliances.get_refrigerator_reference_annual_kwh(@nbeds))
+    new_hpxml.refrigerators.add(id: 'Refrigerator',
+                                location: HPXML::LocationLivingSpace,
+                                rated_annual_kwh: HotWaterAndAppliances.get_refrigerator_reference_annual_kwh(@nbeds))
   end
 
   def self.set_appliances_cooking_range_oven(orig_hpxml, new_hpxml)
-    new_hpxml.set_cooking_range(id: 'CookingRange',
-                                fuel_type: 'electricity',
-                                is_induction: HotWaterAndAppliances.get_range_oven_reference_is_induction())
+    new_hpxml.cooking_ranges.add(id: 'CookingRange',
+                                 fuel_type: HPXML::FuelTypeElectricity,
+                                 is_induction: HotWaterAndAppliances.get_range_oven_reference_is_induction())
 
-    new_hpxml.set_oven(id: 'Oven',
-                       is_convection: HotWaterAndAppliances.get_range_oven_reference_is_convection())
+    new_hpxml.ovens.add(id: 'Oven',
+                        is_convection: HotWaterAndAppliances.get_range_oven_reference_is_convection())
   end
 
   def self.set_lighting(orig_hpxml, new_hpxml)
     fFI_int, fFI_ext, fFI_grg, fFII_int, fFII_ext, fFII_grg = Lighting.get_reference_fractions()
-    new_hpxml.set_lighting(fraction_tier_i_interior: fFI_int,
-                           fraction_tier_i_exterior: fFI_ext,
-                           fraction_tier_i_garage: fFI_grg,
-                           fraction_tier_ii_interior: fFII_int,
-                           fraction_tier_ii_exterior: fFII_ext,
-                           fraction_tier_ii_garage: fFII_grg)
+
+    new_hpxml.lighting_groups.add(id: 'Lighting_TierI_Interior',
+                                  location: HPXML::LocationInterior,
+                                  fration_of_units_in_location: fFI_int,
+                                  third_party_certification: HPXML::LightingTypeTierI)
+    new_hpxml.lighting_groups.add(id: 'Lighting_TierI_Exterior',
+                                  location: HPXML::LocationExterior,
+                                  fration_of_units_in_location: fFI_ext,
+                                  third_party_certification: HPXML::LightingTypeTierI)
+    new_hpxml.lighting_groups.add(id: 'Lighting_TierI_Garage',
+                                  location: HPXML::LocationGarage,
+                                  fration_of_units_in_location: fFI_grg,
+                                  third_party_certification: HPXML::LightingTypeTierI)
+    new_hpxml.lighting_groups.add(id: 'Lighting_TierII_Interior',
+                                  location: HPXML::LocationInterior,
+                                  fration_of_units_in_location: fFII_int,
+                                  third_party_certification: HPXML::LightingTypeTierII)
+    new_hpxml.lighting_groups.add(id: 'Lighting_TierII_Exterior',
+                                  location: HPXML::LocationExterior,
+                                  fration_of_units_in_location: fFII_ext,
+                                  third_party_certification: HPXML::LightingTypeTierII)
+    new_hpxml.lighting_groups.add(id: 'Lighting_TierII_Garage',
+                                  location: HPXML::LocationGarage,
+                                  fration_of_units_in_location: fFII_grg,
+                                  third_party_certification: HPXML::LightingTypeTierII)
   end
 
   def self.set_ceiling_fans(orig_hpxml, new_hpxml)
@@ -919,26 +901,45 @@ class HEScoreRuleset
 
   def self.set_misc_plug_loads(orig_hpxml, new_hpxml)
     new_hpxml.plug_loads.add(id: 'PlugLoadOther',
-                             plug_load_type: 'other')
+                             plug_load_type: HPXML::PlugLoadTypeOther)
     # Uses ERI Reference Home for performance
   end
 
   def self.set_misc_television(orig_hpxml, new_hpxml)
     new_hpxml.plug_loads.add(id: 'PlugLoadTV',
-                             plug_load_type: 'TV other')
+                             plug_load_type: HPXML::PlugLoadTypeTelevision)
     # Uses ERI Reference Home for performance
+  end
+
+  def self.get_foundation_perimeter(orig_hpxml, foundation)
+    n_foundations = orig_hpxml.foundations.size
+    if n_foundations == 1
+      return @bldg_perimeter
+    elsif n_foundations == 2
+      fnd_area = foundation.area
+      long_side = [@bldg_length_front, @bldg_length_side].max
+      short_side = [@bldg_length_front, @bldg_length_side].min
+      total_foundation_area = 0
+      orig_hpxml.foundations.each do |a_foundation|
+        total_foundation_area += a_foundation.area
+      end
+      fnd_frac = fnd_area / total_foundation_area
+      return short_side + 2 * long_side * fnd_frac
+    else
+      fail 'Only one or two foundations is allowed.'
+    end
   end
 end
 
 def lookup_hvac_efficiency(year, hvac_type, fuel_type, units, performance_id = 'shipment_weighted', state_code = nil)
   year = 0 if year.nil?
 
-  type_id = { 'central air conditioner' => 'split_dx',
-              'room air conditioner' => 'packaged_dx',
-              'air-to-air' => 'heat_pump',
-              'Furnace' => 'central_furnace',
-              'WallFurnace' => 'wall_furnace',
-              'Boiler' => 'boiler' }[hvac_type]
+  type_id = { HPXML::HVACTypeCentralAirConditioner => 'split_dx',
+              HPXML::HVACTypeRoomAirConditioner => 'packaged_dx',
+              HPXML::HVACTypeHeatPumpAirToAir => 'heat_pump',
+              HPXML::HVACTypeFurnace => 'central_furnace',
+              HPXML::HVACTypeWallFurnace => 'wall_furnace',
+              HPXML::HVACTypeBoiler => 'boiler' }[hvac_type]
   fail "Unexpected hvac_type #{hvac_type}." if type_id.nil?
 
   fuel_primary_id = hpxml_to_hescore_fuel(fuel_type)
@@ -1008,10 +1009,10 @@ end
 
 def get_default_water_heater_volume(fuel)
   # Water Heater Tank Volume by fuel
-  val = { 'electricity' => 50,
-          'natural gas' => 40,
-          'propane' => 40,
-          'fuel oil' => 32 }[fuel]
+  val = { HPXML::FuelTypeElectricity => 50,
+          HPXML::FuelTypeNaturalGas => 40,
+          HPXML::FuelTypePropane => 40,
+          HPXML::FuelTypeOil => 32 }[fuel]
   return val if not val.nil?
 
   fail "Could not get default water heater volume for fuel '#{fuel}'"
@@ -1020,7 +1021,7 @@ end
 def get_default_water_heater_re(fuel, ef)
   # Water Heater Recovery Efficiency by fuel and energy factor
   val = nil
-  if fuel == 'electricity'
+  if fuel == HPXML::FuelTypeElectricity
     val = 0.98
   elsif ef >= 0.75
     val = 0.778114 * ef + 0.276679
@@ -1034,10 +1035,10 @@ end
 
 def get_default_water_heater_capacity(fuel)
   # Water Heater Rated Input Capacity by fuel
-  val = { 'electricity' => 15400,
-          'natural gas' => 38000,
-          'propane' => 38000,
-          'fuel oil' => 90000 }[fuel]
+  val = { HPXML::FuelTypeElectricity => 15400,
+          HPXML::FuelTypeNaturalGas => 38000,
+          HPXML::FuelTypePropane => 38000,
+          HPXML::FuelTypeOil => 90000 }[fuel]
   return val if not val.nil?
 
   fail "Could not get default water heater capacity for fuel '#{fuel}'"
@@ -1055,11 +1056,11 @@ def get_wall_effective_r_from_doe2code(doe2code)
 end
 
 $siding_map = {
-  'wood siding' => 'wo',
-  'stucco' => 'st',
-  'vinyl siding' => 'vi',
-  'aluminum siding' => 'al',
-  'brick veneer' => 'br',
+  HPXML::SidingTypeWood => 'wo',
+  HPXML::SidingTypeStucco => 'st',
+  HPXML::SidingTypeVinyl => 'vi',
+  HPXML::SidingTypeAluminum => 'al',
+  HPXML::SidingTypeBrick => 'br',
   nil => 'nn'
 }
 
@@ -1129,11 +1130,11 @@ def get_roof_assembly_r(r_cavity, r_cont, material, has_radiant_barrier)
   # Roof Assembly R-value
   # http://hes-documentation.lbl.gov/calculation-methodology/calculation-of-energy-consumption/heating-and-cooling-calculation/building-envelope/roof-construction-types
   materials_map = {
-    'asphalt or fiberglass shingles' => 'co',    # Composition Shingles
-    'wood shingles or shakes' => 'wo',           # Wood Shakes
-    'slate or tile shingles' => 'rc',            # Clay Tile
-    'concrete' => 'lc',                          # Concrete Tile
-    'plastic/rubber/synthetic sheeting' => 'tg'  # Tar and Gravel
+    HPXML::RoofMaterialAsphaltShingles => 'co',  # Composition Shingles
+    HPXML::RoofMaterialWoodShingles => 'wo',     # Wood Shakes
+    HPXML::RoofMaterialClayTile => 'rc',         # Clay Tile
+    HPXML::RoofMaterialConcrete => 'lc',         # Concrete Tile
+    HPXML::RoofMaterialPlasticRubber => 'tg'     # Tar and Gravel
   }
   has_r_cont = !r_cont.nil?
   if (not has_r_cont) && (not has_radiant_barrier)
@@ -1193,55 +1194,55 @@ def get_floor_assembly_r(r_cavity)
   fail "Could not get default floor assembly R-value for R-cavity '#{r_cavity}'"
 end
 
-def get_window_ufactor_shgc(frame_type, glass_layers, glass_type, gas_fill)
+def get_window_ufactor_shgc(frame_type, thermal_break, glass_layers, glass_type, gas_fill)
   # https://docs.google.com/spreadsheets/d/1joG39BeiRj1mV0Lge91P_dkL-0-94lSEY5tJzGvpc2A/edit#gid=909262753
-  key = [frame_type, glass_layers, glass_type, gas_fill]
-  vals = { ['Aluminum', 'single-pane', nil, nil] => [1.27, 0.75],                               # scna
-           ['Wood', 'single-pane', nil, nil] => [0.89, 0.64],                                   # scnw
-           ['Aluminum', 'single-pane', 'tinted/reflective', nil] => [1.27, 0.64],               # stna
-           ['Wood', 'single-pane', 'tinted/reflective', nil] => [0.89, 0.54],                   # stnw
-           ['Aluminum', 'double-pane', nil, 'air'] => [0.81, 0.67],                             # dcaa
-           ['AluminumThermalBreak', 'double-pane', nil, 'air'] => [0.60, 0.67],                 # dcab
-           ['Wood', 'double-pane', nil, 'air'] => [0.51, 0.56],                                 # dcaw
-           ['Aluminum', 'double-pane', 'tinted/reflective', 'air'] => [0.81, 0.55],             # dtaa
-           ['AluminumThermalBreak', 'double-pane', 'tinted/reflective', 'air'] => [0.60, 0.55], # dtab
-           ['Wood', 'double-pane', 'tinted/reflective', 'air'] => [0.51, 0.46],                 # dtaw
-           ['Wood', 'double-pane', 'low-e', 'air'] => [0.42, 0.52],                             # dpeaw
-           ['AluminumThermalBreak', 'double-pane', 'low-e', 'argon'] => [0.47, 0.62],           # dpeaab
-           ['Wood', 'double-pane', 'low-e', 'argon'] => [0.39, 0.52],                           # dpeaaw
-           ['Aluminum', 'double-pane', 'reflective', 'air'] => [0.67, 0.37],                    # dseaa
-           ['AluminumThermalBreak', 'double-pane', 'reflective', 'air'] => [0.47, 0.37],        # dseab
-           ['Wood', 'double-pane', 'reflective', 'air'] => [0.39, 0.31],                        # dseaw
-           ['Wood', 'double-pane', 'reflective', 'argon'] => [0.36, 0.31],                      # dseaaw
-           ['Wood', 'triple-pane', 'low-e', 'argon'] => [0.27, 0.31] }[key]                     # thmabw
+  key = [frame_type, thermal_break, glass_layers, glass_type, gas_fill]
+  vals = { [HPXML::WindowFrameTypeAluminum, false, HPXML::WindowLayersSinglePane, nil, nil] => [1.27, 0.75], # scna
+           [HPXML::WindowFrameTypeWood, nil, HPXML::WindowLayersSinglePane, nil, nil] => [0.89, 0.64], # scnw
+           [HPXML::WindowFrameTypeAluminum, false, HPXML::WindowLayersSinglePane, HPXML::WindowGlazingTintedReflective, nil] => [1.27, 0.64], # stna
+           [HPXML::WindowFrameTypeWood, nil, HPXML::WindowLayersSinglePane, HPXML::WindowGlazingTintedReflective, nil] => [0.89, 0.54], # stnw
+           [HPXML::WindowFrameTypeAluminum, false, HPXML::WindowLayersDoublePane, nil, HPXML::WindowGasAir] => [0.81, 0.67], # dcaa
+           [HPXML::WindowFrameTypeAluminum, true, HPXML::WindowLayersDoublePane, nil, HPXML::WindowGasAir] => [0.60, 0.67], # dcab
+           [HPXML::WindowFrameTypeWood, nil, HPXML::WindowLayersDoublePane, nil, HPXML::WindowGasAir] => [0.51, 0.56], # dcaw
+           [HPXML::WindowFrameTypeAluminum, false, HPXML::WindowLayersDoublePane, HPXML::WindowGlazingTintedReflective, HPXML::WindowGasAir] => [0.81, 0.55], # dtaa
+           [HPXML::WindowFrameTypeAluminum, true, HPXML::WindowLayersDoublePane, HPXML::WindowGlazingTintedReflective, HPXML::WindowGasAir] => [0.60, 0.55], # dtab
+           [HPXML::WindowFrameTypeWood, nil, HPXML::WindowLayersDoublePane, HPXML::WindowGlazingTintedReflective, HPXML::WindowGasAir] => [0.51, 0.46], # dtaw
+           [HPXML::WindowFrameTypeWood, nil, HPXML::WindowLayersDoublePane, HPXML::WindowGlazingLowE, HPXML::WindowGasAir] => [0.42, 0.52], # dpeaw
+           [HPXML::WindowFrameTypeAluminum, true, HPXML::WindowLayersDoublePane, HPXML::WindowGlazingLowE, HPXML::WindowGasArgon] => [0.47, 0.62], # dpeaab
+           [HPXML::WindowFrameTypeWood, nil, HPXML::WindowLayersDoublePane, HPXML::WindowGlazingLowE, HPXML::WindowGasArgon] => [0.39, 0.52], # dpeaaw
+           [HPXML::WindowFrameTypeAluminum, false, HPXML::WindowLayersDoublePane, HPXML::WindowGlazingReflective, HPXML::WindowGasAir] => [0.67, 0.37], # dseaa
+           [HPXML::WindowFrameTypeAluminum, true, HPXML::WindowLayersDoublePane, HPXML::WindowGlazingReflective, HPXML::WindowGasAir] => [0.47, 0.37], # dseab
+           [HPXML::WindowFrameTypeWood, nil, HPXML::WindowLayersDoublePane, HPXML::WindowGlazingReflective, HPXML::WindowGasAir] => [0.39, 0.31], # dseaw
+           [HPXML::WindowFrameTypeWood, nil, HPXML::WindowLayersDoublePane, HPXML::WindowGlazingReflective, HPXML::WindowGasArgon] => [0.36, 0.31], # dseaaw
+           [HPXML::WindowFrameTypeWood, nil, HPXML::WindowLayersTriplePane, HPXML::WindowGlazingLowE, HPXML::WindowGasArgon] => [0.27, 0.31] }[key] # thmabw
   return vals if not vals.nil?
 
   fail "Could not get default window U/SHGC for frame type '#{frame_type}' and glass layers '#{glass_layers}' and glass type '#{glass_type}' and gas fill '#{gas_fill}'"
 end
 
-def get_skylight_ufactor_shgc(frame_type, glass_layers, glass_type, gas_fill)
+def get_skylight_ufactor_shgc(frame_type, thermal_break, glass_layers, glass_type, gas_fill)
   # Skylight U-factor/SHGC
   # FIXME: Verify
   # https://docs.google.com/spreadsheets/d/1joG39BeiRj1mV0Lge91P_dkL-0-94lSEY5tJzGvpc2A/edit#gid=909262753
-  key = [frame_type, glass_layers, glass_type, gas_fill]
-  vals = { ['Aluminum', 'single-pane', nil, nil] => [1.98, 0.75],                               # scna
-           ['Wood', 'single-pane', nil, nil] => [1.47, 0.64],                                   # scnw
-           ['Aluminum', 'single-pane', 'tinted/reflective', nil] => [1.98, 0.64],               # stna
-           ['Wood', 'single-pane', 'tinted/reflective', nil] => [1.47, 0.54],                   # stnw
-           ['Aluminum', 'double-pane', nil, 'air'] => [1.30, 0.67],                             # dcaa
-           ['AluminumThermalBreak', 'double-pane', nil, 'air'] => [1.10, 0.67],                 # dcab
-           ['Wood', 'double-pane', nil, 'air'] => [0.84, 0.56],                                 # dcaw
-           ['Aluminum', 'double-pane', 'tinted/reflective', 'air'] => [1.30, 0.55],             # dtaa
-           ['AluminumThermalBreak', 'double-pane', 'tinted/reflective', 'air'] => [1.10, 0.55], # dtab
-           ['Wood', 'double-pane', 'tinted/reflective', 'air'] => [0.84, 0.46],                 # dtaw
-           ['Wood', 'double-pane', 'low-e', 'air'] => [0.74, 0.52],                             # dpeaw
-           ['AluminumThermalBreak', 'double-pane', 'low-e', 'argon'] => [0.95, 0.62],           # dpeaab
-           ['Wood', 'double-pane', 'low-e', 'argon'] => [0.68, 0.52],                           # dpeaaw
-           ['Aluminum', 'double-pane', 'reflective', 'air'] => [1.17, 0.37],                    # dseaa
-           ['AluminumThermalBreak', 'double-pane', 'reflective', 'air'] => [0.98, 0.37],        # dseab
-           ['Wood', 'double-pane', 'reflective', 'air'] => [0.71, 0.31],                        # dseaw
-           ['Wood', 'double-pane', 'reflective', 'argon'] => [0.65, 0.31],                      # dseaaw
-           ['Wood', 'triple-pane', 'low-e', 'argon'] => [0.47, 0.31] }[key]                     # thmabw
+  key = [frame_type, thermal_break, glass_layers, glass_type, gas_fill]
+  vals = { [HPXML::WindowFrameTypeAluminum, false, HPXML::WindowLayersSinglePane, nil, nil] => [1.98, 0.75], # scna
+           [HPXML::WindowFrameTypeWood, nil, HPXML::WindowLayersSinglePane, nil, nil] => [1.47, 0.64], # scnw
+           [HPXML::WindowFrameTypeAluminum, false, HPXML::WindowLayersSinglePane, HPXML::WindowGlazingTintedReflective, nil] => [1.98, 0.64], # stna
+           [HPXML::WindowFrameTypeWood, nil, HPXML::WindowLayersSinglePane, HPXML::WindowGlazingTintedReflective, nil] => [1.47, 0.54], # stnw
+           [HPXML::WindowFrameTypeAluminum, false, HPXML::WindowLayersDoublePane, nil, HPXML::WindowGasAir] => [1.30, 0.67], # dcaa
+           [HPXML::WindowFrameTypeAluminum, true, HPXML::WindowLayersDoublePane, nil, HPXML::WindowGasAir] => [1.10, 0.67], # dcab
+           [HPXML::WindowFrameTypeWood, nil, HPXML::WindowLayersDoublePane, nil, HPXML::WindowGasAir] => [0.84, 0.56], # dcaw
+           [HPXML::WindowFrameTypeAluminum, false, HPXML::WindowLayersDoublePane, HPXML::WindowGlazingTintedReflective, HPXML::WindowGasAir] => [1.30, 0.55], # dtaa
+           [HPXML::WindowFrameTypeAluminum, true, HPXML::WindowLayersDoublePane, HPXML::WindowGlazingTintedReflective, HPXML::WindowGasAir] => [1.10, 0.55], # dtab
+           [HPXML::WindowFrameTypeWood, nil, HPXML::WindowLayersDoublePane, HPXML::WindowGlazingTintedReflective, HPXML::WindowGasAir] => [0.84, 0.46], # dtaw
+           [HPXML::WindowFrameTypeWood, nil, HPXML::WindowLayersDoublePane, HPXML::WindowGlazingLowE, HPXML::WindowGasAir] => [0.74, 0.52], # dpeaw
+           [HPXML::WindowFrameTypeAluminum, true, HPXML::WindowLayersDoublePane, HPXML::WindowGlazingLowE, HPXML::WindowGasArgon] => [0.95, 0.62], # dpeaab
+           [HPXML::WindowFrameTypeWood, nil, HPXML::WindowLayersDoublePane, HPXML::WindowGlazingLowE, HPXML::WindowGasArgon] => [0.68, 0.52], # dpeaaw
+           [HPXML::WindowFrameTypeAluminum, false, HPXML::WindowLayersDoublePane, HPXML::WindowGlazingReflective, HPXML::WindowGasAir] => [1.17, 0.37], # dseaa
+           [HPXML::WindowFrameTypeAluminum, true, HPXML::WindowLayersDoublePane, HPXML::WindowGlazingReflective, HPXML::WindowGasAir] => [0.98, 0.37], # dseab
+           [HPXML::WindowFrameTypeWood, nil, HPXML::WindowLayersDoublePane, HPXML::WindowGlazingReflective, HPXML::WindowGasAir] => [0.71, 0.31], # dseaw
+           [HPXML::WindowFrameTypeWood, nil, HPXML::WindowLayersDoublePane, HPXML::WindowGlazingReflective, HPXML::WindowGasArgon] => [0.65, 0.31], # dseaaw
+           [HPXML::WindowFrameTypeWood, nil, HPXML::WindowLayersTriplePane, HPXML::WindowGlazingLowE, HPXML::WindowGasArgon] => [0.47, 0.31] }[key] # thmabw
   return vals if not vals.nil?
 
   fail "Could not get default skylight U/SHGC for frame type '#{frame_type}' and glass layers '#{glass_layers}' and glass type '#{glass_type}' and gas fill '#{gas_fill}'"
@@ -1250,11 +1251,11 @@ end
 def get_roof_solar_absorptance(roof_color)
   # FIXME: Verify
   # https://docs.google.com/spreadsheets/d/1joG39BeiRj1mV0Lge91P_dkL-0-94lSEY5tJzGvpc2A/edit#gid=1325866208
-  val = { 'reflective' => 0.35,
-          'light' => 0.55,
-          'medium' => 0.7,
-          'medium dark' => 0.8,
-          'dark' => 0.9 }[roof_color]
+  val = { HPXML::WindowGlazingReflective => 0.35,
+          HPXML::RoofColorLight => 0.55,
+          HPXML::RoofColorMedium => 0.7,
+          HPXML::RoofColorMediumDark => 0.8,
+          HPXML::RoofColorDark => 0.9 }[roof_color]
   return val if not val.nil?
 
   fail "Could not get roof absorptance for color '#{roof_color}'"
@@ -1354,11 +1355,11 @@ def calc_ach50(ncfl_ag, cfa, ceil_height, cvolume, desc, year_built, iecc_cz, fn
   sum_fnd_area = 0.0
   fnd_types.each do |fnd_type, area|
     sum_fnd_area += area
-    if fnd_type == 'living space'
+    if fnd_type == HPXML::LocationLivingSpace
       c_foundation += -0.036992 * area
-    elsif (fnd_type == 'basement - conditioned') || (fnd_type == 'crawlspace - unvented')
+    elsif (fnd_type == HPXML::LocationBasementConditioned) || (fnd_type == HPXML::LocationCrawlspaceUnvented)
       c_foundation += 0.108713 * area
-    elsif (fnd_type == 'basement - unconditioned') || (fnd_type == 'crawlspace - vented')
+    elsif (fnd_type == HPXML::LocationBasementUnconditioned) || (fnd_type == HPXML::LocationCrawlspaceVented)
       c_foundation += 0.180352 * area
     else
       fail "Unexpected foundation type: #{fnd_type}"
@@ -1369,13 +1370,13 @@ def calc_ach50(ncfl_ag, cfa, ceil_height, cvolume, desc, year_built, iecc_cz, fn
   # Ducts (weighted by duct fraction and hvac fraction)
   c_duct = 0.0
   ducts.each do |hvac_frac, duct_frac, duct_location|
-    if duct_location == 'living space'
+    if duct_location == HPXML::LocationLivingSpace
       c_duct += -0.12381 * duct_frac * hvac_frac
-    elsif (duct_location == 'attic - unconditioned') || (duct_location == 'basement - unconditioned')
+    elsif (duct_location == HPXML::LocationAtticUnconditioned) || (duct_location == HPXML::LocationBasementUnconditioned)
       c_duct += 0.07126 * duct_frac * hvac_frac
-    elsif duct_location == 'crawlspace - vented'
+    elsif duct_location == HPXML::LocationCrawlspaceVented
       c_duct += 0.18072 * duct_frac * hvac_frac
-    elsif duct_location == 'crawlspace - unvented'
+    elsif duct_location == HPXML::LocationCrawlspaceUnvented
       c_duct += 0.07126 * duct_frac * hvac_frac
     else
       fail "Unexpected duct location: #{duct_location}"
@@ -1383,9 +1384,9 @@ def calc_ach50(ncfl_ag, cfa, ceil_height, cvolume, desc, year_built, iecc_cz, fn
   end
 
   c_sealed = nil
-  if desc == 'tight'
+  if desc == HPXML::LeakinessTight
     c_sealed = -0.288
-  elsif desc == 'average'
+  elsif desc == HPXML::LeakinessAverage
     c_sealed = 0.0
   else
     fail "Unexpected air leakage description: #{desc}"
@@ -1408,28 +1409,28 @@ def calc_ach50(ncfl_ag, cfa, ceil_height, cvolume, desc, year_built, iecc_cz, fn
 end
 
 def orientation_to_azimuth(orientation)
-  return { 'northeast' => 45,
-           'east' => 90,
-           'southeast' => 135,
-           'south' => 180,
-           'southwest' => 225,
-           'west' => 270,
-           'northwest' => 315,
-           'north' => 0 }[orientation]
+  return { HPXML::OrientationNortheast => 45,
+           HPXML::OrientationEast => 90,
+           HPXML::OrientationSoutheast => 135,
+           HPXML::OrientationSouth => 180,
+           HPXML::OrientationSouthwest => 225,
+           HPXML::OrientationWest => 270,
+           HPXML::OrientationNorthwest => 315,
+           HPXML::OrientationNorth => 0 }[orientation]
 end
 
 def reverse_orientation(orientation)
   # Converts, e.g., "northwest" to "southeast"
   reverse = orientation
-  if reverse.include? 'north'
-    reverse = reverse.gsub('north', 'south')
+  if reverse.include? HPXML::OrientationNorth
+    reverse = reverse.gsub(HPXML::OrientationNorth, HPXML::OrientationSouth)
   else
-    reverse = reverse.gsub('south', 'north')
+    reverse = reverse.gsub(HPXML::OrientationSouth, HPXML::OrientationNorth)
   end
-  if reverse.include? 'east'
-    reverse = reverse.gsub('east', 'west')
+  if reverse.include? HPXML::OrientationEast
+    reverse = reverse.gsub(HPXML::OrientationEast, HPXML::OrientationWest)
   else
-    reverse = reverse.gsub('west', 'east')
+    reverse = reverse.gsub(HPXML::OrientationWest, HPXML::OrientationEast)
   end
   return reverse
 end
@@ -1446,31 +1447,17 @@ def sanitize_azimuth(azimuth)
 end
 
 def hpxml_to_hescore_fuel(fuel_type)
-  return { 'electricity' => 'electric',
-           'natural gas' => 'natural_gas',
-           'fuel oil' => 'fuel_oil',
-           'propane' => 'lpg' }[fuel_type]
+  return { HPXML::FuelTypeElectricity => 'electric',
+           HPXML::FuelTypeNaturalGas => 'natural_gas',
+           HPXML::FuelTypeOil => 'fuel_oil',
+           HPXML::FuelTypePropane => 'lpg' }[fuel_type]
 end
 
-def get_foundation_details(orig_hpxml)
-  # Returns a hash of foundation_type => area
+def get_foundation_areas(orig_hpxml)
+  # Returns a hash of foundation location => area
   fnd_types = {}
   orig_hpxml.foundations.each do |orig_foundation|
-    fnd_adjacent = get_foundation_adjacent(orig_foundation)
-
-    orig_hpxml.frame_floors.each do |orig_frame_floor|
-      next unless orig_foundation.attached_to_frame_floors.include? orig_frame_floor.id
-
-      fnd_types[fnd_adjacent] = orig_frame_floor.area
-    end
-
-    next unless fnd_types[fnd_adjacent].nil?
-
-    orig_hpxml.slabs.each do |orig_slab|
-      next unless orig_foundation.attached_to_slabs.include? orig_slab.id
-
-      fnd_types[fnd_adjacent] = orig_slab.area
-    end
+    fnd_types[orig_foundation.to_location] = orig_foundation.area
   end
   return fnd_types
 end
@@ -1507,70 +1494,14 @@ def get_hvac_fraction(orig_hpxml, dist_id)
   return
 end
 
-def get_attic_adjacent(attic)
-  attic_adjacent = nil
-  if attic.attic_type == 'UnventedAttic'
-    attic_adjacent = 'attic - unvented'
-  elsif attic.attic_type == 'VentedAttic'
-    attic_adjacent = 'attic - vented'
-  elsif attic.attic_type == 'ConditionedAttic'
-    attic_adjacent = 'living space'
-  elsif attic.attic_type == 'FlatRoof'
-    attic_adjacent = 'living space'
-  elsif attic.attic_type == 'CathedralCeiling'
-    attic_adjacent = 'living space'
-  else
-    fail 'Unexpected attic type.'
-  end
-  return attic_adjacent
-end
-
-def get_foundation_adjacent(foundation)
-  foundation_adjacent = nil
-  if foundation.foundation_type == 'SlabOnGrade'
-    foundation_adjacent = 'living space'
-  elsif foundation.foundation_type == 'UnconditionedBasement'
-    foundation_adjacent = 'basement - unconditioned'
-  elsif foundation.foundation_type == 'ConditionedBasement'
-    foundation_adjacent = 'basement - conditioned'
-  elsif foundation.foundation_type == 'UnventedCrawlspace'
-    foundation_adjacent = 'crawlspace - unvented'
-  elsif foundation.foundation_type == 'VentedCrawlspace'
-    foundation_adjacent = 'crawlspace - vented'
-  else
-    fail 'Unexpected foundation type.'
-  end
-  return foundation_adjacent
-end
-
-def get_foundation_area(orig_hpxml, foundation)
-  if foundation.foundation_type == 'SlabOnGrade'
-    orig_hpxml.slabs.each do |orig_slab|
-      next unless foundation.attached_to_slabs.include? orig_slab.id
-
-      return orig_slab.area
-    end
-  elsif foundation.foundation_type.include?('Basement') || foundation.foundation_type.include?('Crawlspace')
-    orig_hpxml.frame_floors.each do |orig_frame_floor|
-      next unless foundation.attached_to_frame_floors.include? orig_frame_floor.id
-
-      return orig_frame_floor.area
-    end
-  else
-    fail "Unexpected foundation type: #{foundation.foundation_type}."
-  end
-end
-
 def calc_conditioned_volume(orig_hpxml)
   cvolume = @cfa * @ceil_height
   orig_hpxml.attics.each do |orig_attic|
-    is_conditioned_attic = (orig_attic.attic_type == 'ConditionedAttic')
-    is_cathedral_ceiling = (orig_attic.attic_type == 'CathedralCeiling')
+    is_conditioned_attic = (orig_attic.attic_type == HPXML::AtticTypeConditioned)
+    is_cathedral_ceiling = (orig_attic.attic_type == HPXML::AtticTypeCathedral)
     next unless is_conditioned_attic || is_cathedral_ceiling
 
-    orig_hpxml.roofs.each do |orig_roof|
-      next unless orig_attic.attached_to_roofs.include? orig_roof.id
-
+    orig_attic.attached_roofs.each do |orig_roof|
       # Half of the length of short side of the house
       a = 0.5 * [@bldg_length_front, @bldg_length_side].min
       # Ridge height
