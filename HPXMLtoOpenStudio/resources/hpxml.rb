@@ -1,7 +1,6 @@
 require_relative 'xmlhelper'
 
 '''
-
 Example Usage:
 
 -----------------
@@ -15,25 +14,25 @@ puts hpxml.building_construction.number_of_bedrooms
 
 # Array elements
 hpxml.walls.each do |wall|
-  puts wall.area
+  wall.windows.each do |window|
+    puts window.area
+  end
 end
-puts hpxml.walls[0].area
 
 ---------------------
 Creating from scratch
 ---------------------
 
-hpxml = HPXML.new()
+hpxml = HPXML.new
 
 # Singleton elements
-hpxml.set_building_construction(:number_of_bedrooms => 3,
-                                :conditioned_floor_area => 2400)
+hpxml.set_building_construction(number_of_bedrooms: 3,
+                                conditioned_floor_area: 2400)
 
 # Array elements
-hpxml.walls.add(:id => "WallNorth", :area => 500)
-hpxml.walls.add(:id => "WallSouth", :area => 500)
-hpxml.walls.delete_at(1)
-
+hpxml.walls.clear
+hpxml.walls.add(id: "WallNorth", area: 500)
+hpxml.walls.add(id: "WallSouth", area: 500)
 '''
 
 class HPXML < Object
@@ -336,6 +335,25 @@ class HPXML < Object
           self.send(k.to_s + "=", v)
         end
       end
+    end
+
+    def is_thermal_boundary(interior_adjacent_to, exterior_adjacent_to)
+      def is_adjacent_to_conditioned(adjacent_to)
+        if [HPXML::LocationLivingSpace,
+            HPXML::LocationBasementConditioned].include? adjacent_to
+          return true
+        end
+
+        return false
+      end
+
+      if surface.exterior_adjacent_to.include? HPXML::LocationOtherHousingUnit
+        return false # adiabatic
+      end
+
+      interior_conditioned = is_adjacent_to_conditioned(surface.interior_adjacent_to)
+      exterior_conditioned = is_adjacent_to_conditioned(surface.exterior_adjacent_to)
+      return (interior_conditioned != exterior_conditioned)
     end
 
     def to_h
@@ -931,6 +949,18 @@ class HPXML < Object
       return LocationOutside
     end
 
+    def is_exterior
+      return true
+    end
+
+    def is_interior
+      return !is_exterior
+    end
+
+    def is_thermal_boundary
+      super(@interior_adjacent_to, exterior_adjacent_to)
+    end
+
     def to_rexml(doc)
       return if self.nil?
 
@@ -996,6 +1026,22 @@ class HPXML < Object
     ATTRS = [:id, :exterior_adjacent_to, :interior_adjacent_to, :area, :azimuth, :solar_absorptance,
              :emittance, :insulation_id, :insulation_assembly_r_value]
     attr_accessor(*ATTRS)
+
+    def is_exterior
+      if @exterior_adjacent_to == LocationOutside
+        return true
+      end
+
+      return false
+    end
+
+    def is_interior
+      return !is_exterior
+    end
+
+    def is_thermal_boundary
+      super(@interior_adjacent_to, @exterior_adjacent_to)
+    end
 
     def to_rexml(doc)
       return if self.nil?
@@ -1076,6 +1122,22 @@ class HPXML < Object
       fail "Calculated a negative net surface area for surface '#{@id}'." if val < 0
 
       return val
+    end
+
+    def is_exterior
+      if @exterior_adjacent_to == LocationOutside
+        return true
+      end
+
+      return false
+    end
+
+    def is_interior
+      return !is_exterior
+    end
+
+    def is_thermal_boundary
+      super(@interior_adjacent_to, @exterior_adjacent_to)
     end
 
     def to_rexml(doc)
@@ -1163,6 +1225,22 @@ class HPXML < Object
       fail "Calculated a negative net surface area for surface '#{@id}'." if val < 0
 
       return val
+    end
+
+    def is_exterior
+      if @exterior_adjacent_to == LocationGround
+        return true
+      end
+
+      return false
+    end
+
+    def is_interior
+      return !is_exterior
+    end
+
+    def is_thermal_boundary
+      super(@interior_adjacent_to, @exterior_adjacent_to)
     end
 
     def to_rexml(doc)
@@ -1264,6 +1342,22 @@ class HPXML < Object
       !is_ceiling
     end
 
+    def is_exterior
+      if @exterior_adjacent_to == LocationOutside
+        return true
+      end
+
+      return false
+    end
+
+    def is_interior
+      return !is_exterior
+    end
+
+    def is_thermal_boundary
+      super(@interior_adjacent_to, @exterior_adjacent_to)
+    end
+
     def to_rexml(doc)
       return if self.nil?
 
@@ -1325,6 +1419,18 @@ class HPXML < Object
 
     def exterior_adjacent_to
       return LocationOutside # FIXME: Switch to LocationGround?
+    end
+
+    def is_exterior
+      return true
+    end
+
+    def is_interior
+      return !is_exterior
+    end
+
+    def is_thermal_boundary
+      super(@interior_adjacent_to, exterior_adjacent_to)
     end
 
     def to_rexml(doc)
@@ -1425,6 +1531,18 @@ class HPXML < Object
       fail "Attached wall '#{@wall_idref}' not found for window '#{@id}'."
     end
 
+    def is_exterior
+      return wall.is_exterior
+    end
+
+    def is_interior
+      return !is_exterior
+    end
+
+    def is_thermal_boundary
+      super(wall.interior_adjacent_to, wall.exterior_adjacent_to)
+    end
+
     def to_rexml(doc)
       return if self.nil?
 
@@ -1507,6 +1625,18 @@ class HPXML < Object
       fail "Attached roof '#{@roof_idref}' not found for skylight '#{@id}'."
     end
 
+    def is_exterior
+      return roof.is_exterior
+    end
+
+    def is_interior
+      return !is_exterior
+    end
+
+    def is_thermal_boundary
+      super(skylight.interior_adjacent_to, skylight.exterior_adjacent_to)
+    end
+
     def to_rexml(doc)
       return if self.nil?
 
@@ -1568,6 +1698,18 @@ class HPXML < Object
         return wall
       end
       fail "Attached wall '#{@wall_idref}' not found for door '#{@id}'."
+    end
+
+    def is_exterior
+      return wall.is_exterior
+    end
+
+    def is_interior
+      return !is_exterior
+    end
+
+    def is_thermal_boundary
+      super(wall.interior_adjacent_to, wall.exterior_adjacent_to)
     end
 
     def to_rexml(doc)
@@ -3023,23 +3165,4 @@ def _to_bool_or_nil(value)
   return nil if value.nil?
 
   return Boolean(value)
-end
-
-# TODO: Move into appropriate class above
-def is_thermal_boundary(surface)
-  def is_adjacent_to_conditioned(adjacent_to)
-    if [HPXML::LocationLivingSpace, HPXML::LocationBasementConditioned].include? adjacent_to
-      return true
-    end
-
-    return false
-  end
-
-  if surface.exterior_adjacent_to.start_with? HPXML::LocationOtherHousingUnit
-    return false # adiabatic
-  end
-
-  interior_conditioned = is_adjacent_to_conditioned(surface.interior_adjacent_to)
-  exterior_conditioned = is_adjacent_to_conditioned(surface.exterior_adjacent_to)
-  return (interior_conditioned != exterior_conditioned)
 end
