@@ -60,7 +60,7 @@ class Waterheater
   def self.calc_ef(ef, vol, fuel)
     # Calculate the energy factor as a function of the tank volume and fuel type
     if ef == Constants.Auto
-      if fuel == Constants.FuelTypePropane or fuel == Constants.FuelTypeNaturalGas
+      if (fuel == Constants.FuelTypePropane) || (fuel == Constants.FuelTypeNaturalGas)
         return 0.67 - (0.0019 * vol)
       elsif fuel == Constants.FuelTypeElectricity
         return 0.97 - (0.00132 * vol)
