@@ -2228,8 +2228,8 @@ class HPXMLFile
     return false if not success
 
     hpxml_doc = hpxml.to_rexml()
-    _add_extension(parent: hpxml_doc.elements['/HPXML/Building/BuildingDetails'],
-                   extensions: { "UnitMultiplier": args[:unit_multiplier] })
+    HPXML::add_extension(parent: hpxml_doc.elements['/HPXML/Building/BuildingDetails'],
+                         extensions: { "UnitMultiplier": args[:unit_multiplier] })
 
     return hpxml_doc
   end
@@ -2931,12 +2931,12 @@ class HPXMLFile
     # Ducts
     supply_duct_location = args[:supply_duct_location]
     if supply_duct_location == Constants.Auto
-      supply_duct_location = get_duct_location_auto(args)
+      supply_duct_location = get_duct_location_auto(args, hpxml)
     end
 
     return_duct_location = args[:return_duct_location]
     if return_duct_location == Constants.Auto
-      return_duct_location = get_duct_location_auto(args)
+      return_duct_location = get_duct_location_auto(args, hpxml)
     end
 
     hpxml.hvac_distributions[-1].ducts.add(duct_type: HPXML::DuctTypeSupply,
@@ -2990,11 +2990,11 @@ class HPXMLFile
                             ceiling_fan_cooling_setpoint_temp_offset: ceiling_fan_cooling_setpoint_temp_offset)
   end
 
-  def self.get_duct_location_auto(args) # FIXME
-    if (args[:roof_type] != 'flat') && [HPXML::AtticTypeVented, HPXML::AtticTypeUnvented].include?(args[:attic_type]) && (not ['single-family attached', 'multifamily'].include? args[:unit_type]) # FIXME
-      location = HPXML::to_location(args[:attic_type])
-    elsif args[:foundation_type].downcase.include?('basement') || args[:foundation_type].downcase.include?('crawlspace')
-      location = HPXML::to_location(args[:foundation_type])
+  def self.get_duct_location_auto(args, hpxml) # FIXME
+    if args[:roof_type] != 'flat' && hpxml.attics.size > 0 && [HPXML::AtticTypeVented, HPXML::AtticTypeUnvented].include?(args[:attic_type])
+      location = hpxml.attics[0].to_location
+    elsif hpxml.foundations.size > 0 && (args[:foundation_type].downcase.include?('basement') || args[:foundation_type].downcase.include?('crawlspace'))
+      location = hpxml.foundations[0].to_location
     else
       location = HPXML::LocationLivingSpace
     end
@@ -3006,9 +3006,9 @@ class HPXMLFile
     return location
   end
 
-  def self.get_other_appliance_location_auto(args) # FIXME
-    if args[:foundation_type].downcase.include?('basement') || args[:foundation_type].downcase.include?('crawlspace')
-      location = HPXML::to_location(args[:foundation_type])
+  def self.get_other_appliance_location_auto(args, hpxml) # FIXME
+    if hpxml.foundations.size > 0 && (args[:foundation_type].downcase.include?('basement') || args[:foundation_type].downcase.include?('crawlspace'))
+      location = hpxml.foundations[0].to_location
     else
       location = HPXML::LocationLivingSpace
     end
@@ -3078,7 +3078,7 @@ class HPXMLFile
 
     location = args[:water_heater_location]
     if location == Constants.Auto
-      location = get_other_appliance_location_auto(args)
+      location = get_other_appliance_location_auto(args, hpxml)
     end
 
     num_bathrooms = args[:num_bathrooms]
@@ -3257,7 +3257,7 @@ class HPXMLFile
 
     location = args[:clothes_washer_location]
     if location == Constants.Auto
-      location = get_other_appliance_location_auto(args)
+      location = get_other_appliance_location_auto(args, hpxml)
     end
 
     if args[:clothes_washer_efficiency_type] == 'ModifiedEnergyFactor'
@@ -3288,7 +3288,7 @@ class HPXMLFile
 
     location = args[:clothes_dryer_location]
     if location == Constants.Auto
-      location = get_other_appliance_location_auto(args)
+      location = get_other_appliance_location_auto(args, hpxml)
     end
 
     hpxml.clothes_dryers.add(id: 'ClothesDryer',

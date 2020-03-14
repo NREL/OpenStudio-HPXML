@@ -294,7 +294,7 @@ class HotWaterAndAppliances
   end
 
   def self.get_clothes_dryer_reference_control()
-    return 'timer'
+    return HPXML::ClothesDryerControlTypeTimer
   end
 
   def self.calc_clothes_dryer_energy(nbeds, fuel_type, ef, control_type, cw_ler, cw_cap, cw_mef)
@@ -650,7 +650,7 @@ class HotWaterAndAppliances
     # Amendment on Domestic Hot Water (DHW) Systems
     # Table 4.2.2.5.2.11(6) Hot water distribution system relative annual energy waste factors
     if dist_type == HPXML::DHWDistTypeRecirc
-      if (recirc_control_type == HPXML::DHWRecirControlTypeNone) || (recirc_control_type == 'timer')
+      if (recirc_control_type == HPXML::DHWRecirControlTypeNone) || (recirc_control_type == HPXML::DHWRecirControlTypeTimer)
         if pipe_r < 3.0
           return 500.0
         else
