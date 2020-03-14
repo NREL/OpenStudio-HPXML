@@ -24,16 +24,16 @@ class HEScoreTest < Minitest::Unit::TestCase
     # assert_equal(num_cache_expected, num_cache_actual)
 
     # Prepare results dir for CI storage
-    @results_dir = File.absolute_path(File.join(File.dirname(__FILE__), "..", 'test_results'))
+    @results_dir = File.absolute_path(File.join(File.dirname(__FILE__), '..', 'test_results'))
     _rm_path(@results_dir)
     Dir.mkdir(@results_dir)
   end
 
   def test_valid_simulations
-    zipfile = OpenStudio::ZipFile.new(OpenStudio::Path.new(File.join(@results_dir, "results_jsons.zip")), false)
+    zipfile = OpenStudio::ZipFile.new(OpenStudio::Path.new(File.join(@results_dir, 'results_jsons.zip')), false)
 
     results = {}
-    parent_dir = File.absolute_path(File.join(File.dirname(__FILE__), ".."))
+    parent_dir = File.absolute_path(File.join(File.dirname(__FILE__), '..'))
     xmldir = "#{parent_dir}/sample_files"
     Dir["#{xmldir}/*.xml"].sort.each do |xml|
       results[File.basename(xml)] = run_and_check(xml, parent_dir, false, zipfile)
@@ -43,21 +43,21 @@ class HEScoreTest < Minitest::Unit::TestCase
   end
 
   def test_skip_simulation
-    parent_dir = File.absolute_path(File.join(File.dirname(__FILE__), ".."))
+    parent_dir = File.absolute_path(File.join(File.dirname(__FILE__), '..'))
 
     cli_path = OpenStudio.getOpenStudioCLI
-    xml = File.absolute_path(File.join(parent_dir, "sample_files", "Base_hpxml.xml"))
-    command = "\"#{cli_path}\" --no-ssl \"#{File.join(File.dirname(__FILE__), "../run_simulation.rb")}\" --skip-simulation -x #{xml}"
+    xml = File.absolute_path(File.join(parent_dir, 'sample_files', 'Base_hpxml.xml'))
+    command = "\"#{cli_path}\" --no-ssl \"#{File.join(File.dirname(__FILE__), '../run_simulation.rb')}\" --skip-simulation -x #{xml}"
     start_time = Time.now
     system(command)
 
     # Check for output
-    hes_hpxml = File.join(parent_dir, "results", "HEScoreDesign.xml")
-    assert(File.exists?(hes_hpxml))
+    hes_hpxml = File.join(parent_dir, 'results', 'HEScoreDesign.xml')
+    assert(File.exist?(hes_hpxml))
 
     # Check that IDF wasn't generated
-    idf = File.join(parent_dir, "HEScoreDesign", "in.idf")
-    assert(!File.exists?(idf))
+    idf = File.join(parent_dir, 'HEScoreDesign', 'in.idf')
+    assert(!File.exist?(idf))
   end
 
   private
@@ -68,23 +68,23 @@ class HEScoreTest < Minitest::Unit::TestCase
 
     # Run workflow
     cli_path = OpenStudio.getOpenStudioCLI
-    command = "\"#{cli_path}\" --no-ssl \"#{File.join(File.dirname(__FILE__), "../run_simulation.rb")}\" -x #{xml}"
+    command = "\"#{cli_path}\" --no-ssl \"#{File.join(File.dirname(__FILE__), '../run_simulation.rb')}\" -x #{xml}"
     start_time = Time.now
     system(command)
     runtime = Time.now - start_time
 
-    results_json = File.join(parent_dir, "results", "results.json")
+    results_json = File.join(parent_dir, 'results', 'results.json')
     results = nil
     if expect_error
-      assert(!File.exists?(results_json))
+      assert(!File.exist?(results_json))
     else
       # Check all output files exist
-      hes_hpxml = File.join(parent_dir, "results", "HEScoreDesign.xml")
-      assert(File.exists?(hes_hpxml))
-      assert(File.exists?(results_json))
+      hes_hpxml = File.join(parent_dir, 'results', 'HEScoreDesign.xml')
+      assert(File.exist?(hes_hpxml))
+      assert(File.exist?(results_json))
 
       # Check HPXMLs are valid
-      schemas_dir = File.absolute_path(File.join(parent_dir, "..", "hpxml-measures", "HPXMLtoOpenStudio", "resources"))
+      schemas_dir = File.absolute_path(File.join(parent_dir, '..', 'hpxml-measures', 'HPXMLtoOpenStudio', 'resources'))
       _test_schema_validation(parent_dir, xml, schemas_dir)
       _test_schema_validation(parent_dir, hes_hpxml, schemas_dir)
 
@@ -100,7 +100,7 @@ class HEScoreTest < Minitest::Unit::TestCase
 
   def _get_results(parent_dir, runtime)
     # Retrieve results from results.json
-    json_path = File.join(parent_dir, "results", "results.json")
+    json_path = File.join(parent_dir, 'results', 'results.json')
     data = JSON.parse(File.read(json_path))
 
     results = {}
@@ -113,17 +113,17 @@ class HEScoreTest < Minitest::Unit::TestCase
       key = [resource_type.to_s, end_use.to_s, units]
 
       found_in_results = false
-      data["end_use"].each do |result|
-        resource_type = result["resource_type"]
-        end_use = result["end_use"]
-        units = result["units"]
+      data['end_use'].each do |result|
+        resource_type = result['resource_type']
+        end_use = result['end_use']
+        units = result['units']
         results_key = [resource_type, end_use, units]
         next if results_key != key
 
         if results[key].nil?
           results[key] = 0.0
         end
-        results[key] += Float(result["quantity"]) # Just store annual results
+        results[key] += Float(result['quantity']) # Just store annual results
         found_in_results = true
       end
 
@@ -132,7 +132,7 @@ class HEScoreTest < Minitest::Unit::TestCase
       end
     end
 
-    results["Runtime"] = runtime
+    results['Runtime'] = runtime
 
     return results
   end
@@ -140,50 +140,50 @@ class HEScoreTest < Minitest::Unit::TestCase
   def _test_results(xml, results)
     hpxml_doc = REXML::Document.new(File.read(xml))
 
-    fuel_map = { "electricity" => "electric",
-                 "natural gas" => "natural_gas",
-                 "fuel oil" => "fuel_oil",
-                 "propane" => "lpg",
-                 "wood" => "cord_wood",
-                 "wood pellets" => "pellet_wood" }
+    fuel_map = { HPXML::FuelTypeElectricity => 'electric',
+                 HPXML::FuelTypeNaturalGas => 'natural_gas',
+                 HPXML::FuelTypeOil => 'fuel_oil',
+                 HPXML::FuelTypePropane => 'lpg',
+                 HPXML::FuelTypeWood => 'cord_wood',
+                 HPXML::FuelTypeWoodPellets => 'pellet_wood' }
 
     # Get HPXML values for Building Summary
-    cfa = Float(XMLHelper.get_value(hpxml_doc, "/HPXML/Building/BuildingDetails/BuildingSummary/BuildingConstruction/ConditionedFloorArea"))
-    nbr = Float(XMLHelper.get_value(hpxml_doc, "/HPXML/Building/BuildingDetails/BuildingSummary/BuildingConstruction/NumberofBedrooms"))
+    cfa = Float(XMLHelper.get_value(hpxml_doc, '/HPXML/Building/BuildingDetails/BuildingSummary/BuildingConstruction/ConditionedFloorArea'))
+    nbr = Float(XMLHelper.get_value(hpxml_doc, '/HPXML/Building/BuildingDetails/BuildingSummary/BuildingConstruction/NumberofBedrooms'))
 
     # Get HPXML values for HVAC
-    hvac_plant = hpxml_doc.elements["/HPXML/Building/BuildingDetails/Systems/HVAC/HVACPlant"]
+    hvac_plant = hpxml_doc.elements['/HPXML/Building/BuildingDetails/Systems/HVAC/HVACPlant']
     htg_fuels = []
-    hvac_plant.elements.each("HeatingSystem[FractionHeatLoadServed>0]") do |htg_sys|
-      htg_fuels << fuel_map[XMLHelper.get_value(htg_sys, "HeatingSystemFuel")]
-      if !htg_sys.elements["HeatingSystemType/Furnace"].nil? or !htg_sys.elements["HeatingSystemType/Boiler"].nil?
-        htg_fuels << fuel_map["electricity"] # fan/pump
+    hvac_plant.elements.each('HeatingSystem[FractionHeatLoadServed>0]') do |htg_sys|
+      htg_fuels << fuel_map[XMLHelper.get_value(htg_sys, 'HeatingSystemFuel')]
+      if !htg_sys.elements['HeatingSystemType/Furnace'].nil? || !htg_sys.elements['HeatingSystemType/Boiler'].nil?
+        htg_fuels << fuel_map['electricity'] # fan/pump
       end
     end
-    hvac_plant.elements.each("HeatPump[FractionHeatLoadServed>0]") do |hp|
-      htg_fuels << fuel_map["electricity"]
+    hvac_plant.elements.each('HeatPump[FractionHeatLoadServed>0]') do |hp|
+      htg_fuels << fuel_map['electricity']
     end
-    has_clg = !hvac_plant.elements["CoolingSystem[FractionCoolLoadServed>0] | HeatPump[FractionCoolLoadServed>0]"].nil?
+    has_clg = !hvac_plant.elements['CoolingSystem[FractionCoolLoadServed>0] | HeatPump[FractionCoolLoadServed>0]'].nil?
 
     # Get HPXML values for Water Heating
     hw_fuels = []
-    hpxml_doc.elements.each("/HPXML/Building/BuildingDetails/Systems/WaterHeating/WaterHeatingSystem") do |hw_sys|
-      hw_fuels << fuel_map[XMLHelper.get_value(hw_sys, "FuelType")]
-      hw_type = XMLHelper.get_value(hw_sys, "WaterHeaterType")
-      if hw_type.include? "boiler" or hw_type == "heat pump water heater"
-        hw_fuels << fuel_map["electricity"] # fan/pump
+    hpxml_doc.elements.each('/HPXML/Building/BuildingDetails/Systems/WaterHeating/WaterHeatingSystem') do |hw_sys|
+      hw_fuels << fuel_map[XMLHelper.get_value(hw_sys, 'FuelType')]
+      hw_type = XMLHelper.get_value(hw_sys, 'WaterHeaterType')
+      if hw_type.include?('boiler') || (hw_type == 'heat pump water heater')
+        hw_fuels << fuel_map['electricity'] # fan/pump
       end
     end
 
     # Get HPXML values for PV
-    has_pv = !hpxml_doc.elements["/HPXML/Building/BuildingDetails/Systems/Photovoltaics/PVSystem"].nil?
+    has_pv = !hpxml_doc.elements['/HPXML/Building/BuildingDetails/Systems/Photovoltaics/PVSystem'].nil?
 
     tested_end_uses = []
     results.each do |key, value|
       resource_type, end_use, units = key
 
       # Check lighting end use matches ERI calculation
-      if end_use == "lighting" and resource_type == "electric" and units == "kWh"
+      if (end_use == 'lighting') && (resource_type == 'electric') && (units == 'kWh')
         eri_int_ltg = 455.0 + 0.80 * cfa
         eri_ext_ltg = 100.0 + 0.05 * cfa
         eri_ltg = eri_int_ltg + eri_ext_ltg
@@ -192,7 +192,7 @@ class HEScoreTest < Minitest::Unit::TestCase
       end
 
       # Check large_appliance end use matches ERI calculation
-      if end_use == "large_appliance" and resource_type == "electric" and units == "kWh"
+      if (end_use == 'large_appliance') && (resource_type == 'electric') && (units == 'kWh')
         eri_fridge = 637.0 + 18.0 * nbr
         eri_clothes_dryer = 524.0 + 149.0 * nbr
         eri_clothes_washer = 38.0 + 10.0 * nbr
@@ -203,7 +203,7 @@ class HEScoreTest < Minitest::Unit::TestCase
       end
 
       # Check small_appliance end use matches ERI calculation
-      if end_use == "small_appliance" and resource_type == "electric" and units == "kWh"
+      if (end_use == 'small_appliance') && (resource_type == 'electric') && (units == 'kWh')
         eri_mels = 0.91 * cfa
         eri_tv = 413.0 + 69.0 * nbr
         eri_range_oven = 331.0 + 39.0 * nbr
@@ -213,8 +213,8 @@ class HEScoreTest < Minitest::Unit::TestCase
       end
 
       # Check heating end use by fuel reflects presence of system
-      if end_use == "heating"
-        if xml.include? "sample_files/Location_CZ09_hpxml.xml"
+      if end_use == 'heating'
+        if xml.include? 'sample_files/Location_CZ09_hpxml.xml'
           # skip test: hot climate so potentially no heating energy
         elsif htg_fuels.include? resource_type
           assert_operator(value, :>, 0)
@@ -225,7 +225,7 @@ class HEScoreTest < Minitest::Unit::TestCase
       end
 
       # Check cooling end use reflects presence of cooling system
-      if end_use == "cooling" and resource_type == "electric"
+      if (end_use == 'cooling') && (resource_type == 'electric')
         if has_clg
           assert_operator(value, :>, 0)
         else
@@ -235,7 +235,7 @@ class HEScoreTest < Minitest::Unit::TestCase
       end
 
       # Check hot_water end use by fuel reflects presence of system
-      if end_use == "hot_water" and resource_type != "hot_water"
+      if (end_use == 'hot_water') && (resource_type != 'hot_water')
         if hw_fuels.include? resource_type
           assert_operator(value, :>, 0)
         else
@@ -245,19 +245,19 @@ class HEScoreTest < Minitest::Unit::TestCase
       end
 
       # Check hot water use > 0
-      if end_use == "hot_water" and resource_type == "hot_water"
+      if (end_use == 'hot_water') && (resource_type == 'hot_water')
         assert_operator(value, :>, 0)
       end
 
       # Check generation end use reflects presence of PV system
-      if end_use == "generation" and resource_type == "electric"
-        if has_pv
-          assert_operator(value, :>, 0)
-        else
-          assert_operator(value, :<, 0.5)
-        end
-        tested_end_uses << end_use
+      next unless (end_use == 'generation') && (resource_type == 'electric')
+
+      if has_pv
+        assert_operator(value, :>, 0)
+      else
+        assert_operator(value, :<, 0.5)
       end
+      tested_end_uses << end_use
     end
 
     # Check we actually tested the right number of categories
@@ -276,7 +276,7 @@ class HEScoreTest < Minitest::Unit::TestCase
     end
 
     # Append runtime at the end
-    column_headers << "Runtime [s]"
+    column_headers << 'Runtime [s]'
 
     require 'csv'
     CSV.open(csv_out, 'w') do |csv|
@@ -292,19 +292,19 @@ class HEScoreTest < Minitest::Unit::TestCase
   def _test_schema_validation(parent_dir, xml, schemas_dir)
     # TODO: Remove this when schema validation is included with CLI calls
     hpxml_doc = REXML::Document.new(File.read(xml))
-    errors = XMLHelper.validate(hpxml_doc.to_s, File.join(schemas_dir, "HPXML.xsd"), nil)
+    errors = XMLHelper.validate(hpxml_doc.to_s, File.join(schemas_dir, 'HPXML.xsd'), nil)
     if errors.size > 0
-      puts "#{xml}: #{errors.to_s}"
+      puts "#{xml}: #{errors}"
     end
     assert_equal(0, errors.size)
   end
 
   def _rm_path(path)
-    if Dir.exists?(path)
+    if Dir.exist?(path)
       FileUtils.rm_r(path)
     end
     while true
-      break if not Dir.exists?(path)
+      break if not Dir.exist?(path)
 
       sleep(0.01)
     end

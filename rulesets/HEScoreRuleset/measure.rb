@@ -5,8 +5,8 @@ require 'openstudio'
 require 'rexml/document'
 require 'rexml/xpath'
 require 'pathname'
-require_relative "resources/HESruleset"
-require_relative "../../hpxml-measures/HPXMLtoOpenStudio/resources/xmlhelper"
+require_relative 'resources/HESruleset'
+require_relative '../../hpxml-measures/HPXMLtoOpenStudio/resources/xmlhelper'
 
 # start the measure
 class HEScoreMeasure < OpenStudio::Measure::ModelMeasure
@@ -30,14 +30,14 @@ class HEScoreMeasure < OpenStudio::Measure::ModelMeasure
   def arguments(model)
     args = OpenStudio::Measure::OSArgumentVector.new
 
-    arg = OpenStudio::Measure::OSArgument.makeStringArgument("hpxml_path", true)
-    arg.setDisplayName("HPXML File Path")
-    arg.setDescription("Absolute (or relative) path of the HPXML file.")
+    arg = OpenStudio::Measure::OSArgument.makeStringArgument('hpxml_path', true)
+    arg.setDisplayName('HPXML File Path')
+    arg.setDescription('Absolute (or relative) path of the HPXML file.')
     args << arg
 
-    arg = OpenStudio::Measure::OSArgument.makeStringArgument("hpxml_output_path", false)
-    arg.setDisplayName("HPXML Output File Path")
-    arg.setDescription("Absolute (or relative) path of the output HPXML file.")
+    arg = OpenStudio::Measure::OSArgument.makeStringArgument('hpxml_output_path', false)
+    arg.setDisplayName('HPXML Output File Path')
+    arg.setDescription('Absolute (or relative) path of the output HPXML file.')
     args << arg
 
     return args
@@ -53,13 +53,13 @@ class HEScoreMeasure < OpenStudio::Measure::ModelMeasure
     end
 
     # assign the user inputs to variables
-    hpxml_path = runner.getStringArgumentValue("hpxml_path", user_arguments)
-    hpxml_output_path = runner.getOptionalStringArgumentValue("hpxml_output_path", user_arguments)
+    hpxml_path = runner.getStringArgumentValue('hpxml_path', user_arguments)
+    hpxml_output_path = runner.getOptionalStringArgumentValue('hpxml_output_path', user_arguments)
 
     unless (Pathname.new hpxml_path).absolute?
       hpxml_path = File.expand_path(File.join(File.dirname(__FILE__), hpxml_path))
     end
-    unless File.exists?(hpxml_path) and hpxml_path.downcase.end_with? ".xml"
+    unless File.exist?(hpxml_path) && hpxml_path.downcase.end_with?('.xml')
       runner.registerError("'#{hpxml_path}' does not exist or is not an .xml file.")
       return false
     end

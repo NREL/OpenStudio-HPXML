@@ -5,11 +5,11 @@ def display_usage(command_list)
 end
 
 if ARGV.size == 0
-  puts "ERROR: Missing command."
+  puts 'ERROR: Missing command.'
   display_usage(command_list)
   exit!
 elsif ARGV.size > 1
-  puts "ERROR: Too many commands."
+  puts 'ERROR: Too many commands.'
   display_usage(command_list)
   exit!
 elsif not command_list.include? ARGV[0].to_sym
@@ -22,18 +22,31 @@ if ARGV[0].to_sym == :update_measures
   require 'openstudio'
 
   # Prevent NREL error regarding U: drive when not VPNed in
-  ENV['HOME'] = 'C:' if !ENV['HOME'].nil? and ENV['HOME'].start_with? 'U:'
-  ENV['HOMEDRIVE'] = 'C:\\' if !ENV['HOMEDRIVE'].nil? and ENV['HOMEDRIVE'].start_with? 'U:'
+  ENV['HOME'] = 'C:' if !ENV['HOME'].nil? && ENV['HOME'].start_with?('U:')
+  ENV['HOMEDRIVE'] = 'C:\\' if !ENV['HOMEDRIVE'].nil? && ENV['HOMEDRIVE'].start_with?('U:')
 
   # Apply rubocop
-  command = "rubocop --auto-correct --format simple --only Layout"
-  puts "Applying rubocop style to measures..."
+  cops = ['Layout',
+          'Lint/DeprecatedClassMethods',
+          'Lint/StringConversionInInterpolation',
+          'Style/AndOr',
+          'Style/HashSyntax',
+          'Style/Next',
+          'Style/NilComparison',
+          'Style/RedundantParentheses',
+          'Style/RedundantSelf',
+          'Style/ReturnNil',
+          'Style/SelfAssignment',
+          'Style/StringLiterals',
+          'Style/StringLiteralsInInterpolation']
+  command = 'rubocop --auto-correct --format simple --only ' + cops.join(',')
+  puts 'Applying rubocop auto-correct to measures...'
   system(command)
 
   # Update measures XMLs
   command = "#{OpenStudio.getOpenStudioCLI} measure -t '#{File.join(File.dirname(__FILE__), 'rulesets')}'"
-  puts "Updating measure.xmls..."
+  puts 'Updating measure.xmls...'
   system(command, [:out, :err] => File::NULL)
 
-  puts "Done."
+  puts 'Done.'
 end
