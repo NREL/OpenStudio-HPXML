@@ -52,6 +52,17 @@
             </extension>
           </AirInfiltrationMeasurement>
         </AirInfiltration>
+        <Attics>
+          <Attic>
+            <SystemIdentifier id='UnventedAttic'/>
+            <AtticType>
+              <Attic>
+                <Vented>false</Vented>
+              </Attic>
+            </AtticType>
+            <WithinInfiltrationVolume>false</WithinInfiltrationVolume>
+          </Attic>
+        </Attics>
         <Roofs>
           <Roof>
             <SystemIdentifier id='Roof'/>

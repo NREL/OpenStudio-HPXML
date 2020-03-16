@@ -56,6 +56,15 @@
         </AirInfiltration>
         <Attics>
           <Attic>
+            <SystemIdentifier id='UnventedAttic'/>
+            <AtticType>
+              <Attic>
+                <Vented>false</Vented>
+              </Attic>
+            </AtticType>
+            <WithinInfiltrationVolume>false</WithinInfiltrationVolume>
+          </Attic>
+          <Attic>
             <SystemIdentifier id='VentedAttic'/>
             <AtticType>
               <Attic>

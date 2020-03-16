@@ -1369,11 +1369,12 @@ class Waterheater
   end
 
   def self.get_default_hot_water_temperature(eri_version)
-    if eri_version.include? 'A'
+    # Returns hot water temperature in deg-F
+    if eri_version != '2014' # 2014 w/ Addendum A or newer
       return 125.0
+    else
+      return 120.0
     end
-
-    return 120.0
   end
 
   def self.get_tankless_cycling_derate()

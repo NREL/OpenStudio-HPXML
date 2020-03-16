@@ -718,7 +718,7 @@ class HPXML < Object
   end
 
   class Attic < BaseElement
-    ATTRS = [:id, :attic_type, :vented_attic_sla, :vented_attic_constant_ach,
+    ATTRS = [:id, :attic_type, :vented_attic_sla, :vented_attic_constant_ach, :within_infiltration_volume,
              :attached_to_roof_idrefs, :attached_to_frame_floor_idrefs]
     attr_accessor(*ATTRS)
 
@@ -798,6 +798,7 @@ class HPXML < Object
           fail "Unhandled attic type '#{@attic_type}'."
         end
       end
+      XMLHelper.add_element(attic, 'WithinInfiltrationVolume', Boolean(@within_infiltration_volume)) unless @within_infiltration_volume.nil?
     end
 
     def from_rexml(attic)
@@ -817,6 +818,7 @@ class HPXML < Object
       end
       @vented_attic_sla = HPXML::to_float_or_nil(XMLHelper.get_value(attic, "[AtticType/Attic[Vented='true']]VentilationRate[UnitofMeasure='SLA']/Value"))
       @vented_attic_constant_ach = HPXML::to_float_or_nil(XMLHelper.get_value(attic, "[AtticType/Attic[Vented='true']]extension/ConstantACHnatural"))
+      @within_infiltration_volume = HPXML::to_bool_or_nil(XMLHelper.get_value(attic, 'WithinInfiltrationVolume'))
       @attached_to_roof_idrefs = []
       attic.elements.each('AttachedToRoof') do |roof|
         @attached_to_roof_idrefs << HPXML::get_idref(roof)
@@ -843,7 +845,7 @@ class HPXML < Object
   end
 
   class Foundation < BaseElement
-    ATTRS = [:id, :foundation_type, :vented_crawlspace_sla, :unconditioned_basement_thermal_boundary,
+    ATTRS = [:id, :foundation_type, :vented_crawlspace_sla, :unconditioned_basement_thermal_boundary, :within_infiltration_volume,
              :attached_to_slab_idrefs, :attached_to_frame_floor_idrefs, :attached_to_foundation_wall_idrefs]
     attr_accessor(*ATTRS)
 
@@ -940,6 +942,7 @@ class HPXML < Object
           fail "Unhandled foundation type '#{@foundation_type}'."
         end
       end
+      XMLHelper.add_element(foundation, 'WithinInfiltrationVolume', Boolean(@within_infiltration_volume)) unless @within_infiltration_volume.nil?
     end
 
     def from_rexml(foundation)
@@ -961,6 +964,7 @@ class HPXML < Object
       end
       @vented_crawlspace_sla = HPXML::to_float_or_nil(XMLHelper.get_value(foundation, "[FoundationType/Crawlspace[Vented='true']]VentilationRate[UnitofMeasure='SLA']/Value"))
       @unconditioned_basement_thermal_boundary = XMLHelper.get_value(foundation, "[FoundationType/Basement[Conditioned='false']]ThermalBoundary")
+      @within_infiltration_volume = HPXML::to_bool_or_nil(XMLHelper.get_value(foundation, 'WithinInfiltrationVolume'))
       @attached_to_slab_idrefs = []
       foundation.elements.each('AttachedToSlab') do |slab|
         @attached_to_slab_idrefs << HPXML::get_idref(slab)

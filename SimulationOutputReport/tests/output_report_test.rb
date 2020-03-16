@@ -14,6 +14,8 @@ class SimulationOutputReportTest < MiniTest::Test
     'Natural Gas: Total (MBtu)',
     'Fuel Oil: Total (MBtu)',
     'Propane: Total (MBtu)',
+    'Wood: Total (MBtu)',
+    'Wood Pellets: Total (MBtu)',
     'Electricity: Heating (MBtu)',
     'Electricity: Heating Fans/Pumps (MBtu)',
     'Electricity: Cooling (MBtu)',
@@ -47,6 +49,11 @@ class SimulationOutputReportTest < MiniTest::Test
     'Propane: Hot Water (MBtu)',
     'Propane: Clothes Dryer (MBtu)',
     'Propane: Range/Oven (MBtu)',
+    'Wood: Heating (MBtu)',
+    'Wood: Hot Water (MBtu)',
+    'Wood: Clothes Dryer (MBtu)',
+    'Wood: Range/Oven (MBtu)',
+    'Wood Pellets: Heating (MBtu)',
     'Load: Heating (MBtu)',
     'Load: Cooling (MBtu)',
     'Load: Hot Water: Delivered (MBtu)',
@@ -100,6 +107,8 @@ class SimulationOutputReportTest < MiniTest::Test
     'Natural Gas: Total',
     'Fuel Oil: Total',
     'Propane: Total',
+    'Wood: Total',
+    'Wood Pellets: Total',
   ]
 
   TimeseriesColsEndUses = [
@@ -136,6 +145,11 @@ class SimulationOutputReportTest < MiniTest::Test
     'Propane: Hot Water',
     'Propane: Clothes Dryer',
     'Propane: Range/Oven',
+    'Wood: Heating',
+    'Wood: Hot Water',
+    'Wood: Clothes Dryer',
+    'Wood: Range/Oven',
+    'Wood Pellets: Heating',
   ]
 
   TimeseriesColsTotalLoads = [
@@ -195,6 +209,8 @@ class SimulationOutputReportTest < MiniTest::Test
     'fuelNaturalGas',
     'fuelFuelOil',
     'fuelPropane',
+    'fuelWood',
+    'fuelWoodPellets',
     'enduseElectricityHeating',
     'enduseElectricityHeatingFansPumps',
     'enduseElectricityCooling',
@@ -228,6 +244,11 @@ class SimulationOutputReportTest < MiniTest::Test
     'endusePropaneHotWater',
     'endusePropaneClothesDryer',
     'endusePropaneRangeOven',
+    'enduseWoodHeating',
+    'enduseWoodHotWater',
+    'enduseWoodClothesDryer',
+    'enduseWoodRangeOven',
+    'enduseWoodPelletsHeating',
     'loadHeating',
     'loadCooling',
     'loadHotWaterDelivered',
