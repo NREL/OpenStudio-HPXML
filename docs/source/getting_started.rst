@@ -26,7 +26,7 @@ Basic Run
 The simplest and fastest method is to call the OpenStudio CLI with the provided ``workflow/run_simulation.rb`` script.
 
 For example:
-``openstudio workflow/run_simulation.rb -x tests/base.xml``
+``openstudio workflow/run_simulation.rb -x workflow/sample_files/base.xml``
 
 This will create a "run" directory with all input/output files.
 By default it will be found at the same location as the input HPXML file.
@@ -38,7 +38,7 @@ Advanced Run
  
 If additional flexibility is desired (e.g., specifying individual measure arguments, including additional OpenStudio measures to run alongside this measure in a workflow, etc.), create an `OpenStudio Workflow (OSW) <https://nrel.github.io/OpenStudio-user-documentation/reference/command_line_interface/#osw-structure>`_ file.
 The OSW is a JSON file that will specify all the OpenStudio measures (and their arguments) to be run sequentially.
-A template OSW that simply runs the HPXMLtoOpenStudio and SimulationOutputReport measures on the ``HPXMLtoOpenStudio/tests/base.xml`` file can be found at ``workflow/template.osw``.
+A template OSW that simply runs the HPXMLtoOpenStudio and SimulationOutputReport measures on the ``workflow/sample_files/base.xml`` file can be found at ``workflow/template.osw``.
 
 For example:
 ``openstudio run -w workflow/template.osw``
