@@ -1753,7 +1753,7 @@ class OSModel
         skylight_tilt = roof.pitch / 12.0
       end
       if skylight_tilt.nil?
-        fail "Attached roof '#{skylight.roof_idref}' not found for skylight '#{skylight_id}'."
+        fail "Attached roof '#{skylight.roof_idref}' not found for skylight '#{skylight.id}'."
       end
 
       skylight_area = skylight.area
