@@ -166,6 +166,22 @@ class Airflow
     return 1.0 / 150.0 # Table 4.2.2(1) - Crawlspaces
   end
 
+  def self.get_default_mech_vent_fan_power(fan_type)
+    # 301-2019: Table 4.2.2(1b)
+    # Returns fan power in W/cfm
+    if (fan_type == HPXML::MechVentTypeSupply) || (fan_type == HPXML::MechVentTypeExhaust)
+      return 0.35
+    elsif fan_type == HPXML::MechVentTypeBalanced
+      return 0.70
+    elsif (fan_type == HPXML::MechVentTypeERV) || (fan_type == HPXML::MechVentTypeHRV)
+      return 1.00
+    elsif fan_type == HPXML::MechVentTypeCFIS
+      return 0.50
+    else
+      fail "Unexpected fan_type: '#{fan_type}'."
+    end
+  end
+
   private
 
   def self.process_wind_speed_correction(terrain, shelter_coef, min_neighbor_distance, building_height)
