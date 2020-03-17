@@ -256,6 +256,8 @@ def create_hpxmls
     'base-version-2014A.xml' => 'base.xml',
     'base-version-2014AE.xml' => 'base.xml',
     'base-version-2014AEG.xml' => 'base.xml',
+    'base-version-2019.xml' => 'base.xml',
+    'base-version-2019A.xml' => 'base.xml',
     'base-version-latest.xml' => 'base.xml',
 
     'hvac_autosizing/base-autosize.xml' => 'base.xml',
@@ -479,6 +481,10 @@ def set_hpxml_header(hpxml_file, hpxml)
     hpxml.header.eri_calculation_version = '2014AE'
   elsif ['base-version-2014AEG.xml'].include? hpxml_file
     hpxml.header.eri_calculation_version = '2014AEG'
+  elsif ['base-version-2019.xml'].include? hpxml_file
+    hpxml.header.eri_calculation_version = '2019'
+  elsif ['base-version-2019A.xml'].include? hpxml_file
+    hpxml.header.eri_calculation_version = '2019A'
   elsif ['base-version-latest.xml'].include? hpxml_file
     hpxml.header.eri_calculation_version = 'latest'
   elsif ['base-misc-timestep-10-mins.xml'].include? hpxml_file
@@ -615,7 +621,16 @@ def set_hpxml_air_infiltration_measurements(hpxml_file, hpxml)
 end
 
 def set_hpxml_attics(hpxml_file, hpxml)
-  if ['base-atticroof-vented.xml'].include? hpxml_file
+  if ['base.xml'].include? hpxml_file
+    hpxml.attics.add(id: 'UnventedAttic',
+                     attic_type: HPXML::AtticTypeUnvented,
+                     within_infiltration_volume: false)
+  elsif ['base-atticroof-cathedral.xml',
+         'base-atticroof-conditioned.xml',
+         'base-atticroof-flat.xml',
+         'base-enclosure-adiabatic-surfaces.xml'].include? hpxml_file
+    hpxml.attics.clear
+  elsif ['base-atticroof-vented.xml'].include? hpxml_file
     hpxml.attics.add(id: 'VentedAttic',
                      attic_type: HPXML::AtticTypeVented,
                      vented_attic_sla: 0.003)
@@ -623,14 +638,22 @@ def set_hpxml_attics(hpxml_file, hpxml)
 end
 
 def set_hpxml_foundations(hpxml_file, hpxml)
-  if ['base-foundation-vented-crawlspace.xml'].include? hpxml_file
+  if ['base.xml'].include? hpxml_file
+    hpxml.foundations.clear
+  elsif ['base-foundation-vented-crawlspace.xml'].include? hpxml_file
     hpxml.foundations.add(id: 'VentedCrawlspace',
                           foundation_type: HPXML::FoundationTypeCrawlspaceVented,
                           vented_crawlspace_sla: 0.00667)
+  elsif ['base-foundation-unvented-crawlspace.xml',
+         'base-foundation-multiple.xml'].include? hpxml_file
+    hpxml.foundations.add(id: 'UnventedCrawlspace',
+                          foundation_type: HPXML::FoundationTypeCrawlspaceUnvented,
+                          within_infiltration_volume: false)
   elsif ['base-foundation-unconditioned-basement.xml'].include? hpxml_file
     hpxml.foundations.add(id: 'UnconditionedBasement',
                           foundation_type: HPXML::FoundationTypeBasementUnconditioned,
-                          unconditioned_basement_thermal_boundary: HPXML::FoundationThermalBoundaryFloor)
+                          unconditioned_basement_thermal_boundary: HPXML::FoundationThermalBoundaryFloor,
+                          within_infiltration_volume: false)
   elsif ['base-foundation-unconditioned-basement-wall-insulation.xml'].include? hpxml_file
     hpxml.foundations[0].unconditioned_basement_thermal_boundary = HPXML::FoundationThermalBoundaryWall
   end
