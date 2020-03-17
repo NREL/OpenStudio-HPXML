@@ -655,10 +655,7 @@ def set_hpxml_foundations(hpxml_file, hpxml)
                           unconditioned_basement_thermal_boundary: HPXML::FoundationThermalBoundaryFloor,
                           within_infiltration_volume: false)
   elsif ['base-foundation-unconditioned-basement-wall-insulation.xml'].include? hpxml_file
-    hpxml.foundations.add(id: 'UnconditionedBasement',
-                          foundation_type: HPXML::FoundationTypeBasementUnconditioned,
-                          unconditioned_basement_thermal_boundary: HPXML::FoundationThermalBoundaryWall,
-                          within_infiltration_volume: false)
+    hpxml.foundations[0].unconditioned_basement_thermal_boundary = HPXML::FoundationThermalBoundaryWall
   end
 end
 
@@ -3133,7 +3130,10 @@ if ARGV[0].to_sym == :update_measures
           'Style/SelfAssignment',
           'Style/StringLiterals',
           'Style/StringLiteralsInInterpolation']
-  command = 'rubocop --auto-correct --format simple --only ' + cops.join(',')
+  commands = ["\"require 'rubocop/rake_task'\"",
+              "\"RuboCop::RakeTask.new(:rubocop) do |t| t.options = ['--auto-correct', '--format', 'simple', '--only', '#{cops.join(',')}'] end\"",
+              '"Rake.application[:rubocop].invoke"']
+  command = "openstudio -e #{commands.join(' -e ')}"
   puts 'Applying rubocop auto-correct to measures...'
   system(command)
 
