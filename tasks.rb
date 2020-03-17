@@ -626,11 +626,11 @@ def set_hpxml_attics(hpxml_file, hpxml)
                      attic_type: HPXML::AtticTypeUnvented,
                      within_infiltration_volume: false)
   elsif ['base-atticroof-cathedral.xml',
-         'base-atticroof-conditioned.xml',
          'base-atticroof-flat.xml',
          'base-enclosure-adiabatic-surfaces.xml'].include? hpxml_file
     hpxml.attics.clear
   elsif ['base-atticroof-vented.xml'].include? hpxml_file
+    hpxml.attics.clear
     hpxml.attics.add(id: 'VentedAttic',
                      attic_type: HPXML::AtticTypeVented,
                      vented_attic_sla: 0.003)
@@ -641,21 +641,27 @@ def set_hpxml_foundations(hpxml_file, hpxml)
   if ['base.xml'].include? hpxml_file
     hpxml.foundations.clear
   elsif ['base-foundation-vented-crawlspace.xml'].include? hpxml_file
+    hpxml.foundations.clear
     hpxml.foundations.add(id: 'VentedCrawlspace',
                           foundation_type: HPXML::FoundationTypeCrawlspaceVented,
                           vented_crawlspace_sla: 0.00667)
-  elsif ['base-foundation-unvented-crawlspace.xml',
-         'base-foundation-multiple.xml'].include? hpxml_file
+  elsif ['base-foundation-unvented-crawlspace.xml'].include? hpxml_file
+    hpxml.foundations.clear
     hpxml.foundations.add(id: 'UnventedCrawlspace',
                           foundation_type: HPXML::FoundationTypeCrawlspaceUnvented,
                           within_infiltration_volume: false)
   elsif ['base-foundation-unconditioned-basement.xml'].include? hpxml_file
+    hpxml.foundations.clear
     hpxml.foundations.add(id: 'UnconditionedBasement',
                           foundation_type: HPXML::FoundationTypeBasementUnconditioned,
                           unconditioned_basement_thermal_boundary: HPXML::FoundationThermalBoundaryFloor,
                           within_infiltration_volume: false)
   elsif ['base-foundation-unconditioned-basement-wall-insulation.xml'].include? hpxml_file
     hpxml.foundations[0].unconditioned_basement_thermal_boundary = HPXML::FoundationThermalBoundaryWall
+  elsif ['base-foundation-multiple.xml'].include? hpxml_file
+    hpxml.foundations.add(id: 'UnventedCrawlspace',
+                          foundation_type: HPXML::FoundationTypeCrawlspaceUnvented,
+                          within_infiltration_volume: false)
   end
 end
 
