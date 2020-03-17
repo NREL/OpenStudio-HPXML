@@ -655,10 +655,7 @@ def set_hpxml_foundations(hpxml_file, hpxml)
                           unconditioned_basement_thermal_boundary: HPXML::FoundationThermalBoundaryFloor,
                           within_infiltration_volume: false)
   elsif ['base-foundation-unconditioned-basement-wall-insulation.xml'].include? hpxml_file
-    hpxml.foundations.add(id: 'UnconditionedBasement',
-                          foundation_type: HPXML::FoundationTypeBasementUnconditioned,
-                          unconditioned_basement_thermal_boundary: HPXML::FoundationThermalBoundaryWall,
-                          within_infiltration_volume: false)
+    hpxml.foundations[0].unconditioned_basement_thermal_boundary = HPXML::FoundationThermalBoundaryWall
   end
 end
 
