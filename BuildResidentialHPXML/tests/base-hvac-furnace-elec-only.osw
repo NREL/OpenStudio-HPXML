@@ -197,6 +197,7 @@
         "schedules_output_path": "BuildResidentialHPXML/tests/run/schedules.csv",
         "shelter_coefficient": "auto",
         "shower_low_flow": true,
+        "simulation_control_timestep": 60,
         "sink_low_flow": false,
         "skylight_shgc": 0.45,
         "skylight_ufactor": 0.33,

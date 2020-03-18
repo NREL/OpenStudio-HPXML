@@ -209,6 +209,7 @@ def create_osws
     'base-misc-lighting-none.osw' => 'base.osw',
     'base-misc-loads-detailed.osw' => 'base.osw',
     'base-misc-number-of-occupants.osw' => 'base.osw',
+    'base-misc-timestep-10-mins.osw' => 'base.osw',
     'base-misc-whole-house-fan.osw' => 'base.osw',
 
     'base-pv.osw' => 'base.osw',
@@ -312,6 +313,7 @@ def get_values(osw_file, step)
   step.setArgument('hpxml_path', "../BuildResidentialHPXML/tests/built_residential_hpxml/#{File.basename(osw_file, '.*')}.xml")
 
   if ['base.osw'].include? osw_file
+    step.setArgument('simulation_control_timestep', 60)
     step.setArgument('weather_station_epw_filename', 'USA_CO_Denver.Intl.AP.725650_TMY3.epw')
     step.setArgument('schedules_output_path', 'BuildResidentialHPXML/tests/run/schedules.csv')
     step.setArgument('unit_type', 'single-family detached')
@@ -1429,6 +1431,8 @@ def get_values(osw_file, step)
     step.setArgument('plug_loads_monthly_multipliers', '1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0')
   elsif ['base-misc-number-of-occupants.osw'].include? osw_file
     step.setArgument('num_occupants', 5.0)
+  elsif ['base-misc-timestep-10-mins.osw'].include? osw_file
+    step.setArgument('simulation_control_timestep', 10)
   elsif ['base-misc-whole-house-fan.osw'].include? osw_file
     step.setArgument('has_whole_house_fan', true)
   elsif ['base-pv.osw'].include? osw_file

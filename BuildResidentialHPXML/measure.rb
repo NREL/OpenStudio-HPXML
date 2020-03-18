@@ -34,6 +34,13 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     arg.setDescription('Absolute/relative path of the HPXML file.')
     args << arg
 
+    arg = OpenStudio::Measure::OSArgument::makeIntegerArgument('simulation_control_timestep', true)
+    arg.setDisplayName('Simulation Control: Timestep')
+    arg.setUnits('min')
+    arg.setDescription('Value must be a divisor of 60.')
+    arg.setDefaultValue(60)
+    args << arg
+
     arg = OpenStudio::Measure::OSArgument.makeStringArgument('schedules_output_path', true)
     arg.setDisplayName('Schedules Output File Path')
     arg.setDescription('Absolute (or relative) path of the output schedules file.')
@@ -1861,6 +1868,7 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     # assign the user inputs to variables
     args = { weather_station_epw_filename: runner.getStringArgumentValue('weather_station_epw_filename', user_arguments),
              hpxml_path: runner.getStringArgumentValue('hpxml_path', user_arguments),
+             timestep: runner.getIntegerArgumentValue('simulation_control_timestep', user_arguments),
              schedules_output_path: runner.getStringArgumentValue('schedules_output_path', user_arguments),
              unit_type: runner.getStringArgumentValue('unit_type', user_arguments),
              unit_multiplier: runner.getIntegerArgumentValue('unit_multiplier', user_arguments),
@@ -2296,6 +2304,10 @@ class HPXMLFile
                      transaction: 'create',
                      building_id: 'MyBuilding',
                      event_type: 'proposed workscope')
+
+    if args[:timestep] != 60
+      hpxml.header.timestep = args[:timestep]
+    end
   end
 
   def self.set_site(hpxml, runner, args)
