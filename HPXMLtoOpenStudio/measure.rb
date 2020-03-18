@@ -88,6 +88,7 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
     weather_dir = runner.getStringArgumentValue('weather_dir', user_arguments)
     epw_output_path = runner.getOptionalStringArgumentValue('epw_output_path', user_arguments)
     osm_output_path = runner.getOptionalStringArgumentValue('osm_output_path', user_arguments)
+    debug = osm_output_path.is_initialized
 
     unless (Pathname.new hpxml_path).absolute?
       hpxml_path = File.expand_path(File.join(File.dirname(__FILE__), hpxml_path))
@@ -150,7 +151,7 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
       weather = Location.apply(model, runner, epw_path, cache_path, 'NA', 'NA')
 
       # Create OpenStudio model
-      OSModel.create(hpxml, runner, model, weather, hpxml_path)
+      OSModel.create(hpxml, runner, model, weather, hpxml_path, debug)
     rescue Exception => e
       # Report exception
       runner.registerError("#{e.message}\n#{e.backtrace.join("\n")}")
@@ -190,9 +191,10 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
 end
 
 class OSModel
-  def self.create(hpxml, runner, model, weather, hpxml_path)
+  def self.create(hpxml, runner, model, weather, hpxml_path, debug)
     @hpxml = hpxml
     @hpxml_path = hpxml_path
+    @debug = debug
 
     @eri_version = @hpxml.header.eri_calculation_version # Hidden feature
     @eri_version = 'latest' if @eri_version.nil?
@@ -991,7 +993,7 @@ class OSModel
       next if surfaces.empty?
 
       # Apply construction
-      if is_thermal_boundary(roof)
+      if roof.is_thermal_boundary
         drywall_thick_in = 0.5
       else
         drywall_thick_in = 0.0
@@ -1041,7 +1043,7 @@ class OSModel
   def self.add_walls(runner, model, spaces)
     @hpxml.walls.each do |wall|
       if wall.azimuth.nil?
-        if wall.exterior_adjacent_to == HPXML::LocationOutside
+        if wall.is_exterior
           azimuths = @default_azimuths # Model as four directions for average exterior incident solar
         else
           azimuths = [@default_azimuths[0]] # Arbitrary direction, doesn't receive exterior incident solar
@@ -1073,7 +1075,7 @@ class OSModel
         surface.setSurfaceType('Wall')
         set_surface_interior(model, spaces, surface, wall.interior_adjacent_to)
         set_surface_exterior(model, spaces, surface, wall.exterior_adjacent_to)
-        if wall.exterior_adjacent_to != HPXML::LocationOutside
+        if wall.is_interior
           surface.setSunExposure('NoSun')
           surface.setWindExposure('NoWind')
         end
@@ -1085,12 +1087,12 @@ class OSModel
       # The code below constructs a reasonable wall construction based on the
       # wall type while ensuring the correct assembly R-value.
 
-      if is_thermal_boundary(wall)
+      if wall.is_thermal_boundary
         drywall_thick_in = 0.5
       else
         drywall_thick_in = 0.0
       end
-      if wall.exterior_adjacent_to == HPXML::LocationOutside
+      if wall.is_exterior
         film_r = Material.AirFilmVertical.rvalue + Material.AirFilmOutside.rvalue
         mat_ext_finish = Material.ExtFinishWoodLight
         mat_ext_finish.tAbs = wall.emittance
@@ -1109,7 +1111,7 @@ class OSModel
   def self.add_rim_joists(runner, model, spaces)
     @hpxml.rim_joists.each do |rim_joist|
       if rim_joist.azimuth.nil?
-        if rim_joist.exterior_adjacent_to == HPXML::LocationOutside
+        if rim_joist.is_exterior
           azimuths = @default_azimuths # Model as four directions for average exterior incident solar
         else
           azimuths = [@default_azimuths[0]] # Arbitrary direction, doesn't receive exterior incident solar
@@ -1139,7 +1141,7 @@ class OSModel
         surface.setSurfaceType('Wall')
         set_surface_interior(model, spaces, surface, rim_joist.interior_adjacent_to)
         set_surface_exterior(model, spaces, surface, rim_joist.exterior_adjacent_to)
-        if rim_joist.exterior_adjacent_to != HPXML::LocationOutside
+        if rim_joist.is_interior
           surface.setSunExposure('NoSun')
           surface.setWindExposure('NoWind')
         end
@@ -1147,12 +1149,12 @@ class OSModel
 
       # Apply construction
 
-      if is_thermal_boundary(rim_joist)
+      if rim_joist.is_thermal_boundary
         drywall_thick_in = 0.5
       else
         drywall_thick_in = 0.0
       end
-      if rim_joist.exterior_adjacent_to == HPXML::LocationOutside
+      if rim_joist.is_exterior
         film_r = Material.AirFilmVertical.rvalue + Material.AirFilmOutside.rvalue
         mat_ext_finish = Material.ExtFinishWoodLight
         mat_ext_finish.tAbs = rim_joist.emittance
@@ -1286,7 +1288,7 @@ class OSModel
       # Obtain some wall/slab information
       fnd_wall_lengths = {}
       fnd_walls.each do |foundation_wall|
-        next unless foundation_wall.exterior_adjacent_to == HPXML::LocationGround
+        next unless foundation_wall.is_exterior
 
         fnd_wall_lengths[foundation_wall] = foundation_wall.area / foundation_wall.height
       end
@@ -1361,7 +1363,7 @@ class OSModel
       # The below-grade portion of these walls (in contact with ground) are not modeled, as Kiva does not
       # calculate heat flow between two zones through the ground.
       fnd_walls.each do |foundation_wall|
-        next unless foundation_wall.exterior_adjacent_to != HPXML::LocationGround
+        next unless foundation_wall.is_interior
 
         ag_height = foundation_wall.height - foundation_wall.depth_below_grade
         ag_net_area = foundation_wall.net_area * ag_height / foundation_wall.height
@@ -1390,7 +1392,7 @@ class OSModel
         # Apply construction
 
         wall_type = HPXML::WallTypeConcrete
-        if is_thermal_boundary(foundation_wall)
+        if foundation_wall.is_thermal_boundary
           drywall_thick_in = 0.5
         else
           drywall_thick_in = 0.0
@@ -1449,7 +1451,7 @@ class OSModel
     set_surface_interior(model, spaces, surface, foundation_wall.interior_adjacent_to)
     set_surface_exterior(model, spaces, surface, foundation_wall.exterior_adjacent_to)
 
-    if is_thermal_boundary(foundation_wall)
+    if foundation_wall.is_thermal_boundary
       drywall_thick_in = 0.5
     else
       drywall_thick_in = 0.0
@@ -3159,7 +3161,7 @@ class OSModel
   end
 
   def self.add_hvac_sizing(runner, model, weather)
-    HVACSizing.apply(model, runner, weather, @cfa, @infilvolume, @nbeds, @min_neighbor_distance, @living_space)
+    HVACSizing.apply(model, runner, weather, @cfa, @infilvolume, @nbeds, @min_neighbor_distance, @living_space, @debug)
   end
 
   def self.add_fuel_heating_eae(runner, model)
@@ -4314,7 +4316,7 @@ class OSModel
     # Identify unique Kiva foundations that are required.
     kiva_fnd_walls = []
     fnd_walls.each do |foundation_wall|
-      next unless foundation_wall.exterior_adjacent_to == HPXML::LocationGround
+      next unless foundation_wall.is_exterior
 
       kiva_fnd_walls << foundation_wall
     end

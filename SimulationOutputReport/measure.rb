@@ -503,6 +503,7 @@ class SimulationOutputReport < OpenStudio::Measure::ReportingMeasure
       # Adjust water heater/appliances energy consumptions
       @fuels.keys.reverse.each do |fuel_type| # Reverse so that FT::Elec is considered last
         end_use = @end_uses[[fuel_type, EUT::HotWater]]
+        next if end_use.nil?
         next if end_use.variable.nil?
         next unless end_use.annual_output_by_system[sys_id] > 0
 
@@ -1374,6 +1375,8 @@ class SimulationOutputReport < OpenStudio::Measure::ReportingMeasure
                         OutputVars.SpaceHeatingNaturalGas,
                         OutputVars.SpaceHeatingFuelOil,
                         OutputVars.SpaceHeatingPropane,
+                        OutputVars.SpaceHeatingWood,
+                        OutputVars.SpaceHeatingWoodPellets,
                         OutputVars.SpaceHeatingDFHPPrimaryLoad,
                         OutputVars.SpaceHeatingDFHPBackupLoad,
                         OutputVars.SpaceCoolingElectricity]
@@ -1384,6 +1387,7 @@ class SimulationOutputReport < OpenStudio::Measure::ReportingMeasure
                        OutputVars.WaterHeatingNaturalGas,
                        OutputVars.WaterHeatingFuelOil,
                        OutputVars.WaterHeatingPropane,
+                       OutputVars.WaterHeatingWood,
                        OutputVars.WaterHeatingLoad,
                        OutputVars.WaterHeatingLoadTankLosses,
                        OutputVars.WaterHeaterLoadDesuperheater,
@@ -1580,6 +1584,8 @@ class SimulationOutputReport < OpenStudio::Measure::ReportingMeasure
       FT::Gas => Fuel.new(meter: 'Gas:Facility'),
       FT::Oil => Fuel.new(meter: 'FuelOil#1:Facility'),
       FT::Propane => Fuel.new(meter: 'Propane:Facility'),
+      FT::Wood => Fuel.new(meter: 'OtherFuel1:Facility'),
+      FT::WoodPellets => Fuel.new(meter: 'OtherFuel2:Facility'),
     }
 
     @fuels.each do |fuel_type, fuel|
@@ -1626,6 +1632,11 @@ class SimulationOutputReport < OpenStudio::Measure::ReportingMeasure
       [FT::Propane, EUT::HotWater] => EndUse.new(variable: OutputVars.WaterHeatingPropane),
       [FT::Propane, EUT::ClothesDryer] => EndUse.new(meter: "#{Constants.ObjectNameClothesDryer}:InteriorEquipment:Propane"),
       [FT::Propane, EUT::RangeOven] => EndUse.new(meter: "#{Constants.ObjectNameCookingRange}:InteriorEquipment:Propane"),
+      [FT::Wood, EUT::Heating] => EndUse.new(variable: OutputVars.SpaceHeatingWood),
+      [FT::Wood, EUT::HotWater] => EndUse.new(variable: OutputVars.WaterHeatingWood),
+      [FT::Wood, EUT::ClothesDryer] => EndUse.new(meter: "#{Constants.ObjectNameClothesDryer}:InteriorEquipment:OtherFuel1"),
+      [FT::Wood, EUT::RangeOven] => EndUse.new(meter: "#{Constants.ObjectNameCookingRange}:InteriorEquipment:OtherFuel1"),
+      [FT::WoodPellets, EUT::Heating] => EndUse.new(variable: OutputVars.SpaceHeatingWoodPellets),
     }
 
     @end_uses.each do |key, end_use|
@@ -1773,6 +1784,18 @@ class SimulationOutputReport < OpenStudio::Measure::ReportingMeasure
                'OpenStudio::Model::BoilerHotWater' => ['Boiler Propane Energy'] }
     end
 
+    def self.SpaceHeatingWood
+      return { 'OpenStudio::Model::CoilHeatingGas' => ['Heating Coil OtherFuel1 Energy'],
+               'OpenStudio::Model::ZoneHVACBaseboardConvectiveElectric' => ['Baseboard OtherFuel1 Energy'],
+               'OpenStudio::Model::BoilerHotWater' => ['Boiler OtherFuel1 Energy'] }
+    end
+
+    def self.SpaceHeatingWoodPellets
+      return { 'OpenStudio::Model::CoilHeatingGas' => ['Heating Coil OtherFuel2 Energy'],
+               'OpenStudio::Model::ZoneHVACBaseboardConvectiveElectric' => ['Baseboard OtherFuel2 Energy'],
+               'OpenStudio::Model::BoilerHotWater' => ['Boiler OtherFuel2 Energy'] }
+    end
+
     def self.SpaceHeatingDFHPPrimaryLoad
       return { 'OpenStudio::Model::CoilHeatingDXSingleSpeed' => ['Heating Coil Heating Energy'],
                'OpenStudio::Model::CoilHeatingDXMultiSpeed' => ['Heating Coil Heating Energy'] }
@@ -1817,6 +1840,11 @@ class SimulationOutputReport < OpenStudio::Measure::ReportingMeasure
     def self.WaterHeatingPropane
       return { 'OpenStudio::Model::WaterHeaterMixed' => ['Water Heater Propane Energy'],
                'OpenStudio::Model::WaterHeaterStratified' => ['Water Heater Propane Energy'] }
+    end
+
+    def self.WaterHeatingWood
+      return { 'OpenStudio::Model::WaterHeaterMixed' => ['Water Heater OtherFuel1 Energy'],
+               'OpenStudio::Model::WaterHeaterStratified' => ['Water Heater OtherFuel1 Energy'] }
     end
 
     def self.WaterHeatingLoad

@@ -258,6 +258,8 @@ def create_hpxmls
     'base-version-2014A.xml' => 'base.xml',
     'base-version-2014AE.xml' => 'base.xml',
     'base-version-2014AEG.xml' => 'base.xml',
+    'base-version-2019.xml' => 'base.xml',
+    'base-version-2019A.xml' => 'base.xml',
     'base-version-latest.xml' => 'base.xml',
 
     'hvac_autosizing/base-autosize.xml' => 'base.xml',
@@ -481,6 +483,10 @@ def set_hpxml_header(hpxml_file, hpxml)
     hpxml.header.eri_calculation_version = '2014AE'
   elsif ['base-version-2014AEG.xml'].include? hpxml_file
     hpxml.header.eri_calculation_version = '2014AEG'
+  elsif ['base-version-2019.xml'].include? hpxml_file
+    hpxml.header.eri_calculation_version = '2019'
+  elsif ['base-version-2019A.xml'].include? hpxml_file
+    hpxml.header.eri_calculation_version = '2019A'
   elsif ['base-version-latest.xml'].include? hpxml_file
     hpxml.header.eri_calculation_version = 'latest'
   elsif ['base-misc-timestep-10-mins.xml'].include? hpxml_file
@@ -617,7 +623,25 @@ def set_hpxml_air_infiltration_measurements(hpxml_file, hpxml)
 end
 
 def set_hpxml_attics(hpxml_file, hpxml)
-  if ['base-atticroof-vented.xml'].include? hpxml_file
+  if ['base.xml'].include? hpxml_file
+    hpxml.attics.add(id: 'UnventedAttic',
+                     attic_type: HPXML::AtticTypeUnvented,
+                     within_infiltration_volume: false)
+  elsif ['base-atticroof-cathedral.xml'].include? hpxml_file
+    hpxml.attics.clear
+    hpxml.attics.add(id: 'CathedralCeiling',
+                     attic_type: HPXML::AtticTypeCathedral)
+  elsif ['base-atticroof-conditioned.xml'].include? hpxml_file
+    hpxml.attics.add(id: 'ConditionedAttic',
+                     attic_type: HPXML::AtticTypeConditioned)
+  elsif ['base-atticroof-flat.xml'].include? hpxml_file
+    hpxml.attics.clear
+    hpxml.attics.add(id: 'FlatRoof',
+                     attic_type: HPXML::AtticTypeFlatRoof)
+  elsif ['base-enclosure-adiabatic-surfaces.xml'].include? hpxml_file
+    hpxml.attics.clear
+  elsif ['base-atticroof-vented.xml'].include? hpxml_file
+    hpxml.attics.clear
     hpxml.attics.add(id: 'VentedAttic',
                      attic_type: HPXML::AtticTypeVented,
                      vented_attic_sla: 0.003)
@@ -625,16 +649,39 @@ def set_hpxml_attics(hpxml_file, hpxml)
 end
 
 def set_hpxml_foundations(hpxml_file, hpxml)
-  if ['base-foundation-vented-crawlspace.xml'].include? hpxml_file
+  if ['base.xml'].include? hpxml_file
+    hpxml.foundations.add(id: 'ConditionedBasement',
+                          foundation_type: HPXML::FoundationTypeBasementConditioned)
+  elsif ['base-foundation-vented-crawlspace.xml'].include? hpxml_file
+    hpxml.foundations.clear
     hpxml.foundations.add(id: 'VentedCrawlspace',
                           foundation_type: HPXML::FoundationTypeCrawlspaceVented,
                           vented_crawlspace_sla: 0.00667)
+  elsif ['base-foundation-unvented-crawlspace.xml'].include? hpxml_file
+    hpxml.foundations.clear
+    hpxml.foundations.add(id: 'UnventedCrawlspace',
+                          foundation_type: HPXML::FoundationTypeCrawlspaceUnvented,
+                          within_infiltration_volume: false)
   elsif ['base-foundation-unconditioned-basement.xml'].include? hpxml_file
+    hpxml.foundations.clear
     hpxml.foundations.add(id: 'UnconditionedBasement',
                           foundation_type: HPXML::FoundationTypeBasementUnconditioned,
-                          unconditioned_basement_thermal_boundary: HPXML::FoundationThermalBoundaryFloor)
+                          unconditioned_basement_thermal_boundary: HPXML::FoundationThermalBoundaryFloor,
+                          within_infiltration_volume: false)
   elsif ['base-foundation-unconditioned-basement-wall-insulation.xml'].include? hpxml_file
     hpxml.foundations[0].unconditioned_basement_thermal_boundary = HPXML::FoundationThermalBoundaryWall
+  elsif ['base-foundation-multiple.xml'].include? hpxml_file
+    hpxml.foundations.add(id: 'UnventedCrawlspace',
+                          foundation_type: HPXML::FoundationTypeCrawlspaceUnvented,
+                          within_infiltration_volume: false)
+  elsif ['base-foundation-ambient.xml'].include? hpxml_file
+    hpxml.foundations.clear
+    hpxml.foundations.add(id: 'AmbientFoundation',
+                          foundation_type: HPXML::FoundationTypeAmbient)
+  elsif ['base-foundation-slab.xml'].include? hpxml_file
+    hpxml.foundations.clear
+    hpxml.foundations.add(id: 'SlabFoundation',
+                          foundation_type: HPXML::FoundationTypeSlab)
   end
 end
 
@@ -3221,7 +3268,10 @@ if ARGV[0].to_sym == :update_measures
           'Style/SelfAssignment',
           'Style/StringLiterals',
           'Style/StringLiteralsInInterpolation']
-  command = 'rubocop --auto-correct --format simple --only ' + cops.join(',')
+  commands = ["\"require 'rubocop/rake_task'\"",
+              "\"RuboCop::RakeTask.new(:rubocop) do |t| t.options = ['--auto-correct', '--format', 'simple', '--only', '#{cops.join(',')}'] end\"",
+              '"Rake.application[:rubocop].invoke"']
+  command = "openstudio -e #{commands.join(' -e ')}"
   puts 'Applying rubocop auto-correct to measures...'
   system(command)
 
