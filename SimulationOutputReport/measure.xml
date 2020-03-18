@@ -2,8 +2,8 @@
   <schema_version>3.0</schema_version>
   <name>simulation_output_report</name>
   <uid>df9d170c-c21a-4130-866d-0d46b06073fd</uid>
-  <version_id>92251292-4313-4ce8-9b4f-9d8fca6f94d3</version_id>
-  <version_modified>20200309T035850Z</version_modified>
+  <version_id>744027b9-af47-4f7f-a831-14047d8bd70b</version_id>
+  <version_modified>20200318T215718Z</version_modified>
   <xml_checksum>9BF1E6AC</xml_checksum>
   <class_name>SimulationOutputReport</class_name>
   <display_name>HPXML Simulation Output Report</display_name>
@@ -159,6 +159,20 @@
       <model_dependent>false</model_dependent>
     </output>
     <output>
+      <name>Wood: Total MBtu</name>
+      <display_name>Wood: Total MBtu</display_name>
+      <short_name>Wood: Total MBtu</short_name>
+      <type>Double</type>
+      <model_dependent>false</model_dependent>
+    </output>
+    <output>
+      <name>Wood Pellets: Total MBtu</name>
+      <display_name>Wood Pellets: Total MBtu</display_name>
+      <short_name>Wood Pellets: Total MBtu</short_name>
+      <type>Double</type>
+      <model_dependent>false</model_dependent>
+    </output>
+    <output>
       <name>Electricity: Heating MBtu</name>
       <display_name>Electricity: Heating MBtu</display_name>
       <short_name>Electricity: Heating MBtu</short_name>
@@ -246,6 +260,13 @@
       <name>Electricity: Refrigerator MBtu</name>
       <display_name>Electricity: Refrigerator MBtu</display_name>
       <short_name>Electricity: Refrigerator MBtu</short_name>
+      <type>Double</type>
+      <model_dependent>false</model_dependent>
+    </output>
+    <output>
+      <name>Electricity: Dehumidifier MBtu</name>
+      <display_name>Electricity: Dehumidifier MBtu</display_name>
+      <short_name>Electricity: Dehumidifier MBtu</short_name>
       <type>Double</type>
       <model_dependent>false</model_dependent>
     </output>
@@ -389,6 +410,41 @@
       <type>Double</type>
       <model_dependent>false</model_dependent>
     </output>
+    <output>
+      <name>Wood: Heating MBtu</name>
+      <display_name>Wood: Heating MBtu</display_name>
+      <short_name>Wood: Heating MBtu</short_name>
+      <type>Double</type>
+      <model_dependent>false</model_dependent>
+    </output>
+    <output>
+      <name>Wood: Hot Water MBtu</name>
+      <display_name>Wood: Hot Water MBtu</display_name>
+      <short_name>Wood: Hot Water MBtu</short_name>
+      <type>Double</type>
+      <model_dependent>false</model_dependent>
+    </output>
+    <output>
+      <name>Wood: Clothes Dryer MBtu</name>
+      <display_name>Wood: Clothes Dryer MBtu</display_name>
+      <short_name>Wood: Clothes Dryer MBtu</short_name>
+      <type>Double</type>
+      <model_dependent>false</model_dependent>
+    </output>
+    <output>
+      <name>Wood: Range/Oven MBtu</name>
+      <display_name>Wood: Range/Oven MBtu</display_name>
+      <short_name>Wood: Range/Oven MBtu</short_name>
+      <type>Double</type>
+      <model_dependent>false</model_dependent>
+    </output>
+    <output>
+      <name>Wood Pellets: Heating MBtu</name>
+      <display_name>Wood Pellets: Heating MBtu</display_name>
+      <short_name>Wood Pellets: Heating MBtu</short_name>
+      <type>Double</type>
+      <model_dependent>false</model_dependent>
+    </output>
   </outputs>
   <provenances/>
   <tags>
@@ -413,16 +469,10 @@
   </attributes>
   <files>
     <file>
-      <filename>constants.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>90C6EBF8</checksum>
-    </file>
-    <file>
       <filename>output_report_test.rb</filename>
       <filetype>rb</filetype>
       <usage_type>test</usage_type>
-      <checksum>96B05BBE</checksum>
+      <checksum>313896F9</checksum>
     </file>
     <file>
       <version>
@@ -433,7 +483,25 @@
       <filename>measure.rb</filename>
       <filetype>rb</filetype>
       <usage_type>script</usage_type>
-      <checksum>0A184404</checksum>
+      <checksum>3542C13C</checksum>
+    </file>
+    <file>
+      <filename>constants.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>55D54003</checksum>
+    </file>
+    <file>
+      <filename>output_report_test.rb.bak</filename>
+      <filetype>bak</filetype>
+      <usage_type>test</usage_type>
+      <checksum>904A2D0E</checksum>
+    </file>
+    <file>
+      <filename>constants.rb.bak</filename>
+      <filetype>bak</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>E6A6CE57</checksum>
     </file>
   </files>
 </measure>
