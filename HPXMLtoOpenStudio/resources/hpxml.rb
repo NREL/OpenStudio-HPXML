@@ -205,7 +205,7 @@ class HPXML < Object
     @doc = nil
     from_hpxml_file(hpxml_path)
     if collapse_enclosure
-      _collapse_enclosure_surfaces()
+      collapse_enclosure_surfaces()
     end
   end
 
@@ -564,7 +564,7 @@ class HPXML < Object
     ATTRS = [:year_built, :number_of_conditioned_floors, :number_of_conditioned_floors_above_grade,
              :average_ceiling_height, :number_of_bedrooms, :number_of_bathrooms,
              :conditioned_floor_area, :conditioned_building_volume, :use_only_ideal_air_system,
-             :residential_facility_type, :fraction_of_operable_window_area]
+             :residential_facility_type]
     attr_accessor(*ATTRS)
 
     def to_rexml(doc)
@@ -578,8 +578,7 @@ class HPXML < Object
       XMLHelper.add_element(building_construction, 'ConditionedFloorArea', Float(@conditioned_floor_area)) unless @conditioned_floor_area.nil?
       XMLHelper.add_element(building_construction, 'ConditionedBuildingVolume', Float(@conditioned_building_volume)) unless @conditioned_building_volume.nil?
       HPXML::add_extension(parent: building_construction,
-                           extensions: { 'FractionofOperableWindowArea' => HPXML::to_float_or_nil(@fraction_of_operable_window_area),
-                                         'UseOnlyIdealAirSystem' => HPXML::to_bool_or_nil(@use_only_ideal_air_system) })
+                           extensions: { 'UseOnlyIdealAirSystem' => HPXML::to_bool_or_nil(@use_only_ideal_air_system) })
     end
 
     def from_rexml(hpxml)
@@ -598,7 +597,6 @@ class HPXML < Object
       @conditioned_building_volume = HPXML::to_float_or_nil(XMLHelper.get_value(building_construction, 'ConditionedBuildingVolume'))
       @use_only_ideal_air_system = HPXML::to_bool_or_nil(XMLHelper.get_value(building_construction, 'extension/UseOnlyIdealAirSystem'))
       @residential_facility_type = XMLHelper.get_value(building_construction, 'ResidentialFacilityType')
-      @fraction_of_operable_window_area = HPXML::to_float_or_nil(XMLHelper.get_value(building_construction, 'extension/FractionofOperableWindowArea'))
     end
   end
 
@@ -1615,7 +1613,7 @@ class HPXML < Object
              :glass_type, :gas_fill, :ufactor, :shgc, :interior_shading_factor_summer,
              :interior_shading_factor_winter, :exterior_shading, :overhangs_depth,
              :overhangs_distance_to_top_of_window, :overhangs_distance_to_bottom_of_window,
-             :wall_idref]
+             :operable, :wall_idref]
     attr_accessor(*ATTRS)
 
     def wall
@@ -1667,6 +1665,7 @@ class HPXML < Object
         XMLHelper.add_element(overhangs, 'DistanceToTopOfWindow', Float(@overhangs_distance_to_top_of_window)) unless @overhangs_distance_to_top_of_window.nil?
         XMLHelper.add_element(overhangs, 'DistanceToBottomOfWindow', Float(@overhangs_distance_to_bottom_of_window)) unless @overhangs_distance_to_bottom_of_window.nil?
       end
+      XMLHelper.add_element(window, 'Operable', Boolean(@operable)) unless @operable.nil?
       if not @wall_idref.nil?
         attached_to_wall = XMLHelper.add_element(window, 'AttachedToWall')
         XMLHelper.add_attribute(attached_to_wall, 'idref', @wall_idref)
@@ -1693,6 +1692,7 @@ class HPXML < Object
       @overhangs_depth = HPXML::to_float_or_nil(XMLHelper.get_value(window, 'Overhangs/Depth'))
       @overhangs_distance_to_top_of_window = HPXML::to_float_or_nil(XMLHelper.get_value(window, 'Overhangs/DistanceToTopOfWindow'))
       @overhangs_distance_to_bottom_of_window = HPXML::to_float_or_nil(XMLHelper.get_value(window, 'Overhangs/DistanceToBottomOfWindow'))
+      @operable = HPXML::to_bool_or_nil(XMLHelper.get_value(window, 'Operable'))
       @wall_idref = HPXML::get_idref(window.elements['AttachedToWall'])
     end
   end
@@ -3152,7 +3152,7 @@ class HPXML < Object
     return doc
   end
 
-  def _collapse_enclosure_surfaces()
+  def collapse_enclosure_surfaces(additional_attrs_to_ignore = [])
     # Collapses like surfaces into a single surface with, e.g., aggregate surface area.
     # This can significantly speed up performance for HPXML files with lots of individual
     # surfaces (e.g., windows).
@@ -3173,6 +3173,7 @@ class HPXML < Object
                        :under_slab_insulation_id,
                        :area,
                        :exposed_perimeter]
+    attrs_to_ignore += additional_attrs_to_ignore
 
     # Look for pairs of surfaces that can be collapsed
     surf_types.each do |surf_type, surfaces|
@@ -3194,7 +3195,7 @@ class HPXML < Object
           end
           next unless match
 
-          # Update Area/ExposedPerimeter
+          # Update values
           surf.area += surf2.area
           if surf_type == :slabs
             surf.exposed_perimeter += surf2.exposed_perimeter

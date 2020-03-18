@@ -528,8 +528,7 @@ def set_hpxml_building_construction(hpxml_file, hpxml)
                                     number_of_conditioned_floors_above_grade: 1,
                                     number_of_bedrooms: 3,
                                     conditioned_floor_area: 2700,
-                                    conditioned_building_volume: 2700 * 8,
-                                    fraction_of_operable_window_area: 0.33)
+                                    conditioned_building_volume: 2700 * 8)
   elsif ['base-enclosure-beds-1.xml'].include? hpxml_file
     hpxml.building_construction.number_of_bedrooms = 1
   elsif ['base-enclosure-beds-2.xml'].include? hpxml_file
@@ -560,8 +559,6 @@ def set_hpxml_building_construction(hpxml_file, hpxml)
     hpxml.building_construction.number_of_conditioned_floors_above_grade += 1
     hpxml.building_construction.conditioned_floor_area += 1350
     hpxml.building_construction.conditioned_building_volume += 1350 * 8
-  elsif ['base-enclosure-windows-inoperable.xml'].include? hpxml_file
-    hpxml.building_construction.fraction_of_operable_window_area = 0.0
   end
 end
 
@@ -1397,133 +1394,189 @@ end
 
 def set_hpxml_windows(hpxml_file, hpxml)
   if ['base.xml'].include? hpxml_file
-    hpxml.windows.add(id: 'WindowNorth',
-                      area: 108,
-                      azimuth: 0,
-                      ufactor: 0.33,
-                      shgc: 0.45,
-                      wall_idref: 'Wall')
-    hpxml.windows.add(id: 'WindowSouth',
-                      area: 108,
-                      azimuth: 180,
-                      ufactor: 0.33,
-                      shgc: 0.45,
-                      wall_idref: 'Wall')
-    hpxml.windows.add(id: 'WindowEast',
-                      area: 72,
-                      azimuth: 90,
-                      ufactor: 0.33,
-                      shgc: 0.45,
-                      wall_idref: 'Wall')
-    hpxml.windows.add(id: 'WindowWest',
-                      area: 72,
-                      azimuth: 270,
-                      ufactor: 0.33,
-                      shgc: 0.45,
-                      wall_idref: 'Wall')
+    { 'Operable' => 0.33, 'Inoperable' => 0.67 }.each do |mode, frac|
+      hpxml.windows.add(id: "WindowNorth#{mode}",
+                        area: 108 * frac,
+                        azimuth: 0,
+                        ufactor: 0.33,
+                        shgc: 0.45,
+                        operable: (mode == 'Operable'),
+                        wall_idref: 'Wall')
+      hpxml.windows.add(id: "WindowSouth#{mode}",
+                        area: 108 * frac,
+                        azimuth: 180,
+                        ufactor: 0.33,
+                        shgc: 0.45,
+                        operable: (mode == 'Operable'),
+                        wall_idref: 'Wall')
+      hpxml.windows.add(id: "WindowEast#{mode}",
+                        area: 72 * frac,
+                        azimuth: 90,
+                        ufactor: 0.33,
+                        shgc: 0.45,
+                        operable: (mode == 'Operable'),
+                        wall_idref: 'Wall')
+      hpxml.windows.add(id: "WindowWest#{mode}",
+                        area: 72 * frac,
+                        azimuth: 270,
+                        ufactor: 0.33,
+                        shgc: 0.45,
+                        operable: (mode == 'Operable'),
+                        wall_idref: 'Wall')
+    end
   elsif ['base-enclosure-overhangs.xml'].include? hpxml_file
-    hpxml.windows[0].overhangs_depth = 2.5
-    hpxml.windows[0].overhangs_distance_to_top_of_window = 0
-    hpxml.windows[0].overhangs_distance_to_bottom_of_window = 4
-    hpxml.windows[2].overhangs_depth = 1.5
-    hpxml.windows[2].overhangs_distance_to_top_of_window = 2
-    hpxml.windows[2].overhangs_distance_to_bottom_of_window = 6
-    hpxml.windows[3].overhangs_depth = 1.5
-    hpxml.windows[3].overhangs_distance_to_top_of_window = 2
-    hpxml.windows[3].overhangs_distance_to_bottom_of_window = 7
+    for n in [0, 4]
+      hpxml.windows[n].overhangs_depth = 2.5
+      hpxml.windows[n].overhangs_distance_to_top_of_window = 0
+      hpxml.windows[n].overhangs_distance_to_bottom_of_window = 4
+    end
+    for n in [2, 6]
+      hpxml.windows[n].overhangs_depth = 1.5
+      hpxml.windows[n].overhangs_distance_to_top_of_window = 2
+      hpxml.windows[n].overhangs_distance_to_bottom_of_window = 6
+    end
+    for n in [3, 7]
+      hpxml.windows[n].overhangs_depth = 1.5
+      hpxml.windows[n].overhangs_distance_to_top_of_window = 2
+      hpxml.windows[n].overhangs_distance_to_bottom_of_window = 7
+    end
   elsif ['base-enclosure-windows-interior-shading.xml'].include? hpxml_file
-    hpxml.windows[0].interior_shading_factor_summer = 0.7
-    hpxml.windows[0].interior_shading_factor_winter = 0.85
-    hpxml.windows[1].interior_shading_factor_summer = 0.01
-    hpxml.windows[1].interior_shading_factor_winter = 0.99
-    hpxml.windows[2].interior_shading_factor_summer = 0.0
-    hpxml.windows[2].interior_shading_factor_winter = 0.5
-    hpxml.windows[3].interior_shading_factor_summer = 1.0
-    hpxml.windows[3].interior_shading_factor_winter = 1.0
+    for n in [0, 4]
+      hpxml.windows[n].interior_shading_factor_summer = 0.7
+      hpxml.windows[n].interior_shading_factor_winter = 0.85
+    end
+    for n in [1, 5]
+      hpxml.windows[n].interior_shading_factor_summer = 0.01
+      hpxml.windows[n].interior_shading_factor_winter = 0.99
+    end
+    for n in [2, 6]
+      hpxml.windows[n].interior_shading_factor_summer = 0.0
+      hpxml.windows[n].interior_shading_factor_winter = 0.5
+    end
+    for n in [3, 7]
+      hpxml.windows[n].interior_shading_factor_summer = 1.0
+      hpxml.windows[n].interior_shading_factor_winter = 1.0
+    end
   elsif ['invalid_files/invalid-window-interior-shading.xml'].include? hpxml_file
-    hpxml.windows[0].interior_shading_factor_summer = 0.85
-    hpxml.windows[0].interior_shading_factor_winter = 0.7
+    for n in [0, 4]
+      hpxml.windows[n].interior_shading_factor_summer = 0.85
+      hpxml.windows[n].interior_shading_factor_winter = 0.7
+    end
   elsif ['base-enclosure-windows-none.xml'].include? hpxml_file
     hpxml.windows.clear()
   elsif ['invalid_files/net-area-negative-wall.xml'].include? hpxml_file
     hpxml.windows[0].area = 1000
   elsif ['base-atticroof-conditioned.xml'].include? hpxml_file
-    hpxml.windows[0].area = 108
-    hpxml.windows[1].area = 108
-    hpxml.windows[2].area = 108
-    hpxml.windows[3].area = 108
-    hpxml.windows.add(id: 'AtticGableWindowEast',
-                      area: 12,
-                      azimuth: 90,
-                      ufactor: 0.33,
-                      shgc: 0.45,
-                      wall_idref: 'WallAtticGableCond')
-    hpxml.windows.add(id: 'AtticGableWindowWest',
-                      area: 62,
-                      azimuth: 270,
-                      ufactor: 0.3,
-                      shgc: 0.45,
-                      wall_idref: 'WallAtticGableCond')
+    hpxml.windows[0].area = 108 * 0.33
+    hpxml.windows[1].area = 108 * 0.33
+    hpxml.windows[2].area = 108 * 0.33
+    hpxml.windows[3].area = 108 * 0.33
+    hpxml.windows[4].area = 108 * 0.67
+    hpxml.windows[5].area = 108 * 0.67
+    hpxml.windows[6].area = 108 * 0.67
+    hpxml.windows[7].area = 108 * 0.67
+    { 'Operable' => 0.33, 'Inoperable' => 0.67 }.each do |mode, frac|
+      hpxml.windows.add(id: "AtticGableWindowEast#{mode}",
+                        area: 12 * frac,
+                        azimuth: 90,
+                        ufactor: 0.33,
+                        shgc: 0.45,
+                        operable: (mode == 'Operable'),
+                        wall_idref: 'WallAtticGableCond')
+      hpxml.windows.add(id: "AtticGableWindowWest#{mode}",
+                        area: 62 * frac,
+                        azimuth: 270,
+                        ufactor: 0.3,
+                        shgc: 0.45,
+                        operable: (mode == 'Operable'),
+                        wall_idref: 'WallAtticGableCond')
+    end
   elsif ['base-atticroof-cathedral.xml'].include? hpxml_file
-    hpxml.windows[0].area = 108
-    hpxml.windows[1].area = 108
-    hpxml.windows[2].area = 108
-    hpxml.windows[3].area = 108
-    hpxml.windows.add(id: 'AtticGableWindowEast',
-                      area: 12,
-                      azimuth: 90,
-                      ufactor: 0.33,
-                      shgc: 0.45,
-                      wall_idref: 'WallAtticGable')
-    hpxml.windows.add(id: 'AtticGableWindowWest',
-                      area: 12,
-                      azimuth: 270,
-                      ufactor: 0.33,
-                      shgc: 0.45,
-                      wall_idref: 'WallAtticGable')
+    hpxml.windows[0].area = 108 * 0.33
+    hpxml.windows[1].area = 108 * 0.33
+    hpxml.windows[2].area = 108 * 0.33
+    hpxml.windows[3].area = 108 * 0.33
+    hpxml.windows[4].area = 108 * 0.67
+    hpxml.windows[5].area = 108 * 0.67
+    hpxml.windows[6].area = 108 * 0.67
+    hpxml.windows[7].area = 108 * 0.67
+    { 'Operable' => 0.33, 'Inoperable' => 0.67 }.each do |mode, frac|
+      hpxml.windows.add(id: "AtticGableWindowEast#{mode}",
+                        area: 12 * frac,
+                        azimuth: 90,
+                        ufactor: 0.33,
+                        shgc: 0.45,
+                        operable: (mode == 'Operable'),
+                        wall_idref: 'WallAtticGable')
+      hpxml.windows.add(id: "AtticGableWindowWest#{mode}",
+                        area: 12 * frac,
+                        azimuth: 270,
+                        ufactor: 0.33,
+                        shgc: 0.45,
+                        operable: (mode == 'Operable'),
+                        wall_idref: 'WallAtticGable')
+    end
   elsif ['base-enclosure-garage.xml'].include? hpxml_file
+    hpxml.windows.delete_at(6)
     hpxml.windows.delete_at(2)
-    hpxml.windows.add(id: 'GarageWindowEast',
-                      area: 12,
-                      azimuth: 90,
-                      ufactor: 0.33,
-                      shgc: 0.45,
-                      wall_idref: 'WallGarageExterior')
+    { 'Operable' => 0.33, 'Inoperable' => 0.67 }.each do |mode, frac|
+      hpxml.windows.add(id: "GarageWindowEast#{mode}",
+                        area: 12 * frac,
+                        azimuth: 90,
+                        ufactor: 0.33,
+                        shgc: 0.45,
+                        operable: (mode == 'Operable'),
+                        wall_idref: 'WallGarageExterior')
+    end
   elsif ['base-enclosure-2stories.xml'].include? hpxml_file
-    hpxml.windows[0].area = 216
-    hpxml.windows[1].area = 216
-    hpxml.windows[2].area = 144
-    hpxml.windows[3].area = 144
+    hpxml.windows[0].area = 216 * 0.33
+    hpxml.windows[1].area = 216 * 0.33
+    hpxml.windows[2].area = 144 * 0.33
+    hpxml.windows[3].area = 144 * 0.33
+    hpxml.windows[4].area = 216 * 0.67
+    hpxml.windows[5].area = 216 * 0.67
+    hpxml.windows[6].area = 144 * 0.67
+    hpxml.windows[7].area = 144 * 0.67
   elsif ['base-enclosure-2stories-garage'].include? hpxml_file
-    hpxml.windows[0].area = 168
-    hpxml.windows[1].area = 216
-    hpxml.windows[2].area = 144
-    hpxml.windows[3].area = 96
+    hpxml.windows[0].area = 168 * 0.33
+    hpxml.windows[1].area = 216 * 0.33
+    hpxml.windows[2].area = 144 * 0.33
+    hpxml.windows[3].area = 96 * 0.33
+    hpxml.windows[4].area = 168 * 0.67
+    hpxml.windows[5].area = 216 * 0.67
+    hpxml.windows[6].area = 144 * 0.67
+    hpxml.windows[7].area = 96 * 0.67
   elsif ['base-foundation-unconditioned-basement-above-grade.xml'].include? hpxml_file
-    hpxml.windows.add(id: 'FoundationWindowNorth',
-                      area: 20,
-                      azimuth: 0,
-                      ufactor: 0.33,
-                      shgc: 0.45,
-                      wall_idref: 'FoundationWall')
-    hpxml.windows.add(id: 'FoundationWindowSouth',
-                      area: 20,
-                      azimuth: 180,
-                      ufactor: 0.33,
-                      shgc: 0.45,
-                      wall_idref: 'FoundationWall')
-    hpxml.windows.add(id: 'FoundationWindowEast',
-                      area: 10,
-                      azimuth: 90,
-                      ufactor: 0.33,
-                      shgc: 0.45,
-                      wall_idref: 'FoundationWall')
-    hpxml.windows.add(id: 'FoundationWindowWest',
-                      area: 10,
-                      azimuth: 270,
-                      ufactor: 0.33,
-                      shgc: 0.45,
-                      wall_idref: 'FoundationWall')
+    { 'Operable' => 0.33, 'Inoperable' => 0.67 }.each do |mode, frac|
+      hpxml.windows.add(id: "FoundationWindowNorth#{mode}",
+                        area: 20 * frac,
+                        azimuth: 0,
+                        ufactor: 0.33,
+                        shgc: 0.45,
+                        operable: (mode == 'Operable'),
+                        wall_idref: 'FoundationWall')
+      hpxml.windows.add(id: "FoundationWindowSouth#{mode}",
+                        area: 20 * frac,
+                        azimuth: 180,
+                        ufactor: 0.33,
+                        shgc: 0.45,
+                        operable: (mode == 'Operable'),
+                        wall_idref: 'FoundationWall')
+      hpxml.windows.add(id: "FoundationWindowEast#{mode}",
+                        area: 10 * frac,
+                        azimuth: 90,
+                        ufactor: 0.33,
+                        shgc: 0.45,
+                        operable: (mode == 'Operable'),
+                        wall_idref: 'FoundationWall')
+      hpxml.windows.add(id: "FoundationWindowWest#{mode}",
+                        area: 10 * frac,
+                        azimuth: 270,
+                        ufactor: 0.33,
+                        shgc: 0.45,
+                        operable: (mode == 'Operable'),
+                        wall_idref: 'FoundationWall')
+    end
   elsif ['base-enclosure-adiabatic-surfaces.xml'].include? hpxml_file
     for n in 1..hpxml.windows.size
       hpxml.windows[n - 1].area *= 0.35
@@ -1541,14 +1594,21 @@ def set_hpxml_windows(hpxml_file, hpxml)
       end
     end
   elsif ['base-foundation-walkout-basement.xml'].include? hpxml_file
-    hpxml.windows.add(id: 'FoundationWindow',
-                      area: 20,
-                      azimuth: 0,
-                      ufactor: 0.33,
-                      shgc: 0.45,
-                      wall_idref: 'FoundationWall3')
+    { 'Operable' => 0.33, 'Inoperable' => 0.67 }.each do |mode, frac|
+      hpxml.windows.add(id: "FoundationWindow#{mode}",
+                        area: 20 * frac,
+                        azimuth: 0,
+                        ufactor: 0.33,
+                        shgc: 0.45,
+                        operable: (mode == 'Operable'),
+                        wall_idref: 'FoundationWall3')
+    end
   elsif ['invalid_files/invalid-window-height.xml'].include? hpxml_file
     hpxml.windows[2].overhangs_distance_to_bottom_of_window = hpxml.windows[2].overhangs_distance_to_top_of_window
+  elsif ['base-enclosure-windows-inoperable.xml'].include? hpxml_file
+    hpxml.windows.each do |window|
+      window.operable = false
+    end
   end
 end
 

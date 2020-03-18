@@ -223,6 +223,7 @@ class OSModel
     @has_vented_crawl = @hpxml.has_space_type(HPXML::LocationCrawlspaceVented)
     @min_neighbor_distance = get_min_neighbor_distance()
     @default_azimuths = get_default_azimuths()
+    @frac_window_area_operable = get_frac_window_area_operable()
     @cond_bsmnt_surfaces = [] # list of surfaces in conditioned basement, used for modification of some surface properties, eg. solar absorptance, view factor, etc.
 
     @hvac_map = {} # mapping between HPXML HVAC systems and model objects
@@ -942,6 +943,39 @@ class OSModel
       azimuth -= 360
     end
     return azimuth
+  end
+
+  def self.get_frac_window_area_operable()
+    # Calculate fraction of window area that is operable
+    window_area_total = 0.0
+    window_area_operable = 0.0
+    @hpxml.windows.each do |window|
+      window_area_total += window.area
+      if window.operable.nil?
+        window_area_operable += (window.area * Airflow.get_default_fraction_of_operable_window_area)
+      elsif window.operable
+        window_area_operable += window.area
+      end
+    end
+    if window_area_total <= 0
+      frac_window_area_operable = 0.0
+    else
+      frac_window_area_operable = window_area_operable / window_area_total
+    end
+
+    # Now that we have it, further collapse windows irrespective of their
+    # operable property. For example, if there are two identical windows that
+    # only otherwise differ based on their operable property, we will combine
+    # them so as to model a single window in EnergyPlus for reasons of speed.
+    @hpxml.collapse_enclosure_surfaces([:operable])
+
+    # Finally reset the operable property since it is now arbitrary and we
+    # don't want to accidentally use it.
+    @hpxml.windows.each do |window|
+      window.operable = false
+    end
+
+    return frac_window_area_operable
   end
 
   def self.create_or_get_space(model, spaces, spacetype)
@@ -2903,15 +2937,7 @@ class OSModel
                              vented_attic_sla, unvented_attic_sla, vented_attic_const_ach, unconditioned_basement_ach, has_flue_chimney, terrain)
 
     # Natural Ventilation
-    frac_window_area_operable = @hpxml.building_construction.fraction_of_operable_window_area
-    if frac_window_area_operable.nil?
-      frac_window_area_operable = Airflow.get_default_fraction_of_operable_window_area()
-    end
-    if (frac_window_area_operable < 0) || (frac_window_area_operable > 1)
-      fail "Fraction window area operable (#{frac_window_area_operable}) must be between 0 and 1."
-    end
-
-    nv_frac_window_area_open = frac_window_area_operable * 0.20 # Assume 20% of operable window area is open
+    nv_frac_window_area_open = @frac_window_area_operable * 0.20 # Assume 20% of operable window area is open
     nv_num_days_per_week = 7
     nv_max_oa_hr = 0.0115
     nv_max_oa_rh = 0.7
