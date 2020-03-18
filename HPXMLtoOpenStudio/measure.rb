@@ -946,22 +946,7 @@ class OSModel
   end
 
   def self.get_frac_window_area_operable()
-    # Calculate fraction of window area that is operable
-    window_area_total = 0.0
-    window_area_operable = 0.0
-    @hpxml.windows.each do |window|
-      window_area_total += window.area
-      if window.operable.nil?
-        window_area_operable += (window.area * Airflow.get_default_fraction_of_operable_window_area)
-      elsif window.operable
-        window_area_operable += window.area
-      end
-    end
-    if window_area_total <= 0
-      frac_window_area_operable = 0.0
-    else
-      frac_window_area_operable = window_area_operable / window_area_total
-    end
+    frac_window_area_operable = @hpxml.fraction_of_window_area_operable(Airflow.get_default_fraction_of_operable_window_area)
 
     # Now that we have it, further collapse windows irrespective of their
     # operable property. For example, if there are two identical windows that
