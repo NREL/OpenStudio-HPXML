@@ -4169,28 +4169,6 @@ class OSModel
     return
   end
 
-  def self.assign_space_to_subsurface(surface, subsurface_id, wall_idref, spaces, model, subsurface_type)
-    # Check walls
-    @hpxml.walls.each do |wall|
-      next unless wall.id == wall_idref
-
-      set_surface_interior(model, spaces, surface, subsurface_id, wall.interior_adjacent_to)
-      return
-    end
-
-    # Check foundation walls
-    @hpxml.foundation_walls.each do |foundation_wall|
-      next unless foundation_wall.id == wall_idref
-
-      set_surface_interior(model, spaces, surface, subsurface_id, foundation_wall.interior_adjacent_to)
-      return
-    end
-
-    if not surface.space.is_initialized
-      fail "Attached wall '#{wall_idref}' not found for #{subsurface_type} '#{subsurface_id}'."
-    end
-  end
-
   def self.get_infiltration_volume()
     infilvolume = nil
     @hpxml.air_infiltration_measurements.each do |measurement|
