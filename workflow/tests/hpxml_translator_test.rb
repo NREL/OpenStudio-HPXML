@@ -421,7 +421,7 @@ class HPXMLTest < MiniTest::Test
     args['hpxml_path'] = xml
     args['weather_dir'] = 'weather'
     args['epw_output_path'] = File.absolute_path(File.join(rundir, 'in.epw'))
-    args['osm_output_path'] = File.absolute_path(File.join(rundir, 'in.osm'))
+    args['osm_output_path'] = File.absolute_path(File.join(rundir, 'in.osm')) # debug
     update_args_hash(measures, measure_subdir, args)
 
     # Add reporting measure to workflow
@@ -614,6 +614,7 @@ class HPXMLTest < MiniTest::Test
         results[prop] += value
       end
     end
+    assert(!results.empty?)
     return results
   end
 
