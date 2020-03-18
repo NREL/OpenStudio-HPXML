@@ -1596,10 +1596,6 @@ class HPXML < Object
         @under_slab_insulation_r_value = HPXML::to_float_or_nil(XMLHelper.get_value(under_slab_insulation, "Layer[InstallationType='continuous']/NominalRValue"))
       end
     end
-
-    def exterior_adjacent_to
-      return 'outside' # FIXME: Switch to ground?
-    end
   end
 
   class Windows < BaseArrayElement
