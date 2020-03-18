@@ -65,6 +65,14 @@
             <WithinInfiltrationVolume>false</WithinInfiltrationVolume>
           </Attic>
         </Attics>
+        <Foundations>
+          <Foundation>
+            <SystemIdentifier id='Ambient'/>
+            <FoundationType>
+              <Ambient/>
+            </FoundationType>
+          </Foundation>
+        </Foundations>
         <Roofs>
           <Roof>
             <SystemIdentifier id='Roof'/>
