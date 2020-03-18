@@ -67,7 +67,7 @@
         </Attics>
         <Foundations>
           <Foundation>
-            <SystemIdentifier id='Slab'/>
+            <SystemIdentifier id='SlabFoundation'/>
             <FoundationType>
               <SlabOnGrade/>
             </FoundationType>

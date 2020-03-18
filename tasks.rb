@@ -674,11 +674,11 @@ def set_hpxml_foundations(hpxml_file, hpxml)
                           within_infiltration_volume: false)
   elsif ['base-foundation-ambient.xml'].include? hpxml_file
     hpxml.foundations.clear
-    hpxml.foundations.add(id: 'Ambient',
+    hpxml.foundations.add(id: 'AmbientFoundation',
                           foundation_type: HPXML::FoundationTypeAmbient)
   elsif ['base-foundation-slab.xml'].include? hpxml_file
     hpxml.foundations.clear
-    hpxml.foundations.add(id: 'Slab',
+    hpxml.foundations.add(id: 'SlabFoundation',
                           foundation_type: HPXML::FoundationTypeSlab)
   end
 end

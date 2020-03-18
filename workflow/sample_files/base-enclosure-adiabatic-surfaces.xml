@@ -56,7 +56,7 @@
         </AirInfiltration>
         <Foundations>
           <Foundation>
-            <SystemIdentifier id='Ambient'/>
+            <SystemIdentifier id='AmbientFoundation'/>
             <FoundationType>
               <Ambient/>
             </FoundationType>
