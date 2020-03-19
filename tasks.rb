@@ -2983,6 +2983,8 @@ def set_hpxml_clothes_washer(hpxml_file, hpxml)
                               capacity: 3.0)
   elsif ['base-appliances-none.xml'].include? hpxml_file
     hpxml.clothes_washers.clear()
+  elsif ['base-enclosure-attached-multifamily.xml'].include? hpxml_file
+    hpxml.clothes_washers[0].location = 'other'
   elsif ['base-appliances-modified.xml'].include? hpxml_file
     hpxml.clothes_washers[0].modified_energy_factor = nil
     hpxml.clothes_washers[0].integrated_modified_energy_factor = 0.73
@@ -3007,6 +3009,8 @@ def set_hpxml_clothes_dryer(hpxml_file, hpxml)
                              control_type: HPXML::ClothesDryerControlTypeTimer)
   elsif ['base-appliances-none.xml'].include? hpxml_file
     hpxml.clothes_dryers.clear()
+  elsif ['base-enclosure-attached-multifamily.xml'].include? hpxml_file
+    hpxml.clothes_dryers[0].location = 'other'
   elsif ['base-appliances-modified.xml'].include? hpxml_file
     hpxml.clothes_dryers.clear()
     hpxml.clothes_dryers.add(id: 'ClothesDryer',
@@ -3072,6 +3076,8 @@ def set_hpxml_refrigerator(hpxml_file, hpxml)
     hpxml.refrigerators[0].adjusted_annual_kwh = 600
   elsif ['base-appliances-none.xml'].include? hpxml_file
     hpxml.refrigerators.clear()
+  elsif ['base-enclosure-attached-multifamily.xml'].include? hpxml_file
+    hpxml.refrigerators[0].location = 'other'
   elsif ['base-foundation-unconditioned-basement.xml'].include? hpxml_file
     hpxml.refrigerators[0].location = HPXML::LocationBasementUnconditioned
   elsif ['base-atticroof-conditioned.xml'].include? hpxml_file
