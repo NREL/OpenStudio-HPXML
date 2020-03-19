@@ -1693,6 +1693,10 @@ class HPXML < Object
       return (is_exterior && is_thermal_boundary)
     end
 
+    def delete
+      @hpxml_object.windows.delete(self)
+    end
+
     def to_rexml(doc)
       return if nil?
 
@@ -1791,6 +1795,10 @@ class HPXML < Object
       return (is_exterior && is_thermal_boundary)
     end
 
+    def delete
+      @hpxml_object.skylights.delete(self)
+    end
+
     def to_rexml(doc)
       return if nil?
 
@@ -1870,6 +1878,10 @@ class HPXML < Object
       return (is_exterior && is_thermal_boundary)
     end
 
+    def delete
+      @hpxml_object.doors.delete(self)
+    end
+
     def to_rexml(doc)
       return if nil?
 
@@ -1917,6 +1929,10 @@ class HPXML < Object
              :heating_efficiency_percent, :fraction_heat_load_served, :electric_auxiliary_energy,
              :heating_cfm, :energy_star, :seed_id]
     attr_accessor(*ATTRS)
+
+    def delete
+      @hpxml_object.heating_systems.delete(self)
+    end
 
     def to_rexml(doc)
       return if nil?
@@ -1997,6 +2013,10 @@ class HPXML < Object
              :cooling_efficiency_seer, :cooling_efficiency_eer, :cooling_shr, :cooling_cfm,
              :energy_star, :seed_id]
     attr_accessor(*ATTRS)
+
+    def delete
+      @hpxml_object.cooling_systems.delete(self)
+    end
 
     def to_rexml(doc)
       return if nil?
@@ -2079,6 +2099,10 @@ class HPXML < Object
              :cooling_efficiency_seer, :cooling_efficiency_eer, :heating_efficiency_hspf,
              :heating_efficiency_cop, :energy_star, :seed_id]
     attr_accessor(*ATTRS)
+
+    def delete
+      @hpxml_object.heat_pumps.delete(self)
+    end
 
     def to_rexml(doc)
       return if nil?
@@ -2195,6 +2219,10 @@ class HPXML < Object
              :ceiling_fan_cooling_setpoint_temp_offset]
     attr_accessor(*ATTRS)
 
+    def delete
+      @hpxml_object.hvac_controls.delete(self)
+    end
+
     def to_rexml(doc)
       return if nil?
 
@@ -2266,6 +2294,10 @@ class HPXML < Object
         list << hvac_system
       end
       return list
+    end
+
+    def delete
+      @hpxml_object.hvac_distributions.delete(self)
     end
 
     def to_rexml(doc)
@@ -2427,6 +2459,10 @@ class HPXML < Object
       fail "Attached HVAC distribution system '#{@distribution_system_idref}' not found for mechanical ventilation '#{@id}'."
     end
 
+    def delete
+      @hpxml_object.ventilation_fans.delete(self)
+    end
+
     def to_rexml(doc)
       return if nil?
 
@@ -2498,6 +2534,10 @@ class HPXML < Object
         return hvac_system
       end
       fail "Attached HVAC system '#{@related_hvac_idref}' not found for water heating system '#{@id}'."
+    end
+
+    def delete
+      @hpxml_object.water_heating_systems.delete(self)
     end
 
     def to_rexml(doc)
@@ -2576,6 +2616,10 @@ class HPXML < Object
              :dwhr_efficiency]
     attr_accessor(*ATTRS)
 
+    def delete
+      @hpxml_object.hot_water_distributions.delete(self)
+    end
+
     def to_rexml(doc)
       return if nil?
 
@@ -2645,6 +2689,10 @@ class HPXML < Object
     ATTRS = [:id, :water_fixture_type, :low_flow]
     attr_accessor(*ATTRS)
 
+    def delete
+      @hpxml_object.water_fixtures.delete(self)
+    end
+
     def to_rexml(doc)
       return if nil?
 
@@ -2692,6 +2740,10 @@ class HPXML < Object
         return water_heater
       end
       fail "Attached water heating system '#{@water_heating_system_idref}' not found for solar thermal system '#{@id}'."
+    end
+
+    def delete
+      @hpxml_object.solar_thermal_systems.delete(self)
     end
 
     def to_rexml(doc)
@@ -2755,6 +2807,10 @@ class HPXML < Object
              :year_modules_manufactured]
     attr_accessor(*ATTRS)
 
+    def delete
+      @hpxml_object.pv_systems.delete(self)
+    end
+
     def to_rexml(doc)
       return if nil?
 
@@ -2810,6 +2866,10 @@ class HPXML < Object
              :capacity]
     attr_accessor(*ATTRS)
 
+    def delete
+      @hpxml_object.clothes_washers.delete(self)
+    end
+
     def to_rexml(doc)
       return if nil?
 
@@ -2860,6 +2920,10 @@ class HPXML < Object
     ATTRS = [:id, :location, :fuel_type, :energy_factor, :combined_energy_factor, :control_type]
     attr_accessor(*ATTRS)
 
+    def delete
+      @hpxml_object.clothes_dryers.delete(self)
+    end
+
     def to_rexml(doc)
       return if nil?
 
@@ -2904,6 +2968,10 @@ class HPXML < Object
     ATTRS = [:id, :energy_factor, :rated_annual_kwh, :place_setting_capacity]
     attr_accessor(*ATTRS)
 
+    def delete
+      @hpxml_object.dishwashers.delete(self)
+    end
+
     def to_rexml(doc)
       return if nil?
 
@@ -2943,6 +3011,10 @@ class HPXML < Object
   class Refrigerator < BaseElement
     ATTRS = [:id, :location, :rated_annual_kwh, :adjusted_annual_kwh]
     attr_accessor(*ATTRS)
+
+    def delete
+      @hpxml_object.refrigerators.delete(self)
+    end
 
     def to_rexml(doc)
       return if nil?
@@ -2985,6 +3057,10 @@ class HPXML < Object
     ATTRS = [:id, :fuel_type, :is_induction]
     attr_accessor(*ATTRS)
 
+    def delete
+      @hpxml_object.cooking_ranges.delete(self)
+    end
+
     def to_rexml(doc)
       return if nil?
 
@@ -3023,6 +3099,10 @@ class HPXML < Object
     ATTRS = [:id, :is_convection]
     attr_accessor(*ATTRS)
 
+    def delete
+      @hpxml_object.ovens.delete(self)
+    end
+
     def to_rexml(doc)
       return if nil?
 
@@ -3058,6 +3138,10 @@ class HPXML < Object
   class LightingGroup < BaseElement
     ATTRS = [:id, :location, :fration_of_units_in_location, :third_party_certification]
     attr_accessor(*ATTRS)
+
+    def delete
+      @hpxml_object.lighting_groups.delete(self)
+    end
 
     def to_rexml(doc)
       return if nil?
@@ -3099,6 +3183,10 @@ class HPXML < Object
     ATTRS = [:id, :efficiency, :quantity]
     attr_accessor(*ATTRS)
 
+    def delete
+      @hpxml_object.ceiling_fans.delete(self)
+    end
+
     def to_rexml(doc)
       return if nil?
 
@@ -3138,6 +3226,10 @@ class HPXML < Object
   class PlugLoad < BaseElement
     ATTRS = [:id, :plug_load_type, :kWh_per_year, :frac_sensible, :frac_latent]
     attr_accessor(*ATTRS)
+
+    def delete
+      @hpxml_object.plug_loads.delete(self)
+    end
 
     def to_rexml(doc)
       return if nil?
