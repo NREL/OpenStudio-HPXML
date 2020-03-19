@@ -88,6 +88,7 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
     weather_dir = runner.getStringArgumentValue('weather_dir', user_arguments)
     epw_output_path = runner.getOptionalStringArgumentValue('epw_output_path', user_arguments)
     osm_output_path = runner.getOptionalStringArgumentValue('osm_output_path', user_arguments)
+    debug = osm_output_path.is_initialized
 
     unless (Pathname.new hpxml_path).absolute?
       hpxml_path = File.expand_path(File.join(File.dirname(__FILE__), hpxml_path))
@@ -150,7 +151,7 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
       weather = Location.apply(model, runner, epw_path, cache_path, 'NA', 'NA')
 
       # Create OpenStudio model
-      OSModel.create(hpxml, runner, model, weather, hpxml_path)
+      OSModel.create(hpxml, runner, model, weather, hpxml_path, debug)
     rescue Exception => e
       # Report exception
       runner.registerError("#{e.message}\n#{e.backtrace.join("\n")}")
@@ -190,9 +191,10 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
 end
 
 class OSModel
-  def self.create(hpxml, runner, model, weather, hpxml_path)
+  def self.create(hpxml, runner, model, weather, hpxml_path, debug)
     @hpxml = hpxml
     @hpxml_path = hpxml_path
+    @debug = debug
 
     @eri_version = @hpxml.header.eri_calculation_version # Hidden feature
     @eri_version = 'latest' if @eri_version.nil?
@@ -3147,7 +3149,7 @@ class OSModel
   end
 
   def self.add_hvac_sizing(runner, model, weather)
-    HVACSizing.apply(model, runner, weather, @cfa, @infilvolume, @nbeds, @min_neighbor_distance, @living_space)
+    HVACSizing.apply(model, runner, weather, @cfa, @infilvolume, @nbeds, @min_neighbor_distance, @living_space, @debug)
   end
 
   def self.add_fuel_heating_eae(runner, model)
