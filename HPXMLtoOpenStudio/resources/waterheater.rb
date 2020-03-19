@@ -1599,7 +1599,6 @@ class Waterheater
     if wh_obj.ambientTemperatureSchedule.is_initialized
       wh_obj.ambientTemperatureSchedule.get.remove
     end
-    wh_obj.resetAmbientTemperatureSchedule
     if space.is_a? OpenStudio::Model::ScheduleConstant # Temperature schedule indicator
       wh_obj.setAmbientTemperatureSchedule(space)
     elsif space.nil? # Located outside
