@@ -914,24 +914,28 @@ class OSModel
   end
 
   def self.get_default_azimuths()
-    azimuth_counts = {}
+    # Returns a list of four azimuths (facing each direction). Determined based
+    # on the primary azimuth, as defined by the azimuth with the largest surface
+    # area, plus azimuths that are offset by 90/180/270 degrees. Used for
+    # surfaces that may not have an azimuth defined (e.g., walls).
+    azimuth_areas = {}
     (@hpxml.roofs + @hpxml.rim_joists + @hpxml.walls + @hpxml.foundation_walls +
      @hpxml.windows + @hpxml.skylights + @hpxml.doors).each do |surface|
       az = surface.azimuth
       next if az.nil?
 
-      azimuth_counts[az] = 0 if azimuth_counts[az].nil?
-      azimuth_counts[az] += 1
+      azimuth_areas[az] = 0 if azimuth_areas[az].nil?
+      azimuth_areas[az] += surface.area
     end
-    if azimuth_counts.empty?
-      default_azimuth = 0
+    if azimuth_areas.empty?
+      primary_azimuth = 0
     else
-      default_azimuth = azimuth_counts.max_by { |k, v| v }[0]
+      primary_azimuth = azimuth_areas.max_by { |k, v| v }[0]
     end
-    return [default_azimuth,
-            sanitize_azimuth(default_azimuth + 90),
-            sanitize_azimuth(default_azimuth + 180),
-            sanitize_azimuth(default_azimuth + 270)]
+    return [primary_azimuth,
+            sanitize_azimuth(primary_azimuth + 90),
+            sanitize_azimuth(primary_azimuth + 180),
+            sanitize_azimuth(primary_azimuth + 270)].sort
   end
 
   def self.sanitize_azimuth(azimuth)
