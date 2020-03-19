@@ -957,7 +957,7 @@ class OSModel
     # Finally reset the operable property since it is now arbitrary and we
     # don't want to accidentally use it.
     @hpxml.windows.each do |window|
-      window.operable = false
+      window.operable = nil
     end
 
     return frac_window_area_operable
