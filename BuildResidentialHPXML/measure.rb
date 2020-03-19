@@ -3008,7 +3008,7 @@ class HPXMLFile
   def self.get_duct_location_auto(args, hpxml) # FIXME
     if args[:roof_type] != 'flat' && hpxml.attics.size > 0 && [HPXML::AtticTypeVented, HPXML::AtticTypeUnvented].include?(args[:attic_type])
       location = hpxml.attics[0].to_location
-    elsif hpxml.foundations.size > 0 && (args[:foundation_type].downcase.include?('Basement') || args[:foundation_type].downcase.include?('Crawlspace'))
+    elsif hpxml.foundations.size > 0 && (args[:foundation_type].downcase.include?('basement') || args[:foundation_type].downcase.include?('crawlspace'))
       location = hpxml.foundations[0].to_location
     else
       location = HPXML::LocationLivingSpace
