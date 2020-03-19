@@ -201,9 +201,12 @@ class HPXML < Object
   WindowLayersSinglePane = 'single-pane'
   WindowLayersTriplePane = 'triple-pane'
 
-  def initialize(hpxml_path: nil, collapse_enclosure: true)
+  def initialize(hpxml_path: nil, delete_partitions: true, collapse_enclosure: true)
     @doc = nil
     from_hpxml_file(hpxml_path)
+    if delete_partitions
+      delete_partition_surfaces()
+    end
     if collapse_enclosure
       _collapse_enclosure_surfaces()
     end
@@ -1037,6 +1040,13 @@ class HPXML < Object
       return (is_exterior && is_thermal_boundary)
     end
 
+    def delete
+      @hpxml_object.roofs.delete(self)
+      skylights.reverse_each do |skylight|
+        @hpxml_object.skylights.delete(skylight)
+      end
+    end
+
     def to_rexml(doc)
       return if nil?
 
@@ -1121,6 +1131,10 @@ class HPXML < Object
 
     def is_exterior_thermal_boundary
       return (is_exterior && is_thermal_boundary)
+    end
+
+    def delete
+      @hpxml_object.rim_joists.delete(self)
     end
 
     def to_rexml(doc)
@@ -1224,6 +1238,16 @@ class HPXML < Object
       return (is_exterior && is_thermal_boundary)
     end
 
+    def delete
+      @hpxml_object.walls.delete(self)
+      windows.reverse_each do |window|
+        @hpxml_object.windows.delete(window)
+      end
+      doors.reverse_each do |door|
+        @hpxml_object.doors.delete(door)
+      end
+    end
+
     def to_rexml(doc)
       return if nil?
 
@@ -1297,6 +1321,14 @@ class HPXML < Object
              :insulation_exterior_distance_to_bottom, :insulation_assembly_r_value]
     attr_accessor(*ATTRS)
 
+    def windows
+      return @hpxml_object.windows.select { |window| window.wall_idref == @id }
+    end
+
+    def doors
+      return @hpxml_object.doors.select { |door| door.wall_idref == @id }
+    end
+
     def net_area
       return if nil?
 
@@ -1329,6 +1361,16 @@ class HPXML < Object
 
     def is_exterior_thermal_boundary
       return (is_exterior && is_thermal_boundary)
+    end
+
+    def delete
+      @hpxml_object.foundation_walls.delete(self)
+      windows.reverse_each do |window|
+        @hpxml_object.windows.delete(window)
+      end
+      doors.reverse_each do |door|
+        @hpxml_object.doors.delete(door)
+      end
     end
 
     def to_rexml(doc)
@@ -1450,6 +1492,10 @@ class HPXML < Object
       return (is_exterior && is_thermal_boundary)
     end
 
+    def delete
+      @hpxml_object.frame_floors.delete(self)
+    end
+
     def to_rexml(doc)
       return if nil?
 
@@ -1527,6 +1573,10 @@ class HPXML < Object
 
     def is_exterior_thermal_boundary
       return (is_exterior && is_thermal_boundary)
+    end
+
+    def delete
+      @hpxml_object.slabs.delete(self)
     end
 
     def to_rexml(doc)
@@ -3223,6 +3273,14 @@ class HPXML < Object
           surfaces.delete_at(j)
         end
       end
+    end
+  end
+
+  def delete_partition_surfaces()
+    (@rim_joists + @walls + @foundation_walls + @frame_floors).reverse_each do |surface|
+      next unless surface.interior_adjacent_to == surface.exterior_adjacent_to
+
+      surface.delete
     end
   end
 
