@@ -2039,7 +2039,7 @@ class HVACSizing
     location_spaces = []
     thermal_zones = Geometry.get_thermal_zones_from_spaces(@model_spaces)
     locations.each do |location|
-      if location == HPXML::LocationOutside
+      if [HPXML::LocationOutside, HPXML::LocationOtherHousingUnit, HPXML::LocationOtherHeatedSpace, HPXML::LocationOtherMultifamilyBufferSpace, HPXML::LocationOtherNonFreezingSpace].include? location
         location_spaces << nil
         next
       end

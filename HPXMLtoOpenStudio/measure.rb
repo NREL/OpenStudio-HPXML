@@ -4142,7 +4142,7 @@ class OSModel
         return @heated_space_temp_sch
       else
         @heated_space_temp_sch = OpenStudio::Model::ScheduleConstant.new(model)
-        @heated_space_temp_sch.setName("#{outside_space} sch EMS")
+        @heated_space_temp_sch.setName("#{outside_space}")
         actuated_schedule = @heated_space_temp_sch
       end
     elsif outside_space == HPXML::LocationOtherMultifamilyBufferSpace
@@ -4154,7 +4154,7 @@ class OSModel
         return @multifamily_buffer_space_temp_sch
       else
         @multifamily_buffer_space_temp_sch = OpenStudio::Model::ScheduleConstant.new(model)
-        @multifamily_buffer_space_temp_sch.setName("#{outside_space} sch EMS")
+        @multifamily_buffer_space_temp_sch.setName("#{outside_space}")
         actuated_schedule = @multifamily_buffer_space_temp_sch
       end
     elsif outside_space == HPXML::LocationOtherNonFreezingSpace
@@ -4166,7 +4166,7 @@ class OSModel
         return @non_freezing_space_temp_sch
       else
         @non_freezing_space_temp_sch = OpenStudio::Model::ScheduleConstant.new(model)
-        @non_freezing_space_temp_sch.setName("#{outside_space} sch EMS")
+        @non_freezing_space_temp_sch.setName("#{outside_space}")
         actuated_schedule = @non_freezing_space_temp_sch
       end
     elsif outside_space == HPXML::LocationOtherHousingUnit
@@ -4179,7 +4179,7 @@ class OSModel
         return @other_housing_unit_temp_sch
       else
         @other_housing_unit_temp_sch = OpenStudio::Model::ScheduleConstant.new(model)
-        @other_housing_unit_temp_sch.setName("#{outside_space} sch EMS")
+        @other_housing_unit_temp_sch.setName("#{outside_space}")
         actuated_schedule = @other_housing_unit_temp_sch
       end
     end

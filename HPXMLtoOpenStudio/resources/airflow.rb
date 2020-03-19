@@ -734,6 +734,10 @@ class Airflow
       if duct.space.nil? # Outside
         duct.zone = nil
         duct.zone_handle = HPXML::LocationOutside
+      elsif duct.space.is_a? OpenStudio::Model::ScheduleConstant
+        # Pass schedule and its name to duct.zone
+        duct.zone = duct.space
+        duct.zone_handle = duct.zone.name.to_s
       else
         duct.zone = duct.space.thermalZone.get
         duct.zone_handle = duct.zone.handle.to_s
@@ -1086,6 +1090,9 @@ class Airflow
         if duct_zone.nil? # Outside
           dz_t_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Site Outdoor Air Drybulb Temperature')
           dz_t_sensor.setKeyName('Environment')
+        elsif duct_zone.is_a? OpenStudio::Model::ScheduleConstant
+          dz_t_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Schedule Value')
+          dz_t_sensor.setKeyName(duct_zone.name.to_s)
         else
           dz_t_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Zone Air Temperature')
           dz_t_sensor.setKeyName(duct_zone.name.to_s)
@@ -1094,7 +1101,7 @@ class Airflow
 
         # Duct zone humidity ratio
         dz_w_var = OpenStudio::Model::EnergyManagementSystemGlobalVariable.new(model, "#{air_loop_name_idx} DZ W".gsub(' ', '_'))
-        if duct_zone.nil? # Outside
+        if not duct_zone.is_a? OpenStudio::Model::ThermalZone # Outside or scheduled temperature
           dz_w_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Site Outdoor Air Humidity Ratio')
         else
           dz_w_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Zone Mean Air Humidity Ratio')
@@ -1124,28 +1131,28 @@ class Airflow
         equip_act_infos << ['return_lat_lk_to_rp', 'RetLatLkToRP', ra_duct_space, 1.0, 0.0]
 
         # Supply duct conduction impact on the duct zone
-        if duct_zone.nil? # Outside
+        if not duct_zone.is_a? OpenStudio::Model::ThermalZone # Outside or scheduled temperature
           equip_act_infos << ['supply_cond_to_dz', 'SupCondToDZ', living_space, 0.0, 1.0]
         else
           equip_act_infos << ['supply_cond_to_dz', 'SupCondToDZ', duct_zone.spaces[0], 0.0, 0.0]
         end
 
         # Return duct conduction impact on the duct zone
-        if duct_zone.nil? # Outside
+        if not duct_zone.is_a? OpenStudio::Model::ThermalZone # Outside or scheduled temperature
           equip_act_infos << ['return_cond_to_dz', 'RetCondToDZ', living_space, 0.0, 1.0]
         else
           equip_act_infos << ['return_cond_to_dz', 'RetCondToDZ', duct_zone.spaces[0], 0.0, 0.0]
         end
 
         # Supply duct sensible leakage impact on the duct zone
-        if duct_zone.nil? # Outside
+        if not duct_zone.is_a? OpenStudio::Model::ThermalZone # Outside or scheduled temperature
           equip_act_infos << ['supply_sens_lk_to_dz', 'SupSensLkToDZ', living_space, 0.0, 1.0]
         else
           equip_act_infos << ['supply_sens_lk_to_dz', 'SupSensLkToDZ', duct_zone.spaces[0], 0.0, 0.0]
         end
 
         # Supply duct latent leakage impact on the duct zone
-        if duct_zone.nil? # Outside
+        if not duct_zone.is_a? OpenStudio::Model::ThermalZone # Outside or scheduled temperature
           equip_act_infos << ['supply_lat_lk_to_dz', 'SupLatLkToDZ', living_space, 0.0, 1.0]
         else
           equip_act_infos << ['supply_lat_lk_to_dz', 'SupLatLkToDZ', duct_zone.spaces[0], 1.0, 0.0]
@@ -1187,12 +1194,12 @@ class Airflow
         mix_act_infos = []
 
         # Accounts for leaks from the duct zone to the living zone
-        if not duct_zone.nil? # Not outside
+        if duct_zone.is_a? OpenStudio::Model::ThermalZone # Not Outside nor scheduled temperature
           mix_act_infos << ['dz_to_liv_flow_rate', 'ZoneMixDZToLv', building.living.zone, duct_zone]
         end
 
         # Accounts for leaks from the living zone to the duct zone
-        if not duct_zone.nil? # Not outside
+        if duct_zone.is_a? OpenStudio::Model::ThermalZone # Not Outside nor scheduled temperature
           mix_act_infos << ['liv_to_dz_flow_rate', 'ZoneMixLvToDZ', duct_zone, building.living.zone]
         end
 
@@ -1246,7 +1253,7 @@ class Airflow
 
         # Calculate fraction of outside air specific to this duct location
         f_oa = 1.0
-        if duct_zone.nil? # Outside
+        if not duct_zone.is_a? OpenStudio::Model::ThermalZone # Outside or scheduled temperature
           # nop
         elsif (not building.unconditioned_basement.nil?) && (building.unconditioned_basement.zone.name.to_s == duct_zone.name.to_s)
           f_oa = 0.0

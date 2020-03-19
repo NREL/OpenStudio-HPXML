@@ -769,7 +769,7 @@ def set_hpxml_rim_joists(hpxml_file, hpxml)
          'base-foundation-slab.xml'].include? hpxml_file
     hpxml.rim_joists.clear()
   elsif ['base-enclosure-attached-multifamily.xml'].include? hpxml_file
-    hpxml.rim_joists[0].exterior_adjacent_to = 'other non-freezing space'
+    hpxml.rim_joists[0].exterior_adjacent_to = HPXML::LocationOtherNonFreezingSpace
   elsif ['base-foundation-unconditioned-basement.xml'].include? hpxml_file
     for i in 0..hpxml.rim_joists.size - 1
       hpxml.rim_joists[i].interior_adjacent_to = HPXML::LocationBasementUnconditioned
@@ -868,32 +868,32 @@ def set_hpxml_walls(hpxml_file, hpxml)
                     insulation_assembly_r_value: 4.0)
   elsif ['base-enclosure-attached-multifamily.xml'].include? hpxml_file
     hpxml.walls.add(id: 'WallUnratedHeatedSpace',
-                    exterior_adjacent_to: 'other heated space',
-                    interior_adjacent_to: 'living space',
+                    exterior_adjacent_to: HPXML::LocationOtherHeatedSpace,
+                    interior_adjacent_to: HPXML::LocationLivingSpace,
                     wall_type: 'WoodStud',
                     area: 100,
                     solar_absorptance: 0.7,
                     emittance: 0.92,
                     insulation_assembly_r_value: 23.0)
     hpxml.walls.add(id: 'WallMultifamilyBuffer',
-                    exterior_adjacent_to: 'other multifamily buffer space',
-                    interior_adjacent_to: 'living space',
+                    exterior_adjacent_to: HPXML::LocationOtherMultifamilyBufferSpace,
+                    interior_adjacent_to: HPXML::LocationLivingSpace,
                     wall_type: 'WoodStud',
                     area: 100,
                     solar_absorptance: 0.7,
                     emittance: 0.92,
                     insulation_assembly_r_value: 22.3)
     hpxml.walls.add(id: 'WallNonFreezingSpace',
-                    exterior_adjacent_to: 'other non-freezing space',
-                    interior_adjacent_to: 'living space',
+                    exterior_adjacent_to: HPXML::LocationOtherNonFreezingSpace,
+                    interior_adjacent_to: HPXML::LocationLivingSpace,
                     wall_type: 'WoodStud',
                     area: 100,
                     solar_absorptance: 0.7,
                     emittance: 0.92,
                     insulation_assembly_r_value: 23.0)
     hpxml.walls.add(id: 'WallAdiabatic',
-                    exterior_adjacent_to: 'other housing unit',
-                    interior_adjacent_to: 'living space',
+                    exterior_adjacent_to: HPXML::LocationOtherHousingUnit,
+                    interior_adjacent_to: HPXML::LocationLivingSpace,
                     wall_type: 'WoodStud',
                     area: 100,
                     solar_absorptance: 0.7,
@@ -1030,8 +1030,8 @@ def set_hpxml_foundation_walls(hpxml_file, hpxml)
                                 insulation_exterior_r_value: 8.9)
   elsif ['base-enclosure-attached-multifamily.xml'].include? hpxml_file
     hpxml.foundation_walls.add(id: 'FoundationWall1',
-                               exterior_adjacent_to: 'other non-freezing space',
-                               interior_adjacent_to: 'basement - conditioned',
+                               exterior_adjacent_to: HPXML::LocationOtherNonFreezingSpace,
+                               interior_adjacent_to: HPXML::LocationBasementConditioned,
                                height: 8,
                                area: 480,
                                thickness: 8,
@@ -1043,8 +1043,8 @@ def set_hpxml_foundation_walls(hpxml_file, hpxml)
                                insulation_exterior_distance_to_bottom: 8,
                                insulation_exterior_r_value: 8.9)
     hpxml.foundation_walls.add(id: 'FoundationWall2',
-                               exterior_adjacent_to: 'other multifamily buffer space',
-                               interior_adjacent_to: 'basement - conditioned',
+                               exterior_adjacent_to: HPXML::LocationOtherMultifamilyBufferSpace,
+                               interior_adjacent_to: HPXML::LocationBasementConditioned,
                                height: 4,
                                area: 120,
                                thickness: 8,
@@ -1056,8 +1056,8 @@ def set_hpxml_foundation_walls(hpxml_file, hpxml)
                                insulation_exterior_distance_to_bottom: 4,
                                insulation_exterior_r_value: 8.9)
     hpxml.foundation_walls.add(id: 'FoundationWall3',
-                               exterior_adjacent_to: 'other heated space',
-                               interior_adjacent_to: 'basement - conditioned',
+                               exterior_adjacent_to: HPXML::LocationOtherHeatedSpace,
+                               interior_adjacent_to: HPXML::LocationBasementConditioned,
                                height: 2,
                                area: 60,
                                thickness: 8,
@@ -1331,18 +1331,18 @@ def set_hpxml_frame_floors(hpxml_file, hpxml)
                            insulation_assembly_r_value: 2.1)
   elsif ['base-enclosure-attached-multifamily.xml'].include? hpxml_file
     hpxml.frame_floors.add(id: 'FloorNonFreezingSpace',
-                           exterior_adjacent_to: 'other non-freezing space',
-                           interior_adjacent_to: 'living space',
+                           exterior_adjacent_to: HPXML::LocationOtherNonFreezingSpace,
+                           interior_adjacent_to: HPXML::LocationLivingSpace,
                            area: 1000,
                            insulation_assembly_r_value: 2.1)
     hpxml.frame_floors.add(id: 'FloorMultifamilyBuffer',
-                           exterior_adjacent_to: 'other multifamily buffer space',
-                           interior_adjacent_to: 'living space',
+                           exterior_adjacent_to: HPXML::LocationOtherMultifamilyBufferSpace,
+                           interior_adjacent_to: HPXML::LocationLivingSpace,
                            area: 200,
                            insulation_assembly_r_value: 2.1)
     hpxml.frame_floors.add(id: 'FloorUnratedHeatedSpace',
-                           exterior_adjacent_to: 'other heated space',
-                           interior_adjacent_to: 'living space',
+                           exterior_adjacent_to: HPXML::LocationOtherHeatedSpace,
+                           interior_adjacent_to: HPXML::LocationLivingSpace,
                            area: 150,
                            insulation_assembly_r_value: 2.1)
   elsif ['base-enclosure-split-surfaces.xml'].include? hpxml_file
@@ -2456,6 +2456,8 @@ def set_hpxml_hvac_distributions(hpxml_file, hpxml)
     hpxml.hvac_distributions[0].ducts[1].duct_location = HPXML::LocationOutside
   elsif ['base-hvac-ducts-locations.xml'].include? hpxml_file
     hpxml.hvac_distributions[0].ducts[1].duct_location = HPXML::LocationAtticUnvented
+  elsif ['base-enclosure-attached-multifamily.xml'].include? hpxml_file
+    hpxml.hvac_distributions[0].ducts[1].duct_location = HPXML::LocationOtherMultifamilyBufferSpace
   elsif ['base-hvac-ducts-multiple.xml'].include? hpxml_file
     hpxml.hvac_distributions[0].ducts.add(duct_type: HPXML::DuctTypeSupply,
                                           duct_insulation_r_value: 8,
@@ -2802,7 +2804,7 @@ def set_hpxml_water_heating_systems(hpxml_file, hpxml)
   elsif ['base-dhw-temperature.xml'].include? hpxml_file
     hpxml.water_heating_systems[0].temperature = 130.0
   elsif ['base-enclosure-attached-multifamily.xml'].include? hpxml_file
-    hpxml.water_heating_systems[0].location = 'other multifamily buffer space'
+    hpxml.water_heating_systems[0].location = HPXML::LocationOtherMultifamilyBufferSpace
   elsif ['base-dhw-none.xml'].include? hpxml_file
     hpxml.water_heating_systems.clear()
   end
