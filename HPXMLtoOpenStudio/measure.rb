@@ -78,7 +78,7 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
     end
 
     # Check for correct versions of OS
-    os_version = '3.0.0-pre1'
+    os_version = '3.0.0'
     if OpenStudio.openStudioVersion != os_version
       fail "OpenStudio version #{os_version} is required."
     end
@@ -292,7 +292,7 @@ class OSModel
     tstep.setNumberOfTimestepsPerHour(60 / timestep)
 
     shad = model.getShadowCalculation
-    shad.setCalculationFrequency(20)
+    shad.setShadingCalculationUpdateFrequency(20)
     shad.setMaximumFiguresInShadowOverlapCalculations(200)
 
     outsurf = model.getOutsideSurfaceConvectionAlgorithm
