@@ -3223,6 +3223,11 @@ class OSModel
     return map_str.to_s
   end
 
+  def self.add_output_diagnostics(model)
+    output_diagnostics = model.getOutputDiagnostics
+    output_diagnostics.addKey('DisplayAdvancedReportVariables')
+  end
+
   def self.add_component_loads_output(runner, model)
     # Prevent certain objects (e.g., OtherEquipment) from being counted towards both, e.g., ducts and internal gains
     objects_already_processed = []
@@ -3259,6 +3264,12 @@ class OSModel
                          skylights: [],
                          internal_mass: [] }
 
+    # flag to switch to reading advanced variables for window component load calculation
+    output_diagnostics = false
+    if output_diagnostics
+      add_output_diagnostics(model)
+    end
+
     model.getSurfaces.sort.each_with_index do |s, idx|
       next unless s.space.get.thermalZone.get.name.to_s == @living_zone.name.to_s
 
@@ -3275,18 +3286,37 @@ class OSModel
                 'Skylight' => :skylights }[surface_type]
         fail "Unexpected subsurface for component loads: '#{ss.name}'." if key.nil?
 
-        if (surface_type == 'Window') || (surface_type == 'Skylight')
-          vars = { 'Surface Window Net Heat Transfer Energy' => 'ss_net',
-                   'Surface Inside Face Internal Gains Radiation Heat Gain Energy' => 'ss_ig',
-                   'Surface Window Total Glazing Layers Absorbed Shortwave Radiation Rate' => 'ss_sw_abs',
-                   'Surface Window Total Glazing Layers Absorbed Solar Radiation Energy' => 'ss_sol_abs',
-                   'Surface Inside Face Initial Transmitted Diffuse Transmitted Out Window Solar Radiation Rate' => 'ss_sol_out' }
+        if output_diagnostics
+          if (surface_type == 'Window') || (surface_type == 'Skylight')
+            vars = { 'Surface Window Transmitted Solar Radiation Energy' => 'ss_trans_in',
+                     'Surface Window Shortwave from Zone Back Out Window Heat Transfer Rate' => 'ss_back_out',
+                     'Surface Window Total Glazing Layers Absorbed Shortwave Radiation Rate' => 'ss_sw_abs',
+                     'Surface Window Total Glazing Layers Absorbed Solar Radiation Energy' => 'ss_sol_abs',
+                     'Surface Inside Face Initial Transmitted Diffuse Transmitted Out Window Solar Radiation Rate' => 'ss_trans_out',
+                     'Surface Inside Face Convection Heat Gain Energy' => 'ss_conv',
+                     'Surface Inside Face Internal Gains Radiation Heat Gain Energy' => 'ss_ig',
+                     'Surface Inside Face Net Surface Thermal Radiation Heat Gain Energy' => 'ss_surf' }
+          else
+            vars = { 'Surface Inside Face Solar Radiation Heat Gain Energy' => 'ss_sol',
+                     'Surface Inside Face Lights Radiation Heat Gain Energy' => 'ss_lgt',
+                     'Surface Inside Face Convection Heat Gain Energy' => 'ss_conv',
+                     'Surface Inside Face Internal Gains Radiation Heat Gain Energy' => 'ss_ig',
+                     'Surface Inside Face Net Surface Thermal Radiation Heat Gain Energy' => 'ss_surf' }
+          end
         else
-          vars = { 'Surface Inside Face Convection Heat Gain Energy' => 'ss_conv',
-                   'Surface Inside Face Internal Gains Radiation Heat Gain Energy' => 'ss_ig',
-                   'Surface Inside Face Net Surface Thermal Radiation Heat Gain Energy' => 'ss_surf',
-                   'Surface Inside Face Solar Radiation Heat Gain Energy' => 'ss_sol',
-                   'Surface Inside Face Lights Radiation Heat Gain Energy' => 'ss_lgt' }
+          if (surface_type == 'Window') || (surface_type == 'Skylight')
+            vars = { 'Surface Window Net Heat Transfer Energy' => 'ss_net',
+                     'Surface Inside Face Internal Gains Radiation Heat Gain Energy' => 'ss_ig',
+                     'Surface Window Total Glazing Layers Absorbed Shortwave Radiation Rate' => 'ss_sw_abs',
+                     'Surface Window Total Glazing Layers Absorbed Solar Radiation Energy' => 'ss_sol_abs',
+                     'Surface Inside Face Initial Transmitted Diffuse Transmitted Out Window Solar Radiation Rate' => 'ss_trans_out' }
+          else
+            vars = { 'Surface Inside Face Convection Heat Gain Energy' => 'ss_conv',
+                     'Surface Inside Face Internal Gains Radiation Heat Gain Energy' => 'ss_ig',
+                     'Surface Inside Face Net Surface Thermal Radiation Heat Gain Energy' => 'ss_surf',
+                     'Surface Inside Face Solar Radiation Heat Gain Energy' => 'ss_sol',
+                     'Surface Inside Face Lights Radiation Heat Gain Energy' => 'ss_lgt' }
+          end
         end
 
         surfaces_sensors[key] << []
@@ -3583,9 +3613,10 @@ class OSModel
       surface_sensors.each do |sensors|
         s = "Set hr_#{k} = hr_#{k}"
         sensors.each do |sensor|
-          if sensor.name.to_s.start_with?('ss_net') || sensor.name.to_s.start_with?('ss_sol_abs')
+          # remove ss_net if switch
+          if sensor.name.to_s.start_with?('ss_net', 'ss_sol_abs', 'ss_trans_in')
             s += " - #{sensor.name}"
-          elsif sensor.name.to_s.start_with?('ss_sw_abs') || sensor.name.to_s.start_with?('ss_sol_out')
+          elsif sensor.name.to_s.start_with?('ss_sw_abs', 'ss_trans_out', 'ss_back_out')
             s += " + #{sensor.name} * ZoneTimestep * 3600"
           else
             s += " + #{sensor.name}"
