@@ -264,7 +264,7 @@ class HPXMLTest < MiniTest::Test
   def _run_xml(xml, this_dir, expect_error = false, expect_error_msgs = nil)
     print "Testing #{File.basename(xml)}...\n"
     rundir = File.join(this_dir, 'run')
-    _test_schema_validation(this_dir, xml)
+    _test_schema_validation(this_dir, xml) unless expect_error
     results, compload_results, sizing_results = _test_simulation(this_dir, xml, rundir, expect_error, expect_error_msgs)
     return results, compload_results, sizing_results
   end
