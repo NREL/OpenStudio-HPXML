@@ -625,9 +625,18 @@ def set_hpxml_attics(hpxml_file, hpxml)
     hpxml.attics.add(id: 'UnventedAttic',
                      attic_type: HPXML::AtticTypeUnvented,
                      within_infiltration_volume: false)
-  elsif ['base-atticroof-cathedral.xml',
-         'base-atticroof-flat.xml',
-         'base-enclosure-adiabatic-surfaces.xml'].include? hpxml_file
+  elsif ['base-atticroof-cathedral.xml'].include? hpxml_file
+    hpxml.attics.clear
+    hpxml.attics.add(id: 'CathedralCeiling',
+                     attic_type: HPXML::AtticTypeCathedral)
+  elsif ['base-atticroof-conditioned.xml'].include? hpxml_file
+    hpxml.attics.add(id: 'ConditionedAttic',
+                     attic_type: HPXML::AtticTypeConditioned)
+  elsif ['base-atticroof-flat.xml'].include? hpxml_file
+    hpxml.attics.clear
+    hpxml.attics.add(id: 'FlatRoof',
+                     attic_type: HPXML::AtticTypeFlatRoof)
+  elsif ['base-enclosure-adiabatic-surfaces.xml'].include? hpxml_file
     hpxml.attics.clear
   elsif ['base-atticroof-vented.xml'].include? hpxml_file
     hpxml.attics.clear
@@ -639,7 +648,8 @@ end
 
 def set_hpxml_foundations(hpxml_file, hpxml)
   if ['base.xml'].include? hpxml_file
-    hpxml.foundations.clear
+    hpxml.foundations.add(id: 'ConditionedBasement',
+                          foundation_type: HPXML::FoundationTypeBasementConditioned)
   elsif ['base-foundation-vented-crawlspace.xml'].include? hpxml_file
     hpxml.foundations.clear
     hpxml.foundations.add(id: 'VentedCrawlspace',
@@ -662,6 +672,14 @@ def set_hpxml_foundations(hpxml_file, hpxml)
     hpxml.foundations.add(id: 'UnventedCrawlspace',
                           foundation_type: HPXML::FoundationTypeCrawlspaceUnvented,
                           within_infiltration_volume: false)
+  elsif ['base-foundation-ambient.xml'].include? hpxml_file
+    hpxml.foundations.clear
+    hpxml.foundations.add(id: 'AmbientFoundation',
+                          foundation_type: HPXML::FoundationTypeAmbient)
+  elsif ['base-foundation-slab.xml'].include? hpxml_file
+    hpxml.foundations.clear
+    hpxml.foundations.add(id: 'SlabFoundation',
+                          foundation_type: HPXML::FoundationTypeSlab)
   end
 end
 
