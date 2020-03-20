@@ -78,7 +78,7 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
     end
 
     # Check for correct versions of OS
-    os_version = '2.9.1'
+    os_version = '3.0.0-pre1'
     if OpenStudio.openStudioVersion != os_version
       fail "OpenStudio version #{os_version} is required."
     end

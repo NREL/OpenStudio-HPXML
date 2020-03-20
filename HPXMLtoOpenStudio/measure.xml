@@ -1,9 +1,10 @@
+<?xml version="1.0"?>
 <measure>
   <schema_version>3.0</schema_version>
   <name>hpxm_lto_openstudio</name>
   <uid>b1543b30-9465-45ff-ba04-1d1f85e763bc</uid>
-  <version_id>d0e2bc86-91f6-4439-9d72-7d78e7e14bdf</version_id>
-  <version_modified>20200319T171715Z</version_modified>
+  <version_id>c3917474-b877-4cc4-ac1b-13107fbf16db</version_id>
+  <version_modified>20200320T155157Z</version_modified>
   <xml_checksum>D8922A73</xml_checksum>
   <class_name>HPXMLtoOpenStudio</class_name>
   <display_name>HPXML to OpenStudio Translator</display_name>
@@ -44,8 +45,8 @@
       <model_dependent>false</model_dependent>
     </argument>
   </arguments>
-  <outputs/>
-  <provenances/>
+  <outputs />
+  <provenances />
   <tags>
     <tag>Whole Building.Space Types</tag>
   </tags>
@@ -451,6 +452,12 @@
       <checksum>ACCF116F</checksum>
     </file>
     <file>
+      <filename>hpxml.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>BE0A4900</checksum>
+    </file>
+    <file>
       <version>
         <software_program>OpenStudio</software_program>
         <identifier>2.1.1</identifier>
@@ -459,13 +466,7 @@
       <filename>measure.rb</filename>
       <filetype>rb</filetype>
       <usage_type>script</usage_type>
-      <checksum>1AABBC00</checksum>
-    </file>
-    <file>
-      <filename>hpxml.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>BE0A4900</checksum>
+      <checksum>5525D34A</checksum>
     </file>
   </files>
 </measure>
