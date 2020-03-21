@@ -3171,7 +3171,7 @@ if ARGV[0].to_sym == :update_measures
   commands = ["\"require 'rubocop/rake_task'\"",
               "\"RuboCop::RakeTask.new(:rubocop) do |t| t.options = ['--auto-correct', '--format', 'simple', '--only', '#{cops.join(',')}'] end\"",
               '"Rake.application[:rubocop].invoke"']
-  command = "openstudio -e #{commands.join(' -e ')}"
+  command = "#{OpenStudio.getOpenStudioCLI} -e #{commands.join(' -e ')}"
   puts 'Applying rubocop auto-correct to measures...'
   system(command)
 
