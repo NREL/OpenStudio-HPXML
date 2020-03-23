@@ -1519,6 +1519,7 @@ def create_hpxmls
     'invalid_files/dhw-frac-load-served.xml' => 'base-dhw-multiple.xml',
     'invalid_files/duct-location.xml' => 'base.xml',
     'invalid_files/duct-location-other.xml' => 'base.xml',
+    'invalid_files/duplicate-id.xml' => 'base.xml',
     'invalid_files/heat-pump-mixed-fixed-and-autosize-capacities.xml' => 'base-hvac-air-to-air-heat-pump-1-speed.xml',
     'invalid_files/heat-pump-mixed-fixed-and-autosize-capacities2.xml' => 'base-hvac-air-to-air-heat-pump-1-speed.xml',
     'invalid_files/heat-pump-mixed-fixed-and-autosize-capacities3.xml' => 'base-hvac-air-to-air-heat-pump-1-speed.xml',
@@ -1535,6 +1536,7 @@ def create_hpxmls
     'invalid_files/invalid-timestep.xml' => 'base.xml',
     'invalid_files/invalid-window-height.xml' => 'base-enclosure-overhangs.xml',
     'invalid_files/invalid-window-interior-shading.xml' => 'base.xml',
+    'invalid_files/lighting-fractions.xml' => 'base.xml',
     'invalid_files/mismatched-slab-and-foundation-wall.xml' => 'base.xml',
     'invalid_files/missing-elements.xml' => 'base.xml',
     'invalid_files/missing-surfaces.xml' => 'base.xml',
@@ -1933,11 +1935,19 @@ def create_hpxmls
 
       hpxml_path = File.join(sample_files_dir, derivative)
 
-      # Validate file against HPXML schema
-      schemas_dir = File.absolute_path(File.join(File.dirname(__FILE__), 'HPXMLtoOpenStudio/resources'))
-      errors = XMLHelper.validate(hpxml_doc.to_s, File.join(schemas_dir, 'HPXML.xsd'), nil)
-      if errors.size > 0
-        fail errors.to_s
+      if not hpxml_path.include? 'invalid_files'
+        # Validate file against HPXML schema
+        schemas_dir = File.absolute_path(File.join(File.dirname(__FILE__), 'HPXMLtoOpenStudio/resources'))
+        errors = XMLHelper.validate(hpxml_doc.to_s, File.join(schemas_dir, 'HPXML.xsd'), nil)
+        if errors.size > 0
+          fail "ERRORS: #{errors}"
+        end
+
+        # Check for additional errors
+        errors = hpxml.check_for_errors()
+        if errors.size > 0
+          fail "ERRORS: #{errors}"
+        end
       end
 
       XMLHelper.write_file(hpxml_doc, hpxml_path)
@@ -2476,6 +2486,8 @@ def set_hpxml_walls(hpxml_file, hpxml)
         hpxml.walls[-1].id += i.to_s
       end
     end
+  elsif ['invalid_files/duplicate-id.xml'].include? hpxml_file
+    hpxml.walls[-1].id = hpxml.walls[0].id
   end
 end
 
@@ -4529,6 +4541,8 @@ def set_hpxml_lighting(hpxml_file, hpxml)
                               third_party_certification: HPXML::LightingTypeTierII)
   elsif ['base-misc-lighting-none.xml'].include? hpxml_file
     hpxml.lighting_groups.clear()
+  elsif ['invalid_files/lighting-fractions.xml'].include? hpxml_file
+    hpxml.lighting_groups[0].fration_of_units_in_location = 0.8
   end
 end
 
@@ -4661,7 +4675,7 @@ if ARGV[0].to_sym == :update_measures
   commands = ["\"require 'rubocop/rake_task'\"",
               "\"RuboCop::RakeTask.new(:rubocop) do |t| t.options = ['--auto-correct', '--format', 'simple', '--only', '#{cops.join(',')}'] end\"",
               '"Rake.application[:rubocop].invoke"']
-  command = "openstudio -e #{commands.join(' -e ')}"
+  command = "#{OpenStudio.getOpenStudioCLI} -e #{commands.join(' -e ')}"
   puts 'Applying rubocop auto-correct to measures...'
   system(command)
 
