@@ -353,7 +353,6 @@
               <HeatPumpType>mini-split</HeatPumpType>
               <HeatPumpFuel>electricity</HeatPumpFuel>
               <HeatingCapacity>-1.0</HeatingCapacity>
-              <HeatingCapacity17F>29500.0</HeatingCapacity17F>
               <CoolingCapacity>-1.0</CoolingCapacity>
               <CoolingSensibleHeatFraction>0.7</CoolingSensibleHeatFraction>
               <BackupSystemFuel>natural gas</BackupSystemFuel>

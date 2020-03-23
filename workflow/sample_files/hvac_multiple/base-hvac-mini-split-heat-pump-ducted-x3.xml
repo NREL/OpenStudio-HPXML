@@ -353,7 +353,7 @@
               <HeatPumpType>mini-split</HeatPumpType>
               <HeatPumpFuel>electricity</HeatPumpFuel>
               <HeatingCapacity>17333.333333333332</HeatingCapacity>
-              <HeatingCapacity17F>29500.0</HeatingCapacity17F>
+              <HeatingCapacity17F>9833.333333333334</HeatingCapacity17F>
               <CoolingCapacity>16000.0</CoolingCapacity>
               <CoolingSensibleHeatFraction>0.7</CoolingSensibleHeatFraction>
               <BackupSystemFuel>electricity</BackupSystemFuel>
@@ -379,7 +379,7 @@
               <HeatPumpType>mini-split</HeatPumpType>
               <HeatPumpFuel>electricity</HeatPumpFuel>
               <HeatingCapacity>17333.333333333332</HeatingCapacity>
-              <HeatingCapacity17F>29500.0</HeatingCapacity17F>
+              <HeatingCapacity17F>9833.333333333334</HeatingCapacity17F>
               <CoolingCapacity>16000.0</CoolingCapacity>
               <CoolingSensibleHeatFraction>0.7</CoolingSensibleHeatFraction>
               <BackupSystemFuel>electricity</BackupSystemFuel>
@@ -405,7 +405,7 @@
               <HeatPumpType>mini-split</HeatPumpType>
               <HeatPumpFuel>electricity</HeatPumpFuel>
               <HeatingCapacity>17333.333333333332</HeatingCapacity>
-              <HeatingCapacity17F>29500.0</HeatingCapacity17F>
+              <HeatingCapacity17F>9833.333333333334</HeatingCapacity17F>
               <CoolingCapacity>16000.0</CoolingCapacity>
               <CoolingSensibleHeatFraction>0.7</CoolingSensibleHeatFraction>
               <BackupSystemFuel>electricity</BackupSystemFuel>
