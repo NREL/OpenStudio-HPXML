@@ -832,7 +832,7 @@ class HPXMLTest < MiniTest::Test
       hpxml_value = subsurface.area
       query = "SELECT Value FROM TabularDataWithStrings WHERE ReportName='EnvelopeSummary' AND ReportForString='Entire Facility' AND TableName='Exterior Fenestration' AND RowName='#{subsurface_id}' AND ColumnName='Area of Multiplied Openings' AND Units='m2'"
       sql_value = UnitConversions.convert(sqlFile.execAndReturnFirstDouble(query).get, 'm^2', 'ft^2')
-      assert_in_epsilon(hpxml_value, sql_value, 0.01)
+      assert_in_epsilon(hpxml_value, sql_value, 0.02)
 
       # U-Factor
       hpxml_value = subsurface.ufactor

@@ -322,7 +322,6 @@ class EnergyPlusValidator
         '[CoolingSystemType="central air conditioner" or CoolingSystemType="room air conditioner" or CoolingSystemType="evaporative cooler"]' => one, # See [CoolingType=CentralAC] or [CoolingType=RoomAC] or [CoolingType=EvapCooler]
         '[CoolingSystemFuel="electricity"]' => one,
         'FractionCoolLoadServed' => one, # Must sum to <= 1 across all CoolingSystems and HeatPumps
-        'SensibleHeatFraction' => zero_or_one,
       },
 
       ## [CoolingType=CentralAC]
@@ -332,6 +331,7 @@ class EnergyPlusValidator
         'CoolingCapacity' => one, # Use -1 for autosizing
         '[CompressorType="single stage" or CompressorType="two stage" or CompressorType="variable speed"]' => zero_or_one,
         'AnnualCoolingEfficiency[Units="SEER"]/Value' => one,
+        'SensibleHeatFraction' => zero_or_one,
       },
 
       ## [CoolingType=RoomAC]
@@ -339,6 +339,7 @@ class EnergyPlusValidator
         'DistributionSystem' => zero,
         'CoolingCapacity' => one, # Use -1 for autosizing
         'AnnualCoolingEfficiency[Units="EER"]/Value' => one,
+        'SensibleHeatFraction' => zero_or_one,
       },
 
       ## [CoolingType=EvapCooler]
