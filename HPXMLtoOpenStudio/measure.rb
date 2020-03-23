@@ -2384,8 +2384,12 @@ class OSModel
       end
 
       heat_capacity_btuh_17F = heat_pump.heating_capacity_17F
-      if (heat_capacity_btuh == Constants.SizingAuto) && (not heat_capacity_btuh_17F.nil?)
-        fail "HeatPump '#{heat_pump.id}' has HeatingCapacity17F provided but heating capacity is auto-sized."
+      if not heat_capacity_btuh_17F.nil?
+        if heat_capacity_btuh == Constants.SizingAuto
+          fail "HeatPump '#{heat_pump.id}' has HeatingCapacity17F provided but heating capacity is auto-sized."
+        elsif heat_capacity_btuh == 0.0
+          heat_capacity_btuh_17F = nil
+        end
       end
 
       load_frac_heat = heat_pump.fraction_heat_load_served
