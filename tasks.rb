@@ -1935,18 +1935,18 @@ def create_hpxmls
 
       hpxml_path = File.join(sample_files_dir, derivative)
 
-      # Validate file against HPXML schema
-      schemas_dir = File.absolute_path(File.join(File.dirname(__FILE__), 'HPXMLtoOpenStudio/resources'))
-      errors = XMLHelper.validate(hpxml_doc.to_s, File.join(schemas_dir, 'HPXML.xsd'), nil)
-      if errors.size > 0
-        fail errors.to_s
-      end
-
-      # Check for additional errors
       if not hpxml_path.include? 'invalid_files'
+        # Validate file against HPXML schema
+        schemas_dir = File.absolute_path(File.join(File.dirname(__FILE__), 'HPXMLtoOpenStudio/resources'))
+        errors = XMLHelper.validate(hpxml_doc.to_s, File.join(schemas_dir, 'HPXML.xsd'), nil)
+        if errors.size > 0
+          fail "ERRORS: #{errors}"
+        end
+
+        # Check for additional errors
         errors = hpxml.check_for_errors()
         if errors.size > 0
-          fail errors.to_s
+          fail "ERRORS: #{errors}"
         end
       end
 
