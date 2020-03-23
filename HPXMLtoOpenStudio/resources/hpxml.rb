@@ -37,14 +37,15 @@ hpxml.walls.add(id: "WallSouth", area: 500)
 '''
 
 class HPXML < Object
-  attr_reader(:header, :site, :neighbor_buildings, :building_occupancy, :building_construction,
-              :climate_and_risk_zones, :air_infiltration_measurements, :attics, :foundations,
-              :roofs, :rim_joists, :walls, :foundation_walls, :frame_floors, :slabs, :windows,
-              :skylights, :doors, :heating_systems, :cooling_systems, :heat_pumps, :hvac_controls,
-              :hvac_distributions, :ventilation_fans, :water_heating_systems, :hot_water_distributions,
-              :water_fixtures, :solar_thermal_systems, :pv_systems, :clothes_washers, :clothes_dryers,
-              :dishwashers, :refrigerators, :cooking_ranges, :ovens, :lighting_groups, :ceiling_fans,
-              :plug_loads, :misc_loads_schedule, :doc)
+  HPXML_ATTRS = [:header, :site, :neighbor_buildings, :building_occupancy, :building_construction,
+                 :climate_and_risk_zones, :air_infiltration_measurements, :attics, :foundations,
+                 :roofs, :rim_joists, :walls, :foundation_walls, :frame_floors, :slabs, :windows,
+                 :skylights, :doors, :heating_systems, :cooling_systems, :heat_pumps, :hvac_controls,
+                 :hvac_distributions, :ventilation_fans, :water_heating_systems, :hot_water_distributions,
+                 :water_fixtures, :solar_thermal_systems, :pv_systems, :clothes_washers, :clothes_dryers,
+                 :dishwashers, :refrigerators, :cooking_ranges, :ovens, :lighting_groups, :ceiling_fans,
+                 :plug_loads, :misc_loads_schedule]
+  attr_reader(*HPXML_ATTRS, :doc)
 
   # Constants
   AtticTypeCathedral = 'CathedralCeiling'
@@ -201,12 +202,11 @@ class HPXML < Object
   WindowLayersSinglePane = 'single-pane'
   WindowLayersTriplePane = 'triple-pane'
 
-  def initialize(hpxml_path: nil, delete_partitions: true, collapse_enclosure: true)
+  def initialize(hpxml_path: nil, collapse_enclosure: true)
     @doc = nil
+    @hpxml_path = hpxml_path
     from_hpxml_file(hpxml_path)
-    if delete_partitions
-      delete_partition_surfaces()
-    end
+    delete_partition_surfaces()
     if collapse_enclosure
       collapse_enclosure_surfaces()
     end
@@ -430,6 +430,18 @@ class HPXML < Object
       end
     end
 
+    def check_for_errors
+      errors = []
+      each do |child|
+        if not child.respond_to? :check_for_errors
+          fail "Need to add 'check_for_errors' method to #{child.class} class."
+        end
+
+        errors += child.check_for_errors
+      end
+      return errors
+    end
+
     def to_rexml(doc)
       each do |child|
         child.to_rexml(doc)
@@ -446,6 +458,19 @@ class HPXML < Object
              :software_program_used, :software_program_version, :eri_calculation_version,
              :eri_design, :timestep, :building_id, :event_type, :state_code]
     attr_accessor(*ATTRS)
+
+    def check_for_errors
+      errors = []
+
+      if not @timestep.nil?
+        valid_tsteps = [60, 30, 20, 15, 12, 10, 6, 5, 4, 3, 2, 1]
+        if not valid_tsteps.include? @timestep
+          fail "Timestep (#{@timestep}) must be one of: #{valid_tsteps.join(', ')}."
+        end
+      end
+
+      return errors
+    end
 
     def to_rexml(doc)
       return if nil?
@@ -498,6 +523,11 @@ class HPXML < Object
     ATTRS = [:surroundings, :orientation_of_front_of_home, :fuels, :shelter_coefficient]
     attr_accessor(*ATTRS)
 
+    def check_for_errors
+      errors = []
+      return errors
+    end
+
     def to_rexml(doc)
       return if nil?
 
@@ -543,6 +573,11 @@ class HPXML < Object
     ATTRS = [:azimuth, :distance, :height]
     attr_accessor(*ATTRS)
 
+    def check_for_errors
+      errors = []
+      return errors
+    end
+
     def to_rexml(doc)
       return if nil?
 
@@ -565,6 +600,11 @@ class HPXML < Object
   class BuildingOccupancy < BaseElement
     ATTRS = [:number_of_residents]
     attr_accessor(*ATTRS)
+
+    def check_for_errors
+      errors = []
+      return errors
+    end
 
     def to_rexml(doc)
       return if nil?
@@ -589,6 +629,11 @@ class HPXML < Object
              :conditioned_floor_area, :conditioned_building_volume, :use_only_ideal_air_system,
              :residential_facility_type]
     attr_accessor(*ATTRS)
+
+    def check_for_errors
+      errors = []
+      return errors
+    end
 
     def to_rexml(doc)
       return if nil?
@@ -627,6 +672,11 @@ class HPXML < Object
     ATTRS = [:iecc2006, :iecc2012, :weather_station_id, :weather_station_name, :weather_station_wmo,
              :weather_station_epw_filename]
     attr_accessor(*ATTRS)
+
+    def check_for_errors
+      errors = []
+      return errors
+    end
 
     def to_rexml(doc)
       return if nil?
@@ -691,6 +741,11 @@ class HPXML < Object
              :infiltration_volume, :constant_ach_natural, :leakiness_description]
     attr_accessor(*ATTRS)
 
+    def check_for_errors
+      errors = []
+      return errors
+    end
+
     def to_rexml(doc)
       return if nil?
 
@@ -744,34 +799,28 @@ class HPXML < Object
     attr_accessor(*ATTRS)
 
     def attached_roofs
-      list = []
-      @hpxml_object.roofs.each do |roof|
-        next unless @attached_to_roof_idrefs.include? roof.id
+      return [] if @attached_to_roof_idrefs.nil?
 
-        list << roof
-      end
+      list = @hpxml_object.roofs.select { |roof| @attached_to_roof_idrefs.include? roof.id }
       if @attached_to_roof_idrefs.size > list.size
         fail "Attached roof not found for attic '#{@id}'."
       end
-
       return list
     end
 
     def attached_frame_floors
-      list = []
-      @hpxml_object.frame_floors.each do |frame_floor|
-        next unless @attached_to_frame_floor_idrefs.include? frame_floor.id
+      return [] if @attached_to_frame_floor_idrefs.nil?
 
-        list << frame_floor
-      end
+      list = @hpxml_object.frame_floors.select { |frame_floor| @attached_to_frame_floor_idrefs.include? frame_floor.id }
       if @attached_to_frame_floor_idrefs.size > list.size
         fail "Attached frame floor not found for attic '#{@id}'."
       end
-
       return list
     end
 
     def to_location
+      return if @attic_type.nil?
+
       if @attic_type == AtticTypeCathedral
         return LocationLivingSpace
       elsif @attic_type == AtticTypeConditioned
@@ -785,6 +834,14 @@ class HPXML < Object
       else
         fail "Unexpected attic type: '#{@attic_type}'."
       end
+    end
+
+    def check_for_errors
+      errors = []
+      begin; attached_roofs; rescue StandardError => e; errors << e.message; end
+      begin; attached_frame_floors; rescue StandardError => e; errors << e.message; end
+      begin; to_location; rescue StandardError => e; errors << e.message; end
+      return errors
     end
 
     def to_rexml(doc)
@@ -871,33 +928,38 @@ class HPXML < Object
     attr_accessor(*ATTRS)
 
     def attached_slabs
+      return [] if @attached_to_slab_idrefs.nil?
+
       list = @hpxml_object.slabs.select { |slab| @attached_to_slab_idrefs.include? slab.id }
       if @attached_to_slab_idrefs.size > list.size
         fail "Attached slab not found for foundation '#{@id}'."
       end
-
       return list
     end
 
     def attached_frame_floors
+      return [] if @attached_to_frame_floor_idrefs.nil?
+
       list = @hpxml_object.frame_floors.select { |frame_floor| @attached_to_frame_floor_idrefs.include? frame_floor.id }
       if @attached_to_frame_floor_idrefs.size > list.size
         fail "Attached frame floor not found for foundation '#{@id}'."
       end
-
       return list
     end
 
     def attached_foundation_walls
+      return [] if @attached_to_foundation_wall_idrefs.nil?
+
       list = @hpxml_object.foundation_walls.select { |foundation_wall| @attached_to_foundation_wall_idrefs.include? foundation_wall.id }
       if @attached_to_foundation_wall_idrefs.size > list.size
         fail "Attached foundation wall not found for foundation '#{@id}'."
       end
-
       return list
     end
 
     def to_location
+      return if @foundation_type.nil?
+
       if @foundation_type == FoundationTypeAmbient
         return LocationOutside
       elsif @foundation_type == FoundationTypeBasementConditioned
@@ -928,6 +990,15 @@ class HPXML < Object
         end
       end
       return sum_area
+    end
+
+    def check_for_errors
+      errors = []
+      begin; attached_slabs; rescue StandardError => e; errors << e.message; end
+      begin; attached_frame_floors; rescue StandardError => e; errors << e.message; end
+      begin; attached_foundation_walls; rescue StandardError => e; errors << e.message; end
+      begin; to_location; rescue StandardError => e; errors << e.message; end
+      return errors
     end
 
     def to_rexml(doc)
@@ -1065,6 +1136,12 @@ class HPXML < Object
       end
     end
 
+    def check_for_errors
+      errors = []
+      begin; net_area; rescue StandardError => e; errors << e.message; end
+      return errors
+    end
+
     def to_rexml(doc)
       return if nil?
 
@@ -1153,6 +1230,11 @@ class HPXML < Object
 
     def delete
       @hpxml_object.rim_joists.delete(self)
+    end
+
+    def check_for_errors
+      errors = []
+      return errors
     end
 
     def to_rexml(doc)
@@ -1264,6 +1346,12 @@ class HPXML < Object
       doors.reverse_each do |door|
         @hpxml_object.doors.delete(door)
       end
+    end
+
+    def check_for_errors
+      errors = []
+      begin; net_area; rescue StandardError => e; errors << e.message; end
+      return errors
     end
 
     def to_rexml(doc)
@@ -1391,6 +1479,12 @@ class HPXML < Object
       end
     end
 
+    def check_for_errors
+      errors = []
+      begin; net_area; rescue StandardError => e; errors << e.message; end
+      return errors
+    end
+
     def to_rexml(doc)
       return if nil?
 
@@ -1514,6 +1608,11 @@ class HPXML < Object
       @hpxml_object.frame_floors.delete(self)
     end
 
+    def check_for_errors
+      errors = []
+      return errors
+    end
+
     def to_rexml(doc)
       return if nil?
 
@@ -1595,6 +1694,18 @@ class HPXML < Object
 
     def delete
       @hpxml_object.slabs.delete(self)
+    end
+
+    def check_for_errors
+      errors = []
+
+      if not @exposed_perimeter.nil?
+        if @exposed_perimeter <= 0
+          fail "Exposed perimeter for Slab '#{@id}' must be greater than zero."
+        end
+      end
+
+      return errors
     end
 
     def to_rexml(doc)
@@ -1687,6 +1798,8 @@ class HPXML < Object
     attr_accessor(*ATTRS)
 
     def wall
+      return if @wall_idref.nil?
+
       (@hpxml_object.walls + @hpxml_object.foundation_walls).each do |wall|
         next unless wall.id == @wall_idref
 
@@ -1713,6 +1826,18 @@ class HPXML < Object
 
     def delete
       @hpxml_object.windows.delete(self)
+    end
+
+    def check_for_errors
+      errors = []
+      begin; wall; rescue StandardError => e; errors << e.message; end
+      if (not @overhangs_distance_to_top_of_window.nil?) && (not @overhangs_distance_to_bottom_of_window.nil?)
+        if @overhangs_distance_to_bottom_of_window <= @overhangs_distance_to_top_of_window
+          fail "For Window '#{@id}', overhangs distance to bottom (#{@overhangs_distance_to_bottom_of_window}) must be greater than distance to top (#{@overhangs_distance_to_top_of_window})."
+        end
+      end
+
+      return errors
     end
 
     def to_rexml(doc)
@@ -1791,6 +1916,8 @@ class HPXML < Object
     attr_accessor(*ATTRS)
 
     def roof
+      return if @roof_idref.nil?
+
       @hpxml_object.roofs.each do |roof|
         next unless roof.id == @roof_idref
 
@@ -1817,6 +1944,12 @@ class HPXML < Object
 
     def delete
       @hpxml_object.skylights.delete(self)
+    end
+
+    def check_for_errors
+      errors = []
+      begin; roof; rescue StandardError => e; errors << e.message; end
+      return errors
     end
 
     def to_rexml(doc)
@@ -1874,6 +2007,8 @@ class HPXML < Object
     attr_accessor(*ATTRS)
 
     def wall
+      return if @wall_idref.nil?
+
       (@hpxml_object.walls + @hpxml_object.foundation_walls).each do |wall|
         next unless wall.id == @wall_idref
 
@@ -1900,6 +2035,12 @@ class HPXML < Object
 
     def delete
       @hpxml_object.doors.delete(self)
+    end
+
+    def check_for_errors
+      errors = []
+      begin; wall; rescue StandardError => e; errors << e.message; end
+      return errors
     end
 
     def to_rexml(doc)
@@ -1950,8 +2091,25 @@ class HPXML < Object
              :heating_cfm, :energy_star, :seed_id]
     attr_accessor(*ATTRS)
 
+    def distribution_system
+      return if @distribution_system_idref.nil?
+
+      @hpxml_object.hvac_distributions.each do |hvac_distribution|
+        next unless hvac_distribution.id == @distribution_system_idref
+
+        return hvac_distribution
+      end
+      fail "Attached HVAC distribution system '#{@distribution_system_idref}' not found for HVAC system '#{@id}'."
+    end
+
     def delete
       @hpxml_object.heating_systems.delete(self)
+    end
+
+    def check_for_errors
+      errors = []
+      begin; distribution_system; rescue StandardError => e; errors << e.message; end
+      return errors
     end
 
     def to_rexml(doc)
@@ -2034,8 +2192,25 @@ class HPXML < Object
              :energy_star, :seed_id]
     attr_accessor(*ATTRS)
 
+    def distribution_system
+      return if @distribution_system_idref.nil?
+
+      @hpxml_object.hvac_distributions.each do |hvac_distribution|
+        next unless hvac_distribution.id == @distribution_system_idref
+
+        return hvac_distribution
+      end
+      fail "Attached HVAC distribution system '#{@distribution_system_idref}' not found for HVAC system '#{@id}'."
+    end
+
     def delete
       @hpxml_object.cooling_systems.delete(self)
+    end
+
+    def check_for_errors
+      errors = []
+      begin; distribution_system; rescue StandardError => e; errors << e.message; end
+      return errors
     end
 
     def to_rexml(doc)
@@ -2120,8 +2295,25 @@ class HPXML < Object
              :heating_efficiency_cop, :energy_star, :seed_id]
     attr_accessor(*ATTRS)
 
+    def distribution_system
+      return if @distribution_system_idref.nil?
+
+      @hpxml_object.hvac_distributions.each do |hvac_distribution|
+        next unless hvac_distribution.id == @distribution_system_idref
+
+        return hvac_distribution
+      end
+      fail "Attached HVAC distribution system '#{@distribution_system_idref}' not found for HVAC system '#{@id}'."
+    end
+
     def delete
       @hpxml_object.heat_pumps.delete(self)
+    end
+
+    def check_for_errors
+      errors = []
+      begin; distribution_system; rescue StandardError => e; errors << e.message; end
+      return errors
     end
 
     def to_rexml(doc)
@@ -2243,6 +2435,11 @@ class HPXML < Object
       @hpxml_object.hvac_controls.delete(self)
     end
 
+    def check_for_errors
+      errors = []
+      return errors
+    end
+
     def to_rexml(doc)
       return if nil?
 
@@ -2313,11 +2510,42 @@ class HPXML < Object
 
         list << hvac_system
       end
+
+      if list.size == 0
+        fail "Distribution system '#{@id}' found but no HVAC system attached to it."
+      end
+
+      num_htg = 0
+      num_clg = 0
+      list.each do |obj|
+        if obj.respond_to? :fraction_heat_load_served
+          num_htg += 1 if obj.fraction_heat_load_served > 0
+        end
+        if obj.respond_to? :fraction_cool_load_served
+          num_clg += 1 if obj.fraction_cool_load_served > 0
+        end
+      end
+
+      if num_clg > 1
+        fail "Multiple cooling systems found attached to distribution system '#{@id}'."
+      end
+      if num_htg > 1
+        fail "Multiple heating systems found attached to distribution system '#{@id}'."
+      end
+
       return list
     end
 
     def delete
       @hpxml_object.hvac_distributions.delete(self)
+    end
+
+    def check_for_errors
+      errors = []
+      begin; hvac_systems; rescue StandardError => e; errors << e.message; end
+      errors += @duct_leakage_measurements.check_for_errors
+      errors += @ducts.check_for_errors
+      return errors
     end
 
     def to_rexml(doc)
@@ -2381,6 +2609,11 @@ class HPXML < Object
              :duct_leakage_total_or_to_outside]
     attr_accessor(*ATTRS)
 
+    def check_for_errors
+      errors = []
+      return errors
+    end
+
     def to_rexml(air_distribution)
       duct_leakage_measurement_el = XMLHelper.add_element(air_distribution, 'DuctLeakageMeasurement')
       XMLHelper.add_element(duct_leakage_measurement_el, 'DuctType', @duct_type)
@@ -2421,6 +2654,11 @@ class HPXML < Object
     ATTRS = [:duct_type, :duct_insulation_r_value, :duct_insulation_material, :duct_location,
              :duct_fraction_area, :duct_surface_area]
     attr_accessor(*ATTRS)
+
+    def check_for_errors
+      errors = []
+      return errors
+    end
 
     def to_rexml(air_distribution)
       ducts_el = XMLHelper.add_element(air_distribution, 'Ducts')
@@ -2465,22 +2703,29 @@ class HPXML < Object
     attr_accessor(*ATTRS)
 
     def distribution_system
+      return if @distribution_system_idref.nil?
       return unless @fan_type == MechVentTypeCFIS
 
       @hpxml_object.hvac_distributions.each do |hvac_distribution|
         next unless hvac_distribution.id == @distribution_system_idref
 
         if hvac_distribution.distribution_system_type == HVACDistributionTypeHydronic
-          fail "Attached HVAC distribution system '#{@distribution_system_idref}' cannot be hydronic for mechanical ventilation '#{@id}'."
+          fail "Attached HVAC distribution system '#{@distribution_system_idref}' cannot be hydronic for ventilation fan '#{@id}'."
         end
 
         return hvac_distribution
       end
-      fail "Attached HVAC distribution system '#{@distribution_system_idref}' not found for mechanical ventilation '#{@id}'."
+      fail "Attached HVAC distribution system '#{@distribution_system_idref}' not found for ventilation fan '#{@id}'."
     end
 
     def delete
       @hpxml_object.ventilation_fans.delete(self)
+    end
+
+    def check_for_errors
+      errors = []
+      begin; distribution_system; rescue StandardError => e; errors << e.message; end
+      return errors
     end
 
     def to_rexml(doc)
@@ -2548,16 +2793,24 @@ class HPXML < Object
     attr_accessor(*ATTRS)
 
     def related_hvac_system
+      return if @related_hvac_idref.nil?
+
       (@hpxml_object.heating_systems + @hpxml_object.cooling_systems + @hpxml_object.heat_pumps).each do |hvac_system|
         next unless hvac_system.id == @related_hvac_idref
 
         return hvac_system
       end
-      fail "Attached HVAC system '#{@related_hvac_idref}' not found for water heating system '#{@id}'."
+      fail "RelatedHVACSystem '#{@related_hvac_idref}' not found for water heating system '#{@id}'."
     end
 
     def delete
       @hpxml_object.water_heating_systems.delete(self)
+    end
+
+    def check_for_errors
+      errors = []
+      begin; related_hvac_system; rescue StandardError => e; errors << e.message; end
+      return errors
     end
 
     def to_rexml(doc)
@@ -2640,6 +2893,11 @@ class HPXML < Object
       @hpxml_object.hot_water_distributions.delete(self)
     end
 
+    def check_for_errors
+      errors = []
+      return errors
+    end
+
     def to_rexml(doc)
       return if nil?
 
@@ -2713,6 +2971,11 @@ class HPXML < Object
       @hpxml_object.water_fixtures.delete(self)
     end
 
+    def check_for_errors
+      errors = []
+      return errors
+    end
+
     def to_rexml(doc)
       return if nil?
 
@@ -2754,6 +3017,8 @@ class HPXML < Object
     attr_accessor(*ATTRS)
 
     def water_heating_system
+      return if @water_heating_system_idref.nil?
+
       @hpxml_object.water_heating_systems.each do |water_heater|
         next unless water_heater.id == @water_heating_system_idref
 
@@ -2764,6 +3029,12 @@ class HPXML < Object
 
     def delete
       @hpxml_object.solar_thermal_systems.delete(self)
+    end
+
+    def check_for_errors
+      errors = []
+      begin; water_heating_system; rescue StandardError => e; errors << e.message; end
+      return errors
     end
 
     def to_rexml(doc)
@@ -2831,6 +3102,11 @@ class HPXML < Object
       @hpxml_object.pv_systems.delete(self)
     end
 
+    def check_for_errors
+      errors = []
+      return errors
+    end
+
     def to_rexml(doc)
       return if nil?
 
@@ -2890,6 +3166,11 @@ class HPXML < Object
       @hpxml_object.clothes_washers.delete(self)
     end
 
+    def check_for_errors
+      errors = []
+      return errors
+    end
+
     def to_rexml(doc)
       return if nil?
 
@@ -2944,6 +3225,11 @@ class HPXML < Object
       @hpxml_object.clothes_dryers.delete(self)
     end
 
+    def check_for_errors
+      errors = []
+      return errors
+    end
+
     def to_rexml(doc)
       return if nil?
 
@@ -2992,6 +3278,11 @@ class HPXML < Object
       @hpxml_object.dishwashers.delete(self)
     end
 
+    def check_for_errors
+      errors = []
+      return errors
+    end
+
     def to_rexml(doc)
       return if nil?
 
@@ -3034,6 +3325,11 @@ class HPXML < Object
 
     def delete
       @hpxml_object.refrigerators.delete(self)
+    end
+
+    def check_for_errors
+      errors = []
+      return errors
     end
 
     def to_rexml(doc)
@@ -3081,6 +3377,11 @@ class HPXML < Object
       @hpxml_object.cooking_ranges.delete(self)
     end
 
+    def check_for_errors
+      errors = []
+      return errors
+    end
+
     def to_rexml(doc)
       return if nil?
 
@@ -3123,6 +3424,11 @@ class HPXML < Object
       @hpxml_object.ovens.delete(self)
     end
 
+    def check_for_errors
+      errors = []
+      return errors
+    end
+
     def to_rexml(doc)
       return if nil?
 
@@ -3161,6 +3467,11 @@ class HPXML < Object
 
     def delete
       @hpxml_object.lighting_groups.delete(self)
+    end
+
+    def check_for_errors
+      errors = []
+      return errors
     end
 
     def to_rexml(doc)
@@ -3207,6 +3518,11 @@ class HPXML < Object
       @hpxml_object.ceiling_fans.delete(self)
     end
 
+    def check_for_errors
+      errors = []
+      return errors
+    end
+
     def to_rexml(doc)
       return if nil?
 
@@ -3251,6 +3567,11 @@ class HPXML < Object
       @hpxml_object.plug_loads.delete(self)
     end
 
+    def check_for_errors
+      errors = []
+      return errors
+    end
+
     def to_rexml(doc)
       return if nil?
 
@@ -3281,6 +3602,11 @@ class HPXML < Object
   class MiscLoadsSchedule < BaseElement
     ATTRS = [:weekday_fractions, :weekend_fractions, :monthly_multipliers]
     attr_accessor(*ATTRS)
+
+    def check_for_errors
+      errors = []
+      return errors
+    end
 
     def to_rexml(doc)
       return if nil?
@@ -3395,6 +3721,93 @@ class HPXML < Object
 
       surface.delete
     end
+  end
+
+  def check_for_errors()
+    errors = []
+
+    # ------------------------------- #
+    # Check for errors across objects #
+    # ------------------------------- #
+
+    # Check for globally unique SystemIdentifier IDs
+    sys_ids = {}
+    self.class::HPXML_ATTRS.each do |attribute|
+      hpxml_obj = send(attribute)
+      next unless hpxml_obj.is_a? HPXML::BaseArrayElement
+
+      hpxml_obj.each do |obj|
+        next unless obj.respond_to? :id
+
+        sys_ids[obj.id] = 0 if sys_ids[obj.id].nil?
+        sys_ids[obj.id] += 1
+      end
+    end
+    sys_ids.each do |sys_id, cnt|
+      errors << "Duplicate SystemIdentifier IDs detected for '#{sys_id}'." if cnt > 1
+    end
+
+    # Check sum of HVAC FractionCoolLoadServeds <= 1
+    frac_cool_load = (@cooling_systems + @heat_pumps).map { |hvac| hvac.fraction_cool_load_served }.inject(0, :+)
+    if frac_cool_load > 1.01 # Use 1.01 in case of rounding
+      errors << "Expected FractionCoolLoadServed to sum to <= 1, but calculated sum is #{frac_cool_load.round(2)}."
+    end
+
+    # Check sum of HVAC FractionHeatLoadServeds <= 1
+    frac_heat_load = (@heating_systems + @heat_pumps).map { |hvac| hvac.fraction_heat_load_served }.inject(0, :+)
+    if frac_heat_load > 1.01 # Use 1.01 in case of rounding
+      errors << "Expected FractionHeatLoadServed to sum to <= 1, but calculated sum is #{frac_heat_load.round(2)}."
+    end
+
+    # Check sum of HVAC FractionDHWLoadServed == 1
+    frac_dhw_load = @water_heating_systems.map { |dhw| dhw.fraction_dhw_load_served }.inject(0, :+)
+    if (frac_dhw_load > 0) && ((frac_dhw_load < 0.99) || (frac_dhw_load > 1.01)) # Use 0.99/1.01 in case of rounding
+      errors << "Expected FractionDHWLoadServed to sum to 1, but calculated sum is #{frac_dhw_load.round(2)}."
+    end
+
+    # Check sum of lighting fractions in a location <= 1
+    ltg_fracs = {}
+    @lighting_groups.each do |lighting_group|
+      next if lighting_group.location.nil? || lighting_group.fration_of_units_in_location.nil?
+
+      ltg_fracs[lighting_group.location] = 0 if ltg_fracs[lighting_group.location].nil?
+      ltg_fracs[lighting_group.location] += lighting_group.fration_of_units_in_location
+    end
+    ltg_fracs.each do |location, sum|
+      next if sum <= 1
+
+      fail "Sum of fractions of #{location} lighting (#{sum}) is greater than 1."
+    end
+
+    # Check for HVAC systems referenced by multiple water heating systems
+    (@heating_systems + @cooling_systems + @heat_pumps).each do |hvac_system|
+      num_attached = 0
+      @water_heating_systems.each do |water_heating_system|
+        next if water_heating_system.related_hvac_idref.nil?
+        next unless hvac_system.id == water_heating_system.related_hvac_idref
+
+        num_attached += 1
+      end
+      next if num_attached <= 1
+
+      errors << "RelatedHVACSystem '#{hvac_system.id}' is attached to multiple water heating systems."
+    end
+
+    # ------------------------------- #
+    # Check for errors within objects #
+    # ------------------------------- #
+
+    # Ask objects to check for errors
+    self.class::HPXML_ATTRS.each do |attribute|
+      hpxml_obj = send(attribute)
+      if not hpxml_obj.respond_to? :check_for_errors
+        fail "Need to add 'check_for_errors' method to #{hpxml_obj.class} class."
+      end
+
+      errors += hpxml_obj.check_for_errors
+    end
+
+    return errors
   end
 
   def self.is_thermal_boundary(surface)
