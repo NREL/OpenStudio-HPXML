@@ -2,8 +2,8 @@
   <schema_version>3.0</schema_version>
   <name>hpxm_lto_openstudio</name>
   <uid>b1543b30-9465-45ff-ba04-1d1f85e763bc</uid>
-  <version_id>8dd16187-8492-4786-a54c-b07bac9135df</version_id>
-  <version_modified>20200318T220621Z</version_modified>
+  <version_id>abfdbdb7-84f6-477b-81d0-7273da028de3</version_id>
+  <version_modified>20200323T163608Z</version_modified>
   <xml_checksum>D8922A73</xml_checksum>
   <class_name>HPXMLtoOpenStudio</class_name>
   <display_name>HPXML to OpenStudio Translator</display_name>
@@ -439,16 +439,27 @@
       <checksum>ACCF116F</checksum>
     </file>
     <file>
-      <filename>EPvalidator.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>E35465D5</checksum>
-    </file>
-    <file>
       <filename>hvac.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
       <checksum>209FB723</checksum>
+    </file>
+    <file>
+      <filename>EPvalidator.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>1EB1B855</checksum>
+    </file>
+    <file>
+      <version>
+        <software_program>OpenStudio</software_program>
+        <identifier>2.1.1</identifier>
+        <min_compatible>2.1.1</min_compatible>
+      </version>
+      <filename>measure.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>script</usage_type>
+      <checksum>1BBD4131</checksum>
     </file>
     <file>
       <filename>ERIRatedHome.csv</filename>
@@ -484,7 +495,7 @@
       <filename>hpxml.rb.bak</filename>
       <filetype>bak</filetype>
       <usage_type>resource</usage_type>
-      <checksum>3F8FC41F</checksum>
+      <checksum>23256189</checksum>
     </file>
     <file>
       <filename>hvac.rb.bak</filename>
@@ -499,21 +510,10 @@
       <checksum>6474819C</checksum>
     </file>
     <file>
-      <version>
-        <software_program>OpenStudio</software_program>
-        <identifier>2.1.1</identifier>
-        <min_compatible>2.1.1</min_compatible>
-      </version>
-      <filename>measure.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>script</usage_type>
-      <checksum>D2429DF6</checksum>
-    </file>
-    <file>
       <filename>hpxml.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>A46C8D5E</checksum>
+      <checksum>ECAA3B21</checksum>
     </file>
   </files>
 </measure>
