@@ -353,7 +353,7 @@
               <HeatPumpType>air-to-air</HeatPumpType>
               <HeatPumpFuel>electricity</HeatPumpFuel>
               <HeatingCapacity>14000.0</HeatingCapacity>
-              <HeatingCapacity17F>24780.0</HeatingCapacity17F>
+              <HeatingCapacity17F>8260.0</HeatingCapacity17F>
               <CoolingCapacity>16000.0</CoolingCapacity>
               <CompressorType>two stage</CompressorType>
               <CoolingSensibleHeatFraction>0.7</CoolingSensibleHeatFraction>

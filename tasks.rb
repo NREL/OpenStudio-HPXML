@@ -2206,10 +2206,12 @@ def set_hpxml_heat_pumps(hpxml_file, hpxml)
   elsif hpxml_file.include?('hvac_autosizing') && (not hpxml.heat_pumps.nil?) && (hpxml.heat_pumps.size > 0)
     hpxml.heat_pumps[0].cooling_capacity = -1
     hpxml.heat_pumps[0].heating_capacity = -1
+    hpxml.heat_pumps[0].heating_capacity_17F = nil
     hpxml.heat_pumps[0].backup_heating_capacity = -1
   elsif hpxml_file.include?('-zero-heat.xml') && (not hpxml.heat_pumps.nil?) && (hpxml.heat_pumps.size > 0)
     hpxml.heat_pumps[0].fraction_heat_load_served = 0
     hpxml.heat_pumps[0].heating_capacity = 0
+    hpxml.heat_pumps[0].heating_capacity_17F = 0
     hpxml.heat_pumps[0].backup_heating_capacity = 0
   elsif hpxml_file.include?('-zero-cool.xml') && (not hpxml.heat_pumps.nil?) && (hpxml.heat_pumps.size > 0)
     hpxml.heat_pumps[0].fraction_cool_load_served = 0
@@ -2217,6 +2219,7 @@ def set_hpxml_heat_pumps(hpxml_file, hpxml)
   elsif hpxml_file.include?('hvac_multiple') && (not hpxml.heat_pumps.nil?) && (hpxml.heat_pumps.size > 0)
     hpxml.heat_pumps[0].cooling_capacity /= 3.0
     hpxml.heat_pumps[0].heating_capacity /= 3.0
+    hpxml.heat_pumps[0].heating_capacity_17F /= 3.0 unless hpxml.heat_pumps[0].heating_capacity_17F.nil?
     hpxml.heat_pumps[0].backup_heating_capacity /= 3.0
     hpxml.heat_pumps[0].fraction_heat_load_served = 0.333
     hpxml.heat_pumps[0].fraction_cool_load_served = 0.333
@@ -2229,6 +2232,7 @@ def set_hpxml_heat_pumps(hpxml_file, hpxml)
   elsif hpxml_file.include?('hvac_partial') && (not hpxml.heat_pumps.nil?) && (hpxml.heat_pumps.size > 0)
     hpxml.heat_pumps[0].cooling_capacity /= 3.0
     hpxml.heat_pumps[0].heating_capacity /= 3.0
+    hpxml.heat_pumps[0].heating_capacity_17F /= 3.0 unless hpxml.heat_pumps[0].heating_capacity_17F.nil?
     hpxml.heat_pumps[0].backup_heating_capacity /= 3.0
     hpxml.heat_pumps[0].fraction_heat_load_served = 0.333
     hpxml.heat_pumps[0].fraction_cool_load_served = 0.333
