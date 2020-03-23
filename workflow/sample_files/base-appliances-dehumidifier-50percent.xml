@@ -395,9 +395,9 @@
         <Dehumidifier>
           <SystemIdentifier id='Dehumidifier'/>
           <Capacity>40</Capacity>
-          <IntegratedEnergyFactor>1.5</IntegratedEnergyFactor>
+          <EnergyFactor>1.8</EnergyFactor>
           <DehumidistatSetpoint>0.5</DehumidistatSetpoint>
-          <FractionDehumidificationLoadServed>1.0</FractionDehumidificationLoadServed>
+          <FractionDehumidificationLoadServed>0.5</FractionDehumidificationLoadServed>
         </Dehumidifier>
         <CookingRange>
           <SystemIdentifier id='Range'/>

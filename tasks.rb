@@ -59,6 +59,7 @@ def create_hpxmls
 
     'base-appliances-dehumidifier.xml' => 'base-location-dallas-tx.xml',
     'base-appliances-dehumidifier-ief.xml' => 'base-appliances-dehumidifier.xml',
+    'base-appliances-dehumidifier-50percent.xml' => 'base-appliances-dehumidifier.xml',
     'base-appliances-gas.xml' => 'base.xml',
     'base-appliances-wood.xml' => 'base.xml',
     'base-appliances-modified.xml' => 'base.xml',
@@ -2988,10 +2989,13 @@ def set_hpxml_dehumidifier(hpxml_file, hpxml)
     hpxml.dehumidifiers.add(id: 'Dehumidifier',
                             capacity: 40,
                             energy_factor: 1.8,
-                            rh_setpoint: 0.5)
+                            rh_setpoint: 0.5,
+                            fraction_served: 1.0)
   elsif ['base-appliances-dehumidifier-ief.xml'].include? hpxml_file
     hpxml.dehumidifiers[0].energy_factor = nil
     hpxml.dehumidifiers[0].integrated_energy_factor = 1.5
+  elsif ['base-appliances-dehumidifier-50percent.xml'].include? hpxml_file
+    hpxml.dehumidifiers[0].fraction_served = 0.5
   end
 end
 

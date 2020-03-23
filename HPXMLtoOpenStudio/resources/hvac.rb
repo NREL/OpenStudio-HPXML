@@ -2110,7 +2110,7 @@ class HVAC
   end
 
   def self.apply_dehumidifier(model, runner, energy_factor, integrated_energy_factor, water_removal_rate,
-                              air_flow_rate, humidity_setpoint, control_zone, hvac_map, sys_id)
+                              air_flow_rate, humidity_setpoint, control_zone, hvac_map, sys_id, fraction_served)
 
     obj_name = Constants.ObjectNameDehumidifier
 
@@ -2145,7 +2145,7 @@ class HVAC
     zone_hvac.setName(obj_name + " #{control_zone.name} dx")
     zone_hvac.setAvailabilitySchedule(model.alwaysOnDiscreteSchedule)
     zone_hvac.setRatedWaterRemoval(UnitConversions.convert(water_removal_rate, 'pint', 'L'))
-    zone_hvac.setRatedEnergyFactor(energy_factor)
+    zone_hvac.setRatedEnergyFactor(energy_factor / fraction_served)
     zone_hvac.setRatedAirFlowRate(UnitConversions.convert(air_flow_rate, 'cfm', 'm^3/s'))
     zone_hvac.setMinimumDryBulbTemperatureforDehumidifierOperation(10)
     zone_hvac.setMaximumDryBulbTemperatureforDehumidifierOperation(40)

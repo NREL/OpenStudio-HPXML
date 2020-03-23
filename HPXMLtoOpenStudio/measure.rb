@@ -2686,12 +2686,13 @@ class OSModel
     energy_factor = dehumidifier.energy_factor
     integrated_energy_factor = dehumidifier.integrated_energy_factor
     humidity_setpoint = dehumidifier.rh_setpoint
+    fraction_served = dehumidifier.fraction_served
 
     # Calculate air flow rate by assuming 2.75 cfm/pint/day (based on experimental test data)
     air_flow_rate = 2.75 * water_removal_rate
 
     HVAC.apply_dehumidifier(model, runner, energy_factor, integrated_energy_factor, water_removal_rate,
-                            air_flow_rate, humidity_setpoint, @living_zone, @hvac_map, sys_id)
+                            air_flow_rate, humidity_setpoint, @living_zone, @hvac_map, sys_id, fraction_served)
   end
 
   def self.check_distribution_system(hvac_distribution, system_type)

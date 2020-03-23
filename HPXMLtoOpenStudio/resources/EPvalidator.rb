@@ -648,6 +648,7 @@ class EnergyPlusValidator
         'Capacity' => one, # pints/day
         'EnergyFactor | IntegratedEnergyFactor' => one, # liters/kWh
         'DehumidistatSetpoint' => one, # RH, fraction
+        'FractionDehumidificationLoadServed' => one,
       },
 
       # [CookingRange]

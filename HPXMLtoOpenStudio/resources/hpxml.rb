@@ -3352,7 +3352,7 @@ class HPXML < Object
   end
 
   class Dehumidifier < BaseElement
-    ATTRS = [:id, :capacity, :energy_factor, :integrated_energy_factor, :rh_setpoint]
+    ATTRS = [:id, :capacity, :energy_factor, :integrated_energy_factor, :rh_setpoint, :fraction_served]
     attr_accessor(*ATTRS)
 
     def delete
@@ -3375,6 +3375,7 @@ class HPXML < Object
       XMLHelper.add_element(dehumidifier, 'EnergyFactor', Float(@energy_factor)) unless @energy_factor.nil?
       XMLHelper.add_element(dehumidifier, 'IntegratedEnergyFactor', Float(@integrated_energy_factor)) unless @integrated_energy_factor.nil?
       XMLHelper.add_element(dehumidifier, 'DehumidistatSetpoint', @rh_setpoint) unless @rh_setpoint.nil?
+      XMLHelper.add_element(dehumidifier, 'FractionDehumidificationLoadServed', @fraction_served) unless @fraction_served.nil?
     end
 
     def from_rexml(dehumidifier)
@@ -3385,6 +3386,7 @@ class HPXML < Object
       @energy_factor = HPXML::to_float_or_nil(XMLHelper.get_value(dehumidifier, 'EnergyFactor'))
       @integrated_energy_factor = HPXML::to_float_or_nil(XMLHelper.get_value(dehumidifier, 'IntegratedEnergyFactor'))
       @rh_setpoint = HPXML::to_float_or_nil(XMLHelper.get_value(dehumidifier, 'DehumidistatSetpoint'))
+      @fraction_served = HPXML::to_float_or_nil(XMLHelper.get_value(dehumidifier, 'FractionDehumidificationLoadServed'))
     end
   end
 
