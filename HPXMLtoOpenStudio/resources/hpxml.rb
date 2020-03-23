@@ -3356,7 +3356,7 @@ class HPXML < Object
     attr_accessor(*ATTRS)
 
     def delete
-      @hpxml_object.refrigerators.delete(self)
+      @hpxml_object.dehumidifiers.delete(self)
     end
 
     def check_for_errors
