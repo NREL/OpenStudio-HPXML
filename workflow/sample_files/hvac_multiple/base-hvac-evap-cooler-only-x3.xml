@@ -351,25 +351,19 @@
               <SystemIdentifier id='CoolingSystem'/>
               <CoolingSystemType>evaporative cooler</CoolingSystemType>
               <CoolingSystemFuel>electricity</CoolingSystemFuel>
-              <CompressorType>single stage</CompressorType>
               <FractionCoolLoadServed>0.333</FractionCoolLoadServed>
-              <SensibleHeatFraction>0.7</SensibleHeatFraction>
             </CoolingSystem>
             <CoolingSystem>
               <SystemIdentifier id='CoolingSystem2'/>
               <CoolingSystemType>evaporative cooler</CoolingSystemType>
               <CoolingSystemFuel>electricity</CoolingSystemFuel>
-              <CompressorType>single stage</CompressorType>
               <FractionCoolLoadServed>0.333</FractionCoolLoadServed>
-              <SensibleHeatFraction>0.7</SensibleHeatFraction>
             </CoolingSystem>
             <CoolingSystem>
               <SystemIdentifier id='CoolingSystem3'/>
               <CoolingSystemType>evaporative cooler</CoolingSystemType>
               <CoolingSystemFuel>electricity</CoolingSystemFuel>
-              <CompressorType>single stage</CompressorType>
               <FractionCoolLoadServed>0.333</FractionCoolLoadServed>
-              <SensibleHeatFraction>0.7</SensibleHeatFraction>
             </CoolingSystem>
           </HVACPlant>
           <HVACControl>
