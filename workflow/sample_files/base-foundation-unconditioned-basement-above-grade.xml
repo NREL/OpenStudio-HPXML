@@ -290,44 +290,8 @@
             <AttachedToWall idref='Wall'/>
           </Window>
           <Window>
-            <SystemIdentifier id='FoundationWindowNorthOperable'/>
-            <Area>6.6000000000000005</Area>
-            <Azimuth>0</Azimuth>
-            <UFactor>0.33</UFactor>
-            <SHGC>0.45</SHGC>
-            <Operable>true</Operable>
-            <AttachedToWall idref='FoundationWall'/>
-          </Window>
-          <Window>
-            <SystemIdentifier id='FoundationWindowSouthOperable'/>
-            <Area>6.6000000000000005</Area>
-            <Azimuth>180</Azimuth>
-            <UFactor>0.33</UFactor>
-            <SHGC>0.45</SHGC>
-            <Operable>true</Operable>
-            <AttachedToWall idref='FoundationWall'/>
-          </Window>
-          <Window>
-            <SystemIdentifier id='FoundationWindowEastOperable'/>
-            <Area>3.3000000000000003</Area>
-            <Azimuth>90</Azimuth>
-            <UFactor>0.33</UFactor>
-            <SHGC>0.45</SHGC>
-            <Operable>true</Operable>
-            <AttachedToWall idref='FoundationWall'/>
-          </Window>
-          <Window>
-            <SystemIdentifier id='FoundationWindowWestOperable'/>
-            <Area>3.3000000000000003</Area>
-            <Azimuth>270</Azimuth>
-            <UFactor>0.33</UFactor>
-            <SHGC>0.45</SHGC>
-            <Operable>true</Operable>
-            <AttachedToWall idref='FoundationWall'/>
-          </Window>
-          <Window>
-            <SystemIdentifier id='FoundationWindowNorthInoperable'/>
-            <Area>13.4</Area>
+            <SystemIdentifier id='FoundationWindowNorth'/>
+            <Area>20.0</Area>
             <Azimuth>0</Azimuth>
             <UFactor>0.33</UFactor>
             <SHGC>0.45</SHGC>
@@ -335,8 +299,8 @@
             <AttachedToWall idref='FoundationWall'/>
           </Window>
           <Window>
-            <SystemIdentifier id='FoundationWindowSouthInoperable'/>
-            <Area>13.4</Area>
+            <SystemIdentifier id='FoundationWindowSouth'/>
+            <Area>20.0</Area>
             <Azimuth>180</Azimuth>
             <UFactor>0.33</UFactor>
             <SHGC>0.45</SHGC>
@@ -344,8 +308,8 @@
             <AttachedToWall idref='FoundationWall'/>
           </Window>
           <Window>
-            <SystemIdentifier id='FoundationWindowEastInoperable'/>
-            <Area>6.7</Area>
+            <SystemIdentifier id='FoundationWindowEast'/>
+            <Area>10.0</Area>
             <Azimuth>90</Azimuth>
             <UFactor>0.33</UFactor>
             <SHGC>0.45</SHGC>
@@ -353,8 +317,8 @@
             <AttachedToWall idref='FoundationWall'/>
           </Window>
           <Window>
-            <SystemIdentifier id='FoundationWindowWestInoperable'/>
-            <Area>6.7</Area>
+            <SystemIdentifier id='FoundationWindowWest'/>
+            <Area>10.0</Area>
             <Azimuth>270</Azimuth>
             <UFactor>0.33</UFactor>
             <SHGC>0.45</SHGC>

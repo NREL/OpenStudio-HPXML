@@ -263,39 +263,19 @@
             <AttachedToWall idref='Wall'/>
           </Window>
           <Window>
-            <SystemIdentifier id='AtticGableWindowEastOperable'/>
-            <Area>3.96</Area>
+            <SystemIdentifier id='AtticGableWindowEast'/>
+            <Area>12.0</Area>
             <Azimuth>90</Azimuth>
             <UFactor>0.33</UFactor>
             <SHGC>0.45</SHGC>
-            <Operable>true</Operable>
             <AttachedToWall idref='WallAtticGable'/>
           </Window>
           <Window>
-            <SystemIdentifier id='AtticGableWindowWestOperable'/>
-            <Area>3.96</Area>
+            <SystemIdentifier id='AtticGableWindowWest'/>
+            <Area>12.0</Area>
             <Azimuth>270</Azimuth>
             <UFactor>0.33</UFactor>
             <SHGC>0.45</SHGC>
-            <Operable>true</Operable>
-            <AttachedToWall idref='WallAtticGable'/>
-          </Window>
-          <Window>
-            <SystemIdentifier id='AtticGableWindowEastInoperable'/>
-            <Area>8.040000000000001</Area>
-            <Azimuth>90</Azimuth>
-            <UFactor>0.33</UFactor>
-            <SHGC>0.45</SHGC>
-            <Operable>false</Operable>
-            <AttachedToWall idref='WallAtticGable'/>
-          </Window>
-          <Window>
-            <SystemIdentifier id='AtticGableWindowWestInoperable'/>
-            <Area>8.040000000000001</Area>
-            <Azimuth>270</Azimuth>
-            <UFactor>0.33</UFactor>
-            <SHGC>0.45</SHGC>
-            <Operable>false</Operable>
             <AttachedToWall idref='WallAtticGable'/>
           </Window>
         </Windows>

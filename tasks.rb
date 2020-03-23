@@ -133,17 +133,7 @@ def create_hpxmls
     'base-enclosure-overhangs.xml' => 'base.xml',
     'base-enclosure-skylights.xml' => 'base.xml',
     'base-enclosure-split-surfaces.xml' => 'base-enclosure-skylights.xml',
-    'base-enclosure-walltype-cmu.xml' => 'base.xml',
-    'base-enclosure-walltype-doublestud.xml' => 'base.xml',
-    'base-enclosure-walltype-icf.xml' => 'base.xml',
-    'base-enclosure-walltype-log.xml' => 'base.xml',
-    'base-enclosure-walltype-sip.xml' => 'base.xml',
-    'base-enclosure-walltype-solidconcrete.xml' => 'base.xml',
-    'base-enclosure-walltype-steelstud.xml' => 'base.xml',
-    'base-enclosure-walltype-stone.xml' => 'base.xml',
-    'base-enclosure-walltype-strawbale.xml' => 'base.xml',
-    'base-enclosure-walltype-structuralbrick.xml' => 'base.xml',
-    'base-enclosure-windows-inoperable.xml' => 'base.xml',
+    'base-enclosure-walltypes.xml' => 'base.xml',
     'base-enclosure-windows-interior-shading.xml' => 'base.xml',
     'base-enclosure-windows-none.xml' => 'base.xml',
     'base-foundation-multiple.xml' => 'base-foundation-unconditioned-basement.xml',
@@ -436,7 +426,7 @@ def create_hpxmls
       schemas_dir = File.absolute_path(File.join(File.dirname(__FILE__), 'HPXMLtoOpenStudio/resources'))
       errors = XMLHelper.validate(hpxml_doc.to_s, File.join(schemas_dir, 'HPXML.xsd'), nil)
       if errors.size > 0
-        fail errors.to_s
+        fail "ERRORS: #{errors}"
       end
 
       # Check for additional errors
@@ -869,36 +859,30 @@ def set_hpxml_walls(hpxml_file, hpxml)
                     solar_absorptance: 0.7,
                     emittance: 0.92,
                     insulation_assembly_r_value: 4.0)
-  elsif ['base-enclosure-walltype-cmu.xml'].include? hpxml_file
-    hpxml.walls[0].wall_type = HPXML::WallTypeCMU
-    hpxml.walls[0].insulation_assembly_r_value = 12
-  elsif ['base-enclosure-walltype-doublestud.xml'].include? hpxml_file
-    hpxml.walls[0].wall_type = HPXML::WallTypeDoubleWoodStud
-    hpxml.walls[0].insulation_assembly_r_value = 28.7
-  elsif ['base-enclosure-walltype-icf.xml'].include? hpxml_file
-    hpxml.walls[0].wall_type = HPXML::WallTypeICF
-    hpxml.walls[0].insulation_assembly_r_value = 21
-  elsif ['base-enclosure-walltype-log.xml'].include? hpxml_file
-    hpxml.walls[0].wall_type = HPXML::WallTypeLog
-    hpxml.walls[0].insulation_assembly_r_value = 7.1
-  elsif ['base-enclosure-walltype-sip.xml'].include? hpxml_file
-    hpxml.walls[0].wall_type = HPXML::WallTypeSIP
-    hpxml.walls[0].insulation_assembly_r_value = 16.1
-  elsif ['base-enclosure-walltype-solidconcrete.xml'].include? hpxml_file
-    hpxml.walls[0].wall_type = HPXML::WallTypeConcrete
-    hpxml.walls[0].insulation_assembly_r_value = 1.35
-  elsif ['base-enclosure-walltype-steelstud.xml'].include? hpxml_file
-    hpxml.walls[0].wall_type = HPXML::WallTypeSteelStud
-    hpxml.walls[0].insulation_assembly_r_value = 8.1
-  elsif ['base-enclosure-walltype-stone.xml'].include? hpxml_file
-    hpxml.walls[0].wall_type = HPXML::WallTypeStone
-    hpxml.walls[0].insulation_assembly_r_value = 5.4
-  elsif ['base-enclosure-walltype-strawbale.xml'].include? hpxml_file
-    hpxml.walls[0].wall_type = HPXML::WallTypeStrawBale
-    hpxml.walls[0].insulation_assembly_r_value = 58.8
-  elsif ['base-enclosure-walltype-structuralbrick.xml'].include? hpxml_file
-    hpxml.walls[0].wall_type = HPXML::WallTypeBrick
-    hpxml.walls[0].insulation_assembly_r_value = 7.9
+  elsif ['base-enclosure-walltypes.xml'].include? hpxml_file
+    walls_map = { HPXML::WallTypeCMU => 12,
+                  HPXML::WallTypeDoubleWoodStud => 28.7,
+                  HPXML::WallTypeICF => 21,
+                  HPXML::WallTypeLog => 7.1,
+                  HPXML::WallTypeSIP => 16.1,
+                  HPXML::WallTypeConcrete => 1.35,
+                  HPXML::WallTypeSteelStud => 8.1,
+                  HPXML::WallTypeStone => 5.4,
+                  HPXML::WallTypeStrawBale => 58.8,
+                  HPXML::WallTypeBrick => 7.9 }
+    last_wall = hpxml.walls[-1]
+    hpxml.walls.clear
+    walls_map.each_with_index do |(wall_type, assembly_r), i|
+      hpxml.walls.add(id: "Wall#{i + 1}",
+                      exterior_adjacent_to: HPXML::LocationOutside,
+                      interior_adjacent_to: HPXML::LocationLivingSpace,
+                      wall_type: wall_type,
+                      area: 1200 / walls_map.size,
+                      solar_absorptance: 0.7,
+                      emittance: 0.92,
+                      insulation_assembly_r_value: assembly_r)
+    end
+    hpxml.walls << last_wall
   elsif ['invalid_files/missing-surfaces.xml'].include? hpxml_file
     hpxml.walls.add(id: 'WallGarage',
                     exterior_adjacent_to: HPXML::LocationGarage,
@@ -1487,22 +1471,20 @@ def set_hpxml_windows(hpxml_file, hpxml)
     hpxml.windows[5].area = 108 * 0.67
     hpxml.windows[6].area = 108 * 0.67
     hpxml.windows[7].area = 108 * 0.67
-    { 'Operable' => 0.33, 'Inoperable' => 0.67 }.each do |mode, frac|
-      hpxml.windows.add(id: "AtticGableWindowEast#{mode}",
-                        area: 12 * frac,
-                        azimuth: 90,
-                        ufactor: 0.33,
-                        shgc: 0.45,
-                        operable: (mode == 'Operable'),
-                        wall_idref: 'WallAtticGableCond')
-      hpxml.windows.add(id: "AtticGableWindowWest#{mode}",
-                        area: 62 * frac,
-                        azimuth: 270,
-                        ufactor: 0.3,
-                        shgc: 0.45,
-                        operable: (mode == 'Operable'),
-                        wall_idref: 'WallAtticGableCond')
-    end
+    hpxml.windows.add(id: 'AtticGableWindowEast',
+                      area: 12,
+                      azimuth: 90,
+                      ufactor: 0.33,
+                      shgc: 0.45,
+                      operable: nil,
+                      wall_idref: 'WallAtticGableCond')
+    hpxml.windows.add(id: 'AtticGableWindowWest',
+                      area: 62,
+                      azimuth: 270,
+                      ufactor: 0.3,
+                      shgc: 0.45,
+                      operable: nil,
+                      wall_idref: 'WallAtticGableCond')
   elsif ['base-atticroof-cathedral.xml'].include? hpxml_file
     hpxml.windows[0].area = 108 * 0.33
     hpxml.windows[1].area = 108 * 0.33
@@ -1512,34 +1494,30 @@ def set_hpxml_windows(hpxml_file, hpxml)
     hpxml.windows[5].area = 108 * 0.67
     hpxml.windows[6].area = 108 * 0.67
     hpxml.windows[7].area = 108 * 0.67
-    { 'Operable' => 0.33, 'Inoperable' => 0.67 }.each do |mode, frac|
-      hpxml.windows.add(id: "AtticGableWindowEast#{mode}",
-                        area: 12 * frac,
-                        azimuth: 90,
-                        ufactor: 0.33,
-                        shgc: 0.45,
-                        operable: (mode == 'Operable'),
-                        wall_idref: 'WallAtticGable')
-      hpxml.windows.add(id: "AtticGableWindowWest#{mode}",
-                        area: 12 * frac,
-                        azimuth: 270,
-                        ufactor: 0.33,
-                        shgc: 0.45,
-                        operable: (mode == 'Operable'),
-                        wall_idref: 'WallAtticGable')
-    end
+    hpxml.windows.add(id: 'AtticGableWindowEast',
+                      area: 12,
+                      azimuth: 90,
+                      ufactor: 0.33,
+                      shgc: 0.45,
+                      operable: nil,
+                      wall_idref: 'WallAtticGable')
+    hpxml.windows.add(id: 'AtticGableWindowWest',
+                      area: 12,
+                      azimuth: 270,
+                      ufactor: 0.33,
+                      shgc: 0.45,
+                      operable: nil,
+                      wall_idref: 'WallAtticGable')
   elsif ['base-enclosure-garage.xml'].include? hpxml_file
     hpxml.windows.delete_at(6)
     hpxml.windows.delete_at(2)
-    { 'Operable' => 0.33, 'Inoperable' => 0.67 }.each do |mode, frac|
-      hpxml.windows.add(id: "GarageWindowEast#{mode}",
-                        area: 12 * frac,
-                        azimuth: 90,
-                        ufactor: 0.33,
-                        shgc: 0.45,
-                        operable: (mode == 'Operable'),
-                        wall_idref: 'WallGarageExterior')
-    end
+    hpxml.windows.add(id: 'GarageWindowEast',
+                      area: 12,
+                      azimuth: 90,
+                      ufactor: 0.33,
+                      shgc: 0.45,
+                      operable: false,
+                      wall_idref: 'WallGarageExterior')
   elsif ['base-enclosure-2stories.xml'].include? hpxml_file
     hpxml.windows[0].area = 216 * 0.33
     hpxml.windows[1].area = 216 * 0.33
@@ -1559,36 +1537,34 @@ def set_hpxml_windows(hpxml_file, hpxml)
     hpxml.windows[6].area = 144 * 0.67
     hpxml.windows[7].area = 96 * 0.67
   elsif ['base-foundation-unconditioned-basement-above-grade.xml'].include? hpxml_file
-    { 'Operable' => 0.33, 'Inoperable' => 0.67 }.each do |mode, frac|
-      hpxml.windows.add(id: "FoundationWindowNorth#{mode}",
-                        area: 20 * frac,
-                        azimuth: 0,
-                        ufactor: 0.33,
-                        shgc: 0.45,
-                        operable: (mode == 'Operable'),
-                        wall_idref: 'FoundationWall')
-      hpxml.windows.add(id: "FoundationWindowSouth#{mode}",
-                        area: 20 * frac,
-                        azimuth: 180,
-                        ufactor: 0.33,
-                        shgc: 0.45,
-                        operable: (mode == 'Operable'),
-                        wall_idref: 'FoundationWall')
-      hpxml.windows.add(id: "FoundationWindowEast#{mode}",
-                        area: 10 * frac,
-                        azimuth: 90,
-                        ufactor: 0.33,
-                        shgc: 0.45,
-                        operable: (mode == 'Operable'),
-                        wall_idref: 'FoundationWall')
-      hpxml.windows.add(id: "FoundationWindowWest#{mode}",
-                        area: 10 * frac,
-                        azimuth: 270,
-                        ufactor: 0.33,
-                        shgc: 0.45,
-                        operable: (mode == 'Operable'),
-                        wall_idref: 'FoundationWall')
-    end
+    hpxml.windows.add(id: 'FoundationWindowNorth',
+                      area: 20,
+                      azimuth: 0,
+                      ufactor: 0.33,
+                      shgc: 0.45,
+                      operable: false,
+                      wall_idref: 'FoundationWall')
+    hpxml.windows.add(id: 'FoundationWindowSouth',
+                      area: 20,
+                      azimuth: 180,
+                      ufactor: 0.33,
+                      shgc: 0.45,
+                      operable: false,
+                      wall_idref: 'FoundationWall')
+    hpxml.windows.add(id: 'FoundationWindowEast',
+                      area: 10,
+                      azimuth: 90,
+                      ufactor: 0.33,
+                      shgc: 0.45,
+                      operable: false,
+                      wall_idref: 'FoundationWall')
+    hpxml.windows.add(id: 'FoundationWindowWest',
+                      area: 10,
+                      azimuth: 270,
+                      ufactor: 0.33,
+                      shgc: 0.45,
+                      operable: false,
+                      wall_idref: 'FoundationWall')
   elsif ['base-enclosure-adiabatic-surfaces.xml'].include? hpxml_file
     for n in 1..hpxml.windows.size
       hpxml.windows[n - 1].area *= 0.35
@@ -1606,20 +1582,51 @@ def set_hpxml_windows(hpxml_file, hpxml)
       end
     end
   elsif ['base-foundation-walkout-basement.xml'].include? hpxml_file
+    hpxml.windows.add(id: 'FoundationWindow',
+                      area: 20,
+                      azimuth: 0,
+                      ufactor: 0.33,
+                      shgc: 0.45,
+                      operable: false,
+                      wall_idref: 'FoundationWall3')
+  elsif ['invalid_files/invalid-window-height.xml'].include? hpxml_file
+    hpxml.windows[2].overhangs_distance_to_bottom_of_window = hpxml.windows[2].overhangs_distance_to_top_of_window
+  elsif ['base-enclosure-walltypes.xml'].include? hpxml_file
+    hpxml.windows.clear
+    wallnum = 1
     { 'Operable' => 0.33, 'Inoperable' => 0.67 }.each do |mode, frac|
-      hpxml.windows.add(id: "FoundationWindow#{mode}",
-                        area: 20 * frac,
+      hpxml.windows.add(id: "WindowNorth#{mode}",
+                        area: 108 * frac / 8,
                         azimuth: 0,
                         ufactor: 0.33,
                         shgc: 0.45,
                         operable: (mode == 'Operable'),
-                        wall_idref: 'FoundationWall3')
-    end
-  elsif ['invalid_files/invalid-window-height.xml'].include? hpxml_file
-    hpxml.windows[2].overhangs_distance_to_bottom_of_window = hpxml.windows[2].overhangs_distance_to_top_of_window
-  elsif ['base-enclosure-windows-inoperable.xml'].include? hpxml_file
-    hpxml.windows.each do |window|
-      window.operable = false
+                        wall_idref: "Wall#{wallnum}")
+      wallnum += 1
+      hpxml.windows.add(id: "WindowSouth#{mode}",
+                        area: 108 * frac / 8,
+                        azimuth: 180,
+                        ufactor: 0.33,
+                        shgc: 0.45,
+                        operable: (mode == 'Operable'),
+                        wall_idref: "Wall#{wallnum}")
+      wallnum += 1
+      hpxml.windows.add(id: "WindowEast#{mode}",
+                        area: 72 * frac / 8,
+                        azimuth: 90,
+                        ufactor: 0.33,
+                        shgc: 0.45,
+                        operable: (mode == 'Operable'),
+                        wall_idref: "Wall#{wallnum}")
+      wallnum += 1
+      hpxml.windows.add(id: "WindowWest#{mode}",
+                        area: 72 * frac / 8,
+                        azimuth: 270,
+                        ufactor: 0.33,
+                        shgc: 0.45,
+                        operable: (mode == 'Operable'),
+                        wall_idref: "Wall#{wallnum}")
+      wallnum += 1
     end
   end
 end
@@ -1685,6 +1692,18 @@ def set_hpxml_doors(hpxml_file, hpxml)
         hpxml.doors[-1].wall_idref += i.to_s
       end
     end
+  elsif ['base-enclosure-walltypes.xml'].include? hpxml_file
+    hpxml.doors.clear
+    hpxml.doors.add(id: 'DoorNorth',
+                    wall_idref: 'Wall9',
+                    area: 40,
+                    azimuth: 0,
+                    r_value: 4.4)
+    hpxml.doors.add(id: 'DoorSouth',
+                    wall_idref: 'Wall10',
+                    area: 40,
+                    azimuth: 180,
+                    r_value: 4.4)
   end
 end
 

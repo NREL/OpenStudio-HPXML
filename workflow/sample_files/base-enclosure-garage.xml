@@ -326,17 +326,8 @@
             <AttachedToWall idref='Wall'/>
           </Window>
           <Window>
-            <SystemIdentifier id='GarageWindowEastOperable'/>
-            <Area>3.96</Area>
-            <Azimuth>90</Azimuth>
-            <UFactor>0.33</UFactor>
-            <SHGC>0.45</SHGC>
-            <Operable>true</Operable>
-            <AttachedToWall idref='WallGarageExterior'/>
-          </Window>
-          <Window>
-            <SystemIdentifier id='GarageWindowEastInoperable'/>
-            <Area>8.040000000000001</Area>
+            <SystemIdentifier id='GarageWindowEast'/>
+            <Area>12.0</Area>
             <Azimuth>90</Azimuth>
             <UFactor>0.33</UFactor>
             <SHGC>0.45</SHGC>

@@ -334,17 +334,8 @@
             <AttachedToWall idref='Wall'/>
           </Window>
           <Window>
-            <SystemIdentifier id='FoundationWindowOperable'/>
-            <Area>6.6000000000000005</Area>
-            <Azimuth>0</Azimuth>
-            <UFactor>0.33</UFactor>
-            <SHGC>0.45</SHGC>
-            <Operable>true</Operable>
-            <AttachedToWall idref='FoundationWall3'/>
-          </Window>
-          <Window>
-            <SystemIdentifier id='FoundationWindowInoperable'/>
-            <Area>13.4</Area>
+            <SystemIdentifier id='FoundationWindow'/>
+            <Area>20.0</Area>
             <Azimuth>0</Azimuth>
             <UFactor>0.33</UFactor>
             <SHGC>0.45</SHGC>
