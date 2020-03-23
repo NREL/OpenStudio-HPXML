@@ -2039,21 +2039,10 @@ class OSModel
           combi_sys_id_list << sys_id
           standby_loss = water_heating_system.standby_loss
           vol = water_heating_system.tank_volume
-          if not related_hvac_idref_list.include? heating_source_id
-            related_hvac_idref_list << heating_source_id
-            boiler_sys = get_boiler_and_plant_loop(@hvac_map, heating_source_id, sys_id)
+          boiler_afue = water_heating_system.related_hvac_system.heating_efficiency_afue
+          boiler_fuel_type = water_heating_system.related_hvac_system.heating_system_fuel
 
-            boiler_afue = nil
-            boiler_fuel_type = nil
-            @hpxml.heating_systems.each do |heating_system|
-              next unless heating_system.id == water_heating_system.related_hvac_idref
-
-              boiler_afue = heating_system.heating_efficiency_afue
-              boiler_fuel_type = heating_system.heating_system_fuel
-            end
-          else
-            fail "RelatedHVACSystem '#{heating_source_id}' for water heating system '#{sys_id}' is already attached to another water heating system."
-          end
+          boiler_sys = get_boiler_and_plant_loop(@hvac_map, water_heating_system.related_hvac_idref, sys_id)
           @dhw_map[sys_id] << boiler_sys['boiler']
 
           Waterheater.apply_combi(model, runner, space, vol, setpoint_temp, ec_adj, @nbeds,
