@@ -3355,6 +3355,15 @@ class HPXML < Object
     ATTRS = [:id, :capacity, :energy_factor, :integrated_energy_factor, :rh_setpoint]
     attr_accessor(*ATTRS)
 
+    def delete
+      @hpxml_object.refrigerators.delete(self)
+    end
+
+    def check_for_errors
+      errors = []
+      return errors
+    end
+
     def to_rexml(doc)
       return if nil?
 
