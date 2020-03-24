@@ -46,10 +46,6 @@ class Waterheater
 
     cap = 100000000.0
 
-    if cd.nil?
-      cd = Waterheater.get_tankless_cycling_derate()
-    end
-
     loop = Waterheater.create_new_loop(model, Constants.PlantLoopDomesticWater, t_set, HPXML::WaterHeaterTypeTankless)
     dhw_map[sys_id] << loop
 
