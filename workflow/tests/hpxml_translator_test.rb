@@ -666,7 +666,8 @@ class HPXMLTest < MiniTest::Test
     assert(File.exist? sql_path)
 
     sqlFile = OpenStudio::SqlFile.new(sql_path, false)
-    hpxml = HPXML.new(hpxml_path: hpxml_path)
+    hpxml_defaults_path = File.join(rundir, 'in.xml')
+    hpxml = HPXML.new(hpxml_path: hpxml_defaults_path)
     hpxml.collapse_enclosure_surfaces([:operable])
 
     # Timestep
