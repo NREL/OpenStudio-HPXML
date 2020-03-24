@@ -976,6 +976,8 @@ class OSModel
 
   def self.add_roofs(runner, model, spaces)
     @hpxml.roofs.each do |roof|
+      next if roof.net_area < 0.1 # skip surfaces smaller than 0.1 sqft
+
       if roof.azimuth.nil?
         if roof.pitch > 0
           azimuths = @default_azimuths # Model as four directions for average exterior incident solar
@@ -989,8 +991,6 @@ class OSModel
       surfaces = []
 
       azimuths.each do |azimuth|
-        next if roof.net_area < 0.1
-
         width = Math::sqrt(roof.net_area)
         length = (roof.net_area / width) / azimuths.size
         tilt = roof.pitch / 12.0
@@ -1065,6 +1065,8 @@ class OSModel
 
   def self.add_walls(runner, model, spaces)
     @hpxml.walls.each do |wall|
+      next if wall.net_area < 0.1 # skip surfaces smaller than 0.1 sqft
+
       if wall.azimuth.nil?
         if wall.is_exterior
           azimuths = @default_azimuths # Model as four directions for average exterior incident solar
@@ -1078,8 +1080,6 @@ class OSModel
       surfaces = []
 
       azimuths.each do |azimuth|
-        next if wall.net_area < 0.1
-
         height = 8.0 * @ncfl_ag
         length = (wall.net_area / height) / azimuths.size
         z_origin = @foundation_top
@@ -1133,6 +1133,8 @@ class OSModel
 
   def self.add_rim_joists(runner, model, spaces)
     @hpxml.rim_joists.each do |rim_joist|
+      next if rim_joist.area < 0.1 # skip surfaces smaller than 0.1 sqft
+
       if rim_joist.azimuth.nil?
         if rim_joist.is_exterior
           azimuths = @default_azimuths # Model as four directions for average exterior incident solar
@@ -1210,6 +1212,8 @@ class OSModel
   def self.add_frame_floors(runner, model, spaces)
     @hpxml.frame_floors.each do |frame_floor|
       area = frame_floor.area
+      next if area < 0.1 # skip surfaces smaller than 0.1 sqft
+
       width = Math::sqrt(area)
       length = area / width
       if frame_floor.interior_adjacent_to.include?('attic') || frame_floor.exterior_adjacent_to.include?('attic')
@@ -1260,8 +1264,11 @@ class OSModel
   def self.add_foundation_walls_slabs(runner, model, spaces)
     # Check for foundation walls without corresponding slabs
     @hpxml.foundation_walls.each do |foundation_wall|
+      next if foundation_wall.net_area < 0.1 # skip surfaces smaller than 0.1 sqft
+
       found_slab = false
       @hpxml.slabs.each do |slab|
+        next if slab.area < 0.1 # skip surfaces smaller than 0.1 sqft
         found_slab = true if foundation_wall.interior_adjacent_to == slab.interior_adjacent_to
       end
       next if found_slab
@@ -1271,10 +1278,12 @@ class OSModel
 
     # Check for slabs without corresponding foundation walls
     @hpxml.slabs.each do |slab|
+      next if slab.area < 0.1 # skip surfaces smaller than 0.1 sqft
       next if [HPXML::LocationLivingSpace, HPXML::LocationGarage].include? slab.interior_adjacent_to
 
       found_foundation_wall = false
       @hpxml.foundation_walls.each do |foundation_wall|
+        next if foundation_wall.net_area < 0.1 # skip surfaces smaller than 0.1 sqft
         found_foundation_wall = true if slab.interior_adjacent_to == foundation_wall.interior_adjacent_to
       end
       next if found_foundation_wall
@@ -1296,11 +1305,13 @@ class OSModel
       slabs = []
       @hpxml.foundation_walls.each do |foundation_wall|
         next unless foundation_wall.interior_adjacent_to == foundation_type
+        next if foundation_wall.net_area < 0.1 # skip surfaces smaller than 0.1 sqft
 
         fnd_walls << foundation_wall
       end
       @hpxml.slabs.each do |slab|
         next unless slab.interior_adjacent_to == foundation_type
+        next if slab.area < 0.1 # skip surfaces smaller than 0.1 sqft
 
         slabs << slab
       end
@@ -1597,7 +1608,7 @@ class OSModel
     end
 
     addtl_cfa = cfa - model_cfa
-    return unless addtl_cfa > 0
+    return unless addtl_cfa > 0.1
 
     conditioned_floor_width = Math::sqrt(addtl_cfa)
     conditioned_floor_length = addtl_cfa / conditioned_floor_width
@@ -1697,6 +1708,8 @@ class OSModel
   def self.add_windows(runner, model, spaces, weather)
     surfaces = []
     @hpxml.windows.each do |window|
+      next if window.area < 0.1 # skip surfaces smaller than 0.1 sqft
+
       window_height = 4.0 # ft, default
       overhang_depth = nil
       if not window.overhangs_depth.nil?
@@ -1763,6 +1776,8 @@ class OSModel
   def self.add_skylights(runner, model, spaces, weather)
     surfaces = []
     @hpxml.skylights.each do |skylight|
+      next if skylight.area < 0.1 # skip surfaces smaller than 0.1 sqft
+
       # Obtain skylight tilt from attached roof
       skylight_tilt = skylight.roof.pitch / 12.0
 
@@ -1808,6 +1823,8 @@ class OSModel
   def self.add_doors(runner, model, spaces)
     surfaces = []
     @hpxml.doors.each do |door|
+      next if door.area < 0.1 # skip surfaces smaller than 0.1 sqft
+
       door_height = 6.67 # ft
       door_width = door.area / door_height
       z_origin = @foundation_top
