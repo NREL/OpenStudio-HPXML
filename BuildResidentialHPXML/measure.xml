@@ -2,8 +2,8 @@
   <schema_version>3.0</schema_version>
   <name>build_residential_hpxml</name>
   <uid>a13a8983-2b01-4930-8af2-42030b6e4233</uid>
-  <version_id>dec870c1-a37d-4299-8a46-8e054d74b981</version_id>
-  <version_modified>20200319T193507Z</version_modified>
+  <version_id>dc2c8bda-57dc-4eb9-a24b-760cf132054a</version_id>
+  <version_modified>20200324T224035Z</version_modified>
   <xml_checksum>2C38F48B</xml_checksum>
   <class_name>BuildResidentialHPXML</class_name>
   <display_name>HPXML Builder</display_name>
@@ -3609,12 +3609,6 @@
   </attributes>
   <files>
     <file>
-      <filename>constants.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>182539AB</checksum>
-    </file>
-    <file>
       <filename>location.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
@@ -3625,12 +3619,6 @@
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
       <checksum>D72E55C5</checksum>
-    </file>
-    <file>
-      <filename>waterheater.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>0A0E0C8E</checksum>
     </file>
     <file>
       <filename>geometry.rb</filename>
@@ -4575,10 +4563,28 @@
       <checksum>E5EF1C3F</checksum>
     </file>
     <file>
+      <filename>base-misc-timestep-10-mins.osw</filename>
+      <filetype>osw</filetype>
+      <usage_type>test</usage_type>
+      <checksum>6A6CDFBB</checksum>
+    </file>
+    <file>
+      <filename>constants.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>932321C5</checksum>
+    </file>
+    <file>
+      <filename>waterheater.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>1D875154</checksum>
+    </file>
+    <file>
       <filename>build_residential_hpxml_test.rb</filename>
       <filetype>rb</filetype>
       <usage_type>test</usage_type>
-      <checksum>F2A3D970</checksum>
+      <checksum>F5716E34</checksum>
     </file>
     <file>
       <version>
@@ -4589,13 +4595,13 @@
       <filename>measure.rb</filename>
       <filetype>rb</filetype>
       <usage_type>script</usage_type>
-      <checksum>D7EB5061</checksum>
+      <checksum>4EB85324</checksum>
     </file>
     <file>
-      <filename>base-misc-timestep-10-mins.osw</filename>
-      <filetype>osw</filetype>
-      <usage_type>test</usage_type>
-      <checksum>6A6CDFBB</checksum>
+      <filename>simulation.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>2213959F</checksum>
     </file>
   </files>
 </measure>
