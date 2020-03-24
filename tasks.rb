@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 def create_hpxmls
   this_dir = File.dirname(__FILE__)
   sample_files_dir = File.join(this_dir, 'workflow/sample_files')
@@ -1629,7 +1631,7 @@ def set_hpxml_windows(hpxml_file, hpxml)
     end
   elsif ['base-misc-defaults.xml'].include? hpxml_file
     for i in 0..3
-      hpxml.windows[i].id.gsub!('Operable', '')
+      hpxml.windows[i].id = hpxml.windows[i].id.gsub('Operable', '')
       hpxml.windows[i].area += hpxml.windows[i + 4].area
       hpxml.windows[i].interior_shading_factor_summer = nil
       hpxml.windows[i].interior_shading_factor_winter = nil
@@ -3285,6 +3287,7 @@ if ARGV[0].to_sym == :update_measures
           'Lint/DeprecatedClassMethods',
           'Lint/StringConversionInInterpolation',
           'Style/AndOr',
+          'Style/FrozenStringLiteralComment',
           'Style/HashSyntax',
           'Style/Next',
           'Style/NilComparison',

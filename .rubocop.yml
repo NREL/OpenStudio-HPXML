@@ -1,2 +1,4 @@
 Layout/EndOfLine:
   Enabled: false
+Style/FrozenStringLiteralComment:
+  AutoCorrect: true

@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 # see the URL below for information on how to write OpenStudio measures
 # http://nrel.github.io/OpenStudio-user-documentation/reference/measure_writing_guide/
 
@@ -713,7 +715,9 @@ class SimulationOutputReport < OpenStudio::Measure::ReportingMeasure
 
     def sanitize_string(s)
       [' ', ':', '/'].each do |c|
-        s.gsub!(c, '')
+        next unless s.include? c
+
+        s = s.gsub(c, '')
       end
       return s
     end
