@@ -1933,7 +1933,7 @@ def set_hpxml_cooling_systems(hpxml_file, hpxml)
                               cooling_capacity: 48000,
                               fraction_cool_load_served: 1,
                               cooling_efficiency_seer: 13,
-                              cooling_shr: 0.7,
+                              cooling_shr: 0.73,
                               compressor_type: HPXML::HVACCompressorTypeSingleStage)
   elsif ['base-hvac-air-to-air-heat-pump-1-speed.xml',
          'base-hvac-air-to-air-heat-pump-2-speed.xml',
@@ -1965,12 +1965,12 @@ def set_hpxml_cooling_systems(hpxml_file, hpxml)
   elsif ['base-hvac-furnace-gas-central-ac-2-speed.xml',
          'base-hvac-central-ac-only-2-speed.xml'].include? hpxml_file
     hpxml.cooling_systems[0].cooling_efficiency_seer = 18
-    hpxml.cooling_systems[0].cooling_shr = 0.7
+    hpxml.cooling_systems[0].cooling_shr = 0.73
     hpxml.cooling_systems[0].compressor_type = HPXML::HVACCompressorTypeTwoStage
   elsif ['base-hvac-furnace-gas-central-ac-var-speed.xml',
          'base-hvac-central-ac-only-var-speed.xml'].include? hpxml_file
     hpxml.cooling_systems[0].cooling_efficiency_seer = 24
-    hpxml.cooling_systems[0].cooling_shr = 0.7
+    hpxml.cooling_systems[0].cooling_shr = 0.78
     hpxml.cooling_systems[0].compressor_type = HPXML::HVACCompressorTypeVariableSpeed
   elsif ['base-hvac-furnace-gas-room-ac.xml',
          'base-hvac-room-ac-only.xml'].include? hpxml_file
@@ -1978,7 +1978,7 @@ def set_hpxml_cooling_systems(hpxml_file, hpxml)
     hpxml.cooling_systems[0].cooling_system_type = HPXML::HVACTypeRoomAirConditioner
     hpxml.cooling_systems[0].cooling_efficiency_seer = nil
     hpxml.cooling_systems[0].cooling_efficiency_eer = 8.5
-    hpxml.cooling_systems[0].cooling_shr = 0.7
+    hpxml.cooling_systems[0].cooling_shr = 0.65
     hpxml.cooling_systems[0].compressor_type = nil
   elsif ['base-hvac-evap-cooler-only-ducted.xml',
          'base-hvac-evap-cooler-furnace-gas.xml',
@@ -2005,7 +2005,7 @@ def set_hpxml_cooling_systems(hpxml_file, hpxml)
                               cooling_capacity: 9600,
                               fraction_cool_load_served: 0.2,
                               cooling_efficiency_eer: 8.5,
-                              cooling_shr: 0.7)
+                              cooling_shr: 0.65)
   elsif ['invalid_files/hvac-frac-load-served.xml'].include? hpxml_file
     hpxml.cooling_systems[0].fraction_cool_load_served += 0.2
   elsif ['invalid_files/hvac-dse-multiple-attached-cooling.xml'].include? hpxml_file
@@ -2056,7 +2056,7 @@ def set_hpxml_heat_pumps(hpxml_file, hpxml)
                          heating_efficiency_hspf: 7.7,
                          cooling_efficiency_seer: 13,
                          heating_capacity_17F: 42000 * 0.630, # Based on OAT slope of default curves
-                         cooling_shr: 0.7,
+                         cooling_shr: 0.73,
                          compressor_type: HPXML::HVACCompressorTypeSingleStage)
     if hpxml_file == 'base-hvac-central-ac-plus-air-to-air-heat-pump-heating.xml'
       hpxml.heat_pumps[0].fraction_cool_load_served = 0
@@ -2076,7 +2076,7 @@ def set_hpxml_heat_pumps(hpxml_file, hpxml)
                          heating_efficiency_hspf: 9.3,
                          cooling_efficiency_seer: 18,
                          heating_capacity_17F: 42000 * 0.590, # Based on OAT slope of default curves
-                         cooling_shr: 0.7,
+                         cooling_shr: 0.73,
                          compressor_type: HPXML::HVACCompressorTypeTwoStage)
   elsif ['base-hvac-air-to-air-heat-pump-var-speed.xml'].include? hpxml_file
     hpxml.heat_pumps.add(id: 'HeatPump',
@@ -2093,7 +2093,7 @@ def set_hpxml_heat_pumps(hpxml_file, hpxml)
                          heating_efficiency_hspf: 10,
                          cooling_efficiency_seer: 22,
                          heating_capacity_17F: 42000 * 0.640, # Based on OAT slope of default curves
-                         cooling_shr: 0.7,
+                         cooling_shr: 0.78,
                          compressor_type: HPXML::HVACCompressorTypeVariableSpeed)
   elsif ['base-hvac-ground-to-air-heat-pump.xml'].include? hpxml_file
     hpxml.heat_pumps.add(id: 'HeatPump',
@@ -2109,7 +2109,7 @@ def set_hpxml_heat_pumps(hpxml_file, hpxml)
                          fraction_cool_load_served: 1,
                          heating_efficiency_cop: 3.6,
                          cooling_efficiency_eer: 16.6,
-                         cooling_shr: 0.70)
+                         cooling_shr: 0.73)
   elsif ['base-hvac-mini-split-heat-pump-ducted.xml'].include? hpxml_file
     f = 1.0 - (1.0 - 0.25) / (47.0 + 5.0) * (47.0 - 17.0)
     hpxml.heat_pumps.add(id: 'HeatPump',
@@ -2126,7 +2126,7 @@ def set_hpxml_heat_pumps(hpxml_file, hpxml)
                          heating_efficiency_hspf: 10,
                          cooling_efficiency_seer: 19,
                          heating_capacity_17F: 52000 * f,
-                         cooling_shr: 0.7)
+                         cooling_shr: 0.73)
   elsif ['base-hvac-mini-split-heat-pump-ductless.xml'].include? hpxml_file
     hpxml.heat_pumps[0].distribution_system_idref = nil
   elsif ['base-hvac-mini-split-heat-pump-ductless-no-backup.xml'].include? hpxml_file
@@ -2156,7 +2156,7 @@ def set_hpxml_heat_pumps(hpxml_file, hpxml)
                          heating_efficiency_hspf: 7.7,
                          cooling_efficiency_seer: 13,
                          heating_capacity_17F: 4800 * 0.630, # Based on OAT slope of default curves
-                         cooling_shr: 0.7,
+                         cooling_shr: 0.73,
                          compressor_type: HPXML::HVACCompressorTypeSingleStage)
     hpxml.heat_pumps.add(id: 'HeatPump2',
                          distribution_system_idref: 'HVACDistribution6',
@@ -2171,7 +2171,7 @@ def set_hpxml_heat_pumps(hpxml_file, hpxml)
                          fraction_cool_load_served: 0.2,
                          heating_efficiency_cop: 3.6,
                          cooling_efficiency_eer: 16.6,
-                         cooling_shr: 0.70)
+                         cooling_shr: 0.73)
     f = 1.0 - (1.0 - 0.25) / (47.0 + 5.0) * (47.0 - 17.0)
     hpxml.heat_pumps.add(id: 'HeatPump3',
                          heat_pump_type: HPXML::HVACTypeHeatPumpMiniSplit,
@@ -2186,7 +2186,7 @@ def set_hpxml_heat_pumps(hpxml_file, hpxml)
                          heating_efficiency_hspf: 10,
                          cooling_efficiency_seer: 19,
                          heating_capacity_17F: 4800 * f,
-                         cooling_shr: 0.7)
+                         cooling_shr: 0.73)
   elsif ['invalid_files/hvac-distribution-multiple-attached-heating.xml'].include? hpxml_file
     hpxml.heat_pumps[0].distribution_system_idref = 'HVACDistribution3'
   elsif ['invalid_files/hvac-distribution-multiple-attached-cooling.xml'].include? hpxml_file
@@ -3181,21 +3181,21 @@ def set_hpxml_plug_loads(hpxml_file, hpxml)
 
     kWh_per_year, frac_sensible, frac_latent = MiscLoads.get_residual_mels_values(cfa)
     hpxml.plug_loads[0].kWh_per_year = kWh_per_year
-    hpxml.plug_loads[0].frac_sensible = frac_sensible.round(2)
-    hpxml.plug_loads[0].frac_latent = frac_latent.round(2)
+    hpxml.plug_loads[0].frac_sensible = frac_sensible.round(3)
+    hpxml.plug_loads[0].frac_latent = frac_latent.round(3)
 
     kWh_per_year, frac_sensible, frac_latent = MiscLoads.get_televisions_values(cfa, nbeds)
     hpxml.plug_loads[1].kWh_per_year = kWh_per_year
-    hpxml.plug_loads[1].frac_sensible = frac_sensible.round(2)
-    hpxml.plug_loads[1].frac_latent = frac_latent.round(2)
+    hpxml.plug_loads[1].frac_sensible = frac_sensible.round(3)
+    hpxml.plug_loads[1].frac_latent = frac_latent.round(3)
   end
 end
 
 def set_hpxml_misc_load_schedule(hpxml_file, hpxml)
   if ['base.xml'].include? hpxml_file
-    hpxml.set_misc_loads_schedule(weekday_fractions: '0.020, 0.020, 0.020, 0.020, 0.020, 0.034, 0.043, 0.085, 0.050, 0.030, 0.030, 0.041, 0.030, 0.025, 0.026, 0.026, 0.039, 0.042, 0.045, 0.070, 0.070, 0.073, 0.073, 0.066',
-                                  weekend_fractions: '0.020, 0.020, 0.020, 0.020, 0.020, 0.034, 0.043, 0.085, 0.050, 0.030, 0.030, 0.041, 0.030, 0.025, 0.026, 0.026, 0.039, 0.042, 0.045, 0.070, 0.070, 0.073, 0.073, 0.066',
-                                  monthly_multipliers: '1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0')
+    hpxml.set_misc_loads_schedule(weekday_fractions: '0.04, 0.037, 0.037, 0.036, 0.033, 0.036, 0.043, 0.047, 0.034, 0.023, 0.024, 0.025, 0.024, 0.028, 0.031, 0.032, 0.039, 0.053, 0.063, 0.067, 0.071, 0.069, 0.059, 0.05',
+                                  weekend_fractions: '0.04, 0.037, 0.037, 0.036, 0.033, 0.036, 0.043, 0.047, 0.034, 0.023, 0.024, 0.025, 0.024, 0.028, 0.031, 0.032, 0.039, 0.053, 0.063, 0.067, 0.071, 0.069, 0.059, 0.05',
+                                  monthly_multipliers: '1.248, 1.257, 0.993, 0.989, 0.993, 0.827, 0.821, 0.821, 0.827, 0.99, 0.987, 1.248')
   elsif ['base-misc-defaults.xml'].include? hpxml_file
     hpxml.misc_loads_schedule.weekday_fractions = nil
     hpxml.misc_loads_schedule.weekend_fractions = nil
