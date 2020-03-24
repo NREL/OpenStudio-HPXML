@@ -115,7 +115,6 @@ def create_hpxmls
     'base-dhw-tankless-oil.xml' => 'base.xml',
     'base-dhw-tankless-propane.xml' => 'base.xml',
     'base-dhw-tankless-wood.xml' => 'base.xml',
-    'base-dhw-temperature.xml' => 'base.xml',
     'base-dhw-uef.xml' => 'base.xml',
     'base-dhw-jacket-electric.xml' => 'base.xml',
     'base-dhw-jacket-gas.xml' => 'base-dhw-tank-gas.xml',
@@ -547,10 +546,10 @@ def set_hpxml_building_construction(hpxml_file, hpxml)
 end
 
 def set_hpxml_building_occupancy(hpxml_file, hpxml)
-  if ['base.xml'].include? hpxml_file
-    hpxml.building_occupancy.number_of_residents = hpxml.building_construction.number_of_bedrooms
-  elsif ['base-misc-defaults.xml'].include? hpxml_file
+  if ['base-misc-defaults.xml'].include? hpxml_file
     hpxml.building_occupancy.number_of_residents = nil
+  else
+    hpxml.building_occupancy.number_of_residents = hpxml.building_construction.number_of_bedrooms
   end
 end
 
@@ -2804,13 +2803,14 @@ def set_hpxml_water_heating_systems(hpxml_file, hpxml)
     hpxml.water_heating_systems[1].id = 'WaterHeater2'
   elsif ['base-enclosure-garage.xml'].include? hpxml_file
     hpxml.water_heating_systems[0].location = HPXML::LocationGarage
-  elsif ['base-dhw-temperature.xml'].include? hpxml_file
-    hpxml.water_heating_systems[0].temperature = 130.0
   elsif ['base-dhw-none.xml'].include? hpxml_file
     hpxml.water_heating_systems.clear()
-  elsif ['base-misc-defaults.xml'].include? hpxml_file
-    hpxml.water_heating_systems.each do |water_heating_system|
+  end
+  hpxml.water_heating_systems.each do |water_heating_system|
+    if ['base-misc-defaults.xml'].include? hpxml_file
       water_heating_system.temperature = nil
+    else
+      water_heating_system.temperature = Waterheater.get_default_hot_water_temperature(hpxml.header.eri_calculation_version)
     end
   end
 end
@@ -3274,6 +3274,7 @@ end
 if ARGV[0].to_sym == :update_measures
   require_relative 'HPXMLtoOpenStudio/resources/hpxml'
   require_relative 'HPXMLtoOpenStudio/resources/misc_loads'
+  require_relative 'HPXMLtoOpenStudio/resources/waterheater'
 
   # Prevent NREL error regarding U: drive when not VPNed in
   ENV['HOME'] = 'C:' if !ENV['HOME'].nil? && ENV['HOME'].start_with?('U:')
