@@ -211,8 +211,7 @@ class OSModel
     @eri_version = 'latest' if @eri_version.nil?
     @eri_version = Constants.ERIVersions[-1] if @eri_version == 'latest'
 
-    set_globals(runner)
-    set_defaults(runner)
+    set_defaults_and_globals(runner)
 
     # Simulation parameters
 
@@ -255,8 +254,7 @@ class OSModel
 
   private
 
-  def self.set_globals(runner)
-    # Global variables
+  def self.set_defaults_and_globals(runner)
     @cfa = @hpxml.building_construction.conditioned_floor_area
     @cfa_ag = @cfa
     @hpxml.slabs.each do |slab|
@@ -270,32 +268,25 @@ class OSModel
 
       @gfa += slab.area
     end
-    @infilvolume = get_infiltration_volume()
     @ncfl = @hpxml.building_construction.number_of_conditioned_floors
     @ncfl_ag = @hpxml.building_construction.number_of_conditioned_floors_above_grade
     @nbeds = @hpxml.building_construction.number_of_bedrooms
-    @has_uncond_bsmnt = @hpxml.has_space_type(HPXML::LocationBasementUnconditioned)
-    @has_vented_attic = @hpxml.has_space_type(HPXML::LocationAtticVented)
-    @has_vented_crawl = @hpxml.has_space_type(HPXML::LocationCrawlspaceVented)
     @min_neighbor_distance = get_min_neighbor_distance()
     @default_azimuths = get_default_azimuths()
-    @frac_window_area_operable = @hpxml.fraction_of_window_area_operable(Airflow.get_default_fraction_of_operable_window_area)
-    @cond_bsmnt_surfaces = [] # list of surfaces in conditioned basement, used for modification of some surface properties, eg. solar absorptance, view factor, etc.
-
-    @hvac_map = {} # mapping between HPXML HVAC systems and model objects
-    @dhw_map = {}  # mapping between HPXML Water Heating systems and model objects
 
     @use_only_ideal_air = false
     if not @hpxml.building_construction.use_only_ideal_air_system.nil?
       @use_only_ideal_air = @hpxml.building_construction.use_only_ideal_air_system
     end
 
+    # Initialize
     @total_frac_remaining_heat_load_served = 1.0
     @total_frac_remaining_cool_load_served = 1.0
-  end
+    @hvac_map = {} # mapping between HPXML HVAC systems and model objects
+    @dhw_map = {}  # mapping between HPXML Water Heating systems and model objects
+    @cond_bsmnt_surfaces = [] # list of surfaces in conditioned basement, used for modification of some surface properties, eg. solar absorptance, view factor, etc.
 
-  def self.set_defaults(runner)
-    # Misc
+    # Default Misc
     # 1. Simulation timestep
     # 2. Shelter coefficient
     # 3. Number of occupants
@@ -303,13 +294,11 @@ class OSModel
     @hpxml.site.shelter_coefficient = Airflow.get_default_shelter_coefficient() if @hpxml.site.shelter_coefficient.nil?
     @hpxml.building_occupancy.number_of_residents = Geometry.get_occupancy_default_num(@nbeds) if @hpxml.building_occupancy.number_of_residents.nil?
 
-    # Envelope
+    # Default Envelope
     # 1. Attic ventilation rate
     # 2. Crawlspace ventilation rate
-    # TODO: Neighbor building height
     # TODO: Infiltration volume
-    # TODO: Surface azimuths
-    if @has_vented_attic
+    if @hpxml.has_space_type(HPXML::LocationAtticVented)
       @hpxml.attics.each do |attic|
         next unless attic.attic_type == HPXML::AtticTypeVented
         next unless (attic.vented_attic_sla.nil? && attic.vented_attic_constant_ach.nil?)
@@ -317,7 +306,7 @@ class OSModel
         attic.vented_attic_sla = Airflow.get_default_vented_attic_sla()
       end
     end
-    if @has_vented_crawl
+    if @hpxml.has_space_type(HPXML::LocationCrawlspaceVented)
       @hpxml.foundations.each do |foundation|
         next unless foundation.foundation_type == HPXML::FoundationTypeCrawlspaceVented
         next unless foundation.vented_crawlspace_sla.nil?
@@ -325,11 +314,31 @@ class OSModel
         foundation.vented_crawlspace_sla = Airflow.get_default_vented_crawl_sla()
       end
     end
+    measurements = []
+    infilvolume = nil
+    @hpxml.air_infiltration_measurements.each do |measurement|
+      is_ach50 = ((measurement.house_pressure == 50) && (measurement.unit_of_measure == HPXML::UnitsACH))
+      is_cfm50 = ((measurement.house_pressure == 50) && (measurement.unit_of_measure == HPXML::UnitsCFM))
+      is_constant_nach = !measurement.constant_ach_natural.nil?
+      next unless (is_ach50 || is_cfm50 || is_constant_nach)
 
-    # Windows
+      measurements << measurement
+      infilvolume = measurement.infiltration_volume unless infilvolume.nil?
+    end
+    if infilvolume.nil?
+      @infilvolume = @hpxml.building_construction.conditioned_building_volume
+      measurements.each do |measurement|
+        measurement.infiltration_volume = @infilvolume
+      end
+    else
+      @infilvolume = infilvolume
+    end
+
+    # Default Windows
     # 1. Interior shading coefficients
-    # TODO: Operable
+    # 2. Fraction of operable area
     default_shade_summer, default_shade_winter = Constructions.get_default_interior_shading_factors()
+    default_operable_frac = Airflow.get_default_fraction_of_operable_window_area()
     @hpxml.windows.each do |window|
       if window.interior_shading_factor_summer.nil?
         window.interior_shading_factor_summer = default_shade_summer
@@ -337,13 +346,24 @@ class OSModel
       if window.interior_shading_factor_winter.nil?
         window.interior_shading_factor_winter = default_shade_winter
       end
-    end
+      next unless window.operable.nil?
+      # Split into operable/inoperable windows
+      @hpxml.windows << window.dup
+      @hpxml.windows[-1].id += 'Inoperable'
+      @hpxml.windows[-1].operable = false
+      @hpxml.windows[-1].area = (@hpxml.windows[-1].area * (1.0 - default_operable_frac)).round(2)
 
-    # HVAC
+      window.id += 'Operable'
+      window.operable = true
+      window.area = (window.area * default_operable_frac).round(2)
+    end
+    @frac_window_area_operable = @hpxml.fraction_of_window_area_operable()
+
+    # Default HVAC
     # 1. Compressor Type
     # 2. Sensible Heat Ratio
     # TODO: HeatingCapacity17F
-    # TODO: Electric Auxiliary Energy (EAE)
+    # TODO: Electric Auxiliary Energy (EAE; requires autosized HVAC capacity)
     @hpxml.cooling_systems.each do |cooling_system|
       next unless cooling_system.cooling_system_type == HPXML::HVACTypeCentralAirConditioner
       if cooling_system.compressor_type.nil?
@@ -366,20 +386,27 @@ class OSModel
       end
     end
 
-    # Water heaters
+    # Default Water Heaters
     # 1. Setpoint temperature
     # 2. Tankless cycle derate (performance adjustment)
-    # TODO: Indirect water heater standby loss
+    # 3. Indirect water heater standby loss
     @hpxml.water_heating_systems.each do |water_heating_system|
       if water_heating_system.temperature.nil?
         water_heating_system.temperature = Waterheater.get_default_hot_water_temperature(@eri_version)
       end
-      if (water_heating_system.water_heater_type == HPXML::WaterHeaterTypeTankless) && water_heating_system.performance_adjustment.nil?
+      if water_heating_system.performance_adjustment.nil? && (water_heating_system.water_heater_type == HPXML::WaterHeaterTypeTankless)
         water_heating_system.performance_adjustment = Waterheater.get_tankless_cycling_derate()
       end
+      next unless water_heating_system.standby_loss.nil? && ([HPXML::WaterHeaterTypeCombiStorage].include? water_heating_system.water_heater_type)
+      # Use equation fit from AHRI database
+      # calculate independent variable SurfaceArea/vol(physically linear to standby_loss/skin_u under test condition) to fit the linear equation from AHRI database
+      act_vol = Waterheater.calc_storage_tank_actual_vol(water_heating_system.tank_volume, nil)
+      surface_area = Waterheater.calc_tank_areas(act_vol)[0]
+      sqft_by_gal = surface_area / act_vol # sqft/gal
+      water_heating_system.standby_loss = (2.9721 * sqft_by_gal - 0.4732).round(3) # linear equation assuming a constant u, F/hr
     end
 
-    # Ceiling fans
+    # Default Ceiling Fans
     # 1. Efficiency
     # 2. Quantity
     if @hpxml.ceiling_fans.size > 0
@@ -393,7 +420,10 @@ class OSModel
       end
     end
 
-    # Plug loads
+    # Default Plug Loads
+    # 1. Kwh/year
+    # 2. Frac sensible/latent
+    # 3. Schedules
     @hpxml.plug_loads.each do |plug_load|
       if plug_load.plug_load_type == HPXML::PlugLoadTypeOther
         default_annual_kwh, default_sens_frac, default_lat_frac = MiscLoads.get_residual_mels_values(@cfa)
@@ -413,8 +443,6 @@ class OSModel
         end
       end
     end
-
-    # Plug loads: Schedules
     if @hpxml.misc_loads_schedule.weekday_fractions.nil?
       @hpxml.misc_loads_schedule.weekday_fractions = '0.04, 0.037, 0.037, 0.036, 0.033, 0.036, 0.043, 0.047, 0.034, 0.023, 0.024, 0.025, 0.024, 0.028, 0.031, 0.032, 0.039, 0.053, 0.063, 0.067, 0.071, 0.069, 0.059, 0.05'
     end
@@ -2108,6 +2136,7 @@ class OSModel
     water_heater_spaces = {}
     combi_sys_id_list = []
     avg_setpoint_temp = 0.0 # Weighted average by fraction DHW load served
+    has_uncond_bsmnt = @hpxml.has_space_type(HPXML::LocationBasementUnconditioned)
     if @hpxml.water_heating_systems.size > 0
       @hpxml.water_heating_systems.each do |water_heating_system|
         sys_id = water_heating_system.id
@@ -2143,7 +2172,7 @@ class OSModel
         end
         solar_fraction = 0.0 if solar_fraction.nil?
 
-        ec_adj = HotWaterAndAppliances.get_dist_energy_consumption_adjustment(@has_uncond_bsmnt, @cfa, @ncfl,
+        ec_adj = HotWaterAndAppliances.get_dist_energy_consumption_adjustment(has_uncond_bsmnt, @cfa, @ncfl,
                                                                               dist_type, recirc_control_type,
                                                                               pipe_r, std_pipe_length, recirc_loop_length)
 
@@ -2204,7 +2233,7 @@ class OSModel
     end
 
     HotWaterAndAppliances.apply(model, weather, @living_space,
-                                @cfa, @nbeds, @ncfl, @has_uncond_bsmnt, avg_setpoint_temp,
+                                @cfa, @nbeds, @ncfl, has_uncond_bsmnt, avg_setpoint_temp,
                                 cw_mef, cw_ler, cw_elec_rate, cw_gas_rate,
                                 cw_agc, cw_cap, cw_space, cd_fuel, cd_ef, cd_control,
                                 cd_space, dw_ef, dw_cap, fridge_annual_kwh, fridge_space,
@@ -2906,7 +2935,7 @@ class OSModel
 
     vented_attic_sla = nil
     vented_attic_const_ach = nil
-    if @has_vented_attic
+    if @hpxml.has_space_type(HPXML::LocationAtticVented)
       @hpxml.attics.each do |attic|
         next unless attic.attic_type == HPXML::AtticTypeVented
 
@@ -2918,7 +2947,7 @@ class OSModel
     end
 
     vented_crawl_sla = nil
-    if @has_vented_crawl
+    if @hpxml.has_space_type(HPXML::LocationCrawlspaceVented)
       @hpxml.foundations.each do |foundation|
         next unless foundation.foundation_type == HPXML::FoundationTypeCrawlspaceVented
 
@@ -4142,22 +4171,6 @@ class OSModel
     end
 
     return
-  end
-
-  def self.get_infiltration_volume()
-    infilvolume = nil
-    @hpxml.air_infiltration_measurements.each do |measurement|
-      is_ach50 = ((measurement.house_pressure == 50) && (measurement.unit_of_measure == HPXML::UnitsACH))
-      is_cfm50 = ((measurement.house_pressure == 50) && (measurement.unit_of_measure == HPXML::UnitsCFM))
-      is_constant_nach = !measurement.constant_ach_natural.nil?
-      next unless (is_ach50 || is_cfm50 || is_constant_nach)
-
-      infilvolume = measurement.infiltration_volume
-      if infilvolume.nil?
-        infilvolume = @hpxml.building_construction.conditioned_building_volume
-      end
-    end
-    return infilvolume
   end
 
   def self.get_min_neighbor_distance()

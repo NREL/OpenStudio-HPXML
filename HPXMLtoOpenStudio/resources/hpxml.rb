@@ -271,24 +271,14 @@ class HPXML < Object
     return fuel_fracs.key(fuel_fracs.values.max)
   end
 
-  def fraction_of_window_area_operable(default_frac_for_unknown_operable)
+  def fraction_of_window_area_operable()
     # Calculates the fraction of window area that is operable.
-    window_area_total = 0.0
-    window_area_operable = 0.0
-    @windows.each do |window|
-      window_area_total += window.area
-      if window.operable.nil?
-        window_area_operable += (window.area * default_frac_for_unknown_operable)
-      elsif window.operable
-        window_area_operable += window.area
-      end
-    end
+    window_area_total = @windows.map { |w| w.area }.inject(0, :+)
+    window_area_operable = @windows.select { |w| w.operable }.map { |w| w.area }.inject(0, :+)
     if window_area_total <= 0
-      frac_window_area_operable = 0.0
-    else
-      frac_window_area_operable = window_area_operable / window_area_total
+      return 0.0
     end
-    return frac_window_area_operable
+    return window_area_operable / window_area_total
   end
 
   def to_rexml()
