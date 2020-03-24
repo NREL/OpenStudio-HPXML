@@ -228,6 +228,7 @@ class OSModel
     @has_vented_crawl = @hpxml.has_space_type(HPXML::LocationCrawlspaceVented)
     @min_neighbor_distance = get_min_neighbor_distance()
     @default_azimuths = get_default_azimuths()
+    @frac_window_area_operable = get_frac_window_area_operable()
     @cond_bsmnt_surfaces = [] # list of surfaces in conditioned basement, used for modification of some surface properties, eg. solar absorptance, view factor, etc.
 
     @hvac_map = {} # mapping between HPXML HVAC systems and model objects
@@ -913,24 +914,28 @@ class OSModel
   end
 
   def self.get_default_azimuths()
-    azimuth_counts = {}
+    # Returns a list of four azimuths (facing each direction). Determined based
+    # on the primary azimuth, as defined by the azimuth with the largest surface
+    # area, plus azimuths that are offset by 90/180/270 degrees. Used for
+    # surfaces that may not have an azimuth defined (e.g., walls).
+    azimuth_areas = {}
     (@hpxml.roofs + @hpxml.rim_joists + @hpxml.walls + @hpxml.foundation_walls +
      @hpxml.windows + @hpxml.skylights + @hpxml.doors).each do |surface|
       az = surface.azimuth
       next if az.nil?
 
-      azimuth_counts[az] = 0 if azimuth_counts[az].nil?
-      azimuth_counts[az] += 1
+      azimuth_areas[az] = 0 if azimuth_areas[az].nil?
+      azimuth_areas[az] += surface.area
     end
-    if azimuth_counts.empty?
-      default_azimuth = 0
+    if azimuth_areas.empty?
+      primary_azimuth = 0
     else
-      default_azimuth = azimuth_counts.max_by { |k, v| v }[0]
+      primary_azimuth = azimuth_areas.max_by { |k, v| v }[0]
     end
-    return [default_azimuth,
-            sanitize_azimuth(default_azimuth + 90),
-            sanitize_azimuth(default_azimuth + 180),
-            sanitize_azimuth(default_azimuth + 270)]
+    return [primary_azimuth,
+            sanitize_azimuth(primary_azimuth + 90),
+            sanitize_azimuth(primary_azimuth + 180),
+            sanitize_azimuth(primary_azimuth + 270)].sort
   end
 
   def self.sanitize_azimuth(azimuth)
@@ -942,6 +947,24 @@ class OSModel
       azimuth -= 360
     end
     return azimuth
+  end
+
+  def self.get_frac_window_area_operable()
+    frac_window_area_operable = @hpxml.fraction_of_window_area_operable(Airflow.get_default_fraction_of_operable_window_area)
+
+    # Now that we have it, further collapse windows irrespective of their
+    # operable property. For example, if there are two identical windows that
+    # only otherwise differ based on their operable property, we will combine
+    # them so as to model a single window in EnergyPlus for reasons of speed.
+    @hpxml.collapse_enclosure_surfaces([:operable])
+
+    # Finally reset the operable property since it is now arbitrary and we
+    # don't want to accidentally use it.
+    @hpxml.windows.each do |window|
+      window.operable = nil
+    end
+
+    return frac_window_area_operable
   end
 
   def self.create_or_get_space(model, spaces, spacetype)
@@ -2361,8 +2384,12 @@ class OSModel
       end
 
       heat_capacity_btuh_17F = heat_pump.heating_capacity_17F
-      if (heat_capacity_btuh == Constants.SizingAuto) && (not heat_capacity_btuh_17F.nil?)
-        fail "HeatPump '#{heat_pump.id}' has HeatingCapacity17F provided but heating capacity is auto-sized."
+      if not heat_capacity_btuh_17F.nil?
+        if heat_capacity_btuh == Constants.SizingAuto
+          fail "HeatPump '#{heat_pump.id}' has HeatingCapacity17F provided but heating capacity is auto-sized."
+        elsif heat_capacity_btuh == 0.0
+          heat_capacity_btuh_17F = nil
+        end
       end
 
       load_frac_heat = heat_pump.fraction_heat_load_served
@@ -2849,15 +2876,7 @@ class OSModel
                              vented_attic_sla, unvented_attic_sla, vented_attic_const_ach, unconditioned_basement_ach, has_flue_chimney, terrain)
 
     # Natural Ventilation
-    frac_window_area_operable = @hpxml.building_construction.fraction_of_operable_window_area
-    if frac_window_area_operable.nil?
-      frac_window_area_operable = Airflow.get_default_fraction_of_operable_window_area()
-    end
-    if (frac_window_area_operable < 0) || (frac_window_area_operable > 1)
-      fail "Fraction window area operable (#{frac_window_area_operable}) must be between 0 and 1."
-    end
-
-    nv_frac_window_area_open = frac_window_area_operable * 0.20 # Assume 20% of operable window area is open
+    nv_frac_window_area_open = @frac_window_area_operable * 0.20 # Assume 20% of operable window area is open
     nv_num_days_per_week = 7
     nv_max_oa_hr = 0.0115
     nv_max_oa_rh = 0.7
