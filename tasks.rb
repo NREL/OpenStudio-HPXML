@@ -546,10 +546,10 @@ def set_hpxml_building_construction(hpxml_file, hpxml)
 end
 
 def set_hpxml_building_occupancy(hpxml_file, hpxml)
-  if ['base.xml'].include? hpxml_file
-    hpxml.building_occupancy.number_of_residents = hpxml.building_construction.number_of_bedrooms
-  elsif ['base-misc-defaults.xml'].include? hpxml_file
+  if ['base-misc-defaults.xml'].include? hpxml_file
     hpxml.building_occupancy.number_of_residents = nil
+  else
+    hpxml.building_occupancy.number_of_residents = hpxml.building_construction.number_of_bedrooms
   end
 end
 
