@@ -1372,7 +1372,7 @@ class HPXMLTest < MiniTest::Test
           next if (result_base == 0.0) && (result == 0.0)
 
           _display_result_epsilon(xml, result_base, result, k)
-          assert_in_epsilon(result_base, result, 0.01)
+          assert_in_epsilon(result_base, result, 0.02)
         end
       end
     end
