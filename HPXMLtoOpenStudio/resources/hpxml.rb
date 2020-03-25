@@ -271,24 +271,14 @@ class HPXML < Object
     return fuel_fracs.key(fuel_fracs.values.max)
   end
 
-  def fraction_of_window_area_operable(default_frac_for_unknown_operable)
+  def fraction_of_window_area_operable()
     # Calculates the fraction of window area that is operable.
-    window_area_total = 0.0
-    window_area_operable = 0.0
-    @windows.each do |window|
-      window_area_total += window.area
-      if window.operable.nil?
-        window_area_operable += (window.area * default_frac_for_unknown_operable)
-      elsif window.operable
-        window_area_operable += window.area
-      end
-    end
+    window_area_total = @windows.map { |w| w.area }.inject(0, :+)
+    window_area_operable = @windows.select { |w| w.operable }.map { |w| w.area }.inject(0, :+)
     if window_area_total <= 0
-      frac_window_area_operable = 0.0
-    else
-      frac_window_area_operable = window_area_operable / window_area_total
+      return 0.0
     end
-    return frac_window_area_operable
+    return window_area_operable / window_area_total
   end
 
   def to_rexml()
@@ -1836,6 +1826,12 @@ class HPXML < Object
           fail "For Window '#{@id}', overhangs distance to bottom (#{@overhangs_distance_to_bottom_of_window}) must be greater than distance to top (#{@overhangs_distance_to_top_of_window})."
         end
       end
+      # TODO: Remove this error when we can support it w/ EnergyPlus
+      if (not @interior_shading_factor_summer.nil?) && (not @interior_shading_factor_winter.nil?)
+        if @interior_shading_factor_summer > @interior_shading_factor_winter
+          fail "SummerShadingCoefficient (#{interior_shading_factor_summer}) must be less than or equal to WinterShadingCoefficient (#{interior_shading_factor_winter}) for window '#{@id}'."
+        end
+      end
 
       return errors
     end
@@ -2498,7 +2494,7 @@ class HPXML < Object
       super(*args)
     end
     ATTRS = [:id, :distribution_system_type, :distribution_system_type, :annual_heating_dse,
-             :annual_cooling_dse, :duct_system_sealed]
+             :annual_cooling_dse, :duct_system_sealed, :duct_leakage_testing_exemption]
     attr_accessor(*ATTRS)
     attr_reader(:duct_leakage_measurements, :ducts)
 
@@ -2571,6 +2567,9 @@ class HPXML < Object
 
       @duct_leakage_measurements.to_rexml(air_distribution)
       @ducts.to_rexml(air_distribution)
+
+      HPXML::add_extension(parent: air_distribution,
+                           extensions: { 'DuctLeakageTestingExemption' => HPXML::to_bool_or_nil(@duct_leakage_testing_exemption) })
     end
 
     def from_rexml(hvac_distribution)
@@ -2584,6 +2583,7 @@ class HPXML < Object
       @annual_heating_dse = HPXML::to_float_or_nil(XMLHelper.get_value(hvac_distribution, 'AnnualHeatingDistributionSystemEfficiency'))
       @annual_cooling_dse = HPXML::to_float_or_nil(XMLHelper.get_value(hvac_distribution, 'AnnualCoolingDistributionSystemEfficiency'))
       @duct_system_sealed = HPXML::to_bool_or_nil(XMLHelper.get_value(hvac_distribution, 'HVACDistributionImprovement/DuctSystemSealed'))
+      @duct_leakage_testing_exemption = HPXML::to_bool_or_nil(XMLHelper.get_value(hvac_distribution, 'DistributionSystemType/AirDistribution/extension/DuctLeakageTestingExemption'))
 
       @duct_leakage_measurements.from_rexml(hvac_distribution)
       @ducts.from_rexml(hvac_distribution)
@@ -3717,6 +3717,7 @@ class HPXML < Object
 
   def delete_partition_surfaces()
     (@rim_joists + @walls + @foundation_walls + @frame_floors).reverse_each do |surface|
+      next if surface.interior_adjacent_to.nil? || surface.exterior_adjacent_to.nil?
       next unless surface.interior_adjacent_to == surface.exterior_adjacent_to
 
       surface.delete
