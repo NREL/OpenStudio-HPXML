@@ -542,6 +542,9 @@ def set_hpxml_building_construction(hpxml_file, hpxml)
     hpxml.building_construction.number_of_conditioned_floors_above_grade += 1
     hpxml.building_construction.conditioned_floor_area += 1350
     hpxml.building_construction.conditioned_building_volume += 1350 * 8
+  elsif ['base-misc-defaults.xml'].include? hpxml_file
+    hpxml.building_construction.conditioned_building_volume = nil
+    hpxml.building_construction.average_ceiling_height = 8
   end
 end
 
@@ -2973,6 +2976,17 @@ def set_hpxml_pv_systems(hpxml_file, hpxml)
                          max_power_output: 1500,
                          inverter_efficiency: 0.96,
                          system_losses_fraction: 0.14)
+  elsif ['base-misc-defaults.xml'].include? hpxml_file
+    hpxml.pv_systems.add(id: 'PVSystem',
+                         module_type: HPXML::PVModuleTypeStandard,
+                         location: HPXML::LocationRoof,
+                         tracking: HPXML::PVTrackingTypeFixed,
+                         array_azimuth: 180,
+                         array_tilt: 20,
+                         max_power_output: 4000,
+                         inverter_efficiency: nil,
+                         system_losses_fraction: nil,
+                         year_modules_manufactured: 2015)
   end
 end
 
@@ -3000,6 +3014,14 @@ def set_hpxml_clothes_washer(hpxml_file, hpxml)
     hpxml.clothes_washers[0].location = HPXML::LocationGarage
   elsif ['invalid_files/clothes-washer-location-other.xml'].include? hpxml_file
     hpxml.clothes_washers[0].location = 'other'
+  elsif ['base-misc-defaults.xml'].include? hpxml_file
+    hpxml.clothes_washers[0].modified_energy_factor = nil
+    hpxml.clothes_washers[0].integrated_modified_energy_factor = nil
+    hpxml.clothes_washers[0].rated_annual_kwh = nil
+    hpxml.clothes_washers[0].label_electric_rate = nil
+    hpxml.clothes_washers[0].label_gas_rate = nil
+    hpxml.clothes_washers[0].label_annual_gas_cost = nil
+    hpxml.clothes_washers[0].capacity = nil
   end
 end
 
@@ -3050,6 +3072,9 @@ def set_hpxml_clothes_dryer(hpxml_file, hpxml)
     hpxml.clothes_dryers[0].location = HPXML::LocationGarage
   elsif ['invalid_files/clothes-dryer-location-other.xml'].include? hpxml_file
     hpxml.clothes_dryers[0].location = 'other'
+  elsif ['base-misc-defaults.xml'].include? hpxml_file
+    hpxml.clothes_dryers[0].energy_factor = nil
+    hpxml.clothes_dryers[0].combined_energy_factor = nil
   end
 end
 
@@ -3065,6 +3090,9 @@ def set_hpxml_dishwasher(hpxml_file, hpxml)
     hpxml.dishwashers.add(id: 'Dishwasher',
                           energy_factor: 0.5,
                           place_setting_capacity: 12)
+  elsif ['base-misc-defaults.xml'].include? hpxml_file
+    hpxml.dishwashers[0].rated_annual_kwh = nil
+    hpxml.dishwashers[0].energy_factor = nil
   end
 end
 
@@ -3086,6 +3114,9 @@ def set_hpxml_refrigerator(hpxml_file, hpxml)
     hpxml.refrigerators[0].location = HPXML::LocationGarage
   elsif ['invalid_files/refrigerator-location-other.xml'].include? hpxml_file
     hpxml.refrigerators[0].location = 'other'
+  elsif ['base-misc-defaults.xml'].include? hpxml_file
+    hpxml.refrigerators[0].rated_annual_kwh = nil
+    hpxml.refrigerators[0].adjusted_annual_kwh = nil
   end
 end
 
@@ -3107,6 +3138,8 @@ def set_hpxml_cooking_range(hpxml_file, hpxml)
   elsif ['base-appliances-wood.xml'].include? hpxml_file
     hpxml.cooking_ranges[0].fuel_type = HPXML::FuelTypeWood
     hpxml.cooking_ranges[0].is_induction = false
+  elsif ['base-misc-defaults.xml'].include? hpxml_file
+    hpxml.cooking_ranges[0].is_induction = nil
   end
 end
 
@@ -3116,6 +3149,8 @@ def set_hpxml_oven(hpxml_file, hpxml)
                     is_convection: false)
   elsif ['base-appliances-none.xml'].include? hpxml_file
     hpxml.ovens.clear()
+  elsif ['base-misc-defaults.xml'].include? hpxml_file
+    hpxml.ovens[0].is_convection = nil
   end
 end
 
@@ -3158,7 +3193,9 @@ def set_hpxml_ceiling_fans(hpxml_file, hpxml)
                            efficiency: 100,
                            quantity: 2)
   elsif ['base-misc-defaults.xml'].include? hpxml_file
-    hpxml.ceiling_fans.add(id: 'CeilingFan')
+    hpxml.ceiling_fans.add(id: 'CeilingFan',
+                           efficiency: nil,
+                           quantity: nil)
   end
 end
 
