@@ -176,7 +176,6 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
       runner.registerError("#{hpxml_path}: #{error}")
       is_valid = false
     end
-    runner.registerInfo("#{hpxml_path}: Validated against HPXML schema.")
 
     # Validate input HPXML against EnergyPlus Use Case
     errors = EnergyPlusValidator.run_validator(hpxml.doc)
@@ -184,7 +183,13 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
       runner.registerError("#{hpxml_path}: #{error}")
       is_valid = false
     end
-    runner.registerInfo("#{hpxml_path}: Validated against HPXML EnergyPlus Use Case.")
+
+    # Check for additional errors
+    errors = hpxml.check_for_errors()
+    errors.each do |error|
+      runner.registerError("#{hpxml_path}: #{error}")
+      is_valid = false
+    end
 
     return is_valid
   end
@@ -223,6 +228,7 @@ class OSModel
     @has_vented_crawl = @hpxml.has_space_type(HPXML::LocationCrawlspaceVented)
     @min_neighbor_distance = get_min_neighbor_distance()
     @default_azimuths = get_default_azimuths()
+    @frac_window_area_operable = get_frac_window_area_operable()
     @cond_bsmnt_surfaces = [] # list of surfaces in conditioned basement, used for modification of some surface properties, eg. solar absorptance, view factor, etc.
 
     @hvac_map = {} # mapping between HPXML HVAC systems and model objects
@@ -281,13 +287,8 @@ class OSModel
     sim = model.getSimulationControl
     sim.setRunSimulationforSizingPeriods(false)
 
-    valid_tsteps = [60, 30, 20, 15, 12, 10, 6, 5, 4, 3, 2, 1]
     timestep = @hpxml.header.timestep
     timestep = 60 if timestep.nil?
-    if not valid_tsteps.include? timestep
-      fail "Timestep (#{timestep}) must be one of: #{valid_tsteps.join(', ')}."
-    end
-
     tstep = model.getTimestep
     tstep.setNumberOfTimestepsPerHour(60 / timestep)
 
@@ -913,24 +914,28 @@ class OSModel
   end
 
   def self.get_default_azimuths()
-    azimuth_counts = {}
+    # Returns a list of four azimuths (facing each direction). Determined based
+    # on the primary azimuth, as defined by the azimuth with the largest surface
+    # area, plus azimuths that are offset by 90/180/270 degrees. Used for
+    # surfaces that may not have an azimuth defined (e.g., walls).
+    azimuth_areas = {}
     (@hpxml.roofs + @hpxml.rim_joists + @hpxml.walls + @hpxml.foundation_walls +
      @hpxml.windows + @hpxml.skylights + @hpxml.doors).each do |surface|
       az = surface.azimuth
       next if az.nil?
 
-      azimuth_counts[az] = 0 if azimuth_counts[az].nil?
-      azimuth_counts[az] += 1
+      azimuth_areas[az] = 0 if azimuth_areas[az].nil?
+      azimuth_areas[az] += surface.area
     end
-    if azimuth_counts.empty?
-      default_azimuth = 0
+    if azimuth_areas.empty?
+      primary_azimuth = 0
     else
-      default_azimuth = azimuth_counts.max_by { |k, v| v }[0]
+      primary_azimuth = azimuth_areas.max_by { |k, v| v }[0]
     end
-    return [default_azimuth,
-            sanitize_azimuth(default_azimuth + 90),
-            sanitize_azimuth(default_azimuth + 180),
-            sanitize_azimuth(default_azimuth + 270)]
+    return [primary_azimuth,
+            sanitize_azimuth(primary_azimuth + 90),
+            sanitize_azimuth(primary_azimuth + 180),
+            sanitize_azimuth(primary_azimuth + 270)].sort
   end
 
   def self.sanitize_azimuth(azimuth)
@@ -942,6 +947,24 @@ class OSModel
       azimuth -= 360
     end
     return azimuth
+  end
+
+  def self.get_frac_window_area_operable()
+    frac_window_area_operable = @hpxml.fraction_of_window_area_operable(Airflow.get_default_fraction_of_operable_window_area)
+
+    # Now that we have it, further collapse windows irrespective of their
+    # operable property. For example, if there are two identical windows that
+    # only otherwise differ based on their operable property, we will combine
+    # them so as to model a single window in EnergyPlus for reasons of speed.
+    @hpxml.collapse_enclosure_surfaces([:operable])
+
+    # Finally reset the operable property since it is now arbitrary and we
+    # don't want to accidentally use it.
+    @hpxml.windows.each do |window|
+      window.operable = nil
+    end
+
+    return frac_window_area_operable
   end
 
   def self.create_or_get_space(model, spaces, spacetype)
@@ -1297,9 +1320,6 @@ class OSModel
       slabs.each do |slab|
         slab_exp_perims[slab] = slab.exposed_perimeter
         slab_areas[slab] = slab.area
-        if slab_exp_perims[slab] <= 0
-          fail "Exposed perimeter for Slab '#{slab.id}' must be greater than zero."
-        end
       end
       total_slab_exp_perim = slab_exp_perims.values.inject(0, :+)
       total_slab_area = slab_areas.values.inject(0, :+)
@@ -1683,10 +1703,6 @@ class OSModel
         overhang_depth = window.overhangs_depth
         overhang_distance_to_top = window.overhangs_distance_to_top_of_window
         overhang_distance_to_bottom = window.overhangs_distance_to_bottom_of_window
-        if overhang_distance_to_bottom <= overhang_distance_to_top
-          fail "For Window '#{window.id}', overhangs distance to bottom (#{overhang_distance_to_bottom}) must be greater than distance to top (#{overhang_distance_to_top})."
-        end
-
         window_height = overhang_distance_to_bottom - overhang_distance_to_top
       end
 
@@ -1977,7 +1993,6 @@ class OSModel
     end
 
     # Water Heater
-    related_hvac_idref_list = [] # list of heating systems referred in water heating system "RelatedHVACSystem" element
     dhw_loop_fracs = {}
     water_heater_spaces = {}
     combi_sys_id_list = []
@@ -1998,16 +2013,8 @@ class OSModel
         fuel = water_heating_system.fuel_type
         jacket_r = water_heating_system.jacket_r_value
 
-        uses_desuperheater = water_heating_system.uses_desuperheater
-        relatedhvac = water_heating_system.related_hvac_idref
-
-        if uses_desuperheater
-          if not related_hvac_idref_list.include? relatedhvac
-            related_hvac_idref_list << relatedhvac
-            desuperheater_clg_coil = get_desuperheatercoil(@hvac_map, relatedhvac, sys_id)
-          else
-            fail "RelatedHVACSystem '#{relatedhvac}' for water heating system '#{sys_id}' is already attached to another water heating system."
-          end
+        if water_heating_system.uses_desuperheater
+          desuperheater_clg_coil = get_desuperheatercoil(@hvac_map, water_heating_system.related_hvac_idref, sys_id)
         end
 
         ef = water_heating_system.energy_factor
@@ -2066,24 +2073,12 @@ class OSModel
         elsif (wh_type == HPXML::WaterHeaterTypeCombiStorage) || (wh_type == HPXML::WaterHeaterTypeCombiTankless)
 
           combi_sys_id_list << sys_id
-          heating_source_id = water_heating_system.related_hvac_idref
           standby_loss = water_heating_system.standby_loss
           vol = water_heating_system.tank_volume
-          if not related_hvac_idref_list.include? heating_source_id
-            related_hvac_idref_list << heating_source_id
-            boiler_sys = get_boiler_and_plant_loop(@hvac_map, heating_source_id, sys_id)
+          boiler_afue = water_heating_system.related_hvac_system.heating_efficiency_afue
+          boiler_fuel_type = water_heating_system.related_hvac_system.heating_system_fuel
 
-            boiler_afue = nil
-            boiler_fuel_type = nil
-            @hpxml.heating_systems.each do |heating_system|
-              next unless heating_system.id == water_heating_system.related_hvac_idref
-
-              boiler_afue = heating_system.heating_efficiency_afue
-              boiler_fuel_type = heating_system.heating_system_fuel
-            end
-          else
-            fail "RelatedHVACSystem '#{heating_source_id}' for water heating system '#{sys_id}' is already attached to another water heating system."
-          end
+          boiler_sys = get_boiler_and_plant_loop(@hvac_map, water_heating_system.related_hvac_idref, sys_id)
           @dhw_map[sys_id] << boiler_sys['boiler']
 
           Waterheater.apply_combi(model, runner, space, vol, setpoint_temp, ec_adj, @nbeds,
@@ -2174,8 +2169,6 @@ class OSModel
         end
       end
       fail "RelatedHVACSystem '#{relatedhvac}' for water heating system '#{wh_id}' is not currently supported for desuperheaters."
-    else
-      fail "RelatedHVACSystem '#{relatedhvac}' not found for water heating system '#{wh_id}'."
     end
   end
 
@@ -2212,7 +2205,7 @@ class OSModel
       load_frac = cooling_system.fraction_cool_load_served
       sequential_load_frac, @total_frac_remaining_cool_load_served, load_frac = calc_sequential_load_fraction(load_frac, @total_frac_remaining_cool_load_served)
 
-      check_distribution_system(cooling_system.distribution_system_idref, cooling_system.id, clg_type)
+      check_distribution_system(cooling_system.distribution_system, clg_type)
 
       @hvac_map[cooling_system.id] = []
 
@@ -2302,7 +2295,7 @@ class OSModel
       @hpxml.heating_systems.each do |heating_system|
         htg_type = heating_system.heating_system_type
 
-        check_distribution_system(heating_system.distribution_system_idref, heating_system.id, htg_type)
+        check_distribution_system(heating_system.distribution_system, htg_type)
 
         attached_clg_system = get_attached_clg_system(heating_system)
 
@@ -2387,7 +2380,7 @@ class OSModel
     @hpxml.heat_pumps.each do |heat_pump|
       hp_type = heat_pump.heat_pump_type
 
-      check_distribution_system(heat_pump.distribution_system_idref, heat_pump.id, hp_type)
+      check_distribution_system(heat_pump.distribution_system, hp_type)
 
       cool_capacity_btuh = heat_pump.cooling_capacity
       if cool_capacity_btuh < 0
@@ -2405,8 +2398,12 @@ class OSModel
       end
 
       heat_capacity_btuh_17F = heat_pump.heating_capacity_17F
-      if (heat_capacity_btuh == Constants.SizingAuto) && (not heat_capacity_btuh_17F.nil?)
-        fail "HeatPump '#{heat_pump.id}' has HeatingCapacity17F provided but heating capacity is auto-sized."
+      if not heat_capacity_btuh_17F.nil?
+        if heat_capacity_btuh == Constants.SizingAuto
+          fail "HeatPump '#{heat_pump.id}' has HeatingCapacity17F provided but heating capacity is auto-sized."
+        elsif heat_capacity_btuh == 0.0
+          heat_capacity_btuh_17F = nil
+        end
       end
 
       load_frac_heat = heat_pump.fraction_heat_load_served
@@ -2719,8 +2716,8 @@ class OSModel
                             @cfa, @living_space)
   end
 
-  def self.check_distribution_system(dist_id, system_id, system_type)
-    return if dist_id.nil?
+  def self.check_distribution_system(hvac_distribution, system_type)
+    return if hvac_distribution.nil?
 
     hvac_distribution_type_map = { HPXML::HVACTypeFurnace => [HPXML::HVACDistributionTypeAir, HPXML::HVACDistributionTypeDSE],
                                    HPXML::HVACTypeBoiler => [HPXML::HVACDistributionTypeHydronic, HPXML::HVACDistributionTypeDSE],
@@ -2730,19 +2727,7 @@ class OSModel
                                    HPXML::HVACTypeHeatPumpMiniSplit => [HPXML::HVACDistributionTypeAir, HPXML::HVACDistributionTypeDSE],
                                    HPXML::HVACTypeHeatPumpGroundToAir => [HPXML::HVACDistributionTypeAir, HPXML::HVACDistributionTypeDSE] }
 
-    # Get attached distribution system
-    found_attached_dist = false
-    type_match = true
-    @hpxml.hvac_distributions.each do |hvac_distribution|
-      next if dist_id != hvac_distribution.id
-
-      found_attached_dist = true
-      type_match = hvac_distribution_type_map[system_type].include? hvac_distribution.distribution_system_type
-    end
-
-    if not found_attached_dist
-      fail "Attached HVAC distribution system '#{dist_id}' cannot be found for HVAC system '#{system_id}'."
-    elsif not type_match
+    if not hvac_distribution_type_map[system_type].include? hvac_distribution.distribution_system_type
       # EPvalidator.rb only checks that a HVAC distribution system of the correct type (for the given HVAC system) exists
       # in the HPXML file, not that it is attached to this HVAC system. So here we perform the more rigorous check.
       fail "Incorrect HVAC distribution system type for HVAC type: '#{system_type}'. Should be one of: #{hvac_distribution_type_map[system_type]}"
@@ -2761,8 +2746,6 @@ class OSModel
         end
       end
       return related_boiler_sys
-    else
-      fail "RelatedHVACSystem '#{heating_source_id}' not found for water heating system '#{sys_id}'."
     end
   end
 
@@ -2830,16 +2813,6 @@ class OSModel
     fractions = {}
     @hpxml.lighting_groups.each do |lg|
       fractions[[lg.location, lg.third_party_certification]] = lg.fration_of_units_in_location
-    end
-
-    if fractions[[HPXML::LocationInterior, HPXML::LightingTypeTierI]] + fractions[[HPXML::LocationInterior, HPXML::LightingTypeTierII]] > 1
-      fail "Fraction of qualifying interior lighting fixtures #{fractions[[HPXML::LocationInterior, HPXML::LightingTypeTierI]] + fractions[[HPXML::LocationInterior, HPXML::LightingTypeTierII]]} is greater than 1."
-    end
-    if fractions[[HPXML::LocationExterior, HPXML::LightingTypeTierI]] + fractions[[HPXML::LocationExterior, HPXML::LightingTypeTierII]] > 1
-      fail "Fraction of qualifying exterior lighting fixtures #{fractions[[HPXML::LocationExterior, HPXML::LightingTypeTierI]] + fractions[[HPXML::LocationExterior, HPXML::LightingTypeTierII]]} is greater than 1."
-    end
-    if fractions[[HPXML::LocationGarage, HPXML::LightingTypeTierI]] + fractions[[HPXML::LocationGarage, HPXML::LightingTypeTierII]] > 1
-      fail "Fraction of qualifying garage lighting fixtures #{fractions[[HPXML::LocationGarage, HPXML::LightingTypeTierI]] + fractions[[HPXML::LocationGarage, HPXML::LightingTypeTierII]]} is greater than 1."
     end
 
     int_kwh, ext_kwh, grg_kwh = Lighting.calc_lighting_energy(@eri_version, @cfa, @gfa,
@@ -2917,15 +2890,7 @@ class OSModel
                              vented_attic_sla, unvented_attic_sla, vented_attic_const_ach, unconditioned_basement_ach, has_flue_chimney, terrain)
 
     # Natural Ventilation
-    frac_window_area_operable = @hpxml.building_construction.fraction_of_operable_window_area
-    if frac_window_area_operable.nil?
-      frac_window_area_operable = Airflow.get_default_fraction_of_operable_window_area()
-    end
-    if (frac_window_area_operable < 0) || (frac_window_area_operable > 1)
-      fail "Fraction window area operable (#{frac_window_area_operable}) must be between 0 and 1."
-    end
-
-    nv_frac_window_area_open = frac_window_area_operable * 0.20 # Assume 20% of operable window area is open
+    nv_frac_window_area_open = @frac_window_area_operable * 0.20 # Assume 20% of operable window area is open
     nv_num_days_per_week = 7
     nv_max_oa_hr = 0.0115
     nv_max_oa_rh = 0.7
@@ -2935,37 +2900,13 @@ class OSModel
     # Ducts
     duct_systems = {}
     @hpxml.hvac_distributions.each do |hvac_distribution|
-      # Check for errors
-      dist_id = hvac_distribution.id
-      num_attached = 0
-      num_heating_attached = 0
-      num_cooling_attached = 0
-      { 'HeatingSystem' => @hpxml.heating_systems,
-        'CoolingSystem' => @hpxml.cooling_systems,
-        'HeatPump' => @hpxml.heat_pumps }.each do |sys_type, hvac_systems|
-        hvac_systems.each do |hvac_system|
-          next if hvac_system.distribution_system_idref.nil? || (dist_id != hvac_system.distribution_system_idref)
-
-          num_attached += 1
-          num_heating_attached += 1 if ['HeatingSystem', 'HeatPump'].include?(sys_type) && (hvac_system.fraction_heat_load_served > 0)
-          num_cooling_attached += 1 if ['CoolingSystem', 'HeatPump'].include?(sys_type) && (hvac_system.fraction_cool_load_served > 0)
-        end
-      end
-
-      fail "Multiple cooling systems found attached to distribution system '#{dist_id}'." if num_cooling_attached > 1
-      fail "Multiple heating systems found attached to distribution system '#{dist_id}'." if num_heating_attached > 1
-      fail "Distribution system '#{dist_id}' found but no HVAC system attached to it." if num_attached == 0
-
       next unless hvac_distribution.distribution_system_type == HPXML::HVACDistributionTypeAir
 
-      air_ducts = create_ducts(hvac_distribution, model, spaces, dist_id)
+      air_ducts = create_ducts(hvac_distribution, model, spaces)
 
       # Connect AirLoopHVACs to ducts
-      (@hpxml.heating_systems + @hpxml.cooling_systems + @hpxml.heat_pumps).each do |hvac_system|
-        next if hvac_system.distribution_system_idref.nil? || (dist_id != hvac_system.distribution_system_idref)
-
-        sys_id = hvac_system.id
-        @hvac_map[sys_id].each do |loop|
+      hvac_distribution.hvac_systems.each do |hvac_system|
+        @hvac_map[hvac_system.id].each do |loop|
           next unless loop.is_a? OpenStudio::Model::AirLoopHVAC
 
           if duct_systems[air_ducts].nil?
@@ -2973,7 +2914,7 @@ class OSModel
           elsif duct_systems[air_ducts] != loop
             # Multiple air loops associated with this duct system, treat
             # as separate duct systems.
-            air_ducts2 = create_ducts(hvac_distribution, model, spaces, dist_id)
+            air_ducts2 = create_ducts(hvac_distribution, model, spaces)
             duct_systems[air_ducts2] = loop
           end
         end
@@ -3085,7 +3026,7 @@ class OSModel
                   @min_neighbor_distance)
   end
 
-  def self.create_ducts(hvac_distribution, model, spaces, dist_id)
+  def self.create_ducts(hvac_distribution, model, spaces)
     air_ducts = []
 
     # Duct leakage (supply/return => [value, units])
@@ -3130,7 +3071,7 @@ class OSModel
       elsif duct_leakage_units == HPXML::UnitsPercent
         duct_leakage_frac = duct_leakage_value
       else
-        fail "#{ducts.duct_type.capitalize} ducts exist but leakage was not specified for distribution system '#{dist_id}'."
+        fail "#{ducts.duct_type.capitalize} ducts exist but leakage was not specified for distribution system '#{hvac_distribution.id}'."
       end
 
       air_ducts << Duct.new(ducts.duct_type, duct_space, duct_leakage_frac, duct_leakage_cfm, duct_area, ducts.duct_insulation_r_value)
@@ -3153,7 +3094,7 @@ class OSModel
       elsif duct_leakage_units == HPXML::UnitsPercent
         duct_leakage_frac = duct_leakage_value
       else
-        fail "#{duct_side.capitalize} ducts exist but leakage was not specified for distribution system '#{dist_id}'."
+        fail "#{duct_side.capitalize} ducts exist but leakage was not specified for distribution system '#{hvac_distribution.id}'."
       end
 
       air_ducts << Duct.new(duct_side, duct_space, duct_leakage_frac, duct_leakage_cfm, duct_area, duct_rvalue)
