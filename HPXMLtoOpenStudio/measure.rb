@@ -480,9 +480,9 @@ class OSModel
       @hpxml.misc_loads_schedule.monthly_multipliers = '1.248, 1.257, 0.993, 0.989, 0.993, 0.827, 0.821, 0.821, 0.827, 0.99, 0.987, 1.248'
     end
 
-    # Default clothes washer rated annual kWh, label electric rate, label gas rate, label annual gas cost, capacity, and modified energy factor 
-    if @hpxml.clothes_washers[0].rated_annual_kwh.nil? || @hpxml.clothes_washers[0].label_electric_rate.nil? || @hpxml.clothes_washers[0].label_gas_rate.nil? || 
-      @hpxml.clothes_washers[0].label_annual_gas_cost.nil? || @hpxml.clothes_washers[0].capacity.nil? || @hpxml.clothes_washers[0].integrated_modified_energy_factor.nil?
+    # Default clothes washer rated annual kWh, label electric rate, label gas rate, label annual gas cost, capacity, and modified energy factor
+    if @hpxml.clothes_washers[0].rated_annual_kwh.nil? || @hpxml.clothes_washers[0].label_electric_rate.nil? || @hpxml.clothes_washers[0].label_gas_rate.nil? ||
+       @hpxml.clothes_washers[0].label_annual_gas_cost.nil? || @hpxml.clothes_washers[0].capacity.nil? || @hpxml.clothes_washers[0].integrated_modified_energy_factor.nil?
 
       @hpxml.clothes_washers[0].rated_annual_kwh = HotWaterAndAppliances.get_clothes_washer_reference_ler()
       @hpxml.clothes_washers[0].label_electric_rate = HotWaterAndAppliances.get_clothes_washer_reference_elec_rate()
@@ -495,9 +495,9 @@ class OSModel
         @hpxml.clothes_washers[0].modified_energy_factor = HotWaterAndAppliances.calc_clothes_washer_mef_from_imef(@hpxml.clothes_washers[0].integrated_modified_energy_factor)
       end
     end
-    
+
     # Default clothes dryer control type and energy factor
-    if @hpxml.clothes_dryers[0].control_type.nil? 
+    if @hpxml.clothes_dryers[0].control_type.nil?
       @hpxml.clothes_dryers[0].control_type = HotWaterAndAppliances.get_clothes_dryer_reference_control()
     end
     if @hpxml.clothes_dryers[0].energy_factor.nil?
@@ -3273,7 +3273,7 @@ class OSModel
       power_w = pv_system.max_power_output
       inv_eff = pv_system.inverter_efficiency
       system_losses = pv_system.system_losses_fraction
-      
+
       PV.apply(model, pv_id, power_w, module_type,
                system_losses, inv_eff, tilt, az, array_type)
     end

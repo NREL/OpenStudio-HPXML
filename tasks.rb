@@ -3075,6 +3075,7 @@ def set_hpxml_clothes_dryer(hpxml_file, hpxml)
   elsif ['base-misc-defaults.xml'].include? hpxml_file
     hpxml.clothes_dryers[0].energy_factor = nil
     hpxml.clothes_dryers[0].combined_energy_factor = nil
+    hpxml.clothes_dryers[0].control_type = nil
   end
 end
 
@@ -3093,6 +3094,7 @@ def set_hpxml_dishwasher(hpxml_file, hpxml)
   elsif ['base-misc-defaults.xml'].include? hpxml_file
     hpxml.dishwashers[0].rated_annual_kwh = nil
     hpxml.dishwashers[0].energy_factor = nil
+    hpxml.dishwashers[0].place_setting_capacity = nil
   end
 end
 
