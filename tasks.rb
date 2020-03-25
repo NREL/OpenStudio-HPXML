@@ -10,12 +10,11 @@ def create_hpxmls
     'invalid_files/bad-site-neighbor-azimuth.xml' => 'base-site-neighbors.xml',
     'invalid_files/cfis-with-hydronic-distribution.xml' => 'base-hvac-boiler-gas-only.xml',
     'invalid_files/clothes-washer-location.xml' => 'base.xml',
-    'invalid_files/clothes-washer-location-other.xml' => 'base.xml',
     'invalid_files/clothes-dryer-location.xml' => 'base.xml',
-    'invalid_files/clothes-dryer-location-other.xml' => 'base.xml',
+    'invalid_files/appliances-location-unconditioned-space.xml' => 'base.xml',
     'invalid_files/dhw-frac-load-served.xml' => 'base-dhw-multiple.xml',
     'invalid_files/duct-location.xml' => 'base.xml',
-    'invalid_files/duct-location-other.xml' => 'base.xml',
+    'invalid_files/duct-location-unconditioned-space.xml' => 'base.xml',
     'invalid_files/duplicate-id.xml' => 'base.xml',
     'invalid_files/heat-pump-mixed-fixed-and-autosize-capacities.xml' => 'base-hvac-air-to-air-heat-pump-1-speed.xml',
     'invalid_files/heat-pump-mixed-fixed-and-autosize-capacities2.xml' => 'base-hvac-air-to-air-heat-pump-1-speed.xml',
@@ -41,7 +40,6 @@ def create_hpxmls
     'invalid_files/net-area-negative-wall.xml' => 'base.xml',
     'invalid_files/orphaned-hvac-distribution.xml' => 'base-hvac-furnace-gas-room-ac.xml',
     'invalid_files/refrigerator-location.xml' => 'base.xml',
-    'invalid_files/refrigerator-location-other.xml' => 'base.xml',
     'invalid_files/repeated-relatedhvac-dhw-indirect.xml' => 'base-dhw-indirect.xml',
     'invalid_files/repeated-relatedhvac-desuperheater.xml' => 'base-hvac-central-ac-only-1-speed.xml',
     'invalid_files/solar-thermal-system-with-combi-tankless.xml' => 'base-dhw-combi-tankless.xml',
@@ -413,10 +411,10 @@ def create_hpxmls
       hpxml_path = File.join(sample_files_dir, derivative)
 
       if not hpxml_path.include? 'invalid_files'
-      # Validate file against HPXML schema
-      schemas_dir = File.absolute_path(File.join(File.dirname(__FILE__), 'HPXMLtoOpenStudio/resources'))
-      errors = XMLHelper.validate(hpxml_doc.to_s, File.join(schemas_dir, 'HPXML.xsd'), nil)
-      if errors.size > 0
+        # Validate file against HPXML schema
+        schemas_dir = File.absolute_path(File.join(File.dirname(__FILE__), 'HPXMLtoOpenStudio/resources'))
+        errors = XMLHelper.validate(hpxml_doc.to_s, File.join(schemas_dir, 'HPXML.xsd'), nil)
+        if errors.size > 0
           fail "ERRORS: #{errors}"
         end
 
@@ -610,8 +608,8 @@ def set_hpxml_air_infiltration_measurements(hpxml_file, hpxml)
   if ['base-misc-defaults.xml'].include? hpxml_file
     hpxml.air_infiltration_measurements[0].infiltration_volume = nil
   else
-  hpxml.air_infiltration_measurements[0].infiltration_volume = infil_volume
-end
+    hpxml.air_infiltration_measurements[0].infiltration_volume = infil_volume
+  end
 end
 
 def set_hpxml_attics(hpxml_file, hpxml)
@@ -1481,40 +1479,40 @@ def set_hpxml_windows(hpxml_file, hpxml)
     { 'Operable' => 0.33, 'Inoperable' => 0.67 }.each do |mode, frac|
       hpxml.windows.add(id: "WindowNorth#{mode}",
                         area: 108 * frac,
-                      azimuth: 0,
-                      ufactor: 0.33,
-                      shgc: 0.45,
+                        azimuth: 0,
+                        ufactor: 0.33,
+                        shgc: 0.45,
                         operable: (mode == 'Operable'),
                         interior_shading_factor_summer: 0.7,
                         interior_shading_factor_winter: 0.85,
-                      wall_idref: 'Wall')
+                        wall_idref: 'Wall')
       hpxml.windows.add(id: "WindowSouth#{mode}",
                         area: 108 * frac,
-                      azimuth: 180,
-                      ufactor: 0.33,
-                      shgc: 0.45,
+                        azimuth: 180,
+                        ufactor: 0.33,
+                        shgc: 0.45,
                         operable: (mode == 'Operable'),
                         interior_shading_factor_summer: 0.7,
                         interior_shading_factor_winter: 0.85,
-                      wall_idref: 'Wall')
+                        wall_idref: 'Wall')
       hpxml.windows.add(id: "WindowEast#{mode}",
                         area: 72 * frac,
-                      azimuth: 90,
-                      ufactor: 0.33,
-                      shgc: 0.45,
+                        azimuth: 90,
+                        ufactor: 0.33,
+                        shgc: 0.45,
                         operable: (mode == 'Operable'),
                         interior_shading_factor_summer: 0.7,
                         interior_shading_factor_winter: 0.85,
-                      wall_idref: 'Wall')
+                        wall_idref: 'Wall')
       hpxml.windows.add(id: "WindowWest#{mode}",
                         area: 72 * frac,
-                      azimuth: 270,
-                      ufactor: 0.33,
-                      shgc: 0.45,
+                        azimuth: 270,
+                        ufactor: 0.33,
+                        shgc: 0.45,
                         operable: (mode == 'Operable'),
                         interior_shading_factor_summer: 0.7,
                         interior_shading_factor_winter: 0.85,
-                      wall_idref: 'Wall')
+                        wall_idref: 'Wall')
     end
   elsif ['invalid_files/attached-multifamily-window-outside-condition.xml'].include? hpxml_file
     hpxml.windows[0].area = 50
@@ -2558,7 +2556,7 @@ def set_hpxml_hvac_distributions(hpxml_file, hpxml)
          'invalid_files/duct-location.xml'].include? hpxml_file
     hpxml.hvac_distributions[0].ducts[0].duct_location = HPXML::LocationGarage
     hpxml.hvac_distributions[0].ducts[1].duct_location = HPXML::LocationGarage
-  elsif ['invalid_files/duct-location-other.xml'].include? hpxml_file
+  elsif ['invalid_files/duct-location-unconditioned-space.xml'].include? hpxml_file
     hpxml.hvac_distributions[0].ducts[0].duct_location = 'unconditioned space'
     hpxml.hvac_distributions[0].ducts[1].duct_location = 'unconditioned space'
   elsif ['base-hvac-ducts-outside.xml'].include? hpxml_file
@@ -3116,8 +3114,8 @@ def set_hpxml_clothes_washer(hpxml_file, hpxml)
   elsif ['base-enclosure-garage.xml',
          'invalid_files/clothes-washer-location.xml'].include? hpxml_file
     hpxml.clothes_washers[0].location = HPXML::LocationGarage
-  elsif ['invalid_files/clothes-washer-location-other.xml'].include? hpxml_file
-    hpxml.clothes_washers[0].location = 'other'
+  elsif ['invalid_files/appliances-location-unconditioned-space.xml'].include? hpxml_file
+    hpxml.clothes_washers[0].location = 'unconditioned space'
   end
 end
 
@@ -3168,8 +3166,8 @@ def set_hpxml_clothes_dryer(hpxml_file, hpxml)
   elsif ['base-enclosure-garage.xml',
          'invalid_files/clothes-dryer-location.xml'].include? hpxml_file
     hpxml.clothes_dryers[0].location = HPXML::LocationGarage
-  elsif ['invalid_files/clothes-dryer-location-other.xml'].include? hpxml_file
-    hpxml.clothes_dryers[0].location = 'other'
+  elsif ['invalid_files/appliances-location-unconditioned-space.xml'].include? hpxml_file
+    hpxml.clothes_dryers[0].location = 'unconditioned space'
   end
 end
 
@@ -3184,8 +3182,11 @@ def set_hpxml_dishwasher(hpxml_file, hpxml)
   elsif ['base-appliances-modified.xml'].include? hpxml_file
     hpxml.dishwashers.clear()
     hpxml.dishwashers.add(id: 'Dishwasher',
+                          location: HPXML::LocationLivingSpace,
                           energy_factor: 0.5,
                           place_setting_capacity: 12)
+  elsif ['invalid_files/appliances-location-unconditioned-space.xml'].include? hpxml_file
+    hpxml.dishwashers[0].location = 'unconditioned space'
   end
 end
 
@@ -3207,8 +3208,8 @@ def set_hpxml_refrigerator(hpxml_file, hpxml)
   elsif ['base-enclosure-garage.xml',
          'invalid_files/refrigerator-location.xml'].include? hpxml_file
     hpxml.refrigerators[0].location = HPXML::LocationGarage
-  elsif ['invalid_files/refrigerator-location-other.xml'].include? hpxml_file
-    hpxml.refrigerators[0].location = 'other'
+  elsif ['invalid_files/appliances-location-unconditioned-space.xml'].include? hpxml_file
+    hpxml.refrigerators[0].location = 'unconditioned space'
   end
 end
 
@@ -3231,6 +3232,8 @@ def set_hpxml_cooking_range(hpxml_file, hpxml)
   elsif ['base-appliances-wood.xml'].include? hpxml_file
     hpxml.cooking_ranges[0].fuel_type = HPXML::FuelTypeWood
     hpxml.cooking_ranges[0].is_induction = false
+  elsif ['invalid_files/appliances-location-unconditioned-space.xml'].include? hpxml_file
+    hpxml.cooking_ranges[0].location = 'unconditioned space'
   end
 end
 
