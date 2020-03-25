@@ -3713,6 +3713,7 @@ class HPXML < Object
 
   def delete_partition_surfaces()
     (@rim_joists + @walls + @foundation_walls + @frame_floors).reverse_each do |surface|
+      next if surface.interior_adjacent_to.nil? || surface.exterior_adjacent_to.nil?
       next unless surface.interior_adjacent_to == surface.exterior_adjacent_to
 
       surface.delete
