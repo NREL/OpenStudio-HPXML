@@ -53,6 +53,10 @@ class HPXML < Object
   AtticTypeFlatRoof = 'FlatRoof'
   AtticTypeUnvented = 'UnventedAttic'
   AtticTypeVented = 'VentedAttic'
+  ResidentialTypeApartment = 'apartment unit'
+  ResidentialTypeManufactured = 'manufactured home'
+  ResidentialTypeSFA = 'single-family attached'
+  ResidentialTypeSFD = 'single-family detached'
   ClothesDryerControlTypeMoisture = 'moisture'
   ClothesDryerControlTypeTimer = 'timer'
   DHWRecirControlTypeManual = 'manual demand control'
@@ -64,6 +68,8 @@ class HPXML < Object
   DHWDistTypeStandard = 'Standard'
   DuctInsulationMaterialUnknown = 'Unknown'
   DuctInsulationMaterialNone = 'None'
+  DuctLeakageTotal = 'total'
+  DuctLeakageToOutside = 'to outside'
   DuctTypeReturn = 'return'
   DuctTypeSupply = 'supply'
   DWHRFacilitiesConnectedAll = 'all'
@@ -629,6 +635,7 @@ class HPXML < Object
       return if nil?
 
       building_construction = XMLHelper.create_elements_as_needed(doc, ['HPXML', 'Building', 'BuildingDetails', 'BuildingSummary', 'BuildingConstruction'])
+      XMLHelper.add_element(building_construction, 'ResidentialFacilityType', @residential_facility_type) unless @residential_facility_type.nil?
       XMLHelper.add_element(building_construction, 'NumberofConditionedFloors', Integer(@number_of_conditioned_floors)) unless @number_of_conditioned_floors.nil?
       XMLHelper.add_element(building_construction, 'NumberofConditionedFloorsAboveGrade', Integer(@number_of_conditioned_floors_above_grade)) unless @number_of_conditioned_floors_above_grade.nil?
       XMLHelper.add_element(building_construction, 'NumberofBedrooms', Integer(@number_of_bedrooms)) unless @number_of_bedrooms.nil?
@@ -2488,10 +2495,10 @@ class HPXML < Object
   end
 
   class HVACDistribution < BaseElement
-    def initialize(*args)
-      @duct_leakage_measurements = DuctLeakageMeasurements.new(@hpxml_object)
-      @ducts = Ducts.new(@hpxml_object)
-      super(*args)
+    def initialize(hpxml_object, *args)
+      @duct_leakage_measurements = DuctLeakageMeasurements.new(hpxml_object)
+      @ducts = Ducts.new(hpxml_object)
+      super(hpxml_object, *args)
     end
     ATTRS = [:id, :distribution_system_type, :distribution_system_type, :annual_heating_dse,
              :annual_cooling_dse, :duct_system_sealed, :duct_leakage_testing_exemption]
@@ -2609,6 +2616,13 @@ class HPXML < Object
              :duct_leakage_total_or_to_outside]
     attr_accessor(*ATTRS)
 
+    def delete
+      @hpxml_object.hvac_distributions.each do |hvac_distribution|
+        next unless hvac_distribution.duct_leakage_measurements.include? self
+        hvac_distribution.duct_leakage_measurements.delete(self)
+      end
+    end
+
     def check_for_errors
       errors = []
       return errors
@@ -2616,12 +2630,12 @@ class HPXML < Object
 
     def to_rexml(air_distribution)
       duct_leakage_measurement_el = XMLHelper.add_element(air_distribution, 'DuctLeakageMeasurement')
-      XMLHelper.add_element(duct_leakage_measurement_el, 'DuctType', @duct_type)
+      XMLHelper.add_element(duct_leakage_measurement_el, 'DuctType', @duct_type) unless @duct_type.nil?
       if not @duct_leakage_value.nil?
         duct_leakage_el = XMLHelper.add_element(duct_leakage_measurement_el, 'DuctLeakage')
-        XMLHelper.add_element(duct_leakage_el, 'Units', @duct_leakage_units)
+        XMLHelper.add_element(duct_leakage_el, 'Units', @duct_leakage_units) unless @duct_leakage_units.nil?
         XMLHelper.add_element(duct_leakage_el, 'Value', Float(@duct_leakage_value))
-        XMLHelper.add_element(duct_leakage_el, 'TotalOrToOutside', 'to outside')
+        XMLHelper.add_element(duct_leakage_el, 'TotalOrToOutside', @duct_leakage_total_or_to_outside) unless @duct_leakage_total_or_to_outside.nil?
       end
     end
 
@@ -2654,6 +2668,13 @@ class HPXML < Object
     ATTRS = [:duct_type, :duct_insulation_r_value, :duct_insulation_material, :duct_location,
              :duct_fraction_area, :duct_surface_area]
     attr_accessor(*ATTRS)
+
+    def delete
+      @hpxml_object.hvac_distributions.each do |hvac_distribution|
+        next unless hvac_distribution.ducts.include? self
+        hvac_distribution.ducts.delete(self)
+      end
+    end
 
     def check_for_errors
       errors = []
