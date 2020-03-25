@@ -2822,7 +2822,6 @@ def set_hpxml_hot_water_distribution(hpxml_file, hpxml)
   if ['base.xml'].include? hpxml_file
     hpxml.hot_water_distributions.add(id: 'HotWaterDstribution',
                                       system_type: HPXML::DHWDistTypeStandard,
-                                      standard_piping_length: 50, # Chosen to test a negative EC_adj
                                       pipe_r_value: 0.0)
   elsif ['base-dhw-dwhr.xml'].include? hpxml_file
     hpxml.hot_water_distributions[0].dwhr_facilities_connected = HPXML::DWHRFacilitiesConnectedAll
@@ -3015,6 +3014,7 @@ def set_hpxml_clothes_washer(hpxml_file, hpxml)
   elsif ['invalid_files/clothes-washer-location-other.xml'].include? hpxml_file
     hpxml.clothes_washers[0].location = 'other'
   elsif ['base-misc-defaults.xml'].include? hpxml_file
+    hpxml.clothes_washers[0].location = nil
     hpxml.clothes_washers[0].modified_energy_factor = nil
     hpxml.clothes_washers[0].integrated_modified_energy_factor = nil
     hpxml.clothes_washers[0].rated_annual_kwh = nil
@@ -3073,6 +3073,7 @@ def set_hpxml_clothes_dryer(hpxml_file, hpxml)
   elsif ['invalid_files/clothes-dryer-location-other.xml'].include? hpxml_file
     hpxml.clothes_dryers[0].location = 'other'
   elsif ['base-misc-defaults.xml'].include? hpxml_file
+    hpxml.clothes_dryers[0].location = nil
     hpxml.clothes_dryers[0].energy_factor = nil
     hpxml.clothes_dryers[0].combined_energy_factor = nil
     hpxml.clothes_dryers[0].control_type = nil
@@ -3117,6 +3118,7 @@ def set_hpxml_refrigerator(hpxml_file, hpxml)
   elsif ['invalid_files/refrigerator-location-other.xml'].include? hpxml_file
     hpxml.refrigerators[0].location = 'other'
   elsif ['base-misc-defaults.xml'].include? hpxml_file
+    hpxml.refrigerators[0].location = nil
     hpxml.refrigerators[0].rated_annual_kwh = nil
     hpxml.refrigerators[0].adjusted_annual_kwh = nil
   end
