@@ -480,6 +480,73 @@ class OSModel
       @hpxml.misc_loads_schedule.monthly_multipliers = '1.248, 1.257, 0.993, 0.989, 0.993, 0.827, 0.821, 0.821, 0.827, 0.99, 0.987, 1.248'
     end
 
+    # Default clothes washer rated annual kWh, label electric rate, label gas rate, label annual gas cost, capacity, and modified energy factor 
+    if @hpxml.clothes_washers[0].rated_annual_kwh.nil? || @hpxml.clothes_washers[0].label_electric_rate.nil? || @hpxml.clothes_washers[0].label_gas_rate.nil? || 
+      @hpxml.clothes_washers[0].label_annual_gas_cost.nil? || @hpxml.clothes_washers[0].capacity.nil? || @hpxml.clothes_washers[0].integrated_modified_energy_factor.nil?
+
+      @hpxml.clothes_washers[0].rated_annual_kwh = HotWaterAndAppliances.get_clothes_washer_reference_ler()
+      @hpxml.clothes_washers[0].label_electric_rate = HotWaterAndAppliances.get_clothes_washer_reference_elec_rate()
+      @hpxml.clothes_washers[0].label_gas_rate = HotWaterAndAppliances.get_clothes_washer_reference_gas_rate()
+      @hpxml.clothes_washers[0].label_annual_gas_cost = HotWaterAndAppliances.get_clothes_washer_reference_agc()
+      @hpxml.clothes_washers[0].capacity = HotWaterAndAppliances.get_clothes_washer_reference_cap()
+      if @hpxml.clothes_washers[0].integrated_modified_energy_factor.nil?
+        @hpxml.clothes_washers[0].modified_energy_factor = HotWaterAndAppliances.calc_clothes_washer_mef_from_imef(HotWaterAndAppliances.get_clothes_washer_reference_imef())
+      else
+        @hpxml.clothes_washers[0].modified_energy_factor = HotWaterAndAppliances.calc_clothes_washer_mef_from_imef(@hpxml.clothes_washers[0].integrated_modified_energy_factor)
+      end
+    end
+    
+    # Default clothes dryer control type and energy factor
+    if @hpxml.clothes_dryers[0].control_type.nil? 
+      @hpxml.clothes_dryers[0].control_type = HotWaterAndAppliances.get_clothes_dryer_reference_control()
+    end
+    if @hpxml.clothes_dryers[0].energy_factor.nil?
+      if @hpxml.clothes_dryers[0].combined_energy_factor.nil?
+        @hpxml.clothes_dryers[0].energy_factor = HotWaterAndAppliances.calc_clothes_dryer_ef_from_cef(HotWaterAndAppliances.get_clothes_dryer_reference_cef(@hpxml.clothes_dryers[0].fuel_type))
+      else
+        @hpxml.clothes_dryers[0].energy_factor = HotWaterAndAppliances.calc_clothes_dryer_ef_from_cef(@hpxml.clothes_dryers[0].combined_energy_factor)
+      end
+    end
+
+    # Default dishwasher place setting capacity and energy factor
+    if @hpxml.dishwashers[0].place_setting_capacity.nil? || @hpxml.dishwashers[0].energy_factor.nil?
+      @hpxml.dishwashers[0].place_setting_capacity = HotWaterAndAppliances.get_dishwasher_reference_cap()
+      if @hpxml.dishwashers[0].rated_annual_kwh.nil?
+        @hpxml.dishwashers[0].energy_factor = HotWaterAndAppliances.get_dishwasher_reference_ef()
+      else
+        @hpxml.dishwashers[0].energy_factor = HotWaterAndAppliances.calc_dishwasher_ef_from_annual_kwh(@hpxml.dishwashers[0].rated_annual_kwh)
+      end
+    end
+
+    # Default refrigerator adjusted annual kWh
+    if @hpxml.refrigerators[0].adjusted_annual_kwh.nil?
+      if @hpxml.refrigerators[0].rated_annual_kwh.nil?
+        @hpxml.refrigerators[0].adjusted_annual_kwh = HotWaterAndAppliances.get_refrigerator_reference_annual_kwh(@nbeds)
+      else
+        @hpxml.refrigerators[0].adjusted_annual_kwh = @hpxml.refrigerators[0].rated_annual_kwh
+      end
+    end
+
+    # Default cooking range type
+    if @hpxml.cooking_ranges[0].is_induction.nil?
+      @hpxml.cooking_ranges[0].is_induction = HotWaterAndAppliances.get_range_oven_reference_is_induction()
+    end
+
+    # Default oven type
+    if @hpxml.ovens[0].is_convection.nil?
+      @hpxml.ovens[0].is_convection = HotWaterAndAppliances.get_range_oven_reference_is_convection()
+    end
+
+    # Default PV systems inverter efficiency and system loss fraction
+    @hpxml.pv_systems.each do |pv_system|
+      if pv_system.inverter_efficiency.nil?
+        pv_system.inverter_efficiency = PV.get_default_inv_eff()
+      end
+      if pv_system.system_losses_fraction.nil?
+        pv_system.system_losses_fraction = PV.get_default_system_losses(pv_system.year_modules_manufactured)
+      end
+    end
+
     if @debug
       # Write updated HPXML object to file
       hpxml_defaults_path = File.join(@output_path, 'in.xml')
@@ -2052,20 +2119,6 @@ class OSModel
       cw_agc = clothes_washer.label_annual_gas_cost
       cw_cap = clothes_washer.capacity
       cw_mef = clothes_washer.modified_energy_factor
-
-      # use default values for all optional variables if any of the optional variables are not provided
-      if cw_ler.nil? || cw_elec_rate.nil? || cw_gas_rate.nil? || cw_agc.nil? || cw_cap.nil? || cw_mef.nil?
-        cw_ler = HotWaterAndAppliances.get_clothes_washer_reference_ler()
-        cw_elec_rate = HotWaterAndAppliances.get_clothes_washer_reference_elec_rate()
-        cw_gas_rate = HotWaterAndAppliances.get_clothes_washer_reference_gas_rate()
-        cw_agc = HotWaterAndAppliances.get_clothes_washer_reference_agc()
-        cw_cap = HotWaterAndAppliances.get_clothes_washer_reference_cap()
-        if clothes_washer.integrated_modified_energy_factor.nil?
-          cw_mef = HotWaterAndAppliances.calc_clothes_washer_mef_from_imef(HotWaterAndAppliances.get_clothes_washer_reference_imef())
-        else
-          cw_mef = HotWaterAndAppliances.calc_clothes_washer_mef_from_imef(clothes_washer.integrated_modified_energy_factor)
-        end
-      end
     else
       cw_mef = cw_ler = cw_elec_rate = cw_gas_rate = cw_agc = cw_cap = cw_space = nil
     end
@@ -2077,16 +2130,6 @@ class OSModel
       cd_fuel = clothes_dryer.fuel_type
       cd_control = clothes_dryer.control_type
       cd_ef = clothes_dryer.energy_factor
-
-      # use default values for all optional variables if any of the optional variables are not provided
-      if cd_control.nil? || cd_ef.nil?
-        cd_control = HotWaterAndAppliances.get_clothes_dryer_reference_control()
-        if clothes_dryer.combined_energy_factor.nil?
-          cd_ef = HotWaterAndAppliances.calc_clothes_dryer_ef_from_cef(HotWaterAndAppliances.get_clothes_dryer_reference_cef(cd_fuel))
-        else
-          cd_ef = HotWaterAndAppliances.calc_clothes_dryer_ef_from_cef(clothes_dryer.combined_energy_factor)
-        end
-      end
     else
       cd_ef = cd_control = cd_fuel = cd_space = nil
     end
@@ -2096,16 +2139,6 @@ class OSModel
       dishwasher = @hpxml.dishwashers[0]
       dw_cap = dishwasher.place_setting_capacity
       dw_ef = dishwasher.energy_factor
-
-      # use default values for all optional variables if any of the optional variables are not provided
-      if dw_cap.nil? || dw_ef.nil?
-        dw_cap = HotWaterAndAppliances.get_dishwasher_reference_cap()
-        if dishwasher.rated_annual_kwh.nil?
-          dw_ef = HotWaterAndAppliances.get_dishwasher_reference_ef()
-        else
-          dw_ef = HotWaterAndAppliances.calc_dishwasher_ef_from_annual_kwh(dishwasher.rated_annual_kwh)
-        end
-      end
     else
       dw_ef = dw_cap = nil
     end
@@ -2115,15 +2148,6 @@ class OSModel
       refrigerator = @hpxml.refrigerators[0]
       fridge_space = get_space_from_location(refrigerator.location, 'Refrigerator', model, spaces)
       fridge_annual_kwh = refrigerator.adjusted_annual_kwh
-
-      # use default values for all optional variables if any of the optional variables are not provided
-      if fridge_annual_kwh.nil?
-        if refrigerator.rated_annual_kwh.nil?
-          fridge_annual_kwh = HotWaterAndAppliances.get_refrigerator_reference_annual_kwh(@nbeds)
-        else
-          fridge_annual_kwh = refrigerator.rated_annual_kwh
-        end
-      end
     else
       fridge_annual_kwh = fridge_space = nil
     end
@@ -2135,12 +2159,6 @@ class OSModel
       cook_fuel_type = cooking_range.fuel_type
       cook_is_induction = cooking_range.is_induction
       oven_is_convection = oven.is_convection
-
-      # use default values for all optional variables if any of the optional variables are not provided
-      if cook_is_induction.nil? || oven_is_convection.nil?
-        cook_is_induction = HotWaterAndAppliances.get_range_oven_reference_is_induction()
-        oven_is_convection = HotWaterAndAppliances.get_range_oven_reference_is_convection()
-      end
     else
       cook_fuel_type = cook_is_induction = oven_is_convection = nil
     end
@@ -3253,22 +3271,9 @@ class OSModel
       az = pv_system.array_azimuth
       tilt = pv_system.array_tilt
       power_w = pv_system.max_power_output
-
-      # Inverter efficiency
-      if pv_system.inverter_efficiency.nil?
-        inv_eff = PV.get_default_inv_eff()
-      else
-        inv_eff = pv_system.inverter_efficiency
-      end
-
-      # System loss fraction
-      year_modules_manufactured = pv_system.year_modules_manufactured
-      if pv_system.system_losses_fraction.nil?
-        system_losses = PV.get_default_system_losses(year_modules_manufactured)
-      else
-        system_losses = pv_system.system_losses_fraction
-      end
-
+      inv_eff = pv_system.inverter_efficiency
+      system_losses = pv_system.system_losses_fraction
+      
       PV.apply(model, pv_id, power_w, module_type,
                system_losses, inv_eff, tilt, az, array_type)
     end
