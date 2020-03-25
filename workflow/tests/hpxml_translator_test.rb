@@ -1204,7 +1204,7 @@ class HPXMLTest < MiniTest::Test
     end
 
     # DishWasher
-    if hpxml.dishwashers.size > 0
+    if (hpxml.dishwashers.size > 0) && (hpxml.water_heating_systems.size > 0)
       # Location
       hpxml_value = hpxml.dishwashers[0].location
       if hpxml_value.nil? || (hpxml_value == HPXML::LocationBasementConditioned) || (hpxml_value == HPXML::LocationOther)
