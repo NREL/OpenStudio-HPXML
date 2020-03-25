@@ -78,6 +78,16 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
       return false
     end
 
+    # Tear down the existing model if it exists
+    handles = OpenStudio::UUIDVector.new
+    model.objects.each do |obj|
+      handles << obj.handle
+    end
+    model.removeObjects(handles)
+    unless handles.empty?
+      runner.registerWarning("The model was 'reset'.")
+    end
+
     # Check for correct versions of OS
     os_version = '2.9.1'
     if OpenStudio.openStudioVersion != os_version
