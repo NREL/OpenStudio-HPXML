@@ -397,6 +397,7 @@
         </Refrigerator>
         <CookingRange>
           <SystemIdentifier id='Range'/>
+          <Location>living space</Location>
           <FuelType>electricity</FuelType>
           <IsInduction>false</IsInduction>
         </CookingRange>

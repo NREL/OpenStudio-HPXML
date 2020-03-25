@@ -1892,6 +1892,7 @@ class OSModel
     # Dishwasher
     if @hpxml.dishwashers.size > 0
       dishwasher = @hpxml.dishwashers[0]
+      dw_space = get_space_from_location(dishwasher.location, 'Dishwasher', model, spaces)
       dw_cap = dishwasher.place_setting_capacity
       dw_ef = dishwasher.energy_factor
       if dw_ef.nil?
@@ -1916,6 +1917,7 @@ class OSModel
     # Cooking Range/Oven
     if (@hpxml.cooking_ranges.size > 0) && (@hpxml.ovens.size > 0)
       cooking_range = @hpxml.cooking_ranges[0]
+      cook_space = get_space_from_location(cooking_range.location, 'CookingRange', model, spaces)
       oven = @hpxml.ovens[0]
       cook_fuel_type = cooking_range.fuel_type
       cook_is_induction = cooking_range.is_induction
@@ -2102,8 +2104,8 @@ class OSModel
                                 @cfa, @nbeds, @ncfl, @has_uncond_bsmnt, avg_setpoint_temp,
                                 cw_mef, cw_ler, cw_elec_rate, cw_gas_rate,
                                 cw_agc, cw_cap, cw_space, cd_fuel, cd_ef, cd_control,
-                                cd_space, dw_ef, dw_cap, fridge_annual_kwh, fridge_space,
-                                cook_fuel_type, cook_is_induction, oven_is_convection,
+                                cd_space, dw_ef, dw_cap, dw_space, fridge_annual_kwh, fridge_space,
+                                cook_fuel_type, cook_is_induction, oven_is_convection, cook_space,
                                 has_low_flow_fixtures, dist_type, pipe_r,
                                 std_pipe_length, recirc_loop_length,
                                 recirc_branch_length, recirc_control_type,
@@ -4219,9 +4221,9 @@ class OSModel
 
   # Returns an OS:Space, or nil if the location is outside the building
   def self.get_space_from_location(location, object_name, model, spaces)
-    if (location == HPXML::LocationOtherExterior) || (location == HPXML::LocationOutside)
+    if (location == HPXML::LocationOtherExterior) || (location == HPXML::LocationOutside) || (location == HPXML::LocationOther)
       return
-    elsif ['other heated space', 'other housing unit', 'other multifamily buffer space', 'other non-freezing space'].include? location
+    elsif (location == HPXML::LocationOtherHeatedSpace) || (location == HPXML::LocationOtherHousingUnit) || (location == HPXML::LocationOtherMultifamilyBufferSpace) || (location == HPXML::LocationOtherNonFreezingSpace)
       schedule = create_or_get_outside_boundary_schedule(model, location, spaces)
       return schedule
     end

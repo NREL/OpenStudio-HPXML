@@ -1134,7 +1134,7 @@ class HPXMLTest < MiniTest::Test
     if (hpxml.clothes_washers.size > 0) && (hpxml.water_heating_systems.size > 0)
       # Location
       hpxml_value = hpxml.clothes_washers[0].location
-      if hpxml_value.nil? || (hpxml_value == HPXML::LocationBasementConditioned)
+      if hpxml_value.nil? || (hpxml_value == HPXML::LocationBasementConditioned) || (hpxml_value == HPXML::LocationOther)
         hpxml_value = HPXML::LocationLivingSpace
       end
       query = "SELECT Value FROM TabularDataWithStrings WHERE TableName='ElectricEquipment Internal Gains Nominal' AND ColumnName='Zone Name' AND RowName=(SELECT RowName FROM TabularDataWithStrings WHERE TableName='ElectricEquipment Internal Gains Nominal' AND ColumnName='Name' AND Value='#{Constants.ObjectNameClothesWasher.upcase}')"
@@ -1146,7 +1146,7 @@ class HPXMLTest < MiniTest::Test
     if (hpxml.clothes_dryers.size > 0) && (hpxml.water_heating_systems.size > 0)
       # Location
       hpxml_value = hpxml.clothes_dryers[0].location
-      if hpxml_value.nil? || (hpxml_value == HPXML::LocationBasementConditioned)
+      if hpxml_value.nil? || (hpxml_value == HPXML::LocationBasementConditioned) || (hpxml_value == HPXML::LocationOther)
         hpxml_value = HPXML::LocationLivingSpace
       end
       query = "SELECT Value FROM TabularDataWithStrings WHERE TableName='ElectricEquipment Internal Gains Nominal' AND ColumnName='Zone Name' AND RowName=(SELECT RowName FROM TabularDataWithStrings WHERE TableName='ElectricEquipment Internal Gains Nominal' AND ColumnName='Name' AND Value='#{Constants.ObjectNameClothesDryer.upcase}')"
@@ -1158,10 +1158,34 @@ class HPXMLTest < MiniTest::Test
     if hpxml.refrigerators.size > 0
       # Location
       hpxml_value = hpxml.refrigerators[0].location
-      if hpxml_value.nil? || (hpxml_value == HPXML::LocationBasementConditioned)
+      if hpxml_value.nil? || (hpxml_value == HPXML::LocationBasementConditioned) || (hpxml_value == HPXML::LocationOther)
         hpxml_value = HPXML::LocationLivingSpace
       end
       query = "SELECT Value FROM TabularDataWithStrings WHERE TableName='ElectricEquipment Internal Gains Nominal' AND ColumnName='Zone Name' AND RowName=(SELECT RowName FROM TabularDataWithStrings WHERE TableName='ElectricEquipment Internal Gains Nominal' AND ColumnName='Name' AND Value='#{Constants.ObjectNameRefrigerator.upcase}')"
+      sql_value = sqlFile.execAndReturnFirstString(query).get
+      assert_equal(hpxml_value.upcase, sql_value)
+    end
+
+    # DishWasher
+    if hpxml.dishwashers.size > 0
+      # Location
+      hpxml_value = hpxml.dishwashers[0].location
+      if hpxml_value.nil? || (hpxml_value == HPXML::LocationBasementConditioned) || (hpxml_value == HPXML::LocationOther)
+        hpxml_value = HPXML::LocationLivingSpace
+      end
+      query = "SELECT Value FROM TabularDataWithStrings WHERE TableName='ElectricEquipment Internal Gains Nominal' AND ColumnName='Zone Name' AND RowName=(SELECT RowName FROM TabularDataWithStrings WHERE TableName='ElectricEquipment Internal Gains Nominal' AND ColumnName='Name' AND Value='#{Constants.ObjectNameDishwasher.upcase}')"
+      sql_value = sqlFile.execAndReturnFirstString(query).get
+      assert_equal(hpxml_value.upcase, sql_value)
+    end
+
+    # Cooking Range
+    if hpxml.cooking_ranges.size > 0
+      # Location
+      hpxml_value = hpxml.cooking_ranges[0].location
+      if hpxml_value.nil? || (hpxml_value == HPXML::LocationBasementConditioned) || (hpxml_value == HPXML::LocationOther)
+        hpxml_value = HPXML::LocationLivingSpace
+      end
+      query = "SELECT Value FROM TabularDataWithStrings WHERE TableName='ElectricEquipment Internal Gains Nominal' AND ColumnName='Zone Name' AND RowName=(SELECT RowName FROM TabularDataWithStrings WHERE TableName='ElectricEquipment Internal Gains Nominal' AND ColumnName='Name' AND Value='#{Constants.ObjectNameCookingRange.upcase}')"
       sql_value = sqlFile.execAndReturnFirstString(query).get
       assert_equal(hpxml_value.upcase, sql_value)
     end

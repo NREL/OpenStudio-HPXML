@@ -358,17 +358,17 @@ class HVACSizing
   def self.process_zone_loads(model, weather)
     # Constant loads (no variation throughout day)
     zone_loads = ZoneLoads.new
-    zone_loads = process_load_windows_skylights(@cond_zone, zone_loads, weather)
-    zone_loads = process_load_doors(@cond_zone, zone_loads, weather)
-    zone_loads = process_load_walls(@cond_zone, zone_loads, weather)
-    zone_loads = process_load_roofs(@cond_zone, zone_loads, weather)
-    zone_loads = process_load_floors(@cond_zone, zone_loads, weather)
+    zone_loads = process_load_windows_skylights(zone_loads, weather)
+    zone_loads = process_load_doors(zone_loads, weather)
+    zone_loads = process_load_walls(zone_loads, weather)
+    zone_loads = process_load_roofs(zone_loads, weather)
+    zone_loads = process_load_floors(zone_loads, weather)
     zone_loads = process_infiltration_ventilation(model, @cond_zone, zone_loads, weather)
     zone_loads = process_internal_gains(@cond_zone, zone_loads)
     return zone_loads
   end
 
-  def self.process_load_windows_skylights(thermal_zone, zone_loads, weather)
+  def self.process_load_windows_skylights(zone_loads, weather)
     '''
     Heating and Cooling Loads: Windows & Skylights
     '''
@@ -504,7 +504,7 @@ class HVACSizing
     alp_load = 0.0 # Average Load Procedure (ALP) Load
     afl_hr = [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0] # Initialize Hourly Aggregate Fenestration Load (AFL)
 
-    Geometry.get_spaces_above_grade_exterior_walls(thermal_zone.spaces).each do |wall|
+    Geometry.get_spaces_above_grade_exterior_walls(@cond_space).each do |wall|
       wall_true_azimuth = true_azimuth(wall)
       cnt225 = (wall_true_azimuth / 22.5).round.to_i
 
@@ -657,7 +657,7 @@ class HVACSizing
     alp_load = 0.0 # Average Load Procedure (ALP) Load
     afl_hr = [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0] # Initialize Hourly Aggregate Fenestration Load (AFL)
 
-    Geometry.get_spaces_above_grade_exterior_roofs(thermal_zone.spaces).each do |roof|
+    Geometry.get_spaces_above_grade_exterior_roofs(@cond_space).each do |roof|
       roof_true_azimuth = true_azimuth(roof)
       cnt225 = (roof_true_azimuth / 22.5).round.to_i
       inclination_angle = Geometry.get_roof_pitch([roof])
@@ -742,7 +742,7 @@ class HVACSizing
     return zone_loads
   end
 
-  def self.process_load_doors(thermal_zone, zone_loads, weather)
+  def self.process_load_doors(zone_loads, weather)
     '''
     Heating and Cooling Loads: Doors
     '''
@@ -758,7 +758,7 @@ class HVACSizing
     zone_loads.Heat_Doors = 0.0
     zone_loads.Cool_Doors = 0.0
 
-    Geometry.get_spaces_above_grade_exterior_walls(thermal_zone.spaces).each do |wall|
+    Geometry.get_spaces_above_grade_exterior_walls(@cond_space).each do |wall|
       wall.subSurfaces.each do |door|
         next if not door.subSurfaceType.downcase.include?('door')
 
@@ -769,10 +769,26 @@ class HVACSizing
       end
     end
 
+    Geometry.get_sfa_mf_space_walls(@cond_space).each do |wall|
+      # parent wall level other side coefficient info
+      adjacent_space_name = wall.surfacePropertyOtherSideCoefficients.get.name.to_s
+      otherside_temp_clg = get_other_side_temp(adjacent_space_name, @cool_setpoint, weather.design.CoolingDrybulb)
+      otherside_temp_htg = get_other_side_temp(adjacent_space_name, @heat_setpoint, weather.design.HeatingDrybulb)
+      # door calculation
+      wall.subSurfaces.each do |door|
+        next if not door.subSurfaceType.downcase.include?('door')
+
+        door_ufactor = get_surface_ufactor(door, door.subSurfaceType)
+
+        zone_loads.Cool_Doors += door_ufactor * UnitConversions.convert(door.netArea, 'm^2', 'ft^2') * (otherside_temp_clg - @cool_setpoint)
+        zone_loads.Heat_Doors += door_ufactor * UnitConversions.convert(door.netArea, 'm^2', 'ft^2') * (@heat_setpoint - otherside_temp_htg)
+      end
+    end
+
     return zone_loads
   end
 
-  def self.process_load_walls(thermal_zone, zone_loads, weather)
+  def self.process_load_walls(zone_loads, weather)
     '''
     Heating and Cooling Loads: Walls
     '''
@@ -782,7 +798,7 @@ class HVACSizing
     surfaces_processed = []
 
     # Above-Grade Exterior Walls
-    Geometry.get_spaces_above_grade_exterior_walls(thermal_zone.spaces).each do |wall|
+    Geometry.get_spaces_above_grade_exterior_walls(@cond_space).each do |wall|
       wallGroup = get_wallgroup(wall)
 
       # Adjust base Cooling Load Temperature Difference (CLTD)
@@ -831,7 +847,7 @@ class HVACSizing
     end
 
     # Interzonal Walls
-    Geometry.get_spaces_interzonal_walls(thermal_zone.spaces).each do |wall|
+    Geometry.get_spaces_interzonal_walls(@cond_space).each do |wall|
       wall_ufactor = get_surface_ufactor(wall, wall.surfaceType)
 
       adjacent_space = wall.adjacentSurface.get.space.get
@@ -840,8 +856,20 @@ class HVACSizing
       surfaces_processed << wall.name.to_s
     end
 
+    # Mf walls
+    Geometry.get_sfa_mf_space_walls(@cond_space).each do |wall|
+      wall_ufactor = get_surface_ufactor(wall, wall.surfaceType)
+
+      adjacent_space_name = wall.surfacePropertyOtherSideCoefficients.get.name.to_s
+      otherside_temp_clg = get_other_side_temp(adjacent_space_name, @cool_setpoint, weather.design.CoolingDrybulb)
+      otherside_temp_htg = get_other_side_temp(adjacent_space_name, @heat_setpoint, weather.design.HeatingDrybulb)
+      zone_loads.Cool_Walls += wall_ufactor * UnitConversions.convert(wall.netArea, 'm^2', 'ft^2') * (otherside_temp_clg - @cool_setpoint)
+      zone_loads.Heat_Walls += wall_ufactor * UnitConversions.convert(wall.netArea, 'm^2', 'ft^2') * (@heat_setpoint - otherside_temp_htg)
+      surfaces_processed << wall.name.to_s
+    end
+
     # Foundation walls
-    Geometry.get_spaces_below_grade_exterior_walls(thermal_zone.spaces).each do |wall|
+    Geometry.get_spaces_below_grade_exterior_walls(@cond_space).each do |wall|
       u_wall_with_soil, u_wall_without_soil, is_insulated = get_foundation_wall_props(wall)
 
       zone_loads.Heat_Walls += u_wall_with_soil * UnitConversions.convert(wall.netArea, 'm^2', 'ft^2') * @htd
@@ -855,7 +883,7 @@ class HVACSizing
     return zone_loads
   end
 
-  def self.process_load_roofs(thermal_zone, zone_loads, weather)
+  def self.process_load_roofs(zone_loads, weather)
     '''
     Heating and Cooling Loads: Ceilings
     '''
@@ -867,7 +895,7 @@ class HVACSizing
     surfaces_processed = []
 
     # Roofs
-    Geometry.get_spaces_above_grade_exterior_roofs(thermal_zone.spaces).each do |roof|
+    Geometry.get_spaces_above_grade_exterior_roofs(@cond_space).each do |roof|
       roof_color = get_feature(roof, Constants.SizingInfoRoofColor, 'string')
       roof_material = get_feature(roof, Constants.SizingInfoRoofMaterial, 'string')
       cavity_r = get_feature(roof, Constants.SizingInfoRoofCavityRvalue, 'double')
@@ -925,7 +953,7 @@ class HVACSizing
     return zone_loads
   end
 
-  def self.process_load_floors(thermal_zone, zone_loads, weather)
+  def self.process_load_floors(zone_loads, weather)
     '''
     Heating and Cooling Loads: Floors
     '''
@@ -935,7 +963,7 @@ class HVACSizing
     surfaces_processed = []
 
     # Exterior Floors
-    Geometry.get_spaces_above_grade_exterior_floors(thermal_zone.spaces).each do |floor|
+    Geometry.get_spaces_above_grade_exterior_floors(@cond_space).each do |floor|
       floor_ufactor = get_surface_ufactor(floor, floor.surfaceType)
 
       zone_loads.Cool_Floors += floor_ufactor * UnitConversions.convert(floor.netArea, 'm^2', 'ft^2') * (@ctd - 5.0 + @daily_range_temp_adjust[@daily_range_num])
@@ -944,7 +972,7 @@ class HVACSizing
     end
 
     # Interzonal Floors
-    Geometry.get_spaces_interzonal_floors_and_ceilings(thermal_zone.spaces).each do |floor|
+    Geometry.get_spaces_interzonal_floors_and_ceilings(@cond_space).each do |floor|
       floor_ufactor = get_surface_ufactor(floor, floor.surfaceType)
 
       adjacent_space = floor.adjacentSurface.get.space.get
@@ -953,8 +981,20 @@ class HVACSizing
       surfaces_processed << floor.name.to_s
     end
 
+    # MF Floors
+    Geometry.get_sfa_mf_space_floors_and_ceilings(@cond_space).each do |floor|
+      floor_ufactor = get_surface_ufactor(floor, floor.surfaceType)
+
+      adjacent_space_name = floor.surfacePropertyOtherSideCoefficients.get.name.to_s
+      otherside_temp_clg = get_other_side_temp(adjacent_space_name, @cool_setpoint, weather.design.CoolingDrybulb)
+      otherside_temp_htg = get_other_side_temp(adjacent_space_name, @heat_setpoint, weather.design.HeatingDrybulb)
+      zone_loads.Cool_Floors += floor_ufactor * UnitConversions.convert(floor.netArea, 'm^2', 'ft^2') * (otherside_temp_clg - @cool_setpoint)
+      zone_loads.Heat_Floors += floor_ufactor * UnitConversions.convert(floor.netArea, 'm^2', 'ft^2') * (@heat_setpoint - otherside_temp_htg)
+      surfaces_processed << floor.name.to_s
+    end
+
     # Foundation Floors
-    Geometry.get_spaces_below_grade_exterior_floors(thermal_zone.spaces).each do |floor|
+    Geometry.get_spaces_below_grade_exterior_floors(@cond_space).each do |floor|
       # Conditioned basement floor combinations based on MJ 8th Ed. A12-7 and ASHRAE HoF 2013 pg 18.31 Eq 40
       k_soil = UnitConversions.convert(BaseMaterial.Soil.k_in, 'in', 'ft')
       r_other = Material.Concrete(4.0).rvalue + Material.AirFilmFloorAverage.rvalue
@@ -967,7 +1007,7 @@ class HVACSizing
     end
 
     # Ground Floors (Slab)
-    Geometry.get_spaces_above_grade_ground_floors(thermal_zone.spaces).each do |floor|
+    Geometry.get_spaces_above_grade_ground_floors(@cond_space).each do |floor|
       floor_ufactor = 1.0 / get_feature(floor, Constants.SizingInfoSlabRvalue, 'double')
       zone_loads.Heat_Floors += floor_ufactor * UnitConversions.convert(floor.netArea, 'm^2', 'ft^2') * (@heat_setpoint - weather.data.GroundMonthlyTemps[0])
       surfaces_processed << floor.name.to_s
@@ -2599,6 +2639,18 @@ class HVACSizing
     end
 
     return design_temp
+  end
+
+  def self.get_other_side_temp(adjacent_space_name, setpoint, oa_db)
+    if adjacent_space_name.include? 'other heated space'
+      return [(setpoint + oa_db) / 2, 68].min
+    elsif adjacent_space_name.include? 'other multifamily buffer space'
+      return [(setpoint + oa_db) / 2, 50].min
+    elsif adjacent_space_name.include? 'other non-freezing space'
+      return [oa_db, 40].min
+    elsif adjacent_space_name.include? 'other housing unit'
+      return setpoint
+    end
   end
 
   def self.get_wallgroup(wall)

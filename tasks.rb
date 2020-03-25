@@ -3055,6 +3055,7 @@ end
 def set_hpxml_dishwasher(hpxml_file, hpxml)
   if ['base.xml'].include? hpxml_file
     hpxml.dishwashers.add(id: 'Dishwasher',
+                          location: HPXML::LocationLivingSpace,
                           rated_annual_kwh: 450,
                           place_setting_capacity: 12)
   elsif ['base-appliances-none.xml'].include? hpxml_file
@@ -3093,6 +3094,7 @@ end
 def set_hpxml_cooking_range(hpxml_file, hpxml)
   if ['base.xml'].include? hpxml_file
     hpxml.cooking_ranges.add(id: 'Range',
+                             location: HPXML::LocationLivingSpace,
                              fuel_type: HPXML::FuelTypeElectricity,
                              is_induction: false)
   elsif ['base-appliances-none.xml'].include? hpxml_file

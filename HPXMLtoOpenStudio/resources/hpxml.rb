@@ -126,6 +126,7 @@ class HPXML < Object
   LocationOtherNonFreezingSpace = 'other non-freezing space'
   LocationOutside = 'outside'
   LocationRoof = 'roof'
+  LocationOther = 'other'
   MechVentTypeBalanced = 'balanced'
   MechVentTypeCFIS = 'central fan integrated supply'
   MechVentTypeERV = 'energy recovery ventilator'
@@ -2854,7 +2855,7 @@ class HPXML < Object
   end
 
   class Dishwasher < BaseElement
-    ATTRS = [:id, :energy_factor, :rated_annual_kwh, :place_setting_capacity]
+    ATTRS = [:id, :location, :energy_factor, :rated_annual_kwh, :place_setting_capacity]
     attr_accessor(*ATTRS)
 
     def to_rexml(doc)
@@ -2864,6 +2865,7 @@ class HPXML < Object
       dishwasher = XMLHelper.add_element(appliances, 'Dishwasher')
       sys_id = XMLHelper.add_element(dishwasher, 'SystemIdentifier')
       XMLHelper.add_attribute(sys_id, 'id', @id)
+      XMLHelper.add_element(dishwasher, 'Location', @location) unless @location.nil?
       XMLHelper.add_element(dishwasher, 'EnergyFactor', Float(@energy_factor)) unless @energy_factor.nil?
       XMLHelper.add_element(dishwasher, 'RatedAnnualkWh', Float(@rated_annual_kwh)) unless @rated_annual_kwh.nil?
       XMLHelper.add_element(dishwasher, 'PlaceSettingCapacity', Integer(@place_setting_capacity)) unless @place_setting_capacity.nil?
@@ -2873,6 +2875,7 @@ class HPXML < Object
       return if dishwasher.nil?
 
       @id = HPXML::get_id(dishwasher)
+      @location = XMLHelper.get_value(dishwasher, 'Location')
       @energy_factor = HPXML::to_float_or_nil(XMLHelper.get_value(dishwasher, 'EnergyFactor'))
       @rated_annual_kwh = HPXML::to_float_or_nil(XMLHelper.get_value(dishwasher, 'RatedAnnualkWh'))
       @place_setting_capacity = HPXML::to_integer_or_nil(XMLHelper.get_value(dishwasher, 'PlaceSettingCapacity'))
@@ -2935,7 +2938,7 @@ class HPXML < Object
   end
 
   class CookingRange < BaseElement
-    ATTRS = [:id, :fuel_type, :is_induction]
+    ATTRS = [:id, :location, :fuel_type, :is_induction]
     attr_accessor(*ATTRS)
 
     def to_rexml(doc)
@@ -2945,6 +2948,7 @@ class HPXML < Object
       cooking_range = XMLHelper.add_element(appliances, 'CookingRange')
       sys_id = XMLHelper.add_element(cooking_range, 'SystemIdentifier')
       XMLHelper.add_attribute(sys_id, 'id', @id)
+      XMLHelper.add_element(cooking_range, 'Location', @location) unless @location.nil?
       XMLHelper.add_element(cooking_range, 'FuelType', @fuel_type) unless @fuel_type.nil?
       XMLHelper.add_element(cooking_range, 'IsInduction', Boolean(@is_induction)) unless @is_induction.nil?
     end
@@ -2953,6 +2957,7 @@ class HPXML < Object
       return if cooking_range.nil?
 
       @id = HPXML::get_id(cooking_range)
+      @location = XMLHelper.get_value(cooking_range, 'Location')
       @fuel_type = XMLHelper.get_value(cooking_range, 'FuelType')
       @is_induction = HPXML::to_bool_or_nil(XMLHelper.get_value(cooking_range, 'IsInduction'))
     end
