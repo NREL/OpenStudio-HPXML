@@ -85,7 +85,7 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
     end
     model.removeObjects(handles)
     unless handles.empty?
-      runner.registerWarning("The model was 'reset'.")
+      runner.registerWarning('The model contains existing objects and is being reset.')
     end
 
     # Check for correct versions of OS
