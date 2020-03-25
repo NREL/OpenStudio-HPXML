@@ -145,7 +145,7 @@ class BuildResidentialHPXMLTest < MiniTest::Test
       hpxml.foundation_walls.sort_by! { |foundation_wall| foundation_wall.area }
       hpxml.frame_floors.sort_by! { |frame_floor| frame_floor.exterior_adjacent_to }
       hpxml.slabs.sort_by! { |slab| slab.area }
-      hpxml.windows.sort_by! { |window| window.azimuth }
+      hpxml.windows.sort_by! { |window| [window.azimuth, window.area] }
 
       # Delete elements that we aren't going to diff
       hpxml.header.xml_type = nil
@@ -170,6 +170,7 @@ class BuildResidentialHPXMLTest < MiniTest::Test
         wall.area = nil # Attic gable wall areas
       end
       hpxml.windows.each do |window|
+        window.area = window.area.round(2)
         window.overhangs_distance_to_bottom_of_window = nil # Height of windows
       end
 
