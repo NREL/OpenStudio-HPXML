@@ -2494,7 +2494,7 @@ class HPXML < Object
       super(*args)
     end
     ATTRS = [:id, :distribution_system_type, :distribution_system_type, :annual_heating_dse,
-             :annual_cooling_dse, :duct_system_sealed]
+             :annual_cooling_dse, :duct_system_sealed, :duct_leakage_testing_exemption]
     attr_accessor(*ATTRS)
     attr_reader(:duct_leakage_measurements, :ducts)
 
@@ -2567,6 +2567,9 @@ class HPXML < Object
 
       @duct_leakage_measurements.to_rexml(air_distribution)
       @ducts.to_rexml(air_distribution)
+
+      HPXML::add_extension(parent: air_distribution,
+                           extensions: { 'DuctLeakageTestingExemption' => HPXML::to_bool_or_nil(@duct_leakage_testing_exemption) })
     end
 
     def from_rexml(hvac_distribution)
@@ -2580,6 +2583,7 @@ class HPXML < Object
       @annual_heating_dse = HPXML::to_float_or_nil(XMLHelper.get_value(hvac_distribution, 'AnnualHeatingDistributionSystemEfficiency'))
       @annual_cooling_dse = HPXML::to_float_or_nil(XMLHelper.get_value(hvac_distribution, 'AnnualCoolingDistributionSystemEfficiency'))
       @duct_system_sealed = HPXML::to_bool_or_nil(XMLHelper.get_value(hvac_distribution, 'HVACDistributionImprovement/DuctSystemSealed'))
+      @duct_leakage_testing_exemption = HPXML::to_bool_or_nil(XMLHelper.get_value(hvac_distribution, 'DistributionSystemType/AirDistribution/extension/DuctLeakageTestingExemption'))
 
       @duct_leakage_measurements.from_rexml(hvac_distribution)
       @ducts.from_rexml(hvac_distribution)

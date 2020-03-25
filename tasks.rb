@@ -232,13 +232,6 @@ def create_hpxmls
     'base-misc-whole-house-fan.xml' => 'base.xml',
     'base-pv.xml' => 'base.xml',
     'base-site-neighbors.xml' => 'base.xml',
-    'base-version-2014.xml' => 'base.xml',
-    'base-version-2014A.xml' => 'base.xml',
-    'base-version-2014AE.xml' => 'base.xml',
-    'base-version-2014AEG.xml' => 'base.xml',
-    'base-version-2019.xml' => 'base.xml',
-    'base-version-2019A.xml' => 'base.xml',
-    'base-version-latest.xml' => 'base.xml',
 
     'hvac_autosizing/base-autosize.xml' => 'base.xml',
     'hvac_autosizing/base-hvac-air-to-air-heat-pump-1-speed-autosize.xml' => 'base-hvac-air-to-air-heat-pump-1-speed.xml',
@@ -462,20 +455,6 @@ def set_hpxml_header(hpxml_file, hpxml)
                      event_type: 'proposed workscope',
                      created_date_and_time: Time.new(2000, 1, 1).strftime('%Y-%m-%dT%H:%M:%S%:z'), # Hard-code to prevent diffs
                      timestep: 60)
-  elsif ['base-version-2014.xml'].include? hpxml_file
-    hpxml.header.eri_calculation_version = '2014'
-  elsif ['base-version-2014A.xml'].include? hpxml_file
-    hpxml.header.eri_calculation_version = '2014A'
-  elsif ['base-version-2014AE.xml'].include? hpxml_file
-    hpxml.header.eri_calculation_version = '2014AE'
-  elsif ['base-version-2014AEG.xml'].include? hpxml_file
-    hpxml.header.eri_calculation_version = '2014AEG'
-  elsif ['base-version-2019.xml'].include? hpxml_file
-    hpxml.header.eri_calculation_version = '2019'
-  elsif ['base-version-2019A.xml'].include? hpxml_file
-    hpxml.header.eri_calculation_version = '2019A'
-  elsif ['base-version-latest.xml'].include? hpxml_file
-    hpxml.header.eri_calculation_version = 'latest'
   elsif ['base-misc-timestep-10-mins.xml'].include? hpxml_file
     hpxml.header.timestep = 10
   elsif ['invalid_files/invalid-timestep.xml'].include? hpxml_file
@@ -2810,7 +2789,7 @@ def set_hpxml_water_heating_systems(hpxml_file, hpxml)
     if ['base-misc-defaults.xml'].include? hpxml_file
       water_heating_system.temperature = nil
     else
-      water_heating_system.temperature = Waterheater.get_default_hot_water_temperature(hpxml.header.eri_calculation_version)
+      water_heating_system.temperature = Waterheater.get_default_hot_water_temperature(Constants.ERIVersions[-1])
     end
   end
 end
