@@ -936,6 +936,13 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     arg.setDefaultValue(Constants.SizingAuto)
     args << arg
 
+    arg = OpenStudio::Measure::OSArgument::makeStringArgument('heat_pump_heating_capacity_17F', true)
+    arg.setDisplayName('Heat Pump: Heating Capacity 17F')
+    arg.setDescription("The output heating capacity of the heat pump at 17F. If using '#{Constants.SizingAuto}', the autosizing algorithm will use ACCA Manual S to set the capacity.")
+    arg.setUnits('Btu/hr')
+    arg.setDefaultValue(Constants.SizingAuto)
+    args << arg
+
     arg = OpenStudio::Measure::OSArgument::makeStringArgument('heat_pump_cooling_capacity', true)
     arg.setDisplayName('Heat Pump: Cooling Capacity')
     arg.setDescription("The output cooling capacity of the heat pump. If using '#{Constants.SizingAuto}', the autosizing algorithm will use ACCA Manual S to set the capacity.")
@@ -1983,6 +1990,7 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
              heat_pump_heating_efficiency: runner.getDoubleArgumentValue('heat_pump_heating_efficiency', user_arguments),
              heat_pump_cooling_efficiency: runner.getDoubleArgumentValue('heat_pump_cooling_efficiency', user_arguments),
              heat_pump_heating_capacity: runner.getStringArgumentValue('heat_pump_heating_capacity', user_arguments),
+             heat_pump_heating_capacity_17F: runner.getStringArgumentValue('heat_pump_heating_capacity_17F', user_arguments),
              heat_pump_cooling_capacity: runner.getStringArgumentValue('heat_pump_cooling_capacity', user_arguments),
              heat_pump_fraction_heat_load_served: runner.getDoubleArgumentValue('heat_pump_fraction_heat_load_served', user_arguments),
              heat_pump_fraction_cool_load_served: runner.getDoubleArgumentValue('heat_pump_fraction_cool_load_served', user_arguments),
@@ -2286,12 +2294,9 @@ class HPXMLFile
     hpxml.set_header(xml_type: 'HPXML',
                      xml_generated_by: 'BuildResidentialHPXML',
                      transaction: 'create',
+                     timestep: args[:timestep],
                      building_id: 'MyBuilding',
                      event_type: 'proposed workscope')
-
-    if args[:timestep] != 60
-      hpxml.header.timestep = args[:timestep]
-    end
   end
 
   def self.set_site(hpxml, runner, args)
@@ -2349,15 +2354,12 @@ class HPXMLFile
 
     conditioned_building_volume = args[:cfa] * args[:wall_height]
 
-    fraction_of_operable_window_area = args[:window_fraction_of_operable_area]
-
     hpxml.set_building_construction(number_of_conditioned_floors: number_of_conditioned_floors,
                                     number_of_conditioned_floors_above_grade: number_of_conditioned_floors_above_grade,
                                     number_of_bedrooms: args[:num_bedrooms],
                                     number_of_bathrooms: number_of_bathrooms,
                                     conditioned_floor_area: args[:cfa],
-                                    conditioned_building_volume: conditioned_building_volume,
-                                    fraction_of_operable_window_area: fraction_of_operable_window_area)
+                                    conditioned_building_volume: conditioned_building_volume)
   end
 
   def self.set_climate_and_risk_zones(hpxml, runner, args)
@@ -2710,17 +2712,34 @@ class HPXMLFile
           interior_shading_factor_winter = 0.0
         end
 
-        hpxml.windows.add(id: "#{sub_surface.name}_#{sub_surface_facade}",
-                          area: UnitConversions.convert(sub_surface.grossArea, 'm^2', 'ft^2').round,
-                          azimuth: UnitConversions.convert(sub_surface.azimuth, 'rad', 'deg').round,
-                          ufactor: args[:window_ufactor],
-                          shgc: args[:window_shgc],
-                          overhangs_depth: overhangs_depth,
-                          overhangs_distance_to_top_of_window: overhangs_distance_to_top_of_window,
-                          overhangs_distance_to_bottom_of_window: overhangs_distance_to_bottom_of_window,
-                          interior_shading_factor_winter: interior_shading_factor_winter,
-                          interior_shading_factor_summer: interior_shading_factor_summer,
-                          wall_idref: surface.name)
+        if args[:window_fraction_of_operable_area] > 0
+          hpxml.windows.add(id: "#{sub_surface.name}_#{sub_surface_facade}_Operable",
+                            area: (UnitConversions.convert(sub_surface.grossArea, 'm^2', 'ft^2') * args[:window_fraction_of_operable_area]).round(2),
+                            azimuth: UnitConversions.convert(sub_surface.azimuth, 'rad', 'deg').round,
+                            ufactor: args[:window_ufactor],
+                            shgc: args[:window_shgc],
+                            overhangs_depth: overhangs_depth,
+                            overhangs_distance_to_top_of_window: overhangs_distance_to_top_of_window,
+                            overhangs_distance_to_bottom_of_window: overhangs_distance_to_bottom_of_window,
+                            interior_shading_factor_winter: interior_shading_factor_winter,
+                            interior_shading_factor_summer: interior_shading_factor_summer,
+                            operable: true,
+                            wall_idref: surface.name)
+        end
+        if args[:window_fraction_of_operable_area] < 1
+          hpxml.windows.add(id: "#{sub_surface.name}_#{sub_surface_facade}_Inoperable",
+                            area: (UnitConversions.convert(sub_surface.grossArea, 'm^2', 'ft^2') * (1.0 - args[:window_fraction_of_operable_area])).round(2),
+                            azimuth: UnitConversions.convert(sub_surface.azimuth, 'rad', 'deg').round,
+                            ufactor: args[:window_ufactor],
+                            shgc: args[:window_shgc],
+                            overhangs_depth: overhangs_depth,
+                            overhangs_distance_to_top_of_window: overhangs_distance_to_top_of_window,
+                            overhangs_distance_to_bottom_of_window: overhangs_distance_to_bottom_of_window,
+                            interior_shading_factor_winter: interior_shading_factor_winter,
+                            interior_shading_factor_summer: interior_shading_factor_summer,
+                            operable: false,
+                            wall_idref: surface.name)
+        end
       end
     end
   end
@@ -2810,8 +2829,19 @@ class HPXMLFile
 
     if [HPXML::HVACTypeCentralAirConditioner].include? cooling_system_type
       hpxml.cooling_systems[-1].cooling_efficiency_seer = args[:cooling_system_cooling_efficiency]
+      if args[:cooling_system_cooling_efficiency] <= 15.0
+        hpxml.cooling_systems[-1].compressor_type = 'single stage'
+        hpxml.cooling_systems[-1].cooling_shr = 0.73
+      elsif args[:cooling_system_cooling_efficiency] <= 21.0
+        hpxml.cooling_systems[-1].compressor_type = 'two stage'
+        hpxml.cooling_systems[-1].cooling_shr = 0.73
+      else
+        hpxml.cooling_systems[-1].compressor_type = 'variable speed'
+        hpxml.cooling_systems[-1].cooling_shr = 0.78
+      end
     elsif [HPXML::HVACTypeRoomAirConditioner].include? cooling_system_type
       hpxml.cooling_systems[-1].cooling_efficiency_eer = args[:cooling_system_cooling_efficiency]
+      hpxml.cooling_systems[-1].cooling_shr = 0.65
     end
   end
 
@@ -2827,6 +2857,13 @@ class HPXMLFile
       heating_capacity = -1
     end
     heating_capacity = Float(heating_capacity)
+
+    heating_capacity_17F = args[:heat_pump_heating_capacity_17F]
+    if heating_capacity_17F == Constants.SizingAuto
+      heating_capacity_17F = nil
+    else
+      heating_capacity_17F = Float(heating_capacity_17F)
+    end
 
     if args[:heat_pump_backup_fuel] != 'none'
       backup_heating_fuel = args[:heat_pump_backup_fuel]
@@ -2855,6 +2892,7 @@ class HPXMLFile
                          heat_pump_type: heat_pump_type,
                          heat_pump_fuel: heat_pump_fuel,
                          heating_capacity: heating_capacity,
+                         heating_capacity_17F: heating_capacity_17F,
                          cooling_capacity: cooling_capacity,
                          fraction_heat_load_served: args[:heat_pump_fraction_heat_load_served],
                          fraction_cool_load_served: args[:heat_pump_fraction_cool_load_served],
@@ -2867,9 +2905,26 @@ class HPXMLFile
     if [HPXML::HVACTypeHeatPumpAirToAir, HPXML::HVACTypeHeatPumpMiniSplit].include? heat_pump_type
       hpxml.heat_pumps[-1].heating_efficiency_hspf = args[:heat_pump_heating_efficiency]
       hpxml.heat_pumps[-1].cooling_efficiency_seer = args[:heat_pump_cooling_efficiency]
+      if args[:heat_pump_cooling_efficiency] <= 15.0
+        if heat_pump_type == HPXML::HVACTypeHeatPumpAirToAir
+          hpxml.heat_pumps[-1].compressor_type = 'single stage'
+        end
+        hpxml.heat_pumps[-1].cooling_shr = 0.73
+      elsif args[:heat_pump_cooling_efficiency] <= 21.0
+        if heat_pump_type == HPXML::HVACTypeHeatPumpAirToAir
+          hpxml.heat_pumps[-1].compressor_type = 'two stage'
+        end
+        hpxml.heat_pumps[-1].cooling_shr = 0.73
+      else
+        if heat_pump_type == HPXML::HVACTypeHeatPumpAirToAir
+          hpxml.heat_pumps[-1].compressor_type = 'variable speed'
+        end
+        hpxml.heat_pumps[-1].cooling_shr = 0.78
+      end
     elsif [HPXML::HVACTypeHeatPumpGroundToAir].include? heat_pump_type
       hpxml.heat_pumps[-1].heating_efficiency_cop = args[:heat_pump_heating_efficiency]
       hpxml.heat_pumps[-1].cooling_efficiency_eer = args[:heat_pump_cooling_efficiency]
+      hpxml.heat_pumps[-1].cooling_shr = 0.73
     end
   end
 
@@ -3151,7 +3206,8 @@ class HPXMLFile
                                     recovery_efficiency: recovery_efficiency,
                                     related_hvac_idref: related_hvac_idref,
                                     standby_loss: standby_loss,
-                                    jacket_r_value: jacket_r_value)
+                                    jacket_r_value: jacket_r_value,
+                                    temperature: 125.0)
   end
 
   def self.set_hot_water_distribution(hpxml, runner, args)
@@ -3392,13 +3448,8 @@ class HPXMLFile
         kWh_per_year = args[:plug_loads_annual_kwh][i]
       end
 
-      if args[:plug_loads_frac_sensible][i] > 0
-        frac_sensible = args[:plug_loads_frac_sensible][i]
-      end
-
-      if args[:plug_loads_frac_latent][i] > 0
-        frac_latent = args[:plug_loads_frac_latent][i]
-      end
+      frac_sensible = args[:plug_loads_frac_sensible][i]
+      frac_latent = args[:plug_loads_frac_latent][i]
 
       hpxml.plug_loads.add(id: "PlugLoadMisc#{i + 1}",
                            plug_load_type: plug_load_type,

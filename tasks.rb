@@ -89,16 +89,7 @@ def create_osws
     'base-enclosure-overhangs.osw' => 'base.osw',
     # 'base-enclosure-skylights.osw' => 'base.osw', # There are no front roof surfaces, but 15.0 ft^2 of skylights were specified.
     # 'base-enclosure-split-surfaces.osw' => 'base.osw',
-    'base-enclosure-walltype-cmu.osw' => 'base.osw',
-    'base-enclosure-walltype-doublestud.osw' => 'base.osw',
-    'base-enclosure-walltype-icf.osw' => 'base.osw',
-    'base-enclosure-walltype-log.osw' => 'base.osw',
-    'base-enclosure-walltype-sip.osw' => 'base.osw',
-    'base-enclosure-walltype-solidconcrete.osw' => 'base.osw',
-    'base-enclosure-walltype-steelstud.osw' => 'base.osw',
-    'base-enclosure-walltype-stone.osw' => 'base.osw',
-    'base-enclosure-walltype-strawbale.osw' => 'base.osw',
-    'base-enclosure-walltype-structuralbrick.osw' => 'base.osw',
+    # 'base-enclosure-walltypes.osw' => 'base.osw',
     'base-enclosure-windows-interior-shading.osw' => 'base.osw',
     'base-enclosure-windows-none.osw' => 'base.osw',
 
@@ -206,9 +197,8 @@ def create_osws
     'base-mechvent-supply.osw' => 'base.osw',
 
     'base-misc-ceiling-fans.osw' => 'base.osw',
+    # 'base-misc-defaults.osw' => 'base.osw',
     'base-misc-lighting-none.osw' => 'base.osw',
-    'base-misc-loads-detailed.osw' => 'base.osw',
-    'base-misc-number-of-occupants.osw' => 'base.osw',
     'base-misc-timestep-10-mins.osw' => 'base.osw',
     'base-misc-whole-house-fan.osw' => 'base.osw',
 
@@ -389,14 +379,14 @@ def get_values(osw_file, step)
     step.setArgument('window_fraction_of_operable_area', 0.33)
     step.setArgument('window_ufactor', 0.33)
     step.setArgument('window_shgc', 0.45)
-    step.setArgument('winter_shading_coefficient_front_facade', 0)
-    step.setArgument('summer_shading_coefficient_front_facade', 0)
-    step.setArgument('winter_shading_coefficient_back_facade', 0)
-    step.setArgument('summer_shading_coefficient_back_facade', 0)
-    step.setArgument('winter_shading_coefficient_left_facade', 0)
-    step.setArgument('summer_shading_coefficient_left_facade', 0)
-    step.setArgument('winter_shading_coefficient_right_facade', 0)
-    step.setArgument('summer_shading_coefficient_right_facade', 0)
+    step.setArgument('winter_shading_coefficient_front_facade', 0.85)
+    step.setArgument('summer_shading_coefficient_front_facade', 0.7)
+    step.setArgument('winter_shading_coefficient_back_facade', 0.85)
+    step.setArgument('summer_shading_coefficient_back_facade', 0.7)
+    step.setArgument('winter_shading_coefficient_left_facade', 0.85)
+    step.setArgument('summer_shading_coefficient_left_facade', 0.7)
+    step.setArgument('winter_shading_coefficient_right_facade', 0.85)
+    step.setArgument('summer_shading_coefficient_right_facade', 0.7)
     step.setArgument('overhangs_front_depth', 0)
     step.setArgument('overhangs_front_distance_to_top_of_window', 0)
     step.setArgument('overhangs_back_depth', 0)
@@ -433,6 +423,7 @@ def get_values(osw_file, step)
     step.setArgument('heat_pump_heating_efficiency', 7.7)
     step.setArgument('heat_pump_cooling_efficiency', 13.0)
     step.setArgument('heat_pump_heating_capacity', 64000.0)
+    step.setArgument('heat_pump_heating_capacity_17F', Constants.SizingAuto)
     step.setArgument('heat_pump_cooling_capacity', 48000.0)
     step.setArgument('heat_pump_fraction_heat_load_served', 1)
     step.setArgument('heat_pump_fraction_cool_load_served', 1)
@@ -551,16 +542,16 @@ def get_values(osw_file, step)
     step.setArgument('ceiling_fan_quantity', 0)
     step.setArgument('ceiling_fan_cooling_setpoint_temp_offset', 0)
     step.setArgument('plug_loads_plug_load_type_1', HPXML::PlugLoadTypeOther)
-    step.setArgument('plug_loads_annual_kwh_1', 0)
-    step.setArgument('plug_loads_frac_sensible_1', 0)
-    step.setArgument('plug_loads_frac_latent_1', 0)
+    step.setArgument('plug_loads_annual_kwh_1', 2457.0)
+    step.setArgument('plug_loads_frac_sensible_1', 0.855)
+    step.setArgument('plug_loads_frac_latent_1', 0.045)
     step.setArgument('plug_loads_plug_load_type_2', HPXML::PlugLoadTypeTelevision)
-    step.setArgument('plug_loads_annual_kwh_2', 0)
-    step.setArgument('plug_loads_frac_sensible_2', 0)
-    step.setArgument('plug_loads_frac_latent_2', 0)
-    step.setArgument('plug_loads_schedule_values', false)
-    step.setArgument('plug_loads_weekday_fractions', '0.035, 0.033, 0.032, 0.031, 0.032, 0.033, 0.037, 0.042, 0.043, 0.043, 0.043, 0.044, 0.045, 0.045, 0.044, 0.046, 0.048, 0.052, 0.053, 0.05, 0.047, 0.045, 0.04, 0.036')
-    step.setArgument('plug_loads_weekend_fractions', '0.035, 0.033, 0.032, 0.031, 0.032, 0.033, 0.037, 0.042, 0.043, 0.043, 0.043, 0.044, 0.045, 0.045, 0.044, 0.046, 0.048, 0.052, 0.053, 0.05, 0.047, 0.045, 0.04, 0.036')
+    step.setArgument('plug_loads_annual_kwh_2', 620.0)
+    step.setArgument('plug_loads_frac_sensible_2', 1.0)
+    step.setArgument('plug_loads_frac_latent_2', 0.0)
+    step.setArgument('plug_loads_schedule_values', true)
+    step.setArgument('plug_loads_weekday_fractions', '0.04, 0.037, 0.037, 0.036, 0.033, 0.036, 0.043, 0.047, 0.034, 0.023, 0.024, 0.025, 0.024, 0.028, 0.031, 0.032, 0.039, 0.053, 0.063, 0.067, 0.071, 0.069, 0.059, 0.05')
+    step.setArgument('plug_loads_weekend_fractions', '0.04, 0.037, 0.037, 0.036, 0.033, 0.036, 0.043, 0.047, 0.034, 0.023, 0.024, 0.025, 0.024, 0.028, 0.031, 0.032, 0.039, 0.053, 0.063, 0.067, 0.071, 0.069, 0.059, 0.05')
     step.setArgument('plug_loads_monthly_multipliers', '1.248, 1.257, 0.993, 0.989, 0.993, 0.827, 0.821, 0.821, 0.827, 0.99, 0.987, 1.248')
   elsif ['base-single-family-attached.osw'].include? osw_file
     step.setArgument('unit_type', 'single-family attached')
@@ -862,6 +853,7 @@ def get_values(osw_file, step)
     step.setArgument('back_window_area', 216.0)
     step.setArgument('left_window_area', 144.0)
     step.setArgument('right_window_area', 144.0)
+    step.setArgument('plug_loads_annual_kwh_1', 3685.5)
   elsif ['base-enclosure-2stories-garage.osw'].include? osw_file
     step.setArgument('cfa', 4050.0)
     step.setArgument('num_floors', 2)
@@ -888,13 +880,17 @@ def get_values(osw_file, step)
   elsif ['base-enclosure-beds-1.osw'].include? osw_file
     step.setArgument('num_bedrooms', 1)
     step.setArgument('water_heater_heating_capacity', 18.767)
+    step.setArgument('plug_loads_annual_kwh_2', 482.0)
   elsif ['base-enclosure-beds-2.osw'].include? osw_file
     step.setArgument('num_bedrooms', 2)
     step.setArgument('water_heater_heating_capacity', 18.767)
+    step.setArgument('plug_loads_annual_kwh_2', 551.0)
   elsif ['base-enclosure-beds-4.osw'].include? osw_file
     step.setArgument('num_bedrooms', 4)
+    step.setArgument('plug_loads_annual_kwh_2', 689.0)
   elsif ['base-enclosure-beds-5.osw'].include? osw_file
     step.setArgument('num_bedrooms', 5)
+    step.setArgument('plug_loads_annual_kwh_2', 758.0)
   elsif ['base-enclosure-garage.osw'].include? osw_file
     step.setArgument('garage_width', 30.0)
     step.setArgument('garage_protrusion', 1.0)
@@ -921,36 +917,8 @@ def get_values(osw_file, step)
     step.setArgument('back_skylight_area', 15)
   elsif ['base-enclosure-split-surfaces.osw'].include? osw_file
 
-  elsif ['base-enclosure-walltype-cmu.osw'].include? osw_file
-    step.setArgument('wall_type', HPXML::WallTypeCMU)
-    step.setArgument('wall_conditioned_r', 12)
-  elsif ['base-enclosure-walltype-doublestud.osw'].include? osw_file
-    step.setArgument('wall_type', HPXML::WallTypeDoubleWoodStud)
-    step.setArgument('wall_conditioned_r', 28.7)
-  elsif ['base-enclosure-walltype-icf.osw'].include? osw_file
-    step.setArgument('wall_type', HPXML::WallTypeICF)
-    step.setArgument('wall_conditioned_r', 21.0)
-  elsif ['base-enclosure-walltype-log.osw'].include? osw_file
-    step.setArgument('wall_type', HPXML::WallTypeLog)
-    step.setArgument('wall_conditioned_r', 7.1)
-  elsif ['base-enclosure-walltype-sip.osw'].include? osw_file
-    step.setArgument('wall_type', HPXML::WallTypeSIP)
-    step.setArgument('wall_conditioned_r', 16.1)
-  elsif ['base-enclosure-walltype-solidconcrete.osw'].include? osw_file
-    step.setArgument('wall_type', HPXML::WallTypeConcrete)
-    step.setArgument('wall_conditioned_r', 1.35)
-  elsif ['base-enclosure-walltype-steelstud.osw'].include? osw_file
-    step.setArgument('wall_type', HPXML::WallTypeSteelStud)
-    step.setArgument('wall_conditioned_r', 8.1)
-  elsif ['base-enclosure-walltype-stone.osw'].include? osw_file
-    step.setArgument('wall_type', HPXML::WallTypeStone)
-    step.setArgument('wall_conditioned_r', 5.4)
-  elsif ['base-enclosure-walltype-strawbale.osw'].include? osw_file
-    step.setArgument('wall_type', HPXML::WallTypeStrawBale)
-    step.setArgument('wall_conditioned_r', 58.8)
-  elsif ['base-enclosure-walltype-structuralbrick.osw'].include? osw_file
-    step.setArgument('wall_type', HPXML::WallTypeBrick)
-    step.setArgument('wall_conditioned_r', 7.9)
+  elsif ['base-enclosure-walltypes.osw'].include? osw_file
+
   elsif ['base-enclosure-windows-interior-shading.osw'].include? osw_file
     step.setArgument('winter_shading_coefficient_front_facade', 0.99)
     step.setArgument('summer_shading_coefficient_front_facade', 0.01)
@@ -969,6 +937,7 @@ def get_values(osw_file, step)
     step.setArgument('cfa', 1350.0)
     step.setArgument('foundation_type', HPXML::FoundationTypeAmbient)
     step.setArgument('foundation_ceiling_r', 18.7)
+    step.setArgument('plug_loads_annual_kwh_1', 1228.5)
   elsif ['base-foundation-complex.osw'].include? osw_file
 
   elsif ['base-foundation-conditioned-basement-slab-insulation.osw'].include? osw_file
@@ -987,6 +956,7 @@ def get_values(osw_file, step)
     step.setArgument('slab_under_width', 999)
     step.setArgument('carpet_fraction', 1.0)
     step.setArgument('carpet_r_value', 2.5)
+    step.setArgument('plug_loads_annual_kwh_1', 1228.5)
   elsif ['base-foundation-unconditioned-basement.osw'].include? osw_file
     step.setArgument('cfa', 1350.0)
     step.setArgument('foundation_type', HPXML::FoundationTypeBasementUnconditioned)
@@ -999,6 +969,7 @@ def get_values(osw_file, step)
     step.setArgument('clothes_washer_location', Constants.Auto)
     step.setArgument('clothes_dryer_location', Constants.Auto)
     step.setArgument('refrigerator_location', HPXML::LocationBasementUnconditioned)
+    step.setArgument('plug_loads_annual_kwh_1', 1228.5)
   elsif ['base-foundation-unconditioned-basement-above-grade.osw'].include? osw_file
     step.setArgument('cfa', 1350.0)
     step.setArgument('foundation_type', HPXML::FoundationTypeBasementUnconditioned)
@@ -1011,6 +982,7 @@ def get_values(osw_file, step)
     step.setArgument('clothes_washer_location', Constants.Auto)
     step.setArgument('clothes_dryer_location', Constants.Auto)
     step.setArgument('refrigerator_location', HPXML::LocationBasementUnconditioned)
+    step.setArgument('plug_loads_annual_kwh_1', 1228.5)
   elsif ['base-foundation-unconditioned-basement-assembly-r.osw'].include? osw_file
 
   elsif ['base-foundation-unconditioned-basement-wall-insulation.osw'].include? osw_file
@@ -1024,6 +996,7 @@ def get_values(osw_file, step)
     step.setArgument('clothes_washer_location', Constants.Auto)
     step.setArgument('clothes_dryer_location', Constants.Auto)
     step.setArgument('refrigerator_location', HPXML::LocationBasementUnconditioned)
+    step.setArgument('plug_loads_annual_kwh_1', 1228.5)
   elsif ['base-foundation-unvented-crawlspace.osw'].include? osw_file
     step.setArgument('cfa', 1350.0)
     step.setArgument('foundation_type', HPXML::FoundationTypeCrawlspaceUnvented)
@@ -1035,6 +1008,7 @@ def get_values(osw_file, step)
     step.setArgument('supply_duct_location', HPXML::LocationCrawlspaceUnvented)
     step.setArgument('return_duct_location', HPXML::LocationCrawlspaceUnvented)
     step.setArgument('water_heater_location', Constants.Auto)
+    step.setArgument('plug_loads_annual_kwh_1', 1228.5)
   elsif ['base-foundation-vented-crawlspace.osw'].include? osw_file
     step.setArgument('cfa', 1350.0)
     step.setArgument('foundation_type', HPXML::FoundationTypeCrawlspaceVented)
@@ -1046,6 +1020,7 @@ def get_values(osw_file, step)
     step.setArgument('supply_duct_location', HPXML::LocationCrawlspaceVented)
     step.setArgument('return_duct_location', HPXML::LocationCrawlspaceVented)
     step.setArgument('water_heater_location', Constants.Auto)
+    step.setArgument('plug_loads_annual_kwh_1', 1228.5)
   elsif ['base-foundation-walkout-basement.osw'].include? osw_file
     step.setArgument('foundation_wall_distance_to_bottom', 4.0)
     step.setArgument('foundation_wall_depth_below_grade', 3.0)
@@ -1054,6 +1029,7 @@ def get_values(osw_file, step)
     step.setArgument('cooling_system_type', 'none')
     step.setArgument('heat_pump_type', HPXML::HVACTypeHeatPumpAirToAir)
     step.setArgument('heat_pump_heating_capacity', 42000.0)
+    step.setArgument('heat_pump_heating_capacity_17F', 26460.0)
     step.setArgument('heat_pump_backup_fuel', HPXML::FuelTypeElectricity)
   elsif ['base-hvac-air-to-air-heat-pump-1-speed.detailed.osw'].include? osw_file
 
@@ -1063,6 +1039,7 @@ def get_values(osw_file, step)
     step.setArgument('heat_pump_type', HPXML::HVACTypeHeatPumpAirToAir)
     step.setArgument('heat_pump_heating_efficiency', 9.3)
     step.setArgument('heat_pump_heating_capacity', 42000.0)
+    step.setArgument('heat_pump_heating_capacity_17F', 24780.0)
     step.setArgument('heat_pump_cooling_efficiency', 18.0)
     step.setArgument('heat_pump_backup_fuel', HPXML::FuelTypeElectricity)
   elsif ['base-hvac-air-to-air-heat-pump-2-speed-detailed.osw'].include? osw_file
@@ -1073,6 +1050,7 @@ def get_values(osw_file, step)
     step.setArgument('heat_pump_type', HPXML::HVACTypeHeatPumpAirToAir)
     step.setArgument('heat_pump_heating_efficiency', 10.0)
     step.setArgument('heat_pump_heating_capacity', 42000.0)
+    step.setArgument('heat_pump_heating_capacity_17F', 26880.0)
     step.setArgument('heat_pump_cooling_efficiency', 22.0)
     step.setArgument('heat_pump_backup_fuel', HPXML::FuelTypeElectricity)
   elsif ['base-hvac-air-to-air-heat-pump-var-speed-detailed.osw'].include? osw_file
@@ -1124,6 +1102,7 @@ def get_values(osw_file, step)
     step.setArgument('heat_pump_fuel', HPXML::FuelTypeElectricity)
     step.setArgument('heat_pump_heating_efficiency', 7.7)
     step.setArgument('heat_pump_heating_capacity', 42000.0)
+    step.setArgument('heat_pump_heating_capacity_17F', 26460.0)
     step.setArgument('heat_pump_fraction_cool_load_served', 0)
     step.setArgument('heat_pump_backup_fuel', HPXML::FuelTypeElectricity)
   elsif ['base-hvac-dual-fuel-air-to-air-heat-pump-1-speed.osw'].include? osw_file
@@ -1132,6 +1111,7 @@ def get_values(osw_file, step)
     step.setArgument('heat_pump_type', HPXML::HVACTypeHeatPumpAirToAir)
     step.setArgument('heat_pump_heating_efficiency', 7.7)
     step.setArgument('heat_pump_heating_capacity', 42000.0)
+    step.setArgument('heat_pump_heating_capacity_17F', 26460.0)
     step.setArgument('heat_pump_backup_fuel', HPXML::FuelTypeNaturalGas)
     step.setArgument('heat_pump_backup_heating_efficiency', 0.95)
     step.setArgument('heat_pump_backup_heating_capacity', 36000.0)
@@ -1141,6 +1121,7 @@ def get_values(osw_file, step)
     step.setArgument('heat_pump_type', HPXML::HVACTypeHeatPumpAirToAir)
     step.setArgument('heat_pump_heating_efficiency', 7.7)
     step.setArgument('heat_pump_heating_capacity', 42000.0)
+    step.setArgument('heat_pump_heating_capacity_17F', 26460.0)
     step.setArgument('heat_pump_backup_fuel', HPXML::FuelTypeElectricity)
     step.setArgument('heat_pump_backup_heating_capacity', 36000.0)
   elsif ['base-hvac-dual-fuel-air-to-air-heat-pump-2-speed.osw'].include? osw_file
@@ -1149,6 +1130,7 @@ def get_values(osw_file, step)
     step.setArgument('heat_pump_type', HPXML::HVACTypeHeatPumpAirToAir)
     step.setArgument('heat_pump_heating_efficiency', 9.3)
     step.setArgument('heat_pump_heating_capacity', 42000.0)
+    step.setArgument('heat_pump_heating_capacity_17F', 24780.0)
     step.setArgument('heat_pump_cooling_efficiency', 18.0)
     step.setArgument('heat_pump_backup_fuel', HPXML::FuelTypeNaturalGas)
     step.setArgument('heat_pump_backup_heating_efficiency', 0.95)
@@ -1159,6 +1141,7 @@ def get_values(osw_file, step)
     step.setArgument('heat_pump_type', HPXML::HVACTypeHeatPumpAirToAir)
     step.setArgument('heat_pump_heating_efficiency', 10.0)
     step.setArgument('heat_pump_heating_capacity', 42000.0)
+    step.setArgument('heat_pump_heating_capacity_17F', 26880.0)
     step.setArgument('heat_pump_cooling_efficiency', 22.0)
     step.setArgument('heat_pump_backup_fuel', HPXML::FuelTypeNaturalGas)
     step.setArgument('heat_pump_backup_heating_efficiency', 0.95)
@@ -1169,6 +1152,7 @@ def get_values(osw_file, step)
     step.setArgument('heat_pump_type', HPXML::HVACTypeHeatPumpMiniSplit)
     step.setArgument('heat_pump_heating_efficiency', 10.0)
     step.setArgument('heat_pump_heating_capacity', 52000.0)
+    step.setArgument('heat_pump_heating_capacity_17F', 29500.0)
     step.setArgument('heat_pump_cooling_efficiency', 19.0)
     step.setArgument('heat_pump_backup_fuel', HPXML::FuelTypeNaturalGas)
     step.setArgument('heat_pump_backup_heating_efficiency', 0.95)
@@ -1200,6 +1184,7 @@ def get_values(osw_file, step)
     step.setArgument('supply_duct_location', HPXML::LocationCrawlspaceVented)
     step.setArgument('return_duct_location', HPXML::LocationAtticUnvented)
     step.setArgument('water_heater_location', Constants.Auto)
+    step.setArgument('plug_loads_annual_kwh_1', 1228.5)
   elsif ['base-hvac-ducts-multiple.osw'].include? osw_file
 
   elsif ['base-hvac-ducts-outside.osw'].include? osw_file
@@ -1263,6 +1248,7 @@ def get_values(osw_file, step)
     step.setArgument('cooling_system_type', 'none')
     step.setArgument('heat_pump_type', HPXML::HVACTypeHeatPumpMiniSplit)
     step.setArgument('heat_pump_heating_capacity', 52000.0)
+    step.setArgument('heat_pump_heating_capacity_17F', 29500.0)
     step.setArgument('heat_pump_heating_efficiency', 10.0)
     step.setArgument('heat_pump_cooling_efficiency', 19.0)
     step.setArgument('heat_pump_backup_fuel', HPXML::FuelTypeElectricity)
@@ -1279,6 +1265,7 @@ def get_values(osw_file, step)
     step.setArgument('cooling_system_type', 'none')
     step.setArgument('heat_pump_type', HPXML::HVACTypeHeatPumpMiniSplit)
     step.setArgument('heat_pump_heating_capacity', 52000.0)
+    step.setArgument('heat_pump_heating_capacity_17F', 29500.0)
     step.setArgument('heat_pump_heating_efficiency', 10.0)
     step.setArgument('heat_pump_cooling_efficiency', 19.0)
     step.setArgument('heat_pump_backup_fuel', HPXML::FuelTypeElectricity)
@@ -1286,9 +1273,10 @@ def get_values(osw_file, step)
     step.setArgument('heating_system_type', 'none')
     step.setArgument('cooling_system_type', 'none')
     step.setArgument('heat_pump_type', HPXML::HVACTypeHeatPumpMiniSplit)
+    step.setArgument('heat_pump_heating_capacity', 52000.0)
+    step.setArgument('heat_pump_heating_capacity_17F', 29500.0)
     step.setArgument('heat_pump_heating_efficiency', 10.0)
     step.setArgument('heat_pump_cooling_efficiency', 19.0)
-    step.setArgument('heat_pump_heating_capacity', 52000.0)
   elsif ['base-hvac-multiple.osw'].include? osw_file
 
   elsif ['base-hvac-none.osw'].include? osw_file
@@ -1418,19 +1406,10 @@ def get_values(osw_file, step)
   elsif ['base-misc-ceiling-fans.osw'].include? osw_file
     step.setArgument('ceiling_fan_cooling_setpoint_temp_offset', 0.5)
     step.setArgument('ceiling_fan_quantity', 2)
+  elsif ['base-misc-defaults.osw'].include? osw_file
+    # TODO
   elsif ['base-misc-lighting-none.osw'].include? osw_file
     step.setArgument('has_lighting', false)
-  elsif ['base-misc-loads-detailed.osw'].include? osw_file
-    step.setArgument('plug_loads_schedule_values', true)
-    step.setArgument('plug_loads_annual_kwh_1', 7302.0)
-    step.setArgument('plug_loads_frac_sensible_1', 0.82)
-    step.setArgument('plug_loads_frac_latent_1', 0.18)
-    step.setArgument('plug_loads_annual_kwh_2', 400.0)
-    step.setArgument('plug_loads_weekday_fractions', '0.020, 0.020, 0.020, 0.020, 0.020, 0.034, 0.043, 0.085, 0.050, 0.030, 0.030, 0.041, 0.030, 0.025, 0.026, 0.026, 0.039, 0.042, 0.045, 0.070, 0.070, 0.073, 0.073, 0.066')
-    step.setArgument('plug_loads_weekend_fractions', '0.020, 0.020, 0.020, 0.020, 0.020, 0.034, 0.043, 0.085, 0.050, 0.030, 0.030, 0.041, 0.030, 0.025, 0.026, 0.026, 0.039, 0.042, 0.045, 0.070, 0.070, 0.073, 0.073, 0.066')
-    step.setArgument('plug_loads_monthly_multipliers', '1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0')
-  elsif ['base-misc-number-of-occupants.osw'].include? osw_file
-    step.setArgument('num_occupants', 5.0)
   elsif ['base-misc-timestep-10-mins.osw'].include? osw_file
     step.setArgument('simulation_control_timestep', 10)
   elsif ['base-misc-whole-house-fan.osw'].include? osw_file
