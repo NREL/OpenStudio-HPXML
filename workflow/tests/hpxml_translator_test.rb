@@ -69,32 +69,63 @@ class HPXMLTest < MiniTest::Test
     os_cli = OpenStudio.getOpenStudioCLI
     rb_path = File.join(File.dirname(__FILE__), '..', 'run_simulation.rb')
     xml = File.join(File.dirname(__FILE__), '..', 'sample_files', 'base.xml')
-    command = "#{os_cli} #{rb_path} -x #{xml}"
+    command = "#{os_cli} #{rb_path} -x #{xml} --debug"
     system(command, err: File::NULL)
+
+    # Check for output files
     sql_path = File.join(File.dirname(xml), 'run', 'eplusout.sql')
     assert(File.exist? sql_path)
+    csv_output_path = File.join(File.dirname(xml), 'run', 'results_annual.csv')
+    assert(File.exist? csv_output_path)
+
+    # Check for debug files
+    osm_path = File.join(File.dirname(xml), 'run', 'in.osm')
+    assert(File.exist? osm_path)
+    hpxml_defaults_path = File.join(File.dirname(xml), 'run', 'in.xml')
+    assert(File.exist? hpxml_defaults_path)
   end
 
   def test_template_osw
     # Check that simulation works using template.osw
+    require 'json'
+
     os_cli = OpenStudio.getOpenStudioCLI
     osw_path = File.join(File.dirname(__FILE__), '..', 'template.osw')
+
+    # Create derivative OSW for testing
+    osw_path_test = osw_path.gsub('.osw', '_test.osw')
+    FileUtils.cp(osw_path, osw_path_test)
+
+    # Turn on debug mode
+    json = JSON.parse(File.read(osw_path_test), symbolize_names: true)
+    json[:steps][0][:arguments][:debug] = true
+
     if Dir.exist? File.join(File.dirname(__FILE__), '..', '..', 'project')
-      # CI checks out the repo as "project", so need to update the OSW
-      osw_path_ci = osw_path.gsub('.osw', '2.osw')
-      FileUtils.cp(osw_path, osw_path_ci)
-      require 'json'
-      json = JSON.parse(File.read(osw_path_ci), symbolize_names: true)
+      # CI checks out the repo as "project", so update dir name
       json[:steps][0][:measure_dir_name] = 'project'
-      File.open(osw_path_ci, 'w') do |f|
-        f.write(JSON.pretty_generate(json))
-      end
-      osw_path = osw_path_ci
     end
-    command = "#{os_cli} run -w #{osw_path}"
+
+    File.open(osw_path_test, 'w') do |f|
+      f.write(JSON.pretty_generate(json))
+    end
+
+    command = "#{os_cli} run -w #{osw_path_test}"
     system(command, err: File::NULL)
-    sql_path = File.join(File.dirname(osw_path), 'run', 'eplusout.sql')
+
+    # Check for output files
+    sql_path = File.join(File.dirname(osw_path_test), 'run', 'eplusout.sql')
     assert(File.exist? sql_path)
+    csv_output_path = File.join(File.dirname(osw_path_test), 'run', 'results_annual.csv')
+    assert(File.exist? csv_output_path)
+
+    # Check for debug files
+    osm_path = File.join(File.dirname(osw_path_test), 'run', 'in.osm')
+    assert(File.exist? osm_path)
+    hpxml_defaults_path = File.join(File.dirname(osw_path_test), 'run', 'in.xml')
+    assert(File.exist? hpxml_defaults_path)
+
+    # Cleanup
+    File.delete(osw_path_test)
   end
 
   def test_weather_cache
@@ -422,8 +453,8 @@ class HPXMLTest < MiniTest::Test
     args = {}
     args['hpxml_path'] = xml
     args['weather_dir'] = 'weather'
-    args['epw_output_path'] = File.absolute_path(File.join(rundir, 'in.epw'))
-    args['osm_output_path'] = File.absolute_path(File.join(rundir, 'in.osm')) # debug
+    args['output_path'] = File.absolute_path(rundir)
+    args['debug'] = true
     update_args_hash(measures, measure_subdir, args)
 
     # Add reporting measure to workflow
@@ -635,7 +666,8 @@ class HPXMLTest < MiniTest::Test
     assert(File.exist? sql_path)
 
     sqlFile = OpenStudio::SqlFile.new(sql_path, false)
-    hpxml = HPXML.new(hpxml_path: hpxml_path)
+    hpxml_defaults_path = File.join(rundir, 'in.xml')
+    hpxml = HPXML.new(hpxml_path: hpxml_defaults_path)
     hpxml.collapse_enclosure_surfaces([:operable])
 
     # Timestep
