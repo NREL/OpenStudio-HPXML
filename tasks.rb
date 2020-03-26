@@ -2812,6 +2812,7 @@ def set_hpxml_water_heating_systems(hpxml_file, hpxml)
   hpxml.water_heating_systems.each do |water_heating_system|
     if ['base-misc-defaults.xml'].include? hpxml_file
       water_heating_system.temperature = nil
+      water_heating_system.location = nil
     else
       water_heating_system.temperature = Waterheater.get_default_hot_water_temperature(hpxml.header.eri_calculation_version)
     end
@@ -2822,6 +2823,7 @@ def set_hpxml_hot_water_distribution(hpxml_file, hpxml)
   if ['base.xml'].include? hpxml_file
     hpxml.hot_water_distributions.add(id: 'HotWaterDstribution',
                                       system_type: HPXML::DHWDistTypeStandard,
+                                      standard_piping_length: 50, # Chosen to test a negative EC_adj
                                       pipe_r_value: 0.0)
   elsif ['base-dhw-dwhr.xml'].include? hpxml_file
     hpxml.hot_water_distributions[0].dwhr_facilities_connected = HPXML::DWHRFacilitiesConnectedAll
@@ -2861,6 +2863,8 @@ def set_hpxml_hot_water_distribution(hpxml_file, hpxml)
     hpxml.hot_water_distributions[0].recirculation_pump_power = 50
   elsif ['base-dhw-none.xml'].include? hpxml_file
     hpxml.hot_water_distributions.clear()
+  elsif ['base-misc-defaults.xml'].include? hpxml_file
+    hpxml.hot_water_distributions[0].standard_piping_length = nil
   end
 end
 
