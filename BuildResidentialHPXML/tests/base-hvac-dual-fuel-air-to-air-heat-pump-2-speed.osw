@@ -85,7 +85,7 @@
         "heat_pump_backup_heating_efficiency": 0.95,
         "heat_pump_backup_heating_switchover_temp": 25,
         "heat_pump_cooling_capacity": 48000,
-        "heat_pump_cooling_compressor_type": "single stage",
+        "heat_pump_cooling_compressor_type": "two stage",
         "heat_pump_cooling_efficiency": 18,
         "heat_pump_cooling_sensible_heat_fraction": 0.73,
         "heat_pump_fraction_cool_load_served": 1,

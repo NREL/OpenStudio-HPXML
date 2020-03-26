@@ -40,7 +40,6 @@
         "cooling_setup_start_hour": 0,
         "cooling_setup_temp": 78,
         "cooling_system_cooling_capacity": 48000,
-        "cooling_system_cooling_compressor_type": "single stage",
         "cooling_system_cooling_efficiency": 13,
         "cooling_system_cooling_sensible_heat_fraction": 0.73,
         "cooling_system_fraction_cool_load_served": 0.33333,

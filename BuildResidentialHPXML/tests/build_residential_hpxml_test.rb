@@ -176,9 +176,6 @@ class BuildResidentialHPXMLTest < MiniTest::Test
       hpxml.cooling_systems.each do |cooling_system|
         cooling_system.cooling_shr = nil
       end
-      hpxml.heat_pumps.each do |heat_pump|
-        heat_pump.cooling_shr = nil
-      end
 
       # Replace IDs/IDREFs with blank strings
       HPXML::HPXML_ATTRS.each do |attr|
