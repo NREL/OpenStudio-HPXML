@@ -173,9 +173,6 @@ class BuildResidentialHPXMLTest < MiniTest::Test
         window.area = window.area.round(2)
         window.overhangs_distance_to_bottom_of_window = nil # Height of windows
       end
-      hpxml.cooling_systems.each do |cooling_system|
-        cooling_system.cooling_shr = nil
-      end
 
       # Replace IDs/IDREFs with blank strings
       HPXML::HPXML_ATTRS.each do |attr|
