@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require_relative 'geometry'
 require_relative 'hvac'
 require_relative 'unit_conversions'
