@@ -256,64 +256,6 @@ class OSModel
 
   private
 
-  def self.get_location_hierarchy(ba_cz_name)
-    # if [Constants.BAZoneHotDry, Constants.BAZoneHotHumid].include? ba_cz_name
-    #   return [HPXML::LocationGarage,
-    #           HPXML::LocationLivingSpace,
-    #           HPXML::LocationBasementConditioned,
-    #           HPXML::LocationInterior,
-    #           HPXML::LocationCrawlspaceVented,
-    #           HPXML::LocationAtticVented]
-    # elsif [Constants.BAZoneMarine, Constants.BAZoneMixedHumid, Constants.BAZoneMixedDry, Constants.BAZoneCold, Constants.BAZoneVeryCold, Constants.BAZoneSubarctic].include? ba_cz_name
-    #   return [HPXML::LocationBasementConditioned,
-    #           HPXML::LocationBasementUnconditioned,
-    #           HPXML::LocationLivingSpace,
-    #           HPXML::LocationInterior,
-    #           HPXML::LocationCrawlspaceVented,
-    #           HPXML::LocationAtticVented]
-    # elsif ba_cz_name.nil?
-    #   return [HPXML::LocationBasementConditioned,
-    #           HPXML::LocationBasementUnconditioned,
-    #           HPXML::LocationGarage,
-    #           HPXML::LocationLivingSpace]
-    # end
-    # FIXME: for testing
-    return [HPXML::LocationGarage,
-            HPXML::LocationLivingSpace,
-            HPXML::LocationBasementConditioned,
-            HPXML::LocationInterior,
-            HPXML::LocationCrawlspaceVented,
-            HPXML::LocationAtticVented]
-  end
-
-  def self.get_space_from_ba_location(location_hierarchy)
-    location_hierarchy.each do |space_type|
-      if @hpxml.has_space_type(space_type)
-        return space_type
-      end
-    end
-  end
-
-  def self.get_climate_zone_ba(wmo)
-    ba_zone = nil
-
-    zones_csv = File.join(File.dirname(__FILE__), 'resources', 'climate_zones.csv')
-    puts zones_csv
-    if not File.exist?(zones_csv)
-      return ba_zone
-    end
-
-    require 'csv'
-    CSV.foreach(zones_csv) do |row|
-      if row[0].to_s == wmo.to_s
-        ba_zone = row[5].to_s
-        break
-      end
-    end
-
-    return ba_zone
-  end
-
   def self.set_defaults_and_globals(runner)
     # Set globals
     @cfa = @hpxml.building_construction.conditioned_floor_area
@@ -500,7 +442,7 @@ class OSModel
     @hpxml.water_heating_systems.each do |water_heating_system|
       ba_cz_name = get_climate_zone_ba(@cz_wmo)
       location_hierarchy = get_location_hierarchy(ba_cz_name)
-      water_heating_system.location = get_space_from_ba_location(location_hierarchy)
+      water_heating_system.location = get_space_from_ba_location_hierarchy(location_hierarchy)
     end
 
     # Default water heater piping length
@@ -4348,6 +4290,58 @@ class OSModel
     walls_top = foundation_top + 8.0 * @ncfl_ag
     return foundation_top, walls_top
   end
+  
+  def self.get_location_hierarchy(ba_cz_name)
+    if [Constants.BAZoneHotDry, Constants.BAZoneHotHumid].include? ba_cz_name
+      return [HPXML::LocationGarage,
+              HPXML::LocationLivingSpace,
+              HPXML::LocationBasementConditioned,
+              HPXML::LocationInterior,
+              HPXML::LocationCrawlspaceVented,
+              HPXML::LocationAtticVented]
+    elsif [Constants.BAZoneMarine, Constants.BAZoneMixedHumid, Constants.BAZoneMixedDry, Constants.BAZoneCold, Constants.BAZoneVeryCold, Constants.BAZoneSubarctic].include? ba_cz_name
+      return [HPXML::LocationBasementConditioned,
+              HPXML::LocationBasementUnconditioned,
+              HPXML::LocationLivingSpace,
+              HPXML::LocationInterior,
+              HPXML::LocationCrawlspaceVented,
+              HPXML::LocationAtticVented]
+    elsif ba_cz_name.nil?
+      return [HPXML::LocationBasementConditioned,
+              HPXML::LocationBasementUnconditioned,
+              HPXML::LocationGarage,
+              HPXML::LocationLivingSpace]
+    end
+  end
+
+  def self.get_space_from_ba_location_hierarchy(location_hierarchy)
+    location_hierarchy.each do |space_type|
+      if @hpxml.has_space_type(space_type)
+        return space_type
+      end
+    end
+  end
+
+  def self.get_climate_zone_ba(wmo)
+    ba_zone = nil
+
+    zones_csv = File.join(File.dirname(__FILE__), 'resources', 'climate_zones.csv')
+
+    if not File.exist?(zones_csv)
+      return ba_zone
+    end
+
+    require 'csv'
+    CSV.foreach(zones_csv) do |row|
+      if row[0].to_s == wmo.to_s
+        ba_zone = row[5].to_s
+        break
+      end
+    end
+
+    return ba_zone
+  end
+
 end
 
 class WoodStudConstructionSet
