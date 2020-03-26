@@ -1105,6 +1105,7 @@ def get_values(osw_file, step)
     step.setArgument('heating_system_type', 'none')
     step.setArgument('cooling_system_cooling_efficiency', 24.0)
     step.setArgument('cooling_system_cooling_compressor_type', HPXML::HVACCompressorTypeVariableSpeed)
+    step.setArgument('cooling_system_cooling_sensible_heat_fraction', 0.78)
   elsif ['base-hvac-central-ac-only-var-speed-detailed.osw'].include? osw_file
 
   elsif ['base-hvac-central-ac-plus-air-to-air-heat-pump-heating.osw'].include? osw_file
@@ -1213,14 +1214,17 @@ def get_values(osw_file, step)
   elsif ['base-hvac-evap-cooler-furnace-gas.osw'].include? osw_file
     step.setArgument('cooling_system_type', HPXML::HVACTypeEvaporativeCooler)
     step.removeArgument('cooling_system_cooling_compressor_type')
+    step.removeArgument('cooling_system_cooling_sensible_heat_fraction')
   elsif ['base-hvac-evap-cooler-only.osw'].include? osw_file
     step.setArgument('heating_system_type', 'none')
     step.setArgument('cooling_system_type', HPXML::HVACTypeEvaporativeCooler)
     step.removeArgument('cooling_system_cooling_compressor_type')
+    step.removeArgument('cooling_system_cooling_sensible_heat_fraction')
   elsif ['base-hvac-evap-cooler-only-ducted.osw'].include? osw_file
     step.setArgument('heating_system_type', 'none')
     step.setArgument('cooling_system_type', HPXML::HVACTypeEvaporativeCooler)
     step.removeArgument('cooling_system_cooling_compressor_type')
+    step.removeArgument('cooling_system_cooling_sensible_heat_fraction')
     step.setArgument('evap_cooler_is_ducted', true)
   elsif ['base-hvac-flowrate.osw'].include? osw_file
 
@@ -1234,6 +1238,7 @@ def get_values(osw_file, step)
   elsif ['base-hvac-furnace-gas-central-ac-var-speed.osw'].include? osw_file
     step.setArgument('cooling_system_cooling_efficiency', 24.0)
     step.setArgument('cooling_system_cooling_compressor_type', HPXML::HVACCompressorTypeVariableSpeed)
+    step.setArgument('cooling_system_cooling_sensible_heat_fraction', 0.78)
   elsif ['base-hvac-furnace-gas-only.osw'].include? osw_file
     step.setArgument('heating_system_electric_auxiliary_energy', 700.0)
     step.setArgument('cooling_system_type', 'none')
@@ -1243,6 +1248,7 @@ def get_values(osw_file, step)
     step.setArgument('cooling_system_type', HPXML::HVACTypeRoomAirConditioner)
     step.setArgument('cooling_system_cooling_efficiency', 8.5)
     step.removeArgument('cooling_system_cooling_compressor_type')
+    step.setArgument('cooling_system_cooling_sensible_heat_fraction', 0.65)
   elsif ['base-hvac-furnace-oil-only.osw'].include? osw_file
     step.setArgument('heating_system_fuel', HPXML::FuelTypeOil)
     step.setArgument('cooling_system_type', 'none')
@@ -1326,6 +1332,7 @@ def get_values(osw_file, step)
     step.setArgument('cooling_system_type', HPXML::HVACTypeRoomAirConditioner)
     step.setArgument('cooling_system_cooling_efficiency', 8.5)
     step.removeArgument('cooling_system_cooling_compressor_type')
+    step.setArgument('cooling_system_cooling_sensible_heat_fraction', 0.65)
   elsif ['base-hvac-room-ac-only-detailed.osw'].include? osw_file
 
   elsif ['base-hvac-setpoints.osw'].include? osw_file
@@ -1401,6 +1408,7 @@ def get_values(osw_file, step)
     step.setArgument('heating_system_type', 'none')
     step.setArgument('cooling_system_type', HPXML::HVACTypeEvaporativeCooler)
     step.removeArgument('cooling_system_cooling_compressor_type')
+    step.removeArgument('cooling_system_cooling_sensible_heat_fraction')
     step.setArgument('evap_cooler_is_ducted', true)
     step.setArgument('mech_vent_fan_type', HPXML::MechVentTypeCFIS)
     step.setArgument('mech_vent_flow_rate', 330)

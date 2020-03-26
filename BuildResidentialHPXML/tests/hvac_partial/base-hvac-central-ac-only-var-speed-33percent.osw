@@ -42,7 +42,7 @@
         "cooling_system_cooling_capacity": 48000,
         "cooling_system_cooling_compressor_type": "variable speed",
         "cooling_system_cooling_efficiency": 24,
-        "cooling_system_cooling_sensible_heat_fraction": 0.73,
+        "cooling_system_cooling_sensible_heat_fraction": 0.78,
         "cooling_system_fraction_cool_load_served": 0.33333,
         "cooling_system_fuel": "electricity",
         "cooling_system_type": "central air conditioner",
