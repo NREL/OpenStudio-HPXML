@@ -819,6 +819,11 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     cooling_system_fuel_choices = OpenStudio::StringVector.new
     cooling_system_fuel_choices << HPXML::FuelTypeElectricity
 
+    compressor_type_choices = OpenStudio::StringVector.new
+    compressor_type_choices << HPXML::HVACCompressorTypeSingleStage
+    compressor_type_choices << HPXML::HVACCompressorTypeTwoStage
+    compressor_type_choices << HPXML::HVACCompressorTypeVariableSpeed
+
     heat_pump_type_choices = OpenStudio::StringVector.new
     heat_pump_type_choices << 'none'
     heat_pump_type_choices << HPXML::HVACTypeHeatPumpAirToAir
@@ -867,10 +872,9 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     arg.setDefaultValue(1)
     args << arg
 
-    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('heating_system_electric_auxiliary_energy', true)
+    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('heating_system_electric_auxiliary_energy', false)
     arg.setDisplayName('Heating System: Electric Auxiliary Energy')
     arg.setDescription('The electric auxiliary energy of the heating system.')
-    arg.setDefaultValue(0)
     args << arg
 
     arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('cooling_system_type', cooling_system_type_choices, true)
@@ -889,6 +893,17 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     arg.setDisplayName('Cooling System: Rated Efficiency')
     arg.setDescription('The rated efficiency value of the cooling system. SEER for central air conditioner. EER for room air conditioner. Ignored for evaporative cooler.')
     arg.setDefaultValue(13.0)
+    args << arg
+
+    arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('cooling_system_cooling_compressor_type', compressor_type_choices, false)
+    arg.setDisplayName('Cooling System: Cooling Compressor Type')
+    arg.setDescription('The compressor type of the cooling system.')
+    args << arg
+
+    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('cooling_system_cooling_sensible_heat_fraction', false)
+    arg.setDisplayName('Cooling System: Cooling Sensible Heat Fraction')
+    arg.setDescription('The sensible heat fraction of the cooling system.')
+    arg.setUnits('Frac')
     args << arg
 
     arg = OpenStudio::Measure::OSArgument::makeStringArgument('cooling_system_cooling_capacity', true)
@@ -927,6 +942,17 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     arg.setDisplayName('Heat Pump: Rated Cooling Efficiency')
     arg.setDescription('The rated cooling efficiency value of the heat pump. SEER for air-to-air/mini-split. EER for ground-to-air.')
     arg.setDefaultValue(13.0)
+    args << arg
+
+    arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('heat_pump_cooling_compressor_type', compressor_type_choices, false)
+    arg.setDisplayName('Heat Pump: Cooling Compressor Type')
+    arg.setDescription('The compressor type of the heat pump.')
+    args << arg
+
+    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('heat_pump_cooling_sensible_heat_fraction', false)
+    arg.setDisplayName('Heat Pump: Cooling Sensible Heat Fraction')
+    arg.setDescription('The sensible heat fraction of the heat pump.')
+    arg.setUnits('Frac')
     args << arg
 
     arg = OpenStudio::Measure::OSArgument::makeStringArgument('heat_pump_heating_capacity', true)
@@ -983,11 +1009,10 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     arg.setDefaultValue(Constants.SizingAuto)
     args << arg
 
-    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('heat_pump_backup_heating_switchover_temp', true)
+    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('heat_pump_backup_heating_switchover_temp', false)
     arg.setDisplayName('Heat Pump: Backup Heating Switchover Temperature')
     arg.setDescription('The temperature at which the heat pump stops operating and the backup heating system starts running.')
     arg.setUnits('degrees F')
-    arg.setDefaultValue(25)
     args << arg
 
     arg = OpenStudio::Measure::OSArgument::makeBoolArgument('mini_split_is_ducted', true)
@@ -1302,25 +1327,22 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     arg.setDefaultValue(0.76)
     args << arg
 
-    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('water_heater_standby_loss', true)
+    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('water_heater_standby_loss', false)
     arg.setDisplayName('Water Heater: Standby Loss')
     arg.setDescription('The standby loss of water heater.')
     arg.setUnits('Frac')
-    arg.setDefaultValue(0)
     args << arg
 
-    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('water_heater_jacket_rvalue', true)
+    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('water_heater_jacket_rvalue', false)
     arg.setDisplayName('Water Heater: Jacket R-value')
     arg.setDescription('The jacket R-value of water heater.')
     arg.setUnits('h-ft^2-R/Btu')
-    arg.setDefaultValue(0)
     args << arg
 
-    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('water_heater_setpoint_temperature', true)
+    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('water_heater_setpoint_temperature', false)
     arg.setDisplayName('Water Heater: Setpoint Temperature')
     arg.setDescription('The setpoint temperature of water heater.')
     arg.setUnits('degrees F')
-    arg.setDefaultValue(125)
     args << arg
 
     hot_water_distribution_system_type_choices = OpenStudio::StringVector.new
@@ -1993,16 +2015,20 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
              heating_system_heating_efficiency: runner.getDoubleArgumentValue('heating_system_heating_efficiency', user_arguments),
              heating_system_heating_capacity: runner.getStringArgumentValue('heating_system_heating_capacity', user_arguments),
              heating_system_fraction_heat_load_served: runner.getDoubleArgumentValue('heating_system_fraction_heat_load_served', user_arguments),
-             heating_system_electric_auxiliary_energy: runner.getDoubleArgumentValue('heating_system_electric_auxiliary_energy', user_arguments),
+             heating_system_electric_auxiliary_energy: runner.getOptionalDoubleArgumentValue('heating_system_electric_auxiliary_energy', user_arguments),
              cooling_system_type: runner.getStringArgumentValue('cooling_system_type', user_arguments),
              cooling_system_fuel: runner.getStringArgumentValue('cooling_system_fuel', user_arguments),
              cooling_system_cooling_efficiency: runner.getDoubleArgumentValue('cooling_system_cooling_efficiency', user_arguments),
+             cooling_system_cooling_compressor_type: runner.getOptionalStringArgumentValue('cooling_system_cooling_compressor_type', user_arguments),
+             cooling_system_cooling_sensible_heat_fraction: runner.getOptionalDoubleArgumentValue('cooling_system_cooling_sensible_heat_fraction', user_arguments),
              cooling_system_cooling_capacity: runner.getStringArgumentValue('cooling_system_cooling_capacity', user_arguments),
              cooling_system_fraction_cool_load_served: runner.getDoubleArgumentValue('cooling_system_fraction_cool_load_served', user_arguments),
              heat_pump_type: runner.getStringArgumentValue('heat_pump_type', user_arguments),
              heat_pump_fuel: runner.getStringArgumentValue('heat_pump_fuel', user_arguments),
              heat_pump_heating_efficiency: runner.getDoubleArgumentValue('heat_pump_heating_efficiency', user_arguments),
              heat_pump_cooling_efficiency: runner.getDoubleArgumentValue('heat_pump_cooling_efficiency', user_arguments),
+             heat_pump_cooling_compressor_type: runner.getOptionalStringArgumentValue('heat_pump_cooling_compressor_type', user_arguments),
+             heat_pump_cooling_sensible_heat_fraction: runner.getOptionalDoubleArgumentValue('heat_pump_cooling_sensible_heat_fraction', user_arguments),
              heat_pump_heating_capacity: runner.getStringArgumentValue('heat_pump_heating_capacity', user_arguments),
              heat_pump_heating_capacity_17F: runner.getStringArgumentValue('heat_pump_heating_capacity_17F', user_arguments),
              heat_pump_cooling_capacity: runner.getStringArgumentValue('heat_pump_cooling_capacity', user_arguments),
@@ -2011,7 +2037,7 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
              heat_pump_backup_fuel: runner.getStringArgumentValue('heat_pump_backup_fuel', user_arguments),
              heat_pump_backup_heating_efficiency: runner.getDoubleArgumentValue('heat_pump_backup_heating_efficiency', user_arguments),
              heat_pump_backup_heating_capacity: runner.getStringArgumentValue('heat_pump_backup_heating_capacity', user_arguments),
-             heat_pump_backup_heating_switchover_temp: runner.getDoubleArgumentValue('heat_pump_backup_heating_switchover_temp', user_arguments),
+             heat_pump_backup_heating_switchover_temp: runner.getOptionalDoubleArgumentValue('heat_pump_backup_heating_switchover_temp', user_arguments),
              mini_split_is_ducted: runner.getBoolArgumentValue('mini_split_is_ducted', user_arguments),
              evap_cooler_is_ducted: runner.getBoolArgumentValue('evap_cooler_is_ducted', user_arguments),
              heating_setpoint_temp: runner.getDoubleArgumentValue('heating_setpoint_temp', user_arguments),
@@ -2051,9 +2077,9 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
              water_heater_efficiency_type: runner.getStringArgumentValue('water_heater_efficiency_type', user_arguments),
              water_heater_efficiency: runner.getStringArgumentValue('water_heater_efficiency', user_arguments),
              water_heater_recovery_efficiency: runner.getDoubleArgumentValue('water_heater_recovery_efficiency', user_arguments),
-             water_heater_standby_loss: runner.getDoubleArgumentValue('water_heater_standby_loss', user_arguments),
-             water_heater_jacket_rvalue: runner.getDoubleArgumentValue('water_heater_jacket_rvalue', user_arguments),
-             water_heater_setpoint_temperature: runner.getDoubleArgumentValue('water_heater_setpoint_temperature', user_arguments),
+             water_heater_standby_loss: runner.getOptionalDoubleArgumentValue('water_heater_standby_loss', user_arguments),
+             water_heater_jacket_rvalue: runner.getOptionalDoubleArgumentValue('water_heater_jacket_rvalue', user_arguments),
+             water_heater_setpoint_temperature: runner.getOptionalDoubleArgumentValue('water_heater_setpoint_temperature', user_arguments),
              hot_water_distribution_system_type: runner.getStringArgumentValue('hot_water_distribution_system_type', user_arguments),
              standard_piping_length: runner.getStringArgumentValue('standard_piping_length', user_arguments),
              recirculation_control_type: runner.getStringArgumentValue('recirculation_control_type', user_arguments),
@@ -2805,8 +2831,10 @@ class HPXMLFile
     end
     heating_capacity = Float(heating_capacity)
 
-    if args[:heating_system_electric_auxiliary_energy] > 0
-      electric_auxiliary_energy = args[:heating_system_electric_auxiliary_energy]
+    if args[:heating_system_electric_auxiliary_energy].is_initialized
+      if args[:heating_system_electric_auxiliary_energy].get > 0
+        electric_auxiliary_energy = args[:heating_system_electric_auxiliary_energy].get
+      end
     end
 
     hpxml.heating_systems.add(id: 'HeatingSystem',
@@ -2838,21 +2866,24 @@ class HPXMLFile
       cooling_capacity = nil
     end
 
+    if args[:cooling_system_cooling_compressor_type].is_initialized
+      compressor_type = args[:cooling_system_cooling_compressor_type].get
+    end
+
+    if args[:cooling_system_cooling_sensible_heat_fraction].is_initialized
+      cooling_shr = args[:cooling_system_cooling_sensible_heat_fraction].get
+    end
+
     hpxml.cooling_systems.add(id: 'CoolingSystem',
                               cooling_system_type: cooling_system_type,
                               cooling_system_fuel: args[:cooling_system_fuel],
                               cooling_capacity: cooling_capacity,
-                              fraction_cool_load_served: args[:cooling_system_fraction_cool_load_served])
+                              fraction_cool_load_served: args[:cooling_system_fraction_cool_load_served],
+                              compressor_type: compressor_type,
+                              cooling_shr: cooling_shr)
 
     if [HPXML::HVACTypeCentralAirConditioner].include? cooling_system_type
       hpxml.cooling_systems[-1].cooling_efficiency_seer = args[:cooling_system_cooling_efficiency]
-      if args[:cooling_system_cooling_efficiency] <= 15.0
-        hpxml.cooling_systems[-1].compressor_type = 'single stage'
-      elsif args[:cooling_system_cooling_efficiency] <= 21.0
-        hpxml.cooling_systems[-1].compressor_type = 'two stage'
-      else
-        hpxml.cooling_systems[-1].compressor_type = 'variable speed'
-      end
     elsif [HPXML::HVACTypeRoomAirConditioner].include? cooling_system_type
       hpxml.cooling_systems[-1].cooling_efficiency_eer = args[:cooling_system_cooling_efficiency]
     end
@@ -2891,7 +2922,9 @@ class HPXMLFile
         backup_heating_efficiency_percent = args[:heat_pump_backup_heating_efficiency]
       else
         backup_heating_efficiency_afue = args[:heat_pump_backup_heating_efficiency]
-        backup_heating_switchover_temp = args[:heat_pump_backup_heating_switchover_temp]
+        if args[:heat_pump_backup_heating_switchover_temp].is_initialized
+          backup_heating_switchover_temp = args[:heat_pump_backup_heating_switchover_temp].get
+        end
       end
     end
 
@@ -2901,11 +2934,21 @@ class HPXMLFile
     end
     cooling_capacity = Float(cooling_capacity)
 
+    if args[:heat_pump_cooling_compressor_type].is_initialized
+      compressor_type = args[:heat_pump_cooling_compressor_type].get
+    end
+
+    if args[:heat_pump_cooling_sensible_heat_fraction].is_initialized
+      cooling_shr = args[:heat_pump_cooling_sensible_heat_fraction].get
+    end
+
     hpxml.heat_pumps.add(id: 'HeatPump',
                          heat_pump_type: heat_pump_type,
                          heat_pump_fuel: heat_pump_fuel,
                          heating_capacity: heating_capacity,
                          heating_capacity_17F: heating_capacity_17F,
+                         compressor_type: compressor_type,
+                         cooling_shr: cooling_shr,
                          cooling_capacity: cooling_capacity,
                          fraction_heat_load_served: args[:heat_pump_fraction_heat_load_served],
                          fraction_cool_load_served: args[:heat_pump_fraction_cool_load_served],
@@ -2918,19 +2961,6 @@ class HPXMLFile
     if [HPXML::HVACTypeHeatPumpAirToAir, HPXML::HVACTypeHeatPumpMiniSplit].include? heat_pump_type
       hpxml.heat_pumps[-1].heating_efficiency_hspf = args[:heat_pump_heating_efficiency]
       hpxml.heat_pumps[-1].cooling_efficiency_seer = args[:heat_pump_cooling_efficiency]
-      if args[:heat_pump_cooling_efficiency] <= 15.0
-        if heat_pump_type == HPXML::HVACTypeHeatPumpAirToAir
-          hpxml.heat_pumps[-1].compressor_type = 'single stage'
-        end
-      elsif args[:heat_pump_cooling_efficiency] <= 21.0
-        if heat_pump_type == HPXML::HVACTypeHeatPumpAirToAir
-          hpxml.heat_pumps[-1].compressor_type = 'two stage'
-        end
-      else
-        if heat_pump_type == HPXML::HVACTypeHeatPumpAirToAir
-          hpxml.heat_pumps[-1].compressor_type = 'variable speed'
-        end
-      end
     elsif [HPXML::HVACTypeHeatPumpGroundToAir].include? heat_pump_type
       hpxml.heat_pumps[-1].heating_efficiency_cop = args[:heat_pump_heating_efficiency]
       hpxml.heat_pumps[-1].cooling_efficiency_eer = args[:heat_pump_cooling_efficiency]
@@ -3193,14 +3223,20 @@ class HPXMLFile
       related_hvac_idref = hpxml.heating_systems[0].id
     end
 
-    standby_loss = nil
-    if args[:water_heater_standby_loss] > 0
-      standby_loss = args[:water_heater_standby_loss]
+    if args[:water_heater_standby_loss].is_initialized
+      if args[:water_heater_standby_loss].get > 0
+        standby_loss = args[:water_heater_standby_loss].get
+      end
     end
 
-    jacket_r_value = nil
-    if args[:water_heater_jacket_rvalue] > 0
-      jacket_r_value = args[:water_heater_jacket_rvalue]
+    if args[:water_heater_jacket_rvalue].is_initialized
+      if args[:water_heater_jacket_rvalue].get > 0
+        jacket_r_value = args[:water_heater_jacket_rvalue].get
+      end
+    end
+
+    if args[:water_heater_setpoint_temperature].is_initialized
+      temperature = args[:water_heater_setpoint_temperature].get
     end
 
     hpxml.water_heating_systems.add(id: 'WaterHeater',
@@ -3216,7 +3252,7 @@ class HPXMLFile
                                     related_hvac_idref: related_hvac_idref,
                                     standby_loss: standby_loss,
                                     jacket_r_value: jacket_r_value,
-                                    temperature: args[:water_heater_setpoint_temperature])
+                                    temperature: temperature)
   end
 
   def self.set_hot_water_distribution(hpxml, runner, args)
