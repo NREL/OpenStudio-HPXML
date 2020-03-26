@@ -274,7 +274,7 @@ class HPXML < Object
   def fraction_of_window_area_operable()
     # Calculates the fraction of window area that is operable.
     window_area_total = @windows.map { |w| w.area }.inject(0, :+)
-    window_area_operable = @windows.select { |w| w.operable }.map { |w| w.area }.inject(0, :+)
+    window_area_operable = @windows.map { |w| w.fraction_operable * w.area }.inject(0, :+)
     if window_area_total <= 0
       return 0.0
     end
@@ -1784,7 +1784,7 @@ class HPXML < Object
              :glass_type, :gas_fill, :ufactor, :shgc, :interior_shading_factor_summer,
              :interior_shading_factor_winter, :exterior_shading, :overhangs_depth,
              :overhangs_distance_to_top_of_window, :overhangs_distance_to_bottom_of_window,
-             :operable, :wall_idref]
+             :fraction_operable, :wall_idref]
     attr_accessor(*ATTRS)
 
     def wall
@@ -1860,7 +1860,7 @@ class HPXML < Object
         XMLHelper.add_element(overhangs, 'DistanceToTopOfWindow', Float(@overhangs_distance_to_top_of_window)) unless @overhangs_distance_to_top_of_window.nil?
         XMLHelper.add_element(overhangs, 'DistanceToBottomOfWindow', Float(@overhangs_distance_to_bottom_of_window)) unless @overhangs_distance_to_bottom_of_window.nil?
       end
-      XMLHelper.add_element(window, 'Operable', Boolean(@operable)) unless @operable.nil?
+      XMLHelper.add_element(window, 'FractionOperable', Float(@fraction_operable)) unless @fraction_operable.nil?
       if not @wall_idref.nil?
         attached_to_wall = XMLHelper.add_element(window, 'AttachedToWall')
         XMLHelper.add_attribute(attached_to_wall, 'idref', @wall_idref)
@@ -1887,7 +1887,7 @@ class HPXML < Object
       @overhangs_depth = HPXML::to_float_or_nil(XMLHelper.get_value(window, 'Overhangs/Depth'))
       @overhangs_distance_to_top_of_window = HPXML::to_float_or_nil(XMLHelper.get_value(window, 'Overhangs/DistanceToTopOfWindow'))
       @overhangs_distance_to_bottom_of_window = HPXML::to_float_or_nil(XMLHelper.get_value(window, 'Overhangs/DistanceToBottomOfWindow'))
-      @operable = HPXML::to_bool_or_nil(XMLHelper.get_value(window, 'Operable'))
+      @fraction_operable = HPXML::to_float_or_nil(XMLHelper.get_value(window, 'FractionOperable'))
       @wall_idref = HPXML::get_idref(window.elements['AttachedToWall'])
     end
   end
@@ -3636,7 +3636,7 @@ class HPXML < Object
     return doc
   end
 
-  def collapse_enclosure_surfaces(additional_attrs_to_ignore = [])
+  def collapse_enclosure_surfaces()
     # Collapses like surfaces into a single surface with, e.g., aggregate surface area.
     # This can significantly speed up performance for HPXML files with lots of individual
     # surfaces (e.g., windows).
@@ -3657,7 +3657,6 @@ class HPXML < Object
                        :under_slab_insulation_id,
                        :area,
                        :exposed_perimeter]
-    attrs_to_ignore += additional_attrs_to_ignore
 
     # Look for pairs of surfaces that can be collapsed
     surf_types.each do |surf_type, surfaces|
