@@ -232,13 +232,6 @@ def create_hpxmls
     'base-misc-whole-house-fan.xml' => 'base.xml',
     'base-pv.xml' => 'base.xml',
     'base-site-neighbors.xml' => 'base.xml',
-    'base-version-2014.xml' => 'base.xml',
-    'base-version-2014A.xml' => 'base.xml',
-    'base-version-2014AE.xml' => 'base.xml',
-    'base-version-2014AEG.xml' => 'base.xml',
-    'base-version-2019.xml' => 'base.xml',
-    'base-version-2019A.xml' => 'base.xml',
-    'base-version-latest.xml' => 'base.xml',
 
     'hvac_autosizing/base-autosize.xml' => 'base.xml',
     'hvac_autosizing/base-hvac-air-to-air-heat-pump-1-speed-autosize.xml' => 'base-hvac-air-to-air-heat-pump-1-speed.xml',
@@ -462,20 +455,6 @@ def set_hpxml_header(hpxml_file, hpxml)
                      event_type: 'proposed workscope',
                      created_date_and_time: Time.new(2000, 1, 1).strftime('%Y-%m-%dT%H:%M:%S%:z'), # Hard-code to prevent diffs
                      timestep: 60)
-  elsif ['base-version-2014.xml'].include? hpxml_file
-    hpxml.header.eri_calculation_version = '2014'
-  elsif ['base-version-2014A.xml'].include? hpxml_file
-    hpxml.header.eri_calculation_version = '2014A'
-  elsif ['base-version-2014AE.xml'].include? hpxml_file
-    hpxml.header.eri_calculation_version = '2014AE'
-  elsif ['base-version-2014AEG.xml'].include? hpxml_file
-    hpxml.header.eri_calculation_version = '2014AEG'
-  elsif ['base-version-2019.xml'].include? hpxml_file
-    hpxml.header.eri_calculation_version = '2019'
-  elsif ['base-version-2019A.xml'].include? hpxml_file
-    hpxml.header.eri_calculation_version = '2019A'
-  elsif ['base-version-latest.xml'].include? hpxml_file
-    hpxml.header.eri_calculation_version = 'latest'
   elsif ['base-misc-timestep-10-mins.xml'].include? hpxml_file
     hpxml.header.timestep = 10
   elsif ['invalid_files/invalid-timestep.xml'].include? hpxml_file
@@ -507,7 +486,8 @@ end
 
 def set_hpxml_building_construction(hpxml_file, hpxml)
   if ['base.xml'].include? hpxml_file
-    hpxml.set_building_construction(number_of_conditioned_floors: 2,
+    hpxml.set_building_construction(residential_facility_type: HPXML::ResidentialTypeSFD,
+                                    number_of_conditioned_floors: 2,
                                     number_of_conditioned_floors_above_grade: 1,
                                     number_of_bedrooms: 3,
                                     conditioned_floor_area: 2700,
@@ -542,6 +522,8 @@ def set_hpxml_building_construction(hpxml_file, hpxml)
     hpxml.building_construction.number_of_conditioned_floors_above_grade += 1
     hpxml.building_construction.conditioned_floor_area += 1350
     hpxml.building_construction.conditioned_building_volume += 1350 * 8
+  elsif ['base-enclosure-adiabatic-surfaces.xml'].include? hpxml_file
+    hpxml.building_construction.residential_facility_type = HPXML::ResidentialTypeApartment
   end
 end
 
@@ -2268,10 +2250,12 @@ def set_hpxml_hvac_distributions(hpxml_file, hpxml)
                                  distribution_system_type: HPXML::HVACDistributionTypeAir)
     hpxml.hvac_distributions[0].duct_leakage_measurements.add(duct_type: HPXML::DuctTypeSupply,
                                                               duct_leakage_units: HPXML::UnitsCFM25,
-                                                              duct_leakage_value: 75)
+                                                              duct_leakage_value: 75,
+                                                              duct_leakage_total_or_to_outside: HPXML::DuctLeakageToOutside)
     hpxml.hvac_distributions[0].duct_leakage_measurements.add(duct_type: HPXML::DuctTypeReturn,
                                                               duct_leakage_units: HPXML::UnitsCFM25,
-                                                              duct_leakage_value: 25)
+                                                              duct_leakage_value: 25,
+                                                              duct_leakage_total_or_to_outside: HPXML::DuctLeakageToOutside)
     hpxml.hvac_distributions[0].ducts.add(duct_type: HPXML::DuctTypeSupply,
                                           duct_insulation_r_value: 4,
                                           duct_location: HPXML::LocationAtticUnvented,
@@ -2296,10 +2280,12 @@ def set_hpxml_hvac_distributions(hpxml_file, hpxml)
                                  distribution_system_type: HPXML::HVACDistributionTypeAir)
     hpxml.hvac_distributions[-1].duct_leakage_measurements.add(duct_type: HPXML::DuctTypeSupply,
                                                                duct_leakage_units: HPXML::UnitsCFM25,
-                                                               duct_leakage_value: 75)
+                                                               duct_leakage_value: 75,
+                                                               duct_leakage_total_or_to_outside: HPXML::DuctLeakageToOutside)
     hpxml.hvac_distributions[-1].duct_leakage_measurements.add(duct_type: HPXML::DuctTypeReturn,
                                                                duct_leakage_units: HPXML::UnitsCFM25,
-                                                               duct_leakage_value: 25)
+                                                               duct_leakage_value: 25,
+                                                               duct_leakage_total_or_to_outside: HPXML::DuctLeakageToOutside)
     hpxml.hvac_distributions[-1].ducts.add(duct_type: HPXML::DuctTypeSupply,
                                            duct_insulation_r_value: 4,
                                            duct_location: HPXML::LocationAtticUnvented,
@@ -2330,10 +2316,12 @@ def set_hpxml_hvac_distributions(hpxml_file, hpxml)
                                  distribution_system_type: HPXML::HVACDistributionTypeAir)
     hpxml.hvac_distributions[-1].duct_leakage_measurements.add(duct_type: HPXML::DuctTypeSupply,
                                                                duct_leakage_units: HPXML::UnitsCFM25,
-                                                               duct_leakage_value: 75)
+                                                               duct_leakage_value: 75,
+                                                               duct_leakage_total_or_to_outside: HPXML::DuctLeakageToOutside)
     hpxml.hvac_distributions[-1].duct_leakage_measurements.add(duct_type: HPXML::DuctTypeReturn,
                                                                duct_leakage_units: HPXML::UnitsCFM25,
-                                                               duct_leakage_value: 25)
+                                                               duct_leakage_value: 25,
+                                                               duct_leakage_total_or_to_outside: HPXML::DuctLeakageToOutside)
     hpxml.hvac_distributions[-1].ducts.add(duct_type: HPXML::DuctTypeSupply,
                                            duct_insulation_r_value: 4,
                                            duct_location: HPXML::LocationAtticUnvented,
@@ -2346,10 +2334,12 @@ def set_hpxml_hvac_distributions(hpxml_file, hpxml)
                                  distribution_system_type: HPXML::HVACDistributionTypeAir)
     hpxml.hvac_distributions[-1].duct_leakage_measurements.add(duct_type: HPXML::DuctTypeSupply,
                                                                duct_leakage_units: HPXML::UnitsCFM25,
-                                                               duct_leakage_value: 75)
+                                                               duct_leakage_value: 75,
+                                                               duct_leakage_total_or_to_outside: HPXML::DuctLeakageToOutside)
     hpxml.hvac_distributions[-1].duct_leakage_measurements.add(duct_type: HPXML::DuctTypeReturn,
                                                                duct_leakage_units: HPXML::UnitsCFM25,
-                                                               duct_leakage_value: 25)
+                                                               duct_leakage_value: 25,
+                                                               duct_leakage_total_or_to_outside: HPXML::DuctLeakageToOutside)
     hpxml.hvac_distributions[-1].ducts.add(duct_type: HPXML::DuctTypeSupply,
                                            duct_insulation_r_value: 4,
                                            duct_location: HPXML::LocationAtticUnvented,
@@ -2362,10 +2352,12 @@ def set_hpxml_hvac_distributions(hpxml_file, hpxml)
                                  distribution_system_type: HPXML::HVACDistributionTypeAir)
     hpxml.hvac_distributions[-1].duct_leakage_measurements.add(duct_type: HPXML::DuctTypeSupply,
                                                                duct_leakage_units: HPXML::UnitsCFM25,
-                                                               duct_leakage_value: 75)
+                                                               duct_leakage_value: 75,
+                                                               duct_leakage_total_or_to_outside: HPXML::DuctLeakageToOutside)
     hpxml.hvac_distributions[-1].duct_leakage_measurements.add(duct_type: HPXML::DuctTypeReturn,
                                                                duct_leakage_units: HPXML::UnitsCFM25,
-                                                               duct_leakage_value: 25)
+                                                               duct_leakage_value: 25,
+                                                               duct_leakage_total_or_to_outside: HPXML::DuctLeakageToOutside)
     hpxml.hvac_distributions[-1].ducts.add(duct_type: HPXML::DuctTypeSupply,
                                            duct_insulation_r_value: 4,
                                            duct_location: HPXML::LocationAtticUnvented,
@@ -2378,10 +2370,12 @@ def set_hpxml_hvac_distributions(hpxml_file, hpxml)
                                  distribution_system_type: HPXML::HVACDistributionTypeAir)
     hpxml.hvac_distributions[-1].duct_leakage_measurements.add(duct_type: HPXML::DuctTypeSupply,
                                                                duct_leakage_units: HPXML::UnitsCFM25,
-                                                               duct_leakage_value: 75)
+                                                               duct_leakage_value: 75,
+                                                               duct_leakage_total_or_to_outside: HPXML::DuctLeakageToOutside)
     hpxml.hvac_distributions[-1].duct_leakage_measurements.add(duct_type: HPXML::DuctTypeReturn,
                                                                duct_leakage_units: HPXML::UnitsCFM25,
-                                                               duct_leakage_value: 25)
+                                                               duct_leakage_value: 25,
+                                                               duct_leakage_total_or_to_outside: HPXML::DuctLeakageToOutside)
     hpxml.hvac_distributions[-1].ducts.add(duct_type: HPXML::DuctTypeSupply,
                                            duct_insulation_r_value: 4,
                                            duct_location: HPXML::LocationAtticUnvented,
@@ -2418,10 +2412,12 @@ def set_hpxml_hvac_distributions(hpxml_file, hpxml)
     hpxml.hvac_distributions[0].duct_leakage_measurements.clear()
     hpxml.hvac_distributions[0].duct_leakage_measurements.add(duct_type: HPXML::DuctTypeSupply,
                                                               duct_leakage_units: HPXML::UnitsPercent,
-                                                              duct_leakage_value: 0.1)
+                                                              duct_leakage_value: 0.1,
+                                                              duct_leakage_total_or_to_outside: HPXML::DuctLeakageToOutside)
     hpxml.hvac_distributions[0].duct_leakage_measurements.add(duct_type: HPXML::DuctTypeReturn,
                                                               duct_leakage_units: HPXML::UnitsPercent,
-                                                              duct_leakage_value: 0.05)
+                                                              duct_leakage_value: 0.05,
+                                                              duct_leakage_total_or_to_outside: HPXML::DuctLeakageToOutside)
   elsif ['base-hvac-undersized.xml'].include? hpxml_file
     hpxml.hvac_distributions[0].duct_leakage_measurements[0].duct_leakage_value /= 10.0
     hpxml.hvac_distributions[0].duct_leakage_measurements[1].duct_leakage_value /= 10.0
@@ -2810,7 +2806,7 @@ def set_hpxml_water_heating_systems(hpxml_file, hpxml)
     if ['base-misc-defaults.xml'].include? hpxml_file
       water_heating_system.temperature = nil
     else
-      water_heating_system.temperature = Waterheater.get_default_hot_water_temperature(hpxml.header.eri_calculation_version)
+      water_heating_system.temperature = Waterheater.get_default_hot_water_temperature(Constants.ERIVersions[-1])
     end
   end
 end
