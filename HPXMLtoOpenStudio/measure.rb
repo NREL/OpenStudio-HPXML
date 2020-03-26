@@ -4269,8 +4269,6 @@ class OSModel
     else
       set_surface_exterior(model, spaces, surface, wall_exterior_adjacent_to)
     end
-
-    return true
   end
 
   def self.get_min_neighbor_distance()

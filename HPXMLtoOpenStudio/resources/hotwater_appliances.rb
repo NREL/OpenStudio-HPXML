@@ -76,12 +76,9 @@ class HotWaterAndAppliances
       cw_schedule = HotWaterSchedule.new(model, cw_name, nbeds)
       cw_peak_flow = cw_schedule.calcPeakFlowFromDailygpm(cw_gpd)
       cw_design_level_w = cw_schedule.calcDesignLevelFromDailykWh(cw_annual_kwh / 365.0)
-      if cw_space.nil? # outside or mf spaces
-        # assign to living space with loss fraction to be one
-        add_electric_equipment(model, cw_name, living_space, cw_design_level_w, 0.0, 0.0, cw_schedule.schedule)
-      else
-        add_electric_equipment(model, cw_name, cw_space, cw_design_level_w, cw_frac_sens, cw_frac_lat, cw_schedule.schedule)
-      end
+
+      cw_space, cw_frac_sens, cw_frac_lat = modify_space_load_fracs(cw_space, living_space, cw_frac_sens, cw_frac_lat)
+      add_electric_equipment(model, cw_name, cw_space, cw_design_level_w, cw_frac_sens, cw_frac_lat, cw_schedule.schedule)
       dhw_loop_fracs.each do |sys_id, dhw_load_frac|
         dhw_loop = dhw_loops[sys_id]
         add_water_use_equipment(model, cw_name, cw_peak_flow * dhw_load_frac, cw_schedule.schedule, setpoint_scheds[dhw_loop], water_use_connections[dhw_loop])
@@ -97,14 +94,10 @@ class HotWaterAndAppliances
       cd_schedule = MonthWeekdayWeekendSchedule.new(model, cd_name, cd_weekday_sch, cd_weekday_sch, cd_monthly_sch, 1.0, 1.0, true, true, Constants.ScheduleTypeLimitsFraction)
       cd_design_level_e = cd_schedule.calcDesignLevelFromDailykWh(cd_annual_kwh / 365.0)
       cd_design_level_f = cd_schedule.calcDesignLevelFromDailyTherm(cd_annual_therm / 365.0)
-      if cd_space.nil? # outside or mf spaces
-        # assign to living space with loss fraction to be one
-        add_electric_equipment(model, cd_name, living_space, cd_design_level_e, 0.0, 0.0, cd_schedule.schedule)
-        add_other_equipment(model, cd_name, living_space, cd_design_level_f, 0.0, 0.0, cd_schedule.schedule, cd_fuel)
-      else
-        add_electric_equipment(model, cd_name, cd_space, cd_design_level_e, cd_frac_sens, cd_frac_lat, cd_schedule.schedule)
-        add_other_equipment(model, cd_name, cd_space, cd_design_level_f, cd_frac_sens, cd_frac_lat, cd_schedule.schedule, cd_fuel)
-      end
+
+      cd_space, cd_frac_sens, cd_frac_lat = modify_space_load_fracs(cd_space, living_space, cd_frac_sens, cd_frac_lat)
+      add_electric_equipment(model, cd_name, cd_space, cd_design_level_e, cd_frac_sens, cd_frac_lat, cd_schedule.schedule)
+      add_other_equipment(model, cd_name, cd_space, cd_design_level_f, cd_frac_sens, cd_frac_lat, cd_schedule.schedule, cd_fuel)
     end
 
     # Dishwasher
@@ -114,12 +107,9 @@ class HotWaterAndAppliances
       dw_schedule = HotWaterSchedule.new(model, dw_name, nbeds)
       dw_peak_flow = dw_schedule.calcPeakFlowFromDailygpm(dw_gpd)
       dw_design_level_w = dw_schedule.calcDesignLevelFromDailykWh(dw_annual_kwh / 365.0)
-      if dw_space.nil? # outside or mf spaces
-        # assign to living space with loss fraction to be one
-        add_electric_equipment(model, dw_name, living_space, dw_design_level_w, 0.0, 0.0, dw_schedule.schedule)
-      else
-        add_electric_equipment(model, dw_name, dw_space, dw_design_level_w, dw_frac_sens, dw_frac_lat, dw_schedule.schedule)
-      end
+
+      dw_space, dw_frac_sens, dw_frac_lat = modify_space_load_fracs(dw_space, living_space, dw_frac_sens, dw_frac_lat)
+      add_electric_equipment(model, dw_name, dw_space, dw_design_level_w, dw_frac_sens, dw_frac_lat, dw_schedule.schedule)
       dhw_loop_fracs.each do |sys_id, dhw_load_frac|
         dhw_loop = dhw_loops[sys_id]
         add_water_use_equipment(model, dw_name, dw_peak_flow * dhw_load_frac, dw_schedule.schedule, setpoint_scheds[dhw_loop], water_use_connections[dhw_loop])
@@ -133,11 +123,9 @@ class HotWaterAndAppliances
       fridge_monthly_sch = '0.837, 0.835, 1.084, 1.084, 1.084, 1.096, 1.096, 1.096, 1.096, 0.931, 0.925, 0.837'
       fridge_schedule = MonthWeekdayWeekendSchedule.new(model, fridge_name, fridge_weekday_sch, fridge_weekday_sch, fridge_monthly_sch, 1.0, 1.0, true, true, Constants.ScheduleTypeLimitsFraction)
       fridge_design_level = fridge_schedule.calcDesignLevelFromDailykWh(fridge_annual_kwh / 365.0)
-      if fridge_space.nil?
-        add_electric_equipment(model, fridge_name, living_space, fridge_design_level, 0.0, 0.0, fridge_schedule.schedule)
-      else
-        add_electric_equipment(model, fridge_name, fridge_space, fridge_design_level, 1.0, 0.0, fridge_schedule.schedule)
-      end
+
+      fridge_space, fridge_frac_sens, fridge_frac_lat = modify_space_load_fracs(fridge_space, living_space, 1.0, 0.0)
+      add_electric_equipment(model, fridge_name, fridge_space, fridge_design_level, fridge_frac_sens, fridge_frac_lat, fridge_schedule.schedule)
     end
 
     # Cooking Range
@@ -149,14 +137,10 @@ class HotWaterAndAppliances
       cook_schedule = MonthWeekdayWeekendSchedule.new(model, cook_name, cook_weekday_sch, cook_weekday_sch, cook_monthly_sch, 1.0, 1.0, true, true, Constants.ScheduleTypeLimitsFraction)
       cook_design_level_e = cook_schedule.calcDesignLevelFromDailykWh(cook_annual_kwh / 365.0)
       cook_design_level_f = cook_schedule.calcDesignLevelFromDailyTherm(cook_annual_therm / 365.0)
-      if cook_space.nil? # outside or mf spaces
-        # assign to living space with loss fraction to be one
-        add_electric_equipment(model, cook_name, living_space, cook_design_level_e, 0.0, 0.0, cook_schedule.schedule)
-        add_other_equipment(model, cook_name, living_space, cook_design_level_f, 0.0, 0.0, cook_schedule.schedule, cook_fuel_type)
-      else
-        add_electric_equipment(model, cook_name, cook_space, cook_design_level_e, cook_frac_sens, cook_frac_lat, cook_schedule.schedule)
-        add_other_equipment(model, cook_name, cook_space, cook_design_level_f, cook_frac_sens, cook_frac_lat, cook_schedule.schedule, cook_fuel_type)
-      end
+
+      cook_space, cook_frac_sens, cook_frac_lat = modify_space_load_fracs(cook_space, living_space, cook_frac_sens, cook_frac_lat)
+      add_electric_equipment(model, cook_name, cook_space, cook_design_level_e, cook_frac_sens, cook_frac_lat, cook_schedule.schedule)
+      add_other_equipment(model, cook_name, cook_space, cook_design_level_f, cook_frac_sens, cook_frac_lat, cook_schedule.schedule, cook_fuel_type)
     end
 
     if not dist_type.nil?
@@ -485,6 +469,15 @@ class HotWaterAndAppliances
     oe.setSchedule(schedule)
 
     return oe
+  end
+
+  def self.modify_space_load_fracs(space, living_space, sens_frac, lat_frac)
+    if space.nil? # HPXML other enumeration, used for mf spaces
+      # assign to living space with loss fraction to be one
+      return living_space, 0.0, 0.0
+    else
+      return space, sens_frac, lat_frac
+    end
   end
 
   def self.add_water_use_equipment(model, obj_name, peak_flow, schedule, temp_schedule, water_use_connection)

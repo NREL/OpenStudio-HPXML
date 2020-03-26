@@ -3103,7 +3103,7 @@ def set_hpxml_clothes_washer(hpxml_file, hpxml)
   elsif ['base-appliances-none.xml'].include? hpxml_file
     hpxml.clothes_washers.clear()
   elsif ['base-enclosure-attached-multifamily.xml'].include? hpxml_file
-    hpxml.clothes_washers[0].location = 'other'
+    hpxml.clothes_washers[0].location = HPXML::LocationOther
   elsif ['base-appliances-modified.xml'].include? hpxml_file
     hpxml.clothes_washers[0].modified_energy_factor = nil
     hpxml.clothes_washers[0].integrated_modified_energy_factor = 0.73
@@ -3129,7 +3129,7 @@ def set_hpxml_clothes_dryer(hpxml_file, hpxml)
   elsif ['base-appliances-none.xml'].include? hpxml_file
     hpxml.clothes_dryers.clear()
   elsif ['base-enclosure-attached-multifamily.xml'].include? hpxml_file
-    hpxml.clothes_dryers[0].location = 'other'
+    hpxml.clothes_dryers[0].location = HPXML::LocationOther
   elsif ['base-appliances-modified.xml'].include? hpxml_file
     hpxml.clothes_dryers.clear()
     hpxml.clothes_dryers.add(id: 'ClothesDryer',
@@ -3177,6 +3177,8 @@ def set_hpxml_dishwasher(hpxml_file, hpxml)
                           location: HPXML::LocationLivingSpace,
                           rated_annual_kwh: 450,
                           place_setting_capacity: 12)
+  elsif ['base-enclosure-attached-multifamily.xml'].include? hpxml_file
+    hpxml.dishwashers[0].location = HPXML::LocationOther
   elsif ['base-appliances-none.xml'].include? hpxml_file
     hpxml.dishwashers.clear()
   elsif ['base-appliances-modified.xml'].include? hpxml_file
@@ -3200,7 +3202,7 @@ def set_hpxml_refrigerator(hpxml_file, hpxml)
   elsif ['base-appliances-none.xml'].include? hpxml_file
     hpxml.refrigerators.clear()
   elsif ['base-enclosure-attached-multifamily.xml'].include? hpxml_file
-    hpxml.refrigerators[0].location = 'other'
+    hpxml.refrigerators[0].location = HPXML::LocationOther
   elsif ['base-foundation-unconditioned-basement.xml'].include? hpxml_file
     hpxml.refrigerators[0].location = HPXML::LocationBasementUnconditioned
   elsif ['base-atticroof-conditioned.xml'].include? hpxml_file
@@ -3221,6 +3223,8 @@ def set_hpxml_cooking_range(hpxml_file, hpxml)
                              is_induction: false)
   elsif ['base-appliances-none.xml'].include? hpxml_file
     hpxml.cooking_ranges.clear()
+  elsif ['base-enclosure-attached-multifamily.xml'].include? hpxml_file
+    hpxml.cooking_ranges[0].location = HPXML::LocationOther
   elsif ['base-appliances-gas.xml'].include? hpxml_file
     hpxml.cooking_ranges[0].fuel_type = HPXML::FuelTypeNaturalGas
     hpxml.cooking_ranges[0].is_induction = false
