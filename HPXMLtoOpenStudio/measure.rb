@@ -295,6 +295,7 @@ class OSModel
     @total_frac_remaining_cool_load_served = 1.0
     @hvac_map = {} # mapping between HPXML HVAC systems and model objects
     @dhw_map = {}  # mapping between HPXML Water Heating systems and model objects
+    @mf_temp_sch_map = {} # mapping between HPXML new sfa/mf spaces and temperature schedules created to model those space
     @cond_bsmnt_surfaces = [] # list of surfaces in conditioned basement, used for modification of some surface properties, eg. solar absorptance, view factor, etc.
 
     # Default misc
@@ -1892,6 +1893,10 @@ class OSModel
   def self.add_windows(runner, model, spaces, weather)
     surfaces = []
     @hpxml.windows.each do |window|
+      wall_exterior_adjacent_to = window.wall.exterior_adjacent_to
+      if [HPXML::LocationOtherHeatedSpace, HPXML::LocationOtherMultifamilyBufferSpace, HPXML::LocationOtherNonFreezingSpace, HPXML::LocationOtherHousingUnit].include? wall_exterior_adjacent_to
+        fail "Window '#{window.id}' cannot be adjacent to '#{wall_exterior_adjacent_to}'. Check parent wall: '#{window.wall.id}'."
+      end
       window_height = 4.0 # ft, default
       overhang_depth = nil
       if not window.overhangs_depth.nil?
@@ -1915,7 +1920,7 @@ class OSModel
       surface.setName("surface #{window.id}")
       surface.setSurfaceType('Wall')
       set_surface_interior(model, spaces, surface, window.wall.interior_adjacent_to)
-      assign_outside_boundary_condition_to_subsurface(surface, window, spaces, model)
+      assign_outside_boundary_condition_to_subsurface(surface, wall_exterior_adjacent_to, spaces, model)
       surfaces << surface
 
       sub_surface = OpenStudio::Model::SubSurface.new(add_wall_polygon(window_width, window_height, z_origin,
@@ -1948,19 +1953,10 @@ class OSModel
     surfaces = []
     @hpxml.skylights.each do |skylight|
       # Obtain skylight tilt from attached roof
-      skylight_tilt = nil
-      @hpxml.roofs.each do |roof|
-        next unless roof.id == skylight.roof_idref
+      skylight_tilt = skylight.roof.pitch / 12.0
 
-        skylight_tilt = roof.pitch / 12.0
-      end
-      if skylight_tilt.nil?
-        fail "Attached roof '#{skylight.roof_idref}' not found for skylight '#{skylight.id}'."
-      end
-
-      skylight_area = skylight.area
-      skylight_height = Math::sqrt(skylight_area)
-      skylight_width = skylight_area / skylight_height
+      skylight_height = Math::sqrt(skylight.area)
+      skylight_width = skylight.area / skylight_height
       z_origin = @walls_top + 0.5 * Math.sin(Math.atan(skylight_tilt)) * skylight_height
 
       # Create parent surface slightly bigger than skylight
@@ -2001,6 +1997,9 @@ class OSModel
   def self.add_doors(runner, model, spaces)
     surfaces = []
     @hpxml.doors.each do |door|
+      # ignore doors with adiabatic outside boundary condition
+      next if door.wall.exterior_adjacent_to == HPXML::LocationOtherHousingUnit
+
       door_height = 6.67 # ft
       door_width = door.area / door_height
       z_origin = @foundation_top
@@ -2016,10 +2015,9 @@ class OSModel
       surface.setName("surface #{door.id}")
       surface.setSurfaceType('Wall')
       set_surface_interior(model, spaces, surface, door.wall.interior_adjacent_to)
-      if not assign_outside_boundary_condition_to_subsurface(surface, door, spaces, model)
-        surface.remove
-        next
-      end
+      wall_exterior_adjacent_to = door.wall.exterior_adjacent_to
+      assign_outside_boundary_condition_to_subsurface(surface, wall_exterior_adjacent_to, spaces, model)
+
       surfaces << surface
 
       sub_surface = OpenStudio::Model::SubSurface.new(add_wall_polygon(door_width, door_height, z_origin,
@@ -4141,16 +4139,15 @@ class OSModel
 
   def self.add_otherside_coefficients(surface, exterior_adjacent_to, model, spaces)
     if spaces[exterior_adjacent_to].nil?
-
       # Create E+ other side coefficient object
       otherside_object = OpenStudio::Model::SurfacePropertyOtherSideCoefficients.new(model)
-      otherside_object.setName(exterior_adjacent_to)
+      otherside_object.setName(exterior_adjacent_to + ' osc')
       # Fixme: assumption the same as SurfacePropertyConvectionCoefficients of return air plenum
       otherside_object.setCombinedConvectiveRadiativeFilmCoefficient(30)
       # Schedule of space temperature, can be shared with water heater/appliances
-      otherside_schedule = create_or_get_outside_boundary_schedule(model, exterior_adjacent_to, spaces)
+      create_outside_boundary_schedule(model, exterior_adjacent_to, spaces)
       # FIXME: wait for new OS release with bugfix of https://github.com/NREL/OpenStudio/issues/3848
-      otherside_object.setPointer(9, otherside_schedule.handle)
+      otherside_object.setPointer(9, @mf_temp_sch_map[exterior_adjacent_to].handle)
       surface.setSurfacePropertyOtherSideCoefficients(otherside_object)
       spaces[exterior_adjacent_to] = otherside_object
     else
@@ -4158,63 +4155,43 @@ class OSModel
     end
   end
 
-  def self.create_or_get_outside_boundary_schedule(model, outside_space, spaces)
-    actuated_schedule = nil
+  def self.create_outside_boundary_schedule(model, outside_space, spaces)
+    # Create outside boundary schedules to be actuated by EMS,
+    # can be shared by any surface, duct, or appliances adjacent to / located in those spaces
+
+    # return if already exists
+    return if not @mf_temp_sch_map[outside_space].nil?
+
+    @mf_temp_sch_map[outside_space] = OpenStudio::Model::ScheduleConstant.new(model)
+    @mf_temp_sch_map[outside_space].setName("#{outside_space}")
+
     if outside_space == HPXML::LocationOtherHeatedSpace
       # Average of indoor/outdoor temperatures with minimum of 68 deg-F
       temp_min = UnitConversions.convert(68, 'F', 'C')
       indoor_weight = 0.5
       outdoor_weight = 0.5
-      if not @heated_space_temp_sch.nil?
-        return @heated_space_temp_sch
-      else
-        @heated_space_temp_sch = OpenStudio::Model::ScheduleConstant.new(model)
-        @heated_space_temp_sch.setName("#{outside_space}")
-        actuated_schedule = @heated_space_temp_sch
-      end
     elsif outside_space == HPXML::LocationOtherMultifamilyBufferSpace
       # Average of indoor/outdoor temperatures with minimum of 50 deg-F
       temp_min = UnitConversions.convert(50, 'F', 'C')
       indoor_weight = 0.5
       outdoor_weight = 0.5
-      if not @multifamily_buffer_space_temp_sch.nil?
-        return @multifamily_buffer_space_temp_sch
-      else
-        @multifamily_buffer_space_temp_sch = OpenStudio::Model::ScheduleConstant.new(model)
-        @multifamily_buffer_space_temp_sch.setName("#{outside_space}")
-        actuated_schedule = @multifamily_buffer_space_temp_sch
-      end
     elsif outside_space == HPXML::LocationOtherNonFreezingSpace
       # Floating with outdoor air temperature with minimum of 40 deg-F
       temp_min = UnitConversions.convert(40, 'F', 'C')
       indoor_weight = 0.0
       outdoor_weight = 1.0
-      if not @non_freezing_space_temp_sch.nil?
-        return @non_freezing_space_temp_sch
-      else
-        @non_freezing_space_temp_sch = OpenStudio::Model::ScheduleConstant.new(model)
-        @non_freezing_space_temp_sch.setName("#{outside_space}")
-        actuated_schedule = @non_freezing_space_temp_sch
-      end
     elsif outside_space == HPXML::LocationOtherHousingUnit
       # For water heater, duct, appliances, etc.
       # Indoor air temperature
       temp_min = UnitConversions.convert(40, 'F', 'C')
       indoor_weight = 1.0
       outdoor_weight = 0.0
-      if not @other_housing_unit_temp_sch.nil?
-        return @other_housing_unit_temp_sch
-      else
-        @other_housing_unit_temp_sch = OpenStudio::Model::ScheduleConstant.new(model)
-        @other_housing_unit_temp_sch.setName("#{outside_space}")
-        actuated_schedule = @other_housing_unit_temp_sch
-      end
     end
 
     # Schedule type limits compatible
     schedule_type_limits = OpenStudio::Model::ScheduleTypeLimits.new(model)
     schedule_type_limits.setUnitType('Temperature')
-    actuated_schedule.setScheduleTypeLimits(schedule_type_limits)
+    @mf_temp_sch_map[outside_space].setScheduleTypeLimits(schedule_type_limits)
 
     # Ems to actuate schedule
     if @sensor_ia.nil?
@@ -4226,7 +4203,7 @@ class OSModel
       @sensor_oa = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Site Outdoor Air Drybulb Temperature')
       @sensor_oa.setName('oa_temp')
     end
-    actuator = OpenStudio::Model::EnergyManagementSystemActuator.new(actuated_schedule, 'Schedule:Constant', 'Schedule Value')
+    actuator = OpenStudio::Model::EnergyManagementSystemActuator.new(@mf_temp_sch_map[outside_space], 'Schedule:Constant', 'Schedule Value')
     actuator.setName("#{outside_space.gsub(' ', '_').gsub('-', '_')}_temp_sch")
 
     program = OpenStudio::Model::EnergyManagementSystemProgram.new(model)
@@ -4240,17 +4217,15 @@ class OSModel
     program_cm.setName("#{program.name} calling manager")
     program_cm.setCallingPoint('EndOfSystemTimestepAfterHVACReporting')
     program_cm.addProgram(program)
-
-    return actuated_schedule
   end
 
   # Returns an OS:Space, or nil if the location is outside the building
   def self.get_space_from_location(location, object_name, model, spaces)
-    if (location == HPXML::LocationOtherExterior) || (location == HPXML::LocationOutside) || (location == HPXML::LocationOther)
-      return
-    elsif (location == HPXML::LocationOtherHeatedSpace) || (location == HPXML::LocationOtherHousingUnit) || (location == HPXML::LocationOtherMultifamilyBufferSpace) || (location == HPXML::LocationOtherNonFreezingSpace)
-      schedule = create_or_get_outside_boundary_schedule(model, location, spaces)
-      return schedule
+    return if (location == HPXML::LocationOtherExterior) || (location == HPXML::LocationOutside) || (location == HPXML::LocationOther)
+
+    if (location == HPXML::LocationOtherHeatedSpace) || (location == HPXML::LocationOtherHousingUnit) || (location == HPXML::LocationOtherMultifamilyBufferSpace) || (location == HPXML::LocationOtherNonFreezingSpace)
+      create_outside_boundary_schedule(model, location, spaces)
+      return @mf_temp_sch_map[location]
     end
 
     num_orig_spaces = spaces.size
@@ -4287,19 +4262,7 @@ class OSModel
     return
   end
 
-  def self.assign_outside_boundary_condition_to_subsurface(surface, subsurface_class, spaces, model)
-    # Check walls
-    wall_exterior_adjacent_to = subsurface_class.wall.exterior_adjacent_to
-
-    if [HPXML::LocationOtherHeatedSpace, HPXML::LocationOtherMultifamilyBufferSpace, HPXML::LocationOtherNonFreezingSpace, HPXML::LocationOtherHousingUnit, HPXML::LocationOtherHousingUnitAbove, HPXML::LocationOtherHousingUnitBelow].include? wall_exterior_adjacent_to
-      if subsurface_class.is_a? HPXML::Window
-        fail "Window '#{subsurface_class.id}' cannot be adjacent to '#{wall_exterior_adjacent_to}'. Check wall: '#{subsurface_class.wall.id}'."
-      elsif [HPXML::LocationOtherHousingUnit, HPXML::LocationOtherHousingUnitAbove, HPXML::LocationOtherHousingUnitBelow].include? wall_exterior_adjacent_to
-        # subsurface with adiabatic outside boundary condition, ignore it
-        return false
-      end
-    end
-
+  def self.assign_outside_boundary_condition_to_subsurface(surface, wall_exterior_adjacent_to, spaces, model)
     # Subsurface on foundationwalls, set it to be adjacent to outdoors
     if wall_exterior_adjacent_to == HPXML::LocationGround
       surface.setOutsideBoundaryCondition('Outdoors')
