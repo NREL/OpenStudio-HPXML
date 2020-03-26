@@ -271,24 +271,14 @@ class HPXML < Object
     return fuel_fracs.key(fuel_fracs.values.max)
   end
 
-  def fraction_of_window_area_operable(default_frac_for_unknown_operable)
+  def fraction_of_window_area_operable()
     # Calculates the fraction of window area that is operable.
-    window_area_total = 0.0
-    window_area_operable = 0.0
-    @windows.each do |window|
-      window_area_total += window.area
-      if window.operable.nil?
-        window_area_operable += (window.area * default_frac_for_unknown_operable)
-      elsif window.operable
-        window_area_operable += window.area
-      end
-    end
+    window_area_total = @windows.map { |w| w.area }.inject(0, :+)
+    window_area_operable = @windows.map { |w| w.fraction_operable * w.area }.inject(0, :+)
     if window_area_total <= 0
-      frac_window_area_operable = 0.0
-    else
-      frac_window_area_operable = window_area_operable / window_area_total
+      return 0.0
     end
-    return frac_window_area_operable
+    return window_area_operable / window_area_total
   end
 
   def to_rexml()
@@ -1794,7 +1784,7 @@ class HPXML < Object
              :glass_type, :gas_fill, :ufactor, :shgc, :interior_shading_factor_summer,
              :interior_shading_factor_winter, :exterior_shading, :overhangs_depth,
              :overhangs_distance_to_top_of_window, :overhangs_distance_to_bottom_of_window,
-             :operable, :wall_idref]
+             :fraction_operable, :wall_idref]
     attr_accessor(*ATTRS)
 
     def wall
@@ -1836,6 +1826,12 @@ class HPXML < Object
           fail "For Window '#{@id}', overhangs distance to bottom (#{@overhangs_distance_to_bottom_of_window}) must be greater than distance to top (#{@overhangs_distance_to_top_of_window})."
         end
       end
+      # TODO: Remove this error when we can support it w/ EnergyPlus
+      if (not @interior_shading_factor_summer.nil?) && (not @interior_shading_factor_winter.nil?)
+        if @interior_shading_factor_summer > @interior_shading_factor_winter
+          fail "SummerShadingCoefficient (#{interior_shading_factor_summer}) must be less than or equal to WinterShadingCoefficient (#{interior_shading_factor_winter}) for window '#{@id}'."
+        end
+      end
 
       return errors
     end
@@ -1864,7 +1860,7 @@ class HPXML < Object
         XMLHelper.add_element(overhangs, 'DistanceToTopOfWindow', Float(@overhangs_distance_to_top_of_window)) unless @overhangs_distance_to_top_of_window.nil?
         XMLHelper.add_element(overhangs, 'DistanceToBottomOfWindow', Float(@overhangs_distance_to_bottom_of_window)) unless @overhangs_distance_to_bottom_of_window.nil?
       end
-      XMLHelper.add_element(window, 'Operable', Boolean(@operable)) unless @operable.nil?
+      XMLHelper.add_element(window, 'FractionOperable', Float(@fraction_operable)) unless @fraction_operable.nil?
       if not @wall_idref.nil?
         attached_to_wall = XMLHelper.add_element(window, 'AttachedToWall')
         XMLHelper.add_attribute(attached_to_wall, 'idref', @wall_idref)
@@ -1891,7 +1887,7 @@ class HPXML < Object
       @overhangs_depth = HPXML::to_float_or_nil(XMLHelper.get_value(window, 'Overhangs/Depth'))
       @overhangs_distance_to_top_of_window = HPXML::to_float_or_nil(XMLHelper.get_value(window, 'Overhangs/DistanceToTopOfWindow'))
       @overhangs_distance_to_bottom_of_window = HPXML::to_float_or_nil(XMLHelper.get_value(window, 'Overhangs/DistanceToBottomOfWindow'))
-      @operable = HPXML::to_bool_or_nil(XMLHelper.get_value(window, 'Operable'))
+      @fraction_operable = HPXML::to_float_or_nil(XMLHelper.get_value(window, 'FractionOperable'))
       @wall_idref = HPXML::get_idref(window.elements['AttachedToWall'])
     end
   end
@@ -3640,7 +3636,7 @@ class HPXML < Object
     return doc
   end
 
-  def collapse_enclosure_surfaces(additional_attrs_to_ignore = [])
+  def collapse_enclosure_surfaces()
     # Collapses like surfaces into a single surface with, e.g., aggregate surface area.
     # This can significantly speed up performance for HPXML files with lots of individual
     # surfaces (e.g., windows).
@@ -3661,7 +3657,6 @@ class HPXML < Object
                        :under_slab_insulation_id,
                        :area,
                        :exposed_perimeter]
-    attrs_to_ignore += additional_attrs_to_ignore
 
     # Look for pairs of surfaces that can be collapsed
     surf_types.each do |surf_type, surfaces|
@@ -3717,6 +3712,7 @@ class HPXML < Object
 
   def delete_partition_surfaces()
     (@rim_joists + @walls + @foundation_walls + @frame_floors).reverse_each do |surface|
+      next if surface.interior_adjacent_to.nil? || surface.exterior_adjacent_to.nil?
       next unless surface.interior_adjacent_to == surface.exterior_adjacent_to
 
       surface.delete
