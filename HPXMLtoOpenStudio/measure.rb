@@ -526,25 +526,17 @@ class OSModel
       if clothes_dryer.control_type.nil?
         clothes_dryer.control_type = HotWaterAndAppliances.get_clothes_dryer_reference_control()
       end
-      if clothes_dryer.energy_factor.nil?
-        if clothes_dryer.combined_energy_factor.nil?
-          clothes_dryer.energy_factor = HotWaterAndAppliances.calc_clothes_dryer_ef_from_cef(HotWaterAndAppliances.get_clothes_dryer_reference_cef(clothes_dryer.fuel_type))
-        else
-          clothes_dryer.energy_factor = HotWaterAndAppliances.calc_clothes_dryer_ef_from_cef(clothes_dryer.combined_energy_factor)
-        end
+      if clothes_dryer.energy_factor.nil? && clothes_dryer.combined_energy_factor.nil?
+        clothes_dryer.energy_factor = HotWaterAndAppliances.calc_clothes_dryer_ef_from_cef(HotWaterAndAppliances.get_clothes_dryer_reference_cef(clothes_dryer.fuel_type))
       end
     end
 
     # Default dishwasher place setting capacity and energy factor
     if @hpxml.dishwashers.size > 0
       dishwasher = @hpxml.dishwashers[0]
-      if dishwasher.place_setting_capacity.nil? || dishwasher.energy_factor.nil?
+      if dishwasher.place_setting_capacity.nil?
         dishwasher.place_setting_capacity = HotWaterAndAppliances.get_dishwasher_reference_cap()
-        if dishwasher.rated_annual_kwh.nil?
-          dishwasher.energy_factor = HotWaterAndAppliances.get_dishwasher_reference_ef()
-        else
-          dishwasher.energy_factor = HotWaterAndAppliances.calc_dishwasher_ef_from_annual_kwh(dishwasher.rated_annual_kwh)
-        end
+        dishwasher.energy_factor = HotWaterAndAppliances.get_dishwasher_reference_ef()
       end
     end
 
@@ -554,12 +546,8 @@ class OSModel
       if refrigerator.location.nil?
         refrigerator.location = HPXML::LocationLivingSpace
       end
-      if refrigerator.adjusted_annual_kwh.nil?
-        if refrigerator.rated_annual_kwh.nil?
-          refrigerator.adjusted_annual_kwh = HotWaterAndAppliances.get_refrigerator_reference_annual_kwh(@nbeds)
-        else
-          refrigerator.adjusted_annual_kwh = refrigerator.rated_annual_kwh
-        end
+      if refrigerator.adjusted_annual_kwh.nil? && refrigerator.rated_annual_kwh.nil?
+        refrigerator.adjusted_annual_kwh = HotWaterAndAppliances.get_refrigerator_reference_annual_kwh(@nbeds)
       end
     end
 
@@ -2173,21 +2161,33 @@ class OSModel
       cd_space = get_space_from_location(clothes_dryer.location, 'ClothesDryer', model, spaces)
       cd_fuel = clothes_dryer.fuel_type
       cd_control = clothes_dryer.control_type
-      cd_ef = clothes_dryer.energy_factor
+      if clothes_dryer.energy_factor.nil?
+        cd_ef = HotWaterAndAppliances.calc_clothes_dryer_ef_from_cef(clothes_dryer.combined_energy_factor)
+      else
+        cd_ef = clothes_dryer.energy_factor
+      end
     end
 
     # Dishwasher
     if @hpxml.dishwashers.size > 0
       dishwasher = @hpxml.dishwashers[0]
       dw_cap = dishwasher.place_setting_capacity
-      dw_ef = dishwasher.energy_factor
+      if dishwasher.energy_factor.nil?
+        dw_ef = HotWaterAndAppliances.calc_dishwasher_ef_from_annual_kwh(dishwasher.rated_annual_kwh)
+      else
+        dw_ef = dishwasher.energy_factor
+      end
     end
 
     # Refrigerator
     if @hpxml.refrigerators.size > 0
       refrigerator = @hpxml.refrigerators[0]
       fridge_space = get_space_from_location(refrigerator.location, 'Refrigerator', model, spaces)
-      fridge_annual_kwh = refrigerator.adjusted_annual_kwh
+      if refrigerator.adjusted_annual_kwh.nil?
+        fridge_annual_kwh = refrigerator.rated_annual_kwh
+      else
+        fridge_annual_kwh = refrigerator.adjusted_annual_kwh
+      end
     end
 
     # Cooking Range/Oven
