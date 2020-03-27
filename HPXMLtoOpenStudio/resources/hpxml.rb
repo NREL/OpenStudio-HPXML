@@ -55,6 +55,8 @@ class HPXML < Object
   AtticTypeVented = 'VentedAttic'
   ResidentialTypeApartment = 'apartment unit'
   ResidentialTypeManufactured = 'manufactured home'
+  ResidentialTypeMF2to4 = '2-4 unit building'
+  ResidentialTypeMF5plus = '5+ unit building'
   ResidentialTypeSFA = 'single-family attached'
   ResidentialTypeSFD = 'single-family detached'
   ClothesDryerControlTypeMoisture = 'moisture'
