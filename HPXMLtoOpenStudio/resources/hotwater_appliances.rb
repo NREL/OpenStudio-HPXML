@@ -306,11 +306,10 @@ class HotWaterAndAppliances
     elsif control_type == HPXML::ClothesDryerControlTypeMoisture
       field_util_factor = 1.04
     end
+    annual_kwh = 12.5 * (164.0 + 46.5 * nbeds) * (field_util_factor / ef) * ((cw_cap / cw_mef) - cw_ler / 392.0) / (0.2184 * (cw_cap * 4.08 + 0.24)) # Eq 4.2-6
     if fuel_type == HPXML::FuelTypeElectricity
-      annual_kwh = 12.5 * (164.0 + 46.5 * nbeds) * (field_util_factor / ef) * ((cw_cap / cw_mef) - cw_ler / 392.0) / (0.2184 * (cw_cap * 4.08 + 0.24)) # Eq 4.2-6
       annual_therm = 0.0
     else
-      annual_kwh = 12.5 * (164.0 + 46.5 * nbeds) * (field_util_factor / 3.01) * ((cw_cap / cw_mef) - cw_ler / 392.0) / (0.2184 * (cw_cap * 4.08 + 0.24)) # Eq 4.2-6
       annual_therm = annual_kwh * 3412.0 * (1.0 - 0.07) * (3.01 / ef) / 100000 # Eq 4.2-7a
       annual_kwh = annual_kwh * 0.07 * (3.01 / ef)
     end
