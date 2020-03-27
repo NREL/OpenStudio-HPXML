@@ -4122,7 +4122,7 @@ class OSModel
     if spaces[exterior_adjacent_to].nil?
       # Create E+ other side coefficient object
       otherside_object = OpenStudio::Model::SurfacePropertyOtherSideCoefficients.new(model)
-      otherside_object.setName(exterior_adjacent_to + ' osc')
+      otherside_object.setName(exterior_adjacent_to)
       # Fixme: assumption the same as SurfacePropertyConvectionCoefficients of return air plenum
       otherside_object.setCombinedConvectiveRadiativeFilmCoefficient(30)
       # Schedule of space temperature, can be shared with water heater/appliances
