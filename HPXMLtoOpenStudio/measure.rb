@@ -210,9 +210,13 @@ class OSModel
     @eri_version = @hpxml.header.eri_calculation_version # Hidden feature
     @eri_version = 'latest' if @eri_version.nil?
     @eri_version = Constants.ERIVersions[-1] if @eri_version == 'latest'
-
-    @cz_wmo = @hpxml.climate_and_risk_zones.weather_station_wmo
-
+    
+    model.getClimateZones.climateZones.each do |ba_cz|
+      if ['Building America'].include? ba_cz.institution
+        @ba_cz_name = ba_cz.value
+      end
+    end
+    
     set_defaults_and_globals(runner)
 
     # Simulation parameters
@@ -440,9 +444,10 @@ class OSModel
 
     # Default water heater location based on Building America climate zone
     @hpxml.water_heating_systems.each do |water_heating_system|
-      ba_cz_name = get_climate_zone_ba(@cz_wmo)
-      location_hierarchy = get_location_hierarchy(ba_cz_name)
-      water_heating_system.location = get_space_from_ba_location_hierarchy(location_hierarchy)
+      if water_heating_system.location.nil?
+        location_hierarchy = get_location_hierarchy(@ba_cz_name)
+        water_heating_system.location = get_space_from_ba_location_hierarchy(location_hierarchy)
+      end
     end
 
     # Default water heater piping length
@@ -498,79 +503,79 @@ class OSModel
 
     # Default clothes washer location, rated annual kWh, label electric rate, label gas rate, label annual gas cost, capacity, and modified energy factor
     if @hpxml.clothes_washers.size > 0
-      if @hpxml.clothes_washers[0].location.nil?
-        @hpxml.clothes_washers[0].location = HPXML::LocationLivingSpace
+      clothes_washer = @hpxml.clothes_washers[0]
+      if clothes_washer.location.nil?
+        clothes_washer.location = HPXML::LocationLivingSpace
       end
-      if @hpxml.clothes_washers[0].rated_annual_kwh.nil? || @hpxml.clothes_washers[0].label_electric_rate.nil? || @hpxml.clothes_washers[0].label_gas_rate.nil? ||
-         @hpxml.clothes_washers[0].label_annual_gas_cost.nil? || @hpxml.clothes_washers[0].capacity.nil? || @hpxml.clothes_washers[0].integrated_modified_energy_factor.nil?
-
-        @hpxml.clothes_washers[0].rated_annual_kwh = HotWaterAndAppliances.get_clothes_washer_reference_ler()
-        @hpxml.clothes_washers[0].label_electric_rate = HotWaterAndAppliances.get_clothes_washer_reference_elec_rate()
-        @hpxml.clothes_washers[0].label_gas_rate = HotWaterAndAppliances.get_clothes_washer_reference_gas_rate()
-        @hpxml.clothes_washers[0].label_annual_gas_cost = HotWaterAndAppliances.get_clothes_washer_reference_agc()
-        @hpxml.clothes_washers[0].capacity = HotWaterAndAppliances.get_clothes_washer_reference_cap()
-        if @hpxml.clothes_washers[0].integrated_modified_energy_factor.nil?
-          @hpxml.clothes_washers[0].modified_energy_factor = HotWaterAndAppliances.calc_clothes_washer_mef_from_imef(HotWaterAndAppliances.get_clothes_washer_reference_imef())
-        else
-          @hpxml.clothes_washers[0].modified_energy_factor = HotWaterAndAppliances.calc_clothes_washer_mef_from_imef(@hpxml.clothes_washers[0].integrated_modified_energy_factor)
-        end
+      if clothes_washer.rated_annual_kwh.nil?
+        clothes_washer.rated_annual_kwh = HotWaterAndAppliances.get_clothes_washer_reference_ler()
+        clothes_washer.label_electric_rate = HotWaterAndAppliances.get_clothes_washer_reference_elec_rate()
+        clothes_washer.label_gas_rate = HotWaterAndAppliances.get_clothes_washer_reference_gas_rate()
+        clothes_washer.label_annual_gas_cost = HotWaterAndAppliances.get_clothes_washer_reference_agc()
+        clothes_washer.capacity = HotWaterAndAppliances.get_clothes_washer_reference_cap()
+        clothes_washer.modified_energy_factor = HotWaterAndAppliances.calc_clothes_washer_mef_from_imef(HotWaterAndAppliances.get_clothes_washer_reference_imef())
       end
     end
 
     # Default clothes dryer location, control type, and energy factor
     if @hpxml.clothes_dryers.size > 0
-      if @hpxml.clothes_dryers[0].location.nil?
-        @hpxml.clothes_dryers[0].location = HPXML::LocationLivingSpace
+      clothes_dryer = @hpxml.clothes_dryers[0]
+      if clothes_dryer.location.nil?
+        clothes_dryer.location = HPXML::LocationLivingSpace
       end
-      if @hpxml.clothes_dryers[0].control_type.nil?
-        @hpxml.clothes_dryers[0].control_type = HotWaterAndAppliances.get_clothes_dryer_reference_control()
+      if clothes_dryer.control_type.nil?
+        clothes_dryer.control_type = HotWaterAndAppliances.get_clothes_dryer_reference_control()
       end
-      if @hpxml.clothes_dryers[0].energy_factor.nil?
-        if @hpxml.clothes_dryers[0].combined_energy_factor.nil?
-          @hpxml.clothes_dryers[0].energy_factor = HotWaterAndAppliances.calc_clothes_dryer_ef_from_cef(HotWaterAndAppliances.get_clothes_dryer_reference_cef(@hpxml.clothes_dryers[0].fuel_type))
+      if clothes_dryer.energy_factor.nil?
+        if clothes_dryer.combined_energy_factor.nil?
+          clothes_dryer.energy_factor = HotWaterAndAppliances.calc_clothes_dryer_ef_from_cef(HotWaterAndAppliances.get_clothes_dryer_reference_cef(clothes_dryer.fuel_type))
         else
-          @hpxml.clothes_dryers[0].energy_factor = HotWaterAndAppliances.calc_clothes_dryer_ef_from_cef(@hpxml.clothes_dryers[0].combined_energy_factor)
+          clothes_dryer.energy_factor = HotWaterAndAppliances.calc_clothes_dryer_ef_from_cef(clothes_dryer.combined_energy_factor)
         end
       end
     end
 
     # Default dishwasher place setting capacity and energy factor
     if @hpxml.dishwashers.size > 0
-      if @hpxml.dishwashers[0].place_setting_capacity.nil? || @hpxml.dishwashers[0].energy_factor.nil?
-        @hpxml.dishwashers[0].place_setting_capacity = HotWaterAndAppliances.get_dishwasher_reference_cap()
-        if @hpxml.dishwashers[0].rated_annual_kwh.nil?
-          @hpxml.dishwashers[0].energy_factor = HotWaterAndAppliances.get_dishwasher_reference_ef()
+      dishwasher = @hpxml.dishwashers[0]
+      if dishwasher.place_setting_capacity.nil? || dishwasher.energy_factor.nil?
+        dishwasher.place_setting_capacity = HotWaterAndAppliances.get_dishwasher_reference_cap()
+        if dishwasher.rated_annual_kwh.nil?
+          dishwasher.energy_factor = HotWaterAndAppliances.get_dishwasher_reference_ef()
         else
-          @hpxml.dishwashers[0].energy_factor = HotWaterAndAppliances.calc_dishwasher_ef_from_annual_kwh(@hpxml.dishwashers[0].rated_annual_kwh)
+          dishwasher.energy_factor = HotWaterAndAppliances.calc_dishwasher_ef_from_annual_kwh(dishwasher.rated_annual_kwh)
         end
       end
     end
 
     # Default refrigerator location and adjusted annual kWh
     if @hpxml.refrigerators.size > 0
-      if @hpxml.refrigerators[0].location.nil?
-        @hpxml.refrigerators[0].location = HPXML::LocationLivingSpace
+      refrigerator = @hpxml.refrigerators[0]
+      if refrigerator.location.nil?
+        refrigerator.location = HPXML::LocationLivingSpace
       end
-      if @hpxml.refrigerators[0].adjusted_annual_kwh.nil?
-        if @hpxml.refrigerators[0].rated_annual_kwh.nil?
-          @hpxml.refrigerators[0].adjusted_annual_kwh = HotWaterAndAppliances.get_refrigerator_reference_annual_kwh(@nbeds)
+      if refrigerator.adjusted_annual_kwh.nil?
+        if refrigerator.rated_annual_kwh.nil?
+          refrigerator.adjusted_annual_kwh = HotWaterAndAppliances.get_refrigerator_reference_annual_kwh(@nbeds)
         else
-          @hpxml.refrigerators[0].adjusted_annual_kwh = @hpxml.refrigerators[0].rated_annual_kwh
+          refrigerator.adjusted_annual_kwh = refrigerator.rated_annual_kwh
         end
       end
     end
 
     # Default cooking range type
     if @hpxml.cooking_ranges.size > 0
-      if @hpxml.cooking_ranges[0].is_induction.nil?
-        @hpxml.cooking_ranges[0].is_induction = HotWaterAndAppliances.get_range_oven_reference_is_induction()
+      cooking_range = @hpxml.cooking_ranges[0]
+      if cooking_range.is_induction.nil?
+        cooking_range.is_induction = HotWaterAndAppliances.get_range_oven_reference_is_induction()
       end
     end
 
     # Default oven type
     if @hpxml.ovens.size > 0
-      if @hpxml.ovens[0].is_convection.nil?
-        @hpxml.ovens[0].is_convection = HotWaterAndAppliances.get_range_oven_reference_is_convection()
+      oven = @hpxml.ovens[0]
+      if oven.is_convection.nil?
+        oven.is_convection = HotWaterAndAppliances.get_range_oven_reference_is_convection()
       end
     end
 
@@ -2155,9 +2160,11 @@ class OSModel
       cw_gas_rate = clothes_washer.label_gas_rate
       cw_agc = clothes_washer.label_annual_gas_cost
       cw_cap = clothes_washer.capacity
-      cw_mef = clothes_washer.modified_energy_factor
-    else
-      cw_mef = cw_ler = cw_elec_rate = cw_gas_rate = cw_agc = cw_cap = cw_space = nil
+      if clothes_washer.modified_energy_factor.nil?
+        cw_mef = HotWaterAndAppliances.calc_clothes_washer_mef_from_imef(clothes_washer.integrated_modified_energy_factor)
+      else
+        cw_mef = clothes_washer.modified_energy_factor
+      end
     end
 
     # Clothes Dryer
@@ -2167,8 +2174,6 @@ class OSModel
       cd_fuel = clothes_dryer.fuel_type
       cd_control = clothes_dryer.control_type
       cd_ef = clothes_dryer.energy_factor
-    else
-      cd_ef = cd_control = cd_fuel = cd_space = nil
     end
 
     # Dishwasher
@@ -2176,8 +2181,6 @@ class OSModel
       dishwasher = @hpxml.dishwashers[0]
       dw_cap = dishwasher.place_setting_capacity
       dw_ef = dishwasher.energy_factor
-    else
-      dw_ef = dw_cap = nil
     end
 
     # Refrigerator
@@ -2185,8 +2188,6 @@ class OSModel
       refrigerator = @hpxml.refrigerators[0]
       fridge_space = get_space_from_location(refrigerator.location, 'Refrigerator', model, spaces)
       fridge_annual_kwh = refrigerator.adjusted_annual_kwh
-    else
-      fridge_annual_kwh = fridge_space = nil
     end
 
     # Cooking Range/Oven
@@ -2196,8 +2197,6 @@ class OSModel
       cook_fuel_type = cooking_range.fuel_type
       cook_is_induction = cooking_range.is_induction
       oven_is_convection = oven.is_convection
-    else
-      cook_fuel_type = cook_is_induction = oven_is_convection = nil
     end
 
     # Fixtures
@@ -4320,26 +4319,6 @@ class OSModel
         return space_type
       end
     end
-  end
-
-  def self.get_climate_zone_ba(wmo)
-    ba_zone = nil
-
-    zones_csv = File.join(File.dirname(__FILE__), 'resources', 'climate_zones.csv')
-
-    if not File.exist?(zones_csv)
-      return ba_zone
-    end
-
-    require 'csv'
-    CSV.foreach(zones_csv) do |row|
-      if row[0].to_s == wmo.to_s
-        ba_zone = row[5].to_s
-        break
-      end
-    end
-
-    return ba_zone
   end
 
 end
