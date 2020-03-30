@@ -141,7 +141,7 @@ class HPXMLTest < MiniTest::Test
     this_dir = File.dirname(__FILE__)
     sample_files_dir = File.join(this_dir, '..', 'sample_files')
 
-    expected_error_msgs = { 'bad-wmo.xml' => ["Weather station WMO '999999' could not be found in weather/data.csv."],
+    expected_error_msgs = { 'bad-wmo.xml' => ["Weather station WMO '999999' could not be found in"],
                             'bad-site-neighbor-azimuth.xml' => ['A neighbor building has an azimuth (145) not equal to the azimuth of any wall.'],
                             'cfis-with-hydronic-distribution.xml' => ["Attached HVAC distribution system 'HVACDistribution' cannot be hydronic for ventilation fan 'MechanicalVentilation'."],
                             'clothes-dryer-location.xml' => ["ClothesDryer location is 'garage' but building does not have this location specified."],
