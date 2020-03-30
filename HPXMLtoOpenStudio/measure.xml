@@ -2,8 +2,8 @@
   <schema_version>3.0</schema_version>
   <name>hpxm_lto_openstudio</name>
   <uid>b1543b30-9465-45ff-ba04-1d1f85e763bc</uid>
-  <version_id>abfdbdb7-84f6-477b-81d0-7273da028de3</version_id>
-  <version_modified>20200323T163608Z</version_modified>
+  <version_id>910ad7ee-9846-4423-8a6d-758b85586161</version_id>
+  <version_modified>20200326T180411Z</version_modified>
   <xml_checksum>D8922A73</xml_checksum>
   <class_name>HPXMLtoOpenStudio</class_name>
   <display_name>HPXML to OpenStudio Translator</display_name>
@@ -28,20 +28,31 @@
       <default_value>weather</default_value>
     </argument>
     <argument>
-      <name>epw_output_path</name>
-      <display_name>EPW Output File Path</display_name>
-      <description>Absolute/relative path of the output EPW file.</description>
+      <name>output_path</name>
+      <display_name>Path for Output Files</display_name>
+      <description>Absolute/relative path for the output files.</description>
       <type>String</type>
-      <required>false</required>
+      <required>true</required>
       <model_dependent>false</model_dependent>
     </argument>
     <argument>
-      <name>osm_output_path</name>
-      <display_name>OSM Output File Path</display_name>
-      <description>Absolute/relative path of the output OSM file.</description>
-      <type>String</type>
+      <name>debug</name>
+      <display_name>Debug Mode?</display_name>
+      <description>If enabled: 1) Writes in.osm file, 2) Writes in.xml HPXML file with defaults filled, and 3) Generates additional log output. Any files written will be in the output path specified above.</description>
+      <type>Boolean</type>
       <required>false</required>
       <model_dependent>false</model_dependent>
+      <default_value>false</default_value>
+      <choices>
+        <choice>
+          <value>true</value>
+          <display_name>true</display_name>
+        </choice>
+        <choice>
+          <value>false</value>
+          <display_name>false</display_name>
+        </choice>
+      </choices>
     </argument>
   </arguments>
   <outputs/>
@@ -313,18 +324,6 @@
       <checksum>8B1ACB99</checksum>
     </file>
     <file>
-      <filename>BaseElements.xsd</filename>
-      <filetype>xsd</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>B2150856</checksum>
-    </file>
-    <file>
-      <filename>HPXMLDataTypes.xsd</filename>
-      <filetype>xsd</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>913AC5AE</checksum>
-    </file>
-    <file>
       <filename>psychrometrics.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
@@ -385,6 +384,12 @@
       <checksum>CF824A5B</checksum>
     </file>
     <file>
+      <filename>hvac.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>D9B91269</checksum>
+    </file>
+    <file>
       <filename>unit_conversions.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
@@ -403,30 +408,6 @@
       <checksum>B301CEB4</checksum>
     </file>
     <file>
-      <filename>lighting.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>167061C7</checksum>
-    </file>
-    <file>
-      <filename>constants.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>E1E20AAC</checksum>
-    </file>
-    <file>
-      <filename>waterheater.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>B6779F3D</checksum>
-    </file>
-    <file>
-      <filename>hotwater_appliances.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>F5DB60C0</checksum>
-    </file>
-    <file>
       <filename>airflow.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
@@ -439,16 +420,46 @@
       <checksum>ACCF116F</checksum>
     </file>
     <file>
-      <filename>hvac.rb</filename>
+      <filename>lighting.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>209FB723</checksum>
+      <checksum>59386D80</checksum>
+    </file>
+    <file>
+      <filename>constants.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>3CE38123</checksum>
+    </file>
+    <file>
+      <filename>hotwater_appliances.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>6FC39741</checksum>
+    </file>
+    <file>
+      <filename>waterheater.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>172A8E75</checksum>
+    </file>
+    <file>
+      <filename>BaseElements.xsd</filename>
+      <filetype>xsd</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>D21FFFA2</checksum>
+    </file>
+    <file>
+      <filename>HPXMLDataTypes.xsd</filename>
+      <filetype>xsd</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>15FA9595</checksum>
     </file>
     <file>
       <filename>EPvalidator.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>1EB1B855</checksum>
+      <checksum>9C61F7C3</checksum>
     </file>
     <file>
       <version>
@@ -459,61 +470,13 @@
       <filename>measure.rb</filename>
       <filetype>rb</filetype>
       <usage_type>script</usage_type>
-      <checksum>1BBD4131</checksum>
-    </file>
-    <file>
-      <filename>ERIRatedHome.csv</filename>
-      <filetype>csv</filetype>
-      <usage_type>test</usage_type>
-      <checksum>0101290A</checksum>
-    </file>
-    <file>
-      <filename>ERIRatedHome.xml</filename>
-      <filetype>xml</filetype>
-      <usage_type>test</usage_type>
-      <checksum>A2750A6C</checksum>
-    </file>
-    <file>
-      <filename>ERIRatedHome_ERI.csv</filename>
-      <filetype>csv</filetype>
-      <usage_type>test</usage_type>
-      <checksum>6AF95BD3</checksum>
-    </file>
-    <file>
-      <filename>hpxml_translator_test.rb~Updated upstream</filename>
-      <filetype>rb~Updated upstream</filetype>
-      <usage_type>test</usage_type>
-      <checksum>79CE093D</checksum>
-    </file>
-    <file>
-      <filename>EPvalidator.rb.bak</filename>
-      <filetype>bak</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>9D13BF91</checksum>
-    </file>
-    <file>
-      <filename>hpxml.rb.bak</filename>
-      <filetype>bak</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>23256189</checksum>
-    </file>
-    <file>
-      <filename>hvac.rb.bak</filename>
-      <filetype>bak</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>67673CF6</checksum>
-    </file>
-    <file>
-      <filename>waterheater.rb.bak</filename>
-      <filetype>bak</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>6474819C</checksum>
+      <checksum>40AD762F</checksum>
     </file>
     <file>
       <filename>hpxml.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>ECAA3B21</checksum>
+      <checksum>570FD6B2</checksum>
     </file>
   </files>
 </measure>

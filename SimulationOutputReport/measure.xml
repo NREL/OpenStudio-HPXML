@@ -2,8 +2,8 @@
   <schema_version>3.0</schema_version>
   <name>simulation_output_report</name>
   <uid>df9d170c-c21a-4130-866d-0d46b06073fd</uid>
-  <version_id>744027b9-af47-4f7f-a831-14047d8bd70b</version_id>
-  <version_modified>20200318T215718Z</version_modified>
+  <version_id>2cd11270-8f49-4d14-b102-71f0ef917cbd</version_id>
+  <version_modified>20200323T183457Z</version_modified>
   <xml_checksum>9BF1E6AC</xml_checksum>
   <class_name>SimulationOutputReport</class_name>
   <display_name>HPXML Simulation Output Report</display_name>
@@ -264,13 +264,6 @@
       <model_dependent>false</model_dependent>
     </output>
     <output>
-      <name>Electricity: Dehumidifier MBtu</name>
-      <display_name>Electricity: Dehumidifier MBtu</display_name>
-      <short_name>Electricity: Dehumidifier MBtu</short_name>
-      <type>Double</type>
-      <model_dependent>false</model_dependent>
-    </output>
-    <output>
       <name>Electricity: Dishwasher MBtu</name>
       <display_name>Electricity: Dishwasher MBtu</display_name>
       <short_name>Electricity: Dishwasher MBtu</short_name>
@@ -469,12 +462,6 @@
   </attributes>
   <files>
     <file>
-      <filename>output_report_test.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>test</usage_type>
-      <checksum>313896F9</checksum>
-    </file>
-    <file>
       <version>
         <software_program>OpenStudio</software_program>
         <identifier>2.9.1</identifier>
@@ -483,25 +470,19 @@
       <filename>measure.rb</filename>
       <filetype>rb</filetype>
       <usage_type>script</usage_type>
-      <checksum>3542C13C</checksum>
+      <checksum>FEA8361B</checksum>
     </file>
     <file>
       <filename>constants.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>55D54003</checksum>
+      <checksum>80167322</checksum>
     </file>
     <file>
-      <filename>output_report_test.rb.bak</filename>
-      <filetype>bak</filetype>
+      <filename>output_report_test.rb</filename>
+      <filetype>rb</filetype>
       <usage_type>test</usage_type>
-      <checksum>904A2D0E</checksum>
-    </file>
-    <file>
-      <filename>constants.rb.bak</filename>
-      <filetype>bak</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>E6A6CE57</checksum>
+      <checksum>D42FC131</checksum>
     </file>
   </files>
 </measure>
