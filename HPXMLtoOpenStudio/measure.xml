@@ -2,8 +2,8 @@
   <schema_version>3.0</schema_version>
   <name>hpxm_lto_openstudio</name>
   <uid>b1543b30-9465-45ff-ba04-1d1f85e763bc</uid>
-  <version_id>910ad7ee-9846-4423-8a6d-758b85586161</version_id>
-  <version_modified>20200326T180411Z</version_modified>
+  <version_id>9a8d890d-f6a2-481d-a857-ae8de8a66712</version_id>
+  <version_modified>20200330T151207Z</version_modified>
   <xml_checksum>D8922A73</xml_checksum>
   <class_name>HPXMLtoOpenStudio</class_name>
   <display_name>HPXML to OpenStudio Translator</display_name>
@@ -28,11 +28,11 @@
       <default_value>weather</default_value>
     </argument>
     <argument>
-      <name>output_path</name>
-      <display_name>Path for Output Files</display_name>
-      <description>Absolute/relative path for the output files.</description>
+      <name>output_dir</name>
+      <display_name>Directory for Output Files</display_name>
+      <description>Absolute/relative path for the output files directory.</description>
       <type>String</type>
-      <required>true</required>
+      <required>false</required>
       <model_dependent>false</model_dependent>
     </argument>
     <argument>
@@ -470,13 +470,13 @@
       <filename>measure.rb</filename>
       <filetype>rb</filetype>
       <usage_type>script</usage_type>
-      <checksum>40AD762F</checksum>
+      <checksum>AB2B1FD4</checksum>
     </file>
     <file>
       <filename>hpxml.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>570FD6B2</checksum>
+      <checksum>D616E24A</checksum>
     </file>
   </files>
 </measure>
