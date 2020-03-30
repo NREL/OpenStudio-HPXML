@@ -2824,7 +2824,7 @@ class OSModel
     air_flow_rate = 2.75 * water_removal_rate
 
     HVAC.apply_dehumidifier(model, runner, energy_factor, integrated_energy_factor, water_removal_rate,
-                            air_flow_rate, humidity_setpoint, @living_zone, @hvac_map, sys_id, fraction_served)
+                            air_flow_rate, humidity_setpoint, @living_space, @hvac_map, sys_id, fraction_served)
   end
 
   def self.check_distribution_system(hvac_distribution, system_type)

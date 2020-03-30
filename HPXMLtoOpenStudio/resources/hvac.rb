@@ -2110,8 +2110,9 @@ class HVAC
   end
 
   def self.apply_dehumidifier(model, runner, energy_factor, integrated_energy_factor, water_removal_rate,
-                              air_flow_rate, humidity_setpoint, control_zone, hvac_map, sys_id, fraction_served)
+                              air_flow_rate, humidity_setpoint, living_space, hvac_map, sys_id, fraction_served)
 
+    control_zone = living_space.thermalZone.get
     obj_name = Constants.ObjectNameDehumidifier
 
     avg_rh_setpoint = humidity_setpoint * 100.0 # (EnergyPlus uses 60 for 60% RH)
@@ -2154,6 +2155,7 @@ class HVAC
     # Only one dehumidifier allowed in current workflow.
     # If more than one allowed in the future, should remove this EMS program to avoid duplication
     hvac_map[sys_id] << zone_hvac
+    adjust_dehumidifier_load_EMS(fraction_served, zone_hvac, model, living_space)
   end
 
   def self.dehumidifier_ief_to_ef_inputs(w_coeff, ef_coeff, ief, water_removal_rate)
@@ -2176,6 +2178,45 @@ class HVAC
     water_removal_rate_input = water_removal_rate / water_removal_curve_value_ief * curve_value_ef
 
     return ef_input, water_removal_rate_input
+  end
+
+  def self.adjust_dehumidifier_load_EMS(fraction_served, zone_hvac, model, living_space)
+    # sensor
+    dehumidifier_sens_htg = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Zone Dehumidifier Sensible Heating Rate')
+    dehumidifier_sens_htg.setName("#{zone_hvac.name} sens htg")
+    dehumidifier_sens_htg.setKeyName(zone_hvac.name.to_s)
+    dehumidifier_power = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Zone Dehumidifier Electric Power')
+    dehumidifier_power.setName("#{zone_hvac.name} power htg")
+    dehumidifier_power.setKeyName(zone_hvac.name.to_s)
+
+    # actuator
+    dehumidifier_load_adj_def = OpenStudio::Model::OtherEquipmentDefinition.new(model)
+    dehumidifier_load_adj_def.setName("#{zone_hvac.name} sens htg adj def")
+    dehumidifier_load_adj_def.setDesignLevel(0)
+    dehumidifier_load_adj_def.setFractionRadiant(0)
+    dehumidifier_load_adj_def.setFractionLatent(0)
+    dehumidifier_load_adj_def.setFractionLost(0)
+    dehumidifier_load_adj = OpenStudio::Model::OtherEquipment.new(dehumidifier_load_adj_def)
+    dehumidifier_load_adj.setName("#{zone_hvac.name} sens htg adj")
+    dehumidifier_load_adj.setSpace(living_space)
+    dehumidifier_load_adj.setSchedule(model.alwaysOnDiscreteSchedule)
+
+    dehumidifier_load_adj_act = OpenStudio::Model::EnergyManagementSystemActuator.new(dehumidifier_load_adj, 'OtherEquipment', 'Power Level')
+    dehumidifier_load_adj_act.setName("#{zone_hvac.name} sens htg adj act")
+
+    # EMS program
+    program = OpenStudio::Model::EnergyManagementSystemProgram.new(model)
+    program.setName("#{zone_hvac.name} load adj program")
+    program.addLine("If #{dehumidifier_sens_htg.name} > 0")
+    program.addLine("  Set #{dehumidifier_load_adj_act.name} = - (#{dehumidifier_sens_htg.name} - #{dehumidifier_power.name}) * (1 - #{fraction_served})")
+    program.addLine('Else')
+    program.addLine("  Set #{dehumidifier_load_adj_act.name} = 0")
+    program.addLine('EndIf')
+
+    program_calling_manager = OpenStudio::Model::EnergyManagementSystemProgramCallingManager.new(model)
+    program_calling_manager.setName(program.name.to_s + 'calling manager')
+    program_calling_manager.setCallingPoint('BeginTimestepBeforePredictor')
+    program_calling_manager.addProgram(program)
   end
 
   def self.apply_ceiling_fans(model, runner, annual_kWh, weekday_sch, weekend_sch, monthly_sch,
