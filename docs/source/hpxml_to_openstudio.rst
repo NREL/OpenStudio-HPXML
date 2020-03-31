@@ -502,8 +502,24 @@ Water Heaters
 *************
 
 Each water heater should be entered as a ``Systems/WaterHeating/WaterHeatingSystem``.
-Inputs including ``WaterHeaterType``, ``Location``, and ``FractionDHWLoadServed`` must be provided.
-The setpoint temperature may be provided as ``HotWaterTemperature``; if not provided, 125 deg-F is assumed.
+Inputs including ``WaterHeaterType`` and ``FractionDHWLoadServed`` must be provided.
+The water heater ``Location`` can be optionally entered; if not provided, a default water heater location will be assumed based on Building America (BA) climate zone and space types in the residence. 
+
++------------------+---------------------------------------------------------------------------------------+
+| BA Climate Zone  | Default Water Heater Location                                                         |
++==================+=======================================================================================+
+| | Hot-Dry        | | Garage, if a garage presents in the residence                                       |
+| | Hot-Humid      | | Living Space, else                                                                  |
++------------------+---------------------------------------------------------------------------------------+
+| | Marine         | | Conditioned Basement, if a conditioned basement presents in the residence           | 
+| | Mixed-Humid    | | Unconditioned Basement, else if an unconditioned basement presents in the residence |
+| | Mixed-Dry      | | Living Space, else                                                                  |
+| | Cold           |                                                                                       |
+| | Very Cold      |                                                                                       |
+| | Subarctic      |                                                                                       |                                                
++------------------+---------------------------------------------------------------------------------------+
+
+The setpoint temperature may be provided as ``HotWaterTemperature``; if not provided, 125°F is assumed.
 
 Depending on the type of water heater specified, additional elements are required/available:
 
@@ -521,7 +537,7 @@ For tankless water heaters, an annual energy derate due to cycling inefficiencie
 If not provided, a value of 0.08 (8%) will be assumed.
 
 For combi boiler systems, the ``RelatedHVACSystem`` must point to a ``HeatingSystem`` of type "Boiler".
-For combi boiler systems with a storage tank, the storage tank losses (deg-F/hr) can be entered as ``StandbyLoss``; if not provided, an average value will be used.
+For combi boiler systems with a storage tank, the storage tank losses (°F/hr) can be entered as ``StandbyLoss``; if not provided, an average value will be used.
 
 For water heaters that are connected to a desuperheater, the ``RelatedHVACSystem`` must either point to a ``HeatPump`` or a ``CoolingSystem``.
 
@@ -531,9 +547,20 @@ Hot Water Distribution
 A ``Systems/WaterHeating/HotWaterDistribution`` must be provided if any water heating systems are specified.
 Inputs including ``SystemType`` and ``PipeInsulation/PipeRValue`` must be provided.
 
-For a ``SystemType/Standard`` (non-recirculating) system, the following element is required:
+For a ``SystemType/Standard`` (non-recirculating) system, the following element can be optionally entered:
 
 - ``PipingLength``: Measured length of hot water piping from the hot water heater to the farthest hot water fixture, measured longitudinally from plans, assuming the hot water piping does not run diagonally, plus 10 feet of piping for each floor level, plus 5 feet of piping for unconditioned basements (if any)
+
+If ``PipingLength`` is not provided, a default ``PipingLength`` will be assumed. The default ``PipingLength`` will be calculated using the equation :eq:`std_piping_length`.  
+
+.. math:: PipeL = 2.0 \cdot (\frac{CFA}{NCfl})^{0.5} + 10.0 \cdot NCfl + 5.0 \cdot bsmnt
+  :label: std_piping_length
+  
+Where, 
+PipeL = piping length [ft], 
+CFA = conditioned floor area [ft²],
+NCfl = number of conditioned floor levels number of conditioned floor levels in the residence, including conditioned basements, 
+bsmnt = presence = 1.0 or absence = 0.0 of an unconditioned basement in the residence.
 
 For a ``SystemType/Recirculation`` system, the following elements are required:
 
@@ -607,7 +634,7 @@ System Losses Fraction   0.14
 If ``YearModulesManufactured`` is provided, ``SystemLossesFraction`` will be calculated based on ``YearModulesManufactured`` using the equation :eq:`pv_loss`.  
 In this case, the user entered ``SystemLossesFraction`` will be ignored.
 
-.. math:: System Losses Fraction = 1.0 - (1.0 - 0.14) \cdot (1.0 - (1.0 - 0.995^{(current year - year modules manufactured)}))
+.. math:: System Losses Fraction = 1.0 - (1.0 - 0.14) \cdot (1.0 - (1.0 - 0.995^{(Current Year - Year Modules Manufactured)}))
   :label: pv_loss
 
 Appliances
@@ -616,13 +643,13 @@ Appliances
 This section describes elements specified in HPXML's ``Appliances``.
 Many of the appliances' inputs are derived from EnergyGuide labels.
 
-The ``Location`` for clothes washers, clothes dryers, and refrigerators can be provided, while dishwashers and cooking ranges are assumed to be in the living space.
+The ``Location`` for clothes washers, clothes dryers, and refrigerators can be optionally provided; if not provided, they are assumed to be in the living space.
+The ``Location`` for dishwashers and cooking ranges are assumed to be in the living space.
 
 Clothes Washer
 **************
 
 An ``Appliances/ClothesWasher`` element can be specified; if not provided, a clothes washer will not be modeled.
-The washer's ``Location`` must be provided.
 Inputs including the efficiency of the clothes washer, ``RatedAnnualkWh``, ``LabelElectricRate``, ``LabelGasRate``, ``LabelAnnualGasCost``, and ``Capacity`` can be optionally provided.
 The efficiency of the clothes washer can either be entered as a ``ModifiedEnergyFactor`` or an ``IntegratedModifiedEnergyFactor``.
 If ``IntegratedModifiedEnergyFactor`` is provided, ``IntegratedModifiedEnergyFactor`` will be converted into ``ModifiedEnergyFactor`` using the equation :eq:`cw_mef`.  

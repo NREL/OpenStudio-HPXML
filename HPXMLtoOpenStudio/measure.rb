@@ -210,13 +210,13 @@ class OSModel
     @eri_version = @hpxml.header.eri_calculation_version # Hidden feature
     @eri_version = 'latest' if @eri_version.nil?
     @eri_version = Constants.ERIVersions[-1] if @eri_version == 'latest'
-    
+
     model.getClimateZones.climateZones.each do |ba_cz|
       if ['Building America'].include? ba_cz.institution
         @ba_cz_name = ba_cz.value
       end
     end
-    
+
     set_defaults_and_globals(runner)
 
     # Simulation parameters
@@ -280,6 +280,7 @@ class OSModel
     @nbeds = @hpxml.building_construction.number_of_bedrooms
     @min_neighbor_distance = get_min_neighbor_distance()
     @default_azimuths = get_default_azimuths()
+    @has_uncond_bsmnt = @hpxml.has_space_type(HPXML::LocationBasementUnconditioned)
 
     @use_only_ideal_air = false
     if not @hpxml.building_construction.use_only_ideal_air_system.nil?
@@ -299,8 +300,6 @@ class OSModel
     @hpxml.building_occupancy.number_of_residents = Geometry.get_occupancy_default_num(@nbeds) if @hpxml.building_occupancy.number_of_residents.nil?
     if @hpxml.building_construction.conditioned_building_volume.nil?
       @hpxml.building_construction.conditioned_building_volume = @cfa * @hpxml.building_construction.average_ceiling_height
-    else
-      @hpxml.building_construction.average_ceiling_height = @hpxml.building_construction.conditioned_building_volume / @cfa
     end
     @cvolume = @hpxml.building_construction.conditioned_building_volume
 
@@ -445,15 +444,18 @@ class OSModel
     # Default water heater location based on Building America climate zone
     @hpxml.water_heating_systems.each do |water_heating_system|
       if water_heating_system.location.nil?
-        location_hierarchy = get_location_hierarchy(@ba_cz_name)
+        location_hierarchy = Waterheater.get_location_hierarchy(@ba_cz_name)
         water_heating_system.location = get_space_from_ba_location_hierarchy(location_hierarchy)
       end
     end
 
     # Default water heater piping length
     if @hpxml.water_heating_systems.size > 0
-      if @hpxml.hot_water_distributions[0].system_type == HPXML::DHWDistTypeStandard
-        @hpxml.hot_water_distributions[0].standard_piping_length = 50 # Chosen to test a negative EC_adj
+      hot_water_distribution = @hpxml.hot_water_distributions[0]
+      if hot_water_distribution.system_type == HPXML::DHWDistTypeStandard
+        if hot_water_distribution.standard_piping_length.nil?
+          hot_water_distribution.standard_piping_length = HotWaterAndAppliances.get_default_std_pipe_length(@has_uncond_bsmnt, @cfa, @ncfl)
+        end
       end
     end
 
@@ -525,8 +527,6 @@ class OSModel
       end
       if clothes_dryer.control_type.nil?
         clothes_dryer.control_type = HotWaterAndAppliances.get_clothes_dryer_reference_control()
-      end
-      if clothes_dryer.energy_factor.nil? && clothes_dryer.combined_energy_factor.nil?
         clothes_dryer.energy_factor = HotWaterAndAppliances.calc_clothes_dryer_ef_from_cef(HotWaterAndAppliances.get_clothes_dryer_reference_cef(clothes_dryer.fuel_type))
       end
     end
@@ -2254,7 +2254,6 @@ class OSModel
     water_heater_spaces = {}
     combi_sys_id_list = []
     avg_setpoint_temp = 0.0 # Weighted average by fraction DHW load served
-    has_uncond_bsmnt = @hpxml.has_space_type(HPXML::LocationBasementUnconditioned)
     if @hpxml.water_heating_systems.size > 0
       @hpxml.water_heating_systems.each do |water_heating_system|
         sys_id = water_heating_system.id
@@ -2290,7 +2289,7 @@ class OSModel
         end
         solar_fraction = 0.0 if solar_fraction.nil?
 
-        ec_adj = HotWaterAndAppliances.get_dist_energy_consumption_adjustment(has_uncond_bsmnt, @cfa, @ncfl,
+        ec_adj = HotWaterAndAppliances.get_dist_energy_consumption_adjustment(@has_uncond_bsmnt, @cfa, @ncfl,
                                                                               dist_type, recirc_control_type,
                                                                               pipe_r, std_pipe_length, recirc_loop_length)
 
@@ -2351,7 +2350,7 @@ class OSModel
     end
 
     HotWaterAndAppliances.apply(model, weather, @living_space,
-                                @cfa, @nbeds, @ncfl, has_uncond_bsmnt, avg_setpoint_temp,
+                                @cfa, @nbeds, @ncfl, @has_uncond_bsmnt, avg_setpoint_temp,
                                 cw_mef, cw_ler, cw_elec_rate, cw_gas_rate,
                                 cw_agc, cw_cap, cw_space, cd_fuel, cd_ef, cd_control,
                                 cd_space, dw_ef, dw_cap, fridge_annual_kwh, fridge_space,
@@ -4289,29 +4288,6 @@ class OSModel
     walls_top = foundation_top + 8.0 * @ncfl_ag
     return foundation_top, walls_top
   end
-  
-  def self.get_location_hierarchy(ba_cz_name)
-    if [Constants.BAZoneHotDry, Constants.BAZoneHotHumid].include? ba_cz_name
-      return [HPXML::LocationGarage,
-              HPXML::LocationLivingSpace,
-              HPXML::LocationBasementConditioned,
-              HPXML::LocationInterior,
-              HPXML::LocationCrawlspaceVented,
-              HPXML::LocationAtticVented]
-    elsif [Constants.BAZoneMarine, Constants.BAZoneMixedHumid, Constants.BAZoneMixedDry, Constants.BAZoneCold, Constants.BAZoneVeryCold, Constants.BAZoneSubarctic].include? ba_cz_name
-      return [HPXML::LocationBasementConditioned,
-              HPXML::LocationBasementUnconditioned,
-              HPXML::LocationLivingSpace,
-              HPXML::LocationInterior,
-              HPXML::LocationCrawlspaceVented,
-              HPXML::LocationAtticVented]
-    elsif ba_cz_name.nil?
-      return [HPXML::LocationBasementConditioned,
-              HPXML::LocationBasementUnconditioned,
-              HPXML::LocationGarage,
-              HPXML::LocationLivingSpace]
-    end
-  end
 
   def self.get_space_from_ba_location_hierarchy(location_hierarchy)
     location_hierarchy.each do |space_type|
@@ -4320,7 +4296,6 @@ class OSModel
       end
     end
   end
-
 end
 
 class WoodStudConstructionSet

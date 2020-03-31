@@ -1364,6 +1364,22 @@ class Waterheater
     return 0.08
   end
 
+  def self.get_location_hierarchy(ba_cz_name)
+    if [Constants.BAZoneHotDry, Constants.BAZoneHotHumid].include? ba_cz_name
+      return [HPXML::LocationGarage,
+              HPXML::LocationLivingSpace]
+    elsif [Constants.BAZoneMarine, Constants.BAZoneMixedHumid, Constants.BAZoneMixedDry, Constants.BAZoneCold, Constants.BAZoneVeryCold, Constants.BAZoneSubarctic].include? ba_cz_name
+      return [HPXML::LocationBasementConditioned,
+              HPXML::LocationBasementUnconditioned,
+              HPXML::LocationLivingSpace]
+    elsif ba_cz_name.nil?
+      return [HPXML::LocationBasementConditioned,
+              HPXML::LocationBasementUnconditioned,
+              HPXML::LocationGarage,
+              HPXML::LocationLivingSpace]
+    end
+  end
+
   private
 
   def self.deadband(wh_type)
