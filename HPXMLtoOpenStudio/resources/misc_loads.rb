@@ -63,7 +63,7 @@ class MiscLoads
     end
   end
 
-  def self.get_residual_mels_values(cfa)
+  def self.get_residual_mels_default_values(cfa)
     annual_kwh = 0.91 * cfa
     frac_lost = 0.10
     frac_sens = (1.0 - frac_lost) * 0.95
@@ -71,7 +71,7 @@ class MiscLoads
     return annual_kwh, frac_sens, frac_lat
   end
 
-  def self.get_televisions_values(cfa, nbeds)
+  def self.get_televisions_default_values(cfa, nbeds)
     annual_kwh = 413.0 + 0.0 * cfa + 69.0 * nbeds
     frac_lost = 0.0
     frac_sens = (1.0 - frac_lost) * 1.0

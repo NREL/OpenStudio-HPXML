@@ -3129,12 +3129,12 @@ def set_hpxml_plug_loads(hpxml_file, hpxml)
     cfa = hpxml.building_construction.conditioned_floor_area
     nbeds = hpxml.building_construction.number_of_bedrooms
 
-    kWh_per_year, frac_sensible, frac_latent = MiscLoads.get_residual_mels_values(cfa)
+    kWh_per_year, frac_sensible, frac_latent = MiscLoads.get_residual_mels_default_values(cfa)
     hpxml.plug_loads[0].kWh_per_year = kWh_per_year
     hpxml.plug_loads[0].frac_sensible = frac_sensible.round(3)
     hpxml.plug_loads[0].frac_latent = frac_latent.round(3)
 
-    kWh_per_year, frac_sensible, frac_latent = MiscLoads.get_televisions_values(cfa, nbeds)
+    kWh_per_year, frac_sensible, frac_latent = MiscLoads.get_televisions_default_values(cfa, nbeds)
     hpxml.plug_loads[1].kWh_per_year = kWh_per_year
     hpxml.plug_loads[1].frac_sensible = frac_sensible.round(3)
     hpxml.plug_loads[1].frac_latent = frac_latent.round(3)

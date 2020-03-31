@@ -622,8 +622,8 @@ Dishwasher
 **********
 
 An ``Appliances/Dishwasher`` element can be specified; if not provided, a dishwasher will not be modeled.
-The dishwasher's ``PlaceSettingCapacity`` must be provided.
 The efficiency of the dishwasher can either be entered as an ``EnergyFactor`` or ``RatedAnnualkWh``.
+The dishwasher's ``PlaceSettingCapacity`` also must be provided as well as other inputs from the EnergyGuide label.
 
 Refrigerator
 ************

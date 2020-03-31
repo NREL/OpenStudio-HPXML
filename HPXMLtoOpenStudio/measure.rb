@@ -447,7 +447,7 @@ class OSModel
     # Default plug loads kwh/year, frac sensible/latent
     @hpxml.plug_loads.each do |plug_load|
       if plug_load.plug_load_type == HPXML::PlugLoadTypeOther
-        default_annual_kwh, default_sens_frac, default_lat_frac = MiscLoads.get_residual_mels_values(@cfa)
+        default_annual_kwh, default_sens_frac, default_lat_frac = MiscLoads.get_residual_mels_default_values(@cfa)
         if plug_load.kWh_per_year.nil?
           plug_load.kWh_per_year = default_annual_kwh
         end
@@ -458,7 +458,7 @@ class OSModel
           plug_load.frac_latent = default_lat_frac
         end
       elsif plug_load.plug_load_type == HPXML::PlugLoadTypeTelevision
-        default_annual_kwh, default_sens_frac, default_lat_frac = MiscLoads.get_televisions_values(@cfa, @nbeds)
+        default_annual_kwh, default_sens_frac, default_lat_frac = MiscLoads.get_televisions_default_values(@cfa, @nbeds)
         if plug_load.kWh_per_year.nil?
           plug_load.kWh_per_year = default_annual_kwh
         end
