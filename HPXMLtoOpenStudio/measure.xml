@@ -2,8 +2,8 @@
   <schema_version>3.0</schema_version>
   <name>hpxm_lto_openstudio</name>
   <uid>b1543b30-9465-45ff-ba04-1d1f85e763bc</uid>
-  <version_id>910ad7ee-9846-4423-8a6d-758b85586161</version_id>
-  <version_modified>20200326T180411Z</version_modified>
+  <version_id>7942df56-53c5-473e-ac5b-bc350df155ae</version_id>
+  <version_modified>20200331T151020Z</version_modified>
   <xml_checksum>D8922A73</xml_checksum>
   <class_name>HPXMLtoOpenStudio</class_name>
   <display_name>HPXML to OpenStudio Translator</display_name>
@@ -354,12 +354,6 @@
       <checksum>A00ABE93</checksum>
     </file>
     <file>
-      <filename>misc_loads.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>72D658F7</checksum>
-    </file>
-    <file>
       <filename>weather.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
@@ -432,22 +426,10 @@
       <checksum>3CE38123</checksum>
     </file>
     <file>
-      <filename>hotwater_appliances.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>6FC39741</checksum>
-    </file>
-    <file>
       <filename>waterheater.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
       <checksum>172A8E75</checksum>
-    </file>
-    <file>
-      <filename>BaseElements.xsd</filename>
-      <filetype>xsd</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>D21FFFA2</checksum>
     </file>
     <file>
       <filename>HPXMLDataTypes.xsd</filename>
@@ -456,10 +438,28 @@
       <checksum>15FA9595</checksum>
     </file>
     <file>
+      <filename>BaseElements.xsd</filename>
+      <filetype>xsd</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>42A41A4B</checksum>
+    </file>
+    <file>
+      <filename>hpxml.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>4551DF73</checksum>
+    </file>
+    <file>
       <filename>EPvalidator.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>9C61F7C3</checksum>
+      <checksum>7F885C63</checksum>
+    </file>
+    <file>
+      <filename>misc_loads.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>5650F84E</checksum>
     </file>
     <file>
       <version>
@@ -470,13 +470,13 @@
       <filename>measure.rb</filename>
       <filetype>rb</filetype>
       <usage_type>script</usage_type>
-      <checksum>40AD762F</checksum>
+      <checksum>0122A7AC</checksum>
     </file>
     <file>
-      <filename>hpxml.rb</filename>
+      <filename>hotwater_appliances.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>570FD6B2</checksum>
+      <checksum>2B80AAD9</checksum>
     </file>
   </files>
 </measure>

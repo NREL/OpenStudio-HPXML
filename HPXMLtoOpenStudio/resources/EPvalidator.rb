@@ -611,6 +611,7 @@ class EnergyPlusValidator
         'SystemIdentifier' => one, # Required by HPXML schema
         '[Location="living space" or Location="basement - conditioned" or Location="basement - unconditioned" or Location="garage"]' => one,
         'ModifiedEnergyFactor | IntegratedModifiedEnergyFactor' => one,
+        'Usage' => one,
         'RatedAnnualkWh' => one,
         'LabelElectricRate' => one,
         'LabelGasRate' => one,
@@ -630,7 +631,10 @@ class EnergyPlusValidator
       # [Dishwasher]
       '/HPXML/Building/BuildingDetails/Appliances/Dishwasher' => {
         'SystemIdentifier' => one, # Required by HPXML schema
-        'EnergyFactor | RatedAnnualkWh' => one,
+        'RatedAnnualkWh' => one,
+        'LabelElectricRate' => one,
+        'LabelGasRate' => one,
+        'LabelAnnualGasCost' => one,
         'PlaceSettingCapacity' => one,
       },
 

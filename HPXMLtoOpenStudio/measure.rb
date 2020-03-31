@@ -2031,66 +2031,29 @@ class OSModel
     if @hpxml.clothes_washers.size > 0
       clothes_washer = @hpxml.clothes_washers[0]
       cw_space = get_space_from_location(clothes_washer.location, 'ClothesWasher', model, spaces)
-      cw_ler = clothes_washer.rated_annual_kwh
-      cw_elec_rate = clothes_washer.label_electric_rate
-      cw_gas_rate = clothes_washer.label_gas_rate
-      cw_agc = clothes_washer.label_annual_gas_cost
-      cw_cap = clothes_washer.capacity
-      cw_mef = clothes_washer.modified_energy_factor
-      if cw_mef.nil?
-        cw_mef = HotWaterAndAppliances.calc_clothes_washer_mef_from_imef(clothes_washer.integrated_modified_energy_factor)
-      end
-    else
-      cw_mef = cw_ler = cw_elec_rate = cw_gas_rate = cw_agc = cw_cap = cw_space = nil
     end
 
     # Clothes Dryer
     if @hpxml.clothes_dryers.size > 0
       clothes_dryer = @hpxml.clothes_dryers[0]
       cd_space = get_space_from_location(clothes_dryer.location, 'ClothesDryer', model, spaces)
-      cd_fuel = clothes_dryer.fuel_type
-      cd_control = clothes_dryer.control_type
-      cd_ef = clothes_dryer.energy_factor
-      if cd_ef.nil?
-        cd_ef = HotWaterAndAppliances.calc_clothes_dryer_ef_from_cef(clothes_dryer.combined_energy_factor)
-      end
-    else
-      cd_ef = cd_control = cd_fuel = cd_space = nil
     end
 
     # Dishwasher
     if @hpxml.dishwashers.size > 0
       dishwasher = @hpxml.dishwashers[0]
-      dw_cap = dishwasher.place_setting_capacity
-      dw_ef = dishwasher.energy_factor
-      if dw_ef.nil?
-        dw_ef = HotWaterAndAppliances.calc_dishwasher_ef_from_annual_kwh(dishwasher.rated_annual_kwh)
-      end
-    else
-      dw_ef = dw_cap = nil
     end
 
     # Refrigerator
     if @hpxml.refrigerators.size > 0
       refrigerator = @hpxml.refrigerators[0]
-      fridge_space = get_space_from_location(refrigerator.location, 'Refrigerator', model, spaces)
-      fridge_annual_kwh = refrigerator.adjusted_annual_kwh
-      if fridge_annual_kwh.nil?
-        fridge_annual_kwh = refrigerator.rated_annual_kwh
-      end
-    else
-      fridge_annual_kwh = fridge_space = nil
+      rf_space = get_space_from_location(refrigerator.location, 'Refrigerator', model, spaces)
     end
 
     # Cooking Range/Oven
     if (@hpxml.cooking_ranges.size > 0) && (@hpxml.ovens.size > 0)
       cooking_range = @hpxml.cooking_ranges[0]
       oven = @hpxml.ovens[0]
-      cook_fuel_type = cooking_range.fuel_type
-      cook_is_induction = cooking_range.is_induction
-      oven_is_convection = oven.is_convection
-    else
-      cook_fuel_type = cook_is_induction = oven_is_convection = nil
     end
 
     # Fixtures
@@ -2246,10 +2209,8 @@ class OSModel
 
     HotWaterAndAppliances.apply(model, weather, @living_space,
                                 @cfa, @nbeds, @ncfl, has_uncond_bsmnt, avg_setpoint_temp,
-                                cw_mef, cw_ler, cw_elec_rate, cw_gas_rate,
-                                cw_agc, cw_cap, cw_space, cd_fuel, cd_ef, cd_control,
-                                cd_space, dw_ef, dw_cap, fridge_annual_kwh, fridge_space,
-                                cook_fuel_type, cook_is_induction, oven_is_convection,
+                                clothes_washer, cw_space, clothes_dryer, cd_space,
+                                dishwasher, refrigerator, rf_space, cooking_range, oven,
                                 has_low_flow_fixtures, dist_type, pipe_r,
                                 std_pipe_length, recirc_loop_length,
                                 recirc_branch_length, recirc_control_type,
