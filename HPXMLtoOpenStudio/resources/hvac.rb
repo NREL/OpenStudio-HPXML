@@ -2109,13 +2109,17 @@ class HVAC
     end
   end
 
-  def self.apply_dehumidifier(model, runner, energy_factor, integrated_energy_factor, water_removal_rate,
-                              air_flow_rate, humidity_setpoint, living_space, hvac_map, sys_id, fraction_served)
+  def self.apply_dehumidifier(model, runner, dehumidifier, living_space, hvac_map)
+    water_removal_rate = dehumidifier.capacity
+    energy_factor = dehumidifier.energy_factor
+
+    # Calculate air flow rate by assuming 2.75 cfm/pint/day (based on experimental test data)
+    air_flow_rate = 2.75 * water_removal_rate
 
     control_zone = living_space.thermalZone.get
     obj_name = Constants.ObjectNameDehumidifier
 
-    avg_rh_setpoint = humidity_setpoint * 100.0 # (EnergyPlus uses 60 for 60% RH)
+    avg_rh_setpoint = dehumidifier.rh_setpoint * 100.0 # (EnergyPlus uses 60 for 60% RH)
     relative_humidity_setpoint_sch = OpenStudio::Model::ScheduleConstant.new(model)
     relative_humidity_setpoint_sch.setName(Constants.ObjectNameRelativeHumiditySetpoint)
     relative_humidity_setpoint_sch.setValue(avg_rh_setpoint)
@@ -2130,7 +2134,7 @@ class HVAC
     part_load_frac_curve = create_curve_quadratic(model, pl_coeff, 'DXDH-PLF-fPLR', 0, 1, 0.7, 1)
     if energy_factor.nil?
       # shift inputs tested under IEF test conditions to those under EF test conditions with performance curves
-      energy_factor, water_removal_rate = dehumidifier_ief_to_ef_inputs(w_coeff, ef_coeff, integrated_energy_factor, water_removal_rate)
+      energy_factor, water_removal_rate = dehumidifier_ief_to_ef_inputs(w_coeff, ef_coeff, dehumidifier.integrated_energy_factor, water_removal_rate)
     end
 
     # Calculate air flow rate by assuming 2.75 cfm/pint/day (based on experimental test data)
@@ -2146,7 +2150,7 @@ class HVAC
     zone_hvac.setName(obj_name + " #{control_zone.name} dx")
     zone_hvac.setAvailabilitySchedule(model.alwaysOnDiscreteSchedule)
     zone_hvac.setRatedWaterRemoval(UnitConversions.convert(water_removal_rate, 'pint', 'L'))
-    zone_hvac.setRatedEnergyFactor(energy_factor / fraction_served)
+    zone_hvac.setRatedEnergyFactor(energy_factor / dehumidifier.fraction_served)
     zone_hvac.setRatedAirFlowRate(UnitConversions.convert(air_flow_rate, 'cfm', 'm^3/s'))
     zone_hvac.setMinimumDryBulbTemperatureforDehumidifierOperation(10)
     zone_hvac.setMaximumDryBulbTemperatureforDehumidifierOperation(40)
@@ -2154,8 +2158,8 @@ class HVAC
     zone_hvac.addToThermalZone(control_zone)
     # Only one dehumidifier allowed in current workflow.
     # If more than one allowed in the future, should remove this EMS program to avoid duplication
-    hvac_map[sys_id] << zone_hvac
-    adjust_dehumidifier_load_EMS(fraction_served, zone_hvac, model, living_space)
+    hvac_map[dehumidifier.id] << zone_hvac
+    adjust_dehumidifier_load_EMS(dehumidifier.fraction_served, zone_hvac, model, living_space)
   end
 
   def self.dehumidifier_ief_to_ef_inputs(w_coeff, ef_coeff, ief, water_removal_rate)

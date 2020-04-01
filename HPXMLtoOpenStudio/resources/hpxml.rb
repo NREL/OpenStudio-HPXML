@@ -3398,11 +3398,11 @@ class HPXML < Object
       dehumidifier = XMLHelper.add_element(appliances, 'Dehumidifier')
       sys_id = XMLHelper.add_element(dehumidifier, 'SystemIdentifier')
       XMLHelper.add_attribute(sys_id, 'id', @id)
-      XMLHelper.add_element(dehumidifier, 'Capacity', @capacity) unless @capacity.nil?
+      XMLHelper.add_element(dehumidifier, 'Capacity', Float(@capacity)) unless @capacity.nil?
       XMLHelper.add_element(dehumidifier, 'EnergyFactor', Float(@energy_factor)) unless @energy_factor.nil?
       XMLHelper.add_element(dehumidifier, 'IntegratedEnergyFactor', Float(@integrated_energy_factor)) unless @integrated_energy_factor.nil?
-      XMLHelper.add_element(dehumidifier, 'DehumidistatSetpoint', @rh_setpoint) unless @rh_setpoint.nil?
-      XMLHelper.add_element(dehumidifier, 'FractionDehumidificationLoadServed', @fraction_served) unless @fraction_served.nil?
+      XMLHelper.add_element(dehumidifier, 'DehumidistatSetpoint', Float(@rh_setpoint)) unless @rh_setpoint.nil?
+      XMLHelper.add_element(dehumidifier, 'FractionDehumidificationLoadServed', Float(@fraction_served)) unless @fraction_served.nil?
     end
 
     def from_rexml(dehumidifier)

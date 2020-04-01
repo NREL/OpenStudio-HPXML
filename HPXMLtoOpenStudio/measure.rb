@@ -2812,19 +2812,9 @@ class OSModel
     return if @hpxml.dehumidifiers.size == 0
 
     dehumidifier = @hpxml.dehumidifiers[0]
-    sys_id = dehumidifier.id
-    @hvac_map[sys_id] = []
-    water_removal_rate = dehumidifier.capacity
-    energy_factor = dehumidifier.energy_factor
-    integrated_energy_factor = dehumidifier.integrated_energy_factor
-    humidity_setpoint = dehumidifier.rh_setpoint
-    fraction_served = dehumidifier.fraction_served
+    @hvac_map[dehumidifier.id] = []
 
-    # Calculate air flow rate by assuming 2.75 cfm/pint/day (based on experimental test data)
-    air_flow_rate = 2.75 * water_removal_rate
-
-    HVAC.apply_dehumidifier(model, runner, energy_factor, integrated_energy_factor, water_removal_rate,
-                            air_flow_rate, humidity_setpoint, @living_space, @hvac_map, sys_id, fraction_served)
+    HVAC.apply_dehumidifier(model, runner, dehumidifier, @living_space, @hvac_map)
   end
 
   def self.check_distribution_system(hvac_distribution, system_type)
