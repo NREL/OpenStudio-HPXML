@@ -95,7 +95,7 @@ def create_osws
     'base-foundation-slab.osw' => 'base.osw',
     'base-foundation-unconditioned-basement.osw' => 'base.osw',
     # 'base-foundation-unconditioned-basement-above-grade.osw' => 'base.osw', # TODO: add foundation wall windows
-    # 'base-foundation-unconditioned-basement-assembly-r.osw' => 'base.osw',
+    'base-foundation-unconditioned-basement-assembly-r.osw' => 'base.osw',
     'base-foundation-unconditioned-basement-wall-insulation.osw' => 'base.osw',
     'base-foundation-unvented-crawlspace.osw' => 'base.osw',
     'base-foundation-vented-crawlspace.osw' => 'base.osw',
@@ -116,20 +116,20 @@ def create_osws
     'base-hvac-central-ac-plus-air-to-air-heat-pump-heating.osw' => 'base.osw',
     # 'base-hvac-dse.osw' => 'base.osw', # Not going to support DSE
     'base-hvac-dual-fuel-air-to-air-heat-pump-1-speed.osw' => 'base.osw',
-    # 'base-hvac-dual-fuel-air-to-air-heat-pump-1-speed-electric.osw' => 'base.osw', # TODO: change AFUE to Percent
+    'base-hvac-dual-fuel-air-to-air-heat-pump-1-speed-electric.osw' => 'base.osw',
     'base-hvac-dual-fuel-air-to-air-heat-pump-2-speed.osw' => 'base.osw',
     'base-hvac-dual-fuel-air-to-air-heat-pump-var-speed.osw' => 'base.osw',
     'base-hvac-dual-fuel-mini-split-heat-pump-ducted.osw' => 'base.osw',
     'base-hvac-ducts-in-conditioned-space.osw' => 'base.osw',
     'base-hvac-ducts-leakage-percent.osw' => 'base.osw',
     'base-hvac-ducts-locations.osw' => 'base.osw',
-    # 'base-hvac-ducts-multiple.osw' => 'base.osw', TODO: not sure how to do multiple ducts
+    # 'base-hvac-ducts-multiple.osw' => 'base.osw', TODO: Not supported for now
     'base-hvac-ducts-outside.osw' => 'base.osw',
     'base-hvac-elec-resistance-only.osw' => 'base.osw',
     'base-hvac-evap-cooler-furnace-gas.osw' => 'base.osw',
     'base-hvac-evap-cooler-only.osw' => 'base.osw',
     'base-hvac-evap-cooler-only-ducted.osw' => 'base.osw',
-    # 'base-hvac-flowrate.osw' => 'base.osw',
+    # 'base-hvac-flowrate.osw' => 'base.osw', # Not going to support in the measure
     'base-hvac-furnace-elec-only.osw' => 'base.osw',
     'base-hvac-furnace-gas-central-ac-2-speed.osw' => 'base.osw',
     'base-hvac-furnace-gas-central-ac-var-speed.osw' => 'base.osw',
@@ -147,7 +147,7 @@ def create_osws
     'base-hvac-mini-split-heat-pump-ductless-no-backup.osw' => 'base.osw',
     # 'base-hvac-multiple.osw' => 'base.osw', # Not supporting multiple heating/cooling systems for now
     'base-hvac-none.osw' => 'base.osw',
-    # 'base-hvac-none-no-fuel-access.osw' => 'base.osw',
+    # 'base-hvac-none-no-fuel-access.osw' => 'base.osw', # Doesn't affect model
     'base-hvac-portable-heater-electric-only.osw' => 'base.osw',
     'base-hvac-programmable-thermostat.osw' => 'base.osw',
     'base-hvac-room-ac-only.osw' => 'base.osw',
@@ -165,7 +165,7 @@ def create_osws
     'base-location-baltimore-md.osw' => 'base.osw',
     'base-location-dallas-tx.osw' => 'base.osw',
     'base-location-duluth-mn.osw' => 'base.osw',
-    # 'base-location-epw-filename.osw' => 'base.osw',
+    'base-location-epw-filename.osw' => 'base.osw',
     'base-location-miami-fl.osw' => 'base.osw',
     'base-mechvent-balanced.osw' => 'base.osw',
     'base-mechvent-cfis.osw' => 'base.osw',
@@ -173,7 +173,7 @@ def create_osws
     'base-mechvent-erv.osw' => 'base.osw',
     'base-mechvent-erv-atre-asre.osw' => 'base.osw',
     'base-mechvent-exhaust.osw' => 'base.osw',
-    # 'base-mechvent-exhaust-rated-flow-rate.osw' => 'base.osw', # TODO: setting all flow rates on TestedFlowRate
+    # 'base-mechvent-exhaust-rated-flow-rate.osw' => 'base.osw', # No difference
     'base-mechvent-hrv.osw' => 'base.osw',
     'base-mechvent-hrv-asre.osw' => 'base.osw',
     'base-mechvent-supply.osw' => 'base.osw',
@@ -304,6 +304,7 @@ def get_values(osw_file, step)
     step.setArgument('geometry_garage_position', 'Right')
     step.setArgument('geometry_foundation_type', HPXML::FoundationTypeBasementConditioned)
     step.setArgument('geometry_foundation_height', 8.0)
+    step.setArgument('geometry_foundation_height_above_grade', 1.0)
     step.setArgument('geometry_eaves_depth', 0)
     step.setArgument('geometry_num_bedrooms', 3)
     step.setArgument('geometry_num_bathrooms', Constants.Auto)
@@ -314,17 +315,17 @@ def get_values(osw_file, step)
     step.setArgument('geometry_roof_pitch', '6:12')
     step.setArgument('geometry_roof_structure', 'truss, cantilever')
     step.setArgument('foundation_ceiling_assembly_r', 0)
-    step.setArgument('foundation_wall_assembly_r', 8.9)
-    step.setArgument('foundation_wall_distance_to_top', 0.0)
-    step.setArgument('foundation_wall_distance_to_bottom', 8.0)
-    step.setArgument('foundation_wall_depth_below_grade', 7.0)
-    step.setArgument('slab_perimeter_r', 0)
+    step.setArgument('foundation_wall_assembly_r', 0)
+    step.setArgument('foundation_wall_insulation_r', 8.9)
+    step.setArgument('foundation_wall_insulation_distance_to_top', 0.0)
+    step.setArgument('foundation_wall_insulation_distance_to_bottom', 8.0)
+    step.setArgument('slab_perimeter_insulation_r', 0)
     step.setArgument('slab_perimeter_depth', 0)
-    step.setArgument('slab_under_r', 0)
+    step.setArgument('slab_under_insulation_r', 0)
     step.setArgument('slab_under_width', 0)
-    step.setArgument('carpet_fraction', 0.0)
-    step.setArgument('carpet_r_value', 0.0)
-    step.setArgument('attic_floor_assembly_r', 39.3)
+    step.setArgument('slab_carpet_fraction', 0.0)
+    step.setArgument('slab_carpet_r', 0.0)
+    step.setArgument('ceiling_assembly_r', 39.3)
     step.setArgument('roof_assembly_r', 2.3)
     step.setArgument('roof_solar_absorptance', 0.7)
     step.setArgument('roof_emittance', 0.92)
@@ -369,7 +370,7 @@ def get_values(osw_file, step)
     step.setArgument('skylight_area_right', 0)
     step.setArgument('skylight_ufactor', 0.33)
     step.setArgument('skylight_shgc', 0.45)
-    step.setArgument('door_area', 40.0)
+    step.setArgument('door_area', 80.0)
     step.setArgument('door_rvalue', 4.4)
     step.setArgument('air_leakage_units', HPXML::UnitsACH50)
     step.setArgument('air_leakage_value', 3)
@@ -381,7 +382,6 @@ def get_values(osw_file, step)
     step.setArgument('heating_system_fraction_heat_load_served', 1)
     step.setArgument('heating_system_electric_auxiliary_energy', 0)
     step.setArgument('cooling_system_type', HPXML::HVACTypeCentralAirConditioner)
-    step.setArgument('cooling_system_fuel', HPXML::FuelTypeElectricity)
     step.setArgument('cooling_system_cooling_efficiency', 13.0)
     step.setArgument('cooling_system_cooling_compressor_type', HPXML::HVACCompressorTypeSingleStage)
     step.setArgument('cooling_system_cooling_sensible_heat_fraction', 0.73)
@@ -389,7 +389,6 @@ def get_values(osw_file, step)
     step.setArgument('cooling_system_fraction_cool_load_served', 1)
     step.setArgument('cooling_system_evap_cooler_is_ducted', false)
     step.setArgument('heat_pump_type', 'none')
-    step.setArgument('heat_pump_fuel', HPXML::FuelTypeElectricity)
     step.setArgument('heat_pump_heating_efficiency', 7.7)
     step.setArgument('heat_pump_cooling_efficiency', 13.0)
     step.setArgument('heat_pump_heating_capacity', 64000.0)
@@ -402,7 +401,6 @@ def get_values(osw_file, step)
     step.setArgument('heat_pump_cooling_compressor_type', HPXML::HVACCompressorTypeSingleStage)
     step.setArgument('heat_pump_cooling_sensible_heat_fraction', 0.73)
     step.setArgument('heat_pump_backup_heating_capacity', 34121.0)
-    step.setArgument('heat_pump_backup_heating_switchover_temp', 25)
     step.setArgument('heat_pump_mini_split_is_ducted', false)
     step.setArgument('setpoint_heating_temp', 68)
     step.setArgument('setpoint_heating_setback_temp', 68)
@@ -416,8 +414,8 @@ def get_values(osw_file, step)
     step.setArgument('ducts_return_leakage_units', HPXML::UnitsCFM25)
     step.setArgument('ducts_supply_leakage_value', 75.0)
     step.setArgument('ducts_return_leakage_value', 25.0)
-    step.setArgument('ducts_supply_insulation_r_value', 4.0)
-    step.setArgument('ducts_return_insulation_r_value', 0.0)
+    step.setArgument('ducts_supply_insulation_r', 4.0)
+    step.setArgument('ducts_return_insulation_r', 0.0)
     step.setArgument('ducts_supply_location', Constants.Auto)
     step.setArgument('ducts_return_location', Constants.Auto)
     step.setArgument('ducts_supply_surface_area', 150.0)
@@ -504,7 +502,6 @@ def get_values(osw_file, step)
     step.setArgument('refrigerator_present', true)
     step.setArgument('refrigerator_location', Constants.Auto)
     step.setArgument('refrigerator_rated_annual_kwh', 650.0)
-    step.setArgument('refrigerator_adjusted_annual_kwh', 0)
     step.setArgument('cooking_range_present', true)
     step.setArgument('cooking_range_fuel_type', HPXML::FuelTypeElectricity)
     step.setArgument('cooking_range_is_induction', false)
@@ -559,7 +556,6 @@ def get_values(osw_file, step)
     step.setArgument('clothes_dryer_control_type', HPXML::ClothesDryerControlTypeMoisture)
     step.setArgument('dishwasher_efficiency_type', 'EnergyFactor')
     step.setArgument('dishwasher_efficiency', 0.5)
-    step.setArgument('refrigerator_adjusted_annual_kwh', 600.0)
   elsif ['base-appliances-none.osw'].include? osw_file
     step.setArgument('clothes_washer_present', false)
     step.setArgument('clothes_dryer_present', false)
@@ -610,7 +606,7 @@ def get_values(osw_file, step)
   elsif ['base-atticroof-radiant-barrier.osw'].include? osw_file
     step.setArgument('roof_radiant_barrier', true)
   elsif ['base-atticroof-unvented-insulated-roof.osw'].include? osw_file
-    step.setArgument('attic_floor_assembly_r', 2.1)
+    step.setArgument('ceiling_assembly_r', 2.1)
     step.setArgument('roof_assembly_r', 25.8)
   elsif ['base-atticroof-vented.osw'].include? osw_file
     step.setArgument('geometry_attic_type', HPXML::AtticTypeVented)
@@ -890,26 +886,26 @@ def get_values(osw_file, step)
     step.setArgument('foundation_ceiling_assembly_r', 18.7)
     step.setArgument('plug_loads_other_annual_kwh', 1228.5)
   elsif ['base-foundation-conditioned-basement-slab-insulation.osw'].include? osw_file
-    step.setArgument('slab_under_r', 10)
+    step.setArgument('slab_under_insulation_r', 10)
     step.setArgument('slab_under_width', 4)
   elsif ['base-foundation-conditioned-basement-wall-interior-insulation.osw'].include? osw_file
-    step.setArgument('foundation_wall_assembly_r', 18.9)
-    step.setArgument('foundation_wall_distance_to_top', 1.0)
+    step.setArgument('foundation_wall_insulation_r', 18.9)
+    step.setArgument('foundation_wall_insulation_distance_to_top', 1.0)
   elsif ['base-foundation-slab.osw'].include? osw_file
     step.setArgument('geometry_cfa', 1350.0)
     step.setArgument('geometry_foundation_type', HPXML::FoundationTypeSlab)
-    step.setArgument('foundation_wall_depth_below_grade', 0.0)
-    step.setArgument('slab_under_r', 5)
+    step.setArgument('geometry_foundation_height_above_grade', 0.0)
+    step.setArgument('slab_under_insulation_r', 5)
     step.setArgument('slab_under_width', 999)
-    step.setArgument('carpet_fraction', 1.0)
-    step.setArgument('carpet_r_value', 2.5)
+    step.setArgument('slab_carpet_fraction', 1.0)
+    step.setArgument('slab_carpet_r', 2.5)
     step.setArgument('plug_loads_other_annual_kwh', 1228.5)
   elsif ['base-foundation-unconditioned-basement.osw'].include? osw_file
     step.setArgument('geometry_cfa', 1350.0)
     step.setArgument('geometry_foundation_type', HPXML::FoundationTypeBasementUnconditioned)
     step.setArgument('foundation_ceiling_assembly_r', 18.7)
-    step.setArgument('foundation_wall_assembly_r', 0)
-    step.setArgument('foundation_wall_distance_to_bottom', 0)
+    step.setArgument('foundation_wall_insulation_r', 0)
+    step.setArgument('foundation_wall_insulation_distance_to_bottom', 0)
     step.setArgument('ducts_supply_location', HPXML::LocationBasementUnconditioned)
     step.setArgument('ducts_return_location', HPXML::LocationBasementUnconditioned)
     step.setArgument('water_heater_location', Constants.Auto)
@@ -920,9 +916,21 @@ def get_values(osw_file, step)
   elsif ['base-foundation-unconditioned-basement-above-grade.osw'].include? osw_file
     step.setArgument('geometry_cfa', 1350.0)
     step.setArgument('geometry_foundation_type', HPXML::FoundationTypeBasementUnconditioned)
-    step.setArgument('foundation_wall_assembly_r', 0)
-    step.setArgument('foundation_wall_distance_to_bottom', 0)
-    step.setArgument('foundation_wall_depth_below_grade', 4.0)
+    step.setArgument('geometry_foundation_height_above_grade', 4.0)
+    step.setArgument('foundation_wall_insulation_r', 0)
+    step.setArgument('foundation_wall_insulation_distance_to_bottom', 0)
+    step.setArgument('ducts_supply_location', HPXML::LocationBasementUnconditioned)
+    step.setArgument('ducts_return_location', HPXML::LocationBasementUnconditioned)
+    step.setArgument('water_heater_location', Constants.Auto)
+    step.setArgument('clothes_washer_location', Constants.Auto)
+    step.setArgument('clothes_dryer_location', Constants.Auto)
+    step.setArgument('refrigerator_location', HPXML::LocationBasementUnconditioned)
+    step.setArgument('plug_loads_other_annual_kwh', 1228.5)
+  elsif ['base-foundation-unconditioned-basement-assembly-r.osw'].include? osw_file
+    step.setArgument('geometry_cfa', 1350.0)
+    step.setArgument('geometry_foundation_type', HPXML::FoundationTypeBasementUnconditioned)
+    step.setArgument('foundation_ceiling_assembly_r', 18.7)
+    step.setArgument('foundation_wall_assembly_r', 10.69)
     step.setArgument('ducts_supply_location', HPXML::LocationBasementUnconditioned)
     step.setArgument('ducts_return_location', HPXML::LocationBasementUnconditioned)
     step.setArgument('water_heater_location', Constants.Auto)
@@ -934,7 +942,7 @@ def get_values(osw_file, step)
     step.setArgument('geometry_cfa', 1350.0)
     step.setArgument('geometry_foundation_type', HPXML::FoundationTypeBasementUnconditioned)
     step.setArgument('foundation_ceiling_assembly_r', 2.1)
-    step.setArgument('foundation_wall_distance_to_bottom', 4)
+    step.setArgument('foundation_wall_insulation_distance_to_bottom', 4)
     step.setArgument('ducts_supply_location', HPXML::LocationBasementUnconditioned)
     step.setArgument('ducts_return_location', HPXML::LocationBasementUnconditioned)
     step.setArgument('water_heater_location', Constants.Auto)
@@ -946,10 +954,10 @@ def get_values(osw_file, step)
     step.setArgument('geometry_cfa', 1350.0)
     step.setArgument('geometry_foundation_type', HPXML::FoundationTypeCrawlspaceUnvented)
     step.setArgument('geometry_foundation_height', 4.0)
+    step.setArgument('geometry_foundation_height_above_grade', 1.0)
     step.setArgument('foundation_ceiling_assembly_r', 18.7)
-    step.setArgument('foundation_wall_distance_to_bottom', 4.0)
-    step.setArgument('foundation_wall_depth_below_grade', 3.0)
-    step.setArgument('carpet_r_value', 2.5)
+    step.setArgument('foundation_wall_insulation_distance_to_bottom', 4.0)
+    step.setArgument('slab_carpet_r', 2.5)
     step.setArgument('ducts_supply_location', HPXML::LocationCrawlspaceUnvented)
     step.setArgument('ducts_return_location', HPXML::LocationCrawlspaceUnvented)
     step.setArgument('water_heater_location', Constants.Auto)
@@ -958,17 +966,17 @@ def get_values(osw_file, step)
     step.setArgument('geometry_cfa', 1350.0)
     step.setArgument('geometry_foundation_type', HPXML::FoundationTypeCrawlspaceVented)
     step.setArgument('geometry_foundation_height', 4.0)
+    step.setArgument('geometry_foundation_height_above_grade', 1.0)
     step.setArgument('foundation_ceiling_assembly_r', 18.7)
-    step.setArgument('foundation_wall_distance_to_bottom', 4.0)
-    step.setArgument('foundation_wall_depth_below_grade', 3.0)
-    step.setArgument('carpet_r_value', 2.5)
+    step.setArgument('foundation_wall_insulation_distance_to_bottom', 4.0)
+    step.setArgument('slab_carpet_r', 2.5)
     step.setArgument('ducts_supply_location', HPXML::LocationCrawlspaceVented)
     step.setArgument('ducts_return_location', HPXML::LocationCrawlspaceVented)
     step.setArgument('water_heater_location', Constants.Auto)
     step.setArgument('plug_loads_other_annual_kwh', 1228.5)
   elsif ['base-foundation-walkout-basement.osw'].include? osw_file
-    step.setArgument('foundation_wall_distance_to_bottom', 4.0)
-    step.setArgument('foundation_wall_depth_below_grade', 3.0)
+    step.setArgument('geometry_foundation_height_above_grade', 5.0)
+    step.setArgument('foundation_wall_insulation_distance_to_bottom', 4.0)
   elsif ['base-hvac-air-to-air-heat-pump-1-speed.osw'].include? osw_file
     step.setArgument('heating_system_type', 'none')
     step.setArgument('cooling_system_type', 'none')
@@ -1038,7 +1046,6 @@ def get_values(osw_file, step)
   elsif ['base-hvac-central-ac-plus-air-to-air-heat-pump-heating.osw'].include? osw_file
     step.setArgument('heating_system_type', 'none')
     step.setArgument('heat_pump_type', HPXML::HVACTypeHeatPumpAirToAir)
-    step.setArgument('heat_pump_fuel', HPXML::FuelTypeElectricity)
     step.setArgument('heat_pump_heating_efficiency', 7.7)
     step.setArgument('heat_pump_heating_capacity', 42000.0)
     step.setArgument('heat_pump_heating_capacity_17F', 26460.0)
@@ -1054,6 +1061,7 @@ def get_values(osw_file, step)
     step.setArgument('heat_pump_backup_fuel', HPXML::FuelTypeNaturalGas)
     step.setArgument('heat_pump_backup_heating_efficiency', 0.95)
     step.setArgument('heat_pump_backup_heating_capacity', 36000.0)
+    step.setArgument('heat_pump_backup_heating_switchover_temp', 25)
   elsif ['base-hvac-dual-fuel-air-to-air-heat-pump-1-speed-electric.osw'].include? osw_file
     step.setArgument('heating_system_type', 'none')
     step.setArgument('cooling_system_type', 'none')
@@ -1063,6 +1071,7 @@ def get_values(osw_file, step)
     step.setArgument('heat_pump_heating_capacity_17F', 26460.0)
     step.setArgument('heat_pump_backup_fuel', HPXML::FuelTypeElectricity)
     step.setArgument('heat_pump_backup_heating_capacity', 36000.0)
+    step.setArgument('heat_pump_backup_heating_switchover_temp', 25)
   elsif ['base-hvac-dual-fuel-air-to-air-heat-pump-2-speed.osw'].include? osw_file
     step.setArgument('heating_system_type', 'none')
     step.setArgument('cooling_system_type', 'none')
@@ -1075,6 +1084,7 @@ def get_values(osw_file, step)
     step.setArgument('heat_pump_backup_fuel', HPXML::FuelTypeNaturalGas)
     step.setArgument('heat_pump_backup_heating_efficiency', 0.95)
     step.setArgument('heat_pump_backup_heating_capacity', 36000.0)
+    step.setArgument('heat_pump_backup_heating_switchover_temp', 25)
   elsif ['base-hvac-dual-fuel-air-to-air-heat-pump-var-speed.osw'].include? osw_file
     step.setArgument('heating_system_type', 'none')
     step.setArgument('cooling_system_type', 'none')
@@ -1088,6 +1098,7 @@ def get_values(osw_file, step)
     step.setArgument('heat_pump_backup_fuel', HPXML::FuelTypeNaturalGas)
     step.setArgument('heat_pump_backup_heating_efficiency', 0.95)
     step.setArgument('heat_pump_backup_heating_capacity', 36000.0)
+    step.setArgument('heat_pump_backup_heating_switchover_temp', 25)
   elsif ['base-hvac-dual-fuel-mini-split-heat-pump-ducted.osw'].include? osw_file
     step.setArgument('heating_system_type', 'none')
     step.setArgument('cooling_system_type', 'none')
@@ -1103,9 +1114,10 @@ def get_values(osw_file, step)
     step.setArgument('heat_pump_mini_split_is_ducted', true)
     step.setArgument('ducts_supply_leakage_value', 15.0)
     step.setArgument('ducts_return_leakage_value', 5.0)
-    step.setArgument('ducts_supply_insulation_r_value', 0.0)
+    step.setArgument('ducts_supply_insulation_r', 0.0)
     step.setArgument('ducts_supply_surface_area', 30.0)
     step.setArgument('ducts_return_surface_area', 10.0)
+    step.setArgument('heat_pump_backup_heating_switchover_temp', 25)
   elsif ['base-hvac-ducts-in-conditioned-space.osw'].include? osw_file
     step.setArgument('ducts_supply_leakage_value', 1.5)
     step.setArgument('ducts_return_leakage_value', 1.5)
@@ -1120,10 +1132,10 @@ def get_values(osw_file, step)
     step.setArgument('geometry_cfa', 1350.0)
     step.setArgument('geometry_foundation_type', HPXML::FoundationTypeCrawlspaceVented)
     step.setArgument('geometry_foundation_height', 4.0)
+    step.setArgument('geometry_foundation_height_above_grade', 1.0)
     step.setArgument('foundation_ceiling_assembly_r', 18.7)
-    step.setArgument('foundation_wall_distance_to_bottom', 4.0)
-    step.setArgument('foundation_wall_depth_below_grade', 3.0)
-    step.setArgument('carpet_r_value', 2.5)
+    step.setArgument('foundation_wall_insulation_distance_to_bottom', 4.0)
+    step.setArgument('slab_carpet_r', 2.5)
     step.setArgument('ducts_supply_location', HPXML::LocationCrawlspaceVented)
     step.setArgument('ducts_return_location', HPXML::LocationAtticUnvented)
     step.setArgument('water_heater_location', Constants.Auto)
@@ -1203,7 +1215,7 @@ def get_values(osw_file, step)
     step.setArgument('heat_pump_mini_split_is_ducted', true)
     step.setArgument('ducts_supply_leakage_value', 15.0)
     step.setArgument('ducts_return_leakage_value', 5.0)
-    step.setArgument('ducts_supply_insulation_r_value', 0.0)
+    step.setArgument('ducts_supply_insulation_r', 0.0)
     step.setArgument('ducts_supply_surface_area', 30.0)
     step.setArgument('ducts_return_surface_area', 10.0)
   elsif ['base-hvac-mini-split-heat-pump-ductless.osw'].include? osw_file
@@ -1338,8 +1350,6 @@ def get_values(osw_file, step)
     step.setArgument('mech_vent_fan_power', 60)
   elsif ['base-mechvent-exhaust.osw'].include? osw_file
     step.setArgument('mech_vent_fan_type', HPXML::MechVentTypeExhaust)
-  elsif ['base-mechvent-exhaust-rated-flow-rate.osw'].include? osw_file
-    step.setArgument('mech_vent_fan_type', HPXML::MechVentTypeExhaust)
   elsif ['base-mechvent-hrv.osw'].include? osw_file
     step.setArgument('mech_vent_fan_type', HPXML::MechVentTypeHRV)
     step.setArgument('mech_vent_fan_power', 60)
@@ -1367,55 +1377,55 @@ def get_values(osw_file, step)
     step.setArgument('neighbor_front_distance', 15)
     step.setArgument('neighbor_front_height', 12)
   elsif ['hvac_partial/base-33percent.osw'].include? osw_file
-    step.setArgument('heating_system_fraction_heat_load_served', 0.33333)
-    step.setArgument('cooling_system_fraction_cool_load_served', 0.33333)
+    step.setArgument('heating_system_fraction_heat_load_served', 0.333)
+    step.setArgument('cooling_system_fraction_cool_load_served', 0.333)
   elsif ['hvac_partial/base-hvac-air-to-air-heat-pump-1-speed-33percent.osw'].include? osw_file
-    step.setArgument('heating_system_fraction_heat_load_served', 0.33333)
-    step.setArgument('cooling_system_fraction_cool_load_served', 0.33333)
+    step.setArgument('heating_system_fraction_heat_load_served', 0.333)
+    step.setArgument('cooling_system_fraction_cool_load_served', 0.333)
   elsif ['hvac_partial/base-hvac-air-to-air-heat-pump-2-speed-33percent.osw'].include? osw_file
-    step.setArgument('heating_system_fraction_heat_load_served', 0.33333)
-    step.setArgument('cooling_system_fraction_cool_load_served', 0.33333)
+    step.setArgument('heating_system_fraction_heat_load_served', 0.333)
+    step.setArgument('cooling_system_fraction_cool_load_served', 0.333)
   elsif ['hvac_partial/base-hvac-air-to-air-heat-pump-var-speed-33percent.osw'].include? osw_file
-    step.setArgument('heating_system_fraction_heat_load_served', 0.33333)
-    step.setArgument('cooling_system_fraction_cool_load_served', 0.33333)
+    step.setArgument('heating_system_fraction_heat_load_served', 0.333)
+    step.setArgument('cooling_system_fraction_cool_load_served', 0.333)
   elsif ['hvac_partial/base-hvac-boiler-gas-only-33percent.osw'].include? osw_file
-    step.setArgument('heating_system_fraction_heat_load_served', 0.33333)
+    step.setArgument('heating_system_fraction_heat_load_served', 0.333)
   elsif ['hvac_partial/base-hvac-central-ac-only-1-speed-33percent.osw'].include? osw_file
-    step.setArgument('cooling_system_fraction_cool_load_served', 0.33333)
+    step.setArgument('cooling_system_fraction_cool_load_served', 0.333)
   elsif ['hvac_partial/base-hvac-central-ac-only-2-speed-33percent.osw'].include? osw_file
-    step.setArgument('cooling_system_fraction_cool_load_served', 0.33333)
+    step.setArgument('cooling_system_fraction_cool_load_served', 0.333)
   elsif ['hvac_partial/base-hvac-central-ac-only-var-speed-33percent.osw'].include? osw_file
-    step.setArgument('cooling_system_fraction_cool_load_served', 0.33333)
+    step.setArgument('cooling_system_fraction_cool_load_served', 0.333)
   elsif ['hvac_partial/base-hvac-dual-fuel-air-to-air-heat-pump-1-speed-33percent.osw'].include? osw_file
-    step.setArgument('heating_system_fraction_heat_load_served', 0.33333)
-    step.setArgument('cooling_system_fraction_cool_load_served', 0.33333)
+    step.setArgument('heating_system_fraction_heat_load_served', 0.333)
+    step.setArgument('cooling_system_fraction_cool_load_served', 0.333)
   elsif ['hvac_partial/base-hvac-elec-resistance-only-33percent.osw'].include? osw_file
-    step.setArgument('heating_system_fraction_heat_load_served', 0.33333)
+    step.setArgument('heating_system_fraction_heat_load_served', 0.333)
   elsif ['hvac_partial/base-hvac-evap-cooler-only-33percent.osw'].include? osw_file
-    step.setArgument('cooling_system_fraction_cool_load_served', 0.33333)
+    step.setArgument('cooling_system_fraction_cool_load_served', 0.333)
   elsif ['hvac_partial/base-hvac-furnace-gas-central-ac-2-speed-33percent.osw'].include? osw_file
-    step.setArgument('heating_system_fraction_heat_load_served', 0.33333)
-    step.setArgument('cooling_system_fraction_cool_load_served', 0.33333)
+    step.setArgument('heating_system_fraction_heat_load_served', 0.333)
+    step.setArgument('cooling_system_fraction_cool_load_served', 0.333)
   elsif ['hvac_partial/base-hvac-furnace-gas-central-ac-var-speed-33percent.osw'].include? osw_file
-    step.setArgument('heating_system_fraction_heat_load_served', 0.33333)
-    step.setArgument('cooling_system_fraction_cool_load_served', 0.33333)
+    step.setArgument('heating_system_fraction_heat_load_served', 0.333)
+    step.setArgument('cooling_system_fraction_cool_load_served', 0.333)
   elsif ['hvac_partial/base-hvac-furnace-gas-only-33percent.osw'].include? osw_file
-    step.setArgument('heating_system_fraction_heat_load_served', 0.33333)
+    step.setArgument('heating_system_fraction_heat_load_served', 0.333)
   elsif ['hvac_partial/base-hvac-furnace-gas-room-ac-33percent.osw'].include? osw_file
-    step.setArgument('heating_system_fraction_heat_load_served', 0.33333)
-    step.setArgument('cooling_system_fraction_cool_load_served', 0.33333)
+    step.setArgument('heating_system_fraction_heat_load_served', 0.333)
+    step.setArgument('cooling_system_fraction_cool_load_served', 0.333)
   elsif ['hvac_partial/base-hvac-ground-to-air-heat-pump-33percent.osw'].include? osw_file
-    step.setArgument('heating_system_fraction_heat_load_served', 0.33333)
-    step.setArgument('cooling_system_fraction_cool_load_served', 0.33333)
+    step.setArgument('heating_system_fraction_heat_load_served', 0.333)
+    step.setArgument('cooling_system_fraction_cool_load_served', 0.333)
   elsif ['hvac_partial/base-hvac-mini-split-heat-pump-ducted-33percent.osw'].include? osw_file
-    step.setArgument('heating_system_fraction_heat_load_served', 0.33333)
-    step.setArgument('cooling_system_fraction_cool_load_served', 0.33333)
+    step.setArgument('heating_system_fraction_heat_load_served', 0.333)
+    step.setArgument('cooling_system_fraction_cool_load_served', 0.333)
   elsif ['hvac_partial/base-hvac-room-ac-only-33percent.osw'].include? osw_file
-    step.setArgument('cooling_system_fraction_cool_load_served', 0.33333)
+    step.setArgument('cooling_system_fraction_cool_load_served', 0.333)
   elsif ['hvac_partial/base-hvac-stove-oil-only-33percent.osw'].include? osw_file
-    step.setArgument('heating_system_fraction_heat_load_served', 0.33333)
+    step.setArgument('heating_system_fraction_heat_load_served', 0.333)
   elsif ['hvac_partial/base-hvac-wall-furnace-propane-only-33percent.osw'].include? osw_file
-    step.setArgument('heating_system_fraction_heat_load_served', 0.33333)
+    step.setArgument('heating_system_fraction_heat_load_served', 0.333)
   elsif ['invalid_files/non-electric-heat-pump-water-heater.osw'].include? osw_file
     step.setArgument('water_heater_type', HPXML::WaterHeaterTypeHeatPump)
     step.setArgument('water_heater_fuel_type', HPXML::FuelTypeNaturalGas)
