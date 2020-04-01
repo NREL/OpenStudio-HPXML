@@ -465,7 +465,8 @@ def set_hpxml_header(hpxml_file, hpxml)
   elsif ['invalid_files/invalid-timestep.xml'].include? hpxml_file
     hpxml.header.timestep = 45
   elsif ['invalid_files/invalid-runperiod.xml'].include? hpxml_file
-    hpxml.header.end_month = 2
+    hpxml.header.end_month = 4
+    hpxml.header.end_day_of_month = 31
   elsif ['base-misc-defaults.xml'].include? hpxml_file
     hpxml.header.timestep = nil
   end
