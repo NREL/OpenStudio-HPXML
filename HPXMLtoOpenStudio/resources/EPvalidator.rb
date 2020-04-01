@@ -92,6 +92,10 @@ class EnergyPlusValidator
       # [SimulationControl]
       '/HPXML/SoftwareInfo/extension/SimulationControl' => {
         'Timestep' => zero_or_one, # minutes; must be a divisor of 60
+        'BeginMonth' => zero_or_one, # integer
+        'BeginDayOfMonth' => zero_or_one, # integer
+        'EndMonth' => zero_or_one, # integer
+        'EndDayOfMonth' => zero_or_one, # integer
       },
 
       # [Neighbors]
