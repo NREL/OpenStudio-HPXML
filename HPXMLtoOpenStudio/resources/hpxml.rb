@@ -26,13 +26,19 @@ Creating from scratch
 hpxml = HPXML.new()
 
 # Singleton elements
-hpxml.set_building_construction(number_of_bedrooms: 3,
-                                conditioned_floor_area: 2400)
+hpxml.building_construction.number_of_bedrooms = 3
+hpxml.building_construction.conditioned_floor_area = 2400
 
 # Array elements
 hpxml.walls.clear
 hpxml.walls.add(id: "WallNorth", area: 500)
 hpxml.walls.add(id: "WallSouth", area: 500)
+hpxml.walls.add
+hpxml.walls[-1].id = "WallEastWest"
+hpxml.walls[-1].area = 1000
+
+# Write file
+XMLHelper.write_file(hpxml.to_rexml, "out.xml")
 
 '''
 
@@ -211,35 +217,20 @@ class HPXML < Object
   def initialize(hpxml_path: nil, collapse_enclosure: true)
     @doc = nil
     @hpxml_path = hpxml_path
-    from_hpxml_file(hpxml_path)
+
+    # Create/populate child objects
+    hpxml = nil
+    if not hpxml_path.nil?
+      @doc = XMLHelper.parse_file(hpxml_path)
+      hpxml = @doc.elements['/HPXML']
+    end
+    from_rexml(hpxml)
+
+    # Clean up
     delete_partition_surfaces()
     if collapse_enclosure
       collapse_enclosure_surfaces()
     end
-  end
-
-  def set_header(**kwargs)
-    @header = Header.new(self, **kwargs)
-  end
-
-  def set_site(**kwargs)
-    @site = Site.new(self, **kwargs)
-  end
-
-  def set_building_occupancy(**kwargs)
-    @building_occupancy = BuildingOccupancy.new(self, **kwargs)
-  end
-
-  def set_building_construction(**kwargs)
-    @building_construction = BuildingConstruction.new(self, **kwargs)
-  end
-
-  def set_climate_and_risk_zones(**kwargs)
-    @climate_and_risk_zones = ClimateandRiskZones.new(self, **kwargs)
-  end
-
-  def set_misc_loads_schedule(**kwargs)
-    @misc_loads_schedule = MiscLoadsSchedule.new(self, **kwargs)
   end
 
   def has_space_type(space_type)
@@ -332,52 +323,47 @@ class HPXML < Object
     return @doc
   end
 
-  def from_hpxml_file(hpxml_path)
-    hpxml_element = nil
-    if not hpxml_path.nil?
-      @doc = XMLHelper.parse_file(hpxml_path)
-      hpxml_element = @doc.elements['/HPXML']
-    end
-    @header = Header.new(self, hpxml_element)
-    @site = Site.new(self, hpxml_element)
-    @neighbor_buildings = NeighborBuildings.new(self, hpxml_element)
-    @building_occupancy = BuildingOccupancy.new(self, hpxml_element)
-    @building_construction = BuildingConstruction.new(self, hpxml_element)
-    @climate_and_risk_zones = ClimateandRiskZones.new(self, hpxml_element)
-    @air_infiltration_measurements = AirInfiltrationMeasurements.new(self, hpxml_element)
-    @attics = Attics.new(self, hpxml_element)
-    @foundations = Foundations.new(self, hpxml_element)
-    @roofs = Roofs.new(self, hpxml_element)
-    @rim_joists = RimJoists.new(self, hpxml_element)
-    @walls = Walls.new(self, hpxml_element)
-    @foundation_walls = FoundationWalls.new(self, hpxml_element)
-    @frame_floors = FrameFloors.new(self, hpxml_element)
-    @slabs = Slabs.new(self, hpxml_element)
-    @windows = Windows.new(self, hpxml_element)
-    @skylights = Skylights.new(self, hpxml_element)
-    @doors = Doors.new(self, hpxml_element)
-    @heating_systems = HeatingSystems.new(self, hpxml_element)
-    @cooling_systems = CoolingSystems.new(self, hpxml_element)
-    @heat_pumps = HeatPumps.new(self, hpxml_element)
-    @hvac_controls = HVACControls.new(self, hpxml_element)
-    @hvac_distributions = HVACDistributions.new(self, hpxml_element)
-    @ventilation_fans = VentilationFans.new(self, hpxml_element)
-    @water_heating_systems = WaterHeatingSystems.new(self, hpxml_element)
-    @hot_water_distributions = HotWaterDistributions.new(self, hpxml_element)
-    @water_fixtures = WaterFixtures.new(self, hpxml_element)
-    @solar_thermal_systems = SolarThermalSystems.new(self, hpxml_element)
-    @pv_systems = PVSystems.new(self, hpxml_element)
-    @clothes_washers = ClothesWashers.new(self, hpxml_element)
-    @clothes_dryers = ClothesDryers.new(self, hpxml_element)
-    @dishwashers = Dishwashers.new(self, hpxml_element)
-    @refrigerators = Refrigerators.new(self, hpxml_element)
-    @dehumidifiers = Dehumidifiers.new(self, hpxml_element)
-    @cooking_ranges = CookingRanges.new(self, hpxml_element)
-    @ovens = Ovens.new(self, hpxml_element)
-    @lighting_groups = LightingGroups.new(self, hpxml_element)
-    @ceiling_fans = CeilingFans.new(self, hpxml_element)
-    @plug_loads = PlugLoads.new(self, hpxml_element)
-    @misc_loads_schedule = MiscLoadsSchedule.new(self, hpxml_element)
+  def from_rexml(hpxml)
+    @header = Header.new(self, hpxml)
+    @site = Site.new(self, hpxml)
+    @neighbor_buildings = NeighborBuildings.new(self, hpxml)
+    @building_occupancy = BuildingOccupancy.new(self, hpxml)
+    @building_construction = BuildingConstruction.new(self, hpxml)
+    @climate_and_risk_zones = ClimateandRiskZones.new(self, hpxml)
+    @air_infiltration_measurements = AirInfiltrationMeasurements.new(self, hpxml)
+    @attics = Attics.new(self, hpxml)
+    @foundations = Foundations.new(self, hpxml)
+    @roofs = Roofs.new(self, hpxml)
+    @rim_joists = RimJoists.new(self, hpxml)
+    @walls = Walls.new(self, hpxml)
+    @foundation_walls = FoundationWalls.new(self, hpxml)
+    @frame_floors = FrameFloors.new(self, hpxml)
+    @slabs = Slabs.new(self, hpxml)
+    @windows = Windows.new(self, hpxml)
+    @skylights = Skylights.new(self, hpxml)
+    @doors = Doors.new(self, hpxml)
+    @heating_systems = HeatingSystems.new(self, hpxml)
+    @cooling_systems = CoolingSystems.new(self, hpxml)
+    @heat_pumps = HeatPumps.new(self, hpxml)
+    @hvac_controls = HVACControls.new(self, hpxml)
+    @hvac_distributions = HVACDistributions.new(self, hpxml)
+    @ventilation_fans = VentilationFans.new(self, hpxml)
+    @water_heating_systems = WaterHeatingSystems.new(self, hpxml)
+    @hot_water_distributions = HotWaterDistributions.new(self, hpxml)
+    @water_fixtures = WaterFixtures.new(self, hpxml)
+    @solar_thermal_systems = SolarThermalSystems.new(self, hpxml)
+    @pv_systems = PVSystems.new(self, hpxml)
+    @clothes_washers = ClothesWashers.new(self, hpxml)
+    @clothes_dryers = ClothesDryers.new(self, hpxml)
+    @dishwashers = Dishwashers.new(self, hpxml)
+    @refrigerators = Refrigerators.new(self, hpxml)
+    @dehumidifiers = Dehumidifiers.new(self, hpxml)
+    @cooking_ranges = CookingRanges.new(self, hpxml)
+    @ovens = Ovens.new(self, hpxml)
+    @lighting_groups = LightingGroups.new(self, hpxml)
+    @ceiling_fans = CeilingFans.new(self, hpxml)
+    @plug_loads = PlugLoads.new(self, hpxml)
+    @misc_loads_schedule = MiscLoadsSchedule.new(self, hpxml)
   end
 
   class BaseElement
@@ -1377,7 +1363,7 @@ class HPXML < Object
       else
         XMLHelper.add_attribute(sys_id, 'id', @id + 'Insulation')
       end
-      XMLHelper.add_element(insulation, 'AssemblyEffectiveRValue', Float(@insulation_assembly_r_value))
+      XMLHelper.add_element(insulation, 'AssemblyEffectiveRValue', Float(@insulation_assembly_r_value)) unless @insulation_assembly_r_value.nil?
     end
 
     def from_rexml(wall)
