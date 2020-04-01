@@ -270,9 +270,7 @@ class SimulationOutputReport < OpenStudio::Measure::ReportingMeasure
       timeseries_output_csv_path = File.join(output_dir, 'results_timeseries.csv')
     end
 
-    @timeseries_size = { 'hourly' => 8760,
-                         'daily' => 365,
-                         'timestep' => @model.getTimestep.numberOfTimestepsPerHour * 8760 }[timeseries_frequency]
+    @timeseries_size = get_timeseries_size(timeseries_frequency)
     fail "Unexpected timeseries_frequency: #{timeseries_frequency}." if @timeseries_size.nil?
 
     # Retrieve outputs
@@ -300,6 +298,20 @@ class SimulationOutputReport < OpenStudio::Measure::ReportingMeasure
     @sqlFile.close()
 
     return true
+  end
+
+  def get_timeseries_size(timeseries_frequency)
+    timeseries_size = nil
+    @fuels.each do |fuel_type, fuel|
+      next unless timeseries_size.nil?
+
+      query = "SELECT VariableValue FROM ReportMeterData WHERE ReportMeterDataDictionaryIndex IN (SELECT ReportMeterDataDictionaryIndex FROM ReportMeterDataDictionary WHERE VariableName='#{fuel.meter}' AND ReportingFrequency='#{reporting_frequency_map[timeseries_frequency]}' AND VariableUnits='J') GROUP BY TimeIndex ORDER BY TimeIndex"
+      values = @sqlFile.execAndReturnVectorOfDouble(query)
+      values = values.get
+      timeseries_size = values.length
+    end
+
+    return timeseries_size
   end
 
   def get_outputs(timeseries_frequency,
