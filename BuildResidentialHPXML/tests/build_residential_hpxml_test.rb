@@ -151,9 +151,12 @@ class BuildResidentialHPXMLTest < MiniTest::Test
       hpxml.header.xml_type = nil
       hpxml.header.xml_generated_by = nil
       hpxml.header.created_date_and_time = Time.new(2000, 1, 1).strftime('%Y-%m-%dT%H:%M:%S%:z')
-      hpxml.set_site()
-      hpxml.set_building_occupancy()
-      hpxml.set_climate_and_risk_zones()
+      hpxml.site.fuels = []
+      hpxml.building_occupancy.number_of_residents = nil
+      hpxml.climate_and_risk_zones.iecc2006 = nil
+      hpxml.climate_and_risk_zones.weather_station_name = nil
+      hpxml.climate_and_risk_zones.weather_station_wmo = nil
+      hpxml.climate_and_risk_zones.weather_station_epw_filename = nil
       hpxml.attics.clear()
       hpxml.foundations.clear()
       hpxml.rim_joists.clear()
