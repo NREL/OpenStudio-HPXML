@@ -452,14 +452,6 @@ class HPXML < Object
         end
       end
 
-      if (@begin_month.nil? && (not @begin_day_of_month.nil?)) || ((not @begin_month.nil?) && @begin_day_of_month.nil?)
-        fail 'Must supply both Begin Month and Begin Day of Month, or neither of them.'
-      end
-
-      if (@end_month.nil? && (not @end_day_of_month.nil?)) || ((not @end_month.nil?) && @end_day_of_month.nil?)
-        fail 'Must supply both End Month and End Day of Month, or neither of them.'
-      end
-
       if not @begin_month.nil?
         valid_months = (1..12).to_a
         if not valid_months.include? @begin_month
@@ -559,6 +551,9 @@ class HPXML < Object
         XMLHelper.add_element(simulation_control, 'BeginDayOfMonth', HPXML::to_integer_or_nil(@begin_day_of_month)) unless @begin_day_of_month.nil?
         XMLHelper.add_element(simulation_control, 'EndMonth', HPXML::to_integer_or_nil(@end_month)) unless @end_month.nil?
         XMLHelper.add_element(simulation_control, 'EndDayOfMonth', HPXML::to_integer_or_nil(@end_day_of_month)) unless @end_day_of_month.nil?
+      end
+      if extension.elements['ERICalculation'].nil? && extension.elements['SimulationControl'].nil?
+        extension.remove
       end
 
       building = XMLHelper.add_element(hpxml, 'Building')
