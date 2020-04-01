@@ -428,7 +428,7 @@
         </Refrigerator>
         <Dehumidifier>
           <SystemIdentifier id='Dehumidifier'/>
-          <Capacity>40</Capacity>
+          <Capacity>40.0</Capacity>
           <EnergyFactor>1.8</EnergyFactor>
           <DehumidistatSetpoint>0.5</DehumidistatSetpoint>
           <FractionDehumidificationLoadServed>0.5</FractionDehumidificationLoadServed>
