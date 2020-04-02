@@ -184,26 +184,9 @@ def create_osws
     'base-misc-whole-house-fan.osw' => 'base.osw',
     'base-pv.osw' => 'base.osw',
     'base-site-neighbors.osw' => 'base.osw',
-    'hvac_partial/base-33percent.osw' => 'base.osw',
-    'hvac_partial/base-hvac-air-to-air-heat-pump-1-speed-33percent.osw' => 'base-hvac-air-to-air-heat-pump-1-speed.osw',
-    'hvac_partial/base-hvac-air-to-air-heat-pump-2-speed-33percent.osw' => 'base-hvac-air-to-air-heat-pump-2-speed.osw',
-    'hvac_partial/base-hvac-air-to-air-heat-pump-var-speed-33percent.osw' => 'base-hvac-air-to-air-heat-pump-var-speed.osw',
-    'hvac_partial/base-hvac-boiler-gas-only-33percent.osw' => 'base-hvac-boiler-gas-only.osw',
-    'hvac_partial/base-hvac-central-ac-only-1-speed-33percent.osw' => 'base-hvac-central-ac-only-1-speed.osw',
-    'hvac_partial/base-hvac-central-ac-only-2-speed-33percent.osw' => 'base-hvac-central-ac-only-2-speed.osw',
-    'hvac_partial/base-hvac-central-ac-only-var-speed-33percent.osw' => 'base-hvac-central-ac-only-var-speed.osw',
-    'hvac_partial/base-hvac-dual-fuel-air-to-air-heat-pump-1-speed-33percent.osw' => 'base-hvac-dual-fuel-air-to-air-heat-pump-1-speed.osw',
-    'hvac_partial/base-hvac-elec-resistance-only-33percent.osw' => 'base-hvac-elec-resistance-only.osw',
-    'hvac_partial/base-hvac-evap-cooler-only-33percent.osw' => 'base-hvac-evap-cooler-only.osw',
-    'hvac_partial/base-hvac-furnace-gas-central-ac-2-speed-33percent.osw' => 'base-hvac-furnace-gas-central-ac-2-speed.osw',
-    'hvac_partial/base-hvac-furnace-gas-central-ac-var-speed-33percent.osw' => 'base-hvac-furnace-gas-central-ac-var-speed.osw',
-    'hvac_partial/base-hvac-furnace-gas-only-33percent.osw' => 'base-hvac-furnace-gas-only.osw',
-    'hvac_partial/base-hvac-furnace-gas-room-ac-33percent.osw' => 'base-hvac-furnace-gas-room-ac.osw',
-    'hvac_partial/base-hvac-ground-to-air-heat-pump-33percent.osw' => 'base-hvac-ground-to-air-heat-pump.osw',
-    'hvac_partial/base-hvac-mini-split-heat-pump-ducted-33percent.osw' => 'base-hvac-mini-split-heat-pump-ducted.osw',
-    'hvac_partial/base-hvac-room-ac-only-33percent.osw' => 'base-hvac-room-ac-only.osw',
-    'hvac_partial/base-hvac-stove-oil-only-33percent.osw' => 'base-hvac-stove-oil-only.osw',
-    'hvac_partial/base-hvac-wall-furnace-propane-only-33percent.osw' => 'base-hvac-wall-furnace-propane-only.osw',
+    # Extra test files that don't correspond with sample files
+    'extra-pv-roofpitch.osw' => 'base.osw',
+    'extra-dhw-solar-latitude.osw' => 'base.osw',
   }
 
   puts "Generating #{osws_files.size} OSW files..."
@@ -279,6 +262,7 @@ def get_values(osw_file, step)
   step.setArgument('hpxml_path', "../BuildResidentialHPXML/tests/built_residential_hpxml/#{File.basename(osw_file, '.*')}.xml")
 
   if ['base.osw'].include? osw_file
+    step.setArgument('weather_dir', 'weather')
     step.setArgument('simulation_control_timestep', 60)
     step.setArgument('weather_station_epw_filename', 'USA_CO_Denver.Intl.AP.725650_TMY3.epw')
     step.setArgument('schedules_output_path', 'BuildResidentialHPXML/tests/run/schedules.csv')
@@ -457,7 +441,7 @@ def get_values(osw_file, step)
     step.setArgument('solar_thermal_collector_loop_type', HPXML::SolarThermalLoopTypeDirect)
     step.setArgument('solar_thermal_collector_type', HPXML::SolarThermalTypeEvacuatedTube)
     step.setArgument('solar_thermal_collector_azimuth', 180)
-    step.setArgument('solar_thermal_collector_tilt', 20)
+    step.setArgument('solar_thermal_collector_tilt', '20')
     step.setArgument('solar_thermal_collector_rated_optical_efficiency', 0.5)
     step.setArgument('solar_thermal_collector_rated_thermal_losses', 0.2799)
     step.setArgument('solar_thermal_storage_volume', Constants.Auto)
@@ -466,7 +450,7 @@ def get_values(osw_file, step)
     step.setArgument('pv_system_location_1', HPXML::LocationRoof)
     step.setArgument('pv_system_tracking_1', HPXML::PVTrackingTypeFixed)
     step.setArgument('pv_system_array_azimuth_1', 180)
-    step.setArgument('pv_system_array_tilt_1', 20)
+    step.setArgument('pv_system_array_tilt_1', '20')
     step.setArgument('pv_system_max_power_output_1', 4000)
     step.setArgument('pv_system_inverter_efficiency_1', 0.96)
     step.setArgument('pv_system_system_losses_fraction_1', 0.14)
@@ -474,7 +458,7 @@ def get_values(osw_file, step)
     step.setArgument('pv_system_location_2', HPXML::LocationRoof)
     step.setArgument('pv_system_tracking_2', HPXML::PVTrackingTypeFixed)
     step.setArgument('pv_system_array_azimuth_2', 180)
-    step.setArgument('pv_system_array_tilt_2', 20)
+    step.setArgument('pv_system_array_tilt_2', '20')
     step.setArgument('pv_system_max_power_output_2', 4000)
     step.setArgument('pv_system_inverter_efficiency_2', 0.96)
     step.setArgument('pv_system_system_losses_fraction_2', 0.14)
@@ -1374,56 +1358,14 @@ def get_values(osw_file, step)
     step.setArgument('neighbor_back_distance', 10)
     step.setArgument('neighbor_front_distance', 15)
     step.setArgument('neighbor_front_height', '12')
-  elsif ['hvac_partial/base-33percent.osw'].include? osw_file
-    step.setArgument('heating_system_fraction_heat_load_served', 0.333)
-    step.setArgument('cooling_system_fraction_cool_load_served', 0.333)
-  elsif ['hvac_partial/base-hvac-air-to-air-heat-pump-1-speed-33percent.osw'].include? osw_file
-    step.setArgument('heating_system_fraction_heat_load_served', 0.333)
-    step.setArgument('cooling_system_fraction_cool_load_served', 0.333)
-  elsif ['hvac_partial/base-hvac-air-to-air-heat-pump-2-speed-33percent.osw'].include? osw_file
-    step.setArgument('heating_system_fraction_heat_load_served', 0.333)
-    step.setArgument('cooling_system_fraction_cool_load_served', 0.333)
-  elsif ['hvac_partial/base-hvac-air-to-air-heat-pump-var-speed-33percent.osw'].include? osw_file
-    step.setArgument('heating_system_fraction_heat_load_served', 0.333)
-    step.setArgument('cooling_system_fraction_cool_load_served', 0.333)
-  elsif ['hvac_partial/base-hvac-boiler-gas-only-33percent.osw'].include? osw_file
-    step.setArgument('heating_system_fraction_heat_load_served', 0.333)
-  elsif ['hvac_partial/base-hvac-central-ac-only-1-speed-33percent.osw'].include? osw_file
-    step.setArgument('cooling_system_fraction_cool_load_served', 0.333)
-  elsif ['hvac_partial/base-hvac-central-ac-only-2-speed-33percent.osw'].include? osw_file
-    step.setArgument('cooling_system_fraction_cool_load_served', 0.333)
-  elsif ['hvac_partial/base-hvac-central-ac-only-var-speed-33percent.osw'].include? osw_file
-    step.setArgument('cooling_system_fraction_cool_load_served', 0.333)
-  elsif ['hvac_partial/base-hvac-dual-fuel-air-to-air-heat-pump-1-speed-33percent.osw'].include? osw_file
-    step.setArgument('heating_system_fraction_heat_load_served', 0.333)
-    step.setArgument('cooling_system_fraction_cool_load_served', 0.333)
-  elsif ['hvac_partial/base-hvac-elec-resistance-only-33percent.osw'].include? osw_file
-    step.setArgument('heating_system_fraction_heat_load_served', 0.333)
-  elsif ['hvac_partial/base-hvac-evap-cooler-only-33percent.osw'].include? osw_file
-    step.setArgument('cooling_system_fraction_cool_load_served', 0.333)
-  elsif ['hvac_partial/base-hvac-furnace-gas-central-ac-2-speed-33percent.osw'].include? osw_file
-    step.setArgument('heating_system_fraction_heat_load_served', 0.333)
-    step.setArgument('cooling_system_fraction_cool_load_served', 0.333)
-  elsif ['hvac_partial/base-hvac-furnace-gas-central-ac-var-speed-33percent.osw'].include? osw_file
-    step.setArgument('heating_system_fraction_heat_load_served', 0.333)
-    step.setArgument('cooling_system_fraction_cool_load_served', 0.333)
-  elsif ['hvac_partial/base-hvac-furnace-gas-only-33percent.osw'].include? osw_file
-    step.setArgument('heating_system_fraction_heat_load_served', 0.333)
-  elsif ['hvac_partial/base-hvac-furnace-gas-room-ac-33percent.osw'].include? osw_file
-    step.setArgument('heating_system_fraction_heat_load_served', 0.333)
-    step.setArgument('cooling_system_fraction_cool_load_served', 0.333)
-  elsif ['hvac_partial/base-hvac-ground-to-air-heat-pump-33percent.osw'].include? osw_file
-    step.setArgument('heating_system_fraction_heat_load_served', 0.333)
-    step.setArgument('cooling_system_fraction_cool_load_served', 0.333)
-  elsif ['hvac_partial/base-hvac-mini-split-heat-pump-ducted-33percent.osw'].include? osw_file
-    step.setArgument('heating_system_fraction_heat_load_served', 0.333)
-    step.setArgument('cooling_system_fraction_cool_load_served', 0.333)
-  elsif ['hvac_partial/base-hvac-room-ac-only-33percent.osw'].include? osw_file
-    step.setArgument('cooling_system_fraction_cool_load_served', 0.333)
-  elsif ['hvac_partial/base-hvac-stove-oil-only-33percent.osw'].include? osw_file
-    step.setArgument('heating_system_fraction_heat_load_served', 0.333)
-  elsif ['hvac_partial/base-hvac-wall-furnace-propane-only-33percent.osw'].include? osw_file
-    step.setArgument('heating_system_fraction_heat_load_served', 0.333)
+  elsif ['extra-pv-roofpitch.osw'].include? osw_file
+    step.setArgument('pv_system_module_type_1', HPXML::PVModuleTypeStandard)
+    step.setArgument('pv_system_module_type_2', HPXML::PVModuleTypeStandard)
+    step.setArgument('pv_system_array_tilt_1', 'roofpitch')
+    step.setArgument('pv_system_array_tilt_2', 'roofpitch+15')
+  elsif ['extra-dhw-solar-latitude.osw'].include? osw_file
+    step.setArgument('solar_thermal_system_type', 'hot water')
+    step.setArgument('solar_thermal_collector_tilt', 'latitude-15')
   end
   return step
 end
