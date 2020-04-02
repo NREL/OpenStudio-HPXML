@@ -264,6 +264,10 @@ def get_values(osw_file, step)
   if ['base.osw'].include? osw_file
     step.setArgument('weather_dir', 'weather')
     step.setArgument('simulation_control_timestep', 60)
+    step.setArgument('simulation_control_begin_month', 1)
+    step.setArgument('simulation_control_begin_day_of_month', 1)
+    step.setArgument('simulation_control_end_month', 12)
+    step.setArgument('simulation_control_end_day_of_month', 31)
     step.setArgument('weather_station_epw_filename', 'USA_CO_Denver.Intl.AP.725650_TMY3.epw')
     step.setArgument('schedules_output_path', 'BuildResidentialHPXML/tests/run/schedules.csv')
     step.setArgument('geometry_unit_type', HPXML::ResidentialTypeSFD)
@@ -1344,9 +1348,11 @@ def get_values(osw_file, step)
     step.setArgument('mech_vent_fan_type', HPXML::MechVentTypeSupply)
   elsif ['base-misc-ceiling-fans.osw'].include? osw_file
     step.setArgument('ceiling_fan_cooling_setpoint_temp_offset', 0.5)
-    step.setArgument('ceiling_fan_quantity', 2)
+    step.setArgument('ceiling_fan_quantity', 2)  
   elsif ['base-misc-timestep-10-mins.osw'].include? osw_file
     step.setArgument('simulation_control_timestep', 10)
+  elsif ['base-misc-runperiod-1-month.osw'].include? osw_file
+    step.setArgument('simulation_control_end_month', 1)
   elsif ['base-misc-whole-house-fan.osw'].include? osw_file
     step.setArgument('whole_house_fan_present', true)
   elsif ['base-pv.osw'].include? osw_file
