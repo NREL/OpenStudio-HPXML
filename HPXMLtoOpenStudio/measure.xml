@@ -2,8 +2,8 @@
   <schema_version>3.0</schema_version>
   <name>hpxm_lto_openstudio</name>
   <uid>b1543b30-9465-45ff-ba04-1d1f85e763bc</uid>
-  <version_id>1ee46a30-1566-457f-88e2-ff77f10023fc</version_id>
-  <version_modified>20200401T013846Z</version_modified>
+  <version_id>1b08e8dd-3c5a-49ad-b892-ddfc3a13ee22</version_id>
+  <version_modified>20200401T201434Z</version_modified>
   <xml_checksum>D8922A73</xml_checksum>
   <class_name>HPXMLtoOpenStudio</class_name>
   <display_name>HPXML to OpenStudio Translator</display_name>
@@ -438,6 +438,12 @@
       <checksum>6FC39741</checksum>
     </file>
     <file>
+      <filename>waterheater.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>172A8E75</checksum>
+    </file>
+    <file>
       <filename>BaseElements.xsd</filename>
       <filetype>xsd</filetype>
       <usage_type>resource</usage_type>
@@ -450,18 +456,6 @@
       <checksum>15FA9595</checksum>
     </file>
     <file>
-      <filename>EPvalidator.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>9C61F7C3</checksum>
-    </file>
-    <file>
-      <filename>waterheater.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>DB7608DC</checksum>
-    </file>
-    <file>
       <version>
         <software_program>OpenStudio</software_program>
         <identifier>2.1.1</identifier>
@@ -470,13 +464,19 @@
       <filename>measure.rb</filename>
       <filetype>rb</filetype>
       <usage_type>script</usage_type>
-      <checksum>3A3A6211</checksum>
+      <checksum>8F3A0A1F</checksum>
+    </file>
+    <file>
+      <filename>EPvalidator.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>764ED30B</checksum>
     </file>
     <file>
       <filename>hpxml.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>E6BE6357</checksum>
+      <checksum>3E3D5CF3</checksum>
     </file>
   </files>
 </measure>
