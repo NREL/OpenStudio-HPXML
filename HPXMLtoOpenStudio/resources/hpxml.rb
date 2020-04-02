@@ -459,25 +459,6 @@ class HPXML < Object
         end
       end
 
-      if not @begin_day_of_month.nil?
-        if [1, 3, 5, 7, 8, 10, 12].include? @begin_month
-          valid_days = (1..31).to_a
-          if not valid_days.include? @begin_day_of_month
-            fail "Begin Day of Month (#{@begin_day_of_month}) must be one of: #{valid_days.join(', ')}."
-          end
-        elsif [4, 6, 9, 11].include? @begin_month
-          valid_days = (1..30).to_a
-          if not valid_days.include? @begin_day_of_month
-            fail "Begin Day of Month (#{@begin_day_of_month}) must be one of: #{valid_days.join(', ')}."
-          end
-        elsif [2].include? @begin_month
-          valid_days = (1..28).to_a
-          if not valid_days.include? @begin_day_of_month
-            fail "Begin Day of Month (#{@begin_day_of_month}) must be one of: #{valid_days.join(', ')}."
-          end
-        end
-      end
-
       if not @end_month.nil?
         valid_months = (1..12).to_a
         if not valid_months.include? @end_month
@@ -485,32 +466,26 @@ class HPXML < Object
         end
       end
 
-      if not @end_day_of_month.nil?
-        if [1, 3, 5, 7, 8, 10, 12].include? @end_month
-          valid_days = (1..31).to_a
-          if not valid_days.include? @end_day_of_month
-            fail "End Day of Month (#{@end_day_of_month}) must be one of: #{valid_days.join(', ')}."
+      months_days = { [1, 3, 5, 7, 8, 10, 12] => (1..31).to_a, [4, 6, 9, 11] => (1..30).to_a, [2] => (1..28).to_a }
+      months_days.each do |months, valid_days|
+        if (not @begin_day_of_month.nil?) && (months.include? @begin_month)
+          if not valid_days.include? @begin_day_of_month
+            fail "Begin Day of Month (#{@begin_day_of_month}) must be one of: #{valid_days.join(', ')}."
           end
-        elsif [4, 6, 9, 11].include? @end_month
-          valid_days = (1..30).to_a
-          if not valid_days.include? @end_day_of_month
-            fail "End Day of Month (#{@end_day_of_month}) must be one of: #{valid_days.join(', ')}."
-          end
-        elsif [2].include? @end_month
-          valid_days = (1..28).to_a
-          if not valid_days.include? @end_day_of_month
-            fail "End Day of Month (#{@end_day_of_month}) must be one of: #{valid_days.join(', ')}."
-          end
+        end
+        next unless (not @end_day_of_month.nil?) && (months.include? @end_month)
+        if not valid_days.include? @end_day_of_month
+          fail "End Day of Month (#{@end_day_of_month}) must be one of: #{valid_days.join(', ')}."
         end
       end
 
       if (not @begin_month.nil?) && (not @end_month.nil?)
-        if not @begin_month <= @end_month
+        if @begin_month > @end_month
           fail "Begin Month (#{@begin_month}) cannot come after End Month (#{@end_month})."
         end
         if (not @begin_day_of_month.nil?) && (not @end_day_of_month.nil?)
           if @begin_month == @end_month
-            if not @begin_day_of_month <= @end_day_of_month
+            if @begin_day_of_month > @end_day_of_month
               fail "Begin Day of Month (#{@begin_day_of_month}) cannot come after End Day of Month (#{@end_day_of_month}) for the same month (#{@begin_month})."
             end
           end
@@ -537,8 +512,7 @@ class HPXML < Object
       software_info = XMLHelper.add_element(hpxml, 'SoftwareInfo')
       XMLHelper.add_element(software_info, 'SoftwareProgramUsed', @software_program_used) unless @software_program_used.nil?
       XMLHelper.add_element(software_info, 'SoftwareProgramVersion', software_program_version) unless software_program_version.nil?
-      extension = HPXML::add_extension(parent: software_info,
-                                       extensions: {})
+      extension = XMLHelper.add_element(software_info, 'extension')
       if (not @eri_calculation_version.nil?) || (not @eri_design.nil?)
         eri_calculation = XMLHelper.add_element(extension, 'ERICalculation')
         XMLHelper.add_element(eri_calculation, 'Version', @eri_calculation_version)
@@ -3961,8 +3935,6 @@ class HPXML < Object
         end
         XMLHelper.add_element(extension, "#{name}", value) unless value.nil?
       end
-    else
-      extension = XMLHelper.add_element(parent, 'extension')
     end
 
     return extension

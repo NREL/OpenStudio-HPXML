@@ -125,17 +125,12 @@ The simulation controls currently offered are timestep, begin month, begin day o
 Timestep can be optionally provided as ``Timestep``, where the value is in minutes and must be a divisor of 60.
 If not provided, the default value of 60 is used.
 
-Begin month can be optionally provided as ``BeginMonth``, where the value is an integer and must be between 1 and 12.
-Begin day of month can be optionally provided as ``BeginDayOfMonth``, where the value is an integer and must have a valid number of days depending on the begin month.
-Either both, or neither, ``BeginMonth`` and ``BeginDayOfMonth`` must be provided.
-If not provided, the default value of 1/1 (January 1st) will be used.
+Begin month and end month can be optionally provided as ``BeginMonth`` ``EndMonth``, respectively, where the value is an integer and must be between 1 and 12.
+Begin day of month and end day of month can be optionally provided as ``BeginDayOfMonth`` and ``EndDayOfMonth``, respectively, where the value is an integer and must have a valid number of days depending on the begin month.
+Either both, or neither, ``BeginMonth`` and ``BeginDayOfMonth`` or ``EndMonth`` and ``EndDayOfMonth`` must be provided.
+If not provided, the default value of 1/1 (January 1st) and 12/31 (December 31st), respectively, will be used.
 
-End month can be optionally provided as ``EndMonth``, where the value is an integer and must be between 1 and 12.
-End day of month can be optionally provided as ``EndDayOfMonth``, where the value is an integer and must have a valid number of days depending on the end month.
-Either both, or neither, ``EndMonth`` and ``EndDayOfMonth`` must be provided.
-If not provided, the default value of 12/31 (December 31st) will be used.
-
-You cannot supply a combination of ``BeginMonth`` and ``BeginDayOfMonth`` that occurs after the supplied combination of ``EndMonth`` and ``EndDayOfMonth`` (e.g., a run period from 1/31 - 1/1 is invalid).
+You cannot supply a combination of ``BeginMonth`` and ``BeginDayOfMonth`` that occurs after the supplied combination of ``EndMonth`` and ``EndDayOfMonth`` (e.g., a run period from 10/1 - 3/31 is invalid).
 
 Building Details
 ~~~~~~~~~~~~~~~~

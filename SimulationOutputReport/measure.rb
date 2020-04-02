@@ -302,16 +302,10 @@ class SimulationOutputReport < OpenStudio::Measure::ReportingMeasure
 
   def get_timeseries_size(timeseries_frequency)
     year_description = @model.getYearDescription
-    assumed_year = year_description.assumedYear
-
     run_period = @model.getRunPeriod
-    begin_month = run_period.getBeginMonth
-    begin_day_of_month = run_period.getBeginDayOfMonth
-    end_month = run_period.getEndMonth
-    end_day_of_month = run_period.getEndDayOfMonth
 
-    start_time = Time.new(assumed_year, begin_month, begin_day_of_month)
-    end_time = Time.new(assumed_year, end_month, end_day_of_month, 24)
+    start_time = Time.new(year_description.assumedYear, run_period.getBeginMonth, run_period.getBeginDayOfMonth)
+    end_time = Time.new(year_description.assumedYear, run_period.getEndMonth, run_period.getEndDayOfMonth, 24)
 
     timeseries_size = (end_time - start_time).to_i # seconds
     if timeseries_frequency == 'hourly'
