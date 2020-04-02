@@ -456,7 +456,7 @@ class HPXMLTest < MiniTest::Test
     args = {}
     args['hpxml_path'] = xml
     args['weather_dir'] = 'weather'
-    args['output_path'] = File.absolute_path(rundir)
+    args['output_dir'] = File.absolute_path(rundir)
     args['debug'] = true
     update_args_hash(measures, measure_subdir, args)
 
