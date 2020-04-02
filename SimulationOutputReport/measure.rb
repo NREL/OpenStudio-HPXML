@@ -301,14 +301,27 @@ class SimulationOutputReport < OpenStudio::Measure::ReportingMeasure
   end
 
   def get_timeseries_size(timeseries_frequency)
-    timeseries_size = nil
-    @fuels.each do |fuel_type, fuel|
-      next unless timeseries_size.nil?
+    year_description = @model.getYearDescription
+    assumed_year = year_description.assumedYear
 
-      query = "SELECT VariableValue FROM ReportMeterData WHERE ReportMeterDataDictionaryIndex IN (SELECT ReportMeterDataDictionaryIndex FROM ReportMeterDataDictionary WHERE VariableName='#{fuel.meter}' AND ReportingFrequency='#{reporting_frequency_map[timeseries_frequency]}' AND VariableUnits='J') GROUP BY TimeIndex ORDER BY TimeIndex"
-      values = @sqlFile.execAndReturnVectorOfDouble(query)
-      values = values.get
-      timeseries_size = values.length
+    run_period = @model.getRunPeriod
+    begin_month = run_period.getBeginMonth
+    begin_day_of_month = run_period.getBeginDayOfMonth
+    end_month = run_period.getEndMonth
+    end_day_of_month = run_period.getEndDayOfMonth
+
+    start_time = Time.new(assumed_year, begin_month, begin_day_of_month)
+    end_time = Time.new(assumed_year, end_month, end_day_of_month, 24)
+
+    timeseries_size = (end_time - start_time).to_i # seconds
+    if timeseries_frequency == 'hourly'
+      timeseries_size /= 3600
+    elsif timeseries_frequency == 'daily'
+      timeseries_size /= 3600
+      timeseries_size /= 24
+    elsif timeseries_frequency == 'timestep'
+      timeseries_size /= 3600
+      timeseries_size *= @model.getTimestep.numberOfTimestepsPerHour
     end
 
     return timeseries_size
