@@ -234,13 +234,6 @@ def create_hpxmls
     'base-misc-whole-house-fan.xml' => 'base.xml',
     'base-pv.xml' => 'base.xml',
     'base-site-neighbors.xml' => 'base.xml',
-    'base-version-2014.xml' => 'base.xml',
-    'base-version-2014A.xml' => 'base.xml',
-    'base-version-2014AE.xml' => 'base.xml',
-    'base-version-2014AEG.xml' => 'base.xml',
-    'base-version-2019.xml' => 'base.xml',
-    'base-version-2019A.xml' => 'base.xml',
-    'base-version-latest.xml' => 'base.xml',
 
     'hvac_autosizing/base-autosize.xml' => 'base.xml',
     'hvac_autosizing/base-hvac-air-to-air-heat-pump-1-speed-autosize.xml' => 'base-hvac-air-to-air-heat-pump-1-speed.xml',
@@ -457,27 +450,13 @@ end
 
 def set_hpxml_header(hpxml_file, hpxml)
   if ['base.xml'].include? hpxml_file
-    hpxml.set_header(xml_type: 'HPXML',
-                     xml_generated_by: 'Rakefile',
-                     transaction: 'create',
-                     building_id: 'MyBuilding',
-                     event_type: 'proposed workscope',
-                     created_date_and_time: Time.new(2000, 1, 1).strftime('%Y-%m-%dT%H:%M:%S%:z'), # Hard-code to prevent diffs
-                     timestep: 60)
-  elsif ['base-version-2014.xml'].include? hpxml_file
-    hpxml.header.eri_calculation_version = '2014'
-  elsif ['base-version-2014A.xml'].include? hpxml_file
-    hpxml.header.eri_calculation_version = '2014A'
-  elsif ['base-version-2014AE.xml'].include? hpxml_file
-    hpxml.header.eri_calculation_version = '2014AE'
-  elsif ['base-version-2014AEG.xml'].include? hpxml_file
-    hpxml.header.eri_calculation_version = '2014AEG'
-  elsif ['base-version-2019.xml'].include? hpxml_file
-    hpxml.header.eri_calculation_version = '2019'
-  elsif ['base-version-2019A.xml'].include? hpxml_file
-    hpxml.header.eri_calculation_version = '2019A'
-  elsif ['base-version-latest.xml'].include? hpxml_file
-    hpxml.header.eri_calculation_version = 'latest'
+    hpxml.header.xml_type = 'HPXML'
+    hpxml.header.xml_generated_by = 'Rakefile'
+    hpxml.header.transaction = 'create'
+    hpxml.header.building_id = 'MyBuilding'
+    hpxml.header.event_type = 'proposed workscope'
+    hpxml.header.created_date_and_time = Time.new(2000, 1, 1).strftime('%Y-%m-%dT%H:%M:%S%:z') # Hard-code to prevent diffs
+    hpxml.header.timestep = 60
   elsif ['base-misc-timestep-10-mins.xml'].include? hpxml_file
     hpxml.header.timestep = 10
   elsif ['invalid_files/invalid-timestep.xml'].include? hpxml_file
@@ -489,7 +468,7 @@ end
 
 def set_hpxml_site(hpxml_file, hpxml)
   if ['base.xml'].include? hpxml_file
-    hpxml.set_site(fuels: [HPXML::FuelTypeElectricity, HPXML::FuelTypeNaturalGas])
+    hpxml.site.fuels = [HPXML::FuelTypeElectricity, HPXML::FuelTypeNaturalGas]
   elsif ['base-hvac-none-no-fuel-access.xml'].include? hpxml_file
     hpxml.site.fuels = [HPXML::FuelTypeElectricity]
   end
@@ -509,11 +488,12 @@ end
 
 def set_hpxml_building_construction(hpxml_file, hpxml)
   if ['base.xml'].include? hpxml_file
-    hpxml.set_building_construction(number_of_conditioned_floors: 2,
-                                    number_of_conditioned_floors_above_grade: 1,
-                                    number_of_bedrooms: 3,
-                                    conditioned_floor_area: 2700,
-                                    conditioned_building_volume: 2700 * 8)
+    hpxml.building_construction.residential_facility_type = HPXML::ResidentialTypeSFD
+    hpxml.building_construction.number_of_conditioned_floors = 2
+    hpxml.building_construction.number_of_conditioned_floors_above_grade = 1
+    hpxml.building_construction.number_of_bedrooms = 3
+    hpxml.building_construction.conditioned_floor_area = 2700
+    hpxml.building_construction.conditioned_building_volume = 2700 * 8
   elsif ['base-enclosure-beds-1.xml'].include? hpxml_file
     hpxml.building_construction.number_of_bedrooms = 1
   elsif ['base-enclosure-beds-2.xml'].include? hpxml_file
@@ -544,6 +524,8 @@ def set_hpxml_building_construction(hpxml_file, hpxml)
     hpxml.building_construction.number_of_conditioned_floors_above_grade += 1
     hpxml.building_construction.conditioned_floor_area += 1350
     hpxml.building_construction.conditioned_building_volume += 1350 * 8
+  elsif ['base-enclosure-adiabatic-surfaces.xml'].include? hpxml_file
+    hpxml.building_construction.residential_facility_type = HPXML::ResidentialTypeApartment
   end
 end
 
@@ -557,30 +539,30 @@ end
 
 def set_hpxml_climate_and_risk_zones(hpxml_file, hpxml)
   if ['base.xml'].include? hpxml_file
-    hpxml.set_climate_and_risk_zones(iecc2006: '5B',
-                                     weather_station_id: 'WeatherStation',
-                                     weather_station_name: 'Denver, CO',
-                                     weather_station_wmo: '725650')
+    hpxml.climate_and_risk_zones.iecc2006 = '5B'
+    hpxml.climate_and_risk_zones.weather_station_id = 'WeatherStation'
+    hpxml.climate_and_risk_zones.weather_station_name = 'Denver, CO'
+    hpxml.climate_and_risk_zones.weather_station_wmo = '725650'
   elsif ['base-location-baltimore-md.xml'].include? hpxml_file
-    hpxml.set_climate_and_risk_zones(iecc2006: '4A',
-                                     weather_station_id: 'WeatherStation',
-                                     weather_station_name: 'Baltimore, MD',
-                                     weather_station_wmo: '724060')
+    hpxml.climate_and_risk_zones.iecc2006 = '4A'
+    hpxml.climate_and_risk_zones.weather_station_id = 'WeatherStation'
+    hpxml.climate_and_risk_zones.weather_station_name = 'Baltimore, MD'
+    hpxml.climate_and_risk_zones.weather_station_wmo = '724060'
   elsif ['base-location-dallas-tx.xml'].include? hpxml_file
-    hpxml.set_climate_and_risk_zones(iecc2006: '3A',
-                                     weather_station_id: 'WeatherStation',
-                                     weather_station_name: 'Dallas, TX',
-                                     weather_station_wmo: '722590')
+    hpxml.climate_and_risk_zones.iecc2006 = '3A'
+    hpxml.climate_and_risk_zones.weather_station_id = 'WeatherStation'
+    hpxml.climate_and_risk_zones.weather_station_name = 'Dallas, TX'
+    hpxml.climate_and_risk_zones.weather_station_wmo = '722590'
   elsif ['base-location-duluth-mn.xml'].include? hpxml_file
-    hpxml.set_climate_and_risk_zones(iecc2006: '7',
-                                     weather_station_id: 'WeatherStation',
-                                     weather_station_name: 'Duluth, MN',
-                                     weather_station_wmo: '727450')
+    hpxml.climate_and_risk_zones.iecc2006 = '7'
+    hpxml.climate_and_risk_zones.weather_station_id = 'WeatherStation'
+    hpxml.climate_and_risk_zones.weather_station_name = 'Duluth, MN'
+    hpxml.climate_and_risk_zones.weather_station_wmo = '727450'
   elsif ['base-location-miami-fl.xml'].include? hpxml_file
-    hpxml.set_climate_and_risk_zones(iecc2006: '1A',
-                                     weather_station_id: 'WeatherStation',
-                                     weather_station_name: 'Miami, FL',
-                                     weather_station_wmo: '722020')
+    hpxml.climate_and_risk_zones.iecc2006 = '1A'
+    hpxml.climate_and_risk_zones.weather_station_id = 'WeatherStation'
+    hpxml.climate_and_risk_zones.weather_station_name = 'Miami, FL'
+    hpxml.climate_and_risk_zones.weather_station_wmo = '722020'
   elsif ['base-location-epw-filename.xml'].include? hpxml_file
     hpxml.climate_and_risk_zones.weather_station_wmo = nil
     hpxml.climate_and_risk_zones.weather_station_epw_filename = 'USA_CO_Denver.Intl.AP.725650_TMY3.epw'
@@ -1398,78 +1380,62 @@ end
 
 def set_hpxml_windows(hpxml_file, hpxml)
   if ['base.xml'].include? hpxml_file
-    { 'Operable' => 0.33, 'Inoperable' => 0.67 }.each do |mode, frac|
-      hpxml.windows.add(id: "WindowNorth#{mode}",
-                        area: 108 * frac,
-                        azimuth: 0,
-                        ufactor: 0.33,
-                        shgc: 0.45,
-                        operable: (mode == 'Operable'),
-                        interior_shading_factor_summer: 0.7,
-                        interior_shading_factor_winter: 0.85,
-                        wall_idref: 'Wall')
-      hpxml.windows.add(id: "WindowSouth#{mode}",
-                        area: 108 * frac,
-                        azimuth: 180,
-                        ufactor: 0.33,
-                        shgc: 0.45,
-                        operable: (mode == 'Operable'),
-                        interior_shading_factor_summer: 0.7,
-                        interior_shading_factor_winter: 0.85,
-                        wall_idref: 'Wall')
-      hpxml.windows.add(id: "WindowEast#{mode}",
-                        area: 72 * frac,
-                        azimuth: 90,
-                        ufactor: 0.33,
-                        shgc: 0.45,
-                        operable: (mode == 'Operable'),
-                        interior_shading_factor_summer: 0.7,
-                        interior_shading_factor_winter: 0.85,
-                        wall_idref: 'Wall')
-      hpxml.windows.add(id: "WindowWest#{mode}",
-                        area: 72 * frac,
-                        azimuth: 270,
-                        ufactor: 0.33,
-                        shgc: 0.45,
-                        operable: (mode == 'Operable'),
-                        interior_shading_factor_summer: 0.7,
-                        interior_shading_factor_winter: 0.85,
-                        wall_idref: 'Wall')
-    end
+    hpxml.windows.add(id: 'WindowNorth',
+                      area: 108,
+                      azimuth: 0,
+                      ufactor: 0.33,
+                      shgc: 0.45,
+                      fraction_operable: 0.33,
+                      interior_shading_factor_summer: 0.7,
+                      interior_shading_factor_winter: 0.85,
+                      wall_idref: 'Wall')
+    hpxml.windows.add(id: 'WindowSouth',
+                      area: 108,
+                      azimuth: 180,
+                      ufactor: 0.33,
+                      shgc: 0.45,
+                      fraction_operable: 0.33,
+                      interior_shading_factor_summer: 0.7,
+                      interior_shading_factor_winter: 0.85,
+                      wall_idref: 'Wall')
+    hpxml.windows.add(id: 'WindowEast',
+                      area: 72,
+                      azimuth: 90,
+                      ufactor: 0.33,
+                      shgc: 0.45,
+                      fraction_operable: 0.33,
+                      interior_shading_factor_summer: 0.7,
+                      interior_shading_factor_winter: 0.85,
+                      wall_idref: 'Wall')
+    hpxml.windows.add(id: 'WindowWest',
+                      area: 72,
+                      azimuth: 270,
+                      ufactor: 0.33,
+                      shgc: 0.45,
+                      fraction_operable: 0.33,
+                      interior_shading_factor_summer: 0.7,
+                      interior_shading_factor_winter: 0.85,
+                      wall_idref: 'Wall')
   elsif ['base-enclosure-overhangs.xml'].include? hpxml_file
-    for n in [0, 4]
-      hpxml.windows[n].overhangs_depth = 2.5
-      hpxml.windows[n].overhangs_distance_to_top_of_window = 0
-      hpxml.windows[n].overhangs_distance_to_bottom_of_window = 4
-    end
-    for n in [2, 6]
-      hpxml.windows[n].overhangs_depth = 1.5
-      hpxml.windows[n].overhangs_distance_to_top_of_window = 2
-      hpxml.windows[n].overhangs_distance_to_bottom_of_window = 6
-    end
-    for n in [3, 7]
-      hpxml.windows[n].overhangs_depth = 1.5
-      hpxml.windows[n].overhangs_distance_to_top_of_window = 2
-      hpxml.windows[n].overhangs_distance_to_bottom_of_window = 7
-    end
+    hpxml.windows[0].overhangs_depth = 2.5
+    hpxml.windows[0].overhangs_distance_to_top_of_window = 0
+    hpxml.windows[0].overhangs_distance_to_bottom_of_window = 4
+    hpxml.windows[2].overhangs_depth = 1.5
+    hpxml.windows[2].overhangs_distance_to_top_of_window = 2
+    hpxml.windows[2].overhangs_distance_to_bottom_of_window = 6
+    hpxml.windows[3].overhangs_depth = 1.5
+    hpxml.windows[3].overhangs_distance_to_top_of_window = 2
+    hpxml.windows[3].overhangs_distance_to_bottom_of_window = 7
   elsif ['base-enclosure-windows-interior-shading.xml'].include? hpxml_file
-    for n in [1, 5]
-      hpxml.windows[n].interior_shading_factor_summer = 0.01
-      hpxml.windows[n].interior_shading_factor_winter = 0.99
-    end
-    for n in [2, 6]
-      hpxml.windows[n].interior_shading_factor_summer = 0.0
-      hpxml.windows[n].interior_shading_factor_winter = 0.5
-    end
-    for n in [3, 7]
-      hpxml.windows[n].interior_shading_factor_summer = 1.0
-      hpxml.windows[n].interior_shading_factor_winter = 1.0
-    end
+    hpxml.windows[1].interior_shading_factor_summer = 0.01
+    hpxml.windows[1].interior_shading_factor_winter = 0.99
+    hpxml.windows[2].interior_shading_factor_summer = 0.0
+    hpxml.windows[2].interior_shading_factor_winter = 0.5
+    hpxml.windows[3].interior_shading_factor_summer = 1.0
+    hpxml.windows[3].interior_shading_factor_winter = 1.0
   elsif ['invalid_files/invalid-window-interior-shading.xml'].include? hpxml_file
-    for n in [0, 4]
-      hpxml.windows[n].interior_shading_factor_summer = 0.85
-      hpxml.windows[n].interior_shading_factor_winter = 0.7
-    end
+    hpxml.windows[0].interior_shading_factor_summer = 0.85
+    hpxml.windows[0].interior_shading_factor_winter = 0.7
   elsif ['base-enclosure-windows-none.xml'].include? hpxml_file
     hpxml.windows.clear()
   elsif ['invalid_files/only-wall-tiny.xml'].include? hpxml_file
@@ -1477,111 +1443,94 @@ def set_hpxml_windows(hpxml_file, hpxml)
   elsif ['invalid_files/net-area-negative-wall.xml'].include? hpxml_file
     hpxml.windows[0].area = 1000
   elsif ['base-atticroof-conditioned.xml'].include? hpxml_file
-    hpxml.windows[0].area = 108 * 0.33
-    hpxml.windows[1].area = 108 * 0.33
-    hpxml.windows[2].area = 108 * 0.33
-    hpxml.windows[3].area = 108 * 0.33
-    hpxml.windows[4].area = 108 * 0.67
-    hpxml.windows[5].area = 108 * 0.67
-    hpxml.windows[6].area = 108 * 0.67
-    hpxml.windows[7].area = 108 * 0.67
+    hpxml.windows[0].area = 108
+    hpxml.windows[1].area = 108
+    hpxml.windows[2].area = 108
+    hpxml.windows[3].area = 108
     hpxml.windows.add(id: 'AtticGableWindowEast',
                       area: 12,
                       azimuth: 90,
                       ufactor: 0.33,
                       shgc: 0.45,
-                      operable: false,
+                      fraction_operable: 0.0,
                       wall_idref: 'WallAtticGableCond')
     hpxml.windows.add(id: 'AtticGableWindowWest',
                       area: 62,
                       azimuth: 270,
                       ufactor: 0.3,
                       shgc: 0.45,
-                      operable: false,
+                      fraction_operable: 0.0,
                       wall_idref: 'WallAtticGableCond')
   elsif ['base-atticroof-cathedral.xml'].include? hpxml_file
-    hpxml.windows[0].area = 108 * 0.33
-    hpxml.windows[1].area = 108 * 0.33
-    hpxml.windows[2].area = 108 * 0.33
-    hpxml.windows[3].area = 108 * 0.33
-    hpxml.windows[4].area = 108 * 0.67
-    hpxml.windows[5].area = 108 * 0.67
-    hpxml.windows[6].area = 108 * 0.67
-    hpxml.windows[7].area = 108 * 0.67
+    hpxml.windows[0].area = 108
+    hpxml.windows[1].area = 108
+    hpxml.windows[2].area = 108
+    hpxml.windows[3].area = 108
     hpxml.windows.add(id: 'AtticGableWindowEast',
                       area: 12,
                       azimuth: 90,
                       ufactor: 0.33,
                       shgc: 0.45,
-                      operable: false,
+                      fraction_operable: 0.0,
                       wall_idref: 'WallAtticGable')
     hpxml.windows.add(id: 'AtticGableWindowWest',
                       area: 12,
                       azimuth: 270,
                       ufactor: 0.33,
                       shgc: 0.45,
-                      operable: false,
+                      fraction_operable: 0.0,
                       wall_idref: 'WallAtticGable')
   elsif ['base-enclosure-garage.xml'].include? hpxml_file
-    hpxml.windows.delete_at(6)
     hpxml.windows.delete_at(2)
     hpxml.windows.add(id: 'GarageWindowEast',
                       area: 12,
                       azimuth: 90,
                       ufactor: 0.33,
                       shgc: 0.45,
-                      operable: false,
+                      fraction_operable: 0.0,
                       wall_idref: 'WallGarageExterior')
   elsif ['base-enclosure-2stories.xml'].include? hpxml_file
-    hpxml.windows[0].area = 216 * 0.33
-    hpxml.windows[1].area = 216 * 0.33
-    hpxml.windows[2].area = 144 * 0.33
-    hpxml.windows[3].area = 144 * 0.33
-    hpxml.windows[4].area = 216 * 0.67
-    hpxml.windows[5].area = 216 * 0.67
-    hpxml.windows[6].area = 144 * 0.67
-    hpxml.windows[7].area = 144 * 0.67
+    hpxml.windows[0].area = 216
+    hpxml.windows[1].area = 216
+    hpxml.windows[2].area = 144
+    hpxml.windows[3].area = 144
   elsif ['base-enclosure-2stories-garage'].include? hpxml_file
-    hpxml.windows[0].area = 168 * 0.33
-    hpxml.windows[1].area = 216 * 0.33
-    hpxml.windows[2].area = 144 * 0.33
-    hpxml.windows[3].area = 96 * 0.33
-    hpxml.windows[4].area = 168 * 0.67
-    hpxml.windows[5].area = 216 * 0.67
-    hpxml.windows[6].area = 144 * 0.67
-    hpxml.windows[7].area = 96 * 0.67
+    hpxml.windows[0].area = 168
+    hpxml.windows[1].area = 216
+    hpxml.windows[2].area = 144
+    hpxml.windows[3].area = 96
   elsif ['base-foundation-unconditioned-basement-above-grade.xml'].include? hpxml_file
     hpxml.windows.add(id: 'FoundationWindowNorth',
                       area: 20,
                       azimuth: 0,
                       ufactor: 0.33,
                       shgc: 0.45,
-                      operable: false,
+                      fraction_operable: 0.0,
                       wall_idref: 'FoundationWall')
     hpxml.windows.add(id: 'FoundationWindowSouth',
                       area: 20,
                       azimuth: 180,
                       ufactor: 0.33,
                       shgc: 0.45,
-                      operable: false,
+                      fraction_operable: 0.0,
                       wall_idref: 'FoundationWall')
     hpxml.windows.add(id: 'FoundationWindowEast',
                       area: 10,
                       azimuth: 90,
                       ufactor: 0.33,
                       shgc: 0.45,
-                      operable: false,
+                      fraction_operable: 0.0,
                       wall_idref: 'FoundationWall')
     hpxml.windows.add(id: 'FoundationWindowWest',
                       area: 10,
                       azimuth: 270,
                       ufactor: 0.33,
                       shgc: 0.45,
-                      operable: false,
+                      fraction_operable: 0.0,
                       wall_idref: 'FoundationWall')
   elsif ['base-enclosure-adiabatic-surfaces.xml'].include? hpxml_file
-    for n in 1..hpxml.windows.size
-      hpxml.windows[n - 1].area *= 0.35
+    hpxml.windows.each do |window|
+      window.area *= 0.35
     end
   elsif ['invalid_files/unattached-window.xml'].include? hpxml_file
     hpxml.windows[0].wall_idref = 'foobar'
@@ -1601,57 +1550,45 @@ def set_hpxml_windows(hpxml_file, hpxml)
                       azimuth: 0,
                       ufactor: 0.33,
                       shgc: 0.45,
-                      operable: false,
+                      fraction_operable: 0.0,
                       wall_idref: 'FoundationWall3')
   elsif ['invalid_files/invalid-window-height.xml'].include? hpxml_file
     hpxml.windows[2].overhangs_distance_to_bottom_of_window = hpxml.windows[2].overhangs_distance_to_top_of_window
   elsif ['base-enclosure-walltypes.xml'].include? hpxml_file
     hpxml.windows.clear
-    wallnum = 1
-    { 'Operable' => 0.33, 'Inoperable' => 0.67 }.each do |mode, frac|
-      hpxml.windows.add(id: "WindowNorth#{mode}",
-                        area: 108 * frac / 8,
-                        azimuth: 0,
-                        ufactor: 0.33,
-                        shgc: 0.45,
-                        operable: (mode == 'Operable'),
-                        wall_idref: "Wall#{wallnum}")
-      wallnum += 1
-      hpxml.windows.add(id: "WindowSouth#{mode}",
-                        area: 108 * frac / 8,
-                        azimuth: 180,
-                        ufactor: 0.33,
-                        shgc: 0.45,
-                        operable: (mode == 'Operable'),
-                        wall_idref: "Wall#{wallnum}")
-      wallnum += 1
-      hpxml.windows.add(id: "WindowEast#{mode}",
-                        area: 72 * frac / 8,
-                        azimuth: 90,
-                        ufactor: 0.33,
-                        shgc: 0.45,
-                        operable: (mode == 'Operable'),
-                        wall_idref: "Wall#{wallnum}")
-      wallnum += 1
-      hpxml.windows.add(id: "WindowWest#{mode}",
-                        area: 72 * frac / 8,
-                        azimuth: 270,
-                        ufactor: 0.33,
-                        shgc: 0.45,
-                        operable: (mode == 'Operable'),
-                        wall_idref: "Wall#{wallnum}")
-      wallnum += 1
-    end
+    hpxml.windows.add(id: 'WindowNorth',
+                      area: 108 / 8,
+                      azimuth: 0,
+                      ufactor: 0.33,
+                      shgc: 0.45,
+                      fraction_operable: 0.33,
+                      wall_idref: 'Wall1')
+    hpxml.windows.add(id: 'WindowSouth',
+                      area: 108 / 8,
+                      azimuth: 180,
+                      ufactor: 0.33,
+                      shgc: 0.45,
+                      fraction_operable: 0.33,
+                      wall_idref: 'Wall2')
+    hpxml.windows.add(id: 'WindowEast',
+                      area: 72 / 8,
+                      azimuth: 90,
+                      ufactor: 0.33,
+                      shgc: 0.45,
+                      fraction_operable: 0.33,
+                      wall_idref: 'Wall3')
+    hpxml.windows.add(id: 'WindowWest',
+                      area: 72 / 8,
+                      azimuth: 270,
+                      ufactor: 0.33,
+                      shgc: 0.45,
+                      fraction_operable: 0.33,
+                      wall_idref: 'Wall4')
   elsif ['base-misc-defaults.xml'].include? hpxml_file
-    for i in 0..3
-      hpxml.windows[i].id.gsub!('Operable', '')
-      hpxml.windows[i].area += hpxml.windows[i + 4].area
-      hpxml.windows[i].interior_shading_factor_summer = nil
-      hpxml.windows[i].interior_shading_factor_winter = nil
-      hpxml.windows[i].operable = nil
-    end
-    for i in 1..4
-      hpxml.windows.delete_at(-1)
+    hpxml.windows.each do |window|
+      window.interior_shading_factor_summer = nil
+      window.interior_shading_factor_winter = nil
+      window.fraction_operable = nil
     end
   end
 end
@@ -2285,10 +2222,12 @@ def set_hpxml_hvac_distributions(hpxml_file, hpxml)
                                  distribution_system_type: HPXML::HVACDistributionTypeAir)
     hpxml.hvac_distributions[0].duct_leakage_measurements.add(duct_type: HPXML::DuctTypeSupply,
                                                               duct_leakage_units: HPXML::UnitsCFM25,
-                                                              duct_leakage_value: 75)
+                                                              duct_leakage_value: 75,
+                                                              duct_leakage_total_or_to_outside: HPXML::DuctLeakageToOutside)
     hpxml.hvac_distributions[0].duct_leakage_measurements.add(duct_type: HPXML::DuctTypeReturn,
                                                               duct_leakage_units: HPXML::UnitsCFM25,
-                                                              duct_leakage_value: 25)
+                                                              duct_leakage_value: 25,
+                                                              duct_leakage_total_or_to_outside: HPXML::DuctLeakageToOutside)
     hpxml.hvac_distributions[0].ducts.add(duct_type: HPXML::DuctTypeSupply,
                                           duct_insulation_r_value: 4,
                                           duct_location: HPXML::LocationAtticUnvented,
@@ -2313,10 +2252,12 @@ def set_hpxml_hvac_distributions(hpxml_file, hpxml)
                                  distribution_system_type: HPXML::HVACDistributionTypeAir)
     hpxml.hvac_distributions[-1].duct_leakage_measurements.add(duct_type: HPXML::DuctTypeSupply,
                                                                duct_leakage_units: HPXML::UnitsCFM25,
-                                                               duct_leakage_value: 75)
+                                                               duct_leakage_value: 75,
+                                                               duct_leakage_total_or_to_outside: HPXML::DuctLeakageToOutside)
     hpxml.hvac_distributions[-1].duct_leakage_measurements.add(duct_type: HPXML::DuctTypeReturn,
                                                                duct_leakage_units: HPXML::UnitsCFM25,
-                                                               duct_leakage_value: 25)
+                                                               duct_leakage_value: 25,
+                                                               duct_leakage_total_or_to_outside: HPXML::DuctLeakageToOutside)
     hpxml.hvac_distributions[-1].ducts.add(duct_type: HPXML::DuctTypeSupply,
                                            duct_insulation_r_value: 4,
                                            duct_location: HPXML::LocationAtticUnvented,
@@ -2347,10 +2288,12 @@ def set_hpxml_hvac_distributions(hpxml_file, hpxml)
                                  distribution_system_type: HPXML::HVACDistributionTypeAir)
     hpxml.hvac_distributions[-1].duct_leakage_measurements.add(duct_type: HPXML::DuctTypeSupply,
                                                                duct_leakage_units: HPXML::UnitsCFM25,
-                                                               duct_leakage_value: 75)
+                                                               duct_leakage_value: 75,
+                                                               duct_leakage_total_or_to_outside: HPXML::DuctLeakageToOutside)
     hpxml.hvac_distributions[-1].duct_leakage_measurements.add(duct_type: HPXML::DuctTypeReturn,
                                                                duct_leakage_units: HPXML::UnitsCFM25,
-                                                               duct_leakage_value: 25)
+                                                               duct_leakage_value: 25,
+                                                               duct_leakage_total_or_to_outside: HPXML::DuctLeakageToOutside)
     hpxml.hvac_distributions[-1].ducts.add(duct_type: HPXML::DuctTypeSupply,
                                            duct_insulation_r_value: 4,
                                            duct_location: HPXML::LocationAtticUnvented,
@@ -2363,10 +2306,12 @@ def set_hpxml_hvac_distributions(hpxml_file, hpxml)
                                  distribution_system_type: HPXML::HVACDistributionTypeAir)
     hpxml.hvac_distributions[-1].duct_leakage_measurements.add(duct_type: HPXML::DuctTypeSupply,
                                                                duct_leakage_units: HPXML::UnitsCFM25,
-                                                               duct_leakage_value: 75)
+                                                               duct_leakage_value: 75,
+                                                               duct_leakage_total_or_to_outside: HPXML::DuctLeakageToOutside)
     hpxml.hvac_distributions[-1].duct_leakage_measurements.add(duct_type: HPXML::DuctTypeReturn,
                                                                duct_leakage_units: HPXML::UnitsCFM25,
-                                                               duct_leakage_value: 25)
+                                                               duct_leakage_value: 25,
+                                                               duct_leakage_total_or_to_outside: HPXML::DuctLeakageToOutside)
     hpxml.hvac_distributions[-1].ducts.add(duct_type: HPXML::DuctTypeSupply,
                                            duct_insulation_r_value: 4,
                                            duct_location: HPXML::LocationAtticUnvented,
@@ -2379,10 +2324,12 @@ def set_hpxml_hvac_distributions(hpxml_file, hpxml)
                                  distribution_system_type: HPXML::HVACDistributionTypeAir)
     hpxml.hvac_distributions[-1].duct_leakage_measurements.add(duct_type: HPXML::DuctTypeSupply,
                                                                duct_leakage_units: HPXML::UnitsCFM25,
-                                                               duct_leakage_value: 75)
+                                                               duct_leakage_value: 75,
+                                                               duct_leakage_total_or_to_outside: HPXML::DuctLeakageToOutside)
     hpxml.hvac_distributions[-1].duct_leakage_measurements.add(duct_type: HPXML::DuctTypeReturn,
                                                                duct_leakage_units: HPXML::UnitsCFM25,
-                                                               duct_leakage_value: 25)
+                                                               duct_leakage_value: 25,
+                                                               duct_leakage_total_or_to_outside: HPXML::DuctLeakageToOutside)
     hpxml.hvac_distributions[-1].ducts.add(duct_type: HPXML::DuctTypeSupply,
                                            duct_insulation_r_value: 4,
                                            duct_location: HPXML::LocationAtticUnvented,
@@ -2395,10 +2342,12 @@ def set_hpxml_hvac_distributions(hpxml_file, hpxml)
                                  distribution_system_type: HPXML::HVACDistributionTypeAir)
     hpxml.hvac_distributions[-1].duct_leakage_measurements.add(duct_type: HPXML::DuctTypeSupply,
                                                                duct_leakage_units: HPXML::UnitsCFM25,
-                                                               duct_leakage_value: 75)
+                                                               duct_leakage_value: 75,
+                                                               duct_leakage_total_or_to_outside: HPXML::DuctLeakageToOutside)
     hpxml.hvac_distributions[-1].duct_leakage_measurements.add(duct_type: HPXML::DuctTypeReturn,
                                                                duct_leakage_units: HPXML::UnitsCFM25,
-                                                               duct_leakage_value: 25)
+                                                               duct_leakage_value: 25,
+                                                               duct_leakage_total_or_to_outside: HPXML::DuctLeakageToOutside)
     hpxml.hvac_distributions[-1].ducts.add(duct_type: HPXML::DuctTypeSupply,
                                            duct_insulation_r_value: 4,
                                            duct_location: HPXML::LocationAtticUnvented,
@@ -2435,10 +2384,12 @@ def set_hpxml_hvac_distributions(hpxml_file, hpxml)
     hpxml.hvac_distributions[0].duct_leakage_measurements.clear()
     hpxml.hvac_distributions[0].duct_leakage_measurements.add(duct_type: HPXML::DuctTypeSupply,
                                                               duct_leakage_units: HPXML::UnitsPercent,
-                                                              duct_leakage_value: 0.1)
+                                                              duct_leakage_value: 0.1,
+                                                              duct_leakage_total_or_to_outside: HPXML::DuctLeakageToOutside)
     hpxml.hvac_distributions[0].duct_leakage_measurements.add(duct_type: HPXML::DuctTypeReturn,
                                                               duct_leakage_units: HPXML::UnitsPercent,
-                                                              duct_leakage_value: 0.05)
+                                                              duct_leakage_value: 0.05,
+                                                              duct_leakage_total_or_to_outside: HPXML::DuctLeakageToOutside)
   elsif ['base-hvac-undersized.xml'].include? hpxml_file
     hpxml.hvac_distributions[0].duct_leakage_measurements[0].duct_leakage_value /= 10.0
     hpxml.hvac_distributions[0].duct_leakage_measurements[1].duct_leakage_value /= 10.0
@@ -2827,7 +2778,7 @@ def set_hpxml_water_heating_systems(hpxml_file, hpxml)
     if ['base-misc-defaults.xml'].include? hpxml_file
       water_heating_system.temperature = nil
     else
-      water_heating_system.temperature = Waterheater.get_default_hot_water_temperature(hpxml.header.eri_calculation_version)
+      water_heating_system.temperature = Waterheater.get_default_hot_water_temperature(Constants.ERIVersions[-1])
     end
   end
 end
@@ -3210,9 +3161,9 @@ end
 
 def set_hpxml_misc_load_schedule(hpxml_file, hpxml)
   if ['base.xml'].include? hpxml_file
-    hpxml.set_misc_loads_schedule(weekday_fractions: '0.04, 0.037, 0.037, 0.036, 0.033, 0.036, 0.043, 0.047, 0.034, 0.023, 0.024, 0.025, 0.024, 0.028, 0.031, 0.032, 0.039, 0.053, 0.063, 0.067, 0.071, 0.069, 0.059, 0.05',
-                                  weekend_fractions: '0.04, 0.037, 0.037, 0.036, 0.033, 0.036, 0.043, 0.047, 0.034, 0.023, 0.024, 0.025, 0.024, 0.028, 0.031, 0.032, 0.039, 0.053, 0.063, 0.067, 0.071, 0.069, 0.059, 0.05',
-                                  monthly_multipliers: '1.248, 1.257, 0.993, 0.989, 0.993, 0.827, 0.821, 0.821, 0.827, 0.99, 0.987, 1.248')
+    hpxml.misc_loads_schedule.weekday_fractions = '0.04, 0.037, 0.037, 0.036, 0.033, 0.036, 0.043, 0.047, 0.034, 0.023, 0.024, 0.025, 0.024, 0.028, 0.031, 0.032, 0.039, 0.053, 0.063, 0.067, 0.071, 0.069, 0.059, 0.05'
+    hpxml.misc_loads_schedule.weekend_fractions = '0.04, 0.037, 0.037, 0.036, 0.033, 0.036, 0.043, 0.047, 0.034, 0.023, 0.024, 0.025, 0.024, 0.028, 0.031, 0.032, 0.039, 0.053, 0.063, 0.067, 0.071, 0.069, 0.059, 0.05'
+    hpxml.misc_loads_schedule.monthly_multipliers = '1.248, 1.257, 0.993, 0.989, 0.993, 0.827, 0.821, 0.821, 0.827, 0.99, 0.987, 1.248'
   elsif ['base-misc-defaults.xml'].include? hpxml_file
     hpxml.misc_loads_schedule.weekday_fractions = nil
     hpxml.misc_loads_schedule.weekend_fractions = nil

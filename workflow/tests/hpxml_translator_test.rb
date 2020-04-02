@@ -69,32 +69,63 @@ class HPXMLTest < MiniTest::Test
     os_cli = OpenStudio.getOpenStudioCLI
     rb_path = File.join(File.dirname(__FILE__), '..', 'run_simulation.rb')
     xml = File.join(File.dirname(__FILE__), '..', 'sample_files', 'base.xml')
-    command = "#{os_cli} #{rb_path} -x #{xml}"
+    command = "#{os_cli} #{rb_path} -x #{xml} --debug"
     system(command, err: File::NULL)
+
+    # Check for output files
     sql_path = File.join(File.dirname(xml), 'run', 'eplusout.sql')
     assert(File.exist? sql_path)
+    csv_output_path = File.join(File.dirname(xml), 'run', 'results_annual.csv')
+    assert(File.exist? csv_output_path)
+
+    # Check for debug files
+    osm_path = File.join(File.dirname(xml), 'run', 'in.osm')
+    assert(File.exist? osm_path)
+    hpxml_defaults_path = File.join(File.dirname(xml), 'run', 'in.xml')
+    assert(File.exist? hpxml_defaults_path)
   end
 
   def test_template_osw
     # Check that simulation works using template.osw
+    require 'json'
+
     os_cli = OpenStudio.getOpenStudioCLI
     osw_path = File.join(File.dirname(__FILE__), '..', 'template.osw')
+
+    # Create derivative OSW for testing
+    osw_path_test = osw_path.gsub('.osw', '_test.osw')
+    FileUtils.cp(osw_path, osw_path_test)
+
+    # Turn on debug mode
+    json = JSON.parse(File.read(osw_path_test), symbolize_names: true)
+    json[:steps][0][:arguments][:debug] = true
+
     if Dir.exist? File.join(File.dirname(__FILE__), '..', '..', 'project')
-      # CI checks out the repo as "project", so need to update the OSW
-      osw_path_ci = osw_path.gsub('.osw', '2.osw')
-      FileUtils.cp(osw_path, osw_path_ci)
-      require 'json'
-      json = JSON.parse(File.read(osw_path_ci), symbolize_names: true)
+      # CI checks out the repo as "project", so update dir name
       json[:steps][0][:measure_dir_name] = 'project'
-      File.open(osw_path_ci, 'w') do |f|
-        f.write(JSON.pretty_generate(json))
-      end
-      osw_path = osw_path_ci
     end
-    command = "#{os_cli} run -w #{osw_path}"
+
+    File.open(osw_path_test, 'w') do |f|
+      f.write(JSON.pretty_generate(json))
+    end
+
+    command = "#{os_cli} run -w #{osw_path_test}"
     system(command, err: File::NULL)
-    sql_path = File.join(File.dirname(osw_path), 'run', 'eplusout.sql')
+
+    # Check for output files
+    sql_path = File.join(File.dirname(osw_path_test), 'run', 'eplusout.sql')
     assert(File.exist? sql_path)
+    csv_output_path = File.join(File.dirname(osw_path_test), 'run', 'results_annual.csv')
+    assert(File.exist? csv_output_path)
+
+    # Check for debug files
+    osm_path = File.join(File.dirname(osw_path_test), 'run', 'in.osm')
+    assert(File.exist? osm_path)
+    hpxml_defaults_path = File.join(File.dirname(osw_path_test), 'run', 'in.xml')
+    assert(File.exist? hpxml_defaults_path)
+
+    # Cleanup
+    File.delete(osw_path_test)
   end
 
   def test_weather_cache
@@ -110,7 +141,7 @@ class HPXMLTest < MiniTest::Test
     this_dir = File.dirname(__FILE__)
     sample_files_dir = File.join(this_dir, '..', 'sample_files')
 
-    expected_error_msgs = { 'bad-wmo.xml' => ["Weather station WMO '999999' could not be found in weather/data.csv."],
+    expected_error_msgs = { 'bad-wmo.xml' => ["Weather station WMO '999999' could not be found in"],
                             'bad-site-neighbor-azimuth.xml' => ['A neighbor building has an azimuth (145) not equal to the azimuth of any wall.'],
                             'cfis-with-hydronic-distribution.xml' => ["Attached HVAC distribution system 'HVACDistribution' cannot be hydronic for ventilation fan 'MechanicalVentilation'."],
                             'clothes-dryer-location.xml' => ["ClothesDryer location is 'garage' but building does not have this location specified."],
@@ -136,8 +167,8 @@ class HPXMLTest < MiniTest::Test
                             'invalid-relatedhvac-dhw-indirect.xml' => ["RelatedHVACSystem 'HeatingSystem_bad' not found for water heating system 'WaterHeater'"],
                             'invalid-relatedhvac-desuperheater.xml' => ["RelatedHVACSystem 'CoolingSystem_bad' not found for water heating system 'WaterHeater'."],
                             'invalid-timestep.xml' => ['Timestep (45) must be one of: 60, 30, 20, 15, 12, 10, 6, 5, 4, 3, 2, 1.'],
-                            'invalid-window-height.xml' => ["For Window 'WindowEastOperable', overhangs distance to bottom (2.0) must be greater than distance to top (2.0)."],
-                            'invalid-window-interior-shading.xml' => ["SummerShadingCoefficient (0.85) must be less than or equal to WinterShadingCoefficient (0.7) for window 'WindowNorthOperable'."],
+                            'invalid-window-height.xml' => ["For Window 'WindowEast', overhangs distance to bottom (2.0) must be greater than distance to top (2.0)."],
+                            'invalid-window-interior-shading.xml' => ["SummerShadingCoefficient (0.85) must be less than or equal to WinterShadingCoefficient (0.7) for window 'WindowNorth'."],
                             'lighting-fractions.xml' => ['Sum of fractions of interior lighting (1.05) is greater than 1.'],
                             'missing-elements.xml' => ['Expected [1] element(s) but found 0 element(s) for xpath: /HPXML/Building/BuildingDetails/BuildingSummary/BuildingConstruction/NumberofConditionedFloors',
                                                        'Expected [1] element(s) but found 0 element(s) for xpath: /HPXML/Building/BuildingDetails/BuildingSummary/BuildingConstruction/ConditionedFloorArea'],
@@ -158,7 +189,7 @@ class HPXMLTest < MiniTest::Test
                             'unattached-hvac-distribution.xml' => ["Attached HVAC distribution system 'foobar' not found for HVAC system 'HeatingSystem'."],
                             'unattached-skylight.xml' => ["Attached roof 'foobar' not found for skylight 'SkylightNorth'."],
                             'unattached-solar-thermal-system.xml' => ["Attached water heating system 'foobar' not found for solar thermal system 'SolarThermalSystem'."],
-                            'unattached-window.xml' => ["Attached wall 'foobar' not found for window 'WindowNorthOperable'."],
+                            'unattached-window.xml' => ["Attached wall 'foobar' not found for window 'WindowNorth'."],
                             'water-heater-location.xml' => ["WaterHeatingSystem location is 'crawlspace - vented' but building does not have this location specified."],
                             'water-heater-location-other.xml' => ['Expected [1] element(s) but found 0 element(s) for xpath: /HPXML/Building/BuildingDetails/Systems/WaterHeating/WaterHeatingSystem[Location='],
                             'mismatched-slab-and-foundation-wall.xml' => ["Foundation wall 'FoundationWall' is adjacent to 'basement - conditioned' but no corresponding slab was found adjacent to"],
@@ -423,8 +454,8 @@ class HPXMLTest < MiniTest::Test
     args = {}
     args['hpxml_path'] = xml
     args['weather_dir'] = 'weather'
-    args['epw_output_path'] = File.absolute_path(File.join(rundir, 'in.epw'))
-    args['osm_output_path'] = File.absolute_path(File.join(rundir, 'in.osm')) # debug
+    args['output_dir'] = File.absolute_path(rundir)
+    args['debug'] = true
     update_args_hash(measures, measure_subdir, args)
 
     # Add reporting measure to workflow
@@ -636,8 +667,8 @@ class HPXMLTest < MiniTest::Test
     assert(File.exist? sql_path)
 
     sqlFile = OpenStudio::SqlFile.new(sql_path, false)
-    hpxml = HPXML.new(hpxml_path: hpxml_path)
-    hpxml.collapse_enclosure_surfaces([:operable])
+    hpxml_defaults_path = File.join(rundir, 'in.xml')
+    hpxml = HPXML.new(hpxml_path: hpxml_defaults_path)
 
     # Timestep
     timestep = hpxml.header.timestep
