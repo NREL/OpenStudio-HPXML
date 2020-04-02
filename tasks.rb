@@ -448,13 +448,13 @@ end
 
 def set_hpxml_header(hpxml_file, hpxml)
   if ['base.xml'].include? hpxml_file
-    hpxml.set_header(xml_type: 'HPXML',
-                     xml_generated_by: 'Rakefile',
-                     transaction: 'create',
-                     building_id: 'MyBuilding',
-                     event_type: 'proposed workscope',
-                     created_date_and_time: Time.new(2000, 1, 1).strftime('%Y-%m-%dT%H:%M:%S%:z'), # Hard-code to prevent diffs
-                     timestep: 60)
+    hpxml.header.xml_type = 'HPXML'
+    hpxml.header.xml_generated_by = 'Rakefile'
+    hpxml.header.transaction = 'create'
+    hpxml.header.building_id = 'MyBuilding'
+    hpxml.header.event_type = 'proposed workscope'
+    hpxml.header.created_date_and_time = Time.new(2000, 1, 1).strftime('%Y-%m-%dT%H:%M:%S%:z') # Hard-code to prevent diffs
+    hpxml.header.timestep = 60
   elsif ['base-misc-timestep-10-mins.xml'].include? hpxml_file
     hpxml.header.timestep = 10
   elsif ['invalid_files/invalid-timestep.xml'].include? hpxml_file
@@ -466,7 +466,7 @@ end
 
 def set_hpxml_site(hpxml_file, hpxml)
   if ['base.xml'].include? hpxml_file
-    hpxml.set_site(fuels: [HPXML::FuelTypeElectricity, HPXML::FuelTypeNaturalGas])
+    hpxml.site.fuels = [HPXML::FuelTypeElectricity, HPXML::FuelTypeNaturalGas]
   elsif ['base-hvac-none-no-fuel-access.xml'].include? hpxml_file
     hpxml.site.fuels = [HPXML::FuelTypeElectricity]
   end
@@ -486,12 +486,12 @@ end
 
 def set_hpxml_building_construction(hpxml_file, hpxml)
   if ['base.xml'].include? hpxml_file
-    hpxml.set_building_construction(residential_facility_type: HPXML::ResidentialTypeSFD,
-                                    number_of_conditioned_floors: 2,
-                                    number_of_conditioned_floors_above_grade: 1,
-                                    number_of_bedrooms: 3,
-                                    conditioned_floor_area: 2700,
-                                    conditioned_building_volume: 2700 * 8)
+    hpxml.building_construction.residential_facility_type = HPXML::ResidentialTypeSFD
+    hpxml.building_construction.number_of_conditioned_floors = 2
+    hpxml.building_construction.number_of_conditioned_floors_above_grade = 1
+    hpxml.building_construction.number_of_bedrooms = 3
+    hpxml.building_construction.conditioned_floor_area = 2700
+    hpxml.building_construction.conditioned_building_volume = 2700 * 8
   elsif ['base-enclosure-beds-1.xml'].include? hpxml_file
     hpxml.building_construction.number_of_bedrooms = 1
   elsif ['base-enclosure-beds-2.xml'].include? hpxml_file
@@ -537,30 +537,30 @@ end
 
 def set_hpxml_climate_and_risk_zones(hpxml_file, hpxml)
   if ['base.xml'].include? hpxml_file
-    hpxml.set_climate_and_risk_zones(iecc2006: '5B',
-                                     weather_station_id: 'WeatherStation',
-                                     weather_station_name: 'Denver, CO',
-                                     weather_station_wmo: '725650')
+    hpxml.climate_and_risk_zones.iecc2006 = '5B'
+    hpxml.climate_and_risk_zones.weather_station_id = 'WeatherStation'
+    hpxml.climate_and_risk_zones.weather_station_name = 'Denver, CO'
+    hpxml.climate_and_risk_zones.weather_station_wmo = '725650'
   elsif ['base-location-baltimore-md.xml'].include? hpxml_file
-    hpxml.set_climate_and_risk_zones(iecc2006: '4A',
-                                     weather_station_id: 'WeatherStation',
-                                     weather_station_name: 'Baltimore, MD',
-                                     weather_station_wmo: '724060')
+    hpxml.climate_and_risk_zones.iecc2006 = '4A'
+    hpxml.climate_and_risk_zones.weather_station_id = 'WeatherStation'
+    hpxml.climate_and_risk_zones.weather_station_name = 'Baltimore, MD'
+    hpxml.climate_and_risk_zones.weather_station_wmo = '724060'
   elsif ['base-location-dallas-tx.xml'].include? hpxml_file
-    hpxml.set_climate_and_risk_zones(iecc2006: '3A',
-                                     weather_station_id: 'WeatherStation',
-                                     weather_station_name: 'Dallas, TX',
-                                     weather_station_wmo: '722590')
+    hpxml.climate_and_risk_zones.iecc2006 = '3A'
+    hpxml.climate_and_risk_zones.weather_station_id = 'WeatherStation'
+    hpxml.climate_and_risk_zones.weather_station_name = 'Dallas, TX'
+    hpxml.climate_and_risk_zones.weather_station_wmo = '722590'
   elsif ['base-location-duluth-mn.xml'].include? hpxml_file
-    hpxml.set_climate_and_risk_zones(iecc2006: '7',
-                                     weather_station_id: 'WeatherStation',
-                                     weather_station_name: 'Duluth, MN',
-                                     weather_station_wmo: '727450')
+    hpxml.climate_and_risk_zones.iecc2006 = '7'
+    hpxml.climate_and_risk_zones.weather_station_id = 'WeatherStation'
+    hpxml.climate_and_risk_zones.weather_station_name = 'Duluth, MN'
+    hpxml.climate_and_risk_zones.weather_station_wmo = '727450'
   elsif ['base-location-miami-fl.xml'].include? hpxml_file
-    hpxml.set_climate_and_risk_zones(iecc2006: '1A',
-                                     weather_station_id: 'WeatherStation',
-                                     weather_station_name: 'Miami, FL',
-                                     weather_station_wmo: '722020')
+    hpxml.climate_and_risk_zones.iecc2006 = '1A'
+    hpxml.climate_and_risk_zones.weather_station_id = 'WeatherStation'
+    hpxml.climate_and_risk_zones.weather_station_name = 'Miami, FL'
+    hpxml.climate_and_risk_zones.weather_station_wmo = '722020'
   elsif ['base-location-epw-filename.xml'].include? hpxml_file
     hpxml.climate_and_risk_zones.weather_station_wmo = nil
     hpxml.climate_and_risk_zones.weather_station_epw_filename = 'USA_CO_Denver.Intl.AP.725650_TMY3.epw'
@@ -3275,9 +3275,9 @@ end
 
 def set_hpxml_misc_load_schedule(hpxml_file, hpxml)
   if ['base.xml'].include? hpxml_file
-    hpxml.set_misc_loads_schedule(weekday_fractions: '0.04, 0.037, 0.037, 0.036, 0.033, 0.036, 0.043, 0.047, 0.034, 0.023, 0.024, 0.025, 0.024, 0.028, 0.031, 0.032, 0.039, 0.053, 0.063, 0.067, 0.071, 0.069, 0.059, 0.05',
-                                  weekend_fractions: '0.04, 0.037, 0.037, 0.036, 0.033, 0.036, 0.043, 0.047, 0.034, 0.023, 0.024, 0.025, 0.024, 0.028, 0.031, 0.032, 0.039, 0.053, 0.063, 0.067, 0.071, 0.069, 0.059, 0.05',
-                                  monthly_multipliers: '1.248, 1.257, 0.993, 0.989, 0.993, 0.827, 0.821, 0.821, 0.827, 0.99, 0.987, 1.248')
+    hpxml.misc_loads_schedule.weekday_fractions = '0.04, 0.037, 0.037, 0.036, 0.033, 0.036, 0.043, 0.047, 0.034, 0.023, 0.024, 0.025, 0.024, 0.028, 0.031, 0.032, 0.039, 0.053, 0.063, 0.067, 0.071, 0.069, 0.059, 0.05'
+    hpxml.misc_loads_schedule.weekend_fractions = '0.04, 0.037, 0.037, 0.036, 0.033, 0.036, 0.043, 0.047, 0.034, 0.023, 0.024, 0.025, 0.024, 0.028, 0.031, 0.032, 0.039, 0.053, 0.063, 0.067, 0.071, 0.069, 0.059, 0.05'
+    hpxml.misc_loads_schedule.monthly_multipliers = '1.248, 1.257, 0.993, 0.989, 0.993, 0.827, 0.821, 0.821, 0.827, 0.99, 0.987, 1.248'
   elsif ['base-misc-defaults.xml'].include? hpxml_file
     hpxml.misc_loads_schedule.weekday_fractions = nil
     hpxml.misc_loads_schedule.weekend_fractions = nil
