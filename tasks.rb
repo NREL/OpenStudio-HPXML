@@ -181,6 +181,7 @@ def create_osws
     # 'base-misc-defaults.osw' => 'base.osw',
     # 'base-misc-lighting-none.osw' => 'base.osw', # Not going to support this
     'base-misc-timestep-10-mins.osw' => 'base.osw',
+    'base-misc-runperiod-1-month.osw' => 'base.osw',
     'base-misc-whole-house-fan.osw' => 'base.osw',
     'base-pv.osw' => 'base.osw',
     'base-site-neighbors.osw' => 'base.osw',
@@ -1348,7 +1349,7 @@ def get_values(osw_file, step)
     step.setArgument('mech_vent_fan_type', HPXML::MechVentTypeSupply)
   elsif ['base-misc-ceiling-fans.osw'].include? osw_file
     step.setArgument('ceiling_fan_cooling_setpoint_temp_offset', 0.5)
-    step.setArgument('ceiling_fan_quantity', 2)  
+    step.setArgument('ceiling_fan_quantity', 2)
   elsif ['base-misc-timestep-10-mins.osw'].include? osw_file
     step.setArgument('simulation_control_timestep', 10)
   elsif ['base-misc-runperiod-1-month.osw'].include? osw_file

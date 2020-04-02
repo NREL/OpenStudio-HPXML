@@ -2281,10 +2281,14 @@ class HPXMLFile
     hpxml.header.xml_generated_by = 'BuildResidentialHPXML'
     hpxml.header.transaction = 'create'
     hpxml.header.timestep = args[:timestep]
-    hpxml.header.begin_month = args[:begin_month]
-    hpxml.header.begin_day_of_month = args[:begin_day_of_month]
-    hpxml.header.end_month = args[:end_month]
-    hpxml.header.end_day_of_month = args[:end_day_of_month]
+    if not (args[:begin_month] == 1 && args[:begin_day_of_month] == 1)
+      hpxml.header.begin_month = args[:begin_month]
+      hpxml.header.begin_day_of_month = args[:begin_day_of_month]
+    end
+    if not (args[:end_month] == 12 && args[:end_day_of_month] == 31)
+      hpxml.header.end_month = args[:end_month]
+      hpxml.header.end_day_of_month = args[:end_day_of_month]
+    end
     hpxml.header.building_id = 'MyBuilding'
     hpxml.header.event_type = 'proposed workscope'
   end
