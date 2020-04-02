@@ -402,7 +402,7 @@
         <ClothesWasher>
           <SystemIdentifier id='ClothesWasher'/>
           <Location>living space</Location>
-          <ModifiedEnergyFactor>1.652</ModifiedEnergyFactor>
+          <ModifiedEnergyFactor>1.65</ModifiedEnergyFactor>
           <Usage>6.0</Usage>
           <RatedAnnualkWh>380.0</RatedAnnualkWh>
           <LabelElectricRate>0.12</LabelElectricRate>
@@ -414,7 +414,7 @@
           <SystemIdentifier id='ClothesDryer'/>
           <Location>living space</Location>
           <FuelType>electricity</FuelType>
-          <EnergyFactor>4.289</EnergyFactor>
+          <EnergyFactor>4.29</EnergyFactor>
           <ControlType>moisture</ControlType>
         </ClothesDryer>
         <Dishwasher>
