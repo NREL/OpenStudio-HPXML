@@ -56,6 +56,7 @@ def create_hpxmls
     'invalid_files/water-heater-location.xml' => 'base.xml',
     'invalid_files/water-heater-location-other.xml' => 'base.xml',
     'invalid_files/slab-zero-exposed-perimeter.xml' => 'base.xml',
+    'invalid_files/only-wall-tiny.xml' => 'base-atticroof-flat.xml',
 
     'base-appliances-gas.xml' => 'base.xml',
     'base-appliances-wood.xml' => 'base.xml',
@@ -135,6 +136,7 @@ def create_hpxmls
     'base-enclosure-walltypes.xml' => 'base.xml',
     'base-enclosure-windows-interior-shading.xml' => 'base.xml',
     'base-enclosure-windows-none.xml' => 'base.xml',
+    'base-enclosure-tiny-wall.xml' => 'base.xml',
     'base-foundation-multiple.xml' => 'base-foundation-unconditioned-basement.xml',
     'base-foundation-ambient.xml' => 'base.xml',
     'base-foundation-conditioned-basement-slab-insulation.xml' => 'base.xml',
@@ -812,7 +814,7 @@ def set_hpxml_walls(hpxml_file, hpxml)
                     area: 1200,
                     solar_absorptance: 0.7,
                     emittance: 0.92,
-                    insulation_assembly_r_value: 23)
+                    insulation_assembly_r_value: 23.0)
     hpxml.walls.add(id: 'WallAtticGable',
                     exterior_adjacent_to: HPXML::LocationOutside,
                     interior_adjacent_to: HPXML::LocationAtticUnvented,
@@ -828,6 +830,17 @@ def set_hpxml_walls(hpxml_file, hpxml)
   elsif ['base-atticroof-cathedral.xml'].include? hpxml_file
     hpxml.walls[1].interior_adjacent_to = HPXML::LocationLivingSpace
     hpxml.walls[1].insulation_assembly_r_value = 23.0
+  elsif ['base-enclosure-tiny-wall.xml'].include? hpxml_file
+    hpxml.walls.add(id: 'TinyWall',
+                    exterior_adjacent_to: HPXML::LocationOutside,
+                    interior_adjacent_to: HPXML::LocationLivingSpace,
+                    wall_type: HPXML::WallTypeWoodStud,
+                    area: 0.05,
+                    solar_absorptance: 0.7,
+                    emittance: 0.92,
+                    insulation_assembly_r_value: 20.0)
+  elsif ['invalid_files/only-wall-tiny.xml'].include? hpxml_file
+    hpxml.walls[0].area = 0.05
   elsif ['base-atticroof-conditioned.xml'].include? hpxml_file
     hpxml.walls.delete_at(1)
     hpxml.walls.add(id: 'WallAtticKneeWall',
@@ -1459,6 +1472,8 @@ def set_hpxml_windows(hpxml_file, hpxml)
     end
   elsif ['base-enclosure-windows-none.xml'].include? hpxml_file
     hpxml.windows.clear()
+  elsif ['invalid_files/only-wall-tiny.xml'].include? hpxml_file
+    hpxml.windows.clear()
   elsif ['invalid_files/net-area-negative-wall.xml'].include? hpxml_file
     hpxml.windows[0].area = 1000
   elsif ['base-atticroof-conditioned.xml'].include? hpxml_file
@@ -1692,6 +1707,8 @@ def set_hpxml_doors(hpxml_file, hpxml)
                     r_value: 4.4)
   elsif ['invalid_files/unattached-door.xml'].include? hpxml_file
     hpxml.doors[0].wall_idref = 'foobar'
+  elsif ['invalid_files/only-wall-tiny.xml'].include? hpxml_file
+    hpxml.doors.clear
   elsif ['base-enclosure-split-surfaces.xml'].include? hpxml_file
     area_adjustments = []
     for n in 1..hpxml.doors.size

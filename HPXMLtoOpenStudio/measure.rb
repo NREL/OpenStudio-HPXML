@@ -1065,6 +1065,9 @@ class OSModel
 
   def self.add_walls(runner, model, spaces)
     @hpxml.walls.each do |wall|
+      if (@hpxml.walls.size == 1) && (wall.net_area < 0.1)
+        fail "The only wall specified:#{wall.id} is smaller than 0.1 sqft."
+      end
       next if wall.net_area < 0.1 # skip surfaces smaller than 0.1 sqft
 
       if wall.azimuth.nil?
