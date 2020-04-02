@@ -4113,6 +4113,8 @@ class OSModel
       @cond_bsmnt_surfaces << surface
     elsif [HPXML::LocationOtherHeatedSpace, HPXML::LocationOtherMultifamilyBufferSpace, HPXML::LocationOtherNonFreezingSpace].include? exterior_adjacent_to
       add_otherside_coefficients(surface, exterior_adjacent_to, model, spaces)
+      surface.setSunExposure('NoSun')
+      surface.setWindExposure('NoWind')
     else
       surface.createAdjacentSurface(create_or_get_space(model, spaces, exterior_adjacent_to))
     end
@@ -4175,21 +4177,19 @@ class OSModel
     @mf_temp_sch_map[outside_space].setScheduleTypeLimits(schedule_type_limits)
 
     # Ems to actuate schedule
-    if @sensor_ia.nil?
-      @sensor_ia = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Zone Air Temperature')
-      @sensor_ia.setName('cond_zone_temp')
-      @sensor_ia.setKeyName(create_or_get_space(model, spaces, 'living space').name.to_s)
-    end
-    if @sensor_oa.nil?
-      @sensor_oa = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Site Outdoor Air Drybulb Temperature')
-      @sensor_oa.setName('oa_temp')
-    end
+    sensor_ia = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Zone Air Temperature')
+    sensor_ia.setName('cond_zone_temp')
+    sensor_ia.setKeyName(create_or_get_space(model, spaces, 'living space').name.to_s)
+
+    sensor_oa = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Site Outdoor Air Drybulb Temperature')
+    sensor_oa.setName('oa_temp')
+
     actuator = OpenStudio::Model::EnergyManagementSystemActuator.new(@mf_temp_sch_map[outside_space], 'Schedule:Constant', 'Schedule Value')
     actuator.setName("#{outside_space.gsub(' ', '_').gsub('-', '_')}_temp_sch")
 
     program = OpenStudio::Model::EnergyManagementSystemProgram.new(model)
     program.setName('Other Side Indoor Temperature Program')
-    program.addLine("Set #{actuator.name} = #{@sensor_ia.name} * #{indoor_weight} + #{@sensor_oa.name} * #{outdoor_weight}")
+    program.addLine("Set #{actuator.name} = #{sensor_ia.name} * #{indoor_weight} + #{sensor_oa.name} * #{outdoor_weight}")
     program.addLine("If #{actuator.name} < #{temp_min}")
     program.addLine("Set #{actuator.name} = #{temp_min}")
     program.addLine('EndIf')
