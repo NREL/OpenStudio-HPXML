@@ -2931,18 +2931,19 @@ def set_hpxml_clothes_washer(hpxml_file, hpxml)
   if ['base.xml'].include? hpxml_file
     hpxml.clothes_washers.add(id: 'ClothesWasher',
                               location: HPXML::LocationLivingSpace,
-                              modified_energy_factor: 0.8,
-                              rated_annual_kwh: 700.0,
-                              label_electric_rate: 0.10,
-                              label_gas_rate: 0.60,
-                              label_annual_gas_cost: 25.0,
-                              capacity: 3.0,
-                              usage: 7.0)
+                              integrated_modified_energy_factor: 1.21,
+                              rated_annual_kwh: 380,
+                              label_electric_rate: 0.12,
+                              label_gas_rate: 1.09,
+                              label_annual_gas_cost: 27,
+                              capacity: 3.2,
+                              usage: 6)
   elsif ['base-appliances-none.xml'].include? hpxml_file
     hpxml.clothes_washers.clear()
   elsif ['base-appliances-modified.xml'].include? hpxml_file
-    hpxml.clothes_washers[0].modified_energy_factor = nil
-    hpxml.clothes_washers[0].integrated_modified_energy_factor = 0.73
+    imef = hpxml.clothes_washers[0].integrated_modified_energy_factor
+    hpxml.clothes_washers[0].integrated_modified_energy_factor = nil
+    hpxml.clothes_washers[0].modified_energy_factor = HotWaterAndAppliances.calc_clothes_washer_mef_from_imef(imef).round(3)
   elsif ['base-foundation-unconditioned-basement.xml'].include? hpxml_file
     hpxml.clothes_washers[0].location = HPXML::LocationBasementUnconditioned
   elsif ['base-atticroof-conditioned.xml'].include? hpxml_file
@@ -2960,16 +2961,17 @@ def set_hpxml_clothes_dryer(hpxml_file, hpxml)
     hpxml.clothes_dryers.add(id: 'ClothesDryer',
                              location: HPXML::LocationLivingSpace,
                              fuel_type: HPXML::FuelTypeElectricity,
-                             energy_factor: 2.95,
+                             combined_energy_factor: 3.73,
                              control_type: HPXML::ClothesDryerControlTypeTimer)
   elsif ['base-appliances-none.xml'].include? hpxml_file
     hpxml.clothes_dryers.clear()
   elsif ['base-appliances-modified.xml'].include? hpxml_file
+    cef = hpxml.clothes_dryers[-1].combined_energy_factor
     hpxml.clothes_dryers.clear()
     hpxml.clothes_dryers.add(id: 'ClothesDryer',
                              location: HPXML::LocationLivingSpace,
                              fuel_type: HPXML::FuelTypeElectricity,
-                             combined_energy_factor: 2.62,
+                             energy_factor: HotWaterAndAppliances.calc_clothes_dryer_ef_from_cef(cef).round(3),
                              control_type: HPXML::ClothesDryerControlTypeMoisture)
   elsif ['base-appliances-gas.xml',
          'base-appliances-propane.xml',
@@ -2977,7 +2979,7 @@ def set_hpxml_clothes_dryer(hpxml_file, hpxml)
     hpxml.clothes_dryers.clear()
     hpxml.clothes_dryers.add(id: 'ClothesDryer',
                              location: HPXML::LocationLivingSpace,
-                             energy_factor: 2.67,
+                             combined_energy_factor: 3.30,
                              control_type: HPXML::ClothesDryerControlTypeMoisture)
     if hpxml_file == 'base-appliances-gas.xml'
       hpxml.clothes_dryers[0].fuel_type = HPXML::FuelTypeNaturalGas
@@ -2991,7 +2993,7 @@ def set_hpxml_clothes_dryer(hpxml_file, hpxml)
     hpxml.clothes_dryers.add(id: 'ClothesDryer',
                              location: HPXML::LocationLivingSpace,
                              fuel_type: HPXML::FuelTypeWood,
-                             energy_factor: 2.67,
+                             combined_energy_factor: 3.30,
                              control_type: HPXML::ClothesDryerControlTypeMoisture)
   elsif ['base-foundation-unconditioned-basement.xml'].include? hpxml_file
     hpxml.clothes_dryers[0].location = HPXML::LocationBasementUnconditioned
@@ -3008,10 +3010,10 @@ end
 def set_hpxml_dishwasher(hpxml_file, hpxml)
   if ['base.xml'].include? hpxml_file
     hpxml.dishwashers.add(id: 'Dishwasher',
-                          rated_annual_kwh: 450,
-                          label_electric_rate: 0.10,
-                          label_gas_rate: 1.05,
-                          label_annual_gas_cost: 33.03,
+                          rated_annual_kwh: 307,
+                          label_electric_rate: 0.12,
+                          label_gas_rate: 1.09,
+                          label_annual_gas_cost: 22.32,
                           place_setting_capacity: 12)
   elsif ['base-appliances-none.xml'].include? hpxml_file
     hpxml.dishwashers.clear()

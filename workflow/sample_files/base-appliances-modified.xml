@@ -402,28 +402,28 @@
         <ClothesWasher>
           <SystemIdentifier id='ClothesWasher'/>
           <Location>living space</Location>
-          <IntegratedModifiedEnergyFactor>0.73</IntegratedModifiedEnergyFactor>
-          <Usage>7.0</Usage>
-          <RatedAnnualkWh>700.0</RatedAnnualkWh>
-          <LabelElectricRate>0.1</LabelElectricRate>
-          <LabelGasRate>0.6</LabelGasRate>
-          <LabelAnnualGasCost>25.0</LabelAnnualGasCost>
-          <Capacity>3.0</Capacity>
+          <ModifiedEnergyFactor>1.652</ModifiedEnergyFactor>
+          <Usage>6.0</Usage>
+          <RatedAnnualkWh>380.0</RatedAnnualkWh>
+          <LabelElectricRate>0.12</LabelElectricRate>
+          <LabelGasRate>1.09</LabelGasRate>
+          <LabelAnnualGasCost>27.0</LabelAnnualGasCost>
+          <Capacity>3.2</Capacity>
         </ClothesWasher>
         <ClothesDryer>
           <SystemIdentifier id='ClothesDryer'/>
           <Location>living space</Location>
           <FuelType>electricity</FuelType>
-          <CombinedEnergyFactor>2.62</CombinedEnergyFactor>
+          <EnergyFactor>4.289</EnergyFactor>
           <ControlType>moisture</ControlType>
         </ClothesDryer>
         <Dishwasher>
           <SystemIdentifier id='Dishwasher'/>
-          <RatedAnnualkWh>450.0</RatedAnnualkWh>
+          <RatedAnnualkWh>307.0</RatedAnnualkWh>
           <PlaceSettingCapacity>12</PlaceSettingCapacity>
-          <LabelElectricRate>0.1</LabelElectricRate>
-          <LabelGasRate>1.05</LabelGasRate>
-          <LabelAnnualGasCost>33.03</LabelAnnualGasCost>
+          <LabelElectricRate>0.12</LabelElectricRate>
+          <LabelGasRate>1.09</LabelGasRate>
+          <LabelAnnualGasCost>22.32</LabelAnnualGasCost>
         </Dishwasher>
         <Refrigerator>
           <SystemIdentifier id='Refrigerator'/>
