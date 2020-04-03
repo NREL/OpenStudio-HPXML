@@ -627,7 +627,7 @@ class EnergyPlusValidator
         'SystemIdentifier' => one, # Required by HPXML schema
         '[not(Location) or Location="living space" or Location="basement - conditioned" or Location="basement - unconditioned" or Location="garage"]' => one,
         '[FuelType="natural gas" or FuelType="fuel oil" or FuelType="propane" or FuelType="electricity" or FuelType="wood"]' => one,
-        '[EnergyFactor | CombinedEnergyFactor] | [ControlType="timer" or ControlType="moisture"]' => zero_or_two,
+        '[EnergyFactor | CombinedEnergyFactor] | ControlType' => zero_or_two,
       },
 
       # [Dishwasher]
