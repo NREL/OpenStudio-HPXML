@@ -560,9 +560,12 @@ class OSModel
       end
     end
 
-    # Default dishwasher place setting capacity and energy factor
+    # Default dishwasher location, place setting capacity and energy factor
     if @hpxml.dishwashers.size > 0
       dishwasher = @hpxml.dishwashers[0]
+      if dishwasher.location.nil?
+        dishwasher.location = HPXML::LocationLivingSpace
+      end
       if dishwasher.place_setting_capacity.nil?
         dishwasher.place_setting_capacity = HotWaterAndAppliances.get_dishwasher_reference_cap()
         dishwasher.energy_factor = HotWaterAndAppliances.get_dishwasher_reference_ef()
@@ -580,9 +583,12 @@ class OSModel
       end
     end
 
-    # Default cooking range type
+    # Default cooking range location and type
     if @hpxml.cooking_ranges.size > 0
       cooking_range = @hpxml.cooking_ranges[0]
+      if cooking_range.location.nil?
+        cooking_range.location = HPXML::LocationLivingSpace
+      end
       if cooking_range.is_induction.nil?
         cooking_range.is_induction = HotWaterAndAppliances.get_range_oven_reference_is_induction()
       end

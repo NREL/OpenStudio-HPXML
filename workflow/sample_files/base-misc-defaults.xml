@@ -380,19 +380,12 @@
         </ClothesDryer>
         <Dishwasher>
           <SystemIdentifier id='Dishwasher'/>
-<<<<<<< HEAD
-          <Location>living space</Location>
-          <RatedAnnualkWh>450.0</RatedAnnualkWh>
-          <PlaceSettingCapacity>12</PlaceSettingCapacity>
-=======
->>>>>>> 50f08783b6ab8823283f9a0cfa2695361f224cec
         </Dishwasher>
         <Refrigerator>
           <SystemIdentifier id='Refrigerator'/>
         </Refrigerator>
         <CookingRange>
           <SystemIdentifier id='Range'/>
-          <Location>living space</Location>
           <FuelType>electricity</FuelType>
         </CookingRange>
         <Oven>

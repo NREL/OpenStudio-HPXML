@@ -633,7 +633,7 @@ class EnergyPlusValidator
       # [Dishwasher]
       '/HPXML/Building/BuildingDetails/Appliances/Dishwasher' => {
         'SystemIdentifier' => one, # Required by HPXML schema
-        '[Location="living space" or Location="basement - conditioned" or Location="basement - unconditioned" or Location="garage" or Location="other"]' => one, # Use "other" for space type of multifamily buffer space, non-freezing space, other housing unit, and other heated space
+        '[not(Location) or Location="living space" or Location="basement - conditioned" or Location="basement - unconditioned" or Location="garage" or Location="other"]' => one, # Use "other" for space type of multifamily buffer space, non-freezing space, other housing unit, and other heated space
         '[EnergyFactor | RatedAnnualkWh] | PlaceSettingCapacity' => zero_or_two,
       },
 
@@ -647,7 +647,7 @@ class EnergyPlusValidator
       # [CookingRange]
       '/HPXML/Building/BuildingDetails/Appliances/CookingRange' => {
         'SystemIdentifier' => one, # Required by HPXML schema
-        '[Location="living space" or Location="basement - conditioned" or Location="basement - unconditioned" or Location="garage" or Location="other"]' => one, # Use "other" for space type of multifamily buffer space, non-freezing space, other housing unit, and other heated space
+        '[not(Location) or Location="living space" or Location="basement - conditioned" or Location="basement - unconditioned" or Location="garage" or Location="other"]' => one, # Use "other" for space type of multifamily buffer space, non-freezing space, other housing unit, and other heated space
         '[FuelType="natural gas" or FuelType="fuel oil" or FuelType="propane" or FuelType="electricity" or FuelType="wood"]' => one,
         'IsInduction' => zero_or_one,
         '../Oven/IsConvection' => zero_or_one,
