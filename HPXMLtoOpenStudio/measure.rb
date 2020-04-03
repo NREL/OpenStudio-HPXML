@@ -473,7 +473,7 @@ class OSModel
     # Default water heater location based on Building America climate zone
     @hpxml.water_heating_systems.each do |water_heating_system|
       if water_heating_system.location.nil?
-        water_heating_system.location = Waterheater.get_default_location(hpxml, @ba_cz_name)
+        water_heating_system.location = Waterheater.get_default_location(@hpxml, @ba_cz_name)
       end
     end
 
