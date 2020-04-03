@@ -21,6 +21,7 @@ class EnergyPlusValidator
     zero = [0]
     one = [1]
     zero_or_one = [0, 1]
+    zero_or_two = [0, 2]
     zero_or_more = nil
     one_or_more = []
     zero_or_two = [0, 2]
@@ -89,6 +90,8 @@ class EnergyPlusValidator
       # [SimulationControl]
       '/HPXML/SoftwareInfo/extension/SimulationControl' => {
         'Timestep' => zero_or_one, # minutes; must be a divisor of 60
+        'BeginMonth | BeginDayOfMonth' => zero_or_two, # integer
+        'EndMonth | EndDayOfMonth' => zero_or_two, # integer
       },
 
       # [BuildingConstruction]
@@ -237,7 +240,7 @@ class EnergyPlusValidator
         'InteriorShading/SummerShadingCoefficient' => zero_or_one, # Uses ERI assumption if not provided
         'InteriorShading/WinterShadingCoefficient' => zero_or_one, # Uses ERI assumption if not provided
         'Overhangs' => zero_or_one, # See [WindowOverhang]
-        'Operable' => zero_or_one,
+        'FractionOperable' => zero_or_one,
         'AttachedToWall' => one,
       },
 

@@ -120,9 +120,17 @@ Simulation Controls
 
 EnergyPlus simulation controls can be entered in ``/HPXML/SoftwareInfo/extension/SimulationControl``.
 
-The only simulation control currently offered is the timestep.
-It can be optionally provided as ``Timestep``, where the value is in minutes and must be a divisor of 60.
+The simulation controls currently offered are timestep, begin month, begin day of month, end month, and end day of month.
+
+Timestep can be optionally provided as ``Timestep``, where the value is in minutes and must be a divisor of 60.
 If not provided, the default value of 60 is used.
+
+Begin month and end month can be optionally provided as ``BeginMonth`` and ``EndMonth``, respectively, where the value is an integer and must be between 1 and 12.
+Begin day of month and end day of month can be optionally provided as ``BeginDayOfMonth`` and ``EndDayOfMonth``, respectively, where the value is an integer and must have a valid number of days depending on the begin month.
+Either both, or neither, ``BeginMonth`` and ``BeginDayOfMonth`` or ``EndMonth`` and ``EndDayOfMonth`` must be provided.
+If not provided, the default value of 1/1 (January 1st) and 12/31 (December 31st), respectively, will be used.
+
+You cannot supply a combination of ``BeginMonth`` and ``BeginDayOfMonth`` that occurs after the supplied combination of ``EndMonth`` and ``EndDayOfMonth`` (e.g., a run period from 10/1 to 3/31 is invalid).
 
 Building Details
 ~~~~~~~~~~~~~~~~
@@ -311,7 +319,7 @@ Overhangs (e.g., a roof eave) can optionally be defined for a window by specifyi
 Overhangs are defined by the vertical distance between the overhang and the top of the window (``DistanceToTopOfWindow``), and the vertical distance between the overhang and the bottom of the window (``DistanceToBottomOfWindow``).
 The difference between these two values equals the height of the window.
 
-Finally, windows can be optionally described as ``Operable``.
+Finally, windows can be optionally described with ``FractionOperable``.
 If not provided, it is assumed that 33% of the window area is operable.
 Of this operable window area, 20% is assumed to be open whenever there are favorable outdoor conditions for cooling.
 
