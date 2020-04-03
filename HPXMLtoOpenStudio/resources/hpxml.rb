@@ -228,6 +228,7 @@ class HPXML < Object
 
     # Clean up
     delete_partition_surfaces()
+    delete_tiny_surfaces()
     if collapse_enclosure
       collapse_enclosure_surfaces()
     end
@@ -3726,6 +3727,18 @@ class HPXML < Object
       next if surface.interior_adjacent_to.nil? || surface.exterior_adjacent_to.nil?
       next unless surface.interior_adjacent_to == surface.exterior_adjacent_to
 
+      surface.delete
+    end
+  end
+
+  def delete_tiny_surfaces()
+    (@rim_joists + @walls + @foundation_walls + @frame_floors + @roofs + @windows + @skylights + @doors + @slabs).reverse_each do |surface|
+      next if surface.area > 0.1
+
+      # error out if the only wall is too small. It skipped EPvalidator but should be blocked here.
+      if (surface.is_a? Wall) && (@walls.size == 1)
+        fail "The only wall specified:#{surface.id} is smaller than 0.1 sqft."
+      end
       surface.delete
     end
   end

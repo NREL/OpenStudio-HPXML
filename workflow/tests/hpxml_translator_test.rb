@@ -193,7 +193,7 @@ class HPXMLTest < MiniTest::Test
                             'water-heater-location.xml' => ["WaterHeatingSystem location is 'crawlspace - vented' but building does not have this location specified."],
                             'water-heater-location-other.xml' => ['Expected [1] element(s) but found 0 element(s) for xpath: /HPXML/Building/BuildingDetails/Systems/WaterHeating/WaterHeatingSystem[Location='],
                             'mismatched-slab-and-foundation-wall.xml' => ["Foundation wall 'FoundationWall' is adjacent to 'basement - conditioned' but no corresponding slab was found adjacent to"],
-                            'only-wall-tiny.xml' => ["The only wall specified:Wall is smaller than 0.1 sqft."] }
+                            'only-wall-tiny.xml' => ['The only wall specified:Wall is smaller than 0.1 sqft.'] }
 
     # Test simulations
     Dir["#{sample_files_dir}/invalid_files/*.xml"].sort.each do |xml|
@@ -787,7 +787,6 @@ class HPXMLTest < MiniTest::Test
     # Enclosure Walls/RimJoists/FoundationWalls
     (hpxml.walls + hpxml.rim_joists + hpxml.foundation_walls).each do |wall|
       next unless [HPXML::LocationOutside, HPXML::LocationGround].include? wall.exterior_adjacent_to
-      next if wall.area < 0.1
 
       wall_id = wall.id.upcase
 

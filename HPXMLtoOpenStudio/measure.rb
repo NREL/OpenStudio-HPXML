@@ -1242,7 +1242,7 @@ class OSModel
   def self.add_walls(runner, model, spaces)
     @hpxml.walls.each do |wall|
       if (@hpxml.walls.size == 1) && (wall.net_area < 0.1)
-        fail "The only wall specified:#{wall.id} is smaller than 0.1 sqft."
+        fail "The only wall specified:#{wall.id} net area is smaller than 0.1 sqft."
       end
       next if wall.net_area < 0.1 # skip surfaces smaller than 0.1 sqft
 
@@ -1312,8 +1312,6 @@ class OSModel
 
   def self.add_rim_joists(runner, model, spaces)
     @hpxml.rim_joists.each do |rim_joist|
-      next if rim_joist.area < 0.1 # skip surfaces smaller than 0.1 sqft
-
       if rim_joist.azimuth.nil?
         if rim_joist.is_exterior
           azimuths = @default_azimuths # Model as four directions for average exterior incident solar
@@ -1391,8 +1389,6 @@ class OSModel
   def self.add_frame_floors(runner, model, spaces)
     @hpxml.frame_floors.each do |frame_floor|
       area = frame_floor.area
-      next if area < 0.1 # skip surfaces smaller than 0.1 sqft
-
       width = Math::sqrt(area)
       length = area / width
       if frame_floor.interior_adjacent_to.include?('attic') || frame_floor.exterior_adjacent_to.include?('attic')
@@ -1447,7 +1443,6 @@ class OSModel
 
       found_slab = false
       @hpxml.slabs.each do |slab|
-        next if slab.area < 0.1 # skip surfaces smaller than 0.1 sqft
         found_slab = true if foundation_wall.interior_adjacent_to == slab.interior_adjacent_to
       end
       next if found_slab
@@ -1457,7 +1452,6 @@ class OSModel
 
     # Check for slabs without corresponding foundation walls
     @hpxml.slabs.each do |slab|
-      next if slab.area < 0.1 # skip surfaces smaller than 0.1 sqft
       next if [HPXML::LocationLivingSpace, HPXML::LocationGarage].include? slab.interior_adjacent_to
 
       found_foundation_wall = false
@@ -1490,7 +1484,6 @@ class OSModel
       end
       @hpxml.slabs.each do |slab|
         next unless slab.interior_adjacent_to == foundation_type
-        next if slab.area < 0.1 # skip surfaces smaller than 0.1 sqft
 
         slabs << slab
       end
@@ -1887,8 +1880,6 @@ class OSModel
   def self.add_windows(runner, model, spaces, weather)
     surfaces = []
     @hpxml.windows.each do |window|
-      next if window.area < 0.1 # skip surfaces smaller than 0.1 sqft
-
       window_height = 4.0 # ft, default
       overhang_depth = nil
       if not window.overhangs_depth.nil?
@@ -1944,8 +1935,6 @@ class OSModel
   def self.add_skylights(runner, model, spaces, weather)
     surfaces = []
     @hpxml.skylights.each do |skylight|
-      next if skylight.area < 0.1 # skip surfaces smaller than 0.1 sqft
-
       # Obtain skylight tilt from attached roof
       skylight_tilt = skylight.roof.pitch / 12.0
 
@@ -1991,8 +1980,6 @@ class OSModel
   def self.add_doors(runner, model, spaces)
     surfaces = []
     @hpxml.doors.each do |door|
-      next if door.area < 0.1 # skip surfaces smaller than 0.1 sqft
-
       door_height = 6.67 # ft
       door_width = door.area / door_height
       z_origin = @foundation_top
