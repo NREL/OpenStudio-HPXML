@@ -563,7 +563,7 @@ class EnergyPlusValidator
 
       ## [HWDistType=Recirculation]
       '/HPXML/Building/BuildingDetails/Systems/WaterHeating/HotWaterDistribution/SystemType/Recirculation' => {
-        '[ControlType="manual demand control" or ControlType=presence sensor demand control" or ControlType=temperature" or ControlType="timer" or ControlType="no control"]' => one,
+        '[ControlType="manual demand control" or ControlType="presence sensor demand control" or ControlType="temperature" or ControlType="timer" or ControlType="no control"]' => one,
         'RecirculationPipingLoopLength' => one,
         'BranchPipingLoopLength' => one,
         'PumpPower' => one,
