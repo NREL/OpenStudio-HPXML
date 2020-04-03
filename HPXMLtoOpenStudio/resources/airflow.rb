@@ -1079,7 +1079,6 @@ class Airflow
         # -- Sensors --
 
         # Duct zone temperature
-        puts air_loop_name_idx
         dz_t_var = OpenStudio::Model::EnergyManagementSystemGlobalVariable.new(model, "#{air_loop_name_idx} DZ T".gsub(' ', '_'))
         if duct_zone.nil? # Outside
           dz_t_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Site Outdoor Air Drybulb Temperature')
