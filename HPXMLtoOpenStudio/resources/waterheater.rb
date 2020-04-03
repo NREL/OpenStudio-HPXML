@@ -1365,19 +1365,24 @@ class Waterheater
     return 0.08
   end
 
-  def self.get_location_hierarchy(ba_cz_name)
+  def self.get_default_location(hpxml, ba_cz_name)
     if [Constants.BAZoneHotDry, Constants.BAZoneHotHumid].include? ba_cz_name
-      return [HPXML::LocationGarage,
-              HPXML::LocationLivingSpace]
+      location_hierarchy = [HPXML::LocationGarage,
+                            HPXML::LocationLivingSpace]
     elsif [Constants.BAZoneMarine, Constants.BAZoneMixedHumid, Constants.BAZoneMixedDry, Constants.BAZoneCold, Constants.BAZoneVeryCold, Constants.BAZoneSubarctic].include? ba_cz_name
-      return [HPXML::LocationBasementConditioned,
-              HPXML::LocationBasementUnconditioned,
-              HPXML::LocationLivingSpace]
+      location_hierarchy = [HPXML::LocationBasementConditioned,
+                            HPXML::LocationBasementUnconditioned,
+                            HPXML::LocationLivingSpace]
     elsif ba_cz_name.nil?
-      return [HPXML::LocationBasementConditioned,
-              HPXML::LocationBasementUnconditioned,
-              HPXML::LocationGarage,
-              HPXML::LocationLivingSpace]
+      location_hierarchy = [HPXML::LocationBasementConditioned,
+                            HPXML::LocationBasementUnconditioned,
+                            HPXML::LocationGarage,
+                            HPXML::LocationLivingSpace]
+    end
+    location_hierarchy.each do |space_type|
+      if hpxml.has_space_type(space_type)
+        return space_type
+      end
     end
   end
 

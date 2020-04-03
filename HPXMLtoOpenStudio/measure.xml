@@ -2,8 +2,8 @@
   <schema_version>3.0</schema_version>
   <name>hpxm_lto_openstudio</name>
   <uid>b1543b30-9465-45ff-ba04-1d1f85e763bc</uid>
-  <version_id>54aad69e-d16f-4114-9490-777df0c160b9</version_id>
-  <version_modified>20200403T151235Z</version_modified>
+  <version_id>37ba5574-6d2e-4a5e-b6cf-9aa42b3585fe</version_id>
+  <version_modified>20200403T163847Z</version_modified>
   <xml_checksum>D8922A73</xml_checksum>
   <class_name>HPXMLtoOpenStudio</class_name>
   <display_name>HPXML to OpenStudio Translator</display_name>
@@ -330,12 +330,6 @@
       <checksum>BC6216BE</checksum>
     </file>
     <file>
-      <filename>location.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>09938D82</checksum>
-    </file>
-    <file>
       <filename>schedules.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
@@ -450,10 +444,28 @@
       <checksum>E846CADB</checksum>
     </file>
     <file>
+      <filename>hpxml.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>CA3B4EAC</checksum>
+    </file>
+    <file>
+      <filename>location.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>89A31E70</checksum>
+    </file>
+    <file>
+      <filename>EPvalidator.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>FF842F24</checksum>
+    </file>
+    <file>
       <filename>waterheater.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>775D4FB1</checksum>
+      <checksum>ED92740B</checksum>
     </file>
     <file>
       <version>
@@ -464,19 +476,13 @@
       <filename>measure.rb</filename>
       <filetype>rb</filetype>
       <usage_type>script</usage_type>
-      <checksum>283BA716</checksum>
+      <checksum>F9B99B05</checksum>
     </file>
     <file>
-      <filename>EPvalidator.rb</filename>
-      <filetype>rb</filetype>
+      <filename>EPvalidator.rb.bak</filename>
+      <filetype>bak</filetype>
       <usage_type>resource</usage_type>
-      <checksum>A7DBB81A</checksum>
-    </file>
-    <file>
-      <filename>hpxml.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>CA3B4EAC</checksum>
+      <checksum>0DE04A98</checksum>
     </file>
   </files>
 </measure>

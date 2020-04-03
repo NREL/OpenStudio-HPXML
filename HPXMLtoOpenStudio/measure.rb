@@ -227,14 +227,8 @@ class OSModel
     @eri_version = 'latest' if @eri_version.nil?
     @eri_version = Constants.ERIVersions[-1] if @eri_version == 'latest'
 
-    model.getClimateZones.climateZones.each do |ba_cz|
-      if ['Building America'].include? ba_cz.institution
-        @ba_cz_name = ba_cz.value
-      end
-    end
-
     # Init
-    weather = Location.apply(model, runner, epw_path, cache_path, 'NA', 'NA')
+    weather, @ba_cz_name = Location.apply(model, runner, epw_path, cache_path, 'NA', 'NA')
     set_defaults_and_globals(runner)
     add_simulation_params(model)
 
@@ -479,8 +473,7 @@ class OSModel
     # Default water heater location based on Building America climate zone
     @hpxml.water_heating_systems.each do |water_heating_system|
       if water_heating_system.location.nil?
-        location_hierarchy = Waterheater.get_location_hierarchy(@ba_cz_name)
-        water_heating_system.location = get_space_from_ba_location_hierarchy(location_hierarchy)
+        water_heating_system.location = Waterheater.get_default_location(hpxml, @ba_cz_name)
       end
     end
 
@@ -582,7 +575,7 @@ class OSModel
         refrigerator.location = HPXML::LocationLivingSpace
       end
       if refrigerator.adjusted_annual_kwh.nil? && refrigerator.rated_annual_kwh.nil?
-        refrigerator.adjusted_annual_kwh = HotWaterAndAppliances.get_refrigerator_reference_annual_kwh(@nbeds)
+        refrigerator.rated_annual_kwh = HotWaterAndAppliances.get_refrigerator_reference_annual_kwh(@nbeds)
       end
     end
 
@@ -4269,14 +4262,6 @@ class OSModel
     end
     walls_top = foundation_top + 8.0 * @ncfl_ag
     return foundation_top, walls_top
-  end
-
-  def self.get_space_from_ba_location_hierarchy(location_hierarchy)
-    location_hierarchy.each do |space_type|
-      if @hpxml.has_space_type(space_type)
-        return space_type
-      end
-    end
   end
 end
 
