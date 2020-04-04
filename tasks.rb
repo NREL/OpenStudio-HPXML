@@ -2987,6 +2987,7 @@ def set_hpxml_clothes_washer(hpxml_file, hpxml)
     hpxml.clothes_washers[0].label_gas_rate = nil
     hpxml.clothes_washers[0].label_annual_gas_cost = nil
     hpxml.clothes_washers[0].capacity = nil
+    hpxml.clothes_washers[0].usage = nil
   end
 end
 

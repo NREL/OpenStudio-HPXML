@@ -558,7 +558,7 @@ class OSModel
       if clothes_dryer.control_type.nil?
         default_values = HotWaterAndAppliances.get_clothes_dryer_default_values(@eri_version, clothes_dryer.fuel_type)
         clothes_dryer.control_type = default_values[:control_type]
-        clothes_dryer.energy_factor = default_values[:energy_factor]
+        clothes_dryer.combined_energy_factor = default_values[:combined_energy_factor]
       end
     end
 
