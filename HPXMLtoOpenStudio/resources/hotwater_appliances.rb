@@ -405,7 +405,7 @@ class HotWaterAndAppliances
                label_gas_rate: 1.09, # $/therm
                label_annual_gas_cost: 27.0, # $
                capacity: 3.0, # ft^3
-               usage: 6.0 } # cyc/year
+               usage: 6.0 } # cyc/week
     else
       return { integrated_modified_energy_factor: 0.331, # ft3/(kWh/cyc)
                rated_annual_kwh: 704.0, # kWh/yr
@@ -413,7 +413,7 @@ class HotWaterAndAppliances
                label_gas_rate: 0.58, # $/therm, unused
                label_annual_gas_cost: 23.0, # $, unused
                capacity: 2.874, # ft^3
-               usage: 6.0 } # cyc/year, unused
+               usage: 6.0 } # cyc/week, unused
     end
   end
 

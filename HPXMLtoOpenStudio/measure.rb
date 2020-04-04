@@ -228,7 +228,7 @@ class OSModel
     @eri_version = Constants.ERIVersions[-1] if @eri_version == 'latest'
 
     # Init
-    weather = Location.apply(model, runner, epw_path, cache_path, 'NA', 'NA')
+    weather, @ba_cz_name = Location.apply(model, runner, epw_path, cache_path, 'NA', 'NA')
     set_defaults_and_globals(runner)
     add_simulation_params(model)
 
@@ -313,6 +313,7 @@ class OSModel
     @nbeds = @hpxml.building_construction.number_of_bedrooms
     @min_neighbor_distance = get_min_neighbor_distance()
     @default_azimuths = get_default_azimuths()
+    @has_uncond_bsmnt = @hpxml.has_space_type(HPXML::LocationBasementUnconditioned)
 
     @use_only_ideal_air = false
     if not @hpxml.building_construction.use_only_ideal_air_system.nil?
@@ -328,8 +329,16 @@ class OSModel
 
     # Default misc
     @hpxml.header.timestep = 60 if @hpxml.header.timestep.nil?
+    @hpxml.header.begin_month = 1 if @hpxml.header.begin_month.nil?
+    @hpxml.header.begin_day_of_month = 1 if @hpxml.header.begin_day_of_month.nil?
+    @hpxml.header.end_month = 12 if @hpxml.header.end_month.nil?
+    @hpxml.header.end_day_of_month = 31 if @hpxml.header.end_day_of_month.nil?
     @hpxml.site.shelter_coefficient = Airflow.get_default_shelter_coefficient() if @hpxml.site.shelter_coefficient.nil?
     @hpxml.building_occupancy.number_of_residents = Geometry.get_occupancy_default_num(@nbeds) if @hpxml.building_occupancy.number_of_residents.nil?
+    if @hpxml.building_construction.conditioned_building_volume.nil?
+      @hpxml.building_construction.conditioned_building_volume = @cfa * @hpxml.building_construction.average_ceiling_height
+    end
+    @cvolume = @hpxml.building_construction.conditioned_building_volume
 
     # Default attic/crawlspace ventilation rate
     if @hpxml.has_space_type(HPXML::LocationAtticVented)
@@ -362,7 +371,7 @@ class OSModel
       infilvolume = measurement.infiltration_volume unless infilvolume.nil?
     end
     if infilvolume.nil?
-      @infilvolume = @hpxml.building_construction.conditioned_building_volume
+      @infilvolume = @cvolume
       measurements.each do |measurement|
         measurement.infiltration_volume = @infilvolume
       end
@@ -461,6 +470,23 @@ class OSModel
       water_heating_system.standby_loss = (2.9721 * sqft_by_gal - 0.4732).round(3) # linear equation assuming a constant u, F/hr
     end
 
+    # Default water heater location based on Building America climate zone
+    @hpxml.water_heating_systems.each do |water_heating_system|
+      if water_heating_system.location.nil?
+        water_heating_system.location = Waterheater.get_default_location(@hpxml, @ba_cz_name)
+      end
+    end
+
+    # Default water heater piping length
+    if @hpxml.water_heating_systems.size > 0
+      hot_water_distribution = @hpxml.hot_water_distributions[0]
+      if hot_water_distribution.system_type == HPXML::DHWDistTypeStandard
+        if hot_water_distribution.standard_piping_length.nil?
+          hot_water_distribution.standard_piping_length = HotWaterAndAppliances.get_default_std_pipe_length(@has_uncond_bsmnt, @cfa, @ncfl)
+        end
+      end
+    end
+
     # Default ceiling fans efficiency/quantity
     if @hpxml.ceiling_fans.size > 0
       ceiling_fan = @hpxml.ceiling_fans[0]
@@ -505,6 +531,90 @@ class OSModel
       @hpxml.misc_loads_schedule.monthly_multipliers = '1.248, 1.257, 0.993, 0.989, 0.993, 0.827, 0.821, 0.821, 0.827, 0.99, 0.987, 1.248'
     end
 
+    # Default clothes washer location, rated annual kWh, label electric rate, label gas rate, label annual gas cost, capacity, and modified energy factor
+    if @hpxml.clothes_washers.size > 0
+      clothes_washer = @hpxml.clothes_washers[0]
+      if clothes_washer.location.nil?
+        clothes_washer.location = HPXML::LocationLivingSpace
+      end
+      if clothes_washer.rated_annual_kwh.nil?
+        default_values = HotWaterAndAppliances.get_clothes_washer_default_values(@eri_version)
+        clothes_washer.integrated_modified_energy_factor = default_values[:integrated_modified_energy_factor]
+        clothes_washer.rated_annual_kwh = default_values[:rated_annual_kwh]
+        clothes_washer.label_electric_rate = default_values[:label_electric_rate]
+        clothes_washer.label_gas_rate = default_values[:label_gas_rate]
+        clothes_washer.label_annual_gas_cost = default_values[:label_annual_gas_cost]
+        clothes_washer.capacity = default_values[:capacity]
+        clothes_washer.usage = default_values[:usage]
+      end
+    end
+
+    # Default clothes dryer location, control type, and energy factor
+    if @hpxml.clothes_dryers.size > 0
+      clothes_dryer = @hpxml.clothes_dryers[0]
+      if clothes_dryer.location.nil?
+        clothes_dryer.location = HPXML::LocationLivingSpace
+      end
+      if clothes_dryer.control_type.nil?
+        default_values = HotWaterAndAppliances.get_clothes_dryer_default_values(@eri_version, clothes_dryer.fuel_type)
+        clothes_dryer.control_type = default_values[:control_type]
+        clothes_dryer.energy_factor = default_values[:energy_factor]
+      end
+    end
+
+    # Default dishwasher place setting capacity and energy factor
+    if @hpxml.dishwashers.size > 0
+      dishwasher = @hpxml.dishwashers[0]
+      if dishwasher.place_setting_capacity.nil?
+        default_values = HotWaterAndAppliances.get_dishwasher_default_values()
+        dishwasher.rated_annual_kwh = default_values[:rated_annual_kwh]
+        dishwasher.label_electric_rate = default_values[:label_electric_rate]
+        dishwasher.label_gas_rate = default_values[:label_gas_rate]
+        dishwasher.label_annual_gas_cost = default_values[:label_annual_gas_cost]
+        dishwasher.place_setting_capacity = default_values[:place_setting_capacity]
+      end
+    end
+
+    # Default refrigerator location and adjusted annual kWh
+    if @hpxml.refrigerators.size > 0
+      refrigerator = @hpxml.refrigerators[0]
+      if refrigerator.location.nil?
+        refrigerator.location = HPXML::LocationLivingSpace
+      end
+      if refrigerator.adjusted_annual_kwh.nil? && refrigerator.rated_annual_kwh.nil?
+        default_values = HotWaterAndAppliances.get_refrigerator_default_values(@nbeds)
+        refrigerator.rated_annual_kwh = default_values[:rated_annual_kwh]
+      end
+    end
+
+    # Default cooking range/oven type
+    if @hpxml.cooking_ranges.size > 0
+      cooking_range = @hpxml.cooking_ranges[0]
+      if cooking_range.is_induction.nil?
+        default_values = HotWaterAndAppliances.get_range_oven_default_values()
+        cooking_range.is_induction = default_values[:is_induction]
+      end
+    end
+
+    # Default oven type
+    if @hpxml.ovens.size > 0
+      oven = @hpxml.ovens[0]
+      if oven.is_convection.nil?
+        default_values = HotWaterAndAppliances.get_range_oven_default_values()
+        oven.is_convection = default_values[:is_convection]
+      end
+    end
+
+    # Default PV systems inverter efficiency and system loss fraction
+    @hpxml.pv_systems.each do |pv_system|
+      if pv_system.inverter_efficiency.nil?
+        pv_system.inverter_efficiency = PV.get_default_inv_eff()
+      end
+      if pv_system.system_losses_fraction.nil?
+        pv_system.system_losses_fraction = PV.get_default_system_losses(pv_system.year_modules_manufactured)
+      end
+    end
+
     if @debug && (not @output_dir.nil?)
       # Write updated HPXML object to file
       hpxml_defaults_path = File.join(@output_dir, 'in.xml')
@@ -535,6 +645,12 @@ class OSModel
 
     convlim = model.getConvergenceLimits
     convlim.setMinimumSystemTimestep(0)
+
+    run_period = model.getRunPeriod
+    run_period.setBeginMonth(@hpxml.header.begin_month)
+    run_period.setBeginDayOfMonth(@hpxml.header.begin_day_of_month)
+    run_period.setEndMonth(@hpxml.header.end_month)
+    run_period.setEndDayOfMonth(@hpxml.header.end_day_of_month)
   end
 
   def self.set_zone_volumes(runner, model)
@@ -572,7 +688,7 @@ class OSModel
     thermal_zones.each do |thermal_zone|
       if Geometry.is_living(thermal_zone)
         zones_updated += 1
-        thermal_zone.setVolume(UnitConversions.convert(@hpxml.building_construction.conditioned_building_volume, 'ft^3', 'm^3'))
+        thermal_zone.setVolume(UnitConversions.convert(@cvolume, 'ft^3', 'm^3'))
       end
     end
 
@@ -2111,7 +2227,6 @@ class OSModel
     water_heater_spaces = {}
     combi_sys_id_list = []
     avg_setpoint_temp = 0.0 # Weighted average by fraction DHW load served
-    has_uncond_bsmnt = @hpxml.has_space_type(HPXML::LocationBasementUnconditioned)
     if @hpxml.water_heating_systems.size > 0
       @hpxml.water_heating_systems.each do |water_heating_system|
         sys_id = water_heating_system.id
@@ -2147,7 +2262,7 @@ class OSModel
         end
         solar_fraction = 0.0 if solar_fraction.nil?
 
-        ec_adj = HotWaterAndAppliances.get_dist_energy_consumption_adjustment(has_uncond_bsmnt, @cfa, @ncfl,
+        ec_adj = HotWaterAndAppliances.get_dist_energy_consumption_adjustment(@has_uncond_bsmnt, @cfa, @ncfl,
                                                                               dist_type, recirc_control_type,
                                                                               pipe_r, std_pipe_length, recirc_loop_length)
 
@@ -2208,7 +2323,7 @@ class OSModel
     end
 
     HotWaterAndAppliances.apply(model, weather, @living_space,
-                                @cfa, @nbeds, @ncfl, has_uncond_bsmnt, avg_setpoint_temp,
+                                @cfa, @nbeds, @ncfl, @has_uncond_bsmnt, avg_setpoint_temp,
                                 clothes_washer, cw_space, clothes_dryer, cd_space,
                                 dishwasher, refrigerator, rf_space, cooking_range, oven,
                                 has_low_flow_fixtures, dist_type, pipe_r,
