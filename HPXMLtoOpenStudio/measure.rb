@@ -3546,6 +3546,7 @@ class OSModel
       plenum_zones.each do |plenum_zone|
         model.getOtherEquipments.sort.each do |o|
           next unless o.space.get.thermalZone.get.name.to_s == plenum_zone.name.to_s
+          next if objects_already_processed.include? o
 
           ducts_sensors << []
           { 'Other Equipment Convective Heating Energy' => 'ducts_conv',
@@ -3564,6 +3565,7 @@ class OSModel
         model.getOtherEquipments.sort.each do |o|
           next unless o.space.get.thermalZone.get.name.to_s == @living_zone.name.to_s
           next unless o.name.to_s.start_with? airloop.name.to_s.gsub(' ', '_')
+          next if objects_already_processed.include? o
 
           ducts_sensors << []
           { 'Other Equipment Convective Heating Energy' => 'ducts_conv',
