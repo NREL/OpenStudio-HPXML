@@ -2,8 +2,8 @@
   <schema_version>3.0</schema_version>
   <name>hpxm_lto_openstudio</name>
   <uid>b1543b30-9465-45ff-ba04-1d1f85e763bc</uid>
-  <version_id>95b87d21-ea8a-4e45-a57c-1509fea7d3c3</version_id>
-  <version_modified>20200327T003920Z</version_modified>
+  <version_id>f4814531-bb62-4665-8a2d-81c8a5e14891</version_id>
+  <version_modified>20200406T150047Z</version_modified>
   <xml_checksum>D8922A73</xml_checksum>
   <class_name>HPXMLtoOpenStudio</class_name>
   <display_name>HPXML to OpenStudio Translator</display_name>
@@ -28,11 +28,11 @@
       <default_value>weather</default_value>
     </argument>
     <argument>
-      <name>output_path</name>
-      <display_name>Path for Output Files</display_name>
-      <description>Absolute/relative path for the output files.</description>
+      <name>output_dir</name>
+      <display_name>Directory for Output Files</display_name>
+      <description>Absolute/relative path for the output files directory.</description>
       <type>String</type>
-      <required>true</required>
+      <required>false</required>
       <model_dependent>false</model_dependent>
     </argument>
     <argument>
@@ -330,12 +330,6 @@
       <checksum>15FA9595</checksum>
     </file>
     <file>
-      <filename>pv.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>E46ED0E5</checksum>
-    </file>
-    <file>
       <filename>psychrometrics.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
@@ -346,12 +340,6 @@
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
       <checksum>5FA33833</checksum>
-    </file>
-    <file>
-      <filename>location.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>C692A9D9</checksum>
     </file>
     <file>
       <filename>schedules.rb</filename>
@@ -438,28 +426,46 @@
       <checksum>02E9FB04</checksum>
     </file>
     <file>
-      <filename>constants.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>C4AD1F02</checksum>
-    </file>
-    <file>
       <filename>hotwater_appliances.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
       <checksum>59F8F771</checksum>
     </file>
     <file>
+      <filename>pv.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>54B83C91</checksum>
+    </file>
+    <file>
+      <filename>constants.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>49B0A515</checksum>
+    </file>
+    <file>
+      <filename>hpxml.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>AFD065E1</checksum>
+    </file>
+    <file>
+      <filename>location.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>A8C9D90A</checksum>
+    </file>
+    <file>
       <filename>waterheater.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>E5BACB61</checksum>
+      <checksum>5D6F2126</checksum>
     </file>
     <file>
       <filename>EPvalidator.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>FC667B1B</checksum>
+      <checksum>A805B04E</checksum>
     </file>
     <file>
       <version>
@@ -470,13 +476,7 @@
       <filename>measure.rb</filename>
       <filetype>rb</filetype>
       <usage_type>script</usage_type>
-      <checksum>69BC5876</checksum>
-    </file>
-    <file>
-      <filename>hpxml.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>E31506D9</checksum>
+      <checksum>1F4AA06E</checksum>
     </file>
   </files>
 </measure>

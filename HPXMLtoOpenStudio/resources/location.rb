@@ -9,9 +9,9 @@ class Location
     weather, epw_file = apply_weather_file(model, runner, weather_file_path, weather_cache_path)
     apply_year(model, epw_file)
     apply_site(model, epw_file)
-    apply_climate_zones(model, epw_file)
+    ba_zone = apply_climate_zones(model, epw_file)
     apply_dst(model, dst_start_date, dst_end_date)
-    return weather
+    return weather, ba_zone
   end
 
   private
@@ -52,6 +52,7 @@ class Location
 
     climateZones = model.getClimateZones
     climateZones.setClimateZone(Constants.BuildingAmericaClimateZone, ba_zone)
+    return ba_zone
   end
 
   def self.apply_year(model, epw_file)
@@ -82,10 +83,9 @@ class Location
 
   def self.get_climate_zone_ba(wmo)
     ba_zone = nil
-
     zones_csv = File.join(File.dirname(__FILE__), 'climate_zones.csv')
     if not File.exist?(zones_csv)
-      return ba_zone
+      fail 'Could not find climate_zones.csv'
     end
 
     require 'csv'
