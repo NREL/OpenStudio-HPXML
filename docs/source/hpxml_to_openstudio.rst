@@ -511,21 +511,15 @@ Water Heaters
 
 Each water heater should be entered as a ``Systems/WaterHeating/WaterHeatingSystem``.
 Inputs including ``WaterHeaterType`` and ``FractionDHWLoadServed`` must be provided.
-The water heater ``Location`` can be optionally entered; if not provided, a default water heater location will be assumed based on Building America (BA) climate zone and space types in the residence. 
+The water heater ``Location`` can be optionally entered; if not provided, a default water heater location will be assumed based on the IECC climate zone. 
 
-+------------------+---------------------------------------------------------------------------------------+
-| BA Climate Zone  | Default Water Heater Location                                                         |
-+==================+=======================================================================================+
-| | Hot-Dry        | | Garage, if a garage presents in the residence                                       |
-| | Hot-Humid      | | Living Space, else                                                                  |
-+------------------+---------------------------------------------------------------------------------------+
-| | Marine         | | Conditioned Basement, if a conditioned basement presents in the residence           | 
-| | Mixed-Humid    | | Unconditioned Basement, else if an unconditioned basement presents in the residence |
-| | Mixed-Dry      | | Living Space, else                                                                  |
-| | Cold           |                                                                                       |
-| | Very Cold      |                                                                                       |
-| | Subarctic      |                                                                                       |                                                
-+------------------+---------------------------------------------------------------------------------------+
++--------------------+--------------------------------------------------------------------------------------------+
+| IECC Climate Zone  | Default Water Heater Location                                                              |
++====================+============================================================================================+
+| 1-3, excluding 3A  | Garage if present, else Living Space                                                       |
++--------------------+--------------------------------------------------------------------------------------------+
+| 3A, 4-8            | Conditioned Basement if present, else Unconditioned Basement if present, else Living Space |
++--------------------+--------------------------------------------------------------------------------------------+
 
 The setpoint temperature may be provided as ``HotWaterTemperature``; if not provided, 125°F is assumed.
 

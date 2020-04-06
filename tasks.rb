@@ -548,28 +548,25 @@ end
 
 def set_hpxml_climate_and_risk_zones(hpxml_file, hpxml)
   if ['base.xml'].include? hpxml_file
-    hpxml.climate_and_risk_zones.iecc2006 = '5B'
+    hpxml.climate_and_risk_zones.iecc_year = 2006
+    hpxml.climate_and_risk_zones.iecc_zone = '5B'
     hpxml.climate_and_risk_zones.weather_station_id = 'WeatherStation'
     hpxml.climate_and_risk_zones.weather_station_name = 'Denver, CO'
     hpxml.climate_and_risk_zones.weather_station_wmo = '725650'
   elsif ['base-location-baltimore-md.xml'].include? hpxml_file
-    hpxml.climate_and_risk_zones.iecc2006 = '4A'
-    hpxml.climate_and_risk_zones.weather_station_id = 'WeatherStation'
+    hpxml.climate_and_risk_zones.iecc_zone = '4A'
     hpxml.climate_and_risk_zones.weather_station_name = 'Baltimore, MD'
     hpxml.climate_and_risk_zones.weather_station_wmo = '724060'
   elsif ['base-location-dallas-tx.xml'].include? hpxml_file
-    hpxml.climate_and_risk_zones.iecc2006 = '3A'
-    hpxml.climate_and_risk_zones.weather_station_id = 'WeatherStation'
+    hpxml.climate_and_risk_zones.iecc_zone = '3A'
     hpxml.climate_and_risk_zones.weather_station_name = 'Dallas, TX'
     hpxml.climate_and_risk_zones.weather_station_wmo = '722590'
   elsif ['base-location-duluth-mn.xml'].include? hpxml_file
-    hpxml.climate_and_risk_zones.iecc2006 = '7'
-    hpxml.climate_and_risk_zones.weather_station_id = 'WeatherStation'
+    hpxml.climate_and_risk_zones.iecc_zone = '7'
     hpxml.climate_and_risk_zones.weather_station_name = 'Duluth, MN'
     hpxml.climate_and_risk_zones.weather_station_wmo = '727450'
   elsif ['base-location-miami-fl.xml'].include? hpxml_file
-    hpxml.climate_and_risk_zones.iecc2006 = '1A'
-    hpxml.climate_and_risk_zones.weather_station_id = 'WeatherStation'
+    hpxml.climate_and_risk_zones.iecc_zone = '1A'
     hpxml.climate_and_risk_zones.weather_station_name = 'Miami, FL'
     hpxml.climate_and_risk_zones.weather_station_wmo = '722020'
   elsif ['base-location-epw-filename.xml'].include? hpxml_file

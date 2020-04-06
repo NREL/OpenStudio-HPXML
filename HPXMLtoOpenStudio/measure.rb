@@ -228,7 +228,7 @@ class OSModel
     @eri_version = Constants.ERIVersions[-1] if @eri_version == 'latest'
 
     # Init
-    weather, @ba_cz_name = Location.apply(model, runner, epw_path, cache_path, 'NA', 'NA')
+    weather = Location.apply(model, runner, epw_path, cache_path, 'NA', 'NA')
     set_defaults_and_globals(runner)
     add_simulation_params(model)
 
@@ -473,7 +473,7 @@ class OSModel
     # Default water heater location based on Building America climate zone
     @hpxml.water_heating_systems.each do |water_heating_system|
       if water_heating_system.location.nil?
-        water_heating_system.location = Waterheater.get_default_location(@hpxml, @ba_cz_name)
+        water_heating_system.location = Waterheater.get_default_location(@hpxml, @hpxml.climate_and_risk_zones.iecc_zone)
       end
     end
 

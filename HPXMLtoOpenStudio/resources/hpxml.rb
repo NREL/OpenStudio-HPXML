@@ -711,7 +711,7 @@ class HPXML < Object
   end
 
   class ClimateandRiskZones < BaseElement
-    ATTRS = [:iecc2006, :iecc2012, :weather_station_id, :weather_station_name, :weather_station_wmo,
+    ATTRS = [:iecc_year, :iecc_zone, :weather_station_id, :weather_station_name, :weather_station_wmo,
              :weather_station_epw_filename]
     attr_accessor(*ATTRS)
 
@@ -725,14 +725,10 @@ class HPXML < Object
 
       climate_and_risk_zones = XMLHelper.create_elements_as_needed(doc, ['HPXML', 'Building', 'BuildingDetails', 'ClimateandRiskZones'])
 
-      climate_zones = { 2006 => @iecc2006,
-                        2012 => @iecc2012 }
-      climate_zones.each do |year, zone|
-        next if zone.nil?
-
+      if (not @iecc_year.nil?) && (not @iecc_zone.nil?)
         climate_zone_iecc = XMLHelper.add_element(climate_and_risk_zones, 'ClimateZoneIECC')
-        XMLHelper.add_element(climate_zone_iecc, 'Year', Integer(year)) unless year.nil?
-        XMLHelper.add_element(climate_zone_iecc, 'ClimateZone', zone) unless zone.nil?
+        XMLHelper.add_element(climate_zone_iecc, 'Year', Integer(@iecc_year)) unless @iecc_year.nil?
+        XMLHelper.add_element(climate_zone_iecc, 'ClimateZone', @iecc_zone) unless @iecc_zone.nil?
       end
 
       if not @weather_station_id.nil?
@@ -752,8 +748,8 @@ class HPXML < Object
       climate_and_risk_zones = hpxml.elements['Building/BuildingDetails/ClimateandRiskZones']
       return if climate_and_risk_zones.nil?
 
-      @iecc2006 = XMLHelper.get_value(climate_and_risk_zones, 'ClimateZoneIECC[Year=2006]/ClimateZone')
-      @iecc2012 = XMLHelper.get_value(climate_and_risk_zones, 'ClimateZoneIECC[Year=2012]/ClimateZone')
+      @iecc_year = XMLHelper.get_value(climate_and_risk_zones, 'ClimateZoneIECC/Year')
+      @iecc_zone = XMLHelper.get_value(climate_and_risk_zones, 'ClimateZoneIECC/ClimateZone')
       weather_station = climate_and_risk_zones.elements['WeatherStation']
       if not weather_station.nil?
         @weather_station_id = HPXML::get_id(weather_station)
