@@ -19,17 +19,16 @@ class EnergyPlusValidator
     #
 
     zero = [0]
-    one = [1]
     zero_or_one = [0, 1]
-    zero_or_two = [0, 2]
-    zero_or_more = nil
-    one_or_more = []
     zero_or_two = [0, 2]
     zero_or_three = [0, 3]
     zero_or_four = [0, 4]
     zero_or_five = [0, 5]
     zero_or_six = [0, 6]
     zero_or_seven = [0, 7]
+    zero_or_more = nil
+    one = [1]
+    one_or_more = []
 
     requirements = {
 
