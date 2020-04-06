@@ -502,7 +502,7 @@ class HPXMLTest < MiniTest::Test
 
       return
     else
-      # show_output(runner.result)
+      show_output(runner.result) unless success
       assert_equal(true, success)
     end
 

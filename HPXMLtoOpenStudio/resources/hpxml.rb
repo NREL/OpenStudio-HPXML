@@ -277,6 +277,7 @@ class HPXML < Object
     if window_area_total <= 0
       return 0.0
     end
+
     return window_area_operable / window_area_total
   end
 
@@ -485,6 +486,7 @@ class HPXML < Object
         if @begin_month > @end_month
           fail "Begin Month (#{@begin_month}) cannot come after End Month (#{@end_month})."
         end
+
         if (not @begin_day_of_month.nil?) && (not @end_day_of_month.nil?)
           if @begin_month == @end_month
             if @begin_day_of_month > @end_day_of_month
@@ -849,6 +851,7 @@ class HPXML < Object
       if @attached_to_roof_idrefs.size > list.size
         fail "Attached roof not found for attic '#{@id}'."
       end
+
       return list
     end
 
@@ -859,6 +862,7 @@ class HPXML < Object
       if @attached_to_frame_floor_idrefs.size > list.size
         fail "Attached frame floor not found for attic '#{@id}'."
       end
+
       return list
     end
 
@@ -938,8 +942,10 @@ class HPXML < Object
       elsif XMLHelper.has_element(attic, 'AtticType/CathedralCeiling')
         @attic_type = AtticTypeCathedral
       end
-      @vented_attic_sla = HPXML::to_float_or_nil(XMLHelper.get_value(attic, "[AtticType/Attic[Vented='true']]VentilationRate[UnitofMeasure='SLA']/Value"))
-      @vented_attic_constant_ach = HPXML::to_float_or_nil(XMLHelper.get_value(attic, "[AtticType/Attic[Vented='true']]extension/ConstantACHnatural"))
+      if @attic_type == AtticTypeVented
+        @vented_attic_sla = HPXML::to_float_or_nil(XMLHelper.get_value(attic, "VentilationRate[UnitofMeasure='SLA']/Value"))
+        @vented_attic_constant_ach = HPXML::to_float_or_nil(XMLHelper.get_value(attic, 'extension/ConstantACHnatural'))
+      end
       @within_infiltration_volume = HPXML::to_bool_or_nil(XMLHelper.get_value(attic, 'WithinInfiltrationVolume'))
       @attached_to_roof_idrefs = []
       attic.elements.each('AttachedToRoof') do |roof|
@@ -978,6 +984,7 @@ class HPXML < Object
       if @attached_to_slab_idrefs.size > list.size
         fail "Attached slab not found for foundation '#{@id}'."
       end
+
       return list
     end
 
@@ -988,6 +995,7 @@ class HPXML < Object
       if @attached_to_frame_floor_idrefs.size > list.size
         fail "Attached frame floor not found for foundation '#{@id}'."
       end
+
       return list
     end
 
@@ -998,6 +1006,7 @@ class HPXML < Object
       if @attached_to_foundation_wall_idrefs.size > list.size
         fail "Attached foundation wall not found for foundation '#{@id}'."
       end
+
       return list
     end
 
@@ -1098,8 +1107,11 @@ class HPXML < Object
       elsif XMLHelper.has_element(foundation, 'FoundationType/Ambient')
         @foundation_type = FoundationTypeAmbient
       end
-      @vented_crawlspace_sla = HPXML::to_float_or_nil(XMLHelper.get_value(foundation, "[FoundationType/Crawlspace[Vented='true']]VentilationRate[UnitofMeasure='SLA']/Value"))
-      @unconditioned_basement_thermal_boundary = XMLHelper.get_value(foundation, "[FoundationType/Basement[Conditioned='false']]ThermalBoundary")
+      if @foundation_type == FoundationTypeCrawlspaceVented
+        @vented_crawlspace_sla = HPXML::to_float_or_nil(XMLHelper.get_value(foundation, "VentilationRate[UnitofMeasure='SLA']/Value"))
+      elsif @foundation_type == FoundationTypeBasementUnconditioned
+        @unconditioned_basement_thermal_boundary = XMLHelper.get_value(foundation, 'ThermalBoundary')
+      end
       @within_infiltration_volume = HPXML::to_bool_or_nil(XMLHelper.get_value(foundation, 'WithinInfiltrationVolume'))
       @attached_to_slab_idrefs = []
       foundation.elements.each('AttachedToSlab') do |slab|
@@ -2211,8 +2223,11 @@ class HPXML < Object
       @heating_system_type = XMLHelper.get_child_name(heating_system, 'HeatingSystemType')
       @heating_system_fuel = XMLHelper.get_value(heating_system, 'HeatingSystemFuel')
       @heating_capacity = HPXML::to_float_or_nil(XMLHelper.get_value(heating_system, 'HeatingCapacity'))
-      @heating_efficiency_afue = HPXML::to_float_or_nil(XMLHelper.get_value(heating_system, "[HeatingSystemType[#{HVACTypeFurnace} | #{HVACTypeWallFurnace} | #{HVACTypeBoiler}]]AnnualHeatingEfficiency[Units='AFUE']/Value"))
-      @heating_efficiency_percent = HPXML::to_float_or_nil(XMLHelper.get_value(heating_system, "[HeatingSystemType[#{HVACTypeElectricResistance} | #{HVACTypeStove} | #{HVACTypePortableHeater}]]AnnualHeatingEfficiency[Units='Percent']/Value"))
+      if [HVACTypeFurnace, HVACTypeWallFurnace, HVACTypeBoiler].include? @heating_system_type
+        @heating_efficiency_afue = HPXML::to_float_or_nil(XMLHelper.get_value(heating_system, "AnnualHeatingEfficiency[Units='AFUE']/Value"))
+      elsif [HVACTypeElectricResistance, HVACTypeStove, HVACTypePortableHeater].include? @heating_system_type
+        @heating_efficiency_percent = HPXML::to_float_or_nil(XMLHelper.get_value(heating_system, "AnnualHeatingEfficiency[Units='Percent']/Value"))
+      end
       @fraction_heat_load_served = HPXML::to_float_or_nil(XMLHelper.get_value(heating_system, 'FractionHeatLoadServed'))
       @electric_auxiliary_energy = HPXML::to_float_or_nil(XMLHelper.get_value(heating_system, 'ElectricAuxiliaryEnergy'))
       @heating_cfm = HPXML::to_float_or_nil(XMLHelper.get_value(heating_system, 'extension/HeatingFlowRate'))
@@ -2312,8 +2327,11 @@ class HPXML < Object
       @cooling_capacity = HPXML::to_float_or_nil(XMLHelper.get_value(cooling_system, 'CoolingCapacity'))
       @compressor_type = XMLHelper.get_value(cooling_system, 'CompressorType')
       @fraction_cool_load_served = HPXML::to_float_or_nil(XMLHelper.get_value(cooling_system, 'FractionCoolLoadServed'))
-      @cooling_efficiency_seer = HPXML::to_float_or_nil(XMLHelper.get_value(cooling_system, "[CoolingSystemType='#{HVACTypeCentralAirConditioner}']AnnualCoolingEfficiency[Units='SEER']/Value"))
-      @cooling_efficiency_eer = HPXML::to_float_or_nil(XMLHelper.get_value(cooling_system, "[CoolingSystemType='#{HVACTypeRoomAirConditioner}']AnnualCoolingEfficiency[Units='EER']/Value"))
+      if [HVACTypeCentralAirConditioner].include? @cooling_system_type
+        @cooling_efficiency_seer = HPXML::to_float_or_nil(XMLHelper.get_value(cooling_system, "AnnualCoolingEfficiency[Units='SEER']/Value"))
+      elsif [HVACTypeRoomAirConditioner].include? @cooling_system_type
+        @cooling_efficiency_eer = HPXML::to_float_or_nil(XMLHelper.get_value(cooling_system, "AnnualCoolingEfficiency[Units='EER']/Value"))
+      end
       @cooling_shr = HPXML::to_float_or_nil(XMLHelper.get_value(cooling_system, 'SensibleHeatFraction'))
       @cooling_cfm = HPXML::to_float_or_nil(XMLHelper.get_value(cooling_system, 'extension/CoolingFlowRate'))
       @energy_star = XMLHelper.get_values(cooling_system, 'ThirdPartyCertification').include?('Energy Star')
@@ -2451,10 +2469,16 @@ class HPXML < Object
       @backup_heating_switchover_temp = HPXML::to_float_or_nil(XMLHelper.get_value(heat_pump, 'BackupHeatingSwitchoverTemperature'))
       @fraction_heat_load_served = HPXML::to_float_or_nil(XMLHelper.get_value(heat_pump, 'FractionHeatLoadServed'))
       @fraction_cool_load_served = HPXML::to_float_or_nil(XMLHelper.get_value(heat_pump, 'FractionCoolLoadServed'))
-      @cooling_efficiency_seer = HPXML::to_float_or_nil(XMLHelper.get_value(heat_pump, "[HeatPumpType='#{HVACTypeHeatPumpAirToAir}' or HeatPumpType='#{HVACTypeHeatPumpMiniSplit}']AnnualCoolingEfficiency[Units='SEER']/Value"))
-      @cooling_efficiency_eer = HPXML::to_float_or_nil(XMLHelper.get_value(heat_pump, "[HeatPumpType='#{HVACTypeHeatPumpGroundToAir}']AnnualCoolingEfficiency[Units='EER']/Value"))
-      @heating_efficiency_hspf = HPXML::to_float_or_nil(XMLHelper.get_value(heat_pump, "[HeatPumpType='#{HVACTypeHeatPumpAirToAir}' or HeatPumpType='#{HVACTypeHeatPumpMiniSplit}']AnnualHeatingEfficiency[Units='HSPF']/Value"))
-      @heating_efficiency_cop = HPXML::to_float_or_nil(XMLHelper.get_value(heat_pump, "[HeatPumpType='#{HVACTypeHeatPumpGroundToAir}']AnnualHeatingEfficiency[Units='COP']/Value"))
+      if [HVACTypeHeatPumpAirToAir, HVACTypeHeatPumpMiniSplit].include? @heat_pump_type
+        @cooling_efficiency_seer = HPXML::to_float_or_nil(XMLHelper.get_value(heat_pump, "AnnualCoolingEfficiency[Units='SEER']/Value"))
+      elsif [HVACTypeHeatPumpGroundToAir].include? @heat_pump_type
+        @cooling_efficiency_eer = HPXML::to_float_or_nil(XMLHelper.get_value(heat_pump, "AnnualCoolingEfficiency[Units='EER']/Value"))
+      end
+      if [HVACTypeHeatPumpAirToAir, HVACTypeHeatPumpMiniSplit].include? @heat_pump_type
+        @heating_efficiency_hspf = HPXML::to_float_or_nil(XMLHelper.get_value(heat_pump, "AnnualHeatingEfficiency[Units='HSPF']/Value"))
+      elsif [HVACTypeHeatPumpGroundToAir].include? @heat_pump_type
+        @heating_efficiency_cop = HPXML::to_float_or_nil(XMLHelper.get_value(heat_pump, "AnnualHeatingEfficiency[Units='COP']/Value"))
+      end
       @energy_star = XMLHelper.get_values(heat_pump, 'ThirdPartyCertification').include?('Energy Star')
       @seed_id = XMLHelper.get_value(heat_pump, 'extension/SeedId')
     end
@@ -2666,6 +2690,7 @@ class HPXML < Object
     def delete
       @hpxml_object.hvac_distributions.each do |hvac_distribution|
         next unless hvac_distribution.duct_leakage_measurements.include? self
+
         hvac_distribution.duct_leakage_measurements.delete(self)
       end
     end
@@ -2719,6 +2744,7 @@ class HPXML < Object
     def delete
       @hpxml_object.hvac_distributions.each do |hvac_distribution|
         next unless hvac_distribution.ducts.include? self
+
         hvac_distribution.ducts.delete(self)
       end
     end

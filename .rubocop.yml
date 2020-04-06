@@ -1,4 +1,15 @@
 Layout/EndOfLine:
   Enabled: false
+Layout/LineLength:
+  AutoCorrect: false
+  Enabled: false
+Layout/RescueEnsureAlignment:
+  AutoCorrect: true
 Style/FrozenStringLiteralComment:
   AutoCorrect: true
+Style/HashEachMethods:
+  Enabled: true
+Style/HashTransformKeys:
+  Enabled: true
+Style/HashTransformValues:
+  Enabled: true

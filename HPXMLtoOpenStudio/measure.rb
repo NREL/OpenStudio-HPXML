@@ -100,6 +100,7 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
     unless File.exist?(hpxml_path) && hpxml_path.downcase.end_with?('.xml')
       fail "'#{hpxml_path}' does not exist or is not an .xml file."
     end
+
     unless (Pathname.new weather_dir).absolute?
       weather_dir = File.expand_path(File.join(File.dirname(__FILE__), '..', weather_dir))
     end
@@ -404,17 +405,20 @@ class OSModel
     @hpxml.cooling_systems.each do |cooling_system|
       next unless cooling_system.cooling_system_type == HPXML::HVACTypeCentralAirConditioner
       next unless cooling_system.compressor_type.nil?
+
       cooling_system.compressor_type = HVAC.get_default_compressor_type(cooling_system.cooling_efficiency_seer)
     end
     @hpxml.heat_pumps.each do |heat_pump|
       next unless heat_pump.heat_pump_type == HPXML::HVACTypeHeatPumpAirToAir
       next unless heat_pump.compressor_type.nil?
+
       heat_pump.compressor_type = HVAC.get_default_compressor_type(heat_pump.cooling_efficiency_seer)
     end
 
     # Default AC/HP sensible heat ratio
     @hpxml.cooling_systems.each do |cooling_system|
       next unless cooling_system.cooling_shr.nil?
+
       if cooling_system.cooling_system_type == HPXML::HVACTypeCentralAirConditioner
         if cooling_system.compressor_type == HPXML::HVACCompressorTypeSingleStage
           cooling_system.cooling_shr = 0.73
@@ -429,6 +433,7 @@ class OSModel
     end
     @hpxml.heat_pumps.each do |heat_pump|
       next unless heat_pump.cooling_shr.nil?
+
       if heat_pump.heat_pump_type == HPXML::HVACTypeHeatPumpAirToAir
         if heat_pump.compressor_type == HPXML::HVACCompressorTypeSingleStage
           heat_pump.cooling_shr = 0.73
@@ -450,6 +455,7 @@ class OSModel
     # Default hot water temperature
     @hpxml.water_heating_systems.each do |water_heating_system|
       next unless water_heating_system.temperature.nil?
+
       water_heating_system.temperature = Waterheater.get_default_hot_water_temperature(@eri_version)
     end
 
@@ -457,6 +463,7 @@ class OSModel
     @hpxml.water_heating_systems.each do |water_heating_system|
       next unless water_heating_system.water_heater_type == HPXML::WaterHeaterTypeTankless
       next unless water_heating_system.performance_adjustment.nil?
+
       water_heating_system.performance_adjustment = Waterheater.get_tankless_cycling_derate()
     end
 
@@ -464,6 +471,7 @@ class OSModel
     @hpxml.water_heating_systems.each do |water_heating_system|
       next unless [HPXML::WaterHeaterTypeCombiStorage].include? water_heating_system.water_heater_type
       next unless water_heating_system.standby_loss.nil?
+
       # Use equation fit from AHRI database
       # calculate independent variable SurfaceArea/vol(physically linear to standby_loss/skin_u under test condition) to fit the linear equation from AHRI database
       act_vol = Waterheater.calc_storage_tank_actual_vol(water_heating_system.tank_volume, nil)

@@ -3289,7 +3289,7 @@ if ARGV[0].to_sym == :update_measures
   # Apply rubocop
   cops = ['Layout',
           'Lint/DeprecatedClassMethods',
-          'Lint/StringConversionInInterpolation',
+          'Lint/RedundantStringCoercion',
           'Style/AndOr',
           'Style/FrozenStringLiteralComment',
           'Style/HashSyntax',
