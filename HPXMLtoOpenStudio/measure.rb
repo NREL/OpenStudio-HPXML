@@ -2013,14 +2013,16 @@ class OSModel
       surface.setName("surface #{window.id}")
       surface.setSurfaceType('Wall')
       set_surface_interior(model, spaces, surface, window.wall.interior_adjacent_to)
-      assign_outside_boundary_condition_to_subsurface(surface, wall_exterior_adjacent_to, spaces, model)
-      surfaces << surface
 
       sub_surface = OpenStudio::Model::SubSurface.new(add_wall_polygon(window_width, window_height, z_origin,
                                                                        window.azimuth, [-0.0001, 0, 0.0001, 0]), model)
       sub_surface.setName(window.id)
       sub_surface.setSurface(surface)
       sub_surface.setSubSurfaceType('FixedWindow')
+
+      ## Outside boundary condtion needs to be assigned after subsurface attached, this will allow os to create adjacent surface for subsurface as well.
+      assign_outside_boundary_condition_to_subsurface(surface, wall_exterior_adjacent_to, spaces, model)
+      surfaces << surface
 
       if not overhang_depth.nil?
         overhang = sub_surface.addOverhang(UnitConversions.convert(overhang_depth, 'ft', 'm'), UnitConversions.convert(overhang_distance_to_top, 'ft', 'm'))
@@ -2108,16 +2110,17 @@ class OSModel
       surface.setName("surface #{door.id}")
       surface.setSurfaceType('Wall')
       set_surface_interior(model, spaces, surface, door.wall.interior_adjacent_to)
-      wall_exterior_adjacent_to = door.wall.exterior_adjacent_to
-      assign_outside_boundary_condition_to_subsurface(surface, wall_exterior_adjacent_to, spaces, model)
-
-      surfaces << surface
 
       sub_surface = OpenStudio::Model::SubSurface.new(add_wall_polygon(door_width, door_height, z_origin,
                                                                        door.azimuth, [0, 0, 0, 0]), model)
       sub_surface.setName(door.id)
       sub_surface.setSurface(surface)
       sub_surface.setSubSurfaceType('Door')
+      wall_exterior_adjacent_to = door.wall.exterior_adjacent_to
+
+      ## Outside boundary condtion needs to be assigned after subsurface attached, this will allow os to create adjacent surface for subsurface as well.
+      assign_outside_boundary_condition_to_subsurface(surface, wall_exterior_adjacent_to, spaces, model)
+      surfaces << surface
 
       # Apply construction
       ufactor = 1.0 / door.r_value
