@@ -271,7 +271,6 @@ class SimulationOutputReport < OpenStudio::Measure::ReportingMeasure
     end
 
     @timestamps = get_timestamps(timeseries_frequency)
-    fail "Unexpected timeseries_frequency: #{timeseries_frequency}." if @timestamps.empty?
 
     # Retrieve outputs
     outputs = get_outputs(timeseries_frequency,
@@ -823,6 +822,8 @@ class SimulationOutputReport < OpenStudio::Measure::ReportingMeasure
     end
 
     return if fuel_data.size + end_use_data.size + zone_temps_data.size + total_loads_data.size + comp_loads_data.size == 0
+
+    fail 'Unable to obtain timestamps.' if @timestamps.empty?
 
     # Assemble data
     data = data.zip(*fuel_data, *end_use_data, *zone_temps_data, *total_loads_data, *comp_loads_data)
