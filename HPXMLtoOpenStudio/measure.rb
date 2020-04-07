@@ -55,9 +55,9 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
     arg.setDefaultValue('weather')
     args << arg
 
-    arg = OpenStudio::Measure::OSArgument.makeStringArgument('output_path', true)
-    arg.setDisplayName('Path for Output Files')
-    arg.setDescription('Absolute/relative path for the output files.')
+    arg = OpenStudio::Measure::OSArgument.makeStringArgument('output_dir', false)
+    arg.setDisplayName('Directory for Output Files')
+    arg.setDescription('Absolute/relative path for the output files directory.')
     args << arg
 
     arg = OpenStudio::Measure::OSArgument.makeBoolArgument('debug', false)
@@ -78,15 +78,7 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
       return false
     end
 
-    # Tear down the existing model if it exists
-    handles = OpenStudio::UUIDVector.new
-    model.objects.each do |obj|
-      handles << obj.handle
-    end
-    model.removeObjects(handles)
-    unless handles.empty?
-      runner.registerWarning('The model contains existing objects and is being reset.')
-    end
+    tear_down_model(model, runner)
 
     # Check for correct versions of OS
     os_version = '2.9.1'
@@ -97,7 +89,7 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
     # assign the user inputs to variables
     hpxml_path = runner.getStringArgumentValue('hpxml_path', user_arguments)
     weather_dir = runner.getStringArgumentValue('weather_dir', user_arguments)
-    output_path = runner.getStringArgumentValue('output_path', user_arguments)
+    output_dir = runner.getOptionalStringArgumentValue('output_dir', user_arguments)
     debug = runner.getBoolArgumentValue('debug', user_arguments)
 
     unless (Pathname.new hpxml_path).absolute?
@@ -106,79 +98,47 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
     unless File.exist?(hpxml_path) && hpxml_path.downcase.end_with?('.xml')
       fail "'#{hpxml_path}' does not exist or is not an .xml file."
     end
-
-    unless (Pathname.new output_path).absolute?
-      output_path = File.expand_path(File.join(File.dirname(__FILE__), output_path))
+    unless (Pathname.new weather_dir).absolute?
+      weather_dir = File.expand_path(File.join(File.dirname(__FILE__), '..', weather_dir))
     end
-
-    model.getBuilding.additionalProperties.setFeature('hpxml_path', hpxml_path)
-
-    hpxml = HPXML.new(hpxml_path: hpxml_path)
-
-    if not validate_hpxml(runner, hpxml_path, hpxml)
-      return false
+    if output_dir.is_initialized
+      output_dir = output_dir.get
+      unless (Pathname.new output_dir).absolute?
+        output_dir = File.expand_path(File.join(File.dirname(__FILE__), output_dir))
+      end
+    else
+      output_dir = nil
     end
 
     begin
-      # Weather file
-      unless (Pathname.new weather_dir).absolute?
-        weather_dir = File.expand_path(File.join(File.dirname(__FILE__), '..', weather_dir))
+      hpxml = HPXML.new(hpxml_path: hpxml_path)
+
+      if not validate_hpxml(runner, hpxml_path, hpxml)
+        return false
       end
-      epw_path = hpxml.climate_and_risk_zones.weather_station_epw_filename
-      if not epw_path.nil?
-        epw_path = File.join(weather_dir, epw_path)
-        if not File.exist?(epw_path)
-          fail "'#{epw_path}' could not be found."
-        end
-      else
-        weather_wmo = hpxml.climate_and_risk_zones.weather_station_wmo
-        CSV.foreach(File.join(weather_dir, 'data.csv'), headers: true) do |row|
-          next if row['wmo'] != weather_wmo
 
-          epw_path = File.join(weather_dir, row['filename'])
-          if not File.exist?(epw_path)
-            fail "'#{epw_path}' could not be found."
-          end
+      epw_path, cache_path = process_weather(hpxml, runner, model, weather_dir, output_dir)
 
-          break
-        end
-        if epw_path.nil?
-          fail "Weather station WMO '#{weather_wmo}' could not be found in weather/data.csv."
-        end
-      end
-      cache_path = epw_path.gsub('.epw', '-cache.csv')
-      if not File.exist?(cache_path)
-        # Process weather file to create cache .csv
-        runner.registerWarning("'#{cache_path}' could not be found; regenerating it.")
-        epw_file = OpenStudio::EpwFile.new(epw_path)
-        OpenStudio::Model::WeatherFile.setWeatherFile(model, epw_file)
-        weather = WeatherProcess.new(model, runner)
-        File.open(cache_path, 'wb') do |file|
-          weather.dump_to_csv(file)
-        end
-      end
-      epw_output_path = File.join(output_path, 'in.epw')
-      FileUtils.cp(epw_path, epw_output_path)
-      runner.registerInfo("Copied EPW to: #{epw_output_path}")
-
-      # Apply Location to obtain weather data
-      weather = Location.apply(model, runner, epw_path, cache_path, 'NA', 'NA')
-
-      # Create OpenStudio model
-      OSModel.create(hpxml, runner, model, weather, hpxml_path, output_path, debug)
+      OSModel.create(hpxml, runner, model, hpxml_path, epw_path, cache_path, output_dir, debug)
     rescue Exception => e
-      # Report exception
       runner.registerError("#{e.message}\n#{e.backtrace.join("\n")}")
       return false
     end
 
-    if debug
-      osm_output_path = File.join(output_path, 'in.osm')
-      File.write(osm_output_path, model.to_s)
-      runner.registerInfo("Wrote file: #{osm_output_path}")
-    end
-
     return true
+  end
+
+  def tear_down_model(model, runner)
+    # Tear down the existing model if it exists
+    has_existing_objects = (model.getThermalZones.size > 0)
+    handles = OpenStudio::UUIDVector.new
+    model.objects.each do |obj|
+      handles << obj.handle
+    end
+    model.removeObjects(handles)
+    if has_existing_objects
+      runner.registerWarning('The model contains existing objects and is being reset.')
+    end
   end
 
   def validate_hpxml(runner, hpxml_path, hpxml)
@@ -208,31 +168,93 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
 
     return is_valid
   end
+
+  def process_weather(hpxml, runner, model, weather_dir, output_dir)
+    epw_path = hpxml.climate_and_risk_zones.weather_station_epw_filename
+
+    if not epw_path.nil?
+      epw_path = File.join(weather_dir, epw_path)
+      if not File.exist?(epw_path)
+        fail "'#{epw_path}' could not be found."
+      end
+    else
+      weather_wmo = hpxml.climate_and_risk_zones.weather_station_wmo
+      CSV.foreach(File.join(weather_dir, 'data.csv'), headers: true) do |row|
+        next if row['wmo'] != weather_wmo
+
+        epw_path = File.join(weather_dir, row['filename'])
+        if not File.exist?(epw_path)
+          fail "'#{epw_path}' could not be found."
+        end
+
+        break
+      end
+      if epw_path.nil?
+        fail "Weather station WMO '#{weather_wmo}' could not be found in #{File.join(weather_dir, 'data.csv')}."
+      end
+    end
+
+    cache_path = epw_path.gsub('.epw', '-cache.csv')
+    if not File.exist?(cache_path)
+      # Process weather file to create cache .csv
+      runner.registerWarning("'#{cache_path}' could not be found; regenerating it.")
+      epw_file = OpenStudio::EpwFile.new(epw_path)
+      OpenStudio::Model::WeatherFile.setWeatherFile(model, epw_file)
+      weather = WeatherProcess.new(model, runner)
+      File.open(cache_path, 'wb') do |file|
+        weather.dump_to_csv(file)
+      end
+    end
+
+    if not output_dir.nil?
+      epw_output_path = File.join(output_dir, 'in.epw')
+      FileUtils.cp(epw_path, epw_output_path)
+      runner.registerInfo("Copied EPW to: #{epw_output_path}")
+    end
+
+    return epw_path, cache_path
+  end
 end
 
 class OSModel
-  def self.create(hpxml, runner, model, weather, hpxml_path, output_path, debug)
+  def self.create(hpxml, runner, model, hpxml_path, epw_path, cache_path, output_dir, debug)
     @hpxml = hpxml
     @hpxml_path = hpxml_path
-    @output_path = output_path
+    @output_dir = output_dir
     @debug = debug
 
     @eri_version = @hpxml.header.eri_calculation_version # Hidden feature
     @eri_version = 'latest' if @eri_version.nil?
     @eri_version = Constants.ERIVersions[-1] if @eri_version == 'latest'
 
+    # Init
+    weather = Location.apply(model, runner, epw_path, cache_path, 'NA', 'NA')
     set_defaults_and_globals(runner)
-
-    # Simulation parameters
-
     add_simulation_params(model)
 
     # Geometry/Envelope
 
-    spaces = add_geometry_envelope(runner, model, weather)
-
-    # Bedrooms, Occupants
-
+    spaces = {}
+    create_or_get_space(model, spaces, HPXML::LocationLivingSpace)
+    @living_space = spaces[HPXML::LocationLivingSpace]
+    @living_zone = @living_space.thermalZone.get
+    @foundation_top, @walls_top = get_foundation_and_walls_top()
+    add_roofs(runner, model, spaces)
+    add_walls(runner, model, spaces)
+    add_rim_joists(runner, model, spaces)
+    add_frame_floors(runner, model, spaces)
+    add_foundation_walls_slabs(runner, model, spaces)
+    add_interior_shading_schedule(runner, model, weather)
+    add_windows(runner, model, spaces, weather)
+    add_doors(runner, model, spaces)
+    add_skylights(runner, model, spaces, weather)
+    add_conditioned_floor_area(runner, model, spaces)
+    add_thermal_mass(runner, model)
+    modify_cond_basement_surface_properties(runner, model)
+    assign_view_factor(runner, model)
+    check_for_errors(runner, model)
+    set_zone_volumes(runner, model)
+    explode_surfaces(runner, model)
     add_num_occupants(model, hpxml, runner)
 
     # HVAC
@@ -259,7 +281,14 @@ class OSModel
     add_hvac_sizing(runner, model, weather)
     add_fuel_heating_eae(runner, model)
     add_photovoltaics(runner, model)
-    add_outputs(runner, model)
+    add_additional_properties(runner, model)
+    add_component_loads_output(runner, model)
+
+    if debug && (not output_dir.nil?)
+      osm_output_path = File.join(output_dir, 'in.osm')
+      File.write(osm_output_path, model.to_s)
+      runner.registerInfo("Wrote file: #{osm_output_path}")
+    end
   end
 
   private
@@ -284,6 +313,7 @@ class OSModel
     @nbeds = @hpxml.building_construction.number_of_bedrooms
     @min_neighbor_distance = get_min_neighbor_distance()
     @default_azimuths = get_default_azimuths()
+    @has_uncond_bsmnt = @hpxml.has_space_type(HPXML::LocationBasementUnconditioned)
 
     @use_only_ideal_air = false
     if not @hpxml.building_construction.use_only_ideal_air_system.nil?
@@ -299,8 +329,16 @@ class OSModel
 
     # Default misc
     @hpxml.header.timestep = 60 if @hpxml.header.timestep.nil?
+    @hpxml.header.begin_month = 1 if @hpxml.header.begin_month.nil?
+    @hpxml.header.begin_day_of_month = 1 if @hpxml.header.begin_day_of_month.nil?
+    @hpxml.header.end_month = 12 if @hpxml.header.end_month.nil?
+    @hpxml.header.end_day_of_month = 31 if @hpxml.header.end_day_of_month.nil?
     @hpxml.site.shelter_coefficient = Airflow.get_default_shelter_coefficient() if @hpxml.site.shelter_coefficient.nil?
     @hpxml.building_occupancy.number_of_residents = Geometry.get_occupancy_default_num(@nbeds) if @hpxml.building_occupancy.number_of_residents.nil?
+    if @hpxml.building_construction.conditioned_building_volume.nil?
+      @hpxml.building_construction.conditioned_building_volume = @cfa * @hpxml.building_construction.average_ceiling_height
+    end
+    @cvolume = @hpxml.building_construction.conditioned_building_volume
 
     # Default attic/crawlspace ventilation rate
     if @hpxml.has_space_type(HPXML::LocationAtticVented)
@@ -333,7 +371,7 @@ class OSModel
       infilvolume = measurement.infiltration_volume unless infilvolume.nil?
     end
     if infilvolume.nil?
-      @infilvolume = @hpxml.building_construction.conditioned_building_volume
+      @infilvolume = @cvolume
       measurements.each do |measurement|
         measurement.infiltration_volume = @infilvolume
       end
@@ -432,6 +470,23 @@ class OSModel
       water_heating_system.standby_loss = (2.9721 * sqft_by_gal - 0.4732).round(3) # linear equation assuming a constant u, F/hr
     end
 
+    # Default water heater location based on Building America climate zone
+    @hpxml.water_heating_systems.each do |water_heating_system|
+      if water_heating_system.location.nil?
+        water_heating_system.location = Waterheater.get_default_location(@hpxml, @hpxml.climate_and_risk_zones.iecc_zone)
+      end
+    end
+
+    # Default water heater piping length
+    if @hpxml.water_heating_systems.size > 0
+      hot_water_distribution = @hpxml.hot_water_distributions[0]
+      if hot_water_distribution.system_type == HPXML::DHWDistTypeStandard
+        if hot_water_distribution.standard_piping_length.nil?
+          hot_water_distribution.standard_piping_length = HotWaterAndAppliances.get_default_std_pipe_length(@has_uncond_bsmnt, @cfa, @ncfl)
+        end
+      end
+    end
+
     # Default ceiling fans efficiency/quantity
     if @hpxml.ceiling_fans.size > 0
       ceiling_fan = @hpxml.ceiling_fans[0]
@@ -447,7 +502,7 @@ class OSModel
     # Default plug loads kwh/year, frac sensible/latent
     @hpxml.plug_loads.each do |plug_load|
       if plug_load.plug_load_type == HPXML::PlugLoadTypeOther
-        default_annual_kwh, default_sens_frac, default_lat_frac = MiscLoads.get_residual_mels_values(@cfa)
+        default_annual_kwh, default_sens_frac, default_lat_frac = MiscLoads.get_residual_mels_default_values(@cfa)
         if plug_load.kWh_per_year.nil?
           plug_load.kWh_per_year = default_annual_kwh
         end
@@ -458,7 +513,7 @@ class OSModel
           plug_load.frac_latent = default_lat_frac
         end
       elsif plug_load.plug_load_type == HPXML::PlugLoadTypeTelevision
-        default_annual_kwh, default_sens_frac, default_lat_frac = MiscLoads.get_televisions_values(@cfa, @nbeds)
+        default_annual_kwh, default_sens_frac, default_lat_frac = MiscLoads.get_televisions_default_values(@cfa, @nbeds)
         if plug_load.kWh_per_year.nil?
           plug_load.kWh_per_year = default_annual_kwh
         end
@@ -476,9 +531,93 @@ class OSModel
       @hpxml.misc_loads_schedule.monthly_multipliers = '1.248, 1.257, 0.993, 0.989, 0.993, 0.827, 0.821, 0.821, 0.827, 0.99, 0.987, 1.248'
     end
 
-    if @debug
+    # Default clothes washer location, rated annual kWh, label electric rate, label gas rate, label annual gas cost, capacity, and modified energy factor
+    if @hpxml.clothes_washers.size > 0
+      clothes_washer = @hpxml.clothes_washers[0]
+      if clothes_washer.location.nil?
+        clothes_washer.location = HPXML::LocationLivingSpace
+      end
+      if clothes_washer.rated_annual_kwh.nil?
+        default_values = HotWaterAndAppliances.get_clothes_washer_default_values(@eri_version)
+        clothes_washer.integrated_modified_energy_factor = default_values[:integrated_modified_energy_factor]
+        clothes_washer.rated_annual_kwh = default_values[:rated_annual_kwh]
+        clothes_washer.label_electric_rate = default_values[:label_electric_rate]
+        clothes_washer.label_gas_rate = default_values[:label_gas_rate]
+        clothes_washer.label_annual_gas_cost = default_values[:label_annual_gas_cost]
+        clothes_washer.capacity = default_values[:capacity]
+        clothes_washer.usage = default_values[:usage]
+      end
+    end
+
+    # Default clothes dryer location, control type, and energy factor
+    if @hpxml.clothes_dryers.size > 0
+      clothes_dryer = @hpxml.clothes_dryers[0]
+      if clothes_dryer.location.nil?
+        clothes_dryer.location = HPXML::LocationLivingSpace
+      end
+      if clothes_dryer.control_type.nil?
+        default_values = HotWaterAndAppliances.get_clothes_dryer_default_values(@eri_version, clothes_dryer.fuel_type)
+        clothes_dryer.control_type = default_values[:control_type]
+        clothes_dryer.combined_energy_factor = default_values[:combined_energy_factor]
+      end
+    end
+
+    # Default dishwasher place setting capacity and energy factor
+    if @hpxml.dishwashers.size > 0
+      dishwasher = @hpxml.dishwashers[0]
+      if dishwasher.place_setting_capacity.nil?
+        default_values = HotWaterAndAppliances.get_dishwasher_default_values()
+        dishwasher.rated_annual_kwh = default_values[:rated_annual_kwh]
+        dishwasher.label_electric_rate = default_values[:label_electric_rate]
+        dishwasher.label_gas_rate = default_values[:label_gas_rate]
+        dishwasher.label_annual_gas_cost = default_values[:label_annual_gas_cost]
+        dishwasher.place_setting_capacity = default_values[:place_setting_capacity]
+      end
+    end
+
+    # Default refrigerator location and adjusted annual kWh
+    if @hpxml.refrigerators.size > 0
+      refrigerator = @hpxml.refrigerators[0]
+      if refrigerator.location.nil?
+        refrigerator.location = HPXML::LocationLivingSpace
+      end
+      if refrigerator.adjusted_annual_kwh.nil? && refrigerator.rated_annual_kwh.nil?
+        default_values = HotWaterAndAppliances.get_refrigerator_default_values(@nbeds)
+        refrigerator.rated_annual_kwh = default_values[:rated_annual_kwh]
+      end
+    end
+
+    # Default cooking range/oven type
+    if @hpxml.cooking_ranges.size > 0
+      cooking_range = @hpxml.cooking_ranges[0]
+      if cooking_range.is_induction.nil?
+        default_values = HotWaterAndAppliances.get_range_oven_default_values()
+        cooking_range.is_induction = default_values[:is_induction]
+      end
+    end
+
+    # Default oven type
+    if @hpxml.ovens.size > 0
+      oven = @hpxml.ovens[0]
+      if oven.is_convection.nil?
+        default_values = HotWaterAndAppliances.get_range_oven_default_values()
+        oven.is_convection = default_values[:is_convection]
+      end
+    end
+
+    # Default PV systems inverter efficiency and system loss fraction
+    @hpxml.pv_systems.each do |pv_system|
+      if pv_system.inverter_efficiency.nil?
+        pv_system.inverter_efficiency = PV.get_default_inv_eff()
+      end
+      if pv_system.system_losses_fraction.nil?
+        pv_system.system_losses_fraction = PV.get_default_system_losses(pv_system.year_modules_manufactured)
+      end
+    end
+
+    if @debug && (not @output_dir.nil?)
       # Write updated HPXML object to file
-      hpxml_defaults_path = File.join(@output_path, 'in.xml')
+      hpxml_defaults_path = File.join(@output_dir, 'in.xml')
       XMLHelper.write_file(@hpxml.to_rexml, hpxml_defaults_path)
       runner.registerInfo("Wrote file: #{hpxml_defaults_path}")
     end
@@ -506,35 +645,12 @@ class OSModel
 
     convlim = model.getConvergenceLimits
     convlim.setMinimumSystemTimestep(0)
-  end
 
-  def self.add_geometry_envelope(runner, model, weather)
-    spaces = {}
-    @foundation_top, @walls_top = get_foundation_and_walls_top()
-
-    add_roofs(runner, model, spaces)
-    add_walls(runner, model, spaces)
-    add_rim_joists(runner, model, spaces)
-    add_frame_floors(runner, model, spaces)
-    add_foundation_walls_slabs(runner, model, spaces)
-    add_interior_shading_schedule(runner, model, weather)
-    add_windows(runner, model, spaces, weather)
-    add_doors(runner, model, spaces)
-    add_skylights(runner, model, spaces, weather)
-    add_conditioned_floor_area(runner, model, spaces)
-
-    # update living space/zone global variable
-    @living_space = get_space_of_type(spaces, HPXML::LocationLivingSpace)
-    @living_zone = @living_space.thermalZone.get
-
-    add_thermal_mass(runner, model)
-    modify_cond_basement_surface_properties(runner, model)
-    assign_view_factor(runner, model)
-    check_for_errors(runner, model)
-    set_zone_volumes(runner, model)
-    explode_surfaces(runner, model)
-
-    return spaces
+    run_period = model.getRunPeriod
+    run_period.setBeginMonth(@hpxml.header.begin_month)
+    run_period.setBeginDayOfMonth(@hpxml.header.begin_day_of_month)
+    run_period.setEndMonth(@hpxml.header.end_month)
+    run_period.setEndDayOfMonth(@hpxml.header.end_day_of_month)
   end
 
   def self.set_zone_volumes(runner, model)
@@ -572,7 +688,7 @@ class OSModel
     thermal_zones.each do |thermal_zone|
       if Geometry.is_living(thermal_zone)
         zones_updated += 1
-        thermal_zone.setVolume(UnitConversions.convert(@hpxml.building_construction.conditioned_building_volume, 'ft^3', 'm^3'))
+        thermal_zone.setVolume(UnitConversions.convert(@cvolume, 'ft^3', 'm^3'))
       end
     end
 
@@ -2031,66 +2147,29 @@ class OSModel
     if @hpxml.clothes_washers.size > 0
       clothes_washer = @hpxml.clothes_washers[0]
       cw_space = get_space_from_location(clothes_washer.location, 'ClothesWasher', model, spaces)
-      cw_ler = clothes_washer.rated_annual_kwh
-      cw_elec_rate = clothes_washer.label_electric_rate
-      cw_gas_rate = clothes_washer.label_gas_rate
-      cw_agc = clothes_washer.label_annual_gas_cost
-      cw_cap = clothes_washer.capacity
-      cw_mef = clothes_washer.modified_energy_factor
-      if cw_mef.nil?
-        cw_mef = HotWaterAndAppliances.calc_clothes_washer_mef_from_imef(clothes_washer.integrated_modified_energy_factor)
-      end
-    else
-      cw_mef = cw_ler = cw_elec_rate = cw_gas_rate = cw_agc = cw_cap = cw_space = nil
     end
 
     # Clothes Dryer
     if @hpxml.clothes_dryers.size > 0
       clothes_dryer = @hpxml.clothes_dryers[0]
       cd_space = get_space_from_location(clothes_dryer.location, 'ClothesDryer', model, spaces)
-      cd_fuel = clothes_dryer.fuel_type
-      cd_control = clothes_dryer.control_type
-      cd_ef = clothes_dryer.energy_factor
-      if cd_ef.nil?
-        cd_ef = HotWaterAndAppliances.calc_clothes_dryer_ef_from_cef(clothes_dryer.combined_energy_factor)
-      end
-    else
-      cd_ef = cd_control = cd_fuel = cd_space = nil
     end
 
     # Dishwasher
     if @hpxml.dishwashers.size > 0
       dishwasher = @hpxml.dishwashers[0]
-      dw_cap = dishwasher.place_setting_capacity
-      dw_ef = dishwasher.energy_factor
-      if dw_ef.nil?
-        dw_ef = HotWaterAndAppliances.calc_dishwasher_ef_from_annual_kwh(dishwasher.rated_annual_kwh)
-      end
-    else
-      dw_ef = dw_cap = nil
     end
 
     # Refrigerator
     if @hpxml.refrigerators.size > 0
       refrigerator = @hpxml.refrigerators[0]
-      fridge_space = get_space_from_location(refrigerator.location, 'Refrigerator', model, spaces)
-      fridge_annual_kwh = refrigerator.adjusted_annual_kwh
-      if fridge_annual_kwh.nil?
-        fridge_annual_kwh = refrigerator.rated_annual_kwh
-      end
-    else
-      fridge_annual_kwh = fridge_space = nil
+      rf_space = get_space_from_location(refrigerator.location, 'Refrigerator', model, spaces)
     end
 
     # Cooking Range/Oven
     if (@hpxml.cooking_ranges.size > 0) && (@hpxml.ovens.size > 0)
       cooking_range = @hpxml.cooking_ranges[0]
       oven = @hpxml.ovens[0]
-      cook_fuel_type = cooking_range.fuel_type
-      cook_is_induction = cooking_range.is_induction
-      oven_is_convection = oven.is_convection
-    else
-      cook_fuel_type = cook_is_induction = oven_is_convection = nil
     end
 
     # Fixtures
@@ -2148,7 +2227,6 @@ class OSModel
     water_heater_spaces = {}
     combi_sys_id_list = []
     avg_setpoint_temp = 0.0 # Weighted average by fraction DHW load served
-    has_uncond_bsmnt = @hpxml.has_space_type(HPXML::LocationBasementUnconditioned)
     if @hpxml.water_heating_systems.size > 0
       @hpxml.water_heating_systems.each do |water_heating_system|
         sys_id = water_heating_system.id
@@ -2184,7 +2262,7 @@ class OSModel
         end
         solar_fraction = 0.0 if solar_fraction.nil?
 
-        ec_adj = HotWaterAndAppliances.get_dist_energy_consumption_adjustment(has_uncond_bsmnt, @cfa, @ncfl,
+        ec_adj = HotWaterAndAppliances.get_dist_energy_consumption_adjustment(@has_uncond_bsmnt, @cfa, @ncfl,
                                                                               dist_type, recirc_control_type,
                                                                               pipe_r, std_pipe_length, recirc_loop_length)
 
@@ -2245,11 +2323,9 @@ class OSModel
     end
 
     HotWaterAndAppliances.apply(model, weather, @living_space,
-                                @cfa, @nbeds, @ncfl, has_uncond_bsmnt, avg_setpoint_temp,
-                                cw_mef, cw_ler, cw_elec_rate, cw_gas_rate,
-                                cw_agc, cw_cap, cw_space, cd_fuel, cd_ef, cd_control,
-                                cd_space, dw_ef, dw_cap, fridge_annual_kwh, fridge_space,
-                                cook_fuel_type, cook_is_induction, oven_is_convection,
+                                @cfa, @nbeds, @ncfl, @has_uncond_bsmnt, avg_setpoint_temp,
+                                clothes_washer, cw_space, clothes_dryer, cd_space,
+                                dishwasher, refrigerator, rf_space, cooking_range, oven,
                                 has_low_flow_fixtures, dist_type, pipe_r,
                                 std_pipe_length, recirc_loop_length,
                                 recirc_branch_length, recirc_control_type,
@@ -2888,7 +2964,7 @@ class OSModel
                                                               fractions[[HPXML::LocationExterior, HPXML::LightingTypeTierII]],
                                                               fractions[[HPXML::LocationGarage, HPXML::LightingTypeTierII]])
 
-    garage_space = get_space_of_type(spaces, HPXML::LocationGarage)
+    garage_space = spaces[HPXML::LocationGarage]
     Lighting.apply(model, weather, int_kwh, grg_kwh, ext_kwh, @cfa, @gfa,
                    @living_space, garage_space)
   end
@@ -3209,12 +3285,12 @@ class OSModel
     end
   end
 
-  def self.add_outputs(runner, model)
+  def self.add_additional_properties(runner, model)
     # Store some data for use in reporting measure
-    model.getBuilding.additionalProperties.setFeature('hvac_map', map_to_string(@hvac_map))
-    model.getBuilding.additionalProperties.setFeature('dhw_map', map_to_string(@dhw_map))
-
-    add_component_loads_output(runner, model)
+    additionalProperties = model.getBuilding.additionalProperties
+    additionalProperties.setFeature('hpxml_path', @hpxml_path)
+    additionalProperties.setFeature('hvac_map', map_to_string(@hvac_map))
+    additionalProperties.setFeature('dhw_map', map_to_string(@dhw_map))
   end
 
   def self.map_to_string(map)
@@ -3447,6 +3523,7 @@ class OSModel
       plenum_zones.each do |plenum_zone|
         model.getOtherEquipments.sort.each do |o|
           next unless o.space.get.thermalZone.get.name.to_s == plenum_zone.name.to_s
+          next if objects_already_processed.include? o
 
           ducts_sensors << []
           { 'Other Equipment Convective Heating Energy' => 'ducts_conv',
@@ -3465,6 +3542,7 @@ class OSModel
         model.getOtherEquipments.sort.each do |o|
           next unless o.space.get.thermalZone.get.name.to_s == @living_zone.name.to_s
           next unless o.name.to_s.start_with? airloop.name.to_s.gsub(' ', '_')
+          next if objects_already_processed.include? o
 
           ducts_sensors << []
           { 'Other Equipment Convective Heating Energy' => 'ducts_conv',
@@ -4123,25 +4201,6 @@ class OSModel
     end
 
     return space
-  end
-
-  def self.get_spaces_of_type(spaces, space_types_list)
-    spaces_of_type = []
-    space_types_list.each do |space_type|
-      spaces_of_type << spaces[space_type] unless spaces[space_type].nil?
-    end
-    return spaces_of_type
-  end
-
-  def self.get_space_of_type(spaces, space_type)
-    spaces_of_type = get_spaces_of_type(spaces, [space_type])
-    if spaces_of_type.size > 1
-      fail 'Unexpected number of spaces.'
-    elsif spaces_of_type.size == 1
-      return spaces_of_type[0]
-    end
-
-    return
   end
 
   def self.get_min_neighbor_distance()
