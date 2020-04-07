@@ -1940,25 +1940,11 @@ class OSModel
   end
 
   def self.add_neighbors(runner, model, length)
-    # Get the max z-value of any model surface
-    default_height = -9e99
-    model.getSpaces.each do |space|
-      z_origin = space.zOrigin
-      space.surfaces.each do |surface|
-        surface.vertices.each do |vertex|
-          surface_z = vertex.z + z_origin
-          next if surface_z < default_height
-
-          default_height = surface_z
-        end
-      end
-    end
-    default_height = UnitConversions.convert(default_height, 'm', 'ft')
     z_origin = 0 # shading surface always starts at grade
 
     shading_surfaces = []
     @hpxml.neighbor_buildings.each do |neighbor_building|
-      height = neighbor_building.height.nil? ? default_height : neighbor_building.height
+      height = neighbor_building.height.nil? ? @walls_top : neighbor_building.height
 
       shading_surface = OpenStudio::Model::ShadingSurface.new(add_wall_polygon(length, height, z_origin, neighbor_building.azimuth), model)
       shading_surface.additionalProperties.setFeature('Azimuth', neighbor_building.azimuth)
