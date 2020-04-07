@@ -1840,6 +1840,12 @@ def set_hpxml_heating_systems(hpxml_file, hpxml)
     hpxml.heating_systems[0].heating_capacity /= 10.0
   elsif ['base-hvac-flowrate.xml'].include? hpxml_file
     hpxml.heating_systems[0].heating_cfm = hpxml.heating_systems[0].heating_capacity * 360.0 / 12000.0
+  elsif ['base-hvac-ducts-multiple.xml'].include? hpxml_file
+    hpxml.heating_systems[0].heating_capacity /= 2.0
+    hpxml.heating_systems[0].fraction_heat_load_served = 0.5
+    hpxml.heating_systems << hpxml.heating_systems[0].dup
+    hpxml.heating_systems[1].id = 'HeatingSystem2'
+    hpxml.heating_systems[1].distribution_system_idref = 'HVACDistribution2'
   elsif hpxml_file.include?('hvac_autosizing') && (not hpxml.heating_systems.nil?) && (hpxml.heating_systems.size > 0)
     hpxml.heating_systems[0].heating_capacity = -1
   elsif hpxml_file.include?('-zero-heat.xml') && (not hpxml.heating_systems.nil?) && (hpxml.heating_systems.size > 0)
@@ -1960,6 +1966,12 @@ def set_hpxml_cooling_systems(hpxml_file, hpxml)
     hpxml.cooling_systems[0].cooling_capacity /= 10.0
   elsif ['base-hvac-flowrate.xml'].include? hpxml_file
     hpxml.cooling_systems[0].cooling_cfm = hpxml.cooling_systems[0].cooling_capacity * 360.0 / 12000.0
+  elsif ['base-hvac-ducts-multiple.xml'].include? hpxml_file
+    hpxml.cooling_systems[0].cooling_capacity /= 2.0
+    hpxml.cooling_systems[0].fraction_cool_load_served = 0.5
+    hpxml.cooling_systems << hpxml.cooling_systems[0].dup
+    hpxml.cooling_systems[1].id = 'CoolingSystem2'
+    hpxml.cooling_systems[1].distribution_system_idref = 'HVACDistribution2'
   elsif ['base-misc-defaults.xml'].include? hpxml_file
     hpxml.cooling_systems[0].cooling_shr = nil
     hpxml.cooling_systems[0].compressor_type = nil
@@ -2430,6 +2442,8 @@ def set_hpxml_hvac_distributions(hpxml_file, hpxml)
                                           duct_insulation_r_value: 4,
                                           duct_location: HPXML::LocationOutside,
                                           duct_surface_area: 100)
+    hpxml.hvac_distributions << hpxml.hvac_distributions[0].dup
+    hpxml.hvac_distributions[1].id = 'HVACDistribution2'
   elsif ['base-atticroof-conditioned.xml',
          'base-enclosure-adiabatic-surfaces.xml',
          'base-atticroof-cathedral.xml',
