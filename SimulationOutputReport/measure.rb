@@ -270,8 +270,8 @@ class SimulationOutputReport < OpenStudio::Measure::ReportingMeasure
       timeseries_output_csv_path = File.join(output_dir, 'results_timeseries.csv')
     end
 
-    @timeseries_size = get_timeseries_size(timeseries_frequency)
-    fail "Unexpected timeseries_frequency: #{timeseries_frequency}." if @timeseries_size.nil?
+    @timestamps = get_timestamps(timeseries_frequency)
+    fail "Unexpected timeseries_frequency: #{timeseries_frequency}." if @timestamps.empty?
 
     # Retrieve outputs
     outputs = get_outputs(timeseries_frequency,
@@ -300,25 +300,55 @@ class SimulationOutputReport < OpenStudio::Measure::ReportingMeasure
     return true
   end
 
-  def get_timeseries_size(timeseries_frequency)
+  def get_timestamps(timeseries_frequency)
     year_description = @model.getYearDescription
     run_period = @model.getRunPeriod
+    tstep = 60 / @model.getTimestep.numberOfTimestepsPerHour # minutes
 
-    start_time = Time.new(year_description.assumedYear, run_period.getBeginMonth, run_period.getBeginDayOfMonth)
-    end_time = Time.new(year_description.assumedYear, run_period.getEndMonth, run_period.getEndDayOfMonth, 24)
+    year = year_description.assumedYear
+    start_time = Time.new(year, run_period.getBeginMonth, run_period.getBeginDayOfMonth)
+    end_time = Time.new(year, run_period.getEndMonth, run_period.getEndDayOfMonth, 24)
 
-    timeseries_size = (end_time - start_time).to_i # seconds
-    if timeseries_frequency == 'hourly'
-      timeseries_size /= 3600
-    elsif timeseries_frequency == 'daily'
-      timeseries_size /= 3600
-      timeseries_size /= 24
-    elsif timeseries_frequency == 'timestep'
-      timeseries_size /= 3600
-      timeseries_size *= @model.getTimestep.numberOfTimestepsPerHour
+    months_days = { [1, 3, 5, 7, 8, 10, 12] => (1..31).to_a, [4, 6, 9, 11] => (1..30).to_a, [2] => (1..28).to_a }
+
+    timestamps = []
+    (1..12).each do |month|
+      months_days.each do |months, days|
+        next unless months.include? month
+
+        days.each do |day|
+          if ['hourly', 'timestep'].include? timeseries_frequency
+            (1..24).each do |hour|
+              if (timeseries_frequency == 'hourly') || (tstep == 60)
+                ts = ts = Time.new(year, month, day, hour)
+                next if (ts < start_time) || (ts > end_time) # in the run period
+
+                timestamps << ts.strftime('%Y/%m/%d %H:00:00')
+              elsif timeseries_frequency == 'timestep'
+                hour -= 1
+                (tstep..60).step(tstep).to_a.each do |minute|
+                  if minute == 60
+                    hour += 1
+                    minute = 0
+                  end
+                  ts = ts = Time.new(year, month, day, hour, minute)
+                  next if (ts < start_time) || (ts > end_time) # in the run period
+
+                  timestamps << ts.strftime('%Y/%m/%d %H:%M:00')
+                end
+              end
+            end
+          elsif timeseries_frequency == 'daily'
+            ts = ts = Time.new(year, month, day)
+            next if (ts < start_time) || (ts >= end_time) # in the run period
+
+            timestamps << ts.strftime('%Y/%m/%d 00:00:00')
+          end
+        end
+      end
     end
 
-    return timeseries_size
+    return timestamps
   end
 
   def get_outputs(timeseries_frequency,
@@ -793,17 +823,13 @@ class SimulationOutputReport < OpenStudio::Measure::ReportingMeasure
                                       include_timeseries_total_loads,
                                       include_timeseries_component_loads)
     # Time column
-    if timeseries_frequency == 'hourly'
-      data = ['Hour', '#']
-    elsif timeseries_frequency == 'daily'
-      data = ['Day', '#']
-    elsif timeseries_frequency == 'timestep'
-      data = ['Timestep', '#']
+    if ['hourly', 'daily', 'timestep'].include? timeseries_frequency
+      data = ['Time', '']
     else
       fail "Unexpected timeseries_frequency: #{timeseries_frequency}."
     end
-    for i in 1..@timeseries_size
-      data << i
+    @timestamps.each do |timestamp|
+      data << timestamp
     end
 
     if include_timeseries_fuel_consumptions
@@ -1163,7 +1189,7 @@ class SimulationOutputReport < OpenStudio::Measure::ReportingMeasure
     fail "Query error: #{query}" unless values.is_initialized
 
     values = values.get
-    values += [0.0] * @timeseries_size if values.size == 0
+    values += [0.0] * @timestamps.size if values.size == 0
     return values
   end
 
@@ -1175,7 +1201,7 @@ class SimulationOutputReport < OpenStudio::Measure::ReportingMeasure
     fail "Query error: #{query}" unless values.is_initialized
 
     values = values.get
-    values += [0.0] * @timeseries_size if values.size == 0
+    values += [0.0] * @timestamps.size if values.size == 0
     if (key_values_list.size == 1) && (key_values_list[0] == 'EMS')
       # Shift all values by 1 timestep due to EMS reporting lag
       return values[1..-1] + [values[-1]]
