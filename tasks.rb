@@ -548,28 +548,25 @@ end
 
 def set_hpxml_climate_and_risk_zones(hpxml_file, hpxml)
   if ['base.xml'].include? hpxml_file
-    hpxml.climate_and_risk_zones.iecc2006 = '5B'
+    hpxml.climate_and_risk_zones.iecc_year = 2006
+    hpxml.climate_and_risk_zones.iecc_zone = '5B'
     hpxml.climate_and_risk_zones.weather_station_id = 'WeatherStation'
     hpxml.climate_and_risk_zones.weather_station_name = 'Denver, CO'
     hpxml.climate_and_risk_zones.weather_station_wmo = '725650'
   elsif ['base-location-baltimore-md.xml'].include? hpxml_file
-    hpxml.climate_and_risk_zones.iecc2006 = '4A'
-    hpxml.climate_and_risk_zones.weather_station_id = 'WeatherStation'
+    hpxml.climate_and_risk_zones.iecc_zone = '4A'
     hpxml.climate_and_risk_zones.weather_station_name = 'Baltimore, MD'
     hpxml.climate_and_risk_zones.weather_station_wmo = '724060'
   elsif ['base-location-dallas-tx.xml'].include? hpxml_file
-    hpxml.climate_and_risk_zones.iecc2006 = '3A'
-    hpxml.climate_and_risk_zones.weather_station_id = 'WeatherStation'
+    hpxml.climate_and_risk_zones.iecc_zone = '3A'
     hpxml.climate_and_risk_zones.weather_station_name = 'Dallas, TX'
     hpxml.climate_and_risk_zones.weather_station_wmo = '722590'
   elsif ['base-location-duluth-mn.xml'].include? hpxml_file
-    hpxml.climate_and_risk_zones.iecc2006 = '7'
-    hpxml.climate_and_risk_zones.weather_station_id = 'WeatherStation'
+    hpxml.climate_and_risk_zones.iecc_zone = '7'
     hpxml.climate_and_risk_zones.weather_station_name = 'Duluth, MN'
     hpxml.climate_and_risk_zones.weather_station_wmo = '727450'
   elsif ['base-location-miami-fl.xml'].include? hpxml_file
-    hpxml.climate_and_risk_zones.iecc2006 = '1A'
-    hpxml.climate_and_risk_zones.weather_station_id = 'WeatherStation'
+    hpxml.climate_and_risk_zones.iecc_zone = '1A'
     hpxml.climate_and_risk_zones.weather_station_name = 'Miami, FL'
     hpxml.climate_and_risk_zones.weather_station_wmo = '722020'
   elsif ['base-location-epw-filename.xml'].include? hpxml_file
@@ -2970,17 +2967,19 @@ def set_hpxml_clothes_washer(hpxml_file, hpxml)
   if ['base.xml'].include? hpxml_file
     hpxml.clothes_washers.add(id: 'ClothesWasher',
                               location: HPXML::LocationLivingSpace,
-                              modified_energy_factor: 0.8,
-                              rated_annual_kwh: 700.0,
-                              label_electric_rate: 0.10,
-                              label_gas_rate: 0.60,
-                              label_annual_gas_cost: 25.0,
-                              capacity: 3.0)
+                              integrated_modified_energy_factor: 1.21,
+                              rated_annual_kwh: 380,
+                              label_electric_rate: 0.12,
+                              label_gas_rate: 1.09,
+                              label_annual_gas_cost: 27,
+                              capacity: 3.2,
+                              usage: 6)
   elsif ['base-appliances-none.xml'].include? hpxml_file
     hpxml.clothes_washers.clear()
   elsif ['base-appliances-modified.xml'].include? hpxml_file
-    hpxml.clothes_washers[0].modified_energy_factor = nil
-    hpxml.clothes_washers[0].integrated_modified_energy_factor = 0.73
+    imef = hpxml.clothes_washers[0].integrated_modified_energy_factor
+    hpxml.clothes_washers[0].integrated_modified_energy_factor = nil
+    hpxml.clothes_washers[0].modified_energy_factor = HotWaterAndAppliances.calc_clothes_washer_mef_from_imef(imef).round(2)
   elsif ['base-foundation-unconditioned-basement.xml'].include? hpxml_file
     hpxml.clothes_washers[0].location = HPXML::LocationBasementUnconditioned
   elsif ['base-atticroof-conditioned.xml'].include? hpxml_file
@@ -2999,6 +2998,7 @@ def set_hpxml_clothes_washer(hpxml_file, hpxml)
     hpxml.clothes_washers[0].label_gas_rate = nil
     hpxml.clothes_washers[0].label_annual_gas_cost = nil
     hpxml.clothes_washers[0].capacity = nil
+    hpxml.clothes_washers[0].usage = nil
   end
 end
 
@@ -3007,16 +3007,17 @@ def set_hpxml_clothes_dryer(hpxml_file, hpxml)
     hpxml.clothes_dryers.add(id: 'ClothesDryer',
                              location: HPXML::LocationLivingSpace,
                              fuel_type: HPXML::FuelTypeElectricity,
-                             energy_factor: 2.95,
+                             combined_energy_factor: 3.73,
                              control_type: HPXML::ClothesDryerControlTypeTimer)
   elsif ['base-appliances-none.xml'].include? hpxml_file
     hpxml.clothes_dryers.clear()
   elsif ['base-appliances-modified.xml'].include? hpxml_file
+    cef = hpxml.clothes_dryers[-1].combined_energy_factor
     hpxml.clothes_dryers.clear()
     hpxml.clothes_dryers.add(id: 'ClothesDryer',
                              location: HPXML::LocationLivingSpace,
                              fuel_type: HPXML::FuelTypeElectricity,
-                             combined_energy_factor: 2.62,
+                             energy_factor: HotWaterAndAppliances.calc_clothes_dryer_ef_from_cef(cef).round(2),
                              control_type: HPXML::ClothesDryerControlTypeMoisture)
   elsif ['base-appliances-gas.xml',
          'base-appliances-propane.xml',
@@ -3024,7 +3025,7 @@ def set_hpxml_clothes_dryer(hpxml_file, hpxml)
     hpxml.clothes_dryers.clear()
     hpxml.clothes_dryers.add(id: 'ClothesDryer',
                              location: HPXML::LocationLivingSpace,
-                             energy_factor: 2.67,
+                             combined_energy_factor: 3.30,
                              control_type: HPXML::ClothesDryerControlTypeMoisture)
     if hpxml_file == 'base-appliances-gas.xml'
       hpxml.clothes_dryers[0].fuel_type = HPXML::FuelTypeNaturalGas
@@ -3038,7 +3039,7 @@ def set_hpxml_clothes_dryer(hpxml_file, hpxml)
     hpxml.clothes_dryers.add(id: 'ClothesDryer',
                              location: HPXML::LocationLivingSpace,
                              fuel_type: HPXML::FuelTypeWood,
-                             energy_factor: 2.67,
+                             combined_energy_factor: 3.30,
                              control_type: HPXML::ClothesDryerControlTypeMoisture)
   elsif ['base-foundation-unconditioned-basement.xml'].include? hpxml_file
     hpxml.clothes_dryers[0].location = HPXML::LocationBasementUnconditioned
@@ -3060,18 +3061,18 @@ end
 def set_hpxml_dishwasher(hpxml_file, hpxml)
   if ['base.xml'].include? hpxml_file
     hpxml.dishwashers.add(id: 'Dishwasher',
-                          rated_annual_kwh: 450,
+                          rated_annual_kwh: 307,
+                          label_electric_rate: 0.12,
+                          label_gas_rate: 1.09,
+                          label_annual_gas_cost: 22.32,
                           place_setting_capacity: 12)
   elsif ['base-appliances-none.xml'].include? hpxml_file
     hpxml.dishwashers.clear()
-  elsif ['base-appliances-modified.xml'].include? hpxml_file
-    hpxml.dishwashers.clear()
-    hpxml.dishwashers.add(id: 'Dishwasher',
-                          energy_factor: 0.5,
-                          place_setting_capacity: 12)
   elsif ['base-misc-defaults.xml'].include? hpxml_file
     hpxml.dishwashers[0].rated_annual_kwh = nil
-    hpxml.dishwashers[0].energy_factor = nil
+    hpxml.dishwashers[0].label_electric_rate = nil
+    hpxml.dishwashers[0].label_gas_rate = nil
+    hpxml.dishwashers[0].label_annual_gas_cost = nil
     hpxml.dishwashers[0].place_setting_capacity = nil
   end
 end
@@ -3197,12 +3198,12 @@ def set_hpxml_plug_loads(hpxml_file, hpxml)
     cfa = hpxml.building_construction.conditioned_floor_area
     nbeds = hpxml.building_construction.number_of_bedrooms
 
-    kWh_per_year, frac_sensible, frac_latent = MiscLoads.get_residual_mels_values(cfa)
+    kWh_per_year, frac_sensible, frac_latent = MiscLoads.get_residual_mels_default_values(cfa)
     hpxml.plug_loads[0].kWh_per_year = kWh_per_year
     hpxml.plug_loads[0].frac_sensible = frac_sensible.round(3)
     hpxml.plug_loads[0].frac_latent = frac_latent.round(3)
 
-    kWh_per_year, frac_sensible, frac_latent = MiscLoads.get_televisions_values(cfa, nbeds)
+    kWh_per_year, frac_sensible, frac_latent = MiscLoads.get_televisions_default_values(cfa, nbeds)
     hpxml.plug_loads[1].kWh_per_year = kWh_per_year
     hpxml.plug_loads[1].frac_sensible = frac_sensible.round(3)
     hpxml.plug_loads[1].frac_latent = frac_latent.round(3)
