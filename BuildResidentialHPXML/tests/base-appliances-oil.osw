@@ -13,7 +13,7 @@
         "ceiling_fan_efficiency": 100,
         "ceiling_fan_quantity": 0,
         "clothes_dryer_control_type": "moisture",
-        "clothes_dryer_efficiency": 2.67,
+        "clothes_dryer_efficiency": 3.3,
         "clothes_dryer_efficiency_type": "CombinedEnergyFactor",
         "clothes_dryer_fuel_type": "fuel oil",
         "clothes_dryer_location": "living space",
