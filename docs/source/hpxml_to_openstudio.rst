@@ -655,7 +655,7 @@ LabelElectricRate                   0.12  [$/kWh]
 LabelGasRate                        1.09  [$/therm]
 LabelAnnualGasCost                  27.0  [$]
 Capacity                            3.0  [ft³]
-Usage                               6  [cyc/yr]
+Usage                               6  [cyc/week]
 ==================================  ==================
 
 If ``ModifiedEnergyFactor`` is provided instead of ``IntegratedModifiedEnergyFactor``, it will be converted using the following equation.
