@@ -371,12 +371,12 @@ class OSModel
       infilvolume = measurement.infiltration_volume unless infilvolume.nil?
     end
     if infilvolume.nil?
-      @infilvolume = @cvolume
+      @infil_volume = @cvolume
       measurements.each do |measurement|
-        measurement.infiltration_volume = @infilvolume
+        measurement.infiltration_volume = @infil_volume
       end
     else
-      @infilvolume = infilvolume
+      @infil_volume = infilvolume
     end
 
     # Default window interior shading
@@ -2963,7 +2963,7 @@ class OSModel
       if (measurement.house_pressure == 50) && (measurement.unit_of_measure == HPXML::UnitsACH)
         infil_ach50 = measurement.air_leakage
       elsif (measurement.house_pressure == 50) && (measurement.unit_of_measure == HPXML::UnitsCFM)
-        infil_ach50 = measurement.air_leakage * 60.0 / @infilvolume # Convert CFM50 to ACH50
+        infil_ach50 = measurement.air_leakage * 60.0 / @infil_volume # Convert CFM50 to ACH50
       else
         infil_const_ach = measurement.constant_ach_natural
       end
@@ -3128,17 +3128,14 @@ class OSModel
                                           range_exhaust_hour, bathroom_exhaust, bathroom_exhaust_hour,
                                           cfis_open_time, cfis_airflow_frac, cfis_airloop)
 
-    window_area = 0.0
-    @hpxml.windows.each do |window|
-      window_area += window.area
-    end
-
     nbaths = @hpxml.building_construction.number_of_bathrooms
     if nbaths.nil?
       nbaths = Waterheater.get_default_num_bathrooms(@nbeds)
     end
+    window_area = @hpxml.windows.map { |w| w.area }.inject(0, :+)
+    infil_height = Airflow.calc_inferred_infiltration_height(@cfa, @ncfl, @ncfl_ag, @infil_volume, @hpxml)
     Airflow.apply(model, runner, weather, infil, mech_vent, nat_vent, whf, duct_systems,
-                  @cfa, @infilvolume, @nbeds, nbaths, @ncfl, @ncfl_ag, window_area,
+                  @cfa, @infil_volume, infil_height, @nbeds, nbaths, @ncfl_ag, window_area,
                   @min_neighbor_distance)
   end
 
@@ -3170,11 +3167,11 @@ class OSModel
     hvac_distribution.ducts.each do |ducts|
       next if [HPXML::LocationLivingSpace, HPXML::LocationBasementConditioned].include? ducts.duct_location
       next if ducts.duct_type.nil?
+      next if total_unconditioned_duct_area[ducts.duct_type] <= 0
 
-      duct_area = ducts.duct_surface_area
       duct_space = get_space_from_location(ducts.duct_location, 'Duct', model, spaces)
       # Apportion leakage to individual ducts by surface area
-      duct_leakage_value = leakage_to_outside[ducts.duct_type][0] * duct_area / total_unconditioned_duct_area[ducts.duct_type]
+      duct_leakage_value = leakage_to_outside[ducts.duct_type][0] * ducts.duct_surface_area / total_unconditioned_duct_area[ducts.duct_type]
       duct_leakage_units = leakage_to_outside[ducts.duct_type][1]
 
       duct_leakage_cfm = nil
@@ -3187,7 +3184,7 @@ class OSModel
         fail "#{ducts.duct_type.capitalize} ducts exist but leakage was not specified for distribution system '#{hvac_distribution.id}'."
       end
 
-      air_ducts << Duct.new(ducts.duct_type, duct_space, duct_leakage_frac, duct_leakage_cfm, duct_area, ducts.duct_insulation_r_value)
+      air_ducts << Duct.new(ducts.duct_type, duct_space, duct_leakage_frac, duct_leakage_cfm, ducts.duct_surface_area, ducts.duct_insulation_r_value)
     end
 
     # If all ducts are in conditioned space, model leakage as going to outside
@@ -3217,7 +3214,7 @@ class OSModel
   end
 
   def self.add_hvac_sizing(runner, model, weather)
-    HVACSizing.apply(model, runner, weather, @cfa, @infilvolume, @nbeds, @min_neighbor_distance, @living_space, @debug)
+    HVACSizing.apply(model, runner, weather, @cfa, @infil_volume, @nbeds, @min_neighbor_distance, @living_space, @debug)
   end
 
   def self.add_fuel_heating_eae(runner, model)
