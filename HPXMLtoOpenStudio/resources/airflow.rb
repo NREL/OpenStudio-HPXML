@@ -258,7 +258,7 @@ class Airflow
       building.garage.hor_lk_frac = 0.4
       building.garage.neutral_level = 0.5
       building.garage.SLA = Airflow.get_infiltration_SLA_from_ACH50(infil.garage_ach50, 0.65, building.garage.area, building.garage.volume)
-      building.garage.ACH = Airflow.get_infiltration_ACH_from_SLA(building.garage.SLA, 1.0, weather)
+      building.garage.ACH = Airflow.get_infiltration_ACH_from_SLA(building.garage.SLA, 8.202, weather)
       building.garage.inf_flow = building.garage.ACH / UnitConversions.convert(1.0, 'hr', 'min') * building.garage.volume # cfm
     end
 
@@ -269,13 +269,13 @@ class Airflow
 
     unless building.vented_crawlspace.nil?
       building.vented_crawlspace.inf_method = @infMethodConstantCFM
-      building.vented_crawlspace.ACH = Airflow.get_infiltration_ACH_from_SLA(building.vented_crawlspace.SLA, 1.0, weather)
+      building.vented_crawlspace.ACH = Airflow.get_infiltration_ACH_from_SLA(building.vented_crawlspace.SLA, 8.202, weather)
       building.vented_crawlspace.inf_flow = building.vented_crawlspace.ACH / UnitConversions.convert(1.0, 'hr', 'min') * building.vented_crawlspace.volume
     end
 
     unless building.unvented_crawlspace.nil?
       building.unvented_crawlspace.inf_method = @infMethodConstantCFM
-      building.unvented_crawlspace.ACH = Airflow.get_infiltration_ACH_from_SLA(building.unvented_crawlspace.SLA, 1.0, weather)
+      building.unvented_crawlspace.ACH = Airflow.get_infiltration_ACH_from_SLA(building.unvented_crawlspace.SLA, 8.202, weather)
       building.unvented_crawlspace.inf_flow = building.unvented_crawlspace.ACH / UnitConversions.convert(1.0, 'hr', 'min') * building.unvented_crawlspace.volume
     end
 
@@ -284,7 +284,7 @@ class Airflow
         building.vented_attic.inf_method = @infMethodELA
         building.vented_attic.hor_lk_frac = 1.0
         building.vented_attic.neutral_level = 0.5
-        building.vented_attic.ACH = Airflow.get_infiltration_ACH_from_SLA(building.vented_attic.SLA, 1.0, weather)
+        building.vented_attic.ACH = Airflow.get_infiltration_ACH_from_SLA(building.vented_attic.SLA, 8.202, weather)
       elsif not building.vented_attic.ACH.nil?
         building.vented_attic.inf_method = @infMethodConstantCFM
       end
@@ -296,7 +296,7 @@ class Airflow
         building.unvented_attic.inf_method = @infMethodELA
         building.unvented_attic.hor_lk_frac = 1.0
         building.unvented_attic.neutral_level = 0.5 # DOE-2 Default
-        building.unvented_attic.ACH = Airflow.get_infiltration_ACH_from_SLA(building.unvented_attic.SLA, 1.0, weather)
+        building.unvented_attic.ACH = Airflow.get_infiltration_ACH_from_SLA(building.unvented_attic.SLA, 8.202, weather)
       elsif not building.unvented_attic.ACH.nil?
         building.unvented_attic.inf_method = @infMethodConstantCFM
       end
@@ -478,7 +478,7 @@ class Airflow
 
       wind_coef = f_w * UnitConversions.convert(outside_air_density / 2.0, 'lbm/ft^3', 'inH2O/mph^2')**n_i # inH2O^n/mph^2n
 
-      building.living.ACH = Airflow.get_infiltration_ACH_from_SLA(building.living.SLA, building.ncfl_ag, weather)
+      building.living.ACH = Airflow.get_infiltration_ACH_from_SLA(building.living.SLA, building.infilheight, weather)
 
       # Convert living space ACH to cfm:
       building.living.inf_flow = building.living.ACH / UnitConversions.convert(1.0, 'hr', 'min') * building.infilvolume # cfm
@@ -1846,18 +1846,23 @@ class Airflow
     return infil_height
   end
 
-  def self.get_infiltration_ACH_from_SLA(sla, ncfl_ag, weather)
+  def self.get_infiltration_NL_from_SLA(sla, infil_height)
+    # Returns infiltration normalized leakage given SLA.
+    return 1000.0 * sla * (infil_height / 8.202)**0.4
+  end
+
+  def self.get_infiltration_ACH_from_SLA(sla, infil_height, weather)
     # Returns the infiltration annual average ACH given a SLA.
     # Equation from RESNET 380-2016 Equation 9
-    norm_leakage = 1000.0 * sla * ncfl_ag**0.4
+    norm_leakage = get_infiltration_NL_from_SLA(sla, infil_height)
 
     # Equation from ASHRAE 136-1993
     return norm_leakage * weather.data.WSF
   end
 
-  def self.get_infiltration_SLA_from_ACH(ach, ncfl_ag, weather)
+  def self.get_infiltration_SLA_from_ACH(ach, infil_height, weather)
     # Returns the infiltration SLA given an annual average ACH.
-    return ach / (weather.data.WSF * 1000 * ncfl_ag**0.4)
+    return ach / (weather.data.WSF * 1000 * (infil_height / 8.202)**0.4)
   end
 
   def self.get_infiltration_SLA_from_ACH50(ach50, n_i, conditionedFloorArea, conditionedVolume, pressure_difference_Pa = 50)
