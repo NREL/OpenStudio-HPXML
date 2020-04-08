@@ -9,9 +9,9 @@ class Location
     weather, epw_file = apply_weather_file(model, runner, weather_file_path, weather_cache_path)
     apply_year(model, epw_file)
     apply_site(model, epw_file)
-    ba_zone = apply_climate_zones(model, epw_file)
+    apply_climate_zones(model, epw_file)
     apply_dst(model, dst_start_date, dst_end_date)
-    return weather, ba_zone
+    return weather
   end
 
   private
@@ -52,7 +52,6 @@ class Location
 
     climateZones = model.getClimateZones
     climateZones.setClimateZone(Constants.BuildingAmericaClimateZone, ba_zone)
-    return ba_zone
   end
 
   def self.apply_year(model, epw_file)
