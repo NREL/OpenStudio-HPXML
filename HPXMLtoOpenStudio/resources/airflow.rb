@@ -7,7 +7,7 @@ require_relative 'hvac'
 
 class Airflow
   def self.apply(model, runner, weather, infil, mech_vent, nat_vent, whf, duct_systems,
-                 cfa, infilvolume, nbeds, nbaths, ncfl, ncfl_ag, window_area, min_neighbor_distance)
+                 cfa, infil_volume, infil_height, nbeds, nbaths, ncfl_ag, window_area, min_neighbor_distance)
 
     @runner = runner
     @infMethodConstantCFM = 'CONSTANT_CFM'
@@ -37,13 +37,12 @@ class Airflow
       end
     end
     building.cfa = cfa
-    building.infilvolume = infilvolume
-    building.infilheight = calc_infil_height(ncfl_ag, infilvolume, cfa)
+    building.infilvolume = infil_volume
+    building.infilheight = infil_height
     building.living.volume = building.infilvolume
     building.living.height = building.infilheight
     building.nbeds = nbeds
     building.nbaths = nbaths
-    building.ncfl = ncfl
     building.ncfl_ag = ncfl_ag
     building.window_area = window_area
 
@@ -1824,23 +1823,41 @@ class Airflow
     end
   end
 
-  def self.calc_infil_height(ncfl_ag, infilvolume, cfa)
-    # TODO: Use equation in 301.rb calc_mech_vent_q_fan method
-    return Float(ncfl_ag) * infilvolume / cfa # vertical distance between lowest and highest above-grade points within the pressure boundary
+  def self.calc_inferred_infiltration_height(cfa, ncfl, ncfl_ag, infil_volume, hpxml)
+    # Infiltration height: vertical distance between lowest and highest above-grade points within the pressure boundary.
+    # Height is inferred from available HPXML properties.
+    has_walkout_basement = hpxml.has_walkout_basement()
+
+    if has_walkout_basement
+      infil_height = Float(ncfl_ag) * infil_volume / cfa
+    else
+      # Calculate maximum above-grade height of conditioned basement walls
+      max_cond_bsmt_wall_height_ag = 0.0
+      hpxml.foundation_walls.each do |foundation_wall|
+        next unless foundation_wall.is_exterior_thermal_boundary
+
+        height_ag = foundation_wall.height - foundation_wall.depth_below_grade
+        next unless height_ag > max_cond_bsmt_wall_height_ag
+
+        max_cond_bsmt_wall_height_ag = height_ag
+      end
+      infil_height = Float(ncfl_ag) * infil_volume / cfa + max_cond_bsmt_wall_height_ag
+    end
+    return infil_height
   end
 
-  def self.get_infiltration_ACH_from_SLA(sla, numStoriesAboveGrade, weather)
+  def self.get_infiltration_ACH_from_SLA(sla, ncfl_ag, weather)
     # Returns the infiltration annual average ACH given a SLA.
-    # Equation from RESNET 380-2019 Equation 9
-    norm_leakage = 1000.0 * sla * numStoriesAboveGrade**0.4
+    # Equation from RESNET 380-2016 Equation 9
+    norm_leakage = 1000.0 * sla * ncfl_ag**0.4
 
     # Equation from ASHRAE 136-1993
     return norm_leakage * weather.data.WSF
   end
 
-  def self.get_infiltration_SLA_from_ACH(ach, numStoriesAboveGrade, weather)
+  def self.get_infiltration_SLA_from_ACH(ach, ncfl_ag, weather)
     # Returns the infiltration SLA given an annual average ACH.
-    return ach / (weather.data.WSF * 1000 * numStoriesAboveGrade**0.4)
+    return ach / (weather.data.WSF * 1000 * ncfl_ag**0.4)
   end
 
   def self.get_infiltration_SLA_from_ACH50(ach50, n_i, conditionedFloorArea, conditionedVolume, pressure_difference_Pa = 50)
@@ -1996,5 +2013,5 @@ end
 class Building
   def initialize
   end
-  attr_accessor(:cfa, :infilvolume, :infilheight, :nbeds, :nbaths, :ncfl, :ncfl_ag, :window_area, :height, :stories, :SLA, :living, :garage, :unconditioned_basement, :vented_crawlspace, :unvented_crawlspace, :vented_attic, :unvented_attic)
+  attr_accessor(:cfa, :infilvolume, :infilheight, :nbeds, :nbaths, :ncfl_ag, :window_area, :height, :stories, :SLA, :living, :garage, :unconditioned_basement, :vented_crawlspace, :unvented_crawlspace, :vented_attic, :unvented_attic)
 end
