@@ -536,14 +536,14 @@ def get_values(osw_file, step)
     step.setArgument('ducts_return_leakage_value', 0)
   elsif ['base-appliances-gas.osw'].include? osw_file
     step.setArgument('clothes_dryer_fuel_type', HPXML::FuelTypeNaturalGas)
-    step.setArgument('clothes_dryer_efficiency', 2.67)
+    step.setArgument('clothes_dryer_efficiency', 3.3)
     step.setArgument('clothes_dryer_control_type', HPXML::ClothesDryerControlTypeMoisture)
     step.setArgument('cooking_range_fuel_type', HPXML::FuelTypeNaturalGas)
   elsif ['base-appliances-modified.osw'].include? osw_file
-    step.setArgument('clothes_washer_efficiency_type', 'IntegratedModifiedEnergyFactor')
-    step.setArgument('clothes_washer_efficiency', 0.73)
-    step.setArgument('clothes_dryer_efficiency_type', 'CombinedEnergyFactor')
-    step.setArgument('clothes_dryer_efficiency', 2.62)
+    step.setArgument('clothes_washer_efficiency_type', 'ModifiedEnergyFactor')
+    step.setArgument('clothes_washer_efficiency', 1.65)
+    step.setArgument('clothes_dryer_efficiency_type', 'EnergyFactor')
+    step.setArgument('clothes_dryer_efficiency', 4.29)
     step.setArgument('clothes_dryer_control_type', HPXML::ClothesDryerControlTypeMoisture)
     step.setArgument('dishwasher_rated_annual_kwh', 307.0)
   elsif ['base-appliances-none.osw'].include? osw_file
@@ -555,17 +555,17 @@ def get_values(osw_file, step)
     step.setArgument('oven_present', false)
   elsif ['base-appliances-oil.osw'].include? osw_file
     step.setArgument('clothes_dryer_fuel_type', HPXML::FuelTypeOil)
-    step.setArgument('clothes_dryer_efficiency', 2.67)
+    step.setArgument('clothes_dryer_efficiency', 3.3)
     step.setArgument('clothes_dryer_control_type', HPXML::ClothesDryerControlTypeMoisture)
     step.setArgument('cooking_range_fuel_type', HPXML::FuelTypeOil)
   elsif ['base-appliances-propane.osw'].include? osw_file
     step.setArgument('clothes_dryer_fuel_type', HPXML::FuelTypePropane)
-    step.setArgument('clothes_dryer_efficiency', 2.67)
+    step.setArgument('clothes_dryer_efficiency', 3.3)
     step.setArgument('clothes_dryer_control_type', HPXML::ClothesDryerControlTypeMoisture)
     step.setArgument('cooking_range_fuel_type', HPXML::FuelTypePropane)
   elsif ['base-appliances-wood.osw'].include? osw_file
     step.setArgument('clothes_dryer_fuel_type', HPXML::FuelTypeWood)
-    step.setArgument('clothes_dryer_efficiency', 2.67)
+    step.setArgument('clothes_dryer_efficiency', 3.3)
     step.setArgument('clothes_dryer_control_type', HPXML::ClothesDryerControlTypeMoisture)
     step.setArgument('cooking_range_fuel_type', HPXML::FuelTypeWood)
   elsif ['base-atticroof-cathedral.osw'].include? osw_file
@@ -596,6 +596,7 @@ def get_values(osw_file, step)
     step.setArgument('ducts_supply_location', HPXML::LocationBasementConditioned)
     step.setArgument('ducts_return_location', HPXML::LocationBasementConditioned)
   elsif ['base-atticroof-radiant-barrier.osw'].include? osw_file
+    step.setArgument('weather_station_epw_filename', 'USA_TX_Dallas-Fort.Worth.Intl.AP.722590_TMY3.epw')
     step.setArgument('roof_radiant_barrier', true)
   elsif ['base-atticroof-unvented-insulated-roof.osw'].include? osw_file
     step.setArgument('ceiling_assembly_r', 2.1)

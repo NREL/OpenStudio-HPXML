@@ -2216,7 +2216,7 @@ class HPXMLFile
     set_neighbor_buildings(hpxml, runner, args)
     set_building_occupancy(hpxml, runner, args)
     set_building_construction(hpxml, runner, args)
-    set_climate_and_risk_zones(hpxml, runner, args)
+    set_climate_and_risk_zones(hpxml, runner, args, weather)
     set_air_infiltration_measurements(hpxml, runner, args)
     set_attics(hpxml, runner, model_geometry, args)
     set_foundations(hpxml, runner, model_geometry, args)
@@ -2384,10 +2384,10 @@ class HPXMLFile
     hpxml.building_construction.residential_facility_type = args[:geometry_unit_type]
   end
 
-  def self.set_climate_and_risk_zones(hpxml, runner, args)
+  def self.set_climate_and_risk_zones(hpxml, runner, args, weather)
     hpxml.climate_and_risk_zones.weather_station_id = 'WeatherStation'
     hpxml.climate_and_risk_zones.iecc_year = 2006
-    hpxml.climate_and_risk_zones.iecc_zone = '5B' # FIXME: use resources/climate_zones.csv
+    hpxml.climate_and_risk_zones.iecc_zone = Location.get_climate_zone_iecc(weather.header.Station)
     hpxml.climate_and_risk_zones.weather_station_name = args[:weather_station_epw_filename].gsub('.epw', '')
     hpxml.climate_and_risk_zones.weather_station_epw_filename = args[:weather_station_epw_filename]
   end
