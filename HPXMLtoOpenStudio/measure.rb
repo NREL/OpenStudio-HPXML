@@ -1268,7 +1268,7 @@ class OSModel
 
   def self.add_roofs(runner, model, spaces)
     @hpxml.roofs.each do |roof|
-      next if roof.net_area < 0.1 # skip surfaces smaller than 0.1 sqft
+      next if roof.net_area < 0.1 # skip modeling net surface area for surfaces comprised entirely of subsurface area
 
       if roof.azimuth.nil?
         if roof.pitch > 0
@@ -1357,10 +1357,7 @@ class OSModel
 
   def self.add_walls(runner, model, spaces)
     @hpxml.walls.each do |wall|
-      if (@hpxml.walls.size == 1) && (wall.net_area < 0.1)
-        fail "The only wall specified:#{wall.id} net area is smaller than 0.1 sqft."
-      end
-      next if wall.net_area < 0.1 # skip surfaces smaller than 0.1 sqft
+      next if wall.net_area < 0.1 # skip modeling net surface area for surfaces comprised entirely of subsurface area
 
       if wall.azimuth.nil?
         if wall.is_exterior
@@ -1555,7 +1552,7 @@ class OSModel
   def self.add_foundation_walls_slabs(runner, model, spaces)
     # Check for foundation walls without corresponding slabs
     @hpxml.foundation_walls.each do |foundation_wall|
-      next if foundation_wall.net_area < 0.1 # skip surfaces smaller than 0.1 sqft
+      next if foundation_wall.net_area < 0.1 # skip modeling net surface area for surfaces comprised entirely of subsurface area
 
       found_slab = false
       @hpxml.slabs.each do |slab|
@@ -1572,7 +1569,7 @@ class OSModel
 
       found_foundation_wall = false
       @hpxml.foundation_walls.each do |foundation_wall|
-        next if foundation_wall.net_area < 0.1 # skip surfaces smaller than 0.1 sqft
+        next if foundation_wall.net_area < 0.1 # skip modeling net surface area for surfaces comprised entirely of subsurface area
         found_foundation_wall = true if slab.interior_adjacent_to == foundation_wall.interior_adjacent_to
       end
       next if found_foundation_wall
@@ -1594,7 +1591,7 @@ class OSModel
       slabs = []
       @hpxml.foundation_walls.each do |foundation_wall|
         next unless foundation_wall.interior_adjacent_to == foundation_type
-        next if foundation_wall.net_area < 0.1 # skip surfaces smaller than 0.1 sqft
+        next if foundation_wall.net_area < 0.1 # skip modeling net surface area for surfaces comprised entirely of subsurface area
 
         fnd_walls << foundation_wall
       end

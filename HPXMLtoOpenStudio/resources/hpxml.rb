@@ -3800,10 +3800,6 @@ class HPXML < Object
     (@rim_joists + @walls + @foundation_walls + @frame_floors + @roofs + @windows + @skylights + @doors + @slabs).reverse_each do |surface|
       next if surface.area > 0.1
 
-      # error out if the only wall is too small. It skipped EPvalidator but should be blocked here.
-      if (surface.is_a? Wall) && (@walls.size == 1)
-        fail "The only wall specified:#{surface.id} is smaller than 0.1 sqft."
-      end
       surface.delete
     end
   end
