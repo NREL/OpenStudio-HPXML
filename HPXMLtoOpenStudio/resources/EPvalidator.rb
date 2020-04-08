@@ -711,33 +711,7 @@ class EnergyPlusValidator
             next if expected_sizes.nil?
 
             xpath = combine_into_xpath(parent, child)
-            if child.start_with? '['
-              # Workaround bug in REXML; See https://github.com/ruby/rexml/issues/27
-              # FIXME: This is so hacky.
-              actual_size = 0
-              predicate, remainder = parse_predicate(child)
-              if remainder.start_with? '|'
-                # Handle or conditions
-                # E.g., "[foo=val] | blah"
-                # Does not handle "blah | [foo=val]"
-                predicate_element = REXML::XPath.first(parent_element, "self::node()#{predicate}")
-                actual_size += 1 unless predicate_element.nil?
-                remainder[0] = ''
-                actual_size += REXML::XPath.first(parent_element, "count(#{remainder})")
-              else
-                # E.g., "[foo]bar/blah"
-                predicate_element = REXML::XPath.first(parent_element, "self::node()#{predicate}")
-                if not predicate_element.nil?
-                  if remainder.empty?
-                    actual_size += 1
-                  else
-                    actual_size += REXML::XPath.first(predicate_element, "count(#{remainder})")
-                  end
-                end
-              end
-            else
-              actual_size = REXML::XPath.first(parent_element, "count(#{child})")
-            end
+            actual_size = REXML::XPath.first(parent_element, "count(#{update_leading_predicates(child)})")
             check_number_of_elements(actual_size, expected_sizes, xpath, errors)
           end
         end
@@ -769,21 +743,32 @@ class EnergyPlusValidator
     return [parent, child].join('/')
   end
 
-  def self.parse_predicate(str)
-    # E.g., returns ["[foo[bar]]", "thing[type]"] for "[foo[bar]]thing[type]"
-    count = 0
-    for i in 0..str.size - 1
-      if str[i] == '['
-        count += 1
-      elsif str[i] == ']'
-        count -= 1
-      end
-      next unless count == 0
+  def self.update_leading_predicates(str)
+    # Workaround bug in REXML; See https://github.com/ruby/rexml/issues/27
+    # Examples:
+    #   "[foo='1' or foo='2']" => "(self::node()[foo='1' or foo='2'])"
+    #   "[foo] | bar" => "(self::node()[foo]) | bar"
 
-      predicate = str[0..i]
-      remainder = str[i + 1, str.size - 1]
-      return predicate.strip, remainder.strip
+    add_str = '(self::node()'
+
+    # First check beginning of str
+    if str[0] == '['
+      str = add_str + str
+      # Find closing bracket match for ending parenthesis
+      count = 0
+      for i in add_str.size..str.size - 1
+        if str[i] == '['
+          count += 1
+        elsif str[i] == ']'
+          count -= 1
+        end
+        if count == 0
+          str = str[0..i] + ')' + str[i + 1..str.size]
+          break
+        end
+      end
     end
-    fail "Invalid predicate in '#{str}'."
+
+    return str
   end
 end
