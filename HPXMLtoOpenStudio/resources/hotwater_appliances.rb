@@ -246,7 +246,7 @@ class HotWaterAndAppliances
     else
       annual_kwh = burner_ef * oven_ef * (331 + 39.0 * nbeds)
       annual_therm = 0.0
-  end
+    end
 
     frac_lost = 0.20
     if fuel_type == HPXML::FuelTypeElectricity
@@ -255,7 +255,7 @@ class HotWaterAndAppliances
       elec_btu = UnitConversions.convert(annual_kwh, 'kWh', 'Btu')
       gas_btu = UnitConversions.convert(annual_therm, 'therm', 'Btu')
       frac_sens = (1.0 - frac_lost) * ((0.90 * elec_btu + 0.7942 * gas_btu) / (elec_btu + gas_btu))
-  end
+    end
     frac_lat = 1.0 - frac_sens - frac_lost
 
     return annual_kwh, annual_therm, frac_sens, frac_lat
@@ -293,9 +293,9 @@ class HotWaterAndAppliances
       dwcpy = (88.4 + 34.9 * nbeds) * (12.0 / cap)
       annual_kwh = ((86.3 + 47.73 / ef) / 215.0) * dwcpy
 
-    if Constants.ERIVersions.index(eri_version) >= Constants.ERIVersions.index('2014A')
+      if Constants.ERIVersions.index(eri_version) >= Constants.ERIVersions.index('2014A')
         gpd = dwcpy * (4.6415 * (1.0 / ef) - 1.9295) / 365.0
-    else
+      else
         gpd = ((88.4 + 34.9 * nbeds) * 8.16 - (88.4 + 34.9 * nbeds) * 12.0 / cap * (4.6415 * (1.0 / ef) - 1.9295)) / 365.0
       end
     end
@@ -321,7 +321,7 @@ class HotWaterAndAppliances
 
   def self.get_clothes_dryer_default_values(eri_version, fuel_type)
     if Constants.ERIVersions.index(eri_version) >= Constants.ERIVersions.index('2019A')
-    if fuel_type == HPXML::FuelTypeElectricity
+      if fuel_type == HPXML::FuelTypeElectricity
         return { combined_energy_factor: 3.01, # FIXME: Need to verify
                  control_type: HPXML::ClothesDryerControlTypeTimer }
       else
@@ -369,21 +369,21 @@ class HotWaterAndAppliances
       else
         annual_therm = annual_kwh * 3412.0 * (1.0 - 0.07) * (3.73 / 3.30) / 100000
         annual_kwh = annual_kwh * 0.07 * (3.73 / 3.30)
-  end
+      end
     else
-    if control_type == HPXML::ClothesDryerControlTypeTimer
-      field_util_factor = 1.18
-    elsif control_type == HPXML::ClothesDryerControlTypeMoisture
-      field_util_factor = 1.04
-    end
-    if fuel_type == HPXML::FuelTypeElectricity
+      if control_type == HPXML::ClothesDryerControlTypeTimer
+        field_util_factor = 1.18
+      elsif control_type == HPXML::ClothesDryerControlTypeMoisture
+        field_util_factor = 1.04
+      end
+      if fuel_type == HPXML::FuelTypeElectricity
         annual_kwh = 12.5 * (164.0 + 46.5 * nbeds) * (field_util_factor / ef) * ((cw_cap / cw_mef) - cw_ler / 392.0) / (0.2184 * (cw_cap * 4.08 + 0.24))
-      annual_therm = 0.0
-    else
+        annual_therm = 0.0
+      else
         annual_kwh = 12.5 * (164.0 + 46.5 * nbeds) * (field_util_factor / 3.01) * ((cw_cap / cw_mef) - cw_ler / 392.0) / (0.2184 * (cw_cap * 4.08 + 0.24))
         annual_therm = annual_kwh * 3412.0 * (1.0 - 0.07) * (3.01 / ef) / 100000
-      annual_kwh = annual_kwh * 0.07 * (3.01 / ef)
-    end
+        annual_kwh = annual_kwh * 0.07 * (3.01 / ef)
+      end
     end
 
     frac_lost = 0.85
@@ -424,7 +424,7 @@ class HotWaterAndAppliances
                label_annual_gas_cost: 23.0, # $, unused
                capacity: 2.874, # ft^3
                usage: 6.0 } # cyc/week, unused
-  end
+    end
   end
 
   def self.calc_clothes_washer_energy_gpd(eri_version, nbeds, clothes_washer)
@@ -447,17 +447,17 @@ class HotWaterAndAppliances
 
       gpd = (ler - cw_appl) * elec_h20 * acy / 365.0
     else
-    ncy = (3.0 / 2.847) * (164 + nbeds * 45.6)
-    if Constants.ERIVersions.index(eri_version) >= Constants.ERIVersions.index('2014A')
-      ncy = (3.0 / 2.847) * (164 + nbeds * 46.5)
-    end
-    acy = ncy * ((3.0 * 2.08 + 1.59) / (cap * 2.08 + 1.59)) # Adjusted Cycles per Year
-    annual_kwh = ((ler / 392.0) - ((ler * elec_rate - agc) / (21.9825 * elec_rate - gas_rate) / 392.0) * 21.9825) * acy
+      ncy = (3.0 / 2.847) * (164 + nbeds * 45.6)
+      if Constants.ERIVersions.index(eri_version) >= Constants.ERIVersions.index('2014A')
+        ncy = (3.0 / 2.847) * (164 + nbeds * 46.5)
+      end
+      acy = ncy * ((3.0 * 2.08 + 1.59) / (cap * 2.08 + 1.59)) # Adjusted Cycles per Year
+      annual_kwh = ((ler / 392.0) - ((ler * elec_rate - agc) / (21.9825 * elec_rate - gas_rate) / 392.0) * 21.9825) * acy
 
-    gpd = 60.0 * ((ler * elec_rate - agc) / (21.9825 * elec_rate - gas_rate) / 392.0) * acy / 365.0
-    if Constants.ERIVersions.index(eri_version) < Constants.ERIVersions.index('2014A')
-      gpd -= 3.97 # Section 4.2.2.5.2.10
-    end
+      gpd = 60.0 * ((ler * elec_rate - agc) / (21.9825 * elec_rate - gas_rate) / 392.0) * acy / 365.0
+      if Constants.ERIVersions.index(eri_version) < Constants.ERIVersions.index('2014A')
+        gpd -= 3.97 # Section 4.2.2.5.2.10
+      end
     end
 
     frac_lost = 0.70

@@ -596,16 +596,7 @@
       <Appliances>
         <ClothesWasher>
           <SystemIdentifier id='ClothesWasher'/>
-<<<<<<< HEAD:workflow/sample_files/invalid_files/attached-multifamily-window-outside-condition.xml
           <Location>other</Location>
-          <ModifiedEnergyFactor>0.8</ModifiedEnergyFactor>
-          <RatedAnnualkWh>700.0</RatedAnnualkWh>
-          <LabelElectricRate>0.1</LabelElectricRate>
-          <LabelGasRate>0.6</LabelGasRate>
-          <LabelAnnualGasCost>25.0</LabelAnnualGasCost>
-          <Capacity>3.0</Capacity>
-=======
-          <Location>living space</Location>
           <IntegratedModifiedEnergyFactor>1.21</IntegratedModifiedEnergyFactor>
           <Usage>6.0</Usage>
           <RatedAnnualkWh>380.0</RatedAnnualkWh>
@@ -613,7 +604,6 @@
           <LabelGasRate>1.09</LabelGasRate>
           <LabelAnnualGasCost>27.0</LabelAnnualGasCost>
           <Capacity>3.2</Capacity>
->>>>>>> d7d208fb9090bdb1bef26466da8f0a1c9131054c:workflow/sample_files/invalid_files/refrigerator-location-other.xml
         </ClothesWasher>
         <ClothesDryer>
           <SystemIdentifier id='ClothesDryer'/>
@@ -624,12 +614,8 @@
         </ClothesDryer>
         <Dishwasher>
           <SystemIdentifier id='Dishwasher'/>
-<<<<<<< HEAD:workflow/sample_files/invalid_files/attached-multifamily-window-outside-condition.xml
           <Location>other</Location>
-          <RatedAnnualkWh>450.0</RatedAnnualkWh>
-=======
           <RatedAnnualkWh>307.0</RatedAnnualkWh>
->>>>>>> d7d208fb9090bdb1bef26466da8f0a1c9131054c:workflow/sample_files/invalid_files/refrigerator-location-other.xml
           <PlaceSettingCapacity>12</PlaceSettingCapacity>
           <LabelElectricRate>0.12</LabelElectricRate>
           <LabelGasRate>1.09</LabelGasRate>
