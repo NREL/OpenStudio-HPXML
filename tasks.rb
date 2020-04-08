@@ -879,6 +879,14 @@ def set_hpxml_walls(hpxml_file, hpxml)
                     solar_absorptance: 0.7,
                     emittance: 0.92,
                     insulation_assembly_r_value: 4.0)
+    hpxml.walls.add(id: 'WallAtticLivingWall',
+                    exterior_adjacent_to: HPXML::LocationAtticUnvented,
+                    interior_adjacent_to: HPXML::LocationLivingSpace,
+                    wall_type: HPXML::WallTypeWoodStud,
+                    area: 50,
+                    solar_absorptance: 0.7,
+                    emittance: 0.92,
+                    insulation_assembly_r_value: 4.0)
   elsif ['base-enclosure-walltypes.xml'].include? hpxml_file
     walls_map = { HPXML::WallTypeCMU => 12,
                   HPXML::WallTypeDoubleWoodStud => 28.7,
@@ -1743,6 +1751,11 @@ def set_hpxml_doors(hpxml_file, hpxml)
     hpxml.doors.add(id: 'DoorOnOtherUnit',
                     wall_idref: 'WallAdiabatic',
                     area: 40,
+                    azimuth: 0,
+                    r_value: 4.4)
+    hpxml.doors.add(id: 'DoorAttic',
+                    wall_idref: 'WallAtticLivingWall',
+                    area: 10,
                     azimuth: 0,
                     r_value: 4.4)
   elsif ['invalid_files/unattached-door.xml'].include? hpxml_file

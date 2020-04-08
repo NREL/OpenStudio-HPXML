@@ -202,6 +202,21 @@
               <AssemblyEffectiveRValue>4.0</AssemblyEffectiveRValue>
             </Insulation>
           </Wall>
+          <Wall>
+            <SystemIdentifier id='WallAtticLivingWall'/>
+            <ExteriorAdjacentTo>attic - unvented</ExteriorAdjacentTo>
+            <InteriorAdjacentTo>living space</InteriorAdjacentTo>
+            <WallType>
+              <WoodStud/>
+            </WallType>
+            <Area>50.0</Area>
+            <SolarAbsorptance>0.7</SolarAbsorptance>
+            <Emittance>0.92</Emittance>
+            <Insulation>
+              <SystemIdentifier id='WallAtticLivingWallInsulation'/>
+              <AssemblyEffectiveRValue>4.0</AssemblyEffectiveRValue>
+            </Insulation>
+          </Wall>
         </Walls>
         <FoundationWalls>
           <FoundationWall>
@@ -479,6 +494,13 @@
             <SystemIdentifier id='DoorOnOtherUnit'/>
             <AttachedToWall idref='WallAdiabatic'/>
             <Area>40.0</Area>
+            <Azimuth>0</Azimuth>
+            <RValue>4.4</RValue>
+          </Door>
+          <Door>
+            <SystemIdentifier id='DoorAttic'/>
+            <AttachedToWall idref='WallAtticLivingWall'/>
+            <Area>10.0</Area>
             <Azimuth>0</Azimuth>
             <RValue>4.4</RValue>
           </Door>
