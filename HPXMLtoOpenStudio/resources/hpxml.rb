@@ -516,8 +516,8 @@ class HPXML < Object
       extension = XMLHelper.add_element(software_info, 'extension')
       if (not @eri_calculation_version.nil?) || (not @eri_design.nil?)
         eri_calculation = XMLHelper.add_element(extension, 'ERICalculation')
-        XMLHelper.add_element(eri_calculation, 'Version', @eri_calculation_version)
-        XMLHelper.add_element(eri_calculation, 'Design', @eri_design)
+        XMLHelper.add_element(eri_calculation, 'Version', @eri_calculation_version) unless @eri_calculation_version.nil?
+        XMLHelper.add_element(eri_calculation, 'Design', @eri_design) unless @eri_design.nil?
       end
       if (not @timestep.nil?) || (not @begin_month.nil?) || (not @begin_day_of_month.nil?) || (not @end_month.nil?) || (not @end_day_of_month.nil?)
         simulation_control = XMLHelper.add_element(extension, 'SimulationControl')
