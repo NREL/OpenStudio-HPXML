@@ -1935,6 +1935,8 @@ def set_hpxml_building_construction(hpxml_file, hpxml)
     hpxml.building_construction.average_ceiling_height = 8
   elsif ['base-enclosure-adiabatic-surfaces.xml'].include? hpxml_file
     hpxml.building_construction.residential_facility_type = HPXML::ResidentialTypeApartment
+  elsif ['base-foundation-walkout-basement.xml'].include? hpxml_file
+    hpxml.building_construction.number_of_conditioned_floors_above_grade += 1
   end
 end
 
