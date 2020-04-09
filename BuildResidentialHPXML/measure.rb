@@ -1802,7 +1802,7 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     arg.setDefaultValue(0.5)
     args << arg
 
-    arg = OpenStudio::Measure::OSArgument::makeDStringArgument('plug_loads_television_annual_kwh', true)
+    arg = OpenStudio::Measure::OSArgument::makeStringArgument('plug_loads_television_annual_kwh', true)
     arg.setDisplayName('Plug Loads: Television Annual kWh')
     arg.setDescription('The annual energy consumption of the television plug loads.')
     arg.setUnits('kWh/yr')
