@@ -58,6 +58,7 @@ def create_hpxmls
     'invalid_files/water-heater-location-other.xml' => 'base.xml',
     'invalid_files/slab-zero-exposed-perimeter.xml' => 'base.xml',
 
+    'base-3d-coordinates.xml' => 'base.xml',
     'base-appliances-gas.xml' => 'base.xml',
     'base-appliances-wood.xml' => 'base.xml',
     'base-appliances-modified.xml' => 'base.xml',
@@ -813,6 +814,15 @@ def set_hpxml_walls(hpxml_file, hpxml)
                     solar_absorptance: 0.7,
                     emittance: 0.92,
                     insulation_assembly_r_value: 4.0)
+  elsif ['base-3d-coordinates.xml'].include? hpxml_file
+    hpxml.walls[0].add_coordinate(x: 0, y: 0, z: 0)
+    hpxml.walls[0].add_coordinate(x: 1, y: 0, z: 0)
+    hpxml.walls[0].add_coordinate(x: 1, y: 0, z: 1)
+    hpxml.walls[0].add_coordinate(x: 0, y: 0, z: 1)
+    hpxml.walls[1].add_coordinate(x: 0, y: 0)
+    hpxml.walls[1].add_coordinate(x: 2, y: 0)
+    hpxml.walls[1].add_coordinate(x: 2, y: 2)
+    hpxml.walls[1].add_coordinate(x: 0, y: 2)
   elsif ['base-atticroof-flat.xml'].include? hpxml_file
     hpxml.walls.delete_at(1)
   elsif ['base-atticroof-vented.xml'].include? hpxml_file
