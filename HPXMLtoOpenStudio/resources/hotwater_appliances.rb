@@ -467,9 +467,9 @@ class HotWaterAndAppliances
 
   def self.calc_refrigerator_energy(refrigerator)
     # Get values
-    ler = refrigerator.rated_annual_kwh
+    ler = refrigerator.adjusted_annual_kwh
     if ler.nil?
-      ler = refrigerator.adjusted_annual_kwh
+      ler = refrigerator.rated_annual_kwh
     end
 
     annual_kwh = ler
