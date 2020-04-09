@@ -1802,18 +1802,18 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     arg.setDefaultValue(0)
     args << arg
 
-    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('plug_loads_television_annual_kwh', true)
+    arg = OpenStudio::Measure::OSArgument::makeDStringArgument('plug_loads_television_annual_kwh', true)
     arg.setDisplayName('Plug Loads: Television Annual kWh')
     arg.setDescription('The annual energy consumption of the television plug loads.')
     arg.setUnits('kWh/yr')
-    arg.setDefaultValue(620)
+    arg.setDefaultValue(Constants.Auto)
     args << arg
 
-    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('plug_loads_other_annual_kwh', true)
+    arg = OpenStudio::Measure::OSArgument::makeStringArgument('plug_loads_other_annual_kwh', true)
     arg.setDisplayName('Plug Loads: Other Annual kWh')
     arg.setDescription('The annual energy consumption of the other residual plug loads.')
     arg.setUnits('kWh/yr')
-    arg.setDefaultValue(2457.0)
+    arg.setDefaultValue(Constants.Auto)
     args << arg
 
     arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('plug_loads_other_frac_sensible', true)
@@ -2101,8 +2101,8 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
              ceiling_fan_efficiency: runner.getDoubleArgumentValue('ceiling_fan_efficiency', user_arguments),
              ceiling_fan_quantity: runner.getIntegerArgumentValue('ceiling_fan_quantity', user_arguments),
              ceiling_fan_cooling_setpoint_temp_offset: runner.getDoubleArgumentValue('ceiling_fan_cooling_setpoint_temp_offset', user_arguments),
-             plug_loads_television_annual_kwh: runner.getDoubleArgumentValue('plug_loads_television_annual_kwh', user_arguments),
-             plug_loads_other_annual_kwh: runner.getDoubleArgumentValue('plug_loads_other_annual_kwh', user_arguments),
+             plug_loads_television_annual_kwh: runner.getStringArgumentValue('plug_loads_television_annual_kwh', user_arguments),
+             plug_loads_other_annual_kwh: runner.getStringArgumentValue('plug_loads_other_annual_kwh', user_arguments),
              plug_loads_other_frac_sensible: runner.getDoubleArgumentValue('plug_loads_other_frac_sensible', user_arguments),
              plug_loads_other_frac_latent: runner.getDoubleArgumentValue('plug_loads_other_frac_latent', user_arguments),
              plug_loads_schedule_values: runner.getBoolArgumentValue('plug_loads_schedule_values', user_arguments),
@@ -3425,14 +3425,22 @@ class HPXMLFile
   end
 
   def self.set_plug_loads(hpxml, runner, args)
+    if args[:plug_loads_other_annual_kwh] != Constants.Auto
+      plug_loads_other_annual_kwh = args[:plug_loads_other_annual_kwh]
+    end
+
+    if args[:plug_loads_television_annual_kwh] != Constants.Auto
+      plug_loads_television_annual_kwh = args[:plug_loads_television_annual_kwh]
+    end
+
     hpxml.plug_loads.add(id: 'PlugLoadsOther',
                          plug_load_type: HPXML::PlugLoadTypeOther,
-                         kWh_per_year: args[:plug_loads_other_annual_kwh],
+                         kWh_per_year: plug_loads_other_annual_kwh,
                          frac_sensible: args[:plug_loads_other_frac_sensible],
                          frac_latent: args[:plug_loads_other_frac_latent])
     hpxml.plug_loads.add(id: 'PlugLoadsTelevision',
                          plug_load_type: HPXML::PlugLoadTypeTelevision,
-                         kWh_per_year: args[:plug_loads_television_annual_kwh],
+                         kWh_per_year: plug_loads_television_annual_kwh,
                          frac_sensible: 1.0,
                          frac_latent: 0.0)
   end
