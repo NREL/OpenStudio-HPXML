@@ -555,7 +555,7 @@ For a ``SystemType/Standard`` (non-recirculating) system, the following element 
 
 If ``PipingLength`` is not provided, a default ``PipingLength`` will be assumed.
 The default ``PipingLength`` will be calculated using the following equation.
-This equation is based on `ANSI/RESNET/ICC 301-2019 <https://codes.iccsafe.org/content/RESNETICC3012019/toc>`_.
+This equation is based on `ANSI/RESNET/ICC 301-2019 <https://codes.iccsafe.org/content/RESNETICC3012019>`_.
 
 .. math:: PipeL = 2.0 \cdot (\frac{CFA}{NCfl})^{0.5} + 10.0 \cdot NCfl + 5.0 \cdot bsmnt
   
@@ -704,6 +704,11 @@ LabelAnnualGasCost       33.12  [$]
 PlaceSettingCapacity     12  [standard]
 =======================  =================
 
+If ``EnergyFactor`` is provided instead of ``RatedAnnualkWh``, it will be converted into ``RatedAnnualkWh`` using the following equation.
+This equation is based on `ANSI/RESNET/ICC 301-2014 <https://codes.iccsafe.org/content/document/843>`_.
+
+.. math:: RatedAnnualkWh = \frac{215.0}{EnergyFactor}
+
 Refrigerator
 ************
 
@@ -712,7 +717,7 @@ The ``Location`` can be optionally provided; if not provided, it is assumed to b
 
 The efficiency of the refrigerator can be optionally entered as ``RatedAnnualkWh`` or ``extension/AdjustedAnnualkWh``.
 If neither are provided, ``RatedAnnualkWh`` will be defaulted to represent a standard refrigerator from 2006 based on the following equation.
-This equation is based on `ANSI/RESNET/ICC 301-2019 <https://codes.iccsafe.org/content/RESNETICC3012019/toc>`_.
+This equation is based on `ANSI/RESNET/ICC 301-2019 <https://codes.iccsafe.org/content/RESNETICC3012019>`_.
 
 .. math:: RatedAnnualkWh = 637.0 + 18.0 \cdot Number of bedrooms
 

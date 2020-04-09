@@ -3066,6 +3066,10 @@ def set_hpxml_dishwasher(hpxml_file, hpxml)
                           label_gas_rate: 1.09,
                           label_annual_gas_cost: 22.32,
                           place_setting_capacity: 12)
+  elsif ['base-appliances-modified.xml'].include? hpxml_file
+    rated_annual_kwh = hpxml.dishwashers[0].rated_annual_kwh
+    hpxml.dishwashers[0].rated_annual_kwh = nil
+    hpxml.dishwashers[0].energy_factor = HotWaterAndAppliances.calc_dishwasher_ef_from_annual_kwh(rated_annual_kwh).round(2)
   elsif ['base-appliances-none.xml'].include? hpxml_file
     hpxml.dishwashers.clear()
   elsif ['base-misc-defaults.xml'].include? hpxml_file

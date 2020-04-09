@@ -302,7 +302,7 @@ class HotWaterAndAppliances
   end
 
   def self.calc_dishwasher_annual_kwh_from_ef(ef)
-    return ef * 215.0
+    return 215.0 / ef
   end
 
   def self.get_refrigerator_default_values(nbeds)

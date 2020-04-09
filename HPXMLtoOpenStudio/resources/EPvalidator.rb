@@ -645,7 +645,8 @@ class EnergyPlusValidator
       # [Dishwasher]
       '/HPXML/Building/BuildingDetails/Appliances/Dishwasher' => {
         'SystemIdentifier' => one, # Required by HPXML schema
-        'RatedAnnualkWh | LabelElectricRate | LabelGasRate | LabelAnnualGasCost | PlaceSettingCapacity' => zero_or_five,
+        'RatedAnnualkWh | EnergyFactor' => zero_or_one,
+        'RatedAnnualkWh | EnergyFactor | LabelElectricRate | LabelGasRate | LabelAnnualGasCost | PlaceSettingCapacity' => zero_or_five,
       },
 
       # [Refrigerator]
