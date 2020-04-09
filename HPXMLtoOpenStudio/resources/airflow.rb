@@ -1576,6 +1576,13 @@ class Airflow
     infil_flow_actuator = OpenStudio::Model::EnergyManagementSystemActuator.new(infil_flow, 'Zone Infiltration', 'Air Exchange Flow Rate')
     infil_flow_actuator.setName("#{infil_flow.name} act")
 
+    imbal_ducts_flow = OpenStudio::Model::SpaceInfiltrationDesignFlowRate.new(model)
+    imbal_ducts_flow.setName(Constants.ObjectNameDucts + ' flow')
+    imbal_ducts_flow.setSchedule(model.alwaysOnDiscreteSchedule)
+    imbal_ducts_flow.setSpace(living_space)
+    imbal_ducts_flow_actuator = OpenStudio::Model::EnergyManagementSystemActuator.new(imbal_ducts_flow, 'Zone Infiltration', 'Air Exchange Flow Rate')
+    imbal_ducts_flow_actuator.setName("#{imbal_ducts_flow.name} act")
+
     imbal_mechvent_flow = OpenStudio::Model::SpaceInfiltrationDesignFlowRate.new(model)
     imbal_mechvent_flow.setName(Constants.ObjectNameMechanicalVentilation + ' flow')
     imbal_mechvent_flow.setSchedule(model.alwaysOnDiscreteSchedule)
@@ -1784,12 +1791,12 @@ class Airflow
     infil_program.addLine('Set Q_tot_flow = (((Qu^2)+(Qn^2))^0.5)')
     infil_program.addLine('Set Q_tot_flow = (@Max Q_tot_flow 0)')
     if not [HPXML::MechVentTypeBalanced, HPXML::MechVentTypeERV, HPXML::MechVentTypeHRV].include? mech_vent.type
-      infil_program.addLine("Set #{infil_flow_actuator.name} = Q_tot_flow - QWHV")
       infil_program.addLine("Set #{imbal_mechvent_flow_actuator.name} = QWHV")
     else
-      infil_program.addLine("Set #{infil_flow_actuator.name} = Q_tot_flow")
       infil_program.addLine("Set #{imbal_mechvent_flow_actuator.name} = 0")
     end
+    infil_program.addLine("Set #{imbal_ducts_flow_actuator.name} = (@Abs (QductsOut - QductsIn))")
+    infil_program.addLine("Set #{infil_flow_actuator.name} = Q_tot_flow - #{imbal_mechvent_flow_actuator.name} - #{imbal_ducts_flow_actuator.name}") # The remainder
 
     return infil_program
   end
