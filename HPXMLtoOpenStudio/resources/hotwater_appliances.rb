@@ -302,7 +302,7 @@ class HotWaterAndAppliances
   end
 
   def self.calc_dishwasher_annual_kwh_from_ef(ef)
-    return ef * 215.0
+    return 215.0 / ef
   end
 
   def self.get_refrigerator_default_values(nbeds)
@@ -467,9 +467,9 @@ class HotWaterAndAppliances
 
   def self.calc_refrigerator_energy(refrigerator)
     # Get values
-    ler = refrigerator.rated_annual_kwh
+    ler = refrigerator.adjusted_annual_kwh
     if ler.nil?
-      ler = refrigerator.adjusted_annual_kwh
+      ler = refrigerator.rated_annual_kwh
     end
 
     annual_kwh = ler
