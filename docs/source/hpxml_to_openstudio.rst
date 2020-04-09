@@ -96,6 +96,7 @@ The following building features/technologies are available for modeling via the 
   - Dishwasher
   - Refrigerator
   - Cooking Range/Oven
+  - Dehumidifier
   
 - Lighting
 - Ceiling Fans
@@ -636,6 +637,13 @@ Cooking Range/Oven
 
 ``Appliances/CookingRange`` and ``Appliances/Oven`` elements can be specified; if not provided, a range/oven will not be modeled.
 The ``FuelType`` of the range and whether it ``IsInduction``, as well as whether the oven ``IsConvection``, must be provided.
+
+Dehumidifier
+************
+
+An ``Appliance/Dehumidifier`` element can be specified; if not provided, a dehumidifier will not be modeled.
+The ``Capacity``, ``DehumidistatSetpoint`` (relative humidity as a fraction, 0-1), and ``FractionDehumidificationLoadServed`` (0-1) must be provided.
+The efficiency of the dehumidifier can either be entered as an ``IntegratedEnergyFactor`` or ``EnergyFactor``.
 
 Lighting
 ~~~~~~~~
