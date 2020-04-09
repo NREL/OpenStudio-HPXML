@@ -630,7 +630,7 @@ class EnergyPlusValidator
         'SystemIdentifier' => one, # Required by HPXML schema
         '[not(Location)] | Location[text()="living space" or text()="basement - conditioned" or text()="basement - unconditioned" or text()="garage"]' => one,
         'ModifiedEnergyFactor | IntegratedModifiedEnergyFactor' => zero_or_one,
-        'ModifiedEnergyFactor | IntegratedModifiedEnergyFactor | Usage | RatedAnnualkWh | LabelElectricRate | LabelGasRate | LabelAnnualGasCost | Capacity' => zero_or_seven,
+        'ModifiedEnergyFactor | IntegratedModifiedEnergyFactor | RatedAnnualkWh | LabelElectricRate | LabelGasRate | LabelAnnualGasCost | LabelUsage | Capacity' => zero_or_seven,
       },
 
       # [ClothesDryer]
@@ -646,7 +646,7 @@ class EnergyPlusValidator
       '/HPXML/Building/BuildingDetails/Appliances/Dishwasher' => {
         'SystemIdentifier' => one, # Required by HPXML schema
         'RatedAnnualkWh | EnergyFactor' => zero_or_one,
-        'RatedAnnualkWh | EnergyFactor | LabelElectricRate | LabelGasRate | LabelAnnualGasCost | PlaceSettingCapacity' => zero_or_five,
+        'RatedAnnualkWh | EnergyFactor | LabelElectricRate | LabelGasRate | LabelAnnualGasCost | LabelUsage | PlaceSettingCapacity' => zero_or_six,
       },
 
       # [Refrigerator]
