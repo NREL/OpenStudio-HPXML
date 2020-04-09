@@ -348,7 +348,7 @@ class EnergyPlusValidator
         '../../HVACDistribution[DistributionSystemType/AirDistribution | DistributionSystemType[Other="DSE"]]' => one_or_more, # See [HVACDistribution]
         'DistributionSystem' => one,
         'CoolingCapacity' => one, # Use -1 for autosizing
-        'CompressorType[text()="single stage" or text()="two stage" or text()="variable speed"]' => zero_or_one,
+        '[not(CompressorType)] | CompressorType[text()="single stage" or text()="two stage" or text()="variable speed"]' => one,
         'AnnualCoolingEfficiency[Units="SEER"]/Value' => one,
         'SensibleHeatFraction' => zero_or_one,
       },
@@ -377,7 +377,7 @@ class EnergyPlusValidator
         'HeatingCapacity' => one, # Use -1 for autosizing
         'CoolingCapacity' => one, # Use -1 for autosizing
         'CoolingSensibleHeatFraction' => zero_or_one,
-        'BackupSystemFuel[text()="electricity" or text()="natural gas" or text()="fuel oil" or text()="propane"]' => zero_or_one, # See [HeatPumpBackup]
+        '[not(BackupSystemFuel)] | BackupSystemFuel[text()="electricity" or text()="natural gas" or text()="fuel oil" or text()="propane"]' => one, # See [HeatPumpBackup]
         'FractionHeatLoadServed' => one, # Must sum to <= 1 across all HeatPumps and HeatingSystems
         'FractionCoolLoadServed' => one, # Must sum to <= 1 across all HeatPumps and CoolingSystems
       },
@@ -386,7 +386,7 @@ class EnergyPlusValidator
       '/HPXML/Building/BuildingDetails/Systems/HVAC/HVACPlant/HeatPump[HeatPumpType="air-to-air"]' => {
         '../../HVACDistribution[DistributionSystemType/AirDistribution | DistributionSystemType[Other="DSE"]]' => one_or_more, # See [HVACDistribution]
         'DistributionSystem' => one,
-        'CompressorType[text()="single stage" or text()="two stage" or text()="variable speed"]' => zero_or_one,
+        '[not(CompressorType)] | CompressorType[text()="single stage" or text()="two stage" or text()="variable speed"]' => one,
         'AnnualCoolingEfficiency[Units="SEER"]/Value' => one,
         'AnnualHeatingEfficiency[Units="HSPF"]/Value' => one,
         'HeatingCapacity17F' => zero_or_one
@@ -504,7 +504,7 @@ class EnergyPlusValidator
         '../WaterFixture' => one_or_more, # See [WaterFixture]
         'SystemIdentifier' => one, # Required by HPXML schema
         'WaterHeaterType[text()="storage water heater" or text()="instantaneous water heater" or text()="heat pump water heater" or text()="space-heating boiler with storage tank" or text()="space-heating boiler with tankless coil"]' => one, # See [WHType=Tank] or [WHType=Tankless] or [WHType=HeatPump] or [WHType=Indirect] or [WHType=CombiTankless]
-        'Location[text()="living space" or text()="basement - unconditioned" or text()="basement - conditioned" or text()="attic - unvented" or text()="attic - vented" or text()="garage" or text()="crawlspace - unvented" or text()="crawlspace - vented" or text()="other exterior"]' => zero_or_one,
+        '[not(Location)] | Location[text()="living space" or text()="basement - unconditioned" or text()="basement - conditioned" or text()="attic - unvented" or text()="attic - vented" or text()="garage" or text()="crawlspace - unvented" or text()="crawlspace - vented" or text()="other exterior"]' => one,
         'FractionDHWLoadServed' => one,
         'HotWaterTemperature' => zero_or_one,
         'UsesDesuperheater' => zero_or_one, # See [Desuperheater]
@@ -628,7 +628,7 @@ class EnergyPlusValidator
       # [ClothesWasher]
       '/HPXML/Building/BuildingDetails/Appliances/ClothesWasher' => {
         'SystemIdentifier' => one, # Required by HPXML schema
-        'Location[text()="living space" or text()="basement - conditioned" or text()="basement - unconditioned" or text()="garage"]' => zero_or_one,
+        '[not(Location)] | Location[text()="living space" or text()="basement - conditioned" or text()="basement - unconditioned" or text()="garage"]' => one,
         'ModifiedEnergyFactor | IntegratedModifiedEnergyFactor' => zero_or_one,
         'ModifiedEnergyFactor | IntegratedModifiedEnergyFactor | Usage | RatedAnnualkWh | LabelElectricRate | LabelGasRate | LabelAnnualGasCost | Capacity' => zero_or_seven,
       },
@@ -636,7 +636,7 @@ class EnergyPlusValidator
       # [ClothesDryer]
       '/HPXML/Building/BuildingDetails/Appliances/ClothesDryer' => {
         'SystemIdentifier' => one, # Required by HPXML schema
-        'Location[text()="living space" or text()="basement - conditioned" or text()="basement - unconditioned" or text()="garage"]' => zero_or_one,
+        '[not(Location)] | Location[text()="living space" or text()="basement - conditioned" or text()="basement - unconditioned" or text()="garage"]' => one,
         'FuelType[text()="natural gas" or text()="fuel oil" or text()="propane" or text()="electricity" or text()="wood"]' => one,
         'EnergyFactor | CombinedEnergyFactor' => zero_or_one,
         'EnergyFactor | CombinedEnergyFactor | ControlType' => zero_or_two,
@@ -652,7 +652,7 @@ class EnergyPlusValidator
       # [Refrigerator]
       '/HPXML/Building/BuildingDetails/Appliances/Refrigerator' => {
         'SystemIdentifier' => one, # Required by HPXML schema
-        'Location[text()="living space" or text()="basement - conditioned" or text()="basement - unconditioned" or text()="garage"]' => zero_or_one,
+        '[not(Location)] | Location[text()="living space" or text()="basement - conditioned" or text()="basement - unconditioned" or text()="garage"]' => one,
         'RatedAnnualkWh | extension/AdjustedAnnualkWh' => zero_or_more,
       },
 
