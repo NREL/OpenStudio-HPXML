@@ -3445,6 +3445,7 @@ class OSModel
     infil_flow_actuators = []
     natvent_flow_actuators = []
     imbal_mechvent_flow_actuators = []
+    imbal_ducts_flow_actuators = []
     whf_flow_actuators = []
 
     model.getEnergyManagementSystemActuators.each do |actuator|
@@ -3456,17 +3457,20 @@ class OSModel
         natvent_flow_actuators << actuator
       elsif actuator.name.to_s.start_with? Constants.ObjectNameMechanicalVentilation.gsub(' ', '_')
         imbal_mechvent_flow_actuators << actuator
+      elsif actuator.name.to_s.start_with? Constants.ObjectNameDucts.gsub(' ', '_')
+        imbal_ducts_flow_actuators << actuator
       elsif actuator.name.to_s.start_with? Constants.ObjectNameWholeHouseFan.gsub(' ', '_')
         whf_flow_actuators << actuator
       end
     end
-    if (infil_flow_actuators.size != 1) || (natvent_flow_actuators.size != 1) || (imbal_mechvent_flow_actuators.size != 1) || (whf_flow_actuators.size != 1)
+    if (infil_flow_actuators.size != 1) || (natvent_flow_actuators.size != 1) || (imbal_mechvent_flow_actuators.size != 1) || (whf_flow_actuators.size != 1) || (imbal_ducts_flow_actuators.size != 1)
       fail 'Could not find actuator for component loads.'
     end
 
     infil_flow_actuator = infil_flow_actuators[0]
     natvent_flow_actuator = natvent_flow_actuators[0]
     imbal_mechvent_flow_actuator = imbal_mechvent_flow_actuators[0]
+    imbal_ducts_flow_actuator = imbal_ducts_flow_actuators[0]
     whf_flow_actuator = whf_flow_actuators[0]
 
     # EMS Sensors: Ducts
@@ -3677,20 +3681,26 @@ class OSModel
       program.addLine("Set hr_intgains = hr_intgains + #{sensor.name} * (#{off_loss}*(1-#{rtf_sensor.name}) + #{on_loss}*#{rtf_sensor.name})") # Water heater tank losses to zone
     end
 
-    # EMS program: Infiltration, Natural Ventilation, Mechanical Ventilation
-    program.addLine("Set hr_airflow_rate = #{infil_flow_actuator.name} + #{imbal_mechvent_flow_actuator.name} + #{natvent_flow_actuator.name} + #{whf_flow_actuator.name}")
-    program.addLine("Set hr_infil = (#{air_loss_sensor.name} - #{air_gain_sensor.name}) * #{infil_flow_actuator.name} / hr_airflow_rate") # Airflow heat attributed to infiltration
-    program.addLine("Set hr_natvent = (#{air_loss_sensor.name} - #{air_gain_sensor.name}) * #{natvent_flow_actuator.name} / hr_airflow_rate") # Airflow heat attributed to natural ventilation
-    program.addLine("Set hr_whf = (#{air_loss_sensor.name} - #{air_gain_sensor.name}) * #{whf_flow_actuator.name} / hr_airflow_rate") # Airflow heat attributed to whole house fan
-    program.addLine("Set hr_mechvent = ((#{air_loss_sensor.name} - #{air_gain_sensor.name}) * #{imbal_mechvent_flow_actuator.name} / hr_airflow_rate)") # Airflow heat attributed to imbalanced mech vent
+    # EMS program: Infiltration, Natural Ventilation, Mechanical Ventilation, Ducts
+    program.addLine("Set hr_airflow_rate = #{infil_flow_actuator.name} + #{imbal_mechvent_flow_actuator.name} + #{imbal_ducts_flow_actuator.name} + #{natvent_flow_actuator.name} + #{whf_flow_actuator.name}")
+    program.addLine('If hr_airflow_rate > 0')
+    program.addLine("  Set hr_infil = (#{air_loss_sensor.name} - #{air_gain_sensor.name}) * #{infil_flow_actuator.name} / hr_airflow_rate") # Airflow heat attributed to infiltration
+    program.addLine("  Set hr_natvent = (#{air_loss_sensor.name} - #{air_gain_sensor.name}) * #{natvent_flow_actuator.name} / hr_airflow_rate") # Airflow heat attributed to natural ventilation
+    program.addLine("  Set hr_whf = (#{air_loss_sensor.name} - #{air_gain_sensor.name}) * #{whf_flow_actuator.name} / hr_airflow_rate") # Airflow heat attributed to whole house fan
+    program.addLine("  Set hr_mechvent = ((#{air_loss_sensor.name} - #{air_gain_sensor.name}) * #{imbal_mechvent_flow_actuator.name} / hr_airflow_rate)") # Airflow heat attributed to imbalanced mech vent
+    program.addLine("  Set hr_ducts = ((#{air_loss_sensor.name} - #{air_gain_sensor.name}) * #{imbal_ducts_flow_actuator.name} / hr_airflow_rate)") # Airflow heat attributed to infiltration induced by duct leakage imbalance
+    program.addLine('Else')
+    program.addLine('  Set hr_infil = 0')
+    program.addLine('  Set hr_natvent = 0')
+    program.addLine('  Set hr_whf = 0')
+    program.addLine('  Set hr_mechvent = 0')
+    program.addLine('  Set hr_ducts = 0')
+    program.addLine('EndIf')
     s = 'Set hr_mechvent = hr_mechvent'
     mechvent_sensors.each do |sensor|
       s += " - #{sensor.name}" # Balanced mech vent load + imbalanced mech vent fan heat
     end
     program.addLine(s) if mechvent_sensors.size > 0
-
-    # EMS program: Ducts
-    program.addLine('Set hr_ducts = 0')
     ducts_sensors.each do |duct_sensors|
       s = 'Set hr_ducts = hr_ducts'
       duct_sensors.each do |sensor|
@@ -3698,7 +3708,7 @@ class OSModel
       end
       program.addLine(s) if duct_sensors.size > 0
     end
-    if not ducts_mix_loss_sensor.nil?
+    if (not ducts_mix_loss_sensor.nil?) && (not ducts_mix_gain_sensor.nil?)
       program.addLine("Set hr_ducts = hr_ducts + (#{ducts_mix_loss_sensor.name} - #{ducts_mix_gain_sensor.name})")
     end
 
