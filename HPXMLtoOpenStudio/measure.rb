@@ -374,12 +374,12 @@ class OSModel
       infilvolume = measurement.infiltration_volume unless infilvolume.nil?
     end
     if infilvolume.nil?
-      @infilvolume = @cvolume
+      @infil_volume = @cvolume
       measurements.each do |measurement|
-        measurement.infiltration_volume = @infilvolume
+        measurement.infiltration_volume = @infil_volume
       end
     else
-      @infilvolume = infilvolume
+      @infil_volume = infilvolume
     end
 
     # Default window interior shading
@@ -555,7 +555,7 @@ class OSModel
         clothes_washer.label_gas_rate = default_values[:label_gas_rate]
         clothes_washer.label_annual_gas_cost = default_values[:label_annual_gas_cost]
         clothes_washer.capacity = default_values[:capacity]
-        clothes_washer.usage = default_values[:usage]
+        clothes_washer.label_usage = default_values[:label_usage]
       end
     end
 
@@ -581,6 +581,7 @@ class OSModel
         dishwasher.label_electric_rate = default_values[:label_electric_rate]
         dishwasher.label_gas_rate = default_values[:label_gas_rate]
         dishwasher.label_annual_gas_cost = default_values[:label_annual_gas_cost]
+        dishwasher.label_usage = default_values[:label_usage]
         dishwasher.place_setting_capacity = default_values[:place_setting_capacity]
       end
     end
@@ -1278,6 +1279,8 @@ class OSModel
 
   def self.add_roofs(runner, model, spaces)
     @hpxml.roofs.each do |roof|
+      next if roof.net_area < 0.1 # skip modeling net surface area for surfaces comprised entirely of subsurface area
+
       if roof.azimuth.nil?
         if roof.pitch > 0
           azimuths = @default_azimuths # Model as four directions for average exterior incident solar
@@ -1291,8 +1294,6 @@ class OSModel
       surfaces = []
 
       azimuths.each do |azimuth|
-        next if roof.net_area < 0.1
-
         width = Math::sqrt(roof.net_area)
         length = (roof.net_area / width) / azimuths.size
         tilt = roof.pitch / 12.0
@@ -1367,6 +1368,8 @@ class OSModel
 
   def self.add_walls(runner, model, spaces)
     @hpxml.walls.each do |wall|
+      next if wall.net_area < 0.1 # skip modeling net surface area for surfaces comprised entirely of subsurface area
+
       if wall.azimuth.nil?
         if wall.is_exterior
           azimuths = @default_azimuths # Model as four directions for average exterior incident solar
@@ -1380,8 +1383,6 @@ class OSModel
       surfaces = []
 
       azimuths.each do |azimuth|
-        next if wall.net_area < 0.1
-
         height = 8.0 * @ncfl_ag
         length = (wall.net_area / height) / azimuths.size
         z_origin = @foundation_top
@@ -1562,6 +1563,8 @@ class OSModel
   def self.add_foundation_walls_slabs(runner, model, spaces)
     # Check for foundation walls without corresponding slabs
     @hpxml.foundation_walls.each do |foundation_wall|
+      next if foundation_wall.net_area < 0.1 # skip modeling net surface area for surfaces comprised entirely of subsurface area
+
       found_slab = false
       @hpxml.slabs.each do |slab|
         found_slab = true if foundation_wall.interior_adjacent_to == slab.interior_adjacent_to
@@ -1577,6 +1580,8 @@ class OSModel
 
       found_foundation_wall = false
       @hpxml.foundation_walls.each do |foundation_wall|
+        next if foundation_wall.net_area < 0.1 # skip modeling net surface area for surfaces comprised entirely of subsurface area
+
         found_foundation_wall = true if slab.interior_adjacent_to == foundation_wall.interior_adjacent_to
       end
       next if found_foundation_wall
@@ -1598,6 +1603,7 @@ class OSModel
       slabs = []
       @hpxml.foundation_walls.each do |foundation_wall|
         next unless foundation_wall.interior_adjacent_to == foundation_type
+        next if foundation_wall.net_area < 0.1 # skip modeling net surface area for surfaces comprised entirely of subsurface area
 
         fnd_walls << foundation_wall
       end
@@ -1899,7 +1905,7 @@ class OSModel
     end
 
     addtl_cfa = cfa - model_cfa
-    return unless addtl_cfa > 0
+    return unless addtl_cfa > 0.1
 
     conditioned_floor_width = Math::sqrt(addtl_cfa)
     conditioned_floor_length = addtl_cfa / conditioned_floor_width
@@ -2973,7 +2979,7 @@ class OSModel
       if (measurement.house_pressure == 50) && (measurement.unit_of_measure == HPXML::UnitsACH)
         infil_ach50 = measurement.air_leakage
       elsif (measurement.house_pressure == 50) && (measurement.unit_of_measure == HPXML::UnitsCFM)
-        infil_ach50 = measurement.air_leakage * 60.0 / @infilvolume # Convert CFM50 to ACH50
+        infil_ach50 = measurement.air_leakage * 60.0 / @infil_volume # Convert CFM50 to ACH50
       else
         infil_const_ach = measurement.constant_ach_natural
       end
@@ -3138,17 +3144,14 @@ class OSModel
                                           range_exhaust_hour, bathroom_exhaust, bathroom_exhaust_hour,
                                           cfis_open_time, cfis_airflow_frac, cfis_airloop)
 
-    window_area = 0.0
-    @hpxml.windows.each do |window|
-      window_area += window.area
-    end
-
     nbaths = @hpxml.building_construction.number_of_bathrooms
     if nbaths.nil?
       nbaths = Waterheater.get_default_num_bathrooms(@nbeds)
     end
+    window_area = @hpxml.windows.map { |w| w.area }.inject(0, :+)
+    infil_height = Airflow.calc_inferred_infiltration_height(@cfa, @ncfl, @ncfl_ag, @infil_volume, @hpxml)
     Airflow.apply(model, runner, weather, infil, mech_vent, nat_vent, whf, duct_systems,
-                  @cfa, @infilvolume, @nbeds, nbaths, @ncfl, @ncfl_ag, window_area,
+                  @cfa, @infil_volume, infil_height, @nbeds, nbaths, @ncfl_ag, window_area,
                   @min_neighbor_distance)
   end
 
@@ -3227,7 +3230,7 @@ class OSModel
   end
 
   def self.add_hvac_sizing(runner, model, weather)
-    HVACSizing.apply(model, runner, weather, @cfa, @infilvolume, @nbeds, @min_neighbor_distance, @living_space, @debug)
+    HVACSizing.apply(model, runner, weather, @cfa, @infil_volume, @nbeds, @min_neighbor_distance, @living_space, @debug)
   end
 
   def self.add_fuel_heating_eae(runner, model)
@@ -3464,6 +3467,7 @@ class OSModel
     infil_flow_actuators = []
     natvent_flow_actuators = []
     imbal_mechvent_flow_actuators = []
+    imbal_ducts_flow_actuators = []
     whf_flow_actuators = []
 
     model.getEnergyManagementSystemActuators.each do |actuator|
@@ -3475,17 +3479,20 @@ class OSModel
         natvent_flow_actuators << actuator
       elsif actuator.name.to_s.start_with? Constants.ObjectNameMechanicalVentilation.gsub(' ', '_')
         imbal_mechvent_flow_actuators << actuator
+      elsif actuator.name.to_s.start_with? Constants.ObjectNameDucts.gsub(' ', '_')
+        imbal_ducts_flow_actuators << actuator
       elsif actuator.name.to_s.start_with? Constants.ObjectNameWholeHouseFan.gsub(' ', '_')
         whf_flow_actuators << actuator
       end
     end
-    if (infil_flow_actuators.size != 1) || (natvent_flow_actuators.size != 1) || (imbal_mechvent_flow_actuators.size != 1) || (whf_flow_actuators.size != 1)
+    if (infil_flow_actuators.size != 1) || (natvent_flow_actuators.size != 1) || (imbal_mechvent_flow_actuators.size != 1) || (whf_flow_actuators.size != 1) || (imbal_ducts_flow_actuators.size != 1)
       fail 'Could not find actuator for component loads.'
     end
 
     infil_flow_actuator = infil_flow_actuators[0]
     natvent_flow_actuator = natvent_flow_actuators[0]
     imbal_mechvent_flow_actuator = imbal_mechvent_flow_actuators[0]
+    imbal_ducts_flow_actuator = imbal_ducts_flow_actuators[0]
     whf_flow_actuator = whf_flow_actuators[0]
 
     # EMS Sensors: Ducts
@@ -3697,20 +3704,26 @@ class OSModel
       program.addLine("Set hr_intgains = hr_intgains + #{sensor.name} * (#{off_loss}*(1-#{rtf_sensor.name}) + #{on_loss}*#{rtf_sensor.name})") # Water heater tank losses to zone
     end
 
-    # EMS program: Infiltration, Natural Ventilation, Mechanical Ventilation
-    program.addLine("Set hr_airflow_rate = #{infil_flow_actuator.name} + #{imbal_mechvent_flow_actuator.name} + #{natvent_flow_actuator.name} + #{whf_flow_actuator.name}")
-    program.addLine("Set hr_infil = (#{air_loss_sensor.name} - #{air_gain_sensor.name}) * #{infil_flow_actuator.name} / hr_airflow_rate") # Airflow heat attributed to infiltration
-    program.addLine("Set hr_natvent = (#{air_loss_sensor.name} - #{air_gain_sensor.name}) * #{natvent_flow_actuator.name} / hr_airflow_rate") # Airflow heat attributed to natural ventilation
-    program.addLine("Set hr_whf = (#{air_loss_sensor.name} - #{air_gain_sensor.name}) * #{whf_flow_actuator.name} / hr_airflow_rate") # Airflow heat attributed to whole house fan
-    program.addLine("Set hr_mechvent = ((#{air_loss_sensor.name} - #{air_gain_sensor.name}) * #{imbal_mechvent_flow_actuator.name} / hr_airflow_rate)") # Airflow heat attributed to imbalanced mech vent
+    # EMS program: Infiltration, Natural Ventilation, Mechanical Ventilation, Ducts
+    program.addLine("Set hr_airflow_rate = #{infil_flow_actuator.name} + #{imbal_mechvent_flow_actuator.name} + #{imbal_ducts_flow_actuator.name} + #{natvent_flow_actuator.name} + #{whf_flow_actuator.name}")
+    program.addLine('If hr_airflow_rate > 0')
+    program.addLine("  Set hr_infil = (#{air_loss_sensor.name} - #{air_gain_sensor.name}) * #{infil_flow_actuator.name} / hr_airflow_rate") # Airflow heat attributed to infiltration
+    program.addLine("  Set hr_natvent = (#{air_loss_sensor.name} - #{air_gain_sensor.name}) * #{natvent_flow_actuator.name} / hr_airflow_rate") # Airflow heat attributed to natural ventilation
+    program.addLine("  Set hr_whf = (#{air_loss_sensor.name} - #{air_gain_sensor.name}) * #{whf_flow_actuator.name} / hr_airflow_rate") # Airflow heat attributed to whole house fan
+    program.addLine("  Set hr_mechvent = ((#{air_loss_sensor.name} - #{air_gain_sensor.name}) * #{imbal_mechvent_flow_actuator.name} / hr_airflow_rate)") # Airflow heat attributed to imbalanced mech vent
+    program.addLine("  Set hr_ducts = ((#{air_loss_sensor.name} - #{air_gain_sensor.name}) * #{imbal_ducts_flow_actuator.name} / hr_airflow_rate)") # Airflow heat attributed to infiltration induced by duct leakage imbalance
+    program.addLine('Else')
+    program.addLine('  Set hr_infil = 0')
+    program.addLine('  Set hr_natvent = 0')
+    program.addLine('  Set hr_whf = 0')
+    program.addLine('  Set hr_mechvent = 0')
+    program.addLine('  Set hr_ducts = 0')
+    program.addLine('EndIf')
     s = 'Set hr_mechvent = hr_mechvent'
     mechvent_sensors.each do |sensor|
       s += " - #{sensor.name}" # Balanced mech vent load + imbalanced mech vent fan heat
     end
     program.addLine(s) if mechvent_sensors.size > 0
-
-    # EMS program: Ducts
-    program.addLine('Set hr_ducts = 0')
     ducts_sensors.each do |duct_sensors|
       s = 'Set hr_ducts = hr_ducts'
       duct_sensors.each do |sensor|
@@ -3718,7 +3731,7 @@ class OSModel
       end
       program.addLine(s) if duct_sensors.size > 0
     end
-    if not ducts_mix_loss_sensor.nil?
+    if (not ducts_mix_loss_sensor.nil?) && (not ducts_mix_gain_sensor.nil?)
       program.addLine("Set hr_ducts = hr_ducts + (#{ducts_mix_loss_sensor.name} - #{ducts_mix_gain_sensor.name})")
     end
 
