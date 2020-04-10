@@ -143,6 +143,7 @@ Building Summary
 This section describes elements specified in HPXML's ``BuildingSummary``. 
 It is used for high-level building information including conditioned floor area, number of bedrooms, number of residents, number of conditioned floors, etc.
 Most occupancy assumptions are based on the number of bedrooms, while the number of residents is solely used to determine heat gains from the occupants themselves.
+Note that a walkout basement should be included in ``NumberofConditionedFloorsAboveGrade``.
 
 Shading due to neighboring buildings can be defined inside an ``Site/extension/Neighbors`` element.
 Each ``Neighbors/NeighborBuilding`` element is required to have an ``Azimuth`` and ``Distance`` from the house.
@@ -518,7 +519,7 @@ The water heater ``Location`` can be optionally entered; if not provided, a defa
 +====================+============================================================================================+
 | 1-3, excluding 3A  | Garage if present, else Living Space                                                       |
 +--------------------+--------------------------------------------------------------------------------------------+
-| 3A, 4-8            | Conditioned Basement if present, else Unconditioned Basement if present, else Living Space |
+| 3A, 4-8, unknown   | Conditioned Basement if present, else Unconditioned Basement if present, else Living Space |
 +--------------------+--------------------------------------------------------------------------------------------+
 
 The setpoint temperature may be provided as ``HotWaterTemperature``; if not provided, 125°F is assumed.
@@ -555,7 +556,7 @@ For a ``SystemType/Standard`` (non-recirculating) system, the following element 
 
 If ``PipingLength`` is not provided, a default ``PipingLength`` will be assumed.
 The default ``PipingLength`` will be calculated using the following equation.
-This equation is based on `ANSI/RESNET/ICC 301-2019 <https://codes.iccsafe.org/content/RESNETICC3012019/toc>`_.
+This equation is based on `ANSI/RESNET/ICC 301-2019 <https://codes.iccsafe.org/content/RESNETICC3012019>`_.
 
 .. math:: PipeL = 2.0 \cdot (\frac{CFA}{NCfl})^{0.5} + 10.0 \cdot NCfl + 5.0 \cdot bsmnt
   
@@ -655,7 +656,7 @@ LabelElectricRate                   0.12  [$/kWh]
 LabelGasRate                        1.09  [$/therm]
 LabelAnnualGasCost                  27.0  [$]
 Capacity                            3.0  [ft³]
-Usage                               6  [cyc/yr]
+LabelUsage                          6  [cyc/week]
 ==================================  ==================
 
 If ``ModifiedEnergyFactor`` is provided instead of ``IntegratedModifiedEnergyFactor``, it will be converted using the following equation.
@@ -702,7 +703,13 @@ LabelElectricRate        0.12  [$/kWh]
 LabelGasRate             1.09  [$/therm]
 LabelAnnualGasCost       33.12  [$]
 PlaceSettingCapacity     12  [standard]
+LabelUsage               4  [cyc/week]
 =======================  =================
+
+If ``EnergyFactor`` is provided instead of ``RatedAnnualkWh``, it will be converted into ``RatedAnnualkWh`` using the following equation.
+This equation is based on `ANSI/RESNET/ICC 301-2014 <https://codes.iccsafe.org/content/document/843>`_.
+
+.. math:: RatedAnnualkWh = \frac{215.0}{EnergyFactor}
 
 Refrigerator
 ************
@@ -712,7 +719,7 @@ The ``Location`` can be optionally provided; if not provided, it is assumed to b
 
 The efficiency of the refrigerator can be optionally entered as ``RatedAnnualkWh`` or ``extension/AdjustedAnnualkWh``.
 If neither are provided, ``RatedAnnualkWh`` will be defaulted to represent a standard refrigerator from 2006 based on the following equation.
-This equation is based on `ANSI/RESNET/ICC 301-2019 <https://codes.iccsafe.org/content/RESNETICC3012019/toc>`_.
+This equation is based on `ANSI/RESNET/ICC 301-2019 <https://codes.iccsafe.org/content/RESNETICC3012019>`_.
 
 .. math:: RatedAnnualkWh = 637.0 + 18.0 \cdot Number of bedrooms
 
