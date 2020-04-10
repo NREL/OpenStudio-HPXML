@@ -134,19 +134,19 @@
                   <z>0</z>
                 </Coordinate>
                 <Coordinate>
-                  <x>1</x>
+                  <x>150</x>
                   <y>0</y>
                   <z>0</z>
                 </Coordinate>
                 <Coordinate>
-                  <x>1</x>
+                  <x>150</x>
                   <y>0</y>
-                  <z>1</z>
+                  <z>8</z>
                 </Coordinate>
                 <Coordinate>
                   <x>0</x>
                   <y>0</y>
-                  <z>1</z>
+                  <z>8</z>
                 </Coordinate>
               </Coordinates>
             </extension>
@@ -170,18 +170,22 @@
                 <Coordinate>
                   <x>0</x>
                   <y>0</y>
+                  <z>8</z>
                 </Coordinate>
                 <Coordinate>
-                  <x>2</x>
+                  <x>72.5</x>
                   <y>0</y>
+                  <z>8</z>
                 </Coordinate>
                 <Coordinate>
-                  <x>2</x>
-                  <y>2</y>
+                  <x>72.5</x>
+                  <y>0</y>
+                  <z>12</z>
                 </Coordinate>
                 <Coordinate>
                   <x>0</x>
-                  <y>2</y>
+                  <y>0</y>
+                  <z>12</z>
                 </Coordinate>
               </Coordinates>
             </extension>
@@ -447,11 +451,11 @@
           <SystemIdentifier id='ClothesWasher'/>
           <Location>living space</Location>
           <IntegratedModifiedEnergyFactor>1.21</IntegratedModifiedEnergyFactor>
-          <Usage>6.0</Usage>
           <RatedAnnualkWh>380.0</RatedAnnualkWh>
           <LabelElectricRate>0.12</LabelElectricRate>
           <LabelGasRate>1.09</LabelGasRate>
           <LabelAnnualGasCost>27.0</LabelAnnualGasCost>
+          <LabelUsage>6.0</LabelUsage>
           <Capacity>3.2</Capacity>
         </ClothesWasher>
         <ClothesDryer>
@@ -468,6 +472,7 @@
           <LabelElectricRate>0.12</LabelElectricRate>
           <LabelGasRate>1.09</LabelGasRate>
           <LabelAnnualGasCost>22.32</LabelAnnualGasCost>
+          <LabelUsage>4.0</LabelUsage>
         </Dishwasher>
         <Refrigerator>
           <SystemIdentifier id='Refrigerator'/>

@@ -1397,6 +1397,27 @@ class OSModel
         end
       end
 
+      # FIXME: create new polygon method that takes 3D coordinates?
+      # height = (wall.coordinates[0][:z] - wall.coordinates[2][:z]).abs
+      # length = (wall.coordinates[0][:x] - wall.coordinates[2][:x]).abs
+      # z_origin = @foundation_top
+      # azimuth = 0 # FIXME: require this when coordinates are present?
+
+      # surface = OpenStudio::Model::Surface.new(add_wall_polygon(length, height, z_origin, azimuth), model)
+      # surfaces << surface
+      # surface.additionalProperties.setFeature('Length', length)
+      # surface.additionalProperties.setFeature('Azimuth', azimuth)
+      # surface.additionalProperties.setFeature('Tilt', 90.0)
+      # surface.additionalProperties.setFeature('SurfaceType', 'Wall')
+      # surface.setName(wall.id)
+      # surface.setSurfaceType('Wall')
+      # set_surface_interior(model, spaces, surface, wall.interior_adjacent_to)
+      # set_surface_exterior(model, spaces, surface, wall.exterior_adjacent_to)
+      # if wall.is_interior
+        # surface.setSunExposure('NoSun')
+        # surface.setWindExposure('NoWind')
+      # end
+
       next if surfaces.empty?
 
       # Apply construction

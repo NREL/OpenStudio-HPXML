@@ -1472,7 +1472,10 @@ class HPXML < Object
         @insulation_cavity_r_value = HPXML::to_float_or_nil(XMLHelper.get_value(insulation, "Layer[InstallationType='cavity']/NominalRValue"))
         @insulation_continuous_r_value = HPXML::to_float_or_nil(XMLHelper.get_value(insulation, "Layer[InstallationType='continuous']/NominalRValue"))
       end
-      @coordinates = [] # TODO: get coordinates
+      @coordinates = []
+      wall.elements.each('extension/Coordinates/Coordinate') do |coordinate|
+        @coordinates << HPXML::get_coordinate(coordinate)
+      end
     end
   end
 
@@ -3955,6 +3958,16 @@ class HPXML < Object
     return if element.nil?
 
     return element.attributes['idref']
+  end
+
+  def self.get_coordinate(element)
+    return if element.nil?
+
+    return { 
+      :x => HPXML::to_float_or_nil(XMLHelper.get_value(element, 'x')),
+      :y => HPXML::to_float_or_nil(XMLHelper.get_value(element, 'y')),
+      :z => HPXML::to_float_or_nil(XMLHelper.get_value(element, 'z'))
+    }
   end
 
   def self.to_float_or_nil(value)
