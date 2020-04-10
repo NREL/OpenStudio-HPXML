@@ -231,6 +231,7 @@ def create_hpxmls
     'base-misc-lighting-none.xml' => 'base.xml',
     'base-misc-timestep-10-mins.xml' => 'base.xml',
     'base-misc-runperiod-1-month.xml' => 'base.xml',
+    'base-misc-usage-multiplier.xml' => 'base.xml',
     'base-misc-whole-house-fan.xml' => 'base.xml',
     'base-pv.xml' => 'base.xml',
     'base-site-neighbors.xml' => 'base.xml',
@@ -2879,6 +2880,8 @@ def set_hpxml_water_fixtures(hpxml_file, hpxml)
     hpxml.water_fixtures[1].low_flow = true
   elsif ['base-dhw-none.xml'].include? hpxml_file
     hpxml.water_fixtures.clear()
+  elsif ['base-misc-usage-multiplier.xml'].include? hpxml_file
+    hpxml.water_heating.water_fixtures_usage_multiplier = 0.9
   end
 end
 
@@ -3028,6 +3031,8 @@ def set_hpxml_clothes_washer(hpxml_file, hpxml)
     hpxml.clothes_washers[0].label_annual_gas_cost = nil
     hpxml.clothes_washers[0].capacity = nil
     hpxml.clothes_washers[0].label_usage = nil
+  elsif ['base-misc-usage-multiplier.xml'].include? hpxml_file
+    hpxml.clothes_washers[0].usage_multiplier = 0.9
   end
 end
 
@@ -3084,6 +3089,8 @@ def set_hpxml_clothes_dryer(hpxml_file, hpxml)
     hpxml.clothes_dryers[0].energy_factor = nil
     hpxml.clothes_dryers[0].combined_energy_factor = nil
     hpxml.clothes_dryers[0].control_type = nil
+  elsif ['base-misc-usage-multiplier.xml'].include? hpxml_file
+    hpxml.clothes_dryers[0].usage_multiplier = 0.9
   end
 end
 
@@ -3109,6 +3116,8 @@ def set_hpxml_dishwasher(hpxml_file, hpxml)
     hpxml.dishwashers[0].label_annual_gas_cost = nil
     hpxml.dishwashers[0].place_setting_capacity = nil
     hpxml.dishwashers[0].label_usage = nil
+  elsif ['base-misc-usage-multiplier.xml'].include? hpxml_file
+    hpxml.dishwashers[0].usage_multiplier = 0.9
   end
 end
 
@@ -3134,6 +3143,8 @@ def set_hpxml_refrigerator(hpxml_file, hpxml)
     hpxml.refrigerators[0].location = nil
     hpxml.refrigerators[0].rated_annual_kwh = nil
     hpxml.refrigerators[0].adjusted_annual_kwh = nil
+  elsif ['base-misc-usage-multiplier.xml'].include? hpxml_file
+    hpxml.refrigerators[0].usage_multiplier = 0.9
   end
 end
 
@@ -3157,6 +3168,8 @@ def set_hpxml_cooking_range(hpxml_file, hpxml)
     hpxml.cooking_ranges[0].is_induction = false
   elsif ['base-misc-defaults.xml'].include? hpxml_file
     hpxml.cooking_ranges[0].is_induction = nil
+  elsif ['base-misc-usage-multiplier.xml'].include? hpxml_file
+    hpxml.cooking_ranges[0].usage_multiplier = 0.9
   end
 end
 
@@ -3201,6 +3214,8 @@ def set_hpxml_lighting(hpxml_file, hpxml)
     hpxml.lighting_groups.clear()
   elsif ['invalid_files/lighting-fractions.xml'].include? hpxml_file
     hpxml.lighting_groups[0].fration_of_units_in_location = 0.8
+  elsif ['base-misc-usage-multiplier.xml'].include? hpxml_file
+    hpxml.lighting.usage_multiplier = 0.9
   end
 end
 
@@ -3222,6 +3237,10 @@ def set_hpxml_plug_loads(hpxml_file, hpxml)
                          plug_load_type: HPXML::PlugLoadTypeOther)
     hpxml.plug_loads.add(id: 'PlugLoadMisc2',
                          plug_load_type: HPXML::PlugLoadTypeTelevision)
+  elsif ['base-misc-usage-multiplier.xml'].include? hpxml_file
+    hpxml.plug_loads.each do |plug_load|
+      plug_load.usage_multiplier = 0.9
+    end
   end
   if ['base-misc-defaults.xml'].include? hpxml_file
     hpxml.plug_loads.each do |plug_load|
