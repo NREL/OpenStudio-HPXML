@@ -2113,9 +2113,6 @@ class HVAC
     water_removal_rate = dehumidifier.capacity
     energy_factor = dehumidifier.energy_factor
 
-    # Calculate air flow rate by assuming 2.75 cfm/pint/day (based on experimental test data)
-    air_flow_rate = 2.75 * water_removal_rate
-
     control_zone = living_space.thermalZone.get
     obj_name = Constants.ObjectNameDehumidifier
 
@@ -2156,10 +2153,11 @@ class HVAC
     zone_hvac.setMaximumDryBulbTemperatureforDehumidifierOperation(40)
 
     zone_hvac.addToThermalZone(control_zone)
-    # Only one dehumidifier allowed in current workflow.
-    # If more than one allowed in the future, should remove this EMS program to avoid duplication
+
     hvac_map[dehumidifier.id] << zone_hvac
-    adjust_dehumidifier_load_EMS(dehumidifier.fraction_served, zone_hvac, model, living_space)
+    if dehumidifier.fraction_served < 1.0
+      adjust_dehumidifier_load_EMS(dehumidifier.fraction_served, zone_hvac, model, living_space)
+    end
   end
 
   def self.dehumidifier_ief_to_ef_inputs(w_coeff, ef_coeff, ief, water_removal_rate)
@@ -2185,6 +2183,8 @@ class HVAC
   end
 
   def self.adjust_dehumidifier_load_EMS(fraction_served, zone_hvac, model, living_space)
+    # adjust hvac load to space when dehumidifier serves less than 100% dehumidification load. (With E+ dehumidifier object, it can only model 100%)
+
     # sensor
     dehumidifier_sens_htg = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Zone Dehumidifier Sensible Heating Rate')
     dehumidifier_sens_htg.setName("#{zone_hvac.name} sens htg")
