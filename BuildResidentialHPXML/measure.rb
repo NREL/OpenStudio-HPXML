@@ -797,22 +797,6 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     compressor_type_choices << HPXML::HVACCompressorTypeTwoStage
     compressor_type_choices << HPXML::HVACCompressorTypeVariableSpeed
 
-    heat_pump_type_choices = OpenStudio::StringVector.new
-    heat_pump_type_choices << 'none'
-    heat_pump_type_choices << HPXML::HVACTypeHeatPumpAirToAir
-    heat_pump_type_choices << HPXML::HVACTypeHeatPumpMiniSplit
-    heat_pump_type_choices << HPXML::HVACTypeHeatPumpGroundToAir
-
-    heat_pump_fuel_choices = OpenStudio::StringVector.new
-    heat_pump_fuel_choices << HPXML::FuelTypeElectricity
-
-    heat_pump_backup_fuel_choices = OpenStudio::StringVector.new
-    heat_pump_backup_fuel_choices << 'none'
-    heat_pump_backup_fuel_choices << HPXML::FuelTypeElectricity
-    heat_pump_backup_fuel_choices << HPXML::FuelTypeNaturalGas
-    heat_pump_backup_fuel_choices << HPXML::FuelTypeOil
-    heat_pump_backup_fuel_choices << HPXML::FuelTypePropane
-
     arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('heating_system_type', heating_system_type_choices, true)
     arg.setDisplayName('Heating System: Type')
     arg.setDescription('The type of the heating system.')
@@ -892,6 +876,22 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     arg.setDescription('Whether the evaporative cooler is ducted or not.')
     arg.setDefaultValue(false)
     args << arg
+
+    heat_pump_type_choices = OpenStudio::StringVector.new
+    heat_pump_type_choices << 'none'
+    heat_pump_type_choices << HPXML::HVACTypeHeatPumpAirToAir
+    heat_pump_type_choices << HPXML::HVACTypeHeatPumpMiniSplit
+    heat_pump_type_choices << HPXML::HVACTypeHeatPumpGroundToAir
+
+    heat_pump_fuel_choices = OpenStudio::StringVector.new
+    heat_pump_fuel_choices << HPXML::FuelTypeElectricity
+
+    heat_pump_backup_fuel_choices = OpenStudio::StringVector.new
+    heat_pump_backup_fuel_choices << 'none'
+    heat_pump_backup_fuel_choices << HPXML::FuelTypeElectricity
+    heat_pump_backup_fuel_choices << HPXML::FuelTypeNaturalGas
+    heat_pump_backup_fuel_choices << HPXML::FuelTypeOil
+    heat_pump_backup_fuel_choices << HPXML::FuelTypePropane
 
     arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('heat_pump_type', heat_pump_type_choices, true)
     arg.setDisplayName('Heat Pump: Type')
