@@ -31,6 +31,7 @@ def create_hpxmls
     'invalid_files/invalid-relatedhvac-dhw-indirect.xml' => 'base-dhw-indirect.xml',
     'invalid_files/invalid-relatedhvac-desuperheater.xml' => 'base-hvac-central-ac-only-1-speed.xml',
     'invalid_files/invalid-timestep.xml' => 'base.xml',
+    'invalid_files/invalid-runperiod.xml' => 'base.xml',
     'invalid_files/invalid-window-height.xml' => 'base-enclosure-overhangs.xml',
     'invalid_files/invalid-window-interior-shading.xml' => 'base.xml',
     'invalid_files/lighting-fractions.xml' => 'base.xml',
@@ -232,6 +233,7 @@ def create_hpxmls
     'base-misc-defaults.xml' => 'base.xml',
     'base-misc-lighting-none.xml' => 'base.xml',
     'base-misc-timestep-10-mins.xml' => 'base.xml',
+    'base-misc-runperiod-1-month.xml' => 'base.xml',
     'base-misc-whole-house-fan.xml' => 'base.xml',
     'base-pv.xml' => 'base.xml',
     'base-site-neighbors.xml' => 'base.xml',
@@ -461,8 +463,14 @@ def set_hpxml_header(hpxml_file, hpxml)
     hpxml.header.timestep = 60
   elsif ['base-misc-timestep-10-mins.xml'].include? hpxml_file
     hpxml.header.timestep = 10
+  elsif ['base-misc-runperiod-1-month.xml'].include? hpxml_file
+    hpxml.header.end_month = 1
+    hpxml.header.end_day_of_month = 31
   elsif ['invalid_files/invalid-timestep.xml'].include? hpxml_file
     hpxml.header.timestep = 45
+  elsif ['invalid_files/invalid-runperiod.xml'].include? hpxml_file
+    hpxml.header.end_month = 4
+    hpxml.header.end_day_of_month = 31
   elsif ['base-misc-defaults.xml'].include? hpxml_file
     hpxml.header.timestep = nil
   end
@@ -526,8 +534,13 @@ def set_hpxml_building_construction(hpxml_file, hpxml)
     hpxml.building_construction.number_of_conditioned_floors_above_grade += 1
     hpxml.building_construction.conditioned_floor_area += 1350
     hpxml.building_construction.conditioned_building_volume += 1350 * 8
+  elsif ['base-misc-defaults.xml'].include? hpxml_file
+    hpxml.building_construction.conditioned_building_volume = nil
+    hpxml.building_construction.average_ceiling_height = 8
   elsif ['base-enclosure-adiabatic-surfaces.xml'].include? hpxml_file
     hpxml.building_construction.residential_facility_type = HPXML::ResidentialTypeApartment
+  elsif ['base-foundation-walkout-basement.xml'].include? hpxml_file
+    hpxml.building_construction.number_of_conditioned_floors_above_grade += 1
   end
 end
 
@@ -541,28 +554,25 @@ end
 
 def set_hpxml_climate_and_risk_zones(hpxml_file, hpxml)
   if ['base.xml'].include? hpxml_file
-    hpxml.climate_and_risk_zones.iecc2006 = '5B'
+    hpxml.climate_and_risk_zones.iecc_year = 2006
+    hpxml.climate_and_risk_zones.iecc_zone = '5B'
     hpxml.climate_and_risk_zones.weather_station_id = 'WeatherStation'
     hpxml.climate_and_risk_zones.weather_station_name = 'Denver, CO'
     hpxml.climate_and_risk_zones.weather_station_wmo = '725650'
   elsif ['base-location-baltimore-md.xml'].include? hpxml_file
-    hpxml.climate_and_risk_zones.iecc2006 = '4A'
-    hpxml.climate_and_risk_zones.weather_station_id = 'WeatherStation'
+    hpxml.climate_and_risk_zones.iecc_zone = '4A'
     hpxml.climate_and_risk_zones.weather_station_name = 'Baltimore, MD'
     hpxml.climate_and_risk_zones.weather_station_wmo = '724060'
   elsif ['base-location-dallas-tx.xml'].include? hpxml_file
-    hpxml.climate_and_risk_zones.iecc2006 = '3A'
-    hpxml.climate_and_risk_zones.weather_station_id = 'WeatherStation'
+    hpxml.climate_and_risk_zones.iecc_zone = '3A'
     hpxml.climate_and_risk_zones.weather_station_name = 'Dallas, TX'
     hpxml.climate_and_risk_zones.weather_station_wmo = '722590'
   elsif ['base-location-duluth-mn.xml'].include? hpxml_file
-    hpxml.climate_and_risk_zones.iecc2006 = '7'
-    hpxml.climate_and_risk_zones.weather_station_id = 'WeatherStation'
+    hpxml.climate_and_risk_zones.iecc_zone = '7'
     hpxml.climate_and_risk_zones.weather_station_name = 'Duluth, MN'
     hpxml.climate_and_risk_zones.weather_station_wmo = '727450'
   elsif ['base-location-miami-fl.xml'].include? hpxml_file
-    hpxml.climate_and_risk_zones.iecc2006 = '1A'
-    hpxml.climate_and_risk_zones.weather_station_id = 'WeatherStation'
+    hpxml.climate_and_risk_zones.iecc_zone = '1A'
     hpxml.climate_and_risk_zones.weather_station_name = 'Miami, FL'
     hpxml.climate_and_risk_zones.weather_station_wmo = '722020'
   elsif ['base-location-epw-filename.xml'].include? hpxml_file
@@ -1836,6 +1846,12 @@ def set_hpxml_heating_systems(hpxml_file, hpxml)
     hpxml.heating_systems[0].heating_capacity /= 10.0
   elsif ['base-hvac-flowrate.xml'].include? hpxml_file
     hpxml.heating_systems[0].heating_cfm = hpxml.heating_systems[0].heating_capacity * 360.0 / 12000.0
+  elsif ['base-hvac-ducts-multiple.xml'].include? hpxml_file
+    hpxml.heating_systems[0].heating_capacity /= 2.0
+    hpxml.heating_systems[0].fraction_heat_load_served = 0.5
+    hpxml.heating_systems << hpxml.heating_systems[0].dup
+    hpxml.heating_systems[1].id = 'HeatingSystem2'
+    hpxml.heating_systems[1].distribution_system_idref = 'HVACDistribution2'
   elsif hpxml_file.include?('hvac_autosizing') && (not hpxml.heating_systems.nil?) && (hpxml.heating_systems.size > 0)
     hpxml.heating_systems[0].heating_capacity = -1
   elsif hpxml_file.include?('-zero-heat.xml') && (not hpxml.heating_systems.nil?) && (hpxml.heating_systems.size > 0)
@@ -1956,6 +1972,12 @@ def set_hpxml_cooling_systems(hpxml_file, hpxml)
     hpxml.cooling_systems[0].cooling_capacity /= 10.0
   elsif ['base-hvac-flowrate.xml'].include? hpxml_file
     hpxml.cooling_systems[0].cooling_cfm = hpxml.cooling_systems[0].cooling_capacity * 360.0 / 12000.0
+  elsif ['base-hvac-ducts-multiple.xml'].include? hpxml_file
+    hpxml.cooling_systems[0].cooling_capacity /= 2.0
+    hpxml.cooling_systems[0].fraction_cool_load_served = 0.5
+    hpxml.cooling_systems << hpxml.cooling_systems[0].dup
+    hpxml.cooling_systems[1].id = 'CoolingSystem2'
+    hpxml.cooling_systems[1].distribution_system_idref = 'HVACDistribution2'
   elsif ['base-misc-defaults.xml'].include? hpxml_file
     hpxml.cooling_systems[0].cooling_shr = nil
     hpxml.cooling_systems[0].compressor_type = nil
@@ -2426,6 +2448,8 @@ def set_hpxml_hvac_distributions(hpxml_file, hpxml)
                                           duct_insulation_r_value: 4,
                                           duct_location: HPXML::LocationOutside,
                                           duct_surface_area: 100)
+    hpxml.hvac_distributions << hpxml.hvac_distributions[0].dup
+    hpxml.hvac_distributions[1].id = 'HVACDistribution2'
   elsif ['base-atticroof-conditioned.xml',
          'base-enclosure-adiabatic-surfaces.xml',
          'base-atticroof-cathedral.xml',
@@ -2764,6 +2788,7 @@ def set_hpxml_water_heating_systems(hpxml_file, hpxml)
   hpxml.water_heating_systems.each do |water_heating_system|
     if ['base-misc-defaults.xml'].include? hpxml_file
       water_heating_system.temperature = nil
+      water_heating_system.location = nil
     else
       water_heating_system.temperature = Waterheater.get_default_hot_water_temperature(Constants.ERIVersions[-1])
     end
@@ -2814,6 +2839,8 @@ def set_hpxml_hot_water_distribution(hpxml_file, hpxml)
     hpxml.hot_water_distributions[0].recirculation_pump_power = 50
   elsif ['base-dhw-none.xml'].include? hpxml_file
     hpxml.hot_water_distributions.clear()
+  elsif ['base-misc-defaults.xml'].include? hpxml_file
+    hpxml.hot_water_distributions[0].standard_piping_length = nil
   end
 end
 
@@ -2928,6 +2955,17 @@ def set_hpxml_pv_systems(hpxml_file, hpxml)
                          max_power_output: 1500,
                          inverter_efficiency: 0.96,
                          system_losses_fraction: 0.14)
+  elsif ['base-misc-defaults.xml'].include? hpxml_file
+    hpxml.pv_systems.add(id: 'PVSystem',
+                         module_type: HPXML::PVModuleTypeStandard,
+                         location: HPXML::LocationRoof,
+                         tracking: HPXML::PVTrackingTypeFixed,
+                         array_azimuth: 180,
+                         array_tilt: 20,
+                         max_power_output: 4000,
+                         inverter_efficiency: nil,
+                         system_losses_fraction: nil,
+                         year_modules_manufactured: 2015)
   end
 end
 
@@ -2935,17 +2973,19 @@ def set_hpxml_clothes_washer(hpxml_file, hpxml)
   if ['base.xml'].include? hpxml_file
     hpxml.clothes_washers.add(id: 'ClothesWasher',
                               location: HPXML::LocationLivingSpace,
-                              modified_energy_factor: 0.8,
-                              rated_annual_kwh: 700.0,
-                              label_electric_rate: 0.10,
-                              label_gas_rate: 0.60,
-                              label_annual_gas_cost: 25.0,
-                              capacity: 3.0)
+                              integrated_modified_energy_factor: 1.21,
+                              rated_annual_kwh: 380,
+                              label_electric_rate: 0.12,
+                              label_gas_rate: 1.09,
+                              label_annual_gas_cost: 27,
+                              capacity: 3.2,
+                              label_usage: 6)
   elsif ['base-appliances-none.xml'].include? hpxml_file
     hpxml.clothes_washers.clear()
   elsif ['base-appliances-modified.xml'].include? hpxml_file
-    hpxml.clothes_washers[0].modified_energy_factor = nil
-    hpxml.clothes_washers[0].integrated_modified_energy_factor = 0.73
+    imef = hpxml.clothes_washers[0].integrated_modified_energy_factor
+    hpxml.clothes_washers[0].integrated_modified_energy_factor = nil
+    hpxml.clothes_washers[0].modified_energy_factor = HotWaterAndAppliances.calc_clothes_washer_mef_from_imef(imef).round(2)
   elsif ['base-foundation-unconditioned-basement.xml'].include? hpxml_file
     hpxml.clothes_washers[0].location = HPXML::LocationBasementUnconditioned
   elsif ['base-atticroof-conditioned.xml'].include? hpxml_file
@@ -2955,6 +2995,16 @@ def set_hpxml_clothes_washer(hpxml_file, hpxml)
     hpxml.clothes_washers[0].location = HPXML::LocationGarage
   elsif ['invalid_files/clothes-washer-location-other.xml'].include? hpxml_file
     hpxml.clothes_washers[0].location = 'other'
+  elsif ['base-misc-defaults.xml'].include? hpxml_file
+    hpxml.clothes_washers[0].location = nil
+    hpxml.clothes_washers[0].modified_energy_factor = nil
+    hpxml.clothes_washers[0].integrated_modified_energy_factor = nil
+    hpxml.clothes_washers[0].rated_annual_kwh = nil
+    hpxml.clothes_washers[0].label_electric_rate = nil
+    hpxml.clothes_washers[0].label_gas_rate = nil
+    hpxml.clothes_washers[0].label_annual_gas_cost = nil
+    hpxml.clothes_washers[0].capacity = nil
+    hpxml.clothes_washers[0].label_usage = nil
   end
 end
 
@@ -2963,16 +3013,17 @@ def set_hpxml_clothes_dryer(hpxml_file, hpxml)
     hpxml.clothes_dryers.add(id: 'ClothesDryer',
                              location: HPXML::LocationLivingSpace,
                              fuel_type: HPXML::FuelTypeElectricity,
-                             energy_factor: 2.95,
+                             combined_energy_factor: 3.73,
                              control_type: HPXML::ClothesDryerControlTypeTimer)
   elsif ['base-appliances-none.xml'].include? hpxml_file
     hpxml.clothes_dryers.clear()
   elsif ['base-appliances-modified.xml'].include? hpxml_file
+    cef = hpxml.clothes_dryers[-1].combined_energy_factor
     hpxml.clothes_dryers.clear()
     hpxml.clothes_dryers.add(id: 'ClothesDryer',
                              location: HPXML::LocationLivingSpace,
                              fuel_type: HPXML::FuelTypeElectricity,
-                             combined_energy_factor: 2.62,
+                             energy_factor: HotWaterAndAppliances.calc_clothes_dryer_ef_from_cef(cef).round(2),
                              control_type: HPXML::ClothesDryerControlTypeMoisture)
   elsif ['base-appliances-gas.xml',
          'base-appliances-propane.xml',
@@ -2980,7 +3031,7 @@ def set_hpxml_clothes_dryer(hpxml_file, hpxml)
     hpxml.clothes_dryers.clear()
     hpxml.clothes_dryers.add(id: 'ClothesDryer',
                              location: HPXML::LocationLivingSpace,
-                             energy_factor: 2.67,
+                             combined_energy_factor: 3.30,
                              control_type: HPXML::ClothesDryerControlTypeMoisture)
     if hpxml_file == 'base-appliances-gas.xml'
       hpxml.clothes_dryers[0].fuel_type = HPXML::FuelTypeNaturalGas
@@ -2994,7 +3045,7 @@ def set_hpxml_clothes_dryer(hpxml_file, hpxml)
     hpxml.clothes_dryers.add(id: 'ClothesDryer',
                              location: HPXML::LocationLivingSpace,
                              fuel_type: HPXML::FuelTypeWood,
-                             energy_factor: 2.67,
+                             combined_energy_factor: 3.30,
                              control_type: HPXML::ClothesDryerControlTypeMoisture)
   elsif ['base-foundation-unconditioned-basement.xml'].include? hpxml_file
     hpxml.clothes_dryers[0].location = HPXML::LocationBasementUnconditioned
@@ -3005,21 +3056,36 @@ def set_hpxml_clothes_dryer(hpxml_file, hpxml)
     hpxml.clothes_dryers[0].location = HPXML::LocationGarage
   elsif ['invalid_files/clothes-dryer-location-other.xml'].include? hpxml_file
     hpxml.clothes_dryers[0].location = 'other'
+  elsif ['base-misc-defaults.xml'].include? hpxml_file
+    hpxml.clothes_dryers[0].location = nil
+    hpxml.clothes_dryers[0].energy_factor = nil
+    hpxml.clothes_dryers[0].combined_energy_factor = nil
+    hpxml.clothes_dryers[0].control_type = nil
   end
 end
 
 def set_hpxml_dishwasher(hpxml_file, hpxml)
   if ['base.xml'].include? hpxml_file
     hpxml.dishwashers.add(id: 'Dishwasher',
-                          rated_annual_kwh: 450,
+                          rated_annual_kwh: 307,
+                          label_electric_rate: 0.12,
+                          label_gas_rate: 1.09,
+                          label_annual_gas_cost: 22.32,
+                          label_usage: 4,
                           place_setting_capacity: 12)
+  elsif ['base-appliances-modified.xml'].include? hpxml_file
+    rated_annual_kwh = hpxml.dishwashers[0].rated_annual_kwh
+    hpxml.dishwashers[0].rated_annual_kwh = nil
+    hpxml.dishwashers[0].energy_factor = HotWaterAndAppliances.calc_dishwasher_ef_from_annual_kwh(rated_annual_kwh).round(2)
   elsif ['base-appliances-none.xml'].include? hpxml_file
     hpxml.dishwashers.clear()
-  elsif ['base-appliances-modified.xml'].include? hpxml_file
-    hpxml.dishwashers.clear()
-    hpxml.dishwashers.add(id: 'Dishwasher',
-                          energy_factor: 0.5,
-                          place_setting_capacity: 12)
+  elsif ['base-misc-defaults.xml'].include? hpxml_file
+    hpxml.dishwashers[0].rated_annual_kwh = nil
+    hpxml.dishwashers[0].label_electric_rate = nil
+    hpxml.dishwashers[0].label_gas_rate = nil
+    hpxml.dishwashers[0].label_annual_gas_cost = nil
+    hpxml.dishwashers[0].place_setting_capacity = nil
+    hpxml.dishwashers[0].label_usage = nil
   end
 end
 
@@ -3041,6 +3107,10 @@ def set_hpxml_refrigerator(hpxml_file, hpxml)
     hpxml.refrigerators[0].location = HPXML::LocationGarage
   elsif ['invalid_files/refrigerator-location-other.xml'].include? hpxml_file
     hpxml.refrigerators[0].location = 'other'
+  elsif ['base-misc-defaults.xml'].include? hpxml_file
+    hpxml.refrigerators[0].location = nil
+    hpxml.refrigerators[0].rated_annual_kwh = nil
+    hpxml.refrigerators[0].adjusted_annual_kwh = nil
   end
 end
 
@@ -3077,6 +3147,8 @@ def set_hpxml_cooking_range(hpxml_file, hpxml)
   elsif ['base-appliances-wood.xml'].include? hpxml_file
     hpxml.cooking_ranges[0].fuel_type = HPXML::FuelTypeWood
     hpxml.cooking_ranges[0].is_induction = false
+  elsif ['base-misc-defaults.xml'].include? hpxml_file
+    hpxml.cooking_ranges[0].is_induction = nil
   end
 end
 
@@ -3086,6 +3158,8 @@ def set_hpxml_oven(hpxml_file, hpxml)
                     is_convection: false)
   elsif ['base-appliances-none.xml'].include? hpxml_file
     hpxml.ovens.clear()
+  elsif ['base-misc-defaults.xml'].include? hpxml_file
+    hpxml.ovens[0].is_convection = nil
   end
 end
 
@@ -3128,7 +3202,9 @@ def set_hpxml_ceiling_fans(hpxml_file, hpxml)
                            efficiency: 100,
                            quantity: 2)
   elsif ['base-misc-defaults.xml'].include? hpxml_file
-    hpxml.ceiling_fans.add(id: 'CeilingFan')
+    hpxml.ceiling_fans.add(id: 'CeilingFan',
+                           efficiency: nil,
+                           quantity: nil)
   end
 end
 
@@ -3149,12 +3225,12 @@ def set_hpxml_plug_loads(hpxml_file, hpxml)
     cfa = hpxml.building_construction.conditioned_floor_area
     nbeds = hpxml.building_construction.number_of_bedrooms
 
-    kWh_per_year, frac_sensible, frac_latent = MiscLoads.get_residual_mels_values(cfa)
+    kWh_per_year, frac_sensible, frac_latent = MiscLoads.get_residual_mels_default_values(cfa)
     hpxml.plug_loads[0].kWh_per_year = kWh_per_year
     hpxml.plug_loads[0].frac_sensible = frac_sensible.round(3)
     hpxml.plug_loads[0].frac_latent = frac_latent.round(3)
 
-    kWh_per_year, frac_sensible, frac_latent = MiscLoads.get_televisions_values(cfa, nbeds)
+    kWh_per_year, frac_sensible, frac_latent = MiscLoads.get_televisions_default_values(cfa, nbeds)
     hpxml.plug_loads[1].kWh_per_year = kWh_per_year
     hpxml.plug_loads[1].frac_sensible = frac_sensible.round(3)
     hpxml.plug_loads[1].frac_latent = frac_latent.round(3)

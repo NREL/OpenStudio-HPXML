@@ -1365,6 +1365,28 @@ class Waterheater
     return 0.08
   end
 
+  def self.get_default_location(hpxml, iecc_zone)
+    if ['1A', '1B', '1C', '2A', '2B', '2C', '3B', '3C'].include? iecc_zone
+      location_hierarchy = [HPXML::LocationGarage,
+                            HPXML::LocationLivingSpace]
+    elsif ['3A', '4A', '4B', '4C', '5A', '5B', '5C', '6A', '6B', '6C', '7', '8'].include? iecc_zone
+      location_hierarchy = [HPXML::LocationBasementConditioned,
+                            HPXML::LocationBasementUnconditioned,
+                            HPXML::LocationLivingSpace]
+    elsif iecc_zone.nil?
+      location_hierarchy = [HPXML::LocationBasementConditioned,
+                            HPXML::LocationBasementUnconditioned,
+                            HPXML::LocationLivingSpace]
+    else
+      fail "Unexpected IECC climate zone: '#{iecc_zone}'."
+    end
+    location_hierarchy.each do |space_type|
+      if hpxml.has_space_type(space_type)
+        return space_type
+      end
+    end
+  end
+
   private
 
   def self.deadband(wh_type)
