@@ -305,7 +305,7 @@ class SimulationOutputReport < OpenStudio::Measure::ReportingMeasure
     elsif timeseries_frequency == 'daily'
       interval_type = 2
     elsif timeseries_frequency == 'monthly'
-      interval_type == 3
+      interval_type = 3
     elsif timeseries_frequency == 'timestep'
       interval_type = -1
     end
@@ -1169,9 +1169,12 @@ class SimulationOutputReport < OpenStudio::Measure::ReportingMeasure
 
     values = values.get
     values += [0.0] * @timestamps.size if values.size == 0
+
     if (key_values_list.size == 1) && (key_values_list[0] == 'EMS')
-      # Shift all values by 1 timestep due to EMS reporting lag
-      return values[1..-1] + [values[-1]]
+      if (timeseries_frequency.downcase == 'timestep' || (timeseries_frequency.downcase == 'hourly' && @model.getTimestep.numberOfTimestepsPerHour == 1))
+        # Shift all values by 1 timestep due to EMS reporting lag
+        return values[1..-1] + [values[-1]]
+      end
     end
 
     return values

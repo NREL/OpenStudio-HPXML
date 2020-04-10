@@ -2,8 +2,8 @@
   <schema_version>3.0</schema_version>
   <name>simulation_output_report</name>
   <uid>df9d170c-c21a-4130-866d-0d46b06073fd</uid>
-  <version_id>66d99579-4f49-454f-931e-8cc233261995</version_id>
-  <version_modified>20200407T215611Z</version_modified>
+  <version_id>75a4d432-bd9b-479f-9c36-265022018fd8</version_id>
+  <version_modified>20200410T180233Z</version_modified>
   <xml_checksum>9BF1E6AC</xml_checksum>
   <class_name>SimulationOutputReport</class_name>
   <display_name>HPXML Simulation Output Report</display_name>
@@ -30,6 +30,10 @@
         <choice>
           <value>daily</value>
           <display_name>daily</display_name>
+        </choice>
+        <choice>
+          <value>monthly</value>
+          <display_name>monthly</display_name>
         </choice>
       </choices>
     </argument>
@@ -471,7 +475,7 @@
       <filename>output_report_test.rb</filename>
       <filetype>rb</filetype>
       <usage_type>test</usage_type>
-      <checksum>791A6E60</checksum>
+      <checksum>D051F9F2</checksum>
     </file>
     <file>
       <version>
@@ -482,7 +486,7 @@
       <filename>measure.rb</filename>
       <filetype>rb</filetype>
       <usage_type>script</usage_type>
-      <checksum>83EBF872</checksum>
+      <checksum>0C677B20</checksum>
     </file>
   </files>
 </measure>
