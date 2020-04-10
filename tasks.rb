@@ -2975,7 +2975,7 @@ def set_hpxml_clothes_washer(hpxml_file, hpxml)
                               label_gas_rate: 1.09,
                               label_annual_gas_cost: 27,
                               capacity: 3.2,
-                              usage: 6)
+                              label_usage: 6)
   elsif ['base-appliances-none.xml'].include? hpxml_file
     hpxml.clothes_washers.clear()
   elsif ['base-appliances-modified.xml'].include? hpxml_file
@@ -3000,7 +3000,7 @@ def set_hpxml_clothes_washer(hpxml_file, hpxml)
     hpxml.clothes_washers[0].label_gas_rate = nil
     hpxml.clothes_washers[0].label_annual_gas_cost = nil
     hpxml.clothes_washers[0].capacity = nil
-    hpxml.clothes_washers[0].usage = nil
+    hpxml.clothes_washers[0].label_usage = nil
   end
 end
 
@@ -3067,7 +3067,12 @@ def set_hpxml_dishwasher(hpxml_file, hpxml)
                           label_electric_rate: 0.12,
                           label_gas_rate: 1.09,
                           label_annual_gas_cost: 22.32,
+                          label_usage: 4,
                           place_setting_capacity: 12)
+  elsif ['base-appliances-modified.xml'].include? hpxml_file
+    rated_annual_kwh = hpxml.dishwashers[0].rated_annual_kwh
+    hpxml.dishwashers[0].rated_annual_kwh = nil
+    hpxml.dishwashers[0].energy_factor = HotWaterAndAppliances.calc_dishwasher_ef_from_annual_kwh(rated_annual_kwh).round(2)
   elsif ['base-appliances-none.xml'].include? hpxml_file
     hpxml.dishwashers.clear()
   elsif ['base-misc-defaults.xml'].include? hpxml_file
@@ -3076,6 +3081,7 @@ def set_hpxml_dishwasher(hpxml_file, hpxml)
     hpxml.dishwashers[0].label_gas_rate = nil
     hpxml.dishwashers[0].label_annual_gas_cost = nil
     hpxml.dishwashers[0].place_setting_capacity = nil
+    hpxml.dishwashers[0].label_usage = nil
   end
 end
 
