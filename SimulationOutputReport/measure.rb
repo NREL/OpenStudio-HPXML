@@ -304,6 +304,8 @@ class SimulationOutputReport < OpenStudio::Measure::ReportingMeasure
       interval_type = 1
     elsif timeseries_frequency == 'daily'
       interval_type = 2
+    elsif timeseries_frequency == 'monthly'
+      interval_type == 3
     elsif timeseries_frequency == 'timestep'
       interval_type = -1
     end
@@ -786,7 +788,7 @@ class SimulationOutputReport < OpenStudio::Measure::ReportingMeasure
                                       include_timeseries_total_loads,
                                       include_timeseries_component_loads)
     # Time column
-    if ['hourly', 'daily', 'timestep'].include? timeseries_frequency
+    if ['timestep', 'hourly', 'daily', 'monthly'].include? timeseries_frequency
       data = ['Time', '']
     else
       fail "Unexpected timeseries_frequency: #{timeseries_frequency}."
@@ -1752,6 +1754,7 @@ class SimulationOutputReport < OpenStudio::Measure::ReportingMeasure
       'timestep' => 'Zone Timestep',
       'hourly' => 'Hourly',
       'daily' => 'Daily',
+      'monthly' => 'Monthly',
     }
   end
 
