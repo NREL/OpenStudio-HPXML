@@ -228,6 +228,7 @@ class HPXML < Object
 
     # Clean up
     delete_partition_surfaces()
+    delete_tiny_surfaces()
     if collapse_enclosure
       collapse_enclosure_surfaces()
     end
@@ -3800,6 +3801,14 @@ class HPXML < Object
     (@rim_joists + @walls + @foundation_walls + @frame_floors).reverse_each do |surface|
       next if surface.interior_adjacent_to.nil? || surface.exterior_adjacent_to.nil?
       next unless surface.interior_adjacent_to == surface.exterior_adjacent_to
+
+      surface.delete
+    end
+  end
+
+  def delete_tiny_surfaces()
+    (@rim_joists + @walls + @foundation_walls + @frame_floors + @roofs + @windows + @skylights + @doors + @slabs).reverse_each do |surface|
+      next if surface.area > 0.1
 
       surface.delete
     end

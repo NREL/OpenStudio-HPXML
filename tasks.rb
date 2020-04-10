@@ -731,6 +731,9 @@ def set_hpxml_roofs(hpxml_file, hpxml)
         hpxml.roofs[-1].id += i.to_s
       end
     end
+    hpxml.roofs << hpxml.roofs[-1].dup
+    hpxml.roofs[-1].id = 'TinyRoof'
+    hpxml.roofs[-1].area = 0.05
   elsif ['base-atticroof-radiant-barrier.xml'].include? hpxml_file
     hpxml.roofs[0].radiant_barrier = true
   end
@@ -792,6 +795,9 @@ def set_hpxml_rim_joists(hpxml_file, hpxml)
         hpxml.rim_joists[-1].id += i.to_s
       end
     end
+    hpxml.rim_joists << hpxml.rim_joists[-1].dup
+    hpxml.rim_joists[-1].id = 'TinyRimJoist'
+    hpxml.rim_joists[-1].area = 0.05
   end
 end
 
@@ -804,7 +810,7 @@ def set_hpxml_walls(hpxml_file, hpxml)
                     area: 1200,
                     solar_absorptance: 0.7,
                     emittance: 0.92,
-                    insulation_assembly_r_value: 23)
+                    insulation_assembly_r_value: 23.0)
     hpxml.walls.add(id: 'WallAtticGable',
                     exterior_adjacent_to: HPXML::LocationOutside,
                     interior_adjacent_to: HPXML::LocationAtticUnvented,
@@ -951,6 +957,9 @@ def set_hpxml_walls(hpxml_file, hpxml)
         hpxml.walls[-1].id += i.to_s
       end
     end
+    hpxml.walls << hpxml.walls[-1].dup
+    hpxml.walls[-1].id = 'TinyWall'
+    hpxml.walls[-1].area = 0.05
   elsif ['invalid_files/duplicate-id.xml'].include? hpxml_file
     hpxml.walls[-1].id = hpxml.walls[0].id
   end
@@ -1152,6 +1161,9 @@ def set_hpxml_foundation_walls(hpxml_file, hpxml)
         hpxml.foundation_walls[-1].id += i.to_s
       end
     end
+    hpxml.foundation_walls << hpxml.foundation_walls[-1].dup
+    hpxml.foundation_walls[-1].id = 'TinyFoundationWall'
+    hpxml.foundation_walls[-1].area = 0.05
   elsif ['invalid_files/mismatched-slab-and-foundation-wall.xml'].include? hpxml_file
     hpxml.foundation_walls << hpxml.foundation_walls[0].dup
     hpxml.foundation_walls[1].id = 'FoundationWall2'
@@ -1240,6 +1252,9 @@ def set_hpxml_frame_floors(hpxml_file, hpxml)
         hpxml.frame_floors[-1].id += i.to_s
       end
     end
+    hpxml.frame_floors << hpxml.frame_floors[-1].dup
+    hpxml.frame_floors[-1].id = 'TinyFloor'
+    hpxml.frame_floors[-1].area = 0.05
   end
 end
 
@@ -1367,6 +1382,9 @@ def set_hpxml_slabs(hpxml_file, hpxml)
         hpxml.slabs[-1].id += i.to_s
       end
     end
+    hpxml.slabs << hpxml.slabs[-1].dup
+    hpxml.slabs[-1].id = 'TinySlab'
+    hpxml.slabs[-1].area = 0.05
   elsif ['invalid_files/mismatched-slab-and-foundation-wall.xml'].include? hpxml_file
     hpxml.slabs[0].interior_adjacent_to = HPXML::LocationBasementUnconditioned
     hpxml.slabs[0].depth_below_grade = 7.0
@@ -1539,6 +1557,9 @@ def set_hpxml_windows(hpxml_file, hpxml)
         hpxml.windows[-1].wall_idref += i.to_s
       end
     end
+    hpxml.windows << hpxml.windows[-1].dup
+    hpxml.windows[-1].id = 'TinyWindow'
+    hpxml.windows[-1].area = 0.05
   elsif ['base-foundation-walkout-basement.xml'].include? hpxml_file
     hpxml.windows.add(id: 'FoundationWindow',
                       area: 20,
@@ -1615,6 +1636,9 @@ def set_hpxml_skylights(hpxml_file, hpxml)
         hpxml.skylights[-1].roof_idref += i.to_s if i % 2 == 0
       end
     end
+    hpxml.skylights << hpxml.skylights[-1].dup
+    hpxml.skylights[-1].id = 'TinySkylight'
+    hpxml.skylights[-1].area = 0.05
   end
 end
 
@@ -1649,6 +1673,9 @@ def set_hpxml_doors(hpxml_file, hpxml)
         hpxml.doors[-1].wall_idref += i.to_s
       end
     end
+    hpxml.doors << hpxml.doors[-1].dup
+    hpxml.doors[-1].id = 'TinyDoor'
+    hpxml.doors[-1].area = 0.05
   elsif ['base-enclosure-walltypes.xml'].include? hpxml_file
     hpxml.doors.clear
     hpxml.doors.add(id: 'DoorNorth',

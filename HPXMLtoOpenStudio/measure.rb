@@ -1269,6 +1269,8 @@ class OSModel
 
   def self.add_roofs(runner, model, spaces)
     @hpxml.roofs.each do |roof|
+      next if roof.net_area < 0.1 # skip modeling net surface area for surfaces comprised entirely of subsurface area
+
       if roof.azimuth.nil?
         if roof.pitch > 0
           azimuths = @default_azimuths # Model as four directions for average exterior incident solar
@@ -1282,8 +1284,6 @@ class OSModel
       surfaces = []
 
       azimuths.each do |azimuth|
-        next if roof.net_area < 0.1
-
         width = Math::sqrt(roof.net_area)
         length = (roof.net_area / width) / azimuths.size
         tilt = roof.pitch / 12.0
@@ -1358,6 +1358,8 @@ class OSModel
 
   def self.add_walls(runner, model, spaces)
     @hpxml.walls.each do |wall|
+      next if wall.net_area < 0.1 # skip modeling net surface area for surfaces comprised entirely of subsurface area
+
       if wall.azimuth.nil?
         if wall.is_exterior
           azimuths = @default_azimuths # Model as four directions for average exterior incident solar
@@ -1371,8 +1373,6 @@ class OSModel
       surfaces = []
 
       azimuths.each do |azimuth|
-        next if wall.net_area < 0.1
-
         height = 8.0 * @ncfl_ag
         length = (wall.net_area / height) / azimuths.size
         z_origin = @foundation_top
@@ -1553,6 +1553,8 @@ class OSModel
   def self.add_foundation_walls_slabs(runner, model, spaces)
     # Check for foundation walls without corresponding slabs
     @hpxml.foundation_walls.each do |foundation_wall|
+      next if foundation_wall.net_area < 0.1 # skip modeling net surface area for surfaces comprised entirely of subsurface area
+
       found_slab = false
       @hpxml.slabs.each do |slab|
         found_slab = true if foundation_wall.interior_adjacent_to == slab.interior_adjacent_to
@@ -1568,6 +1570,7 @@ class OSModel
 
       found_foundation_wall = false
       @hpxml.foundation_walls.each do |foundation_wall|
+        next if foundation_wall.net_area < 0.1 # skip modeling net surface area for surfaces comprised entirely of subsurface area
         found_foundation_wall = true if slab.interior_adjacent_to == foundation_wall.interior_adjacent_to
       end
       next if found_foundation_wall
@@ -1589,6 +1592,7 @@ class OSModel
       slabs = []
       @hpxml.foundation_walls.each do |foundation_wall|
         next unless foundation_wall.interior_adjacent_to == foundation_type
+        next if foundation_wall.net_area < 0.1 # skip modeling net surface area for surfaces comprised entirely of subsurface area
 
         fnd_walls << foundation_wall
       end
@@ -1890,7 +1894,7 @@ class OSModel
     end
 
     addtl_cfa = cfa - model_cfa
-    return unless addtl_cfa > 0
+    return unless addtl_cfa > 0.1
 
     conditioned_floor_width = Math::sqrt(addtl_cfa)
     conditioned_floor_length = addtl_cfa / conditioned_floor_width
