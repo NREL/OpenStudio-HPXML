@@ -44,6 +44,8 @@ class XMLHelper
   # Returns the value of 'element_name' in the parent element or nil.
   def self.get_value(parent, element_name)
     val = parent.elements[element_name]
+    el_path = parent.xpath + '/' + element_name
+    validate_val(val, el_path)
     if val.nil?
       return val
     end
@@ -61,6 +63,86 @@ class XMLHelper
     return vals
   end
 
+  def self.validate_val(val, el_path)
+    el_path = el_path.gsub(/(?<reg>(\[([^\]\[]|\g<reg>)*\]))/, '')
+    el_array = el_path.split('/').reject{ |p| p.empty? }
+    valid_map = load_or_get_data_type_xsd(el_array)
+    enums = valid_map[:enums]
+    min = valid_map[:min_value]
+    max = valid_map[:max_value]
+    puts enums
+    puts min
+    puts max
+  end
+
+  def self.load_or_get_data_type_xsd(el_array)
+    if @valid_map.nil?
+      @valid_map = {}
+    end
+    return @valid_map[el_array] if not @valid_map[el_array].nil?
+    @valid_map[el_array] = {}
+    puts ""
+    puts "----New element validation required!----"
+    if @doc_base.nil?
+      puts "base file nil"
+      this_dir = File.dirname(__FILE__)
+      base_el_xsd_path = this_dir + '/BaseElements.xsd'
+      dt_type_xsd_path = this_dir + '/HPXMLDataTypes.xsd'
+      @doc_base = REXML::Document.new(File.new(base_el_xsd_path))
+      @doc_data = REXML::Document.new(File.new(dt_type_xsd_path))
+    end
+    parent_type = nil
+    parent_name = nil
+    el_array.each_with_index do |el_name, i|
+      next if i < 2
+      return @valid_map[el_array] if el_name == 'extension'
+      puts "this element name: " + el_name
+      if parent_type.nil? and parent_name.nil?
+        puts "before parent_type: nil"
+        puts "before parent_name: nil"
+        parent_type = REXML::XPath.first(@doc_base, "//xs:element[@name='#{el_name}']").attributes['type']
+      elsif not parent_name.nil? and parent_type.nil?
+        puts "before parent_type: nil"
+        puts "before parent_name: "+parent_name
+        el_type = REXML::XPath.first(@doc_base, "//xs:element[@name='#{parent_name}']//xs:element[@name='#{el_name}']").attributes['type']
+        parent_type = el_type
+      else
+        puts "before parent type: " + parent_type
+        puts "before parent name: " + parent_name
+        el_type = REXML::XPath.first(@doc_base, "//xs:complexType[@name='#{parent_type}']//xs:element[@name='#{el_name}']").attributes['type']
+        parent_type = el_type
+      end
+      parent_name = el_name
+      puts "after parent name: " 
+      puts parent_name
+      puts "after parent type: " 
+      puts parent_type
+    end
+    simple_type_name = parent_name
+    simple_type = REXML::XPath.first(@doc_data, "//xs:simpleType[@name='#{simple_type_name}']")
+    if simple_type.nil?
+      simple_type_name = REXML::XPath.first(@doc_data, "//xs:complexType[@name='#{parent_type}']//xs:extension").attributes['base']
+      if simple_type_name.start_with? 'xs:'
+        simple_type_name = parent_type
+      end
+    end
+    enum_els = @doc_data.elements.to_a("//xs:simpleType[@name='#{simple_type_name}']//xs:enumeration | //xs:complexType[@name='#{simple_type_name}']//xs:enumeration")
+    enums = enum_els.map { |el| el.attributes['value'] } unless enum_els.empty?
+    min_el = REXML::XPath.first(@doc_data, "//xs:simpleType[@name='#{simple_type_name}']//xs:minExclusive | //xs:simpleType[@name='#{simple_type_name}']//xs:minInclusive | //xs:complexType[@name='#{simple_type_name}']//xs:minExclusive | //xs:complexType[@name='#{simple_type_name}']//xs:minInclusive")
+    puts min_el
+    if not min_el.nil?
+      min_value = min_el.attributes['value']
+    end
+    max_el = REXML::XPath.first(@doc_data, "//xs:simpleType[@name='#{simple_type_name}']//xs:maxExclusive | //xs:simpleType[@name='#{simple_type_name}']//xs:maxInclusive | //xs:complexType[@name='#{simple_type_name}']//xs:maxExclusive | //xs:complexType[@name='#{simple_type_name}']//xs:maxInclusive")
+    if not max_el.nil?
+      max_value = max_el.attributes['value']
+    end
+    @valid_map[el_array][:enums] = enums
+    @valid_map[el_array][:min_value] = min_value
+    @valid_map[el_array][:max_value] = max_value
+    return @valid_map[el_array]
+  end
+  
   # Returns the name of the first child element of the 'element_name'
   # element on the parent element.
   def self.get_child_name(parent, element_name)
