@@ -79,8 +79,10 @@ class XMLHelper
     if @valid_map.nil?
       @valid_map = {}
     end
-    return @valid_map[el_array] if not @valid_map[el_array].nil?
-    @valid_map[el_array] = {}
+    if @type_map.nil?
+      @type_map = {}
+    end
+    return @valid_map[@type_map[el_array]] if not @valid_map[@type_map[el_array]].nil?
     puts ""
     puts "----New element validation required!----"
     if @doc_base.nil?
@@ -93,31 +95,39 @@ class XMLHelper
     end
     parent_type = nil
     parent_name = nil
+    # part1: get element data type from BaseElements.xsd using path
     el_array.each_with_index do |el_name, i|
       next if i < 2
-      return @valid_map[el_array] if el_name == 'extension'
+      return {} if el_name == 'extension'
       puts "this element name: " + el_name
       if parent_type.nil? and parent_name.nil?
-        puts "before parent_type: nil"
-        puts "before parent_name: nil"
         parent_type = REXML::XPath.first(@doc_base, "//xs:element[@name='#{el_name}']").attributes['type']
-      elsif not parent_name.nil? and parent_type.nil?
-        puts "before parent_type: nil"
-        puts "before parent_name: "+parent_name
-        el_type = REXML::XPath.first(@doc_base, "//xs:element[@name='#{parent_name}']//xs:element[@name='#{el_name}']").attributes['type']
-        parent_type = el_type
       else
-        puts "before parent type: " + parent_type
-        puts "before parent name: " + parent_name
-        el_type = REXML::XPath.first(@doc_base, "//xs:complexType[@name='#{parent_type}']//xs:element[@name='#{el_name}']").attributes['type']
+        if not parent_name.nil? and parent_type.nil?
+        el = REXML::XPath.first(@doc_base, "//xs:element[@name='#{parent_name}']//xs:element[@name='#{el_name}']")
+        if el.nil?
+          group = REXML::XPath.first(@doc_base, "//xs:element[@name='#{parent_name}']//xs:group").attributes['ref']
+          el = REXML::XPath.first(@doc_base, "//xs:group[@name='#{group}']//xs:element[@name='#{el_name}']")
+        end
+        else
+        el = REXML::XPath.first(@doc_base, "//xs:complexType[@name='#{parent_type}']//xs:element[@name='#{el_name}']")
+        if el.nil?
+          group = REXML::XPath.first(@doc_base, "//xs:complexType[@name='#{parent_type}']//xs:group").attributes['ref'] unless REXML::XPath.first(@doc_base, "//xs:complexType[@name='#{parent_type}']//xs:group").nil?
+          el = REXML::XPath.first(@doc_base, "//xs:group[@name='#{group}']//xs:element[@name='#{el_name}']") unless REXML::XPath.first(@doc_base, "//xs:complexType[@name='#{parent_type}']//xs:group").nil?
+          base = REXML::XPath.first(@doc_base, "//xs:complexType[@name='#{parent_type}']//xs:extension").attributes['base'] unless REXML::XPath.first(@doc_base, "//xs:complexType[@name='#{parent_type}']//xs:extension").nil?
+          el = REXML::XPath.first(@doc_base, "//xs:complexType[@name='#{base}']//xs:element[@name='#{el_name}']") unless REXML::XPath.first(@doc_base, "//xs:complexType[@name='#{parent_type}']//xs:extension").nil?
+        end
+        end
+        el_type = el.attributes['type']
         parent_type = el_type
       end
       parent_name = el_name
-      puts "after parent name: " 
-      puts parent_name
-      puts "after parent type: " 
-      puts parent_type
     end
+    @type_map[el_array] = parent_type
+    
+    # part2: get enums and min/max values from HPXMLDataType.xsd
+    return @valid_map[parent_type] if not @valid_map[parent_type].nil?
+    @valid_map[parent_type] = {}
     simple_type_name = parent_name
     simple_type = REXML::XPath.first(@doc_data, "//xs:simpleType[@name='#{simple_type_name}']")
     if simple_type.nil?
@@ -129,7 +139,6 @@ class XMLHelper
     enum_els = @doc_data.elements.to_a("//xs:simpleType[@name='#{simple_type_name}']//xs:enumeration | //xs:complexType[@name='#{simple_type_name}']//xs:enumeration")
     enums = enum_els.map { |el| el.attributes['value'] } unless enum_els.empty?
     min_el = REXML::XPath.first(@doc_data, "//xs:simpleType[@name='#{simple_type_name}']//xs:minExclusive | //xs:simpleType[@name='#{simple_type_name}']//xs:minInclusive | //xs:complexType[@name='#{simple_type_name}']//xs:minExclusive | //xs:complexType[@name='#{simple_type_name}']//xs:minInclusive")
-    puts min_el
     if not min_el.nil?
       min_value = min_el.attributes['value']
     end
@@ -137,10 +146,10 @@ class XMLHelper
     if not max_el.nil?
       max_value = max_el.attributes['value']
     end
-    @valid_map[el_array][:enums] = enums
-    @valid_map[el_array][:min_value] = min_value
-    @valid_map[el_array][:max_value] = max_value
-    return @valid_map[el_array]
+    @valid_map[parent_type][:enums] = enums
+    @valid_map[parent_type][:min_value] = min_value
+    @valid_map[parent_type][:max_value] = max_value
+    return @valid_map[parent_type]
   end
   
   # Returns the name of the first child element of the 'element_name'
