@@ -143,6 +143,7 @@ Building Summary
 This section describes elements specified in HPXML's ``BuildingSummary``. 
 It is used for high-level building information including conditioned floor area, number of bedrooms, number of residents, number of conditioned floors, etc.
 Most occupancy assumptions are based on the number of bedrooms, while the number of residents is solely used to determine heat gains from the occupants themselves.
+Note that a walkout basement should be included in ``NumberofConditionedFloorsAboveGrade``.
 
 Shading due to neighboring buildings can be defined inside an ``Site/extension/Neighbors`` element.
 Each ``Neighbors/NeighborBuilding`` element is required to have an ``Azimuth`` and ``Distance`` from the house.
@@ -518,7 +519,7 @@ The water heater ``Location`` can be optionally entered; if not provided, a defa
 +====================+============================================================================================+
 | 1-3, excluding 3A  | Garage if present, else Living Space                                                       |
 +--------------------+--------------------------------------------------------------------------------------------+
-| 3A, 4-8            | Conditioned Basement if present, else Unconditioned Basement if present, else Living Space |
+| 3A, 4-8, unknown   | Conditioned Basement if present, else Unconditioned Basement if present, else Living Space |
 +--------------------+--------------------------------------------------------------------------------------------+
 
 The setpoint temperature may be provided as ``HotWaterTemperature``; if not provided, 125°F is assumed.
@@ -555,7 +556,7 @@ For a ``SystemType/Standard`` (non-recirculating) system, the following element 
 
 If ``PipingLength`` is not provided, a default ``PipingLength`` will be assumed.
 The default ``PipingLength`` will be calculated using the following equation.
-This equation is based on `ANSI/RESNET/ICC 301-2019 <https://codes.iccsafe.org/content/RESNETICC3012019/toc>`_.
+This equation is based on `ANSI/RESNET/ICC 301-2019 <https://codes.iccsafe.org/content/RESNETICC3012019>`_.
 
 .. math:: PipeL = 2.0 \cdot (\frac{CFA}{NCfl})^{0.5} + 10.0 \cdot NCfl + 5.0 \cdot bsmnt
   
@@ -585,6 +586,8 @@ Water Fixtures
 Water fixtures should be entered as ``Systems/WaterHeating/WaterFixture`` elements.
 Each fixture must have ``WaterFixtureType`` and ``LowFlow`` elements provided.
 Fixtures should be specified as low flow if they are <= 2.0 gpm.
+
+A ``WaterHeating/extension/WaterFixturesUsageMultiplier`` can also be optionally provided that scales hot water usage; if not provided, it is assumed to be 1.0.
 
 Solar Thermal
 *************
@@ -655,13 +658,15 @@ LabelElectricRate                   0.12  [$/kWh]
 LabelGasRate                        1.09  [$/therm]
 LabelAnnualGasCost                  27.0  [$]
 Capacity                            3.0  [ft³]
-Usage                               6  [cyc/week]
+LabelUsage                          6  [cyc/week]
 ==================================  ==================
 
 If ``ModifiedEnergyFactor`` is provided instead of ``IntegratedModifiedEnergyFactor``, it will be converted using the following equation.
 This equation is based on the `Interpretation on ANSI/RESNET 301-2014 Clothes Washer IMEF <https://www.resnet.us/wp-content/uploads/No.-301-2014-08-sECTION-4.2.2.5.2.8-Clothes-Washers-Eq-4.2-6.pdf>`_.
 
 .. math:: IntegratedModifiedEnergyFactor = \frac{ModifiedEnergyFactor - 0.503}{0.95}
+
+An ``extension/UsageMultiplier`` can also be optionally provided that scales energy and hot water usage; if not provided, it is assumed to be 1.0.
 
 Clothes Dryer
 *************
@@ -685,6 +690,8 @@ This equation is based on the `Interpretation on ANSI/RESNET/ICC 301-2014 Clothe
 
 .. math:: CombinedEnergyFactor = \frac{EnergyFactor}{1.15}
 
+An ``extension/UsageMultiplier`` can also be optionally provided that scales energy usage; if not provided, it is assumed to be 1.0.
+
 Dishwasher
 **********
 
@@ -702,7 +709,15 @@ LabelElectricRate        0.12  [$/kWh]
 LabelGasRate             1.09  [$/therm]
 LabelAnnualGasCost       33.12  [$]
 PlaceSettingCapacity     12  [standard]
+LabelUsage               4  [cyc/week]
 =======================  =================
+
+If ``EnergyFactor`` is provided instead of ``RatedAnnualkWh``, it will be converted into ``RatedAnnualkWh`` using the following equation.
+This equation is based on `ANSI/RESNET/ICC 301-2014 <https://codes.iccsafe.org/content/document/843>`_.
+
+.. math:: RatedAnnualkWh = \frac{215.0}{EnergyFactor}
+
+An ``extension/UsageMultiplier`` can also be optionally provided that scales energy and hot water usage; if not provided, it is assumed to be 1.0.
 
 Refrigerator
 ************
@@ -712,9 +727,11 @@ The ``Location`` can be optionally provided; if not provided, it is assumed to b
 
 The efficiency of the refrigerator can be optionally entered as ``RatedAnnualkWh`` or ``extension/AdjustedAnnualkWh``.
 If neither are provided, ``RatedAnnualkWh`` will be defaulted to represent a standard refrigerator from 2006 based on the following equation.
-This equation is based on `ANSI/RESNET/ICC 301-2019 <https://codes.iccsafe.org/content/RESNETICC3012019/toc>`_.
+This equation is based on `ANSI/RESNET/ICC 301-2019 <https://codes.iccsafe.org/content/RESNETICC3012019>`_.
 
 .. math:: RatedAnnualkWh = 637.0 + 18.0 \cdot Number of bedrooms
+
+An ``extension/UsageMultiplier`` can also be optionally provided that scales energy usage; if not provided, it is assumed to be 1.0.
 
 Cooking Range/Oven
 ******************
@@ -733,6 +750,8 @@ IsInduction    false
 IsConvection   false
 =============  ==============
 
+An ``extension/UsageMultiplier`` can also be optionally provided that scales energy usage; if not provided, it is assumed to be 1.0.
+
 Lighting
 ~~~~~~~~
 
@@ -747,6 +766,8 @@ If the fractions sum to less than 1, the remainder is assumed to be incandescent
 Garage lighting values are ignored if the building has no garage.
 
 To model a building without any lighting, all six ``Lighting/LightingGroup`` elements must be excluded.
+
+A ``Lighting/extension/UsageMultiplier`` can also be optionally provided that scales energy usage; if not provided, it is assumed to be 1.0.
 
 Ceiling Fans
 ~~~~~~~~~~~~
@@ -763,6 +784,8 @@ Plug Loads
 Plug loads can be provided by entering ``MiscLoads/PlugLoad`` elements; if not provided, plug loads will not be modeled.
 Currently only plug loads specified with ``PlugLoadType='other'`` and ``PlugLoadType='TV other'`` are recognized.
 The annual energy consumption (``Load[Units='kWh/year']/Value``) can be provided, otherwise default assumptions based on the plug load type are used.
+
+An ``extension/UsageMultiplier`` can also be optionally provided that scales energy usage; if not provided, it is assumed to be 1.0.
 
 Validating & Debugging Errors
 -----------------------------

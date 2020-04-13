@@ -350,13 +350,13 @@
                 <Ducts>
                   <DuctType>supply</DuctType>
                   <DuctInsulationRValue>4.0</DuctInsulationRValue>
-                  <DuctLocation>outside</DuctLocation>
+                  <DuctLocation>attic - unvented</DuctLocation>
                   <DuctSurfaceArea>150.0</DuctSurfaceArea>
                 </Ducts>
                 <Ducts>
                   <DuctType>return</DuctType>
                   <DuctInsulationRValue>0.0</DuctInsulationRValue>
-                  <DuctLocation>outside</DuctLocation>
+                  <DuctLocation>attic - unvented</DuctLocation>
                   <DuctSurfaceArea>50.0</DuctSurfaceArea>
                 </Ducts>
               </AirDistribution>
@@ -396,6 +396,9 @@
             <WaterFixtureType>faucet</WaterFixtureType>
             <LowFlow>false</LowFlow>
           </WaterFixture>
+          <extension>
+            <WaterFixturesUsageMultiplier>0.9</WaterFixturesUsageMultiplier>
+          </extension>
         </WaterHeating>
       </Systems>
       <Appliances>
@@ -403,12 +406,15 @@
           <SystemIdentifier id='ClothesWasher'/>
           <Location>living space</Location>
           <IntegratedModifiedEnergyFactor>1.21</IntegratedModifiedEnergyFactor>
-          <Usage>6.0</Usage>
           <RatedAnnualkWh>380.0</RatedAnnualkWh>
           <LabelElectricRate>0.12</LabelElectricRate>
           <LabelGasRate>1.09</LabelGasRate>
           <LabelAnnualGasCost>27.0</LabelAnnualGasCost>
+          <LabelUsage>6.0</LabelUsage>
           <Capacity>3.2</Capacity>
+          <extension>
+            <UsageMultiplier>0.9</UsageMultiplier>
+          </extension>
         </ClothesWasher>
         <ClothesDryer>
           <SystemIdentifier id='ClothesDryer'/>
@@ -416,6 +422,9 @@
           <FuelType>electricity</FuelType>
           <CombinedEnergyFactor>3.73</CombinedEnergyFactor>
           <ControlType>timer</ControlType>
+          <extension>
+            <UsageMultiplier>0.9</UsageMultiplier>
+          </extension>
         </ClothesDryer>
         <Dishwasher>
           <SystemIdentifier id='Dishwasher'/>
@@ -424,16 +433,26 @@
           <LabelElectricRate>0.12</LabelElectricRate>
           <LabelGasRate>1.09</LabelGasRate>
           <LabelAnnualGasCost>22.32</LabelAnnualGasCost>
+          <LabelUsage>4.0</LabelUsage>
+          <extension>
+            <UsageMultiplier>0.9</UsageMultiplier>
+          </extension>
         </Dishwasher>
         <Refrigerator>
           <SystemIdentifier id='Refrigerator'/>
           <Location>living space</Location>
           <RatedAnnualkWh>650.0</RatedAnnualkWh>
+          <extension>
+            <UsageMultiplier>0.9</UsageMultiplier>
+          </extension>
         </Refrigerator>
         <CookingRange>
           <SystemIdentifier id='Range'/>
           <FuelType>electricity</FuelType>
           <IsInduction>false</IsInduction>
+          <extension>
+            <UsageMultiplier>0.9</UsageMultiplier>
+          </extension>
         </CookingRange>
         <Oven>
           <SystemIdentifier id='Oven'/>
@@ -477,6 +496,9 @@
           <FractionofUnitsInLocation>0.25</FractionofUnitsInLocation>
           <ThirdPartyCertification>ERI Tier II</ThirdPartyCertification>
         </LightingGroup>
+        <extension>
+          <UsageMultiplier>0.9</UsageMultiplier>
+        </extension>
       </Lighting>
       <MiscLoads>
         <PlugLoad>
@@ -489,6 +511,7 @@
           <extension>
             <FracSensible>0.855</FracSensible>
             <FracLatent>0.045</FracLatent>
+            <UsageMultiplier>0.9</UsageMultiplier>
           </extension>
         </PlugLoad>
         <PlugLoad>
@@ -501,6 +524,7 @@
           <extension>
             <FracSensible>1.0</FracSensible>
             <FracLatent>0.0</FracLatent>
+            <UsageMultiplier>0.9</UsageMultiplier>
           </extension>
         </PlugLoad>
         <extension>
