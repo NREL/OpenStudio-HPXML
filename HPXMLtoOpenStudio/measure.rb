@@ -391,7 +391,7 @@ class OSModel
       end
       if window.fraction_operable.nil?
         window.fraction_operable = Airflow.get_default_fraction_of_operable_window_area()
-    end
+      end
     end
     @frac_window_area_operable = @hpxml.fraction_of_window_area_operable()
 
@@ -445,19 +445,19 @@ class OSModel
     # Default water heaters
     @hpxml.water_heating_systems.each do |water_heating_system|
       if water_heating_system.temperature.nil?
-      water_heating_system.temperature = Waterheater.get_default_hot_water_temperature(@eri_version)
-    end
+        water_heating_system.temperature = Waterheater.get_default_hot_water_temperature(@eri_version)
+      end
       if (water_heating_system.water_heater_type == HPXML::WaterHeaterTypeTankless) && water_heating_system.performance_adjustment.nil?
-      water_heating_system.performance_adjustment = Waterheater.get_tankless_cycling_derate()
-    end
+        water_heating_system.performance_adjustment = Waterheater.get_tankless_cycling_derate()
+      end
       if (water_heating_system.water_heater_type == HPXML::WaterHeaterTypeCombiStorage) && water_heating_system.standby_loss.nil?
-      # Use equation fit from AHRI database
-      # calculate independent variable SurfaceArea/vol(physically linear to standby_loss/skin_u under test condition) to fit the linear equation from AHRI database
-      act_vol = Waterheater.calc_storage_tank_actual_vol(water_heating_system.tank_volume, nil)
-      surface_area = Waterheater.calc_tank_areas(act_vol)[0]
-      sqft_by_gal = surface_area / act_vol # sqft/gal
-      water_heating_system.standby_loss = (2.9721 * sqft_by_gal - 0.4732).round(3) # linear equation assuming a constant u, F/hr
-    end
+        # Use equation fit from AHRI database
+        # calculate independent variable SurfaceArea/vol(physically linear to standby_loss/skin_u under test condition) to fit the linear equation from AHRI database
+        act_vol = Waterheater.calc_storage_tank_actual_vol(water_heating_system.tank_volume, nil)
+        surface_area = Waterheater.calc_tank_areas(act_vol)[0]
+        sqft_by_gal = surface_area / act_vol # sqft/gal
+        water_heating_system.standby_loss = (2.9721 * sqft_by_gal - 0.4732).round(3) # linear equation assuming a constant u, F/hr
+      end
       if water_heating_system.location.nil?
         water_heating_system.location = Waterheater.get_default_location(@hpxml, @hpxml.climate_and_risk_zones.iecc_zone)
       end
@@ -2349,7 +2349,7 @@ class OSModel
                                 clothes_washer, cw_space, clothes_dryer, cd_space,
                                 dishwasher, dw_space, refrigerator, rf_space,
                                 cooking_range, cook_space, oven,
-                                fixtures_all_low_flow, fixtures_usage_multiplier, 
+                                fixtures_all_low_flow, fixtures_usage_multiplier,
                                 dist_type, pipe_r, std_pipe_length, recirc_loop_length,
                                 recirc_branch_length, recirc_control_type,
                                 recirc_pump_power, dwhr_present,
@@ -2947,7 +2947,7 @@ class OSModel
         plug_load_misc = plug_load
       elsif plug_load.plug_load_type == HPXML::PlugLoadTypeTelevision
         plug_load_tv = plug_load
-    end
+      end
     end
 
     MiscLoads.apply_plug(model, plug_load_misc, plug_load_tv, @hpxml.misc_loads_schedule,

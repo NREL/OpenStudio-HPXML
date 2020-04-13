@@ -2430,18 +2430,18 @@ def set_hpxml_hvac_distributions(hpxml_file, hpxml)
                                                                duct_leakage_total_or_to_outside: HPXML::DuctLeakageToOutside)
     hpxml.hvac_distributions[0].ducts.add(duct_type: HPXML::DuctTypeSupply,
                                           duct_insulation_r_value: 8,
-                                           duct_location: HPXML::LocationAtticUnvented,
+                                          duct_location: HPXML::LocationAtticUnvented,
                                           duct_surface_area: 75)
     hpxml.hvac_distributions[0].ducts.add(duct_type: HPXML::DuctTypeSupply,
                                           duct_insulation_r_value: 8,
                                           duct_location: HPXML::LocationOutside,
                                           duct_surface_area: 75)
     hpxml.hvac_distributions[0].ducts.add(duct_type: HPXML::DuctTypeReturn,
-                                           duct_insulation_r_value: 4,
-                                           duct_location: HPXML::LocationAtticUnvented,
+                                          duct_insulation_r_value: 4,
+                                          duct_location: HPXML::LocationAtticUnvented,
                                           duct_surface_area: 25)
     hpxml.hvac_distributions[0].ducts.add(duct_type: HPXML::DuctTypeReturn,
-                                           duct_insulation_r_value: 4,
+                                          duct_insulation_r_value: 4,
                                           duct_location: HPXML::LocationOutside,
                                           duct_surface_area: 25)
     hpxml.hvac_distributions << hpxml.hvac_distributions[0].dup
@@ -2525,10 +2525,10 @@ def set_hpxml_hvac_distributions(hpxml_file, hpxml)
     hpxml.hvac_distributions[0].duct_leakage_measurements[0].duct_leakage_value = 0.0
     hpxml.hvac_distributions[0].duct_leakage_measurements[1].duct_leakage_value = 0.0
     if hpxml_file == 'base-enclosure-adiabatic-surfaces.xml'
-    # Test leakage to outside when all ducts in conditioned space
-    # (e.g., ducts may be in floor cavities which have leaky rims)
-    hpxml.hvac_distributions[0].duct_leakage_measurements[0].duct_leakage_value = 1.5
-    hpxml.hvac_distributions[0].duct_leakage_measurements[1].duct_leakage_value = 1.5
+      # Test leakage to outside when all ducts in conditioned space
+      # (e.g., ducts may be in floor cavities which have leaky rims)
+      hpxml.hvac_distributions[0].duct_leakage_measurements[0].duct_leakage_value = 1.5
+      hpxml.hvac_distributions[0].duct_leakage_measurements[1].duct_leakage_value = 1.5
     end
   elsif (hpxml_file.include?('hvac_partial') || hpxml_file.include?('hvac_base')) && (not hpxml.hvac_distributions.empty?)
     if not hpxml.hvac_distributions[0].duct_leakage_measurements.empty?
