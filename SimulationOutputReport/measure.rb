@@ -313,6 +313,8 @@ class SimulationOutputReport < OpenStudio::Measure::ReportingMeasure
     elsif timeseries_frequency == 'daily'
       timeseries_size /= 3600
       timeseries_size /= 24
+    elsif timeseries_frequency == 'monthly'
+      timeseries_size = run_period.getEndMonth - run_period.getBeginMonth + 1
     elsif timeseries_frequency == 'timestep'
       timeseries_size /= 3600
       timeseries_size *= @model.getTimestep.numberOfTimestepsPerHour
@@ -797,6 +799,8 @@ class SimulationOutputReport < OpenStudio::Measure::ReportingMeasure
       data = ['Hour', '#']
     elsif timeseries_frequency == 'daily'
       data = ['Day', '#']
+    elsif timeseries_frequency == 'monthly'
+      data = ['Month', '#']
     elsif timeseries_frequency == 'timestep'
       data = ['Timestep', '#']
     else
@@ -1761,6 +1765,7 @@ class SimulationOutputReport < OpenStudio::Measure::ReportingMeasure
       'timestep' => 'Zone Timestep',
       'hourly' => 'Hourly',
       'daily' => 'Daily',
+      'monthly' => 'Monthly',
     }
   end
 
