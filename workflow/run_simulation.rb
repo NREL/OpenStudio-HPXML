@@ -132,7 +132,7 @@ def run_design(basedir, rundir, design, resultsdir, hpxml, debug, skip_simulatio
     'Electricity: Dishwasher' => ['large_appliance', 'electric'],
     'Electricity: Clothes Washer' => ['large_appliance', 'electric'],
     'Electricity: Clothes Dryer' => ['large_appliance', 'electric'],
-    'Electricity: Range/Oven' => ['large_appliance', 'electric'],
+    'Electricity: Range/Oven' => ['small_appliance', 'electric'],
     'Electricity: Television' => ['small_appliance', 'electric'],
     'Electricity: Plug Loads' => ['small_appliance', 'electric'],
     'Electricity: Lighting Interior' => ['lighting', 'electric'],
