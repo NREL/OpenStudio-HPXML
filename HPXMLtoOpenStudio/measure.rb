@@ -327,7 +327,7 @@ class OSModel
     @dhw_map = {}  # mapping between HPXML Water Heating systems and model objects
     @cond_bsmnt_surfaces = [] # list of surfaces in conditioned basement, used for modification of some surface properties, eg. solar absorptance, view factor, etc.
 
-    # Default misc
+    # Default high-level parameters
     @hpxml.header.timestep = 60 if @hpxml.header.timestep.nil?
     @hpxml.header.begin_month = 1 if @hpxml.header.begin_month.nil?
     @hpxml.header.begin_day_of_month = 1 if @hpxml.header.begin_day_of_month.nil?
@@ -340,25 +340,39 @@ class OSModel
     end
     @cvolume = @hpxml.building_construction.conditioned_building_volume
 
-    # Default attic/crawlspace ventilation rate
+    # Default attics/foundations
     if @hpxml.has_space_type(HPXML::LocationAtticVented)
+      vented_attic = nil
       @hpxml.attics.each do |attic|
         next unless attic.attic_type == HPXML::AtticTypeVented
-        next unless (attic.vented_attic_sla.nil? && attic.vented_attic_constant_ach.nil?)
-
-        attic.vented_attic_sla = Airflow.get_default_vented_attic_sla()
+        vented_attic = attic
+      end
+      if vented_attic.nil?
+        @hpxml.attics.add(id: 'VentedAttic',
+                          attic_type: HPXML::AtticTypeVented)
+        vented_attic = @hpxml.attics[-1]
+      end
+      if vented_attic.vented_attic_sla.nil? && vented_attic.vented_attic_constant_ach.nil?
+        vented_attic.vented_attic_sla = Airflow.get_default_vented_attic_sla()
       end
     end
     if @hpxml.has_space_type(HPXML::LocationCrawlspaceVented)
+      vented_crawl = nil
       @hpxml.foundations.each do |foundation|
         next unless foundation.foundation_type == HPXML::FoundationTypeCrawlspaceVented
-        next unless foundation.vented_crawlspace_sla.nil?
-
-        foundation.vented_crawlspace_sla = Airflow.get_default_vented_crawl_sla()
+        vented_crawl = foundation
+      end
+      if vented_crawl.nil?
+        @hpxml.foundations.add(id: 'VentedCrawlspace',
+                               foundation_type: HPXML::FoundationTypeCrawlspaceVented)
+        vented_crawl = @hpxml.foundations[-1]
+      end
+      if vented_crawl.vented_crawlspace_sla.nil?
+        vented_crawl.vented_crawlspace_sla = Airflow.get_default_vented_crawl_sla()
       end
     end
 
-    # Default infiltration volume
+    # Default infiltration
     measurements = []
     infilvolume = nil
     @hpxml.air_infiltration_measurements.each do |measurement|
@@ -379,7 +393,7 @@ class OSModel
       @infil_volume = infilvolume
     end
 
-    # Default window interior shading
+    # Default windows
     default_shade_summer, default_shade_winter = Constructions.get_default_interior_shading_factors()
     @hpxml.windows.each do |window|
       if window.interior_shading_factor_summer.nil?
@@ -388,13 +402,9 @@ class OSModel
       if window.interior_shading_factor_winter.nil?
         window.interior_shading_factor_winter = default_shade_winter
       end
-    end
-
-    # Default window fraction operable
-    @hpxml.windows.each do |window|
-      next unless window.fraction_operable.nil?
-
-      window.fraction_operable = Airflow.get_default_fraction_of_operable_window_area()
+      if window.fraction_operable.nil?
+        window.fraction_operable = Airflow.get_default_fraction_of_operable_window_area()
+      end
     end
     @frac_window_area_operable = @hpxml.fraction_of_window_area_operable()
 
@@ -445,40 +455,29 @@ class OSModel
     # TODO: Default HeatingCapacity17F
     # TODO: Default Electric Auxiliary Energy (EAE; requires autosized HVAC capacity)
 
-    # Default hot water temperature
+    # Default water heaters
     @hpxml.water_heating_systems.each do |water_heating_system|
-      next unless water_heating_system.temperature.nil?
-      water_heating_system.temperature = Waterheater.get_default_hot_water_temperature(@eri_version)
-    end
-
-    # Default tankless water heater cycle derate (performance adjustment)
-    @hpxml.water_heating_systems.each do |water_heating_system|
-      next unless water_heating_system.water_heater_type == HPXML::WaterHeaterTypeTankless
-      next unless water_heating_system.performance_adjustment.nil?
-      water_heating_system.performance_adjustment = Waterheater.get_tankless_cycling_derate()
-    end
-
-    # Default indirect water heater standby loss
-    @hpxml.water_heating_systems.each do |water_heating_system|
-      next unless [HPXML::WaterHeaterTypeCombiStorage].include? water_heating_system.water_heater_type
-      next unless water_heating_system.standby_loss.nil?
-      # Use equation fit from AHRI database
-      # calculate independent variable SurfaceArea/vol(physically linear to standby_loss/skin_u under test condition) to fit the linear equation from AHRI database
-      act_vol = Waterheater.calc_storage_tank_actual_vol(water_heating_system.tank_volume, nil)
-      surface_area = Waterheater.calc_tank_areas(act_vol)[0]
-      sqft_by_gal = surface_area / act_vol # sqft/gal
-      water_heating_system.standby_loss = (2.9721 * sqft_by_gal - 0.4732).round(3) # linear equation assuming a constant u, F/hr
-    end
-
-    # Default water heater location based on Building America climate zone
-    @hpxml.water_heating_systems.each do |water_heating_system|
+      if water_heating_system.temperature.nil?
+        water_heating_system.temperature = Waterheater.get_default_hot_water_temperature(@eri_version)
+      end
+      if (water_heating_system.water_heater_type == HPXML::WaterHeaterTypeTankless) && water_heating_system.performance_adjustment.nil?
+        water_heating_system.performance_adjustment = Waterheater.get_tankless_cycling_derate()
+      end
+      if (water_heating_system.water_heater_type == HPXML::WaterHeaterTypeCombiStorage) && water_heating_system.standby_loss.nil?
+        # Use equation fit from AHRI database
+        # calculate independent variable SurfaceArea/vol(physically linear to standby_loss/skin_u under test condition) to fit the linear equation from AHRI database
+        act_vol = Waterheater.calc_storage_tank_actual_vol(water_heating_system.tank_volume, nil)
+        surface_area = Waterheater.calc_tank_areas(act_vol)[0]
+        sqft_by_gal = surface_area / act_vol # sqft/gal
+        water_heating_system.standby_loss = (2.9721 * sqft_by_gal - 0.4732).round(3) # linear equation assuming a constant u, F/hr
+      end
       if water_heating_system.location.nil?
         water_heating_system.location = Waterheater.get_default_location(@hpxml, @hpxml.climate_and_risk_zones.iecc_zone)
       end
     end
 
-    # Default water heater piping length
-    if @hpxml.water_heating_systems.size > 0
+    # Default hot water distribution
+    if @hpxml.hot_water_distributions.size > 0
       hot_water_distribution = @hpxml.hot_water_distributions[0]
       if hot_water_distribution.system_type == HPXML::DHWDistTypeStandard
         if hot_water_distribution.standard_piping_length.nil?
@@ -487,7 +486,12 @@ class OSModel
       end
     end
 
-    # Default ceiling fans efficiency/quantity
+    # Default water fixtures
+    if @hpxml.water_heating.water_fixtures_usage_multiplier.nil?
+      @hpxml.water_heating.water_fixtures_usage_multiplier = 1.0
+    end
+
+    # Default ceiling fans
     if @hpxml.ceiling_fans.size > 0
       ceiling_fan = @hpxml.ceiling_fans[0]
       if ceiling_fan.efficiency.nil?
@@ -499,7 +503,7 @@ class OSModel
       end
     end
 
-    # Default plug loads kwh/year, frac sensible/latent
+    # Default plug loads
     @hpxml.plug_loads.each do |plug_load|
       if plug_load.plug_load_type == HPXML::PlugLoadTypeOther
         default_annual_kwh, default_sens_frac, default_lat_frac = MiscLoads.get_residual_mels_default_values(@cfa)
@@ -518,6 +522,9 @@ class OSModel
           plug_load.kWh_per_year = default_annual_kwh
         end
       end
+      if plug_load.usage_multiplier.nil?
+        plug_load.usage_multiplier = 1.0
+      end
     end
 
     # Default plug load schedules
@@ -531,7 +538,7 @@ class OSModel
       @hpxml.misc_loads_schedule.monthly_multipliers = '1.248, 1.257, 0.993, 0.989, 0.993, 0.827, 0.821, 0.821, 0.827, 0.99, 0.987, 1.248'
     end
 
-    # Default clothes washer location, rated annual kWh, label electric rate, label gas rate, label annual gas cost, capacity, and modified energy factor
+    # Default clothes washer
     if @hpxml.clothes_washers.size > 0
       clothes_washer = @hpxml.clothes_washers[0]
       if clothes_washer.location.nil?
@@ -547,9 +554,12 @@ class OSModel
         clothes_washer.capacity = default_values[:capacity]
         clothes_washer.label_usage = default_values[:label_usage]
       end
+      if clothes_washer.usage_multiplier.nil?
+        clothes_washer.usage_multiplier = 1.0
+      end
     end
 
-    # Default clothes dryer location, control type, and energy factor
+    # Default clothes dryer
     if @hpxml.clothes_dryers.size > 0
       clothes_dryer = @hpxml.clothes_dryers[0]
       if clothes_dryer.location.nil?
@@ -560,9 +570,12 @@ class OSModel
         clothes_dryer.control_type = default_values[:control_type]
         clothes_dryer.combined_energy_factor = default_values[:combined_energy_factor]
       end
+      if clothes_dryer.usage_multiplier.nil?
+        clothes_dryer.usage_multiplier = 1.0
+      end
     end
 
-    # Default dishwasher place setting capacity and energy factor
+    # Default dishwasher
     if @hpxml.dishwashers.size > 0
       dishwasher = @hpxml.dishwashers[0]
       if dishwasher.place_setting_capacity.nil?
@@ -574,9 +587,12 @@ class OSModel
         dishwasher.label_usage = default_values[:label_usage]
         dishwasher.place_setting_capacity = default_values[:place_setting_capacity]
       end
+      if dishwasher.usage_multiplier.nil?
+        dishwasher.usage_multiplier = 1.0
+      end
     end
 
-    # Default refrigerator location and adjusted annual kWh
+    # Default refrigerator
     if @hpxml.refrigerators.size > 0
       refrigerator = @hpxml.refrigerators[0]
       if refrigerator.location.nil?
@@ -586,18 +602,24 @@ class OSModel
         default_values = HotWaterAndAppliances.get_refrigerator_default_values(@nbeds)
         refrigerator.rated_annual_kwh = default_values[:rated_annual_kwh]
       end
+      if refrigerator.usage_multiplier.nil?
+        refrigerator.usage_multiplier = 1.0
+      end
     end
 
-    # Default cooking range/oven type
+    # Default cooking range
     if @hpxml.cooking_ranges.size > 0
       cooking_range = @hpxml.cooking_ranges[0]
       if cooking_range.is_induction.nil?
         default_values = HotWaterAndAppliances.get_range_oven_default_values()
         cooking_range.is_induction = default_values[:is_induction]
       end
+      if cooking_range.usage_multiplier.nil?
+        cooking_range.usage_multiplier = 1.0
+      end
     end
 
-    # Default oven type
+    # Default oven
     if @hpxml.ovens.size > 0
       oven = @hpxml.ovens[0]
       if oven.is_convection.nil?
@@ -606,7 +628,12 @@ class OSModel
       end
     end
 
-    # Default PV systems inverter efficiency and system loss fraction
+    # Default lighting
+    if @hpxml.lighting.usage_multiplier.nil?
+      @hpxml.lighting.usage_multiplier = 1.0
+    end
+
+    # Default PV systems
     @hpxml.pv_systems.each do |pv_system|
       if pv_system.inverter_efficiency.nil?
         pv_system.inverter_efficiency = PV.get_default_inv_eff()
@@ -1269,6 +1296,8 @@ class OSModel
 
   def self.add_roofs(runner, model, spaces)
     @hpxml.roofs.each do |roof|
+      next if roof.net_area < 0.1 # skip modeling net surface area for surfaces comprised entirely of subsurface area
+
       if roof.azimuth.nil?
         if roof.pitch > 0
           azimuths = @default_azimuths # Model as four directions for average exterior incident solar
@@ -1282,8 +1311,6 @@ class OSModel
       surfaces = []
 
       azimuths.each do |azimuth|
-        next if roof.net_area < 0.1
-
         width = Math::sqrt(roof.net_area)
         length = (roof.net_area / width) / azimuths.size
         tilt = roof.pitch / 12.0
@@ -1358,6 +1385,8 @@ class OSModel
 
   def self.add_walls(runner, model, spaces)
     @hpxml.walls.each do |wall|
+      next if wall.net_area < 0.1 # skip modeling net surface area for surfaces comprised entirely of subsurface area
+
       if wall.azimuth.nil?
         if wall.is_exterior
           azimuths = @default_azimuths # Model as four directions for average exterior incident solar
@@ -1371,8 +1400,6 @@ class OSModel
       surfaces = []
 
       azimuths.each do |azimuth|
-        next if wall.net_area < 0.1
-
         height = 8.0 * @ncfl_ag
         length = (wall.net_area / height) / azimuths.size
         z_origin = @foundation_top
@@ -1553,6 +1580,8 @@ class OSModel
   def self.add_foundation_walls_slabs(runner, model, spaces)
     # Check for foundation walls without corresponding slabs
     @hpxml.foundation_walls.each do |foundation_wall|
+      next if foundation_wall.net_area < 0.1 # skip modeling net surface area for surfaces comprised entirely of subsurface area
+
       found_slab = false
       @hpxml.slabs.each do |slab|
         found_slab = true if foundation_wall.interior_adjacent_to == slab.interior_adjacent_to
@@ -1568,6 +1597,7 @@ class OSModel
 
       found_foundation_wall = false
       @hpxml.foundation_walls.each do |foundation_wall|
+        next if foundation_wall.net_area < 0.1 # skip modeling net surface area for surfaces comprised entirely of subsurface area
         found_foundation_wall = true if slab.interior_adjacent_to == foundation_wall.interior_adjacent_to
       end
       next if found_foundation_wall
@@ -1589,6 +1619,7 @@ class OSModel
       slabs = []
       @hpxml.foundation_walls.each do |foundation_wall|
         next unless foundation_wall.interior_adjacent_to == foundation_type
+        next if foundation_wall.net_area < 0.1 # skip modeling net surface area for surfaces comprised entirely of subsurface area
 
         fnd_walls << foundation_wall
       end
@@ -1890,7 +1921,7 @@ class OSModel
     end
 
     addtl_cfa = cfa - model_cfa
-    return unless addtl_cfa > 0
+    return unless addtl_cfa > 0.1
 
     conditioned_floor_width = Math::sqrt(addtl_cfa)
     conditioned_floor_length = addtl_cfa / conditioned_floor_width
@@ -2160,17 +2191,14 @@ class OSModel
     end
 
     # Fixtures
-    has_low_flow_fixtures = false
+    fixtures_usage_multiplier = @hpxml.water_heating.water_fixtures_usage_multiplier
+    fixtures_all_low_flow = false
     if @hpxml.water_heating_systems.size > 0
-      low_flow_fixtures_list = []
+      fixtures_all_low_flow = true # default
       @hpxml.water_fixtures.each do |water_fixture|
         next unless [HPXML::WaterFixtureTypeShowerhead, HPXML::WaterFixtureTypeFaucet].include? water_fixture.water_fixture_type
 
-        low_flow_fixtures_list << water_fixture.low_flow
-      end
-      low_flow_fixtures_list.uniq!
-      if (low_flow_fixtures_list.size == 1) && low_flow_fixtures_list[0]
-        has_low_flow_fixtures = true
+        fixtures_all_low_flow = false if not water_fixture.low_flow
       end
     end
 
@@ -2313,13 +2341,12 @@ class OSModel
                                 @cfa, @nbeds, @ncfl, @has_uncond_bsmnt, avg_setpoint_temp,
                                 clothes_washer, cw_space, clothes_dryer, cd_space,
                                 dishwasher, refrigerator, rf_space, cooking_range, oven,
-                                has_low_flow_fixtures, dist_type, pipe_r,
-                                std_pipe_length, recirc_loop_length,
+                                fixtures_all_low_flow, fixtures_usage_multiplier,
+                                dist_type, pipe_r, std_pipe_length, recirc_loop_length,
                                 recirc_branch_length, recirc_control_type,
                                 recirc_pump_power, dwhr_present,
                                 dwhr_facilities_connected, dwhr_is_equal_flow,
-                                dwhr_efficiency, dhw_loop_fracs, @eri_version,
-                                @dhw_map, @hpxml_path)
+                                dwhr_efficiency, dhw_loop_fracs, @eri_version, @dhw_map)
 
     if @hpxml.solar_thermal_systems.size > 0
       solar_thermal_system = @hpxml.solar_thermal_systems[0]
@@ -2905,33 +2932,17 @@ class OSModel
 
   def self.add_mels(runner, model, spaces)
     # Misc
-    misc_annual_kwh = 0
-    misc_sens_frac = nil
-    misc_lat_frac = nil
-    misc_weekday_sch = nil
-    misc_weekend_sch = nil
-    misc_monthly_sch = nil
+    plug_load_misc = nil
+    plug_load_tv = nil
     @hpxml.plug_loads.each do |plug_load|
-      next unless plug_load.plug_load_type == HPXML::PlugLoadTypeOther
-
-      misc_annual_kwh = plug_load.kWh_per_year
-      misc_sens_frac = plug_load.frac_sensible
-      misc_lat_frac = plug_load.frac_latent
-      misc_weekday_sch = @hpxml.misc_loads_schedule.weekday_fractions
-      misc_weekend_sch = @hpxml.misc_loads_schedule.weekend_fractions
-      misc_monthly_sch = @hpxml.misc_loads_schedule.monthly_multipliers
+      if plug_load.plug_load_type == HPXML::PlugLoadTypeOther
+        plug_load_misc = plug_load
+      elsif plug_load.plug_load_type == HPXML::PlugLoadTypeTelevision
+        plug_load_tv = plug_load
+      end
     end
 
-    # Television
-    tv_annual_kwh = 0
-    @hpxml.plug_loads.each do |plug_load|
-      next unless plug_load.plug_load_type == HPXML::PlugLoadTypeTelevision
-
-      tv_annual_kwh = plug_load.kWh_per_year
-    end
-
-    MiscLoads.apply_plug(model, misc_annual_kwh, misc_sens_frac, misc_lat_frac,
-                         misc_weekday_sch, misc_weekend_sch, misc_monthly_sch, tv_annual_kwh,
+    MiscLoads.apply_plug(model, plug_load_misc, plug_load_tv, @hpxml.misc_loads_schedule,
                          @cfa, @living_space)
   end
 
@@ -2949,7 +2960,8 @@ class OSModel
                                                               fractions[[HPXML::LocationGarage, HPXML::LightingTypeTierI]],
                                                               fractions[[HPXML::LocationInterior, HPXML::LightingTypeTierII]],
                                                               fractions[[HPXML::LocationExterior, HPXML::LightingTypeTierII]],
-                                                              fractions[[HPXML::LocationGarage, HPXML::LightingTypeTierII]])
+                                                              fractions[[HPXML::LocationGarage, HPXML::LightingTypeTierII]],
+                                                              @hpxml.lighting.usage_multiplier)
 
     garage_space = spaces[HPXML::LocationGarage]
     Lighting.apply(model, weather, int_kwh, grg_kwh, ext_kwh, @cfa, @gfa,
