@@ -5,7 +5,6 @@ require 'optparse'
 require 'pathname'
 require_relative '../hpxml-measures/HPXMLtoOpenStudio/resources/meta_measure'
 require_relative '../hpxml-measures/HPXMLtoOpenStudio/resources/unit_conversions'
-require_relative 'hescore_lib'
 
 basedir = File.expand_path(File.dirname(__FILE__))
 
@@ -30,18 +29,7 @@ end
 
 def run_design(basedir, designdir, design, resultsdir, hpxml, debug, skip_simulation)
   puts 'Creating input...'
-  create_idf(design, basedir, designdir, resultsdir, hpxml, debug, skip_simulation)
-
-  return if skip_simulation
-
-  puts 'Running simulation...'
-  run_energyplus(design, designdir)
-
-  # Create output
-  create_output(designdir, resultsdir)
-end
-
-def create_idf(design, basedir, designdir, resultsdir, hpxml, debug, skip_simulation)
+  
   Dir.mkdir(designdir)
 
   OpenStudio::Logger.instance.standardOutLogger.setLogLevel(OpenStudio::Fatal)
@@ -70,185 +58,82 @@ def create_idf(design, basedir, designdir, resultsdir, hpxml, debug, skip_simula
     args['output_dir'] = designdir
     args['debug'] = debug
     update_args_hash(measures, measure_subdir, args)
+    
+    # Add reporting measure to workflow
+    measure_subdir = 'hpxml-measures/SimulationOutputReport'
+    args = {}
+    args['timeseries_frequency'] = 'monthly'
+    args['include_timeseries_zone_temperatures'] = false
+    args['include_timeseries_fuel_consumptions'] = false
+    args['include_timeseries_end_use_consumptions'] = true
+    args['include_timeseries_total_loads'] = false
+    args['include_timeseries_component_loads'] = false
+    update_args_hash(measures, measure_subdir, args)
   end
 
   # Apply measures
-  success = apply_measures(measures_dir, measures, runner, model)
-
-  # Report warnings/errors
-  File.open(File.join(designdir, 'run.log'), 'w') do |f|
-    if debug
-      runner.result.stepInfo.each do |s|
-        f << "Info: #{s}\n"
-      end
-    end
-    runner.result.stepWarnings.each do |s|
-      f << "Warning: #{s}\n"
-    end
-    runner.result.stepErrors.each do |s|
-      f << "Error: #{s}\n"
-    end
-  end
+  success = apply_measures(measures_dir, measures, runner, model, true, 'OpenStudio::Measure::ModelMeasure')
+  report_measure_errors_warnings(runner, designdir, debug)
 
   return if skip_simulation
 
   if not success
-    fail "Simulation unsuccessful for #{design}."
+    fail "Simulation unsuccessful."
   end
-
-  # Add monthly output requests
-  get_output_meter_requests.each do |hes_key, ep_meters|
-    ep_meters.each do |ep_meter|
-      output_meter = OpenStudio::Model::OutputMeter.new(model)
-      output_meter.setName(ep_meter)
-      output_meter.setReportingFrequency('monthly')
-    end
-  end
-
-  # Add monthly hot water output request
-  outputVariable = OpenStudio::Model::OutputVariable.new('Water Use Equipment Hot Water Volume', model)
-  outputVariable.setReportingFrequency('monthly')
-  outputVariable.setKeyValue('*')
 
   # Translate model to IDF
   forward_translator = OpenStudio::EnergyPlus::ForwardTranslator.new
   forward_translator.setExcludeLCCObjects(true)
   model_idf = forward_translator.translateModel(model)
-
-  # Report warnings/errors
-  File.open(File.join(designdir, 'run.log'), 'a') do |f|
-    forward_translator.warnings.each do |s|
-      f << "FT Warning: #{s.logMessage}\n"
-    end
-    forward_translator.errors.each do |s|
-      f << "FT Error: #{s.logMessage}\n"
-    end
-  end
+  report_ft_errors_warnings(forward_translator, designdir)
+  
+  # Apply reporting measure output requests
+  apply_energyplus_output_requests(measures_dir, measures, runner, model, model_idf)
 
   # Write IDF to file
   File.open(File.join(designdir, 'in.idf'), 'w') { |f| f << model_idf.to_s }
-end
 
-def run_energyplus(design, rundir)
+  return if skip_simulation
+
+  puts 'Running simulation...'
+
   # getEnergyPlusDirectory can be unreliable, using getOpenStudioCLI instead
   ep_path = File.absolute_path(File.join(OpenStudio.getOpenStudioCLI.to_s, '..', '..', 'EnergyPlus', 'energyplus'))
   command = "cd #{rundir} && #{ep_path} -w in.epw in.idf > stdout-energyplus"
   system(command, err: File::NULL)
-end
 
-def create_output(designdir, resultsdir)
-  puts 'Compiling outputs...'
-  sql_path = File.join(designdir, 'eplusout.sql')
-  if not File.exist?(sql_path)
+  puts 'Processing output...'
+  
+  # Apply reporting measures
+  runner.setLastEnergyPlusSqlFilePath(File.join(rundir, 'eplusout.sql'))
+  success = apply_measures(measures_dir, measures, runner, model, true, 'OpenStudio::Measure::ReportingMeasure')
+  report_measure_errors_warnings(runner, rundir, debug)
+
+  if not success
     fail 'Processing output unsuccessful.'
   end
-
-  sqlFile = OpenStudio::SqlFile.new(sql_path, false)
-
-  # Initialize
+  
+  timeseries_csv_path = File.join(rundir, 'results_timeseries.csv')
   results = {}
-  results_gj = {}
-  get_output_meter_requests.each do |hes_key, ep_meters|
-    results[hes_key] = [0.0] * 12
-    results_gj[hes_key] = [0.0] * 12
+  CSV.foreach(csv) do |row|
+    puts row
   end
-
-  # Retrieve outputs
-  get_output_meter_requests.each do |hes_key, ep_meters|
-    hes_end_use, hes_resource_type = hes_key
-    to_units = get_fuel_site_units(hes_resource_type)
-
-    ep_meters.each do |ep_meter|
-      query = "SELECT VariableValue FROM ReportMeterData WHERE ReportMeterDataDictionaryIndex=(SELECT ReportMeterDataDictionaryIndex FROM ReportMeterDataDictionary WHERE VariableName='#{ep_meter}' AND ReportingFrequency='Monthly' AND VariableUnits='J') ORDER BY TimeIndex"
-      sql_result = sqlFile.execAndReturnVectorOfDouble(query)
-      next unless sql_result.is_initialized
-
-      sql_result = sql_result.get
-      for i in 1..12
-        next if sql_result[i - 1].nil?
-
-        result = UnitConversions.convert(sql_result[i - 1], 'J', to_units) # convert from J to site energy units
-        result_gj = sql_result[i - 1] / 1000000000.0 # convert from J to GJ
-
-        results[hes_key][i - 1] += result
-        results_gj[hes_key][i - 1] += result_gj
-
-        next unless hes_end_use == 'large_appliance'
-
-        # Subtract out from small appliance end use
-        results[['small_appliance', hes_resource_type]][i - 1] -= result
-        results_gj[['small_appliance', hes_resource_type]][i - 1] -= result_gj
-      end
-    end
-  end
-
-  # Subtract out disaggregated heating/cooling fan and pump energy from hot water electricity end use
-  hes_resource_type = 'electric'
-  to_units = get_fuel_site_units(hes_resource_type)
-  hes_end_uses = { 'heating' => [Constants.ObjectNameFanPumpDisaggregatePrimaryHeat, Constants.ObjectNameFanPumpDisaggregateBackupHeat],
-                   'cooling' => [Constants.ObjectNameFanPumpDisaggregateCool] }
-  hes_end_uses.each do |hes_end_use, var_names|
-    for i in 1..12
-      total = 0.0
-      var_names.each do |var_name|
-        query = "SELECT SUM(VariableValue) FROM ReportVariableData WHERE ReportVariableDataDictionaryIndex IN (SELECT ReportVariableDataDictionaryIndex FROM ReportVariableDataDictionary WHERE VariableName LIKE '%#{var_name}' AND ReportingFrequency='Monthly' AND VariableUnits='J') AND TimeIndex='#{i}'"
-        sql_result = sqlFile.execAndReturnFirstDouble(query)
-        next unless sql_result.is_initialized
-
-        total += sql_result.get
-      end
-
-      result = UnitConversions.convert(total, 'J', to_units) # convert from J to site energy units
-      result_gj = total / 1000000000.0 # convert from J to GJ
-
-      # Add to heating/cooling end use
-      results[[hes_end_use, hes_resource_type]][i - 1] += result
-      results_gj[[hes_end_use, hes_resource_type]][i - 1] += result_gj
-
-      # Subtract from hot water end use
-      results[['hot_water', hes_resource_type]][i - 1] -= result
-      results_gj[['hot_water', hes_resource_type]][i - 1] -= result_gj
-    end
-  end
-
-  # Add hot water volume output
-  hes_end_use = 'hot_water'
-  hes_resource_type = 'hot_water'
-  to_units = get_fuel_site_units(hes_resource_type)
-  for i in 1..12
-    query = "SELECT SUM(VariableValue) FROM ReportVariableData WHERE ReportVariableDataDictionaryIndex IN (SELECT ReportVariableDataDictionaryIndex FROM ReportVariableDataDictionary WHERE VariableName='Water Use Equipment Hot Water Volume' AND ReportingFrequency='Monthly' AND VariableUnits='m3') AND TimeIndex='#{i}'"
-    sql_result = sqlFile.execAndReturnFirstDouble(query)
-    next unless sql_result.is_initialized
-
-    sql_result = sql_result.get
-
-    result = UnitConversions.convert(sql_result, 'm^3', 'gal')
-
-    results[[hes_end_use, hes_resource_type]][i - 1] = result
-  end
-
-  # Error-checking
-  net_energy_gj = sqlFile.netSiteEnergy.get - sqlFile.districtHeatingHeating.get - sqlFile.districtCoolingCooling.get
-  sum_energy_gj = 0
-  results_gj.each do |hes_key, values|
-    hes_end_use, hes_resource_type = hes_key
-    if hes_end_use == 'generation'
-      sum_energy_gj -= values.inject(0, :+)
-    else
-      sum_energy_gj += values.inject(0, :+)
-    end
-  end
-  if (net_energy_gj - sum_energy_gj).abs > 0.1
-    fail "Sum of retrieved outputs #{sum_energy_gj} does not match total net value #{net_energy_gj}."
-  end
-
-  sqlFile.close
+  
+  return # FIXME: TEMPORARY
+  
+  units_map = { 'electric' => 'kWh',
+           'natural_gas' => 'kBtu',
+           'lpg' => 'kBtu',
+           'fuel_oil' => 'kBtu',
+           'cord_wood' => 'kBtu',
+           'pellet_wood' => 'kBtu',
+           'hot_water' => 'gallons' }
 
   # Write results to JSON
   data = { 'end_use' => [] }
   results.each do |hes_key, values|
     hes_end_use, hes_resource_type = hes_key
-    to_units = get_fuel_site_units(hes_resource_type)
+    to_units = units_map[hes_resource_type]
     annual_value = values.inject(0, :+)
     next if annual_value <= 0.01
 
@@ -265,6 +150,35 @@ def create_output(designdir, resultsdir)
 
   File.open(File.join(resultsdir, 'results.json'), 'w') do |f|
     f.write(data.to_s.gsub('=>', ':')) # Much faster than requiring JSON to use pretty_generate
+  end
+end
+
+def report_measure_errors_warnings(runner, designdir, debug)
+  # Report warnings/errors
+  File.open(File.join(designdir, 'run.log'), 'w') do |f|
+    if debug
+      runner.result.stepInfo.each do |s|
+        f << "Info: #{s}\n"
+      end
+    end
+    runner.result.stepWarnings.each do |s|
+      f << "Warning: #{s}\n"
+    end
+    runner.result.stepErrors.each do |s|
+      f << "Error: #{s}\n"
+    end
+  end
+end
+
+def report_ft_errors_warnings(forward_translator, designdir)
+  # Report warnings/errors
+  File.open(File.join(designdir, 'run.log'), 'a') do |f|
+    forward_translator.warnings.each do |s|
+      f << "FT Warning: #{s.logMessage}\n"
+    end
+    forward_translator.errors.each do |s|
+      f << "FT Error: #{s.logMessage}\n"
+    end
   end
 end
 
