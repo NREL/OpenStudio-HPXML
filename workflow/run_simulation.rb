@@ -81,6 +81,12 @@ def run_design(basedir, rundir, design, resultsdir, hpxml, debug, skip_simulatio
     fail 'Simulation unsuccessful.'
   end
 
+  # Add monthly hot water output request
+  # TODO: Move this to reporting measure some day...
+  outputVariable = OpenStudio::Model::OutputVariable.new('Water Use Equipment Hot Water Volume', model)
+  outputVariable.setReportingFrequency('monthly')
+  outputVariable.setKeyValue('*')
+
   # Translate model to IDF
   forward_translator = OpenStudio::EnergyPlus::ForwardTranslator.new
   forward_translator.setExcludeLCCObjects(true)
@@ -113,7 +119,16 @@ def run_design(basedir, rundir, design, resultsdir, hpxml, debug, skip_simulatio
     fail 'Processing output unsuccessful.'
   end
 
-  # Mapping between reporting measure end use and HEScore [end_use, resource_type]
+  # Map between HES resource_type and HES units
+  units_map = { 'electric' => 'kWh',
+                'natural_gas' => 'kBtu',
+                'lpg' => 'kBtu',
+                'fuel_oil' => 'kBtu',
+                'cord_wood' => 'kBtu',
+                'pellet_wood' => 'kBtu',
+                'hot_water' => 'gallons' }
+
+  # Map between reporting measure end use and HEScore [end_use, resource_type]
   output_map = {
     'Electricity: Heating' => ['heating', 'electric'],
     'Electricity: Heating Fans/Pumps' => ['heating', 'electric'],
@@ -140,27 +155,30 @@ def run_design(basedir, rundir, design, resultsdir, hpxml, debug, skip_simulatio
     'Electricity: Lighting Exterior' => ['lighting', 'electric'],
     'Electricity: PV' => ['generation', 'electric'],
   }
-  # Unmapped: ['circulation', 'electric'] and ['hot_water', 'hot_water']
 
   results = {}
   output_map.each do |ep_output, hes_output|
     results[hes_output] = []
   end
   row_index = {}
+  units = nil
   timeseries_csv_path = File.join(rundir, 'results_timeseries.csv')
   CSV.foreach(timeseries_csv_path).with_index do |row, row_num|
     if row_num == 0 # Header
       output_map.each do |ep_output, hes_output|
         row_index[ep_output] = row.index(ep_output)
       end
-    elsif row_num > 1 # Data
+    elsif row_num == 1 # Units
+      units = row
+    else # Data
       # Init for month
       results.keys.each do |k|
         results[k] << 0.0
       end
       # Add values
       output_map.each do |ep_output, hes_output|
-        results[hes_output][-1] += Float(row[row_index[ep_output]])
+        col = row_index[ep_output]
+        results[hes_output][-1] += UnitConversions.convert(Float(row[col]), units[col], units_map[hes_output[1]])
       end
       # Make sure there aren't any end uses with positive values that aren't mapped to HES
       row.each_with_index do |val, col|
@@ -172,13 +190,19 @@ def run_design(basedir, rundir, design, resultsdir, hpxml, debug, skip_simulatio
     end
   end
 
-  units_map = { 'electric' => 'kWh',
-                'natural_gas' => 'kBtu',
-                'lpg' => 'kBtu',
-                'fuel_oil' => 'kBtu',
-                'cord_wood' => 'kBtu',
-                'pellet_wood' => 'kBtu',
-                'hot_water' => 'gallons' }
+  # Add hot water volume output
+  # TODO: Move this to reporting measure some day...
+  sql_path = File.join(rundir, 'eplusout.sql')
+  sqlFile = OpenStudio::SqlFile.new(sql_path, false)
+  hes_end_use = 'hot_water'
+  hes_resource_type = 'hot_water'
+  to_units = units_map[hes_resource_type]
+  results[[hes_end_use, hes_resource_type]] = []
+  for i in 1..12
+    query = "SELECT SUM(VariableValue) FROM ReportVariableData WHERE ReportVariableDataDictionaryIndex IN (SELECT ReportVariableDataDictionaryIndex FROM ReportVariableDataDictionary WHERE VariableName='Water Use Equipment Hot Water Volume' AND ReportingFrequency='Monthly' AND VariableUnits='m3') AND TimeIndex='#{i}'"
+    sql_result = sqlFile.execAndReturnFirstDouble(query).get
+    results[[hes_end_use, hes_resource_type]] << UnitConversions.convert(sql_result, 'm^3', 'gal')
+  end
 
   # Write results to JSON
   data = { 'end_use' => [] }
