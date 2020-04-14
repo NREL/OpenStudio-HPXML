@@ -3,6 +3,7 @@ start_time = Time.now
 require 'fileutils'
 require 'optparse'
 require 'pathname'
+require 'csv'
 require_relative '../hpxml-measures/HPXMLtoOpenStudio/resources/meta_measure'
 require_relative '../hpxml-measures/HPXMLtoOpenStudio/resources/unit_conversions'
 
@@ -19,22 +20,22 @@ def rm_path(path)
   end
 end
 
-def get_designdir(output_dir, design)
+def get_rundir(output_dir, design)
   return File.join(output_dir, design.gsub(' ', ''))
 end
 
-def get_output_hpxml_path(resultsdir, designdir)
-  return File.join(resultsdir, File.basename(designdir) + '.xml')
+def get_output_hpxml_path(resultsdir, rundir)
+  return File.join(resultsdir, File.basename(rundir) + '.xml')
 end
 
-def run_design(basedir, designdir, design, resultsdir, hpxml, debug, skip_simulation)
+def run_design(basedir, rundir, design, resultsdir, hpxml, debug, skip_simulation)
   puts 'Creating input...'
-  
-  Dir.mkdir(designdir)
+
+  Dir.mkdir(rundir)
 
   OpenStudio::Logger.instance.standardOutLogger.setLogLevel(OpenStudio::Fatal)
 
-  output_hpxml_path = get_output_hpxml_path(resultsdir, designdir)
+  output_hpxml_path = get_output_hpxml_path(resultsdir, rundir)
 
   model = OpenStudio::Model::Model.new
   runner = OpenStudio::Measure::OSRunner.new(OpenStudio::WorkflowJSON.new)
@@ -55,10 +56,10 @@ def run_design(basedir, designdir, design, resultsdir, hpxml, debug, skip_simula
     args = {}
     args['hpxml_path'] = output_hpxml_path
     args['weather_dir'] = File.absolute_path(File.join(basedir, '..', 'weather'))
-    args['output_dir'] = designdir
+    args['output_dir'] = rundir
     args['debug'] = debug
     update_args_hash(measures, measure_subdir, args)
-    
+
     # Add reporting measure to workflow
     measure_subdir = 'hpxml-measures/SimulationOutputReport'
     args = {}
@@ -73,25 +74,25 @@ def run_design(basedir, designdir, design, resultsdir, hpxml, debug, skip_simula
 
   # Apply measures
   success = apply_measures(measures_dir, measures, runner, model, true, 'OpenStudio::Measure::ModelMeasure')
-  report_measure_errors_warnings(runner, designdir, debug)
+  report_measure_errors_warnings(runner, rundir, debug)
 
   return if skip_simulation
 
   if not success
-    fail "Simulation unsuccessful."
+    fail 'Simulation unsuccessful.'
   end
 
   # Translate model to IDF
   forward_translator = OpenStudio::EnergyPlus::ForwardTranslator.new
   forward_translator.setExcludeLCCObjects(true)
   model_idf = forward_translator.translateModel(model)
-  report_ft_errors_warnings(forward_translator, designdir)
-  
+  report_ft_errors_warnings(forward_translator, rundir)
+
   # Apply reporting measure output requests
   apply_energyplus_output_requests(measures_dir, measures, runner, model, model_idf)
 
   # Write IDF to file
-  File.open(File.join(designdir, 'in.idf'), 'w') { |f| f << model_idf.to_s }
+  File.open(File.join(rundir, 'in.idf'), 'w') { |f| f << model_idf.to_s }
 
   return if skip_simulation
 
@@ -103,7 +104,7 @@ def run_design(basedir, designdir, design, resultsdir, hpxml, debug, skip_simula
   system(command, err: File::NULL)
 
   puts 'Processing output...'
-  
+
   # Apply reporting measures
   runner.setLastEnergyPlusSqlFilePath(File.join(rundir, 'eplusout.sql'))
   success = apply_measures(measures_dir, measures, runner, model, true, 'OpenStudio::Measure::ReportingMeasure')
@@ -112,22 +113,66 @@ def run_design(basedir, designdir, design, resultsdir, hpxml, debug, skip_simula
   if not success
     fail 'Processing output unsuccessful.'
   end
-  
+
+  # Mapping between reporting measure end use and HEScore [end_use, resource_type]
+  output_map = {
+    'Electricity: Heating' => ['heating', 'electric'],
+    'Electricity: Heating Fans/Pumps' => ['heating', 'electric'],
+    'Natural Gas: Heating' => ['heating', 'natural_gas'],
+    'Propane: Heating' => ['heating', 'lpg'],
+    'Fuel Oil: Heating' => ['heating', 'fuel_oil'],
+    'Wood: Heating' => ['heating', 'cord_wood'],
+    'Wood Pellets: Heating' => ['heating', 'pellet_wood'],
+    'Electricity: Cooling' => ['cooling', 'electric'],
+    'Electricity: Cooling Fans/Pumps' => ['cooling', 'electric'],
+    'Electricity: Hot Water' => ['hot_water', 'electric'],
+    'Natural Gas: Hot Water' => ['hot_water', 'natural_gas'],
+    'Propane: Hot Water' => ['hot_water', 'lpg'],
+    'Fuel Oil: Hot Water' => ['hot_water', 'fuel_oil'],
+    'Electricity: Refrigerator' => ['large_appliance', 'electric'],
+    'Electricity: Dishwasher' => ['large_appliance', 'electric'],
+    'Electricity: Clothes Washer' => ['large_appliance', 'electric'],
+    'Electricity: Clothes Dryer' => ['large_appliance', 'electric'],
+    'Electricity: Range/Oven' => ['large_appliance', 'electric'],
+    'Electricity: Television' => ['small_appliance', 'electric'],
+    'Electricity: Plug Loads' => ['small_appliance', 'electric'],
+    'Electricity: Lighting Interior' => ['lighting', 'electric'],
+    'Electricity: Lighting Garage' => ['lighting', 'electric'],
+    'Electricity: Lighting Exterior' => ['lighting', 'electric'],
+    'Electricity: PV' => ['generation', 'electric'],
+  }
+  # Unmapped: ['circulation', 'electric'] and ['hot_water', 'hot_water']
+
   timeseries_csv_path = File.join(rundir, 'results_timeseries.csv')
   results = {}
-  CSV.foreach(csv) do |row|
-    puts row
+  output_map.each do |ep_output, hes_output|
+    results[hes_output] = []
   end
-  
-  return # FIXME: TEMPORARY
-  
+  row_index = {}
+  header = nil
+  units = nil
+  CSV.foreach(timeseries_csv_path) do |row|
+    if header.nil?
+      header = row
+      output_map.each do |ep_output, hes_output|
+        row_index[ep_output] = header.index(ep_output)
+      end
+    elsif units.nil?
+      units = row
+    else
+      output_map.each do |ep_output, hes_output|
+        results[hes_output] << Float(row[row_index[ep_output]])
+      end
+    end
+  end
+
   units_map = { 'electric' => 'kWh',
-           'natural_gas' => 'kBtu',
-           'lpg' => 'kBtu',
-           'fuel_oil' => 'kBtu',
-           'cord_wood' => 'kBtu',
-           'pellet_wood' => 'kBtu',
-           'hot_water' => 'gallons' }
+                'natural_gas' => 'kBtu',
+                'lpg' => 'kBtu',
+                'fuel_oil' => 'kBtu',
+                'cord_wood' => 'kBtu',
+                'pellet_wood' => 'kBtu',
+                'hot_water' => 'gallons' }
 
   # Write results to JSON
   data = { 'end_use' => [] }
@@ -153,9 +198,9 @@ def run_design(basedir, designdir, design, resultsdir, hpxml, debug, skip_simula
   end
 end
 
-def report_measure_errors_warnings(runner, designdir, debug)
+def report_measure_errors_warnings(runner, rundir, debug)
   # Report warnings/errors
-  File.open(File.join(designdir, 'run.log'), 'w') do |f|
+  File.open(File.join(rundir, 'run.log'), 'w') do |f|
     if debug
       runner.result.stepInfo.each do |s|
         f << "Info: #{s}\n"
@@ -170,9 +215,9 @@ def report_measure_errors_warnings(runner, designdir, debug)
   end
 end
 
-def report_ft_errors_warnings(forward_translator, designdir)
+def report_ft_errors_warnings(forward_translator, rundir)
   # Report warnings/errors
-  File.open(File.join(designdir, 'run.log'), 'a') do |f|
+  File.open(File.join(rundir, 'run.log'), 'a') do |f|
     forward_translator.warnings.each do |s|
       f << "FT Warning: #{s.logMessage}\n"
     end
@@ -311,8 +356,8 @@ Dir.mkdir(resultsdir)
 # Run design
 puts "HPXML: #{options[:hpxml]}"
 design = 'HEScoreDesign'
-designdir = get_designdir(options[:output_dir], design)
-rm_path(designdir)
-rundir = run_design(basedir, designdir, design, resultsdir, options[:hpxml], options[:debug], options[:skip_simulation])
+rundir = get_rundir(options[:output_dir], design)
+rm_path(rundir)
+rundir = run_design(basedir, rundir, design, resultsdir, options[:hpxml], options[:debug], options[:skip_simulation])
 
 puts "Completed in #{(Time.now - start_time).round(1)} seconds."
