@@ -108,7 +108,7 @@ class Constants
   end
 
   def self.ERIVersions
-    return ['2014', '2014A', '2014AE', '2014AEG']
+    return ['2014', '2014A', '2014AD', '2014ADE', '2014ADEG', '2014ADEGL', '2019', '2019A']
   end
 
   def self.FacadeFront
@@ -221,6 +221,10 @@ class Constants
 
   def self.ObjectNameDishwasher
     return 'dishwasher'
+  end
+
+  def self.ObjectNameDucts
+    return 'ducts'
   end
 
   def self.ObjectNameElectricBaseboard
@@ -673,5 +677,37 @@ class Constants
 
   def self.TerrainCity
     return 'city'
+  end
+
+  def self.BAZoneHotDry
+    return 'Hot-Dry'
+  end
+
+  def self.BAZoneHotHumid
+    return 'Hot-Humid'
+  end
+
+  def self.BAZoneMarine
+    return 'Marine'
+  end
+
+  def self.BAZoneMixedHumid
+    return 'Mixed-Humid'
+  end
+
+  def self.BAZoneMixedDry
+    return 'Mixed-Dry'
+  end
+
+  def self.BAZoneCold
+    return 'Cold'
+  end
+
+  def self.BAZoneVeryCold
+    return 'Very Cold'
+  end
+
+  def self.BAZoneSubarctic
+    return 'Subarctic'
   end
 end
