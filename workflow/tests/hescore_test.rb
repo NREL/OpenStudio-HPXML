@@ -170,8 +170,10 @@ class HEScoreTest < Minitest::Unit::TestCase
     hpxml_doc.elements.each('/HPXML/Building/BuildingDetails/Systems/WaterHeating/WaterHeatingSystem') do |hw_sys|
       hw_fuels << fuel_map[XMLHelper.get_value(hw_sys, 'FuelType')]
       hw_type = XMLHelper.get_value(hw_sys, 'WaterHeaterType')
-      if hw_type.include?('boiler') || (hw_type == 'heat pump water heater')
-        hw_fuels << fuel_map['electricity'] # fan/pump
+      next unless hw_type.include?('boiler')
+      hpxml_doc.elements.each('/HPXML/Building/BuildingDetails/Systems/HVAC/HVACPlant/HeatingSystem') do |htg_sys|
+        next unless hw_sys.elements['RelatedHVACSystem'].attributes['idref'] == htg_sys.elements['SystemIdentifier'].attributes['id']
+        hw_fuels << fuel_map[XMLHelper.get_value(htg_sys, 'HeatingSystemFuel')]
       end
     end
 
