@@ -11,11 +11,11 @@ class HEScoreRuleset
   def self.apply_ruleset(orig_hpxml)
     # Create new HPXML object
     new_hpxml = HPXML.new
-    new_hpxml.set_header(xml_type: orig_hpxml.header.xml_type,
-                         xml_generated_by: 'OpenStudio-HEScore',
-                         transaction: orig_hpxml.header.transaction,
-                         building_id: orig_hpxml.header.building_id,
-                         event_type: orig_hpxml.header.event_type)
+    new_hpxml.header.xml_type = orig_hpxml.header.xml_type
+    new_hpxml.header.xml_generated_by = 'OpenStudio-HEScore'
+    new_hpxml.header.transaction = orig_hpxml.header.transaction
+    new_hpxml.header.building_id = orig_hpxml.header.building_id
+    new_hpxml.header.event_type = orig_hpxml.header.event_type
 
     # BuildingSummary
     set_summary(orig_hpxml, new_hpxml)
@@ -93,8 +93,8 @@ class HEScoreRuleset
     @roof_angle_rad = UnitConversions.convert(@roof_angle, 'deg', 'rad') # radians
     @cvolume = calc_conditioned_volume(orig_hpxml)
 
-    new_hpxml.set_site(fuels: [HPXML::FuelTypeElectricity], # TODO Check if changing this would ever influence results; if it does, talk to Leo
-                       shelter_coefficient: Airflow.get_default_shelter_coefficient())
+    new_hpxml.site.fuels = [HPXML::FuelTypeElectricity] # TODO Check if changing this would ever influence results; if it does, talk to Leo
+    new_hpxml.site.shelter_coefficient = Airflow.get_default_shelter_coefficient()
 
     # Neighboring buildings to left/right, 12ft offset, same height as building.
     # FIXME: Verify. What about townhouses?
@@ -105,20 +105,20 @@ class HEScoreRuleset
                                      distance: 20.0,
                                      height: 12.0)
 
-    new_hpxml.set_building_occupancy(number_of_residents: Geometry.get_occupancy_default_num(@nbeds))
+    new_hpxml.building_occupancy.number_of_residents = Geometry.get_occupancy_default_num(@nbeds)
 
-    new_hpxml.set_building_construction(number_of_conditioned_floors: @ncfl,
-                                        number_of_conditioned_floors_above_grade: @ncfl_ag,
-                                        number_of_bedrooms: @nbeds,
-                                        conditioned_floor_area: @cfa,
-                                        conditioned_building_volume: @cvolume)
+    new_hpxml.building_construction.number_of_conditioned_floors = @ncfl
+    new_hpxml.building_construction.number_of_conditioned_floors_above_grade = @ncfl_ag
+    new_hpxml.building_construction.number_of_bedrooms = @nbeds
+    new_hpxml.building_construction.conditioned_floor_area = @cfa
+    new_hpxml.building_construction.conditioned_building_volume = @cvolume
   end
 
   def self.set_climate(orig_hpxml, new_hpxml)
-    new_hpxml.set_climate_and_risk_zones(weather_station_id: orig_hpxml.climate_and_risk_zones.weather_station_id,
-                                         weather_station_name: orig_hpxml.climate_and_risk_zones.weather_station_name,
-                                         weather_station_wmo: orig_hpxml.climate_and_risk_zones.weather_station_wmo)
-    @iecc_zone = orig_hpxml.climate_and_risk_zones.iecc2012
+    new_hpxml.climate_and_risk_zones.weather_station_id = orig_hpxml.climate_and_risk_zones.weather_station_id
+    new_hpxml.climate_and_risk_zones.weather_station_name = orig_hpxml.climate_and_risk_zones.weather_station_name
+    new_hpxml.climate_and_risk_zones.weather_station_wmo = orig_hpxml.climate_and_risk_zones.weather_station_wmo
+    @iecc_zone = orig_hpxml.climate_and_risk_zones.iecc_zone
   end
 
   def self.set_enclosure_air_infiltration(orig_hpxml, new_hpxml)
@@ -411,13 +411,11 @@ class HEScoreRuleset
     end
     fail 'Could not find front wall.' if front_wall.nil?
 
-    ufactor, shgc = Constructions.get_default_ufactor_shgc(@iecc_zone)
-
     new_hpxml.doors.add(id: 'Door',
                         wall_idref: front_wall.id,
                         area: Constructions.get_default_door_area(),
                         azimuth: orientation_to_azimuth(@bldg_orient),
-                        r_value: 1.0 / ufactor)
+                        r_value: 1.0 / 0.51)
   end
 
   def self.set_systems_hvac(orig_hpxml, new_hpxml)
@@ -671,12 +669,14 @@ class HEScoreRuleset
       # Supply duct leakage to the outside
       new_hpxml.hvac_distributions[-1].duct_leakage_measurements.add(duct_type: HPXML::DuctTypeSupply,
                                                                      duct_leakage_units: HPXML::UnitsPercent,
-                                                                     duct_leakage_value: lto_s)
+                                                                     duct_leakage_value: lto_s,
+                                                                     duct_leakage_total_or_to_outside: HPXML::DuctLeakageToOutside)
 
       # Return duct leakage to the outside
       new_hpxml.hvac_distributions[-1].duct_leakage_measurements.add(duct_type: HPXML::DuctTypeReturn,
                                                                      duct_leakage_units: HPXML::UnitsPercent,
-                                                                     duct_leakage_value: lto_r)
+                                                                     duct_leakage_value: lto_r,
+                                                                     duct_leakage_total_or_to_outside: HPXML::DuctLeakageToOutside)
 
       orig_dist.ducts.each do |orig_duct|
         next if orig_duct.duct_location == HPXML::LocationLivingSpace
@@ -828,42 +828,29 @@ class HEScoreRuleset
 
   def self.set_appliances_clothes_washer(orig_hpxml, new_hpxml)
     new_hpxml.clothes_washers.add(id: 'ClothesWasher',
-                                  location: HPXML::LocationLivingSpace,
-                                  integrated_modified_energy_factor: HotWaterAndAppliances.get_clothes_washer_reference_imef(),
-                                  rated_annual_kwh: HotWaterAndAppliances.get_clothes_washer_reference_ler(),
-                                  label_electric_rate: HotWaterAndAppliances.get_clothes_washer_reference_elec_rate(),
-                                  label_gas_rate: HotWaterAndAppliances.get_clothes_washer_reference_gas_rate(),
-                                  label_annual_gas_cost: HotWaterAndAppliances.get_clothes_washer_reference_agc(),
-                                  capacity: HotWaterAndAppliances.get_clothes_washer_reference_cap())
+                                  location: HPXML::LocationLivingSpace)
   end
 
   def self.set_appliances_clothes_dryer(orig_hpxml, new_hpxml)
     new_hpxml.clothes_dryers.add(id: 'ClothesDryer',
                                  location: HPXML::LocationLivingSpace,
-                                 fuel_type: HPXML::FuelTypeElectricity,
-                                 combined_energy_factor: HotWaterAndAppliances.get_clothes_dryer_reference_cef(HPXML::FuelTypeElectricity),
-                                 control_type: HotWaterAndAppliances.get_clothes_dryer_reference_control())
+                                 fuel_type: HPXML::FuelTypeElectricity)
   end
 
   def self.set_appliances_dishwasher(orig_hpxml, new_hpxml)
-    new_hpxml.dishwashers.add(id: 'Dishwasher',
-                              energy_factor: HotWaterAndAppliances.get_dishwasher_reference_ef(),
-                              place_setting_capacity: HotWaterAndAppliances.get_dishwasher_reference_cap())
+    new_hpxml.dishwashers.add(id: 'Dishwasher')
   end
 
   def self.set_appliances_refrigerator(orig_hpxml, new_hpxml)
     new_hpxml.refrigerators.add(id: 'Refrigerator',
-                                location: HPXML::LocationLivingSpace,
-                                rated_annual_kwh: HotWaterAndAppliances.get_refrigerator_reference_annual_kwh(@nbeds))
+                                location: HPXML::LocationLivingSpace)
   end
 
   def self.set_appliances_cooking_range_oven(orig_hpxml, new_hpxml)
     new_hpxml.cooking_ranges.add(id: 'CookingRange',
-                                 fuel_type: HPXML::FuelTypeElectricity,
-                                 is_induction: HotWaterAndAppliances.get_range_oven_reference_is_induction())
+                                 fuel_type: HPXML::FuelTypeElectricity)
 
-    new_hpxml.ovens.add(id: 'Oven',
-                        is_convection: HotWaterAndAppliances.get_range_oven_reference_is_convection())
+    new_hpxml.ovens.add(id: 'Oven')
   end
 
   def self.set_lighting(orig_hpxml, new_hpxml)

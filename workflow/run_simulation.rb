@@ -67,10 +67,8 @@ def create_idf(design, basedir, designdir, resultsdir, hpxml, debug, skip_simula
     args = {}
     args['hpxml_path'] = output_hpxml_path
     args['weather_dir'] = File.absolute_path(File.join(basedir, '..', 'weather'))
-    args['epw_output_path'] = File.join(designdir, 'in.epw')
-    if debug
-      args['osm_output_path'] = File.join(designdir, 'in.osm')
-    end
+    args['output_dir'] = designdir
+    args['debug'] = debug
     update_args_hash(measures, measure_subdir, args)
   end
 
