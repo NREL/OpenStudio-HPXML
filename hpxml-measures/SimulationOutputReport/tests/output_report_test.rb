@@ -393,7 +393,7 @@ class SimulationOutputReportTest < MiniTest::Test
   end
 
   def test_timeseries_timestep_ALL_60min
-    args_hash = { 'hpxml_path' => '../workflow/sample_files/base-misc-timestep-60-mins.xml',
+    args_hash = { 'hpxml_path' => '../workflow/sample_files/base.xml',
                   'timeseries_frequency' => 'timestep',
                   'include_timeseries_zone_temperatures' => true,
                   'include_timeseries_fuel_consumptions' => true,
@@ -426,6 +426,57 @@ class SimulationOutputReportTest < MiniTest::Test
     assert_equal(52560, File.readlines(timeseries_csv).size - 2)
   end
 
+  def test_timeseries_hourly_ALL_runperiod_Jan
+    args_hash = { 'hpxml_path' => '../workflow/sample_files/base-misc-runperiod-1-month.xml',
+                  'timeseries_frequency' => 'hourly',
+                  'include_timeseries_zone_temperatures' => true,
+                  'include_timeseries_fuel_consumptions' => true,
+                  'include_timeseries_end_use_consumptions' => true,
+                  'include_timeseries_total_loads' => true,
+                  'include_timeseries_component_loads' => true }
+    annual_csv, timeseries_csv, eri_csv = _test_measure(args_hash)
+    assert(File.exist?(annual_csv))
+    assert(File.exist?(timeseries_csv))
+    expected_timeseries_cols = ['Hour'] + TimeseriesColsFuels + TimeseriesColsEndUses + TimeseriesColsTotalLoads + TimeseriesColsComponentLoads + TimeseriesColsTemperatures
+    actual_timeseries_cols = File.readlines(timeseries_csv)[0].strip.split(',')
+    assert_equal(expected_timeseries_cols.sort, actual_timeseries_cols.sort)
+    assert_equal(31 * 24, File.readlines(timeseries_csv).size - 2)
+  end
+
+  def test_timeseries_daily_ALL_runperiod_Jan
+    args_hash = { 'hpxml_path' => '../workflow/sample_files/base-misc-runperiod-1-month.xml',
+                  'timeseries_frequency' => 'daily',
+                  'include_timeseries_zone_temperatures' => true,
+                  'include_timeseries_fuel_consumptions' => true,
+                  'include_timeseries_end_use_consumptions' => true,
+                  'include_timeseries_total_loads' => true,
+                  'include_timeseries_component_loads' => true }
+    annual_csv, timeseries_csv, eri_csv = _test_measure(args_hash)
+    assert(File.exist?(annual_csv))
+    assert(File.exist?(timeseries_csv))
+    expected_timeseries_cols = ['Day'] + TimeseriesColsFuels + TimeseriesColsEndUses + TimeseriesColsTotalLoads + TimeseriesColsComponentLoads + TimeseriesColsTemperatures
+    actual_timeseries_cols = File.readlines(timeseries_csv)[0].strip.split(',')
+    assert_equal(expected_timeseries_cols.sort, actual_timeseries_cols.sort)
+    assert_equal(31, File.readlines(timeseries_csv).size - 2)
+  end
+
+  def test_timeseries_timestep_ALL_60min_runperiod_Jan
+    args_hash = { 'hpxml_path' => '../workflow/sample_files/base-misc-runperiod-1-month.xml',
+                  'timeseries_frequency' => 'timestep',
+                  'include_timeseries_zone_temperatures' => true,
+                  'include_timeseries_fuel_consumptions' => true,
+                  'include_timeseries_end_use_consumptions' => true,
+                  'include_timeseries_total_loads' => true,
+                  'include_timeseries_component_loads' => true }
+    annual_csv, timeseries_csv, eri_csv = _test_measure(args_hash)
+    assert(File.exist?(annual_csv))
+    assert(File.exist?(timeseries_csv))
+    expected_timeseries_cols = ['Timestep'] + TimeseriesColsFuels + TimeseriesColsEndUses + TimeseriesColsTotalLoads + TimeseriesColsComponentLoads + TimeseriesColsTemperatures
+    actual_timeseries_cols = File.readlines(timeseries_csv)[0].strip.split(',')
+    assert_equal(expected_timeseries_cols.sort, actual_timeseries_cols.sort)
+    assert_equal(31 * 24, File.readlines(timeseries_csv).size - 2)
+  end
+
   def test_eri_designs
     # Create derivative HPXML file w/ ERI design type set
     require 'fileutils'
@@ -435,9 +486,9 @@ class SimulationOutputReportTest < MiniTest::Test
     [Constants.CalcTypeERIReferenceHome, Constants.CalcTypeERIReferenceHome].each do |eri_design|
       new_hpxml_path = File.join(File.dirname(__FILE__), '../../workflow/sample_files/base-eri.xml')
       FileUtils.cp(old_hpxml_path, new_hpxml_path)
-      hpxml_doc = XMLHelper.parse_file(new_hpxml_path)
-      XMLHelper.add_element(hpxml_doc.elements['/HPXML/SoftwareInfo'], 'extension/ERICalculation/Design', eri_design)
-      XMLHelper.write_file(hpxml_doc, new_hpxml_path)
+      hpxml = HPXML.new(hpxml_path: new_hpxml_path)
+      hpxml.header.eri_design = eri_design
+      XMLHelper.write_file(hpxml.to_rexml(), new_hpxml_path)
 
       # Run tests
       args_hash = { 'hpxml_path' => '../workflow/sample_files/base-eri.xml',
