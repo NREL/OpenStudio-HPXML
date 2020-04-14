@@ -367,7 +367,7 @@ class OSModel
                                foundation_type: HPXML::FoundationTypeCrawlspaceVented)
         vented_crawl = @hpxml.foundations[-1]
       end
-      if foundation.vented_crawlspace_sla.nil?
+      if vented_crawl.vented_crawlspace_sla.nil?
         vented_crawl.vented_crawlspace_sla = Airflow.get_default_vented_crawl_sla()
       end
     end
