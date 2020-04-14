@@ -77,7 +77,6 @@ class HEScoreRuleset
     @ceil_height = orig_hpxml.building_construction.average_ceiling_height # ft
 
     # Calculate geometry
-    # http://hes-documentation.lbl.gov/calculation-methodology/calculation-of-energy-consumption/heating-and-cooling-calculation/building-envelope
     @has_cond_bsmnt = @fnd_areas.key?(HPXML::LocationBasementConditioned)
     @has_uncond_bsmnt = @fnd_areas.key?(HPXML::LocationBasementUnconditioned)
     @ncfl = @ncfl_ag + (@has_cond_bsmnt ? 1 : 0)
@@ -171,7 +170,7 @@ class HEScoreRuleset
                               area: roof_area / 2.0,
                               azimuth: sanitize_azimuth(roof_azimuth),
                               solar_absorptance: roof_solar_abs,
-                              emittance: 0.9, # ERI assumption; TODO get values from method
+                              emittance: 0.9,
                               pitch: Math.tan(@roof_angle_rad) * 12,
                               radiant_barrier: false,
                               insulation_assembly_r_value: roof_r)
@@ -216,8 +215,8 @@ class HEScoreRuleset
                           wall_type: orig_wall.wall_type,
                           area: wall_area,
                           azimuth: orientation_to_azimuth(orig_wall.orientation),
-                          solar_absorptance: 0.75, # ERI assumption; TODO get values from method
-                          emittance: 0.9, # ERI assumption; TODO get values from method
+                          solar_absorptance: 0.75,
+                          emittance: 0.9,
                           insulation_assembly_r_value: wall_r)
     end
   end
@@ -229,7 +228,6 @@ class HEScoreRuleset
       next unless [HPXML::LocationBasementUnconditioned, HPXML::LocationBasementConditioned, HPXML::LocationCrawlspaceVented, HPXML::LocationCrawlspaceUnvented].include? fnd_location
 
       orig_foundation.attached_foundation_walls.each do |orig_foundation_wall|
-        # http://hes-documentation.lbl.gov/calculation-methodology/calculation-of-energy-consumption/heating-and-cooling-calculation/doe2-inputs-assumptions-and-calculations/the-doe2-model
         if [HPXML::LocationBasementUnconditioned, HPXML::LocationBasementConditioned].include? fnd_location
           fndwall_height = 8.0
         else
@@ -787,13 +785,9 @@ class HEScoreRuleset
   end
 
   def self.set_systems_water_heating_use(orig_hpxml, new_hpxml)
-    # Hot water piping length
-    piping_length = HotWaterAndAppliances.get_default_std_pipe_length(@has_uncond_bsmnt, @cfa, @ncfl)
-
     new_hpxml.hot_water_distributions.add(id: 'HotWaterDistribution',
                                           system_type: HPXML::DHWDistTypeStandard,
-                                          pipe_r_value: 0,
-                                          standard_piping_length: piping_length)
+                                          pipe_r_value: 0)
 
     new_hpxml.water_fixtures.add(id: 'ShowerHead',
                                  water_fixture_type: HPXML::WaterFixtureTypeShowerhead,
@@ -812,28 +806,22 @@ class HEScoreRuleset
       max_power_output = orig_pv_system.number_of_panels * module_power
     end
 
-    # Estimate PV panel losses from year
-    losses_fraction = PV.calc_losses_fraction_from_year(orig_pv_system.year_modules_manufactured)
-
     new_hpxml.pv_systems.add(id: 'PVSystem',
                              location: HPXML::LocationRoof,
-                             module_type: HPXML::PVModuleTypeStandard, # From https =>//docs.google.com/spreadsheets/d/1YeoVOwu9DU-50fxtT_KRh_BJLlchF7nls85Ebe9fDkI
+                             module_type: HPXML::PVModuleTypeStandard,
                              tracking: HPXML::PVTrackingTypeFixed,
                              array_azimuth: orientation_to_azimuth(orig_pv_system.array_orientation),
                              array_tilt: @roof_angle,
                              max_power_output: max_power_output,
-                             inverter_efficiency: 0.96, # From https =>//docs.google.com/spreadsheets/d/1YeoVOwu9DU-50fxtT_KRh_BJLlchF7nls85Ebe9fDkI
-                             system_losses_fraction: losses_fraction)
+                             year_modules_manufactured: orig_pv_system.year_modules_manufactured)
   end
 
   def self.set_appliances_clothes_washer(orig_hpxml, new_hpxml)
-    new_hpxml.clothes_washers.add(id: 'ClothesWasher',
-                                  location: HPXML::LocationLivingSpace)
+    new_hpxml.clothes_washers.add(id: 'ClothesWasher')
   end
 
   def self.set_appliances_clothes_dryer(orig_hpxml, new_hpxml)
     new_hpxml.clothes_dryers.add(id: 'ClothesDryer',
-                                 location: HPXML::LocationLivingSpace,
                                  fuel_type: HPXML::FuelTypeElectricity)
   end
 
@@ -842,8 +830,7 @@ class HEScoreRuleset
   end
 
   def self.set_appliances_refrigerator(orig_hpxml, new_hpxml)
-    new_hpxml.refrigerators.add(id: 'Refrigerator',
-                                location: HPXML::LocationLivingSpace)
+    new_hpxml.refrigerators.add(id: 'Refrigerator')
   end
 
   def self.set_appliances_cooking_range_oven(orig_hpxml, new_hpxml)
@@ -889,13 +876,11 @@ class HEScoreRuleset
   def self.set_misc_plug_loads(orig_hpxml, new_hpxml)
     new_hpxml.plug_loads.add(id: 'PlugLoadOther',
                              plug_load_type: HPXML::PlugLoadTypeOther)
-    # Uses ERI Reference Home for performance
   end
 
   def self.set_misc_television(orig_hpxml, new_hpxml)
     new_hpxml.plug_loads.add(id: 'PlugLoadTV',
                              plug_load_type: HPXML::PlugLoadTypeTelevision)
-    # Uses ERI Reference Home for performance
   end
 
   def self.get_foundation_perimeter(orig_hpxml, foundation)
@@ -1053,7 +1038,6 @@ $siding_map = {
 
 def get_wood_stud_wall_assembly_r(r_cavity, r_cont, siding, ove)
   # Walls Wood Stud Assembly R-value
-  # http://hes-documentation.lbl.gov/calculation-methodology/calculation-of-energy-consumption/heating-and-cooling-calculation/building-envelope/wall-construction-types
   has_r_cont = !r_cont.nil?
   if (not has_r_cont) && (not ove)
     # Wood Frame
@@ -1074,7 +1058,6 @@ end
 
 def get_structural_block_wall_assembly_r(r_cont)
   # Walls Structural Block Assembly R-value
-  # http://hes-documentation.lbl.gov/calculation-methodology/calculation-of-energy-consumption/heating-and-cooling-calculation/building-envelope/wall-construction-types
   doe2code = 'ewbr%02.0fnn' % (r_cont.nil? ? 0.0 : r_cont)
   val = get_wall_effective_r_from_doe2code(doe2code)
   return val if not val.nil?
@@ -1084,7 +1067,6 @@ end
 
 def get_concrete_block_wall_assembly_r(r_cavity, siding)
   # Walls Concrete Block Assembly R-value
-  # http://hes-documentation.lbl.gov/calculation-methodology/calculation-of-energy-consumption/heating-and-cooling-calculation/building-envelope/wall-construction-types
   doe2code = 'ewcb%02.0f%s' % [r_cavity, $siding_map[siding]]
   val = get_wall_effective_r_from_doe2code(doe2code)
   return val if not val.nil?
@@ -1094,7 +1076,6 @@ end
 
 def get_straw_bale_wall_assembly_r(siding)
   # Walls Straw Bale Assembly R-value
-  # http://hes-documentation.lbl.gov/calculation-methodology/calculation-of-energy-consumption/heating-and-cooling-calculation/building-envelope/wall-construction-types
   doe2code = 'ewsb00%s' % $siding_map[siding]
   val = get_wall_effective_r_from_doe2code(doe2code)
   return val if not val.nil?
@@ -1115,7 +1096,6 @@ end
 
 def get_roof_assembly_r(r_cavity, r_cont, material, has_radiant_barrier)
   # Roof Assembly R-value
-  # http://hes-documentation.lbl.gov/calculation-methodology/calculation-of-energy-consumption/heating-and-cooling-calculation/building-envelope/roof-construction-types
   materials_map = {
     HPXML::RoofMaterialAsphaltShingles => 'co',  # Composition Shingles
     HPXML::RoofMaterialWoodShingles => 'wo',     # Wood Shakes
@@ -1145,7 +1125,6 @@ end
 
 def get_ceiling_assembly_r(r_cavity)
   # Ceiling Assembly R-value
-  # http://hes-documentation.lbl.gov/calculation-methodology/calculation-of-energy-consumption/heating-and-cooling-calculation/building-envelope/ceiling-construction-types
   val = { 0.0 => 2.2,              # ecwf00
           3.0 => 5.0,              # ecwf03
           6.0 => 7.6,              # ecwf06
@@ -1166,7 +1145,6 @@ end
 
 def get_floor_assembly_r(r_cavity)
   # Floor Assembly R-value
-  # http://hes-documentation.lbl.gov/calculation-methodology/calculation-of-energy-consumption/heating-and-cooling-calculation/building-envelope/floor-construction-types
   val = { 0.0 => 5.9,              # efwf00ca
           11.0 => 15.6,            # efwf11ca
           13.0 => 17.2,            # efwf13ca
@@ -1182,7 +1160,6 @@ def get_floor_assembly_r(r_cavity)
 end
 
 def get_window_ufactor_shgc(frame_type, thermal_break, glass_layers, glass_type, gas_fill)
-  # https://docs.google.com/spreadsheets/d/1joG39BeiRj1mV0Lge91P_dkL-0-94lSEY5tJzGvpc2A/edit#gid=909262753
   key = [frame_type, thermal_break, glass_layers, glass_type, gas_fill]
   vals = { [HPXML::WindowFrameTypeAluminum, false, HPXML::WindowLayersSinglePane, nil, nil] => [1.27, 0.75], # scna
            [HPXML::WindowFrameTypeWood, nil, HPXML::WindowLayersSinglePane, nil, nil] => [0.89, 0.64], # scnw
@@ -1210,7 +1187,6 @@ end
 def get_skylight_ufactor_shgc(frame_type, thermal_break, glass_layers, glass_type, gas_fill)
   # Skylight U-factor/SHGC
   # FIXME: Verify
-  # https://docs.google.com/spreadsheets/d/1joG39BeiRj1mV0Lge91P_dkL-0-94lSEY5tJzGvpc2A/edit#gid=909262753
   key = [frame_type, thermal_break, glass_layers, glass_type, gas_fill]
   vals = { [HPXML::WindowFrameTypeAluminum, false, HPXML::WindowLayersSinglePane, nil, nil] => [1.98, 0.75], # scna
            [HPXML::WindowFrameTypeWood, nil, HPXML::WindowLayersSinglePane, nil, nil] => [1.47, 0.64], # scnw
@@ -1237,7 +1213,6 @@ end
 
 def get_roof_solar_absorptance(roof_color)
   # FIXME: Verify
-  # https://docs.google.com/spreadsheets/d/1joG39BeiRj1mV0Lge91P_dkL-0-94lSEY5tJzGvpc2A/edit#gid=1325866208
   val = { HPXML::WindowGlazingReflective => 0.35,
           HPXML::RoofColorLight => 0.55,
           HPXML::RoofColorMedium => 0.7,
@@ -1285,8 +1260,6 @@ def calc_duct_values(ncfl_ag, cfa, is_sealed, frac_inside)
 end
 
 def calc_ach50(ncfl_ag, cfa, ceil_height, cvolume, desc, year_built, iecc_cz, fnd_types, ducts)
-  # http://hes-documentation.lbl.gov/calculation-methodology/calculation-of-energy-consumption/heating-and-cooling-calculation/infiltration/infiltration
-
   # Constants
   c_floor_area = -0.002078
   c_height = 0.06375
