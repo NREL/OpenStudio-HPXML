@@ -148,17 +148,26 @@ def run_design(basedir, rundir, design, resultsdir, hpxml, debug, skip_simulatio
   end
   row_index = {}
   timeseries_csv_path = File.join(rundir, 'results_timeseries.csv')
-  CSV.foreach(timeseries_csv_path).with_index do |row, i|
-    if i == 0 # Header
+  CSV.foreach(timeseries_csv_path).with_index do |row, row_num|
+    if row_num == 0 # Header
       output_map.each do |ep_output, hes_output|
         row_index[ep_output] = row.index(ep_output)
       end
-    elsif i > 1 # Data
+    elsif row_num > 1 # Data
+      # Init for month
       results.keys.each do |k|
         results[k] << 0.0
       end
+      # Add values
       output_map.each do |ep_output, hes_output|
         results[hes_output][-1] += Float(row[row_index[ep_output]])
+      end
+      # Make sure there aren't any end uses with positive values that aren't mapped to HES
+      row.each_with_index do |val, col|
+        next if col == 0 # Skip time column
+        next if row_index.values.include? col
+
+        fail "Missed energy (#{val}) in row=#{row_num}, col=#{col}." if Float(val) > 0
       end
     end
   end
