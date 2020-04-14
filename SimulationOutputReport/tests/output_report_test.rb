@@ -5,8 +5,6 @@ require 'openstudio'
 require 'openstudio/ruleset/ShowRunnerOutput'
 require 'minitest/autorun'
 require 'fileutils'
-require 'rexml/document'
-require 'rexml/xpath'
 require_relative '../measure.rb'
 
 class SimulationOutputReportTest < MiniTest::Test
@@ -490,7 +488,7 @@ class SimulationOutputReportTest < MiniTest::Test
       FileUtils.cp(old_hpxml_path, new_hpxml_path)
       hpxml = HPXML.new(hpxml_path: new_hpxml_path)
       hpxml.header.eri_design = eri_design
-      XMLHelper.write_file(hpxml.to_rexml(), new_hpxml_path)
+      XMLHelper.write_file(hpxml.to_oga(), new_hpxml_path)
 
       # Run tests
       args_hash = { 'hpxml_path' => '../workflow/sample_files/base-eri.xml',

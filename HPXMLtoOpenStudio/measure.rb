@@ -156,6 +156,7 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
     end
 
     # Validate input HPXML against EnergyPlus Use Case
+    # p hpxml.doc.to_xml
     errors = EnergyPlusValidator.run_validator(hpxml.doc)
     errors.each do |error|
       runner.registerError("#{hpxml_path}: #{error}")
@@ -618,7 +619,7 @@ class OSModel
     if @debug && (not @output_dir.nil?)
       # Write updated HPXML object to file
       hpxml_defaults_path = File.join(@output_dir, 'in.xml')
-      XMLHelper.write_file(@hpxml.to_rexml, hpxml_defaults_path)
+      XMLHelper.write_file(@hpxml.to_oga, hpxml_defaults_path)
       runner.registerInfo("Wrote file: #{hpxml_defaults_path}")
     end
   end

@@ -1,7 +1,8 @@
 # frozen_string_literal: true
 
-require 'rexml/document'
-require 'rexml/xpath'
+# require 'rexml/document'
+# require 'rexml/xpath'
+require 'oga'
 
 class XMLHelper
   # Adds the child element with 'element_name' and sets its value. Returns the
@@ -9,7 +10,7 @@ class XMLHelper
   def self.add_element(parent, element_name, value = nil)
     added = nil
     element_name.split('/').each do |name|
-      added = REXML::Element.new(name)
+      added = Oga.parse_xml(name)
       parent << added
       parent = added
     end
@@ -25,10 +26,10 @@ class XMLHelper
   def self.create_elements_as_needed(parent, element_names)
     this_parent = parent
     element_names.each do |element_name|
-      if this_parent.elements[element_name].nil?
+      if XMLHelper.get_element(this_parent, element_name).nil?
         XMLHelper.add_element(this_parent, element_name)
       end
-      this_parent = this_parent.elements[element_name]
+      this_parent = XMLHelper.get_element(this_parent, element_name)
     end
     return this_parent
   end
@@ -38,14 +39,15 @@ class XMLHelper
     element = nil
     begin
       last_element = element
-      element = parent.elements.delete(element_name)
-    end while !element.nil?
+      # FIXME: previous code: element = parent.elements.delete(element_name)
+      element = parent.at_xpath(element_name).remove
+    end while !parent.at_xpath(element_name).nil?
     return last_element
   end
 
   # Returns the value of 'element_name' in the parent element or nil.
   def self.get_value(parent, element_name)
-    val = parent.elements[element_name]
+    val = parent.at_xpath(element_name)
     if val.nil?
       return val
     end
@@ -56,18 +58,29 @@ class XMLHelper
   # Returns the value(s) of 'element_name' in the parent element or [].
   def self.get_values(parent, element_name)
     vals = []
-    parent.elements.each(element_name) do |val|
+    parent.xpath(element_name).each do |val|
       vals << val.text
     end
 
     return vals
   end
 
+  # Returns the element in the parent element.
+  def self.get_element(parent, element_name)
+    return parent.at_xpath(element_name)
+  end
+
+  # Returns the element in the parent element.
+  def self.get_elements(parent, element_name)
+    return parent.xpath(element_name)
+  end
+
   # Returns the name of the first child element of the 'element_name'
   # element on the parent element.
   def self.get_child_name(parent, element_name)
     begin
-      return parent.elements[element_name].elements[1].name
+      # FIXME: previous code: return parent.elements[element_name].elements[1].name
+      return parent.at_xpath(element_name).children[1].name
     rescue
     end
     return
@@ -75,7 +88,8 @@ class XMLHelper
 
   # Returns true if the element exists.
   def self.has_element(parent, element_name)
-    element = REXML::XPath.first(parent, element_name)
+    # FIXME: previous code: element = REXML::XPath.first(parent, element_name)
+    element = parent.at_xpath(element_name)
     return !element.nil?
   end
 
@@ -97,7 +111,7 @@ class XMLHelper
   def self.copy_element(dest, src, element_name, backup_val = nil)
     return if src.nil?
 
-    element = src.elements[element_name]
+    element = src.at_xpath(element_name)
     if not element.nil?
       dest << element.dup
     elsif not backup_val.nil?
@@ -110,8 +124,8 @@ class XMLHelper
   def self.copy_elements(dest, src, element_name)
     return if src.nil?
 
-    if not src.elements[element_name].nil?
-      src.elements.each(element_name) do |el|
+    if not src.xpath(element_name).nil?
+      src.xpath(element_name).each do |el|
         dest << el.dup
       end
     end
@@ -132,25 +146,30 @@ class XMLHelper
   end
 
   def self.create_doc(version = nil, encoding = nil, standalone = nil)
-    doc = REXML::Document.new
-    decl = REXML::XMLDecl.new(version = version, encoding = encoding, standalone = standalone)
+    # FIXME: previous code: doc = REXML::Document.new
+    # FIXME: previous code: decl = REXML::XMLDecl.new(version = version, encoding = encoding, standalone = standalone)
+    # FIXME: Need to review this.
+    doc = Oga::XML.new # Oga.parse_xml
+    decl = Oga::XML::XmlDeclaration.new(version: version, encoding: encoding, standalone: standalone)
     doc << decl
     return doc
   end
 
   def self.parse_file(hpxml_path)
     file_read = File.read(hpxml_path)
-    hpxml_doc = REXML::Document.new(file_read)
+    hpxml_doc = Oga.parse_xml(file_read)
     return hpxml_doc
   end
 
   def self.write_file(doc, out_path)
     # Write XML file
-    formatter = REXML::Formatters::Pretty.new(2)
-    formatter.compact = true
-    formatter.width = 1000
+    # FIXME: previous code: formatter = REXML::Formatters::Pretty.new(2)
+    # FIXME: previous code: formatter.compact = true
+    # FIXME: previous code: formatter.width = 1000
+    # FIXME: Need to review this
     File.open(out_path, 'w', newline: :crlf) do |f|
-      formatter.write(doc, f)
+      # FIXME: previous code: formatter.write(doc, f)
+      f.to_xml
     end
   end
 end

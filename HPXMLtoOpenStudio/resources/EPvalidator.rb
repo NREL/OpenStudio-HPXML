@@ -1,5 +1,9 @@
 # frozen_string_literal: true
 
+require 'rexml/document'
+require 'rexml/xpath'
+require 'oga'
+
 class EnergyPlusValidator
   def self.run_validator(hpxml_doc)
     # A hash of hashes that defines the XML elements used by the EnergyPlus HPXML Use Case.
@@ -125,7 +129,7 @@ class EnergyPlusValidator
       },
 
       # [AirInfiltration]
-      '/HPXML/Building/BuildingDetails/Enclosure/AirInfiltration/AirInfiltrationMeasurement[(HousePressure=50 and BuildingAirLeakage[UnitofMeasure="ACH" or UnitofMeasure="CFM"]/AirLeakage) | extension/ConstantACHnatural]' => {
+      '/HPXML/Building/BuildingDetails/Enclosure/AirInfiltration/AirInfiltrationMeasurement[HousePressure=50]/BuildingAirLeakage[UnitofMeasure="ACH" or UnitofMeasure="CFM"]/AirLeakage | extension/ConstantACHnatural' => {
         'SystemIdentifier' => one, # Required by HPXML schema
         'InfiltrationVolume' => zero_or_one, # Assumes InfiltrationVolume = ConditionedVolume if not provided
       },
@@ -699,45 +703,37 @@ class EnergyPlusValidator
         requirement.each do |child, expected_sizes|
           next if expected_sizes.nil?
 
-          xpath = combine_into_xpath(parent, child)
-          actual_size = REXML::XPath.first(hpxml_doc, "count(#{xpath})")
+          # FIXME: previous code = xpath = combine_into_xpath(parent, child)
+          xpath = combine_into_xpath(hpxml_doc, parent, child)
+          # FIXME: previous code = actual_size = REXML::XPath.first(hpxml_doc, "count(#{xpath})")
+          actual_size = hpxml_doc.xpath("#{xpath}").length
+          puts "*expected sizes: #{expected_sizes}, *actual size: #{actual_size}"
+          
           check_number_of_elements(actual_size, expected_sizes, xpath, errors)
         end
       else # Conditional based on parent element existence
-        next if hpxml_doc.elements[parent].nil? # Skip if parent element doesn't exist
+        # FIXME: previous code = next if hpxml_doc.elements[parent].nil? # Skip if parent element doesn't exist
+        next if hpxml_doc.xpath(parent).empty? # Skip if parent element doesn't exist
 
-        hpxml_doc.elements.each(parent) do |parent_element|
+        hpxml_doc.xpath(parent).each do |parent_element|
           requirement.each do |child, expected_sizes|
             next if expected_sizes.nil?
+            
+            # FIXME: previous code = xpath = combine_into_xpath(parent, child)
+            xpath = combine_into_xpath(hpxml_doc, parent, child)
+            
+            puts "**parent: #{parent}"
+            puts "**parent element name: #{hpxml_doc.at_xpath(parent).name}"
+            puts "**child: #{child}"
+            puts "**xpath: #{xpath}"
 
-            xpath = combine_into_xpath(parent, child)
-            if child.start_with? '['
-              # Workaround bug in REXML; See https://github.com/ruby/rexml/issues/27
-              # FIXME: This is so hacky.
-              actual_size = 0
-              predicate, remainder = parse_predicate(child)
-              if remainder.start_with? '|'
-                # Handle or conditions
-                # E.g., "[foo=val] | blah"
-                # Does not handle "blah | [foo=val]"
-                predicate_element = REXML::XPath.first(parent_element, "self::node()#{predicate}")
-                actual_size += 1 unless predicate_element.nil?
-                remainder[0] = ''
-                actual_size += REXML::XPath.first(parent_element, "count(#{remainder})")
-              else
-                # E.g., "[foo]bar/blah"
-                predicate_element = REXML::XPath.first(parent_element, "self::node()#{predicate}")
-                if not predicate_element.nil?
-                  if remainder.empty?
-                    actual_size += 1
-                  else
-                    actual_size += REXML::XPath.first(predicate_element, "count(#{remainder})")
-                  end
-                end
-              end
-            else
-              actual_size = REXML::XPath.first(parent_element, "count(#{child})")
+            # FIXME: previous code = actual_size = REXML::XPath.first(parent_element, "count(#{child})")
+            # actual_size = hpxml_doc.at_xpath("count(#{xpath})")
+            if not hpxml_doc.at_xpath("#{xpath}").nil?
+              actual_size = hpxml_doc.xpath("#{xpath}").length
             end
+            puts "**expected sizes: #{expected_sizes}, **actual size: #{actual_size}"
+
             check_number_of_elements(actual_size, expected_sizes, xpath, errors)
           end
         end
@@ -759,11 +755,13 @@ class EnergyPlusValidator
     end
   end
 
-  def self.combine_into_xpath(parent, child)
+  # FIXME: previous code = def self.combine_into_xpath(parent, child)
+  def self.combine_into_xpath(hpxml_doc, parent, child)
     if parent.nil?
       return child
     elsif child.start_with?('[')
-      return [parent, child].join('')
+      # FIXME: previous code = return [parent, child].join('')  # we may want to use this code after merging master
+      return ["//", hpxml_doc.at_xpath(parent).name, child].join('')
     end
 
     return [parent, child].join('/')
