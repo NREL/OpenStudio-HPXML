@@ -106,10 +106,10 @@ class HEScoreTest < Minitest::Unit::TestCase
     results = {}
 
     # Fill in missing results with zeroes
-    get_output_meter_requests.each do |hes_key, ep_meters|
+    get_output_map.values.uniq.each do |hes_key|
       end_use = hes_key[0]
       resource_type = hes_key[1]
-      units = get_fuel_site_units(resource_type)
+      units = get_units_map[resource_type]
       key = [resource_type.to_s, end_use.to_s, units]
 
       found_in_results = false
