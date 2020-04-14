@@ -5,7 +5,6 @@ require 'optparse'
 require 'pathname'
 require 'csv'
 require_relative '../hpxml-measures/HPXMLtoOpenStudio/resources/meta_measure'
-require_relative '../hpxml-measures/HPXMLtoOpenStudio/resources/unit_conversions'
 
 basedir = File.expand_path(File.dirname(__FILE__))
 
@@ -143,25 +142,23 @@ def run_design(basedir, rundir, design, resultsdir, hpxml, debug, skip_simulatio
   }
   # Unmapped: ['circulation', 'electric'] and ['hot_water', 'hot_water']
 
-  timeseries_csv_path = File.join(rundir, 'results_timeseries.csv')
   results = {}
   output_map.each do |ep_output, hes_output|
     results[hes_output] = []
   end
   row_index = {}
-  header = nil
-  units = nil
-  CSV.foreach(timeseries_csv_path) do |row|
-    if header.nil?
-      header = row
+  timeseries_csv_path = File.join(rundir, 'results_timeseries.csv')
+  CSV.foreach(timeseries_csv_path).with_index do |row, i|
+    if i == 0 # Header
       output_map.each do |ep_output, hes_output|
-        row_index[ep_output] = header.index(ep_output)
+        row_index[ep_output] = row.index(ep_output)
       end
-    elsif units.nil?
-      units = row
-    else
+    elsif i > 1 # Data
+      results.keys.each do |k|
+        results[k] << 0.0
+      end
       output_map.each do |ep_output, hes_output|
-        results[hes_output] << Float(row[row_index[ep_output]])
+        results[hes_output][-1] += Float(row[row_index[ep_output]])
       end
     end
   end
