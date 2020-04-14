@@ -145,10 +145,13 @@ def run_design(basedir, rundir, design, resultsdir, hpxml, debug, skip_simulatio
       # Add values
       output_map.each do |ep_output, hes_output|
         col = row_index[ep_output]
+        next if col.nil?
+
         results[hes_output][-1] += UnitConversions.convert(Float(row[col]), units[col], units_map[hes_output[1]]).abs
       end
       # Make sure there aren't any end uses with positive values that aren't mapped to HES
       row.each_with_index do |val, col|
+        next if col.nil?
         next if col == 0 # Skip time column
         next if row_index.values.include? col
 
