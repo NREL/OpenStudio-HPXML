@@ -1,7 +1,5 @@
 # frozen_string_literal: true
 
-# require 'rexml/document'
-# require 'rexml/xpath'
 require 'oga'
 
 class XMLHelper
