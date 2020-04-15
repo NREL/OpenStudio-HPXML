@@ -105,8 +105,11 @@ class HEScoreTest < Minitest::Unit::TestCase
 
     results = {}
 
-    # Fill in missing results with zeroes
-    get_output_map.values.uniq.each do |hes_key|
+    hes_keys = get_output_map.values
+    hes_keys << ['hot_water', 'hot_water'] # TODO: Remove this when eventually incorporated in reporting measure
+
+    # Fill in missing results with zeros
+    hes_keys.uniq.each do |hes_key|
       end_use = hes_key[0]
       resource_type = hes_key[1]
       units = get_units_map[resource_type]
