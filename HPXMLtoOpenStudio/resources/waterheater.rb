@@ -7,7 +7,7 @@ require_relative 'psychrometrics'
 require_relative 'hotwater_appliances'
 
 class Waterheater
-  def self.apply_tank(model, space, fuel_type, cap, vol,
+  def self.apply_tank(model, space, loc_schedule, fuel_type, cap, vol,
                       ef, re, t_set, ec_adj, nbeds, dhw_map,
                       sys_id, desuperheater_clg_coil, jacket_r, solar_fraction)
 
@@ -26,7 +26,7 @@ class Waterheater
 
     act_vol = calc_storage_tank_actual_vol(vol, fuel_type)
     u, ua, eta_c = calc_tank_UA(act_vol, fuel_type, ef, re, cap, HPXML::WaterHeaterTypeStorage, 0, jacket_r, solar_fraction)
-    new_heater = create_new_heater(Constants.ObjectNameWaterHeater, cap, fuel_type, act_vol, ef, t_set, space, 0.0, 0.0, HPXML::WaterHeaterTypeStorage, nbeds, model, ua, eta_c)
+    new_heater = create_new_heater(Constants.ObjectNameWaterHeater, cap, fuel_type, act_vol, ef, t_set, space, loc_schedule, 0.0, 0.0, HPXML::WaterHeaterTypeStorage, nbeds, model, ua, eta_c)
     dhw_map[sys_id] << new_heater
 
     loop.addSupplyBranchForComponent(new_heater)
@@ -36,11 +36,11 @@ class Waterheater
     end
 
     if not desuperheater_clg_coil.nil?
-      add_desuperheater(model, t_set, new_heater, desuperheater_clg_coil, HPXML::WaterHeaterTypeStorage, fuel_type, space, loop, ec_adj).each { |e| dhw_map[sys_id] << e }
+      add_desuperheater(model, t_set, new_heater, desuperheater_clg_coil, HPXML::WaterHeaterTypeStorage, fuel_type, space, loc_schedule, loop, ec_adj).each { |e| dhw_map[sys_id] << e }
     end
   end
 
-  def self.apply_tankless(model, space, fuel_type, ef, cd,
+  def self.apply_tankless(model, space, loc_schedule, fuel_type, ef, cd,
                           t_set, ec_adj, nbeds, dhw_map, sys_id,
                           desuperheater_clg_coil, solar_fraction)
 
@@ -57,7 +57,7 @@ class Waterheater
 
     act_vol = 1.0
     u, ua, eta_c = calc_tank_UA(act_vol, fuel_type, ef, nil, cap, HPXML::WaterHeaterTypeTankless, cd, nil, solar_fraction)
-    new_heater = create_new_heater(Constants.ObjectNameWaterHeater, cap, fuel_type, act_vol, ef, t_set, space, 0.0, 0.0, HPXML::WaterHeaterTypeTankless, nbeds, model, ua, eta_c)
+    new_heater = create_new_heater(Constants.ObjectNameWaterHeater, cap, fuel_type, act_vol, ef, t_set, space, loc_schedule, 0.0, 0.0, HPXML::WaterHeaterTypeTankless, nbeds, model, ua, eta_c)
     dhw_map[sys_id] << new_heater
 
     loop.addSupplyBranchForComponent(new_heater)
@@ -67,11 +67,11 @@ class Waterheater
     end
 
     if not desuperheater_clg_coil.nil?
-      add_desuperheater(model, t_set, new_heater, desuperheater_clg_coil, HPXML::WaterHeaterTypeStorage, fuel_type, space, loop, ec_adj).each { |e| dhw_map[sys_id] << e }
+      add_desuperheater(model, t_set, new_heater, desuperheater_clg_coil, HPXML::WaterHeaterTypeStorage, fuel_type, space, loc_schedule, loop, ec_adj).each { |e| dhw_map[sys_id] << e }
     end
   end
 
-  def self.apply_heatpump(model, runner, space, weather, t_set, vol, ef,
+  def self.apply_heatpump(model, runner, space, loc_schedule, weather, t_set, vol, ef,
                           ec_adj, nbeds, dhw_map, sys_id, jacket_r, solar_fraction)
 
     # Hard coded values for things that wouldn't be captured by hpxml
@@ -104,12 +104,12 @@ class Waterheater
     obj_name_hpwh = Constants.ObjectNameWaterHeater
 
     alt = weather.header.Altitude
-    if space.nil? # Located outside
-      water_heater_tz = nil
-    elsif space.is_a? OpenStudio::Model::ScheduleConstant
-      water_heater_tz = space
-    else
+    if not space.nil?
       water_heater_tz = space.thermalZone.get
+    elsif not loc_schedule.nil? # MF spaces
+      water_heater_tz = loc_schedule
+    else # Located outside
+      water_heater_tz = nil
     end
 
     loop = create_new_loop(model, Constants.PlantLoopDomesticWater, t_set, HPXML::WaterHeaterTypeHeatPump)
@@ -310,7 +310,7 @@ class Waterheater
       int_factor = 1
     end
 
-    if space.is_a? OpenStudio::Model::Space # If located in space
+    if not space.nil? # If located in space
       # Add in other equipment objects for sensible/latent gains
       hpwh_sens_def = OpenStudio::Model::OtherEquipmentDefinition.new(model)
       hpwh_sens_def.setName("#{obj_name_hpwh} sens")
@@ -406,7 +406,7 @@ class Waterheater
     rhamb_act_actuator = OpenStudio::Model::EnergyManagementSystemActuator.new(hpwh_rhamb, 'Schedule:Constant', 'Schedule Value')
     rhamb_act_actuator.setName("#{obj_name_hpwh} RHamb act")
 
-    if space.is_a? OpenStudio::Model::Space
+    if not space.nil?
       sens_act_actuator = OpenStudio::Model::EnergyManagementSystemActuator.new(hpwh_sens, 'OtherEquipment', 'Power Level')
       sens_act_actuator.setName("#{hpwh_sens.name} act")
 
@@ -489,7 +489,7 @@ class Waterheater
         hpwh_ducting_program.addLine("Set T_hpwh_inlet = #{amb_temp_sensor.name}")
       end
     end
-    if not space.is_a? OpenStudio::Model::Space # If not located in rated conditioned space
+    if space.nil? # If not located in rated conditioned space
       hpwh_ducting_program.addLine("Set #{tamb_act_actuator.name} = #{amb_temp_sensor.name}")
       hpwh_ducting_program.addLine("Set #{rhamb_act_actuator.name} = #{amb_rh_sensor.name}/100")
     else
@@ -562,7 +562,7 @@ class Waterheater
     end
   end
 
-  def self.apply_solar_thermal(model, space, collector_area, frta, frul, storage_vol,
+  def self.apply_solar_thermal(model, space, loc_schedule, collector_area, frta, frul, storage_vol,
                                azimuth, tilt, collector_type, loop_type, dhw_loop, dhw_map, sys_id)
 
     obj_name = Constants.ObjectNameSolarHotWater
@@ -767,7 +767,7 @@ class Waterheater
     storage_tank.setHeaterFuelType('Electricity')
     storage_tank.setHeaterThermalEfficiency(1)
     storage_tank.ambientTemperatureSchedule.get.remove
-    set_wh_ambient(space, model, storage_tank)
+    set_wh_ambient(space, loc_schedule, model, storage_tank)
     if fluid_type == Constants.FluidWater # Direct, make the storage tank a dummy tank with 0 tank losses
       storage_tank.setUniformSkinLossCoefficientperUnitAreatoAmbientTemperature(0.0)
     else
@@ -838,7 +838,7 @@ class Waterheater
     program_calling_manager.addProgram(swh_program)
   end
 
-  def self.apply_combi(model, runner, space, vol, t_set, ec_adj, nbeds,
+  def self.apply_combi(model, runner, space, loc_schedule, vol, t_set, ec_adj, nbeds,
                        boiler, boiler_plant_loop, boiler_fuel_type,
                        boiler_afue, dhw_map, sys_id, wh_type, jacket_r, standby_loss)
     obj_name_combi = Constants.ObjectNameWaterHeater
@@ -871,7 +871,7 @@ class Waterheater
     new_manager.addToNode(loop.supplyOutletNode)
 
     # Create water heater
-    new_heater = create_new_heater(obj_name_combi, 0.0, nil, act_vol, nil, t_set, space, 0.0, 0.0, tank_type, nbeds, model, ua, nil)
+    new_heater = create_new_heater(obj_name_combi, 0.0, nil, act_vol, nil, t_set, space, loc_schedule, 0.0, 0.0, tank_type, nbeds, model, ua, nil)
     new_heater.setSourceSideDesignFlowRate(100) # set one large number, override by EMS
     dhw_map[sys_id] << new_heater
 
@@ -1035,7 +1035,7 @@ class Waterheater
     program_calling_manager.addProgram(combi_ctrl_program)
   end
 
-  def self.add_desuperheater(model, t_set, tank, desuperheater_clg_coil, wh_type, fuel_type, space, loop, ec_adj)
+  def self.add_desuperheater(model, t_set, tank, desuperheater_clg_coil, wh_type, fuel_type, space, loc_schedule, loop, ec_adj)
     reclaimed_efficiency = 0.25 # default
     workaround_flag = true # switch after E+ 9.3 release
     if workaround_flag
@@ -1054,6 +1054,9 @@ class Waterheater
       wh_energy.setName("#{tank.name} wh energy")
       wh_energy.setKeyName(tank.name.to_s)
 
+      if space.nil? # WH is not in conditioned zone, set the other equipment to be in a random space
+        space = model.getSpaces[0]
+      end
       dsh_object = HotWaterAndAppliances.add_other_equipment(model, Constants.ObjectNameDesuperheater(tank.name), space, 0.01, 0, 0, model.alwaysOnDiscreteSchedule, fuel_type)
 
       # Actuators
@@ -1116,7 +1119,7 @@ class Waterheater
       nbeds = 0 # won't be used
       assumed_ua = 6.0 # Btu/hr-F FIXME: Assumption: indirect tank ua calculated based on 1.0 standby_loss and 50gal nominal vol
       storage_tank_name = "#{tank.name} storage tank"
-      storage_tank = create_new_heater(storage_tank_name, cap, nil, storage_vol_actual, nil, t_set, space, 0, 0, HPXML::WaterHeaterTypeStorage, nbeds, model, assumed_ua, nil)
+      storage_tank = create_new_heater(storage_tank_name, cap, nil, storage_vol_actual, nil, t_set, space, loc_schedule, 0, 0, HPXML::WaterHeaterTypeStorage, nbeds, model, assumed_ua, nil)
 
       loop.addSupplyBranchForComponent(storage_tank)
       tank.addToNode(storage_tank.supplyOutletModelObject.get.to_Node.get)
@@ -1247,7 +1250,7 @@ class Waterheater
   def self.add_ec_adj(model, heater, ec_adj, space, fuel_type, wh_type, combi_boiler = nil, combi_hx = nil)
     adjustment = ec_adj - 1.0
 
-    if not space.is_a? OpenStudio::Model::Space # WH is not in conditioned zone, set the other equipment to be in a random space
+    if space.nil? # WH is not in conditioned zone, set the other equipment to be in a random space
       space = model.getSpaces[0]
     end
 
@@ -1529,7 +1532,7 @@ class Waterheater
     OpenStudio::Model::SetpointManagerScheduled.new(model, new_schedule)
   end
 
-  def self.create_new_heater(name, cap, fuel, act_vol, ef, t_set, space, oncycle_p, offcycle_p, wh_type, nbeds, model, ua, eta_c)
+  def self.create_new_heater(name, cap, fuel, act_vol, ef, t_set, space, loc_schedule, oncycle_p, offcycle_p, wh_type, nbeds, model, ua, eta_c)
     new_heater = OpenStudio::Model::WaterHeaterMixed.new(model)
     new_heater.setName(name)
     new_heater.setHeaterThermalEfficiency(eta_c) unless eta_c.nil?
@@ -1592,7 +1595,7 @@ class Waterheater
     end
     new_heater.setOffCycleLossFractiontoThermalZone(skinlossfrac)
     new_heater.setOnCycleLossFractiontoThermalZone(1.0)
-    set_wh_ambient(space, model, new_heater)
+    set_wh_ambient(space, loc_schedule, model, new_heater)
 
     ua_w_k = UnitConversions.convert(ua, 'Btu/(hr*F)', 'W/K')
     new_heater.setOnCycleLossCoefficienttoAmbientTemperature(ua_w_k)
@@ -1601,17 +1604,17 @@ class Waterheater
     return new_heater
   end
 
-  def self.set_wh_ambient(space, model, wh_obj)
+  def self.set_wh_ambient(space, loc_schedule, model, wh_obj)
     if wh_obj.ambientTemperatureSchedule.is_initialized
       wh_obj.ambientTemperatureSchedule.get.remove
     end
-    if space.is_a? OpenStudio::Model::ScheduleConstant # Temperature schedule indicator
+    if not loc_schedule.nil? # Temperature schedule indicator
       wh_obj.setAmbientTemperatureSchedule(space)
-    elsif space.nil? # Located outside
-      wh_obj.setAmbientTemperatureIndicator('Outdoors')
-    else
+    elsif not space.nil?
       wh_obj.setAmbientTemperatureIndicator('ThermalZone')
       wh_obj.setAmbientTemperatureThermalZone(space.thermalZone.get)
+    else # Located outside
+      wh_obj.setAmbientTemperatureIndicator('Outdoors')
     end
   end
 

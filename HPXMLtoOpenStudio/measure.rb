@@ -2035,7 +2035,7 @@ class OSModel
       sub_surface.setSubSurfaceType('FixedWindow')
 
       ## Outside boundary condtion needs to be assigned after subsurface attached, this will allow os to create adjacent surface for subsurface as well.
-      assign_outside_boundary_condition_to_subsurface(surface, wall_exterior_adjacent_to, spaces, model)
+      set_subsurface_exterior(surface, wall_exterior_adjacent_to, spaces, model)
       surfaces << surface
 
       if not overhang_depth.nil?
@@ -2133,7 +2133,7 @@ class OSModel
       wall_exterior_adjacent_to = door.wall.exterior_adjacent_to
 
       ## Outside boundary condtion needs to be assigned after subsurface attached, this will allow os to create adjacent surface for subsurface as well.
-      assign_outside_boundary_condition_to_subsurface(surface, wall_exterior_adjacent_to, spaces, model)
+      set_subsurface_exterior(surface, wall_exterior_adjacent_to, spaces, model)
       surfaces << surface
 
       # Apply construction
@@ -2169,31 +2169,31 @@ class OSModel
     # Clothes Washer
     if @hpxml.clothes_washers.size > 0
       clothes_washer = @hpxml.clothes_washers[0]
-      cw_space = get_space_from_location(clothes_washer.location, 'ClothesWasher', model, spaces)
+      cw_space = get_appliance_space_from_location(clothes_washer.location, 'ClothesWasher', model, spaces)
     end
 
     # Clothes Dryer
     if @hpxml.clothes_dryers.size > 0
       clothes_dryer = @hpxml.clothes_dryers[0]
-      cd_space = get_space_from_location(clothes_dryer.location, 'ClothesDryer', model, spaces)
+      cd_space = get_appliance_space_from_location(clothes_dryer.location, 'ClothesDryer', model, spaces)
     end
 
     # Dishwasher
     if @hpxml.dishwashers.size > 0
       dishwasher = @hpxml.dishwashers[0]
-      dw_space = get_space_from_location(dishwasher.location, 'Dishwasher', model, spaces)
+      dw_space = get_appliance_space_from_location(dishwasher.location, 'Dishwasher', model, spaces)
     end
 
     # Refrigerator
     if @hpxml.refrigerators.size > 0
       refrigerator = @hpxml.refrigerators[0]
-      rf_space = get_space_from_location(refrigerator.location, 'Refrigerator', model, spaces)
+      rf_space = get_appliance_space_from_location(refrigerator.location, 'Refrigerator', model, spaces)
     end
 
     # Cooking Range/Oven
     if (@hpxml.cooking_ranges.size > 0) && (@hpxml.ovens.size > 0)
       cooking_range = @hpxml.cooking_ranges[0]
-      cook_space = get_space_from_location(cooking_range.location, 'CookingRange', model, spaces)
+      cook_space = get_appliance_space_from_location(cooking_range.location, 'CookingRange', model, spaces)
       oven = @hpxml.ovens[0]
     end
 
@@ -2254,8 +2254,8 @@ class OSModel
         sys_id = water_heating_system.id
         @dhw_map[sys_id] = []
 
-        space = get_space_from_location(water_heating_system.location, 'WaterHeatingSystem', model, spaces)
-        water_heater_spaces[sys_id] = space
+        space, loc_schedule = get_wh_duct_space_or_temp_schedule_from_location(water_heating_system.location, 'WaterHeatingSystem', model, spaces)
+        water_heater_spaces[sys_id] = [space, loc_schedule]
         setpoint_temp = water_heating_system.temperature
         avg_setpoint_temp += setpoint_temp * water_heating_system.fraction_dhw_load_served
         wh_type = water_heating_system.water_heater_type
@@ -2300,7 +2300,7 @@ class OSModel
           re = water_heating_system.recovery_efficiency
           capacity_kbtuh = water_heating_system.heating_capacity / 1000.0
 
-          Waterheater.apply_tank(model, space, fuel, capacity_kbtuh, tank_vol,
+          Waterheater.apply_tank(model, space, loc_schedule, fuel, capacity_kbtuh, tank_vol,
                                  ef, re, setpoint_temp, ec_adj, @nbeds, @dhw_map,
                                  sys_id, desuperheater_clg_coil, jacket_r, solar_fraction)
 
@@ -2308,7 +2308,7 @@ class OSModel
 
           cycling_derate = water_heating_system.performance_adjustment
 
-          Waterheater.apply_tankless(model, space, fuel, ef, cycling_derate,
+          Waterheater.apply_tankless(model, space, loc_schedule, fuel, ef, cycling_derate,
                                      setpoint_temp, ec_adj, @nbeds, @dhw_map,
                                      sys_id, desuperheater_clg_coil, solar_fraction)
 
@@ -2316,7 +2316,7 @@ class OSModel
 
           tank_vol = water_heating_system.tank_volume
 
-          Waterheater.apply_heatpump(model, runner, space, weather, setpoint_temp, tank_vol, ef, ec_adj,
+          Waterheater.apply_heatpump(model, runner, space, loc_schedule, weather, setpoint_temp, tank_vol, ef, ec_adj,
                                      @nbeds, @dhw_map, sys_id, jacket_r, solar_fraction)
 
         elsif (wh_type == HPXML::WaterHeaterTypeCombiStorage) || (wh_type == HPXML::WaterHeaterTypeCombiTankless)
@@ -2330,7 +2330,7 @@ class OSModel
           boiler_sys = get_boiler_and_plant_loop(@hvac_map, water_heating_system.related_hvac_idref, sys_id)
           @dhw_map[sys_id] << boiler_sys['boiler']
 
-          Waterheater.apply_combi(model, runner, space, vol, setpoint_temp, ec_adj, @nbeds,
+          Waterheater.apply_combi(model, runner, space, loc_schedule, vol, setpoint_temp, ec_adj, @nbeds,
                                   boiler_sys['boiler'], boiler_sys['plant_loop'], boiler_fuel_type,
                                   boiler_afue, @dhw_map, sys_id, wh_type, jacket_r, standby_loss)
 
@@ -2377,7 +2377,7 @@ class OSModel
         azimuth = Float(solar_thermal_system.collector_azimuth)
         tilt = solar_thermal_system.collector_tilt
         collector_type = solar_thermal_system.collector_type
-        space = water_heater_spaces[water_heater.id]
+        space, loc_schedule = water_heater_spaces[water_heater.id]
 
         dhw_loop = nil
         if @dhw_map.keys.include? water_heater.id
@@ -2388,7 +2388,7 @@ class OSModel
           end
         end
 
-        Waterheater.apply_solar_thermal(model, space, collector_area, frta, frul, storage_vol,
+        Waterheater.apply_solar_thermal(model, space, loc_schedule, collector_area, frta, frul, storage_vol,
                                         azimuth, tilt, collector_type, loop_type, dhw_loop, @dhw_map,
                                         water_heater.id)
       end
@@ -3190,7 +3190,7 @@ class OSModel
       next if ducts.duct_type.nil?
       next if total_unconditioned_duct_area[ducts.duct_type] <= 0
 
-      duct_space = get_space_from_location(ducts.duct_location, 'Duct', model, spaces)
+      duct_space, duct_loc_schedule = get_wh_duct_space_or_temp_schedule_from_location(ducts.duct_location, 'Duct', model, spaces)
       # Apportion leakage to individual ducts by surface area
       duct_leakage_value = leakage_to_outside[ducts.duct_type][0] * ducts.duct_surface_area / total_unconditioned_duct_area[ducts.duct_type]
       duct_leakage_units = leakage_to_outside[ducts.duct_type][1]
@@ -4192,23 +4192,21 @@ class OSModel
       surface.createAdjacentSurface(create_or_get_space(model, spaces, HPXML::LocationLivingSpace))
       @cond_bsmnt_surfaces << surface
     elsif [HPXML::LocationOtherHeatedSpace, HPXML::LocationOtherMultifamilyBufferSpace, HPXML::LocationOtherNonFreezingSpace].include? exterior_adjacent_to
-      add_otherside_coefficients(surface, exterior_adjacent_to, model, spaces)
-      surface.setSunExposure('NoSun')
-      surface.setWindExposure('NoWind')
+      set_surface_otherside_coefficients(surface, exterior_adjacent_to, model, spaces)
     else
       surface.createAdjacentSurface(create_or_get_space(model, spaces, exterior_adjacent_to))
     end
   end
 
-  def self.add_otherside_coefficients(surface, exterior_adjacent_to, model, spaces)
+  def self.set_surface_otherside_coefficients(surface, exterior_adjacent_to, model, spaces)
     if spaces[exterior_adjacent_to].nil?
       # Create E+ other side coefficient object
       otherside_object = OpenStudio::Model::SurfacePropertyOtherSideCoefficients.new(model)
       otherside_object.setName(exterior_adjacent_to)
       # Fixme: assumption the same as SurfacePropertyConvectionCoefficients of return air plenum
-      otherside_object.setCombinedConvectiveRadiativeFilmCoefficient(30)
-      # Schedule of space temperature, can be shared with water heater/appliances
-      create_outside_boundary_schedule(model, exterior_adjacent_to, spaces)
+      otherside_object.setCombinedConvectiveRadiativeFilmCoefficient(0)
+      # Schedule of space temperature, can be shared with water heater/ducts
+      create_multifamily_temperature_schedule(model, exterior_adjacent_to, spaces)
       # FIXME: wait for new OS release with bugfix of https://github.com/NREL/OpenStudio/issues/3848
       otherside_object.setPointer(9, @mf_temp_sch_map[exterior_adjacent_to].handle)
       surface.setSurfacePropertyOtherSideCoefficients(otherside_object)
@@ -4216,9 +4214,11 @@ class OSModel
     else
       surface.setSurfacePropertyOtherSideCoefficients(spaces[exterior_adjacent_to])
     end
+    surface.setSunExposure('NoSun')
+    surface.setWindExposure('NoWind')
   end
 
-  def self.create_outside_boundary_schedule(model, outside_space, spaces)
+  def self.create_multifamily_temperature_schedule(model, outside_space, spaces)
     # Create outside boundary schedules to be actuated by EMS,
     # can be shared by any surface, duct, or appliances adjacent to / located in those spaces
 
@@ -4244,7 +4244,7 @@ class OSModel
       indoor_weight = 0.0
       outdoor_weight = 1.0
     elsif outside_space == HPXML::LocationOtherHousingUnit
-      # For water heater, duct, appliances, etc.
+      # For water heater, duct etc.
       # Indoor air temperature
       temp_min = UnitConversions.convert(40, 'F', 'C')
       indoor_weight = 1.0
@@ -4280,15 +4280,31 @@ class OSModel
     program_cm.addProgram(program)
   end
 
-  # Returns an OS:Space, or nil if the location is outside the building
-  def self.get_space_from_location(location, object_name, model, spaces)
+  # Returns an OS:Space or OS:Schedule, or nil if the location is outside the building
+  def self.get_wh_duct_space_or_temp_schedule_from_location(location, object_name, model, spaces)
     return if (location == HPXML::LocationOtherExterior) || (location == HPXML::LocationOutside) || (location == HPXML::LocationOther)
 
+    sch = nil
+    space = nil
     if (location == HPXML::LocationOtherHeatedSpace) || (location == HPXML::LocationOtherHousingUnit) || (location == HPXML::LocationOtherMultifamilyBufferSpace) || (location == HPXML::LocationOtherNonFreezingSpace)
-      create_outside_boundary_schedule(model, location, spaces)
-      return @mf_temp_sch_map[location]
+      # if located in MF spaces, create and return temperature schedule
+      create_multifamily_temperature_schedule(model, location, spaces)
+      sch = @mf_temp_sch_map[location]
+    else
+      space = get_space_from_location(location, object_name, model, spaces)
     end
 
+    return space, sch
+  end
+
+  # Returns an OS:Space or OS:Schedule, or nil if the location is outside the building/MF spaces
+  def self.get_appliance_space_from_location(location, object_name, model, spaces)
+    return if (location == HPXML::LocationOtherExterior) || (location == HPXML::LocationOutside) || (location == HPXML::LocationOther)
+
+    return get_space_from_location(location, object_name, model, spaces)
+  end
+
+  def self.get_space_from_location(location, object_name, model, spaces)
     num_orig_spaces = spaces.size
 
     if location == HPXML::LocationBasementConditioned
@@ -4304,7 +4320,10 @@ class OSModel
     return space
   end
 
-  def self.assign_outside_boundary_condition_to_subsurface(surface, wall_exterior_adjacent_to, spaces, model)
+  def self.set_subsurface_exterior(surface, wall_exterior_adjacent_to, spaces, model)
+    # Set its parent surface outside boundary condition, which will be also applied to subsurfaces through OS
+    # The parent surface is entirely comprised of the subsurface.
+
     # Subsurface on foundationwalls, set it to be adjacent to outdoors
     if wall_exterior_adjacent_to == HPXML::LocationGround
       surface.setOutsideBoundaryCondition('Outdoors')
