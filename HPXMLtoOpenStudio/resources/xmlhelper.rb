@@ -8,12 +8,12 @@ class XMLHelper
   def self.add_element(parent, element_name, value = nil)
     added = nil
     element_name.split('/').each do |name|
-      added = Oga.parse_xml(name)
-      parent << added
-      parent = added
+      added = Oga::XML::Element.new(name: name)
+      parent.children << added
+      # parent = added  # FIXME: not sure if we need this
     end
     if not value.nil?
-      added.text = value
+      added.inner_text = value.to_s
     end
     return added
   end
@@ -94,7 +94,7 @@ class XMLHelper
   # Returns the attribute added
   def self.add_attribute(element, attr_name, attr_val)
     attr_val = valid_attr(attr_val).to_s
-    added = element.add_attribute(attr_name, attr_val)
+    added = element.set(attr_name, attr_val)
     return added
   end
 
@@ -147,9 +147,7 @@ class XMLHelper
     # FIXME: previous code: doc = REXML::Document.new
     # FIXME: previous code: decl = REXML::XMLDecl.new(version = version, encoding = encoding, standalone = standalone)
     # FIXME: Need to review this.
-    doc = Oga::XML.new # Oga.parse_xml
-    decl = Oga::XML::XmlDeclaration.new(version: version, encoding: encoding, standalone: standalone)
-    doc << decl
+    doc = Oga::XML::Document.new(xml_declaration: {version: version, encoding: encoding, standalone: standalone}) # Oga.parse_xml
     return doc
   end
 
@@ -167,7 +165,8 @@ class XMLHelper
     # FIXME: Need to review this
     File.open(out_path, 'w', newline: :crlf) do |f|
       # FIXME: previous code: formatter.write(doc, f)
-      f.to_xml
+      f = doc
+      # f = Oga::XML::Generator.new(doc)
     end
   end
 end
