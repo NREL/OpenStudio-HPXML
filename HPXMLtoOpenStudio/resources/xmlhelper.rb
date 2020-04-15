@@ -77,8 +77,12 @@ class XMLHelper
   # element on the parent element.
   def self.get_child_name(parent, element_name)
     begin
-      # FIXME: previous code: return parent.elements[element_name].elements[1].name
-      return parent.at_xpath(element_name).children[1].name
+      # Workaround for bug in oga; see https://gitlab.com/yorickpeterse/oga/-/issues/202
+      if parent.at_xpath(element_name).children[0].is_a? Oga::XML::Element
+        return parent.at_xpath(element_name).children[0].name
+      else
+        return parent.at_xpath(element_name).children[1].name
+      end
     rescue
     end
     return
@@ -147,7 +151,7 @@ class XMLHelper
     # FIXME: previous code: doc = REXML::Document.new
     # FIXME: previous code: decl = REXML::XMLDecl.new(version = version, encoding = encoding, standalone = standalone)
     # FIXME: Need to review this.
-    doc = Oga::XML::Document.new(xml_declaration: {version: version, encoding: encoding, standalone: standalone}) # Oga.parse_xml
+    doc = Oga::XML::Document.new(xml_declaration: Oga::XML::XmlDeclaration.new(version: version, encoding: encoding, standalone: standalone)) # Oga.parse_xml
     return doc
   end
 
@@ -165,7 +169,7 @@ class XMLHelper
     # FIXME: Need to review this
     File.open(out_path, 'w', newline: :crlf) do |f|
       # FIXME: previous code: formatter.write(doc, f)
-      f = doc
+      f << doc.to_xml
       # f = Oga::XML::Generator.new(doc)
     end
   end

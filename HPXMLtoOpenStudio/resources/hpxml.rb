@@ -2576,7 +2576,7 @@ class HPXML < Object
       @ducts = Ducts.new(hpxml_object)
       super(hpxml_object, *args)
     end
-    ATTRS = [:id, :distribution_system_type, :distribution_system_type, :annual_heating_dse,
+    ATTRS = [:id, :distribution_system_type, :annual_heating_dse,
              :annual_cooling_dse, :duct_system_sealed, :duct_leakage_testing_exemption]
     attr_accessor(*ATTRS)
     attr_reader(:duct_leakage_measurements, :ducts)
@@ -2637,7 +2637,7 @@ class HPXML < Object
       distribution_system_type_e = XMLHelper.add_element(hvac_distribution, 'DistributionSystemType')
       if [HVACDistributionTypeAir, HVACDistributionTypeHydronic].include? @distribution_system_type
         XMLHelper.add_element(distribution_system_type_e, @distribution_system_type)
-      elsif [HVACDistributionTypeDSE].include? distribution_system_type
+      elsif [HVACDistributionTypeDSE].include? @distribution_system_type
         XMLHelper.add_element(distribution_system_type_e, 'Other', @distribution_system_type)
         XMLHelper.add_element(hvac_distribution, 'AnnualHeatingDistributionSystemEfficiency', Float(@annual_heating_dse)) unless @annual_heating_dse.nil?
         XMLHelper.add_element(hvac_distribution, 'AnnualCoolingDistributionSystemEfficiency', Float(@annual_cooling_dse)) unless @annual_cooling_dse.nil?

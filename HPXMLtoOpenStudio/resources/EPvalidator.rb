@@ -720,7 +720,7 @@ class EnergyPlusValidator
           # FIXME: Diagnostic outputs
           # p hpxml_doc.xpath("#{child}")
           # puts "*expected sizes: #{expected_sizes}, *actual size: #{actual_size}"
-          
+
           check_number_of_elements(actual_size, expected_sizes, xpath, errors)
         end
       else # Conditional based on parent element existence
@@ -729,9 +729,9 @@ class EnergyPlusValidator
         hpxml_doc.xpath(parent).each do |parent_element|
           requirement.each do |child, expected_sizes|
             next if expected_sizes.nil?
-            
+
             xpath = combine_into_xpath(parent, child)
-            
+
             # FIXME: Diagnostic outputs
             # puts "**parent_element: "
             # p parent_element
@@ -740,7 +740,7 @@ class EnergyPlusValidator
             # puts "**update_leading_predicates(xpath): #{update_leading_predicates(child)}"
 
             actual_size = parent_element.xpath("#{update_leading_predicates(child)}").length
-            
+
             # FIXME: Diagnostic outputs
             # p parent_element.xpath("#{update_leading_predicates(child)}")
             # puts "**expected sizes: #{expected_sizes}, **actual size: #{actual_size}"
