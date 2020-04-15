@@ -25,6 +25,7 @@ class HEScoreTest < Minitest::Unit::TestCase
 
     # Prepare results dir for CI storage
     @results_dir = File.absolute_path(File.join(File.dirname(__FILE__), '..', 'test_results'))
+    Dir.mkdir(@results_dir) unless File.exist? @results_dir
   end
 
   def test_valid_simulations
