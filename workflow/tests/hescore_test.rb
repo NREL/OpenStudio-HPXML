@@ -25,12 +25,15 @@ class HEScoreTest < Minitest::Unit::TestCase
 
     # Prepare results dir for CI storage
     @results_dir = File.absolute_path(File.join(File.dirname(__FILE__), '..', 'test_results'))
-    _rm_path(@results_dir)
-    Dir.mkdir(@results_dir)
   end
 
   def test_valid_simulations
-    zipfile = OpenStudio::ZipFile.new(OpenStudio::Path.new(File.join(@results_dir, 'results_jsons.zip')), false)
+    results_zip_path = File.join(@results_dir, 'results_jsons.zip')
+    File.delete(results_zip_path) if File.exist? results_zip_path
+    results_csv_path = File.join(@results_dir, 'results.csv')
+    File.delete(results_csv_path) if File.exist? results_csv_path
+
+    zipfile = OpenStudio::ZipFile.new(OpenStudio::Path.new(results_zip_path), false)
 
     results = {}
     parent_dir = File.absolute_path(File.join(File.dirname(__FILE__), '..'))
@@ -39,7 +42,7 @@ class HEScoreTest < Minitest::Unit::TestCase
       results[File.basename(xml)] = run_and_check(xml, parent_dir, false, zipfile)
     end
 
-    _write_summary_results(results)
+    _write_summary_results(results, results_csv_path)
   end
 
   def test_skip_simulation
@@ -264,10 +267,8 @@ class HEScoreTest < Minitest::Unit::TestCase
     assert_equal(7, tested_end_uses.uniq.size)
   end
 
-  def _write_summary_results(results)
+  def _write_summary_results(results, results_csv_path)
     # Writes summary end use results to CSV file.
-    csv_out = File.join(@results_dir, 'results.csv')
-
     column_headers = ['HPXML']
     results[results.keys[0]].keys.each do |key|
       next if not key.is_a? Array
@@ -279,14 +280,14 @@ class HEScoreTest < Minitest::Unit::TestCase
     column_headers << 'Runtime [s]'
 
     require 'csv'
-    CSV.open(csv_out, 'w') do |csv|
+    CSV.open(results_csv_path, 'w') do |csv|
       csv << column_headers
       results.each do |xml, xml_results|
         csv << [xml] + xml_results.values
       end
     end
 
-    puts "Wrote results to #{csv_out}."
+    puts "Wrote results to #{results_csv_path}."
   end
 
   def _test_schema_validation(parent_dir, xml, schemas_dir)
