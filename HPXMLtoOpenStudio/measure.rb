@@ -3191,6 +3191,7 @@ class OSModel
       next if total_unconditioned_duct_area[ducts.duct_type] <= 0
 
       duct_space, duct_loc_schedule = get_wh_duct_space_or_temp_schedule_from_location(ducts.duct_location, 'Duct', model, spaces)
+
       # Apportion leakage to individual ducts by surface area
       duct_leakage_value = leakage_to_outside[ducts.duct_type][0] * ducts.duct_surface_area / total_unconditioned_duct_area[ducts.duct_type]
       duct_leakage_units = leakage_to_outside[ducts.duct_type][1]
@@ -3205,7 +3206,7 @@ class OSModel
         fail "#{ducts.duct_type.capitalize} ducts exist but leakage was not specified for distribution system '#{hvac_distribution.id}'."
       end
 
-      air_ducts << Duct.new(ducts.duct_type, duct_space, duct_leakage_frac, duct_leakage_cfm, ducts.duct_surface_area, ducts.duct_insulation_r_value)
+      air_ducts << Duct.new(ducts.duct_type, duct_space, duct_loc_schedule, duct_leakage_frac, duct_leakage_cfm, ducts.duct_surface_area, ducts.duct_insulation_r_value)
     end
 
     # If all ducts are in conditioned space, model leakage as going to outside
@@ -3228,7 +3229,7 @@ class OSModel
         fail "#{duct_side.capitalize} ducts exist but leakage was not specified for distribution system '#{hvac_distribution.id}'."
       end
 
-      air_ducts << Duct.new(duct_side, duct_space, duct_leakage_frac, duct_leakage_cfm, duct_area, duct_rvalue)
+      air_ducts << Duct.new(duct_side, duct_space, nil, duct_leakage_frac, duct_leakage_cfm, duct_area, duct_rvalue)
     end
 
     return air_ducts
@@ -4203,7 +4204,7 @@ class OSModel
       # Create E+ other side coefficient object
       otherside_object = OpenStudio::Model::SurfacePropertyOtherSideCoefficients.new(model)
       otherside_object.setName(exterior_adjacent_to)
-      # Fixme: assumption the same as SurfacePropertyConvectionCoefficients of return air plenum
+      # Assume to directly apply to surface outside temperature
       otherside_object.setCombinedConvectiveRadiativeFilmCoefficient(0)
       # Schedule of space temperature, can be shared with water heater/ducts
       create_multifamily_temperature_schedule(model, exterior_adjacent_to, spaces)

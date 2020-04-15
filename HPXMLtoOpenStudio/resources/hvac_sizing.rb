@@ -131,6 +131,12 @@ class HVACSizing
     @cool_design_temps[nil] = weather.design.CoolingDrybulb
     @heat_design_temps[nil] = weather.design.HeatingDrybulb
 
+    # MF spaces
+    [HPXML::LocationOtherHousingUnit, HPXML::LocationOtherHeatedSpace, HPXML::LocationOtherMultifamilyBufferSpace, HPXML::LocationOtherNonFreezingSpace].each do |mf_space|
+      @cool_design_temps[mf_space] = get_other_side_temp(mf_space, @cool_setpoint, weather.design.CoolingDrybulb)
+      @heat_design_temps[mf_space] = get_other_side_temp(mf_space, @heat_setpoint, weather.design.HeatingDrybulb)
+    end
+
     # Initialize Manual J buffer space temperatures using current design temperatures
     @model_spaces.each do |space|
       @cool_design_temps[space] = process_design_temp_cooling(weather, space)
@@ -770,18 +776,16 @@ class HVACSizing
     end
 
     Geometry.get_sfa_mf_space_walls(@cond_space).each do |wall|
-      # parent wall level other side coefficient info
+      # parent wall level other side coefficient info, unique object throughout model named the same as mf space name
       adjacent_space_name = wall.surfacePropertyOtherSideCoefficients.get.name.to_s
-      otherside_temp_clg = get_other_side_temp(adjacent_space_name, @cool_setpoint, weather.design.CoolingDrybulb)
-      otherside_temp_htg = get_other_side_temp(adjacent_space_name, @heat_setpoint, weather.design.HeatingDrybulb)
       # door calculation
       wall.subSurfaces.each do |door|
         next if not door.subSurfaceType.downcase.include?('door')
 
         door_ufactor = get_surface_ufactor(door, door.subSurfaceType)
 
-        zone_loads.Cool_Doors += door_ufactor * UnitConversions.convert(door.netArea, 'm^2', 'ft^2') * (otherside_temp_clg - @cool_setpoint)
-        zone_loads.Heat_Doors += door_ufactor * UnitConversions.convert(door.netArea, 'm^2', 'ft^2') * (@heat_setpoint - otherside_temp_htg)
+        zone_loads.Cool_Doors += door_ufactor * UnitConversions.convert(door.netArea, 'm^2', 'ft^2') * (@cool_design_temps[adjacent_space_name] - @cool_setpoint)
+        zone_loads.Heat_Doors += door_ufactor * UnitConversions.convert(door.netArea, 'm^2', 'ft^2') * (@heat_setpoint - @heat_design_temps[adjacent_space_name])
       end
     end
 
@@ -861,10 +865,8 @@ class HVACSizing
       wall_ufactor = get_surface_ufactor(wall, wall.surfaceType)
 
       adjacent_space_name = wall.surfacePropertyOtherSideCoefficients.get.name.to_s
-      otherside_temp_clg = get_other_side_temp(adjacent_space_name, @cool_setpoint, weather.design.CoolingDrybulb)
-      otherside_temp_htg = get_other_side_temp(adjacent_space_name, @heat_setpoint, weather.design.HeatingDrybulb)
-      zone_loads.Cool_Walls += wall_ufactor * UnitConversions.convert(wall.netArea, 'm^2', 'ft^2') * (otherside_temp_clg - @cool_setpoint)
-      zone_loads.Heat_Walls += wall_ufactor * UnitConversions.convert(wall.netArea, 'm^2', 'ft^2') * (@heat_setpoint - otherside_temp_htg)
+      zone_loads.Cool_Walls += wall_ufactor * UnitConversions.convert(wall.netArea, 'm^2', 'ft^2') * (@cool_design_temps[adjacent_space_name] - @cool_setpoint)
+      zone_loads.Heat_Walls += wall_ufactor * UnitConversions.convert(wall.netArea, 'm^2', 'ft^2') * (@heat_setpoint - @heat_design_temps[adjacent_space_name])
       surfaces_processed << wall.name.to_s
     end
 
@@ -986,10 +988,8 @@ class HVACSizing
       floor_ufactor = get_surface_ufactor(floor, floor.surfaceType)
 
       adjacent_space_name = floor.surfacePropertyOtherSideCoefficients.get.name.to_s
-      otherside_temp_clg = get_other_side_temp(adjacent_space_name, @cool_setpoint, weather.design.CoolingDrybulb)
-      otherside_temp_htg = get_other_side_temp(adjacent_space_name, @heat_setpoint, weather.design.HeatingDrybulb)
-      zone_loads.Cool_Floors += floor_ufactor * UnitConversions.convert(floor.netArea, 'm^2', 'ft^2') * (otherside_temp_clg - @cool_setpoint)
-      zone_loads.Heat_Floors += floor_ufactor * UnitConversions.convert(floor.netArea, 'm^2', 'ft^2') * (@heat_setpoint - otherside_temp_htg)
+      zone_loads.Cool_Floors += floor_ufactor * UnitConversions.convert(floor.netArea, 'm^2', 'ft^2') * (@cool_design_temps[adjacent_space_name] - @cool_setpoint)
+      zone_loads.Heat_Floors += floor_ufactor * UnitConversions.convert(floor.netArea, 'm^2', 'ft^2') * (@heat_setpoint - @heat_design_temps[adjacent_space_name])
       surfaces_processed << floor.name.to_s
     end
 
@@ -1179,7 +1179,7 @@ class HVACSizing
 
     dse_Fregain = nil
 
-    if duct.LocationSpace.nil? # Outside
+    if duct.LocationSpace.nil? || ([HPXML::LocationOtherHousingUnit, HPXML::LocationOtherHeatedSpace, HPXML::LocationOtherMultifamilyBufferSpace, HPXML::LocationOtherNonFreezingSpace].include? duct.LocationSpace) # Outside or MF spaces
       dse_Fregain = 0.0
 
     elsif Geometry.is_unconditioned_basement(duct.LocationSpace)
@@ -1229,6 +1229,7 @@ class HVACSizing
     elsif Geometry.is_garage(duct.LocationSpace)
       dse_Fregain = 0.05
 
+    # Geometry.is_conditioned_attic no longer exists, should we remove this?
     elsif Geometry.is_living(duct.LocationSpace) || Geometry.is_conditioned_attic(duct.LocationSpace)
       dse_Fregain = 1.0
 
@@ -2079,8 +2080,12 @@ class HVACSizing
     location_spaces = []
     thermal_zones = Geometry.get_thermal_zones_from_spaces(@model_spaces)
     locations.each do |location|
-      if [HPXML::LocationOutside, HPXML::LocationOtherHousingUnit, HPXML::LocationOtherHeatedSpace, HPXML::LocationOtherMultifamilyBufferSpace, HPXML::LocationOtherNonFreezingSpace].include? location
-        location_spaces << nil
+      if location == HPXML::LocationOutside
+        location_space << nil
+        next
+      elsif [HPXML::LocationOtherHousingUnit, HPXML::LocationOtherHeatedSpace, HPXML::LocationOtherMultifamilyBufferSpace, HPXML::LocationOtherNonFreezingSpace].include? location
+        # schedule name
+        location_spaces << location
         next
       end
 
@@ -2642,13 +2647,13 @@ class HVACSizing
   end
 
   def self.get_other_side_temp(adjacent_space_name, setpoint, oa_db)
-    if adjacent_space_name.include? 'other heated space'
-      return [(setpoint + oa_db) / 2, 68].min
-    elsif adjacent_space_name.include? 'other multifamily buffer space'
-      return [(setpoint + oa_db) / 2, 50].min
-    elsif adjacent_space_name.include? 'other non-freezing space'
-      return [oa_db, 40].min
-    elsif adjacent_space_name.include? 'other housing unit'
+    if adjacent_space_name.include? HPXML::LocationOtherHeatedSpace
+      return [(setpoint + oa_db) / 2, 68].max
+    elsif adjacent_space_name.include? HPXML::LocationOtherMultifamilyBufferSpace
+      return [(setpoint + oa_db) / 2, 50].max
+    elsif adjacent_space_name.include? HPXML::LocationOtherNonFreezingSpace
+      return [oa_db, 40].max
+    elsif adjacent_space_name.include? HPXML::LocationOtherHousingUnit
       return setpoint
     end
   end

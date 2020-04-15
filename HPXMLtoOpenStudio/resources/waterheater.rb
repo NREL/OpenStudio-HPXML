@@ -1609,7 +1609,7 @@ class Waterheater
       wh_obj.ambientTemperatureSchedule.get.remove
     end
     if not loc_schedule.nil? # Temperature schedule indicator
-      wh_obj.setAmbientTemperatureSchedule(space)
+      wh_obj.setAmbientTemperatureSchedule(loc_schedule)
     elsif not space.nil?
       wh_obj.setAmbientTemperatureIndicator('ThermalZone')
       wh_obj.setAmbientTemperatureThermalZone(space.thermalZone.get)
