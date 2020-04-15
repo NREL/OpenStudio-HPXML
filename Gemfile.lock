@@ -2,6 +2,7 @@ GEM
   remote: http://rubygems.org/
   specs:
     ansi (1.5.0)
+    ast (2.4.0)
     builder (3.2.3)
     ci_reporter (2.0.0)
       builder (>= 2.1.2)
@@ -23,9 +24,17 @@ GEM
       builder
       minitest (>= 5.0)
       ruby-progressbar
+    nokogiri (1.6.8.1)
+      mini_portile2 (~> 2.1.0)
     nokogiri (1.6.8.1-x64-mingw32)
       mini_portile2 (~> 2.1.0)
+    oga (3.2)
+      ast
+      ruby-ll (~> 2.1)
     rake (13.0.1)
+    ruby-ll (2.1.2)
+      ansi
+      ast
     ruby-progressbar (1.10.1)
     simplecov (0.17.0)
       docile (~> 1.1)
@@ -35,6 +44,7 @@ GEM
     url (0.3.2)
 
 PLATFORMS
+  ruby
   x64-mingw32
 
 DEPENDENCIES
@@ -44,6 +54,7 @@ DEPENDENCIES
   minitest-ci
   minitest-reporters
   nokogiri (~> 1.6, <= 1.6.8.1)
+  oga
   rake
   simplecov
 
