@@ -209,7 +209,6 @@ def create_hpxmls
     'base-location-miami-fl.xml' => 'base.xml',
     'base-location-epw-filename.xml' => 'base.xml',
     'base-location-epw-filename-AMY-2012.xml' => 'base.xml',
-    'base-location-epw-filename-AMY-2014.xml' => 'base.xml',
     'base-mechvent-balanced.xml' => 'base.xml',
     'base-mechvent-cfis.xml' => 'base.xml',
     'base-mechvent-cfis-evap-cooler-only-ducted.xml' => 'base-hvac-evap-cooler-only-ducted.xml',
@@ -572,11 +571,7 @@ def set_hpxml_climate_and_risk_zones(hpxml_file, hpxml)
   elsif ['base-location-epw-filename-AMY-2012.xml'].include? hpxml_file
     hpxml.climate_and_risk_zones.weather_station_wmo = nil
     hpxml.climate_and_risk_zones.weather_station_name = 'Boulder, CO'
-    hpxml.climate_and_risk_zones.weather_station_epw_filename = '0465925_US_CO_Boulder_8013_0-20000-0-72469_40.13_-105.22_NSRDB_2.0.1_AMY_2012.epw'
-  elsif ['base-location-epw-filename-AMY-2014.xml'].include? hpxml_file
-    hpxml.climate_and_risk_zones.weather_station_wmo = nil
-    hpxml.climate_and_risk_zones.weather_station_name = 'Boulder, CO'
-    hpxml.climate_and_risk_zones.weather_station_epw_filename = '0465925_US_CO_Boulder_8013_0-20000-0-72469_40.13_-105.22_NSRDB_2.0.1_AMY_2014.epw'
+    hpxml.climate_and_risk_zones.weather_station_epw_filename = 'US_CO_Boulder_AMY_2012.epw'
   elsif ['invalid_files/bad-wmo.xml'].include? hpxml_file
     hpxml.climate_and_risk_zones.weather_station_wmo = '999999'
   end

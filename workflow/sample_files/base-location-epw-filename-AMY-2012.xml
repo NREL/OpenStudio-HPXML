@@ -47,7 +47,7 @@
           <SystemIdentifier id='WeatherStation'/>
           <Name>Boulder, CO</Name>
           <extension>
-            <EPWFileName>0465925_US_CO_Boulder_8013_0-20000-0-72469_40.13_-105.22_NSRDB_2.0.1_AMY_2012.epw</EPWFileName>
+            <EPWFileName>US_CO_Boulder_AMY_2012.epw</EPWFileName>
           </extension>
         </WeatherStation>
       </ClimateandRiskZones>
