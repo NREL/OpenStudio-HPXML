@@ -188,6 +188,7 @@ class XMLHelper
     # Retain REXML-styling
     doc_s.gsub!('"', "'")
     doc_s.gsub!(' />', '/>')
+    doc_s.gsub!(' ?>', '?>')
 
     # Write XML file
     File.open(out_path, 'w', newline: :crlf) do |f|
