@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 def create_hpxmls
   this_dir = File.dirname(__FILE__)
   sample_files_dir = File.join(this_dir, 'workflow/sample_files')
@@ -3271,8 +3273,9 @@ if ARGV[0].to_sym == :update_measures
   # Apply rubocop
   cops = ['Layout',
           'Lint/DeprecatedClassMethods',
-          'Lint/StringConversionInInterpolation',
+          # 'Lint/RedundantStringCoercion', # Enable when rubocop is upgraded
           'Style/AndOr',
+          'Style/FrozenStringLiteralComment',
           'Style/HashSyntax',
           'Style/Next',
           'Style/NilComparison',

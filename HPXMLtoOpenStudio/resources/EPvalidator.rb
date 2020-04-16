@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 class EnergyPlusValidator
   def self.run_validator(hpxml_doc)
     # A hash of hashes that defines the XML elements used by the EnergyPlus HPXML Use Case.
@@ -731,7 +733,7 @@ class EnergyPlusValidator
             next if expected_sizes.nil?
 
             xpath = combine_into_xpath(parent, child)
-            actual_size = REXML::XPath.first(parent_element, "count(#{child})")
+            actual_size = REXML::XPath.first(parent_element, "count(#{update_leading_predicates(child)})")
             check_number_of_elements(actual_size, expected_sizes, xpath, errors)
           end
         end
@@ -759,5 +761,34 @@ class EnergyPlusValidator
     end
 
     return [parent, child].join(': ')
+  end
+
+  def self.update_leading_predicates(str)
+    # Workaround bug in REXML; See https://github.com/ruby/rexml/issues/27
+    # Examples:
+    #   "[foo='1' or foo='2']" => "(self::node()[foo='1' or foo='2'])"
+    #   "[foo] | bar" => "(self::node()[foo]) | bar"
+
+    add_str = '(self::node()'
+
+    # First check beginning of str
+    if str[0] == '['
+      str = add_str + str
+      # Find closing bracket match for ending parenthesis
+      count = 0
+      for i in add_str.size..str.size - 1
+        if str[i] == '['
+          count += 1
+        elsif str[i] == ']'
+          count -= 1
+        end
+        if count == 0
+          str = str[0..i] + ')' + str[i + 1..str.size]
+          break
+        end
+      end
+    end
+
+    return str
   end
 end
