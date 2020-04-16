@@ -86,7 +86,7 @@
             </Insulation>
           </Wall>
           <Wall>
-            <SystemIdentifier id='WallAdiabatic'/>
+            <SystemIdentifier id='OtherHousingUnitWall'/>
             <ExteriorAdjacentTo>other housing unit</ExteriorAdjacentTo>
             <InteriorAdjacentTo>living space</InteriorAdjacentTo>
             <WallType>
@@ -96,29 +96,29 @@
             <SolarAbsorptance>0.7</SolarAbsorptance>
             <Emittance>0.92</Emittance>
             <Insulation>
-              <SystemIdentifier id='WallAdiabaticInsulation'/>
+              <SystemIdentifier id='OtherHousingUnitWallInsulation'/>
               <AssemblyEffectiveRValue>4.0</AssemblyEffectiveRValue>
             </Insulation>
           </Wall>
         </Walls>
         <FrameFloors>
           <FrameFloor>
-            <SystemIdentifier id='FloorAboveAdiabatic'/>
+            <SystemIdentifier id='FloorAboveOtherHousingUnit'/>
             <ExteriorAdjacentTo>other housing unit below</ExteriorAdjacentTo>
             <InteriorAdjacentTo>living space</InteriorAdjacentTo>
             <Area>1350.0</Area>
             <Insulation>
-              <SystemIdentifier id='FloorAboveAdiabaticInsulation'/>
+              <SystemIdentifier id='FloorAboveOtherHousingUnitInsulation'/>
               <AssemblyEffectiveRValue>2.1</AssemblyEffectiveRValue>
             </Insulation>
           </FrameFloor>
           <FrameFloor>
-            <SystemIdentifier id='FloorBelowAdiabatic'/>
+            <SystemIdentifier id='FloorBelowOtherHousingUnit'/>
             <ExteriorAdjacentTo>other housing unit above</ExteriorAdjacentTo>
             <InteriorAdjacentTo>living space</InteriorAdjacentTo>
             <Area>1350.0</Area>
             <Insulation>
-              <SystemIdentifier id='FloorBelowAdiabaticInsulation'/>
+              <SystemIdentifier id='FloorBelowOtherHousingUnitInsulation'/>
               <AssemblyEffectiveRValue>2.1</AssemblyEffectiveRValue>
             </Insulation>
           </FrameFloor>
@@ -194,6 +194,13 @@
             <AttachedToWall idref='Wall'/>
             <Area>40.0</Area>
             <Azimuth>180</Azimuth>
+            <RValue>4.4</RValue>
+          </Door>
+          <Door>
+            <SystemIdentifier id='DoorOnOtherHousingUnitWall'/>
+            <AttachedToWall idref='OtherHousingUnitWall'/>
+            <Area>40.0</Area>
+            <Azimuth>0</Azimuth>
             <RValue>4.4</RValue>
           </Door>
         </Doors>
@@ -277,7 +284,7 @@
             <SystemIdentifier id='WaterHeater'/>
             <FuelType>electricity</FuelType>
             <WaterHeaterType>storage water heater</WaterHeaterType>
-            <Location>living space</Location>
+            <Location>other housing unit</Location>
             <TankVolume>40.0</TankVolume>
             <FractionDHWLoadServed>1.0</FractionDHWLoadServed>
             <HeatingCapacity>18767.0</HeatingCapacity>
@@ -310,7 +317,7 @@
       <Appliances>
         <ClothesWasher>
           <SystemIdentifier id='ClothesWasher'/>
-          <Location>living space</Location>
+          <Location>other</Location>
           <IntegratedModifiedEnergyFactor>1.21</IntegratedModifiedEnergyFactor>
           <RatedAnnualkWh>380.0</RatedAnnualkWh>
           <LabelElectricRate>0.12</LabelElectricRate>
@@ -321,14 +328,14 @@
         </ClothesWasher>
         <ClothesDryer>
           <SystemIdentifier id='ClothesDryer'/>
-          <Location>living space</Location>
+          <Location>other</Location>
           <FuelType>electricity</FuelType>
           <CombinedEnergyFactor>3.73</CombinedEnergyFactor>
           <ControlType>timer</ControlType>
         </ClothesDryer>
         <Dishwasher>
           <SystemIdentifier id='Dishwasher'/>
-          <Location>living space</Location>
+          <Location>other</Location>
           <RatedAnnualkWh>307.0</RatedAnnualkWh>
           <PlaceSettingCapacity>12</PlaceSettingCapacity>
           <LabelElectricRate>0.12</LabelElectricRate>
@@ -338,12 +345,12 @@
         </Dishwasher>
         <Refrigerator>
           <SystemIdentifier id='Refrigerator'/>
-          <Location>living space</Location>
+          <Location>other</Location>
           <RatedAnnualkWh>650.0</RatedAnnualkWh>
         </Refrigerator>
         <CookingRange>
           <SystemIdentifier id='Range'/>
-          <Location>living space</Location>
+          <Location>other</Location>
           <FuelType>electricity</FuelType>
           <IsInduction>false</IsInduction>
         </CookingRange>

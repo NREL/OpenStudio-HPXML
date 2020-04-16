@@ -172,7 +172,9 @@ class SimulationOutputReport < OpenStudio::Measure::ReportingMeasure
 
     if include_timeseries_zone_temperatures
       result << OpenStudio::IdfObject.load("Output:Variable,*,Zone Mean Air Temperature,#{timeseries_frequency};").get
-      result << OpenStudio::IdfObject.load("Output:Variable,*,Surface Other Side Coefficients Exterior Air Drybulb Temperature,#{timeseries_frequency};").get
+      # For reporting multifamily timreseries temperatures.
+      # However, in this way, all schedules will be added to output:variable, might impact runtime? Please review.
+      result << OpenStudio::IdfObject.load("Output:Variable,*,Schedule Value,#{timeseries_frequency};").get
     end
 
     if include_timeseries_fuel_consumptions
@@ -614,14 +616,18 @@ class SimulationOutputReport < OpenStudio::Measure::ReportingMeasure
     # Get zone temperatures
     if include_timeseries_zone_temperatures
       zone_names = []
-      other_side_obj_names = []
+      mf_space_names = []
       @model.getThermalZones.each do |zone|
         if zone.floorArea > 1
           zone_names << zone.name.to_s.upcase
         end
       end
-      @model.getSurfacePropertyOtherSideCoefficientss.each do |otherside_obj|
-        other_side_obj_names << otherside_obj.name.to_s.upcase
+      @model.getScheduleConstants.each do |schedule|
+        next unless schedule.name.to_s.include?(HPXML::LocationOtherHeatedSpace) ||
+                    schedule.name.to_s.include?(HPXML::LocationOtherMultifamilyBufferSpace) ||
+                    schedule.name.to_s.include?(HPXML::LocationOtherNonFreezingSpace) ||
+                    schedule.name.to_s.include?(HPXML::LocationOtherHousingUnit)
+        mf_space_names << schedule.name.to_s.upcase
       end
       zone_names.sort.each do |zone_name|
         @zone_temps[zone_name] = ZoneTemp.new
@@ -629,11 +635,11 @@ class SimulationOutputReport < OpenStudio::Measure::ReportingMeasure
         @zone_temps[zone_name].timeseries_units = 'F'
         @zone_temps[zone_name].timeseries_output = get_report_variable_data_timeseries([zone_name], ['Zone Mean Air Temperature'], 9.0 / 5.0, 32.0, timeseries_frequency)
       end
-      other_side_obj_names.sort.each do |obj_name|
-        @zone_temps[obj_name] = ZoneTemp.new
-        @zone_temps[obj_name].name = "Temperature: #{obj_name.split.map(&:capitalize).join(' ')}"
-        @zone_temps[obj_name].timeseries_units = 'F'
-        @zone_temps[obj_name].timeseries_output = get_report_variable_data_timeseries([obj_name], ['Surface Other Side Coefficients Exterior Air Drybulb Temperature'], 9.0 / 5.0, 32.0, timeseries_frequency)
+      mf_space_names.sort.each do |mf_space_name|
+        @zone_temps[mf_space_name] = ZoneTemp.new
+        @zone_temps[mf_space_name].name = "Temperature: #{mf_space_name.split.map(&:capitalize).join(' ')}"
+        @zone_temps[mf_space_name].timeseries_units = 'F'
+        @zone_temps[mf_space_name].timeseries_output = get_report_variable_data_timeseries([mf_space_name], ['Schedule Value'], 9.0 / 5.0, 32.0, timeseries_frequency)
       end
     end
 

@@ -296,7 +296,7 @@ class SimulationOutputReportTest < MiniTest::Test
     assert_equal(8760, File.readlines(timeseries_csv).size - 2)
   end
 
-  def test_timeseries_otherside_hourly_temperatures
+  def test_timeseries_mf_space_hourly_temperatures
     args_hash = { 'hpxml_path' => '../workflow/sample_files/base-enclosure-attached-multifamily.xml',
                   'timeseries_frequency' => 'hourly',
                   'include_timeseries_zone_temperatures' => true,
