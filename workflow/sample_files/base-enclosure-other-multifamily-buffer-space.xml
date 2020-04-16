@@ -103,6 +103,16 @@
         </Walls>
         <FrameFloors>
           <FrameFloor>
+            <SystemIdentifier id='FloorBelowOtherHousingUnit'/>
+            <ExteriorAdjacentTo>other housing unit above</ExteriorAdjacentTo>
+            <InteriorAdjacentTo>living space</InteriorAdjacentTo>
+            <Area>1350.0</Area>
+            <Insulation>
+              <SystemIdentifier id='FloorBelowOtherHousingUnitInsulation'/>
+              <AssemblyEffectiveRValue>2.1</AssemblyEffectiveRValue>
+            </Insulation>
+          </FrameFloor>
+          <FrameFloor>
             <SystemIdentifier id='FloorOtherMultifamilyBufferSpace'/>
             <ExteriorAdjacentTo>other multifamily buffer space</ExteriorAdjacentTo>
             <InteriorAdjacentTo>living space</InteriorAdjacentTo>
@@ -262,7 +272,7 @@
                 <Ducts>
                   <DuctType>return</DuctType>
                   <DuctInsulationRValue>0.0</DuctInsulationRValue>
-                  <DuctLocation>attic - unvented</DuctLocation>
+                  <DuctLocation>other multifamily buffer space</DuctLocation>
                   <DuctSurfaceArea>50.0</DuctSurfaceArea>
                 </Ducts>
               </AirDistribution>

@@ -103,22 +103,22 @@
         </Walls>
         <FrameFloors>
           <FrameFloor>
-            <SystemIdentifier id='FloorAboveOtherHousingUnit'/>
-            <ExteriorAdjacentTo>other housing unit below</ExteriorAdjacentTo>
-            <InteriorAdjacentTo>living space</InteriorAdjacentTo>
-            <Area>1350.0</Area>
-            <Insulation>
-              <SystemIdentifier id='FloorAboveOtherHousingUnitInsulation'/>
-              <AssemblyEffectiveRValue>2.1</AssemblyEffectiveRValue>
-            </Insulation>
-          </FrameFloor>
-          <FrameFloor>
             <SystemIdentifier id='FloorBelowOtherHousingUnit'/>
             <ExteriorAdjacentTo>other housing unit above</ExteriorAdjacentTo>
             <InteriorAdjacentTo>living space</InteriorAdjacentTo>
             <Area>1350.0</Area>
             <Insulation>
               <SystemIdentifier id='FloorBelowOtherHousingUnitInsulation'/>
+              <AssemblyEffectiveRValue>2.1</AssemblyEffectiveRValue>
+            </Insulation>
+          </FrameFloor>
+          <FrameFloor>
+            <SystemIdentifier id='FloorAboveOtherHousingUnit'/>
+            <ExteriorAdjacentTo>other housing unit below</ExteriorAdjacentTo>
+            <InteriorAdjacentTo>living space</InteriorAdjacentTo>
+            <Area>1350.0</Area>
+            <Insulation>
+              <SystemIdentifier id='FloorAboveOtherHousingUnitInsulation'/>
               <AssemblyEffectiveRValue>2.1</AssemblyEffectiveRValue>
             </Insulation>
           </FrameFloor>
