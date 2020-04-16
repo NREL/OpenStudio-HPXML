@@ -156,8 +156,6 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
     end
 
     # Validate input HPXML against EnergyPlus Use Case
-    # FIXME: empty hpxml when running output_report_test.rb -n test_eri_designs
-    # p hpxml
     errors = EnergyPlusValidator.run_validator(hpxml.doc)
     errors.each do |error|
       runner.registerError("#{hpxml_path}: #{error}")

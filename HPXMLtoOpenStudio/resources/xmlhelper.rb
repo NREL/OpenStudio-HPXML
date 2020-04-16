@@ -6,12 +6,8 @@ class XMLHelper
   # Adds the child element with 'element_name' and sets its value. Returns the
   # child element.
   def self.add_element(parent, element_name, value = nil)
-    added = nil
-    element_name.split('/').each do |name|
-      added = Oga::XML::Element.new(name: name)
-      parent.children << added
-      # parent = added  # FIXME: not sure if we need this
-    end
+    added = Oga::XML::Element.new(name: element_name)
+    parent.children << added
     if not value.nil?
       added.inner_text = value.to_s
     end
@@ -37,7 +33,6 @@ class XMLHelper
     element = nil
     begin
       last_element = element
-      # FIXME: previous code: element = parent.elements.delete(element_name)
       element = parent.at_xpath(element_name).remove
     end while !parent.at_xpath(element_name).nil?
     return last_element
@@ -90,7 +85,6 @@ class XMLHelper
 
   # Returns true if the element exists.
   def self.has_element(parent, element_name)
-    # FIXME: previous code: element = REXML::XPath.first(parent, element_name)
     element = parent.at_xpath(element_name)
     return !element.nil?
   end
@@ -148,9 +142,6 @@ class XMLHelper
   end
 
   def self.create_doc(version = nil, encoding = nil, standalone = nil)
-    # FIXME: previous code: doc = REXML::Document.new
-    # FIXME: previous code: decl = REXML::XMLDecl.new(version = version, encoding = encoding, standalone = standalone)
-    # FIXME: Need to review this.
     doc = Oga::XML::Document.new(xml_declaration: Oga::XML::XmlDeclaration.new(version: version, encoding: encoding, standalone: standalone)) # Oga.parse_xml
     return doc
   end
@@ -163,14 +154,8 @@ class XMLHelper
 
   def self.write_file(doc, out_path)
     # Write XML file
-    # FIXME: previous code: formatter = REXML::Formatters::Pretty.new(2)
-    # FIXME: previous code: formatter.compact = true
-    # FIXME: previous code: formatter.width = 1000
-    # FIXME: Need to review this
     File.open(out_path, 'w', newline: :crlf) do |f|
-      # FIXME: previous code: formatter.write(doc, f)
       f << doc.to_xml
-      # f = Oga::XML::Generator.new(doc)
     end
   end
 end
