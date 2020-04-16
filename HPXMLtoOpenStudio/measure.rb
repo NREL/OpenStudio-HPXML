@@ -2351,6 +2351,18 @@ class OSModel
         end
       end
 
+      charge_defect_ratio = cooling_system.charge_defect_ratio
+      if charge_defect_ratio.nil?
+        charge_defect_ratio = 0.0
+      end
+
+      airflow_defect_ratio = cooling_system.airflow_defect_ratio
+      if airflow_defect_ratio.nil?
+        airflow_defect_ratio = 0.0
+      end
+
+      fan_power_measured = cooling_system.blower_watt_cfm
+
       load_frac = cooling_system.fraction_cool_load_served
       sequential_load_frac, @total_frac_remaining_cool_load_served, load_frac = calc_sequential_load_fraction(load_frac, @total_frac_remaining_cool_load_served)
 
@@ -2367,12 +2379,15 @@ class OSModel
 
         if compressor_type == HPXML::HVACCompressorTypeSingleStage
 
+          # TODO: Handle cooling_cfm input (by setting airflow defect to 0?)
+
           shrs = [cooling_system.cooling_shr]
           airflow_rate = cooling_system.cooling_cfm # Hidden feature; used only for HERS DSE test
           HVAC.apply_central_ac_1speed(model, runner, seer, shrs,
                                        crankcase_kw, crankcase_temp,
-                                       cool_capacity_btuh, airflow_rate, load_frac,
-                                       sequential_load_frac, @living_zone,
+                                       cool_capacity_btuh, airflow_rate,
+                                       charge_defect_ratio, airflow_defect_ratio, fan_power_measured,
+                                       load_frac, sequential_load_frac, @living_zone,
                                        @hvac_map, cooling_system.id)
         elsif compressor_type == HPXML::HVACCompressorTypeTwoStage
 
@@ -2534,6 +2549,18 @@ class OSModel
         end
       end
 
+      charge_defect_ratio = heat_pump.charge_defect_ratio
+      if charge_defect_ratio.nil?
+        charge_defect_ratio = 0.0
+      end
+
+      airflow_defect_ratio = heat_pump.airflow_defect_ratio
+      if airflow_defect_ratio.nil?
+        airflow_defect_ratio = 0.0
+      end
+
+      fan_power_measured = heat_pump.blower_watt_cfm
+
       load_frac_heat = heat_pump.fraction_heat_load_served
       sequential_load_frac_heat, @total_frac_remaining_heat_load_served, load_frac_heat = calc_sequential_load_fraction(load_frac_heat, @total_frac_remaining_heat_load_served)
 
@@ -2598,6 +2625,7 @@ class OSModel
                                          hp_compressor_min_temp, crankcase_kw, crankcase_temp,
                                          cool_capacity_btuh, heat_capacity_btuh, heat_capacity_btuh_17F,
                                          backup_heat_fuel, backup_heat_efficiency, backup_heat_capacity_btuh, supp_htg_max_outdoor_temp,
+                                         charge_defect_ratio, airflow_defect_ratio, fan_power_measured,
                                          load_frac_heat, load_frac_cool,
                                          sequential_load_frac_heat, sequential_load_frac_cool,
                                          @living_zone, @hvac_map, heat_pump.id)

@@ -2178,7 +2178,8 @@ class HPXML < Object
     ATTRS = [:id, :distribution_system_idref, :year_installed, :cooling_system_type,
              :cooling_system_fuel, :cooling_capacity, :compressor_type, :fraction_cool_load_served,
              :cooling_efficiency_seer, :cooling_efficiency_eer, :cooling_shr, :cooling_cfm,
-             :energy_star, :seed_id]
+             :energy_star, :seed_id,
+             :airflow_defect_ratio, :charge_defect_ratio, :blower_watt_cfm]
     attr_accessor(*ATTRS)
 
     def distribution_system
@@ -2237,7 +2238,10 @@ class HPXML < Object
       XMLHelper.add_element(cooling_system, 'SensibleHeatFraction', Float(@cooling_shr)) unless @cooling_shr.nil?
       HPXML::add_extension(parent: cooling_system,
                            extensions: { 'CoolingFlowRate' => HPXML::to_float_or_nil(@cooling_cfm),
-                                         'SeedId' => @seed_id })
+                                         'SeedId' => @seed_id,
+                                         'AirflowDefectRatio' => HPXML::to_float_or_nil(@airflow_defect_ratio),
+                                         'ChargeDefectRatio' => HPXML::to_float_or_nil(@charge_defect_ratio),
+                                         'BlowerWattPerCFM' => HPXML::to_float_or_nil(@blower_watt_cfm) })
     end
 
     def from_rexml(cooling_system)
@@ -2257,6 +2261,9 @@ class HPXML < Object
       @cooling_cfm = HPXML::to_float_or_nil(XMLHelper.get_value(cooling_system, 'extension/CoolingFlowRate'))
       @energy_star = XMLHelper.get_values(cooling_system, 'ThirdPartyCertification').include?('Energy Star')
       @seed_id = XMLHelper.get_value(cooling_system, 'extension/SeedId')
+      @airflow_defect_ratio = HPXML::to_float_or_nil(XMLHelper.get_value(cooling_system, 'extension/AirflowDefectRatio'))
+      @charge_defect_ratio = HPXML::to_float_or_nil(XMLHelper.get_value(cooling_system, 'extension/ChargeDefectRatio'))
+      @blower_watt_cfm = HPXML::to_float_or_nil(XMLHelper.get_value(cooling_system, 'extension/BlowerWattPerCFM'))
     end
   end
 
@@ -2281,7 +2288,8 @@ class HPXML < Object
              :backup_heating_efficiency_percent, :backup_heating_efficiency_afue,
              :backup_heating_switchover_temp, :fraction_heat_load_served, :fraction_cool_load_served,
              :cooling_efficiency_seer, :cooling_efficiency_eer, :heating_efficiency_hspf,
-             :heating_efficiency_cop, :energy_star, :seed_id]
+             :heating_efficiency_cop, :energy_star, :seed_id,
+             :airflow_defect_ratio, :charge_defect_ratio, :blower_watt_cfm]
     attr_accessor(*ATTRS)
 
     def distribution_system
@@ -2367,7 +2375,10 @@ class HPXML < Object
       end
 
       HPXML::add_extension(parent: heat_pump,
-                           extensions: { 'SeedId' => @seed_id })
+                           extensions: { 'SeedId' => @seed_id,
+                                         'AirflowDefectRatio' => HPXML::to_float_or_nil(@airflow_defect_ratio),
+                                         'ChargeDefectRatio' => HPXML::to_float_or_nil(@charge_defect_ratio),
+                                         'BlowerWattPerCFM' => HPXML::to_float_or_nil(@blower_watt_cfm) })
     end
 
     def from_rexml(heat_pump)
@@ -2396,6 +2407,9 @@ class HPXML < Object
       @heating_efficiency_cop = HPXML::to_float_or_nil(XMLHelper.get_value(heat_pump, "[HeatPumpType='#{HVACTypeHeatPumpGroundToAir}']AnnualHeatingEfficiency[Units='COP']/Value"))
       @energy_star = XMLHelper.get_values(heat_pump, 'ThirdPartyCertification').include?('Energy Star')
       @seed_id = XMLHelper.get_value(heat_pump, 'extension/SeedId')
+      @airflow_defect_ratio = HPXML::to_float_or_nil(XMLHelper.get_value(heat_pump, 'extension/AirflowDefectRatio'))
+      @charge_defect_ratio = HPXML::to_float_or_nil(XMLHelper.get_value(heat_pump, 'extension/ChargeDefectRatio'))
+      @blower_watt_cfm = HPXML::to_float_or_nil(XMLHelper.get_value(heat_pump, 'extension/BlowerWattPerCFM'))
     end
   end
 

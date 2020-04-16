@@ -8,13 +8,19 @@ require_relative 'schedules'
 class HVAC
   def self.apply_central_ac_1speed(model, runner, seer, shrs,
                                    crankcase_kw, crankcase_temp,
-                                   capacity, airflow_rate, frac_cool_load_served,
-                                   sequential_cool_load_frac, control_zone,
+                                   capacity, airflow_rate,
+                                   charge_defect_ratio, airflow_defect_ratio, fan_power_measured,
+                                   frac_cool_load_served, sequential_cool_load_frac, control_zone,
                                    hvac_map, sys_id)
 
     num_speeds = 1
     fan_power_rated = get_fan_power_rated(seer)
-    fan_power_installed = get_fan_power_installed(seer)
+    if fan_power_measured.nil?
+      fan_power_installed = get_fan_power_installed(seer)
+    else
+      # TODO: NOTE this is overriden by the Eae blower efficiency for furnaces
+      fan_power_installed = fan_power_measured
+    end
     capacity_ratios = HVAC.one_speed_capacity_ratios
     fan_speed_ratios = HVAC.one_speed_fan_speed_ratios
 
@@ -80,6 +86,9 @@ class HVAC
       air_loop_unitary.setSupplyAirFlowRateMethodDuringCoolingOperation('SupplyAirFlowRate')
       air_loop_unitary.setSupplyAirFlowRateDuringCoolingOperation(UnitConversions.convert(airflow_rate, 'cfm', 'm^3/s'))
     end
+
+    # apply_installation_quality_EMS(model, air_loop_unitary, control_zone, charge_defect_ratio, airflow_defect_ratio)
+
     hvac_map[sys_id] << air_loop_unitary
 
     air_loop = OpenStudio::Model::AirLoopHVAC.new(model)
@@ -115,6 +124,230 @@ class HVAC
     air_loop_unitary.additionalProperties.setFeature(Constants.SizingInfoHVACRatedCFMperTonCooling, cfms_ton_rated.join(','))
     air_loop_unitary.additionalProperties.setFeature(Constants.SizingInfoHVACFracCoolLoadServed, frac_cool_load_served)
     air_loop_unitary.additionalProperties.setFeature(Constants.SizingInfoHVACCoolType, Constants.ObjectNameCentralAirConditioner)
+    air_loop_unitary.additionalProperties.setFeature(Constants.SizingInfoHVACAirflowDefectRatio, airflow_defect_ratio)
+    air_loop_unitary.additionalProperties.setFeature(Constants.SizingInfoHVACChargeDefectRatio, charge_defect_ratio)
+  end
+
+  def self.calc_airflow_ratio(airflow_rated, airflow_design, airflow_defect_ratio)
+    return(airflow_design * (1.0 + airflow_defect_ratio) / airflow_rated)
+  end
+
+  def self.apply_installation_quality_EMS(model, unitary_system, control_zone, charge_defect_ratio, airflow_rated_defect_ratio_cool, airflow_rated_defect_ratio_heat)
+    # TODO: Error checking on inputs
+
+    # TEMP: For testing without
+    # return
+
+    if unitary_system.is_a? OpenStudio::Model::AirLoopHVACUnitarySystem
+      clg_coil, htg_coil, supp_htg_coil = get_coils_from_hvac_equip(model, unitary_system)
+
+      if not clg_coil.nil?
+        unless clg_coil.to_CoilCoolingDXSingleSpeed.is_initialized
+          fail "HVAC installation quality unexpected cooling coil #{clg_coil.name}."
+        end
+      else
+        fail 'HVAC installation quality unexpected nil cooling coil.'
+      end
+
+      is_heat_pump = false
+      if not htg_coil.nil?
+        is_heat_pump = htg_coil.to_CoilHeatingDXSingleSpeed.is_initialized
+        if htg_coil.to_CoilHeatingDXMultiSpeed.is_initialized
+          fail "HVAC installation quality unexpected heating coil #{htg_coil.name}."
+        end
+      end
+
+    else
+      fail "HVAC installation quality routine unexpected unitary system #{unitary_system.name}."
+    end
+
+    obj_name = "#{unitary_system.name} install qual"
+
+    tin_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Zone Mean Air Temperature')
+    tin_sensor.setName("#{obj_name} tin s")
+    tin_sensor.setKeyName(control_zone.name.to_s)
+
+    tout_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Zone Outdoor Air Drybulb Temperature')
+    tout_sensor.setName("#{obj_name} tt s")
+    tout_sensor.setKeyName(control_zone.name.to_s)
+
+    cool_cap_fff_curve = clg_coil.totalCoolingCapacityFunctionOfFlowFractionCurve
+    cool_cap_fff_act = OpenStudio::Model::EnergyManagementSystemActuator.new(cool_cap_fff_curve, 'Curve', 'Curve Result')
+    cool_cap_fff_act.setName("#{obj_name} cap clg act")
+
+    cool_eir_fff_curve = clg_coil.energyInputRatioFunctionOfFlowFractionCurve
+    cool_eir_fff_act = OpenStudio::Model::EnergyManagementSystemActuator.new(cool_eir_fff_curve, 'Curve', 'Curve Result')
+    cool_eir_fff_act.setName("#{obj_name} eir clg act")
+
+    fault_program = OpenStudio::Model::EnergyManagementSystemProgram.new(model)
+    fault_program.setName("#{obj_name} prog")
+
+    ff_af_c = 1.0 + airflow_rated_defect_ratio_cool
+    f_chg = charge_defect_ratio
+
+    # Air conditioner airflow curves from Cutler et al.
+    # NOTE: heat pump (cooling) curves don't exhibit expected trends at extreme faults; using air conditioner curves instead
+    fault_program.addLine('Set a1_AF_Qgr_c = 0.718605468')
+    fault_program.addLine('Set a2_AF_Qgr_c = 0.410099989')
+    fault_program.addLine('Set a3_AF_Qgr_c = -0.128705457')
+    fault_program.addLine('Set a1_AF_EIR_c = 1.32299905')
+    fault_program.addLine('Set a2_AF_EIR_c = -0.477711207')
+    fault_program.addLine('Set a3_AF_EIR_c = 0.154712157')
+
+    fault_program.addLine("Set F_CH = #{f_chg.round(3)}")
+    if f_chg <= 0
+      fault_program.addLine('Set a1_CH_Qgr_c = -9.46E-01')
+      fault_program.addLine('Set a2_CH_Qgr_c = 4.93E-02')
+      fault_program.addLine('Set a3_CH_Qgr_c = -1.18E-03')
+      fault_program.addLine('Set a4_CH_Qgr_c = -1.15E+00')
+
+      fault_program.addLine('Set a1_CH_P_c = -3.13E-01')
+      fault_program.addLine('Set a2_CH_P_c = 1.15E-02')
+      fault_program.addLine('Set a3_CH_P_c = 2.66E-03')
+      fault_program.addLine('Set a4_CH_P_c = -1.16E-01')
+
+      ff_ch_c = 1.0 / (1.0 + (-9.46E-01 + (4.93E-02 * 26.67) - (1.18E-03 * 35.0) - (1.15 * f_chg)) * f_chg)
+    else
+      fault_program.addLine('Set a1_CH_Qgr_c = -1.63E-01')
+      fault_program.addLine('Set a2_CH_Qgr_c = 1.14E-02')
+      fault_program.addLine('Set a3_CH_Qgr_c = -2.10E-04')
+      fault_program.addLine('Set a4_CH_Qgr_c = -1.40E-01')
+
+      fault_program.addLine('Set a1_CH_P_c = 2.19E-01')
+      fault_program.addLine('Set a2_CH_P_c = -5.01E-03')
+      fault_program.addLine('Set a3_CH_P_c = 9.89E-04')
+      fault_program.addLine('Set a4_CH_P_c = 2.84E-01')
+
+      ff_ch_c = 1.0 / (1.0 + (-1.63E-01 + (1.14E-02 * 26.67) - (2.10E-04 * 35.0) - (1.40E-01 * f_chg)) * f_chg)
+    end
+
+    fault_program.addLine("Set FF_CH_c = #{ff_ch_c.round(3)}")
+
+    fault_program.addLine('Set q0_CH = a1_CH_Qgr_c')
+    fault_program.addLine("Set q1_CH = a2_CH_Qgr_c*#{tin_sensor.name}")
+    fault_program.addLine("Set q2_CH = a3_CH_Qgr_c*#{tout_sensor.name}")
+    fault_program.addLine('Set q3_CH = a4_CH_Qgr_c*F_CH')
+    fault_program.addLine('Set Y_CH_Q_c = 1 + ((q0_CH+(q1_CH)+(q2_CH)+(q3_CH))*F_CH)')
+
+    fault_program.addLine('Set q0_AF_CH = a1_AF_Qgr_c')
+    fault_program.addLine('Set q1_AF_CH = a2_AF_Qgr_c*FF_CH_c')
+    fault_program.addLine('Set q2_AF_CH = a3_AF_Qgr_c*FF_CH_c*FF_CH_c')
+    fault_program.addLine('Set p_CH_Q_c = Y_CH_Q_c/(q0_AF_CH+(q1_AF_CH)+(q2_AF_CH))')
+
+    fault_program.addLine('Set p1_CH = a1_CH_P_c')
+    fault_program.addLine("Set p2_CH = a2_CH_P_c*#{tin_sensor.name}")
+    fault_program.addLine("Set p3_CH = a3_CH_P_c*#{tout_sensor.name}")
+    fault_program.addLine('Set p4_CH = a4_CH_P_c*F_CH')
+    fault_program.addLine('Set Y_CH_COP_c = Y_CH_Q_c/(1 + (p1_CH+(p2_CH)+(p3_CH)+(p4_CH))*F_CH)')
+
+    fault_program.addLine('Set eir0_AF_CH = a1_AF_EIR_c')
+    fault_program.addLine('Set eir1_AF_CH = a2_AF_EIR_c*FF_CH_c')
+    fault_program.addLine('Set eir2_AF_CH = a3_AF_EIR_c*FF_CH_c*FF_CH_c')
+    fault_program.addLine('Set p_CH_COP_c = Y_CH_COP_c*(eir0_AF_CH+(eir1_AF_CH)+(eir2_AF_CH))')
+
+    ff_af_comb_c = ff_ch_c * ff_af_c
+    fault_program.addLine("Set FF_AF_comb_c = #{ff_af_comb_c.round(3)}")
+
+    fault_program.addLine('Set q0_AF_comb = a1_AF_Qgr_c')
+    fault_program.addLine('Set q1_AF_comb = a2_AF_Qgr_c*FF_AF_comb_c')
+    fault_program.addLine('Set q2_AF_comb = a3_AF_Qgr_c*FF_AF_comb_c*FF_AF_comb_c')
+    fault_program.addLine('Set p_AF_Q_c = q0_AF_comb+(q1_AF_comb)+(q2_AF_comb)')
+
+    fault_program.addLine('Set eir0_AF_comb = a1_AF_EIR_c')
+    fault_program.addLine('Set eir1_AF_comb = a2_AF_EIR_c*FF_AF_comb_c')
+    fault_program.addLine('Set eir2_AF_comb = a3_AF_EIR_c*FF_AF_comb_c*FF_AF_comb_c')
+    fault_program.addLine('Set p_AF_COP_c = 1.0/(eir0_AF_comb+(eir1_AF_comb)+(eir2_AF_comb))')
+
+    fault_program.addLine("Set #{cool_cap_fff_act.name} = (p_CH_Q_c * p_AF_Q_c)")
+    fault_program.addLine("Set #{cool_eir_fff_act.name} = (1.0 / (p_CH_COP_c * p_AF_COP_c))")
+
+    program_calling_manager = OpenStudio::Model::EnergyManagementSystemProgramCallingManager.new(model)
+    program_calling_manager.setName("#{obj_name} prog man")
+    program_calling_manager.setCallingPoint('InsideHVACSystemIterationLoop')
+    program_calling_manager.addProgram(fault_program)
+
+    unless is_heat_pump
+      return
+    end
+
+    hp_heat_cap_fff_curve = htg_coil.totalHeatingCapacityFunctionofFlowFractionCurve
+    hp_heat_eir_fff_curve = htg_coil.energyInputRatioFunctionofFlowFractionCurve
+
+    hp_heat_cap_fff_act = OpenStudio::Model::EnergyManagementSystemActuator.new(hp_heat_cap_fff_curve, 'Curve', 'Curve Result')
+    hp_heat_cap_fff_act.setName("#{obj_name} cap htg act")
+
+    hp_heat_eir_fff_act = OpenStudio::Model::EnergyManagementSystemActuator.new(hp_heat_eir_fff_curve, 'Curve', 'Curve Result')
+    hp_heat_eir_fff_act.setName("#{obj_name} eir htg act")
+
+    # heat pump (heating) airflow curves from Cutler et al.
+    fault_program.addLine('Set a1_AF_Qgr_h = 0.694045465')
+    fault_program.addLine('Set a2_AF_Qgr_h = 0.474207981')
+    fault_program.addLine('Set a3_AF_Qgr_h = -0.168253446')
+
+    fault_program.addLine('Set a1_AF_EIR_h = 2.185418751')
+    fault_program.addLine('Set a2_AF_EIR_h = -1.942827919')
+    fault_program.addLine('Set a3_AF_EIR_h = 0.757409168')
+
+    if f_chg <= 0
+      fault_program.addLine('Set a1_CH_Qgr_h = -0.0338595')
+      fault_program.addLine('Set a2_CH_Qgr_h = 0.0202827')
+      fault_program.addLine('Set a3_CH_Qgr_h = -2.6226343')
+
+      fault_program.addLine('Set a1_CH_P_h = 0.0615649')
+      fault_program.addLine('Set a2_CH_P_h = 0.0044554')
+      fault_program.addLine('Set a3_CH_P_h = -0.2598507')
+
+      ff_ch_h = 1 / (1 + (-0.0338595 + 0.0202827 * 8.33 - 2.6226343 * f_chg) * f_chg)
+    else
+      fault_program.addLine('Set a1_CH_Qgr_h = -0.0029514')
+      fault_program.addLine('Set a2_CH_Qgr_h = 0.0007379')
+      fault_program.addLine('Set a3_CH_Qgr_h = -0.0064112')
+
+      fault_program.addLine('Set a1_CH_P_h = -0.0594134')
+      fault_program.addLine('Set a2_CH_P_h = 0.0159205')
+      fault_program.addLine('Set a3_CH_P_h = 1.8872153')
+
+      ff_ch_h = 1 / (1 + (-0.0029514 + 0.0007379 * 8.33 - 0.0064112 * f_chg) * f_chg)
+    end
+
+    fault_program.addLine("Set FF_CH_h = #{ff_ch_h.round(3)}")
+
+    fault_program.addLine('Set qh1_CH = a1_CH_Qgr_h')
+    fault_program.addLine("Set qh2_CH = a2_CH_Qgr_h*#{tout_sensor.name}")
+    fault_program.addLine('Set qh3_CH = a3_CH_Qgr_h*F_CH')
+    fault_program.addLine('Set Y_CH_Q_h = 1 + ((qh1_CH+(qh2_CH)+(qh3_CH))*F_CH)')
+
+    fault_program.addLine('Set qh0_AF_CH = a1_AF_Qgr_h')
+    fault_program.addLine('Set qh1_AF_CH = a2_AF_Qgr_h*FF_CH_h')
+    fault_program.addLine('Set qh2_AF_CH = a3_AF_Qgr_h*FF_CH_h*FF_CH_h')
+    fault_program.addLine('Set p_CH_Q_h = Y_CH_Q_h/(qh0_AF_CH + (qh1_AF_CH) +(qh2_AF_CH))')
+
+    fault_program.addLine('Set ph1_CH = a1_CH_P_h')
+    fault_program.addLine("Set ph2_CH = a2_CH_P_h*#{tout_sensor.name}")
+    fault_program.addLine('Set ph3_CH = a3_CH_P_h*F_CH')
+    fault_program.addLine('Set Y_CH_COP_h = Y_CH_Q_h/(1 + ((ph1_CH+(ph2_CH)+(ph3_CH))*F_CH))')
+
+    fault_program.addLine('Set eirh0_AF_CH = a1_AF_EIR_h')
+    fault_program.addLine('Set eirh1_AF_CH = a2_AF_EIR_h*FF_CH_h')
+    fault_program.addLine('Set eirh2_AF_CH = a3_AF_EIR_h*FF_CH_h*FF_CH_h')
+    fault_program.addLine('Set p_CH_COP_h = Y_CH_COP_h*(eirh0_AF_CH + (eirh1_AF_CH) + (eirh2_AF_CH))')
+
+    ff_af_h = 1.0 + airflow_rated_defect_ratio_heat
+    ff_af_comb_h = ff_ch_h * ff_af_h
+    fault_program.addLine("Set FF_AF_comb_h = #{ff_af_comb_h.round(3)}")
+
+    fault_program.addLine('Set qh0_AF_comb = a1_AF_Qgr_h')
+    fault_program.addLine('Set qh1_AF_comb = a2_AF_Qgr_h*FF_AF_comb_h')
+    fault_program.addLine('Set qh2_AF_comb = a3_AF_Qgr_h*FF_AF_comb_h*FF_AF_comb_h')
+    fault_program.addLine('Set p_AF_Q_h = qh0_AF_comb+(qh1_AF_comb)+(qh2_AF_comb)')
+
+    fault_program.addLine('Set eirh0_AF_comb = a1_AF_EIR_h')
+    fault_program.addLine('Set eirh1_AF_comb = a2_AF_EIR_h*FF_AF_comb_h')
+    fault_program.addLine('Set eirh2_AF_comb = a3_AF_EIR_h*FF_AF_comb_h*FF_AF_comb_h')
+    fault_program.addLine('Set p_AF_COP_h = 1.0/(eirh0_AF_comb+(eirh1_AF_comb)+(eirh2_AF_comb))')
+
+    fault_program.addLine("Set #{hp_heat_cap_fff_act.name} = (p_CH_Q_h * p_AF_Q_h)")
+    fault_program.addLine("Set #{hp_heat_eir_fff_act.name} = 1.0 / (p_CH_COP_h * p_AF_COP_h)")
   end
 
   def self.apply_central_ac_2speed(model, runner, seer, shrs,
@@ -431,13 +664,18 @@ class HVAC
                                      min_temp, crankcase_kw, crankcase_temp,
                                      heat_pump_capacity_cool, heat_pump_capacity_heat, heat_pump_capacity_heat_17F,
                                      supplemental_fuel_type, supplemental_efficiency, supplemental_capacity, supp_htg_max_outdoor_temp,
+                                     charge_defect_ratio, airflow_defect_ratio, fan_power_measured,
                                      frac_heat_load_served, frac_cool_load_served,
                                      sequential_heat_load_frac, sequential_cool_load_frac,
                                      control_zone, hvac_map, sys_id)
 
     num_speeds = 1
     fan_power_rated = get_fan_power_rated(seer)
-    fan_power_installed = get_fan_power_installed(seer)
+    if fan_power_measured.nil?
+      fan_power_installed = get_fan_power_installed(seer)
+    else
+      fan_power_installed = fan_power_measured
+    end
     capacity_ratios = HVAC.one_speed_capacity_ratios
     fan_speed_ratios = HVAC.one_speed_fan_speed_ratios
 
@@ -534,6 +772,9 @@ class HVAC
     air_loop_unitary.setMaximumSupplyAirTemperature(UnitConversions.convert(170.0, 'F', 'C')) # higher temp for supplemental heat as to not severely limit its use, resulting in unmet hours.
     air_loop_unitary.setMaximumOutdoorDryBulbTemperatureforSupplementalHeaterOperation(UnitConversions.convert(supp_htg_max_outdoor_temp, 'F', 'C'))
     air_loop_unitary.setSupplyAirFlowRateWhenNoCoolingorHeatingisRequired(0)
+
+    # apply_installation_quality_EMS(model, air_loop_unitary, control_zone, charge_defect_ratio, airflow_defect_ratio)
+
     hvac_map[sys_id] << air_loop_unitary
 
     air_loop = OpenStudio::Model::AirLoopHVAC.new(model)
@@ -572,6 +813,8 @@ class HVAC
     air_loop_unitary.additionalProperties.setFeature(Constants.SizingInfoHVACFracCoolLoadServed, frac_cool_load_served)
     air_loop_unitary.additionalProperties.setFeature(Constants.SizingInfoHVACCoolType, Constants.ObjectNameAirSourceHeatPump)
     air_loop_unitary.additionalProperties.setFeature(Constants.SizingInfoHVACHeatType, Constants.ObjectNameAirSourceHeatPump)
+    air_loop_unitary.additionalProperties.setFeature(Constants.SizingInfoHVACAirflowDefectRatio, airflow_defect_ratio)
+    air_loop_unitary.additionalProperties.setFeature(Constants.SizingInfoHVACChargeDefectRatio, charge_defect_ratio)
   end
 
   def self.apply_central_ashp_2speed(model, runner, seer, hspf, shrs,

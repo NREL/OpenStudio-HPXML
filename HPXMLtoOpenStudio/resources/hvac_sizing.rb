@@ -68,6 +68,9 @@ class HVACSizing
       # Set OpenStudio object values
       set_object_values(model, hvac, hvac_final_values)
 
+      # Create installation quality EMS program
+      set_installation_quality(model, hvac, hvac_final_values)
+
       # Display debug info
       display_hvac_final_values_results(hvac_final_values, hvac) if debug
     end
@@ -1767,10 +1770,10 @@ class HVACSizing
     # Prevent errors of "has no air flow"
     min_air_flow = 3.0 # cfm; E+ minimum is 0.001 m^3/s"
     if hvac_final_values.Heat_Airflow > 0
-      hvac_final_values.Heat_Airflow = [hvac_final_values.Heat_Airflow, min_air_flow].max
+      hvac_final_values.Heat_Airflow = [hvac_final_values.Heat_Airflow, min_air_flow].max * (1.0 + hvac.AirflowDefectRatio)
     end
     if hvac_final_values.Cool_Airflow > 0
-      hvac_final_values.Cool_Airflow = [hvac_final_values.Cool_Airflow, min_air_flow].max
+      hvac_final_values.Cool_Airflow = [hvac_final_values.Cool_Airflow, min_air_flow].max * (1.0 + hvac.AirflowDefectRatio)
     end
 
     return hvac_final_values
@@ -2221,6 +2224,11 @@ class HVACSizing
           coolingCFMs = get_feature(equip, Constants.SizingInfoHVACCoolingCFMs, 'string')
 
           hvac.CoolingCFMs = coolingCFMs.split(',').map(&:to_f)
+        end
+
+        if hvac.CoolType == Constants.ObjectNameCentralAirConditioner || hvac.CoolType == Constants.ObjectNameAirSourceHeatPump
+          hvac.AirflowDefectRatio = get_feature(equip, Constants.SizingInfoHVACAirflowDefectRatio, 'double')
+          hvac.ChargeDefectRatio = get_feature(equip, Constants.SizingInfoHVACChargeDefectRatio, 'double')
         end
 
         curves = [clg_coil.totalCoolingCapacityFunctionOfTemperatureCurve]
@@ -3384,6 +3392,40 @@ class HVACSizing
     end # hvac Object
   end
 
+  def self.set_installation_quality(model, hvac, hvac_final_values)
+    hvac.Objects.each do |object|
+      next unless object.is_a?(OpenStudio::Model::AirLoopHVACUnitarySystem) && object.airLoopHVAC.is_initialized
+
+      clg_coil, htg_coil, supp_htg_coil = HVAC.get_coils_from_hvac_equip(model, object)
+
+      if not clg_coil.nil?
+        unless clg_coil.to_CoilCoolingDXSingleSpeed.is_initialized
+          return
+        end
+      else
+        return
+      end
+
+      airflow_defect_cool = UnitConversions.convert(hvac_final_values.Cool_Airflow, 'cfm', 'm^3/s') / clg_coil.getRatedAirFlowRate().get().value() - 1.0
+
+      airflow_defect_heat = 0.0
+      if not htg_coil.nil?
+        if htg_coil.to_CoilHeatingDXMultiSpeed.is_initialized
+          return
+        end
+        if htg_coil.to_CoilHeatingDXSingleSpeed.is_initialized
+          # Re-calculate the rated heating airflow rate since OS doesn't have a get method for this object
+          rated_airflow_heat = UnitConversions.convert(hvac_final_values.Heat_Capacity, 'Btu/hr', 'ton') * UnitConversions.convert(hvac.RatedCFMperTonHeating[0], 'cfm', 'm^3/s')
+          airflow_defect_heat = UnitConversions.convert(hvac_final_values.Heat_Airflow, 'cfm', 'm^3/s') / rated_airflow_heat - 1.0
+        end
+      end
+
+      HVAC.apply_installation_quality_EMS(model, object, @cond_zone, hvac.ChargeDefectRatio, airflow_defect_cool, airflow_defect_heat)
+
+      # object type
+    end # hvac Object
+  end
+
   def self.setCoilsObjectValues(model, hvac, equip, hvac_final_values)
     clg_coil, htg_coil, supp_htg_coil = HVAC.get_coils_from_hvac_equip(model, equip)
 
@@ -3391,7 +3433,7 @@ class HVACSizing
     if clg_coil.is_a? OpenStudio::Model::CoilCoolingDXSingleSpeed
       clg_coil.setRatedTotalCoolingCapacity(UnitConversions.convert(hvac_final_values.Cool_Capacity, 'Btu/hr', 'W'))
       clg_coil.setRatedAirFlowRate(UnitConversions.convert(hvac_final_values.Cool_Capacity, 'Btu/hr', 'ton') * UnitConversions.convert(hvac.RatedCFMperTonCooling[0], 'cfm', 'm^3/s'))
-
+      puts('clg_coil.setRatedAirFlowRate')
     elsif clg_coil.is_a? OpenStudio::Model::CoilCoolingDXMultiSpeed
       clg_coil.stages.each_with_index do |stage, speed|
         stage.setGrossRatedTotalCoolingCapacity(UnitConversions.convert(hvac_final_values.Cool_Capacity, 'Btu/hr', 'W') * hvac.CapacityRatioCooling[speed])
@@ -3594,6 +3636,8 @@ class HVACInfo
     self.OverSizeLimit = 1.15
     self.OverSizeDelta = 15000.0
     self.FanspeedRatioCooling = [1.0]
+    self.AirflowDefectRatio = 0.0
+    self.ChargeDefectRatio = 0.0
     self.Ducts = []
   end
 
@@ -3611,7 +3655,7 @@ class HVACInfo
 
   attr_accessor(:HeatType, :CoolType, :Handle, :Objects, :Ducts, :NumSpeedsCooling, :NumSpeedsHeating,
                 :FixedCoolingCapacity, :FixedHeatingCapacity, :FixedSuppHeatingCapacity,
-                :CoolingCFMs, :HeatingCFMs, :RatedCFMperTonCooling, :RatedCFMperTonHeating,
+                :CoolingCFMs, :HeatingCFMs, :RatedCFMperTonCooling, :RatedCFMperTonHeating, :AirflowDefectRatio, :ChargeDefectRatio,
                 :COOL_CAP_FT_SPEC, :HEAT_CAP_FT_SPEC, :COOL_SH_FT_SPEC, :COIL_BF_FT_SPEC,
                 :SHRRated, :CapacityRatioCooling, :CapacityRatioHeating,
                 :HeatingCapacityOffset, :OverSizeLimit, :OverSizeDelta, :FanspeedRatioCooling,

@@ -551,6 +551,14 @@ class Constants
     return __method__.to_s
   end
 
+  def self.SizingInfoHVACAirflowDefectRatio
+    return __method__.to_s
+  end
+
+  def self.SizingInfoHVACChargeDefectRatio
+    return __method__.to_s
+  end
+
   def self.SizingInfoHVACHeatingCapacityOffset
     return __method__.to_s
   end

@@ -190,6 +190,14 @@ def create_hpxmls
     'base-hvac-furnace-x3-dse.xml' => 'base.xml',
     'base-hvac-ground-to-air-heat-pump.xml' => 'base.xml',
     'base-hvac-ideal-air.xml' => 'base.xml',
+    'base-hvac-install-qual-both.xml' => 'base.xml',
+    'base-hvac-install-qual-none.xml' => 'base.xml',
+    'base-hvac-install-qual-airflow.xml' => 'base.xml',
+    'base-hvac-install-qual-charge.xml' => 'base.xml',
+    'base-hvac-install-qual-both-air-to-air-heat-pump-1-speed.xml' => 'base-hvac-air-to-air-heat-pump-1-speed.xml',
+    'base-hvac-install-qual-none-air-to-air-heat-pump-1-speed.xml' => 'base-hvac-air-to-air-heat-pump-1-speed.xml',
+    'base-hvac-install-qual-airflow-air-to-air-heat-pump-1-speed.xml' => 'base-hvac-air-to-air-heat-pump-1-speed.xml',
+    'base-hvac-install-qual-charge-air-to-air-heat-pump-1-speed.xml' => 'base-hvac-air-to-air-heat-pump-1-speed.xml',
     'base-hvac-mini-split-heat-pump-ducted.xml' => 'base.xml',
     'base-hvac-mini-split-heat-pump-ductless.xml' => 'base-hvac-mini-split-heat-pump-ducted.xml',
     'base-hvac-mini-split-heat-pump-ductless-no-backup.xml' => 'base-hvac-mini-split-heat-pump-ductless.xml',
@@ -1952,6 +1960,16 @@ def set_hpxml_cooling_systems(hpxml_file, hpxml)
     hpxml.cooling_systems[0].cooling_capacity /= 10.0
   elsif ['base-hvac-flowrate.xml'].include? hpxml_file
     hpxml.cooling_systems[0].cooling_cfm = hpxml.cooling_systems[0].cooling_capacity * 360.0 / 12000.0
+  elsif ['base-hvac-install-qual-both.xml'].include? hpxml_file
+    hpxml.cooling_systems[0].airflow_defect_ratio = -0.25
+    hpxml.cooling_systems[0].charge_defect_ratio = -0.25
+  elsif ['base-hvac-install-qual-none.xml'].include? hpxml_file
+    hpxml.cooling_systems[0].airflow_defect_ratio = 0.0
+    hpxml.cooling_systems[0].charge_defect_ratio = 0.0
+  elsif ['base-hvac-install-qual-airflow.xml'].include? hpxml_file
+    hpxml.cooling_systems[0].airflow_defect_ratio = -0.25
+  elsif ['base-hvac-install-qual-charge.xml'].include? hpxml_file
+    hpxml.cooling_systems[0].charge_defect_ratio = -0.25
   elsif ['base-misc-defaults.xml'].include? hpxml_file
     hpxml.cooling_systems[0].cooling_shr = nil
     hpxml.cooling_systems[0].compressor_type = nil
@@ -2139,6 +2157,16 @@ def set_hpxml_heat_pumps(hpxml_file, hpxml)
   elsif ['base-hvac-dual-fuel-air-to-air-heat-pump-1-speed-electric.xml'].include? hpxml_file
     hpxml.heat_pumps[0].backup_heating_fuel = HPXML::FuelTypeElectricity
     hpxml.heat_pumps[0].backup_heating_efficiency_afue = 1.0
+  elsif ['base-hvac-install-qual-both-air-to-air-heat-pump-1-speed.xml'].include? hpxml_file
+    hpxml.heat_pumps[0].airflow_defect_ratio = -0.25
+    hpxml.heat_pumps[0].charge_defect_ratio = -0.25
+  elsif ['base-hvac-install-qual-none-air-to-air-heat-pump-1-speed.xml'].include? hpxml_file
+    hpxml.heat_pumps[0].airflow_defect_ratio = 0.0
+    hpxml.heat_pumps[0].charge_defect_ratio = 0.0
+  elsif ['base-hvac-install-qual-airflow-air-to-air-heat-pump-1-speed.xml'].include? hpxml_file
+    hpxml.heat_pumps[0].airflow_defect_ratio = -0.25
+  elsif ['base-hvac-install-qual-charge-air-to-air-heat-pump-1-speed.xml'].include? hpxml_file
+    hpxml.heat_pumps[0].charge_defect_ratio = -0.25
   elsif hpxml_file.include?('hvac_autosizing') && (not hpxml.heat_pumps.nil?) && (hpxml.heat_pumps.size > 0)
     hpxml.heat_pumps[0].cooling_capacity = -1
     hpxml.heat_pumps[0].heating_capacity = -1
