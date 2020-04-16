@@ -224,7 +224,6 @@ class HPXML < Object
     hpxml = nil
     if not hpxml_path.nil?
       @doc = XMLHelper.parse_file(hpxml_path)
-      # FIXME: previous code: hpxml = @doc.elements['/HPXML']
       hpxml = XMLHelper.get_element(@doc, '/HPXML')
     end
     from_oga(hpxml)

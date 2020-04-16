@@ -401,8 +401,6 @@ def create_hpxmls
       hpxml_doc = hpxml.to_oga()
 
       if ['invalid_files/missing-elements.xml'].include? derivative
-        # hpxml_doc.elements['/HPXML/Building/BuildingDetails/BuildingSummary/BuildingConstruction'].elements.delete('NumberofConditionedFloors')
-        # hpxml_doc.elements['/HPXML/Building/BuildingDetails/BuildingSummary/BuildingConstruction'].elements.delete('ConditionedFloorArea')
         XMLHelper.delete_element(hpxml_doc, '/HPXML/Building/BuildingDetails/BuildingSummary/BuildingConstruction/NumberofConditionedFloors')
         XMLHelper.delete_element(hpxml_doc, '/HPXML/Building/BuildingDetails/BuildingSummary/BuildingConstruction/ConditionedFloorArea')
       end
