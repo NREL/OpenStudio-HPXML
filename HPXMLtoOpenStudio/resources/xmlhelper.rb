@@ -153,9 +153,42 @@ class XMLHelper
   end
 
   def self.write_file(doc, out_path)
+    doc_s = doc.to_xml
+
+    # Manually apply pretty-printing (indentation and newlines)
+    # Can remove if https://gitlab.com/yorickpeterse/oga/-/issues/75 is implemented
+    curr_pos = 1
+    level = -1
+    indents = {}
+    while true
+      open_pos = doc_s.index('<', curr_pos)
+      close_pos = nil
+      if not open_pos.nil?
+        close_pos1 = doc_s.index('</', curr_pos)
+        close_pos2 = doc_s.index('/>', curr_pos)
+        close_pos1 = Float::MAX if close_pos1.nil?
+        close_pos2 = Float::MAX if close_pos2.nil?
+        close_pos = [close_pos1, close_pos2].min
+      end
+      break if open_pos.nil? && close_pos.nil?
+
+      if close_pos <= open_pos
+        indents[close_pos] = level if doc_s[close_pos - 1] == '>'
+        level -= 1
+        curr_pos = close_pos + 1
+      elsif open_pos < close_pos
+        level += 1
+        indents[open_pos] = level unless level == 0
+        curr_pos = open_pos + 1
+      end
+    end
+    indents.reverse_each do |pos, level|
+      doc_s.insert(pos, "\n#{'  ' * level}")
+    end
+
     # Write XML file
     File.open(out_path, 'w', newline: :crlf) do |f|
-      f << doc.to_xml
+      f << doc_s
     end
   end
 end
