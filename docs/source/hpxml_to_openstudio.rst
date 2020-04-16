@@ -612,7 +612,7 @@ If using detailed inputs, the following elements are used:
 - ``CollectorRatedOpticalEfficiency``: FRTA (y-intercept); see Directory of SRCC OG-100 Certified Solar Collector Ratings
 - ``CollectorRatedThermalLosses``: FRUL (slope, in units of Btu/hr-ft^2-R); see Directory of SRCC OG-100 Certified Solar Collector Ratings
 - ``StorageVolume``
-- ``ConnectedTo``: Must point to a ``WaterHeatingSystem``. But the connected water heater cannot be of type space-heating boiler or attached to a desuperheater.
+- ``ConnectedTo``: Must point to a ``WaterHeatingSystem``. The connected water heater cannot be of type space-heating boiler or attached to a desuperheater.
 
 Photovoltaics
 *************
