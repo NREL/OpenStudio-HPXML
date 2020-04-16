@@ -185,6 +185,9 @@ class XMLHelper
     indents.reverse_each do |pos, level|
       doc_s.insert(pos, "\n#{'  ' * level}")
     end
+    # Retain REXML-styling
+    doc_s.gsub!('"', "'")
+    doc_s.gsub!(' />', '/>')
 
     # Write XML file
     File.open(out_path, 'w', newline: :crlf) do |f|
