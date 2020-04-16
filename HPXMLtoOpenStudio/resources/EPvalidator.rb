@@ -598,8 +598,7 @@ class EnergyPlusValidator
       '/HPXML/Building/BuildingDetails/Systems/SolarThermal/SolarThermalSystem' => {
         'SystemIdentifier' => one, # Required by HPXML schema
         'SystemType[text()="hot water"]' => one,
-        'CollectorArea | SolarFraction' => one, # See [SolarThermal=Detailed] if CollectorArea provided
-        'ConnectedTo' => one, # WaterHeatingSystem (any type but space-heating boiler)
+        'CollectorArea | SolarFraction' => one, # See [SolarThermal=Detailed] or [SolarThermal=Simple]
       },
 
       ## [SolarThermal=Detailed]
@@ -611,6 +610,12 @@ class EnergyPlusValidator
         'CollectorRatedOpticalEfficiency' => one,
         'CollectorRatedThermalLosses' => one,
         'StorageVolume' => one,
+        'ConnectedTo' => one, # WaterHeatingSystem (any type but space-heating boiler)
+      },
+
+      ## [SolarThermal=Simple]
+      '/HPXML/Building/BuildingDetails/Systems/SolarThermal/SolarThermalSystem[SolarFraction]' => {
+        'ConnectedTo' => zero_or_one, # WaterHeatingSystem (any type)
       },
 
       # [PVSystem]
