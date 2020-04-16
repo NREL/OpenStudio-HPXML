@@ -37,7 +37,7 @@ class HPXMLTest < MiniTest::Test
 
     xmls = []
     test_dirs.each do |test_dir|
-      Dir["#{test_dir}/base*.xml"].sort.each do |xml|
+      Dir["#{test_dir}/base-enclosure-other-heated-space.xml"].sort.each do |xml|
         xmls << File.absolute_path(xml)
       end
     end
@@ -759,7 +759,10 @@ class HPXMLTest < MiniTest::Test
                                     'base-foundation-multiple.xml' => 2,              # additional instance for 2nd foundation type
                                     'base-enclosure-2stories-garage.xml' => 2,        # additional instance for garage
                                     'base-enclosure-garage.xml' => 2,                 # additional instance for garage
-                                    'base-enclosure-adiabatic-surfaces.xml' => 0,     # no foundation in contact w/ ground
+                                    'base-enclosure-other-housing-unit.xml' => 0,     # no foundation in contact w/ ground
+                                    'base-enclosure-other-heated-space.xml' => 0,     # no foundation in contact w/ ground
+                                    'base-enclosure-other-non-freezing-space.xml' => 0,     # no foundation in contact w/ ground
+                                    'base-enclosure-other-multifamily-buffer-space.xml' => 0,     # no foundation in contact w/ ground
                                     'base-foundation-walkout-basement.xml' => 4,      # 3 foundation walls plus a no-wall exposed perimeter
                                     'base-foundation-complex.xml' => 10 }
 

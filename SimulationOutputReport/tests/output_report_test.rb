@@ -202,6 +202,7 @@ class SimulationOutputReportTest < MiniTest::Test
   TimeseriesColsTemperaturesOtherSide = [
     'Temperature: Other Multifamily Buffer Space',
     'Temperature: Other Non-freezing Space',
+    'Temperature: Other Housing Unit',
     'Temperature: Other Heated Space'
   ]
 
