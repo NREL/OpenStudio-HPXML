@@ -109,11 +109,14 @@ class HEScoreTest < Minitest::Unit::TestCase
 
     results = {}
 
-    # Fill in missing results with zeroes
-    get_output_meter_requests.each do |hes_key, ep_meters|
+    hes_keys = get_output_map.values
+    hes_keys << ['hot_water', 'hot_water'] # TODO: Remove this when eventually incorporated in reporting measure
+
+    # Fill in missing results with zeros
+    hes_keys.uniq.each do |hes_key|
       end_use = hes_key[0]
       resource_type = hes_key[1]
-      units = get_fuel_site_units(resource_type)
+      units = get_units_map[resource_type]
       key = [resource_type.to_s, end_use.to_s, units]
 
       found_in_results = false
@@ -174,8 +177,10 @@ class HEScoreTest < Minitest::Unit::TestCase
     hpxml_doc.elements.each('/HPXML/Building/BuildingDetails/Systems/WaterHeating/WaterHeatingSystem') do |hw_sys|
       hw_fuels << fuel_map[XMLHelper.get_value(hw_sys, 'FuelType')]
       hw_type = XMLHelper.get_value(hw_sys, 'WaterHeaterType')
-      if hw_type.include?('boiler') || (hw_type == 'heat pump water heater')
-        hw_fuels << fuel_map['electricity'] # fan/pump
+      next unless hw_type.include?('boiler')
+      hpxml_doc.elements.each('/HPXML/Building/BuildingDetails/Systems/HVAC/HVACPlant/HeatingSystem') do |htg_sys|
+        next unless hw_sys.elements['RelatedHVACSystem'].attributes['idref'] == htg_sys.elements['SystemIdentifier'].attributes['id']
+        hw_fuels << fuel_map[XMLHelper.get_value(htg_sys, 'HeatingSystemFuel')]
       end
     end
 
