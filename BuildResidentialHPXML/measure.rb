@@ -1642,8 +1642,7 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
 
     arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('clothes_washer_efficiency_imef', true)
     arg.setDisplayName('Clothes Washer: Integrated Modified Energy Factor')
-    arg.setUnits('ft^3/kWh-cycle')
-    arg.setDescription('If only a Modified Energy Factor (MEF) is available, convert using the equation: IMEF = (MEF - 0.503) / 0.95.')
+    arg.setDescription('The energy performance metric for ENERGY STAR certified residential clothes washers as of March 7, 2015.')
     arg.setDefaultValue(1.0)
     args << arg
 
@@ -1737,7 +1736,7 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('clothes_dryer_efficiency_ef', true)
     arg.setDisplayName('Clothes Dryer: Energy Factor')
     arg.setUnits('lb/kWh')
-    arg.setDescription('If only an Energy Factor (EF) is available, convert using the equation: CEF = EF / 1.15.')
+    arg.setDescription('The energy performance metric for ENERGY STAR certified residential clothes dryers prior to September 13, 2013. The new metric is Combined Energy Factor.')
     arg.setDefaultValue(3.4615)
     args << arg
 
