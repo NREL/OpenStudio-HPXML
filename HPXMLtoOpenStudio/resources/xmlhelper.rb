@@ -71,16 +71,14 @@ class XMLHelper
   # Returns the name of the first child element of the 'element_name'
   # element on the parent element.
   def self.get_child_name(parent, element_name)
-    begin
-      # Workaround for bug in oga; see https://gitlab.com/yorickpeterse/oga/-/issues/202
-      if parent.at_xpath(element_name).children[0].is_a? Oga::XML::Element
-        return parent.at_xpath(element_name).children[0].name
-      else
-        return parent.at_xpath(element_name).children[1].name
-      end
-    rescue
+    element = parent.at_xpath(element_name)
+    return if element.nil? || element.children.nil?
+
+    element.children.each do |child|
+      next unless child.is_a? Oga::XML::Element
+
+      return child.name
     end
-    return
   end
 
   # Returns true if the element exists.
