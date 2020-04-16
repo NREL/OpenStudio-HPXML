@@ -2,8 +2,8 @@
   <schema_version>3.0</schema_version>
   <name>hpxm_lto_openstudio</name>
   <uid>b1543b30-9465-45ff-ba04-1d1f85e763bc</uid>
-  <version_id>1d11eb6e-c670-4d11-83b8-60934cd16c82</version_id>
-  <version_modified>20200410T212407Z</version_modified>
+  <version_id>66b658c4-bf4c-4b0c-aa15-de322bd1c45b</version_id>
+  <version_modified>20200416T183023Z</version_modified>
   <xml_checksum>D8922A73</xml_checksum>
   <class_name>HPXMLtoOpenStudio</class_name>
   <display_name>HPXML to OpenStudio Translator</display_name>
@@ -390,12 +390,6 @@
       <checksum>ACCF116F</checksum>
     </file>
     <file>
-      <filename>lighting.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>59386D80</checksum>
-    </file>
-    <file>
       <filename>HPXMLDataTypes.xsd</filename>
       <filetype>xsd</filetype>
       <usage_type>resource</usage_type>
@@ -406,18 +400,6 @@
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
       <checksum>8B5F0A97</checksum>
-    </file>
-    <file>
-      <filename>misc_loads.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>8A303FFD</checksum>
-    </file>
-    <file>
-      <filename>constructions.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>56BE3E09</checksum>
     </file>
     <file>
       <filename>location.rb</filename>
@@ -432,24 +414,6 @@
       <checksum>EB9438B5</checksum>
     </file>
     <file>
-      <filename>hotwater_appliances.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>1565597E</checksum>
-    </file>
-    <file>
-      <filename>BaseElements.xsd</filename>
-      <filetype>xsd</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>04DDCF5B</checksum>
-    </file>
-    <file>
-      <filename>EPvalidator.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>59D78BF2</checksum>
-    </file>
-    <file>
       <filename>constants.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
@@ -462,6 +426,48 @@
       <checksum>9FC9A661</checksum>
     </file>
     <file>
+      <filename>lighting.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>226E206B</checksum>
+    </file>
+    <file>
+      <filename>misc_loads.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>6AB64ECB</checksum>
+    </file>
+    <file>
+      <filename>BaseElements.xsd</filename>
+      <filetype>xsd</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>06222F98</checksum>
+    </file>
+    <file>
+      <filename>EPvalidator.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>4BB70205</checksum>
+    </file>
+    <file>
+      <filename>hotwater_appliances.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>D9C13D5F</checksum>
+    </file>
+    <file>
+      <filename>constructions.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>C4B05406</checksum>
+    </file>
+    <file>
+      <filename>hpxml.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>77EE95AC</checksum>
+    </file>
+    <file>
       <version>
         <software_program>OpenStudio</software_program>
         <identifier>2.1.1</identifier>
@@ -470,13 +476,7 @@
       <filename>measure.rb</filename>
       <filetype>rb</filetype>
       <usage_type>script</usage_type>
-      <checksum>836E3E98</checksum>
-    </file>
-    <file>
-      <filename>hpxml.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>E23A1C39</checksum>
+      <checksum>F2C2D397</checksum>
     </file>
   </files>
 </measure>
