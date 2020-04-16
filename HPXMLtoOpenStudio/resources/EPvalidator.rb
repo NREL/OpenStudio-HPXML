@@ -595,6 +595,7 @@ class EnergyPlusValidator
         'SystemIdentifier' => one, # Required by HPXML schema
         'WaterFixtureType[text()="shower head" or text()="faucet"]' => one, # Required by HPXML schema
         'LowFlow' => one,
+        '../extension/WaterFixturesUsageMultiplier' => zero_or_one,
       },
 
       # [SolarThermalSystem]
@@ -635,6 +636,7 @@ class EnergyPlusValidator
         '[not(Location)] | Location[text()="living space" or text()="basement - conditioned" or text()="basement - unconditioned" or text()="garage"]' => one,
         'ModifiedEnergyFactor | IntegratedModifiedEnergyFactor' => zero_or_one,
         'ModifiedEnergyFactor | IntegratedModifiedEnergyFactor | RatedAnnualkWh | LabelElectricRate | LabelGasRate | LabelAnnualGasCost | LabelUsage | Capacity' => zero_or_seven,
+        'extension/UsageMultiplier' => zero_or_one,
       },
 
       # [ClothesDryer]
@@ -644,6 +646,7 @@ class EnergyPlusValidator
         'FuelType[text()="natural gas" or text()="fuel oil" or text()="propane" or text()="electricity" or text()="wood"]' => one,
         'EnergyFactor | CombinedEnergyFactor' => zero_or_one,
         'EnergyFactor | CombinedEnergyFactor | ControlType' => zero_or_two,
+        'extension/UsageMultiplier' => zero_or_one,
       },
 
       # [Dishwasher]
@@ -651,6 +654,7 @@ class EnergyPlusValidator
         'SystemIdentifier' => one, # Required by HPXML schema
         'RatedAnnualkWh | EnergyFactor' => zero_or_one,
         'RatedAnnualkWh | EnergyFactor | LabelElectricRate | LabelGasRate | LabelAnnualGasCost | LabelUsage | PlaceSettingCapacity' => zero_or_six,
+        'extension/UsageMultiplier' => zero_or_one,
       },
 
       # [Refrigerator]
@@ -658,6 +662,7 @@ class EnergyPlusValidator
         'SystemIdentifier' => one, # Required by HPXML schema
         '[not(Location)] | Location[text()="living space" or text()="basement - conditioned" or text()="basement - unconditioned" or text()="garage"]' => one,
         'RatedAnnualkWh | extension/AdjustedAnnualkWh' => zero_or_more,
+        'extension/UsageMultiplier' => zero_or_one,
       },
 
       # [CookingRange]
@@ -665,12 +670,14 @@ class EnergyPlusValidator
         'SystemIdentifier' => one, # Required by HPXML schema
         'FuelType[text()="natural gas" or text()="fuel oil" or text()="propane" or text()="electricity" or text()="wood"]' => one,
         'IsInduction' => zero_or_one,
+        'extension/UsageMultiplier' => zero_or_one,
         '../Oven/IsConvection' => zero_or_one,
       },
 
       # [Lighting]
       '/HPXML/Building/BuildingDetails/Lighting' => {
         'LightingGroup[(ThirdPartyCertification="ERI Tier I" or ThirdPartyCertification="ERI Tier II") and (Location="interior" or Location="exterior" or Location="garage")]' => zero_or_six, # See [LightingGroup]
+        'extension/UsageMultiplier' => zero_or_one,
       },
 
       ## [LightingGroup]
@@ -692,6 +699,7 @@ class EnergyPlusValidator
         'Load[Units="kWh/year"]/Value' => zero_or_one, # Uses ERI Reference Home if not provided
         'extension/FracSensible' => zero_or_one, # Uses ERI Reference Home if not provided
         'extension/FracLatent' => zero_or_one, # Uses ERI Reference Home if not provided
+        'extension/UsageMultiplier' => zero_or_one,
         '../extension/WeekdayScheduleFractions' => zero_or_one, # Uses ERI Reference Home if not provided
         '../extension/WeekendScheduleFractions' => zero_or_one, # Uses ERI Reference Home if not provided
         '../extension/MonthlyScheduleMultipliers' => zero_or_one, # Uses ERI Reference Home if not provided
@@ -701,6 +709,7 @@ class EnergyPlusValidator
       '/HPXML/Building/BuildingDetails/MiscLoads/PlugLoad[PlugLoadType="TV other"]' => {
         'SystemIdentifier' => one, # Required by HPXML schema
         'Load[Units="kWh/year"]/Value' => zero_or_one, # Uses ERI Reference Home if not provided
+        'extension/UsageMultiplier' => zero_or_one,
         '../extension/WeekdayScheduleFractions' => zero_or_one, # Uses ERI Reference Home if not provided
         '../extension/WeekendScheduleFractions' => zero_or_one, # Uses ERI Reference Home if not provided
         '../extension/MonthlyScheduleMultipliers' => zero_or_one, # Uses ERI Reference Home if not provided
