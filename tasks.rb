@@ -2807,10 +2807,7 @@ def set_hpxml_solar_thermal_system(hpxml_file, hpxml)
   if ['base-dhw-solar-fraction.xml',
       'base-dhw-indirect-with-solar-fraction.xml',
       'base-dhw-tank-heat-pump-with-solar-fraction.xml',
-      'base-dhw-tankless-gas-with-solar-fraction.xml',
-      'invalid_files/solar-thermal-system-with-combi-tankless.xml',
-      'invalid_files/solar-thermal-system-with-desuperheater.xml',
-      'invalid_files/solar-thermal-system-with-dhw-indirect.xml'].include? hpxml_file
+      'base-dhw-tankless-gas-with-solar-fraction.xml'].include? hpxml_file
     hpxml.solar_thermal_systems.add(id: 'SolarThermalSystem',
                                     system_type: 'hot water',
                                     water_heating_system_idref: 'WaterHeater',
@@ -2824,7 +2821,10 @@ def set_hpxml_solar_thermal_system(hpxml_file, hpxml)
          'base-dhw-solar-indirect-flat-plate.xml',
          'base-dhw-solar-thermosyphon-flat-plate.xml',
          'base-dhw-tank-heat-pump-with-solar.xml',
-         'base-dhw-tankless-gas-with-solar.xml'].include? hpxml_file
+         'base-dhw-tankless-gas-with-solar.xml',
+         'invalid_files/solar-thermal-system-with-combi-tankless.xml',
+         'invalid_files/solar-thermal-system-with-desuperheater.xml',
+         'invalid_files/solar-thermal-system-with-dhw-indirect.xml'].include? hpxml_file
     hpxml.solar_thermal_systems.add(id: 'SolarThermalSystem',
                                     system_type: 'hot water',
                                     collector_area: 40,
