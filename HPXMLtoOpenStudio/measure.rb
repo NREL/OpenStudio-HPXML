@@ -150,7 +150,7 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
     is_valid = true
 
     # Validate input HPXML against schema
-    XMLHelper.validate(hpxml.doc.to_s, File.join(schemas_dir, 'HPXML.xsd'), runner).each do |error|
+    XMLHelper.validate(hpxml.doc.to_xml, File.join(schemas_dir, 'HPXML.xsd'), runner).each do |error|
       runner.registerError("#{hpxml_path}: #{error}")
       is_valid = false
     end
@@ -653,7 +653,7 @@ class OSModel
     if @debug && (not @output_dir.nil?)
       # Write updated HPXML object to file
       hpxml_defaults_path = File.join(@output_dir, 'in.xml')
-      XMLHelper.write_file(@hpxml.to_rexml, hpxml_defaults_path)
+      XMLHelper.write_file(@hpxml.to_oga, hpxml_defaults_path)
       runner.registerInfo("Wrote file: #{hpxml_defaults_path}")
     end
   end

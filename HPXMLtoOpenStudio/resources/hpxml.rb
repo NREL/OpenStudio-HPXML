@@ -40,7 +40,7 @@ hpxml.walls[-1].id = "WallEastWest"
 hpxml.walls[-1].area = 1000
 
 # Write file
-XMLHelper.write_file(hpxml.to_rexml, "out.xml")
+XMLHelper.write_file(hpxml.to_oga, "out.xml")
 
 '''
 
@@ -224,9 +224,9 @@ class HPXML < Object
     hpxml = nil
     if not hpxml_path.nil?
       @doc = XMLHelper.parse_file(hpxml_path)
-      hpxml = @doc.elements['/HPXML']
+      hpxml = XMLHelper.get_element(@doc, '/HPXML')
     end
-    from_rexml(hpxml)
+    from_oga(hpxml)
 
     # Clean up
     delete_partition_surfaces()
@@ -363,53 +363,53 @@ class HPXML < Object
     return total_area, exterior_area
   end
 
-  def to_rexml()
-    @doc = _create_rexml_document()
-    @header.to_rexml(@doc)
-    @site.to_rexml(@doc)
-    @neighbor_buildings.to_rexml(@doc)
-    @building_occupancy.to_rexml(@doc)
-    @building_construction.to_rexml(@doc)
-    @climate_and_risk_zones.to_rexml(@doc)
-    @air_infiltration_measurements.to_rexml(@doc)
-    @attics.to_rexml(@doc)
-    @foundations.to_rexml(@doc)
-    @roofs.to_rexml(@doc)
-    @rim_joists.to_rexml(@doc)
-    @walls.to_rexml(@doc)
-    @foundation_walls.to_rexml(@doc)
-    @frame_floors.to_rexml(@doc)
-    @slabs.to_rexml(@doc)
-    @windows.to_rexml(@doc)
-    @skylights.to_rexml(@doc)
-    @doors.to_rexml(@doc)
-    @heating_systems.to_rexml(@doc)
-    @cooling_systems.to_rexml(@doc)
-    @heat_pumps.to_rexml(@doc)
-    @hvac_controls.to_rexml(@doc)
-    @hvac_distributions.to_rexml(@doc)
-    @ventilation_fans.to_rexml(@doc)
-    @water_heating_systems.to_rexml(@doc)
-    @hot_water_distributions.to_rexml(@doc)
-    @water_fixtures.to_rexml(@doc)
-    @water_heating.to_rexml(@doc)
-    @solar_thermal_systems.to_rexml(@doc)
-    @pv_systems.to_rexml(@doc)
-    @clothes_washers.to_rexml(@doc)
-    @clothes_dryers.to_rexml(@doc)
-    @dishwashers.to_rexml(@doc)
-    @refrigerators.to_rexml(@doc)
-    @cooking_ranges.to_rexml(@doc)
-    @ovens.to_rexml(@doc)
-    @lighting_groups.to_rexml(@doc)
-    @lighting.to_rexml(@doc)
-    @ceiling_fans.to_rexml(@doc)
-    @plug_loads.to_rexml(@doc)
-    @misc_loads_schedule.to_rexml(@doc)
+  def to_oga()
+    @doc = _create_oga_document()
+    @header.to_oga(@doc)
+    @site.to_oga(@doc)
+    @neighbor_buildings.to_oga(@doc)
+    @building_occupancy.to_oga(@doc)
+    @building_construction.to_oga(@doc)
+    @climate_and_risk_zones.to_oga(@doc)
+    @air_infiltration_measurements.to_oga(@doc)
+    @attics.to_oga(@doc)
+    @foundations.to_oga(@doc)
+    @roofs.to_oga(@doc)
+    @rim_joists.to_oga(@doc)
+    @walls.to_oga(@doc)
+    @foundation_walls.to_oga(@doc)
+    @frame_floors.to_oga(@doc)
+    @slabs.to_oga(@doc)
+    @windows.to_oga(@doc)
+    @skylights.to_oga(@doc)
+    @doors.to_oga(@doc)
+    @heating_systems.to_oga(@doc)
+    @cooling_systems.to_oga(@doc)
+    @heat_pumps.to_oga(@doc)
+    @hvac_controls.to_oga(@doc)
+    @hvac_distributions.to_oga(@doc)
+    @ventilation_fans.to_oga(@doc)
+    @water_heating_systems.to_oga(@doc)
+    @hot_water_distributions.to_oga(@doc)
+    @water_fixtures.to_oga(@doc)
+    @water_heating.to_oga(@doc)
+    @solar_thermal_systems.to_oga(@doc)
+    @pv_systems.to_oga(@doc)
+    @clothes_washers.to_oga(@doc)
+    @clothes_dryers.to_oga(@doc)
+    @dishwashers.to_oga(@doc)
+    @refrigerators.to_oga(@doc)
+    @cooking_ranges.to_oga(@doc)
+    @ovens.to_oga(@doc)
+    @lighting_groups.to_oga(@doc)
+    @lighting.to_oga(@doc)
+    @ceiling_fans.to_oga(@doc)
+    @plug_loads.to_oga(@doc)
+    @misc_loads_schedule.to_oga(@doc)
     return @doc
   end
 
-  def from_rexml(hpxml)
+  def from_oga(hpxml)
     @header = Header.new(self, hpxml)
     @site = Site.new(self, hpxml)
     @neighbor_buildings = NeighborBuildings.new(self, hpxml)
@@ -456,11 +456,11 @@ class HPXML < Object
   class BaseElement
     attr_accessor(:hpxml_object)
 
-    def initialize(hpxml_object, rexml_element = nil, **kwargs)
+    def initialize(hpxml_object, oga_element = nil, **kwargs)
       @hpxml_object = hpxml_object
-      if not rexml_element.nil?
-        # Set values from HPXML REXML element
-        from_rexml(rexml_element)
+      if not oga_element.nil?
+        # Set values from HPXML Oga element
+        from_oga(oga_element)
       else
         # Set values from **kwargs
         kwargs.each do |k, v|
@@ -493,11 +493,11 @@ class HPXML < Object
   class BaseArrayElement < Array
     attr_accessor(:hpxml_object)
 
-    def initialize(hpxml_object, rexml_element = nil)
+    def initialize(hpxml_object, oga_element = nil)
       @hpxml_object = hpxml_object
-      if not rexml_element.nil?
-        # Set values from HPXML REXML element
-        from_rexml(rexml_element)
+      if not oga_element.nil?
+        # Set values from HPXML Oga element
+        from_oga(oga_element)
       end
     end
 
@@ -513,9 +513,9 @@ class HPXML < Object
       return errors
     end
 
-    def to_rexml(doc)
+    def to_oga(doc)
       each do |child|
-        child.to_rexml(doc)
+        child.to_oga(doc)
       end
     end
 
@@ -585,10 +585,10 @@ class HPXML < Object
       return errors
     end
 
-    def to_rexml(doc)
+    def to_oga(doc)
       return if nil?
 
-      hpxml = doc.elements['/HPXML']
+      hpxml = XMLHelper.get_element(doc, '/HPXML')
       header = XMLHelper.add_element(hpxml, 'XMLTransactionHeaderInformation')
       XMLHelper.add_element(header, 'XMLType', @xml_type)
       XMLHelper.add_element(header, 'XMLGeneratedBy', @xml_generated_by)
@@ -616,7 +616,7 @@ class HPXML < Object
         XMLHelper.add_element(simulation_control, 'EndMonth', HPXML::to_integer_or_nil(@end_month)) unless @end_month.nil?
         XMLHelper.add_element(simulation_control, 'EndDayOfMonth', HPXML::to_integer_or_nil(@end_day_of_month)) unless @end_day_of_month.nil?
       end
-      if extension.elements['ERICalculation'].nil? && extension.elements['SimulationControl'].nil?
+      if XMLHelper.get_element(extension, 'ERICalculation').nil? && XMLHelper.get_element(extension, 'SimulationControl').nil?
         extension.remove
       end
 
@@ -627,7 +627,7 @@ class HPXML < Object
       XMLHelper.add_element(project_status, 'EventType', @event_type)
     end
 
-    def from_rexml(hpxml)
+    def from_oga(hpxml)
       return if hpxml.nil?
 
       @xml_type = XMLHelper.get_value(hpxml, 'XMLTransactionHeaderInformation/XMLType')
@@ -658,7 +658,7 @@ class HPXML < Object
       return errors
     end
 
-    def to_rexml(doc)
+    def to_oga(doc)
       return if nil?
 
       site = XMLHelper.create_elements_as_needed(doc, ['HPXML', 'Building', 'BuildingDetails', 'BuildingSummary', 'Site'])
@@ -672,10 +672,10 @@ class HPXML < Object
                            extensions: { 'ShelterCoefficient' => HPXML::to_float_or_nil(@shelter_coefficient) })
     end
 
-    def from_rexml(hpxml)
+    def from_oga(hpxml)
       return if hpxml.nil?
 
-      site = hpxml.elements['Building/BuildingDetails/BuildingSummary/Site']
+      site = XMLHelper.get_element(hpxml, 'Building/BuildingDetails/BuildingSummary/Site')
       return if site.nil?
 
       @surroundings = XMLHelper.get_value(site, 'Surroundings')
@@ -690,10 +690,10 @@ class HPXML < Object
       self << NeighborBuilding.new(@hpxml_object, **kwargs)
     end
 
-    def from_rexml(hpxml)
+    def from_oga(hpxml)
       return if hpxml.nil?
 
-      hpxml.elements.each('Building/BuildingDetails/BuildingSummary/Site/extension/Neighbors/NeighborBuilding') do |neighbor_building|
+      XMLHelper.get_elements(hpxml, 'Building/BuildingDetails/BuildingSummary/Site/extension/Neighbors/NeighborBuilding').each do |neighbor_building|
         self << NeighborBuilding.new(@hpxml_object, neighbor_building)
       end
     end
@@ -708,7 +708,7 @@ class HPXML < Object
       return errors
     end
 
-    def to_rexml(doc)
+    def to_oga(doc)
       return if nil?
 
       neighbors = XMLHelper.create_elements_as_needed(doc, ['HPXML', 'Building', 'BuildingDetails', 'BuildingSummary', 'Site', 'extension', 'Neighbors'])
@@ -718,7 +718,7 @@ class HPXML < Object
       XMLHelper.add_element(neighbor_building, 'Height', Float(@height)) unless @height.nil?
     end
 
-    def from_rexml(neighbor_building)
+    def from_oga(neighbor_building)
       return if neighbor_building.nil?
 
       @azimuth = HPXML::to_integer_or_nil(XMLHelper.get_value(neighbor_building, 'Azimuth'))
@@ -736,17 +736,17 @@ class HPXML < Object
       return errors
     end
 
-    def to_rexml(doc)
+    def to_oga(doc)
       return if nil?
 
       building_occupancy = XMLHelper.create_elements_as_needed(doc, ['HPXML', 'Building', 'BuildingDetails', 'BuildingSummary', 'BuildingOccupancy'])
       XMLHelper.add_element(building_occupancy, 'NumberofResidents', Float(@number_of_residents)) unless @number_of_residents.nil?
     end
 
-    def from_rexml(hpxml)
+    def from_oga(hpxml)
       return if hpxml.nil?
 
-      building_occupancy = hpxml.elements['Building/BuildingDetails/BuildingSummary/BuildingOccupancy']
+      building_occupancy = XMLHelper.get_element(hpxml, 'Building/BuildingDetails/BuildingSummary/BuildingOccupancy')
       return if building_occupancy.nil?
 
       @number_of_residents = HPXML::to_float_or_nil(XMLHelper.get_value(building_occupancy, 'NumberofResidents'))
@@ -765,7 +765,7 @@ class HPXML < Object
       return errors
     end
 
-    def to_rexml(doc)
+    def to_oga(doc)
       return if nil?
 
       building_construction = XMLHelper.create_elements_as_needed(doc, ['HPXML', 'Building', 'BuildingDetails', 'BuildingSummary', 'BuildingConstruction'])
@@ -781,10 +781,10 @@ class HPXML < Object
                            extensions: { 'UseOnlyIdealAirSystem' => HPXML::to_bool_or_nil(@use_only_ideal_air_system) })
     end
 
-    def from_rexml(hpxml)
+    def from_oga(hpxml)
       return if hpxml.nil?
 
-      building_construction = hpxml.elements['Building/BuildingDetails/BuildingSummary/BuildingConstruction']
+      building_construction = XMLHelper.get_element(hpxml, 'Building/BuildingDetails/BuildingSummary/BuildingConstruction')
       return if building_construction.nil?
 
       @year_built = HPXML::to_integer_or_nil(XMLHelper.get_value(building_construction, 'YearBuilt'))
@@ -810,7 +810,7 @@ class HPXML < Object
       return errors
     end
 
-    def to_rexml(doc)
+    def to_oga(doc)
       return if nil?
 
       climate_and_risk_zones = XMLHelper.create_elements_as_needed(doc, ['HPXML', 'Building', 'BuildingDetails', 'ClimateandRiskZones'])
@@ -832,15 +832,15 @@ class HPXML < Object
       end
     end
 
-    def from_rexml(hpxml)
+    def from_oga(hpxml)
       return if hpxml.nil?
 
-      climate_and_risk_zones = hpxml.elements['Building/BuildingDetails/ClimateandRiskZones']
+      climate_and_risk_zones = XMLHelper.get_element(hpxml, 'Building/BuildingDetails/ClimateandRiskZones')
       return if climate_and_risk_zones.nil?
 
       @iecc_year = XMLHelper.get_value(climate_and_risk_zones, 'ClimateZoneIECC/Year')
       @iecc_zone = XMLHelper.get_value(climate_and_risk_zones, 'ClimateZoneIECC/ClimateZone')
-      weather_station = climate_and_risk_zones.elements['WeatherStation']
+      weather_station = XMLHelper.get_element(climate_and_risk_zones, 'WeatherStation')
       if not weather_station.nil?
         @weather_station_id = HPXML::get_id(weather_station)
         @weather_station_name = XMLHelper.get_value(weather_station, 'Name')
@@ -855,10 +855,10 @@ class HPXML < Object
       self << AirInfiltrationMeasurement.new(@hpxml_object, **kwargs)
     end
 
-    def from_rexml(hpxml)
+    def from_oga(hpxml)
       return if hpxml.nil?
 
-      hpxml.elements.each('Building/BuildingDetails/Enclosure/AirInfiltration/AirInfiltrationMeasurement') do |air_infiltration_measurement|
+      XMLHelper.get_elements(hpxml, 'Building/BuildingDetails/Enclosure/AirInfiltration/AirInfiltrationMeasurement').each do |air_infiltration_measurement|
         self << AirInfiltrationMeasurement.new(@hpxml_object, air_infiltration_measurement)
       end
     end
@@ -874,7 +874,7 @@ class HPXML < Object
       return errors
     end
 
-    def to_rexml(doc)
+    def to_oga(doc)
       return if nil?
 
       air_infiltration = XMLHelper.create_elements_as_needed(doc, ['HPXML', 'Building', 'BuildingDetails', 'Enclosure', 'AirInfiltration'])
@@ -893,7 +893,7 @@ class HPXML < Object
                            extensions: { 'ConstantACHnatural' => HPXML::to_float_or_nil(@constant_ach_natural) })
     end
 
-    def from_rexml(air_infiltration_measurement)
+    def from_oga(air_infiltration_measurement)
       return if air_infiltration_measurement.nil?
 
       @id = HPXML::get_id(air_infiltration_measurement)
@@ -912,10 +912,10 @@ class HPXML < Object
       self << Attic.new(@hpxml_object, **kwargs)
     end
 
-    def from_rexml(hpxml)
+    def from_oga(hpxml)
       return if hpxml.nil?
 
-      hpxml.elements.each('Building/BuildingDetails/Enclosure/Attics/Attic') do |attic|
+      XMLHelper.get_elements(hpxml, 'Building/BuildingDetails/Enclosure/Attics/Attic').each do |attic|
         self << Attic.new(@hpxml_object, attic)
       end
     end
@@ -974,7 +974,7 @@ class HPXML < Object
       return errors
     end
 
-    def to_rexml(doc)
+    def to_oga(doc)
       return if nil?
 
       attics = XMLHelper.create_elements_as_needed(doc, ['HPXML', 'Building', 'BuildingDetails', 'Enclosure', 'Attics'])
@@ -1009,7 +1009,7 @@ class HPXML < Object
       XMLHelper.add_element(attic, 'WithinInfiltrationVolume', Boolean(@within_infiltration_volume)) unless @within_infiltration_volume.nil?
     end
 
-    def from_rexml(attic)
+    def from_oga(attic)
       return if attic.nil?
 
       @id = HPXML::get_id(attic)
@@ -1030,11 +1030,11 @@ class HPXML < Object
       end
       @within_infiltration_volume = HPXML::to_bool_or_nil(XMLHelper.get_value(attic, 'WithinInfiltrationVolume'))
       @attached_to_roof_idrefs = []
-      attic.elements.each('AttachedToRoof') do |roof|
+      XMLHelper.get_elements(attic, 'AttachedToRoof').each do |roof|
         @attached_to_roof_idrefs << HPXML::get_idref(roof)
       end
       @attached_to_frame_floor_idrefs = []
-      attic.elements.each('AttachedToFrameFloor') do |frame_floor|
+      XMLHelper.get_elements(attic, 'AttachedToFrameFloor').each do |frame_floor|
         @attached_to_frame_floor_idrefs << HPXML::get_idref(frame_floor)
       end
     end
@@ -1045,10 +1045,10 @@ class HPXML < Object
       self << Foundation.new(@hpxml_object, **kwargs)
     end
 
-    def from_rexml(hpxml)
+    def from_oga(hpxml)
       return if hpxml.nil?
 
-      hpxml.elements.each('Building/BuildingDetails/Enclosure/Foundations/Foundation') do |foundation|
+      XMLHelper.get_elements(hpxml, 'Building/BuildingDetails/Enclosure/Foundations/Foundation').each do |foundation|
         self << Foundation.new(@hpxml_object, foundation)
       end
     end
@@ -1136,7 +1136,7 @@ class HPXML < Object
       return errors
     end
 
-    def to_rexml(doc)
+    def to_oga(doc)
       return if nil?
 
       foundations = XMLHelper.create_elements_as_needed(doc, ['HPXML', 'Building', 'BuildingDetails', 'Enclosure', 'Foundations'])
@@ -1172,7 +1172,7 @@ class HPXML < Object
       XMLHelper.add_element(foundation, 'WithinInfiltrationVolume', Boolean(@within_infiltration_volume)) unless @within_infiltration_volume.nil?
     end
 
-    def from_rexml(foundation)
+    def from_oga(foundation)
       return if foundation.nil?
 
       @id = HPXML::get_id(foundation)
@@ -1196,15 +1196,15 @@ class HPXML < Object
       end
       @within_infiltration_volume = HPXML::to_bool_or_nil(XMLHelper.get_value(foundation, 'WithinInfiltrationVolume'))
       @attached_to_slab_idrefs = []
-      foundation.elements.each('AttachedToSlab') do |slab|
+      XMLHelper.get_elements(foundation, 'AttachedToSlab').each do |slab|
         @attached_to_slab_idrefs << HPXML::get_idref(slab)
       end
       @attached_to_frame_floor_idrefs = []
-      foundation.elements.each('AttachedToFrameFloor') do |frame_floor|
+      XMLHelper.get_elements(foundation, 'AttachedToFrameFloor').each do |frame_floor|
         @attached_to_frame_floor_idrefs << HPXML::get_idref(frame_floor)
       end
       @attached_to_foundation_wall_idrefs = []
-      foundation.elements.each('AttachedToFoundationWall') do |foundation_wall|
+      XMLHelper.get_elements(foundation, 'AttachedToFoundationWall').each do |foundation_wall|
         @attached_to_foundation_wall_idrefs << HPXML::get_idref(foundation_wall)
       end
     end
@@ -1215,10 +1215,10 @@ class HPXML < Object
       self << Roof.new(@hpxml_object, **kwargs)
     end
 
-    def from_rexml(hpxml)
+    def from_oga(hpxml)
       return if hpxml.nil?
 
-      hpxml.elements.each('Building/BuildingDetails/Enclosure/Roofs/Roof') do |roof|
+      XMLHelper.get_elements(hpxml, 'Building/BuildingDetails/Enclosure/Roofs/Roof').each do |roof|
         self << Roof.new(@hpxml_object, roof)
       end
     end
@@ -1280,7 +1280,7 @@ class HPXML < Object
       return errors
     end
 
-    def to_rexml(doc)
+    def to_oga(doc)
       return if nil?
 
       roofs = XMLHelper.create_elements_as_needed(doc, ['HPXML', 'Building', 'BuildingDetails', 'Enclosure', 'Roofs'])
@@ -1304,7 +1304,7 @@ class HPXML < Object
       XMLHelper.add_element(insulation, 'AssemblyEffectiveRValue', Float(@insulation_assembly_r_value)) unless @insulation_assembly_r_value.nil?
     end
 
-    def from_rexml(roof)
+    def from_oga(roof)
       return if roof.nil?
 
       @id = HPXML::get_id(roof)
@@ -1317,7 +1317,7 @@ class HPXML < Object
       @emittance = HPXML::to_float_or_nil(XMLHelper.get_value(roof, 'Emittance'))
       @pitch = HPXML::to_float_or_nil(XMLHelper.get_value(roof, 'Pitch'))
       @radiant_barrier = HPXML::to_bool_or_nil(XMLHelper.get_value(roof, 'RadiantBarrier'))
-      insulation = roof.elements['Insulation']
+      insulation = XMLHelper.get_element(roof, 'Insulation')
       if not insulation.nil?
         insulation_id = HPXML::get_id(insulation)
         @insulation_assembly_r_value = HPXML::to_float_or_nil(XMLHelper.get_value(insulation, 'AssemblyEffectiveRValue'))
@@ -1332,10 +1332,10 @@ class HPXML < Object
       self << RimJoist.new(@hpxml_object, **kwargs)
     end
 
-    def from_rexml(hpxml)
+    def from_oga(hpxml)
       return if hpxml.nil?
 
-      hpxml.elements.each('Building/BuildingDetails/Enclosure/RimJoists/RimJoist') do |rim_joist|
+      XMLHelper.get_elements(hpxml, 'Building/BuildingDetails/Enclosure/RimJoists/RimJoist').each do |rim_joist|
         self << RimJoist.new(@hpxml_object, rim_joist)
       end
     end
@@ -1375,7 +1375,7 @@ class HPXML < Object
       return errors
     end
 
-    def to_rexml(doc)
+    def to_oga(doc)
       return if nil?
 
       rim_joists = XMLHelper.create_elements_as_needed(doc, ['HPXML', 'Building', 'BuildingDetails', 'Enclosure', 'RimJoists'])
@@ -1398,7 +1398,7 @@ class HPXML < Object
       XMLHelper.add_element(insulation, 'AssemblyEffectiveRValue', Float(@insulation_assembly_r_value)) unless @insulation_assembly_r_value.nil?
     end
 
-    def from_rexml(rim_joist)
+    def from_oga(rim_joist)
       return if rim_joist.nil?
 
       @id = HPXML::get_id(rim_joist)
@@ -1408,7 +1408,7 @@ class HPXML < Object
       @azimuth = HPXML::to_integer_or_nil(XMLHelper.get_value(rim_joist, 'Azimuth'))
       @solar_absorptance = HPXML::to_float_or_nil(XMLHelper.get_value(rim_joist, 'SolarAbsorptance'))
       @emittance = HPXML::to_float_or_nil(XMLHelper.get_value(rim_joist, 'Emittance'))
-      insulation = rim_joist.elements['Insulation']
+      insulation = XMLHelper.get_element(rim_joist, 'Insulation')
       if not insulation.nil?
         insulation_id = HPXML::get_id(insulation)
         @insulation_assembly_r_value = HPXML::to_float_or_nil(XMLHelper.get_value(insulation, 'AssemblyEffectiveRValue'))
@@ -1421,10 +1421,10 @@ class HPXML < Object
       self << Wall.new(@hpxml_object, **kwargs)
     end
 
-    def from_rexml(hpxml)
+    def from_oga(hpxml)
       return if hpxml.nil?
 
-      hpxml.elements.each('Building/BuildingDetails/Enclosure/Walls/Wall') do |wall|
+      XMLHelper.get_elements(hpxml, 'Building/BuildingDetails/Enclosure/Walls/Wall').each do |wall|
         self << Wall.new(@hpxml_object, wall)
       end
     end
@@ -1492,7 +1492,7 @@ class HPXML < Object
       return errors
     end
 
-    def to_rexml(doc)
+    def to_oga(doc)
       return if nil?
 
       walls = XMLHelper.create_elements_as_needed(doc, ['HPXML', 'Building', 'BuildingDetails', 'Enclosure', 'Walls'])
@@ -1519,7 +1519,7 @@ class HPXML < Object
       XMLHelper.add_element(insulation, 'AssemblyEffectiveRValue', Float(@insulation_assembly_r_value)) unless @insulation_assembly_r_value.nil?
     end
 
-    def from_rexml(wall)
+    def from_oga(wall)
       return if wall.nil?
 
       @id = HPXML::get_id(wall)
@@ -1533,7 +1533,7 @@ class HPXML < Object
       @siding = XMLHelper.get_value(wall, 'Siding')
       @solar_absorptance = HPXML::to_float_or_nil(XMLHelper.get_value(wall, 'SolarAbsorptance'))
       @emittance = HPXML::to_float_or_nil(XMLHelper.get_value(wall, 'Emittance'))
-      insulation = wall.elements['Insulation']
+      insulation = XMLHelper.get_element(wall, 'Insulation')
       if not insulation.nil?
         insulation_id = HPXML::get_id(insulation)
         @insulation_assembly_r_value = HPXML::to_float_or_nil(XMLHelper.get_value(insulation, 'AssemblyEffectiveRValue'))
@@ -1548,10 +1548,10 @@ class HPXML < Object
       self << FoundationWall.new(@hpxml_object, **kwargs)
     end
 
-    def from_rexml(hpxml)
+    def from_oga(hpxml)
       return if hpxml.nil?
 
-      hpxml.elements.each('Building/BuildingDetails/Enclosure/FoundationWalls/FoundationWall') do |foundation_wall|
+      XMLHelper.get_elements(hpxml, 'Building/BuildingDetails/Enclosure/FoundationWalls/FoundationWall').each do |foundation_wall|
         self << FoundationWall.new(@hpxml_object, foundation_wall)
       end
     end
@@ -1623,7 +1623,7 @@ class HPXML < Object
       return errors
     end
 
-    def to_rexml(doc)
+    def to_oga(doc)
       return if nil?
 
       foundation_walls = XMLHelper.create_elements_as_needed(doc, ['HPXML', 'Building', 'BuildingDetails', 'Enclosure', 'FoundationWalls'])
@@ -1663,7 +1663,7 @@ class HPXML < Object
       end
     end
 
-    def from_rexml(foundation_wall)
+    def from_oga(foundation_wall)
       return if foundation_wall.nil?
 
       @id = HPXML::get_id(foundation_wall)
@@ -1674,7 +1674,7 @@ class HPXML < Object
       @azimuth = HPXML::to_integer_or_nil(XMLHelper.get_value(foundation_wall, 'Azimuth'))
       @thickness = HPXML::to_float_or_nil(XMLHelper.get_value(foundation_wall, 'Thickness'))
       @depth_below_grade = HPXML::to_float_or_nil(XMLHelper.get_value(foundation_wall, 'DepthBelowGrade'))
-      insulation = foundation_wall.elements['Insulation']
+      insulation = XMLHelper.get_element(foundation_wall, 'Insulation')
       if not insulation.nil?
         insulation_id = HPXML::get_id(insulation)
         @insulation_r_value = HPXML::to_float_or_nil(XMLHelper.get_value(insulation, "Layer[InstallationType='continuous']/NominalRValue"))
@@ -1694,10 +1694,10 @@ class HPXML < Object
       self << FrameFloor.new(@hpxml_object, **kwargs)
     end
 
-    def from_rexml(hpxml)
+    def from_oga(hpxml)
       return if hpxml.nil?
 
-      hpxml.elements.each('Building/BuildingDetails/Enclosure/FrameFloors/FrameFloor') do |frame_floor|
+      XMLHelper.get_elements(hpxml, 'Building/BuildingDetails/Enclosure/FrameFloors/FrameFloor').each do |frame_floor|
         self << FrameFloor.new(@hpxml_object, frame_floor)
       end
     end
@@ -1751,7 +1751,7 @@ class HPXML < Object
       return errors
     end
 
-    def to_rexml(doc)
+    def to_oga(doc)
       return if nil?
 
       frame_floors = XMLHelper.create_elements_as_needed(doc, ['HPXML', 'Building', 'BuildingDetails', 'Enclosure', 'FrameFloors'])
@@ -1771,14 +1771,14 @@ class HPXML < Object
       XMLHelper.add_element(insulation, 'AssemblyEffectiveRValue', Float(@insulation_assembly_r_value)) unless @insulation_assembly_r_value.nil?
     end
 
-    def from_rexml(frame_floor)
+    def from_oga(frame_floor)
       return if frame_floor.nil?
 
       @id = HPXML::get_id(frame_floor)
       @exterior_adjacent_to = XMLHelper.get_value(frame_floor, 'ExteriorAdjacentTo')
       @interior_adjacent_to = XMLHelper.get_value(frame_floor, 'InteriorAdjacentTo')
       @area = HPXML::to_float_or_nil(XMLHelper.get_value(frame_floor, 'Area'))
-      insulation = frame_floor.elements['Insulation']
+      insulation = XMLHelper.get_element(frame_floor, 'Insulation')
       if not insulation.nil?
         insulation_id = HPXML::get_id(insulation)
         @insulation_assembly_r_value = HPXML::to_float_or_nil(XMLHelper.get_value(insulation, 'AssemblyEffectiveRValue'))
@@ -1793,10 +1793,10 @@ class HPXML < Object
       self << Slab.new(@hpxml_object, **kwargs)
     end
 
-    def from_rexml(hpxml)
+    def from_oga(hpxml)
       return if hpxml.nil?
 
-      hpxml.elements.each('Building/BuildingDetails/Enclosure/Slabs/Slab') do |slab|
+      XMLHelper.get_elements(hpxml, 'Building/BuildingDetails/Enclosure/Slabs/Slab').each do |slab|
         self << Slab.new(@hpxml_object, slab)
       end
     end
@@ -1846,7 +1846,7 @@ class HPXML < Object
       return errors
     end
 
-    def to_rexml(doc)
+    def to_oga(doc)
       return if nil?
 
       slabs = XMLHelper.create_elements_as_needed(doc, ['HPXML', 'Building', 'BuildingDetails', 'Enclosure', 'Slabs'])
@@ -1886,7 +1886,7 @@ class HPXML < Object
                                          'CarpetRValue' => HPXML::to_float_or_nil(@carpet_r_value) })
     end
 
-    def from_rexml(slab)
+    def from_oga(slab)
       return if slab.nil?
 
       @id = HPXML::get_id(slab)
@@ -1900,12 +1900,12 @@ class HPXML < Object
       @depth_below_grade = HPXML::to_float_or_nil(XMLHelper.get_value(slab, 'DepthBelowGrade'))
       @carpet_fraction = HPXML::to_float_or_nil(XMLHelper.get_value(slab, 'extension/CarpetFraction'))
       @carpet_r_value = HPXML::to_float_or_nil(XMLHelper.get_value(slab, 'extension/CarpetRValue'))
-      perimeter_insulation = slab.elements['PerimeterInsulation']
+      perimeter_insulation = XMLHelper.get_element(slab, 'PerimeterInsulation')
       if not perimeter_insulation.nil?
         perimeter_insulation_id = HPXML::get_id(perimeter_insulation)
         @perimeter_insulation_r_value = HPXML::to_float_or_nil(XMLHelper.get_value(perimeter_insulation, "Layer[InstallationType='continuous']/NominalRValue"))
       end
-      under_slab_insulation = slab.elements['UnderSlabInsulation']
+      under_slab_insulation = XMLHelper.get_element(slab, 'UnderSlabInsulation')
       if not under_slab_insulation.nil?
         under_slab_insulation_id = HPXML::get_id(under_slab_insulation)
         @under_slab_insulation_r_value = HPXML::to_float_or_nil(XMLHelper.get_value(under_slab_insulation, "Layer[InstallationType='continuous']/NominalRValue"))
@@ -1918,10 +1918,10 @@ class HPXML < Object
       self << Window.new(@hpxml_object, **kwargs)
     end
 
-    def from_rexml(hpxml)
+    def from_oga(hpxml)
       return if hpxml.nil?
 
-      hpxml.elements.each('Building/BuildingDetails/Enclosure/Windows/Window') do |window|
+      XMLHelper.get_elements(hpxml, 'Building/BuildingDetails/Enclosure/Windows/Window').each do |window|
         self << Window.new(@hpxml_object, window)
       end
     end
@@ -1984,7 +1984,7 @@ class HPXML < Object
       return errors
     end
 
-    def to_rexml(doc)
+    def to_oga(doc)
       return if nil?
 
       windows = XMLHelper.create_elements_as_needed(doc, ['HPXML', 'Building', 'BuildingDetails', 'Enclosure', 'Windows'])
@@ -2015,7 +2015,7 @@ class HPXML < Object
       end
     end
 
-    def from_rexml(window)
+    def from_oga(window)
       return if window.nil?
 
       @id = HPXML::get_id(window)
@@ -2036,7 +2036,7 @@ class HPXML < Object
       @overhangs_distance_to_top_of_window = HPXML::to_float_or_nil(XMLHelper.get_value(window, 'Overhangs/DistanceToTopOfWindow'))
       @overhangs_distance_to_bottom_of_window = HPXML::to_float_or_nil(XMLHelper.get_value(window, 'Overhangs/DistanceToBottomOfWindow'))
       @fraction_operable = HPXML::to_float_or_nil(XMLHelper.get_value(window, 'FractionOperable'))
-      @wall_idref = HPXML::get_idref(window.elements['AttachedToWall'])
+      @wall_idref = HPXML::get_idref(XMLHelper.get_element(window, 'AttachedToWall'))
     end
   end
 
@@ -2045,10 +2045,10 @@ class HPXML < Object
       self << Skylight.new(@hpxml_object, **kwargs)
     end
 
-    def from_rexml(hpxml)
+    def from_oga(hpxml)
       return if hpxml.nil?
 
-      hpxml.elements.each('Building/BuildingDetails/Enclosure/Skylights/Skylight') do |skylight|
+      XMLHelper.get_elements(hpxml, 'Building/BuildingDetails/Enclosure/Skylights/Skylight').each do |skylight|
         self << Skylight.new(@hpxml_object, skylight)
       end
     end
@@ -2096,7 +2096,7 @@ class HPXML < Object
       return errors
     end
 
-    def to_rexml(doc)
+    def to_oga(doc)
       return if nil?
 
       skylights = XMLHelper.create_elements_as_needed(doc, ['HPXML', 'Building', 'BuildingDetails', 'Enclosure', 'Skylights'])
@@ -2113,7 +2113,7 @@ class HPXML < Object
       end
     end
 
-    def from_rexml(skylight)
+    def from_oga(skylight)
       return if skylight.nil?
 
       @id = HPXML::get_id(skylight)
@@ -2128,7 +2128,7 @@ class HPXML < Object
       @ufactor = HPXML::to_float_or_nil(XMLHelper.get_value(skylight, 'UFactor'))
       @shgc = HPXML::to_float_or_nil(XMLHelper.get_value(skylight, 'SHGC'))
       @exterior_shading = XMLHelper.get_value(skylight, 'ExteriorShading/Type')
-      @roof_idref = HPXML::get_idref(skylight.elements['AttachedToRoof'])
+      @roof_idref = HPXML::get_idref(XMLHelper.get_element(skylight, 'AttachedToRoof'))
     end
   end
 
@@ -2137,10 +2137,10 @@ class HPXML < Object
       self << Door.new(@hpxml_object, **kwargs)
     end
 
-    def from_rexml(hpxml)
+    def from_oga(hpxml)
       return if hpxml.nil?
 
-      hpxml.elements.each('Building/BuildingDetails/Enclosure/Doors/Door') do |door|
+      XMLHelper.get_elements(hpxml, 'Building/BuildingDetails/Enclosure/Doors/Door').each do |door|
         self << Door.new(@hpxml_object, door)
       end
     end
@@ -2187,7 +2187,7 @@ class HPXML < Object
       return errors
     end
 
-    def to_rexml(doc)
+    def to_oga(doc)
       return if nil?
 
       doors = XMLHelper.create_elements_as_needed(doc, ['HPXML', 'Building', 'BuildingDetails', 'Enclosure', 'Doors'])
@@ -2203,11 +2203,11 @@ class HPXML < Object
       XMLHelper.add_element(door, 'RValue', Float(@r_value)) unless @r_value.nil?
     end
 
-    def from_rexml(door)
+    def from_oga(door)
       return if door.nil?
 
       @id = HPXML::get_id(door)
-      @wall_idref = HPXML::get_idref(door.elements['AttachedToWall'])
+      @wall_idref = HPXML::get_idref(XMLHelper.get_element(door, 'AttachedToWall'))
       @area = HPXML::to_float_or_nil(XMLHelper.get_value(door, 'Area'))
       @azimuth = HPXML::to_integer_or_nil(XMLHelper.get_value(door, 'Azimuth'))
       @r_value = HPXML::to_float_or_nil(XMLHelper.get_value(door, 'RValue'))
@@ -2219,10 +2219,10 @@ class HPXML < Object
       self << HeatingSystem.new(@hpxml_object, **kwargs)
     end
 
-    def from_rexml(hpxml)
+    def from_oga(hpxml)
       return if hpxml.nil?
 
-      hpxml.elements.each('Building/BuildingDetails/Systems/HVAC/HVACPlant/HeatingSystem') do |heating_system|
+      XMLHelper.get_elements(hpxml, 'Building/BuildingDetails/Systems/HVAC/HVACPlant/HeatingSystem').each do |heating_system|
         self << HeatingSystem.new(@hpxml_object, heating_system)
       end
     end
@@ -2256,7 +2256,7 @@ class HPXML < Object
       return errors
     end
 
-    def to_rexml(doc)
+    def to_oga(doc)
       return if nil?
 
       hvac_plant = XMLHelper.create_elements_as_needed(doc, ['HPXML', 'Building', 'BuildingDetails', 'Systems', 'HVAC', 'HVACPlant'])
@@ -2296,11 +2296,11 @@ class HPXML < Object
                                          'SeedId' => @seed_id })
     end
 
-    def from_rexml(heating_system)
+    def from_oga(heating_system)
       return if heating_system.nil?
 
       @id = HPXML::get_id(heating_system)
-      @distribution_system_idref = HPXML::get_idref(heating_system.elements['DistributionSystem'])
+      @distribution_system_idref = HPXML::get_idref(XMLHelper.get_element(heating_system, 'DistributionSystem'))
       @year_installed = HPXML::to_integer_or_nil(XMLHelper.get_value(heating_system, 'YearInstalled'))
       @heating_system_type = XMLHelper.get_child_name(heating_system, 'HeatingSystemType')
       @heating_system_fuel = XMLHelper.get_value(heating_system, 'HeatingSystemFuel')
@@ -2323,10 +2323,10 @@ class HPXML < Object
       self << CoolingSystem.new(@hpxml_object, **kwargs)
     end
 
-    def from_rexml(hpxml)
+    def from_oga(hpxml)
       return if hpxml.nil?
 
-      hpxml.elements.each('Building/BuildingDetails/Systems/HVAC/HVACPlant/CoolingSystem') do |cooling_system|
+      XMLHelper.get_elements(hpxml, 'Building/BuildingDetails/Systems/HVAC/HVACPlant/CoolingSystem').each do |cooling_system|
         self << CoolingSystem.new(@hpxml_object, cooling_system)
       end
     end
@@ -2360,7 +2360,7 @@ class HPXML < Object
       return errors
     end
 
-    def to_rexml(doc)
+    def to_oga(doc)
       return if nil?
 
       hvac_plant = XMLHelper.create_elements_as_needed(doc, ['HPXML', 'Building', 'BuildingDetails', 'Systems', 'HVAC', 'HVACPlant'])
@@ -2398,11 +2398,11 @@ class HPXML < Object
                                          'SeedId' => @seed_id })
     end
 
-    def from_rexml(cooling_system)
+    def from_oga(cooling_system)
       return if cooling_system.nil?
 
       @id = HPXML::get_id(cooling_system)
-      @distribution_system_idref = HPXML::get_idref(cooling_system.elements['DistributionSystem'])
+      @distribution_system_idref = HPXML::get_idref(XMLHelper.get_element(cooling_system, 'DistributionSystem'))
       @year_installed = HPXML::to_integer_or_nil(XMLHelper.get_value(cooling_system, 'YearInstalled'))
       @cooling_system_type = XMLHelper.get_value(cooling_system, 'CoolingSystemType')
       @cooling_system_fuel = XMLHelper.get_value(cooling_system, 'CoolingSystemFuel')
@@ -2426,10 +2426,10 @@ class HPXML < Object
       self << HeatPump.new(@hpxml_object, **kwargs)
     end
 
-    def from_rexml(hpxml)
+    def from_oga(hpxml)
       return if hpxml.nil?
 
-      hpxml.elements.each('Building/BuildingDetails/Systems/HVAC/HVACPlant/HeatPump') do |heat_pump|
+      XMLHelper.get_elements(hpxml, 'Building/BuildingDetails/Systems/HVAC/HVACPlant/HeatPump').each do |heat_pump|
         self << HeatPump.new(@hpxml_object, heat_pump)
       end
     end
@@ -2466,7 +2466,7 @@ class HPXML < Object
       return errors
     end
 
-    def to_rexml(doc)
+    def to_oga(doc)
       return if nil?
 
       hvac_plant = XMLHelper.create_elements_as_needed(doc, ['HPXML', 'Building', 'BuildingDetails', 'Systems', 'HVAC', 'HVACPlant'])
@@ -2531,11 +2531,11 @@ class HPXML < Object
                            extensions: { 'SeedId' => @seed_id })
     end
 
-    def from_rexml(heat_pump)
+    def from_oga(heat_pump)
       return if heat_pump.nil?
 
       @id = HPXML::get_id(heat_pump)
-      @distribution_system_idref = HPXML::get_idref(heat_pump.elements['DistributionSystem'])
+      @distribution_system_idref = HPXML::get_idref(XMLHelper.get_element(heat_pump, 'DistributionSystem'))
       @year_installed = HPXML::to_integer_or_nil(XMLHelper.get_value(heat_pump, 'YearInstalled'))
       @heat_pump_type = XMLHelper.get_value(heat_pump, 'HeatPumpType')
       @heat_pump_fuel = XMLHelper.get_value(heat_pump, 'HeatPumpFuel')
@@ -2571,10 +2571,10 @@ class HPXML < Object
       self << HVACControl.new(@hpxml_object, **kwargs)
     end
 
-    def from_rexml(hpxml)
+    def from_oga(hpxml)
       return if hpxml.nil?
 
-      hpxml.elements.each('Building/BuildingDetails/Systems/HVAC/HVACControl') do |hvac_control|
+      XMLHelper.get_elements(hpxml, 'Building/BuildingDetails/Systems/HVAC/HVACControl').each do |hvac_control|
         self << HVACControl.new(@hpxml_object, hvac_control)
       end
     end
@@ -2596,7 +2596,7 @@ class HPXML < Object
       return errors
     end
 
-    def to_rexml(doc)
+    def to_oga(doc)
       return if nil?
 
       hvac = XMLHelper.create_elements_as_needed(doc, ['HPXML', 'Building', 'BuildingDetails', 'Systems', 'HVAC'])
@@ -2616,7 +2616,7 @@ class HPXML < Object
                                          'CeilingFanSetpointTempCoolingSeasonOffset' => HPXML::to_float_or_nil(@ceiling_fan_cooling_setpoint_temp_offset) })
     end
 
-    def from_rexml(hvac_control)
+    def from_oga(hvac_control)
       return if hvac_control.nil?
 
       @id = HPXML::get_id(hvac_control)
@@ -2638,10 +2638,10 @@ class HPXML < Object
       self << HVACDistribution.new(@hpxml_object, **kwargs)
     end
 
-    def from_rexml(hpxml)
+    def from_oga(hpxml)
       return if hpxml.nil?
 
-      hpxml.elements.each('Building/BuildingDetails/Systems/HVAC/HVACDistribution') do |hvac_distribution|
+      XMLHelper.get_elements(hpxml, 'Building/BuildingDetails/Systems/HVAC/HVACDistribution').each do |hvac_distribution|
         self << HVACDistribution.new(@hpxml_object, hvac_distribution)
       end
     end
@@ -2653,7 +2653,7 @@ class HPXML < Object
       @ducts = Ducts.new(hpxml_object)
       super(hpxml_object, *args)
     end
-    ATTRS = [:id, :distribution_system_type, :distribution_system_type, :annual_heating_dse,
+    ATTRS = [:id, :distribution_system_type, :annual_heating_dse,
              :annual_cooling_dse, :duct_system_sealed, :duct_leakage_testing_exemption]
     attr_accessor(*ATTRS)
     attr_reader(:duct_leakage_measurements, :ducts)
@@ -2704,7 +2704,7 @@ class HPXML < Object
       return errors
     end
 
-    def to_rexml(doc)
+    def to_oga(doc)
       return if nil?
 
       hvac = XMLHelper.create_elements_as_needed(doc, ['HPXML', 'Building', 'BuildingDetails', 'Systems', 'HVAC'])
@@ -2714,7 +2714,7 @@ class HPXML < Object
       distribution_system_type_e = XMLHelper.add_element(hvac_distribution, 'DistributionSystemType')
       if [HVACDistributionTypeAir, HVACDistributionTypeHydronic].include? @distribution_system_type
         XMLHelper.add_element(distribution_system_type_e, @distribution_system_type)
-      elsif [HVACDistributionTypeDSE].include? distribution_system_type
+      elsif [HVACDistributionTypeDSE].include? @distribution_system_type
         XMLHelper.add_element(distribution_system_type_e, 'Other', @distribution_system_type)
         XMLHelper.add_element(hvac_distribution, 'AnnualHeatingDistributionSystemEfficiency', Float(@annual_heating_dse)) unless @annual_heating_dse.nil?
         XMLHelper.add_element(hvac_distribution, 'AnnualCoolingDistributionSystemEfficiency', Float(@annual_cooling_dse)) unless @annual_cooling_dse.nil?
@@ -2722,31 +2722,31 @@ class HPXML < Object
         fail "Unexpected distribution_system_type '#{@distribution_system_type}'."
       end
 
-      air_distribution = hvac_distribution.elements['DistributionSystemType/AirDistribution']
+      air_distribution = XMLHelper.get_element(hvac_distribution, 'DistributionSystemType/AirDistribution')
       return if air_distribution.nil?
 
-      @duct_leakage_measurements.to_rexml(air_distribution)
-      @ducts.to_rexml(air_distribution)
+      @duct_leakage_measurements.to_oga(air_distribution)
+      @ducts.to_oga(air_distribution)
 
       HPXML::add_extension(parent: air_distribution,
                            extensions: { 'DuctLeakageTestingExemption' => HPXML::to_bool_or_nil(@duct_leakage_testing_exemption) })
     end
 
-    def from_rexml(hvac_distribution)
+    def from_oga(hvac_distribution)
       return if hvac_distribution.nil?
 
       @id = HPXML::get_id(hvac_distribution)
       @distribution_system_type = XMLHelper.get_child_name(hvac_distribution, 'DistributionSystemType')
       if @distribution_system_type == 'Other'
-        @distribution_system_type = XMLHelper.get_value(hvac_distribution.elements['DistributionSystemType'], 'Other')
+        @distribution_system_type = XMLHelper.get_value(XMLHelper.get_element(hvac_distribution, 'DistributionSystemType'), 'Other')
       end
       @annual_heating_dse = HPXML::to_float_or_nil(XMLHelper.get_value(hvac_distribution, 'AnnualHeatingDistributionSystemEfficiency'))
       @annual_cooling_dse = HPXML::to_float_or_nil(XMLHelper.get_value(hvac_distribution, 'AnnualCoolingDistributionSystemEfficiency'))
       @duct_system_sealed = HPXML::to_bool_or_nil(XMLHelper.get_value(hvac_distribution, 'HVACDistributionImprovement/DuctSystemSealed'))
       @duct_leakage_testing_exemption = HPXML::to_bool_or_nil(XMLHelper.get_value(hvac_distribution, 'DistributionSystemType/AirDistribution/extension/DuctLeakageTestingExemption'))
 
-      @duct_leakage_measurements.from_rexml(hvac_distribution)
-      @ducts.from_rexml(hvac_distribution)
+      @duct_leakage_measurements.from_oga(hvac_distribution)
+      @ducts.from_oga(hvac_distribution)
     end
   end
 
@@ -2755,10 +2755,10 @@ class HPXML < Object
       self << DuctLeakageMeasurement.new(@hpxml_object, **kwargs)
     end
 
-    def from_rexml(hvac_distribution)
+    def from_oga(hvac_distribution)
       return if hvac_distribution.nil?
 
-      hvac_distribution.elements.each('DistributionSystemType/AirDistribution/DuctLeakageMeasurement') do |duct_leakage_measurement|
+      XMLHelper.get_elements(hvac_distribution, 'DistributionSystemType/AirDistribution/DuctLeakageMeasurement').each do |duct_leakage_measurement|
         self << DuctLeakageMeasurement.new(@hpxml_object, duct_leakage_measurement)
       end
     end
@@ -2782,7 +2782,7 @@ class HPXML < Object
       return errors
     end
 
-    def to_rexml(air_distribution)
+    def to_oga(air_distribution)
       duct_leakage_measurement_el = XMLHelper.add_element(air_distribution, 'DuctLeakageMeasurement')
       XMLHelper.add_element(duct_leakage_measurement_el, 'DuctType', @duct_type) unless @duct_type.nil?
       if not @duct_leakage_value.nil?
@@ -2793,7 +2793,7 @@ class HPXML < Object
       end
     end
 
-    def from_rexml(duct_leakage_measurement)
+    def from_oga(duct_leakage_measurement)
       return if duct_leakage_measurement.nil?
 
       @duct_type = XMLHelper.get_value(duct_leakage_measurement, 'DuctType')
@@ -2809,10 +2809,10 @@ class HPXML < Object
       self << Duct.new(@hpxml_object, **kwargs)
     end
 
-    def from_rexml(hvac_distribution)
+    def from_oga(hvac_distribution)
       return if hvac_distribution.nil?
 
-      hvac_distribution.elements.each('DistributionSystemType/AirDistribution/Ducts') do |duct|
+      XMLHelper.get_elements(hvac_distribution, 'DistributionSystemType/AirDistribution/Ducts').each do |duct|
         self << Duct.new(@hpxml_object, duct)
       end
     end
@@ -2836,7 +2836,7 @@ class HPXML < Object
       return errors
     end
 
-    def to_rexml(air_distribution)
+    def to_oga(air_distribution)
       ducts_el = XMLHelper.add_element(air_distribution, 'Ducts')
       XMLHelper.add_element(ducts_el, 'DuctType', @duct_type) unless @duct_type.nil?
       XMLHelper.add_element(ducts_el, 'DuctInsulationRValue', Float(@duct_insulation_r_value)) unless @duct_insulation_r_value.nil?
@@ -2844,7 +2844,7 @@ class HPXML < Object
       XMLHelper.add_element(ducts_el, 'DuctSurfaceArea', Float(@duct_surface_area)) unless @duct_surface_area.nil?
     end
 
-    def from_rexml(duct)
+    def from_oga(duct)
       return if duct.nil?
 
       @duct_type = XMLHelper.get_value(duct, 'DuctType')
@@ -2861,10 +2861,10 @@ class HPXML < Object
       self << VentilationFan.new(@hpxml_object, **kwargs)
     end
 
-    def from_rexml(hpxml)
+    def from_oga(hpxml)
       return if hpxml.nil?
 
-      hpxml.elements.each('Building/BuildingDetails/Systems/MechanicalVentilation/VentilationFans/VentilationFan') do |ventilation_fan|
+      XMLHelper.get_elements(hpxml, 'Building/BuildingDetails/Systems/MechanicalVentilation/VentilationFans/VentilationFan').each do |ventilation_fan|
         self << VentilationFan.new(@hpxml_object, ventilation_fan)
       end
     end
@@ -2904,7 +2904,7 @@ class HPXML < Object
       return errors
     end
 
-    def to_rexml(doc)
+    def to_oga(doc)
       return if nil?
 
       ventilation_fans = XMLHelper.create_elements_as_needed(doc, ['HPXML', 'Building', 'BuildingDetails', 'Systems', 'MechanicalVentilation', 'VentilationFans'])
@@ -2928,7 +2928,7 @@ class HPXML < Object
       end
     end
 
-    def from_rexml(ventilation_fan)
+    def from_oga(ventilation_fan)
       return if ventilation_fan.nil?
 
       @id = HPXML::get_id(ventilation_fan)
@@ -2943,7 +2943,7 @@ class HPXML < Object
       @sensible_recovery_efficiency = HPXML::to_float_or_nil(XMLHelper.get_value(ventilation_fan, 'SensibleRecoveryEfficiency'))
       @sensible_recovery_efficiency_adjusted = HPXML::to_float_or_nil(XMLHelper.get_value(ventilation_fan, 'AdjustedSensibleRecoveryEfficiency'))
       @fan_power = HPXML::to_float_or_nil(XMLHelper.get_value(ventilation_fan, 'FanPower'))
-      @distribution_system_idref = HPXML::get_idref(ventilation_fan.elements['AttachedToHVACDistributionSystem'])
+      @distribution_system_idref = HPXML::get_idref(XMLHelper.get_element(ventilation_fan, 'AttachedToHVACDistributionSystem'))
     end
   end
 
@@ -2952,10 +2952,10 @@ class HPXML < Object
       self << WaterHeatingSystem.new(@hpxml_object, **kwargs)
     end
 
-    def from_rexml(hpxml)
+    def from_oga(hpxml)
       return if hpxml.nil?
 
-      hpxml.elements.each('Building/BuildingDetails/Systems/WaterHeating/WaterHeatingSystem') do |water_heating_system|
+      XMLHelper.get_elements(hpxml, 'Building/BuildingDetails/Systems/WaterHeating/WaterHeatingSystem').each do |water_heating_system|
         self << WaterHeatingSystem.new(@hpxml_object, water_heating_system)
       end
     end
@@ -2989,7 +2989,7 @@ class HPXML < Object
       return errors
     end
 
-    def to_rexml(doc)
+    def to_oga(doc)
       return if nil?
 
       water_heating = XMLHelper.create_elements_as_needed(doc, ['HPXML', 'Building', 'BuildingDetails', 'Systems', 'WaterHeating'])
@@ -3020,7 +3020,7 @@ class HPXML < Object
       end
     end
 
-    def from_rexml(water_heating_system)
+    def from_oga(water_heating_system)
       return if water_heating_system.nil?
 
       @id = HPXML::get_id(water_heating_system)
@@ -3037,7 +3037,7 @@ class HPXML < Object
       @recovery_efficiency = HPXML::to_float_or_nil(XMLHelper.get_value(water_heating_system, 'RecoveryEfficiency'))
       @uses_desuperheater = HPXML::to_bool_or_nil(XMLHelper.get_value(water_heating_system, 'UsesDesuperheater'))
       @jacket_r_value = HPXML::to_float_or_nil(XMLHelper.get_value(water_heating_system, 'WaterHeaterInsulation/Jacket/JacketRValue'))
-      @related_hvac_idref = HPXML::get_idref(water_heating_system.elements['RelatedHVACSystem'])
+      @related_hvac_idref = HPXML::get_idref(XMLHelper.get_element(water_heating_system, 'RelatedHVACSystem'))
       @energy_star = XMLHelper.get_values(water_heating_system, 'ThirdPartyCertification').include?('Energy Star')
       @standby_loss = HPXML::to_float_or_nil(XMLHelper.get_value(water_heating_system, 'StandbyLoss'))
       @temperature = HPXML::to_float_or_nil(XMLHelper.get_value(water_heating_system, 'HotWaterTemperature'))
@@ -3049,10 +3049,10 @@ class HPXML < Object
       self << HotWaterDistribution.new(@hpxml_object, **kwargs)
     end
 
-    def from_rexml(hpxml)
+    def from_oga(hpxml)
       return if hpxml.nil?
 
-      hpxml.elements.each('Building/BuildingDetails/Systems/WaterHeating/HotWaterDistribution') do |hot_water_distribution|
+      XMLHelper.get_elements(hpxml, 'Building/BuildingDetails/Systems/WaterHeating/HotWaterDistribution').each do |hot_water_distribution|
         self << HotWaterDistribution.new(@hpxml_object, hot_water_distribution)
       end
     end
@@ -3074,7 +3074,7 @@ class HPXML < Object
       return errors
     end
 
-    def to_rexml(doc)
+    def to_oga(doc)
       return if nil?
 
       water_heating = XMLHelper.create_elements_as_needed(doc, ['HPXML', 'Building', 'BuildingDetails', 'Systems', 'WaterHeating'])
@@ -3108,7 +3108,7 @@ class HPXML < Object
       end
     end
 
-    def from_rexml(hot_water_distribution)
+    def from_oga(hot_water_distribution)
       return if hot_water_distribution.nil?
 
       @id = HPXML::get_id(hot_water_distribution)
@@ -3130,10 +3130,10 @@ class HPXML < Object
       self << WaterFixture.new(@hpxml_object, **kwargs)
     end
 
-    def from_rexml(hpxml)
+    def from_oga(hpxml)
       return if hpxml.nil?
 
-      hpxml.elements.each('Building/BuildingDetails/Systems/WaterHeating/WaterFixture') do |water_fixture|
+      XMLHelper.get_elements(hpxml, 'Building/BuildingDetails/Systems/WaterHeating/WaterFixture').each do |water_fixture|
         self << WaterFixture.new(@hpxml_object, water_fixture)
       end
     end
@@ -3152,7 +3152,7 @@ class HPXML < Object
       return errors
     end
 
-    def to_rexml(doc)
+    def to_oga(doc)
       return if nil?
 
       water_heating = XMLHelper.create_elements_as_needed(doc, ['HPXML', 'Building', 'BuildingDetails', 'Systems', 'WaterHeating'])
@@ -3163,7 +3163,7 @@ class HPXML < Object
       XMLHelper.add_element(water_fixture, 'LowFlow', Boolean(@low_flow)) unless @low_flow.nil?
     end
 
-    def from_rexml(water_fixture)
+    def from_oga(water_fixture)
       return if water_fixture.nil?
 
       @id = HPXML::get_id(water_fixture)
@@ -3181,7 +3181,7 @@ class HPXML < Object
       return errors
     end
 
-    def to_rexml(doc)
+    def to_oga(doc)
       return if nil?
 
       water_heating = XMLHelper.create_elements_as_needed(doc, ['HPXML', 'Building', 'BuildingDetails', 'Systems', 'WaterHeating'])
@@ -3189,10 +3189,10 @@ class HPXML < Object
                            extensions: { 'WaterFixturesUsageMultiplier' => HPXML::to_float_or_nil(@water_fixtures_usage_multiplier) })
     end
 
-    def from_rexml(hpxml)
+    def from_oga(hpxml)
       return if hpxml.nil?
 
-      water_heating = hpxml.elements['Building/BuildingDetails/Systems/WaterHeating']
+      water_heating = XMLHelper.get_element(hpxml, 'Building/BuildingDetails/Systems/WaterHeating')
       return if water_heating.nil?
 
       @water_fixtures_usage_multiplier = HPXML::to_float_or_nil(XMLHelper.get_value(water_heating, 'extension/WaterFixturesUsageMultiplier'))
@@ -3204,10 +3204,10 @@ class HPXML < Object
       self << SolarThermalSystem.new(@hpxml_object, **kwargs)
     end
 
-    def from_rexml(hpxml)
+    def from_oga(hpxml)
       return if hpxml.nil?
 
-      hpxml.elements.each('Building/BuildingDetails/Systems/SolarThermal/SolarThermalSystem') do |solar_thermal_system|
+      XMLHelper.get_elements(hpxml, 'Building/BuildingDetails/Systems/SolarThermal/SolarThermalSystem').each do |solar_thermal_system|
         self << SolarThermalSystem.new(@hpxml_object, solar_thermal_system)
       end
     end
@@ -3240,7 +3240,7 @@ class HPXML < Object
       return errors
     end
 
-    def to_rexml(doc)
+    def to_oga(doc)
       return if nil?
 
       solar_thermal = XMLHelper.create_elements_as_needed(doc, ['HPXML', 'Building', 'BuildingDetails', 'Systems', 'SolarThermal'])
@@ -3263,7 +3263,7 @@ class HPXML < Object
       XMLHelper.add_element(solar_thermal_system, 'SolarFraction', Float(@solar_fraction)) unless @solar_fraction.nil?
     end
 
-    def from_rexml(solar_thermal_system)
+    def from_oga(solar_thermal_system)
       return if solar_thermal_system.nil?
 
       @id = HPXML::get_id(solar_thermal_system)
@@ -3276,7 +3276,7 @@ class HPXML < Object
       @collector_frta = HPXML::to_float_or_nil(XMLHelper.get_value(solar_thermal_system, 'CollectorRatedOpticalEfficiency'))
       @collector_frul = HPXML::to_float_or_nil(XMLHelper.get_value(solar_thermal_system, 'CollectorRatedThermalLosses'))
       @storage_volume = HPXML::to_float_or_nil(XMLHelper.get_value(solar_thermal_system, 'StorageVolume'))
-      @water_heating_system_idref = HPXML::get_idref(solar_thermal_system.elements['ConnectedTo'])
+      @water_heating_system_idref = HPXML::get_idref(XMLHelper.get_element(solar_thermal_system, 'ConnectedTo'))
       @solar_fraction = HPXML::to_float_or_nil(XMLHelper.get_value(solar_thermal_system, 'SolarFraction'))
     end
   end
@@ -3286,10 +3286,10 @@ class HPXML < Object
       self << PVSystem.new(@hpxml_object, **kwargs)
     end
 
-    def from_rexml(hpxml)
+    def from_oga(hpxml)
       return if hpxml.nil?
 
-      hpxml.elements.each('Building/BuildingDetails/Systems/Photovoltaics/PVSystem') do |pv_system|
+      XMLHelper.get_elements(hpxml, 'Building/BuildingDetails/Systems/Photovoltaics/PVSystem').each do |pv_system|
         self << PVSystem.new(@hpxml_object, pv_system)
       end
     end
@@ -3310,7 +3310,7 @@ class HPXML < Object
       return errors
     end
 
-    def to_rexml(doc)
+    def to_oga(doc)
       return if nil?
 
       photovoltaics = XMLHelper.create_elements_as_needed(doc, ['HPXML', 'Building', 'BuildingDetails', 'Systems', 'Photovoltaics'])
@@ -3328,7 +3328,7 @@ class HPXML < Object
       XMLHelper.add_element(pv_system, 'YearModulesManufactured', Integer(@year_modules_manufactured)) unless @year_modules_manufactured.nil?
     end
 
-    def from_rexml(pv_system)
+    def from_oga(pv_system)
       return if pv_system.nil?
 
       @id = HPXML::get_id(pv_system)
@@ -3351,10 +3351,10 @@ class HPXML < Object
       self << ClothesWasher.new(@hpxml_object, **kwargs)
     end
 
-    def from_rexml(hpxml)
+    def from_oga(hpxml)
       return if hpxml.nil?
 
-      hpxml.elements.each('Building/BuildingDetails/Appliances/ClothesWasher') do |clothes_washer|
+      XMLHelper.get_elements(hpxml, 'Building/BuildingDetails/Appliances/ClothesWasher').each do |clothes_washer|
         self << ClothesWasher.new(@hpxml_object, clothes_washer)
       end
     end
@@ -3375,7 +3375,7 @@ class HPXML < Object
       return errors
     end
 
-    def to_rexml(doc)
+    def to_oga(doc)
       return if nil?
 
       appliances = XMLHelper.create_elements_as_needed(doc, ['HPXML', 'Building', 'BuildingDetails', 'Appliances'])
@@ -3395,7 +3395,7 @@ class HPXML < Object
                            extensions: { 'UsageMultiplier' => HPXML::to_float_or_nil(@usage_multiplier) })
     end
 
-    def from_rexml(clothes_washer)
+    def from_oga(clothes_washer)
       return if clothes_washer.nil?
 
       @id = HPXML::get_id(clothes_washer)
@@ -3417,10 +3417,10 @@ class HPXML < Object
       self << ClothesDryer.new(@hpxml_object, **kwargs)
     end
 
-    def from_rexml(hpxml)
+    def from_oga(hpxml)
       return if hpxml.nil?
 
-      hpxml.elements.each('Building/BuildingDetails/Appliances/ClothesDryer') do |clothes_dryer|
+      XMLHelper.get_elements(hpxml, 'Building/BuildingDetails/Appliances/ClothesDryer').each do |clothes_dryer|
         self << ClothesDryer.new(@hpxml_object, clothes_dryer)
       end
     end
@@ -3440,7 +3440,7 @@ class HPXML < Object
       return errors
     end
 
-    def to_rexml(doc)
+    def to_oga(doc)
       return if nil?
 
       appliances = XMLHelper.create_elements_as_needed(doc, ['HPXML', 'Building', 'BuildingDetails', 'Appliances'])
@@ -3456,7 +3456,7 @@ class HPXML < Object
                            extensions: { 'UsageMultiplier' => HPXML::to_float_or_nil(@usage_multiplier) })
     end
 
-    def from_rexml(clothes_dryer)
+    def from_oga(clothes_dryer)
       return if clothes_dryer.nil?
 
       @id = HPXML::get_id(clothes_dryer)
@@ -3474,10 +3474,10 @@ class HPXML < Object
       self << Dishwasher.new(@hpxml_object, **kwargs)
     end
 
-    def from_rexml(hpxml)
+    def from_oga(hpxml)
       return if hpxml.nil?
 
-      hpxml.elements.each('Building/BuildingDetails/Appliances/Dishwasher') do |dishwasher|
+      XMLHelper.get_elements(hpxml, 'Building/BuildingDetails/Appliances/Dishwasher').each do |dishwasher|
         self << Dishwasher.new(@hpxml_object, dishwasher)
       end
     end
@@ -3498,7 +3498,7 @@ class HPXML < Object
       return errors
     end
 
-    def to_rexml(doc)
+    def to_oga(doc)
       return if nil?
 
       appliances = XMLHelper.create_elements_as_needed(doc, ['HPXML', 'Building', 'BuildingDetails', 'Appliances'])
@@ -3516,7 +3516,7 @@ class HPXML < Object
                            extensions: { 'UsageMultiplier' => HPXML::to_float_or_nil(@usage_multiplier) })
     end
 
-    def from_rexml(dishwasher)
+    def from_oga(dishwasher)
       return if dishwasher.nil?
 
       @id = HPXML::get_id(dishwasher)
@@ -3536,10 +3536,10 @@ class HPXML < Object
       self << Refrigerator.new(@hpxml_object, **kwargs)
     end
 
-    def from_rexml(hpxml)
+    def from_oga(hpxml)
       return if hpxml.nil?
 
-      hpxml.elements.each('Building/BuildingDetails/Appliances/Refrigerator') do |refrigerator|
+      XMLHelper.get_elements(hpxml, 'Building/BuildingDetails/Appliances/Refrigerator').each do |refrigerator|
         self << Refrigerator.new(@hpxml_object, refrigerator)
       end
     end
@@ -3558,7 +3558,7 @@ class HPXML < Object
       return errors
     end
 
-    def to_rexml(doc)
+    def to_oga(doc)
       return if nil?
 
       appliances = XMLHelper.create_elements_as_needed(doc, ['HPXML', 'Building', 'BuildingDetails', 'Appliances'])
@@ -3572,7 +3572,7 @@ class HPXML < Object
                                          'UsageMultiplier' => HPXML::to_float_or_nil(@usage_multiplier) })
     end
 
-    def from_rexml(refrigerator)
+    def from_oga(refrigerator)
       return if refrigerator.nil?
 
       @id = HPXML::get_id(refrigerator)
@@ -3588,10 +3588,10 @@ class HPXML < Object
       self << CookingRange.new(@hpxml_object, **kwargs)
     end
 
-    def from_rexml(hpxml)
+    def from_oga(hpxml)
       return if hpxml.nil?
 
-      hpxml.elements.each('Building/BuildingDetails/Appliances/CookingRange') do |cooking_range|
+      XMLHelper.get_elements(hpxml, 'Building/BuildingDetails/Appliances/CookingRange').each do |cooking_range|
         self << CookingRange.new(@hpxml_object, cooking_range)
       end
     end
@@ -3610,7 +3610,7 @@ class HPXML < Object
       return errors
     end
 
-    def to_rexml(doc)
+    def to_oga(doc)
       return if nil?
 
       appliances = XMLHelper.create_elements_as_needed(doc, ['HPXML', 'Building', 'BuildingDetails', 'Appliances'])
@@ -3623,7 +3623,7 @@ class HPXML < Object
                            extensions: { 'UsageMultiplier' => HPXML::to_float_or_nil(@usage_multiplier) })
     end
 
-    def from_rexml(cooking_range)
+    def from_oga(cooking_range)
       return if cooking_range.nil?
 
       @id = HPXML::get_id(cooking_range)
@@ -3638,10 +3638,10 @@ class HPXML < Object
       self << Oven.new(@hpxml_object, **kwargs)
     end
 
-    def from_rexml(hpxml)
+    def from_oga(hpxml)
       return if hpxml.nil?
 
-      hpxml.elements.each('Building/BuildingDetails/Appliances/Oven') do |oven|
+      XMLHelper.get_elements(hpxml, 'Building/BuildingDetails/Appliances/Oven').each do |oven|
         self << Oven.new(@hpxml_object, oven)
       end
     end
@@ -3660,7 +3660,7 @@ class HPXML < Object
       return errors
     end
 
-    def to_rexml(doc)
+    def to_oga(doc)
       return if nil?
 
       appliances = XMLHelper.create_elements_as_needed(doc, ['HPXML', 'Building', 'BuildingDetails', 'Appliances'])
@@ -3670,7 +3670,7 @@ class HPXML < Object
       XMLHelper.add_element(oven, 'IsConvection', Boolean(@is_convection)) unless @is_convection.nil?
     end
 
-    def from_rexml(oven)
+    def from_oga(oven)
       return if oven.nil?
 
       @id = HPXML::get_id(oven)
@@ -3683,10 +3683,10 @@ class HPXML < Object
       self << LightingGroup.new(@hpxml_object, **kwargs)
     end
 
-    def from_rexml(hpxml)
+    def from_oga(hpxml)
       return if hpxml.nil?
 
-      hpxml.elements.each('Building/BuildingDetails/Lighting/LightingGroup') do |lighting_group|
+      XMLHelper.get_elements(hpxml, 'Building/BuildingDetails/Lighting/LightingGroup').each do |lighting_group|
         self << LightingGroup.new(@hpxml_object, lighting_group)
       end
     end
@@ -3705,7 +3705,7 @@ class HPXML < Object
       return errors
     end
 
-    def to_rexml(doc)
+    def to_oga(doc)
       return if nil?
 
       lighting = XMLHelper.create_elements_as_needed(doc, ['HPXML', 'Building', 'BuildingDetails', 'Lighting'])
@@ -3717,7 +3717,7 @@ class HPXML < Object
       XMLHelper.add_element(lighting_group, 'ThirdPartyCertification', @third_party_certification) unless @third_party_certification.nil?
     end
 
-    def from_rexml(lighting_group)
+    def from_oga(lighting_group)
       return if lighting_group.nil?
 
       @id = HPXML::get_id(lighting_group)
@@ -3736,7 +3736,7 @@ class HPXML < Object
       return errors
     end
 
-    def to_rexml(doc)
+    def to_oga(doc)
       return if nil?
 
       lighting = XMLHelper.create_elements_as_needed(doc, ['HPXML', 'Building', 'BuildingDetails', 'Lighting'])
@@ -3744,10 +3744,10 @@ class HPXML < Object
                            extensions: { 'UsageMultiplier' => HPXML::to_float_or_nil(@usage_multiplier) })
     end
 
-    def from_rexml(hpxml)
+    def from_oga(hpxml)
       return if hpxml.nil?
 
-      lighting = hpxml.elements['Building/BuildingDetails/Lighting']
+      lighting = XMLHelper.get_element(hpxml, 'Building/BuildingDetails/Lighting')
       return if lighting.nil?
 
       @usage_multiplier = HPXML::to_float_or_nil(XMLHelper.get_value(lighting, 'extension/UsageMultiplier'))
@@ -3759,10 +3759,10 @@ class HPXML < Object
       self << CeilingFan.new(@hpxml_object, **kwargs)
     end
 
-    def from_rexml(hpxml)
+    def from_oga(hpxml)
       return if hpxml.nil?
 
-      hpxml.elements.each('Building/BuildingDetails/Lighting/CeilingFan') do |ceiling_fan|
+      XMLHelper.get_elements(hpxml, 'Building/BuildingDetails/Lighting/CeilingFan').each do |ceiling_fan|
         self << CeilingFan.new(@hpxml_object, ceiling_fan)
       end
     end
@@ -3781,7 +3781,7 @@ class HPXML < Object
       return errors
     end
 
-    def to_rexml(doc)
+    def to_oga(doc)
       return if nil?
 
       lighting = XMLHelper.create_elements_as_needed(doc, ['HPXML', 'Building', 'BuildingDetails', 'Lighting'])
@@ -3796,7 +3796,7 @@ class HPXML < Object
       XMLHelper.add_element(ceiling_fan, 'Quantity', Integer(@quantity)) unless @quantity.nil?
     end
 
-    def from_rexml(ceiling_fan)
+    def from_oga(ceiling_fan)
       @id = HPXML::get_id(ceiling_fan)
       @efficiency = HPXML::to_float_or_nil(XMLHelper.get_value(ceiling_fan, "Airflow[FanSpeed='medium']/Efficiency"))
       @quantity = HPXML::to_integer_or_nil(XMLHelper.get_value(ceiling_fan, 'Quantity'))
@@ -3808,10 +3808,10 @@ class HPXML < Object
       self << PlugLoad.new(@hpxml_object, **kwargs)
     end
 
-    def from_rexml(hpxml)
+    def from_oga(hpxml)
       return if hpxml.nil?
 
-      hpxml.elements.each('Building/BuildingDetails/MiscLoads/PlugLoad') do |plug_load|
+      XMLHelper.get_elements(hpxml, 'Building/BuildingDetails/MiscLoads/PlugLoad').each do |plug_load|
         self << PlugLoad.new(@hpxml_object, plug_load)
       end
     end
@@ -3830,7 +3830,7 @@ class HPXML < Object
       return errors
     end
 
-    def to_rexml(doc)
+    def to_oga(doc)
       return if nil?
 
       misc_loads = XMLHelper.create_elements_as_needed(doc, ['HPXML', 'Building', 'BuildingDetails', 'MiscLoads'])
@@ -3849,7 +3849,7 @@ class HPXML < Object
                                          'UsageMultiplier' => HPXML::to_float_or_nil(@usage_multiplier) })
     end
 
-    def from_rexml(plug_load)
+    def from_oga(plug_load)
       @id = HPXML::get_id(plug_load)
       @plug_load_type = XMLHelper.get_value(plug_load, 'PlugLoadType')
       @kWh_per_year = HPXML::to_float_or_nil(XMLHelper.get_value(plug_load, "Load[Units='kWh/year']/Value"))
@@ -3868,7 +3868,7 @@ class HPXML < Object
       return errors
     end
 
-    def to_rexml(doc)
+    def to_oga(doc)
       return if nil?
 
       misc_loads = XMLHelper.create_elements_as_needed(doc, ['HPXML', 'Building', 'BuildingDetails', 'MiscLoads'])
@@ -3878,10 +3878,10 @@ class HPXML < Object
                                          'MonthlyScheduleMultipliers' => @monthly_multipliers })
     end
 
-    def from_rexml(hpxml)
+    def from_oga(hpxml)
       return if hpxml.nil?
 
-      misc_loads = hpxml.elements['Building/BuildingDetails/MiscLoads']
+      misc_loads = XMLHelper.get_element(hpxml, 'Building/BuildingDetails/MiscLoads')
       return if misc_loads.nil?
 
       @weekday_fractions = XMLHelper.get_value(misc_loads, 'extension/WeekdayScheduleFractions')
@@ -3890,7 +3890,7 @@ class HPXML < Object
     end
   end
 
-  def _create_rexml_document()
+  def _create_oga_document()
     doc = XMLHelper.create_doc(version = '1.0', encoding = 'UTF-8')
     hpxml = XMLHelper.add_element(doc, 'HPXML')
     XMLHelper.add_attribute(hpxml, 'xmlns', 'http://hpxmlonline.com/2019/10')
@@ -4100,13 +4100,13 @@ class HPXML < Object
   end
 
   def self.get_id(parent, element_name = 'SystemIdentifier')
-    return parent.elements[element_name].attributes['id']
+    return XMLHelper.get_element(parent, element_name).get('id')
   end
 
   def self.get_idref(element)
     return if element.nil?
 
-    return element.attributes['idref']
+    return element.get('idref')
   end
 
   def self.to_float_or_nil(value)
@@ -4134,7 +4134,7 @@ class HPXML < Object
       extensions.each do |name, value|
         next if value.nil?
 
-        extension = parent.elements['extension']
+        extension = XMLHelper.get_element(parent, 'extension')
         if extension.nil?
           extension = XMLHelper.add_element(parent, 'extension')
         end
