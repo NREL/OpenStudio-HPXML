@@ -35,9 +35,7 @@ def create_hpxmls
     'invalid_files/invalid-window-height.xml' => 'base-enclosure-overhangs.xml',
     'invalid_files/invalid-window-interior-shading.xml' => 'base.xml',
     'invalid_files/lighting-fractions.xml' => 'base.xml',
-    'invalid_files/mismatched-slab-and-foundation-wall.xml' => 'base.xml',
     'invalid_files/missing-elements.xml' => 'base.xml',
-    'invalid_files/missing-surfaces.xml' => 'base.xml',
     'invalid_files/net-area-negative-roof.xml' => 'base-enclosure-skylights.xml',
     'invalid_files/net-area-negative-wall.xml' => 'base.xml',
     'invalid_files/orphaned-hvac-distribution.xml' => 'base-hvac-furnace-gas-room-ac.xml',
@@ -878,15 +876,6 @@ def set_hpxml_walls(hpxml_file, hpxml)
                       insulation_assembly_r_value: assembly_r)
     end
     hpxml.walls << last_wall
-  elsif ['invalid_files/missing-surfaces.xml'].include? hpxml_file
-    hpxml.walls.add(id: 'WallGarage',
-                    exterior_adjacent_to: HPXML::LocationGarage,
-                    interior_adjacent_to: HPXML::LocationLivingSpace,
-                    wall_type: HPXML::WallTypeWoodStud,
-                    area: 100,
-                    solar_absorptance: 0.7,
-                    emittance: 0.92,
-                    insulation_assembly_r_value: 4)
   elsif ['base-enclosure-2stories.xml'].include? hpxml_file
     hpxml.walls[0].area *= 2.0
   elsif ['base-enclosure-2stories-garage.xml'].include? hpxml_file
@@ -1166,10 +1155,6 @@ def set_hpxml_foundation_walls(hpxml_file, hpxml)
     hpxml.foundation_walls << hpxml.foundation_walls[-1].dup
     hpxml.foundation_walls[-1].id = 'TinyFoundationWall'
     hpxml.foundation_walls[-1].area = 0.05
-  elsif ['invalid_files/mismatched-slab-and-foundation-wall.xml'].include? hpxml_file
-    hpxml.foundation_walls << hpxml.foundation_walls[0].dup
-    hpxml.foundation_walls[1].id = 'FoundationWall2'
-    hpxml.foundation_walls[1].interior_adjacent_to = HPXML::LocationGarage
   end
 end
 
