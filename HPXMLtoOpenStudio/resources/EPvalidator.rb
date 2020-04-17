@@ -500,7 +500,7 @@ class EnergyPlusValidator
         'RatedFlowRate' => zero_or_one,
         'HoursInOperation' => zero_or_one,
         'FanPower' => zero_or_one,
-        'extension/StartHour' => zero_or_one,
+        'extension/StartHour' => zero_or_one, # 0 = midnight. 12 = noon
       },
 
       # [BathFan]
@@ -510,7 +510,7 @@ class EnergyPlusValidator
         'RatedFlowRate' => zero_or_one,
         'HoursInOperation' => zero_or_one,
         'FanPower' => zero_or_one,
-        'extension/StartHour' => zero_or_one,
+        'extension/StartHour' => zero_or_one, # 0 = midnight. 12 = noon
       },
 
       # [WholeHouseFan]
