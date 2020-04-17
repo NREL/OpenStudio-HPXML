@@ -311,11 +311,19 @@ class SimulationOutputReport < OpenStudio::Measure::ReportingMeasure
     elsif timeseries_frequency == 'timestep'
       interval_type = -1
     end
-    query = "SELECT Year || '-' || SUBSTR('0' || Month, -2) || '-' || SUBSTR('0' || Day, -2) || ' ' || SUBSTR('0' || Hour, -2) || ':' || SUBSTR('0' || Minute, -2) || ':00' As Timestamp FROM Time WHERE IntervalType='#{interval_type}'"
+
+    query = "SELECT Year || ' ' || Month || ' ' || Day || ' ' || Hour || ' ' || Minute As Timestamp FROM Time WHERE IntervalType='#{interval_type}'"
     values = @sqlFile.execAndReturnVectorOfString(query)
     fail "Query error: #{query}" unless values.is_initialized
 
-    return values.get
+    timestamps = []
+    values.get.each do |value|
+      year, month, day, hour, minute = value.split(' ')
+      ts = ts = Time.new(year, month, day, hour, minute)
+      timestamps << ts.strftime('%Y/%m/%d %H:%M:00')
+    end
+
+    return timestamps
   end
 
   def get_outputs(timeseries_frequency,
