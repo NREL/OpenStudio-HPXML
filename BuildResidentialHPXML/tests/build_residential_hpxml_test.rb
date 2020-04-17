@@ -24,7 +24,7 @@ class BuildResidentialHPXMLTest < MiniTest::Test
 
     osws = []
     test_dirs.each do |test_dir|
-      Dir["#{test_dir}/base*.osw"].sort.each do |osw|
+      Dir["#{test_dir}/base-single-family-attached.osw"].sort.each do |osw|
         osws << File.absolute_path(osw)
       end
       Dir["#{test_dir}/extra*.osw"].sort.each do |osw|
