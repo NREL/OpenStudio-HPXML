@@ -1124,46 +1124,63 @@ class HPXMLTest < MiniTest::Test
     end
 
     # Mechanical Ventilation
+    vent_fan_whole_house = nil
+    vent_fan_kitchen = nil
+    vent_fan_bath = nil
     hpxml.ventilation_fans.each do |ventilation_fan|
-      next unless ventilation_fan.used_for_whole_building_ventilation
-
+      if ventilation_fan.used_for_local_ventilation
+        if ventilation_fan.fan_location == HPXML::VentilationFanLocationKitchen
+          vent_fan_kitchen = ventilation_fan
+        elsif ventilation_fan.fan_location == HPXML::VentilationFanLocationBath
+          vent_fan_bath = ventilation_fan
+        end
+      elsif ventilation_fan.used_for_whole_building_ventilation
+        vent_fan_whole_house = ventilation_fan
+      end
+    end
+    if (not vent_fan_whole_house.nil?) || (not vent_fan_kitchen.nil?) || (not vent_fan_bath.nil?)
       mv_energy = 0.0
       results.keys.each do |k|
         next if (k[0] != 'Electricity') || (k[1] != 'Interior Equipment') || (not k[2].start_with? Constants.ObjectNameMechanicalVentilation)
 
         mv_energy = results[k]
       end
-      fan_w = ventilation_fan.fan_power
-      hrs_per_day = ventilation_fan.hours_in_operation
-      if not ventilation_fan.distribution_system_idref.nil?
+
+      if (not vent_fan_whole_house.nil?) && (vent_fan_whole_house.fan_type == HPXML::MechVentTypeCFIS)
         # CFIS, check for positive mech vent energy that is less than the energy if it had run 24/7
-        fan_kwhs = UnitConversions.convert(fan_w * hrs_per_day * 365.0, 'Wh', 'GJ')
-        if fan_kwhs > 0
+        fan_gj = UnitConversions.convert(vent_fan_whole_house.fan_power * vent_fan_whole_house.hours_in_operation * 365.0, 'Wh', 'GJ')
+        if fan_gj > 0
           assert_operator(mv_energy, :>, 0)
-          assert_operator(mv_energy, :<, fan_kwhs)
+          assert_operator(mv_energy, :<, fan_gj)
         else
           assert_equal(mv_energy, 0.0)
         end
+
+        # CFIS Fan power
+        hpxml_value = vent_fan_whole_house.fan_power
+        query = "SELECT Value FROM ReportData WHERE ReportDataDictionaryIndex IN (SELECT ReportDataDictionaryIndex FROM ReportDataDictionary WHERE Name='#{@cfis_fan_power_output_var.variableName}' AND ReportingFrequency='Run Period')"
+        sql_value = sqlFile.execAndReturnFirstDouble(query).get
+        assert_in_delta(hpxml_value, sql_value, 0.01)
+
+        # CFIS Flow rate
+        hpxml_value = vent_fan_whole_house.tested_flow_rate * vent_fan_whole_house.hours_in_operation / 24.0
+        query = "SELECT Value FROM ReportData WHERE ReportDataDictionaryIndex IN (SELECT ReportDataDictionaryIndex FROM ReportDataDictionary WHERE Name='#{@cfis_flow_rate_output_var.variableName}' AND ReportingFrequency='Run Period')"
+        sql_value = UnitConversions.convert(sqlFile.execAndReturnFirstDouble(query).get, 'm^3/s', 'cfm')
+        assert_in_delta(hpxml_value, sql_value, 0.01)
       else
         # Supply, exhaust, ERV, HRV, etc., check for appropriate mech vent energy
-        fan_kwhs = UnitConversions.convert(fan_w * hrs_per_day * 365.0, 'Wh', 'GJ')
-        assert_in_delta(mv_energy, fan_kwhs, 0.1)
+        fan_gj = 0
+        if not vent_fan_whole_house.nil?
+          fan_gj += UnitConversions.convert(vent_fan_whole_house.fan_power * vent_fan_whole_house.hours_in_operation * 365.0, 'Wh', 'GJ')
+        end
+        if not vent_fan_kitchen.nil?
+          fan_gj += UnitConversions.convert(vent_fan_kitchen.fan_power * vent_fan_kitchen.hours_in_operation * 365.0, 'Wh', 'GJ')
+        end
+        if not vent_fan_bath.nil?
+          fan_gj += UnitConversions.convert(vent_fan_bath.fan_power * vent_fan_bath.hours_in_operation * vent_fan_bath.quantity * 365.0, 'Wh', 'GJ')
+        end
+        assert_in_delta(mv_energy, fan_gj, 0.1)
       end
-
-      # CFIS
-      next unless ventilation_fan.fan_type == HPXML::MechVentTypeCFIS
-
-      # Fan power
-      hpxml_value = fan_w
-      query = "SELECT Value FROM ReportData WHERE ReportDataDictionaryIndex IN (SELECT ReportDataDictionaryIndex FROM ReportDataDictionary WHERE Name='#{@cfis_fan_power_output_var.variableName}' AND ReportingFrequency='Run Period')"
-      sql_value = sqlFile.execAndReturnFirstDouble(query).get
-      assert_in_delta(hpxml_value, sql_value, 0.01)
-
-      # Flow rate
-      hpxml_value = ventilation_fan.tested_flow_rate * hrs_per_day / 24.0
-      query = "SELECT Value FROM ReportData WHERE ReportDataDictionaryIndex IN (SELECT ReportDataDictionaryIndex FROM ReportDataDictionary WHERE Name='#{@cfis_flow_rate_output_var.variableName}' AND ReportingFrequency='Run Period')"
-      sql_value = UnitConversions.convert(sqlFile.execAndReturnFirstDouble(query).get, 'm^3/s', 'cfm')
-      assert_in_delta(hpxml_value, sql_value, 0.01)
     end
 
     # Clothes Washer

@@ -1565,7 +1565,7 @@ class Airflow
     equip_def.setFractionRadiant(0)
     equip_def.setFractionLatent(0)
     equip_def.setFractionLost(1)
-    equip.setSchedule(model.alwaysOnDiscreteSchedule)
+    equip.setSchedule(range_hood_sch.schedule)
     equip.setEndUseSubcategory(Constants.ObjectNameMechanicalVentilation)
 
     equip_def = OpenStudio::Model::ElectricEquipmentDefinition.new(model)
@@ -1581,7 +1581,7 @@ class Airflow
     equip_def.setFractionRadiant(0)
     equip_def.setFractionLatent(0)
     equip_def.setFractionLost(1)
-    equip.setSchedule(model.alwaysOnDiscreteSchedule)
+    equip.setSchedule(bath_exhaust_sch.schedule)
     equip.setEndUseSubcategory(Constants.ObjectNameMechanicalVentilation)
 
     infil_flow = OpenStudio::Model::SpaceInfiltrationDesignFlowRate.new(model)
