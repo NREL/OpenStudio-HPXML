@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 def create_hpxmls
   this_dir = File.dirname(__FILE__)
   sample_files_dir = File.join(this_dir, 'workflow/sample_files')
@@ -211,6 +213,7 @@ def create_hpxmls
     'base-location-duluth-mn.xml' => 'base.xml',
     'base-location-miami-fl.xml' => 'base.xml',
     'base-location-epw-filename.xml' => 'base.xml',
+    'base-location-epw-filename-AMY-2012.xml' => 'base.xml',
     'base-mechvent-balanced.xml' => 'base.xml',
     'base-mechvent-cfis.xml' => 'base.xml',
     'base-mechvent-cfis-evap-cooler-only-ducted.xml' => 'base-hvac-evap-cooler-only-ducted.xml',
@@ -393,11 +396,11 @@ def create_hpxmls
         set_hpxml_misc_load_schedule(hpxml_file, hpxml)
       end
 
-      hpxml_doc = hpxml.to_rexml()
+      hpxml_doc = hpxml.to_oga()
 
       if ['invalid_files/missing-elements.xml'].include? derivative
-        hpxml_doc.elements['/HPXML/Building/BuildingDetails/BuildingSummary/BuildingConstruction'].elements.delete('NumberofConditionedFloors')
-        hpxml_doc.elements['/HPXML/Building/BuildingDetails/BuildingSummary/BuildingConstruction'].elements.delete('ConditionedFloorArea')
+        XMLHelper.delete_element(hpxml_doc, '/HPXML/Building/BuildingDetails/BuildingSummary/BuildingConstruction/NumberofConditionedFloors')
+        XMLHelper.delete_element(hpxml_doc, '/HPXML/Building/BuildingDetails/BuildingSummary/BuildingConstruction/ConditionedFloorArea')
       end
 
       hpxml_path = File.join(sample_files_dir, derivative)
@@ -576,6 +579,10 @@ def set_hpxml_climate_and_risk_zones(hpxml_file, hpxml)
   elsif ['base-location-epw-filename.xml'].include? hpxml_file
     hpxml.climate_and_risk_zones.weather_station_wmo = nil
     hpxml.climate_and_risk_zones.weather_station_epw_filename = 'USA_CO_Denver.Intl.AP.725650_TMY3.epw'
+  elsif ['base-location-epw-filename-AMY-2012.xml'].include? hpxml_file
+    hpxml.climate_and_risk_zones.weather_station_wmo = nil
+    hpxml.climate_and_risk_zones.weather_station_name = 'Boulder, CO'
+    hpxml.climate_and_risk_zones.weather_station_epw_filename = 'US_CO_Boulder_AMY_2012.epw'
   elsif ['invalid_files/bad-wmo.xml'].include? hpxml_file
     hpxml.climate_and_risk_zones.weather_station_wmo = '999999'
   end
@@ -3544,8 +3551,9 @@ if ARGV[0].to_sym == :update_measures
   # Apply rubocop
   cops = ['Layout',
           'Lint/DeprecatedClassMethods',
-          'Lint/StringConversionInInterpolation',
+          # 'Lint/RedundantStringCoercion', # Enable when rubocop is upgraded
           'Style/AndOr',
+          'Style/FrozenStringLiteralComment',
           'Style/HashSyntax',
           'Style/Next',
           'Style/NilComparison',

@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 # see the URL below for information on how to write OpenStudio measures
 # http://nrel.github.io/OpenStudio-user-documentation/reference/measure_writing_guide/
 
@@ -81,7 +83,7 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
     tear_down_model(model, runner)
 
     # Check for correct versions of OS
-    os_version = '2.9.1'
+    os_version = '3.0.0'
     if OpenStudio.openStudioVersion != os_version
       fail "OpenStudio version #{os_version} is required."
     end
@@ -98,6 +100,7 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
     unless File.exist?(hpxml_path) && hpxml_path.downcase.end_with?('.xml')
       fail "'#{hpxml_path}' does not exist or is not an .xml file."
     end
+
     unless (Pathname.new weather_dir).absolute?
       weather_dir = File.expand_path(File.join(File.dirname(__FILE__), '..', weather_dir))
     end
@@ -147,7 +150,7 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
     is_valid = true
 
     # Validate input HPXML against schema
-    XMLHelper.validate(hpxml.doc.to_s, File.join(schemas_dir, 'HPXML.xsd'), runner).each do |error|
+    XMLHelper.validate(hpxml.doc.to_xml, File.join(schemas_dir, 'HPXML.xsd'), runner).each do |error|
       runner.registerError("#{hpxml_path}: #{error}")
       is_valid = false
     end
@@ -343,19 +346,33 @@ class OSModel
 
     # Default attics/foundations
     if @hpxml.has_space_type(HPXML::LocationAtticVented)
+      vented_attic = nil
       @hpxml.attics.each do |attic|
         next unless attic.attic_type == HPXML::AtticTypeVented
-        next unless (attic.vented_attic_sla.nil? && attic.vented_attic_constant_ach.nil?)
-
-        attic.vented_attic_sla = Airflow.get_default_vented_attic_sla()
+        vented_attic = attic
+      end
+      if vented_attic.nil?
+        @hpxml.attics.add(id: 'VentedAttic',
+                          attic_type: HPXML::AtticTypeVented)
+        vented_attic = @hpxml.attics[-1]
+      end
+      if vented_attic.vented_attic_sla.nil? && vented_attic.vented_attic_constant_ach.nil?
+        vented_attic.vented_attic_sla = Airflow.get_default_vented_attic_sla()
       end
     end
     if @hpxml.has_space_type(HPXML::LocationCrawlspaceVented)
+      vented_crawl = nil
       @hpxml.foundations.each do |foundation|
         next unless foundation.foundation_type == HPXML::FoundationTypeCrawlspaceVented
-        next unless foundation.vented_crawlspace_sla.nil?
-
-        foundation.vented_crawlspace_sla = Airflow.get_default_vented_crawl_sla()
+        vented_crawl = foundation
+      end
+      if vented_crawl.nil?
+        @hpxml.foundations.add(id: 'VentedCrawlspace',
+                               foundation_type: HPXML::FoundationTypeCrawlspaceVented)
+        vented_crawl = @hpxml.foundations[-1]
+      end
+      if vented_crawl.vented_crawlspace_sla.nil?
+        vented_crawl.vented_crawlspace_sla = Airflow.get_default_vented_crawl_sla()
       end
     end
 
@@ -399,17 +416,20 @@ class OSModel
     @hpxml.cooling_systems.each do |cooling_system|
       next unless cooling_system.cooling_system_type == HPXML::HVACTypeCentralAirConditioner
       next unless cooling_system.compressor_type.nil?
+
       cooling_system.compressor_type = HVAC.get_default_compressor_type(cooling_system.cooling_efficiency_seer)
     end
     @hpxml.heat_pumps.each do |heat_pump|
       next unless heat_pump.heat_pump_type == HPXML::HVACTypeHeatPumpAirToAir
       next unless heat_pump.compressor_type.nil?
+
       heat_pump.compressor_type = HVAC.get_default_compressor_type(heat_pump.cooling_efficiency_seer)
     end
 
     # Default AC/HP sensible heat ratio
     @hpxml.cooling_systems.each do |cooling_system|
       next unless cooling_system.cooling_shr.nil?
+
       if cooling_system.cooling_system_type == HPXML::HVACTypeCentralAirConditioner
         if cooling_system.compressor_type == HPXML::HVACCompressorTypeSingleStage
           cooling_system.cooling_shr = 0.73
@@ -424,6 +444,7 @@ class OSModel
     end
     @hpxml.heat_pumps.each do |heat_pump|
       next unless heat_pump.cooling_shr.nil?
+
       if heat_pump.heat_pump_type == HPXML::HVACTypeHeatPumpAirToAir
         if heat_pump.compressor_type == HPXML::HVACCompressorTypeSingleStage
           heat_pump.cooling_shr = 0.73
@@ -639,7 +660,7 @@ class OSModel
     if @debug && (not @output_dir.nil?)
       # Write updated HPXML object to file
       hpxml_defaults_path = File.join(@output_dir, 'in.xml')
-      XMLHelper.write_file(@hpxml.to_rexml, hpxml_defaults_path)
+      XMLHelper.write_file(@hpxml.to_oga, hpxml_defaults_path)
       runner.registerInfo("Wrote file: #{hpxml_defaults_path}")
     end
   end
@@ -652,7 +673,7 @@ class OSModel
     tstep.setNumberOfTimestepsPerHour(60 / @hpxml.header.timestep)
 
     shad = model.getShadowCalculation
-    shad.setCalculationFrequency(20)
+    shad.setShadingCalculationUpdateFrequency(20)
     shad.setMaximumFiguresInShadowOverlapCalculations(200)
 
     outsurf = model.getOutsideSurfaceConvectionAlgorithm
@@ -1591,6 +1612,7 @@ class OSModel
       found_foundation_wall = false
       @hpxml.foundation_walls.each do |foundation_wall|
         next if foundation_wall.net_area < 0.1 # skip modeling net surface area for surfaces comprised entirely of subsurface area
+
         found_foundation_wall = true if slab.interior_adjacent_to == foundation_wall.interior_adjacent_to
       end
       next if found_foundation_wall
@@ -3346,6 +3368,10 @@ class OSModel
                          skylights: [],
                          internal_mass: [] }
 
+    # Output diagnostics needed for some output variables used below
+    output_diagnostics = model.getOutputDiagnostics
+    output_diagnostics.addKey('DisplayAdvancedReportVariables')
+
     model.getSurfaces.sort.each_with_index do |s, idx|
       next unless s.space.get.thermalZone.get.name.to_s == @living_zone.name.to_s
 
@@ -3363,17 +3389,20 @@ class OSModel
         fail "Unexpected subsurface for component loads: '#{ss.name}'." if key.nil?
 
         if (surface_type == 'Window') || (surface_type == 'Skylight')
-          vars = { 'Surface Window Net Heat Transfer Energy' => 'ss_net',
-                   'Surface Inside Face Internal Gains Radiation Heat Gain Energy' => 'ss_ig',
+          vars = { 'Surface Window Transmitted Solar Radiation Energy' => 'ss_trans_in',
+                   'Surface Window Shortwave from Zone Back Out Window Heat Transfer Rate' => 'ss_back_out',
                    'Surface Window Total Glazing Layers Absorbed Shortwave Radiation Rate' => 'ss_sw_abs',
                    'Surface Window Total Glazing Layers Absorbed Solar Radiation Energy' => 'ss_sol_abs',
-                   'Surface Inside Face Initial Transmitted Diffuse Transmitted Out Window Solar Radiation Rate' => 'ss_sol_out' }
-        else
-          vars = { 'Surface Inside Face Convection Heat Gain Energy' => 'ss_conv',
+                   'Surface Inside Face Initial Transmitted Diffuse Transmitted Out Window Solar Radiation Rate' => 'ss_trans_out',
+                   'Surface Inside Face Convection Heat Gain Energy' => 'ss_conv',
                    'Surface Inside Face Internal Gains Radiation Heat Gain Energy' => 'ss_ig',
-                   'Surface Inside Face Net Surface Thermal Radiation Heat Gain Energy' => 'ss_surf',
-                   'Surface Inside Face Solar Radiation Heat Gain Energy' => 'ss_sol',
-                   'Surface Inside Face Lights Radiation Heat Gain Energy' => 'ss_lgt' }
+                   'Surface Inside Face Net Surface Thermal Radiation Heat Gain Energy' => 'ss_surf' }
+        else
+          vars = { 'Surface Inside Face Solar Radiation Heat Gain Energy' => 'ss_sol',
+                   'Surface Inside Face Lights Radiation Heat Gain Energy' => 'ss_lgt',
+                   'Surface Inside Face Convection Heat Gain Energy' => 'ss_conv',
+                   'Surface Inside Face Internal Gains Radiation Heat Gain Energy' => 'ss_ig',
+                   'Surface Inside Face Net Surface Thermal Radiation Heat Gain Energy' => 'ss_surf' }
         end
 
         surfaces_sensors[key] << []
@@ -3676,9 +3705,10 @@ class OSModel
       surface_sensors.each do |sensors|
         s = "Set hr_#{k} = hr_#{k}"
         sensors.each do |sensor|
-          if sensor.name.to_s.start_with?('ss_net') || sensor.name.to_s.start_with?('ss_sol_abs')
+          # remove ss_net if switch
+          if sensor.name.to_s.start_with?('ss_net', 'ss_sol_abs', 'ss_trans_in')
             s += " - #{sensor.name}"
-          elsif sensor.name.to_s.start_with?('ss_sw_abs') || sensor.name.to_s.start_with?('ss_sol_out')
+          elsif sensor.name.to_s.start_with?('ss_sw_abs', 'ss_trans_out', 'ss_back_out')
             s += " + #{sensor.name} * ZoneTimestep * 3600"
           else
             s += " + #{sensor.name}"

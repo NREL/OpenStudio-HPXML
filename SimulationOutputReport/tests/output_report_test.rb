@@ -1,10 +1,10 @@
+# frozen_string_literal: true
+
 require_relative '../../HPXMLtoOpenStudio/resources/minitest_helper'
 require 'openstudio'
 require 'openstudio/ruleset/ShowRunnerOutput'
 require 'minitest/autorun'
 require 'fileutils'
-require 'rexml/document'
-require 'rexml/xpath'
 require_relative '../measure.rb'
 
 class SimulationOutputReportTest < MiniTest::Test
@@ -291,7 +291,7 @@ class SimulationOutputReportTest < MiniTest::Test
     annual_csv, timeseries_csv, eri_csv = _test_measure(args_hash)
     assert(File.exist?(annual_csv))
     assert(File.exist?(timeseries_csv))
-    expected_timeseries_cols = ['Hour'] + TimeseriesColsTemperatures
+    expected_timeseries_cols = ['Time'] + TimeseriesColsTemperatures
     actual_timeseries_cols = File.readlines(timeseries_csv)[0].strip.split(',')
     assert_equal(expected_timeseries_cols.sort, actual_timeseries_cols.sort)
     assert_equal(8760, File.readlines(timeseries_csv).size - 2)
@@ -325,7 +325,7 @@ class SimulationOutputReportTest < MiniTest::Test
     annual_csv, timeseries_csv, eri_csv = _test_measure(args_hash)
     assert(File.exist?(annual_csv))
     assert(File.exist?(timeseries_csv))
-    expected_timeseries_cols = ['Hour'] + TimeseriesColsFuels
+    expected_timeseries_cols = ['Time'] + TimeseriesColsFuels
     actual_timeseries_cols = File.readlines(timeseries_csv)[0].strip.split(',')
     assert_equal(expected_timeseries_cols.sort, actual_timeseries_cols.sort)
     assert_equal(8760, File.readlines(timeseries_csv).size - 2)
@@ -342,7 +342,7 @@ class SimulationOutputReportTest < MiniTest::Test
     annual_csv, timeseries_csv, eri_csv = _test_measure(args_hash)
     assert(File.exist?(annual_csv))
     assert(File.exist?(timeseries_csv))
-    expected_timeseries_cols = ['Hour'] + TimeseriesColsEndUses
+    expected_timeseries_cols = ['Time'] + TimeseriesColsEndUses
     actual_timeseries_cols = File.readlines(timeseries_csv)[0].strip.split(',')
     assert_equal(expected_timeseries_cols.sort, actual_timeseries_cols.sort)
     assert_equal(8760, File.readlines(timeseries_csv).size - 2)
@@ -359,7 +359,7 @@ class SimulationOutputReportTest < MiniTest::Test
     annual_csv, timeseries_csv, eri_csv = _test_measure(args_hash)
     assert(File.exist?(annual_csv))
     assert(File.exist?(timeseries_csv))
-    expected_timeseries_cols = ['Hour'] + TimeseriesColsTotalLoads
+    expected_timeseries_cols = ['Time'] + TimeseriesColsTotalLoads
     actual_timeseries_cols = File.readlines(timeseries_csv)[0].strip.split(',')
     assert_equal(expected_timeseries_cols.sort, actual_timeseries_cols.sort)
     assert_equal(8760, File.readlines(timeseries_csv).size - 2)
@@ -376,7 +376,7 @@ class SimulationOutputReportTest < MiniTest::Test
     annual_csv, timeseries_csv, eri_csv = _test_measure(args_hash)
     assert(File.exist?(annual_csv))
     assert(File.exist?(timeseries_csv))
-    expected_timeseries_cols = ['Hour'] + TimeseriesColsComponentLoads
+    expected_timeseries_cols = ['Time'] + TimeseriesColsComponentLoads
     actual_timeseries_cols = File.readlines(timeseries_csv)[0].strip.split(',')
     assert_equal(expected_timeseries_cols.sort, actual_timeseries_cols.sort)
     assert_equal(8760, File.readlines(timeseries_csv).size - 2)
@@ -393,7 +393,7 @@ class SimulationOutputReportTest < MiniTest::Test
     annual_csv, timeseries_csv, eri_csv = _test_measure(args_hash)
     assert(File.exist?(annual_csv))
     assert(File.exist?(timeseries_csv))
-    expected_timeseries_cols = ['Hour'] + TimeseriesColsFuels + TimeseriesColsEndUses + TimeseriesColsTotalLoads + TimeseriesColsComponentLoads + TimeseriesColsTemperatures
+    expected_timeseries_cols = ['Time'] + TimeseriesColsFuels + TimeseriesColsEndUses + TimeseriesColsTotalLoads + TimeseriesColsComponentLoads + TimeseriesColsTemperatures
     actual_timeseries_cols = File.readlines(timeseries_csv)[0].strip.split(',')
     assert_equal(expected_timeseries_cols.sort, actual_timeseries_cols.sort)
     assert_equal(8760, File.readlines(timeseries_csv).size - 2)
@@ -410,10 +410,27 @@ class SimulationOutputReportTest < MiniTest::Test
     annual_csv, timeseries_csv, eri_csv = _test_measure(args_hash)
     assert(File.exist?(annual_csv))
     assert(File.exist?(timeseries_csv))
-    expected_timeseries_cols = ['Day'] + TimeseriesColsFuels + TimeseriesColsEndUses + TimeseriesColsTotalLoads + TimeseriesColsComponentLoads + TimeseriesColsTemperatures
+    expected_timeseries_cols = ['Time'] + TimeseriesColsFuels + TimeseriesColsEndUses + TimeseriesColsTotalLoads + TimeseriesColsComponentLoads + TimeseriesColsTemperatures
     actual_timeseries_cols = File.readlines(timeseries_csv)[0].strip.split(',')
     assert_equal(expected_timeseries_cols.sort, actual_timeseries_cols.sort)
     assert_equal(365, File.readlines(timeseries_csv).size - 2)
+  end
+
+  def test_timeseries_monthly_ALL
+    args_hash = { 'hpxml_path' => '../workflow/sample_files/base.xml',
+                  'timeseries_frequency' => 'monthly',
+                  'include_timeseries_zone_temperatures' => true,
+                  'include_timeseries_fuel_consumptions' => true,
+                  'include_timeseries_end_use_consumptions' => true,
+                  'include_timeseries_total_loads' => true,
+                  'include_timeseries_component_loads' => true }
+    annual_csv, timeseries_csv, eri_csv = _test_measure(args_hash)
+    assert(File.exist?(annual_csv))
+    assert(File.exist?(timeseries_csv))
+    expected_timeseries_cols = ['Time'] + TimeseriesColsFuels + TimeseriesColsEndUses + TimeseriesColsTotalLoads + TimeseriesColsComponentLoads + TimeseriesColsTemperatures
+    actual_timeseries_cols = File.readlines(timeseries_csv)[0].strip.split(',')
+    assert_equal(expected_timeseries_cols.sort, actual_timeseries_cols.sort)
+    assert_equal(12, File.readlines(timeseries_csv).size - 2)
   end
 
   def test_timeseries_timestep_ALL_60min
@@ -427,7 +444,7 @@ class SimulationOutputReportTest < MiniTest::Test
     annual_csv, timeseries_csv, eri_csv = _test_measure(args_hash)
     assert(File.exist?(annual_csv))
     assert(File.exist?(timeseries_csv))
-    expected_timeseries_cols = ['Timestep'] + TimeseriesColsFuels + TimeseriesColsEndUses + TimeseriesColsTotalLoads + TimeseriesColsComponentLoads + TimeseriesColsTemperatures
+    expected_timeseries_cols = ['Time'] + TimeseriesColsFuels + TimeseriesColsEndUses + TimeseriesColsTotalLoads + TimeseriesColsComponentLoads + TimeseriesColsTemperatures
     actual_timeseries_cols = File.readlines(timeseries_csv)[0].strip.split(',')
     assert_equal(expected_timeseries_cols.sort, actual_timeseries_cols.sort)
     assert_equal(8760, File.readlines(timeseries_csv).size - 2)
@@ -444,7 +461,7 @@ class SimulationOutputReportTest < MiniTest::Test
     annual_csv, timeseries_csv, eri_csv = _test_measure(args_hash)
     assert(File.exist?(annual_csv))
     assert(File.exist?(timeseries_csv))
-    expected_timeseries_cols = ['Timestep'] + TimeseriesColsFuels + TimeseriesColsEndUses + TimeseriesColsTotalLoads + TimeseriesColsComponentLoads + TimeseriesColsTemperatures
+    expected_timeseries_cols = ['Time'] + TimeseriesColsFuels + TimeseriesColsEndUses + TimeseriesColsTotalLoads + TimeseriesColsComponentLoads + TimeseriesColsTemperatures
     actual_timeseries_cols = File.readlines(timeseries_csv)[0].strip.split(',')
     assert_equal(expected_timeseries_cols.sort, actual_timeseries_cols.sort)
     assert_equal(52560, File.readlines(timeseries_csv).size - 2)
@@ -461,7 +478,7 @@ class SimulationOutputReportTest < MiniTest::Test
     annual_csv, timeseries_csv, eri_csv = _test_measure(args_hash)
     assert(File.exist?(annual_csv))
     assert(File.exist?(timeseries_csv))
-    expected_timeseries_cols = ['Hour'] + TimeseriesColsFuels + TimeseriesColsEndUses + TimeseriesColsTotalLoads + TimeseriesColsComponentLoads + TimeseriesColsTemperatures
+    expected_timeseries_cols = ['Time'] + TimeseriesColsFuels + TimeseriesColsEndUses + TimeseriesColsTotalLoads + TimeseriesColsComponentLoads + TimeseriesColsTemperatures
     actual_timeseries_cols = File.readlines(timeseries_csv)[0].strip.split(',')
     assert_equal(expected_timeseries_cols.sort, actual_timeseries_cols.sort)
     assert_equal(31 * 24, File.readlines(timeseries_csv).size - 2)
@@ -478,10 +495,27 @@ class SimulationOutputReportTest < MiniTest::Test
     annual_csv, timeseries_csv, eri_csv = _test_measure(args_hash)
     assert(File.exist?(annual_csv))
     assert(File.exist?(timeseries_csv))
-    expected_timeseries_cols = ['Day'] + TimeseriesColsFuels + TimeseriesColsEndUses + TimeseriesColsTotalLoads + TimeseriesColsComponentLoads + TimeseriesColsTemperatures
+    expected_timeseries_cols = ['Time'] + TimeseriesColsFuels + TimeseriesColsEndUses + TimeseriesColsTotalLoads + TimeseriesColsComponentLoads + TimeseriesColsTemperatures
     actual_timeseries_cols = File.readlines(timeseries_csv)[0].strip.split(',')
     assert_equal(expected_timeseries_cols.sort, actual_timeseries_cols.sort)
     assert_equal(31, File.readlines(timeseries_csv).size - 2)
+  end
+
+  def test_timeseries_monthly_ALL_runperiod_Jan
+    args_hash = { 'hpxml_path' => '../workflow/sample_files/base-misc-runperiod-1-month.xml',
+                  'timeseries_frequency' => 'monthly',
+                  'include_timeseries_zone_temperatures' => true,
+                  'include_timeseries_fuel_consumptions' => true,
+                  'include_timeseries_end_use_consumptions' => true,
+                  'include_timeseries_total_loads' => true,
+                  'include_timeseries_component_loads' => true }
+    annual_csv, timeseries_csv, eri_csv = _test_measure(args_hash)
+    assert(File.exist?(annual_csv))
+    assert(File.exist?(timeseries_csv))
+    expected_timeseries_cols = ['Time'] + TimeseriesColsFuels + TimeseriesColsEndUses + TimeseriesColsTotalLoads + TimeseriesColsComponentLoads + TimeseriesColsTemperatures
+    actual_timeseries_cols = File.readlines(timeseries_csv)[0].strip.split(',')
+    assert_equal(expected_timeseries_cols.sort, actual_timeseries_cols.sort)
+    assert_equal(1, File.readlines(timeseries_csv).size - 2)
   end
 
   def test_timeseries_timestep_ALL_60min_runperiod_Jan
@@ -495,10 +529,61 @@ class SimulationOutputReportTest < MiniTest::Test
     annual_csv, timeseries_csv, eri_csv = _test_measure(args_hash)
     assert(File.exist?(annual_csv))
     assert(File.exist?(timeseries_csv))
-    expected_timeseries_cols = ['Timestep'] + TimeseriesColsFuels + TimeseriesColsEndUses + TimeseriesColsTotalLoads + TimeseriesColsComponentLoads + TimeseriesColsTemperatures
+    expected_timeseries_cols = ['Time'] + TimeseriesColsFuels + TimeseriesColsEndUses + TimeseriesColsTotalLoads + TimeseriesColsComponentLoads + TimeseriesColsTemperatures
     actual_timeseries_cols = File.readlines(timeseries_csv)[0].strip.split(',')
     assert_equal(expected_timeseries_cols.sort, actual_timeseries_cols.sort)
     assert_equal(31 * 24, File.readlines(timeseries_csv).size - 2)
+  end
+
+  def test_timeseries_hourly_ALL_AMY_2012
+    args_hash = { 'hpxml_path' => '../workflow/sample_files/base-location-epw-filename-AMY-2012.xml',
+                  'timeseries_frequency' => 'hourly',
+                  'include_timeseries_zone_temperatures' => true,
+                  'include_timeseries_fuel_consumptions' => true,
+                  'include_timeseries_end_use_consumptions' => true,
+                  'include_timeseries_total_loads' => true,
+                  'include_timeseries_component_loads' => true }
+    annual_csv, timeseries_csv, eri_csv = _test_measure(args_hash)
+    assert(File.exist?(annual_csv))
+    assert(File.exist?(timeseries_csv))
+    expected_timeseries_cols = ['Time'] + TimeseriesColsFuels + TimeseriesColsEndUses + TimeseriesColsTotalLoads + TimeseriesColsComponentLoads + TimeseriesColsTemperatures
+    actual_timeseries_cols = File.readlines(timeseries_csv)[0].strip.split(',')
+    assert_equal(expected_timeseries_cols.sort, actual_timeseries_cols.sort)
+    assert_equal(8784, File.readlines(timeseries_csv).size - 2)
+  end
+
+  def test_timeseries_daily_ALL_AMY_2012
+    args_hash = { 'hpxml_path' => '../workflow/sample_files/base-location-epw-filename-AMY-2012.xml',
+                  'timeseries_frequency' => 'daily',
+                  'include_timeseries_zone_temperatures' => true,
+                  'include_timeseries_fuel_consumptions' => true,
+                  'include_timeseries_end_use_consumptions' => true,
+                  'include_timeseries_total_loads' => true,
+                  'include_timeseries_component_loads' => true }
+    annual_csv, timeseries_csv, eri_csv = _test_measure(args_hash)
+    assert(File.exist?(annual_csv))
+    assert(File.exist?(timeseries_csv))
+    expected_timeseries_cols = ['Time'] + TimeseriesColsFuels + TimeseriesColsEndUses + TimeseriesColsTotalLoads + TimeseriesColsComponentLoads + TimeseriesColsTemperatures
+    actual_timeseries_cols = File.readlines(timeseries_csv)[0].strip.split(',')
+    assert_equal(expected_timeseries_cols.sort, actual_timeseries_cols.sort)
+    assert_equal(366, File.readlines(timeseries_csv).size - 2)
+  end
+
+  def test_timeseries_timestep_ALL_60min_AMY_2012
+    args_hash = { 'hpxml_path' => '../workflow/sample_files/base-location-epw-filename-AMY-2012.xml',
+                  'timeseries_frequency' => 'timestep',
+                  'include_timeseries_zone_temperatures' => true,
+                  'include_timeseries_fuel_consumptions' => true,
+                  'include_timeseries_end_use_consumptions' => true,
+                  'include_timeseries_total_loads' => true,
+                  'include_timeseries_component_loads' => true }
+    annual_csv, timeseries_csv, eri_csv = _test_measure(args_hash)
+    assert(File.exist?(annual_csv))
+    assert(File.exist?(timeseries_csv))
+    expected_timeseries_cols = ['Time'] + TimeseriesColsFuels + TimeseriesColsEndUses + TimeseriesColsTotalLoads + TimeseriesColsComponentLoads + TimeseriesColsTemperatures
+    actual_timeseries_cols = File.readlines(timeseries_csv)[0].strip.split(',')
+    assert_equal(expected_timeseries_cols.sort, actual_timeseries_cols.sort)
+    assert_equal(8784, File.readlines(timeseries_csv).size - 2)
   end
 
   def test_eri_designs
@@ -512,7 +597,7 @@ class SimulationOutputReportTest < MiniTest::Test
       FileUtils.cp(old_hpxml_path, new_hpxml_path)
       hpxml = HPXML.new(hpxml_path: new_hpxml_path)
       hpxml.header.eri_design = eri_design
-      XMLHelper.write_file(hpxml.to_rexml(), new_hpxml_path)
+      XMLHelper.write_file(hpxml.to_oga(), new_hpxml_path)
 
       # Run tests
       args_hash = { 'hpxml_path' => '../workflow/sample_files/base-eri.xml',
