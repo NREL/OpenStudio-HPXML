@@ -299,14 +299,14 @@ class OSModel
     location = HPXML::LocationLivingSpace
     if (@hpxml.roofs.select { |s| s.interior_adjacent_to == location }.size +
         @hpxml.frame_floors.select { |s| s.is_ceiling && (s.interior_adjacent_to == location) }.size) == 0
-      fail 'Conditioned space must have at least one ceiling/roof.'
+      fail 'There must be at least one ceiling/roof adjacent to conditioned space.'
     end
     if @hpxml.walls.select { |s| (s.interior_adjacent_to == location) && s.is_exterior }.size == 0
-      fail 'Conditioned space must have at least one exterior wall.'
+      fail 'There must be at least one exterior wall adjacent to conditioned space.'
     end
     if (@hpxml.slabs.select { |s| [location, HPXML::LocationBasementConditioned].include? s.interior_adjacent_to }.size +
         @hpxml.frame_floors.select { |s| s.is_floor && (s.interior_adjacent_to == location) }.size) == 0
-      fail 'Conditioned space must have at least one floor/slab.'
+      fail 'There must be at least one floor/slab adjacent to conditioned space.'
     end
 
     # Basement/Crawlspace
@@ -318,14 +318,14 @@ class OSModel
 
       if location != HPXML::LocationBasementConditioned # HPXML file doesn't need to have FrameFloor between living and conditioned basement
         if @hpxml.frame_floors.select { |s| s.is_floor && (s.interior_adjacent_to == HPXML::LocationLivingSpace) && (s.exterior_adjacent_to == location) }.size == 0
-          fail "#{location} must have at least one ceiling."
+          fail "There must be at least one ceiling adjacent to #{location}."
         end
       end
       if @hpxml.foundation_walls.select { |s| (s.interior_adjacent_to == location) && s.is_exterior }.size == 0
-        fail "#{location} must have at least one exterior foundation wall."
+        fail "There must be at least one exterior foundation wall adjacent to #{location}."
       end
       if @hpxml.slabs.select { |s| s.interior_adjacent_to == location }.size == 0
-        fail "#{location} must have at least one slab."
+        fail "There must be at least one slab adjacent to #{location}."
       end
     end
 
@@ -334,15 +334,14 @@ class OSModel
     if @hpxml.has_space_type(location)
       if (@hpxml.roofs.select { |s| s.interior_adjacent_to == location }.size +
           @hpxml.frame_floors.select { |s| [s.interior_adjacent_to, s.exterior_adjacent_to].include? location }.size) == 0
-        fail "#{location} must have at least one roof/ceiling."
+        fail "There must be at least one roof/ceiling adjacent to #{location}."
       end
       if (@hpxml.walls.select { |s| (s.interior_adjacent_to == location) && s.is_exterior }.size +
          @hpxml.foundation_walls.select { |s| [s.interior_adjacent_to, s.exterior_adjacent_to].include?(location) && s.is_exterior }.size) == 0
-        fail "#{location} must have at least one exterior wall/foundation wall."
+        fail "There must be at least one exterior wall/foundation wall adjacent to #{location}."
       end
-      if (@hpxml.slabs.select { |s| s.interior_adjacent_to == location }.size +
-          @hpxml.frame_floors.select { |s| [s.interior_adjacent_to, s.exterior_adjacent_to].include? location }.size) == 0
-        fail "#{location} must have at least one slab/floor."
+      if @hpxml.slabs.select { |s| s.interior_adjacent_to == location }.size == 0
+        fail "There must be at least one slab adjacent to #{location}."
       end
     end
 
@@ -352,11 +351,11 @@ class OSModel
       next unless @hpxml.has_space_type(location)
 
       if @hpxml.roofs.select { |s| s.interior_adjacent_to == location }.size == 0
-        fail "#{location} must have at least one roof."
+        fail "There must be at least one roof adjacent to #{location}."
       end
 
       if @hpxml.frame_floors.select { |s| s.is_ceiling && [s.interior_adjacent_to, s.exterior_adjacent_to].include?(location) }.size == 0
-        fail "#{location} must have at least one floor."
+        fail "There must be at least one floor adjacent to #{location}."
       end
     end
   end
