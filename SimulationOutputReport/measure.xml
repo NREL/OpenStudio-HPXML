@@ -1,10 +1,9 @@
-<?xml version="1.0"?>
 <measure>
   <schema_version>3.0</schema_version>
   <name>simulation_output_report</name>
   <uid>df9d170c-c21a-4130-866d-0d46b06073fd</uid>
-  <version_id>0c91ee9c-2709-432a-8774-cbaaa183d8c0</version_id>
-  <version_modified>20200416T193014Z</version_modified>
+  <version_id>0cb9b50d-fe1f-4a6d-9f78-38907c1b681f</version_id>
+  <version_modified>20200416T210729Z</version_modified>
   <xml_checksum>9BF1E6AC</xml_checksum>
   <class_name>SimulationOutputReport</class_name>
   <display_name>HPXML Simulation Output Report</display_name>
@@ -444,7 +443,7 @@
       <model_dependent>false</model_dependent>
     </output>
   </outputs>
-  <provenances />
+  <provenances/>
   <tags>
     <tag>Reporting.QAQC</tag>
   </tags>
@@ -470,7 +469,7 @@
       <filename>constants.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>3CE5370E</checksum>
+      <checksum>80167322</checksum>
     </file>
     <file>
       <version>
@@ -481,13 +480,13 @@
       <filename>measure.rb</filename>
       <filetype>rb</filetype>
       <usage_type>script</usage_type>
-      <checksum>22D64527</checksum>
+      <checksum>F9F0C597</checksum>
     </file>
     <file>
       <filename>output_report_test.rb</filename>
       <filetype>rb</filetype>
       <usage_type>test</usage_type>
-      <checksum>1EBB07C1</checksum>
+      <checksum>77A75734</checksum>
     </file>
   </files>
 </measure>
