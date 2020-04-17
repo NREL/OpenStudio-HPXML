@@ -2,8 +2,8 @@
   <schema_version>3.0</schema_version>
   <name>build_residential_hpxml</name>
   <uid>a13a8983-2b01-4930-8af2-42030b6e4233</uid>
-  <version_id>70db3964-340b-45ac-b0c5-ab3afec89d34</version_id>
-  <version_modified>20200417T014719Z</version_modified>
+  <version_id>e56d7ba3-f070-4e1e-a3fc-239f3c955673</version_id>
+  <version_modified>20200417T142306Z</version_modified>
   <xml_checksum>2C38F48B</xml_checksum>
   <class_name>BuildResidentialHPXML</class_name>
   <display_name>HPXML Builder</display_name>
@@ -3687,18 +3687,6 @@
       <checksum>6CB12333</checksum>
     </file>
     <file>
-      <filename>geometry.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>EA68295C</checksum>
-    </file>
-    <file>
-      <filename>build_residential_hpxml_test.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>test</usage_type>
-      <checksum>F110B0C7</checksum>
-    </file>
-    <file>
       <filename>base-misc-usage-multiplier.osw</filename>
       <filetype>osw</filetype>
       <usage_type>test</usage_type>
@@ -3927,12 +3915,6 @@
       <checksum>0DD4C156</checksum>
     </file>
     <file>
-      <filename>base-hvac-boiler-elec-only.osw</filename>
-      <filetype>osw</filetype>
-      <usage_type>test</usage_type>
-      <checksum>809A7DF1</checksum>
-    </file>
-    <file>
       <filename>base-hvac-boiler-gas-central-ac-1-speed.osw</filename>
       <filetype>osw</filetype>
       <usage_type>test</usage_type>
@@ -4035,12 +4017,6 @@
       <checksum>009F409A</checksum>
     </file>
     <file>
-      <filename>base-hvac-portable-heater-electric-only.osw</filename>
-      <filetype>osw</filetype>
-      <usage_type>test</usage_type>
-      <checksum>80269FF5</checksum>
-    </file>
-    <file>
       <filename>base-hvac-programmable-thermostat.osw</filename>
       <filetype>osw</filetype>
       <usage_type>test</usage_type>
@@ -4051,48 +4027,6 @@
       <filetype>osw</filetype>
       <usage_type>test</usage_type>
       <checksum>BBD23B30</checksum>
-    </file>
-    <file>
-      <filename>base-hvac-stove-oil-only-no-eae.osw</filename>
-      <filetype>osw</filetype>
-      <usage_type>test</usage_type>
-      <checksum>5C696A37</checksum>
-    </file>
-    <file>
-      <filename>base-hvac-stove-oil-only.osw</filename>
-      <filetype>osw</filetype>
-      <usage_type>test</usage_type>
-      <checksum>9A43794A</checksum>
-    </file>
-    <file>
-      <filename>base-hvac-stove-wood-only.osw</filename>
-      <filetype>osw</filetype>
-      <usage_type>test</usage_type>
-      <checksum>7F3A76DB</checksum>
-    </file>
-    <file>
-      <filename>base-hvac-wall-furnace-elec-only.osw</filename>
-      <filetype>osw</filetype>
-      <usage_type>test</usage_type>
-      <checksum>B46D9EB5</checksum>
-    </file>
-    <file>
-      <filename>base-hvac-wall-furnace-propane-only-no-eae.osw</filename>
-      <filetype>osw</filetype>
-      <usage_type>test</usage_type>
-      <checksum>E920C651</checksum>
-    </file>
-    <file>
-      <filename>base-hvac-wall-furnace-propane-only.osw</filename>
-      <filetype>osw</filetype>
-      <usage_type>test</usage_type>
-      <checksum>45132E92</checksum>
-    </file>
-    <file>
-      <filename>base-hvac-wall-furnace-wood-only.osw</filename>
-      <filetype>osw</filetype>
-      <usage_type>test</usage_type>
-      <checksum>F89FCDD7</checksum>
     </file>
     <file>
       <filename>base-location-baltimore-md.osw</filename>
@@ -4297,12 +4231,6 @@
       <filetype>osw</filetype>
       <usage_type>test</usage_type>
       <checksum>A919C46E</checksum>
-    </file>
-    <file>
-      <filename>base-single-family-attached.osw</filename>
-      <filetype>osw</filetype>
-      <usage_type>test</usage_type>
-      <checksum>DE97D188</checksum>
     </file>
     <file>
       <filename>base-pv.osw</filename>
@@ -4521,12 +4449,6 @@
       <checksum>935791FC</checksum>
     </file>
     <file>
-      <filename>base-hvac-stove-wood-pellets-only.osw</filename>
-      <filetype>osw</filetype>
-      <usage_type>test</usage_type>
-      <checksum>45507CB0</checksum>
-    </file>
-    <file>
       <filename>base-atticroof-flat.osw</filename>
       <filetype>osw</filetype>
       <usage_type>test</usage_type>
@@ -4605,6 +4527,84 @@
       <checksum>89D62401</checksum>
     </file>
     <file>
+      <filename>geometry.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>69F5DFFC</checksum>
+    </file>
+    <file>
+      <filename>build_residential_hpxml_test.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>test</usage_type>
+      <checksum>5F037A00</checksum>
+    </file>
+    <file>
+      <filename>base-hvac-boiler-elec-only.osw</filename>
+      <filetype>osw</filetype>
+      <usage_type>test</usage_type>
+      <checksum>1377513E</checksum>
+    </file>
+    <file>
+      <filename>base-hvac-portable-heater-electric-only.osw</filename>
+      <filetype>osw</filetype>
+      <usage_type>test</usage_type>
+      <checksum>5803667F</checksum>
+    </file>
+    <file>
+      <filename>base-hvac-stove-oil-only-no-eae.osw</filename>
+      <filetype>osw</filetype>
+      <usage_type>test</usage_type>
+      <checksum>D673B2C0</checksum>
+    </file>
+    <file>
+      <filename>base-hvac-stove-oil-only.osw</filename>
+      <filetype>osw</filetype>
+      <usage_type>test</usage_type>
+      <checksum>B4407C92</checksum>
+    </file>
+    <file>
+      <filename>base-hvac-stove-wood-only.osw</filename>
+      <filetype>osw</filetype>
+      <usage_type>test</usage_type>
+      <checksum>8E97C2C1</checksum>
+    </file>
+    <file>
+      <filename>base-hvac-wall-furnace-elec-only.osw</filename>
+      <filetype>osw</filetype>
+      <usage_type>test</usage_type>
+      <checksum>8FDC527E</checksum>
+    </file>
+    <file>
+      <filename>base-hvac-wall-furnace-propane-only-no-eae.osw</filename>
+      <filetype>osw</filetype>
+      <usage_type>test</usage_type>
+      <checksum>0F4EC828</checksum>
+    </file>
+    <file>
+      <filename>base-hvac-wall-furnace-propane-only.osw</filename>
+      <filetype>osw</filetype>
+      <usage_type>test</usage_type>
+      <checksum>537AE479</checksum>
+    </file>
+    <file>
+      <filename>base-hvac-wall-furnace-wood-only.osw</filename>
+      <filetype>osw</filetype>
+      <usage_type>test</usage_type>
+      <checksum>D01D7E29</checksum>
+    </file>
+    <file>
+      <filename>base-single-family-attached.osw</filename>
+      <filetype>osw</filetype>
+      <usage_type>test</usage_type>
+      <checksum>7A733D36</checksum>
+    </file>
+    <file>
+      <filename>base-hvac-stove-wood-pellets-only.osw</filename>
+      <filetype>osw</filetype>
+      <usage_type>test</usage_type>
+      <checksum>66DC46A7</checksum>
+    </file>
+    <file>
       <version>
         <software_program>OpenStudio</software_program>
         <identifier>2.9.0</identifier>
@@ -4613,7 +4613,7 @@
       <filename>measure.rb</filename>
       <filetype>rb</filetype>
       <usage_type>script</usage_type>
-      <checksum>A7524B3E</checksum>
+      <checksum>DAD43680</checksum>
     </file>
   </files>
 </measure>

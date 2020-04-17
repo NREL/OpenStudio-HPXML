@@ -106,7 +106,6 @@ def create_osws
     'base-hvac-boiler-elec-only.osw' => 'base.osw',
     'base-hvac-boiler-gas-central-ac-1-speed.osw' => 'base.osw',
     'base-hvac-boiler-gas-only.osw' => 'base.osw',
-    'base-hvac-boiler-gas-only-no-eae.osw' => 'base.osw',
     'base-hvac-boiler-oil-only.osw' => 'base.osw',
     'base-hvac-boiler-propane-only.osw' => 'base.osw',
     'base-hvac-boiler-wood-only.osw' => 'base.osw',
@@ -120,11 +119,7 @@ def create_osws
     'base-hvac-dual-fuel-air-to-air-heat-pump-2-speed.osw' => 'base.osw',
     'base-hvac-dual-fuel-air-to-air-heat-pump-var-speed.osw' => 'base.osw',
     'base-hvac-dual-fuel-mini-split-heat-pump-ducted.osw' => 'base.osw',
-    'base-hvac-ducts-in-conditioned-space.osw' => 'base.osw',
     'base-hvac-ducts-leakage-percent.osw' => 'base.osw',
-    'base-hvac-ducts-locations.osw' => 'base.osw',
-    # 'base-hvac-ducts-multiple.osw' => 'base.osw', TODO: Not supported for now
-    'base-hvac-ducts-outside.osw' => 'base.osw',
     'base-hvac-elec-resistance-only.osw' => 'base.osw',
     'base-hvac-evap-cooler-furnace-gas.osw' => 'base.osw',
     'base-hvac-evap-cooler-only.osw' => 'base.osw',
@@ -134,7 +129,6 @@ def create_osws
     'base-hvac-furnace-gas-central-ac-2-speed.osw' => 'base.osw',
     'base-hvac-furnace-gas-central-ac-var-speed.osw' => 'base.osw',
     'base-hvac-furnace-gas-only.osw' => 'base.osw',
-    'base-hvac-furnace-gas-only-no-eae.osw' => 'base.osw',
     'base-hvac-furnace-gas-room-ac.osw' => 'base.osw',
     'base-hvac-furnace-oil-only.osw' => 'base.osw',
     'base-hvac-furnace-propane-only.osw' => 'base.osw',
@@ -153,13 +147,11 @@ def create_osws
     'base-hvac-room-ac-only.osw' => 'base.osw',
     'base-hvac-setpoints.osw' => 'base.osw',
     'base-hvac-stove-oil-only.osw' => 'base.osw',
-    'base-hvac-stove-oil-only-no-eae.osw' => 'base.osw',
     'base-hvac-stove-wood-only.osw' => 'base.osw',
     'base-hvac-stove-wood-pellets-only.osw' => 'base.osw',
     'base-hvac-undersized.osw' => 'base.osw',
     'base-hvac-wall-furnace-elec-only.osw' => 'base.osw',
     'base-hvac-wall-furnace-propane-only.osw' => 'base.osw',
-    'base-hvac-wall-furnace-propane-only-no-eae.osw' => 'base.osw',
     'base-hvac-wall-furnace-wood-only.osw' => 'base.osw',
     # 'base-infiltration-ach-natural.osw' => 'base.osw', # Not going to support constant ACH
     'base-location-baltimore-md.osw' => 'base.osw',
@@ -530,6 +522,7 @@ def get_values(osw_file, step)
   elsif ['base-single-family-attached.osw'].include? osw_file
     step.setArgument('geometry_unit_type', HPXML::ResidentialTypeSFA)
     step.setArgument('geometry_cfa', 900.0)
+    step.setArgument('geometry_num_units', 3)
     step.setArgument('window_front_wwr', 0.18)
     step.setArgument('window_back_wwr', 0.18)
     step.setArgument('window_left_wwr', 0.18)
@@ -1034,9 +1027,6 @@ def get_values(osw_file, step)
     step.setArgument('heating_system_type', HPXML::HVACTypeBoiler)
     step.setArgument('heating_system_electric_auxiliary_energy', 200.0)
     step.setArgument('cooling_system_type', 'none')
-  elsif ['base-hvac-boiler-gas-only-no-eae.osw'].include? osw_file
-    step.setArgument('heating_system_type', HPXML::HVACTypeBoiler)
-    step.setArgument('cooling_system_type', 'none')
   elsif ['base-hvac-boiler-oil-only.osw'].include? osw_file
     step.setArgument('heating_system_type', HPXML::HVACTypeBoiler)
     step.setArgument('heating_system_fuel', HPXML::FuelTypeOil)
@@ -1135,31 +1125,11 @@ def get_values(osw_file, step)
     step.setArgument('ducts_supply_surface_area', 30.0)
     step.setArgument('ducts_return_surface_area', 10.0)
     step.setArgument('heat_pump_backup_heating_switchover_temp', 25)
-  elsif ['base-hvac-ducts-in-conditioned-space.osw'].include? osw_file
-    step.setArgument('ducts_supply_leakage_value', 1.5)
-    step.setArgument('ducts_return_leakage_value', 1.5)
-    step.setArgument('ducts_supply_location', HPXML::LocationLivingSpace)
-    step.setArgument('ducts_return_location', HPXML::LocationLivingSpace)
   elsif ['base-hvac-ducts-leakage-percent.osw'].include? osw_file
     step.setArgument('ducts_supply_leakage_units', HPXML::UnitsPercent)
     step.setArgument('ducts_return_leakage_units', HPXML::UnitsPercent)
     step.setArgument('ducts_supply_leakage_value', 0.1)
     step.setArgument('ducts_return_leakage_value', 0.05)
-  elsif ['base-hvac-ducts-locations.osw'].include? osw_file
-    step.setArgument('geometry_cfa', 1350.0)
-    step.setArgument('geometry_foundation_type', HPXML::FoundationTypeCrawlspaceVented)
-    step.setArgument('geometry_foundation_height', 4.0)
-    step.setArgument('geometry_foundation_height_above_grade', 1.0)
-    step.setArgument('floor_assembly_r', 18.7)
-    step.setArgument('foundation_wall_insulation_distance_to_bottom', 4.0)
-    step.setArgument('slab_carpet_r', 2.5)
-    step.setArgument('ducts_supply_location', HPXML::LocationCrawlspaceVented)
-    step.setArgument('ducts_return_location', HPXML::LocationAtticUnvented)
-    step.setArgument('water_heater_location', HPXML::LocationCrawlspaceVented)
-    step.setArgument('plug_loads_other_annual_kwh', '1228.5')
-  elsif ['base-hvac-ducts-outside.osw'].include? osw_file
-    step.setArgument('ducts_supply_location', HPXML::LocationOutside)
-    step.setArgument('ducts_return_location', HPXML::LocationOutside)
   elsif ['base-hvac-elec-resistance-only.osw'].include? osw_file
     step.setArgument('heating_system_type', HPXML::HVACTypeElectricResistance)
     step.setArgument('heating_system_fuel', HPXML::FuelTypeElectricity)
@@ -1192,8 +1162,6 @@ def get_values(osw_file, step)
     step.setArgument('cooling_system_cooling_sensible_heat_fraction', 0.78)
   elsif ['base-hvac-furnace-gas-only.osw'].include? osw_file
     step.setArgument('heating_system_electric_auxiliary_energy', 700.0)
-    step.setArgument('cooling_system_type', 'none')
-  elsif ['base-hvac-furnace-gas-only-no-eae.osw'].include? osw_file
     step.setArgument('cooling_system_type', 'none')
   elsif ['base-hvac-furnace-gas-room-ac.osw'].include? osw_file
     step.setArgument('cooling_system_type', HPXML::HVACTypeRoomAirConditioner)
@@ -1281,11 +1249,6 @@ def get_values(osw_file, step)
     step.setArgument('heating_system_heating_efficiency_percent', 0.8)
     step.setArgument('heating_system_electric_auxiliary_energy', 200.0)
     step.setArgument('cooling_system_type', 'none')
-  elsif ['base-hvac-stove-oil-only-no-eae.osw'].include? osw_file
-    step.setArgument('heating_system_type', HPXML::HVACTypeStove)
-    step.setArgument('heating_system_fuel', HPXML::FuelTypeOil)
-    step.setArgument('heating_system_heating_efficiency_percent', 0.8)
-    step.setArgument('cooling_system_type', 'none')
   elsif ['base-hvac-stove-wood-only.osw'].include? osw_file
     step.setArgument('heating_system_type', HPXML::HVACTypeStove)
     step.setArgument('heating_system_fuel', HPXML::FuelTypeWood)
@@ -1314,11 +1277,6 @@ def get_values(osw_file, step)
     step.setArgument('heating_system_fuel', HPXML::FuelTypePropane)
     step.setArgument('heating_system_heating_efficiency_afue', 0.8)
     step.setArgument('heating_system_electric_auxiliary_energy', 200.0)
-    step.setArgument('cooling_system_type', 'none')
-  elsif ['base-hvac-wall-furnace-propane-only-no-eae.osw'].include? osw_file
-    step.setArgument('heating_system_type', HPXML::HVACTypeWallFurnace)
-    step.setArgument('heating_system_fuel', HPXML::FuelTypePropane)
-    step.setArgument('heating_system_heating_efficiency_afue', 0.8)
     step.setArgument('cooling_system_type', 'none')
   elsif ['base-hvac-wall-furnace-wood-only.osw'].include? osw_file
     step.setArgument('heating_system_type', HPXML::HVACTypeWallFurnace)

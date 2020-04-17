@@ -104,7 +104,7 @@
         "geometry_num_bedrooms": 3,
         "geometry_num_floors_above_grade": 1,
         "geometry_num_occupants": "3",
-        "geometry_num_units": 1,
+        "geometry_num_units": 3,
         "geometry_orientation": 180,
         "geometry_roof_pitch": "6:12",
         "geometry_roof_structure": "truss, cantilever",
