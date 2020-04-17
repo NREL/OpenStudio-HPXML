@@ -471,6 +471,13 @@ class OSModel
         sqft_by_gal = surface_area / act_vol # sqft/gal
         water_heating_system.standby_loss = (2.9721 * sqft_by_gal - 0.4732).round(3) # linear equation assuming a constant u, F/hr
       end
+      if (water_heating_system.water_heater_type == HPXML::WaterHeaterTypeStorage) && water_heating_system.heating_capacity.nil?
+        water_heater_fuel_type = water_heating_system.fuel_type
+        num_water_heaters = @hpxml.water_heating_systems.size
+        nbaths = @hpxml.building_construction.number_of_bathrooms
+        water_heating_system.heating_capacity = Waterheater.calc_water_heater_capacity(water_heater_fuel_type, @nbeds, num_water_heaters, nbaths)
+        water_heating_system.tank_volume = Waterheater.calc_water_heater_tankvol(water_heater_fuel_type, @nbeds, nbaths)
+      end
       if water_heating_system.location.nil?
         water_heating_system.location = Waterheater.get_default_location(@hpxml, @hpxml.climate_and_risk_zones.iecc_zone)
       end
@@ -483,12 +490,30 @@ class OSModel
         if hot_water_distribution.standard_piping_length.nil?
           hot_water_distribution.standard_piping_length = HotWaterAndAppliances.get_default_std_pipe_length(@has_uncond_bsmnt, @cfa, @ncfl)
         end
+      elsif hot_water_distribution.system_type == HPXML::DHWDistTypeRecirc
+        if hot_water_distribution.recirculation_piping_length.nil?
+          hot_water_distribution.recirculation_piping_length = HotWaterAndAppliances.get_default_recirc_loop_length(HotWaterAndAppliances.get_default_std_pipe_length(@has_uncond_bsmnt, @cfa, @ncfl))
+          hot_water_distribution.recirculation_branch_piping_length = HotWaterAndAppliances.get_default_recirc_branch_loop_length()
+          hot_water_distribution.recirculation_pump_power = HotWaterAndAppliances.get_default_recirc_pump_power()
+        end
       end
     end
 
     # Default water fixtures
     if @hpxml.water_heating.water_fixtures_usage_multiplier.nil?
       @hpxml.water_heating.water_fixtures_usage_multiplier = 1.0
+    end
+
+    # Default solar thermal systems
+    if @hpxml.solar_thermal_systems.size > 0
+      solar_thermal_system = @hpxml.solar_thermal_systems[0]
+      collector_area = solar_thermal_system.collector_area
+
+      if not collector_area.nil? # Detailed solar water heater
+        if solar_thermal_system.storage_volume.nil?
+          solar_thermal_system.storage_volume = Waterheater.calc_default_solar_thermal_system_storage_volume(collector_area)
+        end
+      end
     end
 
     # Default ceiling fans

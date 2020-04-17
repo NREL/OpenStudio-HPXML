@@ -529,7 +529,7 @@ Depending on the type of water heater specified, additional elements are require
 ========================================  ===================================  ===========  ==========  ===============  ========================  =================  =================  =========================================
 WaterHeaterType                           UniformEnergyFactor or EnergyFactor  FuelType     TankVolume  HeatingCapacity  RecoveryEfficiency        RelatedHVACSystem  UsesDesuperheater  WaterHeaterInsulation/Jacket/JacketRValue
 ========================================  ===================================  ===========  ==========  ===============  ========================  =================  =================  =========================================
-storage water heater                      required                             <any>        required    <optional>       required if non-electric                     <optional>         <optional>
+storage water heater                      required                             <any>        <optional>  <optional>       required if non-electric                     <optional>         <optional>
 instantaneous water heater                required                             <any>                                                                                  <optional>
 heat pump water heater                    required                             electricity  required                                                                                     <optional>
 space-heating boiler with storage tank                                                      required                                               required                              <optional>
@@ -554,8 +554,7 @@ For a ``SystemType/Standard`` (non-recirculating) system, the following element 
 
 - ``PipingLength``: Measured length of hot water piping from the hot water heater to the farthest hot water fixture, measured longitudinally from plans, assuming the hot water piping does not run diagonally, plus 10 feet of piping for each floor level, plus 5 feet of piping for unconditioned basements (if any)
 
-If ``PipingLength`` is not provided, a default ``PipingLength`` will be assumed.
-The default ``PipingLength`` will be calculated using the following equation.
+If ``PipingLength`` is not provided, a default ``PipingLength`` will be calculated using the following equation.
 This equation is based on `ANSI/RESNET/ICC 301-2019 <https://codes.iccsafe.org/content/RESNETICC3012019>`_.
 
 .. math:: PipeL = 2.0 \cdot (\frac{CFA}{NCfl})^{0.5} + 10.0 \cdot NCfl + 5.0 \cdot bsmnt
@@ -566,12 +565,25 @@ CFA = conditioned floor area [ft²],
 NCfl = number of conditioned floor levels number of conditioned floor levels in the residence, including conditioned basements, 
 bsmnt = presence = 1.0 or absence = 0.0 of an unconditioned basement in the residence.
 
-For a ``SystemType/Recirculation`` system, the following elements are required:
+For a ``SystemType/Recirculation`` system, the following element is required:
 
 - ``ControlType``
+
+For a ``SystemType/Recirculation`` system, the following elements can be optionally entered:
+
 - ``RecirculationPipingLoopLength``: Measured recirculation loop length including both supply and return sides, measured longitudinally from plans, assuming the hot water piping does not run diagonally, plus 20 feet of piping for each floor level greater than one plus 10 feet of piping for unconditioned basements
 - ``BranchPipingLoopLength``: Measured length of the branch hot water piping from the recirculation loop to the farthest hot water fixture from the recirculation loop, measured longitudinally from plans, assuming the branch hot water piping does not run diagonally
 - ``PumpPower``
+
+If the complete set of the optional inputs is not provided, the following default values will be used.
+
+======================================  ====================================================================================================
+Element Name                            Default Value
+======================================  ====================================================================================================
+Recirculation Piping Loop Length [ft]   .. math:: 2.0 \cdot (2.0 \cdot (\frac{CFA}{NCfl})^{0.5} + 10.0 \cdot NCfl + 5.0 \cdot bsmnt) - 20.0
+Branch Piping Loop Length [ft]          10 
+Pump Power [W]                          50 
+======================================  ====================================================================================================
 
 In addition, a ``HotWaterDistribution/DrainWaterHeatRecovery`` (DWHR) may be specified.
 The DWHR system is defined by:
@@ -604,14 +616,21 @@ If using simple inputs, the following element is required:
 
 If using detailed inputs, the following elements are required:
 
-- ``CollectorArea``
+- ``CollectorArea``: in units of ft²
 - ``CollectorLoopType``: 'liquid indirect' or 'liquid direct' or 'passive thermosyphon'
 - ``CollectorType``: 'single glazing black' or 'double glazing black' or 'evacuated tube' or 'integrated collector storage'
 - ``CollectorAzimuth``
 - ``CollectorTilt``
 - ``CollectorRatedOpticalEfficiency``: FRTA (y-intercept); see Directory of SRCC OG-100 Certified Solar Collector Ratings
-- ``CollectorRatedThermalLosses``: FRUL (slope, in units of Btu/hr-ft^2-R); see Directory of SRCC OG-100 Certified Solar Collector Ratings
-- ``StorageVolume``
+- ``CollectorRatedThermalLosses``: FRUL (slope, in units of Btu/hr-ft²-R); see Directory of SRCC OG-100 Certified Solar Collector Ratings
+
+the following element can be optionally entered:
+
+- ``StorageVolume``: in units of gal
+
+If ``StorageVolume`` is not provided, a default ``StorageVolume`` will be calculated using the following equation. 
+
+.. math:: StorageVolume = 1.5 \cdot CollectorArea
 
 Photovoltaics
 *************
@@ -649,17 +668,17 @@ The ``Location`` can be optionally provided; if not provided, it is assumed to b
 Several EnergyGuide label inputs describing the efficiency of the appliance can be provided.
 If the complete set of efficiency inputs is not provided, the following default values representing a standard clothes washer from 2006 will be used.
 
-==================================  ==================
-Element Name                        Default Value
-==================================  ==================
-IntegratedModifiedEnergyFactor      1.0  [ft3/kWh-cyc]
-RatedAnnualkWh                      400  [kWh/yr]
-LabelElectricRate                   0.12  [$/kWh]
-LabelGasRate                        1.09  [$/therm]
-LabelAnnualGasCost                  27.0  [$]
-Capacity                            3.0  [ft³]
-LabelUsage                          6  [cyc/week]
-==================================  ==================
+=============================================  ==============
+Element Name                                   Default Value
+=============================================  ==============
+IntegratedModifiedEnergyFactor [ft³/kWh-cyc]   1.0  
+RatedAnnualkWh [kWh/yr]                        400  
+LabelElectricRate [$/kWh]                      0.12  
+LabelGasRate [$/therm]                         1.09  
+LabelAnnualGasCost [$]                         27.0  
+Capacity [ft³]                                 3.0  
+LabelUsage [cyc/week]                          6  
+=============================================  ==============
 
 If ``ModifiedEnergyFactor`` is provided instead of ``IntegratedModifiedEnergyFactor``, it will be converted using the following equation.
 This equation is based on the `Interpretation on ANSI/RESNET 301-2014 Clothes Washer IMEF <https://www.resnet.us/wp-content/uploads/No.-301-2014-08-sECTION-4.2.2.5.2.8-Clothes-Washers-Eq-4.2-6.pdf>`_.
@@ -678,12 +697,12 @@ The ``Location`` can be optionally provided; if not provided, it is assumed to b
 Several EnergyGuide label inputs describing the efficiency of the appliance can be provided.
 If the complete set of efficiency inputs is not provided, the following default values representing a standard clothes dryer from 2006 will be used.
 
-=======================  ==============
-Element Name             Default Value
-=======================  ==============
-CombinedEnergyFactor     3.01  [lb/kWh]
-ControlType              timer
-=======================  ==============
+==============================  ==============
+Element Name                    Default Value
+==============================  ==============
+CombinedEnergyFactor [lb/kWh]   3.01  
+ControlType                     timer
+==============================  ==============
 
 If ``EnergyFactor`` is provided instead of ``CombinedEnergyFactor``, it will be converted into ``CombinedEnergyFactor`` using the following equation.
 This equation is based on the `Interpretation on ANSI/RESNET/ICC 301-2014 Clothes Dryer CEF <https://www.resnet.us/wp-content/uploads/No.-301-2014-10-Section-4.2.2.5.2.8-Clothes-Dryer-CEF-Rating.pdf>`_.
@@ -701,16 +720,16 @@ The dishwasher is assumed to be in the living space.
 Several EnergyGuide label inputs describing the efficiency of the appliance can be provided.
 If the complete set of efficiency inputs is not provided, the following default values representing a standard dishwasher from 2006 will be used.
 
-=======================  =================
-Element Name             Default Value
-=======================  =================
-RatedAnnualkWh           467  [kwh/yr]
-LabelElectricRate        0.12  [$/kWh]
-LabelGasRate             1.09  [$/therm]
-LabelAnnualGasCost       33.12  [$]
-PlaceSettingCapacity     12  [standard]
-LabelUsage               4  [cyc/week]
-=======================  =================
+===============================  =================
+Element Name                     Default Value
+===============================  =================
+RatedAnnualkWh [kwh/yr]          467  
+LabelElectricRate [$/kWh]        0.12  
+LabelGasRate [$/therm]           1.09  
+LabelAnnualGasCost [$]           33.12  
+PlaceSettingCapacity [standard]  12  
+LabelUsage [cyc/week]            4  
+===============================  =================
 
 If ``EnergyFactor`` is provided instead of ``RatedAnnualkWh``, it will be converted into ``RatedAnnualkWh`` using the following equation.
 This equation is based on `ANSI/RESNET/ICC 301-2014 <https://codes.iccsafe.org/content/document/843>`_.
