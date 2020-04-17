@@ -142,8 +142,6 @@ class Geometry
       foundation_offset = foundation_height
     end
 
-    space_types_hash = {}
-
     # loop through the number of floors
     foundation_polygon_with_wrong_zs = nil
     for floor in (0..num_floors - 1)
@@ -176,13 +174,8 @@ class Geometry
         garage_space = garage_space.get
         garage_space_name = 'garage space'
         garage_space.setName(garage_space_name)
-        if space_types_hash.keys.include? 'garage'
-          garage_space_type = space_types_hash['garage']
-        else
-          garage_space_type = OpenStudio::Model::SpaceType.new(model)
-          garage_space_type.setStandardsSpaceType('garage')
-          space_types_hash['garage'] = garage_space_type
-        end
+        garage_space_type = OpenStudio::Model::SpaceType.new(model)
+        garage_space_type.setStandardsSpaceType('garage')
         garage_space.setSpaceType(garage_space_type)
         runner.registerInfo("Set #{garage_space_name}.")
 
@@ -279,13 +272,8 @@ class Geometry
         living_space_name = HPXML::LocationLivingSpace
       end
       living_space.setName(living_space_name)
-      if space_types_hash.keys.include? HPXML::LocationLivingSpace
-        living_space_type = space_types_hash[HPXML::LocationLivingSpace]
-      else
-        living_space_type = OpenStudio::Model::SpaceType.new(model)
-        living_space_type.setStandardsSpaceType(HPXML::LocationLivingSpace)
-        space_types_hash[HPXML::LocationLivingSpace] = living_space_type
-      end
+      living_space_type = OpenStudio::Model::SpaceType.new(model)
+      living_space_type.setStandardsSpaceType(HPXML::LocationLivingSpace)
       living_space.setSpaceType(living_space_type)
       runner.registerInfo("Set #{living_space_name}.")
 
@@ -399,13 +387,8 @@ class Geometry
       end
       attic_space_name = "#{attic_type} space"
       attic_space.setName(attic_space_name)
-      if space_types_hash.keys.include? attic_space_type_name
-        attic_space_type = space_types_hash[attic_space_type_name]
-      else
-        attic_space_type = OpenStudio::Model::SpaceType.new(model)
-        attic_space_type.setStandardsSpaceType(attic_space_type_name)
-        space_types_hash[attic_space_type_name] = attic_space_type
-      end
+      attic_space_type = OpenStudio::Model::SpaceType.new(model)
+      attic_space_type.setStandardsSpaceType(attic_space_type_name)
       attic_space.setSpaceType(attic_space_type)
       runner.registerInfo("Set #{attic_space_name}.")
 
@@ -450,13 +433,8 @@ class Geometry
       end
       foundation_space_name = "#{foundation_type} space"
       foundation_space.setName(foundation_space_name)
-      if space_types_hash.keys.include? foundation_space_type_name
-        foundation_space_type = space_types_hash[foundation_space_type_name]
-      else
-        foundation_space_type = OpenStudio::Model::SpaceType.new(model)
-        foundation_space_type.setStandardsSpaceType(foundation_space_type_name)
-        space_types_hash[foundation_space_type_name] = foundation_space_type
-      end
+      foundation_space_type = OpenStudio::Model::SpaceType.new(model)
+      foundation_space_type.setStandardsSpaceType(foundation_space_type_name)
       foundation_space.setSpaceType(foundation_space_type)
       runner.registerInfo("Set #{foundation_space_name}.")
 
@@ -607,13 +585,8 @@ class Geometry
         end
 
         surface.createAdjacentSurface(garage_attic_space) # garage attic floor
-        if space_types_hash.keys.include? garage_attic_space_type_name
-          garage_attic_space_type = space_types_hash[garage_attic_space_type_name]
-        else
-          garage_attic_space_type = OpenStudio::Model::SpaceType.new(model)
-          garage_attic_space_type.setStandardsSpaceType(garage_attic_space_type_name)
-          space_types_hash[garage_attic_space_type_name] = garage_attic_space_type
-        end
+        garage_attic_space_type = OpenStudio::Model::SpaceType.new(model)
+        garage_attic_space_type.setStandardsSpaceType(garage_attic_space_type_name)
         garage_attic_space.setSpaceType(garage_attic_space_type)
         runner.registerInfo("Set #{garage_attic_space_name}.")
 
@@ -1480,6 +1453,7 @@ class Geometry
                                          geometry_aspect_ratio:,
                                          geometry_horizontal_location:,
                                          geometry_foundation_type:,
+                                         geometry_foundation_height:,
                                          geometry_attic_type:,
                                          geometry_roof_type:,
                                          geometry_roof_pitch:,
@@ -1492,6 +1466,7 @@ class Geometry
     aspect_ratio = geometry_aspect_ratio
     horizontal_location = geometry_horizontal_location
     foundation_type = geometry_foundation_type
+    foundation_height = geometry_foundation_height
     attic_type = geometry_attic_type
     roof_type = geometry_roof_type
     roof_pitch = geometry_roof_pitch
@@ -1507,7 +1482,7 @@ class Geometry
       unit_width = num_units
     end
 
-    if foundation_type == HPXML::FoundationTypeSlab
+    if [HPXML::FoundationTypeSlab, HPXML::LocationOtherHousingUnitBelow].include? foundation_type
       foundation_height = 0.0
     elsif [HPXML::FoundationTypeBasementUnconditioned, HPXML::FoundationTypeBasementConditioned].include? foundation_type
       foundation_height = 8.0
@@ -1543,23 +1518,9 @@ class Geometry
       return false
     end
 
-    # minimal collapsed
-    # num_middle = 1
-    # if minimal_collapsed
-    #   if has_rear_units
-    #     if num_units >= 8 # can be collapsed
-    #       num_middle = (num_units / 2) - 2
-    #       num_units = 6
-    #     end
-    #   else # front only
-    #     if num_units >= 4 # can be collapsed
-    #       num_middle = num_units - 2
-    #       num_units = 3
-    #     end
-    #   end
-    # end
-
-    # convert to si
+    # Convert to SI
+    cfa = UnitConversions.convert(cfa, 'ft^2', 'm^2')
+    wall_height = UnitConversions.convert(wall_height, 'ft', 'm')
     foundation_height = UnitConversions.convert(foundation_height, 'ft', 'm')
 
     # starting spaces
@@ -2092,8 +2053,6 @@ class Geometry
     wall_height = UnitConversions.convert(wall_height, 'ft', 'm')
     foundation_height = UnitConversions.convert(foundation_height, 'ft', 'm')
 
-    space_types_hash = {}
-
     # starting spaces
     runner.registerInitialCondition("The building started with #{model.getSpaces.size} spaces.")
 
@@ -2160,13 +2119,8 @@ class Geometry
     living_space = OpenStudio::Model::Space::fromFloorPrint(living_polygon, wall_height, model)
     living_space = living_space.get
     living_space.setName(HPXML::LocationLivingSpace)
-    if space_types_hash.keys.include? HPXML::LocationLivingSpace
-      living_space_type = space_types_hash[HPXML::LocationLivingSpace]
-    else
-      living_space_type = OpenStudio::Model::SpaceType.new(model)
-      living_space_type.setStandardsSpaceType(HPXML::LocationLivingSpace)
-      space_types_hash[HPXML::LocationLivingSpace] = living_space_type
-    end
+    living_space_type = OpenStudio::Model::SpaceType.new(model)
+    living_space_type.setStandardsSpaceType(HPXML::LocationLivingSpace)
     living_space.setSpaceType(living_space_type)
     living_space.setThermalZone(living_zone)
 
@@ -2243,13 +2197,8 @@ class Geometry
         corridor_space = corridor_space.get
         corridor_space_name = 'corridor space'
         corridor_space.setName(corridor_space_name)
-        if space_types_hash.keys.include? 'corridor'
-          corridor_space_type = space_types_hash['corridor']
-        else
-          corridor_space_type = OpenStudio::Model::SpaceType.new(model)
-          corridor_space_type.setStandardsSpaceType('corridor')
-          space_types_hash['corridor'] = corridor_space_type
-        end
+        corridor_space_type = OpenStudio::Model::SpaceType.new(model)
+        corridor_space_type.setStandardsSpaceType('corridor')
 
         corridor_space.setSpaceType(corridor_space_type)
         corridor_space.setThermalZone(corridor_zone)
@@ -2337,13 +2286,8 @@ class Geometry
           foundation_space.setThermalZone(foundation_zone)
           foundation_space_type_name = 'unconditioned basement'
         end
-        if space_types_hash.keys.include? foundation_space_type_name
-          foundation_space_type = space_types_hash[foundation_space_type_name]
-        else
-          foundation_space_type = OpenStudio::Model::SpaceType.new(model)
-          foundation_space_type.setStandardsSpaceType(foundation_space_type_name)
-          space_types_hash[foundation_space_type_name] = foundation_space_type
-        end
+        foundation_space_type = OpenStudio::Model::SpaceType.new(model)
+        foundation_space_type.setStandardsSpaceType(foundation_space_type_name)
         foundation_space.setSpaceType(foundation_space_type)
       end
 
