@@ -392,11 +392,11 @@ def create_hpxmls
         set_hpxml_misc_load_schedule(hpxml_file, hpxml)
       end
 
-      hpxml_doc = hpxml.to_rexml()
+      hpxml_doc = hpxml.to_oga()
 
       if ['invalid_files/missing-elements.xml'].include? derivative
-        hpxml_doc.elements['/HPXML/Building/BuildingDetails/BuildingSummary/BuildingConstruction'].elements.delete('NumberofConditionedFloors')
-        hpxml_doc.elements['/HPXML/Building/BuildingDetails/BuildingSummary/BuildingConstruction'].elements.delete('ConditionedFloorArea')
+        XMLHelper.delete_element(hpxml_doc, '/HPXML/Building/BuildingDetails/BuildingSummary/BuildingConstruction/NumberofConditionedFloors')
+        XMLHelper.delete_element(hpxml_doc, '/HPXML/Building/BuildingDetails/BuildingSummary/BuildingConstruction/ConditionedFloorArea')
       end
 
       hpxml_path = File.join(sample_files_dir, derivative)
