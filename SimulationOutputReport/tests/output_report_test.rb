@@ -524,7 +524,7 @@ class SimulationOutputReportTest < MiniTest::Test
     annual_csv, timeseries_csv, eri_csv = _test_measure(args_hash)
     assert(File.exist?(annual_csv))
     assert(File.exist?(timeseries_csv))
-    expected_timeseries_cols = ['Hour'] + TimeseriesColsFuels + TimeseriesColsEndUses + TimeseriesColsTotalLoads + TimeseriesColsComponentLoads + TimeseriesColsTemperatures
+    expected_timeseries_cols = ['Time'] + TimeseriesColsFuels + TimeseriesColsEndUses + TimeseriesColsTotalLoads + TimeseriesColsComponentLoads + TimeseriesColsTemperatures
     actual_timeseries_cols = File.readlines(timeseries_csv)[0].strip.split(',')
     assert_equal(expected_timeseries_cols.sort, actual_timeseries_cols.sort)
     assert_equal(8784, File.readlines(timeseries_csv).size - 2)
@@ -541,7 +541,7 @@ class SimulationOutputReportTest < MiniTest::Test
     annual_csv, timeseries_csv, eri_csv = _test_measure(args_hash)
     assert(File.exist?(annual_csv))
     assert(File.exist?(timeseries_csv))
-    expected_timeseries_cols = ['Day'] + TimeseriesColsFuels + TimeseriesColsEndUses + TimeseriesColsTotalLoads + TimeseriesColsComponentLoads + TimeseriesColsTemperatures
+    expected_timeseries_cols = ['Time'] + TimeseriesColsFuels + TimeseriesColsEndUses + TimeseriesColsTotalLoads + TimeseriesColsComponentLoads + TimeseriesColsTemperatures
     actual_timeseries_cols = File.readlines(timeseries_csv)[0].strip.split(',')
     assert_equal(expected_timeseries_cols.sort, actual_timeseries_cols.sort)
     assert_equal(366, File.readlines(timeseries_csv).size - 2)
@@ -558,7 +558,7 @@ class SimulationOutputReportTest < MiniTest::Test
     annual_csv, timeseries_csv, eri_csv = _test_measure(args_hash)
     assert(File.exist?(annual_csv))
     assert(File.exist?(timeseries_csv))
-    expected_timeseries_cols = ['Timestep'] + TimeseriesColsFuels + TimeseriesColsEndUses + TimeseriesColsTotalLoads + TimeseriesColsComponentLoads + TimeseriesColsTemperatures
+    expected_timeseries_cols = ['Time'] + TimeseriesColsFuels + TimeseriesColsEndUses + TimeseriesColsTotalLoads + TimeseriesColsComponentLoads + TimeseriesColsTemperatures
     actual_timeseries_cols = File.readlines(timeseries_csv)[0].strip.split(',')
     assert_equal(expected_timeseries_cols.sort, actual_timeseries_cols.sort)
     assert_equal(8784, File.readlines(timeseries_csv).size - 2)
