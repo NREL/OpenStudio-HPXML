@@ -2538,8 +2538,10 @@ def set_hpxml_ventilation_fans(hpxml_file, hpxml)
                                used_for_local_ventilation: true)
   elsif ['base-misc-defaults.xml'].include? hpxml_file
     hpxml.ventilation_fans.add(id: 'KitchenRangeFan',
+                               fan_location: HPXML::VentilationFanLocationKitchen,
                                used_for_local_ventilation: true)
     hpxml.ventilation_fans.add(id: 'BathFans',
+                               fan_location: HPXML::VentilationFanLocationBath,
                                used_for_local_ventilation: true)
   end
 end

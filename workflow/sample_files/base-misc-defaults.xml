@@ -310,10 +310,12 @@
           <VentilationFans>
             <VentilationFan>
               <SystemIdentifier id='KitchenRangeFan'/>
+              <FanLocation>kitchen</FanLocation>
               <UsedForLocalVentilation>true</UsedForLocalVentilation>
             </VentilationFan>
             <VentilationFan>
               <SystemIdentifier id='BathFans'/>
+              <FanLocation>bath</FanLocation>
               <UsedForLocalVentilation>true</UsedForLocalVentilation>
             </VentilationFan>
           </VentilationFans>
