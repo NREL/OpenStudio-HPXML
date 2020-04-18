@@ -2,8 +2,8 @@
   <schema_version>3.0</schema_version>
   <name>hpxm_lto_openstudio</name>
   <uid>b1543b30-9465-45ff-ba04-1d1f85e763bc</uid>
-  <version_id>389b402f-9542-4eca-9f0b-d9f642874b91</version_id>
-  <version_modified>20200417T215627Z</version_modified>
+  <version_id>401aa240-8e44-40bb-9c36-6bc0619aa918</version_id>
+  <version_modified>20200418T204724Z</version_modified>
   <xml_checksum>D8922A73</xml_checksum>
   <class_name>HPXMLtoOpenStudio</class_name>
   <display_name>HPXML to OpenStudio Translator</display_name>
@@ -414,12 +414,6 @@
       <checksum>B25F263A</checksum>
     </file>
     <file>
-      <filename>airflow.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>9FC9A661</checksum>
-    </file>
-    <file>
       <filename>lighting.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
@@ -432,22 +426,16 @@
       <checksum>6AB64ECB</checksum>
     </file>
     <file>
-      <filename>BaseElements.xsd</filename>
-      <filetype>xsd</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>06222F98</checksum>
-    </file>
-    <file>
       <filename>constructions.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
       <checksum>C4B05406</checksum>
     </file>
     <file>
-      <filename>hpxml.rb</filename>
+      <filename>airflow.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>BC45CCC5</checksum>
+      <checksum>0F4703C7</checksum>
     </file>
     <file>
       <filename>hotwater_appliances.rb</filename>
@@ -456,16 +444,16 @@
       <checksum>2963E900</checksum>
     </file>
     <file>
-      <filename>EPvalidator.rb</filename>
+      <filename>hpxml.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>E6712369</checksum>
+      <checksum>BDBE1575</checksum>
     </file>
     <file>
       <filename>waterheater.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>6C7AA049</checksum>
+      <checksum>76182AA8</checksum>
     </file>
     <file>
       <version>
@@ -476,7 +464,19 @@
       <filename>measure.rb</filename>
       <filetype>rb</filetype>
       <usage_type>script</usage_type>
-      <checksum>F1704A8D</checksum>
+      <checksum>8F6F7A82</checksum>
+    </file>
+    <file>
+      <filename>EPvalidator.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>44CA055E</checksum>
+    </file>
+    <file>
+      <filename>BaseElements.xsd</filename>
+      <filetype>xsd</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>CE0F105B</checksum>
     </file>
   </files>
 </measure>

@@ -12,22 +12,8 @@ The following building features/technologies are available for modeling via the 
 
 - Enclosure
 
-  - Attics
-  
-    - Vented
-    - Unvented
-    - Conditioned
-    - Radiant Barriers
-    
-  - Foundations
-  
-    - Slab
-    - Unconditioned Basement
-    - Conditioned Basement
-    - Vented Crawlspace
-    - Unvented Crawlspace
-    - Ambient
-    
+  - Attics (Vented, Unvented, Conditioned)
+  - Foundations (Slab, Unconditioned Basement, Conditioned Basement, Vented Crawlspace, Unvented Crawlspace, Ambient)
   - Garages
   - Windows & Overhangs
   - Skylights
@@ -35,68 +21,30 @@ The following building features/technologies are available for modeling via the 
   
 - HVAC
 
-  - Heating Systems
-  
-    - Electric Resistance
-    - Furnaces
-    - Wall Furnaces & Stoves
-    - Boilers
-    - Portable Heaters
-    
-  - Cooling Systems
-  
-    - Central Air Conditioners
-    - Room Air Conditioners
-    - Evaporative Coolers
-    
-  - Heat Pumps
-  
-    - Air Source Heat Pumps
-    - Mini Split Heat Pumps
-    - Ground Source Heat Pumps
-    - Dual-Fuel Heat Pumps
-    
+  - Heating Systems (Electric Resistance, Furnaces, Wall Furnaces, Stoves, Boilers, Portable Heaters)
+  - Cooling Systems (Central Air Conditioners, Room Air Conditioners, Evaporative Coolers)
+  - Heat Pumps (Air Source, Mini Split, Ground Source, Dual-Fuel)
   - Setpoints
   - Ducts
   
 - Water Heating
 
-  - Water Heaters
-  
-    - Storage Tank
-    - Instantaneous Tankless
-    - Heat Pump Water Heater
-    - Indirect Water Heater (Combination Boiler)
-    - Tankless Coil (Combination Boiler)
-
+  - Water Heaters (Storage, Tankless, Heat Pump, Indirect, Tankless Coil)
   - Solar Hot Water
   - Desuperheaters
-  - Hot Water Distribution
-  
-    - Recirculation
-    
+  - Hot Water Distribution (Standard, Recirculation)
   - Drain Water Heat Recovery
-  - Low-Flow Fixtures
+  - Hot Water Fixtures
   
-- Mechanical Ventilation
+- Ventilation
 
-  - Exhaust Only
-  - Supply Only
-  - Balanced
-  - Energy Recovery Ventilator
-  - Heat Recovery Ventilator
-  - Central Fan Integrated Supply
-  
-- Whole House Fan
+  - Mechanical Ventilation (Exhaust, Supply, Balanced, ERV, HRV, CFIS)
+  - Kitchen Fan
+  - Bathroom Fans
+  - Whole House Fan
+
 - Photovoltaics
-- Appliances
-
-  - Clothes Washer
-  - Clothes Dryer
-  - Dishwasher
-  - Refrigerator
-  - Cooking Range/Oven
-  
+- Appliances (Clothes Washer/Dryer, Dishwasher, Refrigerator, Cooking Range/Oven)
 - Lighting
 - Ceiling Fans
 - Plug Loads
@@ -144,6 +92,11 @@ This section describes elements specified in HPXML's ``BuildingSummary``.
 It is used for high-level building information including conditioned floor area, number of bedrooms, number of residents, number of conditioned floors, etc.
 Most occupancy assumptions are based on the number of bedrooms, while the number of residents is solely used to determine heat gains from the occupants themselves.
 Note that a walkout basement should be included in ``NumberofConditionedFloorsAboveGrade``.
+
+If ``NumberofBathrooms`` is not provided, it is calculated using the following equation.
+The equation is from the `Building America House Simulation Protocols <https://www1.eere.energy.gov/buildings/publications/pdfs/building_america/house_simulation.pdf>`_.
+
+.. math:: NumberofBathrooms = \frac{NumberofBedrooms}{2} + 0.5
 
 Shading due to neighboring buildings can be defined inside an ``Site/extension/Neighbors`` element.
 Each ``Neighbors/NeighborBuilding`` element is required to have an ``Azimuth`` and ``Distance`` from the house.
@@ -497,6 +450,41 @@ Note that AdjustedSensibleRecoveryEfficiency and AdjustedTotalRecoveryEfficiency
 
 In many situations, the rated flow rate should be the value derived from actual testing of the system.
 For a CFIS system, the rated flow rate should equal the amount of outdoor air provided to the distribution system.
+
+Kitchen Fan
+***********
+
+A kitchen range fan may be specified as a ``Systems/MechanicalVentilation/VentilationFans/VentilationFan`` with ``FanLocation='kitchen'`` and ``UsedForLocalVentilation='true'``.
+
+Additional fields may be provided per the table below. If not provided, default values will be assumed.
+The default values are based on the `Building America House Simulation Protocols <https://www1.eere.energy.gov/buildings/publications/pdfs/building_america/house_simulation.pdf>`_.
+
+====================== ========================
+Element Name           Default Value
+====================== ========================
+RatedFlowRate          100 [cfm]
+HoursInOperation       1 [hrs/day]
+FanPower               0.3 * RatedFlowRate [W]
+extension/StartHour    18 [6pm]
+====================== ========================
+
+Bathroom Fans
+*************
+
+Bathroom fans may be specified as a ``Systems/MechanicalVentilation/VentilationFans/VentilationFan`` with ``FanLocation='bath'`` and ``UsedForLocalVentilation='true'``.
+
+Additional fields may be provided per the table below. If not provided, default values will be assumed.
+The default values are based on the `Building America House Simulation Protocols <https://www1.eere.energy.gov/buildings/publications/pdfs/building_america/house_simulation.pdf>`_.
+
+====================== ========================
+Element Name           Default Value
+====================== ========================
+Quantity               NumberofBathrooms [#]
+RatedFlowRate          50 [cfm]
+HoursInOperation       1 [hrs/day]
+FanPower               0.3 * RatedFlowRate [W]
+extension/StartHour    7 [7am]
+====================== ========================
 
 Whole House Fan
 ***************
