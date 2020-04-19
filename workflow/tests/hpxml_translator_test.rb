@@ -760,9 +760,9 @@ class HPXMLTest < MiniTest::Test
                                     'base-enclosure-garage.xml' => 2,                 # additional instance for garage
                                     'base-enclosure-other-housing-unit.xml' => 0,     # no foundation in contact w/ ground
                                     'base-enclosure-other-heated-space.xml' => 0,     # no foundation in contact w/ ground
-                                    'base-enclosure-other-non-freezing-space.xml' => 0,     # no foundation in contact w/ ground
-                                    'base-enclosure-other-multifamily-buffer-space.xml' => 0,     # no foundation in contact w/ ground
-                                    'base-foundation-walkout-basement.xml' => 4,      # 3 foundation walls plus a no-wall exposed perimeter
+                                    'base-enclosure-other-non-freezing-space.xml' => 0, # no foundation in contact w/ ground
+                                    'base-enclosure-other-multifamily-buffer-space.xml' => 0, # no foundation in contact w/ ground
+                                    'base-foundation-walkout-basement.xml' => 4, # 3 foundation walls plus a no-wall exposed perimeter
                                     'base-foundation-complex.xml' => 10 }
 
     if not num_expected_kiva_instances[File.basename(hpxml_path)].nil?

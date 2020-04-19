@@ -632,6 +632,7 @@ class SimulationOutputReport < OpenStudio::Measure::ReportingMeasure
                     schedule.name.to_s.include?(HPXML::LocationOtherMultifamilyBufferSpace) ||
                     schedule.name.to_s.include?(HPXML::LocationOtherNonFreezingSpace) ||
                     schedule.name.to_s.include?(HPXML::LocationOtherHousingUnit)
+
         mf_space_names << schedule.name.to_s.upcase
       end
       zone_names.sort.each do |zone_name|

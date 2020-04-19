@@ -349,6 +349,7 @@ class OSModel
       vented_attic = nil
       @hpxml.attics.each do |attic|
         next unless attic.attic_type == HPXML::AtticTypeVented
+
         vented_attic = attic
       end
       if vented_attic.nil?
@@ -364,6 +365,7 @@ class OSModel
       vented_crawl = nil
       @hpxml.foundations.each do |foundation|
         next unless foundation.foundation_type == HPXML::FoundationTypeCrawlspaceVented
+
         vented_crawl = foundation
       end
       if vented_crawl.nil?
@@ -2026,6 +2028,7 @@ class OSModel
       if [HPXML::LocationOtherHeatedSpace, HPXML::LocationOtherMultifamilyBufferSpace, HPXML::LocationOtherNonFreezingSpace, HPXML::LocationOtherHousingUnit].include? wall_exterior_adjacent_to
         fail "Window '#{window.id}' cannot be adjacent to '#{wall_exterior_adjacent_to}'. Check parent wall: '#{window.wall.id}'."
       end
+
       window_height = 4.0 # ft, default
       overhang_depth = nil
       if not window.overhangs_depth.nil?
@@ -4238,8 +4241,7 @@ class OSModel
       otherside_object.setCombinedConvectiveRadiativeFilmCoefficient(0)
       # Schedule of space temperature, can be shared with water heater/ducts
       create_multifamily_temperature_schedule(model, exterior_adjacent_to, spaces)
-      # FIXME: wait for new OS release with bugfix of https://github.com/NREL/OpenStudio/issues/3848
-      otherside_object.setPointer(9, @mf_temp_sch_map[exterior_adjacent_to].handle)
+      otherside_object.setConstantTemperatureSchedule(@mf_temp_sch_map[exterior_adjacent_to])
       surface.setSurfacePropertyOtherSideCoefficients(otherside_object)
       spaces[exterior_adjacent_to] = otherside_object
     else
