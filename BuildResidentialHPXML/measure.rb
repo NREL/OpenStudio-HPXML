@@ -3339,7 +3339,7 @@ class HPXMLFile
       end
 
       if args[:bathroom_fans_quantity].is_initialized
-        quantity = args[:bathroom_fans_quantity]
+        quantity = args[:bathroom_fans_quantity].get
       end
 
       hpxml.ventilation_fans.add(id: 'BathFans',
