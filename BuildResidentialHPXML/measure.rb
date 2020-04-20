@@ -2324,7 +2324,12 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
              plug_loads_usage_multiplier: runner.getDoubleArgumentValue('plug_loads_usage_multiplier', user_arguments) }
 
     # Argument error checks
-    errors = check_for_argument_errors(args)
+    warnings, errors = validate_arguments(args)
+    unless warnings.empty?
+      warnings.each do |warning|
+        runner.registerWarning(warning)
+      end
+    end
     unless errors.empty?
       errors.each do |error|
         runner.registerError(error)
@@ -2381,18 +2386,19 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     runner.registerInfo("Wrote file: #{hpxml_path}")
   end
 
-  def check_for_argument_errors(args)
+  def validate_arguments(args)
+    warnings = []
     errors = []
 
     # heat pump water heater with natural gas fuel type
-    error = ([HPXML::WaterHeaterTypeHeatPump].include?(args[:water_heater_type]) && (args[:water_heater_fuel_type] != HPXML::FuelTypeElectricity))
-    errors << "water_heater_type=#{args[:water_heater_type]} and water_heater_fuel_type=#{args[:water_heater_fuel_type]}" if error
+    warning = ([HPXML::WaterHeaterTypeHeatPump].include?(args[:water_heater_type]) && (args[:water_heater_fuel_type] != HPXML::FuelTypeElectricity))
+    warnings << "water_heater_type=#{args[:water_heater_type]} and water_heater_fuel_type=#{args[:water_heater_fuel_type]}" if warning
 
     # furnace, air conditioner, and heat pump
-    error = (args[:heating_system_type] != 'none') && (args[:cooling_system_type] != 'none') && (args[:heat_pump_type] != 'none')
+    error = (args[:heating_system_type]!='none') && (args[:cooling_system_type]!='none') && (args[:heat_pump_type]!='none')
     errors << "heating_system_type=#{args[:heating_system_type]} and cooling_system_type=#{args[:cooling_system_type]} and heat_pump_type=#{args[:heat_pump_type]}" if error
 
-    return errors
+    return warnings, errors
   end
 
   def validate_hpxml(runner, hpxml_path, hpxml_doc, schemas_dir)
