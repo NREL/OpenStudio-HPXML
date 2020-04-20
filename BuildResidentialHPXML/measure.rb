@@ -2722,6 +2722,13 @@ class HPXMLFile
                       pitch: pitch,
                       radiant_barrier: args[:roof_radiant_barrier],
                       insulation_assembly_r_value: args[:roof_assembly_r])
+
+      surface.vertices.each do |vertex|
+        x = UnitConversions.convert(vertex.x, 'm', 'ft').round(2)
+        y = UnitConversions.convert(vertex.y, 'm', 'ft').round(2)
+        z = UnitConversions.convert(vertex.z, 'm', 'ft').round(2)
+        hpxml.roofs[-1].add_coordinate(x: x, y: y, z: z)
+      end
     end
   end
 
@@ -2815,6 +2822,13 @@ class HPXMLFile
                                  insulation_exterior_r_value: insulation_exterior_r_value,
                                  insulation_exterior_distance_to_top: insulation_exterior_distance_to_top,
                                  insulation_exterior_distance_to_bottom: insulation_exterior_distance_to_bottom)
+
+      surface.vertices.each do |vertex|
+        x = UnitConversions.convert(vertex.x, 'm', 'ft').round(2)
+        y = UnitConversions.convert(vertex.y, 'm', 'ft').round(2)
+        z = UnitConversions.convert(vertex.z, 'm', 'ft').round(2)
+        hpxml.foundation_walls[-1].add_coordinate(x: x, y: y, z: z)
+      end
     end
   end
 
@@ -2854,6 +2868,13 @@ class HPXMLFile
         end
       else
         hpxml.frame_floors[-1].insulation_assembly_r_value = 2.1 # Uninsulated
+      end
+
+      surface.vertices.each do |vertex|
+        x = UnitConversions.convert(vertex.x, 'm', 'ft').round(2)
+        y = UnitConversions.convert(vertex.y, 'm', 'ft').round(2)
+        z = UnitConversions.convert(vertex.z, 'm', 'ft').round(2)
+        hpxml.frame_floors[-1].add_coordinate(x: x, y: y, z: z)
       end
     end
   end
@@ -2900,6 +2921,13 @@ class HPXMLFile
                       depth_below_grade: depth_below_grade,
                       carpet_fraction: args[:slab_carpet_fraction],
                       carpet_r_value: args[:slab_carpet_r_value])
+
+      surface.vertices.each do |vertex|
+        x = UnitConversions.convert(vertex.x, 'm', 'ft').round(2)
+        y = UnitConversions.convert(vertex.y, 'm', 'ft').round(2)
+        z = UnitConversions.convert(vertex.z, 'm', 'ft').round(2)
+        hpxml.slabs[-1].add_coordinate(x: x, y: y, z: z)
+      end
     end
   end
 
@@ -2969,6 +2997,13 @@ class HPXMLFile
                           interior_shading_factor_summer: args[:window_interior_shading_summer],
                           fraction_operable: args[:window_fraction_of_operable_area],
                           wall_idref: "#{surface.name}")
+
+        sub_surface.vertices.each do |vertex|
+          x = UnitConversions.convert(vertex.x, 'm', 'ft').round(2)
+          y = UnitConversions.convert(vertex.y, 'm', 'ft').round(2)
+          z = UnitConversions.convert(vertex.z, 'm', 'ft').round(2)
+          hpxml.windows[-1].add_coordinate(x: x, y: y, z: z)
+        end
       end # sub_surfaces
     end # surfaces
   end
@@ -2986,6 +3021,13 @@ class HPXMLFile
                             ufactor: args[:skylight_ufactor],
                             shgc: args[:skylight_shgc],
                             roof_idref: "#{surface.name}")
+
+        sub_surface.vertices.each do |vertex|
+          x = UnitConversions.convert(vertex.x, 'm', 'ft').round(2)
+          y = UnitConversions.convert(vertex.y, 'm', 'ft').round(2)
+          z = UnitConversions.convert(vertex.z, 'm', 'ft').round(2)
+          hpxml.skylights[-1].add_coordinate(x: x, y: y, z: z)
+        end
       end
     end
   end
@@ -3002,6 +3044,13 @@ class HPXMLFile
                         area: UnitConversions.convert(sub_surface.grossArea, 'm^2', 'ft^2').round,
                         azimuth: args[:geometry_orientation],
                         r_value: args[:door_rvalue])
+
+        sub_surface.vertices.each do |vertex|
+          x = UnitConversions.convert(vertex.x, 'm', 'ft').round(2)
+          y = UnitConversions.convert(vertex.y, 'm', 'ft').round(2)
+          z = UnitConversions.convert(vertex.z, 'm', 'ft').round(2)
+          hpxml.doors[-1].add_coordinate(x: x, y: y, z: z)
+        end
       end
     end
   end
