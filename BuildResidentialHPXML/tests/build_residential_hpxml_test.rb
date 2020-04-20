@@ -195,7 +195,12 @@ class BuildResidentialHPXMLTest < MiniTest::Test
         refrigerator.schedules_output_path = nil
         refrigerator.schedules_column_name = nil
       end
+      hpxml.roofs.each do |roof|
+        roof.coordinates = []
+      end
       hpxml.foundation_walls.each do |foundation_wall|
+        foundation_wall.coordinates = []
+
         next if foundation_wall.insulation_assembly_r_value.nil?
         foundation_wall.insulation_assembly_r_value = foundation_wall.insulation_assembly_r_value.round(2)
       end
@@ -207,11 +212,24 @@ class BuildResidentialHPXMLTest < MiniTest::Test
 
         wall.area = nil # TODO: Attic gable wall areas
       end
+      hpxml.frame_floors.each do |frame_floor|
+        frame_floor.coordinates = []
+      end
+      hpxml.slabs.each do |slab|
+        slab.coordinates = []
+      end
       hpxml.windows.each do |window|
+        window.coordinates = []
+
         window.area = window.area.round
         window.overhangs_distance_to_bottom_of_window = nil # TODO: Height of windows
       end
+      hpxml.skylights.each do |skylight|
+        skylight.coordinates = []
+      end
       hpxml.doors.each do |door|
+        door.coordinates = []
+
         door.azimuth = nil # Not important
       end
       hpxml.heat_pumps.each do |heat_pump|
