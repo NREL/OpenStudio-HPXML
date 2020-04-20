@@ -2726,7 +2726,7 @@ class HPXMLFile
       surface.vertices.each do |vertex|
         x = UnitConversions.convert(vertex.x, 'm', 'ft').round(2)
         y = UnitConversions.convert(vertex.y, 'm', 'ft').round(2)
-        z = UnitConversions.convert(vertex.z, 'm', 'ft').round(2)
+        z = UnitConversions.convert(vertex.z + surface.space.get.zOrigin, 'm', 'ft').round(2)
         hpxml.roofs[-1].add_coordinate(x: x, y: y, z: z)
       end
     end
@@ -2786,7 +2786,7 @@ class HPXMLFile
       surface.vertices.each do |vertex|
         x = UnitConversions.convert(vertex.x, 'm', 'ft').round(2)
         y = UnitConversions.convert(vertex.y, 'm', 'ft').round(2)
-        z = UnitConversions.convert(vertex.z, 'm', 'ft').round(2)
+        z = UnitConversions.convert(vertex.z + surface.space.get.zOrigin, 'm', 'ft').round(2)
         hpxml.walls[-1].add_coordinate(x: x, y: y, z: z)
       end
     end
@@ -2826,7 +2826,7 @@ class HPXMLFile
       surface.vertices.each do |vertex|
         x = UnitConversions.convert(vertex.x, 'm', 'ft').round(2)
         y = UnitConversions.convert(vertex.y, 'm', 'ft').round(2)
-        z = UnitConversions.convert(vertex.z, 'm', 'ft').round(2)
+        z = UnitConversions.convert(vertex.z + surface.space.get.zOrigin, 'm', 'ft').round(2)
         hpxml.foundation_walls[-1].add_coordinate(x: x, y: y, z: z)
       end
     end
@@ -2873,7 +2873,7 @@ class HPXMLFile
       surface.vertices.each do |vertex|
         x = UnitConversions.convert(vertex.x, 'm', 'ft').round(2)
         y = UnitConversions.convert(vertex.y, 'm', 'ft').round(2)
-        z = UnitConversions.convert(vertex.z, 'm', 'ft').round(2)
+        z = UnitConversions.convert(vertex.z + surface.space.get.zOrigin, 'm', 'ft').round(2)
         hpxml.frame_floors[-1].add_coordinate(x: x, y: y, z: z)
       end
     end
@@ -2925,7 +2925,7 @@ class HPXMLFile
       surface.vertices.each do |vertex|
         x = UnitConversions.convert(vertex.x, 'm', 'ft').round(2)
         y = UnitConversions.convert(vertex.y, 'm', 'ft').round(2)
-        z = UnitConversions.convert(vertex.z, 'm', 'ft').round(2)
+        z = UnitConversions.convert(vertex.z + surface.space.get.zOrigin, 'm', 'ft').round(2)
         hpxml.slabs[-1].add_coordinate(x: x, y: y, z: z)
       end
     end
@@ -3001,7 +3001,7 @@ class HPXMLFile
         sub_surface.vertices.each do |vertex|
           x = UnitConversions.convert(vertex.x, 'm', 'ft').round(2)
           y = UnitConversions.convert(vertex.y, 'm', 'ft').round(2)
-          z = UnitConversions.convert(vertex.z, 'm', 'ft').round(2)
+          z = UnitConversions.convert(vertex.z + sub_surface.space.get.zOrigin, 'm', 'ft').round(2)
           hpxml.windows[-1].add_coordinate(x: x, y: y, z: z)
         end
       end # sub_surfaces
@@ -3025,7 +3025,7 @@ class HPXMLFile
         sub_surface.vertices.each do |vertex|
           x = UnitConversions.convert(vertex.x, 'm', 'ft').round(2)
           y = UnitConversions.convert(vertex.y, 'm', 'ft').round(2)
-          z = UnitConversions.convert(vertex.z, 'm', 'ft').round(2)
+          z = UnitConversions.convert(vertex.z + sub_surface.space.get.zOrigin, 'm', 'ft').round(2)
           hpxml.skylights[-1].add_coordinate(x: x, y: y, z: z)
         end
       end
@@ -3048,7 +3048,7 @@ class HPXMLFile
         sub_surface.vertices.each do |vertex|
           x = UnitConversions.convert(vertex.x, 'm', 'ft').round(2)
           y = UnitConversions.convert(vertex.y, 'm', 'ft').round(2)
-          z = UnitConversions.convert(vertex.z, 'm', 'ft').round(2)
+          z = UnitConversions.convert(vertex.z + sub_surface.space.get.zOrigin, 'm', 'ft').round(2)
           hpxml.doors[-1].add_coordinate(x: x, y: y, z: z)
         end
       end

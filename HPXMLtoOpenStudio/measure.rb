@@ -255,7 +255,7 @@ class OSModel
     assign_view_factor(runner, model)
     check_for_errors(runner, model)
     set_zone_volumes(runner, model)
-    explode_surfaces(runner, model)
+    # explode_surfaces(runner, model)
     add_num_occupants(model, hpxml, runner)
 
     # HVAC
@@ -1348,36 +1348,61 @@ class OSModel
     @hpxml.roofs.each do |roof|
       next if roof.net_area < 0.1 # skip modeling net surface area for surfaces comprised entirely of subsurface area
 
-      if roof.azimuth.nil?
-        if roof.pitch > 0
-          azimuths = @default_azimuths # Model as four directions for average exterior incident solar
+      surfaces = []
+      if roof.coordinates.empty?
+        if roof.azimuth.nil?
+          if roof.pitch > 0
+            azimuths = @default_azimuths # Model as four directions for average exterior incident solar
+          else
+            azimuths = [90] # Arbitrary azimuth for flat roof
+          end
         else
-          azimuths = [90] # Arbitrary azimuth for flat roof
+          azimuths = [roof.azimuth]
+        end
+
+        azimuths.each do |azimuth|
+          width = Math::sqrt(roof.net_area)
+          length = (roof.net_area / width) / azimuths.size
+          tilt = roof.pitch / 12.0
+          z_origin = @walls_top + 0.5 * Math.sin(Math.atan(tilt)) * width
+
+          surface = OpenStudio::Model::Surface.new(add_roof_polygon(length, width, z_origin, azimuth, tilt), model)
+          surfaces << surface
+          surface.additionalProperties.setFeature('Length', length)
+          surface.additionalProperties.setFeature('Width', width)
+          surface.additionalProperties.setFeature('Azimuth', azimuth)
+          surface.additionalProperties.setFeature('Tilt', tilt)
+          surface.additionalProperties.setFeature('SurfaceType', 'Roof')
+          if azimuths.size > 1
+            surface.setName("#{roof.id}:#{azimuth}")
+          else
+            surface.setName(roof.id)
+          end
+          surface.setSurfaceType('RoofCeiling')
+          surface.setOutsideBoundaryCondition('Outdoors')
+          set_surface_interior(model, spaces, surface, roof.interior_adjacent_to)
         end
       else
-        azimuths = [roof.azimuth]
-      end
+        vertices = OpenStudio::Point3dVector.new
+        roof.coordinates.each do |coordinate|
+          x = UnitConversions.convert(coordinate[:x], 'ft', 'm')
+          y = UnitConversions.convert(coordinate[:y], 'ft', 'm')
+          z = UnitConversions.convert(coordinate[:z], 'ft', 'm')
+          vertices << OpenStudio::Point3d.new(x, y, z)
+        end
 
-      surfaces = []
-
-      azimuths.each do |azimuth|
         width = Math::sqrt(roof.net_area)
-        length = (roof.net_area / width) / azimuths.size
+        length = roof.net_area / width
         tilt = roof.pitch / 12.0
-        z_origin = @walls_top + 0.5 * Math.sin(Math.atan(tilt)) * width
 
-        surface = OpenStudio::Model::Surface.new(add_roof_polygon(length, width, z_origin, azimuth, tilt), model)
+        surface = OpenStudio::Model::Surface.new(vertices, model)
         surfaces << surface
         surface.additionalProperties.setFeature('Length', length)
         surface.additionalProperties.setFeature('Width', width)
-        surface.additionalProperties.setFeature('Azimuth', azimuth)
+        surface.additionalProperties.setFeature('Azimuth', 0) # FIXME
         surface.additionalProperties.setFeature('Tilt', tilt)
         surface.additionalProperties.setFeature('SurfaceType', 'Roof')
-        if azimuths.size > 1
-          surface.setName("#{roof.id}:#{azimuth}")
-        else
-          surface.setName(roof.id)
-        end
+        surface.setName(roof.id)
         surface.setSurfaceType('RoofCeiling')
         surface.setOutsideBoundaryCondition('Outdoors')
         set_surface_interior(model, spaces, surface, roof.interior_adjacent_to)
@@ -1437,34 +1462,63 @@ class OSModel
     @hpxml.walls.each do |wall|
       next if wall.net_area < 0.1 # skip modeling net surface area for surfaces comprised entirely of subsurface area
 
-      if wall.azimuth.nil?
-        if wall.is_exterior
-          azimuths = @default_azimuths # Model as four directions for average exterior incident solar
+      surfaces = []
+      if wall.coordinates.empty?
+        if wall.azimuth.nil?
+          if wall.is_exterior
+            azimuths = @default_azimuths # Model as four directions for average exterior incident solar
+          else
+            azimuths = [@default_azimuths[0]] # Arbitrary direction, doesn't receive exterior incident solar
+          end
         else
-          azimuths = [@default_azimuths[0]] # Arbitrary direction, doesn't receive exterior incident solar
+          azimuths = [wall.azimuth]
+        end
+
+        azimuths.each do |azimuth|
+          height = 8.0 * @ncfl_ag
+          length = (wall.net_area / height) / azimuths.size
+          z_origin = @foundation_top
+
+          surface = OpenStudio::Model::Surface.new(add_wall_polygon(length, height, z_origin, azimuth), model)
+          surfaces << surface
+          surface.additionalProperties.setFeature('Length', length)
+          surface.additionalProperties.setFeature('Azimuth', azimuth)
+          surface.additionalProperties.setFeature('Tilt', 90.0)
+          surface.additionalProperties.setFeature('SurfaceType', 'Wall')
+          if azimuths.size > 1
+            surface.setName("#{wall.id}:#{azimuth}")
+          else
+            surface.setName(wall.id)
+          end
+          surface.setSurfaceType('Wall')
+          set_surface_interior(model, spaces, surface, wall.interior_adjacent_to)
+          set_surface_exterior(model, spaces, surface, wall.exterior_adjacent_to)
+          if wall.is_interior
+            surface.setSunExposure('NoSun')
+            surface.setWindExposure('NoWind')
+          end
         end
       else
-        azimuths = [wall.azimuth]
-      end
+        z_coordinates = []
+        vertices = OpenStudio::Point3dVector.new
+        wall.coordinates.each do |coordinate|
+          z_coordinates << coordinate[:z]
+          x = UnitConversions.convert(coordinate[:x], 'ft', 'm')
+          y = UnitConversions.convert(coordinate[:y], 'ft', 'm')
+          z = UnitConversions.convert(coordinate[:z], 'ft', 'm')
+          vertices << OpenStudio::Point3d.new(x, y, z)
+        end
 
-      surfaces = []
+        height = z_coordinates.max - z_coordinates.min
+        length = wall.net_area / height
 
-      azimuths.each do |azimuth|
-        height = 8.0 * @ncfl_ag
-        length = (wall.net_area / height) / azimuths.size
-        z_origin = @foundation_top
-
-        surface = OpenStudio::Model::Surface.new(add_wall_polygon(length, height, z_origin, azimuth), model)
+        surface = OpenStudio::Model::Surface.new(vertices, model)
         surfaces << surface
         surface.additionalProperties.setFeature('Length', length)
-        surface.additionalProperties.setFeature('Azimuth', azimuth)
+        surface.additionalProperties.setFeature('Azimuth', 0) # FIXME
         surface.additionalProperties.setFeature('Tilt', 90.0)
         surface.additionalProperties.setFeature('SurfaceType', 'Wall')
-        if azimuths.size > 1
-          surface.setName("#{wall.id}:#{azimuth}")
-        else
-          surface.setName(wall.id)
-        end
+        surface.setName(wall.id)
         surface.setSurfaceType('Wall')
         set_surface_interior(model, spaces, surface, wall.interior_adjacent_to)
         set_surface_exterior(model, spaces, surface, wall.exterior_adjacent_to)
@@ -1503,34 +1557,64 @@ class OSModel
 
   def self.add_rim_joists(runner, model, spaces)
     @hpxml.rim_joists.each do |rim_joist|
-      if rim_joist.azimuth.nil?
-        if rim_joist.is_exterior
-          azimuths = @default_azimuths # Model as four directions for average exterior incident solar
+      surfaces = []
+      if rim_joist.coordinates.empty?
+        if rim_joist.azimuth.nil?
+          if rim_joist.is_exterior
+            azimuths = @default_azimuths # Model as four directions for average exterior incident solar
+          else
+            azimuths = [@default_azimuths[0]] # Arbitrary direction, doesn't receive exterior incident solar
+          end
         else
-          azimuths = [@default_azimuths[0]] # Arbitrary direction, doesn't receive exterior incident solar
+          azimuths = [rim_joist.azimuth]
+        end
+
+        azimuths.each do |azimuth|
+          height = 1.0
+          length = (rim_joist.area / height) / azimuths.size
+          z_origin = @foundation_top
+
+          surface = OpenStudio::Model::Surface.new(add_wall_polygon(length, height, z_origin, azimuth), model)
+          surfaces << surface
+          surface.additionalProperties.setFeature('Length', length)
+          surface.additionalProperties.setFeature('Azimuth', azimuth)
+          surface.additionalProperties.setFeature('Tilt', 90.0)
+          surface.additionalProperties.setFeature('SurfaceType', 'RimJoist')
+          if azimuths.size > 1
+            surface.setName("#{rim_joist.id}:#{azimuth}")
+          else
+            surface.setName(rim_joist.id)
+          end
+          surface.setSurfaceType('Wall')
+          set_surface_interior(model, spaces, surface, rim_joist.interior_adjacent_to)
+          set_surface_exterior(model, spaces, surface, rim_joist.exterior_adjacent_to)
+          if rim_joist.is_interior
+            surface.setSunExposure('NoSun')
+            surface.setWindExposure('NoWind')
+          end
         end
       else
-        azimuths = [rim_joist.azimuth]
-      end
+        z_coordinates = []
+        vertices = OpenStudio::Point3dVector.new
+        wall.coordinates.each do |coordinate|
+          z_coordinates << coordinate[:z]
+          x = UnitConversions.convert(coordinate[:x], 'ft', 'm')
+          y = UnitConversions.convert(coordinate[:y], 'ft', 'm')
+          z = UnitConversions.convert(coordinate[:z], 'ft', 'm')
+          vertices << OpenStudio::Point3d.new(x, y, z)
+        end
 
-      surfaces = []
-
-      azimuths.each do |azimuth|
-        height = 1.0
-        length = (rim_joist.area / height) / azimuths.size
+        height = z_coordinates.max - z_coordinates.min
+        length = rim_joist.area / height
         z_origin = @foundation_top
 
-        surface = OpenStudio::Model::Surface.new(add_wall_polygon(length, height, z_origin, azimuth), model)
+        surface = OpenStudio::Model::Surface.new(vertices, model)
         surfaces << surface
         surface.additionalProperties.setFeature('Length', length)
-        surface.additionalProperties.setFeature('Azimuth', azimuth)
+        surface.additionalProperties.setFeature('Azimuth', 0) # FIXME
         surface.additionalProperties.setFeature('Tilt', 90.0)
         surface.additionalProperties.setFeature('SurfaceType', 'RimJoist')
-        if azimuths.size > 1
-          surface.setName("#{rim_joist.id}:#{azimuth}")
-        else
-          surface.setName(rim_joist.id)
-        end
+        surface.setName(rim_joist.id)
         surface.setSurfaceType('Wall')
         set_surface_interior(model, spaces, surface, rim_joist.interior_adjacent_to)
         set_surface_exterior(model, spaces, surface, rim_joist.exterior_adjacent_to)
@@ -1589,10 +1673,32 @@ class OSModel
       end
 
       if frame_floor.is_ceiling
-        surface = OpenStudio::Model::Surface.new(add_ceiling_polygon(length, width, z_origin), model)
+        if frame_floor.coordinates.empty?
+          surface = OpenStudio::Model::Surface.new(add_ceiling_polygon(length, width, z_origin), model)
+        else
+          vertices = OpenStudio::Point3dVector.new
+          frame_floor.coordinates.each do |coordinate|
+            x = UnitConversions.convert(coordinate[:x], 'ft', 'm')
+            y = UnitConversions.convert(coordinate[:y], 'ft', 'm')
+            z = UnitConversions.convert(coordinate[:z], 'ft', 'm')
+            vertices << OpenStudio::Point3d.new(x, y, z)
+          end
+          surface = OpenStudio::Model::Surface.new(vertices, model)
+        end
         surface.additionalProperties.setFeature('SurfaceType', 'Ceiling')
       else
-        surface = OpenStudio::Model::Surface.new(add_floor_polygon(length, width, z_origin), model)
+        if frame_floor.coordinates.empty?
+          surface = OpenStudio::Model::Surface.new(add_floor_polygon(length, width, z_origin), model)
+        else
+          vertices = OpenStudio::Point3dVector.new
+          frame_floor.coordinates.each do |coordinate|
+            x = UnitConversions.convert(coordinate[:x], 'ft', 'm')
+            y = UnitConversions.convert(coordinate[:y], 'ft', 'm')
+            z = UnitConversions.convert(coordinate[:z], 'ft', 'm')
+            vertices << OpenStudio::Point3d.new(x, y, z)
+          end
+          surface = OpenStudio::Model::Surface.new(vertices, model)
+        end
         surface.additionalProperties.setFeature('SurfaceType', 'Floor')
       end
       set_surface_interior(model, spaces, surface, frame_floor.interior_adjacent_to)
@@ -1771,7 +1877,18 @@ class OSModel
           azimuth = foundation_wall.azimuth
         end
 
-        surface = OpenStudio::Model::Surface.new(add_wall_polygon(length, ag_height, z_origin, azimuth), model)
+        if foundation_wall.coordinates.empty?
+          surface = OpenStudio::Model::Surface.new(add_wall_polygon(length, ag_height, z_origin, azimuth), model)
+        else
+          vertices = OpenStudio::Point3dVector.new
+          foundation_wall.coordinates.each do |coordinate|
+            x = UnitConversions.convert(coordinate[:x], 'ft', 'm')
+            y = UnitConversions.convert(coordinate[:y], 'ft', 'm')
+            z = UnitConversions.convert(coordinate[:z], 'ft', 'm')
+            vertices << OpenStudio::Point3d.new(x, y, z)
+          end
+          surface = OpenStudio::Model::Surface.new(vertices, model)
+        end
         surface.additionalProperties.setFeature('Length', length)
         surface.additionalProperties.setFeature('Azimuth', azimuth)
         surface.additionalProperties.setFeature('Tilt', 90.0)
@@ -1835,7 +1952,18 @@ class OSModel
       subsurface_area = 0
     end
 
-    surface = OpenStudio::Model::Surface.new(add_wall_polygon(length, height, z_origin, azimuth, [0] * 4, subsurface_area), model)
+    if foundation_wall.coordinates.empty?
+      surface = OpenStudio::Model::Surface.new(add_wall_polygon(length, height, z_origin, azimuth, [0] * 4, subsurface_area), model)
+    else
+      vertices = OpenStudio::Point3dVector.new
+      foundation_wall.coordinates.each do |coordinate|
+        x = UnitConversions.convert(coordinate[:x], 'ft', 'm')
+        y = UnitConversions.convert(coordinate[:y], 'ft', 'm')
+        z = UnitConversions.convert(coordinate[:z], 'ft', 'm')
+        vertices << OpenStudio::Point3d.new(x, y, z)
+      end
+      surface = OpenStudio::Model::Surface.new(vertices, model)
+    end
     surface.additionalProperties.setFeature('Length', length)
     surface.additionalProperties.setFeature('Azimuth', azimuth)
     surface.additionalProperties.setFeature('Tilt', 90.0)
@@ -1904,7 +2032,18 @@ class OSModel
     slab_length = slab_tot_perim / 4.0 + Math.sqrt(sqrt_term) / 4.0
     slab_width = slab_tot_perim / 4.0 - Math.sqrt(sqrt_term) / 4.0
 
-    surface = OpenStudio::Model::Surface.new(add_floor_polygon(slab_length, slab_width, z_origin), model)
+    if slab.coordinates.empty?
+      surface = OpenStudio::Model::Surface.new(add_floor_polygon(slab_length, slab_width, z_origin), model)
+    else
+      vertices = OpenStudio::Point3dVector.new
+      slab.coordinates.each do |coordinate|
+        x = UnitConversions.convert(coordinate[:x], 'ft', 'm')
+        y = UnitConversions.convert(coordinate[:y], 'ft', 'm')
+        z = UnitConversions.convert(coordinate[:z], 'ft', 'm')
+        vertices << OpenStudio::Point3d.new(x, y, z)
+      end
+      surface = OpenStudio::Model::Surface.new(vertices, model)
+    end
     surface.setName(slab.id)
     surface.setSurfaceType('Floor')
     surface.setOutsideBoundaryCondition('Foundation')
