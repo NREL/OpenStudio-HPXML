@@ -2302,7 +2302,7 @@ class OSModel
           capacity_kbtuh = water_heating_system.heating_capacity / 1000.0
 
           Waterheater.apply_tank(model, space, fuel, capacity_kbtuh, tank_vol,
-                                 ef, re, setpoint_temp, ec_adj, @nbeds, @dhw_map,
+                                 ef, re, setpoint_temp, ec_adj, @dhw_map,
                                  sys_id, desuperheater_clg_coil, jacket_r, solar_fraction)
 
         elsif wh_type == HPXML::WaterHeaterTypeTankless
@@ -2318,7 +2318,7 @@ class OSModel
           tank_vol = water_heating_system.tank_volume
 
           Waterheater.apply_heatpump(model, runner, space, weather, setpoint_temp, tank_vol, ef, ec_adj,
-                                     @nbeds, @dhw_map, sys_id, jacket_r, solar_fraction)
+                                     @dhw_map, sys_id, jacket_r, solar_fraction)
 
         elsif (wh_type == HPXML::WaterHeaterTypeCombiStorage) || (wh_type == HPXML::WaterHeaterTypeCombiTankless)
 
@@ -2331,7 +2331,7 @@ class OSModel
           boiler_sys = get_boiler_and_plant_loop(@hvac_map, water_heating_system.related_hvac_idref, sys_id)
           @dhw_map[sys_id] << boiler_sys['boiler']
 
-          Waterheater.apply_combi(model, runner, space, vol, setpoint_temp, ec_adj, @nbeds,
+          Waterheater.apply_combi(model, runner, space, vol, setpoint_temp, ec_adj,
                                   boiler_sys['boiler'], boiler_sys['plant_loop'], boiler_fuel_type,
                                   boiler_afue, @dhw_map, sys_id, wh_type, jacket_r, standby_loss)
 

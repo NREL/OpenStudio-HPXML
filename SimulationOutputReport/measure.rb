@@ -476,6 +476,7 @@ class SimulationOutputReport < OpenStudio::Measure::ReportingMeasure
 
     # Water Heating (by System)
     solar_keys = []
+    dsh_keys = []
     outputs[:hpxml_dhw_sys_ids].each do |sys_id|
       ep_output_names = get_ep_output_names_for_water_heating(sys_id)
       keys = ep_output_names.map(&:upcase)
@@ -497,7 +498,6 @@ class SimulationOutputReport < OpenStudio::Measure::ReportingMeasure
 
       # Loads
       @loads[LT::HotWaterDelivered].annual_output_by_system[sys_id] = get_report_variable_data_annual_mbtu(keys, get_all_var_keys(@loads[LT::HotWaterDelivered].variable))
-      @loads[LT::HotWaterDesuperheater].annual_output_by_system[sys_id] = get_report_variable_data_annual_mbtu(keys, get_all_var_keys(@loads[LT::HotWaterDesuperheater].variable))
 
       # Combi boiler water system
       hvac_id = get_combi_hvac_id(sys_id)
@@ -547,6 +547,7 @@ class SimulationOutputReport < OpenStudio::Measure::ReportingMeasure
       if solar_keys.empty?
         solar_keys = ep_output_names.select { |name| name.include? Constants.ObjectNameSolarHotWater }.map(&:upcase)
       end
+      dsh_keys << ep_output_names.select { |name| name.include? Constants.ObjectNameDesuperheater(nil) }.map(&:upcase)
     end
 
     # Apply Heating/Cooling DSEs
@@ -574,6 +575,9 @@ class SimulationOutputReport < OpenStudio::Measure::ReportingMeasure
     # Hot Water Load - Solar Thermal
     @loads[LT::HotWaterSolarThermal].annual_output = get_report_variable_data_annual_mbtu(solar_keys, get_all_var_keys(OutputVars.WaterHeaterLoadSolarThermal))
     @loads[LT::HotWaterSolarThermal].annual_output *= -1 if @loads[LT::HotWaterSolarThermal].annual_output != 0
+
+    # Hot Water Load - Desuperheater
+    @loads[LT::HotWaterDesuperheater].annual_output = get_report_variable_data_annual_mbtu(dsh_keys, get_all_var_keys(@loads[LT::HotWaterDesuperheater].variable))
 
     # Hot Water Load - Tank Losses (excluding solar storage tank)
     @loads[LT::HotWaterTankLosses].annual_output = get_report_variable_data_annual_mbtu(solar_keys, ['Water Heater Heat Loss Energy'], not_key: true)
