@@ -74,6 +74,7 @@ The following arguments are used to populate fields of the HPXML file:
 Software Tools
 --------------
 
+The following are software tools that currently use the OpenStudio-HPXML workflow for simulating residential buildings.
 
 ResStock™
 ~~~~~~~~~
