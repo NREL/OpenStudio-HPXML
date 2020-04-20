@@ -1030,108 +1030,39 @@ class Waterheater
 
   def self.add_desuperheater(model, t_set, tank, desuperheater_clg_coil, wh_type, fuel_type, space, loop, ec_adj)
     reclaimed_efficiency = 0.25 # default
-    workaround_flag = true # switch after E+ 9.3 release
-    if workaround_flag
-      eta_c = tank.heaterThermalEfficiency.get
-      tank_name = tank.name.to_s.gsub(' ', '_')
 
-      coil_clg_energy = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Cooling Coil Total Cooling Energy')
-      coil_clg_energy.setName("#{desuperheater_clg_coil.name} clg energy")
-      coil_clg_energy.setKeyName(desuperheater_clg_coil.name.to_s)
+    # create a storage tank
+    vol = 50.0 # FIXME: Input vs assumption?
+    storage_vol_actual = calc_storage_tank_actual_vol(vol, nil)
+    cap = 0
+    nbeds = 0 # won't be used
+    assumed_ua = 6.0 # Btu/hr-F FIXME: Assumption: indirect tank ua calculated based on 1.0 standby_loss and 50gal nominal vol
+    storage_tank_name = "#{tank.name} storage tank"
+    # Preheat tank desuperheater setpoint set to be the same as main water heater
+    storage_tank = create_new_heater(storage_tank_name, cap, nil, storage_vol_actual, nil, t_set, space, 0, 0, HPXML::WaterHeaterTypeStorage, nbeds, model, assumed_ua, nil)
 
-      coil_elec_energy = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Cooling Coil Electric Energy')
-      coil_elec_energy.setName("#{desuperheater_clg_coil.name} elec energy")
-      coil_elec_energy.setKeyName(desuperheater_clg_coil.name.to_s)
+    loop.addSupplyBranchForComponent(storage_tank)
+    tank.addToNode(storage_tank.supplyOutletModelObject.get.to_Node.get)
 
-      wh_energy = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Water Heater Heating Energy')
-      wh_energy.setName("#{tank.name} wh energy")
-      wh_energy.setKeyName(tank.name.to_s)
+    # Create a schedule for desuperheater
+    new_schedule = OpenStudio::Model::ScheduleConstant.new(model)
+    new_schedule.setName("#{tank.name} desuperheater setpoint schedule")
+    # desuperheater setpoint a bit higher than tank setpoint to enable heat reclaim
+    t_dsh_set = t_set + 5
+    new_schedule.setValue(UnitConversions.convert(t_dsh_set, 'F', 'C'))
 
-      dsh_object = HotWaterAndAppliances.add_other_equipment(model, Constants.ObjectNameDesuperheater(tank.name), space, 0.01, 0, 0, model.alwaysOnDiscreteSchedule, fuel_type)
+    # create a desuperheater object
+    desuperheater = OpenStudio::Model::CoilWaterHeatingDesuperheater.new(model, new_schedule)
+    desuperheater.setName("#{tank.name} desuperheater")
+    desuperheater.setMaximumInletWaterTemperatureforHeatReclaim(100)
+    desuperheater.setDeadBandTemperatureDifference(0.2)
+    desuperheater.setRatedHeatReclaimRecoveryEfficiency(reclaimed_efficiency)
+    desuperheater.addToHeatRejectionTarget(storage_tank)
+    desuperheater.setWaterPumpPower(0) # FIXME
+    # attach to the clg coil source
+    desuperheater.setHeatingSource(desuperheater_clg_coil)
 
-      # Actuators
-      dsh_actuator = OpenStudio::Model::EnergyManagementSystemActuator.new(dsh_object, 'OtherEquipment', 'Power Level')
-      dsh_actuator.setName("#{tank.name} dsh fuel saving")
-
-      # energy variables
-      dsh_total = OpenStudio::Model::EnergyManagementSystemGlobalVariable.new(model, "#{tank_name}_dsh_total")
-
-      dsh_program = OpenStudio::Model::EnergyManagementSystemProgram.new(model)
-      dsh_program.setName("#{tank_name} DSH Program")
-      dsh_program.addLine("Set #{tank_name}_eta_c = #{eta_c}")
-      dsh_program.addLine("Set Avail_Cap = #{reclaimed_efficiency} * (#{coil_clg_energy.name} + #{coil_elec_energy.name})")
-      dsh_program.addLine('If WarmupFlag') # need to initialize cumulative dsh energy number
-      dsh_program.addLine("  Set #{dsh_total.name} = 0.0")
-      dsh_program.addLine('Else')
-      dsh_program.addLine("  Set #{dsh_total.name} = #{dsh_total.name} + Avail_Cap")
-      dsh_program.addLine('EndIf')
-      dsh_program.addLine("Set #{tank_name}_dsh_load_saving = -(@Min #{wh_energy.name} #{dsh_total.name})")
-      dsh_program.addLine("Set #{dsh_total.name} = #{dsh_total.name} + #{tank_name}_dsh_load_saving") # update cumulative dsh energy pool
-      dsh_program.addLine("Set #{dsh_actuator.name} = #{tank_name}_dsh_load_saving * #{ec_adj.round(5)} / (SystemTimeStep * 3600) / #{tank_name}_eta_c") # convert to water heater power savings
-
-      # Sensor for EMS reporting
-      ep_consumption_name = { HPXML::FuelTypeElectricity => 'Electric',
-                              HPXML::FuelTypePropane => 'Propane',
-                              HPXML::FuelTypeOil => 'FuelOil#1',
-                              HPXML::FuelTypeNaturalGas => 'Gas',
-                              HPXML::FuelTypeWood => 'OtherFuel1',
-                              HPXML::FuelTypeWoodPellets => 'OtherFuel2' }[fuel_type]
-      dsh_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, "Other Equipment #{ep_consumption_name} Energy")
-      dsh_sensor.setName("#{dsh_object.name} energy consumption")
-      dsh_sensor.setKeyName(dsh_object.name.to_s)
-
-      dsh_energy_output_var = OpenStudio::Model::EnergyManagementSystemOutputVariable.new(model, dsh_sensor)
-      dsh_energy_output_var.setName("#{Constants.ObjectNameDesuperheaterEnergy(tank.name)} outvar")
-      dsh_energy_output_var.setTypeOfDataInVariable('Summed')
-      dsh_energy_output_var.setUpdateFrequency('SystemTimestep')
-      dsh_energy_output_var.setEMSProgramOrSubroutineName(dsh_program)
-      dsh_energy_output_var.setUnits('J')
-
-      dsh_load_output_var = OpenStudio::Model::EnergyManagementSystemOutputVariable.new(model, "#{tank_name}_dsh_load_saving")
-      dsh_load_output_var.setName("#{Constants.ObjectNameDesuperheaterLoad(tank.name)} outvar")
-      dsh_load_output_var.setTypeOfDataInVariable('Summed')
-      dsh_load_output_var.setUpdateFrequency('SystemTimestep')
-      dsh_load_output_var.setEMSProgramOrSubroutineName(dsh_program)
-      dsh_load_output_var.setUnits('J')
-
-      # ProgramCallingManagers
-      program_calling_manager = OpenStudio::Model::EnergyManagementSystemProgramCallingManager.new(model)
-      program_calling_manager.setName("#{tank.name} DSH ProgramManager")
-      program_calling_manager.setCallingPoint('EndOfSystemTimestepBeforeHVACReporting')
-      program_calling_manager.addProgram(dsh_program)
-
-      return [dsh_energy_output_var, dsh_load_output_var]
-    else # need to test after switch
-      # create a storage tank
-      vol = 50.0 # FIXME: Input vs assumption?
-      storage_vol_actual = calc_storage_tank_actual_vol(vol, nil)
-      cap = 0
-      nbeds = 0 # won't be used
-      assumed_ua = 6.0 # Btu/hr-F FIXME: Assumption: indirect tank ua calculated based on 1.0 standby_loss and 50gal nominal vol
-      storage_tank_name = "#{tank.name} storage tank"
-      storage_tank = create_new_heater(storage_tank_name, cap, nil, storage_vol_actual, nil, t_set, space, 0, 0, HPXML::WaterHeaterTypeStorage, nbeds, model, assumed_ua, nil)
-
-      loop.addSupplyBranchForComponent(storage_tank)
-      tank.addToNode(storage_tank.supplyOutletModelObject.get.to_Node.get)
-
-      # Create a schedule for desuperheater
-      new_schedule = OpenStudio::Model::ScheduleConstant.new(model)
-      new_schedule.setName("#{tank.name} desuperheater setpoint schedule")
-      new_schedule.setValue(100)
-
-      # create a desuperheater object
-      desuperheater = OpenStudio::Model::CoilWaterHeatingDesuperheater.new(model, new_schedule)
-      desuperheater.setName("#{tank.name} desuperheater")
-      desuperheater.setMaximumInletWaterTemperatureforHeatReclaim(100)
-      desuperheater.setDeadBandTemperatureDifference(0.2)
-      desuperheater.setRatedHeatReclaimRecoveryEfficiency(reclaimed_efficiency)
-      desuperheater.addToHeatRejectionTarget(storage_tank)
-      desuperheater.setWaterPumpPower(0)
-      # attach to the clg coil source
-      desuperheater.setHeatingSource(desuperheater_clg_coil)
-
-      return [desuperheater]
-    end
+    return [desuperheater]
   end
 
   def self.create_new_hx(model, name)

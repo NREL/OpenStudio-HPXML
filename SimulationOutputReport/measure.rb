@@ -476,7 +476,6 @@ class SimulationOutputReport < OpenStudio::Measure::ReportingMeasure
 
     # Water Heating (by System)
     solar_keys = []
-    desuperheater_vars = []
     outputs[:hpxml_dhw_sys_ids].each do |sys_id|
       ep_output_names = get_ep_output_names_for_water_heating(sys_id)
       keys = ep_output_names.map(&:upcase)
@@ -498,6 +497,7 @@ class SimulationOutputReport < OpenStudio::Measure::ReportingMeasure
 
       # Loads
       @loads[LT::HotWaterDelivered].annual_output_by_system[sys_id] = get_report_variable_data_annual_mbtu(keys, get_all_var_keys(@loads[LT::HotWaterDelivered].variable))
+      @loads[LT::HotWaterDesuperheater].annual_output_by_system[sys_id] = get_report_variable_data_annual_mbtu(keys, get_all_var_keys(@loads[LT::HotWaterDesuperheater].variable))
 
       # Combi boiler water system
       hvac_id = get_combi_hvac_id(sys_id)
@@ -531,26 +531,19 @@ class SimulationOutputReport < OpenStudio::Measure::ReportingMeasure
         next unless end_use.annual_output_by_system[sys_id] > 0
 
         ec_vars = ep_output_names.select { |name| name.include? Constants.ObjectNameWaterHeaterAdjustment(nil) }
-        dsh_vars = ep_output_names.select { |name| name.include? Constants.ObjectNameDesuperheaterEnergy(nil) }
 
         ec_adj = get_report_variable_data_annual_mbtu(['EMS'], ec_vars)
-        dsh_adj = get_report_variable_data_annual_mbtu(['EMS'], dsh_vars)
-        break if ec_adj + dsh_adj == 0 # No adjustment
+        break if ec_adj == 0 # No adjustment
 
-        end_use.annual_output_by_system[sys_id] += ec_adj + dsh_adj
+        end_use.annual_output_by_system[sys_id] += ec_adj
         if include_timeseries_end_use_consumptions
           ec_adj_timeseries = get_report_variable_data_timeseries(['EMS'], ec_vars, UnitConversions.convert(1.0, 'J', end_use.timeseries_units), 0, timeseries_frequency)
-          dsh_adj_timeseries = get_report_variable_data_timeseries(['EMS'], dsh_vars, UnitConversions.convert(1.0, 'J', end_use.timeseries_units), 0, timeseries_frequency)
           end_use.timeseries_output_by_system[sys_id] = end_use.timeseries_output_by_system[sys_id].zip(ec_adj_timeseries).map { |x, y| x + y }
-          end_use.timeseries_output_by_system[sys_id] = end_use.timeseries_output_by_system[sys_id].zip(dsh_adj_timeseries).map { |x, y| x + y }
         end
         break # only apply once
       end
 
-      # Can only be one desuperheater or solar thermal system
-      if desuperheater_vars.empty?
-        desuperheater_vars = ep_output_names.select { |name| name.include? Constants.ObjectNameDesuperheaterLoad(nil) }
-      end
+      # Can only be one solar thermal system
       if solar_keys.empty?
         solar_keys = ep_output_names.select { |name| name.include? Constants.ObjectNameSolarHotWater }.map(&:upcase)
       end
@@ -581,10 +574,6 @@ class SimulationOutputReport < OpenStudio::Measure::ReportingMeasure
     # Hot Water Load - Solar Thermal
     @loads[LT::HotWaterSolarThermal].annual_output = get_report_variable_data_annual_mbtu(solar_keys, get_all_var_keys(OutputVars.WaterHeaterLoadSolarThermal))
     @loads[LT::HotWaterSolarThermal].annual_output *= -1 if @loads[LT::HotWaterSolarThermal].annual_output != 0
-
-    # Hot Water Load - Desuperheater
-    @loads[LT::HotWaterDesuperheater].annual_output = get_report_variable_data_annual_mbtu(['EMS'], desuperheater_vars)
-    @loads[LT::HotWaterDesuperheater].annual_output *= -1.0 if @loads[LT::HotWaterDesuperheater].annual_output != 0
 
     # Hot Water Load - Tank Losses (excluding solar storage tank)
     @loads[LT::HotWaterTankLosses].annual_output = get_report_variable_data_annual_mbtu(solar_keys, ['Water Heater Heat Loss Energy'], not_key: true)
@@ -1681,7 +1670,7 @@ class SimulationOutputReport < OpenStudio::Measure::ReportingMeasure
       LT::Cooling => Load.new(ems_variable: 'loads_clg_tot'),
       LT::HotWaterDelivered => Load.new(variable: OutputVars.WaterHeatingLoad),
       LT::HotWaterTankLosses => Load.new(),
-      LT::HotWaterDesuperheater => Load.new(),
+      LT::HotWaterDesuperheater => Load.new(variable: OutputVars.WaterHeaterLoadDesuperheater),
       LT::HotWaterSolarThermal => Load.new(),
     }
 
