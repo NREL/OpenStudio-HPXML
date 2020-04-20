@@ -95,6 +95,8 @@ class BuildResidentialHPXMLTest < MiniTest::Test
     measures_dir = File.join(this_dir, '../..')
 
     expected_error_msgs = {
+      'non-electric-heat-pump-water-heater.osw' => 'water_heater_type=heat pump water heater and water_heater_fuel_type=natural gas',
+      'multiple-heating-and-cooling-systems.osw' => 'heating_system_type=Furnace and cooling_system_type=central air conditioner and heat_pump_type=air-to-air'
     }
 
     measures = {}

@@ -179,10 +179,14 @@ def create_osws
     'base-misc-whole-house-fan.osw' => 'base.osw',
     'base-pv.osw' => 'base.osw',
     'base-site-neighbors.osw' => 'base.osw',
+
     # Extra test files that don't correspond with sample files
     'extra-auto.osw' => 'base.osw',
     'extra-pv-roofpitch.osw' => 'base.osw',
     'extra-dhw-solar-latitude.osw' => 'base.osw',
+
+    'invalid_files/non-electric-heat-pump-water-heater.osw' => 'base.osw',
+    'invalid_files/multiple-heating-and-cooling-systems.osw' => 'base.osw'
   }
 
   puts "Generating #{osws_files.size} OSW files..."
@@ -1390,6 +1394,11 @@ def get_values(osw_file, step)
   elsif ['extra-dhw-solar-latitude.osw'].include? osw_file
     step.setArgument('solar_thermal_system_type', 'hot water')
     step.setArgument('solar_thermal_collector_tilt', 'latitude-15')
+  elsif ['invalid_files/non-electric-heat-pump-water-heater.osw'].include? osw_file
+    step.setArgument('water_heater_type', HPXML::WaterHeaterTypeHeatPump)
+    step.setArgument('water_heater_fuel_type', HPXML::FuelTypeNaturalGas)
+  elsif ['invalid_files/multiple-heating-and-cooling-systems.osw'].include? osw_file
+    step.setArgument('heat_pump_type', HPXML::HVACTypeHeatPumpAirToAir)
   end
   return step
 end
