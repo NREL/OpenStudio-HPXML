@@ -1436,7 +1436,8 @@ class HPXML < Object
   class Wall < BaseElement
     ATTRS = [:id, :exterior_adjacent_to, :interior_adjacent_to, :wall_type, :optimum_value_engineering,
              :area, :orientation, :azimuth, :siding, :solar_absorptance, :emittance, :insulation_id,
-             :insulation_assembly_r_value, :insulation_cavity_r_value, :insulation_continuous_r_value]
+             :insulation_assembly_r_value, :insulation_cavity_r_value, :insulation_continuous_r_value,
+             :coordinates]
     attr_accessor(*ATTRS)
 
     def windows
@@ -1477,6 +1478,18 @@ class HPXML < Object
 
     def is_exterior_thermal_boundary
       return (is_exterior && is_thermal_boundary)
+    end
+
+    def add_coordinate(x: nil, y: nil, z: nil)
+      if @coordinates.nil?
+        @coordinates = []
+      end
+      if x.nil? && y.nil? && z.nil?
+        return
+      end
+
+      @coordinates << { x: x, y: y, z: z }
+      return @coordinates
     end
 
     def delete
@@ -1520,6 +1533,17 @@ class HPXML < Object
         XMLHelper.add_attribute(sys_id, 'id', @id + 'Insulation')
       end
       XMLHelper.add_element(insulation, 'AssemblyEffectiveRValue', Float(@insulation_assembly_r_value)) unless @insulation_assembly_r_value.nil?
+      add_coordinate # FIXME: is there a better way to initialize @coordinates=[] if add_coordinate is never called on a wall?
+      if (not @coordinates.empty?)
+        extension = XMLHelper.add_element(wall, 'extension')
+        coordinates_element = XMLHelper.add_element(extension, 'Coordinates')
+        @coordinates.each do |coordinate|
+          coordinate_element = XMLHelper.add_element(coordinates_element, 'Coordinate')
+          XMLHelper.add_element(coordinate_element, 'x', coordinate[:x]) unless coordinate[:x].nil?
+          XMLHelper.add_element(coordinate_element, 'y', coordinate[:y]) unless coordinate[:y].nil?
+          XMLHelper.add_element(coordinate_element, 'z', coordinate[:z]) unless coordinate[:z].nil?
+        end
+      end
     end
 
     def from_rexml(wall)
@@ -1542,6 +1566,10 @@ class HPXML < Object
         @insulation_assembly_r_value = HPXML::to_float_or_nil(XMLHelper.get_value(insulation, 'AssemblyEffectiveRValue'))
         @insulation_cavity_r_value = HPXML::to_float_or_nil(XMLHelper.get_value(insulation, "Layer[InstallationType='cavity']/NominalRValue"))
         @insulation_continuous_r_value = HPXML::to_float_or_nil(XMLHelper.get_value(insulation, "Layer[InstallationType='continuous']/NominalRValue"))
+      end
+      @coordinates = []
+      wall.elements.each('extension/Coordinates/Coordinate') do |coordinate|
+        @coordinates << HPXML::get_coordinate(coordinate)
       end
     end
   end
@@ -3925,7 +3953,8 @@ class HPXML < Object
                        :perimeter_insulation_id,
                        :under_slab_insulation_id,
                        :area,
-                       :exposed_perimeter]
+                       :exposed_perimeter,
+                       :coordinates]
 
     # Look for pairs of surfaces that can be collapsed
     surf_types.each do |surf_type, surfaces|
@@ -4112,6 +4141,16 @@ class HPXML < Object
     return if element.nil?
 
     return element.attributes['idref']
+  end
+
+  def self.get_coordinate(element)
+    return if element.nil?
+
+    return {
+      x: HPXML::to_float_or_nil(XMLHelper.get_value(element, 'x')),
+      y: HPXML::to_float_or_nil(XMLHelper.get_value(element, 'y')),
+      z: HPXML::to_float_or_nil(XMLHelper.get_value(element, 'z'))
+    }
   end
 
   def self.to_float_or_nil(value)

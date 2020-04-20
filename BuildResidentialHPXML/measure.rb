@@ -2775,6 +2775,13 @@ class HPXMLFile
       else
         hpxml.walls[-1].insulation_assembly_r_value = 4.0 # Uninsulated
       end
+
+      surface.vertices.each do |vertex|
+        x = UnitConversions.convert(vertex.x, 'm', 'ft').round(2)
+        y = UnitConversions.convert(vertex.y, 'm', 'ft').round(2)
+        z = UnitConversions.convert(vertex.z, 'm', 'ft').round(2)
+        hpxml.walls[-1].add_coordinate(x: x, y: y, z: z)
+      end
     end
   end
 

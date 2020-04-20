@@ -200,6 +200,8 @@ class BuildResidentialHPXMLTest < MiniTest::Test
         foundation_wall.insulation_assembly_r_value = foundation_wall.insulation_assembly_r_value.round(2)
       end
       hpxml.walls.each do |wall|
+        wall.coordinates = []
+
         next unless wall.exterior_adjacent_to == HPXML::LocationOutside
         next unless [HPXML::LocationAtticUnvented, HPXML::LocationAtticVented].include? wall.interior_adjacent_to
 
