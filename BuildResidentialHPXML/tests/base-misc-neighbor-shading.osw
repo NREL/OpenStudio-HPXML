@@ -141,7 +141,7 @@
         "heating_system_heating_efficiency_afue": 0.92,
         "heating_system_heating_efficiency_percent": 1,
         "heating_system_type": "Furnace",
-        "hpxml_path": "../BuildResidentialHPXML/tests/built_residential_hpxml/base-site-neighbors.xml",
+        "hpxml_path": "../BuildResidentialHPXML/tests/built_residential_hpxml/base-misc-neighbor-shading.xml",
         "kitchen_fan_flow_rate": 100,
         "kitchen_fan_hours_in_operation": 1.5,
         "kitchen_fan_power": 30,
