@@ -1218,6 +1218,46 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     arg.setDefaultValue(30)
     args << arg
 
+    arg = OpenStudio::Measure::OSArgument::makeBoolArgument('kitchen_fan_present', true)
+    arg.setDisplayName('Whole House Fan: Present')
+    arg.setDescription('Whether there is a kitchen fan.')
+    arg.setDefaultValue(false)
+    args << arg
+
+    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('kitchen_fan_flow_rate', true)
+    arg.setDisplayName('Kitchen Fan: Flow Rate')
+    arg.setDescription('The flow rate of the kitchen fan.')
+    arg.setUnits('CFM')
+    arg.setDefaultValue(4500)
+    args << arg
+
+    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('kitchen_fan_power', true)
+    arg.setDisplayName('Kitchen Fan: Fan Power')
+    arg.setDescription('The fan power of the kitchen fan.')
+    arg.setUnits('W')
+    arg.setDefaultValue(300)
+    args << arg
+
+    arg = OpenStudio::Measure::OSArgument::makeBoolArgument('bathroom_fans_present', true)
+    arg.setDisplayName('Bathroom Fans: Present')
+    arg.setDescription('Whether there are bathroom fans.')
+    arg.setDefaultValue(false)
+    args << arg
+
+    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('bathroom_fans_flow_rate', true)
+    arg.setDisplayName('Bathroom Fans: Flow Rate')
+    arg.setDescription('The flow rate of the bathroom fans.')
+    arg.setUnits('CFM')
+    arg.setDefaultValue(4500)
+    args << arg
+
+    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('bathroom_fans_power', true)
+    arg.setDisplayName('Bathroom Fans: Fan Power')
+    arg.setDescription('The fan power of the bathroom fans.')
+    arg.setUnits('W')
+    arg.setDefaultValue(300)
+    args << arg
+
     arg = OpenStudio::Measure::OSArgument::makeBoolArgument('whole_house_fan_present', true)
     arg.setDisplayName('Whole House Fan: Present')
     arg.setDescription('Whether there is a whole house fan.')

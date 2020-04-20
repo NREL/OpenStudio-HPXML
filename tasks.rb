@@ -169,6 +169,7 @@ def create_osws
     'base-mechvent-hrv.osw' => 'base.osw',
     'base-mechvent-hrv-asre.osw' => 'base.osw',
     'base-mechvent-supply.osw' => 'base.osw',
+    'base-mechvent-bath-kitchen-fans.osw' => 'base.osw',
     'base-misc-ceiling-fans.osw' => 'base.osw',
     # 'base-misc-defaults.osw' => 'base.osw',
     # 'base-misc-lighting-none.osw' => 'base.osw', # Not going to support this
@@ -1332,6 +1333,8 @@ def get_values(osw_file, step)
     step.setArgument('mech_vent_fan_power', 60)
   elsif ['base-mechvent-supply.osw'].include? osw_file
     step.setArgument('mech_vent_fan_type', HPXML::MechVentTypeSupply)
+  elsif ['base-mechvent-bath-kitchen-fans.osw'].include? osw_file
+    step.setArgument('', '')
   elsif ['base-misc-ceiling-fans.osw'].include? osw_file
     step.setArgument('ceiling_fan_cooling_setpoint_temp_offset', 0.5)
     step.setArgument('ceiling_fan_quantity', 2)
