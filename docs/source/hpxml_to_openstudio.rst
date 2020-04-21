@@ -12,22 +12,8 @@ The following building features/technologies are available for modeling via the 
 
 - Enclosure
 
-  - Attics
-  
-    - Vented
-    - Unvented
-    - Conditioned
-    - Radiant Barriers
-    
-  - Foundations
-  
-    - Slab
-    - Unconditioned Basement
-    - Conditioned Basement
-    - Vented Crawlspace
-    - Unvented Crawlspace
-    - Ambient
-    
+  - Attics (Vented, Unvented, Conditioned)
+  - Foundations (Slab, Unconditioned Basement, Conditioned Basement, Vented Crawlspace, Unvented Crawlspace, Ambient)
   - Garages
   - Windows & Overhangs
   - Skylights
@@ -35,69 +21,30 @@ The following building features/technologies are available for modeling via the 
   
 - HVAC
 
-  - Heating Systems
-  
-    - Electric Resistance
-    - Furnaces
-    - Wall Furnaces & Stoves
-    - Boilers
-    - Portable Heaters
-    
-  - Cooling Systems
-  
-    - Central Air Conditioners
-    - Room Air Conditioners
-    - Evaporative Coolers
-    
-  - Heat Pumps
-  
-    - Air Source Heat Pumps
-    - Mini Split Heat Pumps
-    - Ground Source Heat Pumps
-    - Dual-Fuel Heat Pumps
-    
+  - Heating Systems (Electric Resistance, Furnaces, Wall Furnaces, Stoves, Boilers, Portable Heaters)
+  - Cooling Systems (Central Air Conditioners, Room Air Conditioners, Evaporative Coolers)
+  - Heat Pumps (Air Source, Mini Split, Ground Source, Dual-Fuel)
   - Setpoints
   - Ducts
   
 - Water Heating
 
-  - Water Heaters
-  
-    - Storage Tank
-    - Instantaneous Tankless
-    - Heat Pump Water Heater
-    - Indirect Water Heater (Combination Boiler)
-    - Tankless Coil (Combination Boiler)
-
+  - Water Heaters (Storage, Tankless, Heat Pump, Indirect, Tankless Coil)
   - Solar Hot Water
-  - Desuperheaters
-  - Hot Water Distribution
-  
-    - Recirculation
-    
+  - Desuperheater
+  - Hot Water Distribution (Standard, Recirculation)
   - Drain Water Heat Recovery
-  - Low-Flow Fixtures
+  - Hot Water Fixtures
   
-- Mechanical Ventilation
+- Ventilation
 
-  - Exhaust Only
-  - Supply Only
-  - Balanced
-  - Energy Recovery Ventilator
-  - Heat Recovery Ventilator
-  - Central Fan Integrated Supply
-  
-- Whole House Fan
+  - Mechanical Ventilation (Exhaust, Supply, Balanced, ERV, HRV, CFIS)
+  - Kitchen/Bathroom Fans
+  - Whole House Fan
+
 - Photovoltaics
-- Appliances
-
-  - Clothes Washer
-  - Clothes Dryer
-  - Dishwasher
-  - Refrigerator
-  - Cooking Range/Oven
-  - Dehumidifier
-  
+- Appliances (Clothes Washer/Dryer, Dishwasher, Refrigerator, Cooking Range/Oven)
+- Dehumidifier
 - Lighting
 - Ceiling Fans
 - Plug Loads
@@ -145,6 +92,11 @@ This section describes elements specified in HPXML's ``BuildingSummary``.
 It is used for high-level building information including conditioned floor area, number of bedrooms, number of residents, number of conditioned floors, etc.
 Most occupancy assumptions are based on the number of bedrooms, while the number of residents is solely used to determine heat gains from the occupants themselves.
 Note that a walkout basement should be included in ``NumberofConditionedFloorsAboveGrade``.
+
+If ``NumberofBathrooms`` is not provided, it is calculated using the following equation.
+The equation is from the `Building America House Simulation Protocols <https://www1.eere.energy.gov/buildings/publications/pdfs/building_america/house_simulation.pdf>`_.
+
+.. math:: NumberofBathrooms = \frac{NumberofBedrooms}{2} + 0.5
 
 Shading due to neighboring buildings can be defined inside an ``Site/extension/Neighbors`` element.
 Each ``Neighbors/NeighborBuilding`` element is required to have an ``Azimuth`` and ``Distance`` from the house.
@@ -499,6 +451,41 @@ Note that AdjustedSensibleRecoveryEfficiency and AdjustedTotalRecoveryEfficiency
 In many situations, the rated flow rate should be the value derived from actual testing of the system.
 For a CFIS system, the rated flow rate should equal the amount of outdoor air provided to the distribution system.
 
+Kitchen Fan
+***********
+
+A kitchen range fan may be specified as a ``Systems/MechanicalVentilation/VentilationFans/VentilationFan`` with ``FanLocation='kitchen'`` and ``UsedForLocalVentilation='true'``.
+
+Additional fields may be provided per the table below. If not provided, default values will be assumed.
+The default values are based on the `Building America House Simulation Protocols <https://www1.eere.energy.gov/buildings/publications/pdfs/building_america/house_simulation.pdf>`_.
+
+====================== ========================
+Element Name           Default Value
+====================== ========================
+RatedFlowRate          100 [cfm]
+HoursInOperation       1 [hrs/day]
+FanPower               0.3 * RatedFlowRate [W]
+extension/StartHour    18 [6pm]
+====================== ========================
+
+Bathroom Fans
+*************
+
+Bathroom fans may be specified as a ``Systems/MechanicalVentilation/VentilationFans/VentilationFan`` with ``FanLocation='bath'`` and ``UsedForLocalVentilation='true'``.
+
+Additional fields may be provided per the table below. If not provided, default values will be assumed.
+The default values are based on the `Building America House Simulation Protocols <https://www1.eere.energy.gov/buildings/publications/pdfs/building_america/house_simulation.pdf>`_.
+
+====================== ========================
+Element Name           Default Value
+====================== ========================
+Quantity               NumberofBathrooms [#]
+RatedFlowRate          50 [cfm]
+HoursInOperation       1 [hrs/day]
+FanPower               0.3 * RatedFlowRate [W]
+extension/StartHour    7 [7am]
+====================== ========================
+
 Whole House Fan
 ***************
 
@@ -588,6 +575,8 @@ Water fixtures should be entered as ``Systems/WaterHeating/WaterFixture`` elemen
 Each fixture must have ``WaterFixtureType`` and ``LowFlow`` elements provided.
 Fixtures should be specified as low flow if they are <= 2.0 gpm.
 
+A ``WaterHeating/extension/WaterFixturesUsageMultiplier`` can also be optionally provided that scales hot water usage; if not provided, it is assumed to be 1.0.
+
 Solar Thermal
 *************
 
@@ -651,19 +640,21 @@ If the complete set of efficiency inputs is not provided, the following default 
 ==================================  ==================
 Element Name                        Default Value
 ==================================  ==================
-IntegratedModifiedEnergyFactor      1.0  [ft3/kWh-cyc]
-RatedAnnualkWh                      400  [kWh/yr]
-LabelElectricRate                   0.12  [$/kWh]
-LabelGasRate                        1.09  [$/therm]
-LabelAnnualGasCost                  27.0  [$]
-Capacity                            3.0  [ft³]
-LabelUsage                          6  [cyc/week]
+IntegratedModifiedEnergyFactor      1.0 [ft3/kWh-cyc]
+RatedAnnualkWh                      400 [kWh/yr]
+LabelElectricRate                   0.12 [$/kWh]
+LabelGasRate                        1.09 [$/therm]
+LabelAnnualGasCost                  27.0 [$]
+Capacity                            3.0 [ft³]
+LabelUsage                          6 [cyc/week]
 ==================================  ==================
 
 If ``ModifiedEnergyFactor`` is provided instead of ``IntegratedModifiedEnergyFactor``, it will be converted using the following equation.
 This equation is based on the `Interpretation on ANSI/RESNET 301-2014 Clothes Washer IMEF <https://www.resnet.us/wp-content/uploads/No.-301-2014-08-sECTION-4.2.2.5.2.8-Clothes-Washers-Eq-4.2-6.pdf>`_.
 
 .. math:: IntegratedModifiedEnergyFactor = \frac{ModifiedEnergyFactor - 0.503}{0.95}
+
+An ``extension/UsageMultiplier`` can also be optionally provided that scales energy and hot water usage; if not provided, it is assumed to be 1.0.
 
 Clothes Dryer
 *************
@@ -678,7 +669,7 @@ If the complete set of efficiency inputs is not provided, the following default 
 =======================  ==============
 Element Name             Default Value
 =======================  ==============
-CombinedEnergyFactor     3.01  [lb/kWh]
+CombinedEnergyFactor     3.01 [lb/kWh]
 ControlType              timer
 =======================  ==============
 
@@ -686,6 +677,8 @@ If ``EnergyFactor`` is provided instead of ``CombinedEnergyFactor``, it will be 
 This equation is based on the `Interpretation on ANSI/RESNET/ICC 301-2014 Clothes Dryer CEF <https://www.resnet.us/wp-content/uploads/No.-301-2014-10-Section-4.2.2.5.2.8-Clothes-Dryer-CEF-Rating.pdf>`_.
 
 .. math:: CombinedEnergyFactor = \frac{EnergyFactor}{1.15}
+
+An ``extension/UsageMultiplier`` can also be optionally provided that scales energy usage; if not provided, it is assumed to be 1.0.
 
 Dishwasher
 **********
@@ -699,18 +692,20 @@ If the complete set of efficiency inputs is not provided, the following default 
 =======================  =================
 Element Name             Default Value
 =======================  =================
-RatedAnnualkWh           467  [kwh/yr]
-LabelElectricRate        0.12  [$/kWh]
-LabelGasRate             1.09  [$/therm]
-LabelAnnualGasCost       33.12  [$]
-PlaceSettingCapacity     12  [standard]
-LabelUsage               4  [cyc/week]
+RatedAnnualkWh           467 [kwh/yr]
+LabelElectricRate        0.12 [$/kWh]
+LabelGasRate             1.09 [$/therm]
+LabelAnnualGasCost       33.12 [$]
+PlaceSettingCapacity     12 [standard]
+LabelUsage               4 [cyc/week]
 =======================  =================
 
 If ``EnergyFactor`` is provided instead of ``RatedAnnualkWh``, it will be converted into ``RatedAnnualkWh`` using the following equation.
 This equation is based on `ANSI/RESNET/ICC 301-2014 <https://codes.iccsafe.org/content/document/843>`_.
 
 .. math:: RatedAnnualkWh = \frac{215.0}{EnergyFactor}
+
+An ``extension/UsageMultiplier`` can also be optionally provided that scales energy and hot water usage; if not provided, it is assumed to be 1.0.
 
 Refrigerator
 ************
@@ -723,6 +718,8 @@ If neither are provided, ``RatedAnnualkWh`` will be defaulted to represent a sta
 This equation is based on `ANSI/RESNET/ICC 301-2019 <https://codes.iccsafe.org/content/RESNETICC3012019>`_.
 
 .. math:: RatedAnnualkWh = 637.0 + 18.0 \cdot Number of bedrooms
+
+An ``extension/UsageMultiplier`` can also be optionally provided that scales energy usage; if not provided, it is assumed to be 1.0.
 
 Cooking Range/Oven
 ******************
@@ -741,12 +738,16 @@ IsInduction    false
 IsConvection   false
 =============  ==============
 
+<<<<<<< HEAD
 Dehumidifier
 ************
 
 An ``Appliance/Dehumidifier`` element can be specified; if not provided, a dehumidifier will not be modeled.
 The ``Capacity``, ``DehumidistatSetpoint`` (relative humidity as a fraction, 0-1), and ``FractionDehumidificationLoadServed`` (0-1) must be provided.
 The efficiency of the dehumidifier can either be entered as an ``IntegratedEnergyFactor`` or ``EnergyFactor``.
+=======
+An ``extension/UsageMultiplier`` can also be optionally provided that scales energy usage; if not provided, it is assumed to be 1.0.
+>>>>>>> 1e9d97a1ec8cad427a15e6164465f96b35cdf45d
 
 Lighting
 ~~~~~~~~
@@ -763,6 +764,8 @@ Garage lighting values are ignored if the building has no garage.
 
 To model a building without any lighting, all six ``Lighting/LightingGroup`` elements must be excluded.
 
+A ``Lighting/extension/UsageMultiplier`` can also be optionally provided that scales energy usage; if not provided, it is assumed to be 1.0.
+
 Ceiling Fans
 ~~~~~~~~~~~~
 
@@ -778,6 +781,8 @@ Plug Loads
 Plug loads can be provided by entering ``MiscLoads/PlugLoad`` elements; if not provided, plug loads will not be modeled.
 Currently only plug loads specified with ``PlugLoadType='other'`` and ``PlugLoadType='TV other'`` are recognized.
 The annual energy consumption (``Load[Units='kWh/year']/Value``) can be provided, otherwise default assumptions based on the plug load type are used.
+
+An ``extension/UsageMultiplier`` can also be optionally provided that scales energy usage; if not provided, it is assumed to be 1.0.
 
 Validating & Debugging Errors
 -----------------------------

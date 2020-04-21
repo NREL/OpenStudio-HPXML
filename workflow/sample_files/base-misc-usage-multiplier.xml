@@ -306,6 +306,20 @@
               </AnnualHeatingEfficiency>
               <FractionHeatLoadServed>1.0</FractionHeatLoadServed>
             </HeatingSystem>
+            <CoolingSystem>
+              <SystemIdentifier id='CoolingSystem'/>
+              <DistributionSystem idref='HVACDistribution'/>
+              <CoolingSystemType>central air conditioner</CoolingSystemType>
+              <CoolingSystemFuel>electricity</CoolingSystemFuel>
+              <CoolingCapacity>48000.0</CoolingCapacity>
+              <CompressorType>single stage</CompressorType>
+              <FractionCoolLoadServed>1.0</FractionCoolLoadServed>
+              <AnnualCoolingEfficiency>
+                <Units>SEER</Units>
+                <Value>13.0</Value>
+              </AnnualCoolingEfficiency>
+              <SensibleHeatFraction>0.73</SensibleHeatFraction>
+            </CoolingSystem>
           </HVACPlant>
           <HVACControl>
             <SystemIdentifier id='HVACControl'/>
@@ -382,6 +396,9 @@
             <WaterFixtureType>faucet</WaterFixtureType>
             <LowFlow>false</LowFlow>
           </WaterFixture>
+          <extension>
+            <WaterFixturesUsageMultiplier>0.9</WaterFixturesUsageMultiplier>
+          </extension>
         </WaterHeating>
       </Systems>
       <Appliances>
@@ -395,6 +412,9 @@
           <LabelAnnualGasCost>27.0</LabelAnnualGasCost>
           <LabelUsage>6.0</LabelUsage>
           <Capacity>3.2</Capacity>
+          <extension>
+            <UsageMultiplier>0.9</UsageMultiplier>
+          </extension>
         </ClothesWasher>
         <ClothesDryer>
           <SystemIdentifier id='ClothesDryer'/>
@@ -402,6 +422,9 @@
           <FuelType>electricity</FuelType>
           <CombinedEnergyFactor>3.73</CombinedEnergyFactor>
           <ControlType>timer</ControlType>
+          <extension>
+            <UsageMultiplier>0.9</UsageMultiplier>
+          </extension>
         </ClothesDryer>
         <Dishwasher>
           <SystemIdentifier id='Dishwasher'/>
@@ -411,16 +434,25 @@
           <LabelGasRate>1.09</LabelGasRate>
           <LabelAnnualGasCost>22.32</LabelAnnualGasCost>
           <LabelUsage>4.0</LabelUsage>
+          <extension>
+            <UsageMultiplier>0.9</UsageMultiplier>
+          </extension>
         </Dishwasher>
         <Refrigerator>
           <SystemIdentifier id='Refrigerator'/>
           <Location>living space</Location>
           <RatedAnnualkWh>650.0</RatedAnnualkWh>
+          <extension>
+            <UsageMultiplier>0.9</UsageMultiplier>
+          </extension>
         </Refrigerator>
         <CookingRange>
           <SystemIdentifier id='Range'/>
           <FuelType>electricity</FuelType>
           <IsInduction>false</IsInduction>
+          <extension>
+            <UsageMultiplier>0.9</UsageMultiplier>
+          </extension>
         </CookingRange>
         <Oven>
           <SystemIdentifier id='Oven'/>
@@ -464,6 +496,9 @@
           <FractionofUnitsInLocation>0.25</FractionofUnitsInLocation>
           <ThirdPartyCertification>ERI Tier II</ThirdPartyCertification>
         </LightingGroup>
+        <extension>
+          <UsageMultiplier>0.9</UsageMultiplier>
+        </extension>
       </Lighting>
       <MiscLoads>
         <PlugLoad>
@@ -476,6 +511,7 @@
           <extension>
             <FracSensible>0.855</FracSensible>
             <FracLatent>0.045</FracLatent>
+            <UsageMultiplier>0.9</UsageMultiplier>
           </extension>
         </PlugLoad>
         <PlugLoad>
@@ -488,6 +524,7 @@
           <extension>
             <FracSensible>1.0</FracSensible>
             <FracLatent>0.0</FracLatent>
+            <UsageMultiplier>0.9</UsageMultiplier>
           </extension>
         </PlugLoad>
         <extension>
