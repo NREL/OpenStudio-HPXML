@@ -2,8 +2,8 @@
   <schema_version>3.0</schema_version>
   <name>simulation_output_report</name>
   <uid>df9d170c-c21a-4130-866d-0d46b06073fd</uid>
-  <version_id>b92f67c2-f671-4c0a-83c8-4248dc6c1eae</version_id>
-  <version_modified>20200417T193745Z</version_modified>
+  <version_id>75582f05-35f8-41a6-b45a-6f4399b1796d</version_id>
+  <version_modified>20200421T203656Z</version_modified>
   <xml_checksum>9BF1E6AC</xml_checksum>
   <class_name>SimulationOutputReport</class_name>
   <display_name>HPXML Simulation Output Report</display_name>
@@ -268,6 +268,13 @@
       <model_dependent>false</model_dependent>
     </output>
     <output>
+      <name>Electricity: Dehumidifier MBtu</name>
+      <display_name>Electricity: Dehumidifier MBtu</display_name>
+      <short_name>Electricity: Dehumidifier MBtu</short_name>
+      <type>Double</type>
+      <model_dependent>false</model_dependent>
+    </output>
+    <output>
       <name>Electricity: Dishwasher MBtu</name>
       <display_name>Electricity: Dishwasher MBtu</display_name>
       <short_name>Electricity: Dishwasher MBtu</short_name>
@@ -469,13 +476,13 @@
       <filename>constants.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>80167322</checksum>
+      <checksum>55D54003</checksum>
     </file>
     <file>
       <filename>output_report_test.rb</filename>
       <filetype>rb</filetype>
       <usage_type>test</usage_type>
-      <checksum>77A75734</checksum>
+      <checksum>388DB117</checksum>
     </file>
     <file>
       <version>
@@ -486,7 +493,7 @@
       <filename>measure.rb</filename>
       <filetype>rb</filetype>
       <usage_type>script</usage_type>
-      <checksum>88929A17</checksum>
+      <checksum>47C8150F</checksum>
     </file>
   </files>
 </measure>

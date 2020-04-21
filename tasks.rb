@@ -6,8 +6,6 @@ def create_hpxmls
   hpxmls_files = {
     'base.xml' => nil,
 
-    'invalid_files/bad-wmo.xml' => 'base.xml',
-    'invalid_files/bad-site-neighbor-azimuth.xml' => 'base-site-neighbors.xml',
     'invalid_files/cfis-with-hydronic-distribution.xml' => 'base-hvac-boiler-gas-only.xml',
     'invalid_files/clothes-washer-location.xml' => 'base.xml',
     'invalid_files/clothes-washer-location-other.xml' => 'base.xml',
@@ -28,12 +26,14 @@ def create_hpxmls
     'invalid_files/hvac-dse-multiple-attached-cooling.xml' => 'base-hvac-dse.xml',
     'invalid_files/hvac-dse-multiple-attached-heating.xml' => 'base-hvac-dse.xml',
     'invalid_files/hvac-frac-load-served.xml' => 'base-hvac-multiple.xml',
+    'invalid_files/invalid-neighbor-shading-azimuth.xml' => 'base-misc-neighbor-shading.xml',
     'invalid_files/invalid-relatedhvac-dhw-indirect.xml' => 'base-dhw-indirect.xml',
     'invalid_files/invalid-relatedhvac-desuperheater.xml' => 'base-hvac-central-ac-only-1-speed.xml',
     'invalid_files/invalid-timestep.xml' => 'base.xml',
     'invalid_files/invalid-runperiod.xml' => 'base.xml',
     'invalid_files/invalid-window-height.xml' => 'base-enclosure-overhangs.xml',
     'invalid_files/invalid-window-interior-shading.xml' => 'base.xml',
+    'invalid_files/invalid-wmo.xml' => 'base.xml',
     'invalid_files/lighting-fractions.xml' => 'base.xml',
     'invalid_files/mismatched-slab-and-foundation-wall.xml' => 'base.xml',
     'invalid_files/missing-elements.xml' => 'base.xml',
@@ -45,6 +45,7 @@ def create_hpxmls
     'invalid_files/refrigerator-location-other.xml' => 'base.xml',
     'invalid_files/repeated-relatedhvac-dhw-indirect.xml' => 'base-dhw-indirect.xml',
     'invalid_files/repeated-relatedhvac-desuperheater.xml' => 'base-hvac-central-ac-only-1-speed.xml',
+    'invalid_files/slab-zero-exposed-perimeter.xml' => 'base.xml',
     'invalid_files/solar-thermal-system-with-combi-tankless.xml' => 'base-dhw-combi-tankless.xml',
     'invalid_files/solar-thermal-system-with-desuperheater.xml' => 'base-dhw-desuperheater.xml',
     'invalid_files/solar-thermal-system-with-dhw-indirect.xml' => 'base-dhw-combi-tankless.xml',
@@ -56,8 +57,10 @@ def create_hpxmls
     'invalid_files/unattached-window.xml' => 'base.xml',
     'invalid_files/water-heater-location.xml' => 'base.xml',
     'invalid_files/water-heater-location-other.xml' => 'base.xml',
-    'invalid_files/slab-zero-exposed-perimeter.xml' => 'base.xml',
 
+    'base-appliances-dehumidifier.xml' => 'base-location-dallas-tx.xml',
+    'base-appliances-dehumidifier-ief.xml' => 'base-appliances-dehumidifier.xml',
+    'base-appliances-dehumidifier-50percent.xml' => 'base-appliances-dehumidifier.xml',
     'base-appliances-gas.xml' => 'base.xml',
     'base-appliances-wood.xml' => 'base.xml',
     'base-appliances-modified.xml' => 'base.xml',
@@ -217,6 +220,7 @@ def create_hpxmls
     'base-mechvent-hrv.xml' => 'base.xml',
     'base-mechvent-hrv-asre.xml' => 'base.xml',
     'base-mechvent-supply.xml' => 'base.xml',
+    'base-mechvent-bath-kitchen-fans.xml' => 'base.xml',
     'base-misc-ceiling-fans.xml' => 'base.xml',
     'base-misc-defaults.xml' => 'base.xml',
     'base-misc-lighting-none.xml' => 'base.xml',
@@ -225,7 +229,7 @@ def create_hpxmls
     'base-misc-usage-multiplier.xml' => 'base.xml',
     'base-misc-whole-house-fan.xml' => 'base.xml',
     'base-pv.xml' => 'base.xml',
-    'base-site-neighbors.xml' => 'base.xml',
+    'base-misc-neighbor-shading.xml' => 'base.xml',
 
     'hvac_autosizing/base-autosize.xml' => 'base.xml',
     'hvac_autosizing/base-hvac-air-to-air-heat-pump-1-speed-autosize.xml' => 'base-hvac-air-to-air-heat-pump-1-speed.xml',
@@ -380,6 +384,7 @@ def create_hpxmls
         set_hpxml_clothes_dryer(hpxml_file, hpxml)
         set_hpxml_dishwasher(hpxml_file, hpxml)
         set_hpxml_refrigerator(hpxml_file, hpxml)
+        set_hpxml_dehumidifier(hpxml_file, hpxml)
         set_hpxml_cooking_range(hpxml_file, hpxml)
         set_hpxml_oven(hpxml_file, hpxml)
         set_hpxml_lighting(hpxml_file, hpxml)
@@ -473,13 +478,13 @@ def set_hpxml_site(hpxml_file, hpxml)
 end
 
 def set_hpxml_neighbor_buildings(hpxml_file, hpxml)
-  if ['base-site-neighbors.xml'].include? hpxml_file
+  if ['base-misc-neighbor-shading.xml'].include? hpxml_file
     hpxml.neighbor_buildings.add(azimuth: 0,
                                  distance: 10)
     hpxml.neighbor_buildings.add(azimuth: 180,
                                  distance: 15,
                                  height: 12)
-  elsif ['invalid_files/bad-site-neighbor-azimuth.xml'].include? hpxml_file
+  elsif ['invalid_files/invalid-neighbor-shading-azimuth.xml'].include? hpxml_file
     hpxml.neighbor_buildings[0].azimuth = 145
   end
 end
@@ -570,7 +575,7 @@ def set_hpxml_climate_and_risk_zones(hpxml_file, hpxml)
     hpxml.climate_and_risk_zones.weather_station_wmo = nil
     hpxml.climate_and_risk_zones.weather_station_name = 'Boulder, CO'
     hpxml.climate_and_risk_zones.weather_station_epw_filename = 'US_CO_Boulder_AMY_2012.epw'
-  elsif ['invalid_files/bad-wmo.xml'].include? hpxml_file
+  elsif ['invalid_files/invalid-wmo.xml'].include? hpxml_file
     hpxml.climate_and_risk_zones.weather_station_wmo = '999999'
   end
 end
@@ -2517,6 +2522,29 @@ def set_hpxml_ventilation_fans(hpxml_file, hpxml)
                                rated_flow_rate: 4500,
                                fan_power: 300,
                                used_for_seasonal_cooling_load_reduction: true)
+  elsif ['base-mechvent-bath-kitchen-fans.xml'].include? hpxml_file
+    hpxml.ventilation_fans.add(id: 'KitchenRangeFan',
+                               fan_location: HPXML::VentilationFanLocationKitchen,
+                               rated_flow_rate: 100,
+                               fan_power: 30,
+                               hours_in_operation: 1.5,
+                               start_hour: 18,
+                               used_for_local_ventilation: true)
+    hpxml.ventilation_fans.add(id: 'BathFans',
+                               fan_location: HPXML::VentilationFanLocationBath,
+                               quantity: 2,
+                               rated_flow_rate: 50,
+                               fan_power: 15,
+                               hours_in_operation: 1.5,
+                               start_hour: 7,
+                               used_for_local_ventilation: true)
+  elsif ['base-misc-defaults.xml'].include? hpxml_file
+    hpxml.ventilation_fans.add(id: 'KitchenRangeFan',
+                               fan_location: HPXML::VentilationFanLocationKitchen,
+                               used_for_local_ventilation: true)
+    hpxml.ventilation_fans.add(id: 'BathFans',
+                               fan_location: HPXML::VentilationFanLocationBath,
+                               used_for_local_ventilation: true)
   end
 end
 
@@ -3059,6 +3087,21 @@ def set_hpxml_refrigerator(hpxml_file, hpxml)
     hpxml.refrigerators[0].adjusted_annual_kwh = nil
   elsif ['base-misc-usage-multiplier.xml'].include? hpxml_file
     hpxml.refrigerators[0].usage_multiplier = 0.9
+  end
+end
+
+def set_hpxml_dehumidifier(hpxml_file, hpxml)
+  if ['base-appliances-dehumidifier.xml'].include? hpxml_file
+    hpxml.dehumidifiers.add(id: 'Dehumidifier',
+                            capacity: 40,
+                            energy_factor: 1.8,
+                            rh_setpoint: 0.5,
+                            fraction_served: 1.0)
+  elsif ['base-appliances-dehumidifier-ief.xml'].include? hpxml_file
+    hpxml.dehumidifiers[0].energy_factor = nil
+    hpxml.dehumidifiers[0].integrated_energy_factor = 1.5
+  elsif ['base-appliances-dehumidifier-50percent.xml'].include? hpxml_file
+    hpxml.dehumidifiers[0].fraction_served = 0.5
   end
 end
 
