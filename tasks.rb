@@ -90,7 +90,6 @@ def create_hpxmls
     'base-dhw-recirc-nocontrol.xml' => 'base.xml',
     'base-dhw-recirc-temperature.xml' => 'base.xml',
     'base-dhw-recirc-timer.xml' => 'base.xml',
-    'base-dhw-recirc-defaults.xml' => 'base-dhw-recirc-demand.xml',
     'base-dhw-solar-direct-evacuated-tube.xml' => 'base.xml',
     'base-dhw-solar-direct-flat-plate.xml' => 'base.xml',
     'base-dhw-solar-direct-ics.xml' => 'base.xml',
@@ -100,7 +99,6 @@ def create_hpxmls
     'base-dhw-solar-thermosyphon-evacuated-tube.xml' => 'base.xml',
     'base-dhw-solar-thermosyphon-flat-plate.xml' => 'base.xml',
     'base-dhw-solar-thermosyphon-ics.xml' => 'base.xml',
-    'base-dhw-solar-direct-flat-plate-defaults.xml' => 'base-dhw-solar-direct-flat-plate.xml',
     'base-dhw-tank-gas.xml' => 'base.xml',
     'base-dhw-tank-gas-outside.xml' => 'base-dhw-tank-gas.xml',
     'base-dhw-tank-heat-pump.xml' => 'base.xml',
@@ -224,6 +222,7 @@ def create_hpxmls
     'base-mechvent-bath-kitchen-fans.xml' => 'base.xml',
     'base-misc-ceiling-fans.xml' => 'base.xml',
     'base-misc-defaults.xml' => 'base.xml',
+    'base-misc-defaults2.xml' => 'base-dhw-recirc-demand.xml',
     'base-misc-lighting-none.xml' => 'base.xml',
     'base-misc-timestep-10-mins.xml' => 'base.xml',
     'base-misc-runperiod-1-month.xml' => 'base.xml',
@@ -530,7 +529,6 @@ def set_hpxml_building_construction(hpxml_file, hpxml)
   elsif ['base-misc-defaults.xml'].include? hpxml_file
     hpxml.building_construction.conditioned_building_volume = nil
     hpxml.building_construction.average_ceiling_height = 8
-    hpxml.building_construction.number_of_bathrooms = 3
   elsif ['base-enclosure-adiabatic-surfaces.xml'].include? hpxml_file
     hpxml.building_construction.residential_facility_type = HPXML::ResidentialTypeApartment
   elsif ['base-foundation-walkout-basement.xml'].include? hpxml_file
@@ -2814,7 +2812,7 @@ def set_hpxml_hot_water_distribution(hpxml_file, hpxml)
     hpxml.hot_water_distributions.clear()
   elsif ['base-misc-defaults.xml'].include? hpxml_file
     hpxml.hot_water_distributions[0].standard_piping_length = nil
-  elsif ['base-dhw-recirc-defaults.xml'].include? hpxml_file
+  elsif ['base-misc-defaults2.xml'].include? hpxml_file
     hpxml.hot_water_distributions[0].recirculation_piping_length = nil
     hpxml.hot_water_distributions[0].recirculation_branch_piping_length = nil
     hpxml.hot_water_distributions[0].recirculation_pump_power = nil

@@ -524,6 +524,9 @@ space-heating boiler with storage tank                                          
 space-heating boiler with tankless coil                                                                                                            required           
 ========================================  ===================================  ===========  ==========  ===============  ========================  =================  =================  =========================================
 
+For storage water heaters, the tank volume and heating capacity can be optionally provided. If not provided, default values will be assumed.
+The default values are based on the Table 7 in `Building America House Simulation Protocols <https://www1.eere.energy.gov/buildings/publications/pdfs/building_america/house_simulation.pdf>`_.
+
 For tankless water heaters, an annual energy derate due to cycling inefficiencies can be provided.
 If not provided, a value of 0.08 (8%) will be assumed.
 
@@ -553,15 +556,12 @@ CFA = conditioned floor area [ft²],
 NCfl = number of conditioned floor levels number of conditioned floor levels in the residence, including conditioned basements, 
 bsmnt = presence = 1.0 or absence = 0.0 of an unconditioned basement in the residence.
 
-For a ``SystemType/Recirculation`` system, the following element is required:
+For a ``SystemType/Recirculation`` system, the following elements are used:
 
 - ``ControlType``
-
-For a ``SystemType/Recirculation`` system, the following elements can be optionally entered:
-
-- ``RecirculationPipingLoopLength``: Measured recirculation loop length including both supply and return sides, measured longitudinally from plans, assuming the hot water piping does not run diagonally, plus 20 feet of piping for each floor level greater than one plus 10 feet of piping for unconditioned basements
-- ``BranchPipingLoopLength``: Measured length of the branch hot water piping from the recirculation loop to the farthest hot water fixture from the recirculation loop, measured longitudinally from plans, assuming the branch hot water piping does not run diagonally
-- ``PumpPower``
+- ``RecirculationPipingLoopLength``: Optional. If not provided, the default value will be calculated by using the equation shown in the table below. Measured recirculation loop length including both supply and return sides, measured longitudinally from plans, assuming the hot water piping does not run diagonally, plus 20 feet of piping for each floor level greater than one plus 10 feet of piping for unconditioned basements.
+- ``BranchPipingLoopLength``: Optional. If not provided, the default value will be assumed as shown in the table below. Measured length of the branch hot water piping from the recirculation loop to the farthest hot water fixture from the recirculation loop, measured longitudinally from plans, assuming the branch hot water piping does not run diagonally.
+- ``PumpPower``: Optional. If not provided, the default value will be assumed as shown in the table below. 
 
 If the complete set of the optional inputs is not provided, the following default values will be used.
 
@@ -602,7 +602,7 @@ If using simple inputs, the following element is required:
 
 - ``SolarFraction``: Portion of total conventional hot water heating load (delivered energy and tank standby losses). Can be obtained from Directory of SRCC OG-300 Solar Water Heating System Ratings or NREL's `System Advisor Model <https://sam.nrel.gov/>`_ or equivalent.
 
-If using detailed inputs, the following elements are required:
+If using detailed inputs, the following elements are used:
 
 - ``CollectorArea``: in units of ft²
 - ``CollectorLoopType``: 'liquid indirect' or 'liquid direct' or 'passive thermosyphon'
@@ -611,12 +611,7 @@ If using detailed inputs, the following elements are required:
 - ``CollectorTilt``
 - ``CollectorRatedOpticalEfficiency``: FRTA (y-intercept); see Directory of SRCC OG-100 Certified Solar Collector Ratings
 - ``CollectorRatedThermalLosses``: FRUL (slope, in units of Btu/hr-ft²-R); see Directory of SRCC OG-100 Certified Solar Collector Ratings
-
-the following element can be optionally entered:
-
-- ``StorageVolume``: in units of gal
-
-If ``StorageVolume`` is not provided, a default ``StorageVolume`` will be calculated using the following equation. 
+- ``StorageVolume``: Optional. If not provided, the default value will be calculated using the following equation. in units of gal
 
 .. math:: StorageVolume = 1.5 \cdot CollectorArea
 
@@ -715,7 +710,7 @@ RatedAnnualkWh [kwh/yr]          467
 LabelElectricRate [$/kWh]        0.12  
 LabelGasRate [$/therm]           1.09  
 LabelAnnualGasCost [$]           33.12  
-PlaceSettingCapacity [standard]  12  
+PlaceSettingCapacity [#]         12  
 LabelUsage [cyc/week]            4  
 ===============================  =================
 

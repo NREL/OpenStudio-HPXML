@@ -535,7 +535,8 @@ class EnergyPlusValidator
       ## [WHType=Tank]
       '/HPXML/Building/BuildingDetails/Systems/WaterHeating/WaterHeatingSystem[WaterHeaterType="storage water heater"]' => {
         'FuelType[text()="natural gas" or text()="fuel oil" or text()="propane" or text()="electricity" or text()="wood"]' => one, # If not electricity, see [WHType=FuelTank]
-        'TankVolume | HeatingCapacity' => zero_or_two,
+        'TankVolume' => zero_or_one,
+        'HeatingCapacity' => zero_or_one,
         'EnergyFactor | UniformEnergyFactor' => one,
         'WaterHeaterInsulation/Jacket/JacketRValue' => zero_or_one, # Capable to model tank wrap insulation
       },
@@ -595,7 +596,9 @@ class EnergyPlusValidator
       ## [HWDistType=Recirculation]
       '/HPXML/Building/BuildingDetails/Systems/WaterHeating/HotWaterDistribution/SystemType/Recirculation' => {
         'ControlType[text()="manual demand control" or text()="presence sensor demand control" or text()="temperature" or text()="timer" or text()="no control"]' => one,
-        'RecirculationPipingLoopLength | BranchPipingLoopLength | PumpPower' => zero_or_three,
+        'RecirculationPipingLoopLength' => zero_or_one,
+        'BranchPipingLoopLength' => zero_or_one,
+        'PumpPower' => zero_or_one,
       },
 
       ## [DrainWaterHeatRecovery]

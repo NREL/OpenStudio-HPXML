@@ -26,7 +26,6 @@
           <NumberofConditionedFloorsAboveGrade>1</NumberofConditionedFloorsAboveGrade>
           <AverageCeilingHeight>8.0</AverageCeilingHeight>
           <NumberofBedrooms>3</NumberofBedrooms>
-          <NumberofBathrooms>3</NumberofBathrooms>
           <ConditionedFloorArea>2700.0</ConditionedFloorArea>
         </BuildingConstruction>
       </BuildingSummary>

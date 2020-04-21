@@ -2,8 +2,8 @@
   <schema_version>3.0</schema_version>
   <name>hpxm_lto_openstudio</name>
   <uid>b1543b30-9465-45ff-ba04-1d1f85e763bc</uid>
-  <version_id>401aa240-8e44-40bb-9c36-6bc0619aa918</version_id>
-  <version_modified>20200418T204724Z</version_modified>
+  <version_id>00200dcc-65b8-447e-a3c5-0699343c45d1</version_id>
+  <version_modified>20200421T172302Z</version_modified>
   <xml_checksum>D8922A73</xml_checksum>
   <class_name>HPXMLtoOpenStudio</class_name>
   <display_name>HPXML to OpenStudio Translator</display_name>
@@ -456,6 +456,12 @@
       <checksum>76182AA8</checksum>
     </file>
     <file>
+      <filename>BaseElements.xsd</filename>
+      <filetype>xsd</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>CE0F105B</checksum>
+    </file>
+    <file>
       <version>
         <software_program>OpenStudio</software_program>
         <identifier>2.1.1</identifier>
@@ -464,19 +470,13 @@
       <filename>measure.rb</filename>
       <filetype>rb</filetype>
       <usage_type>script</usage_type>
-      <checksum>8F6F7A82</checksum>
+      <checksum>C3087C2E</checksum>
     </file>
     <file>
       <filename>EPvalidator.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>44CA055E</checksum>
-    </file>
-    <file>
-      <filename>BaseElements.xsd</filename>
-      <filetype>xsd</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>CE0F105B</checksum>
+      <checksum>BC104F40</checksum>
     </file>
   </files>
 </measure>
