@@ -31,7 +31,7 @@ The following building features/technologies are available for modeling via the 
 
   - Water Heaters (Storage, Tankless, Heat Pump, Indirect, Tankless Coil)
   - Solar Hot Water
-  - Desuperheaters
+  - Desuperheater
   - Hot Water Distribution (Standard, Recirculation)
   - Drain Water Heat Recovery
   - Hot Water Fixtures
@@ -39,12 +39,12 @@ The following building features/technologies are available for modeling via the 
 - Ventilation
 
   - Mechanical Ventilation (Exhaust, Supply, Balanced, ERV, HRV, CFIS)
-  - Kitchen Fan
-  - Bathroom Fans
+  - Kitchen/Bathroom Fans
   - Whole House Fan
 
 - Photovoltaics
 - Appliances (Clothes Washer/Dryer, Dishwasher, Refrigerator, Cooking Range/Oven)
+- Dehumidifier
 - Lighting
 - Ceiling Fans
 - Plug Loads
@@ -563,8 +563,6 @@ For a ``SystemType/Recirculation`` system, the following elements are used:
 - ``BranchPipingLoopLength``: Optional. If not provided, the default value will be assumed as shown in the table below. Measured length of the branch hot water piping from the recirculation loop to the farthest hot water fixture from the recirculation loop, measured longitudinally from plans, assuming the branch hot water piping does not run diagonally.
 - ``PumpPower``: Optional. If not provided, the default value will be assumed as shown in the table below. 
 
-If the complete set of the optional inputs is not provided, the following default values will be used.
-
 ======================================  ====================================================================================================
 Element Name                            Default Value
 ======================================  ====================================================================================================
@@ -753,6 +751,13 @@ IsConvection   false
 =============  ==============
 
 An ``extension/UsageMultiplier`` can also be optionally provided that scales energy usage; if not provided, it is assumed to be 1.0.
+
+Dehumidifier
+************
+
+An ``Appliance/Dehumidifier`` element can be specified; if not provided, a dehumidifier will not be modeled.
+The ``Capacity``, ``DehumidistatSetpoint`` (relative humidity as a fraction, 0-1), and ``FractionDehumidificationLoadServed`` (0-1) must be provided.
+The efficiency of the dehumidifier can either be entered as an ``IntegratedEnergyFactor`` or ``EnergyFactor``.
 
 Lighting
 ~~~~~~~~
