@@ -535,16 +535,12 @@ class EnergyPlusValidator
 
       ## [WHType=Tank]
       '/HPXML/Building/BuildingDetails/Systems/WaterHeating/WaterHeatingSystem[WaterHeaterType="storage water heater"]' => {
-        'FuelType[text()="natural gas" or text()="fuel oil" or text()="propane" or text()="electricity" or text()="wood"]' => one, # If not electricity, see [WHType=FuelTank]
+        'FuelType[text()="natural gas" or text()="fuel oil" or text()="propane" or text()="electricity" or text()="wood"]' => one,
         'TankVolume' => zero_or_one,
         'HeatingCapacity' => zero_or_one,
         'EnergyFactor | UniformEnergyFactor' => one,
+        'RecoveryEfficiency' => zero_or_one,
         'WaterHeaterInsulation/Jacket/JacketRValue' => zero_or_one, # Capable to model tank wrap insulation
-      },
-
-      ## [WHType=FuelTank]
-      '/HPXML/Building/BuildingDetails/Systems/WaterHeating/WaterHeatingSystem[WaterHeaterType="storage water heater" and FuelType!="electricity"]' => {
-        'RecoveryEfficiency' => one,
       },
 
       ## [WHType=Tankless]

@@ -1139,8 +1139,8 @@ class Waterheater
     return hx
   end
 
-  def self.calc_water_heater_capacity(fuel, num_beds, num_water_heaters, num_baths = nil)
-    # Calculate the capacity of the water heater based on the fuel type and number
+  def self.get_default_heating_capacity(fuel, num_beds, num_water_heaters, num_baths = nil)
+    # Returns the capacity of the water heater based on the fuel type and number
     # of bedrooms and bathrooms in a home. Returns the capacity in kBtu/hr.
 
     if num_baths.nil?
@@ -1181,9 +1181,8 @@ class Waterheater
     end
   end
 
-  def self.calc_water_heater_tankvol(fuel, num_beds, num_baths)
-    # Calculates the volume of a water heater
-    # Based on the BA HSP
+  def self.get_default_tank_volume(fuel, num_beds, num_baths)
+    # Returns the volume of a water heater based on the BA HSP
     if fuel == HPXML::FuelTypeElectricity
       # Source: Table 5 HUD-FHA Minimum Water Heater Capacities for One- and
       # Two-Family Living Units (ASHRAE HVAC Applications 2007)
@@ -1233,6 +1232,19 @@ class Waterheater
         return 50
       end
     end
+  end
+
+  def self.calc_default_recovery_efficiency(fuel, ef)
+    # Water Heater Recovery Efficiency by fuel and energy factor
+    if fuel == HPXML::FuelTypeElectricity
+      return 0.98
+    elsif ef >= 0.75
+      return 0.778114 * ef + 0.276679
+    else
+      return 0.252117 * ef + 0.607997
+    end
+
+    fail "Could not get default water heater RE for fuel '#{fuel}'"
   end
 
   def self.calc_ef_from_uef(uef, type, fuel_type)

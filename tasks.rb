@@ -2764,6 +2764,7 @@ def set_hpxml_water_heating_systems(hpxml_file, hpxml)
       water_heating_system.location = nil
       water_heating_system.heating_capacity = nil
       water_heating_system.tank_volume = nil
+      water_heating_system.recovery_efficiency = nil
     else
       water_heating_system.temperature = Waterheater.get_default_hot_water_temperature(Constants.ERIVersions[-1])
     end

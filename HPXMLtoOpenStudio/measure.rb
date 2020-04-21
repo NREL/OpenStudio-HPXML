@@ -480,10 +480,20 @@ class OSModel
       end
       if (water_heating_system.water_heater_type == HPXML::WaterHeaterTypeStorage)
         if water_heating_system.heating_capacity.nil?
-          water_heating_system.heating_capacity = Waterheater.calc_water_heater_capacity(water_heating_system.fuel_type, @nbeds, @hpxml.water_heating_systems.size, @nbaths)
+          water_heating_system.heating_capacity = Waterheater.get_default_heating_capacity(water_heating_system.fuel_type, @nbeds, @hpxml.water_heating_systems.size, @nbaths)
         end
         if water_heating_system.tank_volume.nil?
-          water_heating_system.tank_volume = Waterheater.calc_water_heater_tankvol(water_heating_system.fuel_type, @nbeds, @nbaths)
+          water_heating_system.tank_volume = Waterheater.get_default_tank_volume(water_heating_system.fuel_type, @nbeds, @nbaths)
+        end
+        if water_heating_system.recovery_efficiency.nil?
+          ef = water_heating_system.energy_factor
+          if ef.nil?
+            uef = water_heating_system.uniform_energy_factor
+            if not uef.nil?
+              ef = Waterheater.calc_ef_from_uef(uef, water_heating_system.water_heater_type, water_heating_system.fuel_type)
+            end
+          end
+          water_heating_system.recovery_efficiency = Waterheater.calc_default_recovery_efficiency(water_heating_system.fuel_type, ef)
         end
       end
       if water_heating_system.location.nil?
