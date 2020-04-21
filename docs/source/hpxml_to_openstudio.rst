@@ -73,12 +73,9 @@ The simulation controls currently offered are timestep, begin month, begin day o
 Timestep can be optionally provided as ``Timestep``, where the value is in minutes and must be a divisor of 60.
 If not provided, the default value of 60 is used.
 
-Begin month and end month can be optionally provided as ``BeginMonth`` and ``EndMonth``, respectively, where the value is an integer and must be between 1 and 12.
-Begin day of month and end day of month can be optionally provided as ``BeginDayOfMonth`` and ``EndDayOfMonth``, respectively, where the value is an integer and must have a valid number of days depending on the begin month.
-Either both, or neither, ``BeginMonth`` and ``BeginDayOfMonth`` or ``EndMonth`` and ``EndDayOfMonth`` must be provided.
-If not provided, the default value of 1/1 (January 1st) and 12/31 (December 31st), respectively, will be used.
-
-You cannot supply a combination of ``BeginMonth`` and ``BeginDayOfMonth`` that occurs after the supplied combination of ``EndMonth`` and ``EndDayOfMonth`` (e.g., a run period from 10/1 to 3/31 is invalid).
+The simulation run period can be optionally specified with ``BeginMonth``/``BeginDayOfMonth`` and/or ``EndMonth``/``EndDayOfMonth``.
+The ``BeginMonth``/``BeginDayOfMonth`` provided must occur before ``EndMonth``/``EndDayOfMonth`` provided (e.g., a run period from 10/1 to 3/31 is invalid).
+If not provided, default values of January 1st and December 31st will be used.
 
 Building Details
 ~~~~~~~~~~~~~~~~
@@ -93,8 +90,7 @@ It is used for high-level building information including conditioned floor area,
 Most occupancy assumptions are based on the number of bedrooms, while the number of residents is solely used to determine heat gains from the occupants themselves.
 Note that a walkout basement should be included in ``NumberofConditionedFloorsAboveGrade``.
 
-If ``NumberofBathrooms`` is not provided, it is calculated using the following equation.
-The equation is from the `Building America House Simulation Protocols <https://www1.eere.energy.gov/buildings/publications/pdfs/building_america/house_simulation.pdf>`_.
+If ``NumberofBathrooms`` is not provided, it is calculated using the following equation based on the `Building America House Simulation Protocols <https://www1.eere.energy.gov/buildings/publications/pdfs/building_america/house_simulation.pdf>`_.
 
 .. math:: NumberofBathrooms = \frac{NumberofBedrooms}{2} + 0.5
 
@@ -390,15 +386,15 @@ The heating setpoint (``SetpointTempHeatingSeason``) and cooling setpoint (``Set
 
 If there is a heating setback, it is defined with:
 
-- Temperature during heating setback (``SetbackTempHeatingSeason``)
-- The start hour of the heating setback where 0=midnight and 12=noon (``extension/SetbackStartHourHeating``)
-- The number of hours of heating setback per week (``TotalSetbackHoursperWeekHeating``)
+- ``SetbackTempHeatingSeason``: Temperature during heating setback
+- ``extension/SetbackStartHourHeating``: The start hour of the heating setback where 0=midnight and 12=noon
+- ``TotalSetbackHoursperWeekHeating``: The number of hours of heating setback per week
 
 If there is a cooling setup, it is defined with:
 
-- Temperature during cooling setup (``SetupTempCoolingSeason``)
-- The start hour of the cooling setup where 0=midnight and 12=noon (``extension/SetupStartHourCooling``)
-- The number of hours of cooling setup per week (``TotalSetupHoursperWeekCooling``)
+- ``SetupTempCoolingSeason``: Temperature during cooling setup
+- ``extension/SetupStartHourCooling``: The start hour of the cooling setup where 0=midnight and 12=noon
+- ``TotalSetupHoursperWeekCooling``: The number of hours of cooling setup per week
 
 Finally, if there are sufficient ceiling fans present that result in a reduced cooling setpoint, this offset can be specified with ``extension/CeilingFanSetpointTempCoolingSeasonOffset``.
 
@@ -425,7 +421,7 @@ For each duct, ``DuctInsulationRValue``, ``DuctLocation``, and ``DuctSurfaceArea
 
 .. warning::
 
-  Specifying a DSE for the HVAC distribution system will NOT be reflected in the EnergyPlus simulation outputs.
+  Specifying a DSE for the HVAC distribution system will NOT be reflected in the raw EnergyPlus simulation outputs, but IS reflected by the SimulationOutputReport reporting measure.
 
 Mechanical Ventilation
 **********************
@@ -456,35 +452,33 @@ Kitchen Fan
 
 A kitchen range fan may be specified as a ``Systems/MechanicalVentilation/VentilationFans/VentilationFan`` with ``FanLocation='kitchen'`` and ``UsedForLocalVentilation='true'``.
 
-Additional fields may be provided per the table below. If not provided, default values will be assumed.
-The default values are based on the `Building America House Simulation Protocols <https://www1.eere.energy.gov/buildings/publications/pdfs/building_america/house_simulation.pdf>`_.
+Additional fields may be provided per the table below. If not provided, default values will be assumed based on the `Building America House Simulation Protocols <https://www1.eere.energy.gov/buildings/publications/pdfs/building_america/house_simulation.pdf>`_.
 
-====================== ========================
-Element Name           Default Value
-====================== ========================
-RatedFlowRate          100 [cfm]
-HoursInOperation       1 [hrs/day]
-FanPower               0.3 * RatedFlowRate [W]
-extension/StartHour    18 [6pm]
-====================== ========================
+=========================== ========================
+Element Name                Default Value
+=========================== ========================
+RatedFlowRate [cfm]         100
+HoursInOperation [hrs/day]  1
+FanPower [W]                0.3 * RatedFlowRate
+extension/StartHour [0-23]  18
+=========================== ========================
 
 Bathroom Fans
 *************
 
 Bathroom fans may be specified as a ``Systems/MechanicalVentilation/VentilationFans/VentilationFan`` with ``FanLocation='bath'`` and ``UsedForLocalVentilation='true'``.
 
-Additional fields may be provided per the table below. If not provided, default values will be assumed.
-The default values are based on the `Building America House Simulation Protocols <https://www1.eere.energy.gov/buildings/publications/pdfs/building_america/house_simulation.pdf>`_.
+Additional fields may be provided per the table below. If not provided, default values will be assumed based on the `Building America House Simulation Protocols <https://www1.eere.energy.gov/buildings/publications/pdfs/building_america/house_simulation.pdf>`_.
 
-====================== ========================
-Element Name           Default Value
-====================== ========================
-Quantity               NumberofBathrooms [#]
-RatedFlowRate          50 [cfm]
-HoursInOperation       1 [hrs/day]
-FanPower               0.3 * RatedFlowRate [W]
-extension/StartHour    7 [7am]
-====================== ========================
+=========================== ========================
+Element Name                Default Value
+=========================== ========================
+Quantity [#]                NumberofBathrooms
+RatedFlowRate [cfm]         50
+HoursInOperation [hrs/day]  1
+FanPower [W]                0.3 * RatedFlowRate
+extension/StartHour [0-23]  7
+=========================== ========================
 
 Whole House Fan
 ***************
@@ -500,7 +494,7 @@ Water Heaters
 
 Each water heater should be entered as a ``Systems/WaterHeating/WaterHeatingSystem``.
 Inputs including ``WaterHeaterType`` and ``FractionDHWLoadServed`` must be provided.
-The water heater ``Location`` can be optionally entered; if not provided, a default water heater location will be assumed based on the IECC climate zone. 
+The water heater ``Location`` can be optionally entered; if not provided, a default water heater location will be assumed based on IECC climate zone. 
 
 +--------------------+--------------------------------------------------------------------------------------------+
 | IECC Climate Zone  | Default Water Heater Location                                                              |
@@ -524,8 +518,7 @@ space-heating boiler with storage tank                                          
 space-heating boiler with tankless coil                                                                                                            required           
 ========================================  ===================================  ===========  ==========  ===============  ========================  =================  =================  =========================================
 
-For storage water heaters, the tank volume and heating capacity can be optionally provided. If not provided, default values will be assumed.
-The default values are based on the Table 7 in `Building America House Simulation Protocols <https://www1.eere.energy.gov/buildings/publications/pdfs/building_america/house_simulation.pdf>`_.
+For storage water heaters, the tank volume and heating capacity can be optionally provided. If not provided, default values will be assumed based on Table 7 in the `Building America House Simulation Protocols <https://www1.eere.energy.gov/buildings/publications/pdfs/building_america/house_simulation.pdf>`_.
 
 For tankless water heaters, an annual energy derate due to cycling inefficiencies can be provided.
 If not provided, a value of 0.08 (8%) will be assumed.
@@ -541,20 +534,18 @@ Hot Water Distribution
 A ``Systems/WaterHeating/HotWaterDistribution`` must be provided if any water heating systems are specified.
 Inputs including ``SystemType`` and ``PipeInsulation/PipeRValue`` must be provided.
 
-For a ``SystemType/Standard`` (non-recirculating) system, the following element can be optionally entered:
+For a ``SystemType/Standard`` (non-recirculating) system, the following element are used:
 
-- ``PipingLength``: Measured length of hot water piping from the hot water heater to the farthest hot water fixture, measured longitudinally from plans, assuming the hot water piping does not run diagonally, plus 10 feet of piping for each floor level, plus 5 feet of piping for unconditioned basements (if any)
+- ``PipingLength``: Optional. Measured length of hot water piping from the hot water heater to the farthest hot water fixture, measured longitudinally from plans, assuming the hot water piping does not run diagonally, plus 10 feet of piping for each floor level, plus 5 feet of piping for unconditioned basements (if any)
+  If not provided, a default ``PipingLength`` will be calculated using the following equation from `ANSI/RESNET/ICC 301-2019 <https://codes.iccsafe.org/content/RESNETICC3012019>`_.
 
-If ``PipingLength`` is not provided, a default ``PipingLength`` will be calculated using the following equation.
-This equation is based on `ANSI/RESNET/ICC 301-2019 <https://codes.iccsafe.org/content/RESNETICC3012019>`_.
+  .. math:: PipeL = 2.0 \cdot (\frac{CFA}{NCfl})^{0.5} + 10.0 \cdot NCfl + 5.0 \cdot bsmnt
 
-.. math:: PipeL = 2.0 \cdot (\frac{CFA}{NCfl})^{0.5} + 10.0 \cdot NCfl + 5.0 \cdot bsmnt
-  
-Where, 
-PipeL = piping length [ft], 
-CFA = conditioned floor area [ft²],
-NCfl = number of conditioned floor levels number of conditioned floor levels in the residence, including conditioned basements, 
-bsmnt = presence = 1.0 or absence = 0.0 of an unconditioned basement in the residence.
+  Where, 
+  PipeL = piping length [ft], 
+  CFA = conditioned floor area [ft²],
+  NCfl = number of conditioned floor levels number of conditioned floor levels in the residence including conditioned basements, 
+  bsmnt = presence = 1.0 or absence = 0.0 of an unconditioned basement in the residence.
 
 For a ``SystemType/Recirculation`` system, the following elements are used:
 
@@ -563,13 +554,13 @@ For a ``SystemType/Recirculation`` system, the following elements are used:
 - ``BranchPipingLoopLength``: Optional. If not provided, the default value will be assumed as shown in the table below. Measured length of the branch hot water piping from the recirculation loop to the farthest hot water fixture from the recirculation loop, measured longitudinally from plans, assuming the branch hot water piping does not run diagonally.
 - ``PumpPower``: Optional. If not provided, the default value will be assumed as shown in the table below. 
 
-======================================  ====================================================================================================
-Element Name                            Default Value
-======================================  ====================================================================================================
-Recirculation Piping Loop Length [ft]   .. math:: 2.0 \cdot (2.0 \cdot (\frac{CFA}{NCfl})^{0.5} + 10.0 \cdot NCfl + 5.0 \cdot bsmnt) - 20.0
-Branch Piping Loop Length [ft]          10 
-Pump Power [W]                          50 
-======================================  ====================================================================================================
+  ==================================  ====================================================================================================
+  Element Name                        Default Value
+  ==================================  ====================================================================================================
+  RecirculationPipingLoopLength [ft]  .. math:: 2.0 \cdot (2.0 \cdot (\frac{CFA}{NCfl})^{0.5} + 10.0 \cdot NCfl + 5.0 \cdot bsmnt) - 20.0
+  BranchPipingLoopLength [ft]         10 
+  Pump Power [W]                      50 
+  ==================================  ====================================================================================================
 
 In addition, a ``HotWaterDistribution/DrainWaterHeatRecovery`` (DWHR) may be specified.
 The DWHR system is defined by:
@@ -609,9 +600,9 @@ If using detailed inputs, the following elements are used:
 - ``CollectorTilt``
 - ``CollectorRatedOpticalEfficiency``: FRTA (y-intercept); see Directory of SRCC OG-100 Certified Solar Collector Ratings
 - ``CollectorRatedThermalLosses``: FRUL (slope, in units of Btu/hr-ft²-R); see Directory of SRCC OG-100 Certified Solar Collector Ratings
-- ``StorageVolume``: Optional. If not provided, the default value will be calculated using the following equation. in units of gal
-
-.. math:: StorageVolume = 1.5 \cdot CollectorArea
+- ``StorageVolume``: Optional. If not provided, the default value in gallons will be calculated using the following equation
+  
+  .. math:: StorageVolume = 1.5 \cdot CollectorArea
 
 Photovoltaics
 *************
@@ -661,8 +652,7 @@ Capacity [ft³]                                 3.0
 LabelUsage [cyc/week]                          6  
 =============================================  ==============
 
-If ``ModifiedEnergyFactor`` is provided instead of ``IntegratedModifiedEnergyFactor``, it will be converted using the following equation.
-This equation is based on the `Interpretation on ANSI/RESNET 301-2014 Clothes Washer IMEF <https://www.resnet.us/wp-content/uploads/No.-301-2014-08-sECTION-4.2.2.5.2.8-Clothes-Washers-Eq-4.2-6.pdf>`_.
+If ``ModifiedEnergyFactor`` is provided instead of ``IntegratedModifiedEnergyFactor``, it will be converted using the following equation based on the `Interpretation on ANSI/RESNET 301-2014 Clothes Washer IMEF <https://www.resnet.us/wp-content/uploads/No.-301-2014-08-sECTION-4.2.2.5.2.8-Clothes-Washers-Eq-4.2-6.pdf>`_.
 
 .. math:: IntegratedModifiedEnergyFactor = \frac{ModifiedEnergyFactor - 0.503}{0.95}
 
@@ -685,8 +675,7 @@ CombinedEnergyFactor [lb/kWh]   3.01
 ControlType                     timer
 ==============================  ==============
 
-If ``EnergyFactor`` is provided instead of ``CombinedEnergyFactor``, it will be converted into ``CombinedEnergyFactor`` using the following equation.
-This equation is based on the `Interpretation on ANSI/RESNET/ICC 301-2014 Clothes Dryer CEF <https://www.resnet.us/wp-content/uploads/No.-301-2014-10-Section-4.2.2.5.2.8-Clothes-Dryer-CEF-Rating.pdf>`_.
+If ``EnergyFactor`` is provided instead of ``CombinedEnergyFactor``, it will be converted into ``CombinedEnergyFactor`` using the following equation based on the `Interpretation on ANSI/RESNET/ICC 301-2014 Clothes Dryer CEF <https://www.resnet.us/wp-content/uploads/No.-301-2014-10-Section-4.2.2.5.2.8-Clothes-Dryer-CEF-Rating.pdf>`_.
 
 .. math:: CombinedEnergyFactor = \frac{EnergyFactor}{1.15}
 
@@ -712,8 +701,7 @@ PlaceSettingCapacity [#]         12
 LabelUsage [cyc/week]            4  
 ===============================  =================
 
-If ``EnergyFactor`` is provided instead of ``RatedAnnualkWh``, it will be converted into ``RatedAnnualkWh`` using the following equation.
-This equation is based on `ANSI/RESNET/ICC 301-2014 <https://codes.iccsafe.org/content/document/843>`_.
+If ``EnergyFactor`` is provided instead of ``RatedAnnualkWh``, it will be converted into ``RatedAnnualkWh`` using the following equation based on `ANSI/RESNET/ICC 301-2014 <https://codes.iccsafe.org/content/document/843>`_.
 
 .. math:: RatedAnnualkWh = \frac{215.0}{EnergyFactor}
 
@@ -726,8 +714,7 @@ An ``Appliances/Refrigerator`` element can be specified; if not provided, a refr
 The ``Location`` can be optionally provided; if not provided, it is assumed to be in the living space.
 
 The efficiency of the refrigerator can be optionally entered as ``RatedAnnualkWh`` or ``extension/AdjustedAnnualkWh``.
-If neither are provided, ``RatedAnnualkWh`` will be defaulted to represent a standard refrigerator from 2006 based on the following equation.
-This equation is based on `ANSI/RESNET/ICC 301-2019 <https://codes.iccsafe.org/content/RESNETICC3012019>`_.
+If neither are provided, ``RatedAnnualkWh`` will be defaulted to represent a standard refrigerator from 2006 using the following equation based on `ANSI/RESNET/ICC 301-2019 <https://codes.iccsafe.org/content/RESNETICC3012019>`_.
 
 .. math:: RatedAnnualkWh = 637.0 + 18.0 \cdot Number of bedrooms
 
