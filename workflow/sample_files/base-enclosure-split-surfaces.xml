@@ -1411,7 +1411,7 @@
               <SummerShadingCoefficient>0.7</SummerShadingCoefficient>
               <WinterShadingCoefficient>0.85</WinterShadingCoefficient>
             </InteriorShading>
-            <FractionOperable>0.33</FractionOperable>
+            <FractionOperable>0.67</FractionOperable>
             <AttachedToWall idref='Wall'/>
           </Window>
           <Window>
@@ -1425,7 +1425,7 @@
               <SummerShadingCoefficient>0.7</SummerShadingCoefficient>
               <WinterShadingCoefficient>0.85</WinterShadingCoefficient>
             </InteriorShading>
-            <FractionOperable>0.33</FractionOperable>
+            <FractionOperable>0.67</FractionOperable>
             <AttachedToWall idref='Wall'/>
           </Window>
           <Window>
@@ -1439,7 +1439,7 @@
               <SummerShadingCoefficient>0.7</SummerShadingCoefficient>
               <WinterShadingCoefficient>0.85</WinterShadingCoefficient>
             </InteriorShading>
-            <FractionOperable>0.33</FractionOperable>
+            <FractionOperable>0.67</FractionOperable>
             <AttachedToWall idref='Wall'/>
           </Window>
           <Window>
@@ -1453,7 +1453,7 @@
               <SummerShadingCoefficient>0.7</SummerShadingCoefficient>
               <WinterShadingCoefficient>0.85</WinterShadingCoefficient>
             </InteriorShading>
-            <FractionOperable>0.33</FractionOperable>
+            <FractionOperable>0.67</FractionOperable>
             <AttachedToWall idref='Wall'/>
           </Window>
           <Window>
@@ -1467,7 +1467,7 @@
               <SummerShadingCoefficient>0.7</SummerShadingCoefficient>
               <WinterShadingCoefficient>0.85</WinterShadingCoefficient>
             </InteriorShading>
-            <FractionOperable>0.33</FractionOperable>
+            <FractionOperable>0.67</FractionOperable>
             <AttachedToWall idref='Wall2'/>
           </Window>
           <Window>
@@ -1481,7 +1481,7 @@
               <SummerShadingCoefficient>0.7</SummerShadingCoefficient>
               <WinterShadingCoefficient>0.85</WinterShadingCoefficient>
             </InteriorShading>
-            <FractionOperable>0.33</FractionOperable>
+            <FractionOperable>0.67</FractionOperable>
             <AttachedToWall idref='Wall3'/>
           </Window>
           <Window>
@@ -1495,7 +1495,7 @@
               <SummerShadingCoefficient>0.7</SummerShadingCoefficient>
               <WinterShadingCoefficient>0.85</WinterShadingCoefficient>
             </InteriorShading>
-            <FractionOperable>0.33</FractionOperable>
+            <FractionOperable>0.67</FractionOperable>
             <AttachedToWall idref='Wall4'/>
           </Window>
           <Window>
@@ -1509,7 +1509,7 @@
               <SummerShadingCoefficient>0.7</SummerShadingCoefficient>
               <WinterShadingCoefficient>0.85</WinterShadingCoefficient>
             </InteriorShading>
-            <FractionOperable>0.33</FractionOperable>
+            <FractionOperable>0.67</FractionOperable>
             <AttachedToWall idref='Wall5'/>
           </Window>
           <Window>
@@ -1523,7 +1523,7 @@
               <SummerShadingCoefficient>0.7</SummerShadingCoefficient>
               <WinterShadingCoefficient>0.85</WinterShadingCoefficient>
             </InteriorShading>
-            <FractionOperable>0.33</FractionOperable>
+            <FractionOperable>0.67</FractionOperable>
             <AttachedToWall idref='Wall6'/>
           </Window>
           <Window>
@@ -1537,7 +1537,7 @@
               <SummerShadingCoefficient>0.7</SummerShadingCoefficient>
               <WinterShadingCoefficient>0.85</WinterShadingCoefficient>
             </InteriorShading>
-            <FractionOperable>0.33</FractionOperable>
+            <FractionOperable>0.67</FractionOperable>
             <AttachedToWall idref='Wall7'/>
           </Window>
           <Window>
@@ -1551,7 +1551,7 @@
               <SummerShadingCoefficient>0.7</SummerShadingCoefficient>
               <WinterShadingCoefficient>0.85</WinterShadingCoefficient>
             </InteriorShading>
-            <FractionOperable>0.33</FractionOperable>
+            <FractionOperable>0.67</FractionOperable>
             <AttachedToWall idref='Wall8'/>
           </Window>
           <Window>
@@ -1565,7 +1565,7 @@
               <SummerShadingCoefficient>0.7</SummerShadingCoefficient>
               <WinterShadingCoefficient>0.85</WinterShadingCoefficient>
             </InteriorShading>
-            <FractionOperable>0.33</FractionOperable>
+            <FractionOperable>0.67</FractionOperable>
             <AttachedToWall idref='Wall9'/>
           </Window>
           <Window>
@@ -1579,7 +1579,7 @@
               <SummerShadingCoefficient>0.7</SummerShadingCoefficient>
               <WinterShadingCoefficient>0.85</WinterShadingCoefficient>
             </InteriorShading>
-            <FractionOperable>0.33</FractionOperable>
+            <FractionOperable>0.67</FractionOperable>
             <AttachedToWall idref='Wall10'/>
           </Window>
           <Window>
@@ -1593,7 +1593,7 @@
               <SummerShadingCoefficient>0.7</SummerShadingCoefficient>
               <WinterShadingCoefficient>0.85</WinterShadingCoefficient>
             </InteriorShading>
-            <FractionOperable>0.33</FractionOperable>
+            <FractionOperable>0.67</FractionOperable>
             <AttachedToWall idref='Wall2'/>
           </Window>
           <Window>
@@ -1607,7 +1607,7 @@
               <SummerShadingCoefficient>0.7</SummerShadingCoefficient>
               <WinterShadingCoefficient>0.85</WinterShadingCoefficient>
             </InteriorShading>
-            <FractionOperable>0.33</FractionOperable>
+            <FractionOperable>0.67</FractionOperable>
             <AttachedToWall idref='Wall3'/>
           </Window>
           <Window>
@@ -1621,7 +1621,7 @@
               <SummerShadingCoefficient>0.7</SummerShadingCoefficient>
               <WinterShadingCoefficient>0.85</WinterShadingCoefficient>
             </InteriorShading>
-            <FractionOperable>0.33</FractionOperable>
+            <FractionOperable>0.67</FractionOperable>
             <AttachedToWall idref='Wall4'/>
           </Window>
           <Window>
@@ -1635,7 +1635,7 @@
               <SummerShadingCoefficient>0.7</SummerShadingCoefficient>
               <WinterShadingCoefficient>0.85</WinterShadingCoefficient>
             </InteriorShading>
-            <FractionOperable>0.33</FractionOperable>
+            <FractionOperable>0.67</FractionOperable>
             <AttachedToWall idref='Wall5'/>
           </Window>
           <Window>
@@ -1649,7 +1649,7 @@
               <SummerShadingCoefficient>0.7</SummerShadingCoefficient>
               <WinterShadingCoefficient>0.85</WinterShadingCoefficient>
             </InteriorShading>
-            <FractionOperable>0.33</FractionOperable>
+            <FractionOperable>0.67</FractionOperable>
             <AttachedToWall idref='Wall6'/>
           </Window>
           <Window>
@@ -1663,7 +1663,7 @@
               <SummerShadingCoefficient>0.7</SummerShadingCoefficient>
               <WinterShadingCoefficient>0.85</WinterShadingCoefficient>
             </InteriorShading>
-            <FractionOperable>0.33</FractionOperable>
+            <FractionOperable>0.67</FractionOperable>
             <AttachedToWall idref='Wall7'/>
           </Window>
           <Window>
@@ -1677,7 +1677,7 @@
               <SummerShadingCoefficient>0.7</SummerShadingCoefficient>
               <WinterShadingCoefficient>0.85</WinterShadingCoefficient>
             </InteriorShading>
-            <FractionOperable>0.33</FractionOperable>
+            <FractionOperable>0.67</FractionOperable>
             <AttachedToWall idref='Wall8'/>
           </Window>
           <Window>
@@ -1691,7 +1691,7 @@
               <SummerShadingCoefficient>0.7</SummerShadingCoefficient>
               <WinterShadingCoefficient>0.85</WinterShadingCoefficient>
             </InteriorShading>
-            <FractionOperable>0.33</FractionOperable>
+            <FractionOperable>0.67</FractionOperable>
             <AttachedToWall idref='Wall9'/>
           </Window>
           <Window>
@@ -1705,7 +1705,7 @@
               <SummerShadingCoefficient>0.7</SummerShadingCoefficient>
               <WinterShadingCoefficient>0.85</WinterShadingCoefficient>
             </InteriorShading>
-            <FractionOperable>0.33</FractionOperable>
+            <FractionOperable>0.67</FractionOperable>
             <AttachedToWall idref='Wall10'/>
           </Window>
           <Window>
@@ -1719,7 +1719,7 @@
               <SummerShadingCoefficient>0.7</SummerShadingCoefficient>
               <WinterShadingCoefficient>0.85</WinterShadingCoefficient>
             </InteriorShading>
-            <FractionOperable>0.33</FractionOperable>
+            <FractionOperable>0.67</FractionOperable>
             <AttachedToWall idref='Wall2'/>
           </Window>
           <Window>
@@ -1733,7 +1733,7 @@
               <SummerShadingCoefficient>0.7</SummerShadingCoefficient>
               <WinterShadingCoefficient>0.85</WinterShadingCoefficient>
             </InteriorShading>
-            <FractionOperable>0.33</FractionOperable>
+            <FractionOperable>0.67</FractionOperable>
             <AttachedToWall idref='Wall3'/>
           </Window>
           <Window>
@@ -1747,7 +1747,7 @@
               <SummerShadingCoefficient>0.7</SummerShadingCoefficient>
               <WinterShadingCoefficient>0.85</WinterShadingCoefficient>
             </InteriorShading>
-            <FractionOperable>0.33</FractionOperable>
+            <FractionOperable>0.67</FractionOperable>
             <AttachedToWall idref='Wall4'/>
           </Window>
           <Window>
@@ -1761,7 +1761,7 @@
               <SummerShadingCoefficient>0.7</SummerShadingCoefficient>
               <WinterShadingCoefficient>0.85</WinterShadingCoefficient>
             </InteriorShading>
-            <FractionOperable>0.33</FractionOperable>
+            <FractionOperable>0.67</FractionOperable>
             <AttachedToWall idref='Wall5'/>
           </Window>
           <Window>
@@ -1775,7 +1775,7 @@
               <SummerShadingCoefficient>0.7</SummerShadingCoefficient>
               <WinterShadingCoefficient>0.85</WinterShadingCoefficient>
             </InteriorShading>
-            <FractionOperable>0.33</FractionOperable>
+            <FractionOperable>0.67</FractionOperable>
             <AttachedToWall idref='Wall6'/>
           </Window>
           <Window>
@@ -1789,7 +1789,7 @@
               <SummerShadingCoefficient>0.7</SummerShadingCoefficient>
               <WinterShadingCoefficient>0.85</WinterShadingCoefficient>
             </InteriorShading>
-            <FractionOperable>0.33</FractionOperable>
+            <FractionOperable>0.67</FractionOperable>
             <AttachedToWall idref='Wall7'/>
           </Window>
           <Window>
@@ -1803,7 +1803,7 @@
               <SummerShadingCoefficient>0.7</SummerShadingCoefficient>
               <WinterShadingCoefficient>0.85</WinterShadingCoefficient>
             </InteriorShading>
-            <FractionOperable>0.33</FractionOperable>
+            <FractionOperable>0.67</FractionOperable>
             <AttachedToWall idref='Wall8'/>
           </Window>
           <Window>
@@ -1817,7 +1817,7 @@
               <SummerShadingCoefficient>0.7</SummerShadingCoefficient>
               <WinterShadingCoefficient>0.85</WinterShadingCoefficient>
             </InteriorShading>
-            <FractionOperable>0.33</FractionOperable>
+            <FractionOperable>0.67</FractionOperable>
             <AttachedToWall idref='Wall9'/>
           </Window>
           <Window>
@@ -1831,7 +1831,7 @@
               <SummerShadingCoefficient>0.7</SummerShadingCoefficient>
               <WinterShadingCoefficient>0.85</WinterShadingCoefficient>
             </InteriorShading>
-            <FractionOperable>0.33</FractionOperable>
+            <FractionOperable>0.67</FractionOperable>
             <AttachedToWall idref='Wall10'/>
           </Window>
           <Window>
@@ -1845,7 +1845,7 @@
               <SummerShadingCoefficient>0.7</SummerShadingCoefficient>
               <WinterShadingCoefficient>0.85</WinterShadingCoefficient>
             </InteriorShading>
-            <FractionOperable>0.33</FractionOperable>
+            <FractionOperable>0.67</FractionOperable>
             <AttachedToWall idref='Wall2'/>
           </Window>
           <Window>
@@ -1859,7 +1859,7 @@
               <SummerShadingCoefficient>0.7</SummerShadingCoefficient>
               <WinterShadingCoefficient>0.85</WinterShadingCoefficient>
             </InteriorShading>
-            <FractionOperable>0.33</FractionOperable>
+            <FractionOperable>0.67</FractionOperable>
             <AttachedToWall idref='Wall3'/>
           </Window>
           <Window>
@@ -1873,7 +1873,7 @@
               <SummerShadingCoefficient>0.7</SummerShadingCoefficient>
               <WinterShadingCoefficient>0.85</WinterShadingCoefficient>
             </InteriorShading>
-            <FractionOperable>0.33</FractionOperable>
+            <FractionOperable>0.67</FractionOperable>
             <AttachedToWall idref='Wall4'/>
           </Window>
           <Window>
@@ -1887,7 +1887,7 @@
               <SummerShadingCoefficient>0.7</SummerShadingCoefficient>
               <WinterShadingCoefficient>0.85</WinterShadingCoefficient>
             </InteriorShading>
-            <FractionOperable>0.33</FractionOperable>
+            <FractionOperable>0.67</FractionOperable>
             <AttachedToWall idref='Wall5'/>
           </Window>
           <Window>
@@ -1901,7 +1901,7 @@
               <SummerShadingCoefficient>0.7</SummerShadingCoefficient>
               <WinterShadingCoefficient>0.85</WinterShadingCoefficient>
             </InteriorShading>
-            <FractionOperable>0.33</FractionOperable>
+            <FractionOperable>0.67</FractionOperable>
             <AttachedToWall idref='Wall6'/>
           </Window>
           <Window>
@@ -1915,7 +1915,7 @@
               <SummerShadingCoefficient>0.7</SummerShadingCoefficient>
               <WinterShadingCoefficient>0.85</WinterShadingCoefficient>
             </InteriorShading>
-            <FractionOperable>0.33</FractionOperable>
+            <FractionOperable>0.67</FractionOperable>
             <AttachedToWall idref='Wall7'/>
           </Window>
           <Window>
@@ -1929,7 +1929,7 @@
               <SummerShadingCoefficient>0.7</SummerShadingCoefficient>
               <WinterShadingCoefficient>0.85</WinterShadingCoefficient>
             </InteriorShading>
-            <FractionOperable>0.33</FractionOperable>
+            <FractionOperable>0.67</FractionOperable>
             <AttachedToWall idref='Wall8'/>
           </Window>
           <Window>
@@ -1943,7 +1943,7 @@
               <SummerShadingCoefficient>0.7</SummerShadingCoefficient>
               <WinterShadingCoefficient>0.85</WinterShadingCoefficient>
             </InteriorShading>
-            <FractionOperable>0.33</FractionOperable>
+            <FractionOperable>0.67</FractionOperable>
             <AttachedToWall idref='Wall9'/>
           </Window>
           <Window>
@@ -1957,7 +1957,7 @@
               <SummerShadingCoefficient>0.7</SummerShadingCoefficient>
               <WinterShadingCoefficient>0.85</WinterShadingCoefficient>
             </InteriorShading>
-            <FractionOperable>0.33</FractionOperable>
+            <FractionOperable>0.67</FractionOperable>
             <AttachedToWall idref='Wall10'/>
           </Window>
           <Window>
@@ -1971,7 +1971,7 @@
               <SummerShadingCoefficient>0.7</SummerShadingCoefficient>
               <WinterShadingCoefficient>0.85</WinterShadingCoefficient>
             </InteriorShading>
-            <FractionOperable>0.33</FractionOperable>
+            <FractionOperable>0.67</FractionOperable>
             <AttachedToWall idref='Wall10'/>
           </Window>
         </Windows>

@@ -1407,7 +1407,7 @@ def set_hpxml_windows(hpxml_file, hpxml)
                       azimuth: 0,
                       ufactor: 0.33,
                       shgc: 0.45,
-                      fraction_operable: 0.33,
+                      fraction_operable: 0.67,
                       interior_shading_factor_summer: 0.7,
                       interior_shading_factor_winter: 0.85,
                       wall_idref: 'Wall')
@@ -1416,7 +1416,7 @@ def set_hpxml_windows(hpxml_file, hpxml)
                       azimuth: 180,
                       ufactor: 0.33,
                       shgc: 0.45,
-                      fraction_operable: 0.33,
+                      fraction_operable: 0.67,
                       interior_shading_factor_summer: 0.7,
                       interior_shading_factor_winter: 0.85,
                       wall_idref: 'Wall')
@@ -1425,7 +1425,7 @@ def set_hpxml_windows(hpxml_file, hpxml)
                       azimuth: 90,
                       ufactor: 0.33,
                       shgc: 0.45,
-                      fraction_operable: 0.33,
+                      fraction_operable: 0.67,
                       interior_shading_factor_summer: 0.7,
                       interior_shading_factor_winter: 0.85,
                       wall_idref: 'Wall')
@@ -1434,7 +1434,7 @@ def set_hpxml_windows(hpxml_file, hpxml)
                       azimuth: 270,
                       ufactor: 0.33,
                       shgc: 0.45,
-                      fraction_operable: 0.33,
+                      fraction_operable: 0.67,
                       interior_shading_factor_summer: 0.7,
                       interior_shading_factor_winter: 0.85,
                       wall_idref: 'Wall')
@@ -1584,28 +1584,28 @@ def set_hpxml_windows(hpxml_file, hpxml)
                       azimuth: 0,
                       ufactor: 0.33,
                       shgc: 0.45,
-                      fraction_operable: 0.33,
+                      fraction_operable: 0.67,
                       wall_idref: 'Wall1')
     hpxml.windows.add(id: 'WindowSouth',
                       area: 108 / 8,
                       azimuth: 180,
                       ufactor: 0.33,
                       shgc: 0.45,
-                      fraction_operable: 0.33,
+                      fraction_operable: 0.67,
                       wall_idref: 'Wall2')
     hpxml.windows.add(id: 'WindowEast',
                       area: 72 / 8,
                       azimuth: 90,
                       ufactor: 0.33,
                       shgc: 0.45,
-                      fraction_operable: 0.33,
+                      fraction_operable: 0.67,
                       wall_idref: 'Wall3')
     hpxml.windows.add(id: 'WindowWest',
                       area: 72 / 8,
                       azimuth: 270,
                       ufactor: 0.33,
                       shgc: 0.45,
-                      fraction_operable: 0.33,
+                      fraction_operable: 0.67,
                       wall_idref: 'Wall4')
   elsif ['base-misc-defaults.xml'].include? hpxml_file
     hpxml.windows.each do |window|
