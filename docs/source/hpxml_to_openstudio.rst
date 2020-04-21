@@ -738,16 +738,14 @@ IsInduction    false
 IsConvection   false
 =============  ==============
 
-<<<<<<< HEAD
+An ``extension/UsageMultiplier`` can also be optionally provided that scales energy usage; if not provided, it is assumed to be 1.0.
+
 Dehumidifier
 ************
 
 An ``Appliance/Dehumidifier`` element can be specified; if not provided, a dehumidifier will not be modeled.
 The ``Capacity``, ``DehumidistatSetpoint`` (relative humidity as a fraction, 0-1), and ``FractionDehumidificationLoadServed`` (0-1) must be provided.
 The efficiency of the dehumidifier can either be entered as an ``IntegratedEnergyFactor`` or ``EnergyFactor``.
-=======
-An ``extension/UsageMultiplier`` can also be optionally provided that scales energy usage; if not provided, it is assumed to be 1.0.
->>>>>>> 1e9d97a1ec8cad427a15e6164465f96b35cdf45d
 
 Lighting
 ~~~~~~~~
