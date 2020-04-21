@@ -1558,10 +1558,14 @@ def set_hpxml_windows(hpxml_file, hpxml)
     area_adjustments = []
     for n in 1..hpxml.windows.size
       hpxml.windows[n - 1].area /= 10.0
+      hpxml.windows[n - 1].fraction_operable = 0.0
       for i in 2..10
         hpxml.windows << hpxml.windows[n - 1].dup
         hpxml.windows[-1].id += i.to_s
         hpxml.windows[-1].wall_idref += i.to_s
+        if i >= 7
+          hpxml.windows[-1].fraction_operable = 1.0
+        end
       end
     end
     hpxml.windows << hpxml.windows[-1].dup
