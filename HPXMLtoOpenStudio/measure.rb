@@ -493,7 +493,7 @@ class OSModel
               ef = Waterheater.calc_ef_from_uef(uef, water_heating_system.water_heater_type, water_heating_system.fuel_type)
             end
           end
-          water_heating_system.recovery_efficiency = Waterheater.calc_default_recovery_efficiency(water_heating_system.fuel_type, ef)
+          water_heating_system.recovery_efficiency = Waterheater.get_default_recovery_efficiency(water_heating_system.fuel_type, ef)
         end
       end
       if water_heating_system.location.nil?

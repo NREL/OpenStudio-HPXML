@@ -519,7 +519,15 @@ space-heating boiler with tankless coil                                         
 ========================================  ===================================  ===========  ==========  ===============  ==================  =================  =================  =========================================
 
 For storage water heaters, the tank volume, heating capacity, and recovery efficiency can be optionally provided. If not provided, default values for the tank volume and heating capacity will be assumed based on Table 7 in the `Building America House Simulation Protocols <https://www1.eere.energy.gov/buildings/publications/pdfs/building_america/house_simulation.pdf>`_ 
-and a default recovery efficiency will be calculated based on the regression analysis of `AHRI certified water heaters <https://www.ahridirectory.org/NewSearch?programId=24&searchTypeId=3>`_.
+and a default recovery efficiency will be assumed depending on the fuel type, as shown in the table below. The equations for non-electric storage water heaters are based on the regression analysis of `AHRI certified water heaters <https://www.ahridirectory.org/NewSearch?programId=24&searchTypeId=3>`_.
+
+========================  ======================================
+FuelType                  RecoveryEfficiency
+========================  ======================================
+Electric                  0.98
+Non-electric, EF >= 0.75  .. math:: 0.778114 \cdot EF + 0.276679
+Non-electric, EF < 0.75   .. math:: 0.252117 \cdot EF + 0.607997
+========================  ======================================
 
 For tankless water heaters, an annual energy derate due to cycling inefficiencies can be provided.
 If not provided, a value of 0.08 (8%) will be assumed.

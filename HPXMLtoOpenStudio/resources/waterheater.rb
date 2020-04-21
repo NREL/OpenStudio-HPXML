@@ -1234,7 +1234,7 @@ class Waterheater
     end
   end
 
-  def self.calc_default_recovery_efficiency(fuel, ef)
+  def self.get_default_recovery_efficiency(fuel, ef)
     # Water Heater Recovery Efficiency by fuel and energy factor
     if fuel == HPXML::FuelTypeElectricity
       return 0.98
@@ -1243,8 +1243,6 @@ class Waterheater
     else
       return 0.252117 * ef + 0.607997
     end
-
-    fail "Could not get default water heater RE for fuel '#{fuel}'"
   end
 
   def self.calc_ef_from_uef(uef, type, fuel_type)
