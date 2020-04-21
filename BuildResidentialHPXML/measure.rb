@@ -1724,12 +1724,6 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     arg.setDefaultValue(true)
     args << arg
 
-    arg = OpenStudio::Measure::OSArgument::makeBoolArgument('clothes_washer_present', true)
-    arg.setDisplayName('Clothes Washer: Present')
-    arg.setDescription('Whether there is a clothes washer.')
-    arg.setDefaultValue(true)
-    args << arg
-
     appliance_location_choices = OpenStudio::StringVector.new
     appliance_location_choices << Constants.Auto
     appliance_location_choices << HPXML::LocationLivingSpace
