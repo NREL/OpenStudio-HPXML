@@ -1048,7 +1048,8 @@ class Waterheater
     storage_tank_name = "#{tank.name} storage tank"
     # Preheat tank desuperheater setpoint set to be the same as main water heater
     # FIXME: Preheat tank location (currently assume to be the same as main wh tank)
-    storage_tank = create_new_heater(storage_tank_name, cap, nil, storage_vol_actual, t_set, space, HPXML::WaterHeaterTypeStorage, model, assumed_ua, nil)
+    tank_setpoint = t_set - 5 # reduce tank setpoint to enable desuperheater setpoint at t_set
+    storage_tank = create_new_heater(storage_tank_name, cap, nil, storage_vol_actual, tank_setpoint, space, HPXML::WaterHeaterTypeStorage, model, assumed_ua, nil)
     set_parasitic_power_for_wh(0.0, 0.0, storage_tank)
 
     loop.addSupplyBranchForComponent(storage_tank)
@@ -1058,8 +1059,8 @@ class Waterheater
     new_schedule = OpenStudio::Model::ScheduleConstant.new(model)
     new_schedule.setName("#{desuperheater_name} setpoint schedule")
     # desuperheater setpoint a bit higher than tank setpoint to enable heat reclaim
-    t_dsh_set = t_set + 5
-    new_schedule.setValue(UnitConversions.convert(t_dsh_set, 'F', 'C'))
+    dsh_setpoint = UnitConversions.convert(t_set, 'F', 'C') + deadband(HPXML::WaterHeaterTypeStorage) / 2.0
+    new_schedule.setValue(dsh_setpoint)
 
     # create a desuperheater object
     desuperheater = OpenStudio::Model::CoilWaterHeatingDesuperheater.new(model, new_schedule)
