@@ -85,6 +85,7 @@ def create_hpxmls
     'base-dhw-indirect-dse.xml' => 'base-dhw-indirect.xml',
     'base-dhw-indirect-outside.xml' => 'base-dhw-indirect.xml',
     'base-dhw-indirect-standbyloss.xml' => 'base-dhw-indirect.xml',
+    'base-dhw-indirect-with-solar-fraction.xml' => 'base-dhw-indirect.xml',
     'base-dhw-low-flow-fixtures.xml' => 'base.xml',
     'base-dhw-multiple.xml' => 'base-hvac-boiler-gas-only.xml',
     'base-dhw-none.xml' => 'base.xml',
@@ -97,11 +98,8 @@ def create_hpxmls
     'base-dhw-solar-direct-flat-plate.xml' => 'base.xml',
     'base-dhw-solar-direct-ics.xml' => 'base.xml',
     'base-dhw-solar-fraction.xml' => 'base.xml',
-    'base-dhw-solar-indirect-evacuated-tube.xml' => 'base.xml',
     'base-dhw-solar-indirect-flat-plate.xml' => 'base.xml',
-    'base-dhw-solar-thermosyphon-evacuated-tube.xml' => 'base.xml',
     'base-dhw-solar-thermosyphon-flat-plate.xml' => 'base.xml',
-    'base-dhw-solar-thermosyphon-ics.xml' => 'base.xml',
     'base-dhw-tank-gas.xml' => 'base.xml',
     'base-dhw-tank-gas-outside.xml' => 'base-dhw-tank-gas.xml',
     'base-dhw-tank-heat-pump.xml' => 'base.xml',
@@ -2839,21 +2837,26 @@ end
 
 def set_hpxml_solar_thermal_system(hpxml_file, hpxml)
   if ['base-dhw-solar-fraction.xml',
-      'base-dhw-multiple.xml',
+      'base-dhw-indirect-with-solar-fraction.xml',
       'base-dhw-tank-heat-pump-with-solar-fraction.xml',
-      'base-dhw-tankless-gas-with-solar-fraction.xml',
-      'invalid_files/solar-thermal-system-with-combi-tankless.xml',
-      'invalid_files/solar-thermal-system-with-desuperheater.xml',
-      'invalid_files/solar-thermal-system-with-dhw-indirect.xml'].include? hpxml_file
+      'base-dhw-tankless-gas-with-solar-fraction.xml'].include? hpxml_file
     hpxml.solar_thermal_systems.add(id: 'SolarThermalSystem',
                                     system_type: 'hot water',
                                     water_heating_system_idref: 'WaterHeater',
+                                    solar_fraction: 0.65)
+  elsif ['base-dhw-multiple.xml'].include? hpxml_file
+    hpxml.solar_thermal_systems.add(id: 'SolarThermalSystem',
+                                    system_type: 'hot water',
+                                    water_heating_system_idref: nil, # Apply to all water heaters
                                     solar_fraction: 0.65)
   elsif ['base-dhw-solar-direct-flat-plate.xml',
          'base-dhw-solar-indirect-flat-plate.xml',
          'base-dhw-solar-thermosyphon-flat-plate.xml',
          'base-dhw-tank-heat-pump-with-solar.xml',
-         'base-dhw-tankless-gas-with-solar.xml'].include? hpxml_file
+         'base-dhw-tankless-gas-with-solar.xml',
+         'invalid_files/solar-thermal-system-with-combi-tankless.xml',
+         'invalid_files/solar-thermal-system-with-desuperheater.xml',
+         'invalid_files/solar-thermal-system-with-dhw-indirect.xml'].include? hpxml_file
     hpxml.solar_thermal_systems.add(id: 'SolarThermalSystem',
                                     system_type: 'hot water',
                                     collector_area: 40,
@@ -2871,9 +2874,7 @@ def set_hpxml_solar_thermal_system(hpxml_file, hpxml)
     else
       hpxml.solar_thermal_systems[0].collector_loop_type = HPXML::SolarThermalLoopTypeIndirect
     end
-  elsif ['base-dhw-solar-indirect-evacuated-tube.xml',
-         'base-dhw-solar-direct-evacuated-tube.xml',
-         'base-dhw-solar-thermosyphon-evacuated-tube.xml'].include? hpxml_file
+  elsif ['base-dhw-solar-direct-evacuated-tube.xml'].include? hpxml_file
     hpxml.solar_thermal_systems.add(id: 'SolarThermalSystem',
                                     system_type: 'hot water',
                                     collector_area: 40,
@@ -2886,16 +2887,14 @@ def set_hpxml_solar_thermal_system(hpxml_file, hpxml)
                                     water_heating_system_idref: 'WaterHeater')
     if hpxml_file == 'base-dhw-solar-direct-evacuated-tube.xml'
       hpxml.solar_thermal_systems[0].collector_loop_type = HPXML::SolarThermalLoopTypeDirect
-    elsif hpxml_file == 'base-dhw-solar-thermosyphon-evacuated-tube.xml'
-      hpxml.solar_thermal_systems[0].collector_loop_type = HPXML::SolarThermalLoopTypeThermosyphon
     else
       hpxml.solar_thermal_systems[0].collector_loop_type = HPXML::SolarThermalLoopTypeIndirect
     end
-  elsif ['base-dhw-solar-direct-ics.xml',
-         'base-dhw-solar-thermosyphon-ics.xml'].include? hpxml_file
+  elsif ['base-dhw-solar-direct-ics.xml'].include? hpxml_file
     hpxml.solar_thermal_systems.add(id: 'SolarThermalSystem',
                                     system_type: 'hot water',
                                     collector_area: 40,
+                                    collector_loop_type: HPXML::SolarThermalLoopTypeDirect,
                                     collector_type: HPXML::SolarThermalTypeICS,
                                     collector_azimuth: 180,
                                     collector_tilt: 20,
@@ -2903,11 +2902,6 @@ def set_hpxml_solar_thermal_system(hpxml_file, hpxml)
                                     collector_frul: 0.793,
                                     storage_volume: 60,
                                     water_heating_system_idref: 'WaterHeater')
-    if hpxml_file == 'base-dhw-solar-direct-ics.xml'
-      hpxml.solar_thermal_systems[0].collector_loop_type = HPXML::SolarThermalLoopTypeDirect
-    elsif hpxml_file == 'base-dhw-solar-thermosyphon-ics.xml'
-      hpxml.solar_thermal_systems[0].collector_loop_type = HPXML::SolarThermalLoopTypeThermosyphon
-    end
   elsif ['invalid_files/unattached-solar-thermal-system.xml'].include? hpxml_file
     hpxml.solar_thermal_systems[0].water_heating_system_idref = 'foobar'
   end
