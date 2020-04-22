@@ -2288,6 +2288,11 @@ class OSModel
       end
     end
 
+    solar_thermal_system = nil
+    if @hpxml.solar_thermal_systems.size > 0
+      solar_thermal_system = @hpxml.solar_thermal_systems[0]
+    end
+
     # Water Heater
     dhw_loop_fracs = {}
     water_heater_spaces = {}
@@ -2323,8 +2328,8 @@ class OSModel
         # Solar fraction is used to adjust water heater's tank losses and hot water use, because it is
         # the portion of the total conventional hot water heating load (delivered energy + tank losses).
         solar_fraction = nil
-        if (@hpxml.solar_thermal_systems.size > 0) && (water_heating_system.id == @hpxml.solar_thermal_systems[0].water_heating_system.id)
-          solar_fraction = @hpxml.solar_thermal_systems[0].solar_fraction
+        if (not solar_thermal_system.nil?) && (solar_thermal_system.water_heating_system.nil? || (solar_thermal_system.water_heating_system.id == water_heating_system.id))
+          solar_fraction = solar_thermal_system.solar_fraction
         end
         solar_fraction = 0.0 if solar_fraction.nil?
 
@@ -2370,13 +2375,11 @@ class OSModel
           vol = water_heating_system.tank_volume
           boiler_afue = water_heating_system.related_hvac_system.heating_efficiency_afue
           boiler_fuel_type = water_heating_system.related_hvac_system.heating_system_fuel
-
-          boiler_sys = get_boiler_and_plant_loop(@hvac_map, water_heating_system.related_hvac_idref, sys_id)
-          @dhw_map[sys_id] << boiler_sys['boiler']
+          boiler, plant_loop = get_boiler_and_plant_loop(@hvac_map, water_heating_system.related_hvac_idref, sys_id)
 
           Waterheater.apply_combi(model, runner, space, vol, setpoint_temp, ec_adj, @nbeds,
-                                  boiler_sys['boiler'], boiler_sys['plant_loop'], boiler_fuel_type,
-                                  boiler_afue, @dhw_map, sys_id, wh_type, jacket_r, standby_loss)
+                                  boiler, plant_loop, boiler_fuel_type, boiler_afue, @dhw_map,
+                                  sys_id, wh_type, jacket_r, standby_loss, solar_fraction)
 
         else
 
@@ -2399,20 +2402,18 @@ class OSModel
                                 dwhr_facilities_connected, dwhr_is_equal_flow,
                                 dwhr_efficiency, dhw_loop_fracs, @eri_version, @dhw_map)
 
-    if @hpxml.solar_thermal_systems.size > 0
-      solar_thermal_system = @hpxml.solar_thermal_systems[0]
-      water_heater = solar_thermal_system.water_heating_system
-
-      if [HPXML::WaterHeaterTypeCombiStorage, HPXML::WaterHeaterTypeCombiTankless].include? water_heater.water_heater_type
-        fail "Water heating system '#{water_heater.id}' connected to solar thermal system '#{solar_thermal_system.id}' cannot be a space-heating boiler."
-      end
-
-      if water_heater.uses_desuperheater
-        fail "Water heating system '#{water_heater.id}' connected to solar thermal system '#{solar_thermal_system.id}' cannot be attached to a desuperheater."
-      end
-
+    if not solar_thermal_system.nil?
       collector_area = solar_thermal_system.collector_area
       if not collector_area.nil? # Detailed solar water heater
+        water_heater = solar_thermal_system.water_heating_system
+
+        if [HPXML::WaterHeaterTypeCombiStorage, HPXML::WaterHeaterTypeCombiTankless].include? water_heater.water_heater_type
+          fail "Water heating system '#{water_heater.id}' connected to solar thermal system '#{solar_thermal_system.id}' cannot be a space-heating boiler."
+        end
+        if water_heater.uses_desuperheater
+          fail "Water heating system '#{water_heater.id}' connected to solar thermal system '#{solar_thermal_system.id}' cannot be attached to a desuperheater."
+        end
+
         frta = solar_thermal_system.collector_frta
         frul = solar_thermal_system.collector_frul
         storage_vol = solar_thermal_system.storage_volume
@@ -2977,17 +2978,18 @@ class OSModel
 
   def self.get_boiler_and_plant_loop(loop_hvacs, heating_source_id, sys_id)
     # Search for the right boiler OS object
-    related_boiler_sys = {}
+    boiler = nil
+    plant_loop = nil
     if loop_hvacs.keys.include? heating_source_id
       loop_hvacs[heating_source_id].each do |comp|
         if comp.is_a? OpenStudio::Model::PlantLoop
-          related_boiler_sys['plant_loop'] = comp
+          plant_loop = comp
         elsif comp.is_a? OpenStudio::Model::BoilerHotWater
-          related_boiler_sys['boiler'] = comp
+          boiler = comp
         end
       end
-      return related_boiler_sys
     end
+    return boiler, plant_loop
   end
 
   def self.add_mels(runner, model, spaces)
