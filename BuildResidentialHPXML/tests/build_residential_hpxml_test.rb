@@ -197,15 +197,18 @@ class BuildResidentialHPXMLTest < MiniTest::Test
       end
       hpxml.roofs.each do |roof|
         roof.coordinates = []
+        roof.outward_normal = {}
       end
       hpxml.foundation_walls.each do |foundation_wall|
         foundation_wall.coordinates = []
+        foundation_wall.outward_normal = {}
 
         next if foundation_wall.insulation_assembly_r_value.nil?
         foundation_wall.insulation_assembly_r_value = foundation_wall.insulation_assembly_r_value.round(2)
       end
       hpxml.walls.each do |wall|
         wall.coordinates = []
+        wall.outward_normal = {}
 
         next unless wall.exterior_adjacent_to == HPXML::LocationOutside
         next unless [HPXML::LocationAtticUnvented, HPXML::LocationAtticVented].include? wall.interior_adjacent_to
@@ -214,21 +217,26 @@ class BuildResidentialHPXMLTest < MiniTest::Test
       end
       hpxml.frame_floors.each do |frame_floor|
         frame_floor.coordinates = []
+        frame_floor.outward_normal = {}
       end
       hpxml.slabs.each do |slab|
         slab.coordinates = []
+        slab.outward_normal = {}
       end
       hpxml.windows.each do |window|
         window.coordinates = []
+        window.outward_normal = {}
 
         window.area = window.area.round
         window.overhangs_distance_to_bottom_of_window = nil # TODO: Height of windows
       end
       hpxml.skylights.each do |skylight|
         skylight.coordinates = []
+        skylight.outward_normal = {}
       end
       hpxml.doors.each do |door|
         door.coordinates = []
+        door.outward_normal = {}
 
         door.azimuth = nil # Not important
       end

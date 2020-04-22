@@ -2777,6 +2777,11 @@ class HPXMLFile
         z = UnitConversions.convert(vertex.z + surface.space.get.zOrigin, 'm', 'ft').round(2)
         hpxml.roofs[-1].add_coordinate(x: x, y: y, z: z)
       end
+
+      x = surface.outwardNormal.x.round(2)
+      y = surface.outwardNormal.y.round(2)
+      z = surface.outwardNormal.z.round(2)
+      hpxml.roofs[-1].set_outward_normal(x: x, y: y, z: z)
     end
   end
 
@@ -2837,6 +2842,11 @@ class HPXMLFile
         z = UnitConversions.convert(vertex.z + surface.space.get.zOrigin, 'm', 'ft').round(2)
         hpxml.walls[-1].add_coordinate(x: x, y: y, z: z)
       end
+      
+      x = surface.outwardNormal.x.round(2)
+      y = surface.outwardNormal.y.round(2)
+      z = surface.outwardNormal.z.round(2)
+      hpxml.walls[-1].set_outward_normal(x: x, y: y, z: z)
     end
   end
 
@@ -2877,6 +2887,11 @@ class HPXMLFile
         z = UnitConversions.convert(vertex.z + surface.space.get.zOrigin, 'm', 'ft').round(2)
         hpxml.foundation_walls[-1].add_coordinate(x: x, y: y, z: z)
       end
+      
+      x = surface.outwardNormal.x.round(2)
+      y = surface.outwardNormal.y.round(2)
+      z = surface.outwardNormal.z.round(2)
+      hpxml.foundation_walls[-1].set_outward_normal(x: x, y: y, z: z)
     end
   end
 
@@ -2924,6 +2939,11 @@ class HPXMLFile
         z = UnitConversions.convert(vertex.z + surface.space.get.zOrigin, 'm', 'ft').round(2)
         hpxml.frame_floors[-1].add_coordinate(x: x, y: y, z: z)
       end
+      
+      x = surface.outwardNormal.x.round(2)
+      y = surface.outwardNormal.y.round(2)
+      z = surface.outwardNormal.z.round(2)
+      hpxml.frame_floors[-1].set_outward_normal(x: x, y: y, z: z)
     end
   end
 
@@ -2976,6 +2996,11 @@ class HPXMLFile
         z = UnitConversions.convert(vertex.z + surface.space.get.zOrigin, 'm', 'ft').round(2)
         hpxml.slabs[-1].add_coordinate(x: x, y: y, z: z)
       end
+      
+      x = surface.outwardNormal.x.round(2)
+      y = surface.outwardNormal.y.round(2)
+      z = surface.outwardNormal.z.round(2)
+      hpxml.slabs[-1].set_outward_normal(x: x, y: y, z: z)
     end
   end
 
@@ -3052,6 +3077,11 @@ class HPXMLFile
           z = UnitConversions.convert(vertex.z + sub_surface.space.get.zOrigin, 'm', 'ft').round(2)
           hpxml.windows[-1].add_coordinate(x: x, y: y, z: z)
         end
+        
+        x = surface.outwardNormal.x.round(2)
+        y = surface.outwardNormal.y.round(2)
+        z = surface.outwardNormal.z.round(2)
+        hpxml.windows[-1].set_outward_normal(x: x, y: y, z: z)
       end # sub_surfaces
     end # surfaces
   end
@@ -3076,6 +3106,11 @@ class HPXMLFile
           z = UnitConversions.convert(vertex.z + sub_surface.space.get.zOrigin, 'm', 'ft').round(2)
           hpxml.skylights[-1].add_coordinate(x: x, y: y, z: z)
         end
+        
+        x = surface.outwardNormal.x.round(2)
+        y = surface.outwardNormal.y.round(2)
+        z = surface.outwardNormal.z.round(2)
+        hpxml.skylights[-1].set_outward_normal(x: x, y: y, z: z)
       end
     end
   end
@@ -3099,6 +3134,11 @@ class HPXMLFile
           z = UnitConversions.convert(vertex.z + sub_surface.space.get.zOrigin, 'm', 'ft').round(2)
           hpxml.doors[-1].add_coordinate(x: x, y: y, z: z)
         end
+        
+        x = surface.outwardNormal.x.round(2)
+        y = surface.outwardNormal.y.round(2)
+        z = surface.outwardNormal.z.round(2)
+        hpxml.doors[-1].set_outward_normal(x: x, y: y, z: z)
       end
     end
   end
