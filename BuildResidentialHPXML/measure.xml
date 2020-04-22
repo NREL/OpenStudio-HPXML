@@ -2,8 +2,8 @@
   <schema_version>3.0</schema_version>
   <name>build_residential_hpxml</name>
   <uid>a13a8983-2b01-4930-8af2-42030b6e4233</uid>
-  <version_id>8cfa173e-02ce-451a-abce-f9f01f9c761f</version_id>
-  <version_modified>20200421T175949Z</version_modified>
+  <version_id>b414298a-e7dd-4e3a-91af-97c626085dbd</version_id>
+  <version_modified>20200422T145002Z</version_modified>
   <xml_checksum>2C38F48B</xml_checksum>
   <class_name>BuildResidentialHPXML</class_name>
   <display_name>HPXML Builder</display_name>
@@ -3158,25 +3158,6 @@
       </choices>
     </argument>
     <argument>
-      <name>clothes_washer_present</name>
-      <display_name>Clothes Washer: Present</display_name>
-      <description>Whether there is a clothes washer.</description>
-      <type>Boolean</type>
-      <required>true</required>
-      <model_dependent>false</model_dependent>
-      <default_value>true</default_value>
-      <choices>
-        <choice>
-          <value>true</value>
-          <display_name>true</display_name>
-        </choice>
-        <choice>
-          <value>false</value>
-          <display_name>false</display_name>
-        </choice>
-      </choices>
-    </argument>
-    <argument>
       <name>clothes_washer_location</name>
       <display_name>Clothes Washer: Location</display_name>
       <description>The space type for the clothes washer location.</description>
@@ -3911,23 +3892,6 @@
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
       <checksum>69F5DFFC</checksum>
-    </file>
-    <file>
-      <version>
-        <software_program>OpenStudio</software_program>
-        <identifier>2.9.0</identifier>
-        <min_compatible>2.9.0</min_compatible>
-      </version>
-      <filename>measure.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>script</usage_type>
-      <checksum>16E624B3</checksum>
-    </file>
-    <file>
-      <filename>build_residential_hpxml_test.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>test</usage_type>
-      <checksum>63D95AAE</checksum>
     </file>
     <file>
       <filename>base-misc-usage-multiplier.osw</filename>
@@ -4800,34 +4764,57 @@
       <checksum>D937032D</checksum>
     </file>
     <file>
+      <version>
+        <software_program>OpenStudio</software_program>
+        <identifier>2.9.0</identifier>
+        <min_compatible>2.9.0</min_compatible>
+      </version>
+      <filename>measure.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>script</usage_type>
+      <checksum>6428DDB9</checksum>
+    </file>
+    <file>
       <filename>base-appliances-dehumidifier-50percent.osw</filename>
       <filetype>osw</filetype>
       <usage_type>test</usage_type>
-      <checksum>7A3F82F8</checksum>
+      <checksum>2F21D1DD</checksum>
     </file>
     <file>
       <filename>base-appliances-dehumidifier-ief.osw</filename>
       <filetype>osw</filetype>
       <usage_type>test</usage_type>
-      <checksum>D59A288E</checksum>
+      <checksum>5A92E1F6</checksum>
     </file>
     <file>
       <filename>base-appliances-dehumidifier.osw</filename>
       <filetype>osw</filetype>
       <usage_type>test</usage_type>
-      <checksum>D749E4D2</checksum>
+      <checksum>251A3ABB</checksum>
     </file>
     <file>
-      <filename>test_measure.xml</filename>
-      <filetype>xml</filetype>
+      <filename>build_residential_hpxml_test.rb</filename>
+      <filetype>rb</filetype>
       <usage_type>test</usage_type>
-      <checksum>670A170B</checksum>
+      <checksum>24D07271</checksum>
     </file>
     <file>
       <filename>test_rakefile.xml</filename>
       <filetype>xml</filetype>
       <usage_type>test</usage_type>
-      <checksum>5E2573CD</checksum>
+      <checksum>0E78450E</checksum>
+    </file>
+    <file>
+      <filename>test_measure.xml</filename>
+      <filetype>xml</filetype>
+      <usage_type>test</usage_type>
+      <checksum>B2D412F4</checksum>
+    </file>
+    <file>
+      <filename>base-dhw-indirect-with-solar-fraction.osw</filename>
+      <filetype>osw</filetype>
+      <usage_type>test</usage_type>
+      <checksum>E4C3E982</checksum>
     </file>
   </files>
 </measure>

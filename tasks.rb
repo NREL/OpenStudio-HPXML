@@ -36,6 +36,7 @@ def create_osws
     # 'base-dhw-indirect-dse.osw' => 'base.osw', # Not going to support DSE
     'base-dhw-indirect-outside.osw' => 'base.osw',
     'base-dhw-indirect-standbyloss.osw' => 'base.osw',
+    'base-dhw-indirect-with-solar-fraction.osw' => 'base.osw',
     'base-dhw-jacket-electric.osw' => 'base.osw',
     'base-dhw-jacket-gas.osw' => 'base.osw',
     'base-dhw-jacket-hpwh.osw' => 'base.osw',
@@ -686,6 +687,14 @@ def get_values(osw_file, step)
     step.setArgument('water_heater_type', HPXML::WaterHeaterTypeCombiStorage)
     step.setArgument('water_heater_tank_volume', '50')
     step.setArgument('water_heater_standby_loss', 1.0)
+  elsif ['base-dhw-indirect-with-solar-fraction.osw'].include? osw_file
+    step.setArgument('heating_system_type', HPXML::HVACTypeBoiler)
+    step.setArgument('heating_system_electric_auxiliary_energy', 200.0)
+    step.setArgument('cooling_system_type', 'none')
+    step.setArgument('water_heater_type', HPXML::WaterHeaterTypeCombiStorage)
+    step.setArgument('water_heater_tank_volume', '50')
+    step.setArgument('solar_thermal_system_type', 'hot water')
+    step.setArgument('solar_thermal_solar_fraction', 0.65)
   elsif ['base-dhw-jacket-electric.osw'].include? osw_file
     step.setArgument('water_heater_jacket_rvalue', 10.0)
   elsif ['base-dhw-jacket-gas.osw'].include? osw_file
