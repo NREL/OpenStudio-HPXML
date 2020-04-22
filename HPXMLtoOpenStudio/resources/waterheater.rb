@@ -829,8 +829,10 @@ class Waterheater
   end
 
   def self.apply_combi(model, runner, space, vol, t_set, ec_adj, nbeds,
-                       boiler, boiler_plant_loop, boiler_fuel_type,
-                       boiler_afue, dhw_map, sys_id, wh_type, jacket_r, standby_loss)
+                       boiler, boiler_plant_loop, boiler_fuel_type, boiler_afue,
+                       dhw_map, sys_id, wh_type, jacket_r, standby_loss, solar_fraction)
+    dhw_map[sys_id] << boiler
+
     obj_name_combi = Constants.ObjectNameWaterHeater
     convlim = model.getConvergenceLimits
     convlim.setMinimumPlantIterations(3) # add one more minimum plant iteration to achieve better energy balance across plant loops.
@@ -845,7 +847,7 @@ class Waterheater
       end
       act_vol = calc_storage_tank_actual_vol(vol, nil)
       a_side = calc_tank_areas(act_vol)[1]
-      ua = calc_indirect_ua_with_standbyloss(act_vol, standby_loss, jacket_r, a_side)
+      ua = calc_indirect_ua_with_standbyloss(act_vol, standby_loss, jacket_r, a_side, solar_fraction)
     else
       tank_type = HPXML::WaterHeaterTypeTankless
       ua = 0.0
@@ -1212,7 +1214,7 @@ class Waterheater
     return surface_area, a_side
   end
 
-  def self.calc_indirect_ua_with_standbyloss(act_vol, standby_loss, jacket_r, a_side)
+  def self.calc_indirect_ua_with_standbyloss(act_vol, standby_loss, jacket_r, a_side, solar_fraction)
     # Test conditions
     cp = 0.999 # Btu/lb-F
     rho = 8.216 # lb/gal
@@ -1225,13 +1227,14 @@ class Waterheater
 
     # jacket
     ua = apply_tank_jacket(jacket_r, nil, nil, ua, a_side)
+
+    ua *= (1.0 - solar_fraction)
     return ua
   end
 
   def self.get_default_num_bathrooms(num_beds)
-    # From https://www.sansomeandgeorge.co.uk/news-updates/what-is-the-ideal-ratio-of-bathrooms-to-bedrooms.html
-    # "According to 70% of estate agents, a property should have two bathrooms for every three bedrooms..."
-    num_baths = 2.0 / 3.0 * num_beds
+    # From BA HSP
+    num_baths = num_beds / 2.0 + 0.5
   end
 
   def self.add_ec_adj(model, heater, ec_adj, space, fuel_type, wh_type, combi_boiler = nil, combi_hx = nil)

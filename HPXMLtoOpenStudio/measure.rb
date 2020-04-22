@@ -262,6 +262,7 @@ class OSModel
     add_cooling_system(runner, model)
     add_heating_system(runner, model)
     add_heat_pump(runner, model, weather)
+    add_dehumidifier(runner, model)
     add_residual_hvac(runner, model)
     add_setpoints(runner, model, weather)
     add_ceiling_fans(runner, model, weather)
@@ -339,22 +340,42 @@ class OSModel
       @hpxml.building_construction.conditioned_building_volume = @cfa * @hpxml.building_construction.average_ceiling_height
     end
     @cvolume = @hpxml.building_construction.conditioned_building_volume
+    @nbaths = @hpxml.building_construction.number_of_bathrooms
+    if @hpxml.building_construction.number_of_bathrooms.nil?
+      @nbaths = Waterheater.get_default_num_bathrooms(@nbeds)
+    else
+      @nbaths = Float(@hpxml.building_construction.number_of_bathrooms)
+    end
 
     # Default attics/foundations
     if @hpxml.has_space_type(HPXML::LocationAtticVented)
+      vented_attic = nil
       @hpxml.attics.each do |attic|
         next unless attic.attic_type == HPXML::AtticTypeVented
-        next unless (attic.vented_attic_sla.nil? && attic.vented_attic_constant_ach.nil?)
-
-        attic.vented_attic_sla = Airflow.get_default_vented_attic_sla()
+        vented_attic = attic
+      end
+      if vented_attic.nil?
+        @hpxml.attics.add(id: 'VentedAttic',
+                          attic_type: HPXML::AtticTypeVented)
+        vented_attic = @hpxml.attics[-1]
+      end
+      if vented_attic.vented_attic_sla.nil? && vented_attic.vented_attic_constant_ach.nil?
+        vented_attic.vented_attic_sla = Airflow.get_default_vented_attic_sla()
       end
     end
     if @hpxml.has_space_type(HPXML::LocationCrawlspaceVented)
+      vented_crawl = nil
       @hpxml.foundations.each do |foundation|
         next unless foundation.foundation_type == HPXML::FoundationTypeCrawlspaceVented
-        next unless foundation.vented_crawlspace_sla.nil?
-
-        foundation.vented_crawlspace_sla = Airflow.get_default_vented_crawl_sla()
+        vented_crawl = foundation
+      end
+      if vented_crawl.nil?
+        @hpxml.foundations.add(id: 'VentedCrawlspace',
+                               foundation_type: HPXML::FoundationTypeCrawlspaceVented)
+        vented_crawl = @hpxml.foundations[-1]
+      end
+      if vented_crawl.vented_crawlspace_sla.nil?
+        vented_crawl.vented_crawlspace_sla = Airflow.get_default_vented_crawl_sla()
       end
     end
 
@@ -389,10 +410,10 @@ class OSModel
         window.interior_shading_factor_winter = default_shade_winter
       end
       if window.fraction_operable.nil?
-        window.fraction_operable = Airflow.get_default_fraction_of_operable_window_area()
+        window.fraction_operable = Airflow.get_default_fraction_of_windows_operable()
       end
     end
-    @frac_window_area_operable = @hpxml.fraction_of_window_area_operable()
+    @frac_windows_operable = @hpxml.fraction_of_windows_operable()
 
     # Default AC/HP compressor type
     @hpxml.cooling_systems.each do |cooling_system|
@@ -475,6 +496,45 @@ class OSModel
     # Default water fixtures
     if @hpxml.water_heating.water_fixtures_usage_multiplier.nil?
       @hpxml.water_heating.water_fixtures_usage_multiplier = 1.0
+    end
+
+    # Default kitchen fan
+    @hpxml.ventilation_fans.each do |vent_fan|
+      next unless (vent_fan.used_for_local_ventilation && (vent_fan.fan_location == HPXML::VentilationFanLocationKitchen))
+
+      if vent_fan.rated_flow_rate.nil?
+        vent_fan.rated_flow_rate = 100.0 # cfm, per BA HSP
+      end
+      if vent_fan.hours_in_operation.nil?
+        vent_fan.hours_in_operation = 1.0 # hrs/day, per BA HSP
+      end
+      if vent_fan.fan_power.nil?
+        vent_fan.fan_power = 0.3 * vent_fan.rated_flow_rate # W, per BA HSP
+      end
+      if vent_fan.start_hour.nil?
+        vent_fan.start_hour = 18 # 6 pm, per BA HSP
+      end
+    end
+
+    # Default bath fans
+    @hpxml.ventilation_fans.each do |vent_fan|
+      next unless (vent_fan.used_for_local_ventilation && (vent_fan.fan_location == HPXML::VentilationFanLocationBath))
+
+      if vent_fan.quantity.nil?
+        vent_fan.quantity = @nbaths.to_i
+      end
+      if vent_fan.rated_flow_rate.nil?
+        vent_fan.rated_flow_rate = 50.0 # cfm, per BA HSP
+      end
+      if vent_fan.hours_in_operation.nil?
+        vent_fan.hours_in_operation = 1.0 # hrs/day, per BA HSP
+      end
+      if vent_fan.fan_power.nil?
+        vent_fan.fan_power = 0.3 * vent_fan.rated_flow_rate # W, per BA HSP
+      end
+      if vent_fan.start_hour.nil?
+        vent_fan.start_hour = 7 # 7 am, per BA HSP
+      end
     end
 
     # Default ceiling fans
@@ -1991,6 +2051,15 @@ class OSModel
   end
 
   def self.add_windows(runner, model, spaces, weather)
+    # We already stored @fraction_of_windows_operable, so lets remove the
+    # fraction_operable properties from windows and re-collapse the enclosure
+    # so as to prevent potentially modeling multiple identical windows in E+,
+    # which can increase simulation runtime.
+    @hpxml.windows.each do |window|
+      window.fraction_operable = nil
+    end
+    @hpxml.collapse_enclosure_surfaces()
+
     surfaces = []
     @hpxml.windows.each do |window|
       window_height = 4.0 # ft, default
@@ -2223,6 +2292,11 @@ class OSModel
       end
     end
 
+    solar_thermal_system = nil
+    if @hpxml.solar_thermal_systems.size > 0
+      solar_thermal_system = @hpxml.solar_thermal_systems[0]
+    end
+
     # Water Heater
     dhw_loop_fracs = {}
     water_heater_spaces = {}
@@ -2258,8 +2332,8 @@ class OSModel
         # Solar fraction is used to adjust water heater's tank losses and hot water use, because it is
         # the portion of the total conventional hot water heating load (delivered energy + tank losses).
         solar_fraction = nil
-        if (@hpxml.solar_thermal_systems.size > 0) && (water_heating_system.id == @hpxml.solar_thermal_systems[0].water_heating_system.id)
-          solar_fraction = @hpxml.solar_thermal_systems[0].solar_fraction
+        if (not solar_thermal_system.nil?) && (solar_thermal_system.water_heating_system.nil? || (solar_thermal_system.water_heating_system.id == water_heating_system.id))
+          solar_fraction = solar_thermal_system.solar_fraction
         end
         solar_fraction = 0.0 if solar_fraction.nil?
 
@@ -2305,13 +2379,11 @@ class OSModel
           vol = water_heating_system.tank_volume
           boiler_afue = water_heating_system.related_hvac_system.heating_efficiency_afue
           boiler_fuel_type = water_heating_system.related_hvac_system.heating_system_fuel
-
-          boiler_sys = get_boiler_and_plant_loop(@hvac_map, water_heating_system.related_hvac_idref, sys_id)
-          @dhw_map[sys_id] << boiler_sys['boiler']
+          boiler, plant_loop = get_boiler_and_plant_loop(@hvac_map, water_heating_system.related_hvac_idref, sys_id)
 
           Waterheater.apply_combi(model, runner, space, vol, setpoint_temp, ec_adj, @nbeds,
-                                  boiler_sys['boiler'], boiler_sys['plant_loop'], boiler_fuel_type,
-                                  boiler_afue, @dhw_map, sys_id, wh_type, jacket_r, standby_loss)
+                                  boiler, plant_loop, boiler_fuel_type, boiler_afue, @dhw_map,
+                                  sys_id, wh_type, jacket_r, standby_loss, solar_fraction)
 
         else
 
@@ -2334,20 +2406,18 @@ class OSModel
                                 dwhr_facilities_connected, dwhr_is_equal_flow,
                                 dwhr_efficiency, dhw_loop_fracs, @eri_version, @dhw_map)
 
-    if @hpxml.solar_thermal_systems.size > 0
-      solar_thermal_system = @hpxml.solar_thermal_systems[0]
-      water_heater = solar_thermal_system.water_heating_system
-
-      if [HPXML::WaterHeaterTypeCombiStorage, HPXML::WaterHeaterTypeCombiTankless].include? water_heater.water_heater_type
-        fail "Water heating system '#{water_heater.id}' connected to solar thermal system '#{solar_thermal_system.id}' cannot be a space-heating boiler."
-      end
-
-      if water_heater.uses_desuperheater
-        fail "Water heating system '#{water_heater.id}' connected to solar thermal system '#{solar_thermal_system.id}' cannot be attached to a desuperheater."
-      end
-
+    if not solar_thermal_system.nil?
       collector_area = solar_thermal_system.collector_area
       if not collector_area.nil? # Detailed solar water heater
+        water_heater = solar_thermal_system.water_heating_system
+
+        if [HPXML::WaterHeaterTypeCombiStorage, HPXML::WaterHeaterTypeCombiTankless].include? water_heater.water_heater_type
+          fail "Water heating system '#{water_heater.id}' connected to solar thermal system '#{solar_thermal_system.id}' cannot be a space-heating boiler."
+        end
+        if water_heater.uses_desuperheater
+          fail "Water heating system '#{water_heater.id}' connected to solar thermal system '#{solar_thermal_system.id}' cannot be attached to a desuperheater."
+        end
+
         frta = solar_thermal_system.collector_frta
         frul = solar_thermal_system.collector_frul
         storage_vol = solar_thermal_system.storage_volume
@@ -2399,19 +2469,13 @@ class OSModel
 
   def self.calc_sequential_load_fraction(load_fraction, remaining_fraction)
     if remaining_fraction > 0
-      if (load_fraction - remaining_fraction).abs <= 0.010001
-        # Last equipment to handle all the remaining load (within 0.01 tolerance)
-        load_fraction = remaining_fraction
-        sequential_load_frac = 1.0 # Fraction of remaining load served by this system
-      else
-        sequential_load_frac = load_fraction / remaining_fraction # Fraction of remaining load served by this system
-      end
+      sequential_load_frac = load_fraction / remaining_fraction # Fraction of remaining load served by this system
     else
       sequential_load_frac = 0.0
     end
     remaining_fraction -= load_fraction
 
-    return sequential_load_frac, remaining_fraction, load_fraction
+    return sequential_load_frac, remaining_fraction
   end
 
   def self.add_cooling_system(runner, model)
@@ -2428,7 +2492,7 @@ class OSModel
       end
 
       load_frac = cooling_system.fraction_cool_load_served
-      sequential_load_frac, @total_frac_remaining_cool_load_served, load_frac = calc_sequential_load_fraction(load_frac, @total_frac_remaining_cool_load_served)
+      sequential_load_frac, @total_frac_remaining_cool_load_served = calc_sequential_load_fraction(load_frac, @total_frac_remaining_cool_load_served)
 
       check_distribution_system(cooling_system.distribution_system, clg_type)
 
@@ -2517,7 +2581,7 @@ class OSModel
         end
 
         load_frac = heating_system.fraction_heat_load_served
-        sequential_load_frac, @total_frac_remaining_heat_load_served, load_frac = calc_sequential_load_fraction(load_frac, @total_frac_remaining_heat_load_served)
+        sequential_load_frac, @total_frac_remaining_heat_load_served = calc_sequential_load_fraction(load_frac, @total_frac_remaining_heat_load_served)
 
         @hvac_map[heating_system.id] = []
 
@@ -2611,10 +2675,10 @@ class OSModel
       end
 
       load_frac_heat = heat_pump.fraction_heat_load_served
-      sequential_load_frac_heat, @total_frac_remaining_heat_load_served, load_frac_heat = calc_sequential_load_fraction(load_frac_heat, @total_frac_remaining_heat_load_served)
+      sequential_load_frac_heat, @total_frac_remaining_heat_load_served = calc_sequential_load_fraction(load_frac_heat, @total_frac_remaining_heat_load_served)
 
       load_frac_cool = heat_pump.fraction_cool_load_served
-      sequential_load_frac_cool, @total_frac_remaining_cool_load_served, load_frac_cool = calc_sequential_load_fraction(load_frac_cool, @total_frac_remaining_cool_load_served)
+      sequential_load_frac_cool, @total_frac_remaining_cool_load_served = calc_sequential_load_fraction(load_frac_cool, @total_frac_remaining_cool_load_served)
 
       backup_heat_fuel = heat_pump.backup_heating_fuel
       if not backup_heat_fuel.nil?
@@ -2883,6 +2947,15 @@ class OSModel
                             @cfa, @living_space)
   end
 
+  def self.add_dehumidifier(runner, model)
+    return if @hpxml.dehumidifiers.size == 0
+
+    dehumidifier = @hpxml.dehumidifiers[0]
+    @hvac_map[dehumidifier.id] = []
+
+    HVAC.apply_dehumidifier(model, runner, dehumidifier, @living_space, @hvac_map)
+  end
+
   def self.check_distribution_system(hvac_distribution, system_type)
     return if hvac_distribution.nil?
 
@@ -2903,17 +2976,18 @@ class OSModel
 
   def self.get_boiler_and_plant_loop(loop_hvacs, heating_source_id, sys_id)
     # Search for the right boiler OS object
-    related_boiler_sys = {}
+    boiler = nil
+    plant_loop = nil
     if loop_hvacs.keys.include? heating_source_id
       loop_hvacs[heating_source_id].each do |comp|
         if comp.is_a? OpenStudio::Model::PlantLoop
-          related_boiler_sys['plant_loop'] = comp
+          plant_loop = comp
         elsif comp.is_a? OpenStudio::Model::BoilerHotWater
-          related_boiler_sys['boiler'] = comp
+          boiler = comp
         end
       end
-      return related_boiler_sys
     end
+    return boiler, plant_loop
   end
 
   def self.add_mels(runner, model, spaces)
@@ -3005,7 +3079,7 @@ class OSModel
                              vented_attic_sla, unvented_attic_sla, vented_attic_const_ach, unconditioned_basement_ach, has_flue_chimney, terrain)
 
     # Natural Ventilation
-    nv_frac_window_area_open = @frac_window_area_operable * 0.20 # Assume 20% of operable window area is open
+    nv_frac_window_area_open = @frac_windows_operable * 0.5 * 0.2 # Assume A) 50% of the area of an operable window can be open, and B) 20% of openable window area is actually open
     nv_num_days_per_week = 7
     nv_max_oa_hr = 0.0115
     nv_max_oa_rh = 0.7
@@ -3047,56 +3121,68 @@ class OSModel
     mech_vent_cfm = 0.0
     mech_vent_attached_dist_system = nil
     cfis_open_time = 0.0
-    @hpxml.ventilation_fans.each do |ventilation_fan|
-      next unless ventilation_fan.used_for_whole_building_ventilation
+    @hpxml.ventilation_fans.each do |vent_fan|
+      next unless vent_fan.used_for_whole_building_ventilation
 
-      mech_vent_id = ventilation_fan.id
-      mech_vent_type = ventilation_fan.fan_type
+      mech_vent_id = vent_fan.id
+      mech_vent_type = vent_fan.fan_type
       if (mech_vent_type == HPXML::MechVentTypeERV) || (mech_vent_type == HPXML::MechVentTypeHRV)
-        if ventilation_fan.sensible_recovery_efficiency_adjusted.nil?
-          mech_vent_sens_eff = ventilation_fan.sensible_recovery_efficiency
+        if vent_fan.sensible_recovery_efficiency_adjusted.nil?
+          mech_vent_sens_eff = vent_fan.sensible_recovery_efficiency
         else
-          mech_vent_sens_eff_adj = ventilation_fan.sensible_recovery_efficiency_adjusted
+          mech_vent_sens_eff_adj = vent_fan.sensible_recovery_efficiency_adjusted
         end
       end
       if mech_vent_type == HPXML::MechVentTypeERV
-        if ventilation_fan.total_recovery_efficiency_adjusted.nil?
-          mech_vent_total_eff = ventilation_fan.total_recovery_efficiency
+        if vent_fan.total_recovery_efficiency_adjusted.nil?
+          mech_vent_total_eff = vent_fan.total_recovery_efficiency
         else
-          mech_vent_total_eff_adj = ventilation_fan.total_recovery_efficiency_adjusted
+          mech_vent_total_eff_adj = vent_fan.total_recovery_efficiency_adjusted
         end
       end
-      mech_vent_cfm = ventilation_fan.tested_flow_rate
+      mech_vent_cfm = vent_fan.tested_flow_rate
       if mech_vent_cfm.nil?
-        mech_vent_cfm = ventilation_fan.rated_flow_rate
+        mech_vent_cfm = vent_fan.rated_flow_rate
       end
-      mech_vent_fan_w = ventilation_fan.fan_power
+      mech_vent_fan_w = vent_fan.fan_power
       if mech_vent_type == HPXML::MechVentTypeCFIS
         # CFIS: Specify minimum open time in minutes
-        cfis_open_time = [ventilation_fan.hours_in_operation / 24.0 * 60.0, 59.999].min
+        cfis_open_time = [vent_fan.hours_in_operation / 24.0 * 60.0, 59.999].min
       else
         # Other: Adjust constant CFM/power based on hours per day of operation
-        mech_vent_cfm *= (ventilation_fan.hours_in_operation / 24.0)
-        mech_vent_fan_w *= (ventilation_fan.hours_in_operation / 24.0)
+        mech_vent_cfm *= (vent_fan.hours_in_operation / 24.0)
+        mech_vent_fan_w *= (vent_fan.hours_in_operation / 24.0)
       end
-      mech_vent_attached_dist_system = ventilation_fan.distribution_system
+      mech_vent_attached_dist_system = vent_fan.distribution_system
     end
     cfis_airflow_frac = 1.0
     clothes_dryer_exhaust = 0.0
-    range_exhaust = 0.0
-    range_exhaust_hour = 16
-    bathroom_exhaust = 0.0
-    bathroom_exhaust_hour = 5
+
+    # Kitchen range fan
+    vent_fan_kitchen = nil
+    @hpxml.ventilation_fans.each do |vent_fan|
+      next unless (vent_fan.used_for_local_ventilation && (vent_fan.fan_location == HPXML::VentilationFanLocationKitchen))
+
+      vent_fan_kitchen = vent_fan
+    end
+
+    # Bath fans
+    vent_fan_bath = nil
+    @hpxml.ventilation_fans.each do |vent_fan|
+      next unless (vent_fan.used_for_local_ventilation && (vent_fan.fan_location == HPXML::VentilationFanLocationBath))
+
+      vent_fan_bath = vent_fan
+    end
 
     # Whole house fan
     whole_house_fan_w = 0.0
     whole_house_fan_cfm = 0.0
     whf_num_days_per_week = 0
-    @hpxml.ventilation_fans.each do |ventilation_fan|
-      next unless ventilation_fan.used_for_seasonal_cooling_load_reduction
+    @hpxml.ventilation_fans.each do |vent_fan|
+      next unless vent_fan.used_for_seasonal_cooling_load_reduction
 
-      whole_house_fan_w = ventilation_fan.fan_power
-      whole_house_fan_cfm = ventilation_fan.rated_flow_rate
+      whole_house_fan_w = vent_fan.fan_power
+      whole_house_fan_cfm = vent_fan.rated_flow_rate
       whf_num_days_per_week = 7
     end
     whf = WholeHouseFan.new(whole_house_fan_cfm, whole_house_fan_w, whf_num_days_per_week)
@@ -3122,20 +3208,14 @@ class OSModel
     end
 
     mech_vent = MechanicalVentilation.new(mech_vent_type, mech_vent_total_eff, mech_vent_total_eff_adj, mech_vent_cfm,
-                                          mech_vent_fan_w, mech_vent_sens_eff, mech_vent_sens_eff_adj,
-                                          clothes_dryer_exhaust, range_exhaust,
-                                          range_exhaust_hour, bathroom_exhaust, bathroom_exhaust_hour,
+                                          mech_vent_fan_w, mech_vent_sens_eff, mech_vent_sens_eff_adj, clothes_dryer_exhaust,
                                           cfis_open_time, cfis_airflow_frac, cfis_airloop)
 
-    nbaths = @hpxml.building_construction.number_of_bathrooms
-    if nbaths.nil?
-      nbaths = Waterheater.get_default_num_bathrooms(@nbeds)
-    end
     window_area = @hpxml.windows.map { |w| w.area }.inject(0, :+)
     infil_height = Airflow.calc_inferred_infiltration_height(@cfa, @ncfl, @ncfl_ag, @infil_volume, @hpxml)
     Airflow.apply(model, runner, weather, infil, mech_vent, nat_vent, whf, duct_systems,
-                  @cfa, @infil_volume, infil_height, @nbeds, nbaths, @ncfl_ag, window_area,
-                  @min_neighbor_distance)
+                  @cfa, @infil_volume, infil_height, @nbeds, @nbaths, @ncfl_ag, window_area,
+                  @min_neighbor_distance, vent_fan_kitchen, vent_fan_bath)
   end
 
   def self.create_ducts(hvac_distribution, model, spaces)
@@ -3308,6 +3388,8 @@ class OSModel
 
     tot_load_sensors[:clg] = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Cooling:EnergyTransfer')
     tot_load_sensors[:clg].setName('clg_load_tot')
+
+    load_adj_sensors = {} # Sensors used to adjust E+ EnergyTransfer meter, eg. dehumidifier as load in our program, but included in Heating:EnergyTransfer as HVAC equipment
 
     # EMS Sensors: Surfaces, SubSurfaces, InternalMass
 
@@ -3616,6 +3698,19 @@ class OSModel
       end
     end
 
+    model.getZoneHVACDehumidifierDXs.each do |e|
+      next unless e.thermalZone.get.name.to_s == @living_zone.name.to_s
+
+      intgains_sensors << []
+      { 'Zone Dehumidifier Sensible Heating Energy' => 'ig_dehumidifier' }.each do |var, name|
+        intgain_dehumidifier = OpenStudio::Model::EnergyManagementSystemSensor.new(model, var)
+        intgain_dehumidifier.setName(name)
+        intgain_dehumidifier.setKeyName(e.name.to_s)
+        load_adj_sensors[:dehumidifier] = intgain_dehumidifier
+        intgains_sensors[-1] << intgain_dehumidifier
+      end
+    end
+
     intgains_dhw_sensors = {}
 
     (model.getWaterHeaterMixeds + model.getWaterHeaterStratifieds).sort.each do |wh|
@@ -3741,9 +3836,21 @@ class OSModel
     program.addLine('Set loads_htg_tot = 0')
     program.addLine('Set loads_clg_tot = 0')
     program.addLine("If #{liv_load_sensors[:htg].name} > 0")
-    program.addLine("  Set loads_htg_tot = #{tot_load_sensors[:htg].name} - #{tot_load_sensors[:clg].name}")
+    s = "  Set loads_htg_tot = #{tot_load_sensors[:htg].name} - #{tot_load_sensors[:clg].name}"
+    load_adj_sensors.each do |key, adj_sensor|
+      if ['dehumidifier'].include? key.to_s
+        s += " - #{adj_sensor.name}"
+      end
+    end
+    program.addLine(s)
     program.addLine("ElseIf #{liv_load_sensors[:clg].name} > 0")
-    program.addLine("  Set loads_clg_tot = #{tot_load_sensors[:clg].name} - #{tot_load_sensors[:htg].name}")
+    s = "  Set loads_clg_tot = #{tot_load_sensors[:clg].name} - #{tot_load_sensors[:htg].name}"
+    load_adj_sensors.each do |key, adj_sensor|
+      if ['dehumidifier'].include? key.to_s
+        s += " + #{adj_sensor.name}"
+      end
+    end
+    program.addLine(s)
     program.addLine('EndIf')
 
     # EMS calling manager

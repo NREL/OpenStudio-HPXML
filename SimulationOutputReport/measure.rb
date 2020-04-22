@@ -313,6 +313,8 @@ class SimulationOutputReport < OpenStudio::Measure::ReportingMeasure
     elsif timeseries_frequency == 'daily'
       timeseries_size /= 3600
       timeseries_size /= 24
+    elsif timeseries_frequency == 'monthly'
+      timeseries_size = run_period.getEndMonth - run_period.getBeginMonth + 1
     elsif timeseries_frequency == 'timestep'
       timeseries_size /= 3600
       timeseries_size *= @model.getTimestep.numberOfTimestepsPerHour
@@ -349,6 +351,7 @@ class SimulationOutputReport < OpenStudio::Measure::ReportingMeasure
     end
     outputs[:hpxml_heat_sys_ids] = get_hpxml_heat_sys_ids()
     outputs[:hpxml_cool_sys_ids] = get_hpxml_cool_sys_ids()
+    outputs[:hpxml_dehumidifier_id] = @hpxml.dehumidifiers[0].id if @hpxml.dehumidifiers.size > 0
     outputs[:hpxml_dhw_sys_ids] = get_hpxml_dhw_sys_ids()
     outputs[:hpxml_dse_heats] = get_hpxml_dse_heats(outputs[:hpxml_heat_sys_ids])
     outputs[:hpxml_dse_cools] = get_hpxml_dse_cools(outputs[:hpxml_cool_sys_ids])
@@ -467,6 +470,21 @@ class SimulationOutputReport < OpenStudio::Measure::ReportingMeasure
       if [Constants.CalcTypeERIReferenceHome, Constants.CalcTypeERIIndexAdjustmentReferenceHome].include? @eri_design
         @loads[LT::Cooling].annual_output_by_system[sys_id] = split_clg_load_to_system_by_fraction(sys_id, @loads[LT::Cooling].annual_output)
       end
+    end
+
+    # Dehumidifier
+    end_use = @end_uses[[FT::Elec, EUT::Dehumidifier]]
+    vars = get_all_var_keys(end_use.variable)
+    ep_output_name = @hvac_map[outputs[:hpxml_dehumidifier_id]]
+    if not ep_output_name.nil?
+      keys = ep_output_name.map(&:upcase)
+      end_use.annual_output = get_report_variable_data_annual_mbtu(keys, vars)
+      if include_timeseries_end_use_consumptions
+        end_use.timeseries_output = get_report_variable_data_timeseries(keys, vars, UnitConversions.convert(1.0, 'J', end_use.timeseries_units), 0, timeseries_frequency)
+      end
+    else
+      end_use.annual_output = 0
+      end_use.timeseries_output = [0.0] * @timeseries_size
     end
 
     # Water Heating (by System)
@@ -797,6 +815,8 @@ class SimulationOutputReport < OpenStudio::Measure::ReportingMeasure
       data = ['Hour', '#']
     elsif timeseries_frequency == 'daily'
       data = ['Day', '#']
+    elsif timeseries_frequency == 'monthly'
+      data = ['Month', '#']
     elsif timeseries_frequency == 'timestep'
       data = ['Timestep', '#']
     else
@@ -1177,8 +1197,10 @@ class SimulationOutputReport < OpenStudio::Measure::ReportingMeasure
     values = values.get
     values += [0.0] * @timeseries_size if values.size == 0
     if (key_values_list.size == 1) && (key_values_list[0] == 'EMS')
-      # Shift all values by 1 timestep due to EMS reporting lag
-      return values[1..-1] + [values[-1]]
+      if (timeseries_frequency.downcase == 'timestep' || (timeseries_frequency.downcase == 'hourly' && @model.getTimestep.numberOfTimestepsPerHour == 1))
+        # Shift all values by 1 timestep due to EMS reporting lag
+        return values[1..-1] + [values[-1]]
+      end
     end
 
     return values
@@ -1312,8 +1334,10 @@ class SimulationOutputReport < OpenStudio::Measure::ReportingMeasure
   def get_dhw_solar_fraction(sys_id)
     solar_fraction = 0.0
     if @hpxml.solar_thermal_systems.size > 0
-      if @hpxml.solar_thermal_systems[0].water_heating_system_idref == sys_id
-        solar_fraction = @hpxml.solar_thermal_systems[0].solar_fraction.to_f
+      solar_thermal_system = @hpxml.solar_thermal_systems[0]
+      water_heater_idref = solar_thermal_system.water_heating_system_idref
+      if water_heater_idref.nil? || (water_heater_idref == sys_id)
+        solar_fraction = solar_thermal_system.solar_fraction.to_f
       end
     end
     return solar_fraction
@@ -1387,7 +1411,8 @@ class SimulationOutputReport < OpenStudio::Measure::ReportingMeasure
                         OutputVars.SpaceHeatingWoodPellets,
                         OutputVars.SpaceHeatingDFHPPrimaryLoad,
                         OutputVars.SpaceHeatingDFHPBackupLoad,
-                        OutputVars.SpaceCoolingElectricity]
+                        OutputVars.SpaceCoolingElectricity,
+                        OutputVars.DehumidifierElectricity]
 
     dhw_output_vars = [OutputVars.WaterHeatingElectricity,
                        OutputVars.WaterHeatingElectricityRecircPump,
@@ -1617,9 +1642,10 @@ class SimulationOutputReport < OpenStudio::Measure::ReportingMeasure
       [FT::Elec, EUT::LightsInterior] => EndUse.new(meter: "#{Constants.ObjectNameInteriorLighting}:InteriorLights:Electricity"),
       [FT::Elec, EUT::LightsGarage] => EndUse.new(meter: "#{Constants.ObjectNameGarageLighting}:InteriorLights:Electricity"),
       [FT::Elec, EUT::LightsExterior] => EndUse.new(meter: 'ExteriorLights:Electricity'),
-      [FT::Elec, EUT::MechVent] => EndUse.new(meter: "#{Constants.ObjectNameMechanicalVentilationHouseFan}:InteriorEquipment:Electricity"),
+      [FT::Elec, EUT::MechVent] => EndUse.new(meter: "#{Constants.ObjectNameMechanicalVentilation}:InteriorEquipment:Electricity"),
       [FT::Elec, EUT::WholeHouseFan] => EndUse.new(meter: "#{Constants.ObjectNameWholeHouseFan}:InteriorEquipment:Electricity"),
       [FT::Elec, EUT::Refrigerator] => EndUse.new(meter: "#{Constants.ObjectNameRefrigerator}:InteriorEquipment:Electricity"),
+      [FT::Elec, EUT::Dehumidifier] => EndUse.new(variable: OutputVars.DehumidifierElectricity),
       [FT::Elec, EUT::Dishwasher] => EndUse.new(meter: "#{Constants.ObjectNameDishwasher}:InteriorEquipment:Electricity"),
       [FT::Elec, EUT::ClothesWasher] => EndUse.new(meter: "#{Constants.ObjectNameClothesWasher}:InteriorEquipment:Electricity"),
       [FT::Elec, EUT::ClothesDryer] => EndUse.new(meter: "#{Constants.ObjectNameClothesDryer}:InteriorEquipment:Electricity"),
@@ -1761,6 +1787,7 @@ class SimulationOutputReport < OpenStudio::Measure::ReportingMeasure
       'timestep' => 'Zone Timestep',
       'hourly' => 'Hourly',
       'daily' => 'Daily',
+      'monthly' => 'Monthly',
     }
   end
 
@@ -1819,6 +1846,10 @@ class SimulationOutputReport < OpenStudio::Measure::ReportingMeasure
                'OpenStudio::Model::CoilCoolingDXMultiSpeed' => ['Cooling Coil Electric Energy', 'Cooling Coil Crankcase Heater Electric Energy'],
                'OpenStudio::Model::CoilCoolingWaterToAirHeatPumpEquationFit' => ['Cooling Coil Electric Energy', 'Cooling Coil Crankcase Heater Electric Energy'],
                'OpenStudio::Model::EvaporativeCoolerDirectResearchSpecial' => ['Evaporative Cooler Electric Energy'] }
+    end
+
+    def self.DehumidifierElectricity
+      return { 'OpenStudio::Model::ZoneHVACDehumidifierDX' => ['Zone Dehumidifier Electric Energy'] }
     end
 
     def self.WaterHeatingElectricity
