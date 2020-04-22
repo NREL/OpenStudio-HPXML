@@ -49,8 +49,8 @@ class HPXML < Object
                  :skylights, :doors, :heating_systems, :cooling_systems, :heat_pumps, :hvac_controls,
                  :hvac_distributions, :ventilation_fans, :water_heating_systems, :hot_water_distributions,
                  :water_fixtures, :water_heating, :solar_thermal_systems, :pv_systems, :clothes_washers,
-                 :clothes_dryers, :dishwashers, :refrigerators, :cooking_ranges, :ovens, :lighting_groups,
-                 :lighting, :ceiling_fans, :plug_loads, :misc_loads_schedule]
+                 :clothes_dryers, :dishwashers, :refrigerators, :dehumidifiers, :cooking_ranges, :ovens,
+                 :lighting_groups, :lighting, :ceiling_fans, :plug_loads, :misc_loads_schedule]
   attr_reader(*HPXML_ATTRS, :doc)
 
   # Constants
@@ -185,6 +185,8 @@ class HPXML < Object
   UnitsCFM = 'CFM'
   UnitsCFM25 = 'CFM25'
   UnitsPercent = 'Percent'
+  VentilationFanLocationBath = 'bath'
+  VentilationFanLocationKitchen = 'kitchen'
   WallTypeBrick = 'StructuralBrick'
   WallTypeCMU = 'ConcreteMasonryUnit'
   WallTypeConcrete = 'SolidConcrete'
@@ -269,8 +271,9 @@ class HPXML < Object
     return fuel_fracs.key(fuel_fracs.values.max)
   end
 
-  def fraction_of_window_area_operable()
-    # Calculates the fraction of window area that is operable.
+  def fraction_of_windows_operable()
+    # Calculates the fraction of windows that are operable.
+    # Since we don't have quantity available, we use area as an approximation.
     window_area_total = @windows.map { |w| w.area }.inject(0, :+)
     window_area_operable = @windows.map { |w| w.fraction_operable * w.area }.inject(0, :+)
     if window_area_total <= 0
@@ -396,6 +399,7 @@ class HPXML < Object
     @clothes_dryers.to_rexml(@doc)
     @dishwashers.to_rexml(@doc)
     @refrigerators.to_rexml(@doc)
+    @dehumidifiers.to_rexml(@doc)
     @cooking_ranges.to_rexml(@doc)
     @ovens.to_rexml(@doc)
     @lighting_groups.to_rexml(@doc)
@@ -441,6 +445,7 @@ class HPXML < Object
     @clothes_dryers = ClothesDryers.new(self, hpxml)
     @dishwashers = Dishwashers.new(self, hpxml)
     @refrigerators = Refrigerators.new(self, hpxml)
+    @dehumidifiers = Dehumidifiers.new(self, hpxml)
     @cooking_ranges = CookingRanges.new(self, hpxml)
     @ovens = Ovens.new(self, hpxml)
     @lighting_groups = LightingGroups.new(self, hpxml)
@@ -2845,9 +2850,9 @@ class HPXML < Object
   class VentilationFan < BaseElement
     ATTRS = [:id, :fan_type, :rated_flow_rate, :tested_flow_rate, :hours_in_operation,
              :used_for_whole_building_ventilation, :used_for_seasonal_cooling_load_reduction,
-             :total_recovery_efficiency, :total_recovery_efficiency_adjusted,
+             :used_for_local_ventilation, :total_recovery_efficiency, :total_recovery_efficiency_adjusted,
              :sensible_recovery_efficiency, :sensible_recovery_efficiency_adjusted,
-             :fan_power, :distribution_system_idref]
+             :fan_power, :quantity, :fan_location, :distribution_system_idref, :start_hour]
     attr_accessor(*ATTRS)
 
     def distribution_system
@@ -2883,10 +2888,13 @@ class HPXML < Object
       ventilation_fan = XMLHelper.add_element(ventilation_fans, 'VentilationFan')
       sys_id = XMLHelper.add_element(ventilation_fan, 'SystemIdentifier')
       XMLHelper.add_attribute(sys_id, 'id', @id)
+      XMLHelper.add_element(ventilation_fan, 'Quantity', Integer(@quantity)) unless @quantity.nil?
       XMLHelper.add_element(ventilation_fan, 'FanType', @fan_type) unless @fan_type.nil?
       XMLHelper.add_element(ventilation_fan, 'RatedFlowRate', Float(@rated_flow_rate)) unless @rated_flow_rate.nil?
       XMLHelper.add_element(ventilation_fan, 'TestedFlowRate', Float(@tested_flow_rate)) unless @tested_flow_rate.nil?
       XMLHelper.add_element(ventilation_fan, 'HoursInOperation', Float(@hours_in_operation)) unless @hours_in_operation.nil?
+      XMLHelper.add_element(ventilation_fan, 'FanLocation', @fan_location) unless @fan_location.nil?
+      XMLHelper.add_element(ventilation_fan, 'UsedForLocalVentilation', Boolean(@used_for_local_ventilation)) unless @used_for_local_ventilation.nil?
       XMLHelper.add_element(ventilation_fan, 'UsedForWholeBuildingVentilation', Boolean(@used_for_whole_building_ventilation)) unless @used_for_whole_building_ventilation.nil?
       XMLHelper.add_element(ventilation_fan, 'UsedForSeasonalCoolingLoadReduction', Boolean(@used_for_seasonal_cooling_load_reduction)) unless @used_for_seasonal_cooling_load_reduction.nil?
       XMLHelper.add_element(ventilation_fan, 'TotalRecoveryEfficiency', Float(@total_recovery_efficiency)) unless @total_recovery_efficiency.nil?
@@ -2898,16 +2906,21 @@ class HPXML < Object
         attached_to_hvac_distribution_system = XMLHelper.add_element(ventilation_fan, 'AttachedToHVACDistributionSystem')
         XMLHelper.add_attribute(attached_to_hvac_distribution_system, 'idref', @distribution_system_idref)
       end
+      HPXML::add_extension(parent: ventilation_fan,
+                           extensions: { 'StartHour' => HPXML::to_integer_or_nil(@start_hour) })
     end
 
     def from_rexml(ventilation_fan)
       return if ventilation_fan.nil?
 
       @id = HPXML::get_id(ventilation_fan)
+      @quantity = HPXML::to_integer_or_nil(XMLHelper.get_value(ventilation_fan, 'Quantity'))
       @fan_type = XMLHelper.get_value(ventilation_fan, 'FanType')
       @rated_flow_rate = HPXML::to_float_or_nil(XMLHelper.get_value(ventilation_fan, 'RatedFlowRate'))
       @tested_flow_rate = HPXML::to_float_or_nil(XMLHelper.get_value(ventilation_fan, 'TestedFlowRate'))
       @hours_in_operation = HPXML::to_float_or_nil(XMLHelper.get_value(ventilation_fan, 'HoursInOperation'))
+      @fan_location = XMLHelper.get_value(ventilation_fan, 'FanLocation')
+      @used_for_local_ventilation = HPXML::to_bool_or_nil(XMLHelper.get_value(ventilation_fan, 'UsedForLocalVentilation'))
       @used_for_whole_building_ventilation = HPXML::to_bool_or_nil(XMLHelper.get_value(ventilation_fan, 'UsedForWholeBuildingVentilation'))
       @used_for_seasonal_cooling_load_reduction = HPXML::to_bool_or_nil(XMLHelper.get_value(ventilation_fan, 'UsedForSeasonalCoolingLoadReduction'))
       @total_recovery_efficiency = HPXML::to_float_or_nil(XMLHelper.get_value(ventilation_fan, 'TotalRecoveryEfficiency'))
@@ -2916,6 +2929,7 @@ class HPXML < Object
       @sensible_recovery_efficiency_adjusted = HPXML::to_float_or_nil(XMLHelper.get_value(ventilation_fan, 'AdjustedSensibleRecoveryEfficiency'))
       @fan_power = HPXML::to_float_or_nil(XMLHelper.get_value(ventilation_fan, 'FanPower'))
       @distribution_system_idref = HPXML::get_idref(ventilation_fan.elements['AttachedToHVACDistributionSystem'])
+      @start_hour = HPXML::to_integer_or_nil(XMLHelper.get_value(ventilation_fan, 'extension/StartHour'))
     end
   end
 
@@ -3555,6 +3569,59 @@ class HPXML < Object
     end
   end
 
+  class Dehumidifiers < BaseArrayElement
+    def add(**kwargs)
+      self << Dehumidifier.new(@hpxml_object, **kwargs)
+    end
+
+    def from_rexml(hpxml)
+      return if hpxml.nil?
+
+      hpxml.elements.each('Building/BuildingDetails/Appliances/Dehumidifier') do |dehumidifier|
+        self << Dehumidifier.new(@hpxml_object, dehumidifier)
+      end
+    end
+  end
+
+  class Dehumidifier < BaseElement
+    ATTRS = [:id, :capacity, :energy_factor, :integrated_energy_factor, :rh_setpoint, :fraction_served]
+    attr_accessor(*ATTRS)
+
+    def delete
+      @hpxml_object.dehumidifiers.delete(self)
+    end
+
+    def check_for_errors
+      errors = []
+      return errors
+    end
+
+    def to_rexml(doc)
+      return if nil?
+
+      appliances = XMLHelper.create_elements_as_needed(doc, ['HPXML', 'Building', 'BuildingDetails', 'Appliances'])
+      dehumidifier = XMLHelper.add_element(appliances, 'Dehumidifier')
+      sys_id = XMLHelper.add_element(dehumidifier, 'SystemIdentifier')
+      XMLHelper.add_attribute(sys_id, 'id', @id)
+      XMLHelper.add_element(dehumidifier, 'Capacity', Float(@capacity)) unless @capacity.nil?
+      XMLHelper.add_element(dehumidifier, 'EnergyFactor', Float(@energy_factor)) unless @energy_factor.nil?
+      XMLHelper.add_element(dehumidifier, 'IntegratedEnergyFactor', Float(@integrated_energy_factor)) unless @integrated_energy_factor.nil?
+      XMLHelper.add_element(dehumidifier, 'DehumidistatSetpoint', Float(@rh_setpoint)) unless @rh_setpoint.nil?
+      XMLHelper.add_element(dehumidifier, 'FractionDehumidificationLoadServed', Float(@fraction_served)) unless @fraction_served.nil?
+    end
+
+    def from_rexml(dehumidifier)
+      return if dehumidifier.nil?
+
+      @id = HPXML::get_id(dehumidifier)
+      @capacity = HPXML::to_float_or_nil(XMLHelper.get_value(dehumidifier, 'Capacity'))
+      @energy_factor = HPXML::to_float_or_nil(XMLHelper.get_value(dehumidifier, 'EnergyFactor'))
+      @integrated_energy_factor = HPXML::to_float_or_nil(XMLHelper.get_value(dehumidifier, 'IntegratedEnergyFactor'))
+      @rh_setpoint = HPXML::to_float_or_nil(XMLHelper.get_value(dehumidifier, 'DehumidistatSetpoint'))
+      @fraction_served = HPXML::to_float_or_nil(XMLHelper.get_value(dehumidifier, 'FractionDehumidificationLoadServed'))
+    end
+  end
+
   class CookingRanges < BaseArrayElement
     def add(**kwargs)
       self << CookingRange.new(@hpxml_object, **kwargs)
@@ -3957,7 +4024,7 @@ class HPXML < Object
 
   def delete_tiny_surfaces()
     (@rim_joists + @walls + @foundation_walls + @frame_floors + @roofs + @windows + @skylights + @doors + @slabs).reverse_each do |surface|
-      next if surface.area > 0.1
+      next if surface.area.nil? || (surface.area > 0.1)
 
       surface.delete
     end
