@@ -224,6 +224,7 @@ class OSModel
     @hpxml_path = hpxml_path
     @output_dir = output_dir
     @debug = debug
+    @collapse_enclosure = collapse_enclosure
 
     @eri_version = @hpxml.header.eri_calculation_version # Hidden feature
     @eri_version = 'latest' if @eri_version.nil?
@@ -256,7 +257,7 @@ class OSModel
     assign_view_factor(runner, model)
     check_for_errors(runner, model)
     set_zone_volumes(runner, model)
-    if collapse_enclosure
+    if @collapse_enclosure
       explode_surfaces(runner, model)
     end
     add_num_occupants(model, hpxml, runner)
@@ -1138,7 +1139,9 @@ class OSModel
           if surface2.subSurfaces.size > 0
             # calculate surface and its sub surfaces view factors
             if surface2.netArea > 0.01 # base surface of a sub surface: window/door etc.
-              fail "Unexpected net area for surface '#{surface2.name}'."
+              if @collapse_enclosure
+                fail "Unexpected net area for surface '#{surface2.name}'."
+              end
             end
 
             surface2.subSurfaces.each do |sub_surface|
@@ -2228,6 +2231,7 @@ class OSModel
         sub_surface = OpenStudio::Model::SubSurface.new(vertices, model)
         sub_surface.setName(window.id)
         sub_surface.setSubSurfaceType('FixedWindow')
+        sub_surface.additionalProperties.setFeature('SubSurfaceType', 'Window')
 
         model.getSurfaces.each do |surface|
           next if surface.name.to_s != window.wall_idref
@@ -2299,6 +2303,7 @@ class OSModel
         sub_surface = OpenStudio::Model::SubSurface.new(vertices, model)
         sub_surface.setName(skylight.id)
         sub_surface.setSubSurfaceType('Skylight')
+        sub_surface.additionalProperties.setFeature('SubSurfaceType', 'Skylight')
 
         model.getSurfaces.each do |surface|
           next if surface.name.to_s != skylight.roof_idref
@@ -2360,6 +2365,7 @@ class OSModel
         sub_surface = OpenStudio::Model::SubSurface.new(vertices, model)
         sub_surface.setName(door.id)
         sub_surface.setSubSurfaceType('Door')
+        sub_surface.additionalProperties.setFeature('SubSurfaceType', 'Door')
 
         model.getSurfaces.each do |surface|
           next if surface.name.to_s != door.wall_idref
@@ -3604,12 +3610,19 @@ class OSModel
       surface_type = surface_type.get
 
       s.subSurfaces.each do |ss|
+        sub_surface_type = ss.additionalProperties.getFeatureAsString('SubSurfaceType')
+        if not sub_surface_type.is_initialized
+          sub_surface_type = surface_type
+        else
+          sub_surface_type = sub_surface_type.get
+        end        
+
         key = { 'Window' => :windows,
                 'Door' => :doors,
-                'Skylight' => :skylights }[surface_type]
+                'Skylight' => :skylights }[sub_surface_type]
         fail "Unexpected subsurface for component loads: '#{ss.name}'." if key.nil?
 
-        if (surface_type == 'Window') || (surface_type == 'Skylight')
+        if (sub_surface_type == 'Window') || (sub_surface_type == 'Skylight')
           vars = { 'Surface Window Net Heat Transfer Energy' => 'ss_net',
                    'Surface Inside Face Internal Gains Radiation Heat Gain Energy' => 'ss_ig',
                    'Surface Window Total Glazing Layers Absorbed Shortwave Radiation Rate' => 'ss_sw_abs',
