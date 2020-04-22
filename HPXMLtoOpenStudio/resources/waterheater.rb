@@ -1153,8 +1153,18 @@ class Waterheater
     num_baths /= num_water_heaters.to_f
 
     if fuel != HPXML::FuelTypeElectricity
-      if num_beds <= 4
-        cap_kbtuh = 40.0
+      if num_beds == 1
+        cap_kbtuh = 27.0
+      elsif num_beds == 2
+        cap_kbtuh = 36.0
+      elsif num_beds == 3
+        if num_baths < 3
+          cap_kbtuh = 36.0
+        else
+          cap_kbtuh = 38.0
+        end
+      elsif num_beds == 4
+        cap_kbtuh = 38.0
       elsif num_beds == 5
         cap_kbtuh = 47.0
       else
@@ -1179,59 +1189,60 @@ class Waterheater
       else
         cap_kw = 5.5
       end
-      return UnitConversions.convert(cap_kw * 1000.0, 'W', 'Btu/hr')
+      return UnitConversions.convert(cap_kw, 'kW', 'kBtu/hr')
     end
   end
 
   def self.get_default_tank_volume(fuel, num_beds, num_baths)
     # Returns the volume of a water heater based on the BA HSP
-    if fuel == HPXML::FuelTypeElectricity
-      # Source: Table 5 HUD-FHA Minimum Water Heater Capacities for One- and
-      # Two-Family Living Units (ASHRAE HVAC Applications 2007)
-      if num_baths < 2
-        if num_beds < 2
-          return 20
-        elsif num_beds < 3
-          return 30
-        else
-          return 40
-        end
-      elsif num_baths < 3
-        if num_beds < 3
-          return 40
-        elsif num_beds < 5
-          return 50
-        else
-          return 66
-        end
-      else
-        if num_beds < 4
-          return 50
-        elsif num_beds < 6
-          return 66
-        else
-          return 80
-        end
-      end
-
-    else # Non-electric tank WHs
+    if fuel != HPXML::FuelTypeElectricity # Non-electric tank WHs
       # Source: 2010 HSP Addendum
-      if num_beds <= 2
-        return 30
+      if num_beds == 1
+        return 20.0
+      elsif num_beds == 2
+        return 30.0
       elsif num_beds == 3
         if num_baths <= 1.5
-          return 30
+          return 30.0
         else
-          return 40
+          return 40.0
         end
       elsif num_beds == 4
         if num_baths <= 2.5
-          return 40
+          return 40.0
         else
-          return 50
+          return 50.0
         end
       else
-        return 50
+        return 50.0
+      end
+    else
+      # Source: Table 5 HUD-FHA Minimum Water Heater Capacities for One- and
+      # Two-Family Living Units (ASHRAE HVAC Applications 2007)
+      if num_beds == 1
+        return 20.0
+      elsif num_beds == 2
+        if num_baths <= 1.5
+          return 30.0
+        else
+          return 40.0
+        end
+      elsif num_beds == 3
+        if num_baths <= 1.5
+          return 40.0
+        else
+          return 50.0
+        end
+      elsif num_beds == 4
+        if num_baths <= 2.5
+          return 50.0
+        else
+          return 66.0
+        end
+      elsif num_beds == 5
+        return 66.0
+      else
+        return 80.0
       end
     end
   end
