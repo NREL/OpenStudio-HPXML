@@ -38,7 +38,6 @@ class HPXMLTest < MiniTest::Test
     xmls = []
     test_dirs.each do |test_dir|
       Dir["#{test_dir}/base*.xml"].sort.each do |xml|
-        next unless xml.include?('base-enclosure-skylights.xml') || xml.include?('base-enclosure-split-surfaces.xml')
         xmls << File.absolute_path(xml)
       end
     end
