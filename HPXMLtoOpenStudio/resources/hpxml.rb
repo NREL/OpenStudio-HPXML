@@ -2049,15 +2049,14 @@ class HPXML < Object
       layer = XMLHelper.add_element(insulation, 'Layer')
       XMLHelper.add_element(layer, 'InstallationType', 'continuous')
       XMLHelper.add_element(layer, 'NominalRValue', Float(@under_slab_insulation_r_value)) unless @under_slab_insulation_r_value.nil?
-      HPXML::add_extension(parent: slab,
-                           extensions: { 'CarpetFraction' => HPXML::to_float_or_nil(@carpet_fraction),
-                                         'CarpetRValue' => HPXML::to_float_or_nil(@carpet_r_value) })
-      extension = slab.elements['extension']
+      extension = XMLHelper.add_element(slab, 'extension')
+      XMLHelper.add_element(extension, 'CarpetFraction', HPXML::to_float_or_nil(@carpet_fraction)) unless @carpet_fraction.nil?
+      XMLHelper.add_element(extension, 'CarpetRValue', HPXML::to_float_or_nil(@carpet_r_value)) unless @carpet_r_value.nil?
       add_coordinate
       HPXML::add_coordinates(extension, @coordinates)
       set_outward_normal
       HPXML::add_outward_normal(extension, @outward_normal)
-      if extension.elements['Coordinates'].nil? && extension.elements['OutwardNormal'].nil?
+      if extension.elements['CarpetFraction'].nil? && extension.elements['CarpetRValue'].nil? && extension.elements['Coordinates'].nil? && extension.elements['OutwardNormal'].nil?
         extension.remove
       end
     end
@@ -4476,7 +4475,7 @@ class HPXML < Object
       XMLHelper.add_element(outward_normal_element, 'z', outward_normal[:z]) unless outward_normal[:z].nil?
     end
   end
-  
+
   def self.get_coordinates(planar_surface)
     coordinates = []
     planar_surface.elements.each('extension/Coordinates/Coordinate') do |coordinate|
@@ -4484,7 +4483,7 @@ class HPXML < Object
     end
     return coordinates
   end
-  
+
   def self.get_outward_normal(planar_surface)
     return HPXML::get_coordinate(planar_surface.elements['extension/OutwardNormal'])
   end
