@@ -53,7 +53,6 @@ def create_osws
     'base-dhw-solar-direct-flat-plate.osw' => 'base.osw',
     'base-dhw-solar-direct-ics.osw' => 'base.osw',
     'base-dhw-solar-fraction.osw' => 'base.osw',
-    'base-dhw-solar-indirect-evacuated-tube.osw' => 'base.osw',
     'base-dhw-solar-indirect-flat-plate.osw' => 'base.osw',
     'base-dhw-solar-thermosyphon-evacuated-tube.osw' => 'base.osw',
     'base-dhw-solar-thermosyphon-flat-plate.osw' => 'base.osw',
@@ -749,9 +748,6 @@ def get_values(osw_file, step)
   elsif ['base-dhw-solar-fraction.osw'].include? osw_file
     step.setArgument('solar_thermal_system_type', 'hot water')
     step.setArgument('solar_thermal_solar_fraction', 0.65)
-  elsif ['base-dhw-solar-indirect-evacuated-tube.osw'].include? osw_file
-    step.setArgument('solar_thermal_system_type', 'hot water')
-    step.setArgument('solar_thermal_collector_loop_type', HPXML::SolarThermalLoopTypeIndirect)
   elsif ['base-dhw-solar-indirect-flat-plate.osw'].include? osw_file
     step.setArgument('solar_thermal_system_type', 'hot water')
     step.setArgument('solar_thermal_collector_loop_type', HPXML::SolarThermalLoopTypeIndirect)
