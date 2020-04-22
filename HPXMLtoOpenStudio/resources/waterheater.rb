@@ -79,7 +79,7 @@ class Waterheater
   end
 
   def self.apply_heatpump(model, runner, space, weather, t_set, vol, ef,
-                          ec_adj, dhw_map, sys_id, jacket_r, solar_fraction)
+                          ec_adj, dhw_map, sys_id, desuperheater_clg_coil, jacket_r, solar_fraction)
 
     # Hard coded values for things that wouldn't be captured by hpxml
     int_factor = 1.0 # unitless
@@ -297,6 +297,10 @@ class Waterheater
     tank.setSourceSideFlowControlMode('')
     tank.setSourceSideInletHeight(0)
     tank.setSourceSideOutletHeight(0)
+    loop.addSupplyBranchForComponent(tank)
+    if not desuperheater_clg_coil.nil?
+      add_desuperheater(model, t_set, tank, desuperheater_clg_coil, space, loop).each { |e| dhw_map[sys_id] << e }
+    end
     dhw_map[sys_id] << tank
 
     # Fan:OnOff
@@ -550,8 +554,6 @@ class Waterheater
     program_calling_manager.setCallingPoint('InsideHVACSystemIterationLoop')
     program_calling_manager.addProgram(hpwh_ctrl_program)
     program_calling_manager.addProgram(hpwh_ducting_program)
-
-    loop.addSupplyBranchForComponent(tank)
 
     add_ec_adj(model, hpwh, ec_adj, space, HPXML::FuelTypeElectricity, HPXML::WaterHeaterTypeHeatPump).each do |obj|
       dhw_map[sys_id] << obj unless obj.nil?

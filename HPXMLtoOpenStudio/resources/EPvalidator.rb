@@ -558,7 +558,7 @@ class EnergyPlusValidator
 
       ## [Desuperheater]
       '/HPXML/Building/BuildingDetails/Systems/WaterHeating/WaterHeatingSystem[UsesDesuperheater="true"]' => {
-        'WaterHeaterType[text()="storage water heater" or text()="instantaneous water heater"]' => one, # Desuperheater is only supported with storage/tankless water heater
+        'WaterHeaterType[text()="storage water heater" or text()="instantaneous water heater" or text()="heat pump water heater"]' => one, # Desuperheater is only supported with storage/tankless water heater
         'RelatedHVACSystem' => one, # HeatPump or CoolingSystem
       },
 

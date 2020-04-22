@@ -2318,7 +2318,7 @@ class OSModel
           tank_vol = water_heating_system.tank_volume
 
           Waterheater.apply_heatpump(model, runner, space, weather, setpoint_temp, tank_vol, ef, ec_adj,
-                                     @dhw_map, sys_id, jacket_r, solar_fraction)
+                                     @dhw_map, sys_id, desuperheater_clg_coil, jacket_r, solar_fraction)
 
         elsif (wh_type == HPXML::WaterHeaterTypeCombiStorage) || (wh_type == HPXML::WaterHeaterTypeCombiTankless)
 
