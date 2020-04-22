@@ -2460,19 +2460,13 @@ class OSModel
 
   def self.calc_sequential_load_fraction(load_fraction, remaining_fraction)
     if remaining_fraction > 0
-      if (load_fraction - remaining_fraction).abs <= 0.010001
-        # Last equipment to handle all the remaining load (within 0.01 tolerance)
-        load_fraction = remaining_fraction
-        sequential_load_frac = 1.0 # Fraction of remaining load served by this system
-      else
-        sequential_load_frac = load_fraction / remaining_fraction # Fraction of remaining load served by this system
-      end
+      sequential_load_frac = load_fraction / remaining_fraction # Fraction of remaining load served by this system
     else
       sequential_load_frac = 0.0
     end
     remaining_fraction -= load_fraction
 
-    return sequential_load_frac, remaining_fraction, load_fraction
+    return sequential_load_frac, remaining_fraction
   end
 
   def self.add_cooling_system(runner, model)
@@ -2489,7 +2483,7 @@ class OSModel
       end
 
       load_frac = cooling_system.fraction_cool_load_served
-      sequential_load_frac, @total_frac_remaining_cool_load_served, load_frac = calc_sequential_load_fraction(load_frac, @total_frac_remaining_cool_load_served)
+      sequential_load_frac, @total_frac_remaining_cool_load_served = calc_sequential_load_fraction(load_frac, @total_frac_remaining_cool_load_served)
 
       check_distribution_system(cooling_system.distribution_system, clg_type)
 
@@ -2578,7 +2572,7 @@ class OSModel
         end
 
         load_frac = heating_system.fraction_heat_load_served
-        sequential_load_frac, @total_frac_remaining_heat_load_served, load_frac = calc_sequential_load_fraction(load_frac, @total_frac_remaining_heat_load_served)
+        sequential_load_frac, @total_frac_remaining_heat_load_served = calc_sequential_load_fraction(load_frac, @total_frac_remaining_heat_load_served)
 
         @hvac_map[heating_system.id] = []
 
@@ -2672,10 +2666,10 @@ class OSModel
       end
 
       load_frac_heat = heat_pump.fraction_heat_load_served
-      sequential_load_frac_heat, @total_frac_remaining_heat_load_served, load_frac_heat = calc_sequential_load_fraction(load_frac_heat, @total_frac_remaining_heat_load_served)
+      sequential_load_frac_heat, @total_frac_remaining_heat_load_served = calc_sequential_load_fraction(load_frac_heat, @total_frac_remaining_heat_load_served)
 
       load_frac_cool = heat_pump.fraction_cool_load_served
-      sequential_load_frac_cool, @total_frac_remaining_cool_load_served, load_frac_cool = calc_sequential_load_fraction(load_frac_cool, @total_frac_remaining_cool_load_served)
+      sequential_load_frac_cool, @total_frac_remaining_cool_load_served = calc_sequential_load_fraction(load_frac_cool, @total_frac_remaining_cool_load_served)
 
       backup_heat_fuel = heat_pump.backup_heating_fuel
       if not backup_heat_fuel.nil?
