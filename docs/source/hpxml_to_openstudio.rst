@@ -591,14 +591,14 @@ Solar Thermal
 *************
 
 A solar hot water system can be entered as a ``Systems/SolarThermal/SolarThermalSystem``.
-The ``SystemType`` element must be 'hot water' and the ``ConnectedTo`` element is required and must point to a ``WaterHeatingSystem``.
-Note that the connected water heater cannot be of type space-heating boiler or attached to a desuperheater.
+The ``SystemType`` element must be 'hot water'.
 
 Solar hot water systems can be described with either simple or detailed inputs.
 
-If using simple inputs, the following element is required:
+If using simple inputs, the following elements are used:
 
 - ``SolarFraction``: Portion of total conventional hot water heating load (delivered energy and tank standby losses). Can be obtained from Directory of SRCC OG-300 Solar Water Heating System Ratings or NREL's `System Advisor Model <https://sam.nrel.gov/>`_ or equivalent.
+- ``ConnectedTo``: Optional. If not specified, applies to all water heaters in the building. If specified; must point to a ``WaterHeatingSystem``.
 
 If using detailed inputs, the following elements are used:
 
@@ -612,6 +612,8 @@ If using detailed inputs, the following elements are used:
 - ``StorageVolume``: Optional. If not provided, the default value in gallons will be calculated using the following equation
   
   .. math:: StorageVolume = 1.5 \cdot CollectorArea
+
+- ``ConnectedTo``: Must point to a ``WaterHeatingSystem``. The connected water heater cannot be of type space-heating boiler or attached to a desuperheater.
 
 Photovoltaics
 *************
