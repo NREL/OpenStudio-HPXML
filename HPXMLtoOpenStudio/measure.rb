@@ -410,10 +410,10 @@ class OSModel
         window.interior_shading_factor_winter = default_shade_winter
       end
       if window.fraction_operable.nil?
-        window.fraction_operable = Airflow.get_default_fraction_of_operable_window_area()
+        window.fraction_operable = Airflow.get_default_fraction_of_windows_operable()
       end
     end
-    @frac_window_area_operable = @hpxml.fraction_of_window_area_operable()
+    @frac_windows_operable = @hpxml.fraction_of_windows_operable()
 
     # Default AC/HP compressor type
     @hpxml.cooling_systems.each do |cooling_system|
@@ -2051,6 +2051,15 @@ class OSModel
   end
 
   def self.add_windows(runner, model, spaces, weather)
+    # We already stored @fraction_of_windows_operable, so lets remove the
+    # fraction_operable properties from windows and re-collapse the enclosure
+    # so as to prevent potentially modeling multiple identical windows in E+,
+    # which can increase simulation runtime.
+    @hpxml.windows.each do |window|
+      window.fraction_operable = nil
+    end
+    @hpxml.collapse_enclosure_surfaces()
+
     surfaces = []
     @hpxml.windows.each do |window|
       window_height = 4.0 # ft, default
@@ -3070,7 +3079,7 @@ class OSModel
                              vented_attic_sla, unvented_attic_sla, vented_attic_const_ach, unconditioned_basement_ach, has_flue_chimney, terrain)
 
     # Natural Ventilation
-    nv_frac_window_area_open = @frac_window_area_operable * 0.20 # Assume 20% of operable window area is open
+    nv_frac_window_area_open = @frac_windows_operable * 0.5 * 0.2 # Assume A) 50% of the area of an operable window can be open, and B) 20% of openable window area is actually open
     nv_num_days_per_week = 7
     nv_max_oa_hr = 0.0115
     nv_max_oa_rh = 0.7

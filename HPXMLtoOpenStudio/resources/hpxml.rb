@@ -271,8 +271,9 @@ class HPXML < Object
     return fuel_fracs.key(fuel_fracs.values.max)
   end
 
-  def fraction_of_window_area_operable()
-    # Calculates the fraction of window area that is operable.
+  def fraction_of_windows_operable()
+    # Calculates the fraction of windows that are operable.
+    # Since we don't have quantity available, we use area as an approximation.
     window_area_total = @windows.map { |w| w.area }.inject(0, :+)
     window_area_operable = @windows.map { |w| w.fraction_operable * w.area }.inject(0, :+)
     if window_area_total <= 0

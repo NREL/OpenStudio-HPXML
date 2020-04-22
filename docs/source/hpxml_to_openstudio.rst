@@ -274,8 +274,10 @@ Overhangs are defined by the vertical distance between the overhang and the top 
 The difference between these two values equals the height of the window.
 
 Finally, windows can be optionally described with ``FractionOperable``.
-If not provided, it is assumed that 33% of the window area is operable.
-Of this operable window area, 20% is assumed to be open whenever there are favorable outdoor conditions for cooling.
+If a ``Window`` represents a single window, the value should be 0 or 1.
+If a ``Window`` represents multiple windows (e.g., 4), the value should be between 0 and 1 (e.g., 0, 0.25, 0.5, 0.75, or 1).
+If not provided, it is assumed that 67% of the windows are operable.
+The total open window area for natural ventilation is thus calculated using A) the fraction of windows that are operable, B) the assumption that 50% of the area of operable windows can be open, and C) the assumption that 20% of that openable area is actually opened by occupants whenever outdoor conditions are favorable for cooling.
 
 Skylights
 *********

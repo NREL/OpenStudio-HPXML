@@ -670,6 +670,12 @@ class HPXMLTest < MiniTest::Test
     hpxml_defaults_path = File.join(rundir, 'in.xml')
     hpxml = HPXML.new(hpxml_path: hpxml_defaults_path)
 
+    # Collapse windows further using same logic as measure.rb
+    hpxml.windows.each do |window|
+      window.fraction_operable = nil
+    end
+    hpxml.collapse_enclosure_surfaces()
+
     # Timestep
     timestep = hpxml.header.timestep
     if timestep.nil?
@@ -1535,7 +1541,7 @@ class HPXMLTest < MiniTest::Test
     results_base.keys.each do |k|
       next if [@@simulation_runtime_key, @@workflow_runtime_key].include? k
 
-      assert_equal(results_base[k].to_f, results_collapsed[k].to_f)
+      assert_in_epsilon(results_base[k].to_f, results_collapsed[k].to_f, 0.001)
     end
   end
 
