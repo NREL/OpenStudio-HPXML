@@ -2,8 +2,8 @@
   <schema_version>3.0</schema_version>
   <name>hpxm_lto_openstudio</name>
   <uid>b1543b30-9465-45ff-ba04-1d1f85e763bc</uid>
-  <version_id>156cb87e-3d13-47f8-86f0-5374a52956f2</version_id>
-  <version_modified>20200422T183948Z</version_modified>
+  <version_id>f95b5d8e-1e76-40ec-9a93-3c2a7d9b21a3</version_id>
+  <version_modified>20200422T203237Z</version_modified>
   <xml_checksum>D8922A73</xml_checksum>
   <class_name>HPXMLtoOpenStudio</class_name>
   <display_name>HPXML to OpenStudio Translator</display_name>
@@ -438,12 +438,6 @@
       <checksum>CE0F105B</checksum>
     </file>
     <file>
-      <filename>hvac.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>BE97BC86</checksum>
-    </file>
-    <file>
       <filename>waterheater.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
@@ -454,6 +448,12 @@
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
       <checksum>4A4D1C23</checksum>
+    </file>
+    <file>
+      <filename>hvac.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>90421FFE</checksum>
     </file>
     <file>
       <filename>airflow.rb</filename>
@@ -476,7 +476,7 @@
       <filename>measure.rb</filename>
       <filetype>rb</filetype>
       <usage_type>script</usage_type>
-      <checksum>CC8429C2</checksum>
+      <checksum>5069277D</checksum>
     </file>
   </files>
 </measure>
