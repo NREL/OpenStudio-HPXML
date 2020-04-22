@@ -24,17 +24,9 @@ class HPXMLTest < MiniTest::Test
     _rm_path(results_dir)
 
     sample_files_dir = File.absolute_path(File.join(this_dir, '..', 'sample_files'))
-    hvac_base_dir = File.absolute_path(File.join(this_dir, '..', 'sample_files', 'hvac_base'))
-    hvac_multiple_dir = File.absolute_path(File.join(this_dir, '..', 'sample_files', 'hvac_multiple'))
-    hvac_partial_dir = File.absolute_path(File.join(this_dir, '..', 'sample_files', 'hvac_partial'))
-    hvac_load_fracs_dir = File.absolute_path(File.join(this_dir, '..', 'sample_files', 'hvac_load_fracs'))
     autosize_dir = File.absolute_path(File.join(this_dir, '..', 'sample_files', 'hvac_autosizing'))
 
     test_dirs = [sample_files_dir,
-                 hvac_base_dir,
-                 hvac_multiple_dir,
-                 hvac_partial_dir,
-                 hvac_load_fracs_dir,
                  autosize_dir]
 
     xmls = []
@@ -55,13 +47,6 @@ class HPXMLTest < MiniTest::Test
     Dir.mkdir(results_dir)
     _write_summary_results(results_dir, all_results)
     _write_hvac_sizing_results(results_dir, all_sizing_results)
-
-    # Cross simulation tests
-    # _test_multiple_hvac(xmls, hvac_multiple_dir, hvac_base_dir, all_results)
-    # _test_partial_hvac(xmls, hvac_partial_dir, hvac_base_dir, all_results)
-    # _test_hrv_erv_inputs(sample_files_dir, all_results)
-    # _test_heating_cooling_loads(xmls, hvac_base_dir, all_results)
-    # _test_collapsed_surfaces(all_results, sample_files_dir)
   end
 
   def test_run_simulation_rb
@@ -1123,21 +1108,11 @@ class HPXMLTest < MiniTest::Test
     require 'csv'
     csv_out = File.join(results_dir, 'results.csv')
 
-    # Get all keys across simulations for output columns
     output_keys = []
     results.each do |xml, xml_results|
-      xml_results.keys.each do |key|
-        next if not key.is_a? Array
-        next if output_keys.include? key
-
-        output_keys << key
-      end
+      output_keys = xml_results.keys
+      break
     end
-    output_keys.sort!
-
-    # Append runtimes at the end
-    output_keys << @@simulation_runtime_key
-    output_keys << @@workflow_runtime_key
 
     column_headers = ['HPXML']
     output_keys.each do |key|
@@ -1196,141 +1171,6 @@ class HPXMLTest < MiniTest::Test
       puts "#{xml}: #{errors}"
     end
     assert_equal(0, errors.size)
-  end
-
-  def _test_hrv_erv_inputs(sample_files_dir, all_results)
-    # Compare HRV and ERV results that use different inputs
-    ['hrv', 'erv'].each do |mv_type|
-      puts "#{mv_type.upcase} test results:"
-
-      base_xml = "#{sample_files_dir}/base-mechvent-#{mv_type}.xml"
-      results_base = all_results[base_xml]
-      next if results_base.nil?
-
-      Dir["#{sample_files_dir}/base-mechvent-#{mv_type}-*.xml"].sort.each do |xml|
-        results = all_results[xml]
-        next if results.nil?
-
-        # Compare results
-        results_base.keys.each do |k|
-          next if [@@simulation_runtime_key, @@workflow_runtime_key].include? k
-
-          result_base = results_base[k].to_f
-          result = results[k].to_f
-          next if (result_base == 0.0) && (result == 0.0)
-
-          _display_result_epsilon(xml, result_base, result, k)
-          assert_in_epsilon(result_base, result, 0.02)
-        end
-      end
-    end
-  end
-
-  def _test_heating_cooling_loads(xmls, hvac_base_dir, all_results)
-    puts 'Heating/Cooling Loads test results:'
-
-    base_xml = "#{hvac_base_dir}/base-hvac-ideal-air-base.xml"
-    results_base = all_results[File.absolute_path(base_xml)]
-    return if results_base.nil?
-
-    xmls.sort.each do |xml|
-      next if not xml.include? hvac_base_dir
-
-      xml_compare = File.absolute_path(xml)
-      results_compare = all_results[xml_compare]
-      next if results_compare.nil?
-
-      # Compare results
-      results_compare.keys.each do |k|
-        next if not ['Heating', 'Cooling'].include? k[1]
-
-        result_base = results_base[k].to_f
-        result_compare = results_compare[k].to_f
-        next if (result_base <= 0.1) || (result_compare <= 0.1)
-
-        _display_result_delta(xml, result_base, result_compare, k)
-        assert_in_delta(result_base, result_compare, 0.25)
-      end
-    end
-  end
-
-  def _test_multiple_hvac(xmls, hvac_multiple_dir, hvac_base_dir, all_results)
-    # Compare end use results for three of an HVAC system to results for one HVAC system.
-    puts 'Multiple HVAC test results:'
-    xmls.sort.each do |xml|
-      next if not xml.include? hvac_multiple_dir
-      next if xml.include? 'evap-cooler' # skipping because W/cfm varies as a function of airflow rate
-
-      xml_x3 = File.absolute_path(xml)
-      xml_x1 = File.absolute_path(xml.gsub(hvac_multiple_dir, hvac_base_dir).gsub('-x3.xml', '-base.xml'))
-
-      results_x3 = all_results[xml_x3]
-      results_x1 = all_results[xml_x1]
-      next if results_x1.nil?
-
-      # Compare results
-      results_x3.keys.each do |k|
-        next unless ['Heating', 'Cooling'].include? k[1]
-        next unless ['General'].include? k[2] # Exclude crankcase/defrost
-
-        result_x1 = results_x1[k].to_f
-        result_x3 = results_x3[k].to_f
-        next if (result_x1 == 0.0) && (result_x3 == 0.0)
-
-        _display_result_epsilon(xml, result_x1, result_x3, k)
-        if result_x1 > 1.0
-          assert_in_epsilon(result_x1, result_x3, 0.12)
-        else
-          assert_in_delta(result_x1, result_x3, 0.1)
-        end
-      end
-    end
-  end
-
-  def _test_partial_hvac(xmls, hvac_partial_dir, hvac_base_dir, all_results)
-    # Compare end use results for a partial HVAC system to a full HVAC system.
-    puts 'Partial HVAC test results:'
-    xmls.sort.each do |xml|
-      next if not xml.include? hvac_partial_dir
-      next if xml.include? 'evap-cooler' # skipping because W/cfm varies as a function of airflow rate
-
-      xml_33 = File.absolute_path(xml)
-      xml_100 = File.absolute_path(xml.gsub(hvac_partial_dir, hvac_base_dir).gsub('-33percent.xml', '-base.xml'))
-
-      results_33 = all_results[xml_33]
-      results_100 = all_results[xml_100]
-      next if results_100.nil?
-
-      # Compare results
-      results_33.keys.each do |k|
-        next unless ['Heating', 'Cooling'].include? k[1]
-        next unless ['General'].include? k[2] # Exclude crankcase/defrost
-
-        result_33 = results_33[k].to_f
-        result_100 = results_100[k].to_f
-        next if (result_33 == 0.0) && (result_100 == 0.0)
-
-        _display_result_epsilon(xml, result_33, result_100 / 3.0, k)
-        if result_33 > 1.0
-          assert_in_epsilon(result_33, result_100 / 3.0, 0.12)
-        else
-          assert_in_delta(result_33, result_100 / 3.0, 0.1)
-        end
-      end
-    end
-  end
-
-  def _test_collapsed_surfaces(all_results, sample_files_dir)
-    results_base = all_results[File.absolute_path("#{sample_files_dir}/base-enclosure-skylights.xml")]
-    results_collapsed = all_results[File.absolute_path("#{sample_files_dir}/base-enclosure-split-surfaces.xml")]
-    return if results_base.nil? || results_collapsed.nil?
-
-    # Compare results
-    results_base.keys.each do |k|
-      next if [@@simulation_runtime_key, @@workflow_runtime_key].include? k
-
-      assert_equal(results_base[k].to_f, results_collapsed[k].to_f)
-    end
   end
 
   def _display_result_epsilon(xml, result1, result2, key)
