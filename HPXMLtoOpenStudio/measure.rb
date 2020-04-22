@@ -488,10 +488,7 @@ class OSModel
         if water_heating_system.recovery_efficiency.nil?
           ef = water_heating_system.energy_factor
           if ef.nil?
-            uef = water_heating_system.uniform_energy_factor
-            if not uef.nil?
-              ef = Waterheater.calc_ef_from_uef(uef, water_heating_system.water_heater_type, water_heating_system.fuel_type)
-            end
+            ef = Waterheater.calc_ef_from_uef(water_heating_system.uniform_energy_factor, water_heating_system.water_heater_type, water_heating_system.fuel_type)
           end
           water_heating_system.recovery_efficiency = Waterheater.get_default_recovery_efficiency(water_heating_system.fuel_type, ef)
         end

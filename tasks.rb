@@ -2559,7 +2559,7 @@ def set_hpxml_water_heating_systems(hpxml_file, hpxml)
                                     fraction_dhw_load_served: 1,
                                     heating_capacity: 18767,
                                     energy_factor: 0.95,
-                                    temperature: 125)
+                                    temperature: Waterheater.get_default_hot_water_temperature(Constants.ERIVersions[-1]))
   elsif ['base-dhw-multiple.xml'].include? hpxml_file
     hpxml.water_heating_systems[0].fraction_dhw_load_served = 0.2
     hpxml.water_heating_systems.add(id: 'WaterHeater2',
@@ -2571,7 +2571,7 @@ def set_hpxml_water_heating_systems(hpxml_file, hpxml)
                                     heating_capacity: 40000,
                                     energy_factor: 0.59,
                                     recovery_efficiency: 0.76,
-                                    temperature: 125)
+                                    temperature: Waterheater.get_default_hot_water_temperature(Constants.ERIVersions[-1]))
     hpxml.water_heating_systems.add(id: 'WaterHeater3',
                                     fuel_type: HPXML::FuelTypeElectricity,
                                     water_heater_type: HPXML::WaterHeaterTypeHeatPump,
@@ -2579,28 +2579,28 @@ def set_hpxml_water_heating_systems(hpxml_file, hpxml)
                                     tank_volume: 80,
                                     fraction_dhw_load_served: 0.2,
                                     energy_factor: 2.3,
-                                    temperature: 125)
+                                    temperature: Waterheater.get_default_hot_water_temperature(Constants.ERIVersions[-1]))
     hpxml.water_heating_systems.add(id: 'WaterHeater4',
                                     fuel_type: HPXML::FuelTypeElectricity,
                                     water_heater_type: HPXML::WaterHeaterTypeTankless,
                                     location: HPXML::LocationLivingSpace,
                                     fraction_dhw_load_served: 0.2,
                                     energy_factor: 0.99,
-                                    temperature: 125)
+                                    temperature: Waterheater.get_default_hot_water_temperature(Constants.ERIVersions[-1]))
     hpxml.water_heating_systems.add(id: 'WaterHeater5',
                                     fuel_type: HPXML::FuelTypeNaturalGas,
                                     water_heater_type: HPXML::WaterHeaterTypeTankless,
                                     location: HPXML::LocationLivingSpace,
                                     fraction_dhw_load_served: 0.1,
                                     energy_factor: 0.82,
-                                    temperature: 125)
+                                    temperature: Waterheater.get_default_hot_water_temperature(Constants.ERIVersions[-1]))
     hpxml.water_heating_systems.add(id: 'WaterHeater6',
                                     water_heater_type: HPXML::WaterHeaterTypeCombiStorage,
                                     location: HPXML::LocationLivingSpace,
                                     tank_volume: 50,
                                     fraction_dhw_load_served: 0.1,
                                     related_hvac_idref: 'HeatingSystem',
-                                    temperature: 125)
+                                    temperature: Waterheater.get_default_hot_water_temperature(Constants.ERIVersions[-1]))
   elsif ['invalid_files/dhw-frac-load-served.xml'].include? hpxml_file
     hpxml.water_heating_systems[0].fraction_dhw_load_served += 0.15
   elsif ['base-dhw-tank-gas.xml',
@@ -2755,16 +2755,16 @@ def set_hpxml_water_heating_systems(hpxml_file, hpxml)
     hpxml.water_heating_systems[0].location = HPXML::LocationGarage
   elsif ['base-dhw-none.xml'].include? hpxml_file
     hpxml.water_heating_systems.clear()
-  end
-  hpxml.water_heating_systems.each do |water_heating_system|
-    if ['base-misc-defaults.xml'].include? hpxml_file
-      water_heating_system.temperature = nil
-      water_heating_system.location = nil
-      water_heating_system.heating_capacity = nil
-      water_heating_system.tank_volume = nil
-      water_heating_system.recovery_efficiency = nil
-    else
-      water_heating_system.temperature = Waterheater.get_default_hot_water_temperature(Constants.ERIVersions[-1])
+  elsif ['base-misc-defaults.xml',
+         'base-misc-defaults2.xml'].include? hpxml_file
+    hpxml.water_heating_systems[0].temperature = nil
+    hpxml.water_heating_systems[0].location = nil
+    hpxml.water_heating_systems[0].heating_capacity = nil
+    hpxml.water_heating_systems[0].tank_volume = nil
+    hpxml.water_heating_systems[0].recovery_efficiency = nil
+    if hpxml_file == 'base-misc-defaults2.xml'
+      hpxml.water_heating_systems[0].energy_factor = nil
+      hpxml.water_heating_systems[0].uniform_energy_factor = 0.93
     end
   end
 end
