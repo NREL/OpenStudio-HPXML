@@ -1179,7 +1179,7 @@ class Waterheater
       else
         cap_kw = 5.5
       end
-      return UnitConversions.convert(cap_kw, 'kW', 'kBtu/hr')
+      return UnitConversions.convert(cap_kw * 1000.0, 'W', 'Btu/hr')
     end
   end
 

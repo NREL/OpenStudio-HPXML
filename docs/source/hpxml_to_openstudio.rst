@@ -518,7 +518,7 @@ space-heating boiler with storage tank                                          
 space-heating boiler with tankless coil                                                                                                      required           
 ========================================  ===================================  ===========  ==========  ===============  ==================  =================  =================  =========================================
 
-For storage water heaters, the tank volume, heating capacity, and recovery efficiency can be optionally provided. If not provided, default values for the tank volume and heating capacity will be assumed based on Table 7 in the `Building America House Simulation Protocols <https://www1.eere.energy.gov/buildings/publications/pdfs/building_america/house_simulation.pdf>`_ 
+For storage water heaters, the tank volume in gallons, heating capacity in Btuh, and recovery efficiency can be optionally provided. If not provided, default values for the tank volume and heating capacity will be assumed based on Table 7 in the `Building America House Simulation Protocols <https://www1.eere.energy.gov/buildings/publications/pdfs/building_america/house_simulation.pdf>`_ 
 and a default recovery efficiency will be assumed depending on the fuel type, as shown in the table below. The equations for non-electric storage water heaters are based on the regression analysis of `AHRI certified water heaters <https://www.ahridirectory.org/NewSearch?programId=24&searchTypeId=3>`_.
 
 ========================  ======================================
