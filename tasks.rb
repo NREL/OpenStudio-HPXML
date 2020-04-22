@@ -54,9 +54,7 @@ def create_osws
     'base-dhw-solar-direct-ics.osw' => 'base.osw',
     'base-dhw-solar-fraction.osw' => 'base.osw',
     'base-dhw-solar-indirect-flat-plate.osw' => 'base.osw',
-    'base-dhw-solar-thermosyphon-evacuated-tube.osw' => 'base.osw',
     'base-dhw-solar-thermosyphon-flat-plate.osw' => 'base.osw',
-    'base-dhw-solar-thermosyphon-ics.osw' => 'base.osw',
     'base-dhw-tank-gas.osw' => 'base.osw',
     'base-dhw-tank-gas-outside.osw' => 'base.osw',
     'base-dhw-tank-heat-pump.osw' => 'base.osw',
@@ -754,19 +752,10 @@ def get_values(osw_file, step)
     step.setArgument('solar_thermal_collector_type', HPXML::SolarThermalTypeSingleGlazing)
     step.setArgument('solar_thermal_collector_rated_optical_efficiency', 0.77)
     step.setArgument('solar_thermal_collector_rated_thermal_losses', 0.793)
-  elsif ['base-dhw-solar-thermosyphon-evacuated-tube.osw'].include? osw_file
-    step.setArgument('solar_thermal_system_type', 'hot water')
-    step.setArgument('solar_thermal_collector_loop_type', HPXML::SolarThermalLoopTypeThermosyphon)
   elsif ['base-dhw-solar-thermosyphon-flat-plate.osw'].include? osw_file
     step.setArgument('solar_thermal_system_type', 'hot water')
     step.setArgument('solar_thermal_collector_loop_type', HPXML::SolarThermalLoopTypeThermosyphon)
     step.setArgument('solar_thermal_collector_type', HPXML::SolarThermalTypeSingleGlazing)
-    step.setArgument('solar_thermal_collector_rated_optical_efficiency', 0.77)
-    step.setArgument('solar_thermal_collector_rated_thermal_losses', 0.793)
-  elsif ['base-dhw-solar-thermosyphon-ics.osw'].include? osw_file
-    step.setArgument('solar_thermal_system_type', 'hot water')
-    step.setArgument('solar_thermal_collector_loop_type', HPXML::SolarThermalLoopTypeThermosyphon)
-    step.setArgument('solar_thermal_collector_type', HPXML::SolarThermalTypeICS)
     step.setArgument('solar_thermal_collector_rated_optical_efficiency', 0.77)
     step.setArgument('solar_thermal_collector_rated_thermal_losses', 0.793)
   elsif ['base-dhw-tank-gas.osw'].include? osw_file
