@@ -389,8 +389,15 @@
           <SolarThermalSystem>
             <SystemIdentifier id='SolarThermalSystem'/>
             <SystemType>hot water</SystemType>
+            <CollectorArea>40.0</CollectorArea>
+            <CollectorLoopType>liquid indirect</CollectorLoopType>
+            <CollectorType>single glazing black</CollectorType>
+            <CollectorAzimuth>180</CollectorAzimuth>
+            <CollectorTilt>20.0</CollectorTilt>
+            <CollectorRatedOpticalEfficiency>0.77</CollectorRatedOpticalEfficiency>
+            <CollectorRatedThermalLosses>0.793</CollectorRatedThermalLosses>
+            <StorageVolume>60.0</StorageVolume>
             <ConnectedTo idref='WaterHeater'/>
-            <SolarFraction>0.65</SolarFraction>
           </SolarThermalSystem>
         </SolarThermal>
       </Systems>

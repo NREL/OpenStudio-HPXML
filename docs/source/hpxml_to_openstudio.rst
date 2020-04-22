@@ -31,7 +31,7 @@ The following building features/technologies are available for modeling via the 
 
   - Water Heaters (Storage, Tankless, Heat Pump, Indirect, Tankless Coil)
   - Solar Hot Water
-  - Desuperheaters
+  - Desuperheater
   - Hot Water Distribution (Standard, Recirculation)
   - Drain Water Heat Recovery
   - Hot Water Fixtures
@@ -39,12 +39,12 @@ The following building features/technologies are available for modeling via the 
 - Ventilation
 
   - Mechanical Ventilation (Exhaust, Supply, Balanced, ERV, HRV, CFIS)
-  - Kitchen Fan
-  - Bathroom Fans
+  - Kitchen/Bathroom Fans
   - Whole House Fan
 
 - Photovoltaics
 - Appliances (Clothes Washer/Dryer, Dishwasher, Refrigerator, Cooking Range/Oven)
+- Dehumidifier
 - Lighting
 - Ceiling Fans
 - Plug Loads
@@ -581,16 +581,16 @@ Solar Thermal
 *************
 
 A solar hot water system can be entered as a ``Systems/SolarThermal/SolarThermalSystem``.
-The ``SystemType`` element must be 'hot water' and the ``ConnectedTo`` element is required and must point to a ``WaterHeatingSystem``.
-Note that the connected water heater cannot be of type space-heating boiler or attached to a desuperheater.
+The ``SystemType`` element must be 'hot water'.
 
 Solar hot water systems can be described with either simple or detailed inputs.
 
-If using simple inputs, the following element is required:
+If using simple inputs, the following elements are used:
 
 - ``SolarFraction``: Portion of total conventional hot water heating load (delivered energy and tank standby losses). Can be obtained from Directory of SRCC OG-300 Solar Water Heating System Ratings or NREL's `System Advisor Model <https://sam.nrel.gov/>`_ or equivalent.
+- ``ConnectedTo``: Optional. If not specified, applies to all water heaters in the building. If specified; must point to a ``WaterHeatingSystem``.
 
-If using detailed inputs, the following elements are required:
+If using detailed inputs, the following elements are used:
 
 - ``CollectorArea``
 - ``CollectorLoopType``: 'liquid indirect' or 'liquid direct' or 'passive thermosyphon'
@@ -600,6 +600,7 @@ If using detailed inputs, the following elements are required:
 - ``CollectorRatedOpticalEfficiency``: FRTA (y-intercept); see Directory of SRCC OG-100 Certified Solar Collector Ratings
 - ``CollectorRatedThermalLosses``: FRUL (slope, in units of Btu/hr-ft^2-R); see Directory of SRCC OG-100 Certified Solar Collector Ratings
 - ``StorageVolume``
+- ``ConnectedTo``: Must point to a ``WaterHeatingSystem``. The connected water heater cannot be of type space-heating boiler or attached to a desuperheater.
 
 Photovoltaics
 *************
@@ -739,6 +740,13 @@ IsConvection   false
 =============  ==============
 
 An ``extension/UsageMultiplier`` can also be optionally provided that scales energy usage; if not provided, it is assumed to be 1.0.
+
+Dehumidifier
+************
+
+An ``Appliance/Dehumidifier`` element can be specified; if not provided, a dehumidifier will not be modeled.
+The ``Capacity``, ``DehumidistatSetpoint`` (relative humidity as a fraction, 0-1), and ``FractionDehumidificationLoadServed`` (0-1) must be provided.
+The efficiency of the dehumidifier can either be entered as an ``IntegratedEnergyFactor`` or ``EnergyFactor``.
 
 Lighting
 ~~~~~~~~

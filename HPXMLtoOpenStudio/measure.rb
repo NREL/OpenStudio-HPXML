@@ -263,6 +263,7 @@ class OSModel
     add_cooling_system(runner, model)
     add_heating_system(runner, model)
     add_heat_pump(runner, model, weather)
+    add_dehumidifier(runner, model)
     add_residual_hvac(runner, model)
     add_setpoints(runner, model, weather)
     add_ceiling_fans(runner, model, weather)
@@ -2426,6 +2427,11 @@ class OSModel
       end
     end
 
+    solar_thermal_system = nil
+    if @hpxml.solar_thermal_systems.size > 0
+      solar_thermal_system = @hpxml.solar_thermal_systems[0]
+    end
+
     # Water Heater
     dhw_loop_fracs = {}
     water_heater_spaces = {}
@@ -2461,8 +2467,8 @@ class OSModel
         # Solar fraction is used to adjust water heater's tank losses and hot water use, because it is
         # the portion of the total conventional hot water heating load (delivered energy + tank losses).
         solar_fraction = nil
-        if (@hpxml.solar_thermal_systems.size > 0) && (water_heating_system.id == @hpxml.solar_thermal_systems[0].water_heating_system.id)
-          solar_fraction = @hpxml.solar_thermal_systems[0].solar_fraction
+        if (not solar_thermal_system.nil?) && (solar_thermal_system.water_heating_system.nil? || (solar_thermal_system.water_heating_system.id == water_heating_system.id))
+          solar_fraction = solar_thermal_system.solar_fraction
         end
         solar_fraction = 0.0 if solar_fraction.nil?
 
@@ -2508,13 +2514,11 @@ class OSModel
           vol = water_heating_system.tank_volume
           boiler_afue = water_heating_system.related_hvac_system.heating_efficiency_afue
           boiler_fuel_type = water_heating_system.related_hvac_system.heating_system_fuel
-
-          boiler_sys = get_boiler_and_plant_loop(@hvac_map, water_heating_system.related_hvac_idref, sys_id)
-          @dhw_map[sys_id] << boiler_sys['boiler']
+          boiler, plant_loop = get_boiler_and_plant_loop(@hvac_map, water_heating_system.related_hvac_idref, sys_id)
 
           Waterheater.apply_combi(model, runner, space, vol, setpoint_temp, ec_adj, @nbeds,
-                                  boiler_sys['boiler'], boiler_sys['plant_loop'], boiler_fuel_type,
-                                  boiler_afue, @dhw_map, sys_id, wh_type, jacket_r, standby_loss)
+                                  boiler, plant_loop, boiler_fuel_type, boiler_afue, @dhw_map,
+                                  sys_id, wh_type, jacket_r, standby_loss, solar_fraction)
 
         else
 
@@ -2537,20 +2541,18 @@ class OSModel
                                 dwhr_facilities_connected, dwhr_is_equal_flow,
                                 dwhr_efficiency, dhw_loop_fracs, @eri_version, @dhw_map)
 
-    if @hpxml.solar_thermal_systems.size > 0
-      solar_thermal_system = @hpxml.solar_thermal_systems[0]
-      water_heater = solar_thermal_system.water_heating_system
-
-      if [HPXML::WaterHeaterTypeCombiStorage, HPXML::WaterHeaterTypeCombiTankless].include? water_heater.water_heater_type
-        fail "Water heating system '#{water_heater.id}' connected to solar thermal system '#{solar_thermal_system.id}' cannot be a space-heating boiler."
-      end
-
-      if water_heater.uses_desuperheater
-        fail "Water heating system '#{water_heater.id}' connected to solar thermal system '#{solar_thermal_system.id}' cannot be attached to a desuperheater."
-      end
-
+    if not solar_thermal_system.nil?
       collector_area = solar_thermal_system.collector_area
       if not collector_area.nil? # Detailed solar water heater
+        water_heater = solar_thermal_system.water_heating_system
+
+        if [HPXML::WaterHeaterTypeCombiStorage, HPXML::WaterHeaterTypeCombiTankless].include? water_heater.water_heater_type
+          fail "Water heating system '#{water_heater.id}' connected to solar thermal system '#{solar_thermal_system.id}' cannot be a space-heating boiler."
+        end
+        if water_heater.uses_desuperheater
+          fail "Water heating system '#{water_heater.id}' connected to solar thermal system '#{solar_thermal_system.id}' cannot be attached to a desuperheater."
+        end
+
         frta = solar_thermal_system.collector_frta
         frul = solar_thermal_system.collector_frul
         storage_vol = solar_thermal_system.storage_volume
@@ -3086,6 +3088,15 @@ class OSModel
                             @cfa, @living_space)
   end
 
+  def self.add_dehumidifier(runner, model)
+    return if @hpxml.dehumidifiers.size == 0
+
+    dehumidifier = @hpxml.dehumidifiers[0]
+    @hvac_map[dehumidifier.id] = []
+
+    HVAC.apply_dehumidifier(model, runner, dehumidifier, @living_space, @hvac_map)
+  end
+
   def self.check_distribution_system(hvac_distribution, system_type)
     return if hvac_distribution.nil?
 
@@ -3106,17 +3117,18 @@ class OSModel
 
   def self.get_boiler_and_plant_loop(loop_hvacs, heating_source_id, sys_id)
     # Search for the right boiler OS object
-    related_boiler_sys = {}
+    boiler = nil
+    plant_loop = nil
     if loop_hvacs.keys.include? heating_source_id
       loop_hvacs[heating_source_id].each do |comp|
         if comp.is_a? OpenStudio::Model::PlantLoop
-          related_boiler_sys['plant_loop'] = comp
+          plant_loop = comp
         elsif comp.is_a? OpenStudio::Model::BoilerHotWater
-          related_boiler_sys['boiler'] = comp
+          boiler = comp
         end
       end
-      return related_boiler_sys
     end
+    return boiler, plant_loop
   end
 
   def self.add_mels(runner, model, spaces)
@@ -3518,6 +3530,8 @@ class OSModel
     tot_load_sensors[:clg] = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Cooling:EnergyTransfer')
     tot_load_sensors[:clg].setName('clg_load_tot')
 
+    load_adj_sensors = {} # Sensors used to adjust E+ EnergyTransfer meter, eg. dehumidifier as load in our program, but included in Heating:EnergyTransfer as HVAC equipment
+
     # EMS Sensors: Surfaces, SubSurfaces, InternalMass
 
     surfaces_sensors = { walls: [],
@@ -3825,6 +3839,19 @@ class OSModel
       end
     end
 
+    model.getZoneHVACDehumidifierDXs.each do |e|
+      next unless e.thermalZone.get.name.to_s == @living_zone.name.to_s
+
+      intgains_sensors << []
+      { 'Zone Dehumidifier Sensible Heating Energy' => 'ig_dehumidifier' }.each do |var, name|
+        intgain_dehumidifier = OpenStudio::Model::EnergyManagementSystemSensor.new(model, var)
+        intgain_dehumidifier.setName(name)
+        intgain_dehumidifier.setKeyName(e.name.to_s)
+        load_adj_sensors[:dehumidifier] = intgain_dehumidifier
+        intgains_sensors[-1] << intgain_dehumidifier
+      end
+    end
+
     intgains_dhw_sensors = {}
 
     (model.getWaterHeaterMixeds + model.getWaterHeaterStratifieds).sort.each do |wh|
@@ -3950,9 +3977,21 @@ class OSModel
     program.addLine('Set loads_htg_tot = 0')
     program.addLine('Set loads_clg_tot = 0')
     program.addLine("If #{liv_load_sensors[:htg].name} > 0")
-    program.addLine("  Set loads_htg_tot = #{tot_load_sensors[:htg].name} - #{tot_load_sensors[:clg].name}")
+    s = "  Set loads_htg_tot = #{tot_load_sensors[:htg].name} - #{tot_load_sensors[:clg].name}"
+    load_adj_sensors.each do |key, adj_sensor|
+      if ['dehumidifier'].include? key.to_s
+        s += " - #{adj_sensor.name}"
+      end
+    end
+    program.addLine(s)
     program.addLine("ElseIf #{liv_load_sensors[:clg].name} > 0")
-    program.addLine("  Set loads_clg_tot = #{tot_load_sensors[:clg].name} - #{tot_load_sensors[:htg].name}")
+    s = "  Set loads_clg_tot = #{tot_load_sensors[:clg].name} - #{tot_load_sensors[:htg].name}"
+    load_adj_sensors.each do |key, adj_sensor|
+      if ['dehumidifier'].include? key.to_s
+        s += " + #{adj_sensor.name}"
+      end
+    end
+    program.addLine(s)
     program.addLine('EndIf')
 
     # EMS calling manager

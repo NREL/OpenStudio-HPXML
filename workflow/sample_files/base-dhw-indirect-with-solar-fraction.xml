@@ -324,61 +324,10 @@
         <WaterHeating>
           <WaterHeatingSystem>
             <SystemIdentifier id='WaterHeater'/>
-            <FuelType>electricity</FuelType>
-            <WaterHeaterType>storage water heater</WaterHeaterType>
-            <Location>living space</Location>
-            <TankVolume>40.0</TankVolume>
-            <FractionDHWLoadServed>0.2</FractionDHWLoadServed>
-            <HeatingCapacity>18767.0</HeatingCapacity>
-            <EnergyFactor>0.95</EnergyFactor>
-            <HotWaterTemperature>125.0</HotWaterTemperature>
-          </WaterHeatingSystem>
-          <WaterHeatingSystem>
-            <SystemIdentifier id='WaterHeater2'/>
-            <FuelType>natural gas</FuelType>
-            <WaterHeaterType>storage water heater</WaterHeaterType>
-            <Location>living space</Location>
-            <TankVolume>50.0</TankVolume>
-            <FractionDHWLoadServed>0.2</FractionDHWLoadServed>
-            <HeatingCapacity>40000.0</HeatingCapacity>
-            <EnergyFactor>0.59</EnergyFactor>
-            <RecoveryEfficiency>0.76</RecoveryEfficiency>
-            <HotWaterTemperature>125.0</HotWaterTemperature>
-          </WaterHeatingSystem>
-          <WaterHeatingSystem>
-            <SystemIdentifier id='WaterHeater3'/>
-            <FuelType>electricity</FuelType>
-            <WaterHeaterType>heat pump water heater</WaterHeaterType>
-            <Location>living space</Location>
-            <TankVolume>80.0</TankVolume>
-            <FractionDHWLoadServed>0.2</FractionDHWLoadServed>
-            <EnergyFactor>2.3</EnergyFactor>
-            <HotWaterTemperature>125.0</HotWaterTemperature>
-          </WaterHeatingSystem>
-          <WaterHeatingSystem>
-            <SystemIdentifier id='WaterHeater4'/>
-            <FuelType>electricity</FuelType>
-            <WaterHeaterType>instantaneous water heater</WaterHeaterType>
-            <Location>living space</Location>
-            <FractionDHWLoadServed>0.2</FractionDHWLoadServed>
-            <EnergyFactor>0.99</EnergyFactor>
-            <HotWaterTemperature>125.0</HotWaterTemperature>
-          </WaterHeatingSystem>
-          <WaterHeatingSystem>
-            <SystemIdentifier id='WaterHeater5'/>
-            <FuelType>natural gas</FuelType>
-            <WaterHeaterType>instantaneous water heater</WaterHeaterType>
-            <Location>living space</Location>
-            <FractionDHWLoadServed>0.1</FractionDHWLoadServed>
-            <EnergyFactor>0.82</EnergyFactor>
-            <HotWaterTemperature>125.0</HotWaterTemperature>
-          </WaterHeatingSystem>
-          <WaterHeatingSystem>
-            <SystemIdentifier id='WaterHeater6'/>
             <WaterHeaterType>space-heating boiler with storage tank</WaterHeaterType>
             <Location>living space</Location>
             <TankVolume>50.0</TankVolume>
-            <FractionDHWLoadServed>0.1</FractionDHWLoadServed>
+            <FractionDHWLoadServed>1.0</FractionDHWLoadServed>
             <HotWaterTemperature>125.0</HotWaterTemperature>
             <RelatedHVACSystem idref='HeatingSystem'/>
           </WaterHeatingSystem>
@@ -408,6 +357,7 @@
           <SolarThermalSystem>
             <SystemIdentifier id='SolarThermalSystem'/>
             <SystemType>hot water</SystemType>
+            <ConnectedTo idref='WaterHeater'/>
             <SolarFraction>0.65</SolarFraction>
           </SolarThermalSystem>
         </SolarThermal>
