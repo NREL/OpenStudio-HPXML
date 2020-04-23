@@ -170,10 +170,12 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
   end
 
   def process_weather(hpxml, runner, model, weather_dir, output_dir)
-    epw_path = hpxml.climate_and_risk_zones.weather_station_epw_filename
+    epw_path = hpxml.climate_and_risk_zones.weather_station_epw_filepath
 
     if not epw_path.nil?
-      epw_path = File.join(weather_dir, epw_path)
+      if not File.exist? epw_path
+        epw_path = File.join(weather_dir, epw_path)
+      end
       if not File.exist?(epw_path)
         fail "'#{epw_path}' could not be found."
       end
@@ -340,7 +342,6 @@ class OSModel
       @hpxml.building_construction.conditioned_building_volume = @cfa * @hpxml.building_construction.average_ceiling_height
     end
     @cvolume = @hpxml.building_construction.conditioned_building_volume
-    @nbaths = @hpxml.building_construction.number_of_bathrooms
     if @hpxml.building_construction.number_of_bathrooms.nil?
       @nbaths = Waterheater.get_default_num_bathrooms(@nbeds)
     else
@@ -478,6 +479,21 @@ class OSModel
         sqft_by_gal = surface_area / act_vol # sqft/gal
         water_heating_system.standby_loss = (2.9721 * sqft_by_gal - 0.4732).round(3) # linear equation assuming a constant u, F/hr
       end
+      if (water_heating_system.water_heater_type == HPXML::WaterHeaterTypeStorage)
+        if water_heating_system.heating_capacity.nil?
+          water_heating_system.heating_capacity = Waterheater.get_default_heating_capacity(water_heating_system.fuel_type, @nbeds, @hpxml.water_heating_systems.size, @nbaths) * 1000.0
+        end
+        if water_heating_system.tank_volume.nil?
+          water_heating_system.tank_volume = Waterheater.get_default_tank_volume(water_heating_system.fuel_type, @nbeds, @nbaths)
+        end
+        if water_heating_system.recovery_efficiency.nil?
+          ef = water_heating_system.energy_factor
+          if ef.nil?
+            ef = Waterheater.calc_ef_from_uef(water_heating_system.uniform_energy_factor, water_heating_system.water_heater_type, water_heating_system.fuel_type)
+          end
+          water_heating_system.recovery_efficiency = Waterheater.get_default_recovery_efficiency(water_heating_system.fuel_type, ef)
+        end
+      end
       if water_heating_system.location.nil?
         water_heating_system.location = Waterheater.get_default_location(@hpxml, @hpxml.climate_and_risk_zones.iecc_zone)
       end
@@ -490,12 +506,34 @@ class OSModel
         if hot_water_distribution.standard_piping_length.nil?
           hot_water_distribution.standard_piping_length = HotWaterAndAppliances.get_default_std_pipe_length(@has_uncond_bsmnt, @cfa, @ncfl)
         end
+      elsif hot_water_distribution.system_type == HPXML::DHWDistTypeRecirc
+        if hot_water_distribution.recirculation_piping_length.nil?
+          hot_water_distribution.recirculation_piping_length = HotWaterAndAppliances.get_default_recirc_loop_length(HotWaterAndAppliances.get_default_std_pipe_length(@has_uncond_bsmnt, @cfa, @ncfl))
+        end
+        if hot_water_distribution.recirculation_branch_piping_length.nil?
+          hot_water_distribution.recirculation_branch_piping_length = HotWaterAndAppliances.get_default_recirc_branch_loop_length()
+        end
+        if hot_water_distribution.recirculation_pump_power.nil?
+          hot_water_distribution.recirculation_pump_power = HotWaterAndAppliances.get_default_recirc_pump_power()
+        end
       end
     end
 
     # Default water fixtures
     if @hpxml.water_heating.water_fixtures_usage_multiplier.nil?
       @hpxml.water_heating.water_fixtures_usage_multiplier = 1.0
+    end
+
+    # Default solar thermal systems
+    if @hpxml.solar_thermal_systems.size > 0
+      solar_thermal_system = @hpxml.solar_thermal_systems[0]
+      collector_area = solar_thermal_system.collector_area
+
+      if not collector_area.nil? # Detailed solar water heater
+        if solar_thermal_system.storage_volume.nil?
+          solar_thermal_system.storage_volume = Waterheater.calc_default_solar_thermal_system_storage_volume(collector_area)
+        end
+      end
     end
 
     # Default kitchen fan
