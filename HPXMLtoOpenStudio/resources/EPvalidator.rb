@@ -75,6 +75,8 @@ class EnergyPlusValidator
         '/HPXML/Building/BuildingDetails/Systems/HVAC/HVACDistribution' => zero_or_more, # See [HVACDistribution]
 
         '/HPXML/Building/BuildingDetails/Systems/MechanicalVentilation/VentilationFans/VentilationFan[UsedForWholeBuildingVentilation="true"]' => zero_or_one, # See [MechanicalVentilation]
+        '/HPXML/Building/BuildingDetails/Systems/MechanicalVentilation/VentilationFans/VentilationFan[UsedForLocalVentilation="true" and FanLocation="kitchen"]' => zero_or_one, # See [KitchenRangeFan]
+        '/HPXML/Building/BuildingDetails/Systems/MechanicalVentilation/VentilationFans/VentilationFan[UsedForLocalVentilation="true" and FanLocation="bath"]' => zero_or_one, # See [BathFan]
         '/HPXML/Building/BuildingDetails/Systems/MechanicalVentilation/VentilationFans/VentilationFan[UsedForSeasonalCoolingLoadReduction="true"]' => zero_or_one, # See [WholeHouseFan]
         '/HPXML/Building/BuildingDetails/Systems/WaterHeating/WaterHeatingSystem' => zero_or_more, # See [WaterHeatingSystem]
         '/HPXML/Building/BuildingDetails/Systems/WaterHeating/HotWaterDistribution' => zero_or_one, # See [HotWaterDistribution]
@@ -86,6 +88,7 @@ class EnergyPlusValidator
         '/HPXML/Building/BuildingDetails/Appliances/ClothesDryer' => zero_or_one, # See [ClothesDryer]
         '/HPXML/Building/BuildingDetails/Appliances/Dishwasher' => zero_or_one, # See [Dishwasher]
         '/HPXML/Building/BuildingDetails/Appliances/Refrigerator' => zero_or_one, # See [Refrigerator]
+        '/HPXML/Building/BuildingDetails/Appliances/Dehumidifier' => zero_or_one, # See [Dehumidifier]
         '/HPXML/Building/BuildingDetails/Appliances/CookingRange' => zero_or_one, # See [CookingRange]
 
         '/HPXML/Building/BuildingDetails/Lighting' => zero_or_one, # See [Lighting]
@@ -107,6 +110,7 @@ class EnergyPlusValidator
         'NumberofConditionedFloors' => one,
         'NumberofConditionedFloorsAboveGrade' => one,
         'NumberofBedrooms' => one,
+        'NumberofBathrooms' => zero_or_one,
         'ConditionedFloorArea' => one,
         'ConditionedBuildingVolume | AverageCeilingHeight' => one_or_more,
       },
@@ -495,6 +499,25 @@ class EnergyPlusValidator
         'AttachedToHVACDistributionSystem' => one,
       },
 
+      # [KitchenRangeFan]
+      '/HPXML/Building/BuildingDetails/Systems/MechanicalVentilation/VentilationFans/VentilationFan[UsedForLocalVentilation="true" and FanLocation="kitchen"]' => {
+        'SystemIdentifier' => one, # Required by HPXML schema
+        'RatedFlowRate' => zero_or_one,
+        'HoursInOperation' => zero_or_one,
+        'FanPower' => zero_or_one,
+        'extension/StartHour' => zero_or_one, # 0 = midnight. 12 = noon
+      },
+
+      # [BathFan]
+      '/HPXML/Building/BuildingDetails/Systems/MechanicalVentilation/VentilationFans/VentilationFan[UsedForLocalVentilation="true" and FanLocation="bath"]' => {
+        'SystemIdentifier' => one, # Required by HPXML schema
+        'Quantity' => zero_or_one,
+        'RatedFlowRate' => zero_or_one,
+        'HoursInOperation' => zero_or_one,
+        'FanPower' => zero_or_one,
+        'extension/StartHour' => zero_or_one, # 0 = midnight. 12 = noon
+      },
+
       # [WholeHouseFan]
       '/HPXML/Building/BuildingDetails/Systems/MechanicalVentilation/VentilationFans/VentilationFan[UsedForSeasonalCoolingLoadReduction="true"]' => {
         'SystemIdentifier' => one, # Required by HPXML schema
@@ -664,6 +687,15 @@ class EnergyPlusValidator
         '[not(Location)] | Location[text()="living space" or text()="basement - conditioned" or text()="basement - unconditioned" or text()="garage" or text()="other"]' => one, # Use "other" for space type of multifamily buffer space, non-freezing space, other housing unit, and other heated space
         'RatedAnnualkWh | extension/AdjustedAnnualkWh' => zero_or_more,
         'extension/UsageMultiplier' => zero_or_one,
+      },
+
+      # [Dehumidifier]
+      '/HPXML/Building/BuildingDetails/Appliances/Dehumidifier' => {
+        'SystemIdentifier' => one, # Required by HPXML schema
+        'Capacity' => one, # pints/day
+        'EnergyFactor | IntegratedEnergyFactor' => one, # liters/kWh
+        'DehumidistatSetpoint' => one, # RH, fraction
+        'FractionDehumidificationLoadServed' => one,
       },
 
       # [CookingRange]

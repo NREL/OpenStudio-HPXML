@@ -292,61 +292,17 @@
       <Systems>
         <HVAC>
           <HVACPlant>
-            <HeatingSystem>
-              <SystemIdentifier id='HeatingSystem'/>
-              <DistributionSystem idref='HVACDistribution'/>
-              <HeatingSystemType>
-                <Furnace/>
-              </HeatingSystemType>
-              <HeatingSystemFuel>natural gas</HeatingSystemFuel>
-              <HeatingCapacity>21333.333333333332</HeatingCapacity>
-              <AnnualHeatingEfficiency>
-                <Units>AFUE</Units>
-                <Value>0.92</Value>
-              </AnnualHeatingEfficiency>
-              <FractionHeatLoadServed>0.33</FractionHeatLoadServed>
-            </HeatingSystem>
-            <HeatingSystem>
-              <SystemIdentifier id='HeatingSystem2'/>
-              <DistributionSystem idref='HVACDistribution2'/>
-              <HeatingSystemType>
-                <Furnace/>
-              </HeatingSystemType>
-              <HeatingSystemFuel>natural gas</HeatingSystemFuel>
-              <HeatingCapacity>21333.333333333332</HeatingCapacity>
-              <AnnualHeatingEfficiency>
-                <Units>AFUE</Units>
-                <Value>0.92</Value>
-              </AnnualHeatingEfficiency>
-              <FractionHeatLoadServed>0.33</FractionHeatLoadServed>
-            </HeatingSystem>
-            <HeatingSystem>
-              <SystemIdentifier id='HeatingSystem3'/>
-              <DistributionSystem idref='HVACDistribution3'/>
-              <HeatingSystemType>
-                <Furnace/>
-              </HeatingSystemType>
-              <HeatingSystemFuel>natural gas</HeatingSystemFuel>
-              <HeatingCapacity>21333.333333333332</HeatingCapacity>
-              <AnnualHeatingEfficiency>
-                <Units>AFUE</Units>
-                <Value>0.92</Value>
-              </AnnualHeatingEfficiency>
-              <FractionHeatLoadServed>0.35</FractionHeatLoadServed>
-            </HeatingSystem>
             <CoolingSystem>
               <SystemIdentifier id='CoolingSystem'/>
-              <DistributionSystem idref='HVACDistribution'/>
-              <CoolingSystemType>central air conditioner</CoolingSystemType>
+              <CoolingSystemType>room air conditioner</CoolingSystemType>
               <CoolingSystemFuel>electricity</CoolingSystemFuel>
               <CoolingCapacity>48000.0</CoolingCapacity>
-              <CompressorType>single stage</CompressorType>
-              <FractionCoolLoadServed>1.0</FractionCoolLoadServed>
+              <FractionCoolLoadServed>0.33</FractionCoolLoadServed>
               <AnnualCoolingEfficiency>
-                <Units>SEER</Units>
-                <Value>13.0</Value>
+                <Units>EER</Units>
+                <Value>8.5</Value>
               </AnnualCoolingEfficiency>
-              <SensibleHeatFraction>0.73</SensibleHeatFraction>
+              <SensibleHeatFraction>0.65</SensibleHeatFraction>
             </CoolingSystem>
           </HVACPlant>
           <HVACControl>
@@ -355,28 +311,6 @@
             <SetpointTempHeatingSeason>68.0</SetpointTempHeatingSeason>
             <SetpointTempCoolingSeason>78.0</SetpointTempCoolingSeason>
           </HVACControl>
-          <HVACDistribution>
-            <SystemIdentifier id='HVACDistribution'/>
-            <DistributionSystemType>
-              <Other>DSE</Other>
-            </DistributionSystemType>
-            <AnnualHeatingDistributionSystemEfficiency>0.8</AnnualHeatingDistributionSystemEfficiency>
-            <AnnualCoolingDistributionSystemEfficiency>0.7</AnnualCoolingDistributionSystemEfficiency>
-          </HVACDistribution>
-          <HVACDistribution>
-            <SystemIdentifier id='HVACDistribution2'/>
-            <DistributionSystemType>
-              <Other>DSE</Other>
-            </DistributionSystemType>
-            <AnnualHeatingDistributionSystemEfficiency>0.8</AnnualHeatingDistributionSystemEfficiency>
-          </HVACDistribution>
-          <HVACDistribution>
-            <SystemIdentifier id='HVACDistribution3'/>
-            <DistributionSystemType>
-              <Other>DSE</Other>
-            </DistributionSystemType>
-            <AnnualHeatingDistributionSystemEfficiency>0.8</AnnualHeatingDistributionSystemEfficiency>
-          </HVACDistribution>
         </HVAC>
         <WaterHeating>
           <WaterHeatingSystem>
