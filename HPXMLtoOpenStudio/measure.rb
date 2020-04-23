@@ -342,7 +342,6 @@ class OSModel
       @hpxml.building_construction.conditioned_building_volume = @cfa * @hpxml.building_construction.average_ceiling_height
     end
     @cvolume = @hpxml.building_construction.conditioned_building_volume
-    @nbaths = @hpxml.building_construction.number_of_bathrooms
     if @hpxml.building_construction.number_of_bathrooms.nil?
       @nbaths = Waterheater.get_default_num_bathrooms(@nbeds)
     else
