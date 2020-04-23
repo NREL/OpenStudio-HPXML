@@ -803,7 +803,7 @@ class HPXML < Object
 
   class ClimateandRiskZones < BaseElement
     ATTRS = [:iecc_year, :iecc_zone, :weather_station_id, :weather_station_name, :weather_station_wmo,
-             :weather_station_epw_filename]
+             :weather_station_epw_filepath]
     attr_accessor(*ATTRS)
 
     def check_for_errors
@@ -829,7 +829,7 @@ class HPXML < Object
         XMLHelper.add_element(weather_station, 'Name', @weather_station_name) unless @weather_station_name.nil?
         XMLHelper.add_element(weather_station, 'WMO', @weather_station_wmo) unless @weather_station_wmo.nil?
         HPXML::add_extension(parent: weather_station,
-                             extensions: { 'EPWFileName' => @weather_station_epw_filename })
+                             extensions: { 'EPWFilePath' => @weather_station_epw_filepath })
       end
     end
 
@@ -846,7 +846,7 @@ class HPXML < Object
         @weather_station_id = HPXML::get_id(weather_station)
         @weather_station_name = XMLHelper.get_value(weather_station, 'Name')
         @weather_station_wmo = XMLHelper.get_value(weather_station, 'WMO')
-        @weather_station_epw_filename = XMLHelper.get_value(weather_station, 'extension/EPWFileName')
+        @weather_station_epw_filepath = XMLHelper.get_value(weather_station, 'extension/EPWFilePath')
       end
     end
   end

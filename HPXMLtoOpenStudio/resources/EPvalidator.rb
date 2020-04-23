@@ -133,7 +133,7 @@ class EnergyPlusValidator
       '/HPXML/Building/BuildingDetails/ClimateandRiskZones/WeatherStation' => {
         'SystemIdentifier' => one, # Required by HPXML schema
         'Name' => one, # Required by HPXML schema
-        'WMO | extension/EPWFileName' => one, # Reference weather/data.csv for the list of acceptable WMO station numbers
+        'WMO | extension/EPWFilePath' => one, # Reference weather/data.csv for the list of acceptable WMO station numbers
       },
 
       # [AirInfiltration]

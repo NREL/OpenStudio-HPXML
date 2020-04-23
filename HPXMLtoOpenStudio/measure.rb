@@ -170,10 +170,12 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
   end
 
   def process_weather(hpxml, runner, model, weather_dir, output_dir)
-    epw_path = hpxml.climate_and_risk_zones.weather_station_epw_filename
+    epw_path = hpxml.climate_and_risk_zones.weather_station_epw_filepath
 
     if not epw_path.nil?
-      epw_path = File.join(weather_dir, epw_path)
+      if not File.exist? epw_path
+        epw_path = File.join(weather_dir, epw_path)
+      end
       if not File.exist?(epw_path)
         fail "'#{epw_path}' could not be found."
       end
