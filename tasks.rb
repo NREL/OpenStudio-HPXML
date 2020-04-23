@@ -26,6 +26,7 @@ def create_hpxmls
     'invalid_files/hvac-dse-multiple-attached-cooling.xml' => 'base-hvac-dse.xml',
     'invalid_files/hvac-dse-multiple-attached-heating.xml' => 'base-hvac-dse.xml',
     'invalid_files/hvac-frac-load-served.xml' => 'base-hvac-multiple.xml',
+    'invalid_files/invalid-epw-filepath.xml' => 'base-location-epw-filepath.xml',
     'invalid_files/invalid-neighbor-shading-azimuth.xml' => 'base-misc-neighbor-shading.xml',
     'invalid_files/invalid-relatedhvac-dhw-indirect.xml' => 'base-dhw-indirect.xml',
     'invalid_files/invalid-relatedhvac-desuperheater.xml' => 'base-hvac-central-ac-only-1-speed.xml',
@@ -208,8 +209,8 @@ def create_hpxmls
     'base-location-dallas-tx.xml' => 'base.xml',
     'base-location-duluth-mn.xml' => 'base.xml',
     'base-location-miami-fl.xml' => 'base.xml',
-    'base-location-epw-filename.xml' => 'base.xml',
-    'base-location-epw-filename-AMY-2012.xml' => 'base.xml',
+    'base-location-epw-filepath.xml' => 'base.xml',
+    'base-location-epw-filepath-AMY-2012.xml' => 'base.xml',
     'base-mechvent-balanced.xml' => 'base.xml',
     'base-mechvent-cfis.xml' => 'base.xml',
     'base-mechvent-cfis-evap-cooler-only-ducted.xml' => 'base-hvac-evap-cooler-only-ducted.xml',
@@ -568,15 +569,17 @@ def set_hpxml_climate_and_risk_zones(hpxml_file, hpxml)
     hpxml.climate_and_risk_zones.iecc_zone = '1A'
     hpxml.climate_and_risk_zones.weather_station_name = 'Miami, FL'
     hpxml.climate_and_risk_zones.weather_station_wmo = '722020'
-  elsif ['base-location-epw-filename.xml'].include? hpxml_file
+  elsif ['base-location-epw-filepath.xml'].include? hpxml_file
     hpxml.climate_and_risk_zones.weather_station_wmo = nil
-    hpxml.climate_and_risk_zones.weather_station_epw_filename = 'USA_CO_Denver.Intl.AP.725650_TMY3.epw'
-  elsif ['base-location-epw-filename-AMY-2012.xml'].include? hpxml_file
+    hpxml.climate_and_risk_zones.weather_station_epw_filepath = 'USA_CO_Denver.Intl.AP.725650_TMY3.epw'
+  elsif ['base-location-epw-filepath-AMY-2012.xml'].include? hpxml_file
     hpxml.climate_and_risk_zones.weather_station_wmo = nil
     hpxml.climate_and_risk_zones.weather_station_name = 'Boulder, CO'
-    hpxml.climate_and_risk_zones.weather_station_epw_filename = 'US_CO_Boulder_AMY_2012.epw'
+    hpxml.climate_and_risk_zones.weather_station_epw_filepath = 'US_CO_Boulder_AMY_2012.epw'
   elsif ['invalid_files/invalid-wmo.xml'].include? hpxml_file
     hpxml.climate_and_risk_zones.weather_station_wmo = '999999'
+  elsif ['invalid_files/invalid-epw-filepath.xml'].include? hpxml_file
+    hpxml.climate_and_risk_zones.weather_station_epw_filepath = 'foo.epw'
   end
 end
 
