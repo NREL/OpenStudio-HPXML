@@ -1144,6 +1144,7 @@ class Waterheater
   def self.get_default_heating_capacity(fuel, num_beds, num_water_heaters, num_baths = nil)
     # Returns the capacity of the water heater based on the fuel type and number
     # of bedrooms and bathrooms in a home. Returns the capacity in kBtu/hr.
+    # Source: Table 8. Benchmark DHW Storage and Burner Capacity in 2014 BA HSP
 
     if num_baths.nil?
       num_baths = get_default_num_bathrooms(num_beds)
@@ -1153,20 +1154,12 @@ class Waterheater
     num_baths /= num_water_heaters.to_f
 
     if fuel != HPXML::FuelTypeElectricity
-      if num_beds == 1
-        cap_kbtuh = 27.0
-      elsif num_beds == 2
+      if num_beds <= 3
         cap_kbtuh = 36.0
-      elsif num_beds == 3
-        if num_baths < 3
-          cap_kbtuh = 36.0
-        else
-          cap_kbtuh = 38.0
-        end
       elsif num_beds == 4
         cap_kbtuh = 38.0
       elsif num_beds == 5
-        cap_kbtuh = 47.0
+        cap_kbtuh = 48.0
       else
         cap_kbtuh = 50.0
       end
@@ -1195,11 +1188,9 @@ class Waterheater
 
   def self.get_default_tank_volume(fuel, num_beds, num_baths)
     # Returns the volume of a water heater based on the BA HSP
+    # Source: Table 8. Benchmark DHW Storage and Burner Capacity in 2014 BA HSP
     if fuel != HPXML::FuelTypeElectricity # Non-electric tank WHs
-      # Source: 2010 HSP Addendum
-      if num_beds == 1
-        return 20.0
-      elsif num_beds == 2
+      if num_beds <= 2
         return 30.0
       elsif num_beds == 3
         if num_baths <= 1.5
@@ -1217,10 +1208,8 @@ class Waterheater
         return 50.0
       end
     else
-      # Source: Table 5 HUD-FHA Minimum Water Heater Capacities for One- and
-      # Two-Family Living Units (ASHRAE HVAC Applications 2007)
       if num_beds == 1
-        return 20.0
+        return 30.0
       elsif num_beds == 2
         if num_baths <= 1.5
           return 30.0
