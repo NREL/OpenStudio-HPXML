@@ -27,9 +27,9 @@ class BuildResidentialHPXMLTest < MiniTest::Test
       Dir["#{test_dir}/base*.osw"].sort.each do |osw|
         osws << File.absolute_path(osw)
       end
-      Dir["#{test_dir}/extra*.osw"].sort.each do |osw|
-        osws << File.absolute_path(osw)
-      end
+      # Dir["#{test_dir}/extra*.osw"].sort.each do |osw|
+      # osws << File.absolute_path(osw)
+      # end
     end
 
     workflow_dir = File.expand_path(File.join(File.dirname(__FILE__), '../../workflow/sample_files'))
@@ -250,7 +250,9 @@ class BuildResidentialHPXMLTest < MiniTest::Test
       hpxml.hvac_controls.each do |hvac_control|
         hvac_control.control_type = nil # Not used by model
       end
-      hpxml.collapse_enclosure_surfaces()
+      if hpxml.collapse_enclosure
+        hpxml.collapse_enclosure_surfaces()
+      end
 
       # Replace IDs/IDREFs with blank strings
       HPXML::HPXML_ATTRS.each do |attr|

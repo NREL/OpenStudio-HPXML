@@ -2914,9 +2914,12 @@ class HPXMLFile
           exterior_adjacent_to = HPXML::LocationOtherHousingUnitAbove
         end
       end
+
       next if interior_adjacent_to == exterior_adjacent_to
       next if (surface.surfaceType == 'RoofCeiling') && (exterior_adjacent_to == HPXML::LocationOutside)
-      next if [HPXML::LocationLivingSpace, HPXML::LocationBasementConditioned].include? exterior_adjacent_to
+      unless args[:geometry_export_3d_coordinates]
+        next if [HPXML::LocationLivingSpace, HPXML::LocationBasementConditioned].include? exterior_adjacent_to
+      end
 
       hpxml.frame_floors.add(id: "#{surface.name}",
                              exterior_adjacent_to: exterior_adjacent_to,
@@ -3104,7 +3107,7 @@ class HPXMLFile
   end
 
   def self.set_doors(hpxml, runner, model, args)
-    model.getSurfaces.each do |surface|    
+    model.getSurfaces.each do |surface|
       surface.subSurfaces.each do |sub_surface|
         next if sub_surface.subSurfaceType != 'Door'
         sub_surface_facade = Geometry.get_facade_for_surface(sub_surface)

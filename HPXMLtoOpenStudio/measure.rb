@@ -1655,6 +1655,7 @@ class OSModel
         surface.setSunExposure('NoSun')
         surface.setWindExposure('NoWind')
       else
+
         vertices = OpenStudio::Point3dVector.new
         frame_floor.coordinates.each do |coordinate|
           x = UnitConversions.convert(coordinate[:x], 'ft', 'm')
@@ -1669,36 +1670,50 @@ class OSModel
         else
           surface.additionalProperties.setFeature('SurfaceType', 'Floor')
         end
-        set_surface_interior(model, spaces, surface, frame_floor.interior_adjacent_to)
-        set_surface_exterior(model, spaces, surface, frame_floor.exterior_adjacent_to)
         surface.setName(frame_floor.id)
+        set_surface_interior(model, spaces, surface, frame_floor.interior_adjacent_to)
+        if [HPXML::LocationLivingSpace].include?(frame_floor.interior_adjacent_to) && [HPXML::LocationBasementConditioned].include?(frame_floor.exterior_adjacent_to)
+          surface.setOutsideBoundaryCondition('Adiabatic')
+        else
+          set_surface_exterior(model, spaces, surface, frame_floor.exterior_adjacent_to)
+        end
         surface.setSunExposure('NoSun')
         surface.setWindExposure('NoWind')
+
       end
 
-      # Apply construction
+      if surface.outsideBoundaryCondition != 'Adiabatic'
 
-      film_r = 2.0 * Material.AirFilmFloorReduced.rvalue
-      assembly_r = frame_floor.insulation_assembly_r_value
+        # Apply construction
 
-      constr_sets = [
-        WoodStudConstructionSet.new(Material.Stud2x6, 0.10, 10.0, 0.75, 0.0, Material.CoveringBare), # 2x6, 24" o.c. + R10
-        WoodStudConstructionSet.new(Material.Stud2x6, 0.10, 0.0, 0.75, 0.0, Material.CoveringBare),  # 2x6, 24" o.c.
-        WoodStudConstructionSet.new(Material.Stud2x4, 0.13, 0.0, 0.5, 0.0, Material.CoveringBare),   # 2x4, 16" o.c.
-        WoodStudConstructionSet.new(Material.Stud2x4, 0.01, 0.0, 0.0, 0.0, nil),                     # Fallback
-      ]
-      match, constr_set, cavity_r = pick_wood_stud_construction_set(assembly_r, constr_sets, film_r, frame_floor.id)
+        film_r = 2.0 * Material.AirFilmFloorReduced.rvalue
+        assembly_r = frame_floor.insulation_assembly_r_value
 
-      mat_floor_covering = nil
-      install_grade = 1
+        constr_sets = [
+          WoodStudConstructionSet.new(Material.Stud2x6, 0.10, 10.0, 0.75, 0.0, Material.CoveringBare), # 2x6, 24" o.c. + R10
+          WoodStudConstructionSet.new(Material.Stud2x6, 0.10, 0.0, 0.75, 0.0, Material.CoveringBare),  # 2x6, 24" o.c.
+          WoodStudConstructionSet.new(Material.Stud2x4, 0.13, 0.0, 0.5, 0.0, Material.CoveringBare),   # 2x4, 16" o.c.
+          WoodStudConstructionSet.new(Material.Stud2x4, 0.01, 0.0, 0.0, 0.0, nil),                     # Fallback
+        ]
+        match, constr_set, cavity_r = pick_wood_stud_construction_set(assembly_r, constr_sets, film_r, frame_floor.id)
 
-      # Floor
-      Constructions.apply_floor(model, [surface], "#{frame_floor.id} construction",
-                                cavity_r, install_grade,
-                                constr_set.framing_factor, constr_set.stud.thick_in,
-                                constr_set.osb_thick_in, constr_set.rigid_r,
-                                mat_floor_covering, constr_set.exterior_material)
-      check_surface_assembly_rvalue(runner, [surface], film_r, assembly_r, match)
+        mat_floor_covering = nil
+        install_grade = 1
+
+        # Floor
+        Constructions.apply_floor(model, [surface], "#{frame_floor.id} construction",
+                                  cavity_r, install_grade,
+                                  constr_set.framing_factor, constr_set.stud.thick_in,
+                                  constr_set.osb_thick_in, constr_set.rigid_r,
+                                  mat_floor_covering, constr_set.exterior_material)
+        check_surface_assembly_rvalue(runner, [surface], film_r, assembly_r, match)
+
+      else
+
+        # Apply Construction
+        apply_adiabatic_construction(runner, model, [surface], 'floor')
+
+      end
     end
   end
 
@@ -1778,7 +1793,6 @@ class OSModel
 
       kiva_foundation = nil
       kiva_instances.each do |foundation_wall, slab|
-puts slab.id
         # Apportion referenced walls/slabs for this Kiva instance
         slab_frac = slab_exp_perims[slab] / total_slab_exp_perim
         if total_fnd_wall_length > 0
@@ -2110,38 +2124,42 @@ puts slab.id
     addtl_cfa = cfa - model_cfa
     return unless addtl_cfa > 0.1
 
-    conditioned_floor_width = Math::sqrt(addtl_cfa)
-    conditioned_floor_length = addtl_cfa / conditioned_floor_width
-    z_origin = @foundation_top + 8.0 * (@ncfl_ag - 1)
+    if @hpxml.collapse_enclosure
 
-    floor_surface = OpenStudio::Model::Surface.new(add_floor_polygon(-conditioned_floor_width, -conditioned_floor_length, z_origin), model)
+      conditioned_floor_width = Math::sqrt(addtl_cfa)
+      conditioned_floor_length = addtl_cfa / conditioned_floor_width
+      z_origin = @foundation_top + 8.0 * (@ncfl_ag - 1)
 
-    floor_surface.setSunExposure('NoSun')
-    floor_surface.setWindExposure('NoWind')
-    floor_surface.setName('inferred conditioned floor')
-    floor_surface.setSurfaceType('Floor')
-    floor_surface.setSpace(create_or_get_space(model, spaces, HPXML::LocationLivingSpace))
-    floor_surface.setOutsideBoundaryCondition('Adiabatic')
-    floor_surface.additionalProperties.setFeature('SurfaceType', 'InferredFloor')
+      floor_surface = OpenStudio::Model::Surface.new(add_floor_polygon(-conditioned_floor_width, -conditioned_floor_length, z_origin), model)
 
-    # add ceiling surfaces accordingly
-    ceiling_surface = OpenStudio::Model::Surface.new(add_ceiling_polygon(-conditioned_floor_width, -conditioned_floor_length, z_origin), model)
+      floor_surface.setSunExposure('NoSun')
+      floor_surface.setWindExposure('NoWind')
+      floor_surface.setName('inferred conditioned floor')
+      floor_surface.setSurfaceType('Floor')
+      floor_surface.setSpace(create_or_get_space(model, spaces, HPXML::LocationLivingSpace))
+      floor_surface.setOutsideBoundaryCondition('Adiabatic')
+      floor_surface.additionalProperties.setFeature('SurfaceType', 'InferredFloor')
 
-    ceiling_surface.setSunExposure('NoSun')
-    ceiling_surface.setWindExposure('NoWind')
-    ceiling_surface.setName('inferred conditioned ceiling')
-    ceiling_surface.setSurfaceType('RoofCeiling')
-    ceiling_surface.setSpace(create_or_get_space(model, spaces, HPXML::LocationLivingSpace))
-    ceiling_surface.setOutsideBoundaryCondition('Adiabatic')
-    ceiling_surface.additionalProperties.setFeature('SurfaceType', 'InferredCeiling')
+      # add ceiling surfaces accordingly
+      ceiling_surface = OpenStudio::Model::Surface.new(add_ceiling_polygon(-conditioned_floor_width, -conditioned_floor_length, z_origin), model)
 
-    if not @cond_bsmnt_surfaces.empty?
-      # assuming added ceiling is in conditioned basement
-      @cond_bsmnt_surfaces << ceiling_surface
+      ceiling_surface.setSunExposure('NoSun')
+      ceiling_surface.setWindExposure('NoWind')
+      ceiling_surface.setName('inferred conditioned ceiling')
+      ceiling_surface.setSurfaceType('RoofCeiling')
+      ceiling_surface.setSpace(create_or_get_space(model, spaces, HPXML::LocationLivingSpace))
+      ceiling_surface.setOutsideBoundaryCondition('Adiabatic')
+      ceiling_surface.additionalProperties.setFeature('SurfaceType', 'InferredCeiling')
+
+      if not @cond_bsmnt_surfaces.empty?
+        # assuming added ceiling is in conditioned basement
+        @cond_bsmnt_surfaces << ceiling_surface
+      end
+
+      # Apply Construction
+      apply_adiabatic_construction(runner, model, [floor_surface, ceiling_surface], 'floor')
+
     end
-
-    # Apply Construction
-    apply_adiabatic_construction(runner, model, [floor_surface, ceiling_surface], 'floor')
   end
 
   def self.add_thermal_mass(runner, model)
@@ -4482,10 +4500,10 @@ puts slab.id
     elsif [HPXML::LocationOtherHousingUnit, HPXML::LocationOtherHousingUnitAbove, HPXML::LocationOtherHousingUnitBelow].include? exterior_adjacent_to
       surface.setOutsideBoundaryCondition('Adiabatic')
     elsif [HPXML::LocationBasementConditioned].include? exterior_adjacent_to
-      surface.createAdjacentSurface(create_or_get_space(model, spaces, HPXML::LocationLivingSpace))
+      puts surface.createAdjacentSurface(create_or_get_space(model, spaces, HPXML::LocationLivingSpace)).get
       @cond_bsmnt_surfaces << surface
     else
-      surface.createAdjacentSurface(create_or_get_space(model, spaces, exterior_adjacent_to))
+      surface.createAdjacentSurface(create_or_get_space(model, spaces, exterior_adjacent_to)).get
     end
   end
 
