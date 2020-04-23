@@ -2654,10 +2654,8 @@ def set_hpxml_water_heating_systems(hpxml_file, hpxml)
     hpxml.water_heating_systems[0].uniform_energy_factor = 0.93
   elsif ['base-dhw-desuperheater.xml',
          'base-dhw-desuperheater-2-speed.xml',
-         'base-dhw-desuperheater-var-speed.xml'].include? hpxml_file
-    hpxml.water_heating_systems[0].uses_desuperheater = true
-    hpxml.water_heating_systems[0].related_hvac_idref = 'CoolingSystem'
-  elsif ['base-dhw-desuperheater-hpwh.xml'].include? hpxml_file
+         'base-dhw-desuperheater-var-speed.xml',
+         'base-dhw-desuperheater-hpwh.xml'].include? hpxml_file
     hpxml.water_heating_systems[0].uses_desuperheater = true
     hpxml.water_heating_systems[0].related_hvac_idref = 'CoolingSystem'
   elsif ['base-dhw-desuperheater-tankless.xml'].include? hpxml_file

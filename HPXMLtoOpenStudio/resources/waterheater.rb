@@ -28,11 +28,8 @@ class Waterheater
 
     act_vol = calc_storage_tank_actual_vol(vol, fuel_type)
     u, ua, eta_c = calc_tank_UA(act_vol, fuel_type, ef, re, cap, HPXML::WaterHeaterTypeStorage, 0, jacket_r, solar_fraction)
-    new_heater = create_new_heater(Constants.ObjectNameWaterHeater, cap, fuel_type, act_vol, t_set, space, HPXML::WaterHeaterTypeStorage, model, ua, eta_c)
-    set_parasitic_power_for_wh(0.0, 0.0, new_heater)
-    if fuel_type != HPXML::FuelTypeElectricity
-      adjust_wh_off_loss_frac_to_zone(0.0, ef, new_heater)
-    end
+    new_heater = create_new_heater(name: Constants.ObjectNameWaterHeater, cap: cap, fuel: fuel_type, act_vol: act_vol, t_set: t_set, space: space, wh_type: HPXML::WaterHeaterTypeStorage, model: model, ua: ua, eta_c: eta_c, oncycle_p: 0.0, ef: ef)
+    set_parasitic_power_for_storage_wh(water_heater: new_heater)
     dhw_map[sys_id] << new_heater
 
     loop.addSupplyBranchForComponent(new_heater)
@@ -42,7 +39,7 @@ class Waterheater
     end
 
     if not desuperheater_clg_coil.nil?
-      add_desuperheater(model, t_set, new_heater, desuperheater_clg_coil, space, loop).each { |e| dhw_map[sys_id] << e }
+      dhw_map[sys_id] << add_desuperheater(model, t_set, new_heater, desuperheater_clg_coil, space, loop)
     end
   end
 
@@ -63,8 +60,8 @@ class Waterheater
 
     act_vol = 1.0
     u, ua, eta_c = calc_tank_UA(act_vol, fuel_type, ef, nil, cap, HPXML::WaterHeaterTypeTankless, cd, nil, solar_fraction)
-    new_heater = create_new_heater(Constants.ObjectNameWaterHeater, cap, fuel_type, act_vol, t_set, space, HPXML::WaterHeaterTypeTankless, model, ua, eta_c)
-    set_parasitic_power_for_tankless_wh(nbeds, 0.0, 0.0, new_heater)
+    new_heater = create_new_heater(name: Constants.ObjectNameWaterHeater, cap: cap, fuel: fuel_type, act_vol: act_vol, t_set: t_set, space: space, wh_type: HPXML::WaterHeaterTypeTankless, model: model, ua: ua, eta_c: eta_c, ef: ef)
+    set_parasitic_power_for_tankless_wh(nbeds: nbeds, water_heater: new_heater)
     dhw_map[sys_id] << new_heater
 
     loop.addSupplyBranchForComponent(new_heater)
@@ -74,7 +71,7 @@ class Waterheater
     end
 
     if not desuperheater_clg_coil.nil?
-      add_desuperheater(model, t_set, new_heater, desuperheater_clg_coil, space, loop).each { |e| dhw_map[sys_id] << e }
+      dhw_map[sys_id] << add_desuperheater(model, t_set, new_heater, desuperheater_clg_coil, space, loop)
     end
   end
 
@@ -299,7 +296,7 @@ class Waterheater
     tank.setSourceSideOutletHeight(0)
     loop.addSupplyBranchForComponent(tank)
     if not desuperheater_clg_coil.nil?
-      add_desuperheater(model, t_set, tank, desuperheater_clg_coil, space, loop).each { |e| dhw_map[sys_id] << e }
+      dhw_map[sys_id] << add_desuperheater(model, t_set, tank, desuperheater_clg_coil, space, loop)
     end
     dhw_map[sys_id] << tank
 
@@ -871,8 +868,8 @@ class Waterheater
     new_manager.addToNode(loop.supplyOutletNode)
 
     # Create water heater
-    new_heater = create_new_heater(obj_name_combi, 0.0, nil, act_vol, t_set, space, tank_type, model, ua, nil)
-    set_parasitic_power_for_wh(0.0, 0.0, new_heater)
+    new_heater = create_new_heater(name: obj_name_combi, act_vol: act_vol, t_set: t_set, space: space, wh_type: tank_type, model: model, ua: ua)
+    set_parasitic_power_for_storage_wh(water_heater: new_heater)
     new_heater.setSourceSideDesignFlowRate(100) # set one large number, override by EMS
     dhw_map[sys_id] << new_heater
 
@@ -1041,18 +1038,14 @@ class Waterheater
     desuperheater_name = Constants.ObjectNameDesuperheater(tank.name)
 
     # create a storage tank
-    # FIXME: Input vs assumption?
     vol = 50.0
     storage_vol_actual = calc_storage_tank_actual_vol(vol, nil)
-    cap = 0
-    # FIXME: Assumption: indirect tank ua calculated based on 1.0 standby_loss and 50gal nominal vol
-    assumed_ua = 6.0 # Btu/hr-F
+    assumed_ua = 6.0 # Btu/hr-F, tank ua calculated based on 1.0 standby_loss and 50gal nominal vol
     storage_tank_name = "#{tank.name} storage tank"
     # Preheat tank desuperheater setpoint set to be the same as main water heater
-    # FIXME: Preheat tank location (currently assume to be the same as main wh tank)
     tank_setpoint = t_set - 5 # reduce tank setpoint to enable desuperheater setpoint at t_set
-    storage_tank = create_new_heater(storage_tank_name, cap, nil, storage_vol_actual, tank_setpoint, space, HPXML::WaterHeaterTypeStorage, model, assumed_ua, nil)
-    set_parasitic_power_for_wh(0.0, 0.0, storage_tank)
+    storage_tank = create_new_heater(name: storage_tank_name, act_vol: storage_vol_actual, t_set: tank_setpoint, space: space, wh_type: HPXML::WaterHeaterTypeStorage, model: model, ua: assumed_ua)
+    set_parasitic_power_for_storage_wh(water_heater: storage_tank)
 
     loop.addSupplyBranchForComponent(storage_tank)
     tank.addToNode(storage_tank.supplyOutletModelObject.get.to_Node.get)
@@ -1071,12 +1064,12 @@ class Waterheater
     desuperheater.setDeadBandTemperatureDifference(0.2)
     desuperheater.setRatedHeatReclaimRecoveryEfficiency(reclaimed_efficiency)
     desuperheater.addToHeatRejectionTarget(storage_tank)
-    # FIXME: Desuperheater pump power?
+    # FUTURE: Desuperheater pump power?
     desuperheater.setWaterPumpPower(0)
     # attach to the clg coil source
     desuperheater.setHeatingSource(desuperheater_clg_coil)
 
-    return [desuperheater]
+    return desuperheater
   end
 
   def self.create_new_hx(model, name)
@@ -1467,7 +1460,8 @@ class Waterheater
     OpenStudio::Model::SetpointManagerScheduled.new(model, new_schedule)
   end
 
-  def self.create_new_heater(name, cap, fuel, act_vol, t_set, space, wh_type, model, ua, eta_c)
+  def self.create_new_heater(name:, cap: 0.0, fuel: nil, act_vol:, t_set:, space:, wh_type:, model:, ua:, eta_c: nil, oncycle_p: 0.0, ef: nil)
+    # Applying defaults in parameters creates a minimum preheat tank
     new_heater = OpenStudio::Model::WaterHeaterMixed.new(model)
     new_heater.setName(name)
     new_heater.setHeaterThermalEfficiency(eta_c) unless eta_c.nil?
@@ -1484,13 +1478,7 @@ class Waterheater
     new_heater.setHeaterMinimumCapacity(0.0)
     new_heater.setHeaterMaximumCapacity(UnitConversions.convert(cap, 'kBtu/hr', 'W'))
     new_heater.setTankVolume(UnitConversions.convert(act_vol, 'gal', 'm^3'))
-
-    new_heater.setOnCycleParasiticFuelType(HPXML::FuelTypeElectricity)
-    new_heater.setOffCycleParasiticFuelType(HPXML::FuelTypeElectricity)
-    new_heater.setOnCycleParasiticHeatFractiontoTank(0)
-    new_heater.setOffCycleParasiticHeatFractiontoTank(0)
-    new_heater.setOffCycleLossFractiontoThermalZone(1.0)
-    new_heater.setOnCycleLossFractiontoThermalZone(1.0)
+    set_wh_parasitic_parameters(oncycle_p, ef, new_heater, fuel, wh_type)
 
     if space.nil? # Located outside
       new_heater.setAmbientTemperatureIndicator('Outdoors')
@@ -1508,20 +1496,32 @@ class Waterheater
     return new_heater
   end
 
-  def self.adjust_wh_off_loss_frac_to_zone(oncycle_p, ef, new_heater)
+  def self.set_wh_parasitic_parameters(oncycle_p, ef, water_heater, fuel, wh_type)
+    water_heater.setOnCycleParasiticFuelType('electricity')
+    water_heater.setOnCycleParasiticHeatFractiontoTank(0)
+    water_heater.setOnCycleLossFractiontoThermalZone(1.0)
+
+    water_heater.setOffCycleParasiticFuelType('electricity')
+    water_heater.setOffCycleParasiticHeatFractiontoTank(0)
+
     # Set fraction of heat loss from tank to ambient (vs out flue)
     # Based on lab testing done by LBNL
-    if oncycle_p == 0.0
-      skinlossfrac = 0.64
-    elsif ef < 0.8
-      skinlossfrac = 0.91
-    else
-      skinlossfrac = 0.96
+    skinlossfrac = 1.0
+    if (not fuel.nil?) && (not ef.nil?)
+      if (fuel != HPXML::FuelTypeElectricity) && (wh_type == HPXML::WaterHeaterTypeStorage)
+        if oncycle_p == 0.0
+          skinlossfrac = 0.64
+        elsif ef < 0.8
+          skinlossfrac = 0.91
+        else
+          skinlossfrac = 0.96
+        end
+      end
     end
-    new_heater.setOffCycleLossFractiontoThermalZone(skinlossfrac)
+    water_heater.setOffCycleLossFractiontoThermalZone(skinlossfrac)
   end
 
-  def self.set_parasitic_power_for_tankless_wh(nbeds, oncycle_p, offcycle_p, new_heater)
+  def self.set_parasitic_power_for_tankless_wh(nbeds:, oncycle_p: 0.0, offcycle_p: 0.0, water_heater:)
     # Set parasitic power consumption for tankless water heater
     # Tankless WHs are set to "modulate", not "cycle", so they end up
     # effectively always on. Thus, we need to use a weighted-average of
@@ -1539,14 +1539,14 @@ class Waterheater
     end
     avg_elec = oncycle_p * runtime_frac + offcycle_p * (1 - runtime_frac)
 
-    new_heater.setOnCycleParasiticFuelConsumptionRate(avg_elec)
-    new_heater.setOffCycleParasiticFuelConsumptionRate(avg_elec)
+    water_heater.setOnCycleParasiticFuelConsumptionRate(avg_elec)
+    water_heater.setOffCycleParasiticFuelConsumptionRate(avg_elec)
   end
 
-  def self.set_parasitic_power_for_wh(oncycle_p, offcycle_p, new_heater)
+  def self.set_parasitic_power_for_storage_wh(oncycle_p: 0.0, offcycle_p: 0.0, water_heater:)
     # Set parasitic power consumption
-    new_heater.setOnCycleParasiticFuelConsumptionRate(oncycle_p)
-    new_heater.setOffCycleParasiticFuelConsumptionRate(offcycle_p)
+    water_heater.setOnCycleParasiticFuelConsumptionRate(oncycle_p)
+    water_heater.setOffCycleParasiticFuelConsumptionRate(offcycle_p)
   end
 
   def self.configure_setpoint_schedule(new_heater, t_set, wh_type, model)
