@@ -296,7 +296,7 @@ class HPXMLTest < MiniTest::Test
       next if row.nil? || (row.size < 2)
 
       results[row[0]] = Float(row[1])
-  end
+    end
 
     sql_path = File.join(rundir, 'eplusout.sql')
     sqlFile = OpenStudio::SqlFile.new(sql_path, false)
@@ -994,15 +994,15 @@ class HPXMLTest < MiniTest::Test
 
         # CFIS Fan power
         hpxml_value = vent_fan_whole_house.fan_power
-      query = "SELECT Value FROM ReportData WHERE ReportDataDictionaryIndex IN (SELECT ReportDataDictionaryIndex FROM ReportDataDictionary WHERE Name='#{@cfis_fan_power_output_var.variableName}' AND ReportingFrequency='Run Period')"
-      sql_value = sqlFile.execAndReturnFirstDouble(query).get
-      assert_in_delta(hpxml_value, sql_value, 0.01)
+        query = "SELECT Value FROM ReportData WHERE ReportDataDictionaryIndex IN (SELECT ReportDataDictionaryIndex FROM ReportDataDictionary WHERE Name='#{@cfis_fan_power_output_var.variableName}' AND ReportingFrequency='Run Period')"
+        sql_value = sqlFile.execAndReturnFirstDouble(query).get
+        assert_in_delta(hpxml_value, sql_value, 0.01)
 
         # CFIS Flow rate
         hpxml_value = vent_fan_whole_house.tested_flow_rate * vent_fan_whole_house.hours_in_operation / 24.0
-      query = "SELECT Value FROM ReportData WHERE ReportDataDictionaryIndex IN (SELECT ReportDataDictionaryIndex FROM ReportDataDictionary WHERE Name='#{@cfis_flow_rate_output_var.variableName}' AND ReportingFrequency='Run Period')"
-      sql_value = UnitConversions.convert(sqlFile.execAndReturnFirstDouble(query).get, 'm^3/s', 'cfm')
-      assert_in_delta(hpxml_value, sql_value, 0.01)
+        query = "SELECT Value FROM ReportData WHERE ReportDataDictionaryIndex IN (SELECT ReportDataDictionaryIndex FROM ReportDataDictionary WHERE Name='#{@cfis_flow_rate_output_var.variableName}' AND ReportingFrequency='Run Period')"
+        sql_value = UnitConversions.convert(sqlFile.execAndReturnFirstDouble(query).get, 'm^3/s', 'cfm')
+        assert_in_delta(hpxml_value, sql_value, 0.01)
       else
         # Supply, exhaust, ERV, HRV, etc., check for appropriate mech vent energy
         fan_gj = 0
@@ -1095,7 +1095,7 @@ class HPXMLTest < MiniTest::Test
     hpxml.water_heating_systems.each do |water_heating_system|
       related_hvac = water_heating_system.related_hvac_system
       if related_hvac.nil?
-      wh_fuels << water_heating_system.fuel_type
+        wh_fuels << water_heating_system.fuel_type
       elsif related_hvac.respond_to? :heating_system_fuel
         wh_fuels << related_hvac.heating_system_fuel
       end
@@ -1114,24 +1114,24 @@ class HPXMLTest < MiniTest::Test
       energy_cr = results.fetch("#{fuel_name}: Range/Oven (MBtu)", 0)
       if htg_fuels.include?(fuel) && (not hpxml_path.include? 'location-miami')
         assert_operator(energy_htg, :>, 0)
-    else
+      else
         assert_equal(0, energy_htg)
-    end
+      end
       if wh_fuels.include? fuel
         assert_operator(energy_dhw, :>, 0)
-    else
+      else
         assert_equal(0, energy_dhw)
-    end
+      end
       if (hpxml.clothes_dryers.size > 0) && (hpxml.clothes_dryers[0].fuel_type == fuel)
         assert_operator(energy_cd, :>, 0)
-    else
+      else
         assert_equal(0, energy_cd)
-    end
+      end
       if (hpxml.cooking_ranges.size > 0) && (hpxml.cooking_ranges[0].fuel_type == fuel)
         assert_operator(energy_cr, :>, 0)
-    else
+      else
         assert_equal(0, energy_cr)
-    end
+      end
     end
 
     sqlFile.close
@@ -1149,8 +1149,8 @@ class HPXMLTest < MiniTest::Test
 
     column_headers = ['HPXML']
     output_keys.each do |key|
-        column_headers << key
-      end
+      column_headers << key
+    end
 
     CSV.open(csv_out, 'w') do |csv|
       csv << column_headers
