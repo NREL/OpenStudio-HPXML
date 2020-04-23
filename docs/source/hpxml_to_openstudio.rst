@@ -120,9 +120,9 @@ Weather File
 The ``ClimateandRiskZones/WeatherStation`` element specifies the EnergyPlus weather file (EPW) to be used in the simulation.
 The weather file can be entered in one of two ways:
 
-#. Using the ``WeatherStation/WMO``, which must be one of the acceptable TMY3 WMO station numbers found in the ``weather/data.csv`` file.
+#. Using ``WeatherStation/WMO``, which must be one of the acceptable TMY3 WMO station numbers found in the ``weather/data.csv`` file.
    The full set of U.S. TMY3 weather files can be `downloaded here <https://data.nrel.gov/files/128/tmy3s-cache-csv.zip>`_.
-#. Using the ``WeatherStation/extension/EPWFileName``.
+#. Using ``WeatherStation/extension/EPWFilePath``.
 
 Enclosure
 ~~~~~~~~~
@@ -131,6 +131,7 @@ This section describes elements specified in HPXML's ``Enclosure``.
 
 All surfaces that bound different space types in the building (i.e., not just thermal boundary surfaces) must be specified in the HPXML file.
 For example, an attached garage would generally be defined by walls adjacent to conditioned space, walls adjacent to outdoors, a slab, and a roof or ceiling.
+For software tools that do not collect sufficient inputs for every required surface, the software developers will need to make assumptions about these surfaces or collect additional input.
 
 The space types used in the HPXML building description are:
 
@@ -270,8 +271,11 @@ Overhangs are defined by the vertical distance between the overhang and the top 
 The difference between these two values equals the height of the window.
 
 Finally, windows can be optionally described with ``FractionOperable``.
-If not provided, it is assumed that 33% of the window area is operable.
-Of this operable window area, 20% is assumed to be open whenever there are favorable outdoor conditions for cooling.
+The input should solely reflect whether the windows are operable (can be opened), not how they are used by the occupants.
+If a ``Window`` represents a single window, the value should be 0 or 1.
+If a ``Window`` represents multiple windows (e.g., 4), the value should be between 0 and 1 (e.g., 0, 0.25, 0.5, 0.75, or 1).
+If not provided, it is assumed that 67% of the windows are operable.
+The total open window area for natural ventilation is thus calculated using A) the fraction of windows that are operable, B) the assumption that 50% of the area of operable windows can be open, and C) the assumption that 20% of that openable area is actually opened by occupants whenever outdoor conditions are favorable for cooling.
 
 Skylights
 *********
@@ -533,7 +537,7 @@ For tankless water heaters, an annual energy derate due to cycling inefficiencie
 If not provided, a value of 0.08 (8%) will be assumed.
 
 For combi boiler systems, the ``RelatedHVACSystem`` must point to a ``HeatingSystem`` of type "Boiler".
-For combi boiler systems with a storage tank, the storage tank losses (°F/hr) can be entered as ``StandbyLoss``; if not provided, a default value based on the `AHRI Directory of Certified Product Performance <https://www.ahridirectory.org>`_ will be calculated.
+For combi boiler systems with a storage tank, the storage tank losses (deg-F/hr) can be entered as ``StandbyLoss``; if not provided, a default value based on the `AHRI Directory of Certified Product Performance <https://www.ahridirectory.org>`_ will be calculated.
 
 For water heaters that are connected to a desuperheater, the ``RelatedHVACSystem`` must either point to a ``HeatPump`` or a ``CoolingSystem``.
 
@@ -598,7 +602,7 @@ Solar hot water systems can be described with either simple or detailed inputs.
 If using simple inputs, the following elements are used:
 
 - ``SolarFraction``: Portion of total conventional hot water heating load (delivered energy and tank standby losses). Can be obtained from Directory of SRCC OG-300 Solar Water Heating System Ratings or NREL's `System Advisor Model <https://sam.nrel.gov/>`_ or equivalent.
-- ``ConnectedTo``: Optional. If not specified, applies to all water heaters in the building. If specified; must point to a ``WaterHeatingSystem``.
+- ``ConnectedTo``: Optional. If not specified, applies to all water heaters in the building. If specified, must point to a ``WaterHeatingSystem``.
 
 If using detailed inputs, the following elements are used:
 

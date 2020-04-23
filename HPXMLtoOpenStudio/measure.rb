@@ -170,10 +170,12 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
   end
 
   def process_weather(hpxml, runner, model, weather_dir, output_dir)
-    epw_path = hpxml.climate_and_risk_zones.weather_station_epw_filename
+    epw_path = hpxml.climate_and_risk_zones.weather_station_epw_filepath
 
     if not epw_path.nil?
-      epw_path = File.join(weather_dir, epw_path)
+      if not File.exist? epw_path
+        epw_path = File.join(weather_dir, epw_path)
+      end
       if not File.exist?(epw_path)
         fail "'#{epw_path}' could not be found."
       end
@@ -410,10 +412,10 @@ class OSModel
         window.interior_shading_factor_winter = default_shade_winter
       end
       if window.fraction_operable.nil?
-        window.fraction_operable = Airflow.get_default_fraction_of_operable_window_area()
+        window.fraction_operable = Airflow.get_default_fraction_of_windows_operable()
       end
     end
-    @frac_window_area_operable = @hpxml.fraction_of_window_area_operable()
+    @frac_windows_operable = @hpxml.fraction_of_windows_operable()
 
     # Default AC/HP compressor type
     @hpxml.cooling_systems.each do |cooling_system|
@@ -2088,6 +2090,15 @@ class OSModel
   end
 
   def self.add_windows(runner, model, spaces, weather)
+    # We already stored @fraction_of_windows_operable, so lets remove the
+    # fraction_operable properties from windows and re-collapse the enclosure
+    # so as to prevent potentially modeling multiple identical windows in E+,
+    # which can increase simulation runtime.
+    @hpxml.windows.each do |window|
+      window.fraction_operable = nil
+    end
+    @hpxml.collapse_enclosure_surfaces()
+
     surfaces = []
     @hpxml.windows.each do |window|
       window_height = 4.0 # ft, default
@@ -2497,19 +2508,13 @@ class OSModel
 
   def self.calc_sequential_load_fraction(load_fraction, remaining_fraction)
     if remaining_fraction > 0
-      if (load_fraction - remaining_fraction).abs <= 0.010001
-        # Last equipment to handle all the remaining load (within 0.01 tolerance)
-        load_fraction = remaining_fraction
-        sequential_load_frac = 1.0 # Fraction of remaining load served by this system
-      else
-        sequential_load_frac = load_fraction / remaining_fraction # Fraction of remaining load served by this system
-      end
+      sequential_load_frac = load_fraction / remaining_fraction # Fraction of remaining load served by this system
     else
       sequential_load_frac = 0.0
     end
     remaining_fraction -= load_fraction
 
-    return sequential_load_frac, remaining_fraction, load_fraction
+    return sequential_load_frac, remaining_fraction
   end
 
   def self.add_cooling_system(runner, model)
@@ -2526,7 +2531,7 @@ class OSModel
       end
 
       load_frac = cooling_system.fraction_cool_load_served
-      sequential_load_frac, @total_frac_remaining_cool_load_served, load_frac = calc_sequential_load_fraction(load_frac, @total_frac_remaining_cool_load_served)
+      sequential_load_frac, @total_frac_remaining_cool_load_served = calc_sequential_load_fraction(load_frac, @total_frac_remaining_cool_load_served)
 
       check_distribution_system(cooling_system.distribution_system, clg_type)
 
@@ -2615,7 +2620,7 @@ class OSModel
         end
 
         load_frac = heating_system.fraction_heat_load_served
-        sequential_load_frac, @total_frac_remaining_heat_load_served, load_frac = calc_sequential_load_fraction(load_frac, @total_frac_remaining_heat_load_served)
+        sequential_load_frac, @total_frac_remaining_heat_load_served = calc_sequential_load_fraction(load_frac, @total_frac_remaining_heat_load_served)
 
         @hvac_map[heating_system.id] = []
 
@@ -2709,10 +2714,10 @@ class OSModel
       end
 
       load_frac_heat = heat_pump.fraction_heat_load_served
-      sequential_load_frac_heat, @total_frac_remaining_heat_load_served, load_frac_heat = calc_sequential_load_fraction(load_frac_heat, @total_frac_remaining_heat_load_served)
+      sequential_load_frac_heat, @total_frac_remaining_heat_load_served = calc_sequential_load_fraction(load_frac_heat, @total_frac_remaining_heat_load_served)
 
       load_frac_cool = heat_pump.fraction_cool_load_served
-      sequential_load_frac_cool, @total_frac_remaining_cool_load_served, load_frac_cool = calc_sequential_load_fraction(load_frac_cool, @total_frac_remaining_cool_load_served)
+      sequential_load_frac_cool, @total_frac_remaining_cool_load_served = calc_sequential_load_fraction(load_frac_cool, @total_frac_remaining_cool_load_served)
 
       backup_heat_fuel = heat_pump.backup_heating_fuel
       if not backup_heat_fuel.nil?
@@ -3113,7 +3118,7 @@ class OSModel
                              vented_attic_sla, unvented_attic_sla, vented_attic_const_ach, unconditioned_basement_ach, has_flue_chimney, terrain)
 
     # Natural Ventilation
-    nv_frac_window_area_open = @frac_window_area_operable * 0.20 # Assume 20% of operable window area is open
+    nv_frac_window_area_open = @frac_windows_operable * 0.5 * 0.2 # Assume A) 50% of the area of an operable window can be open, and B) 20% of openable window area is actually open
     nv_num_days_per_week = 7
     nv_max_oa_hr = 0.0115
     nv_max_oa_rh = 0.7

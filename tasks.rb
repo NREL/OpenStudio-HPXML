@@ -26,6 +26,7 @@ def create_hpxmls
     'invalid_files/hvac-dse-multiple-attached-cooling.xml' => 'base-hvac-dse.xml',
     'invalid_files/hvac-dse-multiple-attached-heating.xml' => 'base-hvac-dse.xml',
     'invalid_files/hvac-frac-load-served.xml' => 'base-hvac-multiple.xml',
+    'invalid_files/invalid-epw-filepath.xml' => 'base-location-epw-filepath.xml',
     'invalid_files/invalid-neighbor-shading-azimuth.xml' => 'base-misc-neighbor-shading.xml',
     'invalid_files/invalid-relatedhvac-dhw-indirect.xml' => 'base-dhw-indirect.xml',
     'invalid_files/invalid-relatedhvac-desuperheater.xml' => 'base-hvac-central-ac-only-1-speed.xml',
@@ -208,8 +209,8 @@ def create_hpxmls
     'base-location-dallas-tx.xml' => 'base.xml',
     'base-location-duluth-mn.xml' => 'base.xml',
     'base-location-miami-fl.xml' => 'base.xml',
-    'base-location-epw-filename.xml' => 'base.xml',
-    'base-location-epw-filename-AMY-2012.xml' => 'base.xml',
+    'base-location-epw-filepath.xml' => 'base.xml',
+    'base-location-epw-filepath-AMY-2012.xml' => 'base.xml',
     'base-mechvent-balanced.xml' => 'base.xml',
     'base-mechvent-cfis.xml' => 'base.xml',
     'base-mechvent-cfis-evap-cooler-only-ducted.xml' => 'base-hvac-evap-cooler-only-ducted.xml',
@@ -569,15 +570,17 @@ def set_hpxml_climate_and_risk_zones(hpxml_file, hpxml)
     hpxml.climate_and_risk_zones.iecc_zone = '1A'
     hpxml.climate_and_risk_zones.weather_station_name = 'Miami, FL'
     hpxml.climate_and_risk_zones.weather_station_wmo = '722020'
-  elsif ['base-location-epw-filename.xml'].include? hpxml_file
+  elsif ['base-location-epw-filepath.xml'].include? hpxml_file
     hpxml.climate_and_risk_zones.weather_station_wmo = nil
-    hpxml.climate_and_risk_zones.weather_station_epw_filename = 'USA_CO_Denver.Intl.AP.725650_TMY3.epw'
-  elsif ['base-location-epw-filename-AMY-2012.xml'].include? hpxml_file
+    hpxml.climate_and_risk_zones.weather_station_epw_filepath = 'USA_CO_Denver.Intl.AP.725650_TMY3.epw'
+  elsif ['base-location-epw-filepath-AMY-2012.xml'].include? hpxml_file
     hpxml.climate_and_risk_zones.weather_station_wmo = nil
     hpxml.climate_and_risk_zones.weather_station_name = 'Boulder, CO'
-    hpxml.climate_and_risk_zones.weather_station_epw_filename = 'US_CO_Boulder_AMY_2012.epw'
+    hpxml.climate_and_risk_zones.weather_station_epw_filepath = 'US_CO_Boulder_AMY_2012.epw'
   elsif ['invalid_files/invalid-wmo.xml'].include? hpxml_file
     hpxml.climate_and_risk_zones.weather_station_wmo = '999999'
+  elsif ['invalid_files/invalid-epw-filepath.xml'].include? hpxml_file
+    hpxml.climate_and_risk_zones.weather_station_epw_filepath = 'foo.epw'
   end
 end
 
@@ -731,8 +734,8 @@ def set_hpxml_roofs(hpxml_file, hpxml)
     hpxml.roofs.clear()
   elsif ['base-enclosure-split-surfaces.xml'].include? hpxml_file
     for n in 1..hpxml.roofs.size
-      hpxml.roofs[n - 1].area /= 10.0
-      for i in 2..10
+      hpxml.roofs[n - 1].area /= 9.0
+      for i in 2..9
         hpxml.roofs << hpxml.roofs[n - 1].dup
         hpxml.roofs[-1].id += i.to_s
       end
@@ -795,8 +798,8 @@ def set_hpxml_rim_joists(hpxml_file, hpxml)
                          insulation_assembly_r_value: 23.0)
   elsif ['base-enclosure-split-surfaces.xml'].include? hpxml_file
     for n in 1..hpxml.rim_joists.size
-      hpxml.rim_joists[n - 1].area /= 10.0
-      for i in 2..10
+      hpxml.rim_joists[n - 1].area /= 9.0
+      for i in 2..9
         hpxml.rim_joists << hpxml.rim_joists[n - 1].dup
         hpxml.rim_joists[-1].id += i.to_s
       end
@@ -957,8 +960,8 @@ def set_hpxml_walls(hpxml_file, hpxml)
     hpxml.walls[-1].insulation_assembly_r_value = 4
   elsif ['base-enclosure-split-surfaces.xml'].include? hpxml_file
     for n in 1..hpxml.walls.size
-      hpxml.walls[n - 1].area /= 10.0
-      for i in 2..10
+      hpxml.walls[n - 1].area /= 9.0
+      for i in 2..9
         hpxml.walls << hpxml.walls[n - 1].dup
         hpxml.walls[-1].id += i.to_s
       end
@@ -1161,8 +1164,8 @@ def set_hpxml_foundation_walls(hpxml_file, hpxml)
                                insulation_exterior_r_value: 8.9)
   elsif ['base-enclosure-split-surfaces.xml'].include? hpxml_file
     for n in 1..hpxml.foundation_walls.size
-      hpxml.foundation_walls[n - 1].area /= 10.0
-      for i in 2..10
+      hpxml.foundation_walls[n - 1].area /= 9.0
+      for i in 2..9
         hpxml.foundation_walls << hpxml.foundation_walls[n - 1].dup
         hpxml.foundation_walls[-1].id += i.to_s
       end
@@ -1252,8 +1255,8 @@ def set_hpxml_frame_floors(hpxml_file, hpxml)
                            insulation_assembly_r_value: 2.1)
   elsif ['base-enclosure-split-surfaces.xml'].include? hpxml_file
     for n in 1..hpxml.frame_floors.size
-      hpxml.frame_floors[n - 1].area /= 10.0
-      for i in 2..10
+      hpxml.frame_floors[n - 1].area /= 9.0
+      for i in 2..9
         hpxml.frame_floors << hpxml.frame_floors[n - 1].dup
         hpxml.frame_floors[-1].id += i.to_s
       end
@@ -1381,9 +1384,9 @@ def set_hpxml_slabs(hpxml_file, hpxml)
                     carpet_r_value: 0)
   elsif ['base-enclosure-split-surfaces.xml'].include? hpxml_file
     for n in 1..hpxml.slabs.size
-      hpxml.slabs[n - 1].area /= 10.0
-      hpxml.slabs[n - 1].exposed_perimeter /= 10.0
-      for i in 2..10
+      hpxml.slabs[n - 1].area /= 9.0
+      hpxml.slabs[n - 1].exposed_perimeter /= 9.0
+      for i in 2..9
         hpxml.slabs << hpxml.slabs[n - 1].dup
         hpxml.slabs[-1].id += i.to_s
       end
@@ -1406,7 +1409,7 @@ def set_hpxml_windows(hpxml_file, hpxml)
                       azimuth: 0,
                       ufactor: 0.33,
                       shgc: 0.45,
-                      fraction_operable: 0.33,
+                      fraction_operable: 0.67,
                       interior_shading_factor_summer: 0.7,
                       interior_shading_factor_winter: 0.85,
                       wall_idref: 'Wall')
@@ -1415,7 +1418,7 @@ def set_hpxml_windows(hpxml_file, hpxml)
                       azimuth: 180,
                       ufactor: 0.33,
                       shgc: 0.45,
-                      fraction_operable: 0.33,
+                      fraction_operable: 0.67,
                       interior_shading_factor_summer: 0.7,
                       interior_shading_factor_winter: 0.85,
                       wall_idref: 'Wall')
@@ -1424,7 +1427,7 @@ def set_hpxml_windows(hpxml_file, hpxml)
                       azimuth: 90,
                       ufactor: 0.33,
                       shgc: 0.45,
-                      fraction_operable: 0.33,
+                      fraction_operable: 0.67,
                       interior_shading_factor_summer: 0.7,
                       interior_shading_factor_winter: 0.85,
                       wall_idref: 'Wall')
@@ -1433,7 +1436,7 @@ def set_hpxml_windows(hpxml_file, hpxml)
                       azimuth: 270,
                       ufactor: 0.33,
                       shgc: 0.45,
-                      fraction_operable: 0.33,
+                      fraction_operable: 0.67,
                       interior_shading_factor_summer: 0.7,
                       interior_shading_factor_winter: 0.85,
                       wall_idref: 'Wall')
@@ -1556,11 +1559,15 @@ def set_hpxml_windows(hpxml_file, hpxml)
   elsif ['base-enclosure-split-surfaces.xml'].include? hpxml_file
     area_adjustments = []
     for n in 1..hpxml.windows.size
-      hpxml.windows[n - 1].area /= 10.0
-      for i in 2..10
+      hpxml.windows[n - 1].area /= 9.0
+      hpxml.windows[n - 1].fraction_operable = 0.0
+      for i in 2..9
         hpxml.windows << hpxml.windows[n - 1].dup
         hpxml.windows[-1].id += i.to_s
         hpxml.windows[-1].wall_idref += i.to_s
+        if i >= 4
+          hpxml.windows[-1].fraction_operable = 1.0
+        end
       end
     end
     hpxml.windows << hpxml.windows[-1].dup
@@ -1583,28 +1590,28 @@ def set_hpxml_windows(hpxml_file, hpxml)
                       azimuth: 0,
                       ufactor: 0.33,
                       shgc: 0.45,
-                      fraction_operable: 0.33,
+                      fraction_operable: 0.67,
                       wall_idref: 'Wall1')
     hpxml.windows.add(id: 'WindowSouth',
                       area: 108 / 8,
                       azimuth: 180,
                       ufactor: 0.33,
                       shgc: 0.45,
-                      fraction_operable: 0.33,
+                      fraction_operable: 0.67,
                       wall_idref: 'Wall2')
     hpxml.windows.add(id: 'WindowEast',
                       area: 72 / 8,
                       azimuth: 90,
                       ufactor: 0.33,
                       shgc: 0.45,
-                      fraction_operable: 0.33,
+                      fraction_operable: 0.67,
                       wall_idref: 'Wall3')
     hpxml.windows.add(id: 'WindowWest',
                       area: 72 / 8,
                       azimuth: 270,
                       ufactor: 0.33,
                       shgc: 0.45,
-                      fraction_operable: 0.33,
+                      fraction_operable: 0.67,
                       wall_idref: 'Wall4')
   elsif ['base-misc-defaults.xml'].include? hpxml_file
     hpxml.windows.each do |window|
@@ -1635,8 +1642,8 @@ def set_hpxml_skylights(hpxml_file, hpxml)
     hpxml.skylights[0].roof_idref = 'foobar'
   elsif ['base-enclosure-split-surfaces.xml'].include? hpxml_file
     for n in 1..hpxml.skylights.size
-      hpxml.skylights[n - 1].area /= 10.0
-      for i in 2..10
+      hpxml.skylights[n - 1].area /= 9.0
+      for i in 2..9
         hpxml.skylights << hpxml.skylights[n - 1].dup
         hpxml.skylights[-1].id += i.to_s
         hpxml.skylights[-1].roof_idref += i.to_s if i % 2 == 0
@@ -1672,8 +1679,8 @@ def set_hpxml_doors(hpxml_file, hpxml)
   elsif ['base-enclosure-split-surfaces.xml'].include? hpxml_file
     area_adjustments = []
     for n in 1..hpxml.doors.size
-      hpxml.doors[n - 1].area /= 10.0
-      for i in 2..10
+      hpxml.doors[n - 1].area /= 9.0
+      for i in 2..9
         hpxml.doors << hpxml.doors[n - 1].dup
         hpxml.doors[-1].id += i.to_s
         hpxml.doors[-1].wall_idref += i.to_s
