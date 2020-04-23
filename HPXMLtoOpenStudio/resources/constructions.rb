@@ -821,13 +821,16 @@ class Constructions
 
   def self.apply_foundation_wall(model, wall_surfaces, wall_constr_name,
                                  ext_rigid_ins_offset, int_rigid_ins_offset, ext_rigid_ins_height,
-                                 int_rigid_ins_height, ext_rigid_r, int_rigid_r, wall_drywall_thick_in, wall_concrete_thick_in, wall_height_above_grade)
+                                 int_rigid_ins_height, ext_rigid_r, int_rigid_r, wall_drywall_thick_in, wall_concrete_thick_in, wall_height_above_grade,
+                                 foundation)
 
-    # Create Kiva foundation
-    foundation = apply_kiva_walled_foundation(model, ext_rigid_r, int_rigid_r, ext_rigid_ins_offset,
-                                              int_rigid_ins_offset, ext_rigid_ins_height,
-                                              int_rigid_ins_height, wall_height_above_grade,
-                                              wall_concrete_thick_in, wall_drywall_thick_in)
+    if foundation.nil?
+      # Create Kiva foundation
+      foundation = apply_kiva_walled_foundation(model, ext_rigid_r, int_rigid_r, ext_rigid_ins_offset,
+                                                int_rigid_ins_offset, ext_rigid_ins_height,
+                                                int_rigid_ins_height, wall_height_above_grade,
+                                                wall_concrete_thick_in, wall_drywall_thick_in)
+    end
 
     # Define materials
     mat_concrete = Material.Concrete(wall_concrete_thick_in)
