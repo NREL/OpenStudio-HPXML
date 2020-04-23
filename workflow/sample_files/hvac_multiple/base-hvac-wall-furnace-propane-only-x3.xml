@@ -304,7 +304,9 @@
                 <Value>0.8</Value>
               </AnnualHeatingEfficiency>
               <FractionHeatLoadServed>0.333</FractionHeatLoadServed>
-              <ElectricAuxiliaryEnergy>66.66666666666667</ElectricAuxiliaryEnergy>
+              <extension>
+                <BlowerWattPerCFM>0.2</BlowerWattPerCFM>
+              </extension>
             </HeatingSystem>
             <HeatingSystem>
               <SystemIdentifier id='HeatingSystem2'/>
@@ -318,7 +320,9 @@
                 <Value>0.8</Value>
               </AnnualHeatingEfficiency>
               <FractionHeatLoadServed>0.333</FractionHeatLoadServed>
-              <ElectricAuxiliaryEnergy>66.66666666666667</ElectricAuxiliaryEnergy>
+              <extension>
+                <BlowerWattPerCFM>0.2</BlowerWattPerCFM>
+              </extension>
             </HeatingSystem>
             <HeatingSystem>
               <SystemIdentifier id='HeatingSystem3'/>
@@ -332,7 +336,9 @@
                 <Value>0.8</Value>
               </AnnualHeatingEfficiency>
               <FractionHeatLoadServed>0.333</FractionHeatLoadServed>
-              <ElectricAuxiliaryEnergy>66.66666666666667</ElectricAuxiliaryEnergy>
+              <extension>
+                <BlowerWattPerCFM>0.2</BlowerWattPerCFM>
+              </extension>
             </HeatingSystem>
           </HVACPlant>
           <HVACControl>

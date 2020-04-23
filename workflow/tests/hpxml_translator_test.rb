@@ -933,17 +933,12 @@ class HPXMLTest < MiniTest::Test
 
       # Electric Auxiliary Energy
       # For now, skip if multiple equipment
-      next unless (num_htg_sys == 1) && [HPXML::HVACTypeFurnace, HPXML::HVACTypeBoiler, HPXML::HVACTypeWallFurnace, HPXML::HVACTypeStove].include?(htg_sys_type) && (htg_sys_fuel != HPXML::FuelTypeElectricity)
+      next unless (num_htg_sys == 1) && [HPXML::HVACTypeBoiler].include?(htg_sys_type) && (htg_sys_fuel != HPXML::FuelTypeElectricity)
 
       if not heating_system.electric_auxiliary_energy.nil?
         hpxml_value = heating_system.electric_auxiliary_energy / 2.08
       else
-        furnace_capacity_kbtuh = nil
-        if htg_sys_type == HPXML::HVACTypeFurnace
-          query = "SELECT Value FROM TabularDataWithStrings WHERE ReportName='EquipmentSummary' AND ReportForString='Entire Facility' AND TableName='Heating Coils' AND RowName LIKE '%#{Constants.ObjectNameFurnace.upcase}%' AND ColumnName='Nominal Total Capacity' AND Units='W'"
-          furnace_capacity_kbtuh = UnitConversions.convert(sqlFile.execAndReturnFirstDouble(query).get, 'W', 'kBtu/hr')
-        end
-        hpxml_value = HVAC.get_default_eae(htg_sys_type, htg_sys_fuel, htg_load_frac, furnace_capacity_kbtuh) / 2.08
+        hpxml_value = HVAC.get_default_eae(htg_sys_fuel, htg_load_frac) / 2.08
       end
 
       if htg_sys_type == HPXML::HVACTypeBoiler

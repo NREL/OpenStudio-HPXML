@@ -9,18 +9,12 @@ class HVAC
   def self.apply_central_ac_1speed(model, runner, seer, shrs,
                                    crankcase_kw, crankcase_temp,
                                    capacity, airflow_rate,
-                                   charge_defect_ratio, airflow_defect_ratio, fan_power_measured,
+                                   charge_defect_ratio, airflow_defect_ratio, fan_power_installed,
                                    frac_cool_load_served, sequential_cool_load_frac, control_zone,
                                    hvac_map, sys_id)
 
     num_speeds = 1
     fan_power_rated = get_fan_power_rated(seer)
-    if fan_power_measured.nil?
-      fan_power_installed = get_fan_power_installed(seer)
-    else
-      # TODO: NOTE this is overriden by the Eae blower efficiency for furnaces
-      fan_power_installed = fan_power_measured
-    end
     capacity_ratios = HVAC.one_speed_capacity_ratios
     fan_speed_ratios = HVAC.one_speed_fan_speed_ratios
 
@@ -86,8 +80,6 @@ class HVAC
       air_loop_unitary.setSupplyAirFlowRateMethodDuringCoolingOperation('SupplyAirFlowRate')
       air_loop_unitary.setSupplyAirFlowRateDuringCoolingOperation(UnitConversions.convert(airflow_rate, 'cfm', 'm^3/s'))
     end
-
-    # apply_installation_quality_EMS(model, air_loop_unitary, control_zone, charge_defect_ratio, airflow_defect_ratio)
 
     hvac_map[sys_id] << air_loop_unitary
 
@@ -664,18 +656,13 @@ class HVAC
                                      min_temp, crankcase_kw, crankcase_temp,
                                      heat_pump_capacity_cool, heat_pump_capacity_heat, heat_pump_capacity_heat_17F,
                                      supplemental_fuel_type, supplemental_efficiency, supplemental_capacity, supp_htg_max_outdoor_temp,
-                                     charge_defect_ratio, airflow_defect_ratio, fan_power_measured,
+                                     charge_defect_ratio, airflow_defect_ratio, fan_power_installed,
                                      frac_heat_load_served, frac_cool_load_served,
                                      sequential_heat_load_frac, sequential_cool_load_frac,
                                      control_zone, hvac_map, sys_id)
 
     num_speeds = 1
     fan_power_rated = get_fan_power_rated(seer)
-    if fan_power_measured.nil?
-      fan_power_installed = get_fan_power_installed(seer)
-    else
-      fan_power_installed = fan_power_measured
-    end
     capacity_ratios = HVAC.one_speed_capacity_ratios
     fan_speed_ratios = HVAC.one_speed_fan_speed_ratios
 
@@ -772,8 +759,6 @@ class HVAC
     air_loop_unitary.setMaximumSupplyAirTemperature(UnitConversions.convert(170.0, 'F', 'C')) # higher temp for supplemental heat as to not severely limit its use, resulting in unmet hours.
     air_loop_unitary.setMaximumOutdoorDryBulbTemperatureforSupplementalHeaterOperation(UnitConversions.convert(supp_htg_max_outdoor_temp, 'F', 'C'))
     air_loop_unitary.setSupplyAirFlowRateWhenNoCoolingorHeatingisRequired(0)
-
-    # apply_installation_quality_EMS(model, air_loop_unitary, control_zone, charge_defect_ratio, airflow_defect_ratio)
 
     hvac_map[sys_id] << air_loop_unitary
 
@@ -1849,7 +1834,7 @@ class HVAC
     end
   end
 
-  def self.apply_boiler(model, runner, fuel_type, system_type, afue,
+  def self.apply_boiler(model, runner, fuel_type, system_type, afue, fuel_eae,
                         oat_reset_enabled, oat_high, oat_low, oat_hwst_high, oat_hwst_low,
                         capacity, design_temp, frac_heat_load_served,
                         sequential_heat_load_frac, control_zone,
@@ -1890,10 +1875,15 @@ class HVAC
     loop_sizing.setDesignLoopExitTemperature(UnitConversions.convert(design_temp - 32.0, 'R', 'K'))
     loop_sizing.setLoopDesignTemperatureDifference(UnitConversions.convert(20.0, 'R', 'K'))
 
+    if fuel_eae.nil?
+      fuel_eae = get_default_eae(fuel_type, frac_heat_load_served)
+    end
+
     pump = OpenStudio::Model::PumpVariableSpeed.new(model)
     pump.setName(obj_name + ' hydronic pump')
     pump.setRatedPumpHead(20000)
     pump.setMotorEfficiency(0.9)
+    pump.setRatedPowerConsumption(fuel_eae / 2.08) # W
     pump.setFractionofMotorInefficienciestoFluidStream(0)
     pump.setCoefficient1ofthePartLoadPerformanceCurve(0)
     pump.setCoefficient2ofthePartLoadPerformanceCurve(1)
@@ -2453,92 +2443,14 @@ class HVAC
     return months
   end
 
-  def self.apply_eae_to_heating_fan(runner, eae_hvacs, eae, fuel, load_frac, htg_type)
-    # Applies Electric Auxiliary Energy (EAE) for fuel heating equipment to fan power.
-
-    if htg_type == HPXML::HVACTypeBoiler
-
-      if eae.nil?
-        eae = get_default_eae(htg_type, fuel, load_frac, nil)
-      end
-
-      elec_power = (eae / 2.08) # W
-
-      eae_hvacs.each do |eae_hvac|
-        next unless eae_hvac.is_a? OpenStudio::Model::PlantLoop
-
-        eae_hvac.components.each do |plc|
-          if plc.to_BoilerHotWater.is_initialized
-            boiler = plc.to_BoilerHotWater.get
-            boiler.setParasiticElectricLoad(0.0)
-          elsif plc.to_PumpVariableSpeed.is_initialized
-            pump = plc.to_PumpVariableSpeed.get
-            pump_eff = 0.9
-            pump_gpm = UnitConversions.convert(pump.ratedFlowRate.get, 'm^3/s', 'gal/min')
-            pump_w_gpm = elec_power / pump_gpm # W/gpm
-            pump.setRatedPowerConsumption(elec_power)
-            pump.setRatedPumpHead(calculate_pump_head(pump_eff, pump_w_gpm))
-            pump.setMotorEfficiency(1.0)
-          end
-        end
-      end
-
-    else # Furnace/WallFurnace/Stove
-
-      unitary_systems = []
-      eae_hvacs.each do |eae_hvac|
-        if eae_hvac.is_a? OpenStudio::Model::AirLoopHVAC # Furnace
-          unitary_systems << get_unitary_system_from_air_loop_hvac(eae_hvac)
-        elsif eae_hvac.is_a? OpenStudio::Model::AirLoopHVACUnitarySystem # WallFurnace/Stove
-          unitary_systems << eae_hvac
-        end
-      end
-
-      unitary_systems.each do |unitary_system|
-        if eae.nil?
-          htg_coil = unitary_system.heatingCoil.get.to_CoilHeatingGas.get
-          htg_capacity = UnitConversions.convert(htg_coil.nominalCapacity.get, 'W', 'kBtu/hr')
-          eae = get_default_eae(htg_type, fuel, load_frac, htg_capacity)
-        end
-        elec_power = eae / 2.08 # W
-
-        htg_coil = unitary_system.heatingCoil.get.to_CoilHeatingGas.get
-        htg_coil.setParasiticElectricLoad(0.0)
-
-        htg_cfm = UnitConversions.convert(unitary_system.supplyAirFlowRateDuringHeatingOperation.get, 'm^3/s', 'cfm')
-
-        fan = unitary_system.supplyFan.get.to_FanOnOff.get
-        if elec_power > 0
-          fan_eff = 0.75 # Overall Efficiency of the Fan, Motor and Drive
-          fan_w_cfm = elec_power / htg_cfm # W/cfm
-          fan.setFanEfficiency(fan_eff)
-          fan.setPressureRise(calculate_fan_pressure_rise(fan_eff, fan_w_cfm))
-        else
-          fan.setFanEfficiency(1)
-          fan.setPressureRise(0)
-        end
-        fan.setMotorEfficiency(1.0)
-        fan.setMotorInAirstreamFraction(1.0)
-      end
-
-    end
-  end
-
-  def self.get_default_eae(htg_type, fuel, load_frac, furnace_capacity_kbtuh)
+  def self.get_default_eae(fuel, load_frac)
     # From ANSI/RESNET/ICC 301 Standard
-    if htg_type == HPXML::HVACTypeBoiler
-      if (fuel == HPXML::FuelTypeNaturalGas) || (fuel == HPXML::FuelTypePropane)
-        return 170.0 * load_frac # kWh/yr
-      elsif fuel == HPXML::FuelTypeOil
-        return 330.0 * load_frac # kWh/yr
-      end
-    elsif htg_type == HPXML::HVACTypeFurnace
-      if (fuel == HPXML::FuelTypeNaturalGas) || (fuel == HPXML::FuelTypePropane)
-        return (149.0 + 10.3 * furnace_capacity_kbtuh) * load_frac # kWh/yr
-      elsif fuel == HPXML::FuelTypeOil
-        return (439.0 + 5.5 * furnace_capacity_kbtuh) * load_frac # kWh/yr
-      end
+    if (fuel == HPXML::FuelTypeNaturalGas) || (fuel == HPXML::FuelTypePropane)
+      return 170.0 * load_frac # kWh/yr
+    elsif fuel == HPXML::FuelTypeOil
+      return 330.0 * load_frac # kWh/yr
     end
+
     return 0.0
   end
 

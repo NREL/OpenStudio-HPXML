@@ -2077,7 +2077,7 @@ class HPXML < Object
     ATTRS = [:id, :distribution_system_idref, :year_installed, :heating_system_type,
              :heating_system_fuel, :heating_capacity, :heating_efficiency_afue,
              :heating_efficiency_percent, :fraction_heat_load_served, :electric_auxiliary_energy,
-             :heating_cfm, :energy_star, :seed_id]
+             :heating_cfm, :energy_star, :seed_id, :blower_watt_cfm]
     attr_accessor(*ATTRS)
 
     def distribution_system
@@ -2138,7 +2138,8 @@ class HPXML < Object
       XMLHelper.add_element(heating_system, 'ElectricAuxiliaryEnergy', Float(@electric_auxiliary_energy)) unless @electric_auxiliary_energy.nil?
       HPXML::add_extension(parent: heating_system,
                            extensions: { 'HeatingFlowRate' => HPXML::to_float_or_nil(@heating_cfm),
-                                         'SeedId' => @seed_id })
+                                         'SeedId' => @seed_id,
+                                         'BlowerWattPerCFM' => HPXML::to_float_or_nil(@blower_watt_cfm) })
     end
 
     def from_rexml(heating_system)
@@ -2157,6 +2158,7 @@ class HPXML < Object
       @heating_cfm = HPXML::to_float_or_nil(XMLHelper.get_value(heating_system, 'extension/HeatingFlowRate'))
       @energy_star = XMLHelper.get_values(heating_system, 'ThirdPartyCertification').include?('Energy Star')
       @seed_id = XMLHelper.get_value(heating_system, 'extension/SeedId')
+      @blower_watt_cfm = HPXML::to_float_or_nil(XMLHelper.get_value(heating_system, 'extension/BlowerWattPerCFM'))
     end
   end
 

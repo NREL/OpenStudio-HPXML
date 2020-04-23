@@ -3345,10 +3345,15 @@ class HVACSizing
           end
 
           # Pump
-          if component.to_PumpVariableSpeed.is_initialized
-            pump = component.to_PumpVariableSpeed.get
-            pump.setRatedFlowRate(UnitConversions.convert(hvac_final_values.Heat_Capacity / 20.0 / 500.0, 'gal/min', 'm^3/s'))
-          end
+          next unless component.to_PumpVariableSpeed.is_initialized
+          pump = component.to_PumpVariableSpeed.get
+          pump_gpm = hvac_final_values.Heat_Capacity / 20.0 / 500.0
+          pump.setRatedFlowRate(UnitConversions.convert(pump_gpm, 'gal/min', 'm^3/s'))
+          elec_power = pump.ratedPowerConsumption.get
+          pump_eff = 0.9
+          pump_w_gpm = elec_power / pump_gpm # W/gpm
+          pump.setRatedPumpHead(HVAC.calculate_pump_head(pump_eff, pump_w_gpm))
+          pump.setMotorEfficiency(1.0)
         end
 
       elsif object.is_a? OpenStudio::Model::ZoneHVACBaseboardConvectiveElectric

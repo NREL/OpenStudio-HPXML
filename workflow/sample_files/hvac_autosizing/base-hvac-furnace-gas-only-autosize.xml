@@ -305,7 +305,9 @@
                 <Value>0.92</Value>
               </AnnualHeatingEfficiency>
               <FractionHeatLoadServed>1.0</FractionHeatLoadServed>
-              <ElectricAuxiliaryEnergy>700.0</ElectricAuxiliaryEnergy>
+              <extension>
+                <BlowerWattPerCFM>0.5</BlowerWattPerCFM>
+              </extension>
             </HeatingSystem>
           </HVACPlant>
           <HVACControl>

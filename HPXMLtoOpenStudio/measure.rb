@@ -279,7 +279,6 @@ class OSModel
 
     add_airflow(runner, model, weather, spaces)
     add_hvac_sizing(runner, model, weather)
-    add_fuel_heating_eae(runner, model)
     add_photovoltaics(runner, model)
     add_additional_properties(runner, model)
     add_component_loads_output(runner, model)
@@ -2361,7 +2360,10 @@ class OSModel
         airflow_defect_ratio = 0.0
       end
 
-      fan_power_measured = cooling_system.blower_watt_cfm
+      fan_power_installed = cooling_system.blower_watt_cfm
+      if fan_power_installed.nil?
+        fan_power_installed = 0.58 # RESNET Standard 301 default value (W/cfm)
+      end
 
       load_frac = cooling_system.fraction_cool_load_served
       sequential_load_frac, @total_frac_remaining_cool_load_served, load_frac = calc_sequential_load_fraction(load_frac, @total_frac_remaining_cool_load_served)
@@ -2386,7 +2388,7 @@ class OSModel
           HVAC.apply_central_ac_1speed(model, runner, seer, shrs,
                                        crankcase_kw, crankcase_temp,
                                        cool_capacity_btuh, airflow_rate,
-                                       charge_defect_ratio, airflow_defect_ratio, fan_power_measured,
+                                       charge_defect_ratio, airflow_defect_ratio, fan_power_installed,
                                        load_frac, sequential_load_frac, @living_zone,
                                        @hvac_map, cooling_system.id)
         elsif compressor_type == HPXML::HVACCompressorTypeTwoStage
@@ -2455,6 +2457,12 @@ class OSModel
           heat_capacity_btuh = Constants.SizingAuto
         end
 
+        fan_power = heating_system.blower_watt_cfm # For furnaces, this will only be used if there is not an air conditioner
+        if fan_power.nil?
+          # TODO: Consider if this default should be applied to wall furnaces and stoves
+          fan_power = 0.58 # RESNET Standard 301 default value (W/cfm)
+        end
+
         load_frac = heating_system.fraction_heat_load_served
         sequential_load_frac, @total_frac_remaining_heat_load_served, load_frac = calc_sequential_load_fraction(load_frac, @total_frac_remaining_heat_load_served)
 
@@ -2463,7 +2471,6 @@ class OSModel
         if htg_type == HPXML::HVACTypeFurnace
 
           afue = heating_system.heating_efficiency_afue
-          fan_power = 0.5 # For fuel furnaces, will be overridden by EAE later
           airflow_rate = heating_system.heating_cfm # Hidden feature; used only for HERS DSE test
           HVAC.apply_furnace(model, runner, fuel, afue,
                              heat_capacity_btuh, airflow_rate, fan_power,
@@ -2474,7 +2481,7 @@ class OSModel
 
           afue = heating_system.heating_efficiency_afue
           fan_power = 0.0
-          airflow_rate = 0.0
+          airflow_rate = 0.0 # TODO: Update this for RESNET 310 blower W/cfm input??
           HVAC.apply_unit_heater(model, runner, fuel,
                                  afue, heat_capacity_btuh, fan_power,
                                  airflow_rate, load_frac,
@@ -2484,13 +2491,14 @@ class OSModel
 
           system_type = Constants.BoilerTypeForcedDraft
           afue = heating_system.heating_efficiency_afue
+          fuel_eae = heating_system.electric_auxiliary_energy
           oat_reset_enabled = false
           oat_high = nil
           oat_low = nil
           oat_hwst_high = nil
           oat_hwst_low = nil
           design_temp = 180.0
-          HVAC.apply_boiler(model, runner, fuel, system_type, afue,
+          HVAC.apply_boiler(model, runner, fuel, system_type, afue, fuel_eae,
                             oat_reset_enabled, oat_high, oat_low, oat_hwst_high, oat_hwst_low,
                             heat_capacity_btuh, design_temp, load_frac,
                             sequential_load_frac, @living_zone,
@@ -2506,7 +2514,6 @@ class OSModel
 
           efficiency = heating_system.heating_efficiency_percent
           airflow_rate = 125.0 # cfm/ton; doesn't affect energy consumption
-          fan_power = 0.5 # For fuel equipment, will be overridden by EAE later
           HVAC.apply_unit_heater(model, runner, fuel,
                                  efficiency, heat_capacity_btuh, fan_power,
                                  airflow_rate, load_frac,
@@ -2559,7 +2566,10 @@ class OSModel
         airflow_defect_ratio = 0.0
       end
 
-      fan_power_measured = heat_pump.blower_watt_cfm
+      fan_power_installed = heat_pump.blower_watt_cfm
+      if fan_power_installed.nil?
+        fan_power_installed = 0.58 # RESNET Standard 301 default value (W/cfm)
+      end
 
       load_frac_heat = heat_pump.fraction_heat_load_served
       sequential_load_frac_heat, @total_frac_remaining_heat_load_served, load_frac_heat = calc_sequential_load_fraction(load_frac_heat, @total_frac_remaining_heat_load_served)
@@ -2625,7 +2635,7 @@ class OSModel
                                          hp_compressor_min_temp, crankcase_kw, crankcase_temp,
                                          cool_capacity_btuh, heat_capacity_btuh, heat_capacity_btuh_17F,
                                          backup_heat_fuel, backup_heat_efficiency, backup_heat_capacity_btuh, supp_htg_max_outdoor_temp,
-                                         charge_defect_ratio, airflow_defect_ratio, fan_power_measured,
+                                         charge_defect_ratio, airflow_defect_ratio, fan_power_installed,
                                          load_frac_heat, load_frac_cool,
                                          sequential_load_frac_heat, sequential_load_frac_cool,
                                          @living_zone, @hvac_map, heat_pump.id)
@@ -3184,27 +3194,6 @@ class OSModel
 
   def self.add_hvac_sizing(runner, model, weather)
     HVACSizing.apply(model, runner, weather, @cfa, @infilvolume, @nbeds, @min_neighbor_distance, @living_space, @debug)
-  end
-
-  def self.add_fuel_heating_eae(runner, model)
-    # Needs to come after HVAC sizing (needs heating capacity and airflow rate)
-    # FUTURE: Could remove this method and simplify everything if we could autosize via the HPXML file
-
-    @hpxml.heating_systems.each do |heating_system|
-      next unless heating_system.fraction_heat_load_served > 0
-
-      htg_type = heating_system.heating_system_type
-      next unless [HPXML::HVACTypeFurnace, HPXML::HVACTypeWallFurnace, HPXML::HVACTypeStove, HPXML::HVACTypeBoiler].include? htg_type
-
-      fuel = heating_system.heating_system_fuel
-      next if fuel == HPXML::FuelTypeElectricity
-
-      fuel_eae = heating_system.electric_auxiliary_energy
-      load_frac = heating_system.fraction_heat_load_served
-      sys_id = heating_system.id
-
-      HVAC.apply_eae_to_heating_fan(runner, @hvac_map[sys_id], fuel_eae, fuel, load_frac, htg_type)
-    end
   end
 
   def self.add_photovoltaics(runner, model)
