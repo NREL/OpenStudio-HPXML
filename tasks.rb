@@ -53,11 +53,8 @@ def create_osws
     'base-dhw-solar-direct-flat-plate.osw' => 'base.osw',
     'base-dhw-solar-direct-ics.osw' => 'base.osw',
     'base-dhw-solar-fraction.osw' => 'base.osw',
-    'base-dhw-solar-indirect-evacuated-tube.osw' => 'base.osw',
     'base-dhw-solar-indirect-flat-plate.osw' => 'base.osw',
-    'base-dhw-solar-thermosyphon-evacuated-tube.osw' => 'base.osw',
     'base-dhw-solar-thermosyphon-flat-plate.osw' => 'base.osw',
-    'base-dhw-solar-thermosyphon-ics.osw' => 'base.osw',
     'base-dhw-tank-gas.osw' => 'base.osw',
     'base-dhw-tank-gas-outside.osw' => 'base.osw',
     'base-dhw-tank-heat-pump.osw' => 'base.osw',
@@ -78,6 +75,7 @@ def create_osws
     'base-dhw-uef.osw' => 'base.osw',
     'base-enclosure-2stories.osw' => 'base.osw',
     # 'base-enclosure-2stories-garage.osw' => 'base.osw',
+    'base-enclosure-3d-coordinates.osw' => 'base.osw',
     # 'base-enclosure-adiabatic-surfaces.osw' => 'base.osw',
     'base-enclosure-beds-1.osw' => 'base.osw',
     'base-enclosure-beds-2.osw' => 'base.osw',
@@ -304,6 +302,7 @@ def get_values(osw_file, step)
     step.setArgument('geometry_num_bedrooms', 3)
     step.setArgument('geometry_num_bathrooms', Constants.Auto)
     step.setArgument('geometry_num_occupants', '3')
+    step.setArgument('geometry_export_3d_coordinates', false)
     step.setArgument('floor_assembly_r', 0)
     step.setArgument('foundation_wall_insulation_r', 8.9)
     step.setArgument('foundation_wall_insulation_distance_to_top', 0.0)
@@ -749,28 +748,16 @@ def get_values(osw_file, step)
   elsif ['base-dhw-solar-fraction.osw'].include? osw_file
     step.setArgument('solar_thermal_system_type', 'hot water')
     step.setArgument('solar_thermal_solar_fraction', 0.65)
-  elsif ['base-dhw-solar-indirect-evacuated-tube.osw'].include? osw_file
-    step.setArgument('solar_thermal_system_type', 'hot water')
-    step.setArgument('solar_thermal_collector_loop_type', HPXML::SolarThermalLoopTypeIndirect)
   elsif ['base-dhw-solar-indirect-flat-plate.osw'].include? osw_file
     step.setArgument('solar_thermal_system_type', 'hot water')
     step.setArgument('solar_thermal_collector_loop_type', HPXML::SolarThermalLoopTypeIndirect)
     step.setArgument('solar_thermal_collector_type', HPXML::SolarThermalTypeSingleGlazing)
     step.setArgument('solar_thermal_collector_rated_optical_efficiency', 0.77)
     step.setArgument('solar_thermal_collector_rated_thermal_losses', 0.793)
-  elsif ['base-dhw-solar-thermosyphon-evacuated-tube.osw'].include? osw_file
-    step.setArgument('solar_thermal_system_type', 'hot water')
-    step.setArgument('solar_thermal_collector_loop_type', HPXML::SolarThermalLoopTypeThermosyphon)
   elsif ['base-dhw-solar-thermosyphon-flat-plate.osw'].include? osw_file
     step.setArgument('solar_thermal_system_type', 'hot water')
     step.setArgument('solar_thermal_collector_loop_type', HPXML::SolarThermalLoopTypeThermosyphon)
     step.setArgument('solar_thermal_collector_type', HPXML::SolarThermalTypeSingleGlazing)
-    step.setArgument('solar_thermal_collector_rated_optical_efficiency', 0.77)
-    step.setArgument('solar_thermal_collector_rated_thermal_losses', 0.793)
-  elsif ['base-dhw-solar-thermosyphon-ics.osw'].include? osw_file
-    step.setArgument('solar_thermal_system_type', 'hot water')
-    step.setArgument('solar_thermal_collector_loop_type', HPXML::SolarThermalLoopTypeThermosyphon)
-    step.setArgument('solar_thermal_collector_type', HPXML::SolarThermalTypeICS)
     step.setArgument('solar_thermal_collector_rated_optical_efficiency', 0.77)
     step.setArgument('solar_thermal_collector_rated_thermal_losses', 0.793)
   elsif ['base-dhw-tank-gas.osw'].include? osw_file
@@ -875,6 +862,8 @@ def get_values(osw_file, step)
     step.setArgument('window_area_back', 216.0)
     step.setArgument('window_area_left', 144.0)
     step.setArgument('window_area_right', 144.0)
+  elsif ['base-enclosure-3d-coordinates.osw'].include? osw_file
+    step.setArgument('geometry_export_3d_coordinates', true)
   elsif ['base-enclosure-adiabatic-surfaces.osw'].include? osw_file
     step.setArgument('geometry_unit_type', 'multifamily')
     step.setArgument('geometry_cfa', 1350.0)

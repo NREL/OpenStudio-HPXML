@@ -112,8 +112,7 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
     end
 
     begin
-      collapse_enclosure = false # FIXME: how to decide?
-      hpxml = HPXML.new(hpxml_path: hpxml_path, collapse_enclosure: collapse_enclosure)
+      hpxml = HPXML.new(hpxml_path: hpxml_path)
 
       if not validate_hpxml(runner, hpxml_path, hpxml)
         return false
@@ -121,7 +120,7 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
 
       epw_path, cache_path = process_weather(hpxml, runner, model, weather_dir, output_dir)
 
-      OSModel.create(hpxml, runner, model, hpxml_path, epw_path, cache_path, output_dir, debug, collapse_enclosure)
+      OSModel.create(hpxml, runner, model, hpxml_path, epw_path, cache_path, output_dir, debug)
     rescue Exception => e
       runner.registerError("#{e.message}\n#{e.backtrace.join("\n")}")
       return false
@@ -219,12 +218,12 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
 end
 
 class OSModel
-  def self.create(hpxml, runner, model, hpxml_path, epw_path, cache_path, output_dir, debug, collapse_enclosure)
+  def self.create(hpxml, runner, model, hpxml_path, epw_path, cache_path, output_dir, debug)
     @hpxml = hpxml
     @hpxml_path = hpxml_path
     @output_dir = output_dir
     @debug = debug
-    @collapse_enclosure = collapse_enclosure
+    @collapse_enclosure = @hpxml.collapse_enclosure
 
     @eri_version = @hpxml.header.eri_calculation_version # Hidden feature
     @eri_version = 'latest' if @eri_version.nil?
@@ -3615,7 +3614,7 @@ class OSModel
           sub_surface_type = surface_type
         else
           sub_surface_type = sub_surface_type.get
-        end        
+        end
 
         key = { 'Window' => :windows,
                 'Door' => :doors,

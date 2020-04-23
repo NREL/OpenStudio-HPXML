@@ -220,7 +220,7 @@ class HPXML < Object
   WindowLayersSinglePane = 'single-pane'
   WindowLayersTriplePane = 'triple-pane'
 
-  def initialize(hpxml_path: nil, collapse_enclosure: true)
+  def initialize(hpxml_path: nil)
     @doc = nil
     @hpxml_path = hpxml_path
 
@@ -232,12 +232,28 @@ class HPXML < Object
     end
     from_rexml(hpxml)
 
+    @collapse_enclosure = true
+    if @roofs.coordinates &&
+       @walls.coordinates &&
+       @foundation_walls.coordinates &&
+       @frame_floors.coordinates &&
+       @slabs.coordinates &&
+       @windows.coordinates &&
+       @skylights.coordinates &&
+       @doors.coordinates
+      @collapse_enclosure = false
+    end
+
     # Clean up
     delete_partition_surfaces()
     delete_tiny_surfaces()
-    if collapse_enclosure
+    if @collapse_enclosure
       collapse_enclosure_surfaces()
     end
+  end
+
+  def collapse_enclosure
+    return @collapse_enclosure
   end
 
   def has_space_type(space_type)
@@ -1227,13 +1243,20 @@ class HPXML < Object
         self << Roof.new(@hpxml_object, roof)
       end
     end
+
+    def coordinates
+      each do |roof|
+        return false if roof.coordinates.empty?
+      end
+      return true
+    end
   end
 
   class Roof < BaseElement
     ATTRS = [:id, :exterior_adjacent_to, :interior_adjacent_to, :area, :azimuth, :roof_type,
              :roof_color, :solar_absorptance, :emittance, :pitch, :radiant_barrier,
              :insulation_id, :insulation_assembly_r_value, :insulation_cavity_r_value,
-             :insulation_continuous_r_value, :coordinates, :outward_normal]
+             :insulation_continuous_r_value, :coordinates]
     attr_accessor(*ATTRS)
 
     def skylights
@@ -1284,18 +1307,6 @@ class HPXML < Object
       return @coordinates
     end
 
-    def set_outward_normal(x: nil, y: nil, z: nil)
-      if @outward_normal.nil?
-        @outward_normal = {}
-      end
-      if x.nil? && y.nil? && z.nil?
-        return
-      end
-
-      @outward_normal = { x: x, y: y, z: z }
-      return @outward_normal
-    end
-
     def delete
       @hpxml_object.roofs.delete(self)
       skylights.reverse_each do |skylight|
@@ -1334,9 +1345,7 @@ class HPXML < Object
       extension = XMLHelper.add_element(roof, 'extension')
       add_coordinate
       HPXML::add_coordinates(extension, @coordinates)
-      set_outward_normal
-      HPXML::add_outward_normal(extension, @outward_normal)
-      if extension.elements['Coordinates'].nil? && extension.elements['OutwardNormal'].nil?
+      if extension.elements['Coordinates'].nil?
         extension.remove
       end
     end
@@ -1362,7 +1371,6 @@ class HPXML < Object
         @insulation_continuous_r_value = HPXML::to_float_or_nil(XMLHelper.get_value(insulation, "Layer[InstallationType='continuous']/NominalRValue"))
       end
       @coordinates = HPXML::get_coordinates(roof)
-      @outward_normal = HPXML::get_outward_normal(roof)
     end
   end
 
@@ -1467,13 +1475,20 @@ class HPXML < Object
         self << Wall.new(@hpxml_object, wall)
       end
     end
+
+    def coordinates
+      each do |wall|
+        return false if wall.coordinates.empty?
+      end
+      return true
+    end
   end
 
   class Wall < BaseElement
     ATTRS = [:id, :exterior_adjacent_to, :interior_adjacent_to, :wall_type, :optimum_value_engineering,
              :area, :orientation, :azimuth, :siding, :solar_absorptance, :emittance, :insulation_id,
              :insulation_assembly_r_value, :insulation_cavity_r_value, :insulation_continuous_r_value,
-             :coordinates, :outward_normal]
+             :coordinates]
     attr_accessor(*ATTRS)
 
     def windows
@@ -1528,18 +1543,6 @@ class HPXML < Object
       return @coordinates
     end
 
-    def set_outward_normal(x: nil, y: nil, z: nil)
-      if @outward_normal.nil?
-        @outward_normal = {}
-      end
-      if x.nil? && y.nil? && z.nil?
-        return
-      end
-
-      @outward_normal = { x: x, y: y, z: z }
-      return @outward_normal
-    end
-
     def delete
       @hpxml_object.walls.delete(self)
       windows.reverse_each do |window|
@@ -1584,9 +1587,7 @@ class HPXML < Object
       extension = XMLHelper.add_element(wall, 'extension')
       add_coordinate
       HPXML::add_coordinates(extension, @coordinates)
-      set_outward_normal
-      HPXML::add_outward_normal(extension, @outward_normal)
-      if extension.elements['Coordinates'].nil? && extension.elements['OutwardNormal'].nil?
+      if extension.elements['Coordinates'].nil?
         extension.remove
       end
     end
@@ -1613,7 +1614,6 @@ class HPXML < Object
         @insulation_continuous_r_value = HPXML::to_float_or_nil(XMLHelper.get_value(insulation, "Layer[InstallationType='continuous']/NominalRValue"))
       end
       @coordinates = HPXML::get_coordinates(wall)
-      @outward_normal = HPXML::get_outward_normal(wall)
     end
   end
 
@@ -1629,6 +1629,13 @@ class HPXML < Object
         self << FoundationWall.new(@hpxml_object, foundation_wall)
       end
     end
+
+    def coordinates
+      each do |foundation_wall|
+        return false if foundation_wall.coordinates.empty?
+      end
+      return true
+    end
   end
 
   class FoundationWall < BaseElement
@@ -1637,7 +1644,7 @@ class HPXML < Object
              :insulation_interior_distance_to_top, :insulation_interior_distance_to_bottom,
              :insulation_exterior_r_value, :insulation_exterior_distance_to_top,
              :insulation_exterior_distance_to_bottom, :insulation_assembly_r_value,
-             :coordinates, :outward_normal]
+             :coordinates]
     attr_accessor(*ATTRS)
 
     def windows
@@ -1692,18 +1699,6 @@ class HPXML < Object
 
       @coordinates << { x: x, y: y, z: z }
       return @coordinates
-    end
-
-    def set_outward_normal(x: nil, y: nil, z: nil)
-      if @outward_normal.nil?
-        @outward_normal = {}
-      end
-      if x.nil? && y.nil? && z.nil?
-        return
-      end
-
-      @outward_normal = { x: x, y: y, z: z }
-      return @outward_normal
     end
 
     def delete
@@ -1763,9 +1758,7 @@ class HPXML < Object
       extension = XMLHelper.add_element(foundation_wall, 'extension')
       add_coordinate
       HPXML::add_coordinates(extension, @coordinates)
-      set_outward_normal
-      HPXML::add_outward_normal(extension, @outward_normal)
-      if extension.elements['Coordinates'].nil? && extension.elements['OutwardNormal'].nil?
+      if extension.elements['Coordinates'].nil?
         extension.remove
       end
     end
@@ -1794,7 +1787,6 @@ class HPXML < Object
         @insulation_assembly_r_value = HPXML::to_float_or_nil(XMLHelper.get_value(insulation, 'AssemblyEffectiveRValue'))
       end
       @coordinates = HPXML::get_coordinates(foundation_wall)
-      @outward_normal = HPXML::get_outward_normal(foundation_wall)
     end
   end
 
@@ -1810,12 +1802,19 @@ class HPXML < Object
         self << FrameFloor.new(@hpxml_object, frame_floor)
       end
     end
+
+    def coordinates
+      each do |frame_floor|
+        return false if frame_floor.coordinates.empty?
+      end
+      return true
+    end
   end
 
   class FrameFloor < BaseElement
     ATTRS = [:id, :exterior_adjacent_to, :interior_adjacent_to, :area, :insulation_id,
              :insulation_assembly_r_value, :insulation_cavity_r_value, :insulation_continuous_r_value,
-             :coordinates, :outward_normal]
+             :coordinates]
     attr_accessor(*ATTRS)
 
     def is_ceiling
@@ -1864,18 +1863,6 @@ class HPXML < Object
       return @coordinates
     end
 
-    def set_outward_normal(x: nil, y: nil, z: nil)
-      if @outward_normal.nil?
-        @outward_normal = {}
-      end
-      if x.nil? && y.nil? && z.nil?
-        return
-      end
-
-      @outward_normal = { x: x, y: y, z: z }
-      return @outward_normal
-    end
-
     def delete
       @hpxml_object.frame_floors.delete(self)
     end
@@ -1906,9 +1893,7 @@ class HPXML < Object
       extension = XMLHelper.add_element(frame_floor, 'extension')
       add_coordinate
       HPXML::add_coordinates(extension, @coordinates)
-      set_outward_normal
-      HPXML::add_outward_normal(extension, @outward_normal)
-      if extension.elements['Coordinates'].nil? && extension.elements['OutwardNormal'].nil?
+      if extension.elements['Coordinates'].nil?
         extension.remove
       end
     end
@@ -1928,7 +1913,6 @@ class HPXML < Object
         @insulation_continuous_r_value = HPXML::to_float_or_nil(XMLHelper.get_value(insulation, "Layer[InstallationType='continuous']/NominalRValue"))
       end
       @coordinates = HPXML::get_coordinates(frame_floor)
-      @outward_normal = HPXML::get_outward_normal(frame_floor)
     end
   end
 
@@ -1944,6 +1928,13 @@ class HPXML < Object
         self << Slab.new(@hpxml_object, slab)
       end
     end
+
+    def coordinates
+      each do |slab|
+        return false if slab.coordinates.empty?
+      end
+      return true
+    end
   end
 
   class Slab < BaseElement
@@ -1951,7 +1942,7 @@ class HPXML < Object
              :perimeter_insulation_depth, :under_slab_insulation_width,
              :under_slab_insulation_spans_entire_slab, :depth_below_grade, :carpet_fraction,
              :carpet_r_value, :perimeter_insulation_id, :perimeter_insulation_r_value,
-             :under_slab_insulation_id, :under_slab_insulation_r_value, :coordinates, :outward_normal]
+             :under_slab_insulation_id, :under_slab_insulation_r_value, :coordinates]
     attr_accessor(*ATTRS)
 
     def exterior_adjacent_to
@@ -1984,18 +1975,6 @@ class HPXML < Object
 
       @coordinates << { x: x, y: y, z: z }
       return @coordinates
-    end
-
-    def set_outward_normal(x: nil, y: nil, z: nil)
-      if @outward_normal.nil?
-        @outward_normal = {}
-      end
-      if x.nil? && y.nil? && z.nil?
-        return
-      end
-
-      @outward_normal = { x: x, y: y, z: z }
-      return @outward_normal
     end
 
     def delete
@@ -2054,9 +2033,7 @@ class HPXML < Object
       XMLHelper.add_element(extension, 'CarpetRValue', HPXML::to_float_or_nil(@carpet_r_value)) unless @carpet_r_value.nil?
       add_coordinate
       HPXML::add_coordinates(extension, @coordinates)
-      set_outward_normal
-      HPXML::add_outward_normal(extension, @outward_normal)
-      if extension.elements['CarpetFraction'].nil? && extension.elements['CarpetRValue'].nil? && extension.elements['Coordinates'].nil? && extension.elements['OutwardNormal'].nil?
+      if extension.elements['CarpetFraction'].nil? && extension.elements['CarpetRValue'].nil? && extension.elements['Coordinates'].nil?
         extension.remove
       end
     end
@@ -2086,7 +2063,6 @@ class HPXML < Object
         @under_slab_insulation_r_value = HPXML::to_float_or_nil(XMLHelper.get_value(under_slab_insulation, "Layer[InstallationType='continuous']/NominalRValue"))
       end
       @coordinates = HPXML::get_coordinates(slab)
-      @outward_normal = HPXML::get_outward_normal(slab)
     end
   end
 
@@ -2102,6 +2078,13 @@ class HPXML < Object
         self << Window.new(@hpxml_object, window)
       end
     end
+
+    def coordinates
+      each do |window|
+        return false if window.coordinates.empty?
+      end
+      return true
+    end
   end
 
   class Window < BaseElement
@@ -2109,7 +2092,7 @@ class HPXML < Object
              :glass_type, :gas_fill, :ufactor, :shgc, :interior_shading_factor_summer,
              :interior_shading_factor_winter, :exterior_shading, :overhangs_depth,
              :overhangs_distance_to_top_of_window, :overhangs_distance_to_bottom_of_window,
-             :fraction_operable, :wall_idref, :coordinates, :outward_normal]
+             :fraction_operable, :wall_idref, :coordinates]
     attr_accessor(*ATTRS)
 
     def wall
@@ -2149,18 +2132,6 @@ class HPXML < Object
 
       @coordinates << { x: x, y: y, z: z }
       return @coordinates
-    end
-
-    def set_outward_normal(x: nil, y: nil, z: nil)
-      if @outward_normal.nil?
-        @outward_normal = {}
-      end
-      if x.nil? && y.nil? && z.nil?
-        return
-      end
-
-      @outward_normal = { x: x, y: y, z: z }
-      return @outward_normal
     end
 
     def delete
@@ -2217,9 +2188,7 @@ class HPXML < Object
       extension = XMLHelper.add_element(window, 'extension')
       add_coordinate
       HPXML::add_coordinates(extension, @coordinates)
-      set_outward_normal
-      HPXML::add_outward_normal(extension, @outward_normal)
-      if extension.elements['Coordinates'].nil? && extension.elements['OutwardNormal'].nil?
+      if extension.elements['Coordinates'].nil?
         extension.remove
       end
     end
@@ -2247,7 +2216,6 @@ class HPXML < Object
       @fraction_operable = HPXML::to_float_or_nil(XMLHelper.get_value(window, 'FractionOperable'))
       @wall_idref = HPXML::get_idref(window.elements['AttachedToWall'])
       @coordinates = HPXML::get_coordinates(window)
-      @outward_normal = HPXML::get_outward_normal(window)
     end
   end
 
@@ -2263,11 +2231,18 @@ class HPXML < Object
         self << Skylight.new(@hpxml_object, skylight)
       end
     end
+
+    def coordinates
+      each do |skylight|
+        return false if skylight.coordinates.empty?
+      end
+      return true
+    end
   end
 
   class Skylight < BaseElement
     ATTRS = [:id, :area, :azimuth, :orientation, :frame_type, :aluminum_thermal_break, :glass_layers,
-             :glass_type, :gas_fill, :ufactor, :shgc, :exterior_shading, :roof_idref, :coordinates, :outward_normal]
+             :glass_type, :gas_fill, :ufactor, :shgc, :exterior_shading, :roof_idref, :coordinates]
     attr_accessor(*ATTRS)
 
     def roof
@@ -2309,18 +2284,6 @@ class HPXML < Object
       return @coordinates
     end
 
-    def set_outward_normal(x: nil, y: nil, z: nil)
-      if @outward_normal.nil?
-        @outward_normal = {}
-      end
-      if x.nil? && y.nil? && z.nil?
-        return
-      end
-
-      @outward_normal = { x: x, y: y, z: z }
-      return @outward_normal
-    end
-
     def delete
       @hpxml_object.skylights.delete(self)
     end
@@ -2349,9 +2312,7 @@ class HPXML < Object
       extension = XMLHelper.add_element(skylight, 'extension')
       add_coordinate
       HPXML::add_coordinates(extension, @coordinates)
-      set_outward_normal
-      HPXML::add_outward_normal(extension, @outward_normal)
-      if extension.elements['Coordinates'].nil? && extension.elements['OutwardNormal'].nil?
+      if extension.elements['Coordinates'].nil?
         extension.remove
       end
     end
@@ -2373,7 +2334,6 @@ class HPXML < Object
       @exterior_shading = XMLHelper.get_value(skylight, 'ExteriorShading/Type')
       @roof_idref = HPXML::get_idref(skylight.elements['AttachedToRoof'])
       @coordinates = HPXML::get_coordinates(skylight)
-      @outward_normal = HPXML::get_outward_normal(skylight)
     end
   end
 
@@ -2389,10 +2349,17 @@ class HPXML < Object
         self << Door.new(@hpxml_object, door)
       end
     end
+
+    def coordinates
+      each do |door|
+        return false if door.coordinates.empty?
+      end
+      return true
+    end
   end
 
   class Door < BaseElement
-    ATTRS = [:id, :wall_idref, :area, :azimuth, :r_value, :coordinates, :outward_normal]
+    ATTRS = [:id, :wall_idref, :area, :azimuth, :r_value, :coordinates]
     attr_accessor(*ATTRS)
 
     def wall
@@ -2434,18 +2401,6 @@ class HPXML < Object
       return @coordinates
     end
 
-    def set_outward_normal(x: nil, y: nil, z: nil)
-      if @outward_normal.nil?
-        @outward_normal = {}
-      end
-      if x.nil? && y.nil? && z.nil?
-        return
-      end
-
-      @outward_normal = { x: x, y: y, z: z }
-      return @outward_normal
-    end
-
     def delete
       @hpxml_object.doors.delete(self)
     end
@@ -2473,9 +2428,7 @@ class HPXML < Object
       extension = XMLHelper.add_element(door, 'extension')
       add_coordinate
       HPXML::add_coordinates(extension, @coordinates)
-      set_outward_normal
-      HPXML::add_outward_normal(extension, @outward_normal)
-      if extension.elements['Coordinates'].nil? && extension.elements['OutwardNormal'].nil?
+      if extension.elements['Coordinates'].nil?
         extension.remove
       end
     end
@@ -2489,7 +2442,6 @@ class HPXML < Object
       @azimuth = HPXML::to_integer_or_nil(XMLHelper.get_value(door, 'Azimuth'))
       @r_value = HPXML::to_float_or_nil(XMLHelper.get_value(door, 'RValue'))
       @coordinates = HPXML::get_coordinates(door)
-      @outward_normal = HPXML::get_outward_normal(door)
     end
   end
 
@@ -4255,8 +4207,7 @@ class HPXML < Object
                        :under_slab_insulation_id,
                        :area,
                        :exposed_perimeter,
-                       :coordinates,
-                       :outward_normal]
+                       :coordinates]
 
     # Look for pairs of surfaces that can be collapsed
     surf_types.each do |surf_type, surfaces|
@@ -4467,25 +4418,12 @@ class HPXML < Object
     end
   end
 
-  def self.add_outward_normal(extension, outward_normal)
-    if (not outward_normal.empty?)
-      outward_normal_element = XMLHelper.add_element(extension, 'OutwardNormal')
-      XMLHelper.add_element(outward_normal_element, 'x', outward_normal[:x]) unless outward_normal[:x].nil?
-      XMLHelper.add_element(outward_normal_element, 'y', outward_normal[:y]) unless outward_normal[:y].nil?
-      XMLHelper.add_element(outward_normal_element, 'z', outward_normal[:z]) unless outward_normal[:z].nil?
-    end
-  end
-
   def self.get_coordinates(planar_surface)
     coordinates = []
     planar_surface.elements.each('extension/Coordinates/Coordinate') do |coordinate|
       coordinates << HPXML::get_coordinate(coordinate)
     end
     return coordinates
-  end
-
-  def self.get_outward_normal(planar_surface)
-    return HPXML::get_coordinate(planar_surface.elements['extension/OutwardNormal'])
   end
 
   def self.to_float_or_nil(value)
