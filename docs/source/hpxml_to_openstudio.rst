@@ -124,9 +124,9 @@ Weather File
 The ``ClimateandRiskZones/WeatherStation`` element specifies the EnergyPlus weather file (EPW) to be used in the simulation.
 The weather file can be entered in one of two ways:
 
-#. Using the ``WeatherStation/WMO``, which must be one of the acceptable TMY3 WMO station numbers found in the ``weather/data.csv`` file.
+#. Using ``WeatherStation/WMO``, which must be one of the acceptable TMY3 WMO station numbers found in the ``weather/data.csv`` file.
    The full set of U.S. TMY3 weather files can be `downloaded here <https://data.nrel.gov/files/128/tmy3s-cache-csv.zip>`_.
-#. Using the ``WeatherStation/extension/EPWFileName``.
+#. Using ``WeatherStation/extension/EPWFilePath``.
 
 Enclosure
 ~~~~~~~~~
