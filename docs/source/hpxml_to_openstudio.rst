@@ -274,6 +274,7 @@ Overhangs are defined by the vertical distance between the overhang and the top 
 The difference between these two values equals the height of the window.
 
 Finally, windows can be optionally described with ``FractionOperable``.
+The input should solely reflect whether the windows are operable (can be opened), not how they are used by the occupants.
 If a ``Window`` represents a single window, the value should be 0 or 1.
 If a ``Window`` represents multiple windows (e.g., 4), the value should be between 0 and 1 (e.g., 0, 0.25, 0.5, 0.75, or 1).
 If not provided, it is assumed that 67% of the windows are operable.
