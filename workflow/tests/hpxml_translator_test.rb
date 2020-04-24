@@ -162,6 +162,7 @@ class HPXMLTest < MiniTest::Test
                             'hvac-frac-load-served.xml' => ['Expected FractionCoolLoadServed to sum to <= 1, but calculated sum is 1.2.',
                                                             'Expected FractionHeatLoadServed to sum to <= 1, but calculated sum is 1.1.'],
                             'hvac-distribution-return-duct-leakage-missing.xml' => ["Return ducts exist but leakage was not specified for distribution system 'HVACDistribution'."],
+                            'invalid-epw-filepath.xml' => ["foo.epw' could not be found."],
                             'invalid-neighbor-shading-azimuth.xml' => ['A neighbor building has an azimuth (145) not equal to the azimuth of any wall.'],
                             'invalid-relatedhvac-dhw-indirect.xml' => ["RelatedHVACSystem 'HeatingSystem_bad' not found for water heating system 'WaterHeater'"],
                             'invalid-relatedhvac-desuperheater.xml' => ["RelatedHVACSystem 'CoolingSystem_bad' not found for water heating system 'WaterHeater'."],
@@ -465,6 +466,7 @@ class HPXMLTest < MiniTest::Test
     args['include_timeseries_zone_temperatures'] = true
     args['include_timeseries_fuel_consumptions'] = true
     args['include_timeseries_end_use_consumptions'] = true
+    args['include_timeseries_hot_water_uses'] = true
     args['include_timeseries_total_loads'] = true
     args['include_timeseries_component_loads'] = true
     update_args_hash(measures, measure_subdir, args)
@@ -1541,7 +1543,7 @@ class HPXMLTest < MiniTest::Test
     results_base.keys.each do |k|
       next if [@@simulation_runtime_key, @@workflow_runtime_key].include? k
 
-      assert_in_epsilon(results_base[k].to_f, results_collapsed[k].to_f, 0.001)
+      assert_in_epsilon(results_base[k].to_f, results_collapsed[k].to_f, 0.01)
     end
   end
 

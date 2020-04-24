@@ -47,7 +47,7 @@
           <SystemIdentifier id='WeatherStation'/>
           <Name>Denver, CO</Name>
           <extension>
-            <EPWFileName>USA_CO_Denver.Intl.AP.725650_TMY3.epw</EPWFileName>
+            <EPWFilePath>foo.epw</EPWFilePath>
           </extension>
         </WeatherStation>
       </ClimateandRiskZones>

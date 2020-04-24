@@ -1141,9 +1141,10 @@ class Waterheater
     return hx
   end
 
-  def self.calc_water_heater_capacity(fuel, num_beds, num_water_heaters, num_baths = nil)
-    # Calculate the capacity of the water heater based on the fuel type and number
+  def self.get_default_heating_capacity(fuel, num_beds, num_water_heaters, num_baths = nil)
+    # Returns the capacity of the water heater based on the fuel type and number
     # of bedrooms and bathrooms in a home. Returns the capacity in kBtu/hr.
+    # Source: Table 8. Benchmark DHW Storage and Burner Capacity in 2014 BA HSP
 
     if num_baths.nil?
       num_baths = get_default_num_bathrooms(num_beds)
@@ -1153,10 +1154,12 @@ class Waterheater
     num_baths /= num_water_heaters.to_f
 
     if fuel != HPXML::FuelTypeElectricity
-      if num_beds <= 4
-        cap_kbtuh = 40.0
+      if num_beds <= 3
+        cap_kbtuh = 36.0
+      elsif num_beds == 4
+        cap_kbtuh = 38.0
       elsif num_beds == 5
-        cap_kbtuh = 47.0
+        cap_kbtuh = 48.0
       else
         cap_kbtuh = 50.0
       end
@@ -1180,6 +1183,67 @@ class Waterheater
         cap_kw = 5.5
       end
       return UnitConversions.convert(cap_kw, 'kW', 'kBtu/hr')
+    end
+  end
+
+  def self.get_default_tank_volume(fuel, num_beds, num_baths)
+    # Returns the volume of a water heater based on the BA HSP
+    # Source: Table 8. Benchmark DHW Storage and Burner Capacity in 2014 BA HSP
+    if fuel != HPXML::FuelTypeElectricity # Non-electric tank WHs
+      if num_beds <= 2
+        return 30.0
+      elsif num_beds == 3
+        if num_baths <= 1.5
+          return 30.0
+        else
+          return 40.0
+        end
+      elsif num_beds == 4
+        if num_baths <= 2.5
+          return 40.0
+        else
+          return 50.0
+        end
+      else
+        return 50.0
+      end
+    else
+      if num_beds == 1
+        return 30.0
+      elsif num_beds == 2
+        if num_baths <= 1.5
+          return 30.0
+        else
+          return 40.0
+        end
+      elsif num_beds == 3
+        if num_baths <= 1.5
+          return 40.0
+        else
+          return 50.0
+        end
+      elsif num_beds == 4
+        if num_baths <= 2.5
+          return 50.0
+        else
+          return 66.0
+        end
+      elsif num_beds == 5
+        return 66.0
+      else
+        return 80.0
+      end
+    end
+  end
+
+  def self.get_default_recovery_efficiency(fuel, ef)
+    # Water Heater Recovery Efficiency by fuel and energy factor
+    if fuel == HPXML::FuelTypeElectricity
+      return 0.98
+    elsif ef >= 0.75
+      return 0.778114 * ef + 0.276679
+    else
+      return 0.252117 * ef + 0.607997
     end
   end
 
@@ -1388,6 +1452,10 @@ class Waterheater
         return space_type
       end
     end
+  end
+
+  def self.calc_default_solar_thermal_system_storage_volume(collector_area)
+    return 1.5 * collector_area # 1.5 gal for every sqft of collector area
   end
 
   private
