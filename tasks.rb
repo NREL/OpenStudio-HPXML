@@ -78,6 +78,7 @@ def create_hpxmls
     'base-dhw-combi-tankless.xml' => 'base-dhw-indirect.xml',
     'base-dhw-combi-tankless-outside.xml' => 'base-dhw-combi-tankless.xml',
     'base-dhw-desuperheater.xml' => 'base-hvac-central-ac-only-1-speed.xml',
+    'base-dhw-desuperheater-hpwh.xml' => 'base-dhw-tank-heat-pump.xml',
     'base-dhw-desuperheater-tankless.xml' => 'base-hvac-central-ac-only-1-speed.xml',
     'base-dhw-desuperheater-2-speed.xml' => 'base-hvac-central-ac-only-2-speed.xml',
     'base-dhw-desuperheater-var-speed.xml' => 'base-hvac-central-ac-only-var-speed.xml',
@@ -2544,7 +2545,10 @@ def set_hpxml_water_heating_systems(hpxml_file, hpxml)
   elsif ['base-dhw-uef.xml'].include? hpxml_file
     hpxml.water_heating_systems[0].energy_factor = nil
     hpxml.water_heating_systems[0].uniform_energy_factor = 0.93
-  elsif ['base-dhw-desuperheater.xml'].include? hpxml_file
+  elsif ['base-dhw-desuperheater.xml',
+         'base-dhw-desuperheater-2-speed.xml',
+         'base-dhw-desuperheater-var-speed.xml',
+         'base-dhw-desuperheater-hpwh.xml'].include? hpxml_file
     hpxml.water_heating_systems[0].uses_desuperheater = true
     hpxml.water_heating_systems[0].related_hvac_idref = 'CoolingSystem'
   elsif ['base-dhw-desuperheater-tankless.xml'].include? hpxml_file
@@ -2552,12 +2556,6 @@ def set_hpxml_water_heating_systems(hpxml_file, hpxml)
     hpxml.water_heating_systems[0].tank_volume = nil
     hpxml.water_heating_systems[0].heating_capacity = nil
     hpxml.water_heating_systems[0].energy_factor = 0.99
-    hpxml.water_heating_systems[0].uses_desuperheater = true
-    hpxml.water_heating_systems[0].related_hvac_idref = 'CoolingSystem'
-  elsif ['base-dhw-desuperheater-2-speed.xml'].include? hpxml_file
-    hpxml.water_heating_systems[0].uses_desuperheater = true
-    hpxml.water_heating_systems[0].related_hvac_idref = 'CoolingSystem'
-  elsif ['base-dhw-desuperheater-var-speed.xml'].include? hpxml_file
     hpxml.water_heating_systems[0].uses_desuperheater = true
     hpxml.water_heating_systems[0].related_hvac_idref = 'CoolingSystem'
   elsif ['base-dhw-desuperheater-gshp.xml'].include? hpxml_file

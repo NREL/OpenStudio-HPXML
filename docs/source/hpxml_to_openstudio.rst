@@ -514,15 +514,15 @@ The setpoint temperature may be provided as ``HotWaterTemperature``; if not prov
 
 Depending on the type of water heater specified, additional elements are required/available:
 
-========================================  ===================================  ===========  ==========  ===============  ========================  =================  =================  =========================================
-WaterHeaterType                           UniformEnergyFactor or EnergyFactor  FuelType     TankVolume  HeatingCapacity  RecoveryEfficiency        RelatedHVACSystem  UsesDesuperheater  WaterHeaterInsulation/Jacket/JacketRValue
-========================================  ===================================  ===========  ==========  ===============  ========================  =================  =================  =========================================
-storage water heater                      required                             <any>        required    <optional>       required if non-electric                     <optional>         <optional>
-instantaneous water heater                required                             <any>                                                                                  <optional>
-heat pump water heater                    required                             electricity  required                                                                                     <optional>
-space-heating boiler with storage tank                                                      required                                               required                              <optional>
-space-heating boiler with tankless coil                                                                                                            required           
-========================================  ===================================  ===========  ==========  ===============  ========================  =================  =================  =========================================
+========================================  ===================================  ===========  ==========  ===============  ========================  ============================  =================  =========================================
+WaterHeaterType                           UniformEnergyFactor or EnergyFactor  FuelType     TankVolume  HeatingCapacity  RecoveryEfficiency        RelatedHVACSystem             UsesDesuperheater  WaterHeaterInsulation/Jacket/JacketRValue
+========================================  ===================================  ===========  ==========  ===============  ========================  ============================  =================  =========================================
+storage water heater                      required                             <any>        required    <optional>       required if non-electric  <optional for desuperheater>  <optional>         <optional>
+instantaneous water heater                required                             <any>                                                               <optional for desuperheater>  <optional>
+heat pump water heater                    required                             electricity  required                                               <optional for desuperheater>  <optional>         <optional>
+space-heating boiler with storage tank                                                      required                                               required for boiler                              <optional>
+space-heating boiler with tankless coil                                                                                                            required for boiler
+========================================  ===================================  ===========  ==========  ===============  ========================  ============================  =================  =========================================
 
 For tankless water heaters, an annual energy derate due to cycling inefficiencies can be provided.
 If not provided, a value of 0.08 (8%) will be assumed.
