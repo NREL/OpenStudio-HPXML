@@ -158,9 +158,11 @@ def create_osws
     'base-location-baltimore-md.osw' => 'base.osw',
     'base-location-dallas-tx.osw' => 'base.osw',
     'base-location-duluth-mn.osw' => 'base.osw',
-    'base-location-epw-filename.osw' => 'base.osw',
+    'base-location-epw-filepath.osw' => 'base.osw',
+    'base-location-epw-filepath-AMY-2012.osw' => 'base.osw',
     'base-location-miami-fl.osw' => 'base.osw',
     'base-mechvent-balanced.osw' => 'base.osw',
+    'base-mechvent-bath-kitchen-fans.osw' => 'base.osw',
     'base-mechvent-cfis.osw' => 'base.osw',
     'base-mechvent-cfis-evap-cooler-only-ducted.osw' => 'base.osw',
     'base-mechvent-erv.osw' => 'base.osw',
@@ -170,9 +172,9 @@ def create_osws
     'base-mechvent-hrv.osw' => 'base.osw',
     'base-mechvent-hrv-asre.osw' => 'base.osw',
     'base-mechvent-supply.osw' => 'base.osw',
-    'base-mechvent-bath-kitchen-fans.osw' => 'base.osw',
     'base-misc-ceiling-fans.osw' => 'base.osw',
     # 'base-misc-defaults.osw' => 'base.osw',
+    'base-misc-defaults2.osw' => 'base.osw',
     # 'base-misc-lighting-none.osw' => 'base.osw', # Not going to support this
     'base-misc-neighbor-shading.osw' => 'base.osw',
     'base-misc-runperiod-1-month.osw' => 'base.osw',
@@ -270,7 +272,7 @@ def get_values(osw_file, step)
     step.setArgument('simulation_control_end_month', 12)
     step.setArgument('simulation_control_end_day_of_month', 31)
     step.setArgument('schedules_output_path', 'BuildResidentialHPXML/tests/run/schedules.csv')
-    step.setArgument('weather_station_epw_filename', 'USA_CO_Denver.Intl.AP.725650_TMY3.epw')
+    step.setArgument('weather_station_epw_filepath', 'USA_CO_Denver.Intl.AP.725650_TMY3.epw')
     step.setArgument('geometry_unit_type', HPXML::ResidentialTypeSFD)
     step.setArgument('geometry_num_units', 1)
     step.setArgument('geometry_cfa', 2700.0)
@@ -337,7 +339,7 @@ def get_values(osw_file, step)
     step.setArgument('window_area_left', 72.0)
     step.setArgument('window_area_right', 72.0)
     step.setArgument('window_aspect_ratio', 1.333)
-    step.setArgument('window_fraction_of_operable_area', 0.33)
+    step.setArgument('window_fraction_operable', 0.67)
     step.setArgument('window_ufactor', 0.33)
     step.setArgument('window_shgc', 0.45)
     step.setArgument('window_interior_shading_winter', 0.85)
@@ -436,20 +438,20 @@ def get_values(osw_file, step)
     step.setArgument('water_heater_fuel_type', HPXML::FuelTypeElectricity)
     step.setArgument('water_heater_location', HPXML::LocationLivingSpace)
     step.setArgument('water_heater_tank_volume', '40')
-    step.setArgument('water_heater_heating_capacity', Constants.Auto)
+    step.setArgument('water_heater_heating_capacity', '18767')
     step.setArgument('water_heater_efficiency_type', 'EnergyFactor')
     step.setArgument('water_heater_efficiency_ef', 0.95)
     step.setArgument('water_heater_efficiency_uef', 0.93)
-    step.setArgument('water_heater_recovery_efficiency', 0.76)
+    step.setArgument('water_heater_recovery_efficiency', '0.76')
     step.setArgument('water_heater_standby_loss', 0)
     step.setArgument('water_heater_jacket_rvalue', 0)
-    step.setArgument('water_heater_setpoint_temperature', 125)
+    step.setArgument('water_heater_setpoint_temperature', '125')
     step.setArgument('dhw_distribution_system_type', HPXML::DHWDistTypeStandard)
     step.setArgument('dhw_distribution_standard_piping_length', '50')
     step.setArgument('dhw_distribution_recirc_control_type', HPXML::DHWRecirControlTypeNone)
-    step.setArgument('dhw_distribution_recirc_piping_length', 50)
-    step.setArgument('dhw_distribution_recirc_branch_piping_length', 50)
-    step.setArgument('dhw_distribution_recirc_pump_power', 50)
+    step.setArgument('dhw_distribution_recirc_piping_length', '50')
+    step.setArgument('dhw_distribution_recirc_branch_piping_length', '50')
+    step.setArgument('dhw_distribution_recirc_pump_power', '50')
     step.setArgument('dhw_distribution_pipe_r', 0.0)
     step.setArgument('dwhr_facilities_connected', 'none')
     step.setArgument('dwhr_equal_flow', true)
@@ -569,14 +571,14 @@ def get_values(osw_file, step)
     step.setArgument('ducts_supply_leakage_value', 0)
     step.setArgument('ducts_return_leakage_value', 0)
   elsif ['base-appliances-dehumidifier.osw'].include? osw_file
-    step.setArgument('weather_station_epw_filename', 'USA_TX_Dallas-Fort.Worth.Intl.AP.722590_TMY3.epw')
+    step.setArgument('weather_station_epw_filepath', 'USA_TX_Dallas-Fort.Worth.Intl.AP.722590_TMY3.epw')
     step.setArgument('dehumidifier_present', true)
   elsif ['base-appliances-dehumidifier-50percent.osw'].include? osw_file
-    step.setArgument('weather_station_epw_filename', 'USA_TX_Dallas-Fort.Worth.Intl.AP.722590_TMY3.epw')
+    step.setArgument('weather_station_epw_filepath', 'USA_TX_Dallas-Fort.Worth.Intl.AP.722590_TMY3.epw')
     step.setArgument('dehumidifier_present', true)
     step.setArgument('dehumidifier_fraction_dehumidification_load_served', 0.5)
   elsif ['base-appliances-dehumidifier-ief.osw'].include? osw_file
-    step.setArgument('weather_station_epw_filename', 'USA_TX_Dallas-Fort.Worth.Intl.AP.722590_TMY3.epw')
+    step.setArgument('weather_station_epw_filepath', 'USA_TX_Dallas-Fort.Worth.Intl.AP.722590_TMY3.epw')
     step.setArgument('dehumidifier_present', true)
     step.setArgument('dehumidifier_efficiency_type', 'IntegratedEnergyFactor')
   elsif ['base-appliances-gas.osw'].include? osw_file
@@ -641,7 +643,7 @@ def get_values(osw_file, step)
     step.setArgument('ducts_supply_location', HPXML::LocationBasementConditioned)
     step.setArgument('ducts_return_location', HPXML::LocationBasementConditioned)
   elsif ['base-atticroof-radiant-barrier.osw'].include? osw_file
-    step.setArgument('weather_station_epw_filename', 'USA_TX_Dallas-Fort.Worth.Intl.AP.722590_TMY3.epw')
+    step.setArgument('weather_station_epw_filepath', 'USA_TX_Dallas-Fort.Worth.Intl.AP.722590_TMY3.epw')
     step.setArgument('roof_radiant_barrier', true)
   elsif ['base-atticroof-unvented-insulated-roof.osw'].include? osw_file
     step.setArgument('ceiling_assembly_r', 2.1)
@@ -656,12 +658,14 @@ def get_values(osw_file, step)
     step.setArgument('heating_system_electric_auxiliary_energy', 200.0)
     step.setArgument('cooling_system_type', 'none')
     step.setArgument('water_heater_type', HPXML::WaterHeaterTypeCombiTankless)
+    step.setArgument('water_heater_tank_volume', Constants.Auto)
   elsif ['base-dhw-combi-tankless-outside.osw'].include? osw_file
     step.setArgument('heating_system_type', HPXML::HVACTypeBoiler)
     step.setArgument('heating_system_electric_auxiliary_energy', 200.0)
     step.setArgument('cooling_system_type', 'none')
     step.setArgument('water_heater_type', HPXML::WaterHeaterTypeCombiTankless)
     step.setArgument('water_heater_location', HPXML::LocationOtherExterior)
+    step.setArgument('water_heater_tank_volume', Constants.Auto)
   elsif ['base-dhw-dwhr.osw'].include? osw_file
     step.setArgument('dwhr_facilities_connected', HPXML::DWHRFacilitiesConnectedAll)
   elsif ['base-dhw-indirect.osw'].include? osw_file
@@ -697,11 +701,13 @@ def get_values(osw_file, step)
   elsif ['base-dhw-jacket-gas.osw'].include? osw_file
     step.setArgument('water_heater_fuel_type', HPXML::FuelTypeNaturalGas)
     step.setArgument('water_heater_tank_volume', '50')
+    step.setArgument('water_heater_heating_capacity', '40000')
     step.setArgument('water_heater_efficiency_ef', 0.59)
     step.setArgument('water_heater_jacket_rvalue', 10.0)
   elsif ['base-dhw-jacket-hpwh.osw'].include? osw_file
     step.setArgument('water_heater_type', HPXML::WaterHeaterTypeHeatPump)
     step.setArgument('water_heater_tank_volume', '80')
+    step.setArgument('water_heater_heating_capacity', Constants.Auto)
     step.setArgument('water_heater_efficiency_ef', 2.3)
     step.setArgument('water_heater_jacket_rvalue', 10.0)
   elsif ['base-dhw-jacket-indirect.osw'].include? osw_file
@@ -733,16 +739,19 @@ def get_values(osw_file, step)
     step.setArgument('dhw_distribution_recirc_control_type', HPXML::DHWRecirControlTypeTimer)
   elsif ['base-dhw-solar-direct-evacuated-tube.osw'].include? osw_file
     step.setArgument('solar_thermal_system_type', 'hot water')
+    step.setArgument('solar_thermal_storage_volume', '60')
   elsif ['base-dhw-solar-direct-flat-plate.osw'].include? osw_file
     step.setArgument('solar_thermal_system_type', 'hot water')
     step.setArgument('solar_thermal_collector_type', HPXML::SolarThermalTypeSingleGlazing)
     step.setArgument('solar_thermal_collector_rated_optical_efficiency', 0.77)
     step.setArgument('solar_thermal_collector_rated_thermal_losses', 0.793)
+    step.setArgument('solar_thermal_storage_volume', '60')
   elsif ['base-dhw-solar-direct-ics.osw'].include? osw_file
     step.setArgument('solar_thermal_system_type', 'hot water')
     step.setArgument('solar_thermal_collector_type', HPXML::SolarThermalTypeICS)
     step.setArgument('solar_thermal_collector_rated_optical_efficiency', 0.77)
     step.setArgument('solar_thermal_collector_rated_thermal_losses', 0.793)
+    step.setArgument('solar_thermal_storage_volume', '60')
   elsif ['base-dhw-solar-fraction.osw'].include? osw_file
     step.setArgument('solar_thermal_system_type', 'hot water')
     step.setArgument('solar_thermal_solar_fraction', 0.65)
@@ -752,94 +761,115 @@ def get_values(osw_file, step)
     step.setArgument('solar_thermal_collector_type', HPXML::SolarThermalTypeSingleGlazing)
     step.setArgument('solar_thermal_collector_rated_optical_efficiency', 0.77)
     step.setArgument('solar_thermal_collector_rated_thermal_losses', 0.793)
+    step.setArgument('solar_thermal_storage_volume', '60')
   elsif ['base-dhw-solar-thermosyphon-flat-plate.osw'].include? osw_file
     step.setArgument('solar_thermal_system_type', 'hot water')
     step.setArgument('solar_thermal_collector_loop_type', HPXML::SolarThermalLoopTypeThermosyphon)
     step.setArgument('solar_thermal_collector_type', HPXML::SolarThermalTypeSingleGlazing)
     step.setArgument('solar_thermal_collector_rated_optical_efficiency', 0.77)
     step.setArgument('solar_thermal_collector_rated_thermal_losses', 0.793)
+    step.setArgument('solar_thermal_storage_volume', '60')
   elsif ['base-dhw-tank-gas.osw'].include? osw_file
     step.setArgument('water_heater_fuel_type', HPXML::FuelTypeNaturalGas)
     step.setArgument('water_heater_tank_volume', '50')
+    step.setArgument('water_heater_heating_capacity', '40000')
     step.setArgument('water_heater_efficiency_ef', 0.59)
   elsif ['base-dhw-tank-gas-outside.osw'].include? osw_file
     step.setArgument('water_heater_fuel_type', HPXML::FuelTypeNaturalGas)
     step.setArgument('water_heater_location', HPXML::LocationOtherExterior)
     step.setArgument('water_heater_tank_volume', '50')
+    step.setArgument('water_heater_heating_capacity', '40000')
     step.setArgument('water_heater_efficiency_ef', 0.59)
   elsif ['base-dhw-tank-heat-pump.osw'].include? osw_file
     step.setArgument('water_heater_type', HPXML::WaterHeaterTypeHeatPump)
     step.setArgument('water_heater_tank_volume', '80')
+    step.setArgument('water_heater_heating_capacity', Constants.Auto)
     step.setArgument('water_heater_efficiency_ef', 2.3)
   elsif ['base-dhw-tank-heat-pump-outside.osw'].include? osw_file
     step.setArgument('water_heater_type', HPXML::WaterHeaterTypeHeatPump)
     step.setArgument('water_heater_location', HPXML::LocationOtherExterior)
     step.setArgument('water_heater_tank_volume', '80')
+    step.setArgument('water_heater_heating_capacity', Constants.Auto)
     step.setArgument('water_heater_efficiency_ef', 2.3)
   elsif ['base-dhw-tank-heat-pump-with-solar.osw'].include? osw_file
     step.setArgument('water_heater_type', HPXML::WaterHeaterTypeHeatPump)
     step.setArgument('water_heater_tank_volume', '80')
+    step.setArgument('water_heater_heating_capacity', Constants.Auto)
     step.setArgument('water_heater_efficiency_ef', 2.3)
     step.setArgument('solar_thermal_system_type', 'hot water')
     step.setArgument('solar_thermal_collector_loop_type', HPXML::SolarThermalLoopTypeIndirect)
     step.setArgument('solar_thermal_collector_type', HPXML::SolarThermalTypeSingleGlazing)
     step.setArgument('solar_thermal_collector_rated_optical_efficiency', 0.77)
     step.setArgument('solar_thermal_collector_rated_thermal_losses', 0.793)
+    step.setArgument('solar_thermal_storage_volume', '60')
   elsif ['base-dhw-tank-heat-pump-with-solar-fraction.osw'].include? osw_file
     step.setArgument('water_heater_type', HPXML::WaterHeaterTypeHeatPump)
     step.setArgument('water_heater_tank_volume', '80')
+    step.setArgument('water_heater_heating_capacity', Constants.Auto)
     step.setArgument('water_heater_efficiency_ef', 2.3)
     step.setArgument('solar_thermal_system_type', 'hot water')
     step.setArgument('solar_thermal_solar_fraction', 0.65)
   elsif ['base-dhw-tankless-electric.osw'].include? osw_file
     step.setArgument('water_heater_type', HPXML::WaterHeaterTypeTankless)
+    step.setArgument('water_heater_tank_volume', Constants.Auto)
     step.setArgument('water_heater_efficiency_ef', 0.99)
   elsif ['base-dhw-tankless-electric-outside.osw'].include? osw_file
     step.setArgument('water_heater_type', HPXML::WaterHeaterTypeTankless)
     step.setArgument('water_heater_location', HPXML::LocationOtherExterior)
+    step.setArgument('water_heater_tank_volume', Constants.Auto)
     step.setArgument('water_heater_efficiency_ef', 0.99)
   elsif ['base-dhw-tankless-gas.osw'].include? osw_file
     step.setArgument('water_heater_type', HPXML::WaterHeaterTypeTankless)
     step.setArgument('water_heater_fuel_type', HPXML::FuelTypeNaturalGas)
+    step.setArgument('water_heater_tank_volume', Constants.Auto)
     step.setArgument('water_heater_efficiency_ef', 0.82)
   elsif ['base-dhw-tankless-gas-with-solar.osw'].include? osw_file
     step.setArgument('water_heater_type', HPXML::WaterHeaterTypeTankless)
     step.setArgument('water_heater_fuel_type', HPXML::FuelTypeNaturalGas)
+    step.setArgument('water_heater_tank_volume', Constants.Auto)
     step.setArgument('water_heater_efficiency_ef', 0.82)
     step.setArgument('solar_thermal_system_type', 'hot water')
     step.setArgument('solar_thermal_collector_loop_type', HPXML::SolarThermalLoopTypeIndirect)
     step.setArgument('solar_thermal_collector_type', HPXML::SolarThermalTypeSingleGlazing)
     step.setArgument('solar_thermal_collector_rated_optical_efficiency', 0.77)
     step.setArgument('solar_thermal_collector_rated_thermal_losses', 0.793)
+    step.setArgument('solar_thermal_storage_volume', '60')
   elsif ['base-dhw-tankless-gas-with-solar-fraction.osw'].include? osw_file
     step.setArgument('water_heater_type', HPXML::WaterHeaterTypeTankless)
     step.setArgument('water_heater_fuel_type', HPXML::FuelTypeNaturalGas)
+    step.setArgument('water_heater_tank_volume', Constants.Auto)
     step.setArgument('water_heater_efficiency_ef', 0.82)
     step.setArgument('solar_thermal_system_type', 'hot water')
     step.setArgument('solar_thermal_solar_fraction', 0.65)
   elsif ['base-dhw-tankless-oil.osw'].include? osw_file
     step.setArgument('water_heater_type', HPXML::WaterHeaterTypeTankless)
     step.setArgument('water_heater_fuel_type', HPXML::FuelTypeOil)
+    step.setArgument('water_heater_tank_volume', Constants.Auto)
     step.setArgument('water_heater_efficiency_ef', 0.82)
   elsif ['base-dhw-tankless-propane.osw'].include? osw_file
     step.setArgument('water_heater_type', HPXML::WaterHeaterTypeTankless)
     step.setArgument('water_heater_fuel_type', HPXML::FuelTypePropane)
+    step.setArgument('water_heater_tank_volume', Constants.Auto)
     step.setArgument('water_heater_efficiency_ef', 0.82)
   elsif ['base-dhw-tankless-wood.osw'].include? osw_file
     step.setArgument('water_heater_type', HPXML::WaterHeaterTypeTankless)
     step.setArgument('water_heater_fuel_type', HPXML::FuelTypeWood)
+    step.setArgument('water_heater_tank_volume', Constants.Auto)
     step.setArgument('water_heater_efficiency_ef', 0.82)
   elsif ['base-dhw-tank-oil.osw'].include? osw_file
     step.setArgument('water_heater_fuel_type', HPXML::FuelTypeOil)
     step.setArgument('water_heater_tank_volume', '50')
+    step.setArgument('water_heater_heating_capacity', '40000')
     step.setArgument('water_heater_efficiency_ef', 0.59)
   elsif ['base-dhw-tank-propane.osw'].include? osw_file
     step.setArgument('water_heater_fuel_type', HPXML::FuelTypePropane)
     step.setArgument('water_heater_tank_volume', '50')
+    step.setArgument('water_heater_heating_capacity', '40000')
     step.setArgument('water_heater_efficiency_ef', 0.59)
   elsif ['base-dhw-tank-wood.osw'].include? osw_file
     step.setArgument('water_heater_fuel_type', HPXML::FuelTypeWood)
     step.setArgument('water_heater_tank_volume', '50')
+    step.setArgument('water_heater_heating_capacity', '40000')
     step.setArgument('water_heater_efficiency_ef', 0.59)
   elsif ['base-dhw-uef.osw'].include? osw_file
     step.setArgument('water_heater_efficiency_type', 'UniformEnergyFactor')
@@ -878,12 +908,12 @@ def get_values(osw_file, step)
   elsif ['base-enclosure-beds-1.osw'].include? osw_file
     step.setArgument('geometry_num_bedrooms', 1)
     step.setArgument('geometry_num_occupants', '1')
-    step.setArgument('water_heater_heating_capacity', '18.767')
+    step.setArgument('water_heater_heating_capacity', '18767')
     step.setArgument('plug_loads_television_annual_kwh', '482.0')
   elsif ['base-enclosure-beds-2.osw'].include? osw_file
     step.setArgument('geometry_num_bedrooms', 2)
     step.setArgument('geometry_num_occupants', '2')
-    step.setArgument('water_heater_heating_capacity', '18.767')
+    step.setArgument('water_heater_heating_capacity', '18767')
     step.setArgument('plug_loads_television_annual_kwh', '551.0')
   elsif ['base-enclosure-beds-4.osw'].include? osw_file
     step.setArgument('geometry_num_bedrooms', 4)
@@ -1315,16 +1345,22 @@ def get_values(osw_file, step)
     step.setArgument('heating_system_electric_auxiliary_energy', 200.0)
     step.setArgument('cooling_system_type', 'none')
   elsif ['base-location-baltimore-md.osw'].include? osw_file
-    step.setArgument('weather_station_epw_filename', 'USA_MD_Baltimore-Washington.Intl.AP.724060_TMY3.epw')
+    step.setArgument('weather_station_epw_filepath', 'USA_MD_Baltimore-Washington.Intl.AP.724060_TMY3.epw')
   elsif ['base-location-dallas-tx.osw'].include? osw_file
-    step.setArgument('weather_station_epw_filename', 'USA_TX_Dallas-Fort.Worth.Intl.AP.722590_TMY3.epw')
+    step.setArgument('weather_station_epw_filepath', 'USA_TX_Dallas-Fort.Worth.Intl.AP.722590_TMY3.epw')
   elsif ['base-location-duluth-mn.osw'].include? osw_file
-    step.setArgument('weather_station_epw_filename', 'USA_MN_Duluth.Intl.AP.727450_TMY3.epw')
+    step.setArgument('weather_station_epw_filepath', 'USA_MN_Duluth.Intl.AP.727450_TMY3.epw')
+  elsif ['base-location-epw-filepath.osw'].include? osw_file
+  elsif ['base-location-epw-filepath-AMY-2012.osw'].include? osw_file
+    step.setArgument('weather_station_epw_filepath', 'US_CO_Boulder_AMY_2012.epw')
   elsif ['base-location-miami-fl.osw'].include? osw_file
-    step.setArgument('weather_station_epw_filename', 'USA_FL_Miami.Intl.AP.722020_TMY3.epw')
+    step.setArgument('weather_station_epw_filepath', 'USA_FL_Miami.Intl.AP.722020_TMY3.epw')
   elsif ['base-mechvent-balanced.osw'].include? osw_file
     step.setArgument('mech_vent_fan_type', HPXML::MechVentTypeBalanced)
     step.setArgument('mech_vent_fan_power', 60)
+  elsif ['base-mechvent-bath-kitchen-fans.osw'].include? osw_file
+    step.setArgument('kitchen_fan_present', true)
+    step.setArgument('bathroom_fans_present', true)
   elsif ['base-mechvent-cfis.osw'].include? osw_file
     step.setArgument('mech_vent_fan_type', HPXML::MechVentTypeCFIS)
     step.setArgument('mech_vent_flow_rate', 330)
@@ -1362,12 +1398,23 @@ def get_values(osw_file, step)
     step.setArgument('mech_vent_fan_power', 60)
   elsif ['base-mechvent-supply.osw'].include? osw_file
     step.setArgument('mech_vent_fan_type', HPXML::MechVentTypeSupply)
-  elsif ['base-mechvent-bath-kitchen-fans.osw'].include? osw_file
-    step.setArgument('kitchen_fan_present', true)
-    step.setArgument('bathroom_fans_present', true)
   elsif ['base-misc-ceiling-fans.osw'].include? osw_file
     step.setArgument('ceiling_fan_cooling_setpoint_temp_offset', 0.5)
     step.setArgument('ceiling_fan_quantity', 2)
+  elsif ['base-misc-defaults.osw'].include? osw_file
+
+  elsif ['base-misc-defaults2.osw'].include? osw_file
+    step.setArgument('water_heater_location', Constants.Auto)
+    step.setArgument('water_heater_tank_volume', Constants.Auto)
+    step.setArgument('water_heater_efficiency_type', 'UniformEnergyFactor')
+    step.setArgument('water_heater_heating_capacity', Constants.Auto)
+    step.setArgument('water_heater_setpoint_temperature', Constants.Auto)
+    step.setArgument('dhw_distribution_system_type', HPXML::DHWDistTypeRecirc)
+    step.setArgument('dhw_distribution_recirc_control_type', HPXML::DHWRecirControlTypeSensor)
+    step.setArgument('dhw_distribution_recirc_piping_length', Constants.Auto)
+    step.setArgument('dhw_distribution_recirc_branch_piping_length', Constants.Auto)
+    step.setArgument('dhw_distribution_recirc_pump_power', Constants.Auto)
+    step.setArgument('dhw_distribution_pipe_r', 3)
   elsif ['base-misc-neighbor-shading.osw'].include? osw_file
     step.setArgument('neighbor_back_distance', 10)
     step.setArgument('neighbor_front_distance', 15)
@@ -1993,6 +2040,8 @@ def set_hpxml_climate_and_risk_zones(hpxml_file, hpxml)
     hpxml.climate_and_risk_zones.weather_station_wmo = nil
     hpxml.climate_and_risk_zones.weather_station_epw_filepath = 'USA_CO_Denver.Intl.AP.725650_TMY3.epw'
   elsif ['base-location-epw-filepath-AMY-2012.xml'].include? hpxml_file
+    hpxml.climate_and_risk_zones.iecc_year = nil
+    hpxml.climate_and_risk_zones.iecc_zone = nil
     hpxml.climate_and_risk_zones.weather_station_wmo = nil
     hpxml.climate_and_risk_zones.weather_station_name = 'Boulder, CO'
     hpxml.climate_and_risk_zones.weather_station_epw_filepath = 'US_CO_Boulder_AMY_2012.epw'

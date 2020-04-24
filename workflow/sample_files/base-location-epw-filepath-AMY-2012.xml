@@ -39,10 +39,6 @@
         </BuildingConstruction>
       </BuildingSummary>
       <ClimateandRiskZones>
-        <ClimateZoneIECC>
-          <Year>2006</Year>
-          <ClimateZone>5B</ClimateZone>
-        </ClimateZoneIECC>
         <WeatherStation>
           <SystemIdentifier id='WeatherStation'/>
           <Name>Boulder, CO</Name>
