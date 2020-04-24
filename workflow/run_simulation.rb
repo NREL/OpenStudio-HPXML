@@ -144,7 +144,7 @@ OptionParser.new do |opts|
   end
 
   options[:hourly_outputs] = []
-  opts.on('--hourly TYPE', hourly_types, "Request hourly output type (#{hourly_types[0..3].join(', ')}", "#{hourly_types[4..-1].join(', ')}); can be called multiple times") do |t|
+  opts.on('--hourly TYPE', hourly_types, "Request hourly output type (#{hourly_types[0..3].join(', ')},", "#{hourly_types[4..-1].join(', ')}); can be called multiple times") do |t|
     options[:hourly_outputs] << t
   end
 
