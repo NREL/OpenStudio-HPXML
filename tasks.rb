@@ -224,6 +224,7 @@ def create_hpxmls
     'base-mechvent-bath-kitchen-fans.xml' => 'base.xml',
     'base-misc-ceiling-fans.xml' => 'base.xml',
     'base-misc-defaults.xml' => 'base.xml',
+    'base-misc-defaults2.xml' => 'base-dhw-recirc-demand.xml',
     'base-misc-lighting-none.xml' => 'base.xml',
     'base-misc-timestep-10-mins.xml' => 'base.xml',
     'base-misc-runperiod-1-month.xml' => 'base.xml',
@@ -2565,7 +2566,7 @@ def set_hpxml_water_heating_systems(hpxml_file, hpxml)
                                     fraction_dhw_load_served: 1,
                                     heating_capacity: 18767,
                                     energy_factor: 0.95,
-                                    temperature: 125)
+                                    temperature: Waterheater.get_default_hot_water_temperature(Constants.ERIVersions[-1]))
   elsif ['base-dhw-multiple.xml'].include? hpxml_file
     hpxml.water_heating_systems[0].fraction_dhw_load_served = 0.2
     hpxml.water_heating_systems.add(id: 'WaterHeater2',
@@ -2577,7 +2578,7 @@ def set_hpxml_water_heating_systems(hpxml_file, hpxml)
                                     heating_capacity: 40000,
                                     energy_factor: 0.59,
                                     recovery_efficiency: 0.76,
-                                    temperature: 125)
+                                    temperature: Waterheater.get_default_hot_water_temperature(Constants.ERIVersions[-1]))
     hpxml.water_heating_systems.add(id: 'WaterHeater3',
                                     fuel_type: HPXML::FuelTypeElectricity,
                                     water_heater_type: HPXML::WaterHeaterTypeHeatPump,
@@ -2585,28 +2586,28 @@ def set_hpxml_water_heating_systems(hpxml_file, hpxml)
                                     tank_volume: 80,
                                     fraction_dhw_load_served: 0.2,
                                     energy_factor: 2.3,
-                                    temperature: 125)
+                                    temperature: Waterheater.get_default_hot_water_temperature(Constants.ERIVersions[-1]))
     hpxml.water_heating_systems.add(id: 'WaterHeater4',
                                     fuel_type: HPXML::FuelTypeElectricity,
                                     water_heater_type: HPXML::WaterHeaterTypeTankless,
                                     location: HPXML::LocationLivingSpace,
                                     fraction_dhw_load_served: 0.2,
                                     energy_factor: 0.99,
-                                    temperature: 125)
+                                    temperature: Waterheater.get_default_hot_water_temperature(Constants.ERIVersions[-1]))
     hpxml.water_heating_systems.add(id: 'WaterHeater5',
                                     fuel_type: HPXML::FuelTypeNaturalGas,
                                     water_heater_type: HPXML::WaterHeaterTypeTankless,
                                     location: HPXML::LocationLivingSpace,
                                     fraction_dhw_load_served: 0.1,
                                     energy_factor: 0.82,
-                                    temperature: 125)
+                                    temperature: Waterheater.get_default_hot_water_temperature(Constants.ERIVersions[-1]))
     hpxml.water_heating_systems.add(id: 'WaterHeater6',
                                     water_heater_type: HPXML::WaterHeaterTypeCombiStorage,
                                     location: HPXML::LocationLivingSpace,
                                     tank_volume: 50,
                                     fraction_dhw_load_served: 0.1,
                                     related_hvac_idref: 'HeatingSystem',
-                                    temperature: 125)
+                                    temperature: Waterheater.get_default_hot_water_temperature(Constants.ERIVersions[-1]))
   elsif ['invalid_files/dhw-frac-load-served.xml'].include? hpxml_file
     hpxml.water_heating_systems[0].fraction_dhw_load_served += 0.15
   elsif ['base-dhw-tank-gas.xml',
@@ -2761,13 +2762,16 @@ def set_hpxml_water_heating_systems(hpxml_file, hpxml)
     hpxml.water_heating_systems[0].location = HPXML::LocationGarage
   elsif ['base-dhw-none.xml'].include? hpxml_file
     hpxml.water_heating_systems.clear()
-  end
-  hpxml.water_heating_systems.each do |water_heating_system|
-    if ['base-misc-defaults.xml'].include? hpxml_file
-      water_heating_system.temperature = nil
-      water_heating_system.location = nil
-    else
-      water_heating_system.temperature = Waterheater.get_default_hot_water_temperature(Constants.ERIVersions[-1])
+  elsif ['base-misc-defaults.xml',
+         'base-misc-defaults2.xml'].include? hpxml_file
+    hpxml.water_heating_systems[0].temperature = nil
+    hpxml.water_heating_systems[0].location = nil
+    hpxml.water_heating_systems[0].heating_capacity = nil
+    hpxml.water_heating_systems[0].tank_volume = nil
+    hpxml.water_heating_systems[0].recovery_efficiency = nil
+    if hpxml_file == 'base-misc-defaults2.xml'
+      hpxml.water_heating_systems[0].energy_factor = nil
+      hpxml.water_heating_systems[0].uniform_energy_factor = 0.93
     end
   end
 end
@@ -2818,6 +2822,10 @@ def set_hpxml_hot_water_distribution(hpxml_file, hpxml)
     hpxml.hot_water_distributions.clear()
   elsif ['base-misc-defaults.xml'].include? hpxml_file
     hpxml.hot_water_distributions[0].standard_piping_length = nil
+  elsif ['base-misc-defaults2.xml'].include? hpxml_file
+    hpxml.hot_water_distributions[0].recirculation_piping_length = nil
+    hpxml.hot_water_distributions[0].recirculation_branch_piping_length = nil
+    hpxml.hot_water_distributions[0].recirculation_pump_power = nil
   end
 end
 
@@ -2857,6 +2865,7 @@ def set_hpxml_solar_thermal_system(hpxml_file, hpxml)
          'base-dhw-solar-thermosyphon-flat-plate.xml',
          'base-dhw-tank-heat-pump-with-solar.xml',
          'base-dhw-tankless-gas-with-solar.xml',
+         'base-misc-defaults.xml',
          'invalid_files/solar-thermal-system-with-combi-tankless.xml',
          'invalid_files/solar-thermal-system-with-desuperheater.xml',
          'invalid_files/solar-thermal-system-with-dhw-indirect.xml'].include? hpxml_file
@@ -2874,6 +2883,9 @@ def set_hpxml_solar_thermal_system(hpxml_file, hpxml)
       hpxml.solar_thermal_systems[0].collector_loop_type = HPXML::SolarThermalLoopTypeDirect
     elsif hpxml_file == 'base-dhw-solar-thermosyphon-flat-plate.xml'
       hpxml.solar_thermal_systems[0].collector_loop_type = HPXML::SolarThermalLoopTypeThermosyphon
+    elsif hpxml_file == 'base-misc-defaults.xml'
+      hpxml.solar_thermal_systems[0].collector_loop_type = HPXML::SolarThermalLoopTypeDirect
+      hpxml.solar_thermal_systems[0].storage_volume = nil
     else
       hpxml.solar_thermal_systems[0].collector_loop_type = HPXML::SolarThermalLoopTypeIndirect
     end

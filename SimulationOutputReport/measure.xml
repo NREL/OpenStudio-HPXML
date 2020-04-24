@@ -2,8 +2,8 @@
   <schema_version>3.0</schema_version>
   <name>simulation_output_report</name>
   <uid>df9d170c-c21a-4130-866d-0d46b06073fd</uid>
-  <version_id>91a2ca57-a30c-4347-91fd-b815a6d1f682</version_id>
-  <version_modified>20200423T150856Z</version_modified>
+  <version_id>18d07dac-7e5c-4100-a917-8039f9047e65</version_id>
+  <version_modified>20200424T181255Z</version_modified>
   <xml_checksum>9BF1E6AC</xml_checksum>
   <class_name>SimulationOutputReport</class_name>
   <display_name>HPXML Simulation Output Report</display_name>
@@ -79,6 +79,25 @@
       <name>include_timeseries_end_use_consumptions</name>
       <display_name>Generate Timeseries Output: End Use Consumptions</display_name>
       <description>Generates timeseries energy consumptions for each end use.</description>
+      <type>Boolean</type>
+      <required>true</required>
+      <model_dependent>false</model_dependent>
+      <default_value>false</default_value>
+      <choices>
+        <choice>
+          <value>true</value>
+          <display_name>true</display_name>
+        </choice>
+        <choice>
+          <value>false</value>
+          <display_name>false</display_name>
+        </choice>
+      </choices>
+    </argument>
+    <argument>
+      <name>include_timeseries_hot_water_uses</name>
+      <display_name>Generate Timeseries Output: Hot Water Uses</display_name>
+      <description>Generates timeseries hot water usages for each end use.</description>
       <type>Boolean</type>
       <required>true</required>
       <model_dependent>false</model_dependent>
@@ -476,7 +495,7 @@
       <filename>constants.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>55D54003</checksum>
+      <checksum>CE3C849E</checksum>
     </file>
     <file>
       <version>
@@ -487,13 +506,13 @@
       <filename>measure.rb</filename>
       <filetype>rb</filetype>
       <usage_type>script</usage_type>
-      <checksum>47C8150F</checksum>
+      <checksum>94545E5E</checksum>
     </file>
     <file>
       <filename>output_report_test.rb</filename>
       <filetype>rb</filetype>
       <usage_type>test</usage_type>
-      <checksum>800B0C65</checksum>
+      <checksum>A66B95EE</checksum>
     </file>
   </files>
 </measure>

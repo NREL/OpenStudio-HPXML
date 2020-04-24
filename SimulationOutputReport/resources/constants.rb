@@ -34,6 +34,14 @@ class EUT
   PV = 'PV'
 end
 
+class HWT
+  # Hot Water Types
+  ClothesWasher = 'Clothes Washer'
+  Dishwasher = 'Dishwasher'
+  Fixtures = 'Fixtures'
+  DistributionWaste = 'Distribution Waste'
+end
+
 class LT
   # Load Types
   Heating = 'Heating'
