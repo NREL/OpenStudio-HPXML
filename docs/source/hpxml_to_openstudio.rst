@@ -520,8 +520,8 @@ WaterHeaterType                           UniformEnergyFactor or EnergyFactor  F
 storage water heater                      required                             <any>        required    <optional>       required if non-electric  <optional for desuperheater>  <optional>         <optional>
 instantaneous water heater                required                             <any>                                                               <optional for desuperheater>  <optional>
 heat pump water heater                    required                             electricity  required                                               <optional for desuperheater>  <optional>         <optional>
-space-heating boiler with storage tank                                                      required                                               required                                         <optional>
-space-heating boiler with tankless coil                                                                                                            required           
+space-heating boiler with storage tank                                                      required                                               required for boiler                              <optional>
+space-heating boiler with tankless coil                                                                                                            required for boiler
 ========================================  ===================================  ===========  ==========  ===============  ========================  ============================  =================  =========================================
 
 For tankless water heaters, an annual energy derate due to cycling inefficiencies can be provided.
