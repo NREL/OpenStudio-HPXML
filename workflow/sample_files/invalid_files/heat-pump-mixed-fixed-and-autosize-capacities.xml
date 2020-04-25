@@ -297,7 +297,6 @@
               <DistributionSystem idref='HVACDistribution'/>
               <HeatPumpType>air-to-air</HeatPumpType>
               <HeatPumpFuel>electricity</HeatPumpFuel>
-              <HeatingCapacity>-1.0</HeatingCapacity>
               <HeatingCapacity17F>26460.0</HeatingCapacity17F>
               <CoolingCapacity>48000.0</CoolingCapacity>
               <CompressorType>single stage</CompressorType>
