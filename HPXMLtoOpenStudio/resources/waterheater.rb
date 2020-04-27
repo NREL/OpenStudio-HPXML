@@ -298,7 +298,7 @@ class Waterheater
     tank.setSourceSideOutletHeight(0)
     loop.addSupplyBranchForComponent(tank)
     if not desuperheater_clg_coil.nil?
-      dhw_map[sys_id] << add_desuperheater(model, t_set, tank, desuperheater_clg_coil, space, loop)
+      dhw_map[sys_id] << add_desuperheater(model, t_set, tank, desuperheater_clg_coil, space, loc_schedule, loop)
     end
     dhw_map[sys_id] << tank
 
