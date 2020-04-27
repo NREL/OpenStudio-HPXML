@@ -1000,7 +1000,8 @@ class HPXML < Object
             XMLHelper.add_element(ventilation_rate, 'Value', Float(@vented_attic_sla))
           end
           if not @vented_attic_constant_ach.nil?
-            XMLHelper.add_element(attic, 'extension/ConstantACHnatural', Float(@vented_attic_constant_ach))
+            HPXML::add_extension(parent: attic,
+                                 extensions: { 'ConstantACHnatural' => Float(@vented_attic_constant_ach) })
           end
         elsif @attic_type == AtticTypeConditioned
           attic_type_attic = XMLHelper.add_element(attic_type_e, 'Attic')
@@ -4010,8 +4011,10 @@ class HPXML < Object
           next unless match
 
           # Update values
-          surf.area += surf2.area
-          if surf_type == :slabs
+          if (not surf.area.nil?) && (not surf2.area.nil?)
+            surf.area += surf2.area
+          end
+          if (surf_type == :slabs) && (not surf.exposed_perimeter.nil?) && (not surf2.exposed_perimeter.nil?)
             surf.exposed_perimeter += surf2.exposed_perimeter
           end
 
@@ -4167,13 +4170,11 @@ class HPXML < Object
   end
 
   def self.get_id(parent, element_name = 'SystemIdentifier')
-    return XMLHelper.get_element(parent, element_name).get('id')
+    return XMLHelper.get_attribute_value(XMLHelper.get_element(parent, element_name), 'id')
   end
 
   def self.get_idref(element)
-    return if element.nil?
-
-    return element.get('idref')
+    return XMLHelper.get_attribute_value(element, 'idref')
   end
 
   def self.to_float_or_nil(value)
