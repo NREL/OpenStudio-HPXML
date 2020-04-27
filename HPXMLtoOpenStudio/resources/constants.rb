@@ -225,6 +225,10 @@ class Constants
     return 'dishwasher'
   end
 
+  def self.ObjectNameDistributionWaste
+    return 'dhw distribution waste'
+  end
+
   def self.ObjectNameDucts
     return 'ducts'
   end
@@ -371,6 +375,10 @@ class Constants
 
   def self.ObjectNameUnitHeater
     return 'unit heater'
+  end
+
+  def self.ObjectNameWater
+    return 'water'
   end
 
   def self.ObjectNameWaterHeater
