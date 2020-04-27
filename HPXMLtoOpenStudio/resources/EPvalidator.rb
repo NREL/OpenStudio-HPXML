@@ -799,7 +799,6 @@ class EnergyPlusValidator
   end
 
   def self.update_leading_predicates(str)
-    # Workaround bug in REXML; See https://github.com/ruby/rexml/issues/27
     # Examples:
     #   "[foo='1' or foo='2']" => "(self::node()[foo='1' or foo='2'])"
     #   "[foo] | bar" => "(self::node()[foo]) | bar"
