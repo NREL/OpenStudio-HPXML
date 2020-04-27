@@ -27,9 +27,9 @@ class BuildResidentialHPXMLTest < MiniTest::Test
       Dir["#{test_dir}/base*.osw"].sort.each do |osw|
         osws << File.absolute_path(osw)
       end
-      # Dir["#{test_dir}/extra*.osw"].sort.each do |osw|
-      # osws << File.absolute_path(osw)
-      # end
+      Dir["#{test_dir}/extra*.osw"].sort.each do |osw|
+        osws << File.absolute_path(osw)
+      end
     end
 
     workflow_dir = File.expand_path(File.join(File.dirname(__FILE__), '../../workflow/sample_files'))
@@ -178,7 +178,7 @@ class BuildResidentialHPXMLTest < MiniTest::Test
       hpxml.building_occupancy.schedules_column_name = nil
       hpxml.climate_and_risk_zones.weather_station_name = nil
       hpxml.climate_and_risk_zones.weather_station_wmo = nil
-      hpxml.climate_and_risk_zones.weather_station_epw_filename = nil
+      hpxml.climate_and_risk_zones.weather_station_epw_filepath = nil
       hpxml.building_construction.average_ceiling_height = nil # Comparing conditioned volume instead
       hpxml.attics.each do |attic|
         attic.vented_attic_sla = nil # Defaulting in measure
