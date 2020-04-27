@@ -466,8 +466,8 @@ class HEScoreRulesetTest < MiniTest::Test
   def _test_schema_validation(parent_dir, xml)
     # TODO: Remove this when schema validation is included with CLI calls
     schemas_dir = File.absolute_path(File.join(parent_dir, '..', '..', '..', 'hpxml-measures', 'HPXMLtoOpenStudio', 'resources'))
-    hpxml_doc = REXML::Document.new(File.read(xml))
-    errors = XMLHelper.validate(hpxml_doc.to_s, File.join(schemas_dir, 'HPXML.xsd'), nil)
+    hpxml_doc = XMLHelper.parse_file(xml)
+    errors = XMLHelper.validate(hpxml_doc.to_xml, File.join(schemas_dir, 'HPXML.xsd'), nil)
     if errors.size > 0
       puts "#{xml}: #{errors}"
     end
