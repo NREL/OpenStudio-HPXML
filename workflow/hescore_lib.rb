@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 # Map between HES resource_type and HES units
 def get_units_map
   return { 'electric' => 'kWh',

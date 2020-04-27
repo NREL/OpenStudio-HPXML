@@ -75,7 +75,7 @@ class HEScoreMeasure < OpenStudio::Measure::ModelMeasure
 
     # Write new HPXML file
     if hpxml_output_path.is_initialized
-      XMLHelper.write_file(new_hpxml.to_rexml, hpxml_output_path.get)
+      XMLHelper.write_file(new_hpxml.to_oga, hpxml_output_path.get)
       runner.registerInfo("Wrote file: #{hpxml_output_path.get}")
     end
 

@@ -7,7 +7,7 @@ An OpenStudio/EnergyPlus simulation workflow that operates on a HPXML file produ
 
 ## Setup
 
-1. Either download [OpenStudio 2.9.1](https://github.com/NREL/OpenStudio/releases/tag/v2.9.1) (at a minimum, install the Command Line Interface and EnergyPlus components) or use the [nrel/openstudio docker image](https://hub.docker.com/r/nrel/openstudio).
+1. Either download [OpenStudio 3.0.0](https://github.com/NREL/OpenStudio/releases/tag/v3.0.0) (at a minimum, install the Command Line Interface and EnergyPlus components) or use the [nrel/openstudio docker image](https://hub.docker.com/r/nrel/openstudio).
 2. Clone or download this repository's source code. 
 3. To obtain all available weather files, run:  
 ```openstudio workflow/run_simulation.rb --download-weather``` 
@@ -15,7 +15,7 @@ An OpenStudio/EnergyPlus simulation workflow that operates on a HPXML file produ
 ## Running
 
 Run the HEScore simulation on a provided sample HPXML file:  
-```openstudio --no-ssl workflow/run_simulation.rb -x workflow/sample_files/Base_hpxml.xml```  
+```openstudio workflow/run_simulation.rb -x workflow/sample_files/Base_hpxml.xml```  
 
 Run `openstudio workflow/run_simulation.rb -h` to see all available commands/arguments.
 

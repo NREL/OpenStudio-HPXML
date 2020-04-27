@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 start_time = Time.now
 
 require 'fileutils'
@@ -67,6 +69,7 @@ def run_design(basedir, rundir, design, resultsdir, hpxml, debug, skip_simulatio
     args['include_timeseries_zone_temperatures'] = false
     args['include_timeseries_fuel_consumptions'] = false
     args['include_timeseries_end_use_consumptions'] = true
+    args['include_timeseries_hot_water_uses'] = false
     args['include_timeseries_total_loads'] = false
     args['include_timeseries_component_loads'] = false
     update_args_hash(measures, measure_subdir, args)
@@ -155,7 +158,7 @@ def run_design(basedir, rundir, design, resultsdir, hpxml, debug, skip_simulatio
         next if col == 0 # Skip time column
         next if row_index.values.include? col
 
-        fail "Missed energy (#{val}) in row=#{row_num}, col=#{col}." if Float(val) > 0
+        fail "Missed value (#{val}) in row=#{row_num}, col=#{col}." if Float(val) > 0
       end
     end
   end
@@ -192,9 +195,10 @@ def run_design(basedir, rundir, design, resultsdir, hpxml, debug, skip_simulatio
       data['end_use'] << end_use
     end
   end
-
+  
+  require 'json'
   File.open(File.join(resultsdir, 'results.json'), 'w') do |f|
-    f.write(data.to_s.gsub('=>', ':')) # Much faster than requiring JSON to use pretty_generate
+    f.write(JSON.pretty_generate(data))
   end
 end
 
@@ -334,7 +338,7 @@ unless File.exist?(options[:hpxml]) && options[:hpxml].downcase.end_with?('.xml'
 end
 
 # Check for correct versions of OS
-os_version = '2.9.1'
+os_version = '3.0.0'
 if OpenStudio.openStudioVersion != os_version
   fail "OpenStudio version #{os_version} is required."
 end

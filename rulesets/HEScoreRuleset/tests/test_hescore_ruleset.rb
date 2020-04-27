@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require_relative '../../../hpxml-measures/HPXMLtoOpenStudio/resources/minitest_helper'
 require_relative '../../../hpxml-measures/HPXMLtoOpenStudio/resources/xmlhelper.rb'
 require_relative '../resources/HESruleset.rb'

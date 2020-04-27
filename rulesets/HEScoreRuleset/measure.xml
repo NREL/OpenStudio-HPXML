@@ -1,9 +1,10 @@
+<?xml version="1.0"?>
 <measure>
   <schema_version>3.0</schema_version>
   <name>he_score_measure</name>
   <uid>013ca589-73ab-451f-afae-dbeb5304dea8</uid>
-  <version_id>e5de2eca-2553-49e6-be70-0509065c5cbe</version_id>
-  <version_modified>20200414T051358Z</version_modified>
+  <version_id>18511401-11ba-47f7-bd8d-8cbe056b8b99</version_id>
+  <version_modified>20200427T185855Z</version_modified>
   <xml_checksum>2AF3A68E</xml_checksum>
   <class_name>HEScoreMeasure</class_name>
   <display_name>Apply Home Energy Score Ruleset</display_name>
@@ -27,8 +28,8 @@
       <model_dependent>false</model_dependent>
     </argument>
   </arguments>
-  <outputs/>
-  <provenances/>
+  <outputs />
+  <provenances />
   <tags>
     <tag>Envelope.Form</tag>
   </tags>
@@ -94,19 +95,19 @@
       <filename>measure.rb</filename>
       <filetype>rb</filetype>
       <usage_type>script</usage_type>
-      <checksum>28C29156</checksum>
+      <checksum>73D57FA1</checksum>
     </file>
     <file>
       <filename>test_hescore_ruleset.rb</filename>
       <filetype>rb</filetype>
       <usage_type>test</usage_type>
-      <checksum>63B32F4B</checksum>
+      <checksum>79EF4776</checksum>
     </file>
     <file>
       <filename>HESruleset.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>D38B1297</checksum>
+      <checksum>9FC6D50D</checksum>
     </file>
   </files>
 </measure>
