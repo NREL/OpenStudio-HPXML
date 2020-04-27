@@ -4,8 +4,6 @@
 # http://nrel.github.io/OpenStudio-user-documentation/reference/measure_writing_guide/
 
 require 'openstudio'
-require 'rexml/document'
-require 'rexml/xpath'
 require 'pathname'
 require_relative 'resources/HESruleset'
 require_relative '../../hpxml-measures/HPXMLtoOpenStudio/resources/xmlhelper'

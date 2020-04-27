@@ -9,7 +9,6 @@ require 'openstudio/ruleset/ShowRunnerOutput'
 require 'minitest/autorun'
 require_relative '../measure.rb'
 require 'fileutils'
-require 'rexml/xpath'
 
 class HEScoreRulesetTest < MiniTest::Test
   def test_sample_files
@@ -475,40 +474,40 @@ class HEScoreRulesetTest < MiniTest::Test
   end
 
   def _test_assembly_effective_rvalues(args_hash)
-    in_doc = REXML::Document.new(File.read(args_hash['hpxml_path']))
-    out_doc = REXML::Document.new(File.read(args_hash['hpxml_output_path']))
+    in_doc = XMLHelper.parse_file(args_hash['hpxml_path'])
+    out_doc = XMLHelper.parse_file(args_hash['hpxml_output_path'])
 
     wall_code_by_id = {}
-    in_doc.elements.each('HPXML/Building/BuildingDetails/Enclosure/Walls/Wall') do |wall|
+    XMLHelper.get_elements(in_doc, 'HPXML/Building/BuildingDetails/Enclosure/Walls/Wall') do |wall|
       wall_code = XMLHelper.get_value(wall, 'extension/hescore_wall_code')
-      wallid = wall.elements['SystemIdentifier'].attribute('id').value
+      wallid = XMLHelper.get_element(wall, 'SystemIdentifier').get('id')
       wall_code_by_id[wallid] = wall_code
     end
 
-    out_doc.elements.each('HPXML/Building/BuildingDetails/Enclosure/Walls/Wall') do |wall|
+    XMLHelper.get_elements(out_doc, 'HPXML/Building/BuildingDetails/Enclosure/Walls/Wall') do |wall|
       eff_rvalue = Float(XMLHelper.get_value(wall, 'Insulation/AssemblyEffectiveRValue'))
-      wallid = wall.elements['SystemIdentifier'].attribute('id').value
+      wallid = XMLHelper.get_element(wall, 'SystemIdentifier').get('id')
       next if wall_code_by_id[wallid].nil?
 
       assert_in_epsilon(eff_rvalue, get_wall_effective_r_from_doe2code(wall_code_by_id[wallid]), 0.01)
     end
 
     roof_code_by_id = {}
-    in_doc.elements.each('HPXML/Building/BuildingDetails/Enclosure/Roofs/Roof') do |roof|
-      roofid = roof.elements['SystemIdentifier'].attribute('id').value
+    XMLHelper.get_elements(in_doc, 'HPXML/Building/BuildingDetails/Enclosure/Roofs/Roof') do |roof|
+      roofid = XMLHelper.get_element(roof, 'SystemIdentifier').get('id')
       roof_code_by_id[roofid] = XMLHelper.get_value(roof, 'extension/roof_assembly_code')
     end
 
-    out_doc.elements.each('HPXML/Building/BuildingDetails/Enclosure/Roofs/Roof') do |roof|
-      roofid = roof.elements['SystemIdentifier'].attribute('id').value
+    XMLHelper.get_elements(out_doc, 'HPXML/Building/BuildingDetails/Enclosure/Roofs/Roof') do |roof|
+      roofid = XMLHelper.get_element(roof, 'SystemIdentifier').get('id')
       eff_rvalue = Float(XMLHelper.get_value(roof, 'Insulation/AssemblyEffectiveRValue'))
       assert_in_epsilon(eff_rvalue, get_roof_effective_r_from_doe2code(roof_code_by_id[roofid.split('_')[0]]), 0.01)
     end
   end
 
   def _test_conditioned_building_volume(args_hash)
-    in_doc = REXML::Document.new(File.read(args_hash['hpxml_path']))
-    out_doc = REXML::Document.new(File.read(args_hash['hpxml_output_path']))
+    in_doc = XMLHelper.parse_file(args_hash['hpxml_path'])
+    out_doc = XMLHelper.parse_file(args_hash['hpxml_output_path'])
 
     cfa = Float(XMLHelper.get_value(in_doc, 'HPXML/Building/BuildingDetails/BuildingSummary/BuildingConstruction/ConditionedFloorArea'))
     ceil_height = Float(XMLHelper.get_value(in_doc, 'HPXML/Building/BuildingDetails/BuildingSummary/BuildingConstruction/AverageCeilingHeight'))

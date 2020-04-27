@@ -130,7 +130,7 @@ class HEScoreTest < Minitest::Unit::TestCase
   end
 
   def _test_results(xml, results)
-    hpxml_doc = REXML::Document.new(File.read(xml))
+    hpxml = HPXML.new(hpxml_path: xml)
 
     fuel_map = { HPXML::FuelTypeElectricity => 'electric',
                  HPXML::FuelTypeNaturalGas => 'natural_gas',
@@ -139,38 +139,35 @@ class HEScoreTest < Minitest::Unit::TestCase
                  HPXML::FuelTypeWood => 'cord_wood',
                  HPXML::FuelTypeWoodPellets => 'pellet_wood' }
 
-    # Get HPXML values for Building Summary
-    cfa = Float(XMLHelper.get_value(hpxml_doc, '/HPXML/Building/BuildingDetails/BuildingSummary/BuildingConstruction/ConditionedFloorArea'))
-    nbr = Float(XMLHelper.get_value(hpxml_doc, '/HPXML/Building/BuildingDetails/BuildingSummary/BuildingConstruction/NumberofBedrooms'))
+    # Get HPXML values for Building Construction
+    cfa = hpxml.building_construction.conditioned_floor_area
+    nbr = hpxml.building_construction.number_of_bedrooms
 
     # Get HPXML values for HVAC
-    hvac_plant = hpxml_doc.elements['/HPXML/Building/BuildingDetails/Systems/HVAC/HVACPlant']
     htg_fuels = []
-    hvac_plant.elements.each('HeatingSystem[FractionHeatLoadServed>0]') do |htg_sys|
-      htg_fuels << fuel_map[XMLHelper.get_value(htg_sys, 'HeatingSystemFuel')]
-      if !htg_sys.elements['HeatingSystemType/Furnace'].nil? || !htg_sys.elements['HeatingSystemType/Boiler'].nil?
-        htg_fuels << fuel_map['electricity'] # fan/pump
+    hpxml.heating_systems.each do |heating_system|
+      next unless heating_system.fraction_heat_load_served > 0
+      htg_fuels << fuel_map[heating_system.heating_system_fuel]
+      if [HPXML::HVACTypeFurnace, HPXML::HVACTypeBoiler].include? heating_system.heating_system_type
+        htg_fuels << fuel_map[HPXML::FuelTypeElectricity] # fan/pump
       end
     end
-    hvac_plant.elements.each('HeatPump[FractionHeatLoadServed>0]') do |hp|
-      htg_fuels << fuel_map['electricity']
+    hpxml.heat_pumps.each do |heat_pump|
+      next unless heat_pump.fraction_heat_load_served > 0
+      htg_fuels << fuel_map[HPXML::FuelTypeElectricity]
     end
-    has_clg = !hvac_plant.elements['CoolingSystem[FractionCoolLoadServed>0] | HeatPump[FractionCoolLoadServed>0]'].nil?
+    has_clg = (hpxml.cooling_systems.select { |c| c.fraction_cool_load_served > 0 }.size > 0)
 
     # Get HPXML values for Water Heating
     hw_fuels = []
-    hpxml_doc.elements.each('/HPXML/Building/BuildingDetails/Systems/WaterHeating/WaterHeatingSystem') do |hw_sys|
-      hw_fuels << fuel_map[XMLHelper.get_value(hw_sys, 'FuelType')]
-      hw_type = XMLHelper.get_value(hw_sys, 'WaterHeaterType')
-      next unless hw_type.include?('boiler')
-      hpxml_doc.elements.each('/HPXML/Building/BuildingDetails/Systems/HVAC/HVACPlant/HeatingSystem') do |htg_sys|
-        next unless hw_sys.elements['RelatedHVACSystem'].attributes['idref'] == htg_sys.elements['SystemIdentifier'].attributes['id']
-        hw_fuels << fuel_map[XMLHelper.get_value(htg_sys, 'HeatingSystemFuel')]
-      end
+    hpxml.water_heating_systems.each do |water_heater|
+      hw_fuels << fuel_map[water_heater.fuel_type]
+      next unless [HPXML::WaterHeaterTypeCombiStorage, HPXML::WaterHeaterTypeCombiTankless].include? water_heater.water_heater_type
+      hw_fuels << fuel_map[water_heater.related_hvac_system.heating_system_fuel]
     end
 
     # Get HPXML values for PV
-    has_pv = !hpxml_doc.elements['/HPXML/Building/BuildingDetails/Systems/Photovoltaics/PVSystem'].nil?
+    has_pv = (hpxml.pv_systems.size > 0)
 
     tested_end_uses = []
     results.each do |key, value|
@@ -284,7 +281,7 @@ class HEScoreTest < Minitest::Unit::TestCase
   def _test_schema_validation(parent_dir, xml, schemas_dir)
     # TODO: Remove this when schema validation is included with CLI calls
     hpxml_doc = XMLHelper.parse_file(xml)
-    errors = XMLHelper.validate(hpxml_doc.to_s, File.join(schemas_dir, 'HPXML.xsd'), nil)
+    errors = XMLHelper.validate(hpxml_doc.to_xml, File.join(schemas_dir, 'HPXML.xsd'), nil)
     if errors.size > 0
       puts "#{xml}: #{errors}"
     end
