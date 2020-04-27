@@ -60,7 +60,7 @@ class Waterheater
 
     act_vol = 1.0
     u, ua, eta_c = calc_tank_UA(act_vol, fuel_type, ef, nil, cap, HPXML::WaterHeaterTypeTankless, cd, nil, solar_fraction)
-    new_heater = create_new_heater(name: Constants.ObjectNameWaterHeater, cap: cap, fuel: fuel_type, act_vol: act_vol, t_set: t_set, space: space, loc_schedule: loc_schedule,  wh_type: HPXML::WaterHeaterTypeTankless, model: model, ua: ua, eta_c: eta_c, ef: ef)
+    new_heater = create_new_heater(name: Constants.ObjectNameWaterHeater, cap: cap, fuel: fuel_type, act_vol: act_vol, t_set: t_set, space: space, loc_schedule: loc_schedule, wh_type: HPXML::WaterHeaterTypeTankless, model: model, ua: ua, eta_c: eta_c, ef: ef)
     set_parasitic_power_for_tankless_wh(nbeds: nbeds, water_heater: new_heater)
     dhw_map[sys_id] << new_heater
 
