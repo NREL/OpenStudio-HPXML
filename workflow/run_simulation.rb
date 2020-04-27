@@ -167,7 +167,7 @@ OptionParser.new do |opts|
 end.parse!
 
 if options[:version]
-  workflow_version = '0.8.0'
+  workflow_version = '0.9.0'
   puts "OpenStudio-HPXML v#{workflow_version}"
   exit!
 end
