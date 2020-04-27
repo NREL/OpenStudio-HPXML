@@ -4326,7 +4326,8 @@ class OSModel
       otherside_object = OpenStudio::Model::SurfacePropertyOtherSideCoefficients.new(model)
       otherside_object.setName(exterior_adjacent_to)
       # Assume to directly apply to surface outside temperature
-      otherside_object.setCombinedConvectiveRadiativeFilmCoefficient(0)
+      # Refer to: https://www.sciencedirect.com/science/article/pii/B9780123972705000066 6.1.2 Part: Wall and roof transfer functions
+      otherside_object.setCombinedConvectiveRadiativeFilmCoefficient(8.3)
       # Schedule of space temperature, can be shared with water heater/ducts
       create_multifamily_temperature_schedule(model, exterior_adjacent_to, spaces)
       otherside_object.setConstantTemperatureSchedule(@mf_temp_sch_map[exterior_adjacent_to])
