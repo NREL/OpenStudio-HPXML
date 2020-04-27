@@ -16,7 +16,7 @@ class HEScoreTest < Minitest::Unit::TestCase
     Dir.mkdir(@results_dir) unless File.exist? @results_dir
   end
 
-  def test_valid_simulations
+  def test_simulations
     results_zip_path = File.join(@results_dir, 'results_jsons.zip')
     File.delete(results_zip_path) if File.exist? results_zip_path
     results_csv_path = File.join(@results_dir, 'results.csv')
@@ -156,7 +156,15 @@ class HEScoreTest < Minitest::Unit::TestCase
       next unless heat_pump.fraction_heat_load_served > 0
       htg_fuels << fuel_map[HPXML::FuelTypeElectricity]
     end
-    has_clg = (hpxml.cooling_systems.select { |c| c.fraction_cool_load_served > 0 }.size > 0)
+    has_clg = false
+    hpxml.cooling_systems.each do |cooling_system|
+      next unless cooling_system.fraction_cool_load_served > 0
+      has_clg = true
+    end
+    hpxml.heat_pumps.each do |heat_pump|
+      next unless heat_pump.fraction_cool_load_served > 0
+      has_clg = true
+    end
 
     # Get HPXML values for Water Heating
     hw_fuels = []
