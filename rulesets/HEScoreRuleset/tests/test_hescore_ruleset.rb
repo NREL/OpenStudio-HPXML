@@ -480,13 +480,13 @@ class HEScoreRulesetTest < MiniTest::Test
     wall_code_by_id = {}
     XMLHelper.get_elements(in_doc, 'HPXML/Building/BuildingDetails/Enclosure/Walls/Wall') do |wall|
       wall_code = XMLHelper.get_value(wall, 'extension/hescore_wall_code')
-      wallid = XMLHelper.get_element(wall, 'SystemIdentifier').get('id')
+      wallid = XMLHelper.get_attribute_value(XMLHelper.get_element(wall, 'SystemIdentifier'), 'id')
       wall_code_by_id[wallid] = wall_code
     end
 
     XMLHelper.get_elements(out_doc, 'HPXML/Building/BuildingDetails/Enclosure/Walls/Wall') do |wall|
       eff_rvalue = Float(XMLHelper.get_value(wall, 'Insulation/AssemblyEffectiveRValue'))
-      wallid = XMLHelper.get_element(wall, 'SystemIdentifier').get('id')
+      wallid = XMLHelper.get_attribute_value(XMLHelper.get_element(wall, 'SystemIdentifier'), 'id')
       next if wall_code_by_id[wallid].nil?
 
       assert_in_epsilon(eff_rvalue, get_wall_effective_r_from_doe2code(wall_code_by_id[wallid]), 0.01)
@@ -494,12 +494,12 @@ class HEScoreRulesetTest < MiniTest::Test
 
     roof_code_by_id = {}
     XMLHelper.get_elements(in_doc, 'HPXML/Building/BuildingDetails/Enclosure/Roofs/Roof') do |roof|
-      roofid = XMLHelper.get_element(roof, 'SystemIdentifier').get('id')
+      roofid = XMLHelper.get_attribute_value(XMLHelper.get_element(roof, 'SystemIdentifier'), 'id')
       roof_code_by_id[roofid] = XMLHelper.get_value(roof, 'extension/roof_assembly_code')
     end
 
     XMLHelper.get_elements(out_doc, 'HPXML/Building/BuildingDetails/Enclosure/Roofs/Roof') do |roof|
-      roofid = XMLHelper.get_element(roof, 'SystemIdentifier').get('id')
+      roofid = XMLHelper.get_attribute_value(XMLHelper.get_element(roof, 'SystemIdentifier'), 'id')
       eff_rvalue = Float(XMLHelper.get_value(roof, 'Insulation/AssemblyEffectiveRValue'))
       assert_in_epsilon(eff_rvalue, get_roof_effective_r_from_doe2code(roof_code_by_id[roofid.split('_')[0]]), 0.01)
     end
