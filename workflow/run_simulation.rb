@@ -69,7 +69,7 @@ def run_design(basedir, rundir, design, resultsdir, hpxml, debug, skip_simulatio
     args['include_timeseries_zone_temperatures'] = false
     args['include_timeseries_fuel_consumptions'] = false
     args['include_timeseries_end_use_consumptions'] = true
-    args['include_timeseries_hot_water_uses'] = false
+    args['include_timeseries_hot_water_uses'] = true
     args['include_timeseries_total_loads'] = false
     args['include_timeseries_component_loads'] = false
     update_args_hash(measures, measure_subdir, args)
@@ -84,12 +84,6 @@ def run_design(basedir, rundir, design, resultsdir, hpxml, debug, skip_simulatio
   if not success
     fail 'Simulation unsuccessful.'
   end
-
-  # Add monthly hot water output request
-  # TODO: Move this to reporting measure some day...
-  outputVariable = OpenStudio::Model::OutputVariable.new('Water Use Equipment Hot Water Volume', model)
-  outputVariable.setReportingFrequency('monthly')
-  outputVariable.setKeyValue('*')
 
   # Translate model to IDF
   forward_translator = OpenStudio::EnergyPlus::ForwardTranslator.new
@@ -150,7 +144,7 @@ def run_design(basedir, rundir, design, resultsdir, hpxml, debug, skip_simulatio
         col = row_index[ep_output]
         next if col.nil?
 
-        results[hes_output][-1] += UnitConversions.convert(Float(row[col]), units[col], units_map[hes_output[1]]).abs
+        results[hes_output][-1] += UnitConversions.convert(Float(row[col]), units[col], units_map[hes_output[1]].gsub('gallons', 'gal')).abs
       end
       # Make sure there aren't any end uses with positive values that aren't mapped to HES
       row.each_with_index do |val, col|
@@ -161,20 +155,6 @@ def run_design(basedir, rundir, design, resultsdir, hpxml, debug, skip_simulatio
         fail "Missed value (#{val}) in row=#{row_num}, col=#{col}." if Float(val) > 0
       end
     end
-  end
-
-  # Add hot water volume output
-  # TODO: Move this to reporting measure some day...
-  sql_path = File.join(rundir, 'eplusout.sql')
-  sqlFile = OpenStudio::SqlFile.new(sql_path, false)
-  hes_end_use = 'hot_water'
-  hes_resource_type = 'hot_water'
-  to_units = units_map[hes_resource_type]
-  results[[hes_end_use, hes_resource_type]] = []
-  for i in 1..12
-    query = "SELECT SUM(VariableValue) FROM ReportVariableData WHERE ReportVariableDataDictionaryIndex IN (SELECT ReportVariableDataDictionaryIndex FROM ReportVariableDataDictionary WHERE VariableName='Water Use Equipment Hot Water Volume' AND ReportingFrequency='Monthly' AND VariableUnits='m3') AND TimeIndex='#{i}'"
-    sql_result = sqlFile.execAndReturnFirstDouble(query).get
-    results[[hes_end_use, hes_resource_type]] << UnitConversions.convert(sql_result, 'm^3', 'gal')
   end
 
   # Write results to JSON
@@ -195,7 +175,7 @@ def run_design(basedir, rundir, design, resultsdir, hpxml, debug, skip_simulatio
       data['end_use'] << end_use
     end
   end
-  
+
   require 'json'
   File.open(File.join(resultsdir, 'results.json'), 'w') do |f|
     f.write(JSON.pretty_generate(data))

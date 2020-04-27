@@ -97,11 +97,8 @@ class HEScoreTest < Minitest::Unit::TestCase
 
     results = {}
 
-    hes_keys = get_output_map.values
-    hes_keys << ['hot_water', 'hot_water'] # TODO: Remove this when eventually incorporated in reporting measure
-
     # Fill in missing results with zeros
-    hes_keys.uniq.each do |hes_key|
+    get_output_map.values.uniq.each do |hes_key|
       end_use = hes_key[0]
       resource_type = hes_key[1]
       units = get_units_map[resource_type]
@@ -286,7 +283,7 @@ class HEScoreTest < Minitest::Unit::TestCase
 
   def _test_schema_validation(parent_dir, xml, schemas_dir)
     # TODO: Remove this when schema validation is included with CLI calls
-    hpxml_doc = REXML::Document.new(File.read(xml))
+    hpxml_doc = XMLHelper.parse_file(xml)
     errors = XMLHelper.validate(hpxml_doc.to_s, File.join(schemas_dir, 'HPXML.xsd'), nil)
     if errors.size > 0
       puts "#{xml}: #{errors}"
