@@ -3252,8 +3252,8 @@ if ARGV[0].to_sym == :download_weather
 end
 
 if ARGV[0].to_sym == :update_version
-  version_change = { from: '0.7.0',
-                     to: '0.8.0' }
+  version_change = { from: '0.8.0',
+                     to: '0.9.0' }
 
   file_names = ['workflow/run_simulation.rb']
 
