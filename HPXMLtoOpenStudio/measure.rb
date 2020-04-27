@@ -1823,6 +1823,7 @@ class OSModel
         slab_exp_perims[slab] = slab.exposed_perimeter
         slab_areas[slab] = slab.area
       end
+
       total_slab_exp_perim = slab_exp_perims.values.inject(0, :+)
       total_slab_area = slab_areas.values.inject(0, :+)
       total_fnd_wall_length = fnd_wall_lengths.values.inject(0, :+)
@@ -2162,7 +2163,7 @@ class OSModel
     addtl_cfa = cfa - model_cfa
     return unless addtl_cfa > 0.1
 
-    if @hpxml.collapse_enclosure
+    if @collapse_enclosure
 
       conditioned_floor_width = Math::sqrt(addtl_cfa)
       conditioned_floor_length = addtl_cfa / conditioned_floor_width
@@ -2255,7 +2256,9 @@ class OSModel
     @hpxml.windows.each do |window|
       window.fraction_operable = nil
     end
-    @hpxml.collapse_enclosure_surfaces()
+    if @collapse_enclosure
+      @hpxml.collapse_enclosure_surfaces()
+    end
 
     surfaces = []
     @hpxml.windows.each do |window|
@@ -4541,7 +4544,7 @@ class OSModel
     elsif [HPXML::LocationOtherHousingUnit, HPXML::LocationOtherHousingUnitAbove, HPXML::LocationOtherHousingUnitBelow].include? exterior_adjacent_to
       surface.setOutsideBoundaryCondition('Adiabatic')
     elsif [HPXML::LocationBasementConditioned].include? exterior_adjacent_to
-      puts surface.createAdjacentSurface(create_or_get_space(model, spaces, HPXML::LocationLivingSpace)).get
+      surface.createAdjacentSurface(create_or_get_space(model, spaces, HPXML::LocationLivingSpace)).get
       @cond_bsmnt_surfaces << surface
     else
       surface.createAdjacentSurface(create_or_get_space(model, spaces, exterior_adjacent_to)).get
