@@ -94,6 +94,12 @@ class XMLHelper
     return added
   end
 
+  # Returns the value of the attribute
+  def self.get_attribute_value(element, attr_name)
+    return if element.nil?
+    return element.get(attr_name)
+  end
+
   def self.valid_attr(attr)
     attr = attr.to_s
     attr = attr.gsub(' ', '_')

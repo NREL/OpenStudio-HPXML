@@ -27,6 +27,7 @@ def create_hpxmls
     'invalid_files/hvac-dse-multiple-attached-cooling.xml' => 'base-hvac-dse.xml',
     'invalid_files/hvac-dse-multiple-attached-heating.xml' => 'base-hvac-dse.xml',
     'invalid_files/hvac-frac-load-served.xml' => 'base-hvac-multiple.xml',
+    'invalid_files/invalid-epw-filepath.xml' => 'base-location-epw-filepath.xml',
     'invalid_files/invalid-neighbor-shading-azimuth.xml' => 'base-misc-neighbor-shading.xml',
     'invalid_files/invalid-relatedhvac-dhw-indirect.xml' => 'base-dhw-indirect.xml',
     'invalid_files/invalid-relatedhvac-desuperheater.xml' => 'base-hvac-central-ac-only-1-speed.xml',
@@ -77,6 +78,7 @@ def create_hpxmls
     'base-dhw-combi-tankless.xml' => 'base-dhw-indirect.xml',
     'base-dhw-combi-tankless-outside.xml' => 'base-dhw-combi-tankless.xml',
     'base-dhw-desuperheater.xml' => 'base-hvac-central-ac-only-1-speed.xml',
+    'base-dhw-desuperheater-hpwh.xml' => 'base-dhw-tank-heat-pump.xml',
     'base-dhw-desuperheater-tankless.xml' => 'base-hvac-central-ac-only-1-speed.xml',
     'base-dhw-desuperheater-2-speed.xml' => 'base-hvac-central-ac-only-2-speed.xml',
     'base-dhw-desuperheater-var-speed.xml' => 'base-hvac-central-ac-only-var-speed.xml',
@@ -86,6 +88,7 @@ def create_hpxmls
     'base-dhw-indirect-dse.xml' => 'base-dhw-indirect.xml',
     'base-dhw-indirect-outside.xml' => 'base-dhw-indirect.xml',
     'base-dhw-indirect-standbyloss.xml' => 'base-dhw-indirect.xml',
+    'base-dhw-indirect-with-solar-fraction.xml' => 'base-dhw-indirect.xml',
     'base-dhw-low-flow-fixtures.xml' => 'base.xml',
     'base-dhw-multiple.xml' => 'base-hvac-boiler-gas-only.xml',
     'base-dhw-none.xml' => 'base.xml',
@@ -98,11 +101,8 @@ def create_hpxmls
     'base-dhw-solar-direct-flat-plate.xml' => 'base.xml',
     'base-dhw-solar-direct-ics.xml' => 'base.xml',
     'base-dhw-solar-fraction.xml' => 'base.xml',
-    'base-dhw-solar-indirect-evacuated-tube.xml' => 'base.xml',
     'base-dhw-solar-indirect-flat-plate.xml' => 'base.xml',
-    'base-dhw-solar-thermosyphon-evacuated-tube.xml' => 'base.xml',
     'base-dhw-solar-thermosyphon-flat-plate.xml' => 'base.xml',
-    'base-dhw-solar-thermosyphon-ics.xml' => 'base.xml',
     'base-dhw-tank-gas.xml' => 'base.xml',
     'base-dhw-tank-gas-outside.xml' => 'base-dhw-tank-gas.xml',
     'base-dhw-tank-heat-pump.xml' => 'base.xml',
@@ -218,8 +218,8 @@ def create_hpxmls
     'base-location-dallas-tx.xml' => 'base.xml',
     'base-location-duluth-mn.xml' => 'base.xml',
     'base-location-miami-fl.xml' => 'base.xml',
-    'base-location-epw-filename.xml' => 'base.xml',
-    'base-location-epw-filename-AMY-2012.xml' => 'base.xml',
+    'base-location-epw-filepath.xml' => 'base.xml',
+    'base-location-epw-filepath-AMY-2012.xml' => 'base.xml',
     'base-mechvent-balanced.xml' => 'base.xml',
     'base-mechvent-cfis.xml' => 'base.xml',
     'base-mechvent-cfis-evap-cooler-only-ducted.xml' => 'base-hvac-evap-cooler-only-ducted.xml',
@@ -233,6 +233,7 @@ def create_hpxmls
     'base-mechvent-bath-kitchen-fans.xml' => 'base.xml',
     'base-misc-ceiling-fans.xml' => 'base.xml',
     'base-misc-defaults.xml' => 'base.xml',
+    'base-misc-defaults2.xml' => 'base-dhw-recirc-demand.xml',
     'base-misc-lighting-none.xml' => 'base.xml',
     'base-misc-timestep-10-mins.xml' => 'base.xml',
     'base-misc-runperiod-1-month.xml' => 'base.xml',
@@ -513,15 +514,17 @@ def set_hpxml_climate_and_risk_zones(hpxml_file, hpxml)
     hpxml.climate_and_risk_zones.iecc_zone = '1A'
     hpxml.climate_and_risk_zones.weather_station_name = 'Miami, FL'
     hpxml.climate_and_risk_zones.weather_station_wmo = '722020'
-  elsif ['base-location-epw-filename.xml'].include? hpxml_file
+  elsif ['base-location-epw-filepath.xml'].include? hpxml_file
     hpxml.climate_and_risk_zones.weather_station_wmo = nil
-    hpxml.climate_and_risk_zones.weather_station_epw_filename = 'USA_CO_Denver.Intl.AP.725650_TMY3.epw'
-  elsif ['base-location-epw-filename-AMY-2012.xml'].include? hpxml_file
+    hpxml.climate_and_risk_zones.weather_station_epw_filepath = 'USA_CO_Denver.Intl.AP.725650_TMY3.epw'
+  elsif ['base-location-epw-filepath-AMY-2012.xml'].include? hpxml_file
     hpxml.climate_and_risk_zones.weather_station_wmo = nil
     hpxml.climate_and_risk_zones.weather_station_name = 'Boulder, CO'
-    hpxml.climate_and_risk_zones.weather_station_epw_filename = 'US_CO_Boulder_AMY_2012.epw'
+    hpxml.climate_and_risk_zones.weather_station_epw_filepath = 'US_CO_Boulder_AMY_2012.epw'
   elsif ['invalid_files/invalid-wmo.xml'].include? hpxml_file
     hpxml.climate_and_risk_zones.weather_station_wmo = '999999'
+  elsif ['invalid_files/invalid-epw-filepath.xml'].include? hpxml_file
+    hpxml.climate_and_risk_zones.weather_station_epw_filepath = 'foo.epw'
   end
 end
 
@@ -681,8 +684,8 @@ def set_hpxml_roofs(hpxml_file, hpxml)
     hpxml.roofs.clear()
   elsif ['base-enclosure-split-surfaces.xml'].include? hpxml_file
     for n in 1..hpxml.roofs.size
-      hpxml.roofs[n - 1].area /= 10.0
-      for i in 2..10
+      hpxml.roofs[n - 1].area /= 9.0
+      for i in 2..9
         hpxml.roofs << hpxml.roofs[n - 1].dup
         hpxml.roofs[-1].id += i.to_s
       end
@@ -747,8 +750,8 @@ def set_hpxml_rim_joists(hpxml_file, hpxml)
                          insulation_assembly_r_value: 23.0)
   elsif ['base-enclosure-split-surfaces.xml'].include? hpxml_file
     for n in 1..hpxml.rim_joists.size
-      hpxml.rim_joists[n - 1].area /= 10.0
-      for i in 2..10
+      hpxml.rim_joists[n - 1].area /= 9.0
+      for i in 2..9
         hpxml.rim_joists << hpxml.rim_joists[n - 1].dup
         hpxml.rim_joists[-1].id += i.to_s
       end
@@ -964,8 +967,8 @@ def set_hpxml_walls(hpxml_file, hpxml)
     end
   elsif ['base-enclosure-split-surfaces.xml'].include? hpxml_file
     for n in 1..hpxml.walls.size
-      hpxml.walls[n - 1].area /= 10.0
-      for i in 2..10
+      hpxml.walls[n - 1].area /= 9.0
+      for i in 2..9
         hpxml.walls << hpxml.walls[n - 1].dup
         hpxml.walls[-1].id += i.to_s
       end
@@ -1208,8 +1211,8 @@ def set_hpxml_foundation_walls(hpxml_file, hpxml)
                                insulation_exterior_r_value: 8.9)
   elsif ['base-enclosure-split-surfaces.xml'].include? hpxml_file
     for n in 1..hpxml.foundation_walls.size
-      hpxml.foundation_walls[n - 1].area /= 10.0
-      for i in 2..10
+      hpxml.foundation_walls[n - 1].area /= 9.0
+      for i in 2..9
         hpxml.foundation_walls << hpxml.foundation_walls[n - 1].dup
         hpxml.foundation_walls[-1].id += i.to_s
       end
@@ -1330,8 +1333,8 @@ def set_hpxml_frame_floors(hpxml_file, hpxml)
                            insulation_assembly_r_value: 2.1)
   elsif ['base-enclosure-split-surfaces.xml'].include? hpxml_file
     for n in 1..hpxml.frame_floors.size
-      hpxml.frame_floors[n - 1].area /= 10.0
-      for i in 2..10
+      hpxml.frame_floors[n - 1].area /= 9.0
+      for i in 2..9
         hpxml.frame_floors << hpxml.frame_floors[n - 1].dup
         hpxml.frame_floors[-1].id += i.to_s
       end
@@ -1459,9 +1462,9 @@ def set_hpxml_slabs(hpxml_file, hpxml)
                     carpet_r_value: 0)
   elsif ['base-enclosure-split-surfaces.xml'].include? hpxml_file
     for n in 1..hpxml.slabs.size
-      hpxml.slabs[n - 1].area /= 10.0
-      hpxml.slabs[n - 1].exposed_perimeter /= 10.0
-      for i in 2..10
+      hpxml.slabs[n - 1].area /= 9.0
+      hpxml.slabs[n - 1].exposed_perimeter /= 9.0
+      for i in 2..9
         hpxml.slabs << hpxml.slabs[n - 1].dup
         hpxml.slabs[-1].id += i.to_s
       end
@@ -1484,7 +1487,7 @@ def set_hpxml_windows(hpxml_file, hpxml)
                       azimuth: 0,
                       ufactor: 0.33,
                       shgc: 0.45,
-                      fraction_operable: 0.33,
+                      fraction_operable: 0.67,
                       interior_shading_factor_summer: 0.7,
                       interior_shading_factor_winter: 0.85,
                       wall_idref: 'Wall')
@@ -1493,7 +1496,7 @@ def set_hpxml_windows(hpxml_file, hpxml)
                       azimuth: 180,
                       ufactor: 0.33,
                       shgc: 0.45,
-                      fraction_operable: 0.33,
+                      fraction_operable: 0.67,
                       interior_shading_factor_summer: 0.7,
                       interior_shading_factor_winter: 0.85,
                       wall_idref: 'Wall')
@@ -1502,7 +1505,7 @@ def set_hpxml_windows(hpxml_file, hpxml)
                       azimuth: 90,
                       ufactor: 0.33,
                       shgc: 0.45,
-                      fraction_operable: 0.33,
+                      fraction_operable: 0.67,
                       interior_shading_factor_summer: 0.7,
                       interior_shading_factor_winter: 0.85,
                       wall_idref: 'Wall')
@@ -1511,7 +1514,7 @@ def set_hpxml_windows(hpxml_file, hpxml)
                       azimuth: 270,
                       ufactor: 0.33,
                       shgc: 0.45,
-                      fraction_operable: 0.33,
+                      fraction_operable: 0.67,
                       interior_shading_factor_summer: 0.7,
                       interior_shading_factor_winter: 0.85,
                       wall_idref: 'Wall')
@@ -1640,11 +1643,15 @@ def set_hpxml_windows(hpxml_file, hpxml)
   elsif ['base-enclosure-split-surfaces.xml'].include? hpxml_file
     area_adjustments = []
     for n in 1..hpxml.windows.size
-      hpxml.windows[n - 1].area /= 10.0
-      for i in 2..10
+      hpxml.windows[n - 1].area /= 9.0
+      hpxml.windows[n - 1].fraction_operable = 0.0
+      for i in 2..9
         hpxml.windows << hpxml.windows[n - 1].dup
         hpxml.windows[-1].id += i.to_s
         hpxml.windows[-1].wall_idref += i.to_s
+        if i >= 4
+          hpxml.windows[-1].fraction_operable = 1.0
+        end
       end
     end
     hpxml.windows << hpxml.windows[-1].dup
@@ -1667,28 +1674,28 @@ def set_hpxml_windows(hpxml_file, hpxml)
                       azimuth: 0,
                       ufactor: 0.33,
                       shgc: 0.45,
-                      fraction_operable: 0.33,
+                      fraction_operable: 0.67,
                       wall_idref: 'Wall1')
     hpxml.windows.add(id: 'WindowSouth',
                       area: 108 / 8,
                       azimuth: 180,
                       ufactor: 0.33,
                       shgc: 0.45,
-                      fraction_operable: 0.33,
+                      fraction_operable: 0.67,
                       wall_idref: 'Wall2')
     hpxml.windows.add(id: 'WindowEast',
                       area: 72 / 8,
                       azimuth: 90,
                       ufactor: 0.33,
                       shgc: 0.45,
-                      fraction_operable: 0.33,
+                      fraction_operable: 0.67,
                       wall_idref: 'Wall3')
     hpxml.windows.add(id: 'WindowWest',
                       area: 72 / 8,
                       azimuth: 270,
                       ufactor: 0.33,
                       shgc: 0.45,
-                      fraction_operable: 0.33,
+                      fraction_operable: 0.67,
                       wall_idref: 'Wall4')
   elsif ['base-misc-defaults.xml'].include? hpxml_file
     hpxml.windows.each do |window|
@@ -1719,8 +1726,8 @@ def set_hpxml_skylights(hpxml_file, hpxml)
     hpxml.skylights[0].roof_idref = 'foobar'
   elsif ['base-enclosure-split-surfaces.xml'].include? hpxml_file
     for n in 1..hpxml.skylights.size
-      hpxml.skylights[n - 1].area /= 10.0
-      for i in 2..10
+      hpxml.skylights[n - 1].area /= 9.0
+      for i in 2..9
         hpxml.skylights << hpxml.skylights[n - 1].dup
         hpxml.skylights[-1].id += i.to_s
         hpxml.skylights[-1].roof_idref += i.to_s if i % 2 == 0
@@ -1796,8 +1803,8 @@ def set_hpxml_doors(hpxml_file, hpxml)
   elsif ['base-enclosure-split-surfaces.xml'].include? hpxml_file
     area_adjustments = []
     for n in 1..hpxml.doors.size
-      hpxml.doors[n - 1].area /= 10.0
-      for i in 2..10
+      hpxml.doors[n - 1].area /= 9.0
+      for i in 2..9
         hpxml.doors << hpxml.doors[n - 1].dup
         hpxml.doors[-1].id += i.to_s
         hpxml.doors[-1].wall_idref += i.to_s
@@ -2642,7 +2649,7 @@ def set_hpxml_water_heating_systems(hpxml_file, hpxml)
                                     fraction_dhw_load_served: 1,
                                     heating_capacity: 18767,
                                     energy_factor: 0.95,
-                                    temperature: 125)
+                                    temperature: Waterheater.get_default_hot_water_temperature(Constants.ERIVersions[-1]))
   elsif ['base-dhw-multiple.xml'].include? hpxml_file
     hpxml.water_heating_systems[0].fraction_dhw_load_served = 0.2
     hpxml.water_heating_systems.add(id: 'WaterHeater2',
@@ -2654,7 +2661,7 @@ def set_hpxml_water_heating_systems(hpxml_file, hpxml)
                                     heating_capacity: 40000,
                                     energy_factor: 0.59,
                                     recovery_efficiency: 0.76,
-                                    temperature: 125)
+                                    temperature: Waterheater.get_default_hot_water_temperature(Constants.ERIVersions[-1]))
     hpxml.water_heating_systems.add(id: 'WaterHeater3',
                                     fuel_type: HPXML::FuelTypeElectricity,
                                     water_heater_type: HPXML::WaterHeaterTypeHeatPump,
@@ -2662,28 +2669,28 @@ def set_hpxml_water_heating_systems(hpxml_file, hpxml)
                                     tank_volume: 80,
                                     fraction_dhw_load_served: 0.2,
                                     energy_factor: 2.3,
-                                    temperature: 125)
+                                    temperature: Waterheater.get_default_hot_water_temperature(Constants.ERIVersions[-1]))
     hpxml.water_heating_systems.add(id: 'WaterHeater4',
                                     fuel_type: HPXML::FuelTypeElectricity,
                                     water_heater_type: HPXML::WaterHeaterTypeTankless,
                                     location: HPXML::LocationLivingSpace,
                                     fraction_dhw_load_served: 0.2,
                                     energy_factor: 0.99,
-                                    temperature: 125)
+                                    temperature: Waterheater.get_default_hot_water_temperature(Constants.ERIVersions[-1]))
     hpxml.water_heating_systems.add(id: 'WaterHeater5',
                                     fuel_type: HPXML::FuelTypeNaturalGas,
                                     water_heater_type: HPXML::WaterHeaterTypeTankless,
                                     location: HPXML::LocationLivingSpace,
                                     fraction_dhw_load_served: 0.1,
                                     energy_factor: 0.82,
-                                    temperature: 125)
+                                    temperature: Waterheater.get_default_hot_water_temperature(Constants.ERIVersions[-1]))
     hpxml.water_heating_systems.add(id: 'WaterHeater6',
                                     water_heater_type: HPXML::WaterHeaterTypeCombiStorage,
                                     location: HPXML::LocationLivingSpace,
                                     tank_volume: 50,
                                     fraction_dhw_load_served: 0.1,
                                     related_hvac_idref: 'HeatingSystem',
-                                    temperature: 125)
+                                    temperature: Waterheater.get_default_hot_water_temperature(Constants.ERIVersions[-1]))
   elsif ['invalid_files/dhw-frac-load-served.xml'].include? hpxml_file
     hpxml.water_heating_systems[0].fraction_dhw_load_served += 0.15
   elsif ['base-dhw-tank-gas.xml',
@@ -2759,7 +2766,10 @@ def set_hpxml_water_heating_systems(hpxml_file, hpxml)
   elsif ['base-dhw-uef.xml'].include? hpxml_file
     hpxml.water_heating_systems[0].energy_factor = nil
     hpxml.water_heating_systems[0].uniform_energy_factor = 0.93
-  elsif ['base-dhw-desuperheater.xml'].include? hpxml_file
+  elsif ['base-dhw-desuperheater.xml',
+         'base-dhw-desuperheater-2-speed.xml',
+         'base-dhw-desuperheater-var-speed.xml',
+         'base-dhw-desuperheater-hpwh.xml'].include? hpxml_file
     hpxml.water_heating_systems[0].uses_desuperheater = true
     hpxml.water_heating_systems[0].related_hvac_idref = 'CoolingSystem'
   elsif ['base-dhw-desuperheater-tankless.xml'].include? hpxml_file
@@ -2767,12 +2777,6 @@ def set_hpxml_water_heating_systems(hpxml_file, hpxml)
     hpxml.water_heating_systems[0].tank_volume = nil
     hpxml.water_heating_systems[0].heating_capacity = nil
     hpxml.water_heating_systems[0].energy_factor = 0.99
-    hpxml.water_heating_systems[0].uses_desuperheater = true
-    hpxml.water_heating_systems[0].related_hvac_idref = 'CoolingSystem'
-  elsif ['base-dhw-desuperheater-2-speed.xml'].include? hpxml_file
-    hpxml.water_heating_systems[0].uses_desuperheater = true
-    hpxml.water_heating_systems[0].related_hvac_idref = 'CoolingSystem'
-  elsif ['base-dhw-desuperheater-var-speed.xml'].include? hpxml_file
     hpxml.water_heating_systems[0].uses_desuperheater = true
     hpxml.water_heating_systems[0].related_hvac_idref = 'CoolingSystem'
   elsif ['base-dhw-desuperheater-gshp.xml'].include? hpxml_file
@@ -2855,13 +2859,16 @@ def set_hpxml_water_heating_systems(hpxml_file, hpxml)
     end
   elsif ['base-dhw-none.xml'].include? hpxml_file
     hpxml.water_heating_systems.clear()
-  end
-  hpxml.water_heating_systems.each do |water_heating_system|
-    if ['base-misc-defaults.xml'].include? hpxml_file
-      water_heating_system.temperature = nil
-      water_heating_system.location = nil
-    else
-      water_heating_system.temperature = Waterheater.get_default_hot_water_temperature(Constants.ERIVersions[-1])
+  elsif ['base-misc-defaults.xml',
+         'base-misc-defaults2.xml'].include? hpxml_file
+    hpxml.water_heating_systems[0].temperature = nil
+    hpxml.water_heating_systems[0].location = nil
+    hpxml.water_heating_systems[0].heating_capacity = nil
+    hpxml.water_heating_systems[0].tank_volume = nil
+    hpxml.water_heating_systems[0].recovery_efficiency = nil
+    if hpxml_file == 'base-misc-defaults2.xml'
+      hpxml.water_heating_systems[0].energy_factor = nil
+      hpxml.water_heating_systems[0].uniform_energy_factor = 0.93
     end
   end
 end
@@ -2912,6 +2919,10 @@ def set_hpxml_hot_water_distribution(hpxml_file, hpxml)
     hpxml.hot_water_distributions.clear()
   elsif ['base-misc-defaults.xml'].include? hpxml_file
     hpxml.hot_water_distributions[0].standard_piping_length = nil
+  elsif ['base-misc-defaults2.xml'].include? hpxml_file
+    hpxml.hot_water_distributions[0].recirculation_piping_length = nil
+    hpxml.hot_water_distributions[0].recirculation_branch_piping_length = nil
+    hpxml.hot_water_distributions[0].recirculation_pump_power = nil
   end
 end
 
@@ -2934,21 +2945,27 @@ end
 
 def set_hpxml_solar_thermal_system(hpxml_file, hpxml)
   if ['base-dhw-solar-fraction.xml',
-      'base-dhw-multiple.xml',
+      'base-dhw-indirect-with-solar-fraction.xml',
       'base-dhw-tank-heat-pump-with-solar-fraction.xml',
-      'base-dhw-tankless-gas-with-solar-fraction.xml',
-      'invalid_files/solar-thermal-system-with-combi-tankless.xml',
-      'invalid_files/solar-thermal-system-with-desuperheater.xml',
-      'invalid_files/solar-thermal-system-with-dhw-indirect.xml'].include? hpxml_file
+      'base-dhw-tankless-gas-with-solar-fraction.xml'].include? hpxml_file
     hpxml.solar_thermal_systems.add(id: 'SolarThermalSystem',
                                     system_type: 'hot water',
                                     water_heating_system_idref: 'WaterHeater',
+                                    solar_fraction: 0.65)
+  elsif ['base-dhw-multiple.xml'].include? hpxml_file
+    hpxml.solar_thermal_systems.add(id: 'SolarThermalSystem',
+                                    system_type: 'hot water',
+                                    water_heating_system_idref: nil, # Apply to all water heaters
                                     solar_fraction: 0.65)
   elsif ['base-dhw-solar-direct-flat-plate.xml',
          'base-dhw-solar-indirect-flat-plate.xml',
          'base-dhw-solar-thermosyphon-flat-plate.xml',
          'base-dhw-tank-heat-pump-with-solar.xml',
-         'base-dhw-tankless-gas-with-solar.xml'].include? hpxml_file
+         'base-dhw-tankless-gas-with-solar.xml',
+         'base-misc-defaults.xml',
+         'invalid_files/solar-thermal-system-with-combi-tankless.xml',
+         'invalid_files/solar-thermal-system-with-desuperheater.xml',
+         'invalid_files/solar-thermal-system-with-dhw-indirect.xml'].include? hpxml_file
     hpxml.solar_thermal_systems.add(id: 'SolarThermalSystem',
                                     system_type: 'hot water',
                                     collector_area: 40,
@@ -2963,12 +2980,13 @@ def set_hpxml_solar_thermal_system(hpxml_file, hpxml)
       hpxml.solar_thermal_systems[0].collector_loop_type = HPXML::SolarThermalLoopTypeDirect
     elsif hpxml_file == 'base-dhw-solar-thermosyphon-flat-plate.xml'
       hpxml.solar_thermal_systems[0].collector_loop_type = HPXML::SolarThermalLoopTypeThermosyphon
+    elsif hpxml_file == 'base-misc-defaults.xml'
+      hpxml.solar_thermal_systems[0].collector_loop_type = HPXML::SolarThermalLoopTypeDirect
+      hpxml.solar_thermal_systems[0].storage_volume = nil
     else
       hpxml.solar_thermal_systems[0].collector_loop_type = HPXML::SolarThermalLoopTypeIndirect
     end
-  elsif ['base-dhw-solar-indirect-evacuated-tube.xml',
-         'base-dhw-solar-direct-evacuated-tube.xml',
-         'base-dhw-solar-thermosyphon-evacuated-tube.xml'].include? hpxml_file
+  elsif ['base-dhw-solar-direct-evacuated-tube.xml'].include? hpxml_file
     hpxml.solar_thermal_systems.add(id: 'SolarThermalSystem',
                                     system_type: 'hot water',
                                     collector_area: 40,
@@ -2981,16 +2999,14 @@ def set_hpxml_solar_thermal_system(hpxml_file, hpxml)
                                     water_heating_system_idref: 'WaterHeater')
     if hpxml_file == 'base-dhw-solar-direct-evacuated-tube.xml'
       hpxml.solar_thermal_systems[0].collector_loop_type = HPXML::SolarThermalLoopTypeDirect
-    elsif hpxml_file == 'base-dhw-solar-thermosyphon-evacuated-tube.xml'
-      hpxml.solar_thermal_systems[0].collector_loop_type = HPXML::SolarThermalLoopTypeThermosyphon
     else
       hpxml.solar_thermal_systems[0].collector_loop_type = HPXML::SolarThermalLoopTypeIndirect
     end
-  elsif ['base-dhw-solar-direct-ics.xml',
-         'base-dhw-solar-thermosyphon-ics.xml'].include? hpxml_file
+  elsif ['base-dhw-solar-direct-ics.xml'].include? hpxml_file
     hpxml.solar_thermal_systems.add(id: 'SolarThermalSystem',
                                     system_type: 'hot water',
                                     collector_area: 40,
+                                    collector_loop_type: HPXML::SolarThermalLoopTypeDirect,
                                     collector_type: HPXML::SolarThermalTypeICS,
                                     collector_azimuth: 180,
                                     collector_tilt: 20,
@@ -2998,11 +3014,6 @@ def set_hpxml_solar_thermal_system(hpxml_file, hpxml)
                                     collector_frul: 0.793,
                                     storage_volume: 60,
                                     water_heating_system_idref: 'WaterHeater')
-    if hpxml_file == 'base-dhw-solar-direct-ics.xml'
-      hpxml.solar_thermal_systems[0].collector_loop_type = HPXML::SolarThermalLoopTypeDirect
-    elsif hpxml_file == 'base-dhw-solar-thermosyphon-ics.xml'
-      hpxml.solar_thermal_systems[0].collector_loop_type = HPXML::SolarThermalLoopTypeThermosyphon
-    end
   elsif ['invalid_files/unattached-solar-thermal-system.xml'].include? hpxml_file
     hpxml.solar_thermal_systems[0].water_heating_system_idref = 'foobar'
   end

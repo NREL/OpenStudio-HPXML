@@ -58,6 +58,12 @@ class SimulationOutputReport < OpenStudio::Measure::ReportingMeasure
     arg.setDefaultValue(false)
     args << arg
 
+    arg = OpenStudio::Measure::OSArgument::makeBoolArgument('include_timeseries_hot_water_uses', true)
+    arg.setDisplayName('Generate Timeseries Output: Hot Water Uses')
+    arg.setDescription('Generates timeseries hot water usages for each end use.')
+    arg.setDefaultValue(false)
+    args << arg
+
     arg = OpenStudio::Measure::OSArgument::makeBoolArgument('include_timeseries_total_loads', true)
     arg.setDisplayName('Generate Timeseries Output: Total Loads')
     arg.setDescription('Generates timeseries heating/cooling loads.')
@@ -134,6 +140,11 @@ class SimulationOutputReport < OpenStudio::Measure::ReportingMeasure
       result << OpenStudio::IdfObject.load("Output:Meter,#{meter},runperiod;").get
     end
 
+    # Add hot water use outputs
+    @hot_water_uses.each do |hot_water_type, hot_water|
+      result << OpenStudio::IdfObject.load('Output:Variable,*,Water Use Equipment Hot Water Volume,runperiod;').get
+    end
+
     # Add peak electricity outputs
     @peak_fuels.each do |key, peak_fuel|
       result << OpenStudio::IdfObject.load("Output:Table:Monthly,#{peak_fuel.report},2,#{peak_fuel.meter},HoursPositive,Electricity:Facility,MaximumDuringHoursShown;").get
@@ -162,6 +173,7 @@ class SimulationOutputReport < OpenStudio::Measure::ReportingMeasure
     include_timeseries_zone_temperatures = runner.getBoolArgumentValue('include_timeseries_zone_temperatures', user_arguments)
     include_timeseries_fuel_consumptions = runner.getBoolArgumentValue('include_timeseries_fuel_consumptions', user_arguments)
     include_timeseries_end_use_consumptions = runner.getBoolArgumentValue('include_timeseries_end_use_consumptions', user_arguments)
+    include_timeseries_hot_water_uses = runner.getBoolArgumentValue('include_timeseries_hot_water_uses', user_arguments)
     include_timeseries_total_loads = runner.getBoolArgumentValue('include_timeseries_total_loads', user_arguments)
     include_timeseries_component_loads = runner.getBoolArgumentValue('include_timeseries_component_loads', user_arguments)
 
@@ -197,6 +209,10 @@ class SimulationOutputReport < OpenStudio::Measure::ReportingMeasure
       end
     end
 
+    if include_timeseries_hot_water_uses
+      result << OpenStudio::IdfObject.load("Output:Variable,*,Water Use Equipment Hot Water Volume,#{timeseries_frequency};").get
+    end
+
     if include_timeseries_total_loads
       @loads.each do |load_type, load|
         next if load.ems_variable.nil?
@@ -229,6 +245,7 @@ class SimulationOutputReport < OpenStudio::Measure::ReportingMeasure
     include_timeseries_zone_temperatures = runner.getBoolArgumentValue('include_timeseries_zone_temperatures', user_arguments)
     include_timeseries_fuel_consumptions = runner.getBoolArgumentValue('include_timeseries_fuel_consumptions', user_arguments)
     include_timeseries_end_use_consumptions = runner.getBoolArgumentValue('include_timeseries_end_use_consumptions', user_arguments)
+    include_timeseries_hot_water_uses = runner.getBoolArgumentValue('include_timeseries_hot_water_uses', user_arguments)
     include_timeseries_total_loads = runner.getBoolArgumentValue('include_timeseries_total_loads', user_arguments)
     include_timeseries_component_loads = runner.getBoolArgumentValue('include_timeseries_component_loads', user_arguments)
 
@@ -282,6 +299,7 @@ class SimulationOutputReport < OpenStudio::Measure::ReportingMeasure
                           include_timeseries_zone_temperatures,
                           include_timeseries_fuel_consumptions,
                           include_timeseries_end_use_consumptions,
+                          include_timeseries_hot_water_uses,
                           include_timeseries_total_loads,
                           include_timeseries_component_loads)
     if not check_for_errors(runner, outputs)
@@ -296,6 +314,7 @@ class SimulationOutputReport < OpenStudio::Measure::ReportingMeasure
                                     include_timeseries_zone_temperatures,
                                     include_timeseries_fuel_consumptions,
                                     include_timeseries_end_use_consumptions,
+                                    include_timeseries_hot_water_uses,
                                     include_timeseries_total_loads,
                                     include_timeseries_component_loads)
 
@@ -333,6 +352,7 @@ class SimulationOutputReport < OpenStudio::Measure::ReportingMeasure
                   include_timeseries_zone_temperatures,
                   include_timeseries_fuel_consumptions,
                   include_timeseries_end_use_consumptions,
+                  include_timeseries_hot_water_uses,
                   include_timeseries_total_loads,
                   include_timeseries_component_loads)
     outputs = {}
@@ -366,7 +386,7 @@ class SimulationOutputReport < OpenStudio::Measure::ReportingMeasure
 
     # Fuel Uses
     @fuels.each do |fuel_type, fuel|
-      fuel.annual_output = get_report_meter_data_annual_mbtu(fuel.meter)
+      fuel.annual_output = get_report_meter_data_annual(fuel.meter)
       if include_timeseries_fuel_consumptions
         fuel.timeseries_output = get_report_meter_data_timeseries('', fuel.meter, UnitConversions.convert(1.0, 'J', fuel.timeseries_units), 0, timeseries_frequency)
       end
@@ -381,7 +401,7 @@ class SimulationOutputReport < OpenStudio::Measure::ReportingMeasure
     @loads.each do |load_type, load|
       next if load.ems_variable.nil?
 
-      load.annual_output = get_report_variable_data_annual_mbtu(['EMS'], ["#{load.ems_variable}_annual_outvar"])
+      load.annual_output = get_report_variable_data_annual(['EMS'], ["#{load.ems_variable}_annual_outvar"])
       if include_timeseries_total_loads
         load.timeseries_output = get_report_variable_data_timeseries(['EMS'], ["#{load.ems_variable}_timeseries_outvar"], UnitConversions.convert(1.0, 'J', load.timeseries_units), 0, timeseries_frequency)
       end
@@ -389,7 +409,7 @@ class SimulationOutputReport < OpenStudio::Measure::ReportingMeasure
 
     # Component Loads
     @component_loads.each do |key, comp_load|
-      comp_load.annual_output = get_report_variable_data_annual_mbtu(['EMS'], ["#{comp_load.ems_variable}_annual_outvar"])
+      comp_load.annual_output = get_report_variable_data_annual(['EMS'], ["#{comp_load.ems_variable}_annual_outvar"])
       if include_timeseries_component_loads
         comp_load.timeseries_output = get_report_variable_data_timeseries(['EMS'], ["#{comp_load.ems_variable}_timeseries_outvar"], UnitConversions.convert(1.0, 'J', comp_load.timeseries_units), 0, timeseries_frequency)
       end
@@ -397,7 +417,7 @@ class SimulationOutputReport < OpenStudio::Measure::ReportingMeasure
 
     # Unmet loads (heating/cooling energy delivered by backup ideal air system)
     @unmet_loads.each do |load_type, unmet_load|
-      unmet_load.annual_output = get_report_meter_data_annual_mbtu(unmet_load.meter)
+      unmet_load.annual_output = get_report_meter_data_annual(unmet_load.meter)
     end
 
     # Peak Building Space Heating/Cooling Loads (total heating/cooling energy delivered including backup ideal air system)
@@ -410,7 +430,7 @@ class SimulationOutputReport < OpenStudio::Measure::ReportingMeasure
       next if end_use.meter.nil?
 
       fuel_type, end_use_type = key
-      end_use.annual_output = get_report_meter_data_annual_mbtu(end_use.meter)
+      end_use.annual_output = get_report_meter_data_annual(end_use.meter)
       if (end_use_type == EUT::PV) && (@end_uses[key].annual_output > 0)
         end_use.annual_output *= -1.0
       end
@@ -423,6 +443,14 @@ class SimulationOutputReport < OpenStudio::Measure::ReportingMeasure
       end_use.timeseries_output = get_report_meter_data_timeseries('', end_use.meter, timeseries_unit_conv, 0, timeseries_frequency)
     end
 
+    # Hot Water Uses
+    @hot_water_uses.each do |hot_water_type, hot_water|
+      hot_water.annual_output = get_report_variable_data_annual([hot_water.key.upcase], [hot_water.variable], UnitConversions.convert(1.0, 'm^3', hot_water.annual_units))
+      if include_timeseries_hot_water_uses
+        hot_water.timeseries_output = get_report_variable_data_timeseries([hot_water.key.upcase], [hot_water.variable], UnitConversions.convert(1.0, 'm^3', hot_water.timeseries_units), 0, timeseries_frequency)
+      end
+    end
+
     # Space Heating (by System)
     dfhp_loads = get_dfhp_loads(outputs) # Calculate dual-fuel heat pump load
     outputs[:hpxml_heat_sys_ids].each do |sys_id|
@@ -433,7 +461,7 @@ class SimulationOutputReport < OpenStudio::Measure::ReportingMeasure
       @fuels.each do |fuel_type, fuel|
         end_use = @end_uses[[fuel_type, EUT::Heating]]
         vars = get_all_var_keys(end_use.variable)
-        end_use.annual_output_by_system[sys_id] = get_report_variable_data_annual_mbtu(keys, vars)
+        end_use.annual_output_by_system[sys_id] = get_report_variable_data_annual(keys, vars)
         if include_timeseries_end_use_consumptions
           end_use.timeseries_output_by_system[sys_id] = get_report_variable_data_timeseries(keys, vars, UnitConversions.convert(1.0, 'J', end_use.timeseries_units), 0, timeseries_frequency)
         end
@@ -441,7 +469,7 @@ class SimulationOutputReport < OpenStudio::Measure::ReportingMeasure
 
       # Disaggregated Fan/Pump Energy Use
       end_use = @end_uses[[FT::Elec, EUT::HeatingFanPump]]
-      end_use.annual_output_by_system[sys_id] = get_report_variable_data_annual_mbtu(['EMS'], ep_output_names.select { |name| name.end_with?(Constants.ObjectNameFanPumpDisaggregatePrimaryHeat) || name.end_with?(Constants.ObjectNameFanPumpDisaggregateBackupHeat) })
+      end_use.annual_output_by_system[sys_id] = get_report_variable_data_annual(['EMS'], ep_output_names.select { |name| name.end_with?(Constants.ObjectNameFanPumpDisaggregatePrimaryHeat) || name.end_with?(Constants.ObjectNameFanPumpDisaggregateBackupHeat) })
       if include_timeseries_end_use_consumptions
         end_use.timeseries_output_by_system[sys_id] = get_report_variable_data_timeseries(['EMS'], ep_output_names.select { |name| name.end_with?(Constants.ObjectNameFanPumpDisaggregatePrimaryHeat) || name.end_with?(Constants.ObjectNameFanPumpDisaggregateBackupHeat) }, UnitConversions.convert(1.0, 'J', end_use.timeseries_units), 0, timeseries_frequency)
       end
@@ -460,14 +488,14 @@ class SimulationOutputReport < OpenStudio::Measure::ReportingMeasure
       # End Uses
       end_use = @end_uses[[FT::Elec, EUT::Cooling]]
       vars = get_all_var_keys(end_use.variable)
-      end_use.annual_output_by_system[sys_id] = get_report_variable_data_annual_mbtu(keys, vars)
+      end_use.annual_output_by_system[sys_id] = get_report_variable_data_annual(keys, vars)
       if include_timeseries_end_use_consumptions
         end_use.timeseries_output_by_system[sys_id] = get_report_variable_data_timeseries(keys, vars, UnitConversions.convert(1.0, 'J', end_use.timeseries_units), 0, timeseries_frequency)
       end
 
       # Disaggregated Fan/Pump Energy Use
       end_use = @end_uses[[FT::Elec, EUT::CoolingFanPump]]
-      end_use.annual_output_by_system[sys_id] = get_report_variable_data_annual_mbtu(['EMS'], ep_output_names.select { |name| name.end_with? Constants.ObjectNameFanPumpDisaggregateCool })
+      end_use.annual_output_by_system[sys_id] = get_report_variable_data_annual(['EMS'], ep_output_names.select { |name| name.end_with? Constants.ObjectNameFanPumpDisaggregateCool })
       if include_timeseries_end_use_consumptions
         end_use.timeseries_output_by_system[sys_id] = get_report_variable_data_timeseries(['EMS'], ep_output_names.select { |name| name.end_with? Constants.ObjectNameFanPumpDisaggregateCool }, UnitConversions.convert(1.0, 'J', end_use.timeseries_units), 0, timeseries_frequency)
       end
@@ -484,7 +512,7 @@ class SimulationOutputReport < OpenStudio::Measure::ReportingMeasure
     ep_output_name = @hvac_map[outputs[:hpxml_dehumidifier_id]]
     if not ep_output_name.nil?
       keys = ep_output_name.map(&:upcase)
-      end_use.annual_output = get_report_variable_data_annual_mbtu(keys, vars)
+      end_use.annual_output = get_report_variable_data_annual(keys, vars)
       if include_timeseries_end_use_consumptions
         end_use.timeseries_output = get_report_variable_data_timeseries(keys, vars, UnitConversions.convert(1.0, 'J', end_use.timeseries_units), 0, timeseries_frequency)
       end
@@ -495,7 +523,7 @@ class SimulationOutputReport < OpenStudio::Measure::ReportingMeasure
 
     # Water Heating (by System)
     solar_keys = []
-    desuperheater_vars = []
+    dsh_keys = []
     outputs[:hpxml_dhw_sys_ids].each do |sys_id|
       ep_output_names = get_ep_output_names_for_water_heating(sys_id)
       keys = ep_output_names.map(&:upcase)
@@ -508,7 +536,7 @@ class SimulationOutputReport < OpenStudio::Measure::ReportingMeasure
 
           vars = get_all_var_keys(end_use.variable)
 
-          end_use.annual_output_by_system[sys_id] = get_report_variable_data_annual_mbtu(keys, vars)
+          end_use.annual_output_by_system[sys_id] = get_report_variable_data_annual(keys, vars)
           if include_timeseries_end_use_consumptions
             end_use.timeseries_output_by_system[sys_id] = get_report_variable_data_timeseries(keys, vars, UnitConversions.convert(1.0, 'J', end_use.timeseries_units), 0, timeseries_frequency)
           end
@@ -516,7 +544,7 @@ class SimulationOutputReport < OpenStudio::Measure::ReportingMeasure
       end
 
       # Loads
-      @loads[LT::HotWaterDelivered].annual_output_by_system[sys_id] = get_report_variable_data_annual_mbtu(keys, get_all_var_keys(@loads[LT::HotWaterDelivered].variable))
+      @loads[LT::HotWaterDelivered].annual_output_by_system[sys_id] = get_report_variable_data_annual(keys, get_all_var_keys(@loads[LT::HotWaterDelivered].variable))
 
       # Combi boiler water system
       hvac_id = get_combi_hvac_id(sys_id)
@@ -530,7 +558,7 @@ class SimulationOutputReport < OpenStudio::Measure::ReportingMeasure
 
           combi_hw_vars = ep_output_names.select { |name| name.include? Constants.ObjectNameCombiWaterHeatingEnergy(nil) }
 
-          hw_energy = get_report_variable_data_annual_mbtu(['EMS'], combi_hw_vars)
+          hw_energy = get_report_variable_data_annual(['EMS'], combi_hw_vars)
           hw_end_use.annual_output_by_system[sys_id] += hw_energy
           htg_end_use.annual_output_by_system[hvac_id] -= hw_energy
           if include_timeseries_end_use_consumptions
@@ -550,29 +578,23 @@ class SimulationOutputReport < OpenStudio::Measure::ReportingMeasure
         next unless end_use.annual_output_by_system[sys_id] > 0
 
         ec_vars = ep_output_names.select { |name| name.include? Constants.ObjectNameWaterHeaterAdjustment(nil) }
-        dsh_vars = ep_output_names.select { |name| name.include? Constants.ObjectNameDesuperheaterEnergy(nil) }
 
-        ec_adj = get_report_variable_data_annual_mbtu(['EMS'], ec_vars)
-        dsh_adj = get_report_variable_data_annual_mbtu(['EMS'], dsh_vars)
-        break if ec_adj + dsh_adj == 0 # No adjustment
+        ec_adj = get_report_variable_data_annual(['EMS'], ec_vars)
+        break if ec_adj == 0 # No adjustment
 
-        end_use.annual_output_by_system[sys_id] += ec_adj + dsh_adj
+        end_use.annual_output_by_system[sys_id] += ec_adj
         if include_timeseries_end_use_consumptions
           ec_adj_timeseries = get_report_variable_data_timeseries(['EMS'], ec_vars, UnitConversions.convert(1.0, 'J', end_use.timeseries_units), 0, timeseries_frequency)
-          dsh_adj_timeseries = get_report_variable_data_timeseries(['EMS'], dsh_vars, UnitConversions.convert(1.0, 'J', end_use.timeseries_units), 0, timeseries_frequency)
           end_use.timeseries_output_by_system[sys_id] = end_use.timeseries_output_by_system[sys_id].zip(ec_adj_timeseries).map { |x, y| x + y }
-          end_use.timeseries_output_by_system[sys_id] = end_use.timeseries_output_by_system[sys_id].zip(dsh_adj_timeseries).map { |x, y| x + y }
         end
         break # only apply once
       end
 
-      # Can only be one desuperheater or solar thermal system
-      if desuperheater_vars.empty?
-        desuperheater_vars = ep_output_names.select { |name| name.include? Constants.ObjectNameDesuperheaterLoad(nil) }
-      end
+      # Can only be one solar thermal system
       if solar_keys.empty?
         solar_keys = ep_output_names.select { |name| name.include? Constants.ObjectNameSolarHotWater }.map(&:upcase)
       end
+      dsh_keys << ep_output_names.select { |name| name.include? Constants.ObjectNameDesuperheater(nil) }.map(&:upcase)
     end
 
     # Apply Heating/Cooling DSEs
@@ -598,15 +620,14 @@ class SimulationOutputReport < OpenStudio::Measure::ReportingMeasure
     end
 
     # Hot Water Load - Solar Thermal
-    @loads[LT::HotWaterSolarThermal].annual_output = get_report_variable_data_annual_mbtu(solar_keys, get_all_var_keys(OutputVars.WaterHeaterLoadSolarThermal))
+    @loads[LT::HotWaterSolarThermal].annual_output = get_report_variable_data_annual(solar_keys, get_all_var_keys(OutputVars.WaterHeaterLoadSolarThermal))
     @loads[LT::HotWaterSolarThermal].annual_output *= -1 if @loads[LT::HotWaterSolarThermal].annual_output != 0
 
     # Hot Water Load - Desuperheater
-    @loads[LT::HotWaterDesuperheater].annual_output = get_report_variable_data_annual_mbtu(['EMS'], desuperheater_vars)
-    @loads[LT::HotWaterDesuperheater].annual_output *= -1.0 if @loads[LT::HotWaterDesuperheater].annual_output != 0
+    @loads[LT::HotWaterDesuperheater].annual_output = get_report_variable_data_annual(dsh_keys, get_all_var_keys(@loads[LT::HotWaterDesuperheater].variable))
 
     # Hot Water Load - Tank Losses (excluding solar storage tank)
-    @loads[LT::HotWaterTankLosses].annual_output = get_report_variable_data_annual_mbtu(solar_keys, ['Water Heater Heat Loss Energy'], not_key: true)
+    @loads[LT::HotWaterTankLosses].annual_output = get_report_variable_data_annual(solar_keys, ['Water Heater Heat Loss Energy'], not_key: true)
     @loads[LT::HotWaterTankLosses].annual_output *= -1.0 if @loads[LT::HotWaterTankLosses].annual_output < 0
 
     # Apply solar fraction to load for simple solar water heating systems
@@ -742,6 +763,10 @@ class SimulationOutputReport < OpenStudio::Measure::ReportingMeasure
     @component_loads.each do |load_type, load|
       results_out << ["#{load.name} (#{load.annual_units})", load.annual_output.round(2)]
     end
+    results_out << [line_break]
+    @hot_water_uses.each do |hot_water_type, hot_water|
+      results_out << ["#{hot_water.name} (#{hot_water.annual_units})", hot_water.annual_output.round(2)]
+    end
 
     CSV.open(csv_path, 'wb') { |csv| results_out.to_a.each { |elem| csv << elem } }
     runner.registerInfo("Wrote annual output results to #{csv_path}.")
@@ -831,6 +856,7 @@ class SimulationOutputReport < OpenStudio::Measure::ReportingMeasure
                                       include_timeseries_zone_temperatures,
                                       include_timeseries_fuel_consumptions,
                                       include_timeseries_end_use_consumptions,
+                                      include_timeseries_hot_water_uses,
                                       include_timeseries_total_loads,
                                       include_timeseries_component_loads)
     # Time column
@@ -853,6 +879,11 @@ class SimulationOutputReport < OpenStudio::Measure::ReportingMeasure
     else
       end_use_data = []
     end
+    if include_timeseries_hot_water_uses
+      hot_water_use_data = @hot_water_uses.values.select { |x| !x.timeseries_output.empty? }.map { |x| [x.name, x.timeseries_units] + x.timeseries_output.map { |v| v.round(2) } }
+    else
+      hot_water_use_data = []
+    end
     if include_timeseries_zone_temperatures
       zone_temps_data = @zone_temps.values.select { |x| !x.timeseries_output.empty? }.map { |x| [x.name, x.timeseries_units] + x.timeseries_output.map { |v| v.round(2) } }
     else
@@ -869,12 +900,12 @@ class SimulationOutputReport < OpenStudio::Measure::ReportingMeasure
       comp_loads_data = []
     end
 
-    return if fuel_data.size + end_use_data.size + zone_temps_data.size + total_loads_data.size + comp_loads_data.size == 0
+    return if fuel_data.size + end_use_data.size + hot_water_use_data.size + zone_temps_data.size + total_loads_data.size + comp_loads_data.size == 0
 
     fail 'Unable to obtain timestamps.' if @timestamps.empty?
 
     # Assemble data
-    data = data.zip(*fuel_data, *end_use_data, *zone_temps_data, *total_loads_data, *comp_loads_data)
+    data = data.zip(*fuel_data, *end_use_data, *hot_water_use_data, *zone_temps_data, *total_loads_data, *comp_loads_data)
 
     # Error-check
     n_elements = []
@@ -1173,15 +1204,15 @@ class SimulationOutputReport < OpenStudio::Measure::ReportingMeasure
     return sys.id
   end
 
-  def get_report_meter_data_annual_mbtu(variable)
-    query = "SELECT SUM(VariableValue/1000000000) FROM ReportMeterData WHERE ReportMeterDataDictionaryIndex IN (SELECT ReportMeterDataDictionaryIndex FROM ReportMeterDataDictionary WHERE VariableName='#{variable}' AND ReportingFrequency='Run Period' AND VariableUnits='J')"
+  def get_report_meter_data_annual(variable, unit_conv = UnitConversions.convert(1.0, 'J', 'MBtu'))
+    query = "SELECT SUM(VariableValue*#{unit_conv}) FROM ReportMeterData WHERE ReportMeterDataDictionaryIndex IN (SELECT ReportMeterDataDictionaryIndex FROM ReportMeterDataDictionary WHERE VariableName='#{variable}' AND ReportingFrequency='Run Period' AND VariableUnits='J')"
     value = @sqlFile.execAndReturnFirstDouble(query)
     fail "Query error: #{query}" unless value.is_initialized
 
-    return UnitConversions.convert(value.get, 'GJ', 'MBtu')
+    return value.get
   end
 
-  def get_report_variable_data_annual_mbtu(key_values_list, variable_names_list, not_key: false)
+  def get_report_variable_data_annual(key_values_list, variable_names_list, unit_conv = UnitConversions.convert(1.0, 'J', 'MBtu'), not_key: false)
     keys = "'" + key_values_list.join("','") + "'"
     vars = "'" + variable_names_list.join("','") + "'"
     if not_key
@@ -1189,11 +1220,11 @@ class SimulationOutputReport < OpenStudio::Measure::ReportingMeasure
     else
       s_not = ''
     end
-    query = "SELECT SUM(VariableValue/1000000000) FROM ReportVariableData WHERE ReportVariableDataDictionaryIndex IN (SELECT ReportVariableDataDictionaryIndex FROM ReportVariableDataDictionary WHERE KeyValue #{s_not}IN (#{keys}) AND VariableName IN (#{vars}) AND ReportingFrequency='Run Period')"
+    query = "SELECT SUM(VariableValue*#{unit_conv}) FROM ReportVariableData WHERE ReportVariableDataDictionaryIndex IN (SELECT ReportVariableDataDictionaryIndex FROM ReportVariableDataDictionary WHERE KeyValue #{s_not}IN (#{keys}) AND VariableName IN (#{vars}) AND ReportingFrequency='Run Period')"
     value = @sqlFile.execAndReturnFirstDouble(query)
     fail "Query error: #{query}" unless value.is_initialized
 
-    return UnitConversions.convert(value.get, 'GJ', 'MBtu')
+    return value.get
   end
 
   def get_report_meter_data_timeseries(key_value, variable_name, unit_conv, unit_adder, timeseries_frequency)
@@ -1277,7 +1308,7 @@ class SimulationOutputReport < OpenStudio::Measure::ReportingMeasure
         vars = get_all_var_keys(OutputVars.SpaceHeatingDFHPBackupLoad)
         sys_id = dfhp_primary_sys_id(sys_id)
       end
-      dfhp_loads[[sys_id, dfhp_primary]] = get_report_variable_data_annual_mbtu(keys, vars)
+      dfhp_loads[[sys_id, dfhp_primary]] = get_report_variable_data_annual(keys, vars)
     end
     return dfhp_loads
   end
@@ -1354,8 +1385,10 @@ class SimulationOutputReport < OpenStudio::Measure::ReportingMeasure
   def get_dhw_solar_fraction(sys_id)
     solar_fraction = 0.0
     if @hpxml.solar_thermal_systems.size > 0
-      if @hpxml.solar_thermal_systems[0].water_heating_system_idref == sys_id
-        solar_fraction = @hpxml.solar_thermal_systems[0].solar_fraction.to_f
+      solar_thermal_system = @hpxml.solar_thermal_systems[0]
+      water_heater_idref = solar_thermal_system.water_heating_system_idref
+      if water_heater_idref.nil? || (water_heater_idref == sys_id)
+        solar_fraction = solar_thermal_system.solar_fraction.to_f
       end
     end
     return solar_fraction
@@ -1568,6 +1601,14 @@ class SimulationOutputReport < OpenStudio::Measure::ReportingMeasure
     attr_accessor(:meter, :variable, :annual_output_by_system, :timeseries_output_by_system)
   end
 
+  class HotWater < BaseOutput
+    def initialize(key:)
+      super()
+      @key = key
+    end
+    attr_accessor(:key, :variable)
+  end
+
   class PeakFuel < BaseOutput
     def initialize(meter:, report:)
       super()
@@ -1698,6 +1739,21 @@ class SimulationOutputReport < OpenStudio::Measure::ReportingMeasure
       end_use.timeseries_units = get_timeseries_units_from_fuel_type(fuel_type)
     end
 
+    # Hot Water Uses
+    @hot_water_uses = {
+      HWT::ClothesWasher => HotWater.new(key: Constants.ObjectNameClothesWasher),
+      HWT::Dishwasher => HotWater.new(key: Constants.ObjectNameDishwasher),
+      HWT::Fixtures => HotWater.new(key: Constants.ObjectNameFixtures),
+      HWT::DistributionWaste => HotWater.new(key: Constants.ObjectNameDistributionWaste)
+    }
+
+    @hot_water_uses.each do |hot_water_type, hot_water|
+      hot_water.variable = 'Water Use Equipment Hot Water Volume'
+      hot_water.name = "Hot Water: #{hot_water_type}"
+      hot_water.annual_units = 'gal'
+      hot_water.timeseries_units = 'gal'
+    end
+
     # Peak Fuels
     @peak_fuels = {
       [FT::Elec, PFT::Winter] => PeakFuel.new(meter: 'Heating:EnergyTransfer', report: 'Peak Electricity Winter Total'),
@@ -1717,7 +1773,7 @@ class SimulationOutputReport < OpenStudio::Measure::ReportingMeasure
       LT::Cooling => Load.new(ems_variable: 'loads_clg_tot'),
       LT::HotWaterDelivered => Load.new(variable: OutputVars.WaterHeatingLoad),
       LT::HotWaterTankLosses => Load.new(),
-      LT::HotWaterDesuperheater => Load.new(),
+      LT::HotWaterDesuperheater => Load.new(variable: OutputVars.WaterHeaterLoadDesuperheater),
       LT::HotWaterSolarThermal => Load.new(),
     }
 

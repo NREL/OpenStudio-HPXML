@@ -277,8 +277,9 @@ class HPXML < Object
     return fuel_fracs.key(fuel_fracs.values.max)
   end
 
-  def fraction_of_window_area_operable()
-    # Calculates the fraction of window area that is operable.
+  def fraction_of_windows_operable()
+    # Calculates the fraction of windows that are operable.
+    # Since we don't have quantity available, we use area as an approximation.
     window_area_total = @windows.map { |w| w.area }.inject(0, :+)
     window_area_operable = @windows.map { |w| w.fraction_operable * w.area }.inject(0, :+)
     if window_area_total <= 0
@@ -810,7 +811,7 @@ class HPXML < Object
 
   class ClimateandRiskZones < BaseElement
     ATTRS = [:iecc_year, :iecc_zone, :weather_station_id, :weather_station_name, :weather_station_wmo,
-             :weather_station_epw_filename]
+             :weather_station_epw_filepath]
     attr_accessor(*ATTRS)
 
     def check_for_errors
@@ -836,7 +837,7 @@ class HPXML < Object
         XMLHelper.add_element(weather_station, 'Name', @weather_station_name) unless @weather_station_name.nil?
         XMLHelper.add_element(weather_station, 'WMO', @weather_station_wmo) unless @weather_station_wmo.nil?
         HPXML::add_extension(parent: weather_station,
-                             extensions: { 'EPWFileName' => @weather_station_epw_filename })
+                             extensions: { 'EPWFilePath' => @weather_station_epw_filepath })
       end
     end
 
@@ -853,7 +854,7 @@ class HPXML < Object
         @weather_station_id = HPXML::get_id(weather_station)
         @weather_station_name = XMLHelper.get_value(weather_station, 'Name')
         @weather_station_wmo = XMLHelper.get_value(weather_station, 'WMO')
-        @weather_station_epw_filename = XMLHelper.get_value(weather_station, 'extension/EPWFileName')
+        @weather_station_epw_filepath = XMLHelper.get_value(weather_station, 'extension/EPWFilePath')
       end
     end
   end
@@ -1003,7 +1004,8 @@ class HPXML < Object
             XMLHelper.add_element(ventilation_rate, 'Value', Float(@vented_attic_sla))
           end
           if not @vented_attic_constant_ach.nil?
-            XMLHelper.add_element(attic, 'extension/ConstantACHnatural', Float(@vented_attic_constant_ach))
+            HPXML::add_extension(parent: attic,
+                                 extensions: { 'ConstantACHnatural' => Float(@vented_attic_constant_ach) })
           end
         elsif @attic_type == AtticTypeConditioned
           attic_type_attic = XMLHelper.add_element(attic_type_e, 'Attic')
@@ -4017,8 +4019,10 @@ class HPXML < Object
           next unless match
 
           # Update values
-          surf.area += surf2.area
-          if surf_type == :slabs
+          if (not surf.area.nil?) && (not surf2.area.nil?)
+            surf.area += surf2.area
+          end
+          if (surf_type == :slabs) && (not surf.exposed_perimeter.nil?) && (not surf2.exposed_perimeter.nil?)
             surf.exposed_perimeter += surf2.exposed_perimeter
           end
 
@@ -4174,13 +4178,11 @@ class HPXML < Object
   end
 
   def self.get_id(parent, element_name = 'SystemIdentifier')
-    return XMLHelper.get_element(parent, element_name).get('id')
+    return XMLHelper.get_attribute_value(XMLHelper.get_element(parent, element_name), 'id')
   end
 
   def self.get_idref(element)
-    return if element.nil?
-
-    return element.get('idref')
+    return XMLHelper.get_attribute_value(element, 'idref')
   end
 
   def self.to_float_or_nil(value)
