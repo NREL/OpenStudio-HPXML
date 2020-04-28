@@ -319,6 +319,7 @@ class SimulationOutputReportTest < MiniTest::Test
                   'include_timeseries_zone_temperatures' => true,
                   'include_timeseries_fuel_consumptions' => false,
                   'include_timeseries_end_use_consumptions' => false,
+                  'include_timeseries_hot_water_uses' => false,
                   'include_timeseries_total_loads' => false,
                   'include_timeseries_component_loads' => false }
     annual_csv, timeseries_csv, eri_csv = _test_measure(args_hash)
