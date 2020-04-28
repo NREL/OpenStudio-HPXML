@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require_relative 'constants'
 require_relative 'geometry'
 require_relative 'util'
@@ -1680,7 +1682,6 @@ class HVAC
       boiler_eff_curve = create_curve_bicubic(model, [1.111720116, 0.078614078, -0.400425756, 0.0, -0.000156783, 0.009384599, 0.234257955, 1.32927e-06, -0.004446701, -1.22498e-05], 'NonCondensingBoilerEff', 0.1, 1.0, 20.0, 80.0)
     end
     boiler.setNormalizedBoilerEfficiencyCurve(boiler_eff_curve)
-    boiler.setDesignWaterOutletTemperature(UnitConversions.convert(design_temp - 32.0, 'R', 'K'))
     boiler.setMinimumPartLoadRatio(0.0)
     boiler.setMaximumPartLoadRatio(1.0)
     boiler.setBoilerFlowMode('LeavingSetpointModulated')
@@ -2239,16 +2240,18 @@ class HVAC
       hvac_objects << clg_object_sensor
     end
 
+    var_map = { 'NaturalGas' => 'Heating Coil Gas Energy',
+                'PropaneGas' => 'Heating Coil Propane Energy',
+                'FuelOilNo1' => 'Heating Coil FuelOil#1 Energy',
+                'OtherFuel1' => 'Heating Coil OtherFuel1 Energy',
+                'OtherFuel2' => 'Heating Coil OtherFuel2 Energy' }
+
     if htg_object.nil?
       htg_object_sensor = nil
     else
       var = 'Heating Coil Electric Energy'
       if htg_object.is_a? OpenStudio::Model::CoilHeatingGas
-        var = { 'NaturalGas' => 'Heating Coil Gas Energy',
-                'PropaneGas' => 'Heating Coil Propane Energy',
-                'FuelOil#1' => 'Heating Coil FuelOil#1 Energy',
-                'OtherFuel1' => 'Heating Coil OtherFuel1 Energy',
-                'OtherFuel2' => 'Heating Coil OtherFuel2 Energy' }[htg_object.fuelType]
+        var = var_map[htg_object.fuelType]
         fail "Unexpected heating coil '#{htg_object.name}'." if var.nil?
       elsif htg_object.is_a? OpenStudio::Model::ZoneHVACBaseboardConvectiveWater
         var = 'Baseboard Total Heating Energy'
@@ -2265,11 +2268,7 @@ class HVAC
     else
       var = 'Heating Coil Electric Energy'
       if backup_htg_object.is_a? OpenStudio::Model::CoilHeatingGas
-        var = { 'NaturalGas' => 'Heating Coil Gas Energy',
-                'PropaneGas' => 'Heating Coil Propane Energy',
-                'FuelOil#1' => 'Heating Coil FuelOil#1 Energy',
-                'OtherFuel1' => 'Heating Coil OtherFuel1 Energy',
-                'OtherFuel2' => 'Heating Coil OtherFuel2 Energy' }[backup_htg_object.fuelType]
+        var = var_map[backup_htg_object.fuelType]
         fail "Unexpected heating coil '#{backup_htg_object.name}'." if var.nil?
       end
 
