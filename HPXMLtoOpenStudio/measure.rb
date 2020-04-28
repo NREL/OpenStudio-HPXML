@@ -2117,11 +2117,6 @@ class OSModel
 
     surfaces = []
     @hpxml.windows.each do |window|
-      wall_exterior_adjacent_to = window.wall.exterior_adjacent_to
-      if [HPXML::LocationOtherHeatedSpace, HPXML::LocationOtherMultifamilyBufferSpace, HPXML::LocationOtherNonFreezingSpace, HPXML::LocationOtherHousingUnit].include? wall_exterior_adjacent_to
-        fail "Window '#{window.id}' cannot be adjacent to '#{wall_exterior_adjacent_to}'. Check parent wall: '#{window.wall.id}'."
-      end
-
       window_height = 4.0 # ft, default
       overhang_depth = nil
       if not window.overhangs_depth.nil?
@@ -2153,7 +2148,7 @@ class OSModel
       sub_surface.setSubSurfaceType('FixedWindow')
 
       ## Outside boundary condtion needs to be assigned after subsurface attached, this will allow os to create adjacent surface for subsurface as well.
-      set_subsurface_exterior(surface, wall_exterior_adjacent_to, spaces, model)
+      set_subsurface_exterior(surface, window.wall.exterior_adjacent_to, spaces, model)
       surfaces << surface
 
       if not overhang_depth.nil?
