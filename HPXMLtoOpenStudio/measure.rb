@@ -2649,7 +2649,7 @@ class OSModel
       end
       if not heat_pump.backup_heating_fuel.nil?
         if heat_pump.backup_heating_capacity.nil? ^ heat_pump.heating_capacity.nil?
-          fail "HeatPump '#{heat_pump.id}' must have both BackupHeatingCapacity and HeatingCapacity provided or not provided."
+          fail "HeatPump '#{heat_pump.id}' must have both HeatingCapacity and BackupHeatingCapacity provided or not provided."
         end
       end
 
