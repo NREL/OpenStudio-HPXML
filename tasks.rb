@@ -1464,6 +1464,8 @@ def get_values(osw_file, step)
   return step
 end
 
+# frozen_string_literal: true
+
 def create_hpxmls
   this_dir = File.dirname(__FILE__)
   sample_files_dir = File.join(this_dir, 'workflow/sample_files')
