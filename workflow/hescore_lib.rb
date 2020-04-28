@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 # Map between HES resource_type and HES units
 def get_units_map
   return { 'electric' => 'kWh',
@@ -34,5 +36,9 @@ def get_output_map
            'Electricity: Lighting Interior' => ['lighting', 'electric'],
            'Electricity: Lighting Garage' => ['lighting', 'electric'],
            'Electricity: Lighting Exterior' => ['lighting', 'electric'],
-           'Electricity: PV' => ['generation', 'electric'] }
+           'Electricity: PV' => ['generation', 'electric'],
+           'Hot Water: Clothes Washer' => ['hot_water', 'hot_water'],
+           'Hot Water: Dishwasher' => ['hot_water', 'hot_water'],
+           'Hot Water: Fixtures' => ['hot_water', 'hot_water'],
+           'Hot Water: Distribution Waste' => ['hot_water', 'hot_water'] }
 end

@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require 'openstudio'
 require 'openstudio/ruleset/ShowRunnerOutput'
 require 'minitest/autorun'
@@ -9,26 +11,12 @@ require_relative '../hescore_lib'
 
 class HEScoreTest < Minitest::Unit::TestCase
   def before_setup
-    # Download weather files
-    # this_dir = File.absolute_path(File.join(File.dirname(__FILE__), ".."))
-    # cli_path = OpenStudio.getOpenStudioCLI
-    # command = "\"#{cli_path}\" --no-ssl \"#{File.join(File.dirname(__FILE__), "..", "run_simulation.rb")}\" --download-weather"
-    # system(command)
-
-    # num_epws_expected = File.readlines(File.join(this_dir, "..", "weather", "data.csv")).size - 1
-    # num_epws_actual = Dir[File.join(this_dir, "..", "weather", "*.epw")].count
-    # assert_equal(num_epws_expected, num_epws_actual)
-
-    # num_cache_expected = File.readlines(File.join(this_dir, "..", "weather", "data.csv")).size - 1
-    # num_cache_actual = Dir[File.join(this_dir, "..", "weather", "*-cache.csv")].count
-    # assert_equal(num_cache_expected, num_cache_actual)
-
     # Prepare results dir for CI storage
     @results_dir = File.absolute_path(File.join(File.dirname(__FILE__), '..', 'test_results'))
     Dir.mkdir(@results_dir) unless File.exist? @results_dir
   end
 
-  def test_valid_simulations
+  def test_simulations
     results_zip_path = File.join(@results_dir, 'results_jsons.zip')
     File.delete(results_zip_path) if File.exist? results_zip_path
     results_csv_path = File.join(@results_dir, 'results.csv')
@@ -51,7 +39,7 @@ class HEScoreTest < Minitest::Unit::TestCase
 
     cli_path = OpenStudio.getOpenStudioCLI
     xml = File.absolute_path(File.join(parent_dir, 'sample_files', 'Base_hpxml.xml'))
-    command = "\"#{cli_path}\" --no-ssl \"#{File.join(File.dirname(__FILE__), '../run_simulation.rb')}\" --skip-simulation -x #{xml}"
+    command = "\"#{cli_path}\" \"#{File.join(File.dirname(__FILE__), '../run_simulation.rb')}\" --skip-simulation -x #{xml}"
     start_time = Time.now
     system(command)
 
@@ -72,7 +60,7 @@ class HEScoreTest < Minitest::Unit::TestCase
 
     # Run workflow
     cli_path = OpenStudio.getOpenStudioCLI
-    command = "\"#{cli_path}\" --no-ssl \"#{File.join(File.dirname(__FILE__), '../run_simulation.rb')}\" -x #{xml}"
+    command = "\"#{cli_path}\" \"#{File.join(File.dirname(__FILE__), '../run_simulation.rb')}\" -x #{xml}"
     start_time = Time.now
     system(command)
     runtime = Time.now - start_time
@@ -109,11 +97,8 @@ class HEScoreTest < Minitest::Unit::TestCase
 
     results = {}
 
-    hes_keys = get_output_map.values
-    hes_keys << ['hot_water', 'hot_water'] # TODO: Remove this when eventually incorporated in reporting measure
-
     # Fill in missing results with zeros
-    hes_keys.uniq.each do |hes_key|
+    get_output_map.values.uniq.each do |hes_key|
       end_use = hes_key[0]
       resource_type = hes_key[1]
       units = get_units_map[resource_type]
@@ -145,7 +130,7 @@ class HEScoreTest < Minitest::Unit::TestCase
   end
 
   def _test_results(xml, results)
-    hpxml_doc = REXML::Document.new(File.read(xml))
+    hpxml = HPXML.new(hpxml_path: xml)
 
     fuel_map = { HPXML::FuelTypeElectricity => 'electric',
                  HPXML::FuelTypeNaturalGas => 'natural_gas',
@@ -154,38 +139,43 @@ class HEScoreTest < Minitest::Unit::TestCase
                  HPXML::FuelTypeWood => 'cord_wood',
                  HPXML::FuelTypeWoodPellets => 'pellet_wood' }
 
-    # Get HPXML values for Building Summary
-    cfa = Float(XMLHelper.get_value(hpxml_doc, '/HPXML/Building/BuildingDetails/BuildingSummary/BuildingConstruction/ConditionedFloorArea'))
-    nbr = Float(XMLHelper.get_value(hpxml_doc, '/HPXML/Building/BuildingDetails/BuildingSummary/BuildingConstruction/NumberofBedrooms'))
+    # Get HPXML values for Building Construction
+    cfa = hpxml.building_construction.conditioned_floor_area
+    nbr = hpxml.building_construction.number_of_bedrooms
 
     # Get HPXML values for HVAC
-    hvac_plant = hpxml_doc.elements['/HPXML/Building/BuildingDetails/Systems/HVAC/HVACPlant']
     htg_fuels = []
-    hvac_plant.elements.each('HeatingSystem[FractionHeatLoadServed>0]') do |htg_sys|
-      htg_fuels << fuel_map[XMLHelper.get_value(htg_sys, 'HeatingSystemFuel')]
-      if !htg_sys.elements['HeatingSystemType/Furnace'].nil? || !htg_sys.elements['HeatingSystemType/Boiler'].nil?
-        htg_fuels << fuel_map['electricity'] # fan/pump
+    hpxml.heating_systems.each do |heating_system|
+      next unless heating_system.fraction_heat_load_served > 0
+      htg_fuels << fuel_map[heating_system.heating_system_fuel]
+      if [HPXML::HVACTypeFurnace, HPXML::HVACTypeBoiler].include? heating_system.heating_system_type
+        htg_fuels << fuel_map[HPXML::FuelTypeElectricity] # fan/pump
       end
     end
-    hvac_plant.elements.each('HeatPump[FractionHeatLoadServed>0]') do |hp|
-      htg_fuels << fuel_map['electricity']
+    hpxml.heat_pumps.each do |heat_pump|
+      next unless heat_pump.fraction_heat_load_served > 0
+      htg_fuels << fuel_map[HPXML::FuelTypeElectricity]
     end
-    has_clg = !hvac_plant.elements['CoolingSystem[FractionCoolLoadServed>0] | HeatPump[FractionCoolLoadServed>0]'].nil?
+    has_clg = false
+    hpxml.cooling_systems.each do |cooling_system|
+      next unless cooling_system.fraction_cool_load_served > 0
+      has_clg = true
+    end
+    hpxml.heat_pumps.each do |heat_pump|
+      next unless heat_pump.fraction_cool_load_served > 0
+      has_clg = true
+    end
 
     # Get HPXML values for Water Heating
     hw_fuels = []
-    hpxml_doc.elements.each('/HPXML/Building/BuildingDetails/Systems/WaterHeating/WaterHeatingSystem') do |hw_sys|
-      hw_fuels << fuel_map[XMLHelper.get_value(hw_sys, 'FuelType')]
-      hw_type = XMLHelper.get_value(hw_sys, 'WaterHeaterType')
-      next unless hw_type.include?('boiler')
-      hpxml_doc.elements.each('/HPXML/Building/BuildingDetails/Systems/HVAC/HVACPlant/HeatingSystem') do |htg_sys|
-        next unless hw_sys.elements['RelatedHVACSystem'].attributes['idref'] == htg_sys.elements['SystemIdentifier'].attributes['id']
-        hw_fuels << fuel_map[XMLHelper.get_value(htg_sys, 'HeatingSystemFuel')]
-      end
+    hpxml.water_heating_systems.each do |water_heater|
+      hw_fuels << fuel_map[water_heater.fuel_type]
+      next unless [HPXML::WaterHeaterTypeCombiStorage, HPXML::WaterHeaterTypeCombiTankless].include? water_heater.water_heater_type
+      hw_fuels << fuel_map[water_heater.related_hvac_system.heating_system_fuel]
     end
 
     # Get HPXML values for PV
-    has_pv = !hpxml_doc.elements['/HPXML/Building/BuildingDetails/Systems/Photovoltaics/PVSystem'].nil?
+    has_pv = (hpxml.pv_systems.size > 0)
 
     tested_end_uses = []
     results.each do |key, value|
@@ -298,8 +288,8 @@ class HEScoreTest < Minitest::Unit::TestCase
 
   def _test_schema_validation(parent_dir, xml, schemas_dir)
     # TODO: Remove this when schema validation is included with CLI calls
-    hpxml_doc = REXML::Document.new(File.read(xml))
-    errors = XMLHelper.validate(hpxml_doc.to_s, File.join(schemas_dir, 'HPXML.xsd'), nil)
+    hpxml_doc = XMLHelper.parse_file(xml)
+    errors = XMLHelper.validate(hpxml_doc.to_xml, File.join(schemas_dir, 'HPXML.xsd'), nil)
     if errors.size > 0
       puts "#{xml}: #{errors}"
     end

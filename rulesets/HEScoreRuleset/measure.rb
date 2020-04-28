@@ -1,9 +1,9 @@
+# frozen_string_literal: true
+
 # see the URL below for information on how to write OpenStudio measures
 # http://nrel.github.io/OpenStudio-user-documentation/reference/measure_writing_guide/
 
 require 'openstudio'
-require 'rexml/document'
-require 'rexml/xpath'
 require 'pathname'
 require_relative 'resources/HESruleset'
 require_relative '../../hpxml-measures/HPXMLtoOpenStudio/resources/xmlhelper'
@@ -75,7 +75,7 @@ class HEScoreMeasure < OpenStudio::Measure::ModelMeasure
 
     # Write new HPXML file
     if hpxml_output_path.is_initialized
-      XMLHelper.write_file(new_hpxml.to_rexml, hpxml_output_path.get)
+      XMLHelper.write_file(new_hpxml.to_oga, hpxml_output_path.get)
       runner.registerInfo("Wrote file: #{hpxml_output_path.get}")
     end
 
