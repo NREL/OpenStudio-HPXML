@@ -4037,6 +4037,17 @@ class HPXML < Object
             end
           end
 
+          # Update attic/foundation idrefs as appropriate
+          @attics.each do |attic|
+            attic.attached_to_roof_idrefs.delete(surf2.id)
+            attic.attached_to_frame_floor_idrefs.delete(surf2.id)
+          end
+          @foundations.each do |foundation|
+            foundation.attached_to_slab_idrefs.delete(surf2.id)
+            foundation.attached_to_frame_floor_idrefs.delete(surf2.id)
+            foundation.attached_to_foundation_wall_idrefs.delete(surf2.id)
+          end
+
           # Remove old surface
           surfaces.delete_at(j)
         end
