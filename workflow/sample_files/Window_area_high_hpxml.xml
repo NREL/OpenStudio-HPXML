@@ -3,7 +3,7 @@
   <XMLTransactionHeaderInformation>
     <XMLType/>
     <XMLGeneratedBy>HES Generate HPXML</XMLGeneratedBy>
-    <CreatedDateAndTime>2019-11-08T08:43:56-08:00</CreatedDateAndTime>
+    <CreatedDateAndTime>2020-04-28T11:10:28-07:00</CreatedDateAndTime>
     <Transaction>create</Transaction>
   </XMLTransactionHeaderInformation>
   <SoftwareInfo>
@@ -11,7 +11,7 @@
     <SoftwareProgramVersion>0.2</SoftwareProgramVersion>
   </SoftwareInfo>
   <Building>
-    <BuildingID id="bid-3265.25475">
+    <BuildingID id="bid-2802.29308">
       <SendingSystemIdentifierType>hescore_external_building_id</SendingSystemIdentifierType>
       <SendingSystemIdentifierValue/>
     </BuildingID>
@@ -19,7 +19,7 @@
       <SiteID id="site1"/>
       <Address>
         <AddressType>street</AddressType>
-        <Address1>Regression run 7.45</Address1>
+        <Address1>Regression run 8.101</Address1>
         <CityMunicipality>St Louis</CityMunicipality>
         <StateCode>MO</StateCode>
         <ZipCode>63101</ZipCode>
@@ -27,7 +27,7 @@
     </Site>
     <ProjectStatus>
       <EventType>construction-period testing/daily test out</EventType>
-      <Date>2019-11-04</Date>
+      <Date>2020-03-24</Date>
     </ProjectStatus>
     <BuildingDetails>
       <BuildingSummary>
@@ -47,7 +47,7 @@
           </extension>
         </BuildingConstruction>
         <extension>
-          <comments>Window all same</comments>
+          <comments>Window area high</comments>
         </extension>
       </BuildingSummary>
       <ClimateandRiskZones>
@@ -220,7 +220,7 @@
         <Windows>
           <Window>
             <SystemIdentifier id="front_window"/>
-            <Area>60</Area>
+            <Area>500</Area>
             <Orientation>north</Orientation>
             <FrameType>
               <Wood/>
@@ -238,7 +238,7 @@
           </Window>
           <Window>
             <SystemIdentifier id="back_window"/>
-            <Area>50</Area>
+            <Area>500</Area>
             <Orientation>south</Orientation>
             <FrameType>
               <Wood/>
@@ -256,7 +256,7 @@
           </Window>
           <Window>
             <SystemIdentifier id="right_window"/>
-            <Area>40</Area>
+            <Area>250</Area>
             <Orientation>west</Orientation>
             <FrameType>
               <Wood/>
@@ -274,7 +274,7 @@
           </Window>
           <Window>
             <SystemIdentifier id="left_window"/>
-            <Area>30</Area>
+            <Area>250</Area>
             <Orientation>east</Orientation>
             <FrameType>
               <Wood/>
@@ -293,7 +293,7 @@
         </Windows>
         <extension>
           <hescore_wall_construction_same>true</hescore_wall_construction_same>
-          <hescore_window_construction_same>false</hescore_window_construction_same>
+          <hescore_window_construction_same>true</hescore_window_construction_same>
         </extension>
       </Enclosure>
       <Systems>

@@ -3,7 +3,7 @@
   <XMLTransactionHeaderInformation>
     <XMLType/>
     <XMLGeneratedBy>HES Generate HPXML</XMLGeneratedBy>
-    <CreatedDateAndTime>2019-11-08T08:43:14-08:00</CreatedDateAndTime>
+    <CreatedDateAndTime>2020-04-28T11:33:18-07:00</CreatedDateAndTime>
     <Transaction>create</Transaction>
   </XMLTransactionHeaderInformation>
   <SoftwareInfo>
@@ -11,7 +11,7 @@
     <SoftwareProgramVersion>0.2</SoftwareProgramVersion>
   </SoftwareInfo>
   <Building>
-    <BuildingID id="bid-3261.25471">
+    <BuildingID id="bid-2860.29366">
       <SendingSystemIdentifierType>hescore_external_building_id</SendingSystemIdentifierType>
       <SendingSystemIdentifierValue/>
     </BuildingID>
@@ -19,7 +19,7 @@
       <SiteID id="site1"/>
       <Address>
         <AddressType>street</AddressType>
-        <Address1>Regression run 7.41</Address1>
+        <Address1>Regression run 8.159</Address1>
         <CityMunicipality>St Louis</CityMunicipality>
         <StateCode>MO</StateCode>
         <ZipCode>63101</ZipCode>
@@ -27,7 +27,7 @@
     </Site>
     <ProjectStatus>
       <EventType>construction-period testing/daily test out</EventType>
-      <Date>2019-11-04</Date>
+      <Date>2020-03-24</Date>
     </ProjectStatus>
     <BuildingDetails>
       <BuildingSummary>
@@ -47,7 +47,7 @@
           </extension>
         </BuildingConstruction>
         <extension>
-          <comments>Blowerdoor 25000</comments>
+          <comments>DHW year 2020</comments>
         </extension>
       </BuildingSummary>
       <ClimateandRiskZones>
@@ -65,13 +65,8 @@
         <AirInfiltration>
           <AirInfiltrationMeasurement>
             <SystemIdentifier id="infilt1"/>
-            <TypeOfInfiltrationMeasurement>blower door</TypeOfInfiltrationMeasurement>
-            <HousePressure>50</HousePressure>
+            <TypeOfInfiltrationMeasurement>estimate</TypeOfInfiltrationMeasurement>
             <LeakinessDescription>average</LeakinessDescription>
-            <BuildingAirLeakage>
-              <UnitofMeasure>CFM</UnitofMeasure>
-              <AirLeakage>25000</AirLeakage>
-            </BuildingAirLeakage>
           </AirInfiltrationMeasurement>
         </AirInfiltration>
         <Attics>
@@ -351,7 +346,7 @@
             <SystemIdentifier id="water_heater1"/>
             <FuelType>natural gas</FuelType>
             <WaterHeaterType>storage water heater</WaterHeaterType>
-            <EnergyFactor>0.6</EnergyFactor>
+            <YearInstalled>2020</YearInstalled>
           </WaterHeatingSystem>
         </WaterHeating>
       </Systems>

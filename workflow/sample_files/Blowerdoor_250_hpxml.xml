@@ -3,7 +3,7 @@
   <XMLTransactionHeaderInformation>
     <XMLType/>
     <XMLGeneratedBy>HES Generate HPXML</XMLGeneratedBy>
-    <CreatedDateAndTime>2019-11-08T08:40:15-08:00</CreatedDateAndTime>
+    <CreatedDateAndTime>2020-04-28T10:57:18-07:00</CreatedDateAndTime>
     <Transaction>create</Transaction>
   </XMLTransactionHeaderInformation>
   <SoftwareInfo>
@@ -11,7 +11,7 @@
     <SoftwareProgramVersion>0.2</SoftwareProgramVersion>
   </SoftwareInfo>
   <Building>
-    <BuildingID id="bid-3246.25456">
+    <BuildingID id="bid-2742.29248">
       <SendingSystemIdentifierType>hescore_external_building_id</SendingSystemIdentifierType>
       <SendingSystemIdentifierValue/>
     </BuildingID>
@@ -19,7 +19,7 @@
       <SiteID id="site1"/>
       <Address>
         <AddressType>street</AddressType>
-        <Address1>Regression run 7.26</Address1>
+        <Address1>Regression run 8.41</Address1>
         <CityMunicipality>St Louis</CityMunicipality>
         <StateCode>MO</StateCode>
         <ZipCode>63101</ZipCode>
@@ -27,7 +27,7 @@
     </Site>
     <ProjectStatus>
       <EventType>construction-period testing/daily test out</EventType>
-      <Date>2019-11-04</Date>
+      <Date>2020-03-24</Date>
     </ProjectStatus>
     <BuildingDetails>
       <BuildingSummary>
@@ -40,14 +40,14 @@
           <ResidentialFacilityType>single-family detached</ResidentialFacilityType>
           <NumberofConditionedFloorsAboveGrade>2</NumberofConditionedFloorsAboveGrade>
           <AverageCeilingHeight>8</AverageCeilingHeight>
-          <NumberofBedrooms>10</NumberofBedrooms>
+          <NumberofBedrooms>4</NumberofBedrooms>
           <ConditionedFloorArea>2000</ConditionedFloorArea>
           <extension>
             <hescore_building_shape>rectangle</hescore_building_shape>
           </extension>
         </BuildingConstruction>
         <extension>
-          <comments>Bedrooms 10</comments>
+          <comments>Blowerdoor 250</comments>
         </extension>
       </BuildingSummary>
       <ClimateandRiskZones>
@@ -65,8 +65,13 @@
         <AirInfiltration>
           <AirInfiltrationMeasurement>
             <SystemIdentifier id="infilt1"/>
-            <TypeOfInfiltrationMeasurement>estimate</TypeOfInfiltrationMeasurement>
+            <TypeOfInfiltrationMeasurement>blower door</TypeOfInfiltrationMeasurement>
+            <HousePressure>50</HousePressure>
             <LeakinessDescription>average</LeakinessDescription>
+            <BuildingAirLeakage>
+              <UnitofMeasure>CFM</UnitofMeasure>
+              <AirLeakage>250</AirLeakage>
+            </BuildingAirLeakage>
           </AirInfiltrationMeasurement>
         </AirInfiltration>
         <Attics>

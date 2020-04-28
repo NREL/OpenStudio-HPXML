@@ -3,7 +3,7 @@
   <XMLTransactionHeaderInformation>
     <XMLType/>
     <XMLGeneratedBy>HES Generate HPXML</XMLGeneratedBy>
-    <CreatedDateAndTime>2019-11-08T08:36:14-08:00</CreatedDateAndTime>
+    <CreatedDateAndTime>2020-04-28T10:50:14-07:00</CreatedDateAndTime>
     <Transaction>create</Transaction>
   </XMLTransactionHeaderInformation>
   <SoftwareInfo>
@@ -11,7 +11,7 @@
     <SoftwareProgramVersion>0.2</SoftwareProgramVersion>
   </SoftwareInfo>
   <Building>
-    <BuildingID id="bid-3222.25432">
+    <BuildingID id="bid-2703.29209">
       <SendingSystemIdentifierType>hescore_external_building_id</SendingSystemIdentifierType>
       <SendingSystemIdentifierValue/>
     </BuildingID>
@@ -19,7 +19,7 @@
       <SiteID id="site1"/>
       <Address>
         <AddressType>street</AddressType>
-        <Address1>Regression run 7.2</Address1>
+        <Address1>Regression run 8.2</Address1>
         <CityMunicipality>Providence</CityMunicipality>
         <StateCode>RI</StateCode>
         <ZipCode>02901</ZipCode>
@@ -27,7 +27,7 @@
     </Site>
     <ProjectStatus>
       <EventType>construction-period testing/daily test out</EventType>
-      <Date>2019-11-04</Date>
+      <Date>2020-03-24</Date>
     </ProjectStatus>
     <BuildingDetails>
       <BuildingSummary>

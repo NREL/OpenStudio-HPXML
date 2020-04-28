@@ -3,7 +3,7 @@
   <XMLTransactionHeaderInformation>
     <XMLType/>
     <XMLGeneratedBy>HES Generate HPXML</XMLGeneratedBy>
-    <CreatedDateAndTime>2019-11-08T08:48:23-08:00</CreatedDateAndTime>
+    <CreatedDateAndTime>2020-04-28T11:29:32-07:00</CreatedDateAndTime>
     <Transaction>create</Transaction>
   </XMLTransactionHeaderInformation>
   <SoftwareInfo>
@@ -11,7 +11,7 @@
     <SoftwareProgramVersion>0.2</SoftwareProgramVersion>
   </SoftwareInfo>
   <Building>
-    <BuildingID id="bid-3292.25502">
+    <BuildingID id="bid-2850.29356">
       <SendingSystemIdentifierType>hescore_external_building_id</SendingSystemIdentifierType>
       <SendingSystemIdentifierValue/>
     </BuildingID>
@@ -19,7 +19,7 @@
       <SiteID id="site1"/>
       <Address>
         <AddressType>street</AddressType>
-        <Address1>Regression run 7.72</Address1>
+        <Address1>Regression run 8.149</Address1>
         <CityMunicipality>St Louis</CityMunicipality>
         <StateCode>MO</StateCode>
         <ZipCode>63101</ZipCode>
@@ -27,7 +27,7 @@
     </Site>
     <ProjectStatus>
       <EventType>construction-period testing/daily test out</EventType>
-      <Date>2019-11-04</Date>
+      <Date>2020-03-24</Date>
     </ProjectStatus>
     <BuildingDetails>
       <BuildingSummary>
@@ -47,7 +47,7 @@
           </extension>
         </BuildingConstruction>
         <extension>
-          <comments>Skylight u0.01-shgc0.01</comments>
+          <comments>Orphan duct</comments>
         </extension>
       </BuildingSummary>
       <ClimateandRiskZones>
@@ -291,19 +291,6 @@
             </extension>
           </Window>
         </Windows>
-        <Skylights>
-          <Skylight>
-            <SystemIdentifier id="roof1_skylight"/>
-            <Area>20</Area>
-            <UFactor>0.01</UFactor>
-            <SHGC>0.01</SHGC>
-            <ExteriorShading>
-              <SystemIdentifier id="roof1_skylight_shade"/>
-              <Type>none</Type>
-            </ExteriorShading>
-            <AttachedToRoof idref="roof1"/>
-          </Skylight>
-        </Skylights>
         <extension>
           <hescore_wall_construction_same>true</hescore_wall_construction_same>
           <hescore_window_construction_same>true</hescore_window_construction_same>
@@ -314,45 +301,15 @@
           <HVACPlant>
             <HeatingSystem>
               <SystemIdentifier id="hvac1_heat"/>
-              <DistributionSystem idref="hvac1_dist"/>
               <HeatingSystemType>
-                <Furnace/>
+                <ElectricResistance>
+                  <ElectricDistribution>baseboard</ElectricDistribution>
+                </ElectricResistance>
               </HeatingSystemType>
-              <HeatingSystemFuel>natural gas</HeatingSystemFuel>
-              <AnnualHeatingEfficiency>
-                <Units>AFUE</Units>
-                <Value>0.8</Value>
-              </AnnualHeatingEfficiency>
+              <HeatingSystemFuel>electricity</HeatingSystemFuel>
               <FractionHeatLoadServed>1</FractionHeatLoadServed>
             </HeatingSystem>
-            <CoolingSystem>
-              <SystemIdentifier id="hvac1_cool"/>
-              <DistributionSystem idref="hvac1_dist"/>
-              <CoolingSystemType>central air conditioner</CoolingSystemType>
-              <FractionCoolLoadServed>1</FractionCoolLoadServed>
-              <AnnualCoolingEfficiency>
-                <Units>SEER</Units>
-                <Value>13</Value>
-              </AnnualCoolingEfficiency>
-            </CoolingSystem>
           </HVACPlant>
-          <HVACDistribution>
-            <SystemIdentifier id="hvac1_dist"/>
-            <DistributionSystemType>
-              <AirDistribution>
-                <Ducts>
-                  <DuctInsulationMaterial>
-                    <Unknown/>
-                  </DuctInsulationMaterial>
-                  <DuctLocation>attic - unconditioned</DuctLocation>
-                  <FractionDuctArea>1</FractionDuctArea>
-                </Ducts>
-              </AirDistribution>
-            </DistributionSystemType>
-            <HVACDistributionImprovement>
-              <DuctSystemSealed>true</DuctSystemSealed>
-            </HVACDistributionImprovement>
-          </HVACDistribution>
         </HVAC>
         <WaterHeating>
           <WaterHeatingSystem>

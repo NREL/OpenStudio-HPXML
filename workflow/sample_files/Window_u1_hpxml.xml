@@ -3,7 +3,7 @@
   <XMLTransactionHeaderInformation>
     <XMLType/>
     <XMLGeneratedBy>HES Generate HPXML</XMLGeneratedBy>
-    <CreatedDateAndTime>2019-11-08T09:01:53-08:00</CreatedDateAndTime>
+    <CreatedDateAndTime>2020-04-28T11:11:55-07:00</CreatedDateAndTime>
     <Transaction>create</Transaction>
   </XMLTransactionHeaderInformation>
   <SoftwareInfo>
@@ -11,7 +11,7 @@
     <SoftwareProgramVersion>0.2</SoftwareProgramVersion>
   </SoftwareInfo>
   <Building>
-    <BuildingID id="bid-3379.25589">
+    <BuildingID id="bid-2808.29314">
       <SendingSystemIdentifierType>hescore_external_building_id</SendingSystemIdentifierType>
       <SendingSystemIdentifierValue/>
     </BuildingID>
@@ -19,7 +19,7 @@
       <SiteID id="site1"/>
       <Address>
         <AddressType>street</AddressType>
-        <Address1>Regression run 7.159</Address1>
+        <Address1>Regression run 8.107</Address1>
         <CityMunicipality>St Louis</CityMunicipality>
         <StateCode>MO</StateCode>
         <ZipCode>63101</ZipCode>
@@ -27,7 +27,7 @@
     </Site>
     <ProjectStatus>
       <EventType>construction-period testing/daily test out</EventType>
-      <Date>2019-11-04</Date>
+      <Date>2020-03-24</Date>
     </ProjectStatus>
     <BuildingDetails>
       <BuildingSummary>
@@ -47,7 +47,7 @@
           </extension>
         </BuildingConstruction>
         <extension>
-          <comments>PV panels 100</comments>
+          <comments>Window u1</comments>
         </extension>
       </BuildingSummary>
       <ClimateandRiskZones>
@@ -222,73 +222,49 @@
             <SystemIdentifier id="front_window"/>
             <Area>60</Area>
             <Orientation>north</Orientation>
-            <FrameType>
-              <Wood/>
-            </FrameType>
-            <GlassLayers>double-pane</GlassLayers>
-            <GasFill>air</GasFill>
+            <UFactor>1</UFactor>
+            <SHGC>0.5</SHGC>
             <ExteriorShading>
               <SystemIdentifier id="front_window_shade"/>
               <Type>none</Type>
             </ExteriorShading>
             <AttachedToWall idref="front_wall"/>
-            <extension>
-              <hescore_window_code>dcaw</hescore_window_code>
-            </extension>
           </Window>
           <Window>
             <SystemIdentifier id="back_window"/>
             <Area>50</Area>
             <Orientation>south</Orientation>
-            <FrameType>
-              <Wood/>
-            </FrameType>
-            <GlassLayers>double-pane</GlassLayers>
-            <GasFill>air</GasFill>
+            <UFactor>1</UFactor>
+            <SHGC>0.5</SHGC>
             <ExteriorShading>
               <SystemIdentifier id="back_window_shade"/>
               <Type>none</Type>
             </ExteriorShading>
             <AttachedToWall idref="back_wall"/>
-            <extension>
-              <hescore_window_code>dcaw</hescore_window_code>
-            </extension>
           </Window>
           <Window>
             <SystemIdentifier id="right_window"/>
             <Area>40</Area>
             <Orientation>west</Orientation>
-            <FrameType>
-              <Wood/>
-            </FrameType>
-            <GlassLayers>double-pane</GlassLayers>
-            <GasFill>air</GasFill>
+            <UFactor>1</UFactor>
+            <SHGC>0.5</SHGC>
             <ExteriorShading>
               <SystemIdentifier id="right_window_shade"/>
               <Type>none</Type>
             </ExteriorShading>
             <AttachedToWall idref="right_wall"/>
-            <extension>
-              <hescore_window_code>dcaw</hescore_window_code>
-            </extension>
           </Window>
           <Window>
             <SystemIdentifier id="left_window"/>
             <Area>30</Area>
             <Orientation>east</Orientation>
-            <FrameType>
-              <Wood/>
-            </FrameType>
-            <GlassLayers>double-pane</GlassLayers>
-            <GasFill>air</GasFill>
+            <UFactor>1</UFactor>
+            <SHGC>0.5</SHGC>
             <ExteriorShading>
               <SystemIdentifier id="left_window_shade"/>
               <Type>none</Type>
             </ExteriorShading>
             <AttachedToWall idref="left_wall"/>
-            <extension>
-              <hescore_window_code>dcaw</hescore_window_code>
-            </extension>
           </Window>
         </Windows>
         <extension>
@@ -349,14 +325,6 @@
             <EnergyFactor>0.6</EnergyFactor>
           </WaterHeatingSystem>
         </WaterHeating>
-        <Photovoltaics>
-          <PVSystem>
-            <SystemIdentifier id="pv1"/>
-            <ArrayOrientation>south</ArrayOrientation>
-            <NumberOfPanels>100</NumberOfPanels>
-            <YearModulesManufactured>2009</YearModulesManufactured>
-          </PVSystem>
-        </Photovoltaics>
       </Systems>
     </BuildingDetails>
   </Building>

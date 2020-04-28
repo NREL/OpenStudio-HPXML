@@ -3,7 +3,7 @@
   <XMLTransactionHeaderInformation>
     <XMLType/>
     <XMLGeneratedBy>HES Generate HPXML</XMLGeneratedBy>
-    <CreatedDateAndTime>2019-11-08T11:35:52-08:00</CreatedDateAndTime>
+    <CreatedDateAndTime>2020-04-28T10:55:26-07:00</CreatedDateAndTime>
     <Transaction>create</Transaction>
   </XMLTransactionHeaderInformation>
   <SoftwareInfo>
@@ -11,7 +11,7 @@
     <SoftwareProgramVersion>0.2</SoftwareProgramVersion>
   </SoftwareInfo>
   <Building>
-    <BuildingID id="bid-3385.25603">
+    <BuildingID id="bid-2732.29238">
       <SendingSystemIdentifierType>hescore_external_building_id</SendingSystemIdentifierType>
       <SendingSystemIdentifierValue/>
     </BuildingID>
@@ -19,15 +19,15 @@
       <SiteID id="site1"/>
       <Address>
         <AddressType>street</AddressType>
-        <Address1>1 Cyclotron Rd</Address1>
-        <CityMunicipality>Berkeley</CityMunicipality>
-        <StateCode>CA</StateCode>
-        <ZipCode>94707</ZipCode>
+        <Address1>Regression run 8.31</Address1>
+        <CityMunicipality>St Louis</CityMunicipality>
+        <StateCode>MO</StateCode>
+        <ZipCode>63101</ZipCode>
       </Address>
     </Site>
     <ProjectStatus>
       <EventType>construction-period testing/daily test out</EventType>
-      <Date>2019-08-30</Date>
+      <Date>2020-03-24</Date>
     </ProjectStatus>
     <BuildingDetails>
       <BuildingSummary>
@@ -36,29 +36,29 @@
           <OrientationOfFrontOfHome>north</OrientationOfFrontOfHome>
         </Site>
         <BuildingConstruction>
-          <YearBuilt>1990</YearBuilt>
+          <YearBuilt>1970</YearBuilt>
           <ResidentialFacilityType>single-family detached</ResidentialFacilityType>
           <NumberofConditionedFloorsAboveGrade>2</NumberofConditionedFloorsAboveGrade>
           <AverageCeilingHeight>8</AverageCeilingHeight>
-          <NumberofBedrooms>3</NumberofBedrooms>
-          <ConditionedFloorArea>2000</ConditionedFloorArea>
+          <NumberofBedrooms>4</NumberofBedrooms>
+          <ConditionedFloorArea>500</ConditionedFloorArea>
           <extension>
             <hescore_building_shape>rectangle</hescore_building_shape>
           </extension>
         </BuildingConstruction>
         <extension>
-          <comments>ST OS Energy Star Test File</comments>
+          <comments>Floor area 500</comments>
         </extension>
       </BuildingSummary>
       <ClimateandRiskZones>
         <ClimateZoneIECC>
           <Year>2012</Year>
-          <ClimateZone>3C</ClimateZone>
+          <ClimateZone>4A</ClimateZone>
         </ClimateZoneIECC>
         <WeatherStation>
           <SystemIdentifier id="wmo"/>
-          <Name>Oakland Metro AP</Name>
-          <WMO>724930</WMO>
+          <Name>Cahokia St Louis</Name>
+          <WMO>725314</WMO>
         </WeatherStation>
       </ClimateandRiskZones>
       <Enclosure>
@@ -66,7 +66,7 @@
           <AirInfiltrationMeasurement>
             <SystemIdentifier id="infilt1"/>
             <TypeOfInfiltrationMeasurement>estimate</TypeOfInfiltrationMeasurement>
-            <LeakinessDescription>tight</LeakinessDescription>
+            <LeakinessDescription>average</LeakinessDescription>
           </AirInfiltrationMeasurement>
         </AirInfiltration>
         <Attics>
@@ -112,69 +112,81 @@
           <Wall>
             <SystemIdentifier id="front_wall"/>
             <WallType>
-              <StructuralBrick/>
+              <WoodStud>
+                <OptimumValueEngineering>false</OptimumValueEngineering>
+              </WoodStud>
             </WallType>
             <Orientation>north</Orientation>
+            <Siding>vinyl siding</Siding>
             <Insulation>
               <SystemIdentifier id="front_wall_insulation"/>
               <Layer>
-                <InstallationType>continuous</InstallationType>
-                <NominalRValue>00</NominalRValue>
+                <InstallationType>cavity</InstallationType>
+                <NominalRValue>13</NominalRValue>
               </Layer>
             </Insulation>
             <extension>
-              <hescore_wall_code>ewbr00nn</hescore_wall_code>
+              <hescore_wall_code>ewwf13vi</hescore_wall_code>
             </extension>
           </Wall>
           <Wall>
             <SystemIdentifier id="back_wall"/>
             <WallType>
-              <StructuralBrick/>
+              <WoodStud>
+                <OptimumValueEngineering>false</OptimumValueEngineering>
+              </WoodStud>
             </WallType>
             <Orientation>south</Orientation>
+            <Siding>vinyl siding</Siding>
             <Insulation>
               <SystemIdentifier id="back_wall_insulation"/>
               <Layer>
-                <InstallationType>continuous</InstallationType>
-                <NominalRValue>00</NominalRValue>
+                <InstallationType>cavity</InstallationType>
+                <NominalRValue>13</NominalRValue>
               </Layer>
             </Insulation>
             <extension>
-              <hescore_wall_code>ewbr00nn</hescore_wall_code>
+              <hescore_wall_code>ewwf13vi</hescore_wall_code>
             </extension>
           </Wall>
           <Wall>
             <SystemIdentifier id="right_wall"/>
             <WallType>
-              <StructuralBrick/>
+              <WoodStud>
+                <OptimumValueEngineering>false</OptimumValueEngineering>
+              </WoodStud>
             </WallType>
             <Orientation>west</Orientation>
+            <Siding>vinyl siding</Siding>
             <Insulation>
               <SystemIdentifier id="right_wall_insulation"/>
               <Layer>
-                <InstallationType>continuous</InstallationType>
-                <NominalRValue>00</NominalRValue>
+                <InstallationType>cavity</InstallationType>
+                <NominalRValue>13</NominalRValue>
               </Layer>
             </Insulation>
             <extension>
-              <hescore_wall_code>ewbr00nn</hescore_wall_code>
+              <hescore_wall_code>ewwf13vi</hescore_wall_code>
             </extension>
           </Wall>
           <Wall>
             <SystemIdentifier id="left_wall"/>
             <WallType>
-              <StructuralBrick/>
+              <WoodStud>
+                <OptimumValueEngineering>false</OptimumValueEngineering>
+              </WoodStud>
             </WallType>
             <Orientation>east</Orientation>
+            <Siding>vinyl siding</Siding>
             <Insulation>
               <SystemIdentifier id="left_wall_insulation"/>
               <Layer>
-                <InstallationType>continuous</InstallationType>
-                <NominalRValue>00</NominalRValue>
+                <InstallationType>cavity</InstallationType>
+                <NominalRValue>13</NominalRValue>
               </Layer>
             </Insulation>
             <extension>
-              <hescore_wall_code>ewbr00nn</hescore_wall_code>
+              <hescore_wall_code>ewwf13vi</hescore_wall_code>
             </extension>
           </Wall>
         </Walls>
@@ -182,7 +194,7 @@
           <FrameFloor>
             <SystemIdentifier id="roof1_floor"/>
             <FloorCovering>none</FloorCovering>
-            <Area>1000</Area>
+            <Area>250</Area>
             <Insulation>
               <SystemIdentifier id="roof1_floor_insulation"/>
               <Layer>
@@ -195,7 +207,7 @@
         <Slabs>
           <Slab>
             <SystemIdentifier id="floor1_slab"/>
-            <Area>1000</Area>
+            <Area>250</Area>
             <PerimeterInsulation>
               <SystemIdentifier id="slab1_insulation"/>
               <Layer>
@@ -208,78 +220,74 @@
         <Windows>
           <Window>
             <SystemIdentifier id="front_window"/>
-            <Area>70</Area>
+            <Area>60</Area>
             <Orientation>north</Orientation>
             <FrameType>
-              <Aluminum>
-                <ThermalBreak>false</ThermalBreak>
-              </Aluminum>
+              <Wood/>
             </FrameType>
-            <GlassLayers>single-pane</GlassLayers>
+            <GlassLayers>double-pane</GlassLayers>
+            <GasFill>air</GasFill>
             <ExteriorShading>
               <SystemIdentifier id="front_window_shade"/>
               <Type>none</Type>
             </ExteriorShading>
             <AttachedToWall idref="front_wall"/>
             <extension>
-              <hescore_window_code>scna</hescore_window_code>
+              <hescore_window_code>dcaw</hescore_window_code>
             </extension>
           </Window>
           <Window>
             <SystemIdentifier id="back_window"/>
-            <Area>70</Area>
+            <Area>50</Area>
             <Orientation>south</Orientation>
             <FrameType>
-              <Aluminum>
-                <ThermalBreak>false</ThermalBreak>
-              </Aluminum>
+              <Wood/>
             </FrameType>
-            <GlassLayers>single-pane</GlassLayers>
+            <GlassLayers>double-pane</GlassLayers>
+            <GasFill>air</GasFill>
             <ExteriorShading>
               <SystemIdentifier id="back_window_shade"/>
               <Type>none</Type>
             </ExteriorShading>
             <AttachedToWall idref="back_wall"/>
             <extension>
-              <hescore_window_code>scna</hescore_window_code>
+              <hescore_window_code>dcaw</hescore_window_code>
             </extension>
           </Window>
           <Window>
             <SystemIdentifier id="right_window"/>
-            <Area>35</Area>
+            <Area>40</Area>
             <Orientation>west</Orientation>
             <FrameType>
-              <Aluminum>
-                <ThermalBreak>false</ThermalBreak>
-              </Aluminum>
+              <Wood/>
             </FrameType>
-            <GlassLayers>single-pane</GlassLayers>
+            <GlassLayers>double-pane</GlassLayers>
+            <GasFill>air</GasFill>
             <ExteriorShading>
               <SystemIdentifier id="right_window_shade"/>
               <Type>none</Type>
             </ExteriorShading>
             <AttachedToWall idref="right_wall"/>
             <extension>
-              <hescore_window_code>scna</hescore_window_code>
+              <hescore_window_code>dcaw</hescore_window_code>
             </extension>
           </Window>
           <Window>
             <SystemIdentifier id="left_window"/>
-            <Area>35</Area>
+            <Area>30</Area>
             <Orientation>east</Orientation>
             <FrameType>
-              <Aluminum>
-                <ThermalBreak>false</ThermalBreak>
-              </Aluminum>
+              <Wood/>
             </FrameType>
-            <GlassLayers>single-pane</GlassLayers>
+            <GlassLayers>double-pane</GlassLayers>
+            <GasFill>air</GasFill>
             <ExteriorShading>
               <SystemIdentifier id="left_window_shade"/>
               <Type>none</Type>
             </ExteriorShading>
             <AttachedToWall idref="left_wall"/>
             <extension>
-              <hescore_window_code>scna</hescore_window_code>
+              <hescore_window_code>dcaw</hescore_window_code>
             </extension>
           </Window>
         </Windows>
@@ -306,10 +314,13 @@
             </HeatingSystem>
             <CoolingSystem>
               <SystemIdentifier id="hvac1_cool"/>
-              <ThirdPartyCertification>Energy Star</ThirdPartyCertification>
               <DistributionSystem idref="hvac1_dist"/>
               <CoolingSystemType>central air conditioner</CoolingSystemType>
               <FractionCoolLoadServed>1</FractionCoolLoadServed>
+              <AnnualCoolingEfficiency>
+                <Units>SEER</Units>
+                <Value>13</Value>
+              </AnnualCoolingEfficiency>
             </CoolingSystem>
           </HVACPlant>
           <HVACDistribution>
@@ -326,16 +337,16 @@
               </AirDistribution>
             </DistributionSystemType>
             <HVACDistributionImprovement>
-              <DuctSystemSealed>false</DuctSystemSealed>
+              <DuctSystemSealed>true</DuctSystemSealed>
             </HVACDistributionImprovement>
           </HVACDistribution>
         </HVAC>
         <WaterHeating>
           <WaterHeatingSystem>
             <SystemIdentifier id="water_heater1"/>
-            <FuelType>electricity</FuelType>
+            <FuelType>natural gas</FuelType>
             <WaterHeaterType>storage water heater</WaterHeaterType>
-            <EnergyFactor>0.9</EnergyFactor>
+            <EnergyFactor>0.6</EnergyFactor>
           </WaterHeatingSystem>
         </WaterHeating>
       </Systems>

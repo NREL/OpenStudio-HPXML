@@ -3,7 +3,7 @@
   <XMLTransactionHeaderInformation>
     <XMLType/>
     <XMLGeneratedBy>HES Generate HPXML</XMLGeneratedBy>
-    <CreatedDateAndTime>2019-11-08T08:44:06-08:00</CreatedDateAndTime>
+    <CreatedDateAndTime>2020-04-28T10:58:33-07:00</CreatedDateAndTime>
     <Transaction>create</Transaction>
   </XMLTransactionHeaderInformation>
   <SoftwareInfo>
@@ -11,7 +11,7 @@
     <SoftwareProgramVersion>0.2</SoftwareProgramVersion>
   </SoftwareInfo>
   <Building>
-    <BuildingID id="bid-3266.25476">
+    <BuildingID id="bid-2749.29255">
       <SendingSystemIdentifierType>hescore_external_building_id</SendingSystemIdentifierType>
       <SendingSystemIdentifierValue/>
     </BuildingID>
@@ -19,7 +19,7 @@
       <SiteID id="site1"/>
       <Address>
         <AddressType>street</AddressType>
-        <Address1>Regression run 7.46</Address1>
+        <Address1>Regression run 8.48</Address1>
         <CityMunicipality>St Louis</CityMunicipality>
         <StateCode>MO</StateCode>
         <ZipCode>63101</ZipCode>
@@ -27,7 +27,7 @@
     </Site>
     <ProjectStatus>
       <EventType>construction-period testing/daily test out</EventType>
-      <Date>2019-11-04</Date>
+      <Date>2020-03-24</Date>
     </ProjectStatus>
     <BuildingDetails>
       <BuildingSummary>
@@ -38,10 +38,10 @@
         <BuildingConstruction>
           <YearBuilt>1970</YearBuilt>
           <ResidentialFacilityType>single-family detached</ResidentialFacilityType>
-          <NumberofConditionedFloorsAboveGrade>2</NumberofConditionedFloorsAboveGrade>
+          <NumberofConditionedFloorsAboveGrade>4</NumberofConditionedFloorsAboveGrade>
           <AverageCeilingHeight>8</AverageCeilingHeight>
           <NumberofBedrooms>4</NumberofBedrooms>
-          <ConditionedFloorArea>2000</ConditionedFloorArea>
+          <ConditionedFloorArea>1000</ConditionedFloorArea>
           <extension>
             <hescore_building_shape>rectangle</hescore_building_shape>
           </extension>
@@ -207,7 +207,7 @@
         <Slabs>
           <Slab>
             <SystemIdentifier id="floor1_slab"/>
-            <Area>1000</Area>
+            <Area>250</Area>
             <PerimeterInsulation>
               <SystemIdentifier id="slab1_insulation"/>
               <Layer>
