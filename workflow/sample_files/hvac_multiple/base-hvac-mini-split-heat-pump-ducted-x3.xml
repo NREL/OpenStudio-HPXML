@@ -399,6 +399,7 @@
                 </DuctLeakageMeasurement>
               </AirDistribution>
             </DistributionSystemType>
+            <ConditionedFloorAreaServed>2700</ConditionedFloorAreaServed>
           </HVACDistribution>
           <HVACDistribution>
             <SystemIdentifier id='HVACDistribution2'/>
@@ -422,6 +423,7 @@
                 </DuctLeakageMeasurement>
               </AirDistribution>
             </DistributionSystemType>
+            <ConditionedFloorAreaServed>2700</ConditionedFloorAreaServed>
           </HVACDistribution>
           <HVACDistribution>
             <SystemIdentifier id='HVACDistribution3'/>
@@ -445,6 +447,7 @@
                 </DuctLeakageMeasurement>
               </AirDistribution>
             </DistributionSystemType>
+            <ConditionedFloorAreaServed>2700</ConditionedFloorAreaServed>
           </HVACDistribution>
         </HVAC>
         <WaterHeating>

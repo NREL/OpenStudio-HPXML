@@ -527,6 +527,7 @@
                 </Ducts>
               </AirDistribution>
             </DistributionSystemType>
+            <ConditionedFloorAreaServed>2700</ConditionedFloorAreaServed>
           </HVACDistribution>
         </HVAC>
         <WaterHeating>

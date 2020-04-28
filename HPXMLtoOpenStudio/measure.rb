@@ -323,6 +323,13 @@ class OSModel
       @use_only_ideal_air = @hpxml.building_construction.use_only_ideal_air_system
     end
 
+    @total_conditioned_floor_area_served = 0
+    @hpxml.hvac_distributions.each do |hvac_distribution|
+      next unless hvac_distribution.distribution_system_type == HPXML::HVACDistributionTypeAir
+
+      @total_conditioned_floor_area_served += hvac_distribution.conditioned_floor_area_served
+    end
+
     # Initialize
     @total_frac_remaining_heat_load_served = 1.0
     @total_frac_remaining_cool_load_served = 1.0
@@ -462,6 +469,36 @@ class OSModel
 
     # TODO: Default HeatingCapacity17F
     # TODO: Default Electric Auxiliary Energy (EAE; requires autosized HVAC capacity)
+
+    # Default HVAC distributions
+    @hpxml.hvac_distributions.each do |hvac_distribution|
+      next unless hvac_distribution.distribution_system_type == HPXML::HVACDistributionTypeAir
+
+      # Default return registers
+      if hvac_distribution.number_of_return_registers.nil?
+        hvac_distribution.number_of_return_registers = @ncfl # Add 1 return register per conditioned floor if not provided
+      end
+
+      # Default ducts
+      ducts_by_type = { supply: [], return: [] }
+      hvac_distribution.ducts.each do |duct|
+        if duct.duct_type == HPXML::DuctTypeSupply
+          ducts_by_type[:supply] << duct
+        else
+          ducts_by_type[:return] << duct
+        end
+      end
+
+      # Preserve the ducts and equally split the areas.
+      ducts_by_type.each do |key, ducts|
+        ducts.each_with_index do |duct, idx|
+          next unless duct.duct_surface_area.nil?
+
+          duct.duct_location = HVAC.get_default_duct_locations(@hpxml)[idx]
+          duct.duct_surface_area = HVAC.get_default_duct_surface_area(duct.duct_type, @cfa, @ncfl, @total_conditioned_floor_area_served, hvac_distribution.conditioned_floor_area_served, hvac_distribution.number_of_return_registers) / ducts.length
+        end
+      end
+    end
 
     # Default water heaters
     @hpxml.water_heating_systems.each do |water_heating_system|

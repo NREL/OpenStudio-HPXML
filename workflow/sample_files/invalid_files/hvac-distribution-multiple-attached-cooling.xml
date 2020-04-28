@@ -547,6 +547,7 @@
                 </Ducts>
               </AirDistribution>
             </DistributionSystemType>
+            <ConditionedFloorAreaServed>675</ConditionedFloorAreaServed>
           </HVACDistribution>
           <HVACDistribution>
             <SystemIdentifier id='HVACDistribution2'/>
@@ -594,6 +595,7 @@
                 </Ducts>
               </AirDistribution>
             </DistributionSystemType>
+            <ConditionedFloorAreaServed>675</ConditionedFloorAreaServed>
           </HVACDistribution>
           <HVACDistribution>
             <SystemIdentifier id='HVACDistribution3'/>
@@ -653,6 +655,7 @@
                 </Ducts>
               </AirDistribution>
             </DistributionSystemType>
+            <ConditionedFloorAreaServed>675</ConditionedFloorAreaServed>
           </HVACDistribution>
           <HVACDistribution>
             <SystemIdentifier id='HVACDistribution6'/>
@@ -700,6 +703,7 @@
                 </Ducts>
               </AirDistribution>
             </DistributionSystemType>
+            <ConditionedFloorAreaServed>675</ConditionedFloorAreaServed>
           </HVACDistribution>
         </HVAC>
         <WaterHeating>

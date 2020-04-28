@@ -58,6 +58,8 @@ def create_hpxmls
     'invalid_files/unattached-window.xml' => 'base.xml',
     'invalid_files/water-heater-location.xml' => 'base.xml',
     'invalid_files/water-heater-location-other.xml' => 'base.xml',
+    'invalid_files/missing-duct-location-and-surface-area.xml' => 'base-hvac-multiple.xml',
+    'invalid_files/missing-duct-location.xml' => 'base-hvac-multiple.xml',
 
     'base-appliances-dehumidifier.xml' => 'base-location-dallas-tx.xml',
     'base-appliances-dehumidifier-ief.xml' => 'base-appliances-dehumidifier.xml',
@@ -225,6 +227,7 @@ def create_hpxmls
     'base-misc-ceiling-fans.xml' => 'base.xml',
     'base-misc-defaults.xml' => 'base.xml',
     'base-misc-defaults2.xml' => 'base-dhw-recirc-demand.xml',
+    'base-misc-defaults3.xml' => 'base-hvac-multiple.xml',
     'base-misc-lighting-none.xml' => 'base.xml',
     'base-misc-timestep-10-mins.xml' => 'base.xml',
     'base-misc-runperiod-1-month.xml' => 'base.xml',
@@ -2250,7 +2253,8 @@ end
 def set_hpxml_hvac_distributions(hpxml_file, hpxml)
   if ['base.xml'].include? hpxml_file
     hpxml.hvac_distributions.add(id: 'HVACDistribution',
-                                 distribution_system_type: HPXML::HVACDistributionTypeAir)
+                                 distribution_system_type: HPXML::HVACDistributionTypeAir,
+                                 conditioned_floor_area_served: 2700)
     hpxml.hvac_distributions[0].duct_leakage_measurements.add(duct_type: HPXML::DuctTypeSupply,
                                                               duct_leakage_units: HPXML::UnitsCFM25,
                                                               duct_leakage_value: 75,
@@ -2280,7 +2284,8 @@ def set_hpxml_hvac_distributions(hpxml_file, hpxml)
     hpxml.hvac_distributions[0].duct_leakage_measurements.clear()
     hpxml.hvac_distributions[0].ducts.clear()
     hpxml.hvac_distributions.add(id: 'HVACDistribution2',
-                                 distribution_system_type: HPXML::HVACDistributionTypeAir)
+                                 distribution_system_type: HPXML::HVACDistributionTypeAir,
+                                 conditioned_floor_area_served: 2700)
     hpxml.hvac_distributions[-1].duct_leakage_measurements.add(duct_type: HPXML::DuctTypeSupply,
                                                                duct_leakage_units: HPXML::UnitsCFM25,
                                                                duct_leakage_value: 75,
@@ -2312,7 +2317,8 @@ def set_hpxml_hvac_distributions(hpxml_file, hpxml)
   elsif ['base-hvac-multiple.xml'].include? hpxml_file
     hpxml.hvac_distributions.clear
     hpxml.hvac_distributions.add(id: 'HVACDistribution',
-                                 distribution_system_type: HPXML::HVACDistributionTypeAir)
+                                 distribution_system_type: HPXML::HVACDistributionTypeAir,
+                                 conditioned_floor_area_served: (2700 / 4))
     hpxml.hvac_distributions[-1].duct_leakage_measurements.add(duct_type: HPXML::DuctTypeSupply,
                                                                duct_leakage_units: HPXML::UnitsCFM25,
                                                                duct_leakage_value: 75,
@@ -2445,6 +2451,34 @@ def set_hpxml_hvac_distributions(hpxml_file, hpxml)
                                           duct_insulation_r_value: 0,
                                           duct_location: HPXML::LocationAtticUnvented,
                                           duct_surface_area: 50)
+  elsif ['base-misc-defaults.xml'].include? hpxml_file
+    hpxml.hvac_distributions[0].ducts[0].duct_surface_area = nil
+    hpxml.hvac_distributions[0].ducts[1].duct_surface_area = nil
+    hpxml.hvac_distributions[0].ducts[0].duct_location = nil
+    hpxml.hvac_distributions[0].ducts[1].duct_location = nil
+  elsif ['base-misc-defaults3.xml'].include? hpxml_file
+    hpxml.hvac_distributions[0].ducts.each { |duct| duct.duct_surface_area = nil }
+    hpxml.hvac_distributions[1].ducts.each { |duct| duct.duct_surface_area = nil }
+    hpxml.hvac_distributions[4].ducts.each { |duct| duct.duct_surface_area = nil }
+    hpxml.hvac_distributions[5].ducts.each { |duct| duct.duct_surface_area = nil }
+    hpxml.hvac_distributions[0].ducts.each { |duct| duct.duct_location = nil }
+    hpxml.hvac_distributions[1].ducts.each { |duct| duct.duct_location = nil }
+    hpxml.hvac_distributions[4].ducts.each { |duct| duct.duct_location = nil }
+    hpxml.hvac_distributions[5].ducts.each { |duct| duct.duct_location = nil }
+  elsif ['invalid_files/missing-duct-location-and-surface-area.xml'].include? hpxml_file
+    hpxml.hvac_distributions[0].ducts[1].duct_surface_area = nil
+    hpxml.hvac_distributions[0].ducts[1].duct_location = nil
+    hpxml.hvac_distributions[1].ducts[1].duct_surface_area = nil
+    hpxml.hvac_distributions[1].ducts[1].duct_location = nil
+    hpxml.hvac_distributions[4].ducts[1].duct_surface_area = nil
+    hpxml.hvac_distributions[4].ducts[1].duct_location = nil
+    hpxml.hvac_distributions[5].ducts[1].duct_surface_area = nil
+    hpxml.hvac_distributions[5].ducts[1].duct_location = nil
+  elsif ['invalid_files/missing-duct-location.xml'].include? hpxml_file
+    hpxml.hvac_distributions[0].ducts[1].duct_location = nil
+    hpxml.hvac_distributions[1].ducts[1].duct_location = nil
+    hpxml.hvac_distributions[4].ducts[1].duct_location = nil
+    hpxml.hvac_distributions[5].ducts[1].duct_location = nil
   end
 end
 

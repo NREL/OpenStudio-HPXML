@@ -4506,4 +4506,48 @@ class HVAC
     Schedule.set_schedule_type_limits(model, s, Constants.ScheduleTypeLimitsFraction)
     return s
   end
+
+  def self.get_default_duct_surface_area(duct_type, cfa, ncfl, total_cond_flr_area_served, cond_flr_area_served, num_returns)
+    if duct_type == HPXML::DuctTypeSupply
+      if ncfl == 1
+        return 0.27 * cfa * 1.0 * (cond_flr_area_served / total_cond_flr_area_served)
+      else
+        return 0.27 * cfa * 0.75 * (cond_flr_area_served / total_cond_flr_area_served)
+      end
+    else
+      if ncfl == 1
+        if num_returns < 6
+          return 0.05 * num_returns * 1.0 * cfa * (cond_flr_area_served / total_cond_flr_area_served)
+        else
+          return 0.25 * num_returns * 1.0 * cfa * (cond_flr_area_served / total_cond_flr_area_served)
+        end
+      else
+        if num_returns < 6
+          return 0.05 * num_returns * 0.75 * cfa * (cond_flr_area_served / total_cond_flr_area_served)
+        else
+          return 0.25 * num_returns * 0.75 * cfa * (cond_flr_area_served / total_cond_flr_area_served)
+        end
+      end
+    end
+  end
+
+  def self.get_default_duct_locations(hpxml)
+    location_hierarchy = [HPXML::LocationBasementConditioned,
+                          HPXML::LocationBasementUnconditioned,
+                          HPXML::LocationCrawlspaceVented,
+                          HPXML::LocationCrawlspaceUnvented,
+                          HPXML::LocationAtticVented,
+                          HPXML::LocationAtticUnvented,
+                          HPXML::LocationGarage,
+                          HPXML::LocationLivingSpace]
+
+    space_types = []
+    location_hierarchy.each do |space_type|
+      if hpxml.has_space_type(space_type)
+        space_types << space_type
+      end
+    end
+
+    return space_types
+  end
 end

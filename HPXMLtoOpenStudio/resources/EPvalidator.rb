@@ -451,10 +451,12 @@ class EnergyPlusValidator
 
       ## [HVACDistType=Air]
       '/HPXML/Building/BuildingDetails/Systems/HVAC/HVACDistribution/DistributionSystemType/AirDistribution' => {
+        '../../ConditionedFloorAreaServed' => one,
         'DuctLeakageMeasurement[DuctType="supply"]/DuctLeakage[Units="CFM25" or Units="Percent"][TotalOrToOutside="to outside"]/Value' => one,
         'DuctLeakageMeasurement[DuctType="return"]/DuctLeakage[Units="CFM25" or Units="Percent"][TotalOrToOutside="to outside"]/Value' => zero_or_one,
         'Ducts[DuctType="supply"]' => zero_or_more, # See [HVACDuct]
         'Ducts[DuctType="return"]' => zero_or_more, # See [HVACDuct]
+        'NumberofReturnRegisters' => zero_or_one,
       },
 
       ## [HVACDistType=DSE]
@@ -466,8 +468,12 @@ class EnergyPlusValidator
       ## [HVACDuct]
       '/HPXML/Building/BuildingDetails/Systems/HVAC/HVACDistribution/DistributionSystemType/AirDistribution/Ducts[DuctType="supply" or DuctType="return"]' => {
         'DuctInsulationRValue' => one,
-        'DuctLocation[text()="living space" or text()="basement - conditioned" or text()="basement - unconditioned" or text()="crawlspace - vented" or text()="crawlspace - unvented" or text()="attic - vented" or text()="attic - unvented" or text()="garage" or text()="outside"]' => one,
-        'DuctSurfaceArea' => one,
+        'DuctLocation[text()="living space" or text()="basement - conditioned" or text()="basement - unconditioned" or text()="crawlspace - vented" or text()="crawlspace - unvented" or text()="attic - vented" or text()="attic - unvented" or text()="garage" or text()="outside"] | DuctSurfaceArea' => zero_or_two,
+      },
+      # All or none in terms of surface area defaulting.
+      # FIXME: Please review the xpath expression below:
+      '/HPXML/Building/BuildingDetails/Systems/HVAC/HVACDistribution/DistributionSystemType/AirDistribution/Ducts[(DuctType="supply" or DuctType="return") and not(DuctSurfaceArea)]' => {
+        '//DuctSurfaceArea' => zero,
       },
 
       # [MechanicalVentilation]

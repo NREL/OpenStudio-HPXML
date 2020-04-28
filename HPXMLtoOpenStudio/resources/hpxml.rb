@@ -2633,7 +2633,8 @@ class HPXML < Object
       super(hpxml_object, *args)
     end
     ATTRS = [:id, :distribution_system_type, :distribution_system_type, :annual_heating_dse,
-             :annual_cooling_dse, :duct_system_sealed, :duct_leakage_testing_exemption]
+             :annual_cooling_dse, :duct_system_sealed, :duct_leakage_testing_exemption,
+             :conditioned_floor_area_served, :number_of_return_registers]
     attr_accessor(*ATTRS)
     attr_reader(:duct_leakage_measurements, :ducts)
 
@@ -2693,6 +2694,9 @@ class HPXML < Object
       distribution_system_type_e = XMLHelper.add_element(hvac_distribution, 'DistributionSystemType')
       if [HVACDistributionTypeAir, HVACDistributionTypeHydronic].include? @distribution_system_type
         XMLHelper.add_element(distribution_system_type_e, @distribution_system_type)
+        if @distribution_system_type == HVACDistributionTypeAir
+          XMLHelper.add_element(hvac_distribution, 'ConditionedFloorAreaServed', @conditioned_floor_area_served) unless @conditioned_floor_area_served.nil?
+        end
       elsif [HVACDistributionTypeDSE].include? distribution_system_type
         XMLHelper.add_element(distribution_system_type_e, 'Other', @distribution_system_type)
         XMLHelper.add_element(hvac_distribution, 'AnnualHeatingDistributionSystemEfficiency', Float(@annual_heating_dse)) unless @annual_heating_dse.nil?
@@ -2706,6 +2710,7 @@ class HPXML < Object
 
       @duct_leakage_measurements.to_rexml(air_distribution)
       @ducts.to_rexml(air_distribution)
+      XMLHelper.add_element(air_distribution, 'NumberofReturnRegisters', @number_of_return_registers) unless @number_of_return_registers.nil?
 
       HPXML::add_extension(parent: air_distribution,
                            extensions: { 'DuctLeakageTestingExemption' => HPXML::to_bool_or_nil(@duct_leakage_testing_exemption) })
@@ -2722,6 +2727,8 @@ class HPXML < Object
       @annual_heating_dse = HPXML::to_float_or_nil(XMLHelper.get_value(hvac_distribution, 'AnnualHeatingDistributionSystemEfficiency'))
       @annual_cooling_dse = HPXML::to_float_or_nil(XMLHelper.get_value(hvac_distribution, 'AnnualCoolingDistributionSystemEfficiency'))
       @duct_system_sealed = HPXML::to_bool_or_nil(XMLHelper.get_value(hvac_distribution, 'HVACDistributionImprovement/DuctSystemSealed'))
+      @conditioned_floor_area_served = HPXML::to_float_or_nil(XMLHelper.get_value(hvac_distribution, 'ConditionedFloorAreaServed'))
+      @number_of_return_registers = HPXML::to_float_or_nil(XMLHelper.get_value(hvac_distribution, 'DistributionSystemType/AirDistribution/NumberofReturnRegisters'))
       @duct_leakage_testing_exemption = HPXML::to_bool_or_nil(XMLHelper.get_value(hvac_distribution, 'DistributionSystemType/AirDistribution/extension/DuctLeakageTestingExemption'))
 
       @duct_leakage_measurements.from_rexml(hvac_distribution)
