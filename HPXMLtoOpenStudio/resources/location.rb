@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require_relative 'constants'
 require_relative 'unit_conversions'
 require_relative 'weather'
@@ -8,7 +10,6 @@ class Location
     apply_year(model, epw_file)
     apply_site(model, epw_file)
     apply_climate_zones(model, epw_file)
-    apply_mains_temp(model, weather)
     apply_dst(model, dst_start_date, dst_end_date)
     return weather
   end
@@ -53,22 +54,6 @@ class Location
     climateZones.setClimateZone(Constants.BuildingAmericaClimateZone, ba_zone)
   end
 
-  def self.apply_mains_temp(model, weather)
-    avgOAT = UnitConversions.convert(weather.data.AnnualAvgDrybulb, 'F', 'C')
-    monthlyOAT = weather.data.MonthlyAvgDrybulbs
-
-    min_temp = monthlyOAT.min
-    max_temp = monthlyOAT.max
-
-    maxDiffOAT = UnitConversions.convert(max_temp, 'F', 'C') - UnitConversions.convert(min_temp, 'F', 'C')
-
-    # Calc annual average mains temperature to report
-    swmt = model.getSiteWaterMainsTemperature
-    swmt.setCalculationMethod 'Correlation'
-    swmt.setAnnualAverageOutdoorAirTemperature avgOAT
-    swmt.setMaximumDifferenceInMonthlyAverageOutdoorAirTemperatures maxDiffOAT
-  end
-
   def self.apply_year(model, epw_file)
     year_description = model.getYearDescription
     if epw_file.startDateActualYear.is_initialized # AMY
@@ -97,10 +82,9 @@ class Location
 
   def self.get_climate_zone_ba(wmo)
     ba_zone = nil
-
     zones_csv = File.join(File.dirname(__FILE__), 'climate_zones.csv')
     if not File.exist?(zones_csv)
-      return ba_zone
+      fail 'Could not find climate_zones.csv'
     end
 
     require 'csv'

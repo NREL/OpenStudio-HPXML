@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require_relative 'geometry'
 require_relative 'hvac'
 require_relative 'unit_conversions'
@@ -2363,12 +2365,7 @@ class HVACSizing
           hvac.FixedHeatingCapacity = UnitConversions.convert(htg_coil.heatingDesignCapacity.get, 'W', 'ton')
         end
 
-        htg_coil.plantLoop.get.components.each do |component|
-          if component.to_BoilerHotWater.is_initialized
-            boiler = component.to_BoilerHotWater.get
-            hvac.BoilerDesignTemp = UnitConversions.convert(boiler.designWaterOutletTemperature.get, 'C', 'F')
-          end
-        end
+        hvac.BoilerDesignTemp = UnitConversions.convert(htg_coil.plantLoop.get.sizingPlant.designLoopExitTemperature, 'C', 'F')
 
       elsif htg_coil.is_a? OpenStudio::Model::CoilHeatingDXSingleSpeed
         hvac.NumSpeedsHeating = 1
@@ -3411,7 +3408,7 @@ class HVACSizing
         return
       end
 
-      airflow_defect_cool = UnitConversions.convert(hvac_final_values.Cool_Airflow, 'cfm', 'm^3/s') / clg_coil.getRatedAirFlowRate().get().value() - 1.0
+      airflow_defect_cool = UnitConversions.convert(hvac_final_values.Cool_Airflow, 'cfm', 'm^3/s') / clg_coil.ratedAirFlowRate.get - 1.0
 
       airflow_defect_heat = 0.0
       if not htg_coil.nil?
@@ -3438,7 +3435,6 @@ class HVACSizing
     if clg_coil.is_a? OpenStudio::Model::CoilCoolingDXSingleSpeed
       clg_coil.setRatedTotalCoolingCapacity(UnitConversions.convert(hvac_final_values.Cool_Capacity, 'Btu/hr', 'W'))
       clg_coil.setRatedAirFlowRate(UnitConversions.convert(hvac_final_values.Cool_Capacity, 'Btu/hr', 'ton') * UnitConversions.convert(hvac.RatedCFMperTonCooling[0], 'cfm', 'm^3/s'))
-      puts('clg_coil.setRatedAirFlowRate')
     elsif clg_coil.is_a? OpenStudio::Model::CoilCoolingDXMultiSpeed
       clg_coil.stages.each_with_index do |stage, speed|
         stage.setGrossRatedTotalCoolingCapacity(UnitConversions.convert(hvac_final_values.Cool_Capacity, 'Btu/hr', 'W') * hvac.CapacityRatioCooling[speed])

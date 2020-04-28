@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require_relative 'constants'
 require_relative 'geometry'
 require_relative 'util'
@@ -109,8 +111,8 @@ class HVAC
     air_terminal_living.setName(obj_name + " #{control_zone.name} terminal")
     air_loop.multiAddBranchForZone(control_zone, air_terminal_living)
 
-    control_zone.setSequentialCoolingFractionSchedule(air_terminal_living, get_constant_schedule(model, sequential_cool_load_frac.round(5)))
-    control_zone.setSequentialHeatingFractionSchedule(air_terminal_living, get_constant_schedule(model, 0))
+    control_zone.setSequentialCoolingFractionSchedule(air_terminal_living, get_sequential_load_schedule(model, sequential_cool_load_frac.round(5)))
+    control_zone.setSequentialHeatingFractionSchedule(air_terminal_living, get_sequential_load_schedule(model, 0))
 
     # Store info for HVAC Sizing measure
     air_loop_unitary.additionalProperties.setFeature(Constants.SizingInfoHVACRatedCFMperTonCooling, cfms_ton_rated.join(','))
@@ -445,8 +447,8 @@ class HVAC
     air_terminal_living.setName(obj_name + " #{control_zone.name} terminal")
     air_loop.multiAddBranchForZone(control_zone, air_terminal_living)
 
-    control_zone.setSequentialCoolingFractionSchedule(air_terminal_living, get_constant_schedule(model, sequential_cool_load_frac.round(5)))
-    control_zone.setSequentialHeatingFractionSchedule(air_terminal_living, get_constant_schedule(model, 0))
+    control_zone.setSequentialCoolingFractionSchedule(air_terminal_living, get_sequential_load_schedule(model, sequential_cool_load_frac.round(5)))
+    control_zone.setSequentialHeatingFractionSchedule(air_terminal_living, get_sequential_load_schedule(model, 0))
 
     # Store info for HVAC Sizing measure
     air_loop_unitary.additionalProperties.setFeature(Constants.SizingInfoHVACCapacityRatioCooling, capacity_ratios.join(','))
@@ -563,8 +565,8 @@ class HVAC
     air_terminal_living.setName(obj_name + " #{control_zone.name} terminal")
     air_loop.multiAddBranchForZone(control_zone, air_terminal_living)
 
-    control_zone.setSequentialCoolingFractionSchedule(air_terminal_living, get_constant_schedule(model, sequential_cool_load_frac.round(5)))
-    control_zone.setSequentialHeatingFractionSchedule(air_terminal_living, get_constant_schedule(model, 0))
+    control_zone.setSequentialCoolingFractionSchedule(air_terminal_living, get_sequential_load_schedule(model, sequential_cool_load_frac.round(5)))
+    control_zone.setSequentialHeatingFractionSchedule(air_terminal_living, get_sequential_load_schedule(model, 0))
 
     # Store info for HVAC Sizing measure
     air_loop_unitary.additionalProperties.setFeature(Constants.SizingInfoHVACCapacityRatioCooling, capacity_ratios.join(','))
@@ -644,8 +646,8 @@ class HVAC
     air_terminal_living.setName(obj_name + " #{control_zone.name} terminal")
     air_terminal_living.setConstantMinimumAirFlowFraction(0)
     air_loop.multiAddBranchForZone(control_zone, air_terminal_living)
-    control_zone.setSequentialCoolingFractionSchedule(air_terminal_living, get_constant_schedule(model, sequential_cool_load_frac.round(5)))
-    control_zone.setSequentialHeatingFractionSchedule(air_terminal_living, get_constant_schedule(model, 0))
+    control_zone.setSequentialCoolingFractionSchedule(air_terminal_living, get_sequential_load_schedule(model, sequential_cool_load_frac.round(5)))
+    control_zone.setSequentialHeatingFractionSchedule(air_terminal_living, get_sequential_load_schedule(model, 0))
 
     # Store info for HVAC Sizing measure
     evap_cooler.additionalProperties.setFeature(Constants.SizingInfoHVACFracCoolLoadServed, frac_cool_load_served)
@@ -788,8 +790,8 @@ class HVAC
     air_terminal_living.setName(obj_name + " #{control_zone.name} terminal")
     air_loop.multiAddBranchForZone(control_zone, air_terminal_living)
 
-    control_zone.setSequentialHeatingFractionSchedule(air_terminal_living, get_constant_schedule(model, sequential_heat_load_frac.round(5)))
-    control_zone.setSequentialCoolingFractionSchedule(air_terminal_living, get_constant_schedule(model, sequential_cool_load_frac.round(5)))
+    control_zone.setSequentialHeatingFractionSchedule(air_terminal_living, get_sequential_load_schedule(model, sequential_heat_load_frac.round(5)))
+    control_zone.setSequentialCoolingFractionSchedule(air_terminal_living, get_sequential_load_schedule(model, sequential_cool_load_frac.round(5)))
 
     # Store info for HVAC Sizing measure
     air_loop_unitary.additionalProperties.setFeature(Constants.SizingInfoHVACRatedCFMperTonHeating, cfms_ton_rated_heating.join(','))
@@ -942,8 +944,8 @@ class HVAC
     air_terminal_living.setName(obj_name + " #{control_zone.name} terminal")
     air_loop.multiAddBranchForZone(control_zone, air_terminal_living)
 
-    control_zone.setSequentialHeatingFractionSchedule(air_terminal_living, get_constant_schedule(model, sequential_heat_load_frac.round(5)))
-    control_zone.setSequentialCoolingFractionSchedule(air_terminal_living, get_constant_schedule(model, sequential_cool_load_frac.round(5)))
+    control_zone.setSequentialHeatingFractionSchedule(air_terminal_living, get_sequential_load_schedule(model, sequential_heat_load_frac.round(5)))
+    control_zone.setSequentialCoolingFractionSchedule(air_terminal_living, get_sequential_load_schedule(model, sequential_cool_load_frac.round(5)))
 
     # Store info for HVAC Sizing measure
     air_loop_unitary.additionalProperties.setFeature(Constants.SizingInfoHVACCapacityRatioHeating, capacity_ratios.join(','))
@@ -1100,8 +1102,8 @@ class HVAC
     air_terminal_living.setName(obj_name + " #{control_zone.name} terminal")
     air_loop.multiAddBranchForZone(control_zone, air_terminal_living)
 
-    control_zone.setSequentialHeatingFractionSchedule(air_terminal_living, get_constant_schedule(model, sequential_heat_load_frac.round(5)))
-    control_zone.setSequentialCoolingFractionSchedule(air_terminal_living, get_constant_schedule(model, sequential_cool_load_frac.round(5)))
+    control_zone.setSequentialHeatingFractionSchedule(air_terminal_living, get_sequential_load_schedule(model, sequential_heat_load_frac.round(5)))
+    control_zone.setSequentialCoolingFractionSchedule(air_terminal_living, get_sequential_load_schedule(model, sequential_cool_load_frac.round(5)))
 
     # Store info for HVAC Sizing measure
     air_loop_unitary.additionalProperties.setFeature(Constants.SizingInfoHVACCapacityRatioHeating, capacity_ratios_heating.join(','))
@@ -1295,8 +1297,8 @@ class HVAC
     air_terminal_living.setName(obj_name + " #{control_zone.name} terminal")
     air_loop.multiAddBranchForZone(control_zone, air_terminal_living)
 
-    control_zone.setSequentialHeatingFractionSchedule(air_terminal_living, get_constant_schedule(model, sequential_heat_load_frac.round(5)))
-    control_zone.setSequentialCoolingFractionSchedule(air_terminal_living, get_constant_schedule(model, sequential_cool_load_frac.round(5)))
+    control_zone.setSequentialHeatingFractionSchedule(air_terminal_living, get_sequential_load_schedule(model, sequential_heat_load_frac.round(5)))
+    control_zone.setSequentialCoolingFractionSchedule(air_terminal_living, get_sequential_load_schedule(model, sequential_cool_load_frac.round(5)))
 
     if pan_heater_power > 0
 
@@ -1598,8 +1600,8 @@ class HVAC
     air_terminal_living.setName(obj_name + " #{control_zone.name} terminal")
     air_loop.multiAddBranchForZone(control_zone, air_terminal_living)
 
-    control_zone.setSequentialHeatingFractionSchedule(air_terminal_living, get_constant_schedule(model, sequential_heat_load_frac.round(5)))
-    control_zone.setSequentialCoolingFractionSchedule(air_terminal_living, get_constant_schedule(model, sequential_cool_load_frac.round(5)))
+    control_zone.setSequentialHeatingFractionSchedule(air_terminal_living, get_sequential_load_schedule(model, sequential_heat_load_frac.round(5)))
+    control_zone.setSequentialCoolingFractionSchedule(air_terminal_living, get_sequential_load_schedule(model, sequential_cool_load_frac.round(5)))
 
     # Store info for HVAC Sizing measure
     air_loop_unitary.additionalProperties.setFeature(Constants.SizingInfoHVACSHR, shr.to_s)
@@ -1674,8 +1676,8 @@ class HVAC
     ptac.addToThermalZone(control_zone)
     hvac_map[sys_id] << ptac
 
-    control_zone.setSequentialCoolingFractionSchedule(ptac, get_constant_schedule(model, sequential_cool_load_frac.round(5)))
-    control_zone.setSequentialHeatingFractionSchedule(ptac, get_constant_schedule(model, 0))
+    control_zone.setSequentialCoolingFractionSchedule(ptac, get_sequential_load_schedule(model, sequential_cool_load_frac.round(5)))
+    control_zone.setSequentialHeatingFractionSchedule(ptac, get_sequential_load_schedule(model, 0))
 
     # Store info for HVAC Sizing measure
     ptac.additionalProperties.setFeature(Constants.SizingInfoHVACCoolingCFMs, airflow_rate.to_s)
@@ -1768,8 +1770,8 @@ class HVAC
       air_terminal_living = OpenStudio::Model::AirTerminalSingleDuctUncontrolled.new(model, model.alwaysOnDiscreteSchedule)
       air_terminal_living.setName(obj_name + " #{control_zone.name} terminal")
       air_loop.multiAddBranchForZone(control_zone, air_terminal_living)
-      control_zone.setSequentialHeatingFractionSchedule(air_terminal_living, get_constant_schedule(model, sequential_heat_load_frac.round(5)))
-      control_zone.setSequentialCoolingFractionSchedule(air_terminal_living, get_constant_schedule(model, 0))
+      control_zone.setSequentialHeatingFractionSchedule(air_terminal_living, get_sequential_load_schedule(model, sequential_heat_load_frac.round(5)))
+      control_zone.setSequentialCoolingFractionSchedule(air_terminal_living, get_sequential_load_schedule(model, 0))
 
       air_loop_unitary.additionalProperties.setFeature(Constants.SizingInfoHVACFracHeatLoadServed, frac_heat_load_served)
       air_loop_unitary.additionalProperties.setFeature(Constants.SizingInfoHVACHeatType, Constants.ObjectNameFurnace)
@@ -1826,7 +1828,7 @@ class HVAC
         next unless air_terminal_living.airLoopHVAC.get == air_loop
 
         air_terminal_living.setName(obj_name + " #{control_zone.name} terminal")
-        control_zone.setSequentialHeatingFractionSchedule(air_terminal_living, get_constant_schedule(model, sequential_heat_load_frac.round(5)))
+        control_zone.setSequentialHeatingFractionSchedule(air_terminal_living, get_sequential_load_schedule(model, sequential_heat_load_frac.round(5)))
       end
 
       attached_clg_system.additionalProperties.setFeature(Constants.SizingInfoHVACFracHeatLoadServed, frac_heat_load_served)
@@ -1915,7 +1917,6 @@ class HVAC
       boiler.setEfficiencyCurveTemperatureEvaluationVariable('LeavingBoiler')
     end
     boiler.setNormalizedBoilerEfficiencyCurve(boiler_eff_curve)
-    boiler.setDesignWaterOutletTemperature(UnitConversions.convert(design_temp - 32.0, 'R', 'K'))
     boiler.setMinimumPartLoadRatio(0.0)
     boiler.setMaximumPartLoadRatio(1.0)
     boiler.setBoilerFlowMode('LeavingSetpointModulated')
@@ -1974,8 +1975,8 @@ class HVAC
 
     plant_loop.addDemandBranchForComponent(baseboard_coil)
 
-    control_zone.setSequentialHeatingFractionSchedule(baseboard_heater, get_constant_schedule(model, sequential_heat_load_frac.round(5)))
-    control_zone.setSequentialCoolingFractionSchedule(baseboard_heater, get_constant_schedule(model, 0))
+    control_zone.setSequentialHeatingFractionSchedule(baseboard_heater, get_sequential_load_schedule(model, sequential_heat_load_frac.round(5)))
+    control_zone.setSequentialCoolingFractionSchedule(baseboard_heater, get_sequential_load_schedule(model, 0))
 
     # Store info for HVAC Sizing measure
     baseboard_heater.additionalProperties.setFeature(Constants.SizingInfoHVACFracHeatLoadServed, frac_heat_load_served)
@@ -1997,8 +1998,8 @@ class HVAC
     hvac_map[sys_id] << baseboard_heater
 
     baseboard_heater.addToThermalZone(control_zone)
-    control_zone.setSequentialHeatingFractionSchedule(baseboard_heater, get_constant_schedule(model, sequential_heat_load_frac.round(5)))
-    control_zone.setSequentialCoolingFractionSchedule(baseboard_heater, get_constant_schedule(model, 0))
+    control_zone.setSequentialHeatingFractionSchedule(baseboard_heater, get_sequential_load_schedule(model, sequential_heat_load_frac.round(5)))
+    control_zone.setSequentialCoolingFractionSchedule(baseboard_heater, get_sequential_load_schedule(model, 0))
 
     # Store info for HVAC Sizing measure
     baseboard_heater.additionalProperties.setFeature(Constants.SizingInfoHVACFracHeatLoadServed, frac_heat_load_served)
@@ -2068,8 +2069,8 @@ class HVAC
     unitary_system.setControllingZoneorThermostatLocation(control_zone)
     unitary_system.addToThermalZone(control_zone)
 
-    control_zone.setSequentialHeatingFractionSchedule(unitary_system, get_constant_schedule(model, sequential_heat_load_frac.round(5)))
-    control_zone.setSequentialCoolingFractionSchedule(unitary_system, get_constant_schedule(model, 0))
+    control_zone.setSequentialHeatingFractionSchedule(unitary_system, get_sequential_load_schedule(model, sequential_heat_load_frac.round(5)))
+    control_zone.setSequentialCoolingFractionSchedule(unitary_system, get_sequential_load_schedule(model, 0))
 
     # Store info for HVAC Sizing measure
     unitary_system.additionalProperties.setFeature(Constants.SizingInfoHVACRatedCFMperTonHeating, airflow_rate.to_s)
@@ -2094,8 +2095,8 @@ class HVAC
     ideal_air.setHumidificationControlType('None')
     ideal_air.addToThermalZone(control_zone)
 
-    control_zone.setSequentialCoolingFractionSchedule(ideal_air, get_constant_schedule(model, sequential_cool_load_frac.round(5)))
-    control_zone.setSequentialHeatingFractionSchedule(ideal_air, get_constant_schedule(model, sequential_heat_load_frac.round(5)))
+    control_zone.setSequentialCoolingFractionSchedule(ideal_air, get_sequential_load_schedule(model, sequential_cool_load_frac.round(5)))
+    control_zone.setSequentialHeatingFractionSchedule(ideal_air, get_sequential_load_schedule(model, sequential_heat_load_frac.round(5)))
 
     # Store info for HVAC Sizing measure
     ideal_air.additionalProperties.setFeature(Constants.SizingInfoHVACCoolType, Constants.ObjectNameIdealAirSystem)
@@ -2138,8 +2139,8 @@ class HVAC
       var = 'Heating Coil Electric Energy'
       if htg_object.is_a? OpenStudio::Model::CoilHeatingGas
         var = { 'NaturalGas' => 'Heating Coil Gas Energy',
-                'PropaneGas' => 'Heating Coil Propane Energy',
-                'FuelOil#1' => 'Heating Coil FuelOil#1 Energy',
+                'Propane' => 'Heating Coil Propane Energy',
+                'FuelOilNo1' => 'Heating Coil FuelOil#1 Energy',
                 'OtherFuel1' => 'Heating Coil OtherFuel1 Energy',
                 'OtherFuel2' => 'Heating Coil OtherFuel2 Energy' }[htg_object.fuelType]
         fail "Unexpected heating coil '#{htg_object.name}'." if var.nil?
@@ -2159,8 +2160,8 @@ class HVAC
       var = 'Heating Coil Electric Energy'
       if backup_htg_object.is_a? OpenStudio::Model::CoilHeatingGas
         var = { 'NaturalGas' => 'Heating Coil Gas Energy',
-                'PropaneGas' => 'Heating Coil Propane Energy',
-                'FuelOil#1' => 'Heating Coil FuelOil#1 Energy',
+                'Propane' => 'Heating Coil Propane Energy',
+                'FuelOilNo1' => 'Heating Coil FuelOil#1 Energy',
                 'OtherFuel1' => 'Heating Coil OtherFuel1 Energy',
                 'OtherFuel2' => 'Heating Coil OtherFuel2 Energy' }[backup_htg_object.fuelType]
         fail "Unexpected heating coil '#{backup_htg_object.name}'." if var.nil?
@@ -2342,66 +2343,118 @@ class HVAC
     end
   end
 
-  def self.apply_dehumidifier(model, runner, energy_factor, water_removal_rate,
-                              air_flow_rate, humidity_setpoint, control_zone)
+  def self.apply_dehumidifier(model, runner, dehumidifier, living_space, hvac_map)
+    water_removal_rate = dehumidifier.capacity
+    energy_factor = dehumidifier.energy_factor
 
-    # error checking
-    if (humidity_setpoint < 0) || (humidity_setpoint > 1)
-      fail 'Invalid humidity setpoint value entered.'
-    end
-    if (water_removal_rate != Constants.Auto) && (water_removal_rate.to_f <= 0)
-      fail 'Invalid water removal rate value entered.'
-    end
-    if (energy_factor != Constants.Auto) && (energy_factor.to_f < 0)
-      fail 'Invalid energy factor value entered.'
-    end
-    if (air_flow_rate != Constants.Auto) && (air_flow_rate.to_f < 0)
-      fail 'Invalid air flow rate value entered.'
-    end
-
+    control_zone = living_space.thermalZone.get
     obj_name = Constants.ObjectNameDehumidifier
 
-    avg_rh_setpoint = humidity_setpoint * 100.0 # (EnergyPlus uses 60 for 60% RH)
+    avg_rh_setpoint = dehumidifier.rh_setpoint * 100.0 # (EnergyPlus uses 60 for 60% RH)
     relative_humidity_setpoint_sch = OpenStudio::Model::ScheduleConstant.new(model)
     relative_humidity_setpoint_sch.setName(Constants.ObjectNameRelativeHumiditySetpoint)
     relative_humidity_setpoint_sch.setValue(avg_rh_setpoint)
 
     # Dehumidifier coefficients
     # Generic model coefficients from Winkler, Christensen, and Tomerlin (2011)
-    water_removal_curve = create_curve_biquadratic(model, [-1.162525707, 0.02271469, -0.000113208, 0.021110538, -0.0000693034, 0.000378843], 'DXDH-WaterRemove-Cap-fT', -100, 100, -100, 100)
-    energy_factor_curve = create_curve_biquadratic(model, [-1.902154518, 0.063466565, -0.000622839, 0.039540407, -0.000125637, -0.000176722], 'DXDH-EnergyFactor-fT', -100, 100, -100, 100)
-    part_load_frac_curve = create_curve_quadratic(model, [0.90, 0.10, 0.0], 'DXDH-PLF-fPLR', 0, 1, 0.7, 1)
-
-    control_zone.each do |control_zone, slave_zones|
-      humidistat = OpenStudio::Model::ZoneControlHumidistat.new(model)
-      humidistat.setName(obj_name + " #{control_zone.name} humidistat")
-      humidistat.setHumidifyingRelativeHumiditySetpointSchedule(relative_humidity_setpoint_sch)
-      humidistat.setDehumidifyingRelativeHumiditySetpointSchedule(relative_humidity_setpoint_sch)
-      control_zone.setZoneControlHumidistat(humidistat)
-
-      zone_hvac = OpenStudio::Model::ZoneHVACDehumidifierDX.new(model, water_removal_curve, energy_factor_curve, part_load_frac_curve)
-      zone_hvac.setName(obj_name + " #{control_zone.name} dx")
-      zone_hvac.setAvailabilitySchedule(model.alwaysOnDiscreteSchedule)
-      if water_removal_rate != Constants.Auto
-        zone_hvac.setRatedWaterRemoval(UnitConversions.convert(water_removal_rate.to_f, 'pint', 'L'))
-      else
-        zone_hvac.setRatedWaterRemoval(Constants.small) # Autosize flag for HVACSizing measure
-      end
-      if energy_factor != Constants.Auto
-        zone_hvac.setRatedEnergyFactor(energy_factor.to_f)
-      else
-        zone_hvac.setRatedEnergyFactor(Constants.small) # Autosize flag for HVACSizing measure
-      end
-      if air_flow_rate != Constants.Auto
-        zone_hvac.setRatedAirFlowRate(UnitConversions.convert(air_flow_rate.to_f, 'cfm', 'm^3/s'))
-      else
-        zone_hvac.setRatedAirFlowRate(Constants.small) # Autosize flag for HVACSizing measure
-      end
-      zone_hvac.setMinimumDryBulbTemperatureforDehumidifierOperation(10)
-      zone_hvac.setMaximumDryBulbTemperatureforDehumidifierOperation(40)
-
-      zone_hvac.addToThermalZone(control_zone)
+    w_coeff = [-1.162525707, 0.02271469, -0.000113208, 0.021110538, -0.0000693034, 0.000378843]
+    ef_coeff = [-1.902154518, 0.063466565, -0.000622839, 0.039540407, -0.000125637, -0.000176722]
+    pl_coeff = [0.90, 0.10, 0.0]
+    water_removal_curve = create_curve_biquadratic(model, w_coeff, 'DXDH-WaterRemove-Cap-fT', -100, 100, -100, 100)
+    energy_factor_curve = create_curve_biquadratic(model, ef_coeff, 'DXDH-EnergyFactor-fT', -100, 100, -100, 100)
+    part_load_frac_curve = create_curve_quadratic(model, pl_coeff, 'DXDH-PLF-fPLR', 0, 1, 0.7, 1)
+    if energy_factor.nil?
+      # shift inputs tested under IEF test conditions to those under EF test conditions with performance curves
+      energy_factor, water_removal_rate = dehumidifier_ief_to_ef_inputs(w_coeff, ef_coeff, dehumidifier.integrated_energy_factor, water_removal_rate)
     end
+
+    # Calculate air flow rate by assuming 2.75 cfm/pint/day (based on experimental test data)
+    air_flow_rate = 2.75 * water_removal_rate
+
+    humidistat = OpenStudio::Model::ZoneControlHumidistat.new(model)
+    humidistat.setName(obj_name + " #{control_zone.name} humidistat")
+    humidistat.setHumidifyingRelativeHumiditySetpointSchedule(relative_humidity_setpoint_sch)
+    humidistat.setDehumidifyingRelativeHumiditySetpointSchedule(relative_humidity_setpoint_sch)
+    control_zone.setZoneControlHumidistat(humidistat)
+
+    zone_hvac = OpenStudio::Model::ZoneHVACDehumidifierDX.new(model, water_removal_curve, energy_factor_curve, part_load_frac_curve)
+    zone_hvac.setName(obj_name + " #{control_zone.name} dx")
+    zone_hvac.setAvailabilitySchedule(model.alwaysOnDiscreteSchedule)
+    zone_hvac.setRatedWaterRemoval(UnitConversions.convert(water_removal_rate, 'pint', 'L'))
+    zone_hvac.setRatedEnergyFactor(energy_factor / dehumidifier.fraction_served)
+    zone_hvac.setRatedAirFlowRate(UnitConversions.convert(air_flow_rate, 'cfm', 'm^3/s'))
+    zone_hvac.setMinimumDryBulbTemperatureforDehumidifierOperation(10)
+    zone_hvac.setMaximumDryBulbTemperatureforDehumidifierOperation(40)
+
+    zone_hvac.addToThermalZone(control_zone)
+
+    hvac_map[dehumidifier.id] << zone_hvac
+    if dehumidifier.fraction_served < 1.0
+      adjust_dehumidifier_load_EMS(dehumidifier.fraction_served, zone_hvac, model, living_space)
+    end
+  end
+
+  def self.dehumidifier_ief_to_ef_inputs(w_coeff, ef_coeff, ief, water_removal_rate)
+    # Shift inputs under IEF test conditions to E+ supported EF test conditions
+    # test conditions
+    ief_db = UnitConversions.convert(65.0, 'F', 'C') # degree C
+    rh = 60.0 # for both EF and IEF test conditions, %
+
+    # Independent ariables applied to curve equations
+    var_array_ief = [1, ief_db, ief_db * ief_db, rh, rh * rh, ief_db * rh]
+
+    # Curved values under EF test conditions
+    curve_value_ef = 1 # Curves are nomalized to 1.0 under EF test conditions, 80F, 60%
+    # Curve values under IEF test conditions
+    ef_curve_value_ief = var_array_ief.zip(ef_coeff).map { |var, coeff| var * coeff }.inject(0, :+)
+    water_removal_curve_value_ief = var_array_ief.zip(w_coeff).map { |var, coeff| var * coeff }.inject(0, :+)
+
+    # E+ inputs under EF test conditions
+    ef_input = ief / ef_curve_value_ief * curve_value_ef
+    water_removal_rate_input = water_removal_rate / water_removal_curve_value_ief * curve_value_ef
+
+    return ef_input, water_removal_rate_input
+  end
+
+  def self.adjust_dehumidifier_load_EMS(fraction_served, zone_hvac, model, living_space)
+    # adjust hvac load to space when dehumidifier serves less than 100% dehumidification load. (With E+ dehumidifier object, it can only model 100%)
+
+    # sensor
+    dehumidifier_sens_htg = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Zone Dehumidifier Sensible Heating Rate')
+    dehumidifier_sens_htg.setName("#{zone_hvac.name} sens htg")
+    dehumidifier_sens_htg.setKeyName(zone_hvac.name.to_s)
+    dehumidifier_power = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Zone Dehumidifier Electric Power')
+    dehumidifier_power.setName("#{zone_hvac.name} power htg")
+    dehumidifier_power.setKeyName(zone_hvac.name.to_s)
+
+    # actuator
+    dehumidifier_load_adj_def = OpenStudio::Model::OtherEquipmentDefinition.new(model)
+    dehumidifier_load_adj_def.setName("#{zone_hvac.name} sens htg adj def")
+    dehumidifier_load_adj_def.setDesignLevel(0)
+    dehumidifier_load_adj_def.setFractionRadiant(0)
+    dehumidifier_load_adj_def.setFractionLatent(0)
+    dehumidifier_load_adj_def.setFractionLost(0)
+    dehumidifier_load_adj = OpenStudio::Model::OtherEquipment.new(dehumidifier_load_adj_def)
+    dehumidifier_load_adj.setName("#{zone_hvac.name} sens htg adj")
+    dehumidifier_load_adj.setSpace(living_space)
+    dehumidifier_load_adj.setSchedule(model.alwaysOnDiscreteSchedule)
+
+    dehumidifier_load_adj_act = OpenStudio::Model::EnergyManagementSystemActuator.new(dehumidifier_load_adj, 'OtherEquipment', 'Power Level')
+    dehumidifier_load_adj_act.setName("#{zone_hvac.name} sens htg adj act")
+
+    # EMS program
+    program = OpenStudio::Model::EnergyManagementSystemProgram.new(model)
+    program.setName("#{zone_hvac.name} load adj program")
+    program.addLine("If #{dehumidifier_sens_htg.name} > 0")
+    program.addLine("  Set #{dehumidifier_load_adj_act.name} = - (#{dehumidifier_sens_htg.name} - #{dehumidifier_power.name}) * (1 - #{fraction_served})")
+    program.addLine('Else')
+    program.addLine("  Set #{dehumidifier_load_adj_act.name} = 0")
+    program.addLine('EndIf')
+
+    program_calling_manager = OpenStudio::Model::EnergyManagementSystemProgramCallingManager.new(model)
+    program_calling_manager.setName(program.name.to_s + 'calling manager')
+    program_calling_manager.setCallingPoint('BeginTimestepBeforePredictor')
+    program_calling_manager.addProgram(program)
   end
 
   def self.apply_ceiling_fans(model, runner, annual_kWh, weekday_sch, weekend_sch, monthly_sch,
@@ -4598,10 +4651,14 @@ class HVAC
     return hspf
   end
 
-  def self.get_constant_schedule(model, value)
+  def self.get_sequential_load_schedule(model, value)
     s = OpenStudio::Model::ScheduleConstant.new(model)
     s.setName('Sequential Fraction Schedule')
-    s.setValue(value)
+    if value > 1
+      s.setValue(1.0)
+    else
+      s.setValue(value)
+    end
     Schedule.set_schedule_type_limits(model, s, Constants.ScheduleTypeLimitsFraction)
     return s
   end

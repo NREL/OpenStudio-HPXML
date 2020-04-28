@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 class Constants
   # Numbers --------------------
 
@@ -223,6 +225,14 @@ class Constants
     return 'dishwasher'
   end
 
+  def self.ObjectNameDistributionWaste
+    return 'dhw distribution waste'
+  end
+
+  def self.ObjectNameDucts
+    return 'ducts'
+  end
+
   def self.ObjectNameElectricBaseboard
     return 'baseboard'
   end
@@ -367,6 +377,10 @@ class Constants
     return 'unit heater'
   end
 
+  def self.ObjectNameWater
+    return 'water'
+  end
+
   def self.ObjectNameWaterHeater
     return 'water heater'
   end
@@ -377,14 +391,6 @@ class Constants
 
   def self.ObjectNameDesuperheater(water_heater_name)
     return "#{water_heater_name} Desuperheater"
-  end
-
-  def self.ObjectNameDesuperheaterEnergy(water_heater_name)
-    return "#{water_heater_name} Desuperheater energy"
-  end
-
-  def self.ObjectNameDesuperheaterLoad(water_heater_name)
-    return "#{water_heater_name} Desuperheater load"
   end
 
   def self.ObjectNameTankHX
@@ -681,5 +687,37 @@ class Constants
 
   def self.TerrainCity
     return 'city'
+  end
+
+  def self.BAZoneHotDry
+    return 'Hot-Dry'
+  end
+
+  def self.BAZoneHotHumid
+    return 'Hot-Humid'
+  end
+
+  def self.BAZoneMarine
+    return 'Marine'
+  end
+
+  def self.BAZoneMixedHumid
+    return 'Mixed-Humid'
+  end
+
+  def self.BAZoneMixedDry
+    return 'Mixed-Dry'
+  end
+
+  def self.BAZoneCold
+    return 'Cold'
+  end
+
+  def self.BAZoneVeryCold
+    return 'Very Cold'
+  end
+
+  def self.BAZoneSubarctic
+    return 'Subarctic'
   end
 end

@@ -1,9 +1,10 @@
+<?xml version="1.0"?>
 <measure>
   <schema_version>3.0</schema_version>
   <name>simulation_output_report</name>
   <uid>df9d170c-c21a-4130-866d-0d46b06073fd</uid>
-  <version_id>2cd11270-8f49-4d14-b102-71f0ef917cbd</version_id>
-  <version_modified>20200323T183457Z</version_modified>
+  <version_id>b1bde40b-0b71-4f7f-98c7-b559c27199bd</version_id>
+  <version_modified>20200427T163313Z</version_modified>
   <xml_checksum>9BF1E6AC</xml_checksum>
   <class_name>SimulationOutputReport</class_name>
   <display_name>HPXML Simulation Output Report</display_name>
@@ -30,6 +31,10 @@
         <choice>
           <value>daily</value>
           <display_name>daily</display_name>
+        </choice>
+        <choice>
+          <value>monthly</value>
+          <display_name>monthly</display_name>
         </choice>
       </choices>
     </argument>
@@ -75,6 +80,25 @@
       <name>include_timeseries_end_use_consumptions</name>
       <display_name>Generate Timeseries Output: End Use Consumptions</display_name>
       <description>Generates timeseries energy consumptions for each end use.</description>
+      <type>Boolean</type>
+      <required>true</required>
+      <model_dependent>false</model_dependent>
+      <default_value>false</default_value>
+      <choices>
+        <choice>
+          <value>true</value>
+          <display_name>true</display_name>
+        </choice>
+        <choice>
+          <value>false</value>
+          <display_name>false</display_name>
+        </choice>
+      </choices>
+    </argument>
+    <argument>
+      <name>include_timeseries_hot_water_uses</name>
+      <display_name>Generate Timeseries Output: Hot Water Uses</display_name>
+      <description>Generates timeseries hot water usages for each end use.</description>
       <type>Boolean</type>
       <required>true</required>
       <model_dependent>false</model_dependent>
@@ -264,6 +288,13 @@
       <model_dependent>false</model_dependent>
     </output>
     <output>
+      <name>Electricity: Dehumidifier MBtu</name>
+      <display_name>Electricity: Dehumidifier MBtu</display_name>
+      <short_name>Electricity: Dehumidifier MBtu</short_name>
+      <type>Double</type>
+      <model_dependent>false</model_dependent>
+    </output>
+    <output>
       <name>Electricity: Dishwasher MBtu</name>
       <display_name>Electricity: Dishwasher MBtu</display_name>
       <short_name>Electricity: Dishwasher MBtu</short_name>
@@ -439,7 +470,7 @@
       <model_dependent>false</model_dependent>
     </output>
   </outputs>
-  <provenances/>
+  <provenances />
   <tags>
     <tag>Reporting.QAQC</tag>
   </tags>
@@ -462,6 +493,12 @@
   </attributes>
   <files>
     <file>
+      <filename>constants.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>301A7C10</checksum>
+    </file>
+    <file>
       <version>
         <software_program>OpenStudio</software_program>
         <identifier>2.9.1</identifier>
@@ -470,19 +507,13 @@
       <filename>measure.rb</filename>
       <filetype>rb</filetype>
       <usage_type>script</usage_type>
-      <checksum>FEA8361B</checksum>
-    </file>
-    <file>
-      <filename>constants.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>80167322</checksum>
+      <checksum>2213ED0C</checksum>
     </file>
     <file>
       <filename>output_report_test.rb</filename>
       <filetype>rb</filetype>
       <usage_type>test</usage_type>
-      <checksum>D42FC131</checksum>
+      <checksum>4C895D3B</checksum>
     </file>
   </files>
 </measure>
