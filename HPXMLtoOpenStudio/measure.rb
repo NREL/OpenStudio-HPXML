@@ -3060,6 +3060,8 @@ class OSModel
       fractions[[lg.location, lg.third_party_certification]] = lg.fration_of_units_in_location
     end
 
+    return if fractions[[HPXML::LocationInterior, HPXML::LightingTypeTierI]].nil? # Not the lighting group(s) we're interested in
+
     int_kwh, ext_kwh, grg_kwh = Lighting.calc_lighting_energy(@eri_version, @cfa, @gfa,
                                                               fractions[[HPXML::LocationInterior, HPXML::LightingTypeTierI]],
                                                               fractions[[HPXML::LocationExterior, HPXML::LightingTypeTierI]],
