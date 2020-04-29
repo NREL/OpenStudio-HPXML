@@ -448,8 +448,6 @@ def set_hpxml_building_construction(hpxml_file, hpxml)
     hpxml.building_construction.number_of_conditioned_floors -= 1
     hpxml.building_construction.conditioned_floor_area -= 1350
     hpxml.building_construction.conditioned_building_volume -= 1350 * 8
-  elsif ['base-hvac-ideal-air.xml'].include? hpxml_file
-    hpxml.building_construction.use_only_ideal_air_system = true
   elsif ['base-atticroof-conditioned.xml'].include? hpxml_file
     hpxml.building_construction.number_of_conditioned_floors += 1
     hpxml.building_construction.number_of_conditioned_floors_above_grade += 1

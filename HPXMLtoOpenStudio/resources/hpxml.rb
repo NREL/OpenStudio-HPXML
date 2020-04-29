@@ -761,8 +761,7 @@ class HPXML < Object
   class BuildingConstruction < BaseElement
     ATTRS = [:year_built, :number_of_conditioned_floors, :number_of_conditioned_floors_above_grade,
              :average_ceiling_height, :number_of_bedrooms, :number_of_bathrooms,
-             :conditioned_floor_area, :conditioned_building_volume, :use_only_ideal_air_system,
-             :residential_facility_type]
+             :conditioned_floor_area, :conditioned_building_volume, :residential_facility_type]
     attr_accessor(*ATTRS)
 
     def check_for_errors
@@ -782,8 +781,6 @@ class HPXML < Object
       XMLHelper.add_element(building_construction, 'NumberofBathrooms', Integer(@number_of_bathrooms)) unless @number_of_bathrooms.nil?
       XMLHelper.add_element(building_construction, 'ConditionedFloorArea', Float(@conditioned_floor_area)) unless @conditioned_floor_area.nil?
       XMLHelper.add_element(building_construction, 'ConditionedBuildingVolume', Float(@conditioned_building_volume)) unless @conditioned_building_volume.nil?
-      HPXML::add_extension(parent: building_construction,
-                           extensions: { 'UseOnlyIdealAirSystem' => HPXML::to_bool_or_nil(@use_only_ideal_air_system) })
     end
 
     def from_oga(hpxml)
@@ -800,7 +797,6 @@ class HPXML < Object
       @number_of_bathrooms = HPXML::to_integer_or_nil(XMLHelper.get_value(building_construction, 'NumberofBathrooms'))
       @conditioned_floor_area = HPXML::to_float_or_nil(XMLHelper.get_value(building_construction, 'ConditionedFloorArea'))
       @conditioned_building_volume = HPXML::to_float_or_nil(XMLHelper.get_value(building_construction, 'ConditionedBuildingVolume'))
-      @use_only_ideal_air_system = HPXML::to_bool_or_nil(XMLHelper.get_value(building_construction, 'extension/UseOnlyIdealAirSystem'))
       @residential_facility_type = XMLHelper.get_value(building_construction, 'ResidentialFacilityType')
     end
   end
