@@ -4380,7 +4380,7 @@ class OSModel
 
   def self.create_multifamily_temperature_schedule(model, outside_space, spaces)
     # Create outside boundary schedules to be actuated by EMS,
-    # can be shared by any surface, duct, or appliances adjacent to / located in those spaces
+    # can be shared by any surface, duct adjacent to / located in those spaces
 
     # return if already exists
     return if not @mf_temp_sch_map[outside_space].nil?
@@ -4440,9 +4440,9 @@ class OSModel
     program_cm.addProgram(program)
   end
 
-  # Returns an OS:Space or OS:Schedule, or nil if the location is outside the building
+  # Returns an OS:Space or OS:Schedule (MF spaces), or nil (outside) for water heaters and ducts
   def self.get_wh_duct_space_or_temp_schedule_from_location(location, object_name, model, spaces)
-    return if (location == HPXML::LocationOtherExterior) || (location == HPXML::LocationOutside) || (location == HPXML::LocationOther)
+    return if (location == HPXML::LocationOtherExterior) || (location == HPXML::LocationOutside)
 
     sch = nil
     space = nil
@@ -4457,9 +4457,9 @@ class OSModel
     return space, sch
   end
 
-  # Returns an OS:Space or OS:Schedule, or nil if the location is outside the building/MF spaces
+  # Returns an OS:Space, or nil if the location is in MF spaces for appliance
   def self.get_appliance_space_from_location(location, object_name, model, spaces)
-    return if (location == HPXML::LocationOtherExterior) || (location == HPXML::LocationOutside) || (location == HPXML::LocationOther)
+    return if location == HPXML::LocationOther
 
     return get_space_from_location(location, object_name, model, spaces)
   end

@@ -727,8 +727,7 @@ class Airflow
     ducts.each do |duct|
       duct.rvalue = get_duct_insulation_rvalue(duct.rvalue, duct.side) # Convert from nominal to actual R-value
       if not duct.amb_temp_sch.nil?
-        # Pass MF space temperature schedule
-        # Keep zone and schedule set in the same attribute because duct program will be created per duct zone instead of per duct, it can be: nil(outside), schedule(mf spaces), and thermal zone(OS spaces), if in two places, hard to distinguish the nil
+        # Pass MF space temperature schedule name
         duct.zone_or_sch_handle = duct.amb_temp_sch.name.to_s
       elsif not duct.space.nil?
         duct.zone = duct.space.thermalZone.get
@@ -1190,7 +1189,7 @@ class Airflow
         # List of: [Var name, object name, space, frac load latent, frac load outside]
         mix_act_infos = []
 
-        if duct_zone_or_sch.is_a? OpenStudio::Model::ThermalZone # Not Outside nor scheduled temperature
+        if duct_zone_or_sch.is_a? OpenStudio::Model::ThermalZone
           # Accounts for leaks from the duct zone to the living zone
           mix_act_infos << ['dz_to_liv_flow_rate', 'ZoneMixDZToLv', building.living.zone, duct_zone_or_sch]
           # Accounts for leaks from the living zone to the duct zone
