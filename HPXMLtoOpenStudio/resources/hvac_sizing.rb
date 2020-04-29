@@ -3115,9 +3115,9 @@ class HVACSizing
     # Calculated based on Manual J 8th Ed. procedure in section A12-4 (15% decrease due to soil thermal storage)
     u_wall_with_soil = 0.0
     u_wall_without_soil = 0.0
-    wall_height_ft = Geometry.get_surface_height(surface).round
+    wall_height_ft = Geometry.get_surface_height(surface).ceil
     for d in 1..wall_height_ft
-      r_soil = (Math::PI * d / 2.0) / k_soil
+      r_soil = (Math::PI * d / 2.0) / k_soil # FIXME: Should this be (d-wall_height_ag) instead of d?
 
       # Calculate R-wall at this depth
       r_wall = wall_constr_rvalue + Material.AirFilmVertical.rvalue # Base wall construction + interior film
