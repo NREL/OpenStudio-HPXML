@@ -256,7 +256,7 @@ class OSModel
     add_conditioned_floor_area(runner, model, spaces)
     add_thermal_mass(runner, model)
     modify_cond_basement_surface_properties(runner, model)
-    assign_view_factor(runner, model)
+    assign_view_factor(runner, model) unless @cond_bsmnt_surfaces.empty?
     check_for_errors(runner, model)
     set_zone_volumes(runner, model)
     explode_surfaces(runner, model)
