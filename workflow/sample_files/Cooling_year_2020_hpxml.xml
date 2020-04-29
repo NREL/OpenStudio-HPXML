@@ -3,7 +3,7 @@
   <XMLTransactionHeaderInformation>
     <XMLType/>
     <XMLGeneratedBy>HES Generate HPXML</XMLGeneratedBy>
-    <CreatedDateAndTime>2019-11-08T08:57:43-08:00</CreatedDateAndTime>
+    <CreatedDateAndTime>2020-04-28T11:26:40-07:00</CreatedDateAndTime>
     <Transaction>create</Transaction>
   </XMLTransactionHeaderInformation>
   <SoftwareInfo>
@@ -11,7 +11,7 @@
     <SoftwareProgramVersion>0.2</SoftwareProgramVersion>
   </SoftwareInfo>
   <Building>
-    <BuildingID id="bid-3353.25563">
+    <BuildingID id="bid-2842.29348">
       <SendingSystemIdentifierType>hescore_external_building_id</SendingSystemIdentifierType>
       <SendingSystemIdentifierValue/>
     </BuildingID>
@@ -19,7 +19,7 @@
       <SiteID id="site1"/>
       <Address>
         <AddressType>street</AddressType>
-        <Address1>Regression run 7.133</Address1>
+        <Address1>Regression run 8.141</Address1>
         <CityMunicipality>St Louis</CityMunicipality>
         <StateCode>MO</StateCode>
         <ZipCode>63101</ZipCode>
@@ -27,7 +27,7 @@
     </Site>
     <ProjectStatus>
       <EventType>construction-period testing/daily test out</EventType>
-      <Date>2019-11-04</Date>
+      <Date>2020-03-24</Date>
     </ProjectStatus>
     <BuildingDetails>
       <BuildingSummary>
@@ -47,7 +47,7 @@
           </extension>
         </BuildingConstruction>
         <extension>
-          <comments>Cooling year 2019</comments>
+          <comments>Cooling year 2020</comments>
         </extension>
       </BuildingSummary>
       <ClimateandRiskZones>
@@ -314,7 +314,7 @@
             </HeatingSystem>
             <CoolingSystem>
               <SystemIdentifier id="hvac1_cool"/>
-              <YearInstalled>2019</YearInstalled>
+              <YearInstalled>2020</YearInstalled>
               <DistributionSystem idref="hvac1_dist"/>
               <CoolingSystemType>central air conditioner</CoolingSystemType>
               <FractionCoolLoadServed>1</FractionCoolLoadServed>

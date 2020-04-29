@@ -3,7 +3,7 @@
   <XMLTransactionHeaderInformation>
     <XMLType/>
     <XMLGeneratedBy>HES Generate HPXML</XMLGeneratedBy>
-    <CreatedDateAndTime>2019-11-08T08:39:55-08:00</CreatedDateAndTime>
+    <CreatedDateAndTime>2020-04-28T11:37:11-07:00</CreatedDateAndTime>
     <Transaction>create</Transaction>
   </XMLTransactionHeaderInformation>
   <SoftwareInfo>
@@ -11,7 +11,7 @@
     <SoftwareProgramVersion>0.2</SoftwareProgramVersion>
   </SoftwareInfo>
   <Building>
-    <BuildingID id="bid-3244.25454">
+    <BuildingID id="bid-2869.29375">
       <SendingSystemIdentifierType>hescore_external_building_id</SendingSystemIdentifierType>
       <SendingSystemIdentifierValue/>
     </BuildingID>
@@ -19,7 +19,7 @@
       <SiteID id="site1"/>
       <Address>
         <AddressType>street</AddressType>
-        <Address1>Regression run 7.24</Address1>
+        <Address1>Regression run 8.168</Address1>
         <CityMunicipality>St Louis</CityMunicipality>
         <StateCode>MO</StateCode>
         <ZipCode>63101</ZipCode>
@@ -27,7 +27,7 @@
     </Site>
     <ProjectStatus>
       <EventType>construction-period testing/daily test out</EventType>
-      <Date>2019-11-04</Date>
+      <Date>2020-03-24</Date>
     </ProjectStatus>
     <BuildingDetails>
       <BuildingSummary>
@@ -36,7 +36,7 @@
           <OrientationOfFrontOfHome>north</OrientationOfFrontOfHome>
         </Site>
         <BuildingConstruction>
-          <YearBuilt>2019</YearBuilt>
+          <YearBuilt>1970</YearBuilt>
           <ResidentialFacilityType>single-family detached</ResidentialFacilityType>
           <NumberofConditionedFloorsAboveGrade>2</NumberofConditionedFloorsAboveGrade>
           <AverageCeilingHeight>8</AverageCeilingHeight>
@@ -47,7 +47,7 @@
           </extension>
         </BuildingConstruction>
         <extension>
-          <comments>Year 2019</comments>
+          <comments>PV panels 20</comments>
         </extension>
       </BuildingSummary>
       <ClimateandRiskZones>
@@ -349,6 +349,14 @@
             <EnergyFactor>0.6</EnergyFactor>
           </WaterHeatingSystem>
         </WaterHeating>
+        <Photovoltaics>
+          <PVSystem>
+            <SystemIdentifier id="pv1"/>
+            <ArrayOrientation>south</ArrayOrientation>
+            <NumberOfPanels>20</NumberOfPanels>
+            <YearModulesManufactured>2010</YearModulesManufactured>
+          </PVSystem>
+        </Photovoltaics>
       </Systems>
     </BuildingDetails>
   </Building>

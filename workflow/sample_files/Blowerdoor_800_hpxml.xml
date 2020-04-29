@@ -3,7 +3,7 @@
   <XMLTransactionHeaderInformation>
     <XMLType/>
     <XMLGeneratedBy>HES Generate HPXML</XMLGeneratedBy>
-    <CreatedDateAndTime>2019-11-08T09:01:23-08:00</CreatedDateAndTime>
+    <CreatedDateAndTime>2020-04-28T10:57:27-07:00</CreatedDateAndTime>
     <Transaction>create</Transaction>
   </XMLTransactionHeaderInformation>
   <SoftwareInfo>
@@ -11,7 +11,7 @@
     <SoftwareProgramVersion>0.2</SoftwareProgramVersion>
   </SoftwareInfo>
   <Building>
-    <BuildingID id="bid-3376.25586">
+    <BuildingID id="bid-2743.29249">
       <SendingSystemIdentifierType>hescore_external_building_id</SendingSystemIdentifierType>
       <SendingSystemIdentifierValue/>
     </BuildingID>
@@ -19,7 +19,7 @@
       <SiteID id="site1"/>
       <Address>
         <AddressType>street</AddressType>
-        <Address1>Regression run 7.156</Address1>
+        <Address1>Regression run 8.42</Address1>
         <CityMunicipality>St Louis</CityMunicipality>
         <StateCode>MO</StateCode>
         <ZipCode>63101</ZipCode>
@@ -27,7 +27,7 @@
     </Site>
     <ProjectStatus>
       <EventType>construction-period testing/daily test out</EventType>
-      <Date>2019-11-04</Date>
+      <Date>2020-03-24</Date>
     </ProjectStatus>
     <BuildingDetails>
       <BuildingSummary>
@@ -47,7 +47,7 @@
           </extension>
         </BuildingConstruction>
         <extension>
-          <comments>PV kw .05</comments>
+          <comments>Blowerdoor 800</comments>
         </extension>
       </BuildingSummary>
       <ClimateandRiskZones>
@@ -65,8 +65,13 @@
         <AirInfiltration>
           <AirInfiltrationMeasurement>
             <SystemIdentifier id="infilt1"/>
-            <TypeOfInfiltrationMeasurement>estimate</TypeOfInfiltrationMeasurement>
+            <TypeOfInfiltrationMeasurement>blower door</TypeOfInfiltrationMeasurement>
+            <HousePressure>50</HousePressure>
             <LeakinessDescription>average</LeakinessDescription>
+            <BuildingAirLeakage>
+              <UnitofMeasure>CFM</UnitofMeasure>
+              <AirLeakage>800</AirLeakage>
+            </BuildingAirLeakage>
           </AirInfiltrationMeasurement>
         </AirInfiltration>
         <Attics>
@@ -349,14 +354,6 @@
             <EnergyFactor>0.6</EnergyFactor>
           </WaterHeatingSystem>
         </WaterHeating>
-        <Photovoltaics>
-          <PVSystem>
-            <SystemIdentifier id="pv1"/>
-            <ArrayOrientation>south</ArrayOrientation>
-            <MaxPowerOutput>50</MaxPowerOutput>
-            <YearModulesManufactured>2009</YearModulesManufactured>
-          </PVSystem>
-        </Photovoltaics>
       </Systems>
     </BuildingDetails>
   </Building>

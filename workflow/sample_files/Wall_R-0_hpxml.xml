@@ -3,7 +3,7 @@
   <XMLTransactionHeaderInformation>
     <XMLType/>
     <XMLGeneratedBy>HES Generate HPXML</XMLGeneratedBy>
-    <CreatedDateAndTime>2019-11-08T09:02:04-08:00</CreatedDateAndTime>
+    <CreatedDateAndTime>2020-04-28T11:08:54-07:00</CreatedDateAndTime>
     <Transaction>create</Transaction>
   </XMLTransactionHeaderInformation>
   <SoftwareInfo>
@@ -11,7 +11,7 @@
     <SoftwareProgramVersion>0.2</SoftwareProgramVersion>
   </SoftwareInfo>
   <Building>
-    <BuildingID id="bid-3380.25590">
+    <BuildingID id="bid-2796.29302">
       <SendingSystemIdentifierType>hescore_external_building_id</SendingSystemIdentifierType>
       <SendingSystemIdentifierValue/>
     </BuildingID>
@@ -19,7 +19,7 @@
       <SiteID id="site1"/>
       <Address>
         <AddressType>street</AddressType>
-        <Address1>Regression run 7.160</Address1>
+        <Address1>Regression run 8.95</Address1>
         <CityMunicipality>St Louis</CityMunicipality>
         <StateCode>MO</StateCode>
         <ZipCode>63101</ZipCode>
@@ -27,7 +27,7 @@
     </Site>
     <ProjectStatus>
       <EventType>construction-period testing/daily test out</EventType>
-      <Date>2019-11-04</Date>
+      <Date>2020-03-24</Date>
     </ProjectStatus>
     <BuildingDetails>
       <BuildingSummary>
@@ -47,7 +47,7 @@
           </extension>
         </BuildingConstruction>
         <extension>
-          <comments>PV year 2002</comments>
+          <comments>Wall R-0</comments>
         </extension>
       </BuildingSummary>
       <ClimateandRiskZones>
@@ -122,11 +122,11 @@
               <SystemIdentifier id="front_wall_insulation"/>
               <Layer>
                 <InstallationType>cavity</InstallationType>
-                <NominalRValue>13</NominalRValue>
+                <NominalRValue>00</NominalRValue>
               </Layer>
             </Insulation>
             <extension>
-              <hescore_wall_code>ewwf13vi</hescore_wall_code>
+              <hescore_wall_code>ewwf00vi</hescore_wall_code>
             </extension>
           </Wall>
           <Wall>
@@ -142,11 +142,11 @@
               <SystemIdentifier id="back_wall_insulation"/>
               <Layer>
                 <InstallationType>cavity</InstallationType>
-                <NominalRValue>13</NominalRValue>
+                <NominalRValue>00</NominalRValue>
               </Layer>
             </Insulation>
             <extension>
-              <hescore_wall_code>ewwf13vi</hescore_wall_code>
+              <hescore_wall_code>ewwf00vi</hescore_wall_code>
             </extension>
           </Wall>
           <Wall>
@@ -162,11 +162,11 @@
               <SystemIdentifier id="right_wall_insulation"/>
               <Layer>
                 <InstallationType>cavity</InstallationType>
-                <NominalRValue>13</NominalRValue>
+                <NominalRValue>00</NominalRValue>
               </Layer>
             </Insulation>
             <extension>
-              <hescore_wall_code>ewwf13vi</hescore_wall_code>
+              <hescore_wall_code>ewwf00vi</hescore_wall_code>
             </extension>
           </Wall>
           <Wall>
@@ -182,11 +182,11 @@
               <SystemIdentifier id="left_wall_insulation"/>
               <Layer>
                 <InstallationType>cavity</InstallationType>
-                <NominalRValue>13</NominalRValue>
+                <NominalRValue>00</NominalRValue>
               </Layer>
             </Insulation>
             <extension>
-              <hescore_wall_code>ewwf13vi</hescore_wall_code>
+              <hescore_wall_code>ewwf00vi</hescore_wall_code>
             </extension>
           </Wall>
         </Walls>
@@ -292,7 +292,7 @@
           </Window>
         </Windows>
         <extension>
-          <hescore_wall_construction_same>true</hescore_wall_construction_same>
+          <hescore_wall_construction_same>false</hescore_wall_construction_same>
           <hescore_window_construction_same>true</hescore_window_construction_same>
         </extension>
       </Enclosure>
@@ -349,14 +349,6 @@
             <EnergyFactor>0.6</EnergyFactor>
           </WaterHeatingSystem>
         </WaterHeating>
-        <Photovoltaics>
-          <PVSystem>
-            <SystemIdentifier id="pv1"/>
-            <ArrayOrientation>south</ArrayOrientation>
-            <MaxPowerOutput>4000</MaxPowerOutput>
-            <YearModulesManufactured>2002</YearModulesManufactured>
-          </PVSystem>
-        </Photovoltaics>
       </Systems>
     </BuildingDetails>
   </Building>

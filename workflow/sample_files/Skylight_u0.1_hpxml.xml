@@ -3,7 +3,7 @@
   <XMLTransactionHeaderInformation>
     <XMLType/>
     <XMLGeneratedBy>HES Generate HPXML</XMLGeneratedBy>
-    <CreatedDateAndTime>2019-11-08T08:52:02-08:00</CreatedDateAndTime>
+    <CreatedDateAndTime>2020-04-28T11:03:55-07:00</CreatedDateAndTime>
     <Transaction>create</Transaction>
   </XMLTransactionHeaderInformation>
   <SoftwareInfo>
@@ -11,7 +11,7 @@
     <SoftwareProgramVersion>0.2</SoftwareProgramVersion>
   </SoftwareInfo>
   <Building>
-    <BuildingID id="bid-3315.25525">
+    <BuildingID id="bid-2775.29281">
       <SendingSystemIdentifierType>hescore_external_building_id</SendingSystemIdentifierType>
       <SendingSystemIdentifierValue/>
     </BuildingID>
@@ -19,7 +19,7 @@
       <SiteID id="site1"/>
       <Address>
         <AddressType>street</AddressType>
-        <Address1>Regression run 7.95</Address1>
+        <Address1>Regression run 8.74</Address1>
         <CityMunicipality>St Louis</CityMunicipality>
         <StateCode>MO</StateCode>
         <ZipCode>63101</ZipCode>
@@ -27,7 +27,7 @@
     </Site>
     <ProjectStatus>
       <EventType>construction-period testing/daily test out</EventType>
-      <Date>2019-11-04</Date>
+      <Date>2020-03-24</Date>
     </ProjectStatus>
     <BuildingDetails>
       <BuildingSummary>
@@ -47,7 +47,7 @@
           </extension>
         </BuildingConstruction>
         <extension>
-          <comments>Window area 500</comments>
+          <comments>Skylight u0.1</comments>
         </extension>
       </BuildingSummary>
       <ClimateandRiskZones>
@@ -220,7 +220,7 @@
         <Windows>
           <Window>
             <SystemIdentifier id="front_window"/>
-            <Area>500</Area>
+            <Area>60</Area>
             <Orientation>north</Orientation>
             <FrameType>
               <Wood/>
@@ -291,6 +291,19 @@
             </extension>
           </Window>
         </Windows>
+        <Skylights>
+          <Skylight>
+            <SystemIdentifier id="roof1_skylight"/>
+            <Area>100</Area>
+            <UFactor>0.1</UFactor>
+            <SHGC>0.5</SHGC>
+            <ExteriorShading>
+              <SystemIdentifier id="roof1_skylight_shade"/>
+              <Type>none</Type>
+            </ExteriorShading>
+            <AttachedToRoof idref="roof1"/>
+          </Skylight>
+        </Skylights>
         <extension>
           <hescore_wall_construction_same>true</hescore_wall_construction_same>
           <hescore_window_construction_same>true</hescore_window_construction_same>
