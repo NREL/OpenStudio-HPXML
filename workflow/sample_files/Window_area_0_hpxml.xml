@@ -217,7 +217,26 @@
             </PerimeterInsulation>
           </Slab>
         </Slabs>
-        <Windows/>
+        <Windows>
+          <Window>
+            <SystemIdentifier id="front_window"/>
+            <Area>1</Area>
+            <Orientation>north</Orientation>
+            <FrameType>
+              <Wood/>
+            </FrameType>
+            <GlassLayers>double-pane</GlassLayers>
+            <GasFill>air</GasFill>
+            <ExteriorShading>
+              <SystemIdentifier id="front_window_shade"/>
+              <Type>none</Type>
+            </ExteriorShading>
+            <AttachedToWall idref="front_wall"/>
+            <extension>
+              <hescore_window_code>dcaw</hescore_window_code>
+            </extension>
+          </Window>
+        </Windows>
         <extension>
           <hescore_wall_construction_same>true</hescore_wall_construction_same>
           <hescore_window_construction_same>true</hescore_window_construction_same>
