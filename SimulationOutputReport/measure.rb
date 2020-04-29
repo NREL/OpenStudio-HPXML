@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 # see the URL below for information on how to write OpenStudio measures
 # http://nrel.github.io/OpenStudio-user-documentation/reference/measure_writing_guide/
 
@@ -287,8 +289,7 @@ class SimulationOutputReport < OpenStudio::Measure::ReportingMeasure
       timeseries_output_csv_path = File.join(output_dir, 'results_timeseries.csv')
     end
 
-    @timeseries_size = get_timeseries_size(timeseries_frequency)
-    fail "Unexpected timeseries_frequency: #{timeseries_frequency}." if @timeseries_size.nil?
+    @timestamps = get_timestamps(timeseries_frequency)
 
     # Retrieve outputs
     outputs = get_outputs(timeseries_frequency,
@@ -319,27 +320,29 @@ class SimulationOutputReport < OpenStudio::Measure::ReportingMeasure
     return true
   end
 
-  def get_timeseries_size(timeseries_frequency)
-    year_description = @model.getYearDescription
-    run_period = @model.getRunPeriod
-
-    start_time = Time.new(year_description.assumedYear, run_period.getBeginMonth, run_period.getBeginDayOfMonth)
-    end_time = Time.new(year_description.assumedYear, run_period.getEndMonth, run_period.getEndDayOfMonth, 24)
-
-    timeseries_size = (end_time - start_time).to_i # seconds
+  def get_timestamps(timeseries_frequency)
     if timeseries_frequency == 'hourly'
-      timeseries_size /= 3600
+      interval_type = 1
     elsif timeseries_frequency == 'daily'
-      timeseries_size /= 3600
-      timeseries_size /= 24
+      interval_type = 2
     elsif timeseries_frequency == 'monthly'
-      timeseries_size = run_period.getEndMonth - run_period.getBeginMonth + 1
+      interval_type = 3
     elsif timeseries_frequency == 'timestep'
-      timeseries_size /= 3600
-      timeseries_size *= @model.getTimestep.numberOfTimestepsPerHour
+      interval_type = -1
     end
 
-    return timeseries_size
+    query = "SELECT Year || ' ' || Month || ' ' || Day || ' ' || Hour || ' ' || Minute As Timestamp FROM Time WHERE IntervalType='#{interval_type}'"
+    values = @sqlFile.execAndReturnVectorOfString(query)
+    fail "Query error: #{query}" unless values.is_initialized
+
+    timestamps = []
+    values.get.each do |value|
+      year, month, day, hour, minute = value.split(' ')
+      ts = ts = Time.new(year, month, day, hour, minute)
+      timestamps << ts.strftime('%Y/%m/%d %H:%M:00')
+    end
+
+    return timestamps
   end
 
   def get_outputs(timeseries_frequency,
@@ -512,12 +515,12 @@ class SimulationOutputReport < OpenStudio::Measure::ReportingMeasure
       end
     else
       end_use.annual_output = 0
-      end_use.timeseries_output = [0.0] * @timeseries_size
+      end_use.timeseries_output = [0.0] * @timestamps.size
     end
 
     # Water Heating (by System)
     solar_keys = []
-    desuperheater_vars = []
+    dsh_keys = []
     outputs[:hpxml_dhw_sys_ids].each do |sys_id|
       ep_output_names = get_ep_output_names_for_water_heating(sys_id)
       keys = ep_output_names.map(&:upcase)
@@ -572,29 +575,23 @@ class SimulationOutputReport < OpenStudio::Measure::ReportingMeasure
         next unless end_use.annual_output_by_system[sys_id] > 0
 
         ec_vars = ep_output_names.select { |name| name.include? Constants.ObjectNameWaterHeaterAdjustment(nil) }
-        dsh_vars = ep_output_names.select { |name| name.include? Constants.ObjectNameDesuperheaterEnergy(nil) }
 
         ec_adj = get_report_variable_data_annual(['EMS'], ec_vars)
-        dsh_adj = get_report_variable_data_annual(['EMS'], dsh_vars)
-        break if ec_adj + dsh_adj == 0 # No adjustment
+        break if ec_adj == 0 # No adjustment
 
-        end_use.annual_output_by_system[sys_id] += ec_adj + dsh_adj
+        end_use.annual_output_by_system[sys_id] += ec_adj
         if include_timeseries_end_use_consumptions
           ec_adj_timeseries = get_report_variable_data_timeseries(['EMS'], ec_vars, UnitConversions.convert(1.0, 'J', end_use.timeseries_units), 0, timeseries_frequency)
-          dsh_adj_timeseries = get_report_variable_data_timeseries(['EMS'], dsh_vars, UnitConversions.convert(1.0, 'J', end_use.timeseries_units), 0, timeseries_frequency)
           end_use.timeseries_output_by_system[sys_id] = end_use.timeseries_output_by_system[sys_id].zip(ec_adj_timeseries).map { |x, y| x + y }
-          end_use.timeseries_output_by_system[sys_id] = end_use.timeseries_output_by_system[sys_id].zip(dsh_adj_timeseries).map { |x, y| x + y }
         end
         break # only apply once
       end
 
-      # Can only be one desuperheater or solar thermal system
-      if desuperheater_vars.empty?
-        desuperheater_vars = ep_output_names.select { |name| name.include? Constants.ObjectNameDesuperheaterLoad(nil) }
-      end
+      # Can only be one solar thermal system
       if solar_keys.empty?
         solar_keys = ep_output_names.select { |name| name.include? Constants.ObjectNameSolarHotWater }.map(&:upcase)
       end
+      dsh_keys << ep_output_names.select { |name| name.include? Constants.ObjectNameDesuperheater(nil) }.map(&:upcase)
     end
 
     # Apply Heating/Cooling DSEs
@@ -624,8 +621,7 @@ class SimulationOutputReport < OpenStudio::Measure::ReportingMeasure
     @loads[LT::HotWaterSolarThermal].annual_output *= -1 if @loads[LT::HotWaterSolarThermal].annual_output != 0
 
     # Hot Water Load - Desuperheater
-    @loads[LT::HotWaterDesuperheater].annual_output = get_report_variable_data_annual(['EMS'], desuperheater_vars)
-    @loads[LT::HotWaterDesuperheater].annual_output *= -1.0 if @loads[LT::HotWaterDesuperheater].annual_output != 0
+    @loads[LT::HotWaterDesuperheater].annual_output = get_report_variable_data_annual(dsh_keys, get_all_var_keys(@loads[LT::HotWaterDesuperheater].variable))
 
     # Hot Water Load - Tank Losses (excluding solar storage tank)
     @loads[LT::HotWaterTankLosses].annual_output = get_report_variable_data_annual(solar_keys, ['Water Heater Heat Loss Energy'], not_key: true)
@@ -782,7 +778,9 @@ class SimulationOutputReport < OpenStudio::Measure::ReportingMeasure
 
     def sanitize_string(s)
       [' ', ':', '/'].each do |c|
-        s.gsub!(c, '')
+        next unless s.include? c
+
+        s = s.gsub(c, '')
       end
       return s
     end
@@ -844,19 +842,13 @@ class SimulationOutputReport < OpenStudio::Measure::ReportingMeasure
                                       include_timeseries_total_loads,
                                       include_timeseries_component_loads)
     # Time column
-    if timeseries_frequency == 'hourly'
-      data = ['Hour', '#']
-    elsif timeseries_frequency == 'daily'
-      data = ['Day', '#']
-    elsif timeseries_frequency == 'monthly'
-      data = ['Month', '#']
-    elsif timeseries_frequency == 'timestep'
-      data = ['Timestep', '#']
+    if ['timestep', 'hourly', 'daily', 'monthly'].include? timeseries_frequency
+      data = ['Time', '']
     else
       fail "Unexpected timeseries_frequency: #{timeseries_frequency}."
     end
-    for i in 1..@timeseries_size
-      data << i
+    @timestamps.each do |timestamp|
+      data << timestamp
     end
 
     if include_timeseries_fuel_consumptions
@@ -891,6 +883,8 @@ class SimulationOutputReport < OpenStudio::Measure::ReportingMeasure
     end
 
     return if fuel_data.size + end_use_data.size + hot_water_use_data.size + zone_temps_data.size + total_loads_data.size + comp_loads_data.size == 0
+
+    fail 'Unable to obtain timestamps.' if @timestamps.empty?
 
     # Assemble data
     data = data.zip(*fuel_data, *end_use_data, *hot_water_use_data, *zone_temps_data, *total_loads_data, *comp_loads_data)
@@ -1221,7 +1215,7 @@ class SimulationOutputReport < OpenStudio::Measure::ReportingMeasure
     fail "Query error: #{query}" unless values.is_initialized
 
     values = values.get
-    values += [0.0] * @timeseries_size if values.size == 0
+    values += [0.0] * @timestamps.size if values.size == 0
     return values
   end
 
@@ -1233,7 +1227,8 @@ class SimulationOutputReport < OpenStudio::Measure::ReportingMeasure
     fail "Query error: #{query}" unless values.is_initialized
 
     values = values.get
-    values += [0.0] * @timeseries_size if values.size == 0
+    values += [0.0] * @timestamps.size if values.size == 0
+
     if (key_values_list.size == 1) && (key_values_list[0] == 'EMS')
       if (timeseries_frequency.downcase == 'timestep' || (timeseries_frequency.downcase == 'hourly' && @model.getTimestep.numberOfTimestepsPerHour == 1))
         # Shift all values by 1 timestep due to EMS reporting lag
@@ -1760,7 +1755,7 @@ class SimulationOutputReport < OpenStudio::Measure::ReportingMeasure
       LT::Cooling => Load.new(ems_variable: 'loads_clg_tot'),
       LT::HotWaterDelivered => Load.new(variable: OutputVars.WaterHeatingLoad),
       LT::HotWaterTankLosses => Load.new(),
-      LT::HotWaterDesuperheater => Load.new(),
+      LT::HotWaterDesuperheater => Load.new(variable: OutputVars.WaterHeaterLoadDesuperheater),
       LT::HotWaterSolarThermal => Load.new(),
     }
 
