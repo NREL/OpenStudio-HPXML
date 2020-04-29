@@ -3172,7 +3172,7 @@ class OSModel
       next unless heating_system.fraction_heat_load_served > 0
 
       htg_type = heating_system.heating_system_type
-      next unless [HPXML::HVACTypeFurnace, HPXML::HVACTypeBoiler].include? htg_type
+      next unless [HPXML::HVACTypeFurnace, HPXML::HVACTypeWallFurnace, HPXML::HVACTypeStove, HPXML::HVACTypeBoiler].include? htg_type
 
       fuel = heating_system.heating_system_fuel
       next if fuel == HPXML::FuelTypeElectricity

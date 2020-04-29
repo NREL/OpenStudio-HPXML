@@ -1778,8 +1778,8 @@ class HVAC
                              sequential_heat_load_frac, control_zone,
                              hvac_map)
 
-    fan_power = 0.0 # W/cfm
-    airflow_rate = 0.0 # cfm/ton
+    fan_power = 0.5 # W/cfm # For fuel equipment, will be overridden by EAE later
+    airflow_rate = 125.0 # cfm/ton; doesn't affect energy consumption
     obj_name = Constants.ObjectNameUnitHeater
 
     if (fan_power > 0) && (airflow_rate == 0)
@@ -2047,12 +2047,14 @@ class HVAC
         end
       end
 
-    else # Furnace
+    else # Furnace/WallFurnace/Stove
 
       unitary_systems = []
       eae_hvacs.each do |eae_hvac|
-        if eae_hvac.is_a? OpenStudio::Model::AirLoopHVAC
+        if eae_hvac.is_a? OpenStudio::Model::AirLoopHVAC # Furnace
           unitary_systems << get_unitary_system_from_air_loop_hvac(eae_hvac)
+        elsif eae_hvac.is_a? OpenStudio::Model::AirLoopHVACUnitarySystem # WallFurnace/Stove
+          unitary_systems << eae_hvac
         end
       end
 
