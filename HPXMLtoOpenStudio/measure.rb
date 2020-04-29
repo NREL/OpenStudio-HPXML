@@ -321,6 +321,11 @@ class OSModel
     @default_azimuths = get_default_azimuths()
     @has_uncond_bsmnt = @hpxml.has_space_type(HPXML::LocationBasementUnconditioned)
 
+    @use_only_ideal_air = false
+    if not @hpxml.building_construction.use_only_ideal_air_system.nil?
+      @use_only_ideal_air = @hpxml.building_construction.use_only_ideal_air_system
+    end
+
     # Initialize
     @remaining_heat_load_frac = 1.0
     @remaining_cool_load_frac = 1.0
@@ -2551,6 +2556,8 @@ class OSModel
   end
 
   def self.add_cooling_system(runner, model)
+    return if @use_only_ideal_air
+
     @hpxml.cooling_systems.each do |cooling_system|
       sequential_load_frac, @remaining_cool_load_frac = calc_sequential_load_fraction(cooling_system.fraction_cool_load_served, @remaining_cool_load_frac)
       check_distribution_system(cooling_system.distribution_system, cooling_system.cooling_system_type)
@@ -2593,6 +2600,8 @@ class OSModel
   end
 
   def self.add_heating_system(runner, model)
+    return if @use_only_ideal_air
+
     [true, false].each do |only_furnaces_attached_to_cooling|
       @hpxml.heating_systems.each do |heating_system|
         # We need to process furnaces attached to ACs before any other heating system
@@ -2636,6 +2645,8 @@ class OSModel
   end
 
   def self.add_heat_pump(runner, model, weather)
+    return if @use_only_ideal_air
+
     @hpxml.heat_pumps.each do |heat_pump|
       if not heat_pump.heating_capacity_17F.nil?
         if heat_pump.heating_capacity.nil?
@@ -2699,14 +2710,32 @@ class OSModel
   end
 
   def self.add_residual_hvac(runner, model)
+    if @use_only_ideal_air
+      HVAC.apply_ideal_air_loads(model, runner, 1, 1, @living_zone)
+      return
+    end
+
     # Adds an ideal air system to meet either:
     # 1. Any expected unmet load (i.e., because the sum of fractions load served is less than 1), or
-    # 2. Any unexpected unmet load (i.e., because the HVAC systems are undersized to meet the load)
+    # 2. Any unexpected load (i.e., because the HVAC systems are undersized to meet the load)
+    #
     # Addressing #2 ensures we can correctly calculate heating/cooling loads without having to run
     # an additional EnergyPlus simulation solely for that purpose, as well as allows us to report
     # the unmet load (i.e., the energy delivered by the ideal air system).
-    if (@remaining_cool_load_frac > 0.01) || (@remaining_heat_load_frac > 0.01)
-      HVAC.apply_ideal_air_loads(model, runner, 1.0, 1.0, @living_zone)
+    if @remaining_cool_load_frac < 1
+      sequential_cool_load_frac = 1
+    else
+      sequential_cool_load_frac = 0 # no cooling system, don't add ideal air for cooling either
+    end
+
+    if @remaining_heat_load_frac < 1
+      sequential_heat_load_frac = 1
+    else
+      sequential_heat_load_frac = 0 # no heating system, don't add ideal air for heating either
+    end
+    if (sequential_heat_load_frac > 0) || (sequential_cool_load_frac > 0)
+      HVAC.apply_ideal_air_loads(model, runner, sequential_cool_load_frac, sequential_heat_load_frac,
+                                 @living_zone)
     end
   end
 
