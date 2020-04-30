@@ -1485,8 +1485,6 @@ def create_hpxmls
     'invalid_files/duplicate-id.xml' => 'base.xml',
     'invalid_files/heat-pump-mixed-fixed-and-autosize-capacities.xml' => 'base-hvac-air-to-air-heat-pump-1-speed.xml',
     'invalid_files/heat-pump-mixed-fixed-and-autosize-capacities2.xml' => 'base-hvac-air-to-air-heat-pump-1-speed.xml',
-    'invalid_files/heat-pump-mixed-fixed-and-autosize-capacities3.xml' => 'base-hvac-air-to-air-heat-pump-1-speed.xml',
-    'invalid_files/heat-pump-mixed-fixed-and-autosize-capacities4.xml' => 'base-hvac-air-to-air-heat-pump-1-speed.xml',
     'invalid_files/hvac-invalid-distribution-system-type.xml' => 'base.xml',
     'invalid_files/hvac-distribution-multiple-attached-cooling.xml' => 'base-hvac-multiple.xml',
     'invalid_files/hvac-distribution-multiple-attached-heating.xml' => 'base-hvac-multiple.xml',
@@ -3289,7 +3287,7 @@ def set_hpxml_heating_systems(hpxml_file, hpxml)
   elsif ['base-hvac-flowrate.xml'].include? hpxml_file
     hpxml.heating_systems[0].heating_cfm = hpxml.heating_systems[0].heating_capacity * 360.0 / 12000.0
   elsif hpxml_file.include?('hvac_autosizing') && (not hpxml.heating_systems.nil?) && (hpxml.heating_systems.size > 0)
-    hpxml.heating_systems[0].heating_capacity = -1
+    hpxml.heating_systems[0].heating_capacity = nil
   end
 end
 
@@ -3391,7 +3389,7 @@ def set_hpxml_cooling_systems(hpxml_file, hpxml)
     hpxml.cooling_systems[0].cooling_shr = nil
     hpxml.cooling_systems[0].compressor_type = nil
   elsif hpxml_file.include?('hvac_autosizing') && (not hpxml.cooling_systems.nil?) && (hpxml.cooling_systems.size > 0)
-    hpxml.cooling_systems[0].cooling_capacity = -1
+    hpxml.cooling_systems[0].cooling_capacity = nil
   end
 end
 
@@ -3496,15 +3494,11 @@ def set_hpxml_heat_pumps(hpxml_file, hpxml)
   elsif ['base-hvac-mini-split-heat-pump-ductless-no-backup.xml'].include? hpxml_file
     hpxml.heat_pumps[0].backup_heating_fuel = nil
   elsif ['invalid_files/heat-pump-mixed-fixed-and-autosize-capacities.xml'].include? hpxml_file
-    hpxml.heat_pumps[0].heating_capacity = -1
-  elsif ['invalid_files/heat-pump-mixed-fixed-and-autosize-capacities2.xml'].include? hpxml_file
-    hpxml.heat_pumps[0].cooling_capacity = -1
-  elsif ['invalid_files/heat-pump-mixed-fixed-and-autosize-capacities3.xml'].include? hpxml_file
-    hpxml.heat_pumps[0].cooling_capacity = -1
-    hpxml.heat_pumps[0].heating_capacity = -1
+    hpxml.heat_pumps[0].cooling_capacity = nil
+    hpxml.heat_pumps[0].heating_capacity = nil
     hpxml.heat_pumps[0].heating_capacity_17F = 25000
-  elsif ['invalid_files/heat-pump-mixed-fixed-and-autosize-capacities4.xml'].include? hpxml_file
-    hpxml.heat_pumps[0].backup_heating_capacity = -1
+  elsif ['invalid_files/heat-pump-mixed-fixed-and-autosize-capacities2.xml'].include? hpxml_file
+    hpxml.heat_pumps[0].backup_heating_capacity = nil
   elsif ['base-hvac-multiple.xml'].include? hpxml_file
     hpxml.heat_pumps.add(id: 'HeatPump',
                          distribution_system_idref: 'HVACDistribution5',
@@ -3568,10 +3562,10 @@ def set_hpxml_heat_pumps(hpxml_file, hpxml)
     hpxml.heat_pumps[0].backup_heating_fuel = HPXML::FuelTypeElectricity
     hpxml.heat_pumps[0].backup_heating_efficiency_afue = 1.0
   elsif hpxml_file.include?('hvac_autosizing') && (not hpxml.heat_pumps.nil?) && (hpxml.heat_pumps.size > 0)
-    hpxml.heat_pumps[0].cooling_capacity = -1
-    hpxml.heat_pumps[0].heating_capacity = -1
+    hpxml.heat_pumps[0].cooling_capacity = nil
+    hpxml.heat_pumps[0].heating_capacity = nil
     hpxml.heat_pumps[0].heating_capacity_17F = nil
-    hpxml.heat_pumps[0].backup_heating_capacity = -1
+    hpxml.heat_pumps[0].backup_heating_capacity = nil
   end
 end
 
@@ -3947,8 +3941,10 @@ def set_hpxml_water_heating_systems(hpxml_file, hpxml)
   elsif ['invalid_files/dhw-frac-load-served.xml'].include? hpxml_file
     hpxml.water_heating_systems[0].fraction_dhw_load_served += 0.15
   elsif ['base-dhw-tank-gas.xml',
-         'base-dhw-tank-gas-outside.xml'].include? hpxml_file
-    hpxml.water_heating_systems[0].fuel_type = HPXML::FuelTypeNaturalGas
+         'base-dhw-tank-gas-outside.xml',
+         'base-dhw-tank-oil.xml',
+         'base-dhw-tank-propane.xml',
+         'base-dhw-tank-wood.xml'].include? hpxml_file
     hpxml.water_heating_systems[0].tank_volume = 50
     hpxml.water_heating_systems[0].heating_capacity = 40000
     hpxml.water_heating_systems[0].energy_factor = 0.59
@@ -3956,12 +3952,15 @@ def set_hpxml_water_heating_systems(hpxml_file, hpxml)
     if hpxml_file == 'base-dhw-tank-gas-outside.xml'
       hpxml.water_heating_systems[0].location = HPXML::LocationOtherExterior
     end
-  elsif ['base-dhw-tank-wood.xml'].include? hpxml_file
-    hpxml.water_heating_systems[0].fuel_type = HPXML::FuelTypeWood
-    hpxml.water_heating_systems[0].tank_volume = 50
-    hpxml.water_heating_systems[0].heating_capacity = 40000
-    hpxml.water_heating_systems[0].energy_factor = 0.59
-    hpxml.water_heating_systems[0].recovery_efficiency = 0.76
+    if hpxml_file == 'base-dhw-tank-oil.xml'
+      hpxml.water_heating_systems[0].fuel_type = HPXML::FuelTypeOil
+    elsif hpxml_file == 'base-dhw-tank-propane.xml'
+      hpxml.water_heating_systems[0].fuel_type = HPXML::FuelTypePropane
+    elsif hpxml_file == 'base-dhw-tank-wood.xml'
+      hpxml.water_heating_systems[0].fuel_type = HPXML::FuelTypeWood
+    else
+      hpxml.water_heating_systems[0].fuel_type = HPXML::FuelTypeNaturalGas
+    end
   elsif ['base-dhw-tank-heat-pump.xml',
          'base-dhw-tank-heat-pump-outside.xml'].include? hpxml_file
     hpxml.water_heating_systems[0].water_heater_type = HPXML::WaterHeaterTypeHeatPump
@@ -3980,42 +3979,23 @@ def set_hpxml_water_heating_systems(hpxml_file, hpxml)
     if hpxml_file == 'base-dhw-tankless-electric-outside.xml'
       hpxml.water_heating_systems[0].location = HPXML::LocationOtherExterior
     end
-  elsif ['base-dhw-tankless-gas.xml'].include? hpxml_file
-    hpxml.water_heating_systems[0].fuel_type = HPXML::FuelTypeNaturalGas
+  elsif ['base-dhw-tankless-gas.xml',
+         'base-dhw-tankless-oil.xml',
+         'base-dhw-tankless-propane.xml',
+         'base-dhw-tankless-wood.xml'].include? hpxml_file
     hpxml.water_heating_systems[0].water_heater_type = HPXML::WaterHeaterTypeTankless
     hpxml.water_heating_systems[0].tank_volume = nil
     hpxml.water_heating_systems[0].heating_capacity = nil
     hpxml.water_heating_systems[0].energy_factor = 0.82
-  elsif ['base-dhw-tankless-oil.xml'].include? hpxml_file
-    hpxml.water_heating_systems[0].fuel_type = HPXML::FuelTypeOil
-    hpxml.water_heating_systems[0].water_heater_type = HPXML::WaterHeaterTypeTankless
-    hpxml.water_heating_systems[0].tank_volume = nil
-    hpxml.water_heating_systems[0].heating_capacity = nil
-    hpxml.water_heating_systems[0].energy_factor = 0.82
-  elsif ['base-dhw-tankless-propane.xml'].include? hpxml_file
-    hpxml.water_heating_systems[0].fuel_type = HPXML::FuelTypePropane
-    hpxml.water_heating_systems[0].water_heater_type = HPXML::WaterHeaterTypeTankless
-    hpxml.water_heating_systems[0].tank_volume = nil
-    hpxml.water_heating_systems[0].heating_capacity = nil
-    hpxml.water_heating_systems[0].energy_factor = 0.82
-  elsif ['base-dhw-tankless-wood.xml'].include? hpxml_file
-    hpxml.water_heating_systems[0].fuel_type = HPXML::FuelTypeWood
-    hpxml.water_heating_systems[0].water_heater_type = HPXML::WaterHeaterTypeTankless
-    hpxml.water_heating_systems[0].tank_volume = nil
-    hpxml.water_heating_systems[0].heating_capacity = nil
-    hpxml.water_heating_systems[0].energy_factor = 0.82
-  elsif ['base-dhw-tank-oil.xml'].include? hpxml_file
-    hpxml.water_heating_systems[0].fuel_type = HPXML::FuelTypeOil
-    hpxml.water_heating_systems[0].tank_volume = 50
-    hpxml.water_heating_systems[0].heating_capacity = 40000
-    hpxml.water_heating_systems[0].energy_factor = 0.59
-    hpxml.water_heating_systems[0].recovery_efficiency = 0.76
-  elsif ['base-dhw-tank-propane.xml'].include? hpxml_file
-    hpxml.water_heating_systems[0].fuel_type = HPXML::FuelTypePropane
-    hpxml.water_heating_systems[0].tank_volume = 50
-    hpxml.water_heating_systems[0].heating_capacity = 40000
-    hpxml.water_heating_systems[0].energy_factor = 0.59
-    hpxml.water_heating_systems[0].recovery_efficiency = 0.76
+    if hpxml_file == 'base-dhw-tankless-gas.xml'
+      hpxml.water_heating_systems[0].fuel_type = HPXML::FuelTypeNaturalGas
+    elsif hpxml_file == 'base-dhw-tankless-oil.xml'
+      hpxml.water_heating_systems[0].fuel_type = HPXML::FuelTypeOil
+    elsif hpxml_file == 'base-dhw-tankless-propane.xml'
+      hpxml.water_heating_systems[0].fuel_type = HPXML::FuelTypePropane
+    elsif hpxml_file == 'base-dhw-tankless-wood.xml'
+      hpxml.water_heating_systems[0].fuel_type = HPXML::FuelTypeWood
+    end
   elsif ['base-dhw-uef.xml'].include? hpxml_file
     hpxml.water_heating_systems[0].energy_factor = nil
     hpxml.water_heating_systems[0].uniform_energy_factor = 0.93

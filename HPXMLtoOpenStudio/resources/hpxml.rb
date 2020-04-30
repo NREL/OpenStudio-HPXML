@@ -1285,7 +1285,10 @@ class HPXML < Object
     def delete
       @hpxml_object.roofs.delete(self)
       skylights.reverse_each do |skylight|
-        @hpxml_object.skylights.delete(skylight)
+        skylight.delete
+      end
+      @hpxml_object.attics.each do |attic|
+        attic.attached_to_roof_idrefs.delete(@id)
       end
     end
 
@@ -1494,10 +1497,10 @@ class HPXML < Object
     def delete
       @hpxml_object.walls.delete(self)
       windows.reverse_each do |window|
-        @hpxml_object.windows.delete(window)
+        window.delete
       end
       doors.reverse_each do |door|
-        @hpxml_object.doors.delete(door)
+        door.delete
       end
     end
 
@@ -1625,10 +1628,13 @@ class HPXML < Object
     def delete
       @hpxml_object.foundation_walls.delete(self)
       windows.reverse_each do |window|
-        @hpxml_object.windows.delete(window)
+        window.delete
       end
       doors.reverse_each do |door|
-        @hpxml_object.doors.delete(door)
+        door.delete
+      end
+      @hpxml_object.foundations.each do |foundation|
+        foundation.attached_to_foundation_wall_idrefs.delete(@id)
       end
     end
 
@@ -1759,6 +1765,12 @@ class HPXML < Object
 
     def delete
       @hpxml_object.frame_floors.delete(self)
+      @hpxml_object.attics.each do |attic|
+        attic.attached_to_frame_floor_idrefs.delete(@id)
+      end
+      @hpxml_object.foundations.each do |foundation|
+        foundation.attached_to_frame_floor_idrefs.delete(@id)
+      end
     end
 
     def check_for_errors
@@ -1847,6 +1859,9 @@ class HPXML < Object
 
     def delete
       @hpxml_object.slabs.delete(self)
+      @hpxml_object.foundations.each do |foundation|
+        foundation.attached_to_slab_idrefs.delete(@id)
+      end
     end
 
     def check_for_errors
@@ -2263,6 +2278,10 @@ class HPXML < Object
 
     def delete
       @hpxml_object.heating_systems.delete(self)
+      @hpxml_object.water_heating_systems.each do |water_heating_system|
+        next unless water_heating_system.related_hvac_idref == @id
+        water_heating_system.related_hvac_idref = nil
+      end
     end
 
     def check_for_errors
@@ -2367,6 +2386,10 @@ class HPXML < Object
 
     def delete
       @hpxml_object.cooling_systems.delete(self)
+      @hpxml_object.water_heating_systems.each do |water_heating_system|
+        next unless water_heating_system.related_hvac_idref == @id
+        water_heating_system.related_hvac_idref = nil
+      end
     end
 
     def check_for_errors
@@ -2473,6 +2496,10 @@ class HPXML < Object
 
     def delete
       @hpxml_object.heat_pumps.delete(self)
+      @hpxml_object.water_heating_systems.each do |water_heating_system|
+        next unless water_heating_system.related_hvac_idref == @id
+        water_heating_system.related_hvac_idref = nil
+      end
     end
 
     def check_for_errors
@@ -2709,6 +2736,14 @@ class HPXML < Object
 
     def delete
       @hpxml_object.hvac_distributions.delete(self)
+      (@hpxml_object.heating_systems + @hpxml_object.cooling_systems + @hpxml_object.heat_pumps).each do |hvac|
+        next unless hvac.distribution_system_idref == @id
+        hvac.distribution_system_idref = nil
+      end
+      @hpxml_object.ventilation_fans.each do |ventilation_fan|
+        next unless ventilation_fan.distribution_system_idref == @id
+        ventilation_fan.distribution_system_idref = nil
+      end
     end
 
     def check_for_errors
@@ -2787,7 +2822,6 @@ class HPXML < Object
     def delete
       @hpxml_object.hvac_distributions.each do |hvac_distribution|
         next unless hvac_distribution.duct_leakage_measurements.include? self
-
         hvac_distribution.duct_leakage_measurements.delete(self)
       end
     end
@@ -2841,7 +2875,6 @@ class HPXML < Object
     def delete
       @hpxml_object.hvac_distributions.each do |hvac_distribution|
         next unless hvac_distribution.ducts.include? self
-
         hvac_distribution.ducts.delete(self)
       end
     end
@@ -3005,6 +3038,10 @@ class HPXML < Object
 
     def delete
       @hpxml_object.water_heating_systems.delete(self)
+      @hpxml_object.solar_thermal_systems.each do |solar_thermal_system|
+        next unless solar_thermal_system.water_heating_system_idref == @id
+        solar_thermal_system.water_heating_system_idref = nil
+      end
     end
 
     def check_for_errors
@@ -4033,26 +4070,17 @@ class HPXML < Object
           end
 
           # Update subsurface idrefs as appropriate
-          if [:walls, :foundation_walls].include? surf_type
-            [:windows, :doors].each do |subsurf_type|
-              surf_types[subsurf_type].each do |subsurf, idx|
-                next unless subsurf.wall_idref == surf2.id
-
-                subsurf.wall_idref = surf.id
-              end
-            end
-          elsif [:roofs].include? surf_type
-            [:skylights].each do |subsurf_type|
-              surf_types[subsurf_type].each do |subsurf|
-                next unless subsurf.roof_idref == surf2.id
-
-                subsurf.roof_idref = surf.id
-              end
-            end
+          (@windows + @doors).each do |subsurf|
+            next unless subsurf.wall_idref == surf2.id
+            subsurf.wall_idref = surf.id
+          end
+          @skylights.each do |subsurf|
+            next unless subsurf.roof_idref == surf2.id
+            subsurf.roof_idref = surf.id
           end
 
           # Remove old surface
-          surfaces.delete_at(j)
+          surfaces[j].delete
         end
       end
     end
@@ -4062,7 +4090,6 @@ class HPXML < Object
     (@rim_joists + @walls + @foundation_walls + @frame_floors).reverse_each do |surface|
       next if surface.interior_adjacent_to.nil? || surface.exterior_adjacent_to.nil?
       next unless surface.interior_adjacent_to == surface.exterior_adjacent_to
-
       surface.delete
     end
   end
@@ -4070,7 +4097,6 @@ class HPXML < Object
   def delete_tiny_surfaces()
     (@rim_joists + @walls + @foundation_walls + @frame_floors + @roofs + @windows + @skylights + @doors + @slabs).reverse_each do |surface|
       next if surface.area.nil? || (surface.area > 0.1)
-
       surface.delete
     end
   end
