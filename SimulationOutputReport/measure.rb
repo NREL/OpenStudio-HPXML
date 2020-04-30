@@ -31,13 +31,14 @@ class SimulationOutputReport < OpenStudio::Measure::ReportingMeasure
     args = OpenStudio::Measure::OSArgumentVector.new
 
     timeseries_frequency_chs = OpenStudio::StringVector.new
+    timeseries_frequency_chs << 'none'
     reporting_frequency_map.keys.each do |freq|
       timeseries_frequency_chs << freq
     end
     arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('timeseries_frequency', timeseries_frequency_chs, true)
     arg.setDisplayName('Timeseries Reporting Frequency')
-    arg.setDescription('The frequency at which to report timeseries output data.')
-    arg.setDefaultValue('hourly')
+    arg.setDescription("The frequency at which to report timeseries output data. Using 'none' will disable timeseries outputs.")
+    arg.setDefaultValue('none')
     args << arg
 
     arg = OpenStudio::Measure::OSArgument::makeBoolArgument('include_timeseries_fuel_consumptions', true)
@@ -189,14 +190,16 @@ class SimulationOutputReport < OpenStudio::Measure::ReportingMeasure
     # Timeseries outputs
 
     timeseries_frequency = runner.getStringArgumentValue('timeseries_frequency', user_arguments)
-    include_timeseries_fuel_consumptions = runner.getBoolArgumentValue('include_timeseries_fuel_consumptions', user_arguments)
-    include_timeseries_end_use_consumptions = runner.getBoolArgumentValue('include_timeseries_end_use_consumptions', user_arguments)
-    include_timeseries_hot_water_uses = runner.getBoolArgumentValue('include_timeseries_hot_water_uses', user_arguments)
-    include_timeseries_total_loads = runner.getBoolArgumentValue('include_timeseries_total_loads', user_arguments)
-    include_timeseries_component_loads = runner.getBoolArgumentValue('include_timeseries_component_loads', user_arguments)
-    include_timeseries_zone_temperatures = runner.getBoolArgumentValue('include_timeseries_zone_temperatures', user_arguments)
-    include_timeseries_airflows = runner.getBoolArgumentValue('include_timeseries_airflows', user_arguments)
-    include_timeseries_weather = runner.getBoolArgumentValue('include_timeseries_weather', user_arguments)
+    if timeseries_frequency != 'none'
+      include_timeseries_fuel_consumptions = runner.getBoolArgumentValue('include_timeseries_fuel_consumptions', user_arguments)
+      include_timeseries_end_use_consumptions = runner.getBoolArgumentValue('include_timeseries_end_use_consumptions', user_arguments)
+      include_timeseries_hot_water_uses = runner.getBoolArgumentValue('include_timeseries_hot_water_uses', user_arguments)
+      include_timeseries_total_loads = runner.getBoolArgumentValue('include_timeseries_total_loads', user_arguments)
+      include_timeseries_component_loads = runner.getBoolArgumentValue('include_timeseries_component_loads', user_arguments)
+      include_timeseries_zone_temperatures = runner.getBoolArgumentValue('include_timeseries_zone_temperatures', user_arguments)
+      include_timeseries_airflows = runner.getBoolArgumentValue('include_timeseries_airflows', user_arguments)
+      include_timeseries_weather = runner.getBoolArgumentValue('include_timeseries_weather', user_arguments)
+    end
 
     if include_timeseries_fuel_consumptions
       # If fuel uses are selected, we also need to select end uses because
@@ -283,14 +286,16 @@ class SimulationOutputReport < OpenStudio::Measure::ReportingMeasure
     end
 
     timeseries_frequency = runner.getStringArgumentValue('timeseries_frequency', user_arguments)
-    include_timeseries_fuel_consumptions = runner.getBoolArgumentValue('include_timeseries_fuel_consumptions', user_arguments)
-    include_timeseries_end_use_consumptions = runner.getBoolArgumentValue('include_timeseries_end_use_consumptions', user_arguments)
-    include_timeseries_hot_water_uses = runner.getBoolArgumentValue('include_timeseries_hot_water_uses', user_arguments)
-    include_timeseries_total_loads = runner.getBoolArgumentValue('include_timeseries_total_loads', user_arguments)
-    include_timeseries_component_loads = runner.getBoolArgumentValue('include_timeseries_component_loads', user_arguments)
-    include_timeseries_zone_temperatures = runner.getBoolArgumentValue('include_timeseries_zone_temperatures', user_arguments)
-    include_timeseries_airflows = runner.getBoolArgumentValue('include_timeseries_airflows', user_arguments)
-    include_timeseries_weather = runner.getBoolArgumentValue('include_timeseries_weather', user_arguments)
+    if timeseries_frequency != 'none'
+      include_timeseries_fuel_consumptions = runner.getBoolArgumentValue('include_timeseries_fuel_consumptions', user_arguments)
+      include_timeseries_end_use_consumptions = runner.getBoolArgumentValue('include_timeseries_end_use_consumptions', user_arguments)
+      include_timeseries_hot_water_uses = runner.getBoolArgumentValue('include_timeseries_hot_water_uses', user_arguments)
+      include_timeseries_total_loads = runner.getBoolArgumentValue('include_timeseries_total_loads', user_arguments)
+      include_timeseries_component_loads = runner.getBoolArgumentValue('include_timeseries_component_loads', user_arguments)
+      include_timeseries_zone_temperatures = runner.getBoolArgumentValue('include_timeseries_zone_temperatures', user_arguments)
+      include_timeseries_airflows = runner.getBoolArgumentValue('include_timeseries_airflows', user_arguments)
+      include_timeseries_weather = runner.getBoolArgumentValue('include_timeseries_weather', user_arguments)
+    end
 
     sqlFile = runner.lastEnergyPlusSqlFile
     if sqlFile.empty?
@@ -906,9 +911,11 @@ class SimulationOutputReport < OpenStudio::Measure::ReportingMeasure
                                       include_timeseries_zone_temperatures,
                                       include_timeseries_airflows,
                                       include_timeseries_weather)
+    return if timeseries_frequency == 'none'
+
     # Time column
     if ['timestep', 'hourly', 'daily', 'monthly'].include? timeseries_frequency
-      data = ['Time', '']
+      data = ['Time', nil]
     else
       fail "Unexpected timeseries_frequency: #{timeseries_frequency}."
     end
