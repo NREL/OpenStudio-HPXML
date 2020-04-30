@@ -36,6 +36,9 @@
           <NumberofBedrooms>3</NumberofBedrooms>
           <ConditionedFloorArea>2700.0</ConditionedFloorArea>
           <ConditionedBuildingVolume>21600.0</ConditionedBuildingVolume>
+          <extension>
+            <UseOnlyIdealAirSystem>true</UseOnlyIdealAirSystem>
+          </extension>
         </BuildingConstruction>
       </BuildingSummary>
       <ClimateandRiskZones>
