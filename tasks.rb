@@ -138,6 +138,8 @@ def create_osws
     'base-hvac-ground-to-air-heat-pump.osw' => 'base.osw',
     # 'base-hvac-ideal-air.osw' => 'base.osw',
     'base-hvac-mini-split-heat-pump-ducted.osw' => 'base.osw',
+    'base-hvac-mini-split-heat-pump-ducted-cooling-only.osw' => 'base.osw',
+    'base-hvac-mini-split-heat-pump-ducted-heating-only.osw' => 'base.osw',
     'base-hvac-mini-split-heat-pump-ductless.osw' => 'base.osw',
     'base-hvac-mini-split-heat-pump-ductless-no-backup.osw' => 'base.osw',
     # 'base-hvac-multiple.osw' => 'base.osw', # Not supporting multiple heating/cooling systems for now
@@ -146,6 +148,7 @@ def create_osws
     'base-hvac-portable-heater-electric-only.osw' => 'base.osw',
     'base-hvac-programmable-thermostat.osw' => 'base.osw',
     'base-hvac-room-ac-only.osw' => 'base.osw',
+    'base-hvac-room-ac-only-33percent.osw' => 'base.osw',
     'base-hvac-setpoints.osw' => 'base.osw',
     'base-hvac-stove-oil-only.osw' => 'base.osw',
     'base-hvac-stove-wood-only.osw' => 'base.osw',
@@ -1250,10 +1253,44 @@ def get_values(osw_file, step)
     step.setArgument('cooling_system_type', 'none')
     step.setArgument('heat_pump_type', HPXML::HVACTypeHeatPumpMiniSplit)
     step.setArgument('heat_pump_heating_capacity', '52000.0')
-    step.removeArgument('heat_pump_cooling_compressor_type')
     step.setArgument('heat_pump_heating_capacity_17F', '29500.0')
     step.setArgument('heat_pump_heating_efficiency_hspf', 10.0)
     step.setArgument('heat_pump_cooling_efficiency_seer', 19.0)
+    step.removeArgument('heat_pump_cooling_compressor_type')
+    step.setArgument('heat_pump_backup_fuel', HPXML::FuelTypeElectricity)
+    step.setArgument('heat_pump_mini_split_is_ducted', true)
+    step.setArgument('ducts_supply_leakage_value', 15.0)
+    step.setArgument('ducts_return_leakage_value', 5.0)
+    step.setArgument('ducts_supply_insulation_r', 0.0)
+    step.setArgument('ducts_supply_surface_area', 30.0)
+    step.setArgument('ducts_return_surface_area', 10.0)
+  elsif ['base-hvac-mini-split-heat-pump-ducted-cooling-only.osw'].include? osw_file
+    step.setArgument('heating_system_type', 'none')
+    step.setArgument('cooling_system_type', 'none')
+    step.setArgument('heat_pump_type', HPXML::HVACTypeHeatPumpMiniSplit)
+    step.setArgument('heat_pump_heating_efficiency_hspf', 10.0)
+    step.setArgument('heat_pump_cooling_efficiency_seer', 19.0)
+    step.removeArgument('heat_pump_cooling_compressor_type')
+    step.setArgument('heat_pump_heating_capacity', '0')
+    step.setArgument('heat_pump_heating_capacity_17F', '0')
+    step.setArgument('heat_pump_fraction_heat_load_served', 0)
+    step.setArgument('heat_pump_mini_split_is_ducted', true)
+    step.setArgument('ducts_supply_leakage_value', 15.0)
+    step.setArgument('ducts_return_leakage_value', 5.0)
+    step.setArgument('ducts_supply_insulation_r', 0.0)
+    step.setArgument('ducts_supply_surface_area', 30.0)
+    step.setArgument('ducts_return_surface_area', 10.0)
+  elsif ['base-hvac-mini-split-heat-pump-ducted-heating-only.osw'].include? osw_file
+    step.setArgument('heating_system_type', 'none')
+    step.setArgument('cooling_system_type', 'none')
+    step.setArgument('heat_pump_type', HPXML::HVACTypeHeatPumpMiniSplit)
+    step.setArgument('heat_pump_heating_capacity', '52000.0')
+    step.setArgument('heat_pump_heating_capacity_17F', '29500.0')
+    step.setArgument('heat_pump_heating_efficiency_hspf', 10.0)
+    step.setArgument('heat_pump_cooling_efficiency_seer', 19.0)
+    step.removeArgument('heat_pump_cooling_compressor_type')
+    step.setArgument('heat_pump_cooling_capacity', '0')
+    step.setArgument('heat_pump_fraction_cool_load_served', 0)
     step.setArgument('heat_pump_backup_fuel', HPXML::FuelTypeElectricity)
     step.setArgument('heat_pump_mini_split_is_ducted', true)
     step.setArgument('ducts_supply_leakage_value', 15.0)
@@ -1287,7 +1324,6 @@ def get_values(osw_file, step)
     step.setArgument('heating_system_type', HPXML::HVACTypePortableHeater)
     step.setArgument('heating_system_fuel', HPXML::FuelTypeElectricity)
     step.setArgument('heating_system_heating_efficiency_percent', 1.0)
-    # step.setArgument("cooling_system_type", "none")
   elsif ['base-hvac-programmable-thermostat.osw'].include? osw_file
     step.setArgument('setpoint_heating_setback_temp', 66)
     step.setArgument('setpoint_heating_setback_hours_per_week', 49)
@@ -1300,6 +1336,12 @@ def get_values(osw_file, step)
     step.setArgument('cooling_system_type', HPXML::HVACTypeRoomAirConditioner)
     step.removeArgument('cooling_system_cooling_compressor_type')
     step.setArgument('cooling_system_cooling_sensible_heat_fraction', 0.65)
+  elsif ['base-hvac-room-ac-only-33percent.osw'].include? osw_file
+    step.setArgument('heating_system_type', 'none')
+    step.setArgument('cooling_system_type', HPXML::HVACTypeRoomAirConditioner)
+    step.removeArgument('cooling_system_cooling_compressor_type')
+    step.setArgument('cooling_system_cooling_sensible_heat_fraction', 0.65)
+    step.setArgument('cooling_system_fraction_cool_load_served', 0.33)
   elsif ['base-hvac-setpoints.osw'].include? osw_file
     step.setArgument('setpoint_heating_temp', 60.0)
     step.setArgument('setpoint_cooling_temp', 80.0)

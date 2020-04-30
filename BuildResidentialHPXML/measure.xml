@@ -3,8 +3,8 @@
   <schema_version>3.0</schema_version>
   <name>build_residential_hpxml</name>
   <uid>a13a8983-2b01-4930-8af2-42030b6e4233</uid>
-  <version_id>377dd856-e441-4cac-af40-7e6267239799</version_id>
-  <version_modified>20200428T183828Z</version_modified>
+  <version_id>8ab57dd0-1f70-4a98-a6fe-4182b6d94083</version_id>
+  <version_modified>20200430T183158Z</version_modified>
   <xml_checksum>2C38F48B</xml_checksum>
   <class_name>BuildResidentialHPXML</class_name>
   <display_name>HPXML Builder</display_name>
@@ -3889,12 +3889,6 @@
       <checksum>69F5DFFC</checksum>
     </file>
     <file>
-      <filename>build_residential_hpxml_test.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>test</usage_type>
-      <checksum>AEF68FEC</checksum>
-    </file>
-    <file>
       <filename>base-misc-usage-multiplier.osw</filename>
       <filetype>osw</filetype>
       <usage_type>test</usage_type>
@@ -4791,7 +4785,43 @@
       <filename>measure.rb</filename>
       <filetype>rb</filetype>
       <usage_type>script</usage_type>
-      <checksum>99C2A628</checksum>
+      <checksum>C54D8A6E</checksum>
+    </file>
+    <file>
+      <filename>base-hvac-room-ac-only-33percent.osw</filename>
+      <filetype>osw</filetype>
+      <usage_type>test</usage_type>
+      <checksum>E1A6BC7F</checksum>
+    </file>
+    <file>
+      <filename>build_residential_hpxml_test.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>test</usage_type>
+      <checksum>C08C6F0C</checksum>
+    </file>
+    <file>
+      <filename>test_rakefile.xml</filename>
+      <filetype>xml</filetype>
+      <usage_type>test</usage_type>
+      <checksum>0ECC2122</checksum>
+    </file>
+    <file>
+      <filename>base-hvac-mini-split-heat-pump-ducted-cooling-only.osw</filename>
+      <filetype>osw</filetype>
+      <usage_type>test</usage_type>
+      <checksum>671EBA78</checksum>
+    </file>
+    <file>
+      <filename>base-hvac-mini-split-heat-pump-ducted-heating-only.osw</filename>
+      <filetype>osw</filetype>
+      <usage_type>test</usage_type>
+      <checksum>38CA4571</checksum>
+    </file>
+    <file>
+      <filename>test_measure.xml</filename>
+      <filetype>xml</filetype>
+      <usage_type>test</usage_type>
+      <checksum>5F9A39DC</checksum>
     </file>
   </files>
 </measure>
