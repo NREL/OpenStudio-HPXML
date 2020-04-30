@@ -5,6 +5,7 @@ require 'openstudio'
 require 'openstudio/ruleset/ShowRunnerOutput'
 require 'minitest/autorun'
 require 'fileutils'
+require 'csv'
 require_relative '../measure.rb'
 
 class SimulationOutputReportTest < MiniTest::Test
@@ -207,7 +208,7 @@ class SimulationOutputReportTest < MiniTest::Test
     'Component Load: Cooling: Internal Gains',
   ]
 
-  TimeseriesColsTemperatures = [
+  TimeseriesColsZoneTemps = [
     'Temperature: Attic - Unvented',
     'Temperature: Living Space',
   ]
@@ -293,7 +294,7 @@ class SimulationOutputReportTest < MiniTest::Test
             TimeseriesColsWaterUses +
             TimeseriesColsTotalLoads +
             TimeseriesColsComponentLoads +
-            TimeseriesColsTemperatures +
+            TimeseriesColsZoneTemps +
             TimeseriesColsAirflows +
             TimeseriesColsWeather)
   end
@@ -335,6 +336,7 @@ class SimulationOutputReportTest < MiniTest::Test
     actual_timeseries_cols = File.readlines(timeseries_csv)[0].strip.split(',')
     assert_equal(expected_timeseries_cols.sort, actual_timeseries_cols.sort)
     assert_equal(8760, File.readlines(timeseries_csv).size - 2)
+    _check_for_nonzero_value(timeseries_csv, [TimeseriesColsFuels[0]])
   end
 
   def test_timeseries_hourly_enduses
@@ -355,6 +357,7 @@ class SimulationOutputReportTest < MiniTest::Test
     actual_timeseries_cols = File.readlines(timeseries_csv)[0].strip.split(',')
     assert_equal(expected_timeseries_cols.sort, actual_timeseries_cols.sort)
     assert_equal(8760, File.readlines(timeseries_csv).size - 2)
+    _check_for_nonzero_value(timeseries_csv, TimeseriesColsEndUses.select { |eu| eu.include? 'Plug Loads' })
   end
 
   def test_timeseries_hourly_hotwateruses
@@ -375,6 +378,7 @@ class SimulationOutputReportTest < MiniTest::Test
     actual_timeseries_cols = File.readlines(timeseries_csv)[0].strip.split(',')
     assert_equal(expected_timeseries_cols.sort, actual_timeseries_cols.sort)
     assert_equal(8760, File.readlines(timeseries_csv).size - 2)
+    _check_for_nonzero_value(timeseries_csv, TimeseriesColsWaterUses)
   end
 
   def test_timeseries_hourly_loads
@@ -395,6 +399,7 @@ class SimulationOutputReportTest < MiniTest::Test
     actual_timeseries_cols = File.readlines(timeseries_csv)[0].strip.split(',')
     assert_equal(expected_timeseries_cols.sort, actual_timeseries_cols.sort)
     assert_equal(8760, File.readlines(timeseries_csv).size - 2)
+    _check_for_nonzero_value(timeseries_csv, TimeseriesColsTotalLoads)
   end
 
   def test_timeseries_hourly_componentloads
@@ -415,6 +420,7 @@ class SimulationOutputReportTest < MiniTest::Test
     actual_timeseries_cols = File.readlines(timeseries_csv)[0].strip.split(',')
     assert_equal(expected_timeseries_cols.sort, actual_timeseries_cols.sort)
     assert_equal(8760, File.readlines(timeseries_csv).size - 2)
+    _check_for_nonzero_value(timeseries_csv, TimeseriesColsComponentLoads.select { |l| l.include? 'Internal Gains' })
   end
 
   def test_timeseries_hourly_zone_temperatures
@@ -431,14 +437,15 @@ class SimulationOutputReportTest < MiniTest::Test
     annual_csv, timeseries_csv, eri_csv = _test_measure(args_hash)
     assert(File.exist?(annual_csv))
     assert(File.exist?(timeseries_csv))
-    expected_timeseries_cols = ['Time'] + TimeseriesColsTemperatures
+    expected_timeseries_cols = ['Time'] + TimeseriesColsZoneTemps
     actual_timeseries_cols = File.readlines(timeseries_csv)[0].strip.split(',')
     assert_equal(expected_timeseries_cols.sort, actual_timeseries_cols.sort)
     assert_equal(8760, File.readlines(timeseries_csv).size - 2)
+    _check_for_nonzero_value(timeseries_csv, TimeseriesColsZoneTemps)
   end
 
   def test_timeseries_hourly_airflows
-    args_hash = { 'hpxml_path' => '../workflow/sample_files/base.xml',
+    args_hash = { 'hpxml_path' => '../workflow/sample_files/base-mechvent-exhaust.xml',
                   'timeseries_frequency' => 'hourly',
                   'include_timeseries_fuel_consumptions' => false,
                   'include_timeseries_end_use_consumptions' => false,
@@ -455,6 +462,28 @@ class SimulationOutputReportTest < MiniTest::Test
     actual_timeseries_cols = File.readlines(timeseries_csv)[0].strip.split(',')
     assert_equal(expected_timeseries_cols.sort, actual_timeseries_cols.sort)
     assert_equal(8760, File.readlines(timeseries_csv).size - 2)
+    _check_for_nonzero_value(timeseries_csv, TimeseriesColsAirflows[0..-2])
+  end
+
+  def test_timeseries_hourly_airflows_with_whf
+    args_hash = { 'hpxml_path' => '../workflow/sample_files/base-misc-whole-house-fan.xml',
+                  'timeseries_frequency' => 'hourly',
+                  'include_timeseries_fuel_consumptions' => false,
+                  'include_timeseries_end_use_consumptions' => false,
+                  'include_timeseries_hot_water_uses' => false,
+                  'include_timeseries_total_loads' => false,
+                  'include_timeseries_component_loads' => false,
+                  'include_timeseries_zone_temperatures' => false,
+                  'include_timeseries_airflows' => true,
+                  'include_timeseries_weather' => false }
+    annual_csv, timeseries_csv, eri_csv = _test_measure(args_hash)
+    assert(File.exist?(annual_csv))
+    assert(File.exist?(timeseries_csv))
+    expected_timeseries_cols = ['Time'] + TimeseriesColsAirflows
+    actual_timeseries_cols = File.readlines(timeseries_csv)[0].strip.split(',')
+    assert_equal(expected_timeseries_cols.sort, actual_timeseries_cols.sort)
+    assert_equal(8760, File.readlines(timeseries_csv).size - 2)
+    _check_for_nonzero_value(timeseries_csv, [TimeseriesColsAirflows[-1]])
   end
 
   def test_timeseries_hourly_weather
@@ -475,6 +504,7 @@ class SimulationOutputReportTest < MiniTest::Test
     actual_timeseries_cols = File.readlines(timeseries_csv)[0].strip.split(',')
     assert_equal(expected_timeseries_cols.sort, actual_timeseries_cols.sort)
     assert_equal(8760, File.readlines(timeseries_csv).size - 2)
+    _check_for_nonzero_value(timeseries_csv, TimeseriesColsWeather)
   end
 
   def test_timeseries_hourly_ALL
@@ -801,5 +831,23 @@ class SimulationOutputReportTest < MiniTest::Test
       eri_csv = nil
     end
     return annual_csv, timeseries_csv, eri_csv
+  end
+
+  def _check_for_nonzero_value(timeseries_csv, timeseries_cols)
+    values = {}
+    timeseries_cols.each do |col|
+      values[col] = []
+    end
+    CSV.foreach(timeseries_csv, headers: true) do |row|
+      next if row['Time'].empty?
+      timeseries_cols.each do |col|
+        fail "Unexpected column: #{col}." if row[col].nil?
+        values[col] << Float(row[col])
+      end
+    end
+    timeseries_cols.each do |col|
+      avg_value = values[col].inject(:+) / values[col].size
+      assert_operator(avg_value, :!=, 0)
+    end
   end
 end
