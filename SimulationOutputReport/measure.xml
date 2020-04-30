@@ -3,8 +3,8 @@
   <schema_version>3.0</schema_version>
   <name>simulation_output_report</name>
   <uid>df9d170c-c21a-4130-866d-0d46b06073fd</uid>
-  <version_id>dbd2a834-8b13-46da-b481-dc6c2f4d2303</version_id>
-  <version_modified>20200429T154624Z</version_modified>
+  <version_id>a822fc13-8f6a-4835-9df6-b96c761c0b37</version_id>
+  <version_modified>20200430T151924Z</version_modified>
   <xml_checksum>9BF1E6AC</xml_checksum>
   <class_name>SimulationOutputReport</class_name>
   <display_name>HPXML Simulation Output Report</display_name>
@@ -18,8 +18,12 @@
       <type>Choice</type>
       <required>true</required>
       <model_dependent>false</model_dependent>
-      <default_value>hourly</default_value>
+      <default_value>none</default_value>
       <choices>
+        <choice>
+          <value>none</value>
+          <display_name>none</display_name>
+        </choice>
         <choice>
           <value>timestep</value>
           <display_name>timestep</display_name>
@@ -502,7 +506,7 @@
       <filename>output_report_test.rb</filename>
       <filetype>rb</filetype>
       <usage_type>test</usage_type>
-      <checksum>4C895D3B</checksum>
+      <checksum>1F156299</checksum>
     </file>
     <file>
       <version>
@@ -513,7 +517,7 @@
       <filename>measure.rb</filename>
       <filetype>rb</filetype>
       <usage_type>script</usage_type>
-      <checksum>F4E99528</checksum>
+      <checksum>04B2921A</checksum>
     </file>
   </files>
 </measure>
