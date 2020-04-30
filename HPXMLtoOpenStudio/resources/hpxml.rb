@@ -533,7 +533,8 @@ class HPXML < Object
     ATTRS = [:xml_type, :xml_generated_by, :created_date_and_time, :transaction,
              :software_program_used, :software_program_version, :eri_calculation_version,
              :eri_design, :timestep, :building_id, :event_type, :state_code,
-             :begin_month, :begin_day_of_month, :end_month, :end_day_of_month]
+             :begin_month, :begin_day_of_month, :end_month, :end_day_of_month,
+             :apply_ashrae140_assumptions]
     attr_accessor(*ATTRS)
 
     def check_for_errors
@@ -620,6 +621,7 @@ class HPXML < Object
         XMLHelper.add_element(simulation_control, 'BeginDayOfMonth', HPXML::to_integer_or_nil(@begin_day_of_month)) unless @begin_day_of_month.nil?
         XMLHelper.add_element(simulation_control, 'EndMonth', HPXML::to_integer_or_nil(@end_month)) unless @end_month.nil?
         XMLHelper.add_element(simulation_control, 'EndDayOfMonth', HPXML::to_integer_or_nil(@end_day_of_month)) unless @end_day_of_month.nil?
+        XMLHelper.add_element(simulation_control, 'ApplyASHRAE140Assumptions', HPXML::to_bool_or_nil(@apply_ashrae140_assumptions)) unless @apply_ashrae140_assumptions.nil?
       end
       if XMLHelper.get_element(extension, 'ERICalculation').nil? && XMLHelper.get_element(extension, 'SimulationControl').nil?
         extension.remove
@@ -648,6 +650,7 @@ class HPXML < Object
       @begin_day_of_month = HPXML::to_integer_or_nil(XMLHelper.get_value(hpxml, 'SoftwareInfo/extension/SimulationControl/BeginDayOfMonth'))
       @end_month = HPXML::to_integer_or_nil(XMLHelper.get_value(hpxml, 'SoftwareInfo/extension/SimulationControl/EndMonth'))
       @end_day_of_month = HPXML::to_integer_or_nil(XMLHelper.get_value(hpxml, 'SoftwareInfo/extension/SimulationControl/EndDayOfMonth'))
+      @apply_ashrae140_assumptions = HPXML::to_bool_or_nil(XMLHelper.get_value(hpxml, 'SoftwareInfo/extension/SimulationControl/ApplyASHRAE140Assumptions'))
       @building_id = HPXML::get_id(hpxml, 'Building/BuildingID')
       @event_type = XMLHelper.get_value(hpxml, 'Building/ProjectStatus/EventType')
       @state_code = XMLHelper.get_value(hpxml, 'Building/Site/Address/StateCode')

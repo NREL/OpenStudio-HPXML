@@ -232,6 +232,9 @@ class OSModel
     @eri_version = 'latest' if @eri_version.nil?
     @eri_version = Constants.ERIVersions[-1] if @eri_version == 'latest'
 
+    @apply_ashrae140_assumptions = @hpxml.header.apply_ashrae140_assumptions # Hidden feature
+    @apply_ashrae140_assumptions = false if @apply_ashrae140_assumptions.nil?
+
     # Init
     weather = Location.apply(model, runner, epw_path, cache_path, 'NA', 'NA')
     set_defaults_and_globals(runner)
@@ -321,9 +324,8 @@ class OSModel
     @default_azimuths = get_default_azimuths()
     @has_uncond_bsmnt = @hpxml.has_space_type(HPXML::LocationBasementUnconditioned)
 
-    @use_only_ideal_air = false
     if not @hpxml.building_construction.use_only_ideal_air_system.nil?
-      @use_only_ideal_air = @hpxml.building_construction.use_only_ideal_air_system
+      @hpxml.building_construction.use_only_ideal_air_system = false
     end
 
     # Initialize
@@ -763,6 +765,14 @@ class OSModel
       if pv_system.system_losses_fraction.nil?
         pv_system.system_losses_fraction = PV.get_default_system_losses(pv_system.year_modules_manufactured)
       end
+    end
+
+    if @apply_ashrae140_assumptions
+      @hpxml.building_construction.use_only_ideal_air_system = true
+      @hpxml.building_occupancy.number_of_residents = 0
+      @hpxml.misc_loads_schedule.weekday_fractions = '0.020, 0.020, 0.020, 0.020, 0.020, 0.034, 0.043, 0.085, 0.050, 0.030, 0.030, 0.041, 0.030, 0.025, 0.026, 0.026, 0.039, 0.042, 0.045, 0.070, 0.070, 0.073, 0.073, 0.066'
+      @hpxml.misc_loads_schedule.weekend_fractions = '0.020, 0.020, 0.020, 0.020, 0.020, 0.034, 0.043, 0.085, 0.050, 0.030, 0.030, 0.041, 0.030, 0.025, 0.026, 0.026, 0.039, 0.042, 0.045, 0.070, 0.070, 0.073, 0.073, 0.066'
+      @hpxml.misc_loads_schedule.monthly_multipliers = '1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0'
     end
 
     if @debug && (not @output_dir.nil?)
@@ -2081,17 +2091,26 @@ class OSModel
   end
 
   def self.add_thermal_mass(runner, model)
-    drywall_thick_in = 0.5
-    partition_frac_of_cfa = 1.0 # Ratio of partition wall area to conditioned floor area
-    basement_frac_of_cfa = (@cfa - @cfa_ag) / @cfa
-    Constructions.apply_partition_walls(model, 'PartitionWallConstruction', drywall_thick_in, partition_frac_of_cfa,
-                                        basement_frac_of_cfa, @cond_bsmnt_surfaces, @living_space)
+    if @apply_ashrae140_assumptions
+      # 1024 ft2 of interior partition wall mass, no furniture mass
+      drywall_thick_in = 0.5
+      partition_frac_of_cfa = 1024.0 / @cfa # Ratio of partition wall area to conditioned floor area
+      basement_frac_of_cfa = (@cfa - @cfa_ag) / @cfa
+      Constructions.apply_partition_walls(model, 'PartitionWallConstruction', drywall_thick_in, partition_frac_of_cfa,
+                                          basement_frac_of_cfa, @cond_bsmnt_surfaces, @living_space)
+    else
+      drywall_thick_in = 0.5
+      partition_frac_of_cfa = 1.0 # Ratio of partition wall area to conditioned floor area
+      basement_frac_of_cfa = (@cfa - @cfa_ag) / @cfa
+      Constructions.apply_partition_walls(model, 'PartitionWallConstruction', drywall_thick_in, partition_frac_of_cfa,
+                                          basement_frac_of_cfa, @cond_bsmnt_surfaces, @living_space)
 
-    mass_lb_per_sqft = 8.0
-    density_lb_per_cuft = 40.0
-    mat = BaseMaterial.Wood
-    Constructions.apply_furniture(model, mass_lb_per_sqft, density_lb_per_cuft, mat,
-                                  basement_frac_of_cfa, @cond_bsmnt_surfaces, @living_space)
+      mass_lb_per_sqft = 8.0
+      density_lb_per_cuft = 40.0
+      mat = BaseMaterial.Wood
+      Constructions.apply_furniture(model, mass_lb_per_sqft, density_lb_per_cuft, mat,
+                                    basement_frac_of_cfa, @cond_bsmnt_surfaces, @living_space)
+    end
   end
 
   def self.add_neighbors(runner, model, length)
@@ -2556,7 +2575,7 @@ class OSModel
   end
 
   def self.add_cooling_system(runner, model)
-    return if @use_only_ideal_air
+    return if @hpxml.building_construction.use_only_ideal_air_system
 
     @hpxml.cooling_systems.each do |cooling_system|
       sequential_load_frac, @remaining_cool_load_frac = calc_sequential_load_fraction(cooling_system.fraction_cool_load_served, @remaining_cool_load_frac)
@@ -2600,7 +2619,7 @@ class OSModel
   end
 
   def self.add_heating_system(runner, model)
-    return if @use_only_ideal_air
+    return if @hpxml.building_construction.use_only_ideal_air_system
 
     [true, false].each do |only_furnaces_attached_to_cooling|
       @hpxml.heating_systems.each do |heating_system|
@@ -2645,7 +2664,7 @@ class OSModel
   end
 
   def self.add_heat_pump(runner, model, weather)
-    return if @use_only_ideal_air
+    return if @hpxml.building_construction.use_only_ideal_air_system
 
     @hpxml.heat_pumps.each do |heat_pump|
       if not heat_pump.heating_capacity_17F.nil?
@@ -2710,7 +2729,7 @@ class OSModel
   end
 
   def self.add_residual_hvac(runner, model)
-    if @use_only_ideal_air
+    if @hpxml.building_construction.use_only_ideal_air_system
       HVAC.apply_ideal_air_loads(model, runner, 1, 1, @living_zone)
       return
     end
