@@ -40,12 +40,6 @@ class SimulationOutputReport < OpenStudio::Measure::ReportingMeasure
     arg.setDefaultValue('hourly')
     args << arg
 
-    arg = OpenStudio::Measure::OSArgument::makeBoolArgument('include_timeseries_zone_temperatures', true)
-    arg.setDisplayName('Generate Timeseries Output: Zone Temperatures')
-    arg.setDescription('Generates timeseries temperatures for each thermal zone.')
-    arg.setDefaultValue(false)
-    args << arg
-
     arg = OpenStudio::Measure::OSArgument::makeBoolArgument('include_timeseries_fuel_consumptions', true)
     arg.setDisplayName('Generate Timeseries Output: Fuel Consumptions')
     arg.setDescription('Generates timeseries energy consumptions for each fuel type.')
@@ -73,6 +67,24 @@ class SimulationOutputReport < OpenStudio::Measure::ReportingMeasure
     arg = OpenStudio::Measure::OSArgument::makeBoolArgument('include_timeseries_component_loads', true)
     arg.setDisplayName('Generate Timeseries Output: Component Loads')
     arg.setDescription('Generates timeseries heating/cooling loads disaggregated by component type.')
+    arg.setDefaultValue(false)
+    args << arg
+
+    arg = OpenStudio::Measure::OSArgument::makeBoolArgument('include_timeseries_zone_temperatures', true)
+    arg.setDisplayName('Generate Timeseries Output: Zone Temperatures')
+    arg.setDescription('Generates timeseries temperatures for each thermal zone.')
+    arg.setDefaultValue(false)
+    args << arg
+
+    arg = OpenStudio::Measure::OSArgument::makeBoolArgument('include_timeseries_airflows', true)
+    arg.setDisplayName('Generate Timeseries Output: Airflows')
+    arg.setDescription('Generates timeseries airflows.')
+    arg.setDefaultValue(false)
+    args << arg
+
+    arg = OpenStudio::Measure::OSArgument::makeBoolArgument('include_timeseries_weather', true)
+    arg.setDisplayName('Generate Timeseries Output: Weather')
+    arg.setDescription('Generates timeseries weather data.')
     arg.setDefaultValue(false)
     args << arg
 
@@ -177,12 +189,14 @@ class SimulationOutputReport < OpenStudio::Measure::ReportingMeasure
     # Timeseries outputs
 
     timeseries_frequency = runner.getStringArgumentValue('timeseries_frequency', user_arguments)
-    include_timeseries_zone_temperatures = runner.getBoolArgumentValue('include_timeseries_zone_temperatures', user_arguments)
     include_timeseries_fuel_consumptions = runner.getBoolArgumentValue('include_timeseries_fuel_consumptions', user_arguments)
     include_timeseries_end_use_consumptions = runner.getBoolArgumentValue('include_timeseries_end_use_consumptions', user_arguments)
     include_timeseries_hot_water_uses = runner.getBoolArgumentValue('include_timeseries_hot_water_uses', user_arguments)
     include_timeseries_total_loads = runner.getBoolArgumentValue('include_timeseries_total_loads', user_arguments)
     include_timeseries_component_loads = runner.getBoolArgumentValue('include_timeseries_component_loads', user_arguments)
+    include_timeseries_zone_temperatures = runner.getBoolArgumentValue('include_timeseries_zone_temperatures', user_arguments)
+    include_timeseries_airflows = runner.getBoolArgumentValue('include_timeseries_airflows', user_arguments)
+    include_timeseries_weather = runner.getBoolArgumentValue('include_timeseries_weather', user_arguments)
 
     if include_timeseries_fuel_consumptions
       # If fuel uses are selected, we also need to select end uses because
@@ -193,6 +207,22 @@ class SimulationOutputReport < OpenStudio::Measure::ReportingMeasure
 
     if include_timeseries_zone_temperatures
       result << OpenStudio::IdfObject.load("Output:Variable,*,Zone Mean Air Temperature,#{timeseries_frequency};").get
+    end
+
+    if include_timeseries_airflows
+      @airflows.each do |airflow_type, airflow|
+        ems_program = @model.getModelObjectByName(airflow.ems_program.gsub(' ', '_')).get.to_EnergyManagementSystemProgram.get
+        airflow.ems_variables.each do |ems_variable|
+          result << OpenStudio::IdfObject.load("EnergyManagementSystem:OutputVariable,#{ems_variable}_timeseries_outvar,#{ems_variable},Summed,ZoneTimestep,#{ems_program.name},m^3/s;").get
+          result << OpenStudio::IdfObject.load("Output:Variable,*,#{ems_variable}_timeseries_outvar,#{timeseries_frequency};").get
+        end
+      end
+    end
+
+    if include_timeseries_weather
+      @weather.each do |weather_type, weather_data|
+        result << OpenStudio::IdfObject.load("Output:Variable,*,#{weather_data.variable},#{timeseries_frequency};").get
+      end
     end
 
     if include_timeseries_fuel_consumptions
@@ -253,12 +283,14 @@ class SimulationOutputReport < OpenStudio::Measure::ReportingMeasure
     end
 
     timeseries_frequency = runner.getStringArgumentValue('timeseries_frequency', user_arguments)
-    include_timeseries_zone_temperatures = runner.getBoolArgumentValue('include_timeseries_zone_temperatures', user_arguments)
     include_timeseries_fuel_consumptions = runner.getBoolArgumentValue('include_timeseries_fuel_consumptions', user_arguments)
     include_timeseries_end_use_consumptions = runner.getBoolArgumentValue('include_timeseries_end_use_consumptions', user_arguments)
     include_timeseries_hot_water_uses = runner.getBoolArgumentValue('include_timeseries_hot_water_uses', user_arguments)
     include_timeseries_total_loads = runner.getBoolArgumentValue('include_timeseries_total_loads', user_arguments)
     include_timeseries_component_loads = runner.getBoolArgumentValue('include_timeseries_component_loads', user_arguments)
+    include_timeseries_zone_temperatures = runner.getBoolArgumentValue('include_timeseries_zone_temperatures', user_arguments)
+    include_timeseries_airflows = runner.getBoolArgumentValue('include_timeseries_airflows', user_arguments)
+    include_timeseries_weather = runner.getBoolArgumentValue('include_timeseries_weather', user_arguments)
 
     sqlFile = runner.lastEnergyPlusSqlFile
     if sqlFile.empty?
@@ -299,12 +331,14 @@ class SimulationOutputReport < OpenStudio::Measure::ReportingMeasure
 
     # Retrieve outputs
     outputs = get_outputs(timeseries_frequency,
-                          include_timeseries_zone_temperatures,
                           include_timeseries_fuel_consumptions,
                           include_timeseries_end_use_consumptions,
                           include_timeseries_hot_water_uses,
                           include_timeseries_total_loads,
-                          include_timeseries_component_loads)
+                          include_timeseries_component_loads,
+                          include_timeseries_zone_temperatures,
+                          include_timeseries_airflows,
+                          include_timeseries_weather)
     if not check_for_errors(runner, outputs)
       return false
     end
@@ -314,12 +348,14 @@ class SimulationOutputReport < OpenStudio::Measure::ReportingMeasure
     report_sim_outputs(outputs, runner)
     write_eri_output_results(outputs, eri_output_csv_path)
     write_timeseries_output_results(runner, timeseries_output_csv_path, timeseries_frequency,
-                                    include_timeseries_zone_temperatures,
                                     include_timeseries_fuel_consumptions,
                                     include_timeseries_end_use_consumptions,
                                     include_timeseries_hot_water_uses,
                                     include_timeseries_total_loads,
-                                    include_timeseries_component_loads)
+                                    include_timeseries_component_loads,
+                                    include_timeseries_zone_temperatures,
+                                    include_timeseries_airflows,
+                                    include_timeseries_weather)
 
     @sqlFile.close()
 
@@ -352,12 +388,14 @@ class SimulationOutputReport < OpenStudio::Measure::ReportingMeasure
   end
 
   def get_outputs(timeseries_frequency,
-                  include_timeseries_zone_temperatures,
                   include_timeseries_fuel_consumptions,
                   include_timeseries_end_use_consumptions,
                   include_timeseries_hot_water_uses,
                   include_timeseries_total_loads,
-                  include_timeseries_component_loads)
+                  include_timeseries_component_loads,
+                  include_timeseries_zone_temperatures,
+                  include_timeseries_airflows,
+                  include_timeseries_weather)
     outputs = {}
 
     if include_timeseries_fuel_consumptions
@@ -674,6 +712,25 @@ class SimulationOutputReport < OpenStudio::Measure::ReportingMeasure
       end
     end
 
+    if include_timeseries_airflows
+      @airflows.each do |airflow_type, airflow|
+        airflow.timeseries_output = get_report_variable_data_timeseries(['EMS'], airflow.ems_variables.map { |var| "#{var}_timeseries_outvar" }, UnitConversions.convert(1.0, 'm^3/s', 'cfm'), 0, timeseries_frequency)
+      end
+    end
+
+    if include_timeseries_weather
+      @weather.each do |weather_type, weather_data|
+        if weather_data.timeseries_units == 'F'
+          unit_conv = 9.0 / 5.0
+          unit_adder = 32.0
+        else
+          unit_conv = UnitConversions.convert(1.0, weather_data.variable_units, weather_data.timeseries_units)
+          unit_adder = 0
+        end
+        weather_data.timeseries_output = get_report_variable_data_timeseries(['Environment'], [weather_data.variable], unit_conv, unit_adder, timeseries_frequency)
+      end
+    end
+
     return outputs
   end
 
@@ -841,12 +898,14 @@ class SimulationOutputReport < OpenStudio::Measure::ReportingMeasure
   end
 
   def write_timeseries_output_results(runner, csv_path, timeseries_frequency,
-                                      include_timeseries_zone_temperatures,
                                       include_timeseries_fuel_consumptions,
                                       include_timeseries_end_use_consumptions,
                                       include_timeseries_hot_water_uses,
                                       include_timeseries_total_loads,
-                                      include_timeseries_component_loads)
+                                      include_timeseries_component_loads,
+                                      include_timeseries_zone_temperatures,
+                                      include_timeseries_airflows,
+                                      include_timeseries_weather)
     # Time column
     if ['timestep', 'hourly', 'daily', 'monthly'].include? timeseries_frequency
       data = ['Time', '']
@@ -872,11 +931,6 @@ class SimulationOutputReport < OpenStudio::Measure::ReportingMeasure
     else
       hot_water_use_data = []
     end
-    if include_timeseries_zone_temperatures
-      zone_temps_data = @zone_temps.values.select { |x| !x.timeseries_output.empty? }.map { |x| [x.name, x.timeseries_units] + x.timeseries_output.map { |v| v.round(2) } }
-    else
-      zone_temps_data = []
-    end
     if include_timeseries_total_loads
       total_loads_data = @loads.values.select { |x| !x.timeseries_output.empty? }.map { |x| [x.name, x.timeseries_units] + x.timeseries_output.map { |v| v.round(2) } }
     else
@@ -887,13 +941,28 @@ class SimulationOutputReport < OpenStudio::Measure::ReportingMeasure
     else
       comp_loads_data = []
     end
+    if include_timeseries_zone_temperatures
+      zone_temps_data = @zone_temps.values.select { |x| !x.timeseries_output.empty? }.map { |x| [x.name, x.timeseries_units] + x.timeseries_output.map { |v| v.round(2) } }
+    else
+      zone_temps_data = []
+    end
+    if include_timeseries_airflows
+      airflows_data = @airflows.values.select { |x| !x.timeseries_output.empty? }.map { |x| [x.name, x.timeseries_units] + x.timeseries_output.map { |v| v.round(2) } }
+    else
+      airflows_data = []
+    end
+    if include_timeseries_weather
+      weather_data = @weather.values.select { |x| !x.timeseries_output.empty? }.map { |x| [x.name, x.timeseries_units] + x.timeseries_output.map { |v| v.round(2) } }
+    else
+      weather_data = []
+    end
 
-    return if fuel_data.size + end_use_data.size + hot_water_use_data.size + zone_temps_data.size + total_loads_data.size + comp_loads_data.size == 0
+    return if fuel_data.size + end_use_data.size + hot_water_use_data.size + total_loads_data.size + comp_loads_data.size + zone_temps_data.size + airflows_data.size + weather_data.size == 0
 
     fail 'Unable to obtain timestamps.' if @timestamps.empty?
 
     # Assemble data
-    data = data.zip(*fuel_data, *end_use_data, *hot_water_use_data, *zone_temps_data, *total_loads_data, *comp_loads_data)
+    data = data.zip(*fuel_data, *end_use_data, *hot_water_use_data, *total_loads_data, *comp_loads_data, *zone_temps_data, *airflows_data, *weather_data)
 
     # Error-check
     n_elements = []
@@ -1648,6 +1717,25 @@ class SimulationOutputReport < OpenStudio::Measure::ReportingMeasure
     attr_accessor()
   end
 
+  class Airflow < BaseOutput
+    def initialize(ems_program:, ems_variables:)
+      super()
+      @ems_program = ems_program
+      @ems_variables = ems_variables
+    end
+    attr_accessor(:ems_program, :ems_variables)
+  end
+
+  class Weather < BaseOutput
+    def initialize(variable:, variable_units:, timeseries_units:)
+      super()
+      @variable = variable
+      @variable_units = variable_units
+      @timeseries_units = timeseries_units
+    end
+    attr_accessor(:variable, :variable_units)
+  end
+
   def setup_outputs
     def get_timeseries_units_from_fuel_type(fuel_type)
       if fuel_type == FT::Elec
@@ -1842,6 +1930,33 @@ class SimulationOutputReport < OpenStudio::Measure::ReportingMeasure
     # Zone Temperatures
 
     @zone_temps = {}
+
+    # Airflows
+    @airflows = {
+      AFT::Infiltration => Airflow.new(ems_program: Constants.ObjectNameInfiltration + ' program', ems_variables: [(Constants.ObjectNameInfiltration + ' flow act').gsub(' ', '_')]),
+      AFT::MechanicalVentilation => Airflow.new(ems_program: Constants.ObjectNameInfiltration + ' program', ems_variables: [(Constants.ObjectNameMechanicalVentilation + ' flow act').gsub(' ', '_'), 'balanced_mechvent_flow_rate']),
+      AFT::NaturalVentilation => Airflow.new(ems_program: Constants.ObjectNameNaturalVentilation + ' program', ems_variables: [(Constants.ObjectNameNaturalVentilation + ' flow act').gsub(' ', '_')]),
+      AFT::WholeHouseFan => Airflow.new(ems_program: Constants.ObjectNameNaturalVentilation + ' program', ems_variables: [(Constants.ObjectNameWholeHouseFan + ' flow act').gsub(' ', '_')]),
+    }
+
+    @airflows.each do |airflow_type, airflow|
+      airflow.name = "Airflow: #{airflow_type}"
+      airflow.timeseries_units = 'cfm'
+    end
+
+    # Weather
+    @weather = {
+      WT::DrybulbTemp => Weather.new(variable: 'Site Outdoor Air Drybulb Temperature', variable_units: 'C', timeseries_units: 'F'),
+      WT::WetbulbTemp => Weather.new(variable: 'Site Outdoor Air Wetbulb Temperature', variable_units: 'C', timeseries_units: 'F'),
+      WT::RelativeHumidity => Weather.new(variable: 'Site Outdoor Air Relative Humidity', variable_units: '%', timeseries_units: '%'),
+      WT::WindSpeed => Weather.new(variable: 'Site Wind Speed', variable_units: 'm/s', timeseries_units: 'mph'),
+      WT::DiffuseSolar => Weather.new(variable: 'Site Diffuse Solar Radiation Rate per Area', variable_units: 'W/m^2', timeseries_units: 'Btu/(hr*ft^2)'),
+      WT::DirectSolar => Weather.new(variable: 'Site Direct Solar Radiation Rate per Area', variable_units: 'W/m^2', timeseries_units: 'Btu/(hr*ft^2)'),
+    }
+
+    @weather.each do |weather_type, weather_data|
+      weather_data.name = "Weather: #{weather_type}"
+    end
   end
 
   def reporting_frequency_map
