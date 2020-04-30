@@ -288,6 +288,23 @@ class SimulationOutputReportTest < MiniTest::Test
     assert_equal(expected_annual_rows.sort, actual_annual_rows.sort)
   end
 
+  def test_annual_only2
+    args_hash = { 'hpxml_path' => '../workflow/sample_files/base.xml',
+                  'timeseries_frequency' => 'none',
+                  'include_timeseries_zone_temperatures' => true,
+                  'include_timeseries_fuel_consumptions' => true,
+                  'include_timeseries_end_use_consumptions' => true,
+                  'include_timeseries_hot_water_uses' => true,
+                  'include_timeseries_total_loads' => true,
+                  'include_timeseries_component_loads' => true }
+    annual_csv, timeseries_csv, eri_csv = _test_measure(args_hash)
+    assert(File.exist?(annual_csv))
+    assert(!File.exist?(timeseries_csv))
+    expected_annual_rows = AnnualRows
+    actual_annual_rows = File.readlines(annual_csv).map { |x| x.split(',')[0].strip }.select { |x| !x.empty? }
+    assert_equal(expected_annual_rows.sort, actual_annual_rows.sort)
+  end
+
   def test_timeseries_hourly_temperatures
     args_hash = { 'hpxml_path' => '../workflow/sample_files/base.xml',
                   'timeseries_frequency' => 'hourly',
