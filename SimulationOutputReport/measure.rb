@@ -37,7 +37,7 @@ class SimulationOutputReport < OpenStudio::Measure::ReportingMeasure
     end
     arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('timeseries_frequency', timeseries_frequency_chs, true)
     arg.setDisplayName('Timeseries Reporting Frequency')
-    arg.setDescription('The frequency at which to report timeseries output data.')
+    arg.setDescription("The frequency at which to report timeseries output data. Using 'none' will disable timeseries outputs.")
     arg.setDefaultValue('none')
     args << arg
 
