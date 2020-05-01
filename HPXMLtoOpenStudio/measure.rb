@@ -327,6 +327,9 @@ class OSModel
     if @hpxml.building_construction.use_only_ideal_air_system.nil?
       @hpxml.building_construction.use_only_ideal_air_system = false
     end
+    if @apply_ashrae140_assumptions
+      @hpxml.building_construction.use_only_ideal_air_system = true
+    end
 
     # Initialize
     @remaining_heat_load_frac = 1.0
@@ -765,14 +768,6 @@ class OSModel
       if pv_system.system_losses_fraction.nil?
         pv_system.system_losses_fraction = PV.get_default_system_losses(pv_system.year_modules_manufactured)
       end
-    end
-
-    if @apply_ashrae140_assumptions
-      @hpxml.building_construction.use_only_ideal_air_system = true
-      @hpxml.building_occupancy.number_of_residents = 0
-      @hpxml.misc_loads_schedule.weekday_fractions = '0.020, 0.020, 0.020, 0.020, 0.020, 0.034, 0.043, 0.085, 0.050, 0.030, 0.030, 0.041, 0.030, 0.025, 0.026, 0.026, 0.039, 0.042, 0.045, 0.070, 0.070, 0.073, 0.073, 0.066'
-      @hpxml.misc_loads_schedule.weekend_fractions = '0.020, 0.020, 0.020, 0.020, 0.020, 0.034, 0.043, 0.085, 0.050, 0.030, 0.030, 0.041, 0.030, 0.025, 0.026, 0.026, 0.039, 0.042, 0.045, 0.070, 0.070, 0.073, 0.073, 0.066'
-      @hpxml.misc_loads_schedule.monthly_multipliers = '1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0'
     end
 
     if @debug && (not @output_dir.nil?)
