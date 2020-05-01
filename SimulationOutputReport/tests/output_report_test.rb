@@ -858,7 +858,7 @@ class SimulationOutputReportTest < MiniTest::Test
       values[col] = []
     end
     CSV.foreach(timeseries_csv, headers: true) do |row|
-      next if row['Time'].empty?
+      next if row['Time'].nil?
       timeseries_cols.each do |col|
         fail "Unexpected column: #{col}." if row[col].nil?
         values[col] << Float(row[col])
