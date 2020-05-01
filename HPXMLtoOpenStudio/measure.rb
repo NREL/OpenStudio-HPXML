@@ -320,17 +320,11 @@ class OSModel
     @min_neighbor_distance = get_min_neighbor_distance()
     @default_azimuths = get_default_azimuths()
     @has_uncond_bsmnt = @hpxml.has_space_type(HPXML::LocationBasementUnconditioned)
+    @total_conditioned_floor_area_served = get_total_conditioned_floor_area_served()
 
     @use_only_ideal_air = false
     if not @hpxml.building_construction.use_only_ideal_air_system.nil?
       @use_only_ideal_air = @hpxml.building_construction.use_only_ideal_air_system
-    end
-
-    @total_conditioned_floor_area_served = 0
-    @hpxml.hvac_distributions.each do |hvac_distribution|
-      next unless hvac_distribution.distribution_system_type == HPXML::HVACDistributionTypeAir
-
-      @total_conditioned_floor_area_served += hvac_distribution.conditioned_floor_area_served
     end
 
     # Initialize
@@ -363,6 +357,7 @@ class OSModel
       vented_attic = nil
       @hpxml.attics.each do |attic|
         next unless attic.attic_type == HPXML::AtticTypeVented
+
         vented_attic = attic
       end
       if vented_attic.nil?
@@ -378,6 +373,7 @@ class OSModel
       vented_crawl = nil
       @hpxml.foundations.each do |foundation|
         next unless foundation.foundation_type == HPXML::FoundationTypeCrawlspaceVented
+
         vented_crawl = foundation
       end
       if vented_crawl.nil?
@@ -496,7 +492,7 @@ class OSModel
         end
       end
 
-      # Preserve the ducts and equally split the areas.
+      # Preserve the ducts and equally split the areas
       ducts_by_type.each do |key, ducts|
         ducts.each_with_index do |duct, idx|
           next unless duct.duct_surface_area.nil?
@@ -4404,6 +4400,21 @@ class OSModel
       end
     end
     return min_neighbor_distance
+  end
+
+  def self.get_total_conditioned_floor_area_served()
+    total_conditioned_floor_area_served = 0
+    @hpxml.hvac_distributions.each do |hvac_distribution|
+      next unless hvac_distribution.distribution_system_type == HPXML::HVACDistributionTypeAir
+
+      total_conditioned_floor_area_served += hvac_distribution.conditioned_floor_area_served
+    end
+
+    if total_conditioned_floor_area_served > @cfa
+      fail 'The total conditioned floor area served by the HVAC distribution system(s) is larger than the conditioned floor area of the building.'
+    end
+
+    return total_conditioned_floor_area_served
   end
 
   def self.get_kiva_instances(fnd_walls, slabs)
