@@ -27,17 +27,18 @@ class SimulationOutputReport < OpenStudio::Measure::ReportingMeasure
   end
 
   # define the arguments that the user will input
-  def arguments(ignore = nil)
+  def arguments(model)
     args = OpenStudio::Measure::OSArgumentVector.new
 
     timeseries_frequency_chs = OpenStudio::StringVector.new
+    timeseries_frequency_chs << 'none'
     reporting_frequency_map.keys.each do |freq|
       timeseries_frequency_chs << freq
     end
     arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('timeseries_frequency', timeseries_frequency_chs, true)
     arg.setDisplayName('Timeseries Reporting Frequency')
-    arg.setDescription('The frequency at which to report timeseries output data.')
-    arg.setDefaultValue('hourly')
+    arg.setDescription("The frequency at which to report timeseries output data. Using 'none' will disable timeseries outputs.")
+    arg.setDefaultValue('none')
     args << arg
 
     arg = OpenStudio::Measure::OSArgument::makeBoolArgument('include_timeseries_zone_temperatures', true)
@@ -106,8 +107,15 @@ class SimulationOutputReport < OpenStudio::Measure::ReportingMeasure
 
     result = OpenStudio::IdfObjectVector.new
 
+    model = runner.lastOpenStudioModel
+    if model.empty?
+      runner.registerError('Cannot find last model.')
+      return false
+    end
+    model = model.get
+
     # use the built-in error checking
-    if !runner.validateUserArguments(arguments, user_arguments)
+    if !runner.validateUserArguments(arguments(model), user_arguments)
       return result
     end
 
@@ -170,12 +178,14 @@ class SimulationOutputReport < OpenStudio::Measure::ReportingMeasure
     # Timeseries outputs
 
     timeseries_frequency = runner.getStringArgumentValue('timeseries_frequency', user_arguments)
-    include_timeseries_zone_temperatures = runner.getBoolArgumentValue('include_timeseries_zone_temperatures', user_arguments)
-    include_timeseries_fuel_consumptions = runner.getBoolArgumentValue('include_timeseries_fuel_consumptions', user_arguments)
-    include_timeseries_end_use_consumptions = runner.getBoolArgumentValue('include_timeseries_end_use_consumptions', user_arguments)
-    include_timeseries_hot_water_uses = runner.getBoolArgumentValue('include_timeseries_hot_water_uses', user_arguments)
-    include_timeseries_total_loads = runner.getBoolArgumentValue('include_timeseries_total_loads', user_arguments)
-    include_timeseries_component_loads = runner.getBoolArgumentValue('include_timeseries_component_loads', user_arguments)
+    if timeseries_frequency != 'none'
+      include_timeseries_zone_temperatures = runner.getBoolArgumentValue('include_timeseries_zone_temperatures', user_arguments)
+      include_timeseries_fuel_consumptions = runner.getBoolArgumentValue('include_timeseries_fuel_consumptions', user_arguments)
+      include_timeseries_end_use_consumptions = runner.getBoolArgumentValue('include_timeseries_end_use_consumptions', user_arguments)
+      include_timeseries_hot_water_uses = runner.getBoolArgumentValue('include_timeseries_hot_water_uses', user_arguments)
+      include_timeseries_total_loads = runner.getBoolArgumentValue('include_timeseries_total_loads', user_arguments)
+      include_timeseries_component_loads = runner.getBoolArgumentValue('include_timeseries_component_loads', user_arguments)
+    end
 
     if include_timeseries_fuel_consumptions
       # If fuel uses are selected, we also need to select end uses because
@@ -233,26 +243,27 @@ class SimulationOutputReport < OpenStudio::Measure::ReportingMeasure
   def run(runner, user_arguments)
     super(runner, user_arguments)
 
-    # use the built-in error checking
-    if !runner.validateUserArguments(arguments, user_arguments)
-      return false
-    end
-
-    timeseries_frequency = runner.getStringArgumentValue('timeseries_frequency', user_arguments)
-    include_timeseries_zone_temperatures = runner.getBoolArgumentValue('include_timeseries_zone_temperatures', user_arguments)
-    include_timeseries_fuel_consumptions = runner.getBoolArgumentValue('include_timeseries_fuel_consumptions', user_arguments)
-    include_timeseries_end_use_consumptions = runner.getBoolArgumentValue('include_timeseries_end_use_consumptions', user_arguments)
-    include_timeseries_hot_water_uses = runner.getBoolArgumentValue('include_timeseries_hot_water_uses', user_arguments)
-    include_timeseries_total_loads = runner.getBoolArgumentValue('include_timeseries_total_loads', user_arguments)
-    include_timeseries_component_loads = runner.getBoolArgumentValue('include_timeseries_component_loads', user_arguments)
-
-    # get the last model and sql file
     model = runner.lastOpenStudioModel
     if model.empty?
       runner.registerError('Cannot find OpenStudio model.')
       return false
     end
     @model = model.get
+
+    # use the built-in error checking
+    if !runner.validateUserArguments(arguments(@model), user_arguments)
+      return false
+    end
+
+    timeseries_frequency = runner.getStringArgumentValue('timeseries_frequency', user_arguments)
+    if timeseries_frequency != 'none'
+      include_timeseries_zone_temperatures = runner.getBoolArgumentValue('include_timeseries_zone_temperatures', user_arguments)
+      include_timeseries_fuel_consumptions = runner.getBoolArgumentValue('include_timeseries_fuel_consumptions', user_arguments)
+      include_timeseries_end_use_consumptions = runner.getBoolArgumentValue('include_timeseries_end_use_consumptions', user_arguments)
+      include_timeseries_hot_water_uses = runner.getBoolArgumentValue('include_timeseries_hot_water_uses', user_arguments)
+      include_timeseries_total_loads = runner.getBoolArgumentValue('include_timeseries_total_loads', user_arguments)
+      include_timeseries_component_loads = runner.getBoolArgumentValue('include_timeseries_component_loads', user_arguments)
+    end
 
     sqlFile = runner.lastEnergyPlusSqlFile
     if sqlFile.empty?
@@ -841,9 +852,11 @@ class SimulationOutputReport < OpenStudio::Measure::ReportingMeasure
                                       include_timeseries_hot_water_uses,
                                       include_timeseries_total_loads,
                                       include_timeseries_component_loads)
+    return if timeseries_frequency == 'none'
+
     # Time column
     if ['timestep', 'hourly', 'daily', 'monthly'].include? timeseries_frequency
-      data = ['Time', '']
+      data = ['Time', nil]
     else
       fail "Unexpected timeseries_frequency: #{timeseries_frequency}."
     end
