@@ -324,7 +324,7 @@ class OSModel
     @default_azimuths = get_default_azimuths()
     @has_uncond_bsmnt = @hpxml.has_space_type(HPXML::LocationBasementUnconditioned)
 
-    if not @hpxml.building_construction.use_only_ideal_air_system.nil?
+    if @hpxml.building_construction.use_only_ideal_air_system.nil?
       @hpxml.building_construction.use_only_ideal_air_system = false
     end
 
