@@ -1,0 +1,3133 @@
+{
+  "DataSource": {
+    "enums": [
+      "user",
+      "software"
+    ],
+    "min_in": null,
+    "min_ex": null,
+    "max_in": null,
+    "max_ex": null
+  },
+  "schemaVersionType": {
+    "enums": [
+      "3.0"
+    ],
+    "min_in": null,
+    "min_ex": null,
+    "max_in": null,
+    "max_ex": null
+  },
+  "AddressTypeCode": {
+    "enums": [
+      "street",
+      "mailing"
+    ],
+    "min_in": null,
+    "min_ex": null,
+    "max_in": null,
+    "max_ex": null
+  },
+  "IndividualType": {
+    "enums": [
+      "owner-occupant",
+      "owner-non-occupant",
+      "property manager",
+      "real estate agent",
+      "tenant",
+      "other"
+    ],
+    "min_in": null,
+    "min_ex": null,
+    "max_in": null,
+    "max_ex": null
+  },
+  "BusinessCertification": {
+    "enums": [
+      "BPI",
+      "RESNET",
+      "other"
+    ],
+    "min_in": null,
+    "min_ex": null,
+    "max_in": null,
+    "max_ex": null
+  },
+  "TelephoneTypeCode": {
+    "enums": [
+      "day",
+      "evening",
+      "mobile"
+    ],
+    "min_in": null,
+    "min_ex": null,
+    "max_in": null,
+    "max_ex": null
+  },
+  "EmailTypeCode": {
+    "enums": [
+      "personal",
+      "work",
+      "other"
+    ],
+    "min_in": null,
+    "min_ex": null,
+    "max_in": null,
+    "max_ex": null
+  },
+  "BuildingLeakiness": {
+    "enums": [
+      "very tight",
+      "tight",
+      "average",
+      "leaky",
+      "very leaky"
+    ],
+    "min_in": null,
+    "min_ex": null,
+    "max_in": null,
+    "max_ex": null
+  },
+  "WindConditions": {
+    "enums": [
+      "windy",
+      "normal"
+    ],
+    "min_in": null,
+    "min_ex": null,
+    "max_in": null,
+    "max_ex": null
+  },
+  "BuildingAirLeakageUnit": {
+    "enums": [
+      "CFM",
+      "CFMnatural",
+      "ACH",
+      "ACHnatural"
+    ],
+    "min_in": null,
+    "min_ex": null,
+    "max_in": null,
+    "max_ex": null
+  },
+  "FanRingUsed": {
+    "enums": [
+      "open",
+      "A",
+      "B"
+    ],
+    "min_in": null,
+    "min_ex": null,
+    "max_in": null,
+    "max_ex": null
+  },
+  "TestInorOut": {
+    "enums": [
+      "test in",
+      "test out"
+    ],
+    "min_in": null,
+    "min_ex": null,
+    "max_in": null,
+    "max_ex": null
+  },
+  "TypeofBlowerDoorTest": {
+    "enums": [
+      "pressurization",
+      "depressurization"
+    ],
+    "min_in": null,
+    "min_ex": null,
+    "max_in": null,
+    "max_ex": null
+  },
+  "TypeofInfiltrationMeasurement": {
+    "enums": [
+      "blower door",
+      "tracer gas",
+      "estimate",
+      "checklist"
+    ],
+    "min_in": null,
+    "min_ex": null,
+    "max_in": null,
+    "max_ex": null
+  },
+  "ClimateZoneDOE": {
+    "enums": [
+      "subarctic",
+      "marine",
+      "hot-dry",
+      "mixed-dry",
+      "hot-humid",
+      "mixed-humid",
+      "cold",
+      "very cold"
+    ],
+    "min_in": null,
+    "min_ex": null,
+    "max_in": null,
+    "max_ex": null
+  },
+  "IECCYear": {
+    "enums": [
+      "2012",
+      "2009",
+      "2006",
+      "2003"
+    ],
+    "min_in": null,
+    "min_ex": null,
+    "max_in": null,
+    "max_ex": null
+  },
+  "ClimateZoneIECC": {
+    "enums": [
+      "1A",
+      "1B",
+      "1C",
+      "2A",
+      "2B",
+      "2C",
+      "3A",
+      "3B",
+      "3C",
+      "4A",
+      "4B",
+      "4C",
+      "5A",
+      "5B",
+      "5C",
+      "6A",
+      "6B",
+      "6C",
+      "7",
+      "8"
+    ],
+    "min_in": null,
+    "min_ex": null,
+    "max_in": null,
+    "max_ex": null
+  },
+  "TermiteZone": {
+    "enums": [
+      "none to slight",
+      "slight to moderate",
+      "moderate to heavy",
+      "very heavy"
+    ],
+    "min_in": null,
+    "min_ex": null,
+    "max_in": null,
+    "max_ex": null
+  },
+  "ResidentialFacilityType": {
+    "enums": [
+      "single-family detached",
+      "single-family attached",
+      "manufactured home",
+      "2-4 unit building",
+      "5+ unit building",
+      "multi-family - uncategorized",
+      "multi-family - town homes",
+      "multi-family - condos",
+      "apartment unit",
+      "studio unit",
+      "other",
+      "unknown"
+    ],
+    "min_in": null,
+    "min_ex": null,
+    "max_in": null,
+    "max_ex": null
+  },
+  "EducationLevels": {
+    "enums": [
+      "no high school",
+      "some high school",
+      "high school graduate",
+      "some college",
+      "vocational/technical/associates degree",
+      "bachelor's degree",
+      "some post graduate ",
+      "master's degree",
+      "professional degree",
+      "doctoral degree"
+    ],
+    "min_in": null,
+    "min_ex": null,
+    "max_in": null,
+    "max_ex": null
+  },
+  "FootprintShape": {
+    "enums": [
+      "rectangular",
+      "square",
+      "circular",
+      "L-shaped",
+      "U-shaped",
+      "I-shaped",
+      "V-shaped",
+      "other"
+    ],
+    "min_in": null,
+    "min_ex": null,
+    "max_in": null,
+    "max_ex": null
+  },
+  "OrientationType": {
+    "enums": [
+      "north",
+      "northwest",
+      "west",
+      "southwest",
+      "south",
+      "southeast",
+      "east",
+      "northeast"
+    ],
+    "min_in": null,
+    "min_ex": null,
+    "max_in": null,
+    "max_ex": null
+  },
+  "SiteType": {
+    "enums": [
+      "rural",
+      "suburban",
+      "urban"
+    ],
+    "min_in": null,
+    "min_ex": null,
+    "max_in": null,
+    "max_ex": null
+  },
+  "Surroundings": {
+    "enums": [
+      "stand-alone",
+      "attached on one side",
+      "attached on two sides",
+      "attached on three sides"
+    ],
+    "min_in": null,
+    "min_ex": null,
+    "max_in": null,
+    "max_ex": null
+  },
+  "VerticalSurroundings": {
+    "enums": [
+      "unit above",
+      "unit below",
+      "unit above and below",
+      "no units above or below"
+    ],
+    "min_in": null,
+    "min_ex": null,
+    "max_in": null,
+    "max_ex": null
+  },
+  "ShieldingofHome": {
+    "enums": [
+      "well-shielded",
+      "normal",
+      "exposed"
+    ],
+    "min_in": null,
+    "min_ex": null,
+    "max_in": null,
+    "max_ex": null
+  },
+  "GarageLocation": {
+    "enums": [
+      "basement",
+      "first floor",
+      "detached"
+    ],
+    "min_in": null,
+    "min_ex": null,
+    "max_in": null,
+    "max_ex": null
+  },
+  "SpaceAboveGarage": {
+    "enums": [
+      "conditioned area",
+      "unconditioned attic",
+      "crawlspace"
+    ],
+    "min_in": null,
+    "min_ex": null,
+    "max_in": null,
+    "max_ex": null
+  },
+  "HouseholdType": {
+    "enums": [
+      "family household",
+      "married couple, no children",
+      "male household, no spouse",
+      "female household, no spouse",
+      "nonfamily household",
+      "single male",
+      "single female",
+      "other"
+    ],
+    "min_in": null,
+    "min_ex": null,
+    "max_in": null,
+    "max_ex": null
+  },
+  "ResidentPopulationType": {
+    "enums": [
+      "no specific resident population",
+      "student",
+      "military",
+      "senior",
+      "special accessibility needs",
+      "young children",
+      "at risk",
+      "other"
+    ],
+    "min_in": null,
+    "min_ex": null,
+    "max_in": null,
+    "max_ex": null
+  },
+  "Occupancy": {
+    "enums": [
+      "owner-occupied",
+      "renter-occupied",
+      "owner-and-renter-occupied",
+      "other"
+    ],
+    "min_in": null,
+    "min_ex": null,
+    "max_in": null,
+    "max_ex": null
+  },
+  "OccupantIncomeRangeUnits": {
+    "enums": [
+      "% area median income",
+      "% federal poverty level"
+    ],
+    "min_in": null,
+    "min_ex": null,
+    "max_in": null,
+    "max_ex": null
+  },
+  "ConsumptionType": {
+    "enums": [
+      "electricity",
+      "renewable electricity",
+      "natural gas",
+      "renewable natural gas",
+      "fuel oil",
+      "fuel oil 1",
+      "fuel oil 2",
+      "fuel oil 4",
+      "fuel oil 5/6",
+      "district steam",
+      "district hot water",
+      "district chilled water",
+      "solar hot water",
+      "propane",
+      "kerosene",
+      "diesel",
+      "anthracite coal",
+      "bituminous coal",
+      "coke",
+      "wood",
+      "wood pellets",
+      "combination",
+      "water",
+      "other"
+    ],
+    "min_in": null,
+    "min_ex": null,
+    "max_in": null,
+    "max_ex": null
+  },
+  "MeteringConfiguration": {
+    "enums": [
+      "direct metering",
+      "master meter without sub-metering",
+      "master meter with sub-metering"
+    ],
+    "min_in": null,
+    "min_ex": null,
+    "max_in": null,
+    "max_ex": null
+  },
+  "EmissionType": {
+    "enums": [
+      "CO2",
+      "methane",
+      "N2O",
+      "CO2 equivalent"
+    ],
+    "min_in": null,
+    "min_ex": null,
+    "max_in": null,
+    "max_ex": null
+  },
+  "EmissionUnits": {
+    "enums": [
+      "kg",
+      "ton",
+      "metric ton",
+      "pound"
+    ],
+    "min_in": null,
+    "min_ex": null,
+    "max_in": null,
+    "max_ex": null
+  },
+  "FuelInterruptibility": {
+    "enums": [
+      "interruptible",
+      "firm",
+      "na"
+    ],
+    "min_in": null,
+    "min_ex": null,
+    "max_in": null,
+    "max_ex": null
+  },
+  "SharedEnergySystem": {
+    "enums": [
+      "yes",
+      "no",
+      "common meter"
+    ],
+    "min_in": null,
+    "min_ex": null,
+    "max_in": null,
+    "max_ex": null
+  },
+  "IntervalType": {
+    "enums": [
+      "15-minute",
+      "hourly",
+      "daily",
+      "monthly",
+      "annual"
+    ],
+    "min_in": null,
+    "min_ex": null,
+    "max_in": null,
+    "max_ex": null
+  },
+  "PeakSeason": {
+    "enums": [
+      "summer",
+      "winter"
+    ],
+    "min_in": null,
+    "min_ex": null,
+    "max_in": null,
+    "max_ex": null
+  },
+  "RadonTestTypes": {
+    "enums": [
+      "activated charcoal absorption",
+      "alpha-track detectors",
+      "unfiltered track detection",
+      "short term electret ion chamber",
+      "long term electret ion chamber",
+      "continuous radon monitoring"
+    ],
+    "min_in": null,
+    "min_ex": null,
+    "max_in": null,
+    "max_ex": null
+  },
+  "RadonTestLocation": {
+    "enums": [
+      "kitchen",
+      "crawlspace",
+      "basement",
+      "bedroom",
+      "living room",
+      "other"
+    ],
+    "min_in": null,
+    "min_ex": null,
+    "max_in": null,
+    "max_ex": null
+  },
+  "FuelType": {
+    "enums": [
+      "electricity",
+      "renewable electricity",
+      "natural gas",
+      "renewable natural gas",
+      "fuel oil",
+      "fuel oil 1",
+      "fuel oil 2",
+      "fuel oil 4",
+      "fuel oil 5/6",
+      "district steam",
+      "district hot water",
+      "district chilled water",
+      "solar hot water",
+      "propane",
+      "kerosene",
+      "diesel",
+      "coal",
+      "anthracite coal",
+      "bituminous coal",
+      "coke",
+      "wood",
+      "wood pellets",
+      "combination",
+      "other"
+    ],
+    "min_in": null,
+    "min_ex": null,
+    "max_in": null,
+    "max_ex": null
+  },
+  "EventType": {
+    "enums": [
+      "audit",
+      "proposed workscope",
+      "approved workscope",
+      "construction-period testing/daily test out",
+      "job completion testing/final inspection",
+      "quality assurance/monitoring",
+      "preconstruction"
+    ],
+    "min_in": null,
+    "min_ex": null,
+    "max_in": null,
+    "max_ex": null
+  },
+  "AtticComponentsAirSealed": {
+    "enums": [
+      "attic floor",
+      "top plates",
+      "kneewall transitions",
+      "plumbing wet walls",
+      "chimney/flue chases",
+      "recessed lights",
+      "attic access",
+      "dropped soffit",
+      "attic level transitions",
+      "mechanical chases",
+      "other"
+    ],
+    "min_in": null,
+    "min_ex": null,
+    "max_in": null,
+    "max_ex": null
+  },
+  "BasementCrawlspaceComponentsAirSealed": {
+    "enums": [
+      "plumbing penetrations",
+      "access",
+      "wiring penetrations",
+      "chimney/flue chase",
+      "mechanical chases",
+      "rim joists",
+      "windows and door",
+      "foundation service penetrations",
+      "cantilevers",
+      "other"
+    ],
+    "min_in": null,
+    "min_ex": null,
+    "max_in": null,
+    "max_ex": null
+  },
+  "LivingSpaceComponentsAirSealed": {
+    "enums": [
+      "home-garage connection",
+      "rim joists",
+      "baseboards",
+      "windows and door",
+      "plumbing penetrations",
+      "hvac registers",
+      "interior sheating voids",
+      "cantilevers",
+      "other"
+    ],
+    "min_in": null,
+    "min_ex": null,
+    "max_in": null,
+    "max_ex": null
+  },
+  "FoundationWallType": {
+    "enums": [
+      "solid concrete",
+      "concrete block",
+      "concrete block foam core",
+      "concrete block vermiculite core",
+      "double brick",
+      "wood"
+    ],
+    "min_in": null,
+    "min_ex": null,
+    "max_in": null,
+    "max_ex": null
+  },
+  "AdjacentTo": {
+    "enums": [
+      "attic",
+      "attic - conditioned",
+      "attic - unconditioned",
+      "attic - unvented",
+      "attic - vented",
+      "basement",
+      "basement - conditioned",
+      "basement - unconditioned",
+      "crawlspace",
+      "crawlspace - conditioned",
+      "crawlspace - unconditioned",
+      "crawlspace - unvented",
+      "crawlspace - vented",
+      "garage",
+      "garage - conditioned",
+      "garage - unconditioned",
+      "ground",
+      "living space",
+      "other",
+      "other heated space",
+      "other housing unit",
+      "other housing unit above",
+      "other housing unit below",
+      "other multifamily buffer space",
+      "other non-freezing space",
+      "outside",
+      "unconditioned space"
+    ],
+    "min_in": null,
+    "min_ex": null,
+    "max_in": null,
+    "max_ex": null
+  },
+  "StudSize": {
+    "enums": [
+      "2x2",
+      "2x3",
+      "2x4",
+      "2x6",
+      "2x8",
+      "2x10",
+      "2x12",
+      "2x14",
+      "2x16",
+      "other"
+    ],
+    "min_in": null,
+    "min_ex": null,
+    "max_in": null,
+    "max_ex": null
+  },
+  "StudMaterial": {
+    "enums": [
+      "wood",
+      "metal"
+    ],
+    "min_in": null,
+    "min_ex": null,
+    "max_in": null,
+    "max_ex": null
+  },
+  "DoorMaterial": {
+    "enums": [
+      "solid wood",
+      "hollow wood",
+      "uninsulated metal",
+      "insulated metal",
+      "glass",
+      "other"
+    ],
+    "min_in": null,
+    "min_ex": null,
+    "max_in": null,
+    "max_ex": null
+  },
+  "DoorType": {
+    "enums": [
+      "interior",
+      "exterior",
+      "storm"
+    ],
+    "min_in": null,
+    "min_ex": null,
+    "max_in": null,
+    "max_ex": null
+  },
+  "DoorThirdPartyCertifications": {
+    "enums": [
+      "Energy Star",
+      "other"
+    ],
+    "min_in": null,
+    "min_ex": null,
+    "max_in": null,
+    "max_ex": null
+  },
+  "InstallationType": {
+    "enums": [
+      "cavity",
+      "continuous",
+      "continuous - interior",
+      "continuous - exterior"
+    ],
+    "min_in": null,
+    "min_ex": null,
+    "max_in": null,
+    "max_ex": null
+  },
+  "InsulationBattType": {
+    "enums": [
+      "fiberglass",
+      "rockwool",
+      "recycled cotton",
+      "unknown"
+    ],
+    "min_in": null,
+    "min_ex": null,
+    "max_in": null,
+    "max_ex": null
+  },
+  "InsulationLooseFillType": {
+    "enums": [
+      "cellulose",
+      "fiberglass",
+      "rockwool",
+      "vermiculite",
+      "unknown"
+    ],
+    "min_in": null,
+    "min_ex": null,
+    "max_in": null,
+    "max_ex": null
+  },
+  "InsulationRigidType": {
+    "enums": [
+      "polyisocyanurate",
+      "xps",
+      "eps",
+      "unknown"
+    ],
+    "min_in": null,
+    "min_ex": null,
+    "max_in": null,
+    "max_ex": null
+  },
+  "InsulationSprayFoamType": {
+    "enums": [
+      "open cell",
+      "closed cell",
+      "unknown"
+    ],
+    "min_in": null,
+    "min_ex": null,
+    "max_in": null,
+    "max_ex": null
+  },
+  "InsulationCondition": {
+    "enums": [
+      "good",
+      "fair",
+      "poor"
+    ],
+    "min_in": null,
+    "min_ex": null,
+    "max_in": null,
+    "max_ex": null
+  },
+  "InsulationLocation": {
+    "enums": [
+      "interior",
+      "exterior"
+    ],
+    "min_in": null,
+    "min_ex": null,
+    "max_in": null,
+    "max_ex": null
+  },
+  "LightingLocation": {
+    "enums": [
+      "interior",
+      "exterior",
+      "garage",
+      "common area"
+    ],
+    "min_in": null,
+    "min_ex": null,
+    "max_in": null,
+    "max_ex": null
+  },
+  "FluorescentTubeType": {
+    "enums": [
+      "T2",
+      "T4",
+      "T5",
+      "T8",
+      "super T8",
+      "T9",
+      "T10",
+      "T12",
+      "T17"
+    ],
+    "min_in": null,
+    "min_ex": null,
+    "max_in": null,
+    "max_ex": null
+  },
+  "FluorescentBallastType": {
+    "enums": [
+      "electronic",
+      "magnetic",
+      "instant start",
+      "rapid start",
+      "programmed start"
+    ],
+    "min_in": null,
+    "min_ex": null,
+    "max_in": null,
+    "max_ex": null
+  },
+  "LightingThirdPartyCertification": {
+    "enums": [
+      "Energy Star",
+      "Energy Star Most Efficient",
+      "CEE Tier 1",
+      "CEE Tier 2",
+      "CEE Tier 3",
+      "ERI Tier I",
+      "ERI Tier II",
+      "other",
+      "unknown"
+    ],
+    "min_in": null,
+    "min_ex": null,
+    "max_in": null,
+    "max_ex": null
+  },
+  "LightingDailyHours": {
+    "enums": [
+      "1 to 4 hours per day",
+      "4 to 12 hours per day",
+      "more than 12 hours per day",
+      "all day"
+    ],
+    "min_in": null,
+    "min_ex": null,
+    "max_in": null,
+    "max_ex": null
+  },
+  "LightingControls": {
+    "enums": [
+      "daylight dimming",
+      "occupancy sensors",
+      "vacancy sensors",
+      "manual dimming",
+      "bi-level control",
+      "timers",
+      "manual",
+      "advanced controls",
+      "part of emcs"
+    ],
+    "min_in": null,
+    "min_ex": null,
+    "max_in": null,
+    "max_ex": null
+  },
+  "ExteriorLocationsWaterIntrusionorDamage": {
+    "enums": [
+      "roof",
+      "interior ceiling",
+      "foundation",
+      "basement",
+      "crawlspace",
+      "walls",
+      "around windows",
+      "other"
+    ],
+    "min_in": null,
+    "min_ex": null,
+    "max_in": null,
+    "max_ex": null
+  },
+  "InteriorLocationsofWaterLeaksorDamage": {
+    "enums": [
+      "kitchen ",
+      "bathroom",
+      "basement",
+      "other"
+    ],
+    "min_in": null,
+    "min_ex": null,
+    "max_in": null,
+    "max_ex": null
+  },
+  "PlugLoadControlType": {
+    "enums": [
+      "advanced power strip for AV",
+      "advanced power strip for IT",
+      "whole-house energy management system",
+      "smart plug",
+      "other"
+    ],
+    "min_in": null,
+    "min_ex": null,
+    "max_in": null,
+    "max_ex": null
+  },
+  "RadiantBarrierLocation": {
+    "enums": [
+      "top side of truss under sheathing",
+      "below bottom chord of truss",
+      "attic floor",
+      "underside of rafters",
+      "other"
+    ],
+    "min_in": null,
+    "min_ex": null,
+    "max_in": null,
+    "max_ex": null
+  },
+  "HVACThirdPartyCertification": {
+    "enums": [
+      "Energy Star",
+      "Energy Star Most Efficient",
+      "CEE Tier 1",
+      "CEE Tier 2",
+      "CEE Tier 3",
+      "NEEP Cold-Climate Air-Source Heat Pump Specification",
+      "other"
+    ],
+    "min_in": null,
+    "min_ex": null,
+    "max_in": null,
+    "max_ex": null
+  },
+  "DHWThirdPartyCertification": {
+    "enums": [
+      "Energy Star",
+      "CEE Tier 1",
+      "CEE Tier 2",
+      "CEE Tier 3",
+      "other"
+    ],
+    "min_in": null,
+    "min_ex": null,
+    "max_in": null,
+    "max_ex": null
+  },
+  "GlassLayers": {
+    "enums": [
+      "single-pane",
+      "double-pane",
+      "triple-pane",
+      "multi-layered",
+      "other"
+    ],
+    "min_in": null,
+    "min_ex": null,
+    "max_in": null,
+    "max_ex": null
+  },
+  "WindowThirdPartyCertification": {
+    "enums": [
+      "Energy Star",
+      "other"
+    ],
+    "min_in": null,
+    "min_ex": null,
+    "max_in": null,
+    "max_ex": null
+  },
+  "InteriorShading": {
+    "enums": [
+      "light blinds",
+      "dark blinds",
+      "light shades",
+      "dark shades",
+      "light curtains",
+      "dark curtains",
+      "none"
+    ],
+    "min_in": null,
+    "min_ex": null,
+    "max_in": null,
+    "max_ex": null
+  },
+  "ExteriorShading": {
+    "enums": [
+      "external overhangs",
+      "awnings",
+      "solar screens",
+      "solar film",
+      "deciduous tree",
+      "evergreen tree",
+      "building",
+      "other",
+      "none"
+    ],
+    "min_in": null,
+    "min_ex": null,
+    "max_in": null,
+    "max_ex": null
+  },
+  "FlueCondition": {
+    "enums": [
+      "pass",
+      "fail"
+    ],
+    "min_in": null,
+    "min_ex": null,
+    "max_in": null,
+    "max_ex": null
+  },
+  "OpenClosed": {
+    "enums": [
+      "open",
+      "closed"
+    ],
+    "min_in": null,
+    "min_ex": null,
+    "max_in": null,
+    "max_ex": null
+  },
+  "DepressurizationFindingPoorCase": {
+    "enums": [
+      "pass",
+      "fail"
+    ],
+    "min_in": null,
+    "min_ex": null,
+    "max_in": null,
+    "max_ex": null
+  },
+  "CoolingSystemType": {
+    "enums": [
+      "central air conditioner",
+      "mini-split",
+      "room air conditioner",
+      "evaporative cooler",
+      "other"
+    ],
+    "min_in": null,
+    "min_ex": null,
+    "max_in": null,
+    "max_ex": null
+  },
+  "CoolingEfficiencyUnits": {
+    "enums": [
+      "SEER",
+      "EER",
+      "COP",
+      "kW/ton"
+    ],
+    "min_in": null,
+    "min_ex": null,
+    "max_in": null,
+    "max_ex": null
+  },
+  "HeatingEfficiencyUnits": {
+    "enums": [
+      "HSPF",
+      "COP",
+      "AFUE",
+      "Percent"
+    ],
+    "min_in": null,
+    "min_ex": null,
+    "max_in": null,
+    "max_ex": null
+  },
+  "DistrictSteamType": {
+    "enums": [
+      "1-pipe",
+      "2-pipe",
+      "other"
+    ],
+    "min_in": null,
+    "min_ex": null,
+    "max_in": null,
+    "max_ex": null
+  },
+  "GeothermalLoop": {
+    "enums": [
+      "open",
+      "closed",
+      "direct expansion"
+    ],
+    "min_in": null,
+    "min_ex": null,
+    "max_in": null,
+    "max_ex": null
+  },
+  "HeatPumpType": {
+    "enums": [
+      "water-to-air",
+      "water-to-water",
+      "air-to-air",
+      "air-to-water",
+      "mini-split",
+      "ground-to-air",
+      "ground-to-water"
+    ],
+    "min_in": null,
+    "min_ex": null,
+    "max_in": null,
+    "max_ex": null
+  },
+  "VentSystem": {
+    "enums": [
+      "atmospheric",
+      "induced draft",
+      "power vented (at unit)",
+      "power vented (at exterior)",
+      "direct vented",
+      "sealed combustion"
+    ],
+    "min_in": null,
+    "min_ex": null,
+    "max_in": null,
+    "max_ex": null
+  },
+  "DuctType": {
+    "enums": [
+      "supply",
+      "return"
+    ],
+    "min_in": null,
+    "min_ex": null,
+    "max_in": null,
+    "max_ex": null
+  },
+  "DuctMaterial": {
+    "enums": [
+      "duct board",
+      "sheet metal",
+      "galvanized",
+      "flexible",
+      "fiberboard",
+      "other"
+    ],
+    "min_in": null,
+    "min_ex": null,
+    "max_in": null,
+    "max_ex": null
+  },
+  "DuctLocation": {
+    "enums": [
+      "attic",
+      "attic - conditioned",
+      "attic - unconditioned",
+      "attic - unvented",
+      "attic - vented",
+      "basement",
+      "basement - conditioned",
+      "basement - unconditioned",
+      "crawlspace",
+      "crawlspace - conditioned",
+      "crawlspace - unconditioned",
+      "crawlspace - unvented",
+      "crawlspace - vented",
+      "exterior wall",
+      "garage",
+      "garage - conditioned",
+      "garage - unconditioned",
+      "interstitial space",
+      "living space",
+      "other heated space",
+      "other housing unit",
+      "other multifamily buffer space",
+      "other non-freezing space",
+      "outside",
+      "roof deck",
+      "unconditioned space",
+      "under slab"
+    ],
+    "min_in": null,
+    "min_ex": null,
+    "max_in": null,
+    "max_ex": null
+  },
+  "DuctLeakageTestMethod": {
+    "enums": [
+      "duct leakage tester",
+      "blower door subtract",
+      "pressure pan",
+      "visual inspection"
+    ],
+    "min_in": null,
+    "min_ex": null,
+    "max_in": null,
+    "max_ex": null
+  },
+  "DuctLeakageTestUnitofMeasure": {
+    "enums": [
+      "CFM50",
+      "CFM25",
+      "CFM per Std 152",
+      "Percent"
+    ],
+    "min_in": null,
+    "min_ex": null,
+    "max_in": null,
+    "max_ex": null
+  },
+  "LeakinessObservedVisualInspection": {
+    "enums": [
+      "connections sealed w mastic",
+      "no observable leaks",
+      "some observable leaks",
+      "significant leaks",
+      "catastrophic leaks"
+    ],
+    "min_in": null,
+    "min_ex": null,
+    "max_in": null,
+    "max_ex": null
+  },
+  "AirHandlerStaticPressureMeasurementLocation": {
+    "enums": [
+      "in ducts",
+      "at equipment"
+    ],
+    "min_in": null,
+    "min_ex": null,
+    "max_in": null,
+    "max_ex": null
+  },
+  "StaticPressureSource": {
+    "enums": [
+      "as measured",
+      "per design report",
+      "per OEM documentation"
+    ],
+    "min_in": null,
+    "min_ex": null,
+    "max_in": null,
+    "max_ex": null
+  },
+  "HVACMaintenanceSchedule": {
+    "enums": [
+      "none",
+      "yes - unspecified",
+      "as needed",
+      "daily",
+      "weekly",
+      "bi-weekly",
+      "monthly",
+      "semi-quarterly",
+      "quarterly",
+      "semi-annually",
+      "annually"
+    ],
+    "min_in": null,
+    "min_ex": null,
+    "max_in": null,
+    "max_ex": null
+  },
+  "UnitLocation": {
+    "enums": [
+      "attic",
+      "attic - conditioned",
+      "attic - unconditioned",
+      "attic - unvented",
+      "attic - vented",
+      "basement",
+      "basement - conditioned",
+      "basement - unconditioned",
+      "crawlspace",
+      "crawlspace - conditioned",
+      "crawlspace - unconditioned",
+      "crawlspace - unvented",
+      "crawlspace - vented",
+      "garage",
+      "garage - conditioned",
+      "garage - unconditioned",
+      "living space",
+      "mechanical closet",
+      "other exterior",
+      "other heated space",
+      "other housing unit",
+      "other interior",
+      "other multifamily buffer space",
+      "other non-freezing space",
+      "roof deck",
+      "unconditioned space"
+    ],
+    "min_in": null,
+    "min_ex": null,
+    "max_in": null,
+    "max_ex": null
+  },
+  "ThermostatType": {
+    "enums": [
+      "programmable thermostat",
+      "manual thermostat",
+      "digital thermostat",
+      "timer",
+      "EMCS",
+      "other"
+    ],
+    "min_in": null,
+    "min_ex": null,
+    "max_in": null,
+    "max_ex": null
+  },
+  "HotWaterResetControl": {
+    "enums": [
+      "seasonal",
+      "other"
+    ],
+    "min_in": null,
+    "min_ex": null,
+    "max_in": null,
+    "max_ex": null
+  },
+  "ApplianceThirdPartyCertifications": {
+    "enums": [
+      "Energy Star",
+      "Energy Star Most Efficient",
+      "CEE Tier 1",
+      "CEE Tier 2",
+      "CEE Tier 3"
+    ],
+    "min_in": null,
+    "min_ex": null,
+    "max_in": null,
+    "max_ex": null
+  },
+  "DishwasherType": {
+    "enums": [
+      "uncategorized",
+      "built-in under counter",
+      "portable",
+      "counter-top",
+      "single tank",
+      "conveyor"
+    ],
+    "min_in": null,
+    "min_ex": null,
+    "max_in": null,
+    "max_ex": null
+  },
+  "BusinessSpecialization": {
+    "enums": [
+      "energy audit",
+      "hvac",
+      "insulation",
+      "carpentry",
+      "plumbing",
+      "electrical",
+      "painting",
+      "other"
+    ],
+    "min_in": null,
+    "min_ex": null,
+    "max_in": null,
+    "max_ex": null
+  },
+  "BusinessType": {
+    "enums": [
+      "contractor",
+      "auditor",
+      "subcontractor",
+      "property manager"
+    ],
+    "min_in": null,
+    "min_ex": null,
+    "max_in": null,
+    "max_ex": null
+  },
+  "AuditorQualification": {
+    "enums": [
+      "PE",
+      "CEM",
+      "BPI-BA",
+      "RESNET-Home Partner",
+      "RA",
+      "other"
+    ],
+    "min_in": null,
+    "min_ex": null,
+    "max_in": null,
+    "max_ex": null
+  },
+  "ImplementerQualification": {
+    "enums": [
+      "PE",
+      "CEM",
+      "BPI-BA",
+      "BPI-MFBA",
+      "RESNET-Home Partner",
+      "RA",
+      "Refrigerating System Operating Engineer",
+      "High Pressure Boiler Operating Engineer",
+      "HEP - EA",
+      "HEP - QCI",
+      "other"
+    ],
+    "min_in": null,
+    "min_ex": null,
+    "max_in": null,
+    "max_ex": null
+  },
+  "energyUnitType": {
+    "enums": [
+      "cmh",
+      "ccf",
+      "kcf",
+      "Mcf",
+      "cfh",
+      "kWh",
+      "MWh",
+      "Btu",
+      "kBtu",
+      "MBtu",
+      "therms",
+      "lbs",
+      "kLbs",
+      "MLbs",
+      "tonnes",
+      "cords",
+      "gal",
+      "kgal",
+      "ton hours"
+    ],
+    "min_in": null,
+    "min_ex": null,
+    "max_in": null,
+    "max_ex": null
+  },
+  "waterUnitType": {
+    "enums": [
+      "gal",
+      "kgal",
+      "Mgal",
+      "cf",
+      "ccf",
+      "kcf",
+      "Mcf"
+    ],
+    "min_in": null,
+    "min_ex": null,
+    "max_in": null,
+    "max_ex": null
+  },
+  "MeterReadingType": {
+    "enums": [
+      "point",
+      "median",
+      "average",
+      "total",
+      "estimate",
+      "other"
+    ],
+    "min_in": null,
+    "min_ex": null,
+    "max_in": null,
+    "max_ex": null
+  },
+  "WaterType": {
+    "enums": [
+      "indoor and outdoor water",
+      "indoor water",
+      "outdoor water",
+      "wastewater/sewer"
+    ],
+    "min_in": null,
+    "min_ex": null,
+    "max_in": null,
+    "max_ex": null
+  },
+  "WaterUseIntensityUnits": {
+    "enums": [
+      "gal/sq.ft.",
+      "gal/day/person"
+    ],
+    "min_in": null,
+    "min_ex": null,
+    "max_in": null,
+    "max_ex": null
+  },
+  "endUseType": {
+    "enums": [
+      "Heating",
+      "Cooling",
+      "HotWater",
+      "Appliance",
+      "Lighting",
+      "PV",
+      "SolarThermal",
+      "Other"
+    ],
+    "min_in": null,
+    "min_ex": null,
+    "max_in": null,
+    "max_ex": null
+  },
+  "MeasuredOrEstimated": {
+    "enums": [
+      "estimated",
+      "measured"
+    ],
+    "min_in": null,
+    "min_ex": null,
+    "max_in": null,
+    "max_ex": null
+  },
+  "GrossOrNet": {
+    "enums": [
+      "gross",
+      "net"
+    ],
+    "min_in": null,
+    "min_ex": null,
+    "max_in": null,
+    "max_ex": null
+  },
+  "TransactionType": {
+    "enums": [
+      "create",
+      "update"
+    ],
+    "min_in": null,
+    "min_ex": null,
+    "max_in": null,
+    "max_ex": null
+  },
+  "HVACInstallationStandard": {
+    "enums": [
+      "ACCA 5 QI HVAC",
+      "other"
+    ],
+    "min_in": null,
+    "min_ex": null,
+    "max_in": null,
+    "max_ex": null
+  },
+  "HVACSizingCalcs": {
+    "enums": [
+      "manual j",
+      "manual j and manual d",
+      "other"
+    ],
+    "min_in": null,
+    "min_ex": null,
+    "max_in": null,
+    "max_ex": null
+  },
+  "HydronicDistributionType": {
+    "enums": [
+      "radiator",
+      "baseboard",
+      "radiant floor",
+      "radiant ceiling",
+      "other"
+    ],
+    "min_in": null,
+    "min_ex": null,
+    "max_in": null,
+    "max_ex": null
+  },
+  "AirDistributionType": {
+    "enums": [
+      "regular velocity",
+      "high velocity",
+      "gravity"
+    ],
+    "min_in": null,
+    "min_ex": null,
+    "max_in": null,
+    "max_ex": null
+  },
+  "ElectricDistributionType": {
+    "enums": [
+      "baseboard",
+      "radiant floor",
+      "radiant ceiling"
+    ],
+    "min_in": null,
+    "min_ex": null,
+    "max_in": null,
+    "max_ex": null
+  },
+  "AirHandlerMotorType": {
+    "enums": [
+      "PSC single-speed",
+      "PSC multi-speed",
+      "ECM"
+    ],
+    "min_in": null,
+    "min_ex": null,
+    "max_in": null,
+    "max_ex": null
+  },
+  "PlugLoadType": {
+    "enums": [
+      "TV plasma",
+      "TV CRT",
+      "TV other",
+      "computer",
+      "space heater",
+      "water bed",
+      "aquarium",
+      "electric vehicle charging",
+      "well pump",
+      "sauna",
+      "other"
+    ],
+    "min_in": null,
+    "min_ex": null,
+    "max_in": null,
+    "max_ex": null
+  },
+  "PlugLoadLocation": {
+    "enums": [
+      "interior",
+      "exterior"
+    ],
+    "min_in": null,
+    "min_ex": null,
+    "max_in": null,
+    "max_ex": null
+  },
+  "PlugLoadUnits": {
+    "enums": [
+      "kWh/year",
+      "W"
+    ],
+    "min_in": null,
+    "min_ex": null,
+    "max_in": null,
+    "max_ex": null
+  },
+  "WindowCondition": {
+    "enums": [
+      "good",
+      "moderate",
+      "poor"
+    ],
+    "min_in": null,
+    "min_ex": null,
+    "max_in": null,
+    "max_ex": null
+  },
+  "GasFill": {
+    "enums": [
+      "air",
+      "argon",
+      "other"
+    ],
+    "min_in": null,
+    "min_ex": null,
+    "max_in": null,
+    "max_ex": null
+  },
+  "GlassType": {
+    "enums": [
+      "low-e",
+      "tinted",
+      "reflective",
+      "tinted/reflective",
+      "other"
+    ],
+    "min_in": null,
+    "min_ex": null,
+    "max_in": null,
+    "max_ex": null
+  },
+  "ClothesWasherType": {
+    "enums": [
+      "top loader",
+      "front loader",
+      "all-in-one combination washer/dryer",
+      "unitized/stacked washer-dryer pair"
+    ],
+    "min_in": null,
+    "min_ex": null,
+    "max_in": null,
+    "max_ex": null
+  },
+  "ClothesDryerType": {
+    "enums": [
+      "dryer",
+      "all-in-one combination washer/dryer",
+      "unitized/stacked washer-dryer pair"
+    ],
+    "min_in": null,
+    "min_ex": null,
+    "max_in": null,
+    "max_ex": null
+  },
+  "LaundryMachineLocation": {
+    "enums": [
+      "basement",
+      "basement - conditioned",
+      "basement - unconditioned",
+      "garage",
+      "garage - conditioned",
+      "garage - unconditioned",
+      "laundry room",
+      "living space",
+      "other",
+      "unconditioned space"
+    ],
+    "min_in": null,
+    "min_ex": null,
+    "max_in": null,
+    "max_ex": null
+  },
+  "FreezerStyle": {
+    "enums": [
+      "uncategorized",
+      "manual defrost",
+      "frost free",
+      "walk-in",
+      "case"
+    ],
+    "min_in": null,
+    "min_ex": null,
+    "max_in": null,
+    "max_ex": null
+  },
+  "RefrigeratorStyle": {
+    "enums": [
+      "side-by-side",
+      "top freezer",
+      "bottom freezer",
+      "single door",
+      "single door with freezer",
+      "full-size one door",
+      "full-size two doors",
+      "half or quarter size",
+      "walk-in",
+      "open case",
+      "closed case",
+      "uncategorized"
+    ],
+    "min_in": null,
+    "min_ex": null,
+    "max_in": null,
+    "max_ex": null
+  },
+  "RefrigeratorLocation": {
+    "enums": [
+      "basement",
+      "basement - conditioned",
+      "basement - unconditioned",
+      "garage",
+      "garage - conditioned",
+      "garage - unconditioned",
+      "kitchen",
+      "living space",
+      "other",
+      "unconditioned space"
+    ],
+    "min_in": null,
+    "min_ex": null,
+    "max_in": null,
+    "max_ex": null
+  },
+  "DehumidifierLocation": {
+    "enums": [
+      "living space",
+      "basement",
+      "other"
+    ],
+    "min_in": null,
+    "min_ex": null,
+    "max_in": null,
+    "max_ex": null
+  },
+  "WaterHeaterType": {
+    "enums": [
+      "storage water heater",
+      "dedicated boiler with storage tank",
+      "instantaneous water heater",
+      "heat pump water heater",
+      "space-heating boiler with storage tank",
+      "space-heating boiler with tankless coil"
+    ],
+    "min_in": null,
+    "min_ex": null,
+    "max_in": null,
+    "max_ex": null
+  },
+  "SolarThermalSystemType": {
+    "enums": [
+      "hot water",
+      "hot water and space heating",
+      "space heating",
+      "hybrid system"
+    ],
+    "min_in": null,
+    "min_ex": null,
+    "max_in": null,
+    "max_ex": null
+  },
+  "SolarThermalCollectorLoopType": {
+    "enums": [
+      "air direct",
+      "air indirect",
+      "liquid direct",
+      "liquid indirect",
+      "passive thermosyphon"
+    ],
+    "min_in": null,
+    "min_ex": null,
+    "max_in": null,
+    "max_ex": null
+  },
+  "SolarThermalCollectorType": {
+    "enums": [
+      "single glazing black",
+      "single glazing selective",
+      "double glazing black",
+      "double glazing selective",
+      "evacuated tube",
+      "integrated collector storage"
+    ],
+    "min_in": null,
+    "min_ex": null,
+    "max_in": null,
+    "max_ex": null
+  },
+  "ImprovementStatusType": {
+    "enums": [
+      "Installed",
+      "NotInstalled",
+      "Recommended"
+    ],
+    "min_in": null,
+    "min_ex": null,
+    "max_in": null,
+    "max_ex": null
+  },
+  "TestResultType": {
+    "enums": [
+      "passed",
+      "failed",
+      "not tested"
+    ],
+    "min_in": null,
+    "min_ex": null,
+    "max_in": null,
+    "max_ex": null
+  },
+  "FoundationThermalBoundary": {
+    "enums": [
+      "frame floor",
+      "foundation wall"
+    ],
+    "min_in": null,
+    "min_ex": null,
+    "max_in": null,
+    "max_ex": null
+  },
+  "WallAndRoofColor": {
+    "enums": [
+      "light",
+      "medium",
+      "medium dark",
+      "dark",
+      "reflective"
+    ],
+    "min_in": null,
+    "min_ex": null,
+    "max_in": null,
+    "max_ex": null
+  },
+  "RoofType": {
+    "enums": [
+      "shingles",
+      "slate or tile shingles",
+      "wood shingles or shakes",
+      "asphalt or fiberglass shingles",
+      "metal surfacing",
+      "expanded polystyrene sheathing",
+      "plastic/rubber/synthetic sheeting",
+      "concrete",
+      "cool roof",
+      "green roof",
+      "no one major type",
+      "other"
+    ],
+    "min_in": null,
+    "min_ex": null,
+    "max_in": null,
+    "max_ex": null
+  },
+  "DeckType": {
+    "enums": [
+      "concrete",
+      "metal",
+      "wood",
+      "other"
+    ],
+    "min_in": null,
+    "min_ex": null,
+    "max_in": null,
+    "max_ex": null
+  },
+  "Siding": {
+    "enums": [
+      "wood siding",
+      "stucco",
+      "synthetic stucco",
+      "vinyl siding",
+      "aluminum siding",
+      "brick veneer",
+      "asbestos siding",
+      "fiber cement siding",
+      "composite shingle siding",
+      "masonite siding",
+      "other"
+    ],
+    "min_in": null,
+    "min_ex": null,
+    "max_in": null,
+    "max_ex": null
+  },
+  "FloorCovering": {
+    "enums": [
+      "carpet",
+      "tile",
+      "hardwood",
+      "vinyl",
+      "none"
+    ],
+    "min_in": null,
+    "min_ex": null,
+    "max_in": null,
+    "max_ex": null
+  },
+  "PVSystemLocation": {
+    "enums": [
+      "roof",
+      "ground",
+      "other"
+    ],
+    "min_in": null,
+    "min_ex": null,
+    "max_in": null,
+    "max_ex": null
+  },
+  "PVSystemOwnership": {
+    "enums": [
+      "leased",
+      "owned",
+      "power purchase agreement",
+      "utility owned",
+      "other"
+    ],
+    "min_in": null,
+    "min_ex": null,
+    "max_in": null,
+    "max_ex": null
+  },
+  "EVChargingConnector": {
+    "enums": [
+      "SAE J1772",
+      "CHAdeMO",
+      "Tesla",
+      "Combined Charging System"
+    ],
+    "min_in": null,
+    "min_ex": null,
+    "max_in": null,
+    "max_ex": null
+  },
+  "ZoneType": {
+    "enums": [
+      "conditioned",
+      "unconditioned"
+    ],
+    "min_in": null,
+    "min_ex": null,
+    "max_in": null,
+    "max_ex": null
+  },
+  "WholeBldgVentilationRequirementMethod": {
+    "enums": [
+      "ASHRAE 62.2-1989",
+      "ASHRAE 62.2-2007",
+      "ASHRAE 62.2-2010",
+      "ASHRAE 62.2-2013"
+    ],
+    "min_in": null,
+    "min_ex": null,
+    "max_in": null,
+    "max_ex": null
+  },
+  "BooleanWithNA": {
+    "enums": [
+      "true",
+      "false",
+      "na"
+    ],
+    "min_in": null,
+    "min_ex": null,
+    "max_in": null,
+    "max_ex": null
+  },
+  "VentilationRateUnits": {
+    "enums": [
+      "ACH",
+      "CFMnat"
+    ],
+    "min_in": null,
+    "min_ex": null,
+    "max_in": null,
+    "max_ex": null
+  },
+  "VentilationFanThirdPartyCertification": {
+    "enums": [
+      "Energy Star",
+      "Home Ventilation Institute",
+      "other"
+    ],
+    "min_in": null,
+    "min_ex": null,
+    "max_in": null,
+    "max_ex": null
+  },
+  "Recommendation": {
+    "enums": [
+      "require",
+      "recommend",
+      "no recommendation"
+    ],
+    "min_in": null,
+    "min_ex": null,
+    "max_in": null,
+    "max_ex": null
+  },
+  "SpotVentilationLocation": {
+    "enums": [
+      "bath",
+      "garage",
+      "garage - conditioned",
+      "garage - unconditioned",
+      "kitchen",
+      "other"
+    ],
+    "min_in": null,
+    "min_ex": null,
+    "max_in": null,
+    "max_ex": null
+  },
+  "SpotVentilationUnits": {
+    "enums": [
+      "CFM",
+      "ACH",
+      "L/s"
+    ],
+    "min_in": null,
+    "min_ex": null,
+    "max_in": null,
+    "max_ex": null
+  },
+  "VentilationFanType": {
+    "enums": [
+      "exhaust only",
+      "supply only",
+      "heat recovery ventilator",
+      "energy recovery ventilator",
+      "balanced",
+      "central fan integrated supply"
+    ],
+    "min_in": null,
+    "min_ex": null,
+    "max_in": null,
+    "max_ex": null
+  },
+  "VentilationFanLocation": {
+    "enums": [
+      "bath",
+      "garage",
+      "garage - conditioned",
+      "garage - unconditioned",
+      "hallway",
+      "kitchen",
+      "other"
+    ],
+    "min_in": null,
+    "min_ex": null,
+    "max_in": null,
+    "max_ex": null
+  },
+  "eGridRegions": {
+    "enums": [
+      "Alaska",
+      "Eastern",
+      "ERCOT",
+      "Hawaii",
+      "Western"
+    ],
+    "min_in": null,
+    "min_ex": null,
+    "max_in": null,
+    "max_ex": null
+  },
+  "GreenBuildingVerificationType": {
+    "enums": [
+      "BPI-2101-compliant Certificate of Residential Energy Efficiency Features and Performance",
+      "Certified Passive House",
+      "ENERGY STAR Certified Homes",
+      "EnerPHit",
+      "HERS Index Score",
+      "Home Energy Score",
+      "Home Performance with ENERGY STAR",
+      "Indoor airPLUS",
+      "LEED For Homes",
+      "Living Building Challenge",
+      "NGBS New Construction",
+      "NGBS Small Projects Remodel",
+      "NGBS Whole-Home Remodel",
+      "Pearl Home Certification",
+      "PHIUS+",
+      "WaterSense",
+      "Zero Energy Ready Home",
+      "other"
+    ],
+    "min_in": null,
+    "min_ex": null,
+    "max_in": null,
+    "max_ex": null
+  },
+  "GreenBuildingVerificationSource": {
+    "enums": [
+      "Administrator",
+      "Assessor",
+      "Builder",
+      "Contractor or Installer",
+      "Other",
+      "Owner",
+      "Program Sponsor",
+      "Program Verifier",
+      "Public Records",
+      "See Remarks"
+    ],
+    "min_in": null,
+    "min_ex": null,
+    "max_in": null,
+    "max_ex": null
+  },
+  "GreenBuildingVerificationStatus": {
+    "enums": [
+      "complete",
+      "in process"
+    ],
+    "min_in": null,
+    "min_ex": null,
+    "max_in": null,
+    "max_ex": null
+  },
+  "BoilerType": {
+    "enums": [
+      "hot water",
+      "steam"
+    ],
+    "min_in": null,
+    "min_ex": null,
+    "max_in": null,
+    "max_ex": null
+  },
+  "KnownOrEstimated": {
+    "enums": [
+      "known",
+      "estimated"
+    ],
+    "min_in": null,
+    "min_ex": null,
+    "max_in": null,
+    "max_ex": null
+  },
+  "PoolType": {
+    "enums": [
+      "in ground",
+      "on ground",
+      "above ground",
+      "other",
+      "unknown",
+      "none"
+    ],
+    "min_in": null,
+    "min_ex": null,
+    "max_in": null,
+    "max_ex": null
+  },
+  "PoolFilterType": {
+    "enums": [
+      "sand",
+      "diatomaceous earth",
+      "cartridge",
+      "other",
+      "unknown",
+      "none"
+    ],
+    "min_in": null,
+    "min_ex": null,
+    "max_in": null,
+    "max_ex": null
+  },
+  "PoolPumpType": {
+    "enums": [
+      "single speed",
+      "multi speed",
+      "variable speed",
+      "variable flow",
+      "other",
+      "unknown",
+      "none"
+    ],
+    "min_in": null,
+    "min_ex": null,
+    "max_in": null,
+    "max_ex": null
+  },
+  "PoolPump3rdPartyCertification": {
+    "enums": [
+      "ENERGY STAR",
+      "ENERGY STAR Most Efficient",
+      "CEE Tier 1",
+      "CEE Tier 2",
+      "Cee Tier 3",
+      "other",
+      "unknown",
+      "none"
+    ],
+    "min_in": null,
+    "min_ex": null,
+    "max_in": null,
+    "max_ex": null
+  },
+  "PoolPumpSpeedSetting": {
+    "enums": [
+      "low",
+      "high",
+      "most efficient",
+      "other",
+      "unknown",
+      "none"
+    ],
+    "min_in": null,
+    "min_ex": null,
+    "max_in": null,
+    "max_ex": null
+  },
+  "PoolCleanerType": {
+    "enums": [
+      "robotic",
+      "suction side",
+      "pressure side",
+      "booster pump",
+      "other",
+      "unknown",
+      "none"
+    ],
+    "min_in": null,
+    "min_ex": null,
+    "max_in": null,
+    "max_ex": null
+  },
+  "PoolHeaterType": {
+    "enums": [
+      "gas fired",
+      "electric resistance",
+      "heat pump",
+      "solar",
+      "other",
+      "unknown",
+      "none"
+    ],
+    "min_in": null,
+    "min_ex": null,
+    "max_in": null,
+    "max_ex": null
+  },
+  "BPI2400CalibrationQualification": {
+    "enums": [
+      "none",
+      "detailed",
+      "simple"
+    ],
+    "min_in": null,
+    "min_ex": null,
+    "max_in": null,
+    "max_ex": null
+  },
+  "WeatherStationType": {
+    "enums": [
+      "TMY",
+      "TMY2",
+      "TMY3",
+      "other"
+    ],
+    "min_in": null,
+    "min_ex": null,
+    "max_in": null,
+    "max_ex": null
+  },
+  "DuctLeakageTotalOrToOutside": {
+    "enums": [
+      "to outside",
+      "total"
+    ],
+    "min_in": null,
+    "min_ex": null,
+    "max_in": null,
+    "max_ex": null
+  },
+  "WeatherStationUse": {
+    "enums": [
+      "billing analysis",
+      "energy modeling"
+    ],
+    "min_in": null,
+    "min_ex": null,
+    "max_in": null,
+    "max_ex": null
+  },
+  "WaterFixtureType": {
+    "enums": [
+      "faucet",
+      "shower head",
+      "other"
+    ],
+    "min_in": null,
+    "min_ex": null,
+    "max_in": null,
+    "max_ex": null
+  },
+  "WaterFixtureThirdPartyCertification": {
+    "enums": [
+      "Energy Star",
+      "Energy Star Most Efficient",
+      "WaterSense",
+      "CEE Tier 1",
+      "CEE Tier 2",
+      "CEE Tier 3",
+      "other",
+      "unknown"
+    ],
+    "min_in": null,
+    "min_ex": null,
+    "max_in": null,
+    "max_ex": null
+  },
+  "LightingFixtureThirdPartyCertification": {
+    "enums": [
+      "Energy Star",
+      "Energy Star Most Efficient",
+      "CEE Tier 1",
+      "CEE Tier 2",
+      "CEE Tier 3",
+      "ERI Tier I",
+      "ERI Tier II",
+      "other",
+      "unknown"
+    ],
+    "min_in": null,
+    "min_ex": null,
+    "max_in": null,
+    "max_ex": null
+  },
+  "WindThirdPartyCertification": {
+    "enums": [
+      "AWEA 9.1-2009",
+      "other"
+    ],
+    "min_in": null,
+    "min_ex": null,
+    "max_in": null,
+    "max_ex": null
+  },
+  "DrainWaterHeatRecoveryFacilitiesConnected": {
+    "enums": [
+      "one",
+      "all"
+    ],
+    "min_in": null,
+    "min_ex": null,
+    "max_in": null,
+    "max_ex": null
+  },
+  "RecirculationControlType": {
+    "enums": [
+      "no control",
+      "timer",
+      "temperature",
+      "presence sensor demand control",
+      "manual demand control"
+    ],
+    "min_in": null,
+    "min_ex": null,
+    "max_in": null,
+    "max_ex": null
+  },
+  "AtticWallType": {
+    "enums": [
+      "gable",
+      "knee wall",
+      "other"
+    ],
+    "min_in": null,
+    "min_ex": null,
+    "max_in": null,
+    "max_ex": null
+  },
+  "VentilationUnit": {
+    "enums": [
+      "SLA",
+      "ACHnatural",
+      "CFM per sq.ft."
+    ],
+    "min_in": null,
+    "min_ex": null,
+    "max_in": null,
+    "max_ex": null
+  },
+  "BatteryType": {
+    "enums": [
+      "Li-ion",
+      "lead acid",
+      "Ni-Cd",
+      "salt water",
+      "other"
+    ],
+    "min_in": null,
+    "min_ex": null,
+    "max_in": null,
+    "max_ex": null
+  },
+  "BatteryCoolingStrategy": {
+    "enums": [
+      "passive",
+      "active air cooling",
+      "liquid cooling"
+    ],
+    "min_in": null,
+    "min_ex": null,
+    "max_in": null,
+    "max_ex": null
+  },
+  "BatteryLocation": {
+    "enums": [
+      "attic",
+      "attic - conditioned",
+      "attic - unconditioned",
+      "attic - unvented",
+      "attic - vented",
+      "basement",
+      "basement - conditioned",
+      "basement - unconditioned",
+      "crawlspace",
+      "crawlspace - conditioned",
+      "crawlspace - unconditioned",
+      "crawlspace - unvented",
+      "crawlspace - vented",
+      "exterior wall",
+      "garage",
+      "garage - conditioned",
+      "garage - unconditioned",
+      "living space",
+      "outside",
+      "roof deck",
+      "unconditioned space"
+    ],
+    "min_in": null,
+    "min_ex": null,
+    "max_in": null,
+    "max_ex": null
+  },
+  "DiameterDimension": {
+    "enums": [
+      "inner",
+      "outer",
+      "nominal"
+    ],
+    "min_in": null,
+    "min_ex": null,
+    "max_in": null,
+    "max_ex": null
+  },
+  "ConnectedDeviceCommunicationProtocol": {
+    "enums": [
+      "Wi-Fi",
+      "Zigbee",
+      "Z-wave",
+      "Ethernet",
+      "Bluetooth",
+      "LTE",
+      "cellular modem",
+      "other"
+    ],
+    "min_in": null,
+    "min_ex": null,
+    "max_in": null,
+    "max_ex": null
+  },
+  "DHWControllerTechnology": {
+    "enums": [
+      "smart",
+      "timer"
+    ],
+    "min_in": null,
+    "min_ex": null,
+    "max_in": null,
+    "max_ex": null
+  },
+  "DHWTemperatureControl": {
+    "enums": [
+      "fixed",
+      "variable"
+    ],
+    "min_in": null,
+    "min_ex": null,
+    "max_in": null,
+    "max_ex": null
+  },
+  "ClothesDryerControlType": {
+    "enums": [
+      "timer",
+      "moisture",
+      "temperature"
+    ],
+    "min_in": null,
+    "min_ex": null,
+    "max_in": null,
+    "max_ex": null
+  },
+  "PVModuleType": {
+    "enums": [
+      "standard",
+      "premium",
+      "thin film"
+    ],
+    "min_in": null,
+    "min_ex": null,
+    "max_in": null,
+    "max_ex": null
+  },
+  "PVTracking": {
+    "enums": [
+      "fixed",
+      "1-axis",
+      "1-axis backtracked",
+      "2-axis"
+    ],
+    "min_in": null,
+    "min_ex": null,
+    "max_in": null,
+    "max_ex": null
+  },
+  "FanSpeed": {
+    "enums": [
+      "low",
+      "medium",
+      "high"
+    ],
+    "min_in": null,
+    "min_ex": null,
+    "max_in": null,
+    "max_ex": null
+  },
+  "SodiumLight_Pressure": {
+    "enums": [
+      "high",
+      "low"
+    ],
+    "min_in": null,
+    "min_ex": null,
+    "max_in": null,
+    "max_ex": null
+  },
+  "HeatPumpBackupType": {
+    "enums": [
+      "integrated",
+      "separate"
+    ],
+    "min_in": null,
+    "min_ex": null,
+    "max_in": null,
+    "max_ex": null
+  },
+  "ExternalResourceType": {
+    "enums": [
+      "photo",
+      "illustration",
+      "document",
+      "spreadsheet",
+      "website",
+      "other"
+    ],
+    "min_in": null,
+    "min_ex": null,
+    "max_in": null,
+    "max_ex": null
+  },
+  "DehumidifierType": {
+    "enums": [
+      "portable",
+      "whole-home"
+    ],
+    "min_in": null,
+    "min_ex": null,
+    "max_in": null,
+    "max_ex": null
+  },
+  "CompressorType": {
+    "enums": [
+      "single stage",
+      "two stage",
+      "variable speed"
+    ],
+    "min_in": null,
+    "min_ex": null,
+    "max_in": null,
+    "max_ex": null
+  },
+  "RadonZone": {
+    "enums": [
+
+    ],
+    "min_in": "1",
+    "min_ex": null,
+    "max_in": "3",
+    "max_ex": null
+  },
+  "NumberOfFloorsType": {
+    "enums": [
+
+    ],
+    "min_in": "0",
+    "min_ex": null,
+    "max_in": null,
+    "max_ex": null
+  },
+  "IntegerGreaterThanOrEqualToZero": {
+    "enums": [
+
+    ],
+    "min_in": "0",
+    "min_ex": null,
+    "max_in": null,
+    "max_ex": null
+  },
+  "RValue": {
+    "enums": [
+
+    ],
+    "min_in": "0",
+    "min_ex": null,
+    "max_in": null,
+    "max_ex": null
+  },
+  "Efficiency": {
+    "enums": [
+
+    ],
+    "min_in": "0",
+    "min_ex": null,
+    "max_in": null,
+    "max_ex": null
+  },
+  "AFUE": {
+    "enums": [
+
+    ],
+    "min_in": "1",
+    "min_ex": null,
+    "max_in": "100",
+    "max_ex": null
+  },
+  "HSPF": {
+    "enums": [
+
+    ],
+    "min_in": "0",
+    "min_ex": null,
+    "max_in": null,
+    "max_ex": null
+  },
+  "SEER": {
+    "enums": [
+
+    ],
+    "min_in": "0",
+    "min_ex": null,
+    "max_in": null,
+    "max_ex": null
+  },
+  "EER": {
+    "enums": [
+
+    ],
+    "min_in": "0",
+    "min_ex": null,
+    "max_in": null,
+    "max_ex": null
+  },
+  "kWperTon": {
+    "enums": [
+
+    ],
+    "min_in": "0",
+    "min_ex": null,
+    "max_in": null,
+    "max_ex": null
+  },
+  "HomeownerQuestionaireScore": {
+    "enums": [
+
+    ],
+    "min_in": "0",
+    "min_ex": null,
+    "max_in": "10",
+    "max_ex": null
+  },
+  "AzimuthType": {
+    "enums": [
+
+    ],
+    "min_in": "0",
+    "min_ex": null,
+    "max_in": null,
+    "max_ex": "360"
+  },
+  "Fraction": {
+    "enums": [
+
+    ],
+    "min_in": "0",
+    "min_ex": null,
+    "max_in": "1",
+    "max_ex": null
+  },
+  "FractionGreaterThanOne": {
+    "enums": [
+
+    ],
+    "min_in": "0",
+    "min_ex": null,
+    "max_in": null,
+    "max_ex": null
+  },
+  "LengthMeasurement": {
+    "enums": [
+
+    ],
+    "min_in": "0",
+    "min_ex": null,
+    "max_in": null,
+    "max_ex": null
+  },
+  "InsulationGrade": {
+    "enums": [
+
+    ],
+    "min_in": "1",
+    "min_ex": null,
+    "max_in": "3",
+    "max_ex": null
+  },
+  "Pitch": {
+    "enums": [
+
+    ],
+    "min_in": "0",
+    "min_ex": null,
+    "max_in": null,
+    "max_ex": null
+  },
+  "Tilt": {
+    "enums": [
+
+    ],
+    "min_in": "0",
+    "min_ex": null,
+    "max_in": "90",
+    "max_ex": null
+  },
+  "EVChargingLevel": {
+    "enums": [
+
+    ],
+    "min_in": "1",
+    "min_ex": null,
+    "max_in": "3",
+    "max_ex": null
+  },
+  "Current": {
+    "enums": [
+
+    ],
+    "min_in": "0",
+    "min_ex": null,
+    "max_in": null,
+    "max_ex": null
+  },
+  "Voltage": {
+    "enums": [
+
+    ],
+    "min_in": "0",
+    "min_ex": null,
+    "max_in": null,
+    "max_ex": null
+  },
+  "Power": {
+    "enums": [
+
+    ],
+    "min_in": "0",
+    "min_ex": null,
+    "max_in": null,
+    "max_ex": null
+  },
+  "HoursPerDay": {
+    "enums": [
+
+    ],
+    "min_in": "0",
+    "min_ex": null,
+    "max_in": "24",
+    "max_ex": null
+  },
+  "MonthsPerYear": {
+    "enums": [
+
+    ],
+    "min_in": "0",
+    "min_ex": null,
+    "max_in": "12",
+    "max_ex": null
+  },
+  "Speed": {
+    "enums": [
+
+    ],
+    "min_in": "0",
+    "min_ex": null,
+    "max_in": null,
+    "max_ex": null
+  },
+  "FlowRate": {
+    "enums": [
+
+    ],
+    "min_in": "0",
+    "min_ex": null,
+    "max_in": null,
+    "max_ex": null
+  },
+  "PeopleCount": {
+    "enums": [
+
+    ],
+    "min_in": "0",
+    "min_ex": null,
+    "max_in": null,
+    "max_ex": null
+  },
+  "MERV": {
+    "enums": [
+
+    ],
+    "min_in": "1",
+    "min_ex": null,
+    "max_in": "20",
+    "max_ex": null
+  },
+  "SolarAbsorptance": {
+    "enums": [
+
+    ],
+    "min_in": "0",
+    "min_ex": null,
+    "max_in": "1",
+    "max_ex": null
+  },
+  "Emittance": {
+    "enums": [
+
+    ],
+    "min_in": "0",
+    "min_ex": null,
+    "max_in": "1",
+    "max_ex": null
+  },
+  "MinutesPerDay": {
+    "enums": [
+
+    ],
+    "min_in": "0",
+    "min_ex": null,
+    "max_in": "1440",
+    "max_ex": null
+  },
+  "BatteryCapacity": {
+    "enums": [
+
+    ],
+    "min_in": "0",
+    "min_ex": null,
+    "max_in": null,
+    "max_ex": null
+  },
+  "BuildingAirLeakage": {
+    "enums": [
+
+    ],
+    "min_in": null,
+    "min_ex": "0",
+    "max_in": null,
+    "max_ex": null
+  },
+  "HousePressure": {
+    "enums": [
+
+    ],
+    "min_in": null,
+    "min_ex": "0",
+    "max_in": null,
+    "max_ex": null
+  },
+  "IntegerGreaterThanZero": {
+    "enums": [
+
+    ],
+    "min_in": null,
+    "min_ex": "0",
+    "max_in": null,
+    "max_ex": null
+  },
+  "SHGC": {
+    "enums": [
+
+    ],
+    "min_in": null,
+    "min_ex": "0",
+    "max_in": null,
+    "max_ex": "1"
+  },
+  "UFactor": {
+    "enums": [
+
+    ],
+    "min_in": null,
+    "min_ex": "0",
+    "max_in": null,
+    "max_ex": null
+  },
+  "COP": {
+    "enums": [
+
+    ],
+    "min_in": null,
+    "min_ex": "0",
+    "max_in": null,
+    "max_ex": null
+  },
+  "EnergyFactor": {
+    "enums": [
+
+    ],
+    "min_in": null,
+    "min_ex": "0",
+    "max_in": "5",
+    "max_ex": null
+  },
+  "RecoveryEfficiency": {
+    "enums": [
+
+    ],
+    "min_in": null,
+    "min_ex": "0",
+    "max_in": "5",
+    "max_ex": null
+  },
+  "Volume": {
+    "enums": [
+
+    ],
+    "min_in": null,
+    "min_ex": "0",
+    "max_in": null,
+    "max_ex": null
+  },
+  "ThermalEfficiency": {
+    "enums": [
+
+    ],
+    "min_in": null,
+    "min_ex": "0",
+    "max_in": "1",
+    "max_ex": null
+  },
+  "RatedAnnualkWh": {
+    "enums": [
+
+    ],
+    "min_in": null,
+    "min_ex": "0",
+    "max_in": null,
+    "max_ex": null
+  },
+  "RatedWaterGalPerCycle": {
+    "enums": [
+
+    ],
+    "min_in": null,
+    "min_ex": "0",
+    "max_in": null,
+    "max_ex": null
+  },
+  "SurfaceArea": {
+    "enums": [
+
+    ],
+    "min_in": null,
+    "min_ex": "0",
+    "max_in": null,
+    "max_ex": null
+  },
+  "CollectorRatedThermalLosses": {
+    "enums": [
+
+    ],
+    "min_in": null,
+    "min_ex": "0",
+    "max_in": null,
+    "max_ex": null
+  },
+  "SolarFraction": {
+    "enums": [
+
+    ],
+    "min_in": null,
+    "min_ex": "0",
+    "max_in": "1",
+    "max_ex": null
+  },
+  "CollectorRatedOpticalEfficiency": {
+    "enums": [
+
+    ],
+    "min_in": null,
+    "min_ex": "0",
+    "max_in": null,
+    "max_ex": "1"
+  },
+  "SolarThermalSystemEnergyFactor": {
+    "enums": [
+
+    ],
+    "min_in": null,
+    "min_ex": "0",
+    "max_in": null,
+    "max_ex": null
+  }
+}

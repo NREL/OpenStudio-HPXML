@@ -5,6 +5,7 @@ require 'openstudio'
 require 'pathname'
 require 'csv'
 require_relative 'resources/EPvalidator'
+require_relative 'resources/HPXMLvalidator'
 require_relative 'resources/airflow'
 require_relative 'resources/constants'
 require_relative 'resources/constructions'
@@ -154,6 +155,7 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
 
     # Validate input HPXML against EnergyPlus Use Case
     errors = EnergyPlusValidator.run_validator(hpxml.doc)
+    errors = HPXMLValidator.run_validator()
     errors.each do |error|
       runner.registerError("#{hpxml_path}: #{error}")
       is_valid = false

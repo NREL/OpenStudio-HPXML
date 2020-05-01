@@ -1,5 +1,6 @@
 require 'rexml/document'
 require 'rexml/xpath'
+require 'json'
 
 class XMLHelper
   # Adds the child element with 'element_name' and sets its value. Returns the
@@ -44,8 +45,8 @@ class XMLHelper
   # Returns the value of 'element_name' in the parent element or nil.
   def self.get_value(parent, element_name)
     val = parent.elements[element_name]
-    el_path = parent.xpath + '/' + element_name
-    validate_val(val, el_path)
+    #el_path = parent.xpath + '/' + element_name
+    #validate_val(val, el_path)
     if val.nil?
       return val
     end
@@ -61,6 +62,67 @@ class XMLHelper
     end
 
     return vals
+  end
+
+  def self.get_complex_type_name(simple_type_name)
+    puts simple_type_name
+    complex_type = REXML::XPath.first(@doc_data, "//xs:complexType[xs:simpleContent[xs:extension[@base='#{simple_type_name}']]]")
+    puts complex_type
+    if complex_type.nil?
+      return simple_type_name
+    else
+      return complex_type.attributes['name']
+    end
+  end
+  
+  def self.get_enums_min_max_datatype()
+    this_dir = File.dirname(__FILE__)
+    dt_type_xsd_path = this_dir + '/HPXMLDataTypes.xsd'
+    @doc_data = REXML::Document.new(File.new(dt_type_xsd_path))
+    @type_map = {}
+    @doc_data.elements.to_a('//xs:enumeration').each do |enum_el|
+      simple_type_name = enum_el.parent.parent.attributes['name']
+      complex_type_name = get_complex_type_name(simple_type_name)
+      if @type_map[complex_type_name].nil?
+        @type_map[complex_type_name] = {'enums'=> [], 'min_in' => nil, 'min_ex' => nil, 'max_in' => nil, 'max_ex' => nil}
+      end
+      @type_map[complex_type_name]['enums'] << enum_el.attributes['value']
+    end
+    @doc_data.elements.to_a('//xs:minInclusive').each do |enum_el|
+      simple_type_name = enum_el.parent.parent.attributes['name']
+      complex_type_name = get_complex_type_name(simple_type_name)
+      if @type_map[complex_type_name].nil?
+        @type_map[complex_type_name] = {'enums'=> [], 'min_in' => nil, 'min_ex' => nil, 'max_in' => nil, 'max_ex' => nil}
+      end
+      @type_map[complex_type_name]['min_in'] = enum_el.attributes['value']
+    end
+    @doc_data.elements.to_a('//xs:minExclusive').each do |enum_el|
+      simple_type_name = enum_el.parent.parent.attributes['name']
+      complex_type_name = get_complex_type_name(simple_type_name)
+      if @type_map[complex_type_name].nil?
+        @type_map[complex_type_name] = {'enums'=> [], 'min_in' => nil, 'min_ex' => nil, 'max_in' => nil, 'max_ex' => nil}
+      end
+      @type_map[complex_type_name]['min_ex'] = enum_el.attributes['value']
+    end
+    @doc_data.elements.to_a('//xs:maxInclusive').each do |enum_el|
+      simple_type_name = enum_el.parent.parent.attributes['name']
+      complex_type_name = get_complex_type_name(simple_type_name)
+      if @type_map[complex_type_name].nil?
+        @type_map[complex_type_name] = {'enums'=> [], 'min_in' => nil, 'min_ex' => nil, 'max_in' => nil, 'max_ex' => nil}
+      end
+      @type_map[complex_type_name]['max_in'] = enum_el.attributes['value']
+    end
+    @doc_data.elements.to_a('//xs:maxExclusive').each do |enum_el|
+      simple_type_name = enum_el.parent.parent.attributes['name']
+      complex_type_name = get_complex_type_name(simple_type_name)
+      if @type_map[complex_type_name].nil?
+        @type_map[complex_type_name] = {'enums'=> [], 'min_in' => nil, 'min_ex' => nil, 'max_in' => nil, 'max_ex' => nil}
+      end
+      @type_map[complex_type_name]['max_ex'] = enum_el.attributes['value']
+    end
+    File.open(this_dir + '/datatype_map.json','w') do |f|
+      f.write(JSON.pretty_generate(@type_map))
+    end
   end
 
   def self.validate_val(val, el_path)
