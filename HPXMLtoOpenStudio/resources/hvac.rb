@@ -4344,4 +4344,5 @@ class HVAC
     end
 
     return space_types
-  endend
+  end
+end
