@@ -355,7 +355,7 @@ class SimulationOutputReportTest < MiniTest::Test
     actual_timeseries_cols = File.readlines(timeseries_csv)[0].strip.split(',')
     assert_equal(expected_timeseries_cols.sort, actual_timeseries_cols.sort)
     assert_equal(8760, File.readlines(timeseries_csv).size - 2)
-    _check_for_nonzero_value(timeseries_csv, [TimeseriesColsFuels[0]])
+    _check_for_nonzero_timeseries_value(timeseries_csv, ['Electricity: Total'])
   end
 
   def test_timeseries_hourly_enduses
@@ -376,7 +376,7 @@ class SimulationOutputReportTest < MiniTest::Test
     actual_timeseries_cols = File.readlines(timeseries_csv)[0].strip.split(',')
     assert_equal(expected_timeseries_cols.sort, actual_timeseries_cols.sort)
     assert_equal(8760, File.readlines(timeseries_csv).size - 2)
-    _check_for_nonzero_value(timeseries_csv, TimeseriesColsEndUses.select { |eu| eu.include? 'Plug Loads' })
+    _check_for_nonzero_timeseries_value(timeseries_csv, ['Electricity: Plug Loads'])
   end
 
   def test_timeseries_hourly_hotwateruses
@@ -397,7 +397,7 @@ class SimulationOutputReportTest < MiniTest::Test
     actual_timeseries_cols = File.readlines(timeseries_csv)[0].strip.split(',')
     assert_equal(expected_timeseries_cols.sort, actual_timeseries_cols.sort)
     assert_equal(8760, File.readlines(timeseries_csv).size - 2)
-    _check_for_nonzero_value(timeseries_csv, TimeseriesColsWaterUses)
+    _check_for_nonzero_timeseries_value(timeseries_csv, TimeseriesColsWaterUses)
   end
 
   def test_timeseries_hourly_loads
@@ -418,7 +418,7 @@ class SimulationOutputReportTest < MiniTest::Test
     actual_timeseries_cols = File.readlines(timeseries_csv)[0].strip.split(',')
     assert_equal(expected_timeseries_cols.sort, actual_timeseries_cols.sort)
     assert_equal(8760, File.readlines(timeseries_csv).size - 2)
-    _check_for_nonzero_value(timeseries_csv, TimeseriesColsTotalLoads)
+    _check_for_nonzero_timeseries_value(timeseries_csv, TimeseriesColsTotalLoads)
   end
 
   def test_timeseries_hourly_componentloads
@@ -439,7 +439,7 @@ class SimulationOutputReportTest < MiniTest::Test
     actual_timeseries_cols = File.readlines(timeseries_csv)[0].strip.split(',')
     assert_equal(expected_timeseries_cols.sort, actual_timeseries_cols.sort)
     assert_equal(8760, File.readlines(timeseries_csv).size - 2)
-    _check_for_nonzero_value(timeseries_csv, TimeseriesColsComponentLoads.select { |l| l.include? 'Internal Gains' })
+    _check_for_nonzero_timeseries_value(timeseries_csv, ['Component Load: Heating: Internal Gains', 'Component Load: Cooling: Internal Gains'])
   end
 
   def test_timeseries_hourly_zone_temperatures
@@ -460,7 +460,7 @@ class SimulationOutputReportTest < MiniTest::Test
     actual_timeseries_cols = File.readlines(timeseries_csv)[0].strip.split(',')
     assert_equal(expected_timeseries_cols.sort, actual_timeseries_cols.sort)
     assert_equal(8760, File.readlines(timeseries_csv).size - 2)
-    _check_for_nonzero_value(timeseries_csv, TimeseriesColsZoneTemps)
+    _check_for_nonzero_timeseries_value(timeseries_csv, TimeseriesColsZoneTemps)
   end
 
   def test_timeseries_hourly_airflows
@@ -481,7 +481,7 @@ class SimulationOutputReportTest < MiniTest::Test
     actual_timeseries_cols = File.readlines(timeseries_csv)[0].strip.split(',')
     assert_equal(expected_timeseries_cols.sort, actual_timeseries_cols.sort)
     assert_equal(8760, File.readlines(timeseries_csv).size - 2)
-    _check_for_nonzero_value(timeseries_csv, TimeseriesColsAirflows[0..-2])
+    _check_for_nonzero_timeseries_value(timeseries_csv, TimeseriesColsAirflows.select { |t| t != 'Airflow: Whole House Fan' })
   end
 
   def test_timeseries_hourly_airflows_with_whf
@@ -502,7 +502,49 @@ class SimulationOutputReportTest < MiniTest::Test
     actual_timeseries_cols = File.readlines(timeseries_csv)[0].strip.split(',')
     assert_equal(expected_timeseries_cols.sort, actual_timeseries_cols.sort)
     assert_equal(8760, File.readlines(timeseries_csv).size - 2)
-    _check_for_nonzero_value(timeseries_csv, [TimeseriesColsAirflows[-1]])
+    _check_for_nonzero_timeseries_value(timeseries_csv, ['Airflow: Whole House Fan'])
+  end
+
+  def test_timeseries_hourly_airflows_with_balanced_mechvent
+    args_hash = { 'hpxml_path' => '../workflow/sample_files/base-mechvent-balanced.xml',
+                  'timeseries_frequency' => 'hourly',
+                  'include_timeseries_fuel_consumptions' => false,
+                  'include_timeseries_end_use_consumptions' => false,
+                  'include_timeseries_hot_water_uses' => false,
+                  'include_timeseries_total_loads' => false,
+                  'include_timeseries_component_loads' => false,
+                  'include_timeseries_zone_temperatures' => false,
+                  'include_timeseries_airflows' => true,
+                  'include_timeseries_weather' => false }
+    annual_csv, timeseries_csv, eri_csv = _test_measure(args_hash)
+    assert(File.exist?(annual_csv))
+    assert(File.exist?(timeseries_csv))
+    expected_timeseries_cols = ['Time'] + TimeseriesColsAirflows
+    actual_timeseries_cols = File.readlines(timeseries_csv)[0].strip.split(',')
+    assert_equal(expected_timeseries_cols.sort, actual_timeseries_cols.sort)
+    assert_equal(8760, File.readlines(timeseries_csv).size - 2)
+    _check_for_nonzero_timeseries_value(timeseries_csv, ['Airflow: Mechanical Ventilation'])
+  end
+
+  def test_timeseries_hourly_airflows_with_cfis
+    args_hash = { 'hpxml_path' => '../workflow/sample_files/base-mechvent-cfis.xml',
+                  'timeseries_frequency' => 'hourly',
+                  'include_timeseries_fuel_consumptions' => false,
+                  'include_timeseries_end_use_consumptions' => false,
+                  'include_timeseries_hot_water_uses' => false,
+                  'include_timeseries_total_loads' => false,
+                  'include_timeseries_component_loads' => false,
+                  'include_timeseries_zone_temperatures' => false,
+                  'include_timeseries_airflows' => true,
+                  'include_timeseries_weather' => false }
+    annual_csv, timeseries_csv, eri_csv = _test_measure(args_hash)
+    assert(File.exist?(annual_csv))
+    assert(File.exist?(timeseries_csv))
+    expected_timeseries_cols = ['Time'] + TimeseriesColsAirflows
+    actual_timeseries_cols = File.readlines(timeseries_csv)[0].strip.split(',')
+    assert_equal(expected_timeseries_cols.sort, actual_timeseries_cols.sort)
+    assert_equal(8760, File.readlines(timeseries_csv).size - 2)
+    _check_for_nonzero_timeseries_value(timeseries_csv, ['Airflow: Mechanical Ventilation'])
   end
 
   def test_timeseries_hourly_weather
@@ -523,7 +565,7 @@ class SimulationOutputReportTest < MiniTest::Test
     actual_timeseries_cols = File.readlines(timeseries_csv)[0].strip.split(',')
     assert_equal(expected_timeseries_cols.sort, actual_timeseries_cols.sort)
     assert_equal(8760, File.readlines(timeseries_csv).size - 2)
-    _check_for_nonzero_value(timeseries_csv, TimeseriesColsWeather)
+    _check_for_nonzero_timeseries_value(timeseries_csv, TimeseriesColsWeather)
   end
 
   def test_timeseries_hourly_ALL
@@ -852,7 +894,7 @@ class SimulationOutputReportTest < MiniTest::Test
     return annual_csv, timeseries_csv, eri_csv
   end
 
-  def _check_for_nonzero_value(timeseries_csv, timeseries_cols)
+  def _check_for_nonzero_timeseries_value(timeseries_csv, timeseries_cols)
     values = {}
     timeseries_cols.each do |col|
       values[col] = []
