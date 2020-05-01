@@ -2274,13 +2274,20 @@ def set_hpxml_hvac_distributions(hpxml_file, hpxml)
   elsif ['base-hvac-undersized.xml'].include? hpxml_file
     hpxml.hvac_distributions[0].duct_leakage_measurements[0].duct_leakage_value /= 10.0
     hpxml.hvac_distributions[0].duct_leakage_measurements[1].duct_leakage_value /= 10.0
+  elsif ['base-foundation-ambient.xml',
+         'base-foundation-multiple.xml',
+         'base-foundation-slab.xml'].include? hpxml_file
+    hpxml.hvac_distributions[0].conditioned_floor_area_served = 1350
   elsif ['base-foundation-unconditioned-basement.xml'].include? hpxml_file
+    hpxml.hvac_distributions[0].conditioned_floor_area_served = 1350
     hpxml.hvac_distributions[0].ducts[0].duct_location = HPXML::LocationBasementUnconditioned
     hpxml.hvac_distributions[0].ducts[1].duct_location = HPXML::LocationBasementUnconditioned
   elsif ['base-foundation-unvented-crawlspace.xml'].include? hpxml_file
+    hpxml.hvac_distributions[0].conditioned_floor_area_served = 1350
     hpxml.hvac_distributions[0].ducts[0].duct_location = HPXML::LocationCrawlspaceUnvented
     hpxml.hvac_distributions[0].ducts[1].duct_location = HPXML::LocationCrawlspaceUnvented
   elsif ['base-foundation-vented-crawlspace.xml'].include? hpxml_file
+    hpxml.hvac_distributions[0].conditioned_floor_area_served = 1350
     hpxml.hvac_distributions[0].ducts[0].duct_location = HPXML::LocationCrawlspaceVented
     hpxml.hvac_distributions[0].ducts[1].duct_location = HPXML::LocationCrawlspaceVented
   elsif ['base-atticroof-flat.xml'].include? hpxml_file
@@ -2308,6 +2315,7 @@ def set_hpxml_hvac_distributions(hpxml_file, hpxml)
     if hpxml_file == 'base-enclosure-adiabatic-surfaces.xml'
       # Test leakage to outside when all ducts in conditioned space
       # (e.g., ducts may be in floor cavities which have leaky rims)
+      hpxml.hvac_distributions[0].conditioned_floor_area_served = 1350
       hpxml.hvac_distributions[0].duct_leakage_measurements[0].duct_leakage_value = 1.5
       hpxml.hvac_distributions[0].duct_leakage_measurements[1].duct_leakage_value = 1.5
     end

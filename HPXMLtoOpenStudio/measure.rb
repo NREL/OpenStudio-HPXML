@@ -483,22 +483,15 @@ class OSModel
       end
 
       # Default ducts
-      ducts_by_type = { supply: [], return: [] }
-      hvac_distribution.ducts.each do |duct|
-        if duct.duct_type == HPXML::DuctTypeSupply
-          ducts_by_type[:supply] << duct
-        else
-          ducts_by_type[:return] << duct
-        end
-      end
+      supply_ducts = hvac_distribution.ducts.select { |item| item.duct_type == 'supply' }
+      return_ducts = hvac_distribution.ducts.select { |item| item.duct_type == 'return' }
 
-      # Preserve the ducts and equally split the areas
-      ducts_by_type.each do |key, ducts|
+      [supply_ducts, return_ducts].each do |ducts|
         ducts.each_with_index do |duct, idx|
           next unless duct.duct_surface_area.nil?
 
           duct.duct_location = HVAC.get_default_duct_locations(@hpxml)[idx]
-          duct.duct_surface_area = HVAC.get_default_duct_surface_area(duct.duct_type, @cfa, @ncfl, @total_conditioned_floor_area_served, hvac_distribution.conditioned_floor_area_served, hvac_distribution.number_of_return_registers) / ducts.length
+          duct.duct_surface_area = HVAC.get_default_duct_surface_area(duct.duct_type, @cfa, @ncfl, @total_conditioned_floor_area_served, hvac_distribution.conditioned_floor_area_served, hvac_distribution.number_of_return_registers) / ducts.size
         end
       end
     end
@@ -4409,7 +4402,8 @@ class OSModel
 
       total_conditioned_floor_area_served += hvac_distribution.conditioned_floor_area_served
     end
-
+    puts total_conditioned_floor_area_served
+    puts @cfa
     if total_conditioned_floor_area_served > @cfa
       fail 'The total conditioned floor area served by the HVAC distribution system(s) is larger than the conditioned floor area of the building.'
     end
