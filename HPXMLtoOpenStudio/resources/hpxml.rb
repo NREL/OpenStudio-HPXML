@@ -609,6 +609,7 @@ class HPXML < Object
       XMLHelper.add_element(software_info, 'SoftwareProgramUsed', @software_program_used) unless @software_program_used.nil?
       XMLHelper.add_element(software_info, 'SoftwareProgramVersion', software_program_version) unless software_program_version.nil?
       extension = XMLHelper.add_element(software_info, 'extension')
+      XMLHelper.add_element(extension, 'ApplyASHRAE140Assumptions', HPXML::to_bool_or_nil(@apply_ashrae140_assumptions)) unless @apply_ashrae140_assumptions.nil?
       if (not @eri_calculation_version.nil?) || (not @eri_design.nil?)
         eri_calculation = XMLHelper.add_element(extension, 'ERICalculation')
         XMLHelper.add_element(eri_calculation, 'Version', @eri_calculation_version) unless @eri_calculation_version.nil?
@@ -621,9 +622,8 @@ class HPXML < Object
         XMLHelper.add_element(simulation_control, 'BeginDayOfMonth', HPXML::to_integer_or_nil(@begin_day_of_month)) unless @begin_day_of_month.nil?
         XMLHelper.add_element(simulation_control, 'EndMonth', HPXML::to_integer_or_nil(@end_month)) unless @end_month.nil?
         XMLHelper.add_element(simulation_control, 'EndDayOfMonth', HPXML::to_integer_or_nil(@end_day_of_month)) unless @end_day_of_month.nil?
-        XMLHelper.add_element(simulation_control, 'ApplyASHRAE140Assumptions', HPXML::to_bool_or_nil(@apply_ashrae140_assumptions)) unless @apply_ashrae140_assumptions.nil?
       end
-      if XMLHelper.get_element(extension, 'ERICalculation').nil? && XMLHelper.get_element(extension, 'SimulationControl').nil?
+      if XMLHelper.get_element(extension, 'ERICalculation').nil? && XMLHelper.get_element(extension, 'SimulationControl').nil? && @apply_ashrae140_assumptions.nil?
         extension.remove
       end
 
@@ -650,7 +650,7 @@ class HPXML < Object
       @begin_day_of_month = HPXML::to_integer_or_nil(XMLHelper.get_value(hpxml, 'SoftwareInfo/extension/SimulationControl/BeginDayOfMonth'))
       @end_month = HPXML::to_integer_or_nil(XMLHelper.get_value(hpxml, 'SoftwareInfo/extension/SimulationControl/EndMonth'))
       @end_day_of_month = HPXML::to_integer_or_nil(XMLHelper.get_value(hpxml, 'SoftwareInfo/extension/SimulationControl/EndDayOfMonth'))
-      @apply_ashrae140_assumptions = HPXML::to_bool_or_nil(XMLHelper.get_value(hpxml, 'SoftwareInfo/extension/SimulationControl/ApplyASHRAE140Assumptions'))
+      @apply_ashrae140_assumptions = HPXML::to_bool_or_nil(XMLHelper.get_value(hpxml, 'SoftwareInfo/extension/ApplyASHRAE140Assumptions'))
       @building_id = HPXML::get_id(hpxml, 'Building/BuildingID')
       @event_type = XMLHelper.get_value(hpxml, 'Building/ProjectStatus/EventType')
       @state_code = XMLHelper.get_value(hpxml, 'Building/Site/Address/StateCode')
