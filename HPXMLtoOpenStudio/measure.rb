@@ -4402,8 +4402,6 @@ class OSModel
 
       total_conditioned_floor_area_served += hvac_distribution.conditioned_floor_area_served
     end
-    puts total_conditioned_floor_area_served
-    puts @cfa
     if total_conditioned_floor_area_served > @cfa
       fail 'The total conditioned floor area served by the HVAC distribution system(s) is larger than the conditioned floor area of the building.'
     end
