@@ -2271,6 +2271,7 @@ class HPXML < Object
       @hpxml_object.heating_systems.delete(self)
       @hpxml_object.water_heating_systems.each do |water_heating_system|
         next unless water_heating_system.related_hvac_idref == @id
+
         water_heating_system.related_hvac_idref = nil
       end
     end
@@ -2379,6 +2380,7 @@ class HPXML < Object
       @hpxml_object.cooling_systems.delete(self)
       @hpxml_object.water_heating_systems.each do |water_heating_system|
         next unless water_heating_system.related_hvac_idref == @id
+
         water_heating_system.related_hvac_idref = nil
       end
     end
@@ -2489,6 +2491,7 @@ class HPXML < Object
       @hpxml_object.heat_pumps.delete(self)
       @hpxml_object.water_heating_systems.each do |water_heating_system|
         next unless water_heating_system.related_hvac_idref == @id
+
         water_heating_system.related_hvac_idref = nil
       end
     end
@@ -2730,10 +2733,12 @@ class HPXML < Object
       @hpxml_object.hvac_distributions.delete(self)
       (@hpxml_object.heating_systems + @hpxml_object.cooling_systems + @hpxml_object.heat_pumps).each do |hvac|
         next unless hvac.distribution_system_idref == @id
+
         hvac.distribution_system_idref = nil
       end
       @hpxml_object.ventilation_fans.each do |ventilation_fan|
         next unless ventilation_fan.distribution_system_idref == @id
+
         ventilation_fan.distribution_system_idref = nil
       end
     end
@@ -2820,6 +2825,7 @@ class HPXML < Object
     def delete
       @hpxml_object.hvac_distributions.each do |hvac_distribution|
         next unless hvac_distribution.duct_leakage_measurements.include? self
+
         hvac_distribution.duct_leakage_measurements.delete(self)
       end
     end
@@ -2873,6 +2879,7 @@ class HPXML < Object
     def delete
       @hpxml_object.hvac_distributions.each do |hvac_distribution|
         next unless hvac_distribution.ducts.include? self
+
         hvac_distribution.ducts.delete(self)
       end
     end
@@ -3038,6 +3045,7 @@ class HPXML < Object
       @hpxml_object.water_heating_systems.delete(self)
       @hpxml_object.solar_thermal_systems.each do |solar_thermal_system|
         next unless solar_thermal_system.water_heating_system_idref == @id
+
         solar_thermal_system.water_heating_system_idref = nil
       end
     end
@@ -4065,10 +4073,12 @@ class HPXML < Object
           # Update subsurface idrefs as appropriate
           (@windows + @doors).each do |subsurf|
             next unless subsurf.wall_idref == surf2.id
+
             subsurf.wall_idref = surf.id
           end
           @skylights.each do |subsurf|
             next unless subsurf.roof_idref == surf2.id
+
             subsurf.roof_idref = surf.id
           end
 
@@ -4083,6 +4093,7 @@ class HPXML < Object
     (@rim_joists + @walls + @foundation_walls + @frame_floors).reverse_each do |surface|
       next if surface.interior_adjacent_to.nil? || surface.exterior_adjacent_to.nil?
       next unless surface.interior_adjacent_to == surface.exterior_adjacent_to
+
       surface.delete
     end
   end
@@ -4090,6 +4101,7 @@ class HPXML < Object
   def delete_tiny_surfaces()
     (@rim_joists + @walls + @foundation_walls + @frame_floors + @roofs + @windows + @skylights + @doors + @slabs).reverse_each do |surface|
       next if surface.area.nil? || (surface.area > 0.1)
+
       surface.delete
     end
   end
