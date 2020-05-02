@@ -160,6 +160,7 @@ def create_hpxmls
     'base-enclosure-beds-5.xml' => 'base.xml',
     'base-enclosure-garage.xml' => 'base.xml',
     'base-enclosure-infil-cfm50.xml' => 'base.xml',
+    'base-enclosure-infil-natural-ach.xml' => 'base.xml',
     'base-enclosure-overhangs.xml' => 'base.xml',
     'base-enclosure-skylights.xml' => 'base.xml',
     'base-enclosure-split-surfaces.xml' => 'base-enclosure-skylights.xml',
@@ -235,7 +236,6 @@ def create_hpxmls
     'base-hvac-wall-furnace-elec-only.xml' => 'base.xml',
     'base-hvac-wall-furnace-propane-only.xml' => 'base.xml',
     'base-hvac-wall-furnace-wood-only.xml' => 'base.xml',
-    'base-infiltration-ach-natural.xml' => 'base.xml',
     'base-location-baltimore-md.xml' => 'base.xml',
     'base-location-dallas-tx.xml' => 'base.xml',
     'base-location-duluth-mn.xml' => 'base.xml',
@@ -577,25 +577,24 @@ end
 def set_hpxml_air_infiltration_measurements(hpxml_file, hpxml)
   infil_volume = hpxml.building_construction.conditioned_building_volume
   if ['ASHRAE_Standard_140/L100AC.xml',
-      'ASHRAE_Standard_140/L100AL.xml'].include? hpxml_file
+      'ASHRAE_Standard_140/L100AL.xml',
+      'base-enclosure-infil-natural-ach.xml'].include? hpxml_file
+    hpxml.air_infiltration_measurements.clear
     hpxml.air_infiltration_measurements.add(id: 'InfiltrationMeasurement',
-                                            constant_ach_natural: 0.67)
+                                            unit_of_measure: HPXML::UnitsACH,
+                                            air_leakage: 0.67)
   elsif ['ASHRAE_Standard_140/L322XC.xml'].include? hpxml_file
-    hpxml.air_infiltration_measurements[0].constant_ach_natural = 0.335
+    hpxml.air_infiltration_measurements[0].air_leakage = 0.335
   elsif ['ASHRAE_Standard_140/L110AC.xml',
          'ASHRAE_Standard_140/L110AL.xml',
          'ASHRAE_Standard_140/L200AC.xml',
          'ASHRAE_Standard_140/L200AL.xml'].include? hpxml_file
-    hpxml.air_infiltration_measurements[0].constant_ach_natural = 1.5
+    hpxml.air_infiltration_measurements[0].air_leakage = 1.5
   elsif ['base.xml'].include? hpxml_file
     hpxml.air_infiltration_measurements.add(id: 'InfiltrationMeasurement',
                                             house_pressure: 50,
                                             unit_of_measure: HPXML::UnitsACH,
                                             air_leakage: 3.0)
-  elsif ['base-infiltration-ach-natural.xml'].include? hpxml_file
-    hpxml.air_infiltration_measurements.clear
-    hpxml.air_infiltration_measurements.add(id: 'InfiltrationMeasurement',
-                                            constant_ach_natural: 0.67)
   elsif ['base-enclosure-infil-cfm50.xml'].include? hpxml_file
     hpxml.air_infiltration_measurements.clear
     hpxml.air_infiltration_measurements.add(id: 'InfiltrationMeasurement',
@@ -615,7 +614,7 @@ def set_hpxml_attics(hpxml_file, hpxml)
       'ASHRAE_Standard_140/L100AL.xml'].include? hpxml_file
     hpxml.attics.add(id: 'VentedAttic',
                      attic_type: HPXML::AtticTypeVented,
-                     vented_attic_constant_ach: 2.4)
+                     vented_attic_ach: 2.4)
   elsif ['base.xml'].include? hpxml_file
     hpxml.attics.add(id: 'UnventedAttic',
                      attic_type: HPXML::AtticTypeUnvented,

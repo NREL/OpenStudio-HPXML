@@ -41,10 +41,11 @@
         <AirInfiltration>
           <AirInfiltrationMeasurement>
             <SystemIdentifier id='InfiltrationMeasurement'/>
+            <BuildingAirLeakage>
+              <UnitofMeasure>ACH</UnitofMeasure>
+              <AirLeakage>0.67</AirLeakage>
+            </BuildingAirLeakage>
             <InfiltrationVolume>12312.0</InfiltrationVolume>
-            <extension>
-              <ConstantACHnatural>0.67</ConstantACHnatural>
-            </extension>
           </AirInfiltrationMeasurement>
         </AirInfiltration>
         <Attics>
@@ -55,9 +56,10 @@
                 <Vented>true</Vented>
               </Attic>
             </AtticType>
-            <extension>
-              <ConstantACHnatural>2.4</ConstantACHnatural>
-            </extension>
+            <VentilationRate>
+              <UnitofMeasure>ACHnatural</UnitofMeasure>
+              <Value>2.4</Value>
+            </VentilationRate>
           </Attic>
         </Attics>
         <Roofs>

@@ -368,7 +368,7 @@ class OSModel
                           attic_type: HPXML::AtticTypeVented)
         vented_attic = @hpxml.attics[-1]
       end
-      if vented_attic.vented_attic_sla.nil? && vented_attic.vented_attic_constant_ach.nil?
+      if vented_attic.vented_attic_sla.nil? && vented_attic.vented_attic_ach.nil?
         vented_attic.vented_attic_sla = Airflow.get_default_vented_attic_sla()
       end
     end
@@ -394,8 +394,8 @@ class OSModel
     @hpxml.air_infiltration_measurements.each do |measurement|
       is_ach50 = ((measurement.house_pressure == 50) && (measurement.unit_of_measure == HPXML::UnitsACH))
       is_cfm50 = ((measurement.house_pressure == 50) && (measurement.unit_of_measure == HPXML::UnitsCFM))
-      is_constant_nach = !measurement.constant_ach_natural.nil?
-      next unless (is_ach50 || is_cfm50 || is_constant_nach)
+      is_nach = (measurement.house_pressure.nil? && (measurement.unit_of_measure == HPXML::UnitsCFM))
+      next unless (is_ach50 || is_cfm50 || is_nach)
 
       measurements << measurement
       infilvolume = measurement.infiltration_volume unless infilvolume.nil?
@@ -2911,6 +2911,7 @@ class OSModel
 
   def self.add_airflow(runner, model, weather, spaces)
     # Infiltration
+    infil_height = Airflow.calc_inferred_infiltration_height(@cfa, @ncfl, @ncfl_ag, @infil_volume, @hpxml)
     infil_ach50 = nil
     infil_const_ach = nil
     @hpxml.air_infiltration_measurements.each do |measurement|
@@ -2918,9 +2919,17 @@ class OSModel
         infil_ach50 = measurement.air_leakage
       elsif (measurement.house_pressure == 50) && (measurement.unit_of_measure == HPXML::UnitsCFM)
         infil_ach50 = measurement.air_leakage * 60.0 / @infil_volume # Convert CFM50 to ACH50
-      else
-        infil_const_ach = measurement.constant_ach_natural
+      elsif measurement.house_pressure.nil? && (measurement.unit_of_measure == HPXML::UnitsACH)
+        if @apply_ashrae140_assumptions
+          infil_const_ach = measurement.air_leakage
+        else
+          sla = Airflow.get_infiltration_SLA_from_ACH(measurement.air_leakage, infil_height, weather)
+          infil_ach50 = Airflow.get_infiltration_ACH50_from_SLA(sla, 0.65, @cfa, @infil_volume)
+        end
       end
+    end
+    if infil_ach50.nil? && infil_const_ach.nil?
+      fail 'Infiltration rate not found.'
     end
 
     vented_attic_sla = nil
@@ -2929,8 +2938,15 @@ class OSModel
       @hpxml.attics.each do |attic|
         next unless attic.attic_type == HPXML::AtticTypeVented
 
-        vented_attic_sla = attic.vented_attic_sla
-        vented_attic_const_ach = attic.vented_attic_constant_ach
+        if not attic.vented_attic_sla.nil?
+          vented_attic_sla = attic.vented_attic_sla
+        elsif not attic.vented_attic_ach.nil?
+          if @apply_ashrae140_assumptions
+            vented_attic_const_ach = attic.vented_attic_ach
+          else
+            vented_attic_sla = Airflow.get_infiltration_SLA_from_ACH(attic.vented_attic_ach, 8.202, weather)
+          end
+        end
       end
     else
       vented_attic_sla = 0.0
@@ -3093,7 +3109,6 @@ class OSModel
                                           cfis_open_time, cfis_airflow_frac, cfis_airloop)
 
     window_area = @hpxml.windows.map { |w| w.area }.inject(0, :+)
-    infil_height = Airflow.calc_inferred_infiltration_height(@cfa, @ncfl, @ncfl_ag, @infil_volume, @hpxml)
     Airflow.apply(model, runner, weather, infil, mech_vent, nat_vent, whf, duct_systems,
                   @cfa, @infil_volume, infil_height, @nbeds, @nbaths, @ncfl_ag, window_area,
                   @min_neighbor_distance, vent_fan_kitchen, vent_fan_bath)
