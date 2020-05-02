@@ -164,7 +164,7 @@ Air Leakage
 Building air leakage is entered using ``Enclosure/AirInfiltration/AirInfiltrationMeasurement``.
 Air leakage can be provided in one of three ways:
 
-#. nACH (natural air changes per hour): Use ``BuildingAirLeakage/UnitofMeasure='ACH'``
+#. nACH (natural air changes per hour): Use ``BuildingAirLeakage/UnitofMeasure='ACHnatural'``
 #. ACH50 (air changes per hour at 50Pa): Use ``BuildingAirLeakage/UnitofMeasure='ACH'`` and ``HousePressure='50'``
 #. CFM50 (cubic feet per minute at 50Pa): Use ``BuildingAirLeakage/UnitofMeasure='CFM'`` and ``HousePressure='50'``
 

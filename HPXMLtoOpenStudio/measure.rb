@@ -394,7 +394,7 @@ class OSModel
     @hpxml.air_infiltration_measurements.each do |measurement|
       is_ach50 = ((measurement.house_pressure == 50) && (measurement.unit_of_measure == HPXML::UnitsACH))
       is_cfm50 = ((measurement.house_pressure == 50) && (measurement.unit_of_measure == HPXML::UnitsCFM))
-      is_nach = (measurement.house_pressure.nil? && (measurement.unit_of_measure == HPXML::UnitsCFM))
+      is_nach = (measurement.house_pressure.nil? && (measurement.unit_of_measure == HPXML::UnitsACHNatural))
       next unless (is_ach50 || is_cfm50 || is_nach)
 
       measurements << measurement
@@ -2919,7 +2919,7 @@ class OSModel
         infil_ach50 = measurement.air_leakage
       elsif (measurement.house_pressure == 50) && (measurement.unit_of_measure == HPXML::UnitsCFM)
         infil_ach50 = measurement.air_leakage * 60.0 / @infil_volume # Convert CFM50 to ACH50
-      elsif measurement.house_pressure.nil? && (measurement.unit_of_measure == HPXML::UnitsACH)
+      elsif measurement.house_pressure.nil? && (measurement.unit_of_measure == HPXML::UnitsACHNatural)
         if @apply_ashrae140_assumptions
           infil_const_ach = measurement.air_leakage
         else
@@ -2927,9 +2927,6 @@ class OSModel
           infil_ach50 = Airflow.get_infiltration_ACH50_from_SLA(sla, 0.65, @cfa, @infil_volume)
         end
       end
-    end
-    if infil_ach50.nil? && infil_const_ach.nil?
-      fail 'Infiltration rate not found.'
     end
 
     vented_attic_sla = nil

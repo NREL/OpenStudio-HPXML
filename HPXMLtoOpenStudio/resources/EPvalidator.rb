@@ -56,7 +56,7 @@ class EnergyPlusValidator
         '/HPXML/Building/BuildingDetails/ClimateandRiskZones/ClimateZoneIECC' => zero_or_one, # See [ClimateZone]
         '/HPXML/Building/BuildingDetails/ClimateandRiskZones/WeatherStation' => one, # See [WeatherStation]
 
-        '/HPXML/Building/BuildingDetails/Enclosure/AirInfiltration/AirInfiltrationMeasurement[BuildingAirLeakage/UnitofMeasure="ACH" or BuildingAirLeakage/UnitofMeasure="CFM"]' => one, # see [AirInfiltration]
+        '/HPXML/Building/BuildingDetails/Enclosure/AirInfiltration/AirInfiltrationMeasurement[BuildingAirLeakage/UnitofMeasure[text()="ACH" or text()="CFM" or text()="ACHnatural"]]' => one, # see [AirInfiltration]
 
         '/HPXML/Building/BuildingDetails/Enclosure/Roofs/Roof' => zero_or_more, # See [Roof]
         '/HPXML/Building/BuildingDetails/Enclosure/Walls/Wall' => one_or_more, # See [Wall]
@@ -141,9 +141,9 @@ class EnergyPlusValidator
       },
 
       # [AirInfiltration]
-      '/HPXML/Building/BuildingDetails/Enclosure/AirInfiltration/AirInfiltrationMeasurement[BuildingAirLeakage/UnitofMeasure="ACH" or BuildingAirLeakage/UnitofMeasure="CFM"]' => {
+      '/HPXML/Building/BuildingDetails/Enclosure/AirInfiltration/AirInfiltrationMeasurement[BuildingAirLeakage/UnitofMeasure[text()="ACH" or text()="CFM" or text()="ACHnatural"]]' => {
         'SystemIdentifier' => one, # Required by HPXML schema
-        '[not(HousePressure)] | HousePressure[number(text())=50]' => one,
+        '[(BuildingAirLeakage/UnitofMeasure="ACHnatural" and not(HousePressure)) or (BuildingAirLeakage/UnitofMeasure!="ACHnatural" and number(HousePressure)=50)]' => one,
         'BuildingAirLeakage/AirLeakage' => one,
         'InfiltrationVolume' => zero_or_one,
       },
