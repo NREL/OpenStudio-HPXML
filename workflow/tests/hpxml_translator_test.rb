@@ -218,22 +218,22 @@ class HPXMLTest < MiniTest::Test
     htg_cap_w = 0
     for spd in [4, 2]
       # Get capacity of highest speed for multi-speed coil
-      query = "SELECT SUM(Value) FROM ComponentSizes WHERE CompType='Coil:Heating:DX:multi-speed' AND Description LIKE '%User-Specified Speed #{spd}%Capacity' AND Units='W'"
+      query = "SELECT SUM(Value) FROM ComponentSizes WHERE CompType='Coil:Heating:DX:MultiSpeed' AND Description LIKE '%User-Specified Speed #{spd}%Capacity' AND Units='W'"
       htg_cap_w += sqlFile.execAndReturnFirstDouble(query).get
       break if htg_cap_w > 0
     end
-    query = "SELECT SUM(Value) FROM ComponentSizes WHERE ((CompType LIKE 'Coil:Heating:%' OR CompType LIKE 'Boiler:%' OR CompType LIKE 'ZONEHVAC:BASEBOARD:%') AND CompType!='Coil:Heating:DX:multi-speed') AND Description LIKE '%User-Specified%Capacity' AND Units='W'"
+    query = "SELECT SUM(Value) FROM ComponentSizes WHERE ((CompType LIKE 'Coil:Heating:%' OR CompType LIKE 'Boiler:%' OR CompType LIKE 'ZONEHVAC:BASEBOARD:%') AND CompType!='Coil:Heating:DX:MultiSpeed') AND Description LIKE '%User-Specified%Capacity' AND Units='W'"
     htg_cap_w += sqlFile.execAndReturnFirstDouble(query).get
     results['Capacity: Heating (W)'] = htg_cap_w
 
     clg_cap_w = 0
     for spd in [4, 2]
       # Get capacity of highest speed for multi-speed coil
-      query = "SELECT SUM(Value) FROM ComponentSizes WHERE CompType='Coil:Cooling:DX:multi-speed' AND Description LIKE 'User-Specified Speed #{spd}%Total%Capacity' AND Units='W'"
+      query = "SELECT SUM(Value) FROM ComponentSizes WHERE CompType='Coil:Cooling:DX:MultiSpeed' AND Description LIKE 'User-Specified Speed #{spd}%Total%Capacity' AND Units='W'"
       clg_cap_w += sqlFile.execAndReturnFirstDouble(query).get
       break if clg_cap_w > 0
     end
-    query = "SELECT SUM(Value) FROM ComponentSizes WHERE CompType LIKE 'Coil:Cooling:%' AND CompType!='Coil:Cooling:DX:multi-speed' AND Description LIKE '%User-Specified%Total%Capacity' AND Units='W'"
+    query = "SELECT SUM(Value) FROM ComponentSizes WHERE CompType LIKE 'Coil:Cooling:%' AND CompType!='Coil:Cooling:DX:MultiSpeed' AND Description LIKE '%User-Specified%Total%Capacity' AND Units='W'"
     clg_cap_w += sqlFile.execAndReturnFirstDouble(query).get
     results['Capacity: Cooling (W)'] = clg_cap_w
 
