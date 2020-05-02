@@ -30,7 +30,7 @@ class HPXMLTest < MiniTest::Test
     test_dirs = [sample_files_dir,
                  autosize_dir,
                  ashrae_140_dir]
-    test_dirs = [ashrae_140_dir]
+
     xmls = []
     test_dirs.each do |test_dir|
       Dir["#{test_dir}/*.xml"].sort.each do |xml|
