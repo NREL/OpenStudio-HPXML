@@ -143,7 +143,7 @@ class EnergyPlusValidator
       # [AirInfiltration]
       '/HPXML/Building/BuildingDetails/Enclosure/AirInfiltration/AirInfiltrationMeasurement[BuildingAirLeakage/UnitofMeasure[text()="ACH" or text()="CFM" or text()="ACHnatural"]]' => {
         'SystemIdentifier' => one, # Required by HPXML schema
-        '[(BuildingAirLeakage/UnitofMeasure="ACHnatural" and not(HousePressure)) or (BuildingAirLeakage/UnitofMeasure!="ACHnatural" and number(HousePressure)=50)]' => one,
+        '[(number(HousePressure)=50 and BuildingAirLeakage/UnitofMeasure!="ACHnatural") or (not(HousePressure) and BuildingAirLeakage/UnitofMeasure="ACHnatural")]' => one,
         'BuildingAirLeakage/AirLeakage' => one,
         'InfiltrationVolume' => zero_or_one,
       },
