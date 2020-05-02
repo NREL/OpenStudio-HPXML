@@ -581,7 +581,7 @@ def set_hpxml_air_infiltration_measurements(hpxml_file, hpxml)
       'base-enclosure-infil-natural-ach.xml'].include? hpxml_file
     hpxml.air_infiltration_measurements.clear
     hpxml.air_infiltration_measurements.add(id: 'InfiltrationMeasurement',
-                                            unit_of_measure: HPXML::UnitsACH,
+                                            unit_of_measure: HPXML::UnitsACHNatural,
                                             air_leakage: 0.67)
   elsif ['ASHRAE_Standard_140/L322XC.xml'].include? hpxml_file
     hpxml.air_infiltration_measurements[0].air_leakage = 0.335

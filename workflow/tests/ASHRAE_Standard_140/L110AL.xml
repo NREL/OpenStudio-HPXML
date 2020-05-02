@@ -42,7 +42,7 @@
           <AirInfiltrationMeasurement>
             <SystemIdentifier id='InfiltrationMeasurement'/>
             <BuildingAirLeakage>
-              <UnitofMeasure>ACH</UnitofMeasure>
+              <UnitofMeasure>ACHnatural</UnitofMeasure>
               <AirLeakage>1.5</AirLeakage>
             </BuildingAirLeakage>
             <InfiltrationVolume>12312.0</InfiltrationVolume>
