@@ -2584,24 +2584,9 @@ class OSModel
 
       if cooling_system.cooling_system_type == HPXML::HVACTypeCentralAirConditioner
 
-        if cooling_system.compressor_type == HPXML::HVACCompressorTypeSingleStage
-
-          HVAC.apply_central_air_conditioner_1speed(model, runner, cooling_system,
-                                                    sequential_load_frac, @living_zone,
-                                                    @hvac_map)
-
-        elsif cooling_system.compressor_type == HPXML::HVACCompressorTypeTwoStage
-
-          HVAC.apply_central_air_conditioner_2speed(model, runner, cooling_system,
-                                                    sequential_load_frac, @living_zone,
-                                                    @hvac_map)
-
-        elsif cooling_system.compressor_type == HPXML::HVACCompressorTypeVariableSpeed
-
-          HVAC.apply_central_air_conditioner_4speed(model, runner, cooling_system,
-                                                    sequential_load_frac, @living_zone,
-                                                    @hvac_map)
-        end
+        HVAC.apply_central_air_conditioner(model, runner, cooling_system,
+                                           sequential_load_frac, @living_zone,
+                                           @hvac_map)
 
       elsif cooling_system.cooling_system_type == HPXML::HVACTypeRoomAirConditioner
 
@@ -2687,28 +2672,10 @@ class OSModel
 
       if heat_pump.heat_pump_type == HPXML::HVACTypeHeatPumpAirToAir
 
-        if heat_pump.compressor_type == HPXML::HVACCompressorTypeSingleStage
-
-          HVAC.apply_central_air_to_air_heat_pump_1speed(model, runner, heat_pump,
-                                                         sequential_heat_load_frac,
-                                                         sequential_cool_load_frac,
-                                                         @living_zone, @hvac_map)
-
-        elsif heat_pump.compressor_type == HPXML::HVACCompressorTypeTwoStage
-
-          HVAC.apply_central_air_to_air_heat_pump_2speed(model, runner, heat_pump,
-                                                         sequential_heat_load_frac,
-                                                         sequential_cool_load_frac,
-                                                         @living_zone, @hvac_map)
-
-        elsif heat_pump.compressor_type == HPXML::HVACCompressorTypeVariableSpeed
-
-          HVAC.apply_central_air_to_air_heat_pump_4speed(model, runner, heat_pump,
-                                                         sequential_heat_load_frac,
-                                                         sequential_cool_load_frac,
-                                                         @living_zone, @hvac_map)
-
-        end
+        HVAC.apply_central_air_to_air_heat_pump(model, runner, heat_pump,
+                                                sequential_heat_load_frac,
+                                                sequential_cool_load_frac,
+                                                @living_zone, @hvac_map)
 
       elsif heat_pump.heat_pump_type == HPXML::HVACTypeHeatPumpMiniSplit
 
