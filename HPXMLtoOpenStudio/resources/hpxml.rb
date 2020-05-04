@@ -2270,6 +2270,14 @@ class HPXML < Object
       fail "Attached HVAC distribution system '#{@distribution_system_idref}' not found for HVAC system '#{@id}'."
     end
 
+    def attached_cooling_system
+      distribution_system.hvac_systems.each do |hvac_system|
+        next if hvac_system.id == @id
+        return hvac_system
+      end
+      return
+    end
+
     def delete
       @hpxml_object.heating_systems.delete(self)
       @hpxml_object.water_heating_systems.each do |water_heating_system|
@@ -2376,6 +2384,14 @@ class HPXML < Object
         return hvac_distribution
       end
       fail "Attached HVAC distribution system '#{@distribution_system_idref}' not found for HVAC system '#{@id}'."
+    end
+
+    def attached_heating_system
+      distribution_system.hvac_systems.each do |hvac_system|
+        next if hvac_system.id == @id
+        return hvac_system
+      end
+      return
     end
 
     def delete
