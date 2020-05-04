@@ -145,7 +145,7 @@ class HVAC
     # Cooling Coil
 
     clg_coil = OpenStudio::Model::CoilCoolingDXSingleSpeed.new(model, model.alwaysOnDiscreteSchedule, roomac_cap_ft_curve, roomac_cap_fff_curve, roomac_eir_ft_curve, roomcac_eir_fff_curve, roomac_plf_fplr_curve)
-    clg_coil.setName(obj_name + " clg coil")
+    clg_coil.setName(obj_name + ' clg coil')
     if not cooling_system.cooling_capacity.nil?
       clg_coil.setRatedTotalCoolingCapacity(UnitConversions.convert([cooling_system.cooling_capacity, Constants.small].max, 'Btu/hr', 'W')) # Used by HVACSizing measure
     end
@@ -160,7 +160,7 @@ class HVAC
     # Fan
 
     fan = OpenStudio::Model::FanOnOff.new(model, model.alwaysOnDiscreteSchedule)
-    fan.setName(obj_name + " supply fan")
+    fan.setName(obj_name + ' supply fan')
     fan.setEndUseSubcategory('supply fan')
     fan.setFanEfficiency(1)
     fan.setPressureRise(0)
@@ -171,7 +171,7 @@ class HVAC
     # Heating Coil (none)
 
     htg_coil = OpenStudio::Model::CoilHeatingElectric.new(model, model.alwaysOffDiscreteSchedule())
-    htg_coil.setName(obj_name + " htg coil")
+    htg_coil.setName(obj_name + ' htg coil')
 
     # PTAC
 
@@ -551,7 +551,7 @@ class HVAC
       perf.addSupplyAirflowRatioField(f)
     end
     air_loop_unitary.setDesignSpecificationMultispeedObject(perf)
-    
+
     # Air Loop
 
     create_air_loop(model, obj_name, air_loop_unitary, control_zone, sequential_heat_load_frac, sequential_cool_load_frac)
@@ -901,6 +901,10 @@ class HVAC
 
       air_loop = create_air_loop(model, obj_name, air_loop_unitary, control_zone, sequential_heat_load_frac, 0)
       hvac_map[heating_system.id] << air_loop
+
+      # Store info for HVAC Sizing measure
+      air_loop_unitary.additionalProperties.setFeature(Constants.SizingInfoHVACFracHeatLoadServed, heating_system.fraction_heat_load_served)
+      air_loop_unitary.additionalProperties.setFeature(Constants.SizingInfoHVACHeatType, Constants.ObjectNameFurnace)
     else
       # Attach to existing cooling unitary system
       # TODO: Is there a simpler approach?
@@ -951,10 +955,11 @@ class HVAC
       control_zone.airLoopHVACTerminals.each do |air_terminal|
         next unless air_terminal.airLoopHVAC.get == air_loop
 
-        air_terminal.setName(obj_name + " terminal")
+        air_terminal.setName(obj_name + ' terminal')
         control_zone.setSequentialHeatingFractionSchedule(air_terminal, get_sequential_load_schedule(model, sequential_heat_load_frac))
       end
 
+      # Store info for HVAC Sizing measure
       attached_clg_system.additionalProperties.setFeature(Constants.SizingInfoHVACFracHeatLoadServed, heating_system.fraction_heat_load_served)
       attached_clg_system.additionalProperties.setFeature(Constants.SizingInfoHVACHeatType, Constants.ObjectNameFurnace)
     end
@@ -1085,7 +1090,7 @@ class HVAC
     # Baseboard Coil
 
     baseboard_coil = OpenStudio::Model::CoilHeatingWaterBaseboard.new(model)
-    baseboard_coil.setName(obj_name + " htg coil")
+    baseboard_coil.setName(obj_name + ' htg coil')
     if not heating_system.heating_capacity.nil?
       baseboard_coil.setHeatingDesignCapacity(UnitConversions.convert([heating_system.heating_capacity, Constants.small].max, 'Btu/hr', 'W')) # Used by HVACSizing measure
     end
@@ -1243,7 +1248,7 @@ class HVAC
     air_flow_rate = 2.75 * water_removal_rate
 
     humidistat = OpenStudio::Model::ZoneControlHumidistat.new(model)
-    humidistat.setName(obj_name + " humidistat")
+    humidistat.setName(obj_name + ' humidistat')
     humidistat.setHumidifyingRelativeHumiditySetpointSchedule(relative_humidity_setpoint_sch)
     humidistat.setDehumidifyingRelativeHumiditySetpointSchedule(relative_humidity_setpoint_sch)
     control_zone.setZoneControlHumidistat(humidistat)
@@ -1411,7 +1416,6 @@ class HVAC
         puts "htg_cfm #{htg_cfm}"
 
         fan = unitary_system.supplyFan.get.to_FanOnOff.get
-        puts "AAAAA"
         if elec_power > 0
           fan_eff = 0.75 # Overall Efficiency of the Fan, Motor and Drive
           fan_w_cfm = elec_power / htg_cfm # W/cfm
@@ -1421,7 +1425,6 @@ class HVAC
           fan.setFanEfficiency(1)
           fan.setPressureRise(0)
         end
-        puts "BBBBBBB"
         fan.setMotorEfficiency(1.0)
         fan.setMotorInAirstreamFraction(1.0)
       end
@@ -1774,7 +1777,7 @@ class HVAC
     fan.setMotorInAirstreamFraction(1.0)
     return fan
   end
-  
+
   def self.create_air_loop_unitary_system(model, obj_name, fan, htg_coil, clg_coil, htg_supp_coil, supp_max_temp, htg_cfm: nil, clg_cfm: nil)
     air_loop_unitary = OpenStudio::Model::AirLoopHVACUnitarySystem.new(model)
     air_loop_unitary.setName(obj_name + ' unitary system')
@@ -1810,7 +1813,7 @@ class HVAC
     end
     return air_loop_unitary
   end
-  
+
   def self.create_air_loop(model, obj_name, system, control_zone, sequential_heat_load_frac, sequential_cool_load_frac)
     air_loop = OpenStudio::Model::AirLoopHVAC.new(model)
     air_loop.setAvailabilitySchedule(model.alwaysOnDiscreteSchedule)
@@ -1826,12 +1829,12 @@ class HVAC
       air_terminal = OpenStudio::Model::AirTerminalSingleDuctVAVNoReheat.new(model, model.alwaysOnDiscreteSchedule)
       air_terminal.setConstantMinimumAirFlowFraction(0)
     end
-    air_terminal.setName(obj_name + " terminal")
+    air_terminal.setName(obj_name + ' terminal')
     air_loop.multiAddBranchForZone(control_zone, air_terminal)
 
     control_zone.setSequentialHeatingFractionSchedule(air_terminal, get_sequential_load_schedule(model, sequential_heat_load_frac))
     control_zone.setSequentialCoolingFractionSchedule(air_terminal, get_sequential_load_schedule(model, sequential_cool_load_frac))
-    
+
     return air_loop
   end
 
