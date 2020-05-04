@@ -554,7 +554,7 @@ class HVAC
 
     # Air Loop
 
-    create_air_loop(model, obj_name, air_loop_unitary, control_zone, sequential_heat_load_frac, sequential_cool_load_frac)
+    air_loop = create_air_loop(model, obj_name, air_loop_unitary, control_zone, sequential_heat_load_frac, sequential_cool_load_frac)
     hvac_map[heat_pump.id] << air_loop
 
     if pan_heater_power > 0
@@ -935,7 +935,7 @@ class HVAC
 
       # Add new disaggregation program
       ems_fan_objects = disaggregate_fan_or_pump(model, fan, htg_coil, attached_clg_system.coolingCoil.get, nil)
-      hvac_map[heating_system.id] << ems_fan_objects
+      hvac_map[heating_system.id] += ems_fan_objects
       hvac_map[attached_clg_sys_id] += ems_fan_objects
 
       attached_clg_system.setHeatingCoil(htg_coil)
@@ -1178,9 +1178,9 @@ class HVAC
 
     # Unitary System
 
-    air_loop_unitary = create_air_loop_unitary_system(model, obj_name, fan, htg_coil, nil, nil)
-    air_loop_unitary.setControllingZoneorThermostatLocation(control_zone)
-    air_loop_unitary.addToThermalZone(control_zone)
+    unitary_system = create_air_loop_unitary_system(model, obj_name, fan, htg_coil, nil, nil)
+    unitary_system.setControllingZoneorThermostatLocation(control_zone)
+    unitary_system.addToThermalZone(control_zone)
     hvac_map[heating_system.id] << unitary_system
 
     control_zone.setSequentialHeatingFractionSchedule(unitary_system, get_sequential_load_schedule(model, sequential_heat_load_frac))
@@ -1413,7 +1413,6 @@ class HVAC
         htg_coil.setParasiticElectricLoad(0.0)
 
         htg_cfm = UnitConversions.convert(unitary_system.supplyAirFlowRateDuringHeatingOperation.get, 'm^3/s', 'cfm')
-        puts "htg_cfm #{htg_cfm}"
 
         fan = unitary_system.supplyFan.get.to_FanOnOff.get
         if elec_power > 0
@@ -1778,7 +1777,7 @@ class HVAC
     return fan
   end
 
-  def self.create_air_loop_unitary_system(model, obj_name, fan, htg_coil, clg_coil, htg_supp_coil, supp_max_temp, htg_cfm: nil, clg_cfm: nil)
+  def self.create_air_loop_unitary_system(model, obj_name, fan, htg_coil, clg_coil, htg_supp_coil, supp_max_temp = nil, htg_cfm: nil, clg_cfm: nil)
     air_loop_unitary = OpenStudio::Model::AirLoopHVACUnitarySystem.new(model)
     air_loop_unitary.setName(obj_name + ' unitary system')
     air_loop_unitary.setAvailabilitySchedule(model.alwaysOnDiscreteSchedule)
