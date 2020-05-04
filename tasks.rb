@@ -178,7 +178,7 @@ def create_osws
     'base-misc-ceiling-fans.osw' => 'base.osw',
     # 'base-misc-defaults.osw' => 'base.osw',
     'base-misc-defaults2.osw' => 'base.osw',
-    # 'base-misc-lighting-none.osw' => 'base.osw', # Not going to support this
+    'base-misc-lighting-none.osw' => 'base.osw',
     'base-misc-neighbor-shading.osw' => 'base.osw',
     'base-misc-runperiod-1-month.osw' => 'base.osw',
     'base-misc-timestep-10-mins.osw' => 'base.osw',
@@ -488,6 +488,12 @@ def get_values(osw_file, step)
     step.setArgument('pv_system_max_power_output_2', 4000)
     step.setArgument('pv_system_inverter_efficiency_2', 0.96)
     step.setArgument('pv_system_system_losses_fraction_2', 0.14)
+    step.setArgument('lighting_fraction_cfl_interior', 0.5)
+    step.setArgument('lighting_fraction_led_interior', 0.25)
+    step.setArgument('lighting_fraction_cfl_exterior', 0.5)
+    step.setArgument('lighting_fraction_led_exterior', 0.25)
+    step.setArgument('lighting_fraction_cfl_garage', 0.5)
+    step.setArgument('lighting_fraction_led_garage', 0.25)
     step.setArgument('lighting_usage_multiplier', 1.0)
     step.setArgument('dehumidifier_present', false)
     step.setArgument('dehumidifier_efficiency_type', 'EnergyFactor')
@@ -1457,6 +1463,13 @@ def get_values(osw_file, step)
     step.setArgument('dhw_distribution_recirc_branch_piping_length', Constants.Auto)
     step.setArgument('dhw_distribution_recirc_pump_power', Constants.Auto)
     step.setArgument('dhw_distribution_pipe_r', 3)
+  elsif ['base-misc-lighting-none.osw'].include? osw_file
+    step.removeArgument('lighting_fraction_cfl_interior')
+    step.removeArgument('lighting_fraction_led_interior')
+    step.removeArgument('lighting_fraction_cfl_exterior')
+    step.removeArgument('lighting_fraction_led_exterior')
+    step.removeArgument('lighting_fraction_cfl_garage')
+    step.removeArgument('lighting_fraction_led_garage')
   elsif ['base-misc-neighbor-shading.osw'].include? osw_file
     step.setArgument('neighbor_back_distance', 10)
     step.setArgument('neighbor_front_distance', 15)
