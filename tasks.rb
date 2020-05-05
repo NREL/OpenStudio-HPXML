@@ -258,7 +258,6 @@ def create_hpxmls
     'base-misc-ceiling-fans.xml' => 'base.xml',
     'base-misc-defaults.xml' => 'base.xml',
     'base-misc-defaults2.xml' => 'base-dhw-recirc-demand.xml',
-    'base-misc-lighting-none.xml' => 'base.xml',
     'base-misc-timestep-10-mins.xml' => 'base.xml',
     'base-misc-runperiod-1-month.xml' => 'base.xml',
     'base-misc-usage-multiplier.xml' => 'base.xml',
@@ -3520,34 +3519,44 @@ end
 
 def set_hpxml_lighting(hpxml_file, hpxml)
   if ['base.xml'].include? hpxml_file
-    hpxml.lighting_groups.add(id: 'Lighting_TierI_Interior',
+    hpxml.lighting_groups.add(id: 'Lighting_CFL_Interior',
                               location: HPXML::LocationInterior,
-                              fration_of_units_in_location: 0.5,
-                              third_party_certification: HPXML::LightingTypeTierI)
-    hpxml.lighting_groups.add(id: 'Lighting_TierI_Exterior',
+                              fraction_of_units_in_location: 0.4,
+                              lighting_type: HPXML::LightingTypeCFL)
+    hpxml.lighting_groups.add(id: 'Lighting_CFL_Exterior',
                               location: HPXML::LocationExterior,
-                              fration_of_units_in_location: 0.5,
-                              third_party_certification: HPXML::LightingTypeTierI)
-    hpxml.lighting_groups.add(id: 'Lighting_TierI_Garage',
+                              fraction_of_units_in_location: 0.4,
+                              lighting_type: HPXML::LightingTypeCFL)
+    hpxml.lighting_groups.add(id: 'Lighting_CFL_Garage',
                               location: HPXML::LocationGarage,
-                              fration_of_units_in_location: 0.5,
-                              third_party_certification: HPXML::LightingTypeTierI)
-    hpxml.lighting_groups.add(id: 'Lighting_TierII_Interior',
+                              fraction_of_units_in_location: 0.4,
+                              lighting_type: HPXML::LightingTypeCFL)
+    hpxml.lighting_groups.add(id: 'Lighting_LFL_Interior',
                               location: HPXML::LocationInterior,
-                              fration_of_units_in_location: 0.25,
-                              third_party_certification: HPXML::LightingTypeTierII)
-    hpxml.lighting_groups.add(id: 'Lighting_TierII_Exterior',
+                              fraction_of_units_in_location: 0.1,
+                              lighting_type: HPXML::LightingTypeLFL)
+    hpxml.lighting_groups.add(id: 'Lighting_LFL_Exterior',
                               location: HPXML::LocationExterior,
-                              fration_of_units_in_location: 0.25,
-                              third_party_certification: HPXML::LightingTypeTierII)
-    hpxml.lighting_groups.add(id: 'Lighting_TierII_Garage',
+                              fraction_of_units_in_location: 0.1,
+                              lighting_type: HPXML::LightingTypeLFL)
+    hpxml.lighting_groups.add(id: 'Lighting_LFL_Garage',
                               location: HPXML::LocationGarage,
-                              fration_of_units_in_location: 0.25,
-                              third_party_certification: HPXML::LightingTypeTierII)
-  elsif ['base-misc-lighting-none.xml'].include? hpxml_file
-    hpxml.lighting_groups.clear
+                              fraction_of_units_in_location: 0.1,
+                              lighting_type: HPXML::LightingTypeLFL)
+    hpxml.lighting_groups.add(id: 'Lighting_LED_Interior',
+                              location: HPXML::LocationInterior,
+                              fraction_of_units_in_location: 0.25,
+                              lighting_type: HPXML::LightingTypeLED)
+    hpxml.lighting_groups.add(id: 'Lighting_LED_Exterior',
+                              location: HPXML::LocationExterior,
+                              fraction_of_units_in_location: 0.25,
+                              lighting_type: HPXML::LightingTypeLED)
+    hpxml.lighting_groups.add(id: 'Lighting_LED_Garage',
+                              location: HPXML::LocationGarage,
+                              fraction_of_units_in_location: 0.25,
+                              lighting_type: HPXML::LightingTypeLED)
   elsif ['invalid_files/lighting-fractions.xml'].include? hpxml_file
-    hpxml.lighting_groups[0].fration_of_units_in_location = 0.8
+    hpxml.lighting_groups[0].fraction_of_units_in_location = 0.8
   elsif ['base-misc-usage-multiplier.xml'].include? hpxml_file
     hpxml.lighting.usage_multiplier = 0.9
   end
