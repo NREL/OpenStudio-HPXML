@@ -3,8 +3,8 @@
   <schema_version>3.0</schema_version>
   <name>build_residential_hpxml</name>
   <uid>a13a8983-2b01-4930-8af2-42030b6e4233</uid>
-  <version_id>64347f52-3fb4-4032-861f-406175586728</version_id>
-  <version_modified>20200504T234649Z</version_modified>
+  <version_id>22b3437a-9b8e-412c-be6c-8db1776ccada</version_id>
+  <version_modified>20200505T205041Z</version_modified>
   <xml_checksum>2C38F48B</xml_checksum>
   <class_name>BuildResidentialHPXML</class_name>
   <display_name>HPXML Builder</display_name>
@@ -1963,12 +1963,25 @@
       <display_name>Heating System 2: Type</display_name>
       <description>The type of the second heating system.</description>
       <type>Choice</type>
-      <required>false</required>
+      <required>true</required>
       <model_dependent>false</model_dependent>
+      <default_value>none</default_value>
       <choices>
+        <choice>
+          <value>none</value>
+          <display_name>none</display_name>
+        </choice>
+        <choice>
+          <value>Furnace</value>
+          <display_name>Furnace</display_name>
+        </choice>
         <choice>
           <value>WallFurnace</value>
           <display_name>WallFurnace</display_name>
+        </choice>
+        <choice>
+          <value>Boiler</value>
+          <display_name>Boiler</display_name>
         </choice>
         <choice>
           <value>ElectricResistance</value>
@@ -1989,8 +2002,9 @@
       <display_name>Heating System 2: Fuel Type</display_name>
       <description>The fuel type of the second heating system. Ignored for ElectricResistance.</description>
       <type>Choice</type>
-      <required>false</required>
+      <required>true</required>
       <model_dependent>false</model_dependent>
+      <default_value>electricity</default_value>
       <choices>
         <choice>
           <value>electricity</value>
@@ -2024,8 +2038,9 @@
       <description>The rated efficiency value of the second Furnace/WallFurnace/Boiler heating system.</description>
       <type>Double</type>
       <units>AFUE</units>
-      <required>false</required>
+      <required>true</required>
       <model_dependent>false</model_dependent>
+      <default_value>0.78</default_value>
     </argument>
     <argument>
       <name>heating_system_heating_efficiency_percent_2</name>
@@ -2033,8 +2048,9 @@
       <description>The rated efficiency value of the second ElectricResistance/Stove/PortableHeater heating system.</description>
       <type>Double</type>
       <units>Percent</units>
-      <required>false</required>
+      <required>true</required>
       <model_dependent>false</model_dependent>
+      <default_value>1</default_value>
     </argument>
     <argument>
       <name>heating_system_heating_capacity_2</name>
@@ -2042,8 +2058,9 @@
       <description>The output heating capacity of the second heating system. If using 'auto', the autosizing algorithm will use ACCA Manual S to set the capacity.</description>
       <type>String</type>
       <units>Btu/hr</units>
-      <required>false</required>
+      <required>true</required>
       <model_dependent>false</model_dependent>
+      <default_value>auto</default_value>
     </argument>
     <argument>
       <name>heating_system_fraction_heat_load_served_2</name>
@@ -2051,8 +2068,9 @@
       <description>The heat load served fraction of the second heating system.</description>
       <type>Double</type>
       <units>Frac</units>
-      <required>false</required>
+      <required>true</required>
       <model_dependent>false</model_dependent>
+      <default_value>0</default_value>
     </argument>
     <argument>
       <name>heating_system_electric_auxiliary_energy_2</name>
@@ -4973,19 +4991,19 @@
       <filename>measure.rb</filename>
       <filetype>rb</filetype>
       <usage_type>script</usage_type>
-      <checksum>83EF881E</checksum>
+      <checksum>9CEAD892</checksum>
     </file>
     <file>
       <filename>extra-second-heating-system.osw</filename>
       <filetype>osw</filetype>
       <usage_type>test</usage_type>
-      <checksum>EC6A09B0</checksum>
+      <checksum>24D106B5</checksum>
     </file>
     <file>
       <filename>build_residential_hpxml_test.rb</filename>
       <filetype>rb</filetype>
       <usage_type>test</usage_type>
-      <checksum>02A0A791</checksum>
+      <checksum>7B252734</checksum>
     </file>
   </files>
 </measure>

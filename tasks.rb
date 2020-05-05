@@ -194,7 +194,7 @@ def create_osws
 
     'invalid_files/non-electric-heat-pump-water-heater.osw' => 'base.osw',
     'invalid_files/multiple-heating-and-cooling-systems.osw' => 'base.osw',
-    'invalid_files/heating-system-fraction-loads-served-greater-than-one.osw' => 'base.osw'
+    'invalid_files/none-second-heating-system-serves-heat.osw' => 'base.osw'
   }
 
   puts "Generating #{osws_files.size} OSW files..."
@@ -417,6 +417,13 @@ def get_values(osw_file, step)
     step.setArgument('ducts_return_location', HPXML::LocationAtticUnvented)
     step.setArgument('ducts_supply_surface_area', 150.0)
     step.setArgument('ducts_return_surface_area', 50.0)
+    step.setArgument('heating_system_type_2', 'none')
+    step.setArgument('heating_system_fuel_2', HPXML::FuelTypeElectricity)
+    step.setArgument('heating_system_heating_efficiency_afue_2', 0.78)
+    step.setArgument('heating_system_heating_efficiency_percent_2', 1.0)
+    step.setArgument('heating_system_heating_capacity_2', Constants.Auto)
+    step.setArgument('heating_system_fraction_heat_load_served_2', 0)
+    step.setArgument('heating_system_electric_auxiliary_energy_2', 0)
     step.setArgument('mech_vent_fan_type', 'none')
     step.setArgument('mech_vent_flow_rate', 110)
     step.setArgument('mech_vent_hours_in_operation', 24)
@@ -1513,19 +1520,15 @@ def get_values(osw_file, step)
     step.setArgument('solar_thermal_system_type', 'hot water')
     step.setArgument('solar_thermal_collector_tilt', 'latitude-15')
   elsif ['extra-second-heating-system.osw'].include? osw_file
-    step.setArgument('heating_system_fraction_heat_load_served', 0.75)
     step.setArgument('heating_system_type_2', HPXML::HVACTypePortableHeater)
-    step.setArgument('heating_system_fuel_2', HPXML::FuelTypeElectricity)
-    step.setArgument('heating_system_heating_efficiency_percent_2', 1.0)
     step.setArgument('heating_system_fraction_heat_load_served_2', 0.25)
   elsif ['invalid_files/non-electric-heat-pump-water-heater.osw'].include? osw_file
     step.setArgument('water_heater_type', HPXML::WaterHeaterTypeHeatPump)
     step.setArgument('water_heater_fuel_type', HPXML::FuelTypeNaturalGas)
   elsif ['invalid_files/multiple-heating-and-cooling-systems.osw'].include? osw_file
     step.setArgument('heat_pump_type', HPXML::HVACTypeHeatPumpAirToAir)
-  elsif ['invalid_files/heating-system-fraction-loads-served-greater-than-one.osw'].include? osw_file
-    step.setArgument('heating_system_fraction_heat_load_served', 0.75)
-    step.setArgument('heating_system_fraction_heat_load_served_2', 0.35)
+  elsif ['invalid_files/none-second-heating-system-serves-heat.osw'].include? osw_file
+    step.setArgument('heating_system_fraction_heat_load_served_2', 0.25)
   end
   return step
 end

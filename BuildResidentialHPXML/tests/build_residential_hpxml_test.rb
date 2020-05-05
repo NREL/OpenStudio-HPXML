@@ -105,7 +105,7 @@ class BuildResidentialHPXMLTest < MiniTest::Test
 
     expected_error_msgs = {
       'multiple-heating-and-cooling-systems.osw' => 'heating_system_type=Furnace and cooling_system_type=central air conditioner and heat_pump_type=air-to-air',
-      'heating-system-fraction-loads-served-greater-than-one.osw' => 'heating_system_fraction_heat_load_served=0.75 and heating_system_fraction_heat_load_served_2=0.35'
+      'none-second-heating-system-serves-heat.osw' => 'heating_system_type_2=none and heating_system_fraction_heat_load_served_2=0.25'
     }
 
     measures = {}
