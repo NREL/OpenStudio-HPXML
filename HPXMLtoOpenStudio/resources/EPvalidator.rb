@@ -33,6 +33,7 @@ class EnergyPlusValidator
     zero_or_more = nil
     one = [1]
     one_or_more = []
+    nine = [9]
 
     requirements = {
 
@@ -91,7 +92,7 @@ class EnergyPlusValidator
         '/HPXML/Building/BuildingDetails/Appliances/Dehumidifier' => zero_or_one, # See [Dehumidifier]
         '/HPXML/Building/BuildingDetails/Appliances/CookingRange' => zero_or_one, # See [CookingRange]
 
-        '/HPXML/Building/BuildingDetails/Lighting' => zero_or_one, # See [Lighting]
+        '/HPXML/Building/BuildingDetails/Lighting' => one, # See [Lighting]
         '/HPXML/Building/BuildingDetails/Lighting/CeilingFan' => zero_or_one, # See [CeilingFan]
 
         '/HPXML/Building/BuildingDetails/MiscLoads/PlugLoad[PlugLoadType="other"]' => zero_or_one, # See [PlugLoads]
@@ -711,12 +712,12 @@ class EnergyPlusValidator
 
       # [Lighting]
       '/HPXML/Building/BuildingDetails/Lighting' => {
-        'LightingGroup[(ThirdPartyCertification="ERI Tier I" or ThirdPartyCertification="ERI Tier II") and (Location="interior" or Location="exterior" or Location="garage")]' => zero_or_six, # See [LightingGroup]
+        'LightingGroup[LightingType[LightEmittingDiode | CompactFluorescent | FluorescentTube] and Location[text()="interior" or text()="exterior" or text()="garage"]]' => nine, # See [LightingGroup]
         'extension/UsageMultiplier' => zero_or_one,
       },
 
       ## [LightingGroup]
-      '/HPXML/Building/BuildingDetails/Lighting/LightingGroup[(ThirdPartyCertification="ERI Tier I" or ThirdPartyCertification="ERI Tier II") and (Location="interior" or Location="exterior" or Location="garage")]' => {
+      'LightingGroup[LightingType[LightEmittingDiode | CompactFluorescent | FluorescentTube] and Location[text()="interior" or text()="exterior" or text()="garage"]]' => {
         'SystemIdentifier' => one, # Required by HPXML schema
         'FractionofUnitsInLocation' => one,
       },
