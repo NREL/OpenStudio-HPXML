@@ -861,6 +861,12 @@ class HPXMLTest < MiniTest::Test
     clg_energy = results.select { |k, v| (k.include?(': Cooling (MBtu)') || k.include?(': Cooling Fans/Pumps (MBtu)')) && !k.include?('Load') }.map { |k, v| v }.inject(0, :+)
     assert_equal(clg_load_frac > 0, clg_energy > 0)
 
+    # Unmet Load
+    if (htg_load_frac == 0.0) and (clg_load_frac == 0.0)
+      assert_in_epsilon(results['Unmet Load: Heating (MBtu)'], results['Load: Heating (MBtu)'], 0.005)
+      assert_in_epsilon(results['Unmet Load: Cooling (MBtu)'], results['Load: Cooling (MBtu)'], 0.005)
+    end
+
     # Water Heater
     if hpxml.water_heating_systems.size > 0
       query = "SELECT SUM(ABS(VariableValue)/1000000000) FROM ReportVariableData WHERE ReportVariableDataDictionaryIndex IN (SELECT ReportVariableDataDictionaryIndex FROM ReportVariableDataDictionary WHERE VariableType='Sum' AND VariableName='Fluid Heat Exchanger Heat Transfer Energy' AND ReportingFrequency='Run Period' AND VariableUnits='J')"
