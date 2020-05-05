@@ -862,9 +862,9 @@ class HPXMLTest < MiniTest::Test
     assert_equal(clg_load_frac > 0, clg_energy > 0)
 
     # Unmet Load
-    if hpxml_path.include? 'base-hvac-ideal-air'
-      assert_in_epsilon(results['Unmet Load: Heating (MBtu)'], results['Load: Heating (MBtu)'], 0.02)
-      assert_in_epsilon(results['Unmet Load: Cooling (MBtu)'], results['Load: Cooling (MBtu)'], 0.02)
+    if (htg_load_frac == 0.0) and (clg_load_frac == 0.0)
+      assert_in_epsilon(results['Unmet Load: Heating (MBtu)'], results['Load: Heating (MBtu)'], 0.002)
+      assert_in_epsilon(results['Unmet Load: Cooling (MBtu)'], results['Load: Cooling (MBtu)'], 0.002)
     end
 
     # Water Heater
