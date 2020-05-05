@@ -2268,6 +2268,7 @@ class HPXML < Object
     end
 
     def attached_cooling_system
+      return if distribution_system.nil?
       distribution_system.hvac_systems.each do |hvac_system|
         next if hvac_system.id == @id
         return hvac_system
@@ -2384,6 +2385,7 @@ class HPXML < Object
     end
 
     def attached_heating_system
+      return if distribution_system.nil?
       distribution_system.hvac_systems.each do |hvac_system|
         next if hvac_system.id == @id
         return hvac_system
