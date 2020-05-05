@@ -863,8 +863,8 @@ class HPXMLTest < MiniTest::Test
 
     # Unmet Load
     if (htg_load_frac == 0.0) and (clg_load_frac == 0.0)
-      assert_in_epsilon(results['Unmet Load: Heating (MBtu)'], results['Load: Heating (MBtu)'], 0.002)
-      assert_in_epsilon(results['Unmet Load: Cooling (MBtu)'], results['Load: Cooling (MBtu)'], 0.002)
+      assert_in_epsilon(results['Unmet Load: Heating (MBtu)'], results['Load: Heating (MBtu)'], 0.005)
+      assert_in_epsilon(results['Unmet Load: Cooling (MBtu)'], results['Load: Cooling (MBtu)'], 0.005)
     end
 
     # Water Heater
