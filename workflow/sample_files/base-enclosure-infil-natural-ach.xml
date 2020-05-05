@@ -53,10 +53,9 @@
         <AirInfiltration>
           <AirInfiltrationMeasurement>
             <SystemIdentifier id='InfiltrationMeasurement'/>
-            <HousePressure>50.0</HousePressure>
             <BuildingAirLeakage>
-              <UnitofMeasure>ACH</UnitofMeasure>
-              <AirLeakage>3.0</AirLeakage>
+              <UnitofMeasure>ACHnatural</UnitofMeasure>
+              <AirLeakage>0.67</AirLeakage>
             </BuildingAirLeakage>
             <InfiltrationVolume>21600.0</InfiltrationVolume>
           </AirInfiltrationMeasurement>
@@ -226,7 +225,7 @@
               <SummerShadingCoefficient>0.7</SummerShadingCoefficient>
               <WinterShadingCoefficient>0.85</WinterShadingCoefficient>
             </InteriorShading>
-            <FractionOperable>0.33</FractionOperable>
+            <FractionOperable>0.67</FractionOperable>
             <AttachedToWall idref='Wall'/>
           </Window>
           <Window>
@@ -240,7 +239,7 @@
               <SummerShadingCoefficient>0.7</SummerShadingCoefficient>
               <WinterShadingCoefficient>0.85</WinterShadingCoefficient>
             </InteriorShading>
-            <FractionOperable>0.33</FractionOperable>
+            <FractionOperable>0.67</FractionOperable>
             <AttachedToWall idref='Wall'/>
           </Window>
           <Window>
@@ -254,7 +253,7 @@
               <SummerShadingCoefficient>0.7</SummerShadingCoefficient>
               <WinterShadingCoefficient>0.85</WinterShadingCoefficient>
             </InteriorShading>
-            <FractionOperable>0.33</FractionOperable>
+            <FractionOperable>0.67</FractionOperable>
             <AttachedToWall idref='Wall'/>
           </Window>
           <Window>
@@ -268,7 +267,7 @@
               <SummerShadingCoefficient>0.7</SummerShadingCoefficient>
               <WinterShadingCoefficient>0.85</WinterShadingCoefficient>
             </InteriorShading>
-            <FractionOperable>0.33</FractionOperable>
+            <FractionOperable>0.67</FractionOperable>
             <AttachedToWall idref='Wall'/>
           </Window>
         </Windows>
@@ -397,21 +396,6 @@
             <LowFlow>false</LowFlow>
           </WaterFixture>
         </WaterHeating>
-        <SolarThermal>
-          <SolarThermalSystem>
-            <SystemIdentifier id='SolarThermalSystem'/>
-            <SystemType>hot water</SystemType>
-            <CollectorArea>40.0</CollectorArea>
-            <CollectorLoopType>passive thermosyphon</CollectorLoopType>
-            <CollectorType>integrated collector storage</CollectorType>
-            <CollectorAzimuth>180</CollectorAzimuth>
-            <CollectorTilt>20.0</CollectorTilt>
-            <CollectorRatedOpticalEfficiency>0.77</CollectorRatedOpticalEfficiency>
-            <CollectorRatedThermalLosses>0.793</CollectorRatedThermalLosses>
-            <StorageVolume>60.0</StorageVolume>
-            <ConnectedTo idref='WaterHeater'/>
-          </SolarThermalSystem>
-        </SolarThermal>
       </Systems>
       <Appliances>
         <ClothesWasher>
@@ -458,40 +442,76 @@
       </Appliances>
       <Lighting>
         <LightingGroup>
-          <SystemIdentifier id='Lighting_TierI_Interior'/>
+          <SystemIdentifier id='Lighting_CFL_Interior'/>
           <Location>interior</Location>
-          <FractionofUnitsInLocation>0.5</FractionofUnitsInLocation>
-          <ThirdPartyCertification>ERI Tier I</ThirdPartyCertification>
+          <FractionofUnitsInLocation>0.4</FractionofUnitsInLocation>
+          <LightingType>
+            <CompactFluorescent/>
+          </LightingType>
         </LightingGroup>
         <LightingGroup>
-          <SystemIdentifier id='Lighting_TierI_Exterior'/>
+          <SystemIdentifier id='Lighting_CFL_Exterior'/>
           <Location>exterior</Location>
-          <FractionofUnitsInLocation>0.5</FractionofUnitsInLocation>
-          <ThirdPartyCertification>ERI Tier I</ThirdPartyCertification>
+          <FractionofUnitsInLocation>0.4</FractionofUnitsInLocation>
+          <LightingType>
+            <CompactFluorescent/>
+          </LightingType>
         </LightingGroup>
         <LightingGroup>
-          <SystemIdentifier id='Lighting_TierI_Garage'/>
+          <SystemIdentifier id='Lighting_CFL_Garage'/>
           <Location>garage</Location>
-          <FractionofUnitsInLocation>0.5</FractionofUnitsInLocation>
-          <ThirdPartyCertification>ERI Tier I</ThirdPartyCertification>
+          <FractionofUnitsInLocation>0.4</FractionofUnitsInLocation>
+          <LightingType>
+            <CompactFluorescent/>
+          </LightingType>
         </LightingGroup>
         <LightingGroup>
-          <SystemIdentifier id='Lighting_TierII_Interior'/>
+          <SystemIdentifier id='Lighting_LFL_Interior'/>
+          <Location>interior</Location>
+          <FractionofUnitsInLocation>0.1</FractionofUnitsInLocation>
+          <LightingType>
+            <FluorescentTube/>
+          </LightingType>
+        </LightingGroup>
+        <LightingGroup>
+          <SystemIdentifier id='Lighting_LFL_Exterior'/>
+          <Location>exterior</Location>
+          <FractionofUnitsInLocation>0.1</FractionofUnitsInLocation>
+          <LightingType>
+            <FluorescentTube/>
+          </LightingType>
+        </LightingGroup>
+        <LightingGroup>
+          <SystemIdentifier id='Lighting_LFL_Garage'/>
+          <Location>garage</Location>
+          <FractionofUnitsInLocation>0.1</FractionofUnitsInLocation>
+          <LightingType>
+            <FluorescentTube/>
+          </LightingType>
+        </LightingGroup>
+        <LightingGroup>
+          <SystemIdentifier id='Lighting_LED_Interior'/>
           <Location>interior</Location>
           <FractionofUnitsInLocation>0.25</FractionofUnitsInLocation>
-          <ThirdPartyCertification>ERI Tier II</ThirdPartyCertification>
+          <LightingType>
+            <LightEmittingDiode/>
+          </LightingType>
         </LightingGroup>
         <LightingGroup>
-          <SystemIdentifier id='Lighting_TierII_Exterior'/>
+          <SystemIdentifier id='Lighting_LED_Exterior'/>
           <Location>exterior</Location>
           <FractionofUnitsInLocation>0.25</FractionofUnitsInLocation>
-          <ThirdPartyCertification>ERI Tier II</ThirdPartyCertification>
+          <LightingType>
+            <LightEmittingDiode/>
+          </LightingType>
         </LightingGroup>
         <LightingGroup>
-          <SystemIdentifier id='Lighting_TierII_Garage'/>
+          <SystemIdentifier id='Lighting_LED_Garage'/>
           <Location>garage</Location>
           <FractionofUnitsInLocation>0.25</FractionofUnitsInLocation>
-          <ThirdPartyCertification>ERI Tier II</ThirdPartyCertification>
+          <LightingType>
+            <LightEmittingDiode/>
+          </LightingType>
         </LightingGroup>
       </Lighting>
       <MiscLoads>

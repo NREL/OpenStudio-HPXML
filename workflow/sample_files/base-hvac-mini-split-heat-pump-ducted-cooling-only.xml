@@ -226,7 +226,7 @@
               <SummerShadingCoefficient>0.7</SummerShadingCoefficient>
               <WinterShadingCoefficient>0.85</WinterShadingCoefficient>
             </InteriorShading>
-            <FractionOperable>0.33</FractionOperable>
+            <FractionOperable>0.67</FractionOperable>
             <AttachedToWall idref='Wall'/>
           </Window>
           <Window>
@@ -240,7 +240,7 @@
               <SummerShadingCoefficient>0.7</SummerShadingCoefficient>
               <WinterShadingCoefficient>0.85</WinterShadingCoefficient>
             </InteriorShading>
-            <FractionOperable>0.33</FractionOperable>
+            <FractionOperable>0.67</FractionOperable>
             <AttachedToWall idref='Wall'/>
           </Window>
           <Window>
@@ -254,7 +254,7 @@
               <SummerShadingCoefficient>0.7</SummerShadingCoefficient>
               <WinterShadingCoefficient>0.85</WinterShadingCoefficient>
             </InteriorShading>
-            <FractionOperable>0.33</FractionOperable>
+            <FractionOperable>0.67</FractionOperable>
             <AttachedToWall idref='Wall'/>
           </Window>
           <Window>
@@ -268,7 +268,7 @@
               <SummerShadingCoefficient>0.7</SummerShadingCoefficient>
               <WinterShadingCoefficient>0.85</WinterShadingCoefficient>
             </InteriorShading>
-            <FractionOperable>0.33</FractionOperable>
+            <FractionOperable>0.67</FractionOperable>
             <AttachedToWall idref='Wall'/>
           </Window>
         </Windows>
@@ -292,18 +292,26 @@
       <Systems>
         <HVAC>
           <HVACPlant>
-            <CoolingSystem>
-              <SystemIdentifier id='CoolingSystem'/>
-              <CoolingSystemType>room air conditioner</CoolingSystemType>
-              <CoolingSystemFuel>electricity</CoolingSystemFuel>
+            <HeatPump>
+              <SystemIdentifier id='HeatPump'/>
+              <DistributionSystem idref='HVACDistribution'/>
+              <HeatPumpType>mini-split</HeatPumpType>
+              <HeatPumpFuel>electricity</HeatPumpFuel>
+              <HeatingCapacity>0.0</HeatingCapacity>
+              <HeatingCapacity17F>0.0</HeatingCapacity17F>
               <CoolingCapacity>48000.0</CoolingCapacity>
+              <CoolingSensibleHeatFraction>0.73</CoolingSensibleHeatFraction>
+              <FractionHeatLoadServed>0.0</FractionHeatLoadServed>
               <FractionCoolLoadServed>1.0</FractionCoolLoadServed>
               <AnnualCoolingEfficiency>
-                <Units>EER</Units>
-                <Value>8.5</Value>
+                <Units>SEER</Units>
+                <Value>19.0</Value>
               </AnnualCoolingEfficiency>
-              <SensibleHeatFraction>0.65</SensibleHeatFraction>
-            </CoolingSystem>
+              <AnnualHeatingEfficiency>
+                <Units>HSPF</Units>
+                <Value>10.0</Value>
+              </AnnualHeatingEfficiency>
+            </HeatPump>
           </HVACPlant>
           <HVACControl>
             <SystemIdentifier id='HVACControl'/>
@@ -311,6 +319,41 @@
             <SetpointTempHeatingSeason>68.0</SetpointTempHeatingSeason>
             <SetpointTempCoolingSeason>78.0</SetpointTempCoolingSeason>
           </HVACControl>
+          <HVACDistribution>
+            <SystemIdentifier id='HVACDistribution'/>
+            <DistributionSystemType>
+              <AirDistribution>
+                <DuctLeakageMeasurement>
+                  <DuctType>supply</DuctType>
+                  <DuctLeakage>
+                    <Units>CFM25</Units>
+                    <Value>15.0</Value>
+                    <TotalOrToOutside>to outside</TotalOrToOutside>
+                  </DuctLeakage>
+                </DuctLeakageMeasurement>
+                <DuctLeakageMeasurement>
+                  <DuctType>return</DuctType>
+                  <DuctLeakage>
+                    <Units>CFM25</Units>
+                    <Value>5.0</Value>
+                    <TotalOrToOutside>to outside</TotalOrToOutside>
+                  </DuctLeakage>
+                </DuctLeakageMeasurement>
+                <Ducts>
+                  <DuctType>supply</DuctType>
+                  <DuctInsulationRValue>0.0</DuctInsulationRValue>
+                  <DuctLocation>attic - unvented</DuctLocation>
+                  <DuctSurfaceArea>30.0</DuctSurfaceArea>
+                </Ducts>
+                <Ducts>
+                  <DuctType>return</DuctType>
+                  <DuctInsulationRValue>0.0</DuctInsulationRValue>
+                  <DuctLocation>attic - unvented</DuctLocation>
+                  <DuctSurfaceArea>10.0</DuctSurfaceArea>
+                </Ducts>
+              </AirDistribution>
+            </DistributionSystemType>
+          </HVACDistribution>
         </HVAC>
         <WaterHeating>
           <WaterHeatingSystem>
@@ -392,40 +435,76 @@
       </Appliances>
       <Lighting>
         <LightingGroup>
-          <SystemIdentifier id='Lighting_TierI_Interior'/>
+          <SystemIdentifier id='Lighting_CFL_Interior'/>
           <Location>interior</Location>
-          <FractionofUnitsInLocation>0.5</FractionofUnitsInLocation>
-          <ThirdPartyCertification>ERI Tier I</ThirdPartyCertification>
+          <FractionofUnitsInLocation>0.4</FractionofUnitsInLocation>
+          <LightingType>
+            <CompactFluorescent/>
+          </LightingType>
         </LightingGroup>
         <LightingGroup>
-          <SystemIdentifier id='Lighting_TierI_Exterior'/>
+          <SystemIdentifier id='Lighting_CFL_Exterior'/>
           <Location>exterior</Location>
-          <FractionofUnitsInLocation>0.5</FractionofUnitsInLocation>
-          <ThirdPartyCertification>ERI Tier I</ThirdPartyCertification>
+          <FractionofUnitsInLocation>0.4</FractionofUnitsInLocation>
+          <LightingType>
+            <CompactFluorescent/>
+          </LightingType>
         </LightingGroup>
         <LightingGroup>
-          <SystemIdentifier id='Lighting_TierI_Garage'/>
+          <SystemIdentifier id='Lighting_CFL_Garage'/>
           <Location>garage</Location>
-          <FractionofUnitsInLocation>0.5</FractionofUnitsInLocation>
-          <ThirdPartyCertification>ERI Tier I</ThirdPartyCertification>
+          <FractionofUnitsInLocation>0.4</FractionofUnitsInLocation>
+          <LightingType>
+            <CompactFluorescent/>
+          </LightingType>
         </LightingGroup>
         <LightingGroup>
-          <SystemIdentifier id='Lighting_TierII_Interior'/>
+          <SystemIdentifier id='Lighting_LFL_Interior'/>
+          <Location>interior</Location>
+          <FractionofUnitsInLocation>0.1</FractionofUnitsInLocation>
+          <LightingType>
+            <FluorescentTube/>
+          </LightingType>
+        </LightingGroup>
+        <LightingGroup>
+          <SystemIdentifier id='Lighting_LFL_Exterior'/>
+          <Location>exterior</Location>
+          <FractionofUnitsInLocation>0.1</FractionofUnitsInLocation>
+          <LightingType>
+            <FluorescentTube/>
+          </LightingType>
+        </LightingGroup>
+        <LightingGroup>
+          <SystemIdentifier id='Lighting_LFL_Garage'/>
+          <Location>garage</Location>
+          <FractionofUnitsInLocation>0.1</FractionofUnitsInLocation>
+          <LightingType>
+            <FluorescentTube/>
+          </LightingType>
+        </LightingGroup>
+        <LightingGroup>
+          <SystemIdentifier id='Lighting_LED_Interior'/>
           <Location>interior</Location>
           <FractionofUnitsInLocation>0.25</FractionofUnitsInLocation>
-          <ThirdPartyCertification>ERI Tier II</ThirdPartyCertification>
+          <LightingType>
+            <LightEmittingDiode/>
+          </LightingType>
         </LightingGroup>
         <LightingGroup>
-          <SystemIdentifier id='Lighting_TierII_Exterior'/>
+          <SystemIdentifier id='Lighting_LED_Exterior'/>
           <Location>exterior</Location>
           <FractionofUnitsInLocation>0.25</FractionofUnitsInLocation>
-          <ThirdPartyCertification>ERI Tier II</ThirdPartyCertification>
+          <LightingType>
+            <LightEmittingDiode/>
+          </LightingType>
         </LightingGroup>
         <LightingGroup>
-          <SystemIdentifier id='Lighting_TierII_Garage'/>
+          <SystemIdentifier id='Lighting_LED_Garage'/>
           <Location>garage</Location>
           <FractionofUnitsInLocation>0.25</FractionofUnitsInLocation>
-          <ThirdPartyCertification>ERI Tier II</ThirdPartyCertification>
+          <LightingType>
+            <LightEmittingDiode/>
+          </LightingType>
         </LightingGroup>
       </Lighting>
       <MiscLoads>

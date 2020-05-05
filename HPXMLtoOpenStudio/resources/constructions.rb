@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require_relative 'constants'
 require_relative 'unit_conversions'
 require_relative 'materials'
@@ -9,7 +11,7 @@ class Constructions
   def self.apply_wood_stud_wall(model, surfaces, constr_name,
                                 cavity_r, install_grade, cavity_depth_in, cavity_filled,
                                 framing_factor, drywall_thick_in, osb_thick_in,
-                                rigid_r, mat_ext_finish)
+                                rigid_r, mat_ext_finish, otherside_drywall_thick_in = 0)
 
     return if surfaces.empty?
 
@@ -49,6 +51,9 @@ class Constructions
       constr.add_layer(mat_ext_finish)
     else # interior wall
       constr.add_layer(Material.AirFilmVertical)
+    end
+    if otherside_drywall_thick_in > 0 # E.g., interior partition wall
+      constr.add_layer(Material.GypsumWall(otherside_drywall_thick_in))
     end
     if not mat_rigid.nil?
       constr.add_layer(mat_rigid)
@@ -971,7 +976,7 @@ class Constructions
 
     Constructions.apply_wood_stud_wall(model, imdefs, constr_name,
                                        0, 1, 3.5, false, 0.16,
-                                       drywall_thick_in, 0, 0, nil)
+                                       drywall_thick_in, 0, 0, nil, drywall_thick_in)
   end
 
   def self.apply_furniture(model, mass_lb_per_sqft, density_lb_per_cuft,
@@ -1173,14 +1178,6 @@ class Constructions
     summer = 0.70
     winter = 0.85
     return summer, winter
-  end
-
-  def self.get_default_door_area()
-    return 40.0 # ft2
-  end
-
-  def self.get_default_door_azimuth()
-    return 0 # North
   end
 
   private

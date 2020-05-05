@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 class FT
   # Fuel Types
   Elec = 'Electricity'
@@ -23,6 +25,7 @@ class EUT
   MechVent = 'Mech Vent'
   WholeHouseFan = 'Whole House Fan'
   Refrigerator = 'Refrigerator'
+  Dehumidifier = 'Dehumidifier'
   Dishwasher = 'Dishwasher'
   ClothesWasher = 'Clothes Washer'
   ClothesDryer = 'Clothes Dryer'
@@ -31,6 +34,14 @@ class EUT
   Television = 'Television'
   PlugLoads = 'Plug Loads'
   PV = 'PV'
+end
+
+class HWT
+  # Hot Water Types
+  ClothesWasher = 'Clothes Washer'
+  Dishwasher = 'Dishwasher'
+  Fixtures = 'Fixtures'
+  DistributionWaste = 'Distribution Waste'
 end
 
 class LT
@@ -68,4 +79,22 @@ class PFT
   # Peak Fuel Types
   Summer = 'Summer'
   Winter = 'Winter'
+end
+
+class AFT
+  # Airflow Types
+  Infiltration = 'Infiltration'
+  MechanicalVentilation = 'Mechanical Ventilation'
+  NaturalVentilation = 'Natural Ventilation'
+  WholeHouseFan = 'Whole House Fan'
+end
+
+class WT
+  # Weather Types
+  DrybulbTemp = 'Drybulb Temperature'
+  WetbulbTemp = 'Wetbulb Temperature'
+  RelativeHumidity = 'Relative Humidity'
+  WindSpeed = 'Wind Speed'
+  DiffuseSolar = 'Diffuse Solar Radiation'
+  DirectSolar = 'Direct Solar Radiation'
 end

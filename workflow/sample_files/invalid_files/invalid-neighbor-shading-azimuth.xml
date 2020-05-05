@@ -25,6 +25,19 @@
             <Fuel>electricity</Fuel>
             <Fuel>natural gas</Fuel>
           </FuelTypesAvailable>
+          <extension>
+            <Neighbors>
+              <NeighborBuilding>
+                <Azimuth>145</Azimuth>
+                <Distance>10.0</Distance>
+              </NeighborBuilding>
+              <NeighborBuilding>
+                <Azimuth>180</Azimuth>
+                <Distance>15.0</Distance>
+                <Height>12.0</Height>
+              </NeighborBuilding>
+            </Neighbors>
+          </extension>
         </Site>
         <BuildingOccupancy>
           <NumberofResidents>3.0</NumberofResidents>
@@ -46,9 +59,7 @@
         <WeatherStation>
           <SystemIdentifier id='WeatherStation'/>
           <Name>Denver, CO</Name>
-          <extension>
-            <EPWFileName>USA_CO_Denver.Intl.AP.725650_TMY3.epw</EPWFileName>
-          </extension>
+          <WMO>725650</WMO>
         </WeatherStation>
       </ClimateandRiskZones>
       <Enclosure>
@@ -228,7 +239,7 @@
               <SummerShadingCoefficient>0.7</SummerShadingCoefficient>
               <WinterShadingCoefficient>0.85</WinterShadingCoefficient>
             </InteriorShading>
-            <FractionOperable>0.33</FractionOperable>
+            <FractionOperable>0.67</FractionOperable>
             <AttachedToWall idref='Wall'/>
           </Window>
           <Window>
@@ -242,7 +253,7 @@
               <SummerShadingCoefficient>0.7</SummerShadingCoefficient>
               <WinterShadingCoefficient>0.85</WinterShadingCoefficient>
             </InteriorShading>
-            <FractionOperable>0.33</FractionOperable>
+            <FractionOperable>0.67</FractionOperable>
             <AttachedToWall idref='Wall'/>
           </Window>
           <Window>
@@ -256,7 +267,7 @@
               <SummerShadingCoefficient>0.7</SummerShadingCoefficient>
               <WinterShadingCoefficient>0.85</WinterShadingCoefficient>
             </InteriorShading>
-            <FractionOperable>0.33</FractionOperable>
+            <FractionOperable>0.67</FractionOperable>
             <AttachedToWall idref='Wall'/>
           </Window>
           <Window>
@@ -270,7 +281,7 @@
               <SummerShadingCoefficient>0.7</SummerShadingCoefficient>
               <WinterShadingCoefficient>0.85</WinterShadingCoefficient>
             </InteriorShading>
-            <FractionOperable>0.33</FractionOperable>
+            <FractionOperable>0.67</FractionOperable>
             <AttachedToWall idref='Wall'/>
           </Window>
         </Windows>
@@ -445,40 +456,76 @@
       </Appliances>
       <Lighting>
         <LightingGroup>
-          <SystemIdentifier id='Lighting_TierI_Interior'/>
+          <SystemIdentifier id='Lighting_CFL_Interior'/>
           <Location>interior</Location>
-          <FractionofUnitsInLocation>0.5</FractionofUnitsInLocation>
-          <ThirdPartyCertification>ERI Tier I</ThirdPartyCertification>
+          <FractionofUnitsInLocation>0.4</FractionofUnitsInLocation>
+          <LightingType>
+            <CompactFluorescent/>
+          </LightingType>
         </LightingGroup>
         <LightingGroup>
-          <SystemIdentifier id='Lighting_TierI_Exterior'/>
+          <SystemIdentifier id='Lighting_CFL_Exterior'/>
           <Location>exterior</Location>
-          <FractionofUnitsInLocation>0.5</FractionofUnitsInLocation>
-          <ThirdPartyCertification>ERI Tier I</ThirdPartyCertification>
+          <FractionofUnitsInLocation>0.4</FractionofUnitsInLocation>
+          <LightingType>
+            <CompactFluorescent/>
+          </LightingType>
         </LightingGroup>
         <LightingGroup>
-          <SystemIdentifier id='Lighting_TierI_Garage'/>
+          <SystemIdentifier id='Lighting_CFL_Garage'/>
           <Location>garage</Location>
-          <FractionofUnitsInLocation>0.5</FractionofUnitsInLocation>
-          <ThirdPartyCertification>ERI Tier I</ThirdPartyCertification>
+          <FractionofUnitsInLocation>0.4</FractionofUnitsInLocation>
+          <LightingType>
+            <CompactFluorescent/>
+          </LightingType>
         </LightingGroup>
         <LightingGroup>
-          <SystemIdentifier id='Lighting_TierII_Interior'/>
+          <SystemIdentifier id='Lighting_LFL_Interior'/>
+          <Location>interior</Location>
+          <FractionofUnitsInLocation>0.1</FractionofUnitsInLocation>
+          <LightingType>
+            <FluorescentTube/>
+          </LightingType>
+        </LightingGroup>
+        <LightingGroup>
+          <SystemIdentifier id='Lighting_LFL_Exterior'/>
+          <Location>exterior</Location>
+          <FractionofUnitsInLocation>0.1</FractionofUnitsInLocation>
+          <LightingType>
+            <FluorescentTube/>
+          </LightingType>
+        </LightingGroup>
+        <LightingGroup>
+          <SystemIdentifier id='Lighting_LFL_Garage'/>
+          <Location>garage</Location>
+          <FractionofUnitsInLocation>0.1</FractionofUnitsInLocation>
+          <LightingType>
+            <FluorescentTube/>
+          </LightingType>
+        </LightingGroup>
+        <LightingGroup>
+          <SystemIdentifier id='Lighting_LED_Interior'/>
           <Location>interior</Location>
           <FractionofUnitsInLocation>0.25</FractionofUnitsInLocation>
-          <ThirdPartyCertification>ERI Tier II</ThirdPartyCertification>
+          <LightingType>
+            <LightEmittingDiode/>
+          </LightingType>
         </LightingGroup>
         <LightingGroup>
-          <SystemIdentifier id='Lighting_TierII_Exterior'/>
+          <SystemIdentifier id='Lighting_LED_Exterior'/>
           <Location>exterior</Location>
           <FractionofUnitsInLocation>0.25</FractionofUnitsInLocation>
-          <ThirdPartyCertification>ERI Tier II</ThirdPartyCertification>
+          <LightingType>
+            <LightEmittingDiode/>
+          </LightingType>
         </LightingGroup>
         <LightingGroup>
-          <SystemIdentifier id='Lighting_TierII_Garage'/>
+          <SystemIdentifier id='Lighting_LED_Garage'/>
           <Location>garage</Location>
           <FractionofUnitsInLocation>0.25</FractionofUnitsInLocation>
-          <ThirdPartyCertification>ERI Tier II</ThirdPartyCertification>
+          <LightingType>
+            <LightEmittingDiode/>
+          </LightingType>
         </LightingGroup>
       </Lighting>
       <MiscLoads>
