@@ -1860,22 +1860,28 @@ class Airflow
   def self.calc_inferred_infiltration_height(cfa, ncfl, ncfl_ag, infil_volume, hpxml)
     # Infiltration height: vertical distance between lowest and highest above-grade points within the pressure boundary.
     # Height is inferred from available HPXML properties.
-    has_walkout_basement = hpxml.has_walkout_basement()
-
-    if has_walkout_basement
+    # FIXME: Use WithinInfiltrationVolume properties
+    if hpxml.has_walkout_basement()
       infil_height = Float(ncfl_ag) * infil_volume / cfa
     else
       # Calculate maximum above-grade height of conditioned basement walls
       max_cond_bsmt_wall_height_ag = 0.0
       hpxml.foundation_walls.each do |foundation_wall|
-        next unless foundation_wall.is_exterior_thermal_boundary
+        next unless foundation_wall.is_exterior && (foundation_wall.interior_adjacent_to == HPXML::LocationBasementConditioned)
 
         height_ag = foundation_wall.height - foundation_wall.depth_below_grade
         next unless height_ag > max_cond_bsmt_wall_height_ag
 
         max_cond_bsmt_wall_height_ag = height_ag
       end
-      infil_height = Float(ncfl_ag) * infil_volume / cfa + max_cond_bsmt_wall_height_ag
+      # Add assumed rim joist height
+      cond_bsmt_rim_joist_height = 0
+      hpxml.rim_joists.each do |rim_joist|
+        next unless rim_joist.is_exterior && (rim_joist.interior_adjacent_to == HPXML::LocationBasementConditioned)
+
+        cond_bsmt_rim_joist_height = UnitConversions.convert(9, 'in', 'ft')
+      end
+      infil_height = Float(ncfl_ag) * infil_volume / cfa + max_cond_bsmt_wall_height_ag + cond_bsmt_rim_joist_height
     end
     return infil_height
   end
