@@ -126,6 +126,7 @@ def create_osws
     'base-hvac-evap-cooler-only.osw' => 'base.osw',
     'base-hvac-evap-cooler-only-ducted.osw' => 'base.osw',
     # 'base-hvac-flowrate.osw' => 'base.osw', # Not going to support in the measure
+    'base-hvac-furnace-elec-central-ac-1-speed.osw' => 'base.osw',
     'base-hvac-furnace-elec-only.osw' => 'base.osw',
     'base-hvac-furnace-gas-central-ac-2-speed.osw' => 'base.osw',
     'base-hvac-furnace-gas-central-ac-var-speed.osw' => 'base.osw',
@@ -143,6 +144,7 @@ def create_osws
     'base-hvac-mini-split-heat-pump-ductless.osw' => 'base.osw',
     'base-hvac-mini-split-heat-pump-ductless-no-backup.osw' => 'base.osw',
     # 'base-hvac-multiple.osw' => 'base.osw', # Not supporting multiple heating/cooling systems for now
+    # 'base-hvac-multiple2.osw' => 'base.osw', # Not supporting multiple heating/cooling systems for now
     'base-hvac-none.osw' => 'base.osw',
     # 'base-hvac-none-no-fuel-access.osw' => 'base.osw', # Doesn't affect model
     'base-hvac-portable-heater-electric-only.osw' => 'base.osw',
@@ -178,7 +180,6 @@ def create_osws
     'base-misc-ceiling-fans.osw' => 'base.osw',
     # 'base-misc-defaults.osw' => 'base.osw',
     'base-misc-defaults2.osw' => 'base.osw',
-    'base-misc-lighting-none.osw' => 'base.osw',
     'base-misc-neighbor-shading.osw' => 'base.osw',
     'base-misc-runperiod-1-month.osw' => 'base.osw',
     'base-misc-timestep-10-mins.osw' => 'base.osw',
@@ -488,12 +489,14 @@ def get_values(osw_file, step)
     step.setArgument('pv_system_max_power_output_2', 4000)
     step.setArgument('pv_system_inverter_efficiency_2', 0.96)
     step.setArgument('pv_system_system_losses_fraction_2', 0.14)
-    step.setArgument('lighting_present', true)
-    step.setArgument('lighting_fraction_fluorescent_interior', 0.5)
+    step.setArgument('lighting_fraction_cfl_interior', 0.4)
+    step.setArgument('lighting_fraction_lfl_interior', 0.1)
     step.setArgument('lighting_fraction_led_interior', 0.25)
-    step.setArgument('lighting_fraction_fluorescent_exterior', 0.5)
+    step.setArgument('lighting_fraction_cfl_exterior', 0.4)
+    step.setArgument('lighting_fraction_lfl_exterior', 0.1)
     step.setArgument('lighting_fraction_led_exterior', 0.25)
-    step.setArgument('lighting_fraction_fluorescent_garage', 0.5)
+    step.setArgument('lighting_fraction_cfl_garage', 0.4)
+    step.setArgument('lighting_fraction_lfl_garage', 0.1)
     step.setArgument('lighting_fraction_led_garage', 0.25)
     step.setArgument('lighting_usage_multiplier', 1.0)
     step.setArgument('dehumidifier_present', false)
@@ -1219,6 +1222,9 @@ def get_values(osw_file, step)
     step.removeArgument('cooling_system_cooling_compressor_type')
     step.removeArgument('cooling_system_cooling_sensible_heat_fraction')
     step.setArgument('cooling_system_evap_cooler_is_ducted', true)
+  elsif ['base-hvac-furnace-elec-central-ac-1-speed.osw'].include? osw_file
+    step.setArgument('heating_system_fuel', HPXML::FuelTypeElectricity)
+    step.setArgument('heating_system_heating_efficiency_afue', 1.0)
   elsif ['base-hvac-furnace-elec-only.osw'].include? osw_file
     step.setArgument('heating_system_fuel', HPXML::FuelTypeElectricity)
     step.setArgument('heating_system_heating_efficiency_afue', 1.0)
@@ -1464,8 +1470,6 @@ def get_values(osw_file, step)
     step.setArgument('dhw_distribution_recirc_branch_piping_length', Constants.Auto)
     step.setArgument('dhw_distribution_recirc_pump_power', Constants.Auto)
     step.setArgument('dhw_distribution_pipe_r', 3)
-  elsif ['base-misc-lighting-none.osw'].include? osw_file
-    step.setArgument('lighting_present', false)
   elsif ['base-misc-neighbor-shading.osw'].include? osw_file
     step.setArgument('neighbor_back_distance', 10)
     step.setArgument('neighbor_front_distance', 15)
