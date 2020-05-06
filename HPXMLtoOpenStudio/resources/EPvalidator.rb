@@ -30,10 +30,10 @@ class EnergyPlusValidator
     zero_or_five = [0, 5]
     zero_or_six = [0, 6]
     zero_or_seven = [0, 7]
-    zero_or_nine = [0, 9]
     zero_or_more = nil
     one = [1]
     one_or_more = []
+    nine = [9]
 
     requirements = {
 
@@ -711,7 +711,7 @@ class EnergyPlusValidator
 
       # [Lighting]
       '/HPXML/Building/BuildingDetails/Lighting' => {
-        'LightingGroup[LightingType[LightEmittingDiode | CompactFluorescent | FluorescentTube] and Location[text()="interior" or text()="exterior" or text()="garage"]]' => zero_or_nine, # See [LightingGroup]
+        'LightingGroup[LightingType[LightEmittingDiode | CompactFluorescent | FluorescentTube] and Location[text()="interior" or text()="exterior" or text()="garage"]]' => nine, # See [LightingGroup]
         'extension/UsageMultiplier' => zero_or_one,
       },
 
