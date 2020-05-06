@@ -30,6 +30,7 @@ class EnergyPlusValidator
     zero_or_five = [0, 5]
     zero_or_six = [0, 6]
     zero_or_seven = [0, 7]
+    zero_or_nine = [0, 9]
     zero_or_more = nil
     one = [1]
     one_or_more = []
@@ -56,7 +57,7 @@ class EnergyPlusValidator
         '/HPXML/Building/BuildingDetails/ClimateandRiskZones/ClimateZoneIECC' => zero_or_one, # See [ClimateZone]
         '/HPXML/Building/BuildingDetails/ClimateandRiskZones/WeatherStation' => one, # See [WeatherStation]
 
-        '/HPXML/Building/BuildingDetails/Enclosure/AirInfiltration/AirInfiltrationMeasurement[number(HousePressure)=50]/BuildingAirLeakage[UnitofMeasure="ACH" or UnitofMeasure="CFM"]/AirLeakage | /HPXML/Building/BuildingDetails/Enclosure/AirInfiltration/AirInfiltrationMeasurement/extension/ConstantACHnatural' => one, # see [AirInfiltration]
+        '/HPXML/Building/BuildingDetails/Enclosure/AirInfiltration/AirInfiltrationMeasurement[BuildingAirLeakage/UnitofMeasure[text()="ACH" or text()="CFM" or text()="ACHnatural"]]' => one, # see [AirInfiltration]
 
         '/HPXML/Building/BuildingDetails/Enclosure/Roofs/Roof' => zero_or_more, # See [Roof]
         '/HPXML/Building/BuildingDetails/Enclosure/Walls/Wall' => one_or_more, # See [Wall]
@@ -141,9 +142,11 @@ class EnergyPlusValidator
       },
 
       # [AirInfiltration]
-      '/HPXML/Building/BuildingDetails/Enclosure/AirInfiltration/AirInfiltrationMeasurement[number(HousePressure)=50 and BuildingAirLeakage[UnitofMeasure="ACH" or UnitofMeasure="CFM"]/AirLeakage] | /HPXML/Building/BuildingDetails/Enclosure/AirInfiltration/AirInfiltrationMeasurement[extension/ConstantACHnatural]' => {
+      '/HPXML/Building/BuildingDetails/Enclosure/AirInfiltration/AirInfiltrationMeasurement[BuildingAirLeakage/UnitofMeasure[text()="ACH" or text()="CFM" or text()="ACHnatural"]]' => {
         'SystemIdentifier' => one, # Required by HPXML schema
-        'InfiltrationVolume' => zero_or_one, # Assumes InfiltrationVolume = ConditionedVolume if not provided
+        '[(number(HousePressure)=50 and BuildingAirLeakage/UnitofMeasure!="ACHnatural") or (not(HousePressure) and BuildingAirLeakage/UnitofMeasure="ACHnatural")]' => one,
+        'BuildingAirLeakage/AirLeakage' => one,
+        'InfiltrationVolume' => zero_or_one,
       },
 
       # [Roof]
@@ -162,7 +165,7 @@ class EnergyPlusValidator
 
       ## [VentedAttic]
       '/HPXML/Building/BuildingDetails/Enclosure/Roofs/Roof[InteriorAdjacentTo="attic - vented"]' => {
-        '../../Attics/Attic[AtticType/Attic[Vented="true"]]/VentilationRate[UnitofMeasure="SLA"]/Value | ../../Attics/Attic[AtticType/Attic[Vented="true"]]/extension/ConstantACHnatural' => zero_or_one,
+        '../../Attics/Attic[AtticType/Attic[Vented="true"]]/VentilationRate[UnitofMeasure="SLA" or UnitofMeasure="ACHnatural"]/Value' => zero_or_one,
       },
 
       # [Wall]
@@ -457,7 +460,8 @@ class EnergyPlusValidator
       '/HPXML/Building/BuildingDetails/Systems/HVAC/HVACDistribution/DistributionSystemType/AirDistribution' => {
         '../../ConditionedFloorAreaServed' => one,
         'DuctLeakageMeasurement[DuctType="supply"]/DuctLeakage[(Units="CFM25" or Units="Percent") and TotalOrToOutside="to outside"]/Value' => one,
-        'DuctLeakageMeasurement[DuctType="return"]/DuctLeakage[(Units="CFM25" or Units="Percent") and TotalOrToOutside="to outside"]/Value' => zero_or_one, 'Ducts[DuctType="supply"]' => zero_or_more, # See [HVACDuct]
+        'DuctLeakageMeasurement[DuctType="return"]/DuctLeakage[(Units="CFM25" or Units="Percent") and TotalOrToOutside="to outside"]/Value' => zero_or_one,
+        'Ducts[DuctType="supply"]' => zero_or_more, # See [HVACDuct]
         'Ducts[DuctType="return"]' => zero_or_more, # See [HVACDuct]
         'NumberofReturnRegisters' => zero_or_one,
       },
@@ -471,12 +475,7 @@ class EnergyPlusValidator
       ## [HVACDuct]
       '/HPXML/Building/BuildingDetails/Systems/HVAC/HVACDistribution/DistributionSystemType/AirDistribution/Ducts[DuctType="supply" or DuctType="return"]' => {
         'DuctInsulationRValue' => one,
-        'DuctLocation[text()="living space" or text()="basement - conditioned" or text()="basement - unconditioned" or text()="crawlspace - vented" or text()="crawlspace - unvented" or text()="attic - vented" or text()="attic - unvented" or text()="garage" or text()="outside"] | DuctSurfaceArea' => zero_or_two,
-      },
-      # All or none in terms of surface area defaulting.
-      # FIXME: Please review the xpath expression below:
-      '/HPXML/Building/BuildingDetails/Systems/HVAC/HVACDistribution/DistributionSystemType/AirDistribution/Ducts[(DuctType="supply" or DuctType="return") and not(DuctSurfaceArea)]' => {
-        '//DuctSurfaceArea' => zero,
+        'DuctSurfaceArea | DuctLocation[text()="living space" or text()="basement - conditioned" or text()="basement - unconditioned" or text()="crawlspace - vented" or text()="crawlspace - unvented" or text()="attic - vented" or text()="attic - unvented" or text()="garage" or text()="outside"]' => zero_or_two,
       },
 
       # [MechanicalVentilation]
@@ -714,12 +713,12 @@ class EnergyPlusValidator
 
       # [Lighting]
       '/HPXML/Building/BuildingDetails/Lighting' => {
-        'LightingGroup[(ThirdPartyCertification="ERI Tier I" or ThirdPartyCertification="ERI Tier II") and (Location="interior" or Location="exterior" or Location="garage")]' => zero_or_six, # See [LightingGroup]
+        'LightingGroup[LightingType[LightEmittingDiode | CompactFluorescent | FluorescentTube] and Location[text()="interior" or text()="exterior" or text()="garage"]]' => zero_or_nine, # See [LightingGroup]
         'extension/UsageMultiplier' => zero_or_one,
       },
 
       ## [LightingGroup]
-      '/HPXML/Building/BuildingDetails/Lighting/LightingGroup[(ThirdPartyCertification="ERI Tier I" or ThirdPartyCertification="ERI Tier II") and (Location="interior" or Location="exterior" or Location="garage")]' => {
+      'LightingGroup[LightingType[LightEmittingDiode | CompactFluorescent | FluorescentTube] and Location[text()="interior" or text()="exterior" or text()="garage"]]' => {
         'SystemIdentifier' => one, # Required by HPXML schema
         'FractionofUnitsInLocation' => one,
       },

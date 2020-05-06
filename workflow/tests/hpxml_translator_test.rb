@@ -25,13 +25,15 @@ class HPXMLTest < MiniTest::Test
 
     sample_files_dir = File.absolute_path(File.join(this_dir, '..', 'sample_files'))
     autosize_dir = File.absolute_path(File.join(this_dir, '..', 'sample_files', 'hvac_autosizing'))
+    ashrae_140_dir = File.absolute_path(File.join(this_dir, 'ASHRAE_Standard_140'))
 
     test_dirs = [sample_files_dir,
-                 autosize_dir]
+                 autosize_dir,
+                 ashrae_140_dir]
 
     xmls = []
     test_dirs.each do |test_dir|
-      Dir["#{test_dir}/base*.xml"].sort.each do |xml|
+      Dir["#{test_dir}/*.xml"].sort.each do |xml|
         xmls << File.absolute_path(xml)
       end
     end
@@ -47,6 +49,7 @@ class HPXMLTest < MiniTest::Test
     Dir.mkdir(results_dir)
     _write_summary_results(results_dir, all_results)
     _write_hvac_sizing_results(results_dir, all_sizing_results)
+    _write_ashrae_140_results(results_dir, all_results, ashrae_140_dir)
   end
 
   def test_run_simulation_rb
@@ -133,7 +136,7 @@ class HPXMLTest < MiniTest::Test
                             'clothes-washer-location-other.xml' => ['Expected [1] element(s) but found 0 element(s) for xpath: /HPXML/Building/BuildingDetails/Appliances/ClothesWasher: [not(Location)] |'],
                             'dhw-frac-load-served.xml' => ['Expected FractionDHWLoadServed to sum to 1, but calculated sum is 1.15.'],
                             'duct-location.xml' => ["Duct location is 'garage' but building does not have this location specified."],
-                            'duct-location-other.xml' => ['Expected [0, 2] element(s) but found 1 element(s) for xpath: /HPXML/Building/BuildingDetails/Systems/HVAC/HVACDistribution/DistributionSystemType/AirDistribution/Ducts[DuctType="supply" or DuctType="return"]: DuctLocation[text()="living space" or text()="basement - conditioned" or text()="basement - unconditioned" or text()="crawlspace - vented" or text()="crawlspace - unvented" or text()="attic - vented" or text()="attic - unvented" or text()="garage" or text()="outside"] | DuctSurfaceArea'],
+                            'duct-location-other.xml' => ['Expected [0, 2] element(s) but found 1 element(s) for xpath: /HPXML/Building/BuildingDetails/Systems/HVAC/HVACDistribution/DistributionSystemType/AirDistribution/Ducts[DuctType="supply" or DuctType="return"]: DuctSurfaceArea | DuctLocation[text()="living space" or text()="basement - conditioned" or text()="basement - unconditioned" or text()="crawlspace - vented" or text()="crawlspace - unvented" or text()="attic - vented" or text()="attic - unvented" or text()="garage" or text()="outside"]'],
                             'duplicate-id.xml' => ["Duplicate SystemIdentifier IDs detected for 'Wall'."],
                             'heat-pump-mixed-fixed-and-autosize-capacities.xml' => ["HeatPump 'HeatPump' must have both HeatingCapacity and HeatingCapacity17F provided or not provided."],
                             'heat-pump-mixed-fixed-and-autosize-capacities2.xml' => ["HeatPump 'HeatPump' must have both HeatingCapacity and BackupHeatingCapacity provided or not provided."],
@@ -145,6 +148,7 @@ class HPXMLTest < MiniTest::Test
                             'hvac-frac-load-served.xml' => ['Expected FractionCoolLoadServed to sum to <= 1, but calculated sum is 1.2.',
                                                             'Expected FractionHeatLoadServed to sum to <= 1, but calculated sum is 1.1.'],
                             'hvac-distribution-return-duct-leakage-missing.xml' => ["Return ducts exist but leakage was not specified for distribution system 'HVACDistribution'."],
+                            'invalid-distribution-cfa-served.xml' => ['Error: The total conditioned floor area served by the HVAC distribution system(s) is larger than the conditioned floor area of the building.'],
                             'invalid-epw-filepath.xml' => ["foo.epw' could not be found."],
                             'invalid-neighbor-shading-azimuth.xml' => ['A neighbor building has an azimuth (145) not equal to the azimuth of any wall.'],
                             'invalid-relatedhvac-dhw-indirect.xml' => ["RelatedHVACSystem 'HeatingSystem_bad' not found for water heating system 'WaterHeater'"],
@@ -154,13 +158,13 @@ class HPXMLTest < MiniTest::Test
                             'invalid-window-height.xml' => ["For Window 'WindowEast', overhangs distance to bottom (2.0) must be greater than distance to top (2.0)."],
                             'invalid-window-interior-shading.xml' => ["SummerShadingCoefficient (0.85) must be less than or equal to WinterShadingCoefficient (0.7) for window 'WindowNorth'."],
                             'invalid-wmo.xml' => ["Weather station WMO '999999' could not be found in"],
-                            'lighting-fractions.xml' => ['Sum of fractions of interior lighting (1.05) is greater than 1.'],
+                            'lighting-fractions.xml' => ['Sum of fractions of interior lighting (1.15) is greater than 1.'],
                             'mismatched-slab-and-foundation-wall.xml' => ["Foundation wall 'FoundationWall' is adjacent to 'basement - conditioned' but no corresponding slab was found adjacent to"],
                             'missing-elements.xml' => ['Expected [1] element(s) but found 0 element(s) for xpath: /HPXML/Building/BuildingDetails/BuildingSummary/BuildingConstruction: NumberofConditionedFloors',
                                                        'Expected [1] element(s) but found 0 element(s) for xpath: /HPXML/Building/BuildingDetails/BuildingSummary/BuildingConstruction: ConditionedFloorArea'],
                             'missing-surfaces.xml' => ["'garage' must have at least one floor surface."],
-                            'missing-duct-location.xml' => ['Expected [0, 2] element(s) but found 1 element(s) for xpath: /HPXML/Building/BuildingDetails/Systems/HVAC/HVACDistribution/DistributionSystemType/AirDistribution/Ducts[DuctType="supply" or DuctType="return"]: DuctLocation[text()="living space" or text()="basement - conditioned" or text()="basement - unconditioned" or text()="crawlspace - vented" or text()="crawlspace - unvented" or text()="attic - vented" or text()="attic - unvented" or text()="garage" or text()="outside"] | DuctSurfaceArea'],
-                            'missing-duct-location-and-surface-area.xml' => ['Expected [0] element(s) but found 12 element(s) for xpath: /HPXML/Building/BuildingDetails/Systems/HVAC/HVACDistribution/DistributionSystemType/AirDistribution/Ducts[(DuctType="supply" or DuctType="return") and not(DuctSurfaceArea)]: //DuctSurfaceArea'],
+                            'missing-duct-location.xml' => ['Expected [0, 2] element(s) but found 1 element(s) for xpath: /HPXML/Building/BuildingDetails/Systems/HVAC/HVACDistribution/DistributionSystemType/AirDistribution/Ducts[DuctType="supply" or DuctType="return"]: DuctSurfaceArea | DuctLocation[text()="living space" or text()="basement - conditioned" or text()="basement - unconditioned" or text()="crawlspace - vented" or text()="crawlspace - unvented" or text()="attic - vented" or text()="attic - unvented" or text()="garage" or text()="outside"]'],
+                            'missing-duct-location-and-surface-area.xml' => ['Error: The location and surface area of all ducts must be provided or blank.'],
                             'net-area-negative-wall.xml' => ["Calculated a negative net surface area for surface 'Wall'."],
                             'net-area-negative-roof.xml' => ["Calculated a negative net surface area for surface 'Roof'."],
                             'orphaned-hvac-distribution.xml' => ["Distribution system 'HVACDistribution' found but no HVAC system attached to it."],
@@ -195,7 +199,7 @@ class HPXMLTest < MiniTest::Test
     return results, sizing_results
   end
 
-  def _get_results(rundir, sim_time, workflow_time, annual_csv_path)
+  def _get_results(rundir, sim_time, workflow_time, annual_csv_path, xml)
     # Grab all outputs from reporting measure CSV annual results
     results = {}
     CSV.foreach(annual_csv_path) do |row|
@@ -216,7 +220,7 @@ class HPXMLTest < MiniTest::Test
     # TODO: Add to reporting measure?
     htg_cap_w = 0
     for spd in [4, 2]
-      # Get capacity of highest speed for multispeed coil
+      # Get capacity of highest speed for multi-speed coil
       query = "SELECT SUM(Value) FROM ComponentSizes WHERE CompType='Coil:Heating:DX:MultiSpeed' AND Description LIKE '%User-Specified Speed #{spd}%Capacity' AND Units='W'"
       htg_cap_w += sqlFile.execAndReturnFirstDouble(query).get
       break if htg_cap_w > 0
@@ -227,7 +231,7 @@ class HPXMLTest < MiniTest::Test
 
     clg_cap_w = 0
     for spd in [4, 2]
-      # Get capacity of highest speed for multispeed coil
+      # Get capacity of highest speed for multi-speed coil
       query = "SELECT SUM(Value) FROM ComponentSizes WHERE CompType='Coil:Cooling:DX:MultiSpeed' AND Description LIKE 'User-Specified Speed #{spd}%Total%Capacity' AND Units='W'"
       clg_cap_w += sqlFile.execAndReturnFirstDouble(query).get
       break if clg_cap_w > 0
@@ -239,12 +243,14 @@ class HPXMLTest < MiniTest::Test
     sqlFile.close
 
     # Check discrepancy between total load and sum of component loads
-    sum_component_htg_loads = results.select { |k, v| k.start_with? 'Component Load: Heating:' }.map { |k, v| v }.inject(0, :+)
-    sum_component_clg_loads = results.select { |k, v| k.start_with? 'Component Load: Cooling:' }.map { |k, v| v }.inject(0, :+)
-    residual_htg_load = results['Load: Heating (MBtu)'] - sum_component_htg_loads
-    residual_clg_load = results['Load: Cooling (MBtu)'] - sum_component_clg_loads
-    assert_operator(residual_htg_load.abs, :<, 0.45)
-    assert_operator(residual_clg_load.abs, :<, 0.45)
+    if not xml.include? 'ASHRAE_Standard_140'
+      sum_component_htg_loads = results.select { |k, v| k.start_with? 'Component Load: Heating:' }.map { |k, v| v }.inject(0, :+)
+      sum_component_clg_loads = results.select { |k, v| k.start_with? 'Component Load: Cooling:' }.map { |k, v| v }.inject(0, :+)
+      residual_htg_load = results['Load: Heating (MBtu)'] - sum_component_htg_loads
+      residual_clg_load = results['Load: Cooling (MBtu)'] - sum_component_clg_loads
+      assert_operator(residual_htg_load.abs, :<, 0.45)
+      assert_operator(residual_clg_load.abs, :<, 0.45)
+    end
 
     results[@@simulation_runtime_key] = sim_time
     results[@@workflow_runtime_key] = workflow_time
@@ -271,7 +277,11 @@ class HPXMLTest < MiniTest::Test
     measure_subdir = 'HPXMLtoOpenStudio'
     args = {}
     args['hpxml_path'] = xml
-    args['weather_dir'] = 'weather'
+    if xml.include? 'ASHRAE_Standard_140'
+      args['weather_dir'] = File.join(File.dirname(xml), 'weather')
+    else
+      args['weather_dir'] = 'weather'
+    end
     args['output_dir'] = File.absolute_path(rundir)
     args['debug'] = true
     update_args_hash(measures, measure_subdir, args)
@@ -411,7 +421,7 @@ class HPXMLTest < MiniTest::Test
     assert(File.exist? annual_csv_path)
     assert(File.exist? timeseries_csv_path)
 
-    results = _get_results(rundir, sim_time, workflow_time, annual_csv_path)
+    results = _get_results(rundir, sim_time, workflow_time, annual_csv_path, xml)
 
     # Verify simulation outputs
     _verify_simulation_outputs(runner, rundir, xml, results)
@@ -556,7 +566,9 @@ class HPXMLTest < MiniTest::Test
                                     'base-foundation-walkout-basement.xml' => 4,      # 3 foundation walls plus a no-wall exposed perimeter
                                     'base-foundation-complex.xml' => 10 }
 
-    if not num_expected_kiva_instances[File.basename(hpxml_path)].nil?
+    if hpxml_path.include? 'ASHRAE_Standard_140'
+      # nop
+    elsif not num_expected_kiva_instances[File.basename(hpxml_path)].nil?
       assert_equal(num_expected_kiva_instances[File.basename(hpxml_path)], num_kiva_instances)
     else
       assert_equal(1, num_kiva_instances)
@@ -670,7 +682,7 @@ class HPXMLTest < MiniTest::Test
       hpxml_value = subsurface.ufactor
       query = "SELECT Value FROM TabularDataWithStrings WHERE ReportName='EnvelopeSummary' AND ReportForString='Entire Facility' AND TableName='Exterior Fenestration' AND RowName='#{subsurface_id}' AND ColumnName='Glass U-Factor' AND Units='W/m2-K'"
       sql_value = UnitConversions.convert(sqlFile.execAndReturnFirstDouble(query).get, 'W/(m^2*K)', 'Btu/(hr*ft^2*F)')
-      assert_in_epsilon(hpxml_value, sql_value, 0.01)
+      assert_in_epsilon(hpxml_value, sql_value, 0.02)
 
       # SHGC
       # TODO: Affected by interior shading
@@ -851,6 +863,12 @@ class HPXMLTest < MiniTest::Test
     end
     clg_energy = results.select { |k, v| (k.include?(': Cooling (MBtu)') || k.include?(': Cooling Fans/Pumps (MBtu)')) && !k.include?('Load') }.map { |k, v| v }.inject(0, :+)
     assert_equal(clg_load_frac > 0, clg_energy > 0)
+
+    # Unmet Load
+    if (htg_load_frac == 0.0) && (clg_load_frac == 0.0)
+      assert_in_epsilon(results['Unmet Load: Heating (MBtu)'], results['Load: Heating (MBtu)'], 0.005)
+      assert_in_epsilon(results['Unmet Load: Cooling (MBtu)'], results['Load: Cooling (MBtu)'], 0.005)
+    end
 
     # Water Heater
     if hpxml.water_heating_systems.size > 0
@@ -1077,6 +1095,29 @@ class HPXMLTest < MiniTest::Test
     end
 
     puts "Wrote HVAC sizing results to #{csv_out}."
+  end
+
+  def _write_ashrae_140_results(results_dir, all_results, ashrae_140_dir)
+    require 'csv'
+    csv_out = File.join(results_dir, 'results_ashrae_140.csv')
+
+    CSV.open(csv_out, 'w') do |csv|
+      csv << ['Test Case', 'Annual Heating Load [MMBtu]', 'Annual Cooling Load [MMBtu]']
+      all_results.sort.each do |xml, xml_results|
+        next unless xml.include? ashrae_140_dir
+        next unless xml.include? 'C.xml'
+
+        csv << [File.basename(xml), xml_results['Load: Heating (MBtu)'].round(2), 'N/A']
+      end
+      all_results.sort.each do |xml, xml_results|
+        next unless xml.include? ashrae_140_dir
+        next unless xml.include? 'L.xml'
+
+        csv << [File.basename(xml), 'N/A', xml_results['Load: Cooling (MBtu)'].round(2)]
+      end
+    end
+
+    puts "Wrote ASHRAE 140 results to #{csv_out}."
   end
 
   def _test_schema_validation(this_dir, xml)

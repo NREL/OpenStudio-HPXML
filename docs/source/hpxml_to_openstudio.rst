@@ -161,8 +161,12 @@ Thus, software tools can choose to use a single wall (or roof) surface to repres
 Air Leakage
 ***********
 
-Building air leakage characterized by air changes per hour or cfm at 50 pascals pressure difference (ACH50 or CFM50) is entered at ``Enclosure/AirInfiltration/AirInfiltrationMeasurement/BuildingAirLeakage/AirLeakage``.
-The ``Enclosure/AirInfiltration/AirInfiltrationMeasurement`` should be specified with ``HousePressure='50'`` and ``BuildingAirLeakage/UnitofMeasure='ACH'`` or ``BuildingAirLeakage/UnitofMeasure='CFM'``.
+Building air leakage is entered using ``Enclosure/AirInfiltration/AirInfiltrationMeasurement``.
+Air leakage can be provided in one of three ways:
+
+#. nACH (natural air changes per hour): Use ``BuildingAirLeakage/UnitofMeasure='ACHnatural'``
+#. ACH50 (air changes per hour at 50Pa): Use ``BuildingAirLeakage/UnitofMeasure='ACH'`` and ``HousePressure='50'``
+#. CFM50 (cubic feet per minute at 50Pa): Use ``BuildingAirLeakage/UnitofMeasure='CFM'`` and ``HousePressure='50'``
 
 In addition, the building's volume associated with the air leakage measurement can be provided in HPXML's ``AirInfiltrationMeasurement/InfiltrationVolume``.
 If not provided, the infiltration volume is assumed to be equal to the conditioned building volume.
@@ -170,10 +174,11 @@ If not provided, the infiltration volume is assumed to be equal to the condition
 Vented Attics/Crawlspaces
 *************************
 
-The ventilation rate for vented attics (or crawlspaces) can be specified using an ``Attic`` (or ``Foundation``) element.
+The ventilation rate for vented attics (or vented crawlspaces) can be specified using an ``Attic`` (or ``Foundation``) element.
 First, define the ``AtticType`` as ``Attic[Vented='true']`` (or ``FoundationType`` as ``Crawlspace[Vented='true']``).
-Then use the ``VentilationRate[UnitofMeasure='SLA']/Value`` element to specify a specific leakage area (SLA).
-If these elements are not provided, default values of 1/300 for vented attics and 1/150 for vented crawlspaces will be used based on `ANSI/RESNET/ICC 301-2019 <https://codes.iccsafe.org/content/RESNETICC3012019>`_.
+Then specify the specific leakage area (SLA) using the ``VentilationRate[UnitofMeasure='SLA']/Value`` element.
+For vented attics, the natural air changes per hour (nACH) can instead be specified using ``UnitofMeasure='ACHnatural'``.
+If the ventilation rate is not provided, default values of SLA=1/300 for vented attics and SLA=1/150 for vented crawlspaces will be used based on `ANSI/RESNET/ICC 301-2019 <https://codes.iccsafe.org/content/RESNETICC3012019>`_.
 
 Roofs
 *****
@@ -413,7 +418,8 @@ Also, note that some HVAC systems (e.g., room air conditioners) are not allowed 
 - Optional supply ducts (``Ducts[DuctType='supply']``)
 - Optional return ducts (``Ducts[DuctType='return']``)
 
-For each duct, ``DuctInsulationRValue``, ``DuctLocation``, and ``DuctSurfaceArea`` must be provided.
+For ``AirDistribution`` systems, ``ConditionedFloorAreaServed`` must be provided. ``NumberofReturnRegisters`` can be optionally provided;
+If ``NumberofReturnRegisters`` is not provided, one return register per floor will be assumed.
 
 ``HydronicDistribution`` systems do not require any additional inputs.
 
@@ -422,6 +428,24 @@ For each duct, ``DuctInsulationRValue``, ``DuctLocation``, and ``DuctSurfaceArea
 .. warning::
 
   Specifying a DSE for the HVAC distribution system will NOT be reflected in the raw EnergyPlus simulation outputs, but IS reflected by the SimulationOutputReport reporting measure.
+
+For each duct, ``DuctInsulationRValue`` must be provided. ``DuctLocation`` and ``DuctSurfaceArea`` can be optionally provided; ``DuctLocation`` and ``DuctSurfaceArea`` of all ducts must be provided or blank.
+
+If ``DuctLocation`` and ``DuctSurfaceArea`` of all ducts are not provided, the following default values will be used. 
+``DuctLocation`` will be assumed depending on the space type in the building.
+To calculate default ``DuctSurfaceArea``, the total duct surface area of supply and return ducts will first be calculated based on ANSI/ASHRAE Standard 152-2004. 
+Then, the total duct surface areas will be apportioned by the conditioned floor area served by the air distribution system relative to the sum of the conditioned floor area served by all air distribution systems.
+In the equations below, F\ :sub:`out` is 1.0 for single-story houses and 0.75 for houses with more than one story. 
+b\ :sub:`r` is :math:`(0.05 \cdot NumberofReturnRegisters)` if NumberofReturnRegisters is less than 6 and b\ :sub:`r` is 0.25 if NumberofReturnRegisters is greater than or equal to 6. 
+CFA is the conditioned floor area of building in ft².
+
+======================================  =============================================================================================================================================================================================================================================================================
+Element Name                            Default Value
+======================================  =============================================================================================================================================================================================================================================================================
+DuctLocation (supply and return ducts)  Conditioned Basement if present, else Unconditioned Basement if present, else Vented Crawlspace if present, else Unvented Crawlspace if present, else Vented Attic if present, else Unvented Attic if present, else Garage if present, else Living space
+DuctSurfaceArea (supply ducts)          :math:`0.27 \cdot F_{out} \cdot CFA \cdot \frac{CFA_{ServedByAirDistribution}}{SumOfCFA_{ServedByAirDistribution}}`
+DuctSurfaceArea (return ducts)          :math:`b_r \cdot F_{out} \cdot CFA \cdot \frac{CFA_{ServedByAirDistribution}}{SumOfCFA_{ServedByAirDistribution}}`
+======================================  =============================================================================================================================================================================================================================================================================
 
 Mechanical Ventilation
 **********************
@@ -496,13 +520,12 @@ Each water heater should be entered as a ``Systems/WaterHeating/WaterHeatingSyst
 Inputs including ``WaterHeaterType`` and ``FractionDHWLoadServed`` must be provided.
 The water heater ``Location`` can be optionally entered; if not provided, a default water heater location will be assumed based on IECC climate zone. 
 
-+--------------------+--------------------------------------------------------------------------------------------+
-| IECC Climate Zone  | Default Water Heater Location                                                              |
-+====================+============================================================================================+
-| 1-3, excluding 3A  | Garage if present, else Living Space                                                       |
-+--------------------+--------------------------------------------------------------------------------------------+
-| 3A, 4-8, unknown   | Conditioned Basement if present, else Unconditioned Basement if present, else Living Space |
-+--------------------+--------------------------------------------------------------------------------------------+
+=================  ==========================================================================================
+IECC Climate Zone  Default Water Heater location
+=================  ==========================================================================================
+1-3, excluding 3A  Garage if present, else Living Space                                                      
+3A, 4-8, unknown   Conditioned Basement if present, else Unconditioned Basement if present, else Living Space
+=================  ==========================================================================================
 
 The setpoint temperature may be provided as ``HotWaterTemperature``; if not provided, 125°F is assumed.
 
@@ -525,8 +548,8 @@ and a default recovery efficiency will be assumed depending on the fuel type, as
 FuelType                  RecoveryEfficiency
 ========================  ======================================
 Electric                  0.98
-Non-electric, EF >= 0.75  .. math:: 0.778114 \cdot EF + 0.276679
-Non-electric, EF < 0.75   .. math:: 0.252117 \cdot EF + 0.607997
+Non-electric, EF >= 0.75  :math:`0.778114 \cdot EF + 0.276679`
+Non-electric, EF < 0.75   :math:`0.252117 \cdot EF + 0.607997`
 ========================  ======================================
 
 For tankless water heaters, an annual energy derate due to cycling inefficiencies can be provided.
@@ -566,7 +589,7 @@ For a ``SystemType/Recirculation`` system, the following elements are used:
   ==================================  ====================================================================================================
   Element Name                        Default Value
   ==================================  ====================================================================================================
-  RecirculationPipingLoopLength [ft]  .. math:: 2.0 \cdot (2.0 \cdot (\frac{CFA}{NCfl})^{0.5} + 10.0 \cdot NCfl + 5.0 \cdot bsmnt) - 20.0
+  RecirculationPipingLoopLength [ft]  :math:`2.0 \cdot (2.0 \cdot (\frac{CFA}{NCfl})^{0.5} + 10.0 \cdot NCfl + 5.0 \cdot bsmnt) - 20.0`
   BranchPipingLoopLength [ft]         10 
   Pump Power [W]                      50 
   ==================================  ====================================================================================================
@@ -760,17 +783,15 @@ The efficiency of the dehumidifier can either be entered as an ``IntegratedEnerg
 Lighting
 ~~~~~~~~
 
-The building's lighting is described by six ``Lighting/LightingGroup`` elements, each of which is the combination of:
+The building's lighting is described by nine ``Lighting/LightingGroup`` elements, each of which is the combination of:
 
-- ``LightingGroup/ThirdPartyCertification``: 'ERI Tier I' (fluorescent) and 'ERI Tier II' (LEDs, outdoor lamps controlled by photocells, or indoor lamps controlled by motion sensor)
-- ``LightingGroup/Location``: 'interior', 'garage', and 'exterior'
+- ``LightingType``: 'LightEmittingDiode', 'CompactFluorescent', and 'FluorescentTube'
+- ``Location``: 'interior', 'garage', and 'exterior'
 
 The fraction of lamps of the given type in the given location are provided as the ``LightingGroup/FractionofUnitsInLocation``.
 The fractions for a given location cannot sum to greater than 1.
 If the fractions sum to less than 1, the remainder is assumed to be incandescent lighting.
 Garage lighting values are ignored if the building has no garage.
-
-To model a building without any lighting, all six ``Lighting/LightingGroup`` elements must be excluded.
 
 A ``Lighting/extension/UsageMultiplier`` can also be optionally provided that scales energy usage; if not provided, it is assumed to be 1.0.
 
