@@ -2712,7 +2712,8 @@ def set_hpxml_hvac_distributions(hpxml_file, hpxml)
   elsif ['base-hvac-multiple2.xml'].include? hpxml_file
     hpxml.hvac_distributions.clear
     hpxml.hvac_distributions.add(id: 'HVACDistribution',
-                                 distribution_system_type: HPXML::HVACDistributionTypeAir)
+                                 distribution_system_type: HPXML::HVACDistributionTypeAir,
+                                 conditioned_floor_area_served: (2700 / 4))
     hpxml.hvac_distributions[-1].duct_leakage_measurements.add(duct_type: HPXML::DuctTypeSupply,
                                                                duct_leakage_units: HPXML::UnitsCFM25,
                                                                duct_leakage_value: 75,
