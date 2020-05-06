@@ -53,10 +53,9 @@
         <AirInfiltration>
           <AirInfiltrationMeasurement>
             <SystemIdentifier id='InfiltrationMeasurement'/>
-            <HousePressure>50.0</HousePressure>
             <BuildingAirLeakage>
-              <UnitofMeasure>ACH</UnitofMeasure>
-              <AirLeakage>3.0</AirLeakage>
+              <UnitofMeasure>ACHnatural</UnitofMeasure>
+              <AirLeakage>0.67</AirLeakage>
             </BuildingAirLeakage>
             <InfiltrationVolume>21600.0</InfiltrationVolume>
           </AirInfiltrationMeasurement>
@@ -441,6 +440,80 @@
           <IsConvection>false</IsConvection>
         </Oven>
       </Appliances>
+      <Lighting>
+        <LightingGroup>
+          <SystemIdentifier id='Lighting_CFL_Interior'/>
+          <Location>interior</Location>
+          <FractionofUnitsInLocation>0.4</FractionofUnitsInLocation>
+          <LightingType>
+            <CompactFluorescent/>
+          </LightingType>
+        </LightingGroup>
+        <LightingGroup>
+          <SystemIdentifier id='Lighting_CFL_Exterior'/>
+          <Location>exterior</Location>
+          <FractionofUnitsInLocation>0.4</FractionofUnitsInLocation>
+          <LightingType>
+            <CompactFluorescent/>
+          </LightingType>
+        </LightingGroup>
+        <LightingGroup>
+          <SystemIdentifier id='Lighting_CFL_Garage'/>
+          <Location>garage</Location>
+          <FractionofUnitsInLocation>0.4</FractionofUnitsInLocation>
+          <LightingType>
+            <CompactFluorescent/>
+          </LightingType>
+        </LightingGroup>
+        <LightingGroup>
+          <SystemIdentifier id='Lighting_LFL_Interior'/>
+          <Location>interior</Location>
+          <FractionofUnitsInLocation>0.1</FractionofUnitsInLocation>
+          <LightingType>
+            <FluorescentTube/>
+          </LightingType>
+        </LightingGroup>
+        <LightingGroup>
+          <SystemIdentifier id='Lighting_LFL_Exterior'/>
+          <Location>exterior</Location>
+          <FractionofUnitsInLocation>0.1</FractionofUnitsInLocation>
+          <LightingType>
+            <FluorescentTube/>
+          </LightingType>
+        </LightingGroup>
+        <LightingGroup>
+          <SystemIdentifier id='Lighting_LFL_Garage'/>
+          <Location>garage</Location>
+          <FractionofUnitsInLocation>0.1</FractionofUnitsInLocation>
+          <LightingType>
+            <FluorescentTube/>
+          </LightingType>
+        </LightingGroup>
+        <LightingGroup>
+          <SystemIdentifier id='Lighting_LED_Interior'/>
+          <Location>interior</Location>
+          <FractionofUnitsInLocation>0.25</FractionofUnitsInLocation>
+          <LightingType>
+            <LightEmittingDiode/>
+          </LightingType>
+        </LightingGroup>
+        <LightingGroup>
+          <SystemIdentifier id='Lighting_LED_Exterior'/>
+          <Location>exterior</Location>
+          <FractionofUnitsInLocation>0.25</FractionofUnitsInLocation>
+          <LightingType>
+            <LightEmittingDiode/>
+          </LightingType>
+        </LightingGroup>
+        <LightingGroup>
+          <SystemIdentifier id='Lighting_LED_Garage'/>
+          <Location>garage</Location>
+          <FractionofUnitsInLocation>0.25</FractionofUnitsInLocation>
+          <LightingType>
+            <LightEmittingDiode/>
+          </LightingType>
+        </LightingGroup>
+      </Lighting>
       <MiscLoads>
         <PlugLoad>
           <SystemIdentifier id='PlugLoadMisc'/>

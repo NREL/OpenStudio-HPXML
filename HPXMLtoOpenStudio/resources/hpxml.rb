@@ -120,8 +120,9 @@ class HPXML < Object
   HVACTypeWallFurnace = 'WallFurnace'
   LeakinessTight = 'tight'
   LeakinessAverage = 'average'
-  LightingTypeTierI = 'ERI Tier I'
-  LightingTypeTierII = 'ERI Tier II'
+  LightingTypeCFL = 'CompactFluorescent'
+  LightingTypeLED = 'LightEmittingDiode'
+  LightingTypeLFL = 'FluorescentTube'
   LocationAtticUnconditioned = 'attic - unconditioned'
   LocationAtticUnvented = 'attic - unvented'
   LocationAtticVented = 'attic - vented'
@@ -674,7 +675,7 @@ class HPXML < Object
       return if nil?
 
       site = XMLHelper.create_elements_as_needed(doc, ['HPXML', 'Building', 'BuildingDetails', 'BuildingSummary', 'Site'])
-      if not @fuels.empty?
+      if (not @fuels.nil?) && (not @fuels.empty?)
         fuel_types_available = XMLHelper.add_element(site, 'FuelTypesAvailable')
         @fuels.each do |fuel|
           XMLHelper.add_element(fuel_types_available, 'Fuel', fuel)
@@ -883,7 +884,7 @@ class HPXML < Object
 
   class AirInfiltrationMeasurement < BaseElement
     ATTRS = [:id, :house_pressure, :unit_of_measure, :air_leakage, :effective_leakage_area,
-             :infiltration_volume, :constant_ach_natural, :leakiness_description]
+             :infiltration_volume, :leakiness_description]
     attr_accessor(*ATTRS)
 
     def check_for_errors
@@ -906,8 +907,6 @@ class HPXML < Object
       end
       XMLHelper.add_element(air_infiltration_measurement, 'EffectiveLeakageArea', Float(@effective_leakage_area)) unless @effective_leakage_area.nil?
       XMLHelper.add_element(air_infiltration_measurement, 'InfiltrationVolume', Float(@infiltration_volume)) unless @infiltration_volume.nil?
-      HPXML::add_extension(parent: air_infiltration_measurement,
-                           extensions: { 'ConstantACHnatural' => HPXML::to_float_or_nil(@constant_ach_natural) })
     end
 
     def from_oga(air_infiltration_measurement)
@@ -919,7 +918,6 @@ class HPXML < Object
       @air_leakage = HPXML::to_float_or_nil(XMLHelper.get_value(air_infiltration_measurement, 'BuildingAirLeakage/AirLeakage'))
       @effective_leakage_area = HPXML::to_float_or_nil(XMLHelper.get_value(air_infiltration_measurement, 'EffectiveLeakageArea'))
       @infiltration_volume = HPXML::to_float_or_nil(XMLHelper.get_value(air_infiltration_measurement, 'InfiltrationVolume'))
-      @constant_ach_natural = HPXML::to_float_or_nil(XMLHelper.get_value(air_infiltration_measurement, 'extension/ConstantACHnatural'))
       @leakiness_description = XMLHelper.get_value(air_infiltration_measurement, 'LeakinessDescription')
     end
   end
@@ -939,7 +937,7 @@ class HPXML < Object
   end
 
   class Attic < BaseElement
-    ATTRS = [:id, :attic_type, :vented_attic_sla, :vented_attic_constant_ach, :within_infiltration_volume,
+    ATTRS = [:id, :attic_type, :vented_attic_sla, :vented_attic_ach, :within_infiltration_volume,
              :attached_to_roof_idrefs, :attached_to_frame_floor_idrefs]
     attr_accessor(*ATTRS)
 
@@ -1010,10 +1008,10 @@ class HPXML < Object
             ventilation_rate = XMLHelper.add_element(attic, 'VentilationRate')
             XMLHelper.add_element(ventilation_rate, 'UnitofMeasure', 'SLA')
             XMLHelper.add_element(ventilation_rate, 'Value', Float(@vented_attic_sla))
-          end
-          if not @vented_attic_constant_ach.nil?
-            HPXML::add_extension(parent: attic,
-                                 extensions: { 'ConstantACHnatural' => Float(@vented_attic_constant_ach) })
+          elsif not @vented_attic_ach.nil?
+            ventilation_rate = XMLHelper.add_element(attic, 'VentilationRate')
+            XMLHelper.add_element(ventilation_rate, 'UnitofMeasure', 'ACHnatural')
+            XMLHelper.add_element(ventilation_rate, 'Value', Float(@vented_attic_ach))
           end
         elsif @attic_type == AtticTypeConditioned
           attic_type_attic = XMLHelper.add_element(attic_type_e, 'Attic')
@@ -1044,7 +1042,7 @@ class HPXML < Object
       end
       if @attic_type == AtticTypeVented
         @vented_attic_sla = HPXML::to_float_or_nil(XMLHelper.get_value(attic, "VentilationRate[UnitofMeasure='SLA']/Value"))
-        @vented_attic_constant_ach = HPXML::to_float_or_nil(XMLHelper.get_value(attic, 'extension/ConstantACHnatural'))
+        @vented_attic_ach = HPXML::to_float_or_nil(XMLHelper.get_value(attic, "VentilationRate[UnitofMeasure='ACHnatural']/Value"))
       end
       @within_infiltration_volume = HPXML::to_bool_or_nil(XMLHelper.get_value(attic, 'WithinInfiltrationVolume'))
       @attached_to_roof_idrefs = []
@@ -2279,6 +2277,15 @@ class HPXML < Object
       fail "Attached HVAC distribution system '#{@distribution_system_idref}' not found for HVAC system '#{@id}'."
     end
 
+    def attached_cooling_system
+      return if distribution_system.nil?
+      distribution_system.hvac_systems.each do |hvac_system|
+        next if hvac_system.id == @id
+        return hvac_system
+      end
+      return
+    end
+
     def delete
       @hpxml_object.heating_systems.delete(self)
       @hpxml_object.water_heating_systems.each do |water_heating_system|
@@ -2385,6 +2392,15 @@ class HPXML < Object
         return hvac_distribution
       end
       fail "Attached HVAC distribution system '#{@distribution_system_idref}' not found for HVAC system '#{@id}'."
+    end
+
+    def attached_heating_system
+      return if distribution_system.nil?
+      distribution_system.hvac_systems.each do |hvac_system|
+        next if hvac_system.id == @id
+        return hvac_system
+      end
+      return
     end
 
     def delete
@@ -3815,7 +3831,7 @@ class HPXML < Object
   end
 
   class LightingGroup < BaseElement
-    ATTRS = [:id, :location, :fration_of_units_in_location, :third_party_certification]
+    ATTRS = [:id, :location, :fraction_of_units_in_location, :lighting_type]
     attr_accessor(*ATTRS)
 
     def delete
@@ -3835,8 +3851,11 @@ class HPXML < Object
       sys_id = XMLHelper.add_element(lighting_group, 'SystemIdentifier')
       XMLHelper.add_attribute(sys_id, 'id', @id)
       XMLHelper.add_element(lighting_group, 'Location', @location) unless @location.nil?
-      XMLHelper.add_element(lighting_group, 'FractionofUnitsInLocation', Float(@fration_of_units_in_location)) unless @fration_of_units_in_location.nil?
-      XMLHelper.add_element(lighting_group, 'ThirdPartyCertification', @third_party_certification) unless @third_party_certification.nil?
+      XMLHelper.add_element(lighting_group, 'FractionofUnitsInLocation', Float(@fraction_of_units_in_location)) unless @fraction_of_units_in_location.nil?
+      if not @lighting_type.nil?
+        lighting_type = XMLHelper.add_element(lighting_group, 'LightingType')
+        XMLHelper.add_element(lighting_type, @lighting_type)
+      end
     end
 
     def from_oga(lighting_group)
@@ -3844,8 +3863,8 @@ class HPXML < Object
 
       @id = HPXML::get_id(lighting_group)
       @location = XMLHelper.get_value(lighting_group, 'Location')
-      @fration_of_units_in_location = HPXML::to_float_or_nil(XMLHelper.get_value(lighting_group, 'FractionofUnitsInLocation'))
-      @third_party_certification = XMLHelper.get_value(lighting_group, 'ThirdPartyCertification')
+      @fraction_of_units_in_location = HPXML::to_float_or_nil(XMLHelper.get_value(lighting_group, 'FractionofUnitsInLocation'))
+      @lighting_type = XMLHelper.get_child_name(lighting_group, 'LightingType')
     end
   end
 
@@ -4149,10 +4168,10 @@ class HPXML < Object
     # Check sum of lighting fractions in a location <= 1
     ltg_fracs = {}
     @lighting_groups.each do |lighting_group|
-      next if lighting_group.location.nil? || lighting_group.fration_of_units_in_location.nil?
+      next if lighting_group.location.nil? || lighting_group.fraction_of_units_in_location.nil?
 
       ltg_fracs[lighting_group.location] = 0 if ltg_fracs[lighting_group.location].nil?
-      ltg_fracs[lighting_group.location] += lighting_group.fration_of_units_in_location
+      ltg_fracs[lighting_group.location] += lighting_group.fraction_of_units_in_location
     end
     ltg_fracs.each do |location, sum|
       next if sum <= 1
