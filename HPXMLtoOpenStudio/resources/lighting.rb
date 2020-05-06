@@ -171,29 +171,29 @@ class Lighting
     end
   end
 
-  def self.get_reference_fractions()
-    fFI_int = 0.10
-    fFI_ext = 0.0
-    fFI_grg = 0.0
-    fFII_int = 0.0
-    fFII_ext = 0.0
-    fFII_grg = 0.0
-    return fFI_int, fFI_ext, fFI_grg, fFII_int, fFII_ext, fFII_grg
+  def self.get_default_fractions()
+    ltg_fracs = {}
+    [HPXML::LocationInterior, HPXML::LocationExterior, HPXML::LocationGarage].each do |location|
+      [HPXML::LightingTypeCFL, HPXML::LightingTypeLFL, HPXML::LightingTypeLED].each do |lighting_type|
+        if (location == HPXML::LocationInterior) && (lighting_type == HPXML::LightingTypeCFL)
+          ltg_fracs[[location, lighting_type]] = 0.1
+        else
+          ltg_fracs[[location, lighting_type]] = 0
+        end
+      end
+    end
+    return ltg_fracs
   end
 
-  def self.get_iad_fractions()
-    fFI_int = 0.75
-    fFI_ext = 0.75
-    fFI_grg = 0.75
-    fFII_int = 0.0
-    fFII_ext = 0.0
-    fFII_grg = 0.0
-    return fFI_int, fFI_ext, fFI_grg, fFII_int, fFII_ext, fFII_grg
-  end
-
-  def self.calc_lighting_energy(eri_version, cfa, gfa, fFI_int, fFI_ext, fFI_grg, fFII_int, fFII_ext, fFII_grg, usage_multiplier = 1.0)
+  def self.calc_lighting_energy(eri_version, cfa, gfa, f_int_cfl, f_ext_cfl, f_grg_cfl, f_int_lfl, f_ext_lfl, f_grg_lfl, f_int_led, f_ext_led, f_grg_led, usage_multiplier = 1.0)
     if Constants.ERIVersions.index(eri_version) >= Constants.ERIVersions.index('2014ADEG')
       # ANSI/RESNET/ICC 301-2014 Addendum G-2018, Solid State Lighting
+      fFI_int = f_int_cfl + f_int_lfl
+      fFI_ext = f_ext_cfl + f_ext_lfl
+      fFI_grg = f_grg_cfl + f_grg_lfl
+      fFII_int = f_int_led
+      fFII_ext = f_ext_led
+      fFII_grg = f_grg_led
       int_kwh = 0.9 / 0.925 * (455.0 + 0.8 * cfa) * ((1.0 - fFII_int - fFI_int) + fFI_int * 15.0 / 60.0 + fFII_int * 15.0 / 90.0) + 0.1 * (455.0 + 0.8 * cfa) # Eq 4.2-2)
       ext_kwh = (100.0 + 0.05 * cfa) * (1.0 - fFI_ext - fFII_ext) + 15.0 / 60.0 * (100.0 + 0.05 * cfa) * fFI_ext + 15.0 / 90.0 * (100.0 + 0.05 * cfa) * fFII_ext # Eq 4.2-3
       grg_kwh = 0.0
@@ -201,11 +201,14 @@ class Lighting
         grg_kwh = 100.0 * ((1.0 - fFI_grg - fFII_grg) + 15.0 / 60.0 * fFI_grg + 15.0 / 90.0 * fFII_grg) # Eq 4.2-4
       end
     else
-      int_kwh = 0.8 * ((4.0 - 3.0 * (fFI_int + fFII_int)) / 3.7) * (455.0 + 0.8 * cfa) + 0.2 * (455.0 + 0.8 * cfa) # Eq 4.2-2
-      ext_kwh = (100.0 + 0.05 * cfa) * (1.0 - (fFI_ext + fFII_ext)) + 0.25 * (100.0 + 0.05 * cfa) * (fFI_ext + fFII_ext) # Eq 4.2-3
+      fF_int = f_int_cfl + f_int_lfl + f_int_led
+      fF_ext = f_ext_cfl + f_ext_lfl + f_ext_led
+      fF_grg = f_grg_cfl + f_grg_lfl + f_grg_led
+      int_kwh = 0.8 * ((4.0 - 3.0 * fF_int) / 3.7) * (455.0 + 0.8 * cfa) + 0.2 * (455.0 + 0.8 * cfa) # Eq 4.2-2
+      ext_kwh = (100.0 + 0.05 * cfa) * (1.0 - fF_ext) + 0.25 * (100.0 + 0.05 * cfa) * fF_ext # Eq 4.2-3
       grg_kwh = 0.0
       if gfa > 0
-        grg_kwh = 100.0 * (1.0 - (fFI_grg + fFII_grg)) + 25.0 * (fFI_grg + fFII_grg) # Eq 4.2-4
+        grg_kwh = 100.0 * (1.0 - fF_grg) + 25.0 * fF_grg # Eq 4.2-4
       end
     end
 

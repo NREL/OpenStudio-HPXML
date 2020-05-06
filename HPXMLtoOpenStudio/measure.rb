@@ -2863,9 +2863,12 @@ class OSModel
     return if fractions[[HPXML::LocationInterior, HPXML::LightingTypeCFL]].nil? # Not the lighting group(s) we're interested in
 
     int_kwh, ext_kwh, grg_kwh = Lighting.calc_lighting_energy(@eri_version, @cfa, @gfa,
-                                                              fractions[[HPXML::LocationInterior, HPXML::LightingTypeCFL]] + fractions[[HPXML::LocationInterior, HPXML::LightingTypeLFL]],
-                                                              fractions[[HPXML::LocationExterior, HPXML::LightingTypeCFL]] + fractions[[HPXML::LocationExterior, HPXML::LightingTypeLFL]],
-                                                              fractions[[HPXML::LocationGarage, HPXML::LightingTypeCFL]] + fractions[[HPXML::LocationGarage, HPXML::LightingTypeLFL]],
+                                                              fractions[[HPXML::LocationInterior, HPXML::LightingTypeCFL]],
+                                                              fractions[[HPXML::LocationExterior, HPXML::LightingTypeCFL]],
+                                                              fractions[[HPXML::LocationGarage, HPXML::LightingTypeCFL]],
+                                                              fractions[[HPXML::LocationInterior, HPXML::LightingTypeLFL]],
+                                                              fractions[[HPXML::LocationExterior, HPXML::LightingTypeLFL]],
+                                                              fractions[[HPXML::LocationGarage, HPXML::LightingTypeLFL]],
                                                               fractions[[HPXML::LocationInterior, HPXML::LightingTypeLED]],
                                                               fractions[[HPXML::LocationExterior, HPXML::LightingTypeLED]],
                                                               fractions[[HPXML::LocationGarage, HPXML::LightingTypeLED]],
