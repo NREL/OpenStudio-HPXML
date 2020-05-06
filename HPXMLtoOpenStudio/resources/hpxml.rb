@@ -120,8 +120,6 @@ class HPXML < Object
   HVACTypeWallFurnace = 'WallFurnace'
   LeakinessTight = 'tight'
   LeakinessAverage = 'average'
-  LightingTypeTierI = 'ERI Tier I'
-  LightingTypeTierII = 'ERI Tier II'
   LightingTypeCFL = 'CompactFluorescent'
   LightingTypeLED = 'LightEmittingDiode'
   LightingTypeLFL = 'FluorescentTube'
@@ -3833,7 +3831,7 @@ class HPXML < Object
   end
 
   class LightingGroup < BaseElement
-    ATTRS = [:id, :location, :fraction_of_units_in_location, :third_party_certification, :lighting_type]
+    ATTRS = [:id, :location, :fraction_of_units_in_location, :lighting_type]
     attr_accessor(*ATTRS)
 
     def delete
@@ -3858,7 +3856,6 @@ class HPXML < Object
         lighting_type = XMLHelper.add_element(lighting_group, 'LightingType')
         XMLHelper.add_element(lighting_type, @lighting_type)
       end
-      XMLHelper.add_element(lighting_group, 'ThirdPartyCertification', @third_party_certification) unless @third_party_certification.nil?
     end
 
     def from_oga(lighting_group)
@@ -3868,7 +3865,6 @@ class HPXML < Object
       @location = XMLHelper.get_value(lighting_group, 'Location')
       @fraction_of_units_in_location = HPXML::to_float_or_nil(XMLHelper.get_value(lighting_group, 'FractionofUnitsInLocation'))
       @lighting_type = XMLHelper.get_child_name(lighting_group, 'LightingType')
-      @third_party_certification = XMLHelper.get_value(lighting_group, 'ThirdPartyCertification')
     end
   end
 
