@@ -3724,7 +3724,7 @@ class HPXMLFile
                               location: HPXML::LocationGarage,
                               fraction_of_units_in_location: args[:lighting_fraction_cfl_garage],
                               lighting_type: HPXML::LightingTypeCFL)
-    hpxml.lighting_groups.add(id: 'Lighting_:FL_Interior',
+    hpxml.lighting_groups.add(id: 'Lighting_LFL_Interior',
                               location: HPXML::LocationInterior,
                               fraction_of_units_in_location: args[:lighting_fraction_lfl_interior],
                               lighting_type: HPXML::LightingTypeLFL)
