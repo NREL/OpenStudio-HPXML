@@ -4162,8 +4162,9 @@ class OSModel
     # can be shared by any surface, duct adjacent to / located in those spaces
 
     # return if already exists
-    if not spaces[location].nil?
-      return spaces[location].constantTemperatureSchedule.get.to_ScheduleConstant.get
+    model.getScheduleConstants.each do |sch|
+      next unless sch.name.to_s == location
+      return sch
     end
 
     sch = OpenStudio::Model::ScheduleConstant.new(model)
