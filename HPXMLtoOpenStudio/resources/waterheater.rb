@@ -571,7 +571,23 @@ class Waterheater
     end
   end
 
-  def self.apply_solar_thermal(model, space, solar_thermal_system, dhw_loop, dhw_map)
+  def self.apply_solar_thermal(model, space, solar_thermal_system, dhw_map)
+    if [HPXML::WaterHeaterTypeCombiStorage, HPXML::WaterHeaterTypeCombiTankless].include? solar_thermal_system.water_heating_system.water_heater_type
+      fail "Water heating system '#{solar_thermal_system.water_heating_system.id}' connected to solar thermal system '#{solar_thermal_system.id}' cannot be a space-heating boiler."
+    end
+    if solar_thermal_system.water_heating_system.uses_desuperheater
+      fail "Water heating system '#{solar_thermal_system.water_heating_system.id}' connected to solar thermal system '#{solar_thermal_system.id}' cannot be attached to a desuperheater."
+    end
+
+    dhw_loop = nil
+    if dhw_map.keys.include? solar_thermal_system.water_heating_system.id
+      dhw_map[solar_thermal_system.water_heating_system.id].each do |dhw_object|
+        next unless dhw_object.is_a? OpenStudio::Model::PlantLoop
+
+        dhw_loop = dhw_object
+      end
+    end
+
     obj_name = Constants.ObjectNameSolarHotWater
 
     if [HPXML::SolarThermalTypeEvacuatedTube].include? solar_thermal_system.collector_type

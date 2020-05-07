@@ -2338,18 +2338,6 @@ class OSModel
       oven = @hpxml.ovens[0]
     end
 
-    # Fixtures
-    fixtures_usage_multiplier = @hpxml.water_heating.water_fixtures_usage_multiplier
-    fixtures_all_low_flow = false
-    if @hpxml.water_heating_systems.size > 0
-      fixtures_all_low_flow = true # default
-      @hpxml.water_fixtures.each do |water_fixture|
-        next unless [HPXML::WaterFixtureTypeShowerhead, HPXML::WaterFixtureTypeFaucet].include? water_fixture.water_fixture_type
-
-        fixtures_all_low_flow = false if not water_fixture.low_flow
-      end
-    end
-
     # Distribution
     if @hpxml.water_heating_systems.size > 0
       hot_water_distribution = @hpxml.hot_water_distributions[0]
@@ -2458,7 +2446,7 @@ class OSModel
                                 clothes_washer, cw_space, clothes_dryer, cd_space,
                                 dishwasher, refrigerator, rf_space, cooking_range, oven,
                                 fixtures_all_low_flow, fixtures_usage_multiplier,
-                                dist_type, pipe_r, std_pipe_length, recirc_loop_length,
+                                dist_type, pipe_r, std_pipe_length,
                                 recirc_branch_length, recirc_control_type,
                                 recirc_pump_power, dwhr_present,
                                 dwhr_facilities_connected, dwhr_is_equal_flow,
@@ -2466,23 +2454,7 @@ class OSModel
 
     if not solar_thermal_system.nil?
       if not solar_thermal_system.collector_area.nil? # Detailed solar water heater
-        if [HPXML::WaterHeaterTypeCombiStorage, HPXML::WaterHeaterTypeCombiTankless].include? solar_thermal_system.water_heating_system.water_heater_type
-          fail "Water heating system '#{solar_thermal_system.water_heating_system.id}' connected to solar thermal system '#{solar_thermal_system.id}' cannot be a space-heating boiler."
-        end
-        if solar_thermal_system.water_heating_system.uses_desuperheater
-          fail "Water heating system '#{solar_thermal_system.water_heating_system.id}' connected to solar thermal system '#{solar_thermal_system.id}' cannot be attached to a desuperheater."
-        end
-
-        dhw_loop = nil
-        if @dhw_map.keys.include? solar_thermal_system.water_heating_system.id
-          @dhw_map[solar_thermal_system.water_heating_system.id].each do |dhw_object|
-            next unless dhw_object.is_a? OpenStudio::Model::PlantLoop
-
-            dhw_loop = dhw_object
-          end
-        end
-
-        Waterheater.apply_solar_thermal(model, water_heater_spaces[solar_thermal_system.water_heating_system.id], solar_thermal_system, dhw_loop, @dhw_map)
+        Waterheater.apply_solar_thermal(model, water_heater_spaces[solar_thermal_system.water_heating_system.id], solar_thermal_system, @dhw_map)
       end
     end
 

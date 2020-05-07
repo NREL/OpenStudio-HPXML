@@ -8,8 +8,8 @@ class HotWaterAndAppliances
                  cfa, nbeds, ncfl, has_uncond_bsmnt, wh_setpoint,
                  clothes_washer, cw_space, clothes_dryer, cd_space,
                  dishwasher, refrigerator, rf_space, cooking_range, oven,
-                 fixtures_all_low_flow, fixtures_usage_multiplier,
-                 dist_type, pipe_r, std_pipe_length, recirc_loop_length,
+                 hpxml,
+                 dist_type, pipe_r, std_pipe_length,
                  recirc_branch_length, recirc_control_type,
                  recirc_pump_power, dwhr_present,
                  dwhr_facilities_connected, dwhr_is_equal_flow,
@@ -52,6 +52,31 @@ class HotWaterAndAppliances
           end
         end
         fail 'Could not find setpoint schedule.' if setpoint_scheds[dhw_loop].nil?
+      end
+
+      # Drain Water Heat Recovery
+      dwhr_present = false
+      dwhr_facilities_connected = nil
+      dwhr_is_equal_flow = nil
+      dwhr_efficiency = nil
+      if @hpxml.water_heating_systems.size > 0
+        hot_water_distribution = @hpxml.hot_water_distributions[0]
+        if not hot_water_distribution.dwhr_efficiency.nil?
+          dwhr_present = true
+          dwhr_facilities_connected = hot_water_distribution.dwhr_facilities_connected
+          dwhr_is_equal_flow = hot_water_distribution.dwhr_equal_flow
+          dwhr_efficiency = hot_water_distribution.dwhr_efficiency
+        end
+      end
+      
+      fixtures_all_low_flow = false
+      if hpxml.water_heating_systems.size > 0
+        fixtures_all_low_flow = true # default
+        hpxml.water_fixtures.each do |water_fixture|
+          next unless [HPXML::WaterFixtureTypeShowerhead, HPXML::WaterFixtureTypeFaucet].include? water_fixture.water_fixture_type
+
+          fixtures_all_low_flow = false if not water_fixture.low_flow
+        end
       end
 
       # Calculate mixed water fractions
@@ -136,9 +161,9 @@ class HotWaterAndAppliances
     if not dist_type.nil?
       # Fixtures (showers, sinks, baths) + distribution waste
       fx_gpd = get_fixtures_gpd(eri_version, nbeds, fixtures_all_low_flow, daily_mw_fractions)
-      fx_gpd *= fixtures_usage_multiplier
+      fx_gpd *= hpxml.water_heating.water_fixtures_usage_multiplier
       w_gpd = get_dist_waste_gpd(eri_version, nbeds, has_uncond_bsmnt, cfa, ncfl, dist_type, pipe_r, std_pipe_length, recirc_branch_length, fixtures_all_low_flow)
-      w_gpd *= fixtures_usage_multiplier # Fixture draws are the reason for most distribution waste, so scale this too
+      w_gpd *= hpxml.water_heating.water_fixtures_usage_multiplier # Fixture draws are the reason for most distribution waste, so scale this too
 
       mw_schedule = OpenStudio::Model::ScheduleConstant.new(model)
       mw_schedule.setValue(UnitConversions.convert(t_mix, 'F', 'C'))
