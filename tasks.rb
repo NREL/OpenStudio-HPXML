@@ -546,7 +546,7 @@ def get_values(osw_file, step)
     step.setArgument('cooking_range_oven_is_convection', false)
     step.setArgument('cooking_range_oven_usage_multiplier', 1.0)
     step.setArgument('ceiling_fan_efficiency', 100)
-    step.setArgument('ceiling_fan_quantity', 0)
+    step.setArgument('ceiling_fan_quantity', '0')
     step.setArgument('ceiling_fan_cooling_setpoint_temp_offset', 0)
     step.setArgument('plug_loads_television_annual_kwh', '620.0')
     step.setArgument('plug_loads_other_annual_kwh', '2457.0')
@@ -1455,7 +1455,7 @@ def get_values(osw_file, step)
     step.setArgument('mech_vent_fan_type', HPXML::MechVentTypeSupply)
   elsif ['base-misc-ceiling-fans.osw'].include? osw_file
     step.setArgument('ceiling_fan_cooling_setpoint_temp_offset', 0.5)
-    step.setArgument('ceiling_fan_quantity', 2)
+    step.setArgument('ceiling_fan_quantity', '2')
   elsif ['base-misc-defaults.osw'].include? osw_file
 
   elsif ['base-misc-defaults2.osw'].include? osw_file
