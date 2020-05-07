@@ -1231,8 +1231,7 @@ class HVACSizing
     elsif Geometry.is_garage(duct.LocationSpace)
       dse_Fregain = 0.05
 
-    # Geometry.is_conditioned_attic no longer exists, should we remove this?
-    elsif Geometry.is_living(duct.LocationSpace) || Geometry.is_conditioned_attic(duct.LocationSpace)
+    elsif Geometry.is_living(duct.LocationSpace)
       dse_Fregain = 1.0
 
     else
@@ -2077,7 +2076,7 @@ class HVACSizing
     rvalues = rvalues.split(',').map(&:to_f)
 
     # Locations
-    locations = get_feature(air_loop, Constants.SizingInfoDuctLocationZones, 'string')
+    locations = get_feature(air_loop, Constants.SizingInfoDuctLocationHandles, 'string')
     locations = locations.split(',')
     location_spaces = []
     thermal_zones = Geometry.get_thermal_zones_from_spaces(@model_spaces)
