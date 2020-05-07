@@ -1289,7 +1289,7 @@ class HPXML < Object
         skylight.delete
       end
       @hpxml_object.attics.each do |attic|
-        attic.attached_to_roof_idrefs.delete(@id)
+        attic.attached_to_roof_idrefs.delete(@id) unless attic.attached_to_roof_idrefs.nil?
       end
     end
 
@@ -1635,7 +1635,7 @@ class HPXML < Object
         door.delete
       end
       @hpxml_object.foundations.each do |foundation|
-        foundation.attached_to_foundation_wall_idrefs.delete(@id)
+        foundation.attached_to_foundation_wall_idrefs.delete(@id) unless foundation.attached_to_foundation_wall_idrefs.nil?
       end
     end
 
@@ -1767,10 +1767,10 @@ class HPXML < Object
     def delete
       @hpxml_object.frame_floors.delete(self)
       @hpxml_object.attics.each do |attic|
-        attic.attached_to_frame_floor_idrefs.delete(@id)
+        attic.attached_to_frame_floor_idrefs.delete(@id) unless attic.attached_to_frame_floor_idrefs.nil?
       end
       @hpxml_object.foundations.each do |foundation|
-        foundation.attached_to_frame_floor_idrefs.delete(@id)
+        foundation.attached_to_frame_floor_idrefs.delete(@id) unless foundation.attached_to_frame_floor_idrefs.nil?
       end
     end
 
@@ -1861,7 +1861,7 @@ class HPXML < Object
     def delete
       @hpxml_object.slabs.delete(self)
       @hpxml_object.foundations.each do |foundation|
-        foundation.attached_to_slab_idrefs.delete(@id)
+        foundation.attached_to_slab_idrefs.delete(@id) unless foundation.attached_to_slab_idrefs.nil?
       end
     end
 
