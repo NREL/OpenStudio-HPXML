@@ -4270,9 +4270,9 @@ def to_boolean(value)
     return true
   elsif value.is_a? FalseClass
     return false
-  elsif (value.downcase.to_s == 'true') || (value == '1')
+  elsif (value.downcase.to_s == 'true') || (value == '1') || (value == 1)
     return true
-  elsif (value.downcase.to_s == 'false') || (value == '0')
+  elsif (value.downcase.to_s == 'false') || (value == '0') || (value == 0)
     return false
   end
 
