@@ -3,8 +3,8 @@
   <schema_version>3.0</schema_version>
   <name>build_residential_hpxml</name>
   <uid>a13a8983-2b01-4930-8af2-42030b6e4233</uid>
-  <version_id>a13d05e5-852a-40de-8528-625779b1d3aa</version_id>
-  <version_modified>20200507T230726Z</version_modified>
+  <version_id>36f005fa-6b37-429b-9c6d-355dc1bad36c</version_id>
+  <version_modified>20200508T164932Z</version_modified>
   <xml_checksum>2C38F48B</xml_checksum>
   <class_name>BuildResidentialHPXML</class_name>
   <display_name>HPXML Builder</display_name>
@@ -4252,12 +4252,6 @@
       <checksum>5BA059C4</checksum>
     </file>
     <file>
-      <filename>base-misc-ceiling-fans.osw</filename>
-      <filetype>osw</filetype>
-      <usage_type>test</usage_type>
-      <checksum>F84DE96F</checksum>
-    </file>
-    <file>
       <filename>base-misc-whole-house-fan.osw</filename>
       <filetype>osw</filetype>
       <usage_type>test</usage_type>
@@ -4897,6 +4891,12 @@
       <filetype>rb</filetype>
       <usage_type>script</usage_type>
       <checksum>8490F3B9</checksum>
+    </file>
+    <file>
+      <filename>base-misc-ceiling-fans.osw</filename>
+      <filetype>osw</filetype>
+      <usage_type>test</usage_type>
+      <checksum>12BEB99D</checksum>
     </file>
   </files>
 </measure>
