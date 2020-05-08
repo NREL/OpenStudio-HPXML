@@ -653,10 +653,6 @@ class Constants
     return __method__.to_s
   end
 
-  def self.SizingInfoZoneInfiltrationELA
-    return __method__.to_s
-  end
-
   def self.TerrainOcean
     return 'ocean'
   end

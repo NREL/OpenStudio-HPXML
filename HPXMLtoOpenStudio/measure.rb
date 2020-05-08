@@ -3053,8 +3053,8 @@ class OSModel
                                           cfis_open_time, cfis_airflow_frac, cfis_airloop)
 
     window_area = @hpxml.windows.map { |w| w.area }.inject(0, :+)
-    Airflow.apply(model, runner, weather, infil, mech_vent, nat_vent, vent_whf, duct_systems,
-                  @cfa, @infil_volume, infil_height, @nbeds, @nbaths, @ncfl_ag, window_area,
+    Airflow.apply(model, runner, weather, spaces, infil, mech_vent, nat_vent, vent_whf, duct_systems,
+                  @cfa, @infil_volume, infil_height, @nbeds, window_area,
                   @min_neighbor_distance, vent_fan_kitchen, vent_fan_bath)
   end
 
