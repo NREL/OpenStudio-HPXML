@@ -8,11 +8,15 @@ require_relative 'psychrometrics'
 require_relative 'hvac'
 
 class Airflow
-  def self.apply(model, runner, weather, spaces, infil, mech_vent, nat_vent, vent_whf, duct_systems,
+  def self.apply(model, runner, weather, spaces, air_infils,
+                 mech_vent, nat_vent, vent_whf, duct_systems,
                  cfa, infil_volume, infil_height, nbeds, window_area,
-                 min_neighbor_distance, vent_fan_kitchen, vent_fan_bath, site_type)
+                 min_neighbor_distance, vent_fan_kitchen, vent_fan_bath,
+                 vented_attic, vented_crawl, site_type, shelter_coef,
+                 has_flue_chimney, apply_ashrae140_assumptions)
 
     @runner = runner
+    @spaces = spaces
     @cfa = cfa
     @nbeds = nbeds
     @building_height = Geometry.get_max_z_of_spaces(model.getSpaces)
@@ -20,62 +24,76 @@ class Airflow
     @infil_height = infil_height
     @living_space = spaces[HPXML::LocationLivingSpace]
     @living_zone = @living_space.thermalZone.get
-    @unconditioned_basement = spaces[HPXML::LocationBasementUnconditioned]
-    @garage = spaces[HPXML::LocationGarage]
-    @vented_crawlspace = spaces[HPXML::LocationCrawlspaceVented]
-    @unvented_crawlspace = spaces[HPXML::LocationCrawlspaceUnvented]
-    @vented_attic = spaces[HPXML::LocationAtticVented]
-    @unvented_attic = spaces[HPXML::LocationAtticUnvented]
+    @apply_ashrae140_assumptions = apply_ashrae140_assumptions
+
+    # Get air infiltration
+    living_ach50 = nil
+    living_const_ach = nil
+    air_infils.each do |air_infil|
+      if (air_infil.unit_of_measure == HPXML::UnitsACH) && (air_infil.house_pressure == 50)
+        living_ach50 = air_infil.air_leakage
+      elsif (air_infil.unit_of_measure == HPXML::UnitsCFM) && (air_infil.house_pressure == 50)
+        living_ach50 = air_infil.air_leakage * 60.0 / infil_volume # Convert CFM50 to ACH50
+      elsif air_infil.unit_of_measure == HPXML::UnitsACHNatural
+        if apply_ashrae140_assumptions
+          living_const_ach = air_infil.air_leakage
+        else
+          sla = Airflow.get_infiltration_SLA_from_ACH(air_infil.air_leakage, infil_height, weather)
+          living_ach50 = Airflow.get_infiltration_ACH50_from_SLA(sla, 0.65, cfa, infil_volume)
+        end
+      end
+    end
 
     # Global sensors
 
-    pbar_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Site Outdoor Air Barometric Pressure')
-    pbar_sensor.setName('out pb s')
+    @pbar_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Site Outdoor Air Barometric Pressure')
+    @pbar_sensor.setName('out pb s')
 
-    wout_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Site Outdoor Air Humidity Ratio')
-    wout_sensor.setName('out wt s')
+    @wout_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Site Outdoor Air Humidity Ratio')
+    @wout_sensor.setName('out wt s')
 
-    vwind_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Site Wind Speed')
-    vwind_sensor.setName('site vw s')
+    @vwind_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Site Wind Speed')
+    @vwind_sensor.setName('site vw s')
 
-    tin_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Zone Mean Air Temperature')
-    tin_sensor.setName("#{Constants.ObjectNameAirflow} tin s")
-    tin_sensor.setKeyName(@living_zone.name.to_s)
+    @tin_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Zone Mean Air Temperature')
+    @tin_sensor.setName("#{Constants.ObjectNameAirflow} tin s")
+    @tin_sensor.setKeyName(@living_zone.name.to_s)
 
-    tout_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Zone Outdoor Air Drybulb Temperature')
-    tout_sensor.setName("#{Constants.ObjectNameAirflow} tt s")
-    tout_sensor.setKeyName(@living_zone.name.to_s)
+    @tout_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Zone Outdoor Air Drybulb Temperature')
+    @tout_sensor.setName("#{Constants.ObjectNameAirflow} tt s")
+    @tout_sensor.setKeyName(@living_zone.name.to_s)
 
     # Adiabatic construction for ducts
 
     adiabatic_mat = OpenStudio::Model::MasslessOpaqueMaterial.new(model, 'Rough', 176.1)
     adiabatic_mat.setName('Adiabatic')
-    adiabatic_const = OpenStudio::Model::Construction.new(model)
-    adiabatic_const.setName('AdiabaticConst')
-    adiabatic_const.insertLayer(0, adiabatic_mat)
+    @adiabatic_const = OpenStudio::Model::Construction.new(model)
+    @adiabatic_const.setName('AdiabaticConst')
+    @adiabatic_const.insertLayer(0, adiabatic_mat)
 
     # Update model
 
-    wind_speed = process_wind_speed_correction(site_type, infil.shelter_coef, min_neighbor_distance)
-    apply_infiltration_for_unconditioned_spaces(model, infil, wind_speed, weather)
+    @wind_speed = process_wind_speed_correction(site_type, shelter_coef, min_neighbor_distance)
+
+    apply_infiltration_for_unconditioned_spaces(model, weather, vented_attic, vented_crawl, living_ach50)
 
     air_loop_objects = create_air_loop_objects(model, model.getAirLoopHVACs, mech_vent)
-    process_mech_vent(model, mech_vent, weather, infil)
+    process_mech_vent(model, mech_vent, weather)
 
     if mech_vent.type == HPXML::MechVentTypeCFIS
       cfis_program = create_cfis_objects(model, mech_vent)
     end
 
-    nv_and_whf_program = process_nat_vent_and_whole_house_fan(model, nat_vent, vent_whf, tin_sensor, tout_sensor, pbar_sensor, vwind_sensor, wind_speed, infil, weather, wout_sensor, window_area)
+    nv_and_whf_program = process_nat_vent_and_whole_house_fan(model, nat_vent, vent_whf, weather, window_area)
 
     duct_programs = {}
     duct_lks = {}
     duct_systems.each do |ducts, air_loop|
       process_ducts(model, ducts, air_loop)
-      create_ducts_objects(model, ducts, mech_vent, tin_sensor, pbar_sensor, adiabatic_const, air_loop, duct_programs, duct_lks, air_loop_objects)
+      create_ducts_objects(model, ducts, mech_vent, air_loop, duct_programs, duct_lks, air_loop_objects)
     end
 
-    infil_program = create_infil_mech_vent_objects(model, weather, infil, mech_vent, vent_fan_kitchen, vent_fan_bath, wind_speed, tin_sensor, tout_sensor, vwind_sensor, duct_lks, wout_sensor, pbar_sensor)
+    infil_program = create_infil_mech_vent_program(model, weather, mech_vent, vent_fan_kitchen, vent_fan_bath, duct_lks, has_flue_chimney, living_ach50, living_const_ach)
 
     create_ems_program_managers(model, infil_program, nv_and_whf_program, cfis_program, duct_programs)
 
@@ -182,88 +200,105 @@ class Airflow
     return wind_speed
   end
 
-  def self.apply_infiltration_for_unconditioned_spaces(model, infil, wind_speed, weather)
+  def self.apply_infiltration_for_unconditioned_spaces(model, weather, vented_attic, vented_crawl, living_ach50)
     # Garage
-    if not @garage.nil?
-      garage_area = UnitConversions.convert(@garage.floorArea, 'm^2', 'ft^2')
-      garage_volume = UnitConversions.convert(@garage.volume, 'm^3', 'ft^3')
+    if not @spaces[HPXML::LocationGarage].nil?
+      space = @spaces[HPXML::LocationGarage]
+      garage_area = UnitConversions.convert(space.floorArea, 'm^2', 'ft^2')
+      garage_volume = UnitConversions.convert(space.volume, 'm^3', 'ft^3')
       hor_lk_frac = 0.4
       neutral_level = 0.5
-      sla = Airflow.get_infiltration_SLA_from_ACH50(infil.garage_ach50, 0.65, garage_area, garage_volume)
+      sla = Airflow.get_infiltration_SLA_from_ACH50(living_ach50, 0.65, garage_area, garage_volume)
       ela = sla * garage_area
       ach = Airflow.get_infiltration_ACH_from_SLA(sla, 8.202, weather)
-      inf_flow = ach / UnitConversions.convert(1.0, 'hr', 'min') * garage_volume # cfm
-      c_w_SG, c_s_SG = calc_wind_stack_coeffs(wind_speed, hor_lk_frac, neutral_level, @garage)
-      apply_infiltration_to_unconditioned_space(model, wind_speed, @garage, nil, ela, c_w_SG, c_s_SG)
+      cfm = ach / UnitConversions.convert(1.0, 'hr', 'min') * garage_volume
+      c_w_SG, c_s_SG = calc_wind_stack_coeffs(hor_lk_frac, neutral_level, space)
+      apply_infiltration_to_unconditioned_space(model, space, nil, ela, c_w_SG, c_s_SG)
     end
 
     # Unconditioned Basement
-    if not @unconditioned_basement.nil?
-      uncond_bsmt_volume = UnitConversions.convert(@unconditioned_basement.volume, 'm^3', 'ft^3')
+    if not @spaces[HPXML::LocationBasementUnconditioned].nil?
+      space = @spaces[HPXML::LocationBasementUnconditioned]
+      uncond_bsmt_volume = UnitConversions.convert(space.volume, 'm^3', 'ft^3')
       ach = 0.1 # Assumption
-      inf_flow = ach / UnitConversions.convert(1.0, 'hr', 'min') * uncond_bsmt_volume # cfm
-      apply_infiltration_to_unconditioned_space(model, wind_speed, @unconditioned_basement, ach, nil, nil, nil)
+      cfm = ach / UnitConversions.convert(1.0, 'hr', 'min') * uncond_bsmt_volume
+      apply_infiltration_to_unconditioned_space(model, space, ach, nil, nil, nil)
       # Store info for HVAC Sizing measure
-      @unconditioned_basement.thermalZone.get.additionalProperties.setFeature(Constants.SizingInfoZoneInfiltrationCFM, inf_flow.to_f)
+      space.thermalZone.get.additionalProperties.setFeature(Constants.SizingInfoZoneInfiltrationCFM, cfm.to_f)
     end
 
     # Vented Crawlspace
-    if not @vented_crawlspace.nil?
-      vented_crawl_volume = UnitConversions.convert(@vented_crawlspace.volume, 'm^3', 'ft^3')
-      sla = infil.vented_crawl_sla
+    if not @spaces[HPXML::LocationCrawlspaceVented].nil?
+      space = @spaces[HPXML::LocationCrawlspaceVented]
+      vented_crawl_volume = UnitConversions.convert(space.volume, 'm^3', 'ft^3')
+      sla = vented_crawl.vented_crawlspace_sla
       ach = Airflow.get_infiltration_ACH_from_SLA(sla, 8.202, weather)
-      inf_flow = ach / UnitConversions.convert(1.0, 'hr', 'min') * vented_crawl_volume # cfm
-      apply_infiltration_to_unconditioned_space(model, wind_speed, @vented_crawlspace, ach, nil, nil, nil)
+      cfm = ach / UnitConversions.convert(1.0, 'hr', 'min') * vented_crawl_volume
+      apply_infiltration_to_unconditioned_space(model, space, ach, nil, nil, nil)
       # Store info for HVAC Sizing measure
-      @vented_crawlspace.thermalZone.get.additionalProperties.setFeature(Constants.SizingInfoZoneInfiltrationCFM, inf_flow.to_f)
+      space.thermalZone.get.additionalProperties.setFeature(Constants.SizingInfoZoneInfiltrationCFM, cfm.to_f)
     end
 
     # Unvented Crawlspace
-    if not @unvented_crawlspace.nil?
-      unvented_crawl_volume = UnitConversions.convert(@unvented_crawlspace.volume, 'm^3', 'ft^3')
+    if not @spaces[HPXML::LocationCrawlspaceUnvented].nil?
+      space = @spaces[HPXML::LocationCrawlspaceUnvented]
+      unvented_crawl_volume = UnitConversions.convert(space.volume, 'm^3', 'ft^3')
       sla = 0 # Assumption
       ach = Airflow.get_infiltration_ACH_from_SLA(sla, 8.202, weather)
-      inf_flow = ach / UnitConversions.convert(1.0, 'hr', 'min') * unvented_crawl_volume # cfm
-      apply_infiltration_to_unconditioned_space(model, wind_speed, @unvented_crawlspace, ach, nil, nil, nil)
+      cfm = ach / UnitConversions.convert(1.0, 'hr', 'min') * unvented_crawl_volume
+      apply_infiltration_to_unconditioned_space(model, space, ach, nil, nil, nil)
       # Store info for HVAC Sizing measure
-      @unvented_crawlspace.thermalZone.get.additionalProperties.setFeature(Constants.SizingInfoZoneInfiltrationCFM, inf_flow.to_f)
+      space.thermalZone.get.additionalProperties.setFeature(Constants.SizingInfoZoneInfiltrationCFM, cfm.to_f)
     end
 
     # Vented Attic
-    if not @vented_attic.nil?
-      vented_attic_volume = UnitConversions.convert(@vented_attic.volume, 'm^3', 'ft^3')
-      if not infil.vented_attic_sla.nil?
-        vented_attic_area = UnitConversions.convert(@vented_attic.floorArea, 'm^2', 'ft^2')
+    if not @spaces[HPXML::LocationAtticVented].nil?
+      space = @spaces[HPXML::LocationAtticVented]
+      vented_attic_volume = UnitConversions.convert(space.volume, 'm^3', 'ft^3')
+
+      if not vented_attic.vented_attic_sla.nil?
+        vented_attic_sla = vented_attic.vented_attic_sla
+      elsif not vented_attic.vented_attic_ach.nil?
+        if @apply_ashrae140_assumptions
+          vented_attic_const_ach = vented_attic.vented_attic_ach
+        else
+          vented_attic_sla = Airflow.get_infiltration_SLA_from_ACH(vented_attic.vented_attic_ach, 8.202, weather)
+        end
+      end
+
+      if not vented_attic_sla.nil?
+        vented_attic_area = UnitConversions.convert(space.floorArea, 'm^2', 'ft^2')
         hor_lk_frac = 1.0
         neutral_level = 0.5
-        sla = infil.vented_attic_sla
+        sla = vented_attic_sla
         ach = Airflow.get_infiltration_ACH_from_SLA(sla, 8.202, weather)
         ela = sla * vented_attic_area
-        inf_flow = ach / UnitConversions.convert(1.0, 'hr', 'min') * vented_attic_volume
-        c_w_SG, c_s_SG = calc_wind_stack_coeffs(wind_speed, hor_lk_frac, neutral_level, @vented_attic)
-        apply_infiltration_to_unconditioned_space(model, wind_speed, @vented_attic, nil, ela, c_w_SG, c_s_SG)
-      elsif not infil.vented_attic_const_ach.nil?
-        ach = infil.vented_attic_const_ach
-        inf_flow = ach / UnitConversions.convert(1.0, 'hr', 'min') * vented_attic_volume
+        cfm = ach / UnitConversions.convert(1.0, 'hr', 'min') * vented_attic_volume
+        c_w_SG, c_s_SG = calc_wind_stack_coeffs(hor_lk_frac, neutral_level, space)
+        apply_infiltration_to_unconditioned_space(model, space, nil, ela, c_w_SG, c_s_SG)
+      elsif not vented_attic_const_ach.nil?
+        ach = vented_attic_const_ach
+        cfm = ach / UnitConversions.convert(1.0, 'hr', 'min') * vented_attic_volume
       end
       # Store info for HVAC Sizing measure
-      @vented_attic.thermalZone.get.additionalProperties.setFeature(Constants.SizingInfoZoneInfiltrationCFM, inf_flow.to_f)
+      space.thermalZone.get.additionalProperties.setFeature(Constants.SizingInfoZoneInfiltrationCFM, cfm.to_f)
     end
 
     # Unvented Attic
-    if not @unvented_attic.nil?
-      unvented_attic_area = UnitConversions.convert(@unvented_attic.floorArea, 'm^2', 'ft^2')
-      unvented_attic_volume = UnitConversions.convert(@unvented_attic.volume, 'm^3', 'ft^3')
+    if not @spaces[HPXML::LocationAtticUnvented].nil?
+      space = @spaces[HPXML::LocationAtticUnvented]
+      unvented_attic_area = UnitConversions.convert(space.floorArea, 'm^2', 'ft^2')
+      unvented_attic_volume = UnitConversions.convert(space.volume, 'm^3', 'ft^3')
       hor_lk_frac = 1.0
       neutral_level = 0.5
       sla = 0 # Assumption
       ach = Airflow.get_infiltration_ACH_from_SLA(sla, 8.202, weather)
       ela = sla * unvented_attic_area
-      inf_flow = ach / UnitConversions.convert(1.0, 'hr', 'min') * unvented_attic_volume
-      c_w_SG, c_s_SG = calc_wind_stack_coeffs(wind_speed, hor_lk_frac, neutral_level, @unvented_attic)
-      apply_infiltration_to_unconditioned_space(model, wind_speed, @unvented_attic, nil, ela, c_w_SG, c_s_SG)
+      cfm = ach / UnitConversions.convert(1.0, 'hr', 'min') * unvented_attic_volume
+      c_w_SG, c_s_SG = calc_wind_stack_coeffs(hor_lk_frac, neutral_level, space)
+      apply_infiltration_to_unconditioned_space(model, space, nil, ela, c_w_SG, c_s_SG)
       # Store info for HVAC Sizing measure
-      @unvented_attic.thermalZone.get.additionalProperties.setFeature(Constants.SizingInfoZoneInfiltrationCFM, inf_flow.to_f)
+      space.thermalZone.get.additionalProperties.setFeature(Constants.SizingInfoZoneInfiltrationCFM, cfm.to_f)
     end
   end
 
@@ -319,7 +354,7 @@ class Airflow
     return air_loop_objects
   end
 
-  def self.apply_infiltration_to_unconditioned_space(model, wind_speed, space, ach = nil, ela = nil, c_w_SG = nil, c_s_SG = nil)
+  def self.apply_infiltration_to_unconditioned_space(model, space, ach = nil, ela = nil, c_w_SG = nil, c_s_SG = nil)
     if ach.to_f > 0
       # Model ACH as constant infiltration/ventilation
       # This is typically used for below-grade spaces where wind is zero
@@ -344,7 +379,7 @@ class Airflow
     end
   end
 
-  def self.process_mech_vent(model, mech_vent, weather, infil)
+  def self.process_mech_vent(model, mech_vent, weather)
     if mech_vent.type == HPXML::MechVentTypeCFIS
       if not HVAC.has_ducted_equipment(model, mech_vent.cfis_air_loop)
         fail 'A CFIS ventilation system has been specified but the building does not have central, forced air equipment.'
@@ -538,7 +573,7 @@ class Airflow
     end
   end
 
-  def self.process_nat_vent_and_whole_house_fan(model, nat_vent, vent_whf, tin_sensor, tout_sensor, pbar_sensor, vwind_sensor, wind_speed, infil, weather, wout_sensor, window_area)
+  def self.process_nat_vent_and_whole_house_fan(model, nat_vent, vent_whf, weather, window_area)
     nv_num_days_per_week = 7 # FUTURE: Expose via HPXML?
     if vent_whf.nil?
       whf_num_days_per_week = 0
@@ -629,10 +664,10 @@ class Airflow
 
     # Assume located in attic floor if attic zone exists; otherwise assume it's through roof/wall.
     whf_zone = nil
-    if not @vented_attic.nil?
-      whf_zone = @vented_attic.thermalZone.get
-    elsif not @unvented_attic.nil?
-      whf_zone = @unvented_attic.thermalZone.get
+    if not @spaces[HPXML::LocationAtticVented].nil?
+      whf_zone = @spaces[HPXML::LocationAtticVented].thermalZone.get
+    elsif not @spaces[HPXML::LocationAtticUnvented].nil?
+      whf_zone = @spaces[HPXML::LocationAtticUnvented].thermalZone.get
     end
     if not whf_zone.nil?
       # Air from living to WHF zone (attic)
@@ -663,15 +698,15 @@ class Airflow
     max_flow_rate = max_rate * @infil_volume / UnitConversions.convert(1.0, 'hr', 'min')
     neutral_level = 0.5
     hor_lk_frac = 0.0
-    c_w, c_s = calc_wind_stack_coeffs(wind_speed, hor_lk_frac, neutral_level, @living_space, @infil_height)
+    c_w, c_s = calc_wind_stack_coeffs(hor_lk_frac, neutral_level, @living_space, @infil_height)
 
     # Program
     nv_and_whf_program = OpenStudio::Model::EnergyManagementSystemProgram.new(model)
     nv_and_whf_program.setName(Constants.ObjectNameNaturalVentilation + ' program')
-    nv_and_whf_program.addLine("Set Tin = #{tin_sensor.name}")
-    nv_and_whf_program.addLine("Set Tout = #{tout_sensor.name}")
-    nv_and_whf_program.addLine("Set Wout = #{wout_sensor.name}")
-    nv_and_whf_program.addLine("Set Pbar = #{pbar_sensor.name}")
+    nv_and_whf_program.addLine("Set Tin = #{@tin_sensor.name}")
+    nv_and_whf_program.addLine("Set Tout = #{@tout_sensor.name}")
+    nv_and_whf_program.addLine("Set Wout = #{@wout_sensor.name}")
+    nv_and_whf_program.addLine("Set Pbar = #{@pbar_sensor.name}")
     nv_and_whf_program.addLine('Set Phiout = (@RhFnTdbWPb Tout Wout Pbar)')
     nv_and_whf_program.addLine("Set MaxHR = #{nat_vent.max_oa_hr}")
     nv_and_whf_program.addLine("Set MaxRH = #{nat_vent.max_oa_rh}")
@@ -695,7 +730,7 @@ class Airflow
     nv_and_whf_program.addLine("    Set Cw = #{c_w * 0.01}")
     nv_and_whf_program.addLine('    Set Tdiff = Tin-Tout')
     nv_and_whf_program.addLine('    Set dT = (@Abs Tdiff)')
-    nv_and_whf_program.addLine("    Set Vwind = #{vwind_sensor.name}")
+    nv_and_whf_program.addLine("    Set Vwind = #{@vwind_sensor.name}")
     nv_and_whf_program.addLine('    Set SGNV = NVArea*Adj*((((Cs*dT)+(Cw*(Vwind^2)))^0.5)/1000)')
     nv_and_whf_program.addLine("    Set MaxNV = #{UnitConversions.convert(max_flow_rate, 'cfm', 'm^3/s')}")
     nv_and_whf_program.addLine("    Set #{nv_flow_actuator.name} = (@Min SGNV MaxNV)")
@@ -713,7 +748,7 @@ class Airflow
     return nv_and_whf_program
   end
 
-  def self.create_return_air_duct_zone(model, air_loop_name, adiabatic_const)
+  def self.create_return_air_duct_zone(model, air_loop_name)
     # Create the return air plenum zone, space
     ra_duct_zone = OpenStudio::Model::ThermalZone.new(model)
     ra_duct_zone.setName(air_loop_name + ' ret air zone')
@@ -731,7 +766,7 @@ class Airflow
     ra_space.setThermalZone(ra_duct_zone)
 
     ra_space.surfaces.each do |surface|
-      surface.setConstruction(adiabatic_const)
+      surface.setConstruction(@adiabatic_const)
       surface.setOutsideBoundaryCondition('Adiabatic')
       surface.setSunExposure('NoSun')
       surface.setWindExposure('NoWind')
@@ -760,7 +795,7 @@ class Airflow
     return actuator
   end
 
-  def self.create_ducts_objects(model, ducts, mech_vent, tin_sensor, pbar_sensor, adiabatic_const, air_loop, duct_programs, duct_lks, air_loop_objects)
+  def self.create_ducts_objects(model, ducts, mech_vent, air_loop, duct_programs, duct_lks, air_loop_objects)
     return if ducts.size == 0 # No ducts
 
     duct_zones = ducts.map { |duct| duct.zone }.uniq
@@ -776,7 +811,7 @@ class Airflow
 
     if @living_zone.airLoopHVACs.include? air_loop # next if airloop doesn't serve this
 
-      ra_duct_zone = create_return_air_duct_zone(model, air_loop.name.to_s, adiabatic_const)
+      ra_duct_zone = create_return_air_duct_zone(model, air_loop.name.to_s)
       ra_duct_space = ra_duct_zone.spaces[0]
 
       # Get the air demand inlet node
@@ -835,7 +870,7 @@ class Airflow
         ra_t_sensor.setName("#{ra_t_var.name} s")
         ra_t_sensor.setKeyName(living_zone_return_air_node.name.to_s)
       else
-        ra_t_sensor = tin_sensor
+        ra_t_sensor = @tin_sensor
       end
 
       # Return air humidity ratio
@@ -1036,11 +1071,11 @@ class Airflow
         f_oa = 1.0
         if duct_zone.nil? # Outside
           # nop
-        elsif (not @unconditioned_basement.nil?) && (@unconditioned_basement.thermalZone.get.name.to_s == duct_zone.name.to_s)
+        elsif (not @spaces[HPXML::LocationBasementUnconditioned].nil?) && (@spaces[HPXML::LocationBasementUnconditioned].thermalZone.get.name.to_s == duct_zone.name.to_s)
           f_oa = 0.0
-        elsif (not @unvented_crawlspace.nil?) && (@unvented_crawlspace.thermalZone.get.name.to_s == duct_zone.name.to_s)
+        elsif (not @spaces[HPXML::LocationCrawlspaceUnvented].nil?) && (@spaces[HPXML::LocationCrawlspaceUnvented].thermalZone.get.name.to_s == duct_zone.name.to_s)
           f_oa = 0.0
-        elsif (not @unvented_attic.nil?) && (@unvented_attic.thermalZone.get.name.to_s == duct_zone.name.to_s)
+        elsif (not @spaces[HPXML::LocationAtticUnvented].nil?) && (@spaces[HPXML::LocationAtticUnvented].thermalZone.get.name.to_s == duct_zone.name.to_s)
           f_oa = 0.0
         end
 
@@ -1211,7 +1246,7 @@ class Airflow
           duct_program.addLine("  Set cfis_m3s = (#{mech_vent.cfis_fan_mfr_max_var} / 1.16097654) * #{mech_vent.cfis_airflow_frac}") # Density of 1.16097654 was back calculated using E+ results
           duct_program.addLine("  Set #{fan_rtf_var.name} = #{mech_vent.cfis_f_damper_extra_open_var.name}") # Need to use global vars to sync duct_program and infiltration program of different calling points
           duct_program.addLine("  Set #{ah_vfr_var.name} = #{fan_rtf_var.name}*cfis_m3s")
-          duct_program.addLine("  Set rho_in = (@RhoAirFnPbTdbW #{pbar_sensor.name} #{tin_sensor.name} #{win_sensor.name})")
+          duct_program.addLine("  Set rho_in = (@RhoAirFnPbTdbW #{@pbar_sensor.name} #{@tin_sensor.name} #{win_sensor.name})")
           duct_program.addLine("  Set #{ah_mfr_var.name} = #{ah_vfr_var.name} * rho_in")
           duct_program.addLine("  Set #{ah_tout_var.name} = #{ra_t_sensor.name}")
           duct_program.addLine("  Set #{ah_wout_var.name} = #{ra_w_sensor.name}")
@@ -1289,7 +1324,7 @@ class Airflow
     return cfis_program
   end
 
-  def self.create_infil_mech_vent_objects(model, weather, infil, mech_vent, vent_fan_kitchen, vent_fan_bath, wind_speed, tin_sensor, tout_sensor, vwind_sensor, duct_lks, wout_sensor, pbar_sensor)
+  def self.create_infil_mech_vent_program(model, weather, mech_vent, vent_fan_kitchen, vent_fan_bath, duct_lks, has_flue_chimney, living_ach50, living_const_ach)
     # Sensors
 
     range_array = [0.0] * 24
@@ -1405,11 +1440,13 @@ class Airflow
     imbal_mechvent_flow_actuator = OpenStudio::Model::EnergyManagementSystemActuator.new(imbal_mechvent_flow, 'Zone Infiltration', 'Air Exchange Flow Rate')
     imbal_mechvent_flow_actuator.setName("#{imbal_mechvent_flow.name} act")
 
-    # Living Space Infiltration Calculation
-
     outside_air_density = UnitConversions.convert(weather.header.LocalPressure, 'atm', 'Btu/ft^3') / (Gas.Air.r * (weather.data.AnnualAvgDrybulb + 460.0))
 
-    if not infil.living_ach50.nil?
+    # Living Space Infiltration Calculation/Program
+    infil_program = OpenStudio::Model::EnergyManagementSystemProgram.new(model)
+    infil_program.setName(Constants.ObjectNameInfiltration + ' program')
+
+    if living_ach50.to_f > 0
 
       # Based on "Field Validation of Algebraic Equations for Stack and
       # Wind Driven Air Infiltration Calculations" by Walker and Wilson (1998)
@@ -1418,7 +1455,7 @@ class Airflow
       n_i = 0.65
 
       # Calculate SLA
-      living_sla = Airflow.get_infiltration_SLA_from_ACH50(infil.living_ach50, 0.65, @cfa, @infil_volume)
+      living_sla = Airflow.get_infiltration_SLA_from_ACH50(living_ach50, 0.65, @cfa, @infil_volume)
 
       # Effective Leakage Area (ft^2)
       a_o = living_sla * @cfa
@@ -1428,7 +1465,7 @@ class Airflow
       delta_pref = 0.016 # inH2O
       c_i = a_o * (2.0 / outside_air_density)**0.5 * delta_pref**(0.5 - n_i) * inf_conv_factor
 
-      if infil.has_flue_chimney
+      if has_flue_chimney
         y_i = 0.2 # Fraction of leakage through the flue; 0.2 is a "typical" value according to THE ALBERTA AIR INFIL1RATION MODEL, Walker and Wilson, 1990
         flue_height = @building_height + 2.0 # ft
         s_wflue = 1.0 # Flue Shelter Coefficient
@@ -1439,7 +1476,7 @@ class Airflow
       end
 
       vented_crawl = false
-      if not @vented_crawlspace.nil?
+      if not @spaces[HPXML::LocationCrawlspaceVented].nil?
         vented_crawl = true
       end
 
@@ -1475,7 +1512,7 @@ class Airflow
         m_i = 1.0 # eq. 11
       end
 
-      if infil.has_flue_chimney
+      if has_flue_chimney
         # Eq. 13
         x_c = r_i + (2.0 * (1.0 - r_i - y_i)) / (n_i + 1.0) - 2.0 * y_i * (z_f - 1.0)**n_i
         # Additive flue function, Eq. 12
@@ -1521,47 +1558,38 @@ class Airflow
       wind_coef = f_w * UnitConversions.convert(outside_air_density / 2.0, 'lbm/ft^3', 'inH2O/mph^2')**n_i # inH2O^n/mph^2n
 
       living_ach = Airflow.get_infiltration_ACH_from_SLA(living_sla, @infil_height, weather)
+      living_cfm = living_ach / UnitConversions.convert(1.0, 'hr', 'min') * @infil_volume
 
-      # Convert living space ACH to cfm:
-      living_inf_flow = living_ach / UnitConversions.convert(1.0, 'hr', 'min') * @infil_volume # cfm
-
-    elsif not infil.living_constant_ach.nil?
-
-      living_ach = infil.living_constant_ach
-      living_inf_flow = living_ach / UnitConversions.convert(1.0, 'hr', 'min') * @infil_volume # cfm
-
-    end
-
-    # Store info for HVAC Sizing measure
-    @living_zone.additionalProperties.setFeature(Constants.SizingInfoZoneInfiltrationCFM, living_inf_flow.to_f)
-    @living_zone.additionalProperties.setFeature(Constants.SizingInfoZoneInfiltrationACH, living_ach.to_f)
-
-    # Program
-
-    infil_program = OpenStudio::Model::EnergyManagementSystemProgram.new(model)
-    infil_program.setName(Constants.ObjectNameInfiltration + ' program')
-    if living_sla.to_f > 0
-      infil_program.addLine("Set p_m = #{wind_speed.ashrae_terrain_exponent}")
-      infil_program.addLine("Set p_s = #{wind_speed.ashrae_site_terrain_exponent}")
-      infil_program.addLine("Set s_m = #{wind_speed.ashrae_terrain_thickness}")
-      infil_program.addLine("Set s_s = #{wind_speed.ashrae_site_terrain_thickness}")
-      infil_program.addLine("Set z_m = #{UnitConversions.convert(wind_speed.height, 'ft', 'm')}")
+      infil_program.addLine("Set p_m = #{@wind_speed.ashrae_terrain_exponent}")
+      infil_program.addLine("Set p_s = #{@wind_speed.ashrae_site_terrain_exponent}")
+      infil_program.addLine("Set s_m = #{@wind_speed.ashrae_terrain_thickness}")
+      infil_program.addLine("Set s_s = #{@wind_speed.ashrae_site_terrain_thickness}")
+      infil_program.addLine("Set z_m = #{UnitConversions.convert(@wind_speed.height, 'ft', 'm')}")
       infil_program.addLine("Set z_s = #{UnitConversions.convert(@infil_height, 'ft', 'm')}")
       infil_program.addLine('Set f_t = (((s_m/z_m)^p_m)*((z_s/s_s)^p_s))')
-      infil_program.addLine("Set Tdiff = #{tin_sensor.name}-#{tout_sensor.name}")
+      infil_program.addLine("Set Tdiff = #{@tin_sensor.name}-#{@tout_sensor.name}")
       infil_program.addLine('Set dT = @Abs Tdiff')
       infil_program.addLine("Set c = #{((UnitConversions.convert(c_i, 'cfm', 'm^3/s') / (UnitConversions.convert(1.0, 'inH2O', 'Pa')**n_i))).round(4)}")
       infil_program.addLine("Set Cs = #{(stack_coef * (UnitConversions.convert(1.0, 'inH2O/R', 'Pa/K')**n_i)).round(4)}")
       infil_program.addLine("Set Cw = #{(wind_coef * (UnitConversions.convert(1.0, 'inH2O/mph^2', 'Pa*s^2/m^2')**n_i)).round(4)}")
       infil_program.addLine("Set n = #{n_i}")
-      infil_program.addLine("Set sft = (f_t*#{(((wind_speed.S_wo * (1.0 - y_i)) + (s_wflue * (1.5 * y_i))))})")
-      infil_program.addLine("Set temp1 = ((c*Cw)*((sft*#{vwind_sensor.name})^(2*n)))^2")
+      infil_program.addLine("Set sft = (f_t*#{(((@wind_speed.S_wo * (1.0 - y_i)) + (s_wflue * (1.5 * y_i))))})")
+      infil_program.addLine("Set temp1 = ((c*Cw)*((sft*#{@vwind_sensor.name})^(2*n)))^2")
       infil_program.addLine('Set Qn = (((c*Cs*(dT^n))^2)+temp1)^0.5')
-    elsif living_ach.to_f > 0
+
+    elsif living_const_ach.to_f > 0
+
+      living_ach = living_const_ach
+      living_cfm = living_ach / UnitConversions.convert(1.0, 'hr', 'min') * @infil_volume
+
       infil_program.addLine("Set Qn = #{living_ach * UnitConversions.convert(@infil_volume, 'ft^3', 'm^3') / UnitConversions.convert(1.0, 'hr', 's')}")
     else
       infil_program.addLine('Set Qn = 0')
     end
+
+    # Store info for HVAC Sizing measure
+    @living_zone.additionalProperties.setFeature(Constants.SizingInfoZoneInfiltrationCFM, living_cfm.to_f)
+    @living_zone.additionalProperties.setFeature(Constants.SizingInfoZoneInfiltrationACH, living_ach.to_f)
 
     if [HPXML::MechVentTypeBalanced, HPXML::MechVentTypeERV, HPXML::MechVentTypeHRV].include?(mech_vent.type) && (mech_vent.cfm > 0)
       # ERV/HRV/Balanced EMS load model
@@ -1583,14 +1611,14 @@ class Airflow
       erv_lat_load_actuator = create_sens_lat_load_actuator_and_equipment(model, lat_name, @living_space, 1.0, 0.0)
 
       # Air property at inlet nodes in two sides of ERV
-      infil_program.addLine("Set ERVSupInPb = #{pbar_sensor.name}") # oa barometric pressure
-      infil_program.addLine("Set ERVSupInTemp = #{tout_sensor.name}") # oa db temperature
-      infil_program.addLine("Set ERVSupInW = #{wout_sensor.name}")   # oa humidity ratio
+      infil_program.addLine("Set ERVSupInPb = #{@pbar_sensor.name}") # oa barometric pressure
+      infil_program.addLine("Set ERVSupInTemp = #{@tout_sensor.name}") # oa db temperature
+      infil_program.addLine("Set ERVSupInW = #{@wout_sensor.name}")   # oa humidity ratio
       infil_program.addLine('Set ERVSupRho = (@RhoAirFnPbTdbW ERVSupInPb ERVSupInTemp ERVSupInW)')
       infil_program.addLine('Set ERVSupCp = (@CpAirFnW ERVSupInW)')
       infil_program.addLine('Set ERVSupInEnth = (@HFnTdbW ERVSupInTemp ERVSupInW)')
 
-      infil_program.addLine("Set ERVSecInTemp = #{tin_sensor.name}") # zone air temperature
+      infil_program.addLine("Set ERVSecInTemp = #{@tin_sensor.name}") # zone air temperature
       infil_program.addLine("Set ERVSecInW = #{win_sensor.name}") # zone air humidity ratio
       infil_program.addLine('Set ERVSecCp = (@CpAirFnW ERVSecInW)')
       infil_program.addLine('Set ERVSecInEnth = (@HFnTdbW ERVSecInTemp ERVSecInW)')
@@ -1782,14 +1810,14 @@ class Airflow
     end
   end
 
-  def self.calc_wind_stack_coeffs(wind_speed, hor_lk_frac, neutral_level, space, space_height = nil)
+  def self.calc_wind_stack_coeffs(hor_lk_frac, neutral_level, space, space_height = nil)
     if space_height.nil?
       space_height = Geometry.get_height_of_spaces([space])
     end
     coord_z = Geometry.get_z_origin_for_zone(space.thermalZone.get)
-    f_t_SG = wind_speed.site_terrain_multiplier * ((space_height + coord_z) / 32.8)**wind_speed.site_terrain_exponent / (wind_speed.terrain_multiplier * (wind_speed.height / 32.8)**wind_speed.terrain_exponent)
+    f_t_SG = @wind_speed.site_terrain_multiplier * ((space_height + coord_z) / 32.8)**@wind_speed.site_terrain_exponent / (@wind_speed.terrain_multiplier * (@wind_speed.height / 32.8)**@wind_speed.terrain_exponent)
     f_s_SG = 2.0 / 3.0 * (1 + hor_lk_frac / 2.0) * (2.0 * neutral_level * (1.0 - neutral_level))**0.5 / (neutral_level**0.5 + (1.0 - neutral_level)**0.5)
-    f_w_SG = wind_speed.shielding_coef * (1.0 - hor_lk_frac)**(1.0 / 3.0) * f_t_SG
+    f_w_SG = @wind_speed.shielding_coef * (1.0 - hor_lk_frac)**(1.0 / 3.0) * f_t_SG
     c_s_SG = f_s_SG**2.0 * Constants.g * space_height / (Constants.AssumedInsideTemp + 460.0)
     c_w_SG = f_w_SG**2.0
     return c_w_SG, c_s_SG
@@ -1892,22 +1920,6 @@ class Duct
     @rvalue = rvalue
   end
   attr_accessor(:side, :space, :leakage_frac, :leakage_cfm25, :area, :rvalue, :zone, :zone_handle)
-end
-
-class Infiltration
-  def initialize(living_ach50, living_constant_ach, shelter_coef, garage_ach50, vented_crawl_sla, vented_attic_sla,
-                 vented_attic_const_ach, has_flue_chimney)
-    @living_ach50 = living_ach50
-    @living_constant_ach = living_constant_ach
-    @shelter_coef = shelter_coef
-    @garage_ach50 = garage_ach50
-    @vented_crawl_sla = vented_crawl_sla
-    @vented_attic_sla = vented_attic_sla
-    @vented_attic_const_ach = vented_attic_const_ach
-    @has_flue_chimney = has_flue_chimney
-  end
-  attr_accessor(:living_ach50, :living_constant_ach, :shelter_coef, :garage_ach50, :vented_crawl_sla, :vented_attic_sla, :vented_attic_const_ach,
-                :has_flue_chimney)
 end
 
 class NaturalVentilation

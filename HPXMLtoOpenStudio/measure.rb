@@ -460,9 +460,9 @@ class OSModel
     measurements = []
     infilvolume = nil
     @hpxml.air_infiltration_measurements.each do |measurement|
-      is_ach50 = ((measurement.house_pressure == 50) && (measurement.unit_of_measure == HPXML::UnitsACH))
-      is_cfm50 = ((measurement.house_pressure == 50) && (measurement.unit_of_measure == HPXML::UnitsCFM))
-      is_nach = (measurement.house_pressure.nil? && (measurement.unit_of_measure == HPXML::UnitsACHNatural))
+      is_ach50 = ((measurement.unit_of_measure == HPXML::UnitsACH) && (measurement.house_pressure == 50))
+      is_cfm50 = ((measurement.unit_of_measure == HPXML::UnitsCFM) && (measurement.house_pressure == 50))
+      is_nach = (measurement.unit_of_measure == HPXML::UnitsACHNatural)
       next unless (is_ach50 || is_cfm50 || is_nach)
 
       measurements << measurement
@@ -877,7 +877,7 @@ class OSModel
   end
 
   def self.set_zone_volumes(runner, model)
-    # TODO: Use HPXML values not Model values
+    # FUTURE: Use HPXML values not Model values
     thermal_zones = model.getThermalZones
 
     # Init
@@ -2871,63 +2871,19 @@ class OSModel
   end
 
   def self.add_airflow(runner, model, weather, spaces)
-    # Infiltration
-    infil_height = Airflow.calc_inferred_infiltration_height(@cfa, @ncfl, @ncfl_ag, @infil_volume, @hpxml)
-    infil_ach50 = nil
-    infil_const_ach = nil
-    @hpxml.air_infiltration_measurements.each do |measurement|
-      if (measurement.house_pressure == 50) && (measurement.unit_of_measure == HPXML::UnitsACH)
-        infil_ach50 = measurement.air_leakage
-      elsif (measurement.house_pressure == 50) && (measurement.unit_of_measure == HPXML::UnitsCFM)
-        infil_ach50 = measurement.air_leakage * 60.0 / @infil_volume # Convert CFM50 to ACH50
-      elsif measurement.house_pressure.nil? && (measurement.unit_of_measure == HPXML::UnitsACHNatural)
-        if @apply_ashrae140_assumptions
-          infil_const_ach = measurement.air_leakage
-        else
-          sla = Airflow.get_infiltration_SLA_from_ACH(measurement.air_leakage, infil_height, weather)
-          infil_ach50 = Airflow.get_infiltration_ACH50_from_SLA(sla, 0.65, @cfa, @infil_volume)
-        end
-      end
+    # Vented Attic
+    vented_attic = nil
+    @hpxml.attics.each do |attic|
+      next unless attic.attic_type == HPXML::AtticTypeVented
+      vented_attic = attic
     end
 
-    vented_attic_sla = nil
-    vented_attic_const_ach = nil
-    if @hpxml.has_space_type(HPXML::LocationAtticVented)
-      @hpxml.attics.each do |attic|
-        next unless attic.attic_type == HPXML::AtticTypeVented
-
-        if not attic.vented_attic_sla.nil?
-          vented_attic_sla = attic.vented_attic_sla
-        elsif not attic.vented_attic_ach.nil?
-          if @apply_ashrae140_assumptions
-            vented_attic_const_ach = attic.vented_attic_ach
-          else
-            vented_attic_sla = Airflow.get_infiltration_SLA_from_ACH(attic.vented_attic_ach, 8.202, weather)
-          end
-        end
-      end
-    else
-      vented_attic_sla = 0.0
+    # Vented Crawlspace
+    vented_crawl = nil
+    @hpxml.foundations.each do |foundation|
+      next unless foundation.foundation_type == HPXML::FoundationTypeCrawlspaceVented
+      vented_crawl = foundation
     end
-
-    vented_crawl_sla = nil
-    if @hpxml.has_space_type(HPXML::LocationCrawlspaceVented)
-      @hpxml.foundations.each do |foundation|
-        next unless foundation.foundation_type == HPXML::FoundationTypeCrawlspaceVented
-
-        vented_crawl_sla = foundation.vented_crawlspace_sla
-      end
-    else
-      vented_crawl_sla = 0.0
-    end
-
-    shelter_coef = @hpxml.site.shelter_coefficient
-    living_ach50 = infil_ach50
-    living_constant_ach = infil_const_ach
-    garage_ach50 = infil_ach50
-    has_flue_chimney = false
-    infil = Infiltration.new(living_ach50, living_constant_ach, shelter_coef, garage_ach50, vented_crawl_sla,
-                             vented_attic_sla, vented_attic_const_ach, has_flue_chimney)
 
     # Natural Ventilation
     nv_frac_window_area_open = @frac_windows_operable * 0.5 * 0.2 # Assume A) 50% of the area of an operable window can be open, and B) 20% of openable window area is actually open
@@ -3049,11 +3005,18 @@ class OSModel
                                           mech_vent_fan_w, mech_vent_sens_eff, mech_vent_sens_eff_adj, clothes_dryer_exhaust,
                                           cfis_open_time, cfis_airflow_frac, cfis_airloop)
 
+    air_infils = @hpxml.air_infiltration_measurements
     window_area = @hpxml.windows.map { |w| w.area }.inject(0, :+)
     site_type = @hpxml.site.site_type
-    Airflow.apply(model, runner, weather, spaces, infil, mech_vent, nat_vent, vent_whf, duct_systems,
+    shelter_coef = @hpxml.site.shelter_coefficient
+    has_flue_chimney = false # FUTURE: Expose as HPXML input
+    infil_height = Airflow.calc_inferred_infiltration_height(@cfa, @ncfl, @ncfl_ag, @infil_volume, @hpxml)
+    Airflow.apply(model, runner, weather, spaces, air_infils,
+                  mech_vent, nat_vent, vent_whf, duct_systems,
                   @cfa, @infil_volume, infil_height, @nbeds, window_area,
-                  @min_neighbor_distance, vent_fan_kitchen, vent_fan_bath, site_type)
+                  @min_neighbor_distance, vent_fan_kitchen, vent_fan_bath,
+                  vented_attic, vented_crawl, site_type, shelter_coef,
+                  has_flue_chimney, @apply_ashrae140_assumptions)
   end
 
   def self.create_ducts(hvac_distribution, model, spaces)
