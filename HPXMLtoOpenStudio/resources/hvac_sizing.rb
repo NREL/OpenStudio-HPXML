@@ -1231,8 +1231,7 @@ class HVACSizing
     elsif Geometry.is_garage(duct.LocationSpace)
       dse_Fregain = 0.05
 
-    # Geometry.is_conditioned_attic no longer exists, should we remove this?
-    elsif Geometry.is_living(duct.LocationSpace) || Geometry.is_conditioned_attic(duct.LocationSpace)
+    elsif Geometry.is_living(duct.LocationSpace)
       dse_Fregain = 1.0
 
     else
@@ -1706,7 +1705,7 @@ class HVACSizing
 
       loop_flow = [1.0, UnitConversions.convert([hvac_final_values.Heat_Capacity, hvac_final_values.Cool_Capacity].max, 'Btu/hr', 'ton')].max.floor * 3.0
 
-      if (hvac.GSHP_BoreHoles == Constants.SizingAuto) && (hvac.GSHP_BoreDepth == Constants.SizingAuto)
+      if hvac.GSHP_BoreHoles.nil? && hvac.GSHP_BoreDepth.nil?
         hvac.GSHP_BoreHoles = [1, (UnitConversions.convert(hvac_final_values.Cool_Capacity, 'Btu/hr', 'ton') + 0.5).floor].max
         hvac.GSHP_BoreDepth = (bore_length / hvac.GSHP_BoreHoles).floor
         min_bore_depth = 0.15 * hvac.GSHP_BoreSpacing # 0.15 is the maximum Spacing2DepthRatio defined for the G-function
@@ -1723,10 +1722,10 @@ class HVACSizing
 
         hvac.GSHP_BoreDepth = (bore_length / hvac.GSHP_BoreHoles).floor + 5
 
-      elsif (hvac.GSHP_BoreHoles == Constants.SizingAuto) && (hvac.GSHP_BoreDepth != Constants.SizingAuto)
+      elsif hvac.GSHP_BoreHoles.nil? && (not hvac.GSHP_BoreDepth.nil?)
         hvac.GSHP_BoreHoles = (bore_length / hvac.GSHP_BoreDepth.to_f + 0.5).floor
         hvac.GSHP_BoreDepth = hvac.GSHP_BoreDepth.to_f
-      elsif (hvac.GSHP_BoreHoles != Constants.SizingAuto) && (hvac.GSHP_BoreDepth == Constants.SizingAuto)
+      elsif (not hvac.GSHP_BoreHoles.nil?) && hvac.GSHP_BoreDepth.nil?
         hvac.GSHP_BoreHoles = hvac.GSHP_BoreHoles.to_f
         hvac.GSHP_BoreDepth = (bore_length / hvac.GSHP_BoreHoles).floor + 5
       else
@@ -1737,7 +1736,7 @@ class HVACSizing
 
       bore_length = hvac.GSHP_BoreDepth * hvac.GSHP_BoreHoles
 
-      if hvac.GSHP_BoreConfig == Constants.SizingAuto
+      if hvac.GSHP_BoreConfig.nil?
         if hvac.GSHP_BoreHoles == 1
           hvac.GSHP_BoreConfig = Constants.BoreConfigSingle
         elsif hvac.GSHP_BoreHoles == 2
@@ -2077,7 +2076,7 @@ class HVACSizing
     rvalues = rvalues.split(',').map(&:to_f)
 
     # Locations
-    locations = get_feature(air_loop, Constants.SizingInfoDuctLocationZones, 'string')
+    locations = get_feature(air_loop, Constants.SizingInfoDuctLocationHandles, 'string')
     locations = locations.split(',')
     location_spaces = []
     thermal_zones = Geometry.get_thermal_zones_from_spaces(@model_spaces)
@@ -2360,8 +2359,11 @@ class HVACSizing
 
         hvac.GSHP_BoreSpacing = get_feature(equip, Constants.SizingInfoGSHPBoreSpacing, 'double')
         hvac.GSHP_BoreHoles = get_feature(equip, Constants.SizingInfoGSHPBoreHoles, 'string')
+        hvac.GSHP_BoreHoles = nil if hvac.GSHP_BoreHoles.empty?
         hvac.GSHP_BoreDepth = get_feature(equip, Constants.SizingInfoGSHPBoreDepth, 'string')
+        hvac.GSHP_BoreDepth = nil if hvac.GSHP_BoreDepth.empty?
         hvac.GSHP_BoreConfig = get_feature(equip, Constants.SizingInfoGSHPBoreConfig, 'string')
+        hvac.GSHP_BoreConfig = nil if hvac.GSHP_BoreConfig.empty?
         hvac.GSHP_SpacingType = get_feature(equip, Constants.SizingInfoGSHPUTubeSpacingType, 'string')
       elsif not clg_coil.nil?
         fail "Unexpected cooling coil: #{clg_coil.name}."
@@ -3172,9 +3174,9 @@ class HVACSizing
     # Calculated based on Manual J 8th Ed. procedure in section A12-4 (15% decrease due to soil thermal storage)
     u_wall_with_soil = 0.0
     u_wall_without_soil = 0.0
-    wall_height_ft = Geometry.get_surface_height(surface).round
+    wall_height_ft = Geometry.get_surface_height(surface).ceil
     for d in 1..wall_height_ft
-      r_soil = (Math::PI * d / 2.0) / k_soil
+      r_soil = (Math::PI * d / 2.0) / k_soil # FIXME: Should this be (d-wall_height_ag) instead of d?
 
       # Calculate R-wall at this depth
       r_wall = wall_constr_rvalue + Material.AirFilmVertical.rvalue # Base wall construction + interior film
@@ -3357,7 +3359,7 @@ class HVACSizing
         fan_power = [2.79 * hvac_final_values.Cool_Airflow**-0.29, 0.6].min # fit of efficacy to air flow from the CEC listed equipment  W/cfm
         fan_eff = 0.75 # Overall Efficiency of the Fan, Motor and Drive
         fan.setFanEfficiency(fan_eff)
-        fan.setPressureRise(HVAC.calculate_fan_pressure_rise(fan_eff, fan_power))
+        fan.setPressureRise(HVAC.calc_fan_pressure_rise(fan_eff, fan_power))
 
         @cond_zone.airLoopHVACTerminals.each do |aterm|
           next if air_loop != aterm.airLoopHVAC.get

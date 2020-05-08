@@ -314,7 +314,6 @@ class Geometry
   def self.get_spaces_above_grade_exterior_walls(space)
     above_grade_exterior_walls = []
     space.surfaces.each do |surface|
-      next if above_grade_exterior_walls.include?(surface)
       next if surface.surfaceType.downcase != 'wall'
       next if surface.outsideBoundaryCondition.downcase != 'outdoors'
 
@@ -326,7 +325,6 @@ class Geometry
   def self.get_spaces_above_grade_exterior_floors(space)
     above_grade_exterior_floors = []
     space.surfaces.each do |surface|
-      next if above_grade_exterior_floors.include?(surface)
       next if surface.surfaceType.downcase != 'floor'
       next if surface.outsideBoundaryCondition.downcase != 'outdoors'
 
@@ -340,7 +338,6 @@ class Geometry
 
     above_grade_ground_floors = []
     space.surfaces.each do |surface|
-      next if above_grade_ground_floors.include?(surface)
       next if surface.surfaceType.downcase != 'floor'
       next if surface.outsideBoundaryCondition.downcase != 'foundation'
 
@@ -352,7 +349,6 @@ class Geometry
   def self.get_spaces_above_grade_exterior_roofs(space)
     above_grade_exterior_roofs = []
     space.surfaces.each do |surface|
-      next if above_grade_exterior_roofs.include?(surface)
       next if surface.surfaceType.downcase != 'roofceiling'
       next if surface.outsideBoundaryCondition.downcase != 'outdoors'
 
@@ -364,7 +360,6 @@ class Geometry
   def self.get_spaces_interzonal_walls(space)
     interzonal_walls = []
     space.surfaces.each do |surface|
-      next if interzonal_walls.include?(surface)
       next if surface.surfaceType.downcase != 'wall'
       next if not is_interzonal_surface(surface)
 
@@ -376,7 +371,6 @@ class Geometry
   def self.get_sfa_mf_space_floors_and_ceilings(space)
     mf_floors = []
     space.surfaces.each do |surface|
-      next if mf_floors.include?(surface)
       next if (surface.surfaceType.downcase != 'floor') && (surface.surfaceType.downcase != 'roofceiling')
       next if surface.outsideBoundaryCondition.downcase != 'othersidecoefficients'
 
@@ -388,7 +382,6 @@ class Geometry
   def self.get_sfa_mf_space_walls(space)
     mf_walls = []
     space.surfaces.each do |surface|
-      next if mf_walls.include?(surface)
       next if surface.surfaceType.downcase != 'wall'
       next if surface.outsideBoundaryCondition.downcase != 'othersidecoefficients'
 
@@ -400,7 +393,6 @@ class Geometry
   def self.get_spaces_interzonal_floors_and_ceilings(space)
     interzonal_floors = []
     space.surfaces.each do |surface|
-      next if interzonal_floors.include?(surface)
       next if (surface.surfaceType.downcase != 'floor') && (surface.surfaceType.downcase != 'roofceiling')
       next if not is_interzonal_surface(surface)
 
@@ -413,7 +405,6 @@ class Geometry
     below_grade_exterior_walls = []
 
     space.surfaces.each do |surface|
-      next if below_grade_exterior_walls.include?(surface)
       next if surface.surfaceType.downcase != 'wall'
       next if surface.outsideBoundaryCondition.downcase != 'foundation'
 
@@ -427,7 +418,6 @@ class Geometry
 
     below_grade_exterior_floors = []
     space.surfaces.each do |surface|
-      next if below_grade_exterior_floors.include?(surface)
       next if surface.surfaceType.downcase != 'floor'
       next if surface.outsideBoundaryCondition.downcase != 'foundation'
 

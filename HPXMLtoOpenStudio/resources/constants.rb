@@ -465,10 +465,6 @@ class Constants
     return 'None'
   end
 
-  def self.SizingAuto
-    return 'autosize'
-  end
-
   def self.SizingInfoCMUWallFurringInsRvalue
     return __method__.to_s
   end
@@ -481,7 +477,7 @@ class Constants
     return __method__.to_s
   end
 
-  def self.SizingInfoDuctLocationZones
+  def self.SizingInfoDuctLocationHandles
     return __method__.to_s
   end
 
