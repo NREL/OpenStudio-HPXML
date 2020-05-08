@@ -176,6 +176,9 @@ class HPXML < Object
   SidingTypeStucco = 'stucco'
   SidingTypeVinyl = 'vinyl siding'
   SidingTypeWood = 'wood siding'
+  SiteTypeUrban = 'urban'
+  SiteTypeSuburban = 'suburban'
+  SiteTypeRural = 'rural'
   SolarThermalLoopTypeDirect = 'liquid direct'
   SolarThermalLoopTypeIndirect = 'liquid indirect'
   SolarThermalLoopTypeThermosyphon = 'passive thermosyphon'
@@ -659,7 +662,7 @@ class HPXML < Object
   end
 
   class Site < BaseElement
-    ATTRS = [:surroundings, :orientation_of_front_of_home, :fuels, :shelter_coefficient]
+    ATTRS = [:site_type, :surroundings, :orientation_of_front_of_home, :fuels, :shelter_coefficient]
     attr_accessor(*ATTRS)
 
     def check_for_errors
@@ -671,6 +674,9 @@ class HPXML < Object
       return if nil?
 
       site = XMLHelper.create_elements_as_needed(doc, ['HPXML', 'Building', 'BuildingDetails', 'BuildingSummary', 'Site'])
+      XMLHelper.add_element(site, 'SiteType', @site_type) unless @site_type.nil?
+      XMLHelper.add_element(site, 'Surroundings', @surroundings) unless @surroundings.nil?
+      XMLHelper.add_element(site, 'OrientationOfFrontOfHome', @orientation_of_front_of_home) unless @orientation_of_front_of_home.nil?
       if (not @fuels.nil?) && (not @fuels.empty?)
         fuel_types_available = XMLHelper.add_element(site, 'FuelTypesAvailable')
         @fuels.each do |fuel|
@@ -687,6 +693,7 @@ class HPXML < Object
       site = XMLHelper.get_element(hpxml, 'Building/BuildingDetails/BuildingSummary/Site')
       return if site.nil?
 
+      @site_type = XMLHelper.get_value(site, 'SiteType')
       @surroundings = XMLHelper.get_value(site, 'Surroundings')
       @orientation_of_front_of_home = XMLHelper.get_value(site, 'OrientationOfFrontOfHome')
       @fuels = XMLHelper.get_values(site, 'FuelTypesAvailable/Fuel')

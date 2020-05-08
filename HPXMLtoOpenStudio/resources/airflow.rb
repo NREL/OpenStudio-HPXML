@@ -10,7 +10,7 @@ require_relative 'hvac'
 class Airflow
   def self.apply(model, runner, weather, spaces, infil, mech_vent, nat_vent, vent_whf, duct_systems,
                  cfa, infil_volume, infil_height, nbeds, window_area,
-                 min_neighbor_distance, vent_fan_kitchen, vent_fan_bath)
+                 min_neighbor_distance, vent_fan_kitchen, vent_fan_bath, site_type)
 
     @runner = runner
     @cfa = cfa
@@ -56,7 +56,7 @@ class Airflow
 
     # Update model
 
-    wind_speed = process_wind_speed_correction(infil.terrain, infil.shelter_coef, min_neighbor_distance)
+    wind_speed = process_wind_speed_correction(site_type, infil.shelter_coef, min_neighbor_distance)
     apply_infiltration_for_unconditioned_spaces(model, infil, wind_speed, weather)
 
     air_loop_objects = create_air_loop_objects(model, model.getAirLoopHVACs, mech_vent)
@@ -87,12 +87,10 @@ class Airflow
       air_loop.additionalProperties.setFeature(Constants.SizingInfoDuctExist, false)
     end
 
-    terrain = { Constants.TerrainOcean => 'Ocean',      # Ocean, Bayou flat country
-                Constants.TerrainPlains => 'Country',   # Flat, open country
-                Constants.TerrainRural => 'Country',    # Flat, open country
-                Constants.TerrainSuburban => 'Suburbs', # Rough, wooded country, suburbs
-                Constants.TerrainCity => 'City' }       # Towns, city outskirts, center of large cities
-    model.getSite.setTerrain(terrain[infil.terrain])
+    site_map = { HPXML::SiteTypeRural => 'Country',    # Flat, open country
+                 HPXML::SiteTypeSuburban => 'Suburbs', # Rough, wooded country, suburbs
+                 HPXML::SiteTypeUrban => 'City' }      # Towns, city outskirts, center of large cities
+    model.getSite.setTerrain(site_map[site_type])
   end
 
   def self.get_default_shelter_coefficient()
@@ -133,7 +131,7 @@ class Airflow
 
   private
 
-  def self.process_wind_speed_correction(terrain, shelter_coef, min_neighbor_distance)
+  def self.process_wind_speed_correction(site_type, shelter_coef, min_neighbor_distance)
     wind_speed = WindSpeed.new
     wind_speed.height = 32.8 # ft (Standard weather station height)
 
@@ -143,27 +141,17 @@ class Airflow
     wind_speed.ashrae_terrain_thickness = 270
     wind_speed.ashrae_terrain_exponent = 0.14
 
-    if terrain == Constants.TerrainOcean
-      wind_speed.site_terrain_multiplier = 1.30
-      wind_speed.site_terrain_exponent = 0.10
-      wind_speed.ashrae_site_terrain_thickness = 210 # Ocean, Bayou flat country
-      wind_speed.ashrae_site_terrain_exponent = 0.10 # Ocean, Bayou flat country
-    elsif terrain == Constants.TerrainPlains
-      wind_speed.site_terrain_multiplier = 1.00
-      wind_speed.site_terrain_exponent = 0.15
-      wind_speed.ashrae_site_terrain_thickness = 270 # Flat, open country
-      wind_speed.ashrae_site_terrain_exponent = 0.14 # Flat, open country
-    elsif terrain == Constants.TerrainRural
+    if site_type == HPXML::SiteTypeRural
       wind_speed.site_terrain_multiplier = 0.85
       wind_speed.site_terrain_exponent = 0.20
       wind_speed.ashrae_site_terrain_thickness = 270 # Flat, open country
       wind_speed.ashrae_site_terrain_exponent = 0.14 # Flat, open country
-    elsif terrain == Constants.TerrainSuburban
+    elsif site_type == HPXML::SiteTypeSuburban
       wind_speed.site_terrain_multiplier = 0.67
       wind_speed.site_terrain_exponent = 0.25
       wind_speed.ashrae_site_terrain_thickness = 370 # Rough, wooded country, suburbs
       wind_speed.ashrae_site_terrain_exponent = 0.22 # Rough, wooded country, suburbs
-    elsif terrain == Constants.TerrainCity
+    elsif site_type == HPXML::SiteTypeUrban
       wind_speed.site_terrain_multiplier = 0.47
       wind_speed.site_terrain_exponent = 0.35
       wind_speed.ashrae_site_terrain_thickness = 460 # Towns, city outskirts, center of large cities
@@ -212,7 +200,7 @@ class Airflow
     # Unconditioned Basement
     if not @unconditioned_basement.nil?
       uncond_bsmt_volume = UnitConversions.convert(@unconditioned_basement.volume, 'm^3', 'ft^3')
-      ach = infil.unconditioned_basement_ach
+      ach = 0.1 # Assumption
       inf_flow = ach / UnitConversions.convert(1.0, 'hr', 'min') * uncond_bsmt_volume # cfm
       apply_infiltration_to_unconditioned_space(model, wind_speed, @unconditioned_basement, ach, nil, nil, nil)
       # Store info for HVAC Sizing measure
@@ -233,7 +221,7 @@ class Airflow
     # Unvented Crawlspace
     if not @unvented_crawlspace.nil?
       unvented_crawl_volume = UnitConversions.convert(@unvented_crawlspace.volume, 'm^3', 'ft^3')
-      sla = infil.unvented_crawl_sla
+      sla = 0 # Assumption
       ach = Airflow.get_infiltration_ACH_from_SLA(sla, 8.202, weather)
       inf_flow = ach / UnitConversions.convert(1.0, 'hr', 'min') * unvented_crawl_volume # cfm
       apply_infiltration_to_unconditioned_space(model, wind_speed, @unvented_crawlspace, ach, nil, nil, nil)
@@ -268,7 +256,7 @@ class Airflow
       unvented_attic_volume = UnitConversions.convert(@unvented_attic.volume, 'm^3', 'ft^3')
       hor_lk_frac = 1.0
       neutral_level = 0.5
-      sla = infil.unvented_attic_sla
+      sla = 0 # Assumption
       ach = Airflow.get_infiltration_ACH_from_SLA(sla, 8.202, weather)
       ela = sla * unvented_attic_area
       inf_flow = ach / UnitConversions.convert(1.0, 'hr', 'min') * unvented_attic_volume
@@ -1907,23 +1895,19 @@ class Duct
 end
 
 class Infiltration
-  def initialize(living_ach50, living_constant_ach, shelter_coef, garage_ach50, vented_crawl_sla, unvented_crawl_sla, vented_attic_sla, unvented_attic_sla,
-                 vented_attic_const_ach, unconditioned_basement_ach, has_flue_chimney, terrain)
+  def initialize(living_ach50, living_constant_ach, shelter_coef, garage_ach50, vented_crawl_sla, vented_attic_sla,
+                 vented_attic_const_ach, has_flue_chimney)
     @living_ach50 = living_ach50
     @living_constant_ach = living_constant_ach
     @shelter_coef = shelter_coef
     @garage_ach50 = garage_ach50
     @vented_crawl_sla = vented_crawl_sla
-    @unvented_crawl_sla = unvented_crawl_sla
     @vented_attic_sla = vented_attic_sla
-    @unvented_attic_sla = unvented_attic_sla
     @vented_attic_const_ach = vented_attic_const_ach
-    @unconditioned_basement_ach = unconditioned_basement_ach
     @has_flue_chimney = has_flue_chimney
-    @terrain = terrain
   end
-  attr_accessor(:living_ach50, :living_constant_ach, :shelter_coef, :garage_ach50, :vented_crawl_sla, :unvented_crawl_sla, :vented_attic_sla, :unvented_attic_sla, :vented_attic_const_ach,
-                :unconditioned_basement_ach, :has_flue_chimney, :terrain)
+  attr_accessor(:living_ach50, :living_constant_ach, :shelter_coef, :garage_ach50, :vented_crawl_sla, :vented_attic_sla, :vented_attic_const_ach,
+                :has_flue_chimney)
 end
 
 class NaturalVentilation

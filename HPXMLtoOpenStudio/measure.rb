@@ -411,6 +411,7 @@ class OSModel
     @hpxml.header.begin_day_of_month = 1 if @hpxml.header.begin_day_of_month.nil?
     @hpxml.header.end_month = 12 if @hpxml.header.end_month.nil?
     @hpxml.header.end_day_of_month = 31 if @hpxml.header.end_day_of_month.nil?
+    @hpxml.site.site_type = HPXML::SiteTypeSuburban if @hpxml.site.site_type.nil?
     @hpxml.site.shelter_coefficient = Airflow.get_default_shelter_coefficient() if @hpxml.site.shelter_coefficient.nil?
     @hpxml.building_occupancy.number_of_residents = Geometry.get_occupancy_default_num(@nbeds) if @hpxml.building_occupancy.number_of_residents.nil?
     if @hpxml.building_construction.conditioned_building_volume.nil?
@@ -2924,13 +2925,9 @@ class OSModel
     living_ach50 = infil_ach50
     living_constant_ach = infil_const_ach
     garage_ach50 = infil_ach50
-    unconditioned_basement_ach = 0.1
-    unvented_crawl_sla = 0
-    unvented_attic_sla = 0
     has_flue_chimney = false
-    terrain = Constants.TerrainSuburban
-    infil = Infiltration.new(living_ach50, living_constant_ach, shelter_coef, garage_ach50, vented_crawl_sla, unvented_crawl_sla,
-                             vented_attic_sla, unvented_attic_sla, vented_attic_const_ach, unconditioned_basement_ach, has_flue_chimney, terrain)
+    infil = Infiltration.new(living_ach50, living_constant_ach, shelter_coef, garage_ach50, vented_crawl_sla,
+                             vented_attic_sla, vented_attic_const_ach, has_flue_chimney)
 
     # Natural Ventilation
     nv_frac_window_area_open = @frac_windows_operable * 0.5 * 0.2 # Assume A) 50% of the area of an operable window can be open, and B) 20% of openable window area is actually open
@@ -3053,9 +3050,10 @@ class OSModel
                                           cfis_open_time, cfis_airflow_frac, cfis_airloop)
 
     window_area = @hpxml.windows.map { |w| w.area }.inject(0, :+)
+    site_type = @hpxml.site.site_type
     Airflow.apply(model, runner, weather, spaces, infil, mech_vent, nat_vent, vent_whf, duct_systems,
                   @cfa, @infil_volume, infil_height, @nbeds, window_area,
-                  @min_neighbor_distance, vent_fan_kitchen, vent_fan_bath)
+                  @min_neighbor_distance, vent_fan_kitchen, vent_fan_bath, site_type)
   end
 
   def self.create_ducts(hvac_distribution, model, spaces)

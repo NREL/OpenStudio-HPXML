@@ -452,8 +452,11 @@ end
 def set_hpxml_site(hpxml_file, hpxml)
   if ['base.xml'].include? hpxml_file
     hpxml.site.fuels = [HPXML::FuelTypeElectricity, HPXML::FuelTypeNaturalGas]
+    hpxml.site.site_type = HPXML::SiteTypeSuburban
   elsif ['base-hvac-none-no-fuel-access.xml'].include? hpxml_file
     hpxml.site.fuels = [HPXML::FuelTypeElectricity]
+  elsif ['base-misc-defaults.xml'].include? hpxml_file
+    hpxml.site.site_type = nil
   end
 end
 
