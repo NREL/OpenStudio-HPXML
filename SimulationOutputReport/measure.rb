@@ -187,8 +187,10 @@ class SimulationOutputReport < OpenStudio::Measure::ReportingMeasure
     if include_timeseries_zone_temperatures
       result << OpenStudio::IdfObject.load("Output:Variable,*,Zone Mean Air Temperature,#{timeseries_frequency};").get
       # For reporting multifamily timreseries temperatures.
-      # However, in this way, all schedules will be added to output:variable, might impact runtime? Please review.
-      result << OpenStudio::IdfObject.load("Output:Variable,*,Schedule Value,#{timeseries_frequency};").get
+      keys = [HPXML::LocationOtherHeatedSpace, HPXML::LocationOtherMultifamilyBufferSpace, HPXML::LocationOtherNonFreezingSpace, HPXML::LocationOtherHousingUnit]
+      keys.each do |key|
+        result << OpenStudio::IdfObject.load("Output:Variable,#{key},Schedule Value,#{timeseries_frequency};").get
+      end
     end
 
     if include_timeseries_fuel_consumptions

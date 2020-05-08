@@ -2495,13 +2495,12 @@ def set_hpxml_hvac_distributions(hpxml_file, hpxml)
     hpxml.hvac_distributions[0].ducts[0].duct_location = HPXML::LocationOtherHeatedSpace
     hpxml.hvac_distributions[0].ducts[1].duct_location = HPXML::LocationOutside
   elsif ['base-atticroof-conditioned.xml',
-         'base-enclosure-other-housing-unit.xml',
          'base-atticroof-cathedral.xml'].include? hpxml_file
     hpxml.hvac_distributions[0].ducts[0].duct_location = HPXML::LocationLivingSpace
     hpxml.hvac_distributions[0].ducts[1].duct_location = HPXML::LocationLivingSpace
     hpxml.hvac_distributions[0].duct_leakage_measurements[0].duct_leakage_value = 0.0
     hpxml.hvac_distributions[0].duct_leakage_measurements[1].duct_leakage_value = 0.0
-    if hpxml_file == 'base-enclosure-other-housing-unit.xml'
+    if hpxml_file == 'base-atticroof-conditioned.xml'
       # Test leakage to outside when all ducts in conditioned space
       # (e.g., ducts may be in floor cavities which have leaky rims)
       hpxml.hvac_distributions[0].duct_leakage_measurements[0].duct_leakage_value = 1.5
@@ -2509,7 +2508,8 @@ def set_hpxml_hvac_distributions(hpxml_file, hpxml)
     end
   elsif ['base-enclosure-other-heated-space.xml',
          'base-enclosure-other-non-freezing-space.xml',
-         'base-enclosure-other-multifamily-buffer-space.xml'].include? hpxml_file
+         'base-enclosure-other-multifamily-buffer-space.xml',
+         'base-enclosure-other-housing-unit.xml'].include? hpxml_file
     if ['base-enclosure-other-heated-space.xml'].include? hpxml_file
       hpxml.hvac_distributions[0].ducts[0].duct_location = HPXML::LocationOtherHeatedSpace
       hpxml.hvac_distributions[0].ducts[1].duct_location = HPXML::LocationOtherHeatedSpace
@@ -2519,6 +2519,9 @@ def set_hpxml_hvac_distributions(hpxml_file, hpxml)
     elsif ['base-enclosure-other-multifamily-buffer-space.xml'].include? hpxml_file
       hpxml.hvac_distributions[0].ducts[0].duct_location = HPXML::LocationOtherMultifamilyBufferSpace
       hpxml.hvac_distributions[0].ducts[1].duct_location = HPXML::LocationOtherMultifamilyBufferSpace
+    elsif ['base-enclosure-other-housing-unit.xml'].include? hpxml_file
+      hpxml.hvac_distributions[0].ducts[0].duct_location = HPXML::LocationOtherHousingUnit
+      hpxml.hvac_distributions[0].ducts[1].duct_location = HPXML::LocationOtherHousingUnit
     end
   elsif ['invalid_files/hvac-invalid-distribution-system-type.xml'].include? hpxml_file
     hpxml.hvac_distributions.add(id: 'HVACDistribution2',
