@@ -1100,10 +1100,31 @@ class Airflow
         if duct_location.is_a? OpenStudio::Model::ThermalZone
           dz_w_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Zone Mean Air Humidity Ratio')
           dz_w_sensor.setKeyName(duct_location.name.to_s)
-        else # Outside or scheduled temperature
+          dz_w_sensor.setName("#{dz_w_var.name} s")
+          dz_w = "#{dz_w_sensor.name}"
+        elsif duct_location.is_a? OpenStudio::Model::ScheduleConstant # Outside or scheduled temperature
+          if duct_location.name.get == HPXML::LocationOtherNonFreezingSpace
+            dz_w_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Site Outdoor Air Humidity Ratio')
+            dz_w_sensor.setName("#{dz_w_var.name} s")
+            dz_w = "#{dz_w_sensor.name}"
+          elsif duct_location.name.get == HPXML::LocationOtherHousingUnit
+            dz_w_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Zone Mean Air Humidity Ratio')
+            dz_w_sensor.setKeyName('living space') # Should I use HPXML::LocationLivingSpace?
+            dz_w_sensor.setName("#{dz_w_var.name} s")
+            dz_w = "#{dz_w_sensor.name}"
+          else
+            dz_w_sensor1 = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Site Outdoor Air Humidity Ratio')
+            dz_w_sensor1.setName("#{dz_w_var.name} s 1")
+            dz_w_sensor2 = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Zone Mean Air Humidity Ratio')
+            dz_w_sensor2.setName("#{dz_w_var.name} s 2")
+            dz_w_sensor2.setKeyName('living space')
+            dz_w = "(#{dz_w_sensor1.name} + #{dz_w_sensor2.name}) / 2"
+          end
+        else
           dz_w_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Site Outdoor Air Humidity Ratio')
+          dz_w_sensor.setName("#{dz_w_var.name} s")
+          dz_w = "#{dz_w_sensor.name}"
         end
-        dz_w_sensor.setName("#{dz_w_var.name} s")
 
         # -- Actuators --
 
@@ -1398,7 +1419,7 @@ class Airflow
         duct_program.addLine("Set #{ra_t_var.name} = #{ra_t_sensor.name}")
         duct_program.addLine("Set #{ra_w_var.name} = #{ra_w_sensor.name}")
         duct_program.addLine("Set #{dz_t_var.name} = #{dz_t_sensor.name}")
-        duct_program.addLine("Set #{dz_w_var.name} = #{dz_w_sensor.name}")
+        duct_program.addLine("Set #{dz_w_var.name} = #{dz_w}")
         duct_program.addLine("Run #{duct_subroutine.name}")
         duct_program.addLine("Set #{duct_actuators['supply_sens_lk_to_liv'].name} = #{duct_vars['supply_sens_lk_to_liv'].name}")
         duct_program.addLine("Set #{duct_actuators['supply_lat_lk_to_liv'].name} = #{duct_vars['supply_lat_lk_to_liv'].name}")

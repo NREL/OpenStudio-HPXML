@@ -331,15 +331,31 @@ class Waterheater
       amb_rh_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Site Outdoor Air Relative Humidity')
       amb_rh_sensor.setName("#{obj_name_hpwh} amb rh")
       amb_rh_sensor.setKeyName('Environment')
+      rh = "#{amb_rh_sensor.name} / 100"
     elsif water_heater_location.is_a? OpenStudio::Model::ScheduleConstant
       amb_temp_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Schedule Value')
       amb_temp_sensor.setName("#{obj_name_hpwh} amb temp")
       amb_temp_sensor.setKeyName(water_heater_location.name.to_s)
 
-      # FIXME: Outdoor air humidity? Indoor air humidity? Average?
-      amb_rh_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Site Outdoor Air Relative Humidity')
-      amb_rh_sensor.setName("#{obj_name_hpwh} amb rh")
-      amb_rh_sensor.setKeyName('Environment')
+      if water_heater_location.name.get == HPXML::LocationOtherNonFreezingSpace
+        amb_rh_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Site Outdoor Air Relative Humidity')
+        amb_rh_sensor.setName("#{obj_name_hpwh} amb rh")
+        amb_rh_sensor.setKeyName('Environment')
+        rh = "#{amb_rh_sensor.name} / 100"
+      elsif water_heater_location.name.get == HPXML::LocationOtherHousingUnit
+        amb_rh_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Zone Air Relative Humidity')
+        amb_rh_sensor.setName("#{obj_name_hpwh} amb rh")
+        amb_rh_sensor.setKeyName('living space') # Should I use HPXML::LocationLivingSpace?
+        rh = "#{amb_rh_sensor.name} / 100"
+      else
+        amb_rh_sensor1 = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Site Outdoor Air Relative Humidity')
+        amb_rh_sensor1.setName("#{obj_name_hpwh} amb1 rh")
+        amb_rh_sensor1.setKeyName('Environment')
+        amb_rh_sensor2 = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Zone Air Relative Humidity')
+        amb_rh_sensor2.setName("#{obj_name_hpwh} amb2 rh")
+        amb_rh_sensor2.setKeyName('living space')
+        rh = "((#{amb_rh_sensor1.name} + #{amb_rh_sensor2.name}) / 2) / 100"
+      end
     else
       amb_temp_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Zone Mean Air Temperature')
       amb_temp_sensor.setName("#{obj_name_hpwh} amb temp")
@@ -348,6 +364,7 @@ class Waterheater
       amb_rh_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Zone Air Relative Humidity')
       amb_rh_sensor.setName("#{obj_name_hpwh} amb rh")
       amb_rh_sensor.setKeyName(water_heater_location.name.to_s)
+      rh = "#{amb_rh_sensor.name} / 100"
     end
 
     tl_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Water Heater Heat Loss Rate')
@@ -388,7 +405,7 @@ class Waterheater
     hpwh_inlet_air_program = OpenStudio::Model::EnergyManagementSystemProgram.new(model)
     hpwh_inlet_air_program.setName("#{obj_name_hpwh} InletAir")
     hpwh_inlet_air_program.addLine("Set #{tamb_act_actuator.name} = #{amb_temp_sensor.name}")
-    hpwh_inlet_air_program.addLine("Set #{rhamb_act_actuator.name} = #{amb_rh_sensor.name}/100")
+    hpwh_inlet_air_program.addLine("Set #{rhamb_act_actuator.name} = #{rh}")
     if not loc_space.nil?
       # Sensible/latent heat gain to the space
       hpwh_inlet_air_program.addLine("Set #{sens_act_actuator.name} = 0 - #{sens_cool_sensor.name} - (#{tl_sensor.name} + #{fan_power_sensor.name})")

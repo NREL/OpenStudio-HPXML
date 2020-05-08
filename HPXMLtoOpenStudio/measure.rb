@@ -4205,7 +4205,7 @@ class OSModel
     actuator.setName("#{location.gsub(' ', '_').gsub('-', '_')}_temp_sch")
 
     program = OpenStudio::Model::EnergyManagementSystemProgram.new(model)
-    program.setName('Other Side Indoor Temperature Program')
+    program.setName("#{location} Temperature Program")
     program.addLine("Set #{actuator.name} = #{sensor_ia.name} * #{indoor_weight} + #{sensor_oa.name} * #{outdoor_weight}")
     program.addLine("If #{actuator.name} < #{temp_min}")
     program.addLine("Set #{actuator.name} = #{temp_min}")
