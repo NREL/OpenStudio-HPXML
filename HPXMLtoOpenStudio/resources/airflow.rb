@@ -1109,7 +1109,7 @@ class Airflow
             dz_w = "#{dz_w_sensor.name}"
           elsif duct_location.name.get == HPXML::LocationOtherHousingUnit
             dz_w_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Zone Mean Air Humidity Ratio')
-            dz_w_sensor.setKeyName('living space') # Should I use HPXML::LocationLivingSpace?
+            dz_w_sensor.setKeyName(building.living.zone.name.to_s)
             dz_w_sensor.setName("#{dz_w_var.name} s")
             dz_w = "#{dz_w_sensor.name}"
           else
@@ -1117,7 +1117,7 @@ class Airflow
             dz_w_sensor1.setName("#{dz_w_var.name} s 1")
             dz_w_sensor2 = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Zone Mean Air Humidity Ratio')
             dz_w_sensor2.setName("#{dz_w_var.name} s 2")
-            dz_w_sensor2.setKeyName('living space')
+            dz_w_sensor2.setKeyName(building.living.zone.name.to_s)
             dz_w = "(#{dz_w_sensor1.name} + #{dz_w_sensor2.name}) / 2"
           end
         else

@@ -76,7 +76,7 @@ class Waterheater
   end
 
   def self.apply_heatpump(model, runner, loc_space, loc_schedule, weather, t_set, vol, ef,
-                          ec_adj, dhw_map, sys_id, desuperheater_clg_coil, jacket_r, solar_fraction)
+                          ec_adj, dhw_map, sys_id, desuperheater_clg_coil, jacket_r, solar_fraction, living_zone)
 
     # Based on Ecotope lab testing of most recent AO Smith HPWHs (series HPTU)
     if vol <= 58.0
@@ -345,7 +345,7 @@ class Waterheater
       elsif water_heater_location.name.get == HPXML::LocationOtherHousingUnit
         amb_rh_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Zone Air Relative Humidity')
         amb_rh_sensor.setName("#{obj_name_hpwh} amb rh")
-        amb_rh_sensor.setKeyName('living space') # Should I use HPXML::LocationLivingSpace?
+        amb_rh_sensor.setKeyName(living_zone.name.to_s)
         rh = "#{amb_rh_sensor.name} / 100"
       else
         amb_rh_sensor1 = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Site Outdoor Air Relative Humidity')
@@ -353,7 +353,7 @@ class Waterheater
         amb_rh_sensor1.setKeyName('Environment')
         amb_rh_sensor2 = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Zone Air Relative Humidity')
         amb_rh_sensor2.setName("#{obj_name_hpwh} amb2 rh")
-        amb_rh_sensor2.setKeyName('living space')
+        amb_rh_sensor2.setKeyName(living_zone.name.to_s)
         rh = "((#{amb_rh_sensor1.name} + #{amb_rh_sensor2.name}) / 2) / 100"
       end
     else
