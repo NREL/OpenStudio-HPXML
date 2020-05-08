@@ -2252,9 +2252,6 @@ class OSModel
   def self.add_doors(runner, model, spaces)
     surfaces = []
     @hpxml.doors.each do |door|
-      # ignore doors with adiabatic outside boundary condition
-      next if door.wall.exterior_adjacent_to == HPXML::LocationOtherHousingUnit
-
       door_height = 6.67 # ft
       door_width = door.area / door_height
       z_origin = @foundation_top

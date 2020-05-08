@@ -213,7 +213,7 @@ class SimulationOutputReport < OpenStudio::Measure::ReportingMeasure
     if include_timeseries_zone_temperatures
       result << OpenStudio::IdfObject.load("Output:Variable,*,Zone Mean Air Temperature,#{timeseries_frequency};").get
       # For reporting multifamily timreseries temperatures.
-      keys = [HPXML::LocationOtherHeatedSpace, HPXML::LocationOtherMultifamilyBufferSpace, HPXML::LocationOtherNonFreezingSpace, HPXML::LocationOtherHousingUnit]
+      keys = [HPXML::LocationOtherHeatedSpace, HPXML::LocationOtherMultifamilyBufferSpace, HPXML::LocationOtherNonFreezingSpace, HPXML::LocationOtherHousingUnit, HPXML::LocationOtherHousingUnitAbove, HPXML::LocationOtherHousingUnitBelow]
       keys.each do |key|
         result << OpenStudio::IdfObject.load("Output:Variable,#{key},Schedule Value,#{timeseries_frequency};").get
       end
@@ -725,7 +725,9 @@ class SimulationOutputReport < OpenStudio::Measure::ReportingMeasure
         next unless schedule.name.to_s.include?(HPXML::LocationOtherHeatedSpace) ||
                     schedule.name.to_s.include?(HPXML::LocationOtherMultifamilyBufferSpace) ||
                     schedule.name.to_s.include?(HPXML::LocationOtherNonFreezingSpace) ||
-                    schedule.name.to_s.include?(HPXML::LocationOtherHousingUnit)
+                    schedule.name.to_s.include?(HPXML::LocationOtherHousingUnit) ||
+                    schedule.name.to_s.include?(HPXML::LocationOtherHousingUnitAbove) ||
+                    schedule.name.to_s.include?(HPXML::LocationOtherHousingUnitBelow)
 
         mf_space_names << schedule.name.to_s.upcase
       end
