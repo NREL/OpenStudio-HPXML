@@ -3012,34 +3012,21 @@ class OSModel
     cfis_airflow_frac = 1.0
     clothes_dryer_exhaust = 0.0
 
-    # Kitchen range fan
+    # Ventilation fans
     vent_fan_kitchen = nil
-    @hpxml.ventilation_fans.each do |vent_fan|
-      next unless (vent_fan.used_for_local_ventilation && (vent_fan.fan_location == HPXML::VentilationFanLocationKitchen))
-
-      vent_fan_kitchen = vent_fan
-    end
-
-    # Bath fans
     vent_fan_bath = nil
+    vent_whf = nil
     @hpxml.ventilation_fans.each do |vent_fan|
-      next unless (vent_fan.used_for_local_ventilation && (vent_fan.fan_location == HPXML::VentilationFanLocationBath))
-
-      vent_fan_bath = vent_fan
+      if vent_fan.used_for_seasonal_cooling_load_reduction
+        vent_whf = vent_fan
+      elsif vent_fan.used_for_local_ventilation
+        if vent_fan.fan_location == HPXML::VentilationFanLocationKitchen
+          vent_fan_kitchen = vent_fan
+        elsif vent_fan.fan_location == HPXML::VentilationFanLocationBath
+          vent_fan_bath = vent_fan
+        end
+      end
     end
-
-    # Whole house fan
-    whole_house_fan_w = 0.0
-    whole_house_fan_cfm = 0.0
-    whf_num_days_per_week = 0
-    @hpxml.ventilation_fans.each do |vent_fan|
-      next unless vent_fan.used_for_seasonal_cooling_load_reduction
-
-      whole_house_fan_w = vent_fan.fan_power
-      whole_house_fan_cfm = vent_fan.rated_flow_rate
-      whf_num_days_per_week = 7
-    end
-    whf = WholeHouseFan.new(whole_house_fan_cfm, whole_house_fan_w, whf_num_days_per_week)
 
     # Get AirLoop associated with CFIS
     cfis_airloop = nil
@@ -3066,7 +3053,7 @@ class OSModel
                                           cfis_open_time, cfis_airflow_frac, cfis_airloop)
 
     window_area = @hpxml.windows.map { |w| w.area }.inject(0, :+)
-    Airflow.apply(model, runner, weather, infil, mech_vent, nat_vent, whf, duct_systems,
+    Airflow.apply(model, runner, weather, infil, mech_vent, nat_vent, vent_whf, duct_systems,
                   @cfa, @infil_volume, infil_height, @nbeds, @nbaths, @ncfl_ag, window_area,
                   @min_neighbor_distance, vent_fan_kitchen, vent_fan_bath)
   end

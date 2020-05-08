@@ -8,7 +8,7 @@ require_relative 'psychrometrics'
 require_relative 'hvac'
 
 class Airflow
-  def self.apply(model, runner, weather, infil, mech_vent, nat_vent, whf, duct_systems,
+  def self.apply(model, runner, weather, infil, mech_vent, nat_vent, vent_whf, duct_systems,
                  cfa, infil_volume, infil_height, nbeds, nbaths, ncfl_ag, window_area,
                  min_neighbor_distance, vent_fan_kitchen, vent_fan_bath)
 
@@ -91,7 +91,7 @@ class Airflow
       cfis_program = create_cfis_objects(model, building, mech_vent)
     end
 
-    nv_and_whf_program = process_nat_vent_and_whole_house_fan(model, nat_vent, whf, tin_sensor, tout_sensor, pbar_sensor, vwind_sensor, wind_speed, infil, building, weather, wout_sensor)
+    nv_and_whf_program = process_nat_vent_and_whole_house_fan(model, nat_vent, vent_whf, tin_sensor, tout_sensor, pbar_sensor, vwind_sensor, wind_speed, infil, building, weather, wout_sensor)
 
     duct_programs = {}
     duct_lks = {}
@@ -747,11 +747,22 @@ class Airflow
     end
   end
 
-  def self.process_nat_vent_and_whole_house_fan(model, nat_vent, whf, tin_sensor, tout_sensor, pbar_sensor, vwind_sensor, wind_speed, infil, building, weather, wout_sensor)
+  def self.process_nat_vent_and_whole_house_fan(model, nat_vent, vent_whf, tin_sensor, tout_sensor, pbar_sensor, vwind_sensor, wind_speed, infil, building, weather, wout_sensor)
+    nv_num_days_per_week = 7 # FUTURE: Expose via HPXML?
+    if vent_whf.nil?
+      whf_num_days_per_week = 0
+      whf_cfm = 0.0
+      whf_fan_w = 0.0
+    else
+      whf_num_days_per_week = 7 # FUTURE: Expose via HPXML?
+      whf_cfm = vent_whf.rated_flow_rate
+      whf_fan_w = vent_whf.fan_power
+    end
+
     # Availability Schedule
     aval_schs = {}
-    { Constants.ObjectNameNaturalVentilation => nat_vent.nv_num_days_per_week,
-      Constants.ObjectNameWholeHouseFan => whf.whf_num_days_per_week }.each do |obj_name, num_days_per_week|
+    { Constants.ObjectNameNaturalVentilation => nv_num_days_per_week,
+      Constants.ObjectNameWholeHouseFan => whf_num_days_per_week }.each do |obj_name, num_days_per_week|
       aval_schs[obj_name] = OpenStudio::Model::ScheduleRuleset.new(model)
       aval_schs[obj_name].setName("#{obj_name} avail schedule")
       Schedule.set_schedule_type_limits(model, aval_schs[obj_name], Constants.ScheduleTypeLimitsOnOff)
@@ -883,7 +894,7 @@ class Airflow
     nv_and_whf_program.addLine("Set WHFavail = #{whf_avail_sensor.name}")
     nv_and_whf_program.addLine("Set ClgSsnAvail = #{nat_vent.clg_ssn_sensor.name}")
     nv_and_whf_program.addLine('If (Wout < MaxHR) && (Phiout < MaxRH) && (Tin > Tout) && (Tin > Tnvsp) && (ClgSsnAvail > 0)')
-    nv_and_whf_program.addLine("  Set WHF_Flow = #{UnitConversions.convert(whf.cfm, 'cfm', 'm^3/s')}")
+    nv_and_whf_program.addLine("  Set WHF_Flow = #{UnitConversions.convert(whf_cfm, 'cfm', 'm^3/s')}")
     nv_and_whf_program.addLine('  Set Adj = (Tin-Tnvsp)/(Tin-Tout)')
     nv_and_whf_program.addLine('  Set Adj = (@Min Adj 1)')
     nv_and_whf_program.addLine('  Set Adj = (@Max Adj 0)')
@@ -891,7 +902,7 @@ class Airflow
     nv_and_whf_program.addLine("    Set #{nv_flow_actuator.name} = 0")
     nv_and_whf_program.addLine("    Set #{whf_flow_actuator.name} = WHF_Flow*Adj")
     nv_and_whf_program.addLine("    Set #{liv_to_zone_flow_rate_actuator.name} = WHF_Flow*Adj") unless whf_zone.nil?
-    nv_and_whf_program.addLine("    Set #{whf_elec_actuator.name} = #{whf.fan_power_w}*Adj")
+    nv_and_whf_program.addLine("    Set #{whf_elec_actuator.name} = #{whf_fan_w}*Adj")
     nv_and_whf_program.addLine('  ElseIf (NVavail > 0)') # Natural ventilation
     nv_and_whf_program.addLine("    Set NVArea = #{UnitConversions.convert(area, 'ft^2', 'cm^2')}")
     nv_and_whf_program.addLine("    Set Cs = #{UnitConversions.convert(c_s, 'ft^2/(s^2*R)', 'L^2/(s^2*cm^4*K)')}")
@@ -1993,15 +2004,6 @@ class NaturalVentilation
   end
   attr_accessor(:nv_frac_window_area_open, :max_oa_hr, :max_oa_rh, :nv_num_days_per_week,
                 :htg_weekday_setpoints, :htg_weekend_setpoints, :clg_weekday_setpoints, :clg_weekend_setpoints, :clg_ssn_sensor)
-end
-
-class WholeHouseFan
-  def initialize(cfm, fan_power_w, whf_num_days_per_week)
-    @cfm = cfm
-    @fan_power_w = fan_power_w
-    @whf_num_days_per_week = whf_num_days_per_week
-  end
-  attr_accessor(:cfm, :fan_power_w, :whf_num_days_per_week)
 end
 
 class MechanicalVentilation
