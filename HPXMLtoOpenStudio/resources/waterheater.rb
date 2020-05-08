@@ -385,6 +385,16 @@ class Waterheater
     on_off_trend_var.setName("#{obj_name_hpwh} on off")
     on_off_trend_var.setNumberOfTimestepsToBeLogged(2)
 
+    hpwh_inlet_air_program = OpenStudio::Model::EnergyManagementSystemProgram.new(model)
+    hpwh_inlet_air_program.setName("#{obj_name_hpwh} InletAir")
+    hpwh_inlet_air_program.addLine("Set #{tamb_act_actuator.name} = #{amb_temp_sensor.name}")
+    hpwh_inlet_air_program.addLine("Set #{rhamb_act_actuator.name} = #{amb_rh_sensor.name}/100")
+    if not loc_space.nil?
+      # Sensible/latent heat gain to the space
+      hpwh_inlet_air_program.addLine("Set #{sens_act_actuator.name} = 0 - #{sens_cool_sensor.name} - (#{tl_sensor.name} + #{fan_power_sensor.name})")
+      hpwh_inlet_air_program.addLine("Set #{lat_act_actuator.name} = 0 - #{lat_cool_sensor.name}")
+    end
+
     leschedoverride_actuator = OpenStudio::Model::EnergyManagementSystemActuator.new(hpwh_bottom_element_sp, 'Schedule:Constant', 'Schedule Value')
     leschedoverride_actuator.setName("#{obj_name_hpwh} LESchedOverride")
 
@@ -404,6 +414,7 @@ class Waterheater
     program_calling_manager.setName("#{obj_name_hpwh} ProgramManager")
     program_calling_manager.setCallingPoint('InsideHVACSystemIterationLoop')
     program_calling_manager.addProgram(hpwh_ctrl_program)
+    program_calling_manager.addProgram(hpwh_inlet_air_program)
 
     add_ec_adj(model, hpwh, ec_adj, loc_space, HPXML::FuelTypeElectricity, HPXML::WaterHeaterTypeHeatPump).each do |obj|
       dhw_map[sys_id] << obj unless obj.nil?
