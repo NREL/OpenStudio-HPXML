@@ -22,7 +22,7 @@ class HPXMLtoOpenStudioTest < MiniTest::Test
     # Get HPXML values
     water_heating_system = hpxml.water_heating_systems[0]
     # Expected value
-    tank_volume = UnitConversions.convert(water_heating_system.tank_volume * 0.95, 'gal', 'm^3')  # convert to actual volume
+    tank_volume = UnitConversions.convert(water_heating_system.tank_volume * 0.95, 'gal', 'm^3') # convert to actual volume
     cap = UnitConversions.convert(water_heating_system.heating_capacity / 1000.0, 'kBtu/hr', 'W')
     fuel = 'NaturalGas'
     ua = UnitConversions.convert(7.88, 'Btu/(hr*F)', 'W/K')
@@ -51,7 +51,7 @@ class HPXMLtoOpenStudioTest < MiniTest::Test
     # Get HPXML values
     water_heating_system = hpxml.water_heating_systems[0]
     # Expected value
-    tank_volume = UnitConversions.convert(water_heating_system.tank_volume * 0.95, 'gal', 'm^3')  # convert to actual volume
+    tank_volume = UnitConversions.convert(water_heating_system.tank_volume * 0.95, 'gal', 'm^3') # convert to actual volume
     cap = UnitConversions.convert(water_heating_system.heating_capacity / 1000.0, 'kBtu/hr', 'W')
     fuel = 'FuelOilNo1'
     ua = UnitConversions.convert(7.88, 'Btu/(hr*F)', 'W/K')
@@ -80,7 +80,7 @@ class HPXMLtoOpenStudioTest < MiniTest::Test
     # Get HPXML values
     water_heating_system = hpxml.water_heating_systems[0]
     # Expected value
-    tank_volume = UnitConversions.convert(water_heating_system.tank_volume * 0.95, 'gal', 'm^3')  # convert to actual volume
+    tank_volume = UnitConversions.convert(water_heating_system.tank_volume * 0.95, 'gal', 'm^3') # convert to actual volume
     cap = UnitConversions.convert(water_heating_system.heating_capacity / 1000.0, 'kBtu/hr', 'W')
     fuel = 'Propane'
     ua = UnitConversions.convert(7.88, 'Btu/(hr*F)', 'W/K')
@@ -109,7 +109,7 @@ class HPXMLtoOpenStudioTest < MiniTest::Test
     # Get HPXML values
     water_heating_system = hpxml.water_heating_systems[0]
     # Expected value
-    tank_volume = UnitConversions.convert(water_heating_system.tank_volume * 0.95, 'gal', 'm^3')  # convert to actual volume
+    tank_volume = UnitConversions.convert(water_heating_system.tank_volume * 0.95, 'gal', 'm^3') # convert to actual volume
     cap = UnitConversions.convert(water_heating_system.heating_capacity / 1000.0, 'kBtu/hr', 'W')
     fuel = 'OtherFuel1'
     ua = UnitConversions.convert(7.88, 'Btu/(hr*F)', 'W/K')
@@ -138,7 +138,7 @@ class HPXMLtoOpenStudioTest < MiniTest::Test
     # Get HPXML values
     water_heating_system = hpxml.water_heating_systems[0]
     # Expected value
-    tank_volume = UnitConversions.convert(water_heating_system.tank_volume * 0.9, 'gal', 'm^3')  # convert to actual volume
+    tank_volume = UnitConversions.convert(water_heating_system.tank_volume * 0.9, 'gal', 'm^3') # convert to actual volume
     cap = UnitConversions.convert(water_heating_system.heating_capacity / 1000.0, 'kBtu/hr', 'W')
     fuel = 'electricity'
     ua = UnitConversions.convert(1.335, 'Btu/(hr*F)', 'W/K')
@@ -167,7 +167,7 @@ class HPXMLtoOpenStudioTest < MiniTest::Test
     # Get HPXML values
     water_heating_system = hpxml.water_heating_systems[0]
     # Expected value
-    tank_volume = UnitConversions.convert(1.0, 'gal', 'm^3')  # convert to actual volume
+    tank_volume = UnitConversions.convert(1.0, 'gal', 'm^3') # convert to actual volume
     cap = UnitConversions.convert(100000000.0, 'kBtu/hr', 'W')
     fuel = 'electricity'
     ua = 0.0
@@ -196,7 +196,7 @@ class HPXMLtoOpenStudioTest < MiniTest::Test
     # Get HPXML values
     water_heating_system = hpxml.water_heating_systems[0]
     # Expected value
-    tank_volume = UnitConversions.convert(water_heating_system.tank_volume * 0.9, 'gal', 'm^3')  # convert to actual volume
+    tank_volume = UnitConversions.convert(water_heating_system.tank_volume * 0.9, 'gal', 'm^3') # convert to actual volume
     cap = UnitConversions.convert(water_heating_system.heating_capacity / 1000.0, 'kBtu/hr', 'W')
     fuel = 'electricity'
     ua = UnitConversions.convert(1.327, 'Btu/(hr*F)', 'W/K')
@@ -225,7 +225,7 @@ class HPXMLtoOpenStudioTest < MiniTest::Test
     # Get HPXML values
     water_heating_system = hpxml.water_heating_systems[0]
     # Expected value
-    tank_volume = UnitConversions.convert(water_heating_system.tank_volume * 0.95, 'gal', 'm^3')  # convert to actual volume
+    tank_volume = UnitConversions.convert(water_heating_system.tank_volume * 0.95, 'gal', 'm^3') # convert to actual volume
     cap = UnitConversions.convert(water_heating_system.heating_capacity / 1000.0, 'kBtu/hr', 'W')
     fuel = 'NaturalGas'
     ua = UnitConversions.convert(7.88, 'Btu/(hr*F)', 'W/K')
@@ -253,7 +253,7 @@ class HPXMLtoOpenStudioTest < MiniTest::Test
     # Get HPXML values
     water_heating_system = hpxml.water_heating_systems[0]
     # Expected value
-    tank_volume = UnitConversions.convert(water_heating_system.tank_volume * 0.9, 'gal', 'm^3')  # convert to actual volume
+    tank_volume = UnitConversions.convert(water_heating_system.tank_volume * 0.9, 'gal', 'm^3') # convert to actual volume
     cap = UnitConversions.convert(water_heating_system.heating_capacity / 1000.0, 'kBtu/hr', 'W')
     fuel = 'electricity'
     ua = UnitConversions.convert(1.335, 'Btu/(hr*F)', 'W/K')
@@ -263,7 +263,7 @@ class HPXMLtoOpenStudioTest < MiniTest::Test
 
     # Check water heater
     assert_equal(2, model.getWaterHeaterMixeds.size) # preheat tank + water heater
-    wh = model.getWaterHeaterMixeds.select{|wh| (not wh.name.get.include? 'storage tank')}[0]
+    wh = model.getWaterHeaterMixeds.select { |wh| (not wh.name.get.include? 'storage tank') }[0]
     assert_equal(fuel, wh.heaterFuelType)
     assert_equal(loc, wh.ambientTemperatureThermalZone.get.name.get)
     assert_in_epsilon(tank_volume, wh.tankVolume.get, 0.001)
@@ -274,7 +274,7 @@ class HPXMLtoOpenStudioTest < MiniTest::Test
     assert_in_epsilon(ther_eff, wh.heaterThermalEfficiency.get, 0.001)
     # Check desuperheater
     assert_equal(1, model.getCoilWaterHeatingDesuperheaters.size)
-    preheat_tank = model.getWaterHeaterMixeds.select{|wh| wh.name.get.include? 'storage tank'}[0]
+    preheat_tank = model.getWaterHeaterMixeds.select { |wh| wh.name.get.include? 'storage tank' }[0]
     dsh_coil = model.getCoilWaterHeatingDesuperheaters[0]
     assert_equal(true, dsh_coil.heatingSource.get.to_CoilCoolingDXSingleSpeed.is_initialized)
     assert_equal(preheat_tank, dsh_coil.heatRejectionTarget.get.to_WaterHeaterMixed.get)
@@ -288,7 +288,7 @@ class HPXMLtoOpenStudioTest < MiniTest::Test
     # Get HPXML values
     water_heating_system = hpxml.water_heating_systems[0]
     # Expected value
-    tank_volume = UnitConversions.convert(water_heating_system.tank_volume * 0.9, 'gal', 'm^3')  # convert to actual volume
+    tank_volume = UnitConversions.convert(water_heating_system.tank_volume * 0.9, 'gal', 'm^3') # convert to actual volume
     cap = UnitConversions.convert(water_heating_system.heating_capacity / 1000.0, 'kBtu/hr', 'W')
     fuel = 'electricity'
     ua = UnitConversions.convert(1.335, 'Btu/(hr*F)', 'W/K')
@@ -298,7 +298,7 @@ class HPXMLtoOpenStudioTest < MiniTest::Test
 
     # Check water heater
     assert_equal(2, model.getWaterHeaterMixeds.size) # preheat tank + water heater
-    wh = model.getWaterHeaterMixeds.select{|wh| (not wh.name.get.include? 'storage tank')}[0]
+    wh = model.getWaterHeaterMixeds.select { |wh| (not wh.name.get.include? 'storage tank') }[0]
     assert_equal(fuel, wh.heaterFuelType)
     assert_equal(loc, wh.ambientTemperatureThermalZone.get.name.get)
     assert_in_epsilon(tank_volume, wh.tankVolume.get, 0.001)
@@ -309,7 +309,7 @@ class HPXMLtoOpenStudioTest < MiniTest::Test
     assert_in_epsilon(ther_eff, wh.heaterThermalEfficiency.get, 0.001)
     # Check desuperheater
     assert_equal(1, model.getCoilWaterHeatingDesuperheaters.size)
-    preheat_tank = model.getWaterHeaterMixeds.select{|wh| wh.name.get.include? 'storage tank'}[0]
+    preheat_tank = model.getWaterHeaterMixeds.select { |wh| wh.name.get.include? 'storage tank' }[0]
     dsh_coil = model.getCoilWaterHeatingDesuperheaters[0]
     assert_equal(true, dsh_coil.heatingSource.get.to_CoilCoolingDXMultiSpeed.is_initialized)
     assert_equal(preheat_tank, dsh_coil.heatRejectionTarget.get.to_WaterHeaterMixed.get)
@@ -323,7 +323,7 @@ class HPXMLtoOpenStudioTest < MiniTest::Test
     # Get HPXML values
     water_heating_system = hpxml.water_heating_systems[0]
     # Expected value
-    tank_volume = UnitConversions.convert(water_heating_system.tank_volume * 0.9, 'gal', 'm^3')  # convert to actual volume
+    tank_volume = UnitConversions.convert(water_heating_system.tank_volume * 0.9, 'gal', 'm^3') # convert to actual volume
     cap = UnitConversions.convert(water_heating_system.heating_capacity / 1000.0, 'kBtu/hr', 'W')
     fuel = 'electricity'
     ua = UnitConversions.convert(1.335, 'Btu/(hr*F)', 'W/K')
@@ -333,7 +333,7 @@ class HPXMLtoOpenStudioTest < MiniTest::Test
 
     # Check water heater
     assert_equal(2, model.getWaterHeaterMixeds.size) # preheat tank + water heater
-    wh = model.getWaterHeaterMixeds.select{|wh| (not wh.name.get.include? 'storage tank')}[0]
+    wh = model.getWaterHeaterMixeds.select { |wh| (not wh.name.get.include? 'storage tank') }[0]
     assert_equal(fuel, wh.heaterFuelType)
     assert_equal(loc, wh.ambientTemperatureThermalZone.get.name.get)
     assert_in_epsilon(tank_volume, wh.tankVolume.get, 0.001)
@@ -344,7 +344,7 @@ class HPXMLtoOpenStudioTest < MiniTest::Test
     assert_in_epsilon(ther_eff, wh.heaterThermalEfficiency.get, 0.001)
     # Check desuperheater
     assert_equal(1, model.getCoilWaterHeatingDesuperheaters.size)
-    preheat_tank = model.getWaterHeaterMixeds.select{|wh| wh.name.get.include? 'storage tank'}[0]
+    preheat_tank = model.getWaterHeaterMixeds.select { |wh| wh.name.get.include? 'storage tank' }[0]
     dsh_coil = model.getCoilWaterHeatingDesuperheaters[0]
     assert_equal(true, dsh_coil.heatingSource.get.to_CoilCoolingWaterToAirHeatPumpEquationFit.is_initialized)
     assert_equal(preheat_tank, dsh_coil.heatRejectionTarget.get.to_WaterHeaterMixed.get)
@@ -359,7 +359,7 @@ class HPXMLtoOpenStudioTest < MiniTest::Test
     water_heating_system = hpxml.water_heating_systems[0]
     solar_thermal_system = hpxml.solar_thermal_systems[0]
     # Expected value
-    tank_volume = UnitConversions.convert(water_heating_system.tank_volume * 0.9, 'gal', 'm^3')  # convert to actual volume
+    tank_volume = UnitConversions.convert(water_heating_system.tank_volume * 0.9, 'gal', 'm^3') # convert to actual volume
     cap = UnitConversions.convert(water_heating_system.heating_capacity / 1000.0, 'kBtu/hr', 'W')
     fuel = 'electricity'
     ua = UnitConversions.convert(1.335, 'Btu/(hr*F)', 'W/K')
@@ -408,14 +408,14 @@ class HPXMLtoOpenStudioTest < MiniTest::Test
     collector_attached_to_tank = false
     loop = nil
     model.getPlantLoops.each do |plant_loop|
-      next if plant_loop.supplyComponents.select{|comp| comp == collector}.empty?
-      next if plant_loop.demandComponents.select{|comp| comp == preheat_tank}.empty?
+      next if plant_loop.supplyComponents.select { |comp| comp == collector }.empty?
+      next if plant_loop.demandComponents.select { |comp| comp == preheat_tank }.empty?
 
       collector_attached_to_tank = true
       assert_equal(plant_loop.fluidType, 'Water')
       loop = plant_loop
     end
-    pump = loop.supplyComponents.select{|comp| comp.to_PumpConstantSpeed.is_initialized}[0]
+    pump = loop.supplyComponents.select { |comp| comp.to_PumpConstantSpeed.is_initialized }[0]
     assert_equal(pump_power, pump.to_PumpConstantSpeed.get.ratedPowerConsumption.get)
     assert_equal(collector_attached_to_tank, true)
   end
@@ -429,7 +429,7 @@ class HPXMLtoOpenStudioTest < MiniTest::Test
     water_heating_system = hpxml.water_heating_systems[0]
     solar_thermal_system = hpxml.solar_thermal_systems[0]
     # Expected value
-    tank_volume = UnitConversions.convert(water_heating_system.tank_volume * 0.9, 'gal', 'm^3')  # convert to actual volume
+    tank_volume = UnitConversions.convert(water_heating_system.tank_volume * 0.9, 'gal', 'm^3') # convert to actual volume
     cap = UnitConversions.convert(water_heating_system.heating_capacity / 1000.0, 'kBtu/hr', 'W')
     fuel = 'electricity'
     ua = UnitConversions.convert(1.335, 'Btu/(hr*F)', 'W/K')
@@ -478,14 +478,14 @@ class HPXMLtoOpenStudioTest < MiniTest::Test
     collector_attached_to_tank = false
     loop = nil
     model.getPlantLoops.each do |plant_loop|
-      next if plant_loop.supplyComponents.select{|comp| comp == collector}.empty?
-      next if plant_loop.demandComponents.select{|comp| comp == preheat_tank}.empty?
+      next if plant_loop.supplyComponents.select { |comp| comp == collector }.empty?
+      next if plant_loop.demandComponents.select { |comp| comp == preheat_tank }.empty?
 
       collector_attached_to_tank = true
       assert_equal(plant_loop.fluidType, 'Water')
       loop = plant_loop
     end
-    pump = loop.supplyComponents.select{|comp| comp.to_PumpConstantSpeed.is_initialized}[0]
+    pump = loop.supplyComponents.select { |comp| comp.to_PumpConstantSpeed.is_initialized }[0]
     assert_equal(pump_power, pump.to_PumpConstantSpeed.get.ratedPowerConsumption.get)
     assert_equal(collector_attached_to_tank, true)
   end
@@ -499,7 +499,7 @@ class HPXMLtoOpenStudioTest < MiniTest::Test
     water_heating_system = hpxml.water_heating_systems[0]
     solar_thermal_system = hpxml.solar_thermal_systems[0]
     # Expected value
-    tank_volume = UnitConversions.convert(water_heating_system.tank_volume * 0.9, 'gal', 'm^3')  # convert to actual volume
+    tank_volume = UnitConversions.convert(water_heating_system.tank_volume * 0.9, 'gal', 'm^3') # convert to actual volume
     cap = UnitConversions.convert(water_heating_system.heating_capacity / 1000.0, 'kBtu/hr', 'W')
     fuel = 'electricity'
     ua = UnitConversions.convert(1.335, 'Btu/(hr*F)', 'W/K')
@@ -548,14 +548,14 @@ class HPXMLtoOpenStudioTest < MiniTest::Test
     collector_attached_to_tank = false
     loop = nil
     model.getPlantLoops.each do |plant_loop|
-      next if plant_loop.supplyComponents.select{|comp| comp == collector}.empty?
-      next if plant_loop.demandComponents.select{|comp| comp == preheat_tank}.empty?
+      next if plant_loop.supplyComponents.select { |comp| comp == collector }.empty?
+      next if plant_loop.demandComponents.select { |comp| comp == preheat_tank }.empty?
 
       collector_attached_to_tank = true
       assert_equal(plant_loop.fluidType, 'PropyleneGlycol')
       loop = plant_loop
     end
-    pump = loop.supplyComponents.select{|comp| comp.to_PumpConstantSpeed.is_initialized}[0]
+    pump = loop.supplyComponents.select { |comp| comp.to_PumpConstantSpeed.is_initialized }[0]
     assert_equal(pump_power, pump.to_PumpConstantSpeed.get.ratedPowerConsumption.get)
     assert_equal(collector_attached_to_tank, true)
   end
@@ -569,7 +569,7 @@ class HPXMLtoOpenStudioTest < MiniTest::Test
     water_heating_system = hpxml.water_heating_systems[0]
     solar_thermal_system = hpxml.solar_thermal_systems[0]
     # Expected value
-    tank_volume = UnitConversions.convert(water_heating_system.tank_volume * 0.9, 'gal', 'm^3')  # convert to actual volume
+    tank_volume = UnitConversions.convert(water_heating_system.tank_volume * 0.9, 'gal', 'm^3') # convert to actual volume
     cap = UnitConversions.convert(water_heating_system.heating_capacity / 1000.0, 'kBtu/hr', 'W')
     fuel = 'electricity'
     ua = UnitConversions.convert(1.335, 'Btu/(hr*F)', 'W/K')
@@ -618,14 +618,14 @@ class HPXMLtoOpenStudioTest < MiniTest::Test
     collector_attached_to_tank = false
     loop = nil
     model.getPlantLoops.each do |plant_loop|
-      next if plant_loop.supplyComponents.select{|comp| comp == collector}.empty?
-      next if plant_loop.demandComponents.select{|comp| comp == preheat_tank}.empty?
+      next if plant_loop.supplyComponents.select { |comp| comp == collector }.empty?
+      next if plant_loop.demandComponents.select { |comp| comp == preheat_tank }.empty?
 
       collector_attached_to_tank = true
       assert_equal(plant_loop.fluidType, 'Water')
       loop = plant_loop
     end
-    pump = loop.supplyComponents.select{|comp| comp.to_PumpConstantSpeed.is_initialized}[0]
+    pump = loop.supplyComponents.select { |comp| comp.to_PumpConstantSpeed.is_initialized }[0]
     assert_equal(pump_power, pump.to_PumpConstantSpeed.get.ratedPowerConsumption.get)
     assert_equal(collector_attached_to_tank, true)
   end
@@ -639,7 +639,7 @@ class HPXMLtoOpenStudioTest < MiniTest::Test
     water_heating_system = hpxml.water_heating_systems[0]
     solar_thermal_system = hpxml.solar_thermal_systems[0]
     # Expected value
-    tank_volume = UnitConversions.convert(water_heating_system.tank_volume * 0.9, 'gal', 'm^3')  # convert to actual volume
+    tank_volume = UnitConversions.convert(water_heating_system.tank_volume * 0.9, 'gal', 'm^3') # convert to actual volume
     cap = UnitConversions.convert(water_heating_system.heating_capacity / 1000.0, 'kBtu/hr', 'W')
     fuel = 'electricity'
     ua = UnitConversions.convert(1.335, 'Btu/(hr*F)', 'W/K')
@@ -683,14 +683,14 @@ class HPXMLtoOpenStudioTest < MiniTest::Test
     collector_attached_to_tank = false
     loop = nil
     model.getPlantLoops.each do |plant_loop|
-      next if plant_loop.supplyComponents.select{|comp| comp == collector}.empty?
-      next if plant_loop.demandComponents.select{|comp| comp == preheat_tank}.empty?
+      next if plant_loop.supplyComponents.select { |comp| comp == collector }.empty?
+      next if plant_loop.demandComponents.select { |comp| comp == preheat_tank }.empty?
 
       collector_attached_to_tank = true
       assert_equal(plant_loop.fluidType, 'Water')
       loop = plant_loop
     end
-    pump = loop.supplyComponents.select{|comp| comp.to_PumpConstantSpeed.is_initialized}[0]
+    pump = loop.supplyComponents.select { |comp| comp.to_PumpConstantSpeed.is_initialized }[0]
     assert_equal(pump_power, pump.to_PumpConstantSpeed.get.ratedPowerConsumption.get)
     assert_equal(collector_attached_to_tank, true)
   end
@@ -703,7 +703,7 @@ class HPXMLtoOpenStudioTest < MiniTest::Test
     # Get HPXML values
     water_heating_system = hpxml.water_heating_systems[0]
     # Expected value
-    tank_volume = UnitConversions.convert(water_heating_system.tank_volume * 0.9, 'gal', 'm^3')  # convert to actual volume
+    tank_volume = UnitConversions.convert(water_heating_system.tank_volume * 0.9, 'gal', 'm^3') # convert to actual volume
     cap = UnitConversions.convert(water_heating_system.heating_capacity / 1000.0, 'kBtu/hr', 'W')
     fuel = 'electricity'
     ua = UnitConversions.convert(1.335, 'Btu/(hr*F)', 'W/K') * 0.35
@@ -732,7 +732,7 @@ class HPXMLtoOpenStudioTest < MiniTest::Test
     # Get HPXML values
     water_heating_system = hpxml.water_heating_systems[0]
     # Expected value
-    tank_volume = UnitConversions.convert(water_heating_system.tank_volume * 0.95, 'gal', 'm^3')  # convert to actual volume
+    tank_volume = UnitConversions.convert(water_heating_system.tank_volume * 0.95, 'gal', 'm^3') # convert to actual volume
     cap = 0.0
     ua = UnitConversions.convert(5.056, 'Btu/(hr*F)', 'W/K')
     t_set = UnitConversions.convert(water_heating_system.temperature, 'F', 'C') + 1 # setpoint + 1/2 deadband
@@ -753,14 +753,14 @@ class HPXMLtoOpenStudioTest < MiniTest::Test
     hx_attached_to_boiler = false
     hx_attached_to_tank = false
     model.getPlantLoops.each do |plant_loop|
-      next if plant_loop.demandComponents.select{|comp| comp == hx}.empty?
-      next if plant_loop.supplyComponents.select{|comp| comp.name.get.include? 'boiler'}.empty?
+      next if plant_loop.demandComponents.select { |comp| comp == hx }.empty?
+      next if plant_loop.supplyComponents.select { |comp| comp.name.get.include? 'boiler' }.empty?
 
       hx_attached_to_boiler = true
     end
     model.getPlantLoops.each do |plant_loop|
-      next if plant_loop.supplyComponents.select{|comp| comp == hx}.empty?
-      next if plant_loop.demandComponents.select{|comp| comp == wh}.empty?
+      next if plant_loop.supplyComponents.select { |comp| comp == hx }.empty?
+      next if plant_loop.demandComponents.select { |comp| comp == wh }.empty?
 
       hx_attached_to_tank = true
     end
@@ -776,7 +776,7 @@ class HPXMLtoOpenStudioTest < MiniTest::Test
     # Get HPXML values
     water_heating_system = hpxml.water_heating_systems[0]
     # Expected value
-    tank_volume = UnitConversions.convert(1, 'gal', 'm^3')  # convert to actual volume
+    tank_volume = UnitConversions.convert(1, 'gal', 'm^3') # convert to actual volume
     cap = 0.0
     ua = 0.0
     t_set = UnitConversions.convert(water_heating_system.temperature, 'F', 'C') # setpoint + 1/2 deadband
@@ -798,14 +798,14 @@ class HPXMLtoOpenStudioTest < MiniTest::Test
     hx_attached_to_boiler = false
     hx_attached_to_tank = false
     model.getPlantLoops.each do |plant_loop|
-      next if plant_loop.demandComponents.select{|comp| comp == hx}.empty?
-      next if plant_loop.supplyComponents.select{|comp| comp.name.get.include? 'boiler'}.empty?
+      next if plant_loop.demandComponents.select { |comp| comp == hx }.empty?
+      next if plant_loop.supplyComponents.select { |comp| comp.name.get.include? 'boiler' }.empty?
 
       hx_attached_to_boiler = true
     end
     model.getPlantLoops.each do |plant_loop|
-      next if plant_loop.supplyComponents.select{|comp| comp == hx}.empty?
-      next if plant_loop.demandComponents.select{|comp| comp == wh}.empty?
+      next if plant_loop.supplyComponents.select { |comp| comp == hx }.empty?
+      next if plant_loop.demandComponents.select { |comp| comp == wh }.empty?
 
       hx_attached_to_tank = true
     end
@@ -821,7 +821,7 @@ class HPXMLtoOpenStudioTest < MiniTest::Test
     # Get HPXML values
     water_heating_system = hpxml.water_heating_systems[0]
     # Expected value
-    tank_volume = UnitConversions.convert(water_heating_system.tank_volume * 0.9, 'gal', 'm^3')  # convert to actual volume
+    tank_volume = UnitConversions.convert(water_heating_system.tank_volume * 0.9, 'gal', 'm^3') # convert to actual volume
     fuel = 'electricity'
     u =  0.925
     t_set = UnitConversions.convert(water_heating_system.temperature, 'F', 'C') - 9

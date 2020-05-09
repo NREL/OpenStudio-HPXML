@@ -686,6 +686,11 @@ class OSModel
       if clothes_washer.usage_multiplier.nil?
         clothes_washer.usage_multiplier = 1.0
       end
+      if clothes_washer.modified_energy_factor.nil?
+        clothes_washer.modified_energy_factor = HotWaterAndAppliances.calc_clothes_washer_mef_from_imef(clothes_washer.integrated_modified_energy_factor)
+      else
+        clothes_washer.integrated_modified_energy_factor = HotWaterAndAppliances.calc_clothes_washer_imef_from_mef(clothes_washer.modified_energy_factor)
+      end
     end
 
     # Default clothes dryer
@@ -701,6 +706,11 @@ class OSModel
       end
       if clothes_dryer.usage_multiplier.nil?
         clothes_dryer.usage_multiplier = 1.0
+      end
+      if clothes_dryer.energy_factor.nil?
+        clothes_dryer.energy_factor = HotWaterAndAppliances.calc_clothes_dryer_ef_from_cef(clothes_dryer.combined_energy_factor)
+      else
+        clothes_dryer.combined_energy_factor = HotWaterAndAppliances.calc_clothes_dryer_cef_from_ef(clothes_dryer.energy_factor)
       end
     end
 
@@ -718,6 +728,11 @@ class OSModel
       end
       if dishwasher.usage_multiplier.nil?
         dishwasher.usage_multiplier = 1.0
+      end
+      if dishwasher.energy_factor.nil?
+        dishwasher.energy_factor = HotWaterAndAppliances.calc_dishwasher_ef_from_annual_kwh(dishwasher.rated_annual_kwh)
+      else
+        dishwasher.rated_annual_kwh = HotWaterAndAppliances.calc_dishwasher_annual_kwh_from_ef(dishwasher.energy_factor)
       end
     end
 
@@ -2341,36 +2356,6 @@ class OSModel
     # Distribution
     if @hpxml.water_heating_systems.size > 0
       hot_water_distribution = @hpxml.hot_water_distributions[0]
-      dist_type = hot_water_distribution.system_type
-      if dist_type == HPXML::DHWDistTypeStandard
-        std_pipe_length = hot_water_distribution.standard_piping_length
-        recirc_loop_length = nil
-        recirc_branch_length = nil
-        recirc_control_type = nil
-        recirc_pump_power = nil
-      elsif dist_type == HPXML::DHWDistTypeRecirc
-        recirc_loop_length = hot_water_distribution.recirculation_piping_length
-        recirc_branch_length = hot_water_distribution.recirculation_branch_piping_length
-        recirc_control_type = hot_water_distribution.recirculation_control_type
-        recirc_pump_power = hot_water_distribution.recirculation_pump_power
-        std_pipe_length = nil
-      end
-      pipe_r = hot_water_distribution.pipe_r_value
-    end
-
-    # Drain Water Heat Recovery
-    dwhr_present = false
-    dwhr_facilities_connected = nil
-    dwhr_is_equal_flow = nil
-    dwhr_efficiency = nil
-    if @hpxml.water_heating_systems.size > 0
-      hot_water_distribution = @hpxml.hot_water_distributions[0]
-      if not hot_water_distribution.dwhr_efficiency.nil?
-        dwhr_present = true
-        dwhr_facilities_connected = hot_water_distribution.dwhr_facilities_connected
-        dwhr_is_equal_flow = hot_water_distribution.dwhr_equal_flow
-        dwhr_efficiency = hot_water_distribution.dwhr_efficiency
-      end
     end
 
     solar_thermal_system = nil
@@ -2402,9 +2387,7 @@ class OSModel
         end
         solar_fraction = 0.0 if solar_fraction.nil?
 
-        ec_adj = HotWaterAndAppliances.get_dist_energy_consumption_adjustment(@has_uncond_bsmnt, @cfa, @ncfl,
-                                                                              dist_type, recirc_control_type,
-                                                                              pipe_r, std_pipe_length, recirc_loop_length)
+        ec_adj = HotWaterAndAppliances.get_dist_energy_consumption_adjustment(@has_uncond_bsmnt, @cfa, @ncfl, hot_water_distribution)
 
         runner.registerInfo("EC_adj=#{ec_adj}") # Pass value to tests
 
@@ -2444,13 +2427,8 @@ class OSModel
     HotWaterAndAppliances.apply(model, weather, @living_space,
                                 @cfa, @nbeds, @ncfl, @has_uncond_bsmnt, avg_setpoint_temp,
                                 clothes_washer, cw_space, clothes_dryer, cd_space,
-                                dishwasher, refrigerator, rf_space, cooking_range, oven,
-                                fixtures_all_low_flow, fixtures_usage_multiplier,
-                                dist_type, pipe_r, std_pipe_length,
-                                recirc_branch_length, recirc_control_type,
-                                recirc_pump_power, dwhr_present,
-                                dwhr_facilities_connected, dwhr_is_equal_flow,
-                                dwhr_efficiency, dhw_loop_fracs, @eri_version, @dhw_map)
+                                dishwasher, refrigerator, rf_space, cooking_range, oven, @hpxml.water_heating.water_fixtures_usage_multiplier,
+                                @hpxml.water_fixtures, hot_water_distribution, dhw_loop_fracs, @eri_version, @dhw_map)
 
     if not solar_thermal_system.nil?
       if not solar_thermal_system.collector_area.nil? # Detailed solar water heater
