@@ -236,7 +236,9 @@ class OSModel
     @apply_ashrae140_assumptions = false if @apply_ashrae140_assumptions.nil?
 
     # Init
+
     weather = Location.apply(model, runner, epw_path, cache_path, 'NA', 'NA')
+    check_for_errors()
     set_defaults_and_globals(runner)
     add_simulation_params(model)
 
@@ -260,7 +262,6 @@ class OSModel
     add_thermal_mass(runner, model)
     modify_cond_basement_surface_properties(runner, model)
     assign_view_factor(runner, model) unless @cond_bsmnt_surfaces.empty?
-    check_for_errors(runner, model)
     set_zone_volumes(runner, model)
     explode_surfaces(runner, model)
     add_num_occupants(model, hpxml, runner)
@@ -301,6 +302,72 @@ class OSModel
   end
 
   private
+
+  def self.check_for_errors()
+    # Conditioned space
+    location = HPXML::LocationLivingSpace
+    if (@hpxml.roofs.select { |s| s.interior_adjacent_to == location }.size +
+        @hpxml.frame_floors.select { |s| s.is_ceiling && (s.interior_adjacent_to == location) }.size) == 0
+      fail 'There must be at least one ceiling/roof adjacent to conditioned space.'
+    end
+    if @hpxml.walls.select { |s| (s.interior_adjacent_to == location) && s.is_exterior }.size == 0
+      fail 'There must be at least one exterior wall adjacent to conditioned space.'
+    end
+    if (@hpxml.slabs.select { |s| [location, HPXML::LocationBasementConditioned].include? s.interior_adjacent_to }.size +
+        @hpxml.frame_floors.select { |s| s.is_floor && (s.interior_adjacent_to == location) }.size) == 0
+      fail 'There must be at least one floor/slab adjacent to conditioned space.'
+    end
+
+    # Basement/Crawlspace
+    [HPXML::LocationBasementConditioned,
+     HPXML::LocationBasementUnconditioned,
+     HPXML::LocationCrawlspaceVented,
+     HPXML::LocationCrawlspaceUnvented].each do |location|
+      next unless @hpxml.has_space_type(location)
+
+      if location != HPXML::LocationBasementConditioned # HPXML file doesn't need to have FrameFloor between living and conditioned basement
+        if @hpxml.frame_floors.select { |s| s.is_floor && (s.interior_adjacent_to == HPXML::LocationLivingSpace) && (s.exterior_adjacent_to == location) }.size == 0
+          fail "There must be at least one ceiling adjacent to #{location}."
+        end
+      end
+      if @hpxml.foundation_walls.select { |s| (s.interior_adjacent_to == location) && s.is_exterior }.size == 0
+        fail "There must be at least one exterior foundation wall adjacent to #{location}."
+      end
+      if @hpxml.slabs.select { |s| s.interior_adjacent_to == location }.size == 0
+        fail "There must be at least one slab adjacent to #{location}."
+      end
+    end
+
+    # Garage
+    location = HPXML::LocationGarage
+    if @hpxml.has_space_type(location)
+      if (@hpxml.roofs.select { |s| s.interior_adjacent_to == location }.size +
+          @hpxml.frame_floors.select { |s| [s.interior_adjacent_to, s.exterior_adjacent_to].include? location }.size) == 0
+        fail "There must be at least one roof/ceiling adjacent to #{location}."
+      end
+      if (@hpxml.walls.select { |s| (s.interior_adjacent_to == location) && s.is_exterior }.size +
+         @hpxml.foundation_walls.select { |s| [s.interior_adjacent_to, s.exterior_adjacent_to].include?(location) && s.is_exterior }.size) == 0
+        fail "There must be at least one exterior wall/foundation wall adjacent to #{location}."
+      end
+      if @hpxml.slabs.select { |s| s.interior_adjacent_to == location }.size == 0
+        fail "There must be at least one slab adjacent to #{location}."
+      end
+    end
+
+    # Attic
+    [HPXML::LocationAtticVented,
+     HPXML::LocationAtticUnvented].each do |location|
+      next unless @hpxml.has_space_type(location)
+
+      if @hpxml.roofs.select { |s| s.interior_adjacent_to == location }.size == 0
+        fail "There must be at least one roof adjacent to #{location}."
+      end
+
+      if @hpxml.frame_floors.select { |s| s.is_ceiling && [s.interior_adjacent_to, s.exterior_adjacent_to].include?(location) }.size == 0
+        fail "There must be at least one floor adjacent to #{location}."
+      end
+    end
+  end
 
   def self.set_defaults_and_globals(runner)
     # Set globals
@@ -361,6 +428,7 @@ class OSModel
       vented_attic = nil
       @hpxml.attics.each do |attic|
         next unless attic.attic_type == HPXML::AtticTypeVented
+
         vented_attic = attic
       end
       if vented_attic.nil?
@@ -376,6 +444,7 @@ class OSModel
       vented_crawl = nil
       @hpxml.foundations.each do |foundation|
         next unless foundation.foundation_type == HPXML::FoundationTypeCrawlspaceVented
+
         vented_crawl = foundation
       end
       if vented_crawl.nil?
@@ -717,6 +786,9 @@ class OSModel
     # Default dishwasher
     if @hpxml.dishwashers.size > 0
       dishwasher = @hpxml.dishwashers[0]
+      if dishwasher.location.nil?
+        dishwasher.location = HPXML::LocationLivingSpace
+      end
       if dishwasher.place_setting_capacity.nil?
         default_values = HotWaterAndAppliances.get_dishwasher_default_values()
         dishwasher.rated_annual_kwh = default_values[:rated_annual_kwh]
@@ -754,6 +826,9 @@ class OSModel
     # Default cooking range
     if @hpxml.cooking_ranges.size > 0
       cooking_range = @hpxml.cooking_ranges[0]
+      if cooking_range.location.nil?
+        cooking_range.location = HPXML::LocationLivingSpace
+      end
       if cooking_range.is_induction.nil?
         default_values = HotWaterAndAppliances.get_range_oven_default_values()
         cooking_range.is_induction = default_values[:is_induction]
@@ -1029,49 +1104,6 @@ class OSModel
       azimuth_side_shifts[azimuth] -= (surface.additionalProperties.getFeatureAsDouble('Length').get / 2.0 + gap_distance)
 
       surfaces_moved << surface
-    end
-  end
-
-  def self.check_for_errors(runner, model)
-    # Check every thermal zone has:
-    # 1. At least one floor surface
-    # 2. At least one roofceiling surface
-    # 3. At least one wall surface (except for attics)
-    # 4. At least one surface adjacent to outside/ground/adiabatic
-    model.getThermalZones.each do |zone|
-      n_floors = 0
-      n_roofceilings = 0
-      n_walls = 0
-      n_exteriors = 0
-      zone.spaces.each do |space|
-        space.surfaces.each do |surface|
-          if ['outdoors', 'foundation', 'adiabatic'].include? surface.outsideBoundaryCondition.downcase
-            n_exteriors += 1
-          end
-          if surface.surfaceType.downcase == 'floor'
-            n_floors += 1
-          end
-          if surface.surfaceType.downcase == 'wall'
-            n_walls += 1
-          end
-          if surface.surfaceType.downcase == 'roofceiling'
-            n_roofceilings += 1
-          end
-        end
-      end
-
-      if n_floors == 0
-        fail "'#{zone.name}' must have at least one floor surface."
-      end
-      if n_roofceilings == 0
-        fail "'#{zone.name}' must have at least one roof/ceiling surface."
-      end
-      if (n_walls == 0) && (not [HPXML::LocationAtticUnvented, HPXML::LocationAtticVented].include? zone.name.to_s)
-        fail "'#{zone.name}' must have at least one wall surface."
-      end
-      if n_exteriors == 0
-        fail "'#{zone.name}' must have at least one surface adjacent to outside/ground."
-      end
     end
   end
 
@@ -1722,41 +1754,7 @@ class OSModel
   end
 
   def self.add_foundation_walls_slabs(runner, model, spaces)
-    # Check for foundation walls without corresponding slabs
-    @hpxml.foundation_walls.each do |foundation_wall|
-      next if foundation_wall.net_area < 0.1 # skip modeling net surface area for surfaces comprised entirely of subsurface area
-
-      found_slab = false
-      @hpxml.slabs.each do |slab|
-        found_slab = true if foundation_wall.interior_adjacent_to == slab.interior_adjacent_to
-      end
-      next if found_slab
-
-      fail "Foundation wall '#{foundation_wall.id}' is adjacent to '#{foundation_wall.interior_adjacent_to}' but no corresponding slab was found adjacent to '#{foundation_wall.interior_adjacent_to}'."
-    end
-
-    # Check for slabs without corresponding foundation walls
-    @hpxml.slabs.each do |slab|
-      next if [HPXML::LocationLivingSpace, HPXML::LocationGarage].include? slab.interior_adjacent_to
-
-      found_foundation_wall = false
-      @hpxml.foundation_walls.each do |foundation_wall|
-        next if foundation_wall.net_area < 0.1 # skip modeling net surface area for surfaces comprised entirely of subsurface area
-
-        found_foundation_wall = true if slab.interior_adjacent_to == foundation_wall.interior_adjacent_to
-      end
-      next if found_foundation_wall
-
-      fail "Slab '#{slab.id}' is adjacent to '#{slab.interior_adjacent_to}' but no corresponding foundation walls were found adjacent to '#{slab.interior_adjacent_to}'.\n"
-    end
-
-    # Get foundation types
-    foundation_types = []
-    @hpxml.slabs.each do |slab|
-      next if foundation_types.include? slab.interior_adjacent_to
-
-      foundation_types << slab.interior_adjacent_to
-    end
+    foundation_types = @hpxml.slabs.map { |s| s.interior_adjacent_to }.uniq
 
     foundation_types.each do |foundation_type|
       # Get attached foundation walls/slabs
@@ -2193,14 +2191,15 @@ class OSModel
       surface.setName("surface #{window.id}")
       surface.setSurfaceType('Wall')
       set_surface_interior(model, spaces, surface, window.wall.interior_adjacent_to)
-      surface.setOutsideBoundaryCondition('Outdoors') # cannot be adiabatic because subsurfaces won't be created
-      surfaces << surface
 
       sub_surface = OpenStudio::Model::SubSurface.new(add_wall_polygon(window_width, window_height, z_origin,
                                                                        window.azimuth, [-0.0001, 0, 0.0001, 0]), model)
       sub_surface.setName(window.id)
       sub_surface.setSurface(surface)
       sub_surface.setSubSurfaceType('FixedWindow')
+
+      set_subsurface_exterior(surface, window.wall.exterior_adjacent_to, spaces, model)
+      surfaces << surface
 
       if not overhang_depth.nil?
         overhang = sub_surface.addOverhang(UnitConversions.convert(overhang_depth, 'ft', 'm'), UnitConversions.convert(overhang_distance_to_top, 'ft', 'm'))
@@ -2285,14 +2284,15 @@ class OSModel
       surface.setName("surface #{door.id}")
       surface.setSurfaceType('Wall')
       set_surface_interior(model, spaces, surface, door.wall.interior_adjacent_to)
-      surface.setOutsideBoundaryCondition('Outdoors') # cannot be adiabatic because subsurfaces won't be created
-      surfaces << surface
 
       sub_surface = OpenStudio::Model::SubSurface.new(add_wall_polygon(door_width, door_height, z_origin,
                                                                        door.azimuth, [0, 0, 0, 0]), model)
       sub_surface.setName(door.id)
       sub_surface.setSurface(surface)
       sub_surface.setSubSurfaceType('Door')
+
+      set_subsurface_exterior(surface, door.wall.exterior_adjacent_to, spaces, model)
+      surfaces << surface
 
       # Apply construction
       ufactor = 1.0 / door.r_value
@@ -2339,6 +2339,7 @@ class OSModel
     # Dishwasher
     if @hpxml.dishwashers.size > 0
       dishwasher = @hpxml.dishwashers[0]
+      dw_space = get_space_from_location(dishwasher.location, 'Dishwasher', model, spaces)
     end
 
     # Refrigerator
@@ -2350,6 +2351,7 @@ class OSModel
     # Cooking Range/Oven
     if (@hpxml.cooking_ranges.size > 0) && (@hpxml.ovens.size > 0)
       cooking_range = @hpxml.cooking_ranges[0]
+      cook_space = get_space_from_location(cooking_range.location, 'CookingRange', model, spaces)
       oven = @hpxml.ovens[0]
     end
 
@@ -2365,13 +2367,12 @@ class OSModel
 
     # Water Heater
     dhw_loop_fracs = {}
-    water_heater_spaces = {}
     combi_sys_id_list = []
     avg_setpoint_temp = 0.0 # Weighted average by fraction DHW load served
     if @hpxml.water_heating_systems.size > 0
       @hpxml.water_heating_systems.each do |water_heating_system|
         space = get_space_from_location(water_heating_system.location, 'WaterHeatingSystem', model, spaces)
-        water_heater_spaces[water_heating_system.id] = space
+        loc_space, loc_schedule = get_space_or_schedule_from_location(water_heating_system.location, 'WaterHeatingSystem', model, spaces)
         avg_setpoint_temp += water_heating_system.temperature * water_heating_system.fraction_dhw_load_served
 
         if water_heating_system.uses_desuperheater
@@ -2397,22 +2398,22 @@ class OSModel
 
         if water_heating_system.water_heater_type == HPXML::WaterHeaterTypeStorage
 
-          Waterheater.apply_tank(model, space, water_heating_system, ec_adj, @dhw_map, desuperheater_clg_coil, solar_fraction)
+          Waterheater.apply_tank(model, loc_space, loc_schedule, water_heating_system, ec_adj, @dhw_map, desuperheater_clg_coil, solar_fraction)
 
         elsif water_heating_system.water_heater_type == HPXML::WaterHeaterTypeTankless
 
-          Waterheater.apply_tankless(model, space, water_heating_system, ec_adj, @nbeds, @dhw_map, desuperheater_clg_coil, solar_fraction)
+          Waterheater.apply_tankless(model, loc_space, loc_schedule, water_heating_system, ec_adj, @nbeds, @dhw_map, desuperheater_clg_coil, solar_fraction)
 
         elsif water_heating_system.water_heater_type == HPXML::WaterHeaterTypeHeatPump
 
-          Waterheater.apply_heatpump(model, runner, space, weather, water_heating_system, ec_adj, @dhw_map, desuperheater_clg_coil, solar_fraction)
+          Waterheater.apply_heatpump(model, runner, loc_space, loc_schedule, weather, water_heating_system, ec_adj, @dhw_map, desuperheater_clg_coil, solar_fraction, @living_zone)
 
         elsif (water_heating_system.water_heater_type == HPXML::WaterHeaterTypeCombiStorage) || (water_heating_system.water_heater_type == HPXML::WaterHeaterTypeCombiTankless)
 
           combi_sys_id_list << water_heating_system.id
           boiler, plant_loop = get_boiler_and_plant_loop(@hvac_map, water_heating_system.related_hvac_idref, water_heating_system.id)
 
-          Waterheater.apply_combi(model, runner, space, water_heating_system, ec_adj, boiler, plant_loop, @dhw_map, solar_fraction)
+          Waterheater.apply_combi(model, runner, loc_space, loc_schedule, water_heating_system, ec_adj, boiler, plant_loop, @dhw_map, solar_fraction)
 
         else
 
@@ -2427,12 +2428,13 @@ class OSModel
     HotWaterAndAppliances.apply(model, weather, @living_space,
                                 @cfa, @nbeds, @ncfl, @has_uncond_bsmnt, avg_setpoint_temp,
                                 clothes_washer, cw_space, clothes_dryer, cd_space,
-                                dishwasher, refrigerator, rf_space, cooking_range, oven, @hpxml.water_heating.water_fixtures_usage_multiplier,
+                                dishwasher, dw_space, refrigerator, rf_space, cooking_range, cook_space, oven, @hpxml.water_heating.water_fixtures_usage_multiplier,
                                 @hpxml.water_fixtures, hot_water_distribution, dhw_loop_fracs, @eri_version, @dhw_map)
 
     if not solar_thermal_system.nil?
       if not solar_thermal_system.collector_area.nil? # Detailed solar water heater
-        Waterheater.apply_solar_thermal(model, water_heater_spaces[solar_thermal_system.water_heating_system.id], solar_thermal_system, @dhw_map)
+        loc_space, loc_schedule = get_space_or_schedule_from_location(solar_thermal_system.water_heating_system.location, 'WaterHeatingSystem', model, spaces)
+        Waterheater.apply_solar_thermal(model, loc_space, loc_schedule, solar_thermal_system, @dhw_map)
       end
     end
 
@@ -2758,22 +2760,23 @@ class OSModel
   end
 
   def self.add_lighting(runner, model, weather, spaces)
-    return if @hpxml.lighting_groups.size == 0
-
     fractions = {}
     @hpxml.lighting_groups.each do |lg|
-      fractions[[lg.location, lg.third_party_certification]] = lg.fration_of_units_in_location
+      fractions[[lg.location, lg.lighting_type]] = lg.fraction_of_units_in_location
     end
 
-    return if fractions[[HPXML::LocationInterior, HPXML::LightingTypeTierI]].nil? # Not the lighting group(s) we're interested in
+    return if fractions[[HPXML::LocationInterior, HPXML::LightingTypeCFL]].nil? # Not the lighting group(s) we're interested in
 
     int_kwh, ext_kwh, grg_kwh = Lighting.calc_lighting_energy(@eri_version, @cfa, @gfa,
-                                                              fractions[[HPXML::LocationInterior, HPXML::LightingTypeTierI]],
-                                                              fractions[[HPXML::LocationExterior, HPXML::LightingTypeTierI]],
-                                                              fractions[[HPXML::LocationGarage, HPXML::LightingTypeTierI]],
-                                                              fractions[[HPXML::LocationInterior, HPXML::LightingTypeTierII]],
-                                                              fractions[[HPXML::LocationExterior, HPXML::LightingTypeTierII]],
-                                                              fractions[[HPXML::LocationGarage, HPXML::LightingTypeTierII]],
+                                                              fractions[[HPXML::LocationInterior, HPXML::LightingTypeCFL]],
+                                                              fractions[[HPXML::LocationExterior, HPXML::LightingTypeCFL]],
+                                                              fractions[[HPXML::LocationGarage, HPXML::LightingTypeCFL]],
+                                                              fractions[[HPXML::LocationInterior, HPXML::LightingTypeLFL]],
+                                                              fractions[[HPXML::LocationExterior, HPXML::LightingTypeLFL]],
+                                                              fractions[[HPXML::LocationGarage, HPXML::LightingTypeLFL]],
+                                                              fractions[[HPXML::LocationInterior, HPXML::LightingTypeLED]],
+                                                              fractions[[HPXML::LocationExterior, HPXML::LightingTypeLED]],
+                                                              fractions[[HPXML::LocationGarage, HPXML::LightingTypeLED]],
                                                               @hpxml.lighting.usage_multiplier)
 
     garage_space = spaces[HPXML::LocationGarage]
@@ -3013,7 +3016,8 @@ class OSModel
       next if ducts.duct_type.nil?
       next if total_unconditioned_duct_area[ducts.duct_type] <= 0
 
-      duct_space = get_space_from_location(ducts.duct_location, 'Duct', model, spaces)
+      duct_loc_space, duct_loc_schedule = get_space_or_schedule_from_location(ducts.duct_location, 'Duct', model, spaces)
+
       # Apportion leakage to individual ducts by surface area
       duct_leakage_value = leakage_to_outside[ducts.duct_type][0] * ducts.duct_surface_area / total_unconditioned_duct_area[ducts.duct_type]
       duct_leakage_units = leakage_to_outside[ducts.duct_type][1]
@@ -3028,7 +3032,7 @@ class OSModel
         fail "#{ducts.duct_type.capitalize} ducts exist but leakage was not specified for distribution system '#{hvac_distribution.id}'."
       end
 
-      air_ducts << Duct.new(ducts.duct_type, duct_space, duct_leakage_frac, duct_leakage_cfm, ducts.duct_surface_area, ducts.duct_insulation_r_value)
+      air_ducts << Duct.new(ducts.duct_type, duct_loc_space, duct_loc_schedule, duct_leakage_frac, duct_leakage_cfm, ducts.duct_surface_area, ducts.duct_insulation_r_value)
     end
 
     # If all ducts are in conditioned space, model leakage as going to outside
@@ -3037,7 +3041,8 @@ class OSModel
 
       duct_area = 0.0
       duct_rvalue = 0.0
-      duct_space = nil # outside
+      duct_loc_space = nil # outside
+      duct_loc_schedule = nil # outside
       duct_leakage_value = leakage_to_outside[duct_side][0]
       duct_leakage_units = leakage_to_outside[duct_side][1]
 
@@ -3051,7 +3056,7 @@ class OSModel
         fail "#{duct_side.capitalize} ducts exist but leakage was not specified for distribution system '#{hvac_distribution.id}'."
       end
 
-      air_ducts << Duct.new(duct_side, duct_space, duct_leakage_frac, duct_leakage_cfm, duct_area, duct_rvalue)
+      air_ducts << Duct.new(duct_side, duct_loc_space, duct_loc_schedule, duct_leakage_frac, duct_leakage_cfm, duct_area, duct_rvalue)
     end
 
     return air_ducts
@@ -4021,21 +4026,129 @@ class OSModel
       surface.setOutsideBoundaryCondition('Outdoors')
     elsif [HPXML::LocationGround].include? exterior_adjacent_to
       surface.setOutsideBoundaryCondition('Foundation')
-    elsif [HPXML::LocationOtherHousingUnit, HPXML::LocationOtherHousingUnitAbove, HPXML::LocationOtherHousingUnitBelow].include? exterior_adjacent_to
-      surface.setOutsideBoundaryCondition('Adiabatic')
     elsif [HPXML::LocationBasementConditioned].include? exterior_adjacent_to
       surface.createAdjacentSurface(create_or_get_space(model, spaces, HPXML::LocationLivingSpace))
       @cond_bsmnt_surfaces << surface
+    elsif [HPXML::LocationOtherHousingUnit, HPXML::LocationOtherHousingUnitAbove, HPXML::LocationOtherHousingUnitBelow].include? exterior_adjacent_to
+      # collapse into one
+      set_surface_otherside_coefficients(surface, HPXML::LocationOtherHousingUnit, model, spaces)
+    elsif [HPXML::LocationOtherHeatedSpace, HPXML::LocationOtherMultifamilyBufferSpace, HPXML::LocationOtherNonFreezingSpace].include? exterior_adjacent_to
+      set_surface_otherside_coefficients(surface, exterior_adjacent_to, model, spaces)
     else
       surface.createAdjacentSurface(create_or_get_space(model, spaces, exterior_adjacent_to))
     end
   end
 
-  # Returns an OS:Space, or nil if the location is outside the building
-  def self.get_space_from_location(location, object_name, model, spaces)
-    if (location == HPXML::LocationOtherExterior) || (location == HPXML::LocationOutside)
-      return
+  def self.set_surface_otherside_coefficients(surface, exterior_adjacent_to, model, spaces)
+    if spaces[exterior_adjacent_to].nil?
+      # Create E+ other side coefficient object
+      otherside_object = OpenStudio::Model::SurfacePropertyOtherSideCoefficients.new(model)
+      otherside_object.setName(exterior_adjacent_to)
+      # Assume to directly apply to surface outside temperature
+      # Refer to: https://www.sciencedirect.com/science/article/pii/B9780123972705000066 6.1.2 Part: Wall and roof transfer functions
+      otherside_object.setCombinedConvectiveRadiativeFilmCoefficient(8.3)
+      # Schedule of space temperature, can be shared with water heater/ducts
+      sch = get_multifamily_temperature_schedule(model, exterior_adjacent_to, spaces)
+      otherside_object.setConstantTemperatureSchedule(sch)
+      surface.setSurfacePropertyOtherSideCoefficients(otherside_object)
+      spaces[exterior_adjacent_to] = otherside_object
+    else
+      surface.setSurfacePropertyOtherSideCoefficients(spaces[exterior_adjacent_to])
     end
+    surface.setSunExposure('NoSun')
+    surface.setWindExposure('NoWind')
+  end
+
+  def self.get_multifamily_temperature_schedule(model, location, spaces)
+    # Create outside boundary schedules to be actuated by EMS,
+    # can be shared by any surface, duct adjacent to / located in those spaces
+
+    # return if already exists
+    model.getScheduleConstants.each do |sch|
+      next unless sch.name.to_s == location
+      return sch
+    end
+
+    sch = OpenStudio::Model::ScheduleConstant.new(model)
+    sch.setName(location)
+
+    if location == HPXML::LocationOtherHeatedSpace
+      # Average of indoor/outdoor temperatures with minimum of 68 deg-F
+      temp_min = UnitConversions.convert(68, 'F', 'C')
+      indoor_weight = 0.5
+      outdoor_weight = 0.5
+    elsif location == HPXML::LocationOtherMultifamilyBufferSpace
+      # Average of indoor/outdoor temperatures with minimum of 50 deg-F
+      temp_min = UnitConversions.convert(50, 'F', 'C')
+      indoor_weight = 0.5
+      outdoor_weight = 0.5
+    elsif location == HPXML::LocationOtherNonFreezingSpace
+      # Floating with outdoor air temperature with minimum of 40 deg-F
+      temp_min = UnitConversions.convert(40, 'F', 'C')
+      indoor_weight = 0.0
+      outdoor_weight = 1.0
+    elsif location == HPXML::LocationOtherHousingUnit
+      # For water heater, duct etc.
+      # Indoor air temperature
+      temp_min = UnitConversions.convert(40, 'F', 'C')
+      indoor_weight = 1.0
+      outdoor_weight = 0.0
+    end
+
+    # Schedule type limits compatible
+    schedule_type_limits = OpenStudio::Model::ScheduleTypeLimits.new(model)
+    schedule_type_limits.setUnitType('Temperature')
+    sch.setScheduleTypeLimits(schedule_type_limits)
+
+    # Ems to actuate schedule
+    sensor_ia = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Zone Air Temperature')
+    sensor_ia.setName('cond_zone_temp')
+    sensor_ia.setKeyName(create_or_get_space(model, spaces, 'living space').name.to_s)
+
+    sensor_oa = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Site Outdoor Air Drybulb Temperature')
+    sensor_oa.setName('oa_temp')
+
+    actuator = OpenStudio::Model::EnergyManagementSystemActuator.new(sch, 'Schedule:Constant', 'Schedule Value')
+    actuator.setName("#{location.gsub(' ', '_').gsub('-', '_')}_temp_sch")
+
+    program = OpenStudio::Model::EnergyManagementSystemProgram.new(model)
+    program.setName("#{location.gsub('-', '_')} Temperature Program")
+    program.addLine("Set #{actuator.name} = #{sensor_ia.name} * #{indoor_weight} + #{sensor_oa.name} * #{outdoor_weight}")
+    program.addLine("If #{actuator.name} < #{temp_min}")
+    program.addLine("Set #{actuator.name} = #{temp_min}")
+    program.addLine('EndIf')
+
+    program_cm = OpenStudio::Model::EnergyManagementSystemProgramCallingManager.new(model)
+    program_cm.setName("#{program.name} calling manager")
+    program_cm.setCallingPoint('EndOfSystemTimestepAfterHVACReporting')
+    program_cm.addProgram(program)
+
+    return sch
+  end
+
+  # Returns an OS:Space, or temperature OS:Schedule for a MF space, or nil if outside
+  # Should be called when the object's energy use is sensitive to ambient temperature
+  # (e.g., water heaters and ducts).
+  def self.get_space_or_schedule_from_location(location, object_name, model, spaces)
+    return if [HPXML::LocationOtherExterior, HPXML::LocationOutside].include? location
+
+    sch = nil
+    space = nil
+    if [HPXML::LocationOtherHeatedSpace, HPXML::LocationOtherHousingUnit, HPXML::LocationOtherMultifamilyBufferSpace, HPXML::LocationOtherNonFreezingSpace].include? location
+      # if located in MF spaces, create and return temperature schedule
+      sch = get_multifamily_temperature_schedule(model, location, spaces)
+    else
+      space = get_space_from_location(location, object_name, model, spaces)
+    end
+
+    return space, sch
+  end
+
+  # Returns an OS:Space, or nil if a MF space
+  # Should be called when the object's energy use is NOT sensitive to ambient temperature
+  # (e.g., appliances).
+  def self.get_space_from_location(location, object_name, model, spaces)
+    return if location == HPXML::LocationOther
 
     num_orig_spaces = spaces.size
 
@@ -4050,6 +4163,18 @@ class OSModel
     end
 
     return space
+  end
+
+  def self.set_subsurface_exterior(surface, wall_exterior_adjacent_to, spaces, model)
+    # Set its parent surface outside boundary condition, which will be also applied to subsurfaces through OS
+    # The parent surface is entirely comprised of the subsurface.
+
+    # Subsurface on foundation wall, set it to be adjacent to outdoors
+    if wall_exterior_adjacent_to == HPXML::LocationGround
+      surface.setOutsideBoundaryCondition('Outdoors')
+    else
+      set_surface_exterior(model, spaces, surface, wall_exterior_adjacent_to)
+    end
   end
 
   def self.get_min_neighbor_distance()
