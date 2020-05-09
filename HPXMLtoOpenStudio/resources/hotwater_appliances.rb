@@ -225,15 +225,15 @@ class HotWaterAndAppliances
     annual_therm *= cooking_range.usage_multiplier
 
     if not cook_space.nil?
-    frac_lost = 0.20
-    if cooking_range.fuel_type == HPXML::FuelTypeElectricity
-      frac_sens = (1.0 - frac_lost) * 0.90
-    else
-      elec_btu = UnitConversions.convert(annual_kwh, 'kWh', 'Btu')
-      gas_btu = UnitConversions.convert(annual_therm, 'therm', 'Btu')
-      frac_sens = (1.0 - frac_lost) * ((0.90 * elec_btu + 0.7942 * gas_btu) / (elec_btu + gas_btu))
-    end
-    frac_lat = 1.0 - frac_sens - frac_lost
+      frac_lost = 0.20
+      if cooking_range.fuel_type == HPXML::FuelTypeElectricity
+        frac_sens = (1.0 - frac_lost) * 0.90
+      else
+        elec_btu = UnitConversions.convert(annual_kwh, 'kWh', 'Btu')
+        gas_btu = UnitConversions.convert(annual_therm, 'therm', 'Btu')
+        frac_sens = (1.0 - frac_lost) * ((0.90 * elec_btu + 0.7942 * gas_btu) / (elec_btu + gas_btu))
+      end
+      frac_lat = 1.0 - frac_sens - frac_lost
     else # HPXML other enumeration, used for mf spaces, loss fraction to be 1.0
       frac_sens = 0.0
       frac_lat = 0.0
@@ -274,9 +274,9 @@ class HotWaterAndAppliances
     gpd *= dishwasher.usage_multiplier
 
     if not dw_space.nil?
-    frac_lost = 0.40
-    frac_sens = (1.0 - frac_lost) * 0.50
-    frac_lat = 1.0 - frac_sens - frac_lost
+      frac_lost = 0.40
+      frac_sens = (1.0 - frac_lost) * 0.50
+      frac_lat = 1.0 - frac_sens - frac_lost
     else # HPXML other enumeration, used for mf spaces, loss fraction to be 1.0
       frac_sens = 0.0
       frac_lat = 0.0
@@ -348,15 +348,15 @@ class HotWaterAndAppliances
     annual_therm *= clothes_dryer.usage_multiplier
 
     if not cd_space.nil?
-    frac_lost = 0.85
-    if clothes_dryer.fuel_type == HPXML::FuelTypeElectricity
-      frac_sens = (1.0 - frac_lost) * 0.90
-    else
-      elec_btu = UnitConversions.convert(annual_kwh, 'kWh', 'Btu')
-      gas_btu = UnitConversions.convert(annual_therm, 'therm', 'Btu')
-      frac_sens = (1.0 - frac_lost) * ((0.90 * elec_btu + 0.8894 * gas_btu) / (elec_btu + gas_btu))
-    end
-    frac_lat = 1.0 - frac_sens - frac_lost
+      frac_lost = 0.85
+      if clothes_dryer.fuel_type == HPXML::FuelTypeElectricity
+        frac_sens = (1.0 - frac_lost) * 0.90
+      else
+        elec_btu = UnitConversions.convert(annual_kwh, 'kWh', 'Btu')
+        gas_btu = UnitConversions.convert(annual_therm, 'therm', 'Btu')
+        frac_sens = (1.0 - frac_lost) * ((0.90 * elec_btu + 0.8894 * gas_btu) / (elec_btu + gas_btu))
+      end
+      frac_lat = 1.0 - frac_sens - frac_lost
     else # HPXML other enumeration, used for mf spaces, loss fraction to be 1.0
       frac_sens = 0.0
       frac_lat = 0.0
@@ -422,9 +422,9 @@ class HotWaterAndAppliances
     gpd *= clothes_washer.usage_multiplier
 
     if not cw_space.nil?
-    frac_lost = 0.70
-    frac_sens = (1.0 - frac_lost) * 0.90
-    frac_lat = 1.0 - frac_sens - frac_lost
+      frac_lost = 0.70
+      frac_sens = (1.0 - frac_lost) * 0.90
+      frac_lat = 1.0 - frac_sens - frac_lost
     else # HPXML other enumeration, used for mf spaces, loss fraction to be 1.0
       frac_sens = 0.0
       frac_lat = 0.0
@@ -450,8 +450,8 @@ class HotWaterAndAppliances
 
     annual_kwh *= refrigerator.usage_multiplier
     if not rf_space.nil?
-    frac_sens = 1.0
-    frac_lat = 0.0
+      frac_sens = 1.0
+      frac_lat = 0.0
     else # HPXML other enumeration, used for mf spaces, loss fraction to be 1.0
       frac_sens = 0.0
       frac_lat = 0.0

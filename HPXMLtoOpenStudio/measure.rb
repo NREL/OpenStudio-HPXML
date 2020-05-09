@@ -2371,7 +2371,6 @@ class OSModel
     avg_setpoint_temp = 0.0 # Weighted average by fraction DHW load served
     if @hpxml.water_heating_systems.size > 0
       @hpxml.water_heating_systems.each do |water_heating_system|
-        space = get_space_from_location(water_heating_system.location, 'WaterHeatingSystem', model, spaces)
         loc_space, loc_schedule = get_space_or_schedule_from_location(water_heating_system.location, 'WaterHeatingSystem', model, spaces)
         avg_setpoint_temp += water_heating_system.temperature * water_heating_system.fraction_dhw_load_served
 

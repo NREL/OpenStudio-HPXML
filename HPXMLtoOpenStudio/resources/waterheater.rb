@@ -29,7 +29,7 @@ class Waterheater
                                    fuel: water_heating_system.fuel_type,
                                    act_vol: act_vol,
                                    t_set: water_heating_system.temperature,
-                                   loc_space: loc_space, 
+                                   loc_space: loc_space,
                                    loc_schedule: loc_schedule,
                                    wh_type: HPXML::WaterHeaterTypeStorage,
                                    model: model,
@@ -71,8 +71,8 @@ class Waterheater
                                    fuel: water_heating_system.fuel_type,
                                    act_vol: act_vol,
                                    t_set: water_heating_system.temperature,
-                                   loc_space: loc_space, 
-                                   loc_schedule: loc_schedule, 
+                                   loc_space: loc_space,
+                                   loc_schedule: loc_schedule,
                                    wh_type: HPXML::WaterHeaterTypeTankless,
                                    model: model,
                                    ua: ua,
@@ -283,7 +283,7 @@ class Waterheater
     tank.setOnCycleParasiticFuelType('electricity')
     tank.setAmbientTemperatureIndicator('Schedule')
     tank.setUniformSkinLossCoefficientperUnitAreatoAmbientTemperature(u_tank)
-      tank.setAmbientTemperatureSchedule(hpwh_tamb)
+    tank.setAmbientTemperatureSchedule(hpwh_tamb)
     tank.setNumberofNodes(6)
     tank.setAdditionalDestratificationConductivity(0)
     tank.setNode1AdditionalLossCoefficient(0)
@@ -436,7 +436,7 @@ class Waterheater
 
     hpwh_ctrl_program = OpenStudio::Model::EnergyManagementSystemProgram.new(model)
     hpwh_ctrl_program.setName("#{obj_name_hpwh} Control")
-      hpwh_ctrl_program.addLine("If (#{amb_temp_sensor.name}<#{UnitConversions.convert(min_temp, 'F', 'C').round(2)}) || (#{amb_temp_sensor.name}>#{UnitConversions.convert(max_temp, 'F', 'C').round(2)})")
+    hpwh_ctrl_program.addLine("If (#{amb_temp_sensor.name}<#{UnitConversions.convert(min_temp, 'F', 'C').round(2)}) || (#{amb_temp_sensor.name}>#{UnitConversions.convert(max_temp, 'F', 'C').round(2)})")
     hpwh_ctrl_program.addLine("Set #{leschedoverride_actuator.name} = #{tset_C}")
     hpwh_ctrl_program.addLine('Else')
     hpwh_ctrl_program.addLine("Set #{leschedoverride_actuator.name} = 0")
