@@ -2720,7 +2720,7 @@ class OSModel
 
     # Base heating setpoint
     htg_setpoint = hvac_control.heating_setpoint_temp
-    @htg_weekday_setpoints = [[htg_setpoint] * 24] * 12
+    htg_weekday_setpoints = [[htg_setpoint] * 24] * 12
 
     # Apply heating setback?
     htg_setback = hvac_control.heating_setback_temp
@@ -2729,15 +2729,15 @@ class OSModel
       htg_setback_start_hr = hvac_control.heating_setback_start_hour
       for m in 1..12
         for hr in htg_setback_start_hr..htg_setback_start_hr + Integer(htg_setback_hrs_per_week / 7.0) - 1
-          @htg_weekday_setpoints[m - 1][hr % 24] = htg_setback
+          htg_weekday_setpoints[m - 1][hr % 24] = htg_setback
         end
       end
     end
-    @htg_weekend_setpoints = @htg_weekday_setpoints
+    htg_weekend_setpoints = htg_weekday_setpoints
 
     # Base cooling setpoint
     clg_setpoint = hvac_control.cooling_setpoint_temp
-    @clg_weekday_setpoints = [[clg_setpoint] * 24] * 12
+    clg_weekday_setpoints = [[clg_setpoint] * 24] * 12
 
     # Apply cooling setup?
     clg_setup = hvac_control.cooling_setup_temp
@@ -2746,7 +2746,7 @@ class OSModel
       clg_setup_start_hr = hvac_control.cooling_setup_start_hour
       for m in 1..12
         for hr in clg_setup_start_hr..clg_setup_start_hr + Integer(clg_setup_hrs_per_week / 7.0) - 1
-          @clg_weekday_setpoints[m - 1][hr % 24] = clg_setup
+          clg_weekday_setpoints[m - 1][hr % 24] = clg_setup
         end
       end
     end
@@ -2757,14 +2757,14 @@ class OSModel
       HVAC.get_default_ceiling_fan_months(weather).each_with_index do |operation, m|
         next unless operation == 1
 
-        @clg_weekday_setpoints[m] = [@clg_weekday_setpoints[m], Array.new(24, clg_ceiling_fan_offset)].transpose.map { |i| i.reduce(:+) }
+        clg_weekday_setpoints[m] = [clg_weekday_setpoints[m], Array.new(24, clg_ceiling_fan_offset)].transpose.map { |i| i.reduce(:+) }
       end
     end
-    @clg_weekend_setpoints = @clg_weekday_setpoints
+    clg_weekend_setpoints = clg_weekday_setpoints
 
     HVAC.apply_setpoints(model, runner, weather, @living_zone,
-                         @htg_weekday_setpoints, @htg_weekend_setpoints, 1, 12,
-                         @clg_weekday_setpoints, @clg_weekend_setpoints, 1, 12)
+                         htg_weekday_setpoints, htg_weekend_setpoints, 1, 12,
+                         clg_weekday_setpoints, clg_weekend_setpoints, 1, 12)
   end
 
   def self.add_ceiling_fans(runner, model, weather)
@@ -2885,14 +2885,6 @@ class OSModel
       vented_crawl = foundation
     end
 
-    # Natural Ventilation
-    nv_frac_window_area_open = @frac_windows_operable * 0.5 * 0.2 # Assume A) 50% of the area of an operable window can be open, and B) 20% of openable window area is actually open
-    nv_num_days_per_week = 7
-    nv_max_oa_hr = 0.0115
-    nv_max_oa_rh = 0.7
-    nat_vent = NaturalVentilation.new(nv_frac_window_area_open, nv_max_oa_hr, nv_max_oa_rh, nv_num_days_per_week,
-                                      @htg_weekday_setpoints, @htg_weekend_setpoints, @clg_weekday_setpoints, @clg_weekend_setpoints, @clg_ssn_sensor)
-
     # Ducts
     duct_systems = {}
     @hpxml.hvac_distributions.each do |hvac_distribution|
@@ -3007,13 +2999,13 @@ class OSModel
 
     air_infils = @hpxml.air_infiltration_measurements
     window_area = @hpxml.windows.map { |w| w.area }.inject(0, :+)
+    open_window_area = window_area * @frac_windows_operable * 0.5 * 0.2 # Assume A) 50% of the area of an operable window can be open, and B) 20% of openable window area is actually open
     site_type = @hpxml.site.site_type
     shelter_coef = @hpxml.site.shelter_coefficient
     has_flue_chimney = false # FUTURE: Expose as HPXML input
     infil_height = Airflow.calc_inferred_infiltration_height(@cfa, @ncfl, @ncfl_ag, @infil_volume, @hpxml)
-    Airflow.apply(model, runner, weather, spaces, air_infils,
-                  mech_vent, nat_vent, vent_whf, duct_systems,
-                  @cfa, @infil_volume, infil_height, @nbeds, window_area,
+    Airflow.apply(model, runner, weather, spaces, air_infils, mech_vent, vent_whf, duct_systems,
+                  @cfa, @infil_volume, infil_height, @nbeds, open_window_area, @clg_ssn_sensor,
                   @min_neighbor_distance, vent_fan_kitchen, vent_fan_bath,
                   vented_attic, vented_crawl, site_type, shelter_coef,
                   has_flue_chimney, @apply_ashrae140_assumptions)

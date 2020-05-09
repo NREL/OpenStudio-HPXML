@@ -8,9 +8,8 @@ require_relative 'psychrometrics'
 require_relative 'hvac'
 
 class Airflow
-  def self.apply(model, runner, weather, spaces, air_infils,
-                 mech_vent, nat_vent, vent_whf, duct_systems,
-                 cfa, infil_volume, infil_height, nbeds, window_area,
+  def self.apply(model, runner, weather, spaces, air_infils, mech_vent, vent_whf, duct_systems,
+                 cfa, infil_volume, infil_height, nbeds, open_window_area, nv_clg_ssn_sensor,
                  min_neighbor_distance, vent_fan_kitchen, vent_fan_bath,
                  vented_attic, vented_crawl, site_type, shelter_coef,
                  has_flue_chimney, apply_ashrae140_assumptions)
@@ -84,7 +83,7 @@ class Airflow
       cfis_program = create_cfis_objects(model, mech_vent)
     end
 
-    nv_and_whf_program = process_nat_vent_and_whole_house_fan(model, nat_vent, vent_whf, weather, window_area)
+    nv_and_whf_program = process_nat_vent_and_whole_house_fan(model, vent_whf, weather, open_window_area, nv_clg_ssn_sensor)
 
     duct_programs = {}
     duct_lks = {}
@@ -573,7 +572,13 @@ class Airflow
     end
   end
 
-  def self.process_nat_vent_and_whole_house_fan(model, nat_vent, vent_whf, weather, window_area)
+  def self.process_nat_vent_and_whole_house_fan(model, vent_whf, weather, open_window_area, nv_clg_ssn_sensor)
+    return unless @living_zone.thermostatSetpointDualSetpoint.is_initialized
+
+    thermostat = @living_zone.thermostatSetpointDualSetpoint.get
+    htg_sch = thermostat.heatingSetpointTemperatureSchedule.get
+    clg_sch = thermostat.coolingSetpointTemperatureSchedule.get
+
     nv_num_days_per_week = 7 # FUTURE: Expose via HPXML?
     if vent_whf.nil?
       whf_num_days_per_week = 0
@@ -622,22 +627,14 @@ class Airflow
       on_rule.setEndDate(OpenStudio::Date::fromDayOfYear(365))
     end
 
-    # Setpoint schedule (average of heating/cooling setpoints to minimize incurring additional heating energy)
-
-    nv_weekday_setpoints = [[nil] * 24] * 12
-    nv_weekend_setpoints = [[nil] * 24] * 12
-    for month in 1..12
-      for hr in 1..24
-        nv_weekday_setpoints[month - 1][hr - 1] = UnitConversions.convert((nat_vent.htg_weekday_setpoints[month - 1][hr - 1] + nat_vent.clg_weekday_setpoints[month - 1][hr - 1]) / 2.0, 'F', 'C')
-        nv_weekend_setpoints[month - 1][hr - 1] = UnitConversions.convert((nat_vent.htg_weekend_setpoints[month - 1][hr - 1] + nat_vent.clg_weekend_setpoints[month - 1][hr - 1]) / 2.0, 'F', 'C')
-      end
-    end
-    temp_sch = HourlyByMonthSchedule.new(model, Constants.ObjectNameNaturalVentilation + ' temp schedule', nv_weekday_setpoints, nv_weekend_setpoints, false, true, Constants.ScheduleTypeLimitsTemperature)
-
     # Sensors
-    nv_sp_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Schedule Value')
-    nv_sp_sensor.setName('airflow sp s')
-    nv_sp_sensor.setKeyName(temp_sch.schedule.name.to_s)
+    htg_sp_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Schedule Value')
+    htg_sp_sensor.setName('htg sp s')
+    htg_sp_sensor.setKeyName(htg_sch.name.to_s)
+
+    clg_sp_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Schedule Value')
+    clg_sp_sensor.setName('clg sp s')
+    clg_sp_sensor.setKeyName(clg_sch.name.to_s)
 
     nv_avail_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Schedule Value')
     nv_avail_sensor.setName("#{Constants.ObjectNameNaturalVentilation} nva s")
@@ -693,12 +690,14 @@ class Airflow
     whf_elec_actuator = OpenStudio::Model::EnergyManagementSystemActuator.new(whf_equip, 'ElectricEquipment', 'Electric Power Level')
     whf_elec_actuator.setName("#{whf_equip.name} act")
 
-    area = 0.6 * window_area * nat_vent.nv_frac_window_area_open # ft^2, For Sherman-Grimsrud, this is 0.6*(open window area)
+    area = 0.6 * open_window_area # ft^2, for Sherman-Grimsrud
     max_rate = 20.0 # Air Changes per hour
     max_flow_rate = max_rate * @infil_volume / UnitConversions.convert(1.0, 'hr', 'min')
     neutral_level = 0.5
     hor_lk_frac = 0.0
     c_w, c_s = calc_wind_stack_coeffs(hor_lk_frac, neutral_level, @living_space, @infil_height)
+    max_oa_hr = 0.0115 # From BA HSP
+    max_oa_rh = 0.7 # From BA HSP
 
     # Program
     nv_and_whf_program = OpenStudio::Model::EnergyManagementSystemProgram.new(model)
@@ -708,12 +707,12 @@ class Airflow
     nv_and_whf_program.addLine("Set Wout = #{@wout_sensor.name}")
     nv_and_whf_program.addLine("Set Pbar = #{@pbar_sensor.name}")
     nv_and_whf_program.addLine('Set Phiout = (@RhFnTdbWPb Tout Wout Pbar)')
-    nv_and_whf_program.addLine("Set MaxHR = #{nat_vent.max_oa_hr}")
-    nv_and_whf_program.addLine("Set MaxRH = #{nat_vent.max_oa_rh}")
-    nv_and_whf_program.addLine("Set Tnvsp = #{nv_sp_sensor.name}")
+    nv_and_whf_program.addLine("Set MaxHR = #{max_oa_hr}")
+    nv_and_whf_program.addLine("Set MaxRH = #{max_oa_rh}")
+    nv_and_whf_program.addLine("Set Tnvsp = (#{htg_sp_sensor.name} + #{clg_sp_sensor.name}) / 2") # Average of heating/cooling setpoints to minimize incurring additional heating energy
     nv_and_whf_program.addLine("Set NVavail = #{nv_avail_sensor.name}")
     nv_and_whf_program.addLine("Set WHFavail = #{whf_avail_sensor.name}")
-    nv_and_whf_program.addLine("Set ClgSsnAvail = #{nat_vent.clg_ssn_sensor.name}")
+    nv_and_whf_program.addLine("Set ClgSsnAvail = #{nv_clg_ssn_sensor.name}")
     nv_and_whf_program.addLine('If (Wout < MaxHR) && (Phiout < MaxRH) && (Tin > Tout) && (Tin > Tnvsp) && (ClgSsnAvail > 0)')
     nv_and_whf_program.addLine("  Set WHF_Flow = #{UnitConversions.convert(whf_cfm, 'cfm', 'm^3/s')}")
     nv_and_whf_program.addLine('  Set Adj = (Tin-Tnvsp)/(Tin-Tout)')
@@ -1920,23 +1919,6 @@ class Duct
     @rvalue = rvalue
   end
   attr_accessor(:side, :space, :leakage_frac, :leakage_cfm25, :area, :rvalue, :zone, :zone_handle)
-end
-
-class NaturalVentilation
-  def initialize(nv_frac_window_area_open, max_oa_hr, max_oa_rh, nv_num_days_per_week,
-                 htg_weekday_setpoints, htg_weekend_setpoints, clg_weekday_setpoints, clg_weekend_setpoints, clg_ssn_sensor)
-    @nv_frac_window_area_open = nv_frac_window_area_open
-    @max_oa_hr = max_oa_hr
-    @max_oa_rh = max_oa_rh
-    @nv_num_days_per_week = nv_num_days_per_week
-    @htg_weekday_setpoints = htg_weekday_setpoints
-    @htg_weekend_setpoints = htg_weekend_setpoints
-    @clg_weekday_setpoints = clg_weekday_setpoints
-    @clg_weekend_setpoints = clg_weekend_setpoints
-    @clg_ssn_sensor = clg_ssn_sensor
-  end
-  attr_accessor(:nv_frac_window_area_open, :max_oa_hr, :max_oa_rh, :nv_num_days_per_week,
-                :htg_weekday_setpoints, :htg_weekend_setpoints, :clg_weekday_setpoints, :clg_weekend_setpoints, :clg_ssn_sensor)
 end
 
 class MechanicalVentilation
