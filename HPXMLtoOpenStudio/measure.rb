@@ -954,7 +954,7 @@ class OSModel
 
   def self.explode_surfaces(runner, model)
     # Re-position surfaces so as to not shade each other and to make it easier to visualize the building.
-    # FUTURE: Might be able to use the new self-shading options in E+ 8.9 ShadowCalculation object?
+    # FUTURE: Might be able to use the new self-shading options in E+ 8.9 ShadowCalculation object instead?
 
     gap_distance = UnitConversions.convert(10.0, 'ft', 'm') # distance between surfaces of the same azimuth
     rad90 = UnitConversions.convert(90, 'deg', 'rad')
@@ -2920,93 +2920,24 @@ class OSModel
       end
     end
 
-    # Mechanical Ventilation
-    mech_vent_id = nil
-    mech_vent_type = nil
-    mech_vent_total_eff = 0.0
-    mech_vent_total_eff_adj = 0.0
-    mech_vent_sens_eff = 0.0
-    mech_vent_sens_eff_adj = 0.0
-    mech_vent_fan_w = 0.0
-    mech_vent_cfm = 0.0
-    mech_vent_attached_dist_system = nil
-    cfis_open_time = 0.0
-    @hpxml.ventilation_fans.each do |vent_fan|
-      next unless vent_fan.used_for_whole_building_ventilation
-
-      mech_vent_id = vent_fan.id
-      mech_vent_type = vent_fan.fan_type
-      if (mech_vent_type == HPXML::MechVentTypeERV) || (mech_vent_type == HPXML::MechVentTypeHRV)
-        if vent_fan.sensible_recovery_efficiency_adjusted.nil?
-          mech_vent_sens_eff = vent_fan.sensible_recovery_efficiency
-        else
-          mech_vent_sens_eff_adj = vent_fan.sensible_recovery_efficiency_adjusted
-        end
-      end
-      if mech_vent_type == HPXML::MechVentTypeERV
-        if vent_fan.total_recovery_efficiency_adjusted.nil?
-          mech_vent_total_eff = vent_fan.total_recovery_efficiency
-        else
-          mech_vent_total_eff_adj = vent_fan.total_recovery_efficiency_adjusted
-        end
-      end
-      mech_vent_cfm = vent_fan.tested_flow_rate
-      if mech_vent_cfm.nil?
-        mech_vent_cfm = vent_fan.rated_flow_rate
-      end
-      mech_vent_fan_w = vent_fan.fan_power
-      if mech_vent_type == HPXML::MechVentTypeCFIS
-        # CFIS: Specify minimum open time in minutes
-        cfis_open_time = [vent_fan.hours_in_operation / 24.0 * 60.0, 59.999].min
-      else
-        # Other: Adjust constant CFM/power based on hours per day of operation
-        mech_vent_cfm *= (vent_fan.hours_in_operation / 24.0)
-        mech_vent_fan_w *= (vent_fan.hours_in_operation / 24.0)
-      end
-      mech_vent_attached_dist_system = vent_fan.distribution_system
-    end
-    cfis_airflow_frac = 1.0
-    clothes_dryer_exhaust = 0.0
-
     # Ventilation fans
-    vent_fan_kitchen = nil
-    vent_fan_bath = nil
+    vent_mech = nil
+    vent_kitchen = nil
+    vent_bath = nil
     vent_whf = nil
     @hpxml.ventilation_fans.each do |vent_fan|
-      if vent_fan.used_for_seasonal_cooling_load_reduction
+      if vent_fan.used_for_whole_building_ventilation
+        vent_mech = vent_fan
+      elsif vent_fan.used_for_seasonal_cooling_load_reduction
         vent_whf = vent_fan
       elsif vent_fan.used_for_local_ventilation
         if vent_fan.fan_location == HPXML::VentilationFanLocationKitchen
-          vent_fan_kitchen = vent_fan
+          vent_kitchen = vent_fan
         elsif vent_fan.fan_location == HPXML::VentilationFanLocationBath
-          vent_fan_bath = vent_fan
+          vent_bath = vent_fan
         end
       end
     end
-
-    # Get AirLoop associated with CFIS
-    cfis_airloop = nil
-    if mech_vent_type == HPXML::MechVentTypeCFIS
-      cfis_sys_ids = mech_vent_attached_dist_system.hvac_systems.map { |system| system.id }
-
-      # Get AirLoopHVACs associated with these HVAC systems
-      @hvac_map.each do |sys_id, hvacs|
-        next unless cfis_sys_ids.include? sys_id
-
-        hvacs.each do |loop|
-          next unless loop.is_a? OpenStudio::Model::AirLoopHVAC
-          next if cfis_airloop == loop # already assigned
-
-          fail 'Two airloops found for CFIS. Aborting...' unless cfis_airloop.nil?
-
-          cfis_airloop = loop
-        end
-      end
-    end
-
-    mech_vent = MechanicalVentilation.new(mech_vent_type, mech_vent_total_eff, mech_vent_total_eff_adj, mech_vent_cfm,
-                                          mech_vent_fan_w, mech_vent_sens_eff, mech_vent_sens_eff_adj, clothes_dryer_exhaust,
-                                          cfis_open_time, cfis_airflow_frac, cfis_airloop)
 
     air_infils = @hpxml.air_infiltration_measurements
     window_area = @hpxml.windows.map { |w| w.area }.inject(0, :+)
@@ -3015,11 +2946,11 @@ class OSModel
     shelter_coef = @hpxml.site.shelter_coefficient
     has_flue_chimney = false # FUTURE: Expose as HPXML input
     infil_height = Airflow.calc_inferred_infiltration_height(@cfa, @ncfl, @ncfl_ag, @infil_volume, @hpxml)
-    Airflow.apply(model, runner, weather, spaces, air_infils, mech_vent, vent_whf, duct_systems,
-                  @cfa, @infil_volume, infil_height, @nbeds, open_window_area, @clg_ssn_sensor,
-                  @min_neighbor_distance, vent_fan_kitchen, vent_fan_bath,
+    Airflow.apply(model, runner, weather, spaces, air_infils, vent_mech, vent_whf, duct_systems,
+                  @infil_volume, infil_height, open_window_area, @clg_ssn_sensor,
+                  @min_neighbor_distance, vent_kitchen, vent_bath,
                   vented_attic, vented_crawl, site_type, shelter_coef,
-                  has_flue_chimney, @apply_ashrae140_assumptions)
+                  has_flue_chimney, @hvac_map, @apply_ashrae140_assumptions)
   end
 
   def self.create_ducts(hvac_distribution, model, spaces)
