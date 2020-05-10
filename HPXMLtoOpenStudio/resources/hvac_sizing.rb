@@ -2050,7 +2050,8 @@ class HVACSizing
     ducts = []
 
     # Has ducts?
-    has_ducts = get_feature(air_loop, Constants.SizingInfoDuctExist, 'boolean')
+    has_ducts = get_feature(air_loop, Constants.SizingInfoDuctExist, 'boolean', false)
+    return ducts if ducts.nil?
 
     # Leakage values
     leakage_fracs = get_feature(air_loop, Constants.SizingInfoDuctLeakageFracs, 'string', false)

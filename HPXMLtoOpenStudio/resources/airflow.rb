@@ -8,9 +8,9 @@ require_relative 'psychrometrics'
 require_relative 'hvac'
 
 class Airflow
-  def self.apply(model, runner, weather, spaces, air_infils, vent_mech, vent_whf, duct_systems,
-                 infil_volume, infil_height, open_window_area, nv_clg_ssn_sensor,
-                 min_neighbor_distance, vent_kitchen, vent_bath,
+  def self.apply(model, runner, weather, spaces, air_infils, vent_mech, vent_whf,
+                 duct_systems, infil_volume, infil_height, open_window_area,
+                 nv_clg_ssn_sensor, min_neighbor_distance, vent_kitchen, vent_bath,
                  vented_attic, vented_crawl, site_type, shelter_coef,
                  has_flue_chimney, hvac_map, apply_ashrae140_assumptions)
 
@@ -54,35 +54,19 @@ class Airflow
     @adiabatic_const.setName('AdiabaticConst')
     @adiabatic_const.insertLayer(0, adiabatic_mat)
 
-    # Update model
+    # Apply ducts
 
-    cfis = set_cfis_airloop(vent_mech, hvac_map)
-
-    duct_programs = {}
-    duct_lks = {}
+    duct_lks = []
+    cfis = initialize_cfis(vent_mech, hvac_map)
     duct_systems.each do |ducts, air_loop|
-      process_ducts(model, ducts, air_loop)
-      apply_ducts(model, ducts, vent_mech, air_loop, duct_programs, duct_lks, cfis)
+      apply_ducts(model, ducts, vent_mech, air_loop, duct_lks, cfis)
     end
 
-    @wind_speed = get_wind_speed_correction(site_type, shelter_coef, min_neighbor_distance)
-    nv_and_whf_program = apply_natural_ventilation_and_whole_house_fan(model, weather, vent_whf, open_window_area, nv_clg_ssn_sensor)
-    infil_program = apply_infiltration_and_ventilation_fans(model, weather, vent_mech, vent_kitchen, vent_bath, duct_lks, has_flue_chimney, air_infils, vented_attic, vented_crawl, cfis)
+    # Apply infiltration/ventilation
 
-    site_map = { HPXML::SiteTypeRural => 'Country',    # Flat, open country
-                 HPXML::SiteTypeSuburban => 'Suburbs', # Rough, wooded country, suburbs
-                 HPXML::SiteTypeUrban => 'City' }      # Towns, city outskirts, center of large cities
-    model.getSite.setTerrain(site_map[site_type])
-
-    apply_ems_program_managers(model, infil_program, nv_and_whf_program, cfis.program, duct_programs)
-
-    # Store info for HVAC Sizing measure
-    model.getAirLoopHVACs.each do |air_loop|
-      has_ducts = air_loop.additionalProperties.getFeatureAsBoolean(Constants.SizingInfoDuctExist)
-      next if has_ducts.is_initialized
-
-      air_loop.additionalProperties.setFeature(Constants.SizingInfoDuctExist, false)
-    end
+    @wind_speed = set_wind_speed_correction(model, site_type, shelter_coef, min_neighbor_distance)
+    apply_natural_ventilation_and_whole_house_fan(model, weather, vent_whf, open_window_area, nv_clg_ssn_sensor)
+    apply_infiltration_and_ventilation_fans(model, weather, vent_mech, vent_kitchen, vent_bath, duct_lks, has_flue_chimney, air_infils, vented_attic, vented_crawl, cfis)
   end
 
   def self.get_default_shelter_coefficient()
@@ -123,7 +107,12 @@ class Airflow
 
   private
 
-  def self.get_wind_speed_correction(site_type, shelter_coef, min_neighbor_distance)
+  def self.set_wind_speed_correction(model, site_type, shelter_coef, min_neighbor_distance)
+    site_map = { HPXML::SiteTypeRural => 'Country',    # Flat, open country
+                 HPXML::SiteTypeSuburban => 'Suburbs', # Rough, wooded country, suburbs
+                 HPXML::SiteTypeUrban => 'City' }      # Towns, city outskirts, center of large cities
+    model.getSite.setTerrain(site_map[site_type])
+
     wind_speed = WindSpeed.new
     wind_speed.height = 32.8 # ft (Standard weather station height)
 
@@ -195,60 +184,6 @@ class Airflow
       leakage_area.setStackCoefficient(UnitConversions.convert(c_s_SG, 'ft^2/(s^2*R)', 'L^2/(s^2*cm^4*K)'))
       leakage_area.setWindCoefficient(c_w_SG * 0.01)
       leakage_area.setSpace(space)
-    end
-  end
-
-  def self.process_ducts(model, ducts, air_loop)
-    # Validate Inputs
-    ducts.each do |duct|
-      if duct.leakage_frac.nil? == duct.leakage_cfm25.nil?
-        fail 'Ducts: Must provide either leakage fraction or cfm25, but not both.'
-      end
-      if (not duct.leakage_frac.nil?) && ((duct.leakage_frac < 0) || (duct.leakage_frac > 1))
-        fail 'Ducts: Leakage Fraction must be greater than or equal to 0 and less than or equal to 1.'
-      end
-      if (not duct.leakage_cfm25.nil?) && (duct.leakage_cfm25 < 0)
-        fail 'Ducts: Leakage CFM25 must be greater than or equal to 0.'
-      end
-      if duct.rvalue < 0
-        fail 'Ducts: Insulation Nominal R-Value must be greater than or equal to 0.'
-      end
-      if duct.area < 0
-        fail 'Ducts: Surface Area must be greater than or equal to 0.'
-      end
-    end
-
-    has_ducted_hvac = HVAC.has_ducted_equipment(model, air_loop)
-    if (ducts.size > 0) && (not has_ducted_hvac)
-      @runner.registerWarning('No ducted HVAC equipment was found but ducts were specified. Overriding duct specification.')
-      ducts.clear
-    elsif (ducts.size == 0) && has_ducted_hvac
-      @runner.registerWarning('Ducted HVAC equipment was found but no ducts were specified. Proceeding without ducts.')
-    end
-
-    ducts.each do |duct|
-      duct.rvalue = get_duct_insulation_rvalue(duct.rvalue, duct.side) # Convert from nominal to actual R-value
-      if not duct.loc_schedule.nil?
-        # Pass MF space temperature schedule name
-        duct.location_handle = duct.loc_schedule.name.to_s
-      elsif not duct.loc_space.nil?
-        duct.zone = duct.loc_space.thermalZone.get
-        duct.location_handle = duct.zone.handle.to_s
-      else # Outside
-        duct.zone = nil
-        duct.location_handle = HPXML::LocationOutside
-      end
-    end
-
-    if (ducts.size > 0) && @living_zone.airLoopHVACs.include?(air_loop)
-      # Store info for HVAC Sizing measure
-      air_loop.additionalProperties.setFeature(Constants.SizingInfoDuctExist, true)
-      air_loop.additionalProperties.setFeature(Constants.SizingInfoDuctSides, ducts.map { |duct| duct.side }.join(','))
-      air_loop.additionalProperties.setFeature(Constants.SizingInfoDuctLocationHandles, ducts.map { |duct| duct.location_handle.to_s }.join(','))
-      air_loop.additionalProperties.setFeature(Constants.SizingInfoDuctLeakageFracs, ducts.map { |duct| duct.leakage_frac.to_f }.join(','))
-      air_loop.additionalProperties.setFeature(Constants.SizingInfoDuctLeakageCFM25s, ducts.map { |duct| duct.leakage_cfm25.to_f }.join(','))
-      air_loop.additionalProperties.setFeature(Constants.SizingInfoDuctAreas, ducts.map { |duct| duct.area.to_f }.join(','))
-      air_loop.additionalProperties.setFeature(Constants.SizingInfoDuctRvalues, ducts.map { |duct| duct.rvalue.to_f }.join(','))
     end
   end
 
@@ -384,55 +319,58 @@ class Airflow
     max_oa_rh = 0.7 # From BA HSP
 
     # Program
-    nv_and_whf_program = OpenStudio::Model::EnergyManagementSystemProgram.new(model)
-    nv_and_whf_program.setName(Constants.ObjectNameNaturalVentilation + ' program')
-    nv_and_whf_program.addLine("Set Tin = #{@tin_sensor.name}")
-    nv_and_whf_program.addLine("Set Tout = #{@tout_sensor.name}")
-    nv_and_whf_program.addLine("Set Wout = #{@wout_sensor.name}")
-    nv_and_whf_program.addLine("Set Pbar = #{@pbar_sensor.name}")
-    nv_and_whf_program.addLine('Set Phiout = (@RhFnTdbWPb Tout Wout Pbar)')
-    nv_and_whf_program.addLine("Set MaxHR = #{max_oa_hr}")
-    nv_and_whf_program.addLine("Set MaxRH = #{max_oa_rh}")
+    vent_program = OpenStudio::Model::EnergyManagementSystemProgram.new(model)
+    vent_program.setName(Constants.ObjectNameNaturalVentilation + ' program')
+    vent_program.addLine("Set Tin = #{@tin_sensor.name}")
+    vent_program.addLine("Set Tout = #{@tout_sensor.name}")
+    vent_program.addLine("Set Wout = #{@wout_sensor.name}")
+    vent_program.addLine("Set Pbar = #{@pbar_sensor.name}")
+    vent_program.addLine('Set Phiout = (@RhFnTdbWPb Tout Wout Pbar)')
+    vent_program.addLine("Set MaxHR = #{max_oa_hr}")
+    vent_program.addLine("Set MaxRH = #{max_oa_rh}")
     if (not htg_sp_sensor.nil?) && (not clg_sp_sensor.nil?)
-      nv_and_whf_program.addLine("Set Tnvsp = (#{htg_sp_sensor.name} + #{clg_sp_sensor.name}) / 2") # Average of heating/cooling setpoints to minimize incurring additional heating energy
+      vent_program.addLine("Set Tnvsp = (#{htg_sp_sensor.name} + #{clg_sp_sensor.name}) / 2") # Average of heating/cooling setpoints to minimize incurring additional heating energy
     else
-      nv_and_whf_program.addLine("Set Tnvsp = #{UnitConversions.convert(73.0, 'F', 'C')}") # Assumption when no HVAC system
+      vent_program.addLine("Set Tnvsp = #{UnitConversions.convert(73.0, 'F', 'C')}") # Assumption when no HVAC system
     end
-    nv_and_whf_program.addLine("Set NVavail = #{nv_avail_sensor.name}")
-    nv_and_whf_program.addLine("Set WHFavail = #{whf_avail_sensor.name}")
-    nv_and_whf_program.addLine("Set ClgSsnAvail = #{nv_clg_ssn_sensor.name}")
-    nv_and_whf_program.addLine('If (Wout < MaxHR) && (Phiout < MaxRH) && (Tin > Tout) && (Tin > Tnvsp) && (ClgSsnAvail > 0)')
-    nv_and_whf_program.addLine("  Set WHF_Flow = #{UnitConversions.convert(whf_cfm, 'cfm', 'm^3/s')}")
-    nv_and_whf_program.addLine('  Set Adj = (Tin-Tnvsp)/(Tin-Tout)')
-    nv_and_whf_program.addLine('  Set Adj = (@Min Adj 1)')
-    nv_and_whf_program.addLine('  Set Adj = (@Max Adj 0)')
-    nv_and_whf_program.addLine('  If (WHFavail > 0) && (WHF_Flow > 0)') # If available, prioritize whole house fan
-    nv_and_whf_program.addLine("    Set #{nv_flow_actuator.name} = 0")
-    nv_and_whf_program.addLine("    Set #{whf_flow_actuator.name} = WHF_Flow*Adj")
-    nv_and_whf_program.addLine("    Set #{liv_to_zone_flow_rate_actuator.name} = WHF_Flow*Adj") unless whf_zone.nil?
-    nv_and_whf_program.addLine("    Set #{whf_elec_actuator.name} = #{whf_fan_w}*Adj")
-    nv_and_whf_program.addLine('  ElseIf (NVavail > 0)') # Natural ventilation
-    nv_and_whf_program.addLine("    Set NVArea = #{UnitConversions.convert(area, 'ft^2', 'cm^2')}")
-    nv_and_whf_program.addLine("    Set Cs = #{UnitConversions.convert(c_s, 'ft^2/(s^2*R)', 'L^2/(s^2*cm^4*K)')}")
-    nv_and_whf_program.addLine("    Set Cw = #{c_w * 0.01}")
-    nv_and_whf_program.addLine('    Set Tdiff = Tin-Tout')
-    nv_and_whf_program.addLine('    Set dT = (@Abs Tdiff)')
-    nv_and_whf_program.addLine("    Set Vwind = #{@vwind_sensor.name}")
-    nv_and_whf_program.addLine('    Set SGNV = NVArea*Adj*((((Cs*dT)+(Cw*(Vwind^2)))^0.5)/1000)')
-    nv_and_whf_program.addLine("    Set MaxNV = #{UnitConversions.convert(max_flow_rate, 'cfm', 'm^3/s')}")
-    nv_and_whf_program.addLine("    Set #{nv_flow_actuator.name} = (@Min SGNV MaxNV)")
-    nv_and_whf_program.addLine("    Set #{whf_flow_actuator.name} = 0")
-    nv_and_whf_program.addLine("    Set #{liv_to_zone_flow_rate_actuator.name} = 0") unless whf_zone.nil?
-    nv_and_whf_program.addLine("    Set #{whf_elec_actuator.name} = 0")
-    nv_and_whf_program.addLine('  EndIf')
-    nv_and_whf_program.addLine('Else')
-    nv_and_whf_program.addLine("  Set #{nv_flow_actuator.name} = 0")
-    nv_and_whf_program.addLine("  Set #{whf_flow_actuator.name} = 0")
-    nv_and_whf_program.addLine("  Set #{liv_to_zone_flow_rate_actuator.name} = 0") unless whf_zone.nil?
-    nv_and_whf_program.addLine("  Set #{whf_elec_actuator.name} = 0")
-    nv_and_whf_program.addLine('EndIf')
+    vent_program.addLine("Set NVavail = #{nv_avail_sensor.name}")
+    vent_program.addLine("Set WHFavail = #{whf_avail_sensor.name}")
+    vent_program.addLine("Set ClgSsnAvail = #{nv_clg_ssn_sensor.name}")
+    vent_program.addLine('If (Wout < MaxHR) && (Phiout < MaxRH) && (Tin > Tout) && (Tin > Tnvsp) && (ClgSsnAvail > 0)')
+    vent_program.addLine("  Set WHF_Flow = #{UnitConversions.convert(whf_cfm, 'cfm', 'm^3/s')}")
+    vent_program.addLine('  Set Adj = (Tin-Tnvsp)/(Tin-Tout)')
+    vent_program.addLine('  Set Adj = (@Min Adj 1)')
+    vent_program.addLine('  Set Adj = (@Max Adj 0)')
+    vent_program.addLine('  If (WHFavail > 0) && (WHF_Flow > 0)') # If available, prioritize whole house fan
+    vent_program.addLine("    Set #{nv_flow_actuator.name} = 0")
+    vent_program.addLine("    Set #{whf_flow_actuator.name} = WHF_Flow*Adj")
+    vent_program.addLine("    Set #{liv_to_zone_flow_rate_actuator.name} = WHF_Flow*Adj") unless whf_zone.nil?
+    vent_program.addLine("    Set #{whf_elec_actuator.name} = #{whf_fan_w}*Adj")
+    vent_program.addLine('  ElseIf (NVavail > 0)') # Natural ventilation
+    vent_program.addLine("    Set NVArea = #{UnitConversions.convert(area, 'ft^2', 'cm^2')}")
+    vent_program.addLine("    Set Cs = #{UnitConversions.convert(c_s, 'ft^2/(s^2*R)', 'L^2/(s^2*cm^4*K)')}")
+    vent_program.addLine("    Set Cw = #{c_w * 0.01}")
+    vent_program.addLine('    Set Tdiff = Tin-Tout')
+    vent_program.addLine('    Set dT = (@Abs Tdiff)')
+    vent_program.addLine("    Set Vwind = #{@vwind_sensor.name}")
+    vent_program.addLine('    Set SGNV = NVArea*Adj*((((Cs*dT)+(Cw*(Vwind^2)))^0.5)/1000)')
+    vent_program.addLine("    Set MaxNV = #{UnitConversions.convert(max_flow_rate, 'cfm', 'm^3/s')}")
+    vent_program.addLine("    Set #{nv_flow_actuator.name} = (@Min SGNV MaxNV)")
+    vent_program.addLine("    Set #{whf_flow_actuator.name} = 0")
+    vent_program.addLine("    Set #{liv_to_zone_flow_rate_actuator.name} = 0") unless whf_zone.nil?
+    vent_program.addLine("    Set #{whf_elec_actuator.name} = 0")
+    vent_program.addLine('  EndIf')
+    vent_program.addLine('Else')
+    vent_program.addLine("  Set #{nv_flow_actuator.name} = 0")
+    vent_program.addLine("  Set #{whf_flow_actuator.name} = 0")
+    vent_program.addLine("  Set #{liv_to_zone_flow_rate_actuator.name} = 0") unless whf_zone.nil?
+    vent_program.addLine("  Set #{whf_elec_actuator.name} = 0")
+    vent_program.addLine('EndIf')
 
-    return nv_and_whf_program
+    manager = OpenStudio::Model::EnergyManagementSystemProgramCallingManager.new(model)
+    manager.setName("#{vent_program} calling manager")
+    manager.setCallingPoint('BeginTimestepBeforePredictor')
+    manager.addProgram(vent_program)
   end
 
   def self.create_return_air_duct_zone(model, air_loop_name)
@@ -482,7 +420,7 @@ class Airflow
     return actuator
   end
 
-  def self.set_cfis_airloop(vent_mech, hvac_map)
+  def self.initialize_cfis(vent_mech, hvac_map)
     cfis = CFIS.new
 
     # Get AirLoop associated with CFIS
@@ -505,16 +443,62 @@ class Airflow
       end
     end
 
-    # FIXME: Add invalid HPXML test file
-    if cfis_airloop.nil?
-      fail 'CFIS ventilation system not attached to an air distribution system.'
-    end
-
     cfis.airloop = cfis_airloop
     return cfis
   end
 
-  def self.apply_ducts(model, ducts, vent_mech, air_loop, duct_programs, duct_lks, cfis)
+  def self.apply_ducts(model, ducts, vent_mech, air_loop, duct_lks, cfis)
+    ducts.each do |duct|
+      if duct.leakage_frac.nil? == duct.leakage_cfm25.nil?
+        fail 'Ducts: Must provide either leakage fraction or cfm25, but not both.'
+      end
+      if (not duct.leakage_frac.nil?) && ((duct.leakage_frac < 0) || (duct.leakage_frac > 1))
+        fail 'Ducts: Leakage Fraction must be greater than or equal to 0 and less than or equal to 1.'
+      end
+      if (not duct.leakage_cfm25.nil?) && (duct.leakage_cfm25 < 0)
+        fail 'Ducts: Leakage CFM25 must be greater than or equal to 0.'
+      end
+      if duct.rvalue < 0
+        fail 'Ducts: Insulation Nominal R-Value must be greater than or equal to 0.'
+      end
+      if duct.area < 0
+        fail 'Ducts: Surface Area must be greater than or equal to 0.'
+      end
+    end
+
+    has_ducted_hvac = HVAC.has_ducted_equipment(model, air_loop)
+    if (ducts.size > 0) && (not has_ducted_hvac)
+      @runner.registerWarning('No ducted HVAC equipment was found but ducts were specified. Overriding duct specification.')
+      ducts.clear
+    elsif (ducts.size == 0) && has_ducted_hvac
+      @runner.registerWarning('Ducted HVAC equipment was found but no ducts were specified. Proceeding without ducts.')
+    end
+
+    ducts.each do |duct|
+      duct.rvalue = get_duct_insulation_rvalue(duct.rvalue, duct.side) # Convert from nominal to actual R-value
+      if not duct.loc_schedule.nil?
+        # Pass MF space temperature schedule name
+        duct.location_handle = duct.loc_schedule.name.to_s
+      elsif not duct.loc_space.nil?
+        duct.zone = duct.loc_space.thermalZone.get
+        duct.location_handle = duct.zone.handle.to_s
+      else # Outside
+        duct.zone = nil
+        duct.location_handle = HPXML::LocationOutside
+      end
+    end
+
+    if ducts.size > 0
+      # Store info for HVAC Sizing measure
+      air_loop.additionalProperties.setFeature(Constants.SizingInfoDuctExist, true)
+      air_loop.additionalProperties.setFeature(Constants.SizingInfoDuctSides, ducts.map { |duct| duct.side }.join(','))
+      air_loop.additionalProperties.setFeature(Constants.SizingInfoDuctLocationHandles, ducts.map { |duct| duct.location_handle.to_s }.join(','))
+      air_loop.additionalProperties.setFeature(Constants.SizingInfoDuctLeakageFracs, ducts.map { |duct| duct.leakage_frac.to_f }.join(','))
+      air_loop.additionalProperties.setFeature(Constants.SizingInfoDuctLeakageCFM25s, ducts.map { |duct| duct.leakage_cfm25.to_f }.join(','))
+      air_loop.additionalProperties.setFeature(Constants.SizingInfoDuctAreas, ducts.map { |duct| duct.area.to_f }.join(','))
+      air_loop.additionalProperties.setFeature(Constants.SizingInfoDuctRvalues, ducts.map { |duct| duct.rvalue.to_f }.join(','))
+    end
+
     return if ducts.size == 0 # No ducts
 
     # get duct located zone or ambient temperature schedule objects
@@ -530,8 +514,6 @@ class Airflow
       all_ducts_conditioned = false
     end
     return if all_ducts_conditioned
-
-    return unless @living_zone.airLoopHVACs.include? air_loop # next if airloop doesn't serve this # FIXME: Is this still needed?
 
     # Get the supply fan
     system = HVAC.get_unitary_system_from_air_loop_hvac(air_loop)
@@ -627,6 +609,8 @@ class Airflow
     else
       fail "Unexpected fan: #{supply_fan.name}"
     end
+
+    cfis_program = nil
 
     # Create one duct program for each duct location zone
     duct_locations.each_with_index do |duct_location, i|
@@ -803,7 +787,7 @@ class Airflow
 
       duct_lk_supply_fan_equiv_var = OpenStudio::Model::EnergyManagementSystemGlobalVariable.new(model, "#{air_loop_name_idx} LkSupFanEquiv".gsub(' ', '_'))
       duct_lk_exhaust_fan_equiv_var = OpenStudio::Model::EnergyManagementSystemGlobalVariable.new(model, "#{air_loop_name_idx} LkExhFanEquiv".gsub(' ', '_'))
-      duct_lks[air_loop_name_idx] = [duct_lk_supply_fan_equiv_var, duct_lk_exhaust_fan_equiv_var]
+      duct_lks << [duct_lk_supply_fan_equiv_var, duct_lk_exhaust_fan_equiv_var]
 
       # Obtain aggregate values for all ducts in the current duct location
       leakage_fracs = { HPXML::DuctTypeSupply => nil, HPXML::DuctTypeReturn => nil }
@@ -997,7 +981,7 @@ class Airflow
 
       if (not cfis.airloop.nil?) && (air_loop == cfis.airloop)
 
-        if cfis.program.nil?
+        if cfis_program.nil?
           cfis.airflow_frac = 1.0 # Assumption
           cfis.t_sum_open_var = OpenStudio::Model::EnergyManagementSystemGlobalVariable.new(model, "#{Constants.ObjectNameMechanicalVentilation.gsub(' ', '_')}_cfis_t_sum_open") # Sums the time during an hour the CFIS damper has been open
           cfis.f_damper_extra_open_var = OpenStudio::Model::EnergyManagementSystemGlobalVariable.new(model, "#{Constants.ObjectNameMechanicalVentilation.gsub(' ', '_')}_cfis_f_extra_damper_open") # Fraction of timestep the CFIS blower is running while hvac is not operating. Used by infiltration and duct leakage programs
@@ -1005,10 +989,20 @@ class Airflow
           cfis.fan_rtf_sensor = fan_rtf_sensor
 
           # CFIS Initialization Program
-          cfis.program = OpenStudio::Model::EnergyManagementSystemProgram.new(model)
-          cfis.program.setName(Constants.ObjectNameMechanicalVentilation + ' cfis init program')
-          cfis.program.addLine("Set #{cfis.t_sum_open_var.name} = 0")
-          cfis.program.addLine("Set #{cfis.f_damper_extra_open_var.name} = 0")
+          cfis_program = OpenStudio::Model::EnergyManagementSystemProgram.new(model)
+          cfis_program.setName(Constants.ObjectNameMechanicalVentilation + ' cfis init program')
+          cfis_program.addLine("Set #{cfis.t_sum_open_var.name} = 0")
+          cfis_program.addLine("Set #{cfis.f_damper_extra_open_var.name} = 0")
+
+          manager = OpenStudio::Model::EnergyManagementSystemProgramCallingManager.new(model)
+          manager.setName("#{cfis_program} calling manager")
+          manager.setCallingPoint('BeginNewEnvironment')
+          manager.addProgram(cfis_program)
+
+          manager = OpenStudio::Model::EnergyManagementSystemProgramCallingManager.new(model)
+          manager.setName("#{cfis_program} calling manager2")
+          manager.setCallingPoint('AfterNewEnvironmentWarmUpIsComplete')
+          manager.addProgram(cfis_program)
         end
 
         # Calculate CFIS duct losses
@@ -1061,7 +1055,10 @@ class Airflow
 
       end
 
-      duct_programs[air_loop_name_idx] = duct_program
+      manager = OpenStudio::Model::EnergyManagementSystemProgramCallingManager.new(model)
+      manager.setName("#{duct_program.name} calling manager")
+      manager.setCallingPoint('EndOfSystemTimestepAfterHVACReporting')
+      manager.addProgram(duct_program)
     end
   end
 
@@ -1667,7 +1664,7 @@ class Airflow
     infil_program.addLine('Set QductsIn = 0')
     # Disabling duct imbalance affect on infiltration for consistency with other software tools
     # Revisit this in the future.
-    # duct_lks.each do |air_loop_name, value|
+    # duct_lks.each do |value|
     #  duct_lk_supply_fan_equiv_var, duct_lk_exhaust_fan_equiv_var = value
     #  infil_program.addLine("Set QductsOut = QductsOut+#{duct_lk_exhaust_fan_equiv_var.name}")
     #  infil_program.addLine("Set QductsIn = QductsIn+#{duct_lk_supply_fan_equiv_var.name}")
@@ -1701,34 +1698,10 @@ class Airflow
     infil_program.addLine("  Set #{infil_flow_actuator.name} = 0")
     infil_program.addLine('EndIf')
 
-    return infil_program
-  end
-
-  def self.apply_ems_program_managers(model, infil_program, nv_and_whf_program, cfis_program, duct_programs)
     program_calling_manager = OpenStudio::Model::EnergyManagementSystemProgramCallingManager.new(model)
-    program_calling_manager.setName(Constants.ObjectNameAirflow + ' program calling manager')
+    program_calling_manager.setName("#{infil_program} calling manager")
     program_calling_manager.setCallingPoint('BeginTimestepBeforePredictor')
     program_calling_manager.addProgram(infil_program)
-    program_calling_manager.addProgram(nv_and_whf_program)
-
-    if not cfis_program.nil?
-      program_calling_manager = OpenStudio::Model::EnergyManagementSystemProgramCallingManager.new(model)
-      program_calling_manager.setName(Constants.ObjectNameMechanicalVentilation + ' cfis init program 1 calling manager')
-      program_calling_manager.setCallingPoint('BeginNewEnvironment')
-      program_calling_manager.addProgram(cfis_program)
-
-      program_calling_manager = OpenStudio::Model::EnergyManagementSystemProgramCallingManager.new(model)
-      program_calling_manager.setName(Constants.ObjectNameMechanicalVentilation + ' cfis init program 2 calling manager')
-      program_calling_manager.setCallingPoint('AfterNewEnvironmentWarmUpIsComplete')
-      program_calling_manager.addProgram(cfis_program)
-    end
-
-    duct_programs.each do |air_loop_name, duct_program|
-      program_calling_manager = OpenStudio::Model::EnergyManagementSystemProgramCallingManager.new(model)
-      program_calling_manager.setName(air_loop_name + ' program calling manager')
-      program_calling_manager.setCallingPoint('EndOfSystemTimestepAfterHVACReporting')
-      program_calling_manager.addProgram(duct_program)
-    end
   end
 
   def self.calc_wind_stack_coeffs(hor_lk_frac, neutral_level, space, space_height = nil)
@@ -1853,5 +1826,5 @@ end
 class CFIS
   def initialize
   end
-  attr_accessor(:program, :airloop, :airflow_frac, :t_sum_open_var, :f_damper_extra_open_var, :fan_mfr_max_var, :fan_rtf_sensor)
+  attr_accessor(:airloop, :airflow_frac, :t_sum_open_var, :f_damper_extra_open_var, :fan_mfr_max_var, :fan_rtf_sensor)
 end
