@@ -1175,7 +1175,7 @@ class Airflow
     space.thermalZone.get.additionalProperties.setFeature(Constants.SizingInfoZoneInfiltrationCFM, cfm.to_f)
   end
 
-  def self.create_local_ventilation_schedule(model, vent_object, obj_name)
+  def self.apply_local_ventilation(model, vent_object, obj_name)
     daily_sch = [0.0] * 24
     if not vent_object.nil?
       remaining_hrs = vent_object.hours_in_operation
@@ -1188,10 +1188,27 @@ class Airflow
         remaining_hrs -= 1
       end
     end
-    obj_sch = HourlyByMonthSchedule.new(model, "#{Constants.ObjectNameMechanicalVentilation} #{obj_name} exhaust schedule", [daily_sch] * 12, [daily_sch] * 12, false, true, Constants.ScheduleTypeLimitsOnOff)
+    obj_sch = HourlyByMonthSchedule.new(model, "#{obj_name} schedule", [daily_sch] * 12, [daily_sch] * 12, false, true, Constants.ScheduleTypeLimitsOnOff)
     obj_sch_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Schedule Value')
-    obj_sch_sensor.setName("#{Constants.ObjectNameMechanicalVentilation} #{obj_name} sch s")
+    obj_sch_sensor.setName("#{obj_name} sch s")
     obj_sch_sensor.setKeyName(obj_sch.schedule.name.to_s)
+
+    equip_def = OpenStudio::Model::ElectricEquipmentDefinition.new(model)
+    equip_def.setName(obj_name)
+    equip = OpenStudio::Model::ElectricEquipment.new(equip_def)
+    equip.setName(obj_name)
+    equip.setSpace(@living_space)
+    if vent_object.nil?
+      equip_def.setDesignLevel(0.0)
+    else
+      equip_def.setDesignLevel(vent_object.fan_power)
+    end
+    equip_def.setFractionRadiant(0)
+    equip_def.setFractionLatent(0)
+    equip_def.setFractionLost(1)
+    equip.setSchedule(obj_sch.schedule)
+    equip.setEndUseSubcategory(Constants.ObjectNameMechanicalVentilation)
+
     return obj_sch, obj_sch_sensor
   end
 
@@ -1327,8 +1344,8 @@ class Airflow
     apply_infiltration_to_unvented_attic(model, weather)
 
     # Local ventilation
-    range_hood_sch, range_sch_sensor = create_local_ventilation_schedule(model, vent_kitchen, 'range')
-    bath_exhaust_sch, bath_sch_sensor = create_local_ventilation_schedule(model, vent_bath, 'bath')
+    range_hood_sch, range_sch_sensor = apply_local_ventilation(model, vent_kitchen, Constants.ObjectNameMechanicalVentilationRangeFan)
+    bath_exhaust_sch, bath_sch_sensor = apply_local_ventilation(model, vent_bath, Constants.ObjectNameMechanicalVentilationBathFan)
 
     # Actuators
 
@@ -1352,38 +1369,6 @@ class Airflow
     equip.setEndUseSubcategory(Constants.ObjectNameMechanicalVentilation)
     vent_mech_fan_actuator = OpenStudio::Model::EnergyManagementSystemActuator.new(equip, 'ElectricEquipment', 'Electric Power Level')
     vent_mech_fan_actuator.setName("#{equip.name} act")
-
-    equip_def = OpenStudio::Model::ElectricEquipmentDefinition.new(model)
-    equip_def.setName(Constants.ObjectNameMechanicalVentilationRangeFan)
-    equip = OpenStudio::Model::ElectricEquipment.new(equip_def)
-    equip.setName(Constants.ObjectNameMechanicalVentilationRangeFan)
-    equip.setSpace(@living_space)
-    if vent_kitchen.nil?
-      equip_def.setDesignLevel(0.0)
-    else
-      equip_def.setDesignLevel(vent_kitchen.fan_power)
-    end
-    equip_def.setFractionRadiant(0)
-    equip_def.setFractionLatent(0)
-    equip_def.setFractionLost(1)
-    equip.setSchedule(range_hood_sch.schedule)
-    equip.setEndUseSubcategory(Constants.ObjectNameMechanicalVentilation)
-
-    equip_def = OpenStudio::Model::ElectricEquipmentDefinition.new(model)
-    equip_def.setName(Constants.ObjectNameMechanicalVentilationBathFan)
-    equip = OpenStudio::Model::ElectricEquipment.new(equip_def)
-    equip.setName(Constants.ObjectNameMechanicalVentilationBathFan)
-    equip.setSpace(@living_space)
-    if vent_bath.nil?
-      equip_def.setDesignLevel(0.0)
-    else
-      equip_def.setDesignLevel(vent_bath.fan_power)
-    end
-    equip_def.setFractionRadiant(0)
-    equip_def.setFractionLatent(0)
-    equip_def.setFractionLost(1)
-    equip.setSchedule(bath_exhaust_sch.schedule)
-    equip.setEndUseSubcategory(Constants.ObjectNameMechanicalVentilation)
 
     infil_flow = OpenStudio::Model::SpaceInfiltrationDesignFlowRate.new(model)
     infil_flow.setName(Constants.ObjectNameInfiltration + ' flow')
@@ -1411,20 +1396,14 @@ class Airflow
     infil_program.setName(Constants.ObjectNameInfiltration + ' program')
 
     if living_ach50.to_f > 0
-
       # Based on "Field Validation of Algebraic Equations for Stack and
       # Wind Driven Air Infiltration Calculations" by Walker and Wilson (1998)
 
       outside_air_density = UnitConversions.convert(weather.header.LocalPressure, 'atm', 'Btu/ft^3') / (Gas.Air.r * (weather.data.AnnualAvgDrybulb + 460.0))
 
-      # Pressure Exponent
-      n_i = 0.65
-
-      # Calculate SLA
-      living_sla = get_infiltration_SLA_from_ACH50(living_ach50, n_i, @cfa, @infil_volume)
-
-      # Effective Leakage Area (ft^2)
-      a_o = living_sla * @cfa
+      n_i = 0.65 # Pressure Exponent
+      living_sla = get_infiltration_SLA_from_ACH50(living_ach50, n_i, @cfa, @infil_volume) # Calculate SLA
+      a_o = living_sla * @cfa # Effective Leakage Area (ft^2)
 
       # Flow Coefficient (cfm/inH2O^n) (based on ASHRAE HoF)
       inf_conv_factor = 776.25 # [ft/min]/[inH2O^(1/2)*ft^(3/2)/lbm^(1/2)]
@@ -1441,13 +1420,8 @@ class Airflow
         s_wflue = 0.0 # Flue Shelter Coefficient
       end
 
-      vented_crawl = false
-      if not @spaces[HPXML::LocationCrawlspaceVented].nil?
-        vented_crawl = true
-      end
-
       # Leakage distributions per Iain Walker (LBL) recommendations
-      if vented_crawl
+      if not @spaces[HPXML::LocationCrawlspaceVented].nil?
         # 15% ceiling, 35% walls, 50% floor leakage distribution for vented crawl
         leakage_ceiling = 0.15
         leakage_walls = 0.35
@@ -1458,69 +1432,45 @@ class Airflow
         leakage_walls = 0.50
         leakage_floor = 0.25
       end
-      if leakage_ceiling + leakage_walls + leakage_floor != 1
-        fail "Invalid air leakage distribution specified (#{leakage_ceiling}, #{leakage_walls}, #{leakage_floor}); does not add up to 1."
-      end
 
       r_i = (leakage_ceiling + leakage_floor)
       x_i = (leakage_ceiling - leakage_floor)
       r_i *= (1 - y_i)
       x_i *= (1 - y_i)
-
       z_f = flue_height / (@infil_height + Geometry.get_z_origin_for_zone(@living_zone))
 
       # Calculate Stack Coefficient
       m_o = (x_i + (2.0 * n_i + 1.0) * y_i)**2.0 / (2 - r_i)
-
       if m_o <=  1.0
         m_i = m_o # eq. 10
       else
         m_i = 1.0 # eq. 11
       end
-
       if has_flue_chimney
-        # Eq. 13
-        x_c = r_i + (2.0 * (1.0 - r_i - y_i)) / (n_i + 1.0) - 2.0 * y_i * (z_f - 1.0)**n_i
-        # Additive flue function, Eq. 12
-        f_i = n_i * y_i * (z_f - 1.0)**((3.0 * n_i - 1.0) / 3.0) * (1.0 - (3.0 * (x_c - x_i)**2.0 * r_i**(1 - n_i)) / (2.0 * (z_f + 1.0)))
+        x_c = r_i + (2.0 * (1.0 - r_i - y_i)) / (n_i + 1.0) - 2.0 * y_i * (z_f - 1.0)**n_i # Eq. 13
+        f_i = n_i * y_i * (z_f - 1.0)**((3.0 * n_i - 1.0) / 3.0) * (1.0 - (3.0 * (x_c - x_i)**2.0 * r_i**(1 - n_i)) / (2.0 * (z_f + 1.0))) # Additive flue function, Eq. 12
       else
-        # Critical value of ceiling-floor leakage difference where the
-        # neutral level is located at the ceiling (eq. 13)
-        x_c = r_i + (2.0 * (1.0 - r_i - y_i)) / (n_i + 1.0)
-        # Additive flue function (eq. 12)
-        f_i = 0.0
+        x_c = r_i + (2.0 * (1.0 - r_i - y_i)) / (n_i + 1.0) # Critical value of ceiling-floor leakage difference where the neutral level is located at the ceiling (eq. 13)
+        f_i = 0.0 # Additive flue function (eq. 12)
       end
-
       f_s = ((1.0 + n_i * r_i) / (n_i + 1.0)) * (0.5 - 0.5 * m_i**1.2)**(n_i + 1.0) + f_i
-
       stack_coef = f_s * (UnitConversions.convert(outside_air_density * Constants.g * @infil_height, 'lbm/(ft*s^2)', 'inH2O') / (Constants.AssumedInsideTemp + 460.0))**n_i # inH2O^n/R^n
 
       # Calculate wind coefficient
-      if vented_crawl
-
+      if not @spaces[HPXML::LocationCrawlspaceVented].nil?
         if x_i > 1.0 - 2.0 * y_i
           # Critical floor to ceiling difference above which f_w does not change (eq. 25)
           x_i = 1.0 - 2.0 * y_i
         end
-
-        # Redefined R for wind calculations for houses with crawlspaces (eq. 21)
-        r_x = 1.0 - r_i * (n_i / 2.0 + 0.2)
-        # Redefined Y for wind calculations for houses with crawlspaces (eq. 22)
-        y_x = 1.0 - y_i / 4.0
-        # Used to calculate X_x (eq.24)
-        x_s = (1.0 - r_i) / 5.0 - 1.5 * y_i
-        # Redefined X for wind calculations for houses with crawlspaces (eq. 23)
-        x_x = 1.0 - (((x_i - x_s) / (2.0 - r_i))**2.0)**0.75
-        # Wind factor (eq. 20)
-        f_w = 0.19 * (2.0 - n_i) * x_x * r_x * y_x
-
+        r_x = 1.0 - r_i * (n_i / 2.0 + 0.2) # Redefined R for wind calculations for houses with crawlspaces (eq. 21)
+        y_x = 1.0 - y_i / 4.0 # Redefined Y for wind calculations for houses with crawlspaces (eq. 22)
+        x_s = (1.0 - r_i) / 5.0 - 1.5 * y_i # Used to calculate X_x (eq.24)
+        x_x = 1.0 - (((x_i - x_s) / (2.0 - r_i))**2.0)**0.75 # Redefined X for wind calculations for houses with crawlspaces (eq. 23)
+        f_w = 0.19 * (2.0 - n_i) * x_x * r_x * y_x # Wind factor (eq. 20)
       else
-
         j_i = (x_i + r_i + 2.0 * y_i) / 2.0
         f_w = 0.19 * (2.0 - n_i) * (1.0 - ((x_i + r_i) / 2.0)**(1.5 - y_i)) - y_i / 4.0 * (j_i - 2.0 * y_i * j_i**4.0)
-
       end
-
       wind_coef = f_w * UnitConversions.convert(outside_air_density / 2.0, 'lbm/ft^3', 'inH2O/mph^2')**n_i # inH2O^n/mph^2n
 
       living_ach = get_infiltration_ACH_from_SLA(living_sla, @infil_height, weather)
