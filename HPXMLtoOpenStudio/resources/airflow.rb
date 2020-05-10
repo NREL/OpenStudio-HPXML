@@ -25,6 +25,7 @@ class Airflow
     @living_zone = @living_space.thermalZone.get
     @apply_ashrae140_assumptions = apply_ashrae140_assumptions
     @hvac_map = hvac_map
+    @cfa = UnitConversions.convert(@living_space.floorArea, 'm^2', 'ft^2')
 
     # Global sensors
 
@@ -1284,13 +1285,13 @@ class Airflow
       if (air_infil.unit_of_measure == HPXML::UnitsACH) && (air_infil.house_pressure == 50)
         living_ach50 = air_infil.air_leakage
       elsif (air_infil.unit_of_measure == HPXML::UnitsCFM) && (air_infil.house_pressure == 50)
-        living_ach50 = air_infil.air_leakage * 60.0 / infil_volume # Convert CFM50 to ACH50
+        living_ach50 = air_infil.air_leakage * 60.0 / @infil_volume # Convert CFM50 to ACH50
       elsif air_infil.unit_of_measure == HPXML::UnitsACHNatural
-        if apply_ashrae140_assumptions
+        if @apply_ashrae140_assumptions
           living_const_ach = air_infil.air_leakage
         else
-          sla = get_infiltration_SLA_from_ACH(air_infil.air_leakage, infil_height, weather)
-          living_ach50 = get_infiltration_ACH50_from_SLA(sla, 0.65, cfa, infil_volume)
+          sla = get_infiltration_SLA_from_ACH(air_infil.air_leakage, @infil_height, weather)
+          living_ach50 = get_infiltration_ACH50_from_SLA(sla, 0.65, @cfa, @infil_volume)
         end
       end
     end
@@ -1416,16 +1417,14 @@ class Airflow
 
       outside_air_density = UnitConversions.convert(weather.header.LocalPressure, 'atm', 'Btu/ft^3') / (Gas.Air.r * (weather.data.AnnualAvgDrybulb + 460.0))
 
-      area = UnitConversions.convert(@living_space.floorArea, 'm^2', 'ft^2')
-
       # Pressure Exponent
       n_i = 0.65
 
       # Calculate SLA
-      living_sla = get_infiltration_SLA_from_ACH50(living_ach50, n_i, area, @infil_volume)
+      living_sla = get_infiltration_SLA_from_ACH50(living_ach50, n_i, @cfa, @infil_volume)
 
       # Effective Leakage Area (ft^2)
-      a_o = living_sla * area
+      a_o = living_sla * @cfa
 
       # Flow Coefficient (cfm/inH2O^n) (based on ASHRAE HoF)
       inf_conv_factor = 776.25 # [ft/min]/[inH2O^(1/2)*ft^(3/2)/lbm^(1/2)]
