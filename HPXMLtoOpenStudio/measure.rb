@@ -593,7 +593,8 @@ class OSModel
         # Use equation fit from AHRI database
         # calculate independent variable SurfaceArea/vol(physically linear to standby_loss/skin_u under test condition) to fit the linear equation from AHRI database
         act_vol = Waterheater.calc_storage_tank_actual_vol(water_heating_system.tank_volume, nil)
-        surface_area = Waterheater.calc_tank_areas(act_vol)[0]
+        height = 4.0 # feet
+        surface_area = Waterheater.calc_tank_areas(act_vol, height)[0]
         sqft_by_gal = surface_area / act_vol # sqft/gal
         water_heating_system.standby_loss = (2.9721 * sqft_by_gal - 0.4732).round(3) # linear equation assuming a constant u, F/hr
       end
