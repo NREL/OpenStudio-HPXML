@@ -2040,9 +2040,9 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     arg.setDefaultValue(true)
     args << arg
 
-    arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('cooking_range_location', appliance_location_choices, true)
-    arg.setDisplayName('Cooking Range: Location')
-    arg.setDescription('The space type for the cooking range location.')
+    arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('cooking_range_oven_location', appliance_location_choices, true)
+    arg.setDisplayName('Cooking Range/Oven: Location')
+    arg.setDescription('The space type for the cooking range/oven location.')
     arg.setDefaultValue(Constants.Auto)
     args << arg
 
@@ -2432,7 +2432,7 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
              refrigerator_rated_annual_kwh: runner.getDoubleArgumentValue('refrigerator_rated_annual_kwh', user_arguments),
              refrigerator_usage_multiplier: runner.getDoubleArgumentValue('refrigerator_usage_multiplier', user_arguments),
              cooking_range_oven_present: runner.getBoolArgumentValue('cooking_range_oven_present', user_arguments),
-             cooking_range_location: runner.getStringArgumentValue('cooking_range_location', user_arguments),
+             cooking_range_oven_location: runner.getStringArgumentValue('cooking_range_oven_location', user_arguments),
              cooking_range_oven_fuel_type: runner.getStringArgumentValue('cooking_range_oven_fuel_type', user_arguments),
              cooking_range_oven_is_induction: runner.getStringArgumentValue('cooking_range_oven_is_induction', user_arguments),
              cooking_range_oven_is_convection: runner.getStringArgumentValue('cooking_range_oven_is_convection', user_arguments),
@@ -3916,8 +3916,8 @@ class HPXMLFile
   def self.set_cooking_range_oven(hpxml, runner, args)
     return unless args[:cooking_range_oven_present]
 
-    if args[:cooking_range_location] != Constants.Auto
-      location = args[:cooking_range_location]
+    if args[:cooking_range_oven_location] != Constants.Auto
+      location = args[:cooking_range_oven_location]
     end
 
     if args[:cooking_range_oven_usage_multiplier] != 1.0
