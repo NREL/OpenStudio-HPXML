@@ -4315,15 +4315,18 @@ end
 
 def to_float_or_nil(value)
   return if value.nil?
+
   return to_float(value)
 end
 
 def to_integer_or_nil(value)
   return if value.nil?
+
   return to_integer(value)
 end
 
 def to_bool_or_nil(value)
   return if value.nil?
+
   return to_boolean(value)
 end

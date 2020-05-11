@@ -277,7 +277,7 @@
                 </Ducts>
               </AirDistribution>
             </DistributionSystemType>
-            <ConditionedFloorAreaServed>2700.0</ConditionedFloorAreaServed>
+            <ConditionedFloorAreaServed>1350.0</ConditionedFloorAreaServed>
           </HVACDistribution>
         </HVAC>
         <WaterHeating>

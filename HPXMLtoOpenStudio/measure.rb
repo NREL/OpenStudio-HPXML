@@ -4198,6 +4198,7 @@ class OSModel
     # return if already exists
     model.getScheduleConstants.each do |sch|
       next unless sch.name.to_s == location
+
       return sch
     end
 
