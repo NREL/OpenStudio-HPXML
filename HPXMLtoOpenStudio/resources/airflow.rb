@@ -1147,6 +1147,7 @@ class Airflow
     elsif not vented_attic_const_ach.nil?
       ach = vented_attic_const_ach
       cfm = ach / UnitConversions.convert(1.0, 'hr', 'min') * volume
+      apply_infiltration_to_unconditioned_space(model, space, ach, nil, nil, nil)
     end
 
     # Store info for HVAC Sizing measure
