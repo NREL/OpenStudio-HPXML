@@ -75,13 +75,18 @@ def create_osws
     'base-dhw-uef.osw' => 'base.osw',
     'base-enclosure-2stories.osw' => 'base.osw',
     # 'base-enclosure-2stories-garage.osw' => 'base.osw',
-    # 'base-enclosure-adiabatic-surfaces.osw' => 'base.osw',
+    # 'base-enclosure-attached-multifamily.osw' => 'base.osw',
     'base-enclosure-beds-1.osw' => 'base.osw',
     'base-enclosure-beds-2.osw' => 'base.osw',
     'base-enclosure-beds-4.osw' => 'base.osw',
     'base-enclosure-beds-5.osw' => 'base.osw',
     # 'base-enclosure-garage.osw' => 'base.osw', TODO: should garage attic be of type garage or attic?
     'base-enclosure-infil-cfm50.osw' => 'base.osw',
+    'base-enclosure-infil-natural-ach.osw' => 'base.osw',
+    # 'base-enclosure-other-heated-space.osw' => 'base.osw',
+    # 'base-enclosure-other-housing-unit.osw' => 'base.osw',
+    # 'base-enclosure-other-multifamily-buffer-space.osw' => 'base.osw',
+    # 'base-enclosure-other-non-freezing-space.osw' => 'base.osw',
     'base-enclosure-overhangs.osw' => 'base.osw',
     # 'base-enclosure-skylights.osw' => 'base.osw', # There are no front roof surfaces, but 15.0 ft^2 of skylights were specified.
     # 'base-enclosure-split-surfaces.osw' => 'base.osw',
@@ -159,7 +164,6 @@ def create_osws
     'base-hvac-wall-furnace-elec-only.osw' => 'base.osw',
     'base-hvac-wall-furnace-propane-only.osw' => 'base.osw',
     'base-hvac-wall-furnace-wood-only.osw' => 'base.osw',
-    # 'base-infiltration-ach-natural.osw' => 'base.osw', # Not going to support constant ACH
     'base-location-baltimore-md.osw' => 'base.osw',
     'base-location-dallas-tx.osw' => 'base.osw',
     'base-location-duluth-mn.osw' => 'base.osw',
@@ -529,6 +533,7 @@ def get_values(osw_file, step)
     step.setArgument('clothes_dryer_control_type', HPXML::ClothesDryerControlTypeTimer)
     step.setArgument('clothes_dryer_usage_multiplier', 1.0)
     step.setArgument('dishwasher_present', true)
+    step.setArgument('dishwasher_location', HPXML::LocationLivingSpace)
     step.setArgument('dishwasher_efficiency_type', 'RatedAnnualkWh')
     step.setArgument('dishwasher_efficiency_kwh', 307)
     step.setArgument('dishwasher_efficiency_ef', 0.46)
@@ -543,6 +548,7 @@ def get_values(osw_file, step)
     step.setArgument('refrigerator_rated_annual_kwh', 650.0)
     step.setArgument('refrigerator_usage_multiplier', 1.0)
     step.setArgument('cooking_range_oven_present', true)
+    step.setArgument('cooking_range_location', HPXML::LocationLivingSpace)
     step.setArgument('cooking_range_oven_fuel_type', HPXML::FuelTypeElectricity)
     step.setArgument('cooking_range_oven_is_induction', false)
     step.setArgument('cooking_range_oven_is_convection', false)
@@ -905,21 +911,8 @@ def get_values(osw_file, step)
     step.setArgument('window_area_back', 216.0)
     step.setArgument('window_area_left', 144.0)
     step.setArgument('window_area_right', 144.0)
-  elsif ['base-enclosure-adiabatic-surfaces.osw'].include? osw_file
-    step.setArgument('geometry_unit_type', 'multifamily')
-    step.setArgument('geometry_cfa', 1350.0)
-    step.setArgument('geometry_num_units', 9)
-    step.setArgument('geometry_num_floors_above_grade', 3)
-    step.setArgument('geometry_level', 'Middle')
-    step.setArgument('geometry_horizontal_location', 'Middle')
-    step.setArgument('window_area_front', 37.8)
-    step.setArgument('window_area_back', 37.8)
-    step.setArgument('window_area_left', 25.2)
-    step.setArgument('window_area_right', 25.2)
-    step.setArgument('ducts_supply_leakage_value', 0)
-    step.setArgument('ducts_return_leakage_value', 0)
-    step.setArgument('ducts_supply_location', HPXML::LocationLivingSpace)
-    step.setArgument('ducts_return_location', HPXML::LocationLivingSpace)
+  elsif ['base-enclosure-attached-multifamily.osw'].include? osw_file
+
   elsif ['base-enclosure-beds-1.osw'].include? osw_file
     step.setArgument('geometry_num_bedrooms', 1)
     step.setArgument('geometry_num_occupants', '1')
@@ -951,6 +944,17 @@ def get_values(osw_file, step)
   elsif ['base-enclosure-infil-cfm50.osw'].include? osw_file
     step.setArgument('air_leakage_units', HPXML::UnitsCFM50)
     step.setArgument('air_leakage_value', 1080)
+  elsif ['base-enclosure-infil-natural-ach.osw'].include? osw_file
+    step.setArgument('air_leakage_units', HPXML::UnitsACHNatural)
+    step.setArgument('air_leakage_value', 0.67)
+  elsif ['base-enclosure-other-heated-space.osw'].include? osw_file
+
+  elsif ['base-enclosure-other-housing-unit.osw'].include? osw_file
+
+  elsif ['base-enclosure-other-multifamily-buffer-space.osw'].include? osw_file
+
+  elsif ['base-enclosure-other-non-freezing-space.osw'].include? osw_file
+
   elsif ['base-enclosure-overhangs.osw'].include? osw_file
     step.setArgument('overhangs_back_depth', 2.5)
     step.setArgument('overhangs_left_depth', 1.5)
