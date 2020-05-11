@@ -885,20 +885,16 @@ class Airflow
       duct_subroutine.addLine('  Set SupSensLkToLv = SupTotLkToLiv-SupLatLkToLv') # W
 
       # Supply conduction
-      supply_ua = UnitConversions.convert(ua_values[HPXML::DuctTypeSupply], 'Btu/(hr*F)', 'W/K')
-      duct_subroutine.addLine("  Set eTm = (Fan_RTF/(AH_MFR*air_cp))*#{supply_ua.round(3)}")
-      duct_subroutine.addLine('  Set eTm = 0-eTm')
+      duct_subroutine.addLine("  Set supply_ua = #{UnitConversions.convert(ua_values[HPXML::DuctTypeSupply], 'Btu/(hr*F)', 'W/K').round(3)}")
+      duct_subroutine.addLine('  Set eTm = 0-((Fan_RTF/(AH_MFR*air_cp))*supply_ua)')
       duct_subroutine.addLine('  Set t_sup = DZ_T+((AH_Tout-DZ_T)*(@Exp eTm))') # deg-C
-      duct_subroutine.addLine('  Set SupCondToLv = AH_MFR*air_cp*(t_sup-AH_Tout)') # W
-      duct_subroutine.addLine('  Set SupCondToDZ = 0-SupCondToLv') # W
+      duct_subroutine.addLine('  Set SupCondToLv = 0-(AH_MFR*air_cp*(t_sup-AH_Tout))') # W
 
       # Return conduction
-      return_ua = UnitConversions.convert(ua_values[HPXML::DuctTypeReturn], 'Btu/(hr*F)', 'W/K')
-      duct_subroutine.addLine("  Set eTm = (Fan_RTF/(AH_MFR*air_cp))*#{return_ua.round(3)}")
-      duct_subroutine.addLine('  Set eTm = 0-eTm')
+      duct_subroutine.addLine("  Set return_ua = #{UnitConversions.convert(ua_values[HPXML::DuctTypeReturn], 'Btu/(hr*F)', 'W/K').round(3)}")
+      duct_subroutine.addLine('  Set eTm = 0-((Fan_RTF/(AH_MFR*air_cp))*return_ua)')
       duct_subroutine.addLine('  Set t_ret = DZ_T+((RA_T-DZ_T)*(@Exp eTm))') # deg-C
-      duct_subroutine.addLine('  Set RetCondToRP = AH_MFR*air_cp*(t_ret-RA_T)') # W
-      duct_subroutine.addLine('  Set RetCondToDZ = 0-RetCondToRP') # W
+      duct_subroutine.addLine('  Set RetCondToRP = 0-(AH_MFR*air_cp*(t_ret-RA_T))') # W
 
       # Return leakage to return plenum
       duct_subroutine.addLine('  Set RetLatLkToRP = 0') # W
@@ -1614,6 +1610,7 @@ class Airflow
       infil_program.addLine('EndIf')
 
       # Create EMS output variables for CFIS tests
+      # TODO: Move to test file
 
       ems_output_var = OpenStudio::Model::EnergyManagementSystemOutputVariable.new(model, 'CFIS_fan_w')
       ems_output_var.setName("#{Constants.ObjectNameMechanicalVentilation} cfis fan power".gsub(' ', '_'))
@@ -1635,12 +1632,12 @@ class Airflow
     if vent_kitchen.nil?
       infil_program.addLine('Set Qrange = 0')
     else
-      infil_program.addLine("Set Qrange = #{range_sch_sensor.name}*#{UnitConversions.convert(vent_kitchen.rated_flow_rate, 'cfm', 'm^3/s').round(4)}")
+      infil_program.addLine("Set Qrange = #{UnitConversions.convert(vent_kitchen.rated_flow_rate, 'cfm', 'm^3/s').round(4)} * #{range_sch_sensor.name}")
     end
     if vent_bath.nil?
       infil_program.addLine('Set Qbath = 0')
     else
-      infil_program.addLine("Set Qbath = #{bath_sch_sensor.name}*#{UnitConversions.convert(vent_bath.rated_flow_rate * vent_bath.quantity, 'cfm', 'm^3/s').round(4)}")
+      infil_program.addLine("Set Qbath = #{UnitConversions.convert(vent_bath.rated_flow_rate * vent_bath.quantity, 'cfm', 'm^3/s').round(4)} * #{bath_sch_sensor.name}")
     end
     infil_program.addLine('Set QductsOut = 0')
     infil_program.addLine('Set QductsIn = 0')
@@ -1660,11 +1657,9 @@ class Airflow
     end
     infil_program.addLine('Set Qu = (@Abs (Qout-Qin))')
     if (not vent_mech.nil?) && (vent_mech.fan_type != HPXML::MechVentTypeCFIS)
-      if vent_mech_cfm > 0
-        infil_program.addLine("Set #{vent_mech_fan_actuator.name} = QWHV * #{vent_mech_fan_w} / #{UnitConversions.convert(vent_mech_cfm, 'cfm', 'm^3/s')}")
-      else
-        infil_program.addLine("Set #{vent_mech_fan_actuator.name} = #{vent_mech_fan_w}")
-      end
+      infil_program.addLine("Set #{vent_mech_fan_actuator.name} = #{vent_mech_fan_w}")
+    else
+      infil_program.addLine("Set #{vent_mech_fan_actuator.name} = 0")
     end
 
     infil_program.addLine('Set Q_tot_flow = (((Qu^2)+(Qn^2))^0.5)')
