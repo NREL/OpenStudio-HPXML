@@ -137,8 +137,12 @@ class HPXML < Object
   LocationOtherHousingUnit = 'other housing unit'
   LocationOtherHousingUnitAbove = 'other housing unit above'
   LocationOtherHousingUnitBelow = 'other housing unit below'
+  LocationOtherHeatedSpace = 'other heated space'
+  LocationOtherMultifamilyBufferSpace = 'other multifamily buffer space'
+  LocationOtherNonFreezingSpace = 'other non-freezing space'
   LocationOutside = 'outside'
   LocationRoof = 'roof'
+  LocationOther = 'other'
   MechVentTypeBalanced = 'balanced'
   MechVentTypeCFIS = 'central fan integrated supply'
   MechVentTypeERV = 'energy recovery ventilator'
@@ -2002,6 +2006,9 @@ class HPXML < Object
           fail "SummerShadingCoefficient (#{interior_shading_factor_summer}) must be less than or equal to WinterShadingCoefficient (#{interior_shading_factor_winter}) for window '#{@id}'."
         end
       end
+      if [HPXML::LocationOtherHeatedSpace, HPXML::LocationOtherMultifamilyBufferSpace, HPXML::LocationOtherNonFreezingSpace, HPXML::LocationOtherHousingUnit].include? wall.exterior_adjacent_to
+        fail "Window '#{@id}' cannot be adjacent to '#{wall.exterior_adjacent_to}'. Check parent wall: '#{wall.id}'."
+      end
 
       return errors
     end
@@ -3574,7 +3581,7 @@ class HPXML < Object
   end
 
   class Dishwasher < BaseElement
-    ATTRS = [:id, :energy_factor, :rated_annual_kwh, :place_setting_capacity,
+    ATTRS = [:id, :location, :energy_factor, :rated_annual_kwh, :place_setting_capacity,
              :label_electric_rate, :label_gas_rate, :label_annual_gas_cost,
              :label_usage, :usage_multiplier]
     attr_accessor(*ATTRS)
@@ -3595,6 +3602,7 @@ class HPXML < Object
       dishwasher = XMLHelper.add_element(appliances, 'Dishwasher')
       sys_id = XMLHelper.add_element(dishwasher, 'SystemIdentifier')
       XMLHelper.add_attribute(sys_id, 'id', @id)
+      XMLHelper.add_element(dishwasher, 'Location', @location) unless @location.nil?
       XMLHelper.add_element(dishwasher, 'RatedAnnualkWh', to_float(@rated_annual_kwh)) unless @rated_annual_kwh.nil?
       XMLHelper.add_element(dishwasher, 'EnergyFactor', to_float(@energy_factor)) unless @energy_factor.nil?
       XMLHelper.add_element(dishwasher, 'PlaceSettingCapacity', to_integer(@place_setting_capacity)) unless @place_setting_capacity.nil?
@@ -3610,6 +3618,7 @@ class HPXML < Object
       return if dishwasher.nil?
 
       @id = HPXML::get_id(dishwasher)
+      @location = XMLHelper.get_value(dishwasher, 'Location')
       @rated_annual_kwh = to_float_or_nil(XMLHelper.get_value(dishwasher, 'RatedAnnualkWh'))
       @energy_factor = to_float_or_nil(XMLHelper.get_value(dishwasher, 'EnergyFactor'))
       @place_setting_capacity = to_integer_or_nil(XMLHelper.get_value(dishwasher, 'PlaceSettingCapacity'))
@@ -3741,7 +3750,7 @@ class HPXML < Object
   end
 
   class CookingRange < BaseElement
-    ATTRS = [:id, :fuel_type, :is_induction, :usage_multiplier]
+    ATTRS = [:id, :location, :fuel_type, :is_induction, :usage_multiplier]
     attr_accessor(*ATTRS)
 
     def delete
@@ -3760,6 +3769,7 @@ class HPXML < Object
       cooking_range = XMLHelper.add_element(appliances, 'CookingRange')
       sys_id = XMLHelper.add_element(cooking_range, 'SystemIdentifier')
       XMLHelper.add_attribute(sys_id, 'id', @id)
+      XMLHelper.add_element(cooking_range, 'Location', @location) unless @location.nil?
       XMLHelper.add_element(cooking_range, 'FuelType', @fuel_type) unless @fuel_type.nil?
       XMLHelper.add_element(cooking_range, 'IsInduction', to_boolean(@is_induction)) unless @is_induction.nil?
       HPXML::add_extension(parent: cooking_range,
@@ -3770,6 +3780,7 @@ class HPXML < Object
       return if cooking_range.nil?
 
       @id = HPXML::get_id(cooking_range)
+      @location = XMLHelper.get_value(cooking_range, 'Location')
       @fuel_type = XMLHelper.get_value(cooking_range, 'FuelType')
       @is_induction = to_bool_or_nil(XMLHelper.get_value(cooking_range, 'IsInduction'))
       @usage_multiplier = to_float_or_nil(XMLHelper.get_value(cooking_range, 'extension/UsageMultiplier'))
