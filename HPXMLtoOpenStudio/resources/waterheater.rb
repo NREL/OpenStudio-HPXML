@@ -787,9 +787,8 @@ class Waterheater
       if water_heating_system.standby_loss > 10.0
         runner.registerWarning('Indirect water heater standby loss is over 10.0 F/hr, double check water heater inputs.')
       end
-      height = 4.0 # feet
       act_vol = calc_storage_tank_actual_vol(water_heating_system.tank_volume, nil)
-      a_side = calc_tank_areas(act_vol, height)[1]
+      a_side = calc_tank_areas(act_vol)[1]
       ua = calc_indirect_ua_with_standbyloss(act_vol, water_heating_system, a_side, solar_fraction)
     else
       tank_type = HPXML::WaterHeaterTypeTankless
@@ -1158,13 +1157,20 @@ class Waterheater
     fail 'Unexpected water heater.'
   end
 
-  def self.calc_tank_areas(act_vol, height)
+  def self.calc_tank_areas(act_vol, height = nil)
+    if height.nil?
+      height = get_tank_height()
+    end
     diameter = 2.0 * (UnitConversions.convert(act_vol, 'gal', 'ft^3') / (height * Math::PI))**0.5 # feet
     a_top = Math::PI * diameter**2.0 / 4.0 # sqft
     a_side = Math::PI * diameter * height # sqft
     surface_area = 2.0 * a_top + a_side # sqft
 
     return surface_area, a_side
+  end
+
+  def self.get_tank_height()
+    return 4.0 # feet
   end
 
   def self.calc_indirect_ua_with_standbyloss(act_vol, water_heating_system, a_side, solar_fraction)
@@ -1388,8 +1394,7 @@ class Waterheater
       t_in = 58.0 # F
       t_env = 67.5 # F
       q_load = draw_mass * cp * (t - t_in) # Btu/day
-      height = 4.0 # feet
-      surface_area, a_side = calc_tank_areas(act_vol, height)
+      surface_area, a_side = calc_tank_areas(act_vol)
       if water_heating_system.fuel_type != HPXML::FuelTypeElectricity
         ua = (water_heating_system.recovery_efficiency / water_heating_system.energy_factor - 1.0) / ((t - t_env) * (24.0 / q_load - 1.0 / (1000.0 * pow * water_heating_system.energy_factor))) # Btu/hr-F
         eta_c = (water_heating_system.recovery_efficiency + ua * (t - t_env) / (1000 * pow)) # conversion efficiency is supposed to be calculated with initial tank ua
