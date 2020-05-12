@@ -848,6 +848,115 @@ class HPXMLtoOpenStudioTest < MiniTest::Test
     assert_in_epsilon(cop, coil.ratedCOP, 0.001)
   end
 
+  def test_tank_jacket
+    args_hash = {}
+    args_hash['hpxml_path'] = File.absolute_path(File.join(sample_files_dir, 'base-dhw-jacket-electric.xml'))
+    model, hpxml = _test_measure(args_hash)
+
+    # Get HPXML values
+    water_heating_system = hpxml.water_heating_systems[0]
+    # Expected value
+    tank_volume = UnitConversions.convert(water_heating_system.tank_volume * 0.9, 'gal', 'm^3') # convert to actual volume
+    cap = UnitConversions.convert(water_heating_system.heating_capacity / 1000.0, 'kBtu/hr', 'W')
+    fuel = 'electricity'
+    ua = UnitConversions.convert(0.6415, 'Btu/(hr*F)', 'W/K')
+    t_set = UnitConversions.convert(water_heating_system.temperature, 'F', 'C') + 1 # setpoint + 1/2 deadband
+    ther_eff = 1.0
+    loc = 'living space'
+
+    # Check water heater
+    assert_equal(1, model.getWaterHeaterMixeds.size)
+    wh = model.getWaterHeaterMixeds[0]
+    assert_equal(fuel, wh.heaterFuelType)
+    assert_equal(loc, wh.ambientTemperatureThermalZone.get.name.get)
+    assert_in_epsilon(tank_volume, wh.tankVolume.get, 0.001)
+    assert_in_epsilon(cap, wh.heaterMaximumCapacity.get, 0.001)
+    assert_in_epsilon(ua, wh.onCycleLossCoefficienttoAmbientTemperature.get, 0.001)
+    assert_in_epsilon(ua, wh.offCycleLossCoefficienttoAmbientTemperature.get, 0.001)
+    assert_in_epsilon(t_set, wh.setpointTemperatureSchedule.get.to_ScheduleConstant.get.value, 0.001)
+    assert_in_epsilon(ther_eff, wh.heaterThermalEfficiency.get, 0.001)
+  end
+
+  def test_recirc_demand
+    args_hash = {}
+    args_hash['hpxml_path'] = File.absolute_path(File.join(sample_files_dir, 'base-dhw-recirc-demand.xml'))
+    model, hpxml = _test_measure(args_hash)
+
+    # Get HPXML values
+    hot_water_distribution = hpxml.hot_water_distributions[0]
+    sch_max = 0.081
+    sch_sum = 0.999
+    pump_design_level = 0.15 * hot_water_distribution.recirculation_pump_power / 365.0 * sch_max * 1000 * (1 / sch_sum)
+
+    pump_ee_def = model.getElectricEquipmentDefinitions.select { |ee_def| ee_def.name.get.include? 'dhw recirc pump' }
+    assert_equal(1, pump_ee_def.size)
+    assert_in_epsilon(pump_design_level, pump_ee_def[0].designLevel.get, 0.001)
+  end
+
+  def test_recirc_manual
+    args_hash = {}
+    args_hash['hpxml_path'] = File.absolute_path(File.join(sample_files_dir, 'base-dhw-recirc-manual.xml'))
+    model, hpxml = _test_measure(args_hash)
+
+    # Get HPXML values
+    hot_water_distribution = hpxml.hot_water_distributions[0]
+    sch_max = 0.081
+    sch_sum = 0.999
+    pump_design_level = 0.10 * hot_water_distribution.recirculation_pump_power / 365.0 * sch_max * 1000 * (1 / sch_sum)
+
+    pump_ee_def = model.getElectricEquipmentDefinitions.select { |ee_def| ee_def.name.get.include? 'dhw recirc pump' }
+    assert_equal(1, pump_ee_def.size)
+    assert_in_epsilon(pump_design_level, pump_ee_def[0].designLevel.get, 0.001)
+  end
+
+  def test_recirc_no_control
+    args_hash = {}
+    args_hash['hpxml_path'] = File.absolute_path(File.join(sample_files_dir, 'base-dhw-recirc-nocontrol.xml'))
+    model, hpxml = _test_measure(args_hash)
+
+    # Get HPXML values
+    hot_water_distribution = hpxml.hot_water_distributions[0]
+    sch_max = 0.081
+    sch_sum = 0.999
+    pump_design_level = 8.76 * hot_water_distribution.recirculation_pump_power / 365.0 * sch_max * 1000 * (1 / sch_sum)
+
+    pump_ee_def = model.getElectricEquipmentDefinitions.select { |ee_def| ee_def.name.get.include? 'dhw recirc pump' }
+    assert_equal(1, pump_ee_def.size)
+    assert_in_epsilon(pump_design_level, pump_ee_def[0].designLevel.get, 0.001)
+  end
+
+  def test_recirc_timer
+    args_hash = {}
+    args_hash['hpxml_path'] = File.absolute_path(File.join(sample_files_dir, 'base-dhw-recirc-timer.xml'))
+    model, hpxml = _test_measure(args_hash)
+
+    # Get HPXML values
+    hot_water_distribution = hpxml.hot_water_distributions[0]
+    sch_max = 0.081
+    sch_sum = 0.999
+    pump_design_level = 8.76 * hot_water_distribution.recirculation_pump_power / 365.0 * sch_max * 1000 * (1 / sch_sum)
+
+    pump_ee_def = model.getElectricEquipmentDefinitions.select { |ee_def| ee_def.name.get.include? 'dhw recirc pump' }
+    assert_equal(1, pump_ee_def.size)
+    assert_in_epsilon(pump_design_level, pump_ee_def[0].designLevel.get, 0.001)
+  end
+
+  def test_recirc_temp
+    args_hash = {}
+    args_hash['hpxml_path'] = File.absolute_path(File.join(sample_files_dir, 'base-dhw-recirc-temperature.xml'))
+    model, hpxml = _test_measure(args_hash)
+
+    # Get HPXML values
+    hot_water_distribution = hpxml.hot_water_distributions[0]
+    sch_max = 0.081
+    sch_sum = 0.999
+    pump_design_level = 1.46 * hot_water_distribution.recirculation_pump_power / 365.0 * sch_max * 1000 * (1 / sch_sum)
+
+    pump_ee_def = model.getElectricEquipmentDefinitions.select { |ee_def| ee_def.name.get.include? 'dhw recirc pump' }
+    assert_equal(1, pump_ee_def.size)
+    assert_in_epsilon(pump_design_level, pump_ee_def[0].designLevel.get, 0.001)
+  end
+
   def _test_measure(args_hash)
     # create an instance of the measure
     measure = HPXMLtoOpenStudio.new

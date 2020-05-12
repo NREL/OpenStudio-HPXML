@@ -284,7 +284,7 @@ class Waterheater
     else
       tank_ua = 4.7 # Btu/h-R
     end
-    tank_ua = apply_tank_jacket(water_heating_system.jacket_r_value, water_heating_system.energy_factor, HPXML::FuelTypeElectricity, tank_ua, a_side)
+    tank_ua = apply_tank_jacket(water_heating_system, tank_ua, a_side)
     u_tank = ((5.678 * tank_ua) / a_tank) * (1.0 - solar_fraction)
 
     h_UE = (1.0 - (3.5 / 12.0)) * h_tank # in the 3rd node of the tank (counting from top)
@@ -1185,7 +1185,7 @@ class Waterheater
     ua = q / (t_tank_avg - t_amb) # Btu/hr-F
 
     # jacket
-    ua = apply_tank_jacket(water_heating_system.jacket_r_value, nil, nil, ua, a_side)
+    ua = apply_tank_jacket(water_heating_system, ua, a_side)
 
     ua *= (1.0 - solar_fraction)
     return ua
@@ -1402,7 +1402,7 @@ class Waterheater
         ua = q_load * (1.0 / water_heating_system.energy_factor - 1.0) / ((t - t_env) * 24.0)
         eta_c = 1.0
       end
-      ua = apply_tank_jacket(water_heating_system.jacket_r_value, water_heating_system.energy_factor, water_heating_system.fuel_type, ua, a_side)
+      ua = apply_tank_jacket(water_heating_system, ua, a_side)
     end
     ua *= (1.0 - solar_fraction)
     u = ua / surface_area # Btu/hr-ft^2-F
@@ -1416,13 +1416,13 @@ class Waterheater
     return u, ua, eta_c
   end
 
-  def self.apply_tank_jacket(jacket_r, ef, fuel, ua_pre, a_side)
-    if not jacket_r.nil?
+  def self.apply_tank_jacket(water_heating_system, ua_pre, a_side)
+    if not water_heating_system.jacket_r_value.nil?
       skin_insulation_R = 5.0 # R5
-      if fuel.nil? # indirect water heater, etc. Assume 2 inch skin insulation
+      if water_heating_system.fuel_type.nil? # indirect water heater, etc. Assume 2 inch skin insulation
         skin_insulation_t = 2.0 # inch
-      elsif fuel != HPXML::FuelTypeElectricity
-        if ef < 0.7
+      elsif water_heating_system.fuel_type != HPXML::FuelTypeElectricity
+        if water_heating_system.energy_factor < 0.7
           skin_insulation_t = 1.0 # inch
         else
           skin_insulation_t = 2.0 # inch
@@ -1434,7 +1434,7 @@ class Waterheater
       # Modeling Water Heat Wraps in BEopt DRAFT Technical Note
       # Authors:  Ben Polly and Jay Burch (NREL)
       u_pre_skin = 1.0 / (skin_insulation_t * skin_insulation_R + 1.0 / 1.3 + 1.0 / 52.8) # Btu/hr-ft^2-F = (1 / hout + kins / tins + t / hin)^-1
-      ua = ua_pre - jacket_r / (1.0 / u_pre_skin + jacket_r) * u_pre_skin * a_side
+      ua = ua_pre - water_heating_system.jacket_r_value / (1.0 / u_pre_skin + water_heating_system.jacket_r_value) * u_pre_skin * a_side
     else
       ua = ua_pre
     end
