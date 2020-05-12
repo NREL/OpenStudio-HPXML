@@ -38,8 +38,10 @@ def create_hpxmls
     'invalid_files/cfis-with-hydronic-distribution.xml' => 'base-hvac-boiler-gas-only.xml',
     'invalid_files/clothes-washer-location.xml' => 'base.xml',
     'invalid_files/clothes-dryer-location.xml' => 'base.xml',
+    'invalid_files/cooking-range-location.xml' => 'base.xml',
     'invalid_files/appliances-location-unconditioned-space.xml' => 'base.xml',
     'invalid_files/dhw-frac-load-served.xml' => 'base-dhw-multiple.xml',
+    'invalid_files/dishwasher-location.xml' => 'base.xml',
     'invalid_files/duct-location.xml' => 'base.xml',
     'invalid_files/duct-location-unconditioned-space.xml' => 'base.xml',
     'invalid_files/duplicate-id.xml' => 'base.xml',
@@ -3693,6 +3695,13 @@ def set_hpxml_dishwasher(hpxml_file, hpxml)
     hpxml.dishwashers[0].location = HPXML::LocationOther
   elsif ['base-appliances-none.xml'].include? hpxml_file
     hpxml.dishwashers.clear
+  elsif ['base-foundation-unconditioned-basement.xml'].include? hpxml_file
+    hpxml.dishwashers[0].location = HPXML::LocationBasementUnconditioned
+  elsif ['base-atticroof-conditioned.xml'].include? hpxml_file
+    hpxml.dishwashers[0].location = HPXML::LocationBasementConditioned
+  elsif ['base-enclosure-garage.xml',
+         'invalid_files/dishwasher-location.xml'].include? hpxml_file
+    hpxml.dishwashers[0].location = HPXML::LocationGarage
   elsif ['invalid_files/appliances-location-unconditioned-space.xml'].include? hpxml_file
     hpxml.dishwashers[0].location = 'unconditioned space'
   elsif ['base-misc-defaults.xml'].include? hpxml_file
@@ -3780,6 +3789,13 @@ def set_hpxml_cooking_range(hpxml_file, hpxml)
   elsif ['base-appliances-wood.xml'].include? hpxml_file
     hpxml.cooking_ranges[0].fuel_type = HPXML::FuelTypeWood
     hpxml.cooking_ranges[0].is_induction = false
+  elsif ['base-foundation-unconditioned-basement.xml'].include? hpxml_file
+    hpxml.cooking_ranges[0].location = HPXML::LocationBasementUnconditioned
+  elsif ['base-atticroof-conditioned.xml'].include? hpxml_file
+    hpxml.cooking_ranges[0].location = HPXML::LocationBasementConditioned
+  elsif ['base-enclosure-garage.xml',
+         'invalid_files/cooking-range-location.xml'].include? hpxml_file
+    hpxml.cooking_ranges[0].location = HPXML::LocationGarage
   elsif ['invalid_files/appliances-location-unconditioned-space.xml'].include? hpxml_file
     hpxml.cooking_ranges[0].location = 'unconditioned space'
   elsif ['base-misc-defaults.xml'].include? hpxml_file
