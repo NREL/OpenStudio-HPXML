@@ -331,39 +331,25 @@
           <HVACDistribution>
             <SystemIdentifier id='HVACDistribution'/>
             <DistributionSystemType>
-              <AirDistribution>
-                <DuctLeakageMeasurement>
-                  <DuctType>supply</DuctType>
-                  <DuctLeakage>
-                    <Units>CFM25</Units>
-                    <Value>75.0</Value>
-                    <TotalOrToOutside>to outside</TotalOrToOutside>
-                  </DuctLeakage>
-                </DuctLeakageMeasurement>
-                <DuctLeakageMeasurement>
-                  <DuctType>return</DuctType>
-                  <DuctLeakage>
-                    <Units>CFM25</Units>
-                    <Value>25.0</Value>
-                    <TotalOrToOutside>to outside</TotalOrToOutside>
-                  </DuctLeakage>
-                </DuctLeakageMeasurement>
-                <Ducts>
-                  <DuctType>supply</DuctType>
-                  <DuctInsulationRValue>4.0</DuctInsulationRValue>
-                  <DuctLocation>attic - unvented</DuctLocation>
-                  <DuctSurfaceArea>150.0</DuctSurfaceArea>
-                </Ducts>
-                <Ducts>
-                  <DuctType>return</DuctType>
-                  <DuctInsulationRValue>0.0</DuctInsulationRValue>
-                  <DuctLocation>attic - unvented</DuctLocation>
-                  <DuctSurfaceArea>50.0</DuctSurfaceArea>
-                </Ducts>
-              </AirDistribution>
+              <Other>DSE</Other>
             </DistributionSystemType>
+            <AnnualHeatingDistributionSystemEfficiency>0.8</AnnualHeatingDistributionSystemEfficiency>
+            <AnnualCoolingDistributionSystemEfficiency>0.7</AnnualCoolingDistributionSystemEfficiency>
           </HVACDistribution>
         </HVAC>
+        <MechanicalVentilation>
+          <VentilationFans>
+            <VentilationFan>
+              <SystemIdentifier id='MechanicalVentilation'/>
+              <FanType>central fan integrated supply</FanType>
+              <TestedFlowRate>330.0</TestedFlowRate>
+              <HoursInOperation>8.0</HoursInOperation>
+              <UsedForWholeBuildingVentilation>true</UsedForWholeBuildingVentilation>
+              <FanPower>300.0</FanPower>
+              <AttachedToHVACDistributionSystem idref='HVACDistribution'/>
+            </VentilationFan>
+          </VentilationFans>
+        </MechanicalVentilation>
         <WaterHeating>
           <WaterHeatingSystem>
             <SystemIdentifier id='WaterHeater'/>
@@ -414,9 +400,9 @@
         <ClothesDryer>
           <SystemIdentifier id='ClothesDryer'/>
           <Location>living space</Location>
-          <FuelType>fuel oil</FuelType>
-          <CombinedEnergyFactor>3.3</CombinedEnergyFactor>
-          <ControlType>moisture</ControlType>
+          <FuelType>electricity</FuelType>
+          <CombinedEnergyFactor>3.73</CombinedEnergyFactor>
+          <ControlType>timer</ControlType>
         </ClothesDryer>
         <Dishwasher>
           <SystemIdentifier id='Dishwasher'/>
@@ -436,7 +422,7 @@
         <CookingRange>
           <SystemIdentifier id='Range'/>
           <Location>living space</Location>
-          <FuelType>fuel oil</FuelType>
+          <FuelType>electricity</FuelType>
           <IsInduction>false</IsInduction>
         </CookingRange>
         <Oven>

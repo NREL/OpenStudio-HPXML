@@ -258,6 +258,7 @@ def create_hpxmls
     'base-location-epw-filepath-AMY-2012.xml' => 'base.xml',
     'base-mechvent-balanced.xml' => 'base.xml',
     'base-mechvent-cfis.xml' => 'base.xml',
+    'base-mechvent-cfis-dse.xml' => 'base-hvac-dse.xml',
     'base-mechvent-cfis-evap-cooler-only-ducted.xml' => 'base-hvac-evap-cooler-only-ducted.xml',
     'base-mechvent-erv.xml' => 'base.xml',
     'base-mechvent-erv-atre-asre.xml' => 'base.xml',
@@ -457,8 +458,11 @@ end
 def set_hpxml_site(hpxml_file, hpxml)
   if ['base.xml'].include? hpxml_file
     hpxml.site.fuels = [HPXML::FuelTypeElectricity, HPXML::FuelTypeNaturalGas]
+    hpxml.site.site_type = HPXML::SiteTypeSuburban
   elsif ['base-hvac-none-no-fuel-access.xml'].include? hpxml_file
     hpxml.site.fuels = [HPXML::FuelTypeElectricity]
+  elsif ['base-misc-defaults.xml'].include? hpxml_file
+    hpxml.site.site_type = nil
   end
 end
 
@@ -3062,6 +3066,7 @@ def set_hpxml_ventilation_fans(hpxml_file, hpxml)
   elsif ['invalid_files/unattached-cfis.xml',
          'invalid_files/cfis-with-hydronic-distribution.xml',
          'base-mechvent-cfis.xml',
+         'base-mechvent-cfis-dse.xml',
          'base-mechvent-cfis-evap-cooler-only-ducted.xml'].include? hpxml_file
     hpxml.ventilation_fans.add(id: 'MechanicalVentilation',
                                fan_type: HPXML::MechVentTypeCFIS,
