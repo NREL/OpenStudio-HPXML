@@ -2389,8 +2389,6 @@ class OSModel
 
         ec_adj = HotWaterAndAppliances.get_dist_energy_consumption_adjustment(@has_uncond_bsmnt, @cfa, @ncfl, hot_water_distribution)
 
-        runner.registerInfo("EC_adj=#{ec_adj}") # Pass value to tests
-
         dhw_load_frac = water_heating_system.fraction_dhw_load_served * (1.0 - solar_fraction)
 
         @dhw_map[water_heating_system.id] = []
