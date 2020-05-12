@@ -1065,7 +1065,7 @@ class Airflow
 
     space = @spaces[HPXML::LocationGarage]
     area = UnitConversions.convert(space.floorArea, 'm^2', 'ft^2')
-    volume = UnitConversions.convert(space.volume, 'm^3', 'ft^3')
+    volume = Geometry.get_zone_volume(space.thermalZone.get)
     hor_lk_frac = 0.4
     neutral_level = 0.5
     sla = get_infiltration_SLA_from_ACH50(ach50, 0.65, area, volume)
