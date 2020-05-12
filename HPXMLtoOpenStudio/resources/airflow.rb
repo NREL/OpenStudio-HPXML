@@ -431,6 +431,8 @@ class Airflow
 
     cfis_sys_ids = vent_mech.distribution_system.hvac_systems.map { |system| system.id }
 
+    @cfis_airloop = nil
+
     # Get AirLoopHVACs associated with these HVAC systems
     hvac_map.each do |sys_id, hvacs|
       next unless cfis_sys_ids.include? sys_id
@@ -1608,23 +1610,6 @@ class Airflow
       infil_program.addLine('  Set QWHV = 0')
       infil_program.addLine("  Set #{vent_mech_fan_actuator.name} = 0")
       infil_program.addLine('EndIf')
-
-      # Create EMS output variables for CFIS tests
-      # TODO: Move to test file
-
-      ems_output_var = OpenStudio::Model::EnergyManagementSystemOutputVariable.new(model, 'CFIS_fan_w')
-      ems_output_var.setName("#{Constants.ObjectNameMechanicalVentilation} cfis fan power".gsub(' ', '_'))
-      ems_output_var.setTypeOfDataInVariable('Averaged')
-      ems_output_var.setUpdateFrequency('ZoneTimestep')
-      ems_output_var.setEMSProgramOrSubroutineName(infil_program)
-      ems_output_var.setUnits('W')
-
-      ems_output_var = OpenStudio::Model::EnergyManagementSystemOutputVariable.new(model, 'QWHV')
-      ems_output_var.setName("#{Constants.ObjectNameMechanicalVentilation} cfis flow rate".gsub(' ', '_'))
-      ems_output_var.setTypeOfDataInVariable('Averaged')
-      ems_output_var.setUpdateFrequency('ZoneTimestep')
-      ems_output_var.setEMSProgramOrSubroutineName(infil_program)
-      ems_output_var.setUnits('m3/s')
     else
       infil_program.addLine("Set QWHV = #{UnitConversions.convert(vent_mech_cfm.to_f, 'cfm', 'm^3/s').round(4)}")
     end
@@ -1658,7 +1643,7 @@ class Airflow
     infil_program.addLine('Set Qu = (@Abs (Qout-Qin))')
     if (not vent_mech.nil?) && (vent_mech.fan_type != HPXML::MechVentTypeCFIS)
       infil_program.addLine("Set #{vent_mech_fan_actuator.name} = #{vent_mech_fan_w}")
-    else
+    elsif vent_mech.nil?
       infil_program.addLine("Set #{vent_mech_fan_actuator.name} = 0")
     end
 
