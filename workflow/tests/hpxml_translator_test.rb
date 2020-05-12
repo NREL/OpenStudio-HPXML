@@ -354,13 +354,35 @@ class HPXMLTest < MiniTest::Test
     end
 
     # Add output variables for CFIS tests
-    @cfis_fan_power_output_var = OpenStudio::Model::OutputVariable.new("#{Constants.ObjectNameMechanicalVentilation} cfis fan power".gsub(' ', '_'), model)
-    @cfis_fan_power_output_var.setReportingFrequency('runperiod')
-    @cfis_fan_power_output_var.setKeyValue('EMS')
+    if xml.include? 'cfis'
+      infil_program = nil
+      model.getEnergyManagementSystemPrograms.each do |ems_program|
+        next unless ems_program.name.to_s.start_with? Constants.ObjectNameInfiltration
+        infil_program = ems_program
+      end
 
-    @cfis_flow_rate_output_var = OpenStudio::Model::OutputVariable.new("#{Constants.ObjectNameMechanicalVentilation} cfis flow rate".gsub(' ', '_'), model)
-    @cfis_flow_rate_output_var.setReportingFrequency('runperiod')
-    @cfis_flow_rate_output_var.setKeyValue('EMS')
+      ems_output_var = OpenStudio::Model::EnergyManagementSystemOutputVariable.new(model, 'CFIS_fan_w')
+      ems_output_var.setName("#{Constants.ObjectNameMechanicalVentilation} cfis fan power".gsub(' ', '_'))
+      ems_output_var.setTypeOfDataInVariable('Averaged')
+      ems_output_var.setUpdateFrequency('ZoneTimestep')
+      ems_output_var.setEMSProgramOrSubroutineName(infil_program)
+      ems_output_var.setUnits('W')
+
+      @cfis_fan_power_output_var = OpenStudio::Model::OutputVariable.new(ems_output_var.name.to_s, model)
+      @cfis_fan_power_output_var.setReportingFrequency('runperiod')
+      @cfis_fan_power_output_var.setKeyValue('EMS')
+
+      ems_output_var = OpenStudio::Model::EnergyManagementSystemOutputVariable.new(model, 'QWHV')
+      ems_output_var.setName("#{Constants.ObjectNameMechanicalVentilation} cfis flow rate".gsub(' ', '_'))
+      ems_output_var.setTypeOfDataInVariable('Averaged')
+      ems_output_var.setUpdateFrequency('ZoneTimestep')
+      ems_output_var.setEMSProgramOrSubroutineName(infil_program)
+      ems_output_var.setUnits('m3/s')
+
+      @cfis_flow_rate_output_var = OpenStudio::Model::OutputVariable.new(ems_output_var.name.to_s, model)
+      @cfis_flow_rate_output_var.setReportingFrequency('runperiod')
+      @cfis_flow_rate_output_var.setKeyValue('EMS')
+    end
 
     # Add output variables for combi system energy check
     output_var = OpenStudio::Model::OutputVariable.new('Water Heater Source Side Heat Transfer Energy', model)
@@ -414,6 +436,7 @@ class HPXMLTest < MiniTest::Test
       end
     end
 
+    show_output(runner.result) unless success
     assert_equal(true, success)
 
     annual_csv_path = File.join(rundir, 'results_annual.csv')
