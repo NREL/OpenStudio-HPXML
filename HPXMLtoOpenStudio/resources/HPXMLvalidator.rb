@@ -2,638 +2,418 @@ require 'json'
 require 'tree'
 require 'rexml/xpath'
 require 'rexml/document'
+require 'nokogiri'
 
 class HPXMLValidator
-  def self.run_validator()
-    # A hash of hashes that defines the XML elements used by the EnergyPlus HPXML Use Case.
-    #
-    # Example:
-    #
-    # use_case = {
-    #     nil => {
-    #         'floor_area' => one,            # 1 element required always
-    #         'garage_area' => zero_or_one,   # 0 or 1 elements required always
-    #         'walls' => one_or_more,         # 1 or more elements required always
-    #     },
-    #     '/walls' => {
-    #         'rvalue' => one,                # 1 element required if /walls element exists (conditional)
-    #         'windows' => zero_or_one,       # 0 or 1 elements required if /walls element exists (conditional)
-    #         'layers' => one_or_more,        # 1 or more elements required if /walls element exists (conditional)
-    #     }
-    # }
-    #
-
-    zero = [0]
-    zero_or_one = [0, 1]
-    zero_or_two = [0, 2]
-    zero_or_three = [0, 3]
-    zero_or_four = [0, 4]
-    zero_or_five = [0, 5]
-    zero_or_six = [0, 6]
-    zero_or_seven = [0, 7]
-    zero_or_more = nil
-    one = [1]
-    one_or_more = []
-
-    requirements = {
-
-      # Root
-      nil => {
-        '/HPXML/XMLTransactionHeaderInformation/XMLType' => one, # Required by HPXML schema
-        '/HPXML/XMLTransactionHeaderInformation/XMLGeneratedBy' => one, # Required by HPXML schema
-        '/HPXML/XMLTransactionHeaderInformation/CreatedDateAndTime' => one, # Required by HPXML schema
-        '/HPXML/XMLTransactionHeaderInformation/Transaction' => one, # Required by HPXML schema
-        '/HPXML/SoftwareInfo/extension/SimulationControl' => zero_or_one, # See [SimulationControl]
-
-        '/HPXML/Building' => one,
-        '/HPXML/Building/BuildingID' => one, # Required by HPXML schema
-        '/HPXML/Building/ProjectStatus/EventType' => one, # Required by HPXML schema
-
-        '/HPXML/Building/BuildingDetails/BuildingSummary/Site/extension/ShelterCoefficient' => zero_or_one, # Uses ERI assumption if not provided
-        '/HPXML/Building/BuildingDetails/BuildingSummary/BuildingOccupancy/NumberofResidents' => zero_or_one, # Uses ERI assumption if not provided
-        '/HPXML/Building/BuildingDetails/BuildingSummary/BuildingConstruction' => one, # See [BuildingConstruction]
-        '/HPXML/Building/BuildingDetails/BuildingSummary/Site/extension/Neighbors' => zero_or_one, # See [Neighbors]
-
-        '/HPXML/Building/BuildingDetails/ClimateandRiskZones/ClimateZoneIECC' => zero_or_one, # See [ClimateZone]
-        '/HPXML/Building/BuildingDetails/ClimateandRiskZones/WeatherStation' => one, # See [WeatherStation]
-
-        '/HPXML/Building/BuildingDetails/Enclosure/AirInfiltration/AirInfiltrationMeasurement/extension/ConstantACHnatural' => one,
-
-        '/HPXML/Building/BuildingDetails/Enclosure/Roofs/Roof' => zero_or_more, # See [Roof]
-        '/HPXML/Building/BuildingDetails/Enclosure/Walls/Wall' => one_or_more, # See [Wall]
-        '/HPXML/Building/BuildingDetails/Enclosure/RimJoists/RimJoist' => zero_or_more, # See [RimJoist]
-        '/HPXML/Building/BuildingDetails/Enclosure/FoundationWalls/FoundationWall' => zero_or_more, # See [FoundationWall]
-        '/HPXML/Building/BuildingDetails/Enclosure/FrameFloors/FrameFloor' => zero_or_more, # See [FrameFloor]
-        '/HPXML/Building/BuildingDetails/Enclosure/Slabs/Slab' => zero_or_more, # See [Slab]
-        '/HPXML/Building/BuildingDetails/Enclosure/Windows/Window' => zero_or_more, # See [Window]
-        '/HPXML/Building/BuildingDetails/Enclosure/Skylights/Skylight' => zero_or_more, # See [Skylight]
-        '/HPXML/Building/BuildingDetails/Enclosure/Doors/Door' => zero_or_more, # See [Door]
-
-        '/HPXML/Building/BuildingDetails/Systems/HVAC/HVACPlant/HeatingSystem' => zero_or_more, # See [HeatingSystem]
-        '/HPXML/Building/BuildingDetails/Systems/HVAC/HVACPlant/CoolingSystem' => zero_or_more, # See [CoolingSystem]
-        '/HPXML/Building/BuildingDetails/Systems/HVAC/HVACPlant/HeatPump' => zero_or_more, # See [HeatPump]
-        '/HPXML/Building/BuildingDetails/Systems/HVAC/HVACControl' => zero_or_one, # See [HVACControl]
-        '/HPXML/Building/BuildingDetails/Systems/HVAC/HVACDistribution' => zero_or_more, # See [HVACDistribution]
-
-        '/HPXML/Building/BuildingDetails/Systems/MechanicalVentilation/VentilationFans/VentilationFan[UsedForWholeBuildingVentilation="true"]' => zero_or_one, # See [MechanicalVentilation]
-        '/HPXML/Building/BuildingDetails/Systems/MechanicalVentilation/VentilationFans/VentilationFan[UsedForSeasonalCoolingLoadReduction="true"]' => zero_or_one, # See [WholeHouseFan]
-        '/HPXML/Building/BuildingDetails/Systems/WaterHeating/WaterHeatingSystem' => zero_or_more, # See [WaterHeatingSystem]
-        '/HPXML/Building/BuildingDetails/Systems/WaterHeating/HotWaterDistribution' => zero_or_one, # See [HotWaterDistribution]
-        '/HPXML/Building/BuildingDetails/Systems/WaterHeating/WaterFixture' => zero_or_more, # See [WaterFixture]
-        '/HPXML/Building/BuildingDetails/Systems/SolarThermal/SolarThermalSystem' => zero_or_one, # See [SolarThermalSystem]
-        '/HPXML/Building/BuildingDetails/Systems/Photovoltaics/PVSystem' => zero_or_more, # See [PVSystem]
-
-        '/HPXML/Building/BuildingDetails/Appliances/ClothesWasher' => zero_or_one, # See [ClothesWasher]
-        '/HPXML/Building/BuildingDetails/Appliances/ClothesDryer' => zero_or_one, # See [ClothesDryer]
-        '/HPXML/Building/BuildingDetails/Appliances/Dishwasher' => zero_or_one, # See [Dishwasher]
-        '/HPXML/Building/BuildingDetails/Appliances/Refrigerator' => zero_or_one, # See [Refrigerator]
-        '/HPXML/Building/BuildingDetails/Appliances/CookingRange' => zero_or_one, # See [CookingRange]
-
-        '/HPXML/Building/BuildingDetails/Lighting' => zero_or_one, # See [Lighting]
-        '/HPXML/Building/BuildingDetails/Lighting/CeilingFan' => zero_or_one, # See [CeilingFan]
-
-        '/HPXML/Building/BuildingDetails/MiscLoads/PlugLoad[PlugLoadType="other"]' => zero_or_one, # See [PlugLoads]
-        '/HPXML/Building/BuildingDetails/MiscLoads/PlugLoad[PlugLoadType="TV other"]' => zero_or_one, # See [Television]
-      },
-
-      # [SimulationControl]
-      '/HPXML/SoftwareInfo/extension/SimulationControl' => {
-        'Timestep' => zero_or_one, # minutes; must be a divisor of 60
-        'BeginMonth | BeginDayOfMonth' => zero_or_two, # integer
-        'EndMonth | EndDayOfMonth' => zero_or_two, # integer
-      },
-
-      # [BuildingConstruction]
-      '/HPXML/Building/BuildingDetails/BuildingSummary/BuildingConstruction' => {
-        'NumberofConditionedFloors' => one,
-        'NumberofConditionedFloorsAboveGrade' => one,
-        'NumberofBedrooms' => one,
-        'ConditionedFloorArea' => one,
-        'ConditionedBuildingVolume | AverageCeilingHeight' => one_or_more,
-      },
-
-      # [Neighbors]
-      '/HPXML/Building/BuildingDetails/BuildingSummary/Site/extension/Neighbors' => {
-        'NeighborBuilding' => one_or_more, # See [NeighborBuilding]
-      },
-
-      # [NeighborBuilding]
-      '/HPXML/Building/BuildingDetails/BuildingSummary/Site/extension/Neighbors/NeighborBuilding' => {
-        'Azimuth' => one,
-        'Distance' => one, # ft
-        'Height' => zero_or_one # ft; if omitted, the neighbor is the same height as the main building
-      },
-
-      # [ClimateZone]
-      '/HPXML/Building/BuildingDetails/ClimateandRiskZones/ClimateZoneIECC' => {
-        'Year' => one,
-        'ClimateZone' => one,
-      },
-
-      # [WeatherStation]
-      '/HPXML/Building/BuildingDetails/ClimateandRiskZones/WeatherStation' => {
-        'SystemIdentifier' => one, # Required by HPXML schema
-        'Name' => one, # Required by HPXML schema
-        'WMO | extension/EPWFileName' => one, # Reference weather/data.csv for the list of acceptable WMO station numbers
-      },
-
-      # [AirInfiltration]
-      '/HPXML/Building/BuildingDetails/Enclosure/AirInfiltration/AirInfiltrationMeasurement' => {
-        'SystemIdentifier' => one, # Required by HPXML schema
-        'HousePressure' => one, # Required by HPXML schema
-        'BuildingAirLeakage' => one, # Required by HPXML schema
-        'BuildingAirLeakage/UnitofMeasure' => one, # Required by HPXML schema
-        'BuildingAirLeakage/AirLeakage' => one, # Required by HPXML schema
-        'InfiltrationVolume' => zero_or_one, # Assumes InfiltrationVolume = ConditionedVolume if not provided
-      },
-
-      # [Roof]
-      '/HPXML/Building/BuildingDetails/Enclosure/Roofs/Roof' => {
-        'SystemIdentifier' => one, # Required by HPXML schema
-        'InteriorAdjacentTo' => one, # See [VentedAttic]
-        'Area' => one,
-        'Azimuth' => zero_or_one,
-        'SolarAbsorptance' => one,
-        'Emittance' => one,
-        'Pitch' => one,
-        'RadiantBarrier' => one,
-        'Insulation/SystemIdentifier' => one, # Required by HPXML schema
-        'Insulation/AssemblyEffectiveRValue' => one,
-      },
-
-      ## [VentedAttic]
-      '/HPXML/Building/BuildingDetails/Enclosure/Attics/Attic' => {
-        'AtticType/Attic/Vented' => zero_or_one,
-        'VentilationRate/UnitofMeasure' => zero_or_one,
-        'VentilationRate/Value' => zero_or_one,
-      },
-
-      # [Wall]
-      '/HPXML/Building/BuildingDetails/Enclosure/Walls/Wall' => {
-        'SystemIdentifier' => one, # Required by HPXML schema
-        'ExteriorAdjacentTo' => one,
-        'InteriorAdjacentTo' => one,
-        'WallType/WoodStud' => one,
-        'WallType/DoubleWoodStud' => one,
-        'WallType/ConcreteMasonryUnit' => one,
-        'WallType/StructurallyInsulatedPanel' => one,
-        'WallType/InsulatedConcreteForms' => one,
-        'WallType/SteelFrame' => one,
-        'WallType/SolidConcrete' => one,
-        'WallType/StructuralBrick' => one,
-        'WallType/StrawBale' => one,
-        'WallType/Stone' => one,
-        'WallType/LogWall' => one,
-        'Area' => one,
-        'Azimuth' => zero_or_one,
-        'SolarAbsorptance' => one,
-        'Emittance' => one,
-        'Insulation/SystemIdentifier' => one, # Required by HPXML schema
-        'Insulation/AssemblyEffectiveRValue' => one,
-      },
-
-      # [RimJoist]
-      '/HPXML/Building/BuildingDetails/Enclosure/RimJoists/RimJoist' => {
-        'SystemIdentifier' => one, # Required by HPXML schema
-        'ExteriorAdjacentTo' => one,
-        'InteriorAdjacentTo' => one,
-        'Area' => one,
-        'Azimuth' => zero_or_one,
-        'SolarAbsorptance' => one,
-        'Emittance' => one,
-        'Insulation/SystemIdentifier' => one, # Required by HPXML schema
-        'Insulation/AssemblyEffectiveRValue' => one,
-      },
-
-      # [FoundationWall]
-      '/HPXML/Building/BuildingDetails/Enclosure/FoundationWalls/FoundationWall' => {
-        'SystemIdentifier' => one, # Required by HPXML schema
-        'ExteriorAdjacentTo' => one,
-        'InteriorAdjacentTo' => one, # See [VentedCrawlspace]
-        'Height' => one,
-        'Area' => one,
-        'Azimuth' => zero_or_one,
-        'Thickness' => one,
-        'DepthBelowGrade' => one,
-        'Insulation/SystemIdentifier' => one, # Required by HPXML schema
-        # Insulation: either specify interior and exterior layers OR assembly R-value:
-        'Insulation/Layer/InstallationType' => one,
-        'Insulation/AssemblyEffectiveRValue' => one, # See [FoundationWallInsLayer]
-      },
-
-      ## [VentedCrawlspace]
-      '/HPXML/Building/BuildingDetails/Enclosure' => {
-        'Foundations/Foundation/FoundationType/Crawlspace/Vented' => zero_or_one,
-        'Foundations/Foundation/VentilationRate/UnitofMeasure' => zero_or_one,
-        'Foundations/Foundation/VentilationRate/Value' => zero_or_one,
-      },
-
-      ## [FoundationWallInsLayer]
-      '/HPXML/Building/BuildingDetails/Enclosure/FoundationWalls/FoundationWall/Insulation/Layer' => {
-        'InstallationType' => one,
-        'NominalRValue' => one,
-        'extension/DistanceToTopOfInsulation' => one, # ft
-        'extension/DistanceToBottomOfInsulation' => one, # ft
-      },
-
-      # [FrameFloor]
-      '/HPXML/Building/BuildingDetails/Enclosure/FrameFloors/FrameFloor' => {
-        'SystemIdentifier' => one, # Required by HPXML schema
-        'ExteriorAdjacentTo' => one,
-        'InteriorAdjacentTo' => one,
-        'Area' => one,
-        'Insulation/SystemIdentifier' => one, # Required by HPXML schema
-        'Insulation/AssemblyEffectiveRValue' => one,
-      },
-
-      # [Slab]
-      '/HPXML/Building/BuildingDetails/Enclosure/Slabs/Slab' => {
-        'SystemIdentifier' => one, # Required by HPXML schema
-        'InteriorAdjacentTo' => one,
-        'Area' => one,
-        'Thickness' => one, # Use zero for dirt floor
-        'ExposedPerimeter' => one,
-        'PerimeterInsulationDepth' => one,
-        'UnderSlabInsulationWidth | UnderSlabInsulationSpansEntireSlab' => one,
-        'DepthBelowGrade' => one_or_more, # DepthBelowGrade only required when InteriorAdjacentTo is 'living space' or 'garage'
-        'PerimeterInsulation/SystemIdentifier' => one, # Required by HPXML schema
-        'PerimeterInsulation/Layer/NominalRValue' => one,
-        'PerimeterInsulation/Layer/InstallationType' => one,
-        'UnderSlabInsulation/SystemIdentifier' => one, # Required by HPXML schema
-        'UnderSlabInsulation/Layer/InstallationType' => one,
-        'UnderSlabInsulation/Layer/NominalRValue' => one,
-        'extension/CarpetFraction' => one, # 0 - 1
-        'extension/CarpetRValue' => one,
-      },
-
-      # [Window]
-      '/HPXML/Building/BuildingDetails/Enclosure/Windows/Window' => {
-        'SystemIdentifier' => one, # Required by HPXML schema
-        'Area' => one,
-        'Azimuth' => one,
-        'UFactor' => one,
-        'SHGC' => one,
-        'InteriorShading/SummerShadingCoefficient' => zero_or_one, # Uses ERI assumption if not provided
-        'InteriorShading/WinterShadingCoefficient' => zero_or_one, # Uses ERI assumption if not provided
-        'Overhangs' => zero_or_one, # See [WindowOverhang]
-        'FractionOperable' => zero_or_one,
-        'AttachedToWall' => one,
-      },
-
-      ## [WindowOverhang]
-      '/HPXML/Building/BuildingDetails/Enclosure/Windows/Window/Overhangs' => {
-        'Depth' => one,
-        'DistanceToTopOfWindow' => one,
-        'DistanceToBottomOfWindow' => one,
-      },
-
-      # [Skylight]
-      '/HPXML/Building/BuildingDetails/Enclosure/Skylights/Skylight' => {
-        'SystemIdentifier' => one, # Required by HPXML schema
-        'Area' => one,
-        'Azimuth' => one,
-        'UFactor' => one,
-        'SHGC' => one,
-        'AttachedToRoof' => one,
-      },
-
-      # [Door]
-      '/HPXML/Building/BuildingDetails/Enclosure/Doors/Door' => {
-        'SystemIdentifier' => one, # Required by HPXML schema
-        'AttachedToWall' => one,
-        'Area' => one,
-        'Azimuth' => one,
-        'RValue' => one,
-      },
-
-      # [HeatingSystem]
-      '/HPXML/Building/BuildingDetails/Systems/HVAC' => {
-        'HVACControl' => one, # See [HVACControl]
-      },
-
-      '/HPXML/Building/BuildingDetails/Systems/HVAC/HVACPlant/HeatingSystem' => {
-        'SystemIdentifier' => one, # Required by HPXML schema
-        'HeatingCapacity' => one, # Use -1 for autosizing
-        'FractionHeatLoadServed' => one, # Must sum to <= 1 across all HeatingSystems and HeatPumps
-        'ElectricAuxiliaryEnergy' => zero_or_one, # If not provided, uses 301 defaults for fuel furnace/boiler and zero otherwise
-        'HeatingSystemType/Boiler' => one,
-        'HeatingSystemType/ElectricResistance' => one,
-        'HeatingSystemType/Furnace' => one,
-        'HeatingSystemType/WallFurnace' => one,
-        'HeatingSystemType/Stove' => one,
-        'HeatingSystemType/PortableHeater' => one,
-        'DistributionSystem' => one,
-        'HeatingSystemFuel' => one, # See [HeatingType=FuelEquipment] if not electricity
-        'AnnualHeatingEfficiency/Units' => one,
-        'AnnualHeatingEfficiency/Value' => one,
-      },
-
-      # [CoolingSystem]
-      '/HPXML/Building/BuildingDetails/Systems/HVAC/HVACPlant/CoolingSystem' => {
-        'SystemIdentifier' => one, # Required by HPXML schema
-        'CoolingCapacity' => one, # Use -1 for autosizing
-        'FractionCoolLoadServed' => one, # Must sum to <= 1 across all CoolingSystems and HeatPumps
-        'CoolingSystemType' => one,
-        'DistributionSystem' => one,
-        'CoolingSystemFuel' => one, # See [HeatingType=FuelEquipment] if not electricity
-        'AnnualCoolingEfficiency/Units' => one,
-        'AnnualCoolingEfficiency/Value' => one,
-        'SensibleHeatFraction' => one,
-        'CompressorType' => one,
-      },
-
-      # [HeatPump]
-      '/HPXML/Building/BuildingDetails/Systems/HVAC/HVACPlant/HeatPump' => {
-        'SystemIdentifier' => one, # Required by HPXML schema
-        'HeatPumpType' => one, # See [HeatPumpType=ASHP] or [HeatPumpType=MSHP] or [HeatPumpType=GSHP]
-        'HeatPumpFuel' => one,
-        'HeatingCapacity' => one, # Use -1 for autosizing
-        'CoolingCapacity' => one, # Use -1 for autosizing
-        'CoolingSensibleHeatFraction' => zero_or_one,
-        'BackupSystemFuel' => one, # See [HeatPumpBackup]
-        'FractionHeatLoadServed' => one, # Must sum to <= 1 across all HeatPumps and HeatingSystems
-        'FractionCoolLoadServed' => one, # Must sum to <= 1 across all HeatPumps and CoolingSystems
-        'DistributionSystem' => one,
-        'CompressorType' => one,
-        'AnnualCoolingEfficiency/Units' => one,
-        'AnnualCoolingEfficiency/Value' => one,
-        'AnnualHeatingEfficiency/Units' => one,
-        'AnnualHeatingEfficiency/Value' => one,
-        'HeatingCapacity17F' => zero_or_one,
-        'BackupHeatingSwitchoverTemperature' => zero,
-        'BackupAnnualHeatingEfficiency/Units' => one,
-        'BackupAnnualHeatingEfficiency/Value' => one,
-        'BackupHeatingCapacity' => one, # Use -1 for autosizing,
-      },
-
-      # [HVACControl]
-      '/HPXML/Building/BuildingDetails/Systems/HVAC/HVACControl' => {
-        'SystemIdentifier' => one, # Required by HPXML schema
-        'SetpointTempHeatingSeason' => one,
-        'SetbackTempHeatingSeason' => zero_or_one, # See [HVACControlType=HeatingSetback]
-        'SetupTempCoolingSeason' => zero_or_one, # See [HVACControlType=CoolingSetup]
-        'SetpointTempCoolingSeason' => one,
-        'extension/CeilingFanSetpointTempCoolingSeasonOffset' => zero_or_one, # deg-F
-        'extension/SetbackStartHourHeating' => one, # 0 = midnight. 12 = noon
-        'TotalSetbackHoursperWeekHeating' => one,
-        'TotalSetupHoursperWeekCooling' => one,
-        'extension/SetupStartHourCooling' => one, # 0 = midnight, 12 = noon
-      },
-
-      ## [HVACDistType=Air]
-      '/HPXML/Building/BuildingDetails/Systems/HVAC/HVACDistribution/DistributionSystemType/AirDistribution' => {
-        'DuctLeakageMeasurement/DuctLeakage/Units' => zero_or_one,
-        'DuctLeakageMeasurement/DuctLeakage/TotalOrToOutside' => zero_or_one,
-        'DuctLeakageMeasurement/DuctLeakage/Value' => zero_or_one,
-        'Ducts/DuctType' => zero_or_more, # See [HVACDuct]
-      },
-
-      ## [HVACDistType=DSE]
-      ## WARNING: These inputs are unused and EnergyPlus output will NOT reflect the specified DSE. To account for DSE, apply the value to the EnergyPlus output.
-      '/HPXML/Building/BuildingDetails/Systems/HVAC/HVACDistribution' => {
-        'SystemIdentifier' => one, # Required by HPXML schema
-        'DistributionSystemType/Other' => zero_or_one,
-        'AnnualHeatingDistributionSystemEfficiency | AnnualCoolingDistributionSystemEfficiency' => one_or_more,
-      },
-
-      ## [HVACDuct]
-      '/HPXML/Building/BuildingDetails/Systems/HVAC/HVACDistribution/DistributionSystemType/AirDistribution/Ducts' => {
-        'DuctInsulationRValue' => one,
-        'DuctLocation' => one,
-        'DuctSurfaceArea' => one,
-      },
-
-      # [MechanicalVentilation]
-      '/HPXML/Building/BuildingDetails/Systems/MechanicalVentilation/VentilationFans/VentilationFan' => {
-        'UsedForWholeBuildingVentilation' => one,
-        'UsedForSeasonalCoolingLoadReduction' => one,
-        'SystemIdentifier' => one, # Required by HPXML schema
-        'FanType' => one, # See [MechVentType=HRV] or [MechVentType=ERV] or [MechVentType=CFIS]
-        'TestedFlowRate | RatedFlowRate' => one_or_more,
-        'HoursInOperation' => one,
-        'FanPower' => one,
-        'SensibleRecoveryEfficiency | AdjustedSensibleRecoveryEfficiency' => one,
-        'TotalRecoveryEfficiency | AdjustedTotalRecoveryEfficiency' => one,
-        'AttachedToHVACDistributionSystem' => one,
-      },
-
-      # [WaterHeatingSystem]
-      '/HPXML/Building/BuildingDetails/Systems/WaterHeating/WaterHeatingSystem' => {
-        'SystemIdentifier' => one, # Required by HPXML schema
-        'WaterHeaterType' => one, # See [WHType=Tank] or [WHType=Tankless] or [WHType=HeatPump] or [WHType=Indirect] or [WHType=CombiTankless]
-        'Location' => one,
-        'FractionDHWLoadServed' => one,
-        'HotWaterTemperature' => zero_or_one,
-        'UsesDesuperheater' => zero_or_one, # See [Desuperheater]
-        'FuelType' => one,
-        'TankVolume' => one,
-        'HeatingCapacity' => one,
-        'EnergyFactor | UniformEnergyFactor' => one,
-        'WaterHeaterInsulation/Jacket/JacketRValue' => zero_or_one, # Capable to model tank wrap insulation
-        'RecoveryEfficiency' => one,
-        'PerformanceAdjustment' => zero_or_one, # Uses ERI assumption for tankless cycling derate if not provided
-        'RelatedHVACSystem' => one, # HeatingSystem (boiler)
-        'StandbyLoss' => zero_or_one, # Refer to https://www.ahridirectory.org/NewSearch?programId=28&searchTypeId=3
-      },
-
-      # [HotWaterDistribution]
-      '/HPXML/Building/BuildingDetails/Systems/WaterHeating/HotWaterDistribution' => {
-        'SystemIdentifier' => one, # Required by HPXML schema
-        'SystemType/Standard | SystemType/Recirculation' => one, # See [HWDistType=Standard] or [HWDistType=Recirculation]
-        'PipeInsulation/PipeRValue' => one,
-        'DrainWaterHeatRecovery' => zero_or_one, # See [DrainWaterHeatRecovery]
-      },
-
-      ## [HWDistType=Standard]
-      '/HPXML/Building/BuildingDetails/Systems/WaterHeating/HotWaterDistribution/SystemType/Standard' => {
-        'PipingLength' => zero_or_one,
-      },
-
-      ## [HWDistType=Recirculation]
-      '/HPXML/Building/BuildingDetails/Systems/WaterHeating/HotWaterDistribution/SystemType/Recirculation' => {
-        'ControlType' => one,
-        'RecirculationPipingLoopLength' => one,
-        'BranchPipingLoopLength' => one,
-        'PumpPower' => one,
-      },
-
-      ## [DrainWaterHeatRecovery]
-      '/HPXML/Building/BuildingDetails/Systems/WaterHeating/HotWaterDistribution/DrainWaterHeatRecovery' => {
-        'FacilitiesConnected' => one,
-        'EqualFlow' => one,
-        'Efficiency' => one,
-      },
-
-      # [WaterFixture]
-      '/HPXML/Building/BuildingDetails/Systems/WaterHeating/WaterFixture' => {
-        'SystemIdentifier' => one, # Required by HPXML schema
-        'WaterFixtureType' => one, # Required by HPXML schema
-        'LowFlow' => one,
-      },
-
-      # [SolarThermalSystem]
-      '/HPXML/Building/BuildingDetails/Systems/SolarThermal/SolarThermalSystem' => {
-        'SystemIdentifier' => one, # Required by HPXML schema
-        'SystemType' => one,
-        'CollectorArea | SolarFraction' => one, # See [SolarThermal=Detailed] if CollectorArea provided
-        'ConnectedTo' => one, # WaterHeatingSystem (any type but space-heating boiler)
-        'CollectorLoopType' => one,
-        'CollectorType' => one,
-        'CollectorAzimuth' => one,
-        'CollectorTilt' => one,
-        'CollectorRatedOpticalEfficiency' => one,
-        'CollectorRatedThermalLosses' => one,
-        'StorageVolume' => one,
-      },
-
-      # [PVSystem]
-      '/HPXML/Building/BuildingDetails/Systems/Photovoltaics/PVSystem' => {
-        'SystemIdentifier' => one, # Required by HPXML schema
-        'Location' => one,
-        'ModuleType' => one,
-        'Tracking' => one,
-        'ArrayAzimuth' => one,
-        'ArrayTilt' => one,
-        'MaxPowerOutput' => one,
-        'InverterEfficiency' => zero_or_one,
-        'SystemLossesFraction | YearModulesManufactured' => zero_or_more,
-      },
-
-      # [ClothesWasher]
-      '/HPXML/Building/BuildingDetails/Appliances/ClothesWasher' => {
-        'SystemIdentifier' => one, # Required by HPXML schema
-        'Location' => one,
-        'ModifiedEnergyFactor | IntegratedModifiedEnergyFactor | Usage | RatedAnnualkWh | LabelElectricRate | LabelGasRate | LabelAnnualGasCost | Capacity' => zero_or_seven,
-      },
-
-      # [ClothesDryer]
-      '/HPXML/Building/BuildingDetails/Appliances/ClothesDryer' => {
-        'SystemIdentifier' => one, # Required by HPXML schema
-        'Location' => one,
-        'FuelType' => one,
-        'EnergyFactor | CombinedEnergyFactor | ControlType' => zero_or_two,
-      },
-
-      # [Dishwasher]
-      '/HPXML/Building/BuildingDetails/Appliances/Dishwasher' => {
-        'SystemIdentifier' => one, # Required by HPXML schema
-        'RatedAnnualkWh | LabelElectricRate | LabelGasRate | LabelAnnualGasCost | PlaceSettingCapacity' => zero_or_five,
-      },
-
-      # [Refrigerator]
-      '/HPXML/Building/BuildingDetails/Appliances/Refrigerator' => {
-        'SystemIdentifier' => one, # Required by HPXML schema
-        'Location' => one,
-        'RatedAnnualkWh | extension/AdjustedAnnualkWh' => zero_or_more,
-      },
-
-      # [CookingRange]
-      '/HPXML/Building/BuildingDetails/Appliances/CookingRange' => {
-        'SystemIdentifier' => one, # Required by HPXML schema
-        'FuelType' => one,
-        'IsInduction' => zero_or_one,
-      },
-
-      # [CookingRange]
-      '/HPXML/Building/BuildingDetails/Appliances/Oven' => {
-        'IsConvection' => zero_or_one,
-      },
-
-      ## [LightingGroup]
-      '/HPXML/Building/BuildingDetails/Lighting/LightingGroup' => {
-        'ThirdPartyCertification' => one,
-        'Location' => one,
-        'SystemIdentifier' => one, # Required by HPXML schema
-        'FractionofUnitsInLocation' => one,
-      },
-
-      # [CeilingFan]
-      '/HPXML/Building/BuildingDetails/Lighting/CeilingFan' => {
-        'SystemIdentifier' => one, # Required by HPXML schema
-        'Airflow/Efficiency' => zero_or_one, # Uses Reference Home if not provided
-        'Airflow/FanSpeed' => zero_or_one, # Uses Reference Home if not provided
-        'Quantity' => zero_or_one, # Uses Reference Home if not provided
-      },
-
-      # [PlugLoads]
-      '/HPXML/Building/BuildingDetails/MiscLoads/PlugLoad' => {
-        'PlugLoadType' => one,
-        'SystemIdentifier' => one, # Required by HPXML schema
-        'Load/Value' => zero_or_one, # Uses ERI Reference Home if not provided
-        'Load/Units' => zero_or_one, # Uses ERI Reference Home if not provided
-        'extension/FracSensible' => zero_or_one, # Uses ERI Reference Home if not provided
-        'extension/FracLatent' => zero_or_one, # Uses ERI Reference Home if not provided
-      },
-
-      # [Television]
-      '/HPXML/Building/BuildingDetails/MiscLoads' => {
-        'extension/WeekdayScheduleFractions' => zero_or_one, # Uses ERI Reference Home if not provided
-        'extension/WeekendScheduleFractions' => zero_or_one, # Uses ERI Reference Home if not provided
-        'extension/MonthlyScheduleMultipliers' => zero_or_one, # Uses ERI Reference Home if not provided
-      },
-
-    }
+  def self.get_data_type_mapping_xml()
+    xpath_array = [ "/HPXML/XMLTransactionHeaderInformation/XMLType",
+                    "/HPXML/XMLTransactionHeaderInformation/XMLGeneratedBy",
+                    "/HPXML/XMLTransactionHeaderInformation/CreatedDateAndTime",
+                    "/HPXML/XMLTransactionHeaderInformation/Transaction",
+                    "/HPXML/SoftwareInfo/extension/SimulationControl",
+                    "/HPXML/Building",
+                    "/HPXML/Building/BuildingID",
+                    "/HPXML/Building/ProjectStatus/EventType",
+                    "/HPXML/Building/BuildingDetails/BuildingSummary/Site/extension/ShelterCoefficient",
+                    "/HPXML/Building/BuildingDetails/BuildingSummary/BuildingOccupancy/NumberofResidents",
+                    "/HPXML/Building/BuildingDetails/BuildingSummary/BuildingConstruction",
+                    "/HPXML/Building/BuildingDetails/BuildingSummary/Site/extension/Neighbors",
+                    "/HPXML/Building/BuildingDetails/ClimateandRiskZones/ClimateZoneIECC",
+                    "/HPXML/Building/BuildingDetails/ClimateandRiskZones/WeatherStation",
+                    "/HPXML/Building/BuildingDetails/Enclosure/AirInfiltration/AirInfiltrationMeasurement/extension/ConstantACHnatural",
+                    "/HPXML/Building/BuildingDetails/Enclosure/Roofs/Roof",
+                    "/HPXML/Building/BuildingDetails/Enclosure/Walls/Wall",
+                    "/HPXML/Building/BuildingDetails/Enclosure/RimJoists/RimJoist",
+                    "/HPXML/Building/BuildingDetails/Enclosure/FoundationWalls/FoundationWall",
+                    "/HPXML/Building/BuildingDetails/Enclosure/FrameFloors/FrameFloor",
+                    "/HPXML/Building/BuildingDetails/Enclosure/Slabs/Slab",
+                    "/HPXML/Building/BuildingDetails/Enclosure/Windows/Window",
+                    "/HPXML/Building/BuildingDetails/Enclosure/Skylights/Skylight",
+                    "/HPXML/Building/BuildingDetails/Enclosure/Doors/Door",
+                    "/HPXML/Building/BuildingDetails/Systems/HVAC/HVACPlant/HeatingSystem",
+                    "/HPXML/Building/BuildingDetails/Systems/HVAC/HVACPlant/CoolingSystem",
+                    "/HPXML/Building/BuildingDetails/Systems/HVAC/HVACPlant/HeatPump",
+                    "/HPXML/Building/BuildingDetails/Systems/HVAC/HVACControl",
+                    "/HPXML/Building/BuildingDetails/Systems/HVAC/HVACDistribution",
+                    "/HPXML/Building/BuildingDetails/Systems/MechanicalVentilation/VentilationFans/VentilationFan",
+                    "/HPXML/Building/BuildingDetails/Systems/MechanicalVentilation/VentilationFans/VentilationFan",
+                    "/HPXML/Building/BuildingDetails/Systems/WaterHeating/WaterHeatingSystem",
+                    "/HPXML/Building/BuildingDetails/Systems/WaterHeating/HotWaterDistribution",
+                    "/HPXML/Building/BuildingDetails/Systems/WaterHeating/WaterFixture",
+                    "/HPXML/Building/BuildingDetails/Systems/SolarThermal/SolarThermalSystem",
+                    "/HPXML/Building/BuildingDetails/Systems/Photovoltaics/PVSystem",
+                    "/HPXML/Building/BuildingDetails/Appliances/ClothesWasher",
+                    "/HPXML/Building/BuildingDetails/Appliances/ClothesDryer",
+                    "/HPXML/Building/BuildingDetails/Appliances/Dishwasher",
+                    "/HPXML/Building/BuildingDetails/Appliances/Refrigerator",
+                    "/HPXML/Building/BuildingDetails/Appliances/CookingRange",
+                    "/HPXML/Building/BuildingDetails/Lighting",
+                    "/HPXML/Building/BuildingDetails/Lighting/CeilingFan",
+                    "/HPXML/Building/BuildingDetails/MiscLoads/PlugLoad",
+                    "/HPXML/Building/BuildingDetails/MiscLoads/PlugLoad",
+                    "/HPXML/SoftwareInfo/extension/SimulationControl/Timestep",
+                    "/HPXML/SoftwareInfo/extension/SimulationControl/BeginMonth",
+                    "/HPXML/SoftwareInfo/extension/SimulationControl/BeginDayOfMonth",
+                    "/HPXML/SoftwareInfo/extension/SimulationControl/EndMonth",
+                    "/HPXML/SoftwareInfo/extension/SimulationControl/EndDayOfMonth",
+                    "/HPXML/Building/BuildingDetails/BuildingSummary/BuildingConstruction/NumberofConditionedFloors",
+                    "/HPXML/Building/BuildingDetails/BuildingSummary/BuildingConstruction/NumberofConditionedFloorsAboveGrade",
+                    "/HPXML/Building/BuildingDetails/BuildingSummary/BuildingConstruction/NumberofBedrooms",
+                    "/HPXML/Building/BuildingDetails/BuildingSummary/BuildingConstruction/ConditionedFloorArea",
+                    "/HPXML/Building/BuildingDetails/BuildingSummary/BuildingConstruction/ConditionedBuildingVolume",
+                    "/HPXML/Building/BuildingDetails/BuildingSummary/BuildingConstruction/AverageCeilingHeight",
+                    "/HPXML/Building/BuildingDetails/BuildingSummary/Site/extension/Neighbors/NeighborBuilding",
+                    "/HPXML/Building/BuildingDetails/BuildingSummary/Site/extension/Neighbors/NeighborBuilding/Azimuth",
+                    "/HPXML/Building/BuildingDetails/BuildingSummary/Site/extension/Neighbors/NeighborBuilding/Distance",
+                    "/HPXML/Building/BuildingDetails/BuildingSummary/Site/extension/Neighbors/NeighborBuilding/Height",
+                    "/HPXML/Building/BuildingDetails/ClimateandRiskZones/ClimateZoneIECC/Year",
+                    "/HPXML/Building/BuildingDetails/ClimateandRiskZones/ClimateZoneIECC/ClimateZone",
+                    "/HPXML/Building/BuildingDetails/ClimateandRiskZones/WeatherStation/SystemIdentifier",
+                    "/HPXML/Building/BuildingDetails/ClimateandRiskZones/WeatherStation/Name",
+                    "/HPXML/Building/BuildingDetails/ClimateandRiskZones/WeatherStation/WMO",
+                    "/HPXML/Building/BuildingDetails/ClimateandRiskZones/WeatherStation/extension/EPWFileName",
+                    "/HPXML/Building/BuildingDetails/Enclosure/AirInfiltration/AirInfiltrationMeasurement/SystemIdentifier",
+                    "/HPXML/Building/BuildingDetails/Enclosure/AirInfiltration/AirInfiltrationMeasurement/HousePressure",
+                    "/HPXML/Building/BuildingDetails/Enclosure/AirInfiltration/AirInfiltrationMeasurement/BuildingAirLeakage",
+                    "/HPXML/Building/BuildingDetails/Enclosure/AirInfiltration/AirInfiltrationMeasurement/BuildingAirLeakage/UnitofMeasure",
+                    "/HPXML/Building/BuildingDetails/Enclosure/AirInfiltration/AirInfiltrationMeasurement/BuildingAirLeakage/AirLeakage",
+                    "/HPXML/Building/BuildingDetails/Enclosure/AirInfiltration/AirInfiltrationMeasurement/InfiltrationVolume",
+                    "/HPXML/Building/BuildingDetails/Enclosure/Roofs/Roof/SystemIdentifier",
+                    "/HPXML/Building/BuildingDetails/Enclosure/Roofs/Roof/InteriorAdjacentTo",
+                    "/HPXML/Building/BuildingDetails/Enclosure/Roofs/Roof/Area",
+                    "/HPXML/Building/BuildingDetails/Enclosure/Roofs/Roof/Azimuth",
+                    "/HPXML/Building/BuildingDetails/Enclosure/Roofs/Roof/SolarAbsorptance",
+                    "/HPXML/Building/BuildingDetails/Enclosure/Roofs/Roof/Emittance",
+                    "/HPXML/Building/BuildingDetails/Enclosure/Roofs/Roof/Pitch",
+                    "/HPXML/Building/BuildingDetails/Enclosure/Roofs/Roof/RadiantBarrier",
+                    "/HPXML/Building/BuildingDetails/Enclosure/Roofs/Roof/Insulation/SystemIdentifier",
+                    "/HPXML/Building/BuildingDetails/Enclosure/Roofs/Roof/Insulation/AssemblyEffectiveRValue",
+                    "/HPXML/Building/BuildingDetails/Enclosure/Attics/Attic/AtticType/Attic/Vented",
+                    "/HPXML/Building/BuildingDetails/Enclosure/Attics/Attic/VentilationRate/UnitofMeasure",
+                    "/HPXML/Building/BuildingDetails/Enclosure/Attics/Attic/VentilationRate/Value",
+                    "/HPXML/Building/BuildingDetails/Enclosure/Walls/Wall/SystemIdentifier",
+                    "/HPXML/Building/BuildingDetails/Enclosure/Walls/Wall/ExteriorAdjacentTo",
+                    "/HPXML/Building/BuildingDetails/Enclosure/Walls/Wall/InteriorAdjacentTo",
+                    "/HPXML/Building/BuildingDetails/Enclosure/Walls/Wall/WallType/WoodStud",
+                    "/HPXML/Building/BuildingDetails/Enclosure/Walls/Wall/WallType/DoubleWoodStud",
+                    "/HPXML/Building/BuildingDetails/Enclosure/Walls/Wall/WallType/ConcreteMasonryUnit",
+                    "/HPXML/Building/BuildingDetails/Enclosure/Walls/Wall/WallType/StructurallyInsulatedPanel",
+                    "/HPXML/Building/BuildingDetails/Enclosure/Walls/Wall/WallType/InsulatedConcreteForms",
+                    "/HPXML/Building/BuildingDetails/Enclosure/Walls/Wall/WallType/SteelFrame",
+                    "/HPXML/Building/BuildingDetails/Enclosure/Walls/Wall/WallType/SolidConcrete",
+                    "/HPXML/Building/BuildingDetails/Enclosure/Walls/Wall/WallType/StructuralBrick",
+                    "/HPXML/Building/BuildingDetails/Enclosure/Walls/Wall/WallType/StrawBale",
+                    "/HPXML/Building/BuildingDetails/Enclosure/Walls/Wall/WallType/Stone",
+                    "/HPXML/Building/BuildingDetails/Enclosure/Walls/Wall/WallType/LogWall",
+                    "/HPXML/Building/BuildingDetails/Enclosure/Walls/Wall/Area",
+                    "/HPXML/Building/BuildingDetails/Enclosure/Walls/Wall/Azimuth",
+                    "/HPXML/Building/BuildingDetails/Enclosure/Walls/Wall/SolarAbsorptance",
+                    "/HPXML/Building/BuildingDetails/Enclosure/Walls/Wall/Emittance",
+                    "/HPXML/Building/BuildingDetails/Enclosure/Walls/Wall/Insulation/SystemIdentifier",
+                    "/HPXML/Building/BuildingDetails/Enclosure/Walls/Wall/Insulation/AssemblyEffectiveRValue",
+                    "/HPXML/Building/BuildingDetails/Enclosure/RimJoists/RimJoist/SystemIdentifier",
+                    "/HPXML/Building/BuildingDetails/Enclosure/RimJoists/RimJoist/ExteriorAdjacentTo",
+                    "/HPXML/Building/BuildingDetails/Enclosure/RimJoists/RimJoist/InteriorAdjacentTo",
+                    "/HPXML/Building/BuildingDetails/Enclosure/RimJoists/RimJoist/Area",
+                    "/HPXML/Building/BuildingDetails/Enclosure/RimJoists/RimJoist/Azimuth",
+                    "/HPXML/Building/BuildingDetails/Enclosure/RimJoists/RimJoist/SolarAbsorptance",
+                    "/HPXML/Building/BuildingDetails/Enclosure/RimJoists/RimJoist/Emittance",
+                    "/HPXML/Building/BuildingDetails/Enclosure/RimJoists/RimJoist/Insulation/SystemIdentifier",
+                    "/HPXML/Building/BuildingDetails/Enclosure/RimJoists/RimJoist/Insulation/AssemblyEffectiveRValue",
+                    "/HPXML/Building/BuildingDetails/Enclosure/FoundationWalls/FoundationWall/SystemIdentifier",
+                    "/HPXML/Building/BuildingDetails/Enclosure/FoundationWalls/FoundationWall/ExteriorAdjacentTo",
+                    "/HPXML/Building/BuildingDetails/Enclosure/FoundationWalls/FoundationWall/InteriorAdjacentTo",
+                    "/HPXML/Building/BuildingDetails/Enclosure/FoundationWalls/FoundationWall/Height",
+                    "/HPXML/Building/BuildingDetails/Enclosure/FoundationWalls/FoundationWall/Area",
+                    "/HPXML/Building/BuildingDetails/Enclosure/FoundationWalls/FoundationWall/Azimuth",
+                    "/HPXML/Building/BuildingDetails/Enclosure/FoundationWalls/FoundationWall/Thickness",
+                    "/HPXML/Building/BuildingDetails/Enclosure/FoundationWalls/FoundationWall/DepthBelowGrade",
+                    "/HPXML/Building/BuildingDetails/Enclosure/FoundationWalls/FoundationWall/Insulation/SystemIdentifier",
+                    "/HPXML/Building/BuildingDetails/Enclosure/FoundationWalls/FoundationWall/Insulation/Layer/InstallationType",
+                    "/HPXML/Building/BuildingDetails/Enclosure/FoundationWalls/FoundationWall/Insulation/AssemblyEffectiveRValue",
+                    "/HPXML/Building/BuildingDetails/Enclosure/Foundations/Foundation/FoundationType/Crawlspace/Vented",
+                    "/HPXML/Building/BuildingDetails/Enclosure/Foundations/Foundation/VentilationRate/UnitofMeasure",
+                    "/HPXML/Building/BuildingDetails/Enclosure/Foundations/Foundation/VentilationRate/Value",
+                    "/HPXML/Building/BuildingDetails/Enclosure/FoundationWalls/FoundationWall/Insulation/Layer/InstallationType",
+                    "/HPXML/Building/BuildingDetails/Enclosure/FoundationWalls/FoundationWall/Insulation/Layer/NominalRValue",
+                    "/HPXML/Building/BuildingDetails/Enclosure/FoundationWalls/FoundationWall/Insulation/Layer/extension/DistanceToTopOfInsulation",
+                    "/HPXML/Building/BuildingDetails/Enclosure/FoundationWalls/FoundationWall/Insulation/Layer/extension/DistanceToBottomOfInsulation",
+                    "/HPXML/Building/BuildingDetails/Enclosure/FrameFloors/FrameFloor/SystemIdentifier",
+                    "/HPXML/Building/BuildingDetails/Enclosure/FrameFloors/FrameFloor/ExteriorAdjacentTo",
+                    "/HPXML/Building/BuildingDetails/Enclosure/FrameFloors/FrameFloor/InteriorAdjacentTo",
+                    "/HPXML/Building/BuildingDetails/Enclosure/FrameFloors/FrameFloor/Area",
+                    "/HPXML/Building/BuildingDetails/Enclosure/FrameFloors/FrameFloor/Insulation/SystemIdentifier",
+                    "/HPXML/Building/BuildingDetails/Enclosure/FrameFloors/FrameFloor/Insulation/AssemblyEffectiveRValue",
+                    "/HPXML/Building/BuildingDetails/Enclosure/Slabs/Slab/SystemIdentifier",
+                    "/HPXML/Building/BuildingDetails/Enclosure/Slabs/Slab/InteriorAdjacentTo",
+                    "/HPXML/Building/BuildingDetails/Enclosure/Slabs/Slab/Area",
+                    "/HPXML/Building/BuildingDetails/Enclosure/Slabs/Slab/Thickness",
+                    "/HPXML/Building/BuildingDetails/Enclosure/Slabs/Slab/ExposedPerimeter",
+                    "/HPXML/Building/BuildingDetails/Enclosure/Slabs/Slab/PerimeterInsulationDepth",
+                    "/HPXML/Building/BuildingDetails/Enclosure/Slabs/Slab/UnderSlabInsulationWidth",
+                    "/HPXML/Building/BuildingDetails/Enclosure/Slabs/Slab/UnderSlabInsulationSpansEntireSlab",
+                    "/HPXML/Building/BuildingDetails/Enclosure/Slabs/Slab/DepthBelowGrade",
+                    "/HPXML/Building/BuildingDetails/Enclosure/Slabs/Slab/PerimeterInsulation/SystemIdentifier",
+                    "/HPXML/Building/BuildingDetails/Enclosure/Slabs/Slab/PerimeterInsulation/Layer/NominalRValue",
+                    "/HPXML/Building/BuildingDetails/Enclosure/Slabs/Slab/PerimeterInsulation/Layer/InstallationType",
+                    "/HPXML/Building/BuildingDetails/Enclosure/Slabs/Slab/UnderSlabInsulation/SystemIdentifier",
+                    "/HPXML/Building/BuildingDetails/Enclosure/Slabs/Slab/UnderSlabInsulation/Layer/InstallationType",
+                    "/HPXML/Building/BuildingDetails/Enclosure/Slabs/Slab/UnderSlabInsulation/Layer/NominalRValue",
+                    "/HPXML/Building/BuildingDetails/Enclosure/Slabs/Slab/extension/CarpetFraction",
+                    "/HPXML/Building/BuildingDetails/Enclosure/Slabs/Slab/extension/CarpetRValue",
+                    "/HPXML/Building/BuildingDetails/Enclosure/Windows/Window/SystemIdentifier",
+                    "/HPXML/Building/BuildingDetails/Enclosure/Windows/Window/Area",
+                    "/HPXML/Building/BuildingDetails/Enclosure/Windows/Window/Azimuth",
+                    "/HPXML/Building/BuildingDetails/Enclosure/Windows/Window/UFactor",
+                    "/HPXML/Building/BuildingDetails/Enclosure/Windows/Window/SHGC",
+                    "/HPXML/Building/BuildingDetails/Enclosure/Windows/Window/InteriorShading/SummerShadingCoefficient",
+                    "/HPXML/Building/BuildingDetails/Enclosure/Windows/Window/InteriorShading/WinterShadingCoefficient",
+                    "/HPXML/Building/BuildingDetails/Enclosure/Windows/Window/Overhangs",
+                    "/HPXML/Building/BuildingDetails/Enclosure/Windows/Window/FractionOperable",
+                    "/HPXML/Building/BuildingDetails/Enclosure/Windows/Window/AttachedToWall",
+                    "/HPXML/Building/BuildingDetails/Enclosure/Windows/Window/Overhangs/Depth",
+                    "/HPXML/Building/BuildingDetails/Enclosure/Windows/Window/Overhangs/DistanceToTopOfWindow",
+                    "/HPXML/Building/BuildingDetails/Enclosure/Windows/Window/Overhangs/DistanceToBottomOfWindow",
+                    "/HPXML/Building/BuildingDetails/Enclosure/Skylights/Skylight/SystemIdentifier",
+                    "/HPXML/Building/BuildingDetails/Enclosure/Skylights/Skylight/Area",
+                    "/HPXML/Building/BuildingDetails/Enclosure/Skylights/Skylight/Azimuth",
+                    "/HPXML/Building/BuildingDetails/Enclosure/Skylights/Skylight/UFactor",
+                    "/HPXML/Building/BuildingDetails/Enclosure/Skylights/Skylight/SHGC",
+                    "/HPXML/Building/BuildingDetails/Enclosure/Skylights/Skylight/AttachedToRoof",
+                    "/HPXML/Building/BuildingDetails/Enclosure/Doors/Door/SystemIdentifier",
+                    "/HPXML/Building/BuildingDetails/Enclosure/Doors/Door/AttachedToWall",
+                    "/HPXML/Building/BuildingDetails/Enclosure/Doors/Door/Area",
+                    "/HPXML/Building/BuildingDetails/Enclosure/Doors/Door/Azimuth",
+                    "/HPXML/Building/BuildingDetails/Enclosure/Doors/Door/RValue",
+                    "/HPXML/Building/BuildingDetails/Systems/HVAC/HVACControl",
+                    "/HPXML/Building/BuildingDetails/Systems/HVAC/HVACPlant/HeatingSystem/SystemIdentifier",
+                    "/HPXML/Building/BuildingDetails/Systems/HVAC/HVACPlant/HeatingSystem/HeatingCapacity",
+                    "/HPXML/Building/BuildingDetails/Systems/HVAC/HVACPlant/HeatingSystem/FractionHeatLoadServed",
+                    "/HPXML/Building/BuildingDetails/Systems/HVAC/HVACPlant/HeatingSystem/ElectricAuxiliaryEnergy",
+                    "/HPXML/Building/BuildingDetails/Systems/HVAC/HVACPlant/HeatingSystem/HeatingSystemType/Boiler",
+                    "/HPXML/Building/BuildingDetails/Systems/HVAC/HVACPlant/HeatingSystem/HeatingSystemType/ElectricResistance",
+                    "/HPXML/Building/BuildingDetails/Systems/HVAC/HVACPlant/HeatingSystem/HeatingSystemType/Furnace",
+                    "/HPXML/Building/BuildingDetails/Systems/HVAC/HVACPlant/HeatingSystem/HeatingSystemType/WallFurnace",
+                    "/HPXML/Building/BuildingDetails/Systems/HVAC/HVACPlant/HeatingSystem/HeatingSystemType/Stove",
+                    "/HPXML/Building/BuildingDetails/Systems/HVAC/HVACPlant/HeatingSystem/HeatingSystemType/PortableHeater",
+                    "/HPXML/Building/BuildingDetails/Systems/HVAC/HVACPlant/HeatingSystem/DistributionSystem",
+                    "/HPXML/Building/BuildingDetails/Systems/HVAC/HVACPlant/HeatingSystem/HeatingSystemFuel",
+                    "/HPXML/Building/BuildingDetails/Systems/HVAC/HVACPlant/HeatingSystem/AnnualHeatingEfficiency/Units",
+                    "/HPXML/Building/BuildingDetails/Systems/HVAC/HVACPlant/HeatingSystem/AnnualHeatingEfficiency/Value",
+                    "/HPXML/Building/BuildingDetails/Systems/HVAC/HVACPlant/CoolingSystem/SystemIdentifier",
+                    "/HPXML/Building/BuildingDetails/Systems/HVAC/HVACPlant/CoolingSystem/CoolingCapacity",
+                    "/HPXML/Building/BuildingDetails/Systems/HVAC/HVACPlant/CoolingSystem/FractionCoolLoadServed",
+                    "/HPXML/Building/BuildingDetails/Systems/HVAC/HVACPlant/CoolingSystem/CoolingSystemType",
+                    "/HPXML/Building/BuildingDetails/Systems/HVAC/HVACPlant/CoolingSystem/DistributionSystem",
+                    "/HPXML/Building/BuildingDetails/Systems/HVAC/HVACPlant/CoolingSystem/CoolingSystemFuel",
+                    "/HPXML/Building/BuildingDetails/Systems/HVAC/HVACPlant/CoolingSystem/AnnualCoolingEfficiency/Units",
+                    "/HPXML/Building/BuildingDetails/Systems/HVAC/HVACPlant/CoolingSystem/AnnualCoolingEfficiency/Value",
+                    "/HPXML/Building/BuildingDetails/Systems/HVAC/HVACPlant/CoolingSystem/SensibleHeatFraction",
+                    "/HPXML/Building/BuildingDetails/Systems/HVAC/HVACPlant/CoolingSystem/CompressorType",
+                    "/HPXML/Building/BuildingDetails/Systems/HVAC/HVACPlant/HeatPump/SystemIdentifier",
+                    "/HPXML/Building/BuildingDetails/Systems/HVAC/HVACPlant/HeatPump/HeatPumpType",
+                    "/HPXML/Building/BuildingDetails/Systems/HVAC/HVACPlant/HeatPump/HeatPumpFuel",
+                    "/HPXML/Building/BuildingDetails/Systems/HVAC/HVACPlant/HeatPump/HeatingCapacity",
+                    "/HPXML/Building/BuildingDetails/Systems/HVAC/HVACPlant/HeatPump/CoolingCapacity",
+                    "/HPXML/Building/BuildingDetails/Systems/HVAC/HVACPlant/HeatPump/CoolingSensibleHeatFraction",
+                    "/HPXML/Building/BuildingDetails/Systems/HVAC/HVACPlant/HeatPump/BackupSystemFuel",
+                    "/HPXML/Building/BuildingDetails/Systems/HVAC/HVACPlant/HeatPump/FractionHeatLoadServed",
+                    "/HPXML/Building/BuildingDetails/Systems/HVAC/HVACPlant/HeatPump/FractionCoolLoadServed",
+                    "/HPXML/Building/BuildingDetails/Systems/HVAC/HVACPlant/HeatPump/DistributionSystem",
+                    "/HPXML/Building/BuildingDetails/Systems/HVAC/HVACPlant/HeatPump/CompressorType",
+                    "/HPXML/Building/BuildingDetails/Systems/HVAC/HVACPlant/HeatPump/AnnualCoolingEfficiency/Units",
+                    "/HPXML/Building/BuildingDetails/Systems/HVAC/HVACPlant/HeatPump/AnnualCoolingEfficiency/Value",
+                    "/HPXML/Building/BuildingDetails/Systems/HVAC/HVACPlant/HeatPump/AnnualHeatingEfficiency/Units",
+                    "/HPXML/Building/BuildingDetails/Systems/HVAC/HVACPlant/HeatPump/AnnualHeatingEfficiency/Value",
+                    "/HPXML/Building/BuildingDetails/Systems/HVAC/HVACPlant/HeatPump/HeatingCapacity17F",
+                    "/HPXML/Building/BuildingDetails/Systems/HVAC/HVACPlant/HeatPump/BackupHeatingSwitchoverTemperature",
+                    "/HPXML/Building/BuildingDetails/Systems/HVAC/HVACPlant/HeatPump/BackupAnnualHeatingEfficiency/Units",
+                    "/HPXML/Building/BuildingDetails/Systems/HVAC/HVACPlant/HeatPump/BackupAnnualHeatingEfficiency/Value",
+                    "/HPXML/Building/BuildingDetails/Systems/HVAC/HVACPlant/HeatPump/BackupHeatingCapacity",
+                    "/HPXML/Building/BuildingDetails/Systems/HVAC/HVACControl/SystemIdentifier",
+                    "/HPXML/Building/BuildingDetails/Systems/HVAC/HVACControl/SetpointTempHeatingSeason",
+                    "/HPXML/Building/BuildingDetails/Systems/HVAC/HVACControl/SetbackTempHeatingSeason",
+                    "/HPXML/Building/BuildingDetails/Systems/HVAC/HVACControl/SetupTempCoolingSeason",
+                    "/HPXML/Building/BuildingDetails/Systems/HVAC/HVACControl/SetpointTempCoolingSeason",
+                    "/HPXML/Building/BuildingDetails/Systems/HVAC/HVACControl/extension/CeilingFanSetpointTempCoolingSeasonOffset",
+                    "/HPXML/Building/BuildingDetails/Systems/HVAC/HVACControl/extension/SetbackStartHourHeating",
+                    "/HPXML/Building/BuildingDetails/Systems/HVAC/HVACControl/TotalSetbackHoursperWeekHeating",
+                    "/HPXML/Building/BuildingDetails/Systems/HVAC/HVACControl/TotalSetupHoursperWeekCooling",
+                    "/HPXML/Building/BuildingDetails/Systems/HVAC/HVACControl/extension/SetupStartHourCooling",
+                    "/HPXML/Building/BuildingDetails/Systems/HVAC/HVACDistribution/DistributionSystemType/AirDistribution/DuctLeakageMeasurement/DuctLeakage/Units",
+                    "/HPXML/Building/BuildingDetails/Systems/HVAC/HVACDistribution/DistributionSystemType/AirDistribution/DuctLeakageMeasurement/DuctLeakage/TotalOrToOutside",
+                    "/HPXML/Building/BuildingDetails/Systems/HVAC/HVACDistribution/DistributionSystemType/AirDistribution/DuctLeakageMeasurement/DuctLeakage/Value",
+                    "/HPXML/Building/BuildingDetails/Systems/HVAC/HVACDistribution/DistributionSystemType/AirDistribution/Ducts/DuctType",
+                    "/HPXML/Building/BuildingDetails/Systems/HVAC/HVACDistribution/SystemIdentifier",
+                    "/HPXML/Building/BuildingDetails/Systems/HVAC/HVACDistribution/DistributionSystemType/Other",
+                    "/HPXML/Building/BuildingDetails/Systems/HVAC/HVACDistribution/AnnualHeatingDistributionSystemEfficiency",
+                    "/HPXML/Building/BuildingDetails/Systems/HVAC/HVACDistribution/AnnualCoolingDistributionSystemEfficiency",
+                    "/HPXML/Building/BuildingDetails/Systems/HVAC/HVACDistribution/DistributionSystemType/AirDistribution/Ducts/DuctInsulationRValue",
+                    "/HPXML/Building/BuildingDetails/Systems/HVAC/HVACDistribution/DistributionSystemType/AirDistribution/Ducts/DuctLocation",
+                    "/HPXML/Building/BuildingDetails/Systems/HVAC/HVACDistribution/DistributionSystemType/AirDistribution/Ducts/DuctSurfaceArea",
+                    "/HPXML/Building/BuildingDetails/Systems/MechanicalVentilation/VentilationFans/VentilationFan/UsedForWholeBuildingVentilation",
+                    "/HPXML/Building/BuildingDetails/Systems/MechanicalVentilation/VentilationFans/VentilationFan/UsedForSeasonalCoolingLoadReduction",
+                    "/HPXML/Building/BuildingDetails/Systems/MechanicalVentilation/VentilationFans/VentilationFan/SystemIdentifier",
+                    "/HPXML/Building/BuildingDetails/Systems/MechanicalVentilation/VentilationFans/VentilationFan/FanType",
+                    "/HPXML/Building/BuildingDetails/Systems/MechanicalVentilation/VentilationFans/VentilationFan/TestedFlowRate",
+                    "/HPXML/Building/BuildingDetails/Systems/MechanicalVentilation/VentilationFans/VentilationFan/RatedFlowRate",
+                    "/HPXML/Building/BuildingDetails/Systems/MechanicalVentilation/VentilationFans/VentilationFan/HoursInOperation",
+                    "/HPXML/Building/BuildingDetails/Systems/MechanicalVentilation/VentilationFans/VentilationFan/FanPower",
+                    "/HPXML/Building/BuildingDetails/Systems/MechanicalVentilation/VentilationFans/VentilationFan/SensibleRecoveryEfficiency",
+                    "/HPXML/Building/BuildingDetails/Systems/MechanicalVentilation/VentilationFans/VentilationFan/AdjustedSensibleRecoveryEfficiency",
+                    "/HPXML/Building/BuildingDetails/Systems/MechanicalVentilation/VentilationFans/VentilationFan/TotalRecoveryEfficiency",
+                    "/HPXML/Building/BuildingDetails/Systems/MechanicalVentilation/VentilationFans/VentilationFan/AdjustedTotalRecoveryEfficiency",
+                    "/HPXML/Building/BuildingDetails/Systems/MechanicalVentilation/VentilationFans/VentilationFan/AttachedToHVACDistributionSystem",
+                    "/HPXML/Building/BuildingDetails/Systems/WaterHeating/WaterHeatingSystem/SystemIdentifier",
+                    "/HPXML/Building/BuildingDetails/Systems/WaterHeating/WaterHeatingSystem/WaterHeaterType",
+                    "/HPXML/Building/BuildingDetails/Systems/WaterHeating/WaterHeatingSystem/Location",
+                    "/HPXML/Building/BuildingDetails/Systems/WaterHeating/WaterHeatingSystem/FractionDHWLoadServed",
+                    "/HPXML/Building/BuildingDetails/Systems/WaterHeating/WaterHeatingSystem/HotWaterTemperature",
+                    "/HPXML/Building/BuildingDetails/Systems/WaterHeating/WaterHeatingSystem/UsesDesuperheater",
+                    "/HPXML/Building/BuildingDetails/Systems/WaterHeating/WaterHeatingSystem/FuelType",
+                    "/HPXML/Building/BuildingDetails/Systems/WaterHeating/WaterHeatingSystem/TankVolume",
+                    "/HPXML/Building/BuildingDetails/Systems/WaterHeating/WaterHeatingSystem/HeatingCapacity",
+                    "/HPXML/Building/BuildingDetails/Systems/WaterHeating/WaterHeatingSystem/EnergyFactor",
+                    "/HPXML/Building/BuildingDetails/Systems/WaterHeating/WaterHeatingSystem/UniformEnergyFactor",
+                    "/HPXML/Building/BuildingDetails/Systems/WaterHeating/WaterHeatingSystem/WaterHeaterInsulation/Jacket/JacketRValue",
+                    "/HPXML/Building/BuildingDetails/Systems/WaterHeating/WaterHeatingSystem/RecoveryEfficiency",
+                    "/HPXML/Building/BuildingDetails/Systems/WaterHeating/WaterHeatingSystem/PerformanceAdjustment",
+                    "/HPXML/Building/BuildingDetails/Systems/WaterHeating/WaterHeatingSystem/RelatedHVACSystem",
+                    "/HPXML/Building/BuildingDetails/Systems/WaterHeating/WaterHeatingSystem/StandbyLoss",
+                    "/HPXML/Building/BuildingDetails/Systems/WaterHeating/HotWaterDistribution/SystemIdentifier",
+                    "/HPXML/Building/BuildingDetails/Systems/WaterHeating/HotWaterDistribution/SystemType/Standard",
+                    "/HPXML/Building/BuildingDetails/Systems/WaterHeating/HotWaterDistribution/SystemType/Recirculation",
+                    "/HPXML/Building/BuildingDetails/Systems/WaterHeating/HotWaterDistribution/PipeInsulation/PipeRValue",
+                    "/HPXML/Building/BuildingDetails/Systems/WaterHeating/HotWaterDistribution/DrainWaterHeatRecovery",
+                    "/HPXML/Building/BuildingDetails/Systems/WaterHeating/HotWaterDistribution/SystemType/Standard/PipingLength",
+                    "/HPXML/Building/BuildingDetails/Systems/WaterHeating/HotWaterDistribution/SystemType/Recirculation/ControlType",
+                    "/HPXML/Building/BuildingDetails/Systems/WaterHeating/HotWaterDistribution/SystemType/Recirculation/RecirculationPipingLoopLength",
+                    "/HPXML/Building/BuildingDetails/Systems/WaterHeating/HotWaterDistribution/SystemType/Recirculation/BranchPipingLoopLength",
+                    "/HPXML/Building/BuildingDetails/Systems/WaterHeating/HotWaterDistribution/SystemType/Recirculation/PumpPower",
+                    "/HPXML/Building/BuildingDetails/Systems/WaterHeating/HotWaterDistribution/DrainWaterHeatRecovery/FacilitiesConnected",
+                    "/HPXML/Building/BuildingDetails/Systems/WaterHeating/HotWaterDistribution/DrainWaterHeatRecovery/EqualFlow",
+                    "/HPXML/Building/BuildingDetails/Systems/WaterHeating/HotWaterDistribution/DrainWaterHeatRecovery/Efficiency",
+                    "/HPXML/Building/BuildingDetails/Systems/WaterHeating/WaterFixture/SystemIdentifier",
+                    "/HPXML/Building/BuildingDetails/Systems/WaterHeating/WaterFixture/WaterFixtureType",
+                    "/HPXML/Building/BuildingDetails/Systems/WaterHeating/WaterFixture/LowFlow",
+                    "/HPXML/Building/BuildingDetails/Systems/SolarThermal/SolarThermalSystem/SystemIdentifier",
+                    "/HPXML/Building/BuildingDetails/Systems/SolarThermal/SolarThermalSystem/SystemType",
+                    "/HPXML/Building/BuildingDetails/Systems/SolarThermal/SolarThermalSystem/CollectorArea",
+                    "/HPXML/Building/BuildingDetails/Systems/SolarThermal/SolarThermalSystem/SolarFraction",
+                    "/HPXML/Building/BuildingDetails/Systems/SolarThermal/SolarThermalSystem/ConnectedTo",
+                    "/HPXML/Building/BuildingDetails/Systems/SolarThermal/SolarThermalSystem/CollectorLoopType",
+                    "/HPXML/Building/BuildingDetails/Systems/SolarThermal/SolarThermalSystem/CollectorType",
+                    "/HPXML/Building/BuildingDetails/Systems/SolarThermal/SolarThermalSystem/CollectorAzimuth",
+                    "/HPXML/Building/BuildingDetails/Systems/SolarThermal/SolarThermalSystem/CollectorTilt",
+                    "/HPXML/Building/BuildingDetails/Systems/SolarThermal/SolarThermalSystem/CollectorRatedOpticalEfficiency",
+                    "/HPXML/Building/BuildingDetails/Systems/SolarThermal/SolarThermalSystem/CollectorRatedThermalLosses",
+                    "/HPXML/Building/BuildingDetails/Systems/SolarThermal/SolarThermalSystem/StorageVolume",
+                    "/HPXML/Building/BuildingDetails/Systems/Photovoltaics/PVSystem/SystemIdentifier",
+                    "/HPXML/Building/BuildingDetails/Systems/Photovoltaics/PVSystem/Location",
+                    "/HPXML/Building/BuildingDetails/Systems/Photovoltaics/PVSystem/ModuleType",
+                    "/HPXML/Building/BuildingDetails/Systems/Photovoltaics/PVSystem/Tracking",
+                    "/HPXML/Building/BuildingDetails/Systems/Photovoltaics/PVSystem/ArrayAzimuth",
+                    "/HPXML/Building/BuildingDetails/Systems/Photovoltaics/PVSystem/ArrayTilt",
+                    "/HPXML/Building/BuildingDetails/Systems/Photovoltaics/PVSystem/MaxPowerOutput",
+                    "/HPXML/Building/BuildingDetails/Systems/Photovoltaics/PVSystem/InverterEfficiency",
+                    "/HPXML/Building/BuildingDetails/Systems/Photovoltaics/PVSystem/SystemLossesFraction",
+                    "/HPXML/Building/BuildingDetails/Systems/Photovoltaics/PVSystem/YearModulesManufactured",
+                    "/HPXML/Building/BuildingDetails/Appliances/ClothesWasher/SystemIdentifier",
+                    "/HPXML/Building/BuildingDetails/Appliances/ClothesWasher/Location",
+                    "/HPXML/Building/BuildingDetails/Appliances/ClothesWasher/ModifiedEnergyFactor",
+                    "/HPXML/Building/BuildingDetails/Appliances/ClothesWasher/IntegratedModifiedEnergyFactor",
+                    "/HPXML/Building/BuildingDetails/Appliances/ClothesWasher/Usage",
+                    "/HPXML/Building/BuildingDetails/Appliances/ClothesWasher/RatedAnnualkWh",
+                    "/HPXML/Building/BuildingDetails/Appliances/ClothesWasher/LabelElectricRate",
+                    "/HPXML/Building/BuildingDetails/Appliances/ClothesWasher/LabelGasRate",
+                    "/HPXML/Building/BuildingDetails/Appliances/ClothesWasher/LabelAnnualGasCost",
+                    "/HPXML/Building/BuildingDetails/Appliances/ClothesWasher/Capacity",
+                    "/HPXML/Building/BuildingDetails/Appliances/ClothesDryer/SystemIdentifier",
+                    "/HPXML/Building/BuildingDetails/Appliances/ClothesDryer/Location",
+                    "/HPXML/Building/BuildingDetails/Appliances/ClothesDryer/FuelType",
+                    "/HPXML/Building/BuildingDetails/Appliances/ClothesDryer/EnergyFactor",
+                    "/HPXML/Building/BuildingDetails/Appliances/ClothesDryer/CombinedEnergyFactor",
+                    "/HPXML/Building/BuildingDetails/Appliances/ClothesDryer/ControlType",
+                    "/HPXML/Building/BuildingDetails/Appliances/Dishwasher/SystemIdentifier",
+                    "/HPXML/Building/BuildingDetails/Appliances/Dishwasher/RatedAnnualkWh",
+                    "/HPXML/Building/BuildingDetails/Appliances/Dishwasher/LabelElectricRate",
+                    "/HPXML/Building/BuildingDetails/Appliances/Dishwasher/LabelGasRate",
+                    "/HPXML/Building/BuildingDetails/Appliances/Dishwasher/LabelAnnualGasCost",
+                    "/HPXML/Building/BuildingDetails/Appliances/Dishwasher/PlaceSettingCapacity",
+                    "/HPXML/Building/BuildingDetails/Appliances/Refrigerator/SystemIdentifier",
+                    "/HPXML/Building/BuildingDetails/Appliances/Refrigerator/Location",
+                    "/HPXML/Building/BuildingDetails/Appliances/Refrigerator/RatedAnnualkWh",
+                    "/HPXML/Building/BuildingDetails/Appliances/Refrigerator/extension/AdjustedAnnualkWh",
+                    "/HPXML/Building/BuildingDetails/Appliances/CookingRange/SystemIdentifier",
+                    "/HPXML/Building/BuildingDetails/Appliances/CookingRange/FuelType",
+                    "/HPXML/Building/BuildingDetails/Appliances/CookingRange/IsInduction",
+                    "/HPXML/Building/BuildingDetails/Appliances/Oven/IsConvection",
+                    "/HPXML/Building/BuildingDetails/Lighting/LightingGroup/ThirdPartyCertification",
+                    "/HPXML/Building/BuildingDetails/Lighting/LightingGroup/Location",
+                    "/HPXML/Building/BuildingDetails/Lighting/LightingGroup/SystemIdentifier",
+                    "/HPXML/Building/BuildingDetails/Lighting/LightingGroup/FractionofUnitsInLocation",
+                    "/HPXML/Building/BuildingDetails/Lighting/CeilingFan/SystemIdentifier",
+                    "/HPXML/Building/BuildingDetails/Lighting/CeilingFan/Airflow/Efficiency",
+                    "/HPXML/Building/BuildingDetails/Lighting/CeilingFan/Airflow/FanSpeed",
+                    "/HPXML/Building/BuildingDetails/Lighting/CeilingFan/Quantity",
+                    "/HPXML/Building/BuildingDetails/MiscLoads/PlugLoad/PlugLoadType",
+                    "/HPXML/Building/BuildingDetails/MiscLoads/PlugLoad/SystemIdentifier",
+                    "/HPXML/Building/BuildingDetails/MiscLoads/PlugLoad/Load/Value",
+                    "/HPXML/Building/BuildingDetails/MiscLoads/PlugLoad/Load/Units",
+                    "/HPXML/Building/BuildingDetails/MiscLoads/PlugLoad/extension/FracSensible",
+                    "/HPXML/Building/BuildingDetails/MiscLoads/PlugLoad/extension/FracLatent",
+                    "/HPXML/Building/BuildingDetails/MiscLoads/extension/WeekdayScheduleFractions",
+                    "/HPXML/Building/BuildingDetails/MiscLoads/extension/WeekendScheduleFractions",
+                    "/HPXML/Building/BuildingDetails/MiscLoads/extension/MonthlyScheduleMultipliers"]
 
     puts 'run validator!'
-    errors = []
+
     if @doc_base.nil?
       this_dir = File.dirname(__FILE__)
       base_el_xsd_path = this_dir + '/BaseElements.xsd'
       @doc_base = REXML::Document.new(File.new(base_el_xsd_path))
     end
-    requirements.each do |parent, requirement|
+    xpath_array.each do |el_path|
+      el_array = el_path.split('/').reject { |p| p.empty? }
+      load_or_get_data_type_xsd(el_array)
+    end
+
+    xml = @type_xml.to_xml
+    File.write(this_dir + '/element_type.xml', xml)
+
+  end
+
+  def self.generate_xpath_array_from_requirement_hash(ep_validator_requirements)
+    xpath_array = []
+    ep_validator_requirements.each do |parent, requirement|
       if parent.nil? # Unconditional
         requirement.each do |child, expected_sizes|
-          next if expected_sizes.nil?
-
+          count += 1
           xpath = combine_into_xpath(parent, child)
           xpath.gsub(/(?<reg>(\[([^\]\[]|\g<reg>)*\]))/, '').split(/ [|,or] /).each do |el_path|
-            el_array = el_path.split('/').reject { |p| p.empty? }
-            load_or_get_data_type_xsd(el_array)
+            xpath_array << el_path
           end
         end
       else # Conditional based on parent element existence
         parent.gsub(/(?<reg>(\[([^\]\[]|\g<reg>)*\]))/, '').split(/ [|,or] /).each do |parent_path|
           requirement.each do |child, expected_sizes|
-            next if expected_sizes.nil?
-
             child.gsub(/(?<reg>(\[([^\]\[]|\g<reg>)*\]))/, '').split(/ [|,or] /).each do |child_path|
+              count += 1
               el_path = combine_into_xpath(parent_path, child_path)
               next if el_path == parent_path
-              el_array = el_path.split('/').reject { |p| p.empty? }
-              load_or_get_data_type_xsd(el_array)
+              xpath_array << el_path
             end
           end
         end
       end
     end
-
-    json_tree = JSON.parse(@type_tree.to_json)
-    # remove json_class key pairs from hash
-    recursively_remove_property(json_tree, "json_class")
-    File.open(this_dir + '/element_type_tree.json','w') do |f|
-      f.write(JSON.pretty_generate(json_tree))
-    end
-
-    return errors
-  end
-
-  def self.recursively_remove_property(target, property)
-    target.delete_if do |k, v|
-      if k == property
-        true
-      elsif v.is_a?(Array)
-        v.each do |v_h|
-        recursively_remove_property(v_h, property)
-        end
-        false
-      end
-    end
   end
 
   def self.load_or_get_data_type_xsd(el_array)
-    if @type_tree.nil?
-      @type_tree = Tree::TreeNode.new("ROOT", nil)
+    if @type_xml.nil?
+      @type_xml = Nokogiri::XML::Builder.new do |xml|
+        xml.root
+      end
     end
     #return @type_map[el_array] if not @type_map[el_array].nil?
     puts ''
@@ -646,20 +426,19 @@ class HPXMLValidator
     el_array.each_with_index do |el_name, i|
       next if i < 2
       return if el_name == 'extension'
-      if (i == 2)
-        child_node = @type_tree
+      if i == 2
+        parent_node = @type_xml.doc.xpath('//root').first
       else
-        child_node = @type_tree
-        for index in 2..i-1 do
-          child_node = child_node[el_array[index]]
+        parent_node = @type_xml.doc.xpath('//root/' + el_array.drop(2).take(i-2).join('/')).first
+      end
+      puts parent_node
+      if not parent_node.nil?
+        child_node = @type_xml.doc.xpath('//root/' + el_array.drop(2).take(i-1).join('/')).first
+        if not child_node.nil?
+          parent_type = child_node.attr('DataType')
+          parent_name = el_name
+          next
         end
-      end
-      if not child_node.nil?
-      if not child_node[el_name].nil?
-        parent_type = child_node[el_name].content
-        parent_name = el_name
-        next
-      end
       end
 
       puts 'this element name: ' + el_name
@@ -669,8 +448,7 @@ class HPXMLValidator
       puts parent_name
       
       if parent_type.nil? && parent_name.nil?
-        parent_type = REXML::XPath.first(@doc_base, "//xs:element[@name='#{el_name}']").attributes['type']
-        child_node << Tree::TreeNode.new(el_name, parent_type)
+        el_type = REXML::XPath.first(@doc_base, "//xs:element[@name='#{el_name}']").attributes['type']
       else
         if (not parent_name.nil?) && parent_type.nil?
           el = REXML::XPath.first(@doc_base, "//xs:element[@name='#{parent_name}']//xs:element[@name='#{el_name}']")
@@ -701,9 +479,17 @@ class HPXMLValidator
           end
         end
         el_type = el.attributes['type']
-        child_node << Tree::TreeNode.new(el_name, el_type)
-        parent_type = el_type
       end
+      if not el_type.nil?
+        Nokogiri::XML::Builder.with(parent_node) do |xml|
+          xml.send(el_name, 'DataType' => el_type)
+        end
+      else
+        Nokogiri::XML::Builder.with(parent_node) do |xml|
+          xml.send(el_name)
+        end
+      end
+      parent_type = el_type
       parent_name = el_name
     end
   end
@@ -719,4 +505,4 @@ class HPXMLValidator
   end
 end
 
-HPXMLValidator.run_validator()
+HPXMLValidator.get_data_type_mapping_xml()

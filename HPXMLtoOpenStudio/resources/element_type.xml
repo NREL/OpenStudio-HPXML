@@ -1,0 +1,503 @@
+<?xml version="1.0"?>
+<root>
+  <XMLType DataType="XMLType"/>
+  <XMLGeneratedBy DataType="XMLGeneratedBy"/>
+  <CreatedDateAndTime DataType="CreatedDateAndTime"/>
+  <Transaction DataType="TransactionType"/>
+  <BuildingID DataType="SystemIdentifiersInfoType"/>
+  <ProjectStatus>
+    <EventType DataType="EventType"/>
+  </ProjectStatus>
+  <BuildingDetails DataType="BuildingDetailsType">
+    <BuildingSummary>
+      <Site/>
+      <BuildingOccupancy>
+        <NumberofResidents DataType="PeopleCount"/>
+      </BuildingOccupancy>
+      <BuildingConstruction>
+        <NumberofConditionedFloors DataType="NumberOfFloorsType"/>
+        <NumberofConditionedFloorsAboveGrade DataType="NumberOfFloorsType"/>
+        <NumberofBedrooms DataType="IntegerGreaterThanOrEqualToZero"/>
+        <ConditionedFloorArea DataType="SurfaceArea"/>
+        <ConditionedBuildingVolume DataType="Volume"/>
+        <AverageCeilingHeight DataType="LengthMeasurement"/>
+      </BuildingConstruction>
+    </BuildingSummary>
+    <ClimateandRiskZones>
+      <ClimateZoneIECC DataType="IECCClimateZoneType">
+        <Year DataType="IECCYear"/>
+        <ClimateZone DataType="ClimateZoneIECC"/>
+      </ClimateZoneIECC>
+      <WeatherStation DataType="WeatherStation">
+        <SystemIdentifier DataType="SystemIdentifiersInfoType"/>
+        <Name DataType="HPXMLString"/>
+        <WMO DataType="HPXMLString"/>
+      </WeatherStation>
+    </ClimateandRiskZones>
+    <Enclosure DataType="Enclosure">
+      <AirInfiltration>
+        <AirInfiltrationMeasurement DataType="AirInfiltrationMeasurementType">
+          <SystemIdentifier DataType="SystemIdentifiersInfoType"/>
+          <HousePressure DataType="HousePressure"/>
+          <BuildingAirLeakage>
+            <UnitofMeasure DataType="BuildingAirLeakageUnit"/>
+            <AirLeakage DataType="BuildingAirLeakage"/>
+          </BuildingAirLeakage>
+          <InfiltrationVolume DataType="HPXMLDouble"/>
+        </AirInfiltrationMeasurement>
+      </AirInfiltration>
+      <Roofs>
+        <Roof>
+          <SystemIdentifier DataType="SystemIdentifiersInfoType"/>
+          <InteriorAdjacentTo DataType="AdjacentTo"/>
+          <Area DataType="SurfaceArea"/>
+          <Azimuth DataType="AzimuthType"/>
+          <SolarAbsorptance DataType="SolarAbsorptance"/>
+          <Emittance DataType="Emittance"/>
+          <Pitch DataType="Pitch"/>
+          <RadiantBarrier DataType="HPXMLBoolean"/>
+          <Insulation DataType="InsulationInfo">
+            <SystemIdentifier DataType="SystemIdentifiersInfoType"/>
+            <AssemblyEffectiveRValue DataType="RValue"/>
+          </Insulation>
+        </Roof>
+      </Roofs>
+      <Walls>
+        <Wall>
+          <SystemIdentifier DataType="SystemIdentifiersInfoType"/>
+          <ExteriorAdjacentTo DataType="AdjacentTo"/>
+          <InteriorAdjacentTo DataType="AdjacentTo"/>
+          <WallType DataType="WallType">
+            <WoodStud/>
+            <DoubleWoodStud/>
+            <ConcreteMasonryUnit/>
+            <StructurallyInsulatedPanel/>
+            <InsulatedConcreteForms/>
+            <SteelFrame/>
+            <SolidConcrete/>
+            <StructuralBrick/>
+            <StrawBale/>
+            <Stone/>
+            <LogWall/>
+          </WallType>
+          <Area DataType="SurfaceArea"/>
+          <Azimuth DataType="AzimuthType"/>
+          <SolarAbsorptance DataType="SolarAbsorptance"/>
+          <Emittance DataType="Emittance"/>
+          <Insulation DataType="InsulationInfo">
+            <SystemIdentifier DataType="SystemIdentifiersInfoType"/>
+            <AssemblyEffectiveRValue DataType="RValue"/>
+          </Insulation>
+        </Wall>
+      </Walls>
+      <RimJoists>
+        <RimJoist>
+          <SystemIdentifier DataType="SystemIdentifiersInfoType"/>
+          <ExteriorAdjacentTo DataType="AdjacentTo"/>
+          <InteriorAdjacentTo DataType="AdjacentTo"/>
+          <Area DataType="SurfaceArea"/>
+          <Azimuth DataType="AzimuthType"/>
+          <SolarAbsorptance DataType="SolarAbsorptance"/>
+          <Emittance DataType="Emittance"/>
+          <Insulation DataType="InsulationInfo">
+            <SystemIdentifier DataType="SystemIdentifiersInfoType"/>
+            <AssemblyEffectiveRValue DataType="RValue"/>
+          </Insulation>
+        </RimJoist>
+      </RimJoists>
+      <FoundationWalls>
+        <FoundationWall>
+          <SystemIdentifier DataType="SystemIdentifiersInfoType"/>
+          <ExteriorAdjacentTo DataType="AdjacentTo"/>
+          <InteriorAdjacentTo DataType="AdjacentTo"/>
+          <Height DataType="LengthMeasurement"/>
+          <Area DataType="SurfaceArea"/>
+          <Azimuth DataType="AzimuthType"/>
+          <Thickness DataType="LengthMeasurement"/>
+          <DepthBelowGrade DataType="LengthMeasurement"/>
+          <Insulation DataType="InsulationInfo">
+            <SystemIdentifier DataType="SystemIdentifiersInfoType"/>
+            <Layer>
+              <InstallationType DataType="InstallationType"/>
+              <NominalRValue DataType="RValue"/>
+            </Layer>
+            <AssemblyEffectiveRValue DataType="RValue"/>
+          </Insulation>
+        </FoundationWall>
+      </FoundationWalls>
+      <FrameFloors>
+        <FrameFloor>
+          <SystemIdentifier DataType="SystemIdentifiersInfoType"/>
+          <ExteriorAdjacentTo DataType="AdjacentTo"/>
+          <InteriorAdjacentTo DataType="AdjacentTo"/>
+          <Area DataType="SurfaceArea"/>
+          <Insulation DataType="InsulationInfo">
+            <SystemIdentifier DataType="SystemIdentifiersInfoType"/>
+            <AssemblyEffectiveRValue DataType="RValue"/>
+          </Insulation>
+        </FrameFloor>
+      </FrameFloors>
+      <Slabs>
+        <Slab>
+          <SystemIdentifier DataType="SystemIdentifiersInfoType"/>
+          <InteriorAdjacentTo DataType="AdjacentTo"/>
+          <Area DataType="SurfaceArea"/>
+          <Thickness DataType="LengthMeasurement"/>
+          <ExposedPerimeter DataType="LengthMeasurement"/>
+          <PerimeterInsulationDepth DataType="LengthMeasurement"/>
+          <UnderSlabInsulationWidth DataType="LengthMeasurement"/>
+          <UnderSlabInsulationSpansEntireSlab DataType="HPXMLBoolean"/>
+          <DepthBelowGrade DataType="LengthMeasurement"/>
+          <PerimeterInsulation DataType="InsulationInfo">
+            <SystemIdentifier DataType="SystemIdentifiersInfoType"/>
+            <Layer>
+              <NominalRValue DataType="RValue"/>
+              <InstallationType DataType="InstallationType"/>
+            </Layer>
+          </PerimeterInsulation>
+          <UnderSlabInsulation DataType="InsulationInfo">
+            <SystemIdentifier DataType="SystemIdentifiersInfoType"/>
+            <Layer>
+              <InstallationType DataType="InstallationType"/>
+              <NominalRValue DataType="RValue"/>
+            </Layer>
+          </UnderSlabInsulation>
+        </Slab>
+      </Slabs>
+      <Windows>
+        <Window>
+          <SystemIdentifier DataType="SystemIdentifiersInfoType"/>
+          <Area DataType="SurfaceArea"/>
+          <Azimuth DataType="AzimuthType"/>
+          <UFactor DataType="UFactor"/>
+          <SHGC DataType="SHGC"/>
+          <InteriorShading>
+            <SummerShadingCoefficient DataType="Fraction"/>
+            <WinterShadingCoefficient DataType="Fraction"/>
+          </InteriorShading>
+          <Overhangs>
+            <Depth DataType="LengthMeasurement"/>
+            <DistanceToTopOfWindow DataType="LengthMeasurement"/>
+            <DistanceToBottomOfWindow DataType="LengthMeasurement"/>
+          </Overhangs>
+          <FractionOperable DataType="HPXMLBoolean"/>
+          <AttachedToWall DataType="LocalReference"/>
+        </Window>
+      </Windows>
+      <Skylights>
+        <Skylight>
+          <SystemIdentifier DataType="SystemIdentifiersInfoType"/>
+          <Area DataType="SurfaceArea"/>
+          <Azimuth DataType="AzimuthType"/>
+          <UFactor DataType="UFactor"/>
+          <SHGC DataType="SHGC"/>
+          <AttachedToRoof DataType="LocalReference"/>
+        </Skylight>
+      </Skylights>
+      <Doors>
+        <Door>
+          <SystemIdentifier DataType="SystemIdentifiersInfoType"/>
+          <AttachedToWall DataType="LocalReference"/>
+          <Area DataType="SurfaceArea"/>
+          <Azimuth DataType="AzimuthType"/>
+          <RValue DataType="RValue"/>
+        </Door>
+      </Doors>
+      <Attics>
+        <Attic>
+          <AtticType DataType="AtticType">
+            <Attic>
+              <Vented DataType="HPXMLBoolean"/>
+            </Attic>
+          </AtticType>
+          <VentilationRate DataType="VentilationType">
+            <UnitofMeasure DataType="VentilationUnit"/>
+            <Value DataType="BuildingAirLeakage"/>
+          </VentilationRate>
+        </Attic>
+      </Attics>
+      <Foundations>
+        <Foundation>
+          <FoundationType DataType="FoundationType">
+            <Crawlspace>
+              <Vented DataType="HPXMLBoolean"/>
+            </Crawlspace>
+          </FoundationType>
+          <VentilationRate DataType="VentilationType">
+            <UnitofMeasure DataType="VentilationUnit"/>
+            <Value DataType="BuildingAirLeakage"/>
+          </VentilationRate>
+        </Foundation>
+      </Foundations>
+    </Enclosure>
+    <Systems DataType="Systems">
+      <HVAC>
+        <HVACPlant>
+          <HeatingSystem DataType="HeatingSystemInfoType">
+            <SystemIdentifier DataType="SystemIdentifiersInfoType"/>
+            <HeatingCapacity DataType="Capacity"/>
+            <FractionHeatLoadServed DataType="Fraction"/>
+            <ElectricAuxiliaryEnergy DataType="HPXMLDouble"/>
+            <HeatingSystemType DataType="HeatingSystemType">
+              <Boiler/>
+              <ElectricResistance/>
+              <Furnace/>
+              <WallFurnace DataType="WallAndFloorFurnace"/>
+              <Stove/>
+              <PortableHeater/>
+            </HeatingSystemType>
+            <DistributionSystem DataType="LocalReference"/>
+            <HeatingSystemFuel DataType="FuelType"/>
+            <AnnualHeatingEfficiency DataType="HeatingEfficiencyType">
+              <Units DataType="HeatingEfficiencyUnits"/>
+              <Value DataType="Efficiency"/>
+            </AnnualHeatingEfficiency>
+          </HeatingSystem>
+          <CoolingSystem DataType="CoolingSystemInfoType">
+            <SystemIdentifier DataType="SystemIdentifiersInfoType"/>
+            <CoolingCapacity DataType="HPXMLDouble"/>
+            <FractionCoolLoadServed DataType="Fraction"/>
+            <CoolingSystemType DataType="CoolingSystemType"/>
+            <DistributionSystem DataType="LocalReference"/>
+            <CoolingSystemFuel DataType="FuelType"/>
+            <AnnualCoolingEfficiency DataType="CoolingEfficiencyType">
+              <Units DataType="CoolingEfficiencyUnits"/>
+              <Value DataType="Efficiency"/>
+            </AnnualCoolingEfficiency>
+            <SensibleHeatFraction DataType="Fraction"/>
+            <CompressorType DataType="CompressorType"/>
+          </CoolingSystem>
+          <HeatPump DataType="HeatPumpInfoType">
+            <SystemIdentifier DataType="SystemIdentifiersInfoType"/>
+            <HeatPumpType DataType="HeatPumpType"/>
+            <HeatPumpFuel DataType="FuelType"/>
+            <HeatingCapacity DataType="Capacity"/>
+            <CoolingCapacity DataType="Capacity"/>
+            <CoolingSensibleHeatFraction DataType="Fraction"/>
+            <BackupSystemFuel DataType="FuelType"/>
+            <FractionHeatLoadServed DataType="Fraction"/>
+            <FractionCoolLoadServed DataType="Fraction"/>
+            <DistributionSystem DataType="LocalReference"/>
+            <CompressorType DataType="CompressorType"/>
+            <AnnualCoolingEfficiency DataType="CoolingEfficiencyType">
+              <Units DataType="CoolingEfficiencyUnits"/>
+              <Value DataType="Efficiency"/>
+            </AnnualCoolingEfficiency>
+            <AnnualHeatingEfficiency DataType="HeatingEfficiencyType">
+              <Units DataType="HeatingEfficiencyUnits"/>
+              <Value DataType="Efficiency"/>
+            </AnnualHeatingEfficiency>
+            <HeatingCapacity17F DataType="Capacity"/>
+            <BackupHeatingSwitchoverTemperature DataType="Temperature"/>
+            <BackupAnnualHeatingEfficiency DataType="HeatingEfficiencyType">
+              <Units DataType="HeatingEfficiencyUnits"/>
+              <Value DataType="Efficiency"/>
+            </BackupAnnualHeatingEfficiency>
+            <BackupHeatingCapacity DataType="Capacity"/>
+          </HeatPump>
+        </HVACPlant>
+        <HVACControl DataType="HVACControlType">
+          <SystemIdentifier DataType="SystemIdentifiersInfoType"/>
+          <SetpointTempHeatingSeason DataType="Temperature"/>
+          <SetbackTempHeatingSeason DataType="Temperature"/>
+          <SetupTempCoolingSeason DataType="Temperature"/>
+          <SetpointTempCoolingSeason DataType="Temperature"/>
+          <TotalSetbackHoursperWeekHeating DataType="Hours"/>
+          <TotalSetupHoursperWeekCooling DataType="Hours"/>
+        </HVACControl>
+        <HVACDistribution>
+          <DistributionSystemType>
+            <AirDistribution DataType="AirDistributionInfo">
+              <DuctLeakageMeasurement DataType="DuctLeakageMeasurementType">
+                <DuctLeakage>
+                  <Units DataType="DuctLeakageTestUnitofMeasure"/>
+                  <TotalOrToOutside DataType="DuctLeakageTotalOrToOutside"/>
+                  <Value DataType="MeasuredDuctLeakage"/>
+                </DuctLeakage>
+              </DuctLeakageMeasurement>
+              <Ducts>
+                <DuctType DataType="DuctType"/>
+                <DuctInsulationRValue DataType="RValue"/>
+                <DuctLocation DataType="DuctLocation"/>
+                <DuctSurfaceArea DataType="SurfaceArea"/>
+              </Ducts>
+            </AirDistribution>
+            <Other DataType="HPXMLString"/>
+          </DistributionSystemType>
+          <SystemIdentifier DataType="SystemIdentifiersInfoType"/>
+          <AnnualHeatingDistributionSystemEfficiency DataType="HPXMLDouble"/>
+          <AnnualCoolingDistributionSystemEfficiency DataType="HPXMLDouble"/>
+        </HVACDistribution>
+      </HVAC>
+      <MechanicalVentilation>
+        <VentilationFans>
+          <VentilationFan>
+            <UsedForWholeBuildingVentilation DataType="HPXMLBoolean"/>
+            <UsedForSeasonalCoolingLoadReduction DataType="HPXMLBoolean"/>
+            <SystemIdentifier DataType="SystemIdentifiersInfoType"/>
+            <FanType DataType="VentilationFanType"/>
+            <TestedFlowRate DataType="HPXMLDouble"/>
+            <RatedFlowRate DataType="HPXMLDouble"/>
+            <HoursInOperation DataType="HoursPerDay"/>
+            <FanPower DataType="HPXMLDouble"/>
+            <SensibleRecoveryEfficiency DataType="Fraction"/>
+            <AdjustedSensibleRecoveryEfficiency DataType="Fraction"/>
+            <TotalRecoveryEfficiency DataType="Fraction"/>
+            <AdjustedTotalRecoveryEfficiency DataType="Fraction"/>
+            <AttachedToHVACDistributionSystem DataType="LocalReference"/>
+          </VentilationFan>
+        </VentilationFans>
+      </MechanicalVentilation>
+      <WaterHeating>
+        <WaterHeatingSystem>
+          <SystemIdentifier DataType="SystemIdentifiersInfoType"/>
+          <WaterHeaterType DataType="WaterHeaterType"/>
+          <Location DataType="UnitLocation"/>
+          <FractionDHWLoadServed DataType="Fraction"/>
+          <HotWaterTemperature DataType="Temperature"/>
+          <UsesDesuperheater DataType="HPXMLBoolean"/>
+          <FuelType DataType="FuelType"/>
+          <TankVolume DataType="Volume"/>
+          <HeatingCapacity DataType="Capacity"/>
+          <EnergyFactor DataType="EnergyFactor"/>
+          <UniformEnergyFactor DataType="EnergyFactor"/>
+          <WaterHeaterInsulation>
+            <Jacket>
+              <JacketRValue DataType="RValue"/>
+            </Jacket>
+          </WaterHeaterInsulation>
+          <RecoveryEfficiency DataType="RecoveryEfficiency"/>
+          <PerformanceAdjustment DataType="Fraction"/>
+          <RelatedHVACSystem DataType="LocalReference"/>
+          <StandbyLoss DataType="HPXMLDouble"/>
+        </WaterHeatingSystem>
+        <HotWaterDistribution>
+          <SystemIdentifier DataType="SystemIdentifiersInfoType"/>
+          <SystemType>
+            <Standard>
+              <PipingLength DataType="LengthMeasurement"/>
+            </Standard>
+            <Recirculation>
+              <ControlType DataType="RecirculationControlType"/>
+              <RecirculationPipingLoopLength DataType="LengthMeasurement"/>
+              <BranchPipingLoopLength DataType="LengthMeasurement"/>
+              <PumpPower DataType="Power"/>
+            </Recirculation>
+          </SystemType>
+          <PipeInsulation DataType="PipeInsulationType">
+            <PipeRValue DataType="RValue"/>
+          </PipeInsulation>
+          <DrainWaterHeatRecovery>
+            <FacilitiesConnected DataType="DrainWaterHeatRecoveryFacilitiesConnected"/>
+            <EqualFlow DataType="HPXMLBoolean"/>
+            <Efficiency DataType="Fraction"/>
+          </DrainWaterHeatRecovery>
+        </HotWaterDistribution>
+        <WaterFixture>
+          <SystemIdentifier DataType="SystemIdentifiersInfoType"/>
+          <WaterFixtureType DataType="WaterFixtureType"/>
+          <LowFlow DataType="HPXMLBoolean"/>
+        </WaterFixture>
+      </WaterHeating>
+      <SolarThermal>
+        <SolarThermalSystem>
+          <SystemIdentifier DataType="SystemIdentifiersInfoType"/>
+          <SystemType DataType="SolarThermalSystemType"/>
+          <CollectorArea DataType="SurfaceArea"/>
+          <SolarFraction DataType="SolarFraction"/>
+          <ConnectedTo DataType="LocalReference"/>
+          <CollectorLoopType DataType="SolarThermalCollectorLoopType"/>
+          <CollectorType DataType="SolarThermalCollectorType"/>
+          <CollectorAzimuth DataType="AzimuthType"/>
+          <CollectorTilt DataType="Tilt"/>
+          <CollectorRatedOpticalEfficiency DataType="CollectorRatedOpticalEfficiency"/>
+          <CollectorRatedThermalLosses DataType="CollectorRatedThermalLosses"/>
+          <StorageVolume DataType="Volume"/>
+        </SolarThermalSystem>
+      </SolarThermal>
+      <Photovoltaics>
+        <PVSystem>
+          <SystemIdentifier DataType="SystemIdentifiersInfoType"/>
+          <Location DataType="PVSystemLocation"/>
+          <ModuleType DataType="PVModuleType"/>
+          <Tracking DataType="PVTracking"/>
+          <ArrayAzimuth DataType="AzimuthType"/>
+          <ArrayTilt DataType="Tilt"/>
+          <MaxPowerOutput DataType="Power"/>
+          <InverterEfficiency DataType="Fraction"/>
+          <SystemLossesFraction DataType="Fraction"/>
+          <YearModulesManufactured DataType="Year"/>
+        </PVSystem>
+      </Photovoltaics>
+    </Systems>
+    <Appliances DataType="Appliances">
+      <ClothesWasher DataType="ClothesWasherInfoType">
+        <SystemIdentifier DataType="SystemIdentifiersInfoType"/>
+        <Location DataType="LaundryMachineLocation"/>
+        <ModifiedEnergyFactor DataType="HPXMLDouble"/>
+        <IntegratedModifiedEnergyFactor DataType="HPXMLDouble"/>
+        <Usage DataType="HPXMLDouble"/>
+        <RatedAnnualkWh DataType="RatedAnnualkWh"/>
+        <LabelElectricRate DataType="HPXMLDouble"/>
+        <LabelGasRate DataType="HPXMLDouble"/>
+        <LabelAnnualGasCost DataType="HPXMLDouble"/>
+        <Capacity DataType="HPXMLDouble"/>
+      </ClothesWasher>
+      <ClothesDryer DataType="ClothesDryerInfoType">
+        <SystemIdentifier DataType="SystemIdentifiersInfoType"/>
+        <Location DataType="LaundryMachineLocation"/>
+        <FuelType DataType="FuelType"/>
+        <EnergyFactor DataType="HPXMLDouble"/>
+        <CombinedEnergyFactor DataType="HPXMLDouble"/>
+        <ControlType DataType="ClothesDryerControlType"/>
+      </ClothesDryer>
+      <Dishwasher DataType="DishwasherInfoType">
+        <SystemIdentifier DataType="SystemIdentifiersInfoType"/>
+        <RatedAnnualkWh DataType="RatedAnnualkWh"/>
+        <LabelElectricRate DataType="HPXMLDouble"/>
+        <LabelGasRate DataType="HPXMLDouble"/>
+        <LabelAnnualGasCost DataType="HPXMLDouble"/>
+        <PlaceSettingCapacity DataType="IntegerGreaterThanZero"/>
+      </Dishwasher>
+      <Refrigerator DataType="RefrigeratorInfoType">
+        <SystemIdentifier DataType="SystemIdentifiersInfoType"/>
+        <Location DataType="RefrigeratorLocation"/>
+        <RatedAnnualkWh DataType="RatedAnnualkWh"/>
+      </Refrigerator>
+      <CookingRange DataType="CookingRangeInfoType">
+        <SystemIdentifier DataType="SystemIdentifiersInfoType"/>
+        <FuelType DataType="FuelType"/>
+        <IsInduction DataType="HPXMLBoolean"/>
+      </CookingRange>
+      <Oven DataType="OvenInfoType">
+        <IsConvection DataType="HPXMLBoolean"/>
+      </Oven>
+    </Appliances>
+    <Lighting DataType="Lighting">
+      <CeilingFan>
+        <SystemIdentifier DataType="SystemIdentifiersInfoType"/>
+        <Airflow>
+          <Efficiency DataType="HPXMLDouble"/>
+          <FanSpeed DataType="FanSpeed"/>
+        </Airflow>
+        <Quantity DataType="IntegerGreaterThanZero"/>
+      </CeilingFan>
+      <LightingGroup>
+        <ThirdPartyCertification DataType="LightingThirdPartyCertification"/>
+        <Location DataType="LightingLocation"/>
+        <SystemIdentifier DataType="SystemIdentifiersInfoType"/>
+        <FractionofUnitsInLocation DataType="Fraction"/>
+      </LightingGroup>
+    </Lighting>
+    <MiscLoads DataType="MiscLoads">
+      <PlugLoad>
+        <PlugLoadType DataType="PlugLoadType"/>
+        <SystemIdentifier DataType="SystemIdentifiersInfoType"/>
+        <Load>
+          <Value DataType="HPXMLDouble"/>
+          <Units DataType="PlugLoadUnits"/>
+        </Load>
+      </PlugLoad>
+    </MiscLoads>
+  </BuildingDetails>
+</root>
