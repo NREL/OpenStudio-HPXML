@@ -134,7 +134,7 @@ class HPXMLTest < MiniTest::Test
                                                                               'Expected [1] element(s) but found 0 element(s) for xpath: /HPXML/Building/BuildingDetails/Appliances/Dishwasher: [not(Location)] |',
                                                                               'Expected [1] element(s) but found 0 element(s) for xpath: /HPXML/Building/BuildingDetails/Appliances/Refrigerator: [not(Location)] |',
                                                                               'Expected [1] element(s) but found 0 element(s) for xpath: /HPXML/Building/BuildingDetails/Appliances/CookingRange: [not(Location)] |'],
-                            'attached-multifamily-window-outside-condition.xml' => ["Window 'WindowNorth' cannot be adjacent to 'other multifamily buffer space'. Check parent wall: 'WallMultifamilyBuffer'"],
+                            'attached-multifamily-window-outside-condition.xml' => ["Window 'WindowNorth' cannot be adjacent to 'other multifamily buffer space'. Check parent wall:"],
                             'cfis-with-hydronic-distribution.xml' => ["Attached HVAC distribution system 'HVACDistribution' cannot be hydronic for ventilation fan 'MechanicalVentilation'."],
                             'clothes-dryer-location.xml' => ["ClothesDryer location is 'garage' but building does not have this location specified."],
                             'clothes-washer-location.xml' => ["ClothesWasher location is 'garage' but building does not have this location specified."],
@@ -359,13 +359,35 @@ class HPXMLTest < MiniTest::Test
     end
 
     # Add output variables for CFIS tests
-    @cfis_fan_power_output_var = OpenStudio::Model::OutputVariable.new("#{Constants.ObjectNameMechanicalVentilation} cfis fan power".gsub(' ', '_'), model)
-    @cfis_fan_power_output_var.setReportingFrequency('runperiod')
-    @cfis_fan_power_output_var.setKeyValue('EMS')
+    if xml.include? 'cfis'
+      infil_program = nil
+      model.getEnergyManagementSystemPrograms.each do |ems_program|
+        next unless ems_program.name.to_s.start_with? Constants.ObjectNameInfiltration
+        infil_program = ems_program
+      end
 
-    @cfis_flow_rate_output_var = OpenStudio::Model::OutputVariable.new("#{Constants.ObjectNameMechanicalVentilation} cfis flow rate".gsub(' ', '_'), model)
-    @cfis_flow_rate_output_var.setReportingFrequency('runperiod')
-    @cfis_flow_rate_output_var.setKeyValue('EMS')
+      ems_output_var = OpenStudio::Model::EnergyManagementSystemOutputVariable.new(model, 'CFIS_fan_w')
+      ems_output_var.setName("#{Constants.ObjectNameMechanicalVentilation} cfis fan power".gsub(' ', '_'))
+      ems_output_var.setTypeOfDataInVariable('Averaged')
+      ems_output_var.setUpdateFrequency('ZoneTimestep')
+      ems_output_var.setEMSProgramOrSubroutineName(infil_program)
+      ems_output_var.setUnits('W')
+
+      @cfis_fan_power_output_var = OpenStudio::Model::OutputVariable.new(ems_output_var.name.to_s, model)
+      @cfis_fan_power_output_var.setReportingFrequency('runperiod')
+      @cfis_fan_power_output_var.setKeyValue('EMS')
+
+      ems_output_var = OpenStudio::Model::EnergyManagementSystemOutputVariable.new(model, 'QWHV')
+      ems_output_var.setName("#{Constants.ObjectNameMechanicalVentilation} cfis flow rate".gsub(' ', '_'))
+      ems_output_var.setTypeOfDataInVariable('Averaged')
+      ems_output_var.setUpdateFrequency('ZoneTimestep')
+      ems_output_var.setEMSProgramOrSubroutineName(infil_program)
+      ems_output_var.setUnits('m3/s')
+
+      @cfis_flow_rate_output_var = OpenStudio::Model::OutputVariable.new(ems_output_var.name.to_s, model)
+      @cfis_flow_rate_output_var.setReportingFrequency('runperiod')
+      @cfis_flow_rate_output_var.setKeyValue('EMS')
+    end
 
     # Add output variables for hot water volume
     output_var = OpenStudio::Model::OutputVariable.new('Water Use Equipment Hot Water Volume', model)
@@ -424,6 +446,7 @@ class HPXMLTest < MiniTest::Test
       end
     end
 
+    show_output(runner.result) unless success
     assert_equal(true, success)
 
     annual_csv_path = File.join(rundir, 'results_annual.csv')
