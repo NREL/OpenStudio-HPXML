@@ -3,8 +3,8 @@
   <schema_version>3.0</schema_version>
   <name>he_score_measure</name>
   <uid>013ca589-73ab-451f-afae-dbeb5304dea8</uid>
-  <version_id>78b7e610-c4fa-4f44-8001-2cb6cefc6f18</version_id>
-  <version_modified>20200513T185558Z</version_modified>
+  <version_id>c2c3e187-6817-49b8-8f9b-84b682ca09c7</version_id>
+  <version_modified>20200513T191732Z</version_modified>
   <xml_checksum>2AF3A68E</xml_checksum>
   <class_name>HEScoreMeasure</class_name>
   <display_name>Apply Home Energy Score Ruleset</display_name>
@@ -87,12 +87,6 @@
       <checksum>FBD37897</checksum>
     </file>
     <file>
-      <filename>test_hescore_ruleset.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>test</usage_type>
-      <checksum>43EFF336</checksum>
-    </file>
-    <file>
       <filename>HESruleset.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
@@ -108,6 +102,12 @@
       <filetype>rb</filetype>
       <usage_type>script</usage_type>
       <checksum>17F99D73</checksum>
+    </file>
+    <file>
+      <filename>test_hescore_ruleset.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>test</usage_type>
+      <checksum>6EDB97E3</checksum>
     </file>
   </files>
 </measure>
