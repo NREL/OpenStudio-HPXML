@@ -3791,44 +3791,37 @@ class HVAC
     return hp_min_temp, supp_max_temp
   end
 
-  def self.get_default_duct_surface_area(duct_type, cfa, ncfl, total_cond_flr_area_served, cond_flr_area_served, num_returns)
+  def self.get_default_duct_surface_area(duct_type, f_out, cfa_served, n_returns)
     if duct_type == HPXML::DuctTypeSupply
-      if ncfl == 1
-        return 0.27 * cfa * 1.0 * (cond_flr_area_served / total_cond_flr_area_served)
-      else
-        return 0.27 * cfa * 0.75 * (cond_flr_area_served / total_cond_flr_area_served)
-      end
+      outside_duct_area = 0.27 * cfa_served * f_out
+      inside_duct_area = 0.27 * cfa_served * (1.0 - f_out)
     else
-      if ncfl == 1
-        if num_returns < 6
-          return (0.05 * num_returns) * 1.0 * cfa * (cond_flr_area_served / total_cond_flr_area_served)
-        else
-          return 0.25 * 1.0 * cfa * (cond_flr_area_served / total_cond_flr_area_served)
-        end
-      else
-        if num_returns < 6
-          return (0.05 * num_returns) * 0.75 * cfa * (cond_flr_area_served / total_cond_flr_area_served)
-        else
-          return 0.25 * 0.75 * cfa * (cond_flr_area_served / total_cond_flr_area_served)
-        end
-      end
+      b_r = (n_returns < 6) ? (0.05 * n_returns) : 0.25
+      outside_duct_area = b_r * cfa_served * f_out
+      inside_duct_area = b_r * cfa_served * (1.0 - f_out)
     end
+
+    return outside_duct_area, inside_duct_area
   end
 
   def self.get_default_duct_locations(hpxml)
-    location_hierarchy = [HPXML::LocationBasementConditioned,
-                          HPXML::LocationBasementUnconditioned,
-                          HPXML::LocationCrawlspaceVented,
-                          HPXML::LocationCrawlspaceUnvented,
-                          HPXML::LocationAtticVented,
-                          HPXML::LocationAtticUnvented,
-                          HPXML::LocationGarage,
-                          HPXML::LocationLivingSpace]
+    outside_location_hierarchy = [HPXML::LocationBasementConditioned,
+                                  HPXML::LocationBasementUnconditioned,
+                                  HPXML::LocationCrawlspaceVented,
+                                  HPXML::LocationCrawlspaceUnvented,
+                                  HPXML::LocationAtticVented,
+                                  HPXML::LocationAtticUnvented,
+                                  HPXML::LocationGarage]
 
-    location_hierarchy.each do |space_type|
+    outside_duct_location = nil
+    outside_location_hierarchy.each do |space_type|
       if hpxml.has_space_type(space_type)
-        return space_type
+        outside_duct_location = space_type
+        break
       end
     end
+    inside_duct_location = HPXML::LocationLivingSpace
+
+    return outside_duct_location, inside_duct_location
   end
 end

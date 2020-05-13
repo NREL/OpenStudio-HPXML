@@ -92,7 +92,6 @@ def create_hpxmls
     'invalid_files/water-heater-location-other.xml' => 'base.xml',
     'invalid_files/attached-multifamily-window-outside-condition.xml' => 'base-enclosure-attached-multifamily.xml',
     'invalid_files/missing-duct-location.xml' => 'base-hvac-multiple.xml',
-    'invalid_files/invalid-distribution-cfa-served.xml' => 'base.xml',
     'base-appliances-dehumidifier.xml' => 'base-location-dallas-tx.xml',
     'base-appliances-dehumidifier-ief.xml' => 'base-appliances-dehumidifier.xml',
     'base-appliances-dehumidifier-50percent.xml' => 'base-appliances-dehumidifier.xml',
@@ -3084,8 +3083,6 @@ def set_hpxml_hvac_distributions(hpxml_file, hpxml)
 
       hvac_distribution.ducts[1].duct_location = nil
     end
-  elsif ['invalid_files/invalid-distribution-cfa-served.xml'].include? hpxml_file
-    hpxml.hvac_distributions[0].conditioned_floor_area_served = 2700.1
   end
 end
 

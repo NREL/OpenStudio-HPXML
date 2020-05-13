@@ -587,7 +587,6 @@ class OSModel
       fail 'The location and surface area of all ducts must be provided or blank.'
     end
 
-    total_distribution_cfa_served = get_total_distribution_cfa_served()
     @hpxml.hvac_distributions.each do |hvac_distribution|
       next unless hvac_distribution.distribution_system_type == HPXML::HVACDistributionTypeAir
 
@@ -597,15 +596,31 @@ class OSModel
       end
 
       # Default ducts
+      cfa_served = hvac_distribution.conditioned_floor_area_served
+      n_returns = hvac_distribution.number_of_return_registers
+      f_out = (@ncfl == 1) ? 1.0 : 0.75
+
       supply_ducts = hvac_distribution.ducts.select { |duct| duct.duct_type == HPXML::DuctTypeSupply }
       return_ducts = hvac_distribution.ducts.select { |duct| duct.duct_type == HPXML::DuctTypeReturn }
-
       [supply_ducts, return_ducts].each do |ducts|
         ducts.each do |duct|
           next unless duct.duct_surface_area.nil?
 
-          duct.duct_location = HVAC.get_default_duct_locations(@hpxml)
-          duct.duct_surface_area = HVAC.get_default_duct_surface_area(duct.duct_type, @cfa, @ncfl, total_distribution_cfa_served, hvac_distribution.conditioned_floor_area_served, hvac_distribution.number_of_return_registers) / ducts.size
+          outside_duct_area, inside_duct_area = HVAC.get_default_duct_surface_area(duct.duct_type, f_out, cfa_served, n_returns).map { |area| area / ducts.size }
+          outside_duct_location, inside_duct_location = HVAC.get_default_duct_locations(@hpxml)
+          if outside_duct_location.nil? # If a home doesn't have any non-living spaces (outside living space), place all ducts in living space.
+            duct.duct_surface_area = outside_duct_area + inside_duct_area
+            duct.duct_location = inside_duct_location
+          else
+            duct.duct_surface_area = outside_duct_area
+            duct.duct_location = outside_duct_location
+            if inside_duct_area > 0
+              hvac_distribution.ducts.add(duct_type: duct.duct_type,
+                                          duct_insulation_r_value: duct.duct_insulation_r_value,
+                                          duct_location: inside_duct_location,
+                                          duct_surface_area: inside_duct_area)
+            end
+          end
         end
       end
     end
@@ -4321,20 +4336,6 @@ class OSModel
       end
     end
     return min_neighbor_distance
-  end
-
-  def self.get_total_distribution_cfa_served()
-    total_distribution_cfa_served = 0
-    @hpxml.hvac_distributions.each do |hvac_distribution|
-      next unless hvac_distribution.distribution_system_type == HPXML::HVACDistributionTypeAir
-
-      total_distribution_cfa_served += hvac_distribution.conditioned_floor_area_served
-    end
-    if total_distribution_cfa_served > @cfa
-      fail 'The total conditioned floor area served by the HVAC distribution system(s) is larger than the conditioned floor area of the building.'
-    end
-
-    return total_distribution_cfa_served
   end
 
   def self.get_kiva_instances(fnd_walls, slabs)

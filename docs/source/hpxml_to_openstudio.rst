@@ -453,23 +453,27 @@ other non-freezing space        Non-freezing multifamily space (e.g., parking ga
 
   Specifying a DSE for the HVAC distribution system will NOT be reflected in the raw EnergyPlus simulation outputs, but IS reflected by the SimulationOutputReport reporting measure.
 
-For each duct, ``DuctInsulationRValue`` must be provided. ``DuctLocation`` and ``DuctSurfaceArea`` can be optionally provided; ``DuctLocation`` and ``DuctSurfaceArea`` of all ducts must be provided or blank.
+For each duct, ``DuctInsulationRValue`` must be provided. ``DuctLocation`` and ``DuctSurfaceArea`` can be optionally provided; ``DuctLocation`` and ``DuctSurfaceArea`` of all ducts shall be provided or blank.
 
-If ``DuctLocation`` and ``DuctSurfaceArea`` of all ducts are not provided, the following default values will be used. 
-``DuctLocation`` will be assumed depending on the space type in the building.
+If ``DuctLocation`` and ``DuctSurfaceArea`` of all ducts are not provided, the default values will be used, as shown in the table below. 
+
+``DuctLocation`` will be assumed depending on the number of floors above grade and the space type. If the number of floors above grade is equal to one, all ducts will be located in one of the outside living spaces depending on the presence of space types in the building.
+If the number of floors above grade is greater than one, some parts of ducts will be located in one of the outside living spaces and the other part of ducts will be located in living space.
+If a home doesn't have any outside living spaces, all ducts will be located in living space.
+
 To calculate default ``DuctSurfaceArea``, the total duct surface area of supply and return ducts will first be calculated based on ANSI/ASHRAE Standard 152-2004. 
-Then, the total duct surface areas will be apportioned by the conditioned floor area served by the air distribution system relative to the sum of the conditioned floor area served by all air distribution systems.
+Then, the total duct surface areas will be apportioned by the conditioned floor area served by the air distribution system relative to the conditioned floor area of the building.
 In the equations below, F\ :sub:`out` is 1.0 for single-story houses and 0.75 for houses with more than one story. 
-b\ :sub:`r` is :math:`(0.05 \cdot NumberofReturnRegisters)` if NumberofReturnRegisters is less than 6 and b\ :sub:`r` is 0.25 if NumberofReturnRegisters is greater than or equal to 6. 
-CFA is the conditioned floor area of building in ft².
+b\ :sub:`r` is (0.05 * ``NumberofReturnRegisters``) if ``NumberofReturnRegisters`` is less than 6 and b\ :sub:`r` is 0.25 if ``NumberofReturnRegisters`` is greater than or equal to 6. 
 
-======================================  =============================================================================================================================================================================================================================================================================
+======================================  ======================================================================================================================================================================================================================================
 Element Name                            Default Value
-======================================  =============================================================================================================================================================================================================================================================================
-DuctLocation (supply and return ducts)  Conditioned Basement if present, else Unconditioned Basement if present, else Vented Crawlspace if present, else Unvented Crawlspace if present, else Vented Attic if present, else Unvented Attic if present, else Garage if present, else Living space
-DuctSurfaceArea (supply ducts)          :math:`0.27 \cdot F_{out} \cdot CFA \cdot \frac{CFA_{ServedByAirDistribution}}{SumOfCFA_{ServedByAirDistribution}}`
-DuctSurfaceArea (return ducts)          :math:`b_r \cdot F_{out} \cdot CFA \cdot \frac{CFA_{ServedByAirDistribution}}{SumOfCFA_{ServedByAirDistribution}}`
-======================================  =============================================================================================================================================================================================================================================================================
+======================================  ======================================================================================================================================================================================================================================
+DuctLocation (outside living space)     Conditioned Basement if present, else Unconditioned Basement if present, else Vented Crawlspace if present, else Unvented Crawlspace if present, else Vented Attic if present, else Unvented Attic if present, else Garage if present
+DuctLocation (inside living space)      Living Space
+DuctSurfaceArea (supply ducts)          :math:`0.27 \cdot F_{out} \cdot CFA_{ServedByAirDistribution}`
+DuctSurfaceArea (return ducts)          :math:`b_r \cdot F_{out} \cdot CFA_{ServedByAirDistribution}`
+======================================  ======================================================================================================================================================================================================================================
 
 Mechanical Ventilation
 **********************
