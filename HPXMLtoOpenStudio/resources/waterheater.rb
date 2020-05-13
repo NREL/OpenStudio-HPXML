@@ -1480,11 +1480,14 @@ class Waterheater
   end
 
   def self.create_new_heater(name:, water_heating_system: nil, act_vol:, t_set_c: nil, loc_space:, loc_schedule: nil, model:, ua:, eta_c: nil, oncycle_p: 0.0, is_storage: false, is_combi: false)
+    # storage tank doesn't requier water_heating_system class argument being passed
     if is_storage || is_combi
       fuel = nil
       cap = 0.0
       if is_storage
         tank_type = HPXML::WaterHeaterTypeStorage
+      else
+        tank_type = water_heating_system.water_heater_type
       end
     else
       fuel = water_heating_system.fuel_type
