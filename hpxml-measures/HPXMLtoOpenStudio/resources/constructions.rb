@@ -1,10 +1,5 @@
 # frozen_string_literal: true
 
-require_relative 'constants'
-require_relative 'unit_conversions'
-require_relative 'materials'
-require_relative 'geometry'
-
 class Constructions
   # Container class for walls, floors/ceilings, roofs, etc.
 
@@ -1178,14 +1173,6 @@ class Constructions
     summer = 0.70
     winter = 0.85
     return summer, winter
-  end
-
-  def self.get_default_door_area()
-    return 40.0 # ft2
-  end
-
-  def self.get_default_door_azimuth()
-    return 0 # North
   end
 
   private

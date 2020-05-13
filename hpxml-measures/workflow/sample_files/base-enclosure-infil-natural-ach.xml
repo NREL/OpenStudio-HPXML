@@ -2,7 +2,7 @@
 <HPXML xmlns='http://hpxmlonline.com/2019/10' xmlns:xsi='http://www.w3.org/2001/XMLSchema-instance' xsi:schemaLocation='http://hpxmlonline.com/2019/10' schemaVersion='3.0'>
   <XMLTransactionHeaderInformation>
     <XMLType>HPXML</XMLType>
-    <XMLGeneratedBy>Rakefile</XMLGeneratedBy>
+    <XMLGeneratedBy>tasks.rb</XMLGeneratedBy>
     <CreatedDateAndTime>2000-01-01T00:00:00-07:00</CreatedDateAndTime>
     <Transaction>create</Transaction>
   </XMLTransactionHeaderInformation>
@@ -21,6 +21,7 @@
     <BuildingDetails>
       <BuildingSummary>
         <Site>
+          <SiteType>suburban</SiteType>
           <FuelTypesAvailable>
             <Fuel>electricity</Fuel>
             <Fuel>natural gas</Fuel>
@@ -53,10 +54,9 @@
         <AirInfiltration>
           <AirInfiltrationMeasurement>
             <SystemIdentifier id='InfiltrationMeasurement'/>
-            <HousePressure>50.0</HousePressure>
             <BuildingAirLeakage>
-              <UnitofMeasure>ACH</UnitofMeasure>
-              <AirLeakage>3.0</AirLeakage>
+              <UnitofMeasure>ACHnatural</UnitofMeasure>
+              <AirLeakage>0.67</AirLeakage>
             </BuildingAirLeakage>
             <InfiltrationVolume>21600.0</InfiltrationVolume>
           </AirInfiltrationMeasurement>
@@ -172,34 +172,6 @@
               </Layer>
             </Insulation>
           </FoundationWall>
-          <FoundationWall>
-            <SystemIdentifier id='FoundationWall2'/>
-            <ExteriorAdjacentTo>ground</ExteriorAdjacentTo>
-            <InteriorAdjacentTo>garage</InteriorAdjacentTo>
-            <Height>8.0</Height>
-            <Area>1200.0</Area>
-            <Thickness>8.0</Thickness>
-            <DepthBelowGrade>7.0</DepthBelowGrade>
-            <Insulation>
-              <SystemIdentifier id='FoundationWall2Insulation'/>
-              <Layer>
-                <InstallationType>continuous - exterior</InstallationType>
-                <NominalRValue>8.9</NominalRValue>
-                <extension>
-                  <DistanceToTopOfInsulation>0.0</DistanceToTopOfInsulation>
-                  <DistanceToBottomOfInsulation>8.0</DistanceToBottomOfInsulation>
-                </extension>
-              </Layer>
-              <Layer>
-                <InstallationType>continuous - interior</InstallationType>
-                <NominalRValue>0.0</NominalRValue>
-                <extension>
-                  <DistanceToTopOfInsulation>0.0</DistanceToTopOfInsulation>
-                  <DistanceToBottomOfInsulation>0.0</DistanceToBottomOfInsulation>
-                </extension>
-              </Layer>
-            </Insulation>
-          </FoundationWall>
         </FoundationWalls>
         <FrameFloors>
           <FrameFloor>
@@ -216,13 +188,12 @@
         <Slabs>
           <Slab>
             <SystemIdentifier id='Slab'/>
-            <InteriorAdjacentTo>basement - unconditioned</InteriorAdjacentTo>
+            <InteriorAdjacentTo>basement - conditioned</InteriorAdjacentTo>
             <Area>1350.0</Area>
             <Thickness>4.0</Thickness>
             <ExposedPerimeter>150.0</ExposedPerimeter>
             <PerimeterInsulationDepth>0.0</PerimeterInsulationDepth>
             <UnderSlabInsulationWidth>0.0</UnderSlabInsulationWidth>
-            <DepthBelowGrade>7.0</DepthBelowGrade>
             <PerimeterInsulation>
               <SystemIdentifier id='SlabPerimeterInsulation'/>
               <Layer>
@@ -448,6 +419,7 @@
         </ClothesDryer>
         <Dishwasher>
           <SystemIdentifier id='Dishwasher'/>
+          <Location>living space</Location>
           <RatedAnnualkWh>307.0</RatedAnnualkWh>
           <PlaceSettingCapacity>12</PlaceSettingCapacity>
           <LabelElectricRate>0.12</LabelElectricRate>
@@ -462,6 +434,7 @@
         </Refrigerator>
         <CookingRange>
           <SystemIdentifier id='Range'/>
+          <Location>living space</Location>
           <FuelType>electricity</FuelType>
           <IsInduction>false</IsInduction>
         </CookingRange>
@@ -472,40 +445,76 @@
       </Appliances>
       <Lighting>
         <LightingGroup>
-          <SystemIdentifier id='Lighting_TierI_Interior'/>
+          <SystemIdentifier id='Lighting_CFL_Interior'/>
           <Location>interior</Location>
-          <FractionofUnitsInLocation>0.5</FractionofUnitsInLocation>
-          <ThirdPartyCertification>ERI Tier I</ThirdPartyCertification>
+          <FractionofUnitsInLocation>0.4</FractionofUnitsInLocation>
+          <LightingType>
+            <CompactFluorescent/>
+          </LightingType>
         </LightingGroup>
         <LightingGroup>
-          <SystemIdentifier id='Lighting_TierI_Exterior'/>
+          <SystemIdentifier id='Lighting_CFL_Exterior'/>
           <Location>exterior</Location>
-          <FractionofUnitsInLocation>0.5</FractionofUnitsInLocation>
-          <ThirdPartyCertification>ERI Tier I</ThirdPartyCertification>
+          <FractionofUnitsInLocation>0.4</FractionofUnitsInLocation>
+          <LightingType>
+            <CompactFluorescent/>
+          </LightingType>
         </LightingGroup>
         <LightingGroup>
-          <SystemIdentifier id='Lighting_TierI_Garage'/>
+          <SystemIdentifier id='Lighting_CFL_Garage'/>
           <Location>garage</Location>
-          <FractionofUnitsInLocation>0.5</FractionofUnitsInLocation>
-          <ThirdPartyCertification>ERI Tier I</ThirdPartyCertification>
+          <FractionofUnitsInLocation>0.4</FractionofUnitsInLocation>
+          <LightingType>
+            <CompactFluorescent/>
+          </LightingType>
         </LightingGroup>
         <LightingGroup>
-          <SystemIdentifier id='Lighting_TierII_Interior'/>
+          <SystemIdentifier id='Lighting_LFL_Interior'/>
+          <Location>interior</Location>
+          <FractionofUnitsInLocation>0.1</FractionofUnitsInLocation>
+          <LightingType>
+            <FluorescentTube/>
+          </LightingType>
+        </LightingGroup>
+        <LightingGroup>
+          <SystemIdentifier id='Lighting_LFL_Exterior'/>
+          <Location>exterior</Location>
+          <FractionofUnitsInLocation>0.1</FractionofUnitsInLocation>
+          <LightingType>
+            <FluorescentTube/>
+          </LightingType>
+        </LightingGroup>
+        <LightingGroup>
+          <SystemIdentifier id='Lighting_LFL_Garage'/>
+          <Location>garage</Location>
+          <FractionofUnitsInLocation>0.1</FractionofUnitsInLocation>
+          <LightingType>
+            <FluorescentTube/>
+          </LightingType>
+        </LightingGroup>
+        <LightingGroup>
+          <SystemIdentifier id='Lighting_LED_Interior'/>
           <Location>interior</Location>
           <FractionofUnitsInLocation>0.25</FractionofUnitsInLocation>
-          <ThirdPartyCertification>ERI Tier II</ThirdPartyCertification>
+          <LightingType>
+            <LightEmittingDiode/>
+          </LightingType>
         </LightingGroup>
         <LightingGroup>
-          <SystemIdentifier id='Lighting_TierII_Exterior'/>
+          <SystemIdentifier id='Lighting_LED_Exterior'/>
           <Location>exterior</Location>
           <FractionofUnitsInLocation>0.25</FractionofUnitsInLocation>
-          <ThirdPartyCertification>ERI Tier II</ThirdPartyCertification>
+          <LightingType>
+            <LightEmittingDiode/>
+          </LightingType>
         </LightingGroup>
         <LightingGroup>
-          <SystemIdentifier id='Lighting_TierII_Garage'/>
+          <SystemIdentifier id='Lighting_LED_Garage'/>
           <Location>garage</Location>
           <FractionofUnitsInLocation>0.25</FractionofUnitsInLocation>
-          <ThirdPartyCertification>ERI Tier II</ThirdPartyCertification>
+          <LightingType>
+            <LightEmittingDiode/>
+          </LightingType>
         </LightingGroup>
       </Lighting>
       <MiscLoads>

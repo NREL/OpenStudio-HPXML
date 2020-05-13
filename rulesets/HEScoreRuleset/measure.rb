@@ -1,12 +1,20 @@
 # frozen_string_literal: true
 
-# see the URL below for information on how to write OpenStudio measures
-# http://nrel.github.io/OpenStudio-user-documentation/reference/measure_writing_guide/
-
 require 'openstudio'
 require 'pathname'
-require_relative 'resources/HESruleset'
+require 'csv'
+require 'oga'
+require_relative '../../hpxml-measures/HPXMLtoOpenStudio/resources/airflow'
+require_relative '../../hpxml-measures/HPXMLtoOpenStudio/resources/constructions'
+require_relative '../../hpxml-measures/HPXMLtoOpenStudio/resources/geometry'
+require_relative '../../hpxml-measures/HPXMLtoOpenStudio/resources/hotwater_appliances'
+require_relative '../../hpxml-measures/HPXMLtoOpenStudio/resources/hpxml'
+require_relative '../../hpxml-measures/HPXMLtoOpenStudio/resources/hvac'
+require_relative '../../hpxml-measures/HPXMLtoOpenStudio/resources/lighting'
+require_relative '../../hpxml-measures/HPXMLtoOpenStudio/resources/pv'
+require_relative '../../hpxml-measures/HPXMLtoOpenStudio/resources/unit_conversions'
 require_relative '../../hpxml-measures/HPXMLtoOpenStudio/resources/xmlhelper'
+require_relative 'resources/HESruleset'
 
 # start the measure
 class HEScoreMeasure < OpenStudio::Measure::ModelMeasure
