@@ -61,7 +61,7 @@ class HEScoreRuleset
     @year_built = orig_hpxml.building_construction.year_built
     @nbeds = orig_hpxml.building_construction.number_of_bedrooms
     @cfa = orig_hpxml.building_construction.conditioned_floor_area # ft^2
-    @is_townhouse = (orig_hpxml.building_construction.residential_facility_type == 'single-family attached')
+    @is_townhouse = (orig_hpxml.building_construction.residential_facility_type == HPXML::ResidentialTypeSFA)
     @fnd_areas = get_foundation_areas(orig_hpxml)
     @ducts = get_ducts_details(orig_hpxml)
     @cfa_basement = @fnd_areas[HPXML::LocationBasementConditioned]
