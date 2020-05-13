@@ -584,11 +584,12 @@ class OSModel
       if water_heating_system.energy_factor.nil?
         # allow systems not requiring EF and not specifying fuel type, e.g., indirect water heater
         if not water_heating_system.uniform_energy_factor.nil?
-          water_heating_system.energy_factor = Waterheater.calc_ef_from_uef(water_heating_system.uniform_energy_factor, water_heating_system.water_heater_type, water_heating_system.fuel_type)
+          water_heating_system.energy_factor = Waterheater.calc_ef_from_uef(water_heating_system)
         end
       end
-      if (water_heating_system.water_heater_type == HPXML::WaterHeaterTypeTankless) && water_heating_system.performance_adjustment.nil?
-        water_heating_system.performance_adjustment = Waterheater.get_tankless_cycling_derate()
+      if (water_heating_system.water_heater_type == HPXML::WaterHeaterTypeTankless)
+        water_heating_system.performance_adjustment = Waterheater.get_tankless_cycling_derate() if water_heating_system.performance_adjustment.nil?
+        water_heating_system.heating_capacity = 100000000000.0
       end
       if (water_heating_system.water_heater_type == HPXML::WaterHeaterTypeCombiStorage) && water_heating_system.standby_loss.nil?
         # Use equation fit from AHRI database
@@ -606,7 +607,7 @@ class OSModel
           water_heating_system.tank_volume = Waterheater.get_default_tank_volume(water_heating_system.fuel_type, @nbeds, @nbaths)
         end
         if water_heating_system.recovery_efficiency.nil?
-          water_heating_system.recovery_efficiency = Waterheater.get_default_recovery_efficiency(water_heating_system.fuel_type, water_heating_system.energy_factor)
+          water_heating_system.recovery_efficiency = Waterheater.get_default_recovery_efficiency(water_heating_system)
         end
       end
       if water_heating_system.location.nil?
