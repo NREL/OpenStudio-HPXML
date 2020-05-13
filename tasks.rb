@@ -1,6 +1,14 @@
 # frozen_string_literal: true
 
 def create_hpxmls
+  require 'oga'
+  require_relative 'HPXMLtoOpenStudio/resources/constants'
+  require_relative 'HPXMLtoOpenStudio/resources/hotwater_appliances'
+  require_relative 'HPXMLtoOpenStudio/resources/hpxml'
+  require_relative 'HPXMLtoOpenStudio/resources/misc_loads'
+  require_relative 'HPXMLtoOpenStudio/resources/waterheater'
+  require_relative 'HPXMLtoOpenStudio/resources/xmlhelper'
+
   this_dir = File.dirname(__FILE__)
   sample_files_dir = File.join(this_dir, 'workflow/sample_files')
 
@@ -4003,10 +4011,6 @@ elsif not command_list.include? ARGV[0].to_sym
 end
 
 if ARGV[0].to_sym == :update_measures
-  require_relative 'HPXMLtoOpenStudio/resources/hpxml'
-  require_relative 'HPXMLtoOpenStudio/resources/misc_loads'
-  require_relative 'HPXMLtoOpenStudio/resources/waterheater'
-
   # Prevent NREL error regarding U: drive when not VPNed in
   ENV['HOME'] = 'C:' if !ENV['HOME'].nil? && ENV['HOME'].start_with?('U:')
   ENV['HOMEDRIVE'] = 'C:\\' if !ENV['HOMEDRIVE'].nil? && ENV['HOMEDRIVE'].start_with?('U:')

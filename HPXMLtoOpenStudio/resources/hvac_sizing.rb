@@ -1,12 +1,5 @@
 # frozen_string_literal: true
 
-require_relative 'geometry'
-require_relative 'hvac'
-require_relative 'unit_conversions'
-require_relative 'util'
-require_relative 'schedules'
-require_relative 'constructions'
-
 class HVACSizing
   def self.apply(model, runner, weather, cfa, infilvolume, nbeds, min_neighbor_distance, living_space, debug)
     @runner = runner
