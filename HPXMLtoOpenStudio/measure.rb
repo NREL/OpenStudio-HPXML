@@ -1,29 +1,33 @@
 # frozen_string_literal: true
 
-# see the URL below for information on how to write OpenStudio measures
-# http://nrel.github.io/OpenStudio-user-documentation/reference/measure_writing_guide/
-
+# Require all gems up front; this is much faster than multiple resource
+# files lazy loading as needed, as it prevents multiple lookups for the
+# same gem.
 require 'openstudio'
 require 'pathname'
 require 'csv'
-require_relative 'resources/EPvalidator'
+require 'oga'
 require_relative 'resources/airflow'
 require_relative 'resources/constants'
 require_relative 'resources/constructions'
+require_relative 'resources/EPvalidator'
 require_relative 'resources/geometry'
 require_relative 'resources/hotwater_appliances'
+require_relative 'resources/hpxml'
 require_relative 'resources/hvac'
 require_relative 'resources/hvac_sizing'
 require_relative 'resources/lighting'
 require_relative 'resources/location'
+require_relative 'resources/materials'
 require_relative 'resources/misc_loads'
+require_relative 'resources/psychrometrics'
 require_relative 'resources/pv'
+require_relative 'resources/schedules'
 require_relative 'resources/unit_conversions'
 require_relative 'resources/util'
 require_relative 'resources/waterheater'
 require_relative 'resources/weather'
 require_relative 'resources/xmlhelper'
-require_relative 'resources/hpxml'
 
 # start the measure
 class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure

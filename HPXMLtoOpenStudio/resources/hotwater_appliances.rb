@@ -1,8 +1,5 @@
 # frozen_string_literal: true
 
-require_relative 'constants'
-require_relative 'weather'
-
 class HotWaterAndAppliances
   def self.apply(model, weather, living_space,
                  cfa, nbeds, ncfl, has_uncond_bsmnt, wh_setpoint,

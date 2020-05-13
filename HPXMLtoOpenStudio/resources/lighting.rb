@@ -1,9 +1,5 @@
 # frozen_string_literal: true
 
-require_relative 'schedules'
-require_relative 'geometry'
-require_relative 'unit_conversions'
-
 class Lighting
   def self.apply(model, weather, interior_kwh, garage_kwh, exterior_kwh, cfa, gfa,
                  living_space, garage_space)
