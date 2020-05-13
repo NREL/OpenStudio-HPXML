@@ -1,14 +1,5 @@
 # frozen_string_literal: true
 
-require 'csv'
-require_relative '../../../hpxml-measures/HPXMLtoOpenStudio/resources/airflow'
-require_relative '../../../hpxml-measures/HPXMLtoOpenStudio/resources/constructions'
-require_relative '../../../hpxml-measures/HPXMLtoOpenStudio/resources/geometry'
-require_relative '../../../hpxml-measures/HPXMLtoOpenStudio/resources/hotwater_appliances'
-require_relative '../../../hpxml-measures/HPXMLtoOpenStudio/resources/hpxml'
-require_relative '../../../hpxml-measures/HPXMLtoOpenStudio/resources/lighting'
-require_relative '../../../hpxml-measures/HPXMLtoOpenStudio/resources/pv'
-
 class HEScoreRuleset
   def self.apply_ruleset(orig_hpxml)
     # Create new HPXML object
@@ -413,7 +404,7 @@ class HEScoreRuleset
 
     new_hpxml.doors.add(id: 'Door',
                         wall_idref: front_wall.id,
-                        area: Constructions.get_default_door_area(),
+                        area: 40,
                         azimuth: orientation_to_azimuth(@bldg_orient),
                         r_value: 1.0 / 0.51)
   end
@@ -843,32 +834,14 @@ class HEScoreRuleset
   end
 
   def self.set_lighting(orig_hpxml, new_hpxml)
-    fFI_int, fFI_ext, fFI_grg, fFII_int, fFII_ext, fFII_grg = Lighting.get_reference_fractions()
-
-    new_hpxml.lighting_groups.add(id: 'Lighting_TierI_Interior',
-                                  location: HPXML::LocationInterior,
-                                  fration_of_units_in_location: fFI_int,
-                                  third_party_certification: HPXML::LightingTypeTierI)
-    new_hpxml.lighting_groups.add(id: 'Lighting_TierI_Exterior',
-                                  location: HPXML::LocationExterior,
-                                  fration_of_units_in_location: fFI_ext,
-                                  third_party_certification: HPXML::LightingTypeTierI)
-    new_hpxml.lighting_groups.add(id: 'Lighting_TierI_Garage',
-                                  location: HPXML::LocationGarage,
-                                  fration_of_units_in_location: fFI_grg,
-                                  third_party_certification: HPXML::LightingTypeTierI)
-    new_hpxml.lighting_groups.add(id: 'Lighting_TierII_Interior',
-                                  location: HPXML::LocationInterior,
-                                  fration_of_units_in_location: fFII_int,
-                                  third_party_certification: HPXML::LightingTypeTierII)
-    new_hpxml.lighting_groups.add(id: 'Lighting_TierII_Exterior',
-                                  location: HPXML::LocationExterior,
-                                  fration_of_units_in_location: fFII_ext,
-                                  third_party_certification: HPXML::LightingTypeTierII)
-    new_hpxml.lighting_groups.add(id: 'Lighting_TierII_Garage',
-                                  location: HPXML::LocationGarage,
-                                  fration_of_units_in_location: fFII_grg,
-                                  third_party_certification: HPXML::LightingTypeTierII)
+    ltg_fracs = Lighting.get_default_fractions()
+    ltg_fracs.each_with_index do |(key, fraction), i|
+      location, lighting_type = key
+      new_hpxml.lighting_groups.add(id: "LightingGroup#{i + 1}",
+                                    location: location,
+                                    fraction_of_units_in_location: fraction,
+                                    lighting_type: lighting_type)
+    end
   end
 
   def self.set_ceiling_fans(orig_hpxml, new_hpxml)
