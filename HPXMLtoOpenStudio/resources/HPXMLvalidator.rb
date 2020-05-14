@@ -1,8 +1,6 @@
-require 'json'
-require 'tree'
+require_relative 'xmlhelper'
 require 'rexml/xpath'
 require 'rexml/document'
-require 'nokogiri'
 
 class HPXMLValidator
   def self.get_data_type_mapping_xml()
@@ -366,20 +364,19 @@ class HPXMLValidator
                     "/HPXML/Building/BuildingDetails/MiscLoads/extension/WeekendScheduleFractions",
                     "/HPXML/Building/BuildingDetails/MiscLoads/extension/MonthlyScheduleMultipliers"]
 
-    puts 'run validator!'
+    this_dir = File.dirname(__FILE__)
+    base_el_xsd_path = this_dir + '/BaseElements.xsd'
+    doc_base = XMLHelper.parse_file(base_el_xsd_path)
 
-    if @doc_base.nil?
-      this_dir = File.dirname(__FILE__)
-      base_el_xsd_path = this_dir + '/BaseElements.xsd'
-      @doc_base = REXML::Document.new(File.new(base_el_xsd_path))
-    end
+    type_xml = XMLHelper.create_doc(version = '1.0', encoding = 'UTF-8')
+    type_map = XMLHelper.add_element(type_xml, 'ElementDataTypeMap')
+
     xpath_array.each do |el_path|
       el_array = el_path.split('/').reject { |p| p.empty? }
-      load_or_get_data_type_xsd(el_array)
+      puts type_xml
+      type_xml = load_or_get_data_type_xsd(el_array, type_xml, doc_base)
     end
-
-    xml = @type_xml.to_xml
-    File.write(this_dir + '/element_type.xml', xml)
+    XMLHelper.write_file(type_xml, this_dir + '/element_type.xml')
 
   end
 
@@ -409,33 +406,29 @@ class HPXMLValidator
     end
   end
 
-  def self.load_or_get_data_type_xsd(el_array)
-    if @type_xml.nil?
-      @type_xml = Nokogiri::XML::Builder.new do |xml|
-        xml.root
-      end
-    end
+  def self.load_or_get_data_type_xsd(el_array, type_xml, doc_base)
+    # get element data type from BaseElements.xsd using path
+
     #return @type_map[el_array] if not @type_map[el_array].nil?
     puts ''
     puts '----New element validation required!----'
 
     parent_type = nil
     parent_name = nil
-    # part1: get element data type from BaseElements.xsd using path
 
     el_array.each_with_index do |el_name, i|
       next if i < 2
-      return if el_name == 'extension'
+      return type_xml if el_name == 'extension'
       if i == 2
-        parent_node = @type_xml.doc.xpath('//root').first
+        parent_node = type_xml.root
       else
-        parent_node = @type_xml.doc.xpath('//root/' + el_array.drop(2).take(i-2).join('/')).first
+        parent_node = type_xml.elements['//' + el_array.drop(2).take(i-2).join('/')]
       end
       puts parent_node
       if not parent_node.nil?
-        child_node = @type_xml.doc.xpath('//root/' + el_array.drop(2).take(i-1).join('/')).first
+        child_node = type_xml.elements['//' + el_array.drop(2).take(i-1).join('/')]
         if not child_node.nil?
-          parent_type = child_node.attr('DataType')
+          parent_type = child_node.attributes['DataType']
           parent_name = el_name
           next
         end
@@ -448,31 +441,31 @@ class HPXMLValidator
       puts parent_name
       
       if parent_type.nil? && parent_name.nil?
-        el_type = REXML::XPath.first(@doc_base, "//xs:element[@name='#{el_name}']").attributes['type']
+        el_type = REXML::XPath.first(doc_base, "//xs:element[@name='#{el_name}']").attributes['type']
       else
         if (not parent_name.nil?) && parent_type.nil?
-          el = REXML::XPath.first(@doc_base, "//xs:element[@name='#{parent_name}']//xs:element[@name='#{el_name}']")
+          el = REXML::XPath.first(doc_base, "//xs:element[@name='#{parent_name}']//xs:element[@name='#{el_name}']")
           if el.nil?
-            group_name = REXML::XPath.first(@doc_base, "//xs:element[@name='#{parent_name}']//xs:group").attributes['ref']
+            group_name = REXML::XPath.first(doc_base, "//xs:element[@name='#{parent_name}']//xs:group").attributes['ref']
           end
           while el.nil? do
             puts group_name
-            el = REXML::XPath.first(@doc_base, "//xs:group[@name='#{group_name}']//xs:element[@name='#{el_name}']")
-            group_name = REXML::XPath.first(@doc_base, "//xs:group[@name='#{group_name}']//xs:group").attributes['ref'] if el.nil?
+            el = REXML::XPath.first(doc_base, "//xs:group[@name='#{group_name}']//xs:element[@name='#{el_name}']")
+            group_name = REXML::XPath.first(doc_base, "//xs:group[@name='#{group_name}']//xs:group").attributes['ref'] if el.nil?
           end
         else
-          el = REXML::XPath.first(@doc_base, "//xs:complexType[@name='#{parent_type}']//xs:element[@name='#{el_name}']")
+          el = REXML::XPath.first(doc_base, "//xs:complexType[@name='#{parent_type}']//xs:element[@name='#{el_name}']")
           while el.nil? do
             # this approach can only have one group or one base
-            group = REXML::XPath.first(@doc_base, "//xs:complexType[@name='#{parent_type}']//xs:group")
-            base = REXML::XPath.first(@doc_base, "//xs:complexType[@name='#{parent_type}']//xs:extension")
+            group = REXML::XPath.first(doc_base, "//xs:complexType[@name='#{parent_type}']//xs:group")
+            base = REXML::XPath.first(doc_base, "//xs:complexType[@name='#{parent_type}']//xs:extension")
             if not base.nil? and group.nil?
               base_name = base.attributes['base']
-              el = REXML::XPath.first(@doc_base, "//xs:complexType[@name='#{base_name}']//xs:element[@name='#{el_name}']")
+              el = REXML::XPath.first(doc_base, "//xs:complexType[@name='#{base_name}']//xs:element[@name='#{el_name}']")
               parent_type = base_name
             elsif not group.nil?
               group_name = group.attributes['ref']
-              el = REXML::XPath.first(@doc_base, "//xs:group[@name='#{group_name}']//xs:element[@name='#{el_name}']") unless REXML::XPath.first(@doc_base, "//xs:complexType[@name='#{parent_type}']//xs:group").nil?
+              el = REXML::XPath.first(doc_base, "//xs:group[@name='#{group_name}']//xs:element[@name='#{el_name}']") unless REXML::XPath.first(doc_base, "//xs:complexType[@name='#{parent_type}']//xs:group").nil?
             else
               break
             end
@@ -481,17 +474,16 @@ class HPXMLValidator
         el_type = el.attributes['type']
       end
       if not el_type.nil?
-        Nokogiri::XML::Builder.with(parent_node) do |xml|
-          xml.send(el_name, 'DataType' => el_type)
-        end
+        el = XMLHelper.add_element(parent_node, el_name)
+        XMLHelper.add_attribute(el, 'DataType', el_type)
       else
-        Nokogiri::XML::Builder.with(parent_node) do |xml|
-          xml.send(el_name)
-        end
+        el = XMLHelper.add_element(parent_node, el_name)
       end
       parent_type = el_type
       parent_name = el_name
     end
+
+    return type_xml
   end
 
   def self.combine_into_xpath(parent, child)
@@ -503,6 +495,47 @@ class HPXMLValidator
 
     return [parent, child].join('/')
   end
+  
+  def self.get_complex_type_name(doc_data, simple_type_name)
+    complex_type = REXML::XPath.first(doc_data, "//xs:complexType[xs:simpleContent[xs:extension[@base='#{simple_type_name}']]]")
+    if complex_type.nil?
+      return simple_type_name
+    else
+      return complex_type.attributes['name']
+    end
+  end
+  
+  def self.get_datatype_requirement()
+    # get enums, min/max values from HPXMLDataTypes.xsd
+    this_dir = File.dirname(__FILE__)
+    dt_type_xsd_path = this_dir + '/HPXMLDataTypes.xsd'
+    doc_data = XMLHelper.parse_file(dt_type_xsd_path)
+
+    req_xml = XMLHelper.create_doc(version = '1.0', encoding = 'UTF-8')
+    req_root = XMLHelper.add_element(req_xml, 'DataTypeRequirementMap')
+
+    get_individual_requirement(doc_data, 'enumeration', req_root)
+    get_individual_requirement(doc_data, 'minInclusive', req_root)
+    get_individual_requirement(doc_data, 'minExclusive', req_root)
+    get_individual_requirement(doc_data, 'maxInclusive', req_root)
+    get_individual_requirement(doc_data, 'maxExclusive', req_root)
+
+    XMLHelper.write_file(req_xml, this_dir + '/type_requiment.xml')
+  end
+
+  def self.get_individual_requirement(doc_data, req_name, req_root)
+    doc_data.elements.to_a("//xs:#{req_name}").each do |req_el|
+      simple_type_name = req_el.parent.parent.attributes['name']
+      complex_type_name = get_complex_type_name(doc_data, simple_type_name)
+      complex_type_el = req_root.elements["//#{complex_type_name}"]
+      if complex_type_el.nil?
+        complex_type_el = XMLHelper.add_element(req_root, complex_type_name)
+      end
+      if not req_el.attributes['value'].nil?
+        XMLHelper.add_element(complex_type_el, req_name, req_el.attributes['value'])
+      end
+    end
+  end
 end
 
-HPXMLValidator.get_data_type_mapping_xml()
+HPXMLValidator.get_datatype_requirement()
