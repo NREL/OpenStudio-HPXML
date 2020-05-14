@@ -603,7 +603,6 @@ class OSModel
       # Default ducts
       cfa_served = hvac_distribution.conditioned_floor_area_served
       n_returns = hvac_distribution.number_of_return_registers
-      f_out = (@ncfl == 1) ? 1.0 : 0.75
 
       supply_ducts = hvac_distribution.ducts.select { |duct| duct.duct_type == HPXML::DuctTypeSupply }
       return_ducts = hvac_distribution.ducts.select { |duct| duct.duct_type == HPXML::DuctTypeReturn }
@@ -611,7 +610,7 @@ class OSModel
         ducts.each do |duct|
           next unless duct.duct_surface_area.nil?
 
-          outside_duct_area, inside_duct_area = HVAC.get_default_duct_surface_area(duct.duct_type, f_out, cfa_served, n_returns).map { |area| area / ducts.size }
+          outside_duct_area, inside_duct_area = HVAC.get_default_duct_surface_area(duct.duct_type, @ncfl, cfa_served, n_returns).map { |area| area / ducts.size }
           outside_duct_location, inside_duct_location = HVAC.get_default_duct_locations(@hpxml)
           if outside_duct_location.nil? # If a home doesn't have any non-living spaces (outside living space), place all ducts in living space.
             duct.duct_surface_area = outside_duct_area + inside_duct_area

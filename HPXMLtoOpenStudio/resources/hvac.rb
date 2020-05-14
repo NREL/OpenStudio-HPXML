@@ -3784,11 +3784,14 @@ class HVAC
     return hp_min_temp, supp_max_temp
   end
 
-  def self.get_default_duct_surface_area(duct_type, f_out, cfa_served, n_returns)
+  def self.get_default_duct_surface_area(duct_type, ncfl, cfa_served, n_returns)
+    # Fraction of ducts outside conditioned space
+    f_out = (ncfl == 1) ? 1.0 : 0.75
+
     if duct_type == HPXML::DuctTypeSupply
       outside_duct_area = 0.27 * cfa_served * f_out
       inside_duct_area = 0.27 * cfa_served * (1.0 - f_out)
-    else
+    elsif duct_type == HPXML::DuctTypeReturn
       b_r = (n_returns < 6) ? (0.05 * n_returns) : 0.25
       outside_duct_area = b_r * cfa_served * f_out
       inside_duct_area = b_r * cfa_served * (1.0 - f_out)

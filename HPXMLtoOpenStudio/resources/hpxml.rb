@@ -2802,9 +2802,7 @@ class HPXML < Object
       distribution_system_type_e = XMLHelper.add_element(hvac_distribution, 'DistributionSystemType')
       if [HVACDistributionTypeAir, HVACDistributionTypeHydronic].include? @distribution_system_type
         XMLHelper.add_element(distribution_system_type_e, @distribution_system_type)
-        if @distribution_system_type == HVACDistributionTypeAir
-          XMLHelper.add_element(hvac_distribution, 'ConditionedFloorAreaServed', Float(@conditioned_floor_area_served)) unless @conditioned_floor_area_served.nil?
-        end
+        XMLHelper.add_element(hvac_distribution, 'ConditionedFloorAreaServed', Float(@conditioned_floor_area_served)) unless @conditioned_floor_area_served.nil?
       elsif [HVACDistributionTypeDSE].include? @distribution_system_type
         XMLHelper.add_element(distribution_system_type_e, 'Other', @distribution_system_type)
         XMLHelper.add_element(hvac_distribution, 'AnnualHeatingDistributionSystemEfficiency', to_float(@annual_heating_dse)) unless @annual_heating_dse.nil?
@@ -4226,9 +4224,25 @@ class HPXML < Object
 
     # Check for the sum of CFA served by distribution systems <= CFA
     air_distributions = @hvac_distributions.select { |dist| dist if dist.distribution_system_type == HPXML::HVACDistributionTypeAir }
-    total_dist_cfa_served = air_distributions.map { |air_dist| air_dist.conditioned_floor_area_served }.inject(0, :+)
-    if total_dist_cfa_served > @building_construction.conditioned_floor_area
-      errors << 'The total conditioned floor area served by the HVAC distribution system(s) is larger than the conditioned floor area of the building.'
+    heating_dist = []
+    cooling_dist = []
+    air_distributions.each do |dist|
+      heating_systems = dist.hvac_systems.select { |sys| sys if (sys.respond_to? :fraction_heat_load_served) && (sys.fraction_heat_load_served > 0) }
+      cooling_systems = dist.hvac_systems.select { |sys| sys if (sys.respond_to? :fraction_cool_load_served) && (sys.fraction_cool_load_served > 0) }
+      if heating_systems.any? { |sys| sys.distribution_system_idref == dist.id }
+        heating_dist << dist
+      end
+      if cooling_systems.any? { |sys| sys.distribution_system_idref == dist.id }
+        cooling_dist << dist
+      end
+    end
+    heating_total_dist_cfa_served = heating_dist.map { |htg_dist| htg_dist.conditioned_floor_area_served }.inject(0, :+)
+    cooling_total_dist_cfa_served = cooling_dist.map { |clg_dist| clg_dist.conditioned_floor_area_served }.inject(0, :+)
+    if (heating_total_dist_cfa_served > @building_construction.conditioned_floor_area)
+      errors << 'The total conditioned floor area served by the HVAC distribution system(s) for heating is larger than the conditioned floor area of the building.'
+    end
+    if (cooling_total_dist_cfa_served > @building_construction.conditioned_floor_area)
+      errors << 'The total conditioned floor area served by the HVAC distribution system(s) for cooling is larger than the conditioned floor area of the building.'
     end
 
     # ------------------------------- #
