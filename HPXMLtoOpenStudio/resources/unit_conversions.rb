@@ -1,5 +1,4 @@
-require_relative 'constants'
-require_relative 'hpxml'
+# frozen_string_literal: true
 
 class UnitConversions
   # As there is a performance penalty to using OpenStudio's built-in unit convert()

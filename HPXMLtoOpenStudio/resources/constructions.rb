@@ -1,7 +1,4 @@
-require_relative 'constants'
-require_relative 'unit_conversions'
-require_relative 'materials'
-require_relative 'geometry'
+# frozen_string_literal: true
 
 class Constructions
   # Container class for walls, floors/ceilings, roofs, etc.
@@ -9,7 +6,7 @@ class Constructions
   def self.apply_wood_stud_wall(model, surfaces, constr_name,
                                 cavity_r, install_grade, cavity_depth_in, cavity_filled,
                                 framing_factor, drywall_thick_in, osb_thick_in,
-                                rigid_r, mat_ext_finish)
+                                rigid_r, mat_ext_finish, otherside_drywall_thick_in = 0)
 
     return if surfaces.empty?
 
@@ -49,6 +46,9 @@ class Constructions
       constr.add_layer(mat_ext_finish)
     else # interior wall
       constr.add_layer(Material.AirFilmVertical)
+    end
+    if otherside_drywall_thick_in > 0 # E.g., interior partition wall
+      constr.add_layer(Material.GypsumWall(otherside_drywall_thick_in))
     end
     if not mat_rigid.nil?
       constr.add_layer(mat_rigid)
@@ -971,7 +971,7 @@ class Constructions
 
     Constructions.apply_wood_stud_wall(model, imdefs, constr_name,
                                        0, 1, 3.5, false, 0.16,
-                                       drywall_thick_in, 0, 0, nil)
+                                       drywall_thick_in, 0, 0, nil, drywall_thick_in)
   end
 
   def self.apply_furniture(model, mass_lb_per_sqft, density_lb_per_cuft,
@@ -1078,18 +1078,6 @@ class Constructions
     return
   end
 
-  def self.get_default_frame_wall_ufactor(iecc_zone)
-    # Table 4.2.2(2) - Component Heat Transfer Characteristics for Reference Home
-    # Frame Wall U-Factor
-    if ['1A', '1B', '1C', '2A', '2B', '2C', '3A', '3B', '3C', '4A', '4B'].include? iecc_zone
-      return 0.082
-    elsif ['4C', '5A', '5B', '5C', '6A', '6B', '6C'].include? iecc_zone
-      return 0.060
-    elsif ['7', '8'].include? iecc_zone
-      return 0.057
-    end
-  end
-
   def self.get_roofing_materials
     mats = []
     mats << Material.RoofingAsphaltShinglesDark
@@ -1181,87 +1169,10 @@ class Constructions
     return
   end
 
-  def self.get_default_floor_ufactor(iecc_zone)
-    # Table 4.2.2(2) - Component Heat Transfer Characteristics for Reference Home
-    # Floor Over Unconditioned Space U-Factor
-    if ['1A', '1B', '1C', '2A', '2B', '2C'].include? iecc_zone
-      return 0.064
-    elsif ['3A', '3B', '3C', '4A', '4B'].include? iecc_zone
-      return 0.047
-    elsif ['4C', '5A', '5B', '5C', '6A', '6B', '6C', '7', '8'].include? iecc_zone
-      return 0.033
-    end
-  end
-
-  def self.get_default_ceiling_ufactor(iecc_zone)
-    # Table 4.2.2(2) - Component Heat Transfer Characteristics for Reference Home
-    # Ceiling U-Factor
-    if ['1A', '1B', '1C', '2A', '2B', '2C', '3A', '3B', '3C'].include? iecc_zone
-      return 0.035
-    elsif ['4A', '4B', '4C', '5A', '5B', '5C'].include? iecc_zone
-      return 0.030
-    elsif ['6A', '6B', '6C', '7', '8'].include? iecc_zone
-      return 0.026
-    end
-  end
-
-  def self.get_default_basement_wall_ufactor(iecc_zone)
-    # Table 4.2.2(2) - Component Heat Transfer Characteristics for Reference Home
-    # Basement Wall U-Factor
-    if ['1A', '1B', '1C', '2A', '2B', '2C', '3A', '3B', '3C'].include? iecc_zone
-      return 0.360
-    elsif ['4A', '4B', '4C', '5A', '5B', '5C', '6A', '6B', '6C', '7', '8'].include? iecc_zone
-      return 0.059
-    end
-  end
-
-  def self.get_default_slab_perimeter_rvalue_depth(iecc_zone)
-    # Table 4.2.2(2) - Component Heat Transfer Characteristics for Reference Home
-    # Slab-on-Grade R-Value & Depth (ft)
-    if ['1A', '1B', '1C', '2A', '2B', '2C', '3A', '3B', '3C'].include? iecc_zone
-      return 0.0, 0.0
-    elsif ['4A', '4B', '4C', '5A', '5B', '5C'].include? iecc_zone
-      return 10.0, 2.0
-    elsif ['6A', '6B', '6C', '7', '8'].include? iecc_zone
-      return 10.0, 4.0
-    end
-  end
-
-  def self.get_default_slab_under_rvalue_width()
-    return 0.0, 0.0
-  end
-
   def self.get_default_interior_shading_factors()
     summer = 0.70
     winter = 0.85
     return summer, winter
-  end
-
-  def self.get_default_ufactor_shgc(iecc_zone)
-    # Table 4.2.2(2) - Component Heat Transfer Characteristics for Reference Home
-    # Fenestration and Opaque Door U-Factor
-    # Glazed Fenestration Assembly SHGC
-    if ['1A', '1B', '1C'].include? iecc_zone
-      return 1.2, 0.40
-    elsif ['2A', '2B', '2C'].include? iecc_zone
-      return 0.75, 0.40
-    elsif ['3A', '3B', '3C'].include? iecc_zone
-      return 0.65, 0.40
-    elsif ['4A', '4B'].include? iecc_zone
-      return 0.40, 0.40
-    elsif ['4C', '5A', '5B', '5C', '6A', '6B', '6C', '7', '8'].include? iecc_zone
-      return 0.35, 0.40
-    end
-  end
-
-  def self.get_default_door_area()
-    # Table 4.2.2(1) Specifications for the Reference and Rated Homes - Doors
-    return 40.0
-  end
-
-  def self.get_default_door_azimuth()
-    # Table 4.2.2(1) Specifications for the Reference and Rated Homes - Doors
-    return 0 # North
   end
 
   private

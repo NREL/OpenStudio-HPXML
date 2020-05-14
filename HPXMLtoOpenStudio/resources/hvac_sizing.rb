@@ -1,9 +1,4 @@
-require_relative 'geometry'
-require_relative 'hvac'
-require_relative 'unit_conversions'
-require_relative 'util'
-require_relative 'schedules'
-require_relative 'constructions'
+# frozen_string_literal: true
 
 class HVACSizing
   def self.apply(model, runner, weather, cfa, infilvolume, nbeds, min_neighbor_distance, living_space, debug)
@@ -130,6 +125,12 @@ class HVACSizing
     # Outside
     @cool_design_temps[nil] = weather.design.CoolingDrybulb
     @heat_design_temps[nil] = weather.design.HeatingDrybulb
+
+    # MF spaces
+    [HPXML::LocationOtherHousingUnit, HPXML::LocationOtherHeatedSpace, HPXML::LocationOtherMultifamilyBufferSpace, HPXML::LocationOtherNonFreezingSpace].each do |mf_space|
+      @cool_design_temps[mf_space] = get_other_side_temp(mf_space, @cool_setpoint, weather.design.CoolingDrybulb)
+      @heat_design_temps[mf_space] = get_other_side_temp(mf_space, @heat_setpoint, weather.design.HeatingDrybulb)
+    end
 
     # Initialize Manual J buffer space temperatures using current design temperatures
     @model_spaces.each do |space|
@@ -358,17 +359,17 @@ class HVACSizing
   def self.process_zone_loads(model, weather)
     # Constant loads (no variation throughout day)
     zone_loads = ZoneLoads.new
-    zone_loads = process_load_windows_skylights(@cond_zone, zone_loads, weather)
-    zone_loads = process_load_doors(@cond_zone, zone_loads, weather)
-    zone_loads = process_load_walls(@cond_zone, zone_loads, weather)
-    zone_loads = process_load_roofs(@cond_zone, zone_loads, weather)
-    zone_loads = process_load_floors(@cond_zone, zone_loads, weather)
+    zone_loads = process_load_windows_skylights(zone_loads, weather)
+    zone_loads = process_load_doors(zone_loads, weather)
+    zone_loads = process_load_walls(zone_loads, weather)
+    zone_loads = process_load_roofs(zone_loads, weather)
+    zone_loads = process_load_floors(zone_loads, weather)
     zone_loads = process_infiltration_ventilation(model, @cond_zone, zone_loads, weather)
     zone_loads = process_internal_gains(@cond_zone, zone_loads)
     return zone_loads
   end
 
-  def self.process_load_windows_skylights(thermal_zone, zone_loads, weather)
+  def self.process_load_windows_skylights(zone_loads, weather)
     '''
     Heating and Cooling Loads: Windows & Skylights
     '''
@@ -504,7 +505,7 @@ class HVACSizing
     alp_load = 0.0 # Average Load Procedure (ALP) Load
     afl_hr = [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0] # Initialize Hourly Aggregate Fenestration Load (AFL)
 
-    Geometry.get_spaces_above_grade_exterior_walls(thermal_zone.spaces).each do |wall|
+    Geometry.get_spaces_above_grade_exterior_walls(@cond_space).each do |wall|
       wall_true_azimuth = true_azimuth(wall)
       cnt225 = (wall_true_azimuth / 22.5).round.to_i
 
@@ -657,7 +658,7 @@ class HVACSizing
     alp_load = 0.0 # Average Load Procedure (ALP) Load
     afl_hr = [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0] # Initialize Hourly Aggregate Fenestration Load (AFL)
 
-    Geometry.get_spaces_above_grade_exterior_roofs(thermal_zone.spaces).each do |roof|
+    Geometry.get_spaces_above_grade_exterior_roofs(@cond_space).each do |roof|
       roof_true_azimuth = true_azimuth(roof)
       cnt225 = (roof_true_azimuth / 22.5).round.to_i
       inclination_angle = Geometry.get_roof_pitch([roof])
@@ -742,7 +743,7 @@ class HVACSizing
     return zone_loads
   end
 
-  def self.process_load_doors(thermal_zone, zone_loads, weather)
+  def self.process_load_doors(zone_loads, weather)
     '''
     Heating and Cooling Loads: Doors
     '''
@@ -758,7 +759,7 @@ class HVACSizing
     zone_loads.Heat_Doors = 0.0
     zone_loads.Cool_Doors = 0.0
 
-    Geometry.get_spaces_above_grade_exterior_walls(thermal_zone.spaces).each do |wall|
+    Geometry.get_spaces_above_grade_exterior_walls(@cond_space).each do |wall|
       wall.subSurfaces.each do |door|
         next if not door.subSurfaceType.downcase.include?('door')
 
@@ -769,10 +770,24 @@ class HVACSizing
       end
     end
 
+    Geometry.get_sfa_mf_space_walls(@cond_space).each do |wall|
+      # parent wall level other side coefficient info, unique object throughout model named the same as mf space name
+      adjacent_space_name = wall.surfacePropertyOtherSideCoefficients.get.name.to_s
+      # door calculation
+      wall.subSurfaces.each do |door|
+        next if not door.subSurfaceType.downcase.include?('door')
+
+        door_ufactor = get_surface_ufactor(door, door.subSurfaceType)
+
+        zone_loads.Cool_Doors += door_ufactor * UnitConversions.convert(door.netArea, 'm^2', 'ft^2') * (@cool_design_temps[adjacent_space_name] - @cool_setpoint)
+        zone_loads.Heat_Doors += door_ufactor * UnitConversions.convert(door.netArea, 'm^2', 'ft^2') * (@heat_setpoint - @heat_design_temps[adjacent_space_name])
+      end
+    end
+
     return zone_loads
   end
 
-  def self.process_load_walls(thermal_zone, zone_loads, weather)
+  def self.process_load_walls(zone_loads, weather)
     '''
     Heating and Cooling Loads: Walls
     '''
@@ -782,7 +797,7 @@ class HVACSizing
     surfaces_processed = []
 
     # Above-Grade Exterior Walls
-    Geometry.get_spaces_above_grade_exterior_walls(thermal_zone.spaces).each do |wall|
+    Geometry.get_spaces_above_grade_exterior_walls(@cond_space).each do |wall|
       wallGroup = get_wallgroup(wall)
 
       # Adjust base Cooling Load Temperature Difference (CLTD)
@@ -831,7 +846,7 @@ class HVACSizing
     end
 
     # Interzonal Walls
-    Geometry.get_spaces_interzonal_walls(thermal_zone.spaces).each do |wall|
+    Geometry.get_spaces_interzonal_walls(@cond_space).each do |wall|
       wall_ufactor = get_surface_ufactor(wall, wall.surfaceType)
 
       adjacent_space = wall.adjacentSurface.get.space.get
@@ -840,8 +855,18 @@ class HVACSizing
       surfaces_processed << wall.name.to_s
     end
 
+    # Mf walls
+    Geometry.get_sfa_mf_space_walls(@cond_space).each do |wall|
+      wall_ufactor = get_surface_ufactor(wall, wall.surfaceType)
+
+      adjacent_space_name = wall.surfacePropertyOtherSideCoefficients.get.name.to_s
+      zone_loads.Cool_Walls += wall_ufactor * UnitConversions.convert(wall.netArea, 'm^2', 'ft^2') * (@cool_design_temps[adjacent_space_name] - @cool_setpoint)
+      zone_loads.Heat_Walls += wall_ufactor * UnitConversions.convert(wall.netArea, 'm^2', 'ft^2') * (@heat_setpoint - @heat_design_temps[adjacent_space_name])
+      surfaces_processed << wall.name.to_s
+    end
+
     # Foundation walls
-    Geometry.get_spaces_below_grade_exterior_walls(thermal_zone.spaces).each do |wall|
+    Geometry.get_spaces_below_grade_exterior_walls(@cond_space).each do |wall|
       u_wall_with_soil, u_wall_without_soil, is_insulated = get_foundation_wall_props(wall)
 
       zone_loads.Heat_Walls += u_wall_with_soil * UnitConversions.convert(wall.netArea, 'm^2', 'ft^2') * @htd
@@ -855,7 +880,7 @@ class HVACSizing
     return zone_loads
   end
 
-  def self.process_load_roofs(thermal_zone, zone_loads, weather)
+  def self.process_load_roofs(zone_loads, weather)
     '''
     Heating and Cooling Loads: Ceilings
     '''
@@ -867,7 +892,7 @@ class HVACSizing
     surfaces_processed = []
 
     # Roofs
-    Geometry.get_spaces_above_grade_exterior_roofs(thermal_zone.spaces).each do |roof|
+    Geometry.get_spaces_above_grade_exterior_roofs(@cond_space).each do |roof|
       roof_color = get_feature(roof, Constants.SizingInfoRoofColor, 'string')
       roof_material = get_feature(roof, Constants.SizingInfoRoofMaterial, 'string')
       cavity_r = get_feature(roof, Constants.SizingInfoRoofCavityRvalue, 'double')
@@ -925,7 +950,7 @@ class HVACSizing
     return zone_loads
   end
 
-  def self.process_load_floors(thermal_zone, zone_loads, weather)
+  def self.process_load_floors(zone_loads, weather)
     '''
     Heating and Cooling Loads: Floors
     '''
@@ -935,7 +960,7 @@ class HVACSizing
     surfaces_processed = []
 
     # Exterior Floors
-    Geometry.get_spaces_above_grade_exterior_floors(thermal_zone.spaces).each do |floor|
+    Geometry.get_spaces_above_grade_exterior_floors(@cond_space).each do |floor|
       floor_ufactor = get_surface_ufactor(floor, floor.surfaceType)
 
       zone_loads.Cool_Floors += floor_ufactor * UnitConversions.convert(floor.netArea, 'm^2', 'ft^2') * (@ctd - 5.0 + @daily_range_temp_adjust[@daily_range_num])
@@ -944,7 +969,7 @@ class HVACSizing
     end
 
     # Interzonal Floors
-    Geometry.get_spaces_interzonal_floors_and_ceilings(thermal_zone.spaces).each do |floor|
+    Geometry.get_spaces_interzonal_floors_and_ceilings(@cond_space).each do |floor|
       floor_ufactor = get_surface_ufactor(floor, floor.surfaceType)
 
       adjacent_space = floor.adjacentSurface.get.space.get
@@ -953,8 +978,18 @@ class HVACSizing
       surfaces_processed << floor.name.to_s
     end
 
+    # MF Floors
+    Geometry.get_sfa_mf_space_floors_and_ceilings(@cond_space).each do |floor|
+      floor_ufactor = get_surface_ufactor(floor, floor.surfaceType)
+
+      adjacent_space_name = floor.surfacePropertyOtherSideCoefficients.get.name.to_s
+      zone_loads.Cool_Floors += floor_ufactor * UnitConversions.convert(floor.netArea, 'm^2', 'ft^2') * (@cool_design_temps[adjacent_space_name] - @cool_setpoint)
+      zone_loads.Heat_Floors += floor_ufactor * UnitConversions.convert(floor.netArea, 'm^2', 'ft^2') * (@heat_setpoint - @heat_design_temps[adjacent_space_name])
+      surfaces_processed << floor.name.to_s
+    end
+
     # Foundation Floors
-    Geometry.get_spaces_below_grade_exterior_floors(thermal_zone.spaces).each do |floor|
+    Geometry.get_spaces_below_grade_exterior_floors(@cond_space).each do |floor|
       # Conditioned basement floor combinations based on MJ 8th Ed. A12-7 and ASHRAE HoF 2013 pg 18.31 Eq 40
       k_soil = UnitConversions.convert(BaseMaterial.Soil.k_in, 'in', 'ft')
       r_other = Material.Concrete(4.0).rvalue + Material.AirFilmFloorAverage.rvalue
@@ -967,7 +1002,7 @@ class HVACSizing
     end
 
     # Ground Floors (Slab)
-    Geometry.get_spaces_above_grade_ground_floors(thermal_zone.spaces).each do |floor|
+    Geometry.get_spaces_above_grade_ground_floors(@cond_space).each do |floor|
       floor_ufactor = 1.0 / get_feature(floor, Constants.SizingInfoSlabRvalue, 'double')
       zone_loads.Heat_Floors += floor_ufactor * UnitConversions.convert(floor.netArea, 'm^2', 'ft^2') * (@heat_setpoint - weather.data.GroundMonthlyTemps[0])
       surfaces_processed << floor.name.to_s
@@ -1139,7 +1174,7 @@ class HVACSizing
 
     dse_Fregain = nil
 
-    if duct.LocationSpace.nil? # Outside
+    if duct.LocationSpace.nil? || ([HPXML::LocationOtherHousingUnit, HPXML::LocationOtherHeatedSpace, HPXML::LocationOtherMultifamilyBufferSpace, HPXML::LocationOtherNonFreezingSpace].include? duct.LocationSpace) # Outside or MF spaces
       dse_Fregain = 0.0
 
     elsif Geometry.is_unconditioned_basement(duct.LocationSpace)
@@ -1189,7 +1224,7 @@ class HVACSizing
     elsif Geometry.is_garage(duct.LocationSpace)
       dse_Fregain = 0.05
 
-    elsif Geometry.is_living(duct.LocationSpace) || Geometry.is_conditioned_attic(duct.LocationSpace)
+    elsif Geometry.is_living(duct.LocationSpace)
       dse_Fregain = 1.0
 
     else
@@ -1663,7 +1698,7 @@ class HVACSizing
 
       loop_flow = [1.0, UnitConversions.convert([hvac_final_values.Heat_Capacity, hvac_final_values.Cool_Capacity].max, 'Btu/hr', 'ton')].max.floor * 3.0
 
-      if (hvac.GSHP_BoreHoles == Constants.SizingAuto) && (hvac.GSHP_BoreDepth == Constants.SizingAuto)
+      if hvac.GSHP_BoreHoles.nil? && hvac.GSHP_BoreDepth.nil?
         hvac.GSHP_BoreHoles = [1, (UnitConversions.convert(hvac_final_values.Cool_Capacity, 'Btu/hr', 'ton') + 0.5).floor].max
         hvac.GSHP_BoreDepth = (bore_length / hvac.GSHP_BoreHoles).floor
         min_bore_depth = 0.15 * hvac.GSHP_BoreSpacing # 0.15 is the maximum Spacing2DepthRatio defined for the G-function
@@ -1680,10 +1715,10 @@ class HVACSizing
 
         hvac.GSHP_BoreDepth = (bore_length / hvac.GSHP_BoreHoles).floor + 5
 
-      elsif (hvac.GSHP_BoreHoles == Constants.SizingAuto) && (hvac.GSHP_BoreDepth != Constants.SizingAuto)
+      elsif hvac.GSHP_BoreHoles.nil? && (not hvac.GSHP_BoreDepth.nil?)
         hvac.GSHP_BoreHoles = (bore_length / hvac.GSHP_BoreDepth.to_f + 0.5).floor
         hvac.GSHP_BoreDepth = hvac.GSHP_BoreDepth.to_f
-      elsif (hvac.GSHP_BoreHoles != Constants.SizingAuto) && (hvac.GSHP_BoreDepth == Constants.SizingAuto)
+      elsif (not hvac.GSHP_BoreHoles.nil?) && hvac.GSHP_BoreDepth.nil?
         hvac.GSHP_BoreHoles = hvac.GSHP_BoreHoles.to_f
         hvac.GSHP_BoreDepth = (bore_length / hvac.GSHP_BoreHoles).floor + 5
       else
@@ -1694,7 +1729,7 @@ class HVACSizing
 
       bore_length = hvac.GSHP_BoreDepth * hvac.GSHP_BoreHoles
 
-      if hvac.GSHP_BoreConfig == Constants.SizingAuto
+      if hvac.GSHP_BoreConfig.nil?
         if hvac.GSHP_BoreHoles == 1
           hvac.GSHP_BoreConfig = Constants.BoreConfigSingle
         elsif hvac.GSHP_BoreHoles == 2
@@ -1872,27 +1907,25 @@ class HVACSizing
   end
 
   def self.get_ventilation_rates(model)
-    mechVentType = get_feature(model.getBuilding, Constants.SizingInfoMechVentType, 'string')
-    mechVentWholeHouseRate = get_feature(model.getBuilding, Constants.SizingInfoMechVentWholeHouseRate, 'double')
+    mechVentType = get_feature(model.getBuilding, Constants.SizingInfoMechVentType, 'string', false)
+    return [0.0, 0.0, 0.0] if mechVentType.nil?
 
-    q_unb = 0.0
-    q_bal_Sens = 0.0
-    q_bal_Lat = 0.0
+    mechVentWholeHouseRate = get_feature(model.getBuilding, Constants.SizingInfoMechVentWholeHouseRate, 'double')
 
     if [HPXML::MechVentTypeExhaust, HPXML::MechVentTypeSupply, HPXML::MechVentTypeCFIS].include? mechVentType
       q_unb = mechVentWholeHouseRate
+      q_bal_sens = 0.0
+      q_bal_lat = 0.0
     elsif [HPXML::MechVentTypeBalanced, HPXML::MechVentTypeERV, HPXML::MechVentTypeHRV].include? mechVentType
       totalEfficiency = get_feature(model.getBuilding, Constants.SizingInfoMechVentTotalEfficiency, 'double')
       apparentSensibleEffectiveness = get_feature(model.getBuilding, Constants.SizingInfoMechVentApparentSensibleEffectiveness, 'double')
       latentEffectiveness = get_feature(model.getBuilding, Constants.SizingInfoMechVentLatentEffectiveness, 'double')
-
-      q_bal_Sens = mechVentWholeHouseRate * (1.0 - apparentSensibleEffectiveness)
-      q_bal_Lat = mechVentWholeHouseRate * (1.0 - latentEffectiveness)
-    elsif mechVentType.length > 0
-      fail "Unexpected mechanical ventilation type: #{mechVentType}."
+      q_unb = 0.0
+      q_bal_sens = mechVentWholeHouseRate * (1.0 - apparentSensibleEffectiveness)
+      q_bal_lat = mechVentWholeHouseRate * (1.0 - latentEffectiveness)
     end
 
-    return [q_unb, q_bal_Sens, q_bal_Lat]
+    return [q_unb, q_bal_sens, q_bal_lat]
   end
 
   def self.get_fenestration_shgc(surface)
@@ -2010,7 +2043,8 @@ class HVACSizing
     ducts = []
 
     # Has ducts?
-    has_ducts = get_feature(air_loop, Constants.SizingInfoDuctExist, 'boolean')
+    has_ducts = get_feature(air_loop, Constants.SizingInfoDuctExist, 'boolean', false)
+    return ducts if ducts.nil?
 
     # Leakage values
     leakage_fracs = get_feature(air_loop, Constants.SizingInfoDuctLeakageFracs, 'string', false)
@@ -2034,13 +2068,17 @@ class HVACSizing
     rvalues = rvalues.split(',').map(&:to_f)
 
     # Locations
-    locations = get_feature(air_loop, Constants.SizingInfoDuctLocationZones, 'string')
+    locations = get_feature(air_loop, Constants.SizingInfoDuctLocationHandles, 'string')
     locations = locations.split(',')
     location_spaces = []
     thermal_zones = Geometry.get_thermal_zones_from_spaces(@model_spaces)
     locations.each do |location|
       if location == HPXML::LocationOutside
         location_spaces << nil
+        next
+      elsif [HPXML::LocationOtherHousingUnit, HPXML::LocationOtherHeatedSpace, HPXML::LocationOtherMultifamilyBufferSpace, HPXML::LocationOtherNonFreezingSpace].include? location
+        # schedule name
+        location_spaces << location
         next
       end
 
@@ -2313,8 +2351,11 @@ class HVACSizing
 
         hvac.GSHP_BoreSpacing = get_feature(equip, Constants.SizingInfoGSHPBoreSpacing, 'double')
         hvac.GSHP_BoreHoles = get_feature(equip, Constants.SizingInfoGSHPBoreHoles, 'string')
+        hvac.GSHP_BoreHoles = nil if hvac.GSHP_BoreHoles.empty?
         hvac.GSHP_BoreDepth = get_feature(equip, Constants.SizingInfoGSHPBoreDepth, 'string')
+        hvac.GSHP_BoreDepth = nil if hvac.GSHP_BoreDepth.empty?
         hvac.GSHP_BoreConfig = get_feature(equip, Constants.SizingInfoGSHPBoreConfig, 'string')
+        hvac.GSHP_BoreConfig = nil if hvac.GSHP_BoreConfig.empty?
         hvac.GSHP_SpacingType = get_feature(equip, Constants.SizingInfoGSHPUTubeSpacingType, 'string')
       elsif not clg_coil.nil?
         fail "Unexpected cooling coil: #{clg_coil.name}."
@@ -2355,12 +2396,7 @@ class HVACSizing
           hvac.FixedHeatingCapacity = UnitConversions.convert(htg_coil.heatingDesignCapacity.get, 'W', 'ton')
         end
 
-        htg_coil.plantLoop.get.components.each do |component|
-          if component.to_BoilerHotWater.is_initialized
-            boiler = component.to_BoilerHotWater.get
-            hvac.BoilerDesignTemp = UnitConversions.convert(boiler.designWaterOutletTemperature.get, 'C', 'F')
-          end
-        end
+        hvac.BoilerDesignTemp = UnitConversions.convert(htg_coil.plantLoop.get.sizingPlant.designLoopExitTemperature, 'C', 'F')
 
       elsif htg_coil.is_a? OpenStudio::Model::CoilHeatingDXSingleSpeed
         hvac.NumSpeedsHeating = 1
@@ -2599,6 +2635,18 @@ class HVACSizing
     end
 
     return design_temp
+  end
+
+  def self.get_other_side_temp(adjacent_space_name, setpoint, oa_db)
+    if adjacent_space_name == HPXML::LocationOtherHeatedSpace
+      return [(setpoint + oa_db) / 2, 68].max
+    elsif adjacent_space_name == HPXML::LocationOtherMultifamilyBufferSpace
+      return [(setpoint + oa_db) / 2, 50].max
+    elsif adjacent_space_name == HPXML::LocationOtherNonFreezingSpace
+      return [oa_db, 40].max
+    elsif [HPXML::LocationOtherHousingUnit].include? adjacent_space_name
+      return setpoint
+    end
   end
 
   def self.get_wallgroup(wall)
@@ -3118,9 +3166,9 @@ class HVACSizing
     # Calculated based on Manual J 8th Ed. procedure in section A12-4 (15% decrease due to soil thermal storage)
     u_wall_with_soil = 0.0
     u_wall_without_soil = 0.0
-    wall_height_ft = Geometry.get_surface_height(surface).round
+    wall_height_ft = Geometry.get_surface_height(surface).ceil
     for d in 1..wall_height_ft
-      r_soil = (Math::PI * d / 2.0) / k_soil
+      r_soil = (Math::PI * d / 2.0) / k_soil # FIXME: Should this be (d-wall_height_ag) instead of d?
 
       # Calculate R-wall at this depth
       r_wall = wall_constr_rvalue + Material.AirFilmVertical.rvalue # Base wall construction + interior film
@@ -3303,7 +3351,7 @@ class HVACSizing
         fan_power = [2.79 * hvac_final_values.Cool_Airflow**-0.29, 0.6].min # fit of efficacy to air flow from the CEC listed equipment  W/cfm
         fan_eff = 0.75 # Overall Efficiency of the Fan, Motor and Drive
         fan.setFanEfficiency(fan_eff)
-        fan.setPressureRise(HVAC.calculate_fan_pressure_rise(fan_eff, fan_power))
+        fan.setPressureRise(HVAC.calc_fan_pressure_rise(fan_eff, fan_power))
 
         @cond_zone.airLoopHVACTerminals.each do |aterm|
           next if air_loop != aterm.airLoopHVAC.get

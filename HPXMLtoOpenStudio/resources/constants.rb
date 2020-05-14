@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 class Constants
   # Numbers --------------------
 
@@ -223,6 +225,14 @@ class Constants
     return 'dishwasher'
   end
 
+  def self.ObjectNameDistributionWaste
+    return 'dhw distribution waste'
+  end
+
+  def self.ObjectNameDucts
+    return 'ducts'
+  end
+
   def self.ObjectNameElectricBaseboard
     return 'baseboard'
   end
@@ -367,6 +377,10 @@ class Constants
     return 'unit heater'
   end
 
+  def self.ObjectNameWater
+    return 'water'
+  end
+
   def self.ObjectNameWaterHeater
     return 'water heater'
   end
@@ -377,14 +391,6 @@ class Constants
 
   def self.ObjectNameDesuperheater(water_heater_name)
     return "#{water_heater_name} Desuperheater"
-  end
-
-  def self.ObjectNameDesuperheaterEnergy(water_heater_name)
-    return "#{water_heater_name} Desuperheater energy"
-  end
-
-  def self.ObjectNameDesuperheaterLoad(water_heater_name)
-    return "#{water_heater_name} Desuperheater load"
   end
 
   def self.ObjectNameTankHX
@@ -459,10 +465,6 @@ class Constants
     return 'None'
   end
 
-  def self.SizingAuto
-    return 'autosize'
-  end
-
   def self.SizingInfoCMUWallFurringInsRvalue
     return __method__.to_s
   end
@@ -475,7 +477,7 @@ class Constants
     return __method__.to_s
   end
 
-  def self.SizingInfoDuctLocationZones
+  def self.SizingInfoDuctLocationHandles
     return __method__.to_s
   end
 
@@ -649,30 +651,6 @@ class Constants
 
   def self.SizingInfoZoneInfiltrationCFM
     return __method__.to_s
-  end
-
-  def self.SizingInfoZoneInfiltrationELA
-    return __method__.to_s
-  end
-
-  def self.TerrainOcean
-    return 'ocean'
-  end
-
-  def self.TerrainPlains
-    return 'plains'
-  end
-
-  def self.TerrainRural
-    return 'rural'
-  end
-
-  def self.TerrainSuburban
-    return 'suburban'
-  end
-
-  def self.TerrainCity
-    return 'city'
   end
 
   def self.BAZoneHotDry

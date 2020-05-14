@@ -1,4 +1,4 @@
-require_relative 'unit_conversions'
+# frozen_string_literal: true
 
 # Annual schedule defined by 12 24-hour values for weekdays and weekends.
 class HourlyByMonthSchedule

@@ -317,6 +317,11 @@
 							<xs:documentation>$</xs:documentation>
 						</xs:annotation>
 					</xs:element>
+					<xs:element minOccurs="0" name="LabelUsage" type="HPXMLDouble">
+						<xs:annotation>
+							<xs:documentation>loads/week per the Energy Guide label</xs:documentation>
+						</xs:annotation>
+					</xs:element>
 					<xs:element minOccurs="0" name="Capacity" type="HPXMLDouble">
 						<xs:annotation>
 							<xs:documentation>ft^3</xs:documentation>
@@ -360,6 +365,11 @@
 					<xs:element minOccurs="0" name="LabelAnnualGasCost" type="HPXMLDouble">
 						<xs:annotation>
 							<xs:documentation>$</xs:documentation>
+						</xs:annotation>
+					</xs:element>
+					<xs:element minOccurs="0" name="LabelUsage" type="HPXMLDouble">
+						<xs:annotation>
+							<xs:documentation>loads/week per the Energy Guide label</xs:documentation>
 						</xs:annotation>
 					</xs:element>
 					<xs:element ref="extension" minOccurs="0"/>
@@ -1312,6 +1322,11 @@
 												<xs:element minOccurs="0" ref="ConnectedDevice"/>
 												<xs:element minOccurs="0" name="Manufacturer" type="HPXMLString"/>
 												<xs:element minOccurs="0" name="SerialNumber" type="HPXMLString"/>
+												<xs:element minOccurs="0" name="Quantity" type="IntegerGreaterThanZero">
+													<xs:annotation>
+														<xs:documentation>Number of similar ventilation fans (e.g., bath fans).</xs:documentation>
+													</xs:annotation>
+												</xs:element>
 												<xs:element minOccurs="0" name="FanType" type="VentilationFanType"/>
 												<xs:element minOccurs="0" name="RatedFlowRate" type="HPXMLDouble">
 													<xs:annotation>
@@ -1732,6 +1747,7 @@
 								<xs:attribute name="dataSource" type="DataSource"/>
 							</xs:complexType>
 						</xs:element>
+						<xs:element minOccurs="0" ref="extension"/>
 					</xs:sequence>
 					<xs:attribute name="dataSource" type="DataSource"/>
 				</xs:complexType>

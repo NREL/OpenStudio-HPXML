@@ -12,22 +12,8 @@ The following building features/technologies are available for modeling via the 
 
 - Enclosure
 
-  - Attics
-  
-    - Vented
-    - Unvented
-    - Conditioned
-    - Radiant Barriers
-    
-  - Foundations
-  
-    - Slab
-    - Unconditioned Basement
-    - Conditioned Basement
-    - Vented Crawlspace
-    - Unvented Crawlspace
-    - Ambient
-    
+  - Attics (Vented, Unvented, Conditioned)
+  - Foundations (Slab, Unconditioned Basement, Conditioned Basement, Vented Crawlspace, Unvented Crawlspace, Ambient)
   - Garages
   - Windows & Overhangs
   - Skylights
@@ -35,68 +21,30 @@ The following building features/technologies are available for modeling via the 
   
 - HVAC
 
-  - Heating Systems
-  
-    - Electric Resistance
-    - Furnaces
-    - Wall Furnaces & Stoves
-    - Boilers
-    - Portable Heaters
-    
-  - Cooling Systems
-  
-    - Central Air Conditioners
-    - Room Air Conditioners
-    - Evaporative Coolers
-    
-  - Heat Pumps
-  
-    - Air Source Heat Pumps
-    - Mini Split Heat Pumps
-    - Ground Source Heat Pumps
-    - Dual-Fuel Heat Pumps
-    
+  - Heating Systems (Electric Resistance, Furnaces, Wall Furnaces, Stoves, Boilers, Portable Heaters)
+  - Cooling Systems (Central Air Conditioners, Room Air Conditioners, Evaporative Coolers)
+  - Heat Pumps (Air Source, Mini Split, Ground Source, Dual-Fuel)
   - Setpoints
   - Ducts
   
 - Water Heating
 
-  - Water Heaters
-  
-    - Storage Tank
-    - Instantaneous Tankless
-    - Heat Pump Water Heater
-    - Indirect Water Heater (Combination Boiler)
-    - Tankless Coil (Combination Boiler)
-
+  - Water Heaters (Storage, Tankless, Heat Pump, Indirect, Tankless Coil)
   - Solar Hot Water
-  - Desuperheaters
-  - Hot Water Distribution
-  
-    - Recirculation
-    
+  - Desuperheater
+  - Hot Water Distribution (Standard, Recirculation)
   - Drain Water Heat Recovery
-  - Low-Flow Fixtures
+  - Hot Water Fixtures
   
-- Mechanical Ventilation
+- Ventilation
 
-  - Exhaust Only
-  - Supply Only
-  - Balanced
-  - Energy Recovery Ventilator
-  - Heat Recovery Ventilator
-  - Central Fan Integrated Supply
-  
-- Whole House Fan
+  - Mechanical Ventilation (Exhaust, Supply, Balanced, ERV, HRV, CFIS)
+  - Kitchen/Bathroom Fans
+  - Whole House Fan
+
 - Photovoltaics
-- Appliances
-
-  - Clothes Washer
-  - Clothes Dryer
-  - Dishwasher
-  - Refrigerator
-  - Cooking Range/Oven
-  
+- Appliances (Clothes Washer/Dryer, Dishwasher, Refrigerator, Cooking Range/Oven)
+- Dehumidifier
 - Lighting
 - Ceiling Fans
 - Plug Loads
@@ -125,12 +73,9 @@ The simulation controls currently offered are timestep, begin month, begin day o
 Timestep can be optionally provided as ``Timestep``, where the value is in minutes and must be a divisor of 60.
 If not provided, the default value of 60 is used.
 
-Begin month and end month can be optionally provided as ``BeginMonth`` and ``EndMonth``, respectively, where the value is an integer and must be between 1 and 12.
-Begin day of month and end day of month can be optionally provided as ``BeginDayOfMonth`` and ``EndDayOfMonth``, respectively, where the value is an integer and must have a valid number of days depending on the begin month.
-Either both, or neither, ``BeginMonth`` and ``BeginDayOfMonth`` or ``EndMonth`` and ``EndDayOfMonth`` must be provided.
-If not provided, the default value of 1/1 (January 1st) and 12/31 (December 31st), respectively, will be used.
-
-You cannot supply a combination of ``BeginMonth`` and ``BeginDayOfMonth`` that occurs after the supplied combination of ``EndMonth`` and ``EndDayOfMonth`` (e.g., a run period from 10/1 to 3/31 is invalid).
+The simulation run period can be optionally specified with ``BeginMonth``/``BeginDayOfMonth`` and/or ``EndMonth``/``EndDayOfMonth``.
+The ``BeginMonth``/``BeginDayOfMonth`` provided must occur before ``EndMonth``/``EndDayOfMonth`` provided (e.g., a run period from 10/1 to 3/31 is invalid).
+If not provided, default values of January 1st and December 31st will be used.
 
 Building Details
 ~~~~~~~~~~~~~~~~
@@ -144,6 +89,10 @@ This section describes elements specified in HPXML's ``BuildingSummary``.
 It is used for high-level building information including conditioned floor area, number of bedrooms, number of residents, number of conditioned floors, etc.
 Most occupancy assumptions are based on the number of bedrooms, while the number of residents is solely used to determine heat gains from the occupants themselves.
 Note that a walkout basement should be included in ``NumberofConditionedFloorsAboveGrade``.
+
+If ``NumberofBathrooms`` is not provided, it is calculated using the following equation based on the `Building America House Simulation Protocols <https://www1.eere.energy.gov/buildings/publications/pdfs/building_america/house_simulation.pdf>`_.
+
+.. math:: NumberofBathrooms = \frac{NumberofBedrooms}{2} + 0.5
 
 Shading due to neighboring buildings can be defined inside an ``Site/extension/Neighbors`` element.
 Each ``Neighbors/NeighborBuilding`` element is required to have an ``Azimuth`` and ``Distance`` from the house.
@@ -163,7 +112,7 @@ Shelter Coefficient  Description
 0.3                  Complete shielding with large buildings immediately adjacent
 ===================  =========================================================================
 
-The terrain surrounding the building is assumed to be suburban.
+The terrain surrounding the building can be entered as ``Site/SiteType``; if not provided, it is assumed to be suburban.
 
 Weather File
 ~~~~~~~~~~~~
@@ -171,9 +120,9 @@ Weather File
 The ``ClimateandRiskZones/WeatherStation`` element specifies the EnergyPlus weather file (EPW) to be used in the simulation.
 The weather file can be entered in one of two ways:
 
-#. Using the ``WeatherStation/WMO``, which must be one of the acceptable TMY3 WMO station numbers found in the ``weather/data.csv`` file.
+#. Using ``WeatherStation/WMO``, which must be one of the acceptable TMY3 WMO station numbers found in the ``weather/data.csv`` file.
    The full set of U.S. TMY3 weather files can be `downloaded here <https://data.nrel.gov/files/128/tmy3s-cache-csv.zip>`_.
-#. Using the ``WeatherStation/extension/EPWFileName``.
+#. Using ``WeatherStation/extension/EPWFilePath``.
 
 Enclosure
 ~~~~~~~~~
@@ -182,22 +131,26 @@ This section describes elements specified in HPXML's ``Enclosure``.
 
 All surfaces that bound different space types in the building (i.e., not just thermal boundary surfaces) must be specified in the HPXML file.
 For example, an attached garage would generally be defined by walls adjacent to conditioned space, walls adjacent to outdoors, a slab, and a roof or ceiling.
+For software tools that do not collect sufficient inputs for every required surface, the software developers will need to make assumptions about these surfaces or collect additional input.
 
 The space types used in the HPXML building description are:
 
-============================  ===================================
-Space Type                    Notes
-============================  ===================================
-living space                  Above-grade conditioned floor area.
+==============================  ====================================================================  ==============================================================
+Space Type                      Description                                                           Temperature Assumption
+==============================  ====================================================================  ==============================================================
+living space                    Above-grade conditioned floor area.
 attic - vented            
 attic - unvented          
-basement - conditioned        Below-grade conditioned floor area.
+basement - conditioned          Below-grade conditioned floor area.
 basement - unconditioned  
 crawlspace - vented       
 crawlspace - unvented     
 garage                    
-other housing unit            Used to specify adiabatic surfaces.
-============================  ===================================
+other housing unit              Conditioned space of an adjacent attached housing unit.               Same as conditioned space.
+other heated space              Heated multifamily space (e.g., shared laundry or equipment.)         Average of conditioned space and outside; minimum of 68F.
+other multifamily buffer space  Unconditioned multifamily space (e.g., enclosed unheated stairwell).  Average of conditioned space and outside; minimum of 50F.
+other non-freezing space        Non-freezing multifamily space (e.g., parking garage ceiling).        Floats with outside; minimum of 40F.
+==============================  ====================================================================  ==============================================================
 
 .. warning::
 
@@ -211,8 +164,12 @@ Thus, software tools can choose to use a single wall (or roof) surface to repres
 Air Leakage
 ***********
 
-Building air leakage characterized by air changes per hour or cfm at 50 pascals pressure difference (ACH50 or CFM50) is entered at ``Enclosure/AirInfiltration/AirInfiltrationMeasurement/BuildingAirLeakage/AirLeakage``.
-The ``Enclosure/AirInfiltration/AirInfiltrationMeasurement`` should be specified with ``HousePressure='50'`` and ``BuildingAirLeakage/UnitofMeasure='ACH'`` or ``BuildingAirLeakage/UnitofMeasure='CFM'``.
+Building air leakage is entered using ``Enclosure/AirInfiltration/AirInfiltrationMeasurement``.
+Air leakage can be provided in one of three ways:
+
+#. nACH (natural air changes per hour): Use ``BuildingAirLeakage/UnitofMeasure='ACHnatural'``
+#. ACH50 (air changes per hour at 50Pa): Use ``BuildingAirLeakage/UnitofMeasure='ACH'`` and ``HousePressure='50'``
+#. CFM50 (cubic feet per minute at 50Pa): Use ``BuildingAirLeakage/UnitofMeasure='CFM'`` and ``HousePressure='50'``
 
 In addition, the building's volume associated with the air leakage measurement can be provided in HPXML's ``AirInfiltrationMeasurement/InfiltrationVolume``.
 If not provided, the infiltration volume is assumed to be equal to the conditioned building volume.
@@ -220,10 +177,11 @@ If not provided, the infiltration volume is assumed to be equal to the condition
 Vented Attics/Crawlspaces
 *************************
 
-The ventilation rate for vented attics (or crawlspaces) can be specified using an ``Attic`` (or ``Foundation``) element.
+The ventilation rate for vented attics (or vented crawlspaces) can be specified using an ``Attic`` (or ``Foundation``) element.
 First, define the ``AtticType`` as ``Attic[Vented='true']`` (or ``FoundationType`` as ``Crawlspace[Vented='true']``).
-Then use the ``VentilationRate[UnitofMeasure='SLA']/Value`` element to specify a specific leakage area (SLA).
-If these elements are not provided, default values will be used.
+Then specify the specific leakage area (SLA) using the ``VentilationRate[UnitofMeasure='SLA']/Value`` element.
+For vented attics, the natural air changes per hour (nACH) can instead be specified using ``UnitofMeasure='ACHnatural'``.
+If the ventilation rate is not provided, default values of SLA=1/300 for vented attics and SLA=1/150 for vented crawlspaces will be used based on `ANSI/RESNET/ICC 301-2019 <https://codes.iccsafe.org/content/RESNETICC3012019>`_.
 
 Roofs
 *****
@@ -281,6 +239,7 @@ Frame Floors
 ************
 
 Any horizontal floor/ceiling surface that is not in contact with the ground (Slab) nor adjacent to ambient conditions above (Roof) should be specified as an ``Enclosure/FrameFloors/FrameFloor``.
+Frame floors in an attached/multifamily building that are adjacent to "other housing unit", "other heated space", "other multifamily buffer space", or "other non-freezing space" must have the ``extension/OtherSpaceAboveOrBelow`` property set to signify whether the other space is "above" or "below".
 
 Frame floors are primarily defined by their ``Insulation/AssemblyEffectiveRValue``.
 
@@ -314,15 +273,18 @@ Windows must also have an ``Azimuth`` specified, even if the attached wall does 
 In addition, the summer/winter interior shading coefficients can be optionally entered as ``InteriorShading/SummerShadingCoefficient`` and ``InteriorShading/WinterShadingCoefficient``.
 The summer interior shading coefficient must be less than or equal to the winter interior shading coefficient.
 Note that a value of 0.7 indicates a 30% reduction in solar gains (i.e., 30% shading).
-If not provided, default values will be assumed.
+If not provided, default values of 0.70 for summer and 0.85 for winter will be used based on `ANSI/RESNET/ICC 301-2019 <https://codes.iccsafe.org/content/RESNETICC3012019>`_.
 
 Overhangs (e.g., a roof eave) can optionally be defined for a window by specifying a ``Window/Overhangs`` element.
 Overhangs are defined by the vertical distance between the overhang and the top of the window (``DistanceToTopOfWindow``), and the vertical distance between the overhang and the bottom of the window (``DistanceToBottomOfWindow``).
 The difference between these two values equals the height of the window.
 
 Finally, windows can be optionally described with ``FractionOperable``.
-If not provided, it is assumed that 33% of the window area is operable.
-Of this operable window area, 20% is assumed to be open whenever there are favorable outdoor conditions for cooling.
+The input should solely reflect whether the windows are operable (can be opened), not how they are used by the occupants.
+If a ``Window`` represents a single window, the value should be 0 or 1.
+If a ``Window`` represents multiple windows (e.g., 4), the value should be between 0 and 1 (e.g., 0, 0.25, 0.5, 0.75, or 1).
+If not provided, it is assumed that 67% of the windows are operable.
+The total open window area for natural ventilation is thus calculated using A) the fraction of windows that are operable, B) the assumption that 50% of the area of operable windows can be open, and C) the assumption that 20% of that openable area is actually opened by occupants whenever outdoor conditions are favorable for cooling.
 
 Skylights
 *********
@@ -352,22 +314,17 @@ For example, a room air conditioner might be specified with ``FractionCoolLoadSe
 
 If any water heating systems are entered, the sum of all their ``FractionDHWLoadServed`` values must be equal to 1.
 
-.. note:: 
-
-  HVAC systems (Heating Systems, Cooling Systems, and Heat Pumps) can be autosized via ACCA Manual J/S by using -1 as the capacity.
-  For a given system, all capacities must either be autosized or user-specified.
-  For example, an air-to-air heat pump must have its heating capacity, cooling capacity, and backup heating capacity all autosized or user-specified.
-
 Heating Systems
 ***************
 
 Each heating system (other than heat pumps) should be entered as a ``Systems/HVAC/HVACPlant/HeatingSystem``.
-Inputs including ``HeatingSystemType``, ``HeatingCapacity``, and ``FractionHeatLoadServed`` must be provided.
+Inputs including ``HeatingSystemType``, and ``FractionHeatLoadServed`` must be provided.
+``HeatingCapacity`` may be provided; if not, the system will be auto-sized via ACCA Manual J/S.
 
-Depending on the type of heating system specified, additional elements are required:
+Depending on the type of heating system specified, additional elements are used:
 
 ==================  ===========================  =================  =======================
-HeatingSystemType   DistributionSystem           HeatingSystemFuel  AnnualHeatingEfficiency
+HeatingSystemType   DistributionSystem           HeatingSystemFuel  AnnualHeatingEfficiency 
 ==================  ===========================  =================  =======================
 ElectricResistance                               electricity        Percent
 Furnace             AirDistribution or DSE       <any>              AFUE
@@ -384,9 +341,9 @@ Cooling Systems
 
 Each cooling system (other than heat pumps) should be entered as a ``Systems/HVAC/HVACPlant/CoolingSystem``.
 Inputs including ``CoolingSystemType`` and ``FractionCoolLoadServed`` must be provided.
-``CoolingCapacity`` must also be provided for all systems other than evaporative coolers.
+For all systems other than evaporative coolers, ``CoolingCapacity`` may be provided; if not, the system will be auto-sized via ACCA Manual J/S.
 
-Depending on the type of cooling system specified, additional elements are required/available:
+Depending on the type of cooling system specified, additional elements are used:
 
 =======================  =================================  =================  =======================  ====================
 CoolingSystemType        DistributionSystem                 CoolingSystemFuel  AnnualCoolingEfficiency  SensibleHeatFraction
@@ -406,10 +363,11 @@ Heat Pumps
 **********
 
 Each heat pump should be entered as a ``Systems/HVAC/HVACPlant/HeatPump``.
-Inputs including ``HeatPumpType``, ``CoolingCapacity``, ``HeatingCapacity``, ``FractionHeatLoadServed``, and ``FractionCoolLoadServed`` must be provided.
+Inputs including ``HeatPumpType``, ``FractionHeatLoadServed``, and ``FractionCoolLoadServed`` must be provided.
 Note that heat pumps are allowed to provide only heating (``FractionCoolLoadServed`` = 0) or cooling (``FractionHeatLoadServed`` = 0) if appropriate.
+``HeatingCapacity`` and ``CoolingCapacity`` may be provided; if not, the system will be auto-sized via ACCA Manual J/S.
 
-Depending on the type of heat pump specified, additional elements are required/available:
+Depending on the type of heat pump specified, additional elements are used:
 
 =============  =================================  ============  =======================  =======================  ===========================  ==================
 HeatPumpType   DistributionSystem                 HeatPumpFuel  AnnualCoolingEfficiency  AnnualHeatingEfficiency  CoolingSensibleHeatFraction  HeatingCapacity17F
@@ -425,7 +383,7 @@ Air-to-air heat pumps can also have the ``CompressorType`` specified; if not pro
 - "two stage": 15 < SEER <= 21
 - "variable speed": SEER > 21
 
-If the heat pump has backup heating, it can be specified with ``BackupSystemFuel``, ``BackupAnnualHeatingEfficiency``, and ``BackupHeatingCapacity``.
+If the heat pump has backup heating, it can be specified with ``BackupSystemFuel``, ``BackupAnnualHeatingEfficiency``, and (optionally) ``BackupHeatingCapacity``.
 If the heat pump has a switchover temperature (e.g., dual-fuel heat pump) where the heat pump stops operating and the backup heating system starts running, it can be specified with ``BackupHeatingSwitchoverTemperature``.
 If the ``BackupHeatingSwitchoverTemperature`` is not provided, the backup heating system will operate as needed when the heat pump has insufficient capacity.
 
@@ -437,15 +395,15 @@ The heating setpoint (``SetpointTempHeatingSeason``) and cooling setpoint (``Set
 
 If there is a heating setback, it is defined with:
 
-- Temperature during heating setback (``SetbackTempHeatingSeason``)
-- The start hour of the heating setback where 0=midnight and 12=noon (``extension/SetbackStartHourHeating``)
-- The number of hours of heating setback per week (``TotalSetbackHoursperWeekHeating``)
+- ``SetbackTempHeatingSeason``: Temperature during heating setback
+- ``extension/SetbackStartHourHeating``: The start hour of the heating setback where 0=midnight and 12=noon
+- ``TotalSetbackHoursperWeekHeating``: The number of hours of heating setback per week
 
 If there is a cooling setup, it is defined with:
 
-- Temperature during cooling setup (``SetupTempCoolingSeason``)
-- The start hour of the cooling setup where 0=midnight and 12=noon (``extension/SetupStartHourCooling``)
-- The number of hours of cooling setup per week (``TotalSetupHoursperWeekCooling``)
+- ``SetupTempCoolingSeason``: Temperature during cooling setup
+- ``extension/SetupStartHourCooling``: The start hour of the cooling setup where 0=midnight and 12=noon
+- ``TotalSetupHoursperWeekCooling``: The number of hours of cooling setup per week
 
 Finally, if there are sufficient ceiling fans present that result in a reduced cooling setpoint, this offset can be specified with ``extension/CeilingFanSetpointTempCoolingSeasonOffset``.
 
@@ -455,7 +413,7 @@ HVAC Distribution
 Each separate HVAC distribution system should be specified as a ``Systems/HVAC/HVACDistribution``.
 There should be at most one heating system and one cooling system attached to a distribution system.
 See the sections on Heating Systems, Cooling Systems, and Heat Pumps for information on which ``DistributionSystemType`` is allowed for which HVAC system.
-Also, note that some HVAC systems (e.g., room air conditioners) are not allowed to be attached to a distribution system.
+Also note that some HVAC systems (e.g., room air conditioners) are not allowed to be attached to a distribution system.
 
 ``AirDistribution`` systems are defined by:
 
@@ -465,6 +423,25 @@ Also, note that some HVAC systems (e.g., room air conditioners) are not allowed 
 - Optional return ducts (``Ducts[DuctType='return']``)
 
 For each duct, ``DuctInsulationRValue``, ``DuctLocation``, and ``DuctSurfaceArea`` must be provided.
+The ``DuctLocation`` can be one of the following:
+
+==============================  ====================================================================  =========================================================
+Location                        Description                                                           Temperature Assumption
+==============================  ====================================================================  =========================================================
+living space                    Above-grade conditioned floor area.
+basement - conditioned          Below-grade conditioned floor area.
+basement - unconditioned  
+crawlspace - unvented
+crawlspace - vented
+attic - unvented
+attic - vented
+garage                    
+outside                         
+other housing unit              Conditioned space of an adjacent attached housing unit.               Same as conditioned space.
+other heated space              Heated multifamily space (e.g., shared laundry or equipment.)         Average of conditioned space and outside; minimum of 68F.
+other multifamily buffer space  Unconditioned multifamily space (e.g., enclosed unheated stairwell).  Average of conditioned space and outside; minimum of 50F.
+other non-freezing space        Non-freezing multifamily space (e.g., parking garage ceiling).        Floats with outside; minimum of 40F.
+==============================  ====================================================================  =========================================================
 
 ``HydronicDistribution`` systems do not require any additional inputs.
 
@@ -472,7 +449,7 @@ For each duct, ``DuctInsulationRValue``, ``DuctLocation``, and ``DuctSurfaceArea
 
 .. warning::
 
-  Specifying a DSE for the HVAC distribution system will NOT be reflected in the EnergyPlus simulation outputs.
+  Specifying a DSE for the HVAC distribution system will NOT be reflected in the raw EnergyPlus simulation outputs, but IS reflected by the SimulationOutputReport reporting measure.
 
 Mechanical Ventilation
 **********************
@@ -498,6 +475,39 @@ Note that AdjustedSensibleRecoveryEfficiency and AdjustedTotalRecoveryEfficiency
 In many situations, the rated flow rate should be the value derived from actual testing of the system.
 For a CFIS system, the rated flow rate should equal the amount of outdoor air provided to the distribution system.
 
+Kitchen Fan
+***********
+
+A kitchen range fan may be specified as a ``Systems/MechanicalVentilation/VentilationFans/VentilationFan`` with ``FanLocation='kitchen'`` and ``UsedForLocalVentilation='true'``.
+
+Additional fields may be provided per the table below. If not provided, default values will be assumed based on the `Building America House Simulation Protocols <https://www1.eere.energy.gov/buildings/publications/pdfs/building_america/house_simulation.pdf>`_.
+
+=========================== ========================
+Element Name                Default Value
+=========================== ========================
+RatedFlowRate [cfm]         100
+HoursInOperation [hrs/day]  1
+FanPower [W]                0.3 * RatedFlowRate
+extension/StartHour [0-23]  18
+=========================== ========================
+
+Bathroom Fans
+*************
+
+Bathroom fans may be specified as a ``Systems/MechanicalVentilation/VentilationFans/VentilationFan`` with ``FanLocation='bath'`` and ``UsedForLocalVentilation='true'``.
+
+Additional fields may be provided per the table below. If not provided, default values will be assumed based on the `Building America House Simulation Protocols <https://www1.eere.energy.gov/buildings/publications/pdfs/building_america/house_simulation.pdf>`_.
+
+=========================== ========================
+Element Name                Default Value
+=========================== ========================
+Quantity [#]                NumberofBathrooms
+RatedFlowRate [cfm]         50
+HoursInOperation [hrs/day]  1
+FanPower [W]                0.3 * RatedFlowRate
+extension/StartHour [0-23]  7
+=========================== ========================
+
 Whole House Fan
 ***************
 
@@ -512,37 +522,68 @@ Water Heaters
 
 Each water heater should be entered as a ``Systems/WaterHeating/WaterHeatingSystem``.
 Inputs including ``WaterHeaterType`` and ``FractionDHWLoadServed`` must be provided.
-The water heater ``Location`` can be optionally entered; if not provided, a default water heater location will be assumed based on the IECC climate zone. 
-
-+--------------------+--------------------------------------------------------------------------------------------+
-| IECC Climate Zone  | Default Water Heater Location                                                              |
-+====================+============================================================================================+
-| 1-3, excluding 3A  | Garage if present, else Living Space                                                       |
-+--------------------+--------------------------------------------------------------------------------------------+
-| 3A, 4-8, unknown   | Conditioned Basement if present, else Unconditioned Basement if present, else Living Space |
-+--------------------+--------------------------------------------------------------------------------------------+
-
-The setpoint temperature may be provided as ``HotWaterTemperature``; if not provided, 125°F is assumed.
 
 Depending on the type of water heater specified, additional elements are required/available:
 
-========================================  ===================================  ===========  ==========  ===============  ========================  =================  =================  =========================================
-WaterHeaterType                           UniformEnergyFactor or EnergyFactor  FuelType     TankVolume  HeatingCapacity  RecoveryEfficiency        RelatedHVACSystem  UsesDesuperheater  WaterHeaterInsulation/Jacket/JacketRValue
-========================================  ===================================  ===========  ==========  ===============  ========================  =================  =================  =========================================
-storage water heater                      required                             <any>        required    <optional>       required if non-electric                     <optional>         <optional>
-instantaneous water heater                required                             <any>                                                                                  <optional>
-heat pump water heater                    required                             electricity  required                                                                                     <optional>
-space-heating boiler with storage tank                                                      required                                               required                              <optional>
-space-heating boiler with tankless coil                                                                                                            required           
-========================================  ===================================  ===========  ==========  ===============  ========================  =================  =================  =========================================
+========================================  ===================================  ===========  ==========  ===============  ==================  =================  =========================================  ==============================
+WaterHeaterType                           UniformEnergyFactor or EnergyFactor  FuelType     TankVolume  HeatingCapacity  RecoveryEfficiency  UsesDesuperheater  WaterHeaterInsulation/Jacket/JacketRValue  RelatedHVACSystem
+========================================  ===================================  ===========  ==========  ===============  ==================  =================  =========================================  ==============================
+storage water heater                      required                             <any>        <optional>  <optional>       <optional>          <optional>         <optional>                                 required if uses desuperheater
+instantaneous water heater                required                             <any>                                                         <optional>                                                    required if uses desuperheater
+heat pump water heater                    required                             electricity  required                                         <optional>         <optional>                                 required if uses desuperheater
+space-heating boiler with storage tank                                                      required                                                            <optional>                                 required
+space-heating boiler with tankless coil                                                                                                                                                                    required
+========================================  ===================================  ===========  ==========  ===============  ==================  =================  =========================================  ==============================
+
+For storage water heaters, the tank volume in gallons, heating capacity in Btuh, and recovery efficiency can be optionally provided.
+If not provided, default values for the tank volume and heating capacity will be assumed based on Table 8 in the `2014 Building America House Simulation Protocols <https://www.energy.gov/sites/prod/files/2014/03/f13/house_simulation_protocols_2014.pdf#page=22&zoom=100,93,333>`_ 
+and a default recovery efficiency shown in the table below will be assumed based on regression analysis of `AHRI certified water heaters <https://www.ahridirectory.org/NewSearch?programId=24&searchTypeId=3>`_.
+
+============  ======================================
+EnergyFactor  RecoveryEfficiency (default)
+============  ======================================
+>= 0.75       0.778114 * EF + 0.276679
+< 0.75        0.252117 * EF + 0.607997
+============  ======================================
 
 For tankless water heaters, an annual energy derate due to cycling inefficiencies can be provided.
 If not provided, a value of 0.08 (8%) will be assumed.
 
 For combi boiler systems, the ``RelatedHVACSystem`` must point to a ``HeatingSystem`` of type "Boiler".
-For combi boiler systems with a storage tank, the storage tank losses (°F/hr) can be entered as ``StandbyLoss``; if not provided, an average value will be used.
+For combi boiler systems with a storage tank, the storage tank losses (deg-F/hr) can be entered as ``StandbyLoss``; if not provided, a default value based on the `AHRI Directory of Certified Product Performance <https://www.ahridirectory.org>`_ will be calculated.
 
 For water heaters that are connected to a desuperheater, the ``RelatedHVACSystem`` must either point to a ``HeatPump`` or a ``CoolingSystem``.
+
+The water heater ``Location`` can be optionally entered as one of the following:
+
+==============================  ====================================================================  =========================================================
+Location                        Description                                                           Temperature Assumption
+==============================  ====================================================================  =========================================================
+living space                    Above-grade conditioned floor area.
+basement - conditioned          Below-grade conditioned floor area.
+basement - unconditioned  
+attic - unvented
+attic - vented
+garage                    
+crawlspace - unvented
+crawlspace - vented
+other exterior                  Outside.
+other housing unit              Conditioned space of an adjacent attached housing unit.               Same as conditioned space.
+other heated space              Heated multifamily space (e.g., shared laundry or equipment.)         Average of conditioned space and outside; minimum of 68F.
+other multifamily buffer space  Unconditioned multifamily space (e.g., enclosed unheated stairwell).  Average of conditioned space and outside; minimum of 50F.
+other non-freezing space        Non-freezing multifamily space (e.g., parking garage ceiling).        Floats with outside; minimum of 40F.
+==============================  ====================================================================  =========================================================
+
+If the location is not provided, a default water heater location will be assumed based on IECC climate zone:
+
+=================  ============================================================================================
+IECC Climate Zone  Location (default)
+=================  ============================================================================================
+1-3, excluding 3A  garage if present, otherwise living space                                                   
+3A, 4-8, unknown   conditioned basement if present, otherwise unconditioned basement if present, otherwise living space
+=================  ============================================================================================
+
+The setpoint temperature may be provided as ``HotWaterTemperature``; if not provided, 125F is assumed.
 
 Hot Water Distribution
 **********************
@@ -550,28 +591,33 @@ Hot Water Distribution
 A ``Systems/WaterHeating/HotWaterDistribution`` must be provided if any water heating systems are specified.
 Inputs including ``SystemType`` and ``PipeInsulation/PipeRValue`` must be provided.
 
-For a ``SystemType/Standard`` (non-recirculating) system, the following element can be optionally entered:
+For a ``SystemType/Standard`` (non-recirculating) system, the following element are used:
 
-- ``PipingLength``: Measured length of hot water piping from the hot water heater to the farthest hot water fixture, measured longitudinally from plans, assuming the hot water piping does not run diagonally, plus 10 feet of piping for each floor level, plus 5 feet of piping for unconditioned basements (if any)
+- ``PipingLength``: Optional. Measured length of hot water piping from the hot water heater to the farthest hot water fixture, measured longitudinally from plans, assuming the hot water piping does not run diagonally, plus 10 feet of piping for each floor level, plus 5 feet of piping for unconditioned basements (if any)
+  If not provided, a default ``PipingLength`` will be calculated using the following equation from `ANSI/RESNET/ICC 301-2019 <https://codes.iccsafe.org/content/RESNETICC3012019>`_.
 
-If ``PipingLength`` is not provided, a default ``PipingLength`` will be assumed.
-The default ``PipingLength`` will be calculated using the following equation.
-This equation is based on `ANSI/RESNET/ICC 301-2019 <https://codes.iccsafe.org/content/RESNETICC3012019/toc>`_.
+  .. math:: PipeL = 2.0 \cdot (\frac{CFA}{NCfl})^{0.5} + 10.0 \cdot NCfl + 5.0 \cdot bsmnt
 
-.. math:: PipeL = 2.0 \cdot (\frac{CFA}{NCfl})^{0.5} + 10.0 \cdot NCfl + 5.0 \cdot bsmnt
-  
-Where, 
-PipeL = piping length [ft], 
-CFA = conditioned floor area [ft²],
-NCfl = number of conditioned floor levels number of conditioned floor levels in the residence, including conditioned basements, 
-bsmnt = presence = 1.0 or absence = 0.0 of an unconditioned basement in the residence.
+  Where, 
+  PipeL = piping length [ft], 
+  CFA = conditioned floor area [ft²],
+  NCfl = number of conditioned floor levels number of conditioned floor levels in the residence including conditioned basements, 
+  bsmnt = presence = 1.0 or absence = 0.0 of an unconditioned basement in the residence.
 
-For a ``SystemType/Recirculation`` system, the following elements are required:
+For a ``SystemType/Recirculation`` system, the following elements are used:
 
 - ``ControlType``
-- ``RecirculationPipingLoopLength``: Measured recirculation loop length including both supply and return sides, measured longitudinally from plans, assuming the hot water piping does not run diagonally, plus 20 feet of piping for each floor level greater than one plus 10 feet of piping for unconditioned basements
-- ``BranchPipingLoopLength``: Measured length of the branch hot water piping from the recirculation loop to the farthest hot water fixture from the recirculation loop, measured longitudinally from plans, assuming the branch hot water piping does not run diagonally
-- ``PumpPower``
+- ``RecirculationPipingLoopLength``: Optional. If not provided, the default value will be calculated by using the equation shown in the table below. Measured recirculation loop length including both supply and return sides, measured longitudinally from plans, assuming the hot water piping does not run diagonally, plus 20 feet of piping for each floor level greater than one plus 10 feet of piping for unconditioned basements.
+- ``BranchPipingLoopLength``: Optional. If not provided, the default value will be assumed as shown in the table below. Measured length of the branch hot water piping from the recirculation loop to the farthest hot water fixture from the recirculation loop, measured longitudinally from plans, assuming the branch hot water piping does not run diagonally.
+- ``PumpPower``: Optional. If not provided, the default value will be assumed as shown in the table below. 
+
+  ==================================  ====================================================================================================
+  Element Name                        Default Value
+  ==================================  ====================================================================================================
+  RecirculationPipingLoopLength [ft]  .. math:: 2.0 \cdot (2.0 \cdot (\frac{CFA}{NCfl})^{0.5} + 10.0 \cdot NCfl + 5.0 \cdot bsmnt) - 20.0
+  BranchPipingLoopLength [ft]         10 
+  Pump Power [W]                      50 
+  ==================================  ====================================================================================================
 
 In addition, a ``HotWaterDistribution/DrainWaterHeatRecovery`` (DWHR) may be specified.
 The DWHR system is defined by:
@@ -587,29 +633,33 @@ Water fixtures should be entered as ``Systems/WaterHeating/WaterFixture`` elemen
 Each fixture must have ``WaterFixtureType`` and ``LowFlow`` elements provided.
 Fixtures should be specified as low flow if they are <= 2.0 gpm.
 
+A ``WaterHeating/extension/WaterFixturesUsageMultiplier`` can also be optionally provided that scales hot water usage; if not provided, it is assumed to be 1.0.
+
 Solar Thermal
 *************
 
 A solar hot water system can be entered as a ``Systems/SolarThermal/SolarThermalSystem``.
-The ``SystemType`` element must be 'hot water' and the ``ConnectedTo`` element is required and must point to a ``WaterHeatingSystem``.
-Note that the connected water heater cannot be of type space-heating boiler or attached to a desuperheater.
+The ``SystemType`` element must be 'hot water'.
 
 Solar hot water systems can be described with either simple or detailed inputs.
 
-If using simple inputs, the following element is required:
+If using simple inputs, the following elements are used:
 
 - ``SolarFraction``: Portion of total conventional hot water heating load (delivered energy and tank standby losses). Can be obtained from Directory of SRCC OG-300 Solar Water Heating System Ratings or NREL's `System Advisor Model <https://sam.nrel.gov/>`_ or equivalent.
+- ``ConnectedTo``: Optional. If not specified, applies to all water heaters in the building. If specified, must point to a ``WaterHeatingSystem``.
 
-If using detailed inputs, the following elements are required:
+If using detailed inputs, the following elements are used:
 
-- ``CollectorArea``
+- ``CollectorArea``: in units of ft²
 - ``CollectorLoopType``: 'liquid indirect' or 'liquid direct' or 'passive thermosyphon'
 - ``CollectorType``: 'single glazing black' or 'double glazing black' or 'evacuated tube' or 'integrated collector storage'
 - ``CollectorAzimuth``
 - ``CollectorTilt``
 - ``CollectorRatedOpticalEfficiency``: FRTA (y-intercept); see Directory of SRCC OG-100 Certified Solar Collector Ratings
-- ``CollectorRatedThermalLosses``: FRUL (slope, in units of Btu/hr-ft^2-R); see Directory of SRCC OG-100 Certified Solar Collector Ratings
-- ``StorageVolume``
+- ``CollectorRatedThermalLosses``: FRUL (slope, in units of Btu/hr-ft²-R); see Directory of SRCC OG-100 Certified Solar Collector Ratings
+- ``StorageVolume``: Optional. If not provided, the default value in gallons will be calculated as 1.5 * CollectorArea
+
+- ``ConnectedTo``: Must point to a ``WaterHeatingSystem``. The connected water heater cannot be of type space-heating boiler or attached to a desuperheater.
 
 Photovoltaics
 *************
@@ -638,91 +688,110 @@ Appliances
 
 This section describes elements specified in HPXML's ``Appliances``.
 
+The ``Location`` for each appliance can be optionally provided as one of the following:
+
+==============================  ====================================================================
+Location                        Description                                                         
+==============================  ====================================================================
+living space                    Above-grade conditioned floor area.
+basement - conditioned          Below-grade conditioned floor area.
+basement - unconditioned  
+garage                    
+other                           Any space in a multifamily building outside the unit, in which internal gains are neglected.
+==============================  ====================================================================
+
+If the location is not specified, the appliance is assumed to be in the living space.
+
 Clothes Washer
 **************
 
 An ``Appliances/ClothesWasher`` element can be specified; if not provided, a clothes washer will not be modeled.
-The ``Location`` can be optionally provided; if not provided, it is assumed to be in the living space.
 
 Several EnergyGuide label inputs describing the efficiency of the appliance can be provided.
 If the complete set of efficiency inputs is not provided, the following default values representing a standard clothes washer from 2006 will be used.
 
-==================================  ==================
-Element Name                        Default Value
-==================================  ==================
-IntegratedModifiedEnergyFactor      1.0  [ft3/kWh-cyc]
-RatedAnnualkWh                      400  [kWh/yr]
-LabelElectricRate                   0.12  [$/kWh]
-LabelGasRate                        1.09  [$/therm]
-LabelAnnualGasCost                  27.0  [$]
-Capacity                            3.0  [ft³]
-Usage                               6  [cyc/week]
-==================================  ==================
+=============================================  ==============
+Element Name                                   Default Value
+=============================================  ==============
+IntegratedModifiedEnergyFactor [ft³/kWh-cyc]   1.0  
+RatedAnnualkWh [kWh/yr]                        400  
+LabelElectricRate [$/kWh]                      0.12  
+LabelGasRate [$/therm]                         1.09  
+LabelAnnualGasCost [$]                         27.0  
+Capacity [ft³]                                 3.0  
+LabelUsage [cyc/week]                          6  
+=============================================  ==============
 
-If ``ModifiedEnergyFactor`` is provided instead of ``IntegratedModifiedEnergyFactor``, it will be converted using the following equation.
-This equation is based on the `Interpretation on ANSI/RESNET 301-2014 Clothes Washer IMEF <https://www.resnet.us/wp-content/uploads/No.-301-2014-08-sECTION-4.2.2.5.2.8-Clothes-Washers-Eq-4.2-6.pdf>`_.
+If ``ModifiedEnergyFactor`` is provided instead of ``IntegratedModifiedEnergyFactor``, it will be converted using the following equation based on the `Interpretation on ANSI/RESNET 301-2014 Clothes Washer IMEF <https://www.resnet.us/wp-content/uploads/No.-301-2014-08-sECTION-4.2.2.5.2.8-Clothes-Washers-Eq-4.2-6.pdf>`_.
 
 .. math:: IntegratedModifiedEnergyFactor = \frac{ModifiedEnergyFactor - 0.503}{0.95}
+
+An ``extension/UsageMultiplier`` can also be optionally provided that scales energy and hot water usage; if not provided, it is assumed to be 1.0.
 
 Clothes Dryer
 *************
 
 An ``Appliances/ClothesDryer`` element can be specified; if not provided, a clothes dryer will not be modeled.
 The dryer's ``FuelType`` must be provided.
-The ``Location`` can be optionally provided; if not provided, it is assumed to be in the living space.
 
 Several EnergyGuide label inputs describing the efficiency of the appliance can be provided.
 If the complete set of efficiency inputs is not provided, the following default values representing a standard clothes dryer from 2006 will be used.
 
-=======================  ==============
-Element Name             Default Value
-=======================  ==============
-CombinedEnergyFactor     3.01  [lb/kWh]
-ControlType              timer
-=======================  ==============
+==============================  ==============
+Element Name                    Default Value
+==============================  ==============
+CombinedEnergyFactor [lb/kWh]   3.01  
+ControlType                     timer
+==============================  ==============
 
-If ``EnergyFactor`` is provided instead of ``CombinedEnergyFactor``, it will be converted into ``CombinedEnergyFactor`` using the following equation.
-This equation is based on the `Interpretation on ANSI/RESNET/ICC 301-2014 Clothes Dryer CEF <https://www.resnet.us/wp-content/uploads/No.-301-2014-10-Section-4.2.2.5.2.8-Clothes-Dryer-CEF-Rating.pdf>`_.
+If ``EnergyFactor`` is provided instead of ``CombinedEnergyFactor``, it will be converted into ``CombinedEnergyFactor`` using the following equation based on the `Interpretation on ANSI/RESNET/ICC 301-2014 Clothes Dryer CEF <https://www.resnet.us/wp-content/uploads/No.-301-2014-10-Section-4.2.2.5.2.8-Clothes-Dryer-CEF-Rating.pdf>`_.
 
 .. math:: CombinedEnergyFactor = \frac{EnergyFactor}{1.15}
+
+An ``extension/UsageMultiplier`` can also be optionally provided that scales energy usage; if not provided, it is assumed to be 1.0.
 
 Dishwasher
 **********
 
 An ``Appliances/Dishwasher`` element can be specified; if not provided, a dishwasher will not be modeled.
-The dishwasher is assumed to be in the living space.
 
 Several EnergyGuide label inputs describing the efficiency of the appliance can be provided.
 If the complete set of efficiency inputs is not provided, the following default values representing a standard dishwasher from 2006 will be used.
 
-=======================  =================
-Element Name             Default Value
-=======================  =================
-RatedAnnualkWh           467  [kwh/yr]
-LabelElectricRate        0.12  [$/kWh]
-LabelGasRate             1.09  [$/therm]
-LabelAnnualGasCost       33.12  [$]
-PlaceSettingCapacity     12  [standard]
-=======================  =================
+===============================  =================
+Element Name                     Default Value
+===============================  =================
+RatedAnnualkWh [kwh/yr]          467  
+LabelElectricRate [$/kWh]        0.12  
+LabelGasRate [$/therm]           1.09  
+LabelAnnualGasCost [$]           33.12  
+PlaceSettingCapacity [#]         12  
+LabelUsage [cyc/week]            4  
+===============================  =================
+
+If ``EnergyFactor`` is provided instead of ``RatedAnnualkWh``, it will be converted into ``RatedAnnualkWh`` using the following equation based on `ANSI/RESNET/ICC 301-2014 <https://codes.iccsafe.org/content/document/843>`_.
+
+.. math:: RatedAnnualkWh = \frac{215.0}{EnergyFactor}
+
+An ``extension/UsageMultiplier`` can also be optionally provided that scales energy and hot water usage; if not provided, it is assumed to be 1.0.
 
 Refrigerator
 ************
 
 An ``Appliances/Refrigerator`` element can be specified; if not provided, a refrigerator will not be modeled.
-The ``Location`` can be optionally provided; if not provided, it is assumed to be in the living space.
 
 The efficiency of the refrigerator can be optionally entered as ``RatedAnnualkWh`` or ``extension/AdjustedAnnualkWh``.
-If neither are provided, ``RatedAnnualkWh`` will be defaulted to represent a standard refrigerator from 2006 based on the following equation.
-This equation is based on `ANSI/RESNET/ICC 301-2019 <https://codes.iccsafe.org/content/RESNETICC3012019/toc>`_.
+If neither are provided, ``RatedAnnualkWh`` will be defaulted to represent a standard refrigerator from 2006 using the following equation based on `ANSI/RESNET/ICC 301-2019 <https://codes.iccsafe.org/content/RESNETICC3012019>`_.
 
-.. math:: RatedAnnualkWh = 637.0 + 18.0 \cdot Number of bedrooms
+.. math:: RatedAnnualkWh = 637.0 + 18.0 \cdot NumberofBedrooms
+
+An ``extension/UsageMultiplier`` can also be optionally provided that scales energy usage; if not provided, it is assumed to be 1.0.
 
 Cooking Range/Oven
 ******************
 
 ``Appliances/CookingRange`` and ``Appliances/Oven`` elements can be specified; if not provided, a range/oven will not be modeled.
 The ``FuelType`` of the range must be provided.
-The cooking range and oven is assumed to be in the living space.
 
 Inputs including ``IsInduction`` (for the cooking range) and ``IsConvection`` (for the oven) can be optionally provided.
 The following default values will be assumed unless a complete set of the optional variables is provided.
@@ -734,26 +803,42 @@ IsInduction    false
 IsConvection   false
 =============  ==============
 
+An ``extension/UsageMultiplier`` can also be optionally provided that scales energy usage; if not provided, it is assumed to be 1.0.
+
+Dehumidifier
+************
+
+An ``Appliance/Dehumidifier`` element can be specified; if not provided, a dehumidifier will not be modeled.
+The ``Capacity``, ``DehumidistatSetpoint`` (relative humidity as a fraction, 0-1), and ``FractionDehumidificationLoadServed`` (0-1) must be provided.
+The efficiency of the dehumidifier can either be entered as an ``IntegratedEnergyFactor`` or ``EnergyFactor``.
+
 Lighting
 ~~~~~~~~
 
-The building's lighting is described by six ``Lighting/LightingGroup`` elements, each of which is the combination of:
+The building's lighting is described by nine ``Lighting/LightingGroup`` elements, each of which is the combination of:
 
-- ``LightingGroup/ThirdPartyCertification``: 'ERI Tier I' (fluorescent) and 'ERI Tier II' (LEDs, outdoor lamps controlled by photocells, or indoor lamps controlled by motion sensor)
-- ``LightingGroup/Location``: 'interior', 'garage', and 'exterior'
+- ``LightingType``: 'LightEmittingDiode', 'CompactFluorescent', and 'FluorescentTube'
+- ``Location``: 'interior', 'garage', and 'exterior'
 
 The fraction of lamps of the given type in the given location are provided as the ``LightingGroup/FractionofUnitsInLocation``.
 The fractions for a given location cannot sum to greater than 1.
 If the fractions sum to less than 1, the remainder is assumed to be incandescent lighting.
 Garage lighting values are ignored if the building has no garage.
 
-To model a building without any lighting, all six ``Lighting/LightingGroup`` elements must be excluded.
+A ``Lighting/extension/UsageMultiplier`` can also be optionally provided that scales energy usage; if not provided, it is assumed to be 1.0.
 
 Ceiling Fans
 ~~~~~~~~~~~~
 
 Each ceiling fan (or set of identical ceiling fans) should be entered as a ``Lighting/CeilingFan``.
-The ``Airflow/Efficiency`` (at medium speed) and ``Quantity`` can be provided, otherwise default assumptions are used.
+The ``Airflow/Efficiency`` (at medium speed) and ``Quantity`` can be provided, otherwise the following default assumptions are used from `ANSI/RESNET/ICC 301-2019 <https://codes.iccsafe.org/content/RESNETICC3012019>`_.
+
+==========================  ==================
+Element Name                Default Value
+==========================  ==================
+Airflow/Efficiency [cfm/W]  3000/42.6
+Quantity [#]                NumberofBedrooms+1
+==========================  ==================
 
 In addition, a reduced cooling setpoint can be specified for summer months when ceiling fans are operating.
 See the Thermostat section for more information.
@@ -763,7 +848,12 @@ Plug Loads
 
 Plug loads can be provided by entering ``MiscLoads/PlugLoad`` elements; if not provided, plug loads will not be modeled.
 Currently only plug loads specified with ``PlugLoadType='other'`` and ``PlugLoadType='TV other'`` are recognized.
-The annual energy consumption (``Load[Units='kWh/year']/Value``) can be provided, otherwise default assumptions based on the plug load type are used.
+The annual energy consumption (``Load[Units='kWh/year']/Value``) can be provided, otherwise they will be calculated using the following equations from `ANSI/RESNET/ICC 301-2019 <https://codes.iccsafe.org/content/RESNETICC3012019>`_.
+
+.. math:: TelevisionkWhs = 413.0 + 69.0 \cdot NumberofBedrooms
+.. math:: OtherkWhs = 0.91 \cdot ConditionedFloorArea
+
+An ``extension/UsageMultiplier`` can also be optionally provided that scales energy usage; if not provided, it is assumed to be 1.0.
 
 Validating & Debugging Errors
 -----------------------------

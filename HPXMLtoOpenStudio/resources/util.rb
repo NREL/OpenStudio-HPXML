@@ -1,5 +1,4 @@
-require_relative 'constants'
-require_relative 'unit_conversions'
+# frozen_string_literal: true
 
 class HelperMethods
   def self.eplus_fuel_map(fuel)
@@ -8,9 +7,9 @@ class HelperMethods
     elsif fuel == HPXML::FuelTypeNaturalGas
       return 'NaturalGas'
     elsif fuel == HPXML::FuelTypeOil
-      return 'FuelOil#1'
+      return 'FuelOilNo1'
     elsif fuel == HPXML::FuelTypePropane
-      return 'PropaneGas'
+      return 'Propane'
     elsif fuel == HPXML::FuelTypeWood
       return 'OtherFuel1'
     elsif fuel == HPXML::FuelTypeWoodPellets
