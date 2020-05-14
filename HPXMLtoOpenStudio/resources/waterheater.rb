@@ -1,13 +1,5 @@
 # frozen_string_literal: true
 
-require_relative 'constants'
-require_relative 'util'
-require_relative 'geometry'
-require_relative 'schedules'
-require_relative 'unit_conversions'
-require_relative 'psychrometrics'
-require_relative 'hotwater_appliances'
-
 class Waterheater
   def self.apply_tank(model, loc_space, loc_schedule, fuel_type, cap, vol,
                       ef, re, t_set, ec_adj, dhw_map,

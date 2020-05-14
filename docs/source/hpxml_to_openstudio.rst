@@ -112,7 +112,7 @@ Shelter Coefficient  Description
 0.3                  Complete shielding with large buildings immediately adjacent
 ===================  =========================================================================
 
-The terrain surrounding the building is assumed to be suburban.
+The terrain surrounding the building can be entered as ``Site/SiteType``; if not provided, it is assumed to be suburban.
 
 Weather File
 ~~~~~~~~~~~~
@@ -147,8 +147,6 @@ crawlspace - vented
 crawlspace - unvented     
 garage                    
 other housing unit              Conditioned space of an adjacent attached housing unit.               Same as conditioned space.
-other housing unit above        Conditioned space of an attached housing unit above.                  Same as conditioned space.
-other housing unit below        Conditioned space of an attached housing unit below.                  Same as conditioned space.
 other heated space              Heated multifamily space (e.g., shared laundry or equipment.)         Average of conditioned space and outside; minimum of 68F.
 other multifamily buffer space  Unconditioned multifamily space (e.g., enclosed unheated stairwell).  Average of conditioned space and outside; minimum of 50F.
 other non-freezing space        Non-freezing multifamily space (e.g., parking garage ceiling).        Floats with outside; minimum of 40F.
@@ -241,6 +239,7 @@ Frame Floors
 ************
 
 Any horizontal floor/ceiling surface that is not in contact with the ground (Slab) nor adjacent to ambient conditions above (Roof) should be specified as an ``Enclosure/FrameFloors/FrameFloor``.
+Frame floors in an attached/multifamily building that are adjacent to "other housing unit", "other heated space", "other multifamily buffer space", or "other non-freezing space" must have the ``extension/OtherSpaceAboveOrBelow`` property set to signify whether the other space is "above" or "below".
 
 Frame floors are primarily defined by their ``Insulation/AssemblyEffectiveRValue``.
 

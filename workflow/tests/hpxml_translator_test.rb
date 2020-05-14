@@ -129,14 +129,17 @@ class HPXMLTest < MiniTest::Test
     this_dir = File.dirname(__FILE__)
     sample_files_dir = File.join(this_dir, '..', 'sample_files')
 
-    expected_error_msgs = { 'cfis-with-hydronic-distribution.xml' => ["Attached HVAC distribution system 'HVACDistribution' cannot be hydronic for ventilation fan 'MechanicalVentilation'."],
-                            'clothes-dryer-location.xml' => ["ClothesDryer location is 'garage' but building does not have this location specified."],
-                            'clothes-washer-location.xml' => ["ClothesWasher location is 'garage' but building does not have this location specified."],
-                            'appliances-location-unconditioned-space.xml' => ['Expected [1] element(s) but found 0 element(s) for xpath: /HPXML/Building/BuildingDetails/Appliances/ClothesWasher: [not(Location)] |',
+    expected_error_msgs = { 'appliances-location-unconditioned-space.xml' => ['Expected [1] element(s) but found 0 element(s) for xpath: /HPXML/Building/BuildingDetails/Appliances/ClothesWasher: [not(Location)] |',
                                                                               'Expected [1] element(s) but found 0 element(s) for xpath: /HPXML/Building/BuildingDetails/Appliances/ClothesDryer: [not(Location)] |',
                                                                               'Expected [1] element(s) but found 0 element(s) for xpath: /HPXML/Building/BuildingDetails/Appliances/Dishwasher: [not(Location)] |',
                                                                               'Expected [1] element(s) but found 0 element(s) for xpath: /HPXML/Building/BuildingDetails/Appliances/Refrigerator: [not(Location)] |',
                                                                               'Expected [1] element(s) but found 0 element(s) for xpath: /HPXML/Building/BuildingDetails/Appliances/CookingRange: [not(Location)] |'],
+                            'attached-multifamily-window-outside-condition.xml' => ["Window 'WindowNorth' cannot be adjacent to 'other multifamily buffer space'. Check parent wall:"],
+                            'cfis-with-hydronic-distribution.xml' => ["Attached HVAC distribution system 'HVACDistribution' cannot be hydronic for ventilation fan 'MechanicalVentilation'."],
+                            'clothes-dryer-location.xml' => ["ClothesDryer location is 'garage' but building does not have this location specified."],
+                            'clothes-washer-location.xml' => ["ClothesWasher location is 'garage' but building does not have this location specified."],
+                            'cooking-range-location.xml' => ["CookingRange location is 'garage' but building does not have this location specified."],
+                            'dishwasher-location.xml' => ["Dishwasher location is 'garage' but building does not have this location specified."],
                             'dhw-frac-load-served.xml' => ['Expected FractionDHWLoadServed to sum to 1, but calculated sum is 1.15.'],
                             'duct-location.xml' => ["Duct location is 'garage' but building does not have this location specified."],
                             'duct-location-unconditioned-space.xml' => ['Expected [0, 2] element(s) but found 1 element(s) for xpath: /HPXML/Building/BuildingDetails/Systems/HVAC/HVACDistribution/DistributionSystemType/AirDistribution/Ducts[DuctType="supply" or DuctType="return"]: DuctSurfaceArea | DuctLocation[text()="living space" or text()="basement - conditioned" or text()="basement - unconditioned" or text()="crawlspace - vented" or text()="crawlspace - unvented" or text()="attic - vented" or text()="attic - unvented" or text()="garage" or text()="outside" or text()="other housing unit" or text()="other heated space" or text()="other multifamily buffer space" or text()="other non-freezing space"]'],
@@ -160,6 +163,7 @@ class HPXMLTest < MiniTest::Test
                             'hvac-frac-load-served.xml' => ['Expected FractionCoolLoadServed to sum to <= 1, but calculated sum is 1.2.',
                                                             'Expected FractionHeatLoadServed to sum to <= 1, but calculated sum is 1.1.'],
                             'hvac-distribution-return-duct-leakage-missing.xml' => ["Return ducts exist but leakage was not specified for distribution system 'HVACDistribution'."],
+                            'invalid-distribution-cfa-served.xml' => ['The total conditioned floor area served by the HVAC distribution system(s) is larger than the conditioned floor area of the building.'],
                             'invalid-epw-filepath.xml' => ["foo.epw' could not be found."],
                             'invalid-neighbor-shading-azimuth.xml' => ['A neighbor building has an azimuth (145) not equal to the azimuth of any wall.'],
                             'invalid-relatedhvac-dhw-indirect.xml' => ["RelatedHVACSystem 'HeatingSystem_bad' not found for water heating system 'WaterHeater'"],
@@ -192,8 +196,7 @@ class HPXMLTest < MiniTest::Test
                             'unattached-solar-thermal-system.xml' => ["Attached water heating system 'foobar' not found for solar thermal system 'SolarThermalSystem'."],
                             'unattached-window.xml' => ["Attached wall 'foobar' not found for window 'WindowNorth'."],
                             'water-heater-location.xml' => ["WaterHeatingSystem location is 'crawlspace - vented' but building does not have this location specified."],
-                            'water-heater-location-other.xml' => ['Expected [1] element(s) but found 0 element(s) for xpath: /HPXML/Building/BuildingDetails/Systems/WaterHeating/WaterHeatingSystem: [not(Location)] |'],
-                            'attached-multifamily-window-outside-condition.xml' => ["Window 'WindowNorth' cannot be adjacent to 'other multifamily buffer space'. Check parent wall: 'WallMultifamilyBuffer'"] }
+                            'water-heater-location-other.xml' => ['Expected [1] element(s) but found 0 element(s) for xpath: /HPXML/Building/BuildingDetails/Systems/WaterHeating/WaterHeatingSystem: [not(Location)] |'] }
 
     # Test simulations
     Dir["#{sample_files_dir}/invalid_files/*.xml"].sort.each do |xml|
@@ -359,13 +362,36 @@ class HPXMLTest < MiniTest::Test
     end
 
     # Add output variables for CFIS tests
-    @cfis_fan_power_output_var = OpenStudio::Model::OutputVariable.new("#{Constants.ObjectNameMechanicalVentilation} cfis fan power".gsub(' ', '_'), model)
-    @cfis_fan_power_output_var.setReportingFrequency('runperiod')
-    @cfis_fan_power_output_var.setKeyValue('EMS')
+    if xml.include? 'cfis'
+      infil_program = nil
+      model.getEnergyManagementSystemPrograms.each do |ems_program|
+        next unless ems_program.name.to_s.start_with? Constants.ObjectNameInfiltration
 
-    @cfis_flow_rate_output_var = OpenStudio::Model::OutputVariable.new("#{Constants.ObjectNameMechanicalVentilation} cfis flow rate".gsub(' ', '_'), model)
-    @cfis_flow_rate_output_var.setReportingFrequency('runperiod')
-    @cfis_flow_rate_output_var.setKeyValue('EMS')
+        infil_program = ems_program
+      end
+
+      ems_output_var = OpenStudio::Model::EnergyManagementSystemOutputVariable.new(model, 'CFIS_fan_w')
+      ems_output_var.setName("#{Constants.ObjectNameMechanicalVentilation} cfis fan power".gsub(' ', '_'))
+      ems_output_var.setTypeOfDataInVariable('Averaged')
+      ems_output_var.setUpdateFrequency('ZoneTimestep')
+      ems_output_var.setEMSProgramOrSubroutineName(infil_program)
+      ems_output_var.setUnits('W')
+
+      @cfis_fan_power_output_var = OpenStudio::Model::OutputVariable.new(ems_output_var.name.to_s, model)
+      @cfis_fan_power_output_var.setReportingFrequency('runperiod')
+      @cfis_fan_power_output_var.setKeyValue('EMS')
+
+      ems_output_var = OpenStudio::Model::EnergyManagementSystemOutputVariable.new(model, 'QWHV')
+      ems_output_var.setName("#{Constants.ObjectNameMechanicalVentilation} cfis flow rate".gsub(' ', '_'))
+      ems_output_var.setTypeOfDataInVariable('Averaged')
+      ems_output_var.setUpdateFrequency('ZoneTimestep')
+      ems_output_var.setEMSProgramOrSubroutineName(infil_program)
+      ems_output_var.setUnits('m3/s')
+
+      @cfis_flow_rate_output_var = OpenStudio::Model::OutputVariable.new(ems_output_var.name.to_s, model)
+      @cfis_flow_rate_output_var.setReportingFrequency('runperiod')
+      @cfis_flow_rate_output_var.setKeyValue('EMS')
+    end
 
     # Add output variables for hot water volume
     output_var = OpenStudio::Model::OutputVariable.new('Water Use Equipment Hot Water Volume', model)
@@ -424,6 +450,7 @@ class HPXMLTest < MiniTest::Test
       end
     end
 
+    show_output(runner.result) unless success
     assert_equal(true, success)
 
     annual_csv_path = File.join(rundir, 'results_annual.csv')
