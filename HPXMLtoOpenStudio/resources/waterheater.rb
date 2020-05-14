@@ -1241,8 +1241,8 @@ class Waterheater
     end
   end
 
-  def self.get_tankless_cycling_derate()
-    return 0.08
+  def self.get_tankless_performance_adjustment()
+    return 0.92
   end
 
   def self.get_default_location(hpxml, iecc_zone)
