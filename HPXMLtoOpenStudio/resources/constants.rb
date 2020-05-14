@@ -477,7 +477,7 @@ class Constants
     return __method__.to_s
   end
 
-  def self.SizingInfoDuctLocationZones
+  def self.SizingInfoDuctLocationHandles
     return __method__.to_s
   end
 
@@ -651,30 +651,6 @@ class Constants
 
   def self.SizingInfoZoneInfiltrationCFM
     return __method__.to_s
-  end
-
-  def self.SizingInfoZoneInfiltrationELA
-    return __method__.to_s
-  end
-
-  def self.TerrainOcean
-    return 'ocean'
-  end
-
-  def self.TerrainPlains
-    return 'plains'
-  end
-
-  def self.TerrainRural
-    return 'rural'
-  end
-
-  def self.TerrainSuburban
-    return 'suburban'
-  end
-
-  def self.TerrainCity
-    return 'city'
   end
 
   def self.BAZoneHotDry
