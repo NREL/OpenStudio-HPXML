@@ -1241,7 +1241,7 @@ class Waterheater
     end
   end
 
-  def self.get_default_performance_adjustment()
+  def self.get_default_performance_adjustment(water_heating_system)
     return unless water_heating_system.water_heater_type == HPXML::WaterHeaterTypeTankless
 
     return 0.92 # Applies to EF
