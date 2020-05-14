@@ -547,7 +547,7 @@ EnergyFactor  RecoveryEfficiency (default)
 ============  ======================================
 
 For tankless water heaters, a performance adjustment due to cycling inefficiencies can be provided.
-If not provided, a value of 0.92 (92%) will be assumed to apply to its rated performance.
+If not provided, a default value of 0.92 (92%) will apply to the Energy Factor.
 
 For combi boiler systems, the ``RelatedHVACSystem`` must point to a ``HeatingSystem`` of type "Boiler".
 For combi boiler systems with a storage tank, the storage tank losses (deg-F/hr) can be entered as ``StandbyLoss``; if not provided, a default value based on the `AHRI Directory of Certified Product Performance <https://www.ahridirectory.org>`_ will be calculated.
