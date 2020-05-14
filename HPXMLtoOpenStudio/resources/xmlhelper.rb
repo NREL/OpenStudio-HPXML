@@ -1,6 +1,5 @@
 require 'rexml/document'
 require 'rexml/xpath'
-require 'json'
 
 class XMLHelper
   # Adds the child element with 'element_name' and sets its value. Returns the
@@ -45,8 +44,6 @@ class XMLHelper
   # Returns the value of 'element_name' in the parent element or nil.
   def self.get_value(parent, element_name)
     val = parent.elements[element_name]
-    #el_path = parent.xpath + '/' + element_name
-    #validate_val(val, el_path)
     if val.nil?
       return val
     end
@@ -64,6 +61,8 @@ class XMLHelper
     return vals
   end
 
+  # Returns the name of the first child element of the 'element_name'
+  # element on the parent element.
   def self.get_child_name(parent, element_name)
     begin
       return parent.elements[element_name].elements[1].name
