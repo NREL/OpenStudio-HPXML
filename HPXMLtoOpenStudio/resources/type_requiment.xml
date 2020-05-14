@@ -134,9 +134,9 @@
     <enumeration>high school graduate</enumeration>
     <enumeration>some college</enumeration>
     <enumeration>vocational/technical/associates degree</enumeration>
-    <enumeration>bachelor&apos;s degree</enumeration>
+    <enumeration>bachelor's degree</enumeration>
     <enumeration>some post graduate </enumeration>
-    <enumeration>master&apos;s degree</enumeration>
+    <enumeration>master's degree</enumeration>
     <enumeration>professional degree</enumeration>
     <enumeration>doctoral degree</enumeration>
   </EducationLevels>

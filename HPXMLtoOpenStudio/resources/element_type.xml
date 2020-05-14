@@ -10,7 +10,9 @@
   </ProjectStatus>
   <BuildingDetails DataType='BuildingDetailsType'>
     <BuildingSummary>
-      <Site/>
+      <Site>
+        <SiteType DataType='SiteType'/>
+      </Site>
       <BuildingOccupancy>
         <NumberofResidents DataType='PeopleCount'/>
       </BuildingOccupancy>
@@ -18,6 +20,7 @@
         <NumberofConditionedFloors DataType='NumberOfFloorsType'/>
         <NumberofConditionedFloorsAboveGrade DataType='NumberOfFloorsType'/>
         <NumberofBedrooms DataType='IntegerGreaterThanOrEqualToZero'/>
+        <NumberofBathrooms DataType='IntegerGreaterThanZero'/>
         <ConditionedFloorArea DataType='SurfaceArea'/>
         <ConditionedBuildingVolume DataType='Volume'/>
         <AverageCeilingHeight DataType='LengthMeasurement'/>
@@ -180,7 +183,7 @@
             <DistanceToTopOfWindow DataType='LengthMeasurement'/>
             <DistanceToBottomOfWindow DataType='LengthMeasurement'/>
           </Overhangs>
-          <FractionOperable DataType='HPXMLBoolean'/>
+          <FractionOperable DataType='Fraction'/>
           <AttachedToWall DataType='LocalReference'/>
         </Window>
       </Windows>
@@ -464,6 +467,7 @@
         <Location DataType='RefrigeratorLocation'/>
         <RatedAnnualkWh DataType='RatedAnnualkWh'/>
       </Refrigerator>
+      <Dehumidifier DataType='DehumidifierInfoType'/>
       <CookingRange DataType='CookingRangeInfoType'>
         <SystemIdentifier DataType='SystemIdentifiersInfoType'/>
         <FuelType DataType='FuelType'/>
