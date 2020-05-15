@@ -31,6 +31,7 @@ def create_osws
     # 'base-dhw-desuperheater.osw' => 'base.osw', # Not supporting desuperheater for now
     # 'base-dhw-desuperheater-2-speed.osw' => 'base.osw', # Not supporting desuperheater for now
     # 'base-dhw-desuperheater-gshp.osw' => 'base.osw', # Not supporting desuperheater for now
+    # 'base-dhw-desuperheater-hpwh.osw' => 'base.osw', # Not supporting desuperheater for now
     # 'base-dhw-desuperheater-tankless.osw' => 'base.osw', # Not supporting desuperheater for now
     # 'base-dhw-desuperheater-var-speed.osw' => 'base.osw', # Not supporting desuperheater for now
     'base-dhw-dwhr.osw' => 'base.osw',
@@ -175,6 +176,7 @@ def create_osws
     'base-mechvent-balanced.osw' => 'base.osw',
     'base-mechvent-bath-kitchen-fans.osw' => 'base.osw',
     'base-mechvent-cfis.osw' => 'base.osw',
+    # 'base-mechvent-cfis-dse.osw' => 'base.osw', # Not going to support DSE
     'base-mechvent-cfis-evap-cooler-only-ducted.osw' => 'base.osw',
     'base-mechvent-erv.osw' => 'base.osw',
     'base-mechvent-erv-atre-asre.osw' => 'base.osw',
@@ -201,7 +203,12 @@ def create_osws
     'invalid_files/non-electric-heat-pump-water-heater.osw' => 'base.osw',
     'invalid_files/multiple-heating-and-cooling-systems.osw' => 'base.osw',
     'invalid_files/non-integer-geometry-num-bathrooms.osw' => 'base.osw',
-    'invalid_files/non-integer-ceiling-fan-quantity.osw' => 'base.osw'
+    'invalid_files/non-integer-ceiling-fan-quantity.osw' => 'base.osw',
+    'invalid_files/single-family-detached-slab-non-zero-foundation-height.osw' => 'base.osw',
+    'invalid_files/single-family-detached-finished-basement-zero-foundation-height.osw' => 'base.osw',
+    'invalid_files/single-family-attached-ambient.osw' => 'base.osw',
+    'invalid_files/multifamily-bottom-slab-non-zero-foundation-height.osw' => 'base.osw',
+    'invalid_files/multifamily-bottom-crawlspace-zero-foundation-height.osw' => 'base.osw'
   }
 
   puts "Generating #{osws_files.size} OSW files..."
@@ -285,6 +292,7 @@ def get_values(osw_file, step)
     step.setArgument('simulation_control_end_day_of_month', 31)
     step.setArgument('schedules_output_path', 'BuildResidentialHPXML/tests/run/schedules.csv')
     step.setArgument('weather_station_epw_filepath', 'USA_CO_Denver.Intl.AP.725650_TMY3.epw')
+    step.setArgument('site_type', HPXML::SiteTypeSuburban)
     step.setArgument('geometry_unit_type', HPXML::ResidentialTypeSFD)
     step.setArgument('geometry_num_units', 1)
     step.setArgument('geometry_cfa', 2700.0)
@@ -571,6 +579,7 @@ def get_values(osw_file, step)
     step.setArgument('geometry_unit_type', HPXML::ResidentialTypeSFA)
     step.setArgument('geometry_cfa', 900.0)
     step.setArgument('geometry_num_units', 3)
+    step.setArgument('geometry_corridor_position', 'None')
     step.setArgument('window_front_wwr', 0.18)
     step.setArgument('window_back_wwr', 0.18)
     step.setArgument('window_left_wwr', 0.18)
@@ -580,9 +589,11 @@ def get_values(osw_file, step)
     step.setArgument('window_area_left', 0)
     step.setArgument('window_area_right', 0)
   elsif ['base-multifamily.osw'].include? osw_file
-    step.setArgument('geometry_unit_type', HPXML::ResidentialTypeMF2to4)
+    step.setArgument('geometry_unit_type', HPXML::ResidentialTypeMF)
     step.setArgument('geometry_cfa', 900.0)
     step.setArgument('geometry_num_units', 3)
+    step.setArgument('geometry_corridor_position', 'None')
+    step.setArgument('geometry_foundation_type', HPXML::FoundationTypeBasementUnconditioned)
     step.setArgument('window_front_wwr', 0.18)
     step.setArgument('window_back_wwr', 0.18)
     step.setArgument('window_left_wwr', 0.18)
@@ -985,6 +996,7 @@ def get_values(osw_file, step)
   elsif ['base-foundation-slab.osw'].include? osw_file
     step.setArgument('geometry_cfa', 1350.0)
     step.setArgument('geometry_foundation_type', HPXML::FoundationTypeSlab)
+    step.setArgument('geometry_foundation_height', 0.0)
     step.setArgument('geometry_foundation_height_above_grade', 0.0)
     step.setArgument('slab_under_insulation_r', 5)
     step.setArgument('slab_under_width', 999)
@@ -1002,7 +1014,9 @@ def get_values(osw_file, step)
     step.setArgument('water_heater_location', HPXML::LocationBasementUnconditioned)
     step.setArgument('clothes_washer_location', HPXML::LocationBasementUnconditioned)
     step.setArgument('clothes_dryer_location', HPXML::LocationBasementUnconditioned)
+    step.setArgument('dishwasher_location', HPXML::LocationBasementUnconditioned)
     step.setArgument('refrigerator_location', HPXML::LocationBasementUnconditioned)
+    step.setArgument('cooking_range_oven_location', HPXML::LocationBasementUnconditioned)
     step.setArgument('plug_loads_other_annual_kwh', '1228.5')
   elsif ['base-foundation-unconditioned-basement-above-grade.osw'].include? osw_file
     step.setArgument('geometry_cfa', 1350.0)
@@ -1015,7 +1029,9 @@ def get_values(osw_file, step)
     step.setArgument('water_heater_location', HPXML::LocationBasementUnconditioned)
     step.setArgument('clothes_washer_location', HPXML::LocationBasementUnconditioned)
     step.setArgument('clothes_dryer_location', HPXML::LocationBasementUnconditioned)
+    step.setArgument('dishwasher_location', HPXML::LocationBasementUnconditioned)
     step.setArgument('refrigerator_location', HPXML::LocationBasementUnconditioned)
+    step.setArgument('cooking_range_oven_location', HPXML::LocationBasementUnconditioned)
     step.setArgument('plug_loads_other_annual_kwh', '1228.5')
   elsif ['base-foundation-unconditioned-basement-assembly-r.osw'].include? osw_file
     step.setArgument('geometry_cfa', 1350.0)
@@ -1027,7 +1043,9 @@ def get_values(osw_file, step)
     step.setArgument('water_heater_location', HPXML::LocationBasementUnconditioned)
     step.setArgument('clothes_washer_location', HPXML::LocationBasementUnconditioned)
     step.setArgument('clothes_dryer_location', HPXML::LocationBasementUnconditioned)
+    step.setArgument('dishwasher_location', HPXML::LocationBasementUnconditioned)
     step.setArgument('refrigerator_location', HPXML::LocationBasementUnconditioned)
+    step.setArgument('cooking_range_oven_location', HPXML::LocationBasementUnconditioned)
     step.setArgument('plug_loads_other_annual_kwh', '1228.5')
   elsif ['base-foundation-unconditioned-basement-wall-insulation.osw'].include? osw_file
     step.setArgument('geometry_cfa', 1350.0)
@@ -1039,7 +1057,9 @@ def get_values(osw_file, step)
     step.setArgument('water_heater_location', HPXML::LocationBasementUnconditioned)
     step.setArgument('clothes_washer_location', HPXML::LocationBasementUnconditioned)
     step.setArgument('clothes_dryer_location', HPXML::LocationBasementUnconditioned)
+    step.setArgument('dishwasher_location', HPXML::LocationBasementUnconditioned)
     step.setArgument('refrigerator_location', HPXML::LocationBasementUnconditioned)
+    step.setArgument('cooking_range_oven_location', HPXML::LocationBasementUnconditioned)
     step.setArgument('plug_loads_other_annual_kwh', '1228.5')
   elsif ['base-foundation-unvented-crawlspace.osw'].include? osw_file
     step.setArgument('geometry_cfa', 1350.0)
@@ -1528,6 +1548,23 @@ def get_values(osw_file, step)
     step.setArgument('geometry_num_bathrooms', '1.5')
   elsif ['invalid_files/non-integer-ceiling-fan-quantity.osw'].include? osw_file
     step.setArgument('ceiling_fan_quantity', '0.5')
+  elsif ['invalid_files/single-family-detached-slab-non-zero-foundation-height.osw'].include? osw_file
+    step.setArgument('geometry_foundation_type', HPXML::FoundationTypeSlab)
+  elsif ['invalid_files/single-family-detached-finished-basement-zero-foundation-height.osw'].include? osw_file
+    step.setArgument('geometry_foundation_height', 0.0)
+  elsif ['invalid_files/single-family-attached-ambient.osw'].include? osw_file
+    step.setArgument('geometry_unit_type', HPXML::ResidentialTypeSFA)
+    step.setArgument('geometry_corridor_position', 'None')
+    step.setArgument('geometry_foundation_type', HPXML::FoundationTypeAmbient)
+  elsif ['invalid_files/multifamily-bottom-slab-non-zero-foundation-height.osw'].include? osw_file
+    step.setArgument('geometry_unit_type', HPXML::ResidentialTypeMF)
+    step.setArgument('geometry_corridor_position', 'None')
+    step.setArgument('geometry_foundation_type', HPXML::FoundationTypeSlab)
+  elsif ['invalid_files/multifamily-bottom-crawlspace-zero-foundation-height.osw'].include? osw_file
+    step.setArgument('geometry_unit_type', HPXML::ResidentialTypeMF)
+    step.setArgument('geometry_corridor_position', 'None')
+    step.setArgument('geometry_foundation_type', HPXML::FoundationTypeCrawlspaceUnvented)
+    step.setArgument('geometry_foundation_height', 0.0)
   end
   return step
 end
