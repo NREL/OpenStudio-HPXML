@@ -3,8 +3,8 @@
   <schema_version>3.0</schema_version>
   <name>hpxm_lto_openstudio</name>
   <uid>b1543b30-9465-45ff-ba04-1d1f85e763bc</uid>
-  <version_id>ecc80e0c-dc6e-4568-b12e-2ca658343609</version_id>
-  <version_modified>20200515T154858Z</version_modified>
+  <version_id>923e9677-1716-4b32-9a6d-93738932ddef</version_id>
+  <version_modified>20200515T161606Z</version_modified>
   <xml_checksum>D8922A73</xml_checksum>
   <class_name>HPXMLtoOpenStudio</class_name>
   <display_name>HPXML to OpenStudio Translator</display_name>
@@ -325,12 +325,6 @@
       <checksum>15FA9595</checksum>
     </file>
     <file>
-      <filename>BaseElements.xsd</filename>
-      <filetype>xsd</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>CE0F105B</checksum>
-    </file>
-    <file>
       <filename>meta_measure.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
@@ -421,12 +415,6 @@
       <checksum>3426AF5E</checksum>
     </file>
     <file>
-      <filename>waterheater.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>BDCFB48D</checksum>
-    </file>
-    <file>
       <filename>hotwater_appliances.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
@@ -457,10 +445,34 @@
       <checksum>61D6CFEC</checksum>
     </file>
     <file>
+      <filename>BaseElements.xsd</filename>
+      <filetype>xsd</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>76A93C0E</checksum>
+    </file>
+    <file>
+      <filename>waterheater.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>364DBB7E</checksum>
+    </file>
+    <file>
       <filename>pv.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
       <checksum>B8DEA262</checksum>
+    </file>
+    <file>
+      <filename>test_hvac.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>test</usage_type>
+      <checksum>C4BB0763</checksum>
+    </file>
+    <file>
+      <filename>test_airflow.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>test</usage_type>
+      <checksum>CE16F0F3</checksum>
     </file>
     <file>
       <filename>lighting.rb</filename>
@@ -477,25 +489,7 @@
       <filename>measure.rb</filename>
       <filetype>rb</filetype>
       <usage_type>script</usage_type>
-      <checksum>78A028DB</checksum>
-    </file>
-    <file>
-      <filename>test_hvac.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>test</usage_type>
-      <checksum>C4BB0763</checksum>
-    </file>
-    <file>
-      <filename>test_airflow.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>test</usage_type>
-      <checksum>CE16F0F3</checksum>
-    </file>
-    <file>
-      <filename>test_pv.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>test</usage_type>
-      <checksum>E03578EA</checksum>
+      <checksum>A353EACA</checksum>
     </file>
     <file>
       <filename>test_lighting.rb</filename>
@@ -508,6 +502,12 @@
       <filetype>rb</filetype>
       <usage_type>test</usage_type>
       <checksum>E317F8DB</checksum>
+    </file>
+    <file>
+      <filename>test_pv.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>test</usage_type>
+      <checksum>E03578EA</checksum>
     </file>
   </files>
 </measure>

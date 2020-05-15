@@ -585,8 +585,8 @@ class OSModel
       if water_heating_system.temperature.nil?
         water_heating_system.temperature = Waterheater.get_default_hot_water_temperature(@eri_version)
       end
-      if (water_heating_system.water_heater_type == HPXML::WaterHeaterTypeTankless) && water_heating_system.performance_adjustment.nil?
-        water_heating_system.performance_adjustment = Waterheater.get_tankless_cycling_derate()
+      if water_heating_system.performance_adjustment.nil?
+        water_heating_system.performance_adjustment = Waterheater.get_default_performance_adjustment(water_heating_system)
       end
       if (water_heating_system.water_heater_type == HPXML::WaterHeaterTypeCombiStorage) && water_heating_system.standby_loss.nil?
         # Use equation fit from AHRI database
@@ -2455,9 +2455,9 @@ class OSModel
 
         elsif wh_type == HPXML::WaterHeaterTypeTankless
 
-          cycling_derate = water_heating_system.performance_adjustment
+          performance_adjustment = water_heating_system.performance_adjustment
 
-          Waterheater.apply_tankless(model, loc_space, loc_schedule, fuel, ef, cycling_derate,
+          Waterheater.apply_tankless(model, loc_space, loc_schedule, fuel, ef, performance_adjustment,
                                      setpoint_temp, ec_adj, @nbeds, @dhw_map,
                                      sys_id, desuperheater_clg_coil, solar_fraction)
 
