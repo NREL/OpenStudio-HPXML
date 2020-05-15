@@ -18,7 +18,7 @@ Since [OpenStudio measures](http://nrel.github.io/OpenStudio-user-documentation/
 
 This repository contains two OpenStudio measures:
 - `HPXMLtoOpenStudio`: A measure that translates an HPXML file to an OpenStudio model.
-- `SimulationOutputReport`: A reporting measure that generates a variety of annual/timeseries outputs for a residential HPXML-based model.
+- `SimulationOutputReport`: A reporting measure that generates a variety of annual/timeseries CSV outputs for a residential HPXML-based model.
 
 ## Projects
 
