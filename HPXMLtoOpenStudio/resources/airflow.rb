@@ -1,12 +1,5 @@
 # frozen_string_literal: true
 
-require_relative 'constants'
-require_relative 'unit_conversions'
-require_relative 'schedules'
-require_relative 'util'
-require_relative 'psychrometrics'
-require_relative 'hvac'
-
 class Airflow
   def self.apply(model, runner, weather, spaces, air_infils, vent_mech, vent_whf,
                  duct_systems, infil_volume, infil_height, open_window_area,

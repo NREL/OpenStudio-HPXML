@@ -1,13 +1,5 @@
 # frozen_string_literal: true
 
-require_relative 'constants'
-require_relative 'util'
-require_relative 'geometry'
-require_relative 'schedules'
-require_relative 'unit_conversions'
-require_relative 'psychrometrics'
-require_relative 'hotwater_appliances'
-
 class Waterheater
   def self.apply_tank(model, loc_space, loc_schedule, water_heating_system, ec_adj, dhw_map,
                       desuperheater_clg_coil, solar_fraction)
@@ -1316,8 +1308,10 @@ class Waterheater
     end
   end
 
-  def self.get_tankless_cycling_derate()
-    return 0.08
+  def self.get_default_performance_adjustment(water_heating_system)
+    return unless water_heating_system.water_heater_type == HPXML::WaterHeaterTypeTankless
+
+    return 0.92 # Applies to EF
   end
 
   def self.get_default_location(hpxml, iecc_zone)
@@ -1375,7 +1369,7 @@ class Waterheater
     # based on the Energy Factor and recovery efficiency of the tank
     # Source: Burch and Erickson 2004 - http://www.nrel.gov/docs/gen/fy04/36035.pdf
     if water_heating_system.water_heater_type == HPXML::WaterHeaterTypeTankless
-      eta_c = water_heating_system.energy_factor * (1.0 - water_heating_system.performance_adjustment)
+      eta_c = water_heating_system.energy_factor * water_heating_system.performance_adjustment
       ua = 0.0
       surface_area = 1.0
     else

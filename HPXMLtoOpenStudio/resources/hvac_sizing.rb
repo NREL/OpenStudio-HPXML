@@ -1,12 +1,5 @@
 # frozen_string_literal: true
 
-require_relative 'geometry'
-require_relative 'hvac'
-require_relative 'unit_conversions'
-require_relative 'util'
-require_relative 'schedules'
-require_relative 'constructions'
-
 class HVACSizing
   def self.apply(model, runner, weather, cfa, infilvolume, nbeds, min_neighbor_distance, living_space, debug)
     @runner = runner
@@ -134,7 +127,7 @@ class HVACSizing
     @heat_design_temps[nil] = weather.design.HeatingDrybulb
 
     # MF spaces
-    [HPXML::LocationOtherHousingUnit, HPXML::LocationOtherHousingUnitAbove, HPXML::LocationOtherHousingUnitBelow, HPXML::LocationOtherHeatedSpace, HPXML::LocationOtherMultifamilyBufferSpace, HPXML::LocationOtherNonFreezingSpace].each do |mf_space|
+    [HPXML::LocationOtherHousingUnit, HPXML::LocationOtherHeatedSpace, HPXML::LocationOtherMultifamilyBufferSpace, HPXML::LocationOtherNonFreezingSpace].each do |mf_space|
       @cool_design_temps[mf_space] = get_other_side_temp(mf_space, @cool_setpoint, weather.design.CoolingDrybulb)
       @heat_design_temps[mf_space] = get_other_side_temp(mf_space, @heat_setpoint, weather.design.HeatingDrybulb)
     end
@@ -2651,7 +2644,7 @@ class HVACSizing
       return [(setpoint + oa_db) / 2, 50].max
     elsif adjacent_space_name == HPXML::LocationOtherNonFreezingSpace
       return [oa_db, 40].max
-    elsif [HPXML::LocationOtherHousingUnit, HPXML::LocationOtherHousingUnitAbove, HPXML::LocationOtherHousingUnitBelow].include? adjacent_space_name
+    elsif [HPXML::LocationOtherHousingUnit].include? adjacent_space_name
       return setpoint
     end
   end
