@@ -1078,6 +1078,7 @@ class HPXMLTest < MiniTest::Test
      HPXML::FuelTypeWood,
      HPXML::FuelTypeWoodPellets].each do |fuel|
       fuel_name = fuel.split.map(&:capitalize).join(' ')
+      fuel_name += ' Cord' if fuel_name == 'Wood'
       energy_htg = results.fetch("#{fuel_name}: Heating (MBtu)", 0)
       energy_dhw = results.fetch("#{fuel_name}: Hot Water (MBtu)", 0)
       energy_cd = results.fetch("#{fuel_name}: Clothes Dryer (MBtu)", 0)

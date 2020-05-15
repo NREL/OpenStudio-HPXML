@@ -634,8 +634,8 @@ class OSModel
       if water_heating_system.temperature.nil?
         water_heating_system.temperature = Waterheater.get_default_hot_water_temperature(@eri_version)
       end
-      if (water_heating_system.water_heater_type == HPXML::WaterHeaterTypeTankless) && water_heating_system.performance_adjustment.nil?
-        water_heating_system.performance_adjustment = Waterheater.get_tankless_cycling_derate()
+      if water_heating_system.performance_adjustment.nil?
+        water_heating_system.performance_adjustment = Waterheater.get_default_performance_adjustment(water_heating_system)
       end
       if (water_heating_system.water_heater_type == HPXML::WaterHeaterTypeCombiStorage) && water_heating_system.standby_loss.nil?
         # Use equation fit from AHRI database
@@ -2504,9 +2504,9 @@ class OSModel
 
         elsif wh_type == HPXML::WaterHeaterTypeTankless
 
-          cycling_derate = water_heating_system.performance_adjustment
+          performance_adjustment = water_heating_system.performance_adjustment
 
-          Waterheater.apply_tankless(model, loc_space, loc_schedule, fuel, ef, cycling_derate,
+          Waterheater.apply_tankless(model, loc_space, loc_schedule, fuel, ef, performance_adjustment,
                                      setpoint_temp, ec_adj, @nbeds, @dhw_map,
                                      sys_id, desuperheater_clg_coil, solar_fraction)
 
@@ -2911,28 +2911,8 @@ class OSModel
   end
 
   def self.add_lighting(runner, model, weather, spaces)
-    fractions = {}
-    @hpxml.lighting_groups.each do |lg|
-      fractions[[lg.location, lg.lighting_type]] = lg.fraction_of_units_in_location
-    end
-
-    return if fractions[[HPXML::LocationInterior, HPXML::LightingTypeCFL]].nil? # Not the lighting group(s) we're interested in
-
-    int_kwh, ext_kwh, grg_kwh = Lighting.calc_lighting_energy(@eri_version, @cfa, @gfa,
-                                                              fractions[[HPXML::LocationInterior, HPXML::LightingTypeCFL]],
-                                                              fractions[[HPXML::LocationExterior, HPXML::LightingTypeCFL]],
-                                                              fractions[[HPXML::LocationGarage, HPXML::LightingTypeCFL]],
-                                                              fractions[[HPXML::LocationInterior, HPXML::LightingTypeLFL]],
-                                                              fractions[[HPXML::LocationExterior, HPXML::LightingTypeLFL]],
-                                                              fractions[[HPXML::LocationGarage, HPXML::LightingTypeLFL]],
-                                                              fractions[[HPXML::LocationInterior, HPXML::LightingTypeLED]],
-                                                              fractions[[HPXML::LocationExterior, HPXML::LightingTypeLED]],
-                                                              fractions[[HPXML::LocationGarage, HPXML::LightingTypeLED]],
-                                                              @hpxml.lighting.usage_multiplier)
-
-    garage_space = spaces[HPXML::LocationGarage]
-    Lighting.apply(model, weather, int_kwh, grg_kwh, ext_kwh, @cfa, @gfa,
-                   @living_space, garage_space)
+    Lighting.apply(model, weather, spaces, @hpxml.lighting_groups,
+                   @hpxml.lighting.usage_multiplier, @eri_version)
   end
 
   def self.add_airflow(runner, model, weather, spaces)
@@ -3111,32 +3091,8 @@ class OSModel
   end
 
   def self.add_photovoltaics(runner, model)
-    modules_map = { HPXML::PVModuleTypeStandard => 'Standard',
-                    HPXML::PVModuleTypePremium => 'Premium',
-                    HPXML::PVModuleTypeThinFilm => 'ThinFilm' }
-
     @hpxml.pv_systems.each do |pv_system|
-      pv_id = pv_system.id
-      module_type = modules_map[pv_system.module_type]
-      if (pv_system.tracking == HPXML::PVTrackingTypeFixed) && (pv_system.location == HPXML::LocationRoof)
-        array_type = 'FixedRoofMounted'
-      elsif (pv_system.tracking == HPXML::PVTrackingTypeFixed) && (pv_system.location == HPXML::LocationGround)
-        array_type = 'FixedOpenRack'
-      elsif pv_system.tracking == HPXML::PVTrackingType1Axis
-        array_type = 'OneAxis'
-      elsif pv_system.tracking == HPXML::PVTrackingType1AxisBacktracked
-        array_type = 'OneAxisBacktracking'
-      elsif pv_system.tracking == HPXML::PVTrackingType2Axis
-        array_type = 'TwoAxis'
-      end
-      az = pv_system.array_azimuth
-      tilt = pv_system.array_tilt
-      power_w = pv_system.max_power_output
-      inv_eff = pv_system.inverter_efficiency
-      system_losses = pv_system.system_losses_fraction
-
-      PV.apply(model, pv_id, power_w, module_type,
-               system_losses, inv_eff, tilt, az, array_type)
+      PV.apply(model, pv_system)
     end
   end
 
