@@ -1254,8 +1254,7 @@ class SimulationOutputReport < OpenStudio::Measure::ReportingMeasure
       value = dhw_system.energy_factor
       wh_type = dhw_system.water_heater_type
       if wh_type == HPXML::WaterHeaterTypeTankless
-        cycling_derate = dhw_system.performance_adjustment
-        value_adj = 1.0 - cycling_derate
+        value_adj = dhw_system.performance_adjustment
       else
         value_adj = 1.0
       end
