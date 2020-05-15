@@ -1,4 +1,5 @@
 require_relative 'xmlhelper'
+require 'oga'
 
 class HPXMLValidator
   def self.get_data_type_mapping_xml()
@@ -7,16 +8,22 @@ class HPXMLValidator
                    '/HPXML/XMLTransactionHeaderInformation/CreatedDateAndTime',
                    '/HPXML/XMLTransactionHeaderInformation/Transaction',
                    '/HPXML/SoftwareInfo/extension/SimulationControl',
+
                    '/HPXML/Building',
                    '/HPXML/Building/BuildingID',
                    '/HPXML/Building/ProjectStatus/EventType',
+
+                   '/HPXML/Building/BuildingDetails/BuildingSummary/Site/SiteType',
                    '/HPXML/Building/BuildingDetails/BuildingSummary/Site/extension/ShelterCoefficient',
                    '/HPXML/Building/BuildingDetails/BuildingSummary/BuildingOccupancy/NumberofResidents',
                    '/HPXML/Building/BuildingDetails/BuildingSummary/BuildingConstruction',
                    '/HPXML/Building/BuildingDetails/BuildingSummary/Site/extension/Neighbors',
+
                    '/HPXML/Building/BuildingDetails/ClimateandRiskZones/ClimateZoneIECC',
                    '/HPXML/Building/BuildingDetails/ClimateandRiskZones/WeatherStation',
+
                    '/HPXML/Building/BuildingDetails/Enclosure/AirInfiltration/AirInfiltrationMeasurement/extension/ConstantACHnatural',
+
                    '/HPXML/Building/BuildingDetails/Enclosure/Roofs/Roof',
                    '/HPXML/Building/BuildingDetails/Enclosure/Walls/Wall',
                    '/HPXML/Building/BuildingDetails/Enclosure/RimJoists/RimJoist',
@@ -26,54 +33,66 @@ class HPXMLValidator
                    '/HPXML/Building/BuildingDetails/Enclosure/Windows/Window',
                    '/HPXML/Building/BuildingDetails/Enclosure/Skylights/Skylight',
                    '/HPXML/Building/BuildingDetails/Enclosure/Doors/Door',
+
                    '/HPXML/Building/BuildingDetails/Systems/HVAC/HVACPlant/HeatingSystem',
                    '/HPXML/Building/BuildingDetails/Systems/HVAC/HVACPlant/CoolingSystem',
                    '/HPXML/Building/BuildingDetails/Systems/HVAC/HVACPlant/HeatPump',
                    '/HPXML/Building/BuildingDetails/Systems/HVAC/HVACControl',
                    '/HPXML/Building/BuildingDetails/Systems/HVAC/HVACDistribution',
-                   '/HPXML/Building/BuildingDetails/Systems/MechanicalVentilation/VentilationFans/VentilationFan',
+
                    '/HPXML/Building/BuildingDetails/Systems/MechanicalVentilation/VentilationFans/VentilationFan',
                    '/HPXML/Building/BuildingDetails/Systems/WaterHeating/WaterHeatingSystem',
                    '/HPXML/Building/BuildingDetails/Systems/WaterHeating/HotWaterDistribution',
                    '/HPXML/Building/BuildingDetails/Systems/WaterHeating/WaterFixture',
                    '/HPXML/Building/BuildingDetails/Systems/SolarThermal/SolarThermalSystem',
                    '/HPXML/Building/BuildingDetails/Systems/Photovoltaics/PVSystem',
+
                    '/HPXML/Building/BuildingDetails/Appliances/ClothesWasher',
                    '/HPXML/Building/BuildingDetails/Appliances/ClothesDryer',
                    '/HPXML/Building/BuildingDetails/Appliances/Dishwasher',
                    '/HPXML/Building/BuildingDetails/Appliances/Refrigerator',
+                   '/HPXML/Building/BuildingDetails/Appliances/Dehumidifier',
                    '/HPXML/Building/BuildingDetails/Appliances/CookingRange',
+
                    '/HPXML/Building/BuildingDetails/Lighting',
                    '/HPXML/Building/BuildingDetails/Lighting/CeilingFan',
+
                    '/HPXML/Building/BuildingDetails/MiscLoads/PlugLoad',
-                   '/HPXML/Building/BuildingDetails/MiscLoads/PlugLoad',
+
                    '/HPXML/SoftwareInfo/extension/SimulationControl/Timestep',
                    '/HPXML/SoftwareInfo/extension/SimulationControl/BeginMonth',
                    '/HPXML/SoftwareInfo/extension/SimulationControl/BeginDayOfMonth',
                    '/HPXML/SoftwareInfo/extension/SimulationControl/EndMonth',
                    '/HPXML/SoftwareInfo/extension/SimulationControl/EndDayOfMonth',
+
                    '/HPXML/Building/BuildingDetails/BuildingSummary/BuildingConstruction/NumberofConditionedFloors',
                    '/HPXML/Building/BuildingDetails/BuildingSummary/BuildingConstruction/NumberofConditionedFloorsAboveGrade',
                    '/HPXML/Building/BuildingDetails/BuildingSummary/BuildingConstruction/NumberofBedrooms',
+                   '/HPXML/Building/BuildingDetails/BuildingSummary/BuildingConstruction/NumberofBathrooms',
                    '/HPXML/Building/BuildingDetails/BuildingSummary/BuildingConstruction/ConditionedFloorArea',
                    '/HPXML/Building/BuildingDetails/BuildingSummary/BuildingConstruction/ConditionedBuildingVolume',
                    '/HPXML/Building/BuildingDetails/BuildingSummary/BuildingConstruction/AverageCeilingHeight',
+
                    '/HPXML/Building/BuildingDetails/BuildingSummary/Site/extension/Neighbors/NeighborBuilding',
                    '/HPXML/Building/BuildingDetails/BuildingSummary/Site/extension/Neighbors/NeighborBuilding/Azimuth',
                    '/HPXML/Building/BuildingDetails/BuildingSummary/Site/extension/Neighbors/NeighborBuilding/Distance',
                    '/HPXML/Building/BuildingDetails/BuildingSummary/Site/extension/Neighbors/NeighborBuilding/Height',
+
                    '/HPXML/Building/BuildingDetails/ClimateandRiskZones/ClimateZoneIECC/Year',
                    '/HPXML/Building/BuildingDetails/ClimateandRiskZones/ClimateZoneIECC/ClimateZone',
+
                    '/HPXML/Building/BuildingDetails/ClimateandRiskZones/WeatherStation/SystemIdentifier',
                    '/HPXML/Building/BuildingDetails/ClimateandRiskZones/WeatherStation/Name',
                    '/HPXML/Building/BuildingDetails/ClimateandRiskZones/WeatherStation/WMO',
-                   '/HPXML/Building/BuildingDetails/ClimateandRiskZones/WeatherStation/extension/EPWFileName',
+                   '/HPXML/Building/BuildingDetails/ClimateandRiskZones/WeatherStation/extension/EPWFilePath',
+
                    '/HPXML/Building/BuildingDetails/Enclosure/AirInfiltration/AirInfiltrationMeasurement/SystemIdentifier',
                    '/HPXML/Building/BuildingDetails/Enclosure/AirInfiltration/AirInfiltrationMeasurement/HousePressure',
                    '/HPXML/Building/BuildingDetails/Enclosure/AirInfiltration/AirInfiltrationMeasurement/BuildingAirLeakage',
                    '/HPXML/Building/BuildingDetails/Enclosure/AirInfiltration/AirInfiltrationMeasurement/BuildingAirLeakage/UnitofMeasure',
                    '/HPXML/Building/BuildingDetails/Enclosure/AirInfiltration/AirInfiltrationMeasurement/BuildingAirLeakage/AirLeakage',
                    '/HPXML/Building/BuildingDetails/Enclosure/AirInfiltration/AirInfiltrationMeasurement/InfiltrationVolume',
+
                    '/HPXML/Building/BuildingDetails/Enclosure/Roofs/Roof/SystemIdentifier',
                    '/HPXML/Building/BuildingDetails/Enclosure/Roofs/Roof/InteriorAdjacentTo',
                    '/HPXML/Building/BuildingDetails/Enclosure/Roofs/Roof/Area',
@@ -84,9 +103,11 @@ class HPXMLValidator
                    '/HPXML/Building/BuildingDetails/Enclosure/Roofs/Roof/RadiantBarrier',
                    '/HPXML/Building/BuildingDetails/Enclosure/Roofs/Roof/Insulation/SystemIdentifier',
                    '/HPXML/Building/BuildingDetails/Enclosure/Roofs/Roof/Insulation/AssemblyEffectiveRValue',
+
                    '/HPXML/Building/BuildingDetails/Enclosure/Attics/Attic/AtticType/Attic/Vented',
                    '/HPXML/Building/BuildingDetails/Enclosure/Attics/Attic/VentilationRate/UnitofMeasure',
                    '/HPXML/Building/BuildingDetails/Enclosure/Attics/Attic/VentilationRate/Value',
+
                    '/HPXML/Building/BuildingDetails/Enclosure/Walls/Wall/SystemIdentifier',
                    '/HPXML/Building/BuildingDetails/Enclosure/Walls/Wall/ExteriorAdjacentTo',
                    '/HPXML/Building/BuildingDetails/Enclosure/Walls/Wall/InteriorAdjacentTo',
@@ -107,6 +128,7 @@ class HPXMLValidator
                    '/HPXML/Building/BuildingDetails/Enclosure/Walls/Wall/Emittance',
                    '/HPXML/Building/BuildingDetails/Enclosure/Walls/Wall/Insulation/SystemIdentifier',
                    '/HPXML/Building/BuildingDetails/Enclosure/Walls/Wall/Insulation/AssemblyEffectiveRValue',
+
                    '/HPXML/Building/BuildingDetails/Enclosure/RimJoists/RimJoist/SystemIdentifier',
                    '/HPXML/Building/BuildingDetails/Enclosure/RimJoists/RimJoist/ExteriorAdjacentTo',
                    '/HPXML/Building/BuildingDetails/Enclosure/RimJoists/RimJoist/InteriorAdjacentTo',
@@ -116,6 +138,11 @@ class HPXMLValidator
                    '/HPXML/Building/BuildingDetails/Enclosure/RimJoists/RimJoist/Emittance',
                    '/HPXML/Building/BuildingDetails/Enclosure/RimJoists/RimJoist/Insulation/SystemIdentifier',
                    '/HPXML/Building/BuildingDetails/Enclosure/RimJoists/RimJoist/Insulation/AssemblyEffectiveRValue',
+
+                   '/HPXML/Building/BuildingDetails/Enclosure/Foundations/Foundation/FoundationType/Crawlspace/Vented',
+                   '/HPXML/Building/BuildingDetails/Enclosure/Foundations/Foundation/VentilationRate/UnitofMeasure',
+                   '/HPXML/Building/BuildingDetails/Enclosure/Foundations/Foundation/VentilationRate/Value',
+
                    '/HPXML/Building/BuildingDetails/Enclosure/FoundationWalls/FoundationWall/SystemIdentifier',
                    '/HPXML/Building/BuildingDetails/Enclosure/FoundationWalls/FoundationWall/ExteriorAdjacentTo',
                    '/HPXML/Building/BuildingDetails/Enclosure/FoundationWalls/FoundationWall/InteriorAdjacentTo',
@@ -125,21 +152,19 @@ class HPXMLValidator
                    '/HPXML/Building/BuildingDetails/Enclosure/FoundationWalls/FoundationWall/Thickness',
                    '/HPXML/Building/BuildingDetails/Enclosure/FoundationWalls/FoundationWall/DepthBelowGrade',
                    '/HPXML/Building/BuildingDetails/Enclosure/FoundationWalls/FoundationWall/Insulation/SystemIdentifier',
-                   '/HPXML/Building/BuildingDetails/Enclosure/FoundationWalls/FoundationWall/Insulation/Layer/InstallationType',
                    '/HPXML/Building/BuildingDetails/Enclosure/FoundationWalls/FoundationWall/Insulation/AssemblyEffectiveRValue',
-                   '/HPXML/Building/BuildingDetails/Enclosure/Foundations/Foundation/FoundationType/Crawlspace/Vented',
-                   '/HPXML/Building/BuildingDetails/Enclosure/Foundations/Foundation/VentilationRate/UnitofMeasure',
-                   '/HPXML/Building/BuildingDetails/Enclosure/Foundations/Foundation/VentilationRate/Value',
                    '/HPXML/Building/BuildingDetails/Enclosure/FoundationWalls/FoundationWall/Insulation/Layer/InstallationType',
                    '/HPXML/Building/BuildingDetails/Enclosure/FoundationWalls/FoundationWall/Insulation/Layer/NominalRValue',
                    '/HPXML/Building/BuildingDetails/Enclosure/FoundationWalls/FoundationWall/Insulation/Layer/extension/DistanceToTopOfInsulation',
                    '/HPXML/Building/BuildingDetails/Enclosure/FoundationWalls/FoundationWall/Insulation/Layer/extension/DistanceToBottomOfInsulation',
+
                    '/HPXML/Building/BuildingDetails/Enclosure/FrameFloors/FrameFloor/SystemIdentifier',
                    '/HPXML/Building/BuildingDetails/Enclosure/FrameFloors/FrameFloor/ExteriorAdjacentTo',
                    '/HPXML/Building/BuildingDetails/Enclosure/FrameFloors/FrameFloor/InteriorAdjacentTo',
                    '/HPXML/Building/BuildingDetails/Enclosure/FrameFloors/FrameFloor/Area',
                    '/HPXML/Building/BuildingDetails/Enclosure/FrameFloors/FrameFloor/Insulation/SystemIdentifier',
                    '/HPXML/Building/BuildingDetails/Enclosure/FrameFloors/FrameFloor/Insulation/AssemblyEffectiveRValue',
+
                    '/HPXML/Building/BuildingDetails/Enclosure/Slabs/Slab/SystemIdentifier',
                    '/HPXML/Building/BuildingDetails/Enclosure/Slabs/Slab/InteriorAdjacentTo',
                    '/HPXML/Building/BuildingDetails/Enclosure/Slabs/Slab/Area',
@@ -157,6 +182,7 @@ class HPXMLValidator
                    '/HPXML/Building/BuildingDetails/Enclosure/Slabs/Slab/UnderSlabInsulation/Layer/NominalRValue',
                    '/HPXML/Building/BuildingDetails/Enclosure/Slabs/Slab/extension/CarpetFraction',
                    '/HPXML/Building/BuildingDetails/Enclosure/Slabs/Slab/extension/CarpetRValue',
+
                    '/HPXML/Building/BuildingDetails/Enclosure/Windows/Window/SystemIdentifier',
                    '/HPXML/Building/BuildingDetails/Enclosure/Windows/Window/Area',
                    '/HPXML/Building/BuildingDetails/Enclosure/Windows/Window/Azimuth',
@@ -170,18 +196,20 @@ class HPXMLValidator
                    '/HPXML/Building/BuildingDetails/Enclosure/Windows/Window/Overhangs/Depth',
                    '/HPXML/Building/BuildingDetails/Enclosure/Windows/Window/Overhangs/DistanceToTopOfWindow',
                    '/HPXML/Building/BuildingDetails/Enclosure/Windows/Window/Overhangs/DistanceToBottomOfWindow',
+
                    '/HPXML/Building/BuildingDetails/Enclosure/Skylights/Skylight/SystemIdentifier',
                    '/HPXML/Building/BuildingDetails/Enclosure/Skylights/Skylight/Area',
                    '/HPXML/Building/BuildingDetails/Enclosure/Skylights/Skylight/Azimuth',
                    '/HPXML/Building/BuildingDetails/Enclosure/Skylights/Skylight/UFactor',
                    '/HPXML/Building/BuildingDetails/Enclosure/Skylights/Skylight/SHGC',
                    '/HPXML/Building/BuildingDetails/Enclosure/Skylights/Skylight/AttachedToRoof',
+
                    '/HPXML/Building/BuildingDetails/Enclosure/Doors/Door/SystemIdentifier',
                    '/HPXML/Building/BuildingDetails/Enclosure/Doors/Door/AttachedToWall',
                    '/HPXML/Building/BuildingDetails/Enclosure/Doors/Door/Area',
                    '/HPXML/Building/BuildingDetails/Enclosure/Doors/Door/Azimuth',
                    '/HPXML/Building/BuildingDetails/Enclosure/Doors/Door/RValue',
-                   '/HPXML/Building/BuildingDetails/Systems/HVAC/HVACControl',
+
                    '/HPXML/Building/BuildingDetails/Systems/HVAC/HVACPlant/HeatingSystem/SystemIdentifier',
                    '/HPXML/Building/BuildingDetails/Systems/HVAC/HVACPlant/HeatingSystem/HeatingCapacity',
                    '/HPXML/Building/BuildingDetails/Systems/HVAC/HVACPlant/HeatingSystem/FractionHeatLoadServed',
@@ -196,6 +224,7 @@ class HPXMLValidator
                    '/HPXML/Building/BuildingDetails/Systems/HVAC/HVACPlant/HeatingSystem/HeatingSystemFuel',
                    '/HPXML/Building/BuildingDetails/Systems/HVAC/HVACPlant/HeatingSystem/AnnualHeatingEfficiency/Units',
                    '/HPXML/Building/BuildingDetails/Systems/HVAC/HVACPlant/HeatingSystem/AnnualHeatingEfficiency/Value',
+
                    '/HPXML/Building/BuildingDetails/Systems/HVAC/HVACPlant/CoolingSystem/SystemIdentifier',
                    '/HPXML/Building/BuildingDetails/Systems/HVAC/HVACPlant/CoolingSystem/CoolingCapacity',
                    '/HPXML/Building/BuildingDetails/Systems/HVAC/HVACPlant/CoolingSystem/FractionCoolLoadServed',
@@ -206,6 +235,7 @@ class HPXMLValidator
                    '/HPXML/Building/BuildingDetails/Systems/HVAC/HVACPlant/CoolingSystem/AnnualCoolingEfficiency/Value',
                    '/HPXML/Building/BuildingDetails/Systems/HVAC/HVACPlant/CoolingSystem/SensibleHeatFraction',
                    '/HPXML/Building/BuildingDetails/Systems/HVAC/HVACPlant/CoolingSystem/CompressorType',
+
                    '/HPXML/Building/BuildingDetails/Systems/HVAC/HVACPlant/HeatPump/SystemIdentifier',
                    '/HPXML/Building/BuildingDetails/Systems/HVAC/HVACPlant/HeatPump/HeatPumpType',
                    '/HPXML/Building/BuildingDetails/Systems/HVAC/HVACPlant/HeatPump/HeatPumpFuel',
@@ -226,6 +256,7 @@ class HPXMLValidator
                    '/HPXML/Building/BuildingDetails/Systems/HVAC/HVACPlant/HeatPump/BackupAnnualHeatingEfficiency/Units',
                    '/HPXML/Building/BuildingDetails/Systems/HVAC/HVACPlant/HeatPump/BackupAnnualHeatingEfficiency/Value',
                    '/HPXML/Building/BuildingDetails/Systems/HVAC/HVACPlant/HeatPump/BackupHeatingCapacity',
+
                    '/HPXML/Building/BuildingDetails/Systems/HVAC/HVACControl/SystemIdentifier',
                    '/HPXML/Building/BuildingDetails/Systems/HVAC/HVACControl/SetpointTempHeatingSeason',
                    '/HPXML/Building/BuildingDetails/Systems/HVAC/HVACControl/SetbackTempHeatingSeason',
@@ -236,19 +267,24 @@ class HPXMLValidator
                    '/HPXML/Building/BuildingDetails/Systems/HVAC/HVACControl/TotalSetbackHoursperWeekHeating',
                    '/HPXML/Building/BuildingDetails/Systems/HVAC/HVACControl/TotalSetupHoursperWeekCooling',
                    '/HPXML/Building/BuildingDetails/Systems/HVAC/HVACControl/extension/SetupStartHourCooling',
+
                    '/HPXML/Building/BuildingDetails/Systems/HVAC/HVACDistribution/DistributionSystemType/AirDistribution/DuctLeakageMeasurement/DuctLeakage/Units',
                    '/HPXML/Building/BuildingDetails/Systems/HVAC/HVACDistribution/DistributionSystemType/AirDistribution/DuctLeakageMeasurement/DuctLeakage/TotalOrToOutside',
                    '/HPXML/Building/BuildingDetails/Systems/HVAC/HVACDistribution/DistributionSystemType/AirDistribution/DuctLeakageMeasurement/DuctLeakage/Value',
                    '/HPXML/Building/BuildingDetails/Systems/HVAC/HVACDistribution/DistributionSystemType/AirDistribution/Ducts/DuctType',
                    '/HPXML/Building/BuildingDetails/Systems/HVAC/HVACDistribution/SystemIdentifier',
+
                    '/HPXML/Building/BuildingDetails/Systems/HVAC/HVACDistribution/DistributionSystemType/Other',
                    '/HPXML/Building/BuildingDetails/Systems/HVAC/HVACDistribution/AnnualHeatingDistributionSystemEfficiency',
                    '/HPXML/Building/BuildingDetails/Systems/HVAC/HVACDistribution/AnnualCoolingDistributionSystemEfficiency',
+
                    '/HPXML/Building/BuildingDetails/Systems/HVAC/HVACDistribution/DistributionSystemType/AirDistribution/Ducts/DuctInsulationRValue',
                    '/HPXML/Building/BuildingDetails/Systems/HVAC/HVACDistribution/DistributionSystemType/AirDistribution/Ducts/DuctLocation',
                    '/HPXML/Building/BuildingDetails/Systems/HVAC/HVACDistribution/DistributionSystemType/AirDistribution/Ducts/DuctSurfaceArea',
+
                    '/HPXML/Building/BuildingDetails/Systems/MechanicalVentilation/VentilationFans/VentilationFan/UsedForWholeBuildingVentilation',
                    '/HPXML/Building/BuildingDetails/Systems/MechanicalVentilation/VentilationFans/VentilationFan/UsedForSeasonalCoolingLoadReduction',
+                   '/HPXML/Building/BuildingDetails/Systems/MechanicalVentilation/VentilationFans/VentilationFan/UsedForLocalVentilation',
                    '/HPXML/Building/BuildingDetails/Systems/MechanicalVentilation/VentilationFans/VentilationFan/SystemIdentifier',
                    '/HPXML/Building/BuildingDetails/Systems/MechanicalVentilation/VentilationFans/VentilationFan/FanType',
                    '/HPXML/Building/BuildingDetails/Systems/MechanicalVentilation/VentilationFans/VentilationFan/TestedFlowRate',
@@ -260,6 +296,10 @@ class HPXMLValidator
                    '/HPXML/Building/BuildingDetails/Systems/MechanicalVentilation/VentilationFans/VentilationFan/TotalRecoveryEfficiency',
                    '/HPXML/Building/BuildingDetails/Systems/MechanicalVentilation/VentilationFans/VentilationFan/AdjustedTotalRecoveryEfficiency',
                    '/HPXML/Building/BuildingDetails/Systems/MechanicalVentilation/VentilationFans/VentilationFan/AttachedToHVACDistributionSystem',
+                   '/HPXML/Building/BuildingDetails/Systems/MechanicalVentilation/VentilationFans/VentilationFan/FanLocation',
+                   '/HPXML/Building/BuildingDetails/Systems/MechanicalVentilation/VentilationFans/VentilationFan/extension/StartHour',
+                   '/HPXML/Building/BuildingDetails/Systems/MechanicalVentilation/VentilationFans/VentilationFan/Quantity',
+ 
                    '/HPXML/Building/BuildingDetails/Systems/WaterHeating/WaterHeatingSystem/SystemIdentifier',
                    '/HPXML/Building/BuildingDetails/Systems/WaterHeating/WaterHeatingSystem/WaterHeaterType',
                    '/HPXML/Building/BuildingDetails/Systems/WaterHeating/WaterHeatingSystem/Location',
@@ -276,6 +316,7 @@ class HPXMLValidator
                    '/HPXML/Building/BuildingDetails/Systems/WaterHeating/WaterHeatingSystem/PerformanceAdjustment',
                    '/HPXML/Building/BuildingDetails/Systems/WaterHeating/WaterHeatingSystem/RelatedHVACSystem',
                    '/HPXML/Building/BuildingDetails/Systems/WaterHeating/WaterHeatingSystem/StandbyLoss',
+
                    '/HPXML/Building/BuildingDetails/Systems/WaterHeating/HotWaterDistribution/SystemIdentifier',
                    '/HPXML/Building/BuildingDetails/Systems/WaterHeating/HotWaterDistribution/SystemType/Standard',
                    '/HPXML/Building/BuildingDetails/Systems/WaterHeating/HotWaterDistribution/SystemType/Recirculation',
@@ -289,9 +330,12 @@ class HPXMLValidator
                    '/HPXML/Building/BuildingDetails/Systems/WaterHeating/HotWaterDistribution/DrainWaterHeatRecovery/FacilitiesConnected',
                    '/HPXML/Building/BuildingDetails/Systems/WaterHeating/HotWaterDistribution/DrainWaterHeatRecovery/EqualFlow',
                    '/HPXML/Building/BuildingDetails/Systems/WaterHeating/HotWaterDistribution/DrainWaterHeatRecovery/Efficiency',
+
                    '/HPXML/Building/BuildingDetails/Systems/WaterHeating/WaterFixture/SystemIdentifier',
                    '/HPXML/Building/BuildingDetails/Systems/WaterHeating/WaterFixture/WaterFixtureType',
                    '/HPXML/Building/BuildingDetails/Systems/WaterHeating/WaterFixture/LowFlow',
+                   '/HPXML/Building/BuildingDetails/Systems/WaterHeating/extension/WaterFixturesUsageMultiplier',
+
                    '/HPXML/Building/BuildingDetails/Systems/SolarThermal/SolarThermalSystem/SystemIdentifier',
                    '/HPXML/Building/BuildingDetails/Systems/SolarThermal/SolarThermalSystem/SystemType',
                    '/HPXML/Building/BuildingDetails/Systems/SolarThermal/SolarThermalSystem/CollectorArea',
@@ -304,6 +348,7 @@ class HPXMLValidator
                    '/HPXML/Building/BuildingDetails/Systems/SolarThermal/SolarThermalSystem/CollectorRatedOpticalEfficiency',
                    '/HPXML/Building/BuildingDetails/Systems/SolarThermal/SolarThermalSystem/CollectorRatedThermalLosses',
                    '/HPXML/Building/BuildingDetails/Systems/SolarThermal/SolarThermalSystem/StorageVolume',
+
                    '/HPXML/Building/BuildingDetails/Systems/Photovoltaics/PVSystem/SystemIdentifier',
                    '/HPXML/Building/BuildingDetails/Systems/Photovoltaics/PVSystem/Location',
                    '/HPXML/Building/BuildingDetails/Systems/Photovoltaics/PVSystem/ModuleType',
@@ -314,50 +359,78 @@ class HPXMLValidator
                    '/HPXML/Building/BuildingDetails/Systems/Photovoltaics/PVSystem/InverterEfficiency',
                    '/HPXML/Building/BuildingDetails/Systems/Photovoltaics/PVSystem/SystemLossesFraction',
                    '/HPXML/Building/BuildingDetails/Systems/Photovoltaics/PVSystem/YearModulesManufactured',
+
                    '/HPXML/Building/BuildingDetails/Appliances/ClothesWasher/SystemIdentifier',
                    '/HPXML/Building/BuildingDetails/Appliances/ClothesWasher/Location',
                    '/HPXML/Building/BuildingDetails/Appliances/ClothesWasher/ModifiedEnergyFactor',
                    '/HPXML/Building/BuildingDetails/Appliances/ClothesWasher/IntegratedModifiedEnergyFactor',
-                   '/HPXML/Building/BuildingDetails/Appliances/ClothesWasher/Usage',
+                   '/HPXML/Building/BuildingDetails/Appliances/ClothesWasher/LabelUsage',
                    '/HPXML/Building/BuildingDetails/Appliances/ClothesWasher/RatedAnnualkWh',
                    '/HPXML/Building/BuildingDetails/Appliances/ClothesWasher/LabelElectricRate',
                    '/HPXML/Building/BuildingDetails/Appliances/ClothesWasher/LabelGasRate',
                    '/HPXML/Building/BuildingDetails/Appliances/ClothesWasher/LabelAnnualGasCost',
                    '/HPXML/Building/BuildingDetails/Appliances/ClothesWasher/Capacity',
+                   '/HPXML/Building/BuildingDetails/Appliances/ClothesWasher/extension/UsageMultiplier',
+
                    '/HPXML/Building/BuildingDetails/Appliances/ClothesDryer/SystemIdentifier',
                    '/HPXML/Building/BuildingDetails/Appliances/ClothesDryer/Location',
                    '/HPXML/Building/BuildingDetails/Appliances/ClothesDryer/FuelType',
                    '/HPXML/Building/BuildingDetails/Appliances/ClothesDryer/EnergyFactor',
                    '/HPXML/Building/BuildingDetails/Appliances/ClothesDryer/CombinedEnergyFactor',
                    '/HPXML/Building/BuildingDetails/Appliances/ClothesDryer/ControlType',
+                   '/HPXML/Building/BuildingDetails/Appliances/ClothesDryer/extension/UsageMultiplier',
+
                    '/HPXML/Building/BuildingDetails/Appliances/Dishwasher/SystemIdentifier',
+                   '/HPXML/Building/BuildingDetails/Appliances/Dishwasher/Location',
                    '/HPXML/Building/BuildingDetails/Appliances/Dishwasher/RatedAnnualkWh',
+                   '/HPXML/Building/BuildingDetails/Appliances/Dishwasher/EnergyFactor',
                    '/HPXML/Building/BuildingDetails/Appliances/Dishwasher/LabelElectricRate',
                    '/HPXML/Building/BuildingDetails/Appliances/Dishwasher/LabelGasRate',
                    '/HPXML/Building/BuildingDetails/Appliances/Dishwasher/LabelAnnualGasCost',
+                   '/HPXML/Building/BuildingDetails/Appliances/Dishwasher/LabelUsage',
                    '/HPXML/Building/BuildingDetails/Appliances/Dishwasher/PlaceSettingCapacity',
+                   '/HPXML/Building/BuildingDetails/Appliances/Dishwasher/extension/UsageMultiplier',
+
                    '/HPXML/Building/BuildingDetails/Appliances/Refrigerator/SystemIdentifier',
                    '/HPXML/Building/BuildingDetails/Appliances/Refrigerator/Location',
                    '/HPXML/Building/BuildingDetails/Appliances/Refrigerator/RatedAnnualkWh',
                    '/HPXML/Building/BuildingDetails/Appliances/Refrigerator/extension/AdjustedAnnualkWh',
+                   '/HPXML/Building/BuildingDetails/Appliances/Refrigerator/extension/UsageMultiplier',
+
+                   '/HPXML/Building/BuildingDetails/Appliances/Dehumidifier/SystemIdentifier',
+                   '/HPXML/Building/BuildingDetails/Appliances/Dehumidifier/Capacity',
+                   '/HPXML/Building/BuildingDetails/Appliances/Dehumidifier/EnergyFactor',
+                   '/HPXML/Building/BuildingDetails/Appliances/Dehumidifier/IntegratedEnergyFactor',
+                   '/HPXML/Building/BuildingDetails/Appliances/Dehumidifier/DehumidistatSetpoint',
+                   '/HPXML/Building/BuildingDetails/Appliances/Dehumidifier/FractionDehumidificationLoadServed',
+
                    '/HPXML/Building/BuildingDetails/Appliances/CookingRange/SystemIdentifier',
+                   '/HPXML/Building/BuildingDetails/Appliances/CookingRange/Location',
                    '/HPXML/Building/BuildingDetails/Appliances/CookingRange/FuelType',
                    '/HPXML/Building/BuildingDetails/Appliances/CookingRange/IsInduction',
+                   '/HPXML/Building/BuildingDetails/Appliances/CookingRange/extension/UsageMultiplier',
                    '/HPXML/Building/BuildingDetails/Appliances/Oven/IsConvection',
-                   '/HPXML/Building/BuildingDetails/Lighting/LightingGroup/ThirdPartyCertification',
+
+                   '/HPXML/Building/BuildingDetails/Lighting/LightingGroup/LightingType/LightEmittingDiode',
+                   '/HPXML/Building/BuildingDetails/Lighting/LightingGroup/LightingType/CompactFluorescent',
+                   '/HPXML/Building/BuildingDetails/Lighting/LightingGroup/LightingType/FluorescentTube',
                    '/HPXML/Building/BuildingDetails/Lighting/LightingGroup/Location',
+                   '/HPXML/Building/BuildingDetails/Lighting/extension/UsageMultiplier',
                    '/HPXML/Building/BuildingDetails/Lighting/LightingGroup/SystemIdentifier',
                    '/HPXML/Building/BuildingDetails/Lighting/LightingGroup/FractionofUnitsInLocation',
+
                    '/HPXML/Building/BuildingDetails/Lighting/CeilingFan/SystemIdentifier',
                    '/HPXML/Building/BuildingDetails/Lighting/CeilingFan/Airflow/Efficiency',
                    '/HPXML/Building/BuildingDetails/Lighting/CeilingFan/Airflow/FanSpeed',
                    '/HPXML/Building/BuildingDetails/Lighting/CeilingFan/Quantity',
+
                    '/HPXML/Building/BuildingDetails/MiscLoads/PlugLoad/PlugLoadType',
                    '/HPXML/Building/BuildingDetails/MiscLoads/PlugLoad/SystemIdentifier',
                    '/HPXML/Building/BuildingDetails/MiscLoads/PlugLoad/Load/Value',
                    '/HPXML/Building/BuildingDetails/MiscLoads/PlugLoad/Load/Units',
                    '/HPXML/Building/BuildingDetails/MiscLoads/PlugLoad/extension/FracSensible',
                    '/HPXML/Building/BuildingDetails/MiscLoads/PlugLoad/extension/FracLatent',
+                   '/HPXML/Building/BuildingDetails/MiscLoads/PlugLoad/extension/UsageMultiplier',
                    '/HPXML/Building/BuildingDetails/MiscLoads/extension/WeekdayScheduleFractions',
                    '/HPXML/Building/BuildingDetails/MiscLoads/extension/WeekendScheduleFractions',
                    '/HPXML/Building/BuildingDetails/MiscLoads/extension/MonthlyScheduleMultipliers']
@@ -371,7 +444,6 @@ class HPXMLValidator
 
     xpath_array.each do |el_path|
       el_array = el_path.split('/').reject { |p| p.empty? }
-      puts type_xml
       type_xml = load_or_get_data_type_xsd(el_array, type_xml, doc_base)
     end
     XMLHelper.write_file(type_xml, this_dir + '/element_type.xml')
@@ -416,19 +488,18 @@ class HPXMLValidator
     el_array.each_with_index do |el_name, i|
       next if i < 2
       return type_xml if el_name == 'extension'
+      root_node = XMLHelper.get_element(type_xml, 'ElementDataTypeMap')
       if i == 2
-        parent_node = type_xml.root
+        parent_node = root_node
       else
-        parent_node = type_xml.elements['//' + el_array.drop(2).take(i - 2).join('/')]
+        parent_node = XMLHelper.get_element(root_node, el_array.drop(2).take(i - 2).join('/'))
       end
       puts parent_node
-      if not parent_node.nil?
-        child_node = type_xml.elements['//' + el_array.drop(2).take(i - 1).join('/')]
-        if not child_node.nil?
-          parent_type = child_node.attributes['DataType']
-          parent_name = el_name
-          next
-        end
+      child_node = XMLHelper.get_element(parent_node, el_name)
+      if not child_node.nil?
+        parent_type = XMLHelper.get_attribute_value(child_node, 'DataType')
+        parent_name = el_name
+        next
       end
 
       puts 'this element name: ' + el_name
@@ -438,38 +509,37 @@ class HPXMLValidator
       puts parent_name
 
       if parent_type.nil? && parent_name.nil?
-        el_type = doc_base.elements["//xs:element[@name='#{el_name}']"].attributes['type']
+        el= XMLHelper.get_element(doc_base,"//xs:element[@name='#{el_name}']")
       else
         if (not parent_name.nil?) && parent_type.nil?
-          el = doc_base.elements["//xs:element[@name='#{parent_name}']//xs:element[@name='#{el_name}']"]
+          el = XMLHelper.get_element(doc_base,"//xs:element[@name='#{parent_name}']//xs:element[@name='#{el_name}']")
           if el.nil?
-            group_name = doc_base.elements["//xs:element[@name='#{parent_name}']//xs:group"].attributes['ref']
+            group_name = XMLHelper.get_attribute_value(XMLHelper.get_element(doc_base,"//xs:element[@name='#{parent_name}']//xs:group"), 'ref')
           end
           while el.nil? do
-            puts group_name
-            el = doc_base.elements["//xs:group[@name='#{group_name}']//xs:element[@name='#{el_name}']"]
-            group_name = doc_base.elements["//xs:group[@name='#{group_name}']//xs:group"].attributes['ref'] if el.nil?
+            el = XMLHelper.get_element(doc_base,"//xs:group[@name='#{group_name}']//xs:element[@name='#{el_name}']")
+            group_name = XMLHelper.get_attribute_value(XMLHelper.get_element(doc_base,"//xs:group[@name='#{group_name}']//xs:group"),'ref') if el.nil?
           end
         else
-          el = doc_base.elements["//xs:complexType[@name='#{parent_type}']//xs:element[@name='#{el_name}']"]
+          el = XMLHelper.get_element(doc_base,"//xs:complexType[@name='#{parent_type}']//xs:element[@name='#{el_name}']")
           while el.nil? do
             # this approach can only have one group or one base
-            group = doc_base.elements["//xs:complexType[@name='#{parent_type}']//xs:group"]
-            base = doc_base.elements["//xs:complexType[@name='#{parent_type}']//xs:extension"]
+            group = XMLHelper.get_element(doc_base,"//xs:complexType[@name='#{parent_type}']//xs:group")
+            base = XMLHelper.get_element(doc_base,"//xs:complexType[@name='#{parent_type}']//xs:extension")
             if (not base.nil?) && group.nil?
-              base_name = base.attributes['base']
-              el = doc_base.elements["//xs:complexType[@name='#{base_name}']//xs:element[@name='#{el_name}']"]
+              base_name = XMLHelper.get_attribute_value(base, 'base')
+              el = XMLHelper.get_element(doc_base,"//xs:complexType[@name='#{base_name}']//xs:element[@name='#{el_name}']")
               parent_type = base_name
             elsif not group.nil?
-              group_name = group.attributes['ref']
-              el = doc_base.elements["//xs:group[@name='#{group_name}']//xs:element[@name='#{el_name}']"] unless doc_base.elements["//xs:complexType[@name='#{parent_type}']//xs:group"].nil?
+              group_name = XMLHelper.get_attribute_value(group, 'ref')
+              el = XMLHelper.get_element(doc_base, "//xs:group[@name='#{group_name}']//xs:element[@name='#{el_name}']")
             else
               break
             end
           end
         end
-        el_type = el.attributes['type']
       end
+      el_type = XMLHelper.get_attribute_value(el,'type')
       if not el_type.nil?
         el = XMLHelper.add_element(parent_node, el_name)
         XMLHelper.add_attribute(el, 'DataType', el_type)
@@ -483,6 +553,62 @@ class HPXMLValidator
     return type_xml
   end
 
+  def self.recursively_get_all_xsd_data_type()
+    # Not applicable
+    this_dir = File.dirname(__FILE__)
+    base_el_xsd_path = this_dir + '/BaseElements.xsd'
+    doc_base = XMLHelper.parse_file(base_el_xsd_path)
+
+    type_xml = XMLHelper.create_doc(version = '1.0', encoding = 'UTF-8')
+    type_map = XMLHelper.add_element(type_xml, 'ElementDataTypeMap')
+
+    ['Contractor', 'Customer', 'Building', 'Project', 'Utility', 'Consumption'].each do |top_level_type|
+      parent_node = XMLHelper.get_element(doc_base, "//xs:complexType[@name='#{top_level_type}']")
+      recursively_get_type(parent_node, type_map, doc_base)
+    end
+
+    XMLHelper.write_file(type_xml, this_dir + '/element_type.xml')
+  end
+
+  def self.recursively_get_type(xsd_parent_node, xml_parent_node, doc_base)
+    # Not applicable
+    puts xsd_parent_node.to_xml
+    groups = XMLHelper.get_elements(xsd_parent_node, 'xs:sequence/xs:group')
+    base_types = XMLHelper.get_elements(xsd_parent_node, 'xs:complexContent/xs:extension')
+    groups.each do |group|
+        group_name = XMLHelper.get_attribute_value(group, 'ref')
+        group_el = XMLHelper.get_element(doc_base, "//xs:group[@name='#{group_name}']")
+        parent_node = group_el
+        recursively_get_type(parent_node, xml_parent_node, doc_base) unless parent_node.nil?
+    end
+    base_types.each do |base_type|
+        base_type_name = XMLHelper.get_attribute_value(base_type, 'base')
+        base_type_el = XMLHelper.get_element(doc_base, "//xs:complexType[@name='#{base_type_name}']")
+        parent_node = base_type_el
+        recursively_get_type(parent_node, xml_parent_node, doc_base) unless parent_node.nil?
+        parent_node = base_type
+        recursively_get_type(parent_node, xml_parent_node, doc_base) unless parent_node.nil?
+    end
+
+    child_element_nodes = XMLHelper.get_elements(xsd_parent_node, 'xs:sequence/xs:element | xs:choice/xs:element')
+      puts child_element_nodes.size
+
+      child_element_nodes.each do |xsd_child_node|
+      puts "--Add new element!"
+      if not XMLHelper.get_attribute_value(xsd_child_node, 'name').nil?
+        xml_el = XMLHelper.add_element(xml_parent_node, XMLHelper.get_attribute_value(xsd_child_node, 'name'))
+      end
+      el_type = XMLHelper.get_attribute_value(xsd_child_node,'type')
+      if not el_type.nil?
+        XMLHelper.add_attribute(xml_el, 'DataType', el_type)
+        parent_node = XMLHelper.get_element(doc_base,"//xs:complexType[@name='#{el_type}']")
+      else
+        parent_node = XMLHelper.get_element(xsd_child_node,"/xs:complexType")
+      end
+      recursively_get_type(parent_node, xml_el, doc_base) unless parent_node.nil?
+    end
+  end
+
   def self.combine_into_xpath(parent, child)
     if parent.nil?
       return child
@@ -494,11 +620,11 @@ class HPXMLValidator
   end
 
   def self.get_complex_type_name(doc_data, simple_type_name)
-    complex_type = doc_data.elements["//xs:complexType[xs:simpleContent[xs:extension[@base='#{simple_type_name}']]]"]
+    complex_type = XMLHelper.get_element(doc_data, "//xs:complexType[xs:simpleContent[xs:extension[@base='#{simple_type_name}']]]")
     if complex_type.nil?
       return simple_type_name
     else
-      return complex_type.attributes['name']
+      return XMLHelper.get_attribute_value(complex_type, 'name')
     end
   end
 
@@ -521,15 +647,15 @@ class HPXMLValidator
   end
 
   def self.get_individual_requirement(doc_data, req_name, req_root)
-    doc_data.elements.to_a("//xs:#{req_name}").each do |req_el|
-      simple_type_name = req_el.parent.parent.attributes['name']
+    XMLHelper.get_elements(doc_data, "//xs:#{req_name}").each do |req_el|
+      simple_type_name = XMLHelper.get_attribute_value(req_el.parent.parent, 'name')
       complex_type_name = get_complex_type_name(doc_data, simple_type_name)
-      complex_type_el = req_root.elements["//#{complex_type_name}"]
+      complex_type_el = XMLHelper.get_element(req_root, "//#{complex_type_name}")
       if complex_type_el.nil?
         complex_type_el = XMLHelper.add_element(req_root, complex_type_name)
       end
-      if not req_el.attributes['value'].nil?
-        XMLHelper.add_element(complex_type_el, req_name, req_el.attributes['value'])
+      if not XMLHelper.get_attribute_value(req_el,'value').nil?
+        XMLHelper.add_element(complex_type_el, req_name, XMLHelper.get_attribute_value(req_el, 'value'))
       end
     end
   end

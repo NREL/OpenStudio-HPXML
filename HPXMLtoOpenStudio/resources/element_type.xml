@@ -120,11 +120,11 @@
           <DepthBelowGrade DataType='LengthMeasurement'/>
           <Insulation DataType='InsulationInfo'>
             <SystemIdentifier DataType='SystemIdentifiersInfoType'/>
+            <AssemblyEffectiveRValue DataType='RValue'/>
             <Layer>
               <InstallationType DataType='InstallationType'/>
               <NominalRValue DataType='RValue'/>
             </Layer>
-            <AssemblyEffectiveRValue DataType='RValue'/>
           </Insulation>
         </FoundationWall>
       </FoundationWalls>
@@ -337,6 +337,7 @@
           <VentilationFan>
             <UsedForWholeBuildingVentilation DataType='HPXMLBoolean'/>
             <UsedForSeasonalCoolingLoadReduction DataType='HPXMLBoolean'/>
+            <UsedForLocalVentilation DataType='HPXMLBoolean'/>
             <SystemIdentifier DataType='SystemIdentifiersInfoType'/>
             <FanType DataType='VentilationFanType'/>
             <TestedFlowRate DataType='HPXMLDouble'/>
@@ -348,6 +349,8 @@
             <TotalRecoveryEfficiency DataType='Fraction'/>
             <AdjustedTotalRecoveryEfficiency DataType='Fraction'/>
             <AttachedToHVACDistributionSystem DataType='LocalReference'/>
+            <FanLocation DataType='VentilationFanLocation'/>
+            <Quantity DataType='IntegerGreaterThanZero'/>
           </VentilationFan>
         </VentilationFans>
       </MechanicalVentilation>
@@ -439,7 +442,7 @@
         <Location DataType='LaundryMachineLocation'/>
         <ModifiedEnergyFactor DataType='HPXMLDouble'/>
         <IntegratedModifiedEnergyFactor DataType='HPXMLDouble'/>
-        <Usage DataType='HPXMLDouble'/>
+        <LabelUsage DataType='HPXMLDouble'/>
         <RatedAnnualkWh DataType='RatedAnnualkWh'/>
         <LabelElectricRate DataType='HPXMLDouble'/>
         <LabelGasRate DataType='HPXMLDouble'/>
@@ -456,10 +459,13 @@
       </ClothesDryer>
       <Dishwasher DataType='DishwasherInfoType'>
         <SystemIdentifier DataType='SystemIdentifiersInfoType'/>
+        <Location DataType='RefrigeratorLocation'/>
         <RatedAnnualkWh DataType='RatedAnnualkWh'/>
+        <EnergyFactor DataType='EnergyFactor'/>
         <LabelElectricRate DataType='HPXMLDouble'/>
         <LabelGasRate DataType='HPXMLDouble'/>
         <LabelAnnualGasCost DataType='HPXMLDouble'/>
+        <LabelUsage DataType='HPXMLDouble'/>
         <PlaceSettingCapacity DataType='IntegerGreaterThanZero'/>
       </Dishwasher>
       <Refrigerator DataType='RefrigeratorInfoType'>
@@ -467,9 +473,17 @@
         <Location DataType='RefrigeratorLocation'/>
         <RatedAnnualkWh DataType='RatedAnnualkWh'/>
       </Refrigerator>
-      <Dehumidifier DataType='DehumidifierInfoType'/>
+      <Dehumidifier DataType='DehumidifierInfoType'>
+        <SystemIdentifier DataType='SystemIdentifiersInfoType'/>
+        <Capacity DataType='HPXMLDouble'/>
+        <EnergyFactor DataType='HPXMLDouble'/>
+        <IntegratedEnergyFactor DataType='HPXMLDouble'/>
+        <DehumidistatSetpoint DataType='Fraction'/>
+        <FractionDehumidificationLoadServed DataType='Fraction'/>
+      </Dehumidifier>
       <CookingRange DataType='CookingRangeInfoType'>
         <SystemIdentifier DataType='SystemIdentifiersInfoType'/>
+        <Location DataType='RefrigeratorLocation'/>
         <FuelType DataType='FuelType'/>
         <IsInduction DataType='HPXMLBoolean'/>
       </CookingRange>
@@ -487,7 +501,11 @@
         <Quantity DataType='IntegerGreaterThanZero'/>
       </CeilingFan>
       <LightingGroup>
-        <ThirdPartyCertification DataType='LightingThirdPartyCertification'/>
+        <LightingType DataType='LightingType'>
+          <LightEmittingDiode/>
+          <CompactFluorescent/>
+          <FluorescentTube/>
+        </LightingType>
         <Location DataType='LightingLocation'/>
         <SystemIdentifier DataType='SystemIdentifiersInfoType'/>
         <FractionofUnitsInLocation DataType='Fraction'/>
