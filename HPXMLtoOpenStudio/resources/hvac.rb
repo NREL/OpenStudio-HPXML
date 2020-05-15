@@ -3785,39 +3785,39 @@ class HVAC
   end
 
   def self.get_default_duct_surface_area(duct_type, ncfl, cfa_served, n_returns)
-    # Fraction of ducts outside conditioned space
+    # Fraction of primary ducts (ducts outside conditioned space)
     f_out = (ncfl == 1) ? 1.0 : 0.75
 
     if duct_type == HPXML::DuctTypeSupply
-      outside_duct_area = 0.27 * cfa_served * f_out
-      inside_duct_area = 0.27 * cfa_served * (1.0 - f_out)
+      primary_duct_area = 0.27 * cfa_served * f_out
+      secondary_duct_area = 0.27 * cfa_served * (1.0 - f_out)
     elsif duct_type == HPXML::DuctTypeReturn
       b_r = (n_returns < 6) ? (0.05 * n_returns) : 0.25
-      outside_duct_area = b_r * cfa_served * f_out
-      inside_duct_area = b_r * cfa_served * (1.0 - f_out)
+      primary_duct_area = b_r * cfa_served * f_out
+      secondary_duct_area = b_r * cfa_served * (1.0 - f_out)
     end
 
-    return outside_duct_area, inside_duct_area
+    return primary_duct_area, secondary_duct_area
   end
 
   def self.get_default_duct_locations(hpxml)
-    outside_location_hierarchy = [HPXML::LocationBasementConditioned,
-                                  HPXML::LocationBasementUnconditioned,
-                                  HPXML::LocationCrawlspaceVented,
-                                  HPXML::LocationCrawlspaceUnvented,
-                                  HPXML::LocationAtticVented,
-                                  HPXML::LocationAtticUnvented,
-                                  HPXML::LocationGarage]
+    primary_duct_location_hierarchy = [HPXML::LocationBasementConditioned,
+                                       HPXML::LocationBasementUnconditioned,
+                                       HPXML::LocationCrawlspaceVented,
+                                       HPXML::LocationCrawlspaceUnvented,
+                                       HPXML::LocationAtticVented,
+                                       HPXML::LocationAtticUnvented,
+                                       HPXML::LocationGarage]
 
-    outside_duct_location = nil
-    outside_location_hierarchy.each do |space_type|
+    primary_duct_location = nil
+    primary_duct_location_hierarchy.each do |space_type|
       if hpxml.has_space_type(space_type)
-        outside_duct_location = space_type
+        primary_duct_location = space_type
         break
       end
     end
-    inside_duct_location = HPXML::LocationLivingSpace
+    secondary_duct_location = HPXML::LocationLivingSpace
 
-    return outside_duct_location, inside_duct_location
+    return primary_duct_location, secondary_duct_location
   end
 end

@@ -610,19 +610,19 @@ class OSModel
         ducts.each do |duct|
           next unless duct.duct_surface_area.nil?
 
-          outside_duct_area, inside_duct_area = HVAC.get_default_duct_surface_area(duct.duct_type, @ncfl, cfa_served, n_returns).map { |area| area / ducts.size }
-          outside_duct_location, inside_duct_location = HVAC.get_default_duct_locations(@hpxml)
-          if outside_duct_location.nil? # If a home doesn't have any non-living spaces (outside living space), place all ducts in living space.
-            duct.duct_surface_area = outside_duct_area + inside_duct_area
-            duct.duct_location = inside_duct_location
+          primary_duct_area, secondary_duct_area = HVAC.get_default_duct_surface_area(duct.duct_type, @ncfl, cfa_served, n_returns).map { |area| area / ducts.size }
+          primary_duct_location, secondary_duct_location = HVAC.get_default_duct_locations(@hpxml)
+          if primary_duct_location.nil? # If a home doesn't have any non-living spaces (outside living space), place all ducts in living space.
+            duct.duct_surface_area = primary_duct_area + secondary_duct_area
+            duct.duct_location = secondary_duct_location
           else
-            duct.duct_surface_area = outside_duct_area
-            duct.duct_location = outside_duct_location
-            if inside_duct_area > 0
+            duct.duct_surface_area = primary_duct_area
+            duct.duct_location = primary_duct_location
+            if secondary_duct_area > 0
               hvac_distribution.ducts.add(duct_type: duct.duct_type,
                                           duct_insulation_r_value: duct.duct_insulation_r_value,
-                                          duct_location: inside_duct_location,
-                                          duct_surface_area: inside_duct_area)
+                                          duct_location: secondary_duct_location,
+                                          duct_surface_area: secondary_duct_area)
             end
           end
         end
