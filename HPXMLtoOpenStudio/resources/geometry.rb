@@ -22,46 +22,6 @@ class Geometry
     return maxzs.max
   end
 
-  def self.space_is_conditioned(space)
-    unless space.isPlenum
-      if space.spaceType.is_initialized
-        if space.spaceType.get.standardsSpaceType.is_initialized
-          return is_conditioned_space_type(space.spaceType.get.standardsSpaceType.get)
-        end
-      end
-    end
-    return false
-  end
-
-  def self.is_conditioned_space_type(space_type)
-    if [HPXML::LocationLivingSpace].include? space_type
-      return true
-    end
-
-    return false
-  end
-
-  def self.get_space_from_location(model, location, location_hierarchy)
-    if location == Constants.Auto
-      location_hierarchy.each do |space_type|
-        model.getSpaces.each do |space|
-          next if not space_is_of_type(space, space_type)
-
-          return space
-        end
-      end
-    else
-      model.getSpaces.each do |space|
-        next if not space.spaceType.is_initialized
-        next if not space.spaceType.get.standardsSpaceType.is_initialized
-        next if space.spaceType.get.standardsSpaceType.get != location
-
-        return space
-      end
-    end
-    return
-  end
-
   # Return an array of z values for surfaces passed in. The values will be relative to the parent origin. This was intended for spaces.
   def self.getSurfaceZValues(surfaceArray)
     zValueArray = []
@@ -79,35 +39,6 @@ class Geometry
       z_origins << UnitConversions.convert(space.zOrigin, 'm', 'ft')
     end
     return z_origins.min
-  end
-
-  # Takes in a list of spaces and returns the total above grade wall area
-  def self.calculate_above_grade_wall_area(spaces)
-    wall_area = 0
-    spaces.each do |space|
-      space.surfaces.each do |surface|
-        next if surface.surfaceType.downcase != 'wall'
-        next if surface.outsideBoundaryCondition.downcase == 'foundation'
-
-        wall_area += UnitConversions.convert(surface.grossArea, 'm^2', 'ft^2')
-      end
-    end
-    return wall_area
-  end
-
-  def self.calculate_above_grade_exterior_wall_area(spaces)
-    wall_area = 0
-    spaces.each do |space|
-      space.surfaces.each do |surface|
-        next if surface.surfaceType.downcase != 'wall'
-        next if surface.outsideBoundaryCondition.downcase != 'outdoors'
-        next if surface.outsideBoundaryCondition.downcase == 'foundation'
-        next unless space_is_conditioned(surface.space.get)
-
-        wall_area += UnitConversions.convert(surface.grossArea, 'm^2', 'ft^2')
-      end
-    end
-    return wall_area
   end
 
   def self.get_roof_pitch(surfaces)
@@ -235,8 +166,8 @@ class Geometry
     lat_gains = 2884.0 # Btu/person/day
     tot_gains = sens_gains + lat_gains
     heat_gain = tot_gains / hrs_per_day # Btu/person/hr
-    sens = sens_gains / tot_gains
-    lat = lat_gains / tot_gains
-    return heat_gain, hrs_per_day, sens, lat
+    sens_frac = sens_gains / tot_gains
+    lat_frac = lat_gains / tot_gains
+    return heat_gain, hrs_per_day, sens_frac, lat_frac
   end
 end

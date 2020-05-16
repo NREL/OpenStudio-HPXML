@@ -266,7 +266,7 @@ class OSModel
     add_thermal_mass(runner, model)
     modify_cond_basement_surface_properties(runner, model)
     assign_view_factor(runner, model) unless @cond_bsmnt_surfaces.empty?
-    set_zone_volumes(runner, model)
+    set_zone_volumes(runner, model, spaces)
     explode_surfaces(runner, model)
     add_num_occupants(model, hpxml, runner)
 
@@ -928,71 +928,38 @@ class OSModel
     run_period.setEndDayOfMonth(@hpxml.header.end_day_of_month)
   end
 
-  def self.set_zone_volumes(runner, model)
-    # FUTURE: Use HPXML values not Model values
-    thermal_zones = model.getThermalZones
+  def self.set_zone_volumes(runner, model, spaces)
+    # Living space
+    spaces[HPXML::LocationLivingSpace].thermalZone.get.setVolume(UnitConversions.convert(@cvolume, 'ft^3', 'm^3'))
 
-    # Init
-    zones_updated = 0
+    # Basement, crawlspace, garage
+    spaces.keys.each do |space_type|
+      next unless [HPXML::LocationBasementUnconditioned, HPXML::LocationCrawlspaceUnvented, HPXML::LocationCrawlspaceVented, HPXML::LocationGarage].include? space_type
 
-    # Basements, crawl, garage
-    thermal_zones.each do |thermal_zone|
-      next unless Geometry.is_unconditioned_basement(thermal_zone) || Geometry.is_unvented_crawl(thermal_zone) ||
-                  Geometry.is_vented_crawl(thermal_zone) || Geometry.is_garage(thermal_zone)
-
-      zones_updated += 1
-
-      zone_floor_area = 0.0
-      thermal_zone.spaces.each do |space|
-        space.surfaces.each do |surface|
-          if surface.surfaceType.downcase == 'floor'
-            zone_floor_area += UnitConversions.convert(surface.grossArea, 'm^2', 'ft^2')
-          end
-        end
+      floor_area = @hpxml.slabs.select { |s| s.interior_adjacent_to == space_type }.map { |s| s.area }.inject(:+)
+      if space_type == HPXML::LocationGarage
+        height = 8.0
+      else
+        height = @hpxml.foundation_walls.select { |w| w.interior_adjacent_to == space_type }.map { |w| w.height }.max
       end
 
-      zone_volume = Geometry.get_height_of_spaces(thermal_zone.spaces) * zone_floor_area
-      if zone_volume <= 0
-        fail "Calculated volume for #{thermal_zone.name} zone (#{zone_volume}) is not greater than zero."
-      end
-
-      thermal_zone.setVolume(UnitConversions.convert(zone_volume, 'ft^3', 'm^3'))
-    end
-
-    # Conditioned living
-    thermal_zones.each do |thermal_zone|
-      if Geometry.is_living(thermal_zone)
-        zones_updated += 1
-        thermal_zone.setVolume(UnitConversions.convert(@cvolume, 'ft^3', 'm^3'))
-      end
+      spaces[space_type].thermalZone.get.setVolume(UnitConversions.convert(floor_area * height, 'ft^3', 'm^3'))
     end
 
     # Attic
-    thermal_zones.each do |thermal_zone|
-      next unless Geometry.is_vented_attic(thermal_zone) || Geometry.is_unvented_attic(thermal_zone)
+    spaces.keys.each do |space_type|
+      next unless [HPXML::LocationAtticUnvented, HPXML::LocationAtticVented].include? space_type
 
-      zones_updated += 1
-
-      zone_surfaces = []
-      zone_floor_area = 0.0
-      thermal_zone.spaces.each do |space|
-        space.surfaces.each do |surface|
-          zone_surfaces << surface
-          if surface.surfaceType.downcase == 'floor'
-            zone_floor_area += UnitConversions.convert(surface.grossArea, 'm^2', 'ft^2')
-          end
-        end
-      end
+      floor_area = @hpxml.frame_floors.select { |f| [f.interior_adjacent_to, f.exterior_adjacent_to].include? space_type }.map { |s| s.area }.inject(:+)
+      roofs = @hpxml.roofs.select { |r| r.interior_adjacent_to == space_type }
+      avg_pitch = roofs.map { |r| r.pitch }.inject(:+) / roofs.size
 
       # Assume square hip roof for volume calculations; energy results are very insensitive to actual volume
-      zone_length = zone_floor_area**0.5
-      zone_height = Math.tan(UnitConversions.convert(Geometry.get_roof_pitch(zone_surfaces), 'deg', 'rad')) * zone_length / 2.0
-      zone_volume = [zone_floor_area * zone_height / 3.0, 0.01].max
-      thermal_zone.setVolume(UnitConversions.convert(zone_volume, 'ft^3', 'm^3'))
-    end
+      length = floor_area**0.5
+      height = 0.5 * Math.sin(Math.atan(avg_pitch / 12.0)) * length
+      volume = [floor_area * height / 3.0, 0.01].max
 
-    if zones_updated != thermal_zones.size
-      fail 'Unhandled volume calculations for thermal zones.'
+      spaces[space_type].thermalZone.get.setVolume(UnitConversions.convert(volume, 'ft^3', 'm^3'))
     end
   end
 
@@ -2057,32 +2024,32 @@ class OSModel
   end
 
   def self.add_conditioned_floor_area(runner, model, spaces)
-    # TODO: Use HPXML values not Model values
-    cfa = @cfa.round(1)
-
-    # Check if we need to add floors between conditioned spaces (e.g., 2-story buildings).
+    # Check if we need to add floors between conditioned spaces (e.g., between first
+    # and second story or conditioned basement ceiling).
     # This ensures that the E+ reported Conditioned Floor Area is correct.
 
-    # Calculate cfa already added to model
-    model_cfa = 0.0
-    model.getSpaces.each do |space|
-      next unless Geometry.space_is_conditioned(space)
+    sum_cfa = 0.0
+    @hpxml.frame_floors.each do |frame_floor|
+      next unless frame_floor.is_floor
+      next unless frame_floor.interior_adjacent_to == HPXML::LocationLivingSpace
 
-      space.surfaces.each do |surface|
-        next unless surface.surfaceType.downcase.to_s == 'floor'
+      sum_cfa += frame_floor.area
+    end
+    @hpxml.slabs.each do |slab|
+      next unless [HPXML::LocationLivingSpace, HPXML::LocationBasementConditioned].include? slab.interior_adjacent_to
 
-        model_cfa += UnitConversions.convert(surface.grossArea, 'm^2', 'ft^2').round(2)
-      end
+      sum_cfa += slab.area
     end
 
-    addtl_cfa = cfa - model_cfa
+    addtl_cfa = @cfa - sum_cfa
     return unless addtl_cfa > 0.1
 
-    conditioned_floor_width = Math::sqrt(addtl_cfa)
-    conditioned_floor_length = addtl_cfa / conditioned_floor_width
+    floor_width = Math::sqrt(addtl_cfa)
+    floor_length = addtl_cfa / floor_width
     z_origin = @foundation_top + 8.0 * (@ncfl_ag - 1)
 
-    floor_surface = OpenStudio::Model::Surface.new(add_floor_polygon(-conditioned_floor_width, -conditioned_floor_length, z_origin), model)
+    # Add floor surface
+    floor_surface = OpenStudio::Model::Surface.new(add_floor_polygon(-floor_width, -floor_length, z_origin), model)
 
     floor_surface.setSunExposure('NoSun')
     floor_surface.setWindExposure('NoWind')
@@ -2092,8 +2059,8 @@ class OSModel
     floor_surface.setOutsideBoundaryCondition('Adiabatic')
     floor_surface.additionalProperties.setFeature('SurfaceType', 'InferredFloor')
 
-    # add ceiling surfaces accordingly
-    ceiling_surface = OpenStudio::Model::Surface.new(add_ceiling_polygon(-conditioned_floor_width, -conditioned_floor_length, z_origin), model)
+    # Add ceiling surface
+    ceiling_surface = OpenStudio::Model::Surface.new(add_ceiling_polygon(-floor_width, -floor_length, z_origin), model)
 
     ceiling_surface.setSunExposure('NoSun')
     ceiling_surface.setWindExposure('NoWind')

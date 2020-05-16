@@ -3,8 +3,8 @@
   <schema_version>3.0</schema_version>
   <name>hpxm_lto_openstudio</name>
   <uid>b1543b30-9465-45ff-ba04-1d1f85e763bc</uid>
-  <version_id>61568445-9f2e-445f-831d-ec0c4589be8d</version_id>
-  <version_modified>20200516T020651Z</version_modified>
+  <version_id>b463ddba-490d-4ef4-aa7a-e6d9be26ba8a</version_id>
+  <version_modified>20200516T044732Z</version_modified>
   <xml_checksum>D8922A73</xml_checksum>
   <class_name>HPXMLtoOpenStudio</class_name>
   <display_name>HPXML to OpenStudio Translator</display_name>
@@ -463,18 +463,6 @@
       <checksum>591C54E0</checksum>
     </file>
     <file>
-      <filename>constructions.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>2A696F1B</checksum>
-    </file>
-    <file>
-      <filename>geometry.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>6444D0F9</checksum>
-    </file>
-    <file>
       <filename>airflow.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
@@ -493,6 +481,18 @@
       <checksum>E81AD4A3</checksum>
     </file>
     <file>
+      <filename>constructions.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>9E252AA8</checksum>
+    </file>
+    <file>
+      <filename>geometry.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>13AD8733</checksum>
+    </file>
+    <file>
       <version>
         <software_program>OpenStudio</software_program>
         <identifier>2.1.1</identifier>
@@ -501,13 +501,13 @@
       <filename>measure.rb</filename>
       <filetype>rb</filetype>
       <usage_type>script</usage_type>
-      <checksum>257F9311</checksum>
+      <checksum>3B35112A</checksum>
     </file>
     <file>
       <filename>hvac_sizing.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>64A9B7D4</checksum>
+      <checksum>19FE666F</checksum>
     </file>
   </files>
 </measure>

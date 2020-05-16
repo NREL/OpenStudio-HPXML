@@ -721,7 +721,7 @@ class HVACSizing
       next unless wall.is_thermal_boundary
 
       next unless wall.is_exterior
-      wallGroup = get_wallgroup(wall)
+      wall_group = get_wall_group(wall)
 
       # Adjust base Cooling Load Temperature Difference (CLTD)
       # Assume absorptivity for light walls < 0.5, medium walls <= 0.75, dark walls > 0.75 (based on MJ8 Table 4B Notes)
@@ -756,9 +756,9 @@ class HVACSizing
         cltd_base_shade = [25.0, 22.5, 20.0, 18.45, 16.9, 15.45, 14.0, 13.55, 13.1, 12.85, 12.6]
 
         if (true_azimuth >= 157.5) && (true_azimuth <= 202.5)
-          cltd = cltd_base_shade[wallGroup - 1] * colorMultiplier
+          cltd = cltd_base_shade[wall_group - 1] * colorMultiplier
         else
-          cltd = cltd_base_sun[wallGroup - 1] * colorMultiplier
+          cltd = cltd_base_sun[wall_group - 1] * colorMultiplier
         end
 
         if @ctd >= 10.0
@@ -878,7 +878,7 @@ class HVACSizing
       if slab.interior_adjacent_to == HPXML::LocationLivingSpace # Slab-on-grade
         floor_ufactor = 0.1 # FIXME: Hard-coded
         zone_loads.Heat_Floors += floor_ufactor * slab.area * (@heat_setpoint - weather.data.GroundMonthlyTemps[0])
-      else # Conditioned basement slab
+      elsif slab.interior_adjacent_to == HPXML::LocationBasementConditioned
         # Based on MJ 8th Ed. A12-7 and ASHRAE HoF 2013 pg 18.31 Eq 40
         # FIXME: Assumes slab is uninsulated?
         k_soil = UnitConversions.convert(BaseMaterial.Soil.k_in, 'in', 'ft')
@@ -1097,7 +1097,7 @@ class HVACSizing
     elsif [HPXML::LocationGarage].include? duct.Location
       dse_Fregain = 0.05
 
-    elsif [HPXML::LocationLivingSpace].include? duct.Location
+    elsif [HPXML::LocationLivingSpace, HPXML::LocationBasementConditioned].include? duct.Location
       dse_Fregain = 1.0
 
     end
@@ -1726,8 +1726,8 @@ class HVACSizing
 
   def self.get_shelter_class(model, min_neighbor_distance)
     height_ft = Geometry.get_height_of_spaces([@cond_space])
-    exposed_wall_ratio = Geometry.calculate_above_grade_exterior_wall_area(@model_spaces) /
-                         Geometry.calculate_above_grade_wall_area(@model_spaces)
+    tot_cb_area, ext_cb_area = @hpxml.compartmentalization_boundary_areas()
+    exposed_wall_ratio = ext_cb_area / tot_cb_area
 
     if exposed_wall_ratio > 0.5 # 3 or 4 exposures; Table 5D
       if min_neighbor_distance.nil?
@@ -1752,14 +1752,6 @@ class HVACSizing
     end
 
     return shelter_class
-  end
-
-  def self.get_wallgroup_wood_or_steel_stud(wall)
-    '''
-    Determine the base Group Number based on cavity R-value for siding or stucco walls
-    '''
-
-    return wallGroup
   end
 
   def self.get_ventilation_rates(model)
@@ -1928,14 +1920,14 @@ class HVACSizing
     '''
     uncond_area = { HPXML::DuctTypeSupply => 0.0, HPXML::DuctTypeReturn => 0.0 }
     ducts.each do |duct|
-      next if duct.Location == HPXML::LocationLivingSpace
+      next if [HPXML::LocationLivingSpace, HPXML::LocationBasementConditioned].include? duct.Location
 
       uncond_area[duct.Side] += duct.Area
     end
 
     value = { HPXML::DuctTypeSupply => 0.0, HPXML::DuctTypeReturn => 0.0 }
     ducts.each do |duct|
-      next if duct.Location == HPXML::LocationLivingSpace
+      next if [HPXML::LocationLivingSpace, HPXML::LocationBasementConditioned].include? duct.Location
 
       if uncond_area[duct.Side] > 0
         value[duct.Side] += values[duct.Side][duct.Location] * duct.Area / uncond_area[duct.Side]
@@ -1954,7 +1946,7 @@ class HVACSizing
 
     areas = { HPXML::DuctTypeSupply => 0.0, HPXML::DuctTypeReturn => 0.0 }
     ducts.each do |duct|
-      next if duct.Location == HPXML::LocationLivingSpace
+      next if [HPXML::LocationLivingSpace, HPXML::LocationBasementConditioned].include? duct.Location
 
       areas[duct.Side] += duct.Area
     end
@@ -1969,7 +1961,7 @@ class HVACSizing
 
     cfms = { HPXML::DuctTypeSupply => 0.0, HPXML::DuctTypeReturn => 0.0 }
     ducts.each do |duct|
-      next if duct.Location == HPXML::LocationLivingSpace
+      next if [HPXML::LocationLivingSpace, HPXML::LocationBasementConditioned].include? duct.Location
 
       if not duct.LeakageFrac.nil?
         cfms[duct.Side] += duct.LeakageFrac * system_cfm
@@ -1988,7 +1980,7 @@ class HVACSizing
 
     u_factors = { HPXML::DuctTypeSupply => {}, HPXML::DuctTypeReturn => {} }
     ducts.each do |duct|
-      next if duct.Location == HPXML::LocationLivingSpace
+      next if [HPXML::LocationLivingSpace, HPXML::LocationBasementConditioned].include? duct.Location
 
       u_factors[duct.Side][duct.Location] = 1.0 / duct.Rvalue
     end
@@ -2332,7 +2324,7 @@ class HVACSizing
   end
 
   def self.get_space_ua_values(space_type, weather)
-    if space_type == HPXML::LocationLivingSpace
+    if [HPXML::LocationLivingSpace, HPXML::LocationBasementConditioned].include? space_type
       fail 'Method should not be called for a conditioned space.'
     end
 
@@ -2348,6 +2340,8 @@ class HVACSizing
       if [surface.interior_adjacent_to, surface.exterior_adjacent_to].include? HPXML::LocationOutside
         space_UAs[HPXML::LocationOutside] += (1.0 / surface.insulation_assembly_r_value) * surface.area
       elsif [surface.interior_adjacent_to, surface.exterior_adjacent_to].include? HPXML::LocationLivingSpace
+        space_UAs[HPXML::LocationLivingSpace] += (1.0 / surface.insulation_assembly_r_value) * surface.area
+      elsif [surface.interior_adjacent_to, surface.exterior_adjacent_to].include? HPXML::LocationBasementConditioned
         space_UAs[HPXML::LocationLivingSpace] += (1.0 / surface.insulation_assembly_r_value) * surface.area
       elsif [surface.interior_adjacent_to, surface.exterior_adjacent_to].include? HPXML::LocationGround
         if surface.is_a? HPXML::FoundationWall
@@ -2444,8 +2438,8 @@ class HVACSizing
     end
   end
 
-  def self.get_wallgroup(wall)
-    # Determine the wall Group Number (A - K = 1 - 11) for exterior walls (i.e., all walls except basement walls)
+  def self.get_wall_group(wall)
+    # Determine the wall Group Number (A - K = 1 - 11) for above-grade walls
 
     if wall.is_a? HPXML::RimJoist
       wall_type = HPXML::WallTypeWoodStud
@@ -2453,102 +2447,129 @@ class HVACSizing
       wall_type = wall.wall_type
     end
 
-    # The following correlations were estimated by analyzing MJ8 construction tables. This is likely a better
-    # approach than including the Group Number.
+    wall_ufactor = 1.0 / wall.insulation_assembly_r_value
+
+    # The following correlations were estimated by analyzing MJ8 construction tables.
     if [HPXML::WallTypeWoodStud, HPXML::WallTypeSteelStud].include? wall_type
-
       if wall.insulation_cavity_r_value < 2
-        wallGroup = 1   # A
+        wall_group = 1 # A
       elsif wall.insulation_cavity_r_value <= 11
-        wallGroup = 2   # B
+        wall_group = 2 # B
       elsif wall.insulation_cavity_r_value <= 13
-        wallGroup = 3   # C
+        wall_group = 3 # C
       elsif wall.insulation_cavity_r_value <= 15
-        wallGroup = 4   # D
+        wall_group = 4 # D
       elsif wall.insulation_cavity_r_value <= 19
-        wallGroup = 5   # E
+        wall_group = 5 # E
       elsif wall.insulation_cavity_r_value <= 21
-        wallGroup = 6   # F
+        wall_group = 6 # F
       else
-        wallGroup = 7   # G
+        wall_group = 7 # G
       end
-
-      # Adjust the base wall group for rigid foam insulation
+      # Adjust the wall group for rigid foam insulation
       if (wall.insulation_continuous_r_value > 1) && (wall.insulation_continuous_r_value <= 7)
         if wall.insulation_cavity_r_value < 2
-          wallGroup += 2
+          wall_group += 2
         else
-          wallGroup += 4
+          wall_group += 4
         end
       elsif wall.insulation_continuous_r_value > 7
         if wall.insulation_cavity_r_value < 2
-          wallGroup += 4
+          wall_group += 4
         else
-          wallGroup += 6
+          wall_group += 6
         end
       end
-
-      # Assume brick if the outside finish density is >= 100 lb/ft^3
+      # Adjust the wall group for brick siding
       if wall.siding == HPXML::SidingTypeBrick
         if wall.insulation_cavity_r_value < 2
-          wallGroup += 4
+          wall_group += 4
         else
-          wallGroup += 6
+          wall_group += 6
         end
       end
 
     elsif wall_type == HPXML::WallTypeDoubleWoodStud
-      wallGroup = 10 # J (assumed since MJ8 does not include double stud constructions)
+      wall_group = 10 # J (assumed since MJ8 does not include double stud constructions)
       if wall.siding == HPXML::SidingTypeBrick
-        wallGroup = 11 # K
+        wall_group = 11 # K
       end
 
     elsif wall_type == HPXML::WallTypeSIP
-      rigid_thick_in = wall.insulation_continuous_r_value * BaseMaterial.InsulationRigid.k_in
-      sip_ins_thick_in = get_feature(wall, Constants.SizingInfoSIPWallInsThickness, 'double')
-
       # Manual J refers to SIPs as Structural Foam Panel (SFP)
-      if sip_ins_thick_in + rigid_thick_in < 4.5
-        wallGroup = 7   # G
-      elsif sip_ins_thick_in + rigid_thick_in < 6.5
-        wallGroup = 9   # I
+      if wall_ufactor >= (0.072 + 0.050) / 2
+        if wall.siding == HPXML::SidingTypeBrick
+          wall_group = 10 # J
+        else
+          wall_group = 7 # G
+        end
+      elsif wall_ufactor >= 0.050
+        if wall.siding == HPXML::SidingTypeBrick
+          wall_group = 11 # K
+        else
+          wall_group = 9 # I
+        end
       else
-        wallGroup = 11  # K
-      end
-      if wall.siding == HPXML::SidingTypeBrick
-        wallGroup += 3
+        wall_group = 11 # K
       end
 
     elsif wall_type == HPXML::WallTypeCMU
-
       # Manual J uses the same wall group for filled or hollow block
       if wall.insulation_cavity_r_value < 2
-        wallGroup = 5   # E
+        wall_group = 5  # E
       elsif wall.insulation_cavity_r_value <= 11
-        wallGroup = 8   # H
+        wall_group = 8  # H
       elsif wall.insulation_cavity_r_value <= 13
-        wallGroup = 9   # I
+        wall_group = 9  # I
       elsif wall.insulation_cavity_r_value <= 15
-        wallGroup = 9   # I
+        wall_group = 9  # I
       elsif wall.insulation_cavity_r_value <= 19
-        wallGroup = 10  # J
+        wall_group = 10 # J
       elsif wall.insulation_cavity_r_value <= 21
-        wallGroup = 11  # K
+        wall_group = 11 # K
       else
-        wallGroup = 11  # K
+        wall_group = 11 # K
       end
       # This is an estimate based on Table 4A - Construction Number 13
-      wallGroup += (wall.insulation_continuous_r_value / 3.0).floor # Group is increased by approximately 1 letter for each R3
+      wall_group += (wall.insulation_continuous_r_value / 3.0).floor # Group is increased by approximately 1 letter for each R3
 
-    elsif [HPXML::WallTypeICF, HPXML::WallTypeConcrete, HPXML::WallTypeBrick, HPXML::WallTypeStrawBale, HPXML::WallTypeStone, HPXML::WallTypeLog].include? wall_type
-      wallGroup = 11 # K
+    elsif wall_type == HPXML::WallTypeBrick
+      # Two Courses Brick
+      if wall_ufactor >= (0.218 + 0.179) / 2
+        wall_group = 7  # G
+      elsif wall_ufactor >= (0.152 + 0.132) / 2
+        wall_group = 8  # H
+      elsif wall_ufactor >= (0.117 + 0.079) / 2
+        wall_group = 9  # I
+      elsif wall_ufactor >= 0.079
+        wall_group = 10 # J
+      else
+        wall_group = 11 # K
+      end
+
+    elsif wall_type == HPXML::WallTypeLog
+      # Stacked Logs
+      if wall_ufactor >= (0.103 + 0.091) / 2
+        wall_group = 7  # G
+      elsif wall_ufactor >= (0.091 + 0.082) / 2
+        wall_group = 8  # H
+      elsif wall_ufactor >= (0.074 + 0.068) / 2
+        wall_group = 9  # I
+      elsif wall_ufactor >= (0.068 + 0.063) / 2
+        wall_group = 10 # J
+      else
+        wall_group = 11 # K
+      end
+
+    elsif [HPXML::WallTypeICF, HPXML::WallTypeConcrete, HPXML::WallTypeStrawBale, HPXML::WallTypeStone].include? wall_type
+      wall_group = 11 # K
 
     end
 
     # Maximum wall group is K
-    wallGroup = [wallGroup, 11].min
+    wall_group = [wall_group, 11].min
 
-    return wallGroup
+    return wall_group
   end
 
   def self.gshp_hx_pipe_rvalue(pipe_od, pipe_id, pipe_cond)

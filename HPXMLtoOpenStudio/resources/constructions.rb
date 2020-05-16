@@ -335,12 +335,6 @@ class Constructions
 
     # Create and assign construction to surfaces
     constr.create_and_assign_constructions(surfaces, model)
-
-    # Store info for HVAC Sizing measure
-    wall.insulation_continuous_r_value = rigid_r
-    surfaces.each do |surface|
-      surface.additionalProperties.setFeature(Constants.SizingInfoSIPWallInsThickness, Float(sip_thick_in))
-    end
   end
 
   def self.apply_steel_stud_wall(model, surfaces, wall, constr_name,
