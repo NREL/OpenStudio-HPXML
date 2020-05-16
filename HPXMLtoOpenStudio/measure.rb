@@ -1211,7 +1211,7 @@ class OSModel
 
     same_ang_limit = 10.0
     vf_map = {}
-    all_surfaces.each do |surface| # surface, subsurface, and internalmass
+    all_surfaces.each do |surface| # surface, subsurface, and internal mass
       surface_vf_map = {}
 
       # sum all the surface area that could be seen by surface1 up
@@ -1247,7 +1247,7 @@ class OSModel
         else # surfaces
           if surface2.subSurfaces.size > 0
             # calculate surface and its sub surfaces view factors
-            if surface2.netArea > 0.01 # base surface of a sub surface: window/door etc.
+            if surface2.netArea > 0.1 # base surface of a sub surface: window/door etc.
               fail "Unexpected net area for surface '#{surface2.name}'."
             end
 
@@ -2154,7 +2154,7 @@ class OSModel
 
       # Create parent surface slightly bigger than window
       surface = OpenStudio::Model::Surface.new(add_wall_polygon(window_width, window_height, z_origin,
-                                                                window.azimuth, [0, 0.0001, 0.0001, 0.0001]), model)
+                                                                window.azimuth, [0, 0.001, 0.001, 0.001]), model)
 
       surface.additionalProperties.setFeature('Length', window_width)
       surface.additionalProperties.setFeature('Azimuth', window.azimuth)
@@ -2165,7 +2165,7 @@ class OSModel
       set_surface_interior(model, spaces, surface, window.wall.interior_adjacent_to)
 
       sub_surface = OpenStudio::Model::SubSurface.new(add_wall_polygon(window_width, window_height, z_origin,
-                                                                       window.azimuth, [-0.0001, 0, 0.0001, 0]), model)
+                                                                       window.azimuth, [-0.001, 0, 0.001, 0]), model)
       sub_surface.setName(window.id)
       sub_surface.setSurface(surface)
       sub_surface.setSubSurfaceType('FixedWindow')
@@ -2193,21 +2193,19 @@ class OSModel
   def self.add_skylights(runner, model, spaces, weather)
     surfaces = []
     @hpxml.skylights.each do |skylight|
-      # Obtain skylight tilt from attached roof
-      skylight_tilt = skylight.roof.pitch / 12.0
-
-      skylight_height = Math::sqrt(skylight.area)
-      skylight_width = skylight.area / skylight_height
-      z_origin = @walls_top + 0.5 * Math.sin(Math.atan(skylight_tilt)) * skylight_height
+      tilt = skylight.roof.pitch / 12.0
+      width = Math::sqrt(skylight.area)
+      length = skylight.area / width
+      z_origin = @walls_top + 0.5 * Math.sin(Math.atan(tilt)) * width
 
       # Create parent surface slightly bigger than skylight
-      surface = OpenStudio::Model::Surface.new(add_roof_polygon(skylight_width + 0.0001, skylight_height + 0.0001, z_origin,
-                                                                skylight.azimuth, skylight_tilt), model)
+      surface = OpenStudio::Model::Surface.new(add_roof_polygon(length + 0.001, width + 0.001, z_origin,
+                                                                skylight.azimuth, tilt), model)
 
-      surface.additionalProperties.setFeature('Length', skylight_width)
-      surface.additionalProperties.setFeature('Width', skylight_height)
+      surface.additionalProperties.setFeature('Length', length)
+      surface.additionalProperties.setFeature('Width', width)
       surface.additionalProperties.setFeature('Azimuth', skylight.azimuth)
-      surface.additionalProperties.setFeature('Tilt', skylight_tilt)
+      surface.additionalProperties.setFeature('Tilt', tilt)
       surface.additionalProperties.setFeature('SurfaceType', 'Skylight')
       surface.setName("surface #{skylight.id}")
       surface.setSurfaceType('RoofCeiling')
@@ -2215,8 +2213,8 @@ class OSModel
       surface.setOutsideBoundaryCondition('Outdoors') # cannot be adiabatic because subsurfaces won't be created
       surfaces << surface
 
-      sub_surface = OpenStudio::Model::SubSurface.new(add_roof_polygon(skylight_width, skylight_height, z_origin,
-                                                                       skylight.azimuth, skylight_tilt), model)
+      sub_surface = OpenStudio::Model::SubSurface.new(add_roof_polygon(length, width, z_origin,
+                                                                       skylight.azimuth, tilt), model)
       sub_surface.setName(skylight.id)
       sub_surface.setSurface(surface)
       sub_surface.setSubSurfaceType('Skylight')
@@ -2244,7 +2242,7 @@ class OSModel
 
       # Create parent surface slightly bigger than door
       surface = OpenStudio::Model::Surface.new(add_wall_polygon(door_width, door_height, z_origin,
-                                                                door.azimuth, [0, 0.0001, 0.0001, 0.0001]), model)
+                                                                door.azimuth, [0, 0.001, 0.001, 0.001]), model)
 
       surface.additionalProperties.setFeature('Length', door_width)
       surface.additionalProperties.setFeature('Azimuth', door.azimuth)
@@ -3083,7 +3081,7 @@ class OSModel
         end
       end
 
-      next if s.netArea < 0.01 # Skip parent surfaces (of subsurfaces) that have near zero net area
+      next if s.netArea < 0.1 # Skip parent surfaces (of subsurfaces) that have near zero net area
 
       key = { 'FoundationWall' => :foundation_walls,
               'RimJoist' => :rim_joists,

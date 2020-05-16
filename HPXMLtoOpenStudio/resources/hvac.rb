@@ -1200,7 +1200,7 @@ class HVAC
 
   def self.apply_dehumidifier(model, runner, dehumidifier, living_space, hvac_map)
     hvac_map[dehumidifier.id] = []
-    
+
     water_removal_rate = dehumidifier.capacity
     energy_factor = dehumidifier.energy_factor
 
@@ -1281,7 +1281,6 @@ class HVAC
   end
 
   def self.apply_setpoints(model, runner, weather, hvac_control, living_zone)
-
     # Assume heating/cooling seasons are year-round
     htg_start_month = 1
     htg_end_month = 12
