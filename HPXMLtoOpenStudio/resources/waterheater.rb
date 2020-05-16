@@ -9,7 +9,7 @@ class Waterheater
       re = 0.98 # recovery efficiency set by fiat
     end
 
-    loop = create_new_loop(model, Constants.PlantLoopDomesticWater, t_set, HPXML::WaterHeaterTypeStorage)
+    loop = create_new_loop(model, Constants.ObjectNamePlantLoopDHW, t_set, HPXML::WaterHeaterTypeStorage)
     dhw_map[sys_id] << loop
 
     new_pump = create_new_pump(model)
@@ -41,7 +41,7 @@ class Waterheater
 
     cap = 100000000.0
 
-    loop = Waterheater.create_new_loop(model, Constants.PlantLoopDomesticWater, t_set, HPXML::WaterHeaterTypeTankless)
+    loop = Waterheater.create_new_loop(model, Constants.ObjectNamePlantLoopDHW, t_set, HPXML::WaterHeaterTypeTankless)
     dhw_map[sys_id] << loop
 
     new_pump = create_new_pump(model)
@@ -103,7 +103,7 @@ class Waterheater
       water_heater_location = nil
     end
 
-    loop = create_new_loop(model, Constants.PlantLoopDomesticWater, t_set, HPXML::WaterHeaterTypeHeatPump)
+    loop = create_new_loop(model, Constants.ObjectNamePlantLoopDHW, t_set, HPXML::WaterHeaterTypeHeatPump)
     dhw_map[sys_id] << loop
 
     new_pump = create_new_pump(model)
@@ -489,7 +489,7 @@ class Waterheater
     end
 
     plant_loop = OpenStudio::Model::PlantLoop.new(model)
-    plant_loop.setName(Constants.PlantLoopSolarHotWater)
+    plant_loop.setName(Constants.ObjectNamePlantLoopSHW)
     if fluid_type == Constants.FluidWater
       plant_loop.setFluidType('Water')
     else
@@ -733,7 +733,7 @@ class Waterheater
       act_vol = 1.0
     end
 
-    loop = create_new_loop(model, Constants.PlantLoopDomesticWater, t_set, tank_type)
+    loop = create_new_loop(model, Constants.ObjectNamePlantLoopDHW, t_set, tank_type)
 
     new_pump = create_new_pump(model)
     new_pump.addToNode(loop.supplyInletNode)

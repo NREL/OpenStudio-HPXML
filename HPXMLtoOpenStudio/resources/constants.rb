@@ -25,40 +25,12 @@ class Constants
     return 'AirFilm'
   end
 
-  def self.Auto
-    return 'auto'
-  end
-
-  def self.CalcTypeERIRatedHome
-    return 'ERI Rated Home'
-  end
-
   def self.CalcTypeERIReferenceHome
     return 'ERI Reference Home'
   end
 
-  def self.CalcTypeERIIndexAdjustmentDesign
-    return 'ERI Index Adjustment Design'
-  end
-
   def self.CalcTypeERIIndexAdjustmentReferenceHome
     return 'ERI Index Adjustment Reference Home'
-  end
-
-  def self.BoilerTypeCondensing
-    return 'hot water, condensing'
-  end
-
-  def self.BoilerTypeNaturalDraft
-    return 'hot water, natural draft'
-  end
-
-  def self.BoilerTypeForcedDraft
-    return 'hot water, forced draft'
-  end
-
-  def self.BoilerTypeSteam
-    return 'steam'
   end
 
   def self.BoreConfigSingle
@@ -97,22 +69,6 @@ class Constants
     return ['2014', '2014A', '2014AD', '2014ADE', '2014ADEG', '2014ADEGL', '2019', '2019A']
   end
 
-  def self.FacadeFront
-    return 'front'
-  end
-
-  def self.FacadeBack
-    return 'back'
-  end
-
-  def self.FacadeLeft
-    return 'left'
-  end
-
-  def self.FacadeRight
-    return 'right'
-  end
-
   def self.FluidWater
     return 'water'
   end
@@ -123,22 +79,6 @@ class Constants
 
   def self.FluidEthyleneGlycol
     return 'ethylene-glycol'
-  end
-
-  def self.MaterialGypcrete
-    return 'crete'
-  end
-
-  def self.MaterialGypsum
-    return 'gyp'
-  end
-
-  def self.MaterialOSB
-    return 'osb'
-  end
-
-  def self.MonthNames
-    return ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
   end
 
   def self.ObjectNameAirflow
@@ -154,7 +94,7 @@ class Constants
   end
 
   def self.ObjectNameBath
-    return 'res baths'
+    return 'baths'
   end
 
   def self.ObjectNameBoiler
@@ -205,6 +145,10 @@ class Constants
     return 'dehumidifier'
   end
 
+  def self.ObjectNameDesuperheater(water_heater_name)
+    return "#{water_heater_name} Desuperheater"
+  end
+
   def self.ObjectNameDishwasher
     return 'dishwasher'
   end
@@ -221,8 +165,16 @@ class Constants
     return 'baseboard'
   end
 
+  def self.ObjectNameERVHRV
+    return 'erv or hrv'
+  end
+
   def self.ObjectNameEvaporativeCooler
     return 'evap cooler'
+  end
+
+  def self.ObjectNameExteriorLighting
+    return 'exterior lighting'
   end
 
   def self.ObjectNameFanPumpDisaggregateCool(fan_or_pump_name = '')
@@ -249,6 +201,10 @@ class Constants
     return 'furniture'
   end
 
+  def self.ObjectNameGarageLighting
+    return 'garage lighting'
+  end
+
   def self.ObjectNameGroundSourceHeatPump
     return 'gshp'
   end
@@ -271,18 +227,6 @@ class Constants
 
   def self.ObjectNameInfiltration
     return 'infil'
-  end
-
-  def self.ObjectNameERVHRV
-    return 'erv or hrv'
-  end
-
-  def self.ObjectNameExteriorLighting
-    return 'exterior lighting'
-  end
-
-  def self.ObjectNameGarageLighting
-    return 'garage lighting'
   end
 
   def self.ObjectNameInteriorLighting
@@ -333,6 +277,14 @@ class Constants
     return 'overhangs'
   end
 
+  def self.ObjectNamePlantLoopDHW
+    return 'dhw loop'
+  end
+
+  def self.ObjectNamePlantLoopSHW
+    return 'solar hot water loop'
+  end
+
   def self.ObjectNameRefrigerator
     return 'fridge'
   end
@@ -346,15 +298,19 @@ class Constants
   end
 
   def self.ObjectNameShower
-    return 'res showers'
+    return 'showers'
   end
 
   def self.ObjectNameSink
-    return 'res sinks'
+    return 'sinks'
   end
 
   def self.ObjectNameSolarHotWater
     return 'solar hot water'
+  end
+
+  def self.ObjectNameTankHX
+    return 'dhw source hx'
   end
 
   def self.ObjectNameUnitHeater
@@ -373,28 +329,8 @@ class Constants
     return "#{water_heater_name} EC adjustment"
   end
 
-  def self.ObjectNameDesuperheater(water_heater_name)
-    return "#{water_heater_name} Desuperheater"
-  end
-
-  def self.ObjectNameTankHX
-    return 'dhw source hx'
-  end
-
   def self.ObjectNameWholeHouseFan
     return 'whole house fan'
-  end
-
-  def self.OptionallyDuctedSystemIsDucted
-    return __method__.to_s
-  end
-
-  def self.PlantLoopDomesticWater
-    return 'dhw loop'
-  end
-
-  def self.PlantLoopSolarHotWater
-    return 'solar hot water loop'
   end
 
   def self.ScheduleTypeLimitsFraction
@@ -407,22 +343,6 @@ class Constants
 
   def self.ScheduleTypeLimitsTemperature
     return 'Temperature'
-  end
-
-  def self.SeasonHeating
-    return 'Heating'
-  end
-
-  def self.SeasonCooling
-    return 'Cooling'
-  end
-
-  def self.SeasonOverlap
-    return 'Overlap'
-  end
-
-  def self.SeasonNone
-    return 'None'
   end
 
   def self.SizingInfoDuctExist
@@ -466,6 +386,10 @@ class Constants
   end
 
   def self.SizingInfoHVACHeatType
+    return __method__.to_s
+  end
+
+  def self.SizingInfoHVACSystemIsDucted # Only needed for optionally ducted systems
     return __method__.to_s
   end
 
@@ -559,37 +483,5 @@ class Constants
 
   def self.SizingInfoZoneInfiltrationCFM
     return __method__.to_s
-  end
-
-  def self.BAZoneHotDry
-    return 'Hot-Dry'
-  end
-
-  def self.BAZoneHotHumid
-    return 'Hot-Humid'
-  end
-
-  def self.BAZoneMarine
-    return 'Marine'
-  end
-
-  def self.BAZoneMixedHumid
-    return 'Mixed-Humid'
-  end
-
-  def self.BAZoneMixedDry
-    return 'Mixed-Dry'
-  end
-
-  def self.BAZoneCold
-    return 'Cold'
-  end
-
-  def self.BAZoneVeryCold
-    return 'Very Cold'
-  end
-
-  def self.BAZoneSubarctic
-    return 'Subarctic'
   end
 end

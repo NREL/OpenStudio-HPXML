@@ -272,9 +272,8 @@ class Constructions
     wall.insulation_continuous_r_value = rigid_r
   end
 
-  def self.apply_sip_wall(model, surfaces, wall, constr_name,
-                          sip_r, sip_thick_in, framing_factor,
-                          sheathing_type, sheathing_thick_in,
+  def self.apply_sip_wall(model, surfaces, wall, constr_name, sip_r,
+                          sip_thick_in, framing_factor, sheathing_thick_in,
                           drywall_thick_in, osb_thick_in, rigid_r,
                           mat_ext_finish)
 
@@ -283,13 +282,7 @@ class Constructions
     # Define materials
     spline_thick_in = 0.5
     ins_thick_in = sip_thick_in - (2.0 * spline_thick_in) # in
-    if sheathing_type == Constants.MaterialOSB
-      mat_int_sheath = Material.new(name = 'WallIntSheathing', thick_in = sheathing_thick_in, mat_base = BaseMaterial.Wood)
-    elsif sheathing_type == Constants.MaterialGypsum
-      mat_int_sheath = Material.new(name = 'WallIntSheathing', thick_in = sheathing_thick_in, mat_base = BaseMaterial.Gypsum)
-    elsif sheathing_type == Constants.MaterialGypcrete
-      mat_int_sheath = Material.new(name = 'WallIntSheathing', thick_in = sheathing_thick_in, mat_base = BaseMaterial.Gypcrete)
-    end
+    mat_int_sheath = Material.new(name = 'WallIntSheathing', thick_in = sheathing_thick_in, mat_base = BaseMaterial.Wood)
     mat_framing_inner_outer = Material.new(name = nil, thick_in = spline_thick_in, mat_base = BaseMaterial.Wood)
     mat_framing_middle = Material.new(name = nil, thick_in = ins_thick_in, mat_base = BaseMaterial.Wood)
     mat_spline = Material.new(name = nil, thick_in = spline_thick_in, mat_base = BaseMaterial.Wood)

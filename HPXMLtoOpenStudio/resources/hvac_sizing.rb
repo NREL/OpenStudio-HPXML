@@ -1,19 +1,15 @@
 # frozen_string_literal: true
 
 class HVACSizing
-  def self.apply(model, runner, weather, spaces, hpxml, cfa, infilvolume, nbeds, min_neighbor_distance, debug)
+  def self.apply(model, runner, weather, spaces, hpxml, infilvolume, nbeds, min_neighbor_distance, debug)
     @runner = runner
     @hpxml = hpxml
     @spaces = spaces
-    @model_spaces = model.getSpaces
-    @cond_space = spaces[HPXML::LocationLivingSpace]
-    @cond_zone = @cond_space.thermalZone.get
-    @nbeds = nbeds
-    @cfa = cfa
-    @infilvolume = infilvolume
+    @cond_zone = spaces[HPXML::LocationLivingSpace].thermalZone.get
 
-    @model_year = model.yearDescription.get.assumedYear
-    @north_axis = model.getBuilding.northAxis
+    @conditioned_heat_design_temp = 70.0 # Indoor heating design temperature according to ACCA MANUAL J
+    @conditioned_cool_design_temp = 75.0 # Indoor cooling design temperature according to ACCA MANUAL J
+
     @min_cooling_capacity = 1.0 # Btu/hr
 
     # Based on EnergyPlus's model for calculating SHR at off-rated conditions. This curve fit
@@ -21,11 +17,8 @@ class HVACSizing
     # in the SHRRated. It is a function of ODB (MJ design temp) and CFM/Ton (from MJ)
     @shr_biquadratic = [1.08464364, 0.002096954, 0, -0.005766327, 0, -0.000011147]
 
-    @conditioned_heat_design_temp = 70.0 # Indoor heating design temperature according to acca MANUAL J
-    @conditioned_cool_design_temp = 75.0 # Indoor heating design temperature according to acca MANUAL J
-
-    assumed_inside_temp = 73.5 # F
-    @inside_air_dens = UnitConversions.convert(weather.header.LocalPressure, 'atm', 'Btu/ft^3') / (Gas.Air.r * (assumed_inside_temp + 460.0))
+    # Inside air density
+    @inside_air_dens = UnitConversions.convert(weather.header.LocalPressure, 'atm', 'Btu/ft^3') / (Gas.Air.r * (Constants.AssumedInsideTemp + 460.0))
 
     process_site_calcs_and_design_temps(weather)
 
@@ -33,7 +26,7 @@ class HVACSizing
     @shelter_class = get_shelter_class(model, min_neighbor_distance)
 
     # Calculate loads for the conditioned thermal zone
-    zone_loads = process_zone_loads(model, weather)
+    zone_loads = process_zone_loads(model, weather, nbeds, infilvolume)
 
     # Display debug info
     display_zone_loads(zone_loads) if debug
@@ -321,7 +314,7 @@ class HVACSizing
     return cool_temp
   end
 
-  def self.process_zone_loads(model, weather)
+  def self.process_zone_loads(model, weather, nbeds, infilvolume)
     # Constant loads (no variation throughout day)
     zone_loads = ZoneLoads.new
     zone_loads = process_load_windows_skylights(zone_loads, weather)
@@ -329,8 +322,8 @@ class HVACSizing
     zone_loads = process_load_walls(zone_loads, weather)
     zone_loads = process_load_roofs(zone_loads, weather)
     zone_loads = process_load_floors(zone_loads, weather)
-    zone_loads = process_infiltration_ventilation(model, zone_loads, weather)
-    zone_loads = process_internal_gains(zone_loads)
+    zone_loads = process_infiltration_ventilation(model, zone_loads, weather, infilvolume)
+    zone_loads = process_internal_gains(zone_loads, nbeds)
     return zone_loads
   end
 
@@ -895,7 +888,7 @@ class HVACSizing
     return zone_loads
   end
 
-  def self.process_infiltration_ventilation(model, zone_loads, weather)
+  def self.process_infiltration_ventilation(model, zone_loads, weather, infilvolume)
     '''
     Heating and Cooling Loads: Infiltration & Ventilation
     '''
@@ -906,8 +899,8 @@ class HVACSizing
     ach_Cooling = 1.2 * ach_nat
     ach_Heating = 1.6 * ach_nat
 
-    icfm_Cooling = ach_Cooling / UnitConversions.convert(1.0, 'hr', 'min') * @infilvolume
-    icfm_Heating = ach_Heating / UnitConversions.convert(1.0, 'hr', 'min') * @infilvolume
+    icfm_Cooling = ach_Cooling / UnitConversions.convert(1.0, 'hr', 'min') * infilvolume
+    icfm_Heating = ach_Heating / UnitConversions.convert(1.0, 'hr', 'min') * infilvolume
 
     q_unb, q_bal_Sens, q_bal_Lat = get_ventilation_rates(model)
 
@@ -924,13 +917,13 @@ class HVACSizing
     return zone_loads
   end
 
-  def self.process_internal_gains(zone_loads)
+  def self.process_internal_gains(zone_loads, nbeds)
     '''
     Cooling Load: Internal Gains
     '''
 
     # Per ANSI/RESNET/ICC 301
-    n_occupants = @nbeds + 1
+    n_occupants = nbeds + 1
     zone_loads.Cool_IntGains_Sens = 1600.0 + 230.0 * n_occupants
     zone_loads.Cool_IntGains_Lat = 200.0 * n_occupants
 
@@ -1429,7 +1422,8 @@ class HVACSizing
       if @cool_setpoint - hvac.LeavingAirTemp > 0
         hvac_final_values.Cool_Airflow = calc_airflow_rate(hvac_final_values.Cool_Load_Sens, (@cool_setpoint - hvac.LeavingAirTemp))
       else
-        hvac_final_values.Cool_Airflow = @cfa * 2.0 # Use industry rule of thumb sizing method adopted by HEScore
+        cfa = UnitConversions.convert(spaces[HPXML::LocationLivingSpace].floorArea, 'm^2', 'ft^2')
+        hvac_final_values.Cool_Airflow = cfa * 2.0 # Use industry rule of thumb sizing method adopted by HEScore
       end
     else
       hvac_final_values.Cool_Capacity = 0.0
@@ -1725,7 +1719,7 @@ class HVACSizing
   end
 
   def self.get_shelter_class(model, min_neighbor_distance)
-    height_ft = Geometry.get_height_of_spaces([@cond_space])
+    height_ft = Geometry.get_height_of_spaces([@spaces[HPXML::LocationLivingSpace]])
     tot_cb_area, ext_cb_area = @hpxml.compartmentalization_boundary_areas()
     exposed_wall_ratio = ext_cb_area / tot_cb_area
 
@@ -2036,7 +2030,7 @@ class HVACSizing
         hvac.CoolingLoadFraction = get_feature(equip, Constants.SizingInfoHVACFracCoolLoadServed, 'double')
 
         air_loop = equip.airLoopHVAC.get
-        if air_loop.additionalProperties.getFeatureAsBoolean(Constants.OptionallyDuctedSystemIsDucted).get
+        if air_loop.additionalProperties.getFeatureAsBoolean(Constants.SizingInfoHVACSystemIsDucted).get
           hvac.Ducts = get_ducts_for_air_loop(air_loop)
         end
 

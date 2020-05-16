@@ -228,8 +228,6 @@ end
 class OSModel
   def self.create(hpxml, runner, model, hpxml_path, epw_path, cache_path, output_dir, debug)
     @hpxml = hpxml
-    @hpxml_path = hpxml_path
-    @output_dir = output_dir
     @debug = debug
 
     @eri_version = @hpxml.header.eri_calculation_version # Hidden feature
@@ -241,18 +239,16 @@ class OSModel
 
     # Init
 
-    weather = Location.apply(model, runner, epw_path, cache_path, 'NA', 'NA')
+    weather = Location.apply(model, runner, epw_path, cache_path, nil, nil)
     check_for_errors()
-    set_defaults_and_globals(runner)
+    set_defaults_and_globals(runner, output_dir)
     add_simulation_params(model)
 
     # Geometry/Envelope
 
     spaces = {}
     create_or_get_space(model, spaces, HPXML::LocationLivingSpace)
-    @living_space = spaces[HPXML::LocationLivingSpace]
-    @living_zone = @living_space.thermalZone.get
-    @foundation_top, @walls_top = get_foundation_and_walls_top()
+    set_foundation_and_walls_top()
     add_roofs(runner, model, spaces)
     add_walls(runner, model, spaces)
     add_rim_joists(runner, model, spaces)
@@ -263,22 +259,22 @@ class OSModel
     add_doors(runner, model, spaces)
     add_skylights(runner, model, spaces, weather)
     add_conditioned_floor_area(runner, model, spaces)
-    add_thermal_mass(runner, model)
+    add_thermal_mass(runner, model, spaces)
     modify_cond_basement_surface_properties(runner, model)
-    assign_view_factor(runner, model) unless @cond_bsmnt_surfaces.empty?
+    assign_view_factor(runner, model, spaces)
     set_zone_volumes(runner, model, spaces)
     explode_surfaces(runner, model)
-    add_num_occupants(model, hpxml, runner)
+    add_num_occupants(model, runner, spaces)
 
     # HVAC
 
-    add_cooling_system(runner, model)
-    add_heating_system(runner, model)
-    add_heat_pump(runner, model, weather)
-    add_dehumidifier(runner, model)
-    add_residual_hvac(runner, model)
-    add_setpoints(runner, model, weather)
-    add_ceiling_fans(runner, model, weather)
+    add_cooling_system(runner, model, spaces)
+    add_heating_system(runner, model, spaces)
+    add_heat_pump(runner, model, weather, spaces)
+    add_dehumidifier(runner, model, spaces)
+    add_residual_hvac(runner, model, spaces)
+    add_setpoints(runner, model, weather, spaces)
+    add_ceiling_fans(runner, model, weather, spaces)
 
     # Hot Water
 
@@ -295,8 +291,8 @@ class OSModel
     add_hvac_sizing(runner, model, weather, spaces)
     add_fuel_heating_eae(runner, model)
     add_photovoltaics(runner, model)
-    add_additional_properties(runner, model)
-    add_component_loads_output(runner, model)
+    add_additional_properties(runner, model, hpxml_path)
+    add_component_loads_output(runner, model, spaces)
 
     if debug && (not output_dir.nil?)
       osm_output_path = File.join(output_dir, 'in.osm')
@@ -373,7 +369,7 @@ class OSModel
     end
   end
 
-  def self.set_defaults_and_globals(runner)
+  def self.set_defaults_and_globals(runner, output_dir)
     # Set globals
     @cfa = @hpxml.building_construction.conditioned_floor_area
     @cfa_ag = @cfa
@@ -381,12 +377,6 @@ class OSModel
       next unless slab.interior_adjacent_to == HPXML::LocationBasementConditioned
 
       @cfa_ag -= slab.area
-    end
-    @gfa = 0 # garage floor area
-    @hpxml.slabs.each do |slab|
-      next unless slab.interior_adjacent_to == HPXML::LocationGarage
-
-      @gfa += slab.area
     end
     @ncfl = @hpxml.building_construction.number_of_conditioned_floors
     @ncfl_ag = @hpxml.building_construction.number_of_conditioned_floors_above_grade
@@ -890,9 +880,9 @@ class OSModel
       end
     end
 
-    if @debug && (not @output_dir.nil?)
+    if @debug && (not output_dir.nil?)
       # Write updated HPXML object to file
-      hpxml_defaults_path = File.join(@output_dir, 'in.xml')
+      hpxml_defaults_path = File.join(output_dir, 'in.xml')
       XMLHelper.write_file(@hpxml.to_oga, hpxml_defaults_path)
       runner.registerInfo("Wrote file: #{hpxml_defaults_path}")
     end
@@ -1138,19 +1128,21 @@ class OSModel
     end
   end
 
-  def self.assign_view_factor(runner, model)
+  def self.assign_view_factor(runner, model, spaces)
+    return if @cond_bsmnt_surfaces.empty?
+
     # zero out view factors between conditioned basement surfaces and living zone surfaces
     all_surfaces = [] # all surfaces in single conditioned space
     lv_surfaces = []  # surfaces in living
     cond_base_surfaces = [] # surfaces in conditioned basement
 
-    @living_space.surfaces.each do |surface|
+    spaces[HPXML::LocationLivingSpace].surfaces.each do |surface|
       surface.subSurfaces.each do |sub_surface|
         all_surfaces << sub_surface
       end
       all_surfaces << surface
     end
-    @living_space.internalMass.each do |im|
+    spaces[HPXML::LocationLivingSpace].internalMass.each do |im|
       all_surfaces << im
     end
 
@@ -1170,6 +1162,8 @@ class OSModel
     vf_map_lv = calc_approximate_view_factor(runner, model, lv_surfaces)
     vf_map_cb = calc_approximate_view_factor(runner, model, cond_base_surfaces)
 
+    zone_prop = spaces[HPXML::LocationLivingSpace].thermalZone.get.getZonePropertyUserViewFactorsBySurfaceName
+
     all_surfaces.each do |from_surface|
       all_surfaces.each do |to_surface|
         next if (vf_map_lv[from_surface].nil? || vf_map_lv[from_surface][to_surface].nil?) &&
@@ -1183,7 +1177,6 @@ class OSModel
         next if vf < 0.01
 
         os_vf = OpenStudio::Model::ViewFactor.new(from_surface, to_surface, vf.round(10))
-        zone_prop = @living_zone.getZonePropertyUserViewFactorsBySurfaceName
         zone_prop.addViewFactor(os_vf)
       end
     end
@@ -1405,7 +1398,7 @@ class OSModel
     return OpenStudio::reverse(add_floor_polygon(x, y, z))
   end
 
-  def self.add_num_occupants(model, hpxml, runner)
+  def self.add_num_occupants(model, runner, spaces)
     # Occupants
     num_occ = @hpxml.building_occupancy.number_of_residents
     if num_occ > 0
@@ -1418,7 +1411,7 @@ class OSModel
 
       weekend_sch = weekday_sch
       monthly_sch = '1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0'
-      Geometry.process_occupants(model, num_occ, occ_gain, sens_frac, lat_frac, weekday_sch, weekend_sch, monthly_sch, @cfa, @nbeds, @living_space)
+      Geometry.process_occupants(model, num_occ, occ_gain, sens_frac, lat_frac, weekday_sch, weekend_sch, monthly_sch, @cfa, @nbeds, spaces[HPXML::LocationLivingSpace])
     end
   end
 
@@ -2079,26 +2072,26 @@ class OSModel
     apply_adiabatic_construction(runner, model, [floor_surface, ceiling_surface], 'floor')
   end
 
-  def self.add_thermal_mass(runner, model)
+  def self.add_thermal_mass(runner, model, spaces)
     if @apply_ashrae140_assumptions
       # 1024 ft2 of interior partition wall mass, no furniture mass
       drywall_thick_in = 0.5
       partition_frac_of_cfa = 1024.0 / @cfa # Ratio of partition wall area to conditioned floor area
       basement_frac_of_cfa = (@cfa - @cfa_ag) / @cfa
       Constructions.apply_partition_walls(model, 'PartitionWallConstruction', drywall_thick_in, partition_frac_of_cfa,
-                                          basement_frac_of_cfa, @cond_bsmnt_surfaces, @living_space)
+                                          basement_frac_of_cfa, @cond_bsmnt_surfaces, spaces[HPXML::LocationLivingSpace])
     else
       drywall_thick_in = 0.5
       partition_frac_of_cfa = 1.0 # Ratio of partition wall area to conditioned floor area
       basement_frac_of_cfa = (@cfa - @cfa_ag) / @cfa
       Constructions.apply_partition_walls(model, 'PartitionWallConstruction', drywall_thick_in, partition_frac_of_cfa,
-                                          basement_frac_of_cfa, @cond_bsmnt_surfaces, @living_space)
+                                          basement_frac_of_cfa, @cond_bsmnt_surfaces, spaces[HPXML::LocationLivingSpace])
 
       mass_lb_per_sqft = 8.0
       density_lb_per_cuft = 40.0
       mat = BaseMaterial.Wood
       Constructions.apply_furniture(model, mass_lb_per_sqft, density_lb_per_cuft, mat,
-                                    basement_frac_of_cfa, @cond_bsmnt_surfaces, @living_space)
+                                    basement_frac_of_cfa, @cond_bsmnt_surfaces, spaces[HPXML::LocationLivingSpace])
     end
   end
 
@@ -2453,9 +2446,10 @@ class OSModel
         elsif wh_type == HPXML::WaterHeaterTypeHeatPump
 
           tank_vol = water_heating_system.tank_volume
+          living_zone = spaces[HPXML::LocationLivingSpace].thermalZone.get
 
           Waterheater.apply_heatpump(model, runner, loc_space, loc_schedule, weather, setpoint_temp, tank_vol, ef, ec_adj,
-                                     @dhw_map, sys_id, desuperheater_clg_coil, jacket_r, solar_fraction, @living_zone)
+                                     @dhw_map, sys_id, desuperheater_clg_coil, jacket_r, solar_fraction, living_zone)
 
         elsif (wh_type == HPXML::WaterHeaterTypeCombiStorage) || (wh_type == HPXML::WaterHeaterTypeCombiTankless)
 
@@ -2480,7 +2474,7 @@ class OSModel
       end
     end
 
-    HotWaterAndAppliances.apply(model, weather, @living_space,
+    HotWaterAndAppliances.apply(model, weather, spaces[HPXML::LocationLivingSpace],
                                 @cfa, @nbeds, @ncfl, @has_uncond_bsmnt, avg_setpoint_temp,
                                 clothes_washer, cw_space, clothes_dryer, cd_space,
                                 dishwasher, dw_space, refrigerator, rf_space,
@@ -2563,8 +2557,10 @@ class OSModel
     return true
   end
 
-  def self.add_cooling_system(runner, model)
+  def self.add_cooling_system(runner, model, spaces)
     return if @hpxml.building_construction.use_only_ideal_air_system
+
+    living_zone = spaces[HPXML::LocationLivingSpace].thermalZone.get
 
     @hpxml.cooling_systems.each do |cooling_system|
       check_distribution_system(cooling_system.distribution_system, cooling_system.cooling_system_type)
@@ -2578,7 +2574,7 @@ class OSModel
 
         HVAC.apply_central_air_conditioner_furnace(model, runner, cooling_system, heating_system,
                                                    @remaining_cool_load_frac, @remaining_heat_load_frac,
-                                                   @living_zone, @hvac_map)
+                                                   living_zone, @hvac_map)
 
         if not heating_system.nil?
           @remaining_heat_load_frac -= heating_system.fraction_heat_load_served
@@ -2587,13 +2583,13 @@ class OSModel
       elsif cooling_system.cooling_system_type == HPXML::HVACTypeRoomAirConditioner
 
         HVAC.apply_room_air_conditioner(model, runner, cooling_system,
-                                        @remaining_cool_load_frac, @living_zone,
+                                        @remaining_cool_load_frac, living_zone,
                                         @hvac_map)
 
       elsif cooling_system.cooling_system_type == HPXML::HVACTypeEvaporativeCooler
 
         HVAC.apply_evaporative_cooler(model, runner, cooling_system,
-                                      @remaining_cool_load_frac, @living_zone,
+                                      @remaining_cool_load_frac, living_zone,
                                       @hvac_map)
       end
 
@@ -2601,8 +2597,10 @@ class OSModel
     end
   end
 
-  def self.add_heating_system(runner, model)
+  def self.add_heating_system(runner, model, spaces)
     return if @hpxml.building_construction.use_only_ideal_air_system
+
+    living_zone = spaces[HPXML::LocationLivingSpace].thermalZone.get
 
     @hpxml.heating_systems.each do |heating_system|
       check_distribution_system(heating_system.distribution_system, heating_system.heating_system_type)
@@ -2616,34 +2614,37 @@ class OSModel
 
         HVAC.apply_central_air_conditioner_furnace(model, runner, nil, heating_system,
                                                    nil, @remaining_heat_load_frac,
-                                                   @living_zone, @hvac_map)
+                                                   living_zone, @hvac_map)
 
       elsif heating_system.heating_system_type == HPXML::HVACTypeBoiler
 
         HVAC.apply_boiler(model, runner, heating_system,
-                          @remaining_heat_load_frac, @living_zone, @hvac_map)
+                          @remaining_heat_load_frac, living_zone, @hvac_map)
 
       elsif heating_system.heating_system_type == HPXML::HVACTypeElectricResistance
 
         HVAC.apply_electric_baseboard(model, runner, heating_system,
-                                      @remaining_heat_load_frac, @living_zone, @hvac_map)
+                                      @remaining_heat_load_frac, living_zone, @hvac_map)
 
       elsif (heating_system.heating_system_type == HPXML::HVACTypeStove ||
              heating_system.heating_system_type == HPXML::HVACTypePortableHeater ||
              heating_system.heating_system_type == HPXML::HVACTypeWallFurnace)
 
         HVAC.apply_unit_heater(model, runner, heating_system,
-                               @remaining_heat_load_frac, @living_zone, @hvac_map)
+                               @remaining_heat_load_frac, living_zone, @hvac_map)
       end
 
       @remaining_heat_load_frac -= heating_system.fraction_heat_load_served
     end
   end
 
-  def self.add_heat_pump(runner, model, weather)
+  def self.add_heat_pump(runner, model, weather, spaces)
     return if @hpxml.building_construction.use_only_ideal_air_system
 
+    living_zone = spaces[HPXML::LocationLivingSpace].thermalZone.get
+
     @hpxml.heat_pumps.each do |heat_pump|
+      # TODO: Move these checks into hvac.rb
       if not heat_pump.heating_capacity_17F.nil?
         if heat_pump.heating_capacity.nil?
           fail "HeatPump '#{heat_pump.id}' must have both HeatingCapacity and HeatingCapacity17F provided or not provided."
@@ -2664,21 +2665,21 @@ class OSModel
         HVAC.apply_central_air_to_air_heat_pump(model, runner, heat_pump,
                                                 @remaining_heat_load_frac,
                                                 @remaining_cool_load_frac,
-                                                @living_zone, @hvac_map)
+                                                living_zone, @hvac_map)
 
       elsif heat_pump.heat_pump_type == HPXML::HVACTypeHeatPumpMiniSplit
 
         HVAC.apply_mini_split_heat_pump(model, runner, heat_pump,
                                         @remaining_heat_load_frac,
                                         @remaining_cool_load_frac,
-                                        @living_zone, @hvac_map)
+                                        living_zone, @hvac_map)
 
       elsif heat_pump.heat_pump_type == HPXML::HVACTypeHeatPumpGroundToAir
 
         HVAC.apply_ground_to_air_heat_pump(model, runner, weather, heat_pump,
                                            @remaining_heat_load_frac,
                                            @remaining_cool_load_frac,
-                                           @living_zone, @hvac_map)
+                                           living_zone, @hvac_map)
 
       end
 
@@ -2687,9 +2688,11 @@ class OSModel
     end
   end
 
-  def self.add_residual_hvac(runner, model)
+  def self.add_residual_hvac(runner, model, spaces)
+    living_zone = spaces[HPXML::LocationLivingSpace].thermalZone.get
+
     if @hpxml.building_construction.use_only_ideal_air_system
-      HVAC.apply_ideal_air_loads(model, runner, 1, 1, @living_zone)
+      HVAC.apply_ideal_air_loads(model, runner, 1, 1, living_zone)
       return
     end
 
@@ -2713,90 +2716,31 @@ class OSModel
     end
     if (sequential_heat_load_frac > 0) || (sequential_cool_load_frac > 0)
       HVAC.apply_ideal_air_loads(model, runner, sequential_cool_load_frac, sequential_heat_load_frac,
-                                 @living_zone)
+                                 living_zone)
     end
   end
 
-  def self.add_setpoints(runner, model, weather)
+  def self.add_setpoints(runner, model, weather, spaces)
     return if @hpxml.hvac_controls.size == 0
 
     hvac_control = @hpxml.hvac_controls[0]
+    living_zone = spaces[HPXML::LocationLivingSpace].thermalZone.get
 
-    # Base heating setpoint
-    htg_setpoint = hvac_control.heating_setpoint_temp
-    htg_weekday_setpoints = [[htg_setpoint] * 24] * 12
-
-    # Apply heating setback?
-    htg_setback = hvac_control.heating_setback_temp
-    if not htg_setback.nil?
-      htg_setback_hrs_per_week = hvac_control.heating_setback_hours_per_week
-      htg_setback_start_hr = hvac_control.heating_setback_start_hour
-      for m in 1..12
-        for hr in htg_setback_start_hr..htg_setback_start_hr + Integer(htg_setback_hrs_per_week / 7.0) - 1
-          htg_weekday_setpoints[m - 1][hr % 24] = htg_setback
-        end
-      end
-    end
-    htg_weekend_setpoints = htg_weekday_setpoints
-
-    # Base cooling setpoint
-    clg_setpoint = hvac_control.cooling_setpoint_temp
-    clg_weekday_setpoints = [[clg_setpoint] * 24] * 12
-
-    # Apply cooling setup?
-    clg_setup = hvac_control.cooling_setup_temp
-    if not clg_setup.nil?
-      clg_setup_hrs_per_week = hvac_control.cooling_setup_hours_per_week
-      clg_setup_start_hr = hvac_control.cooling_setup_start_hour
-      for m in 1..12
-        for hr in clg_setup_start_hr..clg_setup_start_hr + Integer(clg_setup_hrs_per_week / 7.0) - 1
-          clg_weekday_setpoints[m - 1][hr % 24] = clg_setup
-        end
-      end
-    end
-
-    # Apply cooling setpoint offset due to ceiling fan?
-    clg_ceiling_fan_offset = hvac_control.ceiling_fan_cooling_setpoint_temp_offset
-    if not clg_ceiling_fan_offset.nil?
-      HVAC.get_default_ceiling_fan_months(weather).each_with_index do |operation, m|
-        next unless operation == 1
-
-        clg_weekday_setpoints[m] = [clg_weekday_setpoints[m], Array.new(24, clg_ceiling_fan_offset)].transpose.map { |i| i.reduce(:+) }
-      end
-    end
-    clg_weekend_setpoints = clg_weekday_setpoints
-
-    HVAC.apply_setpoints(model, runner, weather, @living_zone,
-                         htg_weekday_setpoints, htg_weekend_setpoints, 1, 12,
-                         clg_weekday_setpoints, clg_weekend_setpoints, 1, 12)
+    HVAC.apply_setpoints(model, runner, weather, hvac_control, living_zone)
   end
 
-  def self.add_ceiling_fans(runner, model, weather)
+  def self.add_ceiling_fans(runner, model, weather, spaces)
     return if @hpxml.ceiling_fans.size == 0
 
     ceiling_fan = @hpxml.ceiling_fans[0]
-
-    monthly_sch = HVAC.get_default_ceiling_fan_months(weather)
-    medium_cfm = 3000.0
-    weekday_sch = [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.5, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 0.0, 0.0, 0.0, 0.0]
-    weekend_sch = weekday_sch
-    hrs_per_day = weekday_sch.inject(0, :+)
-    cfm_per_w = ceiling_fan.efficiency
-    quantity = ceiling_fan.quantity
-    annual_kwh = UnitConversions.convert(quantity * medium_cfm / cfm_per_w * hrs_per_day * 365.0, 'Wh', 'kWh')
-    annual_kwh *= monthly_sch.inject(:+) / 12.0
-
-    HVAC.apply_ceiling_fans(model, runner, annual_kwh, weekday_sch, weekend_sch, monthly_sch,
-                            @cfa, @living_space)
+    HVAC.apply_ceiling_fans(model, runner, weather, ceiling_fan, spaces[HPXML::LocationLivingSpace])
   end
 
-  def self.add_dehumidifier(runner, model)
+  def self.add_dehumidifier(runner, model, spaces)
     return if @hpxml.dehumidifiers.size == 0
 
     dehumidifier = @hpxml.dehumidifiers[0]
-    @hvac_map[dehumidifier.id] = []
-
-    HVAC.apply_dehumidifier(model, runner, dehumidifier, @living_space, @hvac_map)
+    HVAC.apply_dehumidifier(model, runner, dehumidifier, spaces[HPXML::LocationLivingSpace], @hvac_map)
   end
 
   def self.check_distribution_system(hvac_distribution, system_type)
@@ -2846,7 +2790,7 @@ class OSModel
     end
 
     MiscLoads.apply_plug(model, plug_load_misc, plug_load_tv, @hpxml.misc_loads_schedule,
-                         @cfa, @living_space)
+                         @cfa, spaces[HPXML::LocationLivingSpace])
   end
 
   def self.add_lighting(runner, model, weather, spaces)
@@ -3003,7 +2947,7 @@ class OSModel
   end
 
   def self.add_hvac_sizing(runner, model, weather, spaces)
-    HVACSizing.apply(model, runner, weather, spaces, @hpxml, @cfa, @infil_volume, @nbeds, @min_neighbor_distance, @debug)
+    HVACSizing.apply(model, runner, weather, spaces, @hpxml, @infil_volume, @nbeds, @min_neighbor_distance, @debug)
   end
 
   def self.add_fuel_heating_eae(runner, model)
@@ -3033,10 +2977,10 @@ class OSModel
     end
   end
 
-  def self.add_additional_properties(runner, model)
+  def self.add_additional_properties(runner, model, hpxml_path)
     # Store some data for use in reporting measure
     additionalProperties = model.getBuilding.additionalProperties
-    additionalProperties.setFeature('hpxml_path', @hpxml_path)
+    additionalProperties.setFeature('hpxml_path', hpxml_path)
     additionalProperties.setFeature('hvac_map', map_to_string(@hvac_map))
     additionalProperties.setFeature('dhw_map', map_to_string(@dhw_map))
   end
@@ -3053,7 +2997,9 @@ class OSModel
     return map_str.to_s
   end
 
-  def self.add_component_loads_output(runner, model)
+  def self.add_component_loads_output(runner, model, spaces)
+    living_zone = spaces[HPXML::LocationLivingSpace].thermalZone.get
+
     # Prevent certain objects (e.g., OtherEquipment) from being counted towards both, e.g., ducts and internal gains
     objects_already_processed = []
 
@@ -3061,10 +3007,10 @@ class OSModel
 
     liv_load_sensors = {}
 
-    liv_load_sensors[:htg] = OpenStudio::Model::EnergyManagementSystemSensor.new(model, "Heating:EnergyTransfer:Zone:#{@living_zone.name.to_s.upcase}")
+    liv_load_sensors[:htg] = OpenStudio::Model::EnergyManagementSystemSensor.new(model, "Heating:EnergyTransfer:Zone:#{living_zone.name.to_s.upcase}")
     liv_load_sensors[:htg].setName('htg_load_liv')
 
-    liv_load_sensors[:clg] = OpenStudio::Model::EnergyManagementSystemSensor.new(model, "Cooling:EnergyTransfer:Zone:#{@living_zone.name.to_s.upcase}")
+    liv_load_sensors[:clg] = OpenStudio::Model::EnergyManagementSystemSensor.new(model, "Cooling:EnergyTransfer:Zone:#{living_zone.name.to_s.upcase}")
     liv_load_sensors[:clg].setName('clg_load_liv')
 
     tot_load_sensors = {}
@@ -3096,7 +3042,7 @@ class OSModel
     output_diagnostics.addKey('DisplayAdvancedReportVariables')
 
     model.getSurfaces.sort.each_with_index do |s, idx|
-      next unless s.space.get.thermalZone.get.name.to_s == @living_zone.name.to_s
+      next unless s.space.get.thermalZone.get.name.to_s == living_zone.name.to_s
 
       surface_type = s.additionalProperties.getFeatureAsString('SurfaceType')
       if not surface_type.is_initialized
@@ -3164,7 +3110,7 @@ class OSModel
     end
 
     model.getInternalMasss.sort.each do |m|
-      next unless m.space.get.thermalZone.get.name.to_s == @living_zone.name.to_s
+      next unless m.space.get.thermalZone.get.name.to_s == living_zone.name.to_s
 
       surfaces_sensors[:internal_mass] << []
       { 'Surface Inside Face Convection Heat Gain Energy' => 'im_conv',
@@ -3183,11 +3129,11 @@ class OSModel
 
     air_gain_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Zone Infiltration Sensible Heat Gain Energy')
     air_gain_sensor.setName('airflow_gain')
-    air_gain_sensor.setKeyName(@living_zone.name.to_s)
+    air_gain_sensor.setKeyName(living_zone.name.to_s)
 
     air_loss_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Zone Infiltration Sensible Heat Loss Energy')
     air_loss_sensor.setName('airflow_loss')
-    air_loss_sensor.setKeyName(@living_zone.name.to_s)
+    air_loss_sensor.setKeyName(living_zone.name.to_s)
 
     mechvent_sensors = []
     model.getElectricEquipments.sort.each do |o|
@@ -3262,8 +3208,8 @@ class OSModel
     if not plenum_zones.empty?
 
       has_duct_zone_mixing = false
-      @living_zone.airLoopHVACs.sort.each do |airloop|
-        @living_zone.zoneMixing.each do |zone_mix|
+      living_zone.airLoopHVACs.sort.each do |airloop|
+        living_zone.zoneMixing.each do |zone_mix|
           next unless zone_mix.name.to_s.start_with? airloop.name.to_s.gsub(' ', '_')
 
           has_duct_zone_mixing = true
@@ -3273,11 +3219,11 @@ class OSModel
       if has_duct_zone_mixing
         ducts_mix_gain_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Zone Mixing Sensible Heat Gain Energy')
         ducts_mix_gain_sensor.setName('duct_mix_gain')
-        ducts_mix_gain_sensor.setKeyName(@living_zone.name.to_s)
+        ducts_mix_gain_sensor.setKeyName(living_zone.name.to_s)
 
         ducts_mix_loss_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Zone Mixing Sensible Heat Loss Energy')
         ducts_mix_loss_sensor.setName('duct_mix_loss')
-        ducts_mix_loss_sensor.setKeyName(@living_zone.name.to_s)
+        ducts_mix_loss_sensor.setKeyName(living_zone.name.to_s)
       end
 
       # Return duct losses
@@ -3299,9 +3245,9 @@ class OSModel
       end
 
       # Supply duct losses
-      @living_zone.airLoopHVACs.sort.each do |airloop|
+      living_zone.airLoopHVACs.sort.each do |airloop|
         model.getOtherEquipments.sort.each do |o|
-          next unless o.space.get.thermalZone.get.name.to_s == @living_zone.name.to_s
+          next unless o.space.get.thermalZone.get.name.to_s == living_zone.name.to_s
           next unless o.name.to_s.start_with? airloop.name.to_s.gsub(' ', '_')
           next if objects_already_processed.include? o
 
@@ -3323,7 +3269,7 @@ class OSModel
     intgains_sensors = []
 
     model.getElectricEquipments.sort.each do |o|
-      next unless o.space.get.thermalZone.get.name.to_s == @living_zone.name.to_s
+      next unless o.space.get.thermalZone.get.name.to_s == living_zone.name.to_s
       next if objects_already_processed.include? o
 
       intgains_sensors << []
@@ -3337,7 +3283,7 @@ class OSModel
     end
 
     model.getGasEquipments.sort.each do |o|
-      next unless o.space.get.thermalZone.get.name.to_s == @living_zone.name.to_s
+      next unless o.space.get.thermalZone.get.name.to_s == living_zone.name.to_s
       next if objects_already_processed.include? o
 
       intgains_sensors << []
@@ -3351,7 +3297,7 @@ class OSModel
     end
 
     model.getOtherEquipments.sort.each do |o|
-      next unless o.space.get.thermalZone.get.name.to_s == @living_zone.name.to_s
+      next unless o.space.get.thermalZone.get.name.to_s == living_zone.name.to_s
       next if objects_already_processed.include? o
 
       intgains_sensors << []
@@ -3365,7 +3311,7 @@ class OSModel
     end
 
     model.getLightss.sort.each do |e|
-      next unless e.space.get.thermalZone.get.name.to_s == @living_zone.name.to_s
+      next unless e.space.get.thermalZone.get.name.to_s == living_zone.name.to_s
 
       intgains_sensors << []
       { 'Lights Convective Heating Energy' => 'ig_lgt_conv',
@@ -3379,7 +3325,7 @@ class OSModel
     end
 
     model.getPeoples.sort.each do |e|
-      next unless e.space.get.thermalZone.get.name.to_s == @living_zone.name.to_s
+      next unless e.space.get.thermalZone.get.name.to_s == living_zone.name.to_s
 
       intgains_sensors << []
       { 'People Convective Heating Energy' => 'ig_ppl_conv',
@@ -3392,7 +3338,7 @@ class OSModel
     end
 
     model.getZoneHVACDehumidifierDXs.each do |e|
-      next unless e.thermalZone.get.name.to_s == @living_zone.name.to_s
+      next unless e.thermalZone.get.name.to_s == living_zone.name.to_s
 
       intgains_sensors << []
       { 'Zone Dehumidifier Sensible Heating Energy' => 'ig_dehumidifier' }.each do |var, name|
@@ -3408,7 +3354,7 @@ class OSModel
 
     (model.getWaterHeaterMixeds + model.getWaterHeaterStratifieds).sort.each do |wh|
       next unless wh.ambientTemperatureThermalZone.is_initialized
-      next unless wh.ambientTemperatureThermalZone.get.name.to_s == @living_zone.name.to_s
+      next unless wh.ambientTemperatureThermalZone.get.name.to_s == living_zone.name.to_s
 
       dhw_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Water Heater Heat Loss Energy')
       dhw_sensor.setName('dhw_loss')
@@ -3655,7 +3601,6 @@ class OSModel
                                    rigid_r, constr_set.exterior_material)
     elsif wall_type == HPXML::WallTypeSIP
       sheathing_thick_in = 0.44
-      sheathing_type = Constants.MaterialOSB
 
       constr_sets = [
         SIPConstructionSet.new(10.0, 0.16, 0.0, sheathing_thick_in, 0.5, drywall_thick_in, mat_ext_finish), # 10" SIP core
@@ -3666,9 +3611,9 @@ class OSModel
 
       Constructions.apply_sip_wall(model, surfaces, wall, "#{wall_id} construction",
                                    cavity_r, constr_set.thick_in, constr_set.framing_factor,
-                                   sheathing_type, constr_set.sheath_thick_in,
-                                   constr_set.drywall_thick_in, constr_set.osb_thick_in,
-                                   constr_set.rigid_r, constr_set.exterior_material)
+                                   constr_set.sheath_thick_in, constr_set.drywall_thick_in,
+                                   constr_set.osb_thick_in, constr_set.rigid_r,
+                                   constr_set.exterior_material)
     elsif wall_type == HPXML::WallTypeICF
       constr_sets = [
         ICFConstructionSet.new(2.0, 4.0, 0.08, 0.0, 0.5, drywall_thick_in, mat_ext_finish), # ICF w/4" concrete and 2" rigid ins layers
@@ -4118,14 +4063,13 @@ class OSModel
     return kiva_fnd_walls.product(kiva_slabs)
   end
 
-  def self.get_foundation_and_walls_top()
-    foundation_top = 0
+  def self.set_foundation_and_walls_top()
+    @foundation_top = 0
     @hpxml.foundation_walls.each do |foundation_wall|
       top = -1 * foundation_wall.depth_below_grade + foundation_wall.height
-      foundation_top = top if top > foundation_top
+      @foundation_top = top if top > @foundation_top
     end
-    walls_top = foundation_top + 8.0 * @ncfl_ag
-    return foundation_top, walls_top
+    @walls_top = @foundation_top + 8.0 * @ncfl_ag
   end
 end
 

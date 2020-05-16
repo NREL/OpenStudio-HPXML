@@ -138,7 +138,8 @@ class Airflow
     end
 
     # Local Shielding
-    if shelter_coef == Constants.Auto
+    if shelter_coef.nil?
+      # FIXME: Move into HPXML defaults
       if min_neighbor_distance.nil?
         # Typical shelter for isolated rural house
         wind_speed.S_wo = 0.90

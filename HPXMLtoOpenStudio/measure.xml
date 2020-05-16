@@ -3,8 +3,8 @@
   <schema_version>3.0</schema_version>
   <name>hpxm_lto_openstudio</name>
   <uid>b1543b30-9465-45ff-ba04-1d1f85e763bc</uid>
-  <version_id>b463ddba-490d-4ef4-aa7a-e6d9be26ba8a</version_id>
-  <version_modified>20200516T044732Z</version_modified>
+  <version_id>a92fecbe-9932-433f-a0c6-a4fad4e6875d</version_id>
+  <version_modified>20200516T154720Z</version_modified>
   <xml_checksum>D8922A73</xml_checksum>
   <class_name>HPXMLtoOpenStudio</class_name>
   <display_name>HPXML to OpenStudio Translator</display_name>
@@ -349,12 +349,6 @@
       <checksum>845F2FA5</checksum>
     </file>
     <file>
-      <filename>weather.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>C2A8BC34</checksum>
-    </file>
-    <file>
       <filename>util.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
@@ -367,22 +361,10 @@
       <checksum>7EC7A818</checksum>
     </file>
     <file>
-      <filename>location.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>9AE7D3AC</checksum>
-    </file>
-    <file>
       <filename>misc_loads.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
       <checksum>9726CA6F</checksum>
-    </file>
-    <file>
-      <filename>hvac.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>86AD17CB</checksum>
     </file>
     <file>
       <filename>xmlhelper.rb</filename>
@@ -403,12 +385,6 @@
       <checksum>76A93C0E</checksum>
     </file>
     <file>
-      <filename>waterheater.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>364DBB7E</checksum>
-    </file>
-    <file>
       <filename>pv.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
@@ -425,12 +401,6 @@
       <filetype>rb</filetype>
       <usage_type>test</usage_type>
       <checksum>CE16F0F3</checksum>
-    </file>
-    <file>
-      <filename>lighting.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>56EE504C</checksum>
     </file>
     <file>
       <filename>test_lighting.rb</filename>
@@ -451,22 +421,10 @@
       <checksum>E03578EA</checksum>
     </file>
     <file>
-      <filename>constants.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>7C366B17</checksum>
-    </file>
-    <file>
       <filename>materials.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
       <checksum>591C54E0</checksum>
-    </file>
-    <file>
-      <filename>airflow.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>42C8270C</checksum>
     </file>
     <file>
       <filename>EPvalidator.rb</filename>
@@ -481,16 +439,64 @@
       <checksum>E81AD4A3</checksum>
     </file>
     <file>
-      <filename>constructions.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>9E252AA8</checksum>
-    </file>
-    <file>
       <filename>geometry.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
       <checksum>13AD8733</checksum>
+    </file>
+    <file>
+      <filename>weather.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>C9E02189</checksum>
+    </file>
+    <file>
+      <filename>waterheater.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>9469C7CC</checksum>
+    </file>
+    <file>
+      <filename>lighting.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>CB1C9C64</checksum>
+    </file>
+    <file>
+      <filename>constants.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>E0488071</checksum>
+    </file>
+    <file>
+      <filename>airflow.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>BAA04D3B</checksum>
+    </file>
+    <file>
+      <filename>hvac_sizing.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>DB1CF545</checksum>
+    </file>
+    <file>
+      <filename>location.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>66D8F36B</checksum>
+    </file>
+    <file>
+      <filename>hvac.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>24713150</checksum>
+    </file>
+    <file>
+      <filename>constructions.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>44195EB0</checksum>
     </file>
     <file>
       <version>
@@ -501,13 +507,7 @@
       <filename>measure.rb</filename>
       <filetype>rb</filetype>
       <usage_type>script</usage_type>
-      <checksum>3B35112A</checksum>
-    </file>
-    <file>
-      <filename>hvac_sizing.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>19FE666F</checksum>
+      <checksum>4F48F2AB</checksum>
     </file>
   </files>
 </measure>
