@@ -47,10 +47,8 @@ class EnergyPlusValidator
         '/HPXML/Building/BuildingID' => one, # Required by HPXML schema
         '/HPXML/Building/ProjectStatus/EventType' => one, # Required by HPXML schema
 
-        '/HPXML/Building/BuildingDetails/BuildingSummary/Site/SiteType[text()="urban" or text()="suburban" or text()="rural"]' => zero_or_one,
-        '/HPXML/Building/BuildingDetails/BuildingSummary/Site/extension/ShelterCoefficient' => zero_or_one,
-        '/HPXML/Building/BuildingDetails/BuildingSummary/Site/extension/Neighbors' => zero_or_one, # See [Neighbors]
-        '/HPXML/Building/BuildingDetails/BuildingSummary/BuildingOccupancy/NumberofResidents' => zero_or_one,
+        '/HPXML/Building/BuildingDetails/BuildingSummary/Site' => zero_or_one, # See [Site]
+        '/HPXML/Building/BuildingDetails/BuildingSummary/BuildingOccupancy' => zero_or_one, # See [BuildingOccupancy]
         '/HPXML/Building/BuildingDetails/BuildingSummary/BuildingConstruction' => one, # See [BuildingConstruction]
 
         '/HPXML/Building/BuildingDetails/ClimateandRiskZones/ClimateZoneIECC' => zero_or_one, # See [ClimateZone]
@@ -105,6 +103,30 @@ class EnergyPlusValidator
         'EndMonth | EndDayOfMonth' => zero_or_two, # integer
       },
 
+      # [Site]
+      '/HPXML/Building/BuildingDetails/BuildingSummary/Site' => {
+        'SiteType[text()="urban" or text()="suburban" or text()="rural"]' => zero_or_one,
+        'extension/ShelterCoefficient' => zero_or_one,
+        'extension/Neighbors' => zero_or_one, # See [Neighbors]
+      },
+
+      ## [Neighbors]
+      '/HPXML/Building/BuildingDetails/BuildingSummary/Site/extension/Neighbors' => {
+        'NeighborBuilding' => one_or_more, # See [NeighborBuilding]
+      },
+
+      ## [NeighborBuilding]
+      '/HPXML/Building/BuildingDetails/BuildingSummary/Site/extension/Neighbors/NeighborBuilding' => {
+        'Azimuth' => one,
+        'Distance' => one, # ft
+        'Height' => zero_or_one # ft; if omitted, the neighbor is the same height as the main building
+      },
+
+      # [BuildingOccupancy]
+      '/HPXML/Building/BuildingDetails/BuildingSummary/BuildingOccupancy' => {
+        'NumberofResidents' => zero_or_one,
+      },
+
       # [BuildingConstruction]
       '/HPXML/Building/BuildingDetails/BuildingSummary/BuildingConstruction' => {
         'NumberofConditionedFloors' => one,
@@ -113,18 +135,6 @@ class EnergyPlusValidator
         'NumberofBathrooms' => zero_or_one,
         'ConditionedFloorArea' => one,
         'ConditionedBuildingVolume | AverageCeilingHeight' => one_or_more,
-      },
-
-      # [Neighbors]
-      '/HPXML/Building/BuildingDetails/BuildingSummary/Site/extension/Neighbors' => {
-        'NeighborBuilding' => one_or_more, # See [NeighborBuilding]
-      },
-
-      # [NeighborBuilding]
-      '/HPXML/Building/BuildingDetails/BuildingSummary/Site/extension/Neighbors/NeighborBuilding' => {
-        'Azimuth' => one,
-        'Distance' => one, # ft
-        'Height' => zero_or_one # ft; if omitted, the neighbor is the same height as the main building
       },
 
       # [ClimateZone]
@@ -153,7 +163,8 @@ class EnergyPlusValidator
         'InteriorAdjacentTo[text()="attic - vented" or text()="attic - unvented" or text()="living space" or text()="garage"]' => one, # See [VentedAttic]
         'Area' => one,
         'Azimuth' => zero_or_one,
-        'SolarAbsorptance' => one,
+        '[not(RoofType)] | RoofType[text()="asphalt or fiberglass shingles" or text()="wood shingles or shakes" or text()="slate or tile shingles" or text()="metal surfacing"]' => one,
+        'RoofColor | SolarAbsorptance' => one_or_more,
         'Emittance' => one,
         'Pitch' => one,
         'RadiantBarrier' => one,
@@ -174,7 +185,8 @@ class EnergyPlusValidator
         'WallType[WoodStud | DoubleWoodStud | ConcreteMasonryUnit | StructurallyInsulatedPanel | InsulatedConcreteForms | SteelFrame | SolidConcrete | StructuralBrick | StrawBale | Stone | LogWall]' => one,
         'Area' => one,
         'Azimuth' => zero_or_one,
-        'SolarAbsorptance' => one,
+        '[not(Siding)] | Siding[text()="wood siding" or text()="vinyl siding" or text()="stucco" or text()="fiber cement siding" or text()="brick veneer" or text()="aluminum siding"]' => one,
+        'Color | SolarAbsorptance' => one_or_more,
         'Emittance' => one,
         'Insulation/SystemIdentifier' => one, # Required by HPXML schema
         'Insulation/AssemblyEffectiveRValue' => one,
@@ -187,7 +199,8 @@ class EnergyPlusValidator
         'InteriorAdjacentTo[text()="living space" or text()="attic - vented" or text()="attic - unvented" or text()="basement - conditioned" or text()="basement - unconditioned" or text()="crawlspace - vented" or text()="crawlspace - unvented" or text()="garage"]' => one,
         'Area' => one,
         'Azimuth' => zero_or_one,
-        'SolarAbsorptance' => one,
+        '[not(Siding)] | Siding[text()="wood siding" or text()="vinyl siding" or text()="stucco" or text()="fiber cement siding" or text()="brick veneer" or text()="aluminum siding"]' => one,
+        'Color | SolarAbsorptance' => one_or_more,
         'Emittance' => one,
         'Insulation/SystemIdentifier' => one, # Required by HPXML schema
         'Insulation/AssemblyEffectiveRValue' => one,
@@ -231,7 +244,7 @@ class EnergyPlusValidator
         'Insulation/AssemblyEffectiveRValue' => one,
       },
 
-      # [FrameFloorAdjacentToOther]
+      ## [FrameFloorAdjacentToOther]
       '/HPXML/Building/BuildingDetails/Enclosure/FrameFloors/FrameFloor[ExteriorAdjacentTo[text()="other housing unit" or text()="other heated space" or text()="other multifamily buffer space" or text()="other non-freezing space"]]' => {
         'extension/OtherSpaceAboveOrBelow[text()="above" or text()="below"]' => one,
       },

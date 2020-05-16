@@ -292,7 +292,7 @@ class OSModel
     # Other
 
     add_airflow(runner, model, weather, spaces)
-    add_hvac_sizing(runner, model, weather)
+    add_hvac_sizing(runner, model, weather, spaces)
     add_fuel_heating_eae(runner, model)
     add_photovoltaics(runner, model)
     add_additional_properties(runner, model)
@@ -459,6 +459,46 @@ class OSModel
       end
       if vented_crawl.vented_crawlspace_sla.nil?
         vented_crawl.vented_crawlspace_sla = Airflow.get_default_vented_crawl_sla()
+      end
+    end
+
+    # Default roofs
+    @hpxml.roofs.each do |roof|
+      if roof.roof_type.nil?
+        roof.roof_type = HPXML::RoofTypeAsphaltShingles
+      end
+      if roof.roof_color.nil?
+        roof.roof_color = Constructions.get_default_roof_color(roof.roof_type, roof.solar_absorptance)
+      elsif roof.solar_absorptance.nil?
+        roof.solar_absorptance = Constructions.get_default_roof_solar_absorptance(roof.roof_type, roof.roof_color)
+      end
+    end
+
+    # Default walls
+    @hpxml.walls.each do |wall|
+      next unless wall.is_exterior
+
+      if wall.siding.nil?
+        wall.siding = HPXML::SidingTypeWood
+      end
+      if wall.color.nil?
+        wall.color = Constructions.get_default_wall_color(wall.solar_absorptance)
+      elsif wall.solar_absorptance.nil?
+        wall.solar_absorptance = Constructions.get_default_wall_solar_absorptance(wall.color)
+      end
+    end
+
+    # Default rim joists
+    @hpxml.rim_joists.each do |rim_joist|
+      next unless rim_joist.is_exterior
+
+      if rim_joist.siding.nil?
+        rim_joist.siding = HPXML::SidingTypeWood
+      end
+      if rim_joist.color.nil?
+        rim_joist.color = Constructions.get_default_wall_color(rim_joist.solar_absorptance)
+      elsif wall.solar_absorptance.nil?
+        rim_joist.solar_absorptance = Constructions.get_default_wall_solar_absorptance(rim_joist.color)
       end
     end
 
@@ -1513,15 +1553,7 @@ class OSModel
       else
         film_r = Material.AirFilmOutside.rvalue + Material.AirFilmRoof(Geometry.get_roof_pitch([surfaces[0]])).rvalue
       end
-      if solar_abs >= 0.875
-        mat_roofing = Material.RoofingAsphaltShinglesDark(emitt, solar_abs)
-      elsif solar_abs >= 0.75
-        mat_roofing = Material.RoofingAsphaltShinglesMed(emitt, solar_abs)
-      elsif solar_abs >= 0.6
-        mat_roofing = Material.RoofingAsphaltShinglesLight(emitt, solar_abs)
-      else
-        mat_roofing = Material.RoofingAsphaltShinglesWhiteCool(emitt, solar_abs)
-      end
+      mat_roofing = Material.RoofMaterial(roof.roof_type, emitt, solar_abs)
 
       assembly_r = roof.insulation_assembly_r_value
       constr_sets = [
@@ -1601,16 +1633,13 @@ class OSModel
       end
       if wall.is_exterior
         film_r = Material.AirFilmVertical.rvalue + Material.AirFilmOutside.rvalue
-        mat_ext_finish = Material.ExtFinishWoodLight
-        mat_ext_finish.tAbs = wall.emittance
-        mat_ext_finish.sAbs = wall.solar_absorptance
-        mat_ext_finish.vAbs = wall.solar_absorptance
+        mat_ext_finish = Material.ExteriorFinishMaterial(wall.siding, wall.emittance, wall.solar_absorptance)
       else
         film_r = 2.0 * Material.AirFilmVertical.rvalue
         mat_ext_finish = nil
       end
 
-      apply_wall_construction(runner, model, surfaces, wall.id, wall.wall_type, wall.insulation_assembly_r_value,
+      apply_wall_construction(runner, model, surfaces, wall, wall.id, wall.wall_type, wall.insulation_assembly_r_value,
                               drywall_thick_in, film_r, mat_ext_finish)
     end
   end
@@ -1663,10 +1692,7 @@ class OSModel
       end
       if rim_joist.is_exterior
         film_r = Material.AirFilmVertical.rvalue + Material.AirFilmOutside.rvalue
-        mat_ext_finish = Material.ExtFinishWoodLight
-        mat_ext_finish.tAbs = rim_joist.emittance
-        mat_ext_finish.sAbs = rim_joist.solar_absorptance
-        mat_ext_finish.vAbs = rim_joist.solar_absorptance
+        mat_ext_finish = Material.ExteriorFinishMaterial(rim_joist.siding, rim_joist.emittance, rim_joist.solar_absorptance)
       else
         film_r = 2.0 * Material.AirFilmVertical.rvalue
         mat_ext_finish = nil
@@ -1683,7 +1709,7 @@ class OSModel
       match, constr_set, cavity_r = pick_wood_stud_construction_set(assembly_r, constr_sets, film_r, rim_joist.id)
       install_grade = 1
 
-      Constructions.apply_rim_joist(model, surfaces, "#{rim_joist.id} construction",
+      Constructions.apply_rim_joist(model, surfaces, rim_joist, "#{rim_joist.id} construction",
                                     cavity_r, install_grade, constr_set.framing_factor,
                                     constr_set.drywall_thick_in, constr_set.osb_thick_in,
                                     constr_set.rigid_r, constr_set.exterior_material)
@@ -1882,7 +1908,7 @@ class OSModel
         end
         mat_ext_finish = nil
 
-        apply_wall_construction(runner, model, [surface], foundation_wall.id, wall_type, assembly_r,
+        apply_wall_construction(runner, model, [surface], foundation_wall, foundation_wall.id, wall_type, assembly_r,
                                 drywall_thick_in, film_r, mat_ext_finish)
       end
     end
@@ -2026,8 +2052,6 @@ class OSModel
                                         slab_under_r, slab_under_width, slab_gap_r, slab_perim_r,
                                         slab_perim_depth, slab_whole_r, slab.thickness,
                                         slab_exp_perim, mat_carpet, kiva_foundation)
-    # FIXME: Temporary code for sizing
-    surface.additionalProperties.setFeature(Constants.SizingInfoSlabRvalue, 10.0)
 
     return surface.adjacentFoundation.get
   end
@@ -2192,9 +2216,6 @@ class OSModel
       if not overhang_depth.nil?
         overhang = sub_surface.addOverhang(UnitConversions.convert(overhang_depth, 'ft', 'm'), UnitConversions.convert(overhang_distance_to_top, 'ft', 'm'))
         overhang.get.setName("#{sub_surface.name} - #{Constants.ObjectNameOverhangs}")
-
-        sub_surface.additionalProperties.setFeature(Constants.SizingInfoWindowOverhangDepth, overhang_depth)
-        sub_surface.additionalProperties.setFeature(Constants.SizingInfoWindowOverhangOffset, overhang_distance_to_top)
       end
 
       # Apply construction
@@ -2297,9 +2318,9 @@ class OSModel
     # adiabatic or surface net area is near zero.
 
     if type == 'wall'
-      Constructions.apply_wood_stud_wall(model, surfaces, 'AdiabaticWallConstruction',
+      Constructions.apply_wood_stud_wall(model, surfaces, nil, 'AdiabaticWallConstruction',
                                          0, 1, 3.5, true, 0.1, 0.5, 0, 999,
-                                         Material.ExtFinishStuccoMedDark)
+                                         Material.ExteriorFinishMaterial(HPXML::SidingTypeWood, 0.90, 0.75))
     elsif type == 'floor'
       Constructions.apply_floor(model, surfaces, 'AdiabaticFloorConstruction',
                                 0, 1, 0.07, 5.5, 0.75, 999,
@@ -2307,7 +2328,8 @@ class OSModel
     elsif type == 'roof'
       Constructions.apply_open_cavity_roof(model, surfaces, 'AdiabaticRoofConstruction',
                                            0, 1, 7.25, 0.07, 7.25, 0.75, 999,
-                                           Material.RoofingAsphaltShinglesMed, false)
+                                           Material.RoofMaterial(HPXML::RoofTypeAsphaltShingles, 0.90, 0.75),
+                                           false)
     end
   end
 
@@ -3013,8 +3035,8 @@ class OSModel
     return air_ducts
   end
 
-  def self.add_hvac_sizing(runner, model, weather)
-    HVACSizing.apply(model, runner, weather, @cfa, @infil_volume, @nbeds, @min_neighbor_distance, @living_space, @debug)
+  def self.add_hvac_sizing(runner, model, weather, spaces)
+    HVACSizing.apply(model, runner, weather, spaces, @hpxml, @cfa, @infil_volume, @nbeds, @min_neighbor_distance, @debug)
   end
 
   def self.add_fuel_heating_eae(runner, model)
@@ -3583,16 +3605,13 @@ class OSModel
     return non_cavity_r
   end
 
-  def self.apply_wall_construction(runner, model, surfaces, wall_id, wall_type, assembly_r,
+  def self.apply_wall_construction(runner, model, surfaces, wall, wall_id, wall_type, assembly_r,
                                    drywall_thick_in, film_r, mat_ext_finish)
 
     if mat_ext_finish.nil?
       fallback_mat_ext_finish = nil
     else
-      fallback_mat_ext_finish = Material.ExtFinishWoodLight(0.1)
-      fallback_mat_ext_finish.tAbs = mat_ext_finish.tAbs
-      fallback_mat_ext_finish.vAbs = mat_ext_finish.vAbs
-      fallback_mat_ext_finish.sAbs = mat_ext_finish.sAbs
+      fallback_mat_ext_finish = Material.ExteriorFinishMaterial(mat_ext_finish.name, mat_ext_finish.tAbs, mat_ext_finish.sAbs, 0.1)
     end
 
     if wall_type == HPXML::WallTypeWoodStud
@@ -3608,7 +3627,7 @@ class OSModel
       ]
       match, constr_set, cavity_r = pick_wood_stud_construction_set(assembly_r, constr_sets, film_r, wall_id)
 
-      Constructions.apply_wood_stud_wall(model, surfaces, "#{wall_id} construction",
+      Constructions.apply_wood_stud_wall(model, surfaces, wall, "#{wall_id} construction",
                                          cavity_r, install_grade, constr_set.stud.thick_in,
                                          cavity_filled, constr_set.framing_factor,
                                          constr_set.drywall_thick_in, constr_set.osb_thick_in,
@@ -3627,7 +3646,7 @@ class OSModel
       ]
       match, constr_set, cavity_r = pick_steel_stud_construction_set(assembly_r, constr_sets, film_r, "wall #{wall_id}")
 
-      Constructions.apply_steel_stud_wall(model, surfaces, "#{wall_id} construction",
+      Constructions.apply_steel_stud_wall(model, surfaces, wall, "#{wall_id} construction",
                                           cavity_r, install_grade, constr_set.cavity_thick_in,
                                           cavity_filled, constr_set.framing_factor,
                                           constr_set.corr_factor, constr_set.drywall_thick_in,
@@ -3643,7 +3662,7 @@ class OSModel
       ]
       match, constr_set, cavity_r = pick_double_stud_construction_set(assembly_r, constr_sets, film_r, "wall #{wall_id}")
 
-      Constructions.apply_double_stud_wall(model, surfaces, "#{wall_id} construction",
+      Constructions.apply_double_stud_wall(model, surfaces, wall, "#{wall_id} construction",
                                            cavity_r, install_grade, constr_set.stud.thick_in,
                                            constr_set.stud.thick_in, constr_set.framing_factor,
                                            constr_set.framing_spacing, is_staggered,
@@ -3661,7 +3680,7 @@ class OSModel
       ]
       match, constr_set, rigid_r = pick_cmu_construction_set(assembly_r, constr_sets, film_r, "wall #{wall_id}")
 
-      Constructions.apply_cmu_wall(model, surfaces, "#{wall_id} construction",
+      Constructions.apply_cmu_wall(model, surfaces, wall, "#{wall_id} construction",
                                    constr_set.thick_in, constr_set.cond_in, density,
                                    constr_set.framing_factor, furring_r,
                                    furring_cavity_depth_in, furring_spacing,
@@ -3678,7 +3697,7 @@ class OSModel
       ]
       match, constr_set, cavity_r = pick_sip_construction_set(assembly_r, constr_sets, film_r, "wall #{wall_id}")
 
-      Constructions.apply_sip_wall(model, surfaces, "#{wall_id} construction",
+      Constructions.apply_sip_wall(model, surfaces, wall, "#{wall_id} construction",
                                    cavity_r, constr_set.thick_in, constr_set.framing_factor,
                                    sheathing_type, constr_set.sheath_thick_in,
                                    constr_set.drywall_thick_in, constr_set.osb_thick_in,
@@ -3690,7 +3709,7 @@ class OSModel
       ]
       match, constr_set, icf_r = pick_icf_construction_set(assembly_r, constr_sets, film_r, "wall #{wall_id}")
 
-      Constructions.apply_icf_wall(model, surfaces, "#{wall_id} construction",
+      Constructions.apply_icf_wall(model, surfaces, wall, "#{wall_id} construction",
                                    icf_r, constr_set.ins_thick_in,
                                    constr_set.concrete_thick_in, constr_set.framing_factor,
                                    constr_set.drywall_thick_in, constr_set.osb_thick_in,
@@ -3728,7 +3747,7 @@ class OSModel
       denss = [base_mat.rho]
       specheats = [base_mat.cp]
 
-      Constructions.apply_generic_layered_wall(model, surfaces, "#{wall_id} construction",
+      Constructions.apply_generic_layered_wall(model, surfaces, wall, "#{wall_id} construction",
                                                thick_ins, conds, denss, specheats,
                                                constr_set.drywall_thick_in, constr_set.osb_thick_in,
                                                constr_set.rigid_r, constr_set.exterior_material)

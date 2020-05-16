@@ -45,22 +45,6 @@ class Constants
     return 'ERI Index Adjustment Reference Home'
   end
 
-  def self.ColorWhite
-    return 'white'
-  end
-
-  def self.ColorLight
-    return 'light'
-  end
-
-  def self.ColorMedium
-    return 'medium'
-  end
-
-  def self.ColorDark
-    return 'dark'
-  end
-
   def self.BoilerTypeCondensing
     return 'hot water, condensing'
   end
@@ -413,30 +397,6 @@ class Constants
     return 'solar hot water loop'
   end
 
-  def self.RoofMaterialAsphaltShingles
-    return 'asphalt shingles'
-  end
-
-  def self.RoofMaterialMembrane
-    return 'membrane'
-  end
-
-  def self.RoofMaterialMetal
-    return 'metal'
-  end
-
-  def self.RoofMaterialTarGravel
-    return 'tar gravel'
-  end
-
-  def self.RoofMaterialTile
-    return 'tile'
-  end
-
-  def self.RoofMaterialWoodShakes
-    return 'wood shakes'
-  end
-
   def self.ScheduleTypeLimitsFraction
     return 'Fractional'
   end
@@ -465,10 +425,6 @@ class Constants
     return 'None'
   end
 
-  def self.SizingInfoCMUWallFurringInsRvalue
-    return __method__.to_s
-  end
-
   def self.SizingInfoDuctExist
     return __method__.to_s
   end
@@ -477,7 +433,7 @@ class Constants
     return __method__.to_s
   end
 
-  def self.SizingInfoDuctLocationHandles
+  def self.SizingInfoDuctLocations
     return __method__.to_s
   end
 
@@ -593,55 +549,7 @@ class Constants
     return __method__.to_s
   end
 
-  def self.SizingInfoRoofCavityRvalue
-    return __method__.to_s
-  end
-
-  def self.SizingInfoRoofColor
-    return __method__.to_s
-  end
-
-  def self.SizingInfoRoofHasRadiantBarrier
-    return __method__.to_s
-  end
-
-  def self.SizingInfoRoofMaterial
-    return __method__.to_s
-  end
-
-  def self.SizingInfoRoofRigidInsRvalue
-    return __method__.to_s
-  end
-
   def self.SizingInfoSIPWallInsThickness
-    return __method__.to_s
-  end
-
-  def self.SizingInfoSlabRvalue
-    return __method__.to_s
-  end
-
-  def self.SizingInfoStudWallCavityRvalue
-    return __method__.to_s
-  end
-
-  def self.SizingInfoWallType
-    return __method__.to_s
-  end
-
-  def self.SizingInfoWallRigidInsRvalue
-    return __method__.to_s
-  end
-
-  def self.SizingInfoWallRigidInsThickness
-    return __method__.to_s
-  end
-
-  def self.SizingInfoWindowOverhangDepth
-    return __method__.to_s
-  end
-
-  def self.SizingInfoWindowOverhangOffset
     return __method__.to_s
   end
 

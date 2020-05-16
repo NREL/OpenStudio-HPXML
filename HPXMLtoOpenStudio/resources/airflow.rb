@@ -527,13 +527,13 @@ class Airflow
       duct.rvalue = get_duct_insulation_rvalue(duct.rvalue, duct.side) # Convert from nominal to actual R-value
       if not duct.loc_schedule.nil?
         # Pass MF space temperature schedule name
-        duct.location_handle = duct.loc_schedule.name.to_s
+        duct.location = duct.loc_schedule.name.to_s
       elsif not duct.loc_space.nil?
+        duct.location = duct.loc_space.name.to_s
         duct.zone = duct.loc_space.thermalZone.get
-        duct.location_handle = duct.zone.handle.to_s
       else # Outside
+        duct.location = HPXML::LocationOutside
         duct.zone = nil
-        duct.location_handle = HPXML::LocationOutside
       end
     end
 
@@ -541,7 +541,7 @@ class Airflow
       # Store info for HVAC Sizing measure
       air_loop.additionalProperties.setFeature(Constants.SizingInfoDuctExist, true)
       air_loop.additionalProperties.setFeature(Constants.SizingInfoDuctSides, ducts.map { |duct| duct.side }.join(','))
-      air_loop.additionalProperties.setFeature(Constants.SizingInfoDuctLocationHandles, ducts.map { |duct| duct.location_handle.to_s }.join(','))
+      air_loop.additionalProperties.setFeature(Constants.SizingInfoDuctLocations, ducts.map { |duct| duct.location.to_s }.join(','))
       air_loop.additionalProperties.setFeature(Constants.SizingInfoDuctLeakageFracs, ducts.map { |duct| duct.leakage_frac.to_f }.join(','))
       air_loop.additionalProperties.setFeature(Constants.SizingInfoDuctLeakageCFM25s, ducts.map { |duct| duct.leakage_cfm25.to_f }.join(','))
       air_loop.additionalProperties.setFeature(Constants.SizingInfoDuctAreas, ducts.map { |duct| duct.area.to_f }.join(','))
@@ -1058,7 +1058,7 @@ class Airflow
 
     space = @spaces[HPXML::LocationGarage]
     area = UnitConversions.convert(space.floorArea, 'm^2', 'ft^2')
-    volume = Geometry.get_zone_volume(space.thermalZone.get)
+    volume = UnitConversions.convert(space.volume, 'm^3', 'ft^3')
     hor_lk_frac = 0.4
     neutral_level = 0.5
     sla = get_infiltration_SLA_from_ACH50(ach50, 0.65, area, volume)
@@ -1771,7 +1771,7 @@ class Duct
     @area = area
     @rvalue = rvalue
   end
-  attr_accessor(:side, :loc_space, :loc_schedule, :leakage_frac, :leakage_cfm25, :area, :rvalue, :zone, :location_handle)
+  attr_accessor(:side, :loc_space, :loc_schedule, :leakage_frac, :leakage_cfm25, :area, :rvalue, :zone, :location)
 end
 
 class WindSpeed

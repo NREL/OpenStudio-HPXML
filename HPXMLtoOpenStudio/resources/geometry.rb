@@ -1,23 +1,6 @@
 # frozen_string_literal: true
 
 class Geometry
-  def self.get_zone_volume(zone)
-    if zone.isVolumeAutocalculated || (not zone.volume.is_initialized)
-      # Calculate volume from spaces
-      volume = 0
-      zone.spaces.each do |space|
-        volume += UnitConversions.convert(space.volume, 'm^3', 'ft^3')
-      end
-    else
-      volume = UnitConversions.convert(zone.volume.get, 'm^3', 'ft^3')
-    end
-    if volume <= 0
-      fail 'Could not find any volume.'
-    end
-
-    return volume
-  end
-
   # Calculates space heights as the max z coordinate minus the min z coordinate
   def self.get_height_of_spaces(spaces)
     minzs = []
@@ -37,26 +20,6 @@ class Geometry
       maxzs << zvalues.max + UnitConversions.convert(space.zOrigin, 'm', 'ft')
     end
     return maxzs.max
-  end
-
-  # Calculates the surface height as the max z coordinate minus the min z coordinate
-  def self.surface_height(surface)
-    zvalues = getSurfaceZValues([surface])
-    minz = zvalues.min
-    maxz = zvalues.max
-    return maxz - minz
-  end
-
-  def self.get_thermal_zones_from_spaces(spaces)
-    thermal_zones = []
-    spaces.each do |space|
-      next unless space.thermalZone.is_initialized
-
-      unless thermal_zones.include? space.thermalZone.get
-        thermal_zones << space.thermalZone.get
-      end
-    end
-    return thermal_zones
   end
 
   def self.space_is_conditioned(space)
@@ -97,28 +60,6 @@ class Geometry
       end
     end
     return
-  end
-
-  # Return an array of x values for surfaces passed in. The values will be relative to the parent origin. This was intended for spaces.
-  def self.getSurfaceXValues(surfaceArray)
-    xValueArray = []
-    surfaceArray.each do |surface|
-      surface.vertices.each do |vertex|
-        xValueArray << UnitConversions.convert(vertex.x, 'm', 'ft')
-      end
-    end
-    return xValueArray
-  end
-
-  # Return an array of y values for surfaces passed in. The values will be relative to the parent origin. This was intended for spaces.
-  def self.getSurfaceYValues(surfaceArray)
-    yValueArray = []
-    surfaceArray.each do |surface|
-      surface.vertices.each do |vertex|
-        yValueArray << UnitConversions.convert(vertex.y, 'm', 'ft')
-      end
-    end
-    return yValueArray
   end
 
   # Return an array of z values for surfaces passed in. The values will be relative to the parent origin. This was intended for spaces.
@@ -180,23 +121,6 @@ class Geometry
     return UnitConversions.convert(tilts.max, 'rad', 'deg')
   end
 
-  # Checks if the surface is between conditioned and unconditioned space
-  def self.is_interzonal_surface(surface)
-    if (surface.outsideBoundaryCondition.downcase != 'surface') || (not surface.space.is_initialized) || (not surface.adjacentSurface.is_initialized)
-      return false
-    end
-
-    adjacent_surface = surface.adjacentSurface.get
-    if not adjacent_surface.space.is_initialized
-      return false
-    end
-    if space_is_conditioned(surface.space.get) == space_is_conditioned(adjacent_surface.space.get)
-      return false
-    end
-
-    return true
-  end
-
   # TODO: Remove these methods
   def self.is_living(space_or_zone)
     return space_or_zone_is_of_type(space_or_zone, HPXML::LocationLivingSpace)
@@ -249,177 +173,6 @@ class Geometry
     zone.spaces.each do |space|
       return space_is_of_type(space, space_type)
     end
-  end
-
-  def self.get_facade_for_surface(surface)
-    tol = 0.001
-    n = surface.outwardNormal
-    facade = nil
-    if n.z.abs < tol
-      if (n.x.abs < tol) && ((n.y + 1).abs < tol)
-        facade = Constants.FacadeFront
-      elsif ((n.x - 1).abs < tol) && (n.y.abs < tol)
-        facade = Constants.FacadeRight
-      elsif (n.x.abs < tol) && ((n.y - 1).abs < tol)
-        facade = Constants.FacadeBack
-      elsif ((n.x + 1).abs < tol) && (n.y.abs < tol)
-        facade = Constants.FacadeLeft
-      end
-    else
-      if (n.x.abs < tol) && (n.y < 0)
-        facade = Constants.FacadeFront
-      elsif (n.x > 0) && (n.y.abs < tol)
-        facade = Constants.FacadeRight
-      elsif (n.x.abs < tol) && (n.y > 0)
-        facade = Constants.FacadeBack
-      elsif (n.x < 0) && (n.y.abs < tol)
-        facade = Constants.FacadeLeft
-      end
-    end
-    return facade
-  end
-
-  def self.get_surface_length(surface)
-    xvalues = getSurfaceXValues([surface])
-    yvalues = getSurfaceYValues([surface])
-    xrange = xvalues.max - xvalues.min
-    yrange = yvalues.max - yvalues.min
-    if xrange > yrange
-      return xrange
-    end
-
-    return yrange
-  end
-
-  def self.get_surface_height(surface)
-    zvalues = getSurfaceZValues([surface])
-    zrange = zvalues.max - zvalues.min
-    return zrange
-  end
-
-  def self.space_has_foundation_walls(space)
-    space.surfaces.each do |surface|
-      next if surface.surfaceType.downcase != 'wall'
-      next if surface.outsideBoundaryCondition.downcase != 'foundation'
-
-      return true
-    end
-    return false
-  end
-
-  def self.get_spaces_above_grade_exterior_walls(space)
-    above_grade_exterior_walls = []
-    space.surfaces.each do |surface|
-      next if surface.surfaceType.downcase != 'wall'
-      next if surface.outsideBoundaryCondition.downcase != 'outdoors'
-
-      above_grade_exterior_walls << surface
-    end
-    return above_grade_exterior_walls
-  end
-
-  def self.get_spaces_above_grade_exterior_floors(space)
-    above_grade_exterior_floors = []
-    space.surfaces.each do |surface|
-      next if surface.surfaceType.downcase != 'floor'
-      next if surface.outsideBoundaryCondition.downcase != 'outdoors'
-
-      above_grade_exterior_floors << surface
-    end
-    return above_grade_exterior_floors
-  end
-
-  def self.get_spaces_above_grade_ground_floors(space)
-    return [] if Geometry.space_has_foundation_walls(space)
-
-    above_grade_ground_floors = []
-    space.surfaces.each do |surface|
-      next if surface.surfaceType.downcase != 'floor'
-      next if surface.outsideBoundaryCondition.downcase != 'foundation'
-
-      above_grade_ground_floors << surface
-    end
-    return above_grade_ground_floors
-  end
-
-  def self.get_spaces_above_grade_exterior_roofs(space)
-    above_grade_exterior_roofs = []
-    space.surfaces.each do |surface|
-      next if surface.surfaceType.downcase != 'roofceiling'
-      next if surface.outsideBoundaryCondition.downcase != 'outdoors'
-
-      above_grade_exterior_roofs << surface
-    end
-    return above_grade_exterior_roofs
-  end
-
-  def self.get_spaces_interzonal_walls(space)
-    interzonal_walls = []
-    space.surfaces.each do |surface|
-      next if surface.surfaceType.downcase != 'wall'
-      next if not is_interzonal_surface(surface)
-
-      interzonal_walls << surface
-    end
-    return interzonal_walls
-  end
-
-  def self.get_sfa_mf_space_floors_and_ceilings(space)
-    mf_floors = []
-    space.surfaces.each do |surface|
-      next if (surface.surfaceType.downcase != 'floor') && (surface.surfaceType.downcase != 'roofceiling')
-      next if surface.outsideBoundaryCondition.downcase != 'othersidecoefficients'
-
-      mf_floors << surface
-    end
-    return mf_floors
-  end
-
-  def self.get_sfa_mf_space_walls(space)
-    mf_walls = []
-    space.surfaces.each do |surface|
-      next if surface.surfaceType.downcase != 'wall'
-      next if surface.outsideBoundaryCondition.downcase != 'othersidecoefficients'
-
-      mf_walls << surface
-    end
-    return mf_walls
-  end
-
-  def self.get_spaces_interzonal_floors_and_ceilings(space)
-    interzonal_floors = []
-    space.surfaces.each do |surface|
-      next if (surface.surfaceType.downcase != 'floor') && (surface.surfaceType.downcase != 'roofceiling')
-      next if not is_interzonal_surface(surface)
-
-      interzonal_floors << surface
-    end
-    return interzonal_floors
-  end
-
-  def self.get_spaces_below_grade_exterior_walls(space)
-    below_grade_exterior_walls = []
-
-    space.surfaces.each do |surface|
-      next if surface.surfaceType.downcase != 'wall'
-      next if surface.outsideBoundaryCondition.downcase != 'foundation'
-
-      below_grade_exterior_walls << surface
-    end
-    return below_grade_exterior_walls
-  end
-
-  def self.get_spaces_below_grade_exterior_floors(space)
-    return [] if not Geometry.space_has_foundation_walls(space)
-
-    below_grade_exterior_floors = []
-    space.surfaces.each do |surface|
-      next if surface.surfaceType.downcase != 'floor'
-      next if surface.outsideBoundaryCondition.downcase != 'foundation'
-
-      below_grade_exterior_floors << surface
-    end
-    return below_grade_exterior_floors
   end
 
   def self.process_occupants(model, num_occ, occ_gain, sens_frac, lat_frac, weekday_sch, weekend_sch, monthly_sch,
