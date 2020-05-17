@@ -3498,6 +3498,7 @@ class OSModel
     program_calling_manager.addProgram(program)
   end
 
+  # FIXME: Move all of these construction methods to constructions.rb
   def self.calc_non_cavity_r(film_r, constr_set)
     # Calculate R-value for all non-cavity layers
     non_cavity_r = film_r
@@ -4071,6 +4072,7 @@ class OSModel
   end
 end
 
+# FIXME: Move all of these construction classes to constructions.rb
 class WoodStudConstructionSet
   def initialize(stud, framing_factor, rigid_r, osb_thick_in, drywall_thick_in, exterior_material)
     @stud = stud
