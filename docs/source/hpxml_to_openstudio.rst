@@ -21,7 +21,7 @@ The following building features/technologies are available for modeling via the 
   
 - HVAC
 
-  - Heating Systems (Electric Resistance, Furnaces, Wall Furnaces, Stoves, Boilers, Portable Heaters)
+  - Heating Systems (Electric Resistance, Furnaces, Wall Furnaces, Stoves, Boilers, Portable Heaters, Fireplaces)
   - Cooling Systems (Central Air Conditioners, Room Air Conditioners, Evaporative Coolers)
   - Heat Pumps (Air Source, Mini Split, Ground Source, Dual-Fuel)
   - Setpoints
@@ -332,6 +332,7 @@ WallFurnace                                      <any>              AFUE
 Boiler              HydronicDistribution or DSE  <any>              AFUE
 Stove                                            <any>              Percent
 PortableHeater                                   <any>              Percent
+Fireplace                                        <any>              Percent
 ==================  ===========================  =================  =======================
 
 If a non-electric heating system is specified, the ``ElectricAuxiliaryEnergy`` element may be provided if available. 
