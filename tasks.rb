@@ -1550,6 +1550,7 @@ def get_values(osw_file, step)
     step.setArgument('solar_thermal_system_type', 'hot water')
     step.setArgument('solar_thermal_collector_tilt', 'latitude-15')
   elsif ['extra-second-heating-system.osw'].include? osw_file
+    step.setArgument('heating_system_fuel', HPXML::FuelTypeElectricity)
     step.setArgument('heating_system_type_2', HPXML::HVACTypePortableHeater)
     step.setArgument('heating_system_fraction_heat_load_served_2', 0.25)
   elsif ['invalid_files/non-electric-heat-pump-water-heater.osw'].include? osw_file
