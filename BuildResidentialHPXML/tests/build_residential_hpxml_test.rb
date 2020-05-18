@@ -100,13 +100,19 @@ class BuildResidentialHPXMLTest < MiniTest::Test
     end
 
     expected_warning_msgs = {
-      'non-electric-heat-pump-water-heater.osw' => 'water_heater_type=heat pump water heater and water_heater_fuel_type=natural gas'
+      'non-electric-heat-pump-water-heater.osw' => 'water_heater_type=heat pump water heater and water_heater_fuel_type=natural gas',
+      'single-family-detached-slab-non-zero-foundation-height.osw' => 'geometry_unit_type=single-family detached and geometry_foundation_type=SlabOnGrade and geometry_foundation_height=8.0',
+      'multifamily-bottom-slab-non-zero-foundation-height.osw' => 'geometry_unit_type=multi-family - uncategorized and geometry_level=Bottom and geometry_foundation_type=SlabOnGrade and geometry_foundation_height=8.0',
+      'slab-non-zero-foundation-height-above-grade.osw' => 'geometry_foundation_type=SlabOnGrade and geometry_foundation_height_above_grade=1.0'
     }
 
     expected_error_msgs = {
       'multiple-heating-and-cooling-systems.osw' => 'heating_system_type=Furnace and cooling_system_type=central air conditioner and heat_pump_type=air-to-air',
       'non-integer-geometry-num-bathrooms.osw' => 'geometry_num_bathrooms=1.5',
       'non-integer-ceiling-fan-quantity.osw' => 'ceiling_fan_quantity=0.5',
+      'single-family-detached-finished-basement-zero-foundation-height.osw' => 'geometry_unit_type=single-family detached and geometry_foundation_type=ConditionedBasement and geometry_foundation_height=0.0',
+      'single-family-attached-ambient.osw' => 'geometry_unit_type=single-family attached and geometry_foundation_type=Ambient',
+      'multifamily-bottom-crawlspace-zero-foundation-height.osw' => 'geometry_unit_type=multi-family - uncategorized and geometry_level=Bottom and geometry_foundation_type=UnventedCrawlspace and geometry_foundation_height=0.0',
       'none-second-heating-system-serves-heat.osw' => 'heating_system_type_2=none and heating_system_fraction_heat_load_served_2=0.25'
     }
 

@@ -3,8 +3,13 @@
   <schema_version>3.0</schema_version>
   <name>build_residential_hpxml</name>
   <uid>a13a8983-2b01-4930-8af2-42030b6e4233</uid>
+<<<<<<< HEAD
   <version_id>d112bd49-58c6-46fa-9584-3990f710d632</version_id>
   <version_modified>20200511T154111Z</version_modified>
+=======
+  <version_id>59c9e929-9d1d-4115-a81b-91d7bc331809</version_id>
+  <version_modified>20200515T234323Z</version_modified>
+>>>>>>> build-res-hpxml-v3
   <xml_checksum>2C38F48B</xml_checksum>
   <class_name>BuildResidentialHPXML</class_name>
   <display_name>HPXML Builder</display_name>
@@ -96,6 +101,29 @@
       <default_value>USA_CO_Denver.Intl.AP.725650_TMY3.epw</default_value>
     </argument>
     <argument>
+      <name>site_type</name>
+      <display_name>Site: Type</display_name>
+      <description>The type of site.</description>
+      <type>Choice</type>
+      <required>true</required>
+      <model_dependent>false</model_dependent>
+      <default_value>suburban</default_value>
+      <choices>
+        <choice>
+          <value>suburban</value>
+          <display_name>suburban</display_name>
+        </choice>
+        <choice>
+          <value>urban</value>
+          <display_name>urban</display_name>
+        </choice>
+        <choice>
+          <value>rural</value>
+          <display_name>rural</display_name>
+        </choice>
+      </choices>
+    </argument>
+    <argument>
       <name>geometry_unit_type</name>
       <display_name>Geometry: Unit Type</display_name>
       <description>The type of unit.</description>
@@ -113,19 +141,15 @@
           <display_name>single-family attached</display_name>
         </choice>
         <choice>
-          <value>2-4 unit building</value>
-          <display_name>2-4 unit building</display_name>
-        </choice>
-        <choice>
-          <value>5+ unit building</value>
-          <display_name>5+ unit building</display_name>
+          <value>multi-family - uncategorized</value>
+          <display_name>multi-family - uncategorized</display_name>
         </choice>
       </choices>
     </argument>
     <argument>
       <name>geometry_num_units</name>
       <display_name>Geometry: Number of Units</display_name>
-      <description>The number of units in the building. This is only required for single-family attached, 2-4 unit building, and 5+ unit building buildings.</description>
+      <description>The number of units in the building. This is required for single-family attached and multi-family - uncategorized buildings.</description>
       <type>Integer</type>
       <units>#</units>
       <required>false</required>
@@ -144,7 +168,7 @@
     <argument>
       <name>geometry_num_floors_above_grade</name>
       <display_name>Geometry: Number of Floors</display_name>
-      <description>The number of floors above grade (in the unit if single-family, and in the building if multifamily).</description>
+      <description>The number of floors above grade (in the unit if single-family attached, and in the building if multi-family - uncategorized).</description>
       <type>Integer</type>
       <units>#</units>
       <required>true</required>
@@ -184,7 +208,7 @@
     <argument>
       <name>geometry_level</name>
       <display_name>Geometry: Level</display_name>
-      <description>The level of the unit.</description>
+      <description>The level of the multi-family - uncategorized unit.</description>
       <type>Choice</type>
       <required>true</required>
       <model_dependent>false</model_dependent>
@@ -207,7 +231,7 @@
     <argument>
       <name>geometry_horizontal_location</name>
       <display_name>Geometry: Horizontal Location</display_name>
-      <description>The horizontal location of the unit when viewing the front of the building.</description>
+      <description>The horizontal location of the single-family attached or multi-family - uncategorized unit when viewing the front of the building.</description>
       <type>Choice</type>
       <required>true</required>
       <model_dependent>false</model_dependent>
@@ -405,7 +429,7 @@
       <units>ft</units>
       <required>true</required>
       <model_dependent>false</model_dependent>
-      <default_value>3</default_value>
+      <default_value>0</default_value>
     </argument>
     <argument>
       <name>geometry_foundation_height_above_grade</name>
@@ -415,7 +439,7 @@
       <units>ft</units>
       <required>true</required>
       <model_dependent>false</model_dependent>
-      <default_value>1</default_value>
+      <default_value>0</default_value>
     </argument>
     <argument>
       <name>geometry_roof_type</name>
@@ -3902,9 +3926,9 @@
       </choices>
     </argument>
     <argument>
-      <name>cooking_range_location</name>
-      <display_name>Cooking Range: Location</display_name>
-      <description>The space type for the cooking range location.</description>
+      <name>cooking_range_oven_location</name>
+      <display_name>Cooking Range/Oven: Location</display_name>
+      <description>The space type for the cooking range/oven location.</description>
       <type>Choice</type>
       <required>true</required>
       <model_dependent>false</model_dependent>
@@ -4172,6 +4196,7 @@
       <checksum>B7ECA492</checksum>
     </file>
     <file>
+<<<<<<< HEAD
       <filename>geometry.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
@@ -4200,395 +4225,658 @@
       <filetype>osw</filetype>
       <usage_type>test</usage_type>
       <checksum>D2AA8F54</checksum>
+=======
+      <filename>base-misc-usage-multiplier.osw</filename>
+      <filetype>osw</filetype>
+      <usage_type>test</usage_type>
+      <checksum>9D142AF3</checksum>
+>>>>>>> build-res-hpxml-v3
     </file>
     <file>
       <filename>base-hvac-dual-fuel-air-to-air-heat-pump-1-speed.osw</filename>
       <filetype>osw</filetype>
       <usage_type>test</usage_type>
+<<<<<<< HEAD
       <checksum>E2CDB2D8</checksum>
+=======
+      <checksum>0129C225</checksum>
+>>>>>>> build-res-hpxml-v3
     </file>
     <file>
       <filename>base-hvac-dual-fuel-air-to-air-heat-pump-2-speed.osw</filename>
       <filetype>osw</filetype>
       <usage_type>test</usage_type>
+<<<<<<< HEAD
       <checksum>38019DE2</checksum>
+=======
+      <checksum>E8368CEC</checksum>
+>>>>>>> build-res-hpxml-v3
     </file>
     <file>
       <filename>base-hvac-dual-fuel-mini-split-heat-pump-ducted.osw</filename>
       <filetype>osw</filetype>
       <usage_type>test</usage_type>
+<<<<<<< HEAD
       <checksum>15724C3A</checksum>
+=======
+      <checksum>7522B135</checksum>
+>>>>>>> build-res-hpxml-v3
     </file>
     <file>
       <filename>base-hvac-dual-fuel-air-to-air-heat-pump-var-speed.osw</filename>
       <filetype>osw</filetype>
       <usage_type>test</usage_type>
+<<<<<<< HEAD
       <checksum>D171E9E9</checksum>
+=======
+      <checksum>10AE717E</checksum>
+>>>>>>> build-res-hpxml-v3
     </file>
     <file>
       <filename>base-hvac-dual-fuel-air-to-air-heat-pump-1-speed-electric.osw</filename>
       <filetype>osw</filetype>
       <usage_type>test</usage_type>
+<<<<<<< HEAD
       <checksum>2B3BADAC</checksum>
+=======
+      <checksum>56A55547</checksum>
+>>>>>>> build-res-hpxml-v3
     </file>
     <file>
       <filename>base-mechvent-cfis.osw</filename>
       <filetype>osw</filetype>
       <usage_type>test</usage_type>
+<<<<<<< HEAD
       <checksum>16431A31</checksum>
+=======
+      <checksum>AF01AAF3</checksum>
+>>>>>>> build-res-hpxml-v3
     </file>
     <file>
       <filename>base.osw</filename>
       <filetype>osw</filetype>
       <usage_type>test</usage_type>
+<<<<<<< HEAD
       <checksum>14B5443B</checksum>
+=======
+      <checksum>0F777EBD</checksum>
+>>>>>>> build-res-hpxml-v3
     </file>
     <file>
       <filename>base-appliances-none.osw</filename>
       <filetype>osw</filetype>
       <usage_type>test</usage_type>
+<<<<<<< HEAD
       <checksum>1F7DA767</checksum>
+=======
+      <checksum>7CEB45ED</checksum>
+>>>>>>> build-res-hpxml-v3
     </file>
     <file>
       <filename>base-dhw-indirect-outside.osw</filename>
       <filetype>osw</filetype>
       <usage_type>test</usage_type>
+<<<<<<< HEAD
       <checksum>6DC15F29</checksum>
+=======
+      <checksum>73265022</checksum>
+>>>>>>> build-res-hpxml-v3
     </file>
     <file>
       <filename>base-dhw-jacket-electric.osw</filename>
       <filetype>osw</filetype>
       <usage_type>test</usage_type>
+<<<<<<< HEAD
       <checksum>3B3B6BD5</checksum>
+=======
+      <checksum>F4AD2BC2</checksum>
+>>>>>>> build-res-hpxml-v3
     </file>
     <file>
       <filename>base-dhw-low-flow-fixtures.osw</filename>
       <filetype>osw</filetype>
       <usage_type>test</usage_type>
+<<<<<<< HEAD
       <checksum>D1DA9D29</checksum>
+=======
+      <checksum>B8C2DBB6</checksum>
+>>>>>>> build-res-hpxml-v3
     </file>
     <file>
       <filename>base-dhw-none.osw</filename>
       <filetype>osw</filetype>
       <usage_type>test</usage_type>
+<<<<<<< HEAD
       <checksum>5EA0CEE0</checksum>
+=======
+      <checksum>D2010D56</checksum>
+>>>>>>> build-res-hpxml-v3
     </file>
     <file>
       <filename>base-dhw-recirc-demand.osw</filename>
       <filetype>osw</filetype>
       <usage_type>test</usage_type>
+<<<<<<< HEAD
       <checksum>4AFAA015</checksum>
+=======
+      <checksum>7A99787D</checksum>
+>>>>>>> build-res-hpxml-v3
     </file>
     <file>
       <filename>base-dhw-recirc-manual.osw</filename>
       <filetype>osw</filetype>
       <usage_type>test</usage_type>
+<<<<<<< HEAD
       <checksum>9B5A798D</checksum>
+=======
+      <checksum>B8CF90D0</checksum>
+>>>>>>> build-res-hpxml-v3
     </file>
     <file>
       <filename>base-dhw-recirc-nocontrol.osw</filename>
       <filetype>osw</filetype>
       <usage_type>test</usage_type>
+<<<<<<< HEAD
       <checksum>A7C50A70</checksum>
+=======
+      <checksum>E457BE7E</checksum>
+>>>>>>> build-res-hpxml-v3
     </file>
     <file>
       <filename>base-dhw-recirc-temperature.osw</filename>
       <filetype>osw</filetype>
       <usage_type>test</usage_type>
+<<<<<<< HEAD
       <checksum>A911C600</checksum>
+=======
+      <checksum>96E1AAF3</checksum>
+>>>>>>> build-res-hpxml-v3
     </file>
     <file>
       <filename>base-dhw-recirc-timer.osw</filename>
       <filetype>osw</filetype>
       <usage_type>test</usage_type>
+<<<<<<< HEAD
       <checksum>01992CF4</checksum>
+=======
+      <checksum>418B97AA</checksum>
+>>>>>>> build-res-hpxml-v3
     </file>
     <file>
       <filename>base-dhw-solar-fraction.osw</filename>
       <filetype>osw</filetype>
       <usage_type>test</usage_type>
+<<<<<<< HEAD
       <checksum>F854C5B9</checksum>
+=======
+      <checksum>EFD1502F</checksum>
+>>>>>>> build-res-hpxml-v3
     </file>
     <file>
       <filename>base-dhw-uef.osw</filename>
       <filetype>osw</filetype>
       <usage_type>test</usage_type>
+<<<<<<< HEAD
       <checksum>27F0B962</checksum>
+=======
+      <checksum>DF207623</checksum>
+>>>>>>> build-res-hpxml-v3
     </file>
     <file>
       <filename>base-enclosure-infil-cfm50.osw</filename>
       <filetype>osw</filetype>
       <usage_type>test</usage_type>
+<<<<<<< HEAD
       <checksum>E5F139BA</checksum>
+=======
+      <checksum>C2986FB1</checksum>
+>>>>>>> build-res-hpxml-v3
     </file>
     <file>
       <filename>base-foundation-conditioned-basement-slab-insulation.osw</filename>
       <filetype>osw</filetype>
       <usage_type>test</usage_type>
+<<<<<<< HEAD
       <checksum>DB28A3B3</checksum>
+=======
+      <checksum>CE694D30</checksum>
+>>>>>>> build-res-hpxml-v3
     </file>
     <file>
       <filename>base-hvac-boiler-gas-central-ac-1-speed.osw</filename>
       <filetype>osw</filetype>
       <usage_type>test</usage_type>
+<<<<<<< HEAD
       <checksum>51CD93D4</checksum>
+=======
+      <checksum>E0640C50</checksum>
+>>>>>>> build-res-hpxml-v3
     </file>
     <file>
       <filename>base-hvac-boiler-gas-only.osw</filename>
       <filetype>osw</filetype>
       <usage_type>test</usage_type>
+<<<<<<< HEAD
       <checksum>6160EA26</checksum>
+=======
+      <checksum>425EC0F9</checksum>
+>>>>>>> build-res-hpxml-v3
     </file>
     <file>
       <filename>base-hvac-boiler-oil-only.osw</filename>
       <filetype>osw</filetype>
       <usage_type>test</usage_type>
+<<<<<<< HEAD
       <checksum>C08390D2</checksum>
+=======
+      <checksum>F03D4B76</checksum>
+>>>>>>> build-res-hpxml-v3
     </file>
     <file>
       <filename>base-hvac-boiler-propane-only.osw</filename>
       <filetype>osw</filetype>
       <usage_type>test</usage_type>
+<<<<<<< HEAD
       <checksum>48753847</checksum>
+=======
+      <checksum>6664E664</checksum>
+>>>>>>> build-res-hpxml-v3
     </file>
     <file>
       <filename>base-hvac-boiler-wood-only.osw</filename>
       <filetype>osw</filetype>
       <usage_type>test</usage_type>
+<<<<<<< HEAD
       <checksum>75087966</checksum>
+=======
+      <checksum>72BDF0F7</checksum>
+>>>>>>> build-res-hpxml-v3
     </file>
     <file>
       <filename>base-hvac-central-ac-only-1-speed.osw</filename>
       <filetype>osw</filetype>
       <usage_type>test</usage_type>
+<<<<<<< HEAD
       <checksum>F95208DE</checksum>
+=======
+      <checksum>17C989F8</checksum>
+>>>>>>> build-res-hpxml-v3
     </file>
     <file>
       <filename>base-hvac-ducts-leakage-percent.osw</filename>
       <filetype>osw</filetype>
       <usage_type>test</usage_type>
+<<<<<<< HEAD
       <checksum>E1DAB689</checksum>
+=======
+      <checksum>72BA5835</checksum>
+>>>>>>> build-res-hpxml-v3
     </file>
     <file>
       <filename>base-hvac-elec-resistance-only.osw</filename>
       <filetype>osw</filetype>
       <usage_type>test</usage_type>
+<<<<<<< HEAD
       <checksum>3C4B6F0A</checksum>
+=======
+      <checksum>08D78C02</checksum>
+>>>>>>> build-res-hpxml-v3
     </file>
     <file>
       <filename>base-hvac-furnace-elec-only.osw</filename>
       <filetype>osw</filetype>
       <usage_type>test</usage_type>
+<<<<<<< HEAD
       <checksum>443861EA</checksum>
+=======
+      <checksum>23F89CD2</checksum>
+>>>>>>> build-res-hpxml-v3
     </file>
     <file>
       <filename>base-hvac-furnace-gas-only.osw</filename>
       <filetype>osw</filetype>
       <usage_type>test</usage_type>
+<<<<<<< HEAD
       <checksum>4C12A816</checksum>
+=======
+      <checksum>A226280E</checksum>
+>>>>>>> build-res-hpxml-v3
     </file>
     <file>
       <filename>base-hvac-furnace-oil-only.osw</filename>
       <filetype>osw</filetype>
       <usage_type>test</usage_type>
+<<<<<<< HEAD
       <checksum>78796F04</checksum>
+=======
+      <checksum>6DCC4E9D</checksum>
+>>>>>>> build-res-hpxml-v3
     </file>
     <file>
       <filename>base-hvac-furnace-propane-only.osw</filename>
       <filetype>osw</filetype>
       <usage_type>test</usage_type>
+<<<<<<< HEAD
       <checksum>295F08E6</checksum>
+=======
+      <checksum>DB501BAF</checksum>
+>>>>>>> build-res-hpxml-v3
     </file>
     <file>
       <filename>base-hvac-furnace-wood-only.osw</filename>
       <filetype>osw</filetype>
       <usage_type>test</usage_type>
+<<<<<<< HEAD
       <checksum>92677A9C</checksum>
+=======
+      <checksum>679C43A1</checksum>
+>>>>>>> build-res-hpxml-v3
     </file>
     <file>
       <filename>base-hvac-none.osw</filename>
       <filetype>osw</filetype>
       <usage_type>test</usage_type>
+<<<<<<< HEAD
       <checksum>3A253EE4</checksum>
+=======
+      <checksum>624AA201</checksum>
+>>>>>>> build-res-hpxml-v3
     </file>
     <file>
       <filename>base-hvac-programmable-thermostat.osw</filename>
       <filetype>osw</filetype>
       <usage_type>test</usage_type>
+<<<<<<< HEAD
       <checksum>3EA6463D</checksum>
+=======
+      <checksum>98042F1B</checksum>
+>>>>>>> build-res-hpxml-v3
     </file>
     <file>
       <filename>base-hvac-setpoints.osw</filename>
       <filetype>osw</filetype>
       <usage_type>test</usage_type>
+<<<<<<< HEAD
       <checksum>05EA422A</checksum>
+=======
+      <checksum>3FF9BCAD</checksum>
+>>>>>>> build-res-hpxml-v3
     </file>
     <file>
       <filename>base-location-baltimore-md.osw</filename>
       <filetype>osw</filetype>
       <usage_type>test</usage_type>
+<<<<<<< HEAD
       <checksum>AD004036</checksum>
+=======
+      <checksum>C8969D06</checksum>
+>>>>>>> build-res-hpxml-v3
     </file>
     <file>
       <filename>base-location-dallas-tx.osw</filename>
       <filetype>osw</filetype>
       <usage_type>test</usage_type>
+<<<<<<< HEAD
       <checksum>F621890A</checksum>
+=======
+      <checksum>D8C0D32E</checksum>
+>>>>>>> build-res-hpxml-v3
     </file>
     <file>
       <filename>base-location-duluth-mn.osw</filename>
       <filetype>osw</filetype>
       <usage_type>test</usage_type>
+<<<<<<< HEAD
       <checksum>11FCC958</checksum>
+=======
+      <checksum>AC438D3E</checksum>
+>>>>>>> build-res-hpxml-v3
     </file>
     <file>
       <filename>base-location-miami-fl.osw</filename>
       <filetype>osw</filetype>
       <usage_type>test</usage_type>
+<<<<<<< HEAD
       <checksum>110D3C06</checksum>
+=======
+      <checksum>0886A597</checksum>
+>>>>>>> build-res-hpxml-v3
     </file>
     <file>
       <filename>base-mechvent-balanced.osw</filename>
       <filetype>osw</filetype>
       <usage_type>test</usage_type>
+<<<<<<< HEAD
       <checksum>F137A789</checksum>
+=======
+      <checksum>0C65D5EC</checksum>
+>>>>>>> build-res-hpxml-v3
     </file>
     <file>
       <filename>base-mechvent-erv.osw</filename>
       <filetype>osw</filetype>
       <usage_type>test</usage_type>
+<<<<<<< HEAD
       <checksum>1FA1CFC8</checksum>
+=======
+      <checksum>F89EF5FF</checksum>
+>>>>>>> build-res-hpxml-v3
     </file>
     <file>
       <filename>base-mechvent-exhaust.osw</filename>
       <filetype>osw</filetype>
       <usage_type>test</usage_type>
+<<<<<<< HEAD
       <checksum>8E1E7BF1</checksum>
+=======
+      <checksum>AD57A9DC</checksum>
+>>>>>>> build-res-hpxml-v3
     </file>
     <file>
       <filename>base-mechvent-hrv.osw</filename>
       <filetype>osw</filetype>
       <usage_type>test</usage_type>
+<<<<<<< HEAD
       <checksum>89303CF3</checksum>
+=======
+      <checksum>E04850DC</checksum>
+>>>>>>> build-res-hpxml-v3
     </file>
     <file>
       <filename>base-mechvent-supply.osw</filename>
       <filetype>osw</filetype>
       <usage_type>test</usage_type>
+<<<<<<< HEAD
       <checksum>9511A7A7</checksum>
+=======
+      <checksum>C8EDD6AB</checksum>
+>>>>>>> build-res-hpxml-v3
     </file>
     <file>
       <filename>base-misc-whole-house-fan.osw</filename>
       <filetype>osw</filetype>
       <usage_type>test</usage_type>
+<<<<<<< HEAD
       <checksum>F85B648C</checksum>
+=======
+      <checksum>6F44862C</checksum>
+>>>>>>> build-res-hpxml-v3
     </file>
     <file>
       <filename>base-hvac-air-to-air-heat-pump-1-speed.osw</filename>
       <filetype>osw</filetype>
       <usage_type>test</usage_type>
+<<<<<<< HEAD
       <checksum>823C4F99</checksum>
+=======
+      <checksum>5380DF78</checksum>
+>>>>>>> build-res-hpxml-v3
     </file>
     <file>
       <filename>base-mechvent-erv-atre-asre.osw</filename>
       <filetype>osw</filetype>
       <usage_type>test</usage_type>
+<<<<<<< HEAD
       <checksum>BEBF4B4D</checksum>
+=======
+      <checksum>0CFEDD80</checksum>
+>>>>>>> build-res-hpxml-v3
     </file>
     <file>
       <filename>base-enclosure-windows-none.osw</filename>
       <filetype>osw</filetype>
       <usage_type>test</usage_type>
+<<<<<<< HEAD
       <checksum>DF7D94D5</checksum>
+=======
+      <checksum>8ED55CDA</checksum>
+>>>>>>> build-res-hpxml-v3
     </file>
     <file>
       <filename>base-dhw-indirect-standbyloss.osw</filename>
       <filetype>osw</filetype>
       <usage_type>test</usage_type>
+<<<<<<< HEAD
       <checksum>C6FFFBAE</checksum>
+=======
+      <checksum>8C23A55F</checksum>
+>>>>>>> build-res-hpxml-v3
     </file>
     <file>
       <filename>base-dhw-indirect.osw</filename>
       <filetype>osw</filetype>
       <usage_type>test</usage_type>
+<<<<<<< HEAD
       <checksum>84107F63</checksum>
+=======
+      <checksum>CDDBDC7F</checksum>
+>>>>>>> build-res-hpxml-v3
     </file>
     <file>
       <filename>base-dhw-jacket-indirect.osw</filename>
       <filetype>osw</filetype>
       <usage_type>test</usage_type>
+<<<<<<< HEAD
       <checksum>D5C4B2CA</checksum>
+=======
+      <checksum>65726C12</checksum>
+>>>>>>> build-res-hpxml-v3
     </file>
     <file>
       <filename>base-hvac-undersized.osw</filename>
       <filetype>osw</filetype>
       <usage_type>test</usage_type>
+<<<<<<< HEAD
       <checksum>B0629619</checksum>
+=======
+      <checksum>D3E7C670</checksum>
+>>>>>>> build-res-hpxml-v3
     </file>
     <file>
       <filename>base-atticroof-unvented-insulated-roof.osw</filename>
       <filetype>osw</filetype>
       <usage_type>test</usage_type>
+<<<<<<< HEAD
       <checksum>4F57B8F2</checksum>
+=======
+      <checksum>DD6D9B2B</checksum>
+>>>>>>> build-res-hpxml-v3
     </file>
     <file>
       <filename>base-pv.osw</filename>
       <filetype>osw</filetype>
       <usage_type>test</usage_type>
+<<<<<<< HEAD
       <checksum>252A41E3</checksum>
+=======
+      <checksum>23DF5B13</checksum>
+>>>>>>> build-res-hpxml-v3
     </file>
     <file>
       <filename>base-mechvent-hrv-asre.osw</filename>
       <filetype>osw</filetype>
       <usage_type>test</usage_type>
+<<<<<<< HEAD
       <checksum>AC5F9E74</checksum>
+=======
+      <checksum>07A833D0</checksum>
+>>>>>>> build-res-hpxml-v3
     </file>
     <file>
       <filename>base-enclosure-overhangs.osw</filename>
       <filetype>osw</filetype>
       <usage_type>test</usage_type>
+<<<<<<< HEAD
       <checksum>A1C2B679</checksum>
+=======
+      <checksum>92450D6D</checksum>
+>>>>>>> build-res-hpxml-v3
     </file>
     <file>
       <filename>base-atticroof-vented.osw</filename>
       <filetype>osw</filetype>
       <usage_type>test</usage_type>
+<<<<<<< HEAD
       <checksum>D80E1C09</checksum>
+=======
+      <checksum>CCC8ADB8</checksum>
+>>>>>>> build-res-hpxml-v3
     </file>
     <file>
       <filename>base-dhw-dwhr.osw</filename>
       <filetype>osw</filetype>
       <usage_type>test</usage_type>
+<<<<<<< HEAD
       <checksum>97BD9F36</checksum>
+=======
+      <checksum>9D55E7CB</checksum>
+>>>>>>> build-res-hpxml-v3
     </file>
     <file>
       <filename>base-misc-timestep-10-mins.osw</filename>
       <filetype>osw</filetype>
       <usage_type>test</usage_type>
+<<<<<<< HEAD
       <checksum>3D089D42</checksum>
+=======
+      <checksum>3843AAF1</checksum>
+>>>>>>> build-res-hpxml-v3
     </file>
     <file>
       <filename>base-enclosure-2stories.osw</filename>
       <filetype>osw</filetype>
       <usage_type>test</usage_type>
+<<<<<<< HEAD
       <checksum>B1A83965</checksum>
+=======
+      <checksum>F4D8DE4F</checksum>
+>>>>>>> build-res-hpxml-v3
     </file>
     <file>
       <filename>base-enclosure-beds-4.osw</filename>
       <filetype>osw</filetype>
       <usage_type>test</usage_type>
+<<<<<<< HEAD
       <checksum>3DB41D48</checksum>
+=======
+      <checksum>94698CAC</checksum>
+>>>>>>> build-res-hpxml-v3
     </file>
     <file>
       <filename>base-enclosure-beds-5.osw</filename>
       <filetype>osw</filetype>
       <usage_type>test</usage_type>
+<<<<<<< HEAD
       <checksum>5C7FFD6F</checksum>
+=======
+      <checksum>52D67319</checksum>
+>>>>>>> build-res-hpxml-v3
     </file>
     <file>
       <filename>base-foundation-ambient.osw</filename>
       <filetype>osw</filetype>
       <usage_type>test</usage_type>
+<<<<<<< HEAD
       <checksum>46AD8A15</checksum>
     </file>
     <file>
@@ -4608,119 +4896,195 @@
       <filetype>osw</filetype>
       <usage_type>test</usage_type>
       <checksum>DD7D779D</checksum>
+=======
+      <checksum>E3360169</checksum>
+>>>>>>> build-res-hpxml-v3
     </file>
     <file>
       <filename>base-foundation-vented-crawlspace.osw</filename>
       <filetype>osw</filetype>
       <usage_type>test</usage_type>
+<<<<<<< HEAD
       <checksum>49762894</checksum>
+=======
+      <checksum>A0E7CDC1</checksum>
+>>>>>>> build-res-hpxml-v3
     </file>
     <file>
       <filename>base-foundation-unvented-crawlspace.osw</filename>
       <filetype>osw</filetype>
       <usage_type>test</usage_type>
+<<<<<<< HEAD
       <checksum>7713C26B</checksum>
+=======
+      <checksum>33EBECF0</checksum>
+>>>>>>> build-res-hpxml-v3
     </file>
     <file>
       <filename>base-hvac-central-ac-plus-air-to-air-heat-pump-heating.osw</filename>
       <filetype>osw</filetype>
       <usage_type>test</usage_type>
+<<<<<<< HEAD
       <checksum>223BCB8F</checksum>
+=======
+      <checksum>AED4B910</checksum>
+>>>>>>> build-res-hpxml-v3
     </file>
     <file>
       <filename>base-hvac-air-to-air-heat-pump-2-speed.osw</filename>
       <filetype>osw</filetype>
       <usage_type>test</usage_type>
+<<<<<<< HEAD
       <checksum>BD7BA1F1</checksum>
+=======
+      <checksum>B29587D2</checksum>
+>>>>>>> build-res-hpxml-v3
     </file>
     <file>
       <filename>base-hvac-central-ac-only-2-speed.osw</filename>
       <filetype>osw</filetype>
       <usage_type>test</usage_type>
+<<<<<<< HEAD
       <checksum>F4501D02</checksum>
+=======
+      <checksum>4104FA87</checksum>
+>>>>>>> build-res-hpxml-v3
     </file>
     <file>
       <filename>base-hvac-air-to-air-heat-pump-var-speed.osw</filename>
       <filetype>osw</filetype>
       <usage_type>test</usage_type>
+<<<<<<< HEAD
       <checksum>AADF192E</checksum>
+=======
+      <checksum>7C1D4736</checksum>
+>>>>>>> build-res-hpxml-v3
     </file>
     <file>
       <filename>base-hvac-furnace-gas-central-ac-2-speed.osw</filename>
       <filetype>osw</filetype>
       <usage_type>test</usage_type>
+<<<<<<< HEAD
       <checksum>53AC61CC</checksum>
+=======
+      <checksum>0881F5E0</checksum>
+>>>>>>> build-res-hpxml-v3
     </file>
     <file>
       <filename>base-hvac-ground-to-air-heat-pump.osw</filename>
       <filetype>osw</filetype>
       <usage_type>test</usage_type>
+<<<<<<< HEAD
       <checksum>2B2A7C73</checksum>
+=======
+      <checksum>A5831D03</checksum>
+>>>>>>> build-res-hpxml-v3
     </file>
     <file>
       <filename>base-hvac-mini-split-heat-pump-ducted.osw</filename>
       <filetype>osw</filetype>
       <usage_type>test</usage_type>
+<<<<<<< HEAD
       <checksum>BEDA4626</checksum>
+=======
+      <checksum>966F6FDB</checksum>
+>>>>>>> build-res-hpxml-v3
     </file>
     <file>
       <filename>base-hvac-mini-split-heat-pump-ductless-no-backup.osw</filename>
       <filetype>osw</filetype>
       <usage_type>test</usage_type>
+<<<<<<< HEAD
       <checksum>3B32A12D</checksum>
+=======
+      <checksum>5902018E</checksum>
+>>>>>>> build-res-hpxml-v3
     </file>
     <file>
       <filename>base-hvac-mini-split-heat-pump-ductless.osw</filename>
       <filetype>osw</filetype>
       <usage_type>test</usage_type>
+<<<<<<< HEAD
       <checksum>C7EBCDFD</checksum>
+=======
+      <checksum>E1ED5DB8</checksum>
+>>>>>>> build-res-hpxml-v3
     </file>
     <file>
       <filename>base-hvac-central-ac-only-var-speed.osw</filename>
       <filetype>osw</filetype>
       <usage_type>test</usage_type>
+<<<<<<< HEAD
       <checksum>0958B29E</checksum>
+=======
+      <checksum>67DF94C7</checksum>
+>>>>>>> build-res-hpxml-v3
     </file>
     <file>
       <filename>base-hvac-evap-cooler-furnace-gas.osw</filename>
       <filetype>osw</filetype>
       <usage_type>test</usage_type>
+<<<<<<< HEAD
       <checksum>B9EEA51A</checksum>
+=======
+      <checksum>A4CBDDF4</checksum>
+>>>>>>> build-res-hpxml-v3
     </file>
     <file>
       <filename>base-hvac-evap-cooler-only.osw</filename>
       <filetype>osw</filetype>
       <usage_type>test</usage_type>
+<<<<<<< HEAD
       <checksum>3349C645</checksum>
+=======
+      <checksum>F3B884EC</checksum>
+>>>>>>> build-res-hpxml-v3
     </file>
     <file>
       <filename>base-hvac-evap-cooler-only-ducted.osw</filename>
       <filetype>osw</filetype>
       <usage_type>test</usage_type>
+<<<<<<< HEAD
       <checksum>3D0D8A4A</checksum>
+=======
+      <checksum>2C1A9D68</checksum>
+>>>>>>> build-res-hpxml-v3
     </file>
     <file>
       <filename>base-hvac-furnace-gas-central-ac-var-speed.osw</filename>
       <filetype>osw</filetype>
       <usage_type>test</usage_type>
+<<<<<<< HEAD
       <checksum>418B1781</checksum>
+=======
+      <checksum>A35F2972</checksum>
+>>>>>>> build-res-hpxml-v3
     </file>
     <file>
       <filename>base-hvac-furnace-gas-room-ac.osw</filename>
       <filetype>osw</filetype>
       <usage_type>test</usage_type>
+<<<<<<< HEAD
       <checksum>2945205E</checksum>
+=======
+      <checksum>CEB37F26</checksum>
+>>>>>>> build-res-hpxml-v3
     </file>
     <file>
       <filename>base-hvac-room-ac-only.osw</filename>
       <filetype>osw</filetype>
       <usage_type>test</usage_type>
+<<<<<<< HEAD
       <checksum>B87B7BE6</checksum>
+=======
+      <checksum>8FF0EB03</checksum>
+>>>>>>> build-res-hpxml-v3
     </file>
     <file>
       <filename>base-mechvent-cfis-evap-cooler-only-ducted.osw</filename>
       <filetype>osw</filetype>
       <usage_type>test</usage_type>
+<<<<<<< HEAD
       <checksum>EB81A49B</checksum>
     </file>
     <file>
@@ -4728,11 +5092,15 @@
       <filetype>osw</filetype>
       <usage_type>test</usage_type>
       <checksum>CF7DE47D</checksum>
+=======
+      <checksum>85F6A3A3</checksum>
+>>>>>>> build-res-hpxml-v3
     </file>
     <file>
       <filename>base-atticroof-flat.osw</filename>
       <filetype>osw</filetype>
       <usage_type>test</usage_type>
+<<<<<<< HEAD
       <checksum>F24E422E</checksum>
     </file>
     <file>
@@ -4740,107 +5108,175 @@
       <filetype>osw</filetype>
       <usage_type>test</usage_type>
       <checksum>D866DD1F</checksum>
+=======
+      <checksum>DC0513F3</checksum>
+>>>>>>> build-res-hpxml-v3
     </file>
     <file>
       <filename>extra-dhw-solar-latitude.osw</filename>
       <filetype>osw</filetype>
       <usage_type>test</usage_type>
+<<<<<<< HEAD
       <checksum>DDC4424A</checksum>
+=======
+      <checksum>58CE9C6E</checksum>
+>>>>>>> build-res-hpxml-v3
     </file>
     <file>
       <filename>extra-pv-roofpitch.osw</filename>
       <filetype>osw</filetype>
       <usage_type>test</usage_type>
+<<<<<<< HEAD
       <checksum>8FCB77A0</checksum>
+=======
+      <checksum>38306C50</checksum>
+>>>>>>> build-res-hpxml-v3
     </file>
     <file>
       <filename>base-misc-runperiod-1-month.osw</filename>
       <filetype>osw</filetype>
       <usage_type>test</usage_type>
+<<<<<<< HEAD
       <checksum>8CCBB999</checksum>
+=======
+      <checksum>AAB66541</checksum>
+>>>>>>> build-res-hpxml-v3
     </file>
     <file>
       <filename>extra-auto.osw</filename>
       <filetype>osw</filetype>
       <usage_type>test</usage_type>
+<<<<<<< HEAD
       <checksum>80DAF43C</checksum>
+=======
+      <checksum>D6677CB9</checksum>
+>>>>>>> build-res-hpxml-v3
     </file>
     <file>
       <filename>base-appliances-gas.osw</filename>
       <filetype>osw</filetype>
       <usage_type>test</usage_type>
+<<<<<<< HEAD
       <checksum>1EA184C4</checksum>
+=======
+      <checksum>150DDBB5</checksum>
+>>>>>>> build-res-hpxml-v3
     </file>
     <file>
       <filename>base-appliances-modified.osw</filename>
       <filetype>osw</filetype>
       <usage_type>test</usage_type>
+<<<<<<< HEAD
       <checksum>3F4B33DB</checksum>
+=======
+      <checksum>D79D511B</checksum>
+>>>>>>> build-res-hpxml-v3
     </file>
     <file>
       <filename>base-appliances-oil.osw</filename>
       <filetype>osw</filetype>
       <usage_type>test</usage_type>
+<<<<<<< HEAD
       <checksum>79B2AE8F</checksum>
+=======
+      <checksum>1A811565</checksum>
+>>>>>>> build-res-hpxml-v3
     </file>
     <file>
       <filename>base-appliances-wood.osw</filename>
       <filetype>osw</filetype>
       <usage_type>test</usage_type>
+<<<<<<< HEAD
       <checksum>F7AAA650</checksum>
+=======
+      <checksum>77AE150B</checksum>
+>>>>>>> build-res-hpxml-v3
     </file>
     <file>
       <filename>base-appliances-propane.osw</filename>
       <filetype>osw</filetype>
       <usage_type>test</usage_type>
+<<<<<<< HEAD
       <checksum>A1F093D5</checksum>
+=======
+      <checksum>4C804126</checksum>
+>>>>>>> build-res-hpxml-v3
     </file>
     <file>
       <filename>base-atticroof-radiant-barrier.osw</filename>
       <filetype>osw</filetype>
       <usage_type>test</usage_type>
+<<<<<<< HEAD
       <checksum>1F55D9D5</checksum>
+=======
+      <checksum>B7DFE612</checksum>
+>>>>>>> build-res-hpxml-v3
     </file>
     <file>
       <filename>base-hvac-boiler-elec-only.osw</filename>
       <filetype>osw</filetype>
       <usage_type>test</usage_type>
+<<<<<<< HEAD
       <checksum>14FB9FC9</checksum>
+=======
+      <checksum>C7F90645</checksum>
+>>>>>>> build-res-hpxml-v3
     </file>
     <file>
       <filename>base-hvac-portable-heater-electric-only.osw</filename>
       <filetype>osw</filetype>
       <usage_type>test</usage_type>
+<<<<<<< HEAD
       <checksum>E8EE97A3</checksum>
+=======
+      <checksum>91101ED1</checksum>
+>>>>>>> build-res-hpxml-v3
     </file>
     <file>
       <filename>base-hvac-stove-oil-only.osw</filename>
       <filetype>osw</filetype>
       <usage_type>test</usage_type>
+<<<<<<< HEAD
       <checksum>9CB4EA2E</checksum>
+=======
+      <checksum>9EA81F63</checksum>
+>>>>>>> build-res-hpxml-v3
     </file>
     <file>
       <filename>base-hvac-stove-wood-only.osw</filename>
       <filetype>osw</filetype>
       <usage_type>test</usage_type>
+<<<<<<< HEAD
       <checksum>825F9E99</checksum>
+=======
+      <checksum>6A8E78BD</checksum>
+>>>>>>> build-res-hpxml-v3
     </file>
     <file>
       <filename>base-hvac-wall-furnace-elec-only.osw</filename>
       <filetype>osw</filetype>
       <usage_type>test</usage_type>
+<<<<<<< HEAD
       <checksum>79E73F99</checksum>
+=======
+      <checksum>0F52E7D2</checksum>
+>>>>>>> build-res-hpxml-v3
     </file>
     <file>
       <filename>base-hvac-wall-furnace-propane-only.osw</filename>
       <filetype>osw</filetype>
       <usage_type>test</usage_type>
+<<<<<<< HEAD
       <checksum>438968D0</checksum>
+=======
+      <checksum>7388EC56</checksum>
+>>>>>>> build-res-hpxml-v3
     </file>
     <file>
       <filename>base-hvac-wall-furnace-wood-only.osw</filename>
       <filetype>osw</filetype>
       <usage_type>test</usage_type>
+<<<<<<< HEAD
       <checksum>327B4EF9</checksum>
     </file>
     <file>
@@ -4848,264 +5284,505 @@
       <filetype>osw</filetype>
       <usage_type>test</usage_type>
       <checksum>F287FD68</checksum>
+=======
+      <checksum>35A9C7DC</checksum>
+>>>>>>> build-res-hpxml-v3
     </file>
     <file>
       <filename>base-hvac-stove-wood-pellets-only.osw</filename>
       <filetype>osw</filetype>
       <usage_type>test</usage_type>
+<<<<<<< HEAD
       <checksum>BDBC4B8F</checksum>
+=======
+      <checksum>5CFE1B8A</checksum>
+>>>>>>> build-res-hpxml-v3
     </file>
     <file>
       <filename>base-mechvent-bath-kitchen-fans.osw</filename>
       <filetype>osw</filetype>
       <usage_type>test</usage_type>
+<<<<<<< HEAD
       <checksum>81D52918</checksum>
+=======
+      <checksum>758C2BFB</checksum>
+>>>>>>> build-res-hpxml-v3
     </file>
     <file>
       <filename>base-misc-neighbor-shading.osw</filename>
       <filetype>osw</filetype>
       <usage_type>test</usage_type>
+<<<<<<< HEAD
       <checksum>A3E60ABB</checksum>
+=======
+      <checksum>82CC570F</checksum>
+>>>>>>> build-res-hpxml-v3
     </file>
     <file>
       <filename>base-appliances-dehumidifier-50percent.osw</filename>
       <filetype>osw</filetype>
       <usage_type>test</usage_type>
+<<<<<<< HEAD
       <checksum>3FDFD921</checksum>
+=======
+      <checksum>3B9AE9C0</checksum>
+>>>>>>> build-res-hpxml-v3
     </file>
     <file>
       <filename>base-appliances-dehumidifier-ief.osw</filename>
       <filetype>osw</filetype>
       <usage_type>test</usage_type>
+<<<<<<< HEAD
       <checksum>5A4C069E</checksum>
+=======
+      <checksum>080BFDAF</checksum>
+>>>>>>> build-res-hpxml-v3
     </file>
     <file>
       <filename>base-appliances-dehumidifier.osw</filename>
       <filetype>osw</filetype>
       <usage_type>test</usage_type>
+<<<<<<< HEAD
       <checksum>AC00A0B3</checksum>
+=======
+      <checksum>71582F4C</checksum>
+>>>>>>> build-res-hpxml-v3
     </file>
     <file>
       <filename>base-dhw-indirect-with-solar-fraction.osw</filename>
       <filetype>osw</filetype>
       <usage_type>test</usage_type>
+<<<<<<< HEAD
       <checksum>CF0F8EE4</checksum>
+=======
+      <checksum>74C12460</checksum>
+>>>>>>> build-res-hpxml-v3
     </file>
     <file>
       <filename>base-location-epw-filepath-AMY-2012.osw</filename>
       <filetype>osw</filetype>
       <usage_type>test</usage_type>
+<<<<<<< HEAD
       <checksum>2AEC4870</checksum>
+=======
+      <checksum>63D71DA6</checksum>
+>>>>>>> build-res-hpxml-v3
     </file>
     <file>
       <filename>base-location-epw-filepath.osw</filename>
       <filetype>osw</filetype>
       <usage_type>test</usage_type>
+<<<<<<< HEAD
       <checksum>5AB1D2F3</checksum>
+=======
+      <checksum>2BB5CEFC</checksum>
+>>>>>>> build-res-hpxml-v3
     </file>
     <file>
       <filename>base-enclosure-beds-1.osw</filename>
       <filetype>osw</filetype>
       <usage_type>test</usage_type>
+<<<<<<< HEAD
       <checksum>AD351272</checksum>
+=======
+      <checksum>FADE1DB3</checksum>
+>>>>>>> build-res-hpxml-v3
     </file>
     <file>
       <filename>base-enclosure-beds-2.osw</filename>
       <filetype>osw</filetype>
       <usage_type>test</usage_type>
+<<<<<<< HEAD
       <checksum>24A76A9A</checksum>
+=======
+      <checksum>72105627</checksum>
+>>>>>>> build-res-hpxml-v3
     </file>
     <file>
       <filename>base-dhw-combi-tankless-outside.osw</filename>
       <filetype>osw</filetype>
       <usage_type>test</usage_type>
+<<<<<<< HEAD
       <checksum>D184807C</checksum>
+=======
+      <checksum>7C8B2D6A</checksum>
+>>>>>>> build-res-hpxml-v3
     </file>
     <file>
       <filename>base-dhw-combi-tankless.osw</filename>
       <filetype>osw</filetype>
       <usage_type>test</usage_type>
+<<<<<<< HEAD
       <checksum>0EA0B455</checksum>
+=======
+      <checksum>4844748B</checksum>
+>>>>>>> build-res-hpxml-v3
     </file>
     <file>
       <filename>base-misc-defaults2.osw</filename>
       <filetype>osw</filetype>
       <usage_type>test</usage_type>
+<<<<<<< HEAD
       <checksum>CE958E5F</checksum>
+=======
+      <checksum>4693B4FB</checksum>
+>>>>>>> build-res-hpxml-v3
     </file>
     <file>
       <filename>base-dhw-tank-heat-pump-outside.osw</filename>
       <filetype>osw</filetype>
       <usage_type>test</usage_type>
+<<<<<<< HEAD
       <checksum>163E6BAC</checksum>
+=======
+      <checksum>C70B3E33</checksum>
+>>>>>>> build-res-hpxml-v3
     </file>
     <file>
       <filename>base-dhw-tank-heat-pump-with-solar-fraction.osw</filename>
       <filetype>osw</filetype>
       <usage_type>test</usage_type>
+<<<<<<< HEAD
       <checksum>AD51D667</checksum>
+=======
+      <checksum>92259A7B</checksum>
+>>>>>>> build-res-hpxml-v3
     </file>
     <file>
       <filename>base-dhw-tank-heat-pump.osw</filename>
       <filetype>osw</filetype>
       <usage_type>test</usage_type>
+<<<<<<< HEAD
       <checksum>93B49D04</checksum>
+=======
+      <checksum>224E8AD5</checksum>
+>>>>>>> build-res-hpxml-v3
     </file>
     <file>
       <filename>base-dhw-jacket-hpwh.osw</filename>
       <filetype>osw</filetype>
       <usage_type>test</usage_type>
+<<<<<<< HEAD
       <checksum>5BD329B0</checksum>
+=======
+      <checksum>11F3C35C</checksum>
+>>>>>>> build-res-hpxml-v3
     </file>
     <file>
       <filename>base-dhw-jacket-gas.osw</filename>
       <filetype>osw</filetype>
       <usage_type>test</usage_type>
+<<<<<<< HEAD
       <checksum>BFC86D35</checksum>
+=======
+      <checksum>1E57E2F1</checksum>
+>>>>>>> build-res-hpxml-v3
     </file>
     <file>
       <filename>base-dhw-solar-direct-evacuated-tube.osw</filename>
       <filetype>osw</filetype>
       <usage_type>test</usage_type>
+<<<<<<< HEAD
       <checksum>F4596576</checksum>
+=======
+      <checksum>423F135B</checksum>
+>>>>>>> build-res-hpxml-v3
     </file>
     <file>
       <filename>base-dhw-solar-direct-flat-plate.osw</filename>
       <filetype>osw</filetype>
       <usage_type>test</usage_type>
+<<<<<<< HEAD
       <checksum>D74CE851</checksum>
+=======
+      <checksum>039FAB99</checksum>
+>>>>>>> build-res-hpxml-v3
     </file>
     <file>
       <filename>base-dhw-solar-direct-ics.osw</filename>
       <filetype>osw</filetype>
       <usage_type>test</usage_type>
+<<<<<<< HEAD
       <checksum>143D12A8</checksum>
+=======
+      <checksum>98645955</checksum>
+>>>>>>> build-res-hpxml-v3
     </file>
     <file>
       <filename>base-dhw-solar-indirect-flat-plate.osw</filename>
       <filetype>osw</filetype>
       <usage_type>test</usage_type>
+<<<<<<< HEAD
       <checksum>2733B8CE</checksum>
+=======
+      <checksum>4E603797</checksum>
+>>>>>>> build-res-hpxml-v3
     </file>
     <file>
       <filename>base-dhw-solar-thermosyphon-flat-plate.osw</filename>
       <filetype>osw</filetype>
       <usage_type>test</usage_type>
+<<<<<<< HEAD
       <checksum>1283E5EC</checksum>
+=======
+      <checksum>2C3589A3</checksum>
+>>>>>>> build-res-hpxml-v3
     </file>
     <file>
       <filename>base-dhw-tank-heat-pump-with-solar.osw</filename>
       <filetype>osw</filetype>
       <usage_type>test</usage_type>
+<<<<<<< HEAD
       <checksum>F8BE0152</checksum>
+=======
+      <checksum>01C2A767</checksum>
+>>>>>>> build-res-hpxml-v3
     </file>
     <file>
       <filename>base-dhw-tank-gas-outside.osw</filename>
       <filetype>osw</filetype>
       <usage_type>test</usage_type>
+<<<<<<< HEAD
       <checksum>239D6A53</checksum>
+=======
+      <checksum>9CFB5849</checksum>
+>>>>>>> build-res-hpxml-v3
     </file>
     <file>
       <filename>base-dhw-tank-gas.osw</filename>
       <filetype>osw</filetype>
       <usage_type>test</usage_type>
+<<<<<<< HEAD
       <checksum>7127697E</checksum>
+=======
+      <checksum>7AF7B1D7</checksum>
+>>>>>>> build-res-hpxml-v3
     </file>
     <file>
       <filename>base-dhw-tank-oil.osw</filename>
       <filetype>osw</filetype>
       <usage_type>test</usage_type>
+<<<<<<< HEAD
       <checksum>5F20FF43</checksum>
+=======
+      <checksum>FBDDAA18</checksum>
+>>>>>>> build-res-hpxml-v3
     </file>
     <file>
       <filename>base-dhw-tank-propane.osw</filename>
       <filetype>osw</filetype>
       <usage_type>test</usage_type>
+<<<<<<< HEAD
       <checksum>D77AA112</checksum>
+=======
+      <checksum>FAE0416E</checksum>
+>>>>>>> build-res-hpxml-v3
     </file>
     <file>
       <filename>base-dhw-tank-wood.osw</filename>
       <filetype>osw</filetype>
       <usage_type>test</usage_type>
+<<<<<<< HEAD
       <checksum>AB9EA842</checksum>
+=======
+      <checksum>42136DE4</checksum>
+>>>>>>> build-res-hpxml-v3
     </file>
     <file>
       <filename>base-dhw-tankless-gas-with-solar.osw</filename>
       <filetype>osw</filetype>
       <usage_type>test</usage_type>
+<<<<<<< HEAD
       <checksum>D9E9775D</checksum>
+=======
+      <checksum>D7CC4224</checksum>
+>>>>>>> build-res-hpxml-v3
     </file>
     <file>
       <filename>base-dhw-tankless-electric-outside.osw</filename>
       <filetype>osw</filetype>
       <usage_type>test</usage_type>
+<<<<<<< HEAD
       <checksum>3D4D18F3</checksum>
+=======
+      <checksum>B5DA1CB4</checksum>
+>>>>>>> build-res-hpxml-v3
     </file>
     <file>
       <filename>base-dhw-tankless-electric.osw</filename>
       <filetype>osw</filetype>
       <usage_type>test</usage_type>
+<<<<<<< HEAD
       <checksum>39267F57</checksum>
+=======
+      <checksum>DBCB9B8A</checksum>
+>>>>>>> build-res-hpxml-v3
     </file>
     <file>
       <filename>base-dhw-tankless-gas-with-solar-fraction.osw</filename>
       <filetype>osw</filetype>
       <usage_type>test</usage_type>
+<<<<<<< HEAD
       <checksum>7478F78B</checksum>
+=======
+      <checksum>F8D1BBE1</checksum>
+>>>>>>> build-res-hpxml-v3
     </file>
     <file>
       <filename>base-dhw-tankless-oil.osw</filename>
       <filetype>osw</filetype>
       <usage_type>test</usage_type>
+<<<<<<< HEAD
       <checksum>1594953E</checksum>
+=======
+      <checksum>C107AA27</checksum>
+>>>>>>> build-res-hpxml-v3
     </file>
     <file>
       <filename>base-dhw-tankless-propane.osw</filename>
       <filetype>osw</filetype>
       <usage_type>test</usage_type>
+<<<<<<< HEAD
       <checksum>222DFB75</checksum>
+=======
+      <checksum>30EDAD13</checksum>
+>>>>>>> build-res-hpxml-v3
     </file>
     <file>
       <filename>base-dhw-tankless-wood.osw</filename>
       <filetype>osw</filetype>
       <usage_type>test</usage_type>
+<<<<<<< HEAD
       <checksum>E277D0C5</checksum>
+=======
+      <checksum>7D6AB2E4</checksum>
+>>>>>>> build-res-hpxml-v3
     </file>
     <file>
       <filename>base-dhw-tankless-gas.osw</filename>
       <filetype>osw</filetype>
       <usage_type>test</usage_type>
+<<<<<<< HEAD
       <checksum>09DD97E6</checksum>
+=======
+      <checksum>2E2EA163</checksum>
+>>>>>>> build-res-hpxml-v3
     </file>
     <file>
       <filename>base-hvac-room-ac-only-33percent.osw</filename>
       <filetype>osw</filetype>
       <usage_type>test</usage_type>
+<<<<<<< HEAD
       <checksum>59FBB39C</checksum>
+=======
+      <checksum>C1D6172A</checksum>
+>>>>>>> build-res-hpxml-v3
     </file>
     <file>
       <filename>base-hvac-mini-split-heat-pump-ducted-cooling-only.osw</filename>
       <filetype>osw</filetype>
       <usage_type>test</usage_type>
+<<<<<<< HEAD
       <checksum>325CA268</checksum>
+=======
+      <checksum>9EBB1C6B</checksum>
+>>>>>>> build-res-hpxml-v3
     </file>
     <file>
       <filename>base-hvac-mini-split-heat-pump-ducted-heating-only.osw</filename>
       <filetype>osw</filetype>
       <usage_type>test</usage_type>
+<<<<<<< HEAD
       <checksum>7CC6EB70</checksum>
+=======
+      <checksum>43D22A95</checksum>
+>>>>>>> build-res-hpxml-v3
     </file>
     <file>
       <filename>base-hvac-furnace-elec-central-ac-1-speed.osw</filename>
       <filetype>osw</filetype>
       <usage_type>test</usage_type>
+<<<<<<< HEAD
       <checksum>E9D32AF9</checksum>
+=======
+      <checksum>D15D1C32</checksum>
+>>>>>>> build-res-hpxml-v3
     </file>
     <file>
       <filename>base-misc-ceiling-fans.osw</filename>
       <filetype>osw</filetype>
       <usage_type>test</usage_type>
+<<<<<<< HEAD
       <checksum>EB833FF1</checksum>
+=======
+      <checksum>E04DEC63</checksum>
+    </file>
+    <file>
+      <filename>base-enclosure-infil-natural-ach.osw</filename>
+      <filetype>osw</filetype>
+      <usage_type>test</usage_type>
+      <checksum>4353B131</checksum>
+    </file>
+    <file>
+      <filename>base-foundation-unconditioned-basement-assembly-r.osw</filename>
+      <filetype>osw</filetype>
+      <usage_type>test</usage_type>
+      <checksum>AC115B59</checksum>
+    </file>
+    <file>
+      <filename>base-foundation-unconditioned-basement-wall-insulation.osw</filename>
+      <filetype>osw</filetype>
+      <usage_type>test</usage_type>
+      <checksum>B1D4498C</checksum>
+    </file>
+    <file>
+      <filename>test_measure.xml</filename>
+      <filetype>xml</filetype>
+      <usage_type>test</usage_type>
+      <checksum>4A841CC2</checksum>
+    </file>
+    <file>
+      <filename>test_rakefile.xml</filename>
+      <filetype>xml</filetype>
+      <usage_type>test</usage_type>
+      <checksum>61A6E301</checksum>
+    </file>
+    <file>
+      <filename>base-foundation-unconditioned-basement.osw</filename>
+      <filetype>osw</filetype>
+      <usage_type>test</usage_type>
+      <checksum>798EAC11</checksum>
+    </file>
+    <file>
+      <filename>base-single-family-attached.osw</filename>
+      <filetype>osw</filetype>
+      <usage_type>test</usage_type>
+      <checksum>97E8A9C5</checksum>
+    </file>
+    <file>
+      <filename>geometry.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>0FDE7ECB</checksum>
+    </file>
+    <file>
+      <filename>base-foundation-slab.osw</filename>
+      <filetype>osw</filetype>
+      <usage_type>test</usage_type>
+      <checksum>EA40D8E9</checksum>
+    </file>
+    <file>
+      <filename>base-multifamily.osw</filename>
+      <filetype>osw</filetype>
+      <usage_type>test</usage_type>
+      <checksum>6CF5FC45</checksum>
+    </file>
+    <file>
+      <filename>build_residential_hpxml_test.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>test</usage_type>
+      <checksum>5707A471</checksum>
+>>>>>>> build-res-hpxml-v3
     </file>
     <file>
       <version>
@@ -5116,6 +5793,7 @@
       <filename>measure.rb</filename>
       <filetype>rb</filetype>
       <usage_type>script</usage_type>
+<<<<<<< HEAD
       <checksum>E23CFE79</checksum>
     </file>
     <file>
@@ -5129,6 +5807,9 @@
       <filetype>osw</filetype>
       <usage_type>test</usage_type>
       <checksum>E39BED71</checksum>
+=======
+      <checksum>C2F8686D</checksum>
+>>>>>>> build-res-hpxml-v3
     </file>
   </files>
 </measure>
