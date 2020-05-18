@@ -281,7 +281,6 @@ def create_hpxmls
     'base-misc-defaults.xml' => 'base.xml',
     'base-misc-defaults2.xml' => 'base-dhw-recirc-demand.xml',
     'base-misc-defaults3.xml' => 'base-hvac-multiple.xml',
-    'base-misc-lighting-none.xml' => 'base.xml',
     'base-misc-timestep-10-mins.xml' => 'base.xml',
     'base-misc-runperiod-1-month.xml' => 'base.xml',
     'base-misc-usage-multiplier.xml' => 'base.xml',

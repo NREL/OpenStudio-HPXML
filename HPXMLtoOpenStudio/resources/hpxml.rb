@@ -4229,10 +4229,10 @@ class HPXML < Object
     air_distributions.each do |dist|
       heating_systems = dist.hvac_systems.select { |sys| sys if (sys.respond_to? :fraction_heat_load_served) && (sys.fraction_heat_load_served > 0) }
       cooling_systems = dist.hvac_systems.select { |sys| sys if (sys.respond_to? :fraction_cool_load_served) && (sys.fraction_cool_load_served > 0) }
-      if heating_systems.any? { |sys| sys.distribution_system_idref == dist.id }
+      if heating_systems.size > 0
         heating_dist << dist
       end
-      if cooling_systems.any? { |sys| sys.distribution_system_idref == dist.id }
+      if cooling_systems.size > 0
         cooling_dist << dist
       end
     end
