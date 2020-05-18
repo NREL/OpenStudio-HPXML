@@ -2641,7 +2641,8 @@ class OSModel
 
       elsif (heating_system.heating_system_type == HPXML::HVACTypeStove ||
              heating_system.heating_system_type == HPXML::HVACTypePortableHeater ||
-             heating_system.heating_system_type == HPXML::HVACTypeWallFurnace)
+             heating_system.heating_system_type == HPXML::HVACTypeWallFurnace ||
+             heating_system.heating_system_type == HPXML::HVACTypeFireplace)
 
         HVAC.apply_unit_heater(model, runner, heating_system,
                                @remaining_heat_load_frac, @living_zone, @hvac_map)
