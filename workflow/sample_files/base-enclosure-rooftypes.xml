@@ -87,8 +87,8 @@
           <Roof>
             <SystemIdentifier id='Roof1'/>
             <InteriorAdjacentTo>attic - unvented</InteriorAdjacentTo>
-            <Area>302.0</Area>
-            <RoofType>concrete</RoofType>
+            <Area>503.0</Area>
+            <RoofType>slate or tile shingles</RoofType>
             <RoofColor>light</RoofColor>
             <Emittance>0.92</Emittance>
             <Pitch>6.0</Pitch>
@@ -101,9 +101,9 @@
           <Roof>
             <SystemIdentifier id='Roof2'/>
             <InteriorAdjacentTo>attic - unvented</InteriorAdjacentTo>
-            <Area>302.0</Area>
-            <RoofType>slate or tile shingles</RoofType>
-            <RoofColor>medium</RoofColor>
+            <Area>503.0</Area>
+            <RoofType>metal surfacing</RoofType>
+            <RoofColor>reflective</RoofColor>
             <Emittance>0.92</Emittance>
             <Pitch>6.0</Pitch>
             <RadiantBarrier>false</RadiantBarrier>
@@ -115,42 +115,14 @@
           <Roof>
             <SystemIdentifier id='Roof3'/>
             <InteriorAdjacentTo>attic - unvented</InteriorAdjacentTo>
-            <Area>302.0</Area>
-            <RoofType>metal surfacing</RoofType>
-            <RoofColor>reflective</RoofColor>
-            <Emittance>0.92</Emittance>
-            <Pitch>6.0</Pitch>
-            <RadiantBarrier>false</RadiantBarrier>
-            <Insulation>
-              <SystemIdentifier id='Roof3Insulation'/>
-              <AssemblyEffectiveRValue>2.3</AssemblyEffectiveRValue>
-            </Insulation>
-          </Roof>
-          <Roof>
-            <SystemIdentifier id='Roof4'/>
-            <InteriorAdjacentTo>attic - unvented</InteriorAdjacentTo>
-            <Area>302.0</Area>
-            <RoofType>plastic/rubber/synthetic sheeting</RoofType>
-            <RoofColor>medium dark</RoofColor>
-            <Emittance>0.92</Emittance>
-            <Pitch>6.0</Pitch>
-            <RadiantBarrier>false</RadiantBarrier>
-            <Insulation>
-              <SystemIdentifier id='Roof4Insulation'/>
-              <AssemblyEffectiveRValue>2.3</AssemblyEffectiveRValue>
-            </Insulation>
-          </Roof>
-          <Roof>
-            <SystemIdentifier id='Roof5'/>
-            <InteriorAdjacentTo>attic - unvented</InteriorAdjacentTo>
-            <Area>302.0</Area>
+            <Area>503.0</Area>
             <RoofType>wood shingles or shakes</RoofType>
             <RoofColor>dark</RoofColor>
             <Emittance>0.92</Emittance>
             <Pitch>6.0</Pitch>
             <RadiantBarrier>false</RadiantBarrier>
             <Insulation>
-              <SystemIdentifier id='Roof5Insulation'/>
+              <SystemIdentifier id='Roof3Insulation'/>
               <AssemblyEffectiveRValue>2.3</AssemblyEffectiveRValue>
             </Insulation>
           </Roof>

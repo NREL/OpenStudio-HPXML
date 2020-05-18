@@ -753,10 +753,8 @@ def set_hpxml_roofs(hpxml_file, hpxml)
                     radiant_barrier: false,
                     insulation_assembly_r_value: 2.3)
   elsif ['base-enclosure-rooftypes.xml'].include? hpxml_file
-    roof_types = [[HPXML::RoofTypeConcrete, HPXML::ColorLight],
-                  [HPXML::RoofTypeClayTile, HPXML::ColorMedium],
+    roof_types = [[HPXML::RoofTypeClayTile, HPXML::ColorLight],
                   [HPXML::RoofTypeMetal, HPXML::ColorReflective],
-                  [HPXML::RoofTypePlasticRubber, HPXML::ColorMediumDark],
                   [HPXML::RoofTypeWoodShingles, HPXML::ColorDark]]
     hpxml.roofs.clear
     roof_types.each_with_index do |roof_type, i|

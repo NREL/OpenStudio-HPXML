@@ -487,7 +487,7 @@ class OSModel
       end
       if rim_joist.color.nil?
         rim_joist.color = Constructions.get_default_wall_color(rim_joist.solar_absorptance)
-      elsif wall.solar_absorptance.nil?
+      elsif rim_joist.solar_absorptance.nil?
         rim_joist.solar_absorptance = Constructions.get_default_wall_solar_absorptance(rim_joist.color)
       end
     end
