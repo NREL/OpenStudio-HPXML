@@ -1508,12 +1508,17 @@ class OSModel
       solar_abs = roof.solar_absorptance
       emitt = roof.emittance
       has_radiant_barrier = roof.radiant_barrier
-      if has_radiant_barrier
-        inside_film = Material.AirFilmRoofRadiantBarrier(Geometry.get_roof_pitch([surfaces[0]]))
+      if @apply_ashrae140_assumptions
+        inside_film = Material.AirFilm(1.0 / 1.330)
+        outside_film = Material.AirFilm(1.0 / 5.748)
       else
-        inside_film = Material.AirFilmRoof(Geometry.get_roof_pitch([surfaces[0]]))
+        if has_radiant_barrier
+          inside_film = Material.AirFilmRoofRadiantBarrier(Geometry.get_roof_pitch([surfaces[0]]))
+        else
+          inside_film = Material.AirFilmRoof(Geometry.get_roof_pitch([surfaces[0]]))
+        end
+        outside_film = Material.AirFilmOutside
       end
-      outside_film = Material.AirFilmOutside
       if solar_abs >= 0.875
         mat_roofing = Material.RoofingAsphaltShinglesDark(emitt, solar_abs)
       elsif solar_abs >= 0.75
@@ -1601,16 +1606,22 @@ class OSModel
       else
         drywall_thick_in = 0.0
       end
-      inside_film = Material.AirFilmVertical
+      if @apply_ashrae140_assumptions
+        inside_film = Material.AirFilm(1.0 / 1.460)
+        outside_film = Material.AirFilm(1.0 / 5.748)
+      else
+        inside_film = Material.AirFilmVertical
+        if wall.is_exterior
+          outside_film = Material.AirFilmOutside
+        else
+          outside_film = Material.AirFilmVertical
+        end
+      end
       if wall.is_exterior
-        outside_film = Material.AirFilmOutside
         mat_ext_finish = Material.ExtFinishWoodLight
         mat_ext_finish.tAbs = wall.emittance
         mat_ext_finish.sAbs = wall.solar_absorptance
         mat_ext_finish.vAbs = wall.solar_absorptance
-      else
-        outside_film = Material.AirFilmVertical
-        mat_ext_finish = nil
       end
 
       apply_wall_construction(runner, model, surfaces, wall.id, wall.wall_type, wall.insulation_assembly_r_value,
@@ -1664,16 +1675,22 @@ class OSModel
       else
         drywall_thick_in = 0.0
       end
-      inside_film = Material.AirFilmVertical
+      if @apply_ashrae140_assumptions
+        inside_film = Material.AirFilm(1.0 / 1.460)
+        outside_film = Material.AirFilm(1.0 / 5.748)  
+      else
+        inside_film = Material.AirFilmVertical
+        if rim_joist.is_exterior
+          outside_film = Material.AirFilmOutside
+        else
+          outside_film = Material.AirFilmVertical
+        end
+      end
       if rim_joist.is_exterior
-        outside_film = Material.AirFilmOutside
         mat_ext_finish = Material.ExtFinishWoodLight
         mat_ext_finish.tAbs = rim_joist.emittance
         mat_ext_finish.sAbs = rim_joist.solar_absorptance
         mat_ext_finish.vAbs = rim_joist.solar_absorptance
-      else
-        outside_film = Material.AirFilmVertical
-        mat_ext_finish = nil
       end
 
       assembly_r = rim_joist.insulation_assembly_r_value
@@ -1717,16 +1734,27 @@ class OSModel
       set_surface_interior(model, spaces, surface, frame_floor.interior_adjacent_to)
       set_surface_exterior(model, spaces, surface, frame_floor.exterior_adjacent_to)
       surface.setName(frame_floor.id)
-      surface.setSunExposure('NoSun')
-      surface.setWindExposure('NoWind')
+      if frame_floor.is_interior or @apply_ashrae140_assumptions
+        surface.setSunExposure('NoSun')
+        surface.setWindExposure('NoWind')
+      end
 
       # Apply construction
 
-      inside_film = Material.AirFilmFloorReduced
-      if frame_floor.is_exterior
-        outside_film = Material.AirFilmOutside
+      if @apply_ashrae140_assumptions
+        inside_film = Material.AirFilm(1.0 / 1.307)
+        if frame_floor.is_exterior
+          outside_film = Material.AirFilm(1.0 / 2.200)
+        else
+          outside_film = Material.AirFilm(1.0 / 1.307)
+        end
       else
-        outside_film = Material.AirFilmFloorReduced
+        inside_film = Material.AirFilmFloorReduced
+        if frame_floor.is_exterior
+          outside_film = Material.AirFilmOutside
+        else
+          outside_film = Material.AirFilmFloorReduced
+        end
       end
       assembly_r = frame_floor.insulation_assembly_r_value
 
@@ -1948,7 +1976,11 @@ class OSModel
     if not assembly_r.nil?
       ext_rigid_height = height
       ext_rigid_offset = 0.0
-      inside_film = Material.AirFilmVertical
+      if @apply_ashrae140_assumptions
+        inside_film = Material.AirFilm(1.0 / 1.460)
+      else
+        inside_film = Material.AirFilmVertical
+      end
       ext_rigid_r = assembly_r - Material.Concrete(concrete_thick_in).rvalue - Material.GypsumWall(drywall_thick_in).rvalue - inside_film.rvalue
       int_rigid_r = 0.0
       if ext_rigid_r < 0 # Try without drywall
