@@ -3,8 +3,8 @@
   <schema_version>3.0</schema_version>
   <name>build_residential_hpxml</name>
   <uid>a13a8983-2b01-4930-8af2-42030b6e4233</uid>
-  <version_id>59c9e929-9d1d-4115-a81b-91d7bc331809</version_id>
-  <version_modified>20200515T234323Z</version_modified>
+  <version_id>544b81b0-0fff-4588-b5cf-da3a873754f8</version_id>
+  <version_modified>20200519T214127Z</version_modified>
   <xml_checksum>2C38F48B</xml_checksum>
   <class_name>BuildResidentialHPXML</class_name>
   <display_name>HPXML Builder</display_name>
@@ -4961,18 +4961,6 @@
       <filetype>osw</filetype>
       <usage_type>test</usage_type>
       <checksum>B1D4498C</checksum>
-    </file>
-    <file>
-      <filename>test_measure.xml</filename>
-      <filetype>xml</filetype>
-      <usage_type>test</usage_type>
-      <checksum>4A841CC2</checksum>
-    </file>
-    <file>
-      <filename>test_rakefile.xml</filename>
-      <filetype>xml</filetype>
-      <usage_type>test</usage_type>
-      <checksum>61A6E301</checksum>
     </file>
     <file>
       <filename>base-foundation-unconditioned-basement.osw</filename>
