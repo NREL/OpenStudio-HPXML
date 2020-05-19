@@ -3212,7 +3212,7 @@ class HPXMLFile
 
     if [HPXML::HVACTypeFurnace, HPXML::HVACTypeWallFurnace, HPXML::HVACTypeFloorFurnace, HPXML::HVACTypeBoiler].include? heating_system_type
       heating_efficiency_afue = args[:heating_system_heating_efficiency_afue]
-    elsif [HPXML::HVACTypeElectricResistance, HPXML::HVACTypeStove, HPXML::HVACTypePortableHeater, HPXML::HVACTypeFireplace]
+    elsif [HPXML::HVACTypeElectricResistance, HPXML::HVACTypeStove, HPXML::HVACTypePortableHeater, HPXML::HVACTypeFireplace].include? heating_system_type
       heating_efficiency_percent = args[:heating_system_heating_efficiency_percent]
     end
 
