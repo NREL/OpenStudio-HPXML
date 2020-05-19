@@ -329,6 +329,7 @@ HeatingSystemType   DistributionSystem           HeatingSystemFuel  AnnualHeatin
 ElectricResistance                               electricity        Percent
 Furnace             AirDistribution or DSE       <any>              AFUE
 WallFurnace                                      <any>              AFUE
+FloorFurnace                                     <any>              AFUE
 Boiler              HydronicDistribution or DSE  <any>              AFUE
 Stove                                            <any>              Percent
 PortableHeater                                   <any>              Percent
