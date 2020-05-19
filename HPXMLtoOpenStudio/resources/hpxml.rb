@@ -366,7 +366,7 @@ class HPXML < Object
 
         # Update Compartmentalization Boundary areas
         total_area += surface.area
-        if not [LocationOtherHousingUnit, LocationGarage].include? surface.exterior_adjacent_to # FIXME: Need to add additional "other" spaces?
+        if not [LocationOtherHousingUnit, LocationOtherHeatedSpace, LocationOtherMultifamilyBufferSpace, LocationOtherNonFreezingSpace, LocationGarage].include? surface.exterior_adjacent_to # FIXME: Need to add additional "other" spaces?
           exterior_area += surface.area
         end
       end
