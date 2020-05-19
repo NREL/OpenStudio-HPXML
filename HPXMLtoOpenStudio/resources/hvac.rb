@@ -1373,13 +1373,13 @@ class HVAC
         end
       end
 
-    else # Furnace/WallFurnace/Stove
+    else # Furnace/WallFurnace/FloorFurnace/Stove
 
       unitary_systems = []
       eae_hvacs.each do |eae_hvac|
         if eae_hvac.is_a? OpenStudio::Model::AirLoopHVAC # Furnace
           unitary_systems << get_unitary_system_from_air_loop_hvac(eae_hvac)
-        elsif eae_hvac.is_a? OpenStudio::Model::AirLoopHVACUnitarySystem # WallFurnace/Stove
+        elsif eae_hvac.is_a? OpenStudio::Model::AirLoopHVACUnitarySystem # WallFurnace/FloorFurnace/Stove
           unitary_systems << eae_hvac
         end
       end
