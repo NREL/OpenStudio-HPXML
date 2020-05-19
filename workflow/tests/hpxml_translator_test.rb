@@ -812,7 +812,7 @@ class HPXMLTest < MiniTest::Test
         sql_value_fan_airflow = sqlFile.execAndReturnFirstDouble(query_fan_airflow).get
         sql_value_htg_airflow = sqlFile.execAndReturnFirstDouble(query_htg_airflow).get
         sql_value *= sql_value_htg_airflow / sql_value_fan_airflow
-      elsif (htg_sys_type == HPXML::HVACTypeStove) || (htg_sys_type == HPXML::HVACTypeWallFurnace) || HPXML::HVACTypeFloorFurnace
+      elsif (htg_sys_type == HPXML::HVACTypeStove) || (htg_sys_type == HPXML::HVACTypeWallFurnace) || (htg_sys_type == HPXML::HVACTypeFloorFurnace)
         query = "SELECT AVG(Value) FROM TabularDataWithStrings WHERE ReportName='EquipmentSummary' AND ReportForString='Entire Facility' AND TableName='Fans' AND RowName LIKE '%#{Constants.ObjectNameUnitHeater.upcase}%' AND ColumnName='Rated Electric Power' AND Units='W'"
         sql_value = sqlFile.execAndReturnFirstDouble(query).get
       else
