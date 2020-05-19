@@ -57,12 +57,13 @@ class HPXMLtoOpenStudioTest < MiniTest::Test
     return []
   end
 
-  def get_wu_peak_flow(model, name)
+  def get_wu_gpd(model, name)
     model.getWaterUseEquipments.each do |wue|
       next unless wue.name.to_s == name
 
-      peak_flow = wue.waterUseEquipmentDefinition.peakFlowRate
-      return peak_flow
+      full_load_hrs = Schedule.annual_equivalent_full_load_hrs(model.yearDescription.get.assumedYear, wue.flowRateFractionSchedule.get)
+      gpd = UnitConversions.convert(full_load_hrs * wue.waterUseEquipmentDefinition.peakFlowRate * wue.multiplier, 'm^3/s', 'gal/min') * 60.0 / 365.0
+      return gpd
     end
     return
   end
@@ -128,12 +129,12 @@ class HPXMLtoOpenStudioTest < MiniTest::Test
     model, hpxml = _test_measure(args_hash)
 
     # water use equipment peak flows
-    fixture_peak_flow = 0.0003689
-    dist_peak_flow = 0.00008465
-    assert_in_epsilon(fixture_peak_flow, get_wu_peak_flow(model, Constants.ObjectNameFixtures), 0.001)
-    assert_in_epsilon(dist_peak_flow, get_wu_peak_flow(model, Constants.ObjectNameDistributionWaste), 0.001)
-    assert_nil(get_wu_peak_flow(model, Constants.ObjectNameClothesWasher))
-    assert_nil(get_wu_peak_flow(model, Constants.ObjectNameDishwasher))
+    fixture_gpd = 44.60
+    dist_peak_gpd = 10.2343
+    assert_in_epsilon(fixture_gpd, get_wu_gpd(model, Constants.ObjectNameFixtures), 0.001)
+    assert_in_epsilon(dist_peak_gpd, get_wu_gpd(model, Constants.ObjectNameDistributionWaste), 0.001)
+    assert_nil(get_wu_gpd(model, Constants.ObjectNameClothesWasher))
+    assert_nil(get_wu_gpd(model, Constants.ObjectNameDishwasher))
 
     # electric equipment
     assert_nil(get_ee_kwh_per_year(model, Constants.ObjectNameClothesWasher))
@@ -169,14 +170,14 @@ class HPXMLtoOpenStudioTest < MiniTest::Test
     model, hpxml = _test_measure(args_hash)
 
     # water use equipment peak flows
-    fixture_peak_flow = 0.0003689
-    dist_peak_flow = 0.00008465
-    cw_peak_flow = 0.00025878
-    dw_peak_flow = 0.00011044
-    assert_in_epsilon(fixture_peak_flow, get_wu_peak_flow(model, Constants.ObjectNameFixtures), 0.001)
-    assert_in_epsilon(dist_peak_flow, get_wu_peak_flow(model, Constants.ObjectNameDistributionWaste), 0.001)
-    assert_in_epsilon(cw_peak_flow, get_wu_peak_flow(model, Constants.ObjectNameClothesWasher), 0.001)
-    assert_in_epsilon(dw_peak_flow, get_wu_peak_flow(model, Constants.ObjectNameDishwasher), 0.001)
+    fixture_gpd = 44.60
+    dist_gpd = 10.2343
+    cw_gpd = 3.7116
+    dw_gpd = 2.7342
+    assert_in_epsilon(fixture_gpd, get_wu_gpd(model, Constants.ObjectNameFixtures), 0.001)
+    assert_in_epsilon(dist_gpd, get_wu_gpd(model, Constants.ObjectNameDistributionWaste), 0.001)
+    assert_in_epsilon(cw_gpd, get_wu_gpd(model, Constants.ObjectNameClothesWasher), 0.001)
+    assert_in_epsilon(dw_gpd, get_wu_gpd(model, Constants.ObjectNameDishwasher), 0.001)
 
     # electric equipment
     cw_ee_kwh_yr = 107.059
@@ -232,14 +233,14 @@ class HPXMLtoOpenStudioTest < MiniTest::Test
     model, hpxml = _test_measure(args_hash)
 
     # water use equipment peak flows
-    fixture_peak_flow = 0.0003689
-    dist_peak_flow = 0.00008465
-    cw_peak_flow = 0.00025878
-    dw_peak_flow = 0.00011057
-    assert_in_epsilon(fixture_peak_flow, get_wu_peak_flow(model, Constants.ObjectNameFixtures), 0.001)
-    assert_in_epsilon(dist_peak_flow, get_wu_peak_flow(model, Constants.ObjectNameDistributionWaste), 0.001)
-    assert_in_epsilon(cw_peak_flow, get_wu_peak_flow(model, Constants.ObjectNameClothesWasher), 0.001)
-    assert_in_epsilon(dw_peak_flow, get_wu_peak_flow(model, Constants.ObjectNameDishwasher), 0.001)
+    fixture_gpd = 44.60
+    dist_gpd = 10.2343
+    cw_gpd = 3.7116
+    dw_gpd = 2.7375
+    assert_in_epsilon(fixture_gpd, get_wu_gpd(model, Constants.ObjectNameFixtures), 0.001)
+    assert_in_epsilon(dist_gpd, get_wu_gpd(model, Constants.ObjectNameDistributionWaste), 0.001)
+    assert_in_epsilon(cw_gpd, get_wu_gpd(model, Constants.ObjectNameClothesWasher), 0.001)
+    assert_in_epsilon(dw_gpd, get_wu_gpd(model, Constants.ObjectNameDishwasher), 0.001)
 
     # electric equipment
     cw_ee_kwh_yr = 107.059
@@ -295,14 +296,14 @@ class HPXMLtoOpenStudioTest < MiniTest::Test
     model, hpxml = _test_measure(args_hash)
 
     # water use equipment peak flows
-    fixture_peak_flow = 0.0003689
-    dist_peak_flow = 0.00008465
-    cw_peak_flow = 0.00025878
-    dw_peak_flow = 0.00011044
-    assert_in_epsilon(fixture_peak_flow, get_wu_peak_flow(model, Constants.ObjectNameFixtures), 0.001)
-    assert_in_epsilon(dist_peak_flow, get_wu_peak_flow(model, Constants.ObjectNameDistributionWaste), 0.001)
-    assert_in_epsilon(cw_peak_flow, get_wu_peak_flow(model, Constants.ObjectNameClothesWasher), 0.001)
-    assert_in_epsilon(dw_peak_flow, get_wu_peak_flow(model, Constants.ObjectNameDishwasher), 0.001)
+    fixture_gpd = 44.60
+    dist_gpd = 10.2343
+    cw_gpd = 3.7116
+    dw_gpd = 2.7342
+    assert_in_epsilon(fixture_gpd, get_wu_gpd(model, Constants.ObjectNameFixtures), 0.001)
+    assert_in_epsilon(dist_gpd, get_wu_gpd(model, Constants.ObjectNameDistributionWaste), 0.001)
+    assert_in_epsilon(cw_gpd, get_wu_gpd(model, Constants.ObjectNameClothesWasher), 0.001)
+    assert_in_epsilon(dw_gpd, get_wu_gpd(model, Constants.ObjectNameDishwasher), 0.001)
 
     # electric equipment
     cw_ee_kwh_yr = 107.059
@@ -370,14 +371,14 @@ class HPXMLtoOpenStudioTest < MiniTest::Test
     model, hpxml = _test_measure(args_hash)
 
     # water use equipment peak flows
-    fixture_peak_flow = 0.0003689
-    dist_peak_flow = 0.00008465
-    cw_peak_flow = 0.00025878
-    dw_peak_flow = 0.00011044
-    assert_in_epsilon(fixture_peak_flow, get_wu_peak_flow(model, Constants.ObjectNameFixtures), 0.001)
-    assert_in_epsilon(dist_peak_flow, get_wu_peak_flow(model, Constants.ObjectNameDistributionWaste), 0.001)
-    assert_in_epsilon(cw_peak_flow, get_wu_peak_flow(model, Constants.ObjectNameClothesWasher), 0.001)
-    assert_in_epsilon(dw_peak_flow, get_wu_peak_flow(model, Constants.ObjectNameDishwasher), 0.001)
+    fixture_gpd = 44.60
+    dist_gpd = 10.2343
+    cw_gpd = 3.7116
+    dw_gpd = 2.7342
+    assert_in_epsilon(fixture_gpd, get_wu_gpd(model, Constants.ObjectNameFixtures), 0.001)
+    assert_in_epsilon(dist_gpd, get_wu_gpd(model, Constants.ObjectNameDistributionWaste), 0.001)
+    assert_in_epsilon(cw_gpd, get_wu_gpd(model, Constants.ObjectNameClothesWasher), 0.001)
+    assert_in_epsilon(dw_gpd, get_wu_gpd(model, Constants.ObjectNameDishwasher), 0.001)
 
     # electric equipment
     cw_ee_kwh_yr = 107.059
@@ -445,14 +446,14 @@ class HPXMLtoOpenStudioTest < MiniTest::Test
     model, hpxml = _test_measure(args_hash)
 
     # water use equipment peak flows
-    fixture_peak_flow = 0.0003689
-    dist_peak_flow = 0.00008465
-    cw_peak_flow = 0.00025878
-    dw_peak_flow = 0.00011044
-    assert_in_epsilon(fixture_peak_flow, get_wu_peak_flow(model, Constants.ObjectNameFixtures), 0.001)
-    assert_in_epsilon(dist_peak_flow, get_wu_peak_flow(model, Constants.ObjectNameDistributionWaste), 0.001)
-    assert_in_epsilon(cw_peak_flow, get_wu_peak_flow(model, Constants.ObjectNameClothesWasher), 0.001)
-    assert_in_epsilon(dw_peak_flow, get_wu_peak_flow(model, Constants.ObjectNameDishwasher), 0.001)
+    fixture_gpd = 44.60
+    dist_gpd = 10.2343
+    cw_gpd = 3.7116
+    dw_gpd = 2.7342
+    assert_in_epsilon(fixture_gpd, get_wu_gpd(model, Constants.ObjectNameFixtures), 0.001)
+    assert_in_epsilon(dist_gpd, get_wu_gpd(model, Constants.ObjectNameDistributionWaste), 0.001)
+    assert_in_epsilon(cw_gpd, get_wu_gpd(model, Constants.ObjectNameClothesWasher), 0.001)
+    assert_in_epsilon(dw_gpd, get_wu_gpd(model, Constants.ObjectNameDishwasher), 0.001)
 
     # electric equipment
     cw_ee_kwh_yr = 107.059
@@ -520,14 +521,14 @@ class HPXMLtoOpenStudioTest < MiniTest::Test
     model, hpxml = _test_measure(args_hash)
 
     # water use equipment peak flows
-    fixture_peak_flow = 0.0003689
-    dist_peak_flow = 0.00008465
-    cw_peak_flow = 0.00025878
-    dw_peak_flow = 0.00011044
-    assert_in_epsilon(fixture_peak_flow, get_wu_peak_flow(model, Constants.ObjectNameFixtures), 0.001)
-    assert_in_epsilon(dist_peak_flow, get_wu_peak_flow(model, Constants.ObjectNameDistributionWaste), 0.001)
-    assert_in_epsilon(cw_peak_flow, get_wu_peak_flow(model, Constants.ObjectNameClothesWasher), 0.001)
-    assert_in_epsilon(dw_peak_flow, get_wu_peak_flow(model, Constants.ObjectNameDishwasher), 0.001)
+    fixture_gpd = 44.60
+    dist_gpd = 10.2343
+    cw_gpd = 3.7116
+    dw_gpd = 2.7342
+    assert_in_epsilon(fixture_gpd, get_wu_gpd(model, Constants.ObjectNameFixtures), 0.001)
+    assert_in_epsilon(dist_gpd, get_wu_gpd(model, Constants.ObjectNameDistributionWaste), 0.001)
+    assert_in_epsilon(cw_gpd, get_wu_gpd(model, Constants.ObjectNameClothesWasher), 0.001)
+    assert_in_epsilon(dw_gpd, get_wu_gpd(model, Constants.ObjectNameDishwasher), 0.001)
 
     # electric equipment
     cw_ee_kwh_yr = 107.059
