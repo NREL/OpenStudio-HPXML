@@ -27,61 +27,80 @@ class HPXMLtoOpenStudioDuctsTest < MiniTest::Test
     FileUtils.rm_rf(@tmp_output_path)
   end
 
-  def test_furnace_gas_and_central_air_conditioner
+  def test_ducts
+    hpxml_name = 'base.xml'
+    hpxml = HPXML.new(hpxml_path: File.join(@root_path, 'workflow', 'sample_files', hpxml_name))
+    hpxml_name = File.basename(@tmp_hpxml_path)
+    XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
+    model, hpxml = _test_measure(@args_hash)
+    expected_supply_locations = ['attic - unvented']
+    expected_return_locations = ['attic - unvented']
+    expected_supply_areas = [150.0]
+    expected_return_areas = [50.0]
+    _test_default_duct_values(hpxml, expected_supply_locations, expected_return_locations, expected_supply_areas, expected_return_areas)
+
     default_hpxml('base.xml')
     model, hpxml = _test_measure(@args_hash)
-    expected_locations = ['basement - conditioned', 'basement - conditioned']
-    expected_areas = [729.0, 270.0]
-    _test_default_duct_values(hpxml, expected_locations, expected_areas)
+    expected_supply_locations = ['basement - conditioned']
+    expected_return_locations = ['basement - conditioned']
+    expected_supply_areas = [729.0]
+    expected_return_areas = [270.0]
+    _test_default_duct_values(hpxml, expected_supply_locations, expected_return_locations, expected_supply_areas, expected_return_areas)
 
     default_hpxml('base-foundation-multiple.xml')
     model, hpxml = _test_measure(@args_hash)
-    expected_locations = ['basement - unconditioned', 'basement - unconditioned']
-    expected_areas = [364.5, 67.5]
-    _test_default_duct_values(hpxml, expected_locations, expected_areas)
+    expected_supply_locations = ['basement - unconditioned']
+    expected_return_locations = ['basement - unconditioned']
+    expected_supply_areas = [364.5]
+    expected_return_areas = [67.5]
+    _test_default_duct_values(hpxml, expected_supply_locations, expected_return_locations, expected_supply_areas, expected_return_areas)
 
     default_hpxml('base-foundation-ambient.xml')
     model, hpxml = _test_measure(@args_hash)
-    expected_locations = ['attic - unvented', 'attic - unvented']
-    expected_areas = [364.5, 67.5]
-    _test_default_duct_values(hpxml, expected_locations, expected_areas)
+    expected_supply_locations = ['attic - unvented']
+    expected_return_locations = ['attic - unvented']
+    expected_supply_areas = [364.5]
+    expected_return_areas = [67.5]
+    _test_default_duct_values(hpxml, expected_supply_locations, expected_return_locations, expected_supply_areas, expected_return_areas)
 
     default_hpxml('base-enclosure-other-housing-unit.xml')
     model, hpxml = _test_measure(@args_hash)
-    expected_locations = ['living space', 'living space']
-    expected_areas = [364.5, 67.5]
-    _test_default_duct_values(hpxml, expected_locations, expected_areas)
-  end
+    expected_supply_locations = ['living space']
+    expected_return_locations = ['living space']
+    expected_supply_areas = [364.5]
+    expected_return_areas = [67.5]
+    _test_default_duct_values(hpxml, expected_supply_locations, expected_return_locations, expected_supply_areas, expected_return_areas)
 
-  def test_furnace_gas_and_central_air_conditioner_ncflag_2
     default_hpxml('base-enclosure-2stories.xml')
     model, hpxml = _test_measure(@args_hash)
-    expected_locations = ['basement - conditioned', 'basement - conditioned', 'living space', 'living space']
-    expected_areas = [820.125, 455.625, 273.375, 151.875]
-    _test_default_duct_values(hpxml, expected_locations, expected_areas)
-  end
+    expected_supply_locations = ['basement - conditioned', 'living space']
+    expected_return_locations = ['basement - conditioned', 'living space']
+    expected_supply_areas = [820.125, 273.375]
+    expected_return_areas = [455.625, 151.875]
+    _test_default_duct_values(hpxml, expected_supply_locations, expected_return_locations, expected_supply_areas, expected_return_areas)
 
-  def test_multiple_hvac
     hpxml_files = ['base-hvac-multiple.xml',
                    'base-hvac-multiple2.xml']
-    hpxml_files.each do |hpxml_file|
+      hpxml_files.each do |hpxml_file|
       default_hpxml(hpxml_file)
       model, hpxml = _test_measure(@args_hash)
-      expected_locations = ['basement - conditioned', 'basement - conditioned', 'basement - conditioned', 'basement - conditioned']
-      expected_areas = [91.125, 91.125, 33.75, 33.75]
-      _test_default_duct_values(hpxml, expected_locations, expected_areas)
+      expected_supply_locations = ['basement - conditioned', 'basement - conditioned'] * hpxml.hvac_distributions.size
+      expected_return_locations = ['basement - conditioned', 'basement - conditioned'] * hpxml.hvac_distributions.size
+      expected_supply_areas = [91.125, 91.125] * hpxml.hvac_distributions.size
+      expected_return_areas = [33.75, 33.75] * hpxml.hvac_distributions.size
+      _test_default_duct_values(hpxml, expected_supply_locations, expected_return_locations, expected_supply_areas, expected_return_areas)
     end
-  end
 
-  def test_multiple_ducts_ncflag_2
     default_hpxml('base-hvac-multiple.xml')
     hpxml = HPXML.new(hpxml_path: @tmp_hpxml_path)
     hpxml.building_construction.number_of_conditioned_floors_above_grade = 2
     XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
     model, hpxml = _test_measure(@args_hash)
-    expected_locations = ['basement - conditioned', 'basement - conditioned', 'basement - conditioned', 'basement - conditioned', 'living space', 'living space', 'living space', 'living space']
-    expected_areas = [68.34375, 68.34375, 25.3125, 25.3125, 22.78125, 22.78125, 8.4375, 8.4375]
-    _test_default_duct_values(hpxml, expected_locations, expected_areas)
+    expected_supply_locations = ['basement - conditioned', 'basement - conditioned', 'living space', 'living space'] * hpxml.hvac_distributions.size
+    expected_return_locations = ['basement - conditioned', 'basement - conditioned', 'living space', 'living space'] * hpxml.hvac_distributions.size
+    expected_supply_areas = [68.34375, 68.34375, 22.78125, 22.78125] * hpxml.hvac_distributions.size
+    expected_return_areas = [25.3125, 25.3125, 8.4375, 8.4375] * hpxml.hvac_distributions.size
+    _test_default_duct_values(hpxml, expected_supply_locations, expected_return_locations, expected_supply_areas, expected_return_areas)
   end
 
   def _test_measure(args_hash)
@@ -119,11 +138,20 @@ class HPXMLtoOpenStudioDuctsTest < MiniTest::Test
     return model, hpxml
   end
 
-  def _test_default_duct_values(hpxml, expected_locations, expected_areas)
+  def _test_default_duct_values(hpxml, expected_supply_locations, expected_return_locations, expected_supply_areas, expected_return_areas)
+    supply_duct_idx = 0
+    return_duct_idx = 0
     hpxml.hvac_distributions.each do |hvac_distribution|
-      hvac_distribution.ducts.each_with_index do |duct, idx|
-        assert_equal(duct.duct_location, expected_locations[idx])
-        assert_in_epsilon(duct.duct_surface_area, expected_areas[idx], 0.01)
+      hvac_distribution.ducts.each do |duct|
+        if duct.duct_type == HPXML::DuctTypeSupply
+          assert_equal(duct.duct_location, expected_supply_locations[supply_duct_idx])
+          assert_in_epsilon(duct.duct_surface_area, expected_supply_areas[supply_duct_idx], 0.01)
+          supply_duct_idx += 1
+        elsif duct.duct_type == HPXML::DuctTypeReturn
+          assert_equal(duct.duct_location, expected_return_locations[return_duct_idx])
+          assert_in_epsilon(duct.duct_surface_area, expected_return_areas[return_duct_idx], 0.01)
+          return_duct_idx += 1
+        end
       end
     end
   end
