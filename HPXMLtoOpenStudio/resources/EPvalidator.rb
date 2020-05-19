@@ -298,7 +298,7 @@ class EnergyPlusValidator
       '/HPXML/Building/BuildingDetails/Systems/HVAC/HVACPlant/HeatingSystem' => {
         'SystemIdentifier' => one, # Required by HPXML schema
         '../../HVACControl' => one, # See [HVACControl]
-        'HeatingSystemType[ElectricResistance | Furnace | WallFurnace | Boiler | Stove | PortableHeater | Fireplace]' => one, # See [HeatingType=Resistance] or [HeatingType=Furnace] or [HeatingType=WallFurnace] or [HeatingType=Boiler] or [HeatingType=Stove] or [HeatingType=PortableHeater] or [HeatingType=Fireplace]
+        'HeatingSystemType[ElectricResistance | Furnace | WallFurnace | FloorFurnace | Boiler | Stove | PortableHeater | Fireplace]' => one, # See [HeatingType=Resistance] or [HeatingType=Furnace] or [HeatingType=WallFurnace] or [HeatingType=FloorFurnace] or [HeatingType=Boiler] or [HeatingType=Stove] or [HeatingType=PortableHeater] or [HeatingType=Fireplace]
         'HeatingCapacity' => zero_or_one,
         'FractionHeatLoadServed' => one, # Must sum to <= 1 across all HeatingSystems and HeatPumps
         'ElectricAuxiliaryEnergy' => zero_or_one, # If not provided, uses 301 defaults for fuel furnace/boiler and zero otherwise
@@ -321,6 +321,13 @@ class EnergyPlusValidator
 
       ## [HeatingType=WallFurnace]
       '/HPXML/Building/BuildingDetails/Systems/HVAC/HVACPlant/HeatingSystem[HeatingSystemType/WallFurnace]' => {
+        'DistributionSystem' => zero,
+        'HeatingSystemFuel[text()="natural gas" or text()="fuel oil" or text()="propane" or text()="electricity" or text()="wood"]' => one, # See [HeatingType=FuelEquipment] if not electricity
+        'AnnualHeatingEfficiency[Units="AFUE"]/Value' => one,
+      },
+
+      ## [HeatingType=FloorFurnace]
+      '/HPXML/Building/BuildingDetails/Systems/HVAC/HVACPlant/HeatingSystem[HeatingSystemType/FloorFurnace]' => {
         'DistributionSystem' => zero,
         'HeatingSystemFuel[text()="natural gas" or text()="fuel oil" or text()="propane" or text()="electricity" or text()="wood"]' => one, # See [HeatingType=FuelEquipment] if not electricity
         'AnnualHeatingEfficiency[Units="AFUE"]/Value' => one,
