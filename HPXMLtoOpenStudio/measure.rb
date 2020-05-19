@@ -2691,7 +2691,9 @@ class OSModel
 
       elsif (heating_system.heating_system_type == HPXML::HVACTypeStove ||
              heating_system.heating_system_type == HPXML::HVACTypePortableHeater ||
-             heating_system.heating_system_type == HPXML::HVACTypeWallFurnace)
+             heating_system.heating_system_type == HPXML::HVACTypeWallFurnace ||
+             heating_system.heating_system_type == HPXML::HVACTypeFloorFurnace ||
+             heating_system.heating_system_type == HPXML::HVACTypeFireplace)
 
         HVAC.apply_unit_heater(model, runner, heating_system,
                                @remaining_heat_load_frac, @living_zone, @hvac_map)
@@ -3077,7 +3079,7 @@ class OSModel
       next unless heating_system.fraction_heat_load_served > 0
 
       htg_type = heating_system.heating_system_type
-      next unless [HPXML::HVACTypeFurnace, HPXML::HVACTypeWallFurnace, HPXML::HVACTypeStove, HPXML::HVACTypeBoiler].include? htg_type
+      next unless [HPXML::HVACTypeFurnace, HPXML::HVACTypeWallFurnace, HPXML::HVACTypeFloorFurnace, HPXML::HVACTypeStove, HPXML::HVACTypeBoiler].include? htg_type
 
       fuel = heating_system.heating_system_fuel
       next if fuel == HPXML::FuelTypeElectricity
