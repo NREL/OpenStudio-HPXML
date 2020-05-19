@@ -2113,7 +2113,8 @@ class HPXML < Object
 
   class Skylight < BaseElement
     ATTRS = [:id, :area, :azimuth, :orientation, :frame_type, :aluminum_thermal_break, :glass_layers,
-             :glass_type, :gas_fill, :ufactor, :shgc, :exterior_shading, :roof_idref]
+             :glass_type, :gas_fill, :ufactor, :shgc, :interior_shading_factor_summer,
+             :interior_shading_factor_winter, :exterior_shading, :roof_idref]
     attr_accessor(*ATTRS)
 
     def roof
@@ -2164,6 +2165,13 @@ class HPXML < Object
       XMLHelper.add_element(skylight, 'Azimuth', to_integer(@azimuth)) unless @azimuth.nil?
       XMLHelper.add_element(skylight, 'UFactor', to_float(@ufactor)) unless @ufactor.nil?
       XMLHelper.add_element(skylight, 'SHGC', to_float(@shgc)) unless @shgc.nil?
+      if (not @interior_shading_factor_summer.nil?) || (not @interior_shading_factor_winter.nil?)
+        interior_shading = XMLHelper.add_element(skylight, 'InteriorShading')
+        sys_id = XMLHelper.add_element(interior_shading, 'SystemIdentifier')
+        XMLHelper.add_attribute(sys_id, 'id', "#{id}InteriorShading")
+        XMLHelper.add_element(interior_shading, 'SummerShadingCoefficient', to_float(@interior_shading_factor_summer)) unless @interior_shading_factor_summer.nil?
+        XMLHelper.add_element(interior_shading, 'WinterShadingCoefficient', to_float(@interior_shading_factor_winter)) unless @interior_shading_factor_winter.nil?
+      end
       if not @roof_idref.nil?
         attached_to_roof = XMLHelper.add_element(skylight, 'AttachedToRoof')
         XMLHelper.add_attribute(attached_to_roof, 'idref', @roof_idref)
@@ -2184,6 +2192,8 @@ class HPXML < Object
       @gas_fill = XMLHelper.get_value(skylight, 'GasFill')
       @ufactor = to_float_or_nil(XMLHelper.get_value(skylight, 'UFactor'))
       @shgc = to_float_or_nil(XMLHelper.get_value(skylight, 'SHGC'))
+      @interior_shading_factor_summer = to_float_or_nil(XMLHelper.get_value(skylight, 'InteriorShading/SummerShadingCoefficient'))
+      @interior_shading_factor_winter = to_float_or_nil(XMLHelper.get_value(skylight, 'InteriorShading/WinterShadingCoefficient'))
       @exterior_shading = XMLHelper.get_value(skylight, 'ExteriorShading/Type')
       @roof_idref = HPXML::get_idref(XMLHelper.get_element(skylight, 'AttachedToRoof'))
     end

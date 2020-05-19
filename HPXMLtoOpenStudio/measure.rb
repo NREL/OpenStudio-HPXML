@@ -528,6 +528,16 @@ class OSModel
     end
     @frac_windows_operable = @hpxml.fraction_of_windows_operable()
 
+    # Default skylights
+    @hpxml.skylights.each do |skylight|
+      if skylight.interior_shading_factor_summer.nil?
+        skylight.interior_shading_factor_summer = 1.0
+      end
+      if skylight.interior_shading_factor_winter.nil?
+        skylight.interior_shading_factor_winter = 1.0
+      end
+    end
+
     # Default AC/HP compressor type
     @hpxml.cooling_systems.each do |cooling_system|
       next unless cooling_system.cooling_system_type == HPXML::HVACTypeCentralAirConditioner

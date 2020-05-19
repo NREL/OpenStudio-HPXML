@@ -595,9 +595,7 @@ class HVACSizing
     afl_hr = [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0] # Initialize Hourly Aggregate Fenestration Load (AFL)
 
     @hpxml.skylights.each do |skylight|
-      next unless skylight.roof.is_thermal_boundary
-
-      skylight_true_azimuth = get_true_azimuth(window.azimuth)
+      skylight_true_azimuth = get_true_azimuth(skylight.azimuth)
       cnt225 = (skylight_true_azimuth / 22.5).round.to_i
       inclination_angle = UnitConversions.convert(Math.atan(skylight.roof.pitch / 12.0), 'rad', 'deg')
 
@@ -778,7 +776,7 @@ class HVACSizing
 
     # Foundation walls
     @hpxml.foundation_walls.each do |foundation_wall|
-      next unless foundation_wall.is_exterior
+      next unless foundation_wall.is_exterior_thermal_boundary
       u_wall_with_soil, u_wall_without_soil = get_foundation_wall_properties(foundation_wall)
       zone_loads.Heat_Walls += u_wall_with_soil * foundation_wall.net_area * @htd
     end
@@ -2427,7 +2425,7 @@ class HVACSizing
       return [(setpoint + oa_db) / 2, 50].max
     elsif adjacent_space_name == HPXML::LocationOtherNonFreezingSpace
       return [oa_db, 40].max
-    elsif [HPXML::LocationOtherHousingUnit].include? adjacent_space_name
+    elsif adjacent_space_name == HPXML::LocationOtherHousingUnit
       return setpoint
     end
   end
