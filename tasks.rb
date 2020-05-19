@@ -225,6 +225,9 @@ def create_hpxmls
     'base-hvac-evap-cooler-only.xml' => 'base.xml',
     'base-hvac-evap-cooler-only-ducted.xml' => 'base.xml',
     'base-hvac-fireplace-wood-only.xml' => 'base.xml',
+    'base-hvac-floor-furnace-elec-only.xml' => 'base.xml',
+    'base-hvac-floor-furnace-propane-only.xml' => 'base.xml',
+    'base-hvac-floor-furnace-wood-only.xml' => 'base.xml',
     'base-hvac-flowrate.xml' => 'base.xml',
     'base-hvac-furnace-elec-central-ac-1-speed.xml' => 'base.xml',
     'base-hvac-furnace-elec-only.xml' => 'base.xml',
@@ -302,6 +305,8 @@ def create_hpxmls
     'hvac_autosizing/base-hvac-dual-fuel-mini-split-heat-pump-ducted-autosize.xml' => 'base-hvac-dual-fuel-mini-split-heat-pump-ducted.xml',
     'hvac_autosizing/base-hvac-elec-resistance-only-autosize.xml' => 'base-hvac-elec-resistance-only.xml',
     'hvac_autosizing/base-hvac-evap-cooler-furnace-gas-autosize.xml' => 'base-hvac-evap-cooler-furnace-gas.xml',
+    'hvac_autosizing/base-hvac-floor-furnace-elec-only-autosize.xml' => 'base-hvac-floor-furnace-elec-only.xml',
+    'hvac_autosizing/base-hvac-floor-furnace-propane-only-autosize.xml' => 'base-hvac-floor-furnace-propane-only.xml',
     'hvac_autosizing/base-hvac-furnace-elec-only-autosize.xml' => 'base-hvac-furnace-elec-only.xml',
     'hvac_autosizing/base-hvac-furnace-gas-central-ac-2-speed-autosize.xml' => 'base-hvac-furnace-gas-central-ac-2-speed.xml',
     'hvac_autosizing/base-hvac-furnace-gas-central-ac-var-speed-autosize.xml' => 'base-hvac-furnace-gas-central-ac-var-speed.xml',
@@ -2398,6 +2403,24 @@ def set_hpxml_heating_systems(hpxml_file, hpxml)
     hpxml.heating_systems[0].heating_system_fuel = HPXML::FuelTypeWood
     hpxml.heating_systems[0].heating_efficiency_afue = nil
     hpxml.heating_systems[0].heating_efficiency_percent = 0.8
+  elsif ['base-hvac-floor-furnace-elec-only.xml'].include? hpxml_file
+    hpxml.heating_systems[0].distribution_system_idref = nil
+    hpxml.heating_systems[0].heating_system_type = HPXML::HVACTypeFloorFurnace
+    hpxml.heating_systems[0].heating_system_fuel = HPXML::FuelTypeElectricity
+    hpxml.heating_systems[0].heating_efficiency_afue = 1.0
+    hpxml.heating_systems[0].electric_auxiliary_energy = 200
+  elsif ['base-hvac-floor-furnace-propane-only.xml'].include? hpxml_file
+    hpxml.heating_systems[0].distribution_system_idref = nil
+    hpxml.heating_systems[0].heating_system_type = HPXML::HVACTypeFloorFurnace
+    hpxml.heating_systems[0].heating_system_fuel = HPXML::FuelTypePropane
+    hpxml.heating_systems[0].heating_efficiency_afue = 0.8
+    hpxml.heating_systems[0].electric_auxiliary_energy = 200
+  elsif ['base-hvac-floor-furnace-wood-only.xml'].include? hpxml_file
+    hpxml.heating_systems[0].distribution_system_idref = nil
+    hpxml.heating_systems[0].heating_system_type = HPXML::HVACTypeFloorFurnace
+    hpxml.heating_systems[0].heating_system_fuel = HPXML::FuelTypeWood
+    hpxml.heating_systems[0].heating_efficiency_afue = 0.8
+    hpxml.heating_systems[0].electric_auxiliary_energy = 200
   elsif ['base-hvac-portable-heater-electric-only.xml'].include? hpxml_file
     hpxml.heating_systems[0].distribution_system_idref = nil
     hpxml.heating_systems[0].heating_system_type = HPXML::HVACTypePortableHeater
@@ -2495,6 +2518,9 @@ def set_hpxml_cooling_systems(hpxml_file, hpxml)
          'base-hvac-boiler-wood-only.xml',
          'base-hvac-elec-resistance-only.xml',
          'base-hvac-fireplace-wood-only.xml',
+         'base-hvac-floor-furnace-elec-only.xml',
+         'base-hvac-floor-furnace-propane-only.xml',
+         'base-hvac-floor-furnace-wood-only.xml',
          'base-hvac-furnace-elec-only.xml',
          'base-hvac-furnace-gas-only.xml',
          'base-hvac-furnace-oil-only.xml',
@@ -2879,6 +2905,9 @@ def set_hpxml_hvac_distributions(hpxml_file, hpxml)
          'base-hvac-elec-resistance-only.xml',
          'base-hvac-evap-cooler-only.xml',
          'base-hvac-fireplace-wood-only.xml',
+         'base-hvac-floor-furnace-elec-only.xml',
+         'base-hvac-floor-furnace-propane-only.xml',
+         'base-hvac-floor-furnace-wood-only.xml',
          'base-hvac-ideal-air.xml',
          'base-hvac-mini-split-heat-pump-ductless.xml',
          'base-hvac-room-ac-only.xml',
