@@ -777,10 +777,12 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     heating_system_type_choices << 'none'
     heating_system_type_choices << HPXML::HVACTypeFurnace
     heating_system_type_choices << HPXML::HVACTypeWallFurnace
+    heating_system_type_choices << HPXML::HVACTypeFloorFurnace
     heating_system_type_choices << HPXML::HVACTypeBoiler
     heating_system_type_choices << HPXML::HVACTypeElectricResistance
     heating_system_type_choices << HPXML::HVACTypeStove
     heating_system_type_choices << HPXML::HVACTypePortableHeater
+    heating_system_type_choices << HPXML::HVACTypeFireplace
 
     heating_system_fuel_choices = OpenStudio::StringVector.new
     heating_system_fuel_choices << HPXML::FuelTypeElectricity
@@ -816,14 +818,14 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('heating_system_heating_efficiency_afue', true)
     arg.setDisplayName('Heating System: Rated AFUE')
     arg.setUnits('AFUE')
-    arg.setDescription('The rated efficiency value of the Furnace/WallFurnace/Boiler heating system.')
+    arg.setDescription('The rated efficiency value of the Furnace/WallFurnace/FloorFurnace/Boiler heating system.')
     arg.setDefaultValue(0.78)
     args << arg
 
     arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('heating_system_heating_efficiency_percent', true)
     arg.setDisplayName('Heating System: Rated Percent')
     arg.setUnits('Percent')
-    arg.setDescription('The rated efficiency value of the ElectricResistance/Stove/PortableHeater heating system.')
+    arg.setDescription('The rated efficiency value of the ElectricResistance/Stove/PortableHeater/Fireplace heating system.')
     arg.setDefaultValue(1.0)
     args << arg
 
@@ -1159,10 +1161,11 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     heating_system_type_2_choices = OpenStudio::StringVector.new
     heating_system_type_2_choices << 'none'
     heating_system_type_2_choices << HPXML::HVACTypeWallFurnace
+    heating_system_type_2_choices << HPXML::HVACTypeFloorFurnace
     heating_system_type_2_choices << HPXML::HVACTypeElectricResistance
     heating_system_type_2_choices << HPXML::HVACTypeStove
     heating_system_type_2_choices << HPXML::HVACTypePortableHeater
-    # heating_system_type_2_choices << HPXML::HVACTypeFireplace
+    heating_system_type_2_choices << HPXML::HVACTypeFireplace
 
     arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('heating_system_type_2', heating_system_type_2_choices, true)
     arg.setDisplayName('Heating System 2: Type')
@@ -3272,9 +3275,9 @@ class HPXMLFile
       heating_system_fuel = args[:heating_system_fuel]
     end
 
-    if [HPXML::HVACTypeFurnace, HPXML::HVACTypeWallFurnace, HPXML::HVACTypeBoiler].include? heating_system_type
+    if [HPXML::HVACTypeFurnace, HPXML::HVACTypeWallFurnace, HPXML::HVACTypeFloorFurnace, HPXML::HVACTypeBoiler].include? heating_system_type
       heating_efficiency_afue = args[:heating_system_heating_efficiency_afue]
-    elsif [HPXML::HVACTypeElectricResistance, HPXML::HVACTypeStove, HPXML::HVACTypePortableHeater].include? heating_system_type
+    elsif [HPXML::HVACTypeElectricResistance, HPXML::HVACTypeStove, HPXML::HVACTypePortableHeater, HPXML::HVACTypeFireplace].include? heating_system_type
       heating_efficiency_percent = args[:heating_system_heating_efficiency_percent]
     end
 
