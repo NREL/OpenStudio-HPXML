@@ -711,7 +711,6 @@ class HVACSizing
     (@hpxml.walls + @hpxml.rim_joists).each do |wall|
       next unless wall.is_thermal_boundary
 
-      next unless wall.is_exterior
       wall_group = get_wall_group(wall)
 
       # Adjust base Cooling Load Temperature Difference (CLTD)
@@ -876,7 +875,10 @@ class HVACSizing
         r_other = Material.Concrete(4.0).rvalue + Material.AirFilmFloorAverage.rvalue
         foundation_walls = @hpxml.foundation_walls.select { |fw| fw.is_thermal_boundary }
         z_f = foundation_walls.map { |fw| fw.depth_below_grade }.inject(:+) / foundation_walls.size # Average below-grade depth
-        w_b = Math.sqrt(slab.area)
+        sqrt_term = [slab.exposed_perimeter**2 - 16.0 * slab.area, 0.0].max
+        length = slab.exposed_perimeter / 4.0 + Math.sqrt(sqrt_term) / 4.0
+        width = slab.exposed_perimeter / 4.0 - Math.sqrt(sqrt_term) / 4.0
+        w_b = [length, width].min
         u_avg_bf = (2.0 * k_soil / (Math::PI * w_b)) * (Math::log(w_b / 2.0 + z_f / 2.0 + (k_soil * r_other) / Math::PI) - Math::log(z_f / 2.0 + (k_soil * r_other) / Math::PI))
         u_value_mj8 = 0.85 * u_avg_bf
         zone_loads.Heat_Floors += u_value_mj8 * slab.area * @htd
