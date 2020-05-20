@@ -11,6 +11,7 @@ require_relative 'resources/airflow'
 require_relative 'resources/constants'
 require_relative 'resources/constructions'
 require_relative 'resources/EPvalidator'
+require_relative 'resources/HPXMLvalidator'
 require_relative 'resources/geometry'
 require_relative 'resources/hotwater_appliances'
 require_relative 'resources/hpxml'
@@ -154,6 +155,8 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
     is_valid = true
 
     # Validate input HPXML against schema
+    HPXMLValidator.validate_xml(hpxml.doc)
+
     XMLHelper.validate(hpxml.doc.to_xml, File.join(schemas_dir, 'HPXML.xsd'), runner).each do |error|
       runner.registerError("#{hpxml_path}: #{error}")
       is_valid = false

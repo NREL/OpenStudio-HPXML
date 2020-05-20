@@ -2,9 +2,8 @@ require_relative 'xmlhelper'
 require 'oga'
 
 class HPXMLValidator
-  def self.get_data_type_mapping_xml()
-    xpath_array = ['/HPXML/XMLTransactionHeaderInformation/XMLType',
-                   '/HPXML/XMLTransactionHeaderInformation/XMLGeneratedBy',
+  @xpath_array = ['/HPXML/XMLTransactionHeaderInformation/XMLType',
+                  '/HPXML/XMLTransactionHeaderInformation/XMLGeneratedBy',
                    '/HPXML/XMLTransactionHeaderInformation/CreatedDateAndTime',
                    '/HPXML/XMLTransactionHeaderInformation/Transaction',
                    '/HPXML/SoftwareInfo/extension/SimulationControl',
@@ -435,230 +434,206 @@ class HPXMLValidator
                    '/HPXML/Building/BuildingDetails/MiscLoads/extension/WeekendScheduleFractions',
                    '/HPXML/Building/BuildingDetails/MiscLoads/extension/MonthlyScheduleMultipliers']
 
+  def self.get_data_type_req_xml()
     this_dir = File.dirname(__FILE__)
     base_el_xsd_path = this_dir + '/BaseElements.xsd'
     doc_base = XMLHelper.parse_file(base_el_xsd_path)
+    dt_type_xsd_path = this_dir + '/HPXMLDataTypes.xsd'
+    doc_data = XMLHelper.parse_file(dt_type_xsd_path)
 
     type_xml = XMLHelper.create_doc(version = '1.0', encoding = 'UTF-8')
     type_map = XMLHelper.add_element(type_xml, 'ElementDataTypeMap')
+    hpxml_el = XMLHelper.add_element(type_map, 'HPXML')
 
-    xpath_array.each do |el_path|
+    # add top level elements (specified in HPXML.xsd)
+    XMLHelper.add_element(hpxml_el, 'XMLTransactionHeaderInformation')
+    XMLHelper.add_element(hpxml_el, 'SoftwareInfo')
+    XMLHelper.add_attribute(XMLHelper.add_element(hpxml_el, 'Contractor'), 'DataType', 'Contractor')
+    XMLHelper.add_attribute(XMLHelper.add_element(hpxml_el, 'Customer'), 'DataType', 'Customer')
+    XMLHelper.add_attribute(XMLHelper.add_element(hpxml_el, 'Building'), 'DataType', 'Building')
+    XMLHelper.add_attribute(XMLHelper.add_element(hpxml_el, 'Project'), 'DataType', 'Project')
+    XMLHelper.add_attribute(XMLHelper.add_element(hpxml_el, 'Utility'), 'DataType', 'Utility')
+    XMLHelper.add_attribute(XMLHelper.add_element(hpxml_el, 'Consumption'), 'DataType', 'Consumption')
+
+    @xpath_array.each do |el_path|
       el_array = el_path.split('/').reject { |p| p.empty? }
-      type_xml = load_or_get_data_type_xsd(el_array, type_xml, doc_base)
+      type_xml = get_data_type_req(el_array, type_xml, doc_base, doc_data)
     end
     XMLHelper.write_file(type_xml, this_dir + '/element_type.xml')
   end
 
-  def self.generate_xpath_array_from_requirement_hash(ep_validator_requirements)
-    xpath_array = []
-    ep_validator_requirements.each do |parent, requirement|
-      if parent.nil? # Unconditional
-        requirement.each do |child, expected_sizes|
-          count += 1
-          xpath = combine_into_xpath(parent, child)
-          xpath.gsub(/(?<reg>(\[([^\]\[]|\g<reg>)*\]))/, '').split(/ [|,or] /).each do |el_path|
-            xpath_array << el_path
-          end
+  def self.validate_xml(hpxml_doc)
+    puts 'Validating xml...'
+    this_dir = File.dirname(__FILE__)
+    el_type_path = this_dir + '/element_type.xml'
+    type_req_path = this_dir + '/type_requiment.xml'
+    doc_el_type = XMLHelper.parse_file(el_type_path)
+    doc_type_req = XMLHelper.parse_file(type_req_path)
+
+    @xpath_array.each do |el_path|
+      elements_in_xml = hpxml_doc.xpath("#{el_path}")
+      if not elements_in_xml.empty?
+        el_type_el = XMLHelper.get_element(doc_el_type, '/' + el_path)
+        el_type = XMLHelper.get_attribute_value(el_type_el, 'DataType')
+        if not el_type.nil?
+        type_req = XMLHelper.get_element(doc_type_req, '//' + el_type)
+        if not type_req.nil?
+        min_in = to_float_or_nil(XMLHelper.get_value(type_req, 'minInclusive'))
+        min_ex = to_float_or_nil(XMLHelper.get_value(type_req, 'minExclusive'))
+        max_in = to_float_or_nil(XMLHelper.get_value(type_req, 'maxInclusive'))
+        max_ex = to_float_or_nil(XMLHelper.get_value(type_req, 'maxExclusive'))
+        enums = []
+        XMLHelper.get_elements(type_req, 'enumeration').each do |enum|
+          enums << enum.text
         end
-      else # Conditional based on parent element existence
-        parent.gsub(/(?<reg>(\[([^\]\[]|\g<reg>)*\]))/, '').split(/ [|,or] /).each do |parent_path|
-          requirement.each do |child, expected_sizes|
-            child.gsub(/(?<reg>(\[([^\]\[]|\g<reg>)*\]))/, '').split(/ [|,or] /).each do |child_path|
-              count += 1
-              el_path = combine_into_xpath(parent_path, child_path)
-              next if el_path == parent_path
-              xpath_array << el_path
+        elements_in_xml.each do |el|
+          next if el.text.nil?
+          xml_number = to_float_or_nil(el.text)
+          if not xml_number.nil?
+            if not max_in.nil?
+              if (not xml_number <= max_in)
+                fail "#{el_path} value: #{xml_number} out of maximum bound: #{max_in}"
+              end
+            elsif not max_ex.nil?
+              if (not xml_number < max_ex)
+                fail "#{el_path} value: #{xml_number} out of maximum bound: #{max_ex}"
+              end
+            end
+            if not min_in.nil?
+              if (not xml_number >= min_in)
+                fail "#{el_path} value: #{xml_number} out of minimum bound: #{min_in}"
+              end
+            elsif not min_ex.nil?
+              if (not xml_number > min_ex)
+                fail "#{el_path} value: #{xml_number} out of minimum bound: #{min_ex}"
+              end
+            end
+          else
+            if not enums.empty?
+              if not enums.include? el.text
+                fail "#{el_path} invalid enumerations: #{el.text}"
+              end
             end
           end
+        end
+        end
         end
       end
     end
+    puts 'Validation done!'
   end
 
-  def self.load_or_get_data_type_xsd(el_array, type_xml, doc_base)
+  def self.get_data_type_req(el_array, type_xml, doc_base, doc_data)
     # get element data type from BaseElements.xsd using path
-
-    # return @type_map[el_array] if not @type_map[el_array].nil?
-    puts ''
-    puts '----New element validation required!----'
-
     parent_type = nil
     parent_name = nil
 
+    # get element hierarchy and its data type
     el_array.each_with_index do |el_name, i|
-      next if i < 2
       return type_xml if el_name == 'extension'
-      root_node = XMLHelper.get_element(type_xml, 'ElementDataTypeMap')
-      if i == 2
-        parent_node = root_node
-      else
-        parent_node = XMLHelper.get_element(root_node, el_array.drop(2).take(i - 2).join('/'))
-      end
-      puts parent_node
-      child_node = XMLHelper.get_element(parent_node, el_name)
-      if not child_node.nil?
-        parent_type = XMLHelper.get_attribute_value(child_node, 'DataType')
-        parent_name = el_name
-        next
-      end
-
-      puts 'this element name: ' + el_name
-      puts 'parent type: '
-      puts parent_type
-      puts 'parent name: '
-      puts parent_name
-
-      if parent_type.nil? && parent_name.nil?
-        el= XMLHelper.get_element(doc_base,"//xs:element[@name='#{el_name}']")
-      else
-        if (not parent_name.nil?) && parent_type.nil?
-          el = XMLHelper.get_element(doc_base,"//xs:element[@name='#{parent_name}']//xs:element[@name='#{el_name}']")
-          if el.nil?
-            group_name = XMLHelper.get_attribute_value(XMLHelper.get_element(doc_base,"//xs:element[@name='#{parent_name}']//xs:group"), 'ref')
-          end
-          while el.nil? do
-            el = XMLHelper.get_element(doc_base,"//xs:group[@name='#{group_name}']//xs:element[@name='#{el_name}']")
-            group_name = XMLHelper.get_attribute_value(XMLHelper.get_element(doc_base,"//xs:group[@name='#{group_name}']//xs:group"),'ref') if el.nil?
-          end
-        else
-          el = XMLHelper.get_element(doc_base,"//xs:complexType[@name='#{parent_type}']//xs:element[@name='#{el_name}']")
-          while el.nil? do
-            # this approach can only have one group or one base
-            group = XMLHelper.get_element(doc_base,"//xs:complexType[@name='#{parent_type}']//xs:group")
-            base = XMLHelper.get_element(doc_base,"//xs:complexType[@name='#{parent_type}']//xs:extension")
-            if (not base.nil?) && group.nil?
-              base_name = XMLHelper.get_attribute_value(base, 'base')
-              el = XMLHelper.get_element(doc_base,"//xs:complexType[@name='#{base_name}']//xs:element[@name='#{el_name}']")
-              parent_type = base_name
-            elsif not group.nil?
-              group_name = XMLHelper.get_attribute_value(group, 'ref')
-              el = XMLHelper.get_element(doc_base, "//xs:group[@name='#{group_name}']//xs:element[@name='#{el_name}']")
-            else
-              break
-            end
-          end
-        end
-      end
-      el_type = XMLHelper.get_attribute_value(el,'type')
-      if not el_type.nil?
-        el = XMLHelper.add_element(parent_node, el_name)
-        XMLHelper.add_attribute(el, 'DataType', el_type)
-      else
-        el = XMLHelper.add_element(parent_node, el_name)
-      end
-      parent_type = el_type
-      parent_name = el_name
+      next if i == 0
+      el_type, el_node = get_element_type(type_xml, el_array, el_name, i, doc_base)
+      get_type_requiements(el_type, el_node, doc_data)
     end
 
     return type_xml
   end
 
-  def self.recursively_get_all_xsd_data_type()
-    # Not applicable
-    this_dir = File.dirname(__FILE__)
-    base_el_xsd_path = this_dir + '/BaseElements.xsd'
-    doc_base = XMLHelper.parse_file(base_el_xsd_path)
+  def self.get_element_type(type_xml, el_array, el_name, i, doc_base)
+    root_node = XMLHelper.get_element(type_xml, 'ElementDataTypeMap')
 
-    type_xml = XMLHelper.create_doc(version = '1.0', encoding = 'UTF-8')
-    type_map = XMLHelper.add_element(type_xml, 'ElementDataTypeMap')
+    parent_node = XMLHelper.get_element(root_node, el_array.take(i).join('/'))
+    parent_type = XMLHelper.get_attribute_value(parent_node, 'DataType')
+    parent_name = parent_node.name
 
-    ['Contractor', 'Customer', 'Building', 'Project', 'Utility', 'Consumption'].each do |top_level_type|
-      parent_node = XMLHelper.get_element(doc_base, "//xs:complexType[@name='#{top_level_type}']")
-      recursively_get_type(parent_node, type_map, doc_base)
-    end
+    child_node = XMLHelper.get_element(parent_node, el_name)
+    return[XMLHelper.get_attribute_value(child_node, 'DataType'), child_node] if not child_node.nil?
 
-    XMLHelper.write_file(type_xml, this_dir + '/element_type.xml')
-  end
-
-  def self.recursively_get_type(xsd_parent_node, xml_parent_node, doc_base)
-    # Not applicable
-    puts xsd_parent_node.to_xml
-    groups = XMLHelper.get_elements(xsd_parent_node, 'xs:sequence/xs:group')
-    base_types = XMLHelper.get_elements(xsd_parent_node, 'xs:complexContent/xs:extension')
-    groups.each do |group|
-        group_name = XMLHelper.get_attribute_value(group, 'ref')
-        group_el = XMLHelper.get_element(doc_base, "//xs:group[@name='#{group_name}']")
-        parent_node = group_el
-        recursively_get_type(parent_node, xml_parent_node, doc_base) unless parent_node.nil?
-    end
-    base_types.each do |base_type|
-        base_type_name = XMLHelper.get_attribute_value(base_type, 'base')
-        base_type_el = XMLHelper.get_element(doc_base, "//xs:complexType[@name='#{base_type_name}']")
-        parent_node = base_type_el
-        recursively_get_type(parent_node, xml_parent_node, doc_base) unless parent_node.nil?
-        parent_node = base_type
-        recursively_get_type(parent_node, xml_parent_node, doc_base) unless parent_node.nil?
-    end
-
-    child_element_nodes = XMLHelper.get_elements(xsd_parent_node, 'xs:sequence/xs:element | xs:choice/xs:element')
-      puts child_element_nodes.size
-
-      child_element_nodes.each do |xsd_child_node|
-      puts "--Add new element!"
-      if not XMLHelper.get_attribute_value(xsd_child_node, 'name').nil?
-        xml_el = XMLHelper.add_element(xml_parent_node, XMLHelper.get_attribute_value(xsd_child_node, 'name'))
-      end
-      el_type = XMLHelper.get_attribute_value(xsd_child_node,'type')
-      if not el_type.nil?
-        XMLHelper.add_attribute(xml_el, 'DataType', el_type)
-        parent_node = XMLHelper.get_element(doc_base,"//xs:complexType[@name='#{el_type}']")
-      else
-        parent_node = XMLHelper.get_element(xsd_child_node,"/xs:complexType")
-      end
-      recursively_get_type(parent_node, xml_el, doc_base) unless parent_node.nil?
-    end
-  end
-
-  def self.combine_into_xpath(parent, child)
-    if parent.nil?
-      return child
-    elsif child.start_with?('[')
-      return [parent, child].join('')
-    end
-
-    return [parent, child].join('/')
-  end
-
-  def self.get_complex_type_name(doc_data, simple_type_name)
-    complex_type = XMLHelper.get_element(doc_data, "//xs:complexType[xs:simpleContent[xs:extension[@base='#{simple_type_name}']]]")
-    if complex_type.nil?
-      return simple_type_name
+    if parent_type.nil? && parent_name.nil?
+      el= XMLHelper.get_element(doc_base,"//xs:element[@name='#{el_name}']")
     else
-      return XMLHelper.get_attribute_value(complex_type, 'name')
+      if (not parent_name.nil?) && parent_type.nil?
+        # search elements under parent element if parent element is not pointing to a complex type
+        el = XMLHelper.get_element(doc_base,"//xs:element[@name='#{parent_name}']//xs:element[@name='#{el_name}']")
+        group = XMLHelper.get_element(doc_base,"//xs:element[@name='#{parent_name}']//xs:group")
+
+        # if the element is not at first level group, search deeper grouping
+        el = get_el_from_group(group, el_name, doc_base) if el.nil?
+      else
+        # search under parent type element
+        el = XMLHelper.get_element(doc_base,"//xs:complexType[@name='#{parent_type}']//xs:element[@name='#{el_name}']")
+        base = XMLHelper.get_element(doc_base,"//xs:complexType[@name='#{parent_type}']//xs:extension")
+        group = XMLHelper.get_element(doc_base,"//xs:complexType[@name='#{parent_type}']//xs:group")
+        if el.nil? and not base.nil?
+          base_name = XMLHelper.get_attribute_value(base, 'base')
+          el = XMLHelper.get_element(doc_base,"//xs:complexType[@name='#{base_name}']//xs:element[@name='#{el_name}']")
+          # if base containing group
+          base_group = XMLHelper.get_element(doc_base,"//xs:complexType[@name='#{base_name}']//xs:group")
+        end
+
+        el = get_el_from_group(group, el_name, doc_base) if el.nil?
+        el = get_el_from_group(base_group, el_name, doc_base) if el.nil?
+      end
+    end
+    el_type = XMLHelper.get_attribute_value(el,'type')
+    if not el_type.nil?
+      el_node = XMLHelper.add_element(parent_node, el_name)
+      XMLHelper.add_attribute(el_node, 'DataType', el_type)
+    else
+      el_node = XMLHelper.add_element(parent_node, el_name)
+    end
+
+    # last element
+    if i == (el_array.size() -1)
+      if el_type.nil?
+        puts "Warning: No data type parsed for xpath: #{el_array}"
+      end
+    end
+
+    return el_type, el_node
+  end
+
+  def self.get_el_from_group(group, el_name, doc_base)
+    return if group.nil?
+
+    group_name = XMLHelper.get_attribute_value(group, 'ref')
+    el = XMLHelper.get_element(doc_base, "//xs:group[@name='#{group_name}']//xs:element[@name='#{el_name}']")
+    if el.nil?
+      group = XMLHelper.get_element(doc_base,"//xs:group[@name='#{group_name}']//xs:group")
+      get_el_from_group(group, el_name)
     end
   end
 
-  def self.get_datatype_requirement()
-    # get enums, min/max values from HPXMLDataTypes.xsd
-    this_dir = File.dirname(__FILE__)
-    dt_type_xsd_path = this_dir + '/HPXMLDataTypes.xsd'
-    doc_data = XMLHelper.parse_file(dt_type_xsd_path)
+  def self.get_type_requiements(el_type, el_node, doc_data)
+    complex_type_el = XMLHelper.get_element(doc_data, "//xs:complexType[@name='#{el_type}']")
+    return if complex_type_el.nil?
 
-    req_xml = XMLHelper.create_doc(version = '1.0', encoding = 'UTF-8')
-    req_root = XMLHelper.add_element(req_xml, 'DataTypeRequirementMap')
+    simple_type_el = get_base_element_from_extended_element(complex_type_el, doc_data, 'xs:simpleType')
+    return if simple_type_el.nil?
 
-    get_individual_requirement(doc_data, 'enumeration', req_root)
-    get_individual_requirement(doc_data, 'minInclusive', req_root)
-    get_individual_requirement(doc_data, 'minExclusive', req_root)
-    get_individual_requirement(doc_data, 'maxInclusive', req_root)
-    get_individual_requirement(doc_data, 'maxExclusive', req_root)
-
-    XMLHelper.write_file(req_xml, this_dir + '/type_requiment.xml')
+    ['enumeration', 'minInclusive', 'minExclusive', 'maxInclusive', 'maxExclusive'].each do |req_name|
+      XMLHelper.get_elements(simple_type_el, "xs:restriction/xs:#{req_name}").each do |req_el|
+        XMLHelper.add_element(el_node, req_name, XMLHelper.get_attribute_value(req_el, 'value'))
+      end
+    end
   end
 
-  def self.get_individual_requirement(doc_data, req_name, req_root)
-    XMLHelper.get_elements(doc_data, "//xs:#{req_name}").each do |req_el|
-      simple_type_name = XMLHelper.get_attribute_value(req_el.parent.parent, 'name')
-      complex_type_name = get_complex_type_name(doc_data, simple_type_name)
-      complex_type_el = XMLHelper.get_element(req_root, "//#{complex_type_name}")
-      if complex_type_el.nil?
-        complex_type_el = XMLHelper.add_element(req_root, complex_type_name)
-      end
-      if not XMLHelper.get_attribute_value(req_el,'value').nil?
-        XMLHelper.add_element(complex_type_el, req_name, XMLHelper.get_attribute_value(req_el, 'value'))
-      end
+  def self.get_base_element_from_extended_element(extended_el, doc, base_el_name)
+    extension = extended_el.at_xpath('xs:simpleContent/xs:extension')
+    return if extension.nil?
+
+    base_element_name_attr = XMLHelper.get_attribute_value(extension, 'base')
+    return XMLHelper.get_element(doc, "//#{base_el_name}[@name='#{base_element_name_attr}']")
+  end
+
+  def self.to_float_or_nil(value)
+    return if value.nil?
+    begin
+      return Float(value)
+    rescue ArgumentError
+      return
     end
   end
 end
 
-HPXMLValidator.get_data_type_mapping_xml()
+HPXMLValidator.get_data_type_req_xml()
