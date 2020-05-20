@@ -4074,8 +4074,9 @@ class OSModel
       program.addLine("Set #{actuator.name} = #{actuator.name} + (#{sensor_gnd.name} * #{space_values[:ground_weight]})")
     end
     if not space_values[:temp_min].nil?
-      program.addLine("If #{actuator.name} < #{space_values[:temp_min]}")
-      program.addLine("Set #{actuator.name} = #{space_values[:temp_min]}")
+      min_temp_c = UnitConversions.convert(space_values[:temp_min], 'F', 'C')
+      program.addLine("If #{actuator.name} < #{min_temp_c}")
+      program.addLine("Set #{actuator.name} = #{min_temp_c}")
       program.addLine('EndIf')
     end
 
