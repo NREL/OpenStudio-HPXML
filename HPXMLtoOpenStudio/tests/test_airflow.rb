@@ -261,6 +261,68 @@ class HPXMLtoOpenStudioAirflowTest < MiniTest::Test
     assert_in_epsilon(29.4, UnitConversions.convert(Float(program_values['return_ua']), 'W/K', 'Btu/(hr*F)'), 0.01)
   end
 
+  def test_infiltration_compartmentalization_area
+    # Base
+    hpxml = HPXML.new(hpxml_path: File.absolute_path(File.join(sample_files_dir, 'base.xml')))
+    total_area, exterior_area = hpxml.compartmentalization_boundary_areas
+    assert_equal(5216, exterior_area)
+    assert_equal(5216, total_area)
+
+    # Test adjacent garage
+    hpxml = HPXML.new(hpxml_path: File.absolute_path(File.join(sample_files_dir, 'base-enclosure-garage.xml')))
+    total_area, exterior_area = hpxml.compartmentalization_boundary_areas
+    assert_equal(4976, exterior_area)
+    assert_equal(5216, total_area)
+
+    # Test unvented attic/crawlspace within infiltration volume
+    hpxml = HPXML.new(hpxml_path: File.absolute_path(File.join(sample_files_dir, 'base-foundation-unvented-crawlspace.xml')))
+    hpxml.attics.each do |attic|
+      attic.within_infiltration_volume = true
+    end
+    hpxml.foundations.each do |foundation|
+      foundation.within_infiltration_volume = true
+    end
+    total_area, exterior_area = hpxml.compartmentalization_boundary_areas
+    assert_equal(5066, exterior_area)
+    assert_equal(5066, total_area)
+
+    # Test complex SFA/MF building w/ unvented attic within infiltration volume
+    hpxml = HPXML.new(hpxml_path: File.absolute_path(File.join(sample_files_dir, 'base-enclosure-attached-multifamily.xml')))
+    hpxml.attics.each do |attic|
+      attic.within_infiltration_volume = true
+    end
+    total_area, exterior_area = hpxml.compartmentalization_boundary_areas
+    assert_equal(5550, exterior_area)
+    assert_equal(8076, total_area)
+  end
+
+  def test_infiltration_assumed_height
+    # Base
+    hpxml = HPXML.new(hpxml_path: File.absolute_path(File.join(sample_files_dir, 'base.xml')))
+    infil_height = hpxml.inferred_infiltration_height
+    assert_equal(9.75, infil_height)
+
+    # Test w/o conditioned basement
+    hpxml = HPXML.new(hpxml_path: File.absolute_path(File.join(sample_files_dir, 'base-foundation-unconditioned-basement.xml')))
+    infil_height = hpxml.inferred_infiltration_height
+    assert_equal(8, infil_height)
+
+    # Test w/ walkout basement
+    hpxml = HPXML.new(hpxml_path: File.absolute_path(File.join(sample_files_dir, 'base-foundation-walkout-basement.xml')))
+    infil_height = hpxml.inferred_infiltration_height
+    assert_equal(16, infil_height)
+
+    # Test 2 story building
+    hpxml = HPXML.new(hpxml_path: File.absolute_path(File.join(sample_files_dir, 'base-enclosure-2stories.xml')))
+    infil_height = hpxml.inferred_infiltration_height
+    assert_equal(17.75, infil_height)
+
+    # Test w/ cathedral ceiling
+    hpxml = HPXML.new(hpxml_path: File.absolute_path(File.join(sample_files_dir, 'base-atticroof-cathedral.xml')))
+    infil_height = hpxml.inferred_infiltration_height
+    assert_equal(13.75, infil_height)
+  end
+
   def _test_measure(args_hash)
     # create an instance of the measure
     measure = HPXMLtoOpenStudio.new

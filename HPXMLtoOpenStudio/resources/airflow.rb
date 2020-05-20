@@ -1674,29 +1674,6 @@ class Airflow
     return c_w_SG, c_s_SG
   end
 
-  def self.calc_inferred_infiltration_height(cfa, ncfl, ncfl_ag, infil_volume, hpxml)
-    # Infiltration height: vertical distance between lowest and highest above-grade points within the pressure boundary.
-    # Height is inferred from available HPXML properties.
-    has_walkout_basement = hpxml.has_walkout_basement()
-
-    if has_walkout_basement
-      infil_height = Float(ncfl_ag) * infil_volume / cfa
-    else
-      # Calculate maximum above-grade height of conditioned basement walls
-      max_cond_bsmt_wall_height_ag = 0.0
-      hpxml.foundation_walls.each do |foundation_wall|
-        next unless foundation_wall.is_exterior_thermal_boundary
-
-        height_ag = foundation_wall.height - foundation_wall.depth_below_grade
-        next unless height_ag > max_cond_bsmt_wall_height_ag
-
-        max_cond_bsmt_wall_height_ag = height_ag
-      end
-      infil_height = Float(ncfl_ag) * infil_volume / cfa + max_cond_bsmt_wall_height_ag
-    end
-    return infil_height
-  end
-
   def self.get_infiltration_NL_from_SLA(sla, infil_height)
     # Returns infiltration normalized leakage given SLA.
     return 1000.0 * sla * (infil_height / 8.202)**0.4

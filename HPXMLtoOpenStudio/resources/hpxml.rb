@@ -337,11 +337,12 @@ class HPXML < Object
   end
 
   def compartmentalization_boundary_areas()
+    # Returns the infiltration compartmentalization boundary areas
     total_area = 0.0 # Total surface area that bounds the Infiltration Volume
     exterior_area = 0.0 # Same as above excluding surfaces attached to garage or other housing units
 
     # Determine which spaces are within infiltration volume
-    spaces_within_infil_volume = [LocationLivingSpace]
+    spaces_within_infil_volume = [LocationLivingSpace, LocationBasementConditioned]
     @attics.each do |attic|
       next unless [AtticTypeUnvented].include? attic.attic_type
       next unless attic.within_infiltration_volume
@@ -365,13 +366,48 @@ class HPXML < Object
 
         # Update Compartmentalization Boundary areas
         total_area += surface.area
-        if not [LocationOtherHousingUnit, LocationGarage].include? surface.exterior_adjacent_to # FIXME: Need to add additional "other" spaces?
+        if not [LocationGarage, LocationOtherHousingUnit, LocationOtherHeatedSpace,
+                LocationOtherMultifamilyBufferSpace, LocationOtherNonFreezingSpace].include? surface.exterior_adjacent_to # FIXME: Need to add additional "other" spaces?
           exterior_area += surface.area
         end
       end
     end
 
     return total_area, exterior_area
+  end
+
+  def inferred_infiltration_height()
+    # Infiltration height: vertical distance between lowest and highest above-grade points within the pressure boundary.
+    # Height is inferred from available HPXML properties.
+    # The WithinInfiltrationVolume properties are intentionally ignored for now.
+    # FUTURE: Move into AirInfiltrationMeasurement class?
+    cfa = @building_construction.conditioned_floor_area
+    ncfl = @building_construction.number_of_conditioned_floors
+    ncfl_ag = @building_construction.number_of_conditioned_floors_above_grade
+    infil_volume = @air_infiltration_measurements.select { |m| !m.infiltration_volume.nil? }[0].infiltration_volume
+    if has_walkout_basement()
+      infil_height = Float(ncfl_ag) * infil_volume / cfa
+    else
+      # Calculate maximum above-grade height of conditioned basement walls
+      max_cond_bsmt_wall_height_ag = 0.0
+      @foundation_walls.each do |foundation_wall|
+        next unless foundation_wall.is_exterior && (foundation_wall.interior_adjacent_to == LocationBasementConditioned)
+
+        height_ag = foundation_wall.height - foundation_wall.depth_below_grade
+        next unless height_ag > max_cond_bsmt_wall_height_ag
+
+        max_cond_bsmt_wall_height_ag = height_ag
+      end
+      # Add assumed rim joist height
+      cond_bsmt_rim_joist_height = 0
+      @rim_joists.each do |rim_joist|
+        next unless rim_joist.is_exterior && (rim_joist.interior_adjacent_to == LocationBasementConditioned)
+
+        cond_bsmt_rim_joist_height = UnitConversions.convert(9, 'in', 'ft')
+      end
+      infil_height = Float(ncfl_ag) * infil_volume / cfa + max_cond_bsmt_wall_height_ag + cond_bsmt_rim_joist_height
+    end
+    return infil_height
   end
 
   def to_oga()
