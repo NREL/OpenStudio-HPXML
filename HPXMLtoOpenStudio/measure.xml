@@ -3,8 +3,8 @@
   <schema_version>3.0</schema_version>
   <name>hpxm_lto_openstudio</name>
   <uid>b1543b30-9465-45ff-ba04-1d1f85e763bc</uid>
-  <version_id>c8dc0279-83ae-47e5-95fe-97ca74cd5a24</version_id>
-  <version_modified>20200520T115031Z</version_modified>
+  <version_id>c8241548-c38c-4ff5-82ce-34086b68a583</version_id>
+  <version_modified>20200520T115324Z</version_modified>
   <xml_checksum>D8922A73</xml_checksum>
   <class_name>HPXMLtoOpenStudio</class_name>
   <display_name>HPXML to OpenStudio Translator</display_name>
@@ -385,12 +385,6 @@
       <checksum>9726CA6F</checksum>
     </file>
     <file>
-      <filename>hvac.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>86AD17CB</checksum>
-    </file>
-    <file>
       <filename>xmlhelper.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
@@ -419,18 +413,6 @@
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
       <checksum>AA162D27</checksum>
-    </file>
-    <file>
-      <filename>EPvalidator.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>AE89A124</checksum>
-    </file>
-    <file>
-      <filename>hpxml.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>61D6CFEC</checksum>
     </file>
     <file>
       <filename>BaseElements.xsd</filename>
@@ -487,16 +469,34 @@
       <checksum>E03578EA</checksum>
     </file>
     <file>
-      <filename>constructions.rb</filename>
+      <filename>hpxml.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>B842CF11</checksum>
+      <checksum>FEFBCCEE</checksum>
+    </file>
+    <file>
+      <filename>hvac.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>4795E5F7</checksum>
+    </file>
+    <file>
+      <filename>EPvalidator.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>3000E2CD</checksum>
     </file>
     <file>
       <filename>materials.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
       <checksum>06950667</checksum>
+    </file>
+    <file>
+      <filename>constructions.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>B842CF11</checksum>
     </file>
     <file>
       <version>
@@ -507,7 +507,7 @@
       <filename>measure.rb</filename>
       <filetype>rb</filetype>
       <usage_type>script</usage_type>
-      <checksum>1BAD426E</checksum>
+      <checksum>B1B40CC1</checksum>
     </file>
   </files>
 </measure>
