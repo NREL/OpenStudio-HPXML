@@ -620,6 +620,55 @@ class OSModel
     # TODO: Default HeatingCapacity17F
     # TODO: Default Electric Auxiliary Energy (EAE; requires autosized HVAC capacity)
 
+    # Default HVAC distributions
+    # Check either all ducts have location and surface area or all ducts have no location and surface area
+    n_ducts = 0
+    n_ducts_to_be_defaulted = 0
+    @hpxml.hvac_distributions.each do |hvac_distribution|
+      n_ducts += hvac_distribution.ducts.size
+      n_ducts_to_be_defaulted += hvac_distribution.ducts.select { |duct| duct.duct_surface_area.nil? && duct.duct_location.nil? }.size
+    end
+    if n_ducts_to_be_defaulted > 0 && (n_ducts != n_ducts_to_be_defaulted)
+      fail 'The location and surface area of all ducts must be provided or blank.'
+    end
+
+    @hpxml.hvac_distributions.each do |hvac_distribution|
+      next unless hvac_distribution.distribution_system_type == HPXML::HVACDistributionTypeAir
+
+      # Default return registers
+      if hvac_distribution.number_of_return_registers.nil?
+        hvac_distribution.number_of_return_registers = @ncfl # Add 1 return register per conditioned floor if not provided
+      end
+
+      # Default ducts
+      cfa_served = hvac_distribution.conditioned_floor_area_served
+      n_returns = hvac_distribution.number_of_return_registers
+
+      supply_ducts = hvac_distribution.ducts.select { |duct| duct.duct_type == HPXML::DuctTypeSupply }
+      return_ducts = hvac_distribution.ducts.select { |duct| duct.duct_type == HPXML::DuctTypeReturn }
+      [supply_ducts, return_ducts].each do |ducts|
+        ducts.each do |duct|
+          next unless duct.duct_surface_area.nil?
+
+          primary_duct_area, secondary_duct_area = HVAC.get_default_duct_surface_area(duct.duct_type, @ncfl_ag, cfa_served, n_returns).map { |area| area / ducts.size }
+          primary_duct_location, secondary_duct_location = HVAC.get_default_duct_locations(@hpxml)
+          if primary_duct_location.nil? # If a home doesn't have any non-living spaces (outside living space), place all ducts in living space.
+            duct.duct_surface_area = primary_duct_area + secondary_duct_area
+            duct.duct_location = secondary_duct_location
+          else
+            duct.duct_surface_area = primary_duct_area
+            duct.duct_location = primary_duct_location
+            if secondary_duct_area > 0
+              hvac_distribution.ducts.add(duct_type: duct.duct_type,
+                                          duct_insulation_r_value: duct.duct_insulation_r_value,
+                                          duct_location: secondary_duct_location,
+                                          duct_surface_area: secondary_duct_area)
+            end
+          end
+        end
+      end
+    end
+
     # Default water heaters
     @hpxml.water_heating_systems.each do |water_heating_system|
       if water_heating_system.temperature.nil?
@@ -2586,6 +2635,7 @@ class OSModel
     if not (@hpxml.cooling_systems.include?(cooling_system) && (cooling_system.cooling_system_type == HPXML::HVACTypeCentralAirConditioner))
       return false
     end
+
     return true
   end
 
@@ -2837,6 +2887,7 @@ class OSModel
     vented_attic = nil
     @hpxml.attics.each do |attic|
       next unless attic.attic_type == HPXML::AtticTypeVented
+
       vented_attic = attic
     end
 
@@ -2844,6 +2895,7 @@ class OSModel
     vented_crawl = nil
     @hpxml.foundations.each do |foundation|
       next unless foundation.foundation_type == HPXML::FoundationTypeCrawlspaceVented
+
       vented_crawl = foundation
     end
 
@@ -3973,6 +4025,7 @@ class OSModel
     # return if already exists
     model.getScheduleConstants.each do |sch|
       next unless sch.name.to_s == location
+
       return sch
     end
 
