@@ -212,8 +212,9 @@ class SimulationOutputReport < OpenStudio::Measure::ReportingMeasure
 
     if include_timeseries_zone_temperatures
       result << OpenStudio::IdfObject.load("Output:Variable,*,Zone Mean Air Temperature,#{timeseries_frequency};").get
-      # For reporting multifamily timreseries temperatures.
-      keys = [HPXML::LocationOtherHeatedSpace, HPXML::LocationOtherMultifamilyBufferSpace, HPXML::LocationOtherNonFreezingSpace, HPXML::LocationOtherHousingUnit]
+      # For reporting temperature-scheduled spaces timeseries temperatures.
+      keys = [HPXML::LocationOtherHeatedSpace, HPXML::LocationOtherMultifamilyBufferSpace, HPXML::LocationOtherNonFreezingSpace,
+              HPXML::LocationOtherHousingUnit, HPXML::LocationExteriorWall, HPXML::LocationUnderSlab]
       keys.each do |key|
         result << OpenStudio::IdfObject.load("Output:Variable,#{key},Schedule Value,#{timeseries_frequency};").get
       end
@@ -715,19 +716,17 @@ class SimulationOutputReport < OpenStudio::Measure::ReportingMeasure
     # Get zone temperatures
     if include_timeseries_zone_temperatures
       zone_names = []
-      mf_space_names = []
+      scheduled_temperature_names = []
       @model.getThermalZones.each do |zone|
         if zone.floorArea > 1
           zone_names << zone.name.to_s.upcase
         end
       end
       @model.getScheduleConstants.each do |schedule|
-        next unless schedule.name.to_s.include?(HPXML::LocationOtherHeatedSpace) ||
-                    schedule.name.to_s.include?(HPXML::LocationOtherMultifamilyBufferSpace) ||
-                    schedule.name.to_s.include?(HPXML::LocationOtherNonFreezingSpace) ||
-                    schedule.name.to_s.include?(HPXML::LocationOtherHousingUnit)
+        next unless [HPXML::LocationOtherHeatedSpace, HPXML::LocationOtherMultifamilyBufferSpace, HPXML::LocationOtherNonFreezingSpace,
+                     HPXML::LocationOtherHousingUnit, HPXML::LocationExteriorWall, HPXML::LocationUnderSlab].include? schedule.name.to_s
 
-        mf_space_names << schedule.name.to_s.upcase
+        scheduled_temperature_names << schedule.name.to_s.upcase
       end
       zone_names.sort.each do |zone_name|
         @zone_temps[zone_name] = ZoneTemp.new
@@ -735,11 +734,11 @@ class SimulationOutputReport < OpenStudio::Measure::ReportingMeasure
         @zone_temps[zone_name].timeseries_units = 'F'
         @zone_temps[zone_name].timeseries_output = get_report_variable_data_timeseries([zone_name], ['Zone Mean Air Temperature'], 9.0 / 5.0, 32.0, timeseries_frequency)
       end
-      mf_space_names.sort.each do |mf_space_name|
-        @zone_temps[mf_space_name] = ZoneTemp.new
-        @zone_temps[mf_space_name].name = "Temperature: #{mf_space_name.split.map(&:capitalize).join(' ')}"
-        @zone_temps[mf_space_name].timeseries_units = 'F'
-        @zone_temps[mf_space_name].timeseries_output = get_report_variable_data_timeseries([mf_space_name], ['Schedule Value'], 9.0 / 5.0, 32.0, timeseries_frequency)
+      scheduled_temperature_names.sort.each do |scheduled_temperature_name|
+        @zone_temps[scheduled_temperature_name] = ZoneTemp.new
+        @zone_temps[scheduled_temperature_name].name = "Temperature: #{scheduled_temperature_name.split.map(&:capitalize).join(' ')}"
+        @zone_temps[scheduled_temperature_name].timeseries_units = 'F'
+        @zone_temps[scheduled_temperature_name].timeseries_output = get_report_variable_data_timeseries([scheduled_temperature_name], ['Schedule Value'], 9.0 / 5.0, 32.0, timeseries_frequency)
       end
     end
 
