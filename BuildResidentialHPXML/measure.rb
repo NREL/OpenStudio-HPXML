@@ -2884,7 +2884,7 @@ class HPXMLFile
     elsif ['unconditioned basement'].include? space_type
       return HPXML::LocationBasementUnconditioned
     elsif ['corridor'].include? space_type
-      return HPXML::LocationLivingSpace # FIXME: update to handle new enum
+      return HPXML::LocationOtherHousingUnit
     elsif ['ambient'].include? space_type
       return HPXML::LocationOutside
     else
@@ -2924,7 +2924,6 @@ class HPXMLFile
   def self.set_walls(hpxml, runner, model, args)
     model.getSurfaces.each do |surface|
       next if surface.surfaceType != 'Wall'
-      next if ['ambient'].include? surface.space.get.spaceType.get.standardsSpaceType.get # FIXME
 
       interior_adjacent_to = get_adjacent_to(model, surface)
       next unless [HPXML::LocationLivingSpace, HPXML::LocationAtticUnvented, HPXML::LocationAtticVented, HPXML::LocationGarage].include? interior_adjacent_to
@@ -3005,7 +3004,6 @@ class HPXMLFile
     model.getSurfaces.each do |surface|
       next if surface.outsideBoundaryCondition == 'Foundation'
       next unless ['Floor', 'RoofCeiling'].include? surface.surfaceType
-      next if ['ambient'].include? surface.space.get.spaceType.get.standardsSpaceType.get # FIXME
 
       interior_adjacent_to = get_adjacent_to(model, surface)
       next unless [HPXML::LocationLivingSpace, HPXML::LocationGarage].include? interior_adjacent_to
@@ -3047,9 +3045,9 @@ class HPXMLFile
     model.getSurfaces.each do |surface|
       next unless ['Foundation'].include? surface.outsideBoundaryCondition
       next if surface.surfaceType != 'Floor'
-      next if ['ambient'].include? surface.space.get.spaceType.get.standardsSpaceType.get # FIXME
 
       interior_adjacent_to = get_adjacent_to(model, surface)
+      next if [HPXML::LocationOutside].include? interior_adjacent_to
 
       has_foundation_walls = false
       if [HPXML::LocationCrawlspaceVented, HPXML::LocationCrawlspaceUnvented, HPXML::LocationBasementUnconditioned, HPXML::LocationBasementConditioned].include? interior_adjacent_to
