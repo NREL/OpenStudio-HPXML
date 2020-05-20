@@ -1677,7 +1677,7 @@ class OSModel
       end
       if @apply_ashrae140_assumptions
         inside_film = Material.AirFilm(1.0 / 1.460)
-        outside_film = Material.AirFilm(1.0 / 5.748)  
+        outside_film = Material.AirFilm(1.0 / 5.748)
       else
         inside_film = Material.AirFilmVertical
         if rim_joist.is_exterior
@@ -1734,7 +1734,7 @@ class OSModel
       set_surface_interior(model, spaces, surface, frame_floor.interior_adjacent_to)
       set_surface_exterior(model, spaces, surface, frame_floor.exterior_adjacent_to)
       surface.setName(frame_floor.id)
-      if frame_floor.is_interior or @apply_ashrae140_assumptions
+      if frame_floor.is_interior || @apply_ashrae140_assumptions
         surface.setSunExposure('NoSun')
         surface.setWindExposure('NoWind')
       end

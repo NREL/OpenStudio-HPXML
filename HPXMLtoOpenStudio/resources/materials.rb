@@ -69,7 +69,7 @@ class Material
   def self.AirCavityOpen(thick_in)
     return new(name = nil, thick_in = thick_in, mat_base = nil, k_in = 10000000.0, rho = Gas.Air.rho, cp = Gas.Air.cp)
   end
-  
+
   def self.AirFilm(rvalue)
     return new(name = Constants.AirFilm, thick_in = 1.0, mat_base = nil, k_in = 1.0 / rvalue)
   end

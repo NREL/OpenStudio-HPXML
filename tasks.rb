@@ -1056,7 +1056,7 @@ def set_hpxml_walls(hpxml_file, hpxml)
                     area: 100,
                     solar_absorptance: 0.7,
                     emittance: 0.92,
-                    insulation_assembly_r_value: 22.3)
+                    insulation_assembly_r_value: 23.0)
     hpxml.walls.add(id: 'WallOtherNonFreezingSpace',
                     exterior_adjacent_to: HPXML::LocationOtherNonFreezingSpace,
                     interior_adjacent_to: HPXML::LocationLivingSpace,
@@ -1169,19 +1169,22 @@ def set_hpxml_walls(hpxml_file, hpxml)
     hpxml.walls << hpxml.walls[0].dup
     hpxml.walls[0].area *= 0.35
     hpxml.walls[-1].area *= 0.65
-    hpxml.walls[-1].insulation_assembly_r_value = 4
     if ['base-enclosure-other-housing-unit.xml'].include? hpxml_file
       hpxml.walls[-1].id = 'WallOtherHousingUnit'
       hpxml.walls[-1].exterior_adjacent_to = HPXML::LocationOtherHousingUnit
+      hpxml.walls[-1].insulation_assembly_r_value = 4
     elsif ['base-enclosure-other-heated-space.xml'].include? hpxml_file
       hpxml.walls[-1].id = 'WallOtherHeatedSpace'
       hpxml.walls[-1].exterior_adjacent_to = HPXML::LocationOtherHeatedSpace
+      hpxml.walls[-1].insulation_assembly_r_value = 4
     elsif ['base-enclosure-other-non-freezing-space.xml'].include? hpxml_file
       hpxml.walls[-1].id = 'WallOtherNonFreezingSpace'
       hpxml.walls[-1].exterior_adjacent_to = HPXML::LocationOtherNonFreezingSpace
+      hpxml.walls[-1].insulation_assembly_r_value = 23
     elsif ['base-enclosure-other-multifamily-buffer-space.xml'].include? hpxml_file
       hpxml.walls[-1].id = 'WallOtherMultifamilyBufferSpace'
       hpxml.walls[-1].exterior_adjacent_to = HPXML::LocationOtherMultifamilyBufferSpace
+      hpxml.walls[-1].insulation_assembly_r_value = 23
     end
   elsif ['base-enclosure-split-surfaces.xml'].include? hpxml_file
     for n in 1..hpxml.walls.size
@@ -1601,20 +1604,23 @@ def set_hpxml_frame_floors(hpxml_file, hpxml)
     hpxml.frame_floors.clear
     hpxml.frame_floors.add(interior_adjacent_to: HPXML::LocationLivingSpace,
                            area: 1350,
-                           insulation_assembly_r_value: 2.1,
                            other_space_above_or_below: HPXML::FrameFloorOtherSpaceAbove)
     if ['base-enclosure-other-housing-unit.xml'].include? hpxml_file
       hpxml.frame_floors[0].exterior_adjacent_to = HPXML::LocationOtherHousingUnit
       hpxml.frame_floors[0].id = 'FloorBelowOtherHousingUnit'
+      hpxml.frame_floors[0].insulation_assembly_r_value = 2.1
     elsif ['base-enclosure-other-heated-space.xml'].include? hpxml_file
       hpxml.frame_floors[0].exterior_adjacent_to = HPXML::LocationOtherHeatedSpace
       hpxml.frame_floors[0].id = 'FloorBelowOtherHeatedSpace'
+      hpxml.frame_floors[0].insulation_assembly_r_value = 2.1
     elsif ['base-enclosure-other-non-freezing-space.xml'].include? hpxml_file
       hpxml.frame_floors[0].exterior_adjacent_to = HPXML::LocationOtherNonFreezingSpace
       hpxml.frame_floors[0].id = 'FloorBelowOtherNonFreezingSpace'
+      hpxml.frame_floors[0].insulation_assembly_r_value = 18.7
     elsif ['base-enclosure-other-multifamily-buffer-space.xml'].include? hpxml_file
       hpxml.frame_floors[0].exterior_adjacent_to = HPXML::LocationOtherMultifamilyBufferSpace
       hpxml.frame_floors[0].id = 'FloorBelowOtherMultifamilyBufferSpace'
+      hpxml.frame_floors[0].insulation_assembly_r_value = 18.7
     end
     hpxml.frame_floors << hpxml.frame_floors[0].dup
     hpxml.frame_floors[1].id = hpxml.frame_floors[0].id.gsub('Below', 'Above')
@@ -1624,13 +1630,13 @@ def set_hpxml_frame_floors(hpxml_file, hpxml)
                            exterior_adjacent_to: HPXML::LocationOtherNonFreezingSpace,
                            interior_adjacent_to: HPXML::LocationLivingSpace,
                            area: 1000,
-                           insulation_assembly_r_value: 2.1,
+                           insulation_assembly_r_value: 18.7,
                            other_space_above_or_below: HPXML::FrameFloorOtherSpaceBelow)
     hpxml.frame_floors.add(id: 'FloorAboveMultifamilyBuffer',
                            exterior_adjacent_to: HPXML::LocationOtherMultifamilyBufferSpace,
                            interior_adjacent_to: HPXML::LocationLivingSpace,
                            area: 200,
-                           insulation_assembly_r_value: 2.1,
+                           insulation_assembly_r_value: 18.7,
                            other_space_above_or_below: HPXML::FrameFloorOtherSpaceBelow)
     hpxml.frame_floors.add(id: 'FloorAboveOtherHeatedSpace',
                            exterior_adjacent_to: HPXML::LocationOtherHeatedSpace,
