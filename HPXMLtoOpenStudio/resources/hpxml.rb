@@ -2290,8 +2290,10 @@ class HPXML < Object
 
     def attached_cooling_system
       return if distribution_system.nil?
+
       distribution_system.hvac_systems.each do |hvac_system|
         next if hvac_system.id == @id
+
         return hvac_system
       end
       return
@@ -2301,6 +2303,7 @@ class HPXML < Object
       @hpxml_object.heating_systems.delete(self)
       @hpxml_object.water_heating_systems.each do |water_heating_system|
         next unless water_heating_system.related_hvac_idref == @id
+
         water_heating_system.related_hvac_idref = nil
       end
     end
@@ -2407,8 +2410,10 @@ class HPXML < Object
 
     def attached_heating_system
       return if distribution_system.nil?
+
       distribution_system.hvac_systems.each do |hvac_system|
         next if hvac_system.id == @id
+
         return hvac_system
       end
       return
@@ -2418,6 +2423,7 @@ class HPXML < Object
       @hpxml_object.cooling_systems.delete(self)
       @hpxml_object.water_heating_systems.each do |water_heating_system|
         next unless water_heating_system.related_hvac_idref == @id
+
         water_heating_system.related_hvac_idref = nil
       end
     end
@@ -2528,6 +2534,7 @@ class HPXML < Object
       @hpxml_object.heat_pumps.delete(self)
       @hpxml_object.water_heating_systems.each do |water_heating_system|
         next unless water_heating_system.related_hvac_idref == @id
+
         water_heating_system.related_hvac_idref = nil
       end
     end
@@ -2726,7 +2733,8 @@ class HPXML < Object
       super(hpxml_object, *args)
     end
     ATTRS = [:id, :distribution_system_type, :annual_heating_dse,
-             :annual_cooling_dse, :duct_system_sealed, :duct_leakage_testing_exemption]
+             :annual_cooling_dse, :duct_system_sealed, :duct_leakage_testing_exemption,
+             :conditioned_floor_area_served, :number_of_return_registers]
     attr_accessor(*ATTRS)
     attr_reader(:duct_leakage_measurements, :ducts)
 
@@ -2768,10 +2776,12 @@ class HPXML < Object
       @hpxml_object.hvac_distributions.delete(self)
       (@hpxml_object.heating_systems + @hpxml_object.cooling_systems + @hpxml_object.heat_pumps).each do |hvac|
         next unless hvac.distribution_system_idref == @id
+
         hvac.distribution_system_idref = nil
       end
       @hpxml_object.ventilation_fans.each do |ventilation_fan|
         next unless ventilation_fan.distribution_system_idref == @id
+
         ventilation_fan.distribution_system_idref = nil
       end
     end
@@ -2794,6 +2804,7 @@ class HPXML < Object
       distribution_system_type_e = XMLHelper.add_element(hvac_distribution, 'DistributionSystemType')
       if [HVACDistributionTypeAir, HVACDistributionTypeHydronic].include? @distribution_system_type
         XMLHelper.add_element(distribution_system_type_e, @distribution_system_type)
+        XMLHelper.add_element(hvac_distribution, 'ConditionedFloorAreaServed', Float(@conditioned_floor_area_served)) unless @conditioned_floor_area_served.nil?
       elsif [HVACDistributionTypeDSE].include? @distribution_system_type
         XMLHelper.add_element(distribution_system_type_e, 'Other', @distribution_system_type)
         XMLHelper.add_element(hvac_distribution, 'AnnualHeatingDistributionSystemEfficiency', to_float(@annual_heating_dse)) unless @annual_heating_dse.nil?
@@ -2807,6 +2818,7 @@ class HPXML < Object
 
       @duct_leakage_measurements.to_oga(air_distribution)
       @ducts.to_oga(air_distribution)
+      XMLHelper.add_element(air_distribution, 'NumberofReturnRegisters', Integer(@number_of_return_registers)) unless @number_of_return_registers.nil?
 
       HPXML::add_extension(parent: air_distribution,
                            extensions: { 'DuctLeakageTestingExemption' => to_bool_or_nil(@duct_leakage_testing_exemption) })
@@ -2823,6 +2835,8 @@ class HPXML < Object
       @annual_heating_dse = to_float_or_nil(XMLHelper.get_value(hvac_distribution, 'AnnualHeatingDistributionSystemEfficiency'))
       @annual_cooling_dse = to_float_or_nil(XMLHelper.get_value(hvac_distribution, 'AnnualCoolingDistributionSystemEfficiency'))
       @duct_system_sealed = to_bool_or_nil(XMLHelper.get_value(hvac_distribution, 'HVACDistributionImprovement/DuctSystemSealed'))
+      @conditioned_floor_area_served = to_float_or_nil(XMLHelper.get_value(hvac_distribution, 'ConditionedFloorAreaServed'))
+      @number_of_return_registers = to_integer_or_nil(XMLHelper.get_value(hvac_distribution, 'DistributionSystemType/AirDistribution/NumberofReturnRegisters'))
       @duct_leakage_testing_exemption = to_bool_or_nil(XMLHelper.get_value(hvac_distribution, 'DistributionSystemType/AirDistribution/extension/DuctLeakageTestingExemption'))
 
       @duct_leakage_measurements.from_oga(hvac_distribution)
@@ -2852,6 +2866,7 @@ class HPXML < Object
     def delete
       @hpxml_object.hvac_distributions.each do |hvac_distribution|
         next unless hvac_distribution.duct_leakage_measurements.include? self
+
         hvac_distribution.duct_leakage_measurements.delete(self)
       end
     end
@@ -2905,6 +2920,7 @@ class HPXML < Object
     def delete
       @hpxml_object.hvac_distributions.each do |hvac_distribution|
         next unless hvac_distribution.ducts.include? self
+
         hvac_distribution.ducts.delete(self)
       end
     end
@@ -3070,6 +3086,7 @@ class HPXML < Object
       @hpxml_object.water_heating_systems.delete(self)
       @hpxml_object.solar_thermal_systems.each do |solar_thermal_system|
         next unless solar_thermal_system.water_heating_system_idref == @id
+
         solar_thermal_system.water_heating_system_idref = nil
       end
     end
@@ -4104,10 +4121,12 @@ class HPXML < Object
           # Update subsurface idrefs as appropriate
           (@windows + @doors).each do |subsurf|
             next unless subsurf.wall_idref == surf2.id
+
             subsurf.wall_idref = surf.id
           end
           @skylights.each do |subsurf|
             next unless subsurf.roof_idref == surf2.id
+
             subsurf.roof_idref = surf.id
           end
 
@@ -4122,6 +4141,7 @@ class HPXML < Object
     (@rim_joists + @walls + @foundation_walls + @frame_floors).reverse_each do |surface|
       next if surface.interior_adjacent_to.nil? || surface.exterior_adjacent_to.nil?
       next unless surface.interior_adjacent_to == surface.exterior_adjacent_to
+
       surface.delete
     end
   end
@@ -4129,6 +4149,7 @@ class HPXML < Object
   def delete_tiny_surfaces()
     (@rim_joists + @walls + @foundation_walls + @frame_floors + @roofs + @windows + @skylights + @doors + @slabs).reverse_each do |surface|
       next if surface.area.nil? || (surface.area > 0.1)
+
       surface.delete
     end
   end
@@ -4201,6 +4222,29 @@ class HPXML < Object
       next if num_attached <= 1
 
       errors << "RelatedHVACSystem '#{hvac_system.id}' is attached to multiple water heating systems."
+    end
+
+    # Check for the sum of CFA served by distribution systems <= CFA
+    air_distributions = @hvac_distributions.select { |dist| dist if dist.distribution_system_type == HPXML::HVACDistributionTypeAir }
+    heating_dist = []
+    cooling_dist = []
+    air_distributions.each do |dist|
+      heating_systems = dist.hvac_systems.select { |sys| sys if (sys.respond_to? :fraction_heat_load_served) && (sys.fraction_heat_load_served > 0) }
+      cooling_systems = dist.hvac_systems.select { |sys| sys if (sys.respond_to? :fraction_cool_load_served) && (sys.fraction_cool_load_served > 0) }
+      if heating_systems.size > 0
+        heating_dist << dist
+      end
+      if cooling_systems.size > 0
+        cooling_dist << dist
+      end
+    end
+    heating_total_dist_cfa_served = heating_dist.map { |htg_dist| htg_dist.conditioned_floor_area_served }.inject(0, :+)
+    cooling_total_dist_cfa_served = cooling_dist.map { |clg_dist| clg_dist.conditioned_floor_area_served }.inject(0, :+)
+    if (heating_total_dist_cfa_served > @building_construction.conditioned_floor_area)
+      errors << 'The total conditioned floor area served by the HVAC distribution system(s) for heating is larger than the conditioned floor area of the building.'
+    end
+    if (cooling_total_dist_cfa_served > @building_construction.conditioned_floor_area)
+      errors << 'The total conditioned floor area served by the HVAC distribution system(s) for cooling is larger than the conditioned floor area of the building.'
     end
 
     # ------------------------------- #
@@ -4305,15 +4349,18 @@ end
 
 def to_float_or_nil(value)
   return if value.nil?
+
   return to_float(value)
 end
 
 def to_integer_or_nil(value)
   return if value.nil?
+
   return to_integer(value)
 end
 
 def to_bool_or_nil(value)
   return if value.nil?
+
   return to_boolean(value)
 end
