@@ -3,8 +3,8 @@
   <schema_version>3.0</schema_version>
   <name>hpxm_lto_openstudio</name>
   <uid>b1543b30-9465-45ff-ba04-1d1f85e763bc</uid>
-  <version_id>763d6d16-63ad-4a0c-b292-a0bd2654a5ed</version_id>
-  <version_modified>20200519T193203Z</version_modified>
+  <version_id>6f10ff09-23ba-4c42-a184-a22fd7a51e31</version_id>
+  <version_modified>20200520T134526Z</version_modified>
   <xml_checksum>D8922A73</xml_checksum>
   <class_name>HPXMLtoOpenStudio</class_name>
   <display_name>HPXML to OpenStudio Translator</display_name>
@@ -355,12 +355,6 @@
       <checksum>845F2FA5</checksum>
     </file>
     <file>
-      <filename>materials.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>99AD368E</checksum>
-    </file>
-    <file>
       <filename>weather.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
@@ -389,12 +383,6 @@
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
       <checksum>9726CA6F</checksum>
-    </file>
-    <file>
-      <filename>constructions.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>305F7EFC</checksum>
     </file>
     <file>
       <filename>xmlhelper.rb</filename>
@@ -499,6 +487,18 @@
       <checksum>3000E2CD</checksum>
     </file>
     <file>
+      <filename>materials.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>06950667</checksum>
+    </file>
+    <file>
+      <filename>constructions.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>B842CF11</checksum>
+    </file>
+    <file>
       <version>
         <software_program>OpenStudio</software_program>
         <identifier>2.1.1</identifier>
@@ -507,7 +507,7 @@
       <filename>measure.rb</filename>
       <filetype>rb</filetype>
       <usage_type>script</usage_type>
-      <checksum>CCA80B60</checksum>
+      <checksum>5116FB1F</checksum>
     </file>
   </files>
 </measure>
