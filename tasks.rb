@@ -284,7 +284,6 @@ def create_hpxmls
     'base-misc-ceiling-fans.xml' => 'base.xml',
     'base-misc-defaults.xml' => 'base.xml',
     'base-misc-defaults2.xml' => 'base-dhw-recirc-demand.xml',
-    'base-misc-defaults3.xml' => 'base-hvac-multiple.xml',
     'base-misc-timestep-10-mins.xml' => 'base.xml',
     'base-misc-runperiod-1-month.xml' => 'base.xml',
     'base-misc-usage-multiplier.xml' => 'base.xml',
@@ -3115,8 +3114,7 @@ def set_hpxml_hvac_distributions(hpxml_file, hpxml)
                                           duct_insulation_r_value: 0,
                                           duct_location: HPXML::LocationAtticUnvented,
                                           duct_surface_area: 50)
-  elsif ['base-misc-defaults.xml',
-         'base-misc-defaults3.xml'].include? hpxml_file
+  elsif ['base-misc-defaults.xml'].include? hpxml_file
     hpxml.hvac_distributions.each do |hvac_distribution|
       next unless hvac_distribution.distribution_system_type == HPXML::HVACDistributionTypeAir
 
