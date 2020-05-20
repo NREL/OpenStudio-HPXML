@@ -6,7 +6,8 @@ class Constructions
   def self.apply_wood_stud_wall(model, surfaces, wall, constr_name,
                                 cavity_r, install_grade, cavity_depth_in, cavity_filled,
                                 framing_factor, drywall_thick_in, osb_thick_in,
-                                rigid_r, mat_ext_finish, otherside_drywall_thick_in = 0)
+                                rigid_r, mat_ext_finish, otherside_drywall_thick_in,
+                                inside_film, outside_film)
 
     return if surfaces.empty?
 
@@ -41,11 +42,9 @@ class Constructions
 
     # Define construction
     constr = Construction.new(constr_name, path_fracs)
+    constr.add_layer(outside_film)
     if not mat_ext_finish.nil?
-      constr.add_layer(Material.AirFilmOutside)
       constr.add_layer(mat_ext_finish)
-    else # interior wall
-      constr.add_layer(Material.AirFilmVertical)
     end
     if otherside_drywall_thick_in > 0 # E.g., interior partition wall
       constr.add_layer(Material.GypsumWall(otherside_drywall_thick_in))
@@ -60,7 +59,7 @@ class Constructions
     if drywall_thick_in > 0
       constr.add_layer(Material.GypsumWall(drywall_thick_in))
     end
-    constr.add_layer(Material.AirFilmVertical)
+    constr.add_layer(inside_film)
 
     # Create and assign construction to surfaces
     constr.create_and_assign_constructions(surfaces, model)
@@ -76,7 +75,7 @@ class Constructions
                                   cavity_r, install_grade, stud_depth_in, gap_depth_in,
                                   framing_factor, framing_spacing, is_staggered,
                                   drywall_thick_in, osb_thick_in, rigid_r,
-                                  mat_ext_finish)
+                                  mat_ext_finish, inside_film, outside_film)
 
     return if surfaces.empty?
 
@@ -112,11 +111,9 @@ class Constructions
 
     # Define construction
     constr = Construction.new(constr_name, path_fracs)
+    constr.add_layer(outside_film)
     if not mat_ext_finish.nil?
-      constr.add_layer(Material.AirFilmOutside)
       constr.add_layer(mat_ext_finish)
-    else # interior wall
-      constr.add_layer(Material.AirFilmVertical)
     end
     if not mat_rigid.nil?
       constr.add_layer(mat_rigid)
@@ -136,7 +133,7 @@ class Constructions
     if drywall_thick_in > 0
       constr.add_layer(Material.GypsumWall(drywall_thick_in))
     end
-    constr.add_layer(Material.AirFilmVertical)
+    constr.add_layer(inside_film)
 
     # Create and assign construction to surfaces
     constr.create_and_assign_constructions(surfaces, model)
@@ -149,7 +146,7 @@ class Constructions
                           thick_in, conductivity, density, framing_factor,
                           furring_r, furring_cavity_depth, furring_spacing,
                           drywall_thick_in, osb_thick_in, rigid_r,
-                          mat_ext_finish)
+                          mat_ext_finish, inside_film, outside_film)
 
     return if surfaces.empty?
 
@@ -187,11 +184,9 @@ class Constructions
 
     # Define construction
     constr = Construction.new(constr_name, path_fracs)
+    constr.add_layer(outside_film)
     if not mat_ext_finish.nil?
-      constr.add_layer(Material.AirFilmOutside)
       constr.add_layer(mat_ext_finish)
-    else # interior wall
-      constr.add_layer(Material.AirFilmVertical)
     end
     if not mat_rigid.nil?
       constr.add_layer(mat_rigid)
@@ -208,7 +203,7 @@ class Constructions
     if drywall_thick_in > 0
       constr.add_layer(Material.GypsumWall(drywall_thick_in))
     end
-    constr.add_layer(Material.AirFilmVertical)
+    constr.add_layer(inside_film)
 
     # Create and assign construction to surfaces
     constr.create_and_assign_constructions(surfaces, model)
@@ -221,7 +216,7 @@ class Constructions
   def self.apply_icf_wall(model, surfaces, wall, constr_name,
                           icf_r, ins_thick_in, concrete_thick_in, framing_factor,
                           drywall_thick_in, osb_thick_in, rigid_r,
-                          mat_ext_finish)
+                          mat_ext_finish, inside_film, outside_film)
 
     return if surfaces.empty?
 
@@ -245,11 +240,9 @@ class Constructions
 
     # Define construction
     constr = Construction.new(constr_name, path_fracs)
+    constr.add_layer(outside_film)
     if not mat_ext_finish.nil?
-      constr.add_layer(Material.AirFilmOutside)
       constr.add_layer(mat_ext_finish)
-    else # interior wall
-      constr.add_layer(Material.AirFilmVertical)
     end
     if not mat_rigid.nil?
       constr.add_layer(mat_rigid)
@@ -263,7 +256,7 @@ class Constructions
     if drywall_thick_in > 0
       constr.add_layer(Material.GypsumWall(drywall_thick_in))
     end
-    constr.add_layer(Material.AirFilmVertical)
+    constr.add_layer(inside_film)
 
     # Create and assign construction to surfaces
     constr.create_and_assign_constructions(surfaces, model)
@@ -275,7 +268,7 @@ class Constructions
   def self.apply_sip_wall(model, surfaces, wall, constr_name, sip_r,
                           sip_thick_in, framing_factor, sheathing_thick_in,
                           drywall_thick_in, osb_thick_in, rigid_r,
-                          mat_ext_finish)
+                          mat_ext_finish, inside_film, outside_film)
 
     return if surfaces.empty?
 
@@ -305,11 +298,9 @@ class Constructions
 
     # Define construction
     constr = Construction.new(constr_name, path_fracs)
+    constr.add_layer(outside_film)
     if not mat_ext_finish.nil?
-      constr.add_layer(Material.AirFilmOutside)
       constr.add_layer(mat_ext_finish)
-    else # interior wall
-      constr.add_layer(Material.AirFilmVertical)
     end
     if not mat_rigid.nil?
       constr.add_layer(mat_rigid)
@@ -324,7 +315,7 @@ class Constructions
     if drywall_thick_in > 0
       constr.add_layer(Material.GypsumWall(drywall_thick_in))
     end
-    constr.add_layer(Material.AirFilmVertical)
+    constr.add_layer(inside_film)
 
     # Create and assign construction to surfaces
     constr.create_and_assign_constructions(surfaces, model)
@@ -334,7 +325,7 @@ class Constructions
                                  cavity_r, install_grade, cavity_depth,
                                  cavity_filled, framing_factor, correction_factor,
                                  drywall_thick_in, osb_thick_in, rigid_r,
-                                 mat_ext_finish)
+                                 mat_ext_finish, inside_film, outside_film)
 
     return if surfaces.empty?
 
@@ -369,11 +360,9 @@ class Constructions
 
     # Define construction
     constr = Construction.new(constr_name, path_fracs)
+    constr.add_layer(outside_film)
     if not mat_ext_finish.nil?
-      constr.add_layer(Material.AirFilmOutside)
       constr.add_layer(mat_ext_finish)
-    else # interior wall
-      constr.add_layer(Material.AirFilmVertical)
     end
     if not mat_rigid.nil?
       constr.add_layer(mat_rigid)
@@ -385,7 +374,7 @@ class Constructions
     if drywall_thick_in > 0
       constr.add_layer(Material.GypsumWall(drywall_thick_in))
     end
-    constr.add_layer(Material.AirFilmVertical)
+    constr.add_layer(inside_film)
 
     # Create and assign construction to surfaces
     constr.create_and_assign_constructions(surfaces, model)
@@ -398,7 +387,7 @@ class Constructions
   def self.apply_generic_layered_wall(model, surfaces, wall, constr_name,
                                       thick_ins, conds, denss, specheats,
                                       drywall_thick_in, osb_thick_in, rigid_r,
-                                      mat_ext_finish)
+                                      mat_ext_finish, inside_film, outside_film)
 
     return if surfaces.empty?
 
@@ -439,11 +428,9 @@ class Constructions
 
     # Define construction
     constr = Construction.new(constr_name, path_fracs)
+    constr.add_layer(outside_film)
     if not mat_ext_finish.nil?
-      constr.add_layer(Material.AirFilmOutside)
       constr.add_layer(mat_ext_finish)
-    else # interior wall
-      constr.add_layer(Material.AirFilmVertical)
     end
     if not mat_rigid.nil?
       constr.add_layer(mat_rigid)
@@ -457,7 +444,7 @@ class Constructions
     if drywall_thick_in > 0
       constr.add_layer(Material.GypsumWall(drywall_thick_in))
     end
-    constr.add_layer(Material.AirFilmVertical)
+    constr.add_layer(inside_film)
 
     # Create and assign construction to surfaces
     constr.create_and_assign_constructions(surfaces, model)
@@ -469,7 +456,8 @@ class Constructions
   def self.apply_rim_joist(model, surfaces, rim_joist, constr_name,
                            cavity_r, install_grade, framing_factor,
                            drywall_thick_in, osb_thick_in,
-                           rigid_r, mat_ext_finish)
+                           rigid_r, mat_ext_finish, inside_film,
+                           outside_film)
 
     return if surfaces.empty?
 
@@ -502,11 +490,9 @@ class Constructions
 
     # Define construction
     constr = Construction.new(constr_name, path_fracs)
+    constr.add_layer(outside_film)
     if not mat_ext_finish.nil?
-      constr.add_layer(Material.AirFilmOutside)
       constr.add_layer(mat_ext_finish)
-    else # interior wall
-      constr.add_layer(Material.AirFilmVertical)
     end
     if not mat_rigid.nil?
       constr.add_layer(mat_rigid)
@@ -518,7 +504,7 @@ class Constructions
     if drywall_thick_in > 0
       constr.add_layer(Material.GypsumWall(drywall_thick_in))
     end
-    constr.add_layer(Material.AirFilmVertical)
+    constr.add_layer(inside_film)
 
     # Create and assign construction to surfaces
     constr.create_and_assign_constructions(surfaces, model)
@@ -601,7 +587,8 @@ class Constructions
   def self.apply_closed_cavity_roof(model, surfaces, constr_name,
                                     cavity_r, install_grade, cavity_depth,
                                     filled_cavity, framing_factor, drywall_thick_in,
-                                    osb_thick_in, rigid_r, mat_roofing, has_radiant_barrier)
+                                    osb_thick_in, rigid_r, mat_roofing, has_radiant_barrier,
+                                    inside_film, outside_film)
 
     return if surfaces.empty?
 
@@ -640,7 +627,7 @@ class Constructions
 
     # Define construction
     constr = Construction.new(constr_name, path_fracs)
-    constr.add_layer(Material.AirFilmOutside)
+    constr.add_layer(outside_film)
     if not mat_roofing.nil?
       constr.add_layer(mat_roofing)
     end
@@ -656,10 +643,8 @@ class Constructions
     end
     if not mat_rb.nil?
       constr.add_layer(mat_rb)
-      constr.add_layer(Material.AirFilmRoofRadiantBarrier(Geometry.get_roof_pitch(surfaces)))
-    else
-      constr.add_layer(Material.AirFilmRoof(Geometry.get_roof_pitch(surfaces)))
     end
+    constr.add_layer(inside_film)
 
     # Create and assign construction to surfaces
     constr.create_and_assign_constructions(surfaces, model)
@@ -720,7 +705,7 @@ class Constructions
                        cavity_r, install_grade,
                        framing_factor, joist_height_in,
                        plywood_thick_in, rigid_r, mat_floor_covering,
-                       mat_carpet)
+                       mat_carpet, inside_film, outside_film)
 
     # Open cavity below, floor covering above (e.g., crawlspace ceiling)
 
@@ -747,7 +732,7 @@ class Constructions
 
     # Define construction
     constr = Construction.new(constr_name, path_fracs)
-    constr.add_layer(Material.AirFilmFloorReduced)
+    constr.add_layer(outside_film)
     constr.add_layer([mat_framing, mat_cavity, mat_gap], 'FloorIns')
     if not mat_rigid.nil?
       constr.add_layer(mat_rigid)
@@ -761,7 +746,7 @@ class Constructions
     if not mat_carpet.nil?
       constr.add_layer(mat_carpet)
     end
-    constr.add_layer(Material.AirFilmFloorReduced)
+    constr.add_layer(inside_film)
 
     # Create and assign construction to surfaces
     constr.create_and_assign_constructions(surfaces, model)
@@ -919,7 +904,9 @@ class Constructions
 
     Constructions.apply_wood_stud_wall(model, imdefs, nil, constr_name,
                                        0, 1, 3.5, false, 0.16,
-                                       drywall_thick_in, 0, 0, nil, drywall_thick_in)
+                                       drywall_thick_in, 0, 0, nil, drywall_thick_in,
+                                       Material.AirFilmVertical,
+                                       Material.AirFilmVertical)
   end
 
   def self.apply_furniture(model, mass_lb_per_sqft, density_lb_per_cuft,

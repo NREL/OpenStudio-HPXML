@@ -100,7 +100,7 @@
             <Emittance>0.92</Emittance>
             <Insulation>
               <SystemIdentifier id='WallOtherNonFreezingSpaceInsulation'/>
-              <AssemblyEffectiveRValue>4.0</AssemblyEffectiveRValue>
+              <AssemblyEffectiveRValue>23.0</AssemblyEffectiveRValue>
             </Insulation>
           </Wall>
         </Walls>
@@ -112,7 +112,7 @@
             <Area>1350.0</Area>
             <Insulation>
               <SystemIdentifier id='FloorBelowOtherNonFreezingSpaceInsulation'/>
-              <AssemblyEffectiveRValue>2.1</AssemblyEffectiveRValue>
+              <AssemblyEffectiveRValue>18.7</AssemblyEffectiveRValue>
             </Insulation>
             <extension>
               <OtherSpaceAboveOrBelow>above</OtherSpaceAboveOrBelow>
@@ -125,7 +125,7 @@
             <Area>1350.0</Area>
             <Insulation>
               <SystemIdentifier id='FloorAboveOtherNonFreezingSpaceInsulation'/>
-              <AssemblyEffectiveRValue>2.1</AssemblyEffectiveRValue>
+              <AssemblyEffectiveRValue>18.7</AssemblyEffectiveRValue>
             </Insulation>
             <extension>
               <OtherSpaceAboveOrBelow>below</OtherSpaceAboveOrBelow>
