@@ -3480,17 +3480,6 @@ class HPXMLFile
                             ceiling_fan_cooling_setpoint_temp_offset: ceiling_fan_cooling_setpoint_temp_offset)
   end
 
-  def self.get_duct_location_auto(args, hpxml) # FIXME
-    if args[:geometry_roof_type] != 'flat' && hpxml.attics.size > 0 && [HPXML::AtticTypeVented, HPXML::AtticTypeUnvented].include?(args[:geometry_attic_type])
-      location = hpxml.attics[0].to_location
-    elsif hpxml.foundations.size > 0 && (args[:geometry_foundation_type].downcase.include?('basement') || args[:geometry_foundation_type].downcase.include?('crawlspace'))
-      location = hpxml.foundations[0].to_location
-    else
-      location = HPXML::LocationLivingSpace
-    end
-    return location
-  end
-
   def self.set_ventilation_fans(hpxml, runner, args)
     if args[:mech_vent_fan_type] != 'none'
 
