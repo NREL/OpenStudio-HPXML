@@ -213,7 +213,8 @@ def create_osws
     'invalid_files/single-family-attached-ambient.osw' => 'base.osw',
     'invalid_files/multifamily-bottom-slab-non-zero-foundation-height.osw' => 'base.osw',
     'invalid_files/multifamily-bottom-crawlspace-zero-foundation-height.osw' => 'base.osw',
-    'invalid_files/slab-non-zero-foundation-height-above-grade.osw' => 'base.osw'
+    'invalid_files/slab-non-zero-foundation-height-above-grade.osw' => 'base.osw',
+    'invalid_files/ducts-location-and-areas-not-same-type.osw' => 'base.osw'
   }
 
   puts "Generating #{osws_files.size} OSW files..."
@@ -435,8 +436,8 @@ def get_values(osw_file, step)
     step.setArgument('ducts_return_insulation_r', 0.0)
     step.setArgument('ducts_supply_location', HPXML::LocationAtticUnvented)
     step.setArgument('ducts_return_location', HPXML::LocationAtticUnvented)
-    step.setArgument('ducts_supply_surface_area', 150.0)
-    step.setArgument('ducts_return_surface_area', 50.0)
+    step.setArgument('ducts_supply_surface_area', '150.0')
+    step.setArgument('ducts_return_surface_area', '50.0')
     step.setArgument('mech_vent_fan_type', 'none')
     step.setArgument('mech_vent_flow_rate', 110)
     step.setArgument('mech_vent_hours_in_operation', 24)
@@ -1228,8 +1229,8 @@ def get_values(osw_file, step)
     step.setArgument('ducts_supply_leakage_value', 15.0)
     step.setArgument('ducts_return_leakage_value', 5.0)
     step.setArgument('ducts_supply_insulation_r', 0.0)
-    step.setArgument('ducts_supply_surface_area', 30.0)
-    step.setArgument('ducts_return_surface_area', 10.0)
+    step.setArgument('ducts_supply_surface_area', '30.0')
+    step.setArgument('ducts_return_surface_area', '10.0')
     step.setArgument('heat_pump_backup_heating_switchover_temp', 25)
   elsif ['base-hvac-ducts-leakage-percent.osw'].include? osw_file
     step.setArgument('ducts_supply_leakage_units', HPXML::UnitsPercent)
@@ -1331,8 +1332,8 @@ def get_values(osw_file, step)
     step.setArgument('ducts_supply_leakage_value', 15.0)
     step.setArgument('ducts_return_leakage_value', 5.0)
     step.setArgument('ducts_supply_insulation_r', 0.0)
-    step.setArgument('ducts_supply_surface_area', 30.0)
-    step.setArgument('ducts_return_surface_area', 10.0)
+    step.setArgument('ducts_supply_surface_area', '30.0')
+    step.setArgument('ducts_return_surface_area', '10.0')
   elsif ['base-hvac-mini-split-heat-pump-ducted-cooling-only.osw'].include? osw_file
     step.setArgument('heating_system_type', 'none')
     step.setArgument('cooling_system_type', 'none')
@@ -1347,8 +1348,8 @@ def get_values(osw_file, step)
     step.setArgument('ducts_supply_leakage_value', 15.0)
     step.setArgument('ducts_return_leakage_value', 5.0)
     step.setArgument('ducts_supply_insulation_r', 0.0)
-    step.setArgument('ducts_supply_surface_area', 30.0)
-    step.setArgument('ducts_return_surface_area', 10.0)
+    step.setArgument('ducts_supply_surface_area', '30.0')
+    step.setArgument('ducts_return_surface_area', '10.0')
   elsif ['base-hvac-mini-split-heat-pump-ducted-heating-only.osw'].include? osw_file
     step.setArgument('heating_system_type', 'none')
     step.setArgument('cooling_system_type', 'none')
@@ -1365,8 +1366,8 @@ def get_values(osw_file, step)
     step.setArgument('ducts_supply_leakage_value', 15.0)
     step.setArgument('ducts_return_leakage_value', 5.0)
     step.setArgument('ducts_supply_insulation_r', 0.0)
-    step.setArgument('ducts_supply_surface_area', 30.0)
-    step.setArgument('ducts_return_surface_area', 10.0)
+    step.setArgument('ducts_supply_surface_area', '30.0')
+    step.setArgument('ducts_return_surface_area', '10.0')
   elsif ['base-hvac-mini-split-heat-pump-ductless.osw'].include? osw_file
     step.setArgument('heating_system_type', 'none')
     step.setArgument('cooling_system_type', 'none')
@@ -1553,6 +1554,10 @@ def get_values(osw_file, step)
     step.setArgument('pv_system_max_power_output_2', 1500)
   elsif ['extra-auto.osw'].include? osw_file
     step.setArgument('geometry_num_occupants', Constants.Auto)
+    step.setArgument('ducts_supply_location', Constants.Auto)
+    step.setArgument('ducts_return_location', Constants.Auto)
+    step.setArgument('ducts_supply_surface_area', Constants.Auto)
+    step.setArgument('ducts_return_surface_area', Constants.Auto)
     step.setArgument('water_heater_location', Constants.Auto)
     step.setArgument('water_heater_tank_volume', Constants.Auto)
     step.setArgument('dhw_distribution_standard_piping_length', Constants.Auto)
@@ -1598,6 +1603,8 @@ def get_values(osw_file, step)
   elsif ['invalid_files/slab-non-zero-foundation-height-above-grade.osw'].include? osw_file
     step.setArgument('geometry_foundation_type', HPXML::FoundationTypeSlab)
     step.setArgument('geometry_foundation_height', 0.0)
+  elsif ['invalid_files/ducts-location-and-areas-not-same-type.osw'].include? osw_file
+    step.setArgument('ducts_supply_location', Constants.Auto)
   end
   return step
 end
