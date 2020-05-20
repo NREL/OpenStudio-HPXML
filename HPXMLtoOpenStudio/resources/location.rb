@@ -7,6 +7,7 @@ class Location
     apply_site(model, epw_file)
     apply_climate_zones(model, epw_file)
     apply_dst(model, dst_start_date, dst_end_date)
+    apply_ground_temps(model, weather)
     return weather
   end
 
@@ -70,6 +71,13 @@ class Location
     dst = model.getRunPeriodControlDaylightSavingTime
     dst.setStartDate(dst_start_date_month, dst_start_date_day)
     dst.setEndDate(dst_end_date_month, dst_end_date_day)
+  end
+
+  def self.apply_ground_temps(model, weather)
+    # Ground temperatures only currently used for ducts located under slab
+    sgts = model.getSiteGroundTemperatureShallow
+    sgts.resetAllMonths
+    sgts.setAllMonthlyTemperatures(weather.data.GroundMonthlyTemps.map { |t| UnitConversions.convert(t, 'F', 'C') })
   end
 
   def self.get_climate_zone_ba(wmo)

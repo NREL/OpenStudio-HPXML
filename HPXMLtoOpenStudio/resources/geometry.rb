@@ -1,6 +1,53 @@
 # frozen_string_literal: true
 
 class Geometry
+  def self.get_temperature_scheduled_space_values(space_type)
+    if space_type == HPXML::LocationOtherHeatedSpace
+      # Average of indoor/outdoor temperatures with minimum of 68 deg-F
+      return { temp_min: 68,
+               indoor_weight: 0.5,
+               outdoor_weight: 0.5,
+               ground_weight: 0.0,
+               f_regain: 0.0 }
+    elsif space_type == HPXML::LocationOtherMultifamilyBufferSpace
+      # Average of indoor/outdoor temperatures with minimum of 50 deg-F
+      return { temp_min: 50,
+               indoor_weight: 0.5,
+               outdoor_weight: 0.5,
+               ground_weight: 0.0,
+               f_regain: 0.0 }
+    elsif space_type == HPXML::LocationOtherNonFreezingSpace
+      # Floating with outdoor air temperature with minimum of 40 deg-F
+      return { temp_min: 40,
+               indoor_weight: 0.0,
+               outdoor_weight: 1.0,
+               ground_weight: 0.0,
+               f_regain: 0.0 }
+    elsif space_type == HPXML::LocationOtherHousingUnit
+      # Indoor air temperature
+      return { temp_min: nil,
+               indoor_weight: 1.0,
+               outdoor_weight: 0.0,
+               ground_weight: 0.0,
+               f_regain: 0.0 }
+    elsif space_type == HPXML::LocationExteriorWall
+      # Average of indoor/outdoor temperatures
+      return { temp_min: nil,
+               indoor_weight: 0.5,
+               outdoor_weight: 0.5,
+               ground_weight: 0.0,
+               f_regain: 0.5 } # From LBNL's "Technical Background for default values used for Forced Air Systems in Proposed ASHRAE Standard 152P"
+    elsif space_type == HPXML::LocationUnderSlab
+      # Ground temperature
+      return { temp_min: nil,
+               indoor_weight: 0.0,
+               outdoor_weight: 0.0,
+               ground_weight: 1.0,
+               f_regain: 0.83 } # From LBNL's "Technical Background for default values used for Forced Air Systems in Proposed ASHRAE Standard 152P"
+    end
+    fail "Unhandled space type: #{space_type}."
+  end
+
   # Calculates space heights as the max z coordinate minus the min z coordinate
   def self.get_height_of_spaces(spaces)
     minzs = []
@@ -57,24 +104,8 @@ class Geometry
     return space_or_zone_is_of_type(space_or_zone, HPXML::LocationLivingSpace)
   end
 
-  def self.is_vented_crawl(space_or_zone)
-    return space_or_zone_is_of_type(space_or_zone, HPXML::LocationCrawlspaceVented)
-  end
-
-  def self.is_unvented_crawl(space_or_zone)
-    return space_or_zone_is_of_type(space_or_zone, HPXML::LocationCrawlspaceUnvented)
-  end
-
   def self.is_unconditioned_basement(space_or_zone)
     return space_or_zone_is_of_type(space_or_zone, HPXML::LocationBasementUnconditioned)
-  end
-
-  def self.is_vented_attic(space_or_zone)
-    return space_or_zone_is_of_type(space_or_zone, HPXML::LocationAtticVented)
-  end
-
-  def self.is_unvented_attic(space_or_zone)
-    return space_or_zone_is_of_type(space_or_zone, HPXML::LocationAtticUnvented)
   end
 
   def self.is_garage(space_or_zone)

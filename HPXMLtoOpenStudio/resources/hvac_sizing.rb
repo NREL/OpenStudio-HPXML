@@ -110,19 +110,25 @@ class HVACSizing
 
     db_indoor_degC = UnitConversions.convert(@cool_setpoint, 'F', 'C')
     @enthalpy_indoor_cooling = (1.006 * db_indoor_degC + hr_indoor_cooling * (2501.0 + 1.86 * db_indoor_degC)) * UnitConversions.convert(1.0, 'kJ', 'Btu') * UnitConversions.convert(1.0, 'lbm', 'kg')
+    @wetbulb_outdoor_cooling = weather.design.CoolingWetbulb
 
     # Design Temperatures
 
     @cool_design_temps = {}
     @heat_design_temps = {}
-    @wetbulb_outdoor_cooling = weather.design.CoolingWetbulb
 
-    # Outside
     @cool_design_temps[HPXML::LocationOutside] = weather.design.CoolingDrybulb
     @heat_design_temps[HPXML::LocationOutside] = weather.design.HeatingDrybulb
 
-    # Initialize Manual J space temperatures using current design temperatures
-    @spaces.keys.each do |space_type|
+    [HPXML::LocationOtherHousingUnit, HPXML::LocationOtherHeatedSpace, HPXML::LocationOtherMultifamilyBufferSpace,
+     HPXML::LocationOtherNonFreezingSpace, HPXML::LocationExteriorWall, HPXML::LocationUnderSlab].each do |space_type|
+      @heat_design_temps[space_type] = calculate_scheduled_space_design_temps(space_type, @heat_setpoint, weather.design.HeatingDrybulb, weather.data.GroundMonthlyTemps.min)
+      @cool_design_temps[space_type] = calculate_scheduled_space_design_temps(space_type, @cool_setpoint, weather.design.CoolingDrybulb, weather.data.GroundMonthlyTemps.max)
+    end
+
+    @spaces.each do |space_type, space|
+      next unless space.is_a? OpenStudio::Model::Space
+
       @cool_design_temps[space_type] = process_design_temp_cooling(weather, space_type)
       @heat_design_temps[space_type] = process_design_temp_heating(weather, space_type)
     end
@@ -154,9 +160,6 @@ class HVACSizing
       else
         heat_temp = weather.design.HeatingDrybulb
       end
-
-    elsif [HPXML::LocationOtherHousingUnit, HPXML::LocationOtherHeatedSpace, HPXML::LocationOtherMultifamilyBufferSpace, HPXML::LocationOtherNonFreezingSpace].include? space_type
-      heat_temp = get_other_side_temp(space_type, @heat_setpoint, weather.design.HeatingDrybulb)
 
     elsif [HPXML::LocationBasementUnconditioned, HPXML::LocationCrawlspaceUnvented, HPXML::LocationCrawlspaceVented].include? space_type
       heat_temp = calculate_space_design_temps(space_type, weather, @conditioned_heat_design_temp, weather.design.HeatingDrybulb, weather.data.GroundMonthlyTemps.min)
@@ -300,9 +303,6 @@ class HVACSizing
         # Adjust base CLTD for cooling design temperature and daily range
         cool_temp += (weather.design.CoolingDrybulb - 95.0) + @daily_range_temp_adjust[@daily_range_num]
       end
-
-    elsif [HPXML::LocationOtherHousingUnit, HPXML::LocationOtherHeatedSpace, HPXML::LocationOtherMultifamilyBufferSpace, HPXML::LocationOtherNonFreezingSpace].include? space_type
-      cool_temp = get_other_side_temp(space_type, @cool_setpoint, weather.design.CoolingDrybulb)
 
     elsif [HPXML::LocationBasementUnconditioned, HPXML::LocationCrawlspaceUnvented, HPXML::LocationCrawlspaceVented].include? space_type
       cool_temp = calculate_space_design_temps(space_type, weather, @conditioned_cool_design_temp, weather.design.CoolingDrybulb, weather.data.GroundMonthlyTemps.max)
@@ -1039,8 +1039,13 @@ class HVACSizing
 
     dse_Fregain = nil
 
-    if [HPXML::LocationOutside, HPXML::LocationOtherHousingUnit, HPXML::LocationOtherHeatedSpace, HPXML::LocationOtherMultifamilyBufferSpace, HPXML::LocationOtherNonFreezingSpace].include? duct.Location
+    if [HPXML::LocationOutside, HPXML::LocationRoofDeck].include? duct.Location
       dse_Fregain = 0.0
+
+    elsif [HPXML::LocationOtherHousingUnit, HPXML::LocationOtherHeatedSpace, HPXML::LocationOtherMultifamilyBufferSpace,
+           HPXML::LocationOtherNonFreezingSpace, HPXML::LocationExteriorWall, HPXML::LocationUnderSlab].include? duct.Location
+      space_values = Geometry.get_temperature_scheduled_space_values(duct.Location)
+      dse_Fregain = space_values[:f_regain]
 
     elsif [HPXML::LocationBasementUnconditioned, HPXML::LocationCrawlspaceVented, HPXML::LocationCrawlspaceUnvented].include? duct.Location
 
@@ -2419,17 +2424,13 @@ class HVACSizing
     return design_temp
   end
 
-  def self.get_other_side_temp(adjacent_space_name, setpoint, oa_db)
-    # FIXME: Combine code with get_multifamily_temperature_schedule in measure.rb
-    if adjacent_space_name == HPXML::LocationOtherHeatedSpace
-      return [(setpoint + oa_db) / 2, 68].max
-    elsif adjacent_space_name == HPXML::LocationOtherMultifamilyBufferSpace
-      return [(setpoint + oa_db) / 2, 50].max
-    elsif adjacent_space_name == HPXML::LocationOtherNonFreezingSpace
-      return [oa_db, 40].max
-    elsif adjacent_space_name == HPXML::LocationOtherHousingUnit
-      return setpoint
+  def self.calculate_scheduled_space_design_temps(space_type, setpoint, oa_db, gnd_db)
+    space_values = Geometry.get_temperature_scheduled_space_values(space_type)
+    design_temp = setpoint * space_values[:indoor_weight] + oa_db * space_values[:outdoor_weight] + gnd_db * space_values[:ground_weight]
+    if not space_values[:temp_min].nil?
+      design_temp = [design_temp, space_values[:temp_min]].max
     end
+    return design_temp
   end
 
   def self.get_wall_group(wall)
@@ -2956,7 +2957,7 @@ class HVACSizing
     u_wall_without_soil = 0.0
     wall_height = foundation_wall.height.ceil
     for d in 1..wall_height
-      r_soil = (Math::PI * d / 2.0) / k_soil # FIXME: Should this be (d-wall_height_ag) instead of d?
+      r_soil = (Math::PI * d / 2.0) / k_soil
 
       # Calculate R-wall at this depth
       r_wall = wall_constr_rvalue + Material.AirFilmVertical.rvalue # Base wall construction + interior film
