@@ -3043,6 +3043,10 @@ def set_hpxml_hvac_distributions(hpxml_file, hpxml)
          'base-foundation-multiple.xml',
          'base-foundation-slab.xml'].include? hpxml_file
     hpxml.hvac_distributions[0].conditioned_floor_area_served = 1350
+    if hpxml_file == 'base-foundation-slab.xml'
+      hpxml.hvac_distributions[0].ducts[0].duct_location = HPXML::LocationUnderSlab
+      hpxml.hvac_distributions[0].ducts[1].duct_location = HPXML::LocationUnderSlab
+    end
   elsif ['base-foundation-unconditioned-basement.xml'].include? hpxml_file
     hpxml.hvac_distributions[0].conditioned_floor_area_served = 1350
     hpxml.hvac_distributions[0].ducts[0].duct_location = HPXML::LocationBasementUnconditioned
@@ -3074,14 +3078,23 @@ def set_hpxml_hvac_distributions(hpxml_file, hpxml)
     hpxml.hvac_distributions[0].ducts[1].duct_location = HPXML::LocationOtherHousingUnit
     hpxml.hvac_distributions[0].ducts.add(duct_type: HPXML::DuctTypeSupply,
                                           duct_insulation_r_value: 4,
-                                          duct_location: HPXML::LocationOtherMultifamilyBufferSpace,
+                                          duct_location: HPXML::LocationRoofDeck,
                                           duct_surface_area: 150)
     hpxml.hvac_distributions[0].ducts.add(duct_type: HPXML::DuctTypeReturn,
                                           duct_insulation_r_value: 0,
-                                          duct_location: HPXML::LocationOutside,
+                                          duct_location: HPXML::LocationRoofDeck,
                                           duct_surface_area: 50)
   elsif ['base-enclosure-2stories.xml'].include? hpxml_file
     hpxml.hvac_distributions[0].conditioned_floor_area_served = 4050
+  elsif ['base-enclosure-2stories-garage.xml'].include? hpxml_file
+    hpxml.hvac_distributions[0].ducts << hpxml.hvac_distributions[0].ducts[0].dup
+    hpxml.hvac_distributions[0].ducts << hpxml.hvac_distributions[0].ducts[1].dup
+    hpxml.hvac_distributions[0].ducts[0].duct_surface_area *= 0.75
+    hpxml.hvac_distributions[0].ducts[1].duct_surface_area *= 0.75
+    hpxml.hvac_distributions[0].ducts[2].duct_location = HPXML::LocationExteriorWall
+    hpxml.hvac_distributions[0].ducts[2].duct_surface_area *= 0.25
+    hpxml.hvac_distributions[0].ducts[3].duct_location = HPXML::LocationLivingSpace
+    hpxml.hvac_distributions[0].ducts[3].duct_surface_area *= 0.25
   elsif ['base-atticroof-conditioned.xml',
          'base-atticroof-cathedral.xml'].include? hpxml_file
     hpxml.hvac_distributions[0].ducts[0].duct_location = HPXML::LocationLivingSpace
