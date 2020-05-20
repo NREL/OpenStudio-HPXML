@@ -1578,6 +1578,10 @@ def get_values(osw_file, step)
     step.setArgument('solar_thermal_collector_tilt', 'latitude-15')
   elsif ['extra-second-heating-system.osw'].include? osw_file
     step.setArgument('heating_system_fuel', HPXML::FuelTypeElectricity)
+    step.setArgument('ducts_supply_leakage_value', 0.0)
+    step.setArgument('ducts_return_leakage_value', 0.0)
+    step.setArgument('ducts_supply_location', HPXML::LocationLivingSpace)
+    step.setArgument('ducts_return_location', HPXML::LocationLivingSpace)
     step.setArgument('heating_system_type_2', HPXML::HVACTypePortableHeater)
     step.setArgument('heating_system_fraction_heat_load_served_2', 0.25)
   elsif ['invalid_files/non-electric-heat-pump-water-heater.osw'].include? osw_file
