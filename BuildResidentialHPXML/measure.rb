@@ -2692,6 +2692,7 @@ class HPXMLFile
   def self.create_geometry_envelope(runner, model, args)
     if args[:geometry_foundation_type] == HPXML::FoundationTypeSlab
       args[:geometry_foundation_height] = 0.0
+      args[:geometry_foundation_height_above_grade] = 0.0
     end
 
     if args[:geometry_unit_type] == HPXML::ResidentialTypeSFD
@@ -3019,6 +3020,7 @@ class HPXMLFile
           other_space_above_or_below = HPXML::FrameFloorOtherSpaceAbove
         end
       end
+
       next if interior_adjacent_to == exterior_adjacent_to
       next if (surface.surfaceType == 'RoofCeiling') && (exterior_adjacent_to == HPXML::LocationOutside)
       next if [HPXML::LocationLivingSpace, HPXML::LocationBasementConditioned].include? exterior_adjacent_to
