@@ -190,7 +190,7 @@
         "overhangs_right_depth": 0,
         "overhangs_right_distance_to_top_of_window": 0,
         "plug_loads_monthly_multipliers": "1.248, 1.257, 0.993, 0.989, 0.993, 0.827, 0.821, 0.821, 0.827, 0.99, 0.987, 1.248",
-        "plug_loads_other_annual_kwh": "3685.5",
+        "plug_loads_other_annual_kwh": "2957.5",
         "plug_loads_other_frac_latent": 0.045,
         "plug_loads_other_frac_sensible": 0.855,
         "plug_loads_schedule_values": true,

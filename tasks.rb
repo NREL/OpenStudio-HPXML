@@ -932,7 +932,7 @@ def get_values(osw_file, step)
     step.setArgument('window_area_right', 144.0)
     step.setArgument('ducts_supply_surface_area', '112.5')
     step.setArgument('ducts_return_surface_area', '37.5')
-    step.setArgument('plug_loads_other_annual_kwh', '3685.5')
+    step.setArgument('plug_loads_other_annual_kwh', '2957.5')
   elsif ['base-enclosure-attached-multifamily.osw'].include? osw_file
 
   elsif ['base-enclosure-beds-1.osw'].include? osw_file
@@ -1013,6 +1013,8 @@ def get_values(osw_file, step)
     step.setArgument('slab_under_width', 999)
     step.setArgument('slab_carpet_fraction', 1.0)
     step.setArgument('slab_carpet_r', 2.5)
+    step.setArgument('ducts_supply_location', HPXML::LocationUnderSlab)
+    step.setArgument('ducts_return_location', HPXML::LocationUnderSlab)
     step.setArgument('plug_loads_other_annual_kwh', '1228.5')
   elsif ['base-foundation-unconditioned-basement.osw'].include? osw_file
     step.setArgument('geometry_cfa', 1350.0)

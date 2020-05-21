@@ -1093,6 +1093,7 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     duct_location_choices << HPXML::LocationAtticUnvented
     duct_location_choices << HPXML::LocationGarage
     duct_location_choices << HPXML::LocationOutside
+    duct_location_choices << HPXML::LocationUnderSlab
 
     arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('ducts_supply_leakage_units', duct_leakage_units_choices, true)
     arg.setDisplayName('Ducts: Supply Leakage Units')

@@ -174,7 +174,7 @@ class BuildResidentialHPXMLTest < MiniTest::Test
       hpxml.roofs.sort_by! { |roof| roof.area }
       hpxml.walls.sort_by! { |wall| [wall.insulation_assembly_r_value, wall.area] }
       hpxml.foundation_walls.sort_by! { |foundation_wall| foundation_wall.area }
-      hpxml.frame_floors.sort_by! { |frame_floor| frame_floor.area }
+      hpxml.frame_floors.sort_by! { |frame_floor| [frame_floor.insulation_assembly_r_value, frame_floor.area] }
       hpxml.slabs.sort_by! { |slab| slab.area }
       hpxml.windows.sort_by! { |window| [window.azimuth, window.area] }
 
@@ -242,8 +242,10 @@ class BuildResidentialHPXMLTest < MiniTest::Test
       hpxml.hvac_controls.each do |hvac_control|
         hvac_control.control_type = nil # Not used by model
       end
-      (2..hpxml.hvac_distributions[0].ducts.length).to_a.reverse.each do |i|
-        hpxml.hvac_distributions[0].ducts.delete_at(i)
+      if hpxml.hvac_distributions.length > 0
+        (2..hpxml.hvac_distributions[0].ducts.length).to_a.reverse.each do |i|
+          hpxml.hvac_distributions[0].ducts.delete_at(i) # Only compare first two ducts
+        end
       end
       hpxml.collapse_enclosure_surfaces()
 
