@@ -3,8 +3,8 @@
   <schema_version>3.0</schema_version>
   <name>hpxm_lto_openstudio</name>
   <uid>b1543b30-9465-45ff-ba04-1d1f85e763bc</uid>
-  <version_id>15eca14a-d863-4b35-99f2-c88fe11685fa</version_id>
-  <version_modified>20200520T225926Z</version_modified>
+  <version_id>d50af8f8-106a-4060-bafb-ce88e1d808c9</version_id>
+  <version_modified>20200521T143052Z</version_modified>
   <xml_checksum>D8922A73</xml_checksum>
   <class_name>HPXMLtoOpenStudio</class_name>
   <display_name>HPXML to OpenStudio Translator</display_name>
@@ -403,12 +403,6 @@
       <checksum>E03578EA</checksum>
     </file>
     <file>
-      <filename>test_airflow.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>test</usage_type>
-      <checksum>0560B2EB</checksum>
-    </file>
-    <file>
       <filename>xmlhelper.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
@@ -419,6 +413,12 @@
       <filetype>rb</filetype>
       <usage_type>test</usage_type>
       <checksum>56EB3F0A</checksum>
+    </file>
+    <file>
+      <filename>test_airflow.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>test</usage_type>
+      <checksum>941BB38E</checksum>
     </file>
     <file>
       <filename>constants.rb</filename>
@@ -481,28 +481,28 @@
       <checksum>EDB9AC90</checksum>
     </file>
     <file>
-      <filename>hpxml.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>8FDBDD59</checksum>
-    </file>
-    <file>
       <filename>location.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
       <checksum>D7B8D025</checksum>
     </file>
     <file>
-      <filename>airflow.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>04215314</checksum>
-    </file>
-    <file>
       <filename>hvac_sizing.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
       <checksum>5C30BCC1</checksum>
+    </file>
+    <file>
+      <filename>hpxml.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>ACCE1743</checksum>
+    </file>
+    <file>
+      <filename>airflow.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>6D140689</checksum>
     </file>
     <file>
       <version>
@@ -513,7 +513,7 @@
       <filename>measure.rb</filename>
       <filetype>rb</filetype>
       <usage_type>script</usage_type>
-      <checksum>A3EF475C</checksum>
+      <checksum>68F04E7A</checksum>
     </file>
   </files>
 </measure>
