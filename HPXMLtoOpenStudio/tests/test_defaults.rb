@@ -298,6 +298,27 @@ class HPXMLtoOpenStudioDuctsTest < MiniTest::Test
     _test_default_recirc_hot_water_distribution(hpxml, expected_recirc_hw_dist_values)
   end
 
+  def test_solar_thermal_system
+    hpxml_name = 'base-dhw-solar-direct-flat-plate.xml'
+    hpxml = HPXML.new(hpxml_path: File.join(@root_path, 'workflow', 'sample_files', hpxml_name))
+    XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
+    model, hpxml = _test_measure(@args_hash)
+    expected_storage_volume = 60.0
+    _test_default_solar_thermal_system(hpxml, expected_storage_volume)
+
+    hpxml = default_hpxml('base-dhw-solar-direct-flat-plate.xml')
+    model, hpxml = _test_measure(@args_hash)
+    expected_storage_volume = 60.0
+    _test_default_solar_thermal_system(hpxml, expected_storage_volume)
+
+    hpxml = default_hpxml('base-dhw-solar-direct-flat-plate.xml')
+    hpxml.solar_thermal_systems[0].collector_area = 100.0
+    XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
+    model, hpxml = _test_measure(@args_hash)
+    expected_storage_volume = 150.0
+    _test_default_solar_thermal_system(hpxml, expected_storage_volume)
+  end
+
   def _test_measure(args_hash)
     # create an instance of the measure
     measure = HPXMLtoOpenStudio.new
@@ -425,6 +446,10 @@ class HPXMLtoOpenStudioDuctsTest < MiniTest::Test
     assert_in_epsilon(hpxml.hot_water_distributions[0].recirculation_pump_power, recirc_pump_power, 0.01)
   end
 
+  def _test_default_solar_thermal_system(hpxml, expected_storage_volume)
+    assert_in_epsilon(hpxml.solar_thermal_systems[0].storage_volume, expected_storage_volume)
+  end
+
   def default_hpxml(hpxml_name)
     hpxml = HPXML.new(hpxml_path: File.join(@root_path, 'workflow', 'sample_files', hpxml_name))
 
@@ -485,6 +510,10 @@ class HPXMLtoOpenStudioDuctsTest < MiniTest::Test
       hpxml.hot_water_distributions[0].recirculation_piping_length = nil
       hpxml.hot_water_distributions[0].recirculation_branch_piping_length = nil
       hpxml.hot_water_distributions[0].recirculation_pump_power = nil
+    end
+
+    if not hpxml.solar_thermal_systems[0].collector_area.nil?
+      hpxml.solar_thermal_systems[0].storage_volume = nil
     end
 
     # save new file
