@@ -2402,14 +2402,7 @@ def set_hpxml_roofs(hpxml_file, hpxml)
     hpxml.roofs[0].interior_adjacent_to = HPXML::LocationLivingSpace
     hpxml.roofs[0].insulation_assembly_r_value = 25.8
   elsif ['base-enclosure-garage.xml'].include? hpxml_file
-    hpxml.roofs.add(id: 'RoofGarage',
-                    interior_adjacent_to: HPXML::LocationGarage,
-                    area: 670,
-                    solar_absorptance: 0.7,
-                    emittance: 0.92,
-                    pitch: 6,
-                    radiant_barrier: false,
-                    insulation_assembly_r_value: 2.3)
+    hpxml.roofs[0].area += 670
   elsif ['base-atticroof-unvented-insulated-roof.xml'].include? hpxml_file
     hpxml.roofs[0].insulation_assembly_r_value = 25.8
   elsif ['base-enclosure-other-housing-unit.xml',
@@ -2432,8 +2425,6 @@ def set_hpxml_roofs(hpxml_file, hpxml)
     hpxml.roofs[0].radiant_barrier = true
   elsif ['invalid_files/enclosure-attic-missing-roof.xml'].include? hpxml_file
     hpxml.roofs[0].delete
-  elsif ['invalid_files/enclosure-garage-missing-roof-ceiling.xml'].include? hpxml_file
-    hpxml.roofs[1].delete
   end
 end
 
@@ -3618,14 +3609,7 @@ def set_hpxml_windows(hpxml_file, hpxml)
                       fraction_operable: 0.0,
                       wall_idref: 'WallAtticGable')
   elsif ['base-enclosure-garage.xml'].include? hpxml_file
-    hpxml.windows.delete_at(2)
-    hpxml.windows.add(id: 'GarageWindowEast',
-                      area: 12,
-                      azimuth: 90,
-                      ufactor: 0.33,
-                      shgc: 0.45,
-                      fraction_operable: 0.0,
-                      wall_idref: 'WallGarageExterior')
+    hpxml.windows[1].area = 12
   elsif ['base-enclosure-2stories.xml'].include? hpxml_file
     hpxml.windows[0].area = 216
     hpxml.windows[1].area = 216
