@@ -97,8 +97,7 @@ class HPXMLtoOpenStudioDuctsTest < MiniTest::Test
       _test_default_duct_values(hpxml, expected_supply_locations, expected_return_locations, expected_supply_areas, expected_return_areas, expected_n_return_registers)
     end
 
-    default_hpxml('base-hvac-multiple.xml')
-    hpxml = HPXML.new(hpxml_path: @tmp_hpxml_path)
+    hpxml = default_hpxml('base-hvac-multiple.xml')
     hpxml.building_construction.number_of_conditioned_floors_above_grade = 2
     XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
     model, hpxml = _test_measure(@args_hash)
@@ -108,6 +107,195 @@ class HPXMLtoOpenStudioDuctsTest < MiniTest::Test
     expected_return_areas = [25.3125, 25.3125, 8.4375, 8.4375] * hpxml.hvac_distributions.size
     expected_n_return_registers = hpxml.building_construction.number_of_conditioned_floors
     _test_default_duct_values(hpxml, expected_supply_locations, expected_return_locations, expected_supply_areas, expected_return_areas, expected_n_return_registers)
+  end
+
+  def test_pv
+    hpxml_name = 'base-pv.xml'
+    hpxml = HPXML.new(hpxml_path: File.join(@root_path, 'workflow', 'sample_files', hpxml_name))
+    XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
+    model, hpxml = _test_measure(@args_hash)
+    expected_interver_efficiency = [0.96, 0.96]
+    expected_system_loss_frac = [0.14, 0.14]
+    _test_default_pv(hpxml, expected_interver_efficiency, expected_system_loss_frac)
+
+    default_hpxml('base-pv.xml')
+    model, hpxml = _test_measure(@args_hash)
+    expected_interver_efficiency = [0.96, 0.96]
+    expected_system_loss_frac = [0.14, 0.14]
+    _test_default_pv(hpxml, expected_interver_efficiency, expected_system_loss_frac)
+
+    hpxml = default_hpxml('base-pv.xml')
+    hpxml.pv_systems.each do |pv|
+      pv.year_modules_manufactured = 2010
+    end
+    XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
+    model, hpxml = _test_measure(@args_hash)
+    expected_interver_efficiency = [0.96, 0.96]
+    expected_system_loss_frac = [0.182, 0.182]
+    _test_default_pv(hpxml, expected_interver_efficiency, expected_system_loss_frac)
+  end
+
+  def test_conditioned_building_volume
+    hpxml_name = 'base.xml'
+    hpxml = HPXML.new(hpxml_path: File.join(@root_path, 'workflow', 'sample_files', hpxml_name))
+    XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
+    model, hpxml = _test_measure(@args_hash)
+    expected_building_volume = 21600
+    _test_default_conditioned_building_volume(hpxml, expected_building_volume)
+
+    default_hpxml('base.xml')
+    model, hpxml = _test_measure(@args_hash)
+    expected_building_volume = 27000
+    _test_default_conditioned_building_volume(hpxml, expected_building_volume)
+  end
+
+  def test_appliances
+    hpxml_name = 'base.xml'
+    hpxml = HPXML.new(hpxml_path: File.join(@root_path, 'workflow', 'sample_files', hpxml_name))
+    XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
+    model, hpxml = _test_measure(@args_hash)
+    expected_cw_values = [HPXML::LocationLivingSpace, 1.21, 380.0, 0.12, 1.09, 27.0, 3.2, 6.0, 1.0]
+    expected_cd_values = [HPXML::LocationLivingSpace, HPXML::ClothesDryerControlTypeTimer, 3.73, 1.0]
+    expected_dw_values = [HPXML::LocationLivingSpace, 307.0, 0.12, 1.09, 22.32, 4.0, 12, 1.0]
+    expected_refrig_values = [HPXML::LocationLivingSpace, 650.0, 1.0]
+    expected_cr_values = [HPXML::LocationLivingSpace, false, 1.0]
+    expected_oven_values = false
+    _test_default_clothes_washer(hpxml, expected_cw_values)
+    _test_default_clothes_dryer(hpxml, expected_cd_values)
+    _test_default_dish_washer(hpxml, expected_dw_values)
+    _test_default_refrigerator(hpxml, expected_refrig_values)
+    _test_default_cooking_range(hpxml, expected_cr_values)
+    _test_default_oven(hpxml, expected_oven_values)
+
+    hpxml = default_hpxml('base.xml')
+    hpxml.header.eri_calculation_version = '2014ADEGL'
+    XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
+    model, hpxml = _test_measure(@args_hash)
+    expected_cw_values = [HPXML::LocationLivingSpace, 0.331, 704.0, 0.08, 0.58, 23.0, 2.874, 6.0, 1.0]
+    expected_cd_values = [HPXML::LocationLivingSpace, HPXML::ClothesDryerControlTypeTimer, 2.62, 1.0]
+    expected_dw_values = [HPXML::LocationLivingSpace, 467.0, 0.12, 1.09, 33.12, 4.0, 12, 1.0]
+    expected_refrig_values = [HPXML::LocationLivingSpace, 691.0, 1.0]
+    expected_cr_values = [HPXML::LocationLivingSpace, false, 1.0]
+    expected_oven_values = false
+    _test_default_clothes_washer(hpxml, expected_cw_values)
+    _test_default_clothes_dryer(hpxml, expected_cd_values)
+    _test_default_dish_washer(hpxml, expected_dw_values)
+    _test_default_refrigerator(hpxml, expected_refrig_values)
+    _test_default_cooking_range(hpxml, expected_cr_values)
+    _test_default_oven(hpxml, expected_oven_values)
+
+    hpxml = default_hpxml('base.xml')
+    hpxml.header.eri_calculation_version = '2014ADEGL'
+    hpxml.clothes_dryers[0].fuel_type = HPXML::FuelTypeNaturalGas
+    XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
+    model, hpxml = _test_measure(@args_hash)
+    expected_cw_values = [HPXML::LocationLivingSpace, 0.331, 704.0, 0.08, 0.58, 23.0, 2.874, 6.0, 1.0]
+    expected_cd_values = [HPXML::LocationLivingSpace, HPXML::ClothesDryerControlTypeTimer, 2.32, 1.0]
+    expected_dw_values = [HPXML::LocationLivingSpace, 467.0, 0.12, 1.09, 33.12, 4.0, 12, 1.0]
+    expected_refrig_values = [HPXML::LocationLivingSpace, 691.0, 1.0]
+    expected_cr_values = [HPXML::LocationLivingSpace, false, 1.0]
+    expected_oven_values = false
+    _test_default_clothes_washer(hpxml, expected_cw_values)
+    _test_default_clothes_dryer(hpxml, expected_cd_values)
+    _test_default_dish_washer(hpxml, expected_dw_values)
+    _test_default_refrigerator(hpxml, expected_refrig_values)
+    _test_default_cooking_range(hpxml, expected_cr_values)
+    _test_default_oven(hpxml, expected_oven_values)
+
+    default_hpxml('base.xml')
+    model, hpxml = _test_measure(@args_hash)
+    expected_cw_values = [HPXML::LocationLivingSpace, 1.0, 400.0, 0.12, 1.09, 27.0, 3.0, 6.0, 1.0]
+    expected_cd_values = [HPXML::LocationLivingSpace, HPXML::ClothesDryerControlTypeTimer, 3.01, 1.0]
+    expected_dw_values = [HPXML::LocationLivingSpace, 467.0, 0.12, 1.09, 33.12, 4.0, 12, 1.0]
+    expected_refrig_values = [HPXML::LocationLivingSpace, 691.0, 1.0]
+    expected_cr_values = [HPXML::LocationLivingSpace, false, 1.0]
+    expected_oven_values = false
+    _test_default_clothes_washer(hpxml, expected_cw_values)
+    _test_default_clothes_dryer(hpxml, expected_cd_values)
+    _test_default_dish_washer(hpxml, expected_dw_values)
+    _test_default_refrigerator(hpxml, expected_refrig_values)
+    _test_default_cooking_range(hpxml, expected_cr_values)
+    _test_default_oven(hpxml, expected_oven_values)
+
+    hpxml = default_hpxml('base.xml')
+    hpxml.clothes_dryers[0].fuel_type = HPXML::FuelTypeNaturalGas
+    XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
+    model, hpxml = _test_measure(@args_hash)
+    expected_cw_values = [HPXML::LocationLivingSpace, 1.0, 400.0, 0.12, 1.09, 27.0, 3.0, 6.0, 1.0]
+    expected_cd_values = [HPXML::LocationLivingSpace, HPXML::ClothesDryerControlTypeTimer, 3.01, 1.0]
+    expected_dw_values = [HPXML::LocationLivingSpace, 467.0, 0.12, 1.09, 33.12, 4.0, 12, 1.0]
+    expected_refrig_values = [HPXML::LocationLivingSpace, 691.0, 1.0]
+    expected_cr_values = [HPXML::LocationLivingSpace, false, 1.0]
+    expected_oven_values = false
+    _test_default_clothes_washer(hpxml, expected_cw_values)
+    _test_default_clothes_dryer(hpxml, expected_cd_values)
+    _test_default_dish_washer(hpxml, expected_dw_values)
+    _test_default_refrigerator(hpxml, expected_refrig_values)
+    _test_default_cooking_range(hpxml, expected_cr_values)
+    _test_default_oven(hpxml, expected_oven_values)
+
+    hpxml = default_hpxml('base-enclosure-beds-5.xml')
+    XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
+    model, hpxml = _test_measure(@args_hash)
+    expected_cw_values = [HPXML::LocationLivingSpace, 1.0, 400.0, 0.12, 1.09, 27.0, 3.0, 6.0, 1.0]
+    expected_cd_values = [HPXML::LocationLivingSpace, HPXML::ClothesDryerControlTypeTimer, 3.01, 1.0]
+    expected_dw_values = [HPXML::LocationLivingSpace, 467.0, 0.12, 1.09, 33.12, 4.0, 12, 1.0]
+    expected_refrig_values = [HPXML::LocationLivingSpace, 727.0, 1.0]
+    expected_cr_values = [HPXML::LocationLivingSpace, false, 1.0]
+    expected_oven_values = false
+    _test_default_clothes_washer(hpxml, expected_cw_values)
+    _test_default_clothes_dryer(hpxml, expected_cd_values)
+    _test_default_dish_washer(hpxml, expected_dw_values)
+    _test_default_refrigerator(hpxml, expected_refrig_values)
+    _test_default_cooking_range(hpxml, expected_cr_values)
+    _test_default_oven(hpxml, expected_oven_values)
+  end
+
+  def test_hot_water_distribution
+    hpxml_name = 'base.xml'
+    hpxml = HPXML.new(hpxml_path: File.join(@root_path, 'workflow', 'sample_files', hpxml_name))
+    XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
+    model, hpxml = _test_measure(@args_hash)
+    expected_hw_piping_length = 50.0
+    _test_default_std_hot_water_distribution(hpxml, expected_hw_piping_length)
+
+    default_hpxml('base.xml')
+    model, hpxml = _test_measure(@args_hash)
+    expected_hw_piping_length = 93.48
+    _test_default_std_hot_water_distribution(hpxml, expected_hw_piping_length)
+
+    default_hpxml('base-foundation-unconditioned-basement.xml')
+    model, hpxml = _test_measure(@args_hash)
+    expected_hw_piping_length = 88.48
+    _test_default_std_hot_water_distribution(hpxml, expected_hw_piping_length)
+
+    default_hpxml('base-enclosure-2stories.xml')
+    model, hpxml = _test_measure(@args_hash)
+    expected_std_hw_piping_length = 103.48
+    _test_default_std_hot_water_distribution(hpxml, expected_std_hw_piping_length)
+
+    hpxml_name = 'base-dhw-recirc-demand.xml'
+    hpxml = HPXML.new(hpxml_path: File.join(@root_path, 'workflow', 'sample_files', hpxml_name))
+    XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
+    model, hpxml = _test_measure(@args_hash)
+    expected_recirc_hw_dist_values = [50.0, 50.0, 50.0]
+    _test_default_recirc_hot_water_distribution(hpxml, expected_recirc_hw_dist_values)
+  
+    hpxml = default_hpxml('base-dhw-recirc-demand.xml')
+    model, hpxml = _test_measure(@args_hash)
+    expected_recirc_hw_dist_values = [166.96, 10.0, 50.0]
+    _test_default_recirc_hot_water_distribution(hpxml, expected_recirc_hw_dist_values)
+  
+    hpxml = default_hpxml('base-enclosure-2stories.xml')
+    hpxml.hot_water_distributions.clear
+    hpxml.hot_water_distributions.add(id: 'HotWaterDstribution',
+                                      system_type: HPXML::DHWDistTypeRecirc,
+                                      recirculation_control_type: HPXML::DHWRecirControlTypeSensor,
+                                      pipe_r_value: 3.0)
+    XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
+    model, hpxml = _test_measure(@args_hash)
+    expected_recirc_hw_dist_values = [186.96, 10.0, 50.0]
+    _test_default_recirc_hot_water_distribution(hpxml, expected_recirc_hw_dist_values)
   end
 
   def _test_measure(args_hash)
@@ -164,6 +352,79 @@ class HPXMLtoOpenStudioDuctsTest < MiniTest::Test
     end
   end
 
+  def _test_default_pv(hpxml, expected_interver_efficiency, expected_system_loss_frac)
+    hpxml.pv_systems.each_with_index do |pv, idx|
+      assert_equal(pv.inverter_efficiency, expected_interver_efficiency[idx])
+      assert_in_epsilon(pv.system_losses_fraction, expected_system_loss_frac[idx], 0.01)
+    end
+  end
+
+  def _test_default_conditioned_building_volume(hpxml, expected_building_volume)
+    assert_equal(hpxml.building_construction.conditioned_building_volume, expected_building_volume)
+  end
+
+  def _test_default_clothes_washer(hpxml, expected_cw_values)
+    cw_location, cw_imef, cw_rated_annual_kwh, cw_label_electric_rate, cw_label_gas_rate, cw_label_annual_gas_cost, cw_capacity, cw_label_usage, cw_usage_multiplier = expected_cw_values
+    assert_equal(hpxml.clothes_washers[0].location, cw_location)
+    assert_equal(hpxml.clothes_washers[0].integrated_modified_energy_factor, cw_imef)
+    assert_equal(hpxml.clothes_washers[0].rated_annual_kwh, cw_rated_annual_kwh)
+    assert_equal(hpxml.clothes_washers[0].label_electric_rate, cw_label_electric_rate)
+    assert_equal(hpxml.clothes_washers[0].label_gas_rate, cw_label_gas_rate)
+    assert_equal(hpxml.clothes_washers[0].label_annual_gas_cost, cw_label_annual_gas_cost)
+    assert_equal(hpxml.clothes_washers[0].capacity, cw_capacity)
+    assert_equal(hpxml.clothes_washers[0].label_usage, cw_label_usage)
+    assert_equal(hpxml.clothes_washers[0].usage_multiplier, cw_usage_multiplier)
+  end
+
+  def _test_default_clothes_dryer(hpxml, expected_cd_values)
+    cd_location, cd_control_type, cd_cef, cd_usage_multiplier = expected_cd_values
+    assert_equal(hpxml.clothes_dryers[0].location, cd_location)
+    assert_equal(hpxml.clothes_dryers[0].control_type, cd_control_type)
+    assert_equal(hpxml.clothes_dryers[0].combined_energy_factor, cd_cef)
+    assert_equal(hpxml.clothes_dryers[0].usage_multiplier, cd_usage_multiplier)
+  end
+
+  def _test_default_dish_washer(hpxml, expected_dw_values)
+    dw_location, dw_rated_annual_kwh, dw_label_electric_rate, dw_label_gas_rate, dw_label_annual_gas_cost, dw_label_usage, dw_place_setting_capacity, dw_usage_multiplier = expected_dw_values
+    assert_equal(hpxml.dishwashers[0].location, dw_location)
+    assert_equal(hpxml.dishwashers[0].rated_annual_kwh, dw_rated_annual_kwh)
+    assert_equal(hpxml.dishwashers[0].label_electric_rate, dw_label_electric_rate)
+    assert_equal(hpxml.dishwashers[0].label_gas_rate, dw_label_gas_rate)
+    assert_equal(hpxml.dishwashers[0].label_annual_gas_cost, dw_label_annual_gas_cost)
+    assert_equal(hpxml.dishwashers[0].label_usage, dw_label_usage)
+    assert_equal(hpxml.dishwashers[0].place_setting_capacity, dw_place_setting_capacity)
+    assert_equal(hpxml.dishwashers[0].usage_multiplier, dw_usage_multiplier)
+  end
+
+  def _test_default_refrigerator(hpxml, expected_refrig_values)
+    refrig_location, refrig_rated_annual_kwh, refrig_usage_multiplier = expected_refrig_values
+    assert_equal(hpxml.refrigerators[0].location, refrig_location)
+    assert_equal(hpxml.refrigerators[0].rated_annual_kwh, refrig_rated_annual_kwh)
+    assert_equal(hpxml.refrigerators[0].usage_multiplier, refrig_usage_multiplier)
+  end
+
+  def _test_default_cooking_range(hpxml, expected_cr_values)
+    cr_location, cr_is_induction, cr_usage_multiplier = expected_cr_values
+    assert_equal(hpxml.cooking_ranges[0].location, cr_location)
+    assert_equal(hpxml.cooking_ranges[0].is_induction, cr_is_induction)
+    assert_equal(hpxml.cooking_ranges[0].usage_multiplier, cr_usage_multiplier)
+  end
+
+  def _test_default_oven(hpxml, expected_oven_values)
+    assert_equal(hpxml.ovens[0].is_convection, expected_oven_values)
+  end
+
+  def _test_default_std_hot_water_distribution(hpxml, expected_std_hw_piping_length)
+    assert_in_epsilon(hpxml.hot_water_distributions[0].standard_piping_length, expected_std_hw_piping_length, 0.01)
+  end
+
+  def _test_default_recirc_hot_water_distribution(hpxml, expected_recirc_hw_dist_values)
+    recirc_piping_length, recirc_branch_piping_length, recirc_pump_power = expected_recirc_hw_dist_values
+    assert_in_epsilon(hpxml.hot_water_distributions[0].recirculation_piping_length, recirc_piping_length, 0.01)
+    assert_in_epsilon(hpxml.hot_water_distributions[0].recirculation_branch_piping_length, recirc_branch_piping_length, 0.01)
+    assert_in_epsilon(hpxml.hot_water_distributions[0].recirculation_pump_power, recirc_pump_power, 0.01)
+  end
+
   def default_hpxml(hpxml_name)
     hpxml = HPXML.new(hpxml_path: File.join(@root_path, 'workflow', 'sample_files', hpxml_name))
 
@@ -174,10 +435,62 @@ class HPXMLtoOpenStudioDuctsTest < MiniTest::Test
       end
     end
 
+    hpxml.pv_systems.each do |pv|
+      pv.inverter_efficiency = nil
+      pv.system_losses_fraction = nil
+    end
+
+    hpxml.building_construction.conditioned_building_volume = nil
+    hpxml.building_construction.average_ceiling_height = 10
+
+    hpxml.clothes_washers[0].location = nil
+    hpxml.clothes_washers[0].integrated_modified_energy_factor = nil
+    hpxml.clothes_washers[0].rated_annual_kwh = nil
+    hpxml.clothes_washers[0].label_electric_rate = nil
+    hpxml.clothes_washers[0].label_gas_rate = nil
+    hpxml.clothes_washers[0].label_annual_gas_cost = nil
+    hpxml.clothes_washers[0].capacity = nil
+    hpxml.clothes_washers[0].label_usage = nil
+    hpxml.clothes_washers[0].usage_multiplier = nil
+
+    hpxml.clothes_dryers[0].location = nil
+    hpxml.clothes_dryers[0].control_type = nil
+    hpxml.clothes_dryers[0].combined_energy_factor = nil
+    hpxml.clothes_dryers[0].usage_multiplier = nil
+
+    hpxml.dishwashers[0].location = nil
+    hpxml.dishwashers[0].rated_annual_kwh = nil
+    hpxml.dishwashers[0].label_electric_rate = nil
+    hpxml.dishwashers[0].label_gas_rate = nil
+    hpxml.dishwashers[0].label_annual_gas_cost = nil
+    hpxml.dishwashers[0].label_usage = nil
+    hpxml.dishwashers[0].place_setting_capacity = nil
+    hpxml.dishwashers[0].usage_multiplier = nil
+    
+    hpxml.refrigerators[0].location = nil
+    hpxml.refrigerators[0].rated_annual_kwh = nil
+    hpxml.refrigerators[0].usage_multiplier = nil
+    
+    hpxml.cooking_ranges[0].location = nil
+    hpxml.cooking_ranges[0].is_induction = nil
+    hpxml.cooking_ranges[0].usage_multiplier = nil
+
+    hpxml.ovens[0].is_convection = nil
+
+    if hpxml.hot_water_distributions[0].system_type == HPXML::DHWDistTypeStandard
+      hpxml.hot_water_distributions[0].standard_piping_length = nil
+    end
+
+    if hpxml.hot_water_distributions[0].system_type == HPXML::DHWDistTypeRecirc
+      hpxml.hot_water_distributions[0].recirculation_piping_length = nil
+      hpxml.hot_water_distributions[0].recirculation_branch_piping_length = nil
+      hpxml.hot_water_distributions[0].recirculation_pump_power = nil
+    end
+
     # save new file
     hpxml_name = File.basename(@tmp_hpxml_path)
     XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
 
-    return hpxml_name
+    return hpxml
   end
 end
