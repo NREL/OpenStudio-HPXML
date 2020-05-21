@@ -77,13 +77,13 @@ def create_osws
     'base-dhw-tank-wood.osw' => 'base.osw',
     'base-dhw-uef.osw' => 'base.osw',
     'base-enclosure-2stories.osw' => 'base.osw',
-    # 'base-enclosure-2stories-garage.osw' => 'base.osw',
+    'base-enclosure-2stories-garage.osw' => 'base.osw',
     # 'base-enclosure-attached-multifamily.osw' => 'base.osw',
     'base-enclosure-beds-1.osw' => 'base.osw',
     'base-enclosure-beds-2.osw' => 'base.osw',
     'base-enclosure-beds-4.osw' => 'base.osw',
     'base-enclosure-beds-5.osw' => 'base.osw',
-    # 'base-enclosure-garage.osw' => 'base.osw', TODO: should garage attic be of type garage or attic?
+    'base-enclosure-garage.osw' => 'base.osw',
     'base-enclosure-infil-cfm50.osw' => 'base.osw',
     'base-enclosure-infil-natural-ach.osw' => 'base.osw',
     # 'base-enclosure-other-heated-space.osw' => 'base.osw',
@@ -923,13 +923,16 @@ def get_values(osw_file, step)
     step.setArgument('window_area_right', 144.0)
     step.setArgument('plug_loads_other_annual_kwh', '3685.5')
   elsif ['base-enclosure-2stories-garage.osw'].include? osw_file
-    step.setArgument('geometry_cfa', 4050.0)
+    step.setArgument('geometry_cfa', 3250.0)
     step.setArgument('geometry_num_floors_above_grade', 2)
-    step.setArgument('geometry_garage_width', 12.0)
+    step.setArgument('geometry_garage_width', 20.0)
     step.setArgument('window_area_front', 216.0)
     step.setArgument('window_area_back', 216.0)
     step.setArgument('window_area_left', 144.0)
     step.setArgument('window_area_right', 144.0)
+    step.setArgument('ducts_supply_surface_area', '112.5')
+    step.setArgument('ducts_return_surface_area', '37.5')
+    step.setArgument('plug_loads_other_annual_kwh', '3685.5')
   elsif ['base-enclosure-attached-multifamily.osw'].include? osw_file
 
   elsif ['base-enclosure-beds-1.osw'].include? osw_file
@@ -953,13 +956,15 @@ def get_values(osw_file, step)
   elsif ['base-enclosure-garage.osw'].include? osw_file
     step.setArgument('geometry_garage_width', 30.0)
     step.setArgument('geometry_garage_protrusion', 1.0)
-    step.setArgument('window_area_right', 12.0)
+    step.setArgument('window_area_front', 12.0)
     step.setArgument('ducts_supply_location', HPXML::LocationGarage)
     step.setArgument('ducts_return_location', HPXML::LocationGarage)
     step.setArgument('water_heater_location', HPXML::LocationGarage)
     step.setArgument('clothes_washer_location', HPXML::LocationGarage)
     step.setArgument('clothes_dryer_location', HPXML::LocationGarage)
+    step.setArgument('dishwasher_location', HPXML::LocationGarage)
     step.setArgument('refrigerator_location', HPXML::LocationGarage)
+    step.setArgument('cooking_range_oven_location', HPXML::LocationGarage)
   elsif ['base-enclosure-infil-cfm50.osw'].include? osw_file
     step.setArgument('air_leakage_units', HPXML::UnitsCFM50)
     step.setArgument('air_leakage_value', 1080)
