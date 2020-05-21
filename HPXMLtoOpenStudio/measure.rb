@@ -3008,7 +3008,7 @@ class OSModel
     site_type = @hpxml.site.site_type
     shelter_coef = @hpxml.site.shelter_coefficient
     has_flue_chimney = false # FUTURE: Expose as HPXML input
-    infil_height = Airflow.calc_inferred_infiltration_height(@cfa, @ncfl, @ncfl_ag, @infil_volume, @hpxml)
+    infil_height = @hpxml.inferred_infiltration_height
     Airflow.apply(model, runner, weather, spaces, air_infils, vent_mech, vent_whf,
                   duct_systems, @infil_volume, infil_height, open_window_area,
                   @clg_ssn_sensor, @min_neighbor_distance, vent_kitchen, vent_bath,
@@ -4053,7 +4053,8 @@ class OSModel
       surface.createAdjacentSurface(create_or_get_space(model, spaces, HPXML::LocationLivingSpace))
       @cond_bsmnt_surfaces << surface
       set_surface_otherside_coefficients(surface, exterior_adjacent_to, model, spaces)
-    elsif [HPXML::LocationOtherHousingUnit, HPXML::LocationOtherHeatedSpace, HPXML::LocationOtherMultifamilyBufferSpace, HPXML::LocationOtherNonFreezingSpace].include? exterior_adjacent_to
+    elsif [HPXML::LocationOtherHousingUnit, HPXML::LocationOtherHeatedSpace,
+           HPXML::LocationOtherMultifamilyBufferSpace, HPXML::LocationOtherNonFreezingSpace].include? exterior_adjacent_to
       set_surface_otherside_coefficients(surface, exterior_adjacent_to, model, spaces)
     else
       surface.createAdjacentSurface(create_or_get_space(model, spaces, exterior_adjacent_to))
@@ -4069,7 +4070,7 @@ class OSModel
       # Refer to: https://www.sciencedirect.com/science/article/pii/B9780123972705000066 6.1.2 Part: Wall and roof transfer functions
       otherside_object.setCombinedConvectiveRadiativeFilmCoefficient(8.3)
       # Schedule of space temperature, can be shared with water heater/ducts
-      sch = get_multifamily_temperature_schedule(model, exterior_adjacent_to, spaces)
+      sch = get_space_temperature_schedule(model, exterior_adjacent_to, spaces)
       otherside_object.setConstantTemperatureSchedule(sch)
       surface.setSurfacePropertyOtherSideCoefficients(otherside_object)
       spaces[exterior_adjacent_to] = otherside_object
@@ -4080,7 +4081,7 @@ class OSModel
     surface.setWindExposure('NoWind')
   end
 
-  def self.get_multifamily_temperature_schedule(model, location, spaces)
+  def self.get_space_temperature_schedule(model, location, spaces)
     # Create outside boundary schedules to be actuated by EMS,
     # can be shared by any surface, duct adjacent to / located in those spaces
 
@@ -4099,22 +4100,37 @@ class OSModel
       temp_min = UnitConversions.convert(68, 'F', 'C')
       indoor_weight = 0.5
       outdoor_weight = 0.5
+      ground_weight = 0.0
     elsif location == HPXML::LocationOtherMultifamilyBufferSpace
       # Average of indoor/outdoor temperatures with minimum of 50 deg-F
       temp_min = UnitConversions.convert(50, 'F', 'C')
       indoor_weight = 0.5
       outdoor_weight = 0.5
+      ground_weight = 0.0
     elsif location == HPXML::LocationOtherNonFreezingSpace
       # Floating with outdoor air temperature with minimum of 40 deg-F
       temp_min = UnitConversions.convert(40, 'F', 'C')
       indoor_weight = 0.0
       outdoor_weight = 1.0
+      ground_weight = 0.0
     elsif location == HPXML::LocationOtherHousingUnit
-      # For water heater, duct etc.
       # Indoor air temperature
       temp_min = UnitConversions.convert(40, 'F', 'C')
       indoor_weight = 1.0
       outdoor_weight = 0.0
+      ground_weight = 0.0
+    elsif location == HPXML::LocationExteriorWall
+      # Average of indoor/outdoor temperatures
+      temp_min = nil
+      indoor_weight = 0.5
+      outdoor_weight = 0.5
+      ground_weight = 0.0
+    elsif location == HPXML::LocationUnderSlab
+      # Ground temperature
+      temp_min = nil
+      indoor_weight = 0.0
+      outdoor_weight = 0.0
+      ground_weight = 1.0
     end
 
     # Schedule type limits compatible
@@ -4130,15 +4146,20 @@ class OSModel
     sensor_oa = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Site Outdoor Air Drybulb Temperature')
     sensor_oa.setName('oa_temp')
 
+    sensor_gnd = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Site Surface Ground Temperature')
+    sensor_gnd.setName('ground_temp')
+
     actuator = OpenStudio::Model::EnergyManagementSystemActuator.new(sch, 'Schedule:Constant', 'Schedule Value')
     actuator.setName("#{location.gsub(' ', '_').gsub('-', '_')}_temp_sch")
 
     program = OpenStudio::Model::EnergyManagementSystemProgram.new(model)
     program.setName("#{location.gsub('-', '_')} Temperature Program")
-    program.addLine("Set #{actuator.name} = #{sensor_ia.name} * #{indoor_weight} + #{sensor_oa.name} * #{outdoor_weight}")
-    program.addLine("If #{actuator.name} < #{temp_min}")
-    program.addLine("Set #{actuator.name} = #{temp_min}")
-    program.addLine('EndIf')
+    program.addLine("Set #{actuator.name} = #{sensor_ia.name} * #{indoor_weight} + #{sensor_oa.name} * #{outdoor_weight} + #{sensor_gnd.name} * #{ground_weight}")
+    if not temp_min.nil?
+      program.addLine("If #{actuator.name} < #{temp_min}")
+      program.addLine("Set #{actuator.name} = #{temp_min}")
+      program.addLine('EndIf')
+    end
 
     program_cm = OpenStudio::Model::EnergyManagementSystemProgramCallingManager.new(model)
     program_cm.setName("#{program.name} calling manager")
@@ -4152,13 +4173,14 @@ class OSModel
   # Should be called when the object's energy use is sensitive to ambient temperature
   # (e.g., water heaters and ducts).
   def self.get_space_or_schedule_from_location(location, object_name, model, spaces)
-    return if [HPXML::LocationOtherExterior, HPXML::LocationOutside].include? location
+    return if [HPXML::LocationOtherExterior, HPXML::LocationOutside, HPXML::LocationRoofDeck].include? location
 
     sch = nil
     space = nil
-    if [HPXML::LocationOtherHeatedSpace, HPXML::LocationOtherHousingUnit, HPXML::LocationOtherMultifamilyBufferSpace, HPXML::LocationOtherNonFreezingSpace].include? location
-      # if located in MF spaces, create and return temperature schedule
-      sch = get_multifamily_temperature_schedule(model, location, spaces)
+    if [HPXML::LocationOtherHeatedSpace, HPXML::LocationOtherHousingUnit, HPXML::LocationOtherMultifamilyBufferSpace,
+        HPXML::LocationOtherNonFreezingSpace, HPXML::LocationExteriorWall, HPXML::LocationUnderSlab].include? location
+      # if located in spaces where we don't model a thermal zone, create and return temperature schedule
+      sch = get_space_temperature_schedule(model, location, spaces)
     else
       space = get_space_from_location(location, object_name, model, spaces)
     end
