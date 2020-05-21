@@ -422,11 +422,7 @@ class OSModel
       @hpxml.building_construction.conditioned_building_volume = @cfa * @hpxml.building_construction.average_ceiling_height
     end
     @cvolume = @hpxml.building_construction.conditioned_building_volume
-    if @hpxml.building_construction.number_of_bathrooms.nil?
-      @nbaths = Waterheater.get_default_num_bathrooms(@nbeds)
-    else
-      @nbaths = Float(@hpxml.building_construction.number_of_bathrooms)
-    end
+    @hpxml.building_construction.number_of_bathrooms = Waterheater.get_default_num_bathrooms(@nbeds) if @hpxml.building_construction.number_of_bathrooms.nil?
 
     # Default attics/foundations
     if @hpxml.has_space_type(HPXML::LocationAtticVented)
@@ -647,10 +643,10 @@ class OSModel
       end
       if (water_heating_system.water_heater_type == HPXML::WaterHeaterTypeStorage)
         if water_heating_system.heating_capacity.nil?
-          water_heating_system.heating_capacity = Waterheater.get_default_heating_capacity(water_heating_system.fuel_type, @nbeds, @hpxml.water_heating_systems.size, @nbaths) * 1000.0
+          water_heating_system.heating_capacity = Waterheater.get_default_heating_capacity(water_heating_system.fuel_type, @nbeds, @hpxml.water_heating_systems.size, @hpxml.building_construction.number_of_bathrooms) * 1000.0
         end
         if water_heating_system.tank_volume.nil?
-          water_heating_system.tank_volume = Waterheater.get_default_tank_volume(water_heating_system.fuel_type, @nbeds, @nbaths)
+          water_heating_system.tank_volume = Waterheater.get_default_tank_volume(water_heating_system.fuel_type, @nbeds, @hpxml.building_construction.number_of_bathrooms)
         end
         if water_heating_system.recovery_efficiency.nil?
           ef = water_heating_system.energy_factor
@@ -725,7 +721,7 @@ class OSModel
       next unless (vent_fan.used_for_local_ventilation && (vent_fan.fan_location == HPXML::VentilationFanLocationBath))
 
       if vent_fan.quantity.nil?
-        vent_fan.quantity = @nbaths.to_i
+        vent_fan.quantity = Float(@hpxml.building_construction.number_of_bathrooms).to_i
       end
       if vent_fan.rated_flow_rate.nil?
         vent_fan.rated_flow_rate = 50.0 # cfm, per BA HSP
