@@ -39,7 +39,7 @@ class HPXMLtoOpenStudioAirflowTest < MiniTest::Test
     # Check infiltration/ventilation program
     program_values = get_ems_values(model.getEnergyManagementSystemPrograms, "#{Constants.ObjectNameInfiltration} program")
     assert_in_epsilon(0.0436, Float(program_values['c']), 0.01)
-    assert_in_epsilon(0.0544, Float(program_values['Cs']), 0.01)
+    assert_in_epsilon(0.0573, Float(program_values['Cs']), 0.01)
     assert_in_epsilon(0.1446, Float(program_values['Cw']), 0.01)
   end
 
@@ -51,7 +51,7 @@ class HPXMLtoOpenStudioAirflowTest < MiniTest::Test
     # Check infiltration/ventilation program
     program_values = get_ems_values(model.getEnergyManagementSystemPrograms, "#{Constants.ObjectNameInfiltration} program")
     assert_in_epsilon(0.0436, Float(program_values['c']), 0.01)
-    assert_in_epsilon(0.0544, Float(program_values['Cs']), 0.01)
+    assert_in_epsilon(0.0573, Float(program_values['Cs']), 0.01)
     assert_in_epsilon(0.1446, Float(program_values['Cw']), 0.01)
   end
 
@@ -62,8 +62,8 @@ class HPXMLtoOpenStudioAirflowTest < MiniTest::Test
 
     # Check infiltration/ventilation program
     program_values = get_ems_values(model.getEnergyManagementSystemPrograms, "#{Constants.ObjectNameInfiltration} program")
-    assert_in_epsilon(0.3127, Float(program_values['c']), 0.01)
-    assert_in_epsilon(0.0544, Float(program_values['Cs']), 0.01)
+    assert_in_epsilon(0.3028, Float(program_values['c']), 0.01)
+    assert_in_epsilon(0.0573, Float(program_values['Cs']), 0.01)
     assert_in_epsilon(0.1446, Float(program_values['Cw']), 0.01)
   end
 
@@ -75,8 +75,8 @@ class HPXMLtoOpenStudioAirflowTest < MiniTest::Test
     # Check natural ventilation/whole house fan program
     program_values = get_ems_values(model.getEnergyManagementSystemPrograms, "#{Constants.ObjectNameNaturalVentilation} program")
     assert_in_epsilon(14.5, UnitConversions.convert(Float(program_values['NVArea']), 'cm^2', 'ft^2'), 0.01)
-    assert_in_epsilon(0.000100, Float(program_values['Cs']), 0.01)
-    assert_in_epsilon(0.000065, Float(program_values['Cw']), 0.01)
+    assert_in_epsilon(0.000109, Float(program_values['Cs']), 0.01)
+    assert_in_epsilon(0.000068, Float(program_values['Cw']), 0.01)
     assert_in_epsilon(0.0, UnitConversions.convert(Float(program_values['WHF_Flow']), 'm^3/s', 'cfm'), 0.01)
   end
 
