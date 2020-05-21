@@ -2,7 +2,7 @@
 
 class Waterheater
   def self.apply_tank(model, loc_space, loc_schedule, water_heating_system, ec_adj, dhw_map,
-                      desuperheater_clg_coil, solar_fraction)
+                      hvac_map, solar_fraction)
 
     set_temp_c = get_set_temp_c(water_heating_system.temperature, water_heating_system.water_heater_type)
     loop = create_new_loop(model, Constants.PlantLoopDomesticWater, set_temp_c)
@@ -34,13 +34,13 @@ class Waterheater
       dhw_map[water_heating_system.id] << obj unless obj.nil?
     end
 
-    if not desuperheater_clg_coil.nil?
-      dhw_map[water_heating_system.id] << add_desuperheater(model, water_heating_system.temperature, new_heater, desuperheater_clg_coil, loc_space, loc_schedule, loop)
+    if water_heating_system.uses_desuperheater
+      dhw_map[water_heating_system.id] << add_desuperheater(model, water_heating_system, hvac_map, new_heater, loc_space, loc_schedule, loop)
     end
   end
 
   def self.apply_tankless(model, loc_space, loc_schedule, water_heating_system, ec_adj, nbeds, dhw_map,
-                          desuperheater_clg_coil, solar_fraction)
+                          hvac_map, solar_fraction)
 
     set_temp_c = get_set_temp_c(water_heating_system.temperature, water_heating_system.water_heater_type)
     loop = Waterheater.create_new_loop(model, Constants.PlantLoopDomesticWater, set_temp_c)
@@ -72,13 +72,13 @@ class Waterheater
       dhw_map[water_heating_system.id] << obj unless obj.nil?
     end
 
-    if not desuperheater_clg_coil.nil?
-      dhw_map[water_heating_system.id] << add_desuperheater(model, water_heating_system.temperature, new_heater, desuperheater_clg_coil, loc_space, loc_schedule, loop)
+    if water_heating_system.uses_desuperheater
+      dhw_map[water_heating_system.id] << add_desuperheater(model, water_heating_system, hvac_map, new_heater, loc_space, loc_schedule, loop)
     end
   end
 
   def self.apply_heatpump(model, runner, loc_space, loc_schedule, weather, water_heating_system,
-                          ec_adj, dhw_map, desuperheater_clg_coil, solar_fraction, living_zone)
+                          ec_adj, dhw_map, hvac_map, solar_fraction, living_zone)
 
     obj_name_hpwh = Constants.ObjectNameWaterHeater
 
@@ -129,8 +129,8 @@ class Waterheater
     tank = setup_hpwh_stratified_tank(hpwh, water_heating_system, obj_name_hpwh, h_tank, solar_fraction, hpwh_tamb, hpwh_bottom_element_sp, hpwh_top_element_sp)
     loop.addSupplyBranchForComponent(tank)
 
-    if not desuperheater_clg_coil.nil?
-      dhw_map[water_heating_system.id] << add_desuperheater(model, water_heating_system.temperature, tank, desuperheater_clg_coil, loc_space, loc_schedule, loop)
+    if water_heating_system.uses_desuperheater
+      dhw_map[water_heating_system.id] << add_desuperheater(model, water_heating_system, hvac_map, tank, loc_space, loc_schedule, loop)
     end
     dhw_map[water_heating_system.id] << tank
 
@@ -757,7 +757,9 @@ class Waterheater
   end
 
   def self.apply_combi(model, runner, loc_space, loc_schedule, water_heating_system, ec_adj,
-                       boiler, boiler_plant_loop, dhw_map, solar_fraction)
+                       dhw_map, hvac_map, solar_fraction)
+
+    boiler, boiler_plant_loop = get_combi_boiler_and_plant_loop(hvac_map, water_heating_system.related_hvac_idref)
     dhw_map[water_heating_system.id] << boiler
 
     obj_name_combi = Constants.ObjectNameWaterHeater
@@ -865,106 +867,145 @@ class Waterheater
     end
   end
 
-  def self.apply_combi_system_EMS(model, combi_sys_id, dhw_map)
-    # EMS for modulate source side mass flow rate
-    # Initialization
-    equipment_peaks = {}
-    equipment_sch_sensors = {}
-    equipment_target_temp_sensors = {}
-    tank_volume, deadband, tank_source_temp = 0.0, 0.0, 0.0
-    alt_spt_sch = nil
-    tank_temp_sensor, tank_spt_sensor, tank_loss_energy_sensor = nil, nil, nil
-    altsch_actuator, pump_actuator = nil, nil
-
-    # Create sensors and actuators by dhw map information
-    dhw_map[combi_sys_id].each do |object|
-      if object.is_a? OpenStudio::Model::WaterUseConnections
-        object.waterUseEquipment.each do |wu|
-          # water use equipment peak mass flow rate
-          wu_peak = wu.waterUseEquipmentDefinition.peakFlowRate
-          equipment_peaks[wu.name.to_s] = wu_peak
-          # mfr fraction schedule sensors
-          wu_sch_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Schedule Value')
-          wu_sch_sensor.setName("#{wu.name} sch value")
-          wu_sch_sensor.setKeyName(wu.flowRateFractionSchedule.get.name.to_s)
-          equipment_sch_sensors[wu.name.to_s] = wu_sch_sensor
-          # water use equipment target temperature schedule sensors
-          target_temp_sch = wu.waterUseEquipmentDefinition.targetTemperatureSchedule.get
-          target_temp_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Schedule Value')
-          target_temp_sensor.setName("#{wu.name} target temp")
-          target_temp_sensor.setKeyName(target_temp_sch.name.to_s)
-          equipment_target_temp_sensors[wu.name.to_s] = target_temp_sensor
+  def self.get_combi_boiler_and_plant_loop(loop_hvacs, heating_source_id)
+    # Search for the right boiler OS object
+    boiler = nil
+    plant_loop = nil
+    if loop_hvacs.keys.include? heating_source_id
+      loop_hvacs[heating_source_id].each do |comp|
+        if comp.is_a? OpenStudio::Model::PlantLoop
+          plant_loop = comp
+        elsif comp.is_a? OpenStudio::Model::BoilerHotWater
+          boiler = comp
         end
-      elsif object.is_a? OpenStudio::Model::WaterHeaterMixed
-        # Some parameters to use
-        tank_volume = object.tankVolume.get
-        deadband = object.deadbandTemperatureDifference
-        # Sensors and actuators related to OS water heater object
-        tank_temp_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Water Heater Tank Temperature')
-        tank_temp_sensor.setName("#{combi_sys_id} Tank Temp")
-        tank_temp_sensor.setKeyName(object.name.to_s)
-        tank_loss_energy_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Water Heater Heat Loss Energy')
-        tank_loss_energy_sensor.setName("#{combi_sys_id} Tank Loss Energy")
-        tank_loss_energy_sensor.setKeyName(object.name.to_s)
-        tank_spt_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Schedule Value')
-        tank_spt_sensor.setName("#{combi_sys_id} Setpoint Temperature")
-        tank_spt_sensor.setKeyName(object.setpointTemperatureSchedule.get.name.to_s)
-        alt_spt_sch = object.indirectAlternateSetpointTemperatureSchedule.get
-        altsch_actuator = OpenStudio::Model::EnergyManagementSystemActuator.new(alt_spt_sch, 'Schedule:Constant', 'Schedule Value')
-        altsch_actuator.setName("#{combi_sys_id} AltSchedOverride")
-      elsif object.is_a? OpenStudio::Model::PumpVariableSpeed
-        pump_actuator = OpenStudio::Model::EnergyManagementSystemActuator.new(object, 'Pump', 'Pump Mass Flow Rate')
-        pump_actuator.setName("#{combi_sys_id} Pump MFR")
-      elsif object.is_a? OpenStudio::Model::SetpointManagerScheduled
-        tank_source_temp = object.schedule.to_ScheduleConstant.get.value
       end
     end
-
-    mains_temp_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Site Mains Water Temperature')
-    mains_temp_sensor.setName('Mains Temperature')
-    mains_temp_sensor.setKeyName('*')
-
-    # Program
-    combi_ctrl_program = OpenStudio::Model::EnergyManagementSystemProgram.new(model)
-    combi_ctrl_program.setName("#{combi_sys_id} Source MFR Control")
-    combi_ctrl_program.addLine("Set Rho = @RhoH2O #{tank_temp_sensor.name}")
-    combi_ctrl_program.addLine("Set Cp = @CpHW #{tank_temp_sensor.name}")
-    combi_ctrl_program.addLine("Set Tank_Water_Mass = #{tank_volume} * Rho")
-    combi_ctrl_program.addLine("Set DeltaT = #{tank_source_temp} - #{tank_spt_sensor.name}")
-    combi_ctrl_program.addLine("Set WU_Hot_Temp = #{tank_temp_sensor.name}")
-    combi_ctrl_program.addLine("Set WU_Cold_Temp = #{mains_temp_sensor.name}")
-    combi_ctrl_program.addLine('Set Tank_Use_Total_MFR = 0.0')
-    equipment_peaks.each do |wu_name, peak|
-      wu_id = wu_name.gsub(' ', '_')
-      combi_ctrl_program.addLine("Set #{wu_id}_Peak = #{peak}")
-      combi_ctrl_program.addLine("Set #{wu_id}_MFR_Total = #{wu_id}_Peak * #{equipment_sch_sensors[wu_name].name} * Rho")
-      combi_ctrl_program.addLine("If #{equipment_target_temp_sensors[wu_name].name} > WU_Hot_Temp")
-      combi_ctrl_program.addLine("Set #{wu_id}_MFR_Hot = #{wu_id}_MFR_Total")
-      combi_ctrl_program.addLine('Else')
-      combi_ctrl_program.addLine("Set #{wu_id}_MFR_Hot = #{wu_id}_MFR_Total * (#{equipment_target_temp_sensors[wu_name].name} - WU_Cold_Temp)/(WU_Hot_Temp - WU_Cold_Temp)")
-      combi_ctrl_program.addLine('EndIf')
-      combi_ctrl_program.addLine("Set Tank_Use_Total_MFR = Tank_Use_Total_MFR + #{wu_id}_MFR_Hot")
-    end
-    combi_ctrl_program.addLine("Set WH_Loss = - #{tank_loss_energy_sensor.name}")
-    combi_ctrl_program.addLine("Set WH_Use = Tank_Use_Total_MFR * Cp * (#{tank_temp_sensor.name} - #{mains_temp_sensor.name}) * ZoneTimeStep * 3600")
-    combi_ctrl_program.addLine("Set WH_HeatToLowSetpoint = Tank_Water_Mass * Cp * (#{tank_temp_sensor.name} - #{tank_spt_sensor.name} + #{deadband})")
-    combi_ctrl_program.addLine('Set WH_Energy_Demand = WH_Use + WH_Loss - WH_HeatToLowSetpoint')
-    combi_ctrl_program.addLine('If WH_Energy_Demand > 0')
-    combi_ctrl_program.addLine("Set #{pump_actuator.name} = WH_Energy_Demand / (Cp * DeltaT * 3600 * ZoneTimeStep)")
-    combi_ctrl_program.addLine("Set #{altsch_actuator.name} = 100") # Set the alternate setpoint temperature to highest level to ensure maximum source side flow rate
-    combi_ctrl_program.addLine('Else')
-    combi_ctrl_program.addLine("Set #{pump_actuator.name} = 0")
-    combi_ctrl_program.addLine("Set #{altsch_actuator.name} = #{alt_spt_sch.to_ScheduleConstant.get.value}")
-    combi_ctrl_program.addLine('EndIf')
-
-    # ProgramCallingManagers
-    program_calling_manager = OpenStudio::Model::EnergyManagementSystemProgramCallingManager.new(model)
-    program_calling_manager.setName("#{combi_sys_id} ProgramManager")
-    program_calling_manager.setCallingPoint('BeginTimestepBeforePredictor')
-    program_calling_manager.addProgram(combi_ctrl_program)
+    return boiler, plant_loop
   end
 
-  def self.add_desuperheater(model, t_set, tank, desuperheater_clg_coil, loc_space, loc_schedule, loop)
+  def self.apply_combi_system_EMS(model, dhw_map, water_heating_systems)
+    combi_sys_ids = water_heating_systems.select { |wh| [HPXML::WaterHeaterTypeCombiStorage, HPXML::WaterHeaterTypeCombiTankless].include? wh.water_heater_type }.map { |wh| wh.id }
+
+    dhw_map.keys.each do |sys_id|
+      next unless combi_sys_ids.include? sys_id
+      # EMS for modulate source side mass flow rate
+      # Initialization
+      equipment_peaks = {}
+      equipment_sch_sensors = {}
+      equipment_target_temp_sensors = {}
+      tank_volume, deadband, tank_source_temp = 0.0, 0.0, 0.0
+      alt_spt_sch = nil
+      tank_temp_sensor, tank_spt_sensor, tank_loss_energy_sensor = nil, nil, nil
+      altsch_actuator, pump_actuator = nil, nil
+
+      # Create sensors and actuators by dhw map information
+      dhw_map[sys_id].each do |object|
+        if object.is_a? OpenStudio::Model::WaterUseConnections
+          object.waterUseEquipment.each do |wu|
+            # water use equipment peak mass flow rate
+            wu_peak = wu.waterUseEquipmentDefinition.peakFlowRate
+            equipment_peaks[wu.name.to_s] = wu_peak
+            # mfr fraction schedule sensors
+            wu_sch_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Schedule Value')
+            wu_sch_sensor.setName("#{wu.name} sch value")
+            wu_sch_sensor.setKeyName(wu.flowRateFractionSchedule.get.name.to_s)
+            equipment_sch_sensors[wu.name.to_s] = wu_sch_sensor
+            # water use equipment target temperature schedule sensors
+            target_temp_sch = wu.waterUseEquipmentDefinition.targetTemperatureSchedule.get
+            target_temp_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Schedule Value')
+            target_temp_sensor.setName("#{wu.name} target temp")
+            target_temp_sensor.setKeyName(target_temp_sch.name.to_s)
+            equipment_target_temp_sensors[wu.name.to_s] = target_temp_sensor
+          end
+        elsif object.is_a? OpenStudio::Model::WaterHeaterMixed
+          # Some parameters to use
+          tank_volume = object.tankVolume.get
+          deadband = object.deadbandTemperatureDifference
+          # Sensors and actuators related to OS water heater object
+          tank_temp_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Water Heater Tank Temperature')
+          tank_temp_sensor.setName("#{sys_id} Tank Temp")
+          tank_temp_sensor.setKeyName(object.name.to_s)
+          tank_loss_energy_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Water Heater Heat Loss Energy')
+          tank_loss_energy_sensor.setName("#{sys_id} Tank Loss Energy")
+          tank_loss_energy_sensor.setKeyName(object.name.to_s)
+          tank_spt_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Schedule Value')
+          tank_spt_sensor.setName("#{sys_id} Setpoint Temperature")
+          tank_spt_sensor.setKeyName(object.setpointTemperatureSchedule.get.name.to_s)
+          alt_spt_sch = object.indirectAlternateSetpointTemperatureSchedule.get
+          altsch_actuator = OpenStudio::Model::EnergyManagementSystemActuator.new(alt_spt_sch, 'Schedule:Constant', 'Schedule Value')
+          altsch_actuator.setName("#{sys_id} AltSchedOverride")
+        elsif object.is_a? OpenStudio::Model::PumpVariableSpeed
+          pump_actuator = OpenStudio::Model::EnergyManagementSystemActuator.new(object, 'Pump', 'Pump Mass Flow Rate')
+          pump_actuator.setName("#{sys_id} Pump MFR")
+        elsif object.is_a? OpenStudio::Model::SetpointManagerScheduled
+          tank_source_temp = object.schedule.to_ScheduleConstant.get.value
+        end
+      end
+
+      mains_temp_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Site Mains Water Temperature')
+      mains_temp_sensor.setName('Mains Temperature')
+      mains_temp_sensor.setKeyName('*')
+
+      # Program
+      combi_ctrl_program = OpenStudio::Model::EnergyManagementSystemProgram.new(model)
+      combi_ctrl_program.setName("#{sys_id} Source MFR Control")
+      combi_ctrl_program.addLine("Set Rho = @RhoH2O #{tank_temp_sensor.name}")
+      combi_ctrl_program.addLine("Set Cp = @CpHW #{tank_temp_sensor.name}")
+      combi_ctrl_program.addLine("Set Tank_Water_Mass = #{tank_volume} * Rho")
+      combi_ctrl_program.addLine("Set DeltaT = #{tank_source_temp} - #{tank_spt_sensor.name}")
+      combi_ctrl_program.addLine("Set WU_Hot_Temp = #{tank_temp_sensor.name}")
+      combi_ctrl_program.addLine("Set WU_Cold_Temp = #{mains_temp_sensor.name}")
+      combi_ctrl_program.addLine('Set Tank_Use_Total_MFR = 0.0')
+      equipment_peaks.each do |wu_name, peak|
+        wu_id = wu_name.gsub(' ', '_')
+        combi_ctrl_program.addLine("Set #{wu_id}_Peak = #{peak}")
+        combi_ctrl_program.addLine("Set #{wu_id}_MFR_Total = #{wu_id}_Peak * #{equipment_sch_sensors[wu_name].name} * Rho")
+        combi_ctrl_program.addLine("If #{equipment_target_temp_sensors[wu_name].name} > WU_Hot_Temp")
+        combi_ctrl_program.addLine("Set #{wu_id}_MFR_Hot = #{wu_id}_MFR_Total")
+        combi_ctrl_program.addLine('Else')
+        combi_ctrl_program.addLine("Set #{wu_id}_MFR_Hot = #{wu_id}_MFR_Total * (#{equipment_target_temp_sensors[wu_name].name} - WU_Cold_Temp)/(WU_Hot_Temp - WU_Cold_Temp)")
+        combi_ctrl_program.addLine('EndIf')
+        combi_ctrl_program.addLine("Set Tank_Use_Total_MFR = Tank_Use_Total_MFR + #{wu_id}_MFR_Hot")
+      end
+      combi_ctrl_program.addLine("Set WH_Loss = - #{tank_loss_energy_sensor.name}")
+      combi_ctrl_program.addLine("Set WH_Use = Tank_Use_Total_MFR * Cp * (#{tank_temp_sensor.name} - #{mains_temp_sensor.name}) * ZoneTimeStep * 3600")
+      combi_ctrl_program.addLine("Set WH_HeatToLowSetpoint = Tank_Water_Mass * Cp * (#{tank_temp_sensor.name} - #{tank_spt_sensor.name} + #{deadband})")
+      combi_ctrl_program.addLine('Set WH_Energy_Demand = WH_Use + WH_Loss - WH_HeatToLowSetpoint')
+      combi_ctrl_program.addLine('If WH_Energy_Demand > 0')
+      combi_ctrl_program.addLine("Set #{pump_actuator.name} = WH_Energy_Demand / (Cp * DeltaT * 3600 * ZoneTimeStep)")
+      combi_ctrl_program.addLine("Set #{altsch_actuator.name} = 100") # Set the alternate setpoint temperature to highest level to ensure maximum source side flow rate
+      combi_ctrl_program.addLine('Else')
+      combi_ctrl_program.addLine("Set #{pump_actuator.name} = 0")
+      combi_ctrl_program.addLine("Set #{altsch_actuator.name} = #{alt_spt_sch.to_ScheduleConstant.get.value}")
+      combi_ctrl_program.addLine('EndIf')
+
+      # ProgramCallingManagers
+      program_calling_manager = OpenStudio::Model::EnergyManagementSystemProgramCallingManager.new(model)
+      program_calling_manager.setName("#{sys_id} ProgramManager")
+      program_calling_manager.setCallingPoint('BeginTimestepBeforePredictor')
+      program_calling_manager.addProgram(combi_ctrl_program)
+    end
+  end
+
+  def self.get_desuperheatercoil(water_heating_system, hvac_map)
+    # search for the related cooling coil object for desuperheater
+    if hvac_map.keys.include? water_heating_system.related_hvac_idref
+      hvac_map[water_heating_system.related_hvac_idref].each do |comp|
+        # supported coil types
+        [OpenStudio::Model::CoilCoolingDXSingleSpeed,
+         OpenStudio::Model::CoilCoolingDXMultiSpeed,
+         OpenStudio::Model::CoilCoolingWaterToAirHeatPumpEquationFit].each do |coiltype|
+          if comp.is_a? coiltype
+            return comp
+          end
+        end
+      end
+      fail "RelatedHVACSystem '#{water_heating_system.related_hvac_idref}' for water heating system '#{water_heating_system.id}' is not currently supported for desuperheaters."
+    end
+  end
+
+  def self.add_desuperheater(model, water_heating_system, hvac_map, tank, loc_space, loc_schedule, loop)
+    desuperheater_clg_coil = get_desuperheatercoil(water_heating_system, hvac_map)
     reclaimed_efficiency = 0.25 # default
     desuperheater_name = Constants.ObjectNameDesuperheater(tank.name)
 
@@ -974,7 +1015,7 @@ class Waterheater
     assumed_ua = 6.0 # Btu/hr-F, tank ua calculated based on 1.0 standby_loss and 50gal nominal vol
     storage_tank_name = "#{tank.name} storage tank"
     # reduce tank setpoint to enable desuperheater setpoint at t_set
-    tank_setpoint = get_set_temp_c(t_set - 5.0, HPXML::WaterHeaterTypeStorage)
+    tank_setpoint = get_set_temp_c(water_heating_system.temperature - 5.0, HPXML::WaterHeaterTypeStorage)
     storage_tank = create_new_heater(name: storage_tank_name,
                                      act_vol: storage_vol_actual,
                                      t_set_c: tank_setpoint,
@@ -992,7 +1033,7 @@ class Waterheater
     new_schedule = OpenStudio::Model::ScheduleConstant.new(model)
     new_schedule.setName("#{desuperheater_name} setpoint schedule")
     # Preheat tank desuperheater setpoint set to be the same as main water heater
-    dsh_setpoint = get_set_temp_c(t_set, HPXML::WaterHeaterTypeStorage)
+    dsh_setpoint = get_set_temp_c(water_heating_system.temperature, HPXML::WaterHeaterTypeStorage)
     new_schedule.setValue(dsh_setpoint)
 
     # create a desuperheater object

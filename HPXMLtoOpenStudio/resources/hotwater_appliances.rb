@@ -2,10 +2,10 @@
 
 class HotWaterAndAppliances
   def self.apply(model, weather, living_space,
-                 cfa, nbeds, ncfl, has_uncond_bsmnt, wh_setpoint,
+                 cfa, nbeds, ncfl, has_uncond_bsmnt,
                  clothes_washer, cw_space, clothes_dryer, cd_space,
                  dishwasher, dw_space, refrigerator, rf_space, cooking_range, cook_space, oven,
-                 fixtures_usage_multiplier, water_fixtures, hot_water_distribution,
+                 fixtures_usage_multiplier, water_fixtures, water_heating_systems, hot_water_distribution,
                  dhw_loop_fracs, eri_version, dhw_map)
 
     # Map plant loops to sys_ids
@@ -51,10 +51,14 @@ class HotWaterAndAppliances
       t_mix = 105.0 # F, Temperature of mixed water at fixtures
 
       # Calculate mixed water fractions
-      dwhr_present = (not hot_water_distribution.dwhr_efficiency.nil?)
-      daily_wh_inlet_temperatures = calc_water_heater_daily_inlet_temperatures(weather, dwhr_present, nbeds, hot_water_distribution, fixtures_all_low_flow)
+      # WH Setpoint: Weighted average by fraction DHW load served
+      avg_setpoint_temp = 0.0
+      water_heating_systems.each do |water_heating_system|
+        avg_setpoint_temp += water_heating_system.temperature * water_heating_system.fraction_dhw_load_served
+      end
+      daily_wh_inlet_temperatures = calc_water_heater_daily_inlet_temperatures(weather, nbeds, hot_water_distribution, fixtures_all_low_flow)
       daily_wh_inlet_temperatures_c = daily_wh_inlet_temperatures.map { |t| UnitConversions.convert(t, 'F', 'C') }
-      daily_mw_fractions = calc_mixed_water_daily_fractions(daily_wh_inlet_temperatures, wh_setpoint, t_mix)
+      daily_mw_fractions = calc_mixed_water_daily_fractions(daily_wh_inlet_temperatures, avg_setpoint_temp, t_mix)
 
       # Schedules init
       start_date = OpenStudio::Date.new(OpenStudio::MonthOfYear.new(1), 1, model.getYearDescription.assumedYear)
@@ -594,14 +598,14 @@ class HotWaterAndAppliances
     return eff_adj, iFrac, plc, locF, fixF
   end
 
-  def self.calc_water_heater_daily_inlet_temperatures(weather, dwhr_present = false, nbeds, hot_water_distribution, fixtures_all_low_flow)
+  def self.calc_water_heater_daily_inlet_temperatures(weather, nbeds, hot_water_distribution, fixtures_all_low_flow)
     # Get daily mains temperatures
     avgOAT = weather.data.AnnualAvgDrybulb
     maxDiffMonthlyAvgOAT = weather.data.MonthlyAvgDrybulbs.max - weather.data.MonthlyAvgDrybulbs.min
     tmains_daily = WeatherProcess.calc_mains_temperatures(avgOAT, maxDiffMonthlyAvgOAT, weather.header.Latitude)[2]
 
     wh_temps_daily = tmains_daily
-    if dwhr_present
+    if (not hot_water_distribution.dwhr_efficiency.nil?)
       dwhr_eff_adj, dwhr_iFrac, dwhr_plc, dwhr_locF, dwhr_fixF = get_dwhr_factors(nbeds, hot_water_distribution, fixtures_all_low_flow)
       # Adjust inlet temperatures
       dwhr_inT = 97.0 # F
