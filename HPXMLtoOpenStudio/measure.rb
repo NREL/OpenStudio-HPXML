@@ -3008,7 +3008,7 @@ class OSModel
     site_type = @hpxml.site.site_type
     shelter_coef = @hpxml.site.shelter_coefficient
     has_flue_chimney = false # FUTURE: Expose as HPXML input
-    infil_height = @hpxml.inferred_infiltration_height
+    infil_height = @hpxml.inferred_infiltration_height(@infil_volume)
     Airflow.apply(model, runner, weather, spaces, air_infils, vent_mech, vent_whf,
                   duct_systems, @infil_volume, infil_height, open_window_area,
                   @clg_ssn_sensor, @min_neighbor_distance, vent_kitchen, vent_bath,
