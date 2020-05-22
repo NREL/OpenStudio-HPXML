@@ -1546,7 +1546,7 @@ class SimulationOutputReport < OpenStudio::Measure::ReportingMeasure
                         OutputVars.SpaceHeatingNaturalGas,
                         OutputVars.SpaceHeatingFuelOil,
                         OutputVars.SpaceHeatingPropane,
-                        OutputVars.SpaceHeatingWood,
+                        OutputVars.SpaceHeatingWoodCord,
                         OutputVars.SpaceHeatingWoodPellets,
                         OutputVars.SpaceHeatingDFHPPrimaryLoad,
                         OutputVars.SpaceHeatingDFHPBackupLoad,
@@ -1559,7 +1559,8 @@ class SimulationOutputReport < OpenStudio::Measure::ReportingMeasure
                        OutputVars.WaterHeatingNaturalGas,
                        OutputVars.WaterHeatingFuelOil,
                        OutputVars.WaterHeatingPropane,
-                       OutputVars.WaterHeatingWood,
+                       OutputVars.WaterHeatingWoodCord,
+                       OutputVars.WaterHeatingWoodPellets,
                        OutputVars.WaterHeatingLoad,
                        OutputVars.WaterHeatingLoadTankLosses,
                        OutputVars.WaterHeaterLoadDesuperheater,
@@ -1832,11 +1833,14 @@ class SimulationOutputReport < OpenStudio::Measure::ReportingMeasure
       [FT::Propane, EUT::HotWater] => EndUse.new(variable: OutputVars.WaterHeatingPropane),
       [FT::Propane, EUT::ClothesDryer] => EndUse.new(meter: "#{Constants.ObjectNameClothesDryer}:InteriorEquipment:Propane"),
       [FT::Propane, EUT::RangeOven] => EndUse.new(meter: "#{Constants.ObjectNameCookingRange}:InteriorEquipment:Propane"),
-      [FT::WoodCord, EUT::Heating] => EndUse.new(variable: OutputVars.SpaceHeatingWood),
-      [FT::WoodCord, EUT::HotWater] => EndUse.new(variable: OutputVars.WaterHeatingWood),
+      [FT::WoodCord, EUT::Heating] => EndUse.new(variable: OutputVars.SpaceHeatingWoodCord),
+      [FT::WoodCord, EUT::HotWater] => EndUse.new(variable: OutputVars.WaterHeatingWoodCord),
       [FT::WoodCord, EUT::ClothesDryer] => EndUse.new(meter: "#{Constants.ObjectNameClothesDryer}:InteriorEquipment:OtherFuel1"),
       [FT::WoodCord, EUT::RangeOven] => EndUse.new(meter: "#{Constants.ObjectNameCookingRange}:InteriorEquipment:OtherFuel1"),
       [FT::WoodPellets, EUT::Heating] => EndUse.new(variable: OutputVars.SpaceHeatingWoodPellets),
+      [FT::WoodPellets, EUT::HotWater] => EndUse.new(variable: OutputVars.WaterHeatingWoodPellets),
+      [FT::WoodPellets, EUT::ClothesDryer] => EndUse.new(meter: "#{Constants.ObjectNameClothesDryer}:InteriorEquipment:OtherFuel2"),
+      [FT::WoodPellets, EUT::RangeOven] => EndUse.new(meter: "#{Constants.ObjectNameCookingRange}:InteriorEquipment:OtherFuel2"),
     }
 
     @end_uses.each do |key, end_use|
@@ -2027,7 +2031,7 @@ class SimulationOutputReport < OpenStudio::Measure::ReportingMeasure
                'OpenStudio::Model::BoilerHotWater' => ['Boiler Propane Energy'] }
     end
 
-    def self.SpaceHeatingWood
+    def self.SpaceHeatingWoodCord
       return { 'OpenStudio::Model::CoilHeatingGas' => ['Heating Coil OtherFuel1 Energy'],
                'OpenStudio::Model::ZoneHVACBaseboardConvectiveElectric' => ['Baseboard OtherFuel1 Energy'],
                'OpenStudio::Model::BoilerHotWater' => ['Boiler OtherFuel1 Energy'] }
@@ -2089,9 +2093,14 @@ class SimulationOutputReport < OpenStudio::Measure::ReportingMeasure
                'OpenStudio::Model::WaterHeaterStratified' => ['Water Heater Propane Energy'] }
     end
 
-    def self.WaterHeatingWood
+    def self.WaterHeatingWoodCord
       return { 'OpenStudio::Model::WaterHeaterMixed' => ['Water Heater OtherFuel1 Energy'],
                'OpenStudio::Model::WaterHeaterStratified' => ['Water Heater OtherFuel1 Energy'] }
+    end
+
+    def self.WaterHeatingWoodPellets
+      return { 'OpenStudio::Model::WaterHeaterMixed' => ['Water Heater OtherFuel2 Energy'],
+               'OpenStudio::Model::WaterHeaterStratified' => ['Water Heater OtherFuel2 Energy'] }
     end
 
     def self.WaterHeatingLoad
