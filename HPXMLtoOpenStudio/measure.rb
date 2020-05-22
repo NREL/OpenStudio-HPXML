@@ -422,7 +422,7 @@ class OSModel
       @hpxml.building_construction.conditioned_building_volume = @cfa * @hpxml.building_construction.average_ceiling_height
     end
     @cvolume = @hpxml.building_construction.conditioned_building_volume
-    @hpxml.building_construction.number_of_bathrooms = Waterheater.get_default_num_bathrooms(@nbeds) if @hpxml.building_construction.number_of_bathrooms.nil?
+    @hpxml.building_construction.number_of_bathrooms = Float(Waterheater.get_default_num_bathrooms(@nbeds)).to_i if @hpxml.building_construction.number_of_bathrooms.nil?
 
     # Default attics/foundations
     if @hpxml.has_space_type(HPXML::LocationAtticVented)
@@ -721,7 +721,7 @@ class OSModel
       next unless (vent_fan.used_for_local_ventilation && (vent_fan.fan_location == HPXML::VentilationFanLocationBath))
 
       if vent_fan.quantity.nil?
-        vent_fan.quantity = Float(@hpxml.building_construction.number_of_bathrooms).to_i
+        vent_fan.quantity = @hpxml.building_construction.number_of_bathrooms
       end
       if vent_fan.rated_flow_rate.nil?
         vent_fan.rated_flow_rate = 50.0 # cfm, per BA HSP
