@@ -4045,16 +4045,16 @@ class OSModel
   end
 
   def self.set_surface_exterior(model, spaces, surface, exterior_adjacent_to)
-    if [HPXML::LocationOutside].include? exterior_adjacent_to
+    if exterior_adjacent_to == HPXML::LocationOutside 
       surface.setOutsideBoundaryCondition('Outdoors')
-    elsif [HPXML::LocationGround].include? exterior_adjacent_to
+    elsif exterior_adjacent_to == HPXML::LocationGround
       surface.setOutsideBoundaryCondition('Foundation')
-    elsif [HPXML::LocationBasementConditioned].include? exterior_adjacent_to
+    elsif exterior_adjacent_to == HPXML::LocationOtherHousingUnit
+      surface.setOutsideBoundaryCondition('Adiabatic')
+    elsif exterior_adjacent_to == HPXML::LocationBasementConditioned
       surface.createAdjacentSurface(create_or_get_space(model, spaces, HPXML::LocationLivingSpace))
       @cond_bsmnt_surfaces << surface
-      set_surface_otherside_coefficients(surface, exterior_adjacent_to, model, spaces)
-    elsif [HPXML::LocationOtherHousingUnit, HPXML::LocationOtherHeatedSpace,
-           HPXML::LocationOtherMultifamilyBufferSpace, HPXML::LocationOtherNonFreezingSpace].include? exterior_adjacent_to
+    elsif [HPXML::LocationOtherHeatedSpace, HPXML::LocationOtherMultifamilyBufferSpace, HPXML::LocationOtherNonFreezingSpace].include? exterior_adjacent_to
       set_surface_otherside_coefficients(surface, exterior_adjacent_to, model, spaces)
     else
       surface.createAdjacentSurface(create_or_get_space(model, spaces, exterior_adjacent_to))
@@ -4066,7 +4066,6 @@ class OSModel
       # Create E+ other side coefficient object
       otherside_object = OpenStudio::Model::SurfacePropertyOtherSideCoefficients.new(model)
       otherside_object.setName(exterior_adjacent_to)
-      # Assume to directly apply to surface outside temperature
       # Refer to: https://www.sciencedirect.com/science/article/pii/B9780123972705000066 6.1.2 Part: Wall and roof transfer functions
       otherside_object.setCombinedConvectiveRadiativeFilmCoefficient(8.3)
       # Schedule of space temperature, can be shared with water heater/ducts
