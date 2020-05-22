@@ -1,9 +1,9 @@
 # frozen_string_literal: true
 
 class Airflow
-  def self.apply(model, runner, weather, spaces, air_infils, vent_mech, vent_whf,
+  def self.apply(model, runner, weather, spaces, air_infils, vent_fans_mech, vent_fans_whf,
                  duct_systems, infil_volume, infil_height, open_window_area,
-                 nv_clg_ssn_sensor, min_neighbor_distance, vent_kitchen, vent_bath,
+                 nv_clg_ssn_sensor, min_neighbor_distance, vent_fans_kitchen, vent_fans_bath,
                  vented_attic, vented_crawl, site_type, shelter_coef,
                  has_flue_chimney, hvac_map, apply_ashrae140_assumptions)
 
@@ -48,7 +48,7 @@ class Airflow
 
     # Initialization
 
-    initialize_cfis(model, vent_mech, hvac_map)
+    initialize_cfis(model, vent_fans_mech, hvac_map)
     model.getAirLoopHVACs.each do |air_loop|
       initialize_air_loop_objects(model, air_loop)
     end
@@ -57,14 +57,14 @@ class Airflow
 
     duct_lks = []
     duct_systems.each do |ducts, air_loop|
-      apply_ducts(model, ducts, vent_mech, air_loop, duct_lks)
+      apply_ducts(model, ducts, air_loop, duct_lks)
     end
 
     # Apply infiltration/ventilation
 
     @wind_speed = set_wind_speed_correction(model, site_type, shelter_coef, min_neighbor_distance)
-    apply_natural_ventilation_and_whole_house_fan(model, weather, vent_whf, open_window_area, nv_clg_ssn_sensor)
-    apply_infiltration_and_ventilation_fans(model, weather, vent_mech, vent_kitchen, vent_bath, duct_lks, has_flue_chimney, air_infils, vented_attic, vented_crawl)
+    apply_natural_ventilation_and_whole_house_fan(model, weather, vent_fans_whf, open_window_area, nv_clg_ssn_sensor)
+    apply_infiltration_and_ventilation_fans(model, weather, vent_fans_mech, vent_fans_kitchen, vent_fans_bath, duct_lks, has_flue_chimney, air_infils, vented_attic, vented_crawl)
   end
 
   def self.get_default_shelter_coefficient()
@@ -185,59 +185,32 @@ class Airflow
     end
   end
 
-  def self.apply_natural_ventilation_and_whole_house_fan(model, weather, vent_whf, open_window_area, nv_clg_ssn_sensor)
+  def self.apply_natural_ventilation_and_whole_house_fan(model, weather, vent_fans_whf, open_window_area, nv_clg_ssn_sensor)
     if @living_zone.thermostatSetpointDualSetpoint.is_initialized
       thermostat = @living_zone.thermostatSetpointDualSetpoint.get
       htg_sch = thermostat.heatingSetpointTemperatureSchedule.get
       clg_sch = thermostat.coolingSetpointTemperatureSchedule.get
     end
 
+    # NV Availability Schedule
     nv_num_days_per_week = 7 # FUTURE: Expose via HPXML?
-    if vent_whf.nil?
-      whf_num_days_per_week = 0
-      whf_cfm = 0.0
-      whf_fan_w = 0.0
-    else
-      whf_num_days_per_week = 7 # FUTURE: Expose via HPXML?
-      whf_cfm = vent_whf.rated_flow_rate
-      whf_fan_w = vent_whf.fan_power
-    end
+    nv_aval_sch = create_nv_and_whf_avail_sch(model, Constants.ObjectNameNaturalVentilation, nv_num_days_per_week)
 
-    # Availability Schedule
-    aval_schs = {}
-    { Constants.ObjectNameNaturalVentilation => nv_num_days_per_week,
-      Constants.ObjectNameWholeHouseFan => whf_num_days_per_week }.each do |obj_name, num_days_per_week|
-      aval_schs[obj_name] = OpenStudio::Model::ScheduleRuleset.new(model)
-      aval_schs[obj_name].setName("#{obj_name} avail schedule")
-      Schedule.set_schedule_type_limits(model, aval_schs[obj_name], Constants.ScheduleTypeLimitsOnOff)
-      on_rule = OpenStudio::Model::ScheduleRule.new(aval_schs[obj_name])
-      on_rule.setName("#{obj_name} avail schedule rule")
-      on_rule_day = on_rule.daySchedule
-      on_rule_day.setName("#{obj_name} avail schedule day")
-      on_rule_day.addValue(OpenStudio::Time.new(0, 24, 0, 0), 1)
-      if num_days_per_week >= 1
-        on_rule.setApplyMonday(true)
-      end
-      if num_days_per_week >= 2
-        on_rule.setApplyWednesday(true)
-      end
-      if num_days_per_week >= 3
-        on_rule.setApplyFriday(true)
-      end
-      if num_days_per_week >= 4
-        on_rule.setApplySaturday(true)
-      end
-      if num_days_per_week >= 5
-        on_rule.setApplyTuesday(true)
-      end
-      if num_days_per_week >= 6
-        on_rule.setApplyThursday(true)
-      end
-      if num_days_per_week >= 7
-        on_rule.setApplySunday(true)
-      end
-      on_rule.setStartDate(OpenStudio::Date::fromDayOfYear(1))
-      on_rule.setEndDate(OpenStudio::Date::fromDayOfYear(365))
+    nv_avail_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Schedule Value')
+    nv_avail_sensor.setName("#{Constants.ObjectNameNaturalVentilation} avail s")
+    nv_avail_sensor.setKeyName(nv_aval_sch.name.to_s)
+
+    # Availability Schedules paired with vent fan class
+    # If whf_num_days_per_week is exposed, can handle multiple fans with different days of operation
+    whf_avail_sensors = {}
+    vent_fans_whf.each do |vent_whf|
+      whf_num_days_per_week = 7 # FUTURE: Expose via HPXML?
+      whf_aval_sch = create_nv_and_whf_avail_sch(model, Constants.ObjectNameWholeHouseFan, whf_num_days_per_week)
+          
+      whf_avail_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Schedule Value')
+      whf_avail_sensor.setName("#{Constants.ObjectNameWholeHouseFan} avail s")
+      whf_avail_sensor.setKeyName(whf_aval_sch.name.to_s)
+      whf_avail_sensors[vent_whf] = whf_avail_sensor
     end
 
     # Sensors
@@ -252,14 +225,6 @@ class Airflow
       clg_sp_sensor.setName('clg sp s')
       clg_sp_sensor.setKeyName(clg_sch.name.to_s)
     end
-
-    nv_avail_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Schedule Value')
-    nv_avail_sensor.setName("#{Constants.ObjectNameNaturalVentilation} nva s")
-    nv_avail_sensor.setKeyName(aval_schs[Constants.ObjectNameNaturalVentilation].name.to_s)
-
-    whf_avail_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Schedule Value')
-    whf_avail_sensor.setName("#{Constants.ObjectNameWholeHouseFan} nva s")
-    whf_avail_sensor.setKeyName(aval_schs[Constants.ObjectNameWholeHouseFan].name.to_s)
 
     # Actuators
     nv_flow = OpenStudio::Model::SpaceInfiltrationDesignFlowRate.new(model)
@@ -276,6 +241,22 @@ class Airflow
     whf_flow_actuator = OpenStudio::Model::EnergyManagementSystemActuator.new(whf_flow, 'Zone Infiltration', 'Air Exchange Flow Rate')
     whf_flow_actuator.setName("#{whf_flow.name} act")
 
+    if not vent_fans_whf.empty?
+      # Electric Equipment (for whole house fan electricity consumption)
+      whf_equip_def = OpenStudio::Model::ElectricEquipmentDefinition.new(model)
+      whf_equip_def.setName(Constants.ObjectNameWholeHouseFan)
+      whf_equip = OpenStudio::Model::ElectricEquipment.new(whf_equip_def)
+      whf_equip.setName(Constants.ObjectNameWholeHouseFan)
+      whf_equip.setSpace(@living_space)
+      whf_equip_def.setFractionRadiant(0)
+      whf_equip_def.setFractionLatent(0)
+      whf_equip_def.setFractionLost(1)
+      whf_equip.setSchedule(model.alwaysOnDiscreteSchedule)
+      whf_equip.setEndUseSubcategory(Constants.ObjectNameWholeHouseFan)
+      whf_elec_actuator = OpenStudio::Model::EnergyManagementSystemActuator.new(whf_equip, 'ElectricEquipment', 'Electric Power Level')
+      whf_elec_actuator.setName("#{whf_equip.name} act")
+    end
+
     # Assume located in attic floor if attic zone exists; otherwise assume it's through roof/wall.
     whf_zone = nil
     if not @spaces[HPXML::LocationAtticVented].nil?
@@ -291,21 +272,6 @@ class Airflow
       liv_to_zone_flow_rate_actuator = OpenStudio::Model::EnergyManagementSystemActuator.new(zone_mixing, 'ZoneMixing', 'Air Exchange Flow Rate')
       liv_to_zone_flow_rate_actuator.setName("#{zone_mixing.name} act")
     end
-
-    # Electric Equipment (for whole house fan electricity consumption)
-
-    whf_equip_def = OpenStudio::Model::ElectricEquipmentDefinition.new(model)
-    whf_equip_def.setName(Constants.ObjectNameWholeHouseFan)
-    whf_equip = OpenStudio::Model::ElectricEquipment.new(whf_equip_def)
-    whf_equip.setName(Constants.ObjectNameWholeHouseFan)
-    whf_equip.setSpace(@living_space)
-    whf_equip_def.setFractionRadiant(0)
-    whf_equip_def.setFractionLatent(0)
-    whf_equip_def.setFractionLost(1)
-    whf_equip.setSchedule(model.alwaysOnDiscreteSchedule)
-    whf_equip.setEndUseSubcategory(Constants.ObjectNameWholeHouseFan)
-    whf_elec_actuator = OpenStudio::Model::EnergyManagementSystemActuator.new(whf_equip, 'ElectricEquipment', 'Electric Power Level')
-    whf_elec_actuator.setName("#{whf_equip.name} act")
 
     area = 0.6 * open_window_area # ft^2, for Sherman-Grimsrud
     max_rate = 20.0 # Air Changes per hour
@@ -332,18 +298,24 @@ class Airflow
       vent_program.addLine("Set Tnvsp = #{UnitConversions.convert(73.0, 'F', 'C')}") # Assumption when no HVAC system
     end
     vent_program.addLine("Set NVavail = #{nv_avail_sensor.name}")
-    vent_program.addLine("Set WHFavail = #{whf_avail_sensor.name}")
     vent_program.addLine("Set ClgSsnAvail = #{nv_clg_ssn_sensor.name}")
     vent_program.addLine('If (Wout < MaxHR) && (Phiout < MaxRH) && (Tin > Tout) && (Tin > Tnvsp) && (ClgSsnAvail > 0)')
-    vent_program.addLine("  Set WHF_Flow = #{UnitConversions.convert(whf_cfm, 'cfm', 'm^3/s')}")
+    vent_program.addLine('  Set WHF_Flow = 0')
+    whf_avail_sensors.each do |vent_whf, whf_avail_sensor|
+      vent_program.addLine("Set WHF_Flow = WHF_Flow + #{UnitConversions.convert(vent_whf.rated_flow_rate, 'cfm', 'm^3/s')} * #{whf_avail_sensor.name}"
+    end
     vent_program.addLine('  Set Adj = (Tin-Tnvsp)/(Tin-Tout)')
     vent_program.addLine('  Set Adj = (@Min Adj 1)')
     vent_program.addLine('  Set Adj = (@Max Adj 0)')
-    vent_program.addLine('  If (WHFavail > 0) && (WHF_Flow > 0)') # If available, prioritize whole house fan
+    vent_program.addLine('  If (WHF_Flow > 0)') # If available, prioritize whole house fan
     vent_program.addLine("    Set #{nv_flow_actuator.name} = 0")
     vent_program.addLine("    Set #{whf_flow_actuator.name} = WHF_Flow*Adj")
     vent_program.addLine("    Set #{liv_to_zone_flow_rate_actuator.name} = WHF_Flow*Adj") unless whf_zone.nil?
-    vent_program.addLine("    Set #{whf_elec_actuator.name} = #{whf_fan_w}*Adj")
+    vent_program.addLine('  Set WHF_W = 0')
+    whf_avail_sensors.each do |vent_whf, whf_avail_sensor|
+      vent_program.addLine("Set WHF_W = WHF_W + #{vent_whf.fan_power} * #{whf_avail_sensor.name}"
+    end
+    vent_program.addLine("    Set #{whf_elec_actuator.name} = WHF_W*Adj")
     vent_program.addLine('  ElseIf (NVavail > 0)') # Natural ventilation
     vent_program.addLine("    Set NVArea = #{UnitConversions.convert(area, 'ft^2', 'cm^2')}")
     vent_program.addLine("    Set Cs = #{UnitConversions.convert(c_s, 'ft^2/(s^2*R)', 'L^2/(s^2*cm^4*K)')}")
@@ -369,6 +341,26 @@ class Airflow
     manager.setName("#{vent_program.name} calling manager")
     manager.setCallingPoint('BeginTimestepBeforePredictor')
     manager.addProgram(vent_program)
+  end
+
+  def self.create_nv_and_whf_avail_sch(model, obj_name, num_days_per_week)
+    aval_sch = OpenStudio::Model::ScheduleRuleset.new(model)
+    aval_sch.setName("#{obj_name} avail schedule")
+    Schedule.set_schedule_type_limits(model, aval_sch, Constants.ScheduleTypeLimitsOnOff)
+    on_rule = OpenStudio::Model::ScheduleRule.new(aval_sch)
+    on_rule.setName("#{obj_name} avail schedule rule")
+    on_rule_day = on_rule.daySchedule
+    on_rule_day.setName("#{obj_name} avail schedule day")
+    on_rule_day.addValue(OpenStudio::Time.new(0, 24, 0, 0), 1)
+    method_array = ['setApplyMonday', 'setApplyWednesday', 'setApplyFriday', 'setApplySaturday', 'setApplyTuesday', 'setApplyThursday', 'setApplySunday']
+    for i in 1..7 do
+      if num_days_per_week >= i
+        on_rule.public_send(method_array[i-1], true)
+      end
+    end
+    on_rule.setStartDate(OpenStudio::Date::fromDayOfYear(1))
+    on_rule.setEndDate(OpenStudio::Date::fromDayOfYear(365))
+    return aval_sch
   end
 
   def self.create_return_air_duct_zone(model, air_loop_name)
@@ -418,9 +410,11 @@ class Airflow
     return actuator
   end
 
-  def self.initialize_cfis(model, vent_mech, hvac_map)
+  def self.initialize_cfis(model, vent_fans_mech, hvac_map)
     # Get AirLoop associated with CFIS
-    return if vent_mech.nil? || (vent_mech.fan_type != HPXML::MechVentTypeCFIS)
+    return if vent_fans_mech.empty?
+    vent_fans_mech.each do |vent_mech|
+      next if (vent_mech.fan_type != HPXML::MechVentTypeCFIS)
 
     cfis_sys_ids = vent_mech.distribution_system.hvac_systems.map { |system| system.id }
 
@@ -458,6 +452,7 @@ class Airflow
     manager.setName("#{cfis_program.name} calling manager2")
     manager.setCallingPoint('AfterNewEnvironmentWarmUpIsComplete')
     manager.addProgram(cfis_program)
+    end
   end
 
   def self.initialize_air_loop_objects(model, air_loop)
@@ -496,7 +491,7 @@ class Airflow
     end
   end
 
-  def self.apply_ducts(model, ducts, vent_mech, air_loop, duct_lks)
+  def self.apply_ducts(model, ducts, air_loop, duct_lks)
     ducts.each do |duct|
       if duct.leakage_frac.nil? == duct.leakage_cfm25.nil?
         fail 'Ducts: Must provide either leakage fraction or cfm25, but not both.'
@@ -1300,7 +1295,7 @@ class Airflow
     return vent_mech_sens_eff, vent_mech_lat_eff, vent_mech_apparent_sens_eff
   end
 
-  def self.apply_infiltration_and_ventilation_fans(model, weather, vent_mech, vent_kitchen, vent_bath, duct_lks, has_flue_chimney, air_infils, vented_attic, vented_crawl)
+  def self.apply_infiltration_and_ventilation_fans(model, weather, vent_fans_mech, vent_kitchen, vent_bath, duct_lks, has_flue_chimney, air_infils, vented_attic, vented_crawl)
     # Get living space infiltration
     living_ach50 = nil
     living_const_ach = nil

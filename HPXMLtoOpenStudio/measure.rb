@@ -2984,20 +2984,20 @@ class OSModel
     end
 
     # Ventilation fans
-    vent_mech = nil
-    vent_kitchen = nil
-    vent_bath = nil
-    vent_whf = nil
+    vent_fans_mech = []
+    vent_fans_kitchen = []
+    vent_fans_bath = []
+    vent_fans_whf = []
     @hpxml.ventilation_fans.each do |vent_fan|
       if vent_fan.used_for_whole_building_ventilation
-        vent_mech = vent_fan
+        vent_fans_mech << vent_fan
       elsif vent_fan.used_for_seasonal_cooling_load_reduction
-        vent_whf = vent_fan
+        vent_fans_whf << vent_fan
       elsif vent_fan.used_for_local_ventilation
         if vent_fan.fan_location == HPXML::VentilationFanLocationKitchen
-          vent_kitchen = vent_fan
+          vent_fans_kitchen << vent_fan
         elsif vent_fan.fan_location == HPXML::VentilationFanLocationBath
-          vent_bath = vent_fan
+          vent_fans_bath << vent_fan
         end
       end
     end
@@ -3009,9 +3009,9 @@ class OSModel
     shelter_coef = @hpxml.site.shelter_coefficient
     has_flue_chimney = false # FUTURE: Expose as HPXML input
     infil_height = @hpxml.inferred_infiltration_height
-    Airflow.apply(model, runner, weather, spaces, air_infils, vent_mech, vent_whf,
+    Airflow.apply(model, runner, weather, spaces, air_infils, vent_fans_mech, vent_fans_whf,
                   duct_systems, @infil_volume, infil_height, open_window_area,
-                  @clg_ssn_sensor, @min_neighbor_distance, vent_kitchen, vent_bath,
+                  @clg_ssn_sensor, @min_neighbor_distance, vent_fans_kitchen, vent_fans_bath,
                   vented_attic, vented_crawl, site_type, shelter_coef,
                   has_flue_chimney, @hvac_map, @apply_ashrae140_assumptions)
   end
