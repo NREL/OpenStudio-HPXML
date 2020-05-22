@@ -2839,7 +2839,7 @@ def set_hpxml_walls(hpxml_file, hpxml)
   elsif ['invalid_files/enclosure-living-missing-exterior-wall.xml'].include? hpxml_file
     hpxml.walls[0].delete
   elsif ['invalid_files/enclosure-garage-missing-exterior-wall.xml'].include? hpxml_file
-    hpxml.walls[-1].delete
+    hpxml.walls[-2].delete
   end
 end
 
