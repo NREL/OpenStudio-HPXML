@@ -382,7 +382,7 @@ class HPXML < Object
     return total_area, exterior_area
   end
 
-  def inferred_infiltration_height()
+  def inferred_infiltration_height(infil_volume)
     # Infiltration height: vertical distance between lowest and highest above-grade points within the pressure boundary.
     # Height is inferred from available HPXML properties.
     # The WithinInfiltrationVolume properties are intentionally ignored for now.
@@ -390,7 +390,6 @@ class HPXML < Object
     cfa = @building_construction.conditioned_floor_area
     ncfl = @building_construction.number_of_conditioned_floors
     ncfl_ag = @building_construction.number_of_conditioned_floors_above_grade
-    infil_volume = @air_infiltration_measurements.select { |m| !m.infiltration_volume.nil? }[0].infiltration_volume
     if has_walkout_basement()
       infil_height = Float(ncfl_ag) * infil_volume / cfa
     else
@@ -4290,12 +4289,12 @@ class HPXML < Object
         cooling_dist << dist
       end
     end
-    heating_total_dist_cfa_served = heating_dist.map { |htg_dist| htg_dist.conditioned_floor_area_served }.inject(0, :+)
-    cooling_total_dist_cfa_served = cooling_dist.map { |clg_dist| clg_dist.conditioned_floor_area_served }.inject(0, :+)
-    if (heating_total_dist_cfa_served > @building_construction.conditioned_floor_area)
+    heating_total_dist_cfa_served = heating_dist.map { |htg_dist| htg_dist.conditioned_floor_area_served.to_f }.inject(0, :+)
+    cooling_total_dist_cfa_served = cooling_dist.map { |clg_dist| clg_dist.conditioned_floor_area_served.to_f }.inject(0, :+)
+    if (heating_total_dist_cfa_served > @building_construction.conditioned_floor_area.to_f)
       errors << 'The total conditioned floor area served by the HVAC distribution system(s) for heating is larger than the conditioned floor area of the building.'
     end
-    if (cooling_total_dist_cfa_served > @building_construction.conditioned_floor_area)
+    if (cooling_total_dist_cfa_served > @building_construction.conditioned_floor_area.to_f)
       errors << 'The total conditioned floor area served by the HVAC distribution system(s) for cooling is larger than the conditioned floor area of the building.'
     end
 

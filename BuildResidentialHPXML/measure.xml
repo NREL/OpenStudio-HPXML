@@ -3,8 +3,8 @@
   <schema_version>3.0</schema_version>
   <name>build_residential_hpxml</name>
   <uid>a13a8983-2b01-4930-8af2-42030b6e4233</uid>
-  <version_id>dc4f753f-428e-42d2-9e8c-bf09f70fb82f</version_id>
-  <version_modified>20200521T204617Z</version_modified>
+  <version_id>2129fdae-047b-4610-8c3e-0be2f267082c</version_id>
+  <version_modified>20200522T203942Z</version_modified>
   <xml_checksum>2C38F48B</xml_checksum>
   <class_name>BuildResidentialHPXML</class_name>
   <display_name>HPXML Builder</display_name>
@@ -4985,12 +4985,6 @@
       <checksum>F9345956</checksum>
     </file>
     <file>
-      <filename>base-foundation-slab.osw</filename>
-      <filetype>osw</filetype>
-      <usage_type>test</usage_type>
-      <checksum>6CCF445A</checksum>
-    </file>
-    <file>
       <filename>base-multifamily.osw</filename>
       <filetype>osw</filetype>
       <usage_type>test</usage_type>
@@ -5050,28 +5044,22 @@
       <checksum>9F0006F6</checksum>
     </file>
     <file>
-      <filename>build_residential_hpxml_test.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>test</usage_type>
-      <checksum>EB0CF0AF</checksum>
-    </file>
-    <file>
       <filename>base-enclosure-2stories.osw</filename>
       <filetype>osw</filetype>
       <usage_type>test</usage_type>
       <checksum>C59EED69</checksum>
     </file>
     <file>
-      <filename>test_rakefile.xml</filename>
-      <filetype>xml</filetype>
+      <filename>base-foundation-slab.osw</filename>
+      <filetype>osw</filetype>
       <usage_type>test</usage_type>
-      <checksum>7782D83E</checksum>
+      <checksum>52FE9690</checksum>
     </file>
     <file>
-      <filename>test_measure.xml</filename>
-      <filetype>xml</filetype>
+      <filename>build_residential_hpxml_test.rb</filename>
+      <filetype>rb</filetype>
       <usage_type>test</usage_type>
-      <checksum>8383FD69</checksum>
+      <checksum>CC78A2B7</checksum>
     </file>
   </files>
 </measure>
