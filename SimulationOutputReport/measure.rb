@@ -1838,7 +1838,7 @@ class SimulationOutputReport < OpenStudio::Measure::ReportingMeasure
       [FT::WoodCord, EUT::ClothesDryer] => EndUse.new(meter: "#{Constants.ObjectNameClothesDryer}:InteriorEquipment:OtherFuel1"),
       [FT::WoodCord, EUT::RangeOven] => EndUse.new(meter: "#{Constants.ObjectNameCookingRange}:InteriorEquipment:OtherFuel1"),
       [FT::WoodPellets, EUT::Heating] => EndUse.new(variable: OutputVars.SpaceHeatingWoodPellets),
-      [FT::WoodPellets, EUT::HotWater] => EndUse.new(variable: OutputVars.SpaceHeatingWoodPellets),
+      [FT::WoodPellets, EUT::HotWater] => EndUse.new(variable: OutputVars.WaterHeatingWoodPellets),
       [FT::WoodPellets, EUT::ClothesDryer] => EndUse.new(meter: "#{Constants.ObjectNameClothesDryer}:InteriorEquipment:OtherFuel2"),
       [FT::WoodPellets, EUT::RangeOven] => EndUse.new(meter: "#{Constants.ObjectNameCookingRange}:InteriorEquipment:OtherFuel2"),
     }
