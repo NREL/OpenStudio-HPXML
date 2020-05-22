@@ -70,7 +70,7 @@
             <LeakinessDescription>average</LeakinessDescription>
             <BuildingAirLeakage>
               <UnitofMeasure>CFM</UnitofMeasure>
-              <AirLeakage>0</AirLeakage>
+              <AirLeakage>0.001</AirLeakage>
             </BuildingAirLeakage>
           </AirInfiltrationMeasurement>
         </AirInfiltration>
