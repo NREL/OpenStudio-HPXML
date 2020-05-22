@@ -833,7 +833,7 @@ class HPXML < Object
       XMLHelper.add_element(building_construction, 'NumberofConditionedFloorsAboveGrade', to_integer(@number_of_conditioned_floors_above_grade)) unless @number_of_conditioned_floors_above_grade.nil?
       XMLHelper.add_element(building_construction, 'AverageCeilingHeight', to_float(@average_ceiling_height)) unless @average_ceiling_height.nil?
       XMLHelper.add_element(building_construction, 'NumberofBedrooms', to_integer(@number_of_bedrooms)) unless @number_of_bedrooms.nil?
-      XMLHelper.add_element(building_construction, 'NumberofBathrooms', to_integer(@number_of_bathrooms)) unless @number_of_bathrooms.nil?
+      XMLHelper.add_element(building_construction, 'NumberofBathrooms', to_float(@number_of_bathrooms)) unless @number_of_bathrooms.nil?
       XMLHelper.add_element(building_construction, 'ConditionedFloorArea', to_float(@conditioned_floor_area)) unless @conditioned_floor_area.nil?
       XMLHelper.add_element(building_construction, 'ConditionedBuildingVolume', to_float(@conditioned_building_volume)) unless @conditioned_building_volume.nil?
       HPXML::add_extension(parent: building_construction,
@@ -851,7 +851,7 @@ class HPXML < Object
       @number_of_conditioned_floors_above_grade = to_integer_or_nil(XMLHelper.get_value(building_construction, 'NumberofConditionedFloorsAboveGrade'))
       @average_ceiling_height = to_float_or_nil(XMLHelper.get_value(building_construction, 'AverageCeilingHeight'))
       @number_of_bedrooms = to_integer_or_nil(XMLHelper.get_value(building_construction, 'NumberofBedrooms'))
-      @number_of_bathrooms = to_integer_or_nil(XMLHelper.get_value(building_construction, 'NumberofBathrooms'))
+      @number_of_bathrooms = to_float_or_nil(XMLHelper.get_value(building_construction, 'NumberofBathrooms'))
       @conditioned_floor_area = to_float_or_nil(XMLHelper.get_value(building_construction, 'ConditionedFloorArea'))
       @conditioned_building_volume = to_float_or_nil(XMLHelper.get_value(building_construction, 'ConditionedBuildingVolume'))
       @use_only_ideal_air_system = to_bool_or_nil(XMLHelper.get_value(building_construction, 'extension/UseOnlyIdealAirSystem'))
