@@ -4093,10 +4093,11 @@ class OSModel
 
     sch = OpenStudio::Model::ScheduleConstant.new(model)
     sch.setName(location)
+    heating_setpoint = @hpxml.hvac_controls[0].heating_setpoint_temp
 
     if location == HPXML::LocationOtherHeatedSpace
       # Average of indoor/outdoor temperatures with minimum of 68 deg-F
-      temp_min = UnitConversions.convert(68, 'F', 'C')
+      temp_min = UnitConversions.convert(heating_setpoint, 'F', 'C')
       indoor_weight = 0.5
       outdoor_weight = 0.5
       ground_weight = 0.0
