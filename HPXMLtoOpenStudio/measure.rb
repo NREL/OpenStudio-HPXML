@@ -1313,6 +1313,7 @@ class OSModel
     return vf_map
   end
 
+  # FUTURE: Move this method and many below to geometry.rb
   def self.create_space_and_zone(model, spaces, space_type)
     if not spaces.keys.include? space_type
       thermal_zone = OpenStudio::Model::ThermalZone.new(model)
@@ -1572,6 +1573,10 @@ class OSModel
       else
         mat_roofing = Material.RoofingAsphaltShinglesWhiteCool(emitt, solar_abs)
       end
+      if @apply_ashrae140_assumptions
+        inside_film = Material.AirFilmRoofASHRAE140
+        outside_film = Material.AirFilmOutsideASHRAE140
+      end
 
       assembly_r = roof.insulation_assembly_r_value
       constr_sets = [
@@ -1661,6 +1666,10 @@ class OSModel
         mat_ext_finish.tAbs = wall.emittance
         mat_ext_finish.sAbs = wall.solar_absorptance
         mat_ext_finish.vAbs = wall.solar_absorptance
+      end
+      if @apply_ashrae140_assumptions
+        inside_film = Material.AirFilmVerticalASHRAE140
+        outside_film = Material.AirFilmOutsideASHRAE140
       end
 
       apply_wall_construction(runner, model, surfaces, wall.id, wall.wall_type, wall.insulation_assembly_r_value,
@@ -1777,22 +1786,39 @@ class OSModel
 
       # Apply construction
 
-      inside_film = Material.AirFilmFloorReduced
-      if @apply_ashrae140_assumptions && frame_floor.is_exterior
-        outside_film = Material.AirFilm(0.168)
-        surface.setWindExposure('NoWind')
+      if frame_floor.is_ceiling
+        inside_film = Material.AirFilmFloorAverage
+      else
+        inside_film = Material.AirFilmFloorReduced
+      end
+      if frame_floor.is_ceiling
+        outside_film = Material.AirFilmFloorAverage
       elsif frame_floor.is_exterior
         outside_film = Material.AirFilmOutside
       else
         outside_film = Material.AirFilmFloorReduced
       end
+      if frame_floor.is_floor && (frame_floor.interior_adjacent_to == HPXML::LocationLivingSpace)
+        covering = Material.CoveringBare
+      end
+      if @apply_ashrae140_assumptions
+        if frame_floor.is_exterior # Raised floor
+          inside_film = Material.AirFilmFloorASHRAE140
+          outside_film = Material.AirFilmFloorZeroWindASHRAE140
+          surface.setWindExposure('NoWind')
+          covering = Material.CoveringBare(1.0)
+        elsif frame_floor.is_ceiling # Attic floor
+          inside_film = Material.AirFilmFloorASHRAE140
+          outside_film = Material.AirFilmFloorASHRAE140
+        end
+      end
       assembly_r = frame_floor.insulation_assembly_r_value
 
       constr_sets = [
-        WoodStudConstructionSet.new(Material.Stud2x6, 0.10, 10.0, 0.75, 0.0, Material.CoveringBare), # 2x6, 24" o.c. + R10
-        WoodStudConstructionSet.new(Material.Stud2x6, 0.10, 0.0, 0.75, 0.0, Material.CoveringBare),  # 2x6, 24" o.c.
-        WoodStudConstructionSet.new(Material.Stud2x4, 0.13, 0.0, 0.5, 0.0, Material.CoveringBare),   # 2x4, 16" o.c.
-        WoodStudConstructionSet.new(Material.Stud2x4, 0.01, 0.0, 0.0, 0.0, nil),                     # Fallback
+        WoodStudConstructionSet.new(Material.Stud2x6, 0.10, 10.0, 0.75, 0.0, covering), # 2x6, 24" o.c. + R10
+        WoodStudConstructionSet.new(Material.Stud2x6, 0.10, 0.0, 0.75, 0.0, covering),  # 2x6, 24" o.c.
+        WoodStudConstructionSet.new(Material.Stud2x4, 0.13, 0.0, 0.5, 0.0, covering),   # 2x4, 16" o.c.
+        WoodStudConstructionSet.new(Material.Stud2x4, 0.01, 0.0, 0.0, 0.0, nil),        # Fallback
       ]
       match, constr_set, cavity_r = pick_wood_stud_construction_set(assembly_r, constr_sets, inside_film, outside_film, frame_floor.id)
 
