@@ -4045,7 +4045,7 @@ class OSModel
   end
 
   def self.set_surface_exterior(model, spaces, surface, exterior_adjacent_to)
-    if exterior_adjacent_to == HPXML::LocationOutside 
+    if exterior_adjacent_to == HPXML::LocationOutside
       surface.setOutsideBoundaryCondition('Outdoors')
     elsif exterior_adjacent_to == HPXML::LocationGround
       surface.setOutsideBoundaryCondition('Foundation')
