@@ -111,8 +111,8 @@ class HPXMLtoOpenStudioDuctsTest < MiniTest::Test
     model, hpxml = _test_measure(@args_hash)
     expected_supply_locations = ['basement - conditioned', 'basement - conditioned', 'living space', 'living space'] * hpxml.hvac_distributions.size
     expected_return_locations = ['basement - conditioned', 'basement - conditioned', 'living space', 'living space'] * hpxml.hvac_distributions.size
-    expected_supply_areas = [68.34375, 68.34375, 22.78125, 22.78125] * hpxml.hvac_distributions.size
-    expected_return_areas = [25.3125, 25.3125, 8.4375, 8.4375] * hpxml.hvac_distributions.size
+    expected_supply_areas = [68.344, 68.344, 22.781, 22.781] * hpxml.hvac_distributions.size
+    expected_return_areas = [25.312, 25.312, 8.438, 8.438] * hpxml.hvac_distributions.size
     expected_n_return_registers = hpxml.building_construction.number_of_conditioned_floors
     _test_default_duct_values(hpxml, expected_supply_locations, expected_return_locations, expected_supply_areas, expected_return_areas, expected_n_return_registers)
   end
@@ -472,11 +472,7 @@ class HPXMLtoOpenStudioDuctsTest < MiniTest::Test
   end
 
   def _test_default_number_of_bathrooms(hpxml, expected_n_bathrooms)
-    if expected_n_bathrooms.nil?
-      assert_nil(hpxml.building_construction.number_of_bathrooms)
-    else
-      assert_equal(hpxml.building_construction.number_of_bathrooms, expected_n_bathrooms)
-    end
+    assert_equal(hpxml.building_construction.number_of_bathrooms, expected_n_bathrooms)
   end
 
   def _test_default_water_heaters(hpxml, *expected_wh_values)
@@ -484,27 +480,16 @@ class HPXMLtoOpenStudioDuctsTest < MiniTest::Test
       next unless wh_system.water_heater_type == HPXML::WaterHeaterTypeStorage
 
       wh_heating_capacity, wh_tank_volume, wh_recovery_efficiency = expected_wh_values[idx]
-      if wh_heating_capacity.nil?
-        assert_nil(wh_system.heating_capacity)
-      else
-        assert_in_epsilon(wh_system.heating_capacity, wh_heating_capacity, 0.01)
-      end
-      if wh_tank_volume.nil?
-        assert_nil(wh_system.tank_volume)
-      else
-        assert_equal(wh_system.tank_volume, wh_tank_volume)
-      end
-      if wh_recovery_efficiency.nil?
-        assert_nil(wh_system.recovery_efficiency)
-      else
-        assert_in_epsilon(wh_system.recovery_efficiency, wh_recovery_efficiency, 0.01)
-      end
+      assert_in_epsilon(wh_system.heating_capacity, wh_heating_capacity, 0.01)
+      assert_equal(wh_system.tank_volume, wh_tank_volume)
+      assert_in_epsilon(wh_system.recovery_efficiency, wh_recovery_efficiency, 0.01)
     end
   end
 
   def default_hpxml(hpxml_name)
     hpxml = HPXML.new(hpxml_path: File.join(@root_path, 'workflow', 'sample_files', hpxml_name))
 
+    # remove inputs for tests
     hpxml.hvac_distributions.each do |hvac_distribution|
       hvac_distribution.ducts.each do |duct|
         duct.duct_location = nil
