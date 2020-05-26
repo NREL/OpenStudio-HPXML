@@ -996,9 +996,9 @@ class HPXMLTest < MiniTest::Test
     vent_fan_bath = nil
     hpxml.ventilation_fans.each do |ventilation_fan|
       if ventilation_fan.used_for_local_ventilation
-        if ventilation_fan.fan_location == HPXML::VentilationFanLocationKitchen
+        if ventilation_fan.fan_location == HPXML::LocationKitchen
           vent_fan_kitchen = ventilation_fan
-        elsif ventilation_fan.fan_location == HPXML::VentilationFanLocationBath
+        elsif ventilation_fan.fan_location == HPXML::LocationBath
           vent_fan_bath = ventilation_fan
         end
       elsif ventilation_fan.used_for_whole_building_ventilation
