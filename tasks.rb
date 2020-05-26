@@ -2859,7 +2859,9 @@ def set_hpxml_hvac_control(hpxml_file, hpxml)
     hpxml.hvac_controls[0].heating_setpoint_temp = 60
     hpxml.hvac_controls[0].cooling_setpoint_temp = 80
   elsif ['base-enclosure-other-heated-space.xml'].include? hpxml_file
-    hpxml.hvac_controls[0].heating_setpoint_temp = 60
+    hpxml.hvac_controls[0].heating_setback_temp = 66
+    hpxml.hvac_controls[0].heating_setback_hours_per_week = 7 * 7
+    hpxml.hvac_controls[0].heating_setback_start_hour = 23 # 11pm
   elsif ['base-misc-ceiling-fans.xml'].include? hpxml_file
     hpxml.hvac_controls[0].ceiling_fan_cooling_setpoint_temp_offset = 0.5
   end
