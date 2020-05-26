@@ -246,13 +246,16 @@ class OSModel
     set_defaults_and_globals(runner)
     add_simulation_params(model)
 
-    # Geometry/Envelope
+    # Conditioned space/zone
 
     spaces = {}
     create_or_get_space(model, spaces, HPXML::LocationLivingSpace)
     @living_space = spaces[HPXML::LocationLivingSpace]
     @living_zone = @living_space.thermalZone.get
     @foundation_top, @walls_top = get_foundation_and_walls_top()
+    add_setpoints(runner, model, weather)
+
+    # Geometry/Envelope
     add_roofs(runner, model, spaces)
     add_walls(runner, model, spaces)
     add_rim_joists(runner, model, spaces)
@@ -277,7 +280,6 @@ class OSModel
     add_heat_pump(runner, model, weather)
     add_dehumidifier(runner, model)
     add_residual_hvac(runner, model)
-    add_setpoints(runner, model, weather)
     add_ceiling_fans(runner, model, weather)
 
     # Hot Water
@@ -4096,8 +4098,14 @@ class OSModel
     heating_setpoint = @hpxml.hvac_controls[0].heating_setpoint_temp
 
     if location == HPXML::LocationOtherHeatedSpace
-      # Average of indoor/outdoor temperatures with minimum of 68 deg-F
-      temp_min = UnitConversions.convert(heating_setpoint, 'F', 'C')
+      # Create a sensor to get dynamic heating setpoint
+      htg_sch = @living_zone.thermostatSetpointDualSetpoint.get.heatingSetpointTemperatureSchedule.get
+      sensor_htg_spt = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Schedule Value')
+      sensor_htg_spt.setName('htg_spt')
+      sensor_htg_spt.setKeyName(htg_sch.name.to_s)
+
+      # Average of indoor/outdoor temperatures with minimum of heating setpoint
+      temp_min = sensor_htg_spt.name
       indoor_weight = 0.5
       outdoor_weight = 0.5
       ground_weight = 0.0
