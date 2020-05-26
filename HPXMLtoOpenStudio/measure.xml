@@ -3,8 +3,8 @@
   <schema_version>3.0</schema_version>
   <name>hpxm_lto_openstudio</name>
   <uid>b1543b30-9465-45ff-ba04-1d1f85e763bc</uid>
-  <version_id>d50af8f8-106a-4060-bafb-ce88e1d808c9</version_id>
-  <version_modified>20200521T143052Z</version_modified>
+  <version_id>f2c4027f-9973-4365-9d0d-0a8bbff9f8d7</version_id>
+  <version_modified>20200526T231535Z</version_modified>
   <xml_checksum>D8922A73</xml_checksum>
   <class_name>HPXMLtoOpenStudio</class_name>
   <display_name>HPXML to OpenStudio Translator</display_name>
@@ -373,22 +373,10 @@
       <checksum>DFBC59C4</checksum>
     </file>
     <file>
-      <filename>pv.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>B8DEA262</checksum>
-    </file>
-    <file>
       <filename>test_hvac.rb</filename>
       <filetype>rb</filetype>
       <usage_type>test</usage_type>
       <checksum>C4BB0763</checksum>
-    </file>
-    <file>
-      <filename>test_lighting.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>test</usage_type>
-      <checksum>8F621249</checksum>
     </file>
     <file>
       <filename>test_miscloads.rb</filename>
@@ -409,16 +397,22 @@
       <checksum>EC54E7CF</checksum>
     </file>
     <file>
-      <filename>test_defaults.rb</filename>
+      <filename>pv.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>5AE1EAFB</checksum>
+    </file>
+    <file>
+      <filename>test_lighting.rb</filename>
       <filetype>rb</filetype>
       <usage_type>test</usage_type>
-      <checksum>56EB3F0A</checksum>
+      <checksum>2B96690C</checksum>
     </file>
     <file>
       <filename>test_airflow.rb</filename>
       <filetype>rb</filetype>
       <usage_type>test</usage_type>
-      <checksum>941BB38E</checksum>
+      <checksum>C289056D</checksum>
     </file>
     <file>
       <filename>constants.rb</filename>
@@ -457,12 +451,6 @@
       <checksum>CB1C9C64</checksum>
     </file>
     <file>
-      <filename>materials.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>C3047E58</checksum>
-    </file>
-    <file>
       <filename>hvac.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
@@ -473,12 +461,6 @@
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
       <checksum>65C2A609</checksum>
-    </file>
-    <file>
-      <filename>EPvalidator.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>EDB9AC90</checksum>
     </file>
     <file>
       <filename>location.rb</filename>
@@ -493,16 +475,28 @@
       <checksum>5C30BCC1</checksum>
     </file>
     <file>
-      <filename>hpxml.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>ACCE1743</checksum>
-    </file>
-    <file>
       <filename>airflow.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
       <checksum>6D140689</checksum>
+    </file>
+    <file>
+      <filename>EPvalidator.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>3D3B301C</checksum>
+    </file>
+    <file>
+      <filename>materials.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>FC4DE789</checksum>
+    </file>
+    <file>
+      <filename>hpxml.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>02368688</checksum>
     </file>
     <file>
       <version>
@@ -513,7 +507,19 @@
       <filename>measure.rb</filename>
       <filetype>rb</filetype>
       <usage_type>script</usage_type>
-      <checksum>68F04E7A</checksum>
+      <checksum>38E1A09D</checksum>
+    </file>
+    <file>
+      <filename>test_defaults.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>test</usage_type>
+      <checksum>B4C31A8D</checksum>
+    </file>
+    <file>
+      <filename>hpxml_defaults.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>CF3E3358</checksum>
     </file>
   </files>
 </measure>
