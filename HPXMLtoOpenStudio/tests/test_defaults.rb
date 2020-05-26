@@ -197,7 +197,7 @@ class HPXMLtoOpenStudioDuctsTest < MiniTest::Test
     XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
     model, hpxml = _test_measure(@args_hash)
     _test_default_clothes_dryer(hpxml, [HPXML::LocationLivingSpace, HPXML::ClothesDryerControlTypeTimer, 2.32, 1.0])
-    
+
     # Test appliances (2019 Addendum A)
     default_hpxml('base.xml')
     model, hpxml = _test_measure(@args_hash)
@@ -213,8 +213,8 @@ class HPXMLtoOpenStudioDuctsTest < MiniTest::Test
     hpxml.clothes_dryers[0].fuel_type = HPXML::FuelTypeNaturalGas
     XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
     model, hpxml = _test_measure(@args_hash)
-    _test_default_clothes_dryer(hpxml, [HPXML::LocationLivingSpace, HPXML::ClothesDryerControlTypeTimer, 3.01, 1.0])  # FIXME: Need to verify
-    
+    _test_default_clothes_dryer(hpxml, [HPXML::LocationLivingSpace, HPXML::ClothesDryerControlTypeTimer, 3.01, 1.0]) # FIXME: Need to verify
+
     # Test refrigerator in 5-bedroom house (2019 Addendum A)
     hpxml = default_hpxml('base-enclosure-beds-5.xml')
     XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
@@ -336,7 +336,7 @@ class HPXMLtoOpenStudioDuctsTest < MiniTest::Test
     hpxml = default_hpxml('base-dhw-multiple.xml')
     model, hpxml = _test_measure(@args_hash)
     _test_default_water_heaters(hpxml, [15354.6, 50.0, 0.98],
-                                       [36000.0, 40.0, 0.756])
+                                [36000.0, 40.0, 0.756])
     _test_default_number_of_bathrooms(hpxml, 2.0)
   end
 
