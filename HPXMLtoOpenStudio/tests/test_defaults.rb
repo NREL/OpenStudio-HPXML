@@ -28,7 +28,7 @@ class HPXMLtoOpenStudioDuctsTest < MiniTest::Test
   end
 
   def test_ducts
-    # Base
+    # Test inputs not overridden by defaults
     hpxml_name = 'base.xml'
     hpxml = HPXML.new(hpxml_path: File.join(@root_path, 'workflow', 'sample_files', hpxml_name))
     XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
@@ -40,7 +40,7 @@ class HPXMLtoOpenStudioDuctsTest < MiniTest::Test
     expected_n_return_registers = hpxml.building_construction.number_of_conditioned_floors
     _test_default_duct_values(hpxml, expected_supply_locations, expected_return_locations, expected_supply_areas, expected_return_areas, expected_n_return_registers)
 
-    # Test w/ conditioned basement
+    # Test defaults w/ conditioned basement
     default_hpxml('base.xml')
     model, hpxml = _test_measure(@args_hash)
     expected_supply_locations = ['basement - conditioned']
@@ -50,7 +50,7 @@ class HPXMLtoOpenStudioDuctsTest < MiniTest::Test
     expected_n_return_registers = hpxml.building_construction.number_of_conditioned_floors
     _test_default_duct_values(hpxml, expected_supply_locations, expected_return_locations, expected_supply_areas, expected_return_areas, expected_n_return_registers)
 
-    # Test w/ multiple foundations
+    # Test defaults w/ multiple foundations
     default_hpxml('base-foundation-multiple.xml')
     model, hpxml = _test_measure(@args_hash)
     expected_supply_locations = ['basement - unconditioned']
@@ -60,7 +60,7 @@ class HPXMLtoOpenStudioDuctsTest < MiniTest::Test
     expected_n_return_registers = hpxml.building_construction.number_of_conditioned_floors
     _test_default_duct_values(hpxml, expected_supply_locations, expected_return_locations, expected_supply_areas, expected_return_areas, expected_n_return_registers)
 
-    # Test w/ foundation exposed to ambient
+    # Test defaults w/ foundation exposed to ambient
     default_hpxml('base-foundation-ambient.xml')
     model, hpxml = _test_measure(@args_hash)
     expected_supply_locations = ['attic - unvented']
@@ -70,7 +70,7 @@ class HPXMLtoOpenStudioDuctsTest < MiniTest::Test
     expected_n_return_registers = hpxml.building_construction.number_of_conditioned_floors
     _test_default_duct_values(hpxml, expected_supply_locations, expected_return_locations, expected_supply_areas, expected_return_areas, expected_n_return_registers)
 
-    # Test building/unit adjacent to other housing unit
+    # Test defaults w/ building/unit adjacent to other housing unit
     default_hpxml('base-enclosure-other-housing-unit.xml')
     model, hpxml = _test_measure(@args_hash)
     expected_supply_locations = ['living space']
@@ -80,7 +80,7 @@ class HPXMLtoOpenStudioDuctsTest < MiniTest::Test
     expected_n_return_registers = hpxml.building_construction.number_of_conditioned_floors
     _test_default_duct_values(hpxml, expected_supply_locations, expected_return_locations, expected_supply_areas, expected_return_areas, expected_n_return_registers)
 
-    # Test 2-story building
+    # Test defaults w/ 2-story building
     default_hpxml('base-enclosure-2stories.xml')
     model, hpxml = _test_measure(@args_hash)
     expected_supply_locations = ['basement - conditioned', 'living space']
@@ -90,7 +90,7 @@ class HPXMLtoOpenStudioDuctsTest < MiniTest::Test
     expected_n_return_registers = hpxml.building_construction.number_of_conditioned_floors
     _test_default_duct_values(hpxml, expected_supply_locations, expected_return_locations, expected_supply_areas, expected_return_areas, expected_n_return_registers)
 
-    # Test 1-story building w/ multiple HVAC systems
+    # Test defaults w/ 1-story building & multiple HVAC systems
     hpxml_files = ['base-hvac-multiple.xml',
                    'base-hvac-multiple2.xml']
     hpxml_files.each do |hpxml_file|
@@ -104,7 +104,7 @@ class HPXMLtoOpenStudioDuctsTest < MiniTest::Test
       _test_default_duct_values(hpxml, expected_supply_locations, expected_return_locations, expected_supply_areas, expected_return_areas, expected_n_return_registers)
     end
 
-    # Test 2-story building w/ multiple HVAC systems
+    # Test defaults w/ 2-story building & multiple HVAC systems
     hpxml = default_hpxml('base-hvac-multiple.xml')
     hpxml.building_construction.number_of_conditioned_floors_above_grade = 2
     XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
@@ -118,10 +118,9 @@ class HPXMLtoOpenStudioDuctsTest < MiniTest::Test
   end
 
   def test_pv
-    # Base
+    # Test inputs not overridden by defaults
     hpxml_name = 'base-pv.xml'
     hpxml = HPXML.new(hpxml_path: File.join(@root_path, 'workflow', 'sample_files', hpxml_name))
-    # Override the value(s) to differentiate from default values
     hpxml.pv_systems.each do |pv|
       pv.inverter_efficiency = 0.90
       pv.system_losses_fraction = 0.20
@@ -132,14 +131,14 @@ class HPXMLtoOpenStudioDuctsTest < MiniTest::Test
     expected_system_loss_frac = [0.20, 0.20]
     _test_default_pv(hpxml, expected_interver_efficiency, expected_system_loss_frac)
 
-    # Test w/o year modules manufactured
+    # Test defaults w/o year modules manufactured
     default_hpxml('base-pv.xml')
     model, hpxml = _test_measure(@args_hash)
     expected_interver_efficiency = [0.96, 0.96]
     expected_system_loss_frac = [0.14, 0.14]
     _test_default_pv(hpxml, expected_interver_efficiency, expected_system_loss_frac)
 
-    # Test w/ year modules manufactured
+    # Test defaults w/ year modules manufactured
     hpxml = default_hpxml('base-pv.xml')
     hpxml.pv_systems.each do |pv|
       pv.year_modules_manufactured = 2010
@@ -152,21 +151,21 @@ class HPXMLtoOpenStudioDuctsTest < MiniTest::Test
   end
 
   def test_conditioned_building_volume
-    # Base
+    # Test inputs not overridden by defaults
     hpxml_name = 'base.xml'
     hpxml = HPXML.new(hpxml_path: File.join(@root_path, 'workflow', 'sample_files', hpxml_name))
     XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
     model, hpxml = _test_measure(@args_hash)
     _test_default_conditioned_building_volume(hpxml, 21600)
 
-    # Test w/ average ceiling height
+    # Test defaults w/ average ceiling height
     default_hpxml('base.xml')
     model, hpxml = _test_measure(@args_hash)
     _test_default_conditioned_building_volume(hpxml, 27000)
   end
 
   def test_appliances
-    # Base
+    # Test inputs not overridden by defaults
     hpxml_name = 'base.xml'
     hpxml = HPXML.new(hpxml_path: File.join(@root_path, 'workflow', 'sample_files', hpxml_name))
     XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
@@ -178,7 +177,30 @@ class HPXMLtoOpenStudioDuctsTest < MiniTest::Test
     _test_default_cooking_range(hpxml, [HPXML::LocationLivingSpace, false, 1.0])
     _test_default_oven(hpxml, false)
 
-    # Test appliances (before 2019 Addendum A)
+    # Test defaults w/ appliances
+    default_hpxml('base.xml')
+    model, hpxml = _test_measure(@args_hash)
+    _test_default_clothes_washer(hpxml, [HPXML::LocationLivingSpace, 1.0, 400.0, 0.12, 1.09, 27.0, 3.0, 6.0, 1.0])
+    _test_default_clothes_dryer(hpxml, [HPXML::LocationLivingSpace, HPXML::ClothesDryerControlTypeTimer, 3.01, 1.0])
+    _test_default_dish_washer(hpxml, [HPXML::LocationLivingSpace, 467.0, 0.12, 1.09, 33.12, 4.0, 12, 1.0])
+    _test_default_refrigerator(hpxml, [HPXML::LocationLivingSpace, 691.0, 1.0])
+    _test_default_cooking_range(hpxml, [HPXML::LocationLivingSpace, false, 1.0])
+    _test_default_oven(hpxml, false)
+
+    # Test defaults w/ gas clothes dryer
+    hpxml = default_hpxml('base.xml')
+    hpxml.clothes_dryers[0].fuel_type = HPXML::FuelTypeNaturalGas
+    XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
+    model, hpxml = _test_measure(@args_hash)
+    _test_default_clothes_dryer(hpxml, [HPXML::LocationLivingSpace, HPXML::ClothesDryerControlTypeTimer, 3.01, 1.0])
+
+    # Test defaults w/ refrigerator in 5-bedroom house
+    hpxml = default_hpxml('base-enclosure-beds-5.xml')
+    XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
+    model, hpxml = _test_measure(@args_hash)
+    _test_default_refrigerator(hpxml, [HPXML::LocationLivingSpace, 727.0, 1.0])
+
+    # Test defaults w/ appliances before 301-2019 Addendum A
     hpxml = default_hpxml('base.xml')
     hpxml.header.eri_calculation_version = '2019'
     XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
@@ -190,76 +212,52 @@ class HPXMLtoOpenStudioDuctsTest < MiniTest::Test
     _test_default_cooking_range(hpxml, [HPXML::LocationLivingSpace, false, 1.0])
     _test_default_oven(hpxml, false)
 
-    # Test gas clothes dryer (before 2019 Addendum A)
+    # Test defaults w/ gas clothes dryer before 301-2019 Addendum A
     hpxml = default_hpxml('base.xml')
     hpxml.header.eri_calculation_version = '2019'
     hpxml.clothes_dryers[0].fuel_type = HPXML::FuelTypeNaturalGas
     XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
     model, hpxml = _test_measure(@args_hash)
     _test_default_clothes_dryer(hpxml, [HPXML::LocationLivingSpace, HPXML::ClothesDryerControlTypeTimer, 2.32, 1.0])
-
-    # Test appliances (2019 Addendum A)
-    default_hpxml('base.xml')
-    model, hpxml = _test_measure(@args_hash)
-    _test_default_clothes_washer(hpxml, [HPXML::LocationLivingSpace, 1.0, 400.0, 0.12, 1.09, 27.0, 3.0, 6.0, 1.0])
-    _test_default_clothes_dryer(hpxml, [HPXML::LocationLivingSpace, HPXML::ClothesDryerControlTypeTimer, 3.01, 1.0])
-    _test_default_dish_washer(hpxml, [HPXML::LocationLivingSpace, 467.0, 0.12, 1.09, 33.12, 4.0, 12, 1.0])
-    _test_default_refrigerator(hpxml, [HPXML::LocationLivingSpace, 691.0, 1.0])
-    _test_default_cooking_range(hpxml, [HPXML::LocationLivingSpace, false, 1.0])
-    _test_default_oven(hpxml, false)
-
-    # Test gas clothes dryer (2019 Addendum A)
-    hpxml = default_hpxml('base.xml')
-    hpxml.clothes_dryers[0].fuel_type = HPXML::FuelTypeNaturalGas
-    XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
-    model, hpxml = _test_measure(@args_hash)
-    _test_default_clothes_dryer(hpxml, [HPXML::LocationLivingSpace, HPXML::ClothesDryerControlTypeTimer, 3.01, 1.0]) # FIXME: Need to verify
-
-    # Test refrigerator in 5-bedroom house (2019 Addendum A)
-    hpxml = default_hpxml('base-enclosure-beds-5.xml')
-    XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
-    model, hpxml = _test_measure(@args_hash)
-    _test_default_refrigerator(hpxml, [HPXML::LocationLivingSpace, 727.0, 1.0])
   end
 
   def test_hot_water_distribution
-    # Base (Standard hot water distribution)
+    # Test inputs not overridden by defaults -- standard
     hpxml_name = 'base.xml'
     hpxml = HPXML.new(hpxml_path: File.join(@root_path, 'workflow', 'sample_files', hpxml_name))
     XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
     model, hpxml = _test_measure(@args_hash)
     _test_default_std_hot_water_distribution(hpxml, 50.0)
 
-    # Test w/ conditioned basement
-    default_hpxml('base.xml')
-    model, hpxml = _test_measure(@args_hash)
-    _test_default_std_hot_water_distribution(hpxml, 93.48)
-
-    # Test w/ unconditioned basement
-    default_hpxml('base-foundation-unconditioned-basement.xml')
-    model, hpxml = _test_measure(@args_hash)
-    _test_default_std_hot_water_distribution(hpxml, 88.48)
-
-    # Test 2-story building
-    default_hpxml('base-enclosure-2stories.xml')
-    model, hpxml = _test_measure(@args_hash)
-    _test_default_std_hot_water_distribution(hpxml, 103.48)
-
-    # Base (Recirculation hot water distribution)
+    # Test inputs not overridden by defaults -- recirculation
     hpxml_name = 'base-dhw-recirc-demand.xml'
     hpxml = HPXML.new(hpxml_path: File.join(@root_path, 'workflow', 'sample_files', hpxml_name))
-    # Override the value(s) to differentiate from default values
     hpxml.hot_water_distributions[0].recirculation_pump_power = 65.0
     XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
     model, hpxml = _test_measure(@args_hash)
     _test_default_recirc_hot_water_distribution(hpxml, [50.0, 50.0, 65.0])
 
-    # Test w/ conditioned basement
+    # Test defaults w/ conditioned basement
+    default_hpxml('base.xml')
+    model, hpxml = _test_measure(@args_hash)
+    _test_default_std_hot_water_distribution(hpxml, 93.48)
+
+    # Test defaults w/ unconditioned basement
+    default_hpxml('base-foundation-unconditioned-basement.xml')
+    model, hpxml = _test_measure(@args_hash)
+    _test_default_std_hot_water_distribution(hpxml, 88.48)
+
+    # Test defaults w/ 2-story building
+    default_hpxml('base-enclosure-2stories.xml')
+    model, hpxml = _test_measure(@args_hash)
+    _test_default_std_hot_water_distribution(hpxml, 103.48)
+
+    # Test defaults w/ recirculation & conditioned basement
     hpxml = default_hpxml('base-dhw-recirc-demand.xml')
     model, hpxml = _test_measure(@args_hash)
     _test_default_recirc_hot_water_distribution(hpxml, [166.96, 10.0, 50.0])
 
-    # Test w/ unconditioned basement
+    # Test defaults w/ recirculation & unconditioned basement
     hpxml = default_hpxml('base-foundation-unconditioned-basement.xml')
     hpxml.hot_water_distributions.clear
     hpxml.hot_water_distributions.add(id: 'HotWaterDstribution',
@@ -270,7 +268,7 @@ class HPXMLtoOpenStudioDuctsTest < MiniTest::Test
     model, hpxml = _test_measure(@args_hash)
     _test_default_recirc_hot_water_distribution(hpxml, [156.96, 10.0, 50.0])
 
-    # Test 2-story building
+    # Test defaults w/ recirculation & 2-story building
     hpxml = default_hpxml('base-enclosure-2stories.xml')
     hpxml.hot_water_distributions.clear
     hpxml.hot_water_distributions.add(id: 'HotWaterDstribution',
@@ -283,21 +281,20 @@ class HPXMLtoOpenStudioDuctsTest < MiniTest::Test
   end
 
   def test_solar_thermal_system
-    # Base
+    # Test inputs not overridden by defaults
     hpxml_name = 'base-dhw-solar-direct-flat-plate.xml'
     hpxml = HPXML.new(hpxml_path: File.join(@root_path, 'workflow', 'sample_files', hpxml_name))
-    # Override the value(s) to differentiate from default values
     hpxml.solar_thermal_systems[0].storage_volume = 55.0
     XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
     model, hpxml = _test_measure(@args_hash)
     _test_default_solar_thermal_system(hpxml, 55.0)
 
-    # Test w/ collector area of 40 sqft
+    # Test defaults w/ collector area of 40 sqft
     hpxml = default_hpxml('base-dhw-solar-direct-flat-plate.xml')
     model, hpxml = _test_measure(@args_hash)
     _test_default_solar_thermal_system(hpxml, 60.0)
 
-    # Test w/ collector area of 100 sqft
+    # Test defaults w/ collector area of 100 sqft
     hpxml = default_hpxml('base-dhw-solar-direct-flat-plate.xml')
     hpxml.solar_thermal_systems[0].collector_area = 100.0
     XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
@@ -306,10 +303,9 @@ class HPXMLtoOpenStudioDuctsTest < MiniTest::Test
   end
 
   def test_water_heaters
-    # Base
+    # Test inputs not overridden by defaults
     hpxml_name = 'base.xml'
     hpxml = HPXML.new(hpxml_path: File.join(@root_path, 'workflow', 'sample_files', hpxml_name))
-    # Override the value(s) to differentiate from default values
     hpxml.water_heating_systems.each do |wh|
       wh.heating_capacity = 15000.0
       wh.tank_volume = 40.0
@@ -320,19 +316,19 @@ class HPXMLtoOpenStudioDuctsTest < MiniTest::Test
     _test_default_water_heaters(hpxml, [15000.0, 40.0, 0.95])
     _test_default_number_of_bathrooms(hpxml, 2.0)
 
-    # Test 3-bedroom house w/ 1 electric storage water heater
+    # Test defaults w/ 3-bedroom house & electric storage water heater
     hpxml = default_hpxml('base.xml')
     model, hpxml = _test_measure(@args_hash)
     _test_default_water_heaters(hpxml, [18766.7, 50.0, 0.98])
     _test_default_number_of_bathrooms(hpxml, 2.0)
 
-    # Test 5-bedroom house w/ 1 electric storage water heater
+    # Test defaults w/ 5-bedroom house & electric storage water heater
     hpxml = default_hpxml('base-enclosure-beds-5.xml')
     model, hpxml = _test_measure(@args_hash)
     _test_default_water_heaters(hpxml, [18766.7, 66.0, 0.98])
     _test_default_number_of_bathrooms(hpxml, 3.0)
 
-    # Test 3-bedroom house w/ 2 storage water heaters (1 electric and 1 natural gas)
+    # Test defaults w/ 3-bedroom house & 2 storage water heaters (1 electric and 1 natural gas)
     hpxml = default_hpxml('base-dhw-multiple.xml')
     model, hpxml = _test_measure(@args_hash)
     _test_default_water_heaters(hpxml, [15354.6, 50.0, 0.98],
@@ -379,7 +375,8 @@ class HPXMLtoOpenStudioDuctsTest < MiniTest::Test
     supply_duct_idx = 0
     return_duct_idx = 0
     hpxml.hvac_distributions.each do |hvac_distribution|
-      assert_equal(hvac_distribution.number_of_return_registers, expected_n_return_registers) if hvac_distribution.distribution_system_type == HPXML::HVACDistributionTypeAir
+      next unless hvac_distribution.distribution_system_type == HPXML::HVACDistributionTypeAir
+      assert_equal(hvac_distribution.number_of_return_registers, expected_n_return_registers)
       hvac_distribution.ducts.each do |duct|
         if duct.duct_type == HPXML::DuctTypeSupply
           assert_equal(duct.duct_location, expected_supply_locations[supply_duct_idx])
@@ -395,6 +392,7 @@ class HPXMLtoOpenStudioDuctsTest < MiniTest::Test
   end
 
   def _test_default_pv(hpxml, expected_interver_efficiency, expected_system_loss_frac)
+    assert_equal(expected_interver_efficiency.size, hpxml.pv_systems.size)
     hpxml.pv_systems.each_with_index do |pv, idx|
       assert_equal(pv.inverter_efficiency, expected_interver_efficiency[idx])
       assert_in_epsilon(pv.system_losses_fraction, expected_system_loss_frac[idx], 0.01)
@@ -476,9 +474,9 @@ class HPXMLtoOpenStudioDuctsTest < MiniTest::Test
   end
 
   def _test_default_water_heaters(hpxml, *expected_wh_values)
-    hpxml.water_heating_systems.each_with_index do |wh_system, idx|
-      next unless wh_system.water_heater_type == HPXML::WaterHeaterTypeStorage
-
+    storage_water_heaters = hpxml.water_heating_systems.select { |w| w.water_heater_type == HPXML::WaterHeaterTypeStorage }
+    assert_equal(expected_wh_values.size, storage_water_heaters.size)
+    storage_water_heaters.each_with_index do |wh_system, idx|
       wh_heating_capacity, wh_tank_volume, wh_recovery_efficiency = expected_wh_values[idx]
       assert_in_epsilon(wh_system.heating_capacity, wh_heating_capacity, 0.01)
       assert_equal(wh_system.tank_volume, wh_tank_volume)
