@@ -49,7 +49,7 @@ class HPXMLTest < MiniTest::Test
     Dir.mkdir(results_dir)
     _write_summary_results(results_dir, all_results)
     _write_hvac_sizing_results(results_dir, all_sizing_results)
-    _write_ashrae_140_results(results_dir, all_results, ashrae_140_dir)
+    _write_ashrae_140_results(results_dir, all_results, ashrae_140_dir) # FUTURE: Add Pub 002 stringent acceptance criteria
   end
 
   def test_run_simulation_rb
@@ -547,7 +547,15 @@ class HPXMLTest < MiniTest::Test
 
       # R-value
       hpxml_value = roof.insulation_assembly_r_value
-      query = "SELECT AVG(Value) FROM TabularDataWithStrings WHERE ReportName='EnvelopeSummary' AND ReportForString='Entire Facility' AND TableName='Opaque Exterior' AND (RowName='#{roof_id}' OR RowName LIKE '#{roof_id}:%') AND ColumnName='U-Factor with Film' AND Units='W/m2-K'"
+      if hpxml_path.include? 'ASHRAE_Standard_140'
+        # Compare R-value w/o film
+        hpxml_value -= Material.AirFilmRoofASHRAE140.rvalue
+        hpxml_value -= Material.AirFilmOutsideASHRAE140.rvalue
+        query = "SELECT AVG(Value) FROM TabularDataWithStrings WHERE ReportName='EnvelopeSummary' AND ReportForString='Entire Facility' AND TableName='Opaque Exterior' AND (RowName='#{roof_id}' OR RowName LIKE '#{roof_id}:%') AND ColumnName='U-Factor no Film' AND Units='W/m2-K'"
+      else
+        # Compare R-value w/ film
+        query = "SELECT AVG(Value) FROM TabularDataWithStrings WHERE ReportName='EnvelopeSummary' AND ReportForString='Entire Facility' AND TableName='Opaque Exterior' AND (RowName='#{roof_id}' OR RowName LIKE '#{roof_id}:%') AND ColumnName='U-Factor with Film' AND Units='W/m2-K'"
+      end
       sql_value = 1.0 / UnitConversions.convert(sqlFile.execAndReturnFirstDouble(query).get, 'W/(m^2*K)', 'Btu/(hr*ft^2*F)')
       assert_in_epsilon(hpxml_value, sql_value, 0.1) # TODO: Higher due to outside air film?
 
@@ -644,7 +652,15 @@ class HPXMLTest < MiniTest::Test
       # R-value
       if (not wall.insulation_assembly_r_value.nil?) && (not hpxml_path.include? 'base-foundation-unconditioned-basement-assembly-r.xml') # This file uses Foundation:Kiva for insulation, so skip it
         hpxml_value = wall.insulation_assembly_r_value
-        query = "SELECT AVG(Value) FROM TabularDataWithStrings WHERE ReportName='EnvelopeSummary' AND ReportForString='Entire Facility' AND TableName='Opaque Exterior' AND (RowName='#{wall_id}' OR RowName LIKE '#{wall_id}:%') AND ColumnName='U-Factor with Film' AND Units='W/m2-K'"
+        if hpxml_path.include? 'ASHRAE_Standard_140'
+          # Compare R-value w/o film
+          hpxml_value -= Material.AirFilmVerticalASHRAE140.rvalue
+          hpxml_value -= Material.AirFilmOutsideASHRAE140.rvalue
+          query = "SELECT AVG(Value) FROM TabularDataWithStrings WHERE ReportName='EnvelopeSummary' AND ReportForString='Entire Facility' AND TableName='Opaque Exterior' AND (RowName='#{wall_id}' OR RowName LIKE '#{wall_id}:%') AND ColumnName='U-Factor no Film' AND Units='W/m2-K'"
+        else
+          # Compare R-value w/ film
+          query = "SELECT AVG(Value) FROM TabularDataWithStrings WHERE ReportName='EnvelopeSummary' AND ReportForString='Entire Facility' AND TableName='Opaque Exterior' AND (RowName='#{wall_id}' OR RowName LIKE '#{wall_id}:%') AND ColumnName='U-Factor with Film' AND Units='W/m2-K'"
+        end
         sql_value = 1.0 / UnitConversions.convert(sqlFile.execAndReturnFirstDouble(query).get, 'W/(m^2*K)', 'Btu/(hr*ft^2*F)')
         assert_in_epsilon(hpxml_value, sql_value, 0.03)
       end
@@ -714,7 +730,20 @@ class HPXMLTest < MiniTest::Test
 
       # R-value
       hpxml_value = frame_floor.insulation_assembly_r_value
-      query = "SELECT AVG(Value) FROM TabularDataWithStrings WHERE ReportName='EnvelopeSummary' AND ReportForString='Entire Facility' AND TableName='Opaque Exterior' AND RowName='#{frame_floor_id}' AND ColumnName='U-Factor with Film' AND Units='W/m2-K'"
+      if hpxml_path.include? 'ASHRAE_Standard_140'
+        # Compare R-value w/o film
+        if frame_floor.is_exterior # Raised floor
+          hpxml_value -= Material.AirFilmFloorASHRAE140.rvalue
+          hpxml_value -= Material.AirFilmFloorZeroWindASHRAE140.rvalue
+        elsif frame_floor.is_ceiling # Attic floor
+          hpxml_value -= Material.AirFilmFloorASHRAE140.rvalue
+          hpxml_value -= Material.AirFilmFloorASHRAE140.rvalue
+        end
+        query = "SELECT AVG(Value) FROM TabularDataWithStrings WHERE ReportName='EnvelopeSummary' AND ReportForString='Entire Facility' AND TableName='Opaque Exterior' AND RowName='#{frame_floor_id}' AND ColumnName='U-Factor no Film' AND Units='W/m2-K'"
+      else
+        # Compare R-value w/ film
+        query = "SELECT AVG(Value) FROM TabularDataWithStrings WHERE ReportName='EnvelopeSummary' AND ReportForString='Entire Facility' AND TableName='Opaque Exterior' AND RowName='#{frame_floor_id}' AND ColumnName='U-Factor with Film' AND Units='W/m2-K'"
+      end
       sql_value = 1.0 / UnitConversions.convert(sqlFile.execAndReturnFirstDouble(query).get, 'W/(m^2*K)', 'Btu/(hr*ft^2*F)')
       assert_in_epsilon(hpxml_value, sql_value, 0.03)
 
