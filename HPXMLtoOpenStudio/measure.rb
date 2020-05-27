@@ -3653,7 +3653,6 @@ class OSModel
 
     sch = OpenStudio::Model::ScheduleConstant.new(model)
     sch.setName(location)
-    heating_setpoint = @hpxml.hvac_controls[0].heating_setpoint_temp
 
     if location == HPXML::LocationOtherHeatedSpace
       # Create a sensor to get dynamic heating setpoint
