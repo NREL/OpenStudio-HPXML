@@ -209,9 +209,9 @@ class HPXMLtoOpenStudioAirflowTest < MiniTest::Test
     model, hpxml = _test_measure(args_hash)
 
     # Get HPXML values
-    bath_fan = hpxml.ventilation_fans.select { |f| f.used_for_local_ventilation && f.fan_location == HPXML::VentilationFanLocationBath }[0]
+    bath_fan = hpxml.ventilation_fans.select { |f| f.used_for_local_ventilation && f.fan_location == HPXML::LocationBath }[0]
     bath_fan_cfm = bath_fan.rated_flow_rate * bath_fan.quantity
-    kitchen_fan = hpxml.ventilation_fans.select { |f| f.used_for_local_ventilation && f.fan_location == HPXML::VentilationFanLocationKitchen }[0]
+    kitchen_fan = hpxml.ventilation_fans.select { |f| f.used_for_local_ventilation && f.fan_location == HPXML::LocationKitchen }[0]
     kitchen_fan_cfm = kitchen_fan.rated_flow_rate
 
     # Check infiltration/ventilation program
@@ -299,27 +299,32 @@ class HPXMLtoOpenStudioAirflowTest < MiniTest::Test
   def test_infiltration_assumed_height
     # Base
     hpxml = HPXML.new(hpxml_path: File.absolute_path(File.join(sample_files_dir, 'base.xml')))
-    infil_height = hpxml.inferred_infiltration_height
+    infil_volume = hpxml.air_infiltration_measurements.select { |m| !m.infiltration_volume.nil? }[0].infiltration_volume
+    infil_height = hpxml.inferred_infiltration_height(infil_volume)
     assert_equal(9.75, infil_height)
 
     # Test w/o conditioned basement
     hpxml = HPXML.new(hpxml_path: File.absolute_path(File.join(sample_files_dir, 'base-foundation-unconditioned-basement.xml')))
-    infil_height = hpxml.inferred_infiltration_height
+    infil_volume = hpxml.air_infiltration_measurements.select { |m| !m.infiltration_volume.nil? }[0].infiltration_volume
+    infil_height = hpxml.inferred_infiltration_height(infil_volume)
     assert_equal(8, infil_height)
 
     # Test w/ walkout basement
     hpxml = HPXML.new(hpxml_path: File.absolute_path(File.join(sample_files_dir, 'base-foundation-walkout-basement.xml')))
-    infil_height = hpxml.inferred_infiltration_height
+    infil_volume = hpxml.air_infiltration_measurements.select { |m| !m.infiltration_volume.nil? }[0].infiltration_volume
+    infil_height = hpxml.inferred_infiltration_height(infil_volume)
     assert_equal(16, infil_height)
 
     # Test 2 story building
     hpxml = HPXML.new(hpxml_path: File.absolute_path(File.join(sample_files_dir, 'base-enclosure-2stories.xml')))
-    infil_height = hpxml.inferred_infiltration_height
+    infil_volume = hpxml.air_infiltration_measurements.select { |m| !m.infiltration_volume.nil? }[0].infiltration_volume
+    infil_height = hpxml.inferred_infiltration_height(infil_volume)
     assert_equal(17.75, infil_height)
 
     # Test w/ cathedral ceiling
     hpxml = HPXML.new(hpxml_path: File.absolute_path(File.join(sample_files_dir, 'base-atticroof-cathedral.xml')))
-    infil_height = hpxml.inferred_infiltration_height
+    infil_volume = hpxml.air_infiltration_measurements.select { |m| !m.infiltration_volume.nil? }[0].infiltration_volume
+    infil_height = hpxml.inferred_infiltration_height(infil_volume)
     assert_equal(13.75, infil_height)
   end
 
