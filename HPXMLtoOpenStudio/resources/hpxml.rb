@@ -128,6 +128,7 @@ class HPXML < Object
   LocationAtticVented = 'attic - vented'
   LocationBasementConditioned = 'basement - conditioned'
   LocationBasementUnconditioned = 'basement - unconditioned'
+  LocationBath = 'bath'
   LocationCrawlspaceUnvented = 'crawlspace - unvented'
   LocationCrawlspaceVented = 'crawlspace - vented'
   LocationExterior = 'exterior'
@@ -135,6 +136,7 @@ class HPXML < Object
   LocationGarage = 'garage'
   LocationGround = 'ground'
   LocationInterior = 'interior'
+  LocationKitchen = 'kitchen'
   LocationLivingSpace = 'living space'
   LocationOther = 'other'
   LocationOtherExterior = 'other exterior'
@@ -198,8 +200,6 @@ class HPXML < Object
   UnitsCFM = 'CFM'
   UnitsCFM25 = 'CFM25'
   UnitsPercent = 'Percent'
-  VentilationFanLocationBath = 'bath'
-  VentilationFanLocationKitchen = 'kitchen'
   WallTypeBrick = 'StructuralBrick'
   WallTypeCMU = 'ConcreteMasonryUnit'
   WallTypeConcrete = 'SolidConcrete'
@@ -244,6 +244,7 @@ class HPXML < Object
     # Clean up
     delete_partition_surfaces()
     delete_tiny_surfaces()
+    delete_adiabatic_subsurfaces()
     if collapse_enclosure
       collapse_enclosure_surfaces()
     end
@@ -4189,6 +4190,14 @@ class HPXML < Object
       next if surface.area.nil? || (surface.area > 0.1)
 
       surface.delete
+    end
+  end
+
+  def delete_adiabatic_subsurfaces()
+    @doors.reverse_each do |door|
+      next if door.wall.exterior_adjacent_to != HPXML::LocationOtherHousingUnit
+
+      door.delete
     end
   end
 
