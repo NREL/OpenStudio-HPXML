@@ -3,7 +3,7 @@
 class Geometry
   def self.get_temperature_scheduled_space_values(space_type)
     if space_type == HPXML::LocationOtherHeatedSpace
-      # Average of indoor/outdoor temperatures with minimum of 68 deg-F
+      # Average of indoor/outdoor temperatures with minimum of heating setpoint
       return { temp_min: 68,
                indoor_weight: 0.5,
                outdoor_weight: 0.5,

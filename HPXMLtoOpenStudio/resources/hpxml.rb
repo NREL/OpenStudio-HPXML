@@ -247,6 +247,7 @@ class HPXML < Object
     # Clean up
     delete_partition_surfaces()
     delete_tiny_surfaces()
+    delete_adiabatic_subsurfaces()
     if collapse_enclosure
       collapse_enclosure_surfaces()
     end
@@ -4216,6 +4217,14 @@ class HPXML < Object
       next if surface.area.nil? || (surface.area > 0.1)
 
       surface.delete
+    end
+  end
+
+  def delete_adiabatic_subsurfaces()
+    @doors.reverse_each do |door|
+      next if door.wall.exterior_adjacent_to != HPXML::LocationOtherHousingUnit
+
+      door.delete
     end
   end
 

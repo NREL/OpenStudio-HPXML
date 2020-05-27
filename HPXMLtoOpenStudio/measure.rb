@@ -245,11 +245,14 @@ class OSModel
     set_defaults_and_globals(runner, output_dir)
     add_simulation_params(model)
 
-    # Geometry/Envelope
+    # Conditioned space/zone
 
     spaces = {}
     create_or_get_space(model, spaces, HPXML::LocationLivingSpace)
     set_foundation_and_walls_top()
+    add_setpoints(runner, model, weather, spaces)
+
+    # Geometry/Envelope
     add_roofs(runner, model, spaces)
     add_walls(runner, model, spaces)
     add_rim_joists(runner, model, spaces)
@@ -274,7 +277,6 @@ class OSModel
     add_heat_pump(runner, model, weather, spaces)
     add_dehumidifier(runner, model, spaces)
     add_residual_hvac(runner, model, spaces)
-    add_setpoints(runner, model, weather, spaces)
     add_ceiling_fans(runner, model, weather, spaces)
 
     # Hot Water
@@ -3495,16 +3497,16 @@ class OSModel
   end
 
   def self.set_surface_exterior(model, spaces, surface, exterior_adjacent_to)
-    if [HPXML::LocationOutside].include? exterior_adjacent_to
+    if exterior_adjacent_to == HPXML::LocationOutside
       surface.setOutsideBoundaryCondition('Outdoors')
-    elsif [HPXML::LocationGround].include? exterior_adjacent_to
+    elsif exterior_adjacent_to == HPXML::LocationGround
       surface.setOutsideBoundaryCondition('Foundation')
-    elsif [HPXML::LocationBasementConditioned].include? exterior_adjacent_to
+    elsif exterior_adjacent_to == HPXML::LocationOtherHousingUnit
+      surface.setOutsideBoundaryCondition('Adiabatic')
+    elsif exterior_adjacent_to == HPXML::LocationBasementConditioned
       surface.createAdjacentSurface(create_or_get_space(model, spaces, HPXML::LocationLivingSpace))
       @cond_bsmnt_surfaces << surface
-      set_surface_otherside_coefficients(surface, exterior_adjacent_to, model, spaces)
-    elsif [HPXML::LocationOtherHousingUnit, HPXML::LocationOtherHeatedSpace,
-           HPXML::LocationOtherMultifamilyBufferSpace, HPXML::LocationOtherNonFreezingSpace].include? exterior_adjacent_to
+    elsif [HPXML::LocationOtherHeatedSpace, HPXML::LocationOtherMultifamilyBufferSpace, HPXML::LocationOtherNonFreezingSpace].include? exterior_adjacent_to
       set_surface_otherside_coefficients(surface, exterior_adjacent_to, model, spaces)
     else
       surface.createAdjacentSurface(create_or_get_space(model, spaces, exterior_adjacent_to))
@@ -3516,7 +3518,6 @@ class OSModel
       # Create E+ other side coefficient object
       otherside_object = OpenStudio::Model::SurfacePropertyOtherSideCoefficients.new(model)
       otherside_object.setName(exterior_adjacent_to)
-      # Assume to directly apply to surface outside temperature
       # Refer to: https://www.sciencedirect.com/science/article/pii/B9780123972705000066 6.1.2 Part: Wall and roof transfer functions
       otherside_object.setCombinedConvectiveRadiativeFilmCoefficient(8.3)
       # Schedule of space temperature, can be shared with water heater/ducts
@@ -3546,6 +3547,15 @@ class OSModel
     sch.setName(location)
 
     space_values = Geometry.get_temperature_scheduled_space_values(location)
+
+    if location == HPXML::LocationOtherHeatedSpace
+      # Create a sensor to get dynamic heating setpoint
+      htg_sch = spaces[HPXML::LocationLivingSpace].thermalZone.get.thermostatSetpointDualSetpoint.get.heatingSetpointTemperatureSchedule.get
+      sensor_htg_spt = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Schedule Value')
+      sensor_htg_spt.setName('htg_spt')
+      sensor_htg_spt.setKeyName(htg_sch.name.to_s)
+      space_values[:temp_min] = sensor_htg_spt.name
+    end
 
     # Schedule type limits compatible
     schedule_type_limits = OpenStudio::Model::ScheduleTypeLimits.new(model)
@@ -3586,7 +3596,11 @@ class OSModel
       program.addLine("Set #{actuator.name} = #{actuator.name} + (#{sensor_gnd.name} * #{space_values[:ground_weight]})")
     end
     if not space_values[:temp_min].nil?
-      min_temp_c = UnitConversions.convert(space_values[:temp_min], 'F', 'C')
+      if space_values[:temp_min].is_a? Float
+        min_temp_c = UnitConversions.convert(space_values[:temp_min], 'F', 'C')
+      else
+        min_temp_c = space_values[:temp_min]
+      end
       program.addLine("If #{actuator.name} < #{min_temp_c}")
       program.addLine("Set #{actuator.name} = #{min_temp_c}")
       program.addLine('EndIf')

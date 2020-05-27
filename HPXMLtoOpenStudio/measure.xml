@@ -3,8 +3,8 @@
   <schema_version>3.0</schema_version>
   <name>hpxm_lto_openstudio</name>
   <uid>b1543b30-9465-45ff-ba04-1d1f85e763bc</uid>
-  <version_id>d4d57b14-3736-4425-90c1-e3ba2996f75a</version_id>
-  <version_modified>20200527T020454Z</version_modified>
+  <version_id>e94c9c47-e287-48a2-b03e-357e3ddc914e</version_id>
+  <version_modified>20200527T022143Z</version_modified>
   <xml_checksum>D8922A73</xml_checksum>
   <class_name>HPXMLtoOpenStudio</class_name>
   <display_name>HPXML to OpenStudio Translator</display_name>
@@ -424,7 +424,13 @@
       <filename>geometry.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>1D1758A7</checksum>
+      <checksum>CB76A185</checksum>
+    </file>
+    <file>
+      <filename>hotwater_appliances.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>F2B93E21</checksum>
     </file>
     <file>
       <filename>BaseElements.xsd</filename>
@@ -463,6 +469,12 @@
       <checksum>D7B8D025</checksum>
     </file>
     <file>
+      <filename>hvac_sizing.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>9241E754</checksum>
+    </file>
+    <file>
       <filename>airflow.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
@@ -481,23 +493,6 @@
       <checksum>FC4DE789</checksum>
     </file>
     <file>
-      <filename>hpxml.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>02368688</checksum>
-    </file>
-    <file>
-      <version>
-        <software_program>OpenStudio</software_program>
-        <identifier>3.0.0</identifier>
-        <min_compatible>3.0.0</min_compatible>
-      </version>
-      <filename>measure.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>script</usage_type>
-      <checksum>38E1A09D</checksum>
-    </file>
-    <file>
       <filename>test_defaults.rb</filename>
       <filetype>rb</filetype>
       <usage_type>test</usage_type>
@@ -510,16 +505,21 @@
       <checksum>CF3E3358</checksum>
     </file>
     <file>
-      <filename>hotwater_appliances.rb</filename>
+      <filename>hpxml.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>F2B93E21</checksum>
+      <checksum>B9D76DC9</checksum>
     </file>
     <file>
-      <filename>hvac_sizing.rb</filename>
+      <version>
+        <software_program>OpenStudio</software_program>
+        <identifier>3.0.0</identifier>
+        <min_compatible>3.0.0</min_compatible>
+      </version>
+      <filename>measure.rb</filename>
       <filetype>rb</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>9241E754</checksum>
+      <usage_type>script</usage_type>
+      <checksum>BAFF9045</checksum>
     </file>
   </files>
 </measure>
