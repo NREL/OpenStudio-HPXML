@@ -269,7 +269,7 @@ class HPXMLDefaults
           water_heating_system.tank_volume = Waterheater.get_default_tank_volume(water_heating_system.fuel_type, nbeds, hpxml.building_construction.number_of_bathrooms)
         end
         if water_heating_system.recovery_efficiency.nil?
-          water_heating_system.recovery_efficiency = Waterheater.get_default_recovery_efficiency(water_heating_system.fuel_type, ef)
+          water_heating_system.recovery_efficiency = Waterheater.get_default_recovery_efficiency(water_heating_system)
         end
       end
       if water_heating_system.location.nil?

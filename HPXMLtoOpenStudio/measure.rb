@@ -1312,8 +1312,8 @@ class OSModel
       set_surface_exterior(model, spaces, surface, frame_floor.exterior_adjacent_to)
       surface.setName(frame_floor.id)
       if frame_floor.is_interior
-      surface.setSunExposure('NoSun')
-      surface.setWindExposure('NoWind')
+        surface.setSunExposure('NoSun')
+        surface.setWindExposure('NoWind')
       elsif frame_floor.is_floor
         surface.setSunExposure('NoSun')
       end
@@ -1352,7 +1352,7 @@ class OSModel
         WoodStudConstructionSet.new(Material.Stud2x6, 0.10, 10.0, 0.75, 0.0, covering), # 2x6, 24" o.c. + R10
         WoodStudConstructionSet.new(Material.Stud2x6, 0.10, 0.0, 0.75, 0.0, covering),  # 2x6, 24" o.c.
         WoodStudConstructionSet.new(Material.Stud2x4, 0.13, 0.0, 0.5, 0.0, covering),   # 2x4, 16" o.c.
-        WoodStudConstructionSet.new(Material.Stud2x4, 0.01, 0.0, 0.0, 0.0, nil),                     # Fallback
+        WoodStudConstructionSet.new(Material.Stud2x4, 0.01, 0.0, 0.0, 0.0, nil), # Fallback
       ]
       match, constr_set, cavity_r = pick_wood_stud_construction_set(assembly_r, constr_sets, inside_film, outside_film, frame_floor.id)
 
@@ -3556,9 +3556,9 @@ class OSModel
     program.setName("#{location.gsub('-', '_')} Temperature Program")
     program.addLine("Set #{actuator.name} = #{sensor_ia.name} * #{indoor_weight} + #{sensor_oa.name} * #{outdoor_weight} + #{sensor_gnd.name} * #{ground_weight}")
     if not temp_min.nil?
-    program.addLine("If #{actuator.name} < #{temp_min}")
-    program.addLine("Set #{actuator.name} = #{temp_min}")
-    program.addLine('EndIf')
+      program.addLine("If #{actuator.name} < #{temp_min}")
+      program.addLine("Set #{actuator.name} = #{temp_min}")
+      program.addLine('EndIf')
     end
 
     program_cm = OpenStudio::Model::EnergyManagementSystemProgramCallingManager.new(model)
