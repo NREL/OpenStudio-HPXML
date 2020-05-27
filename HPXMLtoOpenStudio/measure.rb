@@ -3554,7 +3554,7 @@ class OSModel
       sensor_htg_spt = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Schedule Value')
       sensor_htg_spt.setName('htg_spt')
       sensor_htg_spt.setKeyName(htg_sch.name.to_s)
-      space_values[:temp_min] = sensor_htg_spt.name
+      space_values[:temp_min] = sensor_htg_spt.name.to_s
     end
 
     # Schedule type limits compatible
@@ -3596,10 +3596,10 @@ class OSModel
       program.addLine("Set #{actuator.name} = #{actuator.name} + (#{sensor_gnd.name} * #{space_values[:ground_weight]})")
     end
     if not space_values[:temp_min].nil?
-      if space_values[:temp_min].is_a? Float
-        min_temp_c = UnitConversions.convert(space_values[:temp_min], 'F', 'C')
-      else
+      if space_values[:temp_min].is_a? String
         min_temp_c = space_values[:temp_min]
+      else
+        min_temp_c = UnitConversions.convert(space_values[:temp_min], 'F', 'C')
       end
       program.addLine("If #{actuator.name} < #{min_temp_c}")
       program.addLine("Set #{actuator.name} = #{min_temp_c}")
