@@ -184,7 +184,6 @@ class HVACSizing
         area_total += roof.area
       end
       @hpxml.frame_floors.each do |frame_floor|
-        next unless frame_floor.is_floor
         next unless [frame_floor.interior_adjacent_to, frame_floor.exterior_adjacent_to].include? space_type
         area_total += frame_floor.area
         area_conditioned += frame_floor.area if frame_floor.is_thermal_boundary
