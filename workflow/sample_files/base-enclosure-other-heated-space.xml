@@ -248,12 +248,7 @@
             <SystemIdentifier id='HVACControl'/>
             <ControlType>manual thermostat</ControlType>
             <SetpointTempHeatingSeason>68.0</SetpointTempHeatingSeason>
-            <SetbackTempHeatingSeason>66.0</SetbackTempHeatingSeason>
-            <TotalSetbackHoursperWeekHeating>49</TotalSetbackHoursperWeekHeating>
             <SetpointTempCoolingSeason>78.0</SetpointTempCoolingSeason>
-            <extension>
-              <SetbackStartHourHeating>23</SetbackStartHourHeating>
-            </extension>
           </HVACControl>
           <HVACDistribution>
             <SystemIdentifier id='HVACDistribution'/>
