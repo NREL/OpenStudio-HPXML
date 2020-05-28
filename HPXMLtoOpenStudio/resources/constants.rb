@@ -333,6 +333,14 @@ class Constants
     return 'misc tv'
   end
 
+  def self.ObjectNameMiscVehicle
+    return 'misc vehicle'
+  end
+
+  def self.ObjectNameMiscWellPump
+    return 'misc well pump'
+  end
+
   def self.ObjectNameNaturalVentilation
     return 'natural vent'
   end
