@@ -96,6 +96,8 @@ class EnergyPlusValidator
 
         '/HPXML/Building/BuildingDetails/MiscLoads/PlugLoad[PlugLoadType="other"]' => zero_or_one, # See [PlugLoads]
         '/HPXML/Building/BuildingDetails/MiscLoads/PlugLoad[PlugLoadType="TV other"]' => zero_or_one, # See [Television]
+        '/HPXML/Building/BuildingDetails/MiscLoads/PlugLoad[PlugLoadType="electric vehicle charging"]' => zero_or_one, # See [Vehicle]
+        '/HPXML/Building/BuildingDetails/MiscLoads/PlugLoad[PlugLoadType="well pump"]' => zero_or_one, # See [Well Pump]
       },
 
       # [SimulationControl]

@@ -1,8 +1,9 @@
 # frozen_string_literal: true
 
 class MiscLoads
-  def self.apply_plug(model, plug_load_misc, plug_load_tv, schedule, cfa,
-                      living_space)
+  def self.apply_plug(model, plug_load_misc, plug_load_tv,
+                      plug_load_vehicle, plug_load_wellpump,
+                      schedule, cfa, living_space)
 
     misc_kwh = 0
     if not plug_load_misc.nil?
@@ -12,8 +13,16 @@ class MiscLoads
     if not plug_load_tv.nil?
       tv_kwh = plug_load_tv.kWh_per_year * plug_load_tv.usage_multiplier
     end
+    vehicle_kwh = 0
+    if not plug_load_vehicle.nil?
+      vehicle_kwh = plug_load_vehicle.kWh_per_year * plug_load_vehicle.usage_multiplier
+    end
+    wellpump_kwh = 0
+    if not plug_load_wellpump.nil?
+      wellpump_kwh = plug_load_wellpump.kWh_per_year * plug_load_wellpump.usage_multiplier
+    end
 
-    return if misc_kwh + tv_kwh <= 0
+    return if misc_kwh + tv_kwh + vehicle_kwh + wellpump_kwh <= 0
 
     sens_frac = plug_load_misc.frac_sensible
     lat_frac = plug_load_misc.frac_latent
@@ -68,6 +77,48 @@ class MiscLoads
       mel_def.setFractionRadiant(0.6 * tv_sens_frac)
       mel_def.setFractionLatent(tv_lat_frac)
       mel_def.setFractionLost(1 - tv_sens_frac - tv_lat_frac)
+      mel.setSchedule(sch.schedule)
+    end
+
+    # Vehicle
+    vehicle_sens_frac = 1.0
+    vehicle_lat_frac = 0.0
+
+    if vehicle_kwh > 0
+      space_design_level = sch.calcDesignLevelFromDailykWh(vehicle_kwh / 365.0)
+
+      # Add electric equipment for the vehicle
+      mel_def = OpenStudio::Model::ElectricEquipmentDefinition.new(model)
+      mel = OpenStudio::Model::ElectricEquipment.new(mel_def)
+      mel.setName(Constants.ObjectNameMiscVehicle)
+      mel.setEndUseSubcategory(Constants.ObjectNameMiscVehicle)
+      mel.setSpace(living_space)
+      mel_def.setName(Constants.ObjectNameMiscVehicle)
+      mel_def.setDesignLevel(space_design_level)
+      mel_def.setFractionRadiant(0.6 * vehicle_sens_frac)
+      mel_def.setFractionLatent(vehicle_lat_frac)
+      mel_def.setFractionLost(1 - vehicle_sens_frac - vehicle_lat_frac)
+      mel.setSchedule(sch.schedule)
+    end
+
+    # Well Pump
+    wellpump_sens_frac = 1.0
+    wellpump_lat_frac = 0.0
+
+    if wellpump_kwh > 0
+      space_design_level = sch.calcDesignLevelFromDailykWh(wellpump_kwh / 365.0)
+
+      # Add electric equipment for the vehicle
+      mel_def = OpenStudio::Model::ElectricEquipmentDefinition.new(model)
+      mel = OpenStudio::Model::ElectricEquipment.new(mel_def)
+      mel.setName(Constants.ObjectNameMiscWellPump)
+      mel.setEndUseSubcategory(Constants.ObjectNameMiscWellPump)
+      mel.setSpace(living_space)
+      mel_def.setName(Constants.ObjectNameMiscWellPump)
+      mel_def.setDesignLevel(space_design_level)
+      mel_def.setFractionRadiant(0.6 * wellpump_sens_frac)
+      mel_def.setFractionLatent(wellpump_lat_frac)
+      mel_def.setFractionLost(1 - wellpump_sens_frac - wellpump_lat_frac)
       mel.setSchedule(sch.schedule)
     end
   end

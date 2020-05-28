@@ -2485,16 +2485,20 @@ class OSModel
     # Misc
     plug_load_misc = nil
     plug_load_tv = nil
+    plug_load_vehicle = nil
     @hpxml.plug_loads.each do |plug_load|
       if plug_load.plug_load_type == HPXML::PlugLoadTypeOther
         plug_load_misc = plug_load
       elsif plug_load.plug_load_type == HPXML::PlugLoadTypeTelevision
         plug_load_tv = plug_load
+      elsif plug_load.plug_load_type == HPXML::PlugLoadTypeVehicle
+        plug_load_vehicle = plug_load
       end
     end
 
-    MiscLoads.apply_plug(model, plug_load_misc, plug_load_tv, @hpxml.misc_loads_schedule,
-                         @cfa, @living_space)
+    MiscLoads.apply_plug(model, plug_load_misc, plug_load_tv,
+                         plug_load_vehicle,
+                         @hpxml.misc_loads_schedule, @cfa, @living_space)
   end
 
   def self.add_lighting(runner, model, weather, spaces)
