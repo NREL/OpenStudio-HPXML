@@ -209,9 +209,9 @@ class HPXMLtoOpenStudioAirflowTest < MiniTest::Test
     model, hpxml = _test_measure(args_hash)
 
     # Get HPXML values
-    bath_fan = hpxml.ventilation_fans.select { |f| f.used_for_local_ventilation && f.fan_location == HPXML::VentilationFanLocationBath }[0]
+    bath_fan = hpxml.ventilation_fans.select { |f| f.used_for_local_ventilation && f.fan_location == HPXML::LocationBath }[0]
     bath_fan_cfm = bath_fan.rated_flow_rate * bath_fan.quantity
-    kitchen_fan = hpxml.ventilation_fans.select { |f| f.used_for_local_ventilation && f.fan_location == HPXML::VentilationFanLocationKitchen }[0]
+    kitchen_fan = hpxml.ventilation_fans.select { |f| f.used_for_local_ventilation && f.fan_location == HPXML::LocationKitchen }[0]
     kitchen_fan_cfm = kitchen_fan.rated_flow_rate
 
     # Check infiltration/ventilation program
