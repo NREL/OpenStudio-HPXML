@@ -1093,6 +1093,7 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     duct_location_choices << HPXML::LocationAtticUnvented
     duct_location_choices << HPXML::LocationGarage
     duct_location_choices << HPXML::LocationOutside
+    duct_location_choices << HPXML::LocationUnderSlab
 
     arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('ducts_supply_leakage_units', duct_leakage_units_choices, true)
     arg.setDisplayName('Ducts: Supply Leakage Units')
@@ -1144,18 +1145,18 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     arg.setDefaultValue(Constants.Auto)
     args << arg
 
-    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('ducts_supply_surface_area', true)
+    arg = OpenStudio::Measure::OSArgument::makeStringArgument('ducts_supply_surface_area', true)
     arg.setDisplayName('Ducts: Supply Surface Area')
     arg.setDescription('The surface area of the supply ducts.')
     arg.setUnits('ft^2')
-    arg.setDefaultValue(150)
+    arg.setDefaultValue(Constants.Auto)
     args << arg
 
-    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('ducts_return_surface_area', true)
+    arg = OpenStudio::Measure::OSArgument::makeStringArgument('ducts_return_surface_area', true)
     arg.setDisplayName('Ducts: Return Surface Area')
     arg.setDescription('The surface area of the return ducts.')
     arg.setUnits('ft^2')
-    arg.setDefaultValue(50)
+    arg.setDefaultValue(Constants.Auto)
     args << arg
 
     heating_system_type_2_choices = OpenStudio::StringVector.new
@@ -2380,8 +2381,8 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
              ducts_return_insulation_r_value: runner.getDoubleArgumentValue('ducts_return_insulation_r', user_arguments),
              ducts_supply_location: runner.getStringArgumentValue('ducts_supply_location', user_arguments),
              ducts_return_location: runner.getStringArgumentValue('ducts_return_location', user_arguments),
-             ducts_supply_surface_area: runner.getDoubleArgumentValue('ducts_supply_surface_area', user_arguments),
-             ducts_return_surface_area: runner.getDoubleArgumentValue('ducts_return_surface_area', user_arguments),
+             ducts_supply_surface_area: runner.getStringArgumentValue('ducts_supply_surface_area', user_arguments),
+             ducts_return_surface_area: runner.getStringArgumentValue('ducts_return_surface_area', user_arguments),
              heating_system_type_2: runner.getStringArgumentValue('heating_system_type_2', user_arguments),
              heating_system_fuel_2: runner.getStringArgumentValue('heating_system_fuel_2', user_arguments),
              heating_system_heating_efficiency_afue_2: runner.getDoubleArgumentValue('heating_system_heating_efficiency_afue_2', user_arguments),
@@ -2640,6 +2641,10 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     warning = (args[:geometry_foundation_type] == HPXML::FoundationTypeSlab) && (args[:geometry_foundation_height_above_grade] > 0)
     warnings << "geometry_foundation_type=#{args[:geometry_foundation_type]} and geometry_foundation_height_above_grade=#{args[:geometry_foundation_height_above_grade]}" if warning
 
+    # duct location and surface area not both auto or not both specified
+    error = ((args[:ducts_supply_location] == Constants.Auto) && (args[:ducts_supply_surface_area] != Constants.Auto)) || ((args[:ducts_supply_location] != Constants.Auto) && (args[:ducts_supply_surface_area] == Constants.Auto)) || ((args[:ducts_return_location] == Constants.Auto) && (args[:ducts_return_surface_area] != Constants.Auto)) || ((args[:ducts_return_location] != Constants.Auto) && (args[:ducts_return_surface_area] == Constants.Auto))
+    errors << "ducts_supply_location=#{args[:ducts_supply_location]} and ducts_supply_surface_area=#{args[:ducts_supply_surface_area]} and ducts_return_location=#{args[:ducts_return_location]} and ducts_return_surface_area=#{args[:ducts_return_surface_area]}" if error
+
     # no second heating system, but has positive heat load served fraction
     error = (args[:heating_system_type_2] == 'none') && (args[:heating_system_fraction_heat_load_served_2] > 0)
     errors << "heating_system_type_2=none and heating_system_fraction_heat_load_served_2=#{args[:heating_system_fraction_heat_load_served_2]}" if error
@@ -2753,6 +2758,7 @@ class HPXMLFile
   def self.create_geometry_envelope(runner, model, args)
     if args[:geometry_foundation_type] == HPXML::FoundationTypeSlab
       args[:geometry_foundation_height] = 0.0
+      args[:geometry_foundation_height_above_grade] = 0.0
     end
 
     if args[:geometry_unit_type] == HPXML::ResidentialTypeSFD
@@ -2945,7 +2951,7 @@ class HPXMLFile
     elsif ['unconditioned basement'].include? space_type
       return HPXML::LocationBasementUnconditioned
     elsif ['corridor'].include? space_type
-      return HPXML::LocationLivingSpace # FIXME: update to handle new enum
+      return HPXML::LocationOtherHousingUnit
     elsif ['ambient'].include? space_type
       return HPXML::LocationOutside
     else
@@ -2985,7 +2991,6 @@ class HPXMLFile
   def self.set_walls(hpxml, runner, model, args)
     model.getSurfaces.each do |surface|
       next if surface.surfaceType != 'Wall'
-      next if ['ambient'].include? surface.space.get.spaceType.get.standardsSpaceType.get # FIXME
 
       interior_adjacent_to = get_adjacent_to(model, surface)
       next unless [HPXML::LocationLivingSpace, HPXML::LocationAtticUnvented, HPXML::LocationAtticVented, HPXML::LocationGarage].include? interior_adjacent_to
@@ -3066,7 +3071,6 @@ class HPXMLFile
     model.getSurfaces.each do |surface|
       next if surface.outsideBoundaryCondition == 'Foundation'
       next unless ['Floor', 'RoofCeiling'].include? surface.surfaceType
-      next if ['ambient'].include? surface.space.get.spaceType.get.standardsSpaceType.get # FIXME
 
       interior_adjacent_to = get_adjacent_to(model, surface)
       next unless [HPXML::LocationLivingSpace, HPXML::LocationGarage].include? interior_adjacent_to
@@ -3082,6 +3086,7 @@ class HPXMLFile
           other_space_above_or_below = HPXML::FrameFloorOtherSpaceAbove
         end
       end
+
       next if interior_adjacent_to == exterior_adjacent_to
       next if (surface.surfaceType == 'RoofCeiling') && (exterior_adjacent_to == HPXML::LocationOutside)
       next if [HPXML::LocationLivingSpace, HPXML::LocationBasementConditioned].include? exterior_adjacent_to
@@ -3108,9 +3113,9 @@ class HPXMLFile
     model.getSurfaces.each do |surface|
       next unless ['Foundation'].include? surface.outsideBoundaryCondition
       next if surface.surfaceType != 'Floor'
-      next if ['ambient'].include? surface.space.get.spaceType.get.standardsSpaceType.get # FIXME
 
       interior_adjacent_to = get_adjacent_to(model, surface)
+      next if [HPXML::LocationOutside].include? interior_adjacent_to
 
       has_foundation_walls = false
       if [HPXML::LocationCrawlspaceVented, HPXML::LocationCrawlspaceUnvented, HPXML::LocationBasementUnconditioned, HPXML::LocationBasementConditioned].include? interior_adjacent_to
@@ -3466,7 +3471,8 @@ class HPXMLFile
       next unless [HPXML::HVACTypeBoiler].include? heating_system.heating_system_type
 
       hpxml.hvac_distributions.add(id: 'HydronicDistribution',
-                                   distribution_system_type: HPXML::HVACDistributionTypeHydronic)
+                                   distribution_system_type: HPXML::HVACDistributionTypeHydronic,
+                                   conditioned_floor_area_served: args[:geometry_cfa])
       heating_system.distribution_system_idref = hpxml.hvac_distributions[-1].id
       break
     end
@@ -3495,7 +3501,8 @@ class HPXMLFile
     return unless air_distribution_systems.size > 0
 
     hpxml.hvac_distributions.add(id: 'AirDistribution',
-                                 distribution_system_type: HPXML::HVACDistributionTypeAir)
+                                 distribution_system_type: HPXML::HVACDistributionTypeAir,
+                                 conditioned_floor_area_served: args[:geometry_cfa])
 
     air_distribution_systems.each do |hvac_system|
       hvac_system.distribution_system_idref = hpxml.hvac_distributions[-1].id
@@ -3515,26 +3522,32 @@ class HPXMLFile
     end
 
     # Ducts
-    ducts_supply_location = args[:ducts_supply_location]
-    if ducts_supply_location == Constants.Auto
-      ducts_supply_location = get_duct_location_auto(args, hpxml)
+    if args[:ducts_supply_location] != Constants.Auto
+      ducts_supply_location = args[:ducts_supply_location]
     end
 
-    ducts_return_location = args[:ducts_return_location]
-    if ducts_return_location == Constants.Auto
-      ducts_return_location = get_duct_location_auto(args, hpxml)
+    if args[:ducts_return_location] != Constants.Auto
+      ducts_return_location = args[:ducts_return_location]
+    end
+
+    if args[:ducts_supply_surface_area] != Constants.Auto
+      ducts_supply_surface_area = args[:ducts_supply_surface_area]
+    end
+
+    if args[:ducts_return_surface_area] != Constants.Auto
+      ducts_return_surface_area = args[:ducts_return_surface_area]
     end
 
     hpxml.hvac_distributions[-1].ducts.add(duct_type: HPXML::DuctTypeSupply,
                                            duct_insulation_r_value: args[:ducts_supply_insulation_r_value],
                                            duct_location: ducts_supply_location,
-                                           duct_surface_area: args[:ducts_supply_surface_area])
+                                           duct_surface_area: ducts_supply_surface_area)
 
     if not ((args[:cooling_system_type] == HPXML::HVACTypeEvaporativeCooler) && args[:cooling_system_evap_cooler_is_ducted])
       hpxml.hvac_distributions[-1].ducts.add(duct_type: HPXML::DuctTypeReturn,
                                              duct_insulation_r_value: args[:ducts_return_insulation_r_value],
                                              duct_location: ducts_return_location,
-                                             duct_surface_area: args[:ducts_return_surface_area])
+                                             duct_surface_area: ducts_return_surface_area)
     end
   end
 
@@ -3572,17 +3585,6 @@ class HPXMLFile
                             cooling_setup_hours_per_week: cooling_setup_hours_per_week,
                             cooling_setup_start_hour: cooling_setup_start_hour,
                             ceiling_fan_cooling_setpoint_temp_offset: ceiling_fan_cooling_setpoint_temp_offset)
-  end
-
-  def self.get_duct_location_auto(args, hpxml) # FIXME
-    if args[:geometry_roof_type] != 'flat' && hpxml.attics.size > 0 && [HPXML::AtticTypeVented, HPXML::AtticTypeUnvented].include?(args[:geometry_attic_type])
-      location = hpxml.attics[0].to_location
-    elsif hpxml.foundations.size > 0 && (args[:geometry_foundation_type].downcase.include?('basement') || args[:geometry_foundation_type].downcase.include?('crawlspace'))
-      location = hpxml.foundations[0].to_location
-    else
-      location = HPXML::LocationLivingSpace
-    end
-    return location
   end
 
   def self.set_ventilation_fans(hpxml, runner, args)
