@@ -203,6 +203,7 @@ def create_osws
     'extra-auto.osw' => 'base.osw',
     'extra-pv-roofpitch.osw' => 'base.osw',
     'extra-dhw-solar-latitude.osw' => 'base.osw',
+    'extra-second-refrigerator.osw' => 'base.osw',
 
     'invalid_files/non-electric-heat-pump-water-heater.osw' => 'base.osw',
     'invalid_files/multiple-heating-and-cooling-systems.osw' => 'base.osw',
@@ -563,6 +564,10 @@ def get_values(osw_file, step)
     step.setArgument('refrigerator_location', HPXML::LocationLivingSpace)
     step.setArgument('refrigerator_rated_annual_kwh', 650.0)
     step.setArgument('refrigerator_usage_multiplier', 1.0)
+    step.setArgument('extra_refrigerator_present', false)
+    step.setArgument('extra_refrigerator_location', HPXML::LocationLivingSpace)
+    step.setArgument('extra_refrigerator_rated_annual_kwh', 650.0)
+    step.setArgument('extra_refrigerator_usage_multiplier', 1.0)
     step.setArgument('cooking_range_oven_present', true)
     step.setArgument('cooking_range_oven_location', HPXML::LocationLivingSpace)
     step.setArgument('cooking_range_oven_fuel_type', HPXML::FuelTypeElectricity)
@@ -1579,6 +1584,8 @@ def get_values(osw_file, step)
   elsif ['extra-dhw-solar-latitude.osw'].include? osw_file
     step.setArgument('solar_thermal_system_type', 'hot water')
     step.setArgument('solar_thermal_collector_tilt', 'latitude-15')
+  elsif ['extra-second-refrigerator.osw'].include? osw_file
+    step.setArgument('extra_refrigerator_present', true)
   elsif ['invalid_files/non-electric-heat-pump-water-heater.osw'].include? osw_file
     step.setArgument('water_heater_type', HPXML::WaterHeaterTypeHeatPump)
     step.setArgument('water_heater_fuel_type', HPXML::FuelTypeNaturalGas)

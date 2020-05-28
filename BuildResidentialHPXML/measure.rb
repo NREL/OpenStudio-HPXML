@@ -2041,6 +2041,31 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     arg.setDefaultValue(1.0)
     args << arg
 
+    arg = OpenStudio::Measure::OSArgument::makeBoolArgument('extra_refrigerator_present', true)
+    arg.setDisplayName('Extra Refrigerator: Present')
+    arg.setDescription('Whether there is an extra refrigerator.')
+    arg.setDefaultValue(false)
+    args << arg
+
+    arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('extra_refrigerator_location', appliance_location_choices, true)
+    arg.setDisplayName('Extra Refrigerator: Location')
+    arg.setDescription('The space type for the extra refrigerator location.')
+    arg.setDefaultValue(Constants.Auto)
+    args << arg
+
+    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('extra_refrigerator_rated_annual_kwh', true)
+    arg.setDisplayName('Extra Refrigerator: Rated Annual Consumption')
+    arg.setUnits('kWh/yr')
+    arg.setDescription('The EnergyGuide rated annual energy consumption for a refrigerator.')
+    arg.setDefaultValue(434)
+    args << arg
+
+    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('extra_refrigerator_usage_multiplier', true)
+    arg.setDisplayName('Extra Refrigerator: Usage Multiplier')
+    arg.setDescription('Multiplier on the energy usage that can reflect, e.g., high/low usage occupants.')
+    arg.setDefaultValue(1.0)
+    args << arg
+
     cooking_range_oven_fuel_choices = OpenStudio::StringVector.new
     cooking_range_oven_fuel_choices << HPXML::FuelTypeElectricity
     cooking_range_oven_fuel_choices << HPXML::FuelTypeNaturalGas
@@ -2446,6 +2471,10 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
              refrigerator_location: runner.getStringArgumentValue('refrigerator_location', user_arguments),
              refrigerator_rated_annual_kwh: runner.getDoubleArgumentValue('refrigerator_rated_annual_kwh', user_arguments),
              refrigerator_usage_multiplier: runner.getDoubleArgumentValue('refrigerator_usage_multiplier', user_arguments),
+             extra_refrigerator_present: runner.getBoolArgumentValue('extra_refrigerator_present', user_arguments),
+             extra_refrigerator_location: runner.getStringArgumentValue('extra_refrigerator_location', user_arguments),
+             extra_refrigerator_rated_annual_kwh: runner.getDoubleArgumentValue('extra_refrigerator_rated_annual_kwh', user_arguments),
+             extra_refrigerator_usage_multiplier: runner.getDoubleArgumentValue('extra_refrigerator_usage_multiplier', user_arguments),
              cooking_range_oven_present: runner.getBoolArgumentValue('cooking_range_oven_present', user_arguments),
              cooking_range_oven_location: runner.getStringArgumentValue('cooking_range_oven_location', user_arguments),
              cooking_range_oven_fuel_type: runner.getStringArgumentValue('cooking_range_oven_fuel_type', user_arguments),
@@ -2674,6 +2703,7 @@ class HPXMLFile
     set_clothes_dryer(hpxml, runner, args)
     set_dishwasher(hpxml, runner, args)
     set_refrigerator(hpxml, runner, args)
+    set_extra_refrigerator(hpxml, runner, args)
     set_cooking_range_oven(hpxml, runner, args)
     set_ceiling_fans(hpxml, runner, args)
     set_plug_loads(hpxml, runner, args)
@@ -3956,6 +3986,25 @@ class HPXMLFile
     hpxml.refrigerators.add(id: 'Refrigerator',
                             location: location,
                             rated_annual_kwh: args[:refrigerator_rated_annual_kwh],
+                            usage_multiplier: usage_multiplier,
+                            schedules_output_path: args[:schedules_output_path],
+                            schedules_column_name: 'refrigerator')
+  end
+
+  def self.set_extra_refrigerator(hpxml, runner, args)
+    return unless args[:extra_refrigerator_present]
+
+    if args[:extra_refrigerator_location] != Constants.Auto
+      location = args[:extra_refrigerator_location]
+    end
+
+    if args[:extra_refrigerator_usage_multiplier] != 1.0
+      usage_multiplier = args[:extra_refrigerator_usage_multiplier]
+    end
+
+    hpxml.refrigerators.add(id: 'ExtraRefrigerator',
+                            location: location,
+                            rated_annual_kwh: args[:extra_refrigerator_rated_annual_kwh],
                             usage_multiplier: usage_multiplier,
                             schedules_output_path: args[:schedules_output_path],
                             schedules_column_name: 'refrigerator')
