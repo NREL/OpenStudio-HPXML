@@ -284,6 +284,7 @@ def create_hpxmls
     'base-misc-ceiling-fans.xml' => 'base.xml',
     'base-misc-defaults.xml' => 'base.xml',
     'base-misc-defaults2.xml' => 'base-dhw-recirc-demand.xml',
+    'base-misc-large-uncommon-loads.xml' => 'base.xml',
     'base-misc-timestep-10-mins.xml' => 'base.xml',
     'base-misc-runperiod-1-month.xml' => 'base.xml',
     'base-misc-usage-multiplier.xml' => 'base.xml',
@@ -381,6 +382,7 @@ def create_hpxmls
         set_hpxml_lighting(hpxml_file, hpxml)
         set_hpxml_ceiling_fans(hpxml_file, hpxml)
         set_hpxml_plug_loads(hpxml_file, hpxml)
+        set_hpxml_fuel_loads(hpxml_file, hpxml)
         set_hpxml_misc_load_schedule(hpxml_file, hpxml)
       end
 
@@ -4012,6 +4014,17 @@ def set_hpxml_plug_loads(hpxml_file, hpxml)
         plug_load.frac_sensible = nil
         plug_load.frac_latent = nil
       end
+    elsif ['base-misc-large-uncommon-loads.xml'].include? hpxml_file
+      hpxml.plug_loads.add(id: 'PlugLoadMisc3',
+                           plug_load_type: HPXML::PlugLoadTypeVehicle,
+                           kWh_per_year: 100,
+                           frac_sensible: 0.5,
+                           frac_latent: 0.5)
+      hpxml.plug_loads.add(id: 'PlugLoadMisc4',
+                           plug_load_type: HPXML::PlugLoadTypeWellPump,
+                           kWh_per_year: 100,
+                           frac_sensible: 0.5,
+                           frac_latent: 0.5)
     else
       cfa = hpxml.building_construction.conditioned_floor_area
       nbeds = hpxml.building_construction.number_of_bedrooms
@@ -4027,6 +4040,9 @@ def set_hpxml_plug_loads(hpxml_file, hpxml)
       hpxml.plug_loads[1].frac_latent = frac_latent.round(3)
     end
   end
+end
+
+def set_hpxml_fuel_loads(hpxml_file, hpxml)
 end
 
 def set_hpxml_misc_load_schedule(hpxml_file, hpxml)
