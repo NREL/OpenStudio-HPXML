@@ -434,6 +434,11 @@
           <Location>living space</Location>
           <RatedAnnualkWh>650.0</RatedAnnualkWh>
         </Refrigerator>
+        <Refrigerator>
+          <SystemIdentifier id='ExtraRefrigerator'/>
+          <Location>garage</Location>
+          <RatedAnnualkWh>650.0</RatedAnnualkWh>
+        </Refrigerator>
         <CookingRange>
           <SystemIdentifier id='Range'/>
           <Location>living space</Location>
