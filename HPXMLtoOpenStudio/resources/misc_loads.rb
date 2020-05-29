@@ -2,7 +2,7 @@
 
 class MiscLoads
   def self.apply_plug(model, plug_load_misc, plug_load_tv,
-                      plug_load_vehicle, plug_load_wellpump,
+                      plug_load_vehicle, plug_load_well_pump,
                       schedule, cfa, living_space)
 
     misc_kwh = 0
@@ -17,12 +17,12 @@ class MiscLoads
     if not plug_load_vehicle.nil?
       vehicle_kwh = plug_load_vehicle.kWh_per_year * plug_load_vehicle.usage_multiplier
     end
-    wellpump_kwh = 0
-    if not plug_load_wellpump.nil?
-      wellpump_kwh = plug_load_wellpump.kWh_per_year * plug_load_wellpump.usage_multiplier
+    well_pump_kwh = 0
+    if not plug_load_well_pump.nil?
+      well_pump_kwh = plug_load_well_pump.kWh_per_year * plug_load_well_pump.usage_multiplier
     end
 
-    return if misc_kwh + tv_kwh + vehicle_kwh + wellpump_kwh <= 0
+    return if misc_kwh + tv_kwh + vehicle_kwh + well_pump_kwh <= 0
 
     sens_frac = plug_load_misc.frac_sensible
     lat_frac = plug_load_misc.frac_latent
@@ -63,7 +63,7 @@ class MiscLoads
     sens_frac = 1.0
     lat_frac = 0.0
 
-    [[tv_kwh, Constants.ObjectNameMiscTelevision], [vehicle_kwh, Constants.ObjectNameMiscVehicle], [wellpump_kwh, Constants.ObjectNameMiscWellPump]].each do |kwh, name|
+    [[tv_kwh, Constants.ObjectNameMiscTelevision], [vehicle_kwh, Constants.ObjectNameMiscVehicle], [well_pump_kwh, Constants.ObjectNameMiscWellPump]].each do |kwh, name|
       next unless kwh > 0
       space_design_level = sch.calcDesignLevelFromDailykWh(kwh / 365.0)
 
@@ -97,4 +97,11 @@ class MiscLoads
     frac_lat = 1.0 - frac_sens - frac_lost
     return annual_kwh, frac_sens, frac_lat
   end
+
+  def self.apply_fuel(model, fuel_load_grill, fuel_load_lighting, fuel_load_fireplace,
+                      schedule, cfa, living_space)
+
+  # TODO
+
+  end                      
 end

@@ -287,10 +287,14 @@ class OSModel
 
     add_hot_water_and_appliances(runner, model, weather, spaces)
 
-    # Plug Loads & Lighting
+    # Plug Loads & Fuel Loads & Lighting
 
     add_mels(runner, model, spaces)
+    add_mfls(runner, model, spaces)
     add_lighting(runner, model, weather, spaces)
+
+    # Pools & Hot Tubs
+    # TODO
 
     # Other
 
@@ -1966,8 +1970,14 @@ class OSModel
 
     # Refrigerator
     if @hpxml.refrigerators.size > 0
-      refrigerator = @hpxml.refrigerators[0]
+      refrigerator = @hpxml.refrigerators[0] # TODO: extra refrigerators
       rf_space = get_space_from_location(refrigerator.location, 'Refrigerator', model, spaces)
+    end
+
+    # Freezer # TODO
+    if @hpxml.freezers.size > 0
+      # freezer = @hpxml.freezers[0]
+      # fz_space = get_space_from_location(freezer.location, 'Freezer', model, spaces)
     end
 
     # Cooking Range/Oven
@@ -2486,6 +2496,7 @@ class OSModel
     plug_load_misc = nil
     plug_load_tv = nil
     plug_load_vehicle = nil
+    plug_load_well_pump = nil
     @hpxml.plug_loads.each do |plug_load|
       if plug_load.plug_load_type == HPXML::PlugLoadTypeOther
         plug_load_misc = plug_load
@@ -2493,12 +2504,33 @@ class OSModel
         plug_load_tv = plug_load
       elsif plug_load.plug_load_type == HPXML::PlugLoadTypeVehicle
         plug_load_vehicle = plug_load
+      elsif plug_load.plug_load_type == HPXML::PlugLoadTypeWellPumpend
+        plug_load_well_pump = plug_load
       end
     end
 
     MiscLoads.apply_plug(model, plug_load_misc, plug_load_tv,
-                         plug_load_vehicle,
+                         plug_load_vehicle, plug_load_well_pump,
                          @hpxml.misc_loads_schedule, @cfa, @living_space)
+  end
+
+  def self.add_mfls(runner, model, spaces)
+    fuel_load_grill = nil
+    fuel_load_lighting = nil
+    fuel_load_fireplace = nil
+    @hpxml.fuel_loads.each do |fuel_load|
+      if fuel_load.fuel_load_type == HPXML::FuelLoadTypeGrill
+        fuel_load_grill = fuel_load
+      elsif fuel_load.fuel_load_type == HPXML::FuelLoadTypeLighting
+        fuel_load_lighting = fuel_load
+      elsif fuel_load.fuel_load_type == HPXML::FuelLoadTypeFireplace
+        fuel_load_fireplace = fuel_load
+      end
+    end
+
+    MiscLoads.apply_fuel(model, fuel_load_grill, fuel_load_lighting, fuel_load_fireplace,
+                         @hpxml.misc_loads_schedule, @cfa, @living_space)
+
   end
 
   def self.add_lighting(runner, model, weather, spaces)
