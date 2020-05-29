@@ -474,14 +474,16 @@
         </CeilingFan>
       </Lighting>
       <MiscLoads>
-        <PlugLoad>
-          <SystemIdentifier id='PlugLoadMisc'/>
-          <PlugLoadType>other</PlugLoadType>
-        </PlugLoad>
-        <PlugLoad>
-          <SystemIdentifier id='PlugLoadMisc2'/>
-          <PlugLoadType>TV other</PlugLoadType>
-        </PlugLoad>
+        <PlugLoads>
+          <PlugLoad>
+            <SystemIdentifier id='PlugLoadMisc'/>
+            <PlugLoadType>other</PlugLoadType>
+          </PlugLoad>
+          <PlugLoad>
+            <SystemIdentifier id='PlugLoadMisc2'/>
+            <PlugLoadType>TV other</PlugLoadType>
+          </PlugLoad>
+        </PlugLoads>
       </MiscLoads>
     </BuildingDetails>
   </Building>
