@@ -348,6 +348,11 @@ Skylights are defined by *full-assembly* NFRC ``UFactor`` and ``SHGC``, as well 
 Skylights must reference a HPXML ``Enclosures/Roofs/Roof`` element via the ``AttachedToRoof``.
 Skylights must also have an ``Azimuth`` specified, even if the attached roof does not.
 
+In addition, the summer/winter interior shading coefficients can be optionally entered as ``InteriorShading/SummerShadingCoefficient`` and ``InteriorShading/WinterShadingCoefficient``.
+The summer interior shading coefficient must be less than or equal to the winter interior shading coefficient.
+Note that a value of 0.7 indicates a 30% reduction in solar gains (i.e., 30% shading).
+If not provided, default values of 1.0 for summer and 1.0 for winter will be used.
+
 Doors
 *****
 
