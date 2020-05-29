@@ -373,14 +373,15 @@ class OSModel
   end
 
   def self.set_defaults_and_globals(runner, output_dir)
+    # Initialize
+    @remaining_heat_load_frac = 1.0
+    @remaining_cool_load_frac = 1.0
+    @hvac_map = {} # mapping between HPXML HVAC systems and model objects
+    @dhw_map = {}  # mapping between HPXML Water Heating systems and model objects
+    @cond_bsmnt_surfaces = [] # list of surfaces in conditioned basement, used for modification of some surface properties, eg. solar absorptance, view factor, etc.
+
     # Set globals
     @cfa = @hpxml.building_construction.conditioned_floor_area
-    @cfa_ag = @cfa
-    @hpxml.slabs.each do |slab|
-      next unless slab.interior_adjacent_to == HPXML::LocationBasementConditioned
-
-      @cfa_ag -= slab.area
-    end
     @ncfl = @hpxml.building_construction.number_of_conditioned_floors
     @ncfl_ag = @hpxml.building_construction.number_of_conditioned_floors_above_grade
     @nbeds = @hpxml.building_construction.number_of_bedrooms
@@ -395,37 +396,10 @@ class OSModel
       @hpxml.building_construction.use_only_ideal_air_system = true
     end
 
-    # Initialize
-    @remaining_heat_load_frac = 1.0
-    @remaining_cool_load_frac = 1.0
-    @hvac_map = {} # mapping between HPXML HVAC systems and model objects
-    @dhw_map = {}  # mapping between HPXML Water Heating systems and model objects
-    @cond_bsmnt_surfaces = [] # list of surfaces in conditioned basement, used for modification of some surface properties, eg. solar absorptance, view factor, etc.
+    # Apply defaults to HPXML object
+    HPXMLDefaults.apply(@hpxml, @cfa, @nbeds, @ncfl, @ncfl_ag, @has_uncond_bsmnt, @eri_version)
 
-    HPXMLDefaults.apply_header(@hpxml)
-    HPXMLDefaults.apply_site(@hpxml)
-    HPXMLDefaults.apply_building_occupancy(@hpxml, @nbeds)
-    HPXMLDefaults.apply_building_construction(@hpxml, @cfa, @nbeds)
-    HPXMLDefaults.apply_attics(@hpxml)
-    HPXMLDefaults.apply_foundations(@hpxml)
-    @infil_volume = HPXMLDefaults.apply_infiltration(@hpxml)
-    HPXMLDefaults.apply_roofs(@hpxml)
-    HPXMLDefaults.apply_walls(@hpxml)
-    HPXMLDefaults.apply_rim_joists(@hpxml)
-    @frac_windows_operable = HPXMLDefaults.apply_windows(@hpxml)
-    HPXMLDefaults.apply_skylights(@hpxml)
-    HPXMLDefaults.apply_hvac(@hpxml)
-    HPXMLDefaults.apply_hvac_distribution(@hpxml, @ncfl, @ncfl_ag)
-    HPXMLDefaults.apply_water_heaters(@hpxml, @nbeds, @eri_version)
-    HPXMLDefaults.apply_hot_water_distribution(@hpxml, @cfa, @ncfl, @has_uncond_bsmnt)
-    HPXMLDefaults.apply_water_fixtures(@hpxml)
-    HPXMLDefaults.apply_solar_thermal_systems(@hpxml)
-    HPXMLDefaults.apply_ventilation_fans(@hpxml)
-    HPXMLDefaults.apply_ceiling_fans(@hpxml, @nbeds)
-    HPXMLDefaults.apply_plug_loads(@hpxml, @cfa, @nbeds)
-    HPXMLDefaults.apply_appliances(@hpxml, @nbeds, @eri_version)
-    HPXMLDefaults.apply_lighting(@hpxml)
-    HPXMLDefaults.apply_pv_systems(@hpxml)
+    @frac_windows_operable = @hpxml.fraction_of_windows_operable()
 
     if @debug && (not output_dir.nil?)
       # Write updated HPXML object to file
@@ -1665,17 +1639,18 @@ class OSModel
   end
 
   def self.add_thermal_mass(runner, model, spaces)
+    cfa_basement = @hpxml.slabs.select { |s| s.interior_adjacent_to == HPXML::LocationBasementConditioned }.map { |s| s.area }.inject(0, :+)
     if @apply_ashrae140_assumptions
       # 1024 ft2 of interior partition wall mass, no furniture mass
       drywall_thick_in = 0.5
       partition_frac_of_cfa = 1024.0 / @cfa # Ratio of partition wall area to conditioned floor area
-      basement_frac_of_cfa = (@cfa - @cfa_ag) / @cfa
+      basement_frac_of_cfa = cfa_basement / @cfa
       Constructions.apply_partition_walls(model, 'PartitionWallConstruction', drywall_thick_in, partition_frac_of_cfa,
                                           basement_frac_of_cfa, @cond_bsmnt_surfaces, spaces[HPXML::LocationLivingSpace])
     else
       drywall_thick_in = 0.5
       partition_frac_of_cfa = 1.0 # Ratio of partition wall area to conditioned floor area
-      basement_frac_of_cfa = (@cfa - @cfa_ag) / @cfa
+      basement_frac_of_cfa = cfa_basement / @cfa
       Constructions.apply_partition_walls(model, 'PartitionWallConstruction', drywall_thick_in, partition_frac_of_cfa,
                                           basement_frac_of_cfa, @cond_bsmnt_surfaces, spaces[HPXML::LocationLivingSpace])
 
@@ -2462,6 +2437,7 @@ class OSModel
     site_type = @hpxml.site.site_type
     shelter_coef = @hpxml.site.shelter_coefficient
     has_flue_chimney = false # FUTURE: Expose as HPXML input
+    @infil_volume = air_infils.select { |i| !i.infiltration_volume.nil? }[0].infiltration_volume
     infil_height = @hpxml.inferred_infiltration_height(@infil_volume)
     Airflow.apply(model, runner, weather, spaces, air_infils, vent_mech, vent_whf,
                   duct_systems, @infil_volume, infil_height, open_window_area,

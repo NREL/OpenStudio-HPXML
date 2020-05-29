@@ -1,6 +1,35 @@
 # frozen_string_literal: true
 
 class HPXMLDefaults
+  def self.apply(hpxml, cfa, nbeds, ncfl, ncfl_ag, has_uncond_bsmnt, eri_version)
+    apply_header(hpxml)
+    apply_site(hpxml)
+    apply_building_occupancy(hpxml, nbeds)
+    apply_building_construction(hpxml, cfa, nbeds)
+    apply_attics(hpxml)
+    apply_foundations(hpxml)
+    apply_infiltration(hpxml)
+    apply_roofs(hpxml)
+    apply_walls(hpxml)
+    apply_rim_joists(hpxml)
+    apply_windows(hpxml)
+    apply_skylights(hpxml)
+    apply_hvac(hpxml)
+    apply_hvac_distribution(hpxml, ncfl, ncfl_ag)
+    apply_water_heaters(hpxml, nbeds, eri_version)
+    apply_hot_water_distribution(hpxml, cfa, ncfl, has_uncond_bsmnt)
+    apply_water_fixtures(hpxml)
+    apply_solar_thermal_systems(hpxml)
+    apply_ventilation_fans(hpxml)
+    apply_ceiling_fans(hpxml, nbeds)
+    apply_plug_loads(hpxml, cfa, nbeds)
+    apply_appliances(hpxml, nbeds, eri_version)
+    apply_lighting(hpxml)
+    apply_pv_systems(hpxml)
+  end
+
+  private
+
   def self.apply_header(hpxml)
     hpxml.header.timestep = 60 if hpxml.header.timestep.nil?
     hpxml.header.begin_month = 1 if hpxml.header.begin_month.nil?
@@ -83,7 +112,6 @@ class HPXMLDefaults
         measurement.infiltration_volume = infil_volume
       end
     end
-    return infil_volume
   end
 
   def self.apply_roofs(hpxml)
@@ -142,7 +170,6 @@ class HPXMLDefaults
         window.fraction_operable = Airflow.get_default_fraction_of_windows_operable()
       end
     end
-    return hpxml.fraction_of_windows_operable()
   end
 
   def self.apply_skylights(hpxml)
