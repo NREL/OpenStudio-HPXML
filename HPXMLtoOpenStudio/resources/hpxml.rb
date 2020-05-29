@@ -371,7 +371,7 @@ class HPXML < Object
         # Update Compartmentalization Boundary areas
         total_area += surface.area
         if not [LocationGarage, LocationOtherHousingUnit, LocationOtherHeatedSpace,
-                LocationOtherMultifamilyBufferSpace, LocationOtherNonFreezingSpace].include? surface.exterior_adjacent_to # FIXME: Need to add additional "other" spaces?
+                LocationOtherMultifamilyBufferSpace, LocationOtherNonFreezingSpace].include? surface.exterior_adjacent_to
           exterior_area += surface.area
         end
       end
@@ -925,7 +925,7 @@ class HPXML < Object
 
   class AirInfiltrationMeasurement < BaseElement
     ATTRS = [:id, :house_pressure, :unit_of_measure, :air_leakage, :effective_leakage_area,
-             :infiltration_volume, :leakiness_description]
+             :infiltration_volume, :leakiness_description, :infiltration_height, :a_ext]
     attr_accessor(*ATTRS)
 
     def check_for_errors
@@ -948,6 +948,9 @@ class HPXML < Object
       end
       XMLHelper.add_element(air_infiltration_measurement, 'EffectiveLeakageArea', to_float(@effective_leakage_area)) unless @effective_leakage_area.nil?
       XMLHelper.add_element(air_infiltration_measurement, 'InfiltrationVolume', to_float(@infiltration_volume)) unless @infiltration_volume.nil?
+      HPXML::add_extension(parent: air_infiltration_measurement,
+                           extensions: { 'InfiltrationHeight' => to_float_or_nil(@infiltration_height),
+                                         'Aext' => to_float_or_nil(@a_ext) })
     end
 
     def from_oga(air_infiltration_measurement)
@@ -960,6 +963,8 @@ class HPXML < Object
       @effective_leakage_area = to_float_or_nil(XMLHelper.get_value(air_infiltration_measurement, 'EffectiveLeakageArea'))
       @infiltration_volume = to_float_or_nil(XMLHelper.get_value(air_infiltration_measurement, 'InfiltrationVolume'))
       @leakiness_description = XMLHelper.get_value(air_infiltration_measurement, 'LeakinessDescription')
+      @infiltration_height = to_float_or_nil(XMLHelper.get_value(air_infiltration_measurement, 'extension/InfiltrationHeight'))
+      @a_ext = to_float_or_nil(XMLHelper.get_value(air_infiltration_measurement, 'extension/Aext'))
     end
   end
 
