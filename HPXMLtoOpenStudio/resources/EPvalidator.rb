@@ -88,16 +88,24 @@ class EnergyPlusValidator
         '/HPXML/Building/BuildingDetails/Appliances/ClothesDryer' => zero_or_one, # See [ClothesDryer]
         '/HPXML/Building/BuildingDetails/Appliances/Dishwasher' => zero_or_one, # See [Dishwasher]
         '/HPXML/Building/BuildingDetails/Appliances/Refrigerator' => zero_or_more, # See [Refrigerator]
+        '/HPXML/Building/BuildingDetails/Appliances/Freezer' => zero_or_one, # See [Freezer]
         '/HPXML/Building/BuildingDetails/Appliances/Dehumidifier' => zero_or_one, # See [Dehumidifier]
         '/HPXML/Building/BuildingDetails/Appliances/CookingRange' => zero_or_one, # See [CookingRange]
 
         '/HPXML/Building/BuildingDetails/Lighting' => zero_or_one, # See [Lighting]
         '/HPXML/Building/BuildingDetails/Lighting/CeilingFan' => zero_or_one, # See [CeilingFan]
 
-        '/HPXML/Building/BuildingDetails/MiscLoads/PlugLoad[PlugLoadType="other"]' => zero_or_one, # See [PlugLoads]
-        '/HPXML/Building/BuildingDetails/MiscLoads/PlugLoad[PlugLoadType="TV other"]' => zero_or_one, # See [Television]
-        '/HPXML/Building/BuildingDetails/MiscLoads/PlugLoad[PlugLoadType="electric vehicle charging"]' => zero_or_one, # See [Vehicle]
-        '/HPXML/Building/BuildingDetails/MiscLoads/PlugLoad[PlugLoadType="well pump"]' => zero_or_one, # See [Well Pump]
+        '/HPXML/Building/BuildingDetails/Pools/Pool' => zero_or_one, # See [Pool]
+        '/HPXML/Building/BuildingDetails/HotTubs/HotTub' => zero_or_one, # See [HotTub]
+
+        '/HPXML/Building/BuildingDetails/MiscLoads/PlugLoads/PlugLoad[PlugLoadType="other"]' => zero_or_one, # See [PlugLoads]
+        '/HPXML/Building/BuildingDetails/MiscLoads/PlugLoads/PlugLoad[PlugLoadType="TV other"]' => zero_or_one, # See [Television]
+        '/HPXML/Building/BuildingDetails/MiscLoads/PlugLoads/PlugLoad[PlugLoadType="electric vehicle charging"]' => zero_or_one, # See [Vehicle]
+        '/HPXML/Building/BuildingDetails/MiscLoads/PlugLoads/PlugLoad[PlugLoadType="well pump"]' => zero_or_one, # See [Well Pump]
+
+        '/HPXML/Building/BuildingDetails/MiscLoads/FuelLoads/FuelLoad[FuelLoadType="grill"]' => zero_or_one, # See [Grill]
+        '/HPXML/Building/BuildingDetails/MiscLoads/FuelLoads/FuelLoad[FuelLoadType="lighting"]' => zero_or_one, # See [Lighting]
+        '/HPXML/Building/BuildingDetails/MiscLoads/FuelLoads/FuelLoad[FuelLoadType="fireplace"]' => zero_or_one, # See [Fireplace]
       },
 
       # [SimulationControl]
@@ -713,6 +721,14 @@ class EnergyPlusValidator
         'extension/UsageMultiplier' => zero_or_one,
       },
 
+      # [Freezer]
+      '/HPXML/Building/BuildingDetails/Appliances/Freezer' => {
+        'SystemIdentifier' => one, # Required by HPXML schema
+        '[not(Location)] | Location[text()="living space" or text()="basement - conditioned" or text()="basement - unconditioned" or text()="garage" or text()="other"]' => one,
+        'RatedAnnualkWh | extension/AdjustedAnnualkWh' => zero_or_more,
+        'extension/UsageMultiplier' => zero_or_one,
+      },
+
       # [Dehumidifier]
       '/HPXML/Building/BuildingDetails/Appliances/Dehumidifier' => {
         'SystemIdentifier' => one, # Required by HPXML schema
@@ -751,8 +767,20 @@ class EnergyPlusValidator
         'Quantity' => zero_or_one, # Uses Reference Home if not provided
       },
 
+      # [Pool]
+      '/HPXML/Building/BuildingDetails/Pools/Pool' => {
+        'SystemIdentifier' => one, # Required by HPXML schema
+        'Heater[Type[text()="gas fired" or text()="electric resistance"]]' => one,
+      },
+
+      # [HotTub]
+      '/HPXML/Building/BuildingDetails/HotTubs/HotTub' => {
+        'SystemIdentifier' => one, # Required by HPXML schema
+        'Heater[Type[text()="gas fired" or text()="electric resistance"]]' => one,
+      },
+
       # [PlugLoads]
-      '/HPXML/Building/BuildingDetails/MiscLoads/PlugLoad[PlugLoadType="other"]' => {
+      '/HPXML/Building/BuildingDetails/MiscLoads/PlugLoads/PlugLoad[PlugLoadType="other"]' => {
         'SystemIdentifier' => one, # Required by HPXML schema
         'Load[Units="kWh/year"]/Value' => zero_or_one, # Uses ERI Reference Home if not provided
         'extension/FracSensible' => zero_or_one, # Uses ERI Reference Home if not provided
@@ -764,7 +792,7 @@ class EnergyPlusValidator
       },
 
       # [Television]
-      '/HPXML/Building/BuildingDetails/MiscLoads/PlugLoad[PlugLoadType="TV other"]' => {
+      '/HPXML/Building/BuildingDetails/MiscLoads/PlugLoads/PlugLoad[PlugLoadType="TV other"]' => {
         'SystemIdentifier' => one, # Required by HPXML schema
         'Load[Units="kWh/year"]/Value' => zero_or_one, # Uses ERI Reference Home if not provided
         'extension/UsageMultiplier' => zero_or_one,
@@ -773,6 +801,61 @@ class EnergyPlusValidator
         '../extension/MonthlyScheduleMultipliers' => zero_or_one, # Uses ERI Reference Home if not provided
       },
 
+      # [Vehicle]
+      '/HPXML/Building/BuildingDetails/MiscLoads/PlugLoads/PlugLoad[PlugLoadType="electric vehicle charging"]' => {
+        'SystemIdentifier' => one, # Required by HPXML schema
+        'Load[Units="kWh/year"]/Value' => zero_or_one, # Uses ERI Reference Home if not provided
+        'extension/UsageMultiplier' => zero_or_one,
+        '../extension/WeekdayScheduleFractions' => zero_or_one, # Uses ERI Reference Home if not provided
+        '../extension/WeekendScheduleFractions' => zero_or_one, # Uses ERI Reference Home if not provided
+        '../extension/MonthlyScheduleMultipliers' => zero_or_one, # Uses ERI Reference Home if not provided
+      },
+
+      # [Well Pump]
+      '/HPXML/Building/BuildingDetails/MiscLoads/PlugLoads/PlugLoad[PlugLoadType="well pump"]' => {
+        'SystemIdentifier' => one, # Required by HPXML schema
+        'Load[Units="kWh/year"]/Value' => zero_or_one, # Uses ERI Reference Home if not provided
+        'extension/UsageMultiplier' => zero_or_one,
+        '../extension/WeekdayScheduleFractions' => zero_or_one, # Uses ERI Reference Home if not provided
+        '../extension/WeekendScheduleFractions' => zero_or_one, # Uses ERI Reference Home if not provided
+        '../extension/MonthlyScheduleMultipliers' => zero_or_one, # Uses ERI Reference Home if not provided
+      },
+
+      # [Grill]
+      '/HPXML/Building/BuildingDetails/MiscLoads/FuelLoads/FuelLoad[FuelLoadType="grill"]' => {
+        'SystemIdentifier' => one, # Required by HPXML schema
+        'Load[Units="therm/year"]/Value' => zero_or_one, # Uses ERI Reference Home if not provided
+        'extension/FracSensible' => zero_or_one, # Uses ERI Reference Home if not provided
+        'extension/FracLatent' => zero_or_one, # Uses ERI Reference Home if not provided
+        'extension/UsageMultiplier' => zero_or_one,
+        '../extension/WeekdayScheduleFractions' => zero_or_one, # Uses ERI Reference Home if not provided
+        '../extension/WeekendScheduleFractions' => zero_or_one, # Uses ERI Reference Home if not provided
+        '../extension/MonthlyScheduleMultipliers' => zero_or_one, # Uses ERI Reference Home if not provided
+      },
+
+      # [Lighting]
+      '/HPXML/Building/BuildingDetails/MiscLoads/FuelLoads/FuelLoad[FuelLoadType="lighting"]' => {
+        'SystemIdentifier' => one, # Required by HPXML schema
+        'Load[Units="therm/year"]/Value' => zero_or_one, # Uses ERI Reference Home if not provided
+        'extension/FracSensible' => zero_or_one, # Uses ERI Reference Home if not provided
+        'extension/FracLatent' => zero_or_one, # Uses ERI Reference Home if not provided
+        'extension/UsageMultiplier' => zero_or_one,
+        '../extension/WeekdayScheduleFractions' => zero_or_one, # Uses ERI Reference Home if not provided
+        '../extension/WeekendScheduleFractions' => zero_or_one, # Uses ERI Reference Home if not provided
+        '../extension/MonthlyScheduleMultipliers' => zero_or_one, # Uses ERI Reference Home if not provided
+      },
+
+      # [Fireplace]
+      '/HPXML/Building/BuildingDetails/MiscLoads/FuelLoads/FuelLoad[FuelLoadType="fireplace"]' => {
+        'SystemIdentifier' => one, # Required by HPXML schema
+        'Load[Units="therm/year"]/Value' => zero_or_one, # Uses ERI Reference Home if not provided
+        'extension/FracSensible' => zero_or_one, # Uses ERI Reference Home if not provided
+        'extension/FracLatent' => zero_or_one, # Uses ERI Reference Home if not provided
+        'extension/UsageMultiplier' => zero_or_one,
+        '../extension/WeekdayScheduleFractions' => zero_or_one, # Uses ERI Reference Home if not provided
+        '../extension/WeekendScheduleFractions' => zero_or_one, # Uses ERI Reference Home if not provided
+        '../extension/MonthlyScheduleMultipliers' => zero_or_one, # Uses ERI Reference Home if not provided
+      },
     }
 
     errors = []

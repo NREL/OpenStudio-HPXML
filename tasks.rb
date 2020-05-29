@@ -376,11 +376,14 @@ def create_hpxmls
         set_hpxml_clothes_dryer(hpxml_file, hpxml)
         set_hpxml_dishwasher(hpxml_file, hpxml)
         set_hpxml_refrigerator(hpxml_file, hpxml)
+        set_hpxml_freezer(hpxml_file, hpxml)
         set_hpxml_dehumidifier(hpxml_file, hpxml)
         set_hpxml_cooking_range(hpxml_file, hpxml)
         set_hpxml_oven(hpxml_file, hpxml)
         set_hpxml_lighting(hpxml_file, hpxml)
         set_hpxml_ceiling_fans(hpxml_file, hpxml)
+        set_hpxml_pools(hpxml_file, hpxml)
+        set_hpxml_hot_tubs(hpxml_file, hpxml)
         set_hpxml_plug_loads(hpxml_file, hpxml)
         set_hpxml_fuel_loads(hpxml_file, hpxml)
         set_hpxml_misc_load_schedule(hpxml_file, hpxml)
@@ -3866,6 +3869,14 @@ def set_hpxml_refrigerator(hpxml_file, hpxml)
   end
 end
 
+def set_hpxml_freezer(hpxml_file, hpxml)
+  if ['base-misc-large-uncommon-loads.xml'].include? hpxml_file
+    hpxml.freezers.add(id: 'Freezer',
+                       location: HPXML::LocationGarage,
+                       rated_annual_kwh: 650)
+  end
+end
+
 def set_hpxml_dehumidifier(hpxml_file, hpxml)
   if ['base-appliances-dehumidifier.xml'].include? hpxml_file
     hpxml.dehumidifiers.add(id: 'Dehumidifier',
@@ -3990,6 +4001,20 @@ def set_hpxml_ceiling_fans(hpxml_file, hpxml)
   end
 end
 
+def set_hpxml_pools(hpxml_file, hpxml)
+  if ['base-misc-large-uncommon-loads.xml'].include? hpxml_file
+    hpxml.pools.add(id: 'Pool',
+                    heater_type: HPXML::PoolHeaterTypeGas)
+  end
+end
+
+def set_hpxml_hot_tubs(hpxml_file, hpxml)
+  if ['base-misc-large-uncommon-loads.xml'].include? hpxml_file
+    hpxml.hot_tubs.add(id: 'HotTub',
+                       heater_type: HPXML::HotTubHeaterTypeElectric)
+  end
+end
+
 def set_hpxml_plug_loads(hpxml_file, hpxml)
   if ['ASHRAE_Standard_140/L100AC.xml',
       'ASHRAE_Standard_140/L100AL.xml'].include? hpxml_file
@@ -4047,6 +4072,26 @@ def set_hpxml_plug_loads(hpxml_file, hpxml)
 end
 
 def set_hpxml_fuel_loads(hpxml_file, hpxml)
+  if ['base-misc-large-uncommon-loads.xml'].include? hpxml_file
+    hpxml.fuel_loads.add(id: 'FuelLoadMisc',
+                         fuel_load_type: HPXML::FuelLoadTypeGrill,
+                         fuel_type: HPXML::FuelTypeNaturalGas,
+                         therm_per_year: 10,
+                         frac_sensible: 0.5,
+                         frac_latent: 0.5)
+    hpxml.fuel_loads.add(id: 'FuelLoadMisc2',
+                         fuel_load_type: HPXML::FuelLoadTypeLighting,
+                         fuel_type: HPXML::FuelTypeNaturalGas,
+                         therm_per_year: 10,
+                         frac_sensible: 0.5,
+                         frac_latent: 0.5)
+    hpxml.fuel_loads.add(id: 'FuelLoadMisc3',
+                         fuel_load_type: HPXML::FuelLoadTypeFireplace,
+                         fuel_type: HPXML::FuelTypeNaturalGas,
+                         therm_per_year: 10,
+                         frac_sensible: 0.5,
+                         frac_latent: 0.5)
+  end
 end
 
 def set_hpxml_misc_load_schedule(hpxml_file, hpxml)

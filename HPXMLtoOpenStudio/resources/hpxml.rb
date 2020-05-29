@@ -49,8 +49,8 @@ class HPXML < Object
                  :skylights, :doors, :heating_systems, :cooling_systems, :heat_pumps, :hvac_controls,
                  :hvac_distributions, :ventilation_fans, :water_heating_systems, :hot_water_distributions,
                  :water_fixtures, :water_heating, :solar_thermal_systems, :pv_systems, :clothes_washers,
-                 :clothes_dryers, :dishwashers, :refrigerators, :dehumidifiers, :cooking_ranges, :ovens,
-                 :lighting_groups, :lighting, :ceiling_fans, :plug_loads, :misc_loads_schedule]
+                 :clothes_dryers, :dishwashers, :refrigerators, :freezers, :dehumidifiers, :cooking_ranges, :ovens,
+                 :lighting_groups, :lighting, :ceiling_fans, :pools, :hot_tubs, :plug_loads, :fuel_loads, :misc_loads_schedule]
   attr_reader(*HPXML_ATTRS, :doc)
 
   # Constants
@@ -90,12 +90,17 @@ class HPXML < Object
   FoundationTypeSlab = 'SlabOnGrade'
   FrameFloorOtherSpaceAbove = 'above'
   FrameFloorOtherSpaceBelow = 'below'
+  FuelLoadTypeGrill = 'grill'
+  FuelLoadTypeLighting = 'lighting'
+  FuelLoadTypeFireplace = 'fireplace'
   FuelTypeElectricity = 'electricity'
   FuelTypeNaturalGas = 'natural gas'
   FuelTypeOil = 'fuel oil'
   FuelTypePropane = 'propane'
   FuelTypeWood = 'wood'
   FuelTypeWoodPellets = 'wood pellets'
+  HotTubHeaterTypeElectric = 'electric resistance'
+  HotTubHeaterTypeGas = 'gas fired'
   HVACCompressorTypeSingleStage = 'single stage'
   HVACCompressorTypeTwoStage = 'two stage'
   HVACCompressorTypeVariableSpeed = 'variable speed'
@@ -166,6 +171,8 @@ class HPXML < Object
   PlugLoadTypeOther = 'other'
   PlugLoadTypeTelevision = 'TV other'
   PlugLoadTypeWellPump = 'well pump'
+  PoolHeaterTypeElectric = 'electric resistance'
+  PoolHeaterTypeGas = 'gas fired'
   PVModuleTypePremium = 'premium'
   PVModuleTypeStandard = 'standard'
   PVModuleTypeThinFilm = 'thin film'
@@ -451,13 +458,17 @@ class HPXML < Object
     @clothes_dryers.to_oga(@doc)
     @dishwashers.to_oga(@doc)
     @refrigerators.to_oga(@doc)
+    @freezers.to_oga(@doc)
     @dehumidifiers.to_oga(@doc)
     @cooking_ranges.to_oga(@doc)
     @ovens.to_oga(@doc)
     @lighting_groups.to_oga(@doc)
     @lighting.to_oga(@doc)
     @ceiling_fans.to_oga(@doc)
+    @pools.to_oga(@doc)
+    @hot_tubs.to_oga(@doc)
     @plug_loads.to_oga(@doc)
+    @fuel_loads.to_oga(@doc)
     @misc_loads_schedule.to_oga(@doc)
     return @doc
   end
@@ -497,13 +508,17 @@ class HPXML < Object
     @clothes_dryers = ClothesDryers.new(self, hpxml)
     @dishwashers = Dishwashers.new(self, hpxml)
     @refrigerators = Refrigerators.new(self, hpxml)
+    @freezers = Freezers.new(self, hpxml)
     @dehumidifiers = Dehumidifiers.new(self, hpxml)
     @cooking_ranges = CookingRanges.new(self, hpxml)
     @ovens = Ovens.new(self, hpxml)
     @lighting_groups = LightingGroups.new(self, hpxml)
     @lighting = Lighting.new(self, hpxml)
     @ceiling_fans = CeilingFans.new(self, hpxml)
+    @pools = Pools.new(self, hpxml)
+    @hot_tubs = HotTubs.new(self, hpxml)
     @plug_loads = PlugLoads.new(self, hpxml)
+    @fuel_loads = FuelLoads.new(self, hpxml)
     @misc_loads_schedule = MiscLoadsSchedule.new(self, hpxml)
   end
 
@@ -3734,6 +3749,58 @@ class HPXML < Object
     end
   end
 
+  class Freezers < BaseArrayElement
+    def add(**kwargs)
+      self << Freezer.new(@hpxml_object, **kwargs)
+    end
+
+    def from_oga(hpxml)
+      return if hpxml.nil?
+
+      XMLHelper.get_elements(hpxml, 'Building/BuildingDetails/Appliances/Freezer').each do |refrigerator|
+        self << Freezer.new(@hpxml_object, freezer)
+      end
+    end
+  end
+
+  class Freezer < BaseElement
+    ATTRS = [:id, :location, :rated_annual_kwh, :adjusted_annual_kwh, :usage_multiplier]
+    attr_accessor(*ATTRS)
+
+    def delete
+      @hpxml_object.freezers.delete(self)
+    end
+
+    def check_for_errors
+      errors = []
+      return errors
+    end
+
+    def to_oga(doc)
+      return if nil?
+
+      appliances = XMLHelper.create_elements_as_needed(doc, ['HPXML', 'Building', 'BuildingDetails', 'Appliances'])
+      freezer = XMLHelper.add_element(appliances, 'Freezer')
+      sys_id = XMLHelper.add_element(freezer, 'SystemIdentifier')
+      XMLHelper.add_attribute(sys_id, 'id', @id)
+      XMLHelper.add_element(freezer, 'Location', @location) unless @location.nil?
+      XMLHelper.add_element(freezer, 'RatedAnnualkWh', to_float(@rated_annual_kwh)) unless @rated_annual_kwh.nil?
+      HPXML::add_extension(parent: freezer,
+                           extensions: { 'AdjustedAnnualkWh' => to_float_or_nil(@adjusted_annual_kwh),
+                                         'UsageMultiplier' => to_float_or_nil(@usage_multiplier) })
+    end
+
+    def from_oga(freezer)
+      return if freezer.nil?
+
+      @id = HPXML::get_id(freezer)
+      @location = XMLHelper.get_value(freezer, 'Location')
+      @rated_annual_kwh = to_float_or_nil(XMLHelper.get_value(freezer, 'RatedAnnualkWh'))
+      @adjusted_annual_kwh = to_float_or_nil(XMLHelper.get_value(freezer, 'extension/AdjustedAnnualkWh'))
+      @usage_multiplier = to_float_or_nil(XMLHelper.get_value(freezer, 'extension/UsageMultiplier'))
+    end
+  end
+
   class Dehumidifiers < BaseArrayElement
     def add(**kwargs)
       self << Dehumidifier.new(@hpxml_object, **kwargs)
@@ -4012,6 +4079,104 @@ class HPXML < Object
     end
   end
 
+  class Pools < BaseArrayElement
+    def add(**kwargs)
+      self << Pool.new(@hpxml_object, **kwargs)
+    end
+
+    def from_oga(hpxml)
+      return if hpxml.nil?
+
+      XMLHelper.get_elements(hpxml, 'Building/BuildingDetails/Pools/Pool').each do |pool|
+        self << Pool.new(@hpxml_object, pool)
+      end
+    end
+  end
+
+  class Pool < BaseElement
+    ATTRS = [:id, :heater_type, :usage_multiplier]
+    attr_accessor(*ATTRS)
+
+    def delete
+      @hpxml_object.pools.delete(self)
+    end
+
+    def check_for_errors
+      errors = []
+      return errors
+    end
+
+    def to_oga(doc)
+      return if nil?
+
+      pools = XMLHelper.create_elements_as_needed(doc, ['HPXML', 'Building', 'BuildingDetails', 'Pools'])
+      pool = XMLHelper.add_element(pools, 'Pool')
+      sys_id = XMLHelper.add_element(pool, 'SystemIdentifier')
+      XMLHelper.add_attribute(sys_id, 'id', @id)
+      unless @heater_type.nil?
+        heater = XMLHelper.add_element(pool, 'Heater')
+        XMLHelper.add_element(heater, 'Type', @heater_type)
+      end
+      HPXML::add_extension(parent: pool,
+                           extensions: { 'UsageMultiplier' => to_float_or_nil(@usage_multiplier) })
+    end
+
+    def from_oga(pool)
+      @id = HPXML::get_id(pool)
+      @heater_type = XMLHelper.get_value(pool, 'Heater/Type')
+      @usage_multiplier = to_float_or_nil(XMLHelper.get_value(pool, 'extension/UsageMultiplier'))
+    end
+  end
+
+  class HotTubs < BaseArrayElement
+    def add(**kwargs)
+      self << HotTub.new(@hpxml_object, **kwargs)
+    end
+
+    def from_oga(hpxml)
+      return if hpxml.nil?
+
+      XMLHelper.get_elements(hpxml, 'Building/BuildingDetails/HotTubs/HotTub').each do |hot_tub|
+        self << HotTub.new(@hpxml_object, hot_tub)
+      end
+    end
+  end
+
+  class HotTub < BaseElement
+    ATTRS = [:id, :heater_type, :usage_multiplier]
+    attr_accessor(*ATTRS)
+
+    def delete
+      @hpxml_object.hot_tubs.delete(self)
+    end
+
+    def check_for_errors
+      errors = []
+      return errors
+    end
+
+    def to_oga(doc)
+      return if nil?
+
+      hot_tubs = XMLHelper.create_elements_as_needed(doc, ['HPXML', 'Building', 'BuildingDetails', 'HotTubs'])
+      hot_tub = XMLHelper.add_element(hot_tubs, 'HotTub')
+      sys_id = XMLHelper.add_element(hot_tub, 'SystemIdentifier')
+      XMLHelper.add_attribute(sys_id, 'id', @id)
+      unless @heater_type.nil?
+        heater = XMLHelper.add_element(hot_tub, 'Heater')
+        XMLHelper.add_element(heater, 'Type', @heater_type)
+      end
+      HPXML::add_extension(parent: hot_tub,
+                           extensions: { 'UsageMultiplier' => to_float_or_nil(@usage_multiplier) })
+    end
+
+    def from_oga(hot_tub)
+      @id = HPXML::get_id(hot_tub)
+      @heater_type = XMLHelper.get_value(hot_tub, 'Heater/Type')
+      @usage_multiplier = to_float_or_nil(XMLHelper.get_value(hot_tub, 'extension/UsageMultiplier'))
+    end
+  end
+
   class PlugLoads < BaseArrayElement
     def add(**kwargs)
       self << PlugLoad.new(@hpxml_object, **kwargs)
@@ -4020,7 +4185,7 @@ class HPXML < Object
     def from_oga(hpxml)
       return if hpxml.nil?
 
-      XMLHelper.get_elements(hpxml, 'Building/BuildingDetails/MiscLoads/PlugLoad').each do |plug_load|
+      XMLHelper.get_elements(hpxml, 'Building/BuildingDetails/MiscLoads/PlugLoads/PlugLoad').each do |plug_load|
         self << PlugLoad.new(@hpxml_object, plug_load)
       end
     end
@@ -4042,8 +4207,8 @@ class HPXML < Object
     def to_oga(doc)
       return if nil?
 
-      misc_loads = XMLHelper.create_elements_as_needed(doc, ['HPXML', 'Building', 'BuildingDetails', 'MiscLoads'])
-      plug_load = XMLHelper.add_element(misc_loads, 'PlugLoad')
+      plug_loads = XMLHelper.create_elements_as_needed(doc, ['HPXML', 'Building', 'BuildingDetails', 'MiscLoads', 'PlugLoads'])
+      plug_load = XMLHelper.add_element(plug_loads, 'PlugLoad')
       sys_id = XMLHelper.add_element(plug_load, 'SystemIdentifier')
       XMLHelper.add_attribute(sys_id, 'id', @id)
       XMLHelper.add_element(plug_load, 'PlugLoadType', @plug_load_type) unless @plug_load_type.nil?
@@ -4065,6 +4230,63 @@ class HPXML < Object
       @frac_sensible = to_float_or_nil(XMLHelper.get_value(plug_load, 'extension/FracSensible'))
       @frac_latent = to_float_or_nil(XMLHelper.get_value(plug_load, 'extension/FracLatent'))
       @usage_multiplier = to_float_or_nil(XMLHelper.get_value(plug_load, 'extension/UsageMultiplier'))
+    end
+  end
+
+  class FuelLoads < BaseArrayElement
+    def add(**kwargs)
+      self << FuelLoad.new(@hpxml_object, **kwargs)
+    end
+
+    def from_oga(hpxml)
+      return if hpxml.nil?
+
+      XMLHelper.get_elements(hpxml, 'Building/BuildingDetails/MiscLoads/FuelLoads/FuelLoad').each do |fuel_load|
+        self << FuelLoad.new(@hpxml_object, fuel_load)
+      end
+    end
+  end
+
+  class FuelLoad < BaseElement
+    ATTRS = [:id, :fuel_load_type, :fuel_type, :therm_per_year, :frac_sensible, :frac_latent, :usage_multiplier]
+    attr_accessor(*ATTRS)
+
+    def delete
+      @hpxml_object.fuel_loads.delete(self)
+    end
+
+    def check_for_errors
+      errors = []
+      return errors
+    end
+
+    def to_oga(doc)
+      return if nil?
+
+      fuel_loads = XMLHelper.create_elements_as_needed(doc, ['HPXML', 'Building', 'BuildingDetails', 'MiscLoads', 'FuelLoads'])
+      fuel_load = XMLHelper.add_element(fuel_loads, 'FuelLoad')
+      sys_id = XMLHelper.add_element(fuel_load, 'SystemIdentifier')
+      XMLHelper.add_attribute(sys_id, 'id', @id)
+      XMLHelper.add_element(fuel_load, 'FuelLoadLoadType', @fuel_load_type) unless @fuel_load_type.nil?
+      XMLHelper.add_element(fuel_load, 'FuelType', @fuel_type) unless @fuel_type.nil?
+      if not @kWh_per_year.nil?
+        load = XMLHelper.add_element(fuel_load, 'Load')
+        XMLHelper.add_element(load, 'Units', 'therm/year')
+        XMLHelper.add_element(load, 'Value', to_float(@therm_per_year))
+      end
+      HPXML::add_extension(parent: fuel_load,
+                           extensions: { 'FracSensible' => to_float_or_nil(@frac_sensible),
+                                         'FracLatent' => to_float_or_nil(@frac_latent),
+                                         'UsageMultiplier' => to_float_or_nil(@usage_multiplier) })
+    end
+
+    def from_oga(fuel_load)
+      @id = HPXML::get_id(fuel_load)
+      @fuel_load_type = XMLHelper.get_value(fuel_load, 'FuelLoadType')
+      @kWh_per_year = to_float_or_nil(XMLHelper.get_value(fuel_load, "Load[Units='kWh/year']/Value"))
+      @frac_sensible = to_float_or_nil(XMLHelper.get_value(fuel_load, 'extension/FracSensible'))
+      @frac_latent = to_float_or_nil(XMLHelper.get_value(fuel_load, 'extension/FracLatent'))
+      @usage_multiplier = to_float_or_nil(XMLHelper.get_value(fuel_load, 'extension/UsageMultiplier'))
     end
   end
 
