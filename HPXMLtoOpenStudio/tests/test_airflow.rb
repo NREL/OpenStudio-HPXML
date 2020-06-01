@@ -25,8 +25,16 @@ class HPXMLtoOpenStudioAirflowTest < MiniTest::Test
         lhs = lhs.gsub('Set', '').gsub('set', '').strip
         rhs = rhs.gsub(',', '').gsub(';', '').strip
         # eg. "Q = Q + 1.5"
-        if rhs.include? lhs
-          rhs = rhs.split('+')[1].to_f + values[lhs].to_f
+        if rhs.include? '+'
+          rhs_els = rhs.split('+')
+          rhs = 0.0
+          rhs_els.each do |rhs_el|
+            if not values[rhs_el.strip].nil?
+              rhs += values[rhs_el.strip].to_f
+            else
+              rhs += rhs_el.to_f
+            end
+          end
         end
         values[lhs] = rhs
       end
