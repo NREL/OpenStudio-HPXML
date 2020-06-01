@@ -1918,23 +1918,19 @@ class HVACSizing
   end
 
   def self.get_ventilation_rates(model)
-    mechVentType = get_feature(model.getBuilding, Constants.SizingInfoMechVentType, 'string', false)
-    return [0.0, 0.0, 0.0] if mechVentType.nil?
+    mechVentExist = get_feature(model.getBuilding, Constants.SizingInfoMechVentExist, 'boolean')
+    return [0.0, 0.0, 0.0] unless mechVentExist
 
     mechVentWholeHouseRate = get_feature(model.getBuilding, Constants.SizingInfoMechVentWholeHouseRate, 'double')
 
-    if [HPXML::MechVentTypeExhaust, HPXML::MechVentTypeSupply, HPXML::MechVentTypeCFIS].include? mechVentType
-      q_unb = mechVentWholeHouseRate
-      q_bal_sens = 0.0
-      q_bal_lat = 0.0
-    elsif [HPXML::MechVentTypeBalanced, HPXML::MechVentTypeERV, HPXML::MechVentTypeHRV].include? mechVentType
-      totalEfficiency = get_feature(model.getBuilding, Constants.SizingInfoMechVentTotalEfficiency, 'double')
-      apparentSensibleEffectiveness = get_feature(model.getBuilding, Constants.SizingInfoMechVentApparentSensibleEffectiveness, 'double')
-      latentEffectiveness = get_feature(model.getBuilding, Constants.SizingInfoMechVentLatentEffectiveness, 'double')
-      q_unb = 0.0
-      q_bal_sens = mechVentWholeHouseRate * (1.0 - apparentSensibleEffectiveness)
-      q_bal_lat = mechVentWholeHouseRate * (1.0 - latentEffectiveness)
-    end
+    q_unb = get_feature(model.getBuilding, Constants.SizingInfoMechVentWholeHouseRateUnbalanced, 'double')
+    q_b = get_feature(model.getBuilding, Constants.SizingInfoMechVentWholeHouseRateBalanced, 'double')
+    totalEfficiency = get_feature(model.getBuilding, Constants.SizingInfoMechVentTotalEfficiency, 'double')
+    apparentSensibleEffectiveness = get_feature(model.getBuilding, Constants.SizingInfoMechVentApparentSensibleEffectiveness, 'double')
+    latentEffectiveness = get_feature(model.getBuilding, Constants.SizingInfoMechVentLatentEffectiveness, 'double')
+
+    q_bal_sens = q_b * (1.0 - apparentSensibleEffectiveness)
+    q_bal_lat = q_b * (1.0 - latentEffectiveness)
 
     return [q_unb, q_bal_sens, q_bal_lat]
   end
