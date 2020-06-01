@@ -4336,7 +4336,7 @@ class HPXML < Object
       sys_id = XMLHelper.add_element(fuel_load, 'SystemIdentifier')
       XMLHelper.add_attribute(sys_id, 'id', @id)
       XMLHelper.add_element(fuel_load, 'FuelLoadType', @fuel_load_type) unless @fuel_load_type.nil?
-      if not @kWh_per_year.nil?
+      if not @therm_per_year.nil?
         load = XMLHelper.add_element(fuel_load, 'Load')
         XMLHelper.add_element(load, 'Units', 'therm/year')
         XMLHelper.add_element(load, 'Value', to_float(@therm_per_year))
@@ -4353,7 +4353,7 @@ class HPXML < Object
     def from_oga(fuel_load)
       @id = HPXML::get_id(fuel_load)
       @fuel_load_type = XMLHelper.get_value(fuel_load, 'FuelLoadType')
-      @kWh_per_year = to_float_or_nil(XMLHelper.get_value(fuel_load, "Load[Units='kWh/year']/Value"))
+      @therm_per_year = to_float_or_nil(XMLHelper.get_value(fuel_load, "Load[Units='therm/year']/Value"))
       @frac_sensible = to_float_or_nil(XMLHelper.get_value(fuel_load, 'extension/FracSensible'))
       @frac_latent = to_float_or_nil(XMLHelper.get_value(fuel_load, 'extension/FracLatent'))
       @usage_multiplier = to_float_or_nil(XMLHelper.get_value(fuel_load, 'extension/UsageMultiplier'))

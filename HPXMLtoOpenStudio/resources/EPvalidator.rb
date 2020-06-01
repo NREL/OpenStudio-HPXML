@@ -770,13 +770,29 @@ class EnergyPlusValidator
       # [Pool]
       '/HPXML/Building/BuildingDetails/Pools/Pool' => {
         'SystemIdentifier' => one, # Required by HPXML schema
-        'Heater[Type[text()="gas fired" or text()="electric resistance"]]' => zero_or_one,
+        'PoolPumps/PoolPump' => one,
+        'Heater[Type="gas fired" or Type="electric resistance"]]' => one,
+        'Heater/Load[Units="kWh/year" or Units="therm/year"]/Value' => zero_or_one,
+        'PoolPumps/PoolPump/Load[Units="kWh/year"]/Value' => zero_or_one,
+        'Heater/extension/extension/UsageMultiplier' => zero_or_one,
+        'PoolPumps/PoolPump/extension/UsageMultiplier' => zero_or_one,
+        'extension/WeekdayScheduleFractions' => zero_or_one,
+        'extension/WeekendScheduleFractions' => zero_or_one,
+        'extension/MonthlyScheduleMultipliers' => zero_or_one,
       },
 
       # [HotTub]
       '/HPXML/Building/BuildingDetails/HotTubs/HotTub' => {
         'SystemIdentifier' => one, # Required by HPXML schema
-        'Heater[Type[text()="gas fired" or text()="electric resistance"]]' => zero_or_one,
+        'HotTubPumps/HotTubPump' => one,
+        'Heater[Type="gas fired" or Type="electric resistance"]]' => one,
+        'Heater/Load[Units="kWh/year" or Units="therm/year"]/Value' => zero_or_one,
+        'HotTubPumps/HotTubPump/Load[Units="kWh/year"]/Value' => zero_or_one,
+        'Heater/extension/extension/UsageMultiplier' => zero_or_one,
+        'HotTubPumps/HotTubPump/extension/UsageMultiplier' => zero_or_one,
+        'extension/WeekdayScheduleFractions' => zero_or_one,
+        'extension/WeekendScheduleFractions' => zero_or_one,
+        'extension/MonthlyScheduleMultipliers' => zero_or_one,
       },
 
       # [PlugLoads]
@@ -786,9 +802,9 @@ class EnergyPlusValidator
         'extension/FracSensible' => zero_or_one, # Uses ERI Reference Home if not provided
         'extension/FracLatent' => zero_or_one, # Uses ERI Reference Home if not provided
         'extension/UsageMultiplier' => zero_or_one,
-        '../extension/WeekdayScheduleFractions' => zero_or_one, # Uses ERI Reference Home if not provided
-        '../extension/WeekendScheduleFractions' => zero_or_one, # Uses ERI Reference Home if not provided
-        '../extension/MonthlyScheduleMultipliers' => zero_or_one, # Uses ERI Reference Home if not provided
+        'extension/WeekdayScheduleFractions' => zero_or_one, # Uses ERI Reference Home if not provided
+        'extension/WeekendScheduleFractions' => zero_or_one, # Uses ERI Reference Home if not provided
+        'extension/MonthlyScheduleMultipliers' => zero_or_one, # Uses ERI Reference Home if not provided
       },
 
       # [Television]
@@ -796,9 +812,9 @@ class EnergyPlusValidator
         'SystemIdentifier' => one, # Required by HPXML schema
         'Load[Units="kWh/year"]/Value' => zero_or_one, # Uses ERI Reference Home if not provided
         'extension/UsageMultiplier' => zero_or_one,
-        '../extension/WeekdayScheduleFractions' => zero_or_one, # Uses ERI Reference Home if not provided
-        '../extension/WeekendScheduleFractions' => zero_or_one, # Uses ERI Reference Home if not provided
-        '../extension/MonthlyScheduleMultipliers' => zero_or_one, # Uses ERI Reference Home if not provided
+        'extension/WeekdayScheduleFractions' => zero_or_one, # Uses ERI Reference Home if not provided
+        'extension/WeekendScheduleFractions' => zero_or_one, # Uses ERI Reference Home if not provided
+        'extension/MonthlyScheduleMultipliers' => zero_or_one, # Uses ERI Reference Home if not provided
       },
 
       # [Vehicle]
@@ -806,9 +822,9 @@ class EnergyPlusValidator
         'SystemIdentifier' => one, # Required by HPXML schema
         'Load[Units="kWh/year"]/Value' => zero_or_one,
         'extension/UsageMultiplier' => zero_or_one,
-        '../extension/WeekdayScheduleFractions' => zero_or_one,
-        '../extension/WeekendScheduleFractions' => zero_or_one,
-        '../extension/MonthlyScheduleMultipliers' => zero_or_one,
+        'extension/WeekdayScheduleFractions' => zero_or_one,
+        'extension/WeekendScheduleFractions' => zero_or_one,
+        'extension/MonthlyScheduleMultipliers' => zero_or_one,
       },
 
       # [WellPump]
@@ -816,48 +832,48 @@ class EnergyPlusValidator
         'SystemIdentifier' => one, # Required by HPXML schema
         'Load[Units="kWh/year"]/Value' => zero_or_one,
         'extension/UsageMultiplier' => zero_or_one,
-        '../extension/WeekdayScheduleFractions' => zero_or_one,
-        '../extension/WeekendScheduleFractions' => zero_or_one,
-        '../extension/MonthlyScheduleMultipliers' => zero_or_one,
+        'extension/WeekdayScheduleFractions' => zero_or_one,
+        'extension/WeekendScheduleFractions' => zero_or_one,
+        'extension/MonthlyScheduleMultipliers' => zero_or_one,
       },
 
       # [GasGrill]
       '/HPXML/Building/BuildingDetails/MiscLoads/FuelLoad[FuelLoadType="grill"]' => {
         'SystemIdentifier' => one, # Required by HPXML schema
         'Load[Units="therm/year"]/Value' => zero_or_one,
-        'FuelType="natural gas"' => one,
+        'FuelType[text()="natural gas"]' => one,
         'extension/FracSensible' => zero_or_one,
         'extension/FracLatent' => zero_or_one,
         'extension/UsageMultiplier' => zero_or_one,
-        '../extension/WeekdayScheduleFractions' => zero_or_one,
-        '../extension/WeekendScheduleFractions' => zero_or_one,
-        '../extension/MonthlyScheduleMultipliers' => zero_or_one,
+        'extension/WeekdayScheduleFractions' => zero_or_one,
+        'extension/WeekendScheduleFractions' => zero_or_one,
+        'extension/MonthlyScheduleMultipliers' => zero_or_one,
       },
 
       # [GasLighting]
       '/HPXML/Building/BuildingDetails/MiscLoads/FuelLoad[FuelLoadType="lighting"]' => {
         'SystemIdentifier' => one, # Required by HPXML schema
         'Load[Units="therm/year"]/Value' => zero_or_one,
-        'FuelType="natural gas"' => one,
+        'FuelType[text()="natural gas"]' => one,
         'extension/FracSensible' => zero_or_one,
         'extension/FracLatent' => zero_or_one,
         'extension/UsageMultiplier' => zero_or_one,
-        '../extension/WeekdayScheduleFractions' => zero_or_one,
-        '../extension/WeekendScheduleFractions' => zero_or_one,
-        '../extension/MonthlyScheduleMultipliers' => zero_or_one,
+        'extension/WeekdayScheduleFractions' => zero_or_one,
+        'extension/WeekendScheduleFractions' => zero_or_one,
+        'extension/MonthlyScheduleMultipliers' => zero_or_one,
       },
 
       # [GasFireplace]
       '/HPXML/Building/BuildingDetails/MiscLoads/FuelLoad[FuelLoadType="fireplace"]' => {
         'SystemIdentifier' => one, # Required by HPXML schema
         'Load[Units="therm/year"]/Value' => zero_or_one,
-        'FuelType="natural gas"' => one,
+        'FuelType[text()="natural gas"]' => one,
         'extension/FracSensible' => zero_or_one,
         'extension/FracLatent' => zero_or_one,
         'extension/UsageMultiplier' => zero_or_one,
-        '../extension/WeekdayScheduleFractions' => zero_or_one,
-        '../extension/WeekendScheduleFractions' => zero_or_one,
-        '../extension/MonthlyScheduleMultipliers' => zero_or_one,
+        'extension/WeekdayScheduleFractions' => zero_or_one,
+        'extension/WeekendScheduleFractions' => zero_or_one,
+        'extension/MonthlyScheduleMultipliers' => zero_or_one,
       },
     }
 

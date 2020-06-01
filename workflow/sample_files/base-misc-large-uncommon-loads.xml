@@ -636,6 +636,10 @@
         <FuelLoad>
           <SystemIdentifier id='FuelLoadMisc'/>
           <FuelLoadType>grill</FuelLoadType>
+          <Load>
+            <Units>therm/year</Units>
+            <Value>10.0</Value>
+          </Load>
           <FuelType>natural gas</FuelType>
           <extension>
             <WeekdayScheduleFractions>0.04, 0.037, 0.037, 0.036, 0.033, 0.036, 0.043, 0.047, 0.034, 0.023, 0.024, 0.025, 0.024, 0.028, 0.031, 0.032, 0.039, 0.053, 0.063, 0.067, 0.071, 0.069, 0.059, 0.05</WeekdayScheduleFractions>
@@ -646,6 +650,10 @@
         <FuelLoad>
           <SystemIdentifier id='FuelLoadMisc2'/>
           <FuelLoadType>lighting</FuelLoadType>
+          <Load>
+            <Units>therm/year</Units>
+            <Value>10.0</Value>
+          </Load>
           <FuelType>natural gas</FuelType>
           <extension>
             <WeekdayScheduleFractions>0.04, 0.037, 0.037, 0.036, 0.033, 0.036, 0.043, 0.047, 0.034, 0.023, 0.024, 0.025, 0.024, 0.028, 0.031, 0.032, 0.039, 0.053, 0.063, 0.067, 0.071, 0.069, 0.059, 0.05</WeekdayScheduleFractions>
@@ -656,6 +664,10 @@
         <FuelLoad>
           <SystemIdentifier id='FuelLoadMisc3'/>
           <FuelLoadType>fireplace</FuelLoadType>
+          <Load>
+            <Units>therm/year</Units>
+            <Value>10.0</Value>
+          </Load>
           <FuelType>natural gas</FuelType>
           <extension>
             <WeekdayScheduleFractions>0.04, 0.037, 0.037, 0.036, 0.033, 0.036, 0.043, 0.047, 0.034, 0.023, 0.024, 0.025, 0.024, 0.028, 0.031, 0.032, 0.039, 0.053, 0.063, 0.067, 0.071, 0.069, 0.059, 0.05</WeekdayScheduleFractions>

@@ -47,7 +47,10 @@ The following building features/technologies are available for modeling via the 
 - Dehumidifier
 - Lighting
 - Ceiling Fans
+- Pools
+- Hot Tubs
 - Plug Loads
+- Fuel Loads
 
 EnergyPlus Use Case for HPXML
 -----------------------------
@@ -867,6 +870,14 @@ Quantity [#]                NumberofBedrooms+1
 In addition, a reduced cooling setpoint can be specified for summer months when ceiling fans are operating.
 See the Thermostat section for more information.
 
+Pools
+~~~~~
+# TODO
+
+Hot Tubs
+~~~~~~~~
+# TODO
+
 Plug Loads
 ~~~~~~~~~~
 
@@ -878,6 +889,10 @@ The annual energy consumption (``Load[Units='kWh/year']/Value``) can be provided
 .. math:: OtherkWhs = 0.91 \cdot ConditionedFloorArea
 
 An ``extension/UsageMultiplier`` can also be optionally provided that scales energy usage; if not provided, it is assumed to be 1.0.
+
+Fuel Loads
+~~~~~~~~~~
+# TODO
 
 Validating & Debugging Errors
 -----------------------------
