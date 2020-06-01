@@ -1323,7 +1323,7 @@ class OSModel
       if frame_floor.is_ceiling
         inside_film = Material.AirFilmFloorAverage
       else
-      inside_film = Material.AirFilmFloorReduced
+        inside_film = Material.AirFilmFloorReduced
       end
       if frame_floor.is_ceiling
         outside_film = Material.AirFilmFloorAverage
@@ -1352,7 +1352,7 @@ class OSModel
         WoodStudConstructionSet.new(Material.Stud2x6, 0.10, 10.0, 0.75, 0.0, covering), # 2x6, 24" o.c. + R10
         WoodStudConstructionSet.new(Material.Stud2x6, 0.10, 0.0, 0.75, 0.0, covering),  # 2x6, 24" o.c.
         WoodStudConstructionSet.new(Material.Stud2x4, 0.13, 0.0, 0.5, 0.0, covering),   # 2x4, 16" o.c.
-        WoodStudConstructionSet.new(Material.Stud2x4, 0.01, 0.0, 0.0, 0.0, nil),                     # Fallback
+        WoodStudConstructionSet.new(Material.Stud2x4, 0.01, 0.0, 0.0, 0.0, nil), # Fallback
       ]
       match, constr_set, cavity_r = pick_wood_stud_construction_set(assembly_r, constr_sets, inside_film, outside_film, frame_floor.id)
 

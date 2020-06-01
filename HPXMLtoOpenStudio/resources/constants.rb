@@ -604,7 +604,7 @@ class Constants
   def self.SizingInfoMechVentWholeHouseRateBalanced
     return __method__.to_s
   end
-  
+
   def self.SizingInfoMechVentWholeHouseRateUnbalanced
     return __method__.to_s
   end
