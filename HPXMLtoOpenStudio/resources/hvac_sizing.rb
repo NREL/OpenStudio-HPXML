@@ -1921,8 +1921,6 @@ class HVACSizing
     mechVentExist = get_feature(model.getBuilding, Constants.SizingInfoMechVentExist, 'boolean')
     return [0.0, 0.0, 0.0] unless mechVentExist
 
-    mechVentWholeHouseRate = get_feature(model.getBuilding, Constants.SizingInfoMechVentWholeHouseRate, 'double')
-
     q_unb = get_feature(model.getBuilding, Constants.SizingInfoMechVentWholeHouseRateUnbalanced, 'double')
     q_b = get_feature(model.getBuilding, Constants.SizingInfoMechVentWholeHouseRateBalanced, 'double')
     totalEfficiency = get_feature(model.getBuilding, Constants.SizingInfoMechVentTotalEfficiency, 'double')

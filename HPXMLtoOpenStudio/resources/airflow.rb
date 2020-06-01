@@ -241,21 +241,20 @@ class Airflow
     whf_flow_actuator = OpenStudio::Model::EnergyManagementSystemActuator.new(whf_flow, 'Zone Infiltration', 'Air Exchange Flow Rate')
     whf_flow_actuator.setName("#{whf_flow.name} act")
 
-    if not vent_fans_whf.empty?
-      # Electric Equipment (for whole house fan electricity consumption)
-      whf_equip_def = OpenStudio::Model::ElectricEquipmentDefinition.new(model)
-      whf_equip_def.setName(Constants.ObjectNameWholeHouseFan)
-      whf_equip = OpenStudio::Model::ElectricEquipment.new(whf_equip_def)
-      whf_equip.setName(Constants.ObjectNameWholeHouseFan)
-      whf_equip.setSpace(@living_space)
-      whf_equip_def.setFractionRadiant(0)
-      whf_equip_def.setFractionLatent(0)
-      whf_equip_def.setFractionLost(1)
-      whf_equip.setSchedule(model.alwaysOnDiscreteSchedule)
-      whf_equip.setEndUseSubcategory(Constants.ObjectNameWholeHouseFan)
-      whf_elec_actuator = OpenStudio::Model::EnergyManagementSystemActuator.new(whf_equip, 'ElectricEquipment', 'Electric Power Level')
-      whf_elec_actuator.setName("#{whf_equip.name} act")
-    end
+    # Electric Equipment (for whole house fan electricity consumption)
+    # Do we still want to create it if there's no fan in HPXML? Reporting purpose?
+    whf_equip_def = OpenStudio::Model::ElectricEquipmentDefinition.new(model)
+    whf_equip_def.setName(Constants.ObjectNameWholeHouseFan)
+    whf_equip = OpenStudio::Model::ElectricEquipment.new(whf_equip_def)
+    whf_equip.setName(Constants.ObjectNameWholeHouseFan)
+    whf_equip.setSpace(@living_space)
+    whf_equip_def.setFractionRadiant(0)
+    whf_equip_def.setFractionLatent(0)
+    whf_equip_def.setFractionLost(1)
+    whf_equip.setSchedule(model.alwaysOnDiscreteSchedule)
+    whf_equip.setEndUseSubcategory(Constants.ObjectNameWholeHouseFan)
+    whf_elec_actuator = OpenStudio::Model::EnergyManagementSystemActuator.new(whf_equip, 'ElectricEquipment', 'Electric Power Level')
+    whf_elec_actuator.setName("#{whf_equip.name} act")
 
     # Assume located in attic floor if attic zone exists; otherwise assume it's through roof/wall.
     whf_zone = nil
@@ -315,7 +314,7 @@ class Airflow
     vent_fans_whf.each do |vent_whf|
       vent_program.addLine("Set WHF_W = WHF_W + #{vent_whf.fan_power} * #{whf_avail_sensors[vent_whf.id].name}")
     end
-    vent_program.addLine("    Set #{whf_elec_actuator.name} = WHF_W*Adj") unless vent_fans_whf.empty?
+    vent_program.addLine("    Set #{whf_elec_actuator.name} = WHF_W*Adj")
     vent_program.addLine('  ElseIf (NVavail > 0)') # Natural ventilation
     vent_program.addLine("    Set NVArea = #{UnitConversions.convert(area, 'ft^2', 'cm^2')}")
     vent_program.addLine("    Set Cs = #{UnitConversions.convert(c_s, 'ft^2/(s^2*R)', 'L^2/(s^2*cm^4*K)')}")
@@ -328,13 +327,13 @@ class Airflow
     vent_program.addLine("    Set #{nv_flow_actuator.name} = (@Min SGNV MaxNV)")
     vent_program.addLine("    Set #{whf_flow_actuator.name} = 0")
     vent_program.addLine("    Set #{liv_to_zone_flow_rate_actuator.name} = 0") unless whf_zone.nil?
-    vent_program.addLine("    Set #{whf_elec_actuator.name} = 0") unless vent_fans_whf.empty?
+    vent_program.addLine("    Set #{whf_elec_actuator.name} = 0")
     vent_program.addLine('  EndIf')
     vent_program.addLine('Else')
     vent_program.addLine("  Set #{nv_flow_actuator.name} = 0")
     vent_program.addLine("  Set #{whf_flow_actuator.name} = 0")
     vent_program.addLine("  Set #{liv_to_zone_flow_rate_actuator.name} = 0") unless whf_zone.nil?
-    vent_program.addLine("  Set #{whf_elec_actuator.name} = 0") unless vent_fans_whf.empty?
+    vent_program.addLine("  Set #{whf_elec_actuator.name} = 0")
     vent_program.addLine('EndIf')
 
     manager = OpenStudio::Model::EnergyManagementSystemProgramCallingManager.new(model)
@@ -1375,6 +1374,8 @@ class Airflow
       equip.setEndUseSubcategory(Constants.ObjectNameMechanicalVentilation)
       vent_mech_fan_actuator = OpenStudio::Model::EnergyManagementSystemActuator.new(equip, 'ElectricEquipment', 'Electric Power Level')
       vent_mech_fan_actuator.setName("#{equip.name} act")
+    
+    return vent_mech_fan_actuator
   end
   
   def self.apply_balanced_mech_vent(model, infil_program, win_sensor, vent_mech_cfm, vent_mech_sens_eff, vent_mech_lat_eff, erv_sens_load_actuator, erv_lat_load_actuator)
@@ -1484,27 +1485,21 @@ class Airflow
     exh_vent_mech_fan_w = vent_mech_exh.map{|vent_mech| vent_mech.fan_power * (vent_mech.hours_in_operation / 24.0)}.inject(0.0, :+)
     bal_vent_mech_fan_w = vent_mech_bal.map{|vent_mech| vent_mech.fan_power * (vent_mech.hours_in_operation / 24.0)}.inject(0.0, :+)
 
+    # combine supply and exhaust fans, get total balanced/unbalanced cfms and combined balanced/unblanced cfms
     bal_cfm, unbal_cfm, combined_bal_cfm, combined_unbal_cfm = get_mech_vent_cfms(vent_mech_sup, vent_mech_exh, vent_mech_bal, vent_mech_cfis)
 
     # Store info for HVAC Sizing measure
-    # Please review these lines
+    # Please review this, and its integration with hvac_sizing
     model.getBuilding.additionalProperties.setFeature(Constants.SizingInfoMechVentWholeHouseRateBalanced, bal_cfm)
     model.getBuilding.additionalProperties.setFeature(Constants.SizingInfoMechVentWholeHouseRateUnbalanced, unbal_cfm.abs)
     model.getBuilding.additionalProperties.setFeature(Constants.SizingInfoMechVentExist, (not vent_fans_mech.empty?))
 
     # Fan Actuators
-    if not vent_mech_sup.empty?
-      sup_fan_actuator = add_ee_for_vent_fan_power(model, Constants.ObjectNameMechanicalVentilationHouseFanSupply, HPXML::MechVentTypeSupply)
-    end
-    if not vent_mech_exh.empty?
-      exh_fan_actuator = add_ee_for_vent_fan_power(model, Constants.ObjectNameMechanicalVentilationHouseFanExhaust, HPXML::MechVentTypeExhaust)
-    end
-    if not vent_mech_bal.empty?
-      bal_fan_actuator = add_ee_for_vent_fan_power(model, Constants.ObjectNameMechanicalVentilationHouseFanBalanced, HPXML::MechVentTypeBalanced)
-    end
-    if not vent_mech_cfis.empty?
-      cfis_fan_actuator = add_ee_for_vent_fan_power(model, Constants.ObjectNameMechanicalVentilationHouseFanCFIS, HPXML::MechVentTypeCFIS)
-    end
+    # Do we still want to create ee if there's no fan in HPXML? Reporting purpose?
+    sup_fan_actuator = add_ee_for_vent_fan_power(model, Constants.ObjectNameMechanicalVentilationHouseFanSupply, HPXML::MechVentTypeSupply)
+    exh_fan_actuator = add_ee_for_vent_fan_power(model, Constants.ObjectNameMechanicalVentilationHouseFanExhaust, HPXML::MechVentTypeExhaust)
+    bal_fan_actuator = add_ee_for_vent_fan_power(model, Constants.ObjectNameMechanicalVentilationHouseFanBalanced, HPXML::MechVentTypeBalanced)
+    cfis_fan_actuator = add_ee_for_vent_fan_power(model, Constants.ObjectNameMechanicalVentilationHouseFanCFIS, HPXML::MechVentTypeCFIS)
 
     infil_flow = OpenStudio::Model::SpaceInfiltrationDesignFlowRate.new(model)
     infil_flow.setName(Constants.ObjectNameInfiltration + ' flow')
@@ -1551,7 +1546,8 @@ class Airflow
       infil_program.addLine("Set #{erv_lat_load_actuator.name} = 0.0")
     end
     
-    # Cfm weighted average effectiveness for hvac sizing
+    # Calculate cfm weighted average effectiveness for hvac sizing
+    # Please review this, and its integration with hvac_sizing
     weighted_vent_mech_tot_eff = 0.0
     weighted_vent_mech_lat_eff = 0.0
     weighted_vent_mech_apparent_sens_eff = 0.0
@@ -1573,15 +1569,16 @@ class Airflow
       infil_program = apply_balanced_mech_vent(model, infil_program, win_sensor, vent_mech_cfm, vent_mech_sens_eff, vent_mech_lat_eff, erv_sens_load_actuator, erv_lat_load_actuator)
     end
 
+    model.getBuilding.additionalProperties.setFeature(Constants.SizingInfoMechVentTotalEfficiency, weighted_vent_mech_tot_eff)
+    model.getBuilding.additionalProperties.setFeature(Constants.SizingInfoMechVentLatentEffectiveness, weighted_vent_mech_lat_eff)
+    model.getBuilding.additionalProperties.setFeature(Constants.SizingInfoMechVentApparentSensibleEffectiveness, weighted_vent_mech_apparent_sens_eff)
+
     # Combined balanced mech vent
     if combined_bal_cfm > 0.0
       infil_program = apply_balanced_mech_vent(model, infil_program, win_sensor, combined_bal_cfm, 0.0, 0.0, erv_sens_load_actuator, erv_lat_load_actuator)
     end
 
-    model.getBuilding.additionalProperties.setFeature(Constants.SizingInfoMechVentTotalEfficiency, weighted_vent_mech_tot_eff)
-    model.getBuilding.additionalProperties.setFeature(Constants.SizingInfoMechVentLatentEffectiveness, weighted_vent_mech_lat_eff)
-    model.getBuilding.additionalProperties.setFeature(Constants.SizingInfoMechVentApparentSensibleEffectiveness, weighted_vent_mech_apparent_sens_eff)
-
+    # QWHV for unbalanced mech vent systems
     infil_program.addLine("Set QWHV = 0.0")
 
     # Apply CFIS
@@ -1594,18 +1591,16 @@ class Airflow
     end
 
     infil_program.addLine('Set Qrange = 0')
-    if not vent_fans_kitchen.empty?
-      vent_fans_kitchen.each do |vent_kitchen|
-        infil_program.addLine("Set Qrange = Qrange + #{UnitConversions.convert(vent_kitchen.rated_flow_rate, 'cfm', 'm^3/s').round(4)} * #{range_sch_sensors_map[vent_kitchen.id].name}")
-      end
+    vent_fans_kitchen.each do |vent_kitchen|
+      infil_program.addLine("Set Qrange = Qrange + #{UnitConversions.convert(vent_kitchen.rated_flow_rate, 'cfm', 'm^3/s').round(4)} * #{range_sch_sensors_map[vent_kitchen.id].name}")
     end
+
     infil_program.addLine('Set Qbath = 0')
-    if not vent_fans_bath.empty?
-      vent_fans_bath.each do |vent_bath|
-        # Question: There's a quantity attribute being used, but not in apply_local_ventilation, that means the is it expected?
-        infil_program.addLine("Set Qbath = Qbath + #{UnitConversions.convert(vent_bath.rated_flow_rate * vent_bath.quantity, 'cfm', 'm^3/s').round(4)} * #{bath_sch_sensors_map[vent_bath.id].name}")
-      end
+    vent_fans_bath.each do |vent_bath|
+      # Question: There's a quantity attribute being used, but not in apply_local_ventilation, is it expected?
+      infil_program.addLine("Set Qbath = Qbath + #{UnitConversions.convert(vent_bath.rated_flow_rate * vent_bath.quantity, 'cfm', 'm^3/s').round(4)} * #{bath_sch_sensors_map[vent_bath.id].name}")
     end
+
     infil_program.addLine('Set QductsOut = 0')
     infil_program.addLine('Set QductsIn = 0')
     # Disabling duct imbalance affect on infiltration for consistency with other software tools
@@ -1617,12 +1612,12 @@ class Airflow
     # end
     infil_program.addLine('Set Qout = Qrange+Qbath+QductsOut')
     infil_program.addLine('Set Qin = QductsIn')
-    # Question: If there're range/bath exhaust fans + supply mech vent fans, the unbalanced airflow is added here, but are the balanced loads addressed?
+    # Question: If there're range/bath exhaust fans + supply mech vent fans, the unbalanced airflow is calculated here, but are the loads introduced by balanced airflow addressed?
     # QWHV is now net in
     infil_program.addLine('Set Qu = (@Abs (Qout-Qin-QWHV))')
-    infil_program.addLine("Set #{sup_fan_actuator.name} = #{sup_vent_mech_fan_w}") unless vent_mech_sup.empty?
-    infil_program.addLine("Set #{exh_fan_actuator.name} = #{exh_vent_mech_fan_w}") unless vent_mech_exh.empty?
-    infil_program.addLine("Set #{bal_fan_actuator.name} = #{bal_vent_mech_fan_w}") unless vent_mech_bal.empty?
+    infil_program.addLine("Set #{sup_fan_actuator.name} = #{sup_vent_mech_fan_w}")
+    infil_program.addLine("Set #{exh_fan_actuator.name} = #{exh_vent_mech_fan_w}")
+    infil_program.addLine("Set #{bal_fan_actuator.name} = #{bal_vent_mech_fan_w}")
 
     infil_program.addLine('Set Q_tot_flow = (((Qu^2)+(Qn^2))^0.5)')
     infil_program.addLine('Set Q_tot_flow = (@Max Q_tot_flow 0)')
