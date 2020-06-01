@@ -389,15 +389,70 @@ class HPXMLDefaults
       if plug_load.usage_multiplier.nil?
         plug_load.usage_multiplier = 1.0
       end
+      if plug_load.weekday_fractions.nil?
+        plug_load.weekday_fractions = '0.04, 0.037, 0.037, 0.036, 0.033, 0.036, 0.043, 0.047, 0.034, 0.023, 0.024, 0.025, 0.024, 0.028, 0.031, 0.032, 0.039, 0.053, 0.063, 0.067, 0.071, 0.069, 0.059, 0.05'
+      end
+      if plug_load.weekend_fractions.nil?
+        plug_load.weekend_fractions = '0.04, 0.037, 0.037, 0.036, 0.033, 0.036, 0.043, 0.047, 0.034, 0.023, 0.024, 0.025, 0.024, 0.028, 0.031, 0.032, 0.039, 0.053, 0.063, 0.067, 0.071, 0.069, 0.059, 0.05'
+      end
+      if plug_load.monthly_multipliers.nil?
+        plug_load.monthly_multipliers = '1.248, 1.257, 0.993, 0.989, 0.993, 0.827, 0.821, 0.821, 0.827, 0.99, 0.987, 1.248'
+      end
     end
-    if hpxml.misc_loads_schedule.weekday_fractions.nil?
-      hpxml.misc_loads_schedule.weekday_fractions = '0.04, 0.037, 0.037, 0.036, 0.033, 0.036, 0.043, 0.047, 0.034, 0.023, 0.024, 0.025, 0.024, 0.028, 0.031, 0.032, 0.039, 0.053, 0.063, 0.067, 0.071, 0.069, 0.059, 0.05'
+  end
+
+  def self.apply_fuel_loads(hpxml, cfa, nbeds)
+    hpxml.fuel_loads.each do |fuel_load|
+      if fuel_load.usage_multiplier.nil?
+        fuel_load.usage_multiplier = 1.0
+      end
+      if fuel_load.weekday_fractions.nil?
+        fuel_load.weekday_fractions = '0.04, 0.037, 0.037, 0.036, 0.033, 0.036, 0.043, 0.047, 0.034, 0.023, 0.024, 0.025, 0.024, 0.028, 0.031, 0.032, 0.039, 0.053, 0.063, 0.067, 0.071, 0.069, 0.059, 0.05'
+      end
+      if fuel_load.weekend_fractions.nil?
+        fuel_load.weekend_fractions = '0.04, 0.037, 0.037, 0.036, 0.033, 0.036, 0.043, 0.047, 0.034, 0.023, 0.024, 0.025, 0.024, 0.028, 0.031, 0.032, 0.039, 0.053, 0.063, 0.067, 0.071, 0.069, 0.059, 0.05'
+      end
+      if fuel_load.monthly_multipliers.nil?
+        fuel_load.monthly_multipliers = '1.248, 1.257, 0.993, 0.989, 0.993, 0.827, 0.821, 0.821, 0.827, 0.99, 0.987, 1.248'
+      end
     end
-    if hpxml.misc_loads_schedule.weekend_fractions.nil?
-      hpxml.misc_loads_schedule.weekend_fractions = '0.04, 0.037, 0.037, 0.036, 0.033, 0.036, 0.043, 0.047, 0.034, 0.023, 0.024, 0.025, 0.024, 0.028, 0.031, 0.032, 0.039, 0.053, 0.063, 0.067, 0.071, 0.069, 0.059, 0.05'
+  end
+
+  def self.apply_pools_and_hot_tubs(hpxml)
+    hpxml.pools.each do |pool|
+      if pool.heater_usage_multiplier.nil?
+        pool.heater_usage_multiplier = 1.0
+      end
+      if pool.pump_usage_multiplier.nil?
+        pool.pump_usage_multiplier = 1.0
+      end
+      if pool.weekday_fractions.nil?
+        pool.weekday_fractions = '0.04, 0.037, 0.037, 0.036, 0.033, 0.036, 0.043, 0.047, 0.034, 0.023, 0.024, 0.025, 0.024, 0.028, 0.031, 0.032, 0.039, 0.053, 0.063, 0.067, 0.071, 0.069, 0.059, 0.05'
+      end
+      if pool.weekend_fractions.nil?
+        pool.weekend_fractions = '0.04, 0.037, 0.037, 0.036, 0.033, 0.036, 0.043, 0.047, 0.034, 0.023, 0.024, 0.025, 0.024, 0.028, 0.031, 0.032, 0.039, 0.053, 0.063, 0.067, 0.071, 0.069, 0.059, 0.05'
+      end
+      if pool.monthly_multipliers.nil?
+        pool.monthly_multipliers = '1.248, 1.257, 0.993, 0.989, 0.993, 0.827, 0.821, 0.821, 0.827, 0.99, 0.987, 1.248'
+      end
     end
-    if hpxml.misc_loads_schedule.monthly_multipliers.nil?
-      hpxml.misc_loads_schedule.monthly_multipliers = '1.248, 1.257, 0.993, 0.989, 0.993, 0.827, 0.821, 0.821, 0.827, 0.99, 0.987, 1.248'
+
+    hpxml.hot_tubs.each do |hot_tub|
+      if hot_tub.heater_usage_multiplier.nil?
+        hot_tub.heater_usage_multiplier = 1.0
+      end
+      if hot_tub.pump_usage_multiplier.nil?
+        hot_tub.pump_usage_multiplier = 1.0
+      end
+      if hot_tub.weekday_fractions.nil?
+        hot_tub.weekday_fractions = '0.04, 0.037, 0.037, 0.036, 0.033, 0.036, 0.043, 0.047, 0.034, 0.023, 0.024, 0.025, 0.024, 0.028, 0.031, 0.032, 0.039, 0.053, 0.063, 0.067, 0.071, 0.069, 0.059, 0.05'
+      end
+      if hot_tub.weekend_fractions.nil?
+        hot_tub.weekend_fractions = '0.04, 0.037, 0.037, 0.036, 0.033, 0.036, 0.043, 0.047, 0.034, 0.023, 0.024, 0.025, 0.024, 0.028, 0.031, 0.032, 0.039, 0.053, 0.063, 0.067, 0.071, 0.069, 0.059, 0.05'
+      end
+      if hot_tub.monthly_multipliers.nil?
+        hot_tub.monthly_multipliers = '1.248, 1.257, 0.993, 0.989, 0.993, 0.827, 0.821, 0.821, 0.827, 0.99, 0.987, 1.248'
+      end
     end
   end
 

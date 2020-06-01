@@ -35,6 +35,13 @@ class EUT
   PlugLoads = 'Plug Loads'
   Vehicle = 'Vehicle'
   WellPump = 'Well Pump'
+  PoolHeater = 'Pool Heater'
+  PoolPump = 'Pool Pump'
+  HotTubHeater = 'Hot Tub Heater'
+  HotTubPump = 'Hot Tub Pump'
+  Grill = 'Grill'
+  Lighting = 'Lighting'
+  Fireplace = 'Fireplace'
   PV = 'PV'
 end
 

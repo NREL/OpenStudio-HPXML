@@ -2407,6 +2407,14 @@
 														<xs:attribute name="dataSource" type="DataSource"/>
 													</xs:complexType>
 												</xs:element>
+												<xs:element minOccurs="0" name="Load">
+													<xs:complexType>
+														<xs:sequence>
+															<xs:element name="Units" type="PlugLoadUnits"/>
+															<xs:element name="Value" type="HPXMLDouble"/>
+														</xs:sequence>
+													</xs:complexType>
+												</xs:element>
 												<xs:element minOccurs="0" ref="extension"/>
 											</xs:sequence>
 											<xs:attribute name="dataSource" type="DataSource"/>
@@ -2451,6 +2459,14 @@
 											<xs:documentation>Hours per day pool heater is used.</xs:documentation>
 										</xs:annotation>
 									</xs:element>
+									<xs:element minOccurs="0" name="Load">
+										<xs:complexType>
+											<xs:sequence>
+												<xs:element name="Units" type="PoolHeaterUnits"/>
+												<xs:element name="Value" type="HPXMLDouble"/>
+											</xs:sequence>
+										</xs:complexType>
+									</xs:element>
 									<xs:element minOccurs="0" ref="extension"/>
 								</xs:sequence>
 								<xs:attribute name="dataSource" type="DataSource"/>
@@ -2470,7 +2486,7 @@
 				<xs:complexType>
 					<xs:sequence>
 						<xs:group ref="SystemInfo"/>
-						<xs:element minOccurs="0" name="Type" type="HotTubType">
+						<xs:element minOccurs="0" name="Type" type="PoolType">
 							<xs:annotation>
 								<xs:documentation>Indicates if the hot tub is above or below ground.</xs:documentation>
 							</xs:annotation>
@@ -2495,7 +2511,7 @@
 								<xs:documentation>[in]</xs:documentation>
 							</xs:annotation>
 						</xs:element>
-						<xs:element minOccurs="0" name="FilterType" type="HotTubFilterType">
+						<xs:element minOccurs="0" name="FilterType" type="PoolFilterType">
 							<xs:annotation>
 								<xs:documentation>Type of filter used, if any.</xs:documentation>
 							</xs:annotation>
@@ -2512,7 +2528,7 @@
 											<xs:sequence>
 												<xs:group ref="SystemInfo"/>
 												<xs:element minOccurs="0" ref="ConnectedDevice"/>
-												<xs:element minOccurs="0" name="Type" type="HotTubPumpType"/>
+												<xs:element minOccurs="0" name="Type" type="PoolPumpType"/>
 												<xs:element minOccurs="0" name="Manufacturer" type="HPXMLString">
 													<xs:annotation>
 														<xs:documentation>Manufacturer of hot tub pump.</xs:documentation>
@@ -2528,7 +2544,7 @@
 														<xs:documentation>Model number of hot tub pump.</xs:documentation>
 													</xs:annotation>
 												</xs:element>
-												<xs:element minOccurs="0" name="ThirdPartyCertification" type="HotTubPump3rdPartyCertification" maxOccurs="unbounded">
+												<xs:element minOccurs="0" name="ThirdPartyCertification" type="PoolPump3rdPartyCertification" maxOccurs="unbounded">
 													<xs:annotation>
 														<xs:documentation>Independent organization has verified that product or appliance meets or exceeds the standard in question (ENERGY STAR, CEE,
 															or other)</xs:documentation>
@@ -2541,7 +2557,7 @@
 															calculated as: EF (gal/Wh) = flow rate (gpm) * 60 ÷ power (watts) (ANSI/APSP/ICC-15 2011).</xs:documentation>
 													</xs:annotation>
 												</xs:element>
-												<xs:element minOccurs="0" name="SpeedSetting" type="HotTubPumpSpeedSetting">
+												<xs:element minOccurs="0" name="SpeedSetting" type="PoolPumpSpeedSetting">
 													<xs:annotation>
 														<xs:documentation>The speed setting at which the Energy Factor was measured (ENERGY STAR, 2013).</xs:documentation>
 													</xs:annotation>
@@ -2598,6 +2614,14 @@
 														<xs:attribute name="dataSource" type="DataSource"/>
 													</xs:complexType>
 												</xs:element>
+												<xs:element minOccurs="0" name="Load">
+													<xs:complexType>
+														<xs:sequence>
+															<xs:element name="Units" type="PlugLoadUnits"/>
+															<xs:element name="Value" type="HPXMLDouble"/>
+														</xs:sequence>
+													</xs:complexType>
+												</xs:element>
 												<xs:element minOccurs="0" ref="extension"/>
 											</xs:sequence>
 											<xs:attribute name="dataSource" type="DataSource"/>
@@ -2612,7 +2636,7 @@
 								<xs:sequence>
 									<xs:group ref="SystemInfo"/>
 									<xs:element minOccurs="0" ref="ConnectedDevice"/>
-									<xs:element minOccurs="0" name="Type" type="HotTubCleanerType">
+									<xs:element minOccurs="0" name="Type" type="PoolCleanerType">
 										<xs:annotation>
 											<xs:documentation>Type of hot tub cleaner used, if any.</xs:documentation>
 										</xs:annotation>
@@ -2632,7 +2656,7 @@
 								<xs:sequence>
 									<xs:group ref="SystemInfo"/>
 									<xs:element minOccurs="0" ref="ConnectedDevice"/>
-									<xs:element minOccurs="0" name="Type" type="HotTubHeaterType">
+									<xs:element minOccurs="0" name="Type" type="PoolHeaterType">
 										<xs:annotation>
 											<xs:documentation>Type of heater used to heat hot tub, if any.</xs:documentation>
 										</xs:annotation>
@@ -2641,6 +2665,14 @@
 										<xs:annotation>
 											<xs:documentation>Hours per day hot tub heater is used.</xs:documentation>
 										</xs:annotation>
+									</xs:element>
+									<xs:element minOccurs="0" name="Load">
+										<xs:complexType>
+											<xs:sequence>
+												<xs:element name="Units" type="PoolHeaterUnits"/>
+												<xs:element name="Value" type="HPXMLDouble"/>
+											</xs:sequence>
+										</xs:complexType>
 									</xs:element>
 									<xs:element minOccurs="0" ref="extension"/>
 								</xs:sequence>
@@ -2657,93 +2689,79 @@
 	</xs:complexType>
 	<xs:complexType name="MiscLoads">
 		<xs:sequence>
-			<xs:element minOccurs="0" name="PlugLoads">
+			<xs:element name="PlugLoad" maxOccurs="unbounded" minOccurs="0">
 				<xs:complexType>
 					<xs:sequence>
-						<xs:element minOccurs="0" ref="extension"/>
-						<xs:element name="PlugLoad" maxOccurs="unbounded">
+						<xs:group ref="SystemInfo"/>
+						<xs:element minOccurs="0" ref="ConnectedDevice"/>
+						<xs:element minOccurs="0" ref="AttachedToSpace"/>
+						<xs:element name="PlugLoadType" type="PlugLoadType" minOccurs="0"/>
+						<xs:element minOccurs="0" name="Location" type="PlugLoadLocation"/>
+						<xs:element name="Count" type="IntegerGreaterThanOrEqualToZero" minOccurs="0"/>
+						<xs:element minOccurs="0" name="Load">
 							<xs:complexType>
 								<xs:sequence>
-									<xs:group ref="SystemInfo"/>
-									<xs:element minOccurs="0" ref="ConnectedDevice"/>
-									<xs:element minOccurs="0" ref="AttachedToSpace"/>
-									<xs:element name="PlugLoadType" type="PlugLoadType" minOccurs="0"/>
-									<xs:element minOccurs="0" name="Location" type="PlugLoadLocation"/>
-									<xs:element name="Count" type="IntegerGreaterThanOrEqualToZero" minOccurs="0"/>
-									<xs:element minOccurs="0" name="Load">
-										<xs:complexType>
-											<xs:sequence>
-												<xs:element name="Units" type="PlugLoadUnits"/>
-												<xs:element name="Value" type="HPXMLDouble"/>
-											</xs:sequence>
-											<xs:attribute name="dataSource" type="DataSource"/>
-										</xs:complexType>
-									</xs:element>
-									<xs:element ref="extension" minOccurs="0"/>
+									<xs:element name="Units" type="PlugLoadUnits"/>
+									<xs:element name="Value" type="HPXMLDouble"/>
 								</xs:sequence>
 								<xs:attribute name="dataSource" type="DataSource"/>
 							</xs:complexType>
 						</xs:element>
-						<xs:element maxOccurs="unbounded" minOccurs="0" name="PlugLoadControl">
-							<xs:complexType>
-								<xs:sequence>
-									<xs:group ref="SystemInfo"/>
-									<xs:element minOccurs="0" ref="ConnectedDevice"/>
-									<xs:element minOccurs="0" name="ControlsPlugLoad" type="LocalReference"/>
-									<xs:element minOccurs="0" ref="AttachedToSpace"/>
-									<xs:element name="Count" type="IntegerGreaterThanOrEqualToZero" minOccurs="0"/>
-									<xs:element name="PlugLoadControlType" minOccurs="0" type="PlugLoadControlType"/>
-									<xs:element ref="extension" minOccurs="0"/>
-								</xs:sequence>
-								<xs:attribute name="dataSource" type="DataSource"/>
-							</xs:complexType>
-						</xs:element>
+						<xs:element ref="extension" minOccurs="0"/>
 					</xs:sequence>
+					<xs:attribute name="dataSource" type="DataSource"/>
 				</xs:complexType>
 			</xs:element>
-			<xs:element minOccurs="0" name="FuelLoads">
+			<xs:element maxOccurs="unbounded" minOccurs="0" name="PlugLoadControl">
 				<xs:complexType>
 					<xs:sequence>
-						<xs:element minOccurs="0" ref="extension"/>
-						<xs:element name="FuelLoad" maxOccurs="unbounded">
-							<xs:complexType>
-								<xs:sequence>
-									<xs:group ref="SystemInfo"/>
-									<xs:element minOccurs="0" ref="ConnectedDevice"/>
-									<xs:element minOccurs="0" ref="AttachedToSpace"/>
-									<xs:element name="FuelLoadType" type="FuelLoadType" minOccurs="0"/>
-									<xs:element minOccurs="0" name="Location" type="FuelLoadLocation"/>
-									<xs:element name="Count" type="IntegerGreaterThanOrEqualToZero" minOccurs="0"/>
-									<xs:element minOccurs="0" name="Load">
-										<xs:complexType>
-											<xs:sequence>
-												<xs:element name="Units" type="FuelLoadUnits"/>
-												<xs:element name="Value" type="HPXMLDouble"/>
-											</xs:sequence>
-											<xs:attribute name="dataSource" type="DataSource"/>
-										</xs:complexType>
-									</xs:element>
-									<xs:element minOccurs="0" name="FuelType" type="FuelLoadFuelType"/>
-									<xs:element ref="extension" minOccurs="0"/>
-								</xs:sequence>
-								<xs:attribute name="dataSource" type="DataSource"/>
-							</xs:complexType>
-						</xs:element>
-						<xs:element maxOccurs="unbounded" minOccurs="0" name="FuelLoadControl">
-							<xs:complexType>
-								<xs:sequence>
-									<xs:group ref="SystemInfo"/>
-									<xs:element minOccurs="0" ref="ConnectedDevice"/>
-									<xs:element minOccurs="0" name="ControlsFuelLoad" type="LocalReference"/>
-									<xs:element minOccurs="0" ref="AttachedToSpace"/>
-									<xs:element name="Count" type="IntegerGreaterThanOrEqualToZero" minOccurs="0"/>
-									<xs:element name="FuelLoadControlType" minOccurs="0" type="FuelLoadControlType"/>
-									<xs:element ref="extension" minOccurs="0"/>
-								</xs:sequence>
-								<xs:attribute name="dataSource" type="DataSource"/>
-							</xs:complexType>
-						</xs:element>
+						<xs:group ref="SystemInfo"/>
+						<xs:element minOccurs="0" ref="ConnectedDevice"/>
+						<xs:element minOccurs="0" name="ControlsPlugLoad" type="LocalReference"/>
+						<xs:element minOccurs="0" ref="AttachedToSpace"/>
+						<xs:element name="Count" type="IntegerGreaterThanOrEqualToZero" minOccurs="0"/>
+						<xs:element name="PlugLoadControlType" minOccurs="0" type="PlugLoadControlType"/>
+						<xs:element ref="extension" minOccurs="0"/>
 					</xs:sequence>
+					<xs:attribute name="dataSource" type="DataSource"/>
+				</xs:complexType>
+			</xs:element>
+			<xs:element name="FuelLoad" maxOccurs="unbounded" minOccurs="0">
+				<xs:complexType>
+					<xs:sequence>
+						<xs:group ref="SystemInfo"/>
+						<xs:element minOccurs="0" ref="ConnectedDevice"/>
+						<xs:element minOccurs="0" ref="AttachedToSpace"/>
+						<xs:element name="FuelLoadType" type="FuelLoadType" minOccurs="0"/>
+						<xs:element minOccurs="0" name="Location" type="FuelLoadLocation"/>
+						<xs:element name="Count" type="IntegerGreaterThanOrEqualToZero" minOccurs="0"/>
+						<xs:element minOccurs="0" name="Load">
+							<xs:complexType>
+								<xs:sequence>
+									<xs:element name="Units" type="FuelLoadUnits"/>
+									<xs:element name="Value" type="HPXMLDouble"/>
+								</xs:sequence>
+								<xs:attribute name="dataSource" type="DataSource"/>
+							</xs:complexType>
+						</xs:element>
+						<xs:element minOccurs="0" name="FuelType" type="FuelType"/>
+						<xs:element ref="extension" minOccurs="0"/>
+					</xs:sequence>
+					<xs:attribute name="dataSource" type="DataSource"/>
+				</xs:complexType>
+			</xs:element>
+			<xs:element maxOccurs="unbounded" minOccurs="0" name="FuelLoadControl">
+				<xs:complexType>
+					<xs:sequence>
+						<xs:group ref="SystemInfo"/>
+						<xs:element minOccurs="0" ref="ConnectedDevice"/>
+						<xs:element minOccurs="0" name="ControlsFuelLoad" type="LocalReference"/>
+						<xs:element minOccurs="0" ref="AttachedToSpace"/>
+						<xs:element name="Count" type="IntegerGreaterThanOrEqualToZero" minOccurs="0"/>
+						<xs:element name="FuelLoadControlType" minOccurs="0" type="FuelLoadControlType"/>
+						<xs:element ref="extension" minOccurs="0"/>
+					</xs:sequence>
+					<xs:attribute name="dataSource" type="DataSource"/>
 				</xs:complexType>
 			</xs:element>
 			<xs:element ref="extension" minOccurs="0"/>

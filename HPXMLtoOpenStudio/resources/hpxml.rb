@@ -50,7 +50,7 @@ class HPXML < Object
                  :hvac_distributions, :ventilation_fans, :water_heating_systems, :hot_water_distributions,
                  :water_fixtures, :water_heating, :solar_thermal_systems, :pv_systems, :clothes_washers,
                  :clothes_dryers, :dishwashers, :refrigerators, :freezers, :dehumidifiers, :cooking_ranges, :ovens,
-                 :lighting_groups, :lighting, :ceiling_fans, :pools, :hot_tubs, :plug_loads, :fuel_loads, :misc_loads_schedule]
+                 :lighting_groups, :lighting, :ceiling_fans, :pools, :hot_tubs, :plug_loads, :fuel_loads]
   attr_reader(*HPXML_ATTRS, :doc)
 
   # Constants
@@ -469,7 +469,6 @@ class HPXML < Object
     @hot_tubs.to_oga(@doc)
     @plug_loads.to_oga(@doc)
     @fuel_loads.to_oga(@doc)
-    @misc_loads_schedule.to_oga(@doc)
     return @doc
   end
 
@@ -519,7 +518,6 @@ class HPXML < Object
     @hot_tubs = HotTubs.new(self, hpxml)
     @plug_loads = PlugLoads.new(self, hpxml)
     @fuel_loads = FuelLoads.new(self, hpxml)
-    @misc_loads_schedule = MiscLoadsSchedule.new(self, hpxml)
   end
 
   class BaseElement
@@ -4094,7 +4092,8 @@ class HPXML < Object
   end
 
   class Pool < BaseElement
-    ATTRS = [:id, :heater_type, :usage_multiplier]
+    ATTRS = [:id, :heater_type, :heater_annual_energy, :heater_usage_multiplier, :pump_annual_energy, :pump_usage_multiplier,
+             :weekday_fractions, :weekend_fractions, :monthly_multipliers]
     attr_accessor(*ATTRS)
 
     def delete
@@ -4113,18 +4112,48 @@ class HPXML < Object
       pool = XMLHelper.add_element(pools, 'Pool')
       sys_id = XMLHelper.add_element(pool, 'SystemIdentifier')
       XMLHelper.add_attribute(sys_id, 'id', @id)
-      unless @heater_type.nil?
+      if not @heater_type.nil?
         heater = XMLHelper.add_element(pool, 'Heater')
         XMLHelper.add_element(heater, 'Type', @heater_type)
+        if not @heater_annual_energy.nil?
+          load = XMLHelper.add_element(heater, 'Load')
+          if @heater_type.include?('elec')
+            XMLHelper.add_element(load, 'Units', 'kWh/year')
+          else
+            XMLHelper.add_element(load, 'Units', 'therm/year')
+          end
+          XMLHelper.add_element(load, 'Value', to_float(@heater_annual_energy))
+        end
+        HPXML::add_extension(parent: heater,
+                             extensions: { 'UsageMultiplier' => to_float_or_nil(@heater_usage_multiplier) })
+      end
+      if not @pump_annual_energy.nil?
+        pumps = XMLHelper.add_element(pool, 'PoolPumps')
+        pool_pump = XMLHelper.add_element(pumps, 'PoolPump')
+        load = XMLHelper.add_element(pool_pump, 'Load')
+        XMLHelper.add_element(load, 'Units', 'kWh/year')
+        XMLHelper.add_element(load, 'Value', to_float(@pump_annual_energy))
+        HPXML::add_extension(parent: pool_pump,
+                             extensions: { 'UsageMultiplier' => to_float_or_nil(@pump_usage_multiplier) })
       end
       HPXML::add_extension(parent: pool,
-                           extensions: { 'UsageMultiplier' => to_float_or_nil(@usage_multiplier) })
+                           extensions: { 'WeekdayScheduleFractions' => @weekday_fractions,
+                                         'WeekendScheduleFractions' => @weekend_fractions,
+                                         'MonthlyScheduleMultipliers' => @monthly_multipliers })
     end
 
     def from_oga(pool)
       @id = HPXML::get_id(pool)
       @heater_type = XMLHelper.get_value(pool, 'Heater/Type')
-      @usage_multiplier = to_float_or_nil(XMLHelper.get_value(pool, 'extension/UsageMultiplier'))
+      @heater_annual_energy = to_float_or_nil(XMLHelper.get_value(pool, 'Heater/Load/Value'))
+      @heater_usage_multiplier = to_float_or_nil(XMLHelper.get_value(pool, 'Heater/extension/UsageMultiplier'))
+      XMLHelper.get_elements(pool, 'PoolPumps/PoolPump').each do |pool_pump|
+        @pump_annual_energy = to_float_or_nil(XMLHelper.get_value(pool_pump, 'Load/Value'))
+        @pump_usage_multiplier = to_float_or_nil(XMLHelper.get_value(pool_pump, 'extension/UsageMultiplier'))
+      end
+      @weekday_fractions = XMLHelper.get_value(pool, 'extension/WeekdayScheduleFractions')
+      @weekend_fractions = XMLHelper.get_value(pool, 'extension/WeekendScheduleFractions')
+      @monthly_multipliers = XMLHelper.get_value(pool, 'extension/MonthlyScheduleMultipliers')
     end
   end
 
@@ -4143,7 +4172,8 @@ class HPXML < Object
   end
 
   class HotTub < BaseElement
-    ATTRS = [:id, :heater_type, :usage_multiplier]
+    ATTRS = [:id, :heater_type, :heater_annual_energy, :heater_usage_multiplier, :pump_annual_energy, :pump_usage_multiplier,
+             :weekday_fractions, :weekend_fractions, :monthly_multipliers]
     attr_accessor(*ATTRS)
 
     def delete
@@ -4162,18 +4192,48 @@ class HPXML < Object
       hot_tub = XMLHelper.add_element(hot_tubs, 'HotTub')
       sys_id = XMLHelper.add_element(hot_tub, 'SystemIdentifier')
       XMLHelper.add_attribute(sys_id, 'id', @id)
-      unless @heater_type.nil?
+      if not @heater_type.nil?
         heater = XMLHelper.add_element(hot_tub, 'Heater')
         XMLHelper.add_element(heater, 'Type', @heater_type)
+        if not @heater_annual_energy.nil?
+          load = XMLHelper.add_element(heater, 'Load')
+          if @heater_type.include?('elec')
+            XMLHelper.add_element(load, 'Units', 'kWh/year')
+          else
+            XMLHelper.add_element(load, 'Units', 'therm/year')
+          end
+          XMLHelper.add_element(load, 'Value', to_float(@heater_annual_energy))
+        end
+        HPXML::add_extension(parent: heater,
+                             extensions: { 'UsageMultiplier' => to_float_or_nil(@heater_usage_multiplier) })
+      end
+      if not @pump_annual_energy.nil?
+        pumps = XMLHelper.add_element(hot_tub, 'HotTubPumps')
+        hot_tub_pump = XMLHelper.add_element(pumps, 'HotTubPump')
+        load = XMLHelper.add_element(hot_tub_pump, 'Load')
+        XMLHelper.add_element(load, 'Units', 'kWh/year')
+        XMLHelper.add_element(load, 'Value', to_float(@pump_annual_energy))
+        HPXML::add_extension(parent: hot_tub_pump,
+                             extensions: { 'UsageMultiplier' => to_float_or_nil(@pump_usage_multiplier) })
       end
       HPXML::add_extension(parent: hot_tub,
-                           extensions: { 'UsageMultiplier' => to_float_or_nil(@usage_multiplier) })
+                           extensions: { 'WeekdayScheduleFractions' => @weekday_fractions,
+                                         'WeekendScheduleFractions' => @weekend_fractions,
+                                         'MonthlyScheduleMultipliers' => @monthly_multipliers })
     end
 
     def from_oga(hot_tub)
       @id = HPXML::get_id(hot_tub)
       @heater_type = XMLHelper.get_value(hot_tub, 'Heater/Type')
-      @usage_multiplier = to_float_or_nil(XMLHelper.get_value(hot_tub, 'extension/UsageMultiplier'))
+      @heater_annual_energy = to_float_or_nil(XMLHelper.get_value(hot_tub, 'Heater/Load/Value'))
+      @heater_usage_multiplier = to_float_or_nil(XMLHelper.get_value(hot_tub, 'Heater/extension/UsageMultiplier'))
+      XMLHelper.get_elements(hot_tub, 'HotTubPumps/HotTubPump').each do |hot_tub_pump|
+        @pump_annual_energy = to_float_or_nil(XMLHelper.get_value(hot_tub_pump, 'Load/Value'))
+        @pump_usage_multiplier = to_float_or_nil(XMLHelper.get_value(hot_tub_pump, 'extension/UsageMultiplier'))
+      end
+      @weekday_fractions = XMLHelper.get_value(hot_tub, 'extension/WeekdayScheduleFractions')
+      @weekend_fractions = XMLHelper.get_value(hot_tub, 'extension/WeekendScheduleFractions')
+      @monthly_multipliers = XMLHelper.get_value(hot_tub, 'extension/MonthlyScheduleMultipliers')
     end
   end
 
@@ -4185,14 +4245,15 @@ class HPXML < Object
     def from_oga(hpxml)
       return if hpxml.nil?
 
-      XMLHelper.get_elements(hpxml, 'Building/BuildingDetails/MiscLoads/PlugLoads/PlugLoad').each do |plug_load|
+      XMLHelper.get_elements(hpxml, 'Building/BuildingDetails/MiscLoads/PlugLoad').each do |plug_load|
         self << PlugLoad.new(@hpxml_object, plug_load)
       end
     end
   end
 
   class PlugLoad < BaseElement
-    ATTRS = [:id, :plug_load_type, :kWh_per_year, :frac_sensible, :frac_latent, :usage_multiplier]
+    ATTRS = [:id, :plug_load_type, :kWh_per_year, :frac_sensible, :frac_latent, :usage_multiplier,
+             :weekday_fractions, :weekend_fractions, :monthly_multipliers]
     attr_accessor(*ATTRS)
 
     def delete
@@ -4207,8 +4268,8 @@ class HPXML < Object
     def to_oga(doc)
       return if nil?
 
-      plug_loads = XMLHelper.create_elements_as_needed(doc, ['HPXML', 'Building', 'BuildingDetails', 'MiscLoads', 'PlugLoads'])
-      plug_load = XMLHelper.add_element(plug_loads, 'PlugLoad')
+      misc_loads = XMLHelper.create_elements_as_needed(doc, ['HPXML', 'Building', 'BuildingDetails', 'MiscLoads'])
+      plug_load = XMLHelper.add_element(misc_loads, 'PlugLoad')
       sys_id = XMLHelper.add_element(plug_load, 'SystemIdentifier')
       XMLHelper.add_attribute(sys_id, 'id', @id)
       XMLHelper.add_element(plug_load, 'PlugLoadType', @plug_load_type) unless @plug_load_type.nil?
@@ -4220,7 +4281,10 @@ class HPXML < Object
       HPXML::add_extension(parent: plug_load,
                            extensions: { 'FracSensible' => to_float_or_nil(@frac_sensible),
                                          'FracLatent' => to_float_or_nil(@frac_latent),
-                                         'UsageMultiplier' => to_float_or_nil(@usage_multiplier) })
+                                         'UsageMultiplier' => to_float_or_nil(@usage_multiplier),
+                                         'WeekdayScheduleFractions' => @weekday_fractions,
+                                         'WeekendScheduleFractions' => @weekend_fractions,
+                                         'MonthlyScheduleMultipliers' => @monthly_multipliers })
     end
 
     def from_oga(plug_load)
@@ -4230,6 +4294,9 @@ class HPXML < Object
       @frac_sensible = to_float_or_nil(XMLHelper.get_value(plug_load, 'extension/FracSensible'))
       @frac_latent = to_float_or_nil(XMLHelper.get_value(plug_load, 'extension/FracLatent'))
       @usage_multiplier = to_float_or_nil(XMLHelper.get_value(plug_load, 'extension/UsageMultiplier'))
+      @weekday_fractions = XMLHelper.get_value(plug_load, 'extension/WeekdayScheduleFractions')
+      @weekend_fractions = XMLHelper.get_value(plug_load, 'extension/WeekendScheduleFractions')
+      @monthly_multipliers = XMLHelper.get_value(plug_load, 'extension/MonthlyScheduleMultipliers')
     end
   end
 
@@ -4241,14 +4308,15 @@ class HPXML < Object
     def from_oga(hpxml)
       return if hpxml.nil?
 
-      XMLHelper.get_elements(hpxml, 'Building/BuildingDetails/MiscLoads/FuelLoads/FuelLoad').each do |fuel_load|
+      XMLHelper.get_elements(hpxml, 'Building/BuildingDetails/MiscLoads/FuelLoad').each do |fuel_load|
         self << FuelLoad.new(@hpxml_object, fuel_load)
       end
     end
   end
 
   class FuelLoad < BaseElement
-    ATTRS = [:id, :fuel_load_type, :fuel_type, :therm_per_year, :frac_sensible, :frac_latent, :usage_multiplier]
+    ATTRS = [:id, :fuel_load_type, :fuel_type, :therm_per_year, :frac_sensible, :frac_latent, :usage_multiplier,
+             :weekday_fractions, :weekend_fractions, :monthly_multipliers]
     attr_accessor(*ATTRS)
 
     def delete
@@ -4263,8 +4331,8 @@ class HPXML < Object
     def to_oga(doc)
       return if nil?
 
-      fuel_loads = XMLHelper.create_elements_as_needed(doc, ['HPXML', 'Building', 'BuildingDetails', 'MiscLoads', 'FuelLoads'])
-      fuel_load = XMLHelper.add_element(fuel_loads, 'FuelLoad')
+      misc_loads = XMLHelper.create_elements_as_needed(doc, ['HPXML', 'Building', 'BuildingDetails', 'MiscLoads'])
+      fuel_load = XMLHelper.add_element(misc_loads, 'FuelLoad')
       sys_id = XMLHelper.add_element(fuel_load, 'SystemIdentifier')
       XMLHelper.add_attribute(sys_id, 'id', @id)
       XMLHelper.add_element(fuel_load, 'FuelLoadType', @fuel_load_type) unless @fuel_load_type.nil?
@@ -4277,7 +4345,9 @@ class HPXML < Object
       HPXML::add_extension(parent: fuel_load,
                            extensions: { 'FracSensible' => to_float_or_nil(@frac_sensible),
                                          'FracLatent' => to_float_or_nil(@frac_latent),
-                                         'UsageMultiplier' => to_float_or_nil(@usage_multiplier) })
+                                         'WeekdayScheduleFractions' => @weekday_fractions,
+                                         'WeekendScheduleFractions' => @weekend_fractions,
+                                         'MonthlyScheduleMultipliers' => @monthly_multipliers })
     end
 
     def from_oga(fuel_load)
@@ -4287,37 +4357,9 @@ class HPXML < Object
       @frac_sensible = to_float_or_nil(XMLHelper.get_value(fuel_load, 'extension/FracSensible'))
       @frac_latent = to_float_or_nil(XMLHelper.get_value(fuel_load, 'extension/FracLatent'))
       @usage_multiplier = to_float_or_nil(XMLHelper.get_value(fuel_load, 'extension/UsageMultiplier'))
-    end
-  end
-
-  class MiscLoadsSchedule < BaseElement
-    ATTRS = [:weekday_fractions, :weekend_fractions, :monthly_multipliers]
-    attr_accessor(*ATTRS)
-
-    def check_for_errors
-      errors = []
-      return errors
-    end
-
-    def to_oga(doc)
-      return if nil?
-
-      misc_loads = XMLHelper.create_elements_as_needed(doc, ['HPXML', 'Building', 'BuildingDetails', 'MiscLoads'])
-      HPXML::add_extension(parent: misc_loads,
-                           extensions: { 'WeekdayScheduleFractions' => @weekday_fractions,
-                                         'WeekendScheduleFractions' => @weekend_fractions,
-                                         'MonthlyScheduleMultipliers' => @monthly_multipliers })
-    end
-
-    def from_oga(hpxml)
-      return if hpxml.nil?
-
-      misc_loads = XMLHelper.get_element(hpxml, 'Building/BuildingDetails/MiscLoads')
-      return if misc_loads.nil?
-
-      @weekday_fractions = XMLHelper.get_value(misc_loads, 'extension/WeekdayScheduleFractions')
-      @weekend_fractions = XMLHelper.get_value(misc_loads, 'extension/WeekendScheduleFractions')
-      @monthly_multipliers = XMLHelper.get_value(misc_loads, 'extension/MonthlyScheduleMultipliers')
+      @weekday_fractions = XMLHelper.get_value(fuel_load, 'extension/WeekdayScheduleFractions')
+      @weekend_fractions = XMLHelper.get_value(fuel_load, 'extension/WeekendScheduleFractions')
+      @monthly_multipliers = XMLHelper.get_value(fuel_load, 'extension/MonthlyScheduleMultipliers')
     end
   end
 
