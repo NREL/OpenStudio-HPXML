@@ -1393,8 +1393,8 @@ class Airflow
     infil_program.addLine('Set ERVSecInEnth = (@HFnTdbW ERVSecInTemp ERVSecInW)')
 
     # Calculate mass flow rate based on outdoor air density
-    infil_program.addLine("Set balanced_mechvent_flow_rate = #{UnitConversions.convert(vent_mech_cfm, 'cfm', 'm^3/s')}")
-    infil_program.addLine('Set ERV_MFR = balanced_mechvent_flow_rate * ERVSupRho')
+    infil_program.addLine("Set balanced_flow_rate = #{UnitConversions.convert(vent_mech_cfm, 'cfm', 'm^3/s')}")
+    infil_program.addLine('Set ERV_MFR = balanced_flow_rate * ERVSupRho')
 
     # Heat exchanger calculation
     infil_program.addLine('Set ERVCpMin = (@Min ERVSupCp ERVSecCp)')
@@ -1413,6 +1413,7 @@ class Airflow
     # Actuator
     infil_program.addLine("Set #{erv_sens_load_actuator.name} = #{erv_sens_load_actuator.name} + ERVSensToLv")
     infil_program.addLine("Set #{erv_lat_load_actuator.name} = #{erv_lat_load_actuator.name} + ERVLatToLv")
+    infil_program.addLine('Set balanced_mechvent_flow_rate = balanced_mechvent_flow_rate + balanced_flow_rate')
 
     return infil_program
   end
@@ -1528,6 +1529,8 @@ class Airflow
 
     infil_program = apply_infiltration_to_living(living_ach50, living_const_ach, infil_program, weather, has_flue_chimney)
 
+    # Balanced mech vent
+    infil_program.addLine('Set balanced_mechvent_flow_rate = 0.0')
     if not vent_mech_bal.empty?
       # Sensors for ERV/HRV
       win_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Zone Air Humidity Ratio')

@@ -271,6 +271,7 @@ def create_hpxmls
     'base-mechvent-hrv-asre.xml' => 'base.xml',
     'base-mechvent-supply.xml' => 'base.xml',
     'base-mechvent-bath-kitchen-fans.xml' => 'base.xml',
+    'base-mechvent-multiple.xml' => 'base.xml',
     'base-misc-ceiling-fans.xml' => 'base.xml',
     'base-misc-defaults.xml' => 'base.xml',
     'base-misc-defaults2.xml' => 'base-dhw-recirc-demand.xml',
@@ -3221,6 +3222,40 @@ def set_hpxml_ventilation_fans(hpxml_file, hpxml)
     hpxml.ventilation_fans.add(id: 'BathFans',
                                fan_location: HPXML::LocationBath,
                                used_for_local_ventilation: true)
+  elsif ['base-mechvent-multiple.xml'].include? hpxml_file
+    hpxml.ventilation_fans.add(id: 'Balanced',
+                               fan_type: HPXML::MechVentTypeBalanced,
+                               tested_flow_rate: 110,
+                               hours_in_operation: 24,
+                               fan_power: 60,
+                               used_for_whole_building_ventilation: true)
+    hpxml.ventilation_fans.add(id: 'ERV',
+                               fan_type: HPXML::MechVentTypeERV,
+                               tested_flow_rate: 110,
+                               hours_in_operation: 24,
+                               total_recovery_efficiency: 0.48,
+                               sensible_recovery_efficiency: 0.72,
+                               fan_power: 60,
+                               used_for_whole_building_ventilation: true)
+    hpxml.ventilation_fans.add(id: 'CFIS',
+                               fan_type: HPXML::MechVentTypeCFIS,
+                               tested_flow_rate: 330,
+                               hours_in_operation: 8,
+                               fan_power: 300,
+                               used_for_whole_building_ventilation: true,
+                               distribution_system_idref: 'HVACDistribution')
+    hpxml.ventilation_fans.add(id: 'Supply',
+                               fan_type: HPXML::MechVentTypeSupply,
+                               tested_flow_rate: 110,
+                               hours_in_operation: 24,
+                               fan_power: 30,
+                               used_for_whole_building_ventilation: true)
+    hpxml.ventilation_fans.add(id: 'Exhaust',
+                               fan_type: HPXML::MechVentTypeExhaust,
+                               rated_flow_rate: 50,
+                               hours_in_operation: 14,
+                               fan_power: 10,
+                               used_for_whole_building_ventilation: true)
   end
 end
 
