@@ -33,6 +33,8 @@ class EUT
   CeilingFan = 'Ceiling Fan'
   Television = 'Television'
   PlugLoads = 'Plug Loads'
+  Vehicle = 'Vehicle'
+  WellPump = 'Well Pump'
   PV = 'PV'
 end
 
