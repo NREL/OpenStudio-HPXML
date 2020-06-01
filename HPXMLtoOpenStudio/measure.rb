@@ -2504,7 +2504,7 @@ class OSModel
         plug_load_tv = plug_load
       elsif plug_load.plug_load_type == HPXML::PlugLoadTypeVehicle
         plug_load_vehicle = plug_load
-      elsif plug_load.plug_load_type == HPXML::PlugLoadTypeWellPumpend
+      elsif plug_load.plug_load_type == HPXML::PlugLoadTypeWellPump
         plug_load_well_pump = plug_load
       end
     end

@@ -3757,7 +3757,7 @@ class HPXML < Object
     def from_oga(hpxml)
       return if hpxml.nil?
 
-      XMLHelper.get_elements(hpxml, 'Building/BuildingDetails/Appliances/Freezer').each do |refrigerator|
+      XMLHelper.get_elements(hpxml, 'Building/BuildingDetails/Appliances/Freezer').each do |freezer|
         self << Freezer.new(@hpxml_object, freezer)
       end
     end
@@ -4267,13 +4267,13 @@ class HPXML < Object
       fuel_load = XMLHelper.add_element(fuel_loads, 'FuelLoad')
       sys_id = XMLHelper.add_element(fuel_load, 'SystemIdentifier')
       XMLHelper.add_attribute(sys_id, 'id', @id)
-      XMLHelper.add_element(fuel_load, 'FuelLoadLoadType', @fuel_load_type) unless @fuel_load_type.nil?
-      XMLHelper.add_element(fuel_load, 'FuelType', @fuel_type) unless @fuel_type.nil?
+      XMLHelper.add_element(fuel_load, 'FuelLoadType', @fuel_load_type) unless @fuel_load_type.nil?
       if not @kWh_per_year.nil?
         load = XMLHelper.add_element(fuel_load, 'Load')
         XMLHelper.add_element(load, 'Units', 'therm/year')
         XMLHelper.add_element(load, 'Value', to_float(@therm_per_year))
       end
+      XMLHelper.add_element(fuel_load, 'FuelType', @fuel_type) unless @fuel_type.nil?
       HPXML::add_extension(parent: fuel_load,
                            extensions: { 'FracSensible' => to_float_or_nil(@frac_sensible),
                                          'FracLatent' => to_float_or_nil(@frac_latent),
