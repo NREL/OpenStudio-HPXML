@@ -284,7 +284,7 @@ def create_hpxmls
     'base-misc-ceiling-fans.xml' => 'base.xml',
     'base-misc-defaults.xml' => 'base.xml',
     'base-misc-defaults2.xml' => 'base-dhw-recirc-demand.xml',
-    'base-misc-large-uncommon-loads.xml' => 'base.xml',
+    'base-misc-large-uncommon-loads.xml' => 'base-enclosure-garage.xml',
     'base-misc-timestep-10-mins.xml' => 'base.xml',
     'base-misc-runperiod-1-month.xml' => 'base.xml',
     'base-misc-usage-multiplier.xml' => 'base.xml',
@@ -3863,6 +3863,9 @@ def set_hpxml_refrigerator(hpxml_file, hpxml)
     hpxml.refrigerators[0].usage_multiplier = 0.9
   elsif ['base-misc-large-uncommon-loads.xml'].include? hpxml_file
     hpxml.refrigerators.add(id: 'ExtraRefrigerator',
+                            rated_annual_kwh: 650,
+                            primary_indicator: false)
+    hpxml.refrigerators.add(id: 'ExtraRefrigerator2',
                             rated_annual_kwh: 650,
                             primary_indicator: false)
   end

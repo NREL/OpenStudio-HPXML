@@ -613,7 +613,8 @@ class HPXMLTest < MiniTest::Test
                                     'base-enclosure-other-non-freezing-space.xml' => 0, # no foundation in contact w/ ground
                                     'base-enclosure-other-multifamily-buffer-space.xml' => 0, # no foundation in contact w/ ground
                                     'base-foundation-walkout-basement.xml' => 4, # 3 foundation walls plus a no-wall exposed perimeter
-                                    'base-foundation-complex.xml' => 10 }
+                                    'base-foundation-complex.xml' => 10,
+                                    'base-misc-large-uncommon-loads.xml' => 2 }
 
     if hpxml_path.include? 'ASHRAE_Standard_140'
       # nop
