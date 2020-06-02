@@ -146,7 +146,6 @@ class SimulationOutputReportTest < MiniTest::Test
     'Electricity: Mech Vent',
     'Electricity: Whole House Fan',
     'Electricity: Refrigerator',
-    'Electricity: Extra Refrigerator',
     'Electricity: Freezer',
     'Electricity: Dehumidifier',
     'Electricity: Dishwasher',
