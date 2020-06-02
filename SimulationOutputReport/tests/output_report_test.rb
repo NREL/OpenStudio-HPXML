@@ -291,6 +291,7 @@ class SimulationOutputReportTest < MiniTest::Test
     'enduseElectricityMechVent',
     'enduseElectricityWholeHouseFan',
     'enduseElectricityRefrigerator',
+    'enduseElectricityFreezer',
     'enduseElectricityDehumidifier',
     'enduseElectricityDishwasher',
     'enduseElectricityClothesWasher',
@@ -299,11 +300,22 @@ class SimulationOutputReportTest < MiniTest::Test
     'enduseElectricityCeilingFan',
     'enduseElectricityTelevision',
     'enduseElectricityPlugLoads',
+    'enduseElectricityVehicle',
+    'enduseElectricityWellPump',
+    'enduseElectricityPoolHeater',
+    'enduseElectricityPoolPump',
+    'enduseElectricityHotTubHeater',
+    'enduseElectricityHotTubPump',
     'enduseElectricityPV',
     'enduseNaturalGasHeating',
     'enduseNaturalGasHotWater',
     'enduseNaturalGasClothesDryer',
     'enduseNaturalGasRangeOven',
+    'enduseNaturalGasPoolHeater',
+    'enduseNaturalGasHotTubHeater',
+    'enduseNaturalGasGrill',
+    'enduseNaturalGasLighting',
+    'enduseNaturalGasFireplace',
     'enduseFuelOilHeating',
     'enduseFuelOilHotWater',
     'enduseFuelOilClothesDryer',
@@ -874,6 +886,7 @@ class SimulationOutputReportTest < MiniTest::Test
     require 'fileutils'
     require_relative '../../HPXMLtoOpenStudio/resources/xmlhelper.rb'
     require_relative '../../HPXMLtoOpenStudio/resources/constants.rb'
+    require 'oga'
     old_hpxml_path = File.join(File.dirname(__FILE__), '../../workflow/sample_files/base.xml')
     [Constants.CalcTypeERIReferenceHome, Constants.CalcTypeERIReferenceHome].each do |eri_design|
       new_hpxml_path = File.join(File.dirname(__FILE__), '../../workflow/sample_files/base-eri.xml')
