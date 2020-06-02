@@ -1394,7 +1394,7 @@ class HPXML < Object
       @radiant_barrier = to_bool_or_nil(XMLHelper.get_value(roof, 'RadiantBarrier'))
       insulation = XMLHelper.get_element(roof, 'Insulation')
       if not insulation.nil?
-        insulation_id = HPXML::get_id(insulation)
+        @insulation_id = HPXML::get_id(insulation)
         @insulation_assembly_r_value = to_float_or_nil(XMLHelper.get_value(insulation, 'AssemblyEffectiveRValue'))
         @insulation_cavity_r_value = to_float_or_nil(XMLHelper.get_value(insulation, "Layer[InstallationType='cavity']/NominalRValue"))
         @insulation_continuous_r_value = to_float_or_nil(XMLHelper.get_value(insulation, "Layer[InstallationType='continuous']/NominalRValue"))
@@ -1485,7 +1485,7 @@ class HPXML < Object
       @emittance = to_float_or_nil(XMLHelper.get_value(rim_joist, 'Emittance'))
       insulation = XMLHelper.get_element(rim_joist, 'Insulation')
       if not insulation.nil?
-        insulation_id = HPXML::get_id(insulation)
+        @insulation_id = HPXML::get_id(insulation)
         @insulation_assembly_r_value = to_float_or_nil(XMLHelper.get_value(insulation, 'AssemblyEffectiveRValue'))
       end
     end
@@ -1610,7 +1610,7 @@ class HPXML < Object
       @emittance = to_float_or_nil(XMLHelper.get_value(wall, 'Emittance'))
       insulation = XMLHelper.get_element(wall, 'Insulation')
       if not insulation.nil?
-        insulation_id = HPXML::get_id(insulation)
+        @insulation_id = HPXML::get_id(insulation)
         @insulation_assembly_r_value = to_float_or_nil(XMLHelper.get_value(insulation, 'AssemblyEffectiveRValue'))
         @insulation_cavity_r_value = to_float_or_nil(XMLHelper.get_value(insulation, "Layer[InstallationType='cavity']/NominalRValue"))
         @insulation_continuous_r_value = to_float_or_nil(XMLHelper.get_value(insulation, "Layer[InstallationType='continuous']/NominalRValue"))
@@ -1754,7 +1754,7 @@ class HPXML < Object
       @depth_below_grade = to_float_or_nil(XMLHelper.get_value(foundation_wall, 'DepthBelowGrade'))
       insulation = XMLHelper.get_element(foundation_wall, 'Insulation')
       if not insulation.nil?
-        insulation_id = HPXML::get_id(insulation)
+        @insulation_id = HPXML::get_id(insulation)
         @insulation_r_value = to_float_or_nil(XMLHelper.get_value(insulation, "Layer[InstallationType='continuous']/NominalRValue"))
         @insulation_interior_r_value = to_float_or_nil(XMLHelper.get_value(insulation, "Layer[InstallationType='continuous - interior']/NominalRValue"))
         @insulation_interior_distance_to_top = to_float_or_nil(XMLHelper.get_value(insulation, "Layer[InstallationType='continuous - interior']/extension/DistanceToTopOfInsulation"))
@@ -1869,7 +1869,7 @@ class HPXML < Object
       @area = to_float_or_nil(XMLHelper.get_value(frame_floor, 'Area'))
       insulation = XMLHelper.get_element(frame_floor, 'Insulation')
       if not insulation.nil?
-        insulation_id = HPXML::get_id(insulation)
+        @insulation_id = HPXML::get_id(insulation)
         @insulation_assembly_r_value = to_float_or_nil(XMLHelper.get_value(insulation, 'AssemblyEffectiveRValue'))
         @insulation_cavity_r_value = to_float_or_nil(XMLHelper.get_value(insulation, "Layer[InstallationType='cavity']/NominalRValue"))
         @insulation_continuous_r_value = to_float_or_nil(XMLHelper.get_value(insulation, "Layer[InstallationType='continuous']/NominalRValue"))
@@ -1995,12 +1995,12 @@ class HPXML < Object
       @carpet_r_value = to_float_or_nil(XMLHelper.get_value(slab, 'extension/CarpetRValue'))
       perimeter_insulation = XMLHelper.get_element(slab, 'PerimeterInsulation')
       if not perimeter_insulation.nil?
-        perimeter_insulation_id = HPXML::get_id(perimeter_insulation)
+        @perimeter_insulation_id = HPXML::get_id(perimeter_insulation)
         @perimeter_insulation_r_value = to_float_or_nil(XMLHelper.get_value(perimeter_insulation, "Layer[InstallationType='continuous']/NominalRValue"))
       end
       under_slab_insulation = XMLHelper.get_element(slab, 'UnderSlabInsulation')
       if not under_slab_insulation.nil?
-        under_slab_insulation_id = HPXML::get_id(under_slab_insulation)
+        @under_slab_insulation_id = HPXML::get_id(under_slab_insulation)
         @under_slab_insulation_r_value = to_float_or_nil(XMLHelper.get_value(under_slab_insulation, "Layer[InstallationType='continuous']/NominalRValue"))
       end
     end
