@@ -434,7 +434,7 @@ class OSModel
     HPXMLDefaults.apply_ceiling_fans(@hpxml, @nbeds)
     HPXMLDefaults.apply_plug_loads(@hpxml, @cfa, @nbeds)
     HPXMLDefaults.apply_fuel_loads(@hpxml, @cfa, @nbeds)
-    HPXMLDefaults.apply_pools_and_hot_tubs(@hpxml)
+    HPXMLDefaults.apply_pools_and_hot_tubs(@hpxml, @cfa, @nbeds)
     HPXMLDefaults.apply_appliances(@hpxml, @nbeds, @eri_version)
     HPXMLDefaults.apply_lighting(@hpxml)
     HPXMLDefaults.apply_pv_systems(@hpxml)
@@ -1970,15 +1970,11 @@ class OSModel
       dw_space = get_space_from_location(dishwasher.location, 'Dishwasher', model, spaces)
     end
 
-    # Refrigerator / Extra Refrigerator
+    # Refrigerators
     refrigerators = @hpxml.refrigerators
-    if refrigerators.size == 1
-      refrigerator = refrigerators[0]
-      rf_space = get_space_from_location(refrigerator.location, 'Refrigerator', model, spaces)
-    elsif refrigerators.size > 0
-      refrigerator, extra_refrigerator = HotWaterAndAppliances.get_refrigerators(refrigerators)
-      rf_space = get_space_from_location(refrigerator.location, 'Refrigerator', model, spaces)
-      erf_space = get_space_from_location(extra_refrigerator.location, 'Extra Refrigerator', model, spaces)
+    rf_spaces = []
+    refrigerators.each do |refrigerator|
+      rf_spaces << get_space_from_location(refrigerator.location, 'Refrigerator', model, spaces)
     end
 
     # Freezer
@@ -2145,8 +2141,8 @@ class OSModel
     HotWaterAndAppliances.apply(model, weather, @living_space,
                                 @cfa, @nbeds, @ncfl, @has_uncond_bsmnt, avg_setpoint_temp,
                                 clothes_washer, cw_space, clothes_dryer, cd_space,
-                                dishwasher, dw_space, refrigerator, rf_space,
-                                extra_refrigerator, erf_space,
+                                dishwasher, dw_space,
+                                refrigerators, rf_spaces,
                                 freezer, fz_space,
                                 cooking_range, cook_space, oven,
                                 fixtures_all_low_flow, fixtures_usage_multiplier,

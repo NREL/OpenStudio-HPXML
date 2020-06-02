@@ -252,4 +252,44 @@ class MiscLoads
       mel.setSchedule(sch.schedule)
     end
   end
+
+  def self.get_pool_pump_default_values(cfa, nbeds)
+    return 158.6 * (0.5 + 0.25 * nbeds / 3.0 + 0.25 * cfa / 1920.0) # kWh/yr
+  end
+
+  def self.get_pool_heater_default_values(heater_type, cfa, nbeds)
+    if heater_type.include?('elec')
+      return 8.3 * (0.5 + 0.25 * nbeds / 3.0 + 0.25 * cfa / 1920.0) # kWh/yr
+    else
+      return 3.0 * (0.5 + 0.25 * nbeds / 3.0 + 0.25 * cfa / 1920.0) # therm/yr
+    end
+  end
+
+  def self.get_hot_tub_pump_default_values(cfa, nbeds)
+    return 59.5 * (0.5 + 0.25 * nbeds / 3.0 + 0.25 * cfa / 1920.0) # kWh/yr
+  end
+
+  def self.get_hot_tub_heater_default_values(heater_type, cfa, nbeds)
+    if heater_type.include?('elec')
+      return 49.0 * (0.5 + 0.25 * nbeds / 3.0 + 0.25 * cfa / 1920.0) # kWh/yr
+    else
+      return 0.87 * (0.5 + 0.25 * nbeds / 3.0 + 0.25 * cfa / 1920.0) # therm/yr
+    end
+  end
+
+  def self.get_well_pump_default_values(cfa, nbeds)
+    return 50.8 * (0.5 + 0.25 * nbeds / 3.0 + 0.25 * cfa / 1920.0) # kWh/yr
+  end
+
+  def self.get_gas_grill_default_values(cfa, nbeds)
+    return 0.87 * (0.5 + 0.25 * nbeds / 3.0 + 0.25 * cfa / 1920.0) # therm/yr
+  end
+
+  def self.get_gas_lighting_default_values(cfa, nbeds)
+    return 0.22 * (0.5 + 0.25 * nbeds / 3.0 + 0.25 * cfa / 1920.0) # therm/yr
+  end
+
+  def self.get_gas_fireplace_default_values(cfa, nbeds)
+    return 1.95 * (0.5 + 0.25 * nbeds / 3.0 + 0.25 * cfa / 1920.0) # therm/yr
+  end
 end

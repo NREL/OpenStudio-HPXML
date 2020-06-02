@@ -4,8 +4,8 @@ class HotWaterAndAppliances
   def self.apply(model, weather, living_space,
                  cfa, nbeds, ncfl, has_uncond_bsmnt, wh_setpoint,
                  clothes_washer, cw_space, clothes_dryer, cd_space,
-                 dishwasher, dw_space, refrigerator, rf_space,
-                 extra_refrigerator, extra_rf_space,
+                 dishwasher, dw_space,
+                 refrigerators, rf_spaces,
                  freezer, fz_space,
                  cooking_range, cook_space, oven,
                  fixtures_all_low_flow, fixtures_usage_multiplier,
@@ -116,29 +116,18 @@ class HotWaterAndAppliances
     end
 
     # Refrigerator
-    if not refrigerator.nil?
-      rf_annual_kwh, rf_frac_sens, rf_frac_lat = calc_refrigerator_energy(refrigerator, rf_space.nil?)
+    if not refrigerators.empty?
       fridge_name = Constants.ObjectNameRefrigerator
       fridge_weekday_sch = '0.040, 0.039, 0.038, 0.037, 0.036, 0.036, 0.038, 0.040, 0.041, 0.041, 0.040, 0.040, 0.042, 0.042, 0.042, 0.041, 0.044, 0.048, 0.050, 0.048, 0.047, 0.046, 0.044, 0.041'
       fridge_monthly_sch = '0.837, 0.835, 1.084, 1.084, 1.084, 1.096, 1.096, 1.096, 1.096, 0.931, 0.925, 0.837'
       fridge_schedule = MonthWeekdayWeekendSchedule.new(model, fridge_name, fridge_weekday_sch, fridge_weekday_sch, fridge_monthly_sch, 1.0, 1.0, true, true, Constants.ScheduleTypeLimitsFraction)
-      fridge_design_level = fridge_schedule.calcDesignLevelFromDailykWh(rf_annual_kwh / 365.0)
+      refrigerators.zip(rf_spaces).each do |refrigerator, rf_space|
+        rf_annual_kwh, rf_frac_sens, rf_frac_lat = calc_refrigerator_energy(refrigerator, rf_space.nil?)
+        fridge_design_level = fridge_schedule.calcDesignLevelFromDailykWh(rf_annual_kwh / 365.0)
 
-      rf_space = living_space if rf_space.nil?
-      add_electric_equipment(model, fridge_name, rf_space, fridge_design_level, rf_frac_sens, rf_frac_lat, fridge_schedule.schedule)
-    end
-
-    # Extra Refrigerator
-    if not extra_refrigerator.nil?
-      rf_annual_kwh, rf_frac_sens, rf_frac_lat = calc_refrigerator_energy(extra_refrigerator, extra_rf_space.nil?)
-      fridge_name = Constants.ObjectNameExtraRefrigerator
-      fridge_weekday_sch = '0.040, 0.039, 0.038, 0.037, 0.036, 0.036, 0.038, 0.040, 0.041, 0.041, 0.040, 0.040, 0.042, 0.042, 0.042, 0.041, 0.044, 0.048, 0.050, 0.048, 0.047, 0.046, 0.044, 0.041'
-      fridge_monthly_sch = '0.837, 0.835, 1.084, 1.084, 1.084, 1.096, 1.096, 1.096, 1.096, 0.931, 0.925, 0.837'
-      fridge_schedule = MonthWeekdayWeekendSchedule.new(model, fridge_name, fridge_weekday_sch, fridge_weekday_sch, fridge_monthly_sch, 1.0, 1.0, true, true, Constants.ScheduleTypeLimitsFraction)
-      fridge_design_level = fridge_schedule.calcDesignLevelFromDailykWh(rf_annual_kwh / 365.0)
-
-      extra_rf_space = living_space if extra_rf_space.nil?
-      add_electric_equipment(model, fridge_name, extra_rf_space, fridge_design_level, rf_frac_sens, rf_frac_lat, fridge_schedule.schedule)
+        rf_space = living_space if rf_space.nil?
+        add_electric_equipment(model, fridge_name, rf_space, fridge_design_level, rf_frac_sens, rf_frac_lat, fridge_schedule.schedule)
+      end
     end
 
     # Freezer
@@ -147,7 +136,7 @@ class HotWaterAndAppliances
       freezer_name = Constants.ObjectNameFreezer
       freezer_weekday_sch = '0.040, 0.039, 0.038, 0.037, 0.036, 0.036, 0.038, 0.040, 0.041, 0.041, 0.040, 0.040, 0.042, 0.042, 0.042, 0.041, 0.044, 0.048, 0.050, 0.048, 0.047, 0.046, 0.044, 0.041'
       freezer_monthly_sch = '0.837, 0.835, 1.084, 1.084, 1.084, 1.096, 1.096, 1.096, 1.096, 0.931, 0.925, 0.837'
-      freezer_schedule = MonthWeekdayWeekendSchedule.new(model, fridge_name, freezer_weekday_sch, freezer_weekday_sch, freezer_monthly_sch, 1.0, 1.0, true, true, Constants.ScheduleTypeLimitsFraction)
+      freezer_schedule = MonthWeekdayWeekendSchedule.new(model, freezer_name, freezer_weekday_sch, freezer_weekday_sch, freezer_monthly_sch, 1.0, 1.0, true, true, Constants.ScheduleTypeLimitsFraction)
       freezer_design_level = freezer_schedule.calcDesignLevelFromDailykWh(fz_annual_kwh / 365.0)
 
       fz_space = living_space if fz_space.nil?
@@ -343,26 +332,12 @@ class HotWaterAndAppliances
     return { rated_annual_kwh: 637.0 + 18.0 * nbeds } # kWh/yr
   end
 
-  def self.get_refrigerators(refrigerators)
-    fridge1 = refrigerators[0]
-    fridge2 = refrigerators[1]
-    if fridge1.primary_indicator.nil? and fridge2.primary_indicator.nil?
-      refrigerator = fridge1
-      extra_refrigerator = fridge2
-    elsif not fridge1.primary_indicator.nil? and fridge1.primary_indicator
-      refrigerator = fridge1
-      extra_refrigerator = fridge2
-    elsif not fridge2.primary_indicator.nil? and fridge2.primary_indicator
-      refrigerator = fridge2
-      extra_refrigerator = fridge1
-    elsif not fridge1.primary_indicator.nil? and not fridge1.primary_indicator
-      refrigerator = fridge2
-      extra_refrigerator = fridge1
-    elsif not fridge2.primary_indicator.nil? and not fridge2.primary_indicator
-      refrigerator = fridge1
-      extra_refrigerator = fridge2
-    end
-    return refrigerator, extra_refrigerator
+  def self.get_extra_refrigerator_default_values
+    return { rated_annual_kwh: 243.6 } # kWh/yr
+  end
+
+  def self.get_freezer_default_values
+    return 319.8 # kWh/yr
   end
 
   def self.get_clothes_dryer_default_values(eri_version, fuel_type)
@@ -864,5 +839,22 @@ class HotWaterAndAppliances
       end
     end
     fail 'Unexpected hot water distribution system.'
+  end
+
+  def self.get_default_extra_refrigerator_locations(hpxml)
+    extra_refrigerator_location_hierarchy = [HPXML::LocationGarage,
+                                             HPXML::LocationBasementUnconditioned,
+                                             HPXML::LocationBasementConditioned,
+                                             HPXML::LocationLivingSpace]
+
+    extra_refrigerator_location = nil
+    extra_refrigerator_location_hierarchy.each do |space_type|
+      if hpxml.has_space_type(space_type)
+        extra_refrigerator_location = space_type
+        break
+      end
+    end
+
+    return extra_refrigerator_location
   end
 end

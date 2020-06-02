@@ -30,7 +30,6 @@ class SimulationOutputReportTest < MiniTest::Test
     'Electricity: Mech Vent (MBtu)',
     'Electricity: Whole House Fan (MBtu)',
     'Electricity: Refrigerator (MBtu)',
-    'Electricity: Extra Refrigerator (MBtu)',
     'Electricity: Freezer (MBtu)',
     'Electricity: Dehumidifier (MBtu)',
     'Electricity: Dishwasher (MBtu)',

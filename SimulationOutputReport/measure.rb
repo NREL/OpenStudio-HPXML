@@ -1812,7 +1812,6 @@ class SimulationOutputReport < OpenStudio::Measure::ReportingMeasure
       [FT::Elec, EUT::MechVent] => EndUse.new(meter: "#{Constants.ObjectNameMechanicalVentilation}:InteriorEquipment:Electricity"),
       [FT::Elec, EUT::WholeHouseFan] => EndUse.new(meter: "#{Constants.ObjectNameWholeHouseFan}:InteriorEquipment:Electricity"),
       [FT::Elec, EUT::Refrigerator] => EndUse.new(meter: "#{Constants.ObjectNameRefrigerator}:InteriorEquipment:Electricity"),
-      [FT::Elec, EUT::ExtraRefrigerator] => EndUse.new(meter: "#{Constants.ObjectNameExtraRefrigerator}:InteriorEquipment:Electricity"),
       [FT::Elec, EUT::Freezer] => EndUse.new(meter: "#{Constants.ObjectNameFreezer}:InteriorEquipment:Electricity"),
       [FT::Elec, EUT::Dehumidifier] => EndUse.new(variable: OutputVars.DehumidifierElectricity),
       [FT::Elec, EUT::Dishwasher] => EndUse.new(meter: "#{Constants.ObjectNameDishwasher}:InteriorEquipment:Electricity"),
