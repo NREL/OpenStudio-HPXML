@@ -613,6 +613,7 @@
           <SystemIdentifier id='Pool'/>
           <PoolPumps>
             <PoolPump>
+              <SystemIdentifier id='PoolPump'/>
               <Load>
                 <Units>kWh/year</Units>
                 <Value>50.0</Value>
@@ -620,6 +621,7 @@
             </PoolPump>
           </PoolPumps>
           <Heater>
+            <SystemIdentifier id='PoolHeater'/>
             <Type>gas fired</Type>
             <Load>
               <Units>therm/year</Units>
@@ -638,6 +640,7 @@
           <SystemIdentifier id='HotTub'/>
           <HotTubPumps>
             <HotTubPump>
+              <SystemIdentifier id='HotTubPump'/>
               <Load>
                 <Units>kWh/year</Units>
                 <Value>50.0</Value>
@@ -645,6 +648,7 @@
             </HotTubPump>
           </HotTubPumps>
           <Heater>
+            <SystemIdentifier id='HotTubHeater'/>
             <Type>electric resistance</Type>
             <Load>
               <Units>kWh/year</Units>
