@@ -514,9 +514,10 @@ class HPXMLDefaults
       end
     end
 
-    # Default refrigerator
-    if hpxml.refrigerators.size > 0
-      refrigerator = hpxml.refrigerators[0]
+    # Default refrigerator / extra refrigerator
+    refrigerators = hpxml.refrigerators
+    if refrigerators.size == 1
+      refrigerator = refrigerators[0]
       if refrigerator.location.nil?
         refrigerator.location = HPXML::LocationLivingSpace
       end
@@ -526,6 +527,39 @@ class HPXMLDefaults
       end
       if refrigerator.usage_multiplier.nil?
         refrigerator.usage_multiplier = 1.0
+      end
+    elsif refrigerators.size > 0
+      refrigerator, extra_refrigerator = HotWaterAndAppliances.get_refrigerators(refrigerators)
+      if refrigerator.location.nil?
+        refrigerator.location = HPXML::LocationLivingSpace
+      end
+      if refrigerator.adjusted_annual_kwh.nil? && refrigerator.rated_annual_kwh.nil?
+        default_values = HotWaterAndAppliances.get_refrigerator_default_values(nbeds)
+        refrigerator.rated_annual_kwh = default_values[:rated_annual_kwh]
+      end
+      if refrigerator.usage_multiplier.nil?
+        refrigerator.usage_multiplier = 1.0
+      end
+      if extra_refrigerator.location.nil?
+        extra_refrigerator.location = HPXML::LocationLivingSpace # FIXME: get_default_location?
+      end
+      if extra_refrigerator.adjusted_annual_kwh.nil? && extra_refrigerator.rated_annual_kwh.nil?
+        default_values = HotWaterAndAppliances.get_refrigerator_default_values(nbeds)
+        extra_refrigerator.rated_annual_kwh = default_values[:rated_annual_kwh]
+      end
+      if extra_refrigerator.usage_multiplier.nil?
+        extra_refrigerator.usage_multiplier = 1.0
+      end
+    end
+
+    # Default freezer
+    if hpxml.freezers.size > 0
+      freezer = hpxml.freezers[0]
+      if freezer.location.nil?
+        freezer.location = HPXML::LocationLivingSpace # FIXME: get_default_location?
+      end
+      if freezer.usage_multiplier.nil?
+        freezer.usage_multiplier = 1.0
       end
     end
 

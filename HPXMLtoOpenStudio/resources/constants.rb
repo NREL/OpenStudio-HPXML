@@ -297,6 +297,14 @@ class Constants
     return 'exterior lighting'
   end
 
+  def self.ObjectNameExtraRefrigerator
+    return 'extra fridge'
+  end
+
+  def self.ObjectNameFreezer
+    return 'freezer'
+  end
+
   def self.ObjectNameGarageLighting
     return 'garage lighting'
   end

@@ -3710,7 +3710,7 @@ class HPXML < Object
   end
 
   class Refrigerator < BaseElement
-    ATTRS = [:id, :location, :rated_annual_kwh, :adjusted_annual_kwh, :usage_multiplier]
+    ATTRS = [:id, :location, :rated_annual_kwh, :adjusted_annual_kwh, :usage_multiplier, :primary_indicator]
     attr_accessor(*ATTRS)
 
     def delete
@@ -3731,6 +3731,7 @@ class HPXML < Object
       XMLHelper.add_attribute(sys_id, 'id', @id)
       XMLHelper.add_element(refrigerator, 'Location', @location) unless @location.nil?
       XMLHelper.add_element(refrigerator, 'RatedAnnualkWh', to_float(@rated_annual_kwh)) unless @rated_annual_kwh.nil?
+      XMLHelper.add_element(refrigerator, 'PrimaryIndicator', to_boolean(@primary_indicator)) unless @primary_indicator.nil?
       HPXML::add_extension(parent: refrigerator,
                            extensions: { 'AdjustedAnnualkWh' => to_float_or_nil(@adjusted_annual_kwh),
                                          'UsageMultiplier' => to_float_or_nil(@usage_multiplier) })
@@ -3742,6 +3743,7 @@ class HPXML < Object
       @id = HPXML::get_id(refrigerator)
       @location = XMLHelper.get_value(refrigerator, 'Location')
       @rated_annual_kwh = to_float_or_nil(XMLHelper.get_value(refrigerator, 'RatedAnnualkWh'))
+      @primary_indicator = to_bool_or_nil(XMLHelper.get_value(refrigerator, 'PrimaryIndicator'))
       @adjusted_annual_kwh = to_float_or_nil(XMLHelper.get_value(refrigerator, 'extension/AdjustedAnnualkWh'))
       @usage_multiplier = to_float_or_nil(XMLHelper.get_value(refrigerator, 'extension/UsageMultiplier'))
     end

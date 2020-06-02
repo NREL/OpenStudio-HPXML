@@ -1970,16 +1970,21 @@ class OSModel
       dw_space = get_space_from_location(dishwasher.location, 'Dishwasher', model, spaces)
     end
 
-    # Refrigerator
-    if @hpxml.refrigerators.size > 0
-      refrigerator = @hpxml.refrigerators[0] # TODO: extra refrigerators
+    # Refrigerator / Extra Refrigerator
+    refrigerators = @hpxml.refrigerators
+    if refrigerators.size == 1
+      refrigerator = refrigerators[0]
       rf_space = get_space_from_location(refrigerator.location, 'Refrigerator', model, spaces)
+    elsif refrigerators.size > 0
+      refrigerator, extra_refrigerator = HotWaterAndAppliances.get_refrigerators(refrigerators)
+      rf_space = get_space_from_location(refrigerator.location, 'Refrigerator', model, spaces)
+      erf_space = get_space_from_location(extra_refrigerator.location, 'Extra Refrigerator', model, spaces)
     end
 
-    # Freezer # TODO
+    # Freezer
     if @hpxml.freezers.size > 0
-      # freezer = @hpxml.freezers[0]
-      # fz_space = get_space_from_location(freezer.location, 'Freezer', model, spaces)
+      freezer = @hpxml.freezers[0]
+      fz_space = get_space_from_location(freezer.location, 'Freezer', model, spaces)
     end
 
     # Cooking Range/Oven
@@ -2141,6 +2146,8 @@ class OSModel
                                 @cfa, @nbeds, @ncfl, @has_uncond_bsmnt, avg_setpoint_temp,
                                 clothes_washer, cw_space, clothes_dryer, cd_space,
                                 dishwasher, dw_space, refrigerator, rf_space,
+                                extra_refrigerator, erf_space,
+                                freezer, fz_space,
                                 cooking_range, cook_space, oven,
                                 fixtures_all_low_flow, fixtures_usage_multiplier,
                                 dist_type, pipe_r, std_pipe_length, recirc_loop_length,

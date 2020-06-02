@@ -3863,15 +3863,14 @@ def set_hpxml_refrigerator(hpxml_file, hpxml)
     hpxml.refrigerators[0].usage_multiplier = 0.9
   elsif ['base-misc-large-uncommon-loads.xml'].include? hpxml_file
     hpxml.refrigerators.add(id: 'ExtraRefrigerator',
-                            location: HPXML::LocationGarage,
-                            rated_annual_kwh: 650)
+                            rated_annual_kwh: 650,
+                            primary_indicator: false)
   end
 end
 
 def set_hpxml_freezer(hpxml_file, hpxml)
   if ['base-misc-large-uncommon-loads.xml'].include? hpxml_file
     hpxml.freezers.add(id: 'Freezer',
-                       location: HPXML::LocationGarage,
                        rated_annual_kwh: 650)
   end
 end

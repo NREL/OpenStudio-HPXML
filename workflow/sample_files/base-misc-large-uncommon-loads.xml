@@ -436,12 +436,10 @@
         </Refrigerator>
         <Refrigerator>
           <SystemIdentifier id='ExtraRefrigerator'/>
-          <Location>garage</Location>
           <RatedAnnualkWh>650.0</RatedAnnualkWh>
         </Refrigerator>
         <Freezer>
           <SystemIdentifier id='Freezer'/>
-          <Location>garage</Location>
           <RatedAnnualkWh>650.0</RatedAnnualkWh>
         </Freezer>
         <CookingRange>

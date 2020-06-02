@@ -770,29 +770,29 @@ class EnergyPlusValidator
       # [Pool]
       '/HPXML/Building/BuildingDetails/Pools/Pool' => {
         'SystemIdentifier' => one, # Required by HPXML schema
-        'PoolPumps/PoolPump' => one,
-        'Heater[Type="gas fired" or Type="electric resistance"]]' => one,
-        'Heater/Load[Units="kWh/year" or Units="therm/year"]/Value' => zero_or_one,
-        'PoolPumps/PoolPump/Load[Units="kWh/year"]/Value' => zero_or_one,
-        'Heater/extension/extension/UsageMultiplier' => zero_or_one,
-        'PoolPumps/PoolPump/extension/UsageMultiplier' => zero_or_one,
-        'extension/WeekdayScheduleFractions' => zero_or_one,
-        'extension/WeekendScheduleFractions' => zero_or_one,
-        'extension/MonthlyScheduleMultipliers' => zero_or_one,
+        # 'PoolPumps/PoolPump' => one,
+        # 'Heater[Type="gas fired" or Type="electric resistance"]]' => one,
+        # 'Heater/Load[Units="kWh/year" or Units="therm/year"]/Value' => zero_or_one,
+        # 'PoolPumps/PoolPump/Load[Units="kWh/year"]/Value' => zero_or_one,
+        # 'Heater/extension/extension/UsageMultiplier' => zero_or_one,
+        # 'PoolPumps/PoolPump/extension/UsageMultiplier' => zero_or_one,
+        # 'extension/WeekdayScheduleFractions' => zero_or_one,
+        # 'extension/WeekendScheduleFractions' => zero_or_one,
+        # 'extension/MonthlyScheduleMultipliers' => zero_or_one,
       },
 
       # [HotTub]
       '/HPXML/Building/BuildingDetails/HotTubs/HotTub' => {
         'SystemIdentifier' => one, # Required by HPXML schema
-        'HotTubPumps/HotTubPump' => one,
-        'Heater[Type="gas fired" or Type="electric resistance"]]' => one,
-        'Heater/Load[Units="kWh/year" or Units="therm/year"]/Value' => zero_or_one,
-        'HotTubPumps/HotTubPump/Load[Units="kWh/year"]/Value' => zero_or_one,
-        'Heater/extension/extension/UsageMultiplier' => zero_or_one,
-        'HotTubPumps/HotTubPump/extension/UsageMultiplier' => zero_or_one,
-        'extension/WeekdayScheduleFractions' => zero_or_one,
-        'extension/WeekendScheduleFractions' => zero_or_one,
-        'extension/MonthlyScheduleMultipliers' => zero_or_one,
+        # 'HotTubPumps/HotTubPump' => one,
+        # 'Heater[Type="gas fired" or Type="electric resistance"]]' => one,
+        # 'Heater/Load[Units="kWh/year" or Units="therm/year"]/Value' => zero_or_one,
+        # 'HotTubPumps/HotTubPump/Load[Units="kWh/year"]/Value' => zero_or_one,
+        # 'Heater/extension/extension/UsageMultiplier' => zero_or_one,
+        # 'HotTubPumps/HotTubPump/extension/UsageMultiplier' => zero_or_one,
+        # 'extension/WeekdayScheduleFractions' => zero_or_one,
+        # 'extension/WeekendScheduleFractions' => zero_or_one,
+        # 'extension/MonthlyScheduleMultipliers' => zero_or_one,
       },
 
       # [PlugLoads]
