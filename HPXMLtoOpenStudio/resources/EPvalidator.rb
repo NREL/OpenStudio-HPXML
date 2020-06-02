@@ -770,7 +770,7 @@ class EnergyPlusValidator
       # [Pool]
       '/HPXML/Building/BuildingDetails/Pools/Pool' => {
         'SystemIdentifier' => one, # Required by HPXML schema
-        'PoolPumps/PoolPump' => one,
+        'PoolPumps/PoolPump/SystemIdentifier' => one,
         'PoolPumps/PoolPump/Load[Units="kWh/year"]/Value' => zero_or_one,
         'Heater[Type="gas fired" or Type="electric resistance"]' => one,
         'Heater/Load[Units="kWh/year" or Units="therm/year"]/Value' => zero_or_one,
@@ -784,7 +784,7 @@ class EnergyPlusValidator
       # [HotTub]
       '/HPXML/Building/BuildingDetails/HotTubs/HotTub' => {
         'SystemIdentifier' => one, # Required by HPXML schema
-        'HotTubPumps/HotTubPump' => one,
+        'HotTubPumps/HotTubPump/SystemIdentifier' => one,
         'HotTubPumps/HotTubPump/Load[Units="kWh/year"]/Value' => zero_or_one,
         'Heater[Type="gas fired" or Type="electric resistance"]' => one,
         'Heater/Load[Units="kWh/year" or Units="therm/year"]/Value' => zero_or_one,
