@@ -4407,7 +4407,7 @@ class HPXML < Object
       end
       XMLHelper.add_element(fuel_load, 'FuelType', @fuel_type) unless @fuel_type.nil?
       HPXML::add_extension(parent: fuel_load,
-                           extensions: { 'UsageMultiplier': to_float_or_nil(@usage_multiplier),
+                           extensions: { 'UsageMultiplier' => to_float_or_nil(@usage_multiplier),
                                          'WeekdayScheduleFractions' => @weekday_fractions,
                                          'WeekendScheduleFractions' => @weekend_fractions,
                                          'MonthlyScheduleMultipliers' => @monthly_multipliers })
