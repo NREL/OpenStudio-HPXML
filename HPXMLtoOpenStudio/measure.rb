@@ -1971,10 +1971,9 @@ class OSModel
     end
 
     # Refrigerators
-    refrigerators = @hpxml.refrigerators
-    rf_spaces = []
-    refrigerators.each do |refrigerator|
-      rf_spaces << get_space_from_location(refrigerator.location, 'Refrigerator', model, spaces)
+    refrigerators = {}
+    @hpxml.refrigerators.each do |refrigerator|
+      refrigerators[refrigerator] = get_space_from_location(refrigerator.location, 'Refrigerator', model, spaces)
     end
 
     # Freezer
@@ -2142,7 +2141,7 @@ class OSModel
                                 @cfa, @nbeds, @ncfl, @has_uncond_bsmnt, avg_setpoint_temp,
                                 clothes_washer, cw_space, clothes_dryer, cd_space,
                                 dishwasher, dw_space,
-                                refrigerators, rf_spaces,
+                                refrigerators,
                                 freezer, fz_space,
                                 cooking_range, cook_space, oven,
                                 fixtures_all_low_flow, fixtures_usage_multiplier,
@@ -2535,7 +2534,7 @@ class OSModel
     end
 
     MiscLoads.apply_fuel(model, fuel_load_grill, fuel_load_lighting, fuel_load_fireplace,
-                         @cfa, @living_space)
+                         @living_space)
   end
 
   def self.add_lighting(runner, model, weather, spaces)
@@ -2544,38 +2543,15 @@ class OSModel
   end
 
   def self.add_pools_and_hot_tubs(runner, model, spaces)
-    pool_heater_electric = nil
-    pool_heater_gas = nil
-    pool_pump = nil
     @hpxml.pools.each do |pool|
-      if pool.heater_type == HPXML::PoolHeaterTypeElectric
-        pool_heater_electric = pool
-      elsif pool.heater_type == HPXML::PoolHeaterTypeGas
-        pool_heater_gas = pool
-      end
-      if pool.pump_annual_energy
-        pool_pump = pool
-      end
+      MiscLoads.apply_pool_or_hot_tub_heater(model, pool, Constants.ObjectNameMiscPoolHeater, @living_space)
+      MiscLoads.apply_pool_or_hot_tub_pump(model, pool, Constants.ObjectNameMiscPoolPump, @living_space)
     end
 
-    hot_tub_heater_electric = nil
-    hot_tub_heater_gas = nil
-    hot_tub_pump = nil
     @hpxml.hot_tubs.each do |hot_tub|
-      if hot_tub.heater_type == HPXML::HotTubHeaterTypeElectric
-        hot_tub_heater_electric = hot_tub
-      elsif hot_tub.heater_type == HPXML::HotTubHeaterTypeGas
-        hot_tub_heater_gas = hot_tub
-      end
-      if hot_tub.pump_annual_energy
-        hot_tub_pump = hot_tub
-      end
+      MiscLoads.apply_pool_or_hot_tub_heater(model, hot_tub, Constants.ObjectNameMiscHotTubHeater, @living_space)
+      MiscLoads.apply_pool_or_hot_tub_pump(model, hot_tub, Constants.ObjectNameMiscHotTubPump, @living_space)
     end
-
-    MiscLoads.apply_electric(model, pool_heater_electric, pool_pump, hot_tub_heater_electric, hot_tub_pump,
-                             @living_space)
-    MiscLoads.apply_gas(model, pool_heater_gas, hot_tub_heater_gas,
-                        @living_space)
   end
 
   def self.add_airflow(runner, model, weather, spaces)

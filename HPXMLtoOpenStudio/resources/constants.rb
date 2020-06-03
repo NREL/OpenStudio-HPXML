@@ -341,6 +341,14 @@ class Constants
     return 'misc gas fireplace'
   end
 
+  def self.ObjectNameMiscPoolHeater
+    return 'misc pool heater'
+  end
+
+  def self.ObjectNameMiscPoolPump
+    return 'misc pool pump'
+  end
+
   def self.ObjectNameMiscHotTubHeater
     return 'misc hot tub heater'
   end
@@ -351,14 +359,6 @@ class Constants
 
   def self.ObjectNameMiscPlugLoads
     return 'misc plug loads'
-  end
-
-  def self.ObjectNameMiscPoolHeater
-    return 'misc pool heater'
-  end
-
-  def self.ObjectNameMiscPoolPump
-    return 'misc pool pump'
   end
 
   def self.ObjectNameMiscTelevision

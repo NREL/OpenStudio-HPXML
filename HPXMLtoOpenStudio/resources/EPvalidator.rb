@@ -99,13 +99,13 @@ class EnergyPlusValidator
         '/HPXML/Building/BuildingDetails/HotTubs/HotTub' => zero_or_one, # See [HotTub]
 
         '/HPXML/Building/BuildingDetails/MiscLoads/PlugLoad[PlugLoadType="other"]' => zero_or_one, # See [PlugLoads]
-        '/HPXML/Building/BuildingDetails/MiscLoads/PlugLoad[PlugLoadType="TV other"]' => zero_or_one, # See [Television]
-        '/HPXML/Building/BuildingDetails/MiscLoads/PlugLoad[PlugLoadType="electric vehicle charging"]' => zero_or_one, # See [Vehicle]
-        '/HPXML/Building/BuildingDetails/MiscLoads/PlugLoad[PlugLoadType="well pump"]' => zero_or_one, # See [WellPump]
+        '/HPXML/Building/BuildingDetails/MiscLoads/PlugLoad[PlugLoadType[text()="TV other"]]' => zero_or_one, # See [OtherPlugLoads]
+        '/HPXML/Building/BuildingDetails/MiscLoads/PlugLoad[PlugLoadType[text()="electric vehicle charging"]]' => zero_or_one, # See [OtherPlugLoads]
+        '/HPXML/Building/BuildingDetails/MiscLoads/PlugLoad[PlugLoadType[text()="well pump"]]' => zero_or_one, # See [OtherPlugLoads]
 
-        '/HPXML/Building/BuildingDetails/MiscLoads/FuelLoad[FuelLoadType="grill"]' => zero_or_one, # See [GasGrill]
-        '/HPXML/Building/BuildingDetails/MiscLoads/FuelLoad[FuelLoadType="lighting"]' => zero_or_one, # See [GasLighting]
-        '/HPXML/Building/BuildingDetails/MiscLoads/FuelLoad[FuelLoadType="fireplace"]' => zero_or_one, # See [GasFireplace]
+        '/HPXML/Building/BuildingDetails/MiscLoads/FuelLoad[FuelLoadType[text()="grill"]]' => zero_or_more, # See [FuelLoad]
+        '/HPXML/Building/BuildingDetails/MiscLoads/FuelLoad[FuelLoadType[text()="lighting"]]' => zero_or_more, # See [FuelLoad]
+        '/HPXML/Building/BuildingDetails/MiscLoads/FuelLoad[FuelLoadType[text()="fireplace"]]' => zero_or_more, # See [FuelLoad]
       },
 
       # [SimulationControl]
@@ -718,6 +718,7 @@ class EnergyPlusValidator
         'SystemIdentifier' => one, # Required by HPXML schema
         '[not(Location)] | Location[text()="living space" or text()="basement - conditioned" or text()="basement - unconditioned" or text()="garage" or text()="other"]' => one,
         'RatedAnnualkWh | extension/AdjustedAnnualkWh' => zero_or_more,
+        'PrimaryIndicator[text()="true" or text()="false"]' => one,
         'extension/UsageMultiplier' => zero_or_one,
       },
 
@@ -772,10 +773,10 @@ class EnergyPlusValidator
         'SystemIdentifier' => one, # Required by HPXML schema
         'PoolPumps/PoolPump/SystemIdentifier' => one,
         'PoolPumps/PoolPump/Load[Units="kWh/year"]/Value' => zero_or_one,
-        'Heater[Type="gas fired" or Type="electric resistance"]' => one,
+        'PoolPumps/PoolPump/extension/UsageMultiplier' => zero_or_one,
+        '[not(Heater)] | Heater[Type="gas fired" or Type="electric resistance"]' => one,
         'Heater/Load[Units="kWh/year" or Units="therm/year"]/Value' => zero_or_one,
         'Heater/extension/UsageMultiplier' => zero_or_one,
-        'PoolPumps/PoolPump/extension/UsageMultiplier' => zero_or_one,
         'extension/WeekdayScheduleFractions' => zero_or_one,
         'extension/WeekendScheduleFractions' => zero_or_one,
         'extension/MonthlyScheduleMultipliers' => zero_or_one,
@@ -786,10 +787,10 @@ class EnergyPlusValidator
         'SystemIdentifier' => one, # Required by HPXML schema
         'HotTubPumps/HotTubPump/SystemIdentifier' => one,
         'HotTubPumps/HotTubPump/Load[Units="kWh/year"]/Value' => zero_or_one,
-        'Heater[Type="gas fired" or Type="electric resistance"]' => one,
+        'HotTubPumps/HotTubPump/extension/UsageMultiplier' => zero_or_one,
+        '[not(Heater)] | Heater[Type="gas fired" or Type="electric resistance"]' => one,
         'Heater/Load[Units="kWh/year" or Units="therm/year"]/Value' => zero_or_one,
         'Heater/extension/UsageMultiplier' => zero_or_one,
-        'HotTubPumps/HotTubPump/extension/UsageMultiplier' => zero_or_one,
         'extension/WeekdayScheduleFractions' => zero_or_one,
         'extension/WeekendScheduleFractions' => zero_or_one,
         'extension/MonthlyScheduleMultipliers' => zero_or_one,
@@ -807,8 +808,8 @@ class EnergyPlusValidator
         'extension/MonthlyScheduleMultipliers' => zero_or_one, # Uses ERI Reference Home if not provided
       },
 
-      # [Television]
-      '/HPXML/Building/BuildingDetails/MiscLoads/PlugLoad[PlugLoadType="TV other"]' => {
+      # [OtherPlugLoads]
+      '/HPXML/Building/BuildingDetails/MiscLoads/PlugLoad[PlugLoadType[text()="TV other" or text()="electric vehicle charging" or text()="well pump"]]' => {
         'SystemIdentifier' => one, # Required by HPXML schema
         'Load[Units="kWh/year"]/Value' => zero_or_one, # Uses ERI Reference Home if not provided
         'extension/UsageMultiplier' => zero_or_one,
@@ -817,64 +818,11 @@ class EnergyPlusValidator
         'extension/MonthlyScheduleMultipliers' => zero_or_one, # Uses ERI Reference Home if not provided
       },
 
-      # [Vehicle]
-      '/HPXML/Building/BuildingDetails/MiscLoads/PlugLoad[PlugLoadType="electric vehicle charging"]' => {
-        'SystemIdentifier' => one, # Required by HPXML schema
-        'Load[Units="kWh/year"]/Value' => one, # FIXME: allow value to be defaulted? to what?
-        '[not(Location)] | Location[text()="exterior"]' => one,
-        'extension/UsageMultiplier' => zero_or_one,
-        'extension/WeekdayScheduleFractions' => zero_or_one,
-        'extension/WeekendScheduleFractions' => zero_or_one,
-        'extension/MonthlyScheduleMultipliers' => zero_or_one,
-      },
-
-      # [WellPump]
-      '/HPXML/Building/BuildingDetails/MiscLoads/PlugLoad[PlugLoadType="well pump"]' => {
-        'SystemIdentifier' => one, # Required by HPXML schema
-        'Load[Units="kWh/year"]/Value' => zero_or_one,
-        '[not(Location)] | Location[text()="exterior"]' => one,
-        'extension/UsageMultiplier' => zero_or_one,
-        'extension/WeekdayScheduleFractions' => zero_or_one,
-        'extension/WeekendScheduleFractions' => zero_or_one,
-        'extension/MonthlyScheduleMultipliers' => zero_or_one,
-      },
-
-      # [GasGrill]
-      '/HPXML/Building/BuildingDetails/MiscLoads/FuelLoad[FuelLoadType="grill"]' => {
+      # [FuelLoad]
+      '/HPXML/Building/BuildingDetails/MiscLoads/FuelLoad[FuelLoadType[text()="grill" or text()="lighting" or text()="fireplace"]]' => {
         'SystemIdentifier' => one, # Required by HPXML schema
         'Load[Units="therm/year"]/Value' => zero_or_one,
         'FuelType[text()="natural gas"]' => one,
-        '[not(Location)] | Location[text()="exterior"]' => one,
-        'extension/FracSensible' => zero_or_one,
-        'extension/FracLatent' => zero_or_one,
-        'extension/UsageMultiplier' => zero_or_one,
-        'extension/WeekdayScheduleFractions' => zero_or_one,
-        'extension/WeekendScheduleFractions' => zero_or_one,
-        'extension/MonthlyScheduleMultipliers' => zero_or_one,
-      },
-
-      # [GasLighting]
-      '/HPXML/Building/BuildingDetails/MiscLoads/FuelLoad[FuelLoadType="lighting"]' => {
-        'SystemIdentifier' => one, # Required by HPXML schema
-        'Load[Units="therm/year"]/Value' => zero_or_one,
-        'FuelType[text()="natural gas"]' => one,
-        '[not(Location)] | Location[text()="exterior"]' => one,
-        'extension/FracSensible' => zero_or_one,
-        'extension/FracLatent' => zero_or_one,
-        'extension/UsageMultiplier' => zero_or_one,
-        'extension/WeekdayScheduleFractions' => zero_or_one,
-        'extension/WeekendScheduleFractions' => zero_or_one,
-        'extension/MonthlyScheduleMultipliers' => zero_or_one,
-      },
-
-      # [GasFireplace]
-      '/HPXML/Building/BuildingDetails/MiscLoads/FuelLoad[FuelLoadType="fireplace"]' => {
-        'SystemIdentifier' => one, # Required by HPXML schema
-        'Load[Units="therm/year"]/Value' => zero_or_one,
-        'FuelType[text()="natural gas"]' => one,
-        '[not(Location)] | Location[text()="exterior"]' => one,
-        'extension/FracSensible' => zero_or_one,
-        'extension/FracLatent' => zero_or_one,
         'extension/UsageMultiplier' => zero_or_one,
         'extension/WeekdayScheduleFractions' => zero_or_one,
         'extension/WeekendScheduleFractions' => zero_or_one,

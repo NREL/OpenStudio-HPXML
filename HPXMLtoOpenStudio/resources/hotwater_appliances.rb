@@ -5,7 +5,7 @@ class HotWaterAndAppliances
                  cfa, nbeds, ncfl, has_uncond_bsmnt, wh_setpoint,
                  clothes_washer, cw_space, clothes_dryer, cd_space,
                  dishwasher, dw_space,
-                 refrigerators, rf_spaces,
+                 refrigerators,
                  freezer, fz_space,
                  cooking_range, cook_space, oven,
                  fixtures_all_low_flow, fixtures_usage_multiplier,
@@ -121,8 +121,8 @@ class HotWaterAndAppliances
       fridge_weekday_sch = '0.040, 0.039, 0.038, 0.037, 0.036, 0.036, 0.038, 0.040, 0.041, 0.041, 0.040, 0.040, 0.042, 0.042, 0.042, 0.041, 0.044, 0.048, 0.050, 0.048, 0.047, 0.046, 0.044, 0.041'
       fridge_monthly_sch = '0.837, 0.835, 1.084, 1.084, 1.084, 1.096, 1.096, 1.096, 1.096, 0.931, 0.925, 0.837'
       fridge_schedule = MonthWeekdayWeekendSchedule.new(model, fridge_name, fridge_weekday_sch, fridge_weekday_sch, fridge_monthly_sch, 1.0, 1.0, true, true, Constants.ScheduleTypeLimitsFraction)
-      refrigerators.zip(rf_spaces).each do |refrigerator, rf_space|
-        rf_annual_kwh, rf_frac_sens, rf_frac_lat = calc_refrigerator_energy(refrigerator, rf_space.nil?)
+      refrigerators.each do |refrigerator, rf_space|
+        rf_annual_kwh, rf_frac_sens, rf_frac_lat = calc_refrigerator_or_freezer_energy(refrigerator, rf_space.nil?)
         fridge_design_level = fridge_schedule.calcDesignLevelFromDailykWh(rf_annual_kwh / 365.0)
 
         rf_space = living_space if rf_space.nil?
@@ -132,7 +132,7 @@ class HotWaterAndAppliances
 
     # Freezer
     if not freezer.nil?
-      fz_annual_kwh, fz_frac_sens, fz_frac_lat = calc_refrigerator_energy(freezer, fz_space.nil?)
+      fz_annual_kwh, fz_frac_sens, fz_frac_lat = calc_refrigerator_or_freezer_energy(freezer, fz_space.nil?)
       freezer_name = Constants.ObjectNameFreezer
       freezer_weekday_sch = '0.040, 0.039, 0.038, 0.037, 0.036, 0.036, 0.038, 0.040, 0.041, 0.041, 0.040, 0.040, 0.042, 0.042, 0.042, 0.041, 0.044, 0.048, 0.050, 0.048, 0.047, 0.046, 0.044, 0.041'
       freezer_monthly_sch = '0.837, 0.835, 1.084, 1.084, 1.084, 1.096, 1.096, 1.096, 1.096, 0.931, 0.925, 0.837'
@@ -337,7 +337,7 @@ class HotWaterAndAppliances
   end
 
   def self.get_freezer_default_values
-    return 319.8 # kWh/yr
+    return { rated_annual_kwh: 319.8 } # kWh/yr
   end
 
   def self.get_clothes_dryer_default_values(eri_version, fuel_type)
@@ -512,14 +512,14 @@ class HotWaterAndAppliances
     return 0.503 + 0.95 * imef # Interpretation on ANSI/RESNET 301-2014 Clothes Washer IMEF
   end
 
-  def self.calc_refrigerator_energy(refrigerator, is_outside = false)
+  def self.calc_refrigerator_or_freezer_energy(refrigerator_or_freezer, is_outside = false)
     # Get values
-    annual_kwh = refrigerator.adjusted_annual_kwh
+    annual_kwh = refrigerator_or_freezer.adjusted_annual_kwh
     if annual_kwh.nil?
-      annual_kwh = refrigerator.rated_annual_kwh
+      annual_kwh = refrigerator_or_freezer.rated_annual_kwh
     end
 
-    annual_kwh *= refrigerator.usage_multiplier
+    annual_kwh *= refrigerator_or_freezer.usage_multiplier
     if not is_outside
       frac_sens = 1.0
       frac_lat = 0.0

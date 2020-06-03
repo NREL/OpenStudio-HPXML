@@ -118,22 +118,22 @@ class MiscLoads
   end
 
   def self.apply_fuel(model, fuel_load_grill, fuel_load_lighting, fuel_load_fireplace,
-                      cfa, living_space)
+                      living_space)
 
     grill_therm = 0
     if not fuel_load_grill.nil?
       grill_therm = fuel_load_grill.therm_per_year * fuel_load_grill.usage_multiplier
-      grill_sch = MonthWeekdayWeekendSchedule.new(model, Constants.ObjectNameMiscPlugLoads + ' schedule', fuel_load_grill.weekday_fractions, fuel_load_grill.weekend_fractions, fuel_load_grill.monthly_multipliers, 1.0, 1.0, true, true, Constants.ScheduleTypeLimitsFraction)
+      grill_sch = MonthWeekdayWeekendSchedule.new(model, Constants.ObjectNameMiscGasGrill + ' schedule', fuel_load_grill.weekday_fractions, fuel_load_grill.weekend_fractions, fuel_load_grill.monthly_multipliers, 1.0, 1.0, true, true, Constants.ScheduleTypeLimitsFraction)
     end
     lighting_therm = 0
     if not fuel_load_lighting.nil?
       lighting_therm = fuel_load_lighting.therm_per_year * fuel_load_lighting.usage_multiplier
-      lighting_sch = MonthWeekdayWeekendSchedule.new(model, Constants.ObjectNameMiscPlugLoads + ' schedule', fuel_load_lighting.weekday_fractions, fuel_load_lighting.weekend_fractions, fuel_load_lighting.monthly_multipliers, 1.0, 1.0, true, true, Constants.ScheduleTypeLimitsFraction)
+      lighting_sch = MonthWeekdayWeekendSchedule.new(model, Constants.ObjectNameMiscGasLighting + ' schedule', fuel_load_lighting.weekday_fractions, fuel_load_lighting.weekend_fractions, fuel_load_lighting.monthly_multipliers, 1.0, 1.0, true, true, Constants.ScheduleTypeLimitsFraction)
     end
     fireplace_therm = 0
     if not fuel_load_fireplace.nil?
       fireplace_therm = fuel_load_fireplace.therm_per_year * fuel_load_fireplace.usage_multiplier
-      fireplace_sch = MonthWeekdayWeekendSchedule.new(model, Constants.ObjectNameMiscPlugLoads + ' schedule', fuel_load_fireplace.weekday_fractions, fuel_load_fireplace.weekend_fractions, fuel_load_fireplace.monthly_multipliers, 1.0, 1.0, true, true, Constants.ScheduleTypeLimitsFraction)
+      fireplace_sch = MonthWeekdayWeekendSchedule.new(model, Constants.ObjectNameMiscGasFireplace + ' schedule', fuel_load_fireplace.weekday_fractions, fuel_load_fireplace.weekend_fractions, fuel_load_fireplace.monthly_multipliers, 1.0, 1.0, true, true, Constants.ScheduleTypeLimitsFraction)
     end
 
     # Misc fuel loads
@@ -156,100 +156,71 @@ class MiscLoads
     end
   end
 
-  def self.apply_electric(model, pool_heater, pool_pump, hot_tub_heater, hot_tub_pump,
-                          living_space)
-    pool_heater_kwh = 0
-    if not pool_heater.nil?
-      pool_heater_kwh = pool_heater.heater_annual_energy * pool_heater.heater_usage_multiplier
-      pool_heater_sch = MonthWeekdayWeekendSchedule.new(model, Constants.ObjectNameMiscPlugLoads + ' schedule', pool_heater.weekday_fractions, pool_heater.weekend_fractions, pool_heater.monthly_multipliers, 1.0, 1.0, true, true, Constants.ScheduleTypeLimitsFraction)
-    end
-    pool_pump_kwh = 0
-    if not pool_pump.nil?
-      pool_pump_kwh = pool_pump.pump_annual_energy * pool_pump.pump_usage_multiplier
-      pool_pump_sch = MonthWeekdayWeekendSchedule.new(model, Constants.ObjectNameMiscPlugLoads + ' schedule', pool_pump.weekday_fractions, pool_pump.weekend_fractions, pool_pump.monthly_multipliers, 1.0, 1.0, true, true, Constants.ScheduleTypeLimitsFraction)
+  def self.apply_pool_or_hot_tub_heater(model, pool_or_hot_tub, obj_name, living_space)
+    heater_kwh = 0
+    heater_therm = 0
+    if pool_or_hot_tub.heater_type == HPXML::HeaterTypeElectric
+      heater_kwh = pool_or_hot_tub.heater_kwh_per_year * pool_or_hot_tub.heater_usage_multiplier
+      heater_sch = MonthWeekdayWeekendSchedule.new(model, obj_name + ' schedule', pool_or_hot_tub.weekday_fractions, pool_or_hot_tub.weekend_fractions, pool_or_hot_tub.monthly_multipliers, 1.0, 1.0, true, true, Constants.ScheduleTypeLimitsFraction)
+    elsif pool_or_hot_tub.heater_type == HPXML::HeaterTypeGas
+      heater_therm = pool_or_hot_tub.heater_therm_per_year * pool_or_hot_tub.heater_usage_multiplier
+      heater_sch = MonthWeekdayWeekendSchedule.new(model, obj_name + ' schedule', pool_or_hot_tub.weekday_fractions, pool_or_hot_tub.weekend_fractions, pool_or_hot_tub.monthly_multipliers, 1.0, 1.0, true, true, Constants.ScheduleTypeLimitsFraction)
     end
 
-    hot_tub_heater_kwh = 0
-    if not hot_tub_heater.nil?
-      hot_tub_heater_kwh = hot_tub_heater.heater_annual_energy * hot_tub_heater.heater_usage_multiplier
-      hot_tub_heater_sch = MonthWeekdayWeekendSchedule.new(model, Constants.ObjectNameMiscPlugLoads + ' schedule', hot_tub_heater.weekday_fractions, hot_tub_heater.weekend_fractions, hot_tub_heater.monthly_multipliers, 1.0, 1.0, true, true, Constants.ScheduleTypeLimitsFraction)
-    end
-    hot_tub_pump_kwh = 0
-    if not hot_tub_pump.nil?
-      hot_tub_pump_kwh = hot_tub_pump.pump_annual_energy * hot_tub_pump.pump_usage_multiplier
-      hot_tub_pump_sch = MonthWeekdayWeekendSchedule.new(model, Constants.ObjectNameMiscPlugLoads + ' schedule', hot_tub_pump.weekday_fractions, hot_tub_pump.weekend_fractions, hot_tub_pump.monthly_multipliers, 1.0, 1.0, true, true, Constants.ScheduleTypeLimitsFraction)
-    end
+    if heater_kwh > 0
+      space_design_level = heater_sch.calcDesignLevelFromDailykWh(heater_kwh / 365.0)
 
-    # Heater
-    [[pool_heater_kwh, pool_heater_sch, Constants.ObjectNameMiscPoolHeater], [hot_tub_heater_kwh, hot_tub_heater_sch, Constants.ObjectNameMiscHotTubHeater]].each do |kwh, sch, name|
-      next unless kwh > 0
-      space_design_level = sch.calcDesignLevelFromDailykWh(kwh / 365.0)
-
-      # Add electric equipment for the mel
       mel_def = OpenStudio::Model::ElectricEquipmentDefinition.new(model)
       mel = OpenStudio::Model::ElectricEquipment.new(mel_def)
-      mel.setName(name)
-      mel.setEndUseSubcategory(name)
+      mel.setName(obj_name)
+      mel.setEndUseSubcategory(obj_name)
       mel.setSpace(living_space)
-      mel_def.setName(name)
+      mel_def.setName(obj_name)
       mel_def.setDesignLevel(space_design_level)
       mel_def.setFractionRadiant(0)
       mel_def.setFractionLatent(0)
       mel_def.setFractionLost(1)
-      mel.setSchedule(sch.schedule)
+      mel.setSchedule(heater_sch.schedule)
     end
 
-    # Pump
-    [[pool_pump_kwh, pool_pump_sch, Constants.ObjectNameMiscPoolPump], [hot_tub_pump_kwh, hot_tub_pump_sch, Constants.ObjectNameMiscHotTubPump]].each do |kwh, sch, name|
-      next unless kwh > 0
-      space_design_level = sch.calcDesignLevelFromDailykWh(kwh / 365.0)
+    if heater_therm > 0
+      space_design_level = heater_sch.calcDesignLevelFromDailyTherm(heater_therm / 365.0)
 
-      # Add electric equipment for the mel
-      mel_def = OpenStudio::Model::ElectricEquipmentDefinition.new(model)
-      mel = OpenStudio::Model::ElectricEquipment.new(mel_def)
-      mel.setName(name)
-      mel.setEndUseSubcategory(name)
+      mel_def = OpenStudio::Model::GasEquipmentDefinition.new(model)
+      mel = OpenStudio::Model::GasEquipment.new(mel_def)
+      mel.setName(obj_name)
+      mel.setEndUseSubcategory(obj_name)
       mel.setSpace(living_space)
-      mel_def.setName(name)
+      mel_def.setName(obj_name)
       mel_def.setDesignLevel(space_design_level)
       mel_def.setFractionRadiant(0)
       mel_def.setFractionLatent(0)
       mel_def.setFractionLost(1)
-      mel.setSchedule(sch.schedule)
+      mel.setSchedule(heater_sch.schedule)
     end
   end
 
-  def self.apply_gas(model, pool_heater, hot_tub_heater,
-                     living_space)
-    pool_heater_therm = 0
-    if not pool_heater.nil?
-      pool_heater_therm = pool_heater.heater_annual_energy * pool_heater.heater_usage_multiplier
-      pool_heater_sch = MonthWeekdayWeekendSchedule.new(model, Constants.ObjectNameMiscPlugLoads + ' schedule', pool_heater.weekday_fractions, pool_heater.weekend_fractions, pool_heater.monthly_multipliers, 1.0, 1.0, true, true, Constants.ScheduleTypeLimitsFraction)
+  def self.apply_pool_or_hot_tub_pump(model, pool_or_hot_tub, obj_name, living_space)
+    pump_kwh = 0
+    if not pool_or_hot_tub.pump_kwh_per_year.nil?
+      pump_kwh = pool_or_hot_tub.pump_kwh_per_year * pool_or_hot_tub.pump_usage_multiplier
+      pump_sch = MonthWeekdayWeekendSchedule.new(model, obj_name + ' schedule', pool_or_hot_tub.weekday_fractions, pool_or_hot_tub.weekend_fractions, pool_or_hot_tub.monthly_multipliers, 1.0, 1.0, true, true, Constants.ScheduleTypeLimitsFraction)
     end
 
-    hot_tub_heater_therm = 0
-    if not hot_tub_heater.nil?
-      hot_tub_heater_therm = hot_tub_heater.heater_annual_energy * hot_tub_heater.heater_usage_multiplier
-      hot_tub_heater_sch = MonthWeekdayWeekendSchedule.new(model, Constants.ObjectNameMiscPlugLoads + ' schedule', hot_tub_heater.weekday_fractions, hot_tub_heater.weekend_fractions, hot_tub_heater.monthly_multipliers, 1.0, 1.0, true, true, Constants.ScheduleTypeLimitsFraction)
-    end
+    if pump_kwh > 0
+      space_design_level = pump_sch.calcDesignLevelFromDailykWh(pump_kwh / 365.0)
 
-    # Heater
-    [[pool_heater_therm, pool_heater_sch, Constants.ObjectNameMiscPoolHeater], [hot_tub_heater_therm, hot_tub_heater_sch, Constants.ObjectNameMiscHotTubHeater]].each do |therm, sch, name|
-      next unless therm > 0
-      space_design_level = sch.calcDesignLevelFromDailyTherm(therm / 365.0)
-
-      # Add electric equipment for the mel
-      mel_def = OpenStudio::Model::GasEquipmentDefinition.new(model)
-      mel = OpenStudio::Model::GasEquipment.new(mel_def)
-      mel.setName(name)
-      mel.setEndUseSubcategory(name)
+      mel_def = OpenStudio::Model::ElectricEquipmentDefinition.new(model)
+      mel = OpenStudio::Model::ElectricEquipment.new(mel_def)
+      mel.setName(obj_name)
+      mel.setEndUseSubcategory(obj_name)
       mel.setSpace(living_space)
-      mel_def.setName(name)
+      mel_def.setName(obj_name)
       mel_def.setDesignLevel(space_design_level)
       mel_def.setFractionRadiant(0)
       mel_def.setFractionLatent(0)
       mel_def.setFractionLost(1)
-      mel.setSchedule(sch.schedule)
+      mel.setSchedule(pump_sch.schedule)
     end
   end
 
@@ -257,24 +228,24 @@ class MiscLoads
     return 158.6 * (0.5 + 0.25 * nbeds / 3.0 + 0.25 * cfa / 1920.0) # kWh/yr
   end
 
-  def self.get_pool_heater_default_values(heater_type, cfa, nbeds)
-    if heater_type.include?('elec')
-      return 8.3 * (0.5 + 0.25 * nbeds / 3.0 + 0.25 * cfa / 1920.0) # kWh/yr
-    else
-      return 3.0 * (0.5 + 0.25 * nbeds / 3.0 + 0.25 * cfa / 1920.0) # therm/yr
-    end
+  def self.get_pool_heater_electric_default_values(cfa, nbeds)
+    return 8.3 * (0.5 + 0.25 * nbeds / 3.0 + 0.25 * cfa / 1920.0) # kWh/yr
+  end
+
+  def self.get_pool_heater_gas_default_values(cfa, nbeds)
+    return 3.0 * (0.5 + 0.25 * nbeds / 3.0 + 0.25 * cfa / 1920.0) # therm/yr
   end
 
   def self.get_hot_tub_pump_default_values(cfa, nbeds)
     return 59.5 * (0.5 + 0.25 * nbeds / 3.0 + 0.25 * cfa / 1920.0) # kWh/yr
   end
 
-  def self.get_hot_tub_heater_default_values(heater_type, cfa, nbeds)
-    if heater_type.include?('elec')
-      return 49.0 * (0.5 + 0.25 * nbeds / 3.0 + 0.25 * cfa / 1920.0) # kWh/yr
-    else
-      return 0.87 * (0.5 + 0.25 * nbeds / 3.0 + 0.25 * cfa / 1920.0) # therm/yr
-    end
+  def self.get_hot_tub_heater_electric_default_values(cfa, nbeds)
+    return 49.0 * (0.5 + 0.25 * nbeds / 3.0 + 0.25 * cfa / 1920.0) # kWh/yr
+  end
+
+  def self.get_hot_tub_heater_gas_default_values(cfa, nbeds)
+    return 0.87 * (0.5 + 0.25 * nbeds / 3.0 + 0.25 * cfa / 1920.0) # therm/yr
   end
 
   def self.get_well_pump_default_values(cfa, nbeds)

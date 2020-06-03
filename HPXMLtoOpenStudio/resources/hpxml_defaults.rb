@@ -438,11 +438,13 @@ class HPXMLDefaults
 
   def self.apply_pools_and_hot_tubs(hpxml, cfa, nbeds)
     hpxml.pools.each do |pool|
-      if pool.pump_annual_energy.nil?
-        pool.pump_annual_energy = MiscLoads.get_pool_pump_default_values(cfa, nbeds)
+      if pool.pump_kwh_per_year.nil?
+        pool.pump_kwh_per_year = MiscLoads.get_pool_pump_default_values(cfa, nbeds)
       end
-      if pool.heater_annual_energy.nil?
-        pool.heater_annual_energy = MiscLoads.get_pool_heater_default_values(pool.heater_type, cfa, nbeds)
+      if pool.heater_type.include?('elec') && pool.heater_kwh_per_year.nil?
+        pool.heater_kwh_per_year = MiscLoads.get_pool_heater_electric_default_values(cfa, nbeds)
+      elsif pool.heater_type.include?('gas') && pool.heater_therm_per_year.nil?
+        pool.heater_therm_per_year = MiscLoads.get_pool_heater_gas_default_values(cfa, nbeds)
       end
       if pool.heater_usage_multiplier.nil?
         pool.heater_usage_multiplier = 1.0
@@ -462,11 +464,13 @@ class HPXMLDefaults
     end
 
     hpxml.hot_tubs.each do |hot_tub|
-      if hot_tub.pump_annual_energy.nil?
-        hot_tub.pump_annual_energy = MiscLoads.get_hot_tub_pump_default_values(cfa, nbeds)
+      if hot_tub.pump_kwh_per_year.nil?
+        hot_tub.pump_kwh_per_year = MiscLoads.get_hot_tub_pump_default_values(cfa, nbeds)
       end
-      if hot_tub.heater_annual_energy.nil?
-        hot_tub.heater_annual_energy = MiscLoads.get_hot_tub_heater_default_values(hot_tub.heater_type, cfa, nbeds)
+      if hot_tub.heater_type.include?('elec') && hot_tub.heater_kwh_per_year.nil?
+        hot_tub.heater_kwh_per_year = MiscLoads.get_hot_tub_heater_electric_default_values(cfa, nbeds)
+      elsif hot_tub.heater_type.include?('gas') && hot_tub.heater_therm_per_year.nil?
+        hot_tub.heater_therm_per_year = MiscLoads.get_hot_tub_heater_gas_default_values(cfa, nbeds)
       end
       if hot_tub.heater_usage_multiplier.nil?
         hot_tub.heater_usage_multiplier = 1.0
@@ -546,15 +550,15 @@ class HPXMLDefaults
 
     # Default refrigerators
     hpxml.refrigerators.each do |refrigerator|
-      if refrigerator.primary_indicator == false # extra refrigerator
+      if not refrigerator.primary_indicator # extra refrigerator
         if refrigerator.location.nil?
           refrigerator.location = HotWaterAndAppliances.get_default_extra_refrigerator_locations(hpxml)
         end
         if refrigerator.adjusted_annual_kwh.nil? && refrigerator.rated_annual_kwh.nil?
-          default_values = HotWaterAndAppliances.get_extra_refrigerator_default_values(nbeds)
+          default_values = HotWaterAndAppliances.get_extra_refrigerator_default_values
           refrigerator.rated_annual_kwh = default_values[:rated_annual_kwh]
         end
-      else
+      else # primary refrigerator
         if refrigerator.location.nil?
           refrigerator.location = HPXML::LocationLivingSpace
         end
@@ -575,7 +579,7 @@ class HPXMLDefaults
         freezer.location = HotWaterAndAppliances.get_default_extra_refrigerator_locations(hpxml)
       end
       if freezer.adjusted_annual_kwh.nil? && freezer.rated_annual_kwh.nil?
-        default_values = HotWaterAndAppliances.get_freezer_default_values(nbeds)
+        default_values = HotWaterAndAppliances.get_freezer_default_values
         freezer.rated_annual_kwh = default_values[:rated_annual_kwh]
       end
       if freezer.usage_multiplier.nil?
