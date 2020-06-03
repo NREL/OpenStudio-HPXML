@@ -2524,7 +2524,7 @@ class OSModel
     @hpxml.hvac_distributions.each do |hvac_distribution|
       next unless hvac_distribution.distribution_system_type == HPXML::HVACDistributionTypeAir
 
-      air_ducts = create_ducts(hvac_distribution, model, spaces)
+      air_ducts = create_ducts(runner, model, hvac_distribution, spaces)
 
       # Connect AirLoopHVACs to ducts
       hvac_distribution.hvac_systems.each do |hvac_system|
@@ -2536,7 +2536,7 @@ class OSModel
           elsif duct_systems[air_ducts] != loop
             # Multiple air loops associated with this duct system, treat
             # as separate duct systems.
-            air_ducts2 = create_ducts(hvac_distribution, model, spaces)
+            air_ducts2 = create_ducts(runner, model, hvac_distribution, spaces)
             duct_systems[air_ducts2] = loop
           end
         end
@@ -2573,10 +2573,10 @@ class OSModel
                   duct_systems, @infil_volume, infil_height, open_window_area,
                   @clg_ssn_sensor, @min_neighbor_distance, vent_kitchen, vent_bath,
                   vented_attic, vented_crawl, site_type, shelter_coef,
-                  has_flue_chimney, @hvac_map, @apply_ashrae140_assumptions)
+                  has_flue_chimney, @hvac_map, @eri_version, @apply_ashrae140_assumptions)
   end
 
-  def self.create_ducts(hvac_distribution, model, spaces)
+  def self.create_ducts(runner, model, hvac_distribution, spaces)
     air_ducts = []
 
     # Duct leakage (supply/return => [value, units])
@@ -2626,9 +2626,14 @@ class OSModel
     end
 
     # If all ducts are in conditioned space, model leakage as going to outside
+    registered_warning = false
     [HPXML::DuctTypeSupply, HPXML::DuctTypeReturn].each do |duct_side|
       next unless (leakage_to_outside[duct_side][0] > 0) && (total_unconditioned_duct_area[duct_side] == 0)
 
+      if not registered_warning
+        runner.registerWarning("HVACDistribution '#{hvac_distribution.id}' has ducts entirely within conditioned space but there is non-zero leakage to the outside. Leakage to the outside is typically zero in these situations; consider revising leakage values. Leakage will be modeled as heat lost to the ambient environment.")
+        registered_warning = true
+      end
       duct_area = 0.0
       duct_rvalue = 0.0
       duct_loc_space = nil # outside
@@ -2867,8 +2872,7 @@ class OSModel
 
     infil_flow_actuators = []
     natvent_flow_actuators = []
-    imbal_mechvent_flow_actuators = []
-    imbal_ducts_flow_actuators = []
+    mechvent_flow_actuators = []
     whf_flow_actuators = []
 
     model.getEnergyManagementSystemActuators.each do |actuator|
@@ -2879,21 +2883,18 @@ class OSModel
       elsif actuator.name.to_s.start_with? Constants.ObjectNameNaturalVentilation.gsub(' ', '_')
         natvent_flow_actuators << actuator
       elsif actuator.name.to_s.start_with? Constants.ObjectNameMechanicalVentilation.gsub(' ', '_')
-        imbal_mechvent_flow_actuators << actuator
-      elsif actuator.name.to_s.start_with? Constants.ObjectNameDucts.gsub(' ', '_')
-        imbal_ducts_flow_actuators << actuator
+        mechvent_flow_actuators << actuator
       elsif actuator.name.to_s.start_with? Constants.ObjectNameWholeHouseFan.gsub(' ', '_')
         whf_flow_actuators << actuator
       end
     end
-    if (infil_flow_actuators.size != 1) || (natvent_flow_actuators.size != 1) || (imbal_mechvent_flow_actuators.size != 1) || (whf_flow_actuators.size != 1) || (imbal_ducts_flow_actuators.size != 1)
+    if (infil_flow_actuators.size != 1) || (natvent_flow_actuators.size != 1) || (mechvent_flow_actuators.size != 1) || (whf_flow_actuators.size != 1)
       fail 'Could not find actuator for component loads.'
     end
 
     infil_flow_actuator = infil_flow_actuators[0]
     natvent_flow_actuator = natvent_flow_actuators[0]
-    imbal_mechvent_flow_actuator = imbal_mechvent_flow_actuators[0]
-    imbal_ducts_flow_actuator = imbal_ducts_flow_actuators[0]
+    mechvent_flow_actuator = mechvent_flow_actuators[0]
     whf_flow_actuator = whf_flow_actuators[0]
 
     # EMS Sensors: Ducts
@@ -3119,25 +3120,24 @@ class OSModel
     end
 
     # EMS program: Infiltration, Natural Ventilation, Mechanical Ventilation, Ducts
-    program.addLine("Set hr_airflow_rate = #{infil_flow_actuator.name} + #{imbal_mechvent_flow_actuator.name} + #{imbal_ducts_flow_actuator.name} + #{natvent_flow_actuator.name} + #{whf_flow_actuator.name}")
+    program.addLine("Set hr_airflow_rate = #{infil_flow_actuator.name} + #{mechvent_flow_actuator.name} + #{natvent_flow_actuator.name} + #{whf_flow_actuator.name}")
     program.addLine('If hr_airflow_rate > 0')
     program.addLine("  Set hr_infil = (#{air_loss_sensor.name} - #{air_gain_sensor.name}) * #{infil_flow_actuator.name} / hr_airflow_rate") # Airflow heat attributed to infiltration
     program.addLine("  Set hr_natvent = (#{air_loss_sensor.name} - #{air_gain_sensor.name}) * #{natvent_flow_actuator.name} / hr_airflow_rate") # Airflow heat attributed to natural ventilation
     program.addLine("  Set hr_whf = (#{air_loss_sensor.name} - #{air_gain_sensor.name}) * #{whf_flow_actuator.name} / hr_airflow_rate") # Airflow heat attributed to whole house fan
-    program.addLine("  Set hr_mechvent = ((#{air_loss_sensor.name} - #{air_gain_sensor.name}) * #{imbal_mechvent_flow_actuator.name} / hr_airflow_rate)") # Airflow heat attributed to imbalanced mech vent
-    program.addLine("  Set hr_ducts = ((#{air_loss_sensor.name} - #{air_gain_sensor.name}) * #{imbal_ducts_flow_actuator.name} / hr_airflow_rate)") # Airflow heat attributed to infiltration induced by duct leakage imbalance
+    program.addLine("  Set hr_mechvent = ((#{air_loss_sensor.name} - #{air_gain_sensor.name}) * #{mechvent_flow_actuator.name} / hr_airflow_rate)") # Airflow heat attributed to mechanical ventilation
     program.addLine('Else')
     program.addLine('  Set hr_infil = 0')
     program.addLine('  Set hr_natvent = 0')
     program.addLine('  Set hr_whf = 0')
     program.addLine('  Set hr_mechvent = 0')
-    program.addLine('  Set hr_ducts = 0')
     program.addLine('EndIf')
     s = 'Set hr_mechvent = hr_mechvent'
     mechvent_sensors.each do |sensor|
-      s += " - #{sensor.name}" # Balanced mech vent load + imbalanced mech vent fan heat
+      s += " - #{sensor.name}" # Fan heat & ERV/HRV load
     end
     program.addLine(s) if mechvent_sensors.size > 0
+    program.addLine('Set hr_ducts = 0')
     ducts_sensors.each do |duct_sensors|
       s = 'Set hr_ducts = hr_ducts'
       duct_sensors.each do |sensor|
