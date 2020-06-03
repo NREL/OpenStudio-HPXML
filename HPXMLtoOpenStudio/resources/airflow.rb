@@ -28,6 +28,10 @@ class Airflow
     @wout_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Site Outdoor Air Humidity Ratio')
     @wout_sensor.setName('out wt s')
 
+    @win_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Zone Air Humidity Ratio')
+    @win_sensor.setName("#{Constants.ObjectNameAirflow} win s")
+    @win_sensor.setKeyName(@living_zone.name.to_s)
+
     @vwind_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Site Wind Speed')
     @vwind_sensor.setName('site vw s')
 
@@ -624,11 +628,6 @@ class Airflow
       ra_w_sensor.setKeyName(@living_zone.name.to_s)
     end
 
-    # Living zone humidity ratio
-    win_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Zone Mean Air Humidity Ratio')
-    win_sensor.setName("#{air_loop.name} win s")
-    win_sensor.setKeyName(@living_zone.name.to_s)
-
     # Create one duct program for each duct location zone
     duct_locations.each_with_index do |duct_location, i|
       next if (not duct_location.nil?) && (duct_location.name.to_s == @living_zone.name.to_s)
@@ -1002,7 +1001,7 @@ class Airflow
         duct_program.addLine("  Set cfis_m3s = (#{@fan_mfr_max_var[air_loop].name} / 1.16097654)") # Density of 1.16097654 was back calculated using E+ results
         duct_program.addLine("  Set #{@fan_rtf_var[air_loop].name} = #{@cfis_f_damper_extra_open_var.name}") # Need to use global vars to sync duct_program and infiltration program of different calling points
         duct_program.addLine("  Set #{ah_vfr_var.name} = #{@fan_rtf_var[air_loop].name}*cfis_m3s")
-        duct_program.addLine("  Set rho_in = (@RhoAirFnPbTdbW #{@pbar_sensor.name} #{@tin_sensor.name} #{win_sensor.name})")
+        duct_program.addLine("  Set rho_in = (@RhoAirFnPbTdbW #{@pbar_sensor.name} #{@tin_sensor.name} #{@win_sensor.name})")
         duct_program.addLine("  Set #{ah_mfr_var.name} = #{ah_vfr_var.name} * rho_in")
         duct_program.addLine("  Set #{ah_tout_var.name} = #{ra_t_sensor.name}")
         duct_program.addLine("  Set #{ah_wout_var.name} = #{ra_w_sensor.name}")
@@ -1611,17 +1610,10 @@ class Airflow
       # ERV is modeled within EMS infiltration program instead.
 
       # Sensors for ERV/HRV
-      win_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Zone Air Humidity Ratio')
-      win_sensor.setName("#{Constants.ObjectNameAirflow} win s")
-      win_sensor.setKeyName(@living_zone.name.to_s)
 
       # Actuators for ERV/HRV
-      sens_name = "#{Constants.ObjectNameERVHRV} sensible load"
-      erv_sens_load_var = OpenStudio::Model::EnergyManagementSystemGlobalVariable.new(model, sens_name.gsub(' ', '_'))
-      erv_sens_load_actuator = create_sens_lat_load_actuator_and_equipment(model, sens_name, @living_space, 0.0, 0.0)
-      lat_name = "#{Constants.ObjectNameERVHRV} latent load"
-      erv_lat_load_var = OpenStudio::Model::EnergyManagementSystemGlobalVariable.new(model, lat_name.gsub(' ', '_'))
-      erv_lat_load_actuator = create_sens_lat_load_actuator_and_equipment(model, lat_name, @living_space, 1.0, 0.0)
+      erv_sens_load_actuator = create_sens_lat_load_actuator_and_equipment(model, "#{Constants.ObjectNameERVHRV} sensible load", @living_space, 0.0, 0.0)
+      erv_lat_load_actuator = create_sens_lat_load_actuator_and_equipment(model, "#{Constants.ObjectNameERVHRV} latent load", @living_space, 1.0, 0.0)
 
       # Air property at inlet nodes in two sides of ERV
       infil_program.addLine("Set ERVSupInPb = #{@pbar_sensor.name}") # oa barometric pressure
@@ -1632,7 +1624,7 @@ class Airflow
       infil_program.addLine('Set ERVSupInEnth = (@HFnTdbW ERVSupInTemp ERVSupInW)')
 
       infil_program.addLine("Set ERVSecInTemp = #{@tin_sensor.name}") # zone air temperature
-      infil_program.addLine("Set ERVSecInW = #{win_sensor.name}") # zone air humidity ratio
+      infil_program.addLine("Set ERVSecInW = #{@win_sensor.name}") # zone air humidity ratio
       infil_program.addLine('Set ERVSecCp = (@CpAirFnW ERVSecInW)')
       infil_program.addLine('Set ERVSecInEnth = (@HFnTdbW ERVSecInTemp ERVSecInW)')
 
