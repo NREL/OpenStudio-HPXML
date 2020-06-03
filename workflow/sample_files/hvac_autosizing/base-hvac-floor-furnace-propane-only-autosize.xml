@@ -296,7 +296,7 @@
             <HeatingSystem>
               <SystemIdentifier id='HeatingSystem'/>
               <HeatingSystemType>
-                <WallFurnace/>
+                <FloorFurnace/>
               </HeatingSystemType>
               <HeatingSystemFuel>propane</HeatingSystemFuel>
               <AnnualHeatingEfficiency>
@@ -382,6 +382,7 @@
           <SystemIdentifier id='Refrigerator'/>
           <Location>living space</Location>
           <RatedAnnualkWh>650.0</RatedAnnualkWh>
+          <PrimaryIndicator>true</PrimaryIndicator>
         </Refrigerator>
         <CookingRange>
           <SystemIdentifier id='Range'/>
