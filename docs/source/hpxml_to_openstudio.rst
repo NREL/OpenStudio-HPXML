@@ -894,7 +894,7 @@ See the Thermostat section for more information.
 Pools
 ~~~~~
 
-A ``Pools/Pool`` element can be specified; if not provided, a pool will not be modeled.
+Multiple ``Pools/Pool`` elements can be specified; if none are provided, pools will not be modeled.
 
 A ``PoolPumps/PoolPump`` element is required. The annual energy consumption of the pool pump (``Load[Units='kWh/year']/Value``) can be provided, otherwise they will be calculated using the following equation based on the BA HSP.
 
@@ -914,7 +914,7 @@ Optional ``extension/WeekdayScheduleFractions``, ``extension/WeekendScheduleFrac
 Hot Tubs
 ~~~~~~~~
 
-A ``HotTubs/HotTub`` element can be specified; if not provided, a hot tub will not be modeled.
+Multiple ``HotTubs/HotTub`` elements can be specified; if none are provided, hot tubs will not be modeled.
 
 A ``HotTubPumps/HotTubPump`` element is required. The annual energy consumption of the hot tub pump (``Load[Units='kWh/year']/Value``) can be provided, otherwise they will be calculated using the following equation based on the BA HSP.
 

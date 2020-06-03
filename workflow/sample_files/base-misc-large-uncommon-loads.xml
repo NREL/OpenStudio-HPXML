@@ -623,17 +623,32 @@
           </PoolPumps>
           <Heater>
             <SystemIdentifier id='PoolHeater'/>
+            <Type>electric resistance</Type>
+            <Load>
+              <Units>kWh/year</Units>
+              <Value>100.0</Value>
+            </Load>
+          </Heater>
+        </Pool>
+        <Pool>
+          <SystemIdentifier id='Pool2'/>
+          <PoolPumps>
+            <PoolPump>
+              <SystemIdentifier id='Pool2Pump'/>
+              <Load>
+                <Units>kWh/year</Units>
+                <Value>50.0</Value>
+              </Load>
+            </PoolPump>
+          </PoolPumps>
+          <Heater>
+            <SystemIdentifier id='Pool2Heater'/>
             <Type>gas fired</Type>
             <Load>
               <Units>therm/year</Units>
               <Value>100.0</Value>
             </Load>
           </Heater>
-          <extension>
-            <WeekdayScheduleFractions>0.04, 0.037, 0.037, 0.036, 0.033, 0.036, 0.043, 0.047, 0.034, 0.023, 0.024, 0.025, 0.024, 0.028, 0.031, 0.032, 0.039, 0.053, 0.063, 0.067, 0.071, 0.069, 0.059, 0.05</WeekdayScheduleFractions>
-            <WeekendScheduleFractions>0.04, 0.037, 0.037, 0.036, 0.033, 0.036, 0.043, 0.047, 0.034, 0.023, 0.024, 0.025, 0.024, 0.028, 0.031, 0.032, 0.039, 0.053, 0.063, 0.067, 0.071, 0.069, 0.059, 0.05</WeekendScheduleFractions>
-            <MonthlyScheduleMultipliers>1.248, 1.257, 0.993, 0.989, 0.993, 0.827, 0.821, 0.821, 0.827, 0.99, 0.987, 1.248</MonthlyScheduleMultipliers>
-          </extension>
         </Pool>
       </Pools>
       <HotTubs>
@@ -656,11 +671,26 @@
               <Value>100.0</Value>
             </Load>
           </Heater>
-          <extension>
-            <WeekdayScheduleFractions>0.04, 0.037, 0.037, 0.036, 0.033, 0.036, 0.043, 0.047, 0.034, 0.023, 0.024, 0.025, 0.024, 0.028, 0.031, 0.032, 0.039, 0.053, 0.063, 0.067, 0.071, 0.069, 0.059, 0.05</WeekdayScheduleFractions>
-            <WeekendScheduleFractions>0.04, 0.037, 0.037, 0.036, 0.033, 0.036, 0.043, 0.047, 0.034, 0.023, 0.024, 0.025, 0.024, 0.028, 0.031, 0.032, 0.039, 0.053, 0.063, 0.067, 0.071, 0.069, 0.059, 0.05</WeekendScheduleFractions>
-            <MonthlyScheduleMultipliers>1.248, 1.257, 0.993, 0.989, 0.993, 0.827, 0.821, 0.821, 0.827, 0.99, 0.987, 1.248</MonthlyScheduleMultipliers>
-          </extension>
+        </HotTub>
+        <HotTub>
+          <SystemIdentifier id='HotTub2'/>
+          <HotTubPumps>
+            <HotTubPump>
+              <SystemIdentifier id='HotTub2Pump'/>
+              <Load>
+                <Units>kWh/year</Units>
+                <Value>50.0</Value>
+              </Load>
+            </HotTubPump>
+          </HotTubPumps>
+          <Heater>
+            <SystemIdentifier id='HotTub2Heater'/>
+            <Type>gas fired</Type>
+            <Load>
+              <Units>therm/year</Units>
+              <Value>100.0</Value>
+            </Load>
+          </Heater>
         </HotTub>
       </HotTubs>
       <MiscLoads>

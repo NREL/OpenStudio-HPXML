@@ -3946,12 +3946,13 @@ end
 def set_hpxml_pools(hpxml_file, hpxml)
   if ['base-misc-large-uncommon-loads.xml'].include? hpxml_file
     hpxml.pools.add(id: 'Pool',
+                    heater_type: HPXML::HeaterTypeElectric,
+                    heater_kwh_per_year: 100,
+                    pump_kwh_per_year: 50)
+    hpxml.pools.add(id: 'Pool2',
                     heater_type: HPXML::HeaterTypeGas,
                     heater_therm_per_year: 100,
-                    pump_kwh_per_year: 50,
-                    weekday_fractions: '0.04, 0.037, 0.037, 0.036, 0.033, 0.036, 0.043, 0.047, 0.034, 0.023, 0.024, 0.025, 0.024, 0.028, 0.031, 0.032, 0.039, 0.053, 0.063, 0.067, 0.071, 0.069, 0.059, 0.05',
-                    weekend_fractions: '0.04, 0.037, 0.037, 0.036, 0.033, 0.036, 0.043, 0.047, 0.034, 0.023, 0.024, 0.025, 0.024, 0.028, 0.031, 0.032, 0.039, 0.053, 0.063, 0.067, 0.071, 0.069, 0.059, 0.05',
-                    monthly_multipliers: '1.248, 1.257, 0.993, 0.989, 0.993, 0.827, 0.821, 0.821, 0.827, 0.99, 0.987, 1.248')
+                    pump_kwh_per_year: 50)
   end
 end
 
@@ -3960,10 +3961,11 @@ def set_hpxml_hot_tubs(hpxml_file, hpxml)
     hpxml.hot_tubs.add(id: 'HotTub',
                        heater_type: HPXML::HeaterTypeElectric,
                        heater_kwh_per_year: 100,
-                       pump_kwh_per_year: 50,
-                       weekday_fractions: '0.04, 0.037, 0.037, 0.036, 0.033, 0.036, 0.043, 0.047, 0.034, 0.023, 0.024, 0.025, 0.024, 0.028, 0.031, 0.032, 0.039, 0.053, 0.063, 0.067, 0.071, 0.069, 0.059, 0.05',
-                       weekend_fractions: '0.04, 0.037, 0.037, 0.036, 0.033, 0.036, 0.043, 0.047, 0.034, 0.023, 0.024, 0.025, 0.024, 0.028, 0.031, 0.032, 0.039, 0.053, 0.063, 0.067, 0.071, 0.069, 0.059, 0.05',
-                       monthly_multipliers: '1.248, 1.257, 0.993, 0.989, 0.993, 0.827, 0.821, 0.821, 0.827, 0.99, 0.987, 1.248')
+                       pump_kwh_per_year: 50)
+    hpxml.hot_tubs.add(id: 'HotTub2',
+                       heater_type: HPXML::HeaterTypeGas,
+                       heater_therm_per_year: 100,
+                       pump_kwh_per_year: 50)
   end
 end
 

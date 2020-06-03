@@ -4123,15 +4123,15 @@ class HPXML < Object
       pool = XMLHelper.add_element(pools, 'Pool')
       sys_id = XMLHelper.add_element(pool, 'SystemIdentifier')
       XMLHelper.add_attribute(sys_id, 'id', @id)
+      pumps = XMLHelper.add_element(pool, 'PoolPumps')
+      pool_pump = XMLHelper.add_element(pumps, 'PoolPump')
+      sys_id = XMLHelper.add_element(pool_pump, 'SystemIdentifier')
+      if not @pump_id.nil?
+        XMLHelper.add_attribute(sys_id, 'id', @pump_id)
+      else
+        XMLHelper.add_attribute(sys_id, 'id', @id + 'Pump')
+      end
       if not @pump_kwh_per_year.nil?
-        pumps = XMLHelper.add_element(pool, 'PoolPumps')
-        pool_pump = XMLHelper.add_element(pumps, 'PoolPump')
-        sys_id = XMLHelper.add_element(pool_pump, 'SystemIdentifier')
-        if not @pump_id.nil?
-          XMLHelper.add_attribute(sys_id, 'id', @pump_id)
-        else
-          XMLHelper.add_attribute(sys_id, 'id', @id + 'Pump')
-        end
         load = XMLHelper.add_element(pool_pump, 'Load')
         XMLHelper.add_element(load, 'Units', 'kWh/year')
         XMLHelper.add_element(load, 'Value', to_float(@pump_kwh_per_year))
@@ -4230,15 +4230,15 @@ class HPXML < Object
       hot_tub = XMLHelper.add_element(hot_tubs, 'HotTub')
       sys_id = XMLHelper.add_element(hot_tub, 'SystemIdentifier')
       XMLHelper.add_attribute(sys_id, 'id', @id)
+      pumps = XMLHelper.add_element(hot_tub, 'HotTubPumps')
+      hot_tub_pump = XMLHelper.add_element(pumps, 'HotTubPump')
+      sys_id = XMLHelper.add_element(hot_tub_pump, 'SystemIdentifier')
+      if not @pump_id.nil?
+        XMLHelper.add_attribute(sys_id, 'id', @pump_id)
+      else
+        XMLHelper.add_attribute(sys_id, 'id', @id + 'Pump')
+      end
       if not @pump_kwh_per_year.nil?
-        pumps = XMLHelper.add_element(hot_tub, 'HotTubPumps')
-        hot_tub_pump = XMLHelper.add_element(pumps, 'HotTubPump')
-        sys_id = XMLHelper.add_element(hot_tub_pump, 'SystemIdentifier')
-        if not @pump_id.nil?
-          XMLHelper.add_attribute(sys_id, 'id', @pump_id)
-        else
-          XMLHelper.add_attribute(sys_id, 'id', @id + 'Pump')
-        end
         load = XMLHelper.add_element(hot_tub_pump, 'Load')
         XMLHelper.add_element(load, 'Units', 'kWh/year')
         XMLHelper.add_element(load, 'Value', to_float(@pump_kwh_per_year))
@@ -4407,7 +4407,8 @@ class HPXML < Object
       end
       XMLHelper.add_element(fuel_load, 'FuelType', @fuel_type) unless @fuel_type.nil?
       HPXML::add_extension(parent: fuel_load,
-                           extensions: { 'WeekdayScheduleFractions' => @weekday_fractions,
+                           extensions: { 'UsageMultiplier': to_float_or_nil(@usage_multiplier),
+                                         'WeekdayScheduleFractions' => @weekday_fractions,
                                          'WeekendScheduleFractions' => @weekend_fractions,
                                          'MonthlyScheduleMultipliers' => @monthly_multipliers })
     end
@@ -4416,6 +4417,7 @@ class HPXML < Object
       @id = HPXML::get_id(fuel_load)
       @fuel_load_type = XMLHelper.get_value(fuel_load, 'FuelLoadType')
       @therm_per_year = to_float_or_nil(XMLHelper.get_value(fuel_load, "Load[Units='therm/year']/Value"))
+      @fuel_type = XMLHelper.get_value(fuel_load, 'FuelType')
       @usage_multiplier = to_float_or_nil(XMLHelper.get_value(fuel_load, 'extension/UsageMultiplier'))
       @weekday_fractions = XMLHelper.get_value(fuel_load, 'extension/WeekdayScheduleFractions')
       @weekend_fractions = XMLHelper.get_value(fuel_load, 'extension/WeekendScheduleFractions')
