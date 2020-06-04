@@ -2095,6 +2095,49 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     arg.setDefaultValue(1.0)
     args << arg
 
+    arg = OpenStudio::Measure::OSArgument::makeStringArgument('refrigerator_weekday_fractions', true)
+    arg.setDisplayName('Refrigerator: Weekday Schedule')
+    arg.setDescription('Specify the 24-hour weekday schedule.')
+    arg.setDefaultValue(Constants.Auto)
+    args << arg
+
+    arg = OpenStudio::Measure::OSArgument::makeStringArgument('refrigerator_weekend_fractions', true)
+    arg.setDisplayName('Refrigerator: Weekend Schedule')
+    arg.setDescription('Specify the 24-hour weekend schedule.')
+    arg.setDefaultValue(Constants.Auto)
+    args << arg
+
+    arg = OpenStudio::Measure::OSArgument::makeStringArgument('refrigerator_monthly_multipliers', true)
+    arg.setDisplayName('Refrigerator: Month Schedule')
+    arg.setDescription('Specify the 12-month schedule.')
+    arg.setDefaultValue(Constants.Auto)
+    args << arg
+
+    arg = OpenStudio::Measure::OSArgument::makeBoolArgument('extra_refrigerator_present', true)
+    arg.setDisplayName('Extra Refrigerator: Present')
+    arg.setDescription('Whether there is an extra refrigerator.')
+    arg.setDefaultValue(false)
+    args << arg
+
+    arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('extra_refrigerator_location', appliance_location_choices, true)
+    arg.setDisplayName('Extra Refrigerator: Location')
+    arg.setDescription('The space type for the extra refrigerator location.')
+    arg.setDefaultValue(Constants.Auto)
+    args << arg
+
+    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('extra_refrigerator_rated_annual_kwh', true)
+    arg.setDisplayName('Extra Refrigerator: Rated Annual Consumption')
+    arg.setUnits('kWh/yr')
+    arg.setDescription('The EnergyGuide rated annual energy consumption for a refrigerator.')
+    arg.setDefaultValue(434)
+    args << arg
+
+    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('extra_refrigerator_usage_multiplier', true)
+    arg.setDisplayName('Extra Refrigerator: Usage Multiplier')
+    arg.setDescription('Multiplier on the energy usage that can reflect, e.g., high/low usage occupants.')
+    arg.setDefaultValue(1.0)
+    args << arg
+
     cooking_range_oven_fuel_choices = OpenStudio::StringVector.new
     cooking_range_oven_fuel_choices << HPXML::FuelTypeElectricity
     cooking_range_oven_fuel_choices << HPXML::FuelTypeNaturalGas
@@ -2136,6 +2179,24 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     arg.setDisplayName('Cooking Range/Oven: Usage Multiplier')
     arg.setDescription('Multiplier on the energy usage that can reflect, e.g., high/low usage occupants.')
     arg.setDefaultValue(1.0)
+    args << arg
+
+    arg = OpenStudio::Measure::OSArgument::makeStringArgument('cooking_range_oven_weekday_fractions', true)
+    arg.setDisplayName('Cooking Range/Oven: Weekday Schedule')
+    arg.setDescription('Specify the 24-hour weekday schedule.')
+    arg.setDefaultValue(Constants.Auto)
+    args << arg
+
+    arg = OpenStudio::Measure::OSArgument::makeStringArgument('cooking_range_oven_weekend_fractions', true)
+    arg.setDisplayName('Cooking Range/Oven: Weekend Schedule')
+    arg.setDescription('Specify the 24-hour weekend schedule.')
+    arg.setDefaultValue(Constants.Auto)
+    args << arg
+
+    arg = OpenStudio::Measure::OSArgument::makeStringArgument('cooking_range_oven_monthly_multipliers', true)
+    arg.setDisplayName('Cooking Range/Oven: Month Schedule')
+    arg.setDescription('Specify the 12-month schedule.')
+    arg.setDefaultValue(Constants.Auto)
     args << arg
 
     arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('ceiling_fan_efficiency', true)
@@ -2187,34 +2248,28 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     arg.setDefaultValue(0.045)
     args << arg
 
-    arg = OpenStudio::Measure::OSArgument::makeBoolArgument('plug_loads_schedule_values', true)
-    arg.setDisplayName('Plug Loads: Use Schedule Values')
-    arg.setDescription('Whether to use the schedule values.')
-    arg.setDefaultValue(false)
+    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('plug_loads_usage_multiplier', true)
+    arg.setDisplayName('Plug Loads: Usage Multiplier')
+    arg.setDescription('Multiplier on the energy usage that can reflect, e.g., high/low usage occupants.')
+    arg.setDefaultValue(1.0)
     args << arg
 
     arg = OpenStudio::Measure::OSArgument::makeStringArgument('plug_loads_weekday_fractions', true)
     arg.setDisplayName('Plug Loads: Weekday Schedule')
     arg.setDescription('Specify the 24-hour weekday schedule.')
-    arg.setDefaultValue('0.035, 0.033, 0.032, 0.031, 0.032, 0.033, 0.037, 0.042, 0.043, 0.043, 0.043, 0.044, 0.045, 0.045, 0.044, 0.046, 0.048, 0.052, 0.053, 0.05, 0.047, 0.045, 0.04, 0.036')
+    arg.setDefaultValue(Constants.Auto)
     args << arg
 
     arg = OpenStudio::Measure::OSArgument::makeStringArgument('plug_loads_weekend_fractions', true)
     arg.setDisplayName('Plug Loads: Weekend Schedule')
     arg.setDescription('Specify the 24-hour weekend schedule.')
-    arg.setDefaultValue('0.035, 0.033, 0.032, 0.031, 0.032, 0.033, 0.037, 0.042, 0.043, 0.043, 0.043, 0.044, 0.045, 0.045, 0.044, 0.046, 0.048, 0.052, 0.053, 0.05, 0.047, 0.045, 0.04, 0.036')
+    arg.setDefaultValue(Constants.Auto)
     args << arg
 
     arg = OpenStudio::Measure::OSArgument::makeStringArgument('plug_loads_monthly_multipliers', true)
     arg.setDisplayName('Plug Loads: Month Schedule')
     arg.setDescription('Specify the 12-month schedule.')
-    arg.setDefaultValue('1.248, 1.257, 0.993, 0.989, 0.993, 0.827, 0.821, 0.821, 0.827, 0.99, 0.987, 1.248')
-    args << arg
-
-    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('plug_loads_usage_multiplier', true)
-    arg.setDisplayName('Plug Loads: Usage Multiplier')
-    arg.setDescription('Multiplier on the energy usage that can reflect, e.g., high/low usage occupants.')
-    arg.setDefaultValue(1.0)
+    arg.setDefaultValue(Constants.Auto)
     args << arg
 
     return args
@@ -2507,12 +2562,22 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
              refrigerator_location: runner.getStringArgumentValue('refrigerator_location', user_arguments),
              refrigerator_rated_annual_kwh: runner.getDoubleArgumentValue('refrigerator_rated_annual_kwh', user_arguments),
              refrigerator_usage_multiplier: runner.getDoubleArgumentValue('refrigerator_usage_multiplier', user_arguments),
+             refrigerator_weekday_fractions: runner.getStringArgumentValue('refrigerator_weekday_fractions', user_arguments),
+             refrigerator_weekend_fractions: runner.getStringArgumentValue('refrigerator_weekend_fractions', user_arguments),
+             refrigerator_monthly_multipliers: runner.getStringArgumentValue('refrigerator_monthly_multipliers', user_arguments),
+             extra_refrigerator_present: runner.getBoolArgumentValue('extra_refrigerator_present', user_arguments),
+             extra_refrigerator_location: runner.getStringArgumentValue('extra_refrigerator_location', user_arguments),
+             extra_refrigerator_rated_annual_kwh: runner.getDoubleArgumentValue('extra_refrigerator_rated_annual_kwh', user_arguments),
+             extra_refrigerator_usage_multiplier: runner.getDoubleArgumentValue('extra_refrigerator_usage_multiplier', user_arguments),
              cooking_range_oven_present: runner.getBoolArgumentValue('cooking_range_oven_present', user_arguments),
              cooking_range_oven_location: runner.getStringArgumentValue('cooking_range_oven_location', user_arguments),
              cooking_range_oven_fuel_type: runner.getStringArgumentValue('cooking_range_oven_fuel_type', user_arguments),
              cooking_range_oven_is_induction: runner.getStringArgumentValue('cooking_range_oven_is_induction', user_arguments),
              cooking_range_oven_is_convection: runner.getStringArgumentValue('cooking_range_oven_is_convection', user_arguments),
              cooking_range_oven_usage_multiplier: runner.getDoubleArgumentValue('cooking_range_oven_usage_multiplier', user_arguments),
+             cooking_range_oven_weekday_fractions: runner.getStringArgumentValue('cooking_range_oven_weekday_fractions', user_arguments),
+             cooking_range_oven_weekend_fractions: runner.getStringArgumentValue('cooking_range_oven_weekend_fractions', user_arguments),
+             cooking_range_oven_monthly_multipliers: runner.getStringArgumentValue('cooking_range_oven_monthly_multipliers', user_arguments),
              ceiling_fan_efficiency: runner.getDoubleArgumentValue('ceiling_fan_efficiency', user_arguments),
              ceiling_fan_quantity: runner.getStringArgumentValue('ceiling_fan_quantity', user_arguments),
              ceiling_fan_cooling_setpoint_temp_offset: runner.getDoubleArgumentValue('ceiling_fan_cooling_setpoint_temp_offset', user_arguments),
@@ -2520,11 +2585,10 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
              plug_loads_other_annual_kwh: runner.getStringArgumentValue('plug_loads_other_annual_kwh', user_arguments),
              plug_loads_other_frac_sensible: runner.getDoubleArgumentValue('plug_loads_other_frac_sensible', user_arguments),
              plug_loads_other_frac_latent: runner.getDoubleArgumentValue('plug_loads_other_frac_latent', user_arguments),
-             plug_loads_schedule_values: runner.getBoolArgumentValue('plug_loads_schedule_values', user_arguments),
+             plug_loads_usage_multiplier: runner.getDoubleArgumentValue('plug_loads_usage_multiplier', user_arguments),
              plug_loads_weekday_fractions: runner.getStringArgumentValue('plug_loads_weekday_fractions', user_arguments),
              plug_loads_weekend_fractions: runner.getStringArgumentValue('plug_loads_weekend_fractions', user_arguments),
-             plug_loads_monthly_multipliers: runner.getStringArgumentValue('plug_loads_monthly_multipliers', user_arguments),
-             plug_loads_usage_multiplier: runner.getDoubleArgumentValue('plug_loads_usage_multiplier', user_arguments) }
+             plug_loads_monthly_multipliers: runner.getStringArgumentValue('plug_loads_monthly_multipliers', user_arguments) }
 
     # Argument error checks
     warnings, errors = validate_arguments(args)
@@ -2739,6 +2803,7 @@ class HPXMLFile
     set_clothes_dryer(hpxml, runner, args)
     set_dishwasher(hpxml, runner, args)
     set_refrigerator(hpxml, runner, args)
+    set_extra_refrigerator(hpxml, runner, args)
     set_cooking_range_oven(hpxml, runner, args)
     set_ceiling_fans(hpxml, runner, args)
     set_plug_loads(hpxml, runner, args)
@@ -4059,9 +4124,43 @@ class HPXMLFile
       usage_multiplier = args[:refrigerator_usage_multiplier]
     end
 
+    if args[:refrigerator_weekday_fractions] != Constants.Auto
+      refrigerator_weekday_fractions = args[:refrigerator_weekday_fractions]
+    end
+
+    if args[:refrigerator_weekend_fractions] != Constants.Auto
+      refrigerator_weekend_fractions = args[:refrigerator_weekend_fractions]
+    end
+
+    if args[:refrigerator_monthly_multipliers] != Constants.Auto
+      refrigerator_monthly_multipliers = args[:refrigerator_monthly_multipliers]
+    end
+
     hpxml.refrigerators.add(id: 'Refrigerator',
                             location: location,
                             rated_annual_kwh: args[:refrigerator_rated_annual_kwh],
+                            usage_multiplier: usage_multiplier,
+                            weekday_fractions: refrigerator_weekday_fractions,
+                            weekend_fractions: refrigerator_weekend_fractions,
+                            monthly_multipliers: refrigerator_monthly_multipliers,
+                            schedules_output_path: args[:schedules_output_path],
+                            schedules_column_name: 'refrigerator')
+  end
+
+  def self.set_extra_refrigerator(hpxml, runner, args)
+    return unless args[:extra_refrigerator_present]
+
+    if args[:extra_refrigerator_location] != Constants.Auto
+      location = args[:extra_refrigerator_location]
+    end
+
+    if args[:extra_refrigerator_usage_multiplier] != 1.0
+      usage_multiplier = args[:extra_refrigerator_usage_multiplier]
+    end
+
+    hpxml.refrigerators.add(id: 'ExtraRefrigerator',
+                            location: location,
+                            rated_annual_kwh: args[:extra_refrigerator_rated_annual_kwh],
                             usage_multiplier: usage_multiplier,
                             schedules_output_path: args[:schedules_output_path],
                             schedules_column_name: 'refrigerator')
@@ -4078,11 +4177,27 @@ class HPXMLFile
       usage_multiplier = args[:cooking_range_oven_usage_multiplier]
     end
 
+    if args[:cooking_range_oven_weekday_fractions] != Constants.Auto
+      cooking_range_oven_weekday_fractions = args[:cooking_range_oven_weekday_fractions]
+    end
+
+    if args[:cooking_range_oven_weekend_fractions] != Constants.Auto
+      cooking_range_oven_weekend_fractions = args[:cooking_range_oven_weekend_fractions]
+    end
+
+    if args[:cooking_range_oven_monthly_multipliers] != Constants.Auto
+      cooking_range_oven_monthly_multipliers = args[:cooking_range_oven_monthly_multipliers]
+    end
+
     hpxml.cooking_ranges.add(id: 'CookingRange',
                              location: location,
                              fuel_type: args[:cooking_range_oven_fuel_type],
                              is_induction: args[:cooking_range_oven_is_induction],
-                             usage_multiplier: usage_multiplier)
+                             usage_multiplier: usage_multiplier,
+                             weekday_fractions: cooking_range_oven_weekday_fractions,
+                             weekend_fractions: cooking_range_oven_weekend_fractions,
+                             monthly_multipliers: cooking_range_oven_monthly_multipliers)
+
     hpxml.ovens.add(id: 'Oven',
                     is_convection: args[:cooking_range_oven_is_convection])
   end
@@ -4128,11 +4243,21 @@ class HPXMLFile
   end
 
   def self.set_misc_loads_schedule(hpxml, runner, args)
-    return unless args[:plug_loads_schedule_values]
+    if args[:plug_loads_weekday_fractions] != Constants.Auto
+      plug_loads_weekday_fractions = args[:plug_loads_weekday_fractions]
+    end
 
-    hpxml.misc_loads_schedule.weekday_fractions = args[:plug_loads_weekday_fractions]
-    hpxml.misc_loads_schedule.weekend_fractions = args[:plug_loads_weekend_fractions]
-    hpxml.misc_loads_schedule.monthly_multipliers = args[:plug_loads_monthly_multipliers]
+    if args[:plug_loads_weekend_fractions] != Constants.Auto
+      plug_loads_weekend_fractions = args[:plug_loads_weekend_fractions]
+    end
+
+    if args[:plug_loads_monthly_multipliers] != Constants.Auto
+      plug_loads_monthly_multipliers = args[:plug_loads_monthly_multipliers]
+    end
+
+    hpxml.misc_loads_schedule.weekday_fractions = plug_loads_weekday_fractions
+    hpxml.misc_loads_schedule.weekend_fractions = plug_loads_weekend_fractions
+    hpxml.misc_loads_schedule.monthly_multipliers = plug_loads_monthly_multipliers
   end
 end
 
