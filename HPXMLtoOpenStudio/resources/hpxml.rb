@@ -3732,8 +3732,8 @@ class HPXML < Object
                                          'WeekdayScheduleFractions' => @weekday_fractions,
                                          'WeekendScheduleFractions' => @weekend_fractions,
                                          'MonthlyScheduleMultipliers' => @monthly_multipliers,
-                                         'SchedulesOutputPath' => schedules_output_path,
-                                         'SchedulesColumnName' => schedules_column_name })
+                                         'SchedulesOutputPath' => @schedules_output_path,
+                                         'SchedulesColumnName' => @schedules_column_name })
     end
 
     def from_oga(refrigerator)

@@ -69,11 +69,8 @@ def create_osws
     'base-dhw-tankless-gas.osw' => 'base.osw',
     'base-dhw-tankless-gas-with-solar.osw' => 'base.osw',
     'base-dhw-tankless-gas-with-solar-fraction.osw' => 'base.osw',
-    'base-dhw-tankless-oil.osw' => 'base.osw',
     'base-dhw-tankless-propane.osw' => 'base.osw',
-    'base-dhw-tankless-wood.osw' => 'base.osw',
     'base-dhw-tank-oil.osw' => 'base.osw',
-    'base-dhw-tank-propane.osw' => 'base.osw',
     'base-dhw-tank-wood.osw' => 'base.osw',
     'base-dhw-uef.osw' => 'base.osw',
     'base-enclosure-2stories.osw' => 'base.osw',
@@ -134,9 +131,7 @@ def create_osws
     'base-hvac-evap-cooler-only.osw' => 'base.osw',
     'base-hvac-evap-cooler-only-ducted.osw' => 'base.osw',
     'base-hvac-fireplace-wood-only.osw' => 'base.osw',
-    'base-hvac-floor-furnace-elec-only.osw' => 'base.osw',
     'base-hvac-floor-furnace-propane-only.osw' => 'base.osw',
-    'base-hvac-floor-furnace-wood-only.osw' => 'base.osw',
     # 'base-hvac-flowrate.osw' => 'base.osw', # Not going to support in the measure
     'base-hvac-furnace-elec-central-ac-1-speed.osw' => 'base.osw',
     'base-hvac-furnace-elec-only.osw' => 'base.osw',
@@ -154,7 +149,6 @@ def create_osws
     'base-hvac-mini-split-heat-pump-ducted-cooling-only.osw' => 'base.osw',
     'base-hvac-mini-split-heat-pump-ducted-heating-only.osw' => 'base.osw',
     'base-hvac-mini-split-heat-pump-ductless.osw' => 'base.osw',
-    'base-hvac-mini-split-heat-pump-ductless-no-backup.osw' => 'base.osw',
     # 'base-hvac-multiple.osw' => 'base.osw', # Not supporting multiple heating/cooling systems for now
     # 'base-hvac-multiple2.osw' => 'base.osw', # Not supporting multiple heating/cooling systems for now
     'base-hvac-none.osw' => 'base.osw',
@@ -165,12 +159,9 @@ def create_osws
     'base-hvac-room-ac-only-33percent.osw' => 'base.osw',
     'base-hvac-setpoints.osw' => 'base.osw',
     'base-hvac-stove-oil-only.osw' => 'base.osw',
-    'base-hvac-stove-wood-only.osw' => 'base.osw',
     'base-hvac-stove-wood-pellets-only.osw' => 'base.osw',
     'base-hvac-undersized.osw' => 'base.osw',
     'base-hvac-wall-furnace-elec-only.osw' => 'base.osw',
-    'base-hvac-wall-furnace-propane-only.osw' => 'base.osw',
-    'base-hvac-wall-furnace-wood-only.osw' => 'base.osw',
     'base-location-baltimore-md.osw' => 'base.osw',
     'base-location-dallas-tx.osw' => 'base.osw',
     'base-location-duluth-mn.osw' => 'base.osw',
@@ -564,6 +555,9 @@ def get_values(osw_file, step)
     step.setArgument('refrigerator_location', HPXML::LocationLivingSpace)
     step.setArgument('refrigerator_rated_annual_kwh', 650.0)
     step.setArgument('refrigerator_usage_multiplier', 1.0)
+    step.setArgument('refrigerator_weekday_fractions', Constants.Auto)
+    step.setArgument('refrigerator_weekend_fractions', Constants.Auto)
+    step.setArgument('refrigerator_monthly_multipliers', Constants.Auto)
     step.setArgument('extra_refrigerator_present', false)
     step.setArgument('extra_refrigerator_location', HPXML::LocationLivingSpace)
     step.setArgument('extra_refrigerator_rated_annual_kwh', 650.0)
@@ -574,6 +568,9 @@ def get_values(osw_file, step)
     step.setArgument('cooking_range_oven_is_induction', false)
     step.setArgument('cooking_range_oven_is_convection', false)
     step.setArgument('cooking_range_oven_usage_multiplier', 1.0)
+    step.setArgument('cooking_range_oven_weekday_fractions', Constants.Auto)
+    step.setArgument('cooking_range_oven_weekend_fractions', Constants.Auto)
+    step.setArgument('cooking_range_oven_monthly_multipliers', Constants.Auto)
     step.setArgument('ceiling_fan_efficiency', 70.4)
     step.setArgument('ceiling_fan_quantity', '0')
     step.setArgument('ceiling_fan_cooling_setpoint_temp_offset', 0)
@@ -581,11 +578,10 @@ def get_values(osw_file, step)
     step.setArgument('plug_loads_other_annual_kwh', '2457.0')
     step.setArgument('plug_loads_other_frac_sensible', 0.855)
     step.setArgument('plug_loads_other_frac_latent', 0.045)
-    step.setArgument('plug_loads_schedule_values', true)
+    step.setArgument('plug_loads_usage_multiplier', 1.0)
     step.setArgument('plug_loads_weekday_fractions', '0.04, 0.037, 0.037, 0.036, 0.033, 0.036, 0.043, 0.047, 0.034, 0.023, 0.024, 0.025, 0.024, 0.028, 0.031, 0.032, 0.039, 0.053, 0.063, 0.067, 0.071, 0.069, 0.059, 0.05')
     step.setArgument('plug_loads_weekend_fractions', '0.04, 0.037, 0.037, 0.036, 0.033, 0.036, 0.043, 0.047, 0.034, 0.023, 0.024, 0.025, 0.024, 0.028, 0.031, 0.032, 0.039, 0.053, 0.063, 0.067, 0.071, 0.069, 0.059, 0.05')
     step.setArgument('plug_loads_monthly_multipliers', '1.248, 1.257, 0.993, 0.989, 0.993, 0.827, 0.821, 0.821, 0.827, 0.99, 0.987, 1.248')
-    step.setArgument('plug_loads_usage_multiplier', 1.0)
   elsif ['base-single-family-attached.osw'].include? osw_file
     step.setArgument('geometry_unit_type', HPXML::ResidentialTypeSFA)
     step.setArgument('geometry_cfa', 900.0)
@@ -886,28 +882,13 @@ def get_values(osw_file, step)
     step.setArgument('water_heater_efficiency_ef', 0.82)
     step.setArgument('solar_thermal_system_type', 'hot water')
     step.setArgument('solar_thermal_solar_fraction', 0.65)
-  elsif ['base-dhw-tankless-oil.osw'].include? osw_file
-    step.setArgument('water_heater_type', HPXML::WaterHeaterTypeTankless)
-    step.setArgument('water_heater_fuel_type', HPXML::FuelTypeOil)
-    step.setArgument('water_heater_tank_volume', Constants.Auto)
-    step.setArgument('water_heater_efficiency_ef', 0.82)
   elsif ['base-dhw-tankless-propane.osw'].include? osw_file
     step.setArgument('water_heater_type', HPXML::WaterHeaterTypeTankless)
     step.setArgument('water_heater_fuel_type', HPXML::FuelTypePropane)
     step.setArgument('water_heater_tank_volume', Constants.Auto)
     step.setArgument('water_heater_efficiency_ef', 0.82)
-  elsif ['base-dhw-tankless-wood.osw'].include? osw_file
-    step.setArgument('water_heater_type', HPXML::WaterHeaterTypeTankless)
-    step.setArgument('water_heater_fuel_type', HPXML::FuelTypeWood)
-    step.setArgument('water_heater_tank_volume', Constants.Auto)
-    step.setArgument('water_heater_efficiency_ef', 0.82)
   elsif ['base-dhw-tank-oil.osw'].include? osw_file
     step.setArgument('water_heater_fuel_type', HPXML::FuelTypeOil)
-    step.setArgument('water_heater_tank_volume', '50')
-    step.setArgument('water_heater_heating_capacity', '40000')
-    step.setArgument('water_heater_efficiency_ef', 0.59)
-  elsif ['base-dhw-tank-propane.osw'].include? osw_file
-    step.setArgument('water_heater_fuel_type', HPXML::FuelTypePropane)
     step.setArgument('water_heater_tank_volume', '50')
     step.setArgument('water_heater_heating_capacity', '40000')
     step.setArgument('water_heater_efficiency_ef', 0.59)
@@ -1273,21 +1254,9 @@ def get_values(osw_file, step)
     step.setArgument('heating_system_fuel', HPXML::FuelTypeWood)
     step.setArgument('heating_system_heating_efficiency_percent', 0.8)
     step.setArgument('cooling_system_type', 'none')
-  elsif ['base-hvac-floor-furnace-elec-only.osw'].include? osw_file
-    step.setArgument('heating_system_type', HPXML::HVACTypeFloorFurnace)
-    step.setArgument('heating_system_fuel', HPXML::FuelTypeElectricity)
-    step.setArgument('heating_system_heating_efficiency_afue', 1.0)
-    step.setArgument('heating_system_electric_auxiliary_energy', 200.0)
-    step.setArgument('cooling_system_type', 'none')
   elsif ['base-hvac-floor-furnace-propane-only.osw'].include? osw_file
     step.setArgument('heating_system_type', HPXML::HVACTypeFloorFurnace)
     step.setArgument('heating_system_fuel', HPXML::FuelTypePropane)
-    step.setArgument('heating_system_heating_efficiency_afue', 0.8)
-    step.setArgument('heating_system_electric_auxiliary_energy', 200.0)
-    step.setArgument('cooling_system_type', 'none')
-  elsif ['base-hvac-floor-furnace-wood-only.osw'].include? osw_file
-    step.setArgument('heating_system_type', HPXML::HVACTypeFloorFurnace)
-    step.setArgument('heating_system_fuel', HPXML::FuelTypeWood)
     step.setArgument('heating_system_heating_efficiency_afue', 0.8)
     step.setArgument('heating_system_electric_auxiliary_energy', 200.0)
     step.setArgument('cooling_system_type', 'none')
@@ -1389,16 +1358,6 @@ def get_values(osw_file, step)
     step.setArgument('heat_pump_heating_capacity_17F', '29500.0')
     step.setArgument('heat_pump_heating_efficiency_hspf', 10.0)
     step.setArgument('heat_pump_cooling_efficiency_seer', 19.0)
-    step.setArgument('heat_pump_backup_fuel', HPXML::FuelTypeElectricity)
-  elsif ['base-hvac-mini-split-heat-pump-ductless-no-backup.osw'].include? osw_file
-    step.setArgument('heating_system_type', 'none')
-    step.setArgument('cooling_system_type', 'none')
-    step.setArgument('heat_pump_type', HPXML::HVACTypeHeatPumpMiniSplit)
-    step.setArgument('heat_pump_heating_capacity', '52000.0')
-    step.removeArgument('heat_pump_cooling_compressor_type')
-    step.setArgument('heat_pump_heating_capacity_17F', '29500.0')
-    step.setArgument('heat_pump_heating_efficiency_hspf', 10.0)
-    step.setArgument('heat_pump_cooling_efficiency_seer', 19.0)
   elsif ['base-hvac-none.osw'].include? osw_file
     step.setArgument('heating_system_type', 'none')
     step.setArgument('cooling_system_type', 'none')
@@ -1433,12 +1392,6 @@ def get_values(osw_file, step)
     step.setArgument('heating_system_heating_efficiency_percent', 0.8)
     step.setArgument('heating_system_electric_auxiliary_energy', 200.0)
     step.setArgument('cooling_system_type', 'none')
-  elsif ['base-hvac-stove-wood-only.osw'].include? osw_file
-    step.setArgument('heating_system_type', HPXML::HVACTypeStove)
-    step.setArgument('heating_system_fuel', HPXML::FuelTypeWood)
-    step.setArgument('heating_system_heating_efficiency_percent', 0.8)
-    step.setArgument('heating_system_electric_auxiliary_energy', 200.0)
-    step.setArgument('cooling_system_type', 'none')
   elsif ['base-hvac-stove-wood-pellets-only.osw'].include? osw_file
     step.setArgument('heating_system_type', HPXML::HVACTypeStove)
     step.setArgument('heating_system_fuel', HPXML::FuelTypeWoodPellets)
@@ -1454,18 +1407,6 @@ def get_values(osw_file, step)
     step.setArgument('heating_system_type', HPXML::HVACTypeWallFurnace)
     step.setArgument('heating_system_fuel', HPXML::FuelTypeElectricity)
     step.setArgument('heating_system_heating_efficiency_afue', 1.0)
-    step.setArgument('heating_system_electric_auxiliary_energy', 200.0)
-    step.setArgument('cooling_system_type', 'none')
-  elsif ['base-hvac-wall-furnace-propane-only.osw'].include? osw_file
-    step.setArgument('heating_system_type', HPXML::HVACTypeWallFurnace)
-    step.setArgument('heating_system_fuel', HPXML::FuelTypePropane)
-    step.setArgument('heating_system_heating_efficiency_afue', 0.8)
-    step.setArgument('heating_system_electric_auxiliary_energy', 200.0)
-    step.setArgument('cooling_system_type', 'none')
-  elsif ['base-hvac-wall-furnace-wood-only.osw'].include? osw_file
-    step.setArgument('heating_system_type', HPXML::HVACTypeWallFurnace)
-    step.setArgument('heating_system_fuel', HPXML::FuelTypeWood)
-    step.setArgument('heating_system_heating_efficiency_afue', 0.8)
     step.setArgument('heating_system_electric_auxiliary_energy', 200.0)
     step.setArgument('cooling_system_type', 'none')
   elsif ['base-location-baltimore-md.osw'].include? osw_file
