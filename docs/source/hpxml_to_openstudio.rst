@@ -43,12 +43,12 @@ The following building features/technologies are available for modeling via the 
   - Whole House Fan
 
 - Photovoltaics
-- Appliances (Clothes Washer/Dryer, Dishwasher, Refrigerators, Freezer, Cooking Range/Oven)
+- Appliances (Clothes Washer/Dryer, Dishwasher, Refrigerators, Freezers, Cooking Range/Oven)
 - Dehumidifier
 - Lighting
 - Ceiling Fans
-- Pools
-- Hot Tubs
+- Pool
+- Hot Tub
 - Plug Loads
 - Fuel Loads
 
@@ -824,16 +824,17 @@ basement - conditioned          3
 living space                    4
 ==============================  =============================================   
 
-Secondary refrigerators should be labeled by setting the ``PrimaryIndicator`` to false.
+All refrigerators should be labeled by setting the ``PrimaryIndicator`` element (true or false). There should be exactly one primary refrigerator, and all the rest should be labeled as secondary refrigerators.
 If ``Location`` is not provided for secondary refrigerators, the secondary refrigerator location will be chosen based on the presence of spaces and the "Default Priority" indicated above.
 
-Freezer
-*******
+Freezers
+********
 
-An ``Appliances/Freezer`` element can be provided; if not provided, a freezer will not be modeled.
+Multiple ``Appliances/Freezer`` elements can be provided; if none provided, freezers will not be modeled.
 
 The efficiency of the freezer can be optionally entered as RatedAnnualkWh or extension/AdjustedAnnualkWh. If neither are provided, RatedAnnualkWh will be defaulted to represent a benchmark freezer according to the BA HSP (319.8 kWh/year).
 
+Optional ``extension/WeekdayScheduleFractions``, ``extension/WeekendScheduleFractions``, and ``extension/MonthlyScheduleMultipliers`` can be provided; if not provided, values from Figures 16 & 24 of the `Building America House Simulation Protocols <https://www1.eere.energy.gov/buildings/publications/pdfs/building_america/house_simulation.pdf>`_ are used.
 An extension/UsageMultiplier can also be optionally provided that scales energy usage; if not provided, it is assumed to be 1.0.
 
 Cooking Range/Oven
@@ -893,45 +894,45 @@ Quantity [#]                NumberofBedrooms+1
 In addition, a reduced cooling setpoint can be specified for summer months when ceiling fans are operating.
 See the Thermostat section for more information.
 
-Pools
-~~~~~
+Pool
+~~~~
 
-Multiple ``Pools/Pool`` elements can be specified; if none are provided, pools will not be modeled.
+A ``Pools/Pool`` element can be specified; if not provided, a pool will not be modeled.
 
 A ``PoolPumps/PoolPump`` element is required. The annual energy consumption of the pool pump (``Load[Units='kWh/year']/Value``) can be provided, otherwise they will be calculated using the following equation based on the BA HSP.
 
-.. math:: PoolPumpkWhs = 158.5 \cdot (0.5 + 0.25 \cdot NumberofBedrooms / 3 + 0.35 \cdot ConditionedFloorArea / 1920)
+.. math:: PoolPumpkWhs = 158.5 / 0.070 \cdot (0.5 + 0.25 \cdot NumberofBedrooms / 3 + 0.35 \cdot ConditionedFloorArea / 1920)
 
 A ``Heater/Type`` element can be specified; if not provided, a pool heater will not be modeled.
 Currently only pool heaters specified with ``Heater[Type="gas fired" or Type="electric resistance"]`` are recognized.
 The annual energy consumption (``Load[Units='kWh/year' or Units='therm/year']/Value``) can be provided, otherwise they will be calculated using the following equations from the BA HSP.
 
-.. math:: PoolHeaterkWhs = 8.3 \cdot (0.5 + 0.25 \cdot NumberofBedrooms / 3 + 0.35 \cdot ConditionedFloorArea / 1920)
-.. math:: PoolHeatertherms = 3.0 \cdot (0.5 + 0.25 \cdot NumberofBedrooms / 3 + 0.35 \cdot ConditionedFloorArea / 1920)
+.. math:: PoolHeaterkWhs = 8.3 / 0.004 \cdot (0.5 + 0.25 \cdot NumberofBedrooms / 3 + 0.35 \cdot ConditionedFloorArea / 1920)
+.. math:: PoolHeatertherms = 3.0 / 0.014 \cdot (0.5 + 0.25 \cdot NumberofBedrooms / 3 + 0.35 \cdot ConditionedFloorArea / 1920)
 
 An ``PoolPumps/PoolPump/extension/UsageMultiplier`` can also be optionally provided that scales pool pump energy usage; if not provided, it is assumed to be 1.0.
 An ``Heater/extension/UsageMultiplier`` can also be optionally provided that scales pool heater energy usage; if not provided, it is assumed to be 1.0.
 Optional ``extension/WeekdayScheduleFractions``, ``extension/WeekendScheduleFractions``, and ``extension/MonthlyScheduleMultipliers`` can be provided; if not provided, they are assumed to be ``0.04, 0.037, 0.037, 0.036, 0.033, 0.036, 0.043, 0.047, 0.034, 0.023, 0.024, 0.025, 0.024, 0.028, 0.031, 0.032, 0.039, 0.053, 0.063, 0.067, 0.071, 0.069, 0.059, 0.05``, ``0.04, 0.037, 0.037, 0.036, 0.033, 0.036, 0.043, 0.047, 0.034, 0.023, 0.024, 0.025, 0.024, 0.028, 0.031, 0.032, 0.039, 0.053, 0.063, 0.067, 0.071, 0.069, 0.059, 0.05``, and ``1.248, 1.257, 0.993, 0.989, 0.993, 0.827, 0.821, 0.821, 0.827, 0.99, 0.987, 1.248``, respectively.
 
-Hot Tubs
-~~~~~~~~
+Hot Tub
+~~~~~~~
 
-Multiple ``HotTubs/HotTub`` elements can be specified; if none are provided, hot tubs will not be modeled.
+A ``HotTubs/HotTub`` element can be specified; if not provided, a hot tub will not be modeled.
 
 A ``HotTubPumps/HotTubPump`` element is required. The annual energy consumption of the hot tub pump (``Load[Units='kWh/year']/Value``) can be provided, otherwise they will be calculated using the following equation based on the BA HSP.
 
-.. math:: HotTubPumpkWhs = 59.5 \cdot (0.5 + 0.25 \cdot NumberofBedrooms / 3 + 0.35 \cdot ConditionedFloorArea / 1920)
+.. math:: HotTubPumpkWhs = 59.5 / 0.059 \cdot (0.5 + 0.25 \cdot NumberofBedrooms / 3 + 0.35 \cdot ConditionedFloorArea / 1920)
 
 A ``Heater/Type`` element can be specified; if not provided, a hot tub heater will not be modeled.
 Currently only hot tub heaters specified with ``Heater[Type="gas fired" or Type="electric resistance"]`` are recognized.
 The annual energy consumption (``Load[Units='kWh/year' or Units='therm/year']/Value``) can be provided, otherwise they will be calculated using the following equations from the BA HSP.
 
-.. math:: HotTubHeaterkWhs = 49.0 \cdot (0.5 + 0.25 \cdot NumberofBedrooms / 3 + 0.35 \cdot ConditionedFloorArea / 1920)
-.. math:: HotTubHeatertherms = 0.87 \cdot (0.5 + 0.25 \cdot NumberofBedrooms / 3 + 0.35 \cdot ConditionedFloorArea / 1920)
+.. math:: HotTubHeaterkWhs = 49.0 / 0.048 \cdot (0.5 + 0.25 \cdot NumberofBedrooms / 3 + 0.35 \cdot ConditionedFloorArea / 1920)
+.. math:: HotTubHeatertherms = 0.87 / 0.011 \cdot (0.5 + 0.25 \cdot NumberofBedrooms / 3 + 0.35 \cdot ConditionedFloorArea / 1920)
 
 An ``HotTubPumps/HotTubPump/extension/UsageMultiplier`` can also be optionally provided that scales hot tub pump energy usage; if not provided, it is assumed to be 1.0.
 An ``Heater/extension/UsageMultiplier`` can also be optionally provided that scales hot tub heater energy usage; if not provided, it is assumed to be 1.0.
-Optional ``extension/WeekdayScheduleFractions``, ``extension/WeekendScheduleFractions``, and ``extension/MonthlyScheduleMultipliers`` can be provided; if not provided, they are assumed to be ``0.04, 0.037, 0.037, 0.036, 0.033, 0.036, 0.043, 0.047, 0.034, 0.023, 0.024, 0.025, 0.024, 0.028, 0.031, 0.032, 0.039, 0.053, 0.063, 0.067, 0.071, 0.069, 0.059, 0.05``, ``0.04, 0.037, 0.037, 0.036, 0.033, 0.036, 0.043, 0.047, 0.034, 0.023, 0.024, 0.025, 0.024, 0.028, 0.031, 0.032, 0.039, 0.053, 0.063, 0.067, 0.071, 0.069, 0.059, 0.05``, and ``1.248, 1.257, 0.993, 0.989, 0.993, 0.827, 0.821, 0.821, 0.827, 0.99, 0.987, 1.248``, respectively.
+Optional ``extension/WeekdayScheduleFractions``, ``extension/WeekendScheduleFractions``, and ``extension/MonthlyScheduleMultipliers`` can be provided for ``PoolPump`` and ``Heater``; if not provided, they are assumed to be ``0.04, 0.037, 0.037, 0.036, 0.033, 0.036, 0.043, 0.047, 0.034, 0.023, 0.024, 0.025, 0.024, 0.028, 0.031, 0.032, 0.039, 0.053, 0.063, 0.067, 0.071, 0.069, 0.059, 0.05``, ``0.04, 0.037, 0.037, 0.036, 0.033, 0.036, 0.043, 0.047, 0.034, 0.023, 0.024, 0.025, 0.024, 0.028, 0.031, 0.032, 0.039, 0.053, 0.063, 0.067, 0.071, 0.069, 0.059, 0.05``, and ``1.248, 1.257, 0.993, 0.989, 0.993, 0.827, 0.821, 0.821, 0.827, 0.99, 0.987, 1.248``, respectively.
 
 Plug Loads
 ~~~~~~~~~~
@@ -942,10 +943,10 @@ The annual energy consumption (``Load[Units='kWh/year']/Value``) can be provided
 
 .. math:: TelevisionkWhs = 413.0 + 69.0 \cdot NumberofBedrooms
 .. math:: OtherkWhs = 0.91 \cdot ConditionedFloorArea
-.. math:: WellPumpkWhs = 50.8 \cdot (0.5 + 0.25 \cdot NumberofBedrooms / 3 + 0.35 \cdot ConditionedFloorArea / 1920)
+.. math:: WellPumpkWhs = 50.8 / 0.127 \cdot (0.5 + 0.25 \cdot NumberofBedrooms / 3 + 0.35 \cdot ConditionedFloorArea / 1920)
 
 An ``extension/UsageMultiplier`` can also be optionally provided that scales energy usage; if not provided, it is assumed to be 1.0.
-Optional ``extension/WeekdayScheduleFractions``, ``extension/WeekendScheduleFractions``, and ``extension/MonthlyScheduleMultipliers`` can be provided; if not provided, they are assumed to be ``0.04, 0.037, 0.037, 0.036, 0.033, 0.036, 0.043, 0.047, 0.034, 0.023, 0.024, 0.025, 0.024, 0.028, 0.031, 0.032, 0.039, 0.053, 0.063, 0.067, 0.071, 0.069, 0.059, 0.05``, ``0.04, 0.037, 0.037, 0.036, 0.033, 0.036, 0.043, 0.047, 0.034, 0.023, 0.024, 0.025, 0.024, 0.028, 0.031, 0.032, 0.039, 0.053, 0.063, 0.067, 0.071, 0.069, 0.059, 0.05``, and ``1.248, 1.257, 0.993, 0.989, 0.993, 0.827, 0.821, 0.821, 0.827, 0.99, 0.987, 1.248``, respectively.
+Optional ``extension/WeekdayScheduleFractions``, ``extension/WeekendScheduleFractions``, and ``extension/MonthlyScheduleMultipliers`` can be provided; if not provided for ``HotTubPump`` and ``Heater``, they are assumed to be ``0.04, 0.037, 0.037, 0.036, 0.033, 0.036, 0.043, 0.047, 0.034, 0.023, 0.024, 0.025, 0.024, 0.028, 0.031, 0.032, 0.039, 0.053, 0.063, 0.067, 0.071, 0.069, 0.059, 0.05``, ``0.04, 0.037, 0.037, 0.036, 0.033, 0.036, 0.043, 0.047, 0.034, 0.023, 0.024, 0.025, 0.024, 0.028, 0.031, 0.032, 0.039, 0.053, 0.063, 0.067, 0.071, 0.069, 0.059, 0.05``, and ``1.248, 1.257, 0.993, 0.989, 0.993, 0.827, 0.821, 0.821, 0.827, 0.99, 0.987, 1.248``, respectively.
 
 Fuel Loads
 ~~~~~~~~~~
@@ -955,9 +956,9 @@ Currently only exterior fuel loads specified with ``FuelType='natural gas'``, an
 
 The annual energy consumption (``Load[Units='therm/year']/Value``) can be provided, otherwise they will be calculated using the following equations from the BA HSP.
 
-.. math:: Grilltherms = 0.87 \cdot (0.5 + 0.25 \cdot NumberofBedrooms / 3 + 0.35 \cdot ConditionedFloorArea / 1920)
-.. math:: Lightingtherms = 0.22 \cdot (0.5 + 0.25 \cdot NumberofBedrooms / 3 + 0.35 \cdot ConditionedFloorArea / 1920)
-.. math:: Fireplacetherms = 1.95 \cdot (0.5 + 0.25 \cdot NumberofBedrooms / 3 + 0.35 \cdot ConditionedFloorArea / 1920)
+.. math:: Grilltherms = 0.87 / 0.029 \cdot (0.5 + 0.25 \cdot NumberofBedrooms / 3 + 0.35 \cdot ConditionedFloorArea / 1920)
+.. math:: Lightingtherms = 0.22 / 0.012 \cdot (0.5 + 0.25 \cdot NumberofBedrooms / 3 + 0.35 \cdot ConditionedFloorArea / 1920)
+.. math:: Fireplacetherms = 1.95 / 0.032 \cdot (0.5 + 0.25 \cdot NumberofBedrooms / 3 + 0.35 \cdot ConditionedFloorArea / 1920)
 
 An ``extension/UsageMultiplier`` can also be optionally provided that scales energy usage; if not provided, it is assumed to be 1.0.
 Optional ``extension/WeekdayScheduleFractions``, ``extension/WeekendScheduleFractions``, and ``extension/MonthlyScheduleMultipliers`` can be provided; if not provided, they are assumed to be ``0.04, 0.037, 0.037, 0.036, 0.033, 0.036, 0.043, 0.047, 0.034, 0.023, 0.024, 0.025, 0.024, 0.028, 0.031, 0.032, 0.039, 0.053, 0.063, 0.067, 0.071, 0.069, 0.059, 0.05``, ``0.04, 0.037, 0.037, 0.036, 0.033, 0.036, 0.043, 0.047, 0.034, 0.023, 0.024, 0.025, 0.024, 0.028, 0.031, 0.032, 0.039, 0.053, 0.063, 0.067, 0.071, 0.069, 0.059, 0.05``, and ``1.248, 1.257, 0.993, 0.989, 0.993, 0.827, 0.821, 0.821, 0.827, 0.99, 0.987, 1.248``, respectively.
