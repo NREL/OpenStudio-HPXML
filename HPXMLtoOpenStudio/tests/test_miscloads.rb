@@ -25,11 +25,11 @@ class HPXMLtoOpenStudioMiscLoadsTest < MiniTest::Test
   end
 
   def get_therm_per_year(model, name)
-    model.getGasEquipments.each do |ge|
-      next unless ge.name.to_s.include?(name)
+    model.getOtherEquipments.each do |oe|
+      next unless oe.name.to_s.include?(name)
 
-      hrs = Schedule.annual_equivalent_full_load_hrs(model.yearDescription.get.assumedYear, ge.schedule.get)
-      therm_yr = UnitConversions.convert(hrs * ge.designLevel.get * ge.multiplier * ge.space.get.multiplier, 'Wh', 'therm')
+      hrs = Schedule.annual_equivalent_full_load_hrs(model.yearDescription.get.assumedYear, oe.schedule.get)
+      therm_yr = UnitConversions.convert(hrs * oe.definition.to_OtherEquipmentDefinition.get.designLevel.get * oe.multiplier * oe.space.get.multiplier, 'Wh', 'therm')
       return therm_yr
     end
     return
@@ -50,47 +50,39 @@ class HPXMLtoOpenStudioMiscLoadsTest < MiniTest::Test
 
     # Check vehicle
     vehicle_kwh_yr = get_kwh_per_year(model, Constants.ObjectNameMiscVehicle)
-    assert_in_delta(100, vehicle_kwh_yr, 1.0)
+    assert_in_epsilon(500, vehicle_kwh_yr, 0.1)
 
     # Check well pump
     wp_kwh_yr = get_kwh_per_year(model, Constants.ObjectNameMiscWellPump)
-    assert_in_delta(100, wp_kwh_yr, 1.0)
+    assert_in_epsilon(475, wp_kwh_yr, 0.1)
 
     # Check pool pump
     pp_kwh_yr = get_kwh_per_year(model, Constants.ObjectNameMiscPoolPump)
-    assert_in_delta(50, pp_kwh_yr, 1.0)
+    assert_in_epsilon(2700, pp_kwh_yr, 0.1)
 
     # Check pool electric heater
     ph_kwh_yr = get_kwh_per_year(model, Constants.ObjectNameMiscPoolHeater)
-    assert_in_delta(100, ph_kwh_yr, 1.0)
-
-    # Check pool gas heater
-    ph_therm_yr = get_therm_per_year(model, Constants.ObjectNameMiscPoolHeater)
-    assert_in_delta(100, ph_therm_yr, 1.0)
+    assert_in_epsilon(2100, ph_kwh_yr, 0.1)
 
     # Check hot tub pump
     htp_kwh_yr = get_kwh_per_year(model, Constants.ObjectNameMiscHotTubPump)
-    assert_in_delta(50, htp_kwh_yr, 1.0)
+    assert_in_epsilon(1000, htp_kwh_yr, 0.1)
 
     # Check hot tub electric heater
     hth_kwh_yr = get_kwh_per_year(model, Constants.ObjectNameMiscHotTubHeater)
-    assert_in_delta(100, hth_kwh_yr, 1.0)
+    assert_in_epsilon(1300, hth_kwh_yr, 0.1)
 
-    # Check hot tub gas heater
-    hth_therm_yr = get_therm_per_year(model, Constants.ObjectNameMiscHotTubHeater)
-    assert_in_delta(100, hth_therm_yr, 1.0)
-
-    # Check gas grill
-    gg_therm_yr = get_therm_per_year(model, Constants.ObjectNameMiscGasGrill)
-    assert_in_delta(10, gg_therm_yr, 1.0)
+    # Check propane grill
+    pg_therm_yr = get_therm_per_year(model, Constants.ObjectNameMiscGrill)
+    assert_in_epsilon(25, pg_therm_yr, 0.1)
 
     # Check gas lighting
-    gl_therm_yr = get_therm_per_year(model, Constants.ObjectNameMiscGasLighting)
-    assert_in_delta(10, gl_therm_yr, 1.0)
+    gl_therm_yr = get_therm_per_year(model, Constants.ObjectNameMiscLighting)
+    assert_in_epsilon(28, gl_therm_yr, 0.1)
 
-    # Check gas fireplace
-    gf_therm_yr = get_therm_per_year(model, Constants.ObjectNameMiscGasFireplace)
-    assert_in_delta(10, gf_therm_yr, 1.0)
+    # Check wood fireplace
+    wf_therm_yr = get_therm_per_year(model, Constants.ObjectNameMiscFireplace)
+    assert_in_epsilon(55, wf_therm_yr, 0.1)
   end
 
   def _test_measure(args_hash)

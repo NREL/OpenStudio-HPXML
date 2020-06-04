@@ -864,7 +864,7 @@ class EnergyPlusValidator
       '/HPXML/Building/BuildingDetails/MiscLoads/FuelLoad[FuelLoadType[text()="grill" or text()="lighting" or text()="fireplace"]]' => {
         'SystemIdentifier' => one, # Required by HPXML schema
         'Load[Units="therm/year"]/Value' => zero_or_one,
-        'FuelType[text()="natural gas"]' => one,
+        'FuelType[text()="natural gas" or text()="fuel oil" or text()="propane" or text()="wood" or text()="wood pellets"]' => one,
         'extension/UsageMultiplier' => zero_or_one,
         'extension/WeekdayScheduleFractions' => zero_or_one, # Uses ERI Reference Home if not provided
         'extension/WeekendScheduleFractions' => zero_or_one, # Uses ERI Reference Home if not provided

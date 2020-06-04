@@ -718,7 +718,7 @@
             <Units>therm/year</Units>
             <Value>25.0</Value>
           </Load>
-          <FuelType>natural gas</FuelType>
+          <FuelType>propane</FuelType>
         </FuelLoad>
         <FuelLoad>
           <SystemIdentifier id='FuelLoadMisc2'/>
@@ -736,7 +736,7 @@
             <Units>therm/year</Units>
             <Value>55.0</Value>
           </Load>
-          <FuelType>natural gas</FuelType>
+          <FuelType>wood</FuelType>
         </FuelLoad>
       </MiscLoads>
     </BuildingDetails>

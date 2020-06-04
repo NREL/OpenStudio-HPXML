@@ -4060,7 +4060,7 @@ def set_hpxml_fuel_loads(hpxml_file, hpxml)
   if ['base-misc-large-uncommon-loads.xml'].include? hpxml_file
     hpxml.fuel_loads.add(id: 'FuelLoadMisc',
                          fuel_load_type: HPXML::FuelLoadTypeGrill,
-                         fuel_type: HPXML::FuelTypeNaturalGas,
+                         fuel_type: HPXML::FuelTypePropane,
                          therm_per_year: 25)
     hpxml.fuel_loads.add(id: 'FuelLoadMisc2',
                          fuel_load_type: HPXML::FuelLoadTypeLighting,
@@ -4068,7 +4068,7 @@ def set_hpxml_fuel_loads(hpxml_file, hpxml)
                          therm_per_year: 28)
     hpxml.fuel_loads.add(id: 'FuelLoadMisc3',
                          fuel_load_type: HPXML::FuelLoadTypeFireplace,
-                         fuel_type: HPXML::FuelTypeNaturalGas,
+                         fuel_type: HPXML::FuelTypeWood,
                          therm_per_year: 55)
   end
 end

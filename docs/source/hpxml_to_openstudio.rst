@@ -952,7 +952,7 @@ Fuel Loads
 ~~~~~~~~~~
 
 Fuel loads can be provided by entering ``MiscLoads/FuelLoad`` elements; if not provided, fuel loads will not be modeled.
-Currently only exterior fuel loads specified with ``FuelType='natural gas'``, and ``FuelLoadType='grill'`` or ``FuelLoadType='lighting'`` or ``FuelLoadType='fireplace'``, are recognized.
+Currently only exterior fuel loads specified with ``FuelLoadType='grill'`` or ``FuelLoadType='lighting'`` or ``FuelLoadType='fireplace'``, are recognized.
 
 The annual energy consumption (``Load[Units='therm/year']/Value``) can be provided, otherwise they will be calculated using the following equations from the BA HSP.
 

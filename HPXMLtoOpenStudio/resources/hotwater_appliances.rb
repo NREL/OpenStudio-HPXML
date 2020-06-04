@@ -76,7 +76,7 @@ class HotWaterAndAppliances
       cw_peak_flow = cw_schedule.calcPeakFlowFromDailygpm(cw_gpd)
       cw_design_level_w = cw_schedule.calcDesignLevelFromDailykWh(cw_annual_kwh / 365.0)
 
-      cw_space = living_space if cw_space.nil?
+      cw_space = living_space if cw_space.nil? # handling the situation where the appliance is outdoors, so we need to assign the equipment to an arbitrary space
       add_electric_equipment(model, cw_name, cw_space, cw_design_level_w, cw_frac_sens, cw_frac_lat, cw_schedule.schedule)
       dhw_loop_fracs.each do |sys_id, dhw_load_frac|
         dhw_loop = dhw_loops[sys_id]
@@ -94,7 +94,7 @@ class HotWaterAndAppliances
       cd_design_level_e = cd_schedule.calcDesignLevelFromDailykWh(cd_annual_kwh / 365.0)
       cd_design_level_f = cd_schedule.calcDesignLevelFromDailyTherm(cd_annual_therm / 365.0)
 
-      cd_space = living_space if cd_space.nil?
+      cd_space = living_space if cd_space.nil? # handling the situation where the appliance is outdoors, so we need to assign the equipment to an arbitrary space
       add_electric_equipment(model, cd_name, cd_space, cd_design_level_e, cd_frac_sens, cd_frac_lat, cd_schedule.schedule)
       add_other_equipment(model, cd_name, cd_space, cd_design_level_f, cd_frac_sens, cd_frac_lat, cd_schedule.schedule, clothes_dryer.fuel_type)
     end
@@ -107,7 +107,7 @@ class HotWaterAndAppliances
       dw_peak_flow = dw_schedule.calcPeakFlowFromDailygpm(dw_gpd)
       dw_design_level_w = dw_schedule.calcDesignLevelFromDailykWh(dw_annual_kwh / 365.0)
 
-      dw_space = living_space if dw_space.nil?
+      dw_space = living_space if dw_space.nil? # handling the situation where the appliance is outdoors, so we need to assign the equipment to an arbitrary space
       add_electric_equipment(model, dw_name, dw_space, dw_design_level_w, dw_frac_sens, dw_frac_lat, dw_schedule.schedule)
       dhw_loop_fracs.each do |sys_id, dhw_load_frac|
         dhw_loop = dhw_loops[sys_id]
@@ -126,7 +126,7 @@ class HotWaterAndAppliances
         fridge_schedule = MonthWeekdayWeekendSchedule.new(model, fridge_name, fridge_weekday_sch, fridge_weekend_sch, fridge_monthly_sch, 1.0, 1.0, true, true, Constants.ScheduleTypeLimitsFraction)
         fridge_design_level = fridge_schedule.calcDesignLevelFromDailykWh(rf_annual_kwh / 365.0)
 
-        rf_space = living_space if rf_space.nil?
+        rf_space = living_space if rf_space.nil? # handling the situation where the appliance is outdoors, so we need to assign the equipment to an arbitrary space
         add_electric_equipment(model, fridge_name, rf_space, fridge_design_level, rf_frac_sens, rf_frac_lat, fridge_schedule.schedule)
       end
     end
@@ -142,7 +142,7 @@ class HotWaterAndAppliances
         freezer_schedule = MonthWeekdayWeekendSchedule.new(model, freezer_name, freezer_weekday_sch, freezer_weekend_sch, freezer_monthly_sch, 1.0, 1.0, true, true, Constants.ScheduleTypeLimitsFraction)
         freezer_design_level = freezer_schedule.calcDesignLevelFromDailykWh(fz_annual_kwh / 365.0)
 
-        fz_space = living_space if fz_space.nil?
+        fz_space = living_space if fz_space.nil? # handling the situation where the appliance is outdoors, so we need to assign the equipment to an arbitrary space
         add_electric_equipment(model, freezer_name, fz_space, freezer_design_level, fz_frac_sens, fz_frac_lat, freezer_schedule.schedule)
       end
     end
@@ -158,7 +158,7 @@ class HotWaterAndAppliances
       cook_design_level_e = cook_schedule.calcDesignLevelFromDailykWh(cook_annual_kwh / 365.0)
       cook_design_level_f = cook_schedule.calcDesignLevelFromDailyTherm(cook_annual_therm / 365.0)
 
-      cook_space = living_space if cook_space.nil?
+      cook_space = living_space if cook_space.nil? # handling the situation where the appliance is outdoors, so we need to assign the equipment to an arbitrary space
       add_electric_equipment(model, cook_name, cook_space, cook_design_level_e, cook_frac_sens, cook_frac_lat, cook_schedule.schedule)
       add_other_equipment(model, cook_name, cook_space, cook_design_level_f, cook_frac_sens, cook_frac_lat, cook_schedule.schedule, cooking_range.fuel_type)
     end

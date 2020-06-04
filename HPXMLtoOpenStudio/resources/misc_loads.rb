@@ -110,18 +110,23 @@ class MiscLoads
       # Grill / Lighting
       space_design_level = sch.calcDesignLevelFromDailyTherm(therm / 365.0)
 
-      # Add gas equipment for the mel
-      mel_def = OpenStudio::Model::GasEquipmentDefinition.new(model)
-      mel = OpenStudio::Model::GasEquipment.new(mel_def)
-      mel.setName(obj_name)
-      mel.setEndUseSubcategory(obj_name)
-      mel.setSpace(living_space)
-      mel_def.setName(obj_name)
-      mel_def.setDesignLevel(space_design_level)
-      mel_def.setFractionRadiant(0)
-      mel_def.setFractionLatent(0)
-      mel_def.setFractionLost(1)
-      mel.setSchedule(sch.schedule)
+      # Add other equipment for the mfl
+      mfl_def = OpenStudio::Model::OtherEquipmentDefinition.new(model)
+      mfl = OpenStudio::Model::OtherEquipment.new(mfl_def)
+      mfl.setName(obj_name)
+      mfl.setEndUseSubcategory(obj_name)
+      if fuel_load.fuel_type.nil?
+        mfl.setFuelType('None')
+      else
+        mfl.setFuelType(HelperMethods.eplus_fuel_map(fuel_load.fuel_type))
+      end
+      mfl.setSpace(living_space)
+      mfl_def.setName(obj_name)
+      mfl_def.setDesignLevel(space_design_level)
+      mfl_def.setFractionRadiant(0)
+      mfl_def.setFractionLatent(0)
+      mfl_def.setFractionLost(1)
+      mfl.setSchedule(sch.schedule)
     elsif fuel_load.fuel_load_type == HPXML::FuelLoadTypeFireplace
       # Fireplace
       sens_frac = 0.5
@@ -129,18 +134,23 @@ class MiscLoads
 
       space_design_level = sch.calcDesignLevelFromDailyTherm(therm / 365.0)
 
-      # Add gas equipment for the mel
-      mel_def = OpenStudio::Model::GasEquipmentDefinition.new(model)
-      mel = OpenStudio::Model::GasEquipment.new(mel_def)
-      mel.setName(obj_name)
-      mel.setEndUseSubcategory(obj_name)
-      mel.setSpace(living_space)
-      mel_def.setName(obj_name)
-      mel_def.setDesignLevel(space_design_level)
-      mel_def.setFractionRadiant(0.6 * sens_frac)
-      mel_def.setFractionLatent(lat_frac)
-      mel_def.setFractionLost(1 - sens_frac - lat_frac)
-      mel.setSchedule(sch.schedule)
+      # Add other equipment for the mfl
+      mfl_def = OpenStudio::Model::OtherEquipmentDefinition.new(model)
+      mfl = OpenStudio::Model::OtherEquipment.new(mfl_def)
+      mfl.setName(obj_name)
+      mfl.setEndUseSubcategory(obj_name)
+      if fuel_load.fuel_type.nil?
+        mfl.setFuelType('None')
+      else
+        mfl.setFuelType(HelperMethods.eplus_fuel_map(fuel_load.fuel_type))
+      end
+      mfl.setSpace(living_space)
+      mfl_def.setName(obj_name)
+      mfl_def.setDesignLevel(space_design_level)
+      mfl_def.setFractionRadiant(0.6 * sens_frac)
+      mfl_def.setFractionLatent(lat_frac)
+      mfl_def.setFractionLost(1 - sens_frac - lat_frac)
+      mfl.setSchedule(sch.schedule)
     end
   end
 
