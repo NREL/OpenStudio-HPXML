@@ -329,16 +329,16 @@ class Constants
     return 'mshp'
   end
 
-  def self.ObjectNameMiscGasGrill
-    return 'misc gas grill'
+  def self.ObjectNameMiscGrill
+    return 'misc grill'
   end
 
-  def self.ObjectNameMiscGasLighting
-    return 'misc gas lighting'
+  def self.ObjectNameMiscLighting
+    return 'misc lighting'
   end
 
-  def self.ObjectNameMiscGasFireplace
-    return 'misc gas fireplace'
+  def self.ObjectNameMiscFireplace
+    return 'misc fireplace'
   end
 
   def self.ObjectNameMiscPoolHeater

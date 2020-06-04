@@ -1977,9 +1977,9 @@ class OSModel
     end
 
     # Freezer
-    if @hpxml.freezers.size > 0
-      freezer = @hpxml.freezers[0]
-      fz_space = get_space_from_location(freezer.location, 'Freezer', model, spaces)
+    freezers = {}
+    @hpxml.freezers.each do |freezer|
+      freezers[freezer] = get_space_from_location(freezer.location, 'Freezer', model, spaces)
     end
 
     # Cooking Range/Oven
@@ -2142,7 +2142,7 @@ class OSModel
                                 clothes_washer, cw_space, clothes_dryer, cd_space,
                                 dishwasher, dw_space,
                                 refrigerators,
-                                freezer, fz_space,
+                                freezers,
                                 cooking_range, cook_space, oven,
                                 fixtures_all_low_flow, fixtures_usage_multiplier,
                                 dist_type, pipe_r, std_pipe_length, recirc_loop_length,
@@ -2513,9 +2513,10 @@ class OSModel
       end
     end
 
-    MiscLoads.apply_plug(model, plug_load_misc, plug_load_tv,
-                         plug_load_vehicle, plug_load_well_pump,
-                         @cfa, @living_space)
+    MiscLoads.apply_plug(model, plug_load_misc, Constants.ObjectNameMiscPlugLoads, @cfa, @living_space)
+    MiscLoads.apply_plug(model, plug_load_tv, Constants.ObjectNameMiscTelevision, @cfa, @living_space)
+    MiscLoads.apply_plug(model, plug_load_vehicle, Constants.ObjectNameMiscVehicle, @cfa, @living_space)
+    MiscLoads.apply_plug(model, plug_load_well_pump, Constants.ObjectNameMiscWellPump, @cfa, @living_space)
   end
 
   def self.add_mfls(runner, model, spaces)
@@ -2533,8 +2534,9 @@ class OSModel
       end
     end
 
-    MiscLoads.apply_fuel(model, fuel_load_grill, fuel_load_lighting, fuel_load_fireplace,
-                         @living_space)
+    MiscLoads.apply_fuel(model, fuel_load_grill, Constants.ObjectNameMiscGrill, @living_space)
+    MiscLoads.apply_fuel(model, fuel_load_lighting, Constants.ObjectNameMiscLighting, @living_space)
+    MiscLoads.apply_fuel(model, fuel_load_fireplace, Constants.ObjectNameMiscFireplace, @living_space)
   end
 
   def self.add_lighting(runner, model, weather, spaces)

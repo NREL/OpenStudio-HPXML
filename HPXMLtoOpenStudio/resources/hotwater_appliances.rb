@@ -6,7 +6,7 @@ class HotWaterAndAppliances
                  clothes_washer, cw_space, clothes_dryer, cd_space,
                  dishwasher, dw_space,
                  refrigerators,
-                 freezer, fz_space,
+                 freezers,
                  cooking_range, cook_space, oven,
                  fixtures_all_low_flow, fixtures_usage_multiplier,
                  dist_type, pipe_r, std_pipe_length, recirc_loop_length,
@@ -132,16 +132,19 @@ class HotWaterAndAppliances
     end
 
     # Freezer
-    if not freezer.nil?
-      fz_annual_kwh, fz_frac_sens, fz_frac_lat = calc_refrigerator_or_freezer_energy(freezer, fz_space.nil?)
+    if not freezers.empty?
       freezer_name = Constants.ObjectNameFreezer
-      freezer_weekday_sch = '0.040, 0.039, 0.038, 0.037, 0.036, 0.036, 0.038, 0.040, 0.041, 0.041, 0.040, 0.040, 0.042, 0.042, 0.042, 0.041, 0.044, 0.048, 0.050, 0.048, 0.047, 0.046, 0.044, 0.041'
-      freezer_monthly_sch = '0.837, 0.835, 1.084, 1.084, 1.084, 1.096, 1.096, 1.096, 1.096, 0.931, 0.925, 0.837'
-      freezer_schedule = MonthWeekdayWeekendSchedule.new(model, freezer_name, freezer_weekday_sch, freezer_weekday_sch, freezer_monthly_sch, 1.0, 1.0, true, true, Constants.ScheduleTypeLimitsFraction)
-      freezer_design_level = freezer_schedule.calcDesignLevelFromDailykWh(fz_annual_kwh / 365.0)
+      freezers.each do |freezer, fz_space|
+        fz_annual_kwh, fz_frac_sens, fz_frac_lat = calc_refrigerator_or_freezer_energy(freezer, fz_space.nil?)
+        freezer_weekday_sch = freezer.weekday_fractions
+        freezer_weekend_sch = freezer.weekend_fractions
+        freezer_monthly_sch = freezer.monthly_multipliers
+        freezer_schedule = MonthWeekdayWeekendSchedule.new(model, freezer_name, freezer_weekday_sch, freezer_weekend_sch, freezer_monthly_sch, 1.0, 1.0, true, true, Constants.ScheduleTypeLimitsFraction)
+        freezer_design_level = freezer_schedule.calcDesignLevelFromDailykWh(fz_annual_kwh / 365.0)
 
-      fz_space = living_space if fz_space.nil?
-      add_electric_equipment(model, freezer_name, fz_space, freezer_design_level, fz_frac_sens, fz_frac_lat, freezer_schedule.schedule)
+        fz_space = living_space if fz_space.nil?
+        add_electric_equipment(model, freezer_name, fz_space, freezer_design_level, fz_frac_sens, fz_frac_lat, freezer_schedule.schedule)
+      end
     end
 
     # Cooking Range
@@ -843,7 +846,7 @@ class HotWaterAndAppliances
     fail 'Unexpected hot water distribution system.'
   end
 
-  def self.get_default_extra_refrigerator_locations(hpxml)
+  def self.get_default_extra_refrigerator_and_freezer_locations(hpxml)
     extra_refrigerator_location_hierarchy = [HPXML::LocationGarage,
                                              HPXML::LocationBasementUnconditioned,
                                              HPXML::LocationBasementConditioned,
