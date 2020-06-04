@@ -100,7 +100,7 @@ class EnergyPlusValidator
 
         '/HPXML/Building/BuildingDetails/MiscLoads/PlugLoad[PlugLoadType="other"]' => zero_or_one, # See [PlugLoads]
         '/HPXML/Building/BuildingDetails/MiscLoads/PlugLoad[PlugLoadType[text()="TV other"]]' => zero_or_one, # See [OtherPlugLoads]
-        '/HPXML/Building/BuildingDetails/MiscLoads/PlugLoad[PlugLoadType[text()="electric vehicle charging"]]' => zero_or_one, # See [OtherPlugLoads2]
+        '/HPXML/Building/BuildingDetails/MiscLoads/PlugLoad[PlugLoadType[text()="electric vehicle charging"]]' => zero_or_one, # See [OtherPlugLoads]
         '/HPXML/Building/BuildingDetails/MiscLoads/PlugLoad[PlugLoadType[text()="well pump"]]' => zero_or_one, # See [OtherPlugLoads]
 
         '/HPXML/Building/BuildingDetails/MiscLoads/FuelLoad[FuelLoadType[text()="grill"]]' => zero_or_one, # See [FuelLoad]
@@ -841,19 +841,9 @@ class EnergyPlusValidator
       },
 
       # [OtherPlugLoads]
-      '/HPXML/Building/BuildingDetails/MiscLoads/PlugLoad[PlugLoadType[text()="TV other" or text()="well pump"]]' => {
+      '/HPXML/Building/BuildingDetails/MiscLoads/PlugLoad[PlugLoadType[text()="TV other" or text()="electric vehicle charging" or text()="well pump"]]' => {
         'SystemIdentifier' => one, # Required by HPXML schema
         'Load[Units="kWh/year"]/Value' => zero_or_one, # Uses ERI Reference Home if not provided
-        'extension/UsageMultiplier' => zero_or_one,
-        'extension/WeekdayScheduleFractions' => zero_or_one, # Uses ERI Reference Home if not provided
-        'extension/WeekendScheduleFractions' => zero_or_one, # Uses ERI Reference Home if not provided
-        'extension/MonthlyScheduleMultipliers' => zero_or_one, # Uses ERI Reference Home if not provided
-      },
-
-      # [OtherPlugLoads2]
-      '/HPXML/Building/BuildingDetails/MiscLoads/PlugLoad[PlugLoadType[text()="electric vehicle charging"]]' => {
-        'SystemIdentifier' => one, # Required by HPXML schema
-        'Load[Units="kWh/year"]/Value' => one,
         'extension/UsageMultiplier' => zero_or_one,
         'extension/WeekdayScheduleFractions' => zero_or_one, # Uses ERI Reference Home if not provided
         'extension/WeekendScheduleFractions' => zero_or_one, # Uses ERI Reference Home if not provided

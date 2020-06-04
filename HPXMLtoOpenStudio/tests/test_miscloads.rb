@@ -50,7 +50,7 @@ class HPXMLtoOpenStudioMiscLoadsTest < MiniTest::Test
 
     # Check vehicle
     vehicle_kwh_yr = get_kwh_per_year(model, Constants.ObjectNameMiscVehicle)
-    assert_in_epsilon(500, vehicle_kwh_yr, 0.1)
+    assert_in_epsilon(1500, vehicle_kwh_yr, 0.1)
 
     # Check well pump
     wp_kwh_yr = get_kwh_per_year(model, Constants.ObjectNameMiscWellPump)

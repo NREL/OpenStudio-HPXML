@@ -939,10 +939,11 @@ Plug Loads
 
 Plug loads can be provided by entering ``MiscLoads/PlugLoad`` elements; if not provided, plug loads will not be modeled.
 Currently only plug loads specified with ``PlugLoadType='other'``, ``PlugLoadType='TV other'``, ``PlugLoadType='electric vehicle charging'``, or ``PlugLoadType='well pump'`` are recognized.
-The annual energy consumption (``Load[Units='kWh/year']/Value``) can be provided, otherwise they will be calculated (with the except of electric vehicle) using the following equations from either `ANSI/RESNET/ICC 301-2019 <https://codes.iccsafe.org/content/RESNETICC3012019>`_ or the BA HSP.
+The annual energy consumption (``Load[Units='kWh/year']/Value``) can be provided, otherwise they will be calculated using the following equations from either `ANSI/RESNET/ICC 301-2019 <https://codes.iccsafe.org/content/RESNETICC3012019>`_ or the BA HSP.
 
 .. math:: TelevisionkWhs = 413.0 + 69.0 \cdot NumberofBedrooms
 .. math:: OtherkWhs = 0.91 \cdot ConditionedFloorArea
+.. math:: VehiclekWhs = AnnualMiles * kWhPerMile / (EVChargerEfficiency * EVBatteryEfficiency); with AnnualMiles=4500, kWhPerMile=0.3, EVChargerEfficiency=0.9, EVBatteryEfficiency=0.9
 .. math:: WellPumpkWhs = 50.8 / 0.127 \cdot (0.5 + 0.25 \cdot NumberofBedrooms / 3 + 0.35 \cdot ConditionedFloorArea / 1920)
 
 An ``extension/UsageMultiplier`` can also be optionally provided that scales energy usage; if not provided, it is assumed to be 1.0.

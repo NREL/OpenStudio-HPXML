@@ -245,6 +245,14 @@ class MiscLoads
     return 0.87 / 0.011 * (0.5 + 0.25 * nbeds / 3.0 + 0.25 * cfa / 1920.0) # therm/yr
   end
 
+  def self.get_vehicle_default_values
+    ev_charger_efficiency = 0.9
+    ev_battery_efficiency = 0.9
+    vehicle_annual_miles_driven = 4500.0
+    vehicle_kWh_per_mile = 0.3
+    return vehicle_annual_miles_driven * vehicle_kWh_per_mile / (ev_charger_efficiency * ev_battery_efficiency) # kWh/yr
+  end
+
   def self.get_well_pump_default_values(cfa, nbeds)
     return 50.8 / 0.127 * (0.5 + 0.25 * nbeds / 3.0 + 0.25 * cfa / 1920.0) # kWh/yr
   end

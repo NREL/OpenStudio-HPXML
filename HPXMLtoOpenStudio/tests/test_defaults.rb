@@ -479,12 +479,15 @@ class HPXMLtoOpenStudioDuctsTest < MiniTest::Test
     other_pl.kWh_per_year = 2000
     other_pl.frac_sensible = 0.8
     other_pl.frac_latent = 0.1
+    veh_pl = hpxml.plug_loads.select { |pl| pl.plug_load_type == HPXML::PlugLoadTypeVehicle }[0]
+    veh_pl.kWh_per_year = 4000
     wellpump_pl = hpxml.plug_loads.select { |pl| pl.plug_load_type == HPXML::PlugLoadTypeWellPump }[0]
     wellpump_pl.kWh_per_year = 3000
     XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
     hpxml_default = _test_measure()
     _test_default_tv_plug_load_values(hpxml_default, 1000)
     _test_default_other_plug_load_values(hpxml_default, 2000, 0.8, 0.1)
+    _test_default_vehicle_plug_load_values(hpxml_default, 4000)
     _test_default_well_pump_plug_load_values(hpxml_default, 3000)
 
     # Test defaults
@@ -492,6 +495,7 @@ class HPXMLtoOpenStudioDuctsTest < MiniTest::Test
     hpxml_default = _test_measure()
     _test_default_tv_plug_load_values(hpxml_default, 620)
     _test_default_other_plug_load_values(hpxml_default, 2457, 0.855, 0.045)
+    _test_default_vehicle_plug_load_values(hpxml_default, 1667)
     _test_default_well_pump_plug_load_values(hpxml_default, 441)
   end
 
@@ -885,6 +889,11 @@ class HPXMLtoOpenStudioDuctsTest < MiniTest::Test
     assert_in_epsilon(frac_latent, other_pl.frac_latent, 0.01)
   end
 
+  def _test_default_vehicle_plug_load_values(hpxml, kWh_per_year)
+    veh_pl = hpxml.plug_loads.select { |pl| pl.plug_load_type == HPXML::PlugLoadTypeVehicle }[0]
+    assert_in_epsilon(kWh_per_year, veh_pl.kWh_per_year, 0.01)
+  end
+
   def _test_default_well_pump_plug_load_values(hpxml, kWh_per_year)
     wellpump_pl = hpxml.plug_loads.select { |pl| pl.plug_load_type == HPXML::PlugLoadTypeWellPump }[0]
     assert_in_epsilon(kWh_per_year, wellpump_pl.kWh_per_year, 0.01)
@@ -1053,8 +1062,6 @@ class HPXMLtoOpenStudioDuctsTest < MiniTest::Test
     end
 
     hpxml.plug_loads.each do |plug_load|
-      next if plug_load.plug_load_type == HPXML::PlugLoadTypeVehicle
-
       plug_load.kWh_per_year = nil
       plug_load.frac_sensible = nil
       plug_load.frac_latent = nil
