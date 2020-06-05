@@ -417,9 +417,61 @@ class HPXMLtoOpenStudioDuctsTest < MiniTest::Test
     _test_default_ceiling_fan_values(hpxml_default, 4, 70.4)
   end
 
+  def test_pools
+    # Test inputs not overridden by defaults
+    hpxml_name = 'base-misc-large-uncommon-loads.xml'
+    hpxml = HPXML.new(hpxml_path: File.join(@root_path, 'workflow', 'sample_files', hpxml_name))
+    pool = hpxml.pools.select { |pool| pool.heater_type.include?('elec') }[0]
+    pool.heater_kwh_per_year = 1000
+    pool = hpxml.pools[0]
+    pool.pump_kwh_per_year = 3000
+    XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
+    hpxml_default = _test_measure()
+    _test_default_pool_heater_electric_values(hpxml_default, 1000)
+    _test_default_pool_pump_values(hpxml_default, 3000)
+
+    # Test defaults
+    hpxml = apply_hpxml_defaults('base-misc-large-uncommon-loads.xml')
+    hpxml_default = _test_measure()
+    _test_default_pool_heater_electric_values(hpxml_default, 2286)
+    _test_default_pool_pump_values(hpxml_default, 2496)
+
+    # Test defaults 2
+    hpxml = apply_hpxml_defaults('base-misc-large-uncommon-loads2.xml')
+    hpxml_default = _test_measure()
+    _test_default_pool_heater_gas_values(hpxml_default, 236)
+    _test_default_pool_pump_values(hpxml_default, 2496)
+  end
+
+  def test_hot_tubs
+    # Test inputs not overridden by defaults
+    hpxml_name = 'base-misc-large-uncommon-loads.xml'
+    hpxml = HPXML.new(hpxml_path: File.join(@root_path, 'workflow', 'sample_files', hpxml_name))
+    hot_tub = hpxml.hot_tubs.select { |hot_tub| hot_tub.heater_type.include?('elec') }[0]
+    hot_tub.heater_kwh_per_year = 1000
+    hot_tub = hpxml.hot_tubs[0]
+    hot_tub.pump_kwh_per_year = 3000
+    XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
+    hpxml_default = _test_measure()
+    _test_default_hot_tub_heater_electric_values(hpxml_default, 1000)
+    _test_default_hot_tub_pump_values(hpxml_default, 3000)
+
+    # Test defaults
+    hpxml = apply_hpxml_defaults('base-misc-large-uncommon-loads.xml')
+    hpxml_default = _test_measure()
+    _test_default_hot_tub_heater_electric_values(hpxml_default, 1125)
+    _test_default_hot_tub_pump_values(hpxml_default, 1111)
+
+    # Test defaults 2
+    hpxml = apply_hpxml_defaults('base-misc-large-uncommon-loads2.xml')
+    hpxml_default = _test_measure()
+    _test_default_hot_tub_heater_gas_values(hpxml_default, 87)
+    _test_default_hot_tub_pump_values(hpxml_default, 1111)
+  end
+
   def test_plug_loads
     # Test inputs not overridden by defaults
-    hpxml_name = 'base.xml'
+    hpxml_name = 'base-misc-large-uncommon-loads.xml'
     hpxml = HPXML.new(hpxml_path: File.join(@root_path, 'workflow', 'sample_files', hpxml_name))
     tv_pl = hpxml.plug_loads.select { |pl| pl.plug_load_type == HPXML::PlugLoadTypeTelevision }[0]
     tv_pl.kWh_per_year = 1000
@@ -427,16 +479,48 @@ class HPXMLtoOpenStudioDuctsTest < MiniTest::Test
     other_pl.kWh_per_year = 2000
     other_pl.frac_sensible = 0.8
     other_pl.frac_latent = 0.1
+    veh_pl = hpxml.plug_loads.select { |pl| pl.plug_load_type == HPXML::PlugLoadTypeVehicle }[0]
+    veh_pl.kWh_per_year = 4000
+    wellpump_pl = hpxml.plug_loads.select { |pl| pl.plug_load_type == HPXML::PlugLoadTypeWellPump }[0]
+    wellpump_pl.kWh_per_year = 3000
     XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
     hpxml_default = _test_measure()
     _test_default_tv_plug_load_values(hpxml_default, 1000)
     _test_default_other_plug_load_values(hpxml_default, 2000, 0.8, 0.1)
+    _test_default_vehicle_plug_load_values(hpxml_default, 4000)
+    _test_default_well_pump_plug_load_values(hpxml_default, 3000)
 
     # Test defaults
-    hpxml = apply_hpxml_defaults('base.xml')
+    hpxml = apply_hpxml_defaults('base-misc-large-uncommon-loads.xml')
     hpxml_default = _test_measure()
     _test_default_tv_plug_load_values(hpxml_default, 620)
     _test_default_other_plug_load_values(hpxml_default, 2457, 0.855, 0.045)
+    _test_default_vehicle_plug_load_values(hpxml_default, 1667)
+    _test_default_well_pump_plug_load_values(hpxml_default, 441)
+  end
+
+  def test_fuel_loads
+    # Test inputs not overridden by defaults
+    hpxml_name = 'base-misc-large-uncommon-loads.xml'
+    hpxml = HPXML.new(hpxml_path: File.join(@root_path, 'workflow', 'sample_files', hpxml_name))
+    gg_fl = hpxml.fuel_loads.select { |fl| fl.fuel_load_type == HPXML::FuelLoadTypeGrill }[0]
+    gg_fl.therm_per_year = 1000
+    gl_fl = hpxml.fuel_loads.select { |fl| fl.fuel_load_type == HPXML::FuelLoadTypeLighting }[0]
+    gl_fl.therm_per_year = 2000
+    gf_fl = hpxml.fuel_loads.select { |fl| fl.fuel_load_type == HPXML::FuelLoadTypeFireplace }[0]
+    gf_fl.therm_per_year = 3000
+    XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
+    hpxml_default = _test_measure()
+    _test_default_grill_fuel_load_values(hpxml_default, 1000)
+    _test_default_lighting_fuel_load_values(hpxml_default, 2000)
+    _test_default_fireplace_fuel_load_values(hpxml_default, 3000)
+
+    # Test defaults
+    hpxml = apply_hpxml_defaults('base-misc-large-uncommon-loads.xml')
+    hpxml_default = _test_measure()
+    _test_default_grill_fuel_load_values(hpxml_default, 33)
+    _test_default_lighting_fuel_load_values(hpxml_default, 20)
+    _test_default_fireplace_fuel_load_values(hpxml_default, 67)
   end
 
   def test_appliances
@@ -453,12 +537,14 @@ class HPXMLtoOpenStudioDuctsTest < MiniTest::Test
     _test_default_oven_values(hpxml_default, false)
 
     # Test defaults w/ appliances
-    apply_hpxml_defaults('base.xml')
+    apply_hpxml_defaults('base-misc-large-uncommon-loads.xml')
     hpxml_default = _test_measure()
     _test_default_clothes_washer_values(hpxml_default, HPXML::LocationLivingSpace, 1.0, 400.0, 0.12, 1.09, 27.0, 3.0, 6.0, 1.0)
     _test_default_clothes_dryer_values(hpxml_default, HPXML::LocationLivingSpace, HPXML::ClothesDryerControlTypeTimer, 3.01, 1.0)
     _test_default_dishwasher_values(hpxml_default, HPXML::LocationLivingSpace, 467.0, 0.12, 1.09, 33.12, 4.0, 12, 1.0)
     _test_default_refrigerator_values(hpxml_default, HPXML::LocationLivingSpace, 691.0, 1.0)
+    _test_default_extra_refrigerators_values(hpxml_default, HPXML::LocationGarage, 244.0, 1.0)
+    _test_default_freezers_values(hpxml_default, HPXML::LocationGarage, 320.0, 1.0)
     _test_default_cooking_range_values(hpxml_default, HPXML::LocationLivingSpace, false, 1.0)
     _test_default_oven_values(hpxml_default, false)
 
@@ -680,9 +766,31 @@ class HPXMLtoOpenStudioDuctsTest < MiniTest::Test
   end
 
   def _test_default_refrigerator_values(hpxml, location, rated_annual_kwh, usage_multiplier)
-    assert_equal(location, hpxml.refrigerators[0].location)
-    assert_equal(rated_annual_kwh, hpxml.refrigerators[0].rated_annual_kwh)
-    assert_equal(usage_multiplier, hpxml.refrigerators[0].usage_multiplier)
+    hpxml.refrigerators.each do |refrigerator|
+      next unless refrigerator.primary_indicator
+
+      assert_equal(location, refrigerator.location)
+      assert_equal(rated_annual_kwh, refrigerator.rated_annual_kwh)
+      assert_equal(usage_multiplier, refrigerator.usage_multiplier)
+    end
+  end
+
+  def _test_default_extra_refrigerators_values(hpxml, location, rated_annual_kwh, usage_multiplier)
+    hpxml.refrigerators.each do |refrigerator|
+      next if refrigerator.primary_indicator
+
+      assert_equal(location, refrigerator.location)
+      assert_in_epsilon(rated_annual_kwh, refrigerator.rated_annual_kwh, 0.01)
+      assert_equal(usage_multiplier, refrigerator.usage_multiplier)
+    end
+  end
+
+  def _test_default_freezers_values(hpxml, location, rated_annual_kwh, usage_multiplier)
+    hpxml.freezers.each do |freezer|
+      assert_equal(location, freezer.location)
+      assert_in_epsilon(rated_annual_kwh, freezer.rated_annual_kwh, 0.01)
+      assert_equal(usage_multiplier, freezer.usage_multiplier)
+    end
   end
 
   def _test_default_cooking_range_values(hpxml, location, is_induction, usage_multiplier)
@@ -739,6 +847,36 @@ class HPXMLtoOpenStudioDuctsTest < MiniTest::Test
     assert_in_epsilon(efficiency, hpxml.ceiling_fans[0].efficiency, 0.01)
   end
 
+  def _test_default_pool_heater_electric_values(hpxml, kWh_per_year)
+    pool = hpxml.pools.select { |pool| pool.heater_type.include?('elec') }[0]
+    assert_in_epsilon(kWh_per_year, pool.heater_kwh_per_year, 0.01)
+  end
+
+  def _test_default_pool_heater_gas_values(hpxml, therm_per_year)
+    pool = hpxml.pools.select { |pool| pool.heater_type.include?('gas') }[0]
+    assert_in_epsilon(therm_per_year, pool.heater_therm_per_year, 0.01)
+  end
+
+  def _test_default_pool_pump_values(hpxml, kWh_per_year)
+    pool = hpxml.pools[0]
+    assert_in_epsilon(kWh_per_year, pool.pump_kwh_per_year, 0.01)
+  end
+
+  def _test_default_hot_tub_heater_electric_values(hpxml, kWh_per_year)
+    hot_tub = hpxml.hot_tubs.select { |hot_tub| hot_tub.heater_type.include?('elec') }[0]
+    assert_in_epsilon(kWh_per_year, hot_tub.heater_kwh_per_year, 0.01)
+  end
+
+  def _test_default_hot_tub_heater_gas_values(hpxml, therm_per_year)
+    hot_tub = hpxml.hot_tubs.select { |hot_tub| hot_tub.heater_type.include?('gas') }[0]
+    assert_in_epsilon(therm_per_year, hot_tub.heater_therm_per_year, 0.01)
+  end
+
+  def _test_default_hot_tub_pump_values(hpxml, kWh_per_year)
+    hot_tub = hpxml.hot_tubs[0]
+    assert_in_epsilon(kWh_per_year, hot_tub.pump_kwh_per_year, 0.01)
+  end
+
   def _test_default_tv_plug_load_values(hpxml, kWh_per_year)
     tv_pl = hpxml.plug_loads.select { |pl| pl.plug_load_type == HPXML::PlugLoadTypeTelevision }[0]
     assert_equal(kWh_per_year, tv_pl.kWh_per_year)
@@ -749,6 +887,31 @@ class HPXMLtoOpenStudioDuctsTest < MiniTest::Test
     assert_equal(kWh_per_year, other_pl.kWh_per_year)
     assert_in_epsilon(frac_sensible, other_pl.frac_sensible, 0.01)
     assert_in_epsilon(frac_latent, other_pl.frac_latent, 0.01)
+  end
+
+  def _test_default_vehicle_plug_load_values(hpxml, kWh_per_year)
+    veh_pl = hpxml.plug_loads.select { |pl| pl.plug_load_type == HPXML::PlugLoadTypeVehicle }[0]
+    assert_in_epsilon(kWh_per_year, veh_pl.kWh_per_year, 0.01)
+  end
+
+  def _test_default_well_pump_plug_load_values(hpxml, kWh_per_year)
+    wellpump_pl = hpxml.plug_loads.select { |pl| pl.plug_load_type == HPXML::PlugLoadTypeWellPump }[0]
+    assert_in_epsilon(kWh_per_year, wellpump_pl.kWh_per_year, 0.01)
+  end
+
+  def _test_default_grill_fuel_load_values(hpxml, therm_per_year)
+    gg_fl = hpxml.fuel_loads.select { |fl| fl.fuel_load_type == HPXML::FuelLoadTypeGrill }[0]
+    assert_in_epsilon(therm_per_year, gg_fl.therm_per_year, 0.01)
+  end
+
+  def _test_default_lighting_fuel_load_values(hpxml, therm_per_year)
+    gl_fl = hpxml.fuel_loads.select { |fl| fl.fuel_load_type == HPXML::FuelLoadTypeLighting }[0]
+    assert_in_epsilon(therm_per_year, gl_fl.therm_per_year, 0.01)
+  end
+
+  def _test_default_fireplace_fuel_load_values(hpxml, therm_per_year)
+    gf_fl = hpxml.fuel_loads.select { |fl| fl.fuel_load_type == HPXML::FuelLoadTypeFireplace }[0]
+    assert_in_epsilon(therm_per_year, gf_fl.therm_per_year, 0.01)
   end
 
   def _test_default_number_of_bathrooms(hpxml, n_bathrooms)
@@ -868,9 +1031,17 @@ class HPXMLtoOpenStudioDuctsTest < MiniTest::Test
     hpxml.dishwashers[0].place_setting_capacity = nil
     hpxml.dishwashers[0].usage_multiplier = nil
 
-    hpxml.refrigerators[0].location = nil
-    hpxml.refrigerators[0].rated_annual_kwh = nil
-    hpxml.refrigerators[0].usage_multiplier = nil
+    hpxml.refrigerators.each do |refrigerator|
+      refrigerator.location = nil
+      refrigerator.rated_annual_kwh = nil
+      refrigerator.usage_multiplier = nil
+    end
+
+    hpxml.freezers.each do |freezer|
+      freezer.location = nil
+      freezer.rated_annual_kwh = nil
+      freezer.usage_multiplier = nil
+    end
 
     hpxml.cooking_ranges[0].location = nil
     hpxml.cooking_ranges[0].is_induction = nil
@@ -878,10 +1049,26 @@ class HPXMLtoOpenStudioDuctsTest < MiniTest::Test
 
     hpxml.ovens[0].is_convection = nil
 
+    hpxml.pools.each do |pool|
+      pool.heater_kwh_per_year = nil
+      pool.heater_therm_per_year = nil
+      pool.pump_kwh_per_year = nil
+    end
+
+    hpxml.hot_tubs.each do |hot_tub|
+      hot_tub.heater_kwh_per_year = nil
+      hot_tub.heater_therm_per_year = nil
+      hot_tub.pump_kwh_per_year = nil
+    end
+
     hpxml.plug_loads.each do |plug_load|
       plug_load.kWh_per_year = nil
       plug_load.frac_sensible = nil
       plug_load.frac_latent = nil
+    end
+
+    hpxml.fuel_loads.each do |fuel_load|
+      fuel_load.therm_per_year = nil
     end
 
     hpxml.lighting.usage_multiplier = nil

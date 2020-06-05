@@ -385,19 +385,131 @@ class HPXMLDefaults
         if plug_load.kWh_per_year.nil?
           plug_load.kWh_per_year = default_annual_kwh
         end
+      elsif plug_load.plug_load_type == HPXML::PlugLoadTypeVehicle
+        default_annual_kwh = MiscLoads.get_vehicle_default_values
+        if plug_load.kWh_per_year.nil?
+          plug_load.kWh_per_year = default_annual_kwh
+        end
+      elsif plug_load.plug_load_type == HPXML::PlugLoadTypeWellPump
+        default_annual_kwh = MiscLoads.get_well_pump_default_values(cfa, nbeds)
+        if plug_load.kWh_per_year.nil?
+          plug_load.kWh_per_year = default_annual_kwh
+        end
       end
       if plug_load.usage_multiplier.nil?
         plug_load.usage_multiplier = 1.0
       end
+      if plug_load.weekday_fractions.nil?
+        plug_load.weekday_fractions = '0.04, 0.037, 0.037, 0.036, 0.033, 0.036, 0.043, 0.047, 0.034, 0.023, 0.024, 0.025, 0.024, 0.028, 0.031, 0.032, 0.039, 0.053, 0.063, 0.067, 0.071, 0.069, 0.059, 0.05'
+      end
+      if plug_load.weekend_fractions.nil?
+        plug_load.weekend_fractions = '0.04, 0.037, 0.037, 0.036, 0.033, 0.036, 0.043, 0.047, 0.034, 0.023, 0.024, 0.025, 0.024, 0.028, 0.031, 0.032, 0.039, 0.053, 0.063, 0.067, 0.071, 0.069, 0.059, 0.05'
+      end
+      if plug_load.monthly_multipliers.nil?
+        plug_load.monthly_multipliers = '1.248, 1.257, 0.993, 0.989, 0.993, 0.827, 0.821, 0.821, 0.827, 0.99, 0.987, 1.248'
+      end
     end
-    if hpxml.misc_loads_schedule.weekday_fractions.nil?
-      hpxml.misc_loads_schedule.weekday_fractions = '0.04, 0.037, 0.037, 0.036, 0.033, 0.036, 0.043, 0.047, 0.034, 0.023, 0.024, 0.025, 0.024, 0.028, 0.031, 0.032, 0.039, 0.053, 0.063, 0.067, 0.071, 0.069, 0.059, 0.05'
+  end
+
+  def self.apply_fuel_loads(hpxml, cfa, nbeds)
+    hpxml.fuel_loads.each do |fuel_load|
+      if fuel_load.fuel_load_type == HPXML::FuelLoadTypeGrill
+        if fuel_load.therm_per_year.nil?
+          fuel_load.therm_per_year = MiscLoads.get_gas_grill_default_values(cfa, nbeds)
+        end
+      elsif fuel_load.fuel_load_type == HPXML::FuelLoadTypeLighting
+        if fuel_load.therm_per_year.nil?
+          fuel_load.therm_per_year = MiscLoads.get_gas_lighting_default_values(cfa, nbeds)
+        end
+      elsif fuel_load.fuel_load_type == HPXML::FuelLoadTypeFireplace
+        if fuel_load.therm_per_year.nil?
+          fuel_load.therm_per_year = MiscLoads.get_gas_fireplace_default_values(cfa, nbeds)
+        end
+      end
+      if fuel_load.usage_multiplier.nil?
+        fuel_load.usage_multiplier = 1.0
+      end
+      if fuel_load.weekday_fractions.nil?
+        fuel_load.weekday_fractions = '0.04, 0.037, 0.037, 0.036, 0.033, 0.036, 0.043, 0.047, 0.034, 0.023, 0.024, 0.025, 0.024, 0.028, 0.031, 0.032, 0.039, 0.053, 0.063, 0.067, 0.071, 0.069, 0.059, 0.05'
+      end
+      if fuel_load.weekend_fractions.nil?
+        fuel_load.weekend_fractions = '0.04, 0.037, 0.037, 0.036, 0.033, 0.036, 0.043, 0.047, 0.034, 0.023, 0.024, 0.025, 0.024, 0.028, 0.031, 0.032, 0.039, 0.053, 0.063, 0.067, 0.071, 0.069, 0.059, 0.05'
+      end
+      if fuel_load.monthly_multipliers.nil?
+        fuel_load.monthly_multipliers = '1.248, 1.257, 0.993, 0.989, 0.993, 0.827, 0.821, 0.821, 0.827, 0.99, 0.987, 1.248'
+      end
     end
-    if hpxml.misc_loads_schedule.weekend_fractions.nil?
-      hpxml.misc_loads_schedule.weekend_fractions = '0.04, 0.037, 0.037, 0.036, 0.033, 0.036, 0.043, 0.047, 0.034, 0.023, 0.024, 0.025, 0.024, 0.028, 0.031, 0.032, 0.039, 0.053, 0.063, 0.067, 0.071, 0.069, 0.059, 0.05'
+  end
+
+  def self.apply_pools_and_hot_tubs(hpxml, cfa, nbeds)
+    hpxml.pools.each do |pool|
+      if pool.pump_kwh_per_year.nil?
+        pool.pump_kwh_per_year = MiscLoads.get_pool_pump_default_values(cfa, nbeds)
+      end
+      if pool.heater_type.include?('elec') && pool.heater_kwh_per_year.nil?
+        pool.heater_kwh_per_year = MiscLoads.get_pool_heater_electric_default_values(cfa, nbeds)
+      elsif pool.heater_type.include?('gas') && pool.heater_therm_per_year.nil?
+        pool.heater_therm_per_year = MiscLoads.get_pool_heater_gas_default_values(cfa, nbeds)
+      end
+      if pool.heater_usage_multiplier.nil?
+        pool.heater_usage_multiplier = 1.0
+      end
+      if pool.pump_usage_multiplier.nil?
+        pool.pump_usage_multiplier = 1.0
+      end
+      if pool.pump_weekday_fractions.nil?
+        pool.pump_weekday_fractions = '0.04, 0.037, 0.037, 0.036, 0.033, 0.036, 0.043, 0.047, 0.034, 0.023, 0.024, 0.025, 0.024, 0.028, 0.031, 0.032, 0.039, 0.053, 0.063, 0.067, 0.071, 0.069, 0.059, 0.05'
+      end
+      if pool.pump_weekend_fractions.nil?
+        pool.pump_weekend_fractions = '0.04, 0.037, 0.037, 0.036, 0.033, 0.036, 0.043, 0.047, 0.034, 0.023, 0.024, 0.025, 0.024, 0.028, 0.031, 0.032, 0.039, 0.053, 0.063, 0.067, 0.071, 0.069, 0.059, 0.05'
+      end
+      if pool.pump_monthly_multipliers.nil?
+        pool.pump_monthly_multipliers = '1.248, 1.257, 0.993, 0.989, 0.993, 0.827, 0.821, 0.821, 0.827, 0.99, 0.987, 1.248'
+      end
+      if pool.heater_weekday_fractions.nil?
+        pool.heater_weekday_fractions = '0.04, 0.037, 0.037, 0.036, 0.033, 0.036, 0.043, 0.047, 0.034, 0.023, 0.024, 0.025, 0.024, 0.028, 0.031, 0.032, 0.039, 0.053, 0.063, 0.067, 0.071, 0.069, 0.059, 0.05'
+      end
+      if pool.heater_weekend_fractions.nil?
+        pool.heater_weekend_fractions = '0.04, 0.037, 0.037, 0.036, 0.033, 0.036, 0.043, 0.047, 0.034, 0.023, 0.024, 0.025, 0.024, 0.028, 0.031, 0.032, 0.039, 0.053, 0.063, 0.067, 0.071, 0.069, 0.059, 0.05'
+      end
+      if pool.heater_monthly_multipliers.nil?
+        pool.heater_monthly_multipliers = '1.248, 1.257, 0.993, 0.989, 0.993, 0.827, 0.821, 0.821, 0.827, 0.99, 0.987, 1.248'
+      end
     end
-    if hpxml.misc_loads_schedule.monthly_multipliers.nil?
-      hpxml.misc_loads_schedule.monthly_multipliers = '1.248, 1.257, 0.993, 0.989, 0.993, 0.827, 0.821, 0.821, 0.827, 0.99, 0.987, 1.248'
+
+    hpxml.hot_tubs.each do |hot_tub|
+      if hot_tub.pump_kwh_per_year.nil?
+        hot_tub.pump_kwh_per_year = MiscLoads.get_hot_tub_pump_default_values(cfa, nbeds)
+      end
+      if hot_tub.heater_type.include?('elec') && hot_tub.heater_kwh_per_year.nil?
+        hot_tub.heater_kwh_per_year = MiscLoads.get_hot_tub_heater_electric_default_values(cfa, nbeds)
+      elsif hot_tub.heater_type.include?('gas') && hot_tub.heater_therm_per_year.nil?
+        hot_tub.heater_therm_per_year = MiscLoads.get_hot_tub_heater_gas_default_values(cfa, nbeds)
+      end
+      if hot_tub.heater_usage_multiplier.nil?
+        hot_tub.heater_usage_multiplier = 1.0
+      end
+      if hot_tub.pump_usage_multiplier.nil?
+        hot_tub.pump_usage_multiplier = 1.0
+      end
+      if hot_tub.pump_weekday_fractions.nil?
+        hot_tub.pump_weekday_fractions = '0.04, 0.037, 0.037, 0.036, 0.033, 0.036, 0.043, 0.047, 0.034, 0.023, 0.024, 0.025, 0.024, 0.028, 0.031, 0.032, 0.039, 0.053, 0.063, 0.067, 0.071, 0.069, 0.059, 0.05'
+      end
+      if hot_tub.pump_weekend_fractions.nil?
+        hot_tub.pump_weekend_fractions = '0.04, 0.037, 0.037, 0.036, 0.033, 0.036, 0.043, 0.047, 0.034, 0.023, 0.024, 0.025, 0.024, 0.028, 0.031, 0.032, 0.039, 0.053, 0.063, 0.067, 0.071, 0.069, 0.059, 0.05'
+      end
+      if hot_tub.pump_monthly_multipliers.nil?
+        hot_tub.pump_monthly_multipliers = '1.248, 1.257, 0.993, 0.989, 0.993, 0.827, 0.821, 0.821, 0.827, 0.99, 0.987, 1.248'
+      end
+      if hot_tub.heater_weekday_fractions.nil?
+        hot_tub.heater_weekday_fractions = '0.04, 0.037, 0.037, 0.036, 0.033, 0.036, 0.043, 0.047, 0.034, 0.023, 0.024, 0.025, 0.024, 0.028, 0.031, 0.032, 0.039, 0.053, 0.063, 0.067, 0.071, 0.069, 0.059, 0.05'
+      end
+      if hot_tub.heater_weekend_fractions.nil?
+        hot_tub.heater_weekend_fractions = '0.04, 0.037, 0.037, 0.036, 0.033, 0.036, 0.043, 0.047, 0.034, 0.023, 0.024, 0.025, 0.024, 0.028, 0.031, 0.032, 0.039, 0.053, 0.063, 0.067, 0.071, 0.069, 0.059, 0.05'
+      end
+      if hot_tub.heater_monthly_multipliers.nil?
+        hot_tub.heater_monthly_multipliers = '1.248, 1.257, 0.993, 0.989, 0.993, 0.827, 0.821, 0.821, 0.827, 0.99, 0.987, 1.248'
+      end
     end
   end
 
@@ -459,15 +571,24 @@ class HPXMLDefaults
       end
     end
 
-    # Default refrigerator
-    if hpxml.refrigerators.size > 0
-      refrigerator = hpxml.refrigerators[0]
-      if refrigerator.location.nil?
-        refrigerator.location = HPXML::LocationLivingSpace
-      end
-      if refrigerator.adjusted_annual_kwh.nil? && refrigerator.rated_annual_kwh.nil?
-        default_values = HotWaterAndAppliances.get_refrigerator_default_values(nbeds)
-        refrigerator.rated_annual_kwh = default_values[:rated_annual_kwh]
+    # Default refrigerators
+    hpxml.refrigerators.each do |refrigerator|
+      if not refrigerator.primary_indicator # extra refrigerator
+        if refrigerator.location.nil?
+          refrigerator.location = HotWaterAndAppliances.get_default_extra_refrigerator_and_freezer_locations(hpxml)
+        end
+        if refrigerator.adjusted_annual_kwh.nil? && refrigerator.rated_annual_kwh.nil?
+          default_values = HotWaterAndAppliances.get_extra_refrigerator_default_values
+          refrigerator.rated_annual_kwh = default_values[:rated_annual_kwh]
+        end
+      else # primary refrigerator
+        if refrigerator.location.nil?
+          refrigerator.location = HPXML::LocationLivingSpace
+        end
+        if refrigerator.adjusted_annual_kwh.nil? && refrigerator.rated_annual_kwh.nil?
+          default_values = HotWaterAndAppliances.get_refrigerator_default_values(nbeds)
+          refrigerator.rated_annual_kwh = default_values[:rated_annual_kwh]
+        end
       end
       if refrigerator.usage_multiplier.nil?
         refrigerator.usage_multiplier = 1.0
@@ -480,6 +601,29 @@ class HPXMLDefaults
       end
       if refrigerator.monthly_multipliers.nil?
         refrigerator.monthly_multipliers = '0.837, 0.835, 1.084, 1.084, 1.084, 1.096, 1.096, 1.096, 1.096, 0.931, 0.925, 0.837'
+      end
+    end
+
+    # Default freezer
+    hpxml.freezers.each do |freezer|
+      if freezer.location.nil?
+        freezer.location = HotWaterAndAppliances.get_default_extra_refrigerator_and_freezer_locations(hpxml)
+      end
+      if freezer.adjusted_annual_kwh.nil? && freezer.rated_annual_kwh.nil?
+        default_values = HotWaterAndAppliances.get_freezer_default_values
+        freezer.rated_annual_kwh = default_values[:rated_annual_kwh]
+      end
+      if freezer.usage_multiplier.nil?
+        freezer.usage_multiplier = 1.0
+      end
+      if freezer.weekday_fractions.nil?
+        freezer.weekday_fractions = '0.040, 0.039, 0.038, 0.037, 0.036, 0.036, 0.038, 0.040, 0.041, 0.041, 0.040, 0.040, 0.042, 0.042, 0.042, 0.041, 0.044, 0.048, 0.050, 0.048, 0.047, 0.046, 0.044, 0.041'
+      end
+      if freezer.weekend_fractions.nil?
+        freezer.weekend_fractions = '0.040, 0.039, 0.038, 0.037, 0.036, 0.036, 0.038, 0.040, 0.041, 0.041, 0.040, 0.040, 0.042, 0.042, 0.042, 0.041, 0.044, 0.048, 0.050, 0.048, 0.047, 0.046, 0.044, 0.041'
+      end
+      if freezer.monthly_multipliers.nil?
+        freezer.monthly_multipliers = '0.837, 0.835, 1.084, 1.084, 1.084, 1.096, 1.096, 1.096, 1.096, 0.931, 0.925, 0.837'
       end
     end
 

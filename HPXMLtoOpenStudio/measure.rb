@@ -287,10 +287,14 @@ class OSModel
 
     add_hot_water_and_appliances(runner, model, weather, spaces)
 
-    # Plug Loads & Lighting
+    # Plug Loads & Fuel Loads & Lighting
 
     add_mels(runner, model, spaces)
+    add_mfls(runner, model, spaces)
     add_lighting(runner, model, weather, spaces)
+
+    # Pools & Hot Tubs
+    add_pools_and_hot_tubs(runner, model, spaces)
 
     # Other
 
@@ -429,6 +433,8 @@ class OSModel
     HPXMLDefaults.apply_ventilation_fans(@hpxml)
     HPXMLDefaults.apply_ceiling_fans(@hpxml, @nbeds)
     HPXMLDefaults.apply_plug_loads(@hpxml, @cfa, @nbeds)
+    HPXMLDefaults.apply_fuel_loads(@hpxml, @cfa, @nbeds)
+    HPXMLDefaults.apply_pools_and_hot_tubs(@hpxml, @cfa, @nbeds)
     HPXMLDefaults.apply_appliances(@hpxml, @nbeds, @eri_version)
     HPXMLDefaults.apply_lighting(@hpxml)
     HPXMLDefaults.apply_pv_systems(@hpxml)
@@ -1964,10 +1970,16 @@ class OSModel
       dw_space = get_space_from_location(dishwasher.location, 'Dishwasher', model, spaces)
     end
 
-    # Refrigerator
-    if @hpxml.refrigerators.size > 0
-      refrigerator = @hpxml.refrigerators[0]
-      rf_space = get_space_from_location(refrigerator.location, 'Refrigerator', model, spaces)
+    # Refrigerators
+    refrigerators = {}
+    @hpxml.refrigerators.each do |refrigerator|
+      refrigerators[refrigerator] = get_space_from_location(refrigerator.location, 'Refrigerator', model, spaces)
+    end
+
+    # Freezer
+    freezers = {}
+    @hpxml.freezers.each do |freezer|
+      freezers[freezer] = get_space_from_location(freezer.location, 'Freezer', model, spaces)
     end
 
     # Cooking Range/Oven
@@ -2128,7 +2140,9 @@ class OSModel
     HotWaterAndAppliances.apply(model, weather, @living_space,
                                 @cfa, @nbeds, @ncfl, @has_uncond_bsmnt, avg_setpoint_temp,
                                 clothes_washer, cw_space, clothes_dryer, cd_space,
-                                dishwasher, dw_space, refrigerator, rf_space,
+                                dishwasher, dw_space,
+                                refrigerators,
+                                freezers,
                                 cooking_range, cook_space, oven,
                                 fixtures_all_low_flow, fixtures_usage_multiplier,
                                 dist_type, pipe_r, std_pipe_length, recirc_loop_length,
@@ -2485,21 +2499,61 @@ class OSModel
     # Misc
     plug_load_misc = nil
     plug_load_tv = nil
+    plug_load_vehicle = nil
+    plug_load_well_pump = nil
     @hpxml.plug_loads.each do |plug_load|
       if plug_load.plug_load_type == HPXML::PlugLoadTypeOther
         plug_load_misc = plug_load
       elsif plug_load.plug_load_type == HPXML::PlugLoadTypeTelevision
         plug_load_tv = plug_load
+      elsif plug_load.plug_load_type == HPXML::PlugLoadTypeVehicle
+        plug_load_vehicle = plug_load
+      elsif plug_load.plug_load_type == HPXML::PlugLoadTypeWellPump
+        plug_load_well_pump = plug_load
       end
     end
 
-    MiscLoads.apply_plug(model, plug_load_misc, plug_load_tv, @hpxml.misc_loads_schedule,
-                         @cfa, @living_space)
+    MiscLoads.apply_plug(model, plug_load_misc, Constants.ObjectNameMiscPlugLoads, @cfa, @living_space)
+    MiscLoads.apply_plug(model, plug_load_tv, Constants.ObjectNameMiscTelevision, @cfa, @living_space)
+    MiscLoads.apply_plug(model, plug_load_vehicle, Constants.ObjectNameMiscVehicle, @cfa, @living_space)
+    MiscLoads.apply_plug(model, plug_load_well_pump, Constants.ObjectNameMiscWellPump, @cfa, @living_space)
+  end
+
+  def self.add_mfls(runner, model, spaces)
+    # Misc
+    fuel_load_grill = nil
+    fuel_load_lighting = nil
+    fuel_load_fireplace = nil
+    @hpxml.fuel_loads.each do |fuel_load|
+      if fuel_load.fuel_load_type == HPXML::FuelLoadTypeGrill
+        fuel_load_grill = fuel_load
+      elsif fuel_load.fuel_load_type == HPXML::FuelLoadTypeLighting
+        fuel_load_lighting = fuel_load
+      elsif fuel_load.fuel_load_type == HPXML::FuelLoadTypeFireplace
+        fuel_load_fireplace = fuel_load
+      end
+    end
+
+    MiscLoads.apply_fuel(model, fuel_load_grill, Constants.ObjectNameMiscGrill, @living_space)
+    MiscLoads.apply_fuel(model, fuel_load_lighting, Constants.ObjectNameMiscLighting, @living_space)
+    MiscLoads.apply_fuel(model, fuel_load_fireplace, Constants.ObjectNameMiscFireplace, @living_space)
   end
 
   def self.add_lighting(runner, model, weather, spaces)
     Lighting.apply(model, weather, spaces, @hpxml.lighting_groups,
                    @hpxml.lighting.usage_multiplier, @eri_version)
+  end
+
+  def self.add_pools_and_hot_tubs(runner, model, spaces)
+    @hpxml.pools.each do |pool|
+      MiscLoads.apply_pool_or_hot_tub_heater(model, pool, Constants.ObjectNameMiscPoolHeater, @living_space)
+      MiscLoads.apply_pool_or_hot_tub_pump(model, pool, Constants.ObjectNameMiscPoolPump, @living_space)
+    end
+
+    @hpxml.hot_tubs.each do |hot_tub|
+      MiscLoads.apply_pool_or_hot_tub_heater(model, hot_tub, Constants.ObjectNameMiscHotTubHeater, @living_space)
+      MiscLoads.apply_pool_or_hot_tub_pump(model, hot_tub, Constants.ObjectNameMiscHotTubPump, @living_space)
+    end
   end
 
   def self.add_airflow(runner, model, weather, spaces)

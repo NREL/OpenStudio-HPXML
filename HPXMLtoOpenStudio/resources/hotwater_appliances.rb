@@ -4,7 +4,10 @@ class HotWaterAndAppliances
   def self.apply(model, weather, living_space,
                  cfa, nbeds, ncfl, has_uncond_bsmnt, wh_setpoint,
                  clothes_washer, cw_space, clothes_dryer, cd_space,
-                 dishwasher, dw_space, refrigerator, rf_space, cooking_range, cook_space, oven,
+                 dishwasher, dw_space,
+                 refrigerators,
+                 freezers,
+                 cooking_range, cook_space, oven,
                  fixtures_all_low_flow, fixtures_usage_multiplier,
                  dist_type, pipe_r, std_pipe_length, recirc_loop_length,
                  recirc_branch_length, recirc_control_type,
@@ -73,7 +76,7 @@ class HotWaterAndAppliances
       cw_peak_flow = cw_schedule.calcPeakFlowFromDailygpm(cw_gpd)
       cw_design_level_w = cw_schedule.calcDesignLevelFromDailykWh(cw_annual_kwh / 365.0)
 
-      cw_space = living_space if cw_space.nil?
+      cw_space = living_space if cw_space.nil? # handling the situation where the appliance is outdoors, so we need to assign the equipment to an arbitrary space
       add_electric_equipment(model, cw_name, cw_space, cw_design_level_w, cw_frac_sens, cw_frac_lat, cw_schedule.schedule)
       dhw_loop_fracs.each do |sys_id, dhw_load_frac|
         dhw_loop = dhw_loops[sys_id]
@@ -91,7 +94,7 @@ class HotWaterAndAppliances
       cd_design_level_e = cd_schedule.calcDesignLevelFromDailykWh(cd_annual_kwh / 365.0)
       cd_design_level_f = cd_schedule.calcDesignLevelFromDailyTherm(cd_annual_therm / 365.0)
 
-      cd_space = living_space if cd_space.nil?
+      cd_space = living_space if cd_space.nil? # handling the situation where the appliance is outdoors, so we need to assign the equipment to an arbitrary space
       add_electric_equipment(model, cd_name, cd_space, cd_design_level_e, cd_frac_sens, cd_frac_lat, cd_schedule.schedule)
       add_other_equipment(model, cd_name, cd_space, cd_design_level_f, cd_frac_sens, cd_frac_lat, cd_schedule.schedule, clothes_dryer.fuel_type)
     end
@@ -104,7 +107,7 @@ class HotWaterAndAppliances
       dw_peak_flow = dw_schedule.calcPeakFlowFromDailygpm(dw_gpd)
       dw_design_level_w = dw_schedule.calcDesignLevelFromDailykWh(dw_annual_kwh / 365.0)
 
-      dw_space = living_space if dw_space.nil?
+      dw_space = living_space if dw_space.nil? # handling the situation where the appliance is outdoors, so we need to assign the equipment to an arbitrary space
       add_electric_equipment(model, dw_name, dw_space, dw_design_level_w, dw_frac_sens, dw_frac_lat, dw_schedule.schedule)
       dhw_loop_fracs.each do |sys_id, dhw_load_frac|
         dhw_loop = dhw_loops[sys_id]
@@ -113,17 +116,35 @@ class HotWaterAndAppliances
     end
 
     # Refrigerator
-    if not refrigerator.nil?
-      rf_annual_kwh, rf_frac_sens, rf_frac_lat = calc_refrigerator_energy(refrigerator, rf_space.nil?)
+    if not refrigerators.empty?
       fridge_name = Constants.ObjectNameRefrigerator
-      fridge_weekday_sch = refrigerator.weekday_fractions
-      fridge_weekend_sch = refrigerator.weekend_fractions
-      fridge_monthly_sch = refrigerator.monthly_multipliers
-      fridge_schedule = MonthWeekdayWeekendSchedule.new(model, fridge_name, fridge_weekday_sch, fridge_weekend_sch, fridge_monthly_sch, 1.0, 1.0, true, true, Constants.ScheduleTypeLimitsFraction)
-      fridge_design_level = fridge_schedule.calcDesignLevelFromDailykWh(rf_annual_kwh / 365.0)
+      refrigerators.each do |refrigerator, rf_space|
+        rf_annual_kwh, rf_frac_sens, rf_frac_lat = calc_refrigerator_or_freezer_energy(refrigerator, rf_space.nil?)
+        fridge_weekday_sch = refrigerator.weekday_fractions
+        fridge_weekend_sch = refrigerator.weekend_fractions
+        fridge_monthly_sch = refrigerator.monthly_multipliers
+        fridge_schedule = MonthWeekdayWeekendSchedule.new(model, fridge_name, fridge_weekday_sch, fridge_weekend_sch, fridge_monthly_sch, 1.0, 1.0, true, true, Constants.ScheduleTypeLimitsFraction)
+        fridge_design_level = fridge_schedule.calcDesignLevelFromDailykWh(rf_annual_kwh / 365.0)
 
-      rf_space = living_space if rf_space.nil?
-      add_electric_equipment(model, fridge_name, rf_space, fridge_design_level, rf_frac_sens, rf_frac_lat, fridge_schedule.schedule)
+        rf_space = living_space if rf_space.nil? # handling the situation where the appliance is outdoors, so we need to assign the equipment to an arbitrary space
+        add_electric_equipment(model, fridge_name, rf_space, fridge_design_level, rf_frac_sens, rf_frac_lat, fridge_schedule.schedule)
+      end
+    end
+
+    # Freezer
+    if not freezers.empty?
+      freezer_name = Constants.ObjectNameFreezer
+      freezers.each do |freezer, fz_space|
+        fz_annual_kwh, fz_frac_sens, fz_frac_lat = calc_refrigerator_or_freezer_energy(freezer, fz_space.nil?)
+        freezer_weekday_sch = freezer.weekday_fractions
+        freezer_weekend_sch = freezer.weekend_fractions
+        freezer_monthly_sch = freezer.monthly_multipliers
+        freezer_schedule = MonthWeekdayWeekendSchedule.new(model, freezer_name, freezer_weekday_sch, freezer_weekend_sch, freezer_monthly_sch, 1.0, 1.0, true, true, Constants.ScheduleTypeLimitsFraction)
+        freezer_design_level = freezer_schedule.calcDesignLevelFromDailykWh(fz_annual_kwh / 365.0)
+
+        fz_space = living_space if fz_space.nil? # handling the situation where the appliance is outdoors, so we need to assign the equipment to an arbitrary space
+        add_electric_equipment(model, freezer_name, fz_space, freezer_design_level, fz_frac_sens, fz_frac_lat, freezer_schedule.schedule)
+      end
     end
 
     # Cooking Range
@@ -137,7 +158,7 @@ class HotWaterAndAppliances
       cook_design_level_e = cook_schedule.calcDesignLevelFromDailykWh(cook_annual_kwh / 365.0)
       cook_design_level_f = cook_schedule.calcDesignLevelFromDailyTherm(cook_annual_therm / 365.0)
 
-      cook_space = living_space if cook_space.nil?
+      cook_space = living_space if cook_space.nil? # handling the situation where the appliance is outdoors, so we need to assign the equipment to an arbitrary space
       add_electric_equipment(model, cook_name, cook_space, cook_design_level_e, cook_frac_sens, cook_frac_lat, cook_schedule.schedule)
       add_other_equipment(model, cook_name, cook_space, cook_design_level_f, cook_frac_sens, cook_frac_lat, cook_schedule.schedule, cooking_range.fuel_type)
     end
@@ -316,6 +337,14 @@ class HotWaterAndAppliances
     return { rated_annual_kwh: 637.0 + 18.0 * nbeds } # kWh/yr
   end
 
+  def self.get_extra_refrigerator_default_values
+    return { rated_annual_kwh: 243.6 } # kWh/yr
+  end
+
+  def self.get_freezer_default_values
+    return { rated_annual_kwh: 319.8 } # kWh/yr
+  end
+
   def self.get_clothes_dryer_default_values(eri_version, fuel_type)
     if Constants.ERIVersions.index(eri_version) >= Constants.ERIVersions.index('2019A')
       if fuel_type == HPXML::FuelTypeElectricity
@@ -488,14 +517,14 @@ class HotWaterAndAppliances
     return 0.503 + 0.95 * imef # Interpretation on ANSI/RESNET 301-2014 Clothes Washer IMEF
   end
 
-  def self.calc_refrigerator_energy(refrigerator, is_outside = false)
+  def self.calc_refrigerator_or_freezer_energy(refrigerator_or_freezer, is_outside = false)
     # Get values
-    annual_kwh = refrigerator.adjusted_annual_kwh
+    annual_kwh = refrigerator_or_freezer.adjusted_annual_kwh
     if annual_kwh.nil?
-      annual_kwh = refrigerator.rated_annual_kwh
+      annual_kwh = refrigerator_or_freezer.rated_annual_kwh
     end
 
-    annual_kwh *= refrigerator.usage_multiplier
+    annual_kwh *= refrigerator_or_freezer.usage_multiplier
     if not is_outside
       frac_sens = 1.0
       frac_lat = 0.0
@@ -815,5 +844,22 @@ class HotWaterAndAppliances
       end
     end
     fail 'Unexpected hot water distribution system.'
+  end
+
+  def self.get_default_extra_refrigerator_and_freezer_locations(hpxml)
+    extra_refrigerator_location_hierarchy = [HPXML::LocationGarage,
+                                             HPXML::LocationBasementUnconditioned,
+                                             HPXML::LocationBasementConditioned,
+                                             HPXML::LocationLivingSpace]
+
+    extra_refrigerator_location = nil
+    extra_refrigerator_location_hierarchy.each do |space_type|
+      if hpxml.has_space_type(space_type)
+        extra_refrigerator_location = space_type
+        break
+      end
+    end
+
+    return extra_refrigerator_location
   end
 end

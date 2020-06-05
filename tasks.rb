@@ -1669,6 +1669,8 @@ def create_hpxmls
     'invalid_files/attached-multifamily-window-outside-condition.xml' => 'base-enclosure-attached-multifamily.xml',
     'invalid_files/missing-duct-location.xml' => 'base-hvac-multiple.xml',
     'invalid_files/invalid-distribution-cfa-served.xml' => 'base.xml',
+    'invalid_files/refrigerators-multiple-primary.xml' => 'base.xml',
+    'invalid_files/refrigerators-no-primary.xml' => 'base.xml',
     'base-appliances-dehumidifier.xml' => 'base-location-dallas-tx.xml',
     'base-appliances-dehumidifier-ief.xml' => 'base-appliances-dehumidifier.xml',
     'base-appliances-dehumidifier-50percent.xml' => 'base-appliances-dehumidifier.xml',
@@ -1840,6 +1842,8 @@ def create_hpxmls
     'base-misc-ceiling-fans.xml' => 'base.xml',
     'base-misc-defaults.xml' => 'base.xml',
     'base-misc-defaults2.xml' => 'base-dhw-recirc-demand.xml',
+    'base-misc-large-uncommon-loads.xml' => 'base-enclosure-garage.xml',
+    'base-misc-large-uncommon-loads2.xml' => 'base-misc-large-uncommon-loads.xml',
     'base-misc-timestep-10-mins.xml' => 'base.xml',
     'base-misc-runperiod-1-month.xml' => 'base.xml',
     'base-misc-usage-multiplier.xml' => 'base.xml',
@@ -1929,13 +1933,16 @@ def create_hpxmls
         set_hpxml_clothes_dryer(hpxml_file, hpxml)
         set_hpxml_dishwasher(hpxml_file, hpxml)
         set_hpxml_refrigerator(hpxml_file, hpxml)
+        set_hpxml_freezer(hpxml_file, hpxml)
         set_hpxml_dehumidifier(hpxml_file, hpxml)
         set_hpxml_cooking_range(hpxml_file, hpxml)
         set_hpxml_oven(hpxml_file, hpxml)
         set_hpxml_lighting(hpxml_file, hpxml)
         set_hpxml_ceiling_fans(hpxml_file, hpxml)
+        set_hpxml_pools(hpxml_file, hpxml)
+        set_hpxml_hot_tubs(hpxml_file, hpxml)
         set_hpxml_plug_loads(hpxml_file, hpxml)
-        set_hpxml_misc_load_schedule(hpxml_file, hpxml)
+        set_hpxml_fuel_loads(hpxml_file, hpxml)
       end
 
       hpxml_doc = hpxml.to_oga()
@@ -5339,7 +5346,8 @@ def set_hpxml_refrigerator(hpxml_file, hpxml)
   if ['base.xml'].include? hpxml_file
     hpxml.refrigerators.add(id: 'Refrigerator',
                             location: HPXML::LocationLivingSpace,
-                            rated_annual_kwh: 650)
+                            rated_annual_kwh: 650,
+                            primary_indicator: true)
   elsif ['base-appliances-modified.xml'].include? hpxml_file
     hpxml.refrigerators[0].adjusted_annual_kwh = 600
   elsif ['base-appliances-none.xml'].include? hpxml_file
@@ -5365,6 +5373,33 @@ def set_hpxml_refrigerator(hpxml_file, hpxml)
     hpxml.refrigerators[0].adjusted_annual_kwh = nil
   elsif ['base-misc-usage-multiplier.xml'].include? hpxml_file
     hpxml.refrigerators[0].usage_multiplier = 0.9
+  elsif ['base-misc-large-uncommon-loads.xml'].include? hpxml_file
+    hpxml.refrigerators.add(id: 'ExtraRefrigerator',
+                            rated_annual_kwh: 700,
+                            primary_indicator: false)
+    hpxml.refrigerators.add(id: 'ExtraRefrigerator2',
+                            rated_annual_kwh: 800,
+                            primary_indicator: false)
+  elsif ['invalid_files/refrigerators-multiple-primary.xml'].include? hpxml_file
+    hpxml.refrigerators.add(id: 'Refrigerator2',
+                            location: HPXML::LocationLivingSpace,
+                            rated_annual_kwh: 650,
+                            primary_indicator: true)
+  elsif ['invalid_files/refrigerators-no-primary.xml'].include? hpxml_file
+    hpxml.refrigerators[0].primary_indicator = false
+    hpxml.refrigerators.add(id: 'Refrigerator2',
+                            location: HPXML::LocationLivingSpace,
+                            rated_annual_kwh: 650,
+                            primary_indicator: false)
+  end
+end
+
+def set_hpxml_freezer(hpxml_file, hpxml)
+  if ['base-misc-large-uncommon-loads.xml'].include? hpxml_file
+    hpxml.freezers.add(id: 'Freezer',
+                       rated_annual_kwh: 300)
+    hpxml.freezers.add(id: 'Freezer2',
+                       rated_annual_kwh: 400)
   end
 end
 
@@ -5492,6 +5527,32 @@ def set_hpxml_ceiling_fans(hpxml_file, hpxml)
   end
 end
 
+def set_hpxml_pools(hpxml_file, hpxml)
+  if ['base-misc-large-uncommon-loads.xml'].include? hpxml_file
+    hpxml.pools.add(id: 'Pool',
+                    heater_type: HPXML::HeaterTypeElectric,
+                    heater_kwh_per_year: 2100,
+                    pump_kwh_per_year: 2700)
+  elsif ['base-misc-large-uncommon-loads2.xml'].include? hpxml_file
+    hpxml.pools[0].heater_type = HPXML::HeaterTypeGas
+    hpxml.pools[0].heater_kwh_per_year = nil
+    hpxml.pools[0].heater_therm_per_year = 500
+  end
+end
+
+def set_hpxml_hot_tubs(hpxml_file, hpxml)
+  if ['base-misc-large-uncommon-loads.xml'].include? hpxml_file
+    hpxml.hot_tubs.add(id: 'HotTub',
+                       heater_type: HPXML::HeaterTypeElectric,
+                       heater_kwh_per_year: 1300,
+                       pump_kwh_per_year: 1000)
+  elsif ['base-misc-large-uncommon-loads2.xml'].include? hpxml_file
+    hpxml.hot_tubs[0].heater_type = HPXML::HeaterTypeGas
+    hpxml.hot_tubs[0].heater_kwh_per_year = nil
+    hpxml.hot_tubs[0].heater_therm_per_year = 500
+  end
+end
+
 def set_hpxml_plug_loads(hpxml_file, hpxml)
   if ['ASHRAE_Standard_140/L100AC.xml',
       'ASHRAE_Standard_140/L100AL.xml'].include? hpxml_file
@@ -5520,6 +5581,19 @@ def set_hpxml_plug_loads(hpxml_file, hpxml)
         plug_load.frac_sensible = nil
         plug_load.frac_latent = nil
       end
+    elsif ['base-misc-large-uncommon-loads.xml'].include? hpxml_file
+      hpxml.plug_loads.add(id: 'PlugLoadMisc3',
+                           plug_load_type: HPXML::PlugLoadTypeVehicle,
+                           kWh_per_year: 1500,
+                           weekday_fractions: '0.04, 0.037, 0.037, 0.036, 0.033, 0.036, 0.043, 0.047, 0.034, 0.023, 0.024, 0.025, 0.024, 0.028, 0.031, 0.032, 0.039, 0.053, 0.063, 0.067, 0.071, 0.069, 0.059, 0.05',
+                           weekend_fractions: '0.04, 0.037, 0.037, 0.036, 0.033, 0.036, 0.043, 0.047, 0.034, 0.023, 0.024, 0.025, 0.024, 0.028, 0.031, 0.032, 0.039, 0.053, 0.063, 0.067, 0.071, 0.069, 0.059, 0.05',
+                           monthly_multipliers: '1.248, 1.257, 0.993, 0.989, 0.993, 0.827, 0.821, 0.821, 0.827, 0.99, 0.987, 1.248')
+      hpxml.plug_loads.add(id: 'PlugLoadMisc4',
+                           plug_load_type: HPXML::PlugLoadTypeWellPump,
+                           kWh_per_year: 475,
+                           weekday_fractions: '0.04, 0.037, 0.037, 0.036, 0.033, 0.036, 0.043, 0.047, 0.034, 0.023, 0.024, 0.025, 0.024, 0.028, 0.031, 0.032, 0.039, 0.053, 0.063, 0.067, 0.071, 0.069, 0.059, 0.05',
+                           weekend_fractions: '0.04, 0.037, 0.037, 0.036, 0.033, 0.036, 0.043, 0.047, 0.034, 0.023, 0.024, 0.025, 0.024, 0.028, 0.031, 0.032, 0.039, 0.053, 0.063, 0.067, 0.071, 0.069, 0.059, 0.05',
+                           monthly_multipliers: '1.248, 1.257, 0.993, 0.989, 0.993, 0.827, 0.821, 0.821, 0.827, 0.99, 0.987, 1.248')
     else
       cfa = hpxml.building_construction.conditioned_floor_area
       nbeds = hpxml.building_construction.number_of_bedrooms
@@ -5535,21 +5609,35 @@ def set_hpxml_plug_loads(hpxml_file, hpxml)
       hpxml.plug_loads[1].frac_latent = frac_latent.round(3)
     end
   end
+  if hpxml_file.include?('ASHRAE_Standard_140')
+    hpxml.plug_loads[0].weekday_fractions = '0.020, 0.020, 0.020, 0.020, 0.020, 0.034, 0.043, 0.085, 0.050, 0.030, 0.030, 0.041, 0.030, 0.025, 0.026, 0.026, 0.039, 0.042, 0.045, 0.070, 0.070, 0.073, 0.073, 0.066'
+    hpxml.plug_loads[0].weekend_fractions = '0.020, 0.020, 0.020, 0.020, 0.020, 0.034, 0.043, 0.085, 0.050, 0.030, 0.030, 0.041, 0.030, 0.025, 0.026, 0.026, 0.039, 0.042, 0.045, 0.070, 0.070, 0.073, 0.073, 0.066'
+    hpxml.plug_loads[0].monthly_multipliers = '1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0'
+  elsif ['base.xml'].include? hpxml_file
+    hpxml.plug_loads[0].weekday_fractions = '0.04, 0.037, 0.037, 0.036, 0.033, 0.036, 0.043, 0.047, 0.034, 0.023, 0.024, 0.025, 0.024, 0.028, 0.031, 0.032, 0.039, 0.053, 0.063, 0.067, 0.071, 0.069, 0.059, 0.05'
+    hpxml.plug_loads[0].weekend_fractions = '0.04, 0.037, 0.037, 0.036, 0.033, 0.036, 0.043, 0.047, 0.034, 0.023, 0.024, 0.025, 0.024, 0.028, 0.031, 0.032, 0.039, 0.053, 0.063, 0.067, 0.071, 0.069, 0.059, 0.05'
+    hpxml.plug_loads[0].monthly_multipliers = '1.248, 1.257, 0.993, 0.989, 0.993, 0.827, 0.821, 0.821, 0.827, 0.99, 0.987, 1.248'
+  elsif ['base-misc-defaults.xml'].include? hpxml_file
+    hpxml.plug_loads[0].weekday_fractions = nil
+    hpxml.plug_loads[0].weekend_fractions = nil
+    hpxml.plug_loads[0].monthly_multipliers = nil
+  end
 end
 
-def set_hpxml_misc_load_schedule(hpxml_file, hpxml)
-  if hpxml_file.include?('ASHRAE_Standard_140')
-    hpxml.misc_loads_schedule.weekday_fractions = '0.020, 0.020, 0.020, 0.020, 0.020, 0.034, 0.043, 0.085, 0.050, 0.030, 0.030, 0.041, 0.030, 0.025, 0.026, 0.026, 0.039, 0.042, 0.045, 0.070, 0.070, 0.073, 0.073, 0.066'
-    hpxml.misc_loads_schedule.weekend_fractions = '0.020, 0.020, 0.020, 0.020, 0.020, 0.034, 0.043, 0.085, 0.050, 0.030, 0.030, 0.041, 0.030, 0.025, 0.026, 0.026, 0.039, 0.042, 0.045, 0.070, 0.070, 0.073, 0.073, 0.066'
-    hpxml.misc_loads_schedule.monthly_multipliers = '1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0'
-  elsif ['base.xml'].include? hpxml_file
-    hpxml.misc_loads_schedule.weekday_fractions = '0.04, 0.037, 0.037, 0.036, 0.033, 0.036, 0.043, 0.047, 0.034, 0.023, 0.024, 0.025, 0.024, 0.028, 0.031, 0.032, 0.039, 0.053, 0.063, 0.067, 0.071, 0.069, 0.059, 0.05'
-    hpxml.misc_loads_schedule.weekend_fractions = '0.04, 0.037, 0.037, 0.036, 0.033, 0.036, 0.043, 0.047, 0.034, 0.023, 0.024, 0.025, 0.024, 0.028, 0.031, 0.032, 0.039, 0.053, 0.063, 0.067, 0.071, 0.069, 0.059, 0.05'
-    hpxml.misc_loads_schedule.monthly_multipliers = '1.248, 1.257, 0.993, 0.989, 0.993, 0.827, 0.821, 0.821, 0.827, 0.99, 0.987, 1.248'
-  elsif ['base-misc-defaults.xml'].include? hpxml_file
-    hpxml.misc_loads_schedule.weekday_fractions = nil
-    hpxml.misc_loads_schedule.weekend_fractions = nil
-    hpxml.misc_loads_schedule.monthly_multipliers = nil
+def set_hpxml_fuel_loads(hpxml_file, hpxml)
+  if ['base-misc-large-uncommon-loads.xml'].include? hpxml_file
+    hpxml.fuel_loads.add(id: 'FuelLoadMisc',
+                         fuel_load_type: HPXML::FuelLoadTypeGrill,
+                         fuel_type: HPXML::FuelTypePropane,
+                         therm_per_year: 25)
+    hpxml.fuel_loads.add(id: 'FuelLoadMisc2',
+                         fuel_load_type: HPXML::FuelLoadTypeLighting,
+                         fuel_type: HPXML::FuelTypeNaturalGas,
+                         therm_per_year: 28)
+    hpxml.fuel_loads.add(id: 'FuelLoadMisc3',
+                         fuel_load_type: HPXML::FuelLoadTypeFireplace,
+                         fuel_type: HPXML::FuelTypeWood,
+                         therm_per_year: 55)
   end
 end
 
