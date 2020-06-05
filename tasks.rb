@@ -101,7 +101,8 @@ def create_hpxmls
     'invalid_files/water-heater-location.xml' => 'base.xml',
     'invalid_files/water-heater-location-other.xml' => 'base.xml',
     'invalid_files/attached-multifamily-window-outside-condition.xml' => 'base-enclosure-attached-multifamily.xml',
-
+    'invalid_files/missing-duct-location.xml' => 'base-hvac-multiple.xml',
+    'invalid_files/invalid-distribution-cfa-served.xml' => 'base.xml',
     'base-appliances-dehumidifier.xml' => 'base-location-dallas-tx.xml',
     'base-appliances-dehumidifier-ief.xml' => 'base-appliances-dehumidifier.xml',
     'base-appliances-dehumidifier-50percent.xml' => 'base-appliances-dehumidifier.xml',
@@ -152,16 +153,13 @@ def create_hpxmls
     'base-dhw-tank-heat-pump-with-solar.xml' => 'base-dhw-tank-heat-pump.xml',
     'base-dhw-tank-heat-pump-with-solar-fraction.xml' => 'base-dhw-tank-heat-pump.xml',
     'base-dhw-tank-oil.xml' => 'base.xml',
-    'base-dhw-tank-propane.xml' => 'base.xml',
     'base-dhw-tank-wood.xml' => 'base.xml',
     'base-dhw-tankless-electric.xml' => 'base.xml',
     'base-dhw-tankless-electric-outside.xml' => 'base-dhw-tankless-electric.xml',
     'base-dhw-tankless-gas.xml' => 'base.xml',
     'base-dhw-tankless-gas-with-solar.xml' => 'base-dhw-tankless-gas.xml',
     'base-dhw-tankless-gas-with-solar-fraction.xml' => 'base-dhw-tankless-gas.xml',
-    'base-dhw-tankless-oil.xml' => 'base.xml',
     'base-dhw-tankless-propane.xml' => 'base.xml',
-    'base-dhw-tankless-wood.xml' => 'base.xml',
     'base-dhw-uef.xml' => 'base.xml',
     'base-dhw-jacket-electric.xml' => 'base.xml',
     'base-dhw-jacket-gas.xml' => 'base-dhw-tank-gas.xml',
@@ -224,6 +222,8 @@ def create_hpxmls
     'base-hvac-evap-cooler-furnace-gas.xml' => 'base.xml',
     'base-hvac-evap-cooler-only.xml' => 'base.xml',
     'base-hvac-evap-cooler-only-ducted.xml' => 'base.xml',
+    'base-hvac-fireplace-wood-only.xml' => 'base.xml',
+    'base-hvac-floor-furnace-propane-only.xml' => 'base.xml',
     'base-hvac-flowrate.xml' => 'base.xml',
     'base-hvac-furnace-elec-central-ac-1-speed.xml' => 'base.xml',
     'base-hvac-furnace-elec-only.xml' => 'base.xml',
@@ -241,23 +241,18 @@ def create_hpxmls
     'base-hvac-mini-split-heat-pump-ducted-heating-only.xml' => 'base-hvac-mini-split-heat-pump-ducted.xml',
     'base-hvac-mini-split-heat-pump-ducted-cooling-only.xml' => 'base-hvac-mini-split-heat-pump-ducted.xml',
     'base-hvac-mini-split-heat-pump-ductless.xml' => 'base-hvac-mini-split-heat-pump-ducted.xml',
-    'base-hvac-mini-split-heat-pump-ductless-no-backup.xml' => 'base-hvac-mini-split-heat-pump-ductless.xml',
     'base-hvac-multiple.xml' => 'base.xml',
     'base-hvac-multiple2.xml' => 'base.xml',
     'base-hvac-none.xml' => 'base.xml',
-    'base-hvac-none-no-fuel-access.xml' => 'base-hvac-none.xml',
     'base-hvac-portable-heater-electric-only.xml' => 'base.xml',
     'base-hvac-programmable-thermostat.xml' => 'base.xml',
     'base-hvac-room-ac-only.xml' => 'base.xml',
     'base-hvac-room-ac-only-33percent.xml' => 'base-hvac-room-ac-only.xml',
     'base-hvac-setpoints.xml' => 'base.xml',
     'base-hvac-stove-oil-only.xml' => 'base.xml',
-    'base-hvac-stove-wood-only.xml' => 'base.xml',
-    'base-hvac-stove-wood-pellets-only.xml' => 'base-hvac-stove-wood-only.xml',
+    'base-hvac-stove-wood-pellets-only.xml' => 'base.xml',
     'base-hvac-undersized.xml' => 'base.xml',
     'base-hvac-wall-furnace-elec-only.xml' => 'base.xml',
-    'base-hvac-wall-furnace-propane-only.xml' => 'base.xml',
-    'base-hvac-wall-furnace-wood-only.xml' => 'base.xml',
     'base-location-baltimore-md.xml' => 'base.xml',
     'base-location-dallas-tx.xml' => 'base.xml',
     'base-location-duluth-mn.xml' => 'base.xml',
@@ -301,6 +296,7 @@ def create_hpxmls
     'hvac_autosizing/base-hvac-dual-fuel-mini-split-heat-pump-ducted-autosize.xml' => 'base-hvac-dual-fuel-mini-split-heat-pump-ducted.xml',
     'hvac_autosizing/base-hvac-elec-resistance-only-autosize.xml' => 'base-hvac-elec-resistance-only.xml',
     'hvac_autosizing/base-hvac-evap-cooler-furnace-gas-autosize.xml' => 'base-hvac-evap-cooler-furnace-gas.xml',
+    'hvac_autosizing/base-hvac-floor-furnace-propane-only-autosize.xml' => 'base-hvac-floor-furnace-propane-only.xml',
     'hvac_autosizing/base-hvac-furnace-elec-only-autosize.xml' => 'base-hvac-furnace-elec-only.xml',
     'hvac_autosizing/base-hvac-furnace-gas-central-ac-2-speed-autosize.xml' => 'base-hvac-furnace-gas-central-ac-2-speed.xml',
     'hvac_autosizing/base-hvac-furnace-gas-central-ac-var-speed-autosize.xml' => 'base-hvac-furnace-gas-central-ac-var-speed.xml',
@@ -311,7 +307,6 @@ def create_hpxmls
     'hvac_autosizing/base-hvac-room-ac-only-autosize.xml' => 'base-hvac-room-ac-only.xml',
     'hvac_autosizing/base-hvac-stove-oil-only-autosize.xml' => 'base-hvac-stove-oil-only.xml',
     'hvac_autosizing/base-hvac-wall-furnace-elec-only-autosize.xml' => 'base-hvac-wall-furnace-elec-only.xml',
-    'hvac_autosizing/base-hvac-wall-furnace-propane-only-autosize.xml' => 'base-hvac-wall-furnace-propane-only.xml',
   }
 
   puts "Generating #{hpxmls_files.size} HPXML files..."
@@ -467,8 +462,6 @@ def set_hpxml_site(hpxml_file, hpxml)
   if ['base.xml'].include? hpxml_file
     hpxml.site.fuels = [HPXML::FuelTypeElectricity, HPXML::FuelTypeNaturalGas]
     hpxml.site.site_type = HPXML::SiteTypeSuburban
-  elsif ['base-hvac-none-no-fuel-access.xml'].include? hpxml_file
-    hpxml.site.fuels = [HPXML::FuelTypeElectricity]
   elsif ['base-misc-defaults.xml'].include? hpxml_file
     hpxml.site.site_type = nil
   end
@@ -536,6 +529,9 @@ def set_hpxml_building_construction(hpxml_file, hpxml)
     hpxml.building_construction.number_of_conditioned_floors_above_grade += 1
     hpxml.building_construction.conditioned_floor_area += 1350
     hpxml.building_construction.conditioned_building_volume += 1350 * 8
+  elsif ['base-enclosure-2stories-garage.xml'].include? hpxml_file
+    hpxml.building_construction.conditioned_floor_area -= 400 * 2
+    hpxml.building_construction.conditioned_building_volume -= 400 * 2 * 8
   elsif ['base-misc-defaults.xml'].include? hpxml_file
     hpxml.building_construction.conditioned_building_volume = nil
     hpxml.building_construction.average_ceiling_height = 8
@@ -782,14 +778,7 @@ def set_hpxml_roofs(hpxml_file, hpxml)
     hpxml.roofs[0].interior_adjacent_to = HPXML::LocationLivingSpace
     hpxml.roofs[0].insulation_assembly_r_value = 25.8
   elsif ['base-enclosure-garage.xml'].include? hpxml_file
-    hpxml.roofs.add(id: 'RoofGarage',
-                    interior_adjacent_to: HPXML::LocationGarage,
-                    area: 670,
-                    solar_absorptance: 0.7,
-                    emittance: 0.92,
-                    pitch: 6,
-                    radiant_barrier: false,
-                    insulation_assembly_r_value: 2.3)
+    hpxml.roofs[0].area += 670
   elsif ['base-atticroof-unvented-insulated-roof.xml'].include? hpxml_file
     hpxml.roofs[0].insulation_assembly_r_value = 25.8
   elsif ['base-enclosure-other-housing-unit.xml',
@@ -812,8 +801,6 @@ def set_hpxml_roofs(hpxml_file, hpxml)
     hpxml.roofs[0].radiant_barrier = true
   elsif ['invalid_files/enclosure-attic-missing-roof.xml'].include? hpxml_file
     hpxml.roofs[0].delete
-  elsif ['invalid_files/enclosure-garage-missing-roof-ceiling.xml'].include? hpxml_file
-    hpxml.roofs[1].delete
   end
 end
 
@@ -1056,7 +1043,7 @@ def set_hpxml_walls(hpxml_file, hpxml)
                     area: 100,
                     solar_absorptance: 0.7,
                     emittance: 0.92,
-                    insulation_assembly_r_value: 22.3)
+                    insulation_assembly_r_value: 23.0)
     hpxml.walls.add(id: 'WallOtherNonFreezingSpace',
                     exterior_adjacent_to: HPXML::LocationOtherNonFreezingSpace,
                     interior_adjacent_to: HPXML::LocationLivingSpace,
@@ -1113,7 +1100,7 @@ def set_hpxml_walls(hpxml_file, hpxml)
                     exterior_adjacent_to: HPXML::LocationOutside,
                     interior_adjacent_to: HPXML::LocationLivingSpace,
                     wall_type: HPXML::WallTypeWoodStud,
-                    area: 880,
+                    area: 2080,
                     solar_absorptance: 0.7,
                     emittance: 0.92,
                     insulation_assembly_r_value: 23)
@@ -1129,7 +1116,15 @@ def set_hpxml_walls(hpxml_file, hpxml)
                     exterior_adjacent_to: HPXML::LocationOutside,
                     interior_adjacent_to: HPXML::LocationGarage,
                     wall_type: HPXML::WallTypeWoodStud,
-                    area: 800,
+                    area: 320,
+                    solar_absorptance: 0.7,
+                    emittance: 0.92,
+                    insulation_assembly_r_value: 4)
+    hpxml.walls.add(id: 'WallAtticGable',
+                    exterior_adjacent_to: HPXML::LocationOutside,
+                    interior_adjacent_to: HPXML::LocationAtticUnvented,
+                    wall_type: HPXML::WallTypeWoodStud,
+                    area: 113,
                     solar_absorptance: 0.7,
                     emittance: 0.92,
                     insulation_assembly_r_value: 4)
@@ -1159,6 +1154,14 @@ def set_hpxml_walls(hpxml_file, hpxml)
                     solar_absorptance: 0.7,
                     emittance: 0.92,
                     insulation_assembly_r_value: 4)
+    hpxml.walls.add(id: 'WallAtticGable',
+                    exterior_adjacent_to: HPXML::LocationOutside,
+                    interior_adjacent_to: HPXML::LocationAtticUnvented,
+                    wall_type: HPXML::WallTypeWoodStud,
+                    area: 113,
+                    solar_absorptance: 0.7,
+                    emittance: 0.92,
+                    insulation_assembly_r_value: 4)
   elsif ['base-atticroof-unvented-insulated-roof.xml'].include? hpxml_file
     hpxml.walls[1].insulation_assembly_r_value = 23
   elsif ['base-enclosure-other-housing-unit.xml',
@@ -1169,19 +1172,22 @@ def set_hpxml_walls(hpxml_file, hpxml)
     hpxml.walls << hpxml.walls[0].dup
     hpxml.walls[0].area *= 0.35
     hpxml.walls[-1].area *= 0.65
-    hpxml.walls[-1].insulation_assembly_r_value = 4
     if ['base-enclosure-other-housing-unit.xml'].include? hpxml_file
       hpxml.walls[-1].id = 'WallOtherHousingUnit'
       hpxml.walls[-1].exterior_adjacent_to = HPXML::LocationOtherHousingUnit
+      hpxml.walls[-1].insulation_assembly_r_value = 4
     elsif ['base-enclosure-other-heated-space.xml'].include? hpxml_file
       hpxml.walls[-1].id = 'WallOtherHeatedSpace'
       hpxml.walls[-1].exterior_adjacent_to = HPXML::LocationOtherHeatedSpace
+      hpxml.walls[-1].insulation_assembly_r_value = 4
     elsif ['base-enclosure-other-non-freezing-space.xml'].include? hpxml_file
       hpxml.walls[-1].id = 'WallOtherNonFreezingSpace'
       hpxml.walls[-1].exterior_adjacent_to = HPXML::LocationOtherNonFreezingSpace
+      hpxml.walls[-1].insulation_assembly_r_value = 23
     elsif ['base-enclosure-other-multifamily-buffer-space.xml'].include? hpxml_file
       hpxml.walls[-1].id = 'WallOtherMultifamilyBufferSpace'
       hpxml.walls[-1].exterior_adjacent_to = HPXML::LocationOtherMultifamilyBufferSpace
+      hpxml.walls[-1].insulation_assembly_r_value = 23
     end
   elsif ['base-enclosure-split-surfaces.xml'].include? hpxml_file
     for n in 1..hpxml.walls.size
@@ -1199,7 +1205,7 @@ def set_hpxml_walls(hpxml_file, hpxml)
   elsif ['invalid_files/enclosure-living-missing-exterior-wall.xml'].include? hpxml_file
     hpxml.walls[0].delete
   elsif ['invalid_files/enclosure-garage-missing-exterior-wall.xml'].include? hpxml_file
-    hpxml.walls[-1].delete
+    hpxml.walls[-2].delete
   end
 end
 
@@ -1505,6 +1511,8 @@ def set_hpxml_foundation_walls(hpxml_file, hpxml)
     hpxml.foundation_walls << hpxml.foundation_walls[-1].dup
     hpxml.foundation_walls[-1].id = 'TinyFoundationWall'
     hpxml.foundation_walls[-1].area = 0.05
+  elsif ['base-enclosure-2stories-garage.xml'].include? hpxml_file
+    hpxml.foundation_walls[-1].area = 880
   elsif ['invalid_files/enclosure-basement-missing-exterior-foundation-wall.xml'].include? hpxml_file
     hpxml.foundation_walls[0].delete
   end
@@ -1591,7 +1599,7 @@ def set_hpxml_frame_floors(hpxml_file, hpxml)
                            exterior_adjacent_to: HPXML::LocationGarage,
                            interior_adjacent_to: HPXML::LocationLivingSpace,
                            area: 400,
-                           insulation_assembly_r_value: 18.7)
+                           insulation_assembly_r_value: 39.3)
   elsif ['base-atticroof-unvented-insulated-roof.xml'].include? hpxml_file
     hpxml.frame_floors[0].insulation_assembly_r_value = 2.1
   elsif ['base-enclosure-other-housing-unit.xml',
@@ -1601,20 +1609,23 @@ def set_hpxml_frame_floors(hpxml_file, hpxml)
     hpxml.frame_floors.clear
     hpxml.frame_floors.add(interior_adjacent_to: HPXML::LocationLivingSpace,
                            area: 1350,
-                           insulation_assembly_r_value: 2.1,
                            other_space_above_or_below: HPXML::FrameFloorOtherSpaceAbove)
     if ['base-enclosure-other-housing-unit.xml'].include? hpxml_file
       hpxml.frame_floors[0].exterior_adjacent_to = HPXML::LocationOtherHousingUnit
       hpxml.frame_floors[0].id = 'FloorBelowOtherHousingUnit'
+      hpxml.frame_floors[0].insulation_assembly_r_value = 2.1
     elsif ['base-enclosure-other-heated-space.xml'].include? hpxml_file
       hpxml.frame_floors[0].exterior_adjacent_to = HPXML::LocationOtherHeatedSpace
       hpxml.frame_floors[0].id = 'FloorBelowOtherHeatedSpace'
+      hpxml.frame_floors[0].insulation_assembly_r_value = 2.1
     elsif ['base-enclosure-other-non-freezing-space.xml'].include? hpxml_file
       hpxml.frame_floors[0].exterior_adjacent_to = HPXML::LocationOtherNonFreezingSpace
       hpxml.frame_floors[0].id = 'FloorBelowOtherNonFreezingSpace'
+      hpxml.frame_floors[0].insulation_assembly_r_value = 18.7
     elsif ['base-enclosure-other-multifamily-buffer-space.xml'].include? hpxml_file
       hpxml.frame_floors[0].exterior_adjacent_to = HPXML::LocationOtherMultifamilyBufferSpace
       hpxml.frame_floors[0].id = 'FloorBelowOtherMultifamilyBufferSpace'
+      hpxml.frame_floors[0].insulation_assembly_r_value = 18.7
     end
     hpxml.frame_floors << hpxml.frame_floors[0].dup
     hpxml.frame_floors[1].id = hpxml.frame_floors[0].id.gsub('Below', 'Above')
@@ -1624,13 +1635,13 @@ def set_hpxml_frame_floors(hpxml_file, hpxml)
                            exterior_adjacent_to: HPXML::LocationOtherNonFreezingSpace,
                            interior_adjacent_to: HPXML::LocationLivingSpace,
                            area: 1000,
-                           insulation_assembly_r_value: 2.1,
+                           insulation_assembly_r_value: 18.7,
                            other_space_above_or_below: HPXML::FrameFloorOtherSpaceBelow)
     hpxml.frame_floors.add(id: 'FloorAboveMultifamilyBuffer',
                            exterior_adjacent_to: HPXML::LocationOtherMultifamilyBufferSpace,
                            interior_adjacent_to: HPXML::LocationLivingSpace,
                            area: 200,
-                           insulation_assembly_r_value: 2.1,
+                           insulation_assembly_r_value: 18.7,
                            other_space_above_or_below: HPXML::FrameFloorOtherSpaceBelow)
     hpxml.frame_floors.add(id: 'FloorAboveOtherHeatedSpace',
                            exterior_adjacent_to: HPXML::LocationOtherHeatedSpace,
@@ -1992,14 +2003,7 @@ def set_hpxml_windows(hpxml_file, hpxml)
                       fraction_operable: 0.0,
                       wall_idref: 'WallAtticGable')
   elsif ['base-enclosure-garage.xml'].include? hpxml_file
-    hpxml.windows.delete_at(2)
-    hpxml.windows.add(id: 'GarageWindowEast',
-                      area: 12,
-                      azimuth: 90,
-                      ufactor: 0.33,
-                      shgc: 0.45,
-                      fraction_operable: 0.0,
-                      wall_idref: 'WallGarageExterior')
+    hpxml.windows[1].area = 12
   elsif ['base-enclosure-2stories.xml'].include? hpxml_file
     hpxml.windows[0].area = 216
     hpxml.windows[1].area = 216
@@ -2267,7 +2271,6 @@ def set_hpxml_heating_systems(hpxml_file, hpxml)
          'base-hvac-evap-cooler-only-ducted.xml',
          'base-hvac-ground-to-air-heat-pump.xml',
          'base-hvac-mini-split-heat-pump-ducted.xml',
-         'base-hvac-mini-split-heat-pump-ductless-no-backup.xml',
          'base-hvac-ideal-air.xml',
          'base-hvac-none.xml',
          'base-hvac-room-ac-only.xml',
@@ -2391,6 +2394,18 @@ def set_hpxml_heating_systems(hpxml_file, hpxml)
                               fraction_heat_load_served: 0.1)
   elsif ['invalid_files/hvac-frac-load-served.xml'].include? hpxml_file
     hpxml.heating_systems[0].fraction_heat_load_served += 0.1
+  elsif ['base-hvac-fireplace-wood-only.xml'].include? hpxml_file
+    hpxml.heating_systems[0].distribution_system_idref = nil
+    hpxml.heating_systems[0].heating_system_type = HPXML::HVACTypeFireplace
+    hpxml.heating_systems[0].heating_system_fuel = HPXML::FuelTypeWood
+    hpxml.heating_systems[0].heating_efficiency_afue = nil
+    hpxml.heating_systems[0].heating_efficiency_percent = 0.8
+  elsif ['base-hvac-floor-furnace-propane-only.xml'].include? hpxml_file
+    hpxml.heating_systems[0].distribution_system_idref = nil
+    hpxml.heating_systems[0].heating_system_type = HPXML::HVACTypeFloorFurnace
+    hpxml.heating_systems[0].heating_system_fuel = HPXML::FuelTypePropane
+    hpxml.heating_systems[0].heating_efficiency_afue = 0.8
+    hpxml.heating_systems[0].electric_auxiliary_energy = 200
   elsif ['base-hvac-portable-heater-electric-only.xml'].include? hpxml_file
     hpxml.heating_systems[0].distribution_system_idref = nil
     hpxml.heating_systems[0].heating_system_type = HPXML::HVACTypePortableHeater
@@ -2404,32 +2419,18 @@ def set_hpxml_heating_systems(hpxml_file, hpxml)
     hpxml.heating_systems[0].heating_efficiency_afue = nil
     hpxml.heating_systems[0].heating_efficiency_percent = 0.8
     hpxml.heating_systems[0].electric_auxiliary_energy = 200
-  elsif ['base-hvac-stove-wood-only.xml'].include? hpxml_file
+  elsif ['base-hvac-stove-wood-pellets-only.xml'].include? hpxml_file
     hpxml.heating_systems[0].distribution_system_idref = nil
     hpxml.heating_systems[0].heating_system_type = HPXML::HVACTypeStove
-    hpxml.heating_systems[0].heating_system_fuel = HPXML::FuelTypeWood
+    hpxml.heating_systems[0].heating_system_fuel = HPXML::FuelTypeWoodPellets
     hpxml.heating_systems[0].heating_efficiency_afue = nil
     hpxml.heating_systems[0].heating_efficiency_percent = 0.8
     hpxml.heating_systems[0].electric_auxiliary_energy = 200
-  elsif ['base-hvac-stove-wood-pellets-only.xml'].include? hpxml_file
-    hpxml.heating_systems[0].heating_system_fuel = HPXML::FuelTypeWoodPellets
   elsif ['base-hvac-wall-furnace-elec-only.xml'].include? hpxml_file
     hpxml.heating_systems[0].distribution_system_idref = nil
     hpxml.heating_systems[0].heating_system_type = HPXML::HVACTypeWallFurnace
     hpxml.heating_systems[0].heating_system_fuel = HPXML::FuelTypeElectricity
     hpxml.heating_systems[0].heating_efficiency_afue = 1.0
-    hpxml.heating_systems[0].electric_auxiliary_energy = 200
-  elsif ['base-hvac-wall-furnace-propane-only.xml'].include? hpxml_file
-    hpxml.heating_systems[0].distribution_system_idref = nil
-    hpxml.heating_systems[0].heating_system_type = HPXML::HVACTypeWallFurnace
-    hpxml.heating_systems[0].heating_system_fuel = HPXML::FuelTypePropane
-    hpxml.heating_systems[0].heating_efficiency_afue = 0.8
-    hpxml.heating_systems[0].electric_auxiliary_energy = 200
-  elsif ['base-hvac-wall-furnace-wood-only.xml'].include? hpxml_file
-    hpxml.heating_systems[0].distribution_system_idref = nil
-    hpxml.heating_systems[0].heating_system_type = HPXML::HVACTypeWallFurnace
-    hpxml.heating_systems[0].heating_system_fuel = HPXML::FuelTypeWood
-    hpxml.heating_systems[0].heating_efficiency_afue = 0.8
     hpxml.heating_systems[0].electric_auxiliary_energy = 200
   elsif ['base-hvac-furnace-x3-dse.xml'].include? hpxml_file
     hpxml.heating_systems << hpxml.heating_systems[0].dup
@@ -2487,6 +2488,8 @@ def set_hpxml_cooling_systems(hpxml_file, hpxml)
          'base-hvac-boiler-propane-only.xml',
          'base-hvac-boiler-wood-only.xml',
          'base-hvac-elec-resistance-only.xml',
+         'base-hvac-fireplace-wood-only.xml',
+         'base-hvac-floor-furnace-propane-only.xml',
          'base-hvac-furnace-elec-only.xml',
          'base-hvac-furnace-gas-only.xml',
          'base-hvac-furnace-oil-only.xml',
@@ -2494,14 +2497,11 @@ def set_hpxml_cooling_systems(hpxml_file, hpxml)
          'base-hvac-furnace-wood-only.xml',
          'base-hvac-ground-to-air-heat-pump.xml',
          'base-hvac-mini-split-heat-pump-ducted.xml',
-         'base-hvac-mini-split-heat-pump-ductless-no-backup.xml',
          'base-hvac-ideal-air.xml',
          'base-hvac-none.xml',
          'base-hvac-stove-oil-only.xml',
-         'base-hvac-stove-wood-only.xml',
-         'base-hvac-wall-furnace-elec-only.xml',
-         'base-hvac-wall-furnace-propane-only.xml',
-         'base-hvac-wall-furnace-wood-only.xml'].include? hpxml_file
+         'base-hvac-stove-wood-pellets-only.xml',
+         'base-hvac-wall-furnace-elec-only.xml'].include? hpxml_file
     hpxml.cooling_systems.clear
   elsif ['base-hvac-boiler-gas-central-ac-1-speed.xml'].include? hpxml_file
     hpxml.cooling_systems[0].distribution_system_idref = 'HVACDistribution2'
@@ -2679,7 +2679,6 @@ def set_hpxml_heat_pumps(hpxml_file, hpxml)
     hpxml.heat_pumps[0].backup_heating_fuel = nil
   elsif ['base-hvac-mini-split-heat-pump-ductless.xml'].include? hpxml_file
     hpxml.heat_pumps[0].distribution_system_idref = nil
-  elsif ['base-hvac-mini-split-heat-pump-ductless-no-backup.xml'].include? hpxml_file
     hpxml.heat_pumps[0].backup_heating_fuel = nil
   elsif ['invalid_files/heat-pump-mixed-fixed-and-autosize-capacities.xml'].include? hpxml_file
     hpxml.heat_pumps[0].cooling_capacity = nil
@@ -2820,7 +2819,8 @@ end
 def set_hpxml_hvac_distributions(hpxml_file, hpxml)
   if ['base.xml'].include? hpxml_file
     hpxml.hvac_distributions.add(id: 'HVACDistribution',
-                                 distribution_system_type: HPXML::HVACDistributionTypeAir)
+                                 distribution_system_type: HPXML::HVACDistributionTypeAir,
+                                 conditioned_floor_area_served: 2700)
     hpxml.hvac_distributions[0].duct_leakage_measurements.add(duct_type: HPXML::DuctTypeSupply,
                                                               duct_leakage_units: HPXML::UnitsCFM25,
                                                               duct_leakage_value: 75,
@@ -2850,7 +2850,8 @@ def set_hpxml_hvac_distributions(hpxml_file, hpxml)
     hpxml.hvac_distributions[0].duct_leakage_measurements.clear
     hpxml.hvac_distributions[0].ducts.clear
     hpxml.hvac_distributions.add(id: 'HVACDistribution2',
-                                 distribution_system_type: HPXML::HVACDistributionTypeAir)
+                                 distribution_system_type: HPXML::HVACDistributionTypeAir,
+                                 conditioned_floor_area_served: 2700)
     hpxml.hvac_distributions[-1].duct_leakage_measurements.add(duct_type: HPXML::DuctTypeSupply,
                                                                duct_leakage_units: HPXML::UnitsCFM25,
                                                                duct_leakage_value: 75,
@@ -2870,19 +2871,20 @@ def set_hpxml_hvac_distributions(hpxml_file, hpxml)
   elsif ['base-hvac-none.xml',
          'base-hvac-elec-resistance-only.xml',
          'base-hvac-evap-cooler-only.xml',
+         'base-hvac-fireplace-wood-only.xml',
+         'base-hvac-floor-furnace-propane-only.xml',
          'base-hvac-ideal-air.xml',
          'base-hvac-mini-split-heat-pump-ductless.xml',
          'base-hvac-room-ac-only.xml',
          'base-hvac-stove-oil-only.xml',
-         'base-hvac-stove-wood-only.xml',
-         'base-hvac-wall-furnace-elec-only.xml',
-         'base-hvac-wall-furnace-propane-only.xml',
-         'base-hvac-wall-furnace-wood-only.xml'].include? hpxml_file
+         'base-hvac-stove-wood-pellets-only.xml',
+         'base-hvac-wall-furnace-elec-only.xml'].include? hpxml_file
     hpxml.hvac_distributions.clear
   elsif ['base-hvac-multiple.xml'].include? hpxml_file
     hpxml.hvac_distributions.clear
     hpxml.hvac_distributions.add(id: 'HVACDistribution',
-                                 distribution_system_type: HPXML::HVACDistributionTypeAir)
+                                 distribution_system_type: HPXML::HVACDistributionTypeAir,
+                                 conditioned_floor_area_served: (2700 / 4))
     hpxml.hvac_distributions[-1].duct_leakage_measurements.add(duct_type: HPXML::DuctTypeSupply,
                                                                duct_leakage_units: HPXML::UnitsCFM25,
                                                                duct_leakage_value: 75,
@@ -2920,7 +2922,8 @@ def set_hpxml_hvac_distributions(hpxml_file, hpxml)
   elsif ['base-hvac-multiple2.xml'].include? hpxml_file
     hpxml.hvac_distributions.clear
     hpxml.hvac_distributions.add(id: 'HVACDistribution',
-                                 distribution_system_type: HPXML::HVACDistributionTypeAir)
+                                 distribution_system_type: HPXML::HVACDistributionTypeAir,
+                                 conditioned_floor_area_served: (2700 / 4))
     hpxml.hvac_distributions[-1].duct_leakage_measurements.add(duct_type: HPXML::DuctTypeSupply,
                                                                duct_leakage_units: HPXML::UnitsCFM25,
                                                                duct_leakage_value: 75,
@@ -2990,13 +2993,24 @@ def set_hpxml_hvac_distributions(hpxml_file, hpxml)
   elsif ['base-hvac-undersized.xml'].include? hpxml_file
     hpxml.hvac_distributions[0].duct_leakage_measurements[0].duct_leakage_value /= 10.0
     hpxml.hvac_distributions[0].duct_leakage_measurements[1].duct_leakage_value /= 10.0
+  elsif ['base-foundation-ambient.xml',
+         'base-foundation-multiple.xml',
+         'base-foundation-slab.xml'].include? hpxml_file
+    hpxml.hvac_distributions[0].conditioned_floor_area_served = 1350
+    if hpxml_file == 'base-foundation-slab.xml'
+      hpxml.hvac_distributions[0].ducts[0].duct_location = HPXML::LocationUnderSlab
+      hpxml.hvac_distributions[0].ducts[1].duct_location = HPXML::LocationUnderSlab
+    end
   elsif ['base-foundation-unconditioned-basement.xml'].include? hpxml_file
+    hpxml.hvac_distributions[0].conditioned_floor_area_served = 1350
     hpxml.hvac_distributions[0].ducts[0].duct_location = HPXML::LocationBasementUnconditioned
     hpxml.hvac_distributions[0].ducts[1].duct_location = HPXML::LocationBasementUnconditioned
   elsif ['base-foundation-unvented-crawlspace.xml'].include? hpxml_file
+    hpxml.hvac_distributions[0].conditioned_floor_area_served = 1350
     hpxml.hvac_distributions[0].ducts[0].duct_location = HPXML::LocationCrawlspaceUnvented
     hpxml.hvac_distributions[0].ducts[1].duct_location = HPXML::LocationCrawlspaceUnvented
   elsif ['base-foundation-vented-crawlspace.xml'].include? hpxml_file
+    hpxml.hvac_distributions[0].conditioned_floor_area_served = 1350
     hpxml.hvac_distributions[0].ducts[0].duct_location = HPXML::LocationCrawlspaceVented
     hpxml.hvac_distributions[0].ducts[1].duct_location = HPXML::LocationCrawlspaceVented
   elsif ['base-atticroof-flat.xml'].include? hpxml_file
@@ -3018,12 +3032,24 @@ def set_hpxml_hvac_distributions(hpxml_file, hpxml)
     hpxml.hvac_distributions[0].ducts[1].duct_location = HPXML::LocationOtherHousingUnit
     hpxml.hvac_distributions[0].ducts.add(duct_type: HPXML::DuctTypeSupply,
                                           duct_insulation_r_value: 4,
-                                          duct_location: HPXML::LocationOtherMultifamilyBufferSpace,
+                                          duct_location: HPXML::LocationRoofDeck,
                                           duct_surface_area: 150)
     hpxml.hvac_distributions[0].ducts.add(duct_type: HPXML::DuctTypeReturn,
                                           duct_insulation_r_value: 0,
-                                          duct_location: HPXML::LocationOutside,
+                                          duct_location: HPXML::LocationRoofDeck,
                                           duct_surface_area: 50)
+  elsif ['base-enclosure-2stories.xml'].include? hpxml_file
+    hpxml.hvac_distributions[0].conditioned_floor_area_served = 4050
+  elsif ['base-enclosure-2stories-garage.xml'].include? hpxml_file
+    hpxml.hvac_distributions[0].conditioned_floor_area_served -= 400 * 2
+    hpxml.hvac_distributions[0].ducts << hpxml.hvac_distributions[0].ducts[0].dup
+    hpxml.hvac_distributions[0].ducts << hpxml.hvac_distributions[0].ducts[1].dup
+    hpxml.hvac_distributions[0].ducts[0].duct_surface_area *= 0.75
+    hpxml.hvac_distributions[0].ducts[1].duct_surface_area *= 0.75
+    hpxml.hvac_distributions[0].ducts[2].duct_location = HPXML::LocationExteriorWall
+    hpxml.hvac_distributions[0].ducts[2].duct_surface_area *= 0.25
+    hpxml.hvac_distributions[0].ducts[3].duct_location = HPXML::LocationLivingSpace
+    hpxml.hvac_distributions[0].ducts[3].duct_surface_area *= 0.25
   elsif ['base-atticroof-conditioned.xml',
          'base-atticroof-cathedral.xml'].include? hpxml_file
     hpxml.hvac_distributions[0].ducts[0].duct_location = HPXML::LocationLivingSpace
@@ -3033,6 +3059,7 @@ def set_hpxml_hvac_distributions(hpxml_file, hpxml)
     if hpxml_file == 'base-atticroof-conditioned.xml'
       # Test leakage to outside when all ducts in conditioned space
       # (e.g., ducts may be in floor cavities which have leaky rims)
+      hpxml.hvac_distributions[0].conditioned_floor_area_served = 3600
       hpxml.hvac_distributions[0].duct_leakage_measurements[0].duct_leakage_value = 1.5
       hpxml.hvac_distributions[0].duct_leakage_measurements[1].duct_leakage_value = 1.5
     end
@@ -3061,6 +3088,30 @@ def set_hpxml_hvac_distributions(hpxml_file, hpxml)
                                           duct_insulation_r_value: 0,
                                           duct_location: HPXML::LocationAtticUnvented,
                                           duct_surface_area: 50)
+  elsif ['base-misc-defaults.xml'].include? hpxml_file
+    hpxml.hvac_distributions.each do |hvac_distribution|
+      next unless hvac_distribution.distribution_system_type == HPXML::HVACDistributionTypeAir
+
+      hvac_distribution.ducts.each do |duct|
+        duct.duct_surface_area = nil
+        duct.duct_location = nil
+      end
+    end
+  elsif ['invalid_files/missing-duct-location-and-surface-area.xml'].include? hpxml_file
+    hpxml.hvac_distributions.each do |hvac_distribution|
+      next unless hvac_distribution.distribution_system_type == HPXML::HVACDistributionTypeAir
+
+      hvac_distribution.ducts[1].duct_surface_area = nil
+      hvac_distribution.ducts[1].duct_location = nil
+    end
+  elsif ['invalid_files/missing-duct-location.xml'].include? hpxml_file
+    hpxml.hvac_distributions.each do |hvac_distribution|
+      next unless hvac_distribution.distribution_system_type == HPXML::HVACDistributionTypeAir
+
+      hvac_distribution.ducts[1].duct_location = nil
+    end
+  elsif ['invalid_files/invalid-distribution-cfa-served.xml'].include? hpxml_file
+    hpxml.hvac_distributions[0].conditioned_floor_area_served = 2700.1
   end
 end
 
@@ -3149,14 +3200,14 @@ def set_hpxml_ventilation_fans(hpxml_file, hpxml)
                                used_for_seasonal_cooling_load_reduction: true)
   elsif ['base-mechvent-bath-kitchen-fans.xml'].include? hpxml_file
     hpxml.ventilation_fans.add(id: 'KitchenRangeFan',
-                               fan_location: HPXML::VentilationFanLocationKitchen,
+                               fan_location: HPXML::LocationKitchen,
                                rated_flow_rate: 100,
                                fan_power: 30,
                                hours_in_operation: 1.5,
                                start_hour: 18,
                                used_for_local_ventilation: true)
     hpxml.ventilation_fans.add(id: 'BathFans',
-                               fan_location: HPXML::VentilationFanLocationBath,
+                               fan_location: HPXML::LocationBath,
                                quantity: 2,
                                rated_flow_rate: 50,
                                fan_power: 15,
@@ -3165,10 +3216,10 @@ def set_hpxml_ventilation_fans(hpxml_file, hpxml)
                                used_for_local_ventilation: true)
   elsif ['base-misc-defaults.xml'].include? hpxml_file
     hpxml.ventilation_fans.add(id: 'KitchenRangeFan',
-                               fan_location: HPXML::VentilationFanLocationKitchen,
+                               fan_location: HPXML::LocationKitchen,
                                used_for_local_ventilation: true)
     hpxml.ventilation_fans.add(id: 'BathFans',
-                               fan_location: HPXML::VentilationFanLocationBath,
+                               fan_location: HPXML::LocationBath,
                                used_for_local_ventilation: true)
   end
 end
@@ -3230,7 +3281,6 @@ def set_hpxml_water_heating_systems(hpxml_file, hpxml)
   elsif ['base-dhw-tank-gas.xml',
          'base-dhw-tank-gas-outside.xml',
          'base-dhw-tank-oil.xml',
-         'base-dhw-tank-propane.xml',
          'base-dhw-tank-wood.xml'].include? hpxml_file
     hpxml.water_heating_systems[0].tank_volume = 50
     hpxml.water_heating_systems[0].heating_capacity = 40000
@@ -3241,8 +3291,6 @@ def set_hpxml_water_heating_systems(hpxml_file, hpxml)
     end
     if hpxml_file == 'base-dhw-tank-oil.xml'
       hpxml.water_heating_systems[0].fuel_type = HPXML::FuelTypeOil
-    elsif hpxml_file == 'base-dhw-tank-propane.xml'
-      hpxml.water_heating_systems[0].fuel_type = HPXML::FuelTypePropane
     elsif hpxml_file == 'base-dhw-tank-wood.xml'
       hpxml.water_heating_systems[0].fuel_type = HPXML::FuelTypeWood
     else
@@ -3267,21 +3315,15 @@ def set_hpxml_water_heating_systems(hpxml_file, hpxml)
       hpxml.water_heating_systems[0].location = HPXML::LocationOtherExterior
     end
   elsif ['base-dhw-tankless-gas.xml',
-         'base-dhw-tankless-oil.xml',
-         'base-dhw-tankless-propane.xml',
-         'base-dhw-tankless-wood.xml'].include? hpxml_file
+         'base-dhw-tankless-propane.xml'].include? hpxml_file
     hpxml.water_heating_systems[0].water_heater_type = HPXML::WaterHeaterTypeTankless
     hpxml.water_heating_systems[0].tank_volume = nil
     hpxml.water_heating_systems[0].heating_capacity = nil
     hpxml.water_heating_systems[0].energy_factor = 0.82
     if hpxml_file == 'base-dhw-tankless-gas.xml'
       hpxml.water_heating_systems[0].fuel_type = HPXML::FuelTypeNaturalGas
-    elsif hpxml_file == 'base-dhw-tankless-oil.xml'
-      hpxml.water_heating_systems[0].fuel_type = HPXML::FuelTypeOil
     elsif hpxml_file == 'base-dhw-tankless-propane.xml'
       hpxml.water_heating_systems[0].fuel_type = HPXML::FuelTypePropane
-    elsif hpxml_file == 'base-dhw-tankless-wood.xml'
-      hpxml.water_heating_systems[0].fuel_type = HPXML::FuelTypeWood
     end
   elsif ['base-dhw-uef.xml'].include? hpxml_file
     hpxml.water_heating_systems[0].energy_factor = nil
@@ -4074,8 +4116,8 @@ if ARGV[0].to_sym == :download_weather
 end
 
 if ARGV[0].to_sym == :update_version
-  version_change = { from: '0.8.0',
-                     to: '0.9.0' }
+  version_change = { from: '0.9.0',
+                     to: '0.10.0' }
 
   file_names = ['workflow/run_simulation.rb']
 
@@ -4085,6 +4127,7 @@ if ARGV[0].to_sym == :update_version
 
     # To write changes to the file, use:
     File.open(file_name, 'w') { |file| file.puts new_contents }
+    puts "Updated from version #{version_change[:from]} to version #{version_change[:to]} in #{file_name}."
   end
 
   puts 'Done. Now check all changed files before committing.'

@@ -15,7 +15,7 @@ class SimulationOutputReportTest < MiniTest::Test
     'Natural Gas: Total (MBtu)',
     'Fuel Oil: Total (MBtu)',
     'Propane: Total (MBtu)',
-    'Wood: Total (MBtu)',
+    'Wood Cord: Total (MBtu)',
     'Wood Pellets: Total (MBtu)',
     'Electricity: Heating (MBtu)',
     'Electricity: Heating Fans/Pumps (MBtu)',
@@ -51,11 +51,14 @@ class SimulationOutputReportTest < MiniTest::Test
     'Propane: Hot Water (MBtu)',
     'Propane: Clothes Dryer (MBtu)',
     'Propane: Range/Oven (MBtu)',
-    'Wood: Heating (MBtu)',
-    'Wood: Hot Water (MBtu)',
-    'Wood: Clothes Dryer (MBtu)',
-    'Wood: Range/Oven (MBtu)',
+    'Wood Cord: Heating (MBtu)',
+    'Wood Cord: Hot Water (MBtu)',
+    'Wood Cord: Clothes Dryer (MBtu)',
+    'Wood Cord: Range/Oven (MBtu)',
     'Wood Pellets: Heating (MBtu)',
+    'Wood Pellets: Hot Water (MBtu)',
+    'Wood Pellets: Clothes Dryer (MBtu)',
+    'Wood Pellets: Range/Oven (MBtu)',
     'Load: Heating (MBtu)',
     'Load: Cooling (MBtu)',
     'Load: Hot Water: Delivered (MBtu)',
@@ -113,7 +116,7 @@ class SimulationOutputReportTest < MiniTest::Test
     'Natural Gas: Total',
     'Fuel Oil: Total',
     'Propane: Total',
-    'Wood: Total',
+    'Wood Cord: Total',
     'Wood Pellets: Total',
   ]
 
@@ -152,11 +155,14 @@ class SimulationOutputReportTest < MiniTest::Test
     'Propane: Hot Water',
     'Propane: Clothes Dryer',
     'Propane: Range/Oven',
-    'Wood: Heating',
-    'Wood: Hot Water',
-    'Wood: Clothes Dryer',
-    'Wood: Range/Oven',
+    'Wood Cord: Heating',
+    'Wood Cord: Hot Water',
+    'Wood Cord: Clothes Dryer',
+    'Wood Cord: Range/Oven',
     'Wood Pellets: Heating',
+    'Wood Pellets: Hot Water',
+    'Wood Pellets: Clothes Dryer',
+    'Wood Pellets: Range/Oven',
   ]
 
   TimeseriesColsWaterUses = [
@@ -246,7 +252,7 @@ class SimulationOutputReportTest < MiniTest::Test
     'fuelNaturalGas',
     'fuelFuelOil',
     'fuelPropane',
-    'fuelWood',
+    'fuelWoodCord',
     'fuelWoodPellets',
     'enduseElectricityHeating',
     'enduseElectricityHeatingFansPumps',
@@ -282,11 +288,14 @@ class SimulationOutputReportTest < MiniTest::Test
     'endusePropaneHotWater',
     'endusePropaneClothesDryer',
     'endusePropaneRangeOven',
-    'enduseWoodHeating',
-    'enduseWoodHotWater',
-    'enduseWoodClothesDryer',
-    'enduseWoodRangeOven',
+    'enduseWoodCordHeating',
+    'enduseWoodCordHotWater',
+    'enduseWoodCordClothesDryer',
+    'enduseWoodCordRangeOven',
     'enduseWoodPelletsHeating',
+    'enduseWoodPelletsHotWater',
+    'enduseWoodPelletsClothesDryer',
+    'enduseWoodPelletsRangeOven',
     'loadHeating',
     'loadCooling',
     'loadHotWaterDelivered',
@@ -929,8 +938,10 @@ class SimulationOutputReportTest < MiniTest::Test
     end
     CSV.foreach(timeseries_csv, headers: true) do |row|
       next if row['Time'].nil?
+
       timeseries_cols.each do |col|
         fail "Unexpected column: #{col}." if row[col].nil?
+
         values[col] << Float(row[col])
       end
     end
