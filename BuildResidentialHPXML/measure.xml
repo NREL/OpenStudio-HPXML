@@ -3,8 +3,8 @@
   <schema_version>3.0</schema_version>
   <name>build_residential_hpxml</name>
   <uid>a13a8983-2b01-4930-8af2-42030b6e4233</uid>
-  <version_id>733c8a4c-1bd8-4dc1-be9b-3f566f200b16</version_id>
-  <version_modified>20200605T212848Z</version_modified>
+  <version_id>d3c468d0-1855-4323-8201-a52beb8fc13e</version_id>
+  <version_modified>20200605T231808Z</version_modified>
   <xml_checksum>2C38F48B</xml_checksum>
   <class_name>BuildResidentialHPXML</class_name>
   <display_name>HPXML Builder</display_name>
@@ -5068,12 +5068,6 @@
       <checksum>EEB5FA17</checksum>
     </file>
     <file>
-      <filename>base-misc-usage-multiplier.osw</filename>
-      <filetype>osw</filetype>
-      <usage_type>test</usage_type>
-      <checksum>D26DA271</checksum>
-    </file>
-    <file>
       <filename>base-hvac-dual-fuel-air-to-air-heat-pump-1-speed.osw</filename>
       <filetype>osw</filetype>
       <usage_type>test</usage_type>
@@ -5991,16 +5985,22 @@
       <checksum>384F1E2C</checksum>
     </file>
     <file>
-      <filename>build_residential_hpxml_test.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>test</usage_type>
-      <checksum>27EC9763</checksum>
-    </file>
-    <file>
       <filename>base-misc-large-uncommon-loads2.osw</filename>
       <filetype>osw</filetype>
       <usage_type>test</usage_type>
       <checksum>4D9BD24E</checksum>
+    </file>
+    <file>
+      <filename>base-misc-usage-multiplier.osw</filename>
+      <filetype>osw</filetype>
+      <usage_type>test</usage_type>
+      <checksum>42D2EBC8</checksum>
+    </file>
+    <file>
+      <filename>build_residential_hpxml_test.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>test</usage_type>
+      <checksum>99DA4C7B</checksum>
     </file>
   </files>
 </measure>

@@ -2137,7 +2137,7 @@ class OSModel
       end
     end
 
-    HotWaterAndAppliances.apply(model, weather, @living_space,
+    HotWaterAndAppliances.apply(model, runner, weather, @living_space,
                                 @cfa, @nbeds, @ncfl, @has_uncond_bsmnt, avg_setpoint_temp,
                                 clothes_washer, cw_space, clothes_dryer, cd_space,
                                 dishwasher, dw_space,
