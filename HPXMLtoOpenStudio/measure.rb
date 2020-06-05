@@ -232,6 +232,7 @@ class OSModel
     @hpxml_path = hpxml_path
     @output_dir = output_dir
     @debug = debug
+    @collapse_enclosure = @hpxml.collapse_enclosure
 
     @eri_version = @hpxml.header.eri_calculation_version # Hidden feature
     @eri_version = 'latest' if @eri_version.nil?
@@ -271,7 +272,9 @@ class OSModel
     modify_cond_basement_surface_properties(runner, model)
     assign_view_factor(runner, model) unless @cond_bsmnt_surfaces.empty?
     set_zone_volumes(runner, model)
-    explode_surfaces(runner, model)
+    if @collapse_enclosure
+      explode_surfaces(runner, model)
+    end
     add_num_occupants(model, hpxml, runner)
 
     # HVAC
@@ -831,7 +834,9 @@ class OSModel
           if surface2.subSurfaces.size > 0
             # calculate surface and its sub surfaces view factors
             if surface2.netArea > 0.01 # base surface of a sub surface: window/door etc.
-              fail "Unexpected net area for surface '#{surface2.name}'."
+              if @collapse_enclosure
+                fail "Unexpected net area for surface '#{surface2.name}'."
+              end
             end
 
             surface2.subSurfaces.each do |sub_surface|
@@ -1046,39 +1051,60 @@ class OSModel
     @hpxml.roofs.each do |roof|
       next if roof.net_area < 0.1 # skip modeling net surface area for surfaces comprised entirely of subsurface area
 
-      if roof.azimuth.nil?
-        if roof.pitch > 0
-          azimuths = @default_azimuths # Model as four directions for average exterior incident solar
-        else
-          azimuths = [90] # Arbitrary azimuth for flat roof
-        end
-      else
-        azimuths = [roof.azimuth]
-      end
-
       surfaces = []
-
-      azimuths.each do |azimuth|
-        width = Math::sqrt(roof.net_area)
-        length = (roof.net_area / width) / azimuths.size
-        tilt = roof.pitch / 12.0
-        z_origin = @walls_top + 0.5 * Math.sin(Math.atan(tilt)) * width
-
-        surface = OpenStudio::Model::Surface.new(add_roof_polygon(length, width, z_origin, azimuth, tilt), model)
-        surfaces << surface
-        surface.additionalProperties.setFeature('Length', length)
-        surface.additionalProperties.setFeature('Width', width)
-        surface.additionalProperties.setFeature('Azimuth', azimuth)
-        surface.additionalProperties.setFeature('Tilt', tilt)
-        surface.additionalProperties.setFeature('SurfaceType', 'Roof')
-        if azimuths.size > 1
-          surface.setName("#{roof.id}:#{azimuth}")
+      if roof.coordinates.empty?
+        if roof.azimuth.nil?
+          if roof.pitch > 0
+            azimuths = @default_azimuths # Model as four directions for average exterior incident solar
+          else
+            azimuths = [90] # Arbitrary azimuth for flat roof
+          end
         else
-          surface.setName(roof.id)
+          azimuths = [roof.azimuth]
         end
+
+        azimuths.each do |azimuth|
+          width = Math::sqrt(roof.net_area)
+          length = (roof.net_area / width) / azimuths.size
+          tilt = roof.pitch / 12.0
+          z_origin = @walls_top + 0.5 * Math.sin(Math.atan(tilt)) * width
+
+          surface = OpenStudio::Model::Surface.new(add_roof_polygon(length, width, z_origin, azimuth, tilt), model)
+          surfaces << surface
+          surface.additionalProperties.setFeature('Length', length)
+          surface.additionalProperties.setFeature('Width', width)
+          surface.additionalProperties.setFeature('Azimuth', azimuth)
+          surface.additionalProperties.setFeature('Tilt', tilt)
+          surface.additionalProperties.setFeature('SurfaceType', 'Roof')
+          if azimuths.size > 1
+            surface.setName("#{roof.id}:#{azimuth}")
+          else
+            surface.setName(roof.id)
+          end
+          surface.setSurfaceType('RoofCeiling')
+          surface.setOutsideBoundaryCondition('Outdoors')
+          set_surface_interior(model, spaces, surface, roof.interior_adjacent_to)
+        end
+
+      else
+
+        vertices = OpenStudio::Point3dVector.new
+        roof.coordinates.each do |coordinate|
+          x = UnitConversions.convert(coordinate[:x], 'ft', 'm')
+          y = UnitConversions.convert(coordinate[:y], 'ft', 'm')
+          z = UnitConversions.convert(coordinate[:z], 'ft', 'm')
+          vertices << OpenStudio::Point3d.new(x, y, z)
+        end
+
+        surface = OpenStudio::Model::Surface.new(vertices, model)
+        surfaces << surface
+        surface.additionalProperties.setFeature('SurfaceType', 'Roof')
+
+        surface.setName(roof.id)
         surface.setSurfaceType('RoofCeiling')
         surface.setOutsideBoundaryCondition('Outdoors')
         set_surface_interior(model, spaces, surface, roof.interior_adjacent_to)
+
       end
 
       next if surfaces.empty?
@@ -1141,34 +1167,59 @@ class OSModel
     @hpxml.walls.each do |wall|
       next if wall.net_area < 0.1 # skip modeling net surface area for surfaces comprised entirely of subsurface area
 
-      if wall.azimuth.nil?
-        if wall.is_exterior
-          azimuths = @default_azimuths # Model as four directions for average exterior incident solar
-        else
-          azimuths = [@default_azimuths[0]] # Arbitrary direction, doesn't receive exterior incident solar
-        end
-      else
-        azimuths = [wall.azimuth]
-      end
-
       surfaces = []
+      if wall.coordinates.empty?
 
-      azimuths.each do |azimuth|
-        height = 8.0 * @ncfl_ag
-        length = (wall.net_area / height) / azimuths.size
-        z_origin = @foundation_top
-
-        surface = OpenStudio::Model::Surface.new(add_wall_polygon(length, height, z_origin, azimuth), model)
-        surfaces << surface
-        surface.additionalProperties.setFeature('Length', length)
-        surface.additionalProperties.setFeature('Azimuth', azimuth)
-        surface.additionalProperties.setFeature('Tilt', 90.0)
-        surface.additionalProperties.setFeature('SurfaceType', 'Wall')
-        if azimuths.size > 1
-          surface.setName("#{wall.id}:#{azimuth}")
+        if wall.azimuth.nil?
+          if wall.is_exterior
+            azimuths = @default_azimuths # Model as four directions for average exterior incident solar
+          else
+            azimuths = [@default_azimuths[0]] # Arbitrary direction, doesn't receive exterior incident solar
+          end
         else
-          surface.setName(wall.id)
+          azimuths = [wall.azimuth]
         end
+
+        azimuths.each do |azimuth|
+          height = 8.0 * @ncfl_ag
+          length = (wall.net_area / height) / azimuths.size
+          z_origin = @foundation_top
+
+          surface = OpenStudio::Model::Surface.new(add_wall_polygon(length, height, z_origin, azimuth), model)
+          surfaces << surface
+          surface.additionalProperties.setFeature('Length', length)
+          surface.additionalProperties.setFeature('Azimuth', azimuth)
+          surface.additionalProperties.setFeature('Tilt', 90.0)
+          surface.additionalProperties.setFeature('SurfaceType', 'Wall')
+          if azimuths.size > 1
+            surface.setName("#{wall.id}:#{azimuth}")
+          else
+            surface.setName(wall.id)
+          end
+          surface.setSurfaceType('Wall')
+          set_surface_interior(model, spaces, surface, wall.interior_adjacent_to)
+          set_surface_exterior(model, spaces, surface, wall.exterior_adjacent_to)
+          if wall.is_interior
+            surface.setSunExposure('NoSun')
+            surface.setWindExposure('NoWind')
+          end
+        end
+
+      else
+
+        vertices = OpenStudio::Point3dVector.new
+        wall.coordinates.each do |coordinate|
+          x = UnitConversions.convert(coordinate[:x], 'ft', 'm')
+          y = UnitConversions.convert(coordinate[:y], 'ft', 'm')
+          z = UnitConversions.convert(coordinate[:z], 'ft', 'm')
+          vertices << OpenStudio::Point3d.new(x, y, z)
+        end
+
+        surface = OpenStudio::Model::Surface.new(vertices, model)
+        surfaces << surface
+        surface.additionalProperties.setFeature('SurfaceType', 'Wall')
+
+        surface.setName(wall.id)
         surface.setSurfaceType('Wall')
         set_surface_interior(model, spaces, surface, wall.interior_adjacent_to)
         set_surface_exterior(model, spaces, surface, wall.exterior_adjacent_to)
@@ -1176,6 +1227,7 @@ class OSModel
           surface.setSunExposure('NoSun')
           surface.setWindExposure('NoWind')
         end
+
       end
 
       next if surfaces.empty?
@@ -1292,81 +1344,114 @@ class OSModel
 
   def self.add_frame_floors(runner, model, spaces)
     @hpxml.frame_floors.each do |frame_floor|
-      area = frame_floor.area
-      width = Math::sqrt(area)
-      length = area / width
-      if frame_floor.interior_adjacent_to.include?('attic') || frame_floor.exterior_adjacent_to.include?('attic')
-        z_origin = @walls_top
-      else
-        z_origin = @foundation_top
-      end
+      if frame_floor.coordinates.empty?
+        area = frame_floor.area
+        width = Math::sqrt(area)
+        length = area / width
+        if frame_floor.interior_adjacent_to.include?('attic') || frame_floor.exterior_adjacent_to.include?('attic')
+          z_origin = @walls_top
+        else
+          z_origin = @foundation_top
+        end
 
-      if frame_floor.is_ceiling
-        surface = OpenStudio::Model::Surface.new(add_ceiling_polygon(length, width, z_origin), model)
-        surface.additionalProperties.setFeature('SurfaceType', 'Ceiling')
-      else
-        surface = OpenStudio::Model::Surface.new(add_floor_polygon(length, width, z_origin), model)
-        surface.additionalProperties.setFeature('SurfaceType', 'Floor')
-      end
-      set_surface_interior(model, spaces, surface, frame_floor.interior_adjacent_to)
-      set_surface_exterior(model, spaces, surface, frame_floor.exterior_adjacent_to)
-      surface.setName(frame_floor.id)
-      if frame_floor.is_interior
+        if frame_floor.is_ceiling
+          surface = OpenStudio::Model::Surface.new(add_ceiling_polygon(length, width, z_origin), model)
+          surface.additionalProperties.setFeature('SurfaceType', 'Ceiling')
+        else
+          surface = OpenStudio::Model::Surface.new(add_floor_polygon(length, width, z_origin), model)
+          surface.additionalProperties.setFeature('SurfaceType', 'Floor')
+        end
+        set_surface_interior(model, spaces, surface, frame_floor.interior_adjacent_to)
+        set_surface_exterior(model, spaces, surface, frame_floor.exterior_adjacent_to)
+        surface.setName(frame_floor.id)
         surface.setSunExposure('NoSun')
         surface.setWindExposure('NoWind')
-      elsif frame_floor.is_floor
-        surface.setSunExposure('NoSun')
-      end
-
-      # Apply construction
-
-      if frame_floor.is_ceiling
-        inside_film = Material.AirFilmFloorAverage
       else
-        inside_film = Material.AirFilmFloorReduced
-      end
-      if frame_floor.is_ceiling
-        outside_film = Material.AirFilmFloorAverage
-      elsif frame_floor.is_exterior
-        outside_film = Material.AirFilmOutside
-      else
-        outside_film = Material.AirFilmFloorReduced
-      end
-      if frame_floor.is_floor && (frame_floor.interior_adjacent_to == HPXML::LocationLivingSpace)
-        covering = Material.CoveringBare
-      end
-      if @apply_ashrae140_assumptions
-        if frame_floor.is_exterior # Raised floor
-          inside_film = Material.AirFilmFloorASHRAE140
-          outside_film = Material.AirFilmFloorZeroWindASHRAE140
-          surface.setWindExposure('NoWind')
-          covering = Material.CoveringBare(1.0)
-        elsif frame_floor.is_ceiling # Attic floor
-          inside_film = Material.AirFilmFloorASHRAE140
-          outside_film = Material.AirFilmFloorASHRAE140
+
+        vertices = OpenStudio::Point3dVector.new
+        frame_floor.coordinates.each do |coordinate|
+          x = UnitConversions.convert(coordinate[:x], 'ft', 'm')
+          y = UnitConversions.convert(coordinate[:y], 'ft', 'm')
+          z = UnitConversions.convert(coordinate[:z], 'ft', 'm')
+          vertices << OpenStudio::Point3d.new(x, y, z)
         end
+
+        surface = OpenStudio::Model::Surface.new(vertices, model)
+        if frame_floor.is_ceiling
+          surface.additionalProperties.setFeature('SurfaceType', 'Ceiling')
+        else
+          surface.additionalProperties.setFeature('SurfaceType', 'Floor')
+        end
+        surface.setName(frame_floor.id)
+        set_surface_interior(model, spaces, surface, frame_floor.interior_adjacent_to)
+        if [HPXML::LocationLivingSpace].include?(frame_floor.interior_adjacent_to) && [HPXML::LocationBasementConditioned].include?(frame_floor.exterior_adjacent_to)
+          surface.setOutsideBoundaryCondition('Adiabatic')
+        else
+          set_surface_exterior(model, spaces, surface, frame_floor.exterior_adjacent_to)
+        end
+        surface.setSunExposure('NoSun')
+        surface.setWindExposure('NoWind')
+
       end
-      assembly_r = frame_floor.insulation_assembly_r_value
 
-      constr_sets = [
-        WoodStudConstructionSet.new(Material.Stud2x6, 0.10, 10.0, 0.75, 0.0, covering), # 2x6, 24" o.c. + R10
-        WoodStudConstructionSet.new(Material.Stud2x6, 0.10, 0.0, 0.75, 0.0, covering),  # 2x6, 24" o.c.
-        WoodStudConstructionSet.new(Material.Stud2x4, 0.13, 0.0, 0.5, 0.0, covering),   # 2x4, 16" o.c.
-        WoodStudConstructionSet.new(Material.Stud2x4, 0.01, 0.0, 0.0, 0.0, nil),        # Fallback
-      ]
-      match, constr_set, cavity_r = pick_wood_stud_construction_set(assembly_r, constr_sets, inside_film, outside_film, frame_floor.id)
+      if surface.outsideBoundaryCondition != 'Adiabatic'
 
-      mat_floor_covering = nil
-      install_grade = 1
+        # Apply construction
 
-      # Floor
-      Constructions.apply_floor(model, [surface], "#{frame_floor.id} construction",
-                                cavity_r, install_grade,
-                                constr_set.framing_factor, constr_set.stud.thick_in,
-                                constr_set.osb_thick_in, constr_set.rigid_r,
-                                mat_floor_covering, constr_set.exterior_material,
-                                inside_film, outside_film)
-      check_surface_assembly_rvalue(runner, [surface], inside_film, outside_film, assembly_r, match)
+        if frame_floor.is_ceiling
+          inside_film = Material.AirFilmFloorAverage
+        else
+          inside_film = Material.AirFilmFloorReduced
+        end
+        if frame_floor.is_ceiling
+          outside_film = Material.AirFilmFloorAverage
+        elsif frame_floor.is_exterior
+          outside_film = Material.AirFilmOutside
+        else
+          outside_film = Material.AirFilmFloorReduced
+        end
+        if frame_floor.is_floor && (frame_floor.interior_adjacent_to == HPXML::LocationLivingSpace)
+          covering = Material.CoveringBare
+        end
+        if @apply_ashrae140_assumptions
+          if frame_floor.is_exterior # Raised floor
+            inside_film = Material.AirFilmFloorASHRAE140
+            outside_film = Material.AirFilmFloorZeroWindASHRAE140
+            surface.setWindExposure('NoWind')
+            covering = Material.CoveringBare(1.0)
+          elsif frame_floor.is_ceiling # Attic floor
+            inside_film = Material.AirFilmFloorASHRAE140
+            outside_film = Material.AirFilmFloorASHRAE140
+          end
+        end
+        assembly_r = frame_floor.insulation_assembly_r_value
+
+        constr_sets = [
+          WoodStudConstructionSet.new(Material.Stud2x6, 0.10, 10.0, 0.75, 0.0, covering), # 2x6, 24" o.c. + R10
+          WoodStudConstructionSet.new(Material.Stud2x6, 0.10, 0.0, 0.75, 0.0, covering),  # 2x6, 24" o.c.
+          WoodStudConstructionSet.new(Material.Stud2x4, 0.13, 0.0, 0.5, 0.0, covering),   # 2x4, 16" o.c.
+          WoodStudConstructionSet.new(Material.Stud2x4, 0.01, 0.0, 0.0, 0.0, nil),        # Fallback
+        ]
+        match, constr_set, cavity_r = pick_wood_stud_construction_set(assembly_r, constr_sets, inside_film, outside_film, frame_floor.id)
+
+        mat_floor_covering = nil
+        install_grade = 1
+
+        # Floor
+        Constructions.apply_floor(model, [surface], "#{frame_floor.id} construction",
+                                  cavity_r, install_grade,
+                                  constr_set.framing_factor, constr_set.stud.thick_in,
+                                  constr_set.osb_thick_in, constr_set.rigid_r,
+                                  mat_floor_covering, constr_set.exterior_material,
+                                  inside_film, outside_film)
+        check_surface_assembly_rvalue(runner, [surface], inside_film, outside_film, assembly_r, match)
+
+      else
+
+        # Apply Construction
+        apply_adiabatic_construction(runner, model, [surface], 'floor')
+
+      end
     end
   end
 
@@ -1481,17 +1566,35 @@ class OSModel
           azimuth = foundation_wall.azimuth
         end
 
-        surface = OpenStudio::Model::Surface.new(add_wall_polygon(length, ag_height, z_origin, azimuth), model)
-        surface.additionalProperties.setFeature('Length', length)
-        surface.additionalProperties.setFeature('Azimuth', azimuth)
-        surface.additionalProperties.setFeature('Tilt', 90.0)
-        surface.additionalProperties.setFeature('SurfaceType', 'FoundationWall')
-        surface.setName(foundation_wall.id)
-        surface.setSurfaceType('Wall')
-        set_surface_interior(model, spaces, surface, foundation_wall.interior_adjacent_to)
-        set_surface_exterior(model, spaces, surface, foundation_wall.exterior_adjacent_to)
-        surface.setSunExposure('NoSun')
-        surface.setWindExposure('NoWind')
+        if foundation_wall.coordinates.empty?
+          surface = OpenStudio::Model::Surface.new(add_wall_polygon(length, ag_height, z_origin, azimuth), model)
+          surface.additionalProperties.setFeature('Length', length)
+          surface.additionalProperties.setFeature('Azimuth', azimuth)
+          surface.additionalProperties.setFeature('Tilt', 90.0)
+          surface.additionalProperties.setFeature('SurfaceType', 'FoundationWall')
+          surface.setName(foundation_wall.id)
+          surface.setSurfaceType('Wall')
+          set_surface_interior(model, spaces, surface, foundation_wall.interior_adjacent_to)
+          set_surface_exterior(model, spaces, surface, foundation_wall.exterior_adjacent_to)
+          surface.setSunExposure('NoSun')
+          surface.setWindExposure('NoWind')
+        else
+          vertices = OpenStudio::Point3dVector.new
+          foundation_wall.coordinates.each do |coordinate|
+            x = UnitConversions.convert(coordinate[:x], 'ft', 'm')
+            y = UnitConversions.convert(coordinate[:y], 'ft', 'm')
+            z = UnitConversions.convert(coordinate[:z], 'ft', 'm')
+            vertices << OpenStudio::Point3d.new(x, y, z)
+          end
+          surface = OpenStudio::Model::Surface.new(vertices, model)
+          surface.additionalProperties.setFeature('SurfaceType', 'FoundationWall')
+          surface.setName(foundation_wall.id)
+          surface.setSurfaceType('Wall')
+          set_surface_interior(model, spaces, surface, foundation_wall.interior_adjacent_to)
+          set_surface_exterior(model, spaces, surface, foundation_wall.exterior_adjacent_to)
+          surface.setSunExposure('NoSun')
+          surface.setWindExposure('NoWind')
+        end
 
         # Apply construction
 
@@ -1546,15 +1649,32 @@ class OSModel
       subsurface_area = 0
     end
 
-    surface = OpenStudio::Model::Surface.new(add_wall_polygon(length, height, z_origin, azimuth, [0] * 4, subsurface_area), model)
-    surface.additionalProperties.setFeature('Length', length)
-    surface.additionalProperties.setFeature('Azimuth', azimuth)
-    surface.additionalProperties.setFeature('Tilt', 90.0)
-    surface.additionalProperties.setFeature('SurfaceType', 'FoundationWall')
-    surface.setName(foundation_wall.id)
-    surface.setSurfaceType('Wall')
-    set_surface_interior(model, spaces, surface, foundation_wall.interior_adjacent_to)
-    set_surface_exterior(model, spaces, surface, foundation_wall.exterior_adjacent_to)
+    if foundation_wall.coordinates.empty?
+      surface = OpenStudio::Model::Surface.new(add_wall_polygon(length, height, z_origin, azimuth, [0] * 4, subsurface_area), model)
+      surface.additionalProperties.setFeature('Length', length)
+      surface.additionalProperties.setFeature('Azimuth', azimuth)
+      surface.additionalProperties.setFeature('Tilt', 90.0)
+      surface.additionalProperties.setFeature('SurfaceType', 'FoundationWall')
+      surface.setName(foundation_wall.id)
+      surface.setSurfaceType('Wall')
+      set_surface_interior(model, spaces, surface, foundation_wall.interior_adjacent_to)
+      set_surface_exterior(model, spaces, surface, foundation_wall.exterior_adjacent_to)
+    else
+      vertices = OpenStudio::Point3dVector.new
+      foundation_wall.coordinates.each do |coordinate|
+        x = UnitConversions.convert(coordinate[:x], 'ft', 'm')
+        y = UnitConversions.convert(coordinate[:y], 'ft', 'm')
+        z = UnitConversions.convert(coordinate[:z], 'ft', 'm')
+        vertices << OpenStudio::Point3d.new(x, y, z)
+      end
+
+      surface = OpenStudio::Model::Surface.new(vertices, model)
+      surface.additionalProperties.setFeature('SurfaceType', 'FoundationWall')
+      surface.setName(foundation_wall.id)
+      surface.setSurfaceType('Wall')
+      set_surface_interior(model, spaces, surface, foundation_wall.interior_adjacent_to)
+      set_surface_exterior(model, spaces, surface, foundation_wall.exterior_adjacent_to)
+    end
 
     if foundation_wall.is_thermal_boundary
       drywall_thick_in = 0.5
@@ -1615,14 +1735,33 @@ class OSModel
     slab_length = slab_tot_perim / 4.0 + Math.sqrt(sqrt_term) / 4.0
     slab_width = slab_tot_perim / 4.0 - Math.sqrt(sqrt_term) / 4.0
 
-    surface = OpenStudio::Model::Surface.new(add_floor_polygon(slab_length, slab_width, z_origin), model)
-    surface.setName(slab.id)
-    surface.setSurfaceType('Floor')
-    surface.setOutsideBoundaryCondition('Foundation')
-    surface.additionalProperties.setFeature('SurfaceType', 'Slab')
-    set_surface_interior(model, spaces, surface, slab.interior_adjacent_to)
-    surface.setSunExposure('NoSun')
-    surface.setWindExposure('NoWind')
+    if slab.coordinates.empty?
+      surface = OpenStudio::Model::Surface.new(add_floor_polygon(slab_length, slab_width, z_origin), model)
+      surface.setName(slab.id)
+      surface.setSurfaceType('Floor')
+      surface.setOutsideBoundaryCondition('Foundation')
+      surface.additionalProperties.setFeature('SurfaceType', 'Slab')
+      set_surface_interior(model, spaces, surface, slab.interior_adjacent_to)
+      surface.setSunExposure('NoSun')
+      surface.setWindExposure('NoWind')
+    else
+      vertices = OpenStudio::Point3dVector.new
+      slab.coordinates.each do |coordinate|
+        x = UnitConversions.convert(coordinate[:x], 'ft', 'm')
+        y = UnitConversions.convert(coordinate[:y], 'ft', 'm')
+        z = UnitConversions.convert(coordinate[:z], 'ft', 'm')
+        vertices << OpenStudio::Point3d.new(x, y, z)
+      end
+
+      surface = OpenStudio::Model::Surface.new(vertices, model)
+      surface.setName(slab.id)
+      surface.setSurfaceType('Floor')
+      surface.setOutsideBoundaryCondition('Foundation')
+      surface.additionalProperties.setFeature('SurfaceType', 'Slab')
+      set_surface_interior(model, spaces, surface, slab.interior_adjacent_to)
+      surface.setSunExposure('NoSun')
+      surface.setWindExposure('NoWind')
+    end
 
     slab_perim_r = slab.perimeter_insulation_r_value
     slab_perim_depth = slab.perimeter_insulation_depth
@@ -1684,38 +1823,42 @@ class OSModel
     addtl_cfa = cfa - model_cfa
     return unless addtl_cfa > 0.1
 
-    conditioned_floor_width = Math::sqrt(addtl_cfa)
-    conditioned_floor_length = addtl_cfa / conditioned_floor_width
-    z_origin = @foundation_top + 8.0 * (@ncfl_ag - 1)
+    if @collapse_enclosure
 
-    floor_surface = OpenStudio::Model::Surface.new(add_floor_polygon(-conditioned_floor_width, -conditioned_floor_length, z_origin), model)
+      conditioned_floor_width = Math::sqrt(addtl_cfa)
+      conditioned_floor_length = addtl_cfa / conditioned_floor_width
+      z_origin = @foundation_top + 8.0 * (@ncfl_ag - 1)
 
-    floor_surface.setSunExposure('NoSun')
-    floor_surface.setWindExposure('NoWind')
-    floor_surface.setName('inferred conditioned floor')
-    floor_surface.setSurfaceType('Floor')
-    floor_surface.setSpace(create_or_get_space(model, spaces, HPXML::LocationLivingSpace))
-    floor_surface.setOutsideBoundaryCondition('Adiabatic')
-    floor_surface.additionalProperties.setFeature('SurfaceType', 'InferredFloor')
+      floor_surface = OpenStudio::Model::Surface.new(add_floor_polygon(-conditioned_floor_width, -conditioned_floor_length, z_origin), model)
 
-    # add ceiling surfaces accordingly
-    ceiling_surface = OpenStudio::Model::Surface.new(add_ceiling_polygon(-conditioned_floor_width, -conditioned_floor_length, z_origin), model)
+      floor_surface.setSunExposure('NoSun')
+      floor_surface.setWindExposure('NoWind')
+      floor_surface.setName('inferred conditioned floor')
+      floor_surface.setSurfaceType('Floor')
+      floor_surface.setSpace(create_or_get_space(model, spaces, HPXML::LocationLivingSpace))
+      floor_surface.setOutsideBoundaryCondition('Adiabatic')
+      floor_surface.additionalProperties.setFeature('SurfaceType', 'InferredFloor')
 
-    ceiling_surface.setSunExposure('NoSun')
-    ceiling_surface.setWindExposure('NoWind')
-    ceiling_surface.setName('inferred conditioned ceiling')
-    ceiling_surface.setSurfaceType('RoofCeiling')
-    ceiling_surface.setSpace(create_or_get_space(model, spaces, HPXML::LocationLivingSpace))
-    ceiling_surface.setOutsideBoundaryCondition('Adiabatic')
-    ceiling_surface.additionalProperties.setFeature('SurfaceType', 'InferredCeiling')
+      # add ceiling surfaces accordingly
+      ceiling_surface = OpenStudio::Model::Surface.new(add_ceiling_polygon(-conditioned_floor_width, -conditioned_floor_length, z_origin), model)
 
-    if not @cond_bsmnt_surfaces.empty?
-      # assuming added ceiling is in conditioned basement
-      @cond_bsmnt_surfaces << ceiling_surface
+      ceiling_surface.setSunExposure('NoSun')
+      ceiling_surface.setWindExposure('NoWind')
+      ceiling_surface.setName('inferred conditioned ceiling')
+      ceiling_surface.setSurfaceType('RoofCeiling')
+      ceiling_surface.setSpace(create_or_get_space(model, spaces, HPXML::LocationLivingSpace))
+      ceiling_surface.setOutsideBoundaryCondition('Adiabatic')
+      ceiling_surface.additionalProperties.setFeature('SurfaceType', 'InferredCeiling')
+
+      if not @cond_bsmnt_surfaces.empty?
+        # assuming added ceiling is in conditioned basement
+        @cond_bsmnt_surfaces << ceiling_surface
+      end
+
+      # Apply Construction
+      apply_adiabatic_construction(runner, model, [floor_surface, ceiling_surface], 'floor')
+
     end
-
-    # Apply Construction
-    apply_adiabatic_construction(runner, model, [floor_surface, ceiling_surface], 'floor')
   end
 
   def self.add_thermal_mass(runner, model)
@@ -1782,42 +1925,64 @@ class OSModel
     @hpxml.windows.each do |window|
       window.fraction_operable = nil
     end
-    @hpxml.collapse_enclosure_surfaces()
+    if @collapse_enclosure
+      @hpxml.collapse_enclosure_surfaces()
+    end
 
     surfaces = []
     @hpxml.windows.each do |window|
-      window_height = 4.0 # ft, default
-      overhang_depth = nil
-      if not window.overhangs_depth.nil?
-        overhang_depth = window.overhangs_depth
-        overhang_distance_to_top = window.overhangs_distance_to_top_of_window
-        overhang_distance_to_bottom = window.overhangs_distance_to_bottom_of_window
-        window_height = overhang_distance_to_bottom - overhang_distance_to_top
+      if window.coordinates.empty?
+        window_height = 4.0 # ft, default
+        overhang_depth = nil
+        if not window.overhangs_depth.nil?
+          overhang_depth = window.overhangs_depth
+          overhang_distance_to_top = window.overhangs_distance_to_top_of_window
+          overhang_distance_to_bottom = window.overhangs_distance_to_bottom_of_window
+          window_height = overhang_distance_to_bottom - overhang_distance_to_top
+        end
+
+        window_width = window.area / window_height
+        z_origin = @foundation_top
+
+        # Create parent surface slightly bigger than window
+        surface = OpenStudio::Model::Surface.new(add_wall_polygon(window_width, window_height, z_origin,
+                                                                  window.azimuth, [0, 0.0001, 0.0001, 0.0001]), model)
+
+        surface.additionalProperties.setFeature('Length', window_width)
+        surface.additionalProperties.setFeature('Azimuth', window.azimuth)
+        surface.additionalProperties.setFeature('Tilt', 90.0)
+        surface.additionalProperties.setFeature('SurfaceType', 'Window')
+        surface.setName("surface #{window.id}")
+        surface.setSurfaceType('Wall')
+        set_surface_interior(model, spaces, surface, window.wall.interior_adjacent_to)
+        surface.setOutsideBoundaryCondition('Outdoors') # cannot be adiabatic because subsurfaces won't be created
+        surfaces << surface
+
+        sub_surface = OpenStudio::Model::SubSurface.new(add_wall_polygon(window_width, window_height, z_origin,
+                                                                         window.azimuth, [-0.0001, 0, 0.0001, 0]), model)
+        sub_surface.setName(window.id)
+        sub_surface.setSurface(surface)
+        sub_surface.setSubSurfaceType('FixedWindow')
+      else
+        vertices = OpenStudio::Point3dVector.new
+        window.coordinates.each do |coordinate|
+          x = UnitConversions.convert(coordinate[:x], 'ft', 'm')
+          y = UnitConversions.convert(coordinate[:y], 'ft', 'm')
+          z = UnitConversions.convert(coordinate[:z], 'ft', 'm')
+          vertices << OpenStudio::Point3d.new(x, y, z)
+        end
+
+        sub_surface = OpenStudio::Model::SubSurface.new(vertices, model)
+        sub_surface.setName(window.id)
+        sub_surface.setSubSurfaceType('FixedWindow')
+        sub_surface.additionalProperties.setFeature('SubSurfaceType', 'Window')
+
+        model.getSurfaces.each do |surface|
+          next if surface.name.to_s != window.wall_idref
+
+          sub_surface.setSurface(surface)
+        end
       end
-
-      window_width = window.area / window_height
-      z_origin = @foundation_top
-
-      # Create parent surface slightly bigger than window
-      surface = OpenStudio::Model::Surface.new(add_wall_polygon(window_width, window_height, z_origin,
-                                                                window.azimuth, [0, 0.0001, 0.0001, 0.0001]), model)
-
-      surface.additionalProperties.setFeature('Length', window_width)
-      surface.additionalProperties.setFeature('Azimuth', window.azimuth)
-      surface.additionalProperties.setFeature('Tilt', 90.0)
-      surface.additionalProperties.setFeature('SurfaceType', 'Window')
-      surface.setName("surface #{window.id}")
-      surface.setSurfaceType('Wall')
-      set_surface_interior(model, spaces, surface, window.wall.interior_adjacent_to)
-
-      sub_surface = OpenStudio::Model::SubSurface.new(add_wall_polygon(window_width, window_height, z_origin,
-                                                                       window.azimuth, [-0.0001, 0, 0.0001, 0]), model)
-      sub_surface.setName(window.id)
-      sub_surface.setSurface(surface)
-      sub_surface.setSubSurfaceType('FixedWindow')
-
-      set_subsurface_exterior(surface, window.wall.exterior_adjacent_to, spaces, model)
-      surfaces << surface
 
       if not overhang_depth.nil?
         overhang = sub_surface.addOverhang(UnitConversions.convert(overhang_depth, 'ft', 'm'), UnitConversions.convert(overhang_distance_to_top, 'ft', 'm'))
@@ -1842,33 +2007,54 @@ class OSModel
   def self.add_skylights(runner, model, spaces, weather)
     surfaces = []
     @hpxml.skylights.each do |skylight|
-      # Obtain skylight tilt from attached roof
-      skylight_tilt = skylight.roof.pitch / 12.0
+      if skylight.coordinates.empty?
+        # Obtain skylight tilt from attached roof
+        skylight_tilt = skylight.roof.pitch / 12.0
 
-      skylight_height = Math::sqrt(skylight.area)
-      skylight_width = skylight.area / skylight_height
-      z_origin = @walls_top + 0.5 * Math.sin(Math.atan(skylight_tilt)) * skylight_height
+        skylight_height = Math::sqrt(skylight.area)
+        skylight_width = skylight.area / skylight_height
+        z_origin = @walls_top + 0.5 * Math.sin(Math.atan(skylight_tilt)) * skylight_height
 
-      # Create parent surface slightly bigger than skylight
-      surface = OpenStudio::Model::Surface.new(add_roof_polygon(skylight_width + 0.0001, skylight_height + 0.0001, z_origin,
-                                                                skylight.azimuth, skylight_tilt), model)
+        # Create parent surface slightly bigger than skylight
+        surface = OpenStudio::Model::Surface.new(add_roof_polygon(skylight_width + 0.0001, skylight_height + 0.0001, z_origin,
+                                                                  skylight.azimuth, skylight_tilt), model)
 
-      surface.additionalProperties.setFeature('Length', skylight_width)
-      surface.additionalProperties.setFeature('Width', skylight_height)
-      surface.additionalProperties.setFeature('Azimuth', skylight.azimuth)
-      surface.additionalProperties.setFeature('Tilt', skylight_tilt)
-      surface.additionalProperties.setFeature('SurfaceType', 'Skylight')
-      surface.setName("surface #{skylight.id}")
-      surface.setSurfaceType('RoofCeiling')
-      surface.setSpace(create_or_get_space(model, spaces, HPXML::LocationLivingSpace)) # Ensures it is included in Manual J sizing
-      surface.setOutsideBoundaryCondition('Outdoors') # cannot be adiabatic because subsurfaces won't be created
-      surfaces << surface
+        surface.additionalProperties.setFeature('Length', skylight_width)
+        surface.additionalProperties.setFeature('Width', skylight_height)
+        surface.additionalProperties.setFeature('Azimuth', skylight.azimuth)
+        surface.additionalProperties.setFeature('Tilt', skylight_tilt)
+        surface.additionalProperties.setFeature('SurfaceType', 'Skylight')
+        surface.setName("surface #{skylight.id}")
+        surface.setSurfaceType('RoofCeiling')
+        surface.setSpace(create_or_get_space(model, spaces, HPXML::LocationLivingSpace)) # Ensures it is included in Manual J sizing
+        surface.setOutsideBoundaryCondition('Outdoors') # cannot be adiabatic because subsurfaces won't be created
+        surfaces << surface
 
-      sub_surface = OpenStudio::Model::SubSurface.new(add_roof_polygon(skylight_width, skylight_height, z_origin,
-                                                                       skylight.azimuth, skylight_tilt), model)
-      sub_surface.setName(skylight.id)
-      sub_surface.setSurface(surface)
-      sub_surface.setSubSurfaceType('Skylight')
+        sub_surface = OpenStudio::Model::SubSurface.new(add_roof_polygon(skylight_width, skylight_height, z_origin,
+                                                                         skylight.azimuth, skylight_tilt), model)
+        sub_surface.setName(skylight.id)
+        sub_surface.setSurface(surface)
+        sub_surface.setSubSurfaceType('Skylight')
+      else
+        vertices = OpenStudio::Point3dVector.new
+        skylight.coordinates.each do |coordinate|
+          x = UnitConversions.convert(coordinate[:x], 'ft', 'm')
+          y = UnitConversions.convert(coordinate[:y], 'ft', 'm')
+          z = UnitConversions.convert(coordinate[:z], 'ft', 'm')
+          vertices << OpenStudio::Point3d.new(x, y, z)
+        end
+
+        sub_surface = OpenStudio::Model::SubSurface.new(vertices, model)
+        sub_surface.setName(skylight.id)
+        sub_surface.setSubSurfaceType('Skylight')
+        sub_surface.additionalProperties.setFeature('SubSurfaceType', 'Skylight')
+
+        model.getSurfaces.each do |surface|
+          next if surface.name.to_s != skylight.roof_idref
+
+          sub_surface.setSurface(surface)
+        end
+      end
 
       # Apply construction
       ufactor = skylight.ufactor
@@ -1887,30 +2073,50 @@ class OSModel
   def self.add_doors(runner, model, spaces)
     surfaces = []
     @hpxml.doors.each do |door|
-      door_height = 6.67 # ft
-      door_width = door.area / door_height
-      z_origin = @foundation_top
+      if door.coordinates.empty?
+        door_height = 6.67 # ft
+        door_width = door.area / door_height
+        z_origin = @foundation_top
 
-      # Create parent surface slightly bigger than door
-      surface = OpenStudio::Model::Surface.new(add_wall_polygon(door_width, door_height, z_origin,
-                                                                door.azimuth, [0, 0.0001, 0.0001, 0.0001]), model)
+        # Create parent surface slightly bigger than door
+        surface = OpenStudio::Model::Surface.new(add_wall_polygon(door_width, door_height, z_origin,
+                                                                  door.azimuth, [0, 0.0001, 0.0001, 0.0001]), model)
 
-      surface.additionalProperties.setFeature('Length', door_width)
-      surface.additionalProperties.setFeature('Azimuth', door.azimuth)
-      surface.additionalProperties.setFeature('Tilt', 90.0)
-      surface.additionalProperties.setFeature('SurfaceType', 'Door')
-      surface.setName("surface #{door.id}")
-      surface.setSurfaceType('Wall')
-      set_surface_interior(model, spaces, surface, door.wall.interior_adjacent_to)
+        surface.additionalProperties.setFeature('Length', door_width)
+        surface.additionalProperties.setFeature('Azimuth', door.azimuth)
+        surface.additionalProperties.setFeature('Tilt', 90.0)
+        surface.additionalProperties.setFeature('SurfaceType', 'Door')
+        surface.setName("surface #{door.id}")
+        surface.setSurfaceType('Wall')
+        set_surface_interior(model, spaces, surface, door.wall.interior_adjacent_to)
+        surface.setOutsideBoundaryCondition('Outdoors') # cannot be adiabatic because subsurfaces won't be created
+        surfaces << surface
 
-      sub_surface = OpenStudio::Model::SubSurface.new(add_wall_polygon(door_width, door_height, z_origin,
-                                                                       door.azimuth, [0, 0, 0, 0]), model)
-      sub_surface.setName(door.id)
-      sub_surface.setSurface(surface)
-      sub_surface.setSubSurfaceType('Door')
+        sub_surface = OpenStudio::Model::SubSurface.new(add_wall_polygon(door_width, door_height, z_origin,
+                                                                         door.azimuth, [0, 0, 0, 0]), model)
+        sub_surface.setName(door.id)
+        sub_surface.setSurface(surface)
+        sub_surface.setSubSurfaceType('Door')
+      else
+        vertices = OpenStudio::Point3dVector.new
+        door.coordinates.each do |coordinate|
+          x = UnitConversions.convert(coordinate[:x], 'ft', 'm')
+          y = UnitConversions.convert(coordinate[:y], 'ft', 'm')
+          z = UnitConversions.convert(coordinate[:z], 'ft', 'm')
+          vertices << OpenStudio::Point3d.new(x, y, z)
+        end
 
-      set_subsurface_exterior(surface, door.wall.exterior_adjacent_to, spaces, model)
-      surfaces << surface
+        sub_surface = OpenStudio::Model::SubSurface.new(vertices, model)
+        sub_surface.setName(door.id)
+        sub_surface.setSubSurfaceType('Door')
+        sub_surface.additionalProperties.setFeature('SubSurfaceType', 'Door')
+
+        model.getSurfaces.each do |surface|
+          next if surface.name.to_s != door.wall_idref
+
+          sub_surface.setSurface(surface)
+        end
+      end
 
       # Apply construction
       ufactor = 1.0 / door.r_value

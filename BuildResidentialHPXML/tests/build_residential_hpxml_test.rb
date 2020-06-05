@@ -22,7 +22,7 @@ class BuildResidentialHPXMLTest < MiniTest::Test
 
     osws = []
     test_dirs.each do |test_dir|
-      Dir["#{test_dir}/base*.osw"].sort.each do |osw|
+      Dir["#{test_dir}/*.osw"].sort.each do |osw|
         osws << File.absolute_path(osw)
       end
       Dir["#{test_dir}/extra*.osw"].sort.each do |osw|
@@ -247,7 +247,9 @@ class BuildResidentialHPXMLTest < MiniTest::Test
           hpxml.hvac_distributions[0].ducts.delete_at(i) # Only compare first two ducts
         end
       end
-      hpxml.collapse_enclosure_surfaces()
+      if hpxml.collapse_enclosure
+        hpxml.collapse_enclosure_surfaces()
+      end
 
       # Replace IDs/IDREFs with blank strings
       HPXML::HPXML_ATTRS.each do |attr|

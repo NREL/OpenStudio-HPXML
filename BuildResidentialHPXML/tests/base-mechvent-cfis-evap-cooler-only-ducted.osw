@@ -108,6 +108,7 @@
         "geometry_corridor_position": "Double-Loaded Interior",
         "geometry_corridor_width": 10.0,
         "geometry_eaves_depth": 0,
+        "geometry_export_3d_coordinates": false,
         "geometry_foundation_height": 8.0,
         "geometry_foundation_height_above_grade": 1.0,
         "geometry_foundation_type": "ConditionedBasement",

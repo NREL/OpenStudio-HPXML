@@ -230,6 +230,10 @@
               <CarpetFraction>1.0</CarpetFraction>
               <CarpetRValue>2.08</CarpetRValue>
             </extension>
+            <extension>
+              <CarpetFraction>1.0</CarpetFraction>
+              <CarpetRValue>2.08</CarpetRValue>
+            </extension>
           </Slab>
         </Slabs>
         <Windows>

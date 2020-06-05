@@ -75,6 +75,7 @@ def create_osws
     'base-dhw-uef.osw' => 'base.osw',
     'base-enclosure-2stories.osw' => 'base.osw',
     'base-enclosure-2stories-garage.osw' => 'base.osw',
+    'base-enclosure-3d-coordinates.osw' => 'base.osw',
     # 'base-enclosure-attached-multifamily.osw' => 'base.osw',
     'base-enclosure-beds-1.osw' => 'base.osw',
     'base-enclosure-beds-2.osw' => 'base.osw',
@@ -321,6 +322,7 @@ def get_values(osw_file, step)
     step.setArgument('geometry_num_bedrooms', 3)
     step.setArgument('geometry_num_bathrooms', Constants.Auto)
     step.setArgument('geometry_num_occupants', '3')
+    step.setArgument('geometry_export_3d_coordinates', false)
     step.setArgument('floor_assembly_r', 0)
     step.setArgument('foundation_wall_insulation_r', 8.9)
     step.setArgument('foundation_wall_insulation_distance_to_top', 0.0)
@@ -919,6 +921,8 @@ def get_values(osw_file, step)
     step.setArgument('ducts_supply_surface_area', '112.5')
     step.setArgument('ducts_return_surface_area', '37.5')
     step.setArgument('plug_loads_other_annual_kwh', '2957.5')
+  elsif ['base-enclosure-3d-coordinates.osw'].include? osw_file
+    step.setArgument('geometry_export_3d_coordinates', true)
   elsif ['base-enclosure-attached-multifamily.osw'].include? osw_file
 
   elsif ['base-enclosure-beds-1.osw'].include? osw_file
@@ -1733,6 +1737,7 @@ def create_hpxmls
     'base-dhw-jacket-hpwh.xml' => 'base-dhw-tank-heat-pump.xml',
     'base-enclosure-2stories.xml' => 'base.xml',
     'base-enclosure-2stories-garage.xml' => 'base-enclosure-2stories.xml',
+    'base-enclosure-3d-coordinates.xml' => 'base.xml',
     'base-enclosure-other-housing-unit.xml' => 'base-foundation-ambient.xml',
     'base-enclosure-other-heated-space.xml' => 'base-foundation-ambient.xml',
     'base-enclosure-other-non-freezing-space.xml' => 'base-foundation-ambient.xml',
@@ -2345,6 +2350,26 @@ def set_hpxml_roofs(hpxml_file, hpxml)
   elsif ['base-atticroof-cathedral.xml'].include? hpxml_file
     hpxml.roofs[0].interior_adjacent_to = HPXML::LocationLivingSpace
     hpxml.roofs[0].insulation_assembly_r_value = 25.8
+  elsif ['base-enclosure-3d-coordinates.xml'].include? hpxml_file
+    hpxml.roofs.clear()
+    hpxml.roofs.add(id: 'Surface_8',
+                    interior_adjacent_to: HPXML::LocationAtticUnvented,
+                    area: 755,
+                    solar_absorptance: 0.7,
+                    emittance: 0.92,
+                    pitch: 6,
+                    radiant_barrier: false,
+                    insulation_assembly_r_value: 2.3,
+                    coordinates: [{ x: 45, y: 15, z: 15.5 }, { x: 0, y: 15, z: 15.5 }, { x: 0, y: 0, z: 8 }, { x: 45, y: 0, z: 8 }])
+    hpxml.roofs.add(id: 'Surface_9',
+                    interior_adjacent_to: HPXML::LocationAtticUnvented,
+                    area: 755,
+                    solar_absorptance: 0.7,
+                    emittance: 0.92,
+                    pitch: 6,
+                    radiant_barrier: false,
+                    insulation_assembly_r_value: 2.3,
+                    coordinates: [{ x: 0, y: 15, z: 15.5 }, { x: 45, y: 15, z: 15.5 }, { x: 45, y: 30, z: 8 }, { x: 0, y: 30, z: 8 }])
   elsif ['base-enclosure-garage.xml'].include? hpxml_file
     hpxml.roofs[0].area += 670
   elsif ['base-atticroof-unvented-insulated-roof.xml'].include? hpxml_file
@@ -2595,6 +2620,62 @@ def set_hpxml_walls(hpxml_file, hpxml)
                     solar_absorptance: 0.7,
                     emittance: 0.92,
                     insulation_assembly_r_value: 4.0)
+  elsif ['base-enclosure-3d-coordinates.xml'].include? hpxml_file
+    hpxml.walls.clear()
+    hpxml.walls.add(id: 'Surface_4',
+                    exterior_adjacent_to: HPXML::LocationOutside,
+                    interior_adjacent_to: HPXML::LocationLivingSpace,
+                    wall_type: HPXML::WallTypeWoodStud,
+                    area: 240,
+                    solar_absorptance: 0.7,
+                    emittance: 0.92,
+                    insulation_assembly_r_value: 23.0,
+                    coordinates: [{ x: 45, y: 0, z: 8 }, { x: 45, y: 0, z: 0 }, { x: 45, y: 30, z: 0 }, { x: 45, y: 30, z: 8 }])
+    hpxml.walls.add(id: 'Surface_2',
+                    exterior_adjacent_to: HPXML::LocationOutside,
+                    interior_adjacent_to: HPXML::LocationLivingSpace,
+                    wall_type: HPXML::WallTypeWoodStud,
+                    area: 240,
+                    solar_absorptance: 0.7,
+                    emittance: 0.92,
+                    insulation_assembly_r_value: 23.0,
+                    coordinates: [{ x: 0, y: 30, z: 8 }, { x: 0, y: 30, z: 0 }, { x: 0, y: 0, z: 0 }, { x: 0, y: 0, z: 8 }])
+    hpxml.walls.add(id: 'Surface_3',
+                    exterior_adjacent_to: HPXML::LocationOutside,
+                    interior_adjacent_to: HPXML::LocationLivingSpace,
+                    wall_type: HPXML::WallTypeWoodStud,
+                    area: 360,
+                    solar_absorptance: 0.7,
+                    emittance: 0.92,
+                    insulation_assembly_r_value: 23.0,
+                    coordinates: [{ x: 45, y: 30, z: 8 }, { x: 45, y: 30, z: 0 }, { x: 0, y: 30, z: 0 }, { x: 0, y: 30, z: 8 }])
+    hpxml.walls.add(id: 'Surface_5',
+                    exterior_adjacent_to: HPXML::LocationOutside,
+                    interior_adjacent_to: HPXML::LocationLivingSpace,
+                    wall_type: HPXML::WallTypeWoodStud,
+                    area: 360,
+                    solar_absorptance: 0.7,
+                    emittance: 0.92,
+                    insulation_assembly_r_value: 23.0,
+                    coordinates: [{ x: 0, y: 0, z: 8 }, { x: 0, y: 0, z: 0 }, { x: 45, y: 0, z: 0 }, { x: 45, y: 0, z: 8 }])
+    hpxml.walls.add(id: 'Surface_10',
+                    exterior_adjacent_to: HPXML::LocationOutside,
+                    interior_adjacent_to: HPXML::LocationAtticUnvented,
+                    wall_type: HPXML::WallTypeWoodStud,
+                    area: 113,
+                    solar_absorptance: 0.7,
+                    emittance: 0.92,
+                    insulation_assembly_r_value: 4.0,
+                    coordinates: [{ x: 0, y: 15, z: 15.5 }, { x: 0, y: 30, z: 8 }, { x: 0, y: 0, z: 8 }])
+    hpxml.walls.add(id: 'Surface_11',
+                    exterior_adjacent_to: HPXML::LocationOutside,
+                    interior_adjacent_to: HPXML::LocationAtticUnvented,
+                    wall_type: HPXML::WallTypeWoodStud,
+                    area: 113,
+                    solar_absorptance: 0.7,
+                    emittance: 0.92,
+                    insulation_assembly_r_value: 4.0,
+                    coordinates: [{ x: 45, y: 15, z: 15.5 }, { x: 45, y: 0, z: 8 }, { x: 45, y: 30, z: 8 }])
   elsif ['base-enclosure-attached-multifamily.xml'].include? hpxml_file
     hpxml.walls.add(id: 'WallOtherHeatedSpace',
                     exterior_adjacent_to: HPXML::LocationOtherHeatedSpace,
@@ -2855,6 +2936,64 @@ def set_hpxml_foundation_walls(hpxml_file, hpxml)
                                 insulation_exterior_distance_to_top: 0,
                                 insulation_exterior_distance_to_bottom: 8,
                                 insulation_exterior_r_value: 8.9)
+  elsif ['base-enclosure-3d-coordinates.xml'].include? hpxml_file
+    hpxml.foundation_walls.clear()
+    hpxml.foundation_walls.add(id: 'Surface_13',
+                               exterior_adjacent_to: HPXML::LocationGround,
+                               interior_adjacent_to: HPXML::LocationBasementConditioned,
+                               height: 8,
+                               area: 240,
+                               thickness: 8,
+                               depth_below_grade: 7,
+                               insulation_interior_r_value: 0,
+                               insulation_interior_distance_to_top: 0,
+                               insulation_interior_distance_to_bottom: 0,
+                               insulation_exterior_distance_to_top: 0,
+                               insulation_exterior_distance_to_bottom: 8,
+                               insulation_exterior_r_value: 8.9,
+                               coordinates: [{ x: 0, y: 30, z: 0 }, { x: 0, y: 30, z: -8 }, { x: 0, y: 0, z: -8 }, { x: 0, y: 0, z: 0 }])
+    hpxml.foundation_walls.add(id: 'Surface_14',
+                               exterior_adjacent_to: HPXML::LocationGround,
+                               interior_adjacent_to: HPXML::LocationBasementConditioned,
+                               height: 8,
+                               area: 360,
+                               thickness: 8,
+                               depth_below_grade: 7,
+                               insulation_interior_r_value: 0,
+                               insulation_interior_distance_to_top: 0,
+                               insulation_interior_distance_to_bottom: 0,
+                               insulation_exterior_distance_to_top: 0,
+                               insulation_exterior_distance_to_bottom: 8,
+                               insulation_exterior_r_value: 8.9,
+                               coordinates: [{ x: 45, y: 30, z: 0 }, { x: 45, y: 30, z: -8 }, { x: 0, y: 30, z: -8 }, { x: 0, y: 30, z: 0 }])
+    hpxml.foundation_walls.add(id: 'Surface_15',
+                               exterior_adjacent_to: HPXML::LocationGround,
+                               interior_adjacent_to: HPXML::LocationBasementConditioned,
+                               height: 8,
+                               area: 240,
+                               thickness: 8,
+                               depth_below_grade: 7,
+                               insulation_interior_r_value: 0,
+                               insulation_interior_distance_to_top: 0,
+                               insulation_interior_distance_to_bottom: 0,
+                               insulation_exterior_distance_to_top: 0,
+                               insulation_exterior_distance_to_bottom: 8,
+                               insulation_exterior_r_value: 8.9,
+                               coordinates: [{ x: 45, y: 0, z: 0 }, { x: 45, y: 0, z: -8 }, { x: 45, y: 30, z: -8 }, { x: 45, y: 30, z: 0 }])
+    hpxml.foundation_walls.add(id: 'Surface_16',
+                               exterior_adjacent_to: HPXML::LocationGround,
+                               interior_adjacent_to: HPXML::LocationBasementConditioned,
+                               height: 8,
+                               area: 360,
+                               thickness: 8,
+                               depth_below_grade: 7,
+                               insulation_interior_r_value: 0,
+                               insulation_interior_distance_to_top: 0,
+                               insulation_interior_distance_to_bottom: 0,
+                               insulation_exterior_distance_to_top: 0,
+                               insulation_exterior_distance_to_bottom: 8,
+                               insulation_exterior_r_value: 8.9,
+                               coordinates: [{ x: 0, y: 0, z: 0 }, { x: 0, y: 0, z: -8 }, { x: 45, y: 0, z: -8 }, { x: 45, y: 0, z: 0 }])
   elsif ['base-enclosure-attached-multifamily.xml'].include? hpxml_file
     hpxml.foundation_walls.add(id: 'FoundationWallOtherNonFreezingSpace',
                                exterior_adjacent_to: HPXML::LocationOtherNonFreezingSpace,
@@ -3123,6 +3262,20 @@ def set_hpxml_frame_floors(hpxml_file, hpxml)
     hpxml.frame_floors[0].exterior_adjacent_to = HPXML::LocationAtticVented
   elsif ['base-atticroof-conditioned.xml'].include? hpxml_file
     hpxml.frame_floors[0].area = 450
+  elsif ['base-enclosure-3d-coordinates.xml'].include? hpxml_file
+    hpxml.frame_floors.clear()
+    hpxml.frame_floors.add(id: 'Surface_6',
+                           exterior_adjacent_to: HPXML::LocationAtticUnvented,
+                           interior_adjacent_to: HPXML::LocationLivingSpace,
+                           area: 1350,
+                           insulation_assembly_r_value: 39.3,
+                           coordinates: [{ x: 45, y: 0, z: 8 }, { x: 45, y: 30, z: 8 }, { x: 0, y: 30, z: 8 }, { x: 0, y: 0, z: 8 }])
+    hpxml.frame_floors.add(id: 'Surface_1',
+                           exterior_adjacent_to: HPXML::LocationBasementConditioned,
+                           interior_adjacent_to: HPXML::LocationLivingSpace,
+                           area: 1350,
+                           insulation_assembly_r_value: 2.1,
+                           coordinates: [{ x: 0, y: 0, z: 0 }, { x: 0, y: 30, z: 0 }, { x: 45, y: 30, z: 0 }, { x: 45, y: 0, z: 0 }])
   elsif ['base-enclosure-garage.xml'].include? hpxml_file
     hpxml.frame_floors.add(id: 'FloorBetweenAtticGarage',
                            exterior_adjacent_to: HPXML::LocationAtticUnvented,
@@ -3279,6 +3432,20 @@ def set_hpxml_slabs(hpxml_file, hpxml)
                     under_slab_insulation_r_value: 0,
                     carpet_fraction: 0,
                     carpet_r_value: 0)
+  elsif ['base-enclosure-3d-coordinates.xml'].include? hpxml_file
+    hpxml.slabs.clear()
+    hpxml.slabs.add(id: 'Surface_12',
+                    interior_adjacent_to: HPXML::LocationBasementConditioned,
+                    area: 1350,
+                    thickness: 4,
+                    exposed_perimeter: 150,
+                    perimeter_insulation_depth: 0,
+                    under_slab_insulation_width: 0,
+                    perimeter_insulation_r_value: 0,
+                    under_slab_insulation_r_value: 0,
+                    carpet_fraction: 0,
+                    carpet_r_value: 0,
+                    coordinates: [{ x: 0, y: 0, z: -8 }, { x: 0, y: 30, z: -8 }, { x: 45, y: 30, z: -8 }, { x: 45, y: 0, z: -8 }])
   elsif ['base-foundation-unconditioned-basement.xml'].include? hpxml_file
     hpxml.slabs[0].interior_adjacent_to = HPXML::LocationBasementUnconditioned
   elsif ['base-foundation-conditioned-basement-slab-insulation.xml'].include? hpxml_file
@@ -3505,6 +3672,308 @@ def set_hpxml_windows(hpxml_file, hpxml)
                       interior_shading_factor_summer: 0.7,
                       interior_shading_factor_winter: 0.85,
                       wall_idref: 'Wall')
+  elsif ['base-enclosure-3d-coordinates.xml'].include? hpxml_file
+    hpxml.windows.clear()
+    hpxml.windows.add(id: 'Surface_4_-_Window_5_right',
+                      area: 12,
+                      azimuth: 90,
+                      ufactor: 0.33,
+                      shgc: 0.45,
+                      fraction_operable: 0.67,
+                      interior_shading_factor_summer: 0.7,
+                      interior_shading_factor_winter: 0.85,
+                      wall_idref: 'Surface_4',
+                      coordinates: [{ x: 45, y: 19.4, z: 7 }, { x: 45, y: 19.4, z: 3 }, { x: 45, y: 22.4, z: 3 }, { x: 45, y: 22.4, z: 7 }])
+    hpxml.windows.add(id: 'Surface_4_-_Window_6_right',
+                      area: 12,
+                      azimuth: 90,
+                      ufactor: 0.33,
+                      shgc: 0.45,
+                      fraction_operable: 0.67,
+                      interior_shading_factor_summer: 0.7,
+                      interior_shading_factor_winter: 0.85,
+                      wall_idref: 'Surface_4',
+                      coordinates: [{ x: 45, y: 22.6, z: 7 }, { x: 45, y: 22.6, z: 3 }, { x: 45, y: 25.6, z: 3 }, { x: 45, y: 25.6, z: 7 }])
+    hpxml.windows.add(id: 'Surface_4_-_Window_3_right',
+                      area: 12,
+                      azimuth: 90,
+                      ufactor: 0.33,
+                      shgc: 0.45,
+                      fraction_operable: 0.67,
+                      interior_shading_factor_summer: 0.7,
+                      interior_shading_factor_winter: 0.85,
+                      wall_idref: 'Surface_4',
+                      coordinates: [{ x: 45, y: 11.9, z: 7 }, { x: 45, y: 11.9, z: 3 }, { x: 45, y: 14.9, z: 3 }, { x: 45, y: 14.9, z: 7 }])
+    hpxml.windows.add(id: 'Surface_4_-_Window_1_right',
+                      area: 12,
+                      azimuth: 90,
+                      ufactor: 0.33,
+                      shgc: 0.45,
+                      fraction_operable: 0.67,
+                      interior_shading_factor_summer: 0.7,
+                      interior_shading_factor_winter: 0.85,
+                      wall_idref: 'Surface_4',
+                      coordinates: [{ x: 45, y: 4.4, z: 7 }, { x: 45, y: 4.4, z: 3 }, { x: 45, y: 7.4, z: 3 }, { x: 45, y: 7.4, z: 7 }])
+    hpxml.windows.add(id: 'Surface_4_-_Window_2_right',
+                      area: 12,
+                      azimuth: 90,
+                      ufactor: 0.33,
+                      shgc: 0.45,
+                      fraction_operable: 0.67,
+                      interior_shading_factor_summer: 0.7,
+                      interior_shading_factor_winter: 0.85,
+                      wall_idref: 'Surface_4',
+                      coordinates: [{ x: 45, y: 7.6, z: 7 }, { x: 45, y: 7.6, z: 3 }, { x: 45, y: 10.6, z: 3 }, { x: 45, y: 10.6, z: 7 }])
+    hpxml.windows.add(id: 'Surface_4_-_Window_4_right',
+                      area: 12,
+                      azimuth: 90,
+                      ufactor: 0.33,
+                      shgc: 0.45,
+                      fraction_operable: 0.67,
+                      interior_shading_factor_summer: 0.7,
+                      interior_shading_factor_winter: 0.85,
+                      wall_idref: 'Surface_4',
+                      coordinates: [{ x: 45, y: 15.1, z: 7 }, { x: 45, y: 15.1, z: 3 }, { x: 45, y: 18.1, z: 3 }, { x: 45, y: 18.1, z: 7 }])
+    hpxml.windows.add(id: 'Surface_2_-_Window_1_left',
+                      area: 12,
+                      azimuth: 270,
+                      ufactor: 0.33,
+                      shgc: 0.45,
+                      fraction_operable: 0.67,
+                      interior_shading_factor_summer: 0.7,
+                      interior_shading_factor_winter: 0.85,
+                      wall_idref: 'Surface_2',
+                      coordinates: [{ x: 0, y: 25.6, z: 7 }, { x: 0, y: 25.6, z: 3 }, { x: 0, y: 22.6, z: 3 }, { x: 0, y: 22.6, z: 7 }])
+    hpxml.windows.add(id: 'Surface_2_-_Window_3_left',
+                      area: 12,
+                      azimuth: 270,
+                      ufactor: 0.33,
+                      shgc: 0.45,
+                      fraction_operable: 0.67,
+                      interior_shading_factor_summer: 0.7,
+                      interior_shading_factor_winter: 0.85,
+                      wall_idref: 'Surface_2',
+                      coordinates: [{ x: 0, y: 18.1, z: 7 }, { x: 0, y: 18.1, z: 3 }, { x: 0, y: 15.1, z: 3 }, { x: 0, y: 15.1, z: 7 }])
+    hpxml.windows.add(id: 'Surface_2_-_Window_6_left',
+                      area: 12,
+                      azimuth: 270,
+                      ufactor: 0.33,
+                      shgc: 0.45,
+                      fraction_operable: 0.67,
+                      interior_shading_factor_summer: 0.7,
+                      interior_shading_factor_winter: 0.85,
+                      wall_idref: 'Surface_2',
+                      coordinates: [{ x: 0, y: 7.4, z: 7 }, { x: 0, y: 7.4, z: 3 }, { x: 0, y: 4.4, z: 3 }, { x: 0, y: 4.4, z: 7 }])
+    hpxml.windows.add(id: 'Surface_2_-_Window_4_left',
+                      area: 12,
+                      azimuth: 270,
+                      ufactor: 0.33,
+                      shgc: 0.45,
+                      fraction_operable: 0.67,
+                      interior_shading_factor_summer: 0.7,
+                      interior_shading_factor_winter: 0.85,
+                      wall_idref: 'Surface_2',
+                      coordinates: [{ x: 0, y: 14.9, z: 7 }, { x: 0, y: 14.9, z: 3 }, { x: 0, y: 11.9, z: 3 }, { x: 0, y: 11.9, z: 7 }])
+    hpxml.windows.add(id: 'Surface_2_-_Window_5_left',
+                      area: 12,
+                      azimuth: 270,
+                      ufactor: 0.33,
+                      shgc: 0.45,
+                      fraction_operable: 0.67,
+                      interior_shading_factor_summer: 0.7,
+                      interior_shading_factor_winter: 0.85,
+                      wall_idref: 'Surface_2',
+                      coordinates: [{ x: 0, y: 10.6, z: 7 }, { x: 0, y: 10.6, z: 3 }, { x: 0, y: 7.6, z: 3 }, { x: 0, y: 7.6, z: 7 }])
+    hpxml.windows.add(id: 'Surface_2_-_Window_2_left',
+                      area: 12,
+                      azimuth: 270,
+                      ufactor: 0.33,
+                      shgc: 0.45,
+                      fraction_operable: 0.67,
+                      interior_shading_factor_summer: 0.7,
+                      interior_shading_factor_winter: 0.85,
+                      wall_idref: 'Surface_2',
+                      coordinates: [{ x: 0, y: 22.4, z: 7 }, { x: 0, y: 22.4, z: 3 }, { x: 0, y: 19.4, z: 3 }, { x: 0, y: 19.4, z: 7 }])
+    hpxml.windows.add(id: 'Surface_3_-_Window_5_back',
+                      area: 12,
+                      azimuth: 0,
+                      ufactor: 0.33,
+                      shgc: 0.45,
+                      fraction_operable: 0.67,
+                      interior_shading_factor_summer: 0.7,
+                      interior_shading_factor_winter: 0.85,
+                      wall_idref: 'Surface_3',
+                      coordinates: [{ x: 25.6, y: 30, z: 7 }, { x: 25.6, y: 30, z: 3 }, { x: 22.6, y: 30, z: 3 }, { x: 22.6, y: 30, z: 7 }])
+    hpxml.windows.add(id: 'Surface_3_-_Window_6_back',
+                      area: 12,
+                      azimuth: 0,
+                      ufactor: 0.33,
+                      shgc: 0.45,
+                      fraction_operable: 0.67,
+                      interior_shading_factor_summer: 0.7,
+                      interior_shading_factor_winter: 0.85,
+                      wall_idref: 'Surface_3',
+                      coordinates: [{ x: 22.4, y: 30, z: 7 }, { x: 22.4, y: 30, z: 3 }, { x: 19.4, y: 30, z: 3 }, { x: 19.4, y: 30, z: 7 }])
+    hpxml.windows.add(id: 'Surface_3_-_Window_3_back',
+                      area: 12,
+                      azimuth: 0,
+                      ufactor: 0.33,
+                      shgc: 0.45,
+                      fraction_operable: 0.67,
+                      interior_shading_factor_summer: 0.7,
+                      interior_shading_factor_winter: 0.85,
+                      wall_idref: 'Surface_3',
+                      coordinates: [{ x: 33.1, y: 30, z: 7 }, { x: 33.1, y: 30, z: 3 }, { x: 30.1, y: 30, z: 3 }, { x: 30.1, y: 30, z: 7 }])
+    hpxml.windows.add(id: 'Surface_3_-_Window_1_back',
+                      area: 12,
+                      azimuth: 0,
+                      ufactor: 0.33,
+                      shgc: 0.45,
+                      fraction_operable: 0.67,
+                      interior_shading_factor_summer: 0.7,
+                      interior_shading_factor_winter: 0.85,
+                      wall_idref: 'Surface_3',
+                      coordinates: [{ x: 40.6, y: 30, z: 7 }, { x: 40.6, y: 30, z: 3 }, { x: 37.6, y: 30, z: 3 }, { x: 37.6, y: 30, z: 7 }])
+    hpxml.windows.add(id: 'Surface_3_-_Window_7_back',
+                      area: 12,
+                      azimuth: 0,
+                      ufactor: 0.33,
+                      shgc: 0.45,
+                      fraction_operable: 0.67,
+                      interior_shading_factor_summer: 0.7,
+                      interior_shading_factor_winter: 0.85,
+                      wall_idref: 'Surface_3',
+                      coordinates: [{ x: 18.1, y: 30, z: 7 }, { x: 18.1, y: 30, z: 3 }, { x: 15.1, y: 30, z: 3 }, { x: 15.1, y: 30, z: 7 }])
+    hpxml.windows.add(id: 'Surface_3_-_Window_8_back',
+                      area: 12,
+                      azimuth: 0,
+                      ufactor: 0.33,
+                      shgc: 0.45,
+                      fraction_operable: 0.67,
+                      interior_shading_factor_summer: 0.7,
+                      interior_shading_factor_winter: 0.85,
+                      wall_idref: 'Surface_3',
+                      coordinates: [{ x: 14.9, y: 30, z: 7 }, { x: 14.9, y: 30, z: 3 }, { x: 11.9, y: 30, z: 3 }, { x: 11.9, y: 30, z: 7 }])
+    hpxml.windows.add(id: 'Surface_3_-_Window_4_back',
+                      area: 12,
+                      azimuth: 0,
+                      ufactor: 0.33,
+                      shgc: 0.45,
+                      fraction_operable: 0.67,
+                      interior_shading_factor_summer: 0.7,
+                      interior_shading_factor_winter: 0.85,
+                      wall_idref: 'Surface_3',
+                      coordinates: [{ x: 29.9, y: 30, z: 7 }, { x: 29.9, y: 30, z: 3 }, { x: 26.9, y: 30, z: 3 }, { x: 26.9, y: 30, z: 7 }])
+    hpxml.windows.add(id: 'Surface_3_-_Window_2_back',
+                      area: 12,
+                      azimuth: 0,
+                      ufactor: 0.33,
+                      shgc: 0.45,
+                      fraction_operable: 0.67,
+                      interior_shading_factor_summer: 0.7,
+                      interior_shading_factor_winter: 0.85,
+                      wall_idref: 'Surface_3',
+                      coordinates: [{ x: 37.4, y: 30, z: 7 }, { x: 37.4, y: 30, z: 3 }, { x: 34.4, y: 30, z: 3 }, { x: 34.4, y: 30, z: 7 }])
+    hpxml.windows.add(id: 'Surface_3_-_Window_9_back',
+                      area: 12,
+                      azimuth: 0,
+                      ufactor: 0.33,
+                      shgc: 0.45,
+                      fraction_operable: 0.67,
+                      interior_shading_factor_summer: 0.7,
+                      interior_shading_factor_winter: 0.85,
+                      wall_idref: 'Surface_3',
+                      coordinates: [{ x: 9, y: 30, z: 7 }, { x: 9, y: 30, z: 3 }, { x: 6, y: 30, z: 3 }, { x: 6, y: 30, z: 7 }])
+    hpxml.windows.add(id: 'Surface_5_-_Window_1_front',
+                      area: 12,
+                      azimuth: 180,
+                      ufactor: 0.33,
+                      shgc: 0.45,
+                      fraction_operable: 0.67,
+                      interior_shading_factor_summer: 0.7,
+                      interior_shading_factor_winter: 0.85,
+                      wall_idref: 'Surface_5',
+                      coordinates: [{ x: 4.4, y: 0, z: 7 }, { x: 4.4, y: 0, z: 3 }, { x: 7.4, y: 0, z: 3 }, { x: 7.4, y: 0, z: 7 }])
+    hpxml.windows.add(id: 'Surface_5_-_Window_2_front',
+                      area: 12,
+                      azimuth: 180,
+                      ufactor: 0.33,
+                      shgc: 0.45,
+                      fraction_operable: 0.67,
+                      interior_shading_factor_summer: 0.7,
+                      interior_shading_factor_winter: 0.85,
+                      wall_idref: 'Surface_5',
+                      coordinates: [{ x: 7.6, y: 0, z: 7 }, { x: 7.6, y: 0, z: 3 }, { x: 10.6, y: 0, z: 3 }, { x: 10.6, y: 0, z: 7 }])
+    hpxml.windows.add(id: 'Surface_5_-_Window_7_front',
+                      area: 12,
+                      azimuth: 180,
+                      ufactor: 0.33,
+                      shgc: 0.45,
+                      fraction_operable: 0.67,
+                      interior_shading_factor_summer: 0.7,
+                      interior_shading_factor_winter: 0.85,
+                      wall_idref: 'Surface_5',
+                      coordinates: [{ x: 26.9, y: 0, z: 7 }, { x: 26.9, y: 0, z: 3 }, { x: 29.9, y: 0, z: 3 }, { x: 29.9, y: 0, z: 7 }])
+    hpxml.windows.add(id: 'Surface_5_-_Window_4_front',
+                      area: 12,
+                      azimuth: 180,
+                      ufactor: 0.33,
+                      shgc: 0.45,
+                      fraction_operable: 0.67,
+                      interior_shading_factor_summer: 0.7,
+                      interior_shading_factor_winter: 0.85,
+                      wall_idref: 'Surface_5',
+                      coordinates: [{ x: 15.1, y: 0, z: 7 }, { x: 15.1, y: 0, z: 3 }, { x: 18.1, y: 0, z: 3 }, { x: 18.1, y: 0, z: 7 }])
+    hpxml.windows.add(id: 'Surface_5_-_Window_9_front',
+                      area: 12,
+                      azimuth: 180,
+                      ufactor: 0.33,
+                      shgc: 0.45,
+                      fraction_operable: 0.67,
+                      interior_shading_factor_summer: 0.7,
+                      interior_shading_factor_winter: 0.85,
+                      wall_idref: 'Surface_5',
+                      coordinates: [{ x: 36, y: 0, z: 7 }, { x: 36, y: 0, z: 3 }, { x: 39, y: 0, z: 3 }, { x: 39, y: 0, z: 7 }])
+    hpxml.windows.add(id: 'Surface_5_-_Window_3_front',
+                      area: 12,
+                      azimuth: 180,
+                      ufactor: 0.33,
+                      shgc: 0.45,
+                      fraction_operable: 0.67,
+                      interior_shading_factor_summer: 0.7,
+                      interior_shading_factor_winter: 0.85,
+                      wall_idref: 'Surface_5',
+                      coordinates: [{ x: 11.9, y: 0, z: 7 }, { x: 11.9, y: 0, z: 3 }, { x: 14.9, y: 0, z: 3 }, { x: 14.9, y: 0, z: 7 }])
+    hpxml.windows.add(id: 'Surface_5_-_Window_8_front',
+                      area: 12,
+                      azimuth: 180,
+                      ufactor: 0.33,
+                      shgc: 0.45,
+                      fraction_operable: 0.67,
+                      interior_shading_factor_summer: 0.7,
+                      interior_shading_factor_winter: 0.85,
+                      wall_idref: 'Surface_5',
+                      coordinates: [{ x: 30.1, y: 0, z: 7 }, { x: 30.1, y: 0, z: 3 }, { x: 33.1, y: 0, z: 3 }, { x: 33.1, y: 0, z: 7 }])
+    hpxml.windows.add(id: 'Surface_5_-_Window_5_front',
+                      area: 12,
+                      azimuth: 180,
+                      ufactor: 0.33,
+                      shgc: 0.45,
+                      fraction_operable: 0.67,
+                      interior_shading_factor_summer: 0.7,
+                      interior_shading_factor_winter: 0.85,
+                      wall_idref: 'Surface_5',
+                      coordinates: [{ x: 19.4, y: 0, z: 7 }, { x: 19.4, y: 0, z: 3 }, { x: 22.4, y: 0, z: 3 }, { x: 22.4, y: 0, z: 7 }])
+    hpxml.windows.add(id: 'Surface_5_-_Window_6_front',
+                      area: 12,
+                      azimuth: 180,
+                      ufactor: 0.33,
+                      shgc: 0.45,
+                      fraction_operable: 0.67,
+                      interior_shading_factor_summer: 0.7,
+                      interior_shading_factor_winter: 0.85,
+                      wall_idref: 'Surface_5',
+                      coordinates: [{ x: 22.6, y: 0, z: 7 }, { x: 22.6, y: 0, z: 3 }, { x: 25.6, y: 0, z: 3 }, { x: 25.6, y: 0, z: 7 }])
   elsif ['invalid_files/attached-multifamily-window-outside-condition.xml'].include? hpxml_file
     hpxml.windows[0].area = 50
     hpxml.windows[0].wall_idref = 'WallOtherMultifamilyBufferSpace'
@@ -3743,6 +4212,14 @@ def set_hpxml_doors(hpxml_file, hpxml)
                     area: 40,
                     azimuth: 180,
                     r_value: 4.4)
+  elsif ['base-enclosure-3d-coordinates.xml'].include? hpxml_file
+    hpxml.doors.clear()
+    hpxml.doors.add(id: 'Surface_5_-_Door_front',
+                    wall_idref: 'Surface_5',
+                    area: 80,
+                    azimuth: 180,
+                    r_value: 4.4,
+                    coordinates: [{ x: 0.5, y: 0, z: 7 }, { x: 0.5, y: 0, z: 0 }, { x: 11.93, y: 0, z: 0 }, { x: 11.93, y: 0, z: 7 }])
   elsif ['base-enclosure-garage.xml',
          'base-enclosure-2stories-garage.xml'].include? hpxml_file
     hpxml.doors.add(id: 'GarageDoorSouth',

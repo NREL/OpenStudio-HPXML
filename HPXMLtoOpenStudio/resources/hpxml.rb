@@ -232,7 +232,7 @@ class HPXML < Object
   WindowLayersSinglePane = 'single-pane'
   WindowLayersTriplePane = 'triple-pane'
 
-  def initialize(hpxml_path: nil, collapse_enclosure: true)
+  def initialize(hpxml_path: nil)
     @doc = nil
     @hpxml_path = hpxml_path
 
@@ -244,13 +244,29 @@ class HPXML < Object
     end
     from_oga(hpxml)
 
+    @collapse_enclosure = true
+    if @roofs.coordinates &&
+       @walls.coordinates &&
+       @foundation_walls.coordinates &&
+       @frame_floors.coordinates &&
+       @slabs.coordinates &&
+       @windows.coordinates &&
+       @skylights.coordinates &&
+       @doors.coordinates
+      @collapse_enclosure = false
+    end
+
     # Clean up
     delete_partition_surfaces()
     delete_tiny_surfaces()
     delete_adiabatic_subsurfaces()
-    if collapse_enclosure
+    if @collapse_enclosure
       collapse_enclosure_surfaces()
     end
+  end
+
+  def collapse_enclosure
+    return @collapse_enclosure
   end
 
   def has_space_type(space_type)
@@ -1287,13 +1303,20 @@ class HPXML < Object
         self << Roof.new(@hpxml_object, roof)
       end
     end
+
+    def coordinates
+      each do |roof|
+        return false if roof.coordinates.empty?
+      end
+      return true
+    end
   end
 
   class Roof < BaseElement
     ATTRS = [:id, :exterior_adjacent_to, :interior_adjacent_to, :area, :azimuth, :roof_type,
              :roof_color, :solar_absorptance, :emittance, :pitch, :radiant_barrier,
              :insulation_id, :insulation_assembly_r_value, :insulation_cavity_r_value,
-             :insulation_continuous_r_value]
+             :insulation_continuous_r_value, :coordinates]
     attr_accessor(*ATTRS)
 
     def skylights
@@ -1330,6 +1353,18 @@ class HPXML < Object
 
     def is_exterior_thermal_boundary
       return (is_exterior && is_thermal_boundary)
+    end
+
+    def add_coordinate(x: nil, y: nil, z: nil)
+      if @coordinates.nil?
+        @coordinates = []
+      end
+      if x.nil? && y.nil? && z.nil?
+        return
+      end
+
+      @coordinates << { x: x, y: y, z: z }
+      return @coordinates
     end
 
     def delete
@@ -1370,6 +1405,12 @@ class HPXML < Object
         XMLHelper.add_attribute(sys_id, 'id', @id + 'Insulation')
       end
       XMLHelper.add_element(insulation, 'AssemblyEffectiveRValue', to_float(@insulation_assembly_r_value)) unless @insulation_assembly_r_value.nil?
+      extension = XMLHelper.add_element(roof, 'extension')
+      add_coordinate
+      HPXML::add_coordinates(extension, @coordinates)
+      if XMLHelper.get_element(extension, 'Coordinates').nil?
+        extension.remove
+      end
     end
 
     def from_oga(roof)
@@ -1392,6 +1433,7 @@ class HPXML < Object
         @insulation_cavity_r_value = to_float_or_nil(XMLHelper.get_value(insulation, "Layer[InstallationType='cavity']/NominalRValue"))
         @insulation_continuous_r_value = to_float_or_nil(XMLHelper.get_value(insulation, "Layer[InstallationType='continuous']/NominalRValue"))
       end
+      @coordinates = HPXML::get_coordinates(roof)
     end
   end
 
@@ -1496,12 +1538,19 @@ class HPXML < Object
         self << Wall.new(@hpxml_object, wall)
       end
     end
+
+    def coordinates
+      each do |wall|
+        return false if wall.coordinates.empty?
+      end
+      return true
+    end
   end
 
   class Wall < BaseElement
     ATTRS = [:id, :exterior_adjacent_to, :interior_adjacent_to, :wall_type, :optimum_value_engineering,
              :area, :orientation, :azimuth, :siding, :solar_absorptance, :emittance, :insulation_id,
-             :insulation_assembly_r_value, :insulation_cavity_r_value, :insulation_continuous_r_value]
+             :insulation_assembly_r_value, :insulation_cavity_r_value, :insulation_continuous_r_value, :coordinates]
     attr_accessor(*ATTRS)
 
     def windows
@@ -1542,6 +1591,18 @@ class HPXML < Object
 
     def is_exterior_thermal_boundary
       return (is_exterior && is_thermal_boundary)
+    end
+
+    def add_coordinate(x: nil, y: nil, z: nil)
+      if @coordinates.nil?
+        @coordinates = []
+      end
+      if x.nil? && y.nil? && z.nil?
+        return
+      end
+
+      @coordinates << { x: x, y: y, z: z }
+      return @coordinates
     end
 
     def delete
@@ -1585,6 +1646,12 @@ class HPXML < Object
         XMLHelper.add_attribute(sys_id, 'id', @id + 'Insulation')
       end
       XMLHelper.add_element(insulation, 'AssemblyEffectiveRValue', to_float(@insulation_assembly_r_value)) unless @insulation_assembly_r_value.nil?
+      extension = XMLHelper.add_element(wall, 'extension')
+      add_coordinate
+      HPXML::add_coordinates(extension, @coordinates)
+      if XMLHelper.get_element(extension, 'Coordinates').nil?
+        extension.remove
+      end
     end
 
     def from_oga(wall)
@@ -1608,6 +1675,7 @@ class HPXML < Object
         @insulation_cavity_r_value = to_float_or_nil(XMLHelper.get_value(insulation, "Layer[InstallationType='cavity']/NominalRValue"))
         @insulation_continuous_r_value = to_float_or_nil(XMLHelper.get_value(insulation, "Layer[InstallationType='continuous']/NominalRValue"))
       end
+      @coordinates = HPXML::get_coordinates(wall)
     end
   end
 
@@ -1623,6 +1691,13 @@ class HPXML < Object
         self << FoundationWall.new(@hpxml_object, foundation_wall)
       end
     end
+
+    def coordinates
+      each do |foundation_wall|
+        return false if foundation_wall.coordinates.empty?
+      end
+      return true
+    end
   end
 
   class FoundationWall < BaseElement
@@ -1630,7 +1705,7 @@ class HPXML < Object
              :depth_below_grade, :insulation_id, :insulation_r_value, :insulation_interior_r_value,
              :insulation_interior_distance_to_top, :insulation_interior_distance_to_bottom,
              :insulation_exterior_r_value, :insulation_exterior_distance_to_top,
-             :insulation_exterior_distance_to_bottom, :insulation_assembly_r_value]
+             :insulation_exterior_distance_to_bottom, :insulation_assembly_r_value, :coordinates]
     attr_accessor(*ATTRS)
 
     def windows
@@ -1673,6 +1748,18 @@ class HPXML < Object
 
     def is_exterior_thermal_boundary
       return (is_exterior && is_thermal_boundary)
+    end
+
+    def add_coordinate(x: nil, y: nil, z: nil)
+      if @coordinates.nil?
+        @coordinates = []
+      end
+      if x.nil? && y.nil? && z.nil?
+        return
+      end
+
+      @coordinates << { x: x, y: y, z: z }
+      return @coordinates
     end
 
     def delete
@@ -1732,6 +1819,12 @@ class HPXML < Object
                              extensions: { 'DistanceToTopOfInsulation' => to_float_or_nil(@insulation_interior_distance_to_top),
                                            'DistanceToBottomOfInsulation' => to_float_or_nil(@insulation_interior_distance_to_bottom) })
       end
+      extension = XMLHelper.add_element(foundation_wall, 'extension')
+      add_coordinate
+      HPXML::add_coordinates(extension, @coordinates)
+      if XMLHelper.get_element(extension, 'Coordinates').nil?
+        extension.remove
+      end
     end
 
     def from_oga(foundation_wall)
@@ -1757,6 +1850,7 @@ class HPXML < Object
         @insulation_exterior_distance_to_bottom = to_float_or_nil(XMLHelper.get_value(insulation, "Layer[InstallationType='continuous - exterior']/extension/DistanceToBottomOfInsulation"))
         @insulation_assembly_r_value = to_float_or_nil(XMLHelper.get_value(insulation, 'AssemblyEffectiveRValue'))
       end
+      @coordinates = HPXML::get_coordinates(foundation_wall)
     end
   end
 
@@ -1772,12 +1866,19 @@ class HPXML < Object
         self << FrameFloor.new(@hpxml_object, frame_floor)
       end
     end
+
+    def coordinates
+      each do |frame_floor|
+        return false if frame_floor.coordinates.empty?
+      end
+      return true
+    end
   end
 
   class FrameFloor < BaseElement
     ATTRS = [:id, :exterior_adjacent_to, :interior_adjacent_to, :area, :insulation_id,
              :insulation_assembly_r_value, :insulation_cavity_r_value, :insulation_continuous_r_value,
-             :other_space_above_or_below]
+             :other_space_above_or_below, :coordinates]
     attr_accessor(*ATTRS)
 
     def is_ceiling
@@ -1816,6 +1917,18 @@ class HPXML < Object
       return (is_exterior && is_thermal_boundary)
     end
 
+    def add_coordinate(x: nil, y: nil, z: nil)
+      if @coordinates.nil?
+        @coordinates = []
+      end
+      if x.nil? && y.nil? && z.nil?
+        return
+      end
+
+      @coordinates << { x: x, y: y, z: z }
+      return @coordinates
+    end
+
     def delete
       @hpxml_object.frame_floors.delete(self)
       @hpxml_object.attics.each do |attic|
@@ -1851,6 +1964,12 @@ class HPXML < Object
       XMLHelper.add_element(insulation, 'AssemblyEffectiveRValue', to_float(@insulation_assembly_r_value)) unless @insulation_assembly_r_value.nil?
       HPXML::add_extension(parent: frame_floor,
                            extensions: { 'OtherSpaceAboveOrBelow' => @other_space_above_or_below })
+      extension = XMLHelper.add_element(frame_floor, 'extension')
+      add_coordinate
+      HPXML::add_coordinates(extension, @coordinates)
+      if XMLHelper.get_element(extension, 'Coordinates').nil?
+        extension.remove
+      end
     end
 
     def from_oga(frame_floor)
@@ -1868,6 +1987,7 @@ class HPXML < Object
         @insulation_continuous_r_value = to_float_or_nil(XMLHelper.get_value(insulation, "Layer[InstallationType='continuous']/NominalRValue"))
       end
       @other_space_above_or_below = XMLHelper.get_value(frame_floor, 'extension/OtherSpaceAboveOrBelow')
+      @coordinates = HPXML::get_coordinates(frame_floor)
     end
   end
 
@@ -1883,6 +2003,13 @@ class HPXML < Object
         self << Slab.new(@hpxml_object, slab)
       end
     end
+
+    def coordinates
+      each do |slab|
+        return false if slab.coordinates.empty?
+      end
+      return true
+    end
   end
 
   class Slab < BaseElement
@@ -1890,7 +2017,7 @@ class HPXML < Object
              :perimeter_insulation_depth, :under_slab_insulation_width,
              :under_slab_insulation_spans_entire_slab, :depth_below_grade, :carpet_fraction,
              :carpet_r_value, :perimeter_insulation_id, :perimeter_insulation_r_value,
-             :under_slab_insulation_id, :under_slab_insulation_r_value]
+             :under_slab_insulation_id, :under_slab_insulation_r_value, :coordinates]
     attr_accessor(*ATTRS)
 
     def exterior_adjacent_to
@@ -1911,6 +2038,18 @@ class HPXML < Object
 
     def is_exterior_thermal_boundary
       return (is_exterior && is_thermal_boundary)
+    end
+
+    def add_coordinate(x: nil, y: nil, z: nil)
+      if @coordinates.nil?
+        @coordinates = []
+      end
+      if x.nil? && y.nil? && z.nil?
+        return
+      end
+
+      @coordinates << { x: x, y: y, z: z }
+      return @coordinates
     end
 
     def delete
@@ -1967,9 +2106,14 @@ class HPXML < Object
       layer = XMLHelper.add_element(insulation, 'Layer')
       XMLHelper.add_element(layer, 'InstallationType', 'continuous')
       XMLHelper.add_element(layer, 'NominalRValue', to_float(@under_slab_insulation_r_value)) unless @under_slab_insulation_r_value.nil?
-      HPXML::add_extension(parent: slab,
-                           extensions: { 'CarpetFraction' => to_float_or_nil(@carpet_fraction),
-                                         'CarpetRValue' => to_float_or_nil(@carpet_r_value) })
+      extension = XMLHelper.add_element(slab, 'extension')
+      XMLHelper.add_element(extension, 'CarpetFraction', to_float_or_nil(@carpet_fraction)) unless @carpet_fraction.nil?
+      XMLHelper.add_element(extension, 'CarpetRValue', to_float_or_nil(@carpet_r_value)) unless @carpet_r_value.nil?
+      add_coordinate
+      HPXML::add_coordinates(extension, @coordinates)
+      if XMLHelper.get_element(extension, 'CarpetFraction').nil? && XMLHelper.get_element(extension, 'CarpetRValue').nil? && XMLHelper.get_element(extension, 'Coordinates').nil?
+        extension.remove
+      end
     end
 
     def from_oga(slab)
@@ -1996,6 +2140,7 @@ class HPXML < Object
         under_slab_insulation_id = HPXML::get_id(under_slab_insulation)
         @under_slab_insulation_r_value = to_float_or_nil(XMLHelper.get_value(under_slab_insulation, "Layer[InstallationType='continuous']/NominalRValue"))
       end
+      @coordinates = HPXML::get_coordinates(slab)
     end
   end
 
@@ -2011,6 +2156,13 @@ class HPXML < Object
         self << Window.new(@hpxml_object, window)
       end
     end
+
+    def coordinates
+      each do |window|
+        return false if window.coordinates.empty?
+      end
+      return true
+    end
   end
 
   class Window < BaseElement
@@ -2018,7 +2170,7 @@ class HPXML < Object
              :glass_type, :gas_fill, :ufactor, :shgc, :interior_shading_factor_summer,
              :interior_shading_factor_winter, :exterior_shading, :overhangs_depth,
              :overhangs_distance_to_top_of_window, :overhangs_distance_to_bottom_of_window,
-             :fraction_operable, :wall_idref]
+             :fraction_operable, :wall_idref, :coordinates]
     attr_accessor(*ATTRS)
 
     def wall
@@ -2046,6 +2198,18 @@ class HPXML < Object
 
     def is_exterior_thermal_boundary
       return (is_exterior && is_thermal_boundary)
+    end
+
+    def add_coordinate(x: nil, y: nil, z: nil)
+      if @coordinates.nil?
+        @coordinates = []
+      end
+      if x.nil? && y.nil? && z.nil?
+        return
+      end
+
+      @coordinates << { x: x, y: y, z: z }
+      return @coordinates
     end
 
     def delete
@@ -2102,6 +2266,12 @@ class HPXML < Object
         attached_to_wall = XMLHelper.add_element(window, 'AttachedToWall')
         XMLHelper.add_attribute(attached_to_wall, 'idref', @wall_idref)
       end
+      extension = XMLHelper.add_element(window, 'extension')
+      add_coordinate
+      HPXML::add_coordinates(extension, @coordinates)
+      if XMLHelper.get_element(extension, 'Coordinates').nil?
+        extension.remove
+      end
     end
 
     def from_oga(window)
@@ -2126,6 +2296,7 @@ class HPXML < Object
       @overhangs_distance_to_bottom_of_window = to_float_or_nil(XMLHelper.get_value(window, 'Overhangs/DistanceToBottomOfWindow'))
       @fraction_operable = to_float_or_nil(XMLHelper.get_value(window, 'FractionOperable'))
       @wall_idref = HPXML::get_idref(XMLHelper.get_element(window, 'AttachedToWall'))
+      @coordinates = HPXML::get_coordinates(window)
     end
   end
 
@@ -2141,11 +2312,18 @@ class HPXML < Object
         self << Skylight.new(@hpxml_object, skylight)
       end
     end
+
+    def coordinates
+      each do |skylight|
+        return false if skylight.coordinates.empty?
+      end
+      return true
+    end
   end
 
   class Skylight < BaseElement
     ATTRS = [:id, :area, :azimuth, :orientation, :frame_type, :aluminum_thermal_break, :glass_layers,
-             :glass_type, :gas_fill, :ufactor, :shgc, :exterior_shading, :roof_idref]
+             :glass_type, :gas_fill, :ufactor, :shgc, :exterior_shading, :roof_idref, :coordinates]
     attr_accessor(*ATTRS)
 
     def roof
@@ -2175,6 +2353,18 @@ class HPXML < Object
       return (is_exterior && is_thermal_boundary)
     end
 
+    def add_coordinate(x: nil, y: nil, z: nil)
+      if @coordinates.nil?
+        @coordinates = []
+      end
+      if x.nil? && y.nil? && z.nil?
+        return
+      end
+
+      @coordinates << { x: x, y: y, z: z }
+      return @coordinates
+    end
+
     def delete
       @hpxml_object.skylights.delete(self)
     end
@@ -2200,6 +2390,12 @@ class HPXML < Object
         attached_to_roof = XMLHelper.add_element(skylight, 'AttachedToRoof')
         XMLHelper.add_attribute(attached_to_roof, 'idref', @roof_idref)
       end
+      extension = XMLHelper.add_element(skylight, 'extension')
+      add_coordinate
+      HPXML::add_coordinates(extension, @coordinates)
+      if XMLHelper.get_element(extension, 'Coordinates').nil?
+        extension.remove
+      end
     end
 
     def from_oga(skylight)
@@ -2218,6 +2414,7 @@ class HPXML < Object
       @shgc = to_float_or_nil(XMLHelper.get_value(skylight, 'SHGC'))
       @exterior_shading = XMLHelper.get_value(skylight, 'ExteriorShading/Type')
       @roof_idref = HPXML::get_idref(XMLHelper.get_element(skylight, 'AttachedToRoof'))
+      @coordinates = HPXML::get_coordinates(skylight)
     end
   end
 
@@ -2233,10 +2430,17 @@ class HPXML < Object
         self << Door.new(@hpxml_object, door)
       end
     end
+
+    def coordinates
+      each do |door|
+        return false if door.coordinates.empty?
+      end
+      return true
+    end
   end
 
   class Door < BaseElement
-    ATTRS = [:id, :wall_idref, :area, :azimuth, :r_value]
+    ATTRS = [:id, :wall_idref, :area, :azimuth, :r_value, :coordinates]
     attr_accessor(*ATTRS)
 
     def wall
@@ -2266,6 +2470,18 @@ class HPXML < Object
       return (is_exterior && is_thermal_boundary)
     end
 
+    def add_coordinate(x: nil, y: nil, z: nil)
+      if @coordinates.nil?
+        @coordinates = []
+      end
+      if x.nil? && y.nil? && z.nil?
+        return
+      end
+
+      @coordinates << { x: x, y: y, z: z }
+      return @coordinates
+    end
+
     def delete
       @hpxml_object.doors.delete(self)
     end
@@ -2290,6 +2506,12 @@ class HPXML < Object
       XMLHelper.add_element(door, 'Area', to_float(@area)) unless @area.nil?
       XMLHelper.add_element(door, 'Azimuth', to_integer(@azimuth)) unless @azimuth.nil?
       XMLHelper.add_element(door, 'RValue', to_float(@r_value)) unless @r_value.nil?
+      extension = XMLHelper.add_element(door, 'extension')
+      add_coordinate
+      HPXML::add_coordinates(extension, @coordinates)
+      if XMLHelper.get_element(extension, 'Coordinates').nil?
+        extension.remove
+      end
     end
 
     def from_oga(door)
@@ -2300,6 +2522,7 @@ class HPXML < Object
       @area = to_float_or_nil(XMLHelper.get_value(door, 'Area'))
       @azimuth = to_integer_or_nil(XMLHelper.get_value(door, 'Azimuth'))
       @r_value = to_float_or_nil(XMLHelper.get_value(door, 'RValue'))
+      @coordinates = HPXML::get_coordinates(door)
     end
   end
 
@@ -4154,7 +4377,8 @@ class HPXML < Object
                        :perimeter_insulation_id,
                        :under_slab_insulation_id,
                        :area,
-                       :exposed_perimeter]
+                       :exposed_perimeter,
+                       :coordinates]
 
     # Look for pairs of surfaces that can be collapsed
     surf_types.each do |surf_type, surfaces|
@@ -4365,6 +4589,36 @@ class HPXML < Object
 
   def self.get_idref(element)
     return XMLHelper.get_attribute_value(element, 'idref')
+  end
+
+  def self.get_coordinate(element)
+    return if element.nil?
+
+    return {
+      x: to_float_or_nil(XMLHelper.get_value(element, 'x')),
+      y: to_float_or_nil(XMLHelper.get_value(element, 'y')),
+      z: to_float_or_nil(XMLHelper.get_value(element, 'z'))
+    }
+  end
+
+  def self.add_coordinates(extension, coordinates)
+    if (not coordinates.empty?)
+      coordinates_element = XMLHelper.add_element(extension, 'Coordinates')
+      coordinates.each do |coordinate|
+        coordinate_element = XMLHelper.add_element(coordinates_element, 'Coordinate')
+        XMLHelper.add_element(coordinate_element, 'x', Float(coordinate[:x])) unless coordinate[:x].nil?
+        XMLHelper.add_element(coordinate_element, 'y', Float(coordinate[:y])) unless coordinate[:y].nil?
+        XMLHelper.add_element(coordinate_element, 'z', Float(coordinate[:z])) unless coordinate[:z].nil?
+      end
+    end
+  end
+
+  def self.get_coordinates(planar_surface)
+    coordinates = []
+    XMLHelper.get_elements(planar_surface, 'extension/Coordinates/Coordinate') do |coordinate|
+      coordinates << HPXML::get_coordinate(coordinate)
+    end
+    return coordinates
   end
 
   def self.add_extension(parent:,

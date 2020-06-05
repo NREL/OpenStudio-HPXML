@@ -1035,6 +1035,10 @@
               <CarpetFraction>0.0</CarpetFraction>
               <CarpetRValue>0.0</CarpetRValue>
             </extension>
+            <extension>
+              <CarpetFraction>0.0</CarpetFraction>
+              <CarpetRValue>0.0</CarpetRValue>
+            </extension>
           </Slab>
           <Slab>
             <SystemIdentifier id='Slab2'/>
@@ -1058,6 +1062,10 @@
                 <NominalRValue>0.0</NominalRValue>
               </Layer>
             </UnderSlabInsulation>
+            <extension>
+              <CarpetFraction>0.0</CarpetFraction>
+              <CarpetRValue>0.0</CarpetRValue>
+            </extension>
             <extension>
               <CarpetFraction>0.0</CarpetFraction>
               <CarpetRValue>0.0</CarpetRValue>
@@ -1089,6 +1097,10 @@
               <CarpetFraction>0.0</CarpetFraction>
               <CarpetRValue>0.0</CarpetRValue>
             </extension>
+            <extension>
+              <CarpetFraction>0.0</CarpetFraction>
+              <CarpetRValue>0.0</CarpetRValue>
+            </extension>
           </Slab>
           <Slab>
             <SystemIdentifier id='Slab4'/>
@@ -1112,6 +1124,10 @@
                 <NominalRValue>0.0</NominalRValue>
               </Layer>
             </UnderSlabInsulation>
+            <extension>
+              <CarpetFraction>0.0</CarpetFraction>
+              <CarpetRValue>0.0</CarpetRValue>
+            </extension>
             <extension>
               <CarpetFraction>0.0</CarpetFraction>
               <CarpetRValue>0.0</CarpetRValue>
@@ -1143,6 +1159,10 @@
               <CarpetFraction>0.0</CarpetFraction>
               <CarpetRValue>0.0</CarpetRValue>
             </extension>
+            <extension>
+              <CarpetFraction>0.0</CarpetFraction>
+              <CarpetRValue>0.0</CarpetRValue>
+            </extension>
           </Slab>
           <Slab>
             <SystemIdentifier id='Slab6'/>
@@ -1166,6 +1186,10 @@
                 <NominalRValue>0.0</NominalRValue>
               </Layer>
             </UnderSlabInsulation>
+            <extension>
+              <CarpetFraction>0.0</CarpetFraction>
+              <CarpetRValue>0.0</CarpetRValue>
+            </extension>
             <extension>
               <CarpetFraction>0.0</CarpetFraction>
               <CarpetRValue>0.0</CarpetRValue>
@@ -1197,6 +1221,10 @@
               <CarpetFraction>0.0</CarpetFraction>
               <CarpetRValue>0.0</CarpetRValue>
             </extension>
+            <extension>
+              <CarpetFraction>0.0</CarpetFraction>
+              <CarpetRValue>0.0</CarpetRValue>
+            </extension>
           </Slab>
           <Slab>
             <SystemIdentifier id='Slab8'/>
@@ -1220,6 +1248,10 @@
                 <NominalRValue>0.0</NominalRValue>
               </Layer>
             </UnderSlabInsulation>
+            <extension>
+              <CarpetFraction>0.0</CarpetFraction>
+              <CarpetRValue>0.0</CarpetRValue>
+            </extension>
             <extension>
               <CarpetFraction>0.0</CarpetFraction>
               <CarpetRValue>0.0</CarpetRValue>
@@ -1251,6 +1283,10 @@
               <CarpetFraction>0.0</CarpetFraction>
               <CarpetRValue>0.0</CarpetRValue>
             </extension>
+            <extension>
+              <CarpetFraction>0.0</CarpetFraction>
+              <CarpetRValue>0.0</CarpetRValue>
+            </extension>
           </Slab>
           <Slab>
             <SystemIdentifier id='TinySlab'/>
@@ -1274,6 +1310,10 @@
                 <NominalRValue>0.0</NominalRValue>
               </Layer>
             </UnderSlabInsulation>
+            <extension>
+              <CarpetFraction>0.0</CarpetFraction>
+              <CarpetRValue>0.0</CarpetRValue>
+            </extension>
             <extension>
               <CarpetFraction>0.0</CarpetFraction>
               <CarpetRValue>0.0</CarpetRValue>

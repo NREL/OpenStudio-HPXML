@@ -363,6 +363,12 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     arg.setDefaultValue(Constants.Auto)
     args << arg
 
+    arg = OpenStudio::Measure::OSArgument::makeBoolArgument('geometry_export_3d_coordinates', true)
+    arg.setDisplayName('Geometry: Export 3D Coordinates')
+    arg.setDescription('Whether to export the 3D coordinates of each surface and subsurface.')
+    arg.setDefaultValue(false)
+    args << arg
+
     arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('floor_assembly_r', true)
     arg.setDisplayName('Floor: Assembly R-value')
     arg.setUnits('h-ft^2-R/Btu')
@@ -2279,6 +2285,7 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
              geometry_num_bedrooms: runner.getIntegerArgumentValue('geometry_num_bedrooms', user_arguments),
              geometry_num_bathrooms: runner.getStringArgumentValue('geometry_num_bathrooms', user_arguments),
              geometry_num_occupants: runner.getStringArgumentValue('geometry_num_occupants', user_arguments),
+             geometry_export_3d_coordinates: runner.getBoolArgumentValue('geometry_export_3d_coordinates', user_arguments),
              floor_assembly_r: runner.getDoubleArgumentValue('floor_assembly_r', user_arguments),
              foundation_wall_insulation_r: runner.getDoubleArgumentValue('foundation_wall_insulation_r', user_arguments),
              foundation_wall_insulation_distance_to_top: runner.getDoubleArgumentValue('foundation_wall_insulation_distance_to_top', user_arguments),
@@ -2979,6 +2986,15 @@ class HPXMLFile
                       pitch: pitch,
                       radiant_barrier: args[:roof_radiant_barrier],
                       insulation_assembly_r_value: args[:roof_assembly_r])
+
+      next unless args[:geometry_export_3d_coordinates]
+
+      surface.vertices.each do |vertex|
+        x = UnitConversions.convert(vertex.x, 'm', 'ft').round(2)
+        y = UnitConversions.convert(vertex.y, 'm', 'ft').round(2)
+        z = UnitConversions.convert(vertex.z + surface.space.get.zOrigin, 'm', 'ft').round(2)
+        hpxml.roofs[-1].add_coordinate(x: x, y: y, z: z)
+      end
     end
   end
 
@@ -3030,6 +3046,15 @@ class HPXMLFile
         hpxml.walls[-1].insulation_assembly_r_value = args[:wall_assembly_r]
       else
         hpxml.walls[-1].insulation_assembly_r_value = 4.0 # Uninsulated
+      end
+
+      next unless args[:geometry_export_3d_coordinates]
+
+      surface.vertices.each do |vertex|
+        x = UnitConversions.convert(vertex.x, 'm', 'ft').round(2)
+        y = UnitConversions.convert(vertex.y, 'm', 'ft').round(2)
+        z = UnitConversions.convert(vertex.z + surface.space.get.zOrigin, 'm', 'ft').round(2)
+        hpxml.walls[-1].add_coordinate(x: x, y: y, z: z)
       end
     end
   end
@@ -3089,7 +3114,9 @@ class HPXMLFile
 
       next if interior_adjacent_to == exterior_adjacent_to
       next if (surface.surfaceType == 'RoofCeiling') && (exterior_adjacent_to == HPXML::LocationOutside)
-      next if [HPXML::LocationLivingSpace, HPXML::LocationBasementConditioned].include? exterior_adjacent_to
+      unless args[:geometry_export_3d_coordinates]
+        next if [HPXML::LocationLivingSpace, HPXML::LocationBasementConditioned].include? exterior_adjacent_to
+      end
 
       hpxml.frame_floors.add(id: "#{surface.name}",
                              exterior_adjacent_to: exterior_adjacent_to,
@@ -3105,6 +3132,15 @@ class HPXMLFile
         end
       else
         hpxml.frame_floors[-1].insulation_assembly_r_value = 2.1 # Uninsulated
+      end
+
+      next unless args[:geometry_export_3d_coordinates]
+
+      surface.vertices.each do |vertex|
+        x = UnitConversions.convert(vertex.x, 'm', 'ft').round(2)
+        y = UnitConversions.convert(vertex.y, 'm', 'ft').round(2)
+        z = UnitConversions.convert(vertex.z + surface.space.get.zOrigin, 'm', 'ft').round(2)
+        hpxml.frame_floors[-1].add_coordinate(x: x, y: y, z: z)
       end
     end
   end
@@ -3151,6 +3187,15 @@ class HPXMLFile
                       depth_below_grade: depth_below_grade,
                       carpet_fraction: args[:slab_carpet_fraction],
                       carpet_r_value: args[:slab_carpet_r_value])
+
+      next unless args[:geometry_export_3d_coordinates]
+
+      surface.vertices.each do |vertex|
+        x = UnitConversions.convert(vertex.x, 'm', 'ft').round(2)
+        y = UnitConversions.convert(vertex.y, 'm', 'ft').round(2)
+        z = UnitConversions.convert(vertex.z + surface.space.get.zOrigin, 'm', 'ft').round(2)
+        hpxml.slabs[-1].add_coordinate(x: x, y: y, z: z)
+      end
     end
   end
 
@@ -3220,6 +3265,15 @@ class HPXMLFile
                           interior_shading_factor_summer: args[:window_interior_shading_summer],
                           fraction_operable: args[:window_fraction_operable],
                           wall_idref: "#{surface.name}")
+
+        next unless args[:geometry_export_3d_coordinates]
+
+        sub_surface.vertices.each do |vertex|
+          x = UnitConversions.convert(vertex.x, 'm', 'ft').round(2)
+          y = UnitConversions.convert(vertex.y, 'm', 'ft').round(2)
+          z = UnitConversions.convert(vertex.z + sub_surface.space.get.zOrigin, 'm', 'ft').round(2)
+          hpxml.windows[-1].add_coordinate(x: x, y: y, z: z)
+        end
       end # sub_surfaces
     end # surfaces
   end
@@ -3237,6 +3291,15 @@ class HPXMLFile
                             ufactor: args[:skylight_ufactor],
                             shgc: args[:skylight_shgc],
                             roof_idref: "#{surface.name}")
+
+        next unless args[:geometry_export_3d_coordinates]
+
+        sub_surface.vertices.each do |vertex|
+          x = UnitConversions.convert(vertex.x, 'm', 'ft').round(2)
+          y = UnitConversions.convert(vertex.y, 'm', 'ft').round(2)
+          z = UnitConversions.convert(vertex.z + sub_surface.space.get.zOrigin, 'm', 'ft').round(2)
+          hpxml.skylights[-1].add_coordinate(x: x, y: y, z: z)
+        end
       end
     end
   end
@@ -3253,6 +3316,15 @@ class HPXMLFile
                         area: UnitConversions.convert(sub_surface.grossArea, 'm^2', 'ft^2').round,
                         azimuth: args[:geometry_orientation],
                         r_value: args[:door_rvalue])
+
+        next unless args[:geometry_export_3d_coordinates]
+
+        sub_surface.vertices.each do |vertex|
+          x = UnitConversions.convert(vertex.x, 'm', 'ft').round(2)
+          y = UnitConversions.convert(vertex.y, 'm', 'ft').round(2)
+          z = UnitConversions.convert(vertex.z + sub_surface.space.get.zOrigin, 'm', 'ft').round(2)
+          hpxml.doors[-1].add_coordinate(x: x, y: y, z: z)
+        end
       end
     end
   end
