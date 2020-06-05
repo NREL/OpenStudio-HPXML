@@ -454,9 +454,9 @@ class HotWaterAndAppliances
 
       gpd = (ler - cw_appl) * elec_h20 * acy / 365.0
     else
-      ncy = (3.0 / 2.847) * (164 + nbeds * 45.6)
+      ncy = (3.0 / 2.874) * (164 + nbeds * 45.6)
       if Constants.ERIVersions.index(eri_version) >= Constants.ERIVersions.index('2014A')
-        ncy = (3.0 / 2.847) * (164 + nbeds * 46.5)
+        ncy = (3.0 / 2.874) * (164 + nbeds * 46.5)
       end
       acy = ncy * ((3.0 * 2.08 + 1.59) / (cap * 2.08 + 1.59)) # Adjusted Cycles per Year
       annual_kwh = ((ler / 392.0) - ((ler * elec_rate - agc) / (21.9825 * elec_rate - gas_rate) / 392.0) * 21.9825) * acy
