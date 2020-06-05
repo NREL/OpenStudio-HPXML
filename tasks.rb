@@ -2111,6 +2111,14 @@ def set_hpxml_windows(hpxml_file, hpxml)
       window.interior_shading_factor_winter = nil
       window.fraction_operable = nil
     end
+  elsif ['base-enclosure-attached-multifamily.xml'].include? hpxml_file
+    hpxml.windows.add(id: 'InteriorWindow',
+                      area: 50,
+                      azimuth: 270,
+                      ufactor: 0.33,
+                      shgc: 0.45,
+                      fraction_operable: 0.67,
+                      wall_idref: 'WallOtherMultifamilyBufferSpace')
   end
 end
 
