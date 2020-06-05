@@ -244,6 +244,8 @@ class HotWaterAndAppliances
       frac_lat = 0.0
     end
 
+    fail 'Negative energy use calculated for cooking range/oven.' if (annual_kwh < 0) || (annual_therm < 0)
+
     return annual_kwh, annual_therm, frac_sens, frac_lat
   end
 
@@ -300,6 +302,9 @@ class HotWaterAndAppliances
       frac_sens = 0.0
       frac_lat = 0.0
     end
+
+    fail 'Negative energy use calculated for dishwasher.' if annual_kwh < 0
+    fail 'Negative hot water use calculated for dishwasher.' if gpd < 0
 
     return annual_kwh, frac_sens, frac_lat, gpd
   end
@@ -401,6 +406,8 @@ class HotWaterAndAppliances
       frac_lat = 0.0
     end
 
+    fail 'Negative energy use calculated for clothes dryer.' if (annual_kwh < 0) || (annual_therm < 0)
+
     return annual_kwh, annual_therm, frac_sens, frac_lat
   end
 
@@ -477,6 +484,9 @@ class HotWaterAndAppliances
       frac_lat = 0.0
     end
 
+    fail 'Negative energy use calculated for clothes washer.' if annual_kwh < 0
+    fail 'Negative hot water use calculated for clothes washer.' if gpd < 0
+
     return annual_kwh, frac_sens, frac_lat, gpd
   end
 
@@ -503,6 +513,8 @@ class HotWaterAndAppliances
       frac_sens = 0.0
       frac_lat = 0.0
     end
+
+    fail 'Negative energy use calculated for refrigerator.' if annual_kwh < 0
 
     return annual_kwh, frac_sens, frac_lat
   end
