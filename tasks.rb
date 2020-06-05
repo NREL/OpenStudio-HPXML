@@ -5685,8 +5685,8 @@ if ARGV[0].to_sym == :download_weather
 end
 
 if ARGV[0].to_sym == :update_version
-  version_change = { from: '0.8.0',
-                     to: '0.9.0' }
+  version_change = { from: '0.9.0',
+                     to: '0.10.0' }
 
   file_names = ['workflow/run_simulation.rb']
 
@@ -5696,6 +5696,7 @@ if ARGV[0].to_sym == :update_version
 
     # To write changes to the file, use:
     File.open(file_name, 'w') { |file| file.puts new_contents }
+    puts "Updated from version #{version_change[:from]} to version #{version_change[:to]} in #{file_name}."
   end
 
   puts 'Done. Now check all changed files before committing.'

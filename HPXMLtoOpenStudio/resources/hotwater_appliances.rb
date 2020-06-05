@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 class HotWaterAndAppliances
-  def self.apply(model, weather, living_space,
+  def self.apply(model, runner, weather, living_space,
                  cfa, nbeds, ncfl, has_uncond_bsmnt, wh_setpoint,
                  clothes_washer, cw_space, clothes_dryer, cd_space,
                  dishwasher, dw_space, refrigerator, rf_space, cooking_range, cook_space, oven,
@@ -11,6 +11,8 @@ class HotWaterAndAppliances
                  recirc_pump_power, dwhr_present,
                  dwhr_facilities_connected, dwhr_is_equal_flow,
                  dwhr_efficiency, dhw_loop_fracs, eri_version, dhw_map)
+
+    @runner = runner
 
     # Schedules init
     timestep_minutes = (60.0 / model.getTimestep.numberOfTimestepsPerHour).to_i
@@ -244,6 +246,10 @@ class HotWaterAndAppliances
       frac_lat = 0.0
     end
 
+    if not @runner.nil?
+      @runner.registerWarning('Negative energy use calculated for cooking range/oven; this may indicate incorrect ENERGY GUIDE label inputs.') if (annual_kwh < 0) || (annual_therm < 0)
+    end
+
     return annual_kwh, annual_therm, frac_sens, frac_lat
   end
 
@@ -301,6 +307,11 @@ class HotWaterAndAppliances
       frac_lat = 0.0
     end
 
+    if not @runner.nil?
+      @runner.registerWarning('Negative energy use calculated for dishwasher; this may indicate incorrect ENERGY GUIDE label inputs.') if annual_kwh < 0
+      @runner.registerWarning('Negative hot water use calculated for dishwasher; this may indicate incorrect ENERGY GUIDE label inputs.') if gpd < 0
+    end
+
     return annual_kwh, frac_sens, frac_lat, gpd
   end
 
@@ -318,13 +329,8 @@ class HotWaterAndAppliances
 
   def self.get_clothes_dryer_default_values(eri_version, fuel_type)
     if Constants.ERIVersions.index(eri_version) >= Constants.ERIVersions.index('2019A')
-      if fuel_type == HPXML::FuelTypeElectricity
-        return { combined_energy_factor: 3.01, # FIXME: Need to verify
-                 control_type: HPXML::ClothesDryerControlTypeTimer }
-      else
-        return { combined_energy_factor: 3.01, # FIXME: Need to verify
-                 control_type: HPXML::ClothesDryerControlTypeTimer }
-      end
+      return { combined_energy_factor: 3.01,
+               control_type: HPXML::ClothesDryerControlTypeTimer }
     else
       if fuel_type == HPXML::FuelTypeElectricity
         return { combined_energy_factor: 2.62,
@@ -401,6 +407,10 @@ class HotWaterAndAppliances
       frac_lat = 0.0
     end
 
+    if not @runner.nil?
+      @runner.registerWarning('Negative energy use calculated for clothes dryer; this may indicate incorrect ENERGY GUIDE label inputs.') if (annual_kwh < 0) || (annual_therm < 0)
+    end
+
     return annual_kwh, annual_therm, frac_sens, frac_lat
   end
 
@@ -452,10 +462,7 @@ class HotWaterAndAppliances
 
       gpd = (ler - cw_appl) * elec_h20 * acy / 365.0
     else
-      ncy = (3.0 / 2.847) * (164 + nbeds * 45.6)
-      if Constants.ERIVersions.index(eri_version) >= Constants.ERIVersions.index('2014A')
-        ncy = (3.0 / 2.847) * (164 + nbeds * 46.5)
-      end
+      ncy = (3.0 / 2.874) * (164 + nbeds * 46.5)
       acy = ncy * ((3.0 * 2.08 + 1.59) / (cap * 2.08 + 1.59)) # Adjusted Cycles per Year
       annual_kwh = ((ler / 392.0) - ((ler * elec_rate - agc) / (21.9825 * elec_rate - gas_rate) / 392.0) * 21.9825) * acy
 
@@ -475,6 +482,11 @@ class HotWaterAndAppliances
     else # Internal gains outside unit
       frac_sens = 0.0
       frac_lat = 0.0
+    end
+
+    if not @runner.nil?
+      @runner.registerWarning('Negative energy use calculated for clothes washer; this may indicate incorrect ENERGY GUIDE label inputs.') if annual_kwh < 0
+      @runner.registerWarning('Negative hot water use calculated for clothes washer; this may indicate incorrect ENERGY GUIDE label inputs.') if gpd < 0
     end
 
     return annual_kwh, frac_sens, frac_lat, gpd
@@ -502,6 +514,10 @@ class HotWaterAndAppliances
     else # Internal gains outside unit
       frac_sens = 0.0
       frac_lat = 0.0
+    end
+
+    if not @runner.nil?
+      @runner.registerWarning('Negative energy use calculated for refrigerator; this may indicate incorrect ENERGY GUIDE label inputs.') if annual_kwh < 0
     end
 
     return annual_kwh, frac_sens, frac_lat
