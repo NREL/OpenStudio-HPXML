@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 class HotWaterAndAppliances
-  def self.apply(model, weather, living_space,
+  def self.apply(model, runner, weather, living_space,
                  cfa, nbeds, ncfl, has_uncond_bsmnt, wh_setpoint,
                  clothes_washer, cw_space, clothes_dryer, cd_space,
                  dishwasher, dw_space, refrigerator, rf_space, cooking_range, cook_space, oven,
@@ -11,6 +11,8 @@ class HotWaterAndAppliances
                  recirc_pump_power, dwhr_present,
                  dwhr_facilities_connected, dwhr_is_equal_flow,
                  dwhr_efficiency, dhw_loop_fracs, eri_version, dhw_map)
+
+    @runner = runner
 
     # Schedules init
     timestep_minutes = (60.0 / model.getTimestep.numberOfTimestepsPerHour).to_i
@@ -244,7 +246,9 @@ class HotWaterAndAppliances
       frac_lat = 0.0
     end
 
-    fail 'Negative energy use calculated for cooking range/oven.' if (annual_kwh < 0) || (annual_therm < 0)
+    if not @runner.nil?
+      @runner.registerWarning('Negative energy use calculated for cooking range/oven; this may indicate incorrect ENERGY GUIDE label inputs.') if (annual_kwh < 0) || (annual_therm < 0)
+    end
 
     return annual_kwh, annual_therm, frac_sens, frac_lat
   end
@@ -303,8 +307,10 @@ class HotWaterAndAppliances
       frac_lat = 0.0
     end
 
-    fail 'Negative energy use calculated for dishwasher.' if annual_kwh < 0
-    fail 'Negative hot water use calculated for dishwasher.' if gpd < 0
+    if not @runner.nil?
+      @runner.registerWarning('Negative energy use calculated for dishwasher; this may indicate incorrect ENERGY GUIDE label inputs.') if annual_kwh < 0
+      @runner.registerWarning('Negative hot water use calculated for dishwasher; this may indicate incorrect ENERGY GUIDE label inputs.') if gpd < 0
+    end
 
     return annual_kwh, frac_sens, frac_lat, gpd
   end
@@ -401,7 +407,9 @@ class HotWaterAndAppliances
       frac_lat = 0.0
     end
 
-    fail 'Negative energy use calculated for clothes dryer.' if (annual_kwh < 0) || (annual_therm < 0)
+    if not @runner.nil?
+      @runner.registerWarning('Negative energy use calculated for clothes dryer; this may indicate incorrect ENERGY GUIDE label inputs.') if (annual_kwh < 0) || (annual_therm < 0)
+    end
 
     return annual_kwh, annual_therm, frac_sens, frac_lat
   end
@@ -461,7 +469,6 @@ class HotWaterAndAppliances
       gpd = 60.0 * ((ler * elec_rate - agc) / (21.9825 * elec_rate - gas_rate) / 392.0) * acy / 365.0
       if Constants.ERIVersions.index(eri_version) < Constants.ERIVersions.index('2014A')
         gpd -= 3.97 # Section 4.2.2.5.2.10
-        gpd = 0 if gpd < 0
       end
     end
 
@@ -477,8 +484,10 @@ class HotWaterAndAppliances
       frac_lat = 0.0
     end
 
-    fail 'Negative energy use calculated for clothes washer.' if annual_kwh < 0
-    fail 'Negative hot water use calculated for clothes washer.' if gpd < 0
+    if not @runner.nil?
+      @runner.registerWarning('Negative energy use calculated for clothes washer; this may indicate incorrect ENERGY GUIDE label inputs.') if annual_kwh < 0
+      @runner.registerWarning('Negative hot water use calculated for clothes washer; this may indicate incorrect ENERGY GUIDE label inputs.') if gpd < 0
+    end
 
     return annual_kwh, frac_sens, frac_lat, gpd
   end
@@ -507,7 +516,9 @@ class HotWaterAndAppliances
       frac_lat = 0.0
     end
 
-    fail 'Negative energy use calculated for refrigerator.' if annual_kwh < 0
+    if not @runner.nil?
+      @runner.registerWarning('Negative energy use calculated for refrigerator; this may indicate incorrect ENERGY GUIDE label inputs.') if annual_kwh < 0
+    end
 
     return annual_kwh, frac_sens, frac_lat
   end
