@@ -1787,17 +1787,19 @@ class OSModel
     surfaces = []
     @hpxml.windows.each do |window|
       window_height = 4.0 # ft, default
+
+      overhang_depth = nil
+      if not window.overhangs_depth.nil?
+        overhang_depth = window.overhangs_depth
+        overhang_distance_to_top = window.overhangs_distance_to_top_of_window
+        overhang_distance_to_bottom = window.overhangs_distance_to_bottom_of_window
+        window_height = overhang_distance_to_bottom - overhang_distance_to_top
+      end
+
       window_width = window.area / window_height
       z_origin = @foundation_top
 
       if window.wall.is_exterior
-        overhang_depth = nil
-        if not window.overhangs_depth.nil?
-          overhang_depth = window.overhangs_depth
-          overhang_distance_to_top = window.overhangs_distance_to_top_of_window
-          overhang_distance_to_bottom = window.overhangs_distance_to_bottom_of_window
-          window_height = overhang_distance_to_bottom - overhang_distance_to_top
-        end
 
         # Create parent surface slightly bigger than window
         surface = OpenStudio::Model::Surface.new(add_wall_polygon(window_width, window_height, z_origin,
