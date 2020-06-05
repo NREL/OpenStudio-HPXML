@@ -2393,6 +2393,12 @@ def set_hpxml_heating_systems(hpxml_file, hpxml)
                               heating_capacity: 3200,
                               heating_efficiency_percent: 1,
                               fraction_heat_load_served: 0.1)
+  elsif ['base-mechvent-multiple.xml'].include? hpxml_file
+    hpxml.heating_systems[0].heating_capacity /= 2.0
+    hpxml.heating_systems[0].fraction_heat_load_served /= 2.0
+    hpxml.heating_systems << hpxml.heating_systems[0].dup
+    hpxml.heating_systems[1].id = 'HeatingSystem2'
+    hpxml.heating_systems[1].distribution_system_idref = 'HVACDistribution2'
   elsif ['invalid_files/hvac-frac-load-served.xml'].include? hpxml_file
     hpxml.heating_systems[0].fraction_heat_load_served += 0.1
   elsif ['base-hvac-fireplace-wood-only.xml'].include? hpxml_file
@@ -2564,6 +2570,12 @@ def set_hpxml_cooling_systems(hpxml_file, hpxml)
                               fraction_cool_load_served: 0.25,
                               cooling_efficiency_seer: 13,
                               cooling_shr: 0.65)
+  elsif ['base-mechvent-multiple.xml'].include? hpxml_file
+    hpxml.cooling_systems[0].fraction_cool_load_served /= 2.0
+    hpxml.cooling_systems[0].cooling_capacity /= 2.0
+    hpxml.cooling_systems << hpxml.cooling_systems[0].dup
+    hpxml.cooling_systems[1].id += '2'
+    hpxml.cooling_systems[1].distribution_system_idref = 'HVACDistribution2'
   elsif ['invalid_files/hvac-frac-load-served.xml'].include? hpxml_file
     hpxml.cooling_systems[0].fraction_cool_load_served += 0.2
   elsif ['invalid_files/hvac-dse-multiple-attached-cooling.xml'].include? hpxml_file
@@ -2957,6 +2969,10 @@ def set_hpxml_hvac_distributions(hpxml_file, hpxml)
     hpxml.hvac_distributions[-1].id = 'HVACDistribution4'
     hpxml.hvac_distributions << hpxml.hvac_distributions[0].dup
     hpxml.hvac_distributions[-1].id = 'HVACDistribution5'
+  elsif ['base-mechvent-multiple.xml'].include? hpxml_file
+    hpxml.hvac_distributions[0].conditioned_floor_area_served /= 2.0
+    hpxml.hvac_distributions << hpxml.hvac_distributions[0].dup
+    hpxml.hvac_distributions[1].id = 'HVACDistribution2'
   elsif ['base-hvac-dse.xml',
          'base-dhw-indirect-dse.xml'].include? hpxml_file
     hpxml.hvac_distributions[0].distribution_system_type = HPXML::HVACDistributionTypeDSE
@@ -3231,19 +3247,33 @@ def set_hpxml_ventilation_fans(hpxml_file, hpxml)
                                used_for_whole_building_ventilation: true)
     hpxml.ventilation_fans.add(id: 'ERV',
                                fan_type: HPXML::MechVentTypeERV,
-                               tested_flow_rate: 110,
+                               tested_flow_rate: 50,
                                hours_in_operation: 24,
                                total_recovery_efficiency: 0.48,
                                sensible_recovery_efficiency: 0.72,
-                               fan_power: 60,
+                               fan_power: 30,
                                used_for_whole_building_ventilation: true)
-    hpxml.ventilation_fans.add(id: 'CFIS',
+    hpxml.ventilation_fans.add(id: 'HRV',
+                               fan_type: HPXML::MechVentTypeHRV,
+                               tested_flow_rate: 60,
+                               hours_in_operation: 24,
+                               sensible_recovery_efficiency: 0.72,
+                               fan_power: 30,
+                               used_for_whole_building_ventilation: true)
+    hpxml.ventilation_fans.add(id: 'CFIS1',
                                fan_type: HPXML::MechVentTypeCFIS,
-                               tested_flow_rate: 330,
+                               tested_flow_rate: 160,
                                hours_in_operation: 8,
-                               fan_power: 300,
+                               fan_power: 150,
                                used_for_whole_building_ventilation: true,
                                distribution_system_idref: 'HVACDistribution')
+    hpxml.ventilation_fans.add(id: 'CFIS2',
+                               fan_type: HPXML::MechVentTypeCFIS,
+                               tested_flow_rate: 170,
+                               hours_in_operation: 8,
+                               fan_power: 150,
+                               used_for_whole_building_ventilation: true,
+                               distribution_system_idref: 'HVACDistribution2')
     hpxml.ventilation_fans.add(id: 'Supply',
                                fan_type: HPXML::MechVentTypeSupply,
                                tested_flow_rate: 110,

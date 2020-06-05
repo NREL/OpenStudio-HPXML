@@ -1969,7 +1969,7 @@ class SimulationOutputReport < OpenStudio::Measure::ReportingMeasure
     # Airflows
     @airflows = {
       AFT::Infiltration => Airflow.new(ems_program: Constants.ObjectNameInfiltration + ' program', ems_variables: [(Constants.ObjectNameInfiltration + ' flow act').gsub(' ', '_')]),
-      AFT::MechanicalVentilation => Airflow.new(ems_program: Constants.ObjectNameInfiltration + ' program', ems_variables: [(Constants.ObjectNameMechanicalVentilation + ' flow act').gsub(' ', '_'), 'balanced_mechvent_flow_rate']),
+      AFT::MechanicalVentilation => Airflow.new(ems_program: Constants.ObjectNameInfiltration + ' program', ems_variables: [(Constants.ObjectNameMechanicalVentilation + ' flow act').gsub(' ', '_'), 'QWHV_ervhrv']),
       AFT::NaturalVentilation => Airflow.new(ems_program: Constants.ObjectNameNaturalVentilation + ' program', ems_variables: [(Constants.ObjectNameNaturalVentilation + ' flow act').gsub(' ', '_')]),
       AFT::WholeHouseFan => Airflow.new(ems_program: Constants.ObjectNameNaturalVentilation + ' program', ems_variables: [(Constants.ObjectNameWholeHouseFan + ' flow act').gsub(' ', '_')]),
     }
