@@ -651,10 +651,10 @@ class HEScoreRuleset
       fractions_load_served = []
       orig_dist.hvac_systems.each do |hvac_system|
         if hvac_system.respond_to? :fraction_heat_load_served
-          fractions_load_served << hvac_system.fraction_heat_load_served
+          fractions_load_served << hvac_system.fraction_heat_load_served unless hvac_system.fraction_heat_load_served == 0
         end
         if hvac_system.respond_to? :fraction_cool_load_served
-          fractions_load_served << hvac_system.fraction_cool_load_served
+          fractions_load_served << hvac_system.fraction_cool_load_served unless hvac_system.fraction_cool_load_served == 0
         end
       end
       fractions_load_served.uniq!
