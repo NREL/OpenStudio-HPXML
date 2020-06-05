@@ -267,7 +267,7 @@ class BuildResidentialHPXMLTest < MiniTest::Test
 
         hpxml_obj.each do |obj|
           obj.class::ATTRS.each do |obj_attr|
-            next unless (obj_attr.to_s.end_with?('id')) || obj_attr.to_s.end_with?('_idref')
+            next unless obj_attr.to_s.end_with?('id') || obj_attr.to_s.end_with?('_idref')
 
             obj.send(obj_attr.to_s + '=', '')
           end

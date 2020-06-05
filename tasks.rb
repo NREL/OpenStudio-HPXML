@@ -1608,7 +1608,8 @@ def get_values(osw_file, step)
     step.setArgument('dishwasher_usage_multiplier', 0.9)
     step.setArgument('refrigerator_usage_multiplier', 0.9)
     step.setArgument('cooking_range_oven_usage_multiplier', 0.9)
-    step.setArgument('plug_loads_usage_multiplier', 0.9)
+    step.setArgument('plug_loads_television_usage_multiplier', 0.9)
+    step.setArgument('plug_loads_other_usage_multiplier', 0.9)
   elsif ['base-misc-whole-house-fan.osw'].include? osw_file
     step.setArgument('whole_house_fan_present', true)
   elsif ['base-pv.osw'].include? osw_file
