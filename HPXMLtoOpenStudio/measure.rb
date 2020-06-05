@@ -1496,6 +1496,7 @@ class OSModel
 
       no_wall_slab_exp_perim = {}
 
+      kiva_foundation = nil
       kiva_instances.each do |foundation_wall, slab|
         # Apportion referenced walls/slabs for this Kiva instance
         slab_frac = slab_exp_perims[slab] / total_slab_exp_perim
@@ -1505,11 +1506,10 @@ class OSModel
           fnd_wall_frac = 1.0 # Handle slab foundation type
         end
 
-        kiva_foundation = nil
         if not foundation_wall.nil?
           # Add exterior foundation wall surface
           kiva_foundation = add_foundation_wall(runner, model, spaces, foundation_wall, slab_frac,
-                                                total_fnd_wall_length, total_slab_exp_perim)
+                                                total_fnd_wall_length, total_slab_exp_perim, kiva_foundation)
         end
 
         # Add single combined foundation slab surface (for similar surfaces)
@@ -1622,7 +1622,7 @@ class OSModel
   end
 
   def self.add_foundation_wall(runner, model, spaces, foundation_wall, slab_frac,
-                               total_fnd_wall_length, total_slab_exp_perim)
+                               total_fnd_wall_length, total_slab_exp_perim, kiva_foundation)
 
     net_area = foundation_wall.net_area * slab_frac
     gross_area = foundation_wall.area * slab_frac
@@ -1713,7 +1713,7 @@ class OSModel
 
     Constructions.apply_foundation_wall(model, [surface], "#{foundation_wall.id} construction",
                                         ext_rigid_offset, int_rigid_offset, ext_rigid_height, int_rigid_height,
-                                        ext_rigid_r, int_rigid_r, drywall_thick_in, concrete_thick_in, height_ag)
+                                        ext_rigid_r, int_rigid_r, drywall_thick_in, concrete_thick_in, height_ag, kiva_foundation)
 
     if not assembly_r.nil?
       check_surface_assembly_rvalue(runner, [surface], inside_film, nil, assembly_r, match)

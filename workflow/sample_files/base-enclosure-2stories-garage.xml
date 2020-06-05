@@ -265,10 +265,6 @@
               <CarpetFraction>0.0</CarpetFraction>
               <CarpetRValue>0.0</CarpetRValue>
             </extension>
-            <extension>
-              <CarpetFraction>0.0</CarpetFraction>
-              <CarpetRValue>0.0</CarpetRValue>
-            </extension>
           </Slab>
           <Slab>
             <SystemIdentifier id='SlabUnderGarage'/>
@@ -293,10 +289,6 @@
                 <NominalRValue>0.0</NominalRValue>
               </Layer>
             </UnderSlabInsulation>
-            <extension>
-              <CarpetFraction>0.0</CarpetFraction>
-              <CarpetRValue>0.0</CarpetRValue>
-            </extension>
             <extension>
               <CarpetFraction>0.0</CarpetFraction>
               <CarpetRValue>0.0</CarpetRValue>
