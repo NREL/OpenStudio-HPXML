@@ -469,7 +469,6 @@ class HotWaterAndAppliances
       gpd = 60.0 * ((ler * elec_rate - agc) / (21.9825 * elec_rate - gas_rate) / 392.0) * acy / 365.0
       if Constants.ERIVersions.index(eri_version) < Constants.ERIVersions.index('2014A')
         gpd -= 3.97 # Section 4.2.2.5.2.10
-        gpd = 0 if gpd < 0
       end
     end
 
