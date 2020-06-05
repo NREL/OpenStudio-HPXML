@@ -1787,53 +1787,83 @@ class OSModel
     surfaces = []
     @hpxml.windows.each do |window|
       window_height = 4.0 # ft, default
-      overhang_depth = nil
-      if not window.overhangs_depth.nil?
-        overhang_depth = window.overhangs_depth
-        overhang_distance_to_top = window.overhangs_distance_to_top_of_window
-        overhang_distance_to_bottom = window.overhangs_distance_to_bottom_of_window
-        window_height = overhang_distance_to_bottom - overhang_distance_to_top
-      end
-
       window_width = window.area / window_height
       z_origin = @foundation_top
 
-      # Create parent surface slightly bigger than window
-      surface = OpenStudio::Model::Surface.new(add_wall_polygon(window_width, window_height, z_origin,
-                                                                window.azimuth, [0, 0.0001, 0.0001, 0.0001]), model)
+      if window.wall.is_exterior
+        overhang_depth = nil
+        if not window.overhangs_depth.nil?
+          overhang_depth = window.overhangs_depth
+          overhang_distance_to_top = window.overhangs_distance_to_top_of_window
+          overhang_distance_to_bottom = window.overhangs_distance_to_bottom_of_window
+          window_height = overhang_distance_to_bottom - overhang_distance_to_top
+        end
 
-      surface.additionalProperties.setFeature('Length', window_width)
-      surface.additionalProperties.setFeature('Azimuth', window.azimuth)
-      surface.additionalProperties.setFeature('Tilt', 90.0)
-      surface.additionalProperties.setFeature('SurfaceType', 'Window')
-      surface.setName("surface #{window.id}")
-      surface.setSurfaceType('Wall')
-      set_surface_interior(model, spaces, surface, window.wall.interior_adjacent_to)
+        # Create parent surface slightly bigger than window
+        surface = OpenStudio::Model::Surface.new(add_wall_polygon(window_width, window_height, z_origin,
+                                                                  window.azimuth, [0, 0.0001, 0.0001, 0.0001]), model)
 
-      sub_surface = OpenStudio::Model::SubSurface.new(add_wall_polygon(window_width, window_height, z_origin,
-                                                                       window.azimuth, [-0.0001, 0, 0.0001, 0]), model)
-      sub_surface.setName(window.id)
-      sub_surface.setSurface(surface)
-      sub_surface.setSubSurfaceType('FixedWindow')
+        surface.additionalProperties.setFeature('Length', window_width)
+        surface.additionalProperties.setFeature('Azimuth', window.azimuth)
+        surface.additionalProperties.setFeature('Tilt', 90.0)
+        surface.additionalProperties.setFeature('SurfaceType', 'Window')
+        surface.setName("surface #{window.id}")
+        surface.setSurfaceType('Wall')
+        set_surface_interior(model, spaces, surface, window.wall.interior_adjacent_to)
 
-      set_subsurface_exterior(surface, window.wall.exterior_adjacent_to, spaces, model)
-      surfaces << surface
+        sub_surface = OpenStudio::Model::SubSurface.new(add_wall_polygon(window_width, window_height, z_origin,
+                                                                         window.azimuth, [-0.0001, 0, 0.0001, 0]), model)
+        sub_surface.setName(window.id)
+        sub_surface.setSurface(surface)
+        sub_surface.setSubSurfaceType('FixedWindow')
 
-      if not overhang_depth.nil?
-        overhang = sub_surface.addOverhang(UnitConversions.convert(overhang_depth, 'ft', 'm'), UnitConversions.convert(overhang_distance_to_top, 'ft', 'm'))
-        overhang.get.setName("#{sub_surface.name} - #{Constants.ObjectNameOverhangs}")
+        set_subsurface_exterior(surface, window.wall.exterior_adjacent_to, spaces, model)
+        surfaces << surface
 
-        sub_surface.additionalProperties.setFeature(Constants.SizingInfoWindowOverhangDepth, overhang_depth)
-        sub_surface.additionalProperties.setFeature(Constants.SizingInfoWindowOverhangOffset, overhang_distance_to_top)
+        if not overhang_depth.nil?
+          overhang = sub_surface.addOverhang(UnitConversions.convert(overhang_depth, 'ft', 'm'), UnitConversions.convert(overhang_distance_to_top, 'ft', 'm'))
+          overhang.get.setName("#{sub_surface.name} - #{Constants.ObjectNameOverhangs}")
+
+          sub_surface.additionalProperties.setFeature(Constants.SizingInfoWindowOverhangDepth, overhang_depth)
+          sub_surface.additionalProperties.setFeature(Constants.SizingInfoWindowOverhangOffset, overhang_distance_to_top)
+        end
+
+        # Apply construction
+        cool_shade_mult = window.interior_shading_factor_summer
+        heat_shade_mult = window.interior_shading_factor_winter
+        Constructions.apply_window(model, [sub_surface],
+                                   'WindowConstruction',
+                                   weather, @clg_season_sch, window.ufactor, window.shgc,
+                                   heat_shade_mult, cool_shade_mult)
+      else
+        # Window is on an interior surface, which E+ does not allow. Model
+        # as a door instead so that we can get the appropriate conduction
+        # heat transfer; there is no solar gains anyway.
+
+        # Create parent surface slightly bigger than window
+        surface = OpenStudio::Model::Surface.new(add_wall_polygon(window_width, window_height, z_origin,
+                                                                  window.azimuth, [0, 0.0001, 0.0001, 0.0001]), model)
+
+        surface.additionalProperties.setFeature('Length', window_width)
+        surface.additionalProperties.setFeature('Azimuth', window.azimuth)
+        surface.additionalProperties.setFeature('Tilt', 90.0)
+        surface.additionalProperties.setFeature('SurfaceType', 'Door')
+        surface.setName("surface #{window.id}")
+        surface.setSurfaceType('Wall')
+        set_surface_interior(model, spaces, surface, window.wall.interior_adjacent_to)
+
+        sub_surface = OpenStudio::Model::SubSurface.new(add_wall_polygon(window_width, window_height, z_origin,
+                                                                         window.azimuth, [0, 0, 0, 0]), model)
+        sub_surface.setName(window.id)
+        sub_surface.setSurface(surface)
+        sub_surface.setSubSurfaceType('Door')
+
+        set_subsurface_exterior(surface, window.wall.exterior_adjacent_to, spaces, model)
+        surfaces << surface
+
+        # Apply construction
+        Constructions.apply_door(model, [sub_surface], 'Window', window.ufactor)
       end
-
-      # Apply construction
-      cool_shade_mult = window.interior_shading_factor_summer
-      heat_shade_mult = window.interior_shading_factor_winter
-      Constructions.apply_window(model, [sub_surface],
-                                 'WindowConstruction',
-                                 weather, @clg_season_sch, window.ufactor, window.shgc,
-                                 heat_shade_mult, cool_shade_mult)
     end
 
     apply_adiabatic_construction(runner, model, surfaces, 'wall')
@@ -1914,7 +1944,6 @@ class OSModel
 
       # Apply construction
       ufactor = 1.0 / door.r_value
-
       Constructions.apply_door(model, [sub_surface], 'Door', ufactor)
     end
 
