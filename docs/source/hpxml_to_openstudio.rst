@@ -73,7 +73,7 @@ This approach was taken because:
 - It improves runtime speed by being able to simulate individual units in parallel (as opposed to simulating the entire building).
 - It doesn't necessarily preclude the possibility of running a single integrated EnergyPlus simulation.
 
-To model SFA/MF buildings, current capabilities include:
+To model units of SFA/MF buildings, current capabilities include:
 
 - Defining surfaces adjacent to generic SFA/MF space types (e.g., "other housing unit" or "other multifamily buffer space").
 - Locating various building components (e.g., ducts, water heaters, appliances) in these spaces.
@@ -92,7 +92,39 @@ An increasing number of elements in the HPXML file are being made optional with 
 Default values, equations, and logic are described throughout this documentation.
 
 Most defaults can also be seen by using the ``debug`` argument/flag when running the workflow on an actual HPXML file.
-This will create a new HPXML file (``in.xml``) where additional fields are populated.
+This will create a new HPXML file (``in.xml`` in the run directory) where additional fields are populated for inspection.
+
+For example, suppose a HPXML file has a window defined as follows:
+
+.. code-block:: XML
+
+  <Window>
+    <SystemIdentifier id='Window'/>
+    <Area>108.0</Area>
+    <Azimuth>0</Azimuth>
+    <UFactor>0.33</UFactor>
+    <SHGC>0.45</SHGC>
+    <AttachedToWall idref='Wall'/>
+  </Window>
+
+In the ``in.xml`` file, the window would have additional elements like so:
+
+.. code-block:: XML
+
+  <Window>
+    <SystemIdentifier id='Window'/>
+    <Area>108.0</Area>
+    <Azimuth>0</Azimuth>
+    <UFactor>0.33</UFactor>
+    <SHGC>0.45</SHGC>
+    <InteriorShading>
+      <SystemIdentifier id='WindowInteriorShading'/>
+      <SummerShadingCoefficient>0.7</SummerShadingCoefficient>
+      <WinterShadingCoefficient>0.85</WinterShadingCoefficient>
+    </InteriorShading>
+    <FractionOperable>0.67</FractionOperable>
+    <AttachedToWall idref='Wall'/>
+  </Window>
 
 .. warning::
 

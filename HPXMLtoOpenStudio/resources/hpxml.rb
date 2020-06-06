@@ -2058,9 +2058,6 @@ class HPXML < Object
           fail "SummerShadingCoefficient (#{interior_shading_factor_summer}) must be less than or equal to WinterShadingCoefficient (#{interior_shading_factor_winter}) for window '#{@id}'."
         end
       end
-      if [HPXML::LocationOtherHeatedSpace, HPXML::LocationOtherMultifamilyBufferSpace, HPXML::LocationOtherNonFreezingSpace, HPXML::LocationOtherHousingUnit].include? wall.exterior_adjacent_to
-        fail "Window '#{@id}' cannot be adjacent to '#{wall.exterior_adjacent_to}'. Check parent wall: '#{wall.id}'."
-      end
 
       return errors
     end
@@ -4212,6 +4209,11 @@ class HPXML < Object
       next if door.wall.exterior_adjacent_to != HPXML::LocationOtherHousingUnit
 
       door.delete
+    end
+    @windows.reverse_each do |window|
+      next if window.wall.exterior_adjacent_to != HPXML::LocationOtherHousingUnit
+
+      window.delete
     end
   end
 
