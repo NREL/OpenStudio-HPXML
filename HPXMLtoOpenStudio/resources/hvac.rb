@@ -41,7 +41,7 @@ class HVAC
         num_speeds = 4
       end
       fan_power_rated = get_fan_power_rated(cooling_system.cooling_efficiency_seer)
-      crankcase_kw, crankcase_temp = get_crankcase_assumptions()
+      crankcase_kw, crankcase_temp = get_crankcase_assumptions(cooling_system.fraction_cool_load_served)
 
       # Cooling Coil
 
@@ -344,7 +344,7 @@ class HVAC
     if heat_pump.fraction_heat_load_served <= 0
       crankcase_kw, crankcase_temp = 0, nil
     else
-      crankcase_kw, crankcase_temp = get_crankcase_assumptions()
+      crankcase_kw, crankcase_temp = get_crankcase_assumptions(heat_pump.fraction_cool_load_served)
     end
     hp_min_temp, supp_max_temp = get_heatpump_temp_assumptions(heat_pump)
 
@@ -3759,8 +3759,12 @@ class HVAC
     return s
   end
 
-  def self.get_crankcase_assumptions()
-    crankcase_kw = 0.05 # From RESNET Publication No. 002-2017
+  def self.get_crankcase_assumptions(fraction_cool_load_served)
+    if fraction_cool_load_served > 0
+      crankcase_kw = 0.05 # From RESNET Publication No. 002-2017
+    else
+      crankcase_kw = 0.0
+    end
     crankcase_temp = 50.0 # From RESNET Publication No. 002-2017
     return crankcase_kw, crankcase_temp
   end
