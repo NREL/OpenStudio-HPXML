@@ -348,6 +348,7 @@ class OSModel
     # Garage
     location = HPXML::LocationGarage
     if @hpxml.has_space_type(location)
+      puts 'HELLO?'
       if (@hpxml.roofs.select { |s| s.interior_adjacent_to == location }.size +
           @hpxml.frame_floors.select { |s| [s.interior_adjacent_to, s.exterior_adjacent_to].include? location }.size) == 0
         fail "There must be at least one roof/ceiling adjacent to #{location}."

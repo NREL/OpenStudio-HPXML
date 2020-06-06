@@ -215,16 +215,6 @@
               <AssemblyEffectiveRValue>39.3</AssemblyEffectiveRValue>
             </Insulation>
           </FrameFloor>
-          <FrameFloor>
-            <SystemIdentifier id='FloorBetweenAtticGarage'/>
-            <ExteriorAdjacentTo>attic - unvented</ExteriorAdjacentTo>
-            <InteriorAdjacentTo>garage</InteriorAdjacentTo>
-            <Area>600.0</Area>
-            <Insulation>
-              <SystemIdentifier id='FloorBetweenAtticGarageInsulation'/>
-              <AssemblyEffectiveRValue>2.1</AssemblyEffectiveRValue>
-            </Insulation>
-          </FrameFloor>
         </FrameFloors>
         <Slabs>
           <Slab>

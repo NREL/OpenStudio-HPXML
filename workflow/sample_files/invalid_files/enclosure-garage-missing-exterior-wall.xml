@@ -201,16 +201,6 @@
             </Insulation>
           </FrameFloor>
           <FrameFloor>
-            <SystemIdentifier id='FloorAboveCondBasement'/>
-            <ExteriorAdjacentTo>basement - conditioned</ExteriorAdjacentTo>
-            <InteriorAdjacentTo>living space</InteriorAdjacentTo>
-            <Area>1350.0</Area>
-            <Insulation>
-              <SystemIdentifier id='FloorAboveCondBasementInsulation'/>
-              <AssemblyEffectiveRValue>3.9</AssemblyEffectiveRValue>
-            </Insulation>
-          </FrameFloor>
-          <FrameFloor>
             <SystemIdentifier id='FloorBetweenAtticGarage'/>
             <ExteriorAdjacentTo>attic - unvented</ExteriorAdjacentTo>
             <InteriorAdjacentTo>garage</InteriorAdjacentTo>
