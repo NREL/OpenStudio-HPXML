@@ -918,6 +918,16 @@
             </Insulation>
           </FrameFloor>
           <FrameFloor>
+            <SystemIdentifier id='FloorAboveCondBasement'/>
+            <ExteriorAdjacentTo>basement - conditioned</ExteriorAdjacentTo>
+            <InteriorAdjacentTo>living space</InteriorAdjacentTo>
+            <Area>150.0</Area>
+            <Insulation>
+              <SystemIdentifier id='FloorAboveCondBasementInsulation'/>
+              <AssemblyEffectiveRValue>3.9</AssemblyEffectiveRValue>
+            </Insulation>
+          </FrameFloor>
+          <FrameFloor>
             <SystemIdentifier id='FloorBelowAttic2'/>
             <ExteriorAdjacentTo>attic - unvented</ExteriorAdjacentTo>
             <InteriorAdjacentTo>living space</InteriorAdjacentTo>
@@ -998,13 +1008,93 @@
             </Insulation>
           </FrameFloor>
           <FrameFloor>
+            <SystemIdentifier id='FloorAboveCondBasement2'/>
+            <ExteriorAdjacentTo>basement - conditioned</ExteriorAdjacentTo>
+            <InteriorAdjacentTo>living space</InteriorAdjacentTo>
+            <Area>150.0</Area>
+            <Insulation>
+              <SystemIdentifier id='FloorAboveCondBasement2Insulation'/>
+              <AssemblyEffectiveRValue>3.9</AssemblyEffectiveRValue>
+            </Insulation>
+          </FrameFloor>
+          <FrameFloor>
+            <SystemIdentifier id='FloorAboveCondBasement3'/>
+            <ExteriorAdjacentTo>basement - conditioned</ExteriorAdjacentTo>
+            <InteriorAdjacentTo>living space</InteriorAdjacentTo>
+            <Area>150.0</Area>
+            <Insulation>
+              <SystemIdentifier id='FloorAboveCondBasement3Insulation'/>
+              <AssemblyEffectiveRValue>3.9</AssemblyEffectiveRValue>
+            </Insulation>
+          </FrameFloor>
+          <FrameFloor>
+            <SystemIdentifier id='FloorAboveCondBasement4'/>
+            <ExteriorAdjacentTo>basement - conditioned</ExteriorAdjacentTo>
+            <InteriorAdjacentTo>living space</InteriorAdjacentTo>
+            <Area>150.0</Area>
+            <Insulation>
+              <SystemIdentifier id='FloorAboveCondBasement4Insulation'/>
+              <AssemblyEffectiveRValue>3.9</AssemblyEffectiveRValue>
+            </Insulation>
+          </FrameFloor>
+          <FrameFloor>
+            <SystemIdentifier id='FloorAboveCondBasement5'/>
+            <ExteriorAdjacentTo>basement - conditioned</ExteriorAdjacentTo>
+            <InteriorAdjacentTo>living space</InteriorAdjacentTo>
+            <Area>150.0</Area>
+            <Insulation>
+              <SystemIdentifier id='FloorAboveCondBasement5Insulation'/>
+              <AssemblyEffectiveRValue>3.9</AssemblyEffectiveRValue>
+            </Insulation>
+          </FrameFloor>
+          <FrameFloor>
+            <SystemIdentifier id='FloorAboveCondBasement6'/>
+            <ExteriorAdjacentTo>basement - conditioned</ExteriorAdjacentTo>
+            <InteriorAdjacentTo>living space</InteriorAdjacentTo>
+            <Area>150.0</Area>
+            <Insulation>
+              <SystemIdentifier id='FloorAboveCondBasement6Insulation'/>
+              <AssemblyEffectiveRValue>3.9</AssemblyEffectiveRValue>
+            </Insulation>
+          </FrameFloor>
+          <FrameFloor>
+            <SystemIdentifier id='FloorAboveCondBasement7'/>
+            <ExteriorAdjacentTo>basement - conditioned</ExteriorAdjacentTo>
+            <InteriorAdjacentTo>living space</InteriorAdjacentTo>
+            <Area>150.0</Area>
+            <Insulation>
+              <SystemIdentifier id='FloorAboveCondBasement7Insulation'/>
+              <AssemblyEffectiveRValue>3.9</AssemblyEffectiveRValue>
+            </Insulation>
+          </FrameFloor>
+          <FrameFloor>
+            <SystemIdentifier id='FloorAboveCondBasement8'/>
+            <ExteriorAdjacentTo>basement - conditioned</ExteriorAdjacentTo>
+            <InteriorAdjacentTo>living space</InteriorAdjacentTo>
+            <Area>150.0</Area>
+            <Insulation>
+              <SystemIdentifier id='FloorAboveCondBasement8Insulation'/>
+              <AssemblyEffectiveRValue>3.9</AssemblyEffectiveRValue>
+            </Insulation>
+          </FrameFloor>
+          <FrameFloor>
+            <SystemIdentifier id='FloorAboveCondBasement9'/>
+            <ExteriorAdjacentTo>basement - conditioned</ExteriorAdjacentTo>
+            <InteriorAdjacentTo>living space</InteriorAdjacentTo>
+            <Area>150.0</Area>
+            <Insulation>
+              <SystemIdentifier id='FloorAboveCondBasement9Insulation'/>
+              <AssemblyEffectiveRValue>3.9</AssemblyEffectiveRValue>
+            </Insulation>
+          </FrameFloor>
+          <FrameFloor>
             <SystemIdentifier id='TinyFloor'/>
-            <ExteriorAdjacentTo>attic - unvented</ExteriorAdjacentTo>
+            <ExteriorAdjacentTo>basement - conditioned</ExteriorAdjacentTo>
             <InteriorAdjacentTo>living space</InteriorAdjacentTo>
             <Area>0.05</Area>
             <Insulation>
               <SystemIdentifier id='TinyFloorInsulation'/>
-              <AssemblyEffectiveRValue>39.3</AssemblyEffectiveRValue>
+              <AssemblyEffectiveRValue>3.9</AssemblyEffectiveRValue>
             </Insulation>
           </FrameFloor>
         </FrameFloors>

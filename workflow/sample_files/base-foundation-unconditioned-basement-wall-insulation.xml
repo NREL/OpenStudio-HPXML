@@ -188,13 +188,23 @@
             </Insulation>
           </FrameFloor>
           <FrameFloor>
+            <SystemIdentifier id='FloorAboveCondBasement'/>
+            <ExteriorAdjacentTo>basement - conditioned</ExteriorAdjacentTo>
+            <InteriorAdjacentTo>living space</InteriorAdjacentTo>
+            <Area>1350.0</Area>
+            <Insulation>
+              <SystemIdentifier id='FloorAboveCondBasementInsulation'/>
+              <AssemblyEffectiveRValue>2.1</AssemblyEffectiveRValue>
+            </Insulation>
+          </FrameFloor>
+          <FrameFloor>
             <SystemIdentifier id='FloorAboveUncondBasement'/>
             <ExteriorAdjacentTo>basement - unconditioned</ExteriorAdjacentTo>
             <InteriorAdjacentTo>living space</InteriorAdjacentTo>
             <Area>1350.0</Area>
             <Insulation>
               <SystemIdentifier id='FloorAboveUncondBasementInsulation'/>
-              <AssemblyEffectiveRValue>2.1</AssemblyEffectiveRValue>
+              <AssemblyEffectiveRValue>18.7</AssemblyEffectiveRValue>
             </Insulation>
           </FrameFloor>
         </FrameFloors>

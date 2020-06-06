@@ -1547,6 +1547,11 @@ def set_hpxml_frame_floors(hpxml_file, hpxml)
                            interior_adjacent_to: HPXML::LocationLivingSpace,
                            area: 1350,
                            insulation_assembly_r_value: 39.3)
+    hpxml.frame_floors.add(id: 'FloorAboveCondBasement',
+                           exterior_adjacent_to: HPXML::LocationBasementConditioned,
+                           interior_adjacent_to: HPXML::LocationLivingSpace,
+                           area: 1350,
+                           insulation_assembly_r_value: 3.9)
   elsif ['base-atticroof-flat.xml',
          'base-atticroof-cathedral.xml'].include? hpxml_file
     hpxml.frame_floors.delete_at(0)
