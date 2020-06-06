@@ -766,6 +766,8 @@ class HPXMLTest < MiniTest::Test
 
     # Enclosure Windows/Skylights
     (hpxml.windows + hpxml.skylights).each do |subsurface|
+      next unless subsurface.is_exterior
+
       subsurface_id = subsurface.id.upcase
 
       # Area
@@ -812,10 +814,9 @@ class HPXMLTest < MiniTest::Test
 
     # Enclosure Doors
     hpxml.doors.each do |door|
-      door_id = door.id.upcase
-
-      # only outdoor doors will appear on the exterior door table
       next unless door.wall.is_exterior
+
+      door_id = door.id.upcase
 
       # Area
       if not door.area.nil?

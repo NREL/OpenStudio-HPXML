@@ -1799,7 +1799,7 @@ class OSModel
       window_width = window.area / window_height
       z_origin = @foundation_top
 
-      if window.wall.is_exterior
+      if window.is_exterior
 
         # Create parent surface slightly bigger than window
         surface = OpenStudio::Model::Surface.new(add_wall_polygon(window_width, window_height, z_origin,
