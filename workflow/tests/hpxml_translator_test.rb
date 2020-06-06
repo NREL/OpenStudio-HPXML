@@ -134,7 +134,6 @@ class HPXMLTest < MiniTest::Test
                                                                               'Expected [1] element(s) but found 0 element(s) for xpath: /HPXML/Building/BuildingDetails/Appliances/Dishwasher: [not(Location)] |',
                                                                               'Expected [1] element(s) but found 0 element(s) for xpath: /HPXML/Building/BuildingDetails/Appliances/Refrigerator: [not(Location)] |',
                                                                               'Expected [1] element(s) but found 0 element(s) for xpath: /HPXML/Building/BuildingDetails/Appliances/CookingRange: [not(Location)] |'],
-                            'attached-multifamily-window-outside-condition.xml' => ["Window 'WindowNorth' cannot be adjacent to 'other multifamily buffer space'. Check parent wall:"],
                             'cfis-with-hydronic-distribution.xml' => ["Attached HVAC distribution system 'HVACDistribution' cannot be hydronic for ventilation fan 'MechanicalVentilation'."],
                             'clothes-dryer-location.xml' => ["ClothesDryer location is 'garage' but building does not have this location specified."],
                             'clothes-washer-location.xml' => ["ClothesWasher location is 'garage' but building does not have this location specified."],
@@ -767,6 +766,8 @@ class HPXMLTest < MiniTest::Test
 
     # Enclosure Windows/Skylights
     (hpxml.windows + hpxml.skylights).each do |subsurface|
+      next unless subsurface.is_exterior
+
       subsurface_id = subsurface.id.upcase
 
       # Area
@@ -813,10 +814,9 @@ class HPXMLTest < MiniTest::Test
 
     # Enclosure Doors
     hpxml.doors.each do |door|
-      door_id = door.id.upcase
-
-      # only outdoor doors will appear on the exterior door table
       next unless door.wall.is_exterior
+
+      door_id = door.id.upcase
 
       # Area
       if not door.area.nil?
