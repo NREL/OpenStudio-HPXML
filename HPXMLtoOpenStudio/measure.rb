@@ -1787,6 +1787,7 @@ class OSModel
     surfaces = []
     @hpxml.windows.each do |window|
       window_height = 4.0 # ft, default
+
       overhang_depth = nil
       if not window.overhangs_depth.nil?
         overhang_depth = window.overhangs_depth
@@ -1798,42 +1799,73 @@ class OSModel
       window_width = window.area / window_height
       z_origin = @foundation_top
 
-      # Create parent surface slightly bigger than window
-      surface = OpenStudio::Model::Surface.new(add_wall_polygon(window_width, window_height, z_origin,
-                                                                window.azimuth, [0, 0.0001, 0.0001, 0.0001]), model)
+      if window.is_exterior
 
-      surface.additionalProperties.setFeature('Length', window_width)
-      surface.additionalProperties.setFeature('Azimuth', window.azimuth)
-      surface.additionalProperties.setFeature('Tilt', 90.0)
-      surface.additionalProperties.setFeature('SurfaceType', 'Window')
-      surface.setName("surface #{window.id}")
-      surface.setSurfaceType('Wall')
-      set_surface_interior(model, spaces, surface, window.wall.interior_adjacent_to)
+        # Create parent surface slightly bigger than window
+        surface = OpenStudio::Model::Surface.new(add_wall_polygon(window_width, window_height, z_origin,
+                                                                  window.azimuth, [0, 0.0001, 0.0001, 0.0001]), model)
 
-      sub_surface = OpenStudio::Model::SubSurface.new(add_wall_polygon(window_width, window_height, z_origin,
-                                                                       window.azimuth, [-0.0001, 0, 0.0001, 0]), model)
-      sub_surface.setName(window.id)
-      sub_surface.setSurface(surface)
-      sub_surface.setSubSurfaceType('FixedWindow')
+        surface.additionalProperties.setFeature('Length', window_width)
+        surface.additionalProperties.setFeature('Azimuth', window.azimuth)
+        surface.additionalProperties.setFeature('Tilt', 90.0)
+        surface.additionalProperties.setFeature('SurfaceType', 'Window')
+        surface.setName("surface #{window.id}")
+        surface.setSurfaceType('Wall')
+        set_surface_interior(model, spaces, surface, window.wall.interior_adjacent_to)
 
-      set_subsurface_exterior(surface, window.wall.exterior_adjacent_to, spaces, model)
-      surfaces << surface
+        sub_surface = OpenStudio::Model::SubSurface.new(add_wall_polygon(window_width, window_height, z_origin,
+                                                                         window.azimuth, [-0.0001, 0, 0.0001, 0]), model)
+        sub_surface.setName(window.id)
+        sub_surface.setSurface(surface)
+        sub_surface.setSubSurfaceType('FixedWindow')
 
-      if not overhang_depth.nil?
-        overhang = sub_surface.addOverhang(UnitConversions.convert(overhang_depth, 'ft', 'm'), UnitConversions.convert(overhang_distance_to_top, 'ft', 'm'))
-        overhang.get.setName("#{sub_surface.name} - #{Constants.ObjectNameOverhangs}")
+        set_subsurface_exterior(surface, window.wall.exterior_adjacent_to, spaces, model)
+        surfaces << surface
 
-        sub_surface.additionalProperties.setFeature(Constants.SizingInfoWindowOverhangDepth, overhang_depth)
-        sub_surface.additionalProperties.setFeature(Constants.SizingInfoWindowOverhangOffset, overhang_distance_to_top)
+        if not overhang_depth.nil?
+          overhang = sub_surface.addOverhang(UnitConversions.convert(overhang_depth, 'ft', 'm'), UnitConversions.convert(overhang_distance_to_top, 'ft', 'm'))
+          overhang.get.setName("#{sub_surface.name} - #{Constants.ObjectNameOverhangs}")
+
+          sub_surface.additionalProperties.setFeature(Constants.SizingInfoWindowOverhangDepth, overhang_depth)
+          sub_surface.additionalProperties.setFeature(Constants.SizingInfoWindowOverhangOffset, overhang_distance_to_top)
+        end
+
+        # Apply construction
+        cool_shade_mult = window.interior_shading_factor_summer
+        heat_shade_mult = window.interior_shading_factor_winter
+        Constructions.apply_window(model, [sub_surface],
+                                   'WindowConstruction',
+                                   weather, @clg_season_sch, window.ufactor, window.shgc,
+                                   heat_shade_mult, cool_shade_mult)
+      else
+        # Window is on an interior surface, which E+ does not allow. Model
+        # as a door instead so that we can get the appropriate conduction
+        # heat transfer; there is no solar gains anyway.
+
+        # Create parent surface slightly bigger than window
+        surface = OpenStudio::Model::Surface.new(add_wall_polygon(window_width, window_height, z_origin,
+                                                                  window.azimuth, [0, 0.0001, 0.0001, 0.0001]), model)
+
+        surface.additionalProperties.setFeature('Length', window_width)
+        surface.additionalProperties.setFeature('Azimuth', window.azimuth)
+        surface.additionalProperties.setFeature('Tilt', 90.0)
+        surface.additionalProperties.setFeature('SurfaceType', 'Door')
+        surface.setName("surface #{window.id}")
+        surface.setSurfaceType('Wall')
+        set_surface_interior(model, spaces, surface, window.wall.interior_adjacent_to)
+
+        sub_surface = OpenStudio::Model::SubSurface.new(add_wall_polygon(window_width, window_height, z_origin,
+                                                                         window.azimuth, [0, 0, 0, 0]), model)
+        sub_surface.setName(window.id)
+        sub_surface.setSurface(surface)
+        sub_surface.setSubSurfaceType('Door')
+
+        set_subsurface_exterior(surface, window.wall.exterior_adjacent_to, spaces, model)
+        surfaces << surface
+
+        # Apply construction
+        Constructions.apply_door(model, [sub_surface], 'Window', window.ufactor)
       end
-
-      # Apply construction
-      cool_shade_mult = window.interior_shading_factor_summer
-      heat_shade_mult = window.interior_shading_factor_winter
-      Constructions.apply_window(model, [sub_surface],
-                                 'WindowConstruction',
-                                 weather, @clg_season_sch, window.ufactor, window.shgc,
-                                 heat_shade_mult, cool_shade_mult)
     end
 
     apply_adiabatic_construction(runner, model, surfaces, 'wall')
@@ -1914,7 +1946,6 @@ class OSModel
 
       # Apply construction
       ufactor = 1.0 / door.r_value
-
       Constructions.apply_door(model, [sub_surface], 'Door', ufactor)
     end
 
@@ -1928,19 +1959,19 @@ class OSModel
 
     if type == 'wall'
       Constructions.apply_wood_stud_wall(model, surfaces, 'AdiabaticWallConstruction',
-                                         0, 1, 3.5, true, 0.1, 0.5, 0, 999,
+                                         0, 1, 3.5, true, 0.1, 0.5, 0, 99,
                                          Material.ExtFinishStuccoMedDark, 0,
                                          Material.AirFilmVertical,
                                          Material.AirFilmVertical)
     elsif type == 'floor'
       Constructions.apply_floor(model, surfaces, 'AdiabaticFloorConstruction',
-                                0, 1, 0.07, 5.5, 0.75, 999,
+                                0, 1, 0.07, 5.5, 0.75, 99,
                                 Material.FloorWood, Material.CoveringBare,
                                 Material.AirFilmFloorReduced,
                                 Material.AirFilmFloorReduced)
     elsif type == 'roof'
       Constructions.apply_open_cavity_roof(model, surfaces, 'AdiabaticRoofConstruction',
-                                           0, 1, 7.25, 0.07, 7.25, 0.75, 999,
+                                           0, 1, 7.25, 0.07, 7.25, 0.75, 99,
                                            Material.RoofingAsphaltShinglesMed, false)
     end
   end
@@ -2032,7 +2063,7 @@ class OSModel
       dhw_loop_fracs[water_heating_system.id] = dhw_load_frac
     end
 
-    HotWaterAndAppliances.apply(model, weather, @living_space,
+    HotWaterAndAppliances.apply(model, runner, weather, @living_space,
                                 @cfa, @nbeds, @ncfl, @has_uncond_bsmnt,
                                 clothes_washer, cw_space, clothes_dryer, cd_space,
                                 dishwasher, dw_space, refrigerator, rf_space, cooking_range, cook_space, oven, @hpxml.water_heating.water_fixtures_usage_multiplier,
@@ -2408,7 +2439,7 @@ class OSModel
                   duct_systems, @infil_volume, infil_height, open_window_area,
                   @clg_ssn_sensor, @min_neighbor_distance, vent_kitchen, vent_bath,
                   vented_attic, vented_crawl, site_type, shelter_coef,
-                  has_flue_chimney, @hvac_map, @apply_ashrae140_assumptions)
+                  has_flue_chimney, @hvac_map, @eri_version, @apply_ashrae140_assumptions)
   end
 
   def self.create_ducts(runner, model, hvac_distribution, spaces)
@@ -2707,8 +2738,7 @@ class OSModel
 
     infil_flow_actuators = []
     natvent_flow_actuators = []
-    imbal_mechvent_flow_actuators = []
-    imbal_ducts_flow_actuators = []
+    mechvent_flow_actuators = []
     whf_flow_actuators = []
 
     model.getEnergyManagementSystemActuators.each do |actuator|
@@ -2719,21 +2749,18 @@ class OSModel
       elsif actuator.name.to_s.start_with? Constants.ObjectNameNaturalVentilation.gsub(' ', '_')
         natvent_flow_actuators << actuator
       elsif actuator.name.to_s.start_with? Constants.ObjectNameMechanicalVentilation.gsub(' ', '_')
-        imbal_mechvent_flow_actuators << actuator
-      elsif actuator.name.to_s.start_with? Constants.ObjectNameDucts.gsub(' ', '_')
-        imbal_ducts_flow_actuators << actuator
+        mechvent_flow_actuators << actuator
       elsif actuator.name.to_s.start_with? Constants.ObjectNameWholeHouseFan.gsub(' ', '_')
         whf_flow_actuators << actuator
       end
     end
-    if (infil_flow_actuators.size != 1) || (natvent_flow_actuators.size != 1) || (imbal_mechvent_flow_actuators.size != 1) || (whf_flow_actuators.size != 1) || (imbal_ducts_flow_actuators.size != 1)
+    if (infil_flow_actuators.size != 1) || (natvent_flow_actuators.size != 1) || (mechvent_flow_actuators.size != 1) || (whf_flow_actuators.size != 1)
       fail 'Could not find actuator for component loads.'
     end
 
     infil_flow_actuator = infil_flow_actuators[0]
     natvent_flow_actuator = natvent_flow_actuators[0]
-    imbal_mechvent_flow_actuator = imbal_mechvent_flow_actuators[0]
-    imbal_ducts_flow_actuator = imbal_ducts_flow_actuators[0]
+    mechvent_flow_actuator = mechvent_flow_actuators[0]
     whf_flow_actuator = whf_flow_actuators[0]
 
     # EMS Sensors: Ducts
@@ -2959,25 +2986,24 @@ class OSModel
     end
 
     # EMS program: Infiltration, Natural Ventilation, Mechanical Ventilation, Ducts
-    program.addLine("Set hr_airflow_rate = #{infil_flow_actuator.name} + #{imbal_mechvent_flow_actuator.name} + #{imbal_ducts_flow_actuator.name} + #{natvent_flow_actuator.name} + #{whf_flow_actuator.name}")
+    program.addLine("Set hr_airflow_rate = #{infil_flow_actuator.name} + #{mechvent_flow_actuator.name} + #{natvent_flow_actuator.name} + #{whf_flow_actuator.name}")
     program.addLine('If hr_airflow_rate > 0')
     program.addLine("  Set hr_infil = (#{air_loss_sensor.name} - #{air_gain_sensor.name}) * #{infil_flow_actuator.name} / hr_airflow_rate") # Airflow heat attributed to infiltration
     program.addLine("  Set hr_natvent = (#{air_loss_sensor.name} - #{air_gain_sensor.name}) * #{natvent_flow_actuator.name} / hr_airflow_rate") # Airflow heat attributed to natural ventilation
     program.addLine("  Set hr_whf = (#{air_loss_sensor.name} - #{air_gain_sensor.name}) * #{whf_flow_actuator.name} / hr_airflow_rate") # Airflow heat attributed to whole house fan
-    program.addLine("  Set hr_mechvent = ((#{air_loss_sensor.name} - #{air_gain_sensor.name}) * #{imbal_mechvent_flow_actuator.name} / hr_airflow_rate)") # Airflow heat attributed to imbalanced mech vent
-    program.addLine("  Set hr_ducts = ((#{air_loss_sensor.name} - #{air_gain_sensor.name}) * #{imbal_ducts_flow_actuator.name} / hr_airflow_rate)") # Airflow heat attributed to infiltration induced by duct leakage imbalance
+    program.addLine("  Set hr_mechvent = ((#{air_loss_sensor.name} - #{air_gain_sensor.name}) * #{mechvent_flow_actuator.name} / hr_airflow_rate)") # Airflow heat attributed to mechanical ventilation
     program.addLine('Else')
     program.addLine('  Set hr_infil = 0')
     program.addLine('  Set hr_natvent = 0')
     program.addLine('  Set hr_whf = 0')
     program.addLine('  Set hr_mechvent = 0')
-    program.addLine('  Set hr_ducts = 0')
     program.addLine('EndIf')
     s = 'Set hr_mechvent = hr_mechvent'
     mechvent_sensors.each do |sensor|
-      s += " - #{sensor.name}" # Balanced mech vent load + imbalanced mech vent fan heat
+      s += " - #{sensor.name}" # Fan heat & ERV/HRV load
     end
     program.addLine(s) if mechvent_sensors.size > 0
+    program.addLine('Set hr_ducts = 0')
     ducts_sensors.each do |duct_sensors|
       s = 'Set hr_ducts = hr_ducts'
       duct_sensors.each do |sensor|
@@ -3206,7 +3232,7 @@ class OSModel
       end
       thick_ins = [thick_in]
       if layer_r == 0
-        conds = [999]
+        conds = [99]
       else
         conds = [thick_in / layer_r]
       end

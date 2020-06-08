@@ -63,6 +63,76 @@ The `HPXML Toolbox website <https://hpxml.nrel.gov/>`_ also provides several res
 #. A data dictionary
 #. An implementation guide
 
+Scope (Dwelling Units)
+~~~~~~~~~~~~~~~~~~~~~~
+
+The OpenStudio-HPXML workflow is intended to be used to model individual residential dwelling units -- either a single-family detached (SFD) building, or a single unit of a single-family attached (SFA) or multifamily (MF) building.
+This approach was taken because:
+
+- It is required/desired for certain projects.
+- It improves runtime speed by being able to simulate individual units in parallel (as opposed to simulating the entire building).
+- It doesn't necessarily preclude the possibility of running a single integrated EnergyPlus simulation.
+
+To model units of SFA/MF buildings, current capabilities include:
+
+- Defining surfaces adjacent to generic SFA/MF space types (e.g., "other housing unit" or "other multifamily buffer space").
+- Locating various building components (e.g., ducts, water heaters, appliances) in these spaces.
+
+Note that only the energy use attributed to each dwelling unit is calculated.
+Other OpenStudio capabilities should be used to supplement this workflow if the energy use of non-residential dwelling spaces (e.g., gyms, elevators, corridors, etc.) are of interest.
+In the near future, the OpenStudio-HPXML workflow will also begin supporting shared systems (HVAC, water heating, mechanical ventilation, etc.) by approximating the energy use attributed to the unit.
+
+For situations where more complex, integrated modeling is required, it is possible to merge multiple OpenStudio models together into a single model, such that one could merge all residential OSMs together and potentially combine it with a commercial OSM.
+That capability is outside the scope of this project.
+
+Input Defaults
+~~~~~~~~~~~~~~
+
+An increasing number of elements in the HPXML file are being made optional with "smart" defaults.
+Default values, equations, and logic are described throughout this documentation.
+
+Most defaults can also be seen by using the ``debug`` argument/flag when running the workflow on an actual HPXML file.
+This will create a new HPXML file (``in.xml`` in the run directory) where additional fields are populated for inspection.
+
+For example, suppose a HPXML file has a window defined as follows:
+
+.. code-block:: XML
+
+  <Window>
+    <SystemIdentifier id='Window'/>
+    <Area>108.0</Area>
+    <Azimuth>0</Azimuth>
+    <UFactor>0.33</UFactor>
+    <SHGC>0.45</SHGC>
+    <AttachedToWall idref='Wall'/>
+  </Window>
+
+In the ``in.xml`` file, the window would have additional elements like so:
+
+.. code-block:: XML
+
+  <Window>
+    <SystemIdentifier id='Window'/>
+    <Area>108.0</Area>
+    <Azimuth>0</Azimuth>
+    <UFactor>0.33</UFactor>
+    <SHGC>0.45</SHGC>
+    <InteriorShading>
+      <SystemIdentifier id='WindowInteriorShading'/>
+      <SummerShadingCoefficient>0.7</SummerShadingCoefficient>
+      <WinterShadingCoefficient>0.85</WinterShadingCoefficient>
+    </InteriorShading>
+    <FractionOperable>0.67</FractionOperable>
+    <AttachedToWall idref='Wall'/>
+  </Window>
+
+.. warning::
+
+  The OpenStudio-HPXML workflow generally treats missing HPXML elements differently than elements provided but without additional detail.
+  For example, if an HPXML file has no ``Refrigerator`` element defined, it will be interpreted as a building that has no refrigerator and modeled this way.
+  On the other hand, if there is a ``Refrigerator`` element defined but no elements within, it is interpreted as a building that has a refrigerator, but no information about the refrigerator is known.
+  In this case, its details (e.g., location, energy use) will be defaulted in the model.
+
 Simulation Controls
 ~~~~~~~~~~~~~~~~~~~
 
