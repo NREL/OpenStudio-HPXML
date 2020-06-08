@@ -16,8 +16,7 @@ class HPXMLTest < MiniTest::Test
   @@workflow_runtime_key = 'Workflow Runtime'
 
   def test_simulations
-    OpenStudio::Logger.instance.standardOutLogger.setLogLevel(OpenStudio::Error)
-    # OpenStudio::Logger.instance.standardOutLogger.setLogLevel(OpenStudio::Fatal)
+    OpenStudio::Logger.instance.standardOutLogger.setLogLevel(OpenStudio::Warn)
 
     this_dir = File.dirname(__FILE__)
     results_dir = File.join(this_dir, 'results')

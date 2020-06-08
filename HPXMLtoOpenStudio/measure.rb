@@ -2013,67 +2013,56 @@ class OSModel
       hot_water_distribution = @hpxml.hot_water_distributions[0]
     end
 
+    # Solar thermal system
     solar_thermal_system = nil
     if @hpxml.solar_thermal_systems.size > 0
       solar_thermal_system = @hpxml.solar_thermal_systems[0]
     end
 
     # Water Heater
-    dhw_loop_fracs = {}
     @hpxml.water_heating_systems.each do |water_heating_system|
       loc_space, loc_schedule = get_space_or_schedule_from_location(water_heating_system.location, 'WaterHeatingSystem', model, spaces)
 
-      # Check if simple solar water heater (defined by Solar Fraction) attached.
-      # Solar fraction is used to adjust water heater's tank losses and hot water use, because it is
-      # the portion of the total conventional hot water heating load (delivered energy + tank losses).
-      solar_fraction = nil
-      if (not solar_thermal_system.nil?) && (solar_thermal_system.water_heating_system.nil? || (solar_thermal_system.water_heating_system.id == water_heating_system.id))
-        solar_fraction = solar_thermal_system.solar_fraction
-      end
-      solar_fraction = 0.0 if solar_fraction.nil?
-
       ec_adj = HotWaterAndAppliances.get_dist_energy_consumption_adjustment(@has_uncond_bsmnt, @cfa, @ncfl, hot_water_distribution)
-
-      dhw_load_frac = water_heating_system.fraction_dhw_load_served * (1.0 - solar_fraction)
-
-      @dhw_map[water_heating_system.id] = []
 
       if water_heating_system.water_heater_type == HPXML::WaterHeaterTypeStorage
 
-        Waterheater.apply_tank(model, loc_space, loc_schedule, water_heating_system, ec_adj, @dhw_map, @hvac_map, solar_fraction)
+        Waterheater.apply_tank(model, loc_space, loc_schedule, water_heating_system, ec_adj,
+                               @dhw_map, @hvac_map, solar_thermal_system)
 
       elsif water_heating_system.water_heater_type == HPXML::WaterHeaterTypeTankless
 
-        Waterheater.apply_tankless(model, loc_space, loc_schedule, water_heating_system, ec_adj, @nbeds, @dhw_map, @hvac_map, solar_fraction)
+        Waterheater.apply_tankless(model, loc_space, loc_schedule, water_heating_system, ec_adj,
+                                   @nbeds, @dhw_map, @hvac_map, solar_thermal_system)
 
       elsif water_heating_system.water_heater_type == HPXML::WaterHeaterTypeHeatPump
 
-        Waterheater.apply_heatpump(model, runner, loc_space, loc_schedule, weather, water_heating_system, ec_adj, @dhw_map, @hvac_map, solar_fraction, @living_zone)
+        Waterheater.apply_heatpump(model, runner, loc_space, loc_schedule, weather, water_heating_system, ec_adj,
+                                   @dhw_map, @hvac_map, solar_thermal_system, @living_zone)
 
       elsif [HPXML::WaterHeaterTypeCombiStorage, HPXML::WaterHeaterTypeCombiTankless].include? water_heating_system.water_heater_type
 
-        Waterheater.apply_combi(model, runner, loc_space, loc_schedule, water_heating_system, ec_adj, @dhw_map, @hvac_map, solar_fraction)
+        Waterheater.apply_combi(model, runner, loc_space, loc_schedule, water_heating_system, ec_adj,
+                                @dhw_map, @hvac_map, solar_thermal_system)
 
       else
 
         fail "Unhandled water heater (#{water_heating_system.water_heater_type})."
 
       end
-
-      dhw_loop_fracs[water_heating_system.id] = dhw_load_frac
     end
 
+    fixtures_usage_multiplier = @hpxml.water_heating.water_fixtures_usage_multiplier
     HotWaterAndAppliances.apply(model, runner, weather, @living_space,
                                 @cfa, @nbeds, @ncfl, @has_uncond_bsmnt,
                                 clothes_washer, cw_space, clothes_dryer, cd_space,
-                                dishwasher, dw_space, refrigerator, rf_space, cooking_range, cook_space, oven, @hpxml.water_heating.water_fixtures_usage_multiplier,
-                                @hpxml.water_fixtures, @hpxml.water_heating_systems, hot_water_distribution, dhw_loop_fracs, @eri_version, @dhw_map)
+                                dishwasher, dw_space, refrigerator, rf_space, cooking_range, cook_space, oven,
+                                fixtures_usage_multiplier, @hpxml.water_fixtures, @hpxml.water_heating_systems, hot_water_distribution,
+                                solar_thermal_system, @eri_version, @dhw_map)
 
-    if not solar_thermal_system.nil?
-      if not solar_thermal_system.collector_area.nil? # Detailed solar water heater
-        loc_space, loc_schedule = get_space_or_schedule_from_location(solar_thermal_system.water_heating_system.location, 'WaterHeatingSystem', model, spaces)
-        Waterheater.apply_solar_thermal(model, loc_space, loc_schedule, solar_thermal_system, @dhw_map)
-      end
+    if (not solar_thermal_system.nil?) && (not solar_thermal_system.collector_area.nil?) # Detailed solar water heater
+      loc_space, loc_schedule = get_space_or_schedule_from_location(solar_thermal_system.water_heating_system.location, 'WaterHeatingSystem', model, spaces)
+      Waterheater.apply_solar_thermal(model, loc_space, loc_schedule, solar_thermal_system, @dhw_map)
     end
 
     # Add combi-system EMS program with water use equipment information

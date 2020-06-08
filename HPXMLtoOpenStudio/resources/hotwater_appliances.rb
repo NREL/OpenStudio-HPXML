@@ -6,7 +6,7 @@ class HotWaterAndAppliances
                  clothes_washer, cw_space, clothes_dryer, cd_space,
                  dishwasher, dw_space, refrigerator, rf_space, cooking_range, cook_space, oven,
                  fixtures_usage_multiplier, water_fixtures, water_heating_systems, hot_water_distribution,
-                 dhw_loop_fracs, eri_version, dhw_map)
+                 solar_thermal_system, eri_version, dhw_map)
 
     # Map plant loops to sys_ids
     dhw_loops = {}
@@ -16,6 +16,14 @@ class HotWaterAndAppliances
 
         dhw_loops[sys_id] = dhw_object
       end
+    end
+
+    # Calculate load fractions for each water heater
+    dhw_loop_fracs = {}
+    water_heating_systems.each do |water_heating_system|
+      solar_fraction = Waterheater.get_water_heater_solar_fraction(water_heating_system, solar_thermal_system)
+      dhw_load_frac = water_heating_system.fraction_dhw_load_served * (1.0 - solar_fraction)
+      dhw_loop_fracs[water_heating_system.id] = dhw_load_frac
     end
 
     dist_type = hot_water_distribution.system_type unless hot_water_distribution.nil?
