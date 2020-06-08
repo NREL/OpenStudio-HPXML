@@ -1959,19 +1959,19 @@ class OSModel
 
     if type == 'wall'
       Constructions.apply_wood_stud_wall(model, surfaces, 'AdiabaticWallConstruction',
-                                         0, 1, 3.5, true, 0.1, 0.5, 0, 999,
+                                         0, 1, 3.5, true, 0.1, 0.5, 0, 99,
                                          Material.ExtFinishStuccoMedDark, 0,
                                          Material.AirFilmVertical,
                                          Material.AirFilmVertical)
     elsif type == 'floor'
       Constructions.apply_floor(model, surfaces, 'AdiabaticFloorConstruction',
-                                0, 1, 0.07, 5.5, 0.75, 999,
+                                0, 1, 0.07, 5.5, 0.75, 99,
                                 Material.FloorWood, Material.CoveringBare,
                                 Material.AirFilmFloorReduced,
                                 Material.AirFilmFloorReduced)
     elsif type == 'roof'
       Constructions.apply_open_cavity_roof(model, surfaces, 'AdiabaticRoofConstruction',
-                                           0, 1, 7.25, 0.07, 7.25, 0.75, 999,
+                                           0, 1, 7.25, 0.07, 7.25, 0.75, 99,
                                            Material.RoofingAsphaltShinglesMed, false)
     end
   end
@@ -3397,7 +3397,7 @@ class OSModel
       end
       thick_ins = [thick_in]
       if layer_r == 0
-        conds = [999]
+        conds = [99]
       else
         conds = [thick_in / layer_r]
       end
