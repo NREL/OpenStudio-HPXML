@@ -351,16 +351,6 @@ class HPXMLTest < MiniTest::Test
       assert_equal(true, success)
     end
 
-    # Add output variables for crankcase and defrost energy
-    vars = ['Cooling Coil Crankcase Heater Electric Energy',
-            'Heating Coil Crankcase Heater Electric Energy',
-            'Heating Coil Defrost Electric Energy']
-    vars.each do |var|
-      output_var = OpenStudio::Model::OutputVariable.new(var, model)
-      output_var.setReportingFrequency('runperiod')
-      output_var.setKeyValue('*')
-    end
-
     # Add output variables for CFIS tests
     if xml.include? 'cfis'
       infil_program = nil
@@ -490,14 +480,73 @@ class HPXMLTest < MiniTest::Test
   end
 
   def _verify_simulation_outputs(runner, rundir, hpxml_path, results)
-    # Check that eplusout.err has no lines that include "Blank Schedule Type Limits Name input"
-    # Check that eplusout.err has no lines that include "FixViewFactors: View factors not complete"
+    # Check for unexpected warnings
     File.readlines(File.join(rundir, 'eplusout.err')).each do |err_line|
+      next unless err_line.include? '** Warning **'
+
+      # General
       next if err_line.include? 'Schedule:Constant="ALWAYS ON CONTINUOUS", Blank Schedule Type Limits Name input'
       next if err_line.include? 'Schedule:Constant="ALWAYS OFF DISCRETE", Blank Schedule Type Limits Name input'
+      next if err_line.include? 'Output:Meter: invalid Key Name'
+      next if err_line.include? 'GetSurfaceData: Very small surface area'
+      next if err_line.include? 'Entered Zone Volumes differ from calculated zone volume'
+      next if err_line.include?('CalculateZoneVolume') && err_line.include?('not fully enclosed')
+      next if err_line.include?('GetInputViewFactors') && err_line.include?('not enough values')
+      next if err_line.include? 'Pump nominal power or motor efficiency is set to 0'
+      next if err_line.include? 'volume flow rate per watt of rated total cooling capacity is out of range'
+      next if err_line.include? 'volume flow rate per watt of rated total heating capacity is out of range'
+      next if err_line.include? 'The following Report Variables were requested but not generated'
+      next if err_line.include? 'Timestep: Requested number'
+      next if err_line.include? 'The Standard Ratings is calculated for'
+      next if err_line.include?('CheckUsedConstructions') && err_line.include?('nominally unused constructions')
+      next if err_line.include?('GetDXCoils: Coil:Heating:DX') && err_line.include?('curve values') # Defrost curve
+      next if err_line.include? 'Full load outlet air dry-bulb temperature < 2C. This indicates the possibility of coil frost/freeze.' # HPWH located outside, these warnings are fine
+      next if err_line.include? 'Full load outlet temperature indicates a possibility of frost/freeze error continues.' # HPWH located outside, these warnings are fine
+      next if err_line.include?('WetBulb not converged after') && err_line.include?('iterations(PsyTwbFnTdbWPb)')
 
-      assert_equal(err_line.include?('Blank Schedule Type Limits Name input'), false)
-      assert_equal(err_line.include?('FixViewFactors: View factors not complete'), false)
+      # TODO: Eliminate these warnings?
+
+      # GSHP:
+      next if err_line.include? 'Borehole shank spacing is less than the pipe diameter. U-tube spacing is reference from the u-tube pipe center.'
+      next if err_line.include? 'Shank spacing is set to the outer pipe diameter.'
+
+      # DHW Combi:
+      next if err_line.include? 'Missing temperature setpoint for LeavingSetpointModulated mode'
+      next if err_line.include?('Plant Loop') && err_line.include?('Demand Side is storing excess heat the majority of the time')
+      next if err_line.include?('Plant Loop') && err_line.include?('Supply Side is storing excess heat the majority of the time')
+
+      # HPWH:
+      next if err_line.include? 'More Additional Loss Coefficients were entered than the number of nodes; extra coefficients will not be used' # TODO: Fix OpenStudio FT?
+      next if err_line.include? 'Recovery Efficiency and Energy Factor could not be calculated during the test for standard ratings'
+      next if err_line.include? 'SimHVAC: Maximum iterations (20) exceeded for all HVAC loops'
+
+      # SHW:
+      next if err_line.include?('Glycol: Temperature') && err_line.include?('out of range (too low) for fluid')
+      next if err_line.include?('Glycol: Temperature') && err_line.include?('out of range (too high) for fluid')
+      next if err_line.include? 'Plant loop exceeding upper temperature limit'
+
+      # Evap cooler:
+      next if err_line.include? 'Since Zone Minimum Air Flow Input Method = CONSTANT, input for Fixed Minimum Air Flow Rate will be ignored'
+      next if err_line.include?('GetAirPathData: AirLoopHVAC') && err_line.include?('has no Controllers')
+      next if err_line.include?('InitOAController: Maximum Outdoor Air Flow Rate for Controller:OutdoorAir') && err_line.include?('is greater than Design Supply Air Flow Rate')
+      next if err_line.include?('Zone') && err_line.include?('is not accounted for by Controller:MechanicalVentilation object')
+      next if err_line.include?('PEOPLE object for zone') && err_line.include?('is not accounted for by Controller:MechanicalVentilation object')
+
+      # Room AC:
+      next if err_line.include? 'GetDXCoils: Coil:Cooling:DX:SingleSpeed="ROOM AC CLG COIL" curve values' # TODO: Check w/ Jon
+
+      next if err_line.include?('Foundation:Kiva') && err_line.include?('wall surfaces with more than four vertices') # TODO: Check alternative approach
+
+      if hpxml_path.include?('base-misc-timestep-10-mins.xml') || hpxml_path.include?('ASHRAE_Standard_140')
+        next if err_line.include? 'Temperature out of range [-100. to 200.] (PsyPsatFnTemp)'
+      end
+
+      if hpxml_path.include? 'ASHRAE_Standard_140'
+        # TODO: Create E+ issue to add tolerance to check
+        next if err_line.include?('SurfaceProperty:ExposedFoundationPerimeter') && err_line.include?('Total Exposed Perimeter is greater than the perimeter')
+      end
+
+      flunk "Unexpected warning found: #{err_line}"
     end
 
     sql_path = File.join(rundir, 'eplusout.sql')
