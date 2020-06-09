@@ -3392,7 +3392,7 @@ class HVACSizing
         coil = object.heatingCoil.to_CoilHeatingWaterBaseboard.get
         coil.setUFactorTimesAreaValue(bb_UA)
         coil.setMaximumWaterFlowRate(bb_max_flow)
-        coil.setHeatingDesignCapacityMethod('autosize')
+        coil.setHeatingDesignCapacityMethod('HeatingDesignCapacity')
 
         plant_loop.components.each do |component|
           # Boiler

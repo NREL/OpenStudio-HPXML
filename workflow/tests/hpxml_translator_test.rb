@@ -480,7 +480,13 @@ class HPXMLTest < MiniTest::Test
   end
 
   def _verify_simulation_outputs(runner, rundir, hpxml_path, results)
+<<<<<<< HEAD
     # Check for unexpected warnings
+=======
+    # Check that eplusout.err has no lines that include "Blank Schedule Type Limits Name input"
+    # Check that eplusout.err has no lines that include "FixViewFactors: View factors not complete"
+    # Check that eplusout.err has no lines that include "GetHTSurfaceData: Surfaces with interface to Ground found but no "Ground Temperatures" were input"
+>>>>>>> 0caa2761efc62cfb781b266bb72c53ddb04ca90e
     File.readlines(File.join(rundir, 'eplusout.err')).each do |err_line|
       next unless err_line.include? '** Warning **'
 
@@ -542,7 +548,13 @@ class HPXMLTest < MiniTest::Test
         next if err_line.include?('SurfaceProperty:ExposedFoundationPerimeter') && err_line.include?('Total Exposed Perimeter is greater than the perimeter')
       end
 
+<<<<<<< HEAD
       flunk "Unexpected warning found: #{err_line}"
+=======
+      assert_equal(err_line.include?('Blank Schedule Type Limits Name input'), false)
+      assert_equal(err_line.include?('FixViewFactors: View factors not complete'), false)
+      assert_equal(err_line.include?('GetHTSurfaceData: Surfaces with interface to Ground found but no "Ground Temperatures" were input'), false)
+>>>>>>> 0caa2761efc62cfb781b266bb72c53ddb04ca90e
     end
 
     sql_path = File.join(rundir, 'eplusout.sql')
