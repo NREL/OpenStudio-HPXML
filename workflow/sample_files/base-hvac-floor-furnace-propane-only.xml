@@ -296,7 +296,7 @@
             <HeatingSystem>
               <SystemIdentifier id='HeatingSystem'/>
               <HeatingSystemType>
-                <WallFurnace/>
+                <FloorFurnace/>
               </HeatingSystemType>
               <HeatingSystemFuel>propane</HeatingSystemFuel>
               <HeatingCapacity>64000.0</HeatingCapacity>
