@@ -894,9 +894,11 @@ class Waterheater
     combi_ctrl_program.addLine("Set WH_Loss = - #{tank_loss_energy_sensor.name}")
     combi_ctrl_program.addLine("Set WH_Use = Tank_Use_Total_MFR * Cp * (#{tank_temp_sensor.name} - #{mains_temp_sensor.name}) * ZoneTimeStep * 3600")
     combi_ctrl_program.addLine("Set WH_HeatToLowSetpoint = Tank_Water_Mass * Cp * (#{tank_temp_sensor.name} - #{tank_spt_sensor.name} + #{deadband})")
+    combi_ctrl_program.addLine("Set WH_HeatToHighSetpoint = Tank_Water_Mass * Cp * (#{tank_temp_sensor.name} - #{tank_spt_sensor.name})")
     combi_ctrl_program.addLine('Set WH_Energy_Demand = WH_Use + WH_Loss - WH_HeatToLowSetpoint')
+    combi_ctrl_program.addLine('Set WH_Energy_Heat = WH_Use + WH_Loss - WH_HeatToHighSetpoint')
     combi_ctrl_program.addLine('If WH_Energy_Demand > 0')
-    combi_ctrl_program.addLine("Set #{pump_actuator.name} = WH_Energy_Demand / (Cp * DeltaT * 3600 * ZoneTimeStep)")
+    combi_ctrl_program.addLine("Set #{pump_actuator.name} = WH_Energy_Heat / (Cp * DeltaT * 3600 * ZoneTimeStep)")
     combi_ctrl_program.addLine("Set #{altsch_actuator.name} = 100") # Set the alternate setpoint temperature to highest level to ensure maximum source side flow rate
     combi_ctrl_program.addLine('Else')
     combi_ctrl_program.addLine("Set #{pump_actuator.name} = 0")
