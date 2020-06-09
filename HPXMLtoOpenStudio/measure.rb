@@ -401,9 +401,6 @@ class OSModel
     if @hpxml.building_construction.use_only_ideal_air_system.nil?
       @hpxml.building_construction.use_only_ideal_air_system = false
     end
-    if @apply_ashrae140_assumptions
-      @hpxml.building_construction.use_only_ideal_air_system = true
-    end
 
     # Initialize
     @remaining_heat_load_frac = 1.0
@@ -2241,8 +2238,6 @@ class OSModel
   end
 
   def self.add_cooling_system(runner, model)
-    return if @hpxml.building_construction.use_only_ideal_air_system
-
     @hpxml.cooling_systems.each do |cooling_system|
       check_distribution_system(cooling_system.distribution_system, cooling_system.cooling_system_type)
 
@@ -2279,8 +2274,6 @@ class OSModel
   end
 
   def self.add_heating_system(runner, model)
-    return if @hpxml.building_construction.use_only_ideal_air_system
-
     @hpxml.heating_systems.each do |heating_system|
       check_distribution_system(heating_system.distribution_system, heating_system.heating_system_type)
 
@@ -2320,8 +2313,6 @@ class OSModel
   end
 
   def self.add_heat_pump(runner, model, weather)
-    return if @hpxml.building_construction.use_only_ideal_air_system
-
     @hpxml.heat_pumps.each do |heat_pump|
       if not heat_pump.heating_capacity_17F.nil?
         if heat_pump.heating_capacity.nil?
