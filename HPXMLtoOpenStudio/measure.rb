@@ -2571,6 +2571,7 @@ class OSModel
     if not (@hpxml.cooling_systems.include?(cooling_system) && (cooling_system.cooling_system_type == HPXML::HVACTypeCentralAirConditioner))
       return false
     end
+
     return true
   end
 
@@ -2862,7 +2863,7 @@ class OSModel
 
   def self.add_lighting(runner, model, weather, spaces)
     Lighting.apply(model, weather, spaces, @hpxml.lighting_groups,
-                   @hpxml.lighting.usage_multiplier, @eri_version)
+                   @hpxml.lighting.usage_multiplier, @hpxml.lighting_schedule, @eri_version)
   end
 
   def self.add_airflow(runner, model, weather, spaces)
@@ -2870,6 +2871,7 @@ class OSModel
     vented_attic = nil
     @hpxml.attics.each do |attic|
       next unless attic.attic_type == HPXML::AtticTypeVented
+
       vented_attic = attic
     end
 
@@ -2877,6 +2879,7 @@ class OSModel
     vented_crawl = nil
     @hpxml.foundations.each do |foundation|
       next unless foundation.foundation_type == HPXML::FoundationTypeCrawlspaceVented
+
       vented_crawl = foundation
     end
 
@@ -3991,6 +3994,7 @@ class OSModel
     # return if already exists
     model.getScheduleConstants.each do |sch|
       next unless sch.name.to_s == location
+
       return sch
     end
 

@@ -363,6 +363,7 @@ class HPXMLTest < MiniTest::Test
       infil_program = nil
       model.getEnergyManagementSystemPrograms.each do |ems_program|
         next unless ems_program.name.to_s.start_with? Constants.ObjectNameInfiltration
+
         infil_program = ems_program
       end
 
@@ -1170,11 +1171,13 @@ class HPXMLTest < MiniTest::Test
       all_results.sort.each do |xml, xml_results|
         next unless xml.include? ashrae_140_dir
         next unless xml.include? 'C.xml'
+
         csv << [File.basename(xml), xml_results['Load: Heating (MBtu)'].round(2), 'N/A']
       end
       all_results.sort.each do |xml, xml_results|
         next unless xml.include? ashrae_140_dir
         next unless xml.include? 'L.xml'
+
         csv << [File.basename(xml), 'N/A', xml_results['Load: Cooling (MBtu)'].round(2)]
       end
     end

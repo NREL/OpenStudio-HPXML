@@ -304,6 +304,10 @@ class Constants
   def self.ObjectNameInteriorLighting
     return 'interior lighting'
   end
+  
+  def self.ObjectNameLightingExteriorHoliday
+    return "exterior holiday lighting"
+  end
 
   def self.ObjectNameMechanicalVentilation
     return 'mech vent'

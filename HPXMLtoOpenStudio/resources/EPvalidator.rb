@@ -719,6 +719,16 @@ class EnergyPlusValidator
       '/HPXML/Building/BuildingDetails/Lighting' => {
         'LightingGroup[LightingType[LightEmittingDiode | CompactFluorescent | FluorescentTube] and Location[text()="interior" or text()="exterior" or text()="garage"]]' => nine, # See [LightingGroup]
         'extension/UsageMultiplier' => zero_or_one,
+        'extension/InteriorWeekdayScheduleFractions' => zero_or_one,
+        'extension/InteriorWeekendScheduleFractions' => zero_or_one,
+        'extension/InteriorMonthlyScheduleMultipliers' => zero_or_one,
+        'extension/GarageAndExteriorWeekdayScheduleFractions' => zero_or_one,
+        'extension/GarageAndExteriorWeekendScheduleFractions' => zero_or_one,
+        'extension/GarageAndExteriorMonthlyScheduleMultipliers' => zero_or_one,
+        'extension/ExteriorHolidayDailyEnergyUse' => zero_or_one, # kWh/day
+        'extension/ExteriorHolidayPeriodStartDate' => zero_or_one,
+        'extension/ExteriorHolidayPeriodEndDate' => zero_or_one,
+        'extension/ExteriorHolidayScheduleFractions' => zero_or_one,
       },
 
       ## [LightingGroup]

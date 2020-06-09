@@ -50,7 +50,7 @@ class HPXML < Object
                  :hvac_distributions, :ventilation_fans, :water_heating_systems, :hot_water_distributions,
                  :water_fixtures, :water_heating, :solar_thermal_systems, :pv_systems, :clothes_washers,
                  :clothes_dryers, :dishwashers, :refrigerators, :dehumidifiers, :cooking_ranges, :ovens,
-                 :lighting_groups, :lighting, :ceiling_fans, :plug_loads, :misc_loads_schedule]
+                 :lighting_groups, :lighting, :lighting_schedule, :ceiling_fans, :plug_loads, :misc_loads_schedule]
   attr_reader(*HPXML_ATTRS, :doc)
 
   # Constants
@@ -413,6 +413,7 @@ class HPXML < Object
     @ovens.to_oga(@doc)
     @lighting_groups.to_oga(@doc)
     @lighting.to_oga(@doc)
+    @lighting_schedule.to_oga(@doc)
     @ceiling_fans.to_oga(@doc)
     @plug_loads.to_oga(@doc)
     @misc_loads_schedule.to_oga(@doc)
@@ -459,6 +460,7 @@ class HPXML < Object
     @ovens = Ovens.new(self, hpxml)
     @lighting_groups = LightingGroups.new(self, hpxml)
     @lighting = Lighting.new(self, hpxml)
+    @lighting_schedule = LightingSchedule.new(self, hpxml)
     @ceiling_fans = CeilingFans.new(self, hpxml)
     @plug_loads = PlugLoads.new(self, hpxml)
     @misc_loads_schedule = MiscLoadsSchedule.new(self, hpxml)
@@ -2288,8 +2290,10 @@ class HPXML < Object
 
     def attached_cooling_system
       return if distribution_system.nil?
+
       distribution_system.hvac_systems.each do |hvac_system|
         next if hvac_system.id == @id
+
         return hvac_system
       end
       return
@@ -2299,6 +2303,7 @@ class HPXML < Object
       @hpxml_object.heating_systems.delete(self)
       @hpxml_object.water_heating_systems.each do |water_heating_system|
         next unless water_heating_system.related_hvac_idref == @id
+
         water_heating_system.related_hvac_idref = nil
       end
     end
@@ -2405,8 +2410,10 @@ class HPXML < Object
 
     def attached_heating_system
       return if distribution_system.nil?
+
       distribution_system.hvac_systems.each do |hvac_system|
         next if hvac_system.id == @id
+
         return hvac_system
       end
       return
@@ -2416,6 +2423,7 @@ class HPXML < Object
       @hpxml_object.cooling_systems.delete(self)
       @hpxml_object.water_heating_systems.each do |water_heating_system|
         next unless water_heating_system.related_hvac_idref == @id
+
         water_heating_system.related_hvac_idref = nil
       end
     end
@@ -2526,6 +2534,7 @@ class HPXML < Object
       @hpxml_object.heat_pumps.delete(self)
       @hpxml_object.water_heating_systems.each do |water_heating_system|
         next unless water_heating_system.related_hvac_idref == @id
+
         water_heating_system.related_hvac_idref = nil
       end
     end
@@ -2766,10 +2775,12 @@ class HPXML < Object
       @hpxml_object.hvac_distributions.delete(self)
       (@hpxml_object.heating_systems + @hpxml_object.cooling_systems + @hpxml_object.heat_pumps).each do |hvac|
         next unless hvac.distribution_system_idref == @id
+
         hvac.distribution_system_idref = nil
       end
       @hpxml_object.ventilation_fans.each do |ventilation_fan|
         next unless ventilation_fan.distribution_system_idref == @id
+
         ventilation_fan.distribution_system_idref = nil
       end
     end
@@ -2850,6 +2861,7 @@ class HPXML < Object
     def delete
       @hpxml_object.hvac_distributions.each do |hvac_distribution|
         next unless hvac_distribution.duct_leakage_measurements.include? self
+
         hvac_distribution.duct_leakage_measurements.delete(self)
       end
     end
@@ -2903,6 +2915,7 @@ class HPXML < Object
     def delete
       @hpxml_object.hvac_distributions.each do |hvac_distribution|
         next unless hvac_distribution.ducts.include? self
+
         hvac_distribution.ducts.delete(self)
       end
     end
@@ -3068,6 +3081,7 @@ class HPXML < Object
       @hpxml_object.water_heating_systems.delete(self)
       @hpxml_object.solar_thermal_systems.each do |solar_thermal_system|
         next unless solar_thermal_system.water_heating_system_idref == @id
+
         solar_thermal_system.water_heating_system_idref = nil
       end
     end
@@ -3903,6 +3917,53 @@ class HPXML < Object
     end
   end
 
+  class LightingSchedule < BaseElement
+    ATTRS = [:interior_weekday_fractions, :interior_weekend_fractions, :interior_monthly_multipliers,
+             :garage_exterior_weekday_fractions, :garage_exterior_weekend_fractions, :garage_exterior_monthly_multipliers,
+             :exterior_holiday_daily_energy_use, :exterior_holiday_period_start_date, :exterior_holiday_period_end_date, :exterior_holiday_fractions]
+    attr_accessor(*ATTRS)
+
+    def check_for_errors
+      errors = []
+      return errors
+    end
+
+    def to_oga(doc)
+      return if nil?
+
+      lighting = XMLHelper.create_elements_as_needed(doc, ['HPXML', 'Building', 'BuildingDetails', 'Lighting'])
+      HPXML::add_extension(parent: lighting,
+                           extensions: { 'InteriorWeekdayScheduleFractions' => @interior_weekday_fractions,
+                                         'InteriorWeekendScheduleFractions' => @interior_weekend_fractions,
+                                         'InteriorMonthlyScheduleMultipliers' => @interior_monthly_multipliers,
+                                         'GarageAndExteriorWeekdayScheduleFractions' => @garage_exterior_weekday_fractions,
+                                         'GarageAndExteriorWeekendScheduleFractions' => @garage_exterior_weekend_fractions,
+                                         'GarageAndExteriorMonthlyScheduleMultipliers' => @garage_exterior_monthly_multipliers,
+                                         'ExteriorHolidayDailyEnergyUse' => @exterior_holiday_daily_energy_use,
+                                         'ExteriorHolidayPeriodStartDate' => @exterior_holiday_period_start_date,
+                                         'ExteriorHolidayPeriodEndDate' => @exterior_holiday_period_end_date,
+                                         'ExteriorHolidayScheduleFractions' => @exterior_holiday_fractions })
+    end
+
+    def from_oga(hpxml)
+      return if hpxml.nil?
+
+      lighting = XMLHelper.get_element(hpxml, 'Building/BuildingDetails/Lighting')
+      return if lighting.nil?
+
+      @interior_weekday_fractions = XMLHelper.get_value(lighting, 'extension/InteriorWeekdayScheduleFractions')
+      @interior_weekend_fractions = XMLHelper.get_value(lighting, 'extension/InteriorWeekendScheduleFractions')
+      @interior_monthly_multipliers = XMLHelper.get_value(lighting, 'extension/InteriorMonthlyScheduleMultipliers')
+      @garage_exterior_weekday_fractions = XMLHelper.get_value(lighting, 'extension/GarageAndExteriorWeekdayScheduleFractions')
+      @garage_exterior_weekend_fractions = XMLHelper.get_value(lighting, 'extension/GarageAndExteriorWeekendScheduleFractions')
+      @garage_exterior_monthly_multipliers = XMLHelper.get_value(lighting, 'extension/GarageAndExteriorMonthlyScheduleMultipliers')
+      @exterior_holiday_daily_energy_use = XMLHelper.get_value(lighting, 'extension/ExteriorHolidayDailyEnergyUse')
+      @exterior_holiday_period_start_date = XMLHelper.get_value(lighting, 'extension/ExteriorHolidayPeriodStartDate')
+      @exterior_holiday_period_end_date = XMLHelper.get_value(lighting, 'extension/ExteriorHolidayPeriodEndDate')
+      @exterior_holiday_fractions = XMLHelper.get_value(lighting, 'extension/ExteriorHolidayScheduleFractions')
+    end
+  end
+
   class CeilingFans < BaseArrayElement
     def add(**kwargs)
       self << CeilingFan.new(@hpxml_object, **kwargs)
@@ -4102,10 +4163,12 @@ class HPXML < Object
           # Update subsurface idrefs as appropriate
           (@windows + @doors).each do |subsurf|
             next unless subsurf.wall_idref == surf2.id
+
             subsurf.wall_idref = surf.id
           end
           @skylights.each do |subsurf|
             next unless subsurf.roof_idref == surf2.id
+
             subsurf.roof_idref = surf.id
           end
 
@@ -4120,6 +4183,7 @@ class HPXML < Object
     (@rim_joists + @walls + @foundation_walls + @frame_floors).reverse_each do |surface|
       next if surface.interior_adjacent_to.nil? || surface.exterior_adjacent_to.nil?
       next unless surface.interior_adjacent_to == surface.exterior_adjacent_to
+
       surface.delete
     end
   end
@@ -4127,6 +4191,7 @@ class HPXML < Object
   def delete_tiny_surfaces()
     (@rim_joists + @walls + @foundation_walls + @frame_floors + @roofs + @windows + @skylights + @doors + @slabs).reverse_each do |surface|
       next if surface.area.nil? || (surface.area > 0.1)
+
       surface.delete
     end
   end
@@ -4303,15 +4368,18 @@ end
 
 def to_float_or_nil(value)
   return if value.nil?
+
   return to_float(value)
 end
 
 def to_integer_or_nil(value)
   return if value.nil?
+
   return to_integer(value)
 end
 
 def to_bool_or_nil(value)
   return if value.nil?
+
   return to_boolean(value)
 end
