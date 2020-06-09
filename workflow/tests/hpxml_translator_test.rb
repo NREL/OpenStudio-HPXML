@@ -503,17 +503,13 @@ class HPXMLTest < MiniTest::Test
       next if err_line.include? 'Full load outlet air dry-bulb temperature < 2C. This indicates the possibility of coil frost/freeze.' # HPWH located outside, these warnings are fine
       next if err_line.include? 'Full load outlet temperature indicates a possibility of frost/freeze error continues.' # HPWH located outside, these warnings are fine
       next if err_line.include?('WetBulb not converged after') && err_line.include?('iterations(PsyTwbFnTdbWPb)')
+      next if err_line.include? 'Missing temperature setpoint for LeavingSetpointModulated mode' # These warnings are fine, simulation continues with assining plant loop setpoint to boiler, which is the expected one
 
       # TODO: Eliminate these warnings?
 
       # GSHP:
       next if err_line.include? 'Borehole shank spacing is less than the pipe diameter. U-tube spacing is reference from the u-tube pipe center.'
       next if err_line.include? 'Shank spacing is set to the outer pipe diameter.'
-
-      # DHW Combi:
-      next if err_line.include? 'Missing temperature setpoint for LeavingSetpointModulated mode'
-      next if err_line.include?('Plant Loop') && err_line.include?('Demand Side is storing excess heat the majority of the time')
-      next if err_line.include?('Plant Loop') && err_line.include?('Supply Side is storing excess heat the majority of the time')
 
       # HPWH:
       next if err_line.include? 'More Additional Loss Coefficients were entered than the number of nodes; extra coefficients will not be used' # TODO: Fix OpenStudio FT?
