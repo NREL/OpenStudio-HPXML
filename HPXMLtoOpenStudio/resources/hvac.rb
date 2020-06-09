@@ -3760,11 +3760,7 @@ class HVAC
   end
 
   def self.get_crankcase_assumptions(fraction_cool_load_served)
-    if fraction_cool_load_served > 0
-      crankcase_kw = 0.05 # From RESNET Publication No. 002-2017
-    else
-      crankcase_kw = 0.0
-    end
+    crankcase_kw = 0.05 * fraction_cool_load_served # From RESNET Publication No. 002-2017
     crankcase_temp = 50.0 # From RESNET Publication No. 002-2017
     return crankcase_kw, crankcase_temp
   end
