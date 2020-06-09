@@ -773,7 +773,8 @@ class Waterheater
     dhw_map[sys_id] << loop
 
     # Create loop for source side
-    source_loop = create_new_loop(model, 'dhw source loop', UnitConversions.convert(hx_temp, 'C', 'F'), tank_type)
+    # deadband will be added later inside create_new_loop, need to resolve later with wh refactoring
+    source_loop = create_new_loop(model, 'dhw source loop', UnitConversions.convert(hx_temp - deadband(tank_type) / 2.0, 'C', 'F'), tank_type)
     source_loop.autosizeMaximumLoopFlowRate()
 
     # Create heat exchanger
