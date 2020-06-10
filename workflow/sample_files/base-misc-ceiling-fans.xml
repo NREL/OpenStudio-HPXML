@@ -521,6 +521,14 @@
             <LightEmittingDiode/>
           </LightingType>
         </LightingGroup>
+        <CeilingFan>
+          <SystemIdentifier id='CeilingFan'/>
+          <Airflow>
+            <FanSpeed>medium</FanSpeed>
+            <Efficiency>100.0</Efficiency>
+          </Airflow>
+          <Quantity>2</Quantity>
+        </CeilingFan>
         <extension>
           <InteriorWeekdayScheduleFractions>0.20, 0.20, 0.20, 0.20, 0.20, 0.20, 0.20, 0.90, 0.90, 0.90, 0.90, 0.90, 0.90, 0.90, 0.90, 0.90, 0.70, 0.70, 0.50, 0.50, 0.20, 0.20, 0.20, 0.20</InteriorWeekdayScheduleFractions>
           <InteriorWeekendScheduleFractions>0.20, 0.20, 0.20, 0.20, 0.20, 0.20, 0.20, 0.90, 0.90, 0.90, 0.90, 0.90, 0.90, 0.90, 0.90, 0.90, 0.70, 0.70, 0.50, 0.50, 0.20, 0.20, 0.20, 0.20</InteriorWeekendScheduleFractions>
@@ -533,14 +541,6 @@
           <ExteriorHolidayPeriodEndDate>January 6</ExteriorHolidayPeriodEndDate>
           <ExteriorHolidayScheduleFractions>0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.008168, 0.098016, 0.168028, 0.193699, 0.283547, 0.192532, 0.03734, 0.01867</ExteriorHolidayScheduleFractions>
         </extension>
-        <CeilingFan>
-          <SystemIdentifier id='CeilingFan'/>
-          <Airflow>
-            <FanSpeed>medium</FanSpeed>
-            <Efficiency>100.0</Efficiency>
-          </Airflow>
-          <Quantity>2</Quantity>
-        </CeilingFan>
       </Lighting>
       <MiscLoads>
         <PlugLoad>
