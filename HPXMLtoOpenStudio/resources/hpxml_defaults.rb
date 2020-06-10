@@ -244,15 +244,6 @@ class HPXMLDefaults
       if water_heating_system.performance_adjustment.nil?
         water_heating_system.performance_adjustment = Waterheater.get_default_performance_adjustment(water_heating_system)
       end
-      if water_heating_system.energy_factor.nil?
-        # allow systems not requiring EF and not specifying fuel type, e.g., indirect water heater
-        if not water_heating_system.uniform_energy_factor.nil?
-          water_heating_system.energy_factor = Waterheater.calc_ef_from_uef(water_heating_system)
-        end
-      end
-      if (water_heating_system.water_heater_type == HPXML::WaterHeaterTypeTankless)
-        water_heating_system.heating_capacity = 100000000000.0
-      end
       if (water_heating_system.water_heater_type == HPXML::WaterHeaterTypeCombiStorage) && water_heating_system.standby_loss.nil?
         # Use equation fit from AHRI database
         # calculate independent variable SurfaceArea/vol(physically linear to standby_loss/skin_u under test condition) to fit the linear equation from AHRI database
@@ -426,11 +417,6 @@ class HPXMLDefaults
       if clothes_washer.usage_multiplier.nil?
         clothes_washer.usage_multiplier = 1.0
       end
-      if clothes_washer.modified_energy_factor.nil?
-        clothes_washer.modified_energy_factor = HotWaterAndAppliances.calc_clothes_washer_mef_from_imef(clothes_washer.integrated_modified_energy_factor)
-      else
-        clothes_washer.integrated_modified_energy_factor = HotWaterAndAppliances.calc_clothes_washer_imef_from_mef(clothes_washer.modified_energy_factor)
-      end
     end
 
     # Default clothes dryer
@@ -446,11 +432,6 @@ class HPXMLDefaults
       end
       if clothes_dryer.usage_multiplier.nil?
         clothes_dryer.usage_multiplier = 1.0
-      end
-      if clothes_dryer.energy_factor.nil?
-        clothes_dryer.energy_factor = HotWaterAndAppliances.calc_clothes_dryer_ef_from_cef(clothes_dryer.combined_energy_factor)
-      else
-        clothes_dryer.combined_energy_factor = HotWaterAndAppliances.calc_clothes_dryer_cef_from_ef(clothes_dryer.energy_factor)
       end
     end
 
@@ -471,11 +452,6 @@ class HPXMLDefaults
       end
       if dishwasher.usage_multiplier.nil?
         dishwasher.usage_multiplier = 1.0
-      end
-      if dishwasher.energy_factor.nil?
-        dishwasher.energy_factor = HotWaterAndAppliances.calc_dishwasher_ef_from_annual_kwh(dishwasher.rated_annual_kwh)
-      else
-        dishwasher.rated_annual_kwh = HotWaterAndAppliances.calc_dishwasher_annual_kwh_from_ef(dishwasher.energy_factor)
       end
     end
 

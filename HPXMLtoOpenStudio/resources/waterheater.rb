@@ -6,6 +6,10 @@ class Waterheater
 
     dhw_map[water_heating_system.id] = []
 
+    if water_heating_system.energy_factor.nil?
+      water_heating_system.energy_factor = calc_ef_from_uef(water_heating_system)
+    end
+
     solar_fraction = get_water_heater_solar_fraction(water_heating_system, solar_thermal_system)
     set_temp_c = get_set_temp_c(water_heating_system.temperature, water_heating_system.water_heater_type)
     loop = create_new_loop(model, Constants.PlantLoopDomesticWater, set_temp_c)
@@ -47,9 +51,14 @@ class Waterheater
 
     dhw_map[water_heating_system.id] = []
 
+    if water_heating_system.energy_factor.nil?
+      water_heating_system.energy_factor = calc_ef_from_uef(water_heating_system)
+    end
+    water_heating_system.heating_capacity = 100000000000.0
+
     solar_fraction = get_water_heater_solar_fraction(water_heating_system, solar_thermal_system)
     set_temp_c = get_set_temp_c(water_heating_system.temperature, water_heating_system.water_heater_type)
-    loop = Waterheater.create_new_loop(model, Constants.PlantLoopDomesticWater, set_temp_c)
+    loop = create_new_loop(model, Constants.PlantLoopDomesticWater, set_temp_c)
     dhw_map[water_heating_system.id] << loop
 
     new_pump = create_new_pump(model)
@@ -88,8 +97,11 @@ class Waterheater
 
     dhw_map[water_heating_system.id] = []
 
-    obj_name_hpwh = Constants.ObjectNameWaterHeater
+    if water_heating_system.energy_factor.nil?
+      water_heating_system.energy_factor = calc_ef_from_uef(water_heating_system)
+    end
 
+    obj_name_hpwh = Constants.ObjectNameWaterHeater
     solar_fraction = get_water_heater_solar_fraction(water_heating_system, solar_thermal_system)
     set_temp_c = get_set_temp_c(water_heating_system.temperature, water_heating_system.water_heater_type)
     loop = create_new_loop(model, Constants.PlantLoopDomesticWater, set_temp_c)
@@ -169,6 +181,10 @@ class Waterheater
                        dhw_map, hvac_map, solar_thermal_system)
 
     dhw_map[water_heating_system.id] = []
+
+    if water_heating_system.energy_factor.nil?
+      water_heating_system.energy_factor = calc_ef_from_uef(water_heating_system)
+    end
 
     solar_fraction = get_water_heater_solar_fraction(water_heating_system, solar_thermal_system)
     boiler, boiler_plant_loop = get_combi_boiler_and_plant_loop(hvac_map, water_heating_system.related_hvac_idref)
@@ -1172,10 +1188,16 @@ class Waterheater
     # Water Heater Recovery Efficiency by fuel and energy factor
     if water_heating_system.fuel_type == HPXML::FuelTypeElectricity
       return 0.98
-    elsif water_heating_system.energy_factor >= 0.75
-      return 0.778114 * water_heating_system.energy_factor + 0.276679
     else
-      return 0.252117 * water_heating_system.energy_factor + 0.607997
+      ef = water_heating_system.energy_factor
+      if ef.nil?
+        ef = calc_ef_from_uef(water_heating_system)
+      end
+      if ef >= 0.75
+        return 0.778114 * ef + 0.276679
+      else
+        return 0.252117 * ef + 0.607997
+      end
     end
   end
 

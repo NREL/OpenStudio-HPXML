@@ -3,8 +3,8 @@
   <schema_version>3.0</schema_version>
   <name>hpxm_lto_openstudio</name>
   <uid>b1543b30-9465-45ff-ba04-1d1f85e763bc</uid>
-  <version_id>3e39d3c8-b2aa-4a51-935d-254aa4a2ce49</version_id>
-  <version_modified>20200610T173633Z</version_modified>
+  <version_id>be35f19d-84a5-4b32-ae98-dfe3ba3ddedf</version_id>
+  <version_modified>20200610T234144Z</version_modified>
   <xml_checksum>D8922A73</xml_checksum>
   <class_name>HPXMLtoOpenStudio</class_name>
   <display_name>HPXML to OpenStudio Translator</display_name>
@@ -493,24 +493,6 @@
       <checksum>9E9735A4</checksum>
     </file>
     <file>
-      <filename>waterheater.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>DD3C9A96</checksum>
-    </file>
-    <file>
-      <filename>hpxml_defaults.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>A1F1CC6D</checksum>
-    </file>
-    <file>
-      <filename>hotwater_appliances.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>06765B01</checksum>
-    </file>
-    <file>
       <version>
         <software_program>OpenStudio</software_program>
         <identifier>3.0.0</identifier>
@@ -532,6 +514,24 @@
       <filetype>rb</filetype>
       <usage_type>test</usage_type>
       <checksum>96652A98</checksum>
+    </file>
+    <file>
+      <filename>waterheater.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>C7047D4C</checksum>
+    </file>
+    <file>
+      <filename>hotwater_appliances.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>3EFD313B</checksum>
+    </file>
+    <file>
+      <filename>hpxml_defaults.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>8D9D1FE8</checksum>
     </file>
   </files>
 </measure>
