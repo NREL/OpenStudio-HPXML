@@ -761,7 +761,7 @@ class Waterheater
     # Create hx setpoint schedule to specify source side temperature
     hx_stp_sch = OpenStudio::Model::ScheduleConstant.new(model)
     hx_stp_sch.setName("#{obj_name_combi} HX Spt")
-    boiler_spt_mngr = model.getSetpointManagerScheduleds.select{|spt_mngr| spt_mngr.setpointNode.get == boiler_plant_loop.loopTemperatureSetpointNode}[0]
+    boiler_spt_mngr = model.getSetpointManagerScheduleds.select { |spt_mngr| spt_mngr.setpointNode.get == boiler_plant_loop.loopTemperatureSetpointNode }[0]
     boiler_spt = boiler_spt_mngr.to_SetpointManagerScheduled.get.schedule.to_ScheduleConstant.get.value
     hx_temp = (UnitConversions.convert(t_set, 'F', 'C') + deadband(tank_type) / 2.0 + boiler_spt) / 2.0 # tank source side inlet temperature, degree C
     hx_stp_sch.setValue(hx_temp)
