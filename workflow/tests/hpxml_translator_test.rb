@@ -503,6 +503,10 @@ class HPXMLTest < MiniTest::Test
       next if err_line.include? 'Full load outlet air dry-bulb temperature < 2C. This indicates the possibility of coil frost/freeze.' # HPWH located outside, these warnings are fine
       next if err_line.include? 'Full load outlet temperature indicates a possibility of frost/freeze error continues.' # HPWH located outside, these warnings are fine
       next if err_line.include?('WetBulb not converged after') && err_line.include?('iterations(PsyTwbFnTdbWPb)')
+      # Remove when https://github.com/NREL/EnergyPlus/pull/8073 is available:
+      if hpxml_path.include? 'ASHRAE_Standard_140'
+        next if err_line.include?('SurfaceProperty:ExposedFoundationPerimeter') && err_line.include?('Total Exposed Perimeter is greater than the perimeter')
+      end
 
       # TODO: Eliminate these warnings?
 
@@ -539,11 +543,6 @@ class HPXMLTest < MiniTest::Test
 
       if hpxml_path.include?('base-misc-timestep-10-mins.xml') || hpxml_path.include?('ASHRAE_Standard_140')
         next if err_line.include? 'Temperature out of range [-100. to 200.] (PsyPsatFnTemp)'
-      end
-
-      if hpxml_path.include? 'ASHRAE_Standard_140'
-        # TODO: Create E+ issue to add tolerance to check
-        next if err_line.include?('SurfaceProperty:ExposedFoundationPerimeter') && err_line.include?('Total Exposed Perimeter is greater than the perimeter')
       end
 
       flunk "Unexpected warning found: #{err_line}"
