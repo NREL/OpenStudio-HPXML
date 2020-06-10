@@ -21,10 +21,10 @@ class HPXMLtoOpenStudioDuctsTest < MiniTest::Test
     @args_hash['output_dir'] = File.absolute_path(@tmp_output_path)
   end
 
-  # def after_teardown
-  #   File.delete(@tmp_hpxml_path) if File.exist? @tmp_hpxml_path
-  #   FileUtils.rm_rf(@tmp_output_path)
-  # end
+  def after_teardown
+    File.delete(@tmp_hpxml_path) if File.exist? @tmp_hpxml_path
+    FileUtils.rm_rf(@tmp_output_path)
+  end
 
   def test_header
     # Test inputs not overridden by defaults
