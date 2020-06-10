@@ -647,6 +647,22 @@ class HEScoreRuleset
       new_hpxml.hvac_distributions.add(id: orig_dist.id,
                                        distribution_system_type: HPXML::HVACDistributionTypeAir)
 
+      # Calculate ConditionedFloorAreaServed
+      fractions_load_served = []
+      orig_dist.hvac_systems.each do |hvac_system|
+        if hvac_system.respond_to? :fraction_heat_load_served
+          fractions_load_served << hvac_system.fraction_heat_load_served unless hvac_system.fraction_heat_load_served == 0
+        end
+        if hvac_system.respond_to? :fraction_cool_load_served
+          fractions_load_served << hvac_system.fraction_cool_load_served unless hvac_system.fraction_cool_load_served == 0
+        end
+      end
+      fractions_load_served.uniq!
+      if fractions_load_served.size != 1
+        fail 'Could not calculate ConditionedFloorAreaServed for distribution system.'
+      end
+      new_hpxml.hvac_distributions[-1].conditioned_floor_area_served = fractions_load_served[0]
+
       frac_inside = 0.0
       orig_dist.ducts.each do |orig_duct|
         next unless orig_duct.duct_location == HPXML::LocationLivingSpace

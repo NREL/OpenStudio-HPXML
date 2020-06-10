@@ -18,7 +18,7 @@ def get_output_map
            'Natural Gas: Heating' => ['heating', 'natural_gas'],
            'Propane: Heating' => ['heating', 'lpg'],
            'Fuel Oil: Heating' => ['heating', 'fuel_oil'],
-           'Wood: Heating' => ['heating', 'cord_wood'],
+           'Wood Cord: Heating' => ['heating', 'cord_wood'],
            'Wood Pellets: Heating' => ['heating', 'pellet_wood'],
            'Electricity: Cooling' => ['cooling', 'electric'],
            'Electricity: Cooling Fans/Pumps' => ['cooling', 'electric'],
