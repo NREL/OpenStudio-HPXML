@@ -453,9 +453,9 @@ class HPXML < Object
     @cooking_ranges.to_oga(@doc)
     @ovens.to_oga(@doc)
     @lighting_groups.to_oga(@doc)
+    @ceiling_fans.to_oga(@doc)
     @lighting.to_oga(@doc)
     @lighting_schedule.to_oga(@doc)
-    @ceiling_fans.to_oga(@doc)
     @plug_loads.to_oga(@doc)
     @misc_loads_schedule.to_oga(@doc)
     return @doc
@@ -500,9 +500,9 @@ class HPXML < Object
     @cooking_ranges = CookingRanges.new(self, hpxml)
     @ovens = Ovens.new(self, hpxml)
     @lighting_groups = LightingGroups.new(self, hpxml)
+    @ceiling_fans = CeilingFans.new(self, hpxml)
     @lighting = Lighting.new(self, hpxml)
     @lighting_schedule = LightingSchedule.new(self, hpxml)
-    @ceiling_fans = CeilingFans.new(self, hpxml)
     @plug_loads = PlugLoads.new(self, hpxml)
     @misc_loads_schedule = MiscLoadsSchedule.new(self, hpxml)
   end

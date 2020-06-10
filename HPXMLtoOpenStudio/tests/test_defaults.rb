@@ -21,10 +21,10 @@ class HPXMLtoOpenStudioDuctsTest < MiniTest::Test
     @args_hash['output_dir'] = File.absolute_path(@tmp_output_path)
   end
 
-  def after_teardown
-    File.delete(@tmp_hpxml_path) if File.exist? @tmp_hpxml_path
-    FileUtils.rm_rf(@tmp_output_path)
-  end
+  # def after_teardown
+  #   File.delete(@tmp_hpxml_path) if File.exist? @tmp_hpxml_path
+  #   FileUtils.rm_rf(@tmp_output_path)
+  # end
 
   def test_header
     # Test inputs not overridden by defaults
@@ -601,6 +601,7 @@ class HPXMLtoOpenStudioDuctsTest < MiniTest::Test
     return_duct_idx = 0
     hpxml.hvac_distributions.each do |hvac_distribution|
       next unless hvac_distribution.distribution_system_type == HPXML::HVACDistributionTypeAir
+
       assert_equal(n_return_registers, hvac_distribution.number_of_return_registers)
       hvac_distribution.ducts.each do |duct|
         if duct.duct_type == HPXML::DuctTypeSupply

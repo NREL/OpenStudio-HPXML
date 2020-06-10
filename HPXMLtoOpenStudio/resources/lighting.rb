@@ -163,7 +163,7 @@ class Lighting
       end
 
       design_level = lighting_schedule.exterior_holiday_daily_energy_use.to_f * holiday_sch.max * 1000
-      
+
       # Add exterior lighting
       ltg_def = OpenStudio::Model::ExteriorLightsDefinition.new(model)
       ltg = OpenStudio::Model::ExteriorLights.new(ltg_def)
