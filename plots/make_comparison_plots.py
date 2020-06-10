@@ -95,7 +95,7 @@ def main():
     parser.add_argument(
         '--doe2_csv',
         type=argparse.FileType('r'),
-        default=os.path.join(here, 'enduse_mstr_stg_v8_200427.csv')
+        default=os.path.join(here, 'doe2_enduse_v8_3.csv')
     )
     parser.add_argument(
         'results_csv',
