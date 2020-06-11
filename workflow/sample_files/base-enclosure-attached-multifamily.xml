@@ -479,6 +479,15 @@
             <FractionOperable>0.67</FractionOperable>
             <AttachedToWall idref='Wall'/>
           </Window>
+          <Window>
+            <SystemIdentifier id='InteriorWindow'/>
+            <Area>50.0</Area>
+            <Azimuth>270</Azimuth>
+            <UFactor>0.33</UFactor>
+            <SHGC>0.45</SHGC>
+            <FractionOperable>0.67</FractionOperable>
+            <AttachedToWall idref='WallOtherMultifamilyBufferSpace'/>
+          </Window>
         </Windows>
         <Doors>
           <Door>

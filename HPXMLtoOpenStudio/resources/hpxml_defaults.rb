@@ -341,11 +341,7 @@ class HPXMLDefaults
           water_heating_system.tank_volume = Waterheater.get_default_tank_volume(water_heating_system.fuel_type, nbeds, hpxml.building_construction.number_of_bathrooms)
         end
         if water_heating_system.recovery_efficiency.nil?
-          ef = water_heating_system.energy_factor
-          if ef.nil?
-            ef = Waterheater.calc_ef_from_uef(water_heating_system.uniform_energy_factor, water_heating_system.water_heater_type, water_heating_system.fuel_type)
-          end
-          water_heating_system.recovery_efficiency = Waterheater.get_default_recovery_efficiency(water_heating_system.fuel_type, ef)
+          water_heating_system.recovery_efficiency = Waterheater.get_default_recovery_efficiency(water_heating_system)
         end
       end
       if water_heating_system.location.nil?
@@ -553,6 +549,15 @@ class HPXMLDefaults
       if refrigerator.usage_multiplier.nil?
         refrigerator.usage_multiplier = 1.0
       end
+      if refrigerator.weekday_fractions.nil?
+        refrigerator.weekday_fractions = '0.040, 0.039, 0.038, 0.037, 0.036, 0.036, 0.038, 0.040, 0.041, 0.041, 0.040, 0.040, 0.042, 0.042, 0.042, 0.041, 0.044, 0.048, 0.050, 0.048, 0.047, 0.046, 0.044, 0.041'
+      end
+      if refrigerator.weekend_fractions.nil?
+        refrigerator.weekend_fractions = '0.040, 0.039, 0.038, 0.037, 0.036, 0.036, 0.038, 0.040, 0.041, 0.041, 0.040, 0.040, 0.042, 0.042, 0.042, 0.041, 0.044, 0.048, 0.050, 0.048, 0.047, 0.046, 0.044, 0.041'
+      end
+      if refrigerator.monthly_multipliers.nil?
+        refrigerator.monthly_multipliers = '0.837, 0.835, 1.084, 1.084, 1.084, 1.096, 1.096, 1.096, 1.096, 0.931, 0.925, 0.837'
+      end
     end
 
     # Default cooking range
@@ -567,6 +572,15 @@ class HPXMLDefaults
       end
       if cooking_range.usage_multiplier.nil?
         cooking_range.usage_multiplier = 1.0
+      end
+      if cooking_range.weekday_fractions.nil?
+        cooking_range.weekday_fractions = '0.007, 0.007, 0.004, 0.004, 0.007, 0.011, 0.025, 0.042, 0.046, 0.048, 0.042, 0.050, 0.057, 0.046, 0.057, 0.044, 0.092, 0.150, 0.117, 0.060, 0.035, 0.025, 0.016, 0.011'
+      end
+      if cooking_range.weekend_fractions.nil?
+        cooking_range.weekend_fractions = '0.007, 0.007, 0.004, 0.004, 0.007, 0.011, 0.025, 0.042, 0.046, 0.048, 0.042, 0.050, 0.057, 0.046, 0.057, 0.044, 0.092, 0.150, 0.117, 0.060, 0.035, 0.025, 0.016, 0.011'
+      end
+      if cooking_range.monthly_multipliers.nil?
+        cooking_range.monthly_multipliers = '1.097, 1.097, 0.991, 0.987, 0.991, 0.890, 0.896, 0.896, 0.890, 1.085, 1.085, 1.097'
       end
     end
 

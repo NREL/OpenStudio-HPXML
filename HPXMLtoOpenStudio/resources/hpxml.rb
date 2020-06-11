@@ -2075,9 +2075,6 @@ class HPXML < Object
           fail "SummerShadingCoefficient (#{interior_shading_factor_summer}) must be less than or equal to WinterShadingCoefficient (#{interior_shading_factor_winter}) for window '#{@id}'."
         end
       end
-      if [HPXML::LocationOtherHeatedSpace, HPXML::LocationOtherMultifamilyBufferSpace, HPXML::LocationOtherNonFreezingSpace, HPXML::LocationOtherHousingUnit].include? wall.exterior_adjacent_to
-        fail "Window '#{@id}' cannot be adjacent to '#{wall.exterior_adjacent_to}'. Check parent wall: '#{wall.id}'."
-      end
 
       return errors
     end
@@ -3722,7 +3719,8 @@ class HPXML < Object
   end
 
   class Refrigerator < BaseElement
-    ATTRS = [:id, :location, :rated_annual_kwh, :adjusted_annual_kwh, :usage_multiplier]
+    ATTRS = [:id, :location, :rated_annual_kwh, :adjusted_annual_kwh, :usage_multiplier,
+             :weekday_fractions, :weekend_fractions, :monthly_multipliers]
     attr_accessor(*ATTRS)
 
     def delete
@@ -3745,7 +3743,10 @@ class HPXML < Object
       XMLHelper.add_element(refrigerator, 'RatedAnnualkWh', to_float(@rated_annual_kwh)) unless @rated_annual_kwh.nil?
       HPXML::add_extension(parent: refrigerator,
                            extensions: { 'AdjustedAnnualkWh' => to_float_or_nil(@adjusted_annual_kwh),
-                                         'UsageMultiplier' => to_float_or_nil(@usage_multiplier) })
+                                         'UsageMultiplier' => to_float_or_nil(@usage_multiplier),
+                                         'WeekdayScheduleFractions' => @weekday_fractions,
+                                         'WeekendScheduleFractions' => @weekend_fractions,
+                                         'MonthlyScheduleMultipliers' => @monthly_multipliers })
     end
 
     def from_oga(refrigerator)
@@ -3756,6 +3757,9 @@ class HPXML < Object
       @rated_annual_kwh = to_float_or_nil(XMLHelper.get_value(refrigerator, 'RatedAnnualkWh'))
       @adjusted_annual_kwh = to_float_or_nil(XMLHelper.get_value(refrigerator, 'extension/AdjustedAnnualkWh'))
       @usage_multiplier = to_float_or_nil(XMLHelper.get_value(refrigerator, 'extension/UsageMultiplier'))
+      @weekday_fractions = XMLHelper.get_value(refrigerator, 'extension/WeekdayScheduleFractions')
+      @weekend_fractions = XMLHelper.get_value(refrigerator, 'extension/WeekendScheduleFractions')
+      @monthly_multipliers = XMLHelper.get_value(refrigerator, 'extension/MonthlyScheduleMultipliers')
     end
   end
 
@@ -3827,7 +3831,8 @@ class HPXML < Object
   end
 
   class CookingRange < BaseElement
-    ATTRS = [:id, :location, :fuel_type, :is_induction, :usage_multiplier]
+    ATTRS = [:id, :location, :fuel_type, :is_induction, :usage_multiplier,
+             :weekday_fractions, :weekend_fractions, :monthly_multipliers]
     attr_accessor(*ATTRS)
 
     def delete
@@ -3850,7 +3855,10 @@ class HPXML < Object
       XMLHelper.add_element(cooking_range, 'FuelType', @fuel_type) unless @fuel_type.nil?
       XMLHelper.add_element(cooking_range, 'IsInduction', to_boolean(@is_induction)) unless @is_induction.nil?
       HPXML::add_extension(parent: cooking_range,
-                           extensions: { 'UsageMultiplier' => to_float_or_nil(@usage_multiplier) })
+                           extensions: { 'UsageMultiplier' => to_float_or_nil(@usage_multiplier),
+                                         'WeekdayScheduleFractions' => @weekday_fractions,
+                                         'WeekendScheduleFractions' => @weekend_fractions,
+                                         'MonthlyScheduleMultipliers' => @monthly_multipliers })
     end
 
     def from_oga(cooking_range)
@@ -3861,6 +3869,9 @@ class HPXML < Object
       @fuel_type = XMLHelper.get_value(cooking_range, 'FuelType')
       @is_induction = to_bool_or_nil(XMLHelper.get_value(cooking_range, 'IsInduction'))
       @usage_multiplier = to_float_or_nil(XMLHelper.get_value(cooking_range, 'extension/UsageMultiplier'))
+      @weekday_fractions = XMLHelper.get_value(cooking_range, 'extension/WeekdayScheduleFractions')
+      @weekend_fractions = XMLHelper.get_value(cooking_range, 'extension/WeekendScheduleFractions')
+      @monthly_multipliers = XMLHelper.get_value(cooking_range, 'extension/MonthlyScheduleMultipliers')
     end
   end
 
@@ -4206,9 +4217,12 @@ class HPXML < Object
   def delete_partition_surfaces()
     (@rim_joists + @walls + @foundation_walls + @frame_floors).reverse_each do |surface|
       next if surface.interior_adjacent_to.nil? || surface.exterior_adjacent_to.nil?
-      next unless surface.interior_adjacent_to == surface.exterior_adjacent_to
 
-      surface.delete
+      if surface.interior_adjacent_to == surface.exterior_adjacent_to
+        surface.delete
+      elsif [surface.interior_adjacent_to, surface.exterior_adjacent_to].sort == [HPXML::LocationLivingSpace, HPXML::LocationBasementConditioned].sort
+        surface.delete
+      end
     end
   end
 
@@ -4225,6 +4239,11 @@ class HPXML < Object
       next if door.wall.exterior_adjacent_to != HPXML::LocationOtherHousingUnit
 
       door.delete
+    end
+    @windows.reverse_each do |window|
+      next if window.wall.exterior_adjacent_to != HPXML::LocationOtherHousingUnit
+
+      window.delete
     end
   end
 
