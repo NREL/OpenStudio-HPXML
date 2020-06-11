@@ -2058,9 +2058,6 @@ class HPXML < Object
           fail "SummerShadingCoefficient (#{interior_shading_factor_summer}) must be less than or equal to WinterShadingCoefficient (#{interior_shading_factor_winter}) for window '#{@id}'."
         end
       end
-      if [HPXML::LocationOtherHeatedSpace, HPXML::LocationOtherMultifamilyBufferSpace, HPXML::LocationOtherNonFreezingSpace, HPXML::LocationOtherHousingUnit].include? wall.exterior_adjacent_to
-        fail "Window '#{@id}' cannot be adjacent to '#{wall.exterior_adjacent_to}'. Check parent wall: '#{wall.id}'."
-      end
 
       return errors
     end
@@ -4193,9 +4190,12 @@ class HPXML < Object
   def delete_partition_surfaces()
     (@rim_joists + @walls + @foundation_walls + @frame_floors).reverse_each do |surface|
       next if surface.interior_adjacent_to.nil? || surface.exterior_adjacent_to.nil?
-      next unless surface.interior_adjacent_to == surface.exterior_adjacent_to
 
-      surface.delete
+      if surface.interior_adjacent_to == surface.exterior_adjacent_to
+        surface.delete
+      elsif [surface.interior_adjacent_to, surface.exterior_adjacent_to].sort == [HPXML::LocationLivingSpace, HPXML::LocationBasementConditioned].sort
+        surface.delete
+      end
     end
   end
 
@@ -4212,6 +4212,11 @@ class HPXML < Object
       next if door.wall.exterior_adjacent_to != HPXML::LocationOtherHousingUnit
 
       door.delete
+    end
+    @windows.reverse_each do |window|
+      next if window.wall.exterior_adjacent_to != HPXML::LocationOtherHousingUnit
+
+      window.delete
     end
   end
 

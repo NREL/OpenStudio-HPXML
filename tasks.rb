@@ -100,7 +100,6 @@ def create_hpxmls
     'invalid_files/unattached-window.xml' => 'base.xml',
     'invalid_files/water-heater-location.xml' => 'base.xml',
     'invalid_files/water-heater-location-other.xml' => 'base.xml',
-    'invalid_files/attached-multifamily-window-outside-condition.xml' => 'base-enclosure-attached-multifamily.xml',
     'invalid_files/missing-duct-location.xml' => 'base-hvac-multiple.xml',
     'invalid_files/invalid-distribution-cfa-served.xml' => 'base.xml',
     'base-appliances-dehumidifier.xml' => 'base-location-dallas-tx.xml',
@@ -489,6 +488,7 @@ def set_hpxml_building_construction(hpxml_file, hpxml)
     hpxml.building_construction.conditioned_floor_area = 1539
     hpxml.building_construction.conditioned_building_volume = 12312
     hpxml.building_construction.residential_facility_type = HPXML::ResidentialTypeSFD
+    hpxml.building_construction.use_only_ideal_air_system = true
   elsif ['ASHRAE_Standard_140/L322XC.xml'].include? hpxml_file
     hpxml.building_construction.number_of_conditioned_floors = 2
     hpxml.building_construction.conditioned_floor_area = 3078
@@ -1661,6 +1661,12 @@ def set_hpxml_frame_floors(hpxml_file, hpxml)
     hpxml.frame_floors << hpxml.frame_floors[-1].dup
     hpxml.frame_floors[-1].id = 'TinyFloor'
     hpxml.frame_floors[-1].area = 0.05
+  elsif ['invalid_files/base-enclosure-conditioned-basement-slab-insulation.xml'].include? hpxml_file
+    hpxml.frame_floors.add(id: 'FloorAboveCondBasement',
+                           exterior_adjacent_to: HPXML::LocationBasementConditioned,
+                           interior_adjacent_to: HPXML::LocationLivingSpace,
+                           area: 1350,
+                           insulation_assembly_r_value: 3.9)
   elsif ['invalid_files/enclosure-living-missing-ceiling-roof.xml'].include? hpxml_file
     hpxml.frame_floors[0].delete
   elsif ['invalid_files/enclosure-basement-missing-ceiling.xml',
@@ -1938,9 +1944,6 @@ def set_hpxml_windows(hpxml_file, hpxml)
                       interior_shading_factor_summer: 0.7,
                       interior_shading_factor_winter: 0.85,
                       wall_idref: 'Wall')
-  elsif ['invalid_files/attached-multifamily-window-outside-condition.xml'].include? hpxml_file
-    hpxml.windows[0].area = 50
-    hpxml.windows[0].wall_idref = 'WallOtherMultifamilyBufferSpace'
   elsif ['base-enclosure-overhangs.xml'].include? hpxml_file
     hpxml.windows[0].overhangs_depth = 2.5
     hpxml.windows[0].overhangs_distance_to_top_of_window = 0
@@ -2116,6 +2119,14 @@ def set_hpxml_windows(hpxml_file, hpxml)
       window.interior_shading_factor_winter = nil
       window.fraction_operable = nil
     end
+  elsif ['base-enclosure-attached-multifamily.xml'].include? hpxml_file
+    hpxml.windows.add(id: 'InteriorWindow',
+                      area: 50,
+                      azimuth: 270,
+                      ufactor: 0.33,
+                      shgc: 0.45,
+                      fraction_operable: 0.67,
+                      wall_idref: 'WallOtherMultifamilyBufferSpace')
   end
 end
 
@@ -4194,8 +4205,8 @@ if ARGV[0].to_sym == :download_weather
 end
 
 if ARGV[0].to_sym == :update_version
-  version_change = { from: '0.8.0',
-                     to: '0.9.0' }
+  version_change = { from: '0.9.0',
+                     to: '0.10.0' }
 
   file_names = ['workflow/run_simulation.rb']
 
@@ -4205,6 +4216,7 @@ if ARGV[0].to_sym == :update_version
 
     # To write changes to the file, use:
     File.open(file_name, 'w') { |file| file.puts new_contents }
+    puts "Updated from version #{version_change[:from]} to version #{version_change[:to]} in #{file_name}."
   end
 
   puts 'Done. Now check all changed files before committing.'

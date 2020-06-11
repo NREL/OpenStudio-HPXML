@@ -401,9 +401,6 @@ class OSModel
     if @hpxml.building_construction.use_only_ideal_air_system.nil?
       @hpxml.building_construction.use_only_ideal_air_system = false
     end
-    if @apply_ashrae140_assumptions
-      @hpxml.building_construction.use_only_ideal_air_system = true
-    end
 
     # Initialize
     @remaining_heat_load_frac = 1.0
@@ -1787,6 +1784,7 @@ class OSModel
     surfaces = []
     @hpxml.windows.each do |window|
       window_height = 4.0 # ft, default
+
       overhang_depth = nil
       if not window.overhangs_depth.nil?
         overhang_depth = window.overhangs_depth
@@ -1798,42 +1796,73 @@ class OSModel
       window_width = window.area / window_height
       z_origin = @foundation_top
 
-      # Create parent surface slightly bigger than window
-      surface = OpenStudio::Model::Surface.new(add_wall_polygon(window_width, window_height, z_origin,
-                                                                window.azimuth, [0, 0.0001, 0.0001, 0.0001]), model)
+      if window.is_exterior
 
-      surface.additionalProperties.setFeature('Length', window_width)
-      surface.additionalProperties.setFeature('Azimuth', window.azimuth)
-      surface.additionalProperties.setFeature('Tilt', 90.0)
-      surface.additionalProperties.setFeature('SurfaceType', 'Window')
-      surface.setName("surface #{window.id}")
-      surface.setSurfaceType('Wall')
-      set_surface_interior(model, spaces, surface, window.wall.interior_adjacent_to)
+        # Create parent surface slightly bigger than window
+        surface = OpenStudio::Model::Surface.new(add_wall_polygon(window_width, window_height, z_origin,
+                                                                  window.azimuth, [0, 0.0001, 0.0001, 0.0001]), model)
 
-      sub_surface = OpenStudio::Model::SubSurface.new(add_wall_polygon(window_width, window_height, z_origin,
-                                                                       window.azimuth, [-0.0001, 0, 0.0001, 0]), model)
-      sub_surface.setName(window.id)
-      sub_surface.setSurface(surface)
-      sub_surface.setSubSurfaceType('FixedWindow')
+        surface.additionalProperties.setFeature('Length', window_width)
+        surface.additionalProperties.setFeature('Azimuth', window.azimuth)
+        surface.additionalProperties.setFeature('Tilt', 90.0)
+        surface.additionalProperties.setFeature('SurfaceType', 'Window')
+        surface.setName("surface #{window.id}")
+        surface.setSurfaceType('Wall')
+        set_surface_interior(model, spaces, surface, window.wall.interior_adjacent_to)
 
-      set_subsurface_exterior(surface, window.wall.exterior_adjacent_to, spaces, model)
-      surfaces << surface
+        sub_surface = OpenStudio::Model::SubSurface.new(add_wall_polygon(window_width, window_height, z_origin,
+                                                                         window.azimuth, [-0.0001, 0, 0.0001, 0]), model)
+        sub_surface.setName(window.id)
+        sub_surface.setSurface(surface)
+        sub_surface.setSubSurfaceType('FixedWindow')
 
-      if not overhang_depth.nil?
-        overhang = sub_surface.addOverhang(UnitConversions.convert(overhang_depth, 'ft', 'm'), UnitConversions.convert(overhang_distance_to_top, 'ft', 'm'))
-        overhang.get.setName("#{sub_surface.name} - #{Constants.ObjectNameOverhangs}")
+        set_subsurface_exterior(surface, window.wall.exterior_adjacent_to, spaces, model)
+        surfaces << surface
 
-        sub_surface.additionalProperties.setFeature(Constants.SizingInfoWindowOverhangDepth, overhang_depth)
-        sub_surface.additionalProperties.setFeature(Constants.SizingInfoWindowOverhangOffset, overhang_distance_to_top)
+        if not overhang_depth.nil?
+          overhang = sub_surface.addOverhang(UnitConversions.convert(overhang_depth, 'ft', 'm'), UnitConversions.convert(overhang_distance_to_top, 'ft', 'm'))
+          overhang.get.setName("#{sub_surface.name} - #{Constants.ObjectNameOverhangs}")
+
+          sub_surface.additionalProperties.setFeature(Constants.SizingInfoWindowOverhangDepth, overhang_depth)
+          sub_surface.additionalProperties.setFeature(Constants.SizingInfoWindowOverhangOffset, overhang_distance_to_top)
+        end
+
+        # Apply construction
+        cool_shade_mult = window.interior_shading_factor_summer
+        heat_shade_mult = window.interior_shading_factor_winter
+        Constructions.apply_window(model, [sub_surface],
+                                   'WindowConstruction',
+                                   weather, @clg_season_sch, window.ufactor, window.shgc,
+                                   heat_shade_mult, cool_shade_mult)
+      else
+        # Window is on an interior surface, which E+ does not allow. Model
+        # as a door instead so that we can get the appropriate conduction
+        # heat transfer; there is no solar gains anyway.
+
+        # Create parent surface slightly bigger than window
+        surface = OpenStudio::Model::Surface.new(add_wall_polygon(window_width, window_height, z_origin,
+                                                                  window.azimuth, [0, 0.0001, 0.0001, 0.0001]), model)
+
+        surface.additionalProperties.setFeature('Length', window_width)
+        surface.additionalProperties.setFeature('Azimuth', window.azimuth)
+        surface.additionalProperties.setFeature('Tilt', 90.0)
+        surface.additionalProperties.setFeature('SurfaceType', 'Door')
+        surface.setName("surface #{window.id}")
+        surface.setSurfaceType('Wall')
+        set_surface_interior(model, spaces, surface, window.wall.interior_adjacent_to)
+
+        sub_surface = OpenStudio::Model::SubSurface.new(add_wall_polygon(window_width, window_height, z_origin,
+                                                                         window.azimuth, [0, 0, 0, 0]), model)
+        sub_surface.setName(window.id)
+        sub_surface.setSurface(surface)
+        sub_surface.setSubSurfaceType('Door')
+
+        set_subsurface_exterior(surface, window.wall.exterior_adjacent_to, spaces, model)
+        surfaces << surface
+
+        # Apply construction
+        Constructions.apply_door(model, [sub_surface], 'Window', window.ufactor)
       end
-
-      # Apply construction
-      cool_shade_mult = window.interior_shading_factor_summer
-      heat_shade_mult = window.interior_shading_factor_winter
-      Constructions.apply_window(model, [sub_surface],
-                                 'WindowConstruction',
-                                 weather, @clg_season_sch, window.ufactor, window.shgc,
-                                 heat_shade_mult, cool_shade_mult)
     end
 
     apply_adiabatic_construction(runner, model, surfaces, 'wall')
@@ -1914,7 +1943,6 @@ class OSModel
 
       # Apply construction
       ufactor = 1.0 / door.r_value
-
       Constructions.apply_door(model, [sub_surface], 'Door', ufactor)
     end
 
@@ -1928,19 +1956,19 @@ class OSModel
 
     if type == 'wall'
       Constructions.apply_wood_stud_wall(model, surfaces, 'AdiabaticWallConstruction',
-                                         0, 1, 3.5, true, 0.1, 0.5, 0, 999,
+                                         0, 1, 3.5, true, 0.1, 0.5, 0, 99,
                                          Material.ExtFinishStuccoMedDark, 0,
                                          Material.AirFilmVertical,
                                          Material.AirFilmVertical)
     elsif type == 'floor'
       Constructions.apply_floor(model, surfaces, 'AdiabaticFloorConstruction',
-                                0, 1, 0.07, 5.5, 0.75, 999,
+                                0, 1, 0.07, 5.5, 0.75, 99,
                                 Material.FloorWood, Material.CoveringBare,
                                 Material.AirFilmFloorReduced,
                                 Material.AirFilmFloorReduced)
     elsif type == 'roof'
       Constructions.apply_open_cavity_roof(model, surfaces, 'AdiabaticRoofConstruction',
-                                           0, 1, 7.25, 0.07, 7.25, 0.75, 999,
+                                           0, 1, 7.25, 0.07, 7.25, 0.75, 99,
                                            Material.RoofingAsphaltShinglesMed, false)
     end
   end
@@ -2125,7 +2153,7 @@ class OSModel
       end
     end
 
-    HotWaterAndAppliances.apply(model, weather, @living_space,
+    HotWaterAndAppliances.apply(model, runner, weather, @living_space,
                                 @cfa, @nbeds, @ncfl, @has_uncond_bsmnt, avg_setpoint_temp,
                                 clothes_washer, cw_space, clothes_dryer, cd_space,
                                 dishwasher, dw_space, refrigerator, rf_space,
@@ -2210,8 +2238,6 @@ class OSModel
   end
 
   def self.add_cooling_system(runner, model)
-    return if @hpxml.building_construction.use_only_ideal_air_system
-
     @hpxml.cooling_systems.each do |cooling_system|
       check_distribution_system(cooling_system.distribution_system, cooling_system.cooling_system_type)
 
@@ -2248,8 +2274,6 @@ class OSModel
   end
 
   def self.add_heating_system(runner, model)
-    return if @hpxml.building_construction.use_only_ideal_air_system
-
     @hpxml.heating_systems.each do |heating_system|
       check_distribution_system(heating_system.distribution_system, heating_system.heating_system_type)
 
@@ -2289,8 +2313,6 @@ class OSModel
   end
 
   def self.add_heat_pump(runner, model, weather)
-    return if @hpxml.building_construction.use_only_ideal_air_system
-
     @hpxml.heat_pumps.each do |heat_pump|
       if not heat_pump.heating_capacity_17F.nil?
         if heat_pump.heating_capacity.nil?
@@ -3366,7 +3388,7 @@ class OSModel
       end
       thick_ins = [thick_in]
       if layer_r == 0
-        conds = [999]
+        conds = [99]
       else
         conds = [thick_in / layer_r]
       end
