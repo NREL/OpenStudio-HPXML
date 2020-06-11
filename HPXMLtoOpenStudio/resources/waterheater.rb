@@ -182,10 +182,6 @@ class Waterheater
 
     dhw_map[water_heating_system.id] = []
 
-    if water_heating_system.energy_factor.nil?
-      water_heating_system.energy_factor = calc_ef_from_uef(water_heating_system)
-    end
-
     solar_fraction = get_water_heater_solar_fraction(water_heating_system, solar_thermal_system)
     boiler, boiler_plant_loop = get_combi_boiler_and_plant_loop(hvac_map, water_heating_system.related_hvac_idref)
     dhw_map[water_heating_system.id] << boiler
