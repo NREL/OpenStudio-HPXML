@@ -16,8 +16,7 @@ class HPXMLTest < MiniTest::Test
   @@workflow_runtime_key = 'Workflow Runtime'
 
   def test_simulations
-    OpenStudio::Logger.instance.standardOutLogger.setLogLevel(OpenStudio::Error)
-    # OpenStudio::Logger.instance.standardOutLogger.setLogLevel(OpenStudio::Fatal)
+    OpenStudio::Logger.instance.standardOutLogger.setLogLevel(OpenStudio::Warn)
 
     this_dir = File.dirname(__FILE__)
     results_dir = File.join(this_dir, 'results')
@@ -224,11 +223,6 @@ class HPXMLTest < MiniTest::Test
     sql_path = File.join(rundir, 'eplusout.sql')
     sqlFile = OpenStudio::SqlFile.new(sql_path, false)
 
-    # Obtain hot water use
-    # TODO: Add to reporting measure?
-    query = "SELECT SUM(VariableValue) FROM ReportVariableData WHERE ReportVariableDataDictionaryIndex IN (SELECT ReportVariableDataDictionaryIndex FROM ReportVariableDataDictionary WHERE VariableName='Water Use Equipment Hot Water Volume' AND VariableUnits='m3' AND ReportingFrequency='Run Period')"
-    results['Volume: Hot Water (gal)'] = UnitConversions.convert(sqlFile.execAndReturnFirstDouble(query).get, 'm^3', 'gal').round(2)
-
     # Obtain HVAC capacities
     # TODO: Add to reporting measure?
     htg_cap_w = 0
@@ -374,11 +368,6 @@ class HPXMLTest < MiniTest::Test
       cfis_fan_energy_output_var.setReportingFrequency('runperiod')
       cfis_fan_energy_output_var.setKeyValue(Constants.ObjectNameMechanicalVentilationHouseFanCFIS)
     end
-
-    # Add output variables for hot water volume
-    output_var = OpenStudio::Model::OutputVariable.new('Water Use Equipment Hot Water Volume', model)
-    output_var.setReportingFrequency('runperiod')
-    output_var.setKeyValue('*')
 
     # Add output variables for combi system energy check
     output_var = OpenStudio::Model::OutputVariable.new('Water Heater Source Side Heat Transfer Energy', model)
