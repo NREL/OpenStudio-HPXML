@@ -370,17 +370,6 @@ class HPXMLTest < MiniTest::Test
         infil_program = ems_program
       end
 
-      ems_output_var = OpenStudio::Model::EnergyManagementSystemOutputVariable.new(model, 'CFIS_fan_w')
-      ems_output_var.setName("#{Constants.ObjectNameMechanicalVentilation} cfis fan power".gsub(' ', '_'))
-      ems_output_var.setTypeOfDataInVariable('Averaged')
-      ems_output_var.setUpdateFrequency('ZoneTimestep')
-      ems_output_var.setEMSProgramOrSubroutineName(infil_program)
-      ems_output_var.setUnits('W')
-
-      @cfis_fan_power_output_var = OpenStudio::Model::OutputVariable.new(ems_output_var.name.to_s, model)
-      @cfis_fan_power_output_var.setReportingFrequency('runperiod')
-      @cfis_fan_power_output_var.setKeyValue('EMS')
-
       cfis_fan_energy_output_var = OpenStudio::Model::OutputVariable.new('Electric Equipment Electric Energy', model)
       cfis_fan_energy_output_var.setReportingFrequency('runperiod')
       cfis_fan_energy_output_var.setKeyValue(Constants.ObjectNameMechanicalVentilationHouseFanCFIS)
@@ -986,68 +975,50 @@ class HPXMLTest < MiniTest::Test
     end
 
     # Mechanical Ventilation
-    vent_fan_whole_house = []
-    vent_fan_kitchen = nil
-    vent_fan_bath = nil
-    hpxml.ventilation_fans.each do |ventilation_fan|
-      if ventilation_fan.used_for_local_ventilation
-        if ventilation_fan.fan_location == HPXML::LocationKitchen
-          vent_fan_kitchen = ventilation_fan
-        elsif ventilation_fan.fan_location == HPXML::LocationBath
-          vent_fan_bath = ventilation_fan
-        end
-      elsif ventilation_fan.used_for_whole_building_ventilation
-        vent_fan_whole_house << ventilation_fan
-      end
-    end
-    if (not vent_fan_whole_house.empty?) || (not vent_fan_kitchen.nil?) || (not vent_fan_bath.nil?)
+    fan_cfis = hpxml.ventilation_fans.select { |vent_mech| vent_mech.used_for_whole_building_ventilation && (vent_mech.fan_type == HPXML::MechVentTypeCFIS) }
+    fan_sup = hpxml.ventilation_fans.select { |vent_mech| vent_mech.used_for_whole_building_ventilation && (vent_mech.fan_type == HPXML::MechVentTypeSupply) }
+    fan_exh = hpxml.ventilation_fans.select { |vent_mech| vent_mech.used_for_whole_building_ventilation && (vent_mech.fan_type == HPXML::MechVentTypeExhaust) }
+    fan_bal = hpxml.ventilation_fans.select { |vent_mech| vent_mech.used_for_whole_building_ventilation && [HPXML::MechVentTypeBalanced, HPXML::MechVentTypeERV, HPXML::MechVentTypeHRV].include?(vent_mech.fan_type) }
+    vent_fan_kitchen = hpxml.ventilation_fans.select { |vent_mech| vent_mech.used_for_local_ventilation && (vent_mech.fan_location == HPXML::LocationKitchen) }
+    vent_fan_bath = hpxml.ventilation_fans.select { |vent_mech| vent_mech.used_for_local_ventilation && (vent_mech.fan_location == HPXML::LocationBath) }
+
+    if not (fan_cfis + fan_sup + fan_exh + fan_bal + vent_fan_kitchen + vent_fan_bath).empty?
       mv_energy = UnitConversions.convert(results['Electricity: Mech Vent (MBtu)'], 'MBtu', 'GJ')
 
-      if (not vent_fan_whole_house.empty?)
-        fan_cfis = vent_fan_whole_house.select { |vent_mech| vent_mech.fan_type == HPXML::MechVentTypeCFIS }
-        if not fan_cfis.empty?
-          # CFIS, check for positive mech vent energy that is less than the energy if it had run 24/7
-          # CFIS Fan energy
-          query = "SELECT SUM(ABS(VariableValue)/1000000000) FROM ReportVariableData WHERE ReportVariableDataDictionaryIndex IN (SELECT ReportVariableDataDictionaryIndex FROM ReportVariableDataDictionary WHERE VariableType='Sum' AND KeyValue='#{Constants.ObjectNameMechanicalVentilationHouseFanCFIS.upcase}' AND VariableName='Electric Equipment Electric Energy' AND ReportingFrequency='Run Period' AND VariableUnits='J')"
-          cfis_energy = sqlFile.execAndReturnFirstDouble(query).get
-          fan_gj = fan_cfis.map { |vent_mech| UnitConversions.convert(vent_mech.fan_power * vent_mech.hours_in_operation * 365.0, 'Wh', 'GJ') }.inject(0, :+)
-          if fan_gj > 0
-            assert_operator(cfis_energy, :>, 0)
-            assert_operator(cfis_energy, :<, fan_gj)
-          else
-            assert_equal(cfis_energy, 0.0)
-          end
-
-          # CFIS Fan power
-          hpxml_value = fan_cfis[0].fan_power
-          query = "SELECT Value FROM ReportData WHERE ReportDataDictionaryIndex IN (SELECT ReportDataDictionaryIndex FROM ReportDataDictionary WHERE Name='#{@cfis_fan_power_output_var.variableName}' AND ReportingFrequency='Run Period')"
-          sql_value = sqlFile.execAndReturnFirstDouble(query).get
-          assert_in_delta(hpxml_value, sql_value, 0.01)
-          mv_energy -= cfis_energy
+      if not fan_cfis.empty?
+        # CFIS, check for positive mech vent energy that is less than the energy if it had run 24/7
+        # CFIS Fan energy
+        query = "SELECT SUM(ABS(VariableValue)/1000000000) FROM ReportVariableData WHERE ReportVariableDataDictionaryIndex IN (SELECT ReportVariableDataDictionaryIndex FROM ReportVariableDataDictionary WHERE VariableType='Sum' AND KeyValue='#{Constants.ObjectNameMechanicalVentilationHouseFanCFIS.upcase}' AND VariableName='Electric Equipment Electric Energy' AND ReportingFrequency='Run Period' AND VariableUnits='J')"
+        cfis_energy = sqlFile.execAndReturnFirstDouble(query).get
+        fan_gj = fan_cfis.map { |vent_mech| UnitConversions.convert(vent_mech.fan_power * vent_mech.hours_in_operation * 365.0, 'Wh', 'GJ') }.inject(0, :+)
+        if fan_gj > 0
+          assert_operator(cfis_energy, :>, 0)
+          assert_operator(cfis_energy, :<, fan_gj)
+        else
+          assert_equal(cfis_energy, 0.0)
         end
 
-        # Supply, exhaust, ERV, HRV, etc., check for appropriate mech vent energy
-        fan_sup = vent_fan_whole_house.select { |vent_mech| vent_mech.fan_type == HPXML::MechVentTypeSupply }
-        fan_exh = vent_fan_whole_house.select { |vent_mech| vent_mech.fan_type == HPXML::MechVentTypeExhaust }
-        fan_bal = vent_fan_whole_house.select { |vent_mech| [HPXML::MechVentTypeBalanced, HPXML::MechVentTypeERV, HPXML::MechVentTypeHRV].include? vent_mech.fan_type }
-        fan_gj = 0
-        if not fan_sup.empty?
-          fan_gj += fan_sup.map { |vent_mech| UnitConversions.convert(vent_mech.fan_power * vent_mech.hours_in_operation * 365.0, 'Wh', 'GJ') }.inject(0, :+)
-        end
-        if not fan_exh.empty?
-          fan_gj += fan_exh.map { |vent_mech| UnitConversions.convert(vent_mech.fan_power * vent_mech.hours_in_operation * 365.0, 'Wh', 'GJ') }.inject(0, :+)
-        end
-        if not fan_bal.empty?
-          fan_gj += fan_bal.map { |vent_mech| UnitConversions.convert(vent_mech.fan_power * vent_mech.hours_in_operation * 365.0, 'Wh', 'GJ') }.inject(0, :+)
-        end
-        if not vent_fan_kitchen.nil?
-          fan_gj += UnitConversions.convert(vent_fan_kitchen.fan_power * vent_fan_kitchen.hours_in_operation * 365.0, 'Wh', 'GJ')
-        end
-        if not vent_fan_bath.nil?
-          fan_gj += UnitConversions.convert(vent_fan_bath.fan_power * vent_fan_bath.hours_in_operation * vent_fan_bath.quantity * 365.0, 'Wh', 'GJ')
-        end
-        assert_in_delta(mv_energy, fan_gj, 0.01)
+        mv_energy -= cfis_energy
       end
+
+      # Supply, exhaust, ERV, HRV, etc., check for appropriate mech vent energy
+      fan_gj = 0
+      if not fan_sup.empty?
+        fan_gj += fan_sup.map { |vent_mech| UnitConversions.convert(vent_mech.fan_power * vent_mech.hours_in_operation * 365.0, 'Wh', 'GJ') }.inject(0, :+)
+      end
+      if not fan_exh.empty?
+        fan_gj += fan_exh.map { |vent_mech| UnitConversions.convert(vent_mech.fan_power * vent_mech.hours_in_operation * 365.0, 'Wh', 'GJ') }.inject(0, :+)
+      end
+      if not fan_bal.empty?
+        fan_gj += fan_bal.map { |vent_mech| UnitConversions.convert(vent_mech.fan_power * vent_mech.hours_in_operation * 365.0, 'Wh', 'GJ') }.inject(0, :+)
+      end
+      if not vent_fan_kitchen.empty?
+        fan_gj += vent_fan_kitchen.map { |vent_kitchen| UnitConversions.convert(vent_kitchen.fan_power * vent_kitchen.hours_in_operation * 365.0, 'Wh', 'GJ') }.inject(0, :+)
+      end
+      if not vent_fan_bath.empty?
+        fan_gj += vent_fan_bath.map { |vent_bath| UnitConversions.convert(vent_bath.fan_power * vent_bath.hours_in_operation * vent_bath.quantity * 365.0, 'Wh', 'GJ') }.inject(0, :+)
+      end
+      assert_in_delta(mv_energy, fan_gj, 0.001)
     end
 
     # Clothes Washer

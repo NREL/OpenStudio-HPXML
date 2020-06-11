@@ -1183,7 +1183,11 @@ class Airflow
       equip = OpenStudio::Model::ElectricEquipment.new(equip_def)
       equip.setName(obj_name)
       equip.setSpace(@living_space)
-      equip_def.setDesignLevel(vent_object.fan_power)
+      if obj_type_name == Constants.ObjectNameMechanicalVentilationBathFan
+        equip_def.setDesignLevel(vent_object.fan_power * vent_object.quantity)
+      else
+        equip_def.setDesignLevel(vent_object.fan_power)
+      end
       equip_def.setFractionRadiant(0)
       equip_def.setFractionLatent(0)
       equip_def.setFractionLost(1)
@@ -1549,7 +1553,6 @@ class Airflow
 
     infil_program.addLine('Set Qbath = 0')
     vent_fans_bath.each do |vent_bath|
-      # Question: There's a quantity attribute being used, but not in apply_local_ventilation, is it expected?
       infil_program.addLine("Set Qbath = Qbath + #{UnitConversions.convert(vent_bath.rated_flow_rate * vent_bath.quantity, 'cfm', 'm^3/s').round(4)} * #{bath_sch_sensors_map[vent_bath.id].name}")
     end
 
