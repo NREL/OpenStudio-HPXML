@@ -533,17 +533,13 @@ class HPXMLTest < MiniTest::Test
         next if err_line.include? 'Full load outlet air dry-bulb temperature < 2C. This indicates the possibility of coil frost/freeze.'
         next if err_line.include? 'Full load outlet temperature indicates a possibility of frost/freeze error continues.'
       end
+      next if err_line.include? 'Missing temperature setpoint for LeavingSetpointModulated mode' # These warnings are fine, simulation continues with assigning plant loop setpoint to boiler, which is the expected one
 
       # TODO: Eliminate these warnings?
 
       # GSHP:
       next if err_line.include? 'Borehole shank spacing is less than the pipe diameter. U-tube spacing is reference from the u-tube pipe center.'
       next if err_line.include? 'Shank spacing is set to the outer pipe diameter.'
-
-      # DHW Combi:
-      next if err_line.include? 'Missing temperature setpoint for LeavingSetpointModulated mode'
-      next if err_line.include?('Plant Loop') && err_line.include?('Demand Side is storing excess heat the majority of the time')
-      next if err_line.include?('Plant Loop') && err_line.include?('Supply Side is storing excess heat the majority of the time')
 
       # SHW:
       next if err_line.include?('Glycol: Temperature') && err_line.include?('out of range (too low) for fluid')

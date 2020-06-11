@@ -487,6 +487,7 @@ def set_hpxml_building_construction(hpxml_file, hpxml)
     hpxml.building_construction.conditioned_floor_area = 1539
     hpxml.building_construction.conditioned_building_volume = 12312
     hpxml.building_construction.residential_facility_type = HPXML::ResidentialTypeSFD
+    hpxml.building_construction.use_only_ideal_air_system = true
   elsif ['ASHRAE_Standard_140/L322XC.xml'].include? hpxml_file
     hpxml.building_construction.number_of_conditioned_floors = 2
     hpxml.building_construction.conditioned_floor_area = 3078
@@ -1659,6 +1660,12 @@ def set_hpxml_frame_floors(hpxml_file, hpxml)
     hpxml.frame_floors << hpxml.frame_floors[-1].dup
     hpxml.frame_floors[-1].id = 'TinyFloor'
     hpxml.frame_floors[-1].area = 0.05
+  elsif ['invalid_files/base-enclosure-conditioned-basement-slab-insulation.xml'].include? hpxml_file
+    hpxml.frame_floors.add(id: 'FloorAboveCondBasement',
+                           exterior_adjacent_to: HPXML::LocationBasementConditioned,
+                           interior_adjacent_to: HPXML::LocationLivingSpace,
+                           area: 1350,
+                           insulation_assembly_r_value: 3.9)
   elsif ['invalid_files/enclosure-living-missing-ceiling-roof.xml'].include? hpxml_file
     hpxml.frame_floors[0].delete
   elsif ['invalid_files/enclosure-basement-missing-ceiling.xml',

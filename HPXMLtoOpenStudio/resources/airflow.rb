@@ -1126,7 +1126,7 @@ class Airflow
     volume = UnitConversions.convert(space.volume, 'm^3', 'ft^3')
     if not vented_attic_sla.nil?
       vented_attic_area = UnitConversions.convert(space.floorArea, 'm^2', 'ft^2')
-      hor_lk_frac = 1.0
+      hor_lk_frac = 0.75
       neutral_level = 0.5
       sla = vented_attic_sla
       ach = get_infiltration_ACH_from_SLA(sla, 8.202, weather)
@@ -1150,7 +1150,7 @@ class Airflow
     space = @spaces[HPXML::LocationAtticUnvented]
     area = UnitConversions.convert(space.floorArea, 'm^2', 'ft^2')
     volume = UnitConversions.convert(space.volume, 'm^3', 'ft^3')
-    hor_lk_frac = 1.0
+    hor_lk_frac = 0.75
     neutral_level = 0.5
     sla = 0 # Assumption
     ach = get_infiltration_ACH_from_SLA(sla, 8.202, weather)
