@@ -432,31 +432,148 @@
         <MechanicalVentilation>
           <VentilationFans>
             <VentilationFan>
-              <SystemIdentifier id='Balanced'/>
-              <FanType>balanced</FanType>
-              <TestedFlowRate>110.0</TestedFlowRate>
+              <SystemIdentifier id='KitchenRangeFan'/>
+              <RatedFlowRate>50.0</RatedFlowRate>
+              <HoursInOperation>1.5</HoursInOperation>
+              <FanLocation>kitchen</FanLocation>
+              <UsedForLocalVentilation>true</UsedForLocalVentilation>
+              <FanPower>15.0</FanPower>
+              <extension>
+                <StartHour>18</StartHour>
+              </extension>
+            </VentilationFan>
+            <VentilationFan>
+              <SystemIdentifier id='BathFans'/>
+              <Quantity>2</Quantity>
+              <RatedFlowRate>25.0</RatedFlowRate>
+              <HoursInOperation>1.5</HoursInOperation>
+              <FanLocation>bath</FanLocation>
+              <UsedForLocalVentilation>true</UsedForLocalVentilation>
+              <FanPower>7.5</FanPower>
+              <extension>
+                <StartHour>7</StartHour>
+              </extension>
+            </VentilationFan>
+            <VentilationFan>
+              <SystemIdentifier id='WholeHouseFan'/>
+              <RatedFlowRate>1000.0</RatedFlowRate>
+              <UsedForSeasonalCoolingLoadReduction>true</UsedForSeasonalCoolingLoadReduction>
+              <FanPower>75.0</FanPower>
+            </VentilationFan>
+            <VentilationFan>
+              <SystemIdentifier id='Supply'/>
+              <FanType>supply only</FanType>
+              <TestedFlowRate>55.0</TestedFlowRate>
               <HoursInOperation>24.0</HoursInOperation>
               <UsedForWholeBuildingVentilation>true</UsedForWholeBuildingVentilation>
-              <FanPower>60.0</FanPower>
+              <FanPower>15.0</FanPower>
+            </VentilationFan>
+            <VentilationFan>
+              <SystemIdentifier id='Exhaust'/>
+              <FanType>exhaust only</FanType>
+              <RatedFlowRate>25.0</RatedFlowRate>
+              <HoursInOperation>14.0</HoursInOperation>
+              <UsedForWholeBuildingVentilation>true</UsedForWholeBuildingVentilation>
+              <FanPower>5.0</FanPower>
+            </VentilationFan>
+            <VentilationFan>
+              <SystemIdentifier id='Balanced'/>
+              <FanType>balanced</FanType>
+              <TestedFlowRate>55.0</TestedFlowRate>
+              <HoursInOperation>24.0</HoursInOperation>
+              <UsedForWholeBuildingVentilation>true</UsedForWholeBuildingVentilation>
+              <FanPower>30.0</FanPower>
             </VentilationFan>
             <VentilationFan>
               <SystemIdentifier id='ERV'/>
               <FanType>energy recovery ventilator</FanType>
-              <TestedFlowRate>50.0</TestedFlowRate>
+              <TestedFlowRate>25.0</TestedFlowRate>
               <HoursInOperation>24.0</HoursInOperation>
               <UsedForWholeBuildingVentilation>true</UsedForWholeBuildingVentilation>
               <TotalRecoveryEfficiency>0.48</TotalRecoveryEfficiency>
               <SensibleRecoveryEfficiency>0.72</SensibleRecoveryEfficiency>
-              <FanPower>30.0</FanPower>
+              <FanPower>15.0</FanPower>
             </VentilationFan>
             <VentilationFan>
               <SystemIdentifier id='HRV'/>
               <FanType>heat recovery ventilator</FanType>
-              <TestedFlowRate>60.0</TestedFlowRate>
+              <TestedFlowRate>30.0</TestedFlowRate>
               <HoursInOperation>24.0</HoursInOperation>
               <UsedForWholeBuildingVentilation>true</UsedForWholeBuildingVentilation>
               <SensibleRecoveryEfficiency>0.72</SensibleRecoveryEfficiency>
+              <FanPower>15.0</FanPower>
+            </VentilationFan>
+            <VentilationFan>
+              <SystemIdentifier id='HRV_2'/>
+              <FanType>heat recovery ventilator</FanType>
+              <TestedFlowRate>30.0</TestedFlowRate>
+              <HoursInOperation>23.0</HoursInOperation>
+              <UsedForWholeBuildingVentilation>true</UsedForWholeBuildingVentilation>
+              <SensibleRecoveryEfficiency>0.72</SensibleRecoveryEfficiency>
+              <FanPower>15.0</FanPower>
+            </VentilationFan>
+            <VentilationFan>
+              <SystemIdentifier id='ERV_2'/>
+              <FanType>energy recovery ventilator</FanType>
+              <TestedFlowRate>25.0</TestedFlowRate>
+              <HoursInOperation>23.0</HoursInOperation>
+              <UsedForWholeBuildingVentilation>true</UsedForWholeBuildingVentilation>
+              <TotalRecoveryEfficiency>0.48</TotalRecoveryEfficiency>
+              <SensibleRecoveryEfficiency>0.72</SensibleRecoveryEfficiency>
+              <FanPower>15.0</FanPower>
+            </VentilationFan>
+            <VentilationFan>
+              <SystemIdentifier id='Balanced_2'/>
+              <FanType>balanced</FanType>
+              <TestedFlowRate>55.0</TestedFlowRate>
+              <HoursInOperation>23.0</HoursInOperation>
+              <UsedForWholeBuildingVentilation>true</UsedForWholeBuildingVentilation>
               <FanPower>30.0</FanPower>
+            </VentilationFan>
+            <VentilationFan>
+              <SystemIdentifier id='Exhaust_2'/>
+              <FanType>exhaust only</FanType>
+              <RatedFlowRate>25.0</RatedFlowRate>
+              <HoursInOperation>13.0</HoursInOperation>
+              <UsedForWholeBuildingVentilation>true</UsedForWholeBuildingVentilation>
+              <FanPower>5.0</FanPower>
+            </VentilationFan>
+            <VentilationFan>
+              <SystemIdentifier id='Supply_2'/>
+              <FanType>supply only</FanType>
+              <TestedFlowRate>55.0</TestedFlowRate>
+              <HoursInOperation>23.0</HoursInOperation>
+              <UsedForWholeBuildingVentilation>true</UsedForWholeBuildingVentilation>
+              <FanPower>15.0</FanPower>
+            </VentilationFan>
+            <VentilationFan>
+              <SystemIdentifier id='WholeHouseFan_2'/>
+              <RatedFlowRate>1000.0</RatedFlowRate>
+              <UsedForSeasonalCoolingLoadReduction>true</UsedForSeasonalCoolingLoadReduction>
+              <FanPower>75.0</FanPower>
+            </VentilationFan>
+            <VentilationFan>
+              <SystemIdentifier id='BathFans_2'/>
+              <Quantity>2</Quantity>
+              <RatedFlowRate>25.0</RatedFlowRate>
+              <HoursInOperation>0.5</HoursInOperation>
+              <FanLocation>bath</FanLocation>
+              <UsedForLocalVentilation>true</UsedForLocalVentilation>
+              <FanPower>7.5</FanPower>
+              <extension>
+                <StartHour>6</StartHour>
+              </extension>
+            </VentilationFan>
+            <VentilationFan>
+              <SystemIdentifier id='KitchenRangeFan_2'/>
+              <RatedFlowRate>50.0</RatedFlowRate>
+              <HoursInOperation>0.5</HoursInOperation>
+              <FanLocation>kitchen</FanLocation>
+              <UsedForLocalVentilation>true</UsedForLocalVentilation>
+              <FanPower>15.0</FanPower>
+              <extension>
+                <StartHour>17</StartHour>
+              </extension>
             </VentilationFan>
             <VentilationFan>
               <SystemIdentifier id='CFIS1'/>
@@ -475,22 +592,6 @@
               <UsedForWholeBuildingVentilation>true</UsedForWholeBuildingVentilation>
               <FanPower>150.0</FanPower>
               <AttachedToHVACDistributionSystem idref='HVACDistribution2'/>
-            </VentilationFan>
-            <VentilationFan>
-              <SystemIdentifier id='Supply'/>
-              <FanType>supply only</FanType>
-              <TestedFlowRate>110.0</TestedFlowRate>
-              <HoursInOperation>24.0</HoursInOperation>
-              <UsedForWholeBuildingVentilation>true</UsedForWholeBuildingVentilation>
-              <FanPower>30.0</FanPower>
-            </VentilationFan>
-            <VentilationFan>
-              <SystemIdentifier id='Exhaust'/>
-              <FanType>exhaust only</FanType>
-              <RatedFlowRate>50.0</RatedFlowRate>
-              <HoursInOperation>14.0</HoursInOperation>
-              <UsedForWholeBuildingVentilation>true</UsedForWholeBuildingVentilation>
-              <FanPower>10.0</FanPower>
             </VentilationFan>
           </VentilationFans>
         </MechanicalVentilation>

@@ -208,10 +208,11 @@ class Airflow
     whf_avail_sensors = {}
     vent_fans_whf.each do |vent_whf|
       whf_num_days_per_week = 7 # FUTURE: Expose via HPXML?
-      whf_aval_sch = create_nv_and_whf_avail_sch(model, Constants.ObjectNameWholeHouseFan, whf_num_days_per_week)
+      obj_name = "#{Constants.ObjectNameWholeHouseFan} #{vent_whf.id}"
+      whf_aval_sch = create_nv_and_whf_avail_sch(model, obj_name, whf_num_days_per_week)
 
       whf_avail_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Schedule Value')
-      whf_avail_sensor.setName("#{Constants.ObjectNameWholeHouseFan} avail s")
+      whf_avail_sensor.setName("#{obj_name} avail s")
       whf_avail_sensor.setKeyName(whf_aval_sch.name.to_s)
       whf_avail_sensors[vent_whf.id] = whf_avail_sensor
     end
@@ -1158,10 +1159,10 @@ class Airflow
   end
 
   def self.apply_local_ventilation(model, vent_object_array, obj_type_name)
-    daily_sch = [0.0] * 24
     obj_sch_sensors = {}
     vent_object_array.each do |vent_object|
-      obj_name = obj_type_name + vent_object.id
+      daily_sch = [0.0] * 24
+      obj_name = "#{obj_type_name} #{vent_object.id}"
       remaining_hrs = vent_object.hours_in_operation
       for hr in 1..(vent_object.hours_in_operation.ceil)
         if remaining_hrs >= 1
