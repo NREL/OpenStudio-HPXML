@@ -1007,7 +1007,8 @@ class HPXMLTest < MiniTest::Test
       if not vent_fan_bath.empty?
         fan_gj += vent_fan_bath.map { |vent_bath| UnitConversions.convert(vent_bath.fan_power * vent_bath.hours_in_operation * vent_bath.quantity * 365.0, 'Wh', 'GJ') }.inject(0, :+)
       end
-      assert_in_delta(mv_energy, fan_gj, 0.001)
+      # Maximum error that can be caused by rounding
+      assert_in_delta(mv_energy, fan_gj, 0.006)
     end
 
     # Clothes Washer
