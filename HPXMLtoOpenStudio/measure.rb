@@ -827,7 +827,7 @@ class OSModel
         else # surfaces
           if surface2.subSurfaces.size > 0
             # calculate surface and its sub surfaces view factors
-            if surface2.netArea > 0.01 # base surface of a sub surface: window/door etc.
+            if surface2.netArea > 0.1 # base surface of a sub surface: window/door etc.
               fail "Unexpected net area for surface '#{surface2.name}'."
             end
 
@@ -1800,7 +1800,7 @@ class OSModel
 
         # Create parent surface slightly bigger than window
         surface = OpenStudio::Model::Surface.new(add_wall_polygon(window_width, window_height, z_origin,
-                                                                  window.azimuth, [0, 0.0001, 0.0001, 0.0001]), model)
+                                                                  window.azimuth, [0, 0.001, 0.001, 0.001]), model)
 
         surface.additionalProperties.setFeature('Length', window_width)
         surface.additionalProperties.setFeature('Azimuth', window.azimuth)
@@ -1811,7 +1811,7 @@ class OSModel
         set_surface_interior(model, spaces, surface, window.wall.interior_adjacent_to)
 
         sub_surface = OpenStudio::Model::SubSurface.new(add_wall_polygon(window_width, window_height, z_origin,
-                                                                         window.azimuth, [-0.0001, 0, 0.0001, 0]), model)
+                                                                         window.azimuth, [-0.001, 0, 0.001, 0]), model)
         sub_surface.setName(window.id)
         sub_surface.setSurface(surface)
         sub_surface.setSubSurfaceType('FixedWindow')
@@ -1841,7 +1841,7 @@ class OSModel
 
         # Create parent surface slightly bigger than window
         surface = OpenStudio::Model::Surface.new(add_wall_polygon(window_width, window_height, z_origin,
-                                                                  window.azimuth, [0, 0.0001, 0.0001, 0.0001]), model)
+                                                                  window.azimuth, [0, 0.001, 0.001, 0.001]), model)
 
         surface.additionalProperties.setFeature('Length', window_width)
         surface.additionalProperties.setFeature('Azimuth', window.azimuth)
@@ -1879,7 +1879,7 @@ class OSModel
       z_origin = @walls_top + 0.5 * Math.sin(Math.atan(skylight_tilt)) * skylight_height
 
       # Create parent surface slightly bigger than skylight
-      surface = OpenStudio::Model::Surface.new(add_roof_polygon(skylight_width + 0.0001, skylight_height + 0.0001, z_origin,
+      surface = OpenStudio::Model::Surface.new(add_roof_polygon(skylight_width + 0.001, skylight_height + 0.001, z_origin,
                                                                 skylight.azimuth, skylight_tilt), model)
 
       surface.additionalProperties.setFeature('Length', skylight_width)
@@ -1922,7 +1922,7 @@ class OSModel
 
       # Create parent surface slightly bigger than door
       surface = OpenStudio::Model::Surface.new(add_wall_polygon(door_width, door_height, z_origin,
-                                                                door.azimuth, [0, 0.0001, 0.0001, 0.0001]), model)
+                                                                door.azimuth, [0, 0.001, 0.001, 0.001]), model)
 
       surface.additionalProperties.setFeature('Length', door_width)
       surface.additionalProperties.setFeature('Azimuth', door.azimuth)
@@ -2638,7 +2638,7 @@ class OSModel
         end
       end
 
-      next if s.netArea < 0.01 # Skip parent surfaces (of subsurfaces) that have near zero net area
+      next if s.netArea < 0.1 # Skip parent surfaces (of subsurfaces) that have near zero net area
 
       key = { 'FoundationWall' => :foundation_walls,
               'RimJoist' => :rim_joists,

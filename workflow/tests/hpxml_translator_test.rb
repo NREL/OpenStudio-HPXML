@@ -469,6 +469,19 @@ class HPXMLTest < MiniTest::Test
   end
 
   def _verify_simulation_outputs(runner, rundir, hpxml_path, results)
+    sql_path = File.join(rundir, 'eplusout.sql')
+    assert(File.exist? sql_path)
+
+    sqlFile = OpenStudio::SqlFile.new(sql_path, false)
+    hpxml_defaults_path = File.join(rundir, 'in.xml')
+    hpxml = HPXML.new(hpxml_path: hpxml_defaults_path)
+
+    # Collapse windows further using same logic as measure.rb
+    hpxml.windows.each do |window|
+      window.fraction_operable = nil
+    end
+    hpxml.collapse_enclosure_surfaces()
+
     # Check for unexpected warnings
     File.readlines(File.join(rundir, 'eplusout.err')).each do |err_line|
       next unless err_line.include? '** Warning **'
@@ -477,7 +490,6 @@ class HPXMLTest < MiniTest::Test
       next if err_line.include? 'Schedule:Constant="ALWAYS ON CONTINUOUS", Blank Schedule Type Limits Name input'
       next if err_line.include? 'Schedule:Constant="ALWAYS OFF DISCRETE", Blank Schedule Type Limits Name input'
       next if err_line.include? 'Output:Meter: invalid Key Name'
-      next if err_line.include? 'GetSurfaceData: Very small surface area'
       next if err_line.include? 'Entered Zone Volumes differ from calculated zone volume'
       next if err_line.include?('CalculateZoneVolume') && err_line.include?('not fully enclosed')
       next if err_line.include?('GetInputViewFactors') && err_line.include?('not enough values')
@@ -488,22 +500,35 @@ class HPXMLTest < MiniTest::Test
       next if err_line.include? 'Timestep: Requested number'
       next if err_line.include? 'The Standard Ratings is calculated for'
       next if err_line.include?('CheckUsedConstructions') && err_line.include?('nominally unused constructions')
-      next if err_line.include?('GetDXCoils: Coil:Heating:DX') && err_line.include?('curve values') # Defrost curve
-      next if err_line.include? 'Full load outlet air dry-bulb temperature < 2C. This indicates the possibility of coil frost/freeze.' # HPWH located outside, these warnings are fine
-      next if err_line.include? 'Full load outlet temperature indicates a possibility of frost/freeze error continues.' # HPWH located outside, these warnings are fine
       next if err_line.include?('WetBulb not converged after') && err_line.include?('iterations(PsyTwbFnTdbWPb)')
-      next if err_line.include? 'Missing temperature setpoint for LeavingSetpointModulated mode' # These warnings are fine, simulation continues with assining plant loop setpoint to boiler, which is the expected one
+      # HPWHs
+      if hpxml.water_heating_systems.select { |wh| wh.water_heater_type == HPXML::WaterHeaterTypeHeatPump }.size > 0
+        next if err_line.include? 'Recovery Efficiency and Energy Factor could not be calculated during the test for standard ratings'
+        next if err_line.include? 'SimHVAC: Maximum iterations (20) exceeded for all HVAC loops'
+      end
+      # HP defrost curves
+      if hpxml.heat_pumps.select { |hp| [HPXML::HVACTypeHeatPumpAirToAir, HPXML::HVACTypeHeatPumpMiniSplit].include? hp.heat_pump_type }.size > 0
+        next if err_line.include?('GetDXCoils: Coil:Heating:DX') && err_line.include?('curve values')
+      end
+      # FUTURE: Remove when https://github.com/NREL/EnergyPlus/pull/8073 is available
+      if hpxml_path.include? 'ASHRAE_Standard_140'
+        next if err_line.include?('SurfaceProperty:ExposedFoundationPerimeter') && err_line.include?('Total Exposed Perimeter is greater than the perimeter')
+      end
+      # Stratified water heater bug in EnergyPlus; no way to prevent this via OS.
+      if (hpxml.solar_thermal_systems.size > 0) || (hpxml.water_heating_systems.select { |wh| wh.water_heater_type == HPXML::WaterHeaterTypeHeatPump }.size > 0)
+        next if err_line.include? 'More Additional Loss Coefficients were entered than the number of nodes; extra coefficients will not be used'
+      end
+      if hpxml_path.include?('base-dhw-tank-heat-pump-outside.xml') || hpxml_path.include?('base-hvac-flowrate.xml')
+        next if err_line.include? 'Full load outlet air dry-bulb temperature < 2C. This indicates the possibility of coil frost/freeze.'
+        next if err_line.include? 'Full load outlet temperature indicates a possibility of frost/freeze error continues.'
+      end
+      next if err_line.include? 'Missing temperature setpoint for LeavingSetpointModulated mode' # These warnings are fine, simulation continues with assigning plant loop setpoint to boiler, which is the expected one
 
       # TODO: Eliminate these warnings?
 
       # GSHP:
       next if err_line.include? 'Borehole shank spacing is less than the pipe diameter. U-tube spacing is reference from the u-tube pipe center.'
       next if err_line.include? 'Shank spacing is set to the outer pipe diameter.'
-
-      # HPWH:
-      next if err_line.include? 'More Additional Loss Coefficients were entered than the number of nodes; extra coefficients will not be used' # TODO: Fix OpenStudio FT?
-      next if err_line.include? 'Recovery Efficiency and Energy Factor could not be calculated during the test for standard ratings'
-      next if err_line.include? 'SimHVAC: Maximum iterations (20) exceeded for all HVAC loops'
 
       # SHW:
       next if err_line.include?('Glycol: Temperature') && err_line.include?('out of range (too low) for fluid')
@@ -526,26 +551,8 @@ class HPXMLTest < MiniTest::Test
         next if err_line.include? 'Temperature out of range [-100. to 200.] (PsyPsatFnTemp)'
       end
 
-      if hpxml_path.include? 'ASHRAE_Standard_140'
-        # TODO: Create E+ issue to add tolerance to check
-        next if err_line.include?('SurfaceProperty:ExposedFoundationPerimeter') && err_line.include?('Total Exposed Perimeter is greater than the perimeter')
-      end
-
       flunk "Unexpected warning found: #{err_line}"
     end
-
-    sql_path = File.join(rundir, 'eplusout.sql')
-    assert(File.exist? sql_path)
-
-    sqlFile = OpenStudio::SqlFile.new(sql_path, false)
-    hpxml_defaults_path = File.join(rundir, 'in.xml')
-    hpxml = HPXML.new(hpxml_path: hpxml_defaults_path)
-
-    # Collapse windows further using same logic as measure.rb
-    hpxml.windows.each do |window|
-      window.fraction_operable = nil
-    end
-    hpxml.collapse_enclosure_surfaces()
 
     # Timestep
     timestep = hpxml.header.timestep
