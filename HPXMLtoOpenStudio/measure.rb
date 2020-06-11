@@ -1349,7 +1349,7 @@ class OSModel
         WoodStudConstructionSet.new(Material.Stud2x6, 0.10, 10.0, 0.75, 0.0, covering), # 2x6, 24" o.c. + R10
         WoodStudConstructionSet.new(Material.Stud2x6, 0.10, 0.0, 0.75, 0.0, covering),  # 2x6, 24" o.c.
         WoodStudConstructionSet.new(Material.Stud2x4, 0.13, 0.0, 0.5, 0.0, covering),   # 2x4, 16" o.c.
-        WoodStudConstructionSet.new(Material.Stud2x4, 0.01, 0.0, 0.0, 0.0, nil),        # Fallback
+        WoodStudConstructionSet.new(Material.Stud2x4, 0.01, 0.0, 0.0, 0.0, nil), # Fallback
       ]
       match, constr_set, cavity_r = pick_wood_stud_construction_set(assembly_r, constr_sets, inside_film, outside_film, frame_floor.id)
 
@@ -2005,225 +2005,65 @@ class OSModel
       oven = @hpxml.ovens[0]
     end
 
-    # Fixtures
-    fixtures_usage_multiplier = @hpxml.water_heating.water_fixtures_usage_multiplier
-    fixtures_all_low_flow = false
-    if @hpxml.water_heating_systems.size > 0
-      fixtures_all_low_flow = true # default
-      @hpxml.water_fixtures.each do |water_fixture|
-        next unless [HPXML::WaterFixtureTypeShowerhead, HPXML::WaterFixtureTypeFaucet].include? water_fixture.water_fixture_type
-
-        fixtures_all_low_flow = false if not water_fixture.low_flow
-      end
-    end
-
     # Distribution
     if @hpxml.water_heating_systems.size > 0
       hot_water_distribution = @hpxml.hot_water_distributions[0]
-      dist_type = hot_water_distribution.system_type
-      if dist_type == HPXML::DHWDistTypeStandard
-        std_pipe_length = hot_water_distribution.standard_piping_length
-        recirc_loop_length = nil
-        recirc_branch_length = nil
-        recirc_control_type = nil
-        recirc_pump_power = nil
-      elsif dist_type == HPXML::DHWDistTypeRecirc
-        recirc_loop_length = hot_water_distribution.recirculation_piping_length
-        recirc_branch_length = hot_water_distribution.recirculation_branch_piping_length
-        recirc_control_type = hot_water_distribution.recirculation_control_type
-        recirc_pump_power = hot_water_distribution.recirculation_pump_power
-        std_pipe_length = nil
-      end
-      pipe_r = hot_water_distribution.pipe_r_value
     end
 
-    # Drain Water Heat Recovery
-    dwhr_present = false
-    dwhr_facilities_connected = nil
-    dwhr_is_equal_flow = nil
-    dwhr_efficiency = nil
-    if @hpxml.water_heating_systems.size > 0
-      hot_water_distribution = @hpxml.hot_water_distributions[0]
-      if not hot_water_distribution.dwhr_efficiency.nil?
-        dwhr_present = true
-        dwhr_facilities_connected = hot_water_distribution.dwhr_facilities_connected
-        dwhr_is_equal_flow = hot_water_distribution.dwhr_equal_flow
-        dwhr_efficiency = hot_water_distribution.dwhr_efficiency
-      end
-    end
-
+    # Solar thermal system
     solar_thermal_system = nil
     if @hpxml.solar_thermal_systems.size > 0
       solar_thermal_system = @hpxml.solar_thermal_systems[0]
     end
 
     # Water Heater
-    dhw_loop_fracs = {}
-    combi_sys_id_list = []
-    avg_setpoint_temp = 0.0 # Weighted average by fraction DHW load served
-    if @hpxml.water_heating_systems.size > 0
-      @hpxml.water_heating_systems.each do |water_heating_system|
-        sys_id = water_heating_system.id
-        @dhw_map[sys_id] = []
+    @hpxml.water_heating_systems.each do |water_heating_system|
+      loc_space, loc_schedule = get_space_or_schedule_from_location(water_heating_system.location, 'WaterHeatingSystem', model, spaces)
 
-        loc_space, loc_schedule = get_space_or_schedule_from_location(water_heating_system.location, 'WaterHeatingSystem', model, spaces)
-        setpoint_temp = water_heating_system.temperature
-        avg_setpoint_temp += setpoint_temp * water_heating_system.fraction_dhw_load_served
-        wh_type = water_heating_system.water_heater_type
-        fuel = water_heating_system.fuel_type
-        jacket_r = water_heating_system.jacket_r_value
+      ec_adj = HotWaterAndAppliances.get_dist_energy_consumption_adjustment(@has_uncond_bsmnt, @cfa, @ncfl, hot_water_distribution)
 
-        if water_heating_system.uses_desuperheater
-          desuperheater_clg_coil = get_desuperheatercoil(@hvac_map, water_heating_system.related_hvac_idref, sys_id)
-        end
+      if water_heating_system.water_heater_type == HPXML::WaterHeaterTypeStorage
 
-        ef = water_heating_system.energy_factor
-        if ef.nil?
-          uef = water_heating_system.uniform_energy_factor
-          # allow systems not requiring EF and not specifying fuel type, e.g., indirect water heater
-          if not uef.nil?
-            ef = Waterheater.calc_ef_from_uef(uef, wh_type, fuel)
-          end
-        end
+        Waterheater.apply_tank(model, loc_space, loc_schedule, water_heating_system, ec_adj,
+                               @dhw_map, @hvac_map, solar_thermal_system)
 
-        # Check if simple solar water heater (defined by Solar Fraction) attached.
-        # Solar fraction is used to adjust water heater's tank losses and hot water use, because it is
-        # the portion of the total conventional hot water heating load (delivered energy + tank losses).
-        solar_fraction = nil
-        if (not solar_thermal_system.nil?) && (solar_thermal_system.water_heating_system.nil? || (solar_thermal_system.water_heating_system.id == water_heating_system.id))
-          solar_fraction = solar_thermal_system.solar_fraction
-        end
-        solar_fraction = 0.0 if solar_fraction.nil?
+      elsif water_heating_system.water_heater_type == HPXML::WaterHeaterTypeTankless
 
-        ec_adj = HotWaterAndAppliances.get_dist_energy_consumption_adjustment(@has_uncond_bsmnt, @cfa, @ncfl,
-                                                                              dist_type, recirc_control_type,
-                                                                              pipe_r, std_pipe_length, recirc_loop_length)
+        Waterheater.apply_tankless(model, loc_space, loc_schedule, water_heating_system, ec_adj,
+                                   @nbeds, @dhw_map, @hvac_map, solar_thermal_system)
 
-        runner.registerInfo("EC_adj=#{ec_adj}") # Pass value to tests
+      elsif water_heating_system.water_heater_type == HPXML::WaterHeaterTypeHeatPump
 
-        dhw_load_frac = water_heating_system.fraction_dhw_load_served * (1.0 - solar_fraction)
+        Waterheater.apply_heatpump(model, runner, loc_space, loc_schedule, weather, water_heating_system, ec_adj,
+                                   @dhw_map, @hvac_map, solar_thermal_system, @living_zone)
 
-        @dhw_map[sys_id] = []
+      elsif [HPXML::WaterHeaterTypeCombiStorage, HPXML::WaterHeaterTypeCombiTankless].include? water_heating_system.water_heater_type
 
-        if wh_type == HPXML::WaterHeaterTypeStorage
+        Waterheater.apply_combi(model, runner, loc_space, loc_schedule, water_heating_system, ec_adj,
+                                @dhw_map, @hvac_map, solar_thermal_system)
 
-          tank_vol = water_heating_system.tank_volume
-          re = water_heating_system.recovery_efficiency
-          capacity_kbtuh = water_heating_system.heating_capacity / 1000.0
+      else
 
-          Waterheater.apply_tank(model, loc_space, loc_schedule, fuel, capacity_kbtuh, tank_vol,
-                                 ef, re, setpoint_temp, ec_adj, @dhw_map,
-                                 sys_id, desuperheater_clg_coil, jacket_r, solar_fraction)
+        fail "Unhandled water heater (#{water_heating_system.water_heater_type})."
 
-        elsif wh_type == HPXML::WaterHeaterTypeTankless
-
-          performance_adjustment = water_heating_system.performance_adjustment
-
-          Waterheater.apply_tankless(model, loc_space, loc_schedule, fuel, ef, performance_adjustment,
-                                     setpoint_temp, ec_adj, @nbeds, @dhw_map,
-                                     sys_id, desuperheater_clg_coil, solar_fraction)
-
-        elsif wh_type == HPXML::WaterHeaterTypeHeatPump
-
-          tank_vol = water_heating_system.tank_volume
-
-          Waterheater.apply_heatpump(model, runner, loc_space, loc_schedule, weather, setpoint_temp, tank_vol, ef, ec_adj,
-                                     @dhw_map, sys_id, desuperheater_clg_coil, jacket_r, solar_fraction, @living_zone)
-
-        elsif (wh_type == HPXML::WaterHeaterTypeCombiStorage) || (wh_type == HPXML::WaterHeaterTypeCombiTankless)
-
-          combi_sys_id_list << sys_id
-          standby_loss = water_heating_system.standby_loss
-          vol = water_heating_system.tank_volume
-          boiler_afue = water_heating_system.related_hvac_system.heating_efficiency_afue
-          boiler_fuel_type = water_heating_system.related_hvac_system.heating_system_fuel
-          boiler, plant_loop = get_boiler_and_plant_loop(@hvac_map, water_heating_system.related_hvac_idref, sys_id)
-
-          Waterheater.apply_combi(model, runner, loc_space, loc_schedule, vol, setpoint_temp, ec_adj,
-                                  boiler, plant_loop, boiler_fuel_type, boiler_afue, @dhw_map,
-                                  sys_id, wh_type, jacket_r, standby_loss, solar_fraction)
-
-        else
-
-          fail "Unhandled water heater (#{wh_type})."
-
-        end
-
-        dhw_loop_fracs[sys_id] = dhw_load_frac
       end
     end
 
+    fixtures_usage_multiplier = @hpxml.water_heating.water_fixtures_usage_multiplier
     HotWaterAndAppliances.apply(model, runner, weather, @living_space,
-                                @cfa, @nbeds, @ncfl, @has_uncond_bsmnt, avg_setpoint_temp,
+                                @cfa, @nbeds, @ncfl, @has_uncond_bsmnt,
                                 clothes_washer, cw_space, clothes_dryer, cd_space,
-                                dishwasher, dw_space, refrigerator, rf_space,
-                                cooking_range, cook_space, oven,
-                                fixtures_all_low_flow, fixtures_usage_multiplier,
-                                dist_type, pipe_r, std_pipe_length, recirc_loop_length,
-                                recirc_branch_length, recirc_control_type,
-                                recirc_pump_power, dwhr_present,
-                                dwhr_facilities_connected, dwhr_is_equal_flow,
-                                dwhr_efficiency, dhw_loop_fracs, @eri_version, @dhw_map)
+                                dishwasher, dw_space, refrigerator, rf_space, cooking_range, cook_space, oven,
+                                fixtures_usage_multiplier, @hpxml.water_fixtures, @hpxml.water_heating_systems, hot_water_distribution,
+                                solar_thermal_system, @eri_version, @dhw_map)
 
-    if not solar_thermal_system.nil?
-      collector_area = solar_thermal_system.collector_area
-      if not collector_area.nil? # Detailed solar water heater
-        water_heater = solar_thermal_system.water_heating_system
-
-        if [HPXML::WaterHeaterTypeCombiStorage, HPXML::WaterHeaterTypeCombiTankless].include? water_heater.water_heater_type
-          fail "Water heating system '#{water_heater.id}' connected to solar thermal system '#{solar_thermal_system.id}' cannot be a space-heating boiler."
-        end
-        if water_heater.uses_desuperheater
-          fail "Water heating system '#{water_heater.id}' connected to solar thermal system '#{solar_thermal_system.id}' cannot be attached to a desuperheater."
-        end
-
-        frta = solar_thermal_system.collector_frta
-        frul = solar_thermal_system.collector_frul
-        storage_vol = solar_thermal_system.storage_volume
-        loop_type = solar_thermal_system.collector_loop_type
-        azimuth = Float(solar_thermal_system.collector_azimuth)
-        tilt = solar_thermal_system.collector_tilt
-        collector_type = solar_thermal_system.collector_type
-        loc_space, loc_schedule = get_space_or_schedule_from_location(water_heater.location, 'WaterHeatingSystem', model, spaces)
-
-        dhw_loop = nil
-        if @dhw_map.keys.include? water_heater.id
-          @dhw_map[water_heater.id].each do |dhw_object|
-            next unless dhw_object.is_a? OpenStudio::Model::PlantLoop
-
-            dhw_loop = dhw_object
-          end
-        end
-
-        Waterheater.apply_solar_thermal(model, loc_space, loc_schedule, collector_area, frta, frul, storage_vol,
-                                        azimuth, tilt, collector_type, loop_type, dhw_loop, @dhw_map,
-                                        water_heater.id)
-      end
+    if (not solar_thermal_system.nil?) && (not solar_thermal_system.collector_area.nil?) # Detailed solar water heater
+      loc_space, loc_schedule = get_space_or_schedule_from_location(solar_thermal_system.water_heating_system.location, 'WaterHeatingSystem', model, spaces)
+      Waterheater.apply_solar_thermal(model, loc_space, loc_schedule, solar_thermal_system, @dhw_map)
     end
 
     # Add combi-system EMS program with water use equipment information
-    @dhw_map.keys.each do |sys_id|
-      next unless combi_sys_id_list.include? sys_id
-
-      Waterheater.apply_combi_system_EMS(model, sys_id, @dhw_map)
-    end
-  end
-
-  def self.get_desuperheatercoil(hvac_map, relatedhvac, wh_id)
-    # search for the related cooling coil object for desuperheater
-
-    # Supported cooling coil options
-    clg_coil_supported = [OpenStudio::Model::CoilCoolingDXSingleSpeed, OpenStudio::Model::CoilCoolingDXMultiSpeed, OpenStudio::Model::CoilCoolingWaterToAirHeatPumpEquationFit]
-    if hvac_map.keys.include? relatedhvac
-      hvac_map[relatedhvac].each do |comp|
-        clg_coil_supported.each do |coiltype|
-          if comp.is_a? coiltype
-            return comp
-          end
-        end
-      end
-      fail "RelatedHVACSystem '#{relatedhvac}' for water heating system '#{wh_id}' is not currently supported for desuperheaters."
-    end
+    Waterheater.apply_combi_system_EMS(model, @dhw_map, @hpxml.water_heating_systems)
   end
 
   def self.is_central_air_conditioner_and_furnace(heating_system, cooling_system)
@@ -2485,22 +2325,6 @@ class OSModel
       # in the HPXML file, not that it is attached to this HVAC system. So here we perform the more rigorous check.
       fail "Incorrect HVAC distribution system type for HVAC type: '#{system_type}'. Should be one of: #{hvac_distribution_type_map[system_type]}"
     end
-  end
-
-  def self.get_boiler_and_plant_loop(loop_hvacs, heating_source_id, sys_id)
-    # Search for the right boiler OS object
-    boiler = nil
-    plant_loop = nil
-    if loop_hvacs.keys.include? heating_source_id
-      loop_hvacs[heating_source_id].each do |comp|
-        if comp.is_a? OpenStudio::Model::PlantLoop
-          plant_loop = comp
-        elsif comp.is_a? OpenStudio::Model::BoilerHotWater
-          boiler = comp
-        end
-      end
-    end
-    return boiler, plant_loop
   end
 
   def self.add_mels(runner, model, spaces)
