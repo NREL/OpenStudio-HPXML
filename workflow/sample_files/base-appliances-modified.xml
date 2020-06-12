@@ -427,7 +427,7 @@
           <SystemIdentifier id='Dishwasher'/>
           <Location>living space</Location>
           <EnergyFactor>0.7</EnergyFactor>
-          <PlaceSettingCapacity>12</PlaceSettingCapacity>
+          <PlaceSettingCapacity>6</PlaceSettingCapacity>
           <LabelElectricRate>0.12</LabelElectricRate>
           <LabelGasRate>1.09</LabelGasRate>
           <LabelAnnualGasCost>22.32</LabelAnnualGasCost>

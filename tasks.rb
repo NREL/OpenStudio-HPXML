@@ -3850,6 +3850,7 @@ def set_hpxml_dishwasher(hpxml_file, hpxml)
     rated_annual_kwh = hpxml.dishwashers[0].rated_annual_kwh
     hpxml.dishwashers[0].rated_annual_kwh = nil
     hpxml.dishwashers[0].energy_factor = HotWaterAndAppliances.calc_dishwasher_ef_from_annual_kwh(rated_annual_kwh).round(2)
+    hpxml.dishwashers[0].place_setting_capacity = 6 # Compact
   elsif ['base-enclosure-attached-multifamily.xml',
          'base-enclosure-other-housing-unit.xml',
          'base-enclosure-other-heated-space.xml',
