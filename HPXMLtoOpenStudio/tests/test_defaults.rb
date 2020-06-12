@@ -527,12 +527,14 @@ class HPXMLtoOpenStudioDuctsTest < MiniTest::Test
 
     # Test defaults
     hpxml = apply_hpxml_defaults('base-misc-large-uncommon-loads.xml')
+    XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
     hpxml_default = _test_measure()
     _test_default_pool_heater_electric_values(hpxml_default, 2286)
     _test_default_pool_pump_values(hpxml_default, 2496)
 
     # Test defaults 2
     hpxml = apply_hpxml_defaults('base-misc-large-uncommon-loads2.xml')
+    XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
     hpxml_default = _test_measure()
     _test_default_pool_heater_gas_values(hpxml_default, 236)
     _test_default_pool_pump_values(hpxml_default, 2496)
@@ -553,12 +555,14 @@ class HPXMLtoOpenStudioDuctsTest < MiniTest::Test
 
     # Test defaults
     hpxml = apply_hpxml_defaults('base-misc-large-uncommon-loads.xml')
+    XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
     hpxml_default = _test_measure()
     _test_default_hot_tub_heater_electric_values(hpxml_default, 1125)
     _test_default_hot_tub_pump_values(hpxml_default, 1111)
 
     # Test defaults 2
     hpxml = apply_hpxml_defaults('base-misc-large-uncommon-loads2.xml')
+    XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
     hpxml_default = _test_measure()
     _test_default_hot_tub_heater_gas_values(hpxml_default, 87)
     _test_default_hot_tub_pump_values(hpxml_default, 1111)
@@ -1090,6 +1094,8 @@ class HPXMLtoOpenStudioDuctsTest < MiniTest::Test
     end
 
     hpxml.walls.each do |wall|
+      next unless wall.is_exterior
+
       wall.siding = nil
       wall.solar_absorptance = nil
       wall.color = HPXML::ColorLight
