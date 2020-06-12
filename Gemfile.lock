@@ -36,6 +36,8 @@ GEM
       ansi
       ast
     ruby-progressbar (1.10.1)
+    schematron-nokogiri (0.0.3)
+      nokogiri (~> 1.6)
     simplecov (0.17.0)
       docile (~> 1.1)
       json (>= 1.8, < 3)
@@ -56,6 +58,7 @@ DEPENDENCIES
   nokogiri (~> 1.10)
   oga
   rake
+  schematron-nokogiri
   simplecov
 
 BUNDLED WITH
