@@ -301,7 +301,6 @@ class HVAC
     # Outdoor air intake system
     oa_intake_controller = OpenStudio::Model::ControllerOutdoorAir.new(model)
     oa_intake_controller.setName("#{air_loop.name} OA Controller")
-    oa_intake_controller.setMaximumOutdoorAirFlowRate(10) # Set an extreme large value here, will be reset by E+ using sized value
     oa_intake_controller.setMinimumLimitType('FixedMinimum')
     oa_intake_controller.resetEconomizerMinimumLimitDryBulbTemperature
     oa_intake_controller.setMinimumFractionofOutdoorAirSchedule(model.alwaysOnDiscreteSchedule)
@@ -1810,6 +1809,7 @@ class HVAC
     else
       air_terminal = OpenStudio::Model::AirTerminalSingleDuctVAVNoReheat.new(model, model.alwaysOnDiscreteSchedule)
       air_terminal.setConstantMinimumAirFlowFraction(0)
+      air_terminal.setFixedMinimumAirFlowRate(0)
     end
     air_terminal.setName(obj_name + ' terminal')
     air_loop.multiAddBranchForZone(control_zone, air_terminal)

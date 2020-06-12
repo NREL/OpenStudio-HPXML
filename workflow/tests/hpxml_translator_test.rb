@@ -524,6 +524,14 @@ class HPXMLTest < MiniTest::Test
       end
       next if err_line.include? 'Missing temperature setpoint for LeavingSetpointModulated mode' # These warnings are fine, simulation continues with assigning plant loop setpoint to boiler, which is the expected one
 
+      # Evap cooler model is not really using Controller:MechanicalVentilation object, so these warnings of ignoring some features are fine. OS requires a Controller:MechanicalVentilation to be attached to the oa controller, however, it's not required by E+, removing Controller:MechanicalVentilation from idf eliminates these two warnings. Question: Can OS allow removing it in the future? 
+      next if err_line.include?('Zone') && err_line.include?('is not accounted for by Controller:MechanicalVentilation object')
+      next if err_line.include?('PEOPLE object for zone') && err_line.include?('is not accounted for by Controller:MechanicalVentilation object')
+      # "The only valid controller type for an AirLoopHVAC is Controller:WaterCoil.", evap cooler doesn't need one.
+      next if err_line.include?('GetAirPathData: AirLoopHVAC') && err_line.include?('has no Controllers')
+      # input "Autosize" for Fixed Minimum Air Flow Rate is added by OS translation, now set it to 0 to skip potential sizing process, though no way to prevent this warning.
+      next if err_line.include? 'Since Zone Minimum Air Flow Input Method = CONSTANT, input for Fixed Minimum Air Flow Rate will be ignored'
+
       # TODO: Eliminate these warnings?
 
       # GSHP:
@@ -534,13 +542,6 @@ class HPXMLTest < MiniTest::Test
       next if err_line.include?('Glycol: Temperature') && err_line.include?('out of range (too low) for fluid')
       next if err_line.include?('Glycol: Temperature') && err_line.include?('out of range (too high) for fluid')
       next if err_line.include? 'Plant loop exceeding upper temperature limit'
-
-      # Evap cooler:
-      next if err_line.include? 'Since Zone Minimum Air Flow Input Method = CONSTANT, input for Fixed Minimum Air Flow Rate will be ignored'
-      next if err_line.include?('GetAirPathData: AirLoopHVAC') && err_line.include?('has no Controllers')
-      next if err_line.include?('InitOAController: Maximum Outdoor Air Flow Rate for Controller:OutdoorAir') && err_line.include?('is greater than Design Supply Air Flow Rate')
-      next if err_line.include?('Zone') && err_line.include?('is not accounted for by Controller:MechanicalVentilation object')
-      next if err_line.include?('PEOPLE object for zone') && err_line.include?('is not accounted for by Controller:MechanicalVentilation object')
 
       # Room AC:
       next if err_line.include? 'GetDXCoils: Coil:Cooling:DX:SingleSpeed="ROOM AC CLG COIL" curve values' # TODO: Check w/ Jon
