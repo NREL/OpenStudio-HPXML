@@ -236,7 +236,7 @@ class HPXMLtoOpenStudioTest < MiniTest::Test
     fixture_gpd = 44.60
     dist_gpd = 10.2343
     cw_gpd = 3.7116
-    dw_gpd = 2.7375
+    dw_gpd = 5.475
     assert_in_epsilon(fixture_gpd, get_wu_gpd(model, Constants.ObjectNameFixtures), 0.001)
     assert_in_epsilon(dist_gpd, get_wu_gpd(model, Constants.ObjectNameDistributionWaste), 0.001)
     assert_in_epsilon(cw_gpd, get_wu_gpd(model, Constants.ObjectNameClothesWasher), 0.001)
@@ -250,7 +250,7 @@ class HPXMLtoOpenStudioTest < MiniTest::Test
     assert_in_epsilon(cw_sens_frac, get_ee_fractions(model, Constants.ObjectNameClothesWasher)[0], 0.001)
     assert_in_epsilon(cw_lat_frac, get_ee_fractions(model, Constants.ObjectNameClothesWasher)[1], 0.001)
 
-    dw_ee_kwh_yr = 93.298
+    dw_ee_kwh_yr = 186.6
     dw_sens_frac = 0.3
     dw_lat_frac = 0.300
     assert_in_epsilon(dw_ee_kwh_yr, get_ee_kwh_per_year(model, Constants.ObjectNameDishwasher), 0.001)

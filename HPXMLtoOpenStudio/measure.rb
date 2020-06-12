@@ -1873,7 +1873,7 @@ class OSModel
     if type == 'wall'
       Constructions.apply_wood_stud_wall(model, surfaces, nil, 'AdiabaticWallConstruction',
                                          0, 1, 3.5, true, 0.1, 0.5, 0, 99,
-                                         Material.ExteriorFinishMaterial(HPXML::SidingTypeWood, 0.90, 0.75), 
+                                         Material.ExteriorFinishMaterial(HPXML::SidingTypeWood, 0.90, 0.75),
                                          0,
                                          Material.AirFilmVertical,
                                          Material.AirFilmVertical)
@@ -1953,7 +1953,7 @@ class OSModel
       elsif water_heating_system.water_heater_type == HPXML::WaterHeaterTypeHeatPump
 
         living_zone = spaces[HPXML::LocationLivingSpace].thermalZone.get
-        
+
         Waterheater.apply_heatpump(model, runner, loc_space, loc_schedule, weather, water_heating_system, ec_adj,
                                    @dhw_map, @hvac_map, solar_thermal_system, living_zone)
 
