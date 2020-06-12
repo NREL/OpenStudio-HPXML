@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 class Lighting
-  def self.apply(model, weather, spaces, lighting_groups, usage_multiplier, lighting_schedule, eri_version)
+  def self.apply(model, weather, spaces, lighting_groups, lighting, eri_version)
     fractions = {}
     lighting_groups.each do |lg|
       fractions[[lg.location, lg.lighting_type]] = lg.fraction_of_units_in_location
@@ -29,28 +29,24 @@ class Lighting
                                             fractions[[HPXML::LocationInterior, HPXML::LightingTypeLED]],
                                             fractions[[HPXML::LocationExterior, HPXML::LightingTypeLED]],
                                             fractions[[HPXML::LocationGarage, HPXML::LightingTypeLED]],
-                                            usage_multiplier)
+                                            lighting.usage_multiplier)
 
     # Create schedule
-    if lighting_schedule.interior_weekday_fractions.nil?
+    if lighting.interior_weekday_fractions.nil?
       interior_sch = create_schedule(model, weather)
     else
-      interior_sch = MonthWeekdayWeekendSchedule.new(model, Constants.ObjectNameInteriorLighting + ' schedule', lighting_schedule.interior_weekday_fractions, lighting_schedule.interior_weekend_fractions, lighting_schedule.interior_monthly_multipliers, 1.0, 1.0, true, true, Constants.ScheduleTypeLimitsFraction)
+      interior_sch = MonthWeekdayWeekendSchedule.new(model, Constants.ObjectNameInteriorLighting + ' schedule', lighting.interior_weekday_fractions, lighting.interior_weekend_fractions, lighting.interior_monthly_multipliers, 1.0, 1.0, true, true, Constants.ScheduleTypeLimitsFraction)
     end
-    if lighting_schedule.garage_exterior_weekday_fractions.nil?
-      garage_sch = create_schedule(model, weather)
-      exterior_sch = create_schedule(model, weather)
-    else
-      garage_sch = MonthWeekdayWeekendSchedule.new(model, Constants.ObjectNameGarageLighting + ' schedule', lighting_schedule.garage_exterior_weekday_fractions, lighting_schedule.garage_exterior_weekend_fractions, lighting_schedule.garage_exterior_monthly_multipliers, 1.0, 1.0, true, true, Constants.ScheduleTypeLimitsFraction)
-      exterior_sch = MonthWeekdayWeekendSchedule.new(model, Constants.ObjectNameExteriorLighting + ' schedule', lighting_schedule.garage_exterior_weekday_fractions, lighting_schedule.garage_exterior_weekend_fractions, lighting_schedule.garage_exterior_monthly_multipliers, 1.0, 1.0, true, true, Constants.ScheduleTypeLimitsFraction)
-    end
+    garage_sch = MonthWeekdayWeekendSchedule.new(model, Constants.ObjectNameGarageLighting + ' schedule', lighting.garage_weekday_fractions, lighting.garage_weekend_fractions, lighting.garage_monthly_multipliers, 1.0, 1.0, true, true, Constants.ScheduleTypeLimitsFraction)
+    exterior_sch = MonthWeekdayWeekendSchedule.new(model, Constants.ObjectNameExteriorLighting + ' schedule', lighting.exterior_weekday_fractions, lighting.exterior_weekend_fractions, lighting.exterior_monthly_multipliers, 1.0, 1.0, true, true, Constants.ScheduleTypeLimitsFraction)
+    exterior_holiday_sch = MonthWeekdayWeekendSchedule.new(model, Constants.ObjectNameLightingExteriorHoliday + ' schedule', lighting.exterior_holiday_fractions, lighting.exterior_holiday_fractions, lighting.exterior_monthly_multipliers, 1.0, 1.0, true, true, Constants.ScheduleTypeLimitsFraction, lighting.exterior_holiday_period_begin_month, lighting.exterior_holiday_period_begin_day_of_month, lighting.exterior_holiday_period_end_month, lighting.exterior_holiday_period_end_day_of_month)
 
     # Add lighting to each conditioned space
     if int_kwh > 0
-      if lighting_schedule.interior_weekday_fractions.nil?
-        space_design_level = interior_sch.calcDesignLevel(interior_sch.maxval * int_kwh)
+      if lighting.interior_weekday_fractions.nil?
+        design_level = interior_sch.calcDesignLevel(interior_sch.maxval * int_kwh)
       else
-        space_design_level = interior_sch.calcDesignLevelFromDailykWh(int_kwh / 365.0)
+        design_level = interior_sch.calcDesignLevelFromDailykWh(int_kwh / 365.0)
       end
 
       # Add lighting
@@ -60,7 +56,7 @@ class Lighting
       ltg.setSpace(living_space)
       ltg.setEndUseSubcategory(Constants.ObjectNameInteriorLighting)
       ltg_def.setName(Constants.ObjectNameInteriorLighting)
-      ltg_def.setLightingLevel(space_design_level)
+      ltg_def.setLightingLevel(design_level)
       ltg_def.setFractionRadiant(0.6)
       ltg_def.setFractionVisible(0.2)
       ltg_def.setReturnAirFraction(0.0)
@@ -69,11 +65,7 @@ class Lighting
 
     # Add lighting to each garage space
     if grg_kwh > 0
-      if lighting_schedule.garage_exterior_weekday_fractions.nil?
-        space_design_level = garage_sch.calcDesignLevel(garage_sch.maxval * grg_kwh)
-      else
-        space_design_level = garage_sch.calcDesignLevelFromDailykWh(grg_kwh / 365.0)
-      end
+      design_level = garage_sch.calcDesignLevelFromDailykWh(grg_kwh / 365.0)
 
       # Add lighting
       ltg_def = OpenStudio::Model::LightsDefinition.new(model)
@@ -82,7 +74,7 @@ class Lighting
       ltg.setSpace(garage_space)
       ltg.setEndUseSubcategory(Constants.ObjectNameGarageLighting)
       ltg_def.setName(Constants.ObjectNameGarageLighting)
-      ltg_def.setLightingLevel(space_design_level)
+      ltg_def.setLightingLevel(design_level)
       ltg_def.setFractionRadiant(0.6)
       ltg_def.setFractionVisible(0.2)
       ltg_def.setReturnAirFraction(0.0)
@@ -90,79 +82,20 @@ class Lighting
     end
 
     if ext_kwh > 0
-      if lighting_schedule.garage_exterior_weekday_fractions.nil?
-        space_design_level = exterior_sch.calcDesignLevel(exterior_sch.maxval * ext_kwh)
-      else
-        space_design_level = exterior_sch.calcDesignLevelFromDailykWh(ext_kwh / 365.0)
-      end
+      design_level = exterior_sch.calcDesignLevelFromDailykWh(ext_kwh / 365.0)
 
       # Add exterior lighting
       ltg_def = OpenStudio::Model::ExteriorLightsDefinition.new(model)
       ltg = OpenStudio::Model::ExteriorLights.new(ltg_def)
       ltg.setName(Constants.ObjectNameExteriorLighting)
       ltg_def.setName(Constants.ObjectNameExteriorLighting)
-      ltg_def.setDesignLevel(space_design_level)
+      ltg_def.setDesignLevel(design_level)
       ltg.setSchedule(exterior_sch.schedule)
     end
 
     # Add exterior holiday lighting
-    if not lighting_schedule.exterior_holiday_daily_energy_use.nil?
-      year_description = model.getYearDescription
-      assumed_year = year_description.assumedYear
-
-      months = { 'January' => 1, 'February' => 2, 'March' => 3, 'April' => 4, 'May' => 5, 'June' => 6, 'July' => 7, 'August' => 8, 'September' => 9, 'October' => 10, 'November' => 11, 'December' => 12 }
-      holiday_start_month = months[lighting_schedule.exterior_holiday_period_start_date.split[0]]
-      holiday_end_month = months[lighting_schedule.exterior_holiday_period_end_date.split[0]]
-
-      holiday_start_day = lighting_schedule.exterior_holiday_period_start_date.split[1].to_i
-      holiday_end_day = lighting_schedule.exterior_holiday_period_end_date.split[1].to_i
-
-      holiday_start = Time.new(assumed_year, holiday_start_month, holiday_start_day)
-      holiday_end = Time.new(assumed_year, holiday_end_month, holiday_end_day)
-
-      holiday_periods = []
-      if holiday_start < holiday_end # contiguous holiday
-        holiday_s = OpenStudio::Date.new(OpenStudio::MonthOfYear.new(holiday_start.month), holiday_start.day, holiday_start.year)
-        holiday_e = OpenStudio::Date.new(OpenStudio::MonthOfYear.new(holiday_end.month), holiday_end.day, holiday_end.year)
-        holiday_periods << [holiday_s, holiday_e]
-      else # non contiguous holiday
-        holiday_s = OpenStudio::Date.new(OpenStudio::MonthOfYear.new(1), 1, assumed_year)
-        holiday_e = OpenStudio::Date.new(OpenStudio::MonthOfYear.new(holiday_end.month), holiday_end.day, holiday_end.year)
-        holiday_periods << [holiday_s, holiday_e]
-
-        holiday_s = OpenStudio::Date.new(OpenStudio::MonthOfYear.new(holiday_start.month), holiday_start.day, holiday_start.year)
-        holiday_e = OpenStudio::Date.new(OpenStudio::MonthOfYear.new(12), 31, assumed_year)
-        holiday_periods << [holiday_s, holiday_e]
-      end
-
-      vals = lighting_schedule.exterior_holiday_fractions.split(',')
-      holiday_sch = vals.map { |i| i.to_f }
-
-      sch = OpenStudio::Model::ScheduleRuleset.new(model, 0)
-      sch.setName(Constants.ObjectNameLightingExteriorHoliday)
-
-      holiday_periods.each do |holiday_period|
-        holiday_start_date, holiday_end_date = holiday_period
-
-        holiday_rule = OpenStudio::Model::ScheduleRule.new(sch)
-        holiday_day = holiday_rule.daySchedule
-
-        (0..23).each do |hour|
-          holiday_day.addValue(OpenStudio::Time.new(0, hour + 1, 0, 0), holiday_sch[hour] / holiday_sch.max)
-        end
-
-        holiday_rule.setApplySunday(true)
-        holiday_rule.setApplyMonday(true)
-        holiday_rule.setApplyTuesday(true)
-        holiday_rule.setApplyWednesday(true)
-        holiday_rule.setApplyThursday(true)
-        holiday_rule.setApplyFriday(true)
-        holiday_rule.setApplySaturday(true)
-        holiday_rule.setStartDate(holiday_start_date)
-        holiday_rule.setEndDate(holiday_end_date)
-      end
-
-      design_level = lighting_schedule.exterior_holiday_daily_energy_use.to_f * holiday_sch.max * 1000
+    if not lighting.exterior_holiday_daily_energy_use.nil?
+      design_level = exterior_holiday_sch.calcDesignLevelFromDailykWh(lighting.exterior_holiday_daily_energy_use.to_f)
 
       # Add exterior lighting
       ltg_def = OpenStudio::Model::ExteriorLightsDefinition.new(model)
@@ -170,7 +103,7 @@ class Lighting
       ltg.setName(Constants.ObjectNameLightingExteriorHoliday)
       ltg_def.setName(Constants.ObjectNameLightingExteriorHoliday)
       ltg_def.setDesignLevel(design_level)
-      ltg.setSchedule(sch)
+      ltg.setSchedule(exterior_holiday_sch.schedule)
     end
   end
 

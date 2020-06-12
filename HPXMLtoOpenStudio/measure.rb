@@ -2521,7 +2521,7 @@ class OSModel
 
   def self.add_lighting(runner, model, weather, spaces)
     Lighting.apply(model, weather, spaces, @hpxml.lighting_groups,
-                   @hpxml.lighting.usage_multiplier, @hpxml.lighting_schedule, @eri_version)
+                   @hpxml.lighting, @eri_version)
   end
 
   def self.add_airflow(runner, model, weather, spaces)

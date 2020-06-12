@@ -50,7 +50,7 @@ class HPXML < Object
                  :hvac_distributions, :ventilation_fans, :water_heating_systems, :hot_water_distributions,
                  :water_fixtures, :water_heating, :solar_thermal_systems, :pv_systems, :clothes_washers,
                  :clothes_dryers, :dishwashers, :refrigerators, :dehumidifiers, :cooking_ranges, :ovens,
-                 :lighting_groups, :lighting, :lighting_schedule, :ceiling_fans, :plug_loads, :misc_loads_schedule]
+                 :lighting_groups, :lighting, :ceiling_fans, :plug_loads, :misc_loads_schedule]
   attr_reader(*HPXML_ATTRS, :doc)
 
   # Constants
@@ -455,7 +455,6 @@ class HPXML < Object
     @lighting_groups.to_oga(@doc)
     @ceiling_fans.to_oga(@doc)
     @lighting.to_oga(@doc)
-    @lighting_schedule.to_oga(@doc)
     @plug_loads.to_oga(@doc)
     @misc_loads_schedule.to_oga(@doc)
     return @doc
@@ -502,7 +501,6 @@ class HPXML < Object
     @lighting_groups = LightingGroups.new(self, hpxml)
     @ceiling_fans = CeilingFans.new(self, hpxml)
     @lighting = Lighting.new(self, hpxml)
-    @lighting_schedule = LightingSchedule.new(self, hpxml)
     @plug_loads = PlugLoads.new(self, hpxml)
     @misc_loads_schedule = MiscLoadsSchedule.new(self, hpxml)
   end
@@ -3948,7 +3946,11 @@ class HPXML < Object
   end
 
   class Lighting < BaseElement
-    ATTRS = [:usage_multiplier]
+    ATTRS = [:usage_multiplier, :interior_weekday_fractions, :interior_weekend_fractions, :interior_monthly_multipliers,
+             :garage_weekday_fractions, :garage_weekend_fractions, :garage_monthly_multipliers,
+             :exterior_weekday_fractions, :exterior_weekend_fractions, :exterior_monthly_multipliers,
+             :exterior_holiday_daily_energy_use, :exterior_holiday_period_begin_month, :exterior_holiday_period_begin_day_of_month,
+             :exterior_holiday_period_end_month, :exterior_holiday_period_end_day_of_month, :exterior_holiday_fractions]
     attr_accessor(*ATTRS)
 
     def check_for_errors
@@ -3961,44 +3963,21 @@ class HPXML < Object
 
       lighting = XMLHelper.create_elements_as_needed(doc, ['HPXML', 'Building', 'BuildingDetails', 'Lighting'])
       HPXML::add_extension(parent: lighting,
-                           extensions: { 'UsageMultiplier' => to_float_or_nil(@usage_multiplier) })
-    end
-
-    def from_oga(hpxml)
-      return if hpxml.nil?
-
-      lighting = XMLHelper.get_element(hpxml, 'Building/BuildingDetails/Lighting')
-      return if lighting.nil?
-
-      @usage_multiplier = to_float_or_nil(XMLHelper.get_value(lighting, 'extension/UsageMultiplier'))
-    end
-  end
-
-  class LightingSchedule < BaseElement
-    ATTRS = [:interior_weekday_fractions, :interior_weekend_fractions, :interior_monthly_multipliers,
-             :garage_exterior_weekday_fractions, :garage_exterior_weekend_fractions, :garage_exterior_monthly_multipliers,
-             :exterior_holiday_daily_energy_use, :exterior_holiday_period_start_date, :exterior_holiday_period_end_date, :exterior_holiday_fractions]
-    attr_accessor(*ATTRS)
-
-    def check_for_errors
-      errors = []
-      return errors
-    end
-
-    def to_oga(doc)
-      return if nil?
-
-      lighting = XMLHelper.create_elements_as_needed(doc, ['HPXML', 'Building', 'BuildingDetails', 'Lighting'])
-      HPXML::add_extension(parent: lighting,
-                           extensions: { 'InteriorWeekdayScheduleFractions' => @interior_weekday_fractions,
+                           extensions: { 'UsageMultiplier' => to_float_or_nil(@usage_multiplier),
+                                         'InteriorWeekdayScheduleFractions' => @interior_weekday_fractions,
                                          'InteriorWeekendScheduleFractions' => @interior_weekend_fractions,
                                          'InteriorMonthlyScheduleMultipliers' => @interior_monthly_multipliers,
-                                         'GarageAndExteriorWeekdayScheduleFractions' => @garage_exterior_weekday_fractions,
-                                         'GarageAndExteriorWeekendScheduleFractions' => @garage_exterior_weekend_fractions,
-                                         'GarageAndExteriorMonthlyScheduleMultipliers' => @garage_exterior_monthly_multipliers,
+                                         'GarageWeekdayScheduleFractions' => @garage_weekday_fractions,
+                                         'GarageWeekendScheduleFractions' => @garage_weekend_fractions,
+                                         'GarageMonthlyScheduleMultipliers' => @garage_monthly_multipliers,
+                                         'ExteriorWeekdayScheduleFractions' => @exterior_weekday_fractions,
+                                         'ExteriorWeekendScheduleFractions' => @exterior_weekend_fractions,
+                                         'ExteriorMonthlyScheduleMultipliers' => @exterior_monthly_multipliers,
                                          'ExteriorHolidayDailyEnergyUse' => @exterior_holiday_daily_energy_use,
-                                         'ExteriorHolidayPeriodStartDate' => @exterior_holiday_period_start_date,
-                                         'ExteriorHolidayPeriodEndDate' => @exterior_holiday_period_end_date,
+                                         'ExteriorHolidayPeriodBeginMonth' => to_integer_or_nil(@exterior_holiday_period_begin_month),
+                                         'ExteriorHolidayPeriodBeginDayOfMonth' => to_integer_or_nil(@exterior_holiday_period_begin_day_of_month),
+                                         'ExteriorHolidayPeriodEndMonth' => to_integer_or_nil(@exterior_holiday_period_end_month),
+                                         'ExteriorHolidayPeriodEndDayOfMonth' => to_integer_or_nil(@exterior_holiday_period_end_day_of_month),
                                          'ExteriorHolidayScheduleFractions' => @exterior_holiday_fractions })
     end
 
@@ -4008,15 +3987,21 @@ class HPXML < Object
       lighting = XMLHelper.get_element(hpxml, 'Building/BuildingDetails/Lighting')
       return if lighting.nil?
 
+      @usage_multiplier = to_float_or_nil(XMLHelper.get_value(lighting, 'extension/UsageMultiplier'))
       @interior_weekday_fractions = XMLHelper.get_value(lighting, 'extension/InteriorWeekdayScheduleFractions')
       @interior_weekend_fractions = XMLHelper.get_value(lighting, 'extension/InteriorWeekendScheduleFractions')
       @interior_monthly_multipliers = XMLHelper.get_value(lighting, 'extension/InteriorMonthlyScheduleMultipliers')
-      @garage_exterior_weekday_fractions = XMLHelper.get_value(lighting, 'extension/GarageAndExteriorWeekdayScheduleFractions')
-      @garage_exterior_weekend_fractions = XMLHelper.get_value(lighting, 'extension/GarageAndExteriorWeekendScheduleFractions')
-      @garage_exterior_monthly_multipliers = XMLHelper.get_value(lighting, 'extension/GarageAndExteriorMonthlyScheduleMultipliers')
+      @garage_weekday_fractions = XMLHelper.get_value(lighting, 'extension/GarageWeekdayScheduleFractions')
+      @garage_weekend_fractions = XMLHelper.get_value(lighting, 'extension/GarageWeekendScheduleFractions')
+      @garage_monthly_multipliers = XMLHelper.get_value(lighting, 'extension/GarageMonthlyScheduleMultipliers')
+      @exterior_weekday_fractions = XMLHelper.get_value(lighting, 'extension/ExteriorWeekdayScheduleFractions')
+      @exterior_weekend_fractions = XMLHelper.get_value(lighting, 'extension/ExteriorWeekendScheduleFractions')
+      @exterior_monthly_multipliers = XMLHelper.get_value(lighting, 'extension/ExteriorMonthlyScheduleMultipliers')
       @exterior_holiday_daily_energy_use = XMLHelper.get_value(lighting, 'extension/ExteriorHolidayDailyEnergyUse')
-      @exterior_holiday_period_start_date = XMLHelper.get_value(lighting, 'extension/ExteriorHolidayPeriodStartDate')
-      @exterior_holiday_period_end_date = XMLHelper.get_value(lighting, 'extension/ExteriorHolidayPeriodEndDate')
+      @exterior_holiday_period_begin_month = to_integer_or_nil(XMLHelper.get_value(lighting, 'extension/ExteriorHolidayPeriodBeginMonth'))
+      @exterior_holiday_period_begin_day_of_month = to_integer_or_nil(XMLHelper.get_value(lighting, 'extension/ExteriorHolidayPeriodBeginDayOfMonth'))
+      @exterior_holiday_period_end_month = to_integer_or_nil(XMLHelper.get_value(lighting, 'extension/ExteriorHolidayPeriodEndMonth'))
+      @exterior_holiday_period_end_day_of_month = to_integer_or_nil(XMLHelper.get_value(lighting, 'extension/ExteriorHolidayPeriodEndDayOfMonth'))
       @exterior_holiday_fractions = XMLHelper.get_value(lighting, 'extension/ExteriorHolidayScheduleFractions')
     end
   end

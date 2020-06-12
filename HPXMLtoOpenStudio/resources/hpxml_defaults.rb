@@ -521,6 +521,28 @@ class HPXMLDefaults
     if hpxml.lighting.usage_multiplier.nil?
       hpxml.lighting.usage_multiplier = 1.0
     end
+    # schedules from T24 2016 Residential ACM Appendix C Table 8 Exterior Lighting Hourly Multiplier (Weekdays and weekends)
+    default_exterior_lighting_weekday_fractions = '0.046, 0.046, 0.046, 0.046, 0.046, 0.037, 0.035, 0.034, 0.033, 0.028, 0.022, 0.015, 0.012, 0.011, 0.011, 0.012, 0.019, 0.037, 0.049, 0.065, 0.091, 0.105, 0.091, 0.063'
+    default_exterior_lighting_weekend_fractions = '0.046, 0.046, 0.045, 0.045, 0.046, 0.045, 0.044, 0.041, 0.036, 0.03, 0.024, 0.016, 0.012, 0.011, 0.011, 0.012, 0.019, 0.038, 0.048, 0.06, 0.083, 0.098, 0.085, 0.059'
+    default_exterior_lighting_monthly_multipliers = '1.248, 1.257, 0.993, 0.989, 0.993, 0.827, 0.821, 0.821, 0.827, 0.99, 0.987, 1.248'
+    if hpxml.lighting.garage_weekday_fractions.nil?
+      hpxml.lighting.garage_weekday_fractions = default_exterior_lighting_weekday_fractions
+      hpxml.lighting.garage_weekend_fractions = default_exterior_lighting_weekend_fractions
+      hpxml.lighting.garage_monthly_multipliers = default_exterior_lighting_monthly_multipliers
+    end
+    if hpxml.lighting.exterior_weekday_fractions.nil?
+      hpxml.lighting.exterior_weekday_fractions = default_exterior_lighting_weekday_fractions
+      hpxml.lighting.exterior_weekend_fractions = default_exterior_lighting_weekend_fractions
+      hpxml.lighting.exterior_monthly_multipliers = default_exterior_lighting_monthly_multipliers
+    end
+    if hpxml.lighting.exterior_holiday_daily_energy_use.nil?
+      hpxml.lighting.exterior_holiday_daily_energy_use = 0 # kWh/day
+      hpxml.lighting.exterior_holiday_period_begin_month = 11
+      hpxml.lighting.exteiror_holiday_period_begin_day_of_month = 27
+      hpxml.lighting.exterior_holiday_period_end_month = 1
+      hpxml.lighting.exteiror_holiday_period_end_day_of_month = 6
+      hpxml.lighting.exterior_holiday_fractions = '0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.008168, 0.098016, 0.168028, 0.193699, 0.283547, 0.192532, 0.03734, 0.01867'
+    end
   end
 
   def self.apply_pv_systems(hpxml)
