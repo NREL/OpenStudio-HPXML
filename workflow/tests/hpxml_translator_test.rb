@@ -524,7 +524,7 @@ class HPXMLTest < MiniTest::Test
       end
       next if err_line.include? 'Missing temperature setpoint for LeavingSetpointModulated mode' # These warnings are fine, simulation continues with assigning plant loop setpoint to boiler, which is the expected one
 
-      # Evap cooler model is not really using Controller:MechanicalVentilation object, so these warnings of ignoring some features are fine. OS requires a Controller:MechanicalVentilation to be attached to the oa controller, however, it's not required by E+, removing Controller:MechanicalVentilation from idf eliminates these two warnings. Question: Can OS allow removing it in the future? 
+      # Evap cooler model is not really using Controller:MechanicalVentilation object, so these warnings of ignoring some features are fine. OS requires a Controller:MechanicalVentilation to be attached to the oa controller, however, it's not required by E+, removing Controller:MechanicalVentilation from idf eliminates these two warnings. Question: Can OS allow removing it in the future?
       next if err_line.include?('Zone') && err_line.include?('is not accounted for by Controller:MechanicalVentilation object')
       next if err_line.include?('PEOPLE object for zone') && err_line.include?('is not accounted for by Controller:MechanicalVentilation object')
       # "The only valid controller type for an AirLoopHVAC is Controller:WaterCoil.", evap cooler doesn't need one.

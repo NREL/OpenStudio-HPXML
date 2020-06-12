@@ -3363,7 +3363,7 @@ class HVACSizing
         air_loop.setDesignSupplyAirFlowRate(vfr)
         fan = air_loop.supplyFan.get.to_FanVariableVolume.get
         fan.setMaximumFlowRate(vfr)
-        oa_system = air_loop.components.select{|comp| comp.to_AirLoopHVACOutdoorAirSystem.is_initialized}[0].to_AirLoopHVACOutdoorAirSystem.get
+        oa_system = air_loop.components.select { |comp| comp.to_AirLoopHVACOutdoorAirSystem.is_initialized }[0].to_AirLoopHVACOutdoorAirSystem.get
         oa_controller = oa_system.getControllerOutdoorAir
         oa_controller.setMaximumOutdoorAirFlowRate(vfr)
 
