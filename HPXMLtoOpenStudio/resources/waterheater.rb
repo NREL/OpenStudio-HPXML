@@ -12,7 +12,7 @@ class Waterheater
 
     solar_fraction = get_water_heater_solar_fraction(water_heating_system, solar_thermal_system)
     set_temp_c = get_set_temp_c(water_heating_system.temperature, water_heating_system.water_heater_type)
-    loop = create_new_loop(model, Constants.PlantLoopDomesticWater, set_temp_c)
+    loop = create_new_loop(model, Constants.ObjectNamePlantLoopDHW, set_temp_c)
     dhw_map[water_heating_system.id] << loop
 
     new_pump = create_new_pump(model)
@@ -58,7 +58,7 @@ class Waterheater
 
     solar_fraction = get_water_heater_solar_fraction(water_heating_system, solar_thermal_system)
     set_temp_c = get_set_temp_c(water_heating_system.temperature, water_heating_system.water_heater_type)
-    loop = create_new_loop(model, Constants.PlantLoopDomesticWater, set_temp_c)
+    loop = create_new_loop(model, Constants.ObjectNamePlantLoopDHW, set_temp_c)
     dhw_map[water_heating_system.id] << loop
 
     new_pump = create_new_pump(model)
@@ -104,7 +104,7 @@ class Waterheater
     obj_name_hpwh = Constants.ObjectNameWaterHeater
     solar_fraction = get_water_heater_solar_fraction(water_heating_system, solar_thermal_system)
     set_temp_c = get_set_temp_c(water_heating_system.temperature, water_heating_system.water_heater_type)
-    loop = create_new_loop(model, Constants.PlantLoopDomesticWater, set_temp_c)
+    loop = create_new_loop(model, Constants.ObjectNamePlantLoopDHW, set_temp_c)
     dhw_map[water_heating_system.id] << loop
 
     new_pump = create_new_pump(model)
@@ -207,7 +207,7 @@ class Waterheater
     end
 
     set_temp_c = get_set_temp_c(water_heating_system.temperature, water_heating_system.water_heater_type)
-    loop = create_new_loop(model, Constants.PlantLoopDomesticWater, set_temp_c)
+    loop = create_new_loop(model, Constants.ObjectNamePlantLoopDHW, set_temp_c)
 
     new_pump = create_new_pump(model)
     new_pump.addToNode(loop.supplyInletNode)
@@ -468,7 +468,7 @@ class Waterheater
     end
 
     plant_loop = OpenStudio::Model::PlantLoop.new(model)
-    plant_loop.setName(Constants.PlantLoopSolarHotWater)
+    plant_loop.setName(Constants.ObjectNamePlantLoopSHW)
     if fluid_type == Constants.FluidWater
       plant_loop.setFluidType('Water')
     else
