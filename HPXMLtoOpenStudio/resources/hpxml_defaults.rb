@@ -538,9 +538,9 @@ class HPXMLDefaults
     if hpxml.lighting.exterior_holiday_daily_energy_use.nil?
       hpxml.lighting.exterior_holiday_daily_energy_use = 0 # kWh/day
       hpxml.lighting.exterior_holiday_period_begin_month = 11
-      hpxml.lighting.exteiror_holiday_period_begin_day_of_month = 27
+      hpxml.lighting.exterior_holiday_period_begin_day_of_month = 27
       hpxml.lighting.exterior_holiday_period_end_month = 1
-      hpxml.lighting.exteiror_holiday_period_end_day_of_month = 6
+      hpxml.lighting.exterior_holiday_period_end_day_of_month = 6
       hpxml.lighting.exterior_holiday_fractions = '0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.008168, 0.098016, 0.168028, 0.193699, 0.283547, 0.192532, 0.03734, 0.01867'
     end
   end
