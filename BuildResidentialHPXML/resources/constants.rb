@@ -7,6 +7,22 @@ class Constants
     return 'relative'
   end
 
+  def self.FacadeFront
+    return 'front'
+  end
+
+  def self.FacadeBack
+    return 'back'
+  end
+
+  def self.FacadeLeft
+    return 'left'
+  end
+
+  def self.FacadeRight
+    return 'right'
+  end
+
   # Numbers --------------------
 
   def self.MaxNumPhotovoltaics
