@@ -59,12 +59,13 @@ class HPXML < Object
   AtticTypeFlatRoof = 'FlatRoof'
   AtticTypeUnvented = 'UnventedAttic'
   AtticTypeVented = 'VentedAttic'
-  ResidentialTypeApartment = 'apartment unit'
-  ResidentialTypeManufactured = 'manufactured home'
-  ResidentialTypeSFA = 'single-family attached'
-  ResidentialTypeSFD = 'single-family detached'
   ClothesDryerControlTypeMoisture = 'moisture'
   ClothesDryerControlTypeTimer = 'timer'
+  ColorDark = 'dark'
+  ColorLight = 'light'
+  ColorMedium = 'medium'
+  ColorMediumDark = 'medium dark'
+  ColorReflective = 'reflective'
   DHWRecirControlTypeManual = 'manual demand control'
   DHWRecirControlTypeNone = 'no control'
   DHWRecirControlTypeSensor = 'presence sensor demand control'
@@ -171,17 +172,19 @@ class HPXML < Object
   PVTrackingType1Axis = '1-axis'
   PVTrackingType1AxisBacktracked = '1-axis backtracked'
   PVTrackingType2Axis = '2-axis'
-  RoofColorDark = 'dark'
-  RoofColorLight = 'light'
-  RoofColorMedium = 'medium'
-  RoofColorMediumDark = 'medium dark'
-  RoofMaterialAsphaltShingles = 'asphalt or fiberglass shingles'
-  RoofMaterialConcrete = 'concrete'
-  RoofMaterialClayTile = 'slate or tile shingles'
-  RoofMaterialPlasticRubber = 'plastic/rubber/synthetic sheeting'
-  RoofMaterialWoodShingles = 'wood shingles or shakes'
+  ResidentialTypeApartment = 'apartment unit'
+  ResidentialTypeManufactured = 'manufactured home'
+  ResidentialTypeSFA = 'single-family attached'
+  ResidentialTypeSFD = 'single-family detached'
+  RoofTypeAsphaltShingles = 'asphalt or fiberglass shingles'
+  RoofTypeConcrete = 'concrete'
+  RoofTypeClayTile = 'slate or tile shingles'
+  RoofTypeMetal = 'metal surfacing'
+  RoofTypePlasticRubber = 'plastic/rubber/synthetic sheeting'
+  RoofTypeWoodShingles = 'wood shingles or shakes'
   SidingTypeAluminum = 'aluminum siding'
   SidingTypeBrick = 'brick veneer'
+  SidingTypeFiberCement = 'fiber cement siding'
   SidingTypeStucco = 'stucco'
   SidingTypeVinyl = 'vinyl siding'
   SidingTypeWood = 'wood siding'
@@ -371,7 +374,7 @@ class HPXML < Object
         # Update Compartmentalization Boundary areas
         total_area += surface.area
         if not [LocationGarage, LocationOtherHousingUnit, LocationOtherHeatedSpace,
-                LocationOtherMultifamilyBufferSpace, LocationOtherNonFreezingSpace].include? surface.exterior_adjacent_to # FIXME: Need to add additional "other" spaces?
+                LocationOtherMultifamilyBufferSpace, LocationOtherNonFreezingSpace].include? surface.exterior_adjacent_to
           exterior_area += surface.area
         end
       end
@@ -1350,6 +1353,8 @@ class HPXML < Object
       XMLHelper.add_element(roof, 'InteriorAdjacentTo', @interior_adjacent_to) unless @interior_adjacent_to.nil?
       XMLHelper.add_element(roof, 'Area', to_float(@area)) unless @area.nil?
       XMLHelper.add_element(roof, 'Azimuth', to_integer(@azimuth)) unless @azimuth.nil?
+      XMLHelper.add_element(roof, 'RoofType', @roof_type) unless @roof_type.nil?
+      XMLHelper.add_element(roof, 'RoofColor', @roof_color) unless @roof_color.nil?
       XMLHelper.add_element(roof, 'SolarAbsorptance', to_float(@solar_absorptance)) unless @solar_absorptance.nil?
       XMLHelper.add_element(roof, 'Emittance', to_float(@emittance)) unless @emittance.nil?
       XMLHelper.add_element(roof, 'Pitch', to_float(@pitch)) unless @pitch.nil?
@@ -1402,8 +1407,9 @@ class HPXML < Object
   end
 
   class RimJoist < BaseElement
-    ATTRS = [:id, :exterior_adjacent_to, :interior_adjacent_to, :area, :azimuth, :solar_absorptance,
-             :emittance, :insulation_id, :insulation_assembly_r_value]
+    ATTRS = [:id, :exterior_adjacent_to, :interior_adjacent_to, :area, :azimuth, :siding, :color,
+             :solar_absorptance, :emittance, :insulation_id, :insulation_assembly_r_value,
+             :insulation_cavity_r_value, :insulation_continuous_r_value]
     attr_accessor(*ATTRS)
 
     def is_exterior
@@ -1446,6 +1452,8 @@ class HPXML < Object
       XMLHelper.add_element(rim_joist, 'InteriorAdjacentTo', @interior_adjacent_to) unless @interior_adjacent_to.nil?
       XMLHelper.add_element(rim_joist, 'Area', to_float(@area)) unless @area.nil?
       XMLHelper.add_element(rim_joist, 'Azimuth', to_integer(@azimuth)) unless @azimuth.nil?
+      XMLHelper.add_element(rim_joist, 'Siding', @siding) unless @siding.nil?
+      XMLHelper.add_element(rim_joist, 'Color', @color) unless @color.nil?
       XMLHelper.add_element(rim_joist, 'SolarAbsorptance', to_float(@solar_absorptance)) unless @solar_absorptance.nil?
       XMLHelper.add_element(rim_joist, 'Emittance', to_float(@emittance)) unless @emittance.nil?
       insulation = XMLHelper.add_element(rim_joist, 'Insulation')
@@ -1466,12 +1474,16 @@ class HPXML < Object
       @interior_adjacent_to = XMLHelper.get_value(rim_joist, 'InteriorAdjacentTo')
       @area = to_float_or_nil(XMLHelper.get_value(rim_joist, 'Area'))
       @azimuth = to_integer_or_nil(XMLHelper.get_value(rim_joist, 'Azimuth'))
+      @siding = XMLHelper.get_value(rim_joist, 'Siding')
+      @color = XMLHelper.get_value(rim_joist, 'Color')
       @solar_absorptance = to_float_or_nil(XMLHelper.get_value(rim_joist, 'SolarAbsorptance'))
       @emittance = to_float_or_nil(XMLHelper.get_value(rim_joist, 'Emittance'))
       insulation = XMLHelper.get_element(rim_joist, 'Insulation')
       if not insulation.nil?
         insulation_id = HPXML::get_id(insulation)
         @insulation_assembly_r_value = to_float_or_nil(XMLHelper.get_value(insulation, 'AssemblyEffectiveRValue'))
+        @insulation_cavity_r_value = to_float_or_nil(XMLHelper.get_value(insulation, "Layer[InstallationType='cavity']/NominalRValue"))
+        @insulation_continuous_r_value = to_float_or_nil(XMLHelper.get_value(insulation, "Layer[InstallationType='continuous']/NominalRValue"))
       end
     end
   end
@@ -1492,7 +1504,7 @@ class HPXML < Object
 
   class Wall < BaseElement
     ATTRS = [:id, :exterior_adjacent_to, :interior_adjacent_to, :wall_type, :optimum_value_engineering,
-             :area, :orientation, :azimuth, :siding, :solar_absorptance, :emittance, :insulation_id,
+             :area, :orientation, :azimuth, :siding, :color, :solar_absorptance, :emittance, :insulation_id,
              :insulation_assembly_r_value, :insulation_cavity_r_value, :insulation_continuous_r_value]
     attr_accessor(*ATTRS)
 
@@ -1567,6 +1579,8 @@ class HPXML < Object
       end
       XMLHelper.add_element(wall, 'Area', to_float(@area)) unless @area.nil?
       XMLHelper.add_element(wall, 'Azimuth', to_integer(@azimuth)) unless @azimuth.nil?
+      XMLHelper.add_element(wall, 'Siding', @siding) unless @siding.nil?
+      XMLHelper.add_element(wall, 'Color', @color) unless @color.nil?
       XMLHelper.add_element(wall, 'SolarAbsorptance', to_float(@solar_absorptance)) unless @solar_absorptance.nil?
       XMLHelper.add_element(wall, 'Emittance', to_float(@emittance)) unless @emittance.nil?
       insulation = XMLHelper.add_element(wall, 'Insulation')
@@ -1591,6 +1605,7 @@ class HPXML < Object
       @orientation = XMLHelper.get_value(wall, 'Orientation')
       @azimuth = to_integer_or_nil(XMLHelper.get_value(wall, 'Azimuth'))
       @siding = XMLHelper.get_value(wall, 'Siding')
+      @color = XMLHelper.get_value(wall, 'Color')
       @solar_absorptance = to_float_or_nil(XMLHelper.get_value(wall, 'SolarAbsorptance'))
       @emittance = to_float_or_nil(XMLHelper.get_value(wall, 'Emittance'))
       insulation = XMLHelper.get_element(wall, 'Insulation')
@@ -1622,7 +1637,8 @@ class HPXML < Object
              :depth_below_grade, :insulation_id, :insulation_r_value, :insulation_interior_r_value,
              :insulation_interior_distance_to_top, :insulation_interior_distance_to_bottom,
              :insulation_exterior_r_value, :insulation_exterior_distance_to_top,
-             :insulation_exterior_distance_to_bottom, :insulation_assembly_r_value]
+             :insulation_exterior_distance_to_bottom, :insulation_assembly_r_value,
+             :insulation_continuous_r_value]
     attr_accessor(*ATTRS)
 
     def windows
@@ -1747,6 +1763,7 @@ class HPXML < Object
         @insulation_exterior_r_value = to_float_or_nil(XMLHelper.get_value(insulation, "Layer[InstallationType='continuous - exterior']/NominalRValue"))
         @insulation_exterior_distance_to_top = to_float_or_nil(XMLHelper.get_value(insulation, "Layer[InstallationType='continuous - exterior']/extension/DistanceToTopOfInsulation"))
         @insulation_exterior_distance_to_bottom = to_float_or_nil(XMLHelper.get_value(insulation, "Layer[InstallationType='continuous - exterior']/extension/DistanceToBottomOfInsulation"))
+        @insulation_continuous_r_value = to_float_or_nil(XMLHelper.get_value(insulation, "Layer[InstallationType='continuous']/NominalRValue"))
         @insulation_assembly_r_value = to_float_or_nil(XMLHelper.get_value(insulation, 'AssemblyEffectiveRValue'))
       end
     end
@@ -2134,7 +2151,8 @@ class HPXML < Object
 
   class Skylight < BaseElement
     ATTRS = [:id, :area, :azimuth, :orientation, :frame_type, :aluminum_thermal_break, :glass_layers,
-             :glass_type, :gas_fill, :ufactor, :shgc, :exterior_shading, :roof_idref]
+             :glass_type, :gas_fill, :ufactor, :shgc, :interior_shading_factor_summer,
+             :interior_shading_factor_winter, :exterior_shading, :roof_idref]
     attr_accessor(*ATTRS)
 
     def roof
@@ -2185,6 +2203,13 @@ class HPXML < Object
       XMLHelper.add_element(skylight, 'Azimuth', to_integer(@azimuth)) unless @azimuth.nil?
       XMLHelper.add_element(skylight, 'UFactor', to_float(@ufactor)) unless @ufactor.nil?
       XMLHelper.add_element(skylight, 'SHGC', to_float(@shgc)) unless @shgc.nil?
+      if (not @interior_shading_factor_summer.nil?) || (not @interior_shading_factor_winter.nil?)
+        interior_shading = XMLHelper.add_element(skylight, 'InteriorShading')
+        sys_id = XMLHelper.add_element(interior_shading, 'SystemIdentifier')
+        XMLHelper.add_attribute(sys_id, 'id', "#{id}InteriorShading")
+        XMLHelper.add_element(interior_shading, 'SummerShadingCoefficient', to_float(@interior_shading_factor_summer)) unless @interior_shading_factor_summer.nil?
+        XMLHelper.add_element(interior_shading, 'WinterShadingCoefficient', to_float(@interior_shading_factor_winter)) unless @interior_shading_factor_winter.nil?
+      end
       if not @roof_idref.nil?
         attached_to_roof = XMLHelper.add_element(skylight, 'AttachedToRoof')
         XMLHelper.add_attribute(attached_to_roof, 'idref', @roof_idref)
@@ -2205,6 +2230,8 @@ class HPXML < Object
       @gas_fill = XMLHelper.get_value(skylight, 'GasFill')
       @ufactor = to_float_or_nil(XMLHelper.get_value(skylight, 'UFactor'))
       @shgc = to_float_or_nil(XMLHelper.get_value(skylight, 'SHGC'))
+      @interior_shading_factor_summer = to_float_or_nil(XMLHelper.get_value(skylight, 'InteriorShading/SummerShadingCoefficient'))
+      @interior_shading_factor_winter = to_float_or_nil(XMLHelper.get_value(skylight, 'InteriorShading/WinterShadingCoefficient'))
       @exterior_shading = XMLHelper.get_value(skylight, 'ExteriorShading/Type')
       @roof_idref = HPXML::get_idref(XMLHelper.get_element(skylight, 'AttachedToRoof'))
     end
