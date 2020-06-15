@@ -1,6 +1,6 @@
 def create_osws
   require 'json'
-  require_relative 'HPXMLtoOpenStudio/resources/constants'
+  require_relative 'BuildResidentialHPXML/resources/constants'
   require_relative 'HPXMLtoOpenStudio/resources/hpxml'
 
   this_dir = File.dirname(__FILE__)
@@ -1666,7 +1666,6 @@ def create_hpxmls
     'invalid_files/unattached-window.xml' => 'base.xml',
     'invalid_files/water-heater-location.xml' => 'base.xml',
     'invalid_files/water-heater-location-other.xml' => 'base.xml',
-    'invalid_files/attached-multifamily-window-outside-condition.xml' => 'base-enclosure-attached-multifamily.xml',
     'invalid_files/missing-duct-location.xml' => 'base-hvac-multiple.xml',
     'invalid_files/invalid-distribution-cfa-served.xml' => 'base.xml',
     'base-appliances-dehumidifier.xml' => 'base-location-dallas-tx.xml',
@@ -1745,6 +1744,7 @@ def create_hpxmls
     'base-enclosure-infil-cfm50.xml' => 'base.xml',
     'base-enclosure-infil-natural-ach.xml' => 'base.xml',
     'base-enclosure-overhangs.xml' => 'base.xml',
+    'base-enclosure-rooftypes.xml' => 'base.xml',
     'base-enclosure-skylights.xml' => 'base.xml',
     'base-enclosure-split-surfaces.xml' => 'base-enclosure-skylights.xml',
     'base-enclosure-walltypes.xml' => 'base.xml',
@@ -2054,6 +2054,7 @@ def set_hpxml_building_construction(hpxml_file, hpxml)
     hpxml.building_construction.conditioned_floor_area = 1539
     hpxml.building_construction.conditioned_building_volume = 12312
     hpxml.building_construction.residential_facility_type = HPXML::ResidentialTypeSFD
+    hpxml.building_construction.use_only_ideal_air_system = true
   elsif ['ASHRAE_Standard_140/L322XC.xml'].include? hpxml_file
     hpxml.building_construction.number_of_conditioned_floors = 2
     hpxml.building_construction.conditioned_floor_area = 3078
@@ -2284,6 +2285,7 @@ def set_hpxml_roofs(hpxml_file, hpxml)
                     interior_adjacent_to: HPXML::LocationAtticVented,
                     area: 811.1,
                     azimuth: 0,
+                    roof_type: HPXML::RoofTypeAsphaltShingles,
                     solar_absorptance: 0.6,
                     emittance: 0.9,
                     pitch: 4,
@@ -2293,6 +2295,7 @@ def set_hpxml_roofs(hpxml_file, hpxml)
                     interior_adjacent_to: HPXML::LocationAtticVented,
                     area: 811.1,
                     azimuth: 180,
+                    roof_type: HPXML::RoofTypeAsphaltShingles,
                     solar_absorptance: 0.6,
                     emittance: 0.9,
                     pitch: 4,
@@ -2307,16 +2310,34 @@ def set_hpxml_roofs(hpxml_file, hpxml)
     hpxml.roofs.add(id: 'Roof',
                     interior_adjacent_to: HPXML::LocationAtticUnvented,
                     area: 1510,
+                    roof_type: HPXML::RoofTypeAsphaltShingles,
                     solar_absorptance: 0.7,
                     emittance: 0.92,
                     pitch: 6,
                     radiant_barrier: false,
                     insulation_assembly_r_value: 2.3)
+  elsif ['base-enclosure-rooftypes.xml'].include? hpxml_file
+    roof_types = [[HPXML::RoofTypeClayTile, HPXML::ColorLight],
+                  [HPXML::RoofTypeMetal, HPXML::ColorReflective],
+                  [HPXML::RoofTypeWoodShingles, HPXML::ColorDark]]
+    hpxml.roofs.clear
+    roof_types.each_with_index do |roof_type, i|
+      hpxml.roofs.add(id: "Roof#{i + 1}",
+                      interior_adjacent_to: HPXML::LocationAtticUnvented,
+                      area: 1510 / roof_types.size,
+                      roof_type: roof_type[0],
+                      roof_color: roof_type[1],
+                      emittance: 0.92,
+                      pitch: 6,
+                      radiant_barrier: false,
+                      insulation_assembly_r_value: 2.3)
+    end
   elsif ['base-atticroof-flat.xml'].include? hpxml_file
     hpxml.roofs.clear
     hpxml.roofs.add(id: 'Roof',
                     interior_adjacent_to: HPXML::LocationLivingSpace,
                     area: 1350,
+                    roof_type: HPXML::RoofTypeAsphaltShingles,
                     solar_absorptance: 0.7,
                     emittance: 0.92,
                     pitch: 0,
@@ -2327,6 +2348,7 @@ def set_hpxml_roofs(hpxml_file, hpxml)
     hpxml.roofs.add(id: 'RoofCond',
                     interior_adjacent_to: HPXML::LocationLivingSpace,
                     area: 1006,
+                    roof_type: HPXML::RoofTypeAsphaltShingles,
                     solar_absorptance: 0.7,
                     emittance: 0.92,
                     pitch: 6,
@@ -2335,6 +2357,7 @@ def set_hpxml_roofs(hpxml_file, hpxml)
     hpxml.roofs.add(id: 'RoofUncond',
                     interior_adjacent_to: HPXML::LocationAtticUnvented,
                     area: 504,
+                    roof_type: HPXML::RoofTypeAsphaltShingles,
                     solar_absorptance: 0.7,
                     emittance: 0.92,
                     pitch: 6,
@@ -2369,6 +2392,12 @@ def set_hpxml_roofs(hpxml_file, hpxml)
     hpxml.roofs[0].radiant_barrier = true
   elsif ['invalid_files/enclosure-attic-missing-roof.xml'].include? hpxml_file
     hpxml.roofs[0].delete
+  elsif ['base-misc-defaults.xml'].include? hpxml_file
+    hpxml.roofs.each do |roof|
+      roof.roof_type = nil
+      roof.solar_absorptance = nil
+      roof.roof_color = HPXML::ColorLight
+    end
   end
 end
 
@@ -2377,6 +2406,7 @@ def set_hpxml_rim_joists(hpxml_file, hpxml)
     hpxml.rim_joists.add(id: 'RimJoistNorth',
                          exterior_adjacent_to: HPXML::LocationOutside,
                          interior_adjacent_to: HPXML::LocationBasementConditioned,
+                         siding: HPXML::SidingTypeWood,
                          area: 42.75,
                          azimuth: 0,
                          solar_absorptance: 0.6,
@@ -2385,6 +2415,7 @@ def set_hpxml_rim_joists(hpxml_file, hpxml)
     hpxml.rim_joists.add(id: 'RimJoistEast',
                          exterior_adjacent_to: HPXML::LocationOutside,
                          interior_adjacent_to: HPXML::LocationBasementConditioned,
+                         siding: HPXML::SidingTypeWood,
                          area: 20.25,
                          azimuth: 90,
                          solar_absorptance: 0.6,
@@ -2393,6 +2424,7 @@ def set_hpxml_rim_joists(hpxml_file, hpxml)
     hpxml.rim_joists.add(id: 'RimJoistSouth',
                          exterior_adjacent_to: HPXML::LocationOutside,
                          interior_adjacent_to: HPXML::LocationBasementConditioned,
+                         siding: HPXML::SidingTypeWood,
                          area: 42.75,
                          azimuth: 180,
                          solar_absorptance: 0.6,
@@ -2401,6 +2433,7 @@ def set_hpxml_rim_joists(hpxml_file, hpxml)
     hpxml.rim_joists.add(id: 'RimJoistWest',
                          exterior_adjacent_to: HPXML::LocationOutside,
                          interior_adjacent_to: HPXML::LocationBasementConditioned,
+                         siding: HPXML::SidingTypeWood,
                          area: 20.25,
                          azimuth: 270,
                          solar_absorptance: 0.6,
@@ -2416,10 +2449,28 @@ def set_hpxml_rim_joists(hpxml_file, hpxml)
     hpxml.rim_joists.add(id: 'RimJoistFoundation',
                          exterior_adjacent_to: HPXML::LocationOutside,
                          interior_adjacent_to: HPXML::LocationBasementConditioned,
+                         siding: HPXML::SidingTypeWood,
                          area: 116,
                          solar_absorptance: 0.7,
                          emittance: 0.92,
                          insulation_assembly_r_value: 23.0)
+  elsif ['base-enclosure-walltypes.xml'].include? hpxml_file
+    siding_types = [[HPXML::SidingTypeAluminum, HPXML::ColorDark],
+                    [HPXML::SidingTypeBrick, HPXML::ColorReflective],
+                    [HPXML::SidingTypeFiberCement, HPXML::ColorMediumDark],
+                    [HPXML::SidingTypeStucco, HPXML::ColorMedium],
+                    [HPXML::SidingTypeVinyl, HPXML::ColorLight]]
+    hpxml.rim_joists.clear
+    siding_types.each_with_index do |siding_type, i|
+      hpxml.rim_joists.add(id: "RimJoistFoundation#{i + 1}",
+                           exterior_adjacent_to: HPXML::LocationOutside,
+                           interior_adjacent_to: HPXML::LocationBasementConditioned,
+                           siding: siding_type[0],
+                           color: siding_type[1],
+                           area: 116 / siding_types.size,
+                           emittance: 0.92,
+                           insulation_assembly_r_value: 23.0)
+    end
   elsif ['base-foundation-ambient.xml',
          'base-foundation-slab.xml'].include? hpxml_file
     hpxml.rim_joists.clear
@@ -2447,6 +2498,7 @@ def set_hpxml_rim_joists(hpxml_file, hpxml)
     hpxml.rim_joists.add(id: 'RimJoistCrawlspace',
                          exterior_adjacent_to: HPXML::LocationOutside,
                          interior_adjacent_to: HPXML::LocationCrawlspaceUnvented,
+                         siding: HPXML::SidingTypeWood,
                          area: 81,
                          solar_absorptance: 0.7,
                          emittance: 0.92,
@@ -2455,6 +2507,7 @@ def set_hpxml_rim_joists(hpxml_file, hpxml)
     hpxml.rim_joists.add(id: 'RimJoist2ndStory',
                          exterior_adjacent_to: HPXML::LocationOutside,
                          interior_adjacent_to: HPXML::LocationLivingSpace,
+                         siding: HPXML::SidingTypeWood,
                          area: 116,
                          solar_absorptance: 0.7,
                          emittance: 0.92,
@@ -2470,6 +2523,12 @@ def set_hpxml_rim_joists(hpxml_file, hpxml)
     hpxml.rim_joists << hpxml.rim_joists[-1].dup
     hpxml.rim_joists[-1].id = 'TinyRimJoist'
     hpxml.rim_joists[-1].area = 0.05
+  elsif ['base-misc-defaults.xml'].include? hpxml_file
+    hpxml.rim_joists.each do |rim_joist|
+      rim_joist.siding = nil
+      rim_joist.solar_absorptance = nil
+      rim_joist.color = HPXML::ColorMedium
+    end
   end
 end
 
@@ -2480,6 +2539,7 @@ def set_hpxml_walls(hpxml_file, hpxml)
                     exterior_adjacent_to: HPXML::LocationOutside,
                     interior_adjacent_to: HPXML::LocationLivingSpace,
                     wall_type: HPXML::WallTypeWoodStud,
+                    siding: HPXML::SidingTypeWood,
                     area: 456,
                     azimuth: 0,
                     solar_absorptance: 0.6,
@@ -2489,6 +2549,7 @@ def set_hpxml_walls(hpxml_file, hpxml)
                     exterior_adjacent_to: HPXML::LocationOutside,
                     interior_adjacent_to: HPXML::LocationLivingSpace,
                     wall_type: HPXML::WallTypeWoodStud,
+                    siding: HPXML::SidingTypeWood,
                     area: 216,
                     azimuth: 90,
                     solar_absorptance: 0.6,
@@ -2498,6 +2559,7 @@ def set_hpxml_walls(hpxml_file, hpxml)
                     exterior_adjacent_to: HPXML::LocationOutside,
                     interior_adjacent_to: HPXML::LocationLivingSpace,
                     wall_type: HPXML::WallTypeWoodStud,
+                    siding: HPXML::SidingTypeWood,
                     area: 456,
                     azimuth: 180,
                     solar_absorptance: 0.6,
@@ -2507,6 +2569,7 @@ def set_hpxml_walls(hpxml_file, hpxml)
                     exterior_adjacent_to: HPXML::LocationOutside,
                     interior_adjacent_to: HPXML::LocationLivingSpace,
                     wall_type: HPXML::WallTypeWoodStud,
+                    siding: HPXML::SidingTypeWood,
                     area: 216,
                     azimuth: 270,
                     solar_absorptance: 0.6,
@@ -2516,6 +2579,7 @@ def set_hpxml_walls(hpxml_file, hpxml)
                     exterior_adjacent_to: HPXML::LocationOutside,
                     interior_adjacent_to: HPXML::LocationAtticVented,
                     wall_type: HPXML::WallTypeWoodStud,
+                    siding: HPXML::SidingTypeWood,
                     area: 60.75,
                     azimuth: 90,
                     solar_absorptance: 0.6,
@@ -2525,6 +2589,7 @@ def set_hpxml_walls(hpxml_file, hpxml)
                     exterior_adjacent_to: HPXML::LocationOutside,
                     interior_adjacent_to: HPXML::LocationAtticVented,
                     wall_type: HPXML::WallTypeWoodStud,
+                    siding: HPXML::SidingTypeWood,
                     area: 60.75,
                     azimuth: 270,
                     solar_absorptance: 0.6,
@@ -2550,6 +2615,7 @@ def set_hpxml_walls(hpxml_file, hpxml)
                     exterior_adjacent_to: HPXML::LocationOutside,
                     interior_adjacent_to: HPXML::LocationLivingSpace,
                     wall_type: HPXML::WallTypeWoodStud,
+                    siding: HPXML::SidingTypeWood,
                     area: 1200,
                     solar_absorptance: 0.7,
                     emittance: 0.92,
@@ -2558,6 +2624,7 @@ def set_hpxml_walls(hpxml_file, hpxml)
                     exterior_adjacent_to: HPXML::LocationOutside,
                     interior_adjacent_to: HPXML::LocationAtticUnvented,
                     wall_type: HPXML::WallTypeWoodStud,
+                    siding: HPXML::SidingTypeWood,
                     area: 290,
                     solar_absorptance: 0.7,
                     emittance: 0.92,
@@ -2575,6 +2642,7 @@ def set_hpxml_walls(hpxml_file, hpxml)
                     exterior_adjacent_to: HPXML::LocationAtticUnvented,
                     interior_adjacent_to: HPXML::LocationLivingSpace,
                     wall_type: HPXML::WallTypeWoodStud,
+                    siding: HPXML::SidingTypeWood,
                     area: 316,
                     solar_absorptance: 0.7,
                     emittance: 0.92,
@@ -2583,6 +2651,7 @@ def set_hpxml_walls(hpxml_file, hpxml)
                     exterior_adjacent_to: HPXML::LocationOutside,
                     interior_adjacent_to: HPXML::LocationLivingSpace,
                     wall_type: HPXML::WallTypeWoodStud,
+                    siding: HPXML::SidingTypeWood,
                     area: 240,
                     solar_absorptance: 0.7,
                     emittance: 0.92,
@@ -2591,6 +2660,7 @@ def set_hpxml_walls(hpxml_file, hpxml)
                     exterior_adjacent_to: HPXML::LocationOutside,
                     interior_adjacent_to: HPXML::LocationAtticUnvented,
                     wall_type: HPXML::WallTypeWoodStud,
+                    siding: HPXML::SidingTypeWood,
                     area: 50,
                     solar_absorptance: 0.7,
                     emittance: 0.92,
@@ -2599,7 +2669,8 @@ def set_hpxml_walls(hpxml_file, hpxml)
     hpxml.walls.add(id: 'WallOtherHeatedSpace',
                     exterior_adjacent_to: HPXML::LocationOtherHeatedSpace,
                     interior_adjacent_to: HPXML::LocationLivingSpace,
-                    wall_type: 'WoodStud',
+                    wall_type: HPXML::WallTypeWoodStud,
+                    siding: HPXML::SidingTypeWood,
                     area: 100,
                     solar_absorptance: 0.7,
                     emittance: 0.92,
@@ -2607,7 +2678,8 @@ def set_hpxml_walls(hpxml_file, hpxml)
     hpxml.walls.add(id: 'WallOtherMultifamilyBufferSpace',
                     exterior_adjacent_to: HPXML::LocationOtherMultifamilyBufferSpace,
                     interior_adjacent_to: HPXML::LocationLivingSpace,
-                    wall_type: 'WoodStud',
+                    wall_type: HPXML::WallTypeWoodStud,
+                    siding: HPXML::SidingTypeWood,
                     area: 100,
                     solar_absorptance: 0.7,
                     emittance: 0.92,
@@ -2615,7 +2687,8 @@ def set_hpxml_walls(hpxml_file, hpxml)
     hpxml.walls.add(id: 'WallOtherNonFreezingSpace',
                     exterior_adjacent_to: HPXML::LocationOtherNonFreezingSpace,
                     interior_adjacent_to: HPXML::LocationLivingSpace,
-                    wall_type: 'WoodStud',
+                    wall_type: HPXML::WallTypeWoodStud,
+                    siding: HPXML::SidingTypeWood,
                     area: 100,
                     solar_absorptance: 0.7,
                     emittance: 0.92,
@@ -2623,7 +2696,8 @@ def set_hpxml_walls(hpxml_file, hpxml)
     hpxml.walls.add(id: 'WallOtherHousingUnit',
                     exterior_adjacent_to: HPXML::LocationOtherHousingUnit,
                     interior_adjacent_to: HPXML::LocationLivingSpace,
-                    wall_type: 'WoodStud',
+                    wall_type: HPXML::WallTypeWoodStud,
+                    siding: HPXML::SidingTypeWood,
                     area: 100,
                     solar_absorptance: 0.7,
                     emittance: 0.92,
@@ -2632,6 +2706,7 @@ def set_hpxml_walls(hpxml_file, hpxml)
                     exterior_adjacent_to: HPXML::LocationAtticUnvented,
                     interior_adjacent_to: HPXML::LocationLivingSpace,
                     wall_type: HPXML::WallTypeWoodStud,
+                    siding: HPXML::SidingTypeWood,
                     area: 50,
                     solar_absorptance: 0.7,
                     emittance: 0.92,
@@ -2647,6 +2722,11 @@ def set_hpxml_walls(hpxml_file, hpxml)
                   HPXML::WallTypeStone => 5.4,
                   HPXML::WallTypeStrawBale => 58.8,
                   HPXML::WallTypeBrick => 7.9 }
+    siding_types = [[HPXML::SidingTypeAluminum, HPXML::ColorReflective],
+                    [HPXML::SidingTypeBrick, HPXML::ColorMediumDark],
+                    [HPXML::SidingTypeFiberCement, HPXML::ColorMedium],
+                    [HPXML::SidingTypeStucco, HPXML::ColorLight],
+                    [HPXML::SidingTypeVinyl, HPXML::ColorDark]]
     last_wall = hpxml.walls[-1]
     hpxml.walls.clear
     walls_map.each_with_index do |(wall_type, assembly_r), i|
@@ -2654,8 +2734,9 @@ def set_hpxml_walls(hpxml_file, hpxml)
                       exterior_adjacent_to: HPXML::LocationOutside,
                       interior_adjacent_to: HPXML::LocationLivingSpace,
                       wall_type: wall_type,
+                      siding: siding_types[i % siding_types.size][0],
+                      color: siding_types[i % siding_types.size][1],
                       area: 1200 / walls_map.size,
-                      solar_absorptance: 0.7,
                       emittance: 0.92,
                       insulation_assembly_r_value: assembly_r)
     end
@@ -2668,6 +2749,7 @@ def set_hpxml_walls(hpxml_file, hpxml)
                     exterior_adjacent_to: HPXML::LocationOutside,
                     interior_adjacent_to: HPXML::LocationLivingSpace,
                     wall_type: HPXML::WallTypeWoodStud,
+                    siding: HPXML::SidingTypeWood,
                     area: 2080,
                     solar_absorptance: 0.7,
                     emittance: 0.92,
@@ -2676,6 +2758,7 @@ def set_hpxml_walls(hpxml_file, hpxml)
                     exterior_adjacent_to: HPXML::LocationGarage,
                     interior_adjacent_to: HPXML::LocationLivingSpace,
                     wall_type: HPXML::WallTypeWoodStud,
+                    siding: HPXML::SidingTypeWood,
                     area: 320,
                     solar_absorptance: 0.7,
                     emittance: 0.92,
@@ -2684,6 +2767,7 @@ def set_hpxml_walls(hpxml_file, hpxml)
                     exterior_adjacent_to: HPXML::LocationOutside,
                     interior_adjacent_to: HPXML::LocationGarage,
                     wall_type: HPXML::WallTypeWoodStud,
+                    siding: HPXML::SidingTypeWood,
                     area: 320,
                     solar_absorptance: 0.7,
                     emittance: 0.92,
@@ -2692,6 +2776,7 @@ def set_hpxml_walls(hpxml_file, hpxml)
                     exterior_adjacent_to: HPXML::LocationOutside,
                     interior_adjacent_to: HPXML::LocationAtticUnvented,
                     wall_type: HPXML::WallTypeWoodStud,
+                    siding: HPXML::SidingTypeWood,
                     area: 113,
                     solar_absorptance: 0.7,
                     emittance: 0.92,
@@ -2702,6 +2787,7 @@ def set_hpxml_walls(hpxml_file, hpxml)
                     exterior_adjacent_to: HPXML::LocationOutside,
                     interior_adjacent_to: HPXML::LocationLivingSpace,
                     wall_type: HPXML::WallTypeWoodStud,
+                    siding: HPXML::SidingTypeWood,
                     area: 960,
                     solar_absorptance: 0.7,
                     emittance: 0.92,
@@ -2710,6 +2796,7 @@ def set_hpxml_walls(hpxml_file, hpxml)
                     exterior_adjacent_to: HPXML::LocationGarage,
                     interior_adjacent_to: HPXML::LocationLivingSpace,
                     wall_type: HPXML::WallTypeWoodStud,
+                    siding: HPXML::SidingTypeWood,
                     area: 240,
                     solar_absorptance: 0.7,
                     emittance: 0.92,
@@ -2718,6 +2805,7 @@ def set_hpxml_walls(hpxml_file, hpxml)
                     exterior_adjacent_to: HPXML::LocationOutside,
                     interior_adjacent_to: HPXML::LocationGarage,
                     wall_type: HPXML::WallTypeWoodStud,
+                    siding: HPXML::SidingTypeWood,
                     area: 560,
                     solar_absorptance: 0.7,
                     emittance: 0.92,
@@ -2774,6 +2862,12 @@ def set_hpxml_walls(hpxml_file, hpxml)
     hpxml.walls[0].delete
   elsif ['invalid_files/enclosure-garage-missing-exterior-wall.xml'].include? hpxml_file
     hpxml.walls[-2].delete
+  elsif ['base-misc-defaults.xml'].include? hpxml_file
+    hpxml.walls.each do |wall|
+      wall.siding = nil
+      wall.solar_absorptance = nil
+      wall.color = HPXML::ColorMedium
+    end
   end
 end
 
@@ -3228,6 +3322,12 @@ def set_hpxml_frame_floors(hpxml_file, hpxml)
     hpxml.frame_floors << hpxml.frame_floors[-1].dup
     hpxml.frame_floors[-1].id = 'TinyFloor'
     hpxml.frame_floors[-1].area = 0.05
+  elsif ['invalid_files/base-enclosure-conditioned-basement-slab-insulation.xml'].include? hpxml_file
+    hpxml.frame_floors.add(id: 'FloorAboveCondBasement',
+                           exterior_adjacent_to: HPXML::LocationBasementConditioned,
+                           interior_adjacent_to: HPXML::LocationLivingSpace,
+                           area: 1350,
+                           insulation_assembly_r_value: 3.9)
   elsif ['invalid_files/enclosure-living-missing-ceiling-roof.xml'].include? hpxml_file
     hpxml.frame_floors[0].delete
   elsif ['invalid_files/enclosure-basement-missing-ceiling.xml',
@@ -3505,9 +3605,6 @@ def set_hpxml_windows(hpxml_file, hpxml)
                       interior_shading_factor_summer: 0.7,
                       interior_shading_factor_winter: 0.85,
                       wall_idref: 'Wall')
-  elsif ['invalid_files/attached-multifamily-window-outside-condition.xml'].include? hpxml_file
-    hpxml.windows[0].area = 50
-    hpxml.windows[0].wall_idref = 'WallOtherMultifamilyBufferSpace'
   elsif ['base-enclosure-overhangs.xml'].include? hpxml_file
     hpxml.windows[0].overhangs_depth = 2.5
     hpxml.windows[0].overhangs_distance_to_top_of_window = 0
@@ -3683,6 +3780,14 @@ def set_hpxml_windows(hpxml_file, hpxml)
       window.interior_shading_factor_winter = nil
       window.fraction_operable = nil
     end
+  elsif ['base-enclosure-attached-multifamily.xml'].include? hpxml_file
+    hpxml.windows.add(id: 'InteriorWindow',
+                      area: 50,
+                      azimuth: 270,
+                      ufactor: 0.33,
+                      shgc: 0.45,
+                      fraction_operable: 0.67,
+                      wall_idref: 'WallOtherMultifamilyBufferSpace')
   end
 end
 
@@ -5306,6 +5411,7 @@ def set_hpxml_dishwasher(hpxml_file, hpxml)
     rated_annual_kwh = hpxml.dishwashers[0].rated_annual_kwh
     hpxml.dishwashers[0].rated_annual_kwh = nil
     hpxml.dishwashers[0].energy_factor = HotWaterAndAppliances.calc_dishwasher_ef_from_annual_kwh(rated_annual_kwh).round(2)
+    hpxml.dishwashers[0].place_setting_capacity = 6 # Compact
   elsif ['base-enclosure-attached-multifamily.xml',
          'base-enclosure-other-housing-unit.xml',
          'base-enclosure-other-heated-space.xml',

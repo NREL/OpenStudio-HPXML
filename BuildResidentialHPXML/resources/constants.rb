@@ -1,4 +1,8 @@
 class Constants
+  def self.Auto
+    return 'auto'
+  end
+
   def self.CoordRelative
     return 'relative'
   end
