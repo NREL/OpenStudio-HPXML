@@ -161,7 +161,6 @@
               <WoodStud/>
             </WallType>
             <Area>316.0</Area>
-            <Siding>wood siding</Siding>
             <SolarAbsorptance>0.7</SolarAbsorptance>
             <Emittance>0.92</Emittance>
             <Insulation>

@@ -2487,29 +2487,28 @@ class Geometry
     return edges
   end
 
-
   def self.get_facade_for_surface(surface)
     tol = 0.001
     n = surface.outwardNormal
     facade = nil
-    if (n.z).abs < tol
-      if (n.x).abs < tol and (n.y + 1).abs < tol
+    if n.z.abs < tol
+      if (n.x.abs < tol) && ((n.y + 1).abs < tol)
         facade = Constants.FacadeFront
-      elsif (n.x - 1).abs < tol and (n.y).abs < tol
+      elsif ((n.x - 1).abs < tol) && (n.y.abs < tol)
         facade = Constants.FacadeRight
-      elsif (n.x).abs < tol and (n.y - 1).abs < tol
+      elsif (n.x.abs < tol) && ((n.y - 1).abs < tol)
         facade = Constants.FacadeBack
-      elsif (n.x + 1).abs < tol and (n.y).abs < tol
+      elsif ((n.x + 1).abs < tol) && (n.y.abs < tol)
         facade = Constants.FacadeLeft
       end
     else
-      if (n.x).abs < tol and n.y < 0
+      if (n.x.abs < tol) && (n.y < 0)
         facade = Constants.FacadeFront
-      elsif n.x > 0 and (n.y).abs < tol
+      elsif (n.x > 0) && (n.y.abs < tol)
         facade = Constants.FacadeRight
-      elsif (n.x).abs < tol and n.y > 0
+      elsif (n.x.abs < tol) && (n.y > 0)
         facade = Constants.FacadeBack
-      elsif n.x < 0 and (n.y).abs < tol
+      elsif (n.x < 0) && (n.y.abs < tol)
         facade = Constants.FacadeLeft
       end
     end
@@ -2520,7 +2519,7 @@ class Geometry
     unless space.isPlenum
       if space.spaceType.is_initialized
         if space.spaceType.get.standardsSpaceType.is_initialized
-          return self.is_conditioned_space_type(space.spaceType.get.standardsSpaceType.get)
+          return is_conditioned_space_type(space.spaceType.get.standardsSpaceType.get)
         end
       end
     end
@@ -2540,7 +2539,7 @@ class Geometry
     xValueArray = []
     surfaceArray.each do |surface|
       surface.vertices.each do |vertex|
-        xValueArray << UnitConversions.convert(vertex.x, "m", "ft")
+        xValueArray << UnitConversions.convert(vertex.x, 'm', 'ft')
       end
     end
     return xValueArray
@@ -2551,7 +2550,7 @@ class Geometry
     yValueArray = []
     surfaceArray.each do |surface|
       surface.vertices.each do |vertex|
-        yValueArray << UnitConversions.convert(vertex.y, "m", "ft")
+        yValueArray << UnitConversions.convert(vertex.y, 'm', 'ft')
       end
     end
     return yValueArray
@@ -2562,15 +2561,15 @@ class Geometry
     zValueArray = []
     surfaceArray.each do |surface|
       surface.vertices.each do |vertex|
-        zValueArray << UnitConversions.convert(vertex.z, "m", "ft")
+        zValueArray << UnitConversions.convert(vertex.z, 'm', 'ft')
       end
     end
     return zValueArray
   end
 
   def self.get_surface_length(surface)
-    xvalues = self.getSurfaceXValues([surface])
-    yvalues = self.getSurfaceYValues([surface])
+    xvalues = getSurfaceXValues([surface])
+    yvalues = getSurfaceYValues([surface])
     xrange = xvalues.max - xvalues.min
     yrange = yvalues.max - yvalues.min
     if xrange > yrange
@@ -2581,7 +2580,7 @@ class Geometry
   end
 
   def self.get_surface_height(surface)
-    zvalues = self.getSurfaceZValues([surface])
+    zvalues = getSurfaceZValues([surface])
     zrange = zvalues.max - zvalues.min
     return zrange
   end
