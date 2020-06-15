@@ -5,10 +5,27 @@
   <sch:pattern>
     <sch:title>EnergyPlus Validator</sch:title>
     <sch:rule context="/hpxml_v3:HPXML/hpxml_v3:XMLTransactionHeaderInformation">
-      <sch:assert test="count(hpxml_v3:XMLType) = 1">element "hpxml_v3:XMLType" is REQUIRED</sch:assert>
-      <sch:assert test="count(hpxml_v3:XMLGeneratedBy) = 1">element "hpxml_v3:XMLGeneratedBy" is REQUIRED</sch:assert>
-      <sch:assert test="count(hpxml_v3:CreatedDateAndTime) = 1">element "hpxml_v3:CreatedDateAndTime" is REQUIRED</sch:assert>
-      <sch:assert test="count(hpxml_v3:Transaction) = 1">element "hpxml_v3:Transaction" is REQUIRED</sch:assert>
+      <sch:assert test="count(hpxml_v3:XMLType) = 1">element 'hpxml_v3:XMLType' is REQUIRED</sch:assert>
+      <sch:assert test="count(hpxml_v3:XMLGeneratedBy) = 1">element 'hpxml_v3:XMLGeneratedBy' is REQUIRED</sch:assert>
+      <sch:assert test="count(hpxml_v3:CreatedDateAndTime) = 1">element 'hpxml_v3:CreatedDateAndTime' is REQUIRED</sch:assert>
+      <sch:assert test="count(hpxml_v3:Transaction) = 1">element 'hpxml_v3:Transaction' is REQUIRED</sch:assert>
+    </sch:rule>
+    <sch:rule context="/hpxml_v3:HPXML">
+      <sch:assert test="count(hpxml_v3:Building) = 1">element 'hpxml_v3:Building' is REQUIRED</sch:assert>
+    </sch:rule>
+    <sch:rule context="/hpxml_v3:HPXML/hpxml_v3:Building">
+      <sch:assert test="count(hpxml_v3:BuildingID) = 1">element 'hpxml_v3:BuildingID' is REQUIRED</sch:assert>
+    </sch:rule>
+    <sch:rule context="/hpxml_v3:HPXML/hpxml_v3:Building/hpxml_v3:ProjectStatus">
+      <sch:assert test="count(hpxml_v3:EventType) = 1">element 'hpxml_v3:ProjectStatus/hpxml_v3:EventType' is REQUIRED</sch:assert>
+    </sch:rule>
+    <sch:rule context="/hpxml_v3:HPXML/hpxml_v3:Building/hpxml_v3:BuildingDetails/hpxml_v3:BuildingSummary/hpxml_v3:Site">
+      <sch:assert test="count(hpxml_v3:SiteType) &lt;= 1">element 'hpxml_v3:SiteType' is OPTIONAL</sch:assert>
+      <sch:assert test="count(hpxml_v3:extension/hpxml_v3:ShelterCoefficient) &lt;= 1">element 'hpxml_v3:extension/hpxml_v3:ShelterCoefficient' is OPTIONAL</sch:assert>
+      <sch:assert test="count(hpxml_v3:extension/hpxml_v3:Neighbors) &lt;= 1">element 'hpxml_v3:extension/hpxml_v3:Neighbors' is OPTIONAL</sch:assert>
+    </sch:rule>
+    <sch:rule context="/hpxml_v3:HPXML/hpxml_v3:Building/hpxml_v3:BuildingDetails/hpxml_v3:BuildingSummary/hpxml_v3:Site/hpxml_v3:SiteType">
+      <sch:assert test="contains('_urban_ _suburban_ _rural_', concat('_', text(), '_'))">text "<sch:value-of select="text()"/>": element "text()" MUST be "urban", "suburban", or "rural"</sch:assert>
     </sch:rule>
   </sch:pattern>
 </sch:schema>
