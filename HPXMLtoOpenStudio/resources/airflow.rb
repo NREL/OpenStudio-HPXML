@@ -1280,7 +1280,7 @@ class Airflow
 
     cfis_open_time = [vent_mech.hours_in_operation / 24.0 * 60.0, 59.999].min # Minimum open time in minutes
     infil_program.addLine("Set CFIS_t_min_hr_open = #{cfis_open_time}") # minutes per hour the CFIS damper is open
-    infil_program.addLine("Set CFIS_Q_duct = #{UnitConversions.convert(vent_mech.air_flow, 'cfm', 'm^3/s')}")
+    infil_program.addLine("Set CFIS_Q_duct = #{UnitConversions.convert(vent_mech.flow_rate, 'cfm', 'm^3/s')}")
     infil_program.addLine('Set cfis_f_damper_open = 0') # fraction of the timestep the CFIS damper is open
     infil_program.addLine("Set #{@cfis_f_damper_extra_open_var[vent_mech.id].name} = 0") # additional runtime fraction to meet min/hr
 
@@ -1418,11 +1418,11 @@ class Airflow
     bal_vent_mech_fan_w = (vent_mech_bal + vent_mech_erv_hrv).map { |vent_mech| vent_mech.fan_power * (vent_mech.hours_in_operation / 24.0) }.inject(0.0, :+)
 
     # get cfms
-    sup_cfm = vent_mech_sup.map { |vent_mech| vent_mech.air_flow * (vent_mech.hours_in_operation / 24.0) }.inject(0.0, :+)
-    exh_cfm = vent_mech_exh.map { |vent_mech| vent_mech.air_flow * (vent_mech.hours_in_operation / 24.0) }.inject(0.0, :+)
-    bal_cfm = vent_mech_bal.map { |vent_mech| vent_mech.air_flow * (vent_mech.hours_in_operation / 24.0) }.inject(0.0, :+)
-    erv_hrv_cfm = vent_mech_erv_hrv.map { |vent_mech| vent_mech.air_flow * (vent_mech.hours_in_operation / 24.0) }.inject(0.0, :+)
-    cfis_cfm = vent_mech_cfis.map { |vent_mech| vent_mech.air_flow }.inject(0.0, :+)
+    sup_cfm = vent_mech_sup.map { |vent_mech| vent_mech.flow_rate * (vent_mech.hours_in_operation / 24.0) }.inject(0.0, :+)
+    exh_cfm = vent_mech_exh.map { |vent_mech| vent_mech.flow_rate * (vent_mech.hours_in_operation / 24.0) }.inject(0.0, :+)
+    bal_cfm = vent_mech_bal.map { |vent_mech| vent_mech.flow_rate * (vent_mech.hours_in_operation / 24.0) }.inject(0.0, :+)
+    erv_hrv_cfm = vent_mech_erv_hrv.map { |vent_mech| vent_mech.flow_rate * (vent_mech.hours_in_operation / 24.0) }.inject(0.0, :+)
+    cfis_cfm = vent_mech_cfis.map { |vent_mech| vent_mech.flow_rate }.inject(0.0, :+)
 
     # Combine exhaust and supply
     combined_bal_cfm = [sup_cfm, exh_cfm].min
@@ -1505,7 +1505,7 @@ class Airflow
 
     # Apply balanced mechanical ventilation
     vent_mech_erv_hrv.each do |vent_mech|
-      vent_mech_cfm = vent_mech.air_flow * (vent_mech.hours_in_operation / 24.0)
+      vent_mech_cfm = vent_mech.flow_rate * (vent_mech.hours_in_operation / 24.0)
       vent_mech_fan_w = vent_mech.fan_power * (vent_mech.hours_in_operation / 24.0)
       vent_mech_sens_eff, vent_mech_lat_eff, vent_mech_apparent_sens_eff = calc_hrv_erv_effectiveness(vent_mech, vent_mech_cfm, vent_mech_fan_w)
       # No need to add balanced system here to average because their effectivenesses are all 0.0
