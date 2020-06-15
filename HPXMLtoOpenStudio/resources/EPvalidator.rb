@@ -538,6 +538,7 @@ class EnergyPlusValidator
       # [KitchenRangeFan]
       '/HPXML/Building/BuildingDetails/Systems/MechanicalVentilation/VentilationFans/VentilationFan[UsedForLocalVentilation="true" and FanLocation="kitchen"]' => {
         'SystemIdentifier' => one, # Required by HPXML schema
+        'Quantity' => zero_or_one,
         'RatedFlowRate' => zero_or_one,
         'HoursInOperation' => zero_or_one,
         'FanPower' => zero_or_one,
