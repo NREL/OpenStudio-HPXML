@@ -537,7 +537,6 @@
           </LightingType>
         </LightingGroup>
         <extension>
-          <UsageMultiplier>0.9</UsageMultiplier>
           <InteriorWeekdayScheduleFractions>0.20, 0.20, 0.20, 0.20, 0.20, 0.20, 0.20, 0.90, 0.90, 0.90, 0.90, 0.90, 0.90, 0.90, 0.90, 0.90, 0.70, 0.70, 0.50, 0.50, 0.20, 0.20, 0.20, 0.20</InteriorWeekdayScheduleFractions>
           <InteriorWeekendScheduleFractions>0.20, 0.20, 0.20, 0.20, 0.20, 0.20, 0.20, 0.90, 0.90, 0.90, 0.90, 0.90, 0.90, 0.90, 0.90, 0.90, 0.70, 0.70, 0.50, 0.50, 0.20, 0.20, 0.20, 0.20</InteriorWeekendScheduleFractions>
           <InteriorMonthlyScheduleMultipliers>1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0</InteriorMonthlyScheduleMultipliers>

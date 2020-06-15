@@ -739,11 +739,14 @@ class EnergyPlusValidator
       # [Lighting]
       '/HPXML/Building/BuildingDetails/Lighting' => {
         'LightingGroup[LightingType[LightEmittingDiode | CompactFluorescent | FluorescentTube] and Location[text()="interior" or text()="exterior" or text()="garage"]]' => nine, # See [LightingGroup]
-        'extension/UsageMultiplier' => zero_or_one,
+        'extension/InteriorUsageMultiplier' => zero_or_one,
+        'extension/GarageUsageMultiplier' => zero_or_one,
+        'extension/ExteriorUsageMultiplier' => zero_or_one,
         'extension/InteriorWeekdayScheduleFractions | extension/InteriorWeekendScheduleFractions | extension/InteriorMonthlyScheduleMultipliers' => zero_or_three,
         'extension/GarageWeekdayScheduleFractions | extension/GarageWeekendScheduleFractions | extension/GarageMonthlyScheduleMultipliers' => zero_or_three,
         'extension/ExteriorWeekdayScheduleFractions | extension/ExteriorWeekendScheduleFractions | extension/ExteriorMonthlyScheduleMultipliers' => zero_or_three,
-        'extension/ExteriorHolidayDailyEnergyUse | extension/ExteriorHolidayPeriodBeginMonth | extension/ExteriorHolidayPeriodBeginDayOfMonth | extension/ExteriorHolidayPeriodEndMonth | extension/ExteriorHolidayPeriodEndDayOfMonth | extension/ExteriorHolidayScheduleFractions' => zero_or_six, # Daily energy use in kWh/day
+        'extension/ExteriorHolidayDailyEnergyUse' => one, # Daily energy use in kWh/day
+        'extension/ExteriorHolidayPeriodBeginMonth | extension/ExteriorHolidayPeriodBeginDayOfMonth | extension/ExteriorHolidayPeriodEndMonth | extension/ExteriorHolidayPeriodEndDayOfMonth | extension/ExteriorHolidayScheduleFractions' => zero_or_five,
       },
 
       ## [LightingGroup]

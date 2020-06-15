@@ -29,7 +29,9 @@ class Lighting
                                             fractions[[HPXML::LocationInterior, HPXML::LightingTypeLED]],
                                             fractions[[HPXML::LocationExterior, HPXML::LightingTypeLED]],
                                             fractions[[HPXML::LocationGarage, HPXML::LightingTypeLED]],
-                                            lighting.usage_multiplier)
+                                            lighting.interior_usage_multiplier,
+                                            lighting.garage_usage_multiplier,
+                                            lighting.exterior_usage_multiplier)
 
     # Create schedule
     if lighting.interior_weekday_fractions.nil?
@@ -95,7 +97,7 @@ class Lighting
 
     # Add exterior holiday lighting
     if not lighting.exterior_holiday_daily_energy_use.nil?
-      design_level = exterior_holiday_sch.calcDesignLevelFromDailykWh(lighting.exterior_holiday_daily_energy_use.to_f)
+      design_level = exterior_holiday_sch.calcDesignLevelFromDailykWh(lighting.exterior_holiday_daily_energy_use)
 
       # Add exterior lighting
       ltg_def = OpenStudio::Model::ExteriorLightsDefinition.new(model)
@@ -124,7 +126,8 @@ class Lighting
   private
 
   def self.calc_energy(eri_version, cfa, gfa, f_int_cfl, f_ext_cfl, f_grg_cfl, f_int_lfl, f_ext_lfl, f_grg_lfl,
-                       f_int_led, f_ext_led, f_grg_led, usage_multiplier = 1.0)
+                       f_int_led, f_ext_led, f_grg_led,
+                       interior_usage_multiplier = 1.0, garage_usage_multiplier = 1.0, exterior_usage_multiplier = 1.0)
 
     if Constants.ERIVersions.index(eri_version) >= Constants.ERIVersions.index('2014ADEG')
       # Calculate fluorescent (CFL + LFL) fractions
@@ -178,9 +181,9 @@ class Lighting
       end
     end
 
-    int_kwh *= usage_multiplier
-    ext_kwh *= usage_multiplier
-    grg_kwh *= usage_multiplier
+    int_kwh *= interior_usage_multiplier
+    ext_kwh *= exterior_usage_multiplier
+    grg_kwh *= garage_usage_multiplier
 
     return int_kwh, ext_kwh, grg_kwh
   end

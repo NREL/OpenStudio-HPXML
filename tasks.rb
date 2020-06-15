@@ -3920,7 +3920,9 @@ def set_hpxml_lighting(hpxml_file, hpxml)
   elsif ['invalid_files/lighting-fractions.xml'].include? hpxml_file
     hpxml.lighting_groups[0].fraction_of_units_in_location = 0.8
   elsif ['base-misc-usage-multiplier.xml'].include? hpxml_file
-    hpxml.lighting.usage_multiplier = 0.9
+    hpxml.lighting.interior_usage_multiplier = 0.9
+    hpxml.lighting.garage_usage_multiplier = 0.9
+    hpxml.lighting.exterior_usage_multiplier = 0.9
   end
 end
 
@@ -3963,7 +3965,6 @@ def set_hpxml_lighting_schedule(hpxml_file, hpxml)
     hpxml.lighting.exterior_weekday_fractions = nil
     hpxml.lighting.exterior_weekend_fractions = nil
     hpxml.lighting.exterior_monthly_multipliers = nil
-    hpxml.lighting.exterior_holiday_daily_energy_use = nil
     hpxml.lighting.exterior_holiday_period_begin_month = nil
     hpxml.lighting.exterior_holiday_period_begin_day_of_month = nil
     hpxml.lighting.exterior_holiday_period_end_month = nil

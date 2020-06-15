@@ -334,9 +334,9 @@ class MonthWeekdayWeekendSchedule
     prev_wknd_vals = nil
     prev_wknd_rule = nil
     periods = []
-    if @begin_month < @end_month
+    if @begin_month <= @end_month # contiguous period
       periods << [@begin_month, @end_month]
-    else
+    else # non-contiguous period
       periods << [1, @end_month]
       periods << [@begin_month, 12]
     end

@@ -518,8 +518,14 @@ class HPXMLDefaults
   end
 
   def self.apply_lighting(hpxml)
-    if hpxml.lighting.usage_multiplier.nil?
-      hpxml.lighting.usage_multiplier = 1.0
+    if hpxml.lighting.interior_usage_multiplier.nil?
+      hpxml.lighting.interior_usage_multiplier = 1.0
+    end
+    if hpxml.lighting.garage_usage_multiplier.nil?
+      hpxml.lighting.garage_usage_multiplier = 1.0
+    end
+    if hpxml.lighting.exterior_usage_multiplier.nil?
+      hpxml.lighting.exterior_usage_multiplier = 1.0
     end
     # schedules from T24 2016 Residential ACM Appendix C Table 8 Exterior Lighting Hourly Multiplier (Weekdays and weekends)
     default_exterior_lighting_weekday_fractions = '0.046, 0.046, 0.046, 0.046, 0.046, 0.037, 0.035, 0.034, 0.033, 0.028, 0.022, 0.015, 0.012, 0.011, 0.011, 0.012, 0.019, 0.037, 0.049, 0.065, 0.091, 0.105, 0.091, 0.063'
@@ -535,8 +541,7 @@ class HPXMLDefaults
       hpxml.lighting.exterior_weekend_fractions = default_exterior_lighting_weekend_fractions
       hpxml.lighting.exterior_monthly_multipliers = default_exterior_lighting_monthly_multipliers
     end
-    if hpxml.lighting.exterior_holiday_daily_energy_use.nil?
-      hpxml.lighting.exterior_holiday_daily_energy_use = 0 # kWh/day
+    if hpxml.lighting.exterior_holiday_period_begin_month.nil?
       hpxml.lighting.exterior_holiday_period_begin_month = 11
       hpxml.lighting.exterior_holiday_period_begin_day_of_month = 27
       hpxml.lighting.exterior_holiday_period_end_month = 1
