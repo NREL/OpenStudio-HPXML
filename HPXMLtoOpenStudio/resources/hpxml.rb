@@ -3991,7 +3991,9 @@ class HPXML < Object
 
       lighting = XMLHelper.create_elements_as_needed(doc, ['HPXML', 'Building', 'BuildingDetails', 'Lighting'])
       HPXML::add_extension(parent: lighting,
-                           extensions: { 'UsageMultiplier' => to_float_or_nil(@usage_multiplier),
+                           extensions: { 'InteriorUsageMultiplier' => to_float_or_nil(@interior_usage_multiplier),
+                                         'GarageUsageMultiplier' => to_float_or_nil(@garage_usage_multiplier),
+                                         'ExteriorUsageMultiplier' => to_float_or_nil(@exterior_usage_multiplier),
                                          'InteriorWeekdayScheduleFractions' => @interior_weekday_fractions,
                                          'InteriorWeekendScheduleFractions' => @interior_weekend_fractions,
                                          'InteriorMonthlyScheduleMultipliers' => @interior_monthly_multipliers,
@@ -4015,7 +4017,9 @@ class HPXML < Object
       lighting = XMLHelper.get_element(hpxml, 'Building/BuildingDetails/Lighting')
       return if lighting.nil?
 
-      @usage_multiplier = to_float_or_nil(XMLHelper.get_value(lighting, 'extension/UsageMultiplier'))
+      @interior_usage_multiplier = to_float_or_nil(XMLHelper.get_value(lighting, 'extension/InteriorUsageMultiplier'))
+      @garage_usage_multiplier = to_float_or_nil(XMLHelper.get_value(lighting, 'extension/GarageUsageMultiplier'))
+      @exterior_usage_multiplier = to_float_or_nil(XMLHelper.get_value(lighting, 'extension/ExteriorUsageMultiplier'))
       @interior_weekday_fractions = XMLHelper.get_value(lighting, 'extension/InteriorWeekdayScheduleFractions')
       @interior_weekend_fractions = XMLHelper.get_value(lighting, 'extension/InteriorWeekendScheduleFractions')
       @interior_monthly_multipliers = XMLHelper.get_value(lighting, 'extension/InteriorMonthlyScheduleMultipliers')

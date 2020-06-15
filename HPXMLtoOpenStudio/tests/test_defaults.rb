@@ -597,16 +597,18 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
     # Test inputs not overridden by defaults
     hpxml_name = 'base.xml'
     hpxml = HPXML.new(hpxml_path: File.join(@root_path, 'workflow', 'sample_files', hpxml_name))
-    hpxml.lighting.usage_multiplier = 2.0
+    hpxml.lighting.interior_usage_multiplier = 2.0
+    hpxml.lighting.garage_usage_multiplier = 2.0
+    hpxml.lighting.exterior_usage_multiplier = 2.0
     XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
     hpxml_default = _test_measure()
-    _test_default_lighting_values(hpxml_default, 2.0)
+    _test_default_lighting_values(hpxml_default, 2.0, 2.0, 2.0)
 
     # Test defaults
     hpxml = apply_hpxml_defaults('base.xml')
     XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
     hpxml_default = _test_measure()
-    _test_default_lighting_values(hpxml_default, 1.0)
+    _test_default_lighting_values(hpxml_default, 1.0, 1.0, 1.0)
   end
 
   def test_pv
@@ -821,8 +823,10 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
     assert_equal(is_convection, hpxml.ovens[0].is_convection)
   end
 
-  def _test_default_lighting_values(hpxml, usage_multiplier)
-    assert_equal(usage_multiplier, hpxml.lighting.usage_multiplier)
+  def _test_default_lighting_values(hpxml, interior_usage_multiplier, garage_usage_multiplier, exterior_usage_multiplier)
+    assert_equal(interior_usage_multiplier, hpxml.lighting.interior_usage_multiplier)
+    assert_equal(garage_usage_multiplier, hpxml.lighting.garage_usage_multiplier)
+    assert_equal(exterior_usage_multiplier, hpxml.lighting.exterior_usage_multiplier)
   end
 
   def _test_default_standard_distribution_values(hpxml, piping_length)
@@ -1035,7 +1039,9 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
       plug_load.frac_latent = nil
     end
 
-    hpxml.lighting.usage_multiplier = nil
+    hpxml.lighting.interior_usage_multiplier = nil
+    hpxml.lighting.garage_usage_multiplier = nil
+    hpxml.lighting.exterior_usage_multiplier = nil
 
     hpxml.pv_systems.each do |pv|
       pv.inverter_efficiency = nil
