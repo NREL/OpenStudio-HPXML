@@ -3,8 +3,8 @@
   <schema_version>3.0</schema_version>
   <name>hpxm_lto_openstudio</name>
   <uid>b1543b30-9465-45ff-ba04-1d1f85e763bc</uid>
-  <version_id>5e3a128b-ed32-49bd-9383-a0dd234b14a7</version_id>
-  <version_modified>20200615T223038Z</version_modified>
+  <version_id>1745b509-53cb-4f7e-9291-3f3fb773d766</version_id>
+  <version_modified>20200616T165432Z</version_modified>
   <xml_checksum>D8922A73</xml_checksum>
   <class_name>HPXMLtoOpenStudio</class_name>
   <display_name>HPXML to OpenStudio Translator</display_name>
@@ -415,12 +415,6 @@
       <checksum>3EFD313B</checksum>
     </file>
     <file>
-      <filename>constants.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>E0488071</checksum>
-    </file>
-    <file>
       <filename>weather.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
@@ -532,6 +526,12 @@
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
       <checksum>CEEDFAC9</checksum>
+    </file>
+    <file>
+      <filename>constants.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>BC14B3EA</checksum>
     </file>
   </files>
 </measure>
