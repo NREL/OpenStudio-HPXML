@@ -171,6 +171,7 @@ class HotWaterAndAppliances
     # Clothes dryer
     if not clothes_dryers.empty?
       clothes_dryer = clothes_dryers[0]
+      clothes_washer = clothes_washers[0]
 
       cd_annual_kwh, cd_annual_therm, cd_frac_sens, cd_frac_lat = calc_clothes_dryer_energy(eri_version, nbeds, clothes_dryer, clothes_washer)
       cd_name = Constants.ObjectNameClothesDryer
