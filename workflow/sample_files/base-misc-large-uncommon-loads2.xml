@@ -656,7 +656,7 @@
             <Type>heat pump</Type>
             <Load>
               <Units>kWh/year</Units>
-              <Value>1300.0</Value>
+              <Value>260.0</Value>
             </Load>
           </Heater>
         </HotTub>

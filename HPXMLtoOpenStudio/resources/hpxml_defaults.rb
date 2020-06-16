@@ -559,7 +559,7 @@ class HPXMLDefaults
           fuel_load.frac_latent = 0.1
         end
         if fuel_load.location.nil?
-          fuel_load.location = HPXML::LocationExterior
+          fuel_load.location = HPXML::LocationInterior
         end
       end
       if fuel_load.usage_multiplier.nil?
@@ -582,10 +582,12 @@ class HPXMLDefaults
       if pool.pump_kwh_per_year.nil?
         pool.pump_kwh_per_year = MiscLoads.get_pool_pump_default_values(cfa, nbeds)
       end
-      if pool.heater_type.include?('elec') && pool.heater_kwh_per_year.nil?
-        pool.heater_kwh_per_year = MiscLoads.get_pool_heater_electric_default_values(cfa, nbeds)
-      elsif pool.heater_type.include?('gas') && pool.heater_therm_per_year.nil?
-        pool.heater_therm_per_year = MiscLoads.get_pool_heater_gas_default_values(cfa, nbeds)
+      default_heater_kwh_per_year, default_heater_therm_per_year = MiscLoads.get_pool_heater_default_values(cfa, nbeds, pool.heater_type)
+      if pool.heater_kwh_per_year.nil?
+        pool.heater_kwh_per_year = default_heater_kwh_per_year
+      end
+      if pool.heater_therm_per_year.nil?
+        pool.heater_therm_per_year = default_heater_therm_per_year
       end
       if pool.heater_usage_multiplier.nil?
         pool.heater_usage_multiplier = 1.0
@@ -617,10 +619,12 @@ class HPXMLDefaults
       if hot_tub.pump_kwh_per_year.nil?
         hot_tub.pump_kwh_per_year = MiscLoads.get_hot_tub_pump_default_values(cfa, nbeds)
       end
-      if hot_tub.heater_type.include?('elec') && hot_tub.heater_kwh_per_year.nil?
-        hot_tub.heater_kwh_per_year = MiscLoads.get_hot_tub_heater_electric_default_values(cfa, nbeds)
-      elsif hot_tub.heater_type.include?('gas') && hot_tub.heater_therm_per_year.nil?
-        hot_tub.heater_therm_per_year = MiscLoads.get_hot_tub_heater_gas_default_values(cfa, nbeds)
+      default_heater_kwh_per_year, default_heater_therm_per_year = MiscLoads.get_hot_tub_heater_default_values(cfa, nbeds, hot_tub.heater_type)
+      if hot_tub.heater_kwh_per_year.nil?
+        hot_tub.heater_kwh_per_year = default_heater_kwh_per_year
+      end
+      if hot_tub.heater_therm_per_year.nil?
+        hot_tub.heater_therm_per_year = default_heater_therm_per_year
       end
       if hot_tub.heater_usage_multiplier.nil?
         hot_tub.heater_usage_multiplier = 1.0
