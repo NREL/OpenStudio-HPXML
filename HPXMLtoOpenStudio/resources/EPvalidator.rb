@@ -702,6 +702,7 @@ class EnergyPlusValidator
 
       # [ClothesDryer]
       '/HPXML/Building/BuildingDetails/Appliances/ClothesDryer' => {
+        '../ClothesWasher' => one,
         'SystemIdentifier' => one, # Required by HPXML schema
         '[not(Location)] | Location[text()="living space" or text()="basement - conditioned" or text()="basement - unconditioned" or text()="garage" or text()="other"]' => one,
         'FuelType[text()="natural gas" or text()="fuel oil" or text()="propane" or text()="electricity" or text()="wood" or text()="wood pellets"]' => one,
