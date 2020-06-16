@@ -473,7 +473,7 @@
           <SystemIdentifier id='CeilingFan'/>
         </CeilingFan>
         <extension>
-          <ExteriorHolidayDailyEnergyUse>50.0</ExteriorHolidayDailyEnergyUse>
+          <ExteriorHolidayDailyEnergyUse>1.1</ExteriorHolidayDailyEnergyUse>
         </extension>
       </Lighting>
       <MiscLoads>

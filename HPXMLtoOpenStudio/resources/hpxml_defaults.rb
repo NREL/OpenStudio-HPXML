@@ -619,8 +619,9 @@ class HPXMLDefaults
       hpxml.lighting.exterior_monthly_multipliers = default_exterior_lighting_monthly_multipliers
     end
     if hpxml.lighting.exterior_holiday_period_begin_month.nil?
+      # Single-Family Detached Lighting, 2017 from LA100 repo
       hpxml.lighting.exterior_holiday_period_begin_month = 11
-      hpxml.lighting.exterior_holiday_period_begin_day_of_month = 27
+      hpxml.lighting.exterior_holiday_period_begin_day_of_month = 24
       hpxml.lighting.exterior_holiday_period_end_month = 1
       hpxml.lighting.exterior_holiday_period_end_day_of_month = 6
       hpxml.lighting.exterior_holiday_fractions = '0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.008168, 0.098016, 0.168028, 0.193699, 0.283547, 0.192532, 0.03734, 0.01867'

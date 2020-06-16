@@ -40,7 +40,7 @@ class Lighting
       interior_sch = create_schedule(model, weather)
     end
     exterior_sch = MonthWeekdayWeekendSchedule.new(model, Constants.ObjectNameExteriorLighting + ' schedule', lighting.exterior_weekday_fractions, lighting.exterior_weekend_fractions, lighting.exterior_monthly_multipliers, 1.0, 1.0, true, true, Constants.ScheduleTypeLimitsFraction)
-    garage_sch = exterior_sch # use exterior lighting schedule for garage lighting
+    garage_sch = exterior_sch # assume that garage lighting schedule is the same as exterior lighting schedule
     exterior_holiday_sch = MonthWeekdayWeekendSchedule.new(model, Constants.ObjectNameLightingExteriorHoliday + ' schedule', lighting.exterior_holiday_fractions, lighting.exterior_holiday_fractions, lighting.exterior_monthly_multipliers, 1.0, 1.0, true, true, Constants.ScheduleTypeLimitsFraction, lighting.exterior_holiday_period_begin_month, lighting.exterior_holiday_period_begin_day_of_month, lighting.exterior_holiday_period_end_month, lighting.exterior_holiday_period_end_day_of_month)
 
     # Add lighting to each conditioned space
@@ -95,11 +95,10 @@ class Lighting
       ltg.setSchedule(exterior_sch.schedule)
     end
 
-    # Add exterior holiday lighting
     if not lighting.exterior_holiday_daily_energy_use.nil?
       design_level = exterior_holiday_sch.calcDesignLevelFromDailykWh(lighting.exterior_holiday_daily_energy_use)
 
-      # Add exterior lighting
+      # Add exterior holiday lighting
       ltg_def = OpenStudio::Model::ExteriorLightsDefinition.new(model)
       ltg = OpenStudio::Model::ExteriorLights.new(ltg_def)
       ltg.setName(Constants.ObjectNameLightingExteriorHoliday)
