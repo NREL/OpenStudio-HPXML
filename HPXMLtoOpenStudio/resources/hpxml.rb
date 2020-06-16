@@ -521,11 +521,24 @@ class HPXML < Object
     @fuel_loads = FuelLoads.new(self, hpxml)
   end
 
+  # Class to store additional properties on an HPXML object that are not intended
+  # to end up in the HPXML file. For example, you can store the OpenStudio::Model::Space
+  # object for an appliance.
+  class AdditionalProperties < OpenStruct
+    def method_missing(meth, *args)
+      # Complain if no value has been set rather than just returning nil
+      raise NoMethodError, "undefined method '#{meth}' for #{self}" unless meth.to_s.end_with?('=')
+      super
+    end
+  end
+
+  # HPXML Standard Element (e.g., Roof)
   class BaseElement
-    attr_accessor(:hpxml_object)
+    attr_accessor(:hpxml_object, :additional_properties)
 
     def initialize(hpxml_object, oga_element = nil, **kwargs)
       @hpxml_object = hpxml_object
+      @additional_properties = AdditionalProperties.new
       if not oga_element.nil?
         # Set values from HPXML Oga element
         from_oga(oga_element)
@@ -558,11 +571,13 @@ class HPXML < Object
     end
   end
 
+  # HPXML Array Element (e.g., Roofs)
   class BaseArrayElement < Array
-    attr_accessor(:hpxml_object)
+    attr_accessor(:hpxml_object, :additional_properties)
 
     def initialize(hpxml_object, oga_element = nil)
       @hpxml_object = hpxml_object
+      @additional_properties = AdditionalProperties.new
       if not oga_element.nil?
         # Set values from HPXML Oga element
         from_oga(oga_element)

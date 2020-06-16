@@ -1896,41 +1896,24 @@ class OSModel
   end
 
   def self.add_hot_water_and_appliances(runner, model, weather, spaces)
-    # Clothes Washer
-    if @hpxml.clothes_washers.size > 0
-      clothes_washer = @hpxml.clothes_washers[0]
-      cw_space = get_space_from_location(clothes_washer.location, 'ClothesWasher', model, spaces)
+    # Assign spaces
+    @hpxml.clothes_washers.each do |clothes_washer|
+      clothes_washer.additional_properties.space = get_space_from_location(clothes_washer.location, 'ClothesWasher', model, spaces)
     end
-
-    # Clothes Dryer
-    if @hpxml.clothes_dryers.size > 0
-      clothes_dryer = @hpxml.clothes_dryers[0]
-      cd_space = get_space_from_location(clothes_dryer.location, 'ClothesDryer', model, spaces)
+    @hpxml.clothes_dryers.each do |clothes_dryer|
+      clothes_dryer.additional_properties.space = get_space_from_location(clothes_dryer.location, 'ClothesDryer', model, spaces)
     end
-
-    # Dishwasher
-    if @hpxml.dishwashers.size > 0
-      dishwasher = @hpxml.dishwashers[0]
-      dw_space = get_space_from_location(dishwasher.location, 'Dishwasher', model, spaces)
+    @hpxml.dishwashers.each do |dishwasher|
+      dishwasher.additional_properties.space = get_space_from_location(dishwasher.location, 'Dishwasher', model, spaces)
     end
-
-    # Refrigerators
-    refrigerators = {}
     @hpxml.refrigerators.each do |refrigerator|
-      refrigerators[refrigerator] = get_space_from_location(refrigerator.location, 'Refrigerator', model, spaces)
+      refrigerator.additional_properties.space = get_space_from_location(refrigerator.location, 'Refrigerator', model, spaces)
     end
-
-    # Freezer
-    freezers = {}
     @hpxml.freezers.each do |freezer|
-      freezers[freezer] = get_space_from_location(freezer.location, 'Freezer', model, spaces)
+      freezer.additional_properties.space = get_space_from_location(freezer.location, 'Freezer', model, spaces)
     end
-
-    # Cooking Range/Oven
-    if (@hpxml.cooking_ranges.size > 0) && (@hpxml.ovens.size > 0)
-      cooking_range = @hpxml.cooking_ranges[0]
-      cook_space = get_space_from_location(cooking_range.location, 'CookingRange', model, spaces)
-      oven = @hpxml.ovens[0]
+    @hpxml.cooking_ranges.each do |cooking_range|
+      cooking_range.additional_properties.space = get_space_from_location(cooking_range.location, 'CookingRange', model, spaces)
     end
 
     # Distribution
@@ -1981,10 +1964,10 @@ class OSModel
 
     fixtures_usage_multiplier = @hpxml.water_heating.water_fixtures_usage_multiplier
     HotWaterAndAppliances.apply(model, runner, weather, spaces[HPXML::LocationLivingSpace],
-                                @cfa, @nbeds, @ncfl, @has_uncond_bsmnt,
-                                clothes_washer, cw_space, clothes_dryer, cd_space,
-                                dishwasher, dw_space, refrigerators, freezers, cooking_range, cook_space, oven,
-                                fixtures_usage_multiplier, @hpxml.water_fixtures, @hpxml.water_heating_systems, hot_water_distribution,
+                                @cfa, @nbeds, @ncfl, @has_uncond_bsmnt, @hpxml.clothes_washers,
+                                @hpxml.clothes_dryers, @hpxml.dishwashers, @hpxml.refrigerators,
+                                @hpxml.freezers, @hpxml.cooking_ranges, @hpxml.ovens, fixtures_usage_multiplier,
+                                @hpxml.water_fixtures, @hpxml.water_heating_systems, hot_water_distribution,
                                 solar_thermal_system, @eri_version, @dhw_map)
 
     if (not solar_thermal_system.nil?) && (not solar_thermal_system.collector_area.nil?) # Detailed solar water heater

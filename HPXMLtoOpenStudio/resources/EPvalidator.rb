@@ -89,6 +89,7 @@ class EnergyPlusValidator
         '/HPXML/Building/BuildingDetails/Appliances/Freezer' => zero_or_more, # See [Freezer]
         '/HPXML/Building/BuildingDetails/Appliances/Dehumidifier' => zero_or_one, # See [Dehumidifier]
         '/HPXML/Building/BuildingDetails/Appliances/CookingRange' => zero_or_one, # See [CookingRange]
+        '/HPXML/Building/BuildingDetails/Appliances/Oven' => zero_or_one, # See [Oven]
 
         '/HPXML/Building/BuildingDetails/Lighting' => zero_or_one, # See [Lighting]
         '/HPXML/Building/BuildingDetails/Lighting/CeilingFan' => zero_or_one, # See [CeilingFan]
@@ -760,6 +761,7 @@ class EnergyPlusValidator
 
       # [CookingRange]
       '/HPXML/Building/BuildingDetails/Appliances/CookingRange' => {
+        '../Oven' => one, # See [Oven]
         'SystemIdentifier' => one, # Required by HPXML schema
         '[not(Location)] | Location[text()="living space" or text()="basement - conditioned" or text()="basement - unconditioned" or text()="garage" or text()="other"]' => one,
         'FuelType[text()="natural gas" or text()="fuel oil" or text()="propane" or text()="electricity" or text()="wood" or text()="wood pellets"]' => one,
@@ -768,7 +770,13 @@ class EnergyPlusValidator
         'extension/WeekdayScheduleFractions' => zero_or_one, # Uses ERI Reference Home if not provided
         'extension/WeekendScheduleFractions' => zero_or_one, # Uses ERI Reference Home if not provided
         'extension/MonthlyScheduleMultipliers' => zero_or_one, # Uses ERI Reference Home if not provided
-        '../Oven/IsConvection' => zero_or_one,
+      },
+
+      # [Oven]
+      '/HPXML/Building/BuildingDetails/Appliances/Oven' => {
+        '../CookingRange' => one, # See [CookingRange]
+        'SystemIdentifier' => one, # Required by HPXML schema
+        'IsConvection' => zero_or_one,
       },
 
       # [Lighting]
