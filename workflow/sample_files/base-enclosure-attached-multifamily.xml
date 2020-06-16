@@ -105,7 +105,6 @@
             <ExteriorAdjacentTo>other non-freezing space</ExteriorAdjacentTo>
             <InteriorAdjacentTo>basement - conditioned</InteriorAdjacentTo>
             <Area>116.0</Area>
-            <Siding>wood siding</Siding>
             <SolarAbsorptance>0.7</SolarAbsorptance>
             <Emittance>0.92</Emittance>
             <Insulation>
@@ -155,7 +154,6 @@
               <WoodStud/>
             </WallType>
             <Area>100.0</Area>
-            <Siding>wood siding</Siding>
             <SolarAbsorptance>0.7</SolarAbsorptance>
             <Emittance>0.92</Emittance>
             <Insulation>
@@ -171,7 +169,6 @@
               <WoodStud/>
             </WallType>
             <Area>100.0</Area>
-            <Siding>wood siding</Siding>
             <SolarAbsorptance>0.7</SolarAbsorptance>
             <Emittance>0.92</Emittance>
             <Insulation>
@@ -187,7 +184,6 @@
               <WoodStud/>
             </WallType>
             <Area>100.0</Area>
-            <Siding>wood siding</Siding>
             <SolarAbsorptance>0.7</SolarAbsorptance>
             <Emittance>0.92</Emittance>
             <Insulation>
@@ -203,7 +199,6 @@
               <WoodStud/>
             </WallType>
             <Area>100.0</Area>
-            <Siding>wood siding</Siding>
             <SolarAbsorptance>0.7</SolarAbsorptance>
             <Emittance>0.92</Emittance>
             <Insulation>
@@ -219,7 +214,6 @@
               <WoodStud/>
             </WallType>
             <Area>50.0</Area>
-            <Siding>wood siding</Siding>
             <SolarAbsorptance>0.7</SolarAbsorptance>
             <Emittance>0.92</Emittance>
             <Insulation>
