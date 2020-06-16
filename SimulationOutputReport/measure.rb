@@ -1821,7 +1821,7 @@ class SimulationOutputReport < OpenStudio::Measure::ReportingMeasure
       [FT::Elec, EUT::CeilingFan] => EndUse.new(meter: "#{Constants.ObjectNameCeilingFan}:InteriorEquipment:Electricity"),
       [FT::Elec, EUT::Television] => EndUse.new(meter: "#{Constants.ObjectNameMiscTelevision}:InteriorEquipment:Electricity"),
       [FT::Elec, EUT::PlugLoads] => EndUse.new(meter: "#{Constants.ObjectNameMiscPlugLoads}:InteriorEquipment:Electricity"),
-      [FT::Elec, EUT::Vehicle] => EndUse.new(meter: "#{Constants.ObjectNameMiscVehicle}:InteriorEquipment:Electricity"),
+      [FT::Elec, EUT::Vehicle] => EndUse.new(meter: "#{Constants.ObjectNameMiscElectricVehicleCharging}:InteriorEquipment:Electricity"),
       [FT::Elec, EUT::WellPump] => EndUse.new(meter: "#{Constants.ObjectNameMiscWellPump}:InteriorEquipment:Electricity"),
       [FT::Elec, EUT::PoolHeater] => EndUse.new(meter: "#{Constants.ObjectNameMiscPoolHeater}:InteriorEquipment:Electricity"),
       [FT::Elec, EUT::PoolPump] => EndUse.new(meter: "#{Constants.ObjectNameMiscPoolPump}:InteriorEquipment:Electricity"),

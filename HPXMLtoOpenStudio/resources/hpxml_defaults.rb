@@ -476,8 +476,8 @@ class HPXMLDefaults
         if plug_load.location.nil?
           plug_load.location = HPXML::LocationInterior
         end
-      elsif plug_load.plug_load_type == HPXML::PlugLoadTypeVehicle
-        default_annual_kwh = MiscLoads.get_vehicle_default_values
+      elsif plug_load.plug_load_type == HPXML::PlugLoadTypeElectricVehicleCharging
+        default_annual_kwh = MiscLoads.get_electric_vehicle_charging_default_values
         if plug_load.kWh_per_year.nil?
           plug_load.kWh_per_year = default_annual_kwh
         end

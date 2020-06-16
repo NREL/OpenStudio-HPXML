@@ -4086,7 +4086,7 @@ end
 def set_hpxml_hot_tubs(hpxml_file, hpxml)
   if ['base-misc-large-uncommon-loads.xml'].include? hpxml_file
     hpxml.hot_tubs.add(id: 'HotTub',
-                       heater_type: HPXML::HeaterTypeElectric,
+                       heater_type: HPXML::HeaterTypeElectricResistance,
                        heater_load_units: HPXML::UnitsKwhPerYear,
                        heater_load_value: 1300,
                        pump_kwh_per_year: 1000)
@@ -4126,7 +4126,7 @@ def set_hpxml_plug_loads(hpxml_file, hpxml)
       end
     elsif ['base-misc-large-uncommon-loads.xml'].include? hpxml_file
       hpxml.plug_loads.add(id: 'PlugLoadMisc3',
-                           plug_load_type: HPXML::PlugLoadTypeVehicle,
+                           plug_load_type: HPXML::PlugLoadTypeElectricVehicleCharging,
                            kWh_per_year: 1500,
                            weekday_fractions: '0.04, 0.037, 0.037, 0.036, 0.033, 0.036, 0.043, 0.047, 0.034, 0.023, 0.024, 0.025, 0.024, 0.028, 0.031, 0.032, 0.039, 0.053, 0.063, 0.067, 0.071, 0.069, 0.059, 0.05',
                            weekend_fractions: '0.04, 0.037, 0.037, 0.036, 0.033, 0.036, 0.043, 0.047, 0.034, 0.023, 0.024, 0.025, 0.024, 0.028, 0.031, 0.032, 0.039, 0.053, 0.063, 0.067, 0.071, 0.069, 0.059, 0.05',

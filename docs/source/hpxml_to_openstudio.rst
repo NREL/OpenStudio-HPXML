@@ -943,17 +943,20 @@ If neither are provided, ``RatedAnnualkWh`` will be defaulted to represent a sta
 Optional ``extension/WeekdayScheduleFractions``, ``extension/WeekendScheduleFractions``, and ``extension/MonthlyScheduleMultipliers`` can be provided; if not provided, values from Figures 16 & 24 of the `Building America House Simulation Protocols <https://www1.eere.energy.gov/buildings/publications/pdfs/building_america/house_simulation.pdf>`_ are used.
 An ``extension/UsageMultiplier`` can also be optionally provided that scales energy usage; if not provided, it is assumed to be 1.0.
 
-==============================  =============================================
-Location                        Default Priority
-==============================  =============================================
-garage                          1
-basement - unconditioned        2
-basement - conditioned          3
-living space                    4
-==============================  =============================================   
+All refrigerators should be labeled by setting the ``PrimaryIndicator`` element.
+There must be exactly one primary refrigerator (``PrimaryIndicator="true"``), and all the rest should be labeled as non-primary (``PrimaryIndicator="false"``).
 
-All refrigerators should be labeled by setting the ``PrimaryIndicator`` element (true or false). There should be exactly one primary refrigerator, and all the rest should be labeled as secondary refrigerators.
-If ``Location`` is not provided for secondary refrigerators, the secondary refrigerator location will be chosen based on the presence of spaces and the "Default Priority" indicated above.
+The ``Location`` of a primary refrigerator is described in the Appliances section.
+If ``Location`` is not provided for a non-primary refrigerator, its location will be chosen based on the presence of spaces and the "Default Priority" indicated below.
+
+========================  ================
+Location                  Default Priority
+========================  ================
+garage                    1
+basement - unconditioned  2
+basement - conditioned    3
+living space              4
+========================  ================
 
 Freezers
 ********
@@ -1031,7 +1034,7 @@ A ``PoolPumps/PoolPump`` element is required. The annual energy consumption of t
 
 .. math:: PoolPumpkWhs = 158.5 / 0.070 \cdot (0.5 + 0.25 \cdot NumberofBedrooms / 3 + 0.35 \cdot ConditionedFloorArea / 1920)
 
-A ``Heater/Type`` element can be specified; if not provided, a pool heater will not be modeled.
+A ``Heater`` element can be specified; if not provided, a pool heater will not be modeled.
 Currently only pool heaters specified with ``Heater[Type="gas fired" or Type="electric resistance" or Type="heat pump"]`` are recognized.
 The annual energy consumption (``Load[Units='kWh/year' or Units='therm/year']/Value``) can be provided, otherwise they will be calculated using the following equations from the `Building America House Simulation Protocols <https://www1.eere.energy.gov/buildings/publications/pdfs/building_america/house_simulation.pdf>`_.
 
@@ -1052,7 +1055,7 @@ A ``HotTubPumps/HotTubPump`` element is required. The annual energy consumption 
 
 .. math:: HotTubPumpkWhs = 59.5 / 0.059 \cdot (0.5 + 0.25 \cdot NumberofBedrooms / 3 + 0.35 \cdot ConditionedFloorArea / 1920)
 
-A ``Heater/Type`` element can be specified; if not provided, a hot tub heater will not be modeled.
+A ``Heater`` element can be specified; if not provided, a hot tub heater will not be modeled.
 Currently only hot tub heaters specified with ``Heater[Type="gas fired" or Type="electric resistance" or Type="heat pump"]`` are recognized.
 The annual energy consumption (``Load[Units='kWh/year' or Units='therm/year']/Value``) can be provided, otherwise they will be calculated using the following equations from the `Building America House Simulation Protocols <https://www1.eere.energy.gov/buildings/publications/pdfs/building_america/house_simulation.pdf>`_.
 

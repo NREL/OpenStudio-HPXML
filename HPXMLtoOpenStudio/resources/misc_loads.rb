@@ -184,7 +184,7 @@ class MiscLoads
   def self.get_pool_heater_default_values(cfa, nbeds, type)
     load_units = nil
     load_value = nil
-    if [HPXML::HeaterTypeElectric, HPXML::HeaterTypeHeatPump].include? type
+    if [HPXML::HeaterTypeElectricResistance, HPXML::HeaterTypeHeatPump].include? type
       load_units = HPXML::UnitsKwhPerYear
       load_value = 8.3 / 0.004 * (0.5 + 0.25 * nbeds / 3.0 + 0.25 * cfa / 1920.0) # kWh/yr
       if type == HPXML::HeaterTypeHeatPump
@@ -204,7 +204,7 @@ class MiscLoads
   def self.get_hot_tub_heater_default_values(cfa, nbeds, type)
     load_units = nil
     load_value = nil
-    if [HPXML::HeaterTypeElectric, HPXML::HeaterTypeHeatPump].include? type
+    if [HPXML::HeaterTypeElectricResistance, HPXML::HeaterTypeHeatPump].include? type
       load_units = HPXML::UnitsKwhPerYear
       load_value = 49.0 / 0.048 * (0.5 + 0.25 * nbeds / 3.0 + 0.25 * cfa / 1920.0) # kWh/yr
       if type == HPXML::HeaterTypeHeatPump
@@ -217,7 +217,7 @@ class MiscLoads
     return load_units, load_value
   end
 
-  def self.get_vehicle_default_values
+  def self.get_electric_vehicle_charging_default_values
     ev_charger_efficiency = 0.9
     ev_battery_efficiency = 0.9
     vehicle_annual_miles_driven = 4500.0

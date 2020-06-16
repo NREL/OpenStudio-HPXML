@@ -2197,8 +2197,8 @@ class OSModel
         obj_name = Constants.ObjectNameMiscPlugLoads
       elsif plug_load.plug_load_type == HPXML::PlugLoadTypeTelevision
         obj_name = Constants.ObjectNameMiscTelevision
-      elsif plug_load.plug_load_type == HPXML::PlugLoadTypeVehicle
-        obj_name = Constants.ObjectNameMiscVehicle
+      elsif plug_load.plug_load_type == HPXML::PlugLoadTypeElectricVehicleCharging
+        obj_name = Constants.ObjectNameMiscElectricVehicleCharging
       elsif plug_load.plug_load_type == HPXML::PlugLoadTypeWellPump
         obj_name = Constants.ObjectNameMiscWellPump
       end

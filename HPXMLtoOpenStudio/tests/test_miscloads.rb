@@ -53,7 +53,7 @@ class HPXMLtoOpenStudioMiscLoadsTest < MiniTest::Test
     assert_equal(0, therm_yr)
 
     # Check others
-    objects = [Constants.ObjectNameMiscVehicle,
+    objects = [Constants.ObjectNameMiscElectricVehicleCharging,
                Constants.ObjectNameMiscWellPump,
                Constants.ObjectNameMiscPoolPump,
                Constants.ObjectNameMiscPoolHeater,
@@ -85,7 +85,7 @@ class HPXMLtoOpenStudioMiscLoadsTest < MiniTest::Test
     assert_equal(0, therm_yr)
 
     # Check vehicle
-    kwh_yr, therm_yr = get_kwh_therm_per_year(model, Constants.ObjectNameMiscVehicle)
+    kwh_yr, therm_yr = get_kwh_therm_per_year(model, Constants.ObjectNameMiscElectricVehicleCharging)
     assert_in_epsilon(1500, kwh_yr, 0.1)
     assert_equal(0, therm_yr)
 
@@ -146,7 +146,7 @@ class HPXMLtoOpenStudioMiscLoadsTest < MiniTest::Test
     assert_equal(0, therm_yr)
 
     # Check vehicle
-    kwh_yr, therm_yr = get_kwh_therm_per_year(model, Constants.ObjectNameMiscVehicle)
+    kwh_yr, therm_yr = get_kwh_therm_per_year(model, Constants.ObjectNameMiscElectricVehicleCharging)
     assert_in_epsilon(1500, kwh_yr, 0.1)
     assert_equal(0, therm_yr)
 

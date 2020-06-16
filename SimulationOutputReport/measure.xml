@@ -3,8 +3,8 @@
   <schema_version>3.0</schema_version>
   <name>simulation_output_report</name>
   <uid>df9d170c-c21a-4130-866d-0d46b06073fd</uid>
-  <version_id>de7afe1d-bf87-48e1-885c-848386b1256a</version_id>
-  <version_modified>20200604T200923Z</version_modified>
+  <version_id>d8222a6d-ca86-407a-86d8-b8687f3d34b1</version_id>
+  <version_modified>20200616T215258Z</version_modified>
   <xml_checksum>9BF1E6AC</xml_checksum>
   <class_name>SimulationOutputReport</class_name>
   <display_name>HPXML Simulation Output Report</display_name>
@@ -393,9 +393,9 @@
       <model_dependent>false</model_dependent>
     </output>
     <output>
-      <name>Electricity: Vehicle MBtu</name>
-      <display_name>Electricity: Vehicle MBtu</display_name>
-      <short_name>Electricity: Vehicle MBtu</short_name>
+      <name>Electricity: Electric Vehicle Charging MBtu</name>
+      <display_name>Electricity: Electric Vehicle Charging MBtu</display_name>
+      <short_name>Electricity: Electric Vehicle Charging MBtu</short_name>
       <type>Double</type>
       <model_dependent>false</model_dependent>
     </output>
@@ -727,7 +727,7 @@
       <filename>constants.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>DDA91374</checksum>
+      <checksum>BEF65D98</checksum>
     </file>
     <file>
       <version>
@@ -738,13 +738,13 @@
       <filename>measure.rb</filename>
       <filetype>rb</filetype>
       <usage_type>script</usage_type>
-      <checksum>99D3469B</checksum>
+      <checksum>64978927</checksum>
     </file>
     <file>
       <filename>output_report_test.rb</filename>
       <filetype>rb</filetype>
       <usage_type>test</usage_type>
-      <checksum>D065B5B1</checksum>
+      <checksum>16B67206</checksum>
     </file>
   </files>
 </measure>

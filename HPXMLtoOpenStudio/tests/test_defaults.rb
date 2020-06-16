@@ -582,7 +582,7 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
     other_pl.frac_sensible = 0.5
     other_pl.frac_latent = 0.4
     other_pl.location = HPXML::LocationExterior
-    veh_pl = hpxml.plug_loads.select { |pl| pl.plug_load_type == HPXML::PlugLoadTypeVehicle }[0]
+    veh_pl = hpxml.plug_loads.select { |pl| pl.plug_load_type == HPXML::PlugLoadTypeElectricVehicleCharging }[0]
     veh_pl.kWh_per_year = 4000
     veh_pl.frac_sensible = 0.4
     veh_pl.frac_latent = 0.5
@@ -596,7 +596,7 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
     hpxml_default = _test_measure()
     _test_default_plug_load_values(hpxml_default, HPXML::PlugLoadTypeTelevision, 1000, 0.6, 0.3, HPXML::LocationExterior)
     _test_default_plug_load_values(hpxml_default, HPXML::PlugLoadTypeOther, 2000, 0.5, 0.4, HPXML::LocationExterior)
-    _test_default_plug_load_values(hpxml_default, HPXML::PlugLoadTypeVehicle, 4000, 0.4, 0.5, HPXML::LocationInterior)
+    _test_default_plug_load_values(hpxml_default, HPXML::PlugLoadTypeElectricVehicleCharging, 4000, 0.4, 0.5, HPXML::LocationInterior)
     _test_default_plug_load_values(hpxml_default, HPXML::PlugLoadTypeWellPump, 3000, 0.3, 0.6, HPXML::LocationInterior)
 
     # Test defaults
@@ -605,7 +605,7 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
     hpxml_default = _test_measure()
     _test_default_plug_load_values(hpxml_default, HPXML::PlugLoadTypeTelevision, 620, 1.0, 0.0, HPXML::LocationInterior)
     _test_default_plug_load_values(hpxml_default, HPXML::PlugLoadTypeOther, 2457, 0.855, 0.045, HPXML::LocationInterior)
-    _test_default_plug_load_values(hpxml_default, HPXML::PlugLoadTypeVehicle, 1667, 1.0, 0.0, HPXML::LocationExterior)
+    _test_default_plug_load_values(hpxml_default, HPXML::PlugLoadTypeElectricVehicleCharging, 1667, 1.0, 0.0, HPXML::LocationExterior)
     _test_default_plug_load_values(hpxml_default, HPXML::PlugLoadTypeWellPump, 441, 1.0, 0.0, HPXML::LocationExterior)
   end
 

@@ -293,8 +293,8 @@ class Constants
     return 'misc tv'
   end
 
-  def self.ObjectNameMiscVehicle
-    return 'misc vehicle'
+  def self.ObjectNameMiscElectricVehicleCharging
+    return 'misc electric vehicle charging'
   end
 
   def self.ObjectNameMiscWellPump
