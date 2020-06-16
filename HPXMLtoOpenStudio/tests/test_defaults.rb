@@ -522,21 +522,21 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
     pool.pump_kwh_per_year = 3000
     XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
     hpxml_default = _test_measure()
-    _test_default_pool_heater_electric_values(hpxml_default, 1000)
+    _test_default_pool_heater_values(hpxml_default, 1000, 0)
     _test_default_pool_pump_values(hpxml_default, 3000)
 
     # Test defaults
     hpxml = apply_hpxml_defaults('base-misc-large-uncommon-loads.xml')
     XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
     hpxml_default = _test_measure()
-    _test_default_pool_heater_electric_values(hpxml_default, 2286)
+    _test_default_pool_heater_values(hpxml_default, 2286, 0)
     _test_default_pool_pump_values(hpxml_default, 2496)
 
     # Test defaults 2
     hpxml = apply_hpxml_defaults('base-misc-large-uncommon-loads2.xml')
     XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
     hpxml_default = _test_measure()
-    _test_default_pool_heater_gas_values(hpxml_default, 236)
+    _test_default_pool_heater_values(hpxml_default, 0, 236)
     _test_default_pool_pump_values(hpxml_default, 2496)
   end
 
@@ -550,21 +550,21 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
     hot_tub.pump_kwh_per_year = 3000
     XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
     hpxml_default = _test_measure()
-    _test_default_hot_tub_heater_electric_values(hpxml_default, 1000)
+    _test_default_hot_tub_heater_values(hpxml_default, 1000, 0)
     _test_default_hot_tub_pump_values(hpxml_default, 3000)
 
     # Test defaults
     hpxml = apply_hpxml_defaults('base-misc-large-uncommon-loads.xml')
     XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
     hpxml_default = _test_measure()
-    _test_default_hot_tub_heater_electric_values(hpxml_default, 1125)
+    _test_default_hot_tub_heater_values(hpxml_default, 1125, 0)
     _test_default_hot_tub_pump_values(hpxml_default, 1111)
 
     # Test defaults 2
     hpxml = apply_hpxml_defaults('base-misc-large-uncommon-loads2.xml')
     XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
     hpxml_default = _test_measure()
-    _test_default_hot_tub_heater_gas_values(hpxml_default, 87)
+    _test_default_hot_tub_heater_values(hpxml_default, 225, 0)
     _test_default_hot_tub_pump_values(hpxml_default, 1111)
   end
 
@@ -996,14 +996,10 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
     assert_in_epsilon(efficiency, hpxml.ceiling_fans[0].efficiency, 0.01)
   end
 
-  def _test_default_pool_heater_electric_values(hpxml, kWh_per_year)
-    pool = hpxml.pools.select { |pool| pool.heater_type.include?('elec') }[0]
-    assert_in_epsilon(kWh_per_year, pool.heater_kwh_per_year, 0.01)
-  end
-
-  def _test_default_pool_heater_gas_values(hpxml, therm_per_year)
-    pool = hpxml.pools.select { |pool| pool.heater_type.include?('gas') }[0]
-    assert_in_epsilon(therm_per_year, pool.heater_therm_per_year, 0.01)
+  def _test_default_pool_heater_values(hpxml, kWh_per_year, therm_per_year)
+    pool = hpxml.pools[0]
+    assert_in_epsilon(kWh_per_year, pool.heater_kwh_per_year.to_f, 0.01)
+    assert_in_epsilon(therm_per_year, pool.heater_therm_per_year.to_f, 0.01)
   end
 
   def _test_default_pool_pump_values(hpxml, kWh_per_year)
@@ -1011,14 +1007,10 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
     assert_in_epsilon(kWh_per_year, pool.pump_kwh_per_year, 0.01)
   end
 
-  def _test_default_hot_tub_heater_electric_values(hpxml, kWh_per_year)
-    hot_tub = hpxml.hot_tubs.select { |hot_tub| hot_tub.heater_type.include?('elec') }[0]
-    assert_in_epsilon(kWh_per_year, hot_tub.heater_kwh_per_year, 0.01)
-  end
-
-  def _test_default_hot_tub_heater_gas_values(hpxml, therm_per_year)
-    hot_tub = hpxml.hot_tubs.select { |hot_tub| hot_tub.heater_type.include?('gas') }[0]
-    assert_in_epsilon(therm_per_year, hot_tub.heater_therm_per_year, 0.01)
+  def _test_default_hot_tub_heater_values(hpxml, kWh_per_year, therm_per_year)
+    hot_tub = hpxml.hot_tubs[0]
+    assert_in_epsilon(kWh_per_year, hot_tub.heater_kwh_per_year.to_f, 0.01)
+    assert_in_epsilon(therm_per_year, hot_tub.heater_therm_per_year.to_f, 0.01)
   end
 
   def _test_default_hot_tub_pump_values(hpxml, kWh_per_year)

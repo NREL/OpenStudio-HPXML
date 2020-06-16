@@ -4233,14 +4233,13 @@ class HPXML < Object
 
     def from_oga(pool)
       @id = HPXML::get_id(pool)
-      XMLHelper.get_elements(pool, 'PoolPumps/PoolPump').each do |pool_pump|
-        @pump_id = HPXML::get_id(pool_pump)
-        @pump_kwh_per_year = to_float_or_nil(XMLHelper.get_value(pool_pump, 'Load[Units="kWh/year"]/Value'))
-        @pump_usage_multiplier = to_float_or_nil(XMLHelper.get_value(pool_pump, 'extension/UsageMultiplier'))
-        @pump_weekday_fractions = XMLHelper.get_value(pool_pump, 'extension/WeekdayScheduleFractions')
-        @pump_weekend_fractions = XMLHelper.get_value(pool_pump, 'extension/WeekendScheduleFractions')
-        @pump_monthly_multipliers = XMLHelper.get_value(pool_pump, 'extension/MonthlyScheduleMultipliers')
-      end
+      pool_pump = XMLHelper.get_element(pool, 'PoolPumps/PoolPump')
+      @pump_id = HPXML::get_id(pool_pump)
+      @pump_kwh_per_year = to_float_or_nil(XMLHelper.get_value(pool_pump, 'Load[Units="kWh/year"]/Value'))
+      @pump_usage_multiplier = to_float_or_nil(XMLHelper.get_value(pool_pump, 'extension/UsageMultiplier'))
+      @pump_weekday_fractions = XMLHelper.get_value(pool_pump, 'extension/WeekdayScheduleFractions')
+      @pump_weekend_fractions = XMLHelper.get_value(pool_pump, 'extension/WeekendScheduleFractions')
+      @pump_monthly_multipliers = XMLHelper.get_value(pool_pump, 'extension/MonthlyScheduleMultipliers')
       heater = XMLHelper.get_element(pool, 'Heater')
       if not heater.nil?
         @heater_id = HPXML::get_id(heater)
@@ -4340,14 +4339,13 @@ class HPXML < Object
 
     def from_oga(hot_tub)
       @id = HPXML::get_id(hot_tub)
-      XMLHelper.get_elements(hot_tub, 'HotTubPumps/HotTubPump').each do |hot_tub_pump|
-        @pump_id = HPXML::get_id(hot_tub_pump)
-        @pump_kwh_per_year = to_float_or_nil(XMLHelper.get_value(hot_tub_pump, 'Load[Units="kWh/year"]/Value'))
-        @pump_usage_multiplier = to_float_or_nil(XMLHelper.get_value(hot_tub_pump, 'extension/UsageMultiplier'))
-        @pump_weekday_fractions = XMLHelper.get_value(hot_tub_pump, 'extension/WeekdayScheduleFractions')
-        @pump_weekend_fractions = XMLHelper.get_value(hot_tub_pump, 'extension/WeekendScheduleFractions')
-        @pump_monthly_multipliers = XMLHelper.get_value(hot_tub_pump, 'extension/MonthlyScheduleMultipliers')
-      end
+      hot_tub_pump = XMLHelper.get_element(hot_tub, 'HotTubPumps/HotTubPump')
+      @pump_id = HPXML::get_id(hot_tub_pump)
+      @pump_kwh_per_year = to_float_or_nil(XMLHelper.get_value(hot_tub_pump, 'Load[Units="kWh/year"]/Value'))
+      @pump_usage_multiplier = to_float_or_nil(XMLHelper.get_value(hot_tub_pump, 'extension/UsageMultiplier'))
+      @pump_weekday_fractions = XMLHelper.get_value(hot_tub_pump, 'extension/WeekdayScheduleFractions')
+      @pump_weekend_fractions = XMLHelper.get_value(hot_tub_pump, 'extension/WeekendScheduleFractions')
+      @pump_monthly_multipliers = XMLHelper.get_value(hot_tub_pump, 'extension/MonthlyScheduleMultipliers')
       heater = XMLHelper.get_element(hot_tub, 'Heater')
       if not heater.nil?
         @heater_id = HPXML::get_id(heater)

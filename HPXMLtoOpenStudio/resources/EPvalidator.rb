@@ -97,8 +97,14 @@ class EnergyPlusValidator
         '/HPXML/Building/BuildingDetails/Pools/Pool' => zero_or_one, # See [Pool]
         '/HPXML/Building/BuildingDetails/HotTubs/HotTub' => zero_or_one, # See [HotTub]
 
-        '/HPXML/Building/BuildingDetails/MiscLoads/PlugLoad' => zero_or_more, # See [PlugLoad]
-        '/HPXML/Building/BuildingDetails/MiscLoads/FuelLoad' => zero_or_more, # See [FuelLoad]
+        '/HPXML/Building/BuildingDetails/MiscLoads/PlugLoad[PlugLoadType="other"]' => zero_or_one, # See [PlugLoad]
+        '/HPXML/Building/BuildingDetails/MiscLoads/PlugLoad[PlugLoadType="TV other"]' => zero_or_one, # See [PlugLoad]
+        '/HPXML/Building/BuildingDetails/MiscLoads/PlugLoad[PlugLoadType="electric vehicle charging"]' => zero_or_one, # See [PlugLoad]
+        '/HPXML/Building/BuildingDetails/MiscLoads/PlugLoad[PlugLoadType="well pump"]' => zero_or_one, # See [PlugLoad]
+
+        '/HPXML/Building/BuildingDetails/MiscLoads/FuelLoad[FuelLoadType="grill"]' => zero_or_one, # See [FuelLoad]
+        '/HPXML/Building/BuildingDetails/MiscLoads/FuelLoad[FuelLoadType="lighting"]' => zero_or_one, # See [FuelLoad]
+        '/HPXML/Building/BuildingDetails/MiscLoads/FuelLoad[FuelLoadType="fireplace"]' => zero_or_one, # See [FuelLoad]
       },
 
       # [SimulationControl]
@@ -849,9 +855,8 @@ class EnergyPlusValidator
       },
 
       # [PlugLoad]
-      '/HPXML/Building/BuildingDetails/MiscLoads/PlugLoad' => {
+      '/HPXML/Building/BuildingDetails/MiscLoads/PlugLoad[PlugLoadType="other" or PlugLoadType="TV other" or PlugLoadType="electric vehicle charging" or PlugLoadType="well pump"]' => {
         'SystemIdentifier' => one, # Required by HPXML schema
-        'PlugLoadType[text()="other" or text()="TV other" or text()="electric vehicle charging" or text()="well pump"]' => one,
         'Location[text()="interior" or text()="exterior"]' => zero_or_one,
         'Load[Units="kWh/year"]/Value' => zero_or_one,
         'extension/FracSensible' => zero_or_one,
@@ -863,9 +868,8 @@ class EnergyPlusValidator
       },
 
       # [FuelLoad]
-      '/HPXML/Building/BuildingDetails/MiscLoads/FuelLoad' => {
+      '/HPXML/Building/BuildingDetails/MiscLoads/FuelLoad[FuelLoadType="grill" or FuelLoadType="lighting" or FuelLoadType="fireplace"]' => {
         'SystemIdentifier' => one, # Required by HPXML schema
-        'FuelLoadType[text()="grill" or text()="lighting" or text()="fireplace"]' => one,
         'Location[text()="interior" or text()="exterior"]' => zero_or_one,
         'Load[Units="therm/year"]/Value' => zero_or_one,
         'FuelType[text()="natural gas" or text()="fuel oil" or text()="propane" or text()="wood" or text()="wood pellets"]' => one,

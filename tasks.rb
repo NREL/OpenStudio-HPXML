@@ -4180,6 +4180,9 @@ def set_hpxml_fuel_loads(hpxml_file, hpxml)
                          fuel_load_type: HPXML::FuelLoadTypeFireplace,
                          fuel_type: HPXML::FuelTypeWood,
                          therm_per_year: 55)
+  elsif ['base-misc-large-uncommon-loads2.xml'].include? hpxml_file
+    hpxml.fuel_loads[0].fuel_type = HPXML::FuelTypeOil
+    hpxml.fuel_loads[2].fuel_type = HPXML::FuelTypeWoodPellets
   end
 end
 

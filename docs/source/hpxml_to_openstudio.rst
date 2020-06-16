@@ -960,7 +960,7 @@ Freezers
 
 Multiple ``Appliances/Freezer`` elements can be provided; if none provided, freezers will not be modeled.
 
-The efficiency of the freezer can be optionally entered as RatedAnnualkWh or extension/AdjustedAnnualkWh. If neither are provided, RatedAnnualkWh will be defaulted to represent a benchmark freezer according to the BA HSP (319.8 kWh/year).
+The efficiency of the freezer can be optionally entered as RatedAnnualkWh or extension/AdjustedAnnualkWh. If neither are provided, RatedAnnualkWh will be defaulted to represent a benchmark freezer according to the `Building America House Simulation Protocols <https://www1.eere.energy.gov/buildings/publications/pdfs/building_america/house_simulation.pdf>`_ (319.8 kWh/year).
 
 Optional ``extension/WeekdayScheduleFractions``, ``extension/WeekendScheduleFractions``, and ``extension/MonthlyScheduleMultipliers`` can be provided; if not provided, values from Figures 16 & 24 of the `Building America House Simulation Protocols <https://www1.eere.energy.gov/buildings/publications/pdfs/building_america/house_simulation.pdf>`_ are used.
 An extension/UsageMultiplier can also be optionally provided that scales energy usage; if not provided, it is assumed to be 1.0.
@@ -1027,13 +1027,13 @@ Pool
 
 A ``Pools/Pool`` element can be specified; if not provided, a pool will not be modeled.
 
-A ``PoolPumps/PoolPump`` element is required. The annual energy consumption of the pool pump (``Load[Units='kWh/year']/Value``) can be provided, otherwise they will be calculated using the following equation based on the BA HSP.
+A ``PoolPumps/PoolPump`` element is required. The annual energy consumption of the pool pump (``Load[Units='kWh/year']/Value``) can be provided, otherwise they will be calculated using the following equation based on the `Building America House Simulation Protocols <https://www1.eere.energy.gov/buildings/publications/pdfs/building_america/house_simulation.pdf>`_.
 
 .. math:: PoolPumpkWhs = 158.5 / 0.070 \cdot (0.5 + 0.25 \cdot NumberofBedrooms / 3 + 0.35 \cdot ConditionedFloorArea / 1920)
 
 A ``Heater/Type`` element can be specified; if not provided, a pool heater will not be modeled.
 Currently only pool heaters specified with ``Heater[Type="gas fired" or Type="electric resistance" or Type="heat pump"]`` are recognized.
-The annual energy consumption (``Load[Units='kWh/year' or Units='therm/year']/Value``) can be provided, otherwise they will be calculated using the following equations from the BA HSP.
+The annual energy consumption (``Load[Units='kWh/year' or Units='therm/year']/Value``) can be provided, otherwise they will be calculated using the following equations from the `Building America House Simulation Protocols <https://www1.eere.energy.gov/buildings/publications/pdfs/building_america/house_simulation.pdf>`_.
 
 .. math:: GasFiredTherms = 3.0 / 0.014 \cdot (0.5 + 0.25 \cdot NumberofBedrooms / 3 + 0.35 \cdot ConditionedFloorArea / 1920)
 .. math:: ElectricResistancekWhs = 8.3 / 0.004 \cdot (0.5 + 0.25 \cdot NumberofBedrooms / 3 + 0.35 \cdot ConditionedFloorArea / 1920)
@@ -1048,13 +1048,13 @@ Hot Tub
 
 A ``HotTubs/HotTub`` element can be specified; if not provided, a hot tub will not be modeled.
 
-A ``HotTubPumps/HotTubPump`` element is required. The annual energy consumption of the hot tub pump (``Load[Units='kWh/year']/Value``) can be provided, otherwise they will be calculated using the following equation based on the BA HSP.
+A ``HotTubPumps/HotTubPump`` element is required. The annual energy consumption of the hot tub pump (``Load[Units='kWh/year']/Value``) can be provided, otherwise they will be calculated using the following equation based on the `Building America House Simulation Protocols <https://www1.eere.energy.gov/buildings/publications/pdfs/building_america/house_simulation.pdf>`_.
 
 .. math:: HotTubPumpkWhs = 59.5 / 0.059 \cdot (0.5 + 0.25 \cdot NumberofBedrooms / 3 + 0.35 \cdot ConditionedFloorArea / 1920)
 
 A ``Heater/Type`` element can be specified; if not provided, a hot tub heater will not be modeled.
 Currently only hot tub heaters specified with ``Heater[Type="gas fired" or Type="electric resistance" or Type="heat pump"]`` are recognized.
-The annual energy consumption (``Load[Units='kWh/year' or Units='therm/year']/Value``) can be provided, otherwise they will be calculated using the following equations from the BA HSP.
+The annual energy consumption (``Load[Units='kWh/year' or Units='therm/year']/Value``) can be provided, otherwise they will be calculated using the following equations from the `Building America House Simulation Protocols <https://www1.eere.energy.gov/buildings/publications/pdfs/building_america/house_simulation.pdf>`_.
 
 .. math:: GasFiredTherms = 0.87 / 0.011 \cdot (0.5 + 0.25 \cdot NumberofBedrooms / 3 + 0.35 \cdot ConditionedFloorArea / 1920)
 .. math:: ElectricResistancekWhs = 49.0 / 0.048 \cdot (0.5 + 0.25 \cdot NumberofBedrooms / 3 + 0.35 \cdot ConditionedFloorArea / 1920)
@@ -1069,7 +1069,7 @@ Plug Loads
 
 Plug loads can be provided by entering ``MiscLoads/PlugLoad`` elements; if not provided, plug loads will not be modeled.
 Currently only plug loads specified with ``PlugLoadType='other'``, ``PlugLoadType='TV other'``, ``PlugLoadType='electric vehicle charging'``, or ``PlugLoadType='well pump'`` are recognized.
-The annual energy consumption (``Load[Units='kWh/year']/Value``) can be provided, otherwise they will be calculated using the following equations from either `ANSI/RESNET/ICC 301-2019 <https://codes.iccsafe.org/content/RESNETICC3012019>`_ or the BA HSP.
+The annual energy consumption (``Load[Units='kWh/year']/Value``) can be provided, otherwise they will be calculated using the following equations from either `ANSI/RESNET/ICC 301-2019 <https://codes.iccsafe.org/content/RESNETICC3012019>`_ or the `Building America House Simulation Protocols <https://www1.eere.energy.gov/buildings/publications/pdfs/building_america/house_simulation.pdf>`_.
 
 .. math:: TelevisionkWhs = 413.0 + 69.0 \cdot NumberofBedrooms
 .. math:: OtherkWhs = 0.91 \cdot ConditionedFloorArea
@@ -1085,7 +1085,7 @@ Fuel Loads
 Fuel loads can be provided by entering ``MiscLoads/FuelLoad`` elements; if not provided, fuel loads will not be modeled.
 Currently only exterior fuel loads specified with ``FuelLoadType='grill'`` or ``FuelLoadType='lighting'`` or ``FuelLoadType='fireplace'``, are recognized.
 
-The annual energy consumption (``Load[Units='therm/year']/Value``) can be provided, otherwise they will be calculated using the following equations from the BA HSP.
+The annual energy consumption (``Load[Units='therm/year']/Value``) can be provided, otherwise they will be calculated using the following equations from the `Building America House Simulation Protocols <https://www1.eere.energy.gov/buildings/publications/pdfs/building_america/house_simulation.pdf>`_.
 
 .. math:: Grilltherms = 0.87 / 0.029 \cdot (0.5 + 0.25 \cdot NumberofBedrooms / 3 + 0.35 \cdot ConditionedFloorArea / 1920)
 .. math:: Lightingtherms = 0.22 / 0.012 \cdot (0.5 + 0.25 \cdot NumberofBedrooms / 3 + 0.35 \cdot ConditionedFloorArea / 1920)
