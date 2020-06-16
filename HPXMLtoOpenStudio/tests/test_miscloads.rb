@@ -101,8 +101,8 @@ class HPXMLtoOpenStudioMiscLoadsTest < MiniTest::Test
 
     # Check pool heater
     kwh_yr, therm_yr = get_kwh_therm_per_year(model, Constants.ObjectNameMiscPoolHeater)
-    assert_in_epsilon(2100, kwh_yr, 0.1)
-    assert_equal(0, therm_yr)
+    assert_equal(0, kwh_yr)
+    assert_in_epsilon(500, therm_yr, 0.1)
 
     # Check hot tub pump
     kwh_yr, therm_yr = get_kwh_therm_per_year(model, Constants.ObjectNameMiscHotTubPump)
@@ -163,7 +163,7 @@ class HPXMLtoOpenStudioMiscLoadsTest < MiniTest::Test
     # Check pool heater
     kwh_yr, therm_yr = get_kwh_therm_per_year(model, Constants.ObjectNameMiscPoolHeater)
     assert_equal(0, kwh_yr)
-    assert_in_epsilon(500, therm_yr, 0.1)
+    assert_equal(0, therm_yr)
 
     # Check hot tub pump
     kwh_yr, therm_yr = get_kwh_therm_per_year(model, Constants.ObjectNameMiscHotTubPump)

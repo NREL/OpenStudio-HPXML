@@ -582,12 +582,10 @@ class HPXMLDefaults
       if pool.pump_kwh_per_year.nil?
         pool.pump_kwh_per_year = MiscLoads.get_pool_pump_default_values(cfa, nbeds)
       end
-      default_heater_kwh_per_year, default_heater_therm_per_year = MiscLoads.get_pool_heater_default_values(cfa, nbeds, pool.heater_type)
-      if pool.heater_kwh_per_year.nil?
-        pool.heater_kwh_per_year = default_heater_kwh_per_year
-      end
-      if pool.heater_therm_per_year.nil?
-        pool.heater_therm_per_year = default_heater_therm_per_year
+      if pool.heater_load_value.nil?
+        default_heater_load_units, default_heater_load_value = MiscLoads.get_pool_heater_default_values(cfa, nbeds, pool.heater_type)
+        pool.heater_load_units = default_heater_load_units
+        pool.heater_load_value = default_heater_load_value
       end
       if pool.heater_usage_multiplier.nil?
         pool.heater_usage_multiplier = 1.0
@@ -619,12 +617,10 @@ class HPXMLDefaults
       if hot_tub.pump_kwh_per_year.nil?
         hot_tub.pump_kwh_per_year = MiscLoads.get_hot_tub_pump_default_values(cfa, nbeds)
       end
-      default_heater_kwh_per_year, default_heater_therm_per_year = MiscLoads.get_hot_tub_heater_default_values(cfa, nbeds, hot_tub.heater_type)
-      if hot_tub.heater_kwh_per_year.nil?
-        hot_tub.heater_kwh_per_year = default_heater_kwh_per_year
-      end
-      if hot_tub.heater_therm_per_year.nil?
-        hot_tub.heater_therm_per_year = default_heater_therm_per_year
+      if hot_tub.heater_load_value.nil?
+        default_heater_load_units, default_heater_load_value = MiscLoads.get_hot_tub_heater_default_values(cfa, nbeds, hot_tub.heater_type)
+        hot_tub.heater_load_units = default_heater_load_units
+        hot_tub.heater_load_value = default_heater_load_value
       end
       if hot_tub.heater_usage_multiplier.nil?
         hot_tub.heater_usage_multiplier = 1.0

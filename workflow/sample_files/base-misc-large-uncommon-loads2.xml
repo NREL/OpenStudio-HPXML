@@ -629,14 +629,6 @@
               </Load>
             </PoolPump>
           </PoolPumps>
-          <Heater>
-            <SystemIdentifier id='PoolHeater'/>
-            <Type>gas fired</Type>
-            <Load>
-              <Units>therm/year</Units>
-              <Value>500.0</Value>
-            </Load>
-          </Heater>
         </Pool>
       </Pools>
       <HotTubs>

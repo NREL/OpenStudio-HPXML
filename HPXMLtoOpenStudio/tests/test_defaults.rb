@@ -516,27 +516,27 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
     # Test inputs not overridden by defaults
     hpxml_name = 'base-misc-large-uncommon-loads.xml'
     hpxml = HPXML.new(hpxml_path: File.join(@root_path, 'workflow', 'sample_files', hpxml_name))
-    pool = hpxml.pools.select { |pool| pool.heater_type.include?('elec') }[0]
-    pool.heater_kwh_per_year = 1000
     pool = hpxml.pools[0]
+    pool.heater_load_units = HPXML::UnitsKwhPerYear
+    pool.heater_load_value = 1000
     pool.pump_kwh_per_year = 3000
     XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
     hpxml_default = _test_measure()
-    _test_default_pool_heater_values(hpxml_default, 1000, 0)
+    _test_default_pool_heater_values(hpxml_default, HPXML::UnitsKwhPerYear, 1000)
     _test_default_pool_pump_values(hpxml_default, 3000)
 
     # Test defaults
     hpxml = apply_hpxml_defaults('base-misc-large-uncommon-loads.xml')
     XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
     hpxml_default = _test_measure()
-    _test_default_pool_heater_values(hpxml_default, 2286, 0)
+    _test_default_pool_heater_values(hpxml_default, HPXML::UnitsThermPerYear, 236)
     _test_default_pool_pump_values(hpxml_default, 2496)
 
     # Test defaults 2
     hpxml = apply_hpxml_defaults('base-misc-large-uncommon-loads2.xml')
     XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
     hpxml_default = _test_measure()
-    _test_default_pool_heater_values(hpxml_default, 0, 236)
+    _test_default_pool_heater_values(hpxml_default, nil, nil)
     _test_default_pool_pump_values(hpxml_default, 2496)
   end
 
@@ -544,27 +544,27 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
     # Test inputs not overridden by defaults
     hpxml_name = 'base-misc-large-uncommon-loads.xml'
     hpxml = HPXML.new(hpxml_path: File.join(@root_path, 'workflow', 'sample_files', hpxml_name))
-    hot_tub = hpxml.hot_tubs.select { |hot_tub| hot_tub.heater_type.include?('elec') }[0]
-    hot_tub.heater_kwh_per_year = 1000
     hot_tub = hpxml.hot_tubs[0]
+    hot_tub.heater_load_units = HPXML::UnitsThermPerYear
+    hot_tub.heater_load_value = 1000
     hot_tub.pump_kwh_per_year = 3000
     XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
     hpxml_default = _test_measure()
-    _test_default_hot_tub_heater_values(hpxml_default, 1000, 0)
+    _test_default_hot_tub_heater_values(hpxml_default, HPXML::UnitsThermPerYear, 1000)
     _test_default_hot_tub_pump_values(hpxml_default, 3000)
 
     # Test defaults
     hpxml = apply_hpxml_defaults('base-misc-large-uncommon-loads.xml')
     XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
     hpxml_default = _test_measure()
-    _test_default_hot_tub_heater_values(hpxml_default, 1125, 0)
+    _test_default_hot_tub_heater_values(hpxml_default, HPXML::UnitsKwhPerYear, 1125)
     _test_default_hot_tub_pump_values(hpxml_default, 1111)
 
     # Test defaults 2
     hpxml = apply_hpxml_defaults('base-misc-large-uncommon-loads2.xml')
     XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
     hpxml_default = _test_measure()
-    _test_default_hot_tub_heater_values(hpxml_default, 225, 0)
+    _test_default_hot_tub_heater_values(hpxml_default, HPXML::UnitsKwhPerYear, 225)
     _test_default_hot_tub_pump_values(hpxml_default, 1111)
   end
 
@@ -996,10 +996,18 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
     assert_in_epsilon(efficiency, hpxml.ceiling_fans[0].efficiency, 0.01)
   end
 
-  def _test_default_pool_heater_values(hpxml, kWh_per_year, therm_per_year)
+  def _test_default_pool_heater_values(hpxml, load_units, load_value)
     pool = hpxml.pools[0]
-    assert_in_epsilon(kWh_per_year, pool.heater_kwh_per_year.to_f, 0.01)
-    assert_in_epsilon(therm_per_year, pool.heater_therm_per_year.to_f, 0.01)
+    if load_units.nil?
+      assert_nil(pool.heater_load_units)
+    else
+      assert_equal(load_units, pool.heater_load_units)
+    end
+    if load_value.nil?
+      assert_nil(pool.heater_load_value)
+    else
+      assert_in_epsilon(load_value, pool.heater_load_value.to_f, 0.01)
+    end
   end
 
   def _test_default_pool_pump_values(hpxml, kWh_per_year)
@@ -1007,10 +1015,10 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
     assert_in_epsilon(kWh_per_year, pool.pump_kwh_per_year, 0.01)
   end
 
-  def _test_default_hot_tub_heater_values(hpxml, kWh_per_year, therm_per_year)
+  def _test_default_hot_tub_heater_values(hpxml, load_units, load_value)
     hot_tub = hpxml.hot_tubs[0]
-    assert_in_epsilon(kWh_per_year, hot_tub.heater_kwh_per_year.to_f, 0.01)
-    assert_in_epsilon(therm_per_year, hot_tub.heater_therm_per_year.to_f, 0.01)
+    assert_equal(load_units, hot_tub.heater_load_units)
+    assert_in_epsilon(load_value, hot_tub.heater_load_value.to_f, 0.01)
   end
 
   def _test_default_hot_tub_pump_values(hpxml, kWh_per_year)
@@ -1197,14 +1205,14 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
     hpxml.ovens[0].is_convection = nil
 
     hpxml.pools.each do |pool|
-      pool.heater_kwh_per_year = nil
-      pool.heater_therm_per_year = nil
+      pool.heater_load_units = nil
+      pool.heater_load_value = nil
       pool.pump_kwh_per_year = nil
     end
 
     hpxml.hot_tubs.each do |hot_tub|
-      hot_tub.heater_kwh_per_year = nil
-      hot_tub.heater_therm_per_year = nil
+      hot_tub.heater_load_units = nil
+      hot_tub.heater_load_value = nil
       hot_tub.pump_kwh_per_year = nil
     end
 

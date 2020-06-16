@@ -4073,13 +4073,13 @@ end
 def set_hpxml_pools(hpxml_file, hpxml)
   if ['base-misc-large-uncommon-loads.xml'].include? hpxml_file
     hpxml.pools.add(id: 'Pool',
-                    heater_type: HPXML::HeaterTypeElectric,
-                    heater_kwh_per_year: 2100,
+                    heater_type: HPXML::HeaterTypeGas,
+                    heater_load_units: HPXML::UnitsThermPerYear,
+                    heater_load_value: 500,
                     pump_kwh_per_year: 2700)
   elsif ['base-misc-large-uncommon-loads2.xml'].include? hpxml_file
-    hpxml.pools[0].heater_type = HPXML::HeaterTypeGas
-    hpxml.pools[0].heater_kwh_per_year = nil
-    hpxml.pools[0].heater_therm_per_year = 500
+    hpxml.pools[0].heater_type = nil
+    hpxml.pools[0].heater_load_value = nil
   end
 end
 
@@ -4087,11 +4087,12 @@ def set_hpxml_hot_tubs(hpxml_file, hpxml)
   if ['base-misc-large-uncommon-loads.xml'].include? hpxml_file
     hpxml.hot_tubs.add(id: 'HotTub',
                        heater_type: HPXML::HeaterTypeElectric,
-                       heater_kwh_per_year: 1300,
+                       heater_load_units: HPXML::UnitsKwhPerYear,
+                       heater_load_value: 1300,
                        pump_kwh_per_year: 1000)
   elsif ['base-misc-large-uncommon-loads2.xml'].include? hpxml_file
     hpxml.hot_tubs[0].heater_type = HPXML::HeaterTypeHeatPump
-    hpxml.hot_tubs[0].heater_kwh_per_year /= 5.0
+    hpxml.hot_tubs[0].heater_load_value /= 5.0
   end
 end
 

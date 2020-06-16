@@ -96,10 +96,10 @@ class MiscLoads
     heater_kwh = 0
     heater_therm = 0
     heater_sch = MonthWeekdayWeekendSchedule.new(model, obj_name + ' schedule', pool_or_hot_tub.heater_weekday_fractions, pool_or_hot_tub.heater_weekend_fractions, pool_or_hot_tub.heater_monthly_multipliers, 1.0, 1.0, true, true, Constants.ScheduleTypeLimitsFraction)
-    if [HPXML::HeaterTypeElectric, HPXML::HeaterTypeHeatPump].include? pool_or_hot_tub.heater_type
-      heater_kwh = pool_or_hot_tub.heater_kwh_per_year * pool_or_hot_tub.heater_usage_multiplier
-    elsif pool_or_hot_tub.heater_type == HPXML::HeaterTypeGas
-      heater_therm = pool_or_hot_tub.heater_therm_per_year * pool_or_hot_tub.heater_usage_multiplier
+    if pool_or_hot_tub.heater_load_units == HPXML::UnitsKwhPerYear
+      heater_kwh = pool_or_hot_tub.heater_load_value * pool_or_hot_tub.heater_usage_multiplier
+    elsif pool_or_hot_tub.heater_load_units == HPXML::UnitsThermPerYear
+      heater_therm = pool_or_hot_tub.heater_load_value * pool_or_hot_tub.heater_usage_multiplier
     end
 
     if heater_kwh > 0
@@ -182,15 +182,19 @@ class MiscLoads
   end
 
   def self.get_pool_heater_default_values(cfa, nbeds, type)
+    load_units = nil
+    load_value = nil
     if [HPXML::HeaterTypeElectric, HPXML::HeaterTypeHeatPump].include? type
-      kWh_per_year = 8.3 / 0.004 * (0.5 + 0.25 * nbeds / 3.0 + 0.25 * cfa / 1920.0) # kWh/yr
+      load_units = HPXML::UnitsKwhPerYear
+      load_value = 8.3 / 0.004 * (0.5 + 0.25 * nbeds / 3.0 + 0.25 * cfa / 1920.0) # kWh/yr
       if type == HPXML::HeaterTypeHeatPump
-        kWh_per_year /= 5.0 # Assume seasonal COP of 5.0 per https://www.energy.gov/energysaver/heat-pump-swimming-pool-heaters
+        load_value /= 5.0 # Assume seasonal COP of 5.0 per https://www.energy.gov/energysaver/heat-pump-swimming-pool-heaters
       end
     elsif type == HPXML::HeaterTypeGas
-      therm_per_year = 3.0 / 0.014 * (0.5 + 0.25 * nbeds / 3.0 + 0.25 * cfa / 1920.0) # therm/yr
+      load_units = HPXML::UnitsThermPerYear
+      load_value = 3.0 / 0.014 * (0.5 + 0.25 * nbeds / 3.0 + 0.25 * cfa / 1920.0) # therm/yr
     end
-    return kWh_per_year, therm_per_year
+    return load_units, load_value
   end
 
   def self.get_hot_tub_pump_default_values(cfa, nbeds)
@@ -198,15 +202,19 @@ class MiscLoads
   end
 
   def self.get_hot_tub_heater_default_values(cfa, nbeds, type)
+    load_units = nil
+    load_value = nil
     if [HPXML::HeaterTypeElectric, HPXML::HeaterTypeHeatPump].include? type
-      kWh_per_year = 49.0 / 0.048 * (0.5 + 0.25 * nbeds / 3.0 + 0.25 * cfa / 1920.0) # kWh/yr
+      load_units = HPXML::UnitsKwhPerYear
+      load_value = 49.0 / 0.048 * (0.5 + 0.25 * nbeds / 3.0 + 0.25 * cfa / 1920.0) # kWh/yr
       if type == HPXML::HeaterTypeHeatPump
-        kWh_per_year /= 5.0 # Assume seasonal COP of 5.0 per https://www.energy.gov/energysaver/heat-pump-swimming-pool-heaters
+        load_value /= 5.0 # Assume seasonal COP of 5.0 per https://www.energy.gov/energysaver/heat-pump-swimming-pool-heaters
       end
     elsif type == HPXML::HeaterTypeGas
-      therm_per_year = 0.87 / 0.011 * (0.5 + 0.25 * nbeds / 3.0 + 0.25 * cfa / 1920.0) # therm/yr
+      load_units = HPXML::UnitsThermPerYear
+      load_value = 0.87 / 0.011 * (0.5 + 0.25 * nbeds / 3.0 + 0.25 * cfa / 1920.0) # therm/yr
     end
-    return kWh_per_year, therm_per_year
+    return load_units, load_value
   end
 
   def self.get_vehicle_default_values
