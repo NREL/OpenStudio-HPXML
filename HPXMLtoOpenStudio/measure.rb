@@ -2192,46 +2192,36 @@ class OSModel
 
   def self.add_mels(runner, model, spaces)
     # Misc
-    plug_load_misc = nil
-    plug_load_tv = nil
-    plug_load_vehicle = nil
-    plug_load_well_pump = nil
     @hpxml.plug_loads.each do |plug_load|
       if plug_load.plug_load_type == HPXML::PlugLoadTypeOther
-        plug_load_misc = plug_load
+        obj_name = Constants.ObjectNameMiscPlugLoads
       elsif plug_load.plug_load_type == HPXML::PlugLoadTypeTelevision
-        plug_load_tv = plug_load
+        obj_name = Constants.ObjectNameMiscTelevision
       elsif plug_load.plug_load_type == HPXML::PlugLoadTypeVehicle
-        plug_load_vehicle = plug_load
+        obj_name = Constants.ObjectNameMiscVehicle
       elsif plug_load.plug_load_type == HPXML::PlugLoadTypeWellPump
-        plug_load_well_pump = plug_load
+        obj_name = Constants.ObjectNameMiscWellPump
       end
-    end
+      next if obj_name.nil?
 
-    MiscLoads.apply_plug(model, plug_load_misc, Constants.ObjectNameMiscPlugLoads, @cfa, spaces[HPXML::LocationLivingSpace])
-    MiscLoads.apply_plug(model, plug_load_tv, Constants.ObjectNameMiscTelevision, @cfa, spaces[HPXML::LocationLivingSpace])
-    MiscLoads.apply_plug(model, plug_load_vehicle, Constants.ObjectNameMiscVehicle, @cfa, spaces[HPXML::LocationLivingSpace])
-    MiscLoads.apply_plug(model, plug_load_well_pump, Constants.ObjectNameMiscWellPump, @cfa, spaces[HPXML::LocationLivingSpace])
+      MiscLoads.apply_plug(model, plug_load, obj_name, @cfa, spaces[HPXML::LocationLivingSpace])
+    end
   end
 
   def self.add_mfls(runner, model, spaces)
     # Misc
-    fuel_load_grill = nil
-    fuel_load_lighting = nil
-    fuel_load_fireplace = nil
     @hpxml.fuel_loads.each do |fuel_load|
       if fuel_load.fuel_load_type == HPXML::FuelLoadTypeGrill
-        fuel_load_grill = fuel_load
+        obj_name = Constants.ObjectNameMiscGrill
       elsif fuel_load.fuel_load_type == HPXML::FuelLoadTypeLighting
-        fuel_load_lighting = fuel_load
+        obj_name = Constants.ObjectNameMiscLighting
       elsif fuel_load.fuel_load_type == HPXML::FuelLoadTypeFireplace
-        fuel_load_fireplace = fuel_load
+        obj_name = Constants.ObjectNameMiscFireplace
       end
-    end
+      next if obj_name.nil?
 
-    MiscLoads.apply_fuel(model, fuel_load_grill, Constants.ObjectNameMiscGrill, spaces[HPXML::LocationLivingSpace])
-    MiscLoads.apply_fuel(model, fuel_load_lighting, Constants.ObjectNameMiscLighting, spaces[HPXML::LocationLivingSpace])
-    MiscLoads.apply_fuel(model, fuel_load_fireplace, Constants.ObjectNameMiscFireplace, spaces[HPXML::LocationLivingSpace])
+      MiscLoads.apply_fuel(model, fuel_load, obj_name, spaces[HPXML::LocationLivingSpace])
+    end
   end
 
   def self.add_lighting(runner, model, weather, spaces)
