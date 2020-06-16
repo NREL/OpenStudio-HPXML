@@ -574,29 +574,39 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
     hpxml = HPXML.new(hpxml_path: File.join(@root_path, 'workflow', 'sample_files', hpxml_name))
     tv_pl = hpxml.plug_loads.select { |pl| pl.plug_load_type == HPXML::PlugLoadTypeTelevision }[0]
     tv_pl.kWh_per_year = 1000
+    tv_pl.frac_sensible = 0.6
+    tv_pl.frac_latent = 0.3
+    tv_pl.location = HPXML::LocationExterior
     other_pl = hpxml.plug_loads.select { |pl| pl.plug_load_type == HPXML::PlugLoadTypeOther }[0]
     other_pl.kWh_per_year = 2000
-    other_pl.frac_sensible = 0.8
-    other_pl.frac_latent = 0.1
+    other_pl.frac_sensible = 0.5
+    other_pl.frac_latent = 0.4
+    other_pl.location = HPXML::LocationExterior
     veh_pl = hpxml.plug_loads.select { |pl| pl.plug_load_type == HPXML::PlugLoadTypeVehicle }[0]
     veh_pl.kWh_per_year = 4000
+    veh_pl.frac_sensible = 0.4
+    veh_pl.frac_latent = 0.5
+    veh_pl.location = HPXML::LocationInterior
     wellpump_pl = hpxml.plug_loads.select { |pl| pl.plug_load_type == HPXML::PlugLoadTypeWellPump }[0]
     wellpump_pl.kWh_per_year = 3000
+    wellpump_pl.frac_sensible = 0.3
+    wellpump_pl.frac_latent = 0.6
+    wellpump_pl.location = HPXML::LocationInterior
     XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
     hpxml_default = _test_measure()
-    _test_default_tv_plug_load_values(hpxml_default, 1000)
-    _test_default_other_plug_load_values(hpxml_default, 2000, 0.8, 0.1)
-    _test_default_vehicle_plug_load_values(hpxml_default, 4000)
-    _test_default_well_pump_plug_load_values(hpxml_default, 3000)
+    _test_default_plug_load_values(hpxml_default, HPXML::PlugLoadTypeTelevision, 1000, 0.6, 0.3, HPXML::LocationExterior)
+    _test_default_plug_load_values(hpxml_default, HPXML::PlugLoadTypeOther, 2000, 0.5, 0.4, HPXML::LocationExterior)
+    _test_default_plug_load_values(hpxml_default, HPXML::PlugLoadTypeVehicle, 4000, 0.4, 0.5, HPXML::LocationInterior)
+    _test_default_plug_load_values(hpxml_default, HPXML::PlugLoadTypeWellPump, 3000, 0.3, 0.6, HPXML::LocationInterior)
 
     # Test defaults
     hpxml = apply_hpxml_defaults('base-misc-large-uncommon-loads.xml')
     XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
     hpxml_default = _test_measure()
-    _test_default_tv_plug_load_values(hpxml_default, 620)
-    _test_default_other_plug_load_values(hpxml_default, 2457, 0.855, 0.045)
-    _test_default_vehicle_plug_load_values(hpxml_default, 1667)
-    _test_default_well_pump_plug_load_values(hpxml_default, 441)
+    _test_default_plug_load_values(hpxml_default, HPXML::PlugLoadTypeTelevision, 620, 1.0, 0.0, HPXML::LocationInterior)
+    _test_default_plug_load_values(hpxml_default, HPXML::PlugLoadTypeOther, 2457, 0.855, 0.045, HPXML::LocationInterior)
+    _test_default_plug_load_values(hpxml_default, HPXML::PlugLoadTypeVehicle, 1667, 1.0, 0.0, HPXML::LocationExterior)
+    _test_default_plug_load_values(hpxml_default, HPXML::PlugLoadTypeWellPump, 441, 1.0, 0.0, HPXML::LocationExterior)
   end
 
   def test_fuel_loads
@@ -605,23 +615,32 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
     hpxml = HPXML.new(hpxml_path: File.join(@root_path, 'workflow', 'sample_files', hpxml_name))
     gg_fl = hpxml.fuel_loads.select { |fl| fl.fuel_load_type == HPXML::FuelLoadTypeGrill }[0]
     gg_fl.therm_per_year = 1000
+    gg_fl.frac_sensible = 0.6
+    gg_fl.frac_latent = 0.3
+    gg_fl.location = HPXML::LocationInterior
     gl_fl = hpxml.fuel_loads.select { |fl| fl.fuel_load_type == HPXML::FuelLoadTypeLighting }[0]
     gl_fl.therm_per_year = 2000
+    gl_fl.frac_sensible = 0.5
+    gl_fl.frac_latent = 0.4
+    gl_fl.location = HPXML::LocationInterior
     gf_fl = hpxml.fuel_loads.select { |fl| fl.fuel_load_type == HPXML::FuelLoadTypeFireplace }[0]
     gf_fl.therm_per_year = 3000
+    gf_fl.frac_sensible = 0.4
+    gf_fl.frac_latent = 0.5
+    gf_fl.location = HPXML::LocationInterior
     XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
     hpxml_default = _test_measure()
-    _test_default_grill_fuel_load_values(hpxml_default, 1000)
-    _test_default_lighting_fuel_load_values(hpxml_default, 2000)
-    _test_default_fireplace_fuel_load_values(hpxml_default, 3000)
+    _test_default_fuel_load_values(hpxml_default, HPXML::FuelLoadTypeGrill, 1000, 0.6, 0.3, HPXML::LocationInterior)
+    _test_default_fuel_load_values(hpxml_default, HPXML::FuelLoadTypeLighting, 2000, 0.5, 0.4, HPXML::LocationInterior)
+    _test_default_fuel_load_values(hpxml_default, HPXML::FuelLoadTypeFireplace, 3000, 0.4, 0.5, HPXML::LocationInterior)
 
     # Test defaults
     hpxml = apply_hpxml_defaults('base-misc-large-uncommon-loads.xml')
     XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
     hpxml_default = _test_measure()
-    _test_default_grill_fuel_load_values(hpxml_default, 33)
-    _test_default_lighting_fuel_load_values(hpxml_default, 20)
-    _test_default_fireplace_fuel_load_values(hpxml_default, 67)
+    _test_default_fuel_load_values(hpxml_default, HPXML::FuelLoadTypeGrill, 33, 0.0, 0.0, HPXML::LocationExterior)
+    _test_default_fuel_load_values(hpxml_default, HPXML::FuelLoadTypeLighting, 20, 0.0, 0.0, HPXML::LocationExterior)
+    _test_default_fuel_load_values(hpxml_default, HPXML::FuelLoadTypeFireplace, 67, 0.5, 0.1, HPXML::LocationExterior)
   end
 
   def test_appliances
@@ -1007,41 +1026,20 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
     assert_in_epsilon(kWh_per_year, hot_tub.pump_kwh_per_year, 0.01)
   end
 
-  def _test_default_tv_plug_load_values(hpxml, kWh_per_year)
-    tv_pl = hpxml.plug_loads.select { |pl| pl.plug_load_type == HPXML::PlugLoadTypeTelevision }[0]
-    assert_equal(kWh_per_year, tv_pl.kWh_per_year)
+  def _test_default_plug_load_values(hpxml, load_type, kWh_per_year, frac_sensible, frac_latent, location)
+    pl = hpxml.plug_loads.select { |pl| pl.plug_load_type == load_type }[0]
+    assert_in_epsilon(kWh_per_year, pl.kWh_per_year, 0.01)
+    assert_in_epsilon(frac_sensible, pl.frac_sensible, 0.01)
+    assert_in_epsilon(frac_latent, pl.frac_latent, 0.01)
+    assert_equal(location, pl.location)
   end
 
-  def _test_default_other_plug_load_values(hpxml, kWh_per_year, frac_sensible, frac_latent)
-    other_pl = hpxml.plug_loads.select { |pl| pl.plug_load_type == HPXML::PlugLoadTypeOther }[0]
-    assert_equal(kWh_per_year, other_pl.kWh_per_year)
-    assert_in_epsilon(frac_sensible, other_pl.frac_sensible, 0.01)
-    assert_in_epsilon(frac_latent, other_pl.frac_latent, 0.01)
-  end
-
-  def _test_default_vehicle_plug_load_values(hpxml, kWh_per_year)
-    veh_pl = hpxml.plug_loads.select { |pl| pl.plug_load_type == HPXML::PlugLoadTypeVehicle }[0]
-    assert_in_epsilon(kWh_per_year, veh_pl.kWh_per_year, 0.01)
-  end
-
-  def _test_default_well_pump_plug_load_values(hpxml, kWh_per_year)
-    wellpump_pl = hpxml.plug_loads.select { |pl| pl.plug_load_type == HPXML::PlugLoadTypeWellPump }[0]
-    assert_in_epsilon(kWh_per_year, wellpump_pl.kWh_per_year, 0.01)
-  end
-
-  def _test_default_grill_fuel_load_values(hpxml, therm_per_year)
-    gg_fl = hpxml.fuel_loads.select { |fl| fl.fuel_load_type == HPXML::FuelLoadTypeGrill }[0]
-    assert_in_epsilon(therm_per_year, gg_fl.therm_per_year, 0.01)
-  end
-
-  def _test_default_lighting_fuel_load_values(hpxml, therm_per_year)
-    gl_fl = hpxml.fuel_loads.select { |fl| fl.fuel_load_type == HPXML::FuelLoadTypeLighting }[0]
-    assert_in_epsilon(therm_per_year, gl_fl.therm_per_year, 0.01)
-  end
-
-  def _test_default_fireplace_fuel_load_values(hpxml, therm_per_year)
-    gf_fl = hpxml.fuel_loads.select { |fl| fl.fuel_load_type == HPXML::FuelLoadTypeFireplace }[0]
-    assert_in_epsilon(therm_per_year, gf_fl.therm_per_year, 0.01)
+  def _test_default_fuel_load_values(hpxml, load_type, therm_per_year, frac_sensible, frac_latent, location)
+    fl = hpxml.fuel_loads.select { |fl| fl.fuel_load_type == load_type }[0]
+    assert_in_epsilon(therm_per_year, fl.therm_per_year, 0.01)
+    assert_in_epsilon(frac_sensible, fl.frac_sensible, 0.01)
+    assert_in_epsilon(frac_latent, fl.frac_latent, 0.01)
+    assert_equal(location, fl.location)
   end
 
   def _test_default_number_of_bathrooms(hpxml, n_bathrooms)
@@ -1222,10 +1220,14 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
       plug_load.kWh_per_year = nil
       plug_load.frac_sensible = nil
       plug_load.frac_latent = nil
+      plug_load.location = nil
     end
 
     hpxml.fuel_loads.each do |fuel_load|
       fuel_load.therm_per_year = nil
+      fuel_load.frac_sensible = nil
+      fuel_load.frac_latent = nil
+      fuel_load.location = nil
     end
 
     hpxml.lighting.usage_multiplier = nil

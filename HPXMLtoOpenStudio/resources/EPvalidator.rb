@@ -97,14 +97,8 @@ class EnergyPlusValidator
         '/HPXML/Building/BuildingDetails/Pools/Pool' => zero_or_one, # See [Pool]
         '/HPXML/Building/BuildingDetails/HotTubs/HotTub' => zero_or_one, # See [HotTub]
 
-        '/HPXML/Building/BuildingDetails/MiscLoads/PlugLoad[PlugLoadType="other"]' => zero_or_one, # See [PlugLoads]
-        '/HPXML/Building/BuildingDetails/MiscLoads/PlugLoad[PlugLoadType[text()="TV other"]]' => zero_or_one, # See [OtherPlugLoads]
-        '/HPXML/Building/BuildingDetails/MiscLoads/PlugLoad[PlugLoadType[text()="electric vehicle charging"]]' => zero_or_one, # See [OtherPlugLoads]
-        '/HPXML/Building/BuildingDetails/MiscLoads/PlugLoad[PlugLoadType[text()="well pump"]]' => zero_or_one, # See [OtherPlugLoads]
-
-        '/HPXML/Building/BuildingDetails/MiscLoads/FuelLoad[FuelLoadType[text()="grill"]]' => zero_or_one, # See [FuelLoad]
-        '/HPXML/Building/BuildingDetails/MiscLoads/FuelLoad[FuelLoadType[text()="lighting"]]' => zero_or_one, # See [FuelLoad]
-        '/HPXML/Building/BuildingDetails/MiscLoads/FuelLoad[FuelLoadType[text()="fireplace"]]' => zero_or_one, # See [FuelLoad]
+        '/HPXML/Building/BuildingDetails/MiscLoads/PlugLoad' => zero_or_more, # See [PlugLoad]
+        '/HPXML/Building/BuildingDetails/MiscLoads/FuelLoad' => zero_or_more, # See [FuelLoad]
       },
 
       # [SimulationControl]
@@ -801,11 +795,11 @@ class EnergyPlusValidator
       # [Pool]
       '/HPXML/Building/BuildingDetails/Pools/Pool' => {
         'SystemIdentifier' => one, # Required by HPXML schema
-        'PoolPumps/PoolPump' => one,
-        '[not(Heater)] | Heater[Type="gas fired" or Type="electric resistance"]' => one,
+        'PoolPumps/PoolPump' => one, # See [PoolPump]
+        'Heater' => zero_or_one, # See [PoolHeater]
       },
 
-      # [PoolPump]
+      ## [PoolPump]
       '/HPXML/Building/BuildingDetails/Pools/Pool/PoolPumps/PoolPump' => {
         'SystemIdentifier' => one, # Required by HPXML schema
         'Load[Units="kWh/year"]/Value' => zero_or_one,
@@ -815,9 +809,10 @@ class EnergyPlusValidator
         'extension/MonthlyScheduleMultipliers' => zero_or_one,
       },
 
-      # [PoolHeater]
+      ## [PoolHeater]
       '/HPXML/Building/BuildingDetails/Pools/Pool/Heater' => {
         'SystemIdentifier' => one, # Required by HPXML schema
+        'Type[text()="gas fired" or text()="electric resistance" or text()="heat pump"]' => one,
         'Load[Units="kWh/year" or Units="therm/year"]/Value' => zero_or_one,
         'extension/UsageMultiplier' => zero_or_one,
         'extension/WeekdayScheduleFractions' => zero_or_one,
@@ -828,11 +823,11 @@ class EnergyPlusValidator
       # [HotTub]
       '/HPXML/Building/BuildingDetails/HotTubs/HotTub' => {
         'SystemIdentifier' => one, # Required by HPXML schema
-        'HotTubPumps/HotTubPump' => one,
-        '[not(Heater)] | Heater[Type="gas fired" or Type="electric resistance"]' => one,
+        'HotTubPumps/HotTubPump' => one, # See [HotTubPump]
+        'Heater' => zero_or_one, # See [HotTubHeater]
       },
 
-      # [HotTubPump]
+      ## [HotTubPump]
       '/HPXML/Building/BuildingDetails/HotTubs/HotTub/HotTubPumps/HotTubPump' => {
         'SystemIdentifier' => one, # Required by HPXML schema
         'Load[Units="kWh/year"]/Value' => zero_or_one,
@@ -842,9 +837,10 @@ class EnergyPlusValidator
         'extension/MonthlyScheduleMultipliers' => zero_or_one,
       },
 
-      # [HotTubHeater]
+      ## [HotTubHeater]
       '/HPXML/Building/BuildingDetails/HotTubs/HotTub/Heater' => {
         'SystemIdentifier' => one, # Required by HPXML schema
+        'Type[text()="gas fired" or text()="electric resistance" or text()="heat pump"]' => one,
         'Load[Units="kWh/year" or Units="therm/year"]/Value' => zero_or_one,
         'extension/UsageMultiplier' => zero_or_one,
         'extension/WeekdayScheduleFractions' => zero_or_one,
@@ -852,9 +848,11 @@ class EnergyPlusValidator
         'extension/MonthlyScheduleMultipliers' => zero_or_one,
       },
 
-      # [PlugLoads]
-      '/HPXML/Building/BuildingDetails/MiscLoads/PlugLoad[PlugLoadType="other"]' => {
+      # [PlugLoad]
+      '/HPXML/Building/BuildingDetails/MiscLoads/PlugLoad' => {
         'SystemIdentifier' => one, # Required by HPXML schema
+        'PlugLoadType[text()="other" or text()="TV other" or text()="electric vehicle charging" or text()="well pump"]' => one,
+        'Location[text()="interior" or text()="exterior"]' => zero_or_one,
         'Load[Units="kWh/year"]/Value' => zero_or_one,
         'extension/FracSensible' => zero_or_one,
         'extension/FracLatent' => zero_or_one,
@@ -864,19 +862,11 @@ class EnergyPlusValidator
         'extension/MonthlyScheduleMultipliers' => zero_or_one,
       },
 
-      # [OtherPlugLoads]
-      '/HPXML/Building/BuildingDetails/MiscLoads/PlugLoad[PlugLoadType[text()="TV other" or text()="electric vehicle charging" or text()="well pump"]]' => {
-        'SystemIdentifier' => one, # Required by HPXML schema
-        'Load[Units="kWh/year"]/Value' => zero_or_one,
-        'extension/UsageMultiplier' => zero_or_one,
-        'extension/WeekdayScheduleFractions' => zero_or_one,
-        'extension/WeekendScheduleFractions' => zero_or_one,
-        'extension/MonthlyScheduleMultipliers' => zero_or_one,
-      },
-
       # [FuelLoad]
-      '/HPXML/Building/BuildingDetails/MiscLoads/FuelLoad[FuelLoadType[text()="grill" or text()="lighting" or text()="fireplace"]]' => {
+      '/HPXML/Building/BuildingDetails/MiscLoads/FuelLoad' => {
         'SystemIdentifier' => one, # Required by HPXML schema
+        'FuelLoadType[text()="grill" or text()="lighting" or text()="fireplace"]' => one,
+        'Location[text()="interior" or text()="exterior"]' => zero_or_one,
         'Load[Units="therm/year"]/Value' => zero_or_one,
         'FuelType[text()="natural gas" or text()="fuel oil" or text()="propane" or text()="wood" or text()="wood pellets"]' => one,
         'extension/UsageMultiplier' => zero_or_one,

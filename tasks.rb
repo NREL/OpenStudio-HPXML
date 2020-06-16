@@ -4090,9 +4090,7 @@ def set_hpxml_hot_tubs(hpxml_file, hpxml)
                        heater_kwh_per_year: 1300,
                        pump_kwh_per_year: 1000)
   elsif ['base-misc-large-uncommon-loads2.xml'].include? hpxml_file
-    hpxml.hot_tubs[0].heater_type = HPXML::HeaterTypeGas
-    hpxml.hot_tubs[0].heater_kwh_per_year = nil
-    hpxml.hot_tubs[0].heater_therm_per_year = 500
+    hpxml.hot_tubs[0].heater_type = HPXML::HeaterTypeHeatPump
   end
 end
 

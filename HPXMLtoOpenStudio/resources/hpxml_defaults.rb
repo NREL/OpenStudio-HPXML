@@ -459,20 +459,50 @@ class HPXMLDefaults
         if plug_load.frac_latent.nil?
           plug_load.frac_latent = default_lat_frac
         end
+        if plug_load.location.nil?
+          plug_load.location = HPXML::LocationInterior
+        end
       elsif plug_load.plug_load_type == HPXML::PlugLoadTypeTelevision
         default_annual_kwh, default_sens_frac, default_lat_frac = MiscLoads.get_televisions_default_values(cfa, nbeds)
         if plug_load.kWh_per_year.nil?
           plug_load.kWh_per_year = default_annual_kwh
+        end
+        if plug_load.frac_sensible.nil?
+          plug_load.frac_sensible = 1.0
+        end
+        if plug_load.frac_latent.nil?
+          plug_load.frac_latent = 0.0
+        end
+        if plug_load.location.nil?
+          plug_load.location = HPXML::LocationInterior
         end
       elsif plug_load.plug_load_type == HPXML::PlugLoadTypeVehicle
         default_annual_kwh = MiscLoads.get_vehicle_default_values
         if plug_load.kWh_per_year.nil?
           plug_load.kWh_per_year = default_annual_kwh
         end
+        if plug_load.frac_sensible.nil?
+          plug_load.frac_sensible = 1.0
+        end
+        if plug_load.frac_latent.nil?
+          plug_load.frac_latent = 0.0
+        end
+        if plug_load.location.nil?
+          plug_load.location = HPXML::LocationExterior
+        end
       elsif plug_load.plug_load_type == HPXML::PlugLoadTypeWellPump
         default_annual_kwh = MiscLoads.get_well_pump_default_values(cfa, nbeds)
         if plug_load.kWh_per_year.nil?
           plug_load.kWh_per_year = default_annual_kwh
+        end
+        if plug_load.frac_sensible.nil?
+          plug_load.frac_sensible = 1.0
+        end
+        if plug_load.frac_latent.nil?
+          plug_load.frac_latent = 0.0
+        end
+        if plug_load.location.nil?
+          plug_load.location = HPXML::LocationExterior
         end
       end
       if plug_load.usage_multiplier.nil?
@@ -496,13 +526,40 @@ class HPXMLDefaults
         if fuel_load.therm_per_year.nil?
           fuel_load.therm_per_year = MiscLoads.get_gas_grill_default_values(cfa, nbeds)
         end
+        if fuel_load.frac_sensible.nil?
+          fuel_load.frac_sensible = 0.0
+        end
+        if fuel_load.frac_latent.nil?
+          fuel_load.frac_latent = 0.0
+        end
+        if fuel_load.location.nil?
+          fuel_load.location = HPXML::LocationExterior
+        end
       elsif fuel_load.fuel_load_type == HPXML::FuelLoadTypeLighting
         if fuel_load.therm_per_year.nil?
           fuel_load.therm_per_year = MiscLoads.get_gas_lighting_default_values(cfa, nbeds)
         end
+        if fuel_load.frac_sensible.nil?
+          fuel_load.frac_sensible = 0.0
+        end
+        if fuel_load.frac_latent.nil?
+          fuel_load.frac_latent = 0.0
+        end
+        if fuel_load.location.nil?
+          fuel_load.location = HPXML::LocationExterior
+        end
       elsif fuel_load.fuel_load_type == HPXML::FuelLoadTypeFireplace
         if fuel_load.therm_per_year.nil?
           fuel_load.therm_per_year = MiscLoads.get_gas_fireplace_default_values(cfa, nbeds)
+        end
+        if fuel_load.frac_sensible.nil?
+          fuel_load.frac_sensible = 0.5
+        end
+        if fuel_load.frac_latent.nil?
+          fuel_load.frac_latent = 0.1
+        end
+        if fuel_load.location.nil?
+          fuel_load.location = HPXML::LocationExterior
         end
       end
       if fuel_load.usage_multiplier.nil?

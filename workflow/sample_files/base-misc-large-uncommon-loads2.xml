@@ -653,10 +653,10 @@
           </HotTubPumps>
           <Heater>
             <SystemIdentifier id='HotTubHeater'/>
-            <Type>gas fired</Type>
+            <Type>heat pump</Type>
             <Load>
-              <Units>therm/year</Units>
-              <Value>500.0</Value>
+              <Units>kWh/year</Units>
+              <Value>1300.0</Value>
             </Load>
           </Heater>
         </HotTub>
