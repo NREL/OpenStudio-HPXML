@@ -608,7 +608,7 @@ class HPXMLDefaults
     default_exterior_lighting_weekday_fractions = '0.046, 0.046, 0.046, 0.046, 0.046, 0.037, 0.035, 0.034, 0.033, 0.028, 0.022, 0.015, 0.012, 0.011, 0.011, 0.012, 0.019, 0.037, 0.049, 0.065, 0.091, 0.105, 0.091, 0.063'
     default_exterior_lighting_weekend_fractions = '0.046, 0.046, 0.045, 0.045, 0.046, 0.045, 0.044, 0.041, 0.036, 0.03, 0.024, 0.016, 0.012, 0.011, 0.011, 0.012, 0.019, 0.038, 0.048, 0.06, 0.083, 0.098, 0.085, 0.059'
     default_exterior_lighting_monthly_multipliers = '1.248, 1.257, 0.993, 0.989, 0.993, 0.827, 0.821, 0.821, 0.827, 0.99, 0.987, 1.248'
-    if hpxml.lighting.garage_weekday_fractions.nil?
+    if hpxml.lighting.garage_weekday_fractions.nil? && hpxml.has_space_type(HPXML::LocationGarage)
       hpxml.lighting.garage_weekday_fractions = default_exterior_lighting_weekday_fractions
       hpxml.lighting.garage_weekend_fractions = default_exterior_lighting_weekend_fractions
       hpxml.lighting.garage_monthly_multipliers = default_exterior_lighting_monthly_multipliers

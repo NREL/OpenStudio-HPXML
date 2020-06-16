@@ -34,13 +34,13 @@ class Lighting
                                             lighting.exterior_usage_multiplier)
 
     # Create schedule
-    if lighting.interior_weekday_fractions.nil?
-      interior_sch = create_schedule(model, weather)
-    else
+    if not lighting.interior_weekday_fractions.nil?
       interior_sch = MonthWeekdayWeekendSchedule.new(model, Constants.ObjectNameInteriorLighting + ' schedule', lighting.interior_weekday_fractions, lighting.interior_weekend_fractions, lighting.interior_monthly_multipliers, 1.0, 1.0, true, true, Constants.ScheduleTypeLimitsFraction)
+    else
+      interior_sch = create_schedule(model, weather)
     end
-    garage_sch = MonthWeekdayWeekendSchedule.new(model, Constants.ObjectNameGarageLighting + ' schedule', lighting.garage_weekday_fractions, lighting.garage_weekend_fractions, lighting.garage_monthly_multipliers, 1.0, 1.0, true, true, Constants.ScheduleTypeLimitsFraction)
     exterior_sch = MonthWeekdayWeekendSchedule.new(model, Constants.ObjectNameExteriorLighting + ' schedule', lighting.exterior_weekday_fractions, lighting.exterior_weekend_fractions, lighting.exterior_monthly_multipliers, 1.0, 1.0, true, true, Constants.ScheduleTypeLimitsFraction)
+    garage_sch = exterior_sch # use exterior lighting schedule for garage lighting
     exterior_holiday_sch = MonthWeekdayWeekendSchedule.new(model, Constants.ObjectNameLightingExteriorHoliday + ' schedule', lighting.exterior_holiday_fractions, lighting.exterior_holiday_fractions, lighting.exterior_monthly_multipliers, 1.0, 1.0, true, true, Constants.ScheduleTypeLimitsFraction, lighting.exterior_holiday_period_begin_month, lighting.exterior_holiday_period_begin_day_of_month, lighting.exterior_holiday_period_end_month, lighting.exterior_holiday_period_end_day_of_month)
 
     # Add lighting to each conditioned space
