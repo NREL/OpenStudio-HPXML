@@ -1419,6 +1419,7 @@ class SimulationOutputReport < OpenStudio::Measure::ReportingMeasure
           sys_id = dfhp_primary_sys_id(sys_id)
           load_fraction = dfhp_loads[[sys_id, false]] / (dfhp_loads[[sys_id, true]] + dfhp_loads[[sys_id, false]]) unless dfhp_loads[[sys_id, true]].nil?
         end
+        load_fraction = 1.0 if load_fraction.nan?
       end
       next unless get_system_or_seed_id(heat_pump) == sys_id
 

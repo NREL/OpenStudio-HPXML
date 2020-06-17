@@ -3,8 +3,8 @@
   <schema_version>3.0</schema_version>
   <name>hpxm_lto_openstudio</name>
   <uid>b1543b30-9465-45ff-ba04-1d1f85e763bc</uid>
-  <version_id>13db7bb2-9770-4b38-8ed5-d1dc352722c7</version_id>
-  <version_modified>20200617T165703Z</version_modified>
+  <version_id>1d86a450-2d95-4d14-b087-40a43eadbadd</version_id>
+  <version_modified>20200617T170306Z</version_modified>
   <xml_checksum>D8922A73</xml_checksum>
   <class_name>HPXMLtoOpenStudio</class_name>
   <display_name>HPXML to OpenStudio Translator</display_name>
@@ -427,12 +427,6 @@
       <checksum>FC4DE789</checksum>
     </file>
     <file>
-      <filename>hvac_sizing.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>C68506F8</checksum>
-    </file>
-    <file>
       <filename>airflow.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
@@ -463,16 +457,28 @@
       <checksum>2B5DD894</checksum>
     </file>
     <file>
+      <filename>hvac_sizing.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>598BE4EE</checksum>
+    </file>
+    <file>
       <filename>HPXMLDataTypes.xsd</filename>
       <filetype>xsd</filetype>
       <usage_type>resource</usage_type>
       <checksum>0CCEC05A</checksum>
     </file>
     <file>
-      <filename>BaseElements.xsd</filename>
-      <filetype>xsd</filetype>
+      <filename>misc_loads.rb</filename>
+      <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>6B0842BB</checksum>
+      <checksum>2B333CB1</checksum>
+    </file>
+    <file>
+      <filename>test_miscloads.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>test</usage_type>
+      <checksum>179766A0</checksum>
     </file>
     <file>
       <filename>hotwater_appliances.rb</filename>
@@ -481,10 +487,16 @@
       <checksum>BA7AC612</checksum>
     </file>
     <file>
-      <filename>constants.rb</filename>
+      <filename>BaseElements.xsd</filename>
+      <filetype>xsd</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>6B0842BB</checksum>
+    </file>
+    <file>
+      <filename>hpxml.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>C0B6F55B</checksum>
+      <checksum>49D561D9</checksum>
     </file>
     <file>
       <version>
@@ -498,10 +510,10 @@
       <checksum>4A814143</checksum>
     </file>
     <file>
-      <filename>test_miscloads.rb</filename>
+      <filename>hpxml_defaults.rb</filename>
       <filetype>rb</filetype>
-      <usage_type>test</usage_type>
-      <checksum>179766A0</checksum>
+      <usage_type>resource</usage_type>
+      <checksum>AABCF905</checksum>
     </file>
     <file>
       <filename>test_defaults.rb</filename>
@@ -516,22 +528,10 @@
       <checksum>50E17C04</checksum>
     </file>
     <file>
-      <filename>misc_loads.rb</filename>
+      <filename>constants.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>2B333CB1</checksum>
-    </file>
-    <file>
-      <filename>hpxml.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>49D561D9</checksum>
-    </file>
-    <file>
-      <filename>hpxml_defaults.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>AABCF905</checksum>
+      <checksum>30873222</checksum>
     </file>
   </files>
 </measure>
