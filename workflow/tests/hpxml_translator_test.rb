@@ -15,10 +15,10 @@ class HPXMLTest < MiniTest::Test
   @@simulation_runtime_key = 'Simulation Runtime'
   @@workflow_runtime_key = 'Workflow Runtime'
 
-  def test_simulations
-    @os_log = OpenStudio::StringStreamLogSink.new
-    @os_log.setLogLevel(OpenStudio::Warn)
+  @@os_log = OpenStudio::StringStreamLogSink.new
+  @@os_log.setLogLevel(OpenStudio::Warn)
 
+  def test_simulations
     this_dir = File.dirname(__FILE__)
     results_dir = File.join(this_dir, 'results')
     _rm_path(results_dir)
@@ -475,11 +475,11 @@ class HPXMLTest < MiniTest::Test
 
   def report_os_warnings(rundir)
     File.open(File.join(rundir, 'run.log'), 'a') do |f|
-      @os_log.logMessages.each do |s|
+      @@os_log.logMessages.each do |s|
         f << "OS Message: #{s.logMessage}\n"
       end
     end
-    @os_log.resetStringStream
+    @@os_log.resetStringStream
   end
 
   def _get_sizing_results(runner)
@@ -522,6 +522,8 @@ class HPXMLTest < MiniTest::Test
       next if log_line.include? 'Data will be treated as typical (TMY)'
       next if log_line.include? 'WorkflowStepResult value called with undefined stepResult'
       next if log_line.include?("Object of type 'Schedule:Constant' and named 'Always") && log_line.include?('points to an object named') && log_line.include?('but that object cannot be located')
+      next if log_line.include? "-cache.csv' could not be found; regenerating it."
+      next if log_line.include? 'Appears there are no design condition fields in the EPW file'
       next if log_line.include?('Warning: HVACDistribution') && log_line.include?('has ducts entirely within conditioned space but there is non-zero leakage to the outside.')
       # TODO: Remove once https://github.com/NREL/OpenStudio/pull/3999 is available
       next if log_line.include? "OS Message: 'Propane' is deprecated for Coil_Heating_GasFields:FuelType, use 'Propane' instead"
