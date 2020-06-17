@@ -979,7 +979,21 @@ The fractions for a given location cannot sum to greater than 1.
 If the fractions sum to less than 1, the remainder is assumed to be incandescent lighting.
 Garage lighting values are ignored if the building has no garage.
 
-A ``Lighting/extension/UsageMultiplier`` can also be optionally provided that scales energy usage; if not provided, it is assumed to be 1.0.
+``Lighting/extension/InteriorUsageMultiplier``, ``Lighting/extension/ExteriorUsageMultiplier``, and ``Lighting/extension/GarageUsageMultiplier`` can be optionally provided that scales energy usage; if not provided, they are assumed to be 1.0.
+``Lighting/extension/ExteriorHolidayLighting`` can also be optionally provided. If not provided, none will be modeled. 
+If provided (indicating there is exterior holiday lighting), ``HolidayDailyEnergyUse``, ``HolidayPeriodBeginMonth``, ``HolidayPeriodBeginDayOfMonth``, ``HolidayPeriodEndMonth``, ``HolidayPeriodEndDayOfMonth``, and ``HolidayScheduleFactions`` can be optionally provided. 
+If the complete set of exterior holiday lighting inputs is not provided, the following default values will be used.
+
+=============================================  =============================================================================================================================================================
+Element Name                                   Default Value
+=============================================  =============================================================================================================================================================
+HolidayDailyEnergyUse                          1.1 for SFD; 0.5 for SFA or MF  
+HolidayPeriodBeginMonth                        11  
+HolidayPeriodBeginDayOfMonth                   24  
+HolidayPeriodEndMonth                          1  
+HolidayPeriodEndDayOfMonth                     6
+HolidayScheduleFactions                        0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.008168, 0.098016, 0.168028, 0.193699, 0.283547, 0.192532, 0.03734, 0.01867  
+=============================================  =============================================================================================================================================================
 
 Ceiling Fans
 ~~~~~~~~~~~~

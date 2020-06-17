@@ -760,14 +760,18 @@ class EnergyPlusValidator
         'extension/InteriorWeekdayScheduleFractions | extension/InteriorWeekendScheduleFractions | extension/InteriorMonthlyScheduleMultipliers' => zero_or_three,
         'extension/GarageWeekdayScheduleFractions | extension/GarageWeekendScheduleFractions | extension/GarageMonthlyScheduleMultipliers' => zero_or_three,
         'extension/ExteriorWeekdayScheduleFractions | extension/ExteriorWeekendScheduleFractions | extension/ExteriorMonthlyScheduleMultipliers' => zero_or_three,
-        'extension/ExteriorHolidayDailyEnergyUse' => one, # Daily energy use in kWh/day
-        'extension/ExteriorHolidayPeriodBeginMonth | extension/ExteriorHolidayPeriodBeginDayOfMonth | extension/ExteriorHolidayPeriodEndMonth | extension/ExteriorHolidayPeriodEndDayOfMonth | extension/ExteriorHolidayScheduleFractions' => zero_or_five,
+        'extension[ExteriorHolidayLighting = "true"]' => zero_or_one, # See [ExteriorHolidayLighting]
       },
 
       ## [LightingGroup]
       'LightingGroup[LightingType[LightEmittingDiode | CompactFluorescent | FluorescentTube] and Location[text()="interior" or text()="exterior" or text()="garage"]]' => {
         'SystemIdentifier' => one, # Required by HPXML schema
         'FractionofUnitsInLocation' => one,
+      },
+
+      ## [ExteriorHolidayLighting]
+      '/HPXML/Building/BuildingDetails/Lighting/extension[ExteriorHolidayLighting = "true"]' => {
+        'extension/HolidayDailyEnergyUse | extension/HolidayPeriodBeginMonth | extension/HolidayPeriodBeginDayOfMonth | extension/HolidayPeriodEndMonth | extension/HolidayPeriodEndDayOfMonth | extension/HolidayScheduleFractions' => zero_or_six, # Daily energy use in kWh/day
       },
 
       # [CeilingFan]

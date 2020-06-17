@@ -532,20 +532,6 @@
             <LightEmittingDiode/>
           </LightingType>
         </LightingGroup>
-        <extension>
-          <InteriorWeekdayScheduleFractions>0.20, 0.20, 0.20, 0.20, 0.20, 0.20, 0.20, 0.90, 0.90, 0.90, 0.90, 0.90, 0.90, 0.90, 0.90, 0.90, 0.70, 0.70, 0.50, 0.50, 0.20, 0.20, 0.20, 0.20</InteriorWeekdayScheduleFractions>
-          <InteriorWeekendScheduleFractions>0.20, 0.20, 0.20, 0.20, 0.20, 0.20, 0.20, 0.90, 0.90, 0.90, 0.90, 0.90, 0.90, 0.90, 0.90, 0.90, 0.70, 0.70, 0.50, 0.50, 0.20, 0.20, 0.20, 0.20</InteriorWeekendScheduleFractions>
-          <InteriorMonthlyScheduleMultipliers>1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0</InteriorMonthlyScheduleMultipliers>
-          <ExteriorWeekdayScheduleFractions>0.046, 0.046, 0.046, 0.046, 0.046, 0.037, 0.035, 0.034, 0.033, 0.028, 0.022, 0.015, 0.012, 0.011, 0.011, 0.012, 0.019, 0.037, 0.049, 0.065, 0.091, 0.105, 0.091, 0.063</ExteriorWeekdayScheduleFractions>
-          <ExteriorWeekendScheduleFractions>0.046, 0.046, 0.045, 0.045, 0.046, 0.045, 0.044, 0.041, 0.036, 0.03, 0.024, 0.016, 0.012, 0.011, 0.011, 0.012, 0.019, 0.038, 0.048, 0.06, 0.083, 0.098, 0.085, 0.059</ExteriorWeekendScheduleFractions>
-          <ExteriorMonthlyScheduleMultipliers>1.248, 1.257, 0.993, 0.989, 0.993, 0.827, 0.821, 0.821, 0.827, 0.99, 0.987, 1.248</ExteriorMonthlyScheduleMultipliers>
-          <ExteriorHolidayDailyEnergyUse>1.1</ExteriorHolidayDailyEnergyUse>
-          <ExteriorHolidayPeriodBeginMonth>11</ExteriorHolidayPeriodBeginMonth>
-          <ExteriorHolidayPeriodBeginDayOfMonth>24</ExteriorHolidayPeriodBeginDayOfMonth>
-          <ExteriorHolidayPeriodEndMonth>1</ExteriorHolidayPeriodEndMonth>
-          <ExteriorHolidayPeriodEndDayOfMonth>6</ExteriorHolidayPeriodEndDayOfMonth>
-          <ExteriorHolidayScheduleFractions>0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.008168, 0.098016, 0.168028, 0.193699, 0.283547, 0.192532, 0.03734, 0.01867</ExteriorHolidayScheduleFractions>
-        </extension>
       </Lighting>
       <MiscLoads>
         <PlugLoad>
