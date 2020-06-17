@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<sch:schema xmlns:sch="http://purl.oclc.org/dsdl/schematron">
+  <sch:title>HPXML Schematron Validator</sch:title>
+  <sch:ns uri='http://hpxmlonline.com/2019/10' prefix='h'/>
+  <sch:pattern>
+    <sch:title>EnergyPlus Validator</sch:title>
+    <sch:rule context="/h:HPXML/h:XMLTransactionHeaderInformation">
+      <sch:assert test="count(h:XMLType) = 1">element 'XMLType' is REQUIRED</sch:assert>
+      <sch:assert test="count(h:XMLGeneratedBy) = 1">element 'XMLGeneratedBy' is REQUIRED</sch:assert>
+      <sch:assert test="count(h:CreatedDateAndTime) = 1">element 'CreatedDateAndTime' is REQUIRED</sch:assert>
+      <sch:assert test="count(h:Transaction) = 1">element 'Transaction' is REQUIRED</sch:assert>
+    </sch:rule>
+    <sch:rule context="/h:HPXML">
+      <sch:assert test="count(h:Building) = 1">element 'Building' is REQUIRED</sch:assert>
+    </sch:rule>
+    <sch:rule context="/h:HPXML/h:Building">
+      <sch:assert test="count(h:BuildingID) = 1">element 'BuildingID' is REQUIRED</sch:assert>
+    </sch:rule>
+    <sch:rule context="/h:HPXML/h:Building/h:ProjectStatus">
+      <sch:assert test="count(h:EventType) = 1">element 'ProjectStatus/EventType' is REQUIRED</sch:assert>
+    </sch:rule>
+    <sch:rule context="/h:HPXML/h:Building/h:BuildingDetails/h:BuildingSummary/h:Site">
+      <sch:assert test="count(h:SiteType) &lt;= 1">element 'SiteType' is OPTIONAL</sch:assert>
+      <sch:assert test="count(h:extension/h:ShelterCoefficient) &lt;= 1">element 'extension/ShelterCoefficient' is OPTIONAL</sch:assert>
+      <sch:assert test="count(h:extension/h:Neighbors) &lt;= 1">element 'extension/Neighbors' is OPTIONAL</sch:assert>
+    </sch:rule>
+    <sch:rule context="/h:HPXML/h:Building/h:BuildingDetails/h:BuildingSummary/h:Site/h:SiteType">
+      <sch:assert test="contains('_urban_ _suburban_ _rural_', concat('_', text(), '_'))">text "<sch:value-of select="text()"/>": element "text()" MUST be "urban", "suburban", or "rural"</sch:assert>
+    </sch:rule>
+  </sch:pattern>
+</sch:schema>
