@@ -63,6 +63,16 @@ class HPXMLtoOpenStudioLightingTest < MiniTest::Test
     assert_in_delta(109, ext_kwh_yr, 1.0)
   end
 
+  def test_exterior_holiday_lighting
+    args_hash = {}
+    args_hash['hpxml_path'] = File.absolute_path(File.join(sample_files_dir, 'base-misc-detailed-schedules.xml'))
+    model, hpxml = _test_measure(args_hash)
+
+    # Check exterior holiday lighting
+    ext_holiday_kwh_yr = get_kwh_per_year(model, Constants.ObjectNameLightingExteriorHoliday)
+    assert_in_delta(83, ext_holiday_kwh_yr, 1.0)
+  end
+
   def _test_measure(args_hash)
     # create an instance of the measure
     measure = HPXMLtoOpenStudio.new

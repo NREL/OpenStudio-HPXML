@@ -760,7 +760,7 @@ class EnergyPlusValidator
         'extension/InteriorWeekdayScheduleFractions | extension/InteriorWeekendScheduleFractions | extension/InteriorMonthlyScheduleMultipliers' => zero_or_three,
         'extension/GarageWeekdayScheduleFractions | extension/GarageWeekendScheduleFractions | extension/GarageMonthlyScheduleMultipliers' => zero_or_three,
         'extension/ExteriorWeekdayScheduleFractions | extension/ExteriorWeekendScheduleFractions | extension/ExteriorMonthlyScheduleMultipliers' => zero_or_three,
-        'extension[ExteriorHolidayLighting = "true"]' => zero_or_one, # See [ExteriorHolidayLighting]
+        'extension/ExteriorHolidayLighting' => zero_or_one, # See [ExteriorHolidayLighting]
       },
 
       ## [LightingGroup]
@@ -770,8 +770,8 @@ class EnergyPlusValidator
       },
 
       ## [ExteriorHolidayLighting]
-      '/HPXML/Building/BuildingDetails/Lighting/extension[ExteriorHolidayLighting = "true"]' => {
-        'extension/HolidayDailyEnergyUse | extension/HolidayPeriodBeginMonth | extension/HolidayPeriodBeginDayOfMonth | extension/HolidayPeriodEndMonth | extension/HolidayPeriodEndDayOfMonth | extension/HolidayScheduleFractions' => zero_or_six, # Daily energy use in kWh/day
+      '/HPXML/Building/BuildingDetails/Lighting/extension/ExteriorHolidayLighting' => {
+        'HolidayDailyEnergyUse | HolidayPeriodBeginMonth | HolidayPeriodBeginDayOfMonth | HolidayPeriodEndMonth | HolidayPeriodEndDayOfMonth | HolidayScheduleFractions' => zero_or_six, # Daily energy use in kWh/day
       },
 
       # [CeilingFan]

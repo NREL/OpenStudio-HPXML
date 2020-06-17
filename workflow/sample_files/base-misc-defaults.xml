@@ -472,9 +472,6 @@
         <CeilingFan>
           <SystemIdentifier id='CeilingFan'/>
         </CeilingFan>
-        <extension>
-          <ExteriorHolidayLighting>true</ExteriorHolidayLighting>
-        </extension>
       </Lighting>
       <MiscLoads>
         <PlugLoad>
