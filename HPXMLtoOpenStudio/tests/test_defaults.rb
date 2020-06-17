@@ -1350,6 +1350,9 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
     hpxml.cooking_ranges[0].location = nil
     hpxml.cooking_ranges[0].is_induction = nil
     hpxml.cooking_ranges[0].usage_multiplier = nil
+    hpxml.cooking_ranges[0].weekday_fractions = nil
+    hpxml.cooking_ranges[0].weekend_fractions = nil
+    hpxml.cooking_ranges[0].monthly_multipliers = nil
 
     hpxml.ovens[0].is_convection = nil
 
