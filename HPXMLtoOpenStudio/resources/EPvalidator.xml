@@ -10,6 +10,14 @@
       <sch:assert test="count(h:CreatedDateAndTime) = 1">element 'CreatedDateAndTime' is REQUIRED</sch:assert>
       <sch:assert test="count(h:Transaction) = 1">element 'Transaction' is REQUIRED</sch:assert>
     </sch:rule>
+    <sch:rule context="/h:HPXML/h:SoftwareInfo/h:extension">
+      <sch:assert test="count(h:SimulationControl) &lt;= 1">element 'SimulationControl' is OPTIONAL</sch:assert>
+    </sch:rule>
+    <sch:rule context="/h:HPXML/h:SoftwareInfo/h:extension/h:SimulationControl">
+      <sch:assert test="count(h:Timestep) &lt;= 1">element 'Timestep' is OPTIONAL</sch:assert>
+      <sch:assert test="((count(h:BeginMonth) = 0 and count(h:BeginDayOfMonth) = 0) or (count(h:BeginMonth) = 1 and count(h:BeginDayOfMonth) = 1)) ">Both 'BeginMonth' and 'BeginDayOfMonth' must be either blank or provided</sch:assert>
+      <sch:assert test="((count(h:EndMonth) = 0 and count(h:EndDayOfMonth) = 0) or (count(h:EndMonth) = 1 and count(h:EndDayOfMonth) = 1)) ">Both 'EndMonth' and 'EndDayOfMonth' must be either blank or provided</sch:assert>
+    </sch:rule>
     <sch:rule context="/h:HPXML">
       <sch:assert test="count(h:Building) = 1">element 'Building' is REQUIRED</sch:assert>
     </sch:rule>

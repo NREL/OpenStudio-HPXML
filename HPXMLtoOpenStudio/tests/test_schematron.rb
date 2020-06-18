@@ -33,13 +33,24 @@ class HPXMLtoOpenStudioSchematronTest < MiniTest::Test
   end
 
   def test_invalid_files
-    hpxml_name = 'base.xml'
-    hpxml = HPXML.new(hpxml_path: File.join(@root_path, 'workflow', 'sample_files', hpxml_name))
-    hpxml_doc = hpxml.to_oga()
-    XMLHelper.delete_element(hpxml_doc, '/HPXML/XMLTransactionHeaderInformation/XMLType')
-    XMLHelper.write_file(hpxml_doc, @tmp_hpxml_path)
-    expected_error_msgs = ["element 'XMLType' is REQUIRED"]
-    _test_schematron_validation(@tmp_hpxml_path, expected_error_msgs[0])
+    # TODO: Need to add more test cases
+    expected_error_msgs = { '/HPXML/XMLTransactionHeaderInformation/XMLType' => "element 'XMLType' is REQUIRED",
+                            '/HPXML/XMLTransactionHeaderInformation/XMLGeneratedBy' => "element 'XMLGeneratedBy' is REQUIRED",
+                            '/HPXML/XMLTransactionHeaderInformation/CreatedDateAndTime' => "element 'CreatedDateAndTime' is REQUIRED",
+                            '/HPXML/XMLTransactionHeaderInformation/Transaction' => "element 'Transaction' is REQUIRED",
+                            '/HPXML/Building' => "element 'Building' is REQUIRED",
+                            '/HPXML/Building/BuildingID' => "element 'BuildingID' is REQUIRED",
+                            '/HPXML/Building/ProjectStatus/EventType' => "element 'ProjectStatus/EventType' is REQUIRED",
+                          }
+    
+    expected_error_msgs.each do |key, value|
+      hpxml_name = 'base.xml'
+      hpxml = HPXML.new(hpxml_path: File.join(@root_path, 'workflow', 'sample_files', hpxml_name))
+      hpxml_doc = hpxml.to_oga()
+      XMLHelper.delete_element(hpxml_doc, key)
+      XMLHelper.write_file(hpxml_doc, @tmp_hpxml_path)
+      _test_schematron_validation(@tmp_hpxml_path, value)
+    end
   end
 
   def _test_schematron_validation(hpxml_path, expected_error_msgs = nil)
