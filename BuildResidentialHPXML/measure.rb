@@ -2730,11 +2730,11 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     # assign the user inputs to variables
     args = { hpxml_path: runner.getStringArgumentValue('hpxml_path', user_arguments),
              weather_dir: runner.getStringArgumentValue('weather_dir', user_arguments),
-             timestep: runner.getIntegerArgumentValue('simulation_control_timestep', user_arguments),
-             begin_month: runner.getIntegerArgumentValue('simulation_control_begin_month', user_arguments),
-             begin_day_of_month: runner.getIntegerArgumentValue('simulation_control_begin_day_of_month', user_arguments),
-             end_month: runner.getIntegerArgumentValue('simulation_control_end_month', user_arguments),
-             end_day_of_month: runner.getIntegerArgumentValue('simulation_control_end_day_of_month', user_arguments),
+             simulation_control_timestep: runner.getIntegerArgumentValue('simulation_control_timestep', user_arguments),
+             simulation_control_begin_month: runner.getIntegerArgumentValue('simulation_control_begin_month', user_arguments),
+             simulation_control_begin_day_of_month: runner.getIntegerArgumentValue('simulation_control_begin_day_of_month', user_arguments),
+             simulation_control_end_month: runner.getIntegerArgumentValue('simulation_control_end_month', user_arguments),
+             simulation_control_end_day_of_month: runner.getIntegerArgumentValue('simulation_control_end_day_of_month', user_arguments),
              schedules_output_path: runner.getStringArgumentValue('schedules_output_path', user_arguments),
              weather_station_epw_filepath: runner.getStringArgumentValue('weather_station_epw_filepath', user_arguments),
              site_type: runner.getStringArgumentValue('site_type', user_arguments),
@@ -2773,12 +2773,12 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
              foundation_wall_insulation_distance_to_top: runner.getDoubleArgumentValue('foundation_wall_insulation_distance_to_top', user_arguments),
              foundation_wall_insulation_distance_to_bottom: runner.getDoubleArgumentValue('foundation_wall_insulation_distance_to_bottom', user_arguments),
              foundation_wall_assembly_r: runner.getOptionalDoubleArgumentValue('foundation_wall_assembly_r', user_arguments),
-             perimeter_insulation_r_value: runner.getDoubleArgumentValue('slab_perimeter_insulation_r', user_arguments),
-             perimeter_insulation_depth: runner.getDoubleArgumentValue('slab_perimeter_depth', user_arguments),
-             under_slab_insulation_r_value: runner.getDoubleArgumentValue('slab_under_insulation_r', user_arguments),
-             under_slab_insulation_width: runner.getDoubleArgumentValue('slab_under_width', user_arguments),
+             slab_perimeter_insulation_r: runner.getDoubleArgumentValue('slab_perimeter_insulation_r', user_arguments),
+             slab_perimeter_depth: runner.getDoubleArgumentValue('slab_perimeter_depth', user_arguments),
+             slab_under_insulation_r: runner.getDoubleArgumentValue('slab_under_insulation_r', user_arguments),
+             slab_under_width: runner.getDoubleArgumentValue('slab_under_width', user_arguments),
              slab_carpet_fraction: runner.getDoubleArgumentValue('slab_carpet_fraction', user_arguments),
-             slab_carpet_r_value: runner.getDoubleArgumentValue('slab_carpet_r', user_arguments),
+             slab_carpet_r: runner.getDoubleArgumentValue('slab_carpet_r', user_arguments),
              ceiling_assembly_r: runner.getDoubleArgumentValue('ceiling_assembly_r', user_arguments),
              roof_material_type: runner.getOptionalStringArgumentValue('roof_material_type', user_arguments),
              roof_assembly_r: runner.getDoubleArgumentValue('roof_assembly_r', user_arguments),
@@ -2869,8 +2869,8 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
              ducts_return_leakage_units: runner.getStringArgumentValue('ducts_return_leakage_units', user_arguments),
              ducts_supply_leakage_value: runner.getDoubleArgumentValue('ducts_supply_leakage_value', user_arguments),
              ducts_return_leakage_value: runner.getDoubleArgumentValue('ducts_return_leakage_value', user_arguments),
-             ducts_supply_insulation_r_value: runner.getDoubleArgumentValue('ducts_supply_insulation_r', user_arguments),
-             ducts_return_insulation_r_value: runner.getDoubleArgumentValue('ducts_return_insulation_r', user_arguments),
+             ducts_supply_insulation_r: runner.getDoubleArgumentValue('ducts_supply_insulation_r', user_arguments),
+             ducts_return_insulation_r: runner.getDoubleArgumentValue('ducts_return_insulation_r', user_arguments),
              ducts_supply_location: runner.getStringArgumentValue('ducts_supply_location', user_arguments),
              ducts_return_location: runner.getStringArgumentValue('ducts_return_location', user_arguments),
              ducts_supply_surface_area: runner.getStringArgumentValue('ducts_supply_surface_area', user_arguments),
@@ -3367,14 +3367,14 @@ class HPXMLFile
     hpxml.header.xml_type = 'HPXML'
     hpxml.header.xml_generated_by = 'BuildResidentialHPXML'
     hpxml.header.transaction = 'create'
-    hpxml.header.timestep = args[:timestep]
-    if not (args[:begin_month] == 1 && args[:begin_day_of_month] == 1)
-      hpxml.header.begin_month = args[:begin_month]
-      hpxml.header.begin_day_of_month = args[:begin_day_of_month]
+    hpxml.header.timestep = args[:simulation_control_timestep]
+    if not (args[:simulation_control_begin_month] == 1 && args[:simulation_control_begin_day_of_month] == 1)
+      hpxml.header.begin_month = args[:simulation_control_begin_month]
+      hpxml.header.begin_day_of_month = args[:simulation_control_begin_day_of_month]
     end
-    if not (args[:end_month] == 12 && args[:end_day_of_month] == 31)
-      hpxml.header.end_month = args[:end_month]
-      hpxml.header.end_day_of_month = args[:end_day_of_month]
+    if not (args[:simulation_control_end_month] == 12 && args[:simulation_control_end_day_of_month] == 31)
+      hpxml.header.end_month = args[:simulation_control_end_month]
+      hpxml.header.end_day_of_month = args[:simulation_control_end_day_of_month]
     end
     hpxml.header.building_id = 'MyBuilding'
     hpxml.header.event_type = 'proposed workscope'
@@ -3706,10 +3706,10 @@ class HPXMLFile
         depth_below_grade = 0
       end
 
-      if args[:under_slab_insulation_width] == 999
+      if args[:slab_under_width] == 999
         under_slab_insulation_spans_entire_slab = true
       else
-        under_slab_insulation_width = args[:under_slab_insulation_width]
+        under_slab_insulation_width = args[:slab_under_width]
       end
 
       thickness = 4.0
@@ -3722,14 +3722,14 @@ class HPXMLFile
                       area: UnitConversions.convert(surface.grossArea, 'm^2', 'ft^2').round,
                       thickness: thickness,
                       exposed_perimeter: exposed_perimeter,
-                      perimeter_insulation_depth: args[:perimeter_insulation_depth],
+                      perimeter_insulation_depth: args[:slab_perimeter_depth],
                       under_slab_insulation_width: under_slab_insulation_width,
-                      perimeter_insulation_r_value: args[:perimeter_insulation_r_value],
-                      under_slab_insulation_r_value: args[:under_slab_insulation_r_value],
+                      perimeter_insulation_r_value: args[:slab_perimeter_insulation_r],
+                      under_slab_insulation_r_value: args[:slab_under_insulation_r],
                       under_slab_insulation_spans_entire_slab: under_slab_insulation_spans_entire_slab,
                       depth_below_grade: depth_below_grade,
                       carpet_fraction: args[:slab_carpet_fraction],
-                      carpet_r_value: args[:slab_carpet_r_value])
+                      carpet_r_value: args[:slab_carpet_r])
     end
   end
 
@@ -4077,13 +4077,13 @@ class HPXMLFile
     end
 
     hpxml.hvac_distributions[-1].ducts.add(duct_type: HPXML::DuctTypeSupply,
-                                           duct_insulation_r_value: args[:ducts_supply_insulation_r_value],
+                                           duct_insulation_r_value: args[:ducts_supply_insulation_r],
                                            duct_location: ducts_supply_location,
                                            duct_surface_area: ducts_supply_surface_area)
 
     if not ((args[:cooling_system_type] == HPXML::HVACTypeEvaporativeCooler) && args[:cooling_system_evap_cooler_is_ducted])
       hpxml.hvac_distributions[-1].ducts.add(duct_type: HPXML::DuctTypeReturn,
-                                             duct_insulation_r_value: args[:ducts_return_insulation_r_value],
+                                             duct_insulation_r_value: args[:ducts_return_insulation_r],
                                              duct_location: ducts_return_location,
                                              duct_surface_area: ducts_return_surface_area)
     end
