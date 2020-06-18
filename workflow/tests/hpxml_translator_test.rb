@@ -534,10 +534,6 @@ class HPXMLTest < MiniTest::Test
 
       # TODO: Eliminate these warnings?
 
-      # GSHP:
-      next if err_line.include? 'Borehole shank spacing is less than the pipe diameter. U-tube spacing is reference from the u-tube pipe center.'
-      next if err_line.include? 'Shank spacing is set to the outer pipe diameter.'
-
       # SHW:
       next if err_line.include?('Glycol: Temperature') && err_line.include?('out of range (too low) for fluid')
       next if err_line.include?('Glycol: Temperature') && err_line.include?('out of range (too high) for fluid')

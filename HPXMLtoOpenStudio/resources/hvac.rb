@@ -733,8 +733,6 @@ class HVAC
     frac_glycol = 0.3
     design_delta_t = 10.0
     pump_head = 50.0
-    u_tube_leg_spacing = 0.9661
-    u_tube_spacing_type = 'b'
     fan_power_installed = 0.5 # W/cfm
     chw_design = [85.0, weather.design.CoolingDrybulb - 15.0, weather.data.AnnualAvgDrybulb + 10.0].max # Temperature of water entering indoor coil,use 85F as lower bound
     if fluid_type == Constants.FluidWater
@@ -754,6 +752,19 @@ class HVAC
       pipe_od = 1.660
       pipe_id = 1.358
     end
+    u_tube_spacing_type = 'b'
+    # Calculate distance between pipes
+    if u_tube_spacing_type == 'as'
+      # Two tubes, spaced 1/8” apart at the center of the borehole
+      u_tube_spacing = 0.125
+    elsif u_tube_spacing_type == 'b'
+      # Two tubes equally spaced between the borehole edges
+      u_tube_spacing = 0.9661
+    elsif u_tube_spacing_type == 'c'
+      # Both tubes placed against outer edge of borehole
+      u_tube_spacing = bore_diameter - 2 * pipe_od
+    end
+    shank_spacing = u_tube_spacing + pipe_od # Distance from center of pipe to center of pipe
 
     if frac_glycol == 0
       fluid_type = Constants.FluidWater
@@ -844,7 +855,7 @@ class HVAC
     ground_heat_exch_vert.setGroutThermalConductivity(UnitConversions.convert(grout_conductivity, 'Btu/(hr*ft*R)', 'W/(m*K)'))
     ground_heat_exch_vert.setPipeThermalConductivity(UnitConversions.convert(pipe_cond, 'Btu/(hr*ft*R)', 'W/(m*K)'))
     ground_heat_exch_vert.setPipeOutDiameter(UnitConversions.convert(pipe_od, 'in', 'm'))
-    ground_heat_exch_vert.setUTubeDistance(UnitConversions.convert(u_tube_leg_spacing, 'in', 'm'))
+    ground_heat_exch_vert.setUTubeDistance(UnitConversions.convert(shank_spacing, 'in', 'm'))
     ground_heat_exch_vert.setPipeThickness(UnitConversions.convert((pipe_od - pipe_id) / 2.0, 'in', 'm'))
     ground_heat_exch_vert.setMaximumLengthofSimulation(1)
     ground_heat_exch_vert.setGFunctionReferenceRatio(0.0005)
