@@ -3,8 +3,13 @@
   <schema_version>3.0</schema_version>
   <name>hpxm_lto_openstudio</name>
   <uid>b1543b30-9465-45ff-ba04-1d1f85e763bc</uid>
+<<<<<<< HEAD
   <version_id>1e96a0c0-e79c-4f20-aeda-e7486195cda4</version_id>
   <version_modified>20200617T213703Z</version_modified>
+=======
+  <version_id>ea1e4962-dd5b-4600-850f-1187f76c47c3</version_id>
+  <version_modified>20200617T225118Z</version_modified>
+>>>>>>> 09dbbeafe44c45d09bb469dd13b735386ea6e5af
   <xml_checksum>D8922A73</xml_checksum>
   <class_name>HPXMLtoOpenStudio</class_name>
   <display_name>HPXML to OpenStudio Translator</display_name>
@@ -319,12 +324,6 @@
       <checksum>8B1ACB99</checksum>
     </file>
     <file>
-      <filename>HPXMLDataTypes.xsd</filename>
-      <filetype>xsd</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>15FA9595</checksum>
-    </file>
-    <file>
       <filename>meta_measure.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
@@ -353,18 +352,6 @@
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
       <checksum>7EC7A818</checksum>
-    </file>
-    <file>
-      <filename>misc_loads.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>9726CA6F</checksum>
-    </file>
-    <file>
-      <filename>test_miscloads.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>test</usage_type>
-      <checksum>E317F8DB</checksum>
     </file>
     <file>
       <filename>test_pv.rb</filename>
@@ -403,24 +390,40 @@
       <checksum>35F0F6C6</checksum>
     </file>
     <file>
-      <filename>geometry.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>CB76A185</checksum>
-    </file>
-    <file>
+<<<<<<< HEAD
+=======
       <filename>weather.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
       <checksum>C9E02189</checksum>
     </file>
     <file>
+>>>>>>> 09dbbeafe44c45d09bb469dd13b735386ea6e5af
+      <filename>geometry.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>CB76A185</checksum>
+    </file>
+    <file>
+<<<<<<< HEAD
+      <filename>weather.rb</filename>
+=======
+      <filename>lighting.rb</filename>
+>>>>>>> 09dbbeafe44c45d09bb469dd13b735386ea6e5af
+      <filetype>rb</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>C9E02189</checksum>
+    </file>
+    <file>
+<<<<<<< HEAD
       <filename>constructions.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
       <checksum>117D8AD3</checksum>
     </file>
     <file>
+=======
+>>>>>>> 09dbbeafe44c45d09bb469dd13b735386ea6e5af
       <filename>location.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
@@ -433,6 +436,7 @@
       <checksum>3EFD313B</checksum>
     </file>
     <file>
+<<<<<<< HEAD
       <filename>constants.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
@@ -443,11 +447,30 @@
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
       <checksum>A76CCA05</checksum>
+=======
+      <filename>hvac.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>E65D5B86</checksum>
+    </file>
+    <file>
+      <filename>test_water_heater.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>test</usage_type>
+      <checksum>C9239980</checksum>
+    </file>
+    <file>
+      <filename>test_hotwater_appliance.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>test</usage_type>
+      <checksum>2B5DD894</checksum>
+>>>>>>> 09dbbeafe44c45d09bb469dd13b735386ea6e5af
     </file>
     <file>
       <filename>hvac.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
+<<<<<<< HEAD
       <checksum>E65D5B86</checksum>
     </file>
     <file>
@@ -472,11 +495,51 @@
       <filetype>rb</filetype>
       <usage_type>script</usage_type>
       <checksum>936402AF</checksum>
+=======
+      <checksum>598BE4EE</checksum>
+    </file>
+    <file>
+      <filename>HPXMLDataTypes.xsd</filename>
+      <filetype>xsd</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>0CCEC05A</checksum>
+    </file>
+    <file>
+      <filename>misc_loads.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>2B333CB1</checksum>
+    </file>
+    <file>
+      <filename>test_miscloads.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>test</usage_type>
+      <checksum>179766A0</checksum>
+    </file>
+    <file>
+      <filename>hotwater_appliances.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>BA7AC612</checksum>
+    </file>
+    <file>
+      <filename>BaseElements.xsd</filename>
+      <filetype>xsd</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>6B0842BB</checksum>
+    </file>
+    <file>
+      <filename>hpxml.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>49D561D9</checksum>
+>>>>>>> 09dbbeafe44c45d09bb469dd13b735386ea6e5af
     </file>
     <file>
       <filename>schedules.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
+<<<<<<< HEAD
       <checksum>DFB70865</checksum>
     </file>
     <file>
@@ -484,12 +547,21 @@
       <filetype>rb</filetype>
       <usage_type>test</usage_type>
       <checksum>2B5DD894</checksum>
+=======
+      <checksum>AABCF905</checksum>
     </file>
     <file>
-      <filename>test_water_heater.rb</filename>
+      <filename>EPvalidator.rb</filename>
       <filetype>rb</filetype>
-      <usage_type>test</usage_type>
-      <checksum>C9239980</checksum>
+      <usage_type>resource</usage_type>
+      <checksum>50E17C04</checksum>
+>>>>>>> 09dbbeafe44c45d09bb469dd13b735386ea6e5af
+    </file>
+    <file>
+      <filename>constants.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>30873222</checksum>
     </file>
     <file>
       <filename>BaseElements.xsd</filename>
@@ -507,6 +579,7 @@
       <filename>test_defaults.rb</filename>
       <filetype>rb</filetype>
       <usage_type>test</usage_type>
+<<<<<<< HEAD
       <checksum>10318DD2</checksum>
     </file>
     <file>
@@ -538,6 +611,38 @@
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
       <checksum>9354F432</checksum>
+=======
+      <checksum>BF89B569</checksum>
+    </file>
+    <file>
+      <filename>waterheater.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>040ECB24</checksum>
+    </file>
+    <file>
+      <filename>constructions.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>7993F601</checksum>
+    </file>
+    <file>
+      <filename>airflow.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>4A88DBD7</checksum>
+    </file>
+    <file>
+      <version>
+        <software_program>OpenStudio</software_program>
+        <identifier>3.0.0</identifier>
+        <min_compatible>3.0.0</min_compatible>
+      </version>
+      <filename>measure.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>script</usage_type>
+      <checksum>1435D1CF</checksum>
+>>>>>>> 09dbbeafe44c45d09bb469dd13b735386ea6e5af
     </file>
   </files>
 </measure>

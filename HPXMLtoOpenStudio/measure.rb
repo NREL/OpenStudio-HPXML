@@ -283,10 +283,14 @@ class OSModel
 
     add_hot_water_and_appliances(runner, model, weather, spaces)
 
-    # Plug Loads & Lighting
+    # Plug Loads & Fuel Loads & Lighting
 
     add_mels(runner, model, spaces)
+    add_mfls(runner, model, spaces)
     add_lighting(runner, model, weather, spaces)
+
+    # Pools & Hot Tubs
+    add_pools_and_hot_tubs(runner, model, spaces)
 
     # Other
 
@@ -1019,19 +1023,10 @@ class OSModel
       next if surfaces.empty?
 
       # Apply construction
-      if roof.is_thermal_boundary
-        drywall_thick_in = 0.5
-      else
-        drywall_thick_in = 0.0
-      end
       solar_abs = roof.solar_absorptance
       emitt = roof.emittance
       has_radiant_barrier = roof.radiant_barrier
-      if has_radiant_barrier
-        inside_film = Material.AirFilmRoofRadiantBarrier(Geometry.get_roof_pitch([surfaces[0]]))
-      else
-        inside_film = Material.AirFilmRoof(Geometry.get_roof_pitch([surfaces[0]]))
-      end
+      inside_film = Material.AirFilmRoof(Geometry.get_roof_pitch([surfaces[0]]))
       outside_film = Material.AirFilmOutside
       mat_roofing = Material.RoofMaterial(roof.roof_type, emitt, solar_abs)
       if @apply_ashrae140_assumptions
@@ -1039,27 +1034,48 @@ class OSModel
         outside_film = Material.AirFilmOutsideASHRAE140
       end
 
-      assembly_r = roof.insulation_assembly_r_value
-      constr_sets = [
-        WoodStudConstructionSet.new(Material.Stud2x(8.0), 0.07, 10.0, 0.75, drywall_thick_in, mat_roofing), # 2x8, 24" o.c. + R10
-        WoodStudConstructionSet.new(Material.Stud2x(8.0), 0.07, 5.0, 0.75, drywall_thick_in, mat_roofing),  # 2x8, 24" o.c. + R5
-        WoodStudConstructionSet.new(Material.Stud2x(8.0), 0.07, 0.0, 0.75, drywall_thick_in, mat_roofing),  # 2x8, 24" o.c.
-        WoodStudConstructionSet.new(Material.Stud2x6, 0.07, 0.0, 0.75, drywall_thick_in, mat_roofing),      # 2x6, 24" o.c.
-        WoodStudConstructionSet.new(Material.Stud2x4, 0.07, 0.0, 0.5, drywall_thick_in, mat_roofing),       # 2x4, 16" o.c.
-        WoodStudConstructionSet.new(Material.Stud2x4, 0.01, 0.0, 0.0, 0.0, mat_roofing),                    # Fallback
-      ]
-      match, constr_set, cavity_r = pick_wood_stud_construction_set(assembly_r, constr_sets, inside_film, outside_film, roof.id)
-
       install_grade = 1
+      assembly_r = roof.insulation_assembly_r_value
 
-      Constructions.apply_closed_cavity_roof(model, surfaces, "#{roof.id} construction",
-                                             cavity_r, install_grade,
-                                             constr_set.stud.thick_in,
-                                             true, constr_set.framing_factor,
-                                             constr_set.drywall_thick_in,
-                                             constr_set.osb_thick_in, constr_set.rigid_r,
-                                             constr_set.exterior_material, has_radiant_barrier,
+      if roof.is_thermal_boundary
+        constr_sets = [
+          WoodStudConstructionSet.new(Material.Stud2x(8.0), 0.07, 10.0, 0.75, 0.5, mat_roofing), # 2x8, 24" o.c. + R10
+          WoodStudConstructionSet.new(Material.Stud2x(8.0), 0.07, 5.0, 0.75, 0.5, mat_roofing),  # 2x8, 24" o.c. + R5
+          WoodStudConstructionSet.new(Material.Stud2x(8.0), 0.07, 0.0, 0.75, 0.5, mat_roofing),  # 2x8, 24" o.c.
+          WoodStudConstructionSet.new(Material.Stud2x6, 0.07, 0.0, 0.75, 0.5, mat_roofing),      # 2x6, 24" o.c.
+          WoodStudConstructionSet.new(Material.Stud2x4, 0.07, 0.0, 0.5, 0.5, mat_roofing),       # 2x4, 16" o.c.
+          WoodStudConstructionSet.new(Material.Stud2x4, 0.01, 0.0, 0.0, 0.0, mat_roofing),       # Fallback
+        ]
+        match, constr_set, cavity_r = pick_wood_stud_construction_set(assembly_r, constr_sets, inside_film, outside_film, roof.id)
+
+        Constructions.apply_closed_cavity_roof(model, surfaces, "#{roof.id} construction",
+                                               cavity_r, install_grade,
+                                               constr_set.stud.thick_in,
+                                               true, constr_set.framing_factor,
+                                               constr_set.drywall_thick_in,
+                                               constr_set.osb_thick_in, constr_set.rigid_r,
+                                               constr_set.exterior_material, has_radiant_barrier,
+                                               inside_film, outside_film)
+      else
+        constr_sets = [
+          GenericConstructionSet.new(10.0, 0.5, 0.0, mat_roofing), # w/R-10 rigid
+          GenericConstructionSet.new(0.0, 0.5, 0.0, mat_roofing),  # Standard
+          GenericConstructionSet.new(0.0, 0.0, 0.0, mat_roofing),  # Fallback
+        ]
+        match, constr_set, layer_r = pick_generic_construction_set(assembly_r, constr_sets, inside_film, outside_film, roof.id)
+
+        cavity_r = 0
+        cavity_ins_thick_in = 0
+        framing_factor = 0
+        framing_thick_in = 0
+
+        Constructions.apply_open_cavity_roof(model, surfaces, "#{roof.id} construction",
+                                             cavity_r, install_grade, cavity_ins_thick_in,
+                                             framing_factor, framing_thick_in,
+                                             constr_set.osb_thick_in, layer_r + constr_set.rigid_r,
+                                             mat_roofing, has_radiant_barrier,
                                              inside_film, outside_film)
+      end
       check_surface_assembly_rvalue(runner, surfaces, inside_film, outside_film, assembly_r, match)
     end
   end
@@ -1869,6 +1885,7 @@ class OSModel
     # Arbitrary construction for heat capacitance.
     # Only applies to surfaces where outside boundary conditioned is
     # adiabatic or surface net area is near zero.
+    return if surfaces.empty?
 
     if type == 'wall'
       Constructions.apply_wood_stud_wall(model, surfaces, nil, 'AdiabaticWallConstruction',
@@ -1887,40 +1904,31 @@ class OSModel
       Constructions.apply_open_cavity_roof(model, surfaces, 'AdiabaticRoofConstruction',
                                            0, 1, 7.25, 0.07, 7.25, 0.75, 99,
                                            Material.RoofMaterial(HPXML::RoofTypeAsphaltShingles, 0.90, 0.75),
-                                           false)
+                                           false,
+                                           Material.AirFilmOutside,
+                                           Material.AirFilmRoof(Geometry.get_roof_pitch(surfaces)))
     end
   end
 
   def self.add_hot_water_and_appliances(runner, model, weather, spaces)
-    # Clothes Washer
-    if @hpxml.clothes_washers.size > 0
-      clothes_washer = @hpxml.clothes_washers[0]
-      cw_space = get_space_from_location(clothes_washer.location, 'ClothesWasher', model, spaces)
+    # Assign spaces
+    @hpxml.clothes_washers.each do |clothes_washer|
+      clothes_washer.additional_properties.space = get_space_from_location(clothes_washer.location, 'ClothesWasher', model, spaces)
     end
-
-    # Clothes Dryer
-    if @hpxml.clothes_dryers.size > 0
-      clothes_dryer = @hpxml.clothes_dryers[0]
-      cd_space = get_space_from_location(clothes_dryer.location, 'ClothesDryer', model, spaces)
+    @hpxml.clothes_dryers.each do |clothes_dryer|
+      clothes_dryer.additional_properties.space = get_space_from_location(clothes_dryer.location, 'ClothesDryer', model, spaces)
     end
-
-    # Dishwasher
-    if @hpxml.dishwashers.size > 0
-      dishwasher = @hpxml.dishwashers[0]
-      dw_space = get_space_from_location(dishwasher.location, 'Dishwasher', model, spaces)
+    @hpxml.dishwashers.each do |dishwasher|
+      dishwasher.additional_properties.space = get_space_from_location(dishwasher.location, 'Dishwasher', model, spaces)
     end
-
-    # Refrigerator
-    if @hpxml.refrigerators.size > 0
-      refrigerator = @hpxml.refrigerators[0]
-      rf_space = get_space_from_location(refrigerator.location, 'Refrigerator', model, spaces)
+    @hpxml.refrigerators.each do |refrigerator|
+      refrigerator.additional_properties.space = get_space_from_location(refrigerator.location, 'Refrigerator', model, spaces)
     end
-
-    # Cooking Range/Oven
-    if (@hpxml.cooking_ranges.size > 0) && (@hpxml.ovens.size > 0)
-      cooking_range = @hpxml.cooking_ranges[0]
-      cook_space = get_space_from_location(cooking_range.location, 'CookingRange', model, spaces)
-      oven = @hpxml.ovens[0]
+    @hpxml.freezers.each do |freezer|
+      freezer.additional_properties.space = get_space_from_location(freezer.location, 'Freezer', model, spaces)
+    end
+    @hpxml.cooking_ranges.each do |cooking_range|
+      cooking_range.additional_properties.space = get_space_from_location(cooking_range.location, 'CookingRange', model, spaces)
     end
 
     # Distribution
@@ -1971,10 +1979,10 @@ class OSModel
 
     fixtures_usage_multiplier = @hpxml.water_heating.water_fixtures_usage_multiplier
     HotWaterAndAppliances.apply(model, runner, weather, spaces[HPXML::LocationLivingSpace],
-                                @cfa, @nbeds, @ncfl, @has_uncond_bsmnt,
-                                clothes_washer, cw_space, clothes_dryer, cd_space,
-                                dishwasher, dw_space, refrigerator, rf_space, cooking_range, cook_space, oven,
-                                fixtures_usage_multiplier, @hpxml.water_fixtures, @hpxml.water_heating_systems, hot_water_distribution,
+                                @cfa, @nbeds, @ncfl, @has_uncond_bsmnt, @hpxml.clothes_washers,
+                                @hpxml.clothes_dryers, @hpxml.dishwashers, @hpxml.refrigerators,
+                                @hpxml.freezers, @hpxml.cooking_ranges, @hpxml.ovens, fixtures_usage_multiplier,
+                                @hpxml.water_fixtures, @hpxml.water_heating_systems, hot_water_distribution,
                                 solar_thermal_system, @eri_version, @dhw_map)
 
     if (not solar_thermal_system.nil?) && (not solar_thermal_system.collector_area.nil?) # Detailed solar water heater
@@ -2199,23 +2207,53 @@ class OSModel
 
   def self.add_mels(runner, model, spaces)
     # Misc
-    plug_load_misc = nil
-    plug_load_tv = nil
     @hpxml.plug_loads.each do |plug_load|
       if plug_load.plug_load_type == HPXML::PlugLoadTypeOther
-        plug_load_misc = plug_load
+        obj_name = Constants.ObjectNameMiscPlugLoads
       elsif plug_load.plug_load_type == HPXML::PlugLoadTypeTelevision
-        plug_load_tv = plug_load
+        obj_name = Constants.ObjectNameMiscTelevision
+      elsif plug_load.plug_load_type == HPXML::PlugLoadTypeElectricVehicleCharging
+        obj_name = Constants.ObjectNameMiscElectricVehicleCharging
+      elsif plug_load.plug_load_type == HPXML::PlugLoadTypeWellPump
+        obj_name = Constants.ObjectNameMiscWellPump
       end
-    end
+      next if obj_name.nil?
 
-    MiscLoads.apply_plug(model, plug_load_misc, plug_load_tv, @hpxml.misc_loads_schedule,
-                         @cfa, spaces[HPXML::LocationLivingSpace])
+      MiscLoads.apply_plug(model, plug_load, obj_name, @cfa, spaces[HPXML::LocationLivingSpace])
+    end
+  end
+
+  def self.add_mfls(runner, model, spaces)
+    # Misc
+    @hpxml.fuel_loads.each do |fuel_load|
+      if fuel_load.fuel_load_type == HPXML::FuelLoadTypeGrill
+        obj_name = Constants.ObjectNameMiscGrill
+      elsif fuel_load.fuel_load_type == HPXML::FuelLoadTypeLighting
+        obj_name = Constants.ObjectNameMiscLighting
+      elsif fuel_load.fuel_load_type == HPXML::FuelLoadTypeFireplace
+        obj_name = Constants.ObjectNameMiscFireplace
+      end
+      next if obj_name.nil?
+
+      MiscLoads.apply_fuel(model, fuel_load, obj_name, spaces[HPXML::LocationLivingSpace])
+    end
   end
 
   def self.add_lighting(runner, model, weather, spaces)
     Lighting.apply(model, weather, spaces, @hpxml.lighting_groups,
                    @hpxml.lighting, @eri_version)
+  end
+
+  def self.add_pools_and_hot_tubs(runner, model, spaces)
+    @hpxml.pools.each do |pool|
+      MiscLoads.apply_pool_or_hot_tub_heater(model, pool, Constants.ObjectNameMiscPoolHeater, spaces[HPXML::LocationLivingSpace])
+      MiscLoads.apply_pool_or_hot_tub_pump(model, pool, Constants.ObjectNameMiscPoolPump, spaces[HPXML::LocationLivingSpace])
+    end
+
+    @hpxml.hot_tubs.each do |hot_tub|
+      MiscLoads.apply_pool_or_hot_tub_heater(model, hot_tub, Constants.ObjectNameMiscHotTubHeater, spaces[HPXML::LocationLivingSpace])
+      MiscLoads.apply_pool_or_hot_tub_pump(model, hot_tub, Constants.ObjectNameMiscHotTubPump, spaces[HPXML::LocationLivingSpace])
+    end
   end
 
   def self.add_airflow(runner, model, weather, spaces)
@@ -2983,7 +3021,7 @@ class OSModel
         SteelStudConstructionSet.new(3.5, corr_factor, 0.23, 0.0, 0.5, drywall_thick_in, mat_ext_finish),  # 2x4, 16" o.c.
         SteelStudConstructionSet.new(3.5, 1.0, 0.01, 0.0, 0.0, 0.0, fallback_mat_ext_finish),              # Fallback
       ]
-      match, constr_set, cavity_r = pick_steel_stud_construction_set(assembly_r, constr_sets, inside_film, outside_film, "wall #{wall_id}")
+      match, constr_set, cavity_r = pick_steel_stud_construction_set(assembly_r, constr_sets, inside_film, outside_film, wall_id)
 
       Constructions.apply_steel_stud_wall(model, surfaces, wall, "#{wall_id} construction",
                                           cavity_r, install_grade, constr_set.cavity_thick_in,
@@ -2999,7 +3037,7 @@ class OSModel
         DoubleStudConstructionSet.new(Material.Stud2x4, 0.23, 24.0, 0.0, 0.5, drywall_thick_in, mat_ext_finish),  # 2x4, 24" o.c.
         DoubleStudConstructionSet.new(Material.Stud2x4, 0.01, 16.0, 0.0, 0.0, 0.0, fallback_mat_ext_finish),      # Fallback
       ]
-      match, constr_set, cavity_r = pick_double_stud_construction_set(assembly_r, constr_sets, inside_film, outside_film, "wall #{wall_id}")
+      match, constr_set, cavity_r = pick_double_stud_construction_set(assembly_r, constr_sets, inside_film, outside_film, wall_id)
 
       Constructions.apply_double_stud_wall(model, surfaces, wall, "#{wall_id} construction",
                                            cavity_r, install_grade, constr_set.stud.thick_in,
@@ -3018,7 +3056,7 @@ class OSModel
         CMUConstructionSet.new(8.0, 1.4, 0.08, 0.5, drywall_thick_in, mat_ext_finish),  # 8" perlite-filled CMU
         CMUConstructionSet.new(6.0, 5.29, 0.01, 0.0, 0.0, fallback_mat_ext_finish),     # Fallback (6" hollow CMU)
       ]
-      match, constr_set, rigid_r = pick_cmu_construction_set(assembly_r, constr_sets, inside_film, outside_film, "wall #{wall_id}")
+      match, constr_set, rigid_r = pick_cmu_construction_set(assembly_r, constr_sets, inside_film, outside_film, wall_id)
 
       Constructions.apply_cmu_wall(model, surfaces, wall, "#{wall_id} construction",
                                    constr_set.thick_in, constr_set.cond_in, density,
@@ -3035,7 +3073,7 @@ class OSModel
         SIPConstructionSet.new(5.0, 0.16, 0.0, sheathing_thick_in, 0.5, drywall_thick_in, mat_ext_finish),  # 5" SIP core
         SIPConstructionSet.new(1.0, 0.01, 0.0, sheathing_thick_in, 0.0, 0.0, fallback_mat_ext_finish),      # Fallback
       ]
-      match, constr_set, cavity_r = pick_sip_construction_set(assembly_r, constr_sets, inside_film, outside_film, "wall #{wall_id}")
+      match, constr_set, cavity_r = pick_sip_construction_set(assembly_r, constr_sets, inside_film, outside_film, wall_id)
 
       Constructions.apply_sip_wall(model, surfaces, wall, "#{wall_id} construction",
                                    cavity_r, constr_set.thick_in, constr_set.framing_factor,
@@ -3047,7 +3085,7 @@ class OSModel
         ICFConstructionSet.new(2.0, 4.0, 0.08, 0.0, 0.5, drywall_thick_in, mat_ext_finish), # ICF w/4" concrete and 2" rigid ins layers
         ICFConstructionSet.new(1.0, 1.0, 0.01, 0.0, 0.0, 0.0, fallback_mat_ext_finish),     # Fallback
       ]
-      match, constr_set, icf_r = pick_icf_construction_set(assembly_r, constr_sets, inside_film, outside_film, "wall #{wall_id}")
+      match, constr_set, icf_r = pick_icf_construction_set(assembly_r, constr_sets, inside_film, outside_film, wall_id)
 
       Constructions.apply_icf_wall(model, surfaces, wall, "#{wall_id} construction",
                                    icf_r, constr_set.ins_thick_in,
@@ -3061,7 +3099,7 @@ class OSModel
         GenericConstructionSet.new(0.0, 0.5, drywall_thick_in, mat_ext_finish),  # Standard
         GenericConstructionSet.new(0.0, 0.0, 0.0, fallback_mat_ext_finish),      # Fallback
       ]
-      match, constr_set, layer_r = pick_generic_construction_set(assembly_r, constr_sets, inside_film, outside_film, "wall #{wall_id}")
+      match, constr_set, layer_r = pick_generic_construction_set(assembly_r, constr_sets, inside_film, outside_film, wall_id)
 
       if wall_type == HPXML::WallTypeConcrete
         thick_in = 6.0
