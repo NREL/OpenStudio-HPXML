@@ -776,14 +776,14 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     args << arg
 
     air_leakage_units_choices = OpenStudio::StringVector.new
-    air_leakage_units_choices << HPXML::UnitsACH50
-    air_leakage_units_choices << HPXML::UnitsCFM50
+    air_leakage_units_choices << HPXML::UnitsACH
+    air_leakage_units_choices << HPXML::UnitsCFM
     air_leakage_units_choices << HPXML::UnitsACHNatural
 
     arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('air_leakage_units', air_leakage_units_choices, true)
     arg.setDisplayName('Air Leakage: Units')
     arg.setDescription('The unit of measure for the above-grade living air leakage.')
-    arg.setDefaultValue(HPXML::UnitsACH50)
+    arg.setDefaultValue(HPXML::UnitsACH)
     args << arg
 
     arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('air_leakage_value', true)
@@ -2541,8 +2541,9 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
 
     heater_type_choices = OpenStudio::StringVector.new
     heater_type_choices << 'none'
-    heater_type_choices << HPXML::HeaterTypeElectric
+    heater_type_choices << HPXML::HeaterTypeElectricResistance
     heater_type_choices << HPXML::HeaterTypeGas
+    heater_type_choices << HPXML::HeaterTypeHeatPump
 
     arg = OpenStudio::Measure::OSArgument::makeBoolArgument('pool_present', true)
     arg.setDisplayName('Pool: Present')
@@ -2589,7 +2590,7 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
 
     arg = OpenStudio::Measure::OSArgument::makeStringArgument('pool_heater_annual_kwh', true)
     arg.setDisplayName('Pool: Heater Annual kWh')
-    arg.setDescription("The annual energy consumption of the #{HPXML::HeaterTypeElectric} pool heater.")
+    arg.setDescription("The annual energy consumption of the #{HPXML::HeaterTypeElectricResistance} pool heater.")
     arg.setUnits('kWh/yr')
     arg.setDefaultValue(Constants.Auto)
     args << arg
@@ -2670,7 +2671,7 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
 
     arg = OpenStudio::Measure::OSArgument::makeStringArgument('hot_tub_heater_annual_kwh', true)
     arg.setDisplayName('Hot Tub: Heater Annual kWh')
-    arg.setDescription("The annual energy consumption of the #{HPXML::HeaterTypeElectric} hot tub heater.")
+    arg.setDescription("The annual energy consumption of the #{HPXML::HeaterTypeElectricResistance} hot tub heater.")
     arg.setUnits('kWh/yr')
     arg.setDefaultValue(Constants.Auto)
     args << arg
@@ -3476,10 +3477,10 @@ class HPXMLFile
   end
 
   def self.set_air_infiltration_measurements(hpxml, runner, args)
-    if args[:air_leakage_units] == HPXML::UnitsACH50
+    if args[:air_leakage_units] == HPXML::UnitsACH
       house_pressure = 50
       unit_of_measure = HPXML::UnitsACH
-    elsif args[:air_leakage_units] == HPXML::UnitsCFM50
+    elsif args[:air_leakage_units] == HPXML::UnitsCFM
       house_pressure = 50
       unit_of_measure = HPXML::UnitsCFM
     elsif args[:air_leakage_units] == HPXML::UnitsACHNatural
@@ -4968,7 +4969,7 @@ class HPXMLFile
     end
 
     hpxml.plug_loads.add(id: 'PlugLoadsVehicle',
-                         plug_load_type: HPXML::PlugLoadTypeVehicle,
+                         plug_load_type: HPXML::PlugLoadTypeElectricVehicleCharging,
                          kWh_per_year: kWh_per_year,
                          usage_multiplier: usage_multiplier,
                          weekday_fractions: weekday_fractions,
@@ -5004,11 +5005,13 @@ class HPXMLFile
     end
 
     if args[:pool_heater_annual_kwh] != Constants.Auto
-      heater_kwh_per_year = args[:pool_heater_annual_kwh]
+      heater_load_units = 'kWh/year'
+      heater_load_value = args[:pool_heater_annual_kwh]
     end
 
     if args[:pool_heater_annual_therm] != Constants.Auto
-      heater_therm_per_year = args[:pool_heater_annual_therm]
+      heater_load_units = 'therm/year'
+      heater_load_value = args[:pool_heater_annual_therm]
     end
 
     if args[:pool_heater_usage_multiplier] != 1.0
@@ -5034,8 +5037,8 @@ class HPXMLFile
                     pump_weekend_fractions: pump_weekend_fractions,
                     pump_monthly_multipliers: pump_monthly_multipliers,
                     heater_type: heater_type,
-                    heater_kwh_per_year: heater_kwh_per_year,
-                    heater_therm_per_year: heater_therm_per_year,
+                    heater_load_units: heater_load_units,
+                    heater_load_value: heater_load_value,
                     heater_usage_multiplier: heater_usage_multiplier,
                     heater_weekday_fractions: heater_weekday_fractions,
                     heater_weekend_fractions: heater_weekend_fractions,
@@ -5070,11 +5073,13 @@ class HPXMLFile
     end
 
     if args[:hot_tub_heater_annual_kwh] != Constants.Auto
-      heater_kwh_per_year = args[:hot_tub_heater_annual_kwh]
+      heater_load_units = 'kWh/year'
+      heater_load_value = args[:hot_tub_heater_annual_kwh]
     end
 
     if args[:hot_tub_heater_annual_therm] != Constants.Auto
-      heater_therm_per_year = args[:hot_tub_heater_annual_therm]
+      heater_load_units = 'therm/year'
+      heater_load_value = args[:hot_tub_heater_annual_therm]
     end
 
     if args[:hot_tub_heater_usage_multiplier] != 1.0
@@ -5100,8 +5105,8 @@ class HPXMLFile
                        pump_weekend_fractions: pump_weekend_fractions,
                        pump_monthly_multipliers: pump_monthly_multipliers,
                        heater_type: heater_type,
-                       heater_kwh_per_year: heater_kwh_per_year,
-                       heater_therm_per_year: heater_therm_per_year,
+                       heater_load_units: heater_load_units,
+                       heater_load_value: heater_load_value,
                        heater_usage_multiplier: heater_usage_multiplier,
                        heater_weekday_fractions: heater_weekday_fractions,
                        heater_weekend_fractions: heater_weekend_fractions,
