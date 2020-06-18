@@ -12,7 +12,7 @@ class Waterheater
 
     solar_fraction = get_water_heater_solar_fraction(water_heating_system, solar_thermal_system)
     set_temp_c = get_set_temp_c(water_heating_system.temperature, water_heating_system.water_heater_type)
-    loop = create_new_loop(model, Constants.PlantLoopDomesticWater, set_temp_c)
+    loop = create_new_loop(model, Constants.ObjectNamePlantLoopDHW, set_temp_c)
     dhw_map[water_heating_system.id] << loop
 
     new_pump = create_new_pump(model)
@@ -58,7 +58,7 @@ class Waterheater
 
     solar_fraction = get_water_heater_solar_fraction(water_heating_system, solar_thermal_system)
     set_temp_c = get_set_temp_c(water_heating_system.temperature, water_heating_system.water_heater_type)
-    loop = create_new_loop(model, Constants.PlantLoopDomesticWater, set_temp_c)
+    loop = create_new_loop(model, Constants.ObjectNamePlantLoopDHW, set_temp_c)
     dhw_map[water_heating_system.id] << loop
 
     new_pump = create_new_pump(model)
@@ -104,7 +104,7 @@ class Waterheater
     obj_name_hpwh = Constants.ObjectNameWaterHeater
     solar_fraction = get_water_heater_solar_fraction(water_heating_system, solar_thermal_system)
     set_temp_c = get_set_temp_c(water_heating_system.temperature, water_heating_system.water_heater_type)
-    loop = create_new_loop(model, Constants.PlantLoopDomesticWater, set_temp_c)
+    loop = create_new_loop(model, Constants.ObjectNamePlantLoopDHW, set_temp_c)
     dhw_map[water_heating_system.id] << loop
 
     new_pump = create_new_pump(model)
@@ -207,7 +207,7 @@ class Waterheater
     end
 
     set_temp_c = get_set_temp_c(water_heating_system.temperature, water_heating_system.water_heater_type)
-    loop = create_new_loop(model, Constants.PlantLoopDomesticWater, set_temp_c)
+    loop = create_new_loop(model, Constants.ObjectNamePlantLoopDHW, set_temp_c)
 
     new_pump = create_new_pump(model)
     new_pump.addToNode(loop.supplyInletNode)
@@ -471,7 +471,7 @@ class Waterheater
     end
 
     plant_loop = OpenStudio::Model::PlantLoop.new(model)
-    plant_loop.setName(Constants.PlantLoopSolarHotWater)
+    plant_loop.setName(Constants.ObjectNamePlantLoopSHW)
     if fluid_type == Constants.FluidWater
       plant_loop.setFluidType('Water')
     else
@@ -973,11 +973,10 @@ class Waterheater
     hpwh_inlet_air_program.setName("#{obj_name_hpwh} InletAir")
     hpwh_inlet_air_program.addLine("Set #{tamb_act_actuator.name} = #{amb_temp_sensor.name}")
     # Average relative humidity for mf spaces: other multifamily buffer space & other heated space
-    rh = ''
+    hpwh_inlet_air_program.addLine("Set #{rhamb_act_actuator.name} = 0")
     amb_rh_sensors.each do |amb_rh_sensor|
-      rh += "(#{amb_rh_sensor.name} / 100) / #{amb_rh_sensors.size}"
+      hpwh_inlet_air_program.addLine("Set #{rhamb_act_actuator.name} = #{rhamb_act_actuator.name} + (#{amb_rh_sensor.name} / 100) / #{amb_rh_sensors.size}")
     end
-    hpwh_inlet_air_program.addLine("Set #{rhamb_act_actuator.name} = #{rh}")
     if not loc_space.nil?
       # Sensible/latent heat gain to the space
       hpwh_inlet_air_program.addLine("Set #{sens_act_actuator.name} = 0 - #{sens_cool_sensor.name} - (#{tl_sensor.name} + #{fan_power_sensor.name})")

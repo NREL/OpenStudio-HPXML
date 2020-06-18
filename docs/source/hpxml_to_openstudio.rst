@@ -43,11 +43,14 @@ The following building features/technologies are available for modeling via the 
   - Whole House Fan
 
 - Photovoltaics
-- Appliances (Clothes Washer/Dryer, Dishwasher, Refrigerator, Cooking Range/Oven)
+- Appliances (Clothes Washer/Dryer, Dishwasher, Refrigerators, Freezers, Cooking Range/Oven)
 - Dehumidifier
 - Lighting
 - Ceiling Fans
+- Pool
+- Hot Tub
 - Plug Loads
+- Fuel Loads
 
 EnergyPlus Use Case for HPXML
 -----------------------------
@@ -216,7 +219,7 @@ basement - unconditioned                                                       E
 crawlspace - vented                                                            EnergyPlus calculation
 crawlspace - unvented                                                          EnergyPlus calculation
 garage                                                                         EnergyPlus calculation
-other housing unit              Conditioned space of an adjacent housing unit  Same as conditioned space
+other housing unit              E.g., adjacent unit or conditioned corridor    Same as conditioned space
 other heated space              E.g., shared laundry/equipment space           Average of conditioned space and outside; minimum of 68F
 other multifamily buffer space  E.g., enclosed unconditioned stairwell         Average of conditioned space and outside; minimum of 50F
 other non-freezing space        E.g., parking garage ceiling                   Floats with outside; minimum of 40F
@@ -259,7 +262,29 @@ Roofs
 Pitched or flat roof surfaces that are exposed to ambient conditions should be specified as an ``Enclosure/Roofs/Roof``. 
 For a multifamily building where the dwelling unit has another dwelling unit above it, the surface between the two dwelling units should be considered a ``FrameFloor`` and not a ``Roof``.
 
-Beyond the specification of typical heat transfer properties (insulation R-value, solar absorptance, emittance, etc.), note that roofs can be defined as having a radiant barrier.
+Roofs are defined by their ``Area``, ``Pitch``, ``Insulation/AssemblyEffectiveRValue``, ``SolarAbsorptance``, and ``Emittance``.
+
+Roofs must have either ``RoofColor`` and/or ``SolarAbsorptance`` defined.
+If ``RoofColor`` or ``SolarAbsorptance`` is not provided, it is defaulted based on the mapping below:
+
+=========== ======================================================= ================
+RoofColor   RoofMaterial                                            SolarAbsorptance
+=========== ======================================================= ================
+dark        asphalt or fiberglass shingles, wood shingles or shakes 0.92
+medium dark asphalt or fiberglass shingles, wood shingles or shakes 0.89
+medium      asphalt or fiberglass shingles, wood shingles or shakes 0.85
+light       asphalt or fiberglass shingles, wood shingles or shakes 0.75
+reflective  asphalt or fiberglass shingles, wood shingles or shakes 0.50
+dark        slate or tile shingles, metal surfacing                 0.90
+medium dark slate or tile shingles, metal surfacing                 0.83
+medium      slate or tile shingles, metal surfacing                 0.75
+light       slate or tile shingles, metal surfacing                 0.60
+reflective  slate or tile shingles, metal surfacing                 0.30
+=========== ======================================================= ================
+
+Roofs can also have optional elements provided for ``RadiantBarrier and ``RoofType``.
+If ``RadiantBarrier`` is not provided, it is defaulted to not present.
+If ``RoofType`` is not provided, it is defaulted to "asphalt or fiberglass shingles".
 
 Walls
 *****
@@ -267,15 +292,46 @@ Walls
 Any wall that has no contact with the ground and bounds a space type should be specified as an ``Enclosure/Walls/Wall``. 
 Interior walls (for example, walls solely within the conditioned space of the building) are not required.
 
-Walls are primarily defined by their ``Insulation/AssemblyEffectiveRValue``.
+Walls are defined by their ``Area`` and ``Insulation/AssemblyEffectiveRValue``.
 The choice of ``WallType`` has a secondary effect on heat transfer in that it informs the assumption of wall thermal mass.
+
+Walls must have either ``Color`` and/or ``SolarAbsorptance`` defined.
+If ``Color`` or ``SolarAbsorptance`` is not provided, it is defaulted based on the mapping below:
+
+=========== ================
+Color       SolarAbsorptance
+=========== ================
+dark        0.95
+medium dark 0.85
+medium      0.70
+light       0.50
+reflective  0.30
+=========== ================
+
+Walls can have an optional element provided for ``Siding``; if not provided, it defaults to "wood siding".
 
 Rim Joists
 **********
 
-Rim joists, the perimeter of floor joists typically found between stories of a building or on top of a foundation wall, are specified as an ``Enclosure//RimJoists/RimJoist``.
-
+Rim joists, the perimeter of floor joists typically found between stories of a building or on top of a foundation wall, are specified as an ``Enclosure/RimJoists/RimJoist``.
 The ``InteriorAdjacentTo`` element should typically be "living space" for rim joists between stories of a building and "basement - conditioned", "basement - unconditioned", "crawlspace - vented", or "crawlspace - unvented" for rim joists on top of a foundation wall.
+
+Rim joists are defined by their ``Area`` and ``Insulation/AssemblyEffectiveRValue``.
+
+Rim joists must have either ``Color`` and/or ``SolarAbsorptance`` defined.
+If ``Color`` or ``SolarAbsorptance`` is not provided, it is defaulted based on the mapping below:
+
+=========== ================
+Color       SolarAbsorptance
+=========== ================
+dark        0.95
+medium dark 0.85
+medium      0.70
+light       0.50
+reflective  0.30
+=========== ================
+
+Rim joists can have an optional element provided for ``Siding``; if not provided, it defaults to "wood siding".
 
 Foundation Walls
 ****************
@@ -364,6 +420,11 @@ Any skylight should be specified as an ``Enclosure/Skylights/Skylight``.
 Skylights are defined by *full-assembly* NFRC ``UFactor`` and ``SHGC``, as well as ``Area``.
 Skylights must reference a HPXML ``Enclosures/Roofs/Roof`` element via the ``AttachedToRoof``.
 Skylights must also have an ``Azimuth`` specified, even if the attached roof does not.
+
+In addition, the summer/winter interior shading coefficients can be optionally entered as ``InteriorShading/SummerShadingCoefficient`` and ``InteriorShading/WinterShadingCoefficient``.
+The summer interior shading coefficient must be less than or equal to the winter interior shading coefficient.
+Note that a value of 0.7 indicates a 30% reduction in solar gains (i.e., 30% shading).
+If not provided, default values of 1.0 for summer and 1.0 for winter will be used.
 
 Doors
 *****
@@ -515,7 +576,7 @@ outside                                                                        O
 exterior wall                                                                  Average of conditioned space and outside
 under slab                                                                     Ground
 roof deck                                                                      Outside
-other housing unit              Conditioned space of an adjacent housing unit  Same as conditioned space
+other housing unit              E.g., adjacent unit or conditioned corridor    Same as conditioned space
 other heated space              E.g., shared laundry/equipment space           Average of conditioned space and outside; minimum of 68F
 other multifamily buffer space  E.g., enclosed unconditioned stairwell         Average of conditioned space and outside; minimum of 50F
 other non-freezing space        E.g., parking garage ceiling                   Floats with outside; minimum of 40F
@@ -662,7 +723,7 @@ garage                                                                         E
 crawlspace - unvented                                                          EnergyPlus calculation
 crawlspace - vented                                                            EnergyPlus calculation
 other exterior                  Outside                                        EnergyPlus calculation
-other housing unit              Conditioned space of an adjacent housing unit  Same as conditioned space
+other housing unit              E.g., adjacent unit or conditioned corridor    Same as conditioned space
 other heated space              E.g., shared laundry/equipment space           Average of conditioned space and outside; minimum of 68F
 other multifamily buffer space  E.g., enclosed unconditioned stairwell         Average of conditioned space and outside; minimum of 50F
 other non-freezing space        E.g., parking garage ceiling                   Floats with outside; minimum of 40F
@@ -869,10 +930,10 @@ If ``EnergyFactor`` is provided instead of ``RatedAnnualkWh``, it will be conver
 
 An ``extension/UsageMultiplier`` can also be optionally provided that scales energy and hot water usage; if not provided, it is assumed to be 1.0.
 
-Refrigerator
-************
+Refrigerators
+*************
 
-An ``Appliances/Refrigerator`` element can be specified; if not provided, a refrigerator will not be modeled.
+Multiple ``Appliances/Refrigerator`` elements can be specified; if none are provided, refrigerators will not be modeled.
 
 The efficiency of the refrigerator can be optionally entered as ``RatedAnnualkWh`` or ``extension/AdjustedAnnualkWh``.
 If neither are provided, ``RatedAnnualkWh`` will be defaulted to represent a standard refrigerator from 2006 using the following equation based on `ANSI/RESNET/ICC 301-2019 <https://codes.iccsafe.org/content/RESNETICC3012019>`_.
@@ -881,6 +942,31 @@ If neither are provided, ``RatedAnnualkWh`` will be defaulted to represent a sta
 
 Optional ``extension/WeekdayScheduleFractions``, ``extension/WeekendScheduleFractions``, and ``extension/MonthlyScheduleMultipliers`` can be provided; if not provided, values from Figures 16 & 24 of the `Building America House Simulation Protocols <https://www1.eere.energy.gov/buildings/publications/pdfs/building_america/house_simulation.pdf>`_ are used.
 An ``extension/UsageMultiplier`` can also be optionally provided that scales energy usage; if not provided, it is assumed to be 1.0.
+
+All refrigerators should be labeled by setting the ``PrimaryIndicator`` element.
+There must be exactly one primary refrigerator (``PrimaryIndicator="true"``), and all the rest should be labeled as non-primary (``PrimaryIndicator="false"``).
+
+The ``Location`` of a primary refrigerator is described in the Appliances section.
+If ``Location`` is not provided for a non-primary refrigerator, its location will be chosen based on the presence of spaces and the "Default Priority" indicated below.
+
+========================  ================
+Location                  Default Priority
+========================  ================
+garage                    1
+basement - unconditioned  2
+basement - conditioned    3
+living space              4
+========================  ================
+
+Freezers
+********
+
+Multiple ``Appliances/Freezer`` elements can be provided; if none provided, freezers will not be modeled.
+
+The efficiency of the freezer can be optionally entered as RatedAnnualkWh or extension/AdjustedAnnualkWh. If neither are provided, RatedAnnualkWh will be defaulted to represent a benchmark freezer according to the `Building America House Simulation Protocols <https://www1.eere.energy.gov/buildings/publications/pdfs/building_america/house_simulation.pdf>`_ (319.8 kWh/year).
+
+Optional ``extension/WeekdayScheduleFractions``, ``extension/WeekendScheduleFractions``, and ``extension/MonthlyScheduleMultipliers`` can be provided; if not provided, values from Figures 16 & 24 of the `Building America House Simulation Protocols <https://www1.eere.energy.gov/buildings/publications/pdfs/building_america/house_simulation.pdf>`_ are used.
+An extension/UsageMultiplier can also be optionally provided that scales energy usage; if not provided, it is assumed to be 1.0.
 
 Cooking Range/Oven
 ******************
@@ -939,17 +1025,77 @@ Quantity [#]                NumberofBedrooms+1
 In addition, a reduced cooling setpoint can be specified for summer months when ceiling fans are operating.
 See the Thermostat section for more information.
 
+Pool
+~~~~
+
+A ``Pools/Pool`` element can be specified; if not provided, a pool will not be modeled.
+
+A ``PoolPumps/PoolPump`` element is required. The annual energy consumption of the pool pump (``Load[Units='kWh/year']/Value``) can be provided, otherwise they will be calculated using the following equation based on the `Building America House Simulation Protocols <https://www1.eere.energy.gov/buildings/publications/pdfs/building_america/house_simulation.pdf>`_.
+
+.. math:: PoolPumpkWhs = 158.5 / 0.070 \cdot (0.5 + 0.25 \cdot NumberofBedrooms / 3 + 0.35 \cdot ConditionedFloorArea / 1920)
+
+A ``Heater`` element can be specified; if not provided, a pool heater will not be modeled.
+Currently only pool heaters specified with ``Heater[Type="gas fired" or Type="electric resistance" or Type="heat pump"]`` are recognized.
+The annual energy consumption (``Load[Units='kWh/year' or Units='therm/year']/Value``) can be provided, otherwise they will be calculated using the following equations from the `Building America House Simulation Protocols <https://www1.eere.energy.gov/buildings/publications/pdfs/building_america/house_simulation.pdf>`_.
+
+.. math:: GasFiredTherms = 3.0 / 0.014 \cdot (0.5 + 0.25 \cdot NumberofBedrooms / 3 + 0.35 \cdot ConditionedFloorArea / 1920)
+.. math:: ElectricResistancekWhs = 8.3 / 0.004 \cdot (0.5 + 0.25 \cdot NumberofBedrooms / 3 + 0.35 \cdot ConditionedFloorArea / 1920)
+.. math:: HeatPumpkWhs = ElectricResistancekWhs / 5.0
+
+A ``PoolPump/extension/UsageMultiplier`` can also be optionally provided that scales pool pump energy usage; if not provided, it is assumed to be 1.0.
+A ``Heater/extension/UsageMultiplier`` can also be optionally provided that scales pool heater energy usage; if not provided, it is assumed to be 1.0.
+Optional ``extension/WeekdayScheduleFractions``, ``extension/WeekendScheduleFractions``, and ``extension/MonthlyScheduleMultipliers`` can be provided for ``HotTubPump`` and ``Heater``; if not provided, values from Figures 23 & 24 of the `Building America House Simulation Protocols <https://www1.eere.energy.gov/buildings/publications/pdfs/building_america/house_simulation.pdf>`_ are used.
+
+Hot Tub
+~~~~~~~
+
+A ``HotTubs/HotTub`` element can be specified; if not provided, a hot tub will not be modeled.
+
+A ``HotTubPumps/HotTubPump`` element is required. The annual energy consumption of the hot tub pump (``Load[Units='kWh/year']/Value``) can be provided, otherwise they will be calculated using the following equation based on the `Building America House Simulation Protocols <https://www1.eere.energy.gov/buildings/publications/pdfs/building_america/house_simulation.pdf>`_.
+
+.. math:: HotTubPumpkWhs = 59.5 / 0.059 \cdot (0.5 + 0.25 \cdot NumberofBedrooms / 3 + 0.35 \cdot ConditionedFloorArea / 1920)
+
+A ``Heater`` element can be specified; if not provided, a hot tub heater will not be modeled.
+Currently only hot tub heaters specified with ``Heater[Type="gas fired" or Type="electric resistance" or Type="heat pump"]`` are recognized.
+The annual energy consumption (``Load[Units='kWh/year' or Units='therm/year']/Value``) can be provided, otherwise they will be calculated using the following equations from the `Building America House Simulation Protocols <https://www1.eere.energy.gov/buildings/publications/pdfs/building_america/house_simulation.pdf>`_.
+
+.. math:: GasFiredTherms = 0.87 / 0.011 \cdot (0.5 + 0.25 \cdot NumberofBedrooms / 3 + 0.35 \cdot ConditionedFloorArea / 1920)
+.. math:: ElectricResistancekWhs = 49.0 / 0.048 \cdot (0.5 + 0.25 \cdot NumberofBedrooms / 3 + 0.35 \cdot ConditionedFloorArea / 1920)
+.. math:: HeatPumpkWhs = ElectricResistancekWhs / 5.0
+
+A ``HotTubPump/extension/UsageMultiplier`` can also be optionally provided that scales hot tub pump energy usage; if not provided, it is assumed to be 1.0.
+A ``Heater/extension/UsageMultiplier`` can also be optionally provided that scales hot tub heater energy usage; if not provided, it is assumed to be 1.0.
+Optional ``extension/WeekdayScheduleFractions``, ``extension/WeekendScheduleFractions``, and ``extension/MonthlyScheduleMultipliers`` can be provided for ``PoolPump`` and ``Heater``; if not provided, values from Figures 23 & 24 of the `Building America House Simulation Protocols <https://www1.eere.energy.gov/buildings/publications/pdfs/building_america/house_simulation.pdf>`_ are used.
+
 Plug Loads
 ~~~~~~~~~~
 
 Plug loads can be provided by entering ``MiscLoads/PlugLoad`` elements; if not provided, plug loads will not be modeled.
-Currently only plug loads specified with ``PlugLoadType='other'`` and ``PlugLoadType='TV other'`` are recognized.
-The annual energy consumption (``Load[Units='kWh/year']/Value``) can be provided, otherwise they will be calculated using the following equations from `ANSI/RESNET/ICC 301-2019 <https://codes.iccsafe.org/content/RESNETICC3012019>`_.
+Currently only plug loads specified with ``PlugLoadType='other'``, ``PlugLoadType='TV other'``, ``PlugLoadType='electric vehicle charging'``, or ``PlugLoadType='well pump'`` are recognized.
+The annual energy consumption (``Load[Units='kWh/year']/Value``) can be provided, otherwise they will be calculated using the following equations from either `ANSI/RESNET/ICC 301-2019 <https://codes.iccsafe.org/content/RESNETICC3012019>`_ or the `Building America House Simulation Protocols <https://www1.eere.energy.gov/buildings/publications/pdfs/building_america/house_simulation.pdf>`_.
 
 .. math:: TelevisionkWhs = 413.0 + 69.0 \cdot NumberofBedrooms
 .. math:: OtherkWhs = 0.91 \cdot ConditionedFloorArea
+.. math:: VehiclekWhs = AnnualMiles * kWhPerMile / (EVChargerEfficiency * EVBatteryEfficiency); with AnnualMiles=4500, kWhPerMile=0.3, EVChargerEfficiency=0.9, EVBatteryEfficiency=0.9
+.. math:: WellPumpkWhs = 50.8 / 0.127 \cdot (0.5 + 0.25 \cdot NumberofBedrooms / 3 + 0.35 \cdot ConditionedFloorArea / 1920)
 
 An ``extension/UsageMultiplier`` can also be optionally provided that scales energy usage; if not provided, it is assumed to be 1.0.
+Optional ``extension/WeekdayScheduleFractions``, ``extension/WeekendScheduleFractions``, and ``extension/MonthlyScheduleMultipliers`` can be provided; if not provided, values from Figures 23 & 24 of the `Building America House Simulation Protocols <https://www1.eere.energy.gov/buildings/publications/pdfs/building_america/house_simulation.pdf>`_ are used.
+
+Fuel Loads
+~~~~~~~~~~
+
+Fuel loads can be provided by entering ``MiscLoads/FuelLoad`` elements; if not provided, fuel loads will not be modeled.
+Currently only exterior fuel loads specified with ``FuelLoadType='grill'`` or ``FuelLoadType='lighting'`` or ``FuelLoadType='fireplace'``, are recognized.
+
+The annual energy consumption (``Load[Units='therm/year']/Value``) can be provided, otherwise they will be calculated using the following equations from the `Building America House Simulation Protocols <https://www1.eere.energy.gov/buildings/publications/pdfs/building_america/house_simulation.pdf>`_.
+
+.. math:: Grilltherms = 0.87 / 0.029 \cdot (0.5 + 0.25 \cdot NumberofBedrooms / 3 + 0.35 \cdot ConditionedFloorArea / 1920)
+.. math:: Lightingtherms = 0.22 / 0.012 \cdot (0.5 + 0.25 \cdot NumberofBedrooms / 3 + 0.35 \cdot ConditionedFloorArea / 1920)
+.. math:: Fireplacetherms = 1.95 / 0.032 \cdot (0.5 + 0.25 \cdot NumberofBedrooms / 3 + 0.35 \cdot ConditionedFloorArea / 1920)
+
+An ``extension/UsageMultiplier`` can also be optionally provided that scales energy usage; if not provided, it is assumed to be 1.0.
+Optional ``extension/WeekdayScheduleFractions``, ``extension/WeekendScheduleFractions``, and ``extension/MonthlyScheduleMultipliers`` can be provided; if not provided, values from Figures 23 & 24 of the `Building America House Simulation Protocols <https://www1.eere.energy.gov/buildings/publications/pdfs/building_america/house_simulation.pdf>`_ are used.
 
 Validating & Debugging Errors
 -----------------------------

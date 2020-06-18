@@ -142,7 +142,8 @@ class Airflow
     end
 
     # Local Shielding
-    if shelter_coef == Constants.Auto
+    if shelter_coef.nil?
+      # FIXME: Move into HPXML defaults
       if min_neighbor_distance.nil?
         # Typical shelter for isolated rural house
         wind_speed.S_wo = 0.90
@@ -519,25 +520,17 @@ class Airflow
       end
     end
 
-    has_ducted_hvac = HVAC.has_ducted_equipment(model, air_loop)
-    if (ducts.size > 0) && (not has_ducted_hvac)
-      @runner.registerWarning('No ducted HVAC equipment was found but ducts were specified. Overriding duct specification.')
-      ducts.clear
-    elsif (ducts.size == 0) && has_ducted_hvac
-      @runner.registerWarning('Ducted HVAC equipment was found but no ducts were specified. Proceeding without ducts.')
-    end
-
     ducts.each do |duct|
       duct.rvalue = get_duct_insulation_rvalue(duct.rvalue, duct.side) # Convert from nominal to actual R-value
       if not duct.loc_schedule.nil?
         # Pass MF space temperature schedule name
-        duct.location_handle = duct.loc_schedule.name.to_s
+        duct.location = duct.loc_schedule.name.to_s
       elsif not duct.loc_space.nil?
+        duct.location = duct.loc_space.name.to_s
         duct.zone = duct.loc_space.thermalZone.get
-        duct.location_handle = duct.zone.handle.to_s
-      else # Outside
+      else # Outside/RoofDeck
+        duct.location = HPXML::LocationOutside
         duct.zone = nil
-        duct.location_handle = HPXML::LocationOutside
       end
     end
 
@@ -545,7 +538,7 @@ class Airflow
       # Store info for HVAC Sizing measure
       air_loop.additionalProperties.setFeature(Constants.SizingInfoDuctExist, true)
       air_loop.additionalProperties.setFeature(Constants.SizingInfoDuctSides, ducts.map { |duct| duct.side }.join(','))
-      air_loop.additionalProperties.setFeature(Constants.SizingInfoDuctLocationHandles, ducts.map { |duct| duct.location_handle.to_s }.join(','))
+      air_loop.additionalProperties.setFeature(Constants.SizingInfoDuctLocations, ducts.map { |duct| duct.location.to_s }.join(','))
       air_loop.additionalProperties.setFeature(Constants.SizingInfoDuctLeakageFracs, ducts.map { |duct| duct.leakage_frac.to_f }.join(','))
       air_loop.additionalProperties.setFeature(Constants.SizingInfoDuctLeakageCFM25s, ducts.map { |duct| duct.leakage_cfm25.to_f }.join(','))
       air_loop.additionalProperties.setFeature(Constants.SizingInfoDuctAreas, ducts.map { |duct| duct.area.to_f }.join(','))
@@ -660,11 +653,11 @@ class Airflow
         dz_w_sensor.setName("#{dz_w_var.name} s")
         dz_w = "#{dz_w_sensor.name}"
       elsif duct_location.is_a? OpenStudio::Model::ScheduleConstant # Outside or scheduled temperature
-        if duct_location.name.get == HPXML::LocationOtherNonFreezingSpace
+        if duct_location.name.to_s == HPXML::LocationOtherNonFreezingSpace
           dz_w_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Site Outdoor Air Humidity Ratio')
           dz_w_sensor.setName("#{dz_w_var.name} s")
           dz_w = "#{dz_w_sensor.name}"
-        elsif duct_location.name.get == HPXML::LocationOtherHousingUnit
+        elsif duct_location.name.to_s == HPXML::LocationOtherHousingUnit
           dz_w_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Zone Mean Air Humidity Ratio')
           dz_w_sensor.setKeyName(@living_zone.name.to_s)
           dz_w_sensor.setName("#{dz_w_var.name} s")
@@ -689,18 +682,8 @@ class Airflow
       equip_act_infos = []
 
       if duct_location.is_a? OpenStudio::Model::ScheduleConstant
-        # Regain factors from LBNL's "Technical Background for default values used for Forced Air Systems in Proposed ASHRAE Standard 152P"
-        # TODO: Some redundant code in hvac_sizing.rb's get_duct_regain_factor().
-        if duct_location.name.get == HPXML::LocationExteriorWall
-          f_regain = 0.5
-        elsif duct_location.name.get == HPXML::LocationUnderSlab
-          f_regain = 0.83
-        elsif [HPXML::LocationOtherHousingUnit, HPXML::LocationOtherHeatedSpace,
-               HPXML::LocationOtherMultifamilyBufferSpace, HPXML::LocationOtherNonFreezingSpace].include? duct_location.name.get
-          f_regain = 0.0
-        else
-          fail "Unhandled duct location: #{duct_location.name.get}."
-        end
+        space_values = Geometry.get_temperature_scheduled_space_values(duct_location.name.to_s)
+        f_regain = space_values[:f_regain]
       else
         f_regain = 0.0
       end
@@ -1057,7 +1040,7 @@ class Airflow
 
     space = @spaces[HPXML::LocationGarage]
     area = UnitConversions.convert(space.floorArea, 'm^2', 'ft^2')
-    volume = Geometry.get_zone_volume(space.thermalZone.get)
+    volume = UnitConversions.convert(space.volume, 'm^3', 'ft^3')
     hor_lk_frac = 0.4
     neutral_level = 0.5
     sla = get_infiltration_SLA_from_ACH50(ach50, 0.65, area, volume)
@@ -1746,7 +1729,7 @@ class Duct
     @area = area
     @rvalue = rvalue
   end
-  attr_accessor(:side, :loc_space, :loc_schedule, :leakage_frac, :leakage_cfm25, :area, :rvalue, :zone, :location_handle)
+  attr_accessor(:side, :loc_space, :loc_schedule, :leakage_frac, :leakage_cfm25, :area, :rvalue, :zone, :location)
 end
 
 class WindSpeed
