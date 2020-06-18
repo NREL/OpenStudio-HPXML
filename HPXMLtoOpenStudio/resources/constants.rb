@@ -201,6 +201,10 @@ class Constants
     return 'dhw fixtures'
   end
 
+  def self.ObjectNameFreezer
+    return 'freezer'
+  end
+
   def self.ObjectNameFurnace
     return 'furnace'
   end
@@ -265,12 +269,48 @@ class Constants
     return 'mshp'
   end
 
+  def self.ObjectNameMiscGrill
+    return 'misc grill'
+  end
+
+  def self.ObjectNameMiscLighting
+    return 'misc lighting'
+  end
+
+  def self.ObjectNameMiscFireplace
+    return 'misc fireplace'
+  end
+
+  def self.ObjectNameMiscPoolHeater
+    return 'misc pool heater'
+  end
+
+  def self.ObjectNameMiscPoolPump
+    return 'misc pool pump'
+  end
+
+  def self.ObjectNameMiscHotTubHeater
+    return 'misc hot tub heater'
+  end
+
+  def self.ObjectNameMiscHotTubPump
+    return 'misc hot tub pump'
+  end
+
   def self.ObjectNameMiscPlugLoads
     return 'misc plug loads'
   end
 
   def self.ObjectNameMiscTelevision
     return 'misc tv'
+  end
+
+  def self.ObjectNameMiscElectricVehicleCharging
+    return 'misc electric vehicle charging'
+  end
+
+  def self.ObjectNameMiscWellPump
+    return 'misc well pump'
   end
 
   def self.ObjectNameNaturalVentilation
