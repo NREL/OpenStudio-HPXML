@@ -543,6 +543,7 @@ class HPXMLTest < MiniTest::Test
       next if err_line.include? 'The Standard Ratings is calculated for'
       next if err_line.include?('CheckUsedConstructions') && err_line.include?('nominally unused constructions')
       next if err_line.include?('WetBulb not converged after') && err_line.include?('iterations(PsyTwbFnTdbWPb)')
+      next if err_line.include? 'Inside surface heat balance did not converge with Max Temp Difference'
       # HPWHs
       if hpxml.water_heating_systems.select { |wh| wh.water_heater_type == HPXML::WaterHeaterTypeHeatPump }.size > 0
         next if err_line.include? 'Recovery Efficiency and Energy Factor could not be calculated during the test for standard ratings'
@@ -565,27 +566,22 @@ class HPXMLTest < MiniTest::Test
         next if err_line.include? 'Full load outlet temperature indicates a possibility of frost/freeze error continues.'
       end
       next if err_line.include? 'Missing temperature setpoint for LeavingSetpointModulated mode' # These warnings are fine, simulation continues with assigning plant loop setpoint to boiler, which is the expected one
-
-      # Evap cooler model is not really using Controller:MechanicalVentilation object, so these warnings of ignoring some features are fine. OS requires a Controller:MechanicalVentilation to be attached to the oa controller, however, it's not required by E+, removing Controller:MechanicalVentilation from idf eliminates these two warnings. Question: Can OS allow removing it in the future?
-      next if err_line.include?('Zone') && err_line.include?('is not accounted for by Controller:MechanicalVentilation object')
-      next if err_line.include?('PEOPLE object for zone') && err_line.include?('is not accounted for by Controller:MechanicalVentilation object')
-      # "The only valid controller type for an AirLoopHVAC is Controller:WaterCoil.", evap cooler doesn't need one.
-      next if err_line.include?('GetAirPathData: AirLoopHVAC') && err_line.include?('has no Controllers')
-      # input "Autosize" for Fixed Minimum Air Flow Rate is added by OS translation, now set it to 0 to skip potential sizing process, though no way to prevent this warning.
-      next if err_line.include? 'Since Zone Minimum Air Flow Input Method = CONSTANT, input for Fixed Minimum Air Flow Rate will be ignored'
-
-      # TODO: Eliminate these warnings?
-
-      # SHW:
+      if hpxml.cooling_systems.select { |c| c.cooling_system_type == HPXML::HVACTypeEvaporativeCooler }.size > 0
+        # Evap cooler model is not really using Controller:MechanicalVentilation object, so these warnings of ignoring some features are fine. OS requires a Controller:MechanicalVentilation to be attached to the oa controller, however, it's not required by E+, removing Controller:MechanicalVentilation from idf eliminates these two warnings. Question: Can OS allow removing it in the future?
+        next if err_line.include?('Zone') && err_line.include?('is not accounted for by Controller:MechanicalVentilation object')
+        next if err_line.include?('PEOPLE object for zone') && err_line.include?('is not accounted for by Controller:MechanicalVentilation object')
+        # "The only valid controller type for an AirLoopHVAC is Controller:WaterCoil.", evap cooler doesn't need one.
+        next if err_line.include?('GetAirPathData: AirLoopHVAC') && err_line.include?('has no Controllers')
+        # input "Autosize" for Fixed Minimum Air Flow Rate is added by OS translation, now set it to 0 to skip potential sizing process, though no way to prevent this warning.
+        next if err_line.include? 'Since Zone Minimum Air Flow Input Method = CONSTANT, input for Fixed Minimum Air Flow Rate will be ignored'
+      end
       next if err_line.include?('Glycol: Temperature') && err_line.include?('out of range (too low) for fluid')
       next if err_line.include?('Glycol: Temperature') && err_line.include?('out of range (too high) for fluid')
       next if err_line.include? 'Plant loop exceeding upper temperature limit'
-
-      # Room AC:
-      next if err_line.include? 'GetDXCoils: Coil:Cooling:DX:SingleSpeed="ROOM AC CLG COIL" curve values' # TODO: Check w/ Jon
-
+      if hpxml.cooling_systems.select { |c| c.cooling_system_type == HPXML::HVACTypeRoomAirConditioner }.size > 0
+        next if err_line.include? 'GetDXCoils: Coil:Cooling:DX:SingleSpeed="ROOM AC CLG COIL" curve values' # TODO: Check w/ Jon
+      end
       next if err_line.include?('Foundation:Kiva') && err_line.include?('wall surfaces with more than four vertices') # TODO: Check alternative approach
-
       if hpxml_path.include?('base-misc-timestep-10-mins.xml') || hpxml_path.include?('ASHRAE_Standard_140')
         next if err_line.include? 'Temperature out of range [-100. to 200.] (PsyPsatFnTemp)'
       end
