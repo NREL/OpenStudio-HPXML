@@ -1171,10 +1171,8 @@ class HVAC
     unitary_system.additionalProperties.setFeature(Constants.SizingInfoHVACHeatType, Constants.ObjectNameUnitHeater)
   end
 
-  def self.apply_ideal_air_loads(model, runner, sequential_cool_load_frac,
+  def self.apply_ideal_air_loads(model, runner, obj_name, sequential_cool_load_frac,
                                  sequential_heat_load_frac, control_zone)
-
-    obj_name = Constants.ObjectNameIdealAirSystem
 
     # Ideal Air System
 
@@ -3795,11 +3793,7 @@ class HVAC
   def self.get_sequential_load_schedule(model, value)
     s = OpenStudio::Model::ScheduleConstant.new(model)
     s.setName('Sequential Fraction Schedule')
-    if value > 1
-      s.setValue(1.0)
-    else
-      s.setValue(value.round(5))
-    end
+    s.setValue(value.round(5))
     Schedule.set_schedule_type_limits(model, s, Constants.ScheduleTypeLimitsFraction)
     return s
   end

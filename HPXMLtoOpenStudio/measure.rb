@@ -272,6 +272,7 @@ class OSModel
 
     # HVAC
 
+    add_ideal_system_for_partial_hvac(runner, model, spaces)
     add_cooling_system(runner, model, spaces)
     add_heating_system(runner, model, spaces)
     add_heat_pump(runner, model, weather, spaces)
@@ -374,8 +375,8 @@ class OSModel
 
   def self.set_defaults_and_globals(runner, output_dir)
     # Initialize
-    @remaining_heat_load_frac = 1.0
-    @remaining_cool_load_frac = 1.0
+    @remaining_heat_load_frac = @hpxml.total_fraction_heat_load_served
+    @remaining_cool_load_frac = @hpxml.total_fraction_cool_load_served
     @hvac_map = {} # mapping between HPXML HVAC systems and model objects
     @dhw_map = {}  # mapping between HPXML Water Heating systems and model objects
     @cond_bsmnt_surfaces = [] # list of surfaces in conditioned basement, used for modification of some surface properties, eg. solar absorptance, view factor, etc.
@@ -2124,19 +2125,39 @@ class OSModel
     end
   end
 
-  def self.add_residual_hvac(runner, model, spaces)
+  def self.add_ideal_system_for_partial_hvac(runner, model, spaces)
+    # Adds an ideal air system to meet expected unmet load (i.e., because the sum of fractions load served is less than 1)
     living_zone = spaces[HPXML::LocationLivingSpace].thermalZone.get
+    obj_name = Constants.ObjectNameIdealAirSystem
 
     if @hpxml.building_construction.use_only_ideal_air_system
-      HVAC.apply_ideal_air_loads(model, runner, 1, 1, living_zone)
+      HVAC.apply_ideal_air_loads(model, runner, obj_name, 1, 1, living_zone)
       return
     end
 
-    # Adds an ideal air system to meet either:
-    # 1. Any expected unmet load (i.e., because the sum of fractions load served is less than 1), or
-    # 2. Any unexpected load (i.e., because the HVAC systems are undersized to meet the load)
+    if (@hpxml.total_fraction_heat_load_served < 1.0) && (@hpxml.total_fraction_heat_load_served > 0.0)
+      sequential_heat_load_frac = 1.0 - @hpxml.total_fraction_heat_load_served
+    else
+      sequential_heat_load_frac = 0.0
+    end
+    if (@hpxml.total_fraction_cool_load_served < 1.0) || (@hpxml.total_fraction_cool_load_served > 0.0)
+      sequential_cool_load_frac = 1.0 - @hpxml.total_fraction_cool_load_served
+    else
+      sequential_cool_load_frac = 0.0
+    end
+    if (sequential_heat_load_frac > 0.0) || (sequential_cool_load_frac > 0.0)
+      HVAC.apply_ideal_air_loads(model, runner, obj_name, sequential_cool_load_frac, sequential_heat_load_frac,
+                                 living_zone)
+    end
+  end
+
+  def self.add_residual_hvac(runner, model, spaces)
+    living_zone = spaces[HPXML::LocationLivingSpace].thermalZone.get
+    obj_name = Constants.ObjectNameIdealAirSystemResidual
+
+    # Adds an ideal air system to meet unexpected load (i.e., because the HVAC systems are undersized to meet the load)
     #
-    # Addressing #2 ensures we can correctly calculate heating/cooling loads without having to run
+    # Addressing unmet load ensures we can correctly calculate heating/cooling loads without having to run
     # an additional EnergyPlus simulation solely for that purpose, as well as allows us to report
     # the unmet load (i.e., the energy delivered by the ideal air system).
     if @remaining_cool_load_frac < 1
@@ -2151,7 +2172,7 @@ class OSModel
       sequential_heat_load_frac = 0 # no heating system, don't add ideal air for heating either
     end
     if (sequential_heat_load_frac > 0) || (sequential_cool_load_frac > 0)
-      HVAC.apply_ideal_air_loads(model, runner, sequential_cool_load_frac, sequential_heat_load_frac,
+      HVAC.apply_ideal_air_loads(model, runner, obj_name, sequential_cool_load_frac, sequential_heat_load_frac,
                                  living_zone)
     end
   end
