@@ -4297,12 +4297,12 @@ class HPXML < Object
 
     # Check sum of HVAC FractionCoolLoadServeds <= 1
     if total_fraction_cool_load_served > 1.01 # Use 1.01 in case of rounding
-      errors << "Expected FractionCoolLoadServed to sum to <= 1, but calculated sum is #{frac_cool_load.round(2)}."
+      errors << "Expected FractionCoolLoadServed to sum to <= 1, but calculated sum is #{total_fraction_cool_load_served.round(2)}."
     end
 
     # Check sum of HVAC FractionHeatLoadServeds <= 1
     if total_fraction_heat_load_served > 1.01 # Use 1.01 in case of rounding
-      errors << "Expected FractionHeatLoadServed to sum to <= 1, but calculated sum is #{frac_heat_load.round(2)}."
+      errors << "Expected FractionHeatLoadServed to sum to <= 1, but calculated sum is #{total_fraction_heat_load_served.round(2)}."
     end
 
     # Check sum of HVAC FractionDHWLoadServed == 1
