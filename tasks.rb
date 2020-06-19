@@ -1540,6 +1540,7 @@ def get_values(osw_file, step)
   elsif ['base-mechvent-supply.osw'].include? osw_file
     step.setArgument('mech_vent_fan_type', HPXML::MechVentTypeSupply)
   elsif ['base-misc-ceiling-fans.osw'].include? osw_file
+    step.setArgument('ceiling_fan_present', true)
     step.setArgument('ceiling_fan_efficiency', '100.0')
     step.setArgument('ceiling_fan_quantity', '2')
     step.setArgument('ceiling_fan_cooling_setpoint_temp_offset', 0.5)
