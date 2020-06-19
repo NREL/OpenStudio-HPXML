@@ -3768,14 +3768,16 @@ class HPXML < Object
     def check_for_errors
       errors = []
 
-      primary_indicator = false
-      @hpxml_object.refrigerators.each do |refrigerator|
-        next unless not refrigerator.primary_indicator.nil?
-        fail 'More than one refrigerator designated as the primary.' if refrigerator.primary_indicator && primary_indicator
+      if @hpxml_object.refrigerators.size > 1
+        primary_indicator = false
+        @hpxml_object.refrigerators.each do |refrigerator|
+          next unless not refrigerator.primary_indicator.nil?
+          fail 'More than one refrigerator designated as the primary.' if refrigerator.primary_indicator && primary_indicator
 
-        primary_indicator = true if refrigerator.primary_indicator
+          primary_indicator = true if refrigerator.primary_indicator
+        end
+        fail 'Could not find a primary refrigerator.' if not primary_indicator
       end
-      fail 'Could not find a primary refrigerator.' if not primary_indicator
 
       return errors
     end

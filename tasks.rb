@@ -3915,6 +3915,7 @@ def set_hpxml_refrigerator(hpxml_file, hpxml)
   elsif ['invalid_files/appliances-location-unconditioned-space.xml'].include? hpxml_file
     hpxml.refrigerators[0].location = 'unconditioned space'
   elsif ['base-misc-defaults.xml'].include? hpxml_file
+    hpxml.refrigerators[0].primary_indicator = nil
     hpxml.refrigerators[0].location = nil
     hpxml.refrigerators[0].rated_annual_kwh = nil
     hpxml.refrigerators[0].adjusted_annual_kwh = nil
