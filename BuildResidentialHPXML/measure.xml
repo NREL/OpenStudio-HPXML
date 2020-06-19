@@ -3,8 +3,8 @@
   <schema_version>3.0</schema_version>
   <name>build_residential_hpxml</name>
   <uid>a13a8983-2b01-4930-8af2-42030b6e4233</uid>
-  <version_id>8ac4f52d-3a25-4974-a287-5567da43b2a4</version_id>
-  <version_modified>20200619T145645Z</version_modified>
+  <version_id>10ce180c-34a0-4a69-aa5d-0e54a0b3434b</version_id>
+  <version_modified>20200619T155047Z</version_modified>
   <xml_checksum>2C38F48B</xml_checksum>
   <class_name>BuildResidentialHPXML</class_name>
   <display_name>HPXML Builder</display_name>
@@ -6060,12 +6060,6 @@
       <checksum>11916359</checksum>
     </file>
     <file>
-      <filename>base-misc-ceiling-fans.osw</filename>
-      <filetype>osw</filetype>
-      <usage_type>test</usage_type>
-      <checksum>1B1E7EC3</checksum>
-    </file>
-    <file>
       <filename>base-enclosure-infil-natural-ach.osw</filename>
       <filetype>osw</filetype>
       <usage_type>test</usage_type>
@@ -6150,28 +6144,22 @@
       <checksum>30FBFA92</checksum>
     </file>
     <file>
-      <filename>test_rakefile.xml</filename>
-      <filetype>xml</filetype>
-      <usage_type>test</usage_type>
-      <checksum>2FAE5F6F</checksum>
-    </file>
-    <file>
-      <filename>build_residential_hpxml_test.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>test</usage_type>
-      <checksum>346A09FB</checksum>
-    </file>
-    <file>
       <filename>base-misc-runperiod-1-month.osw</filename>
       <filetype>osw</filetype>
       <usage_type>test</usage_type>
       <checksum>80EF87CD</checksum>
     </file>
     <file>
-      <filename>test_measure.xml</filename>
-      <filetype>xml</filetype>
+      <filename>base-misc-ceiling-fans.osw</filename>
+      <filetype>osw</filetype>
       <usage_type>test</usage_type>
-      <checksum>7A934F21</checksum>
+      <checksum>4C6C397D</checksum>
+    </file>
+    <file>
+      <filename>build_residential_hpxml_test.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>test</usage_type>
+      <checksum>112623F9</checksum>
     </file>
   </files>
 </measure>
