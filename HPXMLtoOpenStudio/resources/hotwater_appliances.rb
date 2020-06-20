@@ -380,7 +380,7 @@ class HotWaterAndAppliances
     end
   end
 
-  def self.calc_clothes_dryer_energy(eri_version, nbeds, clothes_dryer, clothes_washer, is_outside)
+  def self.calc_clothes_dryer_energy(eri_version, nbeds, clothes_dryer, clothes_washer, is_outside = false)
     if Constants.ERIVersions.index(eri_version) >= Constants.ERIVersions.index('2019A')
       if clothes_dryer.combined_energy_factor.nil?
         clothes_dryer.combined_energy_factor = calc_clothes_dryer_cef_from_ef(clothes_dryer.energy_factor)
