@@ -43,6 +43,14 @@ class HPXMLtoOpenStudioAirflowTest < MiniTest::Test
     return values
   end
 
+  def get_mechvent_ee_pow_and_lost_frac(model)
+    model.getElectricEquipmentDefinitions.each do |eed|
+      next unless eed.name.to_s == Constants.ObjectNameMechanicalVentilationHouseFan
+
+      return eed.designLevel.get, eed.fractionLost
+    end
+  end
+
   def test_infiltration_ach50
     args_hash = {}
     args_hash['hpxml_path'] = File.absolute_path(File.join(sample_files_dir, 'base.xml'))
@@ -104,9 +112,7 @@ class HPXMLtoOpenStudioAirflowTest < MiniTest::Test
     assert_in_epsilon(0.0, UnitConversions.convert(Float(program_values['QWHV_bal']).abs, 'm^3/s', 'cfm'), 0.01)
     assert_in_epsilon(0.0, UnitConversions.convert(Float(program_values['QWHV_cfis']).abs, 'm^3/s', 'cfm'), 0.01)
     assert_in_epsilon(0.0, UnitConversions.convert(Float(program_values['QWHV_ervhrv']).abs, 'm^3/s', 'cfm'), 0.01)
-    assert_in_epsilon(0.0, Float(program_values['mech_vent_house_fan_balanced_act']), 0.01)
-    assert_in_epsilon(0.0, Float(program_values['mech_vent_house_fan_exhaust_act']), 0.01)
-    assert_in_epsilon(0.0, Float(program_values['mech_vent_house_fan_supply_act']), 0.01)
+    assert_in_epsilon(0.0, get_mechvent_ee_pow_and_lost_frac(model)[0], 0.01)
     assert_in_epsilon(0.0, UnitConversions.convert(Float(program_values['Qrange']), 'm^3/s', 'cfm'), 0.01)
     assert_in_epsilon(0.0, UnitConversions.convert(Float(program_values['Qbath']), 'm^3/s', 'cfm'), 0.01)
   end
@@ -128,9 +134,8 @@ class HPXMLtoOpenStudioAirflowTest < MiniTest::Test
     assert_in_epsilon(0.0, UnitConversions.convert(Float(program_values['QWHV_bal']).abs, 'm^3/s', 'cfm'), 0.01)
     assert_in_epsilon(0.0, UnitConversions.convert(Float(program_values['QWHV_cfis']).abs, 'm^3/s', 'cfm'), 0.01)
     assert_in_epsilon(0.0, UnitConversions.convert(Float(program_values['QWHV_ervhrv']).abs, 'm^3/s', 'cfm'), 0.01)
-    assert_in_epsilon(vent_fan_power, Float(program_values['mech_vent_house_fan_supply_act']), 0.01)
-    assert_in_epsilon(0.0, Float(program_values['mech_vent_house_fan_balanced_act']), 0.01)
-    assert_in_epsilon(0.0, Float(program_values['mech_vent_house_fan_exhaust_act']), 0.01)
+    assert_in_epsilon(vent_fan_power, get_mechvent_ee_pow_and_lost_frac(model)[0], 0.01)
+    assert_in_epsilon(0.0, get_mechvent_ee_pow_and_lost_frac(model)[1], 0.01)
     assert_in_epsilon(0.0, UnitConversions.convert(Float(program_values['Qrange']), 'm^3/s', 'cfm'), 0.01)
     assert_in_epsilon(0.0, UnitConversions.convert(Float(program_values['Qbath']), 'm^3/s', 'cfm'), 0.01)
   end
@@ -152,9 +157,8 @@ class HPXMLtoOpenStudioAirflowTest < MiniTest::Test
     assert_in_epsilon(0.0, UnitConversions.convert(Float(program_values['QWHV_bal']).abs, 'm^3/s', 'cfm'), 0.01)
     assert_in_epsilon(0.0, UnitConversions.convert(Float(program_values['QWHV_cfis']).abs, 'm^3/s', 'cfm'), 0.01)
     assert_in_epsilon(0.0, UnitConversions.convert(Float(program_values['QWHV_ervhrv']).abs, 'm^3/s', 'cfm'), 0.01)
-    assert_in_epsilon(vent_fan_power, Float(program_values['mech_vent_house_fan_exhaust_act']), 0.01)
-    assert_in_epsilon(0.0, Float(program_values['mech_vent_house_fan_balanced_act']), 0.01)
-    assert_in_epsilon(0.0, Float(program_values['mech_vent_house_fan_supply_act']), 0.01)
+    assert_in_epsilon(vent_fan_power, get_mechvent_ee_pow_and_lost_frac(model)[0], 0.01)
+    assert_in_epsilon(1.0, get_mechvent_ee_pow_and_lost_frac(model)[1], 0.01)
     assert_in_epsilon(0.0, UnitConversions.convert(Float(program_values['Qrange']), 'm^3/s', 'cfm'), 0.01)
     assert_in_epsilon(0.0, UnitConversions.convert(Float(program_values['Qbath']), 'm^3/s', 'cfm'), 0.01)
   end
@@ -176,9 +180,8 @@ class HPXMLtoOpenStudioAirflowTest < MiniTest::Test
     assert_in_epsilon(0.0, UnitConversions.convert(Float(program_values['QWHV_exh']).abs, 'm^3/s', 'cfm'), 0.01)
     assert_in_epsilon(0.0, UnitConversions.convert(Float(program_values['QWHV_cfis']).abs, 'm^3/s', 'cfm'), 0.01)
     assert_in_epsilon(0.0, UnitConversions.convert(Float(program_values['QWHV_ervhrv']).abs, 'm^3/s', 'cfm'), 0.01)
-    assert_in_epsilon(vent_fan_power, Float(program_values['mech_vent_house_fan_balanced_act']), 0.01)
-    assert_in_epsilon(0.0, Float(program_values['mech_vent_house_fan_supply_act']), 0.01)
-    assert_in_epsilon(0.0, Float(program_values['mech_vent_house_fan_exhaust_act']), 0.01)
+    assert_in_epsilon(vent_fan_power, get_mechvent_ee_pow_and_lost_frac(model)[0], 0.01)
+    assert_in_epsilon(0.5, get_mechvent_ee_pow_and_lost_frac(model)[1], 0.01)
     assert_in_epsilon(0.0, UnitConversions.convert(Float(program_values['Qrange']), 'm^3/s', 'cfm'), 0.01)
     assert_in_epsilon(0.0, UnitConversions.convert(Float(program_values['Qbath']), 'm^3/s', 'cfm'), 0.01)
   end
@@ -200,9 +203,8 @@ class HPXMLtoOpenStudioAirflowTest < MiniTest::Test
     assert_in_epsilon(0.0, UnitConversions.convert(Float(program_values['QWHV_exh']).abs, 'm^3/s', 'cfm'), 0.01)
     assert_in_epsilon(0.0, UnitConversions.convert(Float(program_values['QWHV_cfis']).abs, 'm^3/s', 'cfm'), 0.01)
     assert_in_epsilon(0.0, UnitConversions.convert(Float(program_values['QWHV_bal']).abs, 'm^3/s', 'cfm'), 0.01)
-    assert_in_epsilon(vent_fan_power, Float(program_values['mech_vent_house_fan_balanced_act']), 0.01)
-    assert_in_epsilon(0.0, Float(program_values['mech_vent_house_fan_supply_act']), 0.01)
-    assert_in_epsilon(0.0, Float(program_values['mech_vent_house_fan_exhaust_act']), 0.01)
+    assert_in_epsilon(vent_fan_power, get_mechvent_ee_pow_and_lost_frac(model)[0], 0.01)
+    assert_in_epsilon(0.5, get_mechvent_ee_pow_and_lost_frac(model)[1], 0.01)
     assert_in_epsilon(0.0, UnitConversions.convert(Float(program_values['Qrange']), 'm^3/s', 'cfm'), 0.01)
     assert_in_epsilon(0.0, UnitConversions.convert(Float(program_values['Qbath']), 'm^3/s', 'cfm'), 0.01)
   end
@@ -224,9 +226,8 @@ class HPXMLtoOpenStudioAirflowTest < MiniTest::Test
     assert_in_epsilon(0.0, UnitConversions.convert(Float(program_values['QWHV_exh']).abs, 'm^3/s', 'cfm'), 0.01)
     assert_in_epsilon(0.0, UnitConversions.convert(Float(program_values['QWHV_cfis']).abs, 'm^3/s', 'cfm'), 0.01)
     assert_in_epsilon(0.0, UnitConversions.convert(Float(program_values['QWHV_bal']).abs, 'm^3/s', 'cfm'), 0.01)
-    assert_in_epsilon(vent_fan_power, Float(program_values['mech_vent_house_fan_balanced_act']), 0.01)
-    assert_in_epsilon(0.0, Float(program_values['mech_vent_house_fan_supply_act']), 0.01)
-    assert_in_epsilon(0.0, Float(program_values['mech_vent_house_fan_exhaust_act']), 0.01)
+    assert_in_epsilon(vent_fan_power, get_mechvent_ee_pow_and_lost_frac(model)[0], 0.01)
+    assert_in_epsilon(0.5, get_mechvent_ee_pow_and_lost_frac(model)[1], 0.01)
     assert_in_epsilon(0.0, UnitConversions.convert(Float(program_values['Qrange']), 'm^3/s', 'cfm'), 0.01)
     assert_in_epsilon(0.0, UnitConversions.convert(Float(program_values['Qbath']), 'm^3/s', 'cfm'), 0.01)
   end
@@ -269,9 +270,7 @@ class HPXMLtoOpenStudioAirflowTest < MiniTest::Test
     assert_in_epsilon(0.0, UnitConversions.convert(Float(program_values['QWHV_bal']).abs, 'm^3/s', 'cfm'), 0.01)
     assert_in_epsilon(0.0, UnitConversions.convert(Float(program_values['QWHV_cfis']).abs, 'm^3/s', 'cfm'), 0.01)
     assert_in_epsilon(0.0, UnitConversions.convert(Float(program_values['QWHV_ervhrv']).abs, 'm^3/s', 'cfm'), 0.01)
-    assert_in_epsilon(0.0, Float(program_values['mech_vent_house_fan_balanced_act']), 0.01)
-    assert_in_epsilon(0.0, Float(program_values['mech_vent_house_fan_supply_act']), 0.01)
-    assert_in_epsilon(0.0, Float(program_values['mech_vent_house_fan_exhaust_act']), 0.01)
+    assert_in_epsilon(0.0, get_mechvent_ee_pow_and_lost_frac(model)[0], 0.01)
     assert_in_epsilon(kitchen_fan_cfm, UnitConversions.convert(program_values['Qrange'].to_f, 'm^3/s', 'cfm'), 0.01)
     assert_in_epsilon(bath_fan_cfm, UnitConversions.convert(program_values['Qbath'].to_f, 'm^3/s', 'cfm'), 0.01)
   end

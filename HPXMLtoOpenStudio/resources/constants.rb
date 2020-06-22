@@ -249,16 +249,8 @@ class Constants
     return 'mech vent'
   end
 
-  def self.ObjectNameMechanicalVentilationHouseFanSupply
-    return 'mech vent house fan supply'
-  end
-
-  def self.ObjectNameMechanicalVentilationHouseFanExhaust
-    return 'mech vent house fan exhaust'
-  end
-
-  def self.ObjectNameMechanicalVentilationHouseFanBalanced
-    return 'mech vent house fan balanced'
+  def self.ObjectNameMechanicalVentilationHouseFan
+    return 'mech vent house fan'
   end
 
   def self.ObjectNameMechanicalVentilationHouseFanCFIS

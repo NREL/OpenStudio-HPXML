@@ -658,6 +658,7 @@ Additional fields may be provided per the table below. If not provided, default 
 =========================== ========================
 Element Name                Default Value
 =========================== ========================
+Quantity [#]                1
 RatedFlowRate [cfm]         100
 HoursInOperation [hrs/day]  1
 FanPower [W]                0.3 * RatedFlowRate

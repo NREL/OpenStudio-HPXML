@@ -1325,17 +1325,13 @@ class Airflow
     infil_program.addLine("      Set #{@cfis_t_sum_open_var[vent_mech.id].name} = #{@cfis_t_sum_open_var[vent_mech.id].name}+cfis_fan_runtime")
     infil_program.addLine('    EndIf')
     # Fan power is metered under fan cooling and heating meters
-    infil_program.addLine("    Set #{cfis_fan_actuator.name} = #{cfis_fan_actuator.name}")
     infil_program.addLine('  EndIf')
-    infil_program.addLine('Else')
-    # The ventilation requirement for the hour has been met
-    infil_program.addLine("  Set #{cfis_fan_actuator.name} = #{cfis_fan_actuator.name}")
     infil_program.addLine('EndIf')
 
     return infil_program
   end
 
-  def self.add_ee_for_vent_fan_power(model, obj_name, fan_type)
+  def self.add_ee_for_vent_fan_power(model, obj_name, frac_lost, is_cfis, pow = 0.0)
     equip_def = OpenStudio::Model::ElectricEquipmentDefinition.new(model)
     equip_def.setName(obj_name)
     equip = OpenStudio::Model::ElectricEquipment.new(equip_def)
@@ -1343,22 +1339,22 @@ class Airflow
     equip.setSpace(@living_space)
     equip_def.setFractionRadiant(0)
     equip_def.setFractionLatent(0)
-    if [HPXML::MechVentTypeExhaust].include? fan_type
-      equip_def.setFractionLost(1.0) # Fan heat does not enter space
-    elsif [HPXML::MechVentTypeSupply, HPXML::MechVentTypeCFIS].include? fan_type
-      equip_def.setFractionLost(0.0) # Fan heat does enter space
-    elsif [HPXML::MechVentTypeBalanced].include? fan_type
-      equip_def.setFractionLost(0.5) # Supply fan heat enters space
-    end
     equip.setSchedule(model.alwaysOnDiscreteSchedule)
     equip.setEndUseSubcategory(Constants.ObjectNameMechanicalVentilation)
-    vent_mech_fan_actuator = OpenStudio::Model::EnergyManagementSystemActuator.new(equip, 'ElectricEquipment', 'Electric Power Level')
-    vent_mech_fan_actuator.setName("#{equip.name} act")
+    equip_def.setFractionLost(frac_lost)
+    vent_mech_fan_actuator = nil
+    if is_cfis # actuate its power level in EMS
+      equip_def.setFractionLost(0.0) # Fan heat does enter space
+      vent_mech_fan_actuator = OpenStudio::Model::EnergyManagementSystemActuator.new(equip, 'ElectricEquipment', 'Electric Power Level')
+      vent_mech_fan_actuator.setName("#{equip.name} act")
+    else
+      equip_def.setDesignLevel(pow)
+    end
 
     return vent_mech_fan_actuator
   end
 
-  def self.apply_balanced_mech_vent_to_infil_program(model, infil_program, vent_mech_cfm, vent_mech_sens_eff, vent_mech_lat_eff, erv_sens_load_actuator, erv_lat_load_actuator)
+  def self.apply_erv_hrv_load_to_infil_program(model, infil_program, vent_mech_cfm, vent_mech_sens_eff, vent_mech_lat_eff, erv_sens_load_actuator, erv_lat_load_actuator)
     # Calculate mass flow rate based on outdoor air density
     infil_program.addLine("Set balanced_flow_rate = #{UnitConversions.convert(vent_mech_cfm, 'cfm', 'm^3/s')}")
     infil_program.addLine('Set ERV_MFR = balanced_flow_rate * ERVSupRho')
@@ -1427,6 +1423,14 @@ class Airflow
     exh_vent_mech_fan_w = vent_mech_exh.map { |vent_mech| vent_mech.fan_power * (vent_mech.hours_in_operation / 24.0) }.inject(0.0, :+)
     # ERV/HRV and balanced system fan power combined altogether
     bal_vent_mech_fan_w = (vent_mech_bal + vent_mech_erv_hrv).map { |vent_mech| vent_mech.fan_power * (vent_mech.hours_in_operation / 24.0) }.inject(0.0, :+)
+    total_sup_exh_bal_w = sup_vent_mech_fan_w + exh_vent_mech_fan_w + bal_vent_mech_fan_w
+    # 1.0: Fan heat does not enter space, 0.0: Fan heat does enter space, 0.5: Supply fan heat enters space
+    if total_sup_exh_bal_w > 0.0
+      fan_heat_lost_fraction = (1.0 * exh_vent_mech_fan_w + 0.0 * sup_vent_mech_fan_w + 0.5 * bal_vent_mech_fan_w) / total_sup_exh_bal_w
+    else
+      fan_heat_lost_fraction = 1.0
+    end
+    add_ee_for_vent_fan_power(model, Constants.ObjectNameMechanicalVentilationHouseFan, fan_heat_lost_fraction, false, total_sup_exh_bal_w)
 
     # get cfms
     sup_cfm = vent_mech_sup.map { |vent_mech| vent_mech.flow_rate * (vent_mech.hours_in_operation / 24.0) }.inject(0.0, :+)
@@ -1449,11 +1453,7 @@ class Airflow
     model.getBuilding.additionalProperties.setFeature(Constants.SizingInfoMechVentExist, (not vent_fans_mech.empty?))
 
     # Fan Actuators
-    # Do we still want to create ee if there's no fan in HPXML? Reporting purpose?
-    sup_fan_actuator = add_ee_for_vent_fan_power(model, Constants.ObjectNameMechanicalVentilationHouseFanSupply, HPXML::MechVentTypeSupply)
-    exh_fan_actuator = add_ee_for_vent_fan_power(model, Constants.ObjectNameMechanicalVentilationHouseFanExhaust, HPXML::MechVentTypeExhaust)
-    bal_fan_actuator = add_ee_for_vent_fan_power(model, Constants.ObjectNameMechanicalVentilationHouseFanBalanced, HPXML::MechVentTypeBalanced)
-    cfis_fan_actuator = add_ee_for_vent_fan_power(model, Constants.ObjectNameMechanicalVentilationHouseFanCFIS, HPXML::MechVentTypeCFIS)
+    cfis_fan_actuator = add_ee_for_vent_fan_power(model, Constants.ObjectNameMechanicalVentilationHouseFanCFIS, 0.0, true)
 
     infil_flow = OpenStudio::Model::SpaceInfiltrationDesignFlowRate.new(model)
     infil_flow.setName(Constants.ObjectNameInfiltration + ' flow')
@@ -1488,7 +1488,7 @@ class Airflow
       infil_program.addLine("Set #{erv_sens_load_actuator.name} = 0.0")
       infil_program.addLine("Set #{erv_lat_load_actuator.name} = 0.0")
 
-      # ERV/HRV/Balanced EMS load model
+      # ERV/HRV EMS load model
       # E+ ERV model is using standard density for MFR calculation, caused discrepancy with other system types.
       # E+ ERV model also does not meet setpoint perfectly.
       # Therefore ERV is modeled within EMS infiltration program
@@ -1514,7 +1514,7 @@ class Airflow
     weighted_vent_mech_lat_eff = 0.0
     weighted_vent_mech_apparent_sens_eff = 0.0
 
-    # Apply balanced mechanical ventilation
+    # Apply ERV/HRV mechanical ventilation
     vent_mech_erv_hrv.each do |vent_mech|
       vent_mech_cfm = vent_mech.flow_rate * (vent_mech.hours_in_operation / 24.0)
       vent_mech_fan_w = vent_mech.fan_power * (vent_mech.hours_in_operation / 24.0)
@@ -1524,7 +1524,7 @@ class Airflow
       weighted_vent_mech_lat_eff += vent_mech_cfm / tot_bal_cfm * vent_mech_lat_eff
       weighted_vent_mech_apparent_sens_eff += vent_mech_cfm / tot_bal_cfm * vent_mech_apparent_sens_eff
 
-      infil_program = apply_balanced_mech_vent_to_infil_program(model, infil_program, vent_mech_cfm, vent_mech_sens_eff, vent_mech_lat_eff, erv_sens_load_actuator, erv_lat_load_actuator)
+      infil_program = apply_erv_hrv_load_to_infil_program(model, infil_program, vent_mech_cfm, vent_mech_sens_eff, vent_mech_lat_eff, erv_sens_load_actuator, erv_lat_load_actuator)
     end
 
     model.getBuilding.additionalProperties.setFeature(Constants.SizingInfoMechVentTotalEfficiency, weighted_vent_mech_tot_eff)
@@ -1582,10 +1582,6 @@ class Airflow
     end
     infil_program.addLine("Set #{mechvent_flow_actuator.name} = Qfan - QWHV_ervhrv") # QWHV load captured by ERV/HRV program
     infil_program.addLine("Set #{infil_flow_actuator.name} = Qinf_adj")
-
-    infil_program.addLine("Set #{sup_fan_actuator.name} = #{sup_vent_mech_fan_w}")
-    infil_program.addLine("Set #{exh_fan_actuator.name} = #{exh_vent_mech_fan_w}")
-    infil_program.addLine("Set #{bal_fan_actuator.name} = #{bal_vent_mech_fan_w}")
 
     program_calling_manager = OpenStudio::Model::EnergyManagementSystemProgramCallingManager.new(model)
     program_calling_manager.setName("#{infil_program.name} calling manager")
