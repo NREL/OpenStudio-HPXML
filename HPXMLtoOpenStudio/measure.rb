@@ -2297,25 +2297,6 @@ class OSModel
       end
     end
 
-    # Ventilation fans
-    vent_fans_mech = []
-    vent_fans_kitchen = []
-    vent_fans_bath = []
-    vent_fans_whf = []
-    @hpxml.ventilation_fans.each do |vent_fan|
-      if vent_fan.used_for_whole_building_ventilation
-        vent_fans_mech << vent_fan
-      elsif vent_fan.used_for_seasonal_cooling_load_reduction
-        vent_fans_whf << vent_fan
-      elsif vent_fan.used_for_local_ventilation
-        if vent_fan.fan_location == HPXML::LocationKitchen
-          vent_fans_kitchen << vent_fan
-        elsif vent_fan.fan_location == HPXML::LocationBath
-          vent_fans_bath << vent_fan
-        end
-      end
-    end
-
     air_infils = @hpxml.air_infiltration_measurements
     window_area = @hpxml.windows.map { |w| w.area }.inject(0, :+)
     open_window_area = window_area * @frac_windows_operable * 0.5 * 0.2 # Assume A) 50% of the area of an operable window can be open, and B) 20% of openable window area is actually open
@@ -2324,11 +2305,11 @@ class OSModel
     has_flue_chimney = false # FUTURE: Expose as HPXML input
     @infil_volume = air_infils.select { |i| !i.infiltration_volume.nil? }[0].infiltration_volume
     infil_height = @hpxml.inferred_infiltration_height(@infil_volume)
-    Airflow.apply(model, runner, weather, spaces, air_infils, vent_fans_mech, vent_fans_whf,
+    Airflow.apply(model, runner, weather, spaces, air_infils, @hpxml.ventilation_fans,
                   duct_systems, @infil_volume, infil_height, open_window_area,
-                  @clg_ssn_sensor, @min_neighbor_distance, vent_fans_kitchen, vent_fans_bath,
-                  vented_attic, vented_crawl, site_type, shelter_coef,
-                  has_flue_chimney, @hvac_map, @eri_version, @apply_ashrae140_assumptions)
+                  @clg_ssn_sensor, @min_neighbor_distance, vented_attic, vented_crawl,
+                  site_type, shelter_coef, has_flue_chimney, @hvac_map, @eri_version,
+                  @apply_ashrae140_assumptions)
   end
 
   def self.create_ducts(runner, model, hvac_distribution, spaces)

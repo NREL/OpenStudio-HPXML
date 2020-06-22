@@ -1,11 +1,11 @@
 # frozen_string_literal: true
 
 class Airflow
-  def self.apply(model, runner, weather, spaces, air_infils, vent_fans_mech, vent_fans_whf,
+  def self.apply(model, runner, weather, spaces, air_infils, vent_fans,
                  duct_systems, infil_volume, infil_height, open_window_area,
-                 nv_clg_ssn_sensor, min_neighbor_distance, vent_fans_kitchen, vent_fans_bath,
-                 vented_attic, vented_crawl, site_type, shelter_coef,
-                 has_flue_chimney, hvac_map, eri_version, apply_ashrae140_assumptions)
+                 nv_clg_ssn_sensor, min_neighbor_distance, vented_attic, vented_crawl,
+                 site_type, shelter_coef, has_flue_chimney, hvac_map, eri_version,
+                 apply_ashrae140_assumptions)
 
     # Global variables
 
@@ -50,6 +50,25 @@ class Airflow
     @adiabatic_const = OpenStudio::Model::Construction.new(model)
     @adiabatic_const.setName('AdiabaticConst')
     @adiabatic_const.insertLayer(0, adiabatic_mat)
+
+    # Ventilation fans
+    vent_fans_mech = []
+    vent_fans_kitchen = []
+    vent_fans_bath = []
+    vent_fans_whf = []
+    vent_fans.each do |vent_fan|
+      if vent_fan.used_for_whole_building_ventilation
+        vent_fans_mech << vent_fan
+      elsif vent_fan.used_for_seasonal_cooling_load_reduction
+        vent_fans_whf << vent_fan
+      elsif vent_fan.used_for_local_ventilation && vent_fan.fan_location == HPXML::LocationKitchen
+        vent_fans_kitchen << vent_fan
+      elsif vent_fan.used_for_local_ventilation && vent_fan.fan_location == HPXML::LocationBath
+        vent_fans_bath << vent_fan
+      else
+        @runner.registerWarning("Unexpected ventilation fan '#{vent_fan.id}'. The fan will not be modeled.")
+      end
+    end
 
     # Initialization
     initialize_cfis(model, vent_fans_mech, hvac_map)
