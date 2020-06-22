@@ -177,6 +177,7 @@ class BuildResidentialHPXMLTest < MiniTest::Test
       hpxml.frame_floors.sort_by! { |frame_floor| [frame_floor.insulation_assembly_r_value, frame_floor.area] }
       hpxml.slabs.sort_by! { |slab| slab.area }
       hpxml.windows.sort_by! { |window| [window.azimuth, window.area] }
+      hpxml.plug_loads.sort_by! { |plug_load| [plug_load.plug_load_type, plug_load.kWh_per_year] }
 
       # Ignore elements that we aren't going to diff
       hpxml.header.xml_type = nil
@@ -188,16 +189,11 @@ class BuildResidentialHPXMLTest < MiniTest::Test
       hpxml.climate_and_risk_zones.weather_station_name = nil
       hpxml.climate_and_risk_zones.weather_station_wmo = nil
       hpxml.climate_and_risk_zones.weather_station_epw_filepath = nil
+      hpxml.building_construction.conditioned_building_volume = nil
       hpxml.building_construction.average_ceiling_height = nil # Comparing conditioned volume instead
-      hpxml.attics.each do |attic|
-        attic.vented_attic_sla = nil # Defaulting in measure
-        attic.within_infiltration_volume = nil # Not used by mode
-      end
-      hpxml.foundations.each do |foundation|
-        foundation.vented_crawlspace_sla = nil # Defaulting in measure
-        foundation.within_infiltration_volume = nil # Not used by mode
-        foundation.unconditioned_basement_thermal_boundary = nil # Not used by mode
-      end
+      hpxml.air_infiltration_measurements[0].infiltration_volume = nil
+      hpxml.attics.clear()
+      hpxml.foundations.clear()
       hpxml.rim_joists.clear() # TODO
       hpxml.refrigerators.each do |refrigerator|
         refrigerator.adjusted_annual_kwh = nil
@@ -247,6 +243,17 @@ class BuildResidentialHPXMLTest < MiniTest::Test
           hpxml.hvac_distributions[0].ducts.delete_at(i) # Only compare first two ducts
         end
       end
+
+      if hpxml.refrigerators.length > 0
+        (2..hpxml.refrigerators.length).to_a.reverse.each do |i|
+          hpxml.refrigerators.delete_at(i) # Only compare first two refrigerators
+        end
+      end
+      if hpxml.freezers.length > 0
+        (1..hpxml.freezers.length).to_a.reverse.each do |i|
+          hpxml.freezers.delete_at(i) # Only compare first freezer
+        end
+      end
       if hpxml.collapse_enclosure
         hpxml.collapse_enclosure_surfaces()
       end
@@ -258,7 +265,7 @@ class BuildResidentialHPXMLTest < MiniTest::Test
 
         hpxml_obj.each do |obj|
           obj.class::ATTRS.each do |obj_attr|
-            next unless (obj_attr.to_s == 'id') || obj_attr.to_s.end_with?('_idref')
+            next unless obj_attr.to_s.end_with?('id') || obj_attr.to_s.end_with?('_idref')
 
             obj.send(obj_attr.to_s + '=', '')
           end

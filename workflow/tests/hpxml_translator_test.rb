@@ -15,10 +15,10 @@ class HPXMLTest < MiniTest::Test
   @@simulation_runtime_key = 'Simulation Runtime'
   @@workflow_runtime_key = 'Workflow Runtime'
 
-  def test_simulations
-    OpenStudio::Logger.instance.standardOutLogger.setLogLevel(OpenStudio::Error)
-    # OpenStudio::Logger.instance.standardOutLogger.setLogLevel(OpenStudio::Fatal)
+  @@os_log = OpenStudio::StringStreamLogSink.new
+  @@os_log.setLogLevel(OpenStudio::Warn)
 
+  def test_simulations
     this_dir = File.dirname(__FILE__)
     results_dir = File.join(this_dir, 'results')
     _rm_path(results_dir)
@@ -134,7 +134,6 @@ class HPXMLTest < MiniTest::Test
                                                                               'Expected [1] element(s) but found 0 element(s) for xpath: /HPXML/Building/BuildingDetails/Appliances/Dishwasher: [not(Location)] |',
                                                                               'Expected [1] element(s) but found 0 element(s) for xpath: /HPXML/Building/BuildingDetails/Appliances/Refrigerator: [not(Location)] |',
                                                                               'Expected [1] element(s) but found 0 element(s) for xpath: /HPXML/Building/BuildingDetails/Appliances/CookingRange: [not(Location)] |'],
-                            'attached-multifamily-window-outside-condition.xml' => ["Window 'WindowNorth' cannot be adjacent to 'other multifamily buffer space'. Check parent wall:"],
                             'cfis-with-hydronic-distribution.xml' => ["Attached HVAC distribution system 'HVACDistribution' cannot be hydronic for ventilation fan 'MechanicalVentilation'."],
                             'clothes-dryer-location.xml' => ["ClothesDryer location is 'garage' but building does not have this location specified."],
                             'clothes-washer-location.xml' => ["ClothesWasher location is 'garage' but building does not have this location specified."],
@@ -197,7 +196,9 @@ class HPXMLTest < MiniTest::Test
                             'unattached-solar-thermal-system.xml' => ["Attached water heating system 'foobar' not found for solar thermal system 'SolarThermalSystem'."],
                             'unattached-window.xml' => ["Attached wall 'foobar' not found for window 'WindowNorth'."],
                             'water-heater-location.xml' => ["WaterHeatingSystem location is 'crawlspace - vented' but building does not have this location specified."],
-                            'water-heater-location-other.xml' => ['Expected [1] element(s) but found 0 element(s) for xpath: /HPXML/Building/BuildingDetails/Systems/WaterHeating/WaterHeatingSystem: [not(Location)] |'] }
+                            'water-heater-location-other.xml' => ['Expected [1] element(s) but found 0 element(s) for xpath: /HPXML/Building/BuildingDetails/Systems/WaterHeating/WaterHeatingSystem: [not(Location)] |'],
+                            'refrigerators-multiple-primary.xml' => ['More than one refrigerator designated as the primary.'],
+                            'refrigerators-no-primary.xml' => ['Could not find a primary refrigerator.'] }
 
     # Test simulations
     Dir["#{sample_files_dir}/invalid_files/*.xml"].sort.each do |xml|
@@ -224,11 +225,6 @@ class HPXMLTest < MiniTest::Test
 
     sql_path = File.join(rundir, 'eplusout.sql')
     sqlFile = OpenStudio::SqlFile.new(sql_path, false)
-
-    # Obtain hot water use
-    # TODO: Add to reporting measure?
-    query = "SELECT SUM(VariableValue) FROM ReportVariableData WHERE ReportVariableDataDictionaryIndex IN (SELECT ReportVariableDataDictionaryIndex FROM ReportVariableDataDictionary WHERE VariableName='Water Use Equipment Hot Water Volume' AND VariableUnits='m3' AND ReportingFrequency='Run Period')"
-    results['Volume: Hot Water (gal)'] = UnitConversions.convert(sqlFile.execAndReturnFirstDouble(query).get, 'm^3', 'gal').round(2)
 
     # Obtain HVAC capacities
     # TODO: Add to reporting measure?
@@ -316,16 +312,7 @@ class HPXMLTest < MiniTest::Test
 
     # Apply measure
     success = apply_measures(measures_dir, measures, runner, model)
-
-    # Report warnings/errors
-    File.open(File.join(rundir, 'run.log'), 'w') do |f|
-      runner.result.stepWarnings.each do |s|
-        f << "Warning: #{s}\n"
-      end
-      runner.result.stepErrors.each do |s|
-        f << "Error: #{s}\n"
-      end
-    end
+    report_measure_errors_warnings(runner, rundir, false)
 
     if expect_error
       assert_equal(false, success)
@@ -394,11 +381,6 @@ class HPXMLTest < MiniTest::Test
       @cfis_flow_rate_output_var.setKeyValue('EMS')
     end
 
-    # Add output variables for hot water volume
-    output_var = OpenStudio::Model::OutputVariable.new('Water Use Equipment Hot Water Volume', model)
-    output_var.setReportingFrequency('runperiod')
-    output_var.setKeyValue('*')
-
     # Add output variables for combi system energy check
     output_var = OpenStudio::Model::OutputVariable.new('Water Heater Source Side Heat Transfer Energy', model)
     output_var.setReportingFrequency('runperiod')
@@ -419,6 +401,7 @@ class HPXMLTest < MiniTest::Test
     forward_translator = OpenStudio::EnergyPlus::ForwardTranslator.new
     forward_translator.setExcludeLCCObjects(true)
     model_idf = forward_translator.translateModel(model)
+    report_ft_errors_warnings(forward_translator, rundir)
 
     # Apply reporting measure output requests
     apply_energyplus_output_requests(measures_dir, measures, runner, model, model_idf)
@@ -439,20 +422,13 @@ class HPXMLTest < MiniTest::Test
     # Apply reporting measures
     runner.setLastEnergyPlusSqlFilePath(File.join(rundir, 'eplusout.sql'))
     success = apply_measures(measures_dir, measures, runner, model, true, 'OpenStudio::Measure::ReportingMeasure')
+    report_measure_errors_warnings(runner, rundir, false)
     runner.resetLastEnergyPlusSqlFilePath
-
-    # Report warnings/errors
-    File.open(File.join(rundir, 'run.log'), 'a') do |f|
-      runner.result.stepWarnings.each do |s|
-        f << "Warning: #{s}\n"
-      end
-      runner.result.stepErrors.each do |s|
-        f << "Error: #{s}\n"
-      end
-    end
 
     show_output(runner.result) unless success
     assert_equal(true, success)
+
+    report_os_warnings(rundir)
 
     annual_csv_path = File.join(rundir, 'results_annual.csv')
     timeseries_csv_path = File.join(rundir, 'results_timeseries.csv')
@@ -468,6 +444,44 @@ class HPXMLTest < MiniTest::Test
     sizing_results = _get_sizing_results(runner)
 
     return results, sizing_results
+  end
+
+  def report_measure_errors_warnings(runner, rundir, debug)
+    # Report warnings/errors
+    File.open(File.join(rundir, 'run.log'), 'w') do |f|
+      if debug
+        runner.result.stepInfo.each do |s|
+          f << "Info: #{s}\n"
+        end
+      end
+      runner.result.stepWarnings.each do |s|
+        f << "Warning: #{s}\n"
+      end
+      runner.result.stepErrors.each do |s|
+        f << "Error: #{s}\n"
+      end
+    end
+  end
+
+  def report_ft_errors_warnings(forward_translator, rundir)
+    # Report warnings/errors
+    File.open(File.join(rundir, 'run.log'), 'a') do |f|
+      forward_translator.warnings.each do |s|
+        f << "FT Warning: #{s.logMessage}\n"
+      end
+      forward_translator.errors.each do |s|
+        f << "FT Error: #{s.logMessage}\n"
+      end
+    end
+  end
+
+  def report_os_warnings(rundir)
+    File.open(File.join(rundir, 'run.log'), 'a') do |f|
+      @@os_log.logMessages.each do |s|
+        f << "OS Message: #{s.logMessage}\n"
+      end
+    end
+    @@os_log.resetStringStream
   end
 
   def _get_sizing_results(runner)
@@ -493,12 +507,30 @@ class HPXMLTest < MiniTest::Test
   def _verify_simulation_outputs(runner, rundir, hpxml_path, results)
     # Check that eplusout.err has no lines that include "Blank Schedule Type Limits Name input"
     # Check that eplusout.err has no lines that include "FixViewFactors: View factors not complete"
+    # Check that eplusout.err has no lines that include "GetHTSurfaceData: Surfaces with interface to Ground found but no "Ground Temperatures" were input"
     File.readlines(File.join(rundir, 'eplusout.err')).each do |err_line|
       next if err_line.include? 'Schedule:Constant="ALWAYS ON CONTINUOUS", Blank Schedule Type Limits Name input'
       next if err_line.include? 'Schedule:Constant="ALWAYS OFF DISCRETE", Blank Schedule Type Limits Name input'
 
       assert_equal(err_line.include?('Blank Schedule Type Limits Name input'), false)
       assert_equal(err_line.include?('FixViewFactors: View factors not complete'), false)
+      assert_equal(err_line.include?('GetHTSurfaceData: Surfaces with interface to Ground found but no "Ground Temperatures" were input'), false)
+    end
+
+    # Check run.log warnings
+    File.readlines(File.join(rundir, 'run.log')).each do |log_line|
+      next if log_line.include? 'Warning: Could not load nokogiri, no HPXML validation performed.'
+      next if log_line.include? 'Cannot find current Workflow Step'
+      next if log_line.include? 'Data will be treated as typical (TMY)'
+      next if log_line.include? 'WorkflowStepResult value called with undefined stepResult'
+      next if log_line.include?("Object of type 'Schedule:Constant' and named 'Always") && log_line.include?('points to an object named') && log_line.include?('but that object cannot be located')
+      next if log_line.include? "-cache.csv' could not be found; regenerating it."
+      next if log_line.include? 'Appears there are no design condition fields in the EPW file'
+      next if log_line.include?('Warning: HVACDistribution') && log_line.include?('has ducts entirely within conditioned space but there is non-zero leakage to the outside.')
+      # TODO: Remove once https://github.com/NREL/OpenStudio/pull/3999 is available
+      next if log_line.include? "OS Message: 'Propane' is deprecated for Coil_Heating_GasFields:FuelType, use 'Propane' instead"
+
+      flunk "Unexpected warning found in run.log: #{log_line}"
     end
 
     sql_path = File.join(rundir, 'eplusout.sql')
@@ -613,7 +645,9 @@ class HPXMLTest < MiniTest::Test
                                     'base-enclosure-other-non-freezing-space.xml' => 0, # no foundation in contact w/ ground
                                     'base-enclosure-other-multifamily-buffer-space.xml' => 0, # no foundation in contact w/ ground
                                     'base-foundation-walkout-basement.xml' => 4, # 3 foundation walls plus a no-wall exposed perimeter
-                                    'base-foundation-complex.xml' => 10 }
+                                    'base-foundation-complex.xml' => 10,
+                                    'base-misc-large-uncommon-loads.xml' => 2,
+                                    'base-misc-large-uncommon-loads2.xml' => 2 }
 
     if hpxml_path.include? 'ASHRAE_Standard_140'
       # nop
@@ -767,6 +801,8 @@ class HPXMLTest < MiniTest::Test
 
     # Enclosure Windows/Skylights
     (hpxml.windows + hpxml.skylights).each do |subsurface|
+      next unless subsurface.is_exterior
+
       subsurface_id = subsurface.id.upcase
 
       # Area
@@ -813,10 +849,9 @@ class HPXMLTest < MiniTest::Test
 
     # Enclosure Doors
     hpxml.doors.each do |door|
-      door_id = door.id.upcase
-
-      # only outdoor doors will appear on the exterior door table
       next unless door.wall.is_exterior
+
+      door_id = door.id.upcase
 
       # Area
       if not door.area.nil?

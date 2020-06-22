@@ -8,7 +8,7 @@ require 'fileutils'
 require_relative '../measure.rb'
 require_relative '../resources/util.rb'
 
-class HPXMLtoOpenStudioDuctsTest < MiniTest::Test
+class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
   def before_setup
     @root_path = File.absolute_path(File.join(File.dirname(__FILE__), '..', '..'))
     @tmp_hpxml_path = File.join(@root_path, 'workflow', 'sample_files', 'tmp.xml')
@@ -40,7 +40,8 @@ class HPXMLtoOpenStudioDuctsTest < MiniTest::Test
     _test_default_header_values(hpxml_default, 30, 2, 2, 11, 11)
 
     # Test defaults
-    apply_hpxml_defaults('base.xml')
+    hpxml = apply_hpxml_defaults('base.xml')
+    XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
     hpxml_default = _test_measure()
     _test_default_header_values(hpxml_default, 60, 1, 1, 12, 31)
   end
@@ -56,7 +57,8 @@ class HPXMLtoOpenStudioDuctsTest < MiniTest::Test
     _test_default_site_values(hpxml_default, HPXML::SiteTypeRural, 0.3)
 
     # Test defaults
-    apply_hpxml_defaults('base.xml')
+    hpxml = apply_hpxml_defaults('base.xml')
+    XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
     hpxml_default = _test_measure()
     _test_default_site_values(hpxml_default, HPXML::SiteTypeSuburban, 0.5)
   end
@@ -71,7 +73,8 @@ class HPXMLtoOpenStudioDuctsTest < MiniTest::Test
     _test_default_occupancy_values(hpxml_default, 1)
 
     # Test defaults
-    apply_hpxml_defaults('base.xml')
+    hpxml = apply_hpxml_defaults('base.xml')
+    XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
     hpxml_default = _test_measure()
     _test_default_occupancy_values(hpxml_default, 3)
   end
@@ -85,7 +88,8 @@ class HPXMLtoOpenStudioDuctsTest < MiniTest::Test
     _test_default_building_construction_values(hpxml_default, 21600)
 
     # Test defaults w/ average ceiling height
-    apply_hpxml_defaults('base.xml')
+    hpxml = apply_hpxml_defaults('base.xml')
+    XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
     hpxml_default = _test_measure()
     _test_default_building_construction_values(hpxml_default, 27000)
   end
@@ -100,7 +104,8 @@ class HPXMLtoOpenStudioDuctsTest < MiniTest::Test
     _test_default_attic_values(hpxml_default, 0.001)
 
     # Test defaults
-    apply_hpxml_defaults('base-atticroof-vented.xml')
+    hpxml = apply_hpxml_defaults('base-atticroof-vented.xml')
+    XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
     hpxml_default = _test_measure()
     _test_default_attic_values(hpxml_default, 1.0 / 300.0)
   end
@@ -115,7 +120,8 @@ class HPXMLtoOpenStudioDuctsTest < MiniTest::Test
     _test_default_foundation_values(hpxml_default, 0.001)
 
     # Test defaults
-    apply_hpxml_defaults('base-foundation-vented-crawlspace.xml')
+    hpxml = apply_hpxml_defaults('base-foundation-vented-crawlspace.xml')
+    XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
     hpxml_default = _test_measure()
     _test_default_foundation_values(hpxml_default, 1.0 / 150.0)
   end
@@ -130,14 +136,64 @@ class HPXMLtoOpenStudioDuctsTest < MiniTest::Test
     _test_default_infiltration_values(hpxml_default, 25000)
 
     # Test defaults w/ conditioned basement
-    apply_hpxml_defaults('base.xml')
+    hpxml = apply_hpxml_defaults('base.xml')
+    XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
     hpxml_default = _test_measure()
     _test_default_infiltration_values(hpxml_default, 2700 * 10)
 
     # Test defaults w/o conditioned basement
-    apply_hpxml_defaults('base-foundation-slab.xml')
+    hpxml = apply_hpxml_defaults('base-foundation-slab.xml')
+    XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
     hpxml_default = _test_measure()
     _test_default_infiltration_values(hpxml_default, 1350 * 10)
+  end
+
+  def test_roofs
+    # Test inputs not overridden by defaults
+    hpxml_name = 'base.xml'
+    hpxml = HPXML.new(hpxml_path: File.join(@root_path, 'workflow', 'sample_files', hpxml_name))
+    hpxml.roofs[0].roof_type = HPXML::RoofTypeMetal
+    XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
+    hpxml_default = _test_measure()
+    _test_default_roof_values(hpxml_default, HPXML::RoofTypeMetal, 0.7, HPXML::ColorMedium)
+
+    # Test defaults
+    hpxml = apply_hpxml_defaults('base.xml')
+    XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
+    hpxml_default = _test_measure()
+    _test_default_roof_values(hpxml_default, HPXML::RoofTypeAsphaltShingles, 0.75, HPXML::ColorLight)
+  end
+
+  def test_walls
+    # Test inputs not overridden by defaults
+    hpxml_name = 'base.xml'
+    hpxml = HPXML.new(hpxml_path: File.join(@root_path, 'workflow', 'sample_files', hpxml_name))
+    hpxml.walls[0].siding = HPXML::SidingTypeFiberCement
+    XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
+    hpxml_default = _test_measure()
+    _test_default_wall_values(hpxml_default, HPXML::SidingTypeFiberCement, 0.7, HPXML::ColorMedium)
+
+    # Test defaults
+    hpxml = apply_hpxml_defaults('base.xml')
+    XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
+    hpxml_default = _test_measure()
+    _test_default_wall_values(hpxml_default, HPXML::SidingTypeWood, 0.5, HPXML::ColorLight)
+  end
+
+  def test_rim_joists
+    # Test inputs not overridden by defaults
+    hpxml_name = 'base.xml'
+    hpxml = HPXML.new(hpxml_path: File.join(@root_path, 'workflow', 'sample_files', hpxml_name))
+    hpxml.rim_joists[0].siding = HPXML::SidingTypeBrick
+    XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
+    hpxml_default = _test_measure()
+    _test_default_rim_joist_values(hpxml_default, HPXML::SidingTypeBrick, 0.7, HPXML::ColorMedium)
+
+    # Test defaults
+    hpxml = apply_hpxml_defaults('base.xml')
+    XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
+    hpxml_default = _test_measure()
+    _test_default_rim_joist_values(hpxml_default, HPXML::SidingTypeWood, 0.95, HPXML::ColorDark)
   end
 
   def test_windows
@@ -153,10 +209,32 @@ class HPXMLtoOpenStudioDuctsTest < MiniTest::Test
     _test_default_window_values(hpxml_default, [0.7, 0.01, 0.0, 1.0], [0.85, 0.99, 0.5, 1.0], [0.5] * n_windows)
 
     # Test defaults
-    apply_hpxml_defaults('base.xml')
+    hpxml = apply_hpxml_defaults('base.xml')
+    XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
     hpxml_default = _test_measure()
     n_windows = hpxml_default.windows.size
     _test_default_window_values(hpxml_default, [0.7] * n_windows, [0.85] * n_windows, [0.67] * n_windows)
+  end
+
+  def test_skylights
+    # Test inputs not overridden by defaults
+    hpxml_name = 'base-enclosure-skylights.xml'
+    hpxml = HPXML.new(hpxml_path: File.join(@root_path, 'workflow', 'sample_files', hpxml_name))
+    hpxml.skylights.each do |skylight|
+      skylight.interior_shading_factor_summer = 0.90
+      skylight.interior_shading_factor_winter = 0.95
+    end
+    XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
+    hpxml_default = _test_measure()
+    n_skylights = hpxml_default.skylights.size
+    _test_default_skylight_values(hpxml_default, [0.90] * n_skylights, [0.95] * n_skylights)
+
+    # Test defaults
+    hpxml = apply_hpxml_defaults('base-enclosure-skylights.xml')
+    XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
+    hpxml_default = _test_measure()
+    n_skylights = hpxml_default.skylights.size
+    _test_default_skylight_values(hpxml_default, [1.0] * n_skylights, [1.0] * n_skylights)
   end
 
   def test_ducts
@@ -173,7 +251,8 @@ class HPXMLtoOpenStudioDuctsTest < MiniTest::Test
     _test_default_duct_values(hpxml_default, expected_supply_locations, expected_return_locations, expected_supply_areas, expected_return_areas, expected_n_return_registers)
 
     # Test defaults w/ conditioned basement
-    apply_hpxml_defaults('base.xml')
+    hpxml = apply_hpxml_defaults('base.xml')
+    XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
     hpxml_default = _test_measure()
     expected_supply_locations = ['basement - conditioned']
     expected_return_locations = ['basement - conditioned']
@@ -183,7 +262,8 @@ class HPXMLtoOpenStudioDuctsTest < MiniTest::Test
     _test_default_duct_values(hpxml_default, expected_supply_locations, expected_return_locations, expected_supply_areas, expected_return_areas, expected_n_return_registers)
 
     # Test defaults w/ multiple foundations
-    apply_hpxml_defaults('base-foundation-multiple.xml')
+    hpxml = apply_hpxml_defaults('base-foundation-multiple.xml')
+    XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
     hpxml_default = _test_measure()
     expected_supply_locations = ['basement - unconditioned']
     expected_return_locations = ['basement - unconditioned']
@@ -193,7 +273,8 @@ class HPXMLtoOpenStudioDuctsTest < MiniTest::Test
     _test_default_duct_values(hpxml_default, expected_supply_locations, expected_return_locations, expected_supply_areas, expected_return_areas, expected_n_return_registers)
 
     # Test defaults w/ foundation exposed to ambient
-    apply_hpxml_defaults('base-foundation-ambient.xml')
+    hpxml = apply_hpxml_defaults('base-foundation-ambient.xml')
+    XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
     hpxml_default = _test_measure()
     expected_supply_locations = ['attic - unvented']
     expected_return_locations = ['attic - unvented']
@@ -203,7 +284,8 @@ class HPXMLtoOpenStudioDuctsTest < MiniTest::Test
     _test_default_duct_values(hpxml_default, expected_supply_locations, expected_return_locations, expected_supply_areas, expected_return_areas, expected_n_return_registers)
 
     # Test defaults w/ building/unit adjacent to other housing unit
-    apply_hpxml_defaults('base-enclosure-other-housing-unit.xml')
+    hpxml = apply_hpxml_defaults('base-enclosure-other-housing-unit.xml')
+    XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
     hpxml_default = _test_measure()
     expected_supply_locations = ['living space']
     expected_return_locations = ['living space']
@@ -213,28 +295,26 @@ class HPXMLtoOpenStudioDuctsTest < MiniTest::Test
     _test_default_duct_values(hpxml_default, expected_supply_locations, expected_return_locations, expected_supply_areas, expected_return_areas, expected_n_return_registers)
 
     # Test defaults w/ 2-story building
-    apply_hpxml_defaults('base-enclosure-2stories.xml')
+    hpxml = apply_hpxml_defaults('base-enclosure-2stories.xml')
+    XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
     hpxml_default = _test_measure()
     expected_supply_locations = ['basement - conditioned', 'living space']
     expected_return_locations = ['basement - conditioned', 'living space']
-    expected_supply_areas = [820.125, 273.375]
-    expected_return_areas = [455.625, 151.875]
+    expected_supply_areas = [820.13, 273.38]
+    expected_return_areas = [455.63, 151.88]
     expected_n_return_registers = hpxml_default.building_construction.number_of_conditioned_floors
     _test_default_duct_values(hpxml_default, expected_supply_locations, expected_return_locations, expected_supply_areas, expected_return_areas, expected_n_return_registers)
 
     # Test defaults w/ 1-story building & multiple HVAC systems
-    hpxml_files = ['base-hvac-multiple.xml',
-                   'base-hvac-multiple2.xml']
-    hpxml_files.each do |hpxml_file|
-      apply_hpxml_defaults(hpxml_file)
-      hpxml_default = _test_measure()
-      expected_supply_locations = ['basement - conditioned', 'basement - conditioned'] * hpxml_default.hvac_distributions.size
-      expected_return_locations = ['basement - conditioned', 'basement - conditioned'] * hpxml_default.hvac_distributions.size
-      expected_supply_areas = [91.125, 91.125] * hpxml_default.hvac_distributions.size
-      expected_return_areas = [33.75, 33.75] * hpxml_default.hvac_distributions.size
-      expected_n_return_registers = hpxml_default.building_construction.number_of_conditioned_floors
-      _test_default_duct_values(hpxml_default, expected_supply_locations, expected_return_locations, expected_supply_areas, expected_return_areas, expected_n_return_registers)
-    end
+    hpxml = apply_hpxml_defaults('base-hvac-multiple.xml')
+    XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
+    hpxml_default = _test_measure()
+    expected_supply_locations = ['basement - conditioned', 'basement - conditioned'] * hpxml_default.hvac_distributions.size
+    expected_return_locations = ['basement - conditioned', 'basement - conditioned'] * hpxml_default.hvac_distributions.size
+    expected_supply_areas = [60.75, 60.75] * hpxml_default.hvac_distributions.size
+    expected_return_areas = [22.5, 22.5] * hpxml_default.hvac_distributions.size
+    expected_n_return_registers = hpxml_default.building_construction.number_of_conditioned_floors
+    _test_default_duct_values(hpxml_default, expected_supply_locations, expected_return_locations, expected_supply_areas, expected_return_areas, expected_n_return_registers)
 
     # Test defaults w/ 2-story building & multiple HVAC systems
     hpxml = apply_hpxml_defaults('base-hvac-multiple.xml')
@@ -243,8 +323,8 @@ class HPXMLtoOpenStudioDuctsTest < MiniTest::Test
     hpxml_default = _test_measure()
     expected_supply_locations = ['basement - conditioned', 'basement - conditioned', 'living space', 'living space'] * hpxml_default.hvac_distributions.size
     expected_return_locations = ['basement - conditioned', 'basement - conditioned', 'living space', 'living space'] * hpxml_default.hvac_distributions.size
-    expected_supply_areas = [68.344, 68.344, 22.781, 22.781] * hpxml_default.hvac_distributions.size
-    expected_return_areas = [25.312, 25.312, 8.438, 8.438] * hpxml_default.hvac_distributions.size
+    expected_supply_areas = [45.56, 45.56, 15.19, 15.19] * hpxml_default.hvac_distributions.size
+    expected_return_areas = [16.88, 16.88, 5.63, 5.63] * hpxml_default.hvac_distributions.size
     expected_n_return_registers = hpxml_default.building_construction.number_of_conditioned_floors
     _test_default_duct_values(hpxml_default, expected_supply_locations, expected_return_locations, expected_supply_areas, expected_return_areas, expected_n_return_registers)
   end
@@ -265,18 +345,21 @@ class HPXMLtoOpenStudioDuctsTest < MiniTest::Test
 
     # Test defaults w/ 3-bedroom house & electric storage water heater
     hpxml = apply_hpxml_defaults('base.xml')
+    XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
     hpxml_default = _test_measure()
     _test_default_water_heater_values(hpxml_default, [18766.7, 50.0, 0.98])
     _test_default_number_of_bathrooms(hpxml_default, 2.0)
 
     # Test defaults w/ 5-bedroom house & electric storage water heater
     hpxml = apply_hpxml_defaults('base-enclosure-beds-5.xml')
+    XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
     hpxml_default = _test_measure()
     _test_default_water_heater_values(hpxml_default, [18766.7, 66.0, 0.98])
     _test_default_number_of_bathrooms(hpxml_default, 3.0)
 
     # Test defaults w/ 3-bedroom house & 2 storage water heaters (1 electric and 1 natural gas)
     hpxml = apply_hpxml_defaults('base-dhw-multiple.xml')
+    XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
     hpxml_default = _test_measure()
     _test_default_water_heater_values(hpxml_default, [15354.6, 50.0, 0.98],
                                       [36000.0, 40.0, 0.756])
@@ -300,22 +383,26 @@ class HPXMLtoOpenStudioDuctsTest < MiniTest::Test
     _test_default_recirc_distribution_values(hpxml_default, 50.0, 50.0, 65.0)
 
     # Test defaults w/ conditioned basement
-    apply_hpxml_defaults('base.xml')
+    hpxml = apply_hpxml_defaults('base.xml')
+    XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
     hpxml_default = _test_measure()
     _test_default_standard_distribution_values(hpxml_default, 93.48)
 
     # Test defaults w/ unconditioned basement
-    apply_hpxml_defaults('base-foundation-unconditioned-basement.xml')
+    hpxml = apply_hpxml_defaults('base-foundation-unconditioned-basement.xml')
+    XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
     hpxml_default = _test_measure()
     _test_default_standard_distribution_values(hpxml_default, 88.48)
 
     # Test defaults w/ 2-story building
-    apply_hpxml_defaults('base-enclosure-2stories.xml')
+    hpxml = apply_hpxml_defaults('base-enclosure-2stories.xml')
+    XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
     hpxml_default = _test_measure()
     _test_default_standard_distribution_values(hpxml_default, 103.48)
 
     # Test defaults w/ recirculation & conditioned basement
     hpxml = apply_hpxml_defaults('base-dhw-recirc-demand.xml')
+    XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
     hpxml_default = _test_measure()
     _test_default_recirc_distribution_values(hpxml_default, 166.96, 10.0, 50.0)
 
@@ -352,7 +439,8 @@ class HPXMLtoOpenStudioDuctsTest < MiniTest::Test
     _test_default_water_fixture_values(hpxml_default, 2.0)
 
     # Test defaults
-    apply_hpxml_defaults('base.xml')
+    hpxml = apply_hpxml_defaults('base.xml')
+    XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
     hpxml_default = _test_measure()
     _test_default_water_fixture_values(hpxml_default, 1.0)
   end
@@ -368,6 +456,7 @@ class HPXMLtoOpenStudioDuctsTest < MiniTest::Test
 
     # Test defaults w/ collector area of 40 sqft
     hpxml = apply_hpxml_defaults('base-dhw-solar-direct-flat-plate.xml')
+    XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
     hpxml_default = _test_measure()
     _test_default_solar_thermal_values(hpxml_default, 60.0)
 
@@ -398,6 +487,7 @@ class HPXMLtoOpenStudioDuctsTest < MiniTest::Test
 
     # Test defaults
     hpxml = apply_hpxml_defaults('base-mechvent-bath-kitchen-fans.xml')
+    XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
     hpxml_default = _test_measure()
     _test_default_kitchen_fan_values(hpxml_default, 100, 1, 30, 18)
     _test_default_bath_fan_values(hpxml_default, 2, 50, 1, 15, 7)
@@ -413,30 +503,173 @@ class HPXMLtoOpenStudioDuctsTest < MiniTest::Test
 
     # Test defaults
     hpxml = apply_hpxml_defaults('base-misc-ceiling-fans.xml')
+    XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
     hpxml_default = _test_measure()
     _test_default_ceiling_fan_values(hpxml_default, 4, 70.4)
   end
 
+  def test_pools
+    # Test inputs not overridden by defaults
+    hpxml_name = 'base-misc-large-uncommon-loads.xml'
+    hpxml = HPXML.new(hpxml_path: File.join(@root_path, 'workflow', 'sample_files', hpxml_name))
+    pool = hpxml.pools[0]
+    pool.heater_load_units = HPXML::UnitsKwhPerYear
+    pool.heater_load_value = 1000
+    pool.pump_kwh_per_year = 3000
+    pool.heater_weekday_fractions = '0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42'
+    pool.heater_weekend_fractions = '0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42'
+    pool.heater_monthly_multipliers = '1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1'
+    pool.pump_weekday_fractions = '0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42'
+    pool.pump_weekend_fractions = '0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42'
+    pool.pump_monthly_multipliers = '1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1'
+    XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
+    hpxml_default = _test_measure()
+    _test_default_pool_heater_values(hpxml_default, HPXML::UnitsKwhPerYear, 1000, '0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42', '0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42', '1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1')
+    _test_default_pool_pump_values(hpxml_default, 3000, '0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42', '0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42', '1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1')
+
+    # Test defaults
+    hpxml = apply_hpxml_defaults('base-misc-large-uncommon-loads.xml')
+    XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
+    hpxml_default = _test_measure()
+    _test_default_pool_heater_values(hpxml_default, HPXML::UnitsThermPerYear, 236, '0.003, 0.003, 0.003, 0.004, 0.008, 0.015, 0.026, 0.044, 0.084, 0.121, 0.127, 0.121, 0.120, 0.090, 0.075, 0.061, 0.037, 0.023, 0.013, 0.008, 0.004, 0.003, 0.003, 0.003', '0.003, 0.003, 0.003, 0.004, 0.008, 0.015, 0.026, 0.044, 0.084, 0.121, 0.127, 0.121, 0.120, 0.090, 0.075, 0.061, 0.037, 0.023, 0.013, 0.008, 0.004, 0.003, 0.003, 0.003', '1.154, 1.161, 1.013, 1.010, 1.013, 0.888, 0.883, 0.883, 0.888, 0.978, 0.974, 1.154')
+    _test_default_pool_pump_values(hpxml_default, 2496, '0.003, 0.003, 0.003, 0.004, 0.008, 0.015, 0.026, 0.044, 0.084, 0.121, 0.127, 0.121, 0.120, 0.090, 0.075, 0.061, 0.037, 0.023, 0.013, 0.008, 0.004, 0.003, 0.003, 0.003', '0.003, 0.003, 0.003, 0.004, 0.008, 0.015, 0.026, 0.044, 0.084, 0.121, 0.127, 0.121, 0.120, 0.090, 0.075, 0.061, 0.037, 0.023, 0.013, 0.008, 0.004, 0.003, 0.003, 0.003', '1.154, 1.161, 1.013, 1.010, 1.013, 0.888, 0.883, 0.883, 0.888, 0.978, 0.974, 1.154')
+
+    # Test defaults 2
+    hpxml = apply_hpxml_defaults('base-misc-large-uncommon-loads2.xml')
+    XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
+    hpxml_default = _test_measure()
+    _test_default_pool_heater_values(hpxml_default, nil, nil, nil, nil, nil)
+    _test_default_pool_pump_values(hpxml_default, 2496, '0.003, 0.003, 0.003, 0.004, 0.008, 0.015, 0.026, 0.044, 0.084, 0.121, 0.127, 0.121, 0.120, 0.090, 0.075, 0.061, 0.037, 0.023, 0.013, 0.008, 0.004, 0.003, 0.003, 0.003', '0.003, 0.003, 0.003, 0.004, 0.008, 0.015, 0.026, 0.044, 0.084, 0.121, 0.127, 0.121, 0.120, 0.090, 0.075, 0.061, 0.037, 0.023, 0.013, 0.008, 0.004, 0.003, 0.003, 0.003', '1.154, 1.161, 1.013, 1.010, 1.013, 0.888, 0.883, 0.883, 0.888, 0.978, 0.974, 1.154')
+  end
+
+  def test_hot_tubs
+    # Test inputs not overridden by defaults
+    hpxml_name = 'base-misc-large-uncommon-loads.xml'
+    hpxml = HPXML.new(hpxml_path: File.join(@root_path, 'workflow', 'sample_files', hpxml_name))
+    hot_tub = hpxml.hot_tubs[0]
+    hot_tub.heater_load_units = HPXML::UnitsThermPerYear
+    hot_tub.heater_load_value = 1000
+    hot_tub.pump_kwh_per_year = 3000
+    hot_tub.heater_weekday_fractions = '0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42'
+    hot_tub.heater_weekend_fractions = '0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42'
+    hot_tub.heater_monthly_multipliers = '1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1'
+    hot_tub.pump_weekday_fractions = '0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42'
+    hot_tub.pump_weekend_fractions = '0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42'
+    hot_tub.pump_monthly_multipliers = '1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1'
+    XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
+    hpxml_default = _test_measure()
+    _test_default_hot_tub_heater_values(hpxml_default, HPXML::UnitsThermPerYear, 1000, '0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42', '0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42', '1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1')
+    _test_default_hot_tub_pump_values(hpxml_default, 3000, '0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42', '0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42', '1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1')
+
+    # Test defaults
+    hpxml = apply_hpxml_defaults('base-misc-large-uncommon-loads.xml')
+    XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
+    hpxml_default = _test_measure()
+    _test_default_hot_tub_heater_values(hpxml_default, HPXML::UnitsKwhPerYear, 1125, '0.024, 0.029, 0.024, 0.029, 0.047, 0.067, 0.057, 0.024, 0.024, 0.019, 0.015, 0.014, 0.014, 0.014, 0.024, 0.058, 0.126, 0.122, 0.068, 0.061, 0.051, 0.043, 0.024, 0.024', '0.024, 0.029, 0.024, 0.029, 0.047, 0.067, 0.057, 0.024, 0.024, 0.019, 0.015, 0.014, 0.014, 0.014, 0.024, 0.058, 0.126, 0.122, 0.068, 0.061, 0.051, 0.043, 0.024, 0.024', '0.837, 0.835, 1.084, 1.084, 1.084, 1.096, 1.096, 1.096, 1.096, 0.931, 0.925, 0.837')
+    _test_default_hot_tub_pump_values(hpxml_default, 1111, '0.024, 0.029, 0.024, 0.029, 0.047, 0.067, 0.057, 0.024, 0.024, 0.019, 0.015, 0.014, 0.014, 0.014, 0.024, 0.058, 0.126, 0.122, 0.068, 0.061, 0.051, 0.043, 0.024, 0.024', '0.024, 0.029, 0.024, 0.029, 0.047, 0.067, 0.057, 0.024, 0.024, 0.019, 0.015, 0.014, 0.014, 0.014, 0.024, 0.058, 0.126, 0.122, 0.068, 0.061, 0.051, 0.043, 0.024, 0.024', '0.921, 0.928, 0.921, 0.915, 0.921, 1.160, 1.158, 1.158, 1.160, 0.921, 0.915, 0.921')
+
+    # Test defaults 2
+    hpxml = apply_hpxml_defaults('base-misc-large-uncommon-loads2.xml')
+    XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
+    hpxml_default = _test_measure()
+    _test_default_hot_tub_heater_values(hpxml_default, HPXML::UnitsKwhPerYear, 225, '0.024, 0.029, 0.024, 0.029, 0.047, 0.067, 0.057, 0.024, 0.024, 0.019, 0.015, 0.014, 0.014, 0.014, 0.024, 0.058, 0.126, 0.122, 0.068, 0.061, 0.051, 0.043, 0.024, 0.024', '0.024, 0.029, 0.024, 0.029, 0.047, 0.067, 0.057, 0.024, 0.024, 0.019, 0.015, 0.014, 0.014, 0.014, 0.024, 0.058, 0.126, 0.122, 0.068, 0.061, 0.051, 0.043, 0.024, 0.024', '0.837, 0.835, 1.084, 1.084, 1.084, 1.096, 1.096, 1.096, 1.096, 0.931, 0.925, 0.837')
+    _test_default_hot_tub_pump_values(hpxml_default, 1111, '0.024, 0.029, 0.024, 0.029, 0.047, 0.067, 0.057, 0.024, 0.024, 0.019, 0.015, 0.014, 0.014, 0.014, 0.024, 0.058, 0.126, 0.122, 0.068, 0.061, 0.051, 0.043, 0.024, 0.024', '0.024, 0.029, 0.024, 0.029, 0.047, 0.067, 0.057, 0.024, 0.024, 0.019, 0.015, 0.014, 0.014, 0.014, 0.024, 0.058, 0.126, 0.122, 0.068, 0.061, 0.051, 0.043, 0.024, 0.024', '0.921, 0.928, 0.921, 0.915, 0.921, 1.160, 1.158, 1.158, 1.160, 0.921, 0.915, 0.921')
+  end
+
   def test_plug_loads
     # Test inputs not overridden by defaults
-    hpxml_name = 'base.xml'
+    hpxml_name = 'base-misc-large-uncommon-loads.xml'
     hpxml = HPXML.new(hpxml_path: File.join(@root_path, 'workflow', 'sample_files', hpxml_name))
     tv_pl = hpxml.plug_loads.select { |pl| pl.plug_load_type == HPXML::PlugLoadTypeTelevision }[0]
     tv_pl.kWh_per_year = 1000
+    tv_pl.frac_sensible = 0.6
+    tv_pl.frac_latent = 0.3
+    tv_pl.location = HPXML::LocationExterior
+    tv_pl.weekday_fractions = '0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42'
+    tv_pl.weekend_fractions = '0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42'
+    tv_pl.monthly_multipliers = '1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1'
     other_pl = hpxml.plug_loads.select { |pl| pl.plug_load_type == HPXML::PlugLoadTypeOther }[0]
     other_pl.kWh_per_year = 2000
-    other_pl.frac_sensible = 0.8
-    other_pl.frac_latent = 0.1
+    other_pl.frac_sensible = 0.5
+    other_pl.frac_latent = 0.4
+    other_pl.location = HPXML::LocationExterior
+    other_pl.weekday_fractions = '0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42'
+    other_pl.weekend_fractions = '0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42'
+    other_pl.monthly_multipliers = '1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1'
+    veh_pl = hpxml.plug_loads.select { |pl| pl.plug_load_type == HPXML::PlugLoadTypeElectricVehicleCharging }[0]
+    veh_pl.kWh_per_year = 4000
+    veh_pl.frac_sensible = 0.4
+    veh_pl.frac_latent = 0.5
+    veh_pl.location = HPXML::LocationInterior
+    veh_pl.weekday_fractions = '0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42'
+    veh_pl.weekend_fractions = '0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42'
+    veh_pl.monthly_multipliers = '1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1'
+    wellpump_pl = hpxml.plug_loads.select { |pl| pl.plug_load_type == HPXML::PlugLoadTypeWellPump }[0]
+    wellpump_pl.kWh_per_year = 3000
+    wellpump_pl.frac_sensible = 0.3
+    wellpump_pl.frac_latent = 0.6
+    wellpump_pl.location = HPXML::LocationInterior
+    wellpump_pl.weekday_fractions = '0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42'
+    wellpump_pl.weekend_fractions = '0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42'
+    wellpump_pl.monthly_multipliers = '1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1'
     XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
     hpxml_default = _test_measure()
-    _test_default_tv_plug_load_values(hpxml_default, 1000)
-    _test_default_other_plug_load_values(hpxml_default, 2000, 0.8, 0.1)
+    _test_default_plug_load_values(hpxml_default, HPXML::PlugLoadTypeTelevision, 1000, 0.6, 0.3, HPXML::LocationExterior, '0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42', '0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42', '1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1')
+    _test_default_plug_load_values(hpxml_default, HPXML::PlugLoadTypeOther, 2000, 0.5, 0.4, HPXML::LocationExterior, '0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42', '0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42', '1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1')
+    _test_default_plug_load_values(hpxml_default, HPXML::PlugLoadTypeElectricVehicleCharging, 4000, 0.4, 0.5, HPXML::LocationInterior, '0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42', '0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42', '1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1')
+    _test_default_plug_load_values(hpxml_default, HPXML::PlugLoadTypeWellPump, 3000, 0.3, 0.6, HPXML::LocationInterior, '0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42', '0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42', '1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1')
 
     # Test defaults
-    hpxml = apply_hpxml_defaults('base.xml')
+    hpxml = apply_hpxml_defaults('base-misc-large-uncommon-loads.xml')
+    XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
     hpxml_default = _test_measure()
-    _test_default_tv_plug_load_values(hpxml_default, 620)
-    _test_default_other_plug_load_values(hpxml_default, 2457, 0.855, 0.045)
+    _test_default_plug_load_values(hpxml_default, HPXML::PlugLoadTypeTelevision, 620, 1.0, 0.0, HPXML::LocationInterior, '0.045, 0.019, 0.01, 0.001, 0.001, 0.001, 0.005, 0.009, 0.018, 0.026, 0.032, 0.038, 0.04, 0.041, 0.043, 0.045, 0.5, 0.055, 0.07, 0.085, 0.097, 0.108, 0.089, 0.07', '0.045, 0.019, 0.01, 0.001, 0.001, 0.001, 0.005, 0.009, 0.018, 0.026, 0.032, 0.038, 0.04, 0.041, 0.043, 0.045, 0.5, 0.055, 0.07, 0.085, 0.097, 0.108, 0.089, 0.07', '1.137, 1.129, 0.961, 0.969, 0.961, 0.993, 0.996, 0.96, 0.993, 0.867, 0.86, 1.137')
+    _test_default_plug_load_values(hpxml_default, HPXML::PlugLoadTypeOther, 2457, 0.855, 0.045, HPXML::LocationInterior, '0.035, 0.033, 0.032, 0.031, 0.032, 0.033, 0.037, 0.042, 0.043, 0.043, 0.043, 0.044, 0.045, 0.045, 0.044, 0.046, 0.048, 0.052, 0.053, 0.05, 0.047, 0.045, 0.04, 0.036', '0.035, 0.033, 0.032, 0.031, 0.032, 0.033, 0.037, 0.042, 0.043, 0.043, 0.043, 0.044, 0.045, 0.045, 0.044, 0.046, 0.048, 0.052, 0.053, 0.05, 0.047, 0.045, 0.04, 0.036', '1.248, 1.257, 0.993, 0.989, 0.993, 0.827, 0.821, 0.821, 0.827, 0.99, 0.987, 1.248')
+    _test_default_plug_load_values(hpxml_default, HPXML::PlugLoadTypeElectricVehicleCharging, 1667, 1.0, 0.0, HPXML::LocationExterior, '0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042', '0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042', '1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1')
+    _test_default_plug_load_values(hpxml_default, HPXML::PlugLoadTypeWellPump, 441, 1.0, 0.0, HPXML::LocationExterior, '0.044, 0.023, 0.019, 0.015, 0.016, 0.018, 0.026, 0.033, 0.033, 0.032, 0.033, 0.033, 0.032, 0.032, 0.032, 0.033, 0.045, 0.057, 0.066, 0.076, 0.081, 0.086, 0.075, 0.065', '0.044, 0.023, 0.019, 0.015, 0.016, 0.018, 0.026, 0.033, 0.033, 0.032, 0.033, 0.033, 0.032, 0.032, 0.032, 0.033, 0.045, 0.057, 0.066, 0.076, 0.081, 0.086, 0.075, 0.065', '1.154, 1.161, 1.013, 1.010, 1.013, 0.888, 0.883, 0.883, 0.888, 0.978, 0.974, 1.154')
+  end
+
+  def test_fuel_loads
+    # Test inputs not overridden by defaults
+    hpxml_name = 'base-misc-large-uncommon-loads.xml'
+    hpxml = HPXML.new(hpxml_path: File.join(@root_path, 'workflow', 'sample_files', hpxml_name))
+    gg_fl = hpxml.fuel_loads.select { |fl| fl.fuel_load_type == HPXML::FuelLoadTypeGrill }[0]
+    gg_fl.therm_per_year = 1000
+    gg_fl.frac_sensible = 0.6
+    gg_fl.frac_latent = 0.3
+    gg_fl.location = HPXML::LocationInterior
+    gg_fl.weekday_fractions = '0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42'
+    gg_fl.weekend_fractions = '0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42'
+    gg_fl.monthly_multipliers = '1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1'
+    gl_fl = hpxml.fuel_loads.select { |fl| fl.fuel_load_type == HPXML::FuelLoadTypeLighting }[0]
+    gl_fl.therm_per_year = 2000
+    gl_fl.frac_sensible = 0.5
+    gl_fl.frac_latent = 0.4
+    gl_fl.location = HPXML::LocationInterior
+    gl_fl.weekday_fractions = '0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42'
+    gl_fl.weekend_fractions = '0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42'
+    gl_fl.monthly_multipliers = '1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1'
+    gf_fl = hpxml.fuel_loads.select { |fl| fl.fuel_load_type == HPXML::FuelLoadTypeFireplace }[0]
+    gf_fl.therm_per_year = 3000
+    gf_fl.frac_sensible = 0.4
+    gf_fl.frac_latent = 0.5
+    gf_fl.location = HPXML::LocationExterior
+    gf_fl.weekday_fractions = '0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42'
+    gf_fl.weekend_fractions = '0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42'
+    gf_fl.monthly_multipliers = '1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1'
+    XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
+    hpxml_default = _test_measure()
+    _test_default_fuel_load_values(hpxml_default, HPXML::FuelLoadTypeGrill, 1000, 0.6, 0.3, HPXML::LocationInterior, '0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42', '0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42', '1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1')
+    _test_default_fuel_load_values(hpxml_default, HPXML::FuelLoadTypeLighting, 2000, 0.5, 0.4, HPXML::LocationInterior, '0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42', '0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42', '1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1')
+    _test_default_fuel_load_values(hpxml_default, HPXML::FuelLoadTypeFireplace, 3000, 0.4, 0.5, HPXML::LocationExterior, '0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42', '0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42, 0.42', '1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1')
+
+    # Test defaults
+    hpxml = apply_hpxml_defaults('base-misc-large-uncommon-loads.xml')
+    XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
+    hpxml_default = _test_measure()
+    _test_default_fuel_load_values(hpxml_default, HPXML::FuelLoadTypeGrill, 33, 0.0, 0.0, HPXML::LocationExterior, '0.004, 0.001, 0.001, 0.002, 0.007, 0.012, 0.029, 0.046, 0.044, 0.041, 0.044, 0.046, 0.042, 0.038, 0.049, 0.059, 0.110, 0.161, 0.115, 0.070, 0.044, 0.019, 0.013, 0.007', '0.004, 0.001, 0.001, 0.002, 0.007, 0.012, 0.029, 0.046, 0.044, 0.041, 0.044, 0.046, 0.042, 0.038, 0.049, 0.059, 0.110, 0.161, 0.115, 0.070, 0.044, 0.019, 0.013, 0.007', '1.097, 1.097, 0.991, 0.987, 0.991, 0.890, 0.896, 0.896, 0.890, 1.085, 1.085, 1.097')
+    _test_default_fuel_load_values(hpxml_default, HPXML::FuelLoadTypeLighting, 20, 0.0, 0.0, HPXML::LocationExterior, '0.044, 0.023, 0.019, 0.015, 0.016, 0.018, 0.026, 0.033, 0.033, 0.032, 0.033, 0.033, 0.032, 0.032, 0.032, 0.033, 0.045, 0.057, 0.066, 0.076, 0.081, 0.086, 0.075, 0.065', '0.044, 0.023, 0.019, 0.015, 0.016, 0.018, 0.026, 0.033, 0.033, 0.032, 0.033, 0.033, 0.032, 0.032, 0.032, 0.033, 0.045, 0.057, 0.066, 0.076, 0.081, 0.086, 0.075, 0.065', '1.154, 1.161, 1.013, 1.010, 1.013, 0.888, 0.883, 0.883, 0.888, 0.978, 0.974, 1.154')
+    _test_default_fuel_load_values(hpxml_default, HPXML::FuelLoadTypeFireplace, 67, 0.5, 0.1, HPXML::LocationInterior, '0.044, 0.023, 0.019, 0.015, 0.016, 0.018, 0.026, 0.033, 0.033, 0.032, 0.033, 0.033, 0.032, 0.032, 0.032, 0.033, 0.045, 0.057, 0.066, 0.076, 0.081, 0.086, 0.075, 0.065', '0.044, 0.023, 0.019, 0.015, 0.016, 0.018, 0.026, 0.033, 0.033, 0.032, 0.033, 0.033, 0.032, 0.032, 0.032, 0.033, 0.045, 0.057, 0.066, 0.076, 0.081, 0.086, 0.075, 0.065', '1.154, 1.161, 1.013, 1.010, 1.013, 0.888, 0.883, 0.883, 0.888, 0.978, 0.974, 1.154')
   end
 
   def test_appliances
@@ -448,18 +681,21 @@ class HPXMLtoOpenStudioDuctsTest < MiniTest::Test
     _test_default_clothes_washer_values(hpxml_default, HPXML::LocationLivingSpace, 1.21, 380.0, 0.12, 1.09, 27.0, 3.2, 6.0, 1.0)
     _test_default_clothes_dryer_values(hpxml_default, HPXML::LocationLivingSpace, HPXML::ClothesDryerControlTypeTimer, 3.73, 1.0)
     _test_default_dishwasher_values(hpxml_default, HPXML::LocationLivingSpace, 307.0, 0.12, 1.09, 22.32, 4.0, 12, 1.0)
-    _test_default_refrigerator_values(hpxml_default, HPXML::LocationLivingSpace, 650.0, 1.0)
-    _test_default_cooking_range_values(hpxml_default, HPXML::LocationLivingSpace, false, 1.0)
+    _test_default_refrigerator_values(hpxml_default, HPXML::LocationLivingSpace, 650.0, 1.0, '0.040, 0.039, 0.038, 0.037, 0.036, 0.036, 0.038, 0.040, 0.041, 0.041, 0.040, 0.040, 0.042, 0.042, 0.042, 0.041, 0.044, 0.048, 0.050, 0.048, 0.047, 0.046, 0.044, 0.041', '0.040, 0.039, 0.038, 0.037, 0.036, 0.036, 0.038, 0.040, 0.041, 0.041, 0.040, 0.040, 0.042, 0.042, 0.042, 0.041, 0.044, 0.048, 0.050, 0.048, 0.047, 0.046, 0.044, 0.041', '0.837, 0.835, 1.084, 1.084, 1.084, 1.096, 1.096, 1.096, 1.096, 0.931, 0.925, 0.837')
+    _test_default_cooking_range_values(hpxml_default, HPXML::LocationLivingSpace, false, 1.0, '0.007, 0.007, 0.004, 0.004, 0.007, 0.011, 0.025, 0.042, 0.046, 0.048, 0.042, 0.050, 0.057, 0.046, 0.057, 0.044, 0.092, 0.150, 0.117, 0.060, 0.035, 0.025, 0.016, 0.011', '0.007, 0.007, 0.004, 0.004, 0.007, 0.011, 0.025, 0.042, 0.046, 0.048, 0.042, 0.050, 0.057, 0.046, 0.057, 0.044, 0.092, 0.150, 0.117, 0.060, 0.035, 0.025, 0.016, 0.011', '1.097, 1.097, 0.991, 0.987, 0.991, 0.890, 0.896, 0.896, 0.890, 1.085, 1.085, 1.097')
     _test_default_oven_values(hpxml_default, false)
 
     # Test defaults w/ appliances
-    apply_hpxml_defaults('base.xml')
+    hpxml = apply_hpxml_defaults('base-misc-large-uncommon-loads.xml')
+    XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
     hpxml_default = _test_measure()
     _test_default_clothes_washer_values(hpxml_default, HPXML::LocationLivingSpace, 1.0, 400.0, 0.12, 1.09, 27.0, 3.0, 6.0, 1.0)
     _test_default_clothes_dryer_values(hpxml_default, HPXML::LocationLivingSpace, HPXML::ClothesDryerControlTypeTimer, 3.01, 1.0)
     _test_default_dishwasher_values(hpxml_default, HPXML::LocationLivingSpace, 467.0, 0.12, 1.09, 33.12, 4.0, 12, 1.0)
-    _test_default_refrigerator_values(hpxml_default, HPXML::LocationLivingSpace, 691.0, 1.0)
-    _test_default_cooking_range_values(hpxml_default, HPXML::LocationLivingSpace, false, 1.0)
+    _test_default_refrigerator_values(hpxml_default, HPXML::LocationLivingSpace, 691.0, 1.0, '0.040, 0.039, 0.038, 0.037, 0.036, 0.036, 0.038, 0.040, 0.041, 0.041, 0.040, 0.040, 0.042, 0.042, 0.042, 0.041, 0.044, 0.048, 0.050, 0.048, 0.047, 0.046, 0.044, 0.041', '0.040, 0.039, 0.038, 0.037, 0.036, 0.036, 0.038, 0.040, 0.041, 0.041, 0.040, 0.040, 0.042, 0.042, 0.042, 0.041, 0.044, 0.048, 0.050, 0.048, 0.047, 0.046, 0.044, 0.041', '0.837, 0.835, 1.084, 1.084, 1.084, 1.096, 1.096, 1.096, 1.096, 0.931, 0.925, 0.837')
+    _test_default_extra_refrigerators_values(hpxml_default, HPXML::LocationGarage, 244.0, 1.0, '0.040, 0.039, 0.038, 0.037, 0.036, 0.036, 0.038, 0.040, 0.041, 0.041, 0.040, 0.040, 0.042, 0.042, 0.042, 0.041, 0.044, 0.048, 0.050, 0.048, 0.047, 0.046, 0.044, 0.041', '0.040, 0.039, 0.038, 0.037, 0.036, 0.036, 0.038, 0.040, 0.041, 0.041, 0.040, 0.040, 0.042, 0.042, 0.042, 0.041, 0.044, 0.048, 0.050, 0.048, 0.047, 0.046, 0.044, 0.041', '0.837, 0.835, 1.084, 1.084, 1.084, 1.096, 1.096, 1.096, 1.096, 0.931, 0.925, 0.837')
+    _test_default_freezers_values(hpxml_default, HPXML::LocationGarage, 320.0, 1.0, '0.040, 0.039, 0.038, 0.037, 0.036, 0.036, 0.038, 0.040, 0.041, 0.041, 0.040, 0.040, 0.042, 0.042, 0.042, 0.041, 0.044, 0.048, 0.050, 0.048, 0.047, 0.046, 0.044, 0.041', '0.040, 0.039, 0.038, 0.037, 0.036, 0.036, 0.038, 0.040, 0.041, 0.041, 0.040, 0.040, 0.042, 0.042, 0.042, 0.041, 0.044, 0.048, 0.050, 0.048, 0.047, 0.046, 0.044, 0.041', '0.837, 0.835, 1.084, 1.084, 1.084, 1.096, 1.096, 1.096, 1.096, 0.931, 0.925, 0.837')
+    _test_default_cooking_range_values(hpxml_default, HPXML::LocationLivingSpace, false, 1.0, '0.007, 0.007, 0.004, 0.004, 0.007, 0.011, 0.025, 0.042, 0.046, 0.048, 0.042, 0.050, 0.057, 0.046, 0.057, 0.044, 0.092, 0.150, 0.117, 0.060, 0.035, 0.025, 0.016, 0.011', '0.007, 0.007, 0.004, 0.004, 0.007, 0.011, 0.025, 0.042, 0.046, 0.048, 0.042, 0.050, 0.057, 0.046, 0.057, 0.044, 0.092, 0.150, 0.117, 0.060, 0.035, 0.025, 0.016, 0.011', '1.097, 1.097, 0.991, 0.987, 0.991, 0.890, 0.896, 0.896, 0.890, 1.085, 1.085, 1.097')
     _test_default_oven_values(hpxml_default, false)
 
     # Test defaults w/ gas clothes dryer
@@ -473,7 +709,7 @@ class HPXMLtoOpenStudioDuctsTest < MiniTest::Test
     hpxml = apply_hpxml_defaults('base-enclosure-beds-5.xml')
     XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
     hpxml_default = _test_measure()
-    _test_default_refrigerator_values(hpxml_default, HPXML::LocationLivingSpace, 727.0, 1.0)
+    _test_default_refrigerator_values(hpxml_default, HPXML::LocationLivingSpace, 727.0, 1.0, '0.040, 0.039, 0.038, 0.037, 0.036, 0.036, 0.038, 0.040, 0.041, 0.041, 0.040, 0.040, 0.042, 0.042, 0.042, 0.041, 0.044, 0.048, 0.050, 0.048, 0.047, 0.046, 0.044, 0.041', '0.040, 0.039, 0.038, 0.037, 0.036, 0.036, 0.038, 0.040, 0.041, 0.041, 0.040, 0.040, 0.042, 0.042, 0.042, 0.041, 0.044, 0.048, 0.050, 0.048, 0.047, 0.046, 0.044, 0.041', '0.837, 0.835, 1.084, 1.084, 1.084, 1.096, 1.096, 1.096, 1.096, 0.931, 0.925, 0.837')
 
     # Test defaults w/ appliances before 301-2019 Addendum A
     hpxml = apply_hpxml_defaults('base.xml')
@@ -483,8 +719,8 @@ class HPXMLtoOpenStudioDuctsTest < MiniTest::Test
     _test_default_clothes_washer_values(hpxml_default, HPXML::LocationLivingSpace, 0.331, 704.0, 0.08, 0.58, 23.0, 2.874, 6.0, 1.0)
     _test_default_clothes_dryer_values(hpxml_default, HPXML::LocationLivingSpace, HPXML::ClothesDryerControlTypeTimer, 2.62, 1.0)
     _test_default_dishwasher_values(hpxml_default, HPXML::LocationLivingSpace, 467.0, 0.12, 1.09, 33.12, 4.0, 12, 1.0)
-    _test_default_refrigerator_values(hpxml_default, HPXML::LocationLivingSpace, 691.0, 1.0)
-    _test_default_cooking_range_values(hpxml_default, HPXML::LocationLivingSpace, false, 1.0)
+    _test_default_refrigerator_values(hpxml_default, HPXML::LocationLivingSpace, 691.0, 1.0, '0.040, 0.039, 0.038, 0.037, 0.036, 0.036, 0.038, 0.040, 0.041, 0.041, 0.040, 0.040, 0.042, 0.042, 0.042, 0.041, 0.044, 0.048, 0.050, 0.048, 0.047, 0.046, 0.044, 0.041', '0.040, 0.039, 0.038, 0.037, 0.036, 0.036, 0.038, 0.040, 0.041, 0.041, 0.040, 0.040, 0.042, 0.042, 0.042, 0.041, 0.044, 0.048, 0.050, 0.048, 0.047, 0.046, 0.044, 0.041', '0.837, 0.835, 1.084, 1.084, 1.084, 1.096, 1.096, 1.096, 1.096, 0.931, 0.925, 0.837')
+    _test_default_cooking_range_values(hpxml_default, HPXML::LocationLivingSpace, false, 1.0, '0.007, 0.007, 0.004, 0.004, 0.007, 0.011, 0.025, 0.042, 0.046, 0.048, 0.042, 0.050, 0.057, 0.046, 0.057, 0.044, 0.092, 0.150, 0.117, 0.060, 0.035, 0.025, 0.016, 0.011', '0.007, 0.007, 0.004, 0.004, 0.007, 0.011, 0.025, 0.042, 0.046, 0.048, 0.042, 0.050, 0.057, 0.046, 0.057, 0.044, 0.092, 0.150, 0.117, 0.060, 0.035, 0.025, 0.016, 0.011', '1.097, 1.097, 0.991, 0.987, 0.991, 0.890, 0.896, 0.896, 0.890, 1.085, 1.085, 1.097')
     _test_default_oven_values(hpxml_default, false)
 
     # Test defaults w/ gas clothes dryer before 301-2019 Addendum A
@@ -506,7 +742,8 @@ class HPXMLtoOpenStudioDuctsTest < MiniTest::Test
     _test_default_lighting_values(hpxml_default, 2.0)
 
     # Test defaults
-    apply_hpxml_defaults('base.xml')
+    hpxml = apply_hpxml_defaults('base.xml')
+    XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
     hpxml_default = _test_measure()
     _test_default_lighting_values(hpxml_default, 1.0)
   end
@@ -526,7 +763,8 @@ class HPXMLtoOpenStudioDuctsTest < MiniTest::Test
     _test_default_pv_system_values(hpxml_default, expected_interver_efficiency, expected_system_loss_frac)
 
     # Test defaults w/o year modules manufactured
-    apply_hpxml_defaults('base-pv.xml')
+    hpxml = apply_hpxml_defaults('base-pv.xml')
+    XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
     hpxml_default = _test_measure()
     expected_interver_efficiency = [0.96, 0.96]
     expected_system_loss_frac = [0.14, 0.14]
@@ -640,12 +878,38 @@ class HPXMLtoOpenStudioDuctsTest < MiniTest::Test
     assert_equal(volume, hpxml.air_infiltration_measurements[0].infiltration_volume)
   end
 
+  def _test_default_roof_values(hpxml, roof_type, solar_absorptance, roof_color)
+    assert_equal(roof_type, hpxml.roofs[0].roof_type)
+    assert_equal(solar_absorptance, hpxml.roofs[0].solar_absorptance)
+    assert_equal(roof_color, hpxml.roofs[0].roof_color)
+  end
+
+  def _test_default_wall_values(hpxml, siding, solar_absorptance, color)
+    assert_equal(siding, hpxml.walls[0].siding)
+    assert_equal(solar_absorptance, hpxml.walls[0].solar_absorptance)
+    assert_equal(color, hpxml.walls[0].color)
+  end
+
+  def _test_default_rim_joist_values(hpxml, siding, solar_absorptance, color)
+    assert_equal(siding, hpxml.rim_joists[0].siding)
+    assert_equal(solar_absorptance, hpxml.rim_joists[0].solar_absorptance)
+    assert_equal(color, hpxml.rim_joists[0].color)
+  end
+
   def _test_default_window_values(hpxml, summer_shade_coeffs, winter_shade_coeffs, fraction_operable)
     assert_equal(summer_shade_coeffs.size, hpxml.windows.size)
     hpxml.windows.each_with_index do |window, idx|
       assert_equal(summer_shade_coeffs[idx], window.interior_shading_factor_summer)
       assert_equal(winter_shade_coeffs[idx], window.interior_shading_factor_winter)
       assert_equal(fraction_operable[idx], window.fraction_operable)
+    end
+  end
+
+  def _test_default_skylight_values(hpxml, summer_shade_coeffs, winter_shade_coeffs)
+    assert_equal(summer_shade_coeffs.size, hpxml.skylights.size)
+    hpxml.skylights.each_with_index do |skylight, idx|
+      assert_equal(summer_shade_coeffs[idx], skylight.interior_shading_factor_summer)
+      assert_equal(winter_shade_coeffs[idx], skylight.interior_shading_factor_winter)
     end
   end
 
@@ -679,16 +943,98 @@ class HPXMLtoOpenStudioDuctsTest < MiniTest::Test
     assert_equal(usage_multiplier, hpxml.dishwashers[0].usage_multiplier)
   end
 
-  def _test_default_refrigerator_values(hpxml, location, rated_annual_kwh, usage_multiplier)
-    assert_equal(location, hpxml.refrigerators[0].location)
-    assert_equal(rated_annual_kwh, hpxml.refrigerators[0].rated_annual_kwh)
-    assert_equal(usage_multiplier, hpxml.refrigerators[0].usage_multiplier)
+  def _test_default_refrigerator_values(hpxml, location, rated_annual_kwh, usage_multiplier, weekday_sch, weekend_sch, monthly_mults)
+    hpxml.refrigerators.each do |refrigerator|
+      next unless refrigerator.primary_indicator
+
+      assert_equal(location, refrigerator.location)
+      assert_equal(rated_annual_kwh, refrigerator.rated_annual_kwh)
+      assert_equal(usage_multiplier, refrigerator.usage_multiplier)
+      if weekday_sch.nil?
+        assert_nil(refrigerator.weekday_fractions)
+      else
+        assert_equal(weekday_sch, refrigerator.weekday_fractions)
+      end
+      if weekend_sch.nil?
+        assert_nil(refrigerator.weekend_fractions)
+      else
+        assert_equal(weekend_sch, refrigerator.weekend_fractions)
+      end
+      if monthly_mults.nil?
+        assert_nil(refrigerator.monthly_multipliers)
+      else
+        assert_equal(monthly_mults, refrigerator.monthly_multipliers)
+      end
+    end
   end
 
-  def _test_default_cooking_range_values(hpxml, location, is_induction, usage_multiplier)
+  def _test_default_extra_refrigerators_values(hpxml, location, rated_annual_kwh, usage_multiplier, weekday_sch, weekend_sch, monthly_mults)
+    hpxml.refrigerators.each do |refrigerator|
+      next if refrigerator.primary_indicator
+
+      assert_equal(location, refrigerator.location)
+      assert_in_epsilon(rated_annual_kwh, refrigerator.rated_annual_kwh, 0.01)
+      assert_equal(usage_multiplier, refrigerator.usage_multiplier)
+      if weekday_sch.nil?
+        assert_nil(refrigerator.weekday_fractions)
+      else
+        assert_equal(weekday_sch, refrigerator.weekday_fractions)
+      end
+      if weekend_sch.nil?
+        assert_nil(refrigerator.weekend_fractions)
+      else
+        assert_equal(weekend_sch, refrigerator.weekend_fractions)
+      end
+      if monthly_mults.nil?
+        assert_nil(refrigerator.monthly_multipliers)
+      else
+        assert_equal(monthly_mults, refrigerator.monthly_multipliers)
+      end
+    end
+  end
+
+  def _test_default_freezers_values(hpxml, location, rated_annual_kwh, usage_multiplier, weekday_sch, weekend_sch, monthly_mults)
+    hpxml.freezers.each do |freezer|
+      assert_equal(location, freezer.location)
+      assert_in_epsilon(rated_annual_kwh, freezer.rated_annual_kwh, 0.01)
+      assert_equal(usage_multiplier, freezer.usage_multiplier)
+      if weekday_sch.nil?
+        assert_nil(freezer.weekday_fractions)
+      else
+        assert_equal(weekday_sch, freezer.weekday_fractions)
+      end
+      if weekend_sch.nil?
+        assert_nil(freezer.weekend_fractions)
+      else
+        assert_equal(weekend_sch, freezer.weekend_fractions)
+      end
+      if monthly_mults.nil?
+        assert_nil(freezer.monthly_multipliers)
+      else
+        assert_equal(monthly_mults, freezer.monthly_multipliers)
+      end
+    end
+  end
+
+  def _test_default_cooking_range_values(hpxml, location, is_induction, usage_multiplier, weekday_sch, weekend_sch, monthly_mults)
     assert_equal(location, hpxml.cooking_ranges[0].location)
     assert_equal(is_induction, hpxml.cooking_ranges[0].is_induction)
     assert_equal(usage_multiplier, hpxml.cooking_ranges[0].usage_multiplier)
+    if weekday_sch.nil?
+      assert_nil(hpxml.cooking_ranges[0].weekday_fractions)
+    else
+      assert_equal(weekday_sch, hpxml.cooking_ranges[0].weekday_fractions)
+    end
+    if weekend_sch.nil?
+      assert_nil(hpxml.cooking_ranges[0].weekend_fractions)
+    else
+      assert_equal(weekend_sch, hpxml.cooking_ranges[0].weekend_fractions)
+    end
+    if monthly_mults.nil?
+      assert_nil(hpxml.cooking_ranges[0].monthly_multipliers)
+    else
+      assert_equal(monthly_mults, hpxml.cooking_ranges[0].monthly_multipliers)
+    end
   end
 
   def _test_default_oven_values(hpxml, is_convection)
@@ -739,16 +1085,100 @@ class HPXMLtoOpenStudioDuctsTest < MiniTest::Test
     assert_in_epsilon(efficiency, hpxml.ceiling_fans[0].efficiency, 0.01)
   end
 
-  def _test_default_tv_plug_load_values(hpxml, kWh_per_year)
-    tv_pl = hpxml.plug_loads.select { |pl| pl.plug_load_type == HPXML::PlugLoadTypeTelevision }[0]
-    assert_equal(kWh_per_year, tv_pl.kWh_per_year)
+  def _test_default_pool_heater_values(hpxml, load_units, load_value, weekday_sch, weekend_sch, monthly_mults)
+    pool = hpxml.pools[0]
+    if load_units.nil?
+      assert_nil(pool.heater_load_units)
+    else
+      assert_equal(load_units, pool.heater_load_units)
+    end
+    if load_value.nil?
+      assert_nil(pool.heater_load_value)
+    else
+      assert_in_epsilon(load_value, pool.heater_load_value.to_f, 0.01)
+    end
+    if weekday_sch.nil?
+      assert_nil(pool.heater_weekday_fractions)
+    else
+      assert_equal(weekday_sch, pool.heater_weekday_fractions)
+    end
+    if weekend_sch.nil?
+      assert_nil(pool.heater_weekend_fractions)
+    else
+      assert_equal(weekend_sch, pool.heater_weekend_fractions)
+    end
+    if monthly_mults.nil?
+      assert_nil(pool.heater_monthly_multipliers)
+    else
+      assert_equal(monthly_mults, pool.heater_monthly_multipliers)
+    end
   end
 
-  def _test_default_other_plug_load_values(hpxml, kWh_per_year, frac_sensible, frac_latent)
-    other_pl = hpxml.plug_loads.select { |pl| pl.plug_load_type == HPXML::PlugLoadTypeOther }[0]
-    assert_equal(kWh_per_year, other_pl.kWh_per_year)
-    assert_in_epsilon(frac_sensible, other_pl.frac_sensible, 0.01)
-    assert_in_epsilon(frac_latent, other_pl.frac_latent, 0.01)
+  def _test_default_pool_pump_values(hpxml, kWh_per_year, weekday_sch, weekend_sch, monthly_mults)
+    pool = hpxml.pools[0]
+    assert_in_epsilon(kWh_per_year, pool.pump_kwh_per_year, 0.01)
+    assert_equal(weekday_sch, pool.pump_weekday_fractions)
+    assert_equal(weekend_sch, pool.pump_weekend_fractions)
+    assert_equal(monthly_mults, pool.pump_monthly_multipliers)
+  end
+
+  def _test_default_hot_tub_heater_values(hpxml, load_units, load_value, weekday_sch, weekend_sch, monthly_mults)
+    hot_tub = hpxml.hot_tubs[0]
+    if load_units.nil?
+      assert_nil(hot_tub.heater_load_units)
+    else
+      assert_equal(load_units, hot_tub.heater_load_units)
+    end
+    if load_value.nil?
+      assert_nil(hot_tub.heater_load_value)
+    else
+      assert_in_epsilon(load_value, hot_tub.heater_load_value.to_f, 0.01)
+    end
+    if weekday_sch.nil?
+      assert_nil(hot_tub.heater_weekday_fractions)
+    else
+      assert_equal(weekday_sch, hot_tub.heater_weekday_fractions)
+    end
+    if weekend_sch.nil?
+      assert_nil(hot_tub.heater_weekend_fractions)
+    else
+      assert_equal(weekend_sch, hot_tub.heater_weekend_fractions)
+    end
+    if monthly_mults.nil?
+      assert_nil(hot_tub.heater_monthly_multipliers)
+    else
+      assert_equal(monthly_mults, hot_tub.heater_monthly_multipliers)
+    end
+  end
+
+  def _test_default_hot_tub_pump_values(hpxml, kWh_per_year, weekday_sch, weekend_sch, monthly_mults)
+    hot_tub = hpxml.hot_tubs[0]
+    assert_in_epsilon(kWh_per_year, hot_tub.pump_kwh_per_year, 0.01)
+    assert_equal(weekday_sch, hot_tub.pump_weekday_fractions)
+    assert_equal(weekend_sch, hot_tub.pump_weekend_fractions)
+    assert_equal(monthly_mults, hot_tub.pump_monthly_multipliers)
+  end
+
+  def _test_default_plug_load_values(hpxml, load_type, kWh_per_year, frac_sensible, frac_latent, location, weekday_sch, weekend_sch, monthly_mults)
+    pl = hpxml.plug_loads.select { |pl| pl.plug_load_type == load_type }[0]
+    assert_in_epsilon(kWh_per_year, pl.kWh_per_year, 0.01)
+    assert_in_epsilon(frac_sensible, pl.frac_sensible, 0.01)
+    assert_in_epsilon(frac_latent, pl.frac_latent, 0.01)
+    assert_equal(location, pl.location)
+    assert_equal(weekday_sch, pl.weekday_fractions)
+    assert_equal(weekend_sch, pl.weekend_fractions)
+    assert_equal(monthly_mults, pl.monthly_multipliers)
+  end
+
+  def _test_default_fuel_load_values(hpxml, load_type, therm_per_year, frac_sensible, frac_latent, location, weekday_sch, weekend_sch, monthly_mults)
+    fl = hpxml.fuel_loads.select { |fl| fl.fuel_load_type == load_type }[0]
+    assert_in_epsilon(therm_per_year, fl.therm_per_year, 0.01)
+    assert_in_epsilon(frac_sensible, fl.frac_sensible, 0.01)
+    assert_in_epsilon(frac_latent, fl.frac_latent, 0.01)
+    assert_equal(location, fl.location)
+    assert_equal(weekday_sch, fl.weekday_fractions)
+    assert_equal(weekend_sch, fl.weekend_fractions)
+    assert_equal(monthly_mults, fl.monthly_multipliers)
   end
 
   def _test_default_number_of_bathrooms(hpxml, n_bathrooms)
@@ -794,8 +1224,35 @@ class HPXMLtoOpenStudioDuctsTest < MiniTest::Test
       infil.infiltration_volume = nil
     end
 
+    hpxml.roofs.each do |roof|
+      roof.roof_type = nil
+      roof.solar_absorptance = nil
+      roof.roof_color = HPXML::ColorLight
+    end
+
+    hpxml.walls.each do |wall|
+      next unless wall.is_exterior
+
+      wall.siding = nil
+      wall.solar_absorptance = nil
+      wall.color = HPXML::ColorLight
+    end
+
+    hpxml.rim_joists.each do |rim_joist|
+      rim_joist.siding = nil
+      rim_joist.solar_absorptance = nil
+      rim_joist.color = HPXML::ColorDark
+    end
+
     hpxml.windows.each do |window|
       window.fraction_operable = nil
+      window.interior_shading_factor_summer = nil
+      window.interior_shading_factor_winter = nil
+    end
+
+    hpxml.skylights.each do |skylight|
+      skylight.interior_shading_factor_summer = nil
+      skylight.interior_shading_factor_winter = nil
     end
 
     hpxml.hvac_distributions.each do |hvac_distribution|
@@ -868,20 +1325,75 @@ class HPXMLtoOpenStudioDuctsTest < MiniTest::Test
     hpxml.dishwashers[0].place_setting_capacity = nil
     hpxml.dishwashers[0].usage_multiplier = nil
 
-    hpxml.refrigerators[0].location = nil
-    hpxml.refrigerators[0].rated_annual_kwh = nil
-    hpxml.refrigerators[0].usage_multiplier = nil
+    hpxml.refrigerators.each do |refrigerator|
+      refrigerator.location = nil
+      refrigerator.rated_annual_kwh = nil
+      refrigerator.usage_multiplier = nil
+      refrigerator.weekday_fractions = nil
+      refrigerator.weekend_fractions = nil
+      refrigerator.monthly_multipliers = nil
+    end
+
+    hpxml.freezers.each do |freezer|
+      freezer.location = nil
+      freezer.rated_annual_kwh = nil
+      freezer.usage_multiplier = nil
+      freezer.weekday_fractions = nil
+      freezer.weekend_fractions = nil
+      freezer.monthly_multipliers = nil
+    end
 
     hpxml.cooking_ranges[0].location = nil
     hpxml.cooking_ranges[0].is_induction = nil
     hpxml.cooking_ranges[0].usage_multiplier = nil
+    hpxml.cooking_ranges[0].weekday_fractions = nil
+    hpxml.cooking_ranges[0].weekend_fractions = nil
+    hpxml.cooking_ranges[0].monthly_multipliers = nil
 
     hpxml.ovens[0].is_convection = nil
+
+    hpxml.pools.each do |pool|
+      pool.heater_load_units = nil
+      pool.heater_load_value = nil
+      pool.pump_kwh_per_year = nil
+      pool.heater_weekday_fractions = nil
+      pool.heater_weekend_fractions = nil
+      pool.heater_monthly_multipliers = nil
+      pool.pump_weekday_fractions = nil
+      pool.pump_weekend_fractions = nil
+      pool.pump_monthly_multipliers = nil
+    end
+
+    hpxml.hot_tubs.each do |hot_tub|
+      hot_tub.heater_load_units = nil
+      hot_tub.heater_load_value = nil
+      hot_tub.pump_kwh_per_year = nil
+      hot_tub.heater_weekday_fractions = nil
+      hot_tub.heater_weekend_fractions = nil
+      hot_tub.heater_monthly_multipliers = nil
+      hot_tub.pump_weekday_fractions = nil
+      hot_tub.pump_weekend_fractions = nil
+      hot_tub.pump_monthly_multipliers = nil
+    end
 
     hpxml.plug_loads.each do |plug_load|
       plug_load.kWh_per_year = nil
       plug_load.frac_sensible = nil
       plug_load.frac_latent = nil
+      plug_load.location = nil
+      plug_load.weekday_fractions = nil
+      plug_load.weekend_fractions = nil
+      plug_load.monthly_multipliers = nil
+    end
+
+    hpxml.fuel_loads.each do |fuel_load|
+      fuel_load.therm_per_year = nil
+      fuel_load.frac_sensible = nil
+      fuel_load.frac_latent = nil
+      fuel_load.location = nil
+      fuel_load.weekday_fractions = nil
+      fuel_load.weekend_fractions = nil
+      fuel_load.monthly_multipliers = nil
     end
 
     hpxml.lighting.usage_multiplier = nil
@@ -890,10 +1402,6 @@ class HPXMLtoOpenStudioDuctsTest < MiniTest::Test
       pv.inverter_efficiency = nil
       pv.system_losses_fraction = nil
     end
-
-    # save new file
-    hpxml_name = File.basename(@tmp_hpxml_path)
-    XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
 
     return hpxml
   end
