@@ -1202,6 +1202,7 @@ def get_values(osw_file, step)
   elsif ['base-hvac-boiler-gas-central-ac-1-speed.osw'].include? osw_file
     step.setArgument('heating_system_type', HPXML::HVACTypeBoiler)
     step.setArgument('heating_system_electric_auxiliary_energy', 200.0)
+    step.setArgument('ducts_cfa_served', 1350.0)
   elsif ['base-hvac-boiler-gas-only.osw'].include? osw_file
     step.setArgument('heating_system_type', HPXML::HVACTypeBoiler)
     step.setArgument('heating_system_electric_auxiliary_energy', 200.0)
