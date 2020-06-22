@@ -211,7 +211,8 @@ def create_osws
     'invalid_files/multifamily-bottom-crawlspace-zero-foundation-height.osw' => 'base.osw',
     'invalid_files/slab-non-zero-foundation-height-above-grade.osw' => 'base.osw',
     'invalid_files/ducts-location-and-areas-not-same-type.osw' => 'base.osw',
-    'invalid_files/none-second-heating-system-serves-heat.osw' => 'base.osw'
+    'invalid_files/none-second-heating-system-serves-heat.osw' => 'base.osw',
+    'invalid_files/second-heating-system-serves-majority-heat.osw' => 'base.osw'
   }
 
   puts "Generating #{osws_files.size} OSW files..."
@@ -1211,6 +1212,7 @@ def get_values(osw_file, step)
   elsif ['base-hvac-boiler-gas-central-ac-1-speed.osw'].include? osw_file
     step.setArgument('heating_system_type', HPXML::HVACTypeBoiler)
     step.setArgument('heating_system_electric_auxiliary_energy', 200.0)
+    step.setArgument('ducts_cfa_served', 1350.0)
   elsif ['base-hvac-boiler-gas-only.osw'].include? osw_file
     step.setArgument('heating_system_type', HPXML::HVACTypeBoiler)
     step.setArgument('heating_system_electric_auxiliary_energy', 200.0)
@@ -1803,6 +1805,9 @@ def get_values(osw_file, step)
     step.setArgument('ducts_supply_location', Constants.Auto)
   elsif ['invalid_files/none-second-heating-system-serves-heat.osw'].include? osw_file
     step.setArgument('heating_system_fraction_heat_load_served_2', 0.25)
+  elsif ['invalid_files/second-heating-system-serves-majority-heat.osw'].include? osw_file
+    step.setArgument('heating_system_type_2', HPXML::HVACTypeFireplace)
+    step.setArgument('heating_system_fraction_heat_load_served_2', 0.6)
   end
   return step
 end
