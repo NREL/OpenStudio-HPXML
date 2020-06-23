@@ -3793,7 +3793,11 @@ class HVAC
   def self.get_sequential_load_schedule(model, value)
     s = OpenStudio::Model::ScheduleConstant.new(model)
     s.setName('Sequential Fraction Schedule')
-    s.setValue(value.round(5))
+    if value > 1
+      s.setValue(1.0)
+    else
+      s.setValue(value.round(5))
+    end
     Schedule.set_schedule_type_limits(model, s, Constants.ScheduleTypeLimitsFraction)
     return s
   end

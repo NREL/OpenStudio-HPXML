@@ -379,8 +379,8 @@ class OSModel
 
   def self.set_defaults_and_globals(runner, output_dir)
     # Initialize
-    @remaining_heat_load_frac = @hpxml.total_fraction_heat_load_served
-    @remaining_cool_load_frac = @hpxml.total_fraction_cool_load_served
+    @remaining_heat_load_frac = 1.0
+    @remaining_cool_load_frac = 1.0
     @hvac_map = {} # mapping between HPXML HVAC systems and model objects
     @dhw_map = {}  # mapping between HPXML Water Heating systems and model objects
     @cond_bsmnt_surfaces = [] # list of surfaces in conditioned basement, used for modification of some surface properties, eg. solar absorptance, view factor, etc.
@@ -2143,13 +2143,17 @@ class OSModel
       return
     end
 
+    # Only fraction of heating load is met
     if (@hpxml.total_fraction_heat_load_served < 1.0) && (@hpxml.total_fraction_heat_load_served > 0.0)
-      sequential_heat_load_frac = 1.0 - @hpxml.total_fraction_heat_load_served
+      sequential_heat_load_frac = @remaining_heat_load_frac - @hpxml.total_fraction_heat_load_served
+      @remaining_heat_load_frac -= sequential_heat_load_frac
     else
       sequential_heat_load_frac = 0.0
     end
+    # Only fraction of cooling load is met
     if (@hpxml.total_fraction_cool_load_served < 1.0) && (@hpxml.total_fraction_cool_load_served > 0.0)
-      sequential_cool_load_frac = 1.0 - @hpxml.total_fraction_cool_load_served
+      sequential_cool_load_frac = @remaining_cool_load_frac - @hpxml.total_fraction_cool_load_served
+      @remaining_cool_load_frac -= sequential_cool_load_frac
     else
       sequential_cool_load_frac = 0.0
     end
@@ -2168,13 +2172,13 @@ class OSModel
     # Addressing unmet load ensures we can correctly calculate heating/cooling loads without having to run
     # an additional EnergyPlus simulation solely for that purpose, as well as allows us to report
     # the unmet load (i.e., the energy delivered by the ideal air system).
-    if @remaining_cool_load_frac < 1
+    if @remaining_cool_load_frac < 1.0
       sequential_cool_load_frac = 1
     else
       sequential_cool_load_frac = 0 # no cooling system, don't add ideal air for cooling either
     end
 
-    if @remaining_heat_load_frac < 1
+    if @remaining_heat_load_frac < 1.0
       sequential_heat_load_frac = 1
     else
       sequential_heat_load_frac = 0 # no heating system, don't add ideal air for heating either
