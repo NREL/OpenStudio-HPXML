@@ -816,6 +816,9 @@ class HPXMLTest < MiniTest::Test
       hpxml_value = subsurface.ufactor
       query = "SELECT Value FROM TabularDataWithStrings WHERE ReportName='EnvelopeSummary' AND ReportForString='Entire Facility' AND TableName='Exterior Fenestration' AND RowName='#{subsurface_id}' AND ColumnName='Glass U-Factor' AND Units='W/m2-K'"
       sql_value = UnitConversions.convert(sqlFile.execAndReturnFirstDouble(query).get, 'W/(m^2*K)', 'Btu/(hr*ft^2*F)')
+      if subsurface.is_a? HPXML::Skylight
+        sql_value *= 1.2 # Convert back from vertical position to NFRC 20-degree slope
+      end
       assert_in_epsilon(hpxml_value, sql_value, 0.02)
 
       # SHGC
