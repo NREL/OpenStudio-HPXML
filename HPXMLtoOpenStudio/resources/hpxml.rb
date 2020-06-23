@@ -1468,7 +1468,7 @@ class HPXML < Object
     end
 
     def is_thermal_boundary
-      HPXML::is_thermal_boundary(self)
+      return HPXML::is_thermal_boundary(self)
     end
 
     def is_exterior_thermal_boundary
@@ -1584,7 +1584,7 @@ class HPXML < Object
     end
 
     def is_thermal_boundary
-      HPXML::is_thermal_boundary(self)
+      return HPXML::is_thermal_boundary(self)
     end
 
     def is_exterior_thermal_boundary
@@ -1719,7 +1719,7 @@ class HPXML < Object
     end
 
     def is_thermal_boundary
-      HPXML::is_thermal_boundary(self)
+      return HPXML::is_thermal_boundary(self)
     end
 
     def is_exterior_thermal_boundary
@@ -1861,7 +1861,7 @@ class HPXML < Object
     end
 
     def is_thermal_boundary
-      HPXML::is_thermal_boundary(self)
+      return HPXML::is_thermal_boundary(self)
     end
 
     def is_exterior_thermal_boundary
@@ -1958,7 +1958,7 @@ class HPXML < Object
     end
 
     def is_thermal_boundary
-      HPXML::is_thermal_boundary(self)
+      return HPXML::is_thermal_boundary(self)
     end
 
     def is_exterior_thermal_boundary
@@ -2093,7 +2093,7 @@ class HPXML < Object
     end
 
     def is_thermal_boundary
-      HPXML::is_thermal_boundary(wall)
+      return HPXML::is_thermal_boundary(wall)
     end
 
     def is_exterior_thermal_boundary
@@ -2218,7 +2218,7 @@ class HPXML < Object
     end
 
     def is_thermal_boundary
-      HPXML::is_thermal_boundary(roof)
+      return HPXML::is_thermal_boundary(roof)
     end
 
     def is_exterior_thermal_boundary
@@ -2318,7 +2318,7 @@ class HPXML < Object
     end
 
     def is_thermal_boundary
-      HPXML::is_thermal_boundary(wall)
+      return HPXML::is_thermal_boundary(wall)
     end
 
     def is_exterior_thermal_boundary
@@ -4723,15 +4723,13 @@ class HPXML < Object
     # Note: Insulated foundation walls of, e.g., unconditioned spaces return false.
     def self.is_adjacent_to_conditioned(adjacent_to)
       if [HPXML::LocationLivingSpace,
-          HPXML::LocationBasementConditioned].include? adjacent_to
+          HPXML::LocationBasementConditioned,
+          HPXML::LocationOtherHousingUnit,
+          HPXML::LocationOtherHeatedSpace].include? adjacent_to
         return true
+      else
+        return false
       end
-
-      return false
-    end
-
-    if surface.exterior_adjacent_to == HPXML::LocationOtherHousingUnit
-      return false # adiabatic
     end
 
     interior_conditioned = is_adjacent_to_conditioned(surface.interior_adjacent_to)
