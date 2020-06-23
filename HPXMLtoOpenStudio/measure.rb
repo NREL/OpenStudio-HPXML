@@ -2148,7 +2148,7 @@ class OSModel
     else
       sequential_heat_load_frac = 0.0
     end
-    if (@hpxml.total_fraction_cool_load_served < 1.0) || (@hpxml.total_fraction_cool_load_served > 0.0)
+    if (@hpxml.total_fraction_cool_load_served < 1.0) && (@hpxml.total_fraction_cool_load_served > 0.0)
       sequential_cool_load_frac = 1.0 - @hpxml.total_fraction_cool_load_served
     else
       sequential_cool_load_frac = 0.0
