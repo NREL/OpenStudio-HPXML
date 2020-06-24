@@ -1,12 +1,12 @@
 # frozen_string_literal: true
 
 class Location
-  def self.apply(model, runner, weather_file_path, weather_cache_path, dst_start_date, dst_end_date)
+  def self.apply(model, runner, weather_file_path, weather_cache_path)
     weather, epw_file = apply_weather_file(model, runner, weather_file_path, weather_cache_path)
     apply_year(model, epw_file)
     apply_site(model, epw_file)
     apply_climate_zones(model, epw_file)
-    apply_dst(model, dst_start_date, dst_end_date)
+    apply_dst(model, epw_file)
     apply_ground_temps(model, weather)
     return weather
   end
@@ -60,17 +60,19 @@ class Location
     end
   end
 
-  def self.apply_dst(model, dst_start_date, dst_end_date)
-    return if dst_start_date.nil? || dst_end_date.nil?
+  def self.apply_dst(model, epw_file)
+    if epw_file.daylightSavingStartDate.is_initialized && epw_file.daylightSavingEndDate.is_initialized
+      month_names = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
 
-    dst_start_date_month = OpenStudio::monthOfYear(dst_start_date.split[0])
-    dst_start_date_day = dst_start_date.split[1].to_i
-    dst_end_date_month = OpenStudio::monthOfYear(dst_end_date.split[0])
-    dst_end_date_day = dst_end_date.split[1].to_i
+      dst_start_date = epw_file.daylightSavingStartDate.get
+      dst_start_date = "#{month_names[dst_start_date.monthOfYear.value - 1]} #{dst_start_date.dayOfMonth}"
+      dst_end_date = epw_file.daylightSavingEndDate.get
+      dst_end_date = "#{month_names[dst_end_date.monthOfYear.value - 1]} #{dst_end_date.dayOfMonth}"
 
-    dst = model.getRunPeriodControlDaylightSavingTime
-    dst.setStartDate(dst_start_date_month, dst_start_date_day)
-    dst.setEndDate(dst_end_date_month, dst_end_date_day)
+      run_period_control_daylight_saving_time = model.getRunPeriodControlDaylightSavingTime
+      run_period_control_daylight_saving_time.setStartDate(dst_start_date)
+      run_period_control_daylight_saving_time.setEndDate(dst_end_date)
+    end
   end
 
   def self.apply_ground_temps(model, weather)
