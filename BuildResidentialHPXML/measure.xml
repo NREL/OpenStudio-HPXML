@@ -3,8 +3,8 @@
   <schema_version>3.0</schema_version>
   <name>build_residential_hpxml</name>
   <uid>a13a8983-2b01-4930-8af2-42030b6e4233</uid>
-  <version_id>a7a22335-c323-4dcd-8638-97e8c8157e1d</version_id>
-  <version_modified>20200622T224010Z</version_modified>
+  <version_id>423788ba-9120-4299-85eb-0e40ec9770ad</version_id>
+  <version_modified>20200624T183457Z</version_modified>
   <xml_checksum>2C38F48B</xml_checksum>
   <class_name>BuildResidentialHPXML</class_name>
   <display_name>HPXML Builder</display_name>
@@ -2238,7 +2238,7 @@
     <argument>
       <name>heating_system_heating_efficiency_afue_2</name>
       <display_name>Heating System 2: Rated AFUE</display_name>
-      <description>The rated efficiency value of the second Furnace/WallFurnace/Boiler heating system.</description>
+      <description>The rated efficiency value of the second Furnace/WallFurnace heating system.</description>
       <type>Double</type>
       <units>AFUE</units>
       <required>true</required>
@@ -2248,7 +2248,7 @@
     <argument>
       <name>heating_system_heating_efficiency_percent_2</name>
       <display_name>Heating System 2: Rated Percent</display_name>
-      <description>The rated efficiency value of the second ElectricResistance/Stove/PortableHeater heating system.</description>
+      <description>The rated efficiency value of the second ElectricResistance/Stove/PortableHeater/Fireplace heating system.</description>
       <type>Double</type>
       <units>Percent</units>
       <required>true</required>
@@ -6318,28 +6318,16 @@
       <checksum>77FA8F32</checksum>
     </file>
     <file>
-      <filename>build_residential_hpxml_test.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>test</usage_type>
-      <checksum>919C2048</checksum>
-    </file>
-    <file>
-      <filename>test_measure.xml</filename>
-      <filetype>xml</filetype>
-      <usage_type>test</usage_type>
-      <checksum>2DBC8724</checksum>
-    </file>
-    <file>
-      <filename>test_rakefile.xml</filename>
-      <filetype>xml</filetype>
-      <usage_type>test</usage_type>
-      <checksum>A3D1C52A</checksum>
-    </file>
-    <file>
       <filename>extra-second-heating-system.osw</filename>
       <filetype>osw</filetype>
       <usage_type>test</usage_type>
       <checksum>ADE10B75</checksum>
+    </file>
+    <file>
+      <filename>build_residential_hpxml_test.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>test</usage_type>
+      <checksum>CD13819B</checksum>
     </file>
     <file>
       <version>
@@ -6350,7 +6338,7 @@
       <filename>measure.rb</filename>
       <filetype>rb</filetype>
       <usage_type>script</usage_type>
-      <checksum>3983E33C</checksum>
+      <checksum>22F2B711</checksum>
     </file>
   </files>
 </measure>

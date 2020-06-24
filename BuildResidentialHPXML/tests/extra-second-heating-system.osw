@@ -189,7 +189,7 @@
         "heating_system_fuel": "electricity",
         "heating_system_fuel_2": "electricity",
         "heating_system_heating_capacity": "64000.0",
-        "heating_system_heating_capacity_2": "auto",
+        "heating_system_heating_capacity_2": "16000.0",
         "heating_system_heating_efficiency_afue": 0.92,
         "heating_system_heating_efficiency_afue_2": 0.78,
         "heating_system_heating_efficiency_percent": 1.0,

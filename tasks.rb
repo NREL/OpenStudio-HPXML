@@ -1769,6 +1769,7 @@ def get_values(osw_file, step)
     step.setArgument('ducts_supply_location', HPXML::LocationLivingSpace)
     step.setArgument('ducts_return_location', HPXML::LocationLivingSpace)
     step.setArgument('heating_system_type_2', HPXML::HVACTypePortableHeater)
+    step.setArgument('heating_system_heating_capacity_2', '16000.0')
     step.setArgument('heating_system_fraction_heat_load_served_2', 0.25)
   elsif ['invalid_files/non-electric-heat-pump-water-heater.osw'].include? osw_file
     step.setArgument('water_heater_type', HPXML::WaterHeaterTypeHeatPump)
