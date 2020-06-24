@@ -137,7 +137,7 @@ class HPXMLTest < MiniTest::Test
                             'cfis-with-hydronic-distribution.xml' => ["Attached HVAC distribution system 'HVACDistribution' cannot be hydronic for ventilation fan 'MechanicalVentilation'."],
                             'clothes-dryer-location.xml' => ["ClothesDryer location is 'garage' but building does not have this location specified."],
                             'clothes-washer-location.xml' => ["ClothesWasher location is 'garage' but building does not have this location specified."],
-                            'coal-for-non-boiler-heating.xml' => ['EnergyPlus does not currently support coal as a fuel type for non-boiler heating systems.'], # FIXME: Allow this when E+/OS is updated
+                            'coal-for-non-boiler-heating.xml' => ['Expected [1] element(s) but found 0 element(s) for xpath: /HPXML/Building/BuildingDetails/Systems/HVAC/HVACPlant/HeatingSystem[HeatingSystemType/Stove]: HeatingSystemFuel[text()='], # FIXME: Allow this when E+/OS is updated
                             'cooking-range-location.xml' => ["CookingRange location is 'garage' but building does not have this location specified."],
                             'dishwasher-location.xml' => ["Dishwasher location is 'garage' but building does not have this location specified."],
                             'dhw-frac-load-served.xml' => ['Expected FractionDHWLoadServed to sum to 1, but calculated sum is 1.15.'],
@@ -338,16 +338,6 @@ class HPXMLTest < MiniTest::Test
     else
       show_output(runner.result) unless success
       assert_equal(true, success)
-    end
-
-    # Add output variables for crankcase and defrost energy
-    vars = ['Cooling Coil Crankcase Heater Electric Energy',
-            'Heating Coil Crankcase Heater Electric Energy',
-            'Heating Coil Defrost Electric Energy']
-    vars.each do |var|
-      output_var = OpenStudio::Model::OutputVariable.new(var, model)
-      output_var.setReportingFrequency('runperiod')
-      output_var.setKeyValue('*')
     end
 
     # Add output variables for CFIS tests

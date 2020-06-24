@@ -118,9 +118,7 @@ class HVAC
         htg_coil.setGasBurnerEfficiency(heating_system.heating_efficiency_afue)
         htg_coil.setParasiticElectricLoad(0)
         htg_coil.setParasiticGasLoad(0)
-        eplus_fuel = HelperMethods.eplus_fuel_map(heating_system.heating_system_fuel)
-        fail 'EnergyPlus does not currently support coal as a fuel type for non-boiler heating systems.' if eplus_fuel == 'Coal'
-        htg_coil.setFuelType(eplus_fuel)
+        htg_coil.setFuelType(HelperMethods.eplus_fuel_map(heating_system.heating_system_fuel))
       end
       htg_coil.setName(obj_name + ' htg coil')
       if not heating_system.heating_capacity.nil?
@@ -1144,9 +1142,7 @@ class HVAC
       htg_coil.setGasBurnerEfficiency(efficiency)
       htg_coil.setParasiticElectricLoad(0.0)
       htg_coil.setParasiticGasLoad(0)
-      eplus_fuel = HelperMethods.eplus_fuel_map(heating_system.heating_system_fuel)
-      fail 'EnergyPlus does not currently support coal as a fuel type for non-boiler heating systems.' if eplus_fuel == 'Coal'
-      htg_coil.setFuelType(eplus_fuel)
+      htg_coil.setFuelType(HelperMethods.eplus_fuel_map(heating_system.heating_system_fuel))
     end
     htg_coil.setName(obj_name + ' htg coil')
     if not heating_system.heating_capacity.nil?
@@ -1769,9 +1765,7 @@ class HVAC
       htg_supp_coil.setGasBurnerEfficiency(efficiency)
       htg_supp_coil.setParasiticElectricLoad(0)
       htg_supp_coil.setParasiticGasLoad(0)
-      eplus_fuel = HelperMethods.eplus_fuel_map(fuel)
-      fail 'EnergyPlus does not currently support coal as a fuel type for non-boiler heating systems.' if eplus_fuel == 'Coal'
-      htg_supp_coil.setFuelType(eplus_fuel)
+      htg_supp_coil.setFuelType(HelperMethods.eplus_fuel_map(fuel))
     end
     htg_supp_coil.setName(obj_name + ' ' + Constants.ObjectNameBackupHeatingCoil)
     if not capacity.nil?
