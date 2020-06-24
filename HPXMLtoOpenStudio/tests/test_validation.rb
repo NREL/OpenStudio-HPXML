@@ -32,7 +32,7 @@ class HPXMLtoOpenStudioSchematronTest < MiniTest::Test
     end
   end
 
-  def test_invalid_files_with_xml_validator
+  def test_invalid_files_schematron_validation
     # TODO: Need to add more test cases
     expected_error_msgs = { '/HPXML/XMLTransactionHeaderInformation/XMLType' => ["element 'XMLType' is REQUIRED"],
                             '/HPXML/XMLTransactionHeaderInformation/XMLGeneratedBy' => ["element 'XMLGeneratedBy' is REQUIRED"],
@@ -55,15 +55,21 @@ class HPXMLtoOpenStudioSchematronTest < MiniTest::Test
     end
   end
 
-  def test_invalid_files_with_rb_validator
+  def test_invalid_files_validator_validation
     # TODO: Need to add more test cases
-    expected_error_msgs = { '/HPXML/XMLTransactionHeaderInformation/XMLType' => "Expected [1] element(s) but found 0 element(s) for xpath: /HPXML/XMLTransactionHeaderInformation/XMLType",
-                            '/HPXML/XMLTransactionHeaderInformation/XMLGeneratedBy' => "Expected [1] element(s) but found 0 element(s) for xpath: /HPXML/XMLTransactionHeaderInformation/XMLGeneratedBy",
-                            '/HPXML/XMLTransactionHeaderInformation/CreatedDateAndTime' => "Expected [1] element(s) but found 0 element(s) for xpath: /HPXML/XMLTransactionHeaderInformation/CreatedDateAndTime",
-                            '/HPXML/XMLTransactionHeaderInformation/Transaction' => "Expected [1] element(s) but found 0 element(s) for xpath: /HPXML/XMLTransactionHeaderInformation/Transaction",
-                            # '/HPXML/Building' => "Expected [1] element(s) but found 0 element(s) for xpath: /HPXML/Building",  # FIXME: Need to review this!!
-                            '/HPXML/Building/BuildingID' => "Expected [1] element(s) but found 0 element(s) for xpath: /HPXML/Building/BuildingID",
-                            '/HPXML/Building/ProjectStatus/EventType' => "Expected [1] element(s) but found 0 element(s) for xpath: /HPXML/Building/ProjectStatus/EventType",
+    expected_error_msgs = { '/HPXML/XMLTransactionHeaderInformation/XMLType' => ["Expected [1] element(s) but found 0 element(s) for xpath: /HPXML/XMLTransactionHeaderInformation/XMLType"],
+                            '/HPXML/XMLTransactionHeaderInformation/XMLGeneratedBy' => ["Expected [1] element(s) but found 0 element(s) for xpath: /HPXML/XMLTransactionHeaderInformation/XMLGeneratedBy"],
+                            '/HPXML/XMLTransactionHeaderInformation/CreatedDateAndTime' => ["Expected [1] element(s) but found 0 element(s) for xpath: /HPXML/XMLTransactionHeaderInformation/CreatedDateAndTime"],
+                            '/HPXML/XMLTransactionHeaderInformation/Transaction' => ["Expected [1] element(s) but found 0 element(s) for xpath: /HPXML/XMLTransactionHeaderInformation/Transaction"],
+                            '/HPXML/Building' => ["Expected [1] element(s) but found 0 element(s) for xpath: /HPXML/Building",
+                                                  "Expected [1] element(s) but found 0 element(s) for xpath: /HPXML/Building/BuildingID",
+                                                  "Expected [1] element(s) but found 0 element(s) for xpath: /HPXML/Building/ProjectStatus/EventType",
+                                                  "Expected [1] element(s) but found 0 element(s) for xpath: /HPXML/Building/BuildingDetails/BuildingSummary/BuildingConstruction",
+                                                  "Expected [1] element(s) but found 0 element(s) for xpath: /HPXML/Building/BuildingDetails/ClimateandRiskZones/WeatherStation",
+                                                  'Expected [1] element(s) but found 0 element(s) for xpath: /HPXML/Building/BuildingDetails/Enclosure/AirInfiltration/AirInfiltrationMeasurement[number(HousePressure)=50 and BuildingAirLeakage/UnitofMeasure[text()="ACH" or text()="CFM"]] | /HPXML/Building/BuildingDetails/Enclosure/AirInfiltration/AirInfiltrationMeasurement[BuildingAirLeakage/UnitofMeasure[text()="ACHnatural"]]',
+                                                  "Expected 1 or more element(s) but found 0 elements for xpath: /HPXML/Building/BuildingDetails/Enclosure/Walls/Wall"],
+                            '/HPXML/Building/BuildingID' => ["Expected [1] element(s) but found 0 element(s) for xpath: /HPXML/Building/BuildingID"],
+                            '/HPXML/Building/ProjectStatus/EventType' => ["Expected [1] element(s) but found 0 element(s) for xpath: /HPXML/Building/ProjectStatus/EventType"],
                           }
     
     expected_error_msgs.each do |key, value|
@@ -90,7 +96,6 @@ class HPXMLtoOpenStudioSchematronTest < MiniTest::Test
       assert_empty(results)
     else
       results.each_with_index do |error, index|
-        puts "error[:message]: #{error[:message]}"
         assert_equal(expected_error_msgs[index], error[:message])
       end
     end
