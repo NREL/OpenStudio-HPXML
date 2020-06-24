@@ -1279,12 +1279,12 @@ class Waterheater
     # EMS for calculating the EC_adj
 
     # Sensors
-    ep_consumption_name = { HPXML::FuelTypeElectricity => 'Electric Power',
-                            HPXML::FuelTypePropane => 'Propane Rate',
-                            HPXML::FuelTypeOil => 'FuelOil#1 Rate',
-                            HPXML::FuelTypeNaturalGas => 'Gas Rate',
-                            HPXML::FuelTypeWood => 'OtherFuel1 Rate',
-                            HPXML::FuelTypeWoodPellets => 'OtherFuel2 Rate' }[fuel_type]
+    eplus_fuel = HelperMethods.eplus_fuel_map(fuel_type)
+    if eplus_fuel == 'electricity'
+      ep_consumption_name = 'Electric Power'
+    else
+      ep_consumption_name = "#{eplus_fuel.gsub('No', '#').gsub('NaturalGas', 'Gas')} Rate"
+    end
     if [HPXML::WaterHeaterTypeCombiStorage, HPXML::WaterHeaterTypeCombiTankless].include? water_heating_system.water_heater_type
       ec_adj_sensor_hx = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Fluid Heat Exchanger Heat Transfer Energy')
       ec_adj_sensor_hx.setName("#{combi_hx.name} energy")

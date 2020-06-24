@@ -1548,6 +1548,7 @@ class SimulationOutputReport < OpenStudio::Measure::ReportingMeasure
                         OutputVars.SpaceHeatingPropane,
                         OutputVars.SpaceHeatingWoodCord,
                         OutputVars.SpaceHeatingWoodPellets,
+                        OutputVars.SpaceHeatingCoal,
                         OutputVars.SpaceHeatingDFHPPrimaryLoad,
                         OutputVars.SpaceHeatingDFHPBackupLoad,
                         OutputVars.SpaceCoolingElectricity,
@@ -1561,6 +1562,7 @@ class SimulationOutputReport < OpenStudio::Measure::ReportingMeasure
                        OutputVars.WaterHeatingPropane,
                        OutputVars.WaterHeatingWoodCord,
                        OutputVars.WaterHeatingWoodPellets,
+                       OutputVars.WaterHeatingCoal,
                        OutputVars.WaterHeatingLoad,
                        OutputVars.WaterHeatingLoadTankLosses,
                        OutputVars.WaterHeaterLoadDesuperheater,
@@ -1782,10 +1784,11 @@ class SimulationOutputReport < OpenStudio::Measure::ReportingMeasure
     @fuels = {}
     @fuels[FT::Elec] = Fuel.new(meter: 'Electricity:Facility')
     @fuels[FT::Gas] = Fuel.new(meter: 'Gas:Facility')
-    @fuels[FT::Oil] = Fuel.new(meter: 'FuelOil#1:Facility')
+    @fuels[FT::Oil] = Fuel.new(meter: 'FuelOil#2:Facility')
     @fuels[FT::Propane] = Fuel.new(meter: 'Propane:Facility')
     @fuels[FT::WoodCord] = Fuel.new(meter: 'OtherFuel1:Facility')
     @fuels[FT::WoodPellets] = Fuel.new(meter: 'OtherFuel2:Facility')
+    @fuels[FT::Coal] = Fuel.new(meter: 'Coal:Facility')
 
     @fuels.each do |fuel_type, fuel|
       fuel.name = "#{fuel_type}: Total"
@@ -1844,12 +1847,12 @@ class SimulationOutputReport < OpenStudio::Measure::ReportingMeasure
     end
     @end_uses[[FT::Oil, EUT::Heating]] = EndUse.new(variable: OutputVars.SpaceHeatingFuelOil)
     @end_uses[[FT::Oil, EUT::HotWater]] = EndUse.new(variable: OutputVars.WaterHeatingFuelOil)
-    @end_uses[[FT::Oil, EUT::ClothesDryer]] = EndUse.new(meter: "#{Constants.ObjectNameClothesDryer}:InteriorEquipment:FuelOil#1")
-    @end_uses[[FT::Oil, EUT::RangeOven]] = EndUse.new(meter: "#{Constants.ObjectNameCookingRange}:InteriorEquipment:FuelOil#1")
+    @end_uses[[FT::Oil, EUT::ClothesDryer]] = EndUse.new(meter: "#{Constants.ObjectNameClothesDryer}:InteriorEquipment:FuelOil#2")
+    @end_uses[[FT::Oil, EUT::RangeOven]] = EndUse.new(meter: "#{Constants.ObjectNameCookingRange}:InteriorEquipment:FuelOil#2")
     if @eri_design.nil? # Skip end uses not used by ERI
-      @end_uses[[FT::Oil, EUT::Grill]] = EndUse.new(meter: "#{Constants.ObjectNameMiscGrill}:InteriorEquipment:FuelOil#1")
-      @end_uses[[FT::Oil, EUT::Lighting]] = EndUse.new(meter: "#{Constants.ObjectNameMiscLighting}:InteriorEquipment:FuelOil#1")
-      @end_uses[[FT::Oil, EUT::Fireplace]] = EndUse.new(meter: "#{Constants.ObjectNameMiscFireplace}:InteriorEquipment:FuelOil#1")
+      @end_uses[[FT::Oil, EUT::Grill]] = EndUse.new(meter: "#{Constants.ObjectNameMiscGrill}:InteriorEquipment:FuelOil#2")
+      @end_uses[[FT::Oil, EUT::Lighting]] = EndUse.new(meter: "#{Constants.ObjectNameMiscLighting}:InteriorEquipment:FuelOil#2")
+      @end_uses[[FT::Oil, EUT::Fireplace]] = EndUse.new(meter: "#{Constants.ObjectNameMiscFireplace}:InteriorEquipment:FuelOil#2")
     end
     @end_uses[[FT::Propane, EUT::Heating]] = EndUse.new(variable: OutputVars.SpaceHeatingPropane)
     @end_uses[[FT::Propane, EUT::HotWater]] = EndUse.new(variable: OutputVars.WaterHeatingPropane)
@@ -1877,6 +1880,15 @@ class SimulationOutputReport < OpenStudio::Measure::ReportingMeasure
       @end_uses[[FT::WoodPellets, EUT::Grill]] = EndUse.new(meter: "#{Constants.ObjectNameMiscGrill}:InteriorEquipment:OtherFuel2")
       @end_uses[[FT::WoodPellets, EUT::Lighting]] = EndUse.new(meter: "#{Constants.ObjectNameMiscLighting}:InteriorEquipment:OtherFuel2")
       @end_uses[[FT::WoodPellets, EUT::Fireplace]] = EndUse.new(meter: "#{Constants.ObjectNameMiscFireplace}:InteriorEquipment:OtherFuel2")
+    end
+    @end_uses[[FT::Coal, EUT::Heating]] = EndUse.new(variable: OutputVars.SpaceHeatingCoal)
+    @end_uses[[FT::Coal, EUT::HotWater]] = EndUse.new(variable: OutputVars.WaterHeatingCoal)
+    @end_uses[[FT::Coal, EUT::ClothesDryer]] = EndUse.new(meter: "#{Constants.ObjectNameClothesDryer}:InteriorEquipment:Coal")
+    @end_uses[[FT::Coal, EUT::RangeOven]] = EndUse.new(meter: "#{Constants.ObjectNameCookingRange}:InteriorEquipment:Coal")
+    if @eri_design.nil? # Skip end uses not used by ERI
+      @end_uses[[FT::Coal, EUT::Grill]] = EndUse.new(meter: "#{Constants.ObjectNameMiscGrill}:InteriorEquipment:Coal")
+      @end_uses[[FT::Coal, EUT::Lighting]] = EndUse.new(meter: "#{Constants.ObjectNameMiscLighting}:InteriorEquipment:Coal")
+      @end_uses[[FT::Coal, EUT::Fireplace]] = EndUse.new(meter: "#{Constants.ObjectNameMiscFireplace}:InteriorEquipment:Coal")
     end
 
     @end_uses.each do |key, end_use|
@@ -2048,9 +2060,9 @@ class SimulationOutputReport < OpenStudio::Measure::ReportingMeasure
     end
 
     def self.SpaceHeatingFuelOil
-      return { 'OpenStudio::Model::CoilHeatingGas' => ['Heating Coil FuelOil#1 Energy'],
-               'OpenStudio::Model::ZoneHVACBaseboardConvectiveElectric' => ['Baseboard FuelOil#1 Energy'],
-               'OpenStudio::Model::BoilerHotWater' => ['Boiler FuelOil#1 Energy'] }
+      return { 'OpenStudio::Model::CoilHeatingGas' => ['Heating Coil FuelOil#2 Energy'],
+               'OpenStudio::Model::ZoneHVACBaseboardConvectiveElectric' => ['Baseboard FuelOil#2 Energy'],
+               'OpenStudio::Model::BoilerHotWater' => ['Boiler FuelOil#2 Energy'] }
     end
 
     def self.SpaceHeatingPropane
@@ -2069,6 +2081,12 @@ class SimulationOutputReport < OpenStudio::Measure::ReportingMeasure
       return { 'OpenStudio::Model::CoilHeatingGas' => ['Heating Coil OtherFuel2 Energy'],
                'OpenStudio::Model::ZoneHVACBaseboardConvectiveElectric' => ['Baseboard OtherFuel2 Energy'],
                'OpenStudio::Model::BoilerHotWater' => ['Boiler OtherFuel2 Energy'] }
+    end
+
+    def self.SpaceHeatingCoal
+      return { 'OpenStudio::Model::CoilHeatingGas' => ['Heating Coil Coal Energy'],
+               'OpenStudio::Model::ZoneHVACBaseboardConvectiveElectric' => ['Baseboard Coal Energy'],
+               'OpenStudio::Model::BoilerHotWater' => ['Boiler Coal Energy'] }
     end
 
     def self.SpaceHeatingDFHPPrimaryLoad
@@ -2112,8 +2130,8 @@ class SimulationOutputReport < OpenStudio::Measure::ReportingMeasure
     end
 
     def self.WaterHeatingFuelOil
-      return { 'OpenStudio::Model::WaterHeaterMixed' => ['Water Heater FuelOil#1 Energy'],
-               'OpenStudio::Model::WaterHeaterStratified' => ['Water Heater FuelOil#1 Energy'] }
+      return { 'OpenStudio::Model::WaterHeaterMixed' => ['Water Heater FuelOil#2 Energy'],
+               'OpenStudio::Model::WaterHeaterStratified' => ['Water Heater FuelOil#2 Energy'] }
     end
 
     def self.WaterHeatingPropane
@@ -2129,6 +2147,11 @@ class SimulationOutputReport < OpenStudio::Measure::ReportingMeasure
     def self.WaterHeatingWoodPellets
       return { 'OpenStudio::Model::WaterHeaterMixed' => ['Water Heater OtherFuel2 Energy'],
                'OpenStudio::Model::WaterHeaterStratified' => ['Water Heater OtherFuel2 Energy'] }
+    end
+
+    def self.WaterHeatingCoal
+      return { 'OpenStudio::Model::WaterHeaterMixed' => ['Water Heater Coal Energy'],
+               'OpenStudio::Model::WaterHeaterStratified' => ['Water Heater Coal Energy'] }
     end
 
     def self.WaterHeatingLoad

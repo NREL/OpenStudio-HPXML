@@ -137,6 +137,7 @@ class HPXMLTest < MiniTest::Test
                             'cfis-with-hydronic-distribution.xml' => ["Attached HVAC distribution system 'HVACDistribution' cannot be hydronic for ventilation fan 'MechanicalVentilation'."],
                             'clothes-dryer-location.xml' => ["ClothesDryer location is 'garage' but building does not have this location specified."],
                             'clothes-washer-location.xml' => ["ClothesWasher location is 'garage' but building does not have this location specified."],
+                            'coal-for-non-boiler-heating.xml' => ['EnergyPlus does not currently support coal as a fuel type for non-boiler heating systems.'], # FIXME: Allow this when E+/OS is updated
                             'cooking-range-location.xml' => ["CookingRange location is 'garage' but building does not have this location specified."],
                             'dishwasher-location.xml' => ["Dishwasher location is 'garage' but building does not have this location specified."],
                             'dhw-frac-load-served.xml' => ['Expected FractionDHWLoadServed to sum to 1, but calculated sum is 1.15.'],
@@ -1165,9 +1166,11 @@ class HPXMLTest < MiniTest::Test
     # Fuel consumption checks
     [HPXML::FuelTypeNaturalGas,
      HPXML::FuelTypeOil,
+     HPXML::FuelTypeKerosene,
      HPXML::FuelTypePropane,
      HPXML::FuelTypeWood,
-     HPXML::FuelTypeWoodPellets].each do |fuel|
+     HPXML::FuelTypeWoodPellets,
+     HPXML::FuelTypeCoal].each do |fuel|
       fuel_name = fuel.split.map(&:capitalize).join(' ')
       fuel_name += ' Cord' if fuel_name == 'Wood'
       energy_htg = results.fetch("#{fuel_name}: Heating (MBtu)", 0)

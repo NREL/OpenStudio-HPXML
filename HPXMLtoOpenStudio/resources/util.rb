@@ -6,14 +6,25 @@ class HelperMethods
       return 'electricity'
     elsif fuel == HPXML::FuelTypeNaturalGas
       return 'NaturalGas'
-    elsif fuel == HPXML::FuelTypeOil
-      return 'FuelOilNo1'
+    elsif [HPXML::FuelTypeOil,
+           HPXML::FuelTypeOil1,
+           HPXML::FuelTypeOil2,
+           HPXML::FuelTypeOil4,
+           HPXML::FuelTypeOil5or6,
+           HPXML::FuelTypeDiesel,
+           HPXML::FuelTypeKerosene].include? fuel
+      return 'FuelOilNo2'
     elsif fuel == HPXML::FuelTypePropane
       return 'Propane'
     elsif fuel == HPXML::FuelTypeWood
       return 'OtherFuel1'
     elsif fuel == HPXML::FuelTypeWoodPellets
       return 'OtherFuel2'
+    elsif [HPXML::FuelTypeCoal,
+           HPXML::FuelTypeCoalAnthracite,
+           HPXML::FuelTypeCoalBituminous,
+           HPXML::FuelTypeCoke].include? fuel
+      return 'Coal'
     end
   end
 end

@@ -118,7 +118,9 @@ class HVAC
         htg_coil.setGasBurnerEfficiency(heating_system.heating_efficiency_afue)
         htg_coil.setParasiticElectricLoad(0)
         htg_coil.setParasiticGasLoad(0)
-        htg_coil.setFuelType(HelperMethods.eplus_fuel_map(heating_system.heating_system_fuel))
+        eplus_fuel = HelperMethods.eplus_fuel_map(heating_system.heating_system_fuel)
+        fail 'EnergyPlus does not currently support coal as a fuel type for non-boiler heating systems.' if eplus_fuel == 'Coal'
+        htg_coil.setFuelType(eplus_fuel)
       end
       htg_coil.setName(obj_name + ' htg coil')
       if not heating_system.heating_capacity.nil?
@@ -1142,7 +1144,9 @@ class HVAC
       htg_coil.setGasBurnerEfficiency(efficiency)
       htg_coil.setParasiticElectricLoad(0.0)
       htg_coil.setParasiticGasLoad(0)
-      htg_coil.setFuelType(HelperMethods.eplus_fuel_map(heating_system.heating_system_fuel))
+      eplus_fuel = HelperMethods.eplus_fuel_map(heating_system.heating_system_fuel)
+      fail 'EnergyPlus does not currently support coal as a fuel type for non-boiler heating systems.' if eplus_fuel == 'Coal'
+      htg_coil.setFuelType(eplus_fuel)
     end
     htg_coil.setName(obj_name + ' htg coil')
     if not heating_system.heating_capacity.nil?
@@ -1613,19 +1617,12 @@ class HVAC
       hvac_objects << clg_object_sensor
     end
 
-    var_map = { 'NaturalGas' => 'Heating Coil Gas Energy',
-                'Propane' => 'Heating Coil Propane Energy',
-                'FuelOilNo1' => 'Heating Coil FuelOil#1 Energy',
-                'OtherFuel1' => 'Heating Coil OtherFuel1 Energy',
-                'OtherFuel2' => 'Heating Coil OtherFuel2 Energy' }
-
     if htg_object.nil?
       htg_object_sensor = nil
     else
       var = 'Heating Coil Electric Energy'
       if htg_object.is_a? OpenStudio::Model::CoilHeatingGas
-        var = var_map[htg_object.fuelType]
-        fail "Unexpected heating coil '#{htg_object.name}'." if var.nil?
+        var = "Heating Coil #{htg_object.fuelType.gsub('No', '#').gsub('NaturalGas', 'Gas')} Energy"
       elsif htg_object.is_a? OpenStudio::Model::ZoneHVACBaseboardConvectiveWater
         var = 'Baseboard Total Heating Energy'
       end
@@ -1641,8 +1638,7 @@ class HVAC
     else
       var = 'Heating Coil Electric Energy'
       if backup_htg_object.is_a? OpenStudio::Model::CoilHeatingGas
-        var = var_map[backup_htg_object.fuelType]
-        fail "Unexpected heating coil '#{backup_htg_object.name}'." if var.nil?
+        var = "Heating Coil #{backup_htg_object.fuelType.gsub('No', '#').gsub('NaturalGas', 'Gas')} Energy"
       end
 
       backup_htg_object_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, var)
@@ -1773,7 +1769,9 @@ class HVAC
       htg_supp_coil.setGasBurnerEfficiency(efficiency)
       htg_supp_coil.setParasiticElectricLoad(0)
       htg_supp_coil.setParasiticGasLoad(0)
-      htg_supp_coil.setFuelType(HelperMethods.eplus_fuel_map(fuel))
+      eplus_fuel = HelperMethods.eplus_fuel_map(fuel)
+      fail 'EnergyPlus does not currently support coal as a fuel type for non-boiler heating systems.' if eplus_fuel == 'Coal'
+      htg_supp_coil.setFuelType(eplus_fuel)
     end
     htg_supp_coil.setName(obj_name + ' ' + Constants.ObjectNameBackupHeatingCoil)
     if not capacity.nil?
@@ -1890,15 +1888,29 @@ class HVAC
   def self.get_default_eae(htg_type, fuel, load_frac, furnace_capacity_kbtuh)
     # From ANSI/RESNET/ICC 301 Standard
     if htg_type == HPXML::HVACTypeBoiler
-      if (fuel == HPXML::FuelTypeNaturalGas) || (fuel == HPXML::FuelTypePropane)
+      if [HPXML::FuelTypeNaturalGas,
+          HPXML::FuelTypePropane].include? fuel
         return 170.0 * load_frac # kWh/yr
-      elsif fuel == HPXML::FuelTypeOil
+      elsif [HPXML::FuelTypeOil,
+             HPXML::FuelTypeOil1,
+             HPXML::FuelTypeOil2,
+             HPXML::FuelTypeOil4,
+             HPXML::FuelTypeOil5or6,
+             HPXML::FuelTypeDiesel,
+             HPXML::FuelTypeKerosene].include? fuel
         return 330.0 * load_frac # kWh/yr
       end
     elsif htg_type == HPXML::HVACTypeFurnace
-      if (fuel == HPXML::FuelTypeNaturalGas) || (fuel == HPXML::FuelTypePropane)
+      if [HPXML::FuelTypeNaturalGas,
+          HPXML::FuelTypePropane].include? fuel
         return (149.0 + 10.3 * furnace_capacity_kbtuh) * load_frac # kWh/yr
-      elsif fuel == HPXML::FuelTypeOil
+      elsif [HPXML::FuelTypeOil,
+             HPXML::FuelTypeOil1,
+             HPXML::FuelTypeOil2,
+             HPXML::FuelTypeOil4,
+             HPXML::FuelTypeOil5or6,
+             HPXML::FuelTypeDiesel,
+             HPXML::FuelTypeKerosene].include? fuel
         return (439.0 + 5.5 * furnace_capacity_kbtuh) * load_frac # kWh/yr
       end
     end
