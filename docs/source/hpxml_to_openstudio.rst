@@ -153,9 +153,11 @@ The simulation run period can be optionally specified with ``BeginMonth``/``Begi
 The ``BeginMonth``/``BeginDayOfMonth`` provided must occur before ``EndMonth``/``EndDayOfMonth`` provided (e.g., a run period from 10/1 to 3/31 is invalid).
 If not provided, default values of January 1st and December 31st will be used.
 
-Whether to apply daylight saving time start/end dates can be optionally denoted with ``DaylightSaving``.
-The simulation will run using the daylight saving time start/end dates specified in the header of the weather file (EPW). If both start and end dates are not specified, the simulation will not use daylight saving time.
-If ``DaylightSaving`` is not provided, the default value of false will be used.
+Whether to apply daylight saving time start/end dates can be optionally denoted with ``DaylightSaving/Enabled``.
+If daylight saving is enabled, the daylight saving period can be optionally specified with ``DaylightSaving/BeginMonth``, ``DaylightSaving/BeginDayOfMonth``, ``DaylightSaving/EndMonth``, and ``DaylightSaving/EndDayOfMonth``.
+If these are not specified, the simulation will run using the daylight saving time start/end dates specified in the header of the weather file (EPW).
+If these are not specified, the simulation will run using the daylight saving time start/end dates corresponding to March 11 and November 4, respectively.
+If ``DaylightSaving`` is not enabled, the default value of false will be used.
 
 HPXML Building Details
 ----------------------

@@ -10,7 +10,13 @@
     <extension>
       <SimulationControl>
         <Timestep>60</Timestep>
-        <DaylightSaving>true</DaylightSaving>
+        <BeginMonth>3</BeginMonth>
+        <BeginDayOfMonth>11</BeginDayOfMonth>
+        <EndMonth>11</EndMonth>
+        <EndDayOfMonth>4</EndDayOfMonth>
+        <DaylightSaving>
+          <Enabled>true</Enabled>
+        </DaylightSaving>
       </SimulationControl>
     </extension>
   </SoftwareInfo>

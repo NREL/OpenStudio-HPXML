@@ -35,7 +35,7 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
     hpxml.header.begin_day_of_month = 2
     hpxml.header.end_month = 11
     hpxml.header.end_day_of_month = 11
-    hpxml.header.daylight_saving = true
+    hpxml.header.dst_enabled = true
     XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
     hpxml_default = _test_measure()
     _test_default_header_values(hpxml_default, 30, 2, 2, 11, 11, true)
@@ -824,7 +824,7 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
     assert_equal(begin_day, hpxml.header.begin_day_of_month)
     assert_equal(end_month, hpxml.header.end_month)
     assert_equal(end_day, hpxml.header.end_day_of_month)
-    assert_equal(dst, hpxml.header.daylight_saving)
+    assert_equal(dst, hpxml.header.dst_enabled)
   end
 
   def _test_default_site_values(hpxml, site_type, shelter_coefficient)
@@ -1206,7 +1206,7 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
     hpxml.header.begin_day_of_month = nil
     hpxml.header.end_month = nil
     hpxml.header.end_day_of_month = nil
-    hpxml.header.daylight_saving = nil
+    hpxml.header.dst_enabled = nil
 
     hpxml.site.site_type = nil
     hpxml.site.shelter_coefficient = nil

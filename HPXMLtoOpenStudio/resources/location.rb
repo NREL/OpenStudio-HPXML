@@ -1,13 +1,13 @@
 # frozen_string_literal: true
 
 class Location
-  def self.apply(model, runner, weather_file_path, weather_cache_path, daylight_saving)
+  def self.apply(model, runner, weather_file_path, weather_cache_path, hpxml)
     weather, epw_file = apply_weather_file(model, runner, weather_file_path, weather_cache_path)
     apply_year(model, epw_file)
     apply_site(model, epw_file)
     apply_climate_zones(model, epw_file)
-    if daylight_saving
-      apply_dst(model, epw_file)
+    if hpxml.header.dst_enabled
+      apply_dst(model, epw_file, hpxml)
     end
     apply_ground_temps(model, weather)
     return weather
@@ -62,19 +62,25 @@ class Location
     end
   end
 
-  def self.apply_dst(model, epw_file)
-    if epw_file.daylightSavingStartDate.is_initialized && epw_file.daylightSavingEndDate.is_initialized
-      month_names = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
+  def self.apply_dst(model, epw_file, hpxml)
+    month_names = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
 
+    if (not @dst_begin_month.nil?) && (not @dst_begin_day_of_month.nil?) && (not @dst_end_month.nil?) && (not @dst_end_day_of_month.nil?)
+      dst_start_date = "#{month_names[@dst_begin_month]} #{@dst_begin_day_of_month}"
+      dst_end_date = "#{month_names[@dst_end_month]} #{@dst_end_day_of_month}"
+    elsif epw_file.daylightSavingStartDate.is_initialized && epw_file.daylightSavingEndDate.is_initialized
       dst_start_date = epw_file.daylightSavingStartDate.get
       dst_start_date = "#{month_names[dst_start_date.monthOfYear.value - 1]} #{dst_start_date.dayOfMonth}"
       dst_end_date = epw_file.daylightSavingEndDate.get
       dst_end_date = "#{month_names[dst_end_date.monthOfYear.value - 1]} #{dst_end_date.dayOfMonth}"
-
-      run_period_control_daylight_saving_time = model.getRunPeriodControlDaylightSavingTime
-      run_period_control_daylight_saving_time.setStartDate(dst_start_date)
-      run_period_control_daylight_saving_time.setEndDate(dst_end_date)
+    else
+      dst_start_date = 'Mar 11'
+      dst_end_date = 'Nov 4'
     end
+
+    run_period_control_daylight_saving_time = model.getRunPeriodControlDaylightSavingTime
+    run_period_control_daylight_saving_time.setStartDate(dst_start_date)
+    run_period_control_daylight_saving_time.setEndDate(dst_end_date)
   end
 
   def self.apply_ground_temps(model, weather)

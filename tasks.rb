@@ -452,7 +452,11 @@ def set_hpxml_header(hpxml_file, hpxml)
       hpxml.header.apply_ashrae140_assumptions = true
     end
   elsif ['base-location-epw-filepath-AMY-2012-dst.xml'].include? hpxml_file
-    hpxml.header.daylight_saving = true
+    hpxml.header.dst_enabled = true
+    hpxml.header.begin_month = 3
+    hpxml.header.begin_day_of_month = 11
+    hpxml.header.end_month = 11
+    hpxml.header.end_day_of_month = 4
   elsif ['base-misc-timestep-10-mins.xml'].include? hpxml_file
     hpxml.header.timestep = 10
   elsif ['base-misc-runperiod-1-month.xml'].include? hpxml_file
