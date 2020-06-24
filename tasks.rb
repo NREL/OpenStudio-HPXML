@@ -261,6 +261,7 @@ def create_hpxmls
     'base-location-miami-fl.xml' => 'base.xml',
     'base-location-epw-filepath.xml' => 'base.xml',
     'base-location-epw-filepath-AMY-2012.xml' => 'base.xml',
+    'base-location-epw-filepath-AMY-2012-dst.xml' => 'base-location-epw-filepath-AMY-2012.xml',
     'base-mechvent-balanced.xml' => 'base.xml',
     'base-mechvent-cfis.xml' => 'base.xml',
     'base-mechvent-cfis-dse.xml' => 'base-hvac-dse.xml',
@@ -450,6 +451,8 @@ def set_hpxml_header(hpxml_file, hpxml)
     else
       hpxml.header.apply_ashrae140_assumptions = true
     end
+  elsif ['base-location-epw-filepath-AMY-2012-dst.xml'].include? hpxml_file
+    hpxml.header.daylight_saving = true
   elsif ['base-misc-timestep-10-mins.xml'].include? hpxml_file
     hpxml.header.timestep = 10
   elsif ['base-misc-runperiod-1-month.xml'].include? hpxml_file
