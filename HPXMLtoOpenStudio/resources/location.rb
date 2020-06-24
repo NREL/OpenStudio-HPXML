@@ -1,12 +1,14 @@
 # frozen_string_literal: true
 
 class Location
-  def self.apply(model, runner, weather_file_path, weather_cache_path)
+  def self.apply(model, runner, weather_file_path, weather_cache_path, daylight_saving)
     weather, epw_file = apply_weather_file(model, runner, weather_file_path, weather_cache_path)
     apply_year(model, epw_file)
     apply_site(model, epw_file)
     apply_climate_zones(model, epw_file)
-    apply_dst(model, epw_file)
+    if daylight_saving
+      apply_dst(model, epw_file)
+    end
     apply_ground_temps(model, weather)
     return weather
   end

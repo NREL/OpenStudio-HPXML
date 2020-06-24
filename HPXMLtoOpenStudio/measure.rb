@@ -240,7 +240,7 @@ class OSModel
 
     # Init
 
-    weather = Location.apply(model, runner, epw_path, cache_path)
+    weather = Location.apply(model, runner, epw_path, cache_path, @hpxml.header.daylight_saving)
     check_for_errors()
     set_defaults_and_globals(runner, output_dir)
     add_simulation_params(model)

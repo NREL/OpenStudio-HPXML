@@ -112,6 +112,7 @@ class EnergyPlusValidator
         'Timestep' => zero_or_one, # minutes; must be a divisor of 60
         'BeginMonth | BeginDayOfMonth' => zero_or_two, # integer
         'EndMonth | EndDayOfMonth' => zero_or_two, # integer
+        'DaylightSaving' => zero_or_one,
       },
 
       # [Site]
