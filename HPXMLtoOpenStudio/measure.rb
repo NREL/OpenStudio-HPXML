@@ -240,7 +240,8 @@ class OSModel
 
     # Init
 
-    weather = Location.apply(model, runner, epw_path, cache_path, @hpxml)
+    weather, @epw_file = Location.apply_weather_file(model, runner, epw_path, cache_path)
+    weather = Location.apply(model, runner, weather, @epw_file, @hpxml)
     check_for_errors()
     set_defaults_and_globals(runner, output_dir)
     add_simulation_params(model)
@@ -398,7 +399,7 @@ class OSModel
     end
 
     # Apply defaults to HPXML object
-    HPXMLDefaults.apply(@hpxml, @cfa, @nbeds, @ncfl, @ncfl_ag, @has_uncond_bsmnt, @eri_version)
+    HPXMLDefaults.apply(@hpxml, @cfa, @nbeds, @ncfl, @ncfl_ag, @has_uncond_bsmnt, @eri_version, @epw_file)
 
     @frac_windows_operable = @hpxml.fraction_of_windows_operable()
 
