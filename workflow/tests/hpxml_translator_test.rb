@@ -203,7 +203,6 @@ class HPXMLTest < MiniTest::Test
 
     # Test simulations
     Dir["#{sample_files_dir}/invalid_files/*.xml"].sort.each do |xml|
-      puts expected_error_msgs[File.basename(xml)]
       _run_xml(File.absolute_path(xml), this_dir, true, expected_error_msgs[File.basename(xml)])
     end
   end
