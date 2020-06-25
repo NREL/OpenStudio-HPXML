@@ -455,9 +455,9 @@ def set_hpxml_header(hpxml_file, hpxml)
   elsif ['base-location-epw-filepath-AMY-2012-dst.xml'].include? hpxml_file
     hpxml.header.dst_enabled = true
     hpxml.header.dst_begin_month = 3
-    hpxml.header.dst_begin_day_of_month = 11
+    hpxml.header.dst_begin_day_of_month = 12
     hpxml.header.dst_end_month = 11
-    hpxml.header.dst_end_day_of_month = 4
+    hpxml.header.dst_end_day_of_month = 6
   elsif ['base-misc-timestep-10-mins.xml'].include? hpxml_file
     hpxml.header.timestep = 10
   elsif ['base-misc-runperiod-1-month.xml'].include? hpxml_file

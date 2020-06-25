@@ -13,9 +13,9 @@
         <DaylightSaving>
           <Enabled>true</Enabled>
           <BeginMonth>3</BeginMonth>
-          <BeginDayOfMonth>11</BeginDayOfMonth>
+          <BeginDayOfMonth>12</BeginDayOfMonth>
           <EndMonth>11</EndMonth>
-          <EndDayOfMonth>4</EndDayOfMonth>
+          <EndDayOfMonth>6</EndDayOfMonth>
         </DaylightSaving>
       </SimulationControl>
     </extension>
