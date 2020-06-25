@@ -747,7 +747,29 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
     hpxml = apply_hpxml_defaults('base.xml')
     XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
     hpxml_default = _test_measure()
-    _test_default_lighting_values(hpxml_default, 1.0, 1.0, 1.0)
+    _test_default_lighting_values(hpxml_default, 1.0, 1.0, 1.0,
+                                  {grg_wk_sch: nil,
+                                   grg_wknd_sch: nil,
+                                   grg_month_mult: nil,
+                                   ext_wk_sch: '0.046, 0.046, 0.046, 0.046, 0.046, 0.037, 0.035, 0.034, 0.033, 0.028, 0.022, 0.015, 0.012, 0.011, 0.011, 0.012, 0.019, 0.037, 0.049, 0.065, 0.091, 0.105, 0.091, 0.063',
+                                   ext_wknd_sch: '0.046, 0.046, 0.045, 0.045, 0.046, 0.045, 0.044, 0.041, 0.036, 0.03, 0.024, 0.016, 0.012, 0.011, 0.011, 0.012, 0.019, 0.038, 0.048, 0.06, 0.083, 0.098, 0.085, 0.059',
+                                   ext_month_mult: '1.248, 1.257, 0.993, 0.989, 0.993, 0.827, 0.821, 0.821, 0.827, 0.99, 0.987, 1.248',
+                                   hol_kwh_per_day: 1.1,
+                                   hol_begin_month: 11,
+                                   hol_begin_day_of_month: 24,
+                                   hol_end_month: 1,
+                                   hol_end_day_of_month: 6,
+                                   hol_wk_sch: '0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.008168, 0.098016, 0.168028, 0.193699, 0.283547, 0.192532, 0.03734, 0.01867',
+                                   hol_wknd_sch: '0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.008168, 0.098016, 0.168028, 0.193699, 0.283547, 0.192532, 0.03734, 0.01867'})
+
+    # Test defaults w/ garage
+    hpxml = apply_hpxml_defaults('base-enclosure-garage.xml')
+    XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
+    hpxml_default = _test_measure()
+    _test_default_lighting_values(hpxml_default, 1.0, 1.0, 1.0,
+                                  {grg_wk_sch: '0.046, 0.046, 0.046, 0.046, 0.046, 0.037, 0.035, 0.034, 0.033, 0.028, 0.022, 0.015, 0.012, 0.011, 0.011, 0.012, 0.019, 0.037, 0.049, 0.065, 0.091, 0.105, 0.091, 0.063',
+                                   grg_wknd_sch: '0.046, 0.046, 0.045, 0.045, 0.046, 0.045, 0.044, 0.041, 0.036, 0.03, 0.024, 0.016, 0.012, 0.011, 0.011, 0.012, 0.019, 0.038, 0.048, 0.06, 0.083, 0.098, 0.085, 0.059',
+                                   grg_month_mult: '1.248, 1.257, 0.993, 0.989, 0.993, 0.827, 0.821, 0.821, 0.827, 0.99, 0.987, 1.248'})
   end
 
   def test_pv
@@ -1044,10 +1066,49 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
     assert_equal(is_convection, hpxml.ovens[0].is_convection)
   end
 
-  def _test_default_lighting_values(hpxml, interior_usage_multiplier, garage_usage_multiplier, exterior_usage_multiplier)
+  def _test_default_lighting_values(hpxml, interior_usage_multiplier, garage_usage_multiplier, exterior_usage_multiplier, schedules={})
     assert_equal(interior_usage_multiplier, hpxml.lighting.interior_usage_multiplier)
     assert_equal(garage_usage_multiplier, hpxml.lighting.garage_usage_multiplier)
     assert_equal(exterior_usage_multiplier, hpxml.lighting.exterior_usage_multiplier)
+    if not schedules[:grg_wk_sch].nil?
+      assert_equal(schedules[:grg_wk_sch], hpxml.lighting.garage_weekday_fractions)
+    end
+    if not schedules[:grg_wknd_sch].nil?
+      assert_equal(schedules[:grg_wknd_sch], hpxml.lighting.garage_weekend_fractions)
+    end
+    if not schedules[:grg_month_mult].nil?
+      assert_equal(schedules[:grg_month_mult], hpxml.lighting.garage_monthly_multipliers)
+    end
+    if not schedules[:ext_wk_sch].nil?
+      assert_equal(schedules[:ext_wk_sch], hpxml.lighting.exterior_weekday_fractions)
+    end
+    if not schedules[:ext_wknd_sch].nil?
+      assert_equal(schedules[:ext_wknd_sch], hpxml.lighting.exterior_weekend_fractions)
+    end
+    if not schedules[:ext_month_mult].nil?
+      assert_equal(schedules[:ext_month_mult], hpxml.lighting.exterior_monthly_multipliers)
+    end
+    if not schedules[:hol_kwh_per_day].nil?
+      assert_equal(schedules[:hol_kwh_per_day], hpxml.lighting.holiday_kwh_per_day)
+    end
+    if not schedules[:hol_begin_month].nil?
+      assert_equal(schedules[:hol_begin_month], hpxml.lighting.holiday_period_begin_month)
+    end
+    if not schedules[:hol_begin_day_of_month].nil?
+      assert_equal(schedules[:hol_begin_day_of_month], hpxml.lighting.holiday_period_begin_day_of_month)
+    end
+    if not schedules[:hol_end_month].nil?
+      assert_equal(schedules[:hol_end_month], hpxml.lighting.holiday_period_end_month)
+    end
+    if not schedules[:hol_end_day_of_month].nil?
+      assert_equal(schedules[:hol_end_day_of_month], hpxml.lighting.holiday_period_end_day_of_month)
+    end
+    if not schedules[:hol_wk_sch].nil?
+      assert_equal(schedules[:hol_wk_sch], hpxml.lighting.holiday_weekday_fractions)
+    end
+    if not schedules[:hol_wknd_sch].nil?
+      assert_equal(schedules[:hol_wknd_sch], hpxml.lighting.holiday_weekend_fractions)
+    end
   end
 
   def _test_default_standard_distribution_values(hpxml, piping_length)

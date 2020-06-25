@@ -4094,8 +4094,8 @@ class HPXML < Object
              :interior_weekday_fractions, :interior_weekend_fractions, :interior_monthly_multipliers,
              :garage_weekday_fractions, :garage_weekend_fractions, :garage_monthly_multipliers,
              :exterior_weekday_fractions, :exterior_weekend_fractions, :exterior_monthly_multipliers,
-             :exterior_holiday_lighting, :holiday_daily_energy_use, :holiday_period_begin_month, :holiday_period_begin_day_of_month,
-             :holiday_period_end_month, :holiday_period_end_day_of_month, :holiday_fractions]
+             :holiday_kwh_per_day, :holiday_period_begin_month, :holiday_period_begin_day_of_month,
+             :holiday_period_end_month, :holiday_period_end_day_of_month, :holiday_weekday_fractions, :holiday_weekend_fractions]
     attr_accessor(*ATTRS)
 
     def check_for_errors
@@ -4120,14 +4120,19 @@ class HPXML < Object
                                          'ExteriorWeekdayScheduleFractions' => @exterior_weekday_fractions,
                                          'ExteriorWeekendScheduleFractions' => @exterior_weekend_fractions,
                                          'ExteriorMonthlyScheduleMultipliers' => @exterior_monthly_multipliers })
-      if not @holiday_daily_energy_use.nil?
+      if not @holiday_kwh_per_day.nil?
         exterior_holiday_lighting = XMLHelper.create_elements_as_needed(doc, ['HPXML', 'Building', 'BuildingDetails', 'Lighting', 'extension', 'ExteriorHolidayLighting'])
-        XMLHelper.add_element(exterior_holiday_lighting, 'HolidayDailyEnergyUse', to_float_or_nil(@holiday_daily_energy_use)) unless @holiday_daily_energy_use.nil?
-        XMLHelper.add_element(exterior_holiday_lighting, 'HolidayPeriodBeginMonth', to_integer_or_nil(@holiday_period_begin_month)) unless @holiday_period_begin_month.nil?
-        XMLHelper.add_element(exterior_holiday_lighting, 'HolidayPeriodBeginDayOfMonth', to_integer_or_nil(@holiday_period_begin_day_of_month)) unless @holiday_period_begin_day_of_month.nil?
-        XMLHelper.add_element(exterior_holiday_lighting, 'HolidayPeriodEndMonth', to_integer_or_nil(@holiday_period_end_month)) unless @holiday_period_end_month.nil?
-        XMLHelper.add_element(exterior_holiday_lighting, 'HolidayPeriodEndDayOfMonth', to_integer_or_nil(@holiday_period_end_day_of_month)) unless @holiday_period_end_day_of_month.nil?
-        XMLHelper.add_element(exterior_holiday_lighting, 'HolidayScheduleFractions', @holiday_fractions) unless @holiday_fractions.nil?
+        if not @holiday_kwh_per_day.nil?
+          holiday_lighting_load = XMLHelper.add_element(exterior_holiday_lighting, 'Load')
+          XMLHelper.add_element(holiday_lighting_load, 'Units', 'kWh/day')
+          XMLHelper.add_element(holiday_lighting_load, 'Value', to_float_or_nil(@holiday_kwh_per_day))
+        end
+        XMLHelper.add_element(exterior_holiday_lighting, 'PeriodBeginMonth', to_integer_or_nil(@holiday_period_begin_month)) unless @holiday_period_begin_month.nil?
+        XMLHelper.add_element(exterior_holiday_lighting, 'PeriodBeginDayOfMonth', to_integer_or_nil(@holiday_period_begin_day_of_month)) unless @holiday_period_begin_day_of_month.nil?
+        XMLHelper.add_element(exterior_holiday_lighting, 'PeriodEndMonth', to_integer_or_nil(@holiday_period_end_month)) unless @holiday_period_end_month.nil?
+        XMLHelper.add_element(exterior_holiday_lighting, 'PeriodEndDayOfMonth', to_integer_or_nil(@holiday_period_end_day_of_month)) unless @holiday_period_end_day_of_month.nil?
+        XMLHelper.add_element(exterior_holiday_lighting, 'WeekdayScheduleFractions', @holiday_weekday_fractions) unless @holiday_weekday_fractions.nil?
+        XMLHelper.add_element(exterior_holiday_lighting, 'WeekendScheduleFractions', @holiday_weekend_fractions) unless @holiday_weekend_fractions.nil?
       end
     end
 
@@ -4149,13 +4154,13 @@ class HPXML < Object
       @exterior_weekday_fractions = XMLHelper.get_value(lighting, 'extension/ExteriorWeekdayScheduleFractions')
       @exterior_weekend_fractions = XMLHelper.get_value(lighting, 'extension/ExteriorWeekendScheduleFractions')
       @exterior_monthly_multipliers = XMLHelper.get_value(lighting, 'extension/ExteriorMonthlyScheduleMultipliers')
-      @exterior_holiday_lighting = XMLHelper.get_value(lighting, 'extension/ExteriorHolidayLighting')
-      @holiday_daily_energy_use = to_float_or_nil(XMLHelper.get_value(lighting, 'extension/ExteriorHolidayLighting/HolidayDailyEnergyUse'))
-      @holiday_period_begin_month = to_integer_or_nil(XMLHelper.get_value(lighting, 'extension/ExteriorHolidayLighting/HolidayPeriodBeginMonth'))
-      @holiday_period_begin_day_of_month = to_integer_or_nil(XMLHelper.get_value(lighting, 'extension/ExteriorHolidayLighting/HolidayPeriodBeginDayOfMonth'))
-      @holiday_period_end_month = to_integer_or_nil(XMLHelper.get_value(lighting, 'extension/ExteriorHolidayLighting/HolidayPeriodEndMonth'))
-      @holiday_period_end_day_of_month = to_integer_or_nil(XMLHelper.get_value(lighting, 'extension/ExteriorHolidayLighting/HolidayPeriodEndDayOfMonth'))
-      @holiday_fractions = XMLHelper.get_value(lighting, 'extension/ExteriorHolidayLighting/HolidayScheduleFractions')
+      @holiday_kwh_per_day = to_float_or_nil(XMLHelper.get_value(lighting, 'extension/ExteriorHolidayLighting/Load[Units="kWh/day"]/Value'))
+      @holiday_period_begin_month = to_integer_or_nil(XMLHelper.get_value(lighting, 'extension/ExteriorHolidayLighting/PeriodBeginMonth'))
+      @holiday_period_begin_day_of_month = to_integer_or_nil(XMLHelper.get_value(lighting, 'extension/ExteriorHolidayLighting/PeriodBeginDayOfMonth'))
+      @holiday_period_end_month = to_integer_or_nil(XMLHelper.get_value(lighting, 'extension/ExteriorHolidayLighting/PeriodEndMonth'))
+      @holiday_period_end_day_of_month = to_integer_or_nil(XMLHelper.get_value(lighting, 'extension/ExteriorHolidayLighting/PeriodEndDayOfMonth'))
+      @holiday_weekday_fractions = XMLHelper.get_value(lighting, 'extension/ExteriorHolidayLighting/WeekdayScheduleFractions')
+      @holiday_weekend_fractions = XMLHelper.get_value(lighting, 'extension/ExteriorHolidayLighting/WeekendScheduleFractions')
     end
   end
 

@@ -335,17 +335,39 @@ class MonthWeekdayWeekendSchedule
     prev_wknd_rule = nil
     periods = []
     if @begin_month <= @end_month # contiguous period
-      periods << [@begin_month, @end_month]
+      periods << [[@begin_month, @begin_day_of_month], [@end_month, @end_day_of_month]]
     else # non-contiguous period
-      periods << [1, @end_month]
-      periods << [@begin_month, 12]
+      periods << [[1, 1], [@end_month, @end_day_of_month]]
+      periods << [[@begin_month, @begin_day_of_month], [12, 31]]
     end
 
     periods.each do |period|
-      for m in period[0]..period[1]
-        date_s = OpenStudio::Date::fromDayOfYear(day_startm[m], assumedYear)
-        date_e = (m == @end_month) ? OpenStudio::Date::fromDayOfYear((day_startm[m] + @end_day_of_month - 1), assumedYear) : OpenStudio::Date::fromDayOfYear(day_endm[m], assumedYear)
+      period_begin_month = period[0][0]
+      period_end_month = period[1][0]
+      period_begin_day_of_month = period[0][1]
+      period_end_day_of_month = period[1][1]
+      
+      for m in period_begin_month..period_end_month
+        if m == @begin_month && m == @end_month
+          # capable of handling a case where a period is within a single calendar month (e.g. 11/24-11/27) 
+          start_date = day_startm[m] + period_begin_day_of_month - 1
+          end_date = day_startm[m] + period_end_day_of_month - 1
+        elsif m == @begin_month
+          # capable of handling a case where begin day of month is not 1
+          start_date = day_startm[m] + period_begin_day_of_month - 1
+          end_date = day_endm[m]
+        elsif m == @end_month
+          # capable of handling a case where end day of month is not the last day of the month
+          start_date = day_startm[m]
+          end_date = day_startm[m] + period_end_day_of_month - 1
+        else
+          start_date = day_startm[m]
+          end_date = day_endm[m]
+        end
 
+        date_s = OpenStudio::Date::fromDayOfYear(start_date, assumedYear)
+        date_e = OpenStudio::Date::fromDayOfYear(end_date, assumedYear)
+        
         wkdy_vals = []
         wknd_vals = []
         for h in 1..24
@@ -353,11 +375,15 @@ class MonthWeekdayWeekendSchedule
           wknd_vals[h] = (@monthly_values[m - 1] * @weekend_hourly_values[h - 1] * @mult_weekend) / @maxval
         end
 
-        if (wkdy_vals == prev_wkdy_vals) && (wknd_vals == prev_wknd_vals)
-          # Extend end date of current rule(s)
-          prev_wkdy_rule.setEndDate(date_e) unless prev_wkdy_rule.nil?
-          prev_wknd_rule.setEndDate(date_e) unless prev_wknd_rule.nil?
-        elsif wkdy_vals == wknd_vals
+        # FIXME: Extending end date of current rule(s) doesn't seem to allow non-contiguous holiday schedules (e.g. 1/1-1/6 and 11/24-12/31). 
+        # Cont'd: Because schedules for a period of 1/1-1/6 are identical to those for 11/24-12/31 and the end date of schedule rule for period 1/1-1/6 gets extended to 12/31.
+        # Cont'd: I have a limited understanding of this part of the code, so I wonder if this part is necessary. Commenting this out may have an adverse effect on simulation runtime?
+        # if (wkdy_vals == prev_wkdy_vals) && (wknd_vals == prev_wknd_vals)
+        #   # Extend end date of current rule(s)
+        #   prev_wkdy_rule.setEndDate(date_e) unless prev_wkdy_rule.nil?
+        #   prev_wknd_rule.setEndDate(date_e) unless prev_wknd_rule.nil?
+        # elsif wkdy_vals == wknd_vals
+        if wkdy_vals == wknd_vals
           # Alldays
           wkdy_rule = OpenStudio::Model::ScheduleRule.new(schedule)
           wkdy_rule.setName(@sch_name + " #{Schedule.allday_name} ruleset#{m}")

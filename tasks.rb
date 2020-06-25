@@ -4147,28 +4147,16 @@ def set_hpxml_lighting_schedule(hpxml_file, hpxml)
     hpxml.lighting.exterior_weekday_fractions = '0.046, 0.046, 0.046, 0.046, 0.046, 0.037, 0.035, 0.034, 0.033, 0.028, 0.022, 0.015, 0.012, 0.011, 0.011, 0.012, 0.019, 0.037, 0.049, 0.065, 0.091, 0.105, 0.091, 0.063'
     hpxml.lighting.exterior_weekend_fractions = '0.046, 0.046, 0.045, 0.045, 0.046, 0.045, 0.044, 0.041, 0.036, 0.03, 0.024, 0.016, 0.012, 0.011, 0.011, 0.012, 0.019, 0.038, 0.048, 0.06, 0.083, 0.098, 0.085, 0.059'
     hpxml.lighting.exterior_monthly_multipliers = '1.248, 1.257, 0.993, 0.989, 0.993, 0.827, 0.821, 0.821, 0.827, 0.99, 0.987, 1.248'
-    hpxml.lighting.holiday_daily_energy_use = 1.1
+    hpxml.lighting.garage_weekday_fractions = '0.046, 0.046, 0.046, 0.046, 0.046, 0.037, 0.035, 0.034, 0.033, 0.028, 0.022, 0.015, 0.012, 0.011, 0.011, 0.012, 0.019, 0.037, 0.049, 0.065, 0.091, 0.105, 0.091, 0.063'
+    hpxml.lighting.garage_weekend_fractions = '0.046, 0.046, 0.045, 0.045, 0.046, 0.045, 0.044, 0.041, 0.036, 0.03, 0.024, 0.016, 0.012, 0.011, 0.011, 0.012, 0.019, 0.038, 0.048, 0.06, 0.083, 0.098, 0.085, 0.059'
+    hpxml.lighting.garage_monthly_multipliers = '1.248, 1.257, 0.993, 0.989, 0.993, 0.827, 0.821, 0.821, 0.827, 0.99, 0.987, 1.248'
+    hpxml.lighting.holiday_kwh_per_day = 1.1
     hpxml.lighting.holiday_period_begin_month = 11
     hpxml.lighting.holiday_period_begin_day_of_month = 24
     hpxml.lighting.holiday_period_end_month = 1
     hpxml.lighting.holiday_period_end_day_of_month = 6
-    hpxml.lighting.holiday_fractions = '0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.008168, 0.098016, 0.168028, 0.193699, 0.283547, 0.192532, 0.03734, 0.01867'
-  elsif ['base-misc-defaults.xml'].include? hpxml_file
-    hpxml.lighting.interior_weekday_fractions = nil
-    hpxml.lighting.interior_weekend_fractions = nil
-    hpxml.lighting.interior_monthly_multipliers = nil
-    hpxml.lighting.garage_weekday_fractions = nil
-    hpxml.lighting.garage_weekend_fractions = nil
-    hpxml.lighting.garage_monthly_multipliers = nil
-    hpxml.lighting.exterior_weekday_fractions = nil
-    hpxml.lighting.exterior_weekend_fractions = nil
-    hpxml.lighting.exterior_monthly_multipliers = nil
-    hpxml.lighting.holiday_daily_energy_use = nil
-    hpxml.lighting.holiday_period_begin_month = nil
-    hpxml.lighting.holiday_period_begin_day_of_month = nil
-    hpxml.lighting.holiday_period_end_month = nil
-    hpxml.lighting.holiday_period_end_day_of_month = nil
-    hpxml.lighting.holiday_fractions = nil
+    hpxml.lighting.holiday_weekday_fractions = '0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.008168, 0.098016, 0.168028, 0.193699, 0.283547, 0.192532, 0.03734, 0.01867'
+    hpxml.lighting.holiday_weekend_fractions = '0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.008168, 0.098016, 0.168028, 0.193699, 0.283547, 0.192532, 0.03734, 0.01867'
   end
 end
 

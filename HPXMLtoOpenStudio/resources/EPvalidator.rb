@@ -788,9 +788,15 @@ class EnergyPlusValidator
         'extension/InteriorUsageMultiplier' => zero_or_one,
         'extension/GarageUsageMultiplier' => zero_or_one,
         'extension/ExteriorUsageMultiplier' => zero_or_one,
-        'extension/InteriorWeekdayScheduleFractions | extension/InteriorWeekendScheduleFractions | extension/InteriorMonthlyScheduleMultipliers' => zero_or_three,
-        'extension/GarageWeekdayScheduleFractions | extension/GarageWeekendScheduleFractions | extension/GarageMonthlyScheduleMultipliers' => zero_or_three,
-        'extension/ExteriorWeekdayScheduleFractions | extension/ExteriorWeekendScheduleFractions | extension/ExteriorMonthlyScheduleMultipliers' => zero_or_three,
+        'extension/InteriorWeekdayScheduleFractions' => zero_or_one,
+        'extension/InteriorWeekendScheduleFractions' => zero_or_one,
+        'extension/InteriorMonthlyScheduleMultipliers' => zero_or_one,
+        'extension/GarageWeekdayScheduleFractions' => zero_or_one,
+        'extension/GarageWeekendScheduleFractions' => zero_or_one,
+        'extension/GarageMonthlyScheduleMultipliers' => zero_or_one,
+        'extension/ExteriorWeekdayScheduleFractions' => zero_or_one,
+        'extension/ExteriorWeekendScheduleFractions' => zero_or_one,
+        'extension/ExteriorMonthlyScheduleMultipliers' => zero_or_one,
         'extension/ExteriorHolidayLighting' => zero_or_one, # See [ExteriorHolidayLighting]
       },
 
@@ -802,7 +808,7 @@ class EnergyPlusValidator
 
       ## [ExteriorHolidayLighting]
       '/HPXML/Building/BuildingDetails/Lighting/extension/ExteriorHolidayLighting' => {
-        'HolidayDailyEnergyUse | HolidayPeriodBeginMonth | HolidayPeriodBeginDayOfMonth | HolidayPeriodEndMonth | HolidayPeriodEndDayOfMonth | HolidayScheduleFractions' => zero_or_six, # Daily energy use in kWh/day
+        'Load[Units="kWh/day"]/Value | PeriodBeginMonth | PeriodBeginDayOfMonth | PeriodEndMonth | PeriodEndDayOfMonth | WeekdayScheduleFractions | WeekendScheduleFractions' => zero_or_seven,
       },
 
       # [CeilingFan]
