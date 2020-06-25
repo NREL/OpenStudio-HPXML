@@ -629,82 +629,49 @@ class HPXML < Object
         end
       end
 
-      if not @begin_month.nil?
+      { 'Run Period' => @begin_month, 'Daylight Saving' => @dst_begin_month }.each do |sim_ctl, begin_month|
+        next unless not begin_month.nil?
         valid_months = (1..12).to_a
-        if not valid_months.include? @begin_month
-          fail "Begin Month (#{@begin_month}) must be one of: #{valid_months.join(', ')}."
+        if not valid_months.include? begin_month
+          fail "#{sim_ctl} Begin Month (#{begin_month}) must be one of: #{valid_months.join(', ')}."
         end
       end
 
-      if not @dst_begin_month.nil?
+      { 'Run Period' => @end_month, 'Daylight Saving' => @dst_end_month }.each do |sim_ctl, end_month|
+        next unless not end_month.nil?
         valid_months = (1..12).to_a
-        if not valid_months.include? @dst_begin_month
-          fail "Daylight Saving Begin Month (#{@dst_begin_month}) must be one of: #{valid_months.join(', ')}."
-        end
-      end
-
-      if not @end_month.nil?
-        valid_months = (1..12).to_a
-        if not valid_months.include? @end_month
-          fail "End Month (#{@end_month}) must be one of: #{valid_months.join(', ')}."
-        end
-      end
-
-      if not @dst_end_month.nil?
-        valid_months = (1..12).to_a
-        if not valid_months.include? @dst_end_month
-          fail "Daylight Saving End Month (#{@dst_end_month}) must be one of: #{valid_months.join(', ')}."
+        if not valid_months.include? end_month
+          fail "#{sim_ctl} End Month (#{end_month}) must be one of: #{valid_months.join(', ')}."
         end
       end
 
       months_days = { [1, 3, 5, 7, 8, 10, 12] => (1..31).to_a, [4, 6, 9, 11] => (1..30).to_a, [2] => (1..28).to_a }
       months_days.each do |months, valid_days|
-        if (not @begin_day_of_month.nil?) && (months.include? @begin_month)
-          if not valid_days.include? @begin_day_of_month
-            fail "Begin Day of Month (#{@begin_day_of_month}) must be one of: #{valid_days.join(', ')}."
-          end
-        end
-        if (not @end_day_of_month.nil?) && (months.include? @end_month)
-          if not valid_days.include? @end_day_of_month
-            fail "End Day of Month (#{@end_day_of_month}) must be one of: #{valid_days.join(', ')}."
-          end
-        end
-        if (not @dst_begin_day_of_month.nil?) && (months.include? @dst_begin_month)
-          if not valid_days.include? @dst_begin_day_of_month
-            fail "Daylight Saving Begin Day of Month (#{@dst_begin_day_of_month}) must be one of: #{valid_days.join(', ')}."
-          end
-        end
-        next unless (not @dst_end_day_of_month.nil?) && (months.include? @dst_end_month)
-        if not valid_days.include? @dst_end_day_of_month
-          fail "Daylight Saving End Day of Month (#{@dst_end_day_of_month}) must be one of: #{valid_days.join(', ')}."
-        end
-      end
-
-      if (not @begin_month.nil?) && (not @end_month.nil?)
-        if @begin_month > @end_month
-          fail "Begin Month (#{@begin_month}) cannot come after End Month (#{@end_month})."
-        end
-
-        if (not @begin_day_of_month.nil?) && (not @end_day_of_month.nil?)
-          if @begin_month == @end_month
-            if @begin_day_of_month > @end_day_of_month
-              fail "Begin Day of Month (#{@begin_day_of_month}) cannot come after End Day of Month (#{@end_day_of_month}) for the same month (#{@begin_month})."
+        { 'Run Period' => [@begin_month, @begin_day_of_month, @end_month, @end_day_of_month], 'Daylight Saving' => [@dst_begin_month, @dst_begin_day_of_month, @dst_end_month, @dst_end_day_of_month] }.each do |sim_ctl, months_and_days|
+          begin_month, begin_day_of_month, end_month, end_day_of_month = months_and_days
+          if (not begin_day_of_month.nil?) && (months.include? begin_month)
+            if not valid_days.include? begin_day_of_month
+              fail "#{sim_ctl} Begin Day of Month (#{begin_day_of_month}) must be one of: #{valid_days.join(', ')}."
             end
+          end
+          next unless (not end_day_of_month.nil?) && (months.include? end_month)
+          if not valid_days.include? end_day_of_month
+            fail "#{sim_ctl} End Day of Month (#{end_day_of_month}) must be one of: #{valid_days.join(', ')}."
           end
         end
       end
 
-      if (not @dst_begin_month.nil?) && (not @dst_end_month.nil?)
-        if @dst_begin_month > @dst_end_month
-          fail "Daylight Saving Begin Month (#{@dst_begin_month}) cannot come after Daylight Saving End Month (#{@dst_end_month})."
+      { 'Run Period' => [@begin_month, @begin_day_of_month, @end_month, @end_day_of_month], 'Daylight Saving' => [@dst_begin_month, @dst_begin_day_of_month, @dst_end_month, @dst_end_day_of_month] }.each do |sim_ctl, months_and_days|
+        begin_month, begin_day_of_month, end_month, end_day_of_month = months_and_days
+        next unless (not begin_month.nil?) && (not end_month.nil?)
+        if begin_month > end_month
+          fail "#{sim_ctl} Begin Month (#{begin_month}) cannot come after #{sim_ctl} End Month (#{end_month})."
         end
 
-        if (not @dst_begin_day_of_month.nil?) && (not @dst_end_day_of_month.nil?)
-          if @dst_begin_month == @dst_end_month
-            if @dst_begin_day_of_month > @dst_end_day_of_month
-              fail "Daylight Saving Begin Day of Month (#{@dst_begin_day_of_month}) cannot come after Daylight Saving End Day of Month (#{@dst_end_day_of_month}) for the same month (#{@dst_begin_month})."
-            end
-          end
+        next unless (not begin_day_of_month.nil?) && (not end_day_of_month.nil?)
+        next unless begin_month == end_month
+        if begin_day_of_month > end_day_of_month
+          fail "#{sim_ctl} Begin Day of Month (#{begin_day_of_month}) cannot come after #{sim_ctl} End Day of Month (#{end_day_of_month}) for the same month (#{begin_month})."
         end
       end
 

@@ -157,7 +157,7 @@ Whether to apply daylight saving time start/end dates can be optionally denoted 
 If daylight saving is enabled, the daylight saving period can be optionally specified with ``DaylightSaving/BeginMonth``, ``DaylightSaving/BeginDayOfMonth``, ``DaylightSaving/EndMonth``, and ``DaylightSaving/EndDayOfMonth``.
 If these are not specified, the simulation will run using the daylight saving time start/end dates specified in the header of the weather file (EPW).
 If these are not specified, the simulation will run using the daylight saving time start/end dates corresponding to March 11 and November 4, respectively.
-If ``DaylightSaving`` is not enabled, the default value of false will be used.
+If ``DaylightSaving`` is not provided, ``DaylightSaving/Enabled`` will default to true.
 
 HPXML Building Details
 ----------------------
