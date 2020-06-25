@@ -1206,10 +1206,10 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
     hpxml = HPXML.new(hpxml_path: File.join(@root_path, 'workflow', 'sample_files', hpxml_name))
 
     hpxml.header.timestep = nil
-    hpxml.header.begin_month = nil
-    hpxml.header.begin_day_of_month = nil
-    hpxml.header.end_month = nil
-    hpxml.header.end_day_of_month = nil
+    hpxml.header.sim_begin_month = nil
+    hpxml.header.sim_begin_day_of_month = nil
+    hpxml.header.sim_end_month = nil
+    hpxml.header.sim_end_day_of_month = nil
     hpxml.header.dst_enabled = nil
 
     hpxml.site.site_type = nil
