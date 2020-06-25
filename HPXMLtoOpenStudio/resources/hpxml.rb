@@ -94,11 +94,21 @@ class HPXML < Object
   FuelLoadTypeGrill = 'grill'
   FuelLoadTypeLighting = 'lighting'
   FuelLoadTypeFireplace = 'fireplace'
+  FuelTypeCoal = 'coal'
+  FuelTypeCoalAnthracite = 'anthracite coal'
+  FuelTypeCoalBituminous = 'bituminous coal'
+  FuelTypeCoke = 'coke'
+  FuelTypeDiesel = 'diesel'
   FuelTypeElectricity = 'electricity'
+  FuelTypeKerosene = 'kerosene'
   FuelTypeNaturalGas = 'natural gas'
   FuelTypeOil = 'fuel oil'
+  FuelTypeOil1 = 'fuel oil 1'
+  FuelTypeOil2 = 'fuel oil 2'
+  FuelTypeOil4 = 'fuel oil 4'
+  FuelTypeOil5or6 = 'fuel oil 5/6'
   FuelTypePropane = 'propane'
-  FuelTypeWood = 'wood'
+  FuelTypeWoodCord = 'wood'
   FuelTypeWoodPellets = 'wood pellets'
   HVACCompressorTypeSingleStage = 'single stage'
   HVACCompressorTypeTwoStage = 'two stage'
@@ -966,7 +976,7 @@ class HPXML < Object
 
   class AirInfiltrationMeasurement < BaseElement
     ATTRS = [:id, :house_pressure, :unit_of_measure, :air_leakage, :effective_leakage_area,
-             :infiltration_volume, :leakiness_description]
+             :infiltration_volume, :leakiness_description, :infiltration_height, :a_ext]
     attr_accessor(*ATTRS)
 
     def check_for_errors
@@ -989,6 +999,9 @@ class HPXML < Object
       end
       XMLHelper.add_element(air_infiltration_measurement, 'EffectiveLeakageArea', to_float(@effective_leakage_area)) unless @effective_leakage_area.nil?
       XMLHelper.add_element(air_infiltration_measurement, 'InfiltrationVolume', to_float(@infiltration_volume)) unless @infiltration_volume.nil?
+      HPXML::add_extension(parent: air_infiltration_measurement,
+                           extensions: { 'InfiltrationHeight' => to_float_or_nil(@infiltration_height),
+                                         'Aext' => to_float_or_nil(@a_ext) })
     end
 
     def from_oga(air_infiltration_measurement)
@@ -1001,6 +1014,8 @@ class HPXML < Object
       @effective_leakage_area = to_float_or_nil(XMLHelper.get_value(air_infiltration_measurement, 'EffectiveLeakageArea'))
       @infiltration_volume = to_float_or_nil(XMLHelper.get_value(air_infiltration_measurement, 'InfiltrationVolume'))
       @leakiness_description = XMLHelper.get_value(air_infiltration_measurement, 'LeakinessDescription')
+      @infiltration_height = to_float_or_nil(XMLHelper.get_value(air_infiltration_measurement, 'extension/InfiltrationHeight'))
+      @a_ext = to_float_or_nil(XMLHelper.get_value(air_infiltration_measurement, 'extension/Aext'))
     end
   end
 
@@ -1463,7 +1478,7 @@ class HPXML < Object
     end
 
     def is_thermal_boundary
-      HPXML::is_thermal_boundary(self)
+      return HPXML::is_thermal_boundary(self)
     end
 
     def is_exterior_thermal_boundary
@@ -1579,7 +1594,7 @@ class HPXML < Object
     end
 
     def is_thermal_boundary
-      HPXML::is_thermal_boundary(self)
+      return HPXML::is_thermal_boundary(self)
     end
 
     def is_exterior_thermal_boundary
@@ -1714,7 +1729,7 @@ class HPXML < Object
     end
 
     def is_thermal_boundary
-      HPXML::is_thermal_boundary(self)
+      return HPXML::is_thermal_boundary(self)
     end
 
     def is_exterior_thermal_boundary
@@ -1856,7 +1871,7 @@ class HPXML < Object
     end
 
     def is_thermal_boundary
-      HPXML::is_thermal_boundary(self)
+      return HPXML::is_thermal_boundary(self)
     end
 
     def is_exterior_thermal_boundary
@@ -1953,7 +1968,7 @@ class HPXML < Object
     end
 
     def is_thermal_boundary
-      HPXML::is_thermal_boundary(self)
+      return HPXML::is_thermal_boundary(self)
     end
 
     def is_exterior_thermal_boundary
@@ -2088,7 +2103,7 @@ class HPXML < Object
     end
 
     def is_thermal_boundary
-      HPXML::is_thermal_boundary(wall)
+      return HPXML::is_thermal_boundary(wall)
     end
 
     def is_exterior_thermal_boundary
@@ -2213,7 +2228,7 @@ class HPXML < Object
     end
 
     def is_thermal_boundary
-      HPXML::is_thermal_boundary(roof)
+      return HPXML::is_thermal_boundary(roof)
     end
 
     def is_exterior_thermal_boundary
@@ -2313,7 +2328,7 @@ class HPXML < Object
     end
 
     def is_thermal_boundary
-      HPXML::is_thermal_boundary(wall)
+      return HPXML::is_thermal_boundary(wall)
     end
 
     def is_exterior_thermal_boundary
@@ -4718,15 +4733,13 @@ class HPXML < Object
     # Note: Insulated foundation walls of, e.g., unconditioned spaces return false.
     def self.is_adjacent_to_conditioned(adjacent_to)
       if [HPXML::LocationLivingSpace,
-          HPXML::LocationBasementConditioned].include? adjacent_to
+          HPXML::LocationBasementConditioned,
+          HPXML::LocationOtherHousingUnit,
+          HPXML::LocationOtherHeatedSpace].include? adjacent_to
         return true
+      else
+        return false
       end
-
-      return false
-    end
-
-    if surface.exterior_adjacent_to == HPXML::LocationOtherHousingUnit
-      return false # adiabatic
     end
 
     interior_conditioned = is_adjacent_to_conditioned(surface.interior_adjacent_to)
