@@ -80,6 +80,7 @@ def create_hpxmls
     'invalid_files/invalid-window-height.xml' => 'base-enclosure-overhangs.xml',
     'invalid_files/invalid-window-interior-shading.xml' => 'base.xml',
     'invalid_files/invalid-wmo.xml' => 'base.xml',
+    'invalid_files/invalid-daylight-saving.xml' => 'base.xml',
     'invalid_files/lighting-fractions.xml' => 'base.xml',
     'invalid_files/missing-elements.xml' => 'base.xml',
     'invalid_files/net-area-negative-roof.xml' => 'base-enclosure-skylights.xml',
@@ -453,10 +454,10 @@ def set_hpxml_header(hpxml_file, hpxml)
     end
   elsif ['base-location-epw-filepath-AMY-2012-dst.xml'].include? hpxml_file
     hpxml.header.dst_enabled = true
-    hpxml.header.begin_month = 3
-    hpxml.header.begin_day_of_month = 11
-    hpxml.header.end_month = 11
-    hpxml.header.end_day_of_month = 4
+    hpxml.header.dst_begin_month = 3
+    hpxml.header.dst_begin_day_of_month = 11
+    hpxml.header.dst_end_month = 11
+    hpxml.header.dst_end_day_of_month = 4
   elsif ['base-misc-timestep-10-mins.xml'].include? hpxml_file
     hpxml.header.timestep = 10
   elsif ['base-misc-runperiod-1-month.xml'].include? hpxml_file
@@ -467,6 +468,9 @@ def set_hpxml_header(hpxml_file, hpxml)
   elsif ['invalid_files/invalid-runperiod.xml'].include? hpxml_file
     hpxml.header.end_month = 4
     hpxml.header.end_day_of_month = 31
+  elsif ['invalid_files/invalid-daylight-saving.xml'].include? hpxml_file
+    hpxml.header.dst_end_month = 4
+    hpxml.header.dst_end_day_of_month = 31
   elsif ['base-misc-defaults.xml'].include? hpxml_file
     hpxml.header.timestep = nil
   end

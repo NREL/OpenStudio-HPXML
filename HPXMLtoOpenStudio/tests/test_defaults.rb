@@ -35,16 +35,16 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
     hpxml.header.begin_day_of_month = 2
     hpxml.header.end_month = 11
     hpxml.header.end_day_of_month = 11
-    hpxml.header.dst_enabled = true
+    hpxml.header.dst_enabled = false
     XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
     hpxml_default = _test_measure()
-    _test_default_header_values(hpxml_default, 30, 2, 2, 11, 11, true)
+    _test_default_header_values(hpxml_default, 30, 2, 2, 11, 11, false)
 
     # Test defaults
     hpxml = apply_hpxml_defaults('base.xml')
     XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
     hpxml_default = _test_measure()
-    _test_default_header_values(hpxml_default, 60, 1, 1, 12, 31, false)
+    _test_default_header_values(hpxml_default, 60, 1, 1, 12, 31, true)
   end
 
   def test_site

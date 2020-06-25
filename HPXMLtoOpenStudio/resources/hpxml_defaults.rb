@@ -38,7 +38,7 @@ class HPXMLDefaults
     hpxml.header.begin_day_of_month = 1 if hpxml.header.begin_day_of_month.nil?
     hpxml.header.end_month = 12 if hpxml.header.end_month.nil?
     hpxml.header.end_day_of_month = 31 if hpxml.header.end_day_of_month.nil?
-    hpxml.header.dst_enabled = false if hpxml.header.dst_enabled.nil?
+    hpxml.header.dst_enabled = true if hpxml.header.dst_enabled.nil?
   end
 
   def self.apply_site(hpxml)

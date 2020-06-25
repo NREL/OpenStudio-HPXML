@@ -65,9 +65,9 @@ class Location
   def self.apply_dst(model, epw_file, hpxml)
     month_names = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
 
-    if (not @dst_begin_month.nil?) && (not @dst_begin_day_of_month.nil?) && (not @dst_end_month.nil?) && (not @dst_end_day_of_month.nil?)
-      dst_start_date = "#{month_names[@dst_begin_month]} #{@dst_begin_day_of_month}"
-      dst_end_date = "#{month_names[@dst_end_month]} #{@dst_end_day_of_month}"
+    if (not hpxml.header.dst_begin_month.nil?) && (not hpxml.header.dst_begin_day_of_month.nil?) && (not hpxml.header.dst_end_month.nil?) && (not hpxml.header.dst_end_day_of_month.nil?)
+      dst_start_date = "#{month_names[hpxml.header.dst_begin_month - 1]} #{hpxml.header.dst_begin_day_of_month}"
+      dst_end_date = "#{month_names[hpxml.header.dst_end_month - 1]} #{hpxml.header.dst_end_day_of_month}"
     elsif epw_file.daylightSavingStartDate.is_initialized && epw_file.daylightSavingEndDate.is_initialized
       dst_start_date = epw_file.daylightSavingStartDate.get
       dst_start_date = "#{month_names[dst_start_date.monthOfYear.value - 1]} #{dst_start_date.dayOfMonth}"

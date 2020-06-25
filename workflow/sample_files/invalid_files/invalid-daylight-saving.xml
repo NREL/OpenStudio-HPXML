@@ -11,11 +11,8 @@
       <SimulationControl>
         <Timestep>60</Timestep>
         <DaylightSaving>
-          <Enabled>true</Enabled>
-          <BeginMonth>3</BeginMonth>
-          <BeginDayOfMonth>11</BeginDayOfMonth>
-          <EndMonth>11</EndMonth>
-          <EndDayOfMonth>4</EndDayOfMonth>
+          <EndMonth>4</EndMonth>
+          <EndDayOfMonth>31</EndDayOfMonth>
         </DaylightSaving>
       </SimulationControl>
     </extension>
@@ -59,10 +56,8 @@
         </ClimateZoneIECC>
         <WeatherStation>
           <SystemIdentifier id='WeatherStation'/>
-          <Name>Boulder, CO</Name>
-          <extension>
-            <EPWFilePath>US_CO_Boulder_AMY_2012.epw</EPWFilePath>
-          </extension>
+          <Name>Denver, CO</Name>
+          <WMO>725650</WMO>
         </WeatherStation>
       </ClimateandRiskZones>
       <Enclosure>

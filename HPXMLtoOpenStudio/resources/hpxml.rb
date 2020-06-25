@@ -694,6 +694,20 @@ class HPXML < Object
         end
       end
 
+      if (not @dst_begin_month.nil?) && (not @dst_end_month.nil?)
+        if @dst_begin_month > @dst_end_month
+          fail "Daylight Saving Begin Month (#{@dst_begin_month}) cannot come after Daylight Saving End Month (#{@dst_end_month})."
+        end
+
+        if (not @dst_begin_day_of_month.nil?) && (not @dst_end_day_of_month.nil?)
+          if @dst_begin_month == @dst_end_month
+            if @dst_begin_day_of_month > @dst_end_day_of_month
+              fail "Daylight Saving Begin Day of Month (#{@dst_begin_day_of_month}) cannot come after Daylight Saving End Day of Month (#{@dst_end_day_of_month}) for the same month (#{@dst_begin_month})."
+            end
+          end
+        end
+      end
+
       return errors
     end
 
