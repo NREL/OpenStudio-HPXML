@@ -6,7 +6,7 @@ class EnergyPlus
   FuelTypeNaturalGas = 'NaturalGas'
   FuelTypeOil = 'FuelOilNo2'
   FuelTypePropane = 'Propane'
-  FuelTypeWood = 'OtherFuel1'
+  FuelTypeWoodCord = 'OtherFuel1'
   FuelTypeWoodPellets = 'OtherFuel2'
   FuelTypeCoal = 'Coal'
 
@@ -26,8 +26,8 @@ class EnergyPlus
       return FuelTypeOil
     elsif [HPXML::FuelTypePropane].include? hpxml_fuel
       return FuelTypePropane
-    elsif [HPXML::FuelTypeWood].include? hpxml_fuel
-      return FuelTypeWood
+    elsif [HPXML::FuelTypeWoodCord].include? hpxml_fuel
+      return FuelTypeWoodCord
     elsif [HPXML::FuelTypeWoodPellets].include? hpxml_fuel
       return FuelTypeWoodPellets
     elsif [HPXML::FuelTypeCoal,

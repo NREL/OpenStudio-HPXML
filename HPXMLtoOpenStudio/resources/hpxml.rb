@@ -108,7 +108,7 @@ class HPXML < Object
   FuelTypeOil4 = 'fuel oil 4'
   FuelTypeOil5or6 = 'fuel oil 5/6'
   FuelTypePropane = 'propane'
-  FuelTypeWood = 'wood'
+  FuelTypeWoodCord = 'wood'
   FuelTypeWoodPellets = 'wood pellets'
   HVACCompressorTypeSingleStage = 'single stage'
   HVACCompressorTypeTwoStage = 'two stage'

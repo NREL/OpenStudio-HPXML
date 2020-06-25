@@ -2421,7 +2421,7 @@ def set_hpxml_heating_systems(hpxml_file, hpxml)
     hpxml.heating_systems[0].heating_system_fuel = HPXML::FuelTypeCoal
   elsif ['base-hvac-boiler-wood-only.xml'].include? hpxml_file
     hpxml.heating_systems[0].heating_system_type = HPXML::HVACTypeBoiler
-    hpxml.heating_systems[0].heating_system_fuel = HPXML::FuelTypeWood
+    hpxml.heating_systems[0].heating_system_fuel = HPXML::FuelTypeWoodCord
   elsif ['base-hvac-elec-resistance-only.xml'].include? hpxml_file
     hpxml.heating_systems[0].distribution_system_idref = nil
     hpxml.heating_systems[0].heating_system_type = HPXML::HVACTypeElectricResistance
@@ -2438,7 +2438,7 @@ def set_hpxml_heating_systems(hpxml_file, hpxml)
   elsif ['base-hvac-furnace-propane-only.xml'].include? hpxml_file
     hpxml.heating_systems[0].heating_system_fuel = HPXML::FuelTypePropane
   elsif ['base-hvac-furnace-wood-only.xml'].include? hpxml_file
-    hpxml.heating_systems[0].heating_system_fuel = HPXML::FuelTypeWood
+    hpxml.heating_systems[0].heating_system_fuel = HPXML::FuelTypeWoodCord
   elsif ['base-hvac-multiple.xml'].include? hpxml_file
     hpxml.heating_systems.clear
     hpxml.heating_systems.add(id: 'HeatingSystem',
@@ -2526,7 +2526,7 @@ def set_hpxml_heating_systems(hpxml_file, hpxml)
   elsif ['base-hvac-fireplace-wood-only.xml'].include? hpxml_file
     hpxml.heating_systems[0].distribution_system_idref = nil
     hpxml.heating_systems[0].heating_system_type = HPXML::HVACTypeFireplace
-    hpxml.heating_systems[0].heating_system_fuel = HPXML::FuelTypeWood
+    hpxml.heating_systems[0].heating_system_fuel = HPXML::FuelTypeWoodCord
     hpxml.heating_systems[0].heating_efficiency_afue = nil
     hpxml.heating_systems[0].heating_efficiency_percent = 0.8
   elsif ['base-hvac-floor-furnace-propane-only.xml'].include? hpxml_file
@@ -3425,7 +3425,7 @@ def set_hpxml_water_heating_systems(hpxml_file, hpxml)
     elsif hpxml_file == 'base-dhw-tank-oil.xml'
       hpxml.water_heating_systems[0].fuel_type = HPXML::FuelTypeOil
     elsif hpxml_file == 'base-dhw-tank-wood.xml'
-      hpxml.water_heating_systems[0].fuel_type = HPXML::FuelTypeWood
+      hpxml.water_heating_systems[0].fuel_type = HPXML::FuelTypeWoodCord
     else
       hpxml.water_heating_systems[0].fuel_type = HPXML::FuelTypeNaturalGas
     end
@@ -3838,7 +3838,7 @@ def set_hpxml_clothes_dryer(hpxml_file, hpxml)
     hpxml.clothes_dryers.clear
     hpxml.clothes_dryers.add(id: 'ClothesDryer',
                              location: HPXML::LocationLivingSpace,
-                             fuel_type: HPXML::FuelTypeWood,
+                             fuel_type: HPXML::FuelTypeWoodCord,
                              combined_energy_factor: 3.30,
                              control_type: HPXML::ClothesDryerControlTypeMoisture)
   elsif ['base-foundation-unconditioned-basement.xml'].include? hpxml_file
@@ -4021,7 +4021,7 @@ def set_hpxml_cooking_range(hpxml_file, hpxml)
   elsif ['base-appliances-coal.xml'].include? hpxml_file
     hpxml.cooking_ranges[0].fuel_type = HPXML::FuelTypeCoal
   elsif ['base-appliances-wood.xml'].include? hpxml_file
-    hpxml.cooking_ranges[0].fuel_type = HPXML::FuelTypeWood
+    hpxml.cooking_ranges[0].fuel_type = HPXML::FuelTypeWoodCord
     hpxml.cooking_ranges[0].is_induction = false
   elsif ['base-foundation-unconditioned-basement.xml'].include? hpxml_file
     hpxml.cooking_ranges[0].location = HPXML::LocationBasementUnconditioned
@@ -4243,7 +4243,7 @@ def set_hpxml_fuel_loads(hpxml_file, hpxml)
                          monthly_multipliers: '1.154, 1.161, 1.013, 1.010, 1.013, 0.888, 0.883, 0.883, 0.888, 0.978, 0.974, 1.154')
     hpxml.fuel_loads.add(id: 'FuelLoadMisc3',
                          fuel_load_type: HPXML::FuelLoadTypeFireplace,
-                         fuel_type: HPXML::FuelTypeWood,
+                         fuel_type: HPXML::FuelTypeWoodCord,
                          therm_per_year: 55,
                          weekday_fractions: '0.044, 0.023, 0.019, 0.015, 0.016, 0.018, 0.026, 0.033, 0.033, 0.032, 0.033, 0.033, 0.032, 0.032, 0.032, 0.033, 0.045, 0.057, 0.066, 0.076, 0.081, 0.086, 0.075, 0.065',
                          weekend_fractions: '0.044, 0.023, 0.019, 0.015, 0.016, 0.018, 0.026, 0.033, 0.033, 0.032, 0.033, 0.033, 0.032, 0.032, 0.032, 0.033, 0.045, 0.057, 0.066, 0.076, 0.081, 0.086, 0.075, 0.065',

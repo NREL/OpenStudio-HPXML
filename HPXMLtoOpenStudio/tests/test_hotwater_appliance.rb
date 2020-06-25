@@ -579,13 +579,13 @@ class HPXMLtoOpenStudioHotWaterApplianceTest < MiniTest::Test
 
     cd_fuel_kwh = UnitConversions.convert(17.972, 'therm', 'kWh')
     assert_in_epsilon(cd_fuel_kwh, get_oe_kwh_fuel(model, Constants.ObjectNameClothesDryer)[0], 0.001)
-    assert_equal(EnergyPlus::FuelTypeWood, get_oe_kwh_fuel(model, Constants.ObjectNameClothesDryer)[1], 0.001)
+    assert_equal(EnergyPlus::FuelTypeWoodCord, get_oe_kwh_fuel(model, Constants.ObjectNameClothesDryer)[1], 0.001)
     assert_in_epsilon(cd_sens_frac, get_oe_fractions(model, Constants.ObjectNameClothesDryer)[0], 0.001)
     assert_in_epsilon(cd_lat_frac, get_oe_fractions(model, Constants.ObjectNameClothesDryer)[1], 0.001)
 
     cook_fuel_kwh = UnitConversions.convert(30.70, 'therm', 'kWh')
     assert_in_epsilon(cook_fuel_kwh, get_oe_kwh_fuel(model, Constants.ObjectNameCookingRange)[0], 0.001)
-    assert_equal(EnergyPlus::FuelTypeWood, get_oe_kwh_fuel(model, Constants.ObjectNameCookingRange)[1], 0.001)
+    assert_equal(EnergyPlus::FuelTypeWoodCord, get_oe_kwh_fuel(model, Constants.ObjectNameCookingRange)[1], 0.001)
     assert_in_epsilon(cook_sens_frac, get_oe_fractions(model, Constants.ObjectNameCookingRange)[0], 0.001)
     assert_in_epsilon(cook_lat_frac, get_oe_fractions(model, Constants.ObjectNameCookingRange)[1], 0.001)
   end

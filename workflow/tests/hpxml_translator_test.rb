@@ -1158,7 +1158,7 @@ class HPXMLTest < MiniTest::Test
      HPXML::FuelTypeOil,
      HPXML::FuelTypeKerosene,
      HPXML::FuelTypePropane,
-     HPXML::FuelTypeWood,
+     HPXML::FuelTypeWoodCord,
      HPXML::FuelTypeWoodPellets,
      HPXML::FuelTypeCoal].each do |fuel|
       fuel_name = fuel.split.map(&:capitalize).join(' ')
