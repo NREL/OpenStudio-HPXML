@@ -501,10 +501,10 @@ class HPXMLDefaults
           plug_load.kWh_per_year = default_annual_kwh
         end
         if plug_load.frac_sensible.nil?
-          plug_load.frac_sensible = 1.0
+          plug_load.frac_sensible = default_sens_frac
         end
         if plug_load.frac_latent.nil?
-          plug_load.frac_latent = 0.0
+          plug_load.frac_latent = default_lat_frac
         end
         if plug_load.location.nil?
           plug_load.location = HPXML::LocationInterior
@@ -524,7 +524,7 @@ class HPXMLDefaults
           plug_load.kWh_per_year = default_annual_kwh
         end
         if plug_load.frac_sensible.nil?
-          plug_load.frac_sensible = 1.0
+          plug_load.frac_sensible = 0.0
         end
         if plug_load.frac_latent.nil?
           plug_load.frac_latent = 0.0
@@ -547,7 +547,7 @@ class HPXMLDefaults
           plug_load.kWh_per_year = default_annual_kwh
         end
         if plug_load.frac_sensible.nil?
-          plug_load.frac_sensible = 1.0
+          plug_load.frac_sensible = 0.0
         end
         if plug_load.frac_latent.nil?
           plug_load.frac_latent = 0.0
