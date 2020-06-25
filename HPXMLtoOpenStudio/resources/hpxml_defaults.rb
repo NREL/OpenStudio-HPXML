@@ -35,10 +35,10 @@ class HPXMLDefaults
   def self.apply_header(hpxml, epw_file)
     hpxml.header.timestep = 60 if hpxml.header.timestep.nil?
 
-    hpxml.header.begin_month = 1 if hpxml.header.begin_month.nil?
-    hpxml.header.begin_day_of_month = 1 if hpxml.header.begin_day_of_month.nil?
-    hpxml.header.end_month = 12 if hpxml.header.end_month.nil?
-    hpxml.header.end_day_of_month = 31 if hpxml.header.end_day_of_month.nil?
+    hpxml.header.sim_begin_month = 1 if hpxml.header.sim_begin_month.nil?
+    hpxml.header.sim_begin_day_of_month = 1 if hpxml.header.sim_begin_day_of_month.nil?
+    hpxml.header.sim_end_month = 12 if hpxml.header.sim_end_month.nil?
+    hpxml.header.sim_end_day_of_month = 31 if hpxml.header.sim_end_day_of_month.nil?
 
     hpxml.header.dst_enabled = true if hpxml.header.dst_enabled.nil?
     if hpxml.header.dst_enabled

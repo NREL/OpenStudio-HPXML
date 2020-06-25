@@ -435,10 +435,10 @@ class OSModel
     convlim.setMinimumSystemTimestep(0)
 
     run_period = model.getRunPeriod
-    run_period.setBeginMonth(@hpxml.header.begin_month)
-    run_period.setBeginDayOfMonth(@hpxml.header.begin_day_of_month)
-    run_period.setEndMonth(@hpxml.header.end_month)
-    run_period.setEndDayOfMonth(@hpxml.header.end_day_of_month)
+    run_period.setBeginMonth(@hpxml.header.sim_begin_month)
+    run_period.setBeginDayOfMonth(@hpxml.header.sim_begin_day_of_month)
+    run_period.setEndMonth(@hpxml.header.sim_end_month)
+    run_period.setEndDayOfMonth(@hpxml.header.sim_end_day_of_month)
   end
 
   def self.set_zone_volumes(runner, model, spaces)

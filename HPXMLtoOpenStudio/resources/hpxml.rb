@@ -614,7 +614,7 @@ class HPXML < Object
     ATTRS = [:xml_type, :xml_generated_by, :created_date_and_time, :transaction,
              :software_program_used, :software_program_version, :eri_calculation_version,
              :eri_design, :timestep, :building_id, :event_type, :state_code,
-             :begin_month, :begin_day_of_month, :end_month, :end_day_of_month,
+             :sim_begin_month, :sim_begin_day_of_month, :sim_end_month, :sim_end_day_of_month,
              :dst_enabled, :dst_begin_month, :dst_begin_day_of_month, :dst_end_month, :dst_end_day_of_month,
              :apply_ashrae140_assumptions]
     attr_accessor(*ATTRS)
@@ -629,7 +629,7 @@ class HPXML < Object
         end
       end
 
-      { 'Run Period' => @begin_month, 'Daylight Saving' => @dst_begin_month }.each do |sim_ctl, begin_month|
+      { 'Run Period' => @sim_begin_month, 'Daylight Saving' => @dst_begin_month }.each do |sim_ctl, begin_month|
         next unless not begin_month.nil?
         valid_months = (1..12).to_a
         if not valid_months.include? begin_month
@@ -637,7 +637,7 @@ class HPXML < Object
         end
       end
 
-      { 'Run Period' => @end_month, 'Daylight Saving' => @dst_end_month }.each do |sim_ctl, end_month|
+      { 'Run Period' => @sim_end_month, 'Daylight Saving' => @dst_end_month }.each do |sim_ctl, end_month|
         next unless not end_month.nil?
         valid_months = (1..12).to_a
         if not valid_months.include? end_month
@@ -647,7 +647,7 @@ class HPXML < Object
 
       months_days = { [1, 3, 5, 7, 8, 10, 12] => (1..31).to_a, [4, 6, 9, 11] => (1..30).to_a, [2] => (1..28).to_a }
       months_days.each do |months, valid_days|
-        { 'Run Period' => [@begin_month, @begin_day_of_month, @end_month, @end_day_of_month], 'Daylight Saving' => [@dst_begin_month, @dst_begin_day_of_month, @dst_end_month, @dst_end_day_of_month] }.each do |sim_ctl, months_and_days|
+        { 'Run Period' => [@sim_begin_month, @sim_begin_day_of_month, @sim_end_month, @sim_end_day_of_month], 'Daylight Saving' => [@dst_begin_month, @dst_begin_day_of_month, @dst_end_month, @dst_end_day_of_month] }.each do |sim_ctl, months_and_days|
           begin_month, begin_day_of_month, end_month, end_day_of_month = months_and_days
           if (not begin_day_of_month.nil?) && (months.include? begin_month)
             if not valid_days.include? begin_day_of_month
@@ -661,7 +661,7 @@ class HPXML < Object
         end
       end
 
-      { 'Run Period' => [@begin_month, @begin_day_of_month, @end_month, @end_day_of_month], 'Daylight Saving' => [@dst_begin_month, @dst_begin_day_of_month, @dst_end_month, @dst_end_day_of_month] }.each do |sim_ctl, months_and_days|
+      { 'Run Period' => [@sim_begin_month, @sim_begin_day_of_month, @sim_end_month, @sim_end_day_of_month] }.each do |sim_ctl, months_and_days|
         begin_month, begin_day_of_month, end_month, end_day_of_month = months_and_days
         next unless (not begin_month.nil?) && (not end_month.nil?)
         if begin_month > end_month
@@ -702,13 +702,13 @@ class HPXML < Object
         XMLHelper.add_element(eri_calculation, 'Version', @eri_calculation_version) unless @eri_calculation_version.nil?
         XMLHelper.add_element(eri_calculation, 'Design', @eri_design) unless @eri_design.nil?
       end
-      if (not @timestep.nil?) || (not @begin_month.nil?) || (not @begin_day_of_month.nil?) || (not @end_month.nil?) || (not @end_day_of_month.nil?) || (not @dst_enabled.nil?) || (not @dst_begin_month.nil?) || (not @dst_begin_day_of_month.nil?) || (not @dst_end_month.nil?) || (not @dst_end_day_of_month.nil?)
+      if (not @timestep.nil?) || (not @sim_begin_month.nil?) || (not @sim_begin_day_of_month.nil?) || (not @sim_end_month.nil?) || (not @sim_end_day_of_month.nil?) || (not @dst_enabled.nil?) || (not @dst_begin_month.nil?) || (not @dst_begin_day_of_month.nil?) || (not @dst_end_month.nil?) || (not @dst_end_day_of_month.nil?)
         simulation_control = XMLHelper.add_element(extension, 'SimulationControl')
         XMLHelper.add_element(simulation_control, 'Timestep', to_integer_or_nil(@timestep)) unless @timestep.nil?
-        XMLHelper.add_element(simulation_control, 'BeginMonth', to_integer_or_nil(@begin_month)) unless @begin_month.nil?
-        XMLHelper.add_element(simulation_control, 'BeginDayOfMonth', to_integer_or_nil(@begin_day_of_month)) unless @begin_day_of_month.nil?
-        XMLHelper.add_element(simulation_control, 'EndMonth', to_integer_or_nil(@end_month)) unless @end_month.nil?
-        XMLHelper.add_element(simulation_control, 'EndDayOfMonth', to_integer_or_nil(@end_day_of_month)) unless @end_day_of_month.nil?
+        XMLHelper.add_element(simulation_control, 'BeginMonth', to_integer_or_nil(@sim_begin_month)) unless @sim_begin_month.nil?
+        XMLHelper.add_element(simulation_control, 'BeginDayOfMonth', to_integer_or_nil(@sim_begin_day_of_month)) unless @sim_begin_day_of_month.nil?
+        XMLHelper.add_element(simulation_control, 'EndMonth', to_integer_or_nil(@sim_end_month)) unless @sim_end_month.nil?
+        XMLHelper.add_element(simulation_control, 'EndDayOfMonth', to_integer_or_nil(@sim_end_day_of_month)) unless @sim_end_day_of_month.nil?
         if (not @dst_enabled.nil?) || (not @dst_begin_month.nil?) || (not @dst_begin_day_of_month.nil?) || (not @dst_end_month.nil?) || (not @dst_end_day_of_month.nil?)
           daylight_saving = XMLHelper.add_element(simulation_control, 'DaylightSaving')
           XMLHelper.add_element(daylight_saving, 'Enabled', to_bool_or_nil(@dst_enabled)) unless @dst_enabled.nil?
@@ -748,10 +748,10 @@ class HPXML < Object
       @eri_calculation_version = XMLHelper.get_value(hpxml, 'SoftwareInfo/extension/ERICalculation/Version')
       @eri_design = XMLHelper.get_value(hpxml, 'SoftwareInfo/extension/ERICalculation/Design')
       @timestep = to_integer_or_nil(XMLHelper.get_value(hpxml, 'SoftwareInfo/extension/SimulationControl/Timestep'))
-      @begin_month = to_integer_or_nil(XMLHelper.get_value(hpxml, 'SoftwareInfo/extension/SimulationControl/BeginMonth'))
-      @begin_day_of_month = to_integer_or_nil(XMLHelper.get_value(hpxml, 'SoftwareInfo/extension/SimulationControl/BeginDayOfMonth'))
-      @end_month = to_integer_or_nil(XMLHelper.get_value(hpxml, 'SoftwareInfo/extension/SimulationControl/EndMonth'))
-      @end_day_of_month = to_integer_or_nil(XMLHelper.get_value(hpxml, 'SoftwareInfo/extension/SimulationControl/EndDayOfMonth'))
+      @sim_begin_month = to_integer_or_nil(XMLHelper.get_value(hpxml, 'SoftwareInfo/extension/SimulationControl/BeginMonth'))
+      @sim_begin_day_of_month = to_integer_or_nil(XMLHelper.get_value(hpxml, 'SoftwareInfo/extension/SimulationControl/BeginDayOfMonth'))
+      @sim_end_month = to_integer_or_nil(XMLHelper.get_value(hpxml, 'SoftwareInfo/extension/SimulationControl/EndMonth'))
+      @sim_end_day_of_month = to_integer_or_nil(XMLHelper.get_value(hpxml, 'SoftwareInfo/extension/SimulationControl/EndDayOfMonth'))
       @dst_enabled = to_bool_or_nil(XMLHelper.get_value(hpxml, 'SoftwareInfo/extension/SimulationControl/DaylightSaving/Enabled'))
       @dst_begin_month = to_integer_or_nil(XMLHelper.get_value(hpxml, 'SoftwareInfo/extension/SimulationControl/DaylightSaving/BeginMonth'))
       @dst_begin_day_of_month = to_integer_or_nil(XMLHelper.get_value(hpxml, 'SoftwareInfo/extension/SimulationControl/DaylightSaving/BeginDayOfMonth'))
