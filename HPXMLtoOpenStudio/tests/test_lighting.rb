@@ -70,7 +70,7 @@ class HPXMLtoOpenStudioLightingTest < MiniTest::Test
 
     # Check exterior holiday lighting
     ext_holiday_kwh_yr = get_kwh_per_year(model, Constants.ObjectNameLightingExteriorHoliday)
-    assert_in_delta(83, ext_holiday_kwh_yr, 1.0)
+    assert_in_delta(58.3, ext_holiday_kwh_yr, 1.0)
   end
 
   def _test_measure(args_hash)
