@@ -547,14 +547,7 @@ class HPXMLTest < MiniTest::Test
     assert_equal(60 / timestep, sql_value)
 
     # Conditioned Floor Area
-    sum_hvac_load_frac = 0.0
-    (hpxml.heating_systems + hpxml.heat_pumps).each do |heating_system|
-      sum_hvac_load_frac += heating_system.fraction_heat_load_served.to_f
-    end
-    (hpxml.cooling_systems + hpxml.heat_pumps).each do |cooling_system|
-      sum_hvac_load_frac += cooling_system.fraction_cool_load_served.to_f
-    end
-    if sum_hvac_load_frac > 0 # EnergyPlus will only report conditioned floor area if there is an HVAC system
+    if (hpxml.total_fraction_cool_load_served > 0) || (hpxml.total_fraction_heat_load_served > 0) # EnergyPlus will only report conditioned floor area if there is an HVAC system
       hpxml_value = hpxml.building_construction.conditioned_floor_area
       query = "SELECT Value FROM TabularDataWithStrings WHERE ReportName='InputVerificationandResultsSummary' AND ReportForString='Entire Facility' AND TableName='Zone Summary' AND RowName='Conditioned Total' AND ColumnName='Area' AND Units='m2'"
       sql_value = UnitConversions.convert(sqlFile.execAndReturnFirstDouble(query).get, 'm^2', 'ft^2')
@@ -978,20 +971,12 @@ class HPXMLTest < MiniTest::Test
     end
 
     # HVAC Load Fractions
-    htg_load_frac = 0.0
-    clg_load_frac = 0.0
-    (hpxml.heating_systems + hpxml.heat_pumps).each do |heating_system|
-      htg_load_frac += heating_system.fraction_heat_load_served.to_f
-    end
-    (hpxml.cooling_systems + hpxml.heat_pumps).each do |cooling_system|
-      clg_load_frac += cooling_system.fraction_cool_load_served.to_f
-    end
     if not hpxml_path.include? 'location-miami'
       htg_energy = results.select { |k, v| (k.include?(': Heating (MBtu)') || k.include?(': Heating Fans/Pumps (MBtu)')) && !k.include?('Load') }.map { |k, v| v }.inject(0, :+)
-      assert_equal(htg_load_frac > 0, htg_energy > 0)
+      assert_equal(hpxml.total_fraction_heat_load_served > 0, htg_energy > 0)
     end
     clg_energy = results.select { |k, v| (k.include?(': Cooling (MBtu)') || k.include?(': Cooling Fans/Pumps (MBtu)')) && !k.include?('Load') }.map { |k, v| v }.inject(0, :+)
-    assert_equal(clg_load_frac > 0, clg_energy > 0)
+    assert_equal(hpxml.total_fraction_cool_load_served > 0, clg_energy > 0)
 
     # Water Heater
     if hpxml.water_heating_systems.size > 0
