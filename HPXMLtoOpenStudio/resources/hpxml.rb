@@ -94,11 +94,21 @@ class HPXML < Object
   FuelLoadTypeGrill = 'grill'
   FuelLoadTypeLighting = 'lighting'
   FuelLoadTypeFireplace = 'fireplace'
+  FuelTypeCoal = 'coal'
+  FuelTypeCoalAnthracite = 'anthracite coal'
+  FuelTypeCoalBituminous = 'bituminous coal'
+  FuelTypeCoke = 'coke'
+  FuelTypeDiesel = 'diesel'
   FuelTypeElectricity = 'electricity'
+  FuelTypeKerosene = 'kerosene'
   FuelTypeNaturalGas = 'natural gas'
   FuelTypeOil = 'fuel oil'
+  FuelTypeOil1 = 'fuel oil 1'
+  FuelTypeOil2 = 'fuel oil 2'
+  FuelTypeOil4 = 'fuel oil 4'
+  FuelTypeOil5or6 = 'fuel oil 5/6'
   FuelTypePropane = 'propane'
-  FuelTypeWood = 'wood'
+  FuelTypeWoodCord = 'wood'
   FuelTypeWoodPellets = 'wood pellets'
   HVACCompressorTypeSingleStage = 'single stage'
   HVACCompressorTypeTwoStage = 'two stage'
@@ -308,6 +318,14 @@ class HPXML < Object
     end
 
     return window_area_operable / window_area_total
+  end
+
+  def total_fraction_cool_load_served()
+    return @cooling_systems.total_fraction_cool_load_served + @heat_pumps.total_fraction_cool_load_served
+  end
+
+  def total_fraction_heat_load_served()
+    return @heating_systems.total_fraction_heat_load_served + @heat_pumps.total_fraction_heat_load_served
   end
 
   def has_walkout_basement()
@@ -2374,6 +2392,10 @@ class HPXML < Object
         self << HeatingSystem.new(@hpxml_object, heating_system)
       end
     end
+
+    def total_fraction_heat_load_served
+      map { |htg_sys| htg_sys.fraction_heat_load_served }.inject(0.0, :+)
+    end
   end
 
   class HeatingSystem < BaseElement
@@ -2494,6 +2516,10 @@ class HPXML < Object
         self << CoolingSystem.new(@hpxml_object, cooling_system)
       end
     end
+
+    def total_fraction_cool_load_served
+      map { |clg_sys| clg_sys.fraction_cool_load_served }.inject(0.0, :+)
+    end
   end
 
   class CoolingSystem < BaseElement
@@ -2612,6 +2638,14 @@ class HPXML < Object
       XMLHelper.get_elements(hpxml, 'Building/BuildingDetails/Systems/HVAC/HVACPlant/HeatPump').each do |heat_pump|
         self << HeatPump.new(@hpxml_object, heat_pump)
       end
+    end
+
+    def total_fraction_heat_load_served
+      map { |hp| hp.fraction_heat_load_served }.inject(0.0, :+)
+    end
+
+    def total_fraction_cool_load_served
+      map { |hp| hp.fraction_cool_load_served }.inject(0.0, :+)
     end
   end
 
@@ -4641,15 +4675,13 @@ class HPXML < Object
     end
 
     # Check sum of HVAC FractionCoolLoadServeds <= 1
-    frac_cool_load = (@cooling_systems + @heat_pumps).map { |hvac| hvac.fraction_cool_load_served }.inject(0, :+)
-    if frac_cool_load > 1.01 # Use 1.01 in case of rounding
-      errors << "Expected FractionCoolLoadServed to sum to <= 1, but calculated sum is #{frac_cool_load.round(2)}."
+    if total_fraction_cool_load_served > 1.01 # Use 1.01 in case of rounding
+      errors << "Expected FractionCoolLoadServed to sum to <= 1, but calculated sum is #{total_fraction_cool_load_served.round(2)}."
     end
 
     # Check sum of HVAC FractionHeatLoadServeds <= 1
-    frac_heat_load = (@heating_systems + @heat_pumps).map { |hvac| hvac.fraction_heat_load_served }.inject(0, :+)
-    if frac_heat_load > 1.01 # Use 1.01 in case of rounding
-      errors << "Expected FractionHeatLoadServed to sum to <= 1, but calculated sum is #{frac_heat_load.round(2)}."
+    if total_fraction_heat_load_served > 1.01 # Use 1.01 in case of rounding
+      errors << "Expected FractionHeatLoadServed to sum to <= 1, but calculated sum is #{total_fraction_heat_load_served.round(2)}."
     end
 
     # Check sum of HVAC FractionDHWLoadServed == 1
