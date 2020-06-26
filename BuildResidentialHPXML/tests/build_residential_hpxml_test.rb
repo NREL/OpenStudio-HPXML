@@ -114,8 +114,7 @@ class BuildResidentialHPXMLTest < MiniTest::Test
       'single-family-detached-finished-basement-zero-foundation-height.osw' => 'geometry_unit_type=single-family detached and geometry_foundation_type=ConditionedBasement and geometry_foundation_height=0.0',
       'single-family-attached-ambient.osw' => 'geometry_unit_type=single-family attached and geometry_foundation_type=Ambient',
       'multifamily-bottom-crawlspace-zero-foundation-height.osw' => 'geometry_unit_type=multi-family - uncategorized and geometry_level=Bottom and geometry_foundation_type=UnventedCrawlspace and geometry_foundation_height=0.0',
-      'ducts-location-and-areas-not-same-type.osw' => 'ducts_supply_location=auto and ducts_supply_surface_area=150.0 and ducts_return_location=attic - unvented and ducts_return_surface_area=50.0',
-      'none-second-heating-system-serves-heat.osw' => 'heating_system_type_2=none and heating_system_fraction_heat_load_served_2=0.25'
+      'ducts-location-and-areas-not-same-type.osw' => 'ducts_supply_location=auto and ducts_supply_surface_area=150.0 and ducts_return_location=attic - unvented and ducts_return_surface_area=50.0'
     }
 
     measures = {}

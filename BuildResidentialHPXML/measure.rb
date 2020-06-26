@@ -863,23 +863,16 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     arg.setDefaultValue(HPXML::FuelTypeNaturalGas)
     args << arg
 
-    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('heating_system_heating_efficiency_afue', true)
-    arg.setDisplayName('Heating System: Rated AFUE')
-    arg.setUnits('AFUE')
-    arg.setDescription('The rated efficiency value of the Furnace/WallFurnace/FloorFurnace/Boiler heating system.')
+    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('heating_system_heating_efficiency', true)
+    arg.setDisplayName('Heating System: Rated AFUE or Percent')
+    arg.setUnits('Frac')
+    arg.setDescription('For Furnace/WallFurnace/FloorFurnace/Boiler heating system, the rated AFUE value. For ElectricResistance/Stove/PortableHeater/Fireplace, the rated Percent value.')
     arg.setDefaultValue(0.78)
-    args << arg
-
-    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('heating_system_heating_efficiency_percent', true)
-    arg.setDisplayName('Heating System: Rated Percent')
-    arg.setUnits('Percent')
-    arg.setDescription('The rated efficiency value of the ElectricResistance/Stove/PortableHeater/Fireplace heating system.')
-    arg.setDefaultValue(1.0)
     args << arg
 
     arg = OpenStudio::Measure::OSArgument::makeStringArgument('heating_system_heating_capacity', true)
     arg.setDisplayName('Heating System: Heating Capacity')
-    arg.setDescription("The output heating capacity of the heating system. If using '#{Constants.Auto}', the autosizing algorithm will use ACCA Manual S to set the capacity.")
+    arg.setDescription("The output heating capacity of the heating system. If using '#{Constants.Auto}', the autosizing algorithm will use ACCA Manual J/S to set the capacity to meet its load served.")
     arg.setUnits('Btu/hr')
     arg.setDefaultValue(Constants.Auto)
     args << arg
@@ -894,6 +887,7 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('heating_system_electric_auxiliary_energy', false)
     arg.setDisplayName('Heating System: Electric Auxiliary Energy')
     arg.setDescription('The electric auxiliary energy of the heating system.')
+    arg.setUnits('kWh/yr')
     args << arg
 
     arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('cooling_system_type', cooling_system_type_choices, true)
@@ -913,7 +907,7 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     arg.setDisplayName('Cooling System: Rated EER')
     arg.setUnits('EER')
     arg.setDescription('The rated efficiency value of the room air conditioner cooling system. Ignored for evaporative cooler.')
-    arg.setDefaultValue(13.0)
+    arg.setDefaultValue(8.5)
     args << arg
 
     arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('cooling_system_cooling_compressor_type', compressor_type_choices, false)
@@ -1241,23 +1235,16 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     arg.setDefaultValue(HPXML::FuelTypeElectricity)
     args << arg
 
-    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('heating_system_heating_efficiency_afue_2', true)
-    arg.setDisplayName('Heating System 2: Rated AFUE')
-    arg.setUnits('AFUE')
-    arg.setDescription('The rated efficiency value of the second Furnace/WallFurnace heating system.')
-    arg.setDefaultValue(0.78)
-    args << arg
-
-    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('heating_system_heating_efficiency_percent_2', true)
-    arg.setDisplayName('Heating System 2: Rated Percent')
-    arg.setUnits('Percent')
-    arg.setDescription('The rated efficiency value of the second ElectricResistance/Stove/PortableHeater/Fireplace heating system.')
+    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('heating_system_heating_efficiency_2', true)
+    arg.setDisplayName('Heating System 2: Rated AFUE or Percent')
+    arg.setUnits('Frac')
+    arg.setDescription('For Furnace/WallFurnace/FloorFurnace/Boiler second heating system, the rated AFUE value. For ElectricResistance/Stove/PortableHeater/Fireplace, the rated Percent value.')
     arg.setDefaultValue(1.0)
     args << arg
 
     arg = OpenStudio::Measure::OSArgument::makeStringArgument('heating_system_heating_capacity_2', true)
     arg.setDisplayName('Heating System 2: Heating Capacity')
-    arg.setDescription("The output heating capacity of the second heating system. If using '#{Constants.Auto}', the autosizing algorithm will use ACCA Manual S to set the capacity.")
+    arg.setDescription("The output heating capacity of the second heating system. If using '#{Constants.Auto}', the autosizing algorithm will use ACCA Manual J/S to set the capacity to meet its load served.")
     arg.setUnits('Btu/hr')
     arg.setDefaultValue(Constants.Auto)
     args << arg
@@ -1266,12 +1253,13 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     arg.setDisplayName('Heating System 2: Fraction Heat Load Served')
     arg.setDescription('The heat load served fraction of the second heating system.')
     arg.setUnits('Frac')
-    arg.setDefaultValue(0)
+    arg.setDefaultValue(0.25)
     args << arg
 
     arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('heating_system_electric_auxiliary_energy_2', false)
     arg.setDisplayName('Heating System 2: Electric Auxiliary Energy')
     arg.setDescription('The electric auxiliary energy of the second heating system.')
+    arg.setUnits('kWh/yr')
     args << arg
 
     mech_vent_fan_type_choices = OpenStudio::StringVector.new
@@ -2929,8 +2917,7 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
              air_leakage_shelter_coefficient: runner.getStringArgumentValue('air_leakage_shelter_coefficient', user_arguments),
              heating_system_type: runner.getStringArgumentValue('heating_system_type', user_arguments),
              heating_system_fuel: runner.getStringArgumentValue('heating_system_fuel', user_arguments),
-             heating_system_heating_efficiency_afue: runner.getDoubleArgumentValue('heating_system_heating_efficiency_afue', user_arguments),
-             heating_system_heating_efficiency_percent: runner.getDoubleArgumentValue('heating_system_heating_efficiency_percent', user_arguments),
+             heating_system_heating_efficiency: runner.getDoubleArgumentValue('heating_system_heating_efficiency', user_arguments),
              heating_system_heating_capacity: runner.getStringArgumentValue('heating_system_heating_capacity', user_arguments),
              heating_system_fraction_heat_load_served: runner.getDoubleArgumentValue('heating_system_fraction_heat_load_served', user_arguments),
              heating_system_electric_auxiliary_energy: runner.getOptionalDoubleArgumentValue('heating_system_electric_auxiliary_energy', user_arguments),
@@ -2981,8 +2968,7 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
              ducts_cfa_served: runner.getOptionalDoubleArgumentValue('ducts_cfa_served', user_arguments),
              heating_system_type_2: runner.getStringArgumentValue('heating_system_type_2', user_arguments),
              heating_system_fuel_2: runner.getStringArgumentValue('heating_system_fuel_2', user_arguments),
-             heating_system_heating_efficiency_afue_2: runner.getDoubleArgumentValue('heating_system_heating_efficiency_afue_2', user_arguments),
-             heating_system_heating_efficiency_percent_2: runner.getDoubleArgumentValue('heating_system_heating_efficiency_percent_2', user_arguments),
+             heating_system_heating_efficiency_2: runner.getDoubleArgumentValue('heating_system_heating_efficiency_2', user_arguments),
              heating_system_heating_capacity_2: runner.getStringArgumentValue('heating_system_heating_capacity_2', user_arguments),
              heating_system_fraction_heat_load_served_2: runner.getDoubleArgumentValue('heating_system_fraction_heat_load_served_2', user_arguments),
              heating_system_electric_auxiliary_energy_2: runner.getOptionalDoubleArgumentValue('heating_system_electric_auxiliary_energy_2', user_arguments),
@@ -3324,10 +3310,6 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     # duct location and surface area not both auto or not both specified
     error = ((args[:ducts_supply_location] == Constants.Auto) && (args[:ducts_supply_surface_area] != Constants.Auto)) || ((args[:ducts_supply_location] != Constants.Auto) && (args[:ducts_supply_surface_area] == Constants.Auto)) || ((args[:ducts_return_location] == Constants.Auto) && (args[:ducts_return_surface_area] != Constants.Auto)) || ((args[:ducts_return_location] != Constants.Auto) && (args[:ducts_return_surface_area] == Constants.Auto))
     errors << "ducts_supply_location=#{args[:ducts_supply_location]} and ducts_supply_surface_area=#{args[:ducts_supply_surface_area]} and ducts_return_location=#{args[:ducts_return_location]} and ducts_return_surface_area=#{args[:ducts_return_surface_area]}" if error
-
-    # no second heating system, but has positive heat load served fraction
-    error = (args[:heating_system_type_2] == 'none') && (args[:heating_system_fraction_heat_load_served_2] > 0)
-    errors << "heating_system_type_2=none and heating_system_fraction_heat_load_served_2=#{args[:heating_system_fraction_heat_load_served_2]}" if error
 
     # second heating system fraction heat load served non less than 50%
     warning = (args[:heating_system_type_2] != 'none') && (args[:heating_system_fraction_heat_load_served_2] >= 0.5)
@@ -4019,11 +4001,9 @@ class HPXMLFile
 
     return if heating_system_type == 'none'
 
-    heating_capacity = args[:heating_system_heating_capacity]
-    if heating_capacity == Constants.Auto
-      heating_capacity = -1
+    if args[:heating_system_heating_capacity] != Constants.Auto
+      heating_capacity = args[:heating_system_heating_capacity]
     end
-    heating_capacity = Float(heating_capacity)
 
     if args[:heating_system_electric_auxiliary_energy].is_initialized
       if args[:heating_system_electric_auxiliary_energy].get > 0
@@ -4038,20 +4018,16 @@ class HPXMLFile
     end
 
     if [HPXML::HVACTypeFurnace, HPXML::HVACTypeWallFurnace, HPXML::HVACTypeFloorFurnace, HPXML::HVACTypeBoiler].include? heating_system_type
-      heating_efficiency_afue = args[:heating_system_heating_efficiency_afue]
+      heating_efficiency_afue = args[:heating_system_heating_efficiency]
     elsif [HPXML::HVACTypeElectricResistance, HPXML::HVACTypeStove, HPXML::HVACTypePortableHeater, HPXML::HVACTypeFireplace].include? heating_system_type
-      heating_efficiency_percent = args[:heating_system_heating_efficiency_percent]
+      heating_efficiency_percent = args[:heating_system_heating_efficiency]
     end
-
-    fraction_heat_load_served = args[:heating_system_fraction_heat_load_served]
-    fraction_heat_load_served_2 = args[:heating_system_fraction_heat_load_served_2]
-    fraction_heat_load_served -= fraction_heat_load_served_2
 
     hpxml.heating_systems.add(id: 'HeatingSystem',
                               heating_system_type: heating_system_type,
                               heating_system_fuel: heating_system_fuel,
                               heating_capacity: heating_capacity,
-                              fraction_heat_load_served: fraction_heat_load_served,
+                              fraction_heat_load_served: args[:heating_system_fraction_heat_load_served],
                               electric_auxiliary_energy: electric_auxiliary_energy,
                               heating_efficiency_afue: heating_efficiency_afue,
                               heating_efficiency_percent: heating_efficiency_percent)
@@ -4060,11 +4036,9 @@ class HPXMLFile
 
     return if heating_system_type_2 == 'none'
 
-    heating_capacity_2 = args[:heating_system_heating_capacity_2]
-    if heating_capacity_2 == Constants.Auto
-      heating_capacity_2 = -1
+    if args[:heating_system_heating_capacity_2] != Constants.Auto
+      heating_capacity_2 = args[:heating_system_heating_capacity_2]
     end
-    heating_capacity_2 = Float(heating_capacity_2)
 
     if args[:heating_system_electric_auxiliary_energy_2].is_initialized
       if args[:heating_system_electric_auxiliary_energy_2].get > 0
@@ -4079,16 +4053,16 @@ class HPXMLFile
     end
 
     if [HPXML::HVACTypeFurnace, HPXML::HVACTypeWallFurnace].include? heating_system_type_2
-      heating_efficiency_afue_2 = args[:heating_system_heating_efficiency_afue_2]
+      heating_efficiency_afue_2 = args[:heating_system_heating_efficiency_2]
     elsif [HPXML::HVACTypeElectricResistance, HPXML::HVACTypeStove, HPXML::HVACTypePortableHeater, HPXML::HVACTypeFireplace].include? heating_system_type_2
-      heating_efficiency_percent_2 = args[:heating_system_heating_efficiency_percent_2]
+      heating_efficiency_percent_2 = args[:heating_system_heating_efficiency_2]
     end
 
     hpxml.heating_systems.add(id: 'SecondHeatingSystem',
                               heating_system_type: heating_system_type_2,
                               heating_system_fuel: heating_system_fuel_2,
                               heating_capacity: heating_capacity_2,
-                              fraction_heat_load_served: fraction_heat_load_served_2,
+                              fraction_heat_load_served: args[:heating_system_fraction_heat_load_served_2],
                               electric_auxiliary_energy: electric_auxiliary_energy_2,
                               heating_efficiency_afue: heating_efficiency_afue_2,
                               heating_efficiency_percent: heating_efficiency_percent_2)
@@ -4100,11 +4074,9 @@ class HPXMLFile
     return if cooling_system_type == 'none'
 
     if cooling_system_type != HPXML::HVACTypeEvaporativeCooler
-      cooling_capacity = args[:cooling_system_cooling_capacity]
-      if cooling_capacity == Constants.Auto
-        cooling_capacity = -1
+      if args[:cooling_system_cooling_capacity] != Constants.Auto
+        cooling_capacity = args[:cooling_system_cooling_capacity]
       end
-      cooling_capacity = Float(cooling_capacity)
     end
 
     if args[:cooling_system_cooling_compressor_type].is_initialized
@@ -4141,29 +4113,22 @@ class HPXMLFile
 
     return if heat_pump_type == 'none'
 
-    heating_capacity = args[:heat_pump_heating_capacity]
-    if heating_capacity == Constants.Auto
-      heating_capacity = -1
+    if args[:heat_pump_heating_capacity] != Constants.Auto
+      heating_capacity = args[:heat_pump_heating_capacity]
     end
-    heating_capacity = Float(heating_capacity)
 
     if [HPXML::HVACTypeHeatPumpAirToAir, HPXML::HVACTypeHeatPumpMiniSplit].include? heat_pump_type
-      heating_capacity_17F = args[:heat_pump_heating_capacity_17F]
-      if heating_capacity_17F == Constants.Auto
-        heating_capacity_17F = nil
-      else
-        heating_capacity_17F = Float(heating_capacity_17F)
+      if args[:heat_pump_heating_capacity_17F] != Constants.Auto
+        heating_capacity_17F = args[:heat_pump_heating_capacity_17F]
       end
     end
 
     if args[:heat_pump_backup_fuel] != 'none'
       backup_heating_fuel = args[:heat_pump_backup_fuel]
 
-      backup_heating_capacity = args[:heat_pump_backup_heating_capacity]
-      if backup_heating_capacity == Constants.Auto
-        backup_heating_capacity = -1
+      if args[:heat_pump_backup_heating_capacity] != Constants.Auto
+        backup_heating_capacity = args[:heat_pump_backup_heating_capacity]
       end
-      backup_heating_capacity = Float(backup_heating_capacity)
 
       if backup_heating_fuel == HPXML::FuelTypeElectricity
         backup_heating_efficiency_percent = args[:heat_pump_backup_heating_efficiency]
@@ -4177,11 +4142,9 @@ class HPXMLFile
       end
     end
 
-    cooling_capacity = args[:heat_pump_cooling_capacity]
-    if cooling_capacity == Constants.Auto
-      cooling_capacity = -1
+    if args[:heat_pump_cooling_capacity] != Constants.Auto
+      cooling_capacity = args[:heat_pump_cooling_capacity]
     end
-    cooling_capacity = Float(cooling_capacity)
 
     if args[:heat_pump_cooling_compressor_type].is_initialized
       if [HPXML::HVACTypeHeatPumpAirToAir, HPXML::HVACTypeHeatPumpMiniSplit].include? heat_pump_type

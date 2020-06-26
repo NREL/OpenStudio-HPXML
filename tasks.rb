@@ -214,7 +214,6 @@ def create_osws
     'invalid_files/multifamily-bottom-crawlspace-zero-foundation-height.osw' => 'base.osw',
     'invalid_files/slab-non-zero-foundation-height-above-grade.osw' => 'base.osw',
     'invalid_files/ducts-location-and-areas-not-same-type.osw' => 'base.osw',
-    'invalid_files/none-second-heating-system-serves-heat.osw' => 'base.osw',
     'invalid_files/second-heating-system-serves-majority-heat.osw' => 'base.osw'
   }
 
@@ -392,8 +391,7 @@ def get_values(osw_file, step)
     step.setArgument('air_leakage_shelter_coefficient', Constants.Auto)
     step.setArgument('heating_system_type', HPXML::HVACTypeFurnace)
     step.setArgument('heating_system_fuel', HPXML::FuelTypeNaturalGas)
-    step.setArgument('heating_system_heating_efficiency_afue', 0.92)
-    step.setArgument('heating_system_heating_efficiency_percent', 1.0)
+    step.setArgument('heating_system_heating_efficiency', 0.92)
     step.setArgument('heating_system_heating_capacity', '64000.0')
     step.setArgument('heating_system_fraction_heat_load_served', 1)
     step.setArgument('heating_system_electric_auxiliary_energy', 0)
@@ -442,10 +440,9 @@ def get_values(osw_file, step)
     step.setArgument('ducts_number_of_return_registers', Constants.Auto)
     step.setArgument('heating_system_type_2', 'none')
     step.setArgument('heating_system_fuel_2', HPXML::FuelTypeElectricity)
-    step.setArgument('heating_system_heating_efficiency_afue_2', 0.78)
-    step.setArgument('heating_system_heating_efficiency_percent_2', 1.0)
+    step.setArgument('heating_system_heating_efficiency_2', 1.0)
     step.setArgument('heating_system_heating_capacity_2', Constants.Auto)
-    step.setArgument('heating_system_fraction_heat_load_served_2', 0)
+    step.setArgument('heating_system_fraction_heat_load_served_2', 0.25)
     step.setArgument('heating_system_electric_auxiliary_energy_2', 0)
     step.setArgument('mech_vent_fan_type', 'none')
     step.setArgument('mech_vent_flow_rate', 110)
@@ -1224,7 +1221,7 @@ def get_values(osw_file, step)
   elsif ['base-hvac-boiler-elec-only.osw'].include? osw_file
     step.setArgument('heating_system_type', HPXML::HVACTypeBoiler)
     step.setArgument('heating_system_fuel', HPXML::FuelTypeElectricity)
-    step.setArgument('heating_system_heating_efficiency_afue', 1.0)
+    step.setArgument('heating_system_heating_efficiency', 1.0)
     step.setArgument('cooling_system_type', 'none')
   elsif ['base-hvac-boiler-gas-central-ac-1-speed.osw'].include? osw_file
     step.setArgument('heating_system_type', HPXML::HVACTypeBoiler)
@@ -1340,6 +1337,7 @@ def get_values(osw_file, step)
   elsif ['base-hvac-elec-resistance-only.osw'].include? osw_file
     step.setArgument('heating_system_type', HPXML::HVACTypeElectricResistance)
     step.setArgument('heating_system_fuel', HPXML::FuelTypeElectricity)
+    step.setArgument('heating_system_heating_efficiency', 1.0)
     step.setArgument('cooling_system_type', 'none')
   elsif ['base-hvac-evap-cooler-furnace-gas.osw'].include? osw_file
     step.setArgument('cooling_system_type', HPXML::HVACTypeEvaporativeCooler)
@@ -1359,20 +1357,20 @@ def get_values(osw_file, step)
   elsif ['base-hvac-fireplace-wood-only.osw'].include? osw_file
     step.setArgument('heating_system_type', HPXML::HVACTypeFireplace)
     step.setArgument('heating_system_fuel', HPXML::FuelTypeWoodCord)
-    step.setArgument('heating_system_heating_efficiency_percent', 0.8)
+    step.setArgument('heating_system_heating_efficiency', 0.8)
     step.setArgument('cooling_system_type', 'none')
   elsif ['base-hvac-floor-furnace-propane-only.osw'].include? osw_file
     step.setArgument('heating_system_type', HPXML::HVACTypeFloorFurnace)
     step.setArgument('heating_system_fuel', HPXML::FuelTypePropane)
-    step.setArgument('heating_system_heating_efficiency_afue', 0.8)
+    step.setArgument('heating_system_heating_efficiency', 0.8)
     step.setArgument('heating_system_electric_auxiliary_energy', 200.0)
     step.setArgument('cooling_system_type', 'none')
   elsif ['base-hvac-furnace-elec-central-ac-1-speed.osw'].include? osw_file
     step.setArgument('heating_system_fuel', HPXML::FuelTypeElectricity)
-    step.setArgument('heating_system_heating_efficiency_afue', 1.0)
+    step.setArgument('heating_system_heating_efficiency', 1.0)
   elsif ['base-hvac-furnace-elec-only.osw'].include? osw_file
     step.setArgument('heating_system_fuel', HPXML::FuelTypeElectricity)
-    step.setArgument('heating_system_heating_efficiency_afue', 1.0)
+    step.setArgument('heating_system_heating_efficiency', 1.0)
     step.setArgument('cooling_system_type', 'none')
   elsif ['base-hvac-furnace-gas-central-ac-2-speed.osw'].include? osw_file
     step.setArgument('cooling_system_cooling_efficiency_seer', 18.0)
@@ -1471,7 +1469,7 @@ def get_values(osw_file, step)
   elsif ['base-hvac-portable-heater-electric-only.osw'].include? osw_file
     step.setArgument('heating_system_type', HPXML::HVACTypePortableHeater)
     step.setArgument('heating_system_fuel', HPXML::FuelTypeElectricity)
-    step.setArgument('heating_system_heating_efficiency_percent', 1.0)
+    step.setArgument('heating_system_heating_efficiency', 1.0)
   elsif ['base-hvac-programmable-thermostat.osw'].include? osw_file
     step.setArgument('setpoint_heating_setback_temp', 66)
     step.setArgument('setpoint_heating_setback_hours_per_week', 49)
@@ -1496,13 +1494,13 @@ def get_values(osw_file, step)
   elsif ['base-hvac-stove-oil-only.osw'].include? osw_file
     step.setArgument('heating_system_type', HPXML::HVACTypeStove)
     step.setArgument('heating_system_fuel', HPXML::FuelTypeOil)
-    step.setArgument('heating_system_heating_efficiency_percent', 0.8)
+    step.setArgument('heating_system_heating_efficiency', 0.8)
     step.setArgument('heating_system_electric_auxiliary_energy', 200.0)
     step.setArgument('cooling_system_type', 'none')
   elsif ['base-hvac-stove-wood-pellets-only.osw'].include? osw_file
     step.setArgument('heating_system_type', HPXML::HVACTypeStove)
     step.setArgument('heating_system_fuel', HPXML::FuelTypeWoodPellets)
-    step.setArgument('heating_system_heating_efficiency_percent', 0.8)
+    step.setArgument('heating_system_heating_efficiency', 0.8)
     step.setArgument('heating_system_electric_auxiliary_energy', 200.0)
     step.setArgument('cooling_system_type', 'none')
   elsif ['base-hvac-undersized.osw'].include? osw_file
@@ -1513,7 +1511,7 @@ def get_values(osw_file, step)
   elsif ['base-hvac-wall-furnace-elec-only.osw'].include? osw_file
     step.setArgument('heating_system_type', HPXML::HVACTypeWallFurnace)
     step.setArgument('heating_system_fuel', HPXML::FuelTypeElectricity)
-    step.setArgument('heating_system_heating_efficiency_afue', 1.0)
+    step.setArgument('heating_system_heating_efficiency', 1.0)
     step.setArgument('heating_system_electric_auxiliary_energy', 200.0)
     step.setArgument('cooling_system_type', 'none')
   elsif ['base-location-baltimore-md.osw'].include? osw_file
@@ -1781,13 +1779,13 @@ def get_values(osw_file, step)
     step.setArgument('extra_refrigerator_present', true)
   elsif ['extra-second-heating-system.osw'].include? osw_file
     step.setArgument('heating_system_fuel', HPXML::FuelTypeElectricity)
+    step.setArgument('heating_system_fraction_heat_load_served', 0.75)
     step.setArgument('ducts_supply_leakage_value', 0.0)
     step.setArgument('ducts_return_leakage_value', 0.0)
     step.setArgument('ducts_supply_location', HPXML::LocationLivingSpace)
     step.setArgument('ducts_return_location', HPXML::LocationLivingSpace)
     step.setArgument('heating_system_type_2', HPXML::HVACTypePortableHeater)
     step.setArgument('heating_system_heating_capacity_2', '16000.0')
-    step.setArgument('heating_system_fraction_heat_load_served_2', 0.25)
   elsif ['invalid_files/non-electric-heat-pump-water-heater.osw'].include? osw_file
     step.setArgument('water_heater_type', HPXML::WaterHeaterTypeHeatPump)
     step.setArgument('water_heater_fuel_type', HPXML::FuelTypeNaturalGas)
@@ -1821,9 +1819,8 @@ def get_values(osw_file, step)
     step.setArgument('geometry_foundation_height', 0.0)
   elsif ['invalid_files/ducts-location-and-areas-not-same-type.osw'].include? osw_file
     step.setArgument('ducts_supply_location', Constants.Auto)
-  elsif ['invalid_files/none-second-heating-system-serves-heat.osw'].include? osw_file
-    step.setArgument('heating_system_fraction_heat_load_served_2', 0.25)
   elsif ['invalid_files/second-heating-system-serves-majority-heat.osw'].include? osw_file
+    step.setArgument('heating_system_fraction_heat_load_served', 0.4)
     step.setArgument('heating_system_type_2', HPXML::HVACTypeFireplace)
     step.setArgument('heating_system_fraction_heat_load_served_2', 0.6)
   end
