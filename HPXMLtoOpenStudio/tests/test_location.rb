@@ -45,7 +45,7 @@ class HPXMLtoOpenStudioLocationTest < MiniTest::Test
     assert_equal(1, model.getObjectsByType('OS:RunPeriodControl:DaylightSavingTime'.to_IddObjectType).size)
     begin_month, begin_day_of_month, end_month, end_day_of_month = get_daylight_saving_month_and_days(model)
     assert_equal(3, begin_month)
-    assert_equal(12, begin_day_of_month)
+    assert_equal(10, begin_day_of_month)
     assert_equal(11, end_month)
     assert_equal(6, end_day_of_month)
   end

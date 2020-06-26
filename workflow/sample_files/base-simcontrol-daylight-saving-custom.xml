@@ -13,7 +13,7 @@
         <DaylightSaving>
           <Enabled>true</Enabled>
           <BeginMonth>3</BeginMonth>
-          <BeginDayOfMonth>12</BeginDayOfMonth>
+          <BeginDayOfMonth>10</BeginDayOfMonth>
           <EndMonth>11</EndMonth>
           <EndDayOfMonth>6</EndDayOfMonth>
         </DaylightSaving>

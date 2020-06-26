@@ -460,7 +460,7 @@ def set_hpxml_header(hpxml_file, hpxml)
   elsif ['base-simcontrol-daylight-saving-custom.xml'].include? hpxml_file
     hpxml.header.dst_enabled = true
     hpxml.header.dst_begin_month = 3
-    hpxml.header.dst_begin_day_of_month = 12
+    hpxml.header.dst_begin_day_of_month = 10
     hpxml.header.dst_end_month = 11
     hpxml.header.dst_end_day_of_month = 6
   elsif ['base-simcontrol-daylight-saving-disabled.xml'].include? hpxml_file
