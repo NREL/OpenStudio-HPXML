@@ -22,10 +22,11 @@ Current fuel types are:
    Electricity: Total (MBtu)
    Electricity: Net (MBtu)    Excludes any PV generation.
    Natural Gas: Total (MBtu)
-   Fuel Oil: Total (MBtu)
+   Fuel Oil: Total (MBtu)     Includes "fuel oil", "fuel oil 1", "fuel oil 2", "fuel oil 4", "fuel oil 5/6", "kerosene", and "diesel"
    Propane: Total (MBtu)
    Wood: Total (MBtu)
    Wood Pellets: Total (MBtu)
+   Coal: Total (MBtu)         Includes "coal", "anthracite coal", "bituminous coal", and "coke".
    ========================== ===========================
 
 Annual Energy Consumption By Fuel Type and End Use
@@ -102,6 +103,13 @@ Current end use/fuel type combinations are:
    Wood Pellets: Grill (MBtu)
    Wood Pellets: Lighting (MBtu)
    Wood Pellets: Fireplace (MBtu)
+   Coal: Heating (MBtu)
+   Coal: Hot Water (MBtu)
+   Coal: Clothes Dryer (MBtu)
+   Coal: Range/Oven (MBtu)
+   Coal: Grill (MBtu)
+   Coal: Lighting (MBtu)
+   Coal: Fireplace (MBtu)
    ================================================ =======
 
 Annual Building Loads
