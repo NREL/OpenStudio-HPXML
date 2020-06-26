@@ -137,6 +137,7 @@ class HPXMLTest < MiniTest::Test
                             'cfis-with-hydronic-distribution.xml' => ["Attached HVAC distribution system 'HVACDistribution' cannot be hydronic for ventilation fan 'MechanicalVentilation'."],
                             'clothes-dryer-location.xml' => ["ClothesDryer location is 'garage' but building does not have this location specified."],
                             'clothes-washer-location.xml' => ["ClothesWasher location is 'garage' but building does not have this location specified."],
+                            'coal-for-non-boiler-heating.xml' => ['Expected [1] element(s) but found 0 element(s) for xpath: /HPXML/Building/BuildingDetails/Systems/HVAC/HVACPlant/HeatingSystem[HeatingSystemType/Stove]: HeatingSystemFuel[text()='], # FIXME: Allow this when E+/OS is updated
                             'cooking-range-location.xml' => ["CookingRange location is 'garage' but building does not have this location specified."],
                             'dishwasher-location.xml' => ["Dishwasher location is 'garage' but building does not have this location specified."],
                             'dhw-frac-load-served.xml' => ['Expected FractionDHWLoadServed to sum to 1, but calculated sum is 1.15.'],
@@ -337,16 +338,6 @@ class HPXMLTest < MiniTest::Test
     else
       show_output(runner.result) unless success
       assert_equal(true, success)
-    end
-
-    # Add output variables for crankcase and defrost energy
-    vars = ['Cooling Coil Crankcase Heater Electric Energy',
-            'Heating Coil Crankcase Heater Electric Energy',
-            'Heating Coil Defrost Electric Energy']
-    vars.each do |var|
-      output_var = OpenStudio::Model::OutputVariable.new(var, model)
-      output_var.setReportingFrequency('runperiod')
-      output_var.setKeyValue('*')
     end
 
     # Add output variables for CFIS tests
@@ -816,6 +807,9 @@ class HPXMLTest < MiniTest::Test
       hpxml_value = subsurface.ufactor
       query = "SELECT Value FROM TabularDataWithStrings WHERE ReportName='EnvelopeSummary' AND ReportForString='Entire Facility' AND TableName='Exterior Fenestration' AND RowName='#{subsurface_id}' AND ColumnName='Glass U-Factor' AND Units='W/m2-K'"
       sql_value = UnitConversions.convert(sqlFile.execAndReturnFirstDouble(query).get, 'W/(m^2*K)', 'Btu/(hr*ft^2*F)')
+      if subsurface.is_a? HPXML::Skylight
+        sql_value *= 1.2 # Convert back from vertical position to NFRC 20-degree slope
+      end
       assert_in_epsilon(hpxml_value, sql_value, 0.02)
 
       # SHGC
@@ -1159,9 +1153,11 @@ class HPXMLTest < MiniTest::Test
     # Fuel consumption checks
     [HPXML::FuelTypeNaturalGas,
      HPXML::FuelTypeOil,
+     HPXML::FuelTypeKerosene,
      HPXML::FuelTypePropane,
-     HPXML::FuelTypeWood,
-     HPXML::FuelTypeWoodPellets].each do |fuel|
+     HPXML::FuelTypeWoodCord,
+     HPXML::FuelTypeWoodPellets,
+     HPXML::FuelTypeCoal].each do |fuel|
       fuel_name = fuel.split.map(&:capitalize).join(' ')
       fuel_name += ' Cord' if fuel_name == 'Wood'
       energy_htg = results.fetch("#{fuel_name}: Heating (MBtu)", 0)
