@@ -6,194 +6,226 @@
     <sch:title>EnergyPlus Validator</sch:title>
     <!-- Root -->
     <sch:rule context="/h:HPXML/h:XMLTransactionHeaderInformation">
-      <sch:assert test="count(h:XMLType) = 1">element 'XMLType' is REQUIRED</sch:assert> <!-- Required by HPXML schema -->
-      <sch:assert test="count(h:XMLGeneratedBy) = 1">element 'XMLGeneratedBy' is REQUIRED</sch:assert> <!-- Required by HPXML schema -->
-      <sch:assert test="count(h:CreatedDateAndTime) = 1">element 'CreatedDateAndTime' is REQUIRED</sch:assert> <!-- Required by HPXML schema -->
-      <sch:assert test="count(h:Transaction) = 1">element 'Transaction' is REQUIRED</sch:assert> <!-- Required by HPXML schema -->
+      <sch:assert test="count(h:XMLType) = 1">element '<sch:name/>/XMLType' is REQUIRED</sch:assert> <!-- Required by HPXML schema -->
+      <sch:assert test="count(h:XMLGeneratedBy) = 1">element '<sch:name/>/XMLGeneratedBy' is REQUIRED</sch:assert> <!-- Required by HPXML schema -->
+      <sch:assert test="count(h:CreatedDateAndTime) = 1">element '<sch:name/>/CreatedDateAndTime' is REQUIRED</sch:assert> <!-- Required by HPXML schema -->
+      <sch:assert test="count(h:Transaction) = 1">element '<sch:name/>/Transaction' is REQUIRED</sch:assert> <!-- Required by HPXML schema -->
     </sch:rule>
-    <sch:rule context="/h:HPXML/h:SoftwareInfo/h:extension">
-      <sch:assert test="count(h:SimulationControl) &lt;= 1">element 'SimulationControl' is OPTIONAL</sch:assert> <!-- See [SimulationControl] -->
+    <sch:rule context="/h:HPXML/h:SoftwareInfo">
+      <sch:assert test="count(h:extension/h:SimulationControl) &lt;= 1">element '<sch:name/>/extension/SimulationControl' is OPTIONAL</sch:assert> <!-- See [SimulationControl] -->
     </sch:rule>
     <sch:rule context="/h:HPXML">
-      <sch:assert test="count(h:Building) = 1">element 'Building' is REQUIRED</sch:assert> <!-- FIXME: Does this need to be count(h:Building) &gt;= 1? -->
-      <sch:assert test="count(h:Building/h:BuildingID) = 1">element 'BuildingID' is REQUIRED</sch:assert> <!-- Required by HPXML schema -->
-      <sch:assert test="count(h:Building/h:ProjectStatus/h:EventType) = 1">element 'ProjectStatus/EventType' is REQUIRED</sch:assert> <!-- Required by HPXML schema -->
+      <sch:assert test="count(h:Building) = 1">element '<sch:name/>/Building' is REQUIRED</sch:assert> <!-- FIXME: Does this need to be count(h:Building) &gt;= 1? -->
+      <sch:assert test="count(h:Building/h:BuildingID) = 1">element '<sch:name/>/Building/BuildingID' is REQUIRED</sch:assert> <!-- Required by HPXML schema -->
+      <sch:assert test="count(h:Building/h:ProjectStatus/h:EventType) = 1">element '<sch:name/>/Building/ProjectStatus/EventType' is REQUIRED</sch:assert> <!-- Required by HPXML schema -->
     </sch:rule>
     <sch:rule context="/h:HPXML/h:Building/h:BuildingDetails/h:BuildingSummary">
-      <sch:assert test="not(h:Site/h:SiteType) or count(h:Site/h:SiteType[text()='urban' or text()='suburban' or text()='rural']) = 1">element 'SiteType' is OPTIONAL</sch:assert>
-      <sch:assert test="count(h:Site/h:extension/h:ShelterCoefficient) &lt;= 1">element 'extension/ShelterCoefficient' is OPTIONAL</sch:assert>
-      <sch:assert test="count(h:Site/h:extension/h:Neighbors) &lt;= 1">element 'extension/Neighbors' is OPTIONAL</sch:assert> <!-- See [Neighbors] -->
-      <sch:assert test="count(h:BuildingOccupancy/h:NumberofResidents) &lt;= 1">element 'NumberofResidents' is OPTIONAL</sch:assert>
-      <sch:assert test="count(h:BuildingConstruction) = 1">element 'BuildingConstruction' is REQUIRED</sch:assert> <!-- See [BuildingConstruction] -->
+      <sch:assert test="not(h:Site/h:SiteType) or count(h:Site/h:SiteType[text()='urban' or text()='suburban' or text()='rural']) = 1">element '<sch:name/>/Site/SiteType' is OPTIONAL</sch:assert>
+      <sch:assert test="count(h:Site/h:extension/h:ShelterCoefficient) &lt;= 1">element '<sch:name/>/extension/ShelterCoefficient' is OPTIONAL</sch:assert>
+      <sch:assert test="count(h:Site/h:extension/h:Neighbors) &lt;= 1">element '<sch:name/>/extension/Neighbors' is OPTIONAL</sch:assert> <!-- See [Neighbors] -->
+      <sch:assert test="count(h:BuildingOccupancy/h:NumberofResidents) &lt;= 1">element '<sch:name/>/BuildingOccupancy/NumberofResidents' is OPTIONAL</sch:assert>
+      <sch:assert test="count(h:BuildingConstruction) = 1">element '<sch:name/>/BuildingConstruction' is REQUIRED</sch:assert> <!-- See [BuildingConstruction] -->
     </sch:rule>
     <sch:rule context="/h:HPXML/h:Building/h:BuildingDetails/h:ClimateandRiskZones">
-      <sch:assert test="count(h:ClimateZoneIECC) &lt;= 1">element 'ClimateZoneIECC' is OPTIONAL</sch:assert> <!-- See [ClimateZone] -->
-      <sch:assert test="count(h:WeatherStation) = 1">element 'WeatherStation' is REQUIRED</sch:assert> <!-- See [WeatherStation] -->
+      <sch:assert test="count(h:ClimateZoneIECC) &lt;= 1">element '<sch:name/>/ClimateZoneIECC' is OPTIONAL</sch:assert> <!-- See [ClimateZone] -->
+      <sch:assert test="count(h:WeatherStation) = 1">element '<sch:name/>/WeatherStation' is REQUIRED</sch:assert> <!-- See [WeatherStation] -->
     </sch:rule>
     <sch:rule context="/h:HPXML/h:Building/h:BuildingDetails/h:Enclosure/h:AirInfiltration">
       <sch:assert test="((number(h:AirInfiltrationMeasurement/h:HousePressure) = 50 and count(h:AirInfiltrationMeasurement[h:BuildingAirLeakage/h:UnitofMeasure[text()='ACH' or text()='CFM']]) = 1) or (count(h:AirInfiltrationMeasurement[h:BuildingAirLeakage/h:UnitofMeasure[text()='ACHnatural']]) = 1))">Air leakage must be provided in one of three ways: (a) nACH (natural air changes per hour), (b) ACH50 (air changes per hour at 50Pa), or (c) CFM50 (cubic feet per minute at 50Pa)</sch:assert> <!-- see [AirInfiltration] -->
     </sch:rule>
     <sch:rule context="/h:HPXML/h:Building/h:BuildingDetails/h:Enclosure">
-      <sch:assert test="count(h:Roofs/h:Roof) &gt;= 0">element 'Roof' is OPTIONAL</sch:assert> <!-- see [Roof] -->
-      <sch:assert test="count(h:Walls/h:Wall) &gt;= 1">element 'Wall' is REQUIRED</sch:assert> <!-- see [Wall] -->
-      <sch:assert test="count(h:RimJoists/h:RimJoist) &gt;= 0">element 'RimJoist' is OPTIONAL</sch:assert> <!-- see [RimJoist] -->
-      <sch:assert test="count(h:FoundationWalls/h:FoundationWall) &gt;= 0">element 'FoundationWall' is OPTIONAL</sch:assert> <!-- see [FoundationWall] -->
-      <sch:assert test="count(h:FrameFloors/h:FrameFloor) &gt;= 0">element 'FrameFloor' is OPTIONAL</sch:assert> <!-- see [FrameFloor] -->
-      <sch:assert test="count(h:Slabs/h:Slab) &gt;= 0">element 'Slab' is OPTIONAL</sch:assert> <!-- see [Slab] -->
-      <sch:assert test="count(h:Windows/h:Window) &gt;= 0">element 'Window' is OPTIONAL</sch:assert> <!-- see [Window] -->
-      <sch:assert test="count(h:Skylights/h:Skylight) &gt;= 0">element 'Skylight' is OPTIONAL</sch:assert> <!-- see [Skylight] -->
-      <sch:assert test="count(h:Doors/h:Door) &gt;= 0">element 'Door' is OPTIONAL</sch:assert> <!-- see [Door] -->
+      <sch:assert test="count(h:Roofs/h:Roof) &gt;= 0">element '<sch:name/>/Roofs/Roof' is OPTIONAL</sch:assert> <!-- see [Roof] -->
+      <sch:assert test="count(h:Walls/h:Wall) &gt;= 1">the number of element '<sch:name/>/Walls/Wall' MUST be greater than or equal to 1</sch:assert> <!-- see [Wall] -->
+      <sch:assert test="count(h:RimJoists/h:RimJoist) &gt;= 0">element '<sch:name/>/RimJoists/RimJoist' is OPTIONAL</sch:assert> <!-- see [RimJoist] -->
+      <sch:assert test="count(h:FoundationWalls/h:FoundationWall) &gt;= 0">element '<sch:name/>/FoundationWalls/FoundationWall' is OPTIONAL</sch:assert> <!-- see [FoundationWall] -->
+      <sch:assert test="count(h:FrameFloors/h:FrameFloor) &gt;= 0">element '<sch:name/>/FrameFloors/FrameFloor' is OPTIONAL</sch:assert> <!-- see [FrameFloor] -->
+      <sch:assert test="count(h:Slabs/h:Slab) &gt;= 0">element '<sch:name/>/Slabs/Slab' is OPTIONAL</sch:assert> <!-- see [Slab] -->
+      <sch:assert test="count(h:Windows/h:Window) &gt;= 0">element '<sch:name/>/Windows/Window' is OPTIONAL</sch:assert> <!-- see [Window] -->
+      <sch:assert test="count(h:Skylights/h:Skylight) &gt;= 0">element '<sch:name/>/Skylights/Skylight' is OPTIONAL</sch:assert> <!-- see [Skylight] -->
+      <sch:assert test="count(h:Doors/h:Door) &gt;= 0">element '<sch:name/>/Doors/Door' is OPTIONAL</sch:assert> <!-- see [Door] -->
     </sch:rule>
     <sch:rule context="/h:HPXML/h:Building/h:BuildingDetails/h:Systems/h:HVAC">
-      <sch:assert test="count(h:HVACPlant/h:HeatingSystem) &gt;= 0">element 'HeatingSystem' is OPTIONAL</sch:assert> <!-- see [HeatingSystem] -->
-      <sch:assert test="count(h:HVACPlant/h:CoolingSystem) &gt;= 0">element 'CoolingSystem' is OPTIONAL</sch:assert> <!-- see [CoolingSystem] -->
-      <sch:assert test="count(h:HVACPlant/h:HeatPump) &gt;= 0">element 'HeatPump' is OPTIONAL</sch:assert> <!-- see [HeatPump] -->
-      <sch:assert test="count(h:HVACControl) &lt;= 1">element 'HVACControl' is OPTIONAL</sch:assert> <!-- see [HVACControl] -->
-      <sch:assert test="count(h:HVACDistribution) &gt;= 0">element 'HVACDistribution' is OPTIONAL</sch:assert> <!-- see [HVACDistribution] -->
+      <sch:assert test="count(h:HVACPlant/h:HeatingSystem) &gt;= 0">element '<sch:name/>/HVACPlant/HeatingSystem' is OPTIONAL</sch:assert> <!-- see [HeatingSystem] -->
+      <sch:assert test="count(h:HVACPlant/h:CoolingSystem) &gt;= 0">element '<sch:name/>/HVACPlant/CoolingSystem' is OPTIONAL</sch:assert> <!-- see [CoolingSystem] -->
+      <sch:assert test="count(h:HVACPlant/h:HeatPump) &gt;= 0">element '<sch:name/>/HVACPlant/HeatPump' is OPTIONAL</sch:assert> <!-- see [HeatPump] -->
+      <sch:assert test="count(h:HVACControl) &lt;= 1">element '<sch:name/>/HVACControl' is OPTIONAL</sch:assert> <!-- see [HVACControl] -->
+      <sch:assert test="count(h:HVACDistribution) &gt;= 0">element '<sch:name/>/HVACDistribution' is OPTIONAL</sch:assert> <!-- see [HVACDistribution] -->
     </sch:rule>
     <sch:rule context="/h:HPXML/h:Building/h:BuildingDetails/h:Systems/h:MechanicalVentilation/h:VentilationFans">
-      <sch:assert test="count(VentilationFan[UsedForWholeBuildingVentilation='true']) &lt;= 1">element 'VentilationFan[UsedForWholeBuildingVentilation='true']' is OPTIONAL</sch:assert> <!-- See [MechanicalVentilation] -->
-      <sch:assert test="count(VentilationFan[UsedForLocalVentilation='true' and FanLocation='kitchen']) &lt;= 1">element 'VentilationFan[UsedForLocalVentilation='true' and FanLocation='kitchen']' is OPTIONAL</sch:assert> <!-- See [KitchenRangeFan] -->
-      <sch:assert test="count(VentilationFan[UsedForLocalVentilation='true' and FanLocation='bath']) &lt;= 1">element 'VentilationFan[UsedForLocalVentilation='true' and FanLocation='bath']' is OPTIONAL</sch:assert> <!-- See [BathFan] -->
-      <sch:assert test="count(VentilationFan[UsedForSeasonalCoolingLoadReduction='true']) &lt;= 1">element 'VentilationFan[UsedForSeasonalCoolingLoadReduction='true']' is OPTIONAL</sch:assert> <!-- See [WholeHouseFan] -->
+      <sch:assert test="count(VentilationFan[UsedForWholeBuildingVentilation='true']) &lt;= 1">element '<sch:name/>/VentilationFan[UsedForWholeBuildingVentilation='true']' is OPTIONAL</sch:assert> <!-- See [MechanicalVentilation] -->
+      <sch:assert test="count(VentilationFan[UsedForLocalVentilation='true' and FanLocation='kitchen']) &lt;= 1">element '<sch:name/>/VentilationFan[UsedForLocalVentilation='true' and FanLocation='kitchen']' is OPTIONAL</sch:assert> <!-- See [KitchenRangeFan] -->
+      <sch:assert test="count(VentilationFan[UsedForLocalVentilation='true' and FanLocation='bath']) &lt;= 1">element '<sch:name/>/VentilationFan[UsedForLocalVentilation='true' and FanLocation='bath']' is OPTIONAL</sch:assert> <!-- See [BathFan] -->
+      <sch:assert test="count(VentilationFan[UsedForSeasonalCoolingLoadReduction='true']) &lt;= 1">element '<sch:name/>/VentilationFan[UsedForSeasonalCoolingLoadReduction='true']' is OPTIONAL</sch:assert> <!-- See [WholeHouseFan] -->
     </sch:rule>
     <sch:rule context="/h:HPXML/h:Building/h:BuildingDetails/h:Systems">
-      <sch:assert test="count(h:WaterHeating/h:WaterHeatingSystem) &gt;= 0">element 'WaterHeating/WaterHeatingSystem' is OPTIONAL</sch:assert> <!-- See [WaterHeatingSystem] -->
-      <sch:assert test="count(h:WaterHeating/h:HotWaterDistribution) &lt;= 1">element 'WaterHeating/HotWaterDistribution' is OPTIONAL</sch:assert> <!-- See [HotWaterDistribution] -->
-      <sch:assert test="count(h:WaterHeating/h:WaterFixture) &gt;= 0">element 'WaterHeating/WaterFixture' is OPTIONAL</sch:assert> <!-- See [WaterFixture] -->
-      <sch:assert test="count(h:SolarThermal/h:SolarThermalSystem) &lt;= 1">element 'SolarThermal/SolarThermalSystem' is OPTIONAL</sch:assert> <!-- See [SolarThermalSystem] -->
-      <sch:assert test="count(h:Photovoltaics/h:PVSystem) &gt;= 0">element 'Photovoltaics/PVSystem' is OPTIONAL</sch:assert> <!-- See [PVSystem] -->
+      <sch:assert test="count(h:WaterHeating/h:WaterHeatingSystem) &gt;= 0">element '<sch:name/>/WaterHeating/WaterHeatingSystem' is OPTIONAL</sch:assert> <!-- See [WaterHeatingSystem] -->
+      <sch:assert test="count(h:WaterHeating/h:HotWaterDistribution) &lt;= 1">element '<sch:name/>/WaterHeating/HotWaterDistribution' is OPTIONAL</sch:assert> <!-- See [HotWaterDistribution] -->
+      <sch:assert test="count(h:WaterHeating/h:WaterFixture) &gt;= 0">element '<sch:name/>/WaterHeating/WaterFixture' is OPTIONAL</sch:assert> <!-- See [WaterFixture] -->
+      <sch:assert test="count(h:SolarThermal/h:SolarThermalSystem) &lt;= 1">element '<sch:name/>/SolarThermal/SolarThermalSystem' is OPTIONAL</sch:assert> <!-- See [SolarThermalSystem] -->
+      <sch:assert test="count(h:Photovoltaics/h:PVSystem) &gt;= 0">element '<sch:name/>/Photovoltaics/PVSystem' is OPTIONAL</sch:assert> <!-- See [PVSystem] -->
     </sch:rule>
     <sch:rule context="/h:HPXML/h:Building/h:BuildingDetails/h:Appliances">
-      <sch:assert test="count(h:ClothesWasher) &lt;= 1">element 'ClothesWasher' is OPTIONAL</sch:assert> <!-- See [ClothesWasher] -->
-      <sch:assert test="count(h:ClothesDryer) &lt;= 1">element 'ClothesDryer' is OPTIONAL</sch:assert> <!-- See [ClothesDryer] -->
-      <sch:assert test="count(h:Dishwasher) &lt;= 1">element 'Dishwasher' is OPTIONAL</sch:assert> <!-- See [Dishwasher] -->
-      <sch:assert test="count(h:Refrigerator) &lt;= 1">element 'Refrigerator' is OPTIONAL</sch:assert> <!-- See [Refrigerator] -->
-      <sch:assert test="count(h:Dehumidifier) &lt;= 1">element 'Dehumidifier' is OPTIONAL</sch:assert> <!-- See [Dehumidifier] -->
-      <sch:assert test="count(h:CookingRange) &lt;= 1">element 'CookingRange' is OPTIONAL</sch:assert> <!-- See [CookingRange] -->
+      <sch:assert test="count(h:ClothesWasher) &lt;= 1">element '<sch:name/>/ClothesWasher' is OPTIONAL</sch:assert> <!-- See [ClothesWasher] -->
+      <sch:assert test="count(h:ClothesDryer) &lt;= 1">element '<sch:name/>/ClothesDryer' is OPTIONAL</sch:assert> <!-- See [ClothesDryer] -->
+      <sch:assert test="count(h:Dishwasher) &lt;= 1">element '<sch:name/>/Dishwasher' is OPTIONAL</sch:assert> <!-- See [Dishwasher] -->
+      <sch:assert test="count(h:Refrigerator) &lt;= 1">element '<sch:name/>/Refrigerator' is OPTIONAL</sch:assert> <!-- See [Refrigerator] -->
+      <sch:assert test="count(h:Dehumidifier) &lt;= 1">element '<sch:name/>/Dehumidifier' is OPTIONAL</sch:assert> <!-- See [Dehumidifier] -->
+      <sch:assert test="count(h:CookingRange) &lt;= 1">element '<sch:name/>/CookingRange' is OPTIONAL</sch:assert> <!-- See [CookingRange] -->
     </sch:rule>
     <sch:rule context="/h:HPXML/h:Building/h:BuildingDetails">
-      <sch:assert test="count(h:Lighting) &lt;= 1">element 'Lighting' is OPTIONAL</sch:assert> <!-- See [Lighting] -->
-      <sch:assert test="count(h:Lighting/h:CeilingFan) &lt;= 1">element 'CeilingFan' is OPTIONAL</sch:assert> <!-- See [CeilingFan] -->
+      <sch:assert test="count(h:Lighting) &lt;= 1">element '<sch:name/>/Lighting' is OPTIONAL</sch:assert> <!-- See [Lighting] -->
+      <sch:assert test="count(h:Lighting/h:CeilingFan) &lt;= 1">element '<sch:name/>/Lighting/CeilingFan' is OPTIONAL</sch:assert> <!-- See [CeilingFan] -->
     </sch:rule>
     <sch:rule context="/h:HPXML/h:Building/h:BuildingDetails/h:MiscLoads">
-      <sch:assert test="count(h:PlugLoad[PlugLoadType='other']) &lt;= 1">element 'PlugLoad[PlugLoadType='other']' is OPTIONAL</sch:assert> <!-- See [PlugLoads] -->
-      <sch:assert test="count(h:PlugLoad[PlugLoadType='TV other']) &lt;= 1">element 'PlugLoad[PlugLoadType='TV other']' is OPTIONAL</sch:assert> <!-- See [Television] -->
+      <sch:assert test="count(h:PlugLoad[PlugLoadType='other']) &lt;= 1">element '<sch:name/>/PlugLoad[PlugLoadType='other']' is OPTIONAL</sch:assert> <!-- See [PlugLoads] -->
+      <sch:assert test="count(h:PlugLoad[PlugLoadType='TV other']) &lt;= 1">element '<sch:name/>/PlugLoad[PlugLoadType='TV other']' is OPTIONAL</sch:assert> <!-- See [Television] -->
     </sch:rule>
     <!-- [SimulationControl] -->
     <sch:rule context="/h:HPXML/h:SoftwareInfo/h:extension/h:SimulationControl">
-      <sch:assert test="count(h:Timestep) &lt;= 1">element 'Timestep' is OPTIONAL</sch:assert>
-      <sch:assert test="((count(h:BeginMonth) = 0 and count(h:BeginDayOfMonth) = 0) or (count(h:BeginMonth) = 1 and count(h:BeginDayOfMonth) = 1))">Both 'BeginMonth' and 'BeginDayOfMonth' must be either blank or provided</sch:assert>
-      <sch:assert test="((count(h:EndMonth) = 0 and count(h:EndDayOfMonth) = 0) or (count(h:EndMonth) = 1 and count(h:EndDayOfMonth) = 1))">Both 'EndMonth' and 'EndDayOfMonth' must be either blank or provided</sch:assert>
+      <sch:assert test="count(h:Timestep) &lt;= 1">element '<sch:name/>/Timestep' is OPTIONAL</sch:assert>
+      <sch:assert test="((count(h:BeginMonth) = 0 and count(h:BeginDayOfMonth) = 0) or (count(h:BeginMonth) = 1 and count(h:BeginDayOfMonth) = 1))">Both '<sch:name/>/BeginMonth' and '<sch:name/>/BeginDayOfMonth' must be either blank or provided</sch:assert>
+      <sch:assert test="((count(h:EndMonth) = 0 and count(h:EndDayOfMonth) = 0) or (count(h:EndMonth) = 1 and count(h:EndDayOfMonth) = 1))">Both '<sch:name/>/EndMonth' and '<sch:name/>/EndDayOfMonth' must be either blank or provided</sch:assert>
     </sch:rule>
     <!-- [BuildingConstruction] -->
     <sch:rule context="/h:HPXML/h:Building/h:BuildingDetails/h:BuildingSummary/h:BuildingConstruction">
-      <sch:assert test="count(h:NumberofConditionedFloors) = 1">element 'NumberofConditionedFloors' is REQUIRED</sch:assert>
-      <sch:assert test="count(h:NumberofConditionedFloorsAboveGrade) = 1">element 'NumberofConditionedFloorsAboveGrade' is REQUIRED</sch:assert>
-      <sch:assert test="count(h:NumberofBedrooms) = 1">element 'NumberofBedrooms' is REQUIRED</sch:assert>
-      <sch:assert test="count(h:NumberofBathrooms) &lt;= 1">element 'NumberofBathrooms' is OPTIONAL</sch:assert>
-      <sch:assert test="count(h:ConditionedFloorArea) = 1">element 'ConditionedFloorArea' is REQUIRED</sch:assert>
-      <sch:assert test="not(count(h:ConditionedBuildingVolume) = 0 and count(h:AverageCeilingHeight) = 0)">either element 'ConditionedBuildingVolume' or element 'AverageCeilingHeight' must be provided</sch:assert>
+      <sch:assert test="count(h:NumberofConditionedFloors) = 1">element '<sch:name/>/NumberofConditionedFloors' is REQUIRED</sch:assert>
+      <sch:assert test="count(h:NumberofConditionedFloorsAboveGrade) = 1">element '<sch:name/>/NumberofConditionedFloorsAboveGrade' is REQUIRED</sch:assert>
+      <sch:assert test="count(h:NumberofBedrooms) = 1">element '<sch:name/>/NumberofBedrooms' is REQUIRED</sch:assert>
+      <sch:assert test="count(h:NumberofBathrooms) &lt;= 1">element '<sch:name/>/NumberofBathrooms' is OPTIONAL</sch:assert>
+      <sch:assert test="count(h:ConditionedFloorArea) = 1">element '<sch:name/>/ConditionedFloorArea' is REQUIRED</sch:assert>
+      <sch:assert test="not(count(h:ConditionedBuildingVolume) = 0 and count(h:AverageCeilingHeight) = 0)">either element '<sch:name/>/ConditionedBuildingVolume' or element '<sch:name/>/AverageCeilingHeight' must be provided</sch:assert>
     </sch:rule>
     <!-- [Neighbors] -->
     <sch:rule context="/h:HPXML/h:Building/h:BuildingDetails/h:BuildingSummary/h:Site/h:extension/h:Neighbors">
-      <sch:assert test="count(h:NeighborBuilding) &gt;= 1">element 'NeighborBuilding' is REQUIRED</sch:assert>
+      <sch:assert test="count(h:NeighborBuilding) &gt;= 1">element '<sch:name/>/NeighborBuilding' is REQUIRED</sch:assert>
     </sch:rule>
     <!-- [NeighborBuilding] -->
     <sch:rule context="/h:HPXML/h:Building/h:BuildingDetails/h:BuildingSummary/h:Site/h:extension/h:Neighbors/h:NeighborBuilding">
-      <sch:assert test="count(h:Azimuth) = 1">element 'Azimuth' is REQUIRED</sch:assert>
-      <sch:assert test="count(h:Distance) = 1">element 'Distance' is REQUIRED</sch:assert> <!-- ft -->
-      <sch:assert test="count(h:Height) &lt;= 1">element 'Height' is OPTIONAL</sch:assert> <!-- ft; if omitted, the neighbor is the same height as the main building -->
+      <sch:assert test="count(h:Azimuth) = 1">element '<sch:name/>/Azimuth' is REQUIRED</sch:assert>
+      <sch:assert test="count(h:Distance) = 1">element '<sch:name/>/Distance' is REQUIRED</sch:assert> <!-- ft -->
+      <sch:assert test="count(h:Height) &lt;= 1">element '<sch:name/>/Height' is OPTIONAL</sch:assert> <!-- ft; if omitted, the neighbor is the same height as the main building -->
     </sch:rule>
     <!-- [ClimateZone] -->
     <sch:rule context="/h:HPXML/h:Building/h:BuildingDetails/h:ClimateandRiskZones/h:ClimateZoneIECC">
-      <sch:assert test="count(h:Year) = 1">element 'Year' is REQUIRED</sch:assert>
-      <sch:assert test="count(h:ClimateZone[text()='1A' or text()='1B' or text()='1C' or text()='2A' or text()='2B' or text()='2C' or text()='3A' or text()='3B' or text()='3C' or text()='4A' or text()='4B' or text()='4C' or text()='5A' or text()='5B' or text()='5C' or text()='6A' or text()='6B' or text()='6C' or text()='7' or text()='8']) = 1">element 'ClimateZone' is REQUIRED</sch:assert>
+      <sch:assert test="count(h:Year) = 1">element '<sch:name/>/Year' is REQUIRED</sch:assert>
+      <sch:assert test="count(h:ClimateZone[text()='1A' or text()='1B' or text()='1C' or text()='2A' or text()='2B' or text()='2C' or text()='3A' or text()='3B' or text()='3C' or text()='4A' or text()='4B' or text()='4C' or text()='5A' or text()='5B' or text()='5C' or text()='6A' or text()='6B' or text()='6C' or text()='7' or text()='8']) = 1">element '<sch:name/>/ClimateZone' is REQUIRED</sch:assert>
     </sch:rule>
     <!-- [WeatherStation] -->
     <sch:rule context="/h:HPXML/h:Building/h:BuildingDetails/h:ClimateandRiskZones/h:WeatherStation">
-      <sch:assert test="count(h:SystemIdentifier) = 1">element 'SystemIdentifier' is REQUIRED</sch:assert> <!-- Required by HPXML schema -->
-      <sch:assert test="count(h:Name) = 1">element 'Name' is REQUIRED</sch:assert> <!-- Required by HPXML schema -->
-      <sch:assert test="(count(h:WMO) = 1 or count(h:extension/h:EPWFilePath) = 1)">either element 'WMO' or element 'extension/EPWFilePath' is REQUIRED</sch:assert> <!-- Reference weather/data.csv for the list of acceptable WMO station numbers -->
+      <sch:assert test="count(h:SystemIdentifier) = 1">element '<sch:name/>/SystemIdentifier' is REQUIRED</sch:assert> <!-- Required by HPXML schema -->
+      <sch:assert test="count(h:Name) = 1">element '<sch:name/>/Name' is REQUIRED</sch:assert> <!-- Required by HPXML schema -->
+      <sch:assert test="(count(h:WMO) = 1 or count(h:extension/h:EPWFilePath) = 1)">either element '<sch:name/>/WMO' or element '<sch:name/>/extension/EPWFilePath' is REQUIRED</sch:assert> <!-- Reference weather/data.csv for the list of acceptable WMO station numbers -->
     </sch:rule>
     <!-- [AirInfiltration] -->
     <!-- FIXME: Can we combine two rules below in schematron context? -->
     <sch:rule context="/h:HPXML/h:Building/h:BuildingDetails/h:Enclosure/h:AirInfiltration/h:AirInfiltrationMeasurement[number(h:HousePressure) = 50 and h:BuildingAirLeakage/h:UnitofMeasure[text()='ACH' or text()='CFM']]">
-      <sch:assert test="count(h:SystemIdentifier) = 1">element 'SystemIdentifier' is REQUIRED</sch:assert> <!-- Required by HPXML schema -->
-      <sch:assert test="count(h:BuildingAirLeakage/h:AirLeakage) = 1">element 'BuildingAirLeakage/AirLeakage' is REQUIRED</sch:assert>
-      <sch:assert test="count(h:InfiltrationVolume) &lt;= 1">element 'InfiltrationVolume' is OPTIONAL</sch:assert>
+      <sch:assert test="count(h:SystemIdentifier) = 1">element '<sch:name/>/SystemIdentifier' is REQUIRED</sch:assert> <!-- Required by HPXML schema -->
+      <sch:assert test="count(h:BuildingAirLeakage/h:AirLeakage) = 1">element '<sch:name/>/BuildingAirLeakage/AirLeakage' is REQUIRED</sch:assert>
+      <sch:assert test="count(h:InfiltrationVolume) &lt;= 1">element '<sch:name/>/InfiltrationVolume' is OPTIONAL</sch:assert>
     </sch:rule>
     <sch:rule context="/h:HPXML/h:Building/h:BuildingDetails/h:Enclosure/h:AirInfiltration/h:AirInfiltrationMeasurement[h:BuildingAirLeakage/h:UnitofMeasure[text()='ACHnatural']]">
-      <sch:assert test="count(h:SystemIdentifier) = 1">element 'SystemIdentifier' is REQUIRED</sch:assert> <!-- Required by HPXML schema -->
-      <sch:assert test="count(h:BuildingAirLeakage/h:AirLeakage) = 1">element 'BuildingAirLeakage/AirLeakage' is REQUIRED</sch:assert>
-      <sch:assert test="count(h:InfiltrationVolume) &lt;= 1">element 'InfiltrationVolume' is OPTIONAL</sch:assert>
+      <sch:assert test="count(h:SystemIdentifier) = 1">element '<sch:name/>/SystemIdentifier' is REQUIRED</sch:assert> <!-- Required by HPXML schema -->
+      <sch:assert test="count(h:BuildingAirLeakage/h:AirLeakage) = 1">element '<sch:name/>/BuildingAirLeakage/AirLeakage' is REQUIRED</sch:assert>
+      <sch:assert test="count(h:InfiltrationVolume) &lt;= 1">element '<sch:name/>/InfiltrationVolume' is OPTIONAL</sch:assert>
     </sch:rule>
     <!-- [Roof] -->
     <sch:rule context="/h:HPXML/h:Building/h:BuildingDetails/h:Enclosure/h:Roofs/h:Roof">
-      <sch:assert test="count(h:SystemIdentifier) = 1">element 'SystemIdentifier' is REQUIRED</sch:assert> <!-- Required by HPXML schema -->
-      <sch:assert test="count(h:InteriorAdjacentTo[text()='attic - vented' or text()='attic - unvented' or text()='living space' or text()='garage']) = 1">element 'InteriorAdjacentTo' is REQUIRED</sch:assert>
-      <sch:assert test="count(h:Area) = 1">element 'Area' is REQUIRED</sch:assert>
-      <sch:assert test="count(h:Azimuth) &lt;= 1">element 'Azimuth' is OPTIONAL</sch:assert>
-      <sch:assert test="count(h:SolarAbsorptance) = 1">element 'SolarAbsorptance' is REQUIRED</sch:assert>
-      <sch:assert test="count(h:Emittance) = 1">element 'Emittance' is REQUIRED</sch:assert>
-      <sch:assert test="count(h:Pitch) = 1">element 'Pitch' is REQUIRED</sch:assert>
-      <sch:assert test="count(h:RadiantBarrier) = 1">element 'RadiantBarrier' is REQUIRED</sch:assert>
-      <sch:assert test="count(h:Insulation/h:SystemIdentifier) = 1">element 'Insulation/SystemIdentifier' is REQUIRED</sch:assert> <!-- Required by HPXML schema -->
-      <sch:assert test="count(h:Insulation/h:AssemblyEffectiveRValue) = 1">element 'Insulation/AssemblyEffectiveRValue' is REQUIRED</sch:assert>
+      <sch:assert test="count(h:SystemIdentifier) = 1">element '<sch:name/>/SystemIdentifier' is REQUIRED</sch:assert> <!-- Required by HPXML schema -->
+      <sch:assert test="count(h:InteriorAdjacentTo[text()='attic - vented' or text()='attic - unvented' or text()='living space' or text()='garage']) = 1">element '<sch:name/>/InteriorAdjacentTo' is REQUIRED</sch:assert>
+      <sch:assert test="count(h:Area) = 1">element '<sch:name/>/Area' is REQUIRED</sch:assert>
+      <sch:assert test="count(h:Azimuth) &lt;= 1">element '<sch:name/>/Azimuth' is OPTIONAL</sch:assert>
+      <sch:assert test="count(h:SolarAbsorptance) = 1">element '<sch:name/>/SolarAbsorptance' is REQUIRED</sch:assert>
+      <sch:assert test="count(h:Emittance) = 1">element '<sch:name/>/Emittance' is REQUIRED</sch:assert>
+      <sch:assert test="count(h:Pitch) = 1">element '<sch:name/>/Pitch' is REQUIRED</sch:assert>
+      <sch:assert test="count(h:RadiantBarrier) = 1">element '<sch:name/>/RadiantBarrier' is REQUIRED</sch:assert>
+      <sch:assert test="count(h:Insulation/h:SystemIdentifier) = 1">element '<sch:name/>/Insulation/SystemIdentifier' is REQUIRED</sch:assert> <!-- Required by HPXML schema -->
+      <sch:assert test="count(h:Insulation/h:AssemblyEffectiveRValue) = 1">element '<sch:name/>/Insulation/AssemblyEffectiveRValue' is REQUIRED</sch:assert>
     </sch:rule>
     <!-- [VentedAttic] -->
     <sch:rule context="/h:HPXML/h:Building/h:BuildingDetails/h:Enclosure/h:Roofs/h:Roof/h:InteriorAdjacentTo[text()='attic - vented']"> <!-- FIXME: Review this xpath -->
-      <sch:assert test="count(/h:HPXML/h:Building/h:BuildingDetails/h:Enclosure/h:Attics/h:Attic[h:AtticType/h:Attic[h:Vented='true']]/h:VentilationRate[h:UnitofMeasure='SLA' or h:UnitofMeasure='ACHnatural']/h:Value) &lt;= 1">element 'VentilationRate/Value' is OPTIONAL</sch:assert>
+      <sch:assert test="count(/h:HPXML/h:Building/h:BuildingDetails/h:Enclosure/h:Attics/h:Attic[h:AtticType/h:Attic[h:Vented='true']]/h:VentilationRate[h:UnitofMeasure='SLA' or h:UnitofMeasure='ACHnatural']/h:Value) &lt;= 1">element 'Attic/VentilationRate/Value' is OPTIONAL</sch:assert>
     </sch:rule>
     <!-- [Wall] -->
     <sch:rule context="/h:HPXML/h:Building/h:BuildingDetails/h:Enclosure/h:Walls/h:Wall">
-      <sch:assert test="count(h:SystemIdentifier) = 1">element 'SystemIdentifier' is REQUIRED</sch:assert> <!-- Required by HPXML schema -->
-      <sch:assert test="count(h:ExteriorAdjacentTo[text()='outside' or text()='attic - vented' or text()='attic - unvented' or text()='basement - conditioned' or text()='basement - unconditioned' or text()='crawlspace - vented' or text()='crawlspace - unvented' or text()='garage' or text()='other housing unit' or text()='other heated space' or text()='other multifamily buffer space' or text()='other non-freezing space']) = 1">element 'ExteriorAdjacentTo' is REQUIRED</sch:assert>
-      <sch:assert test="count(h:InteriorAdjacentTo[text()='living space' or text()='attic - vented' or text()='attic - unvented' or text()='basement - conditioned' or text()='basement - unconditioned' or text()='crawlspace - vented' or text()='crawlspace - unvented' or text()='garage']) = 1">element 'InteriorAdjacentTo' is REQUIRED</sch:assert>
-      <sch:assert test="count(h:WallType[h:WoodStud | h:DoubleWoodStud | h:ConcreteMasonryUnit | h:StructurallyInsulatedPanel | h:InsulatedConcreteForms | h:SteelFrame | h:SolidConcrete | h:StructuralBrick | h:StrawBale | h:Stone | h:LogWall]) = 1">element 'WallType' is REQUIRED</sch:assert>
-      <sch:assert test="count(h:Area) = 1">element 'Area' is REQUIRED</sch:assert>
-      <sch:assert test="count(h:Azimuth) &lt;= 1">element 'Azimuth' is OPTIONAL</sch:assert>
-      <sch:assert test="count(h:SolarAbsorptance) = 1">element 'SolarAbsorptance' is REQUIRED</sch:assert>
-      <sch:assert test="count(h:Emittance) = 1">element 'Emittance' is REQUIRED</sch:assert>
-      <sch:assert test="count(h:Insulation/h:SystemIdentifier) = 1">element 'Insulation/SystemIdentifier' is REQUIRED</sch:assert> <!-- Required by HPXML schema -->
-      <sch:assert test="count(h:Insulation/h:AssemblyEffectiveRValue) = 1">element 'Insulation/AssemblyEffectiveRValue' is REQUIRED</sch:assert>
+      <sch:assert test="count(h:SystemIdentifier) = 1">element '<sch:name/>/SystemIdentifier' is REQUIRED</sch:assert> <!-- Required by HPXML schema -->
+      <sch:assert test="count(h:ExteriorAdjacentTo[text()='outside' or text()='attic - vented' or text()='attic - unvented' or text()='basement - conditioned' or text()='basement - unconditioned' or text()='crawlspace - vented' or text()='crawlspace - unvented' or text()='garage' or text()='other housing unit' or text()='other heated space' or text()='other multifamily buffer space' or text()='other non-freezing space']) = 1">element '<sch:name/>/ExteriorAdjacentTo' is REQUIRED</sch:assert>
+      <sch:assert test="count(h:InteriorAdjacentTo[text()='living space' or text()='attic - vented' or text()='attic - unvented' or text()='basement - conditioned' or text()='basement - unconditioned' or text()='crawlspace - vented' or text()='crawlspace - unvented' or text()='garage']) = 1">element '<sch:name/>/InteriorAdjacentTo' is REQUIRED</sch:assert>
+      <sch:assert test="count(h:WallType[h:WoodStud | h:DoubleWoodStud | h:ConcreteMasonryUnit | h:StructurallyInsulatedPanel | h:InsulatedConcreteForms | h:SteelFrame | h:SolidConcrete | h:StructuralBrick | h:StrawBale | h:Stone | h:LogWall]) = 1">element '<sch:name/>/WallType' is REQUIRED</sch:assert>
+      <sch:assert test="count(h:Area) = 1">element '<sch:name/>/Area' is REQUIRED</sch:assert>
+      <sch:assert test="count(h:Azimuth) &lt;= 1">element '<sch:name/>/Azimuth' is OPTIONAL</sch:assert>
+      <sch:assert test="count(h:SolarAbsorptance) = 1">element '<sch:name/>/SolarAbsorptance' is REQUIRED</sch:assert>
+      <sch:assert test="count(h:Emittance) = 1">element '<sch:name/>/Emittance' is REQUIRED</sch:assert>
+      <sch:assert test="count(h:Insulation/h:SystemIdentifier) = 1">element '<sch:name/>/Insulation/SystemIdentifier' is REQUIRED</sch:assert> <!-- Required by HPXML schema -->
+      <sch:assert test="count(h:Insulation/h:AssemblyEffectiveRValue) = 1">element '<sch:name/>/Insulation/AssemblyEffectiveRValue' is REQUIRED</sch:assert>
     </sch:rule>
     <!-- [RimJoist] -->
     <sch:rule context="/h:HPXML/h:Building/h:BuildingDetails/h:Enclosure/h:RimJoists/h:RimJoist">
-      <sch:assert test="count(h:SystemIdentifier) = 1">element 'SystemIdentifier' is REQUIRED</sch:assert> <!-- Required by HPXML schema -->
-      <sch:assert test="count(h:ExteriorAdjacentTo[text()='outside' or text()='attic - vented' or text()='attic - unvented' or text()='basement - conditioned' or text()='basement - unconditioned' or text()='crawlspace - vented' or text()='crawlspace - unvented' or text()='garage' or text()='other housing unit' or text()='other heated space' or text()='other multifamily buffer space' or text()='other non-freezing space']) = 1">element 'ExteriorAdjacentTo' is REQUIRED</sch:assert>
-      <sch:assert test="count(h:InteriorAdjacentTo[text()='living space' or text()='attic - vented' or text()='attic - unvented' or text()='basement - conditioned' or text()='basement - unconditioned' or text()='crawlspace - vented' or text()='crawlspace - unvented' or text()='garage']) = 1">element 'InteriorAdjacentTo' is REQUIRED</sch:assert>
-      <sch:assert test="count(h:Area) = 1">element 'Area' is REQUIRED</sch:assert>
-      <sch:assert test="count(h:Azimuth) &lt;= 1">element 'Azimuth' is OPTIONAL</sch:assert>
-      <sch:assert test="count(h:SolarAbsorptance) = 1">element 'SolarAbsorptance' is REQUIRED</sch:assert>
-      <sch:assert test="count(h:Emittance) = 1">element 'Emittance' is REQUIRED</sch:assert>
-      <sch:assert test="count(h:Insulation/h:SystemIdentifier) = 1">element 'Insulation/SystemIdentifier' is REQUIRED</sch:assert> <!-- Required by HPXML schema -->
-      <sch:assert test="count(h:Insulation/h:AssemblyEffectiveRValue) = 1">element 'Insulation/AssemblyEffectiveRValue' is REQUIRED</sch:assert>
+      <sch:assert test="count(h:SystemIdentifier) = 1">element '<sch:name/>/SystemIdentifier' is REQUIRED</sch:assert> <!-- Required by HPXML schema -->
+      <sch:assert test="count(h:ExteriorAdjacentTo[text()='outside' or text()='attic - vented' or text()='attic - unvented' or text()='basement - conditioned' or text()='basement - unconditioned' or text()='crawlspace - vented' or text()='crawlspace - unvented' or text()='garage' or text()='other housing unit' or text()='other heated space' or text()='other multifamily buffer space' or text()='other non-freezing space']) = 1">element '<sch:name/>/ExteriorAdjacentTo' is REQUIRED</sch:assert>
+      <sch:assert test="count(h:InteriorAdjacentTo[text()='living space' or text()='attic - vented' or text()='attic - unvented' or text()='basement - conditioned' or text()='basement - unconditioned' or text()='crawlspace - vented' or text()='crawlspace - unvented' or text()='garage']) = 1">element '<sch:name/>/InteriorAdjacentTo' is REQUIRED</sch:assert>
+      <sch:assert test="count(h:Area) = 1">element '<sch:name/>/Area' is REQUIRED</sch:assert>
+      <sch:assert test="count(h:Azimuth) &lt;= 1">element '<sch:name/>/Azimuth' is OPTIONAL</sch:assert>
+      <sch:assert test="count(h:SolarAbsorptance) = 1">element '<sch:name/>/SolarAbsorptance' is REQUIRED</sch:assert>
+      <sch:assert test="count(h:Emittance) = 1">element '<sch:name/>/Emittance' is REQUIRED</sch:assert>
+      <sch:assert test="count(h:Insulation/h:SystemIdentifier) = 1">element '<sch:name/>/Insulation/SystemIdentifier' is REQUIRED</sch:assert> <!-- Required by HPXML schema -->
+      <sch:assert test="count(h:Insulation/h:AssemblyEffectiveRValue) = 1">element '<sch:name/>/Insulation/AssemblyEffectiveRValue' is REQUIRED</sch:assert>
     </sch:rule>
     <!-- [FoundationWall] -->
     <sch:rule context="/h:HPXML/h:Building/h:BuildingDetails/h:Enclosure/h:FoundationWalls/h:FoundationWall">
-      <sch:assert test="count(h:SystemIdentifier) = 1">element 'SystemIdentifier' is REQUIRED</sch:assert> <!-- Required by HPXML schema -->
-      <sch:assert test="count(h:ExteriorAdjacentTo[text()='ground' or text()='basement - conditioned' or text()='basement - unconditioned' or text()='crawlspace - vented' or text()='crawlspace - unvented' or text()='garage' or text()='other housing unit' or text()='other heated space' or text()='other multifamily buffer space' or text()='other non-freezing space']) = 1">element 'ExteriorAdjacentTo' is REQUIRED</sch:assert>
-      <sch:assert test="count(h:InteriorAdjacentTo[text()='basement - conditioned' or text()='basement - unconditioned' or text()='crawlspace - vented' or text()='crawlspace - unvented' or text()='garage']) = 1">element 'InteriorAdjacentTo' is REQUIRED</sch:assert> <!-- See [VentedCrawlspace] -->
-      <sch:assert test="count(h:Height) = 1">element 'Height' is REQUIRED</sch:assert>
-      <sch:assert test="count(h:Area) = 1">element 'Area' is REQUIRED</sch:assert>
-      <sch:assert test="count(h:Azimuth) &lt;= 1">element 'Azimuth' is OPTIONAL</sch:assert>
-      <sch:assert test="count(h:Thickness) = 1">element 'Thickness' is REQUIRED</sch:assert>
-      <sch:assert test="count(h:DepthBelowGrade) = 1">element 'DepthBelowGrade' is REQUIRED</sch:assert>
-      <sch:assert test="count(h:Insulation/h:SystemIdentifier) = 1">element 'Insulation/SystemIdentifier' is REQUIRED</sch:assert> <!-- Required by HPXML schema -->
+      <sch:assert test="count(h:SystemIdentifier) = 1">element '<sch:name/>/SystemIdentifier' is REQUIRED</sch:assert> <!-- Required by HPXML schema -->
+      <sch:assert test="count(h:ExteriorAdjacentTo[text()='ground' or text()='basement - conditioned' or text()='basement - unconditioned' or text()='crawlspace - vented' or text()='crawlspace - unvented' or text()='garage' or text()='other housing unit' or text()='other heated space' or text()='other multifamily buffer space' or text()='other non-freezing space']) = 1">element '<sch:name/>/ExteriorAdjacentTo' is REQUIRED</sch:assert>
+      <sch:assert test="count(h:InteriorAdjacentTo[text()='basement - conditioned' or text()='basement - unconditioned' or text()='crawlspace - vented' or text()='crawlspace - unvented' or text()='garage']) = 1">element '<sch:name/>/InteriorAdjacentTo' is REQUIRED</sch:assert> <!-- See [VentedCrawlspace] -->
+      <sch:assert test="count(h:Height) = 1">element '<sch:name/>/Height' is REQUIRED</sch:assert>
+      <sch:assert test="count(h:Area) = 1">element '<sch:name/>/Area' is REQUIRED</sch:assert>
+      <sch:assert test="count(h:Azimuth) &lt;= 1">element '<sch:name/>/Azimuth' is OPTIONAL</sch:assert>
+      <sch:assert test="count(h:Thickness) = 1">element '<sch:name/>/Thickness' is REQUIRED</sch:assert>
+      <sch:assert test="count(h:DepthBelowGrade) = 1">element '<sch:name/>/DepthBelowGrade' is REQUIRED</sch:assert>
+      <sch:assert test="count(h:Insulation/h:SystemIdentifier) = 1">element '<sch:name/>/Insulation/SystemIdentifier' is REQUIRED</sch:assert> <!-- Required by HPXML schema -->
       <!-- Insulation: either specify interior and exterior layers OR assembly R-value: -->
-      <sch:assert test="count(h:Insulation/h:Layer[h:InstallationType='continuous - interior'] | h:Insulation/h:AssemblyEffectiveRValue) = 1">element 'Insulation/Layer[InstallationType='continuous - interior']' or 'Insulation/AssemblyEffectiveRValue' is REQUIRED</sch:assert> <!-- See [FoundationWallInsLayer] -->
-      <sch:assert test="count(h:Insulation/h:Layer[h:InstallationType='continuous - exterior'] | h:Insulation/h:AssemblyEffectiveRValue) = 1">element 'Insulation/Layer[InstallationType='continuous - exterior']' or 'Insulation/AssemblyEffectiveRValue' is REQUIRED</sch:assert> <!-- See [FoundationWallInsLayer] -->
+      <sch:assert test="count(h:Insulation/h:Layer[h:InstallationType='continuous - interior'] | h:Insulation/h:AssemblyEffectiveRValue) = 1">element '<sch:name/>/Insulation/Layer[InstallationType='continuous - interior']' or '<sch:name/>/Insulation/AssemblyEffectiveRValue' is REQUIRED</sch:assert> <!-- See [FoundationWallInsLayer] -->
+      <sch:assert test="count(h:Insulation/h:Layer[h:InstallationType='continuous - exterior'] | h:Insulation/h:AssemblyEffectiveRValue) = 1">element '<sch:name/>/Insulation/Layer[InstallationType='continuous - exterior']' or '<sch:name/>/Insulation/AssemblyEffectiveRValue' is REQUIRED</sch:assert> <!-- See [FoundationWallInsLayer] -->
     </sch:rule>
     <!-- [VentedCrawlspace] -->
     <sch:rule context="/h:HPXML/h:Building/h:BuildingDetails/h:Enclosure/h:FoundationWalls/h:FoundationWall/h:InteriorAdjacentTo[text()='crawlspace - vented']"> <!-- FIXME: Review this xpath -->
-      <sch:assert test="count(/h:HPXML/h:Building/h:BuildingDetails/h:Enclosure/h:Foundations/h:Foundation[h:FoundationType/h:Crawlspace[h:Vented='true']]/h:VentilationRate[h:UnitofMeasure='SLA']/h:Value) &lt;= 1">element 'VentilationRate/Value' is OPTIONAL</sch:assert>
+      <sch:assert test="count(/h:HPXML/h:Building/h:BuildingDetails/h:Enclosure/h:Foundations/h:Foundation[h:FoundationType/h:Crawlspace[h:Vented='true']]/h:VentilationRate[h:UnitofMeasure='SLA']/h:Value) &lt;= 1">element 'Crawlspace/VentilationRate/Value' is OPTIONAL</sch:assert>
     </sch:rule>
     <!-- [FoundationWallInsLayer] -->
     <sch:rule context="/h:HPXML/h:Building/h:BuildingDetails/h:Enclosure/h:FoundationWalls/h:FoundationWall/h:Insulation/h:Layer[h:InstallationType='continuous - exterior' or h:InstallationType='continuous - interior']">
-      <sch:assert test="count(h:NominalRValue) = 1">element 'NominalRValue' is REQUIRED</sch:assert>
-      <sch:assert test="count(h:extension/h:DistanceToTopOfInsulation) = 1">element 'extension/DistanceToTopOfInsulation' is REQUIRED</sch:assert> <!-- ft -->
-      <sch:assert test="count(h:extension/h:DistanceToBottomOfInsulation) = 1">element 'extension/DistanceToBottomOfInsulation' is REQUIRED</sch:assert> <!-- ft -->
+      <sch:assert test="count(h:NominalRValue) = 1">element '<sch:name/>/NominalRValue' is REQUIRED</sch:assert>
+      <sch:assert test="count(h:extension/h:DistanceToTopOfInsulation) = 1">element '<sch:name/>/extension/DistanceToTopOfInsulation' is REQUIRED</sch:assert> <!-- ft -->
+      <sch:assert test="count(h:extension/h:DistanceToBottomOfInsulation) = 1">element '<sch:name/>/extension/DistanceToBottomOfInsulation' is REQUIRED</sch:assert> <!-- ft -->
     </sch:rule>
+    <!-- [FrameFloor] -->
+    <sch:rule context="/h:HPXML/h:Building/h:BuildingDetails/h:Enclosure/h:FrameFloors/h:FrameFloor">
+      <sch:assert test="count(h:SystemIdentifier) = 1">element '<sch:name/>/SystemIdentifier' is REQUIRED</sch:assert>
+      <sch:assert test="count(h:ExteriorAdjacentTo[text()='outside' or text()='attic - vented' or text()='attic - unvented' or text()='basement - conditioned' or text()='basement - unconditioned' or text()='crawlspace - vented' or text()='crawlspace - unvented' or text()='garage' or text()='other housing unit' or text()='other heated space' or text()='other multifamily buffer space' or text()='other non-freezing space']) = 1">element '<sch:name/>/ExteriorAdjacentTo' is REQUIRED</sch:assert> <!-- See [FrameFloorAdjacentToOther] -->
+      <sch:assert test="count(h:InteriorAdjacentTo[text()='living space' or text()='attic - vented' or text()='attic - unvented' or text()='basement - conditioned' or text()='basement - unconditioned' or text()='crawlspace - vented' or text()='crawlspace - unvented' or text()='garage']) = 1">element '<sch:name/>/InteriorAdjacentTo' is REQUIRED</sch:assert>
+      <sch:assert test="count(h:Area) = 1">element '<sch:name/>/Area' is REQUIRED</sch:assert>
+      <sch:assert test="count(h:Insulation/h:SystemIdentifier) = 1">element '<sch:name/>/Insulation/SystemIdentifier' is REQUIRED</sch:assert> <!-- Required by HPXML schema -->
+      <sch:assert test="count(h:Insulation/h:AssemblyEffectiveRValue) = 1">element '<sch:name/>/Insulation/AssemblyEffectiveRValue' is REQUIRED</sch:assert>
+    </sch:rule>
+    <!-- [FrameFloorAdjacentToOther] -->
+    <sch:rule context="/h:HPXML/h:Building/h:BuildingDetails/h:Enclosure/h:FrameFloors/h:FrameFloor[h:ExteriorAdjacentTo[text()='other housing unit' or text()='other heated space' or text()='other multifamily buffer space' or text()='other non-freezing space']]">
+      <sch:assert test="count(h:extension/h:OtherSpaceAboveOrBelow[text()='above' or text()='below']) = 1">element '<sch:name/>/extension/OtherSpaceAboveOrBelow' is REQUIRED</sch:assert>
+    </sch:rule>
+    <!-- [Slab] -->
+    <sch:rule context="/h:HPXML/h:Building/h:BuildingDetails/h:Enclosure/h:Slabs/h:Slab">
+      <sch:assert test="count(h:SystemIdentifier) = 1">element '<sch:name/>/SystemIdentifier' is REQUIRED</sch:assert> <!-- Required by HPXML schema -->
+      <sch:assert test="count(h:InteriorAdjacentTo[text()='living space' or text()='basement - conditioned' or text()='basement - unconditioned' or text()='crawlspace - vented' or text()='crawlspace - unvented' or text()='garage']) = 1">element '<sch:name/>/InteriorAdjacentTo' is REQUIRED</sch:assert>
+      <sch:assert test="count(h:Area) = 1">element '<sch:name/>/Area' is REQUIRED</sch:assert>
+      <sch:assert test="count(h:Thickness) = 1">element '<sch:name/>/Thickness' is REQUIRED</sch:assert> <!-- Use zero for dirt floor -->
+      <sch:assert test="count(h:ExposedPerimeter) = 1">element '<sch:name/>/ExposedPerimeter' is REQUIRED</sch:assert>
+      <sch:assert test="count(h:PerimeterInsulationDepth) = 1">element '<sch:name/>/PerimeterInsulationDepth' is REQUIRED</sch:assert>
+      <sch:assert test="count(h:UnderSlabInsulationWidth | h:UnderSlabInsulationSpansEntireSlab[text()='true']) = 1">element '<sch:name/>/UnderSlabInsulationWidth' or '<sch:name/>/UnderSlabInsulationSpansEntireSlab[text()="true"]' is REQUIRED</sch:assert>
+      <sch:assert test="count(h:DepthBelowGrade | h:InteriorAdjacentTo[text()!='living space' and text()!='garage']) &gt;= 1">element '<sch:name/>/DepthBelowGrade' is required when InteriorAdjacentTo is 'living space' or 'garage'</sch:assert> <!-- DepthBelowGrade only required when InteriorAdjacentTo is 'living space' or 'garage' -->
+      <sch:assert test="count(h:PerimeterInsulation/h:SystemIdentifier) = 1">element '<sch:name/>/PerimeterInsulation/SystemIdentifier' is REQUIRED</sch:assert> <!-- Required by HPXML schema -->
+      <sch:assert test="count(h:PerimeterInsulation/h:Layer[h:InstallationType='continuous']/h:NominalRValue) = 1">element '<sch:name/>/PerimeterInsulation/Layer[InstallationType="continuous"]/NominalRValue' is REQUIRED</sch:assert>
+      <sch:assert test="count(h:UnderSlabInsulation/h:SystemIdentifier) = 1">element '<sch:name/>/UnderSlabInsulation/SystemIdentifier' is REQUIRED</sch:assert> <!-- Required by HPXML schema -->
+      <sch:assert test="count(h:UnderSlabInsulation/h:Layer[h:InstallationType='continuous']/h:NominalRValue) = 1">element '<sch:name/>/UnderSlabInsulation/Layer[InstallationType="continuous"]/NominalRValue' is REQUIRED</sch:assert>
+      <sch:assert test="count(h:extension/h:CarpetFraction) = 1">element '<sch:name/>/extension/CarpetFraction' is REQUIRED</sch:assert> <!-- 0 - 1 -->
+      <sch:assert test="count(h:extension/h:CarpetRValue) = 1">element '<sch:name/>/extension/CarpetRValue' is REQUIRED</sch:assert>
+    </sch:rule>
+    
+
   </sch:pattern>
 </sch:schema>
