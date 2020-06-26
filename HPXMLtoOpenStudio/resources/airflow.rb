@@ -1376,7 +1376,7 @@ class Airflow
     # Actuator
     infil_program.addLine("Set #{erv_sens_load_actuator.name} = #{erv_sens_load_actuator.name} + ERVSensToLv")
     infil_program.addLine("Set #{erv_lat_load_actuator.name} = #{erv_lat_load_actuator.name} + ERVLatToLv")
-    infil_program.addLine('Set QWHV_ervhrv = QWHV_ervhrv + balanced_flow_rate')
+    infil_program.addLine("Set QWHV_ervhrv = QWHV_ervhrv + #{UnitConversions.convert(vent_mech_cfm, 'cfm', 'm^3/s')}")
 
     return infil_program
   end
