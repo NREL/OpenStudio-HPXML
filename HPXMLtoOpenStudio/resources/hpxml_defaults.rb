@@ -886,10 +886,10 @@ class HPXMLDefaults
       elsif [HPXML::ResidentialTypeApartment, HPXML::ResidentialTypeSFA].include? hpxml.building_construction.residential_facility_type
         hpxml.lighting.holiday_kwh_per_day = 0.5
       end
-      hpxml.lighting.holiday_period_begin_month = 1
-      hpxml.lighting.holiday_period_begin_day_of_month = 1
-      hpxml.lighting.holiday_period_end_month = 12
-      hpxml.lighting.holiday_period_end_day_of_month = 31
+      hpxml.lighting.holiday_period_begin_month = 11
+      hpxml.lighting.holiday_period_begin_day_of_month = 24
+      hpxml.lighting.holiday_period_end_month = 1
+      hpxml.lighting.holiday_period_end_day_of_month = 6
       hpxml.lighting.holiday_weekday_fractions = '0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.008168, 0.098016, 0.168028, 0.193699, 0.283547, 0.192532, 0.03734, 0.01867'
       hpxml.lighting.holiday_weekend_fractions = '0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.008168, 0.098016, 0.168028, 0.193699, 0.283547, 0.192532, 0.03734, 0.01867'
     end
