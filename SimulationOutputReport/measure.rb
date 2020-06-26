@@ -469,12 +469,15 @@ class SimulationOutputReport < OpenStudio::Measure::ReportingMeasure
     end
 
     # Unmet loads (heating/cooling energy delivered by backup ideal air system)
-    sys_ids = []
-    @model.getZoneHVACIdealLoadsAirSystems.each do |ideal_sys|
-      sys_ids << ideal_sys.name.to_s.upcase
-    end
+    key = Constants.ObjectNameIdealAirSystemResidual.upcase
     @unmet_loads.each do |load_type, unmet_load|
-      unmet_load.annual_output = get_report_variable_data_annual(sys_ids, [unmet_load.variable])
+      unmet_load.annual_output = get_report_variable_data_annual([key], [unmet_load.variable])
+    end
+
+    # Ideal system loads (expected fraction of loads that are not met by HVAC)
+    key = Constants.ObjectNameIdealAirSystem.upcase
+    @ideal_system_loads.each do |load_type, unmet_load|
+      unmet_load.annual_output = get_report_variable_data_annual([key], [unmet_load.variable])
     end
 
     # Peak Building Space Heating/Cooling Loads (total heating/cooling energy delivered including backup ideal air system)
@@ -766,6 +769,7 @@ class SimulationOutputReport < OpenStudio::Measure::ReportingMeasure
   def check_for_errors(runner, outputs)
     all_total = @fuels.values.map { |x| x.annual_output }.inject(:+)
     all_total += @unmet_loads.values.map { |x| x.annual_output }.inject(:+)
+    all_total += @ideal_system_loads.values.map { |x| x.annual_output }.inject(:+)
     if all_total == 0
       runner.registerError('Simulation unsuccessful.')
       return false
@@ -1998,6 +2002,16 @@ class SimulationOutputReport < OpenStudio::Measure::ReportingMeasure
 
     @unmet_loads.each do |load_type, unmet_load|
       unmet_load.name = "Unmet Load: #{load_type}"
+      unmet_load.annual_units = 'MBtu'
+    end
+
+    # Ideal System Loads (expected fraction of loads that are not met by HVAC)
+    @ideal_system_loads = {}
+    @ideal_system_loads[LT::Heating] = UnmetLoad.new(variable: 'Zone Ideal Loads Zone Sensible Heating Energy')
+    @ideal_system_loads[LT::Cooling] = UnmetLoad.new(variable: 'Zone Ideal Loads Zone Sensible Cooling Energy')
+
+    @ideal_system_loads.each do |load_type, unmet_load|
+      unmet_load.name = "Ideal System Load: #{load_type}"
       unmet_load.annual_units = 'MBtu'
     end
 
