@@ -143,6 +143,10 @@ Current annual unmet building loads are:
 These numbers reflect the amount of heating/cooling load that is not met by the HVAC system, indicating the degree to which the HVAC system is undersized.
 An HVAC system with sufficient capacity to perfectly maintain the thermostat setpoints will report an unmet load of zero.
 
+Note that if a building has partial (or no) HVAC system, the unserved load will not be included in the unmet load outputs.
+For example, if a building has a room air conditioner that meets 33% of the cooling load, the remaining 67% of the load is not included in the unmet load.
+Rather, the unmet load is only the amount of load that the room AC *should* be serving but is not.
+
 Peak Building Electricity
 ~~~~~~~~~~~~~~~~~~~~~~~~~
 

@@ -1171,10 +1171,8 @@ class HVAC
     unitary_system.additionalProperties.setFeature(Constants.SizingInfoHVACHeatType, Constants.ObjectNameUnitHeater)
   end
 
-  def self.apply_ideal_air_loads(model, runner, sequential_cool_load_frac,
+  def self.apply_ideal_air_loads(model, runner, obj_name, sequential_cool_load_frac,
                                  sequential_heat_load_frac, control_zone)
-
-    obj_name = Constants.ObjectNameIdealAirSystem
 
     # Ideal Air System
 
