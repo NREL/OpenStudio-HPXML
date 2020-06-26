@@ -836,8 +836,9 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     heating_system_fuel_choices << HPXML::FuelTypeNaturalGas
     heating_system_fuel_choices << HPXML::FuelTypeOil
     heating_system_fuel_choices << HPXML::FuelTypePropane
-    heating_system_fuel_choices << HPXML::FuelTypeWood
+    heating_system_fuel_choices << HPXML::FuelTypeWoodCord
     heating_system_fuel_choices << HPXML::FuelTypeWoodPellets
+    heating_system_fuel_choices << HPXML::FuelTypeCoal
 
     cooling_system_type_choices = OpenStudio::StringVector.new
     cooling_system_type_choices << 'none'
@@ -1384,7 +1385,8 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     water_heater_fuel_choices << HPXML::FuelTypeNaturalGas
     water_heater_fuel_choices << HPXML::FuelTypeOil
     water_heater_fuel_choices << HPXML::FuelTypePropane
-    water_heater_fuel_choices << HPXML::FuelTypeWood
+    water_heater_fuel_choices << HPXML::FuelTypeWoodCord
+    water_heater_fuel_choices << HPXML::FuelTypeCoal
 
     water_heater_location_choices = OpenStudio::StringVector.new
     water_heater_location_choices << Constants.Auto
@@ -1954,7 +1956,8 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     clothes_dryer_fuel_choices << HPXML::FuelTypeNaturalGas
     clothes_dryer_fuel_choices << HPXML::FuelTypeOil
     clothes_dryer_fuel_choices << HPXML::FuelTypePropane
-    clothes_dryer_fuel_choices << HPXML::FuelTypeWood
+    clothes_dryer_fuel_choices << HPXML::FuelTypeWoodCord
+    clothes_dryer_fuel_choices << HPXML::FuelTypeCoal
 
     clothes_dryer_control_type_choices = OpenStudio::StringVector.new
     clothes_dryer_control_type_choices << Constants.Auto
@@ -2212,7 +2215,8 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     cooking_range_oven_fuel_choices << HPXML::FuelTypeNaturalGas
     cooking_range_oven_fuel_choices << HPXML::FuelTypeOil
     cooking_range_oven_fuel_choices << HPXML::FuelTypePropane
-    cooking_range_oven_fuel_choices << HPXML::FuelTypeWood
+    cooking_range_oven_fuel_choices << HPXML::FuelTypeWoodCord
+    cooking_range_oven_fuel_choices << HPXML::FuelTypeCoal
 
     arg = OpenStudio::Measure::OSArgument::makeBoolArgument('cooking_range_oven_present', true)
     arg.setDisplayName('Cooking Range/Oven: Present')
@@ -2447,7 +2451,7 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     fuel_loads_fuel_choices << HPXML::FuelTypeNaturalGas
     fuel_loads_fuel_choices << HPXML::FuelTypeOil
     fuel_loads_fuel_choices << HPXML::FuelTypePropane
-    fuel_loads_fuel_choices << HPXML::FuelTypeWood
+    fuel_loads_fuel_choices << HPXML::FuelTypeWoodCord
     fuel_loads_fuel_choices << HPXML::FuelTypeWoodPellets
 
     arg = OpenStudio::Measure::OSArgument::makeBoolArgument('fuel_loads_grill_present', true)

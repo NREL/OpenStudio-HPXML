@@ -11,6 +11,7 @@ def create_osws
     'base.osw' => nil, # single-family detached
     'base-single-family-attached.osw' => 'base.osw',
     'base-multifamily.osw' => 'base.osw',
+    'base-appliances-coal.osw' => 'base.osw',
     'base-appliances-dehumidifier.osw' => 'base.osw',
     'base-appliances-dehumidifier-50percent.osw' => 'base.osw',
     'base-appliances-dehumidifier-ief.osw' => 'base.osw',
@@ -58,6 +59,7 @@ def create_osws
     'base-dhw-solar-fraction.osw' => 'base.osw',
     'base-dhw-solar-indirect-flat-plate.osw' => 'base.osw',
     'base-dhw-solar-thermosyphon-flat-plate.osw' => 'base.osw',
+    'base-dhw-tank-coal.osw' => 'base.osw',
     'base-dhw-tank-gas.osw' => 'base.osw',
     'base-dhw-tank-gas-outside.osw' => 'base.osw',
     'base-dhw-tank-heat-pump.osw' => 'base.osw',
@@ -110,6 +112,7 @@ def create_osws
     'base-hvac-air-to-air-heat-pump-1-speed.osw' => 'base.osw',
     'base-hvac-air-to-air-heat-pump-2-speed.osw' => 'base.osw',
     'base-hvac-air-to-air-heat-pump-var-speed.osw' => 'base.osw',
+    'base-hvac-boiler-coal-only.osw' => 'base.osw',
     'base-hvac-boiler-elec-only.osw' => 'base.osw',
     'base-hvac-boiler-gas-central-ac-1-speed.osw' => 'base.osw',
     'base-hvac-boiler-gas-only.osw' => 'base.osw',
@@ -689,6 +692,11 @@ def get_values(osw_file, step)
     step.setArgument('window_area_right', 0)
     step.setArgument('ducts_supply_leakage_value', 0.0)
     step.setArgument('ducts_return_leakage_value', 0.0)
+  elsif ['base-appliances-coal.osw'].include? osw_file
+    step.setArgument('clothes_dryer_fuel_type', HPXML::FuelTypeCoal)
+    step.setArgument('clothes_dryer_efficiency_cef', '3.3')
+    step.setArgument('clothes_dryer_control_type', HPXML::ClothesDryerControlTypeMoisture)
+    step.setArgument('cooking_range_oven_fuel_type', HPXML::FuelTypeCoal)
   elsif ['base-appliances-dehumidifier.osw'].include? osw_file
     step.setArgument('weather_station_epw_filepath', 'USA_TX_Dallas-Fort.Worth.Intl.AP.722590_TMY3.epw')
     step.setArgument('dehumidifier_present', true)
@@ -889,6 +897,11 @@ def get_values(osw_file, step)
     step.setArgument('solar_thermal_collector_rated_optical_efficiency', 0.77)
     step.setArgument('solar_thermal_collector_rated_thermal_losses', 0.793)
     step.setArgument('solar_thermal_storage_volume', '60')
+  elsif ['base-dhw-tank-coal.osw'].include? osw_file
+    step.setArgument('water_heater_fuel_type', HPXML::FuelTypeCoal)
+    step.setArgument('water_heater_tank_volume', '50')
+    step.setArgument('water_heater_heating_capacity', '40000')
+    step.setArgument('water_heater_efficiency_ef', 0.59)
   elsif ['base-dhw-tank-gas.osw'].include? osw_file
     step.setArgument('water_heater_fuel_type', HPXML::FuelTypeNaturalGas)
     step.setArgument('water_heater_tank_volume', '50')
@@ -1194,6 +1207,10 @@ def get_values(osw_file, step)
     step.setArgument('heat_pump_heating_capacity_17F', '26880.0')
     step.setArgument('heat_pump_cooling_efficiency_seer', 22.0)
     step.setArgument('heat_pump_backup_fuel', HPXML::FuelTypeElectricity)
+  elsif ['base-hvac-boiler-coal-only.osw'].include? osw_file
+    step.setArgument('heating_system_type', HPXML::HVACTypeBoiler)
+    step.setArgument('heating_system_fuel', HPXML::FuelTypeCoal)
+    step.setArgument('cooling_system_type', 'none')
   elsif ['base-hvac-boiler-elec-only.osw'].include? osw_file
     step.setArgument('heating_system_type', HPXML::HVACTypeBoiler)
     step.setArgument('heating_system_fuel', HPXML::FuelTypeElectricity)
