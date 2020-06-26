@@ -59,10 +59,8 @@
         </ClimateZoneIECC>
         <WeatherStation>
           <SystemIdentifier id='WeatherStation'/>
-          <Name>Boulder, CO</Name>
-          <extension>
-            <EPWFilePath>US_CO_Boulder_AMY_2012.epw</EPWFilePath>
-          </extension>
+          <Name>Denver, CO</Name>
+          <WMO>725650</WMO>
         </WeatherStation>
       </ClimateandRiskZones>
       <Enclosure>

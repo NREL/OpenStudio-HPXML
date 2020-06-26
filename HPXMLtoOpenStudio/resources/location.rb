@@ -5,9 +5,7 @@ class Location
     apply_year(model, epw_file)
     apply_site(model, epw_file)
     apply_climate_zones(model, epw_file)
-    if hpxml.header.dst_enabled
-      apply_dst(model, hpxml)
-    end
+    apply_dst(model, hpxml)
     apply_ground_temps(model, weather)
     return weather
   end
@@ -62,6 +60,8 @@ class Location
   end
 
   def self.apply_dst(model, hpxml)
+    return unless hpxml.header.dst_enabled
+
     month_names = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
     dst_start_date = "#{month_names[hpxml.header.dst_begin_month - 1]} #{hpxml.header.dst_begin_day_of_month}"
     dst_end_date = "#{month_names[hpxml.header.dst_end_month - 1]} #{hpxml.header.dst_end_day_of_month}"

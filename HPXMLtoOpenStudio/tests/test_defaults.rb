@@ -40,8 +40,14 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
     hpxml_default = _test_measure()
     _test_default_header_values(hpxml_default, 30, 2, 2, 11, 11, false, nil, nil, nil, nil)
 
-    # Test defaults
+    # Test defaults - DST not in weather file
     hpxml = apply_hpxml_defaults('base.xml')
+    XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
+    hpxml_default = _test_measure()
+    _test_default_header_values(hpxml_default, 60, 1, 1, 12, 31, true, 3, 12, 11, 5)
+
+    # Test defaults - DST in weather file
+    hpxml = apply_hpxml_defaults('base-simcontrol-daylight-saving-custom.xml')
     XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
     hpxml_default = _test_measure()
     _test_default_header_values(hpxml_default, 60, 1, 1, 12, 31, true, 3, 11, 11, 4)
