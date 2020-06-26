@@ -316,9 +316,15 @@ class MonthWeekdayWeekendSchedule
     if year_description.isLeapYear
       leap_offset = 1
     end
-    day_endm = [0, 31, 59 + leap_offset, 90 + leap_offset, 120 + leap_offset, 151 + leap_offset, 181 + leap_offset, 212 + leap_offset, 243 + leap_offset, 273 + leap_offset, 304 + leap_offset, 334 + leap_offset, 365 + leap_offset]
-    day_startm = [0, 1, 32, 60 + leap_offset, 91 + leap_offset, 121 + leap_offset, 152 + leap_offset, 182 + leap_offset, 213 + leap_offset, 244 + leap_offset, 274 + leap_offset, 305 + leap_offset, 335 + leap_offset]
-
+    num_days_in_each_month = [0, 31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31]
+    num_days_in_each_month[@end_month] = @end_day_of_month
+    num_days_in_each_month.each_index { |i| i > 1 ? num_days_in_each_month[i] + leap_offset : num_days_in_each_month[i] }
+    orig_day_startm = [0, 1, 32, 60, 91, 121, 152, 182, 213, 244, 274, 305, 335]
+    day_startm = orig_day_startm.map(&:clone)
+    day_startm[@begin_month] = orig_day_startm[@begin_month] + @begin_day_of_month - 1
+    day_startm.each_index { |i| i > 1 ? day_startm[i] + leap_offset : day_startm[i] }
+    day_endm = [orig_day_startm, num_days_in_each_month].transpose.map { |i| (i != [0, 0]) ? i.reduce(:+) - 1 : 0 }
+        
     time = []
     for h in 1..24
       time[h] = OpenStudio::Time.new(0, h, 0, 0)
@@ -335,38 +341,16 @@ class MonthWeekdayWeekendSchedule
     prev_wknd_rule = nil
     periods = []
     if @begin_month <= @end_month # contiguous period
-      periods << [[@begin_month, @begin_day_of_month], [@end_month, @end_day_of_month]]
+      periods << [@begin_month, @end_month]
     else # non-contiguous period
-      periods << [[1, 1], [@end_month, @end_day_of_month]]
-      periods << [[@begin_month, @begin_day_of_month], [12, 31]]
+      periods << [1, @end_month]
+      periods << [@begin_month, 12]
     end
 
     periods.each do |period|
-      period_begin_month = period[0][0]
-      period_end_month = period[1][0]
-      period_begin_day_of_month = period[0][1]
-      period_end_day_of_month = period[1][1]
-      
-      for m in period_begin_month..period_end_month
-        if m == @begin_month && m == @end_month
-          # capable of handling a case where a period is within a single calendar month (e.g. 11/24-11/27) 
-          start_date = day_startm[m] + period_begin_day_of_month - 1
-          end_date = day_startm[m] + period_end_day_of_month - 1
-        elsif m == @begin_month
-          # capable of handling a case where begin day of month is not 1
-          start_date = day_startm[m] + period_begin_day_of_month - 1
-          end_date = day_endm[m]
-        elsif m == @end_month
-          # capable of handling a case where end day of month is not the last day of the month
-          start_date = day_startm[m]
-          end_date = day_startm[m] + period_end_day_of_month - 1
-        else
-          start_date = day_startm[m]
-          end_date = day_endm[m]
-        end
-
-        date_s = OpenStudio::Date::fromDayOfYear(start_date, assumedYear)
-        date_e = OpenStudio::Date::fromDayOfYear(end_date, assumedYear)
+      for m in period[0]..period[1]
+        date_s = OpenStudio::Date::fromDayOfYear(day_startm[m], assumedYear)
+        date_e = OpenStudio::Date::fromDayOfYear(day_endm[m], assumedYear)
         
         wkdy_vals = []
         wknd_vals = []
