@@ -81,6 +81,7 @@ def create_hpxmls
     'invalid_files/invalid-window-height.xml' => 'base-enclosure-overhangs.xml',
     'invalid_files/invalid-window-interior-shading.xml' => 'base.xml',
     'invalid_files/invalid-wmo.xml' => 'base.xml',
+    'invalid_files/invalid-daylight-saving.xml' => 'base.xml',
     'invalid_files/lighting-fractions.xml' => 'base.xml',
     'invalid_files/missing-elements.xml' => 'base.xml',
     'invalid_files/net-area-negative-roof.xml' => 'base-enclosure-skylights.xml',
@@ -283,12 +284,14 @@ def create_hpxmls
     'base-misc-defaults2.xml' => 'base-dhw-recirc-demand.xml',
     'base-misc-large-uncommon-loads.xml' => 'base-enclosure-garage.xml',
     'base-misc-large-uncommon-loads2.xml' => 'base-misc-large-uncommon-loads.xml',
-    'base-misc-timestep-10-mins.xml' => 'base.xml',
-    'base-misc-runperiod-1-month.xml' => 'base.xml',
+    'base-misc-neighbor-shading.xml' => 'base.xml',
     'base-misc-usage-multiplier.xml' => 'base.xml',
     'base-misc-whole-house-fan.xml' => 'base.xml',
     'base-pv.xml' => 'base.xml',
-    'base-misc-neighbor-shading.xml' => 'base.xml',
+    'base-simcontrol-daylight-saving-custom.xml' => 'base.xml',
+    'base-simcontrol-daylight-saving-disabled.xml' => 'base.xml',
+    'base-simcontrol-runperiod-1-month.xml' => 'base.xml',
+    'base-simcontrol-timestep-10-mins.xml' => 'base.xml',
 
     'hvac_autosizing/base-autosize.xml' => 'base.xml',
     'hvac_autosizing/base-hvac-air-to-air-heat-pump-1-speed-autosize.xml' => 'base-hvac-air-to-air-heat-pump-1-speed.xml',
@@ -455,16 +458,27 @@ def set_hpxml_header(hpxml_file, hpxml)
     else
       hpxml.header.apply_ashrae140_assumptions = true
     end
-  elsif ['base-misc-timestep-10-mins.xml'].include? hpxml_file
+  elsif ['base-simcontrol-daylight-saving-custom.xml'].include? hpxml_file
+    hpxml.header.dst_enabled = true
+    hpxml.header.dst_begin_month = 3
+    hpxml.header.dst_begin_day_of_month = 10
+    hpxml.header.dst_end_month = 11
+    hpxml.header.dst_end_day_of_month = 6
+  elsif ['base-simcontrol-daylight-saving-disabled.xml'].include? hpxml_file
+    hpxml.header.dst_enabled = false
+  elsif ['base-simcontrol-timestep-10-mins.xml'].include? hpxml_file
     hpxml.header.timestep = 10
-  elsif ['base-misc-runperiod-1-month.xml'].include? hpxml_file
-    hpxml.header.end_month = 1
-    hpxml.header.end_day_of_month = 31
+  elsif ['base-simcontrol-runperiod-1-month.xml'].include? hpxml_file
+    hpxml.header.sim_end_month = 1
+    hpxml.header.sim_end_day_of_month = 31
   elsif ['invalid_files/invalid-timestep.xml'].include? hpxml_file
     hpxml.header.timestep = 45
   elsif ['invalid_files/invalid-runperiod.xml'].include? hpxml_file
-    hpxml.header.end_month = 4
-    hpxml.header.end_day_of_month = 31
+    hpxml.header.sim_end_month = 4
+    hpxml.header.sim_end_day_of_month = 31
+  elsif ['invalid_files/invalid-daylight-saving.xml'].include? hpxml_file
+    hpxml.header.dst_end_month = 4
+    hpxml.header.dst_end_day_of_month = 31
   elsif ['base-misc-defaults.xml'].include? hpxml_file
     hpxml.header.timestep = nil
   end
