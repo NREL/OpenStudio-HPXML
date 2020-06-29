@@ -1415,18 +1415,24 @@ end
 def get_hvac_fraction(orig_hpxml, dist_id)
   orig_hpxml.heating_systems.each do |orig_heating|
     next unless orig_heating.distribution_system_idref == dist_id
+    next unless orig_heating.fraction_heat_load_served > 0
 
     return orig_heating.fraction_heat_load_served
   end
   orig_hpxml.cooling_systems.each do |orig_cooling|
     next unless orig_cooling.distribution_system_idref == dist_id
+    next unless orig_cooling.fraction_cool_load_served > 0
 
     return orig_cooling.fraction_cool_load_served
   end
   orig_hpxml.heat_pumps.each do |orig_hp|
     next unless orig_hp.distribution_system_idref == dist_id
 
-    return orig_hp.fraction_cool_load_served
+    if orig_hp.fraction_cool_load_served > 0
+      return orig_hp.fraction_cool_load_served
+    elsif orig_hp.fraction_heat_load_served > 0
+      return orig_hp.fraction_heat_load_served
+    end
   end
   return
 end
