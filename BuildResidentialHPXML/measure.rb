@@ -1706,64 +1706,119 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     pv_system_tracking_choices << HPXML::PVTrackingType1AxisBacktracked
     pv_system_tracking_choices << HPXML::PVTrackingType2Axis
 
-    (1..Constants.MaxNumPhotovoltaics).to_a.each do |n|
-      arg = OpenStudio::Measure::OSArgument::makeChoiceArgument("pv_system_module_type_#{n}", pv_system_module_type_choices, true)
-      arg.setDisplayName("Photovoltaics #{n}: Module Type")
-      arg.setDescription("Module type of the PV system #{n}. Use 'none' if there is no PV system #{n}.")
-      arg.setDefaultValue('none')
-      args << arg
+    arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('pv_system_module_type_1', pv_system_module_type_choices, true)
+    arg.setDisplayName('Photovoltaics 1: Module Type')
+    arg.setDescription("Module type of the PV system 1. Use 'none' if there is no PV system 1.")
+    arg.setDefaultValue('none')
+    args << arg
 
-      arg = OpenStudio::Measure::OSArgument::makeChoiceArgument("pv_system_location_#{n}", pv_system_location_choices, true)
-      arg.setDisplayName("Photovoltaics #{n}: Location")
-      arg.setDescription("Location of the PV system #{n}.")
-      arg.setDefaultValue(HPXML::LocationRoof)
-      args << arg
+    arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('pv_system_location_1', pv_system_location_choices, true)
+    arg.setDisplayName('Photovoltaics 1: Location')
+    arg.setDescription('Location of the PV system 1.')
+    arg.setDefaultValue(HPXML::LocationRoof)
+    args << arg
 
-      arg = OpenStudio::Measure::OSArgument::makeChoiceArgument("pv_system_tracking_#{n}", pv_system_tracking_choices, true)
-      arg.setDisplayName("Photovoltaics #{n}: Tracking")
-      arg.setDescription("Tracking of the PV system #{n}.")
-      arg.setDefaultValue(HPXML::PVTrackingTypeFixed)
-      args << arg
+    arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('pv_system_tracking_1', pv_system_tracking_choices, true)
+    arg.setDisplayName('Photovoltaics 1: Tracking')
+    arg.setDescription('Tracking of the PV system 1.')
+    arg.setDefaultValue(HPXML::PVTrackingTypeFixed)
+    args << arg
 
-      arg = OpenStudio::Measure::OSArgument::makeDoubleArgument("pv_system_array_azimuth_#{n}", true)
-      arg.setDisplayName("Photovoltaics #{n}: Array Azimuth")
-      arg.setUnits('degrees')
-      arg.setDescription("Array azimuth of the PV system #{n}.")
-      arg.setDefaultValue(180)
-      args << arg
+    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('pv_system_array_azimuth_1', true)
+    arg.setDisplayName('Photovoltaics 1: Array Azimuth')
+    arg.setUnits('degrees')
+    arg.setDescription('Array azimuth of the PV system 1.')
+    arg.setDefaultValue(180)
+    args << arg
 
-      arg = OpenStudio::Measure::OSArgument::makeStringArgument("pv_system_array_tilt_#{n}", true)
-      arg.setDisplayName("Photovoltaics #{n}: Array Tilt")
-      arg.setUnits('degrees')
-      arg.setDescription("Array tilt of the PV system #{n}. Can also enter, e.g., RoofPitch, RoofPitch+20, Latitude, Latitude-15, etc.")
-      arg.setDefaultValue('RoofPitch')
-      args << arg
+    arg = OpenStudio::Measure::OSArgument::makeStringArgument('pv_system_array_tilt_1', true)
+    arg.setDisplayName('Photovoltaics 1: Array Tilt')
+    arg.setUnits('degrees')
+    arg.setDescription('Array tilt of the PV system 1. Can also enter, e.g., RoofPitch, RoofPitch+20, Latitude, Latitude-15, etc.')
+    arg.setDefaultValue('RoofPitch')
+    args << arg
 
-      arg = OpenStudio::Measure::OSArgument::makeDoubleArgument("pv_system_max_power_output_#{n}", true)
-      arg.setDisplayName("Photovoltaics #{n}: Maximum Power Output")
-      arg.setUnits('W')
-      arg.setDescription("Maximum power output of the PV system #{n}.")
-      arg.setDefaultValue(4000)
-      args << arg
+    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('pv_system_max_power_output_1', true)
+    arg.setDisplayName('Photovoltaics 1: Maximum Power Output')
+    arg.setUnits('W')
+    arg.setDescription('Maximum power output of the PV system 1.')
+    arg.setDefaultValue(4000)
+    args << arg
 
-      arg = OpenStudio::Measure::OSArgument::makeDoubleArgument("pv_system_inverter_efficiency_#{n}", false)
-      arg.setDisplayName("Photovoltaics #{n}: Inverter Efficiency")
-      arg.setUnits('Frac')
-      arg.setDescription("Inverter efficiency of the PV system #{n}.")
-      args << arg
+    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('pv_system_inverter_efficiency_1', false)
+    arg.setDisplayName('Photovoltaics 1: Inverter Efficiency')
+    arg.setUnits('Frac')
+    arg.setDescription('Inverter efficiency of the PV system 1.')
+    args << arg
 
-      arg = OpenStudio::Measure::OSArgument::makeDoubleArgument("pv_system_system_losses_fraction_#{n}", false)
-      arg.setDisplayName("Photovoltaics #{n}: System Losses Fraction")
-      arg.setUnits('Frac')
-      arg.setDescription("System losses fraction of the PV system #{n}.")
-      args << arg
+    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('pv_system_system_losses_fraction_1', false)
+    arg.setDisplayName('Photovoltaics 1: System Losses Fraction')
+    arg.setUnits('Frac')
+    arg.setDescription('System losses fraction of the PV system 1.')
+    args << arg
 
-      arg = OpenStudio::Measure::OSArgument::makeIntegerArgument("pv_system_year_modules_manufactured_#{n}", false)
-      arg.setDisplayName("Photovoltaics #{n}: Year Modules Manufactured")
-      arg.setUnits('Year')
-      arg.setDescription("Year modules manufactured of the PV system #{n}.")
-      args << arg
-    end
+    arg = OpenStudio::Measure::OSArgument::makeIntegerArgument('pv_system_year_modules_manufactured_1', false)
+    arg.setDisplayName('Photovoltaics 1: Year Modules Manufactured')
+    arg.setUnits('Year')
+    arg.setDescription('Year modules manufactured of the PV system 1.')
+    args << arg
+
+    arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('pv_system_module_type_2', pv_system_module_type_choices, true)
+    arg.setDisplayName('Photovoltaics 2: Module Type')
+    arg.setDescription("Module type of the PV system 2. Use 'none' if there is no PV system 2.")
+    arg.setDefaultValue('none')
+    args << arg
+
+    arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('pv_system_location_2', pv_system_location_choices, true)
+    arg.setDisplayName('Photovoltaics 2: Location')
+    arg.setDescription('Location of the PV system 2.')
+    arg.setDefaultValue(HPXML::LocationRoof)
+    args << arg
+
+    arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('pv_system_tracking_2', pv_system_tracking_choices, true)
+    arg.setDisplayName('Photovoltaics 2: Tracking')
+    arg.setDescription('Tracking of the PV system 2.')
+    arg.setDefaultValue(HPXML::PVTrackingTypeFixed)
+    args << arg
+
+    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('pv_system_array_azimuth_2', true)
+    arg.setDisplayName('Photovoltaics 2: Array Azimuth')
+    arg.setUnits('degrees')
+    arg.setDescription('Array azimuth of the PV system 2.')
+    arg.setDefaultValue(180)
+    args << arg
+
+    arg = OpenStudio::Measure::OSArgument::makeStringArgument('pv_system_array_tilt_2', true)
+    arg.setDisplayName('Photovoltaics 2: Array Tilt')
+    arg.setUnits('degrees')
+    arg.setDescription('Array tilt of the PV system 2. Can also enter, e.g., RoofPitch, RoofPitch+20, Latitude, Latitude-15, etc.')
+    arg.setDefaultValue('RoofPitch')
+    args << arg
+
+    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('pv_system_max_power_output_2', true)
+    arg.setDisplayName('Photovoltaics 2: Maximum Power Output')
+    arg.setUnits('W')
+    arg.setDescription('Maximum power output of the PV system 2.')
+    arg.setDefaultValue(4000)
+    args << arg
+
+    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('pv_system_inverter_efficiency_2', false)
+    arg.setDisplayName('Photovoltaics 2: Inverter Efficiency')
+    arg.setUnits('Frac')
+    arg.setDescription('Inverter efficiency of the PV system 2.')
+    args << arg
+
+    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('pv_system_system_losses_fraction_2', false)
+    arg.setDisplayName('Photovoltaics 2: System Losses Fraction')
+    arg.setUnits('Frac')
+    arg.setDescription('System losses fraction of the PV system 2.')
+    args << arg
+
+    arg = OpenStudio::Measure::OSArgument::makeIntegerArgument('pv_system_year_modules_manufactured_2', false)
+    arg.setDisplayName('Photovoltaics 2: Year Modules Manufactured')
+    arg.setUnits('Year')
+    arg.setDescription('Year modules manufactured of the PV system 2.')
+    args << arg
 
     arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('lighting_fraction_cfl_interior', true)
     arg.setDisplayName('Lighting: Fraction CFL Interior')
@@ -2804,6 +2859,7 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     args[:software_program_used] = runner.getOptionalStringArgumentValue('software_program_used', user_arguments)
     args[:software_program_version] = runner.getOptionalStringArgumentValue('software_program_version', user_arguments)
     args[:schedules_output_path] = runner.getStringArgumentValue('schedules_output_path', user_arguments)
+    args[:geometry_roof_pitch] = { '1:12' => 1.0 / 12.0, '2:12' => 2.0 / 12.0, '3:12' => 3.0 / 12.0, '4:12' => 4.0 / 12.0, '5:12' => 5.0 / 12.0, '6:12' => 6.0 / 12.0, '7:12' => 7.0 / 12.0, '8:12' => 8.0 / 12.0, '9:12' => 9.0 / 12.0, '10:12' => 10.0 / 12.0, '11:12' => 11.0 / 12.0, '12:12' => 12.0 / 12.0 }[args[:geometry_roof_pitch]]
 
     # Argument error checks
     warnings, errors = validate_arguments(args)
@@ -2904,7 +2960,7 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
              geometry_foundation_height: runner.getDoubleArgumentValue('geometry_foundation_height', user_arguments),
              geometry_foundation_height_above_grade: runner.getDoubleArgumentValue('geometry_foundation_height_above_grade', user_arguments),
              geometry_roof_type: runner.getStringArgumentValue('geometry_roof_type', user_arguments),
-             geometry_roof_pitch: { '1:12' => 1.0 / 12.0, '2:12' => 2.0 / 12.0, '3:12' => 3.0 / 12.0, '4:12' => 4.0 / 12.0, '5:12' => 5.0 / 12.0, '6:12' => 6.0 / 12.0, '7:12' => 7.0 / 12.0, '8:12' => 8.0 / 12.0, '9:12' => 9.0 / 12.0, '10:12' => 10.0 / 12.0, '11:12' => 11.0 / 12.0, '12:12' => 12.0 / 12.0 }[runner.getStringArgumentValue('geometry_roof_pitch', user_arguments)],
+             geometry_roof_pitch: runner.getStringArgumentValue('geometry_roof_pitch', user_arguments),
              geometry_roof_structure: runner.getStringArgumentValue('geometry_roof_structure', user_arguments),
              geometry_attic_type: runner.getStringArgumentValue('geometry_attic_type', user_arguments),
              geometry_eaves_depth: runner.getDoubleArgumentValue('geometry_eaves_depth', user_arguments),
@@ -2929,8 +2985,14 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
              roof_solar_absorptance: runner.getStringArgumentValue('roof_solar_absorptance', user_arguments),
              roof_emittance: runner.getDoubleArgumentValue('roof_emittance', user_arguments),
              roof_radiant_barrier: runner.getBoolArgumentValue('roof_radiant_barrier', user_arguments),
-             neighbor_distance: [runner.getDoubleArgumentValue('neighbor_front_distance', user_arguments), runner.getDoubleArgumentValue('neighbor_back_distance', user_arguments), runner.getDoubleArgumentValue('neighbor_left_distance', user_arguments), runner.getDoubleArgumentValue('neighbor_right_distance', user_arguments)],
-             neighbor_height: [runner.getStringArgumentValue('neighbor_front_height', user_arguments), runner.getStringArgumentValue('neighbor_back_height', user_arguments), runner.getStringArgumentValue('neighbor_left_height', user_arguments), runner.getStringArgumentValue('neighbor_right_height', user_arguments)],
+             neighbor_front_distance: runner.getDoubleArgumentValue('neighbor_front_distance', user_arguments),
+             neighbor_back_distance: runner.getDoubleArgumentValue('neighbor_back_distance', user_arguments),
+             neighbor_left_distance: runner.getDoubleArgumentValue('neighbor_left_distance', user_arguments),
+             neighbor_right_distance: runner.getDoubleArgumentValue('neighbor_right_distance', user_arguments),
+             neighbor_front_height: runner.getStringArgumentValue('neighbor_front_height', user_arguments),
+             neighbor_back_height: runner.getStringArgumentValue('neighbor_back_height', user_arguments),
+             neighbor_left_height: runner.getStringArgumentValue('neighbor_left_height', user_arguments),
+             neighbor_right_height: runner.getStringArgumentValue('neighbor_right_height', user_arguments),
              wall_type: runner.getStringArgumentValue('wall_type', user_arguments),
              wall_siding_type: runner.getOptionalStringArgumentValue('wall_siding_type', user_arguments),
              wall_color: runner.getStringArgumentValue('wall_color', user_arguments),
@@ -3078,15 +3140,24 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
              solar_thermal_collector_rated_thermal_losses: runner.getDoubleArgumentValue('solar_thermal_collector_rated_thermal_losses', user_arguments),
              solar_thermal_storage_volume: runner.getStringArgumentValue('solar_thermal_storage_volume', user_arguments),
              solar_thermal_solar_fraction: runner.getDoubleArgumentValue('solar_thermal_solar_fraction', user_arguments),
-             pv_system_module_type: (1..Constants.MaxNumPhotovoltaics).to_a.map { |n| runner.getStringArgumentValue("pv_system_module_type_#{n}", user_arguments) },
-             pv_system_location: (1..Constants.MaxNumPhotovoltaics).to_a.map { |n| runner.getStringArgumentValue("pv_system_location_#{n}", user_arguments) },
-             pv_system_tracking: (1..Constants.MaxNumPhotovoltaics).to_a.map { |n| runner.getStringArgumentValue("pv_system_tracking_#{n}", user_arguments) },
-             pv_system_array_azimuth: (1..Constants.MaxNumPhotovoltaics).to_a.map { |n| runner.getDoubleArgumentValue("pv_system_array_azimuth_#{n}", user_arguments) },
-             pv_system_array_tilt: (1..Constants.MaxNumPhotovoltaics).to_a.map { |n| runner.getStringArgumentValue("pv_system_array_tilt_#{n}", user_arguments) },
-             pv_system_max_power_output: (1..Constants.MaxNumPhotovoltaics).to_a.map { |n| runner.getDoubleArgumentValue("pv_system_max_power_output_#{n}", user_arguments) },
-             pv_system_inverter_efficiency: (1..Constants.MaxNumPhotovoltaics).to_a.map { |n| runner.getOptionalDoubleArgumentValue("pv_system_inverter_efficiency_#{n}", user_arguments) },
-             pv_system_system_losses_fraction: (1..Constants.MaxNumPhotovoltaics).to_a.map { |n| runner.getOptionalDoubleArgumentValue("pv_system_system_losses_fraction_#{n}", user_arguments) },
-             pv_system_year_modules_manufactured: (1..Constants.MaxNumPhotovoltaics).to_a.map { |n| runner.getOptionalIntegerArgumentValue("pv_system_year_modules_manufactured_#{n}", user_arguments) },
+             pv_system_module_type_1: runner.getStringArgumentValue('pv_system_module_type_1', user_arguments),
+             pv_system_location_1: runner.getStringArgumentValue('pv_system_location_1', user_arguments),
+             pv_system_tracking_1: runner.getStringArgumentValue('pv_system_tracking_1', user_arguments),
+             pv_system_array_azimuth_1: runner.getDoubleArgumentValue('pv_system_array_azimuth_1', user_arguments),
+             pv_system_array_tilt_1: runner.getStringArgumentValue('pv_system_array_tilt_1', user_arguments),
+             pv_system_max_power_output_1: runner.getDoubleArgumentValue('pv_system_max_power_output_1', user_arguments),
+             pv_system_inverter_efficiency_1: runner.getOptionalDoubleArgumentValue('pv_system_inverter_efficiency_1', user_arguments),
+             pv_system_system_losses_fraction_1: runner.getOptionalDoubleArgumentValue('pv_system_system_losses_fraction_1', user_arguments),
+             pv_system_year_modules_manufactured_1: runner.getOptionalIntegerArgumentValue('pv_system_year_modules_manufactured_1', user_arguments),
+             pv_system_module_type_2: runner.getStringArgumentValue('pv_system_module_type_2', user_arguments),
+             pv_system_location_2: runner.getStringArgumentValue('pv_system_location_2', user_arguments),
+             pv_system_tracking_2: runner.getStringArgumentValue('pv_system_tracking_2', user_arguments),
+             pv_system_array_azimuth_2: runner.getDoubleArgumentValue('pv_system_array_azimuth_2', user_arguments),
+             pv_system_array_tilt_2: runner.getStringArgumentValue('pv_system_array_tilt_2', user_arguments),
+             pv_system_max_power_output_2: runner.getDoubleArgumentValue('pv_system_max_power_output_2', user_arguments),
+             pv_system_inverter_efficiency_2: runner.getOptionalDoubleArgumentValue('pv_system_inverter_efficiency_2', user_arguments),
+             pv_system_system_losses_fraction_2: runner.getOptionalDoubleArgumentValue('pv_system_system_losses_fraction_2', user_arguments),
+             pv_system_year_modules_manufactured_2: runner.getOptionalIntegerArgumentValue('pv_system_year_modules_manufactured_2', user_arguments),
              lighting_fraction_cfl_interior: runner.getDoubleArgumentValue('lighting_fraction_cfl_interior', user_arguments),
              lighting_fraction_lfl_interior: runner.getDoubleArgumentValue('lighting_fraction_lfl_interior', user_arguments),
              lighting_fraction_led_interior: runner.getDoubleArgumentValue('lighting_fraction_led_interior', user_arguments),
@@ -3512,7 +3583,7 @@ class HPXMLFile
   end
 
   def self.set_neighbor_buildings(hpxml, runner, args)
-    args[:neighbor_distance].each_with_index do |distance, i|
+    [args[:neighbor_front_distance], args[:neighbor_back_distance], args[:neighbor_left_distance], args[:neighbor_right_distance]].each_with_index do |distance, i|
       next if distance == 0
 
       if i == 0 # front
@@ -3525,8 +3596,10 @@ class HPXMLFile
         azimuth = Geometry.get_abs_azimuth(Constants.CoordRelative, 270, args[:geometry_orientation], 0)
       end
 
-      if (distance > 0) && (args[:neighbor_height][i] != Constants.Auto)
-        height = Float(args[:neighbor_height][i])
+      neighbor_height = [args[:neighbor_front_height], args[:neighbor_back_height], args[:neighbor_left_height], args[:neighbor_right_height]]
+
+      if (distance > 0) && (neighbor_height[i] != Constants.Auto)
+        height = Float(neighbor_height[i])
       end
 
       hpxml.neighbor_buildings.add(azimuth: azimuth,
@@ -4592,28 +4665,28 @@ class HPXMLFile
   end
 
   def self.set_pv_systems(hpxml, runner, args, weather)
-    args[:pv_system_module_type].each_with_index do |module_type, i|
+    [args[:pv_system_module_type_1], args[:pv_system_module_type_2]].each_with_index do |module_type, i|
       next if module_type == 'none'
 
-      if args[:pv_system_inverter_efficiency][i].is_initialized
-        inverter_efficiency = args[:pv_system_inverter_efficiency][i].get
+      if [args[:pv_system_inverter_efficiency_1], args[:pv_system_inverter_efficiency_2]][i].is_initialized
+        inverter_efficiency = [args[:pv_system_inverter_efficiency_1], args[:pv_system_inverter_efficiency_2]][i].get
       end
 
-      if args[:pv_system_system_losses_fraction][i].is_initialized
-        system_losses_fraction = args[:pv_system_system_losses_fraction][i].get
+      if [args[:pv_system_system_losses_fraction_1], args[:pv_system_system_losses_fraction_2]][i].is_initialized
+        system_losses_fraction = [args[:pv_system_system_losses_fraction_1], args[:pv_system_system_losses_fraction_2]][i].get
       end
 
-      if args[:pv_system_year_modules_manufactured][i].is_initialized
-        year_modules_manufactured = args[:pv_system_year_modules_manufactured][i].get
+      if [args[:pv_system_year_modules_manufactured_1], args[:pv_system_year_modules_manufactured_2]][i].is_initialized
+        year_modules_manufactured = [args[:pv_system_year_modules_manufactured_1], args[:pv_system_year_modules_manufactured_2]][i].get
       end
 
       hpxml.pv_systems.add(id: "PVSystem#{i + 1}",
-                           location: args[:pv_system_location][i],
+                           location: [args[:pv_system_location_1], args[:pv_system_location_2]][i],
                            module_type: module_type,
-                           tracking: args[:pv_system_tracking][i],
-                           array_azimuth: args[:pv_system_array_azimuth][i],
-                           array_tilt: get_absolute_tilt(args[:pv_system_array_tilt][i], hpxml.roofs[-1].pitch, weather),
-                           max_power_output: args[:pv_system_max_power_output][i],
+                           tracking: [args[:pv_system_tracking_1], args[:pv_system_tracking_2]][i],
+                           array_azimuth: [args[:pv_system_array_azimuth_1], args[:pv_system_array_azimuth_2]][i],
+                           array_tilt: get_absolute_tilt([args[:pv_system_array_tilt_1], args[:pv_system_array_tilt_2]][i], hpxml.roofs[-1].pitch, weather),
+                           max_power_output: [args[:pv_system_max_power_output_1], args[:pv_system_max_power_output_2]][i],
                            inverter_efficiency: inverter_efficiency,
                            system_losses_fraction: system_losses_fraction,
                            year_modules_manufactured: year_modules_manufactured)
