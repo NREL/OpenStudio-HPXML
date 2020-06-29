@@ -3,8 +3,8 @@
   <schema_version>3.0</schema_version>
   <name>he_score_measure</name>
   <uid>013ca589-73ab-451f-afae-dbeb5304dea8</uid>
-  <version_id>b51de2ed-46e8-4ed5-9eea-44b8732ff7d8</version_id>
-  <version_modified>20200605T192559Z</version_modified>
+  <version_id>4fc4b008-5e80-4147-abf7-6336edd3628b</version_id>
+  <version_modified>20200629T215648Z</version_modified>
   <xml_checksum>2AF3A68E</xml_checksum>
   <class_name>HEScoreMeasure</class_name>
   <display_name>Apply Home Energy Score Ruleset</display_name>
@@ -63,12 +63,6 @@
       <checksum>F98E711A</checksum>
     </file>
     <file>
-      <filename>lu_hvac_equipment_efficiency.csv</filename>
-      <filetype>csv</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>F3F667EE</checksum>
-    </file>
-    <file>
       <filename>lu_roof_eff_rvalue.csv</filename>
       <filetype>csv</filetype>
       <usage_type>resource</usage_type>
@@ -98,16 +92,22 @@
       <checksum>17F99D73</checksum>
     </file>
     <file>
-      <filename>test_hescore_ruleset.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>test</usage_type>
-      <checksum>6EDB97E3</checksum>
+      <filename>lu_hvac_equipment_efficiency.csv</filename>
+      <filetype>csv</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>8711ABD8</checksum>
     </file>
     <file>
       <filename>HESruleset.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>AA8670D1</checksum>
+      <checksum>D02363C9</checksum>
+    </file>
+    <file>
+      <filename>test_hescore_ruleset.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>test</usage_type>
+      <checksum>1F5C1946</checksum>
     </file>
   </files>
 </measure>

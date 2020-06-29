@@ -337,10 +337,21 @@ class HEScoreRulesetTest < MiniTest::Test
     eff11 = lookup_hvac_efficiency(nil, 'air-to-air', 'electricity', 'HSPF', 'energy_star')
     assert_in_epsilon(eff11, 8.2, small_number)
 
+    eff10 = lookup_hvac_efficiency(nil, 'mini-split', 'electricity', 'SEER', 'energy_star')
+    assert_in_epsilon(eff10, 14.0, small_number)
+
+    eff11 = lookup_hvac_efficiency(nil, 'mini-split', 'electricity', 'HSPF', 'energy_star')
+    assert_in_epsilon(eff11, 8.2, small_number)
+
     err12 = assert_raises RuntimeError do
       lookup_hvac_efficiency(2010, 'central air conditioner', 'electricity', 'SEER', 'bogus_performance_id')
     end
     assert_match(/Invalid performance_id for HVAC lookup/, err12.message)
+
+    err13 = assert_raises RuntimeError do
+      lookup_hvac_efficiency(2010, 'mini-split', 'electricity', 'SEER')
+    end
+    assert_match(/Could not lookup default HVAC efficiency/, err13.message)
 
     assert_in_epsilon(
       lookup_hvac_efficiency(2010, 'air-to-air', 'electricity', 'SEER'),
