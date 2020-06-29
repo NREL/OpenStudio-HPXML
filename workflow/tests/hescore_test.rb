@@ -136,7 +136,7 @@ class HEScoreTest < Minitest::Unit::TestCase
                  HPXML::FuelTypeNaturalGas => 'natural_gas',
                  HPXML::FuelTypeOil => 'fuel_oil',
                  HPXML::FuelTypePropane => 'lpg',
-                 HPXML::FuelTypeWood => 'cord_wood',
+                 HPXML::FuelTypeWoodCord => 'cord_wood',
                  HPXML::FuelTypeWoodPellets => 'pellet_wood' }
 
     # Get HPXML values for Building Construction
