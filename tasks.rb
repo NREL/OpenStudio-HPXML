@@ -190,11 +190,13 @@ def create_osws
     'base-misc-large-uncommon-loads.osw' => 'base-enclosure-garage.osw',
     'base-misc-large-uncommon-loads2.osw' => 'base-misc-large-uncommon-loads.osw',
     'base-misc-neighbor-shading.osw' => 'base.osw',
-    'base-misc-runperiod-1-month.osw' => 'base.osw',
-    'base-misc-timestep-10-mins.osw' => 'base.osw',
     'base-misc-usage-multiplier.osw' => 'base.osw',
     'base-misc-whole-house-fan.osw' => 'base.osw',
     'base-pv.osw' => 'base.osw',
+    'base-simcontrol-daylight-saving-custom.osw' => 'base.osw',
+    'base-simcontrol-daylight-saving-disabled.osw' => 'base.osw',
+    'base-simcontrol-runperiod-1-month.osw' => 'base.osw',
+    'base-simcontrol-timestep-10-mins.osw' => 'base.osw',
 
     # Extra test files that don't correspond with sample files
     'extra-auto.osw' => 'base.osw',
@@ -1725,11 +1727,6 @@ def get_values(osw_file, step)
     step.setArgument('neighbor_back_distance', 10)
     step.setArgument('neighbor_front_distance', 15)
     step.setArgument('neighbor_front_height', '12')
-  elsif ['base-misc-runperiod-1-month.osw'].include? osw_file
-    step.setArgument('simulation_control_end_month', 1)
-    step.setArgument('simulation_control_end_day_of_month', 31)
-  elsif ['base-misc-timestep-10-mins.osw'].include? osw_file
-    step.setArgument('simulation_control_timestep', '10')
   elsif ['base-misc-usage-multiplier.osw'].include? osw_file
     step.setArgument('water_fixtures_usage_multiplier', 0.9)
     step.setArgument('lighting_usage_multiplier', 0.9)
@@ -1747,6 +1744,19 @@ def get_values(osw_file, step)
     step.setArgument('pv_system_module_type_2', HPXML::PVModuleTypePremium)
     step.setArgument('pv_system_array_azimuth_2', 90)
     step.setArgument('pv_system_max_power_output_2', 1500)
+  elsif ['base-simcontrol-daylight-saving-custom.osw'].include? osw_file
+    step.setArgument('simulation_control_daylight_saving_enabled', true)
+    step.setArgument('simulation_control_daylight_saving_begin_month', 3)
+    step.setArgument('simulation_control_daylight_saving_begin_day_of_month', 10)
+    step.setArgument('simulation_control_daylight_saving_end_month', 11)
+    step.setArgument('simulation_control_daylight_saving_end_day_of_month', 6)
+  elsif ['base-simcontrol-daylight-saving-disabled.osw'].include? osw_file
+    step.setArgument('simulation_control_daylight_saving_enabled', false)
+  elsif ['base-simcontrol-runperiod-1-month.osw'].include? osw_file
+    step.setArgument('simulation_control_run_period_end_month', 1)
+    step.setArgument('simulation_control_run_period_end_day_of_month', 31)
+  elsif ['base-simcontrol-timestep-10-mins.osw'].include? osw_file
+    step.setArgument('simulation_control_timestep', '10')
   elsif ['extra-auto.osw'].include? osw_file
     step.setArgument('geometry_num_occupants', Constants.Auto)
     step.setArgument('ducts_supply_location', Constants.Auto)
