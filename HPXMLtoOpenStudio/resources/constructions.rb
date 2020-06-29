@@ -1531,7 +1531,7 @@ class Construction
       # New material
       mat = OpenStudio::Model::SimpleGlazing.new(model)
       mat.setName(name)
-      puts mat.setUFactor(UnitConversions.convert(material.ufactor, 'Btu/(hr*ft^2*F)', 'W/(m^2*K)'))
+      mat.setUFactor(UnitConversions.convert(material.ufactor, 'Btu/(hr*ft^2*F)', 'W/(m^2*K)'))
       mat.setSolarHeatGainCoefficient(material.shgc)
     else
       # Material already exists?
