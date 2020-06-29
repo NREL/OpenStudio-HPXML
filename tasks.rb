@@ -203,7 +203,8 @@ def create_osws
     'extra-pv-roofpitch.osw' => 'base.osw',
     'extra-dhw-solar-latitude.osw' => 'base.osw',
     'extra-second-refrigerator.osw' => 'base.osw',
-    'extra-second-heating-system.osw' => 'base.osw',
+    'extra-second-heating-system-portable-heater.osw' => 'base.osw',
+    'extra-second-heating-system-fireplace.osw' => 'base.osw',
 
     'invalid_files/non-electric-heat-pump-water-heater.osw' => 'base.osw',
     'invalid_files/multiple-heating-and-cooling-systems.osw' => 'base.osw',
@@ -1787,14 +1788,22 @@ def get_values(osw_file, step)
     step.setArgument('solar_thermal_collector_tilt', 'latitude-15')
   elsif ['extra-second-refrigerator.osw'].include? osw_file
     step.setArgument('extra_refrigerator_present', true)
-  elsif ['extra-second-heating-system.osw'].include? osw_file
+  elsif ['extra-second-heating-system-portable-heater.osw'].include? osw_file
     step.setArgument('heating_system_fuel', HPXML::FuelTypeElectricity)
+    step.setArgument('heating_system_heating_capacity', '48000.0')
     step.setArgument('heating_system_fraction_heat_load_served', 0.75)
     step.setArgument('ducts_supply_leakage_value', 0.0)
     step.setArgument('ducts_return_leakage_value', 0.0)
     step.setArgument('ducts_supply_location', HPXML::LocationLivingSpace)
     step.setArgument('ducts_return_location', HPXML::LocationLivingSpace)
     step.setArgument('heating_system_type_2', HPXML::HVACTypePortableHeater)
+    step.setArgument('heating_system_heating_capacity_2', '16000.0')
+  elsif ['extra-second-heating-system-fireplace.osw'].include? osw_file
+    step.setArgument('heating_system_type', HPXML::HVACTypeElectricResistance)
+    step.setArgument('heating_system_fuel', HPXML::FuelTypeElectricity)
+    step.setArgument('heating_system_heating_capacity', '48000.0')
+    step.setArgument('heating_system_fraction_heat_load_served', 0.75)
+    step.setArgument('heating_system_type_2', HPXML::HVACTypeFireplace)
     step.setArgument('heating_system_heating_capacity_2', '16000.0')
   elsif ['invalid_files/non-electric-heat-pump-water-heater.osw'].include? osw_file
     step.setArgument('water_heater_type', HPXML::WaterHeaterTypeHeatPump)
