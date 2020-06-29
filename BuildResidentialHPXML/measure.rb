@@ -2792,17 +2792,84 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     end
 
     # Check for correct versions of OS
-    os_version = '3.0.0'
+    os_version = '3.0.1'
     if OpenStudio.openStudioVersion != os_version
       fail "OpenStudio version #{os_version} is required."
     end
 
     # assign the user inputs to variables
-    args = { hpxml_path: runner.getStringArgumentValue('hpxml_path', user_arguments),
-             weather_dir: runner.getStringArgumentValue('weather_dir', user_arguments),
-             software_program_used: runner.getOptionalStringArgumentValue('software_program_used', user_arguments),
-             software_program_version: runner.getOptionalStringArgumentValue('software_program_version', user_arguments),
-             simulation_control_timestep: runner.getOptionalIntegerArgumentValue('simulation_control_timestep', user_arguments),
+    args = get_argument_values(runner, user_arguments)
+    args[:hpxml_path] = runner.getStringArgumentValue('hpxml_path', user_arguments)
+    args[:weather_dir] = runner.getStringArgumentValue('weather_dir', user_arguments)
+    args[:software_program_used] = runner.getOptionalStringArgumentValue('software_program_used', user_arguments)
+    args[:software_program_version] = runner.getOptionalStringArgumentValue('software_program_version', user_arguments)
+    args[:schedules_output_path] = runner.getStringArgumentValue('schedules_output_path', user_arguments)
+
+    # Argument error checks
+    warnings, errors = validate_arguments(args)
+    unless warnings.empty?
+      warnings.each do |warning|
+        runner.registerWarning(warning)
+      end
+    end
+    unless errors.empty?
+      errors.each do |error|
+        runner.registerError(error)
+      end
+      return false
+    end
+
+    # Get weather object
+    weather_dir = args[:weather_dir]
+    unless (Pathname.new weather_dir).absolute?
+      weather_dir = File.expand_path(File.join(File.dirname(__FILE__), '..', weather_dir))
+    end
+    epw_path = File.join(weather_dir, args[:weather_station_epw_filepath])
+    if not File.exist?(epw_path)
+      runner.registerError("Could not find EPW file at '#{epw_path}'.")
+      return false
+    end
+    cache_path = epw_path.gsub('.epw', '-cache.csv')
+    if not File.exist?(cache_path)
+      # Process weather file to create cache .csv
+      runner.registerWarning("'#{cache_path}' could not be found; regenerating it.")
+      epw_file = OpenStudio::EpwFile.new(epw_path)
+      OpenStudio::Model::WeatherFile.setWeatherFile(model, epw_file)
+      weather = WeatherProcess.new(model, runner)
+      File.open(cache_path, 'wb') do |file|
+        weather.dump_to_csv(file)
+      end
+    else
+      weather = WeatherProcess.new(nil, nil, cache_path)
+    end
+
+    # Create HPXML file
+    hpxml_doc = HPXMLFile.create(runner, model, args, weather)
+    if not hpxml_doc
+      runner.registerError('Unsuccessful creation of HPXML file.')
+      return false
+    end
+
+    hpxml_path = args[:hpxml_path]
+    unless (Pathname.new hpxml_path).absolute?
+      hpxml_path = File.expand_path(File.join(File.dirname(__FILE__), hpxml_path))
+    end
+
+    # Check for invalid HPXML file
+    schemas_dir = File.join(File.dirname(__FILE__), '../HPXMLtoOpenStudio/resources')
+    skip_validation = false
+    if not skip_validation
+      if not validate_hpxml(runner, hpxml_path, hpxml_doc, schemas_dir)
+        return false
+      end
+    end
+
+    XMLHelper.write_file(hpxml_doc, hpxml_path)
+    runner.registerInfo("Wrote file: #{hpxml_path}")
+  end
+
+  def get_argument_values(runner, user_arguments)
+    return { simulation_control_timestep: runner.getOptionalIntegerArgumentValue('simulation_control_timestep', user_arguments),
              simulation_control_run_period_begin_month: runner.getOptionalIntegerArgumentValue('simulation_control_run_period_begin_month', user_arguments),
              simulation_control_run_period_begin_day_of_month: runner.getOptionalIntegerArgumentValue('simulation_control_run_period_begin_day_of_month', user_arguments),
              simulation_control_run_period_end_month: runner.getOptionalIntegerArgumentValue('simulation_control_run_period_end_month', user_arguments),
@@ -2812,7 +2879,6 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
              simulation_control_daylight_saving_begin_day_of_month: runner.getOptionalIntegerArgumentValue('simulation_control_daylight_saving_begin_day_of_month', user_arguments),
              simulation_control_daylight_saving_end_month: runner.getOptionalIntegerArgumentValue('simulation_control_daylight_saving_end_month', user_arguments),
              simulation_control_daylight_saving_end_day_of_month: runner.getOptionalIntegerArgumentValue('simulation_control_daylight_saving_end_day_of_month', user_arguments),
-             schedules_output_path: runner.getStringArgumentValue('schedules_output_path', user_arguments),
              weather_station_epw_filepath: runner.getStringArgumentValue('weather_station_epw_filepath', user_arguments),
              site_type: runner.getOptionalStringArgumentValue('site_type', user_arguments),
              geometry_unit_type: runner.getStringArgumentValue('geometry_unit_type', user_arguments),
@@ -3174,68 +3240,6 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
              hot_tub_heater_weekday_fractions: runner.getStringArgumentValue('hot_tub_heater_weekday_fractions', user_arguments),
              hot_tub_heater_weekend_fractions: runner.getStringArgumentValue('hot_tub_heater_weekend_fractions', user_arguments),
              hot_tub_heater_monthly_multipliers: runner.getStringArgumentValue('hot_tub_heater_monthly_multipliers', user_arguments) }
-
-    # Argument error checks
-    warnings, errors = validate_arguments(args)
-    unless warnings.empty?
-      warnings.each do |warning|
-        runner.registerWarning(warning)
-      end
-    end
-    unless errors.empty?
-      errors.each do |error|
-        runner.registerError(error)
-      end
-      return false
-    end
-
-    # Get weather object
-    weather_dir = args[:weather_dir]
-    unless (Pathname.new weather_dir).absolute?
-      weather_dir = File.expand_path(File.join(File.dirname(__FILE__), '..', weather_dir))
-    end
-    epw_path = File.join(weather_dir, args[:weather_station_epw_filepath])
-    if not File.exist?(epw_path)
-      runner.registerError("Could not find EPW file at '#{epw_path}'.")
-      return false
-    end
-    cache_path = epw_path.gsub('.epw', '-cache.csv')
-    if not File.exist?(cache_path)
-      # Process weather file to create cache .csv
-      runner.registerWarning("'#{cache_path}' could not be found; regenerating it.")
-      epw_file = OpenStudio::EpwFile.new(epw_path)
-      OpenStudio::Model::WeatherFile.setWeatherFile(model, epw_file)
-      weather = WeatherProcess.new(model, runner)
-      File.open(cache_path, 'wb') do |file|
-        weather.dump_to_csv(file)
-      end
-    else
-      weather = WeatherProcess.new(nil, nil, cache_path)
-    end
-
-    # Create HPXML file
-    hpxml_doc = HPXMLFile.create(runner, model, args, weather)
-    if not hpxml_doc
-      runner.registerError('Unsuccessful creation of HPXML file.')
-      return false
-    end
-
-    hpxml_path = args[:hpxml_path]
-    unless (Pathname.new hpxml_path).absolute?
-      hpxml_path = File.expand_path(File.join(File.dirname(__FILE__), hpxml_path))
-    end
-
-    # Check for invalid HPXML file
-    schemas_dir = File.join(File.dirname(__FILE__), '../HPXMLtoOpenStudio/resources')
-    skip_validation = false
-    if not skip_validation
-      if not validate_hpxml(runner, hpxml_path, hpxml_doc, schemas_dir)
-        return false
-      end
-    end
-
-    XMLHelper.write_file(hpxml_doc, hpxml_path)
-    runner.registerInfo("Wrote file: #{hpxml_path}")
   end
 
   def validate_arguments(args)
