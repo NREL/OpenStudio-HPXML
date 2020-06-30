@@ -25,6 +25,8 @@ def run_workflow(basedir, rundir, hpxml, debug, hourly_outputs)
   puts 'Creating input...'
 
   OpenStudio::Logger.instance.standardOutLogger.setLogLevel(OpenStudio::Fatal)
+  os_log = OpenStudio::StringStreamLogSink.new
+  os_log.setLogLevel(OpenStudio::Warn)
 
   model = OpenStudio::Model::Model.new
   runner = OpenStudio::Measure::OSRunner.new(OpenStudio::WorkflowJSON.new)
@@ -58,6 +60,7 @@ def run_workflow(basedir, rundir, hpxml, debug, hourly_outputs)
   # Apply measures
   success = apply_measures(measures_dir, measures, runner, model, true, 'OpenStudio::Measure::ModelMeasure')
   report_measure_errors_warnings(runner, rundir, debug)
+  report_os_warnings(os_log, rundir)
 
   if not success
     fail 'Simulation unsuccessful.'
@@ -88,6 +91,7 @@ def run_workflow(basedir, rundir, hpxml, debug, hourly_outputs)
   runner.setLastEnergyPlusSqlFilePath(File.join(rundir, 'eplusout.sql'))
   success = apply_measures(measures_dir, measures, runner, model, true, 'OpenStudio::Measure::ReportingMeasure')
   report_measure_errors_warnings(runner, rundir, debug)
+  report_os_warnings(os_log, rundir)
 
   annual_csv_path = File.join(rundir, 'results_annual.csv')
   if File.exist? annual_csv_path
@@ -131,6 +135,19 @@ def report_ft_errors_warnings(forward_translator, designdir)
       f << "FT Error: #{s.logMessage}\n"
     end
   end
+end
+
+def report_os_warnings(os_log, rundir)
+  File.open(File.join(rundir, 'run.log'), 'a') do |f|
+    os_log.logMessages.each do |s|
+      next if s.logMessage.include?("Object of type 'Schedule:Constant' and named 'Always") && s.logMessage.include?('points to an object named') && s.logMessage.include?('but that object cannot be located')
+      next if s.logMessage.include? 'Cannot find current Workflow Step'
+      next if s.logMessage.include? 'WorkflowStepResult value called with undefined stepResult'
+
+      f << "OS Message: #{s.logMessage}\n"
+    end
+  end
+  os_log.resetStringStream
 end
 
 hourly_types = ['ALL', 'fuels', 'enduses', 'hotwater', 'loads', 'componentloads', 'temperatures', 'airflows', 'weather']
