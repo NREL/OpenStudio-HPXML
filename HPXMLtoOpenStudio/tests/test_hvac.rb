@@ -9,6 +9,13 @@ require_relative '../measure.rb'
 require_relative '../resources/util.rb'
 
 class HPXMLtoOpenStudioHVACTest < MiniTest::Test
+  model_measure = OpenStudio::MeasureType.new('ModelMeasure')
+  measure_steps = OpenStudio::MeasureStepVector.new
+  measure_steps.push(OpenStudio::MeasureStep.new('HPXMLtoOpenStudio'))
+  workflow_json = OpenStudio::WorkflowJSON.new
+  workflow_json.setMeasureSteps(model_measure, measure_steps)
+  @@runner = OpenStudio::Measure::OSRunner.new(workflow_json)
+
   def sample_files_dir
     return File.join(File.dirname(__FILE__), '..', '..', 'workflow', 'sample_files')
   end
@@ -401,13 +408,7 @@ class HPXMLtoOpenStudioHVACTest < MiniTest::Test
     # create an instance of the measure
     measure = HPXMLtoOpenStudio.new
 
-    model_measure = OpenStudio::MeasureType.new('ModelMeasure')
-    measure_steps = OpenStudio::MeasureStepVector.new
-    measure_steps.push(OpenStudio::MeasureStep.new('HPXMLtoOpenStudio'))
-    workflow_json = OpenStudio::WorkflowJSON.new
-    workflow_json.setMeasureSteps(model_measure, measure_steps)
-
-    runner = OpenStudio::Measure::OSRunner.new(workflow_json)
+    @@runner.reset # otherwise you get "Step already started"
     model = OpenStudio::Model::Model.new
 
     # get arguments
@@ -424,8 +425,8 @@ class HPXMLtoOpenStudioHVACTest < MiniTest::Test
     end
 
     # run the measure
-    measure.run(model, runner, argument_map)
-    result = runner.result
+    measure.run(model, @@runner, argument_map)
+    result = @@runner.result
 
     # show the output
     show_output(result) unless result.value.valueName == 'Success'
