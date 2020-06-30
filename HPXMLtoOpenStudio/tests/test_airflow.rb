@@ -332,7 +332,13 @@ class HPXMLtoOpenStudioAirflowTest < MiniTest::Test
     # create an instance of the measure
     measure = HPXMLtoOpenStudio.new
 
-    runner = OpenStudio::Measure::OSRunner.new(OpenStudio::WorkflowJSON.new)
+    model_measure = OpenStudio::MeasureType.new('ModelMeasure')
+    measure_steps = OpenStudio::MeasureStepVector.new
+    measure_steps.push(OpenStudio::MeasureStep.new('HPXMLtoOpenStudio'))
+    workflow_json = OpenStudio::WorkflowJSON.new
+    workflow_json.setMeasureSteps(model_measure, measure_steps)
+
+    runner = OpenStudio::Measure::OSRunner.new(workflow_json)
     model = OpenStudio::Model::Model.new
 
     # get arguments
