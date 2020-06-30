@@ -108,9 +108,9 @@ def run_workflow(basedir, rundir, hpxml, debug, hourly_outputs)
   end
 end
 
-def report_measure_errors_warnings(runner, designdir, debug)
+def report_measure_errors_warnings(runner, rundir, debug)
   # Report warnings/errors
-  File.open(File.join(designdir, 'run.log'), 'w') do |f|
+  File.open(File.join(rundir, 'run.log'), 'w') do |f|
     if debug
       runner.result.stepInfo.each do |s|
         f << "Info: #{s}\n"
@@ -125,9 +125,9 @@ def report_measure_errors_warnings(runner, designdir, debug)
   end
 end
 
-def report_ft_errors_warnings(forward_translator, designdir)
+def report_ft_errors_warnings(forward_translator, rundir)
   # Report warnings/errors
-  File.open(File.join(designdir, 'run.log'), 'a') do |f|
+  File.open(File.join(rundir, 'run.log'), 'a') do |f|
     forward_translator.warnings.each do |s|
       f << "FT Warning: #{s.logMessage}\n"
     end
