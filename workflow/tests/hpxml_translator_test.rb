@@ -49,7 +49,7 @@ class HPXMLTest < MiniTest::Test
     Dir.mkdir(results_dir)
     _write_summary_results(results_dir, all_results)
     _write_hvac_sizing_results(results_dir, all_sizing_results)
-    _write_ashrae_140_results(results_dir, all_results, ashrae_140_dir) # FUTURE: Add Pub 002 stringent acceptance criteria
+    _write_and_check_ashrae_140_results(results_dir, all_results, ashrae_140_dir)
   end
 
   def test_run_simulation_rb
@@ -1233,27 +1233,146 @@ class HPXMLTest < MiniTest::Test
     puts "Wrote HVAC sizing results to #{csv_out}."
   end
 
-  def _write_ashrae_140_results(results_dir, all_results, ashrae_140_dir)
+  def _write_and_check_ashrae_140_results(results_dir, all_results, ashrae_140_dir)
     require 'csv'
     csv_out = File.join(results_dir, 'results_ashrae_140.csv')
 
+    htg_loads = {}
+    clg_loads = {}
     CSV.open(csv_out, 'w') do |csv|
       csv << ['Test Case', 'Annual Heating Load [MMBtu]', 'Annual Cooling Load [MMBtu]']
       all_results.sort.each do |xml, xml_results|
         next unless xml.include? ashrae_140_dir
         next unless xml.include? 'C.xml'
 
-        csv << [File.basename(xml), xml_results['Load: Heating (MBtu)'].round(2), 'N/A']
+        htg_load = xml_results['Load: Heating (MBtu)'].round(2)
+        csv << [File.basename(xml), htg_load, 'N/A']
+        test_name = File.basename(xml, File.extname(xml))
+        htg_loads[test_name] = htg_load
       end
       all_results.sort.each do |xml, xml_results|
         next unless xml.include? ashrae_140_dir
         next unless xml.include? 'L.xml'
 
-        csv << [File.basename(xml), 'N/A', xml_results['Load: Cooling (MBtu)'].round(2)]
+        clg_load = xml_results['Load: Cooling (MBtu)'].round(2)
+        csv << [File.basename(xml), 'N/A', clg_load]
+        test_name = File.basename(xml, File.extname(xml))
+        clg_loads[test_name] = clg_load
       end
     end
 
     puts "Wrote ASHRAE 140 results to #{csv_out}."
+
+    # TODO: Uncomment stringent HERS test ranges when E+ version w/
+    # simple window model bugfix is available
+
+    # # Annual Heating Loads
+    # assert_operator(htg_loads['L100AC'], :<=, 59.87)
+    # assert_operator(htg_loads['L100AC'], :>=, 45.28)
+    # assert_operator(htg_loads['L110AC'], :<=, 80.16)
+    # assert_operator(htg_loads['L110AC'], :>=, 71.51)
+    # assert_operator(htg_loads['L120AC'], :<=, 46.86)
+    # assert_operator(htg_loads['L120AC'], :>=, 33.76)
+    # assert_operator(htg_loads['L130AC'], :<=, 48.38)
+    # assert_operator(htg_loads['L130AC'], :>=, 37.75)
+    # assert_operator(htg_loads['L140AC'], :<=, 50.78)
+    # assert_operator(htg_loads['L140AC'], :>=, 44.86)
+    # assert_operator(htg_loads['L150AC'], :<=, 53.91)
+    # assert_operator(htg_loads['L150AC'], :>=, 35.50)
+    # assert_operator(htg_loads['L155AC'], :<=, 56.39)
+    # assert_operator(htg_loads['L155AC'], :>=, 39.17)
+    # assert_operator(htg_loads['L160AC'], :<=, 61.86)
+    # assert_operator(htg_loads['L160AC'], :>=, 45.63)
+    # assert_operator(htg_loads['L170AC'], :<=, 74.39)
+    # assert_operator(htg_loads['L170AC'], :>=, 54.16)
+    # assert_operator(htg_loads['L200AC'], :<=, 137.77)
+    # assert_operator(htg_loads['L200AC'], :>=, 116.32)
+    # assert_operator(htg_loads['L202AC'], :<=, 146.82)
+    # assert_operator(htg_loads['L202AC'], :>=, 121.72)
+    # assert_operator(htg_loads['L302XC'], :<=, 67.50)
+    # assert_operator(htg_loads['L302XC'], :>=, 14.52)
+    # assert_operator(htg_loads['L304XC'], :<=, 55.59)
+    # assert_operator(htg_loads['L304XC'], :>=, 18.84)
+    # assert_operator(htg_loads['L322XC'], :<=, 87.82)
+    # assert_operator(htg_loads['L322XC'], :>=, 16.79)
+    # assert_operator(htg_loads['L324XC'], :<=, 52.50)
+    # assert_operator(htg_loads['L324XC'], :>=, 30.50)
+
+    # # Annual Heating Load Deltas
+    # assert_operator(htg_loads['L110AC'] - htg_loads['L100AC'], :<=, 28.08)
+    # assert_operator(htg_loads['L110AC'] - htg_loads['L100AC'], :>=, 18.66)
+    # assert_operator(htg_loads['L120AC'] - htg_loads['L100AC'], :<=, -9.17)
+    # assert_operator(htg_loads['L120AC'] - htg_loads['L100AC'], :>=, -15.62)
+    # assert_operator(htg_loads['L130AC'] - htg_loads['L100AC'], :<=, -5.68)
+    # assert_operator(htg_loads['L130AC'] - htg_loads['L100AC'], :>=, -12.81)
+    # assert_operator(htg_loads['L140AC'] - htg_loads['L100AC'], :<=, 1.86)
+    # assert_operator(htg_loads['L140AC'] - htg_loads['L100AC'], :>=, -11.58)
+    # assert_operator(htg_loads['L150AC'] - htg_loads['L100AC'], :<=, -3.75)
+    # assert_operator(htg_loads['L150AC'] - htg_loads['L100AC'], :>=, -11.48)
+    # assert_operator(htg_loads['L155AC'] - htg_loads['L150AC'], :<=, 6.68)
+    # assert_operator(htg_loads['L155AC'] - htg_loads['L150AC'], :>=, -0.39)
+    # assert_operator(htg_loads['L160AC'] - htg_loads['L100AC'], :<=, 4.45)
+    # assert_operator(htg_loads['L160AC'] - htg_loads['L100AC'], :>=, -1.84)
+    # assert_operator(htg_loads['L170AC'] - htg_loads['L100AC'], :<=, 16.15)
+    # assert_operator(htg_loads['L170AC'] - htg_loads['L100AC'], :>=, 8.01)
+    # assert_operator(htg_loads['L200AC'] - htg_loads['L100AC'], :<=, 79.57)
+    # assert_operator(htg_loads['L200AC'] - htg_loads['L100AC'], :>=, 70.04)
+    # assert_operator(htg_loads['L202AC'] - htg_loads['L200AC'], :<=, 11.10)
+    # assert_operator(htg_loads['L202AC'] - htg_loads['L200AC'], :>=, 3.57)
+    # assert_operator(htg_loads['L302XC'] - htg_loads['L100AC'], :<=, 8.83)
+    # assert_operator(htg_loads['L302XC'] - htg_loads['L100AC'], :>=, -31.96)
+    # assert_operator(htg_loads['L302XC'] - htg_loads['L304XC'], :<=, 12.18)
+    # assert_operator(htg_loads['L302XC'] - htg_loads['L304XC'], :>=, -4.60)
+    # assert_operator(htg_loads['L322XC'] - htg_loads['L100AC'], :<=, 30.76)
+    # assert_operator(htg_loads['L322XC'] - htg_loads['L100AC'], :>=, -31.30)
+    # assert_operator(htg_loads['L322XC'] - htg_loads['L324XC'], :<=, 35.86)
+    # assert_operator(htg_loads['L322XC'] - htg_loads['L324XC'], :>=, -14.25)
+
+    # # Annual Cooling Loads
+    # assert_operator(clg_loads['L100AL'], :<=, 59.99)
+    # assert_operator(clg_loads['L100AL'], :>=, 39.53)
+    # assert_operator(clg_loads['L110AL'], :<=, 62.53)
+    # assert_operator(clg_loads['L110AL'], :>=, 43.86)
+    # assert_operator(clg_loads['L120AL'], :<=, 52.85)
+    # assert_operator(clg_loads['L120AL'], :>=, 38.08)
+    # assert_operator(clg_loads['L130AL'], :<=, 42.94)
+    # assert_operator(clg_loads['L130AL'], :>=, 29.19)
+    # assert_operator(clg_loads['L140AL'], :<=, 28.59)
+    # assert_operator(clg_loads['L140AL'], :>=, 19.44)
+    # assert_operator(clg_loads['L150AL'], :<=, 77.56)
+    # assert_operator(clg_loads['L150AL'], :>=, 48.53)
+    # assert_operator(clg_loads['L155AL'], :<=, 62.12)
+    # assert_operator(clg_loads['L155AL'], :>=, 33.19)
+    # assert_operator(clg_loads['L160AL'], :<=, 69.47)
+    # assert_operator(clg_loads['L160AL'], :>=, 49.62)
+    # assert_operator(clg_loads['L170AL'], :<=, 47.64)
+    # assert_operator(clg_loads['L170AL'], :>=, 32.00)
+    # assert_operator(clg_loads['L200AL'], :<=, 74.01)
+    # assert_operator(clg_loads['L200AL'], :>=, 52.49)
+    # assert_operator(clg_loads['L202AL'], :<=, 60.19)
+    # assert_operator(clg_loads['L202AL'], :>=, 44.99)
+
+    # # Annual Cooling Load Deltas
+    # assert_operator(clg_loads['L110AL'] - clg_loads['L100AL'], :<=, 6.26)
+    # assert_operator(clg_loads['L110AL'] - clg_loads['L100AL'], :>=, 0.44)
+    # assert_operator(clg_loads['L120AL'] - clg_loads['L100AL'], :<=, -0.29)
+    # assert_operator(clg_loads['L120AL'] - clg_loads['L100AL'], :>=, -8.13)
+    # assert_operator(clg_loads['L130AL'] - clg_loads['L100AL'], :<=, -9.53)
+    # assert_operator(clg_loads['L130AL'] - clg_loads['L100AL'], :>=, -18.50)
+    # assert_operator(clg_loads['L140AL'] - clg_loads['L100AL'], :<=, -19.76)
+    # assert_operator(clg_loads['L140AL'] - clg_loads['L100AL'], :>=, -31.75)
+    # assert_operator(clg_loads['L150AL'] - clg_loads['L100AL'], :<=, 18.26)
+    # assert_operator(clg_loads['L150AL'] - clg_loads['L100AL'], :>=, 8.83)
+    # assert_operator(clg_loads['L155AL'] - clg_loads['L150AL'], :<=, -12.68)
+    # assert_operator(clg_loads['L155AL'] - clg_loads['L150AL'], :>=, -18.01)
+    # assert_operator(clg_loads['L160AL'] - clg_loads['L100AL'], :<=, 12.58)
+    # assert_operator(clg_loads['L160AL'] - clg_loads['L100AL'], :>=, 7.06)
+    # assert_operator(clg_loads['L170AL'] - clg_loads['L100AL'], :<=, -6.49)
+    # assert_operator(clg_loads['L170AL'] - clg_loads['L100AL'], :>=, -13.75)
+    # assert_operator(clg_loads['L200AL'] - clg_loads['L100AL'], :<=, 16.46)
+    # assert_operator(clg_loads['L200AL'] - clg_loads['L100AL'], :>=, 10.34)
+    # assert_operator(clg_loads['L200AL'] - clg_loads['L202AL'], :<=, 14.76)
+    # assert_operator(clg_loads['L200AL'] - clg_loads['L202AL'], :>=, 5.93)
   end
 
   def _test_schema_validation(this_dir, xml)
