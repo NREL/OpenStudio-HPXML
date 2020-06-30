@@ -36,6 +36,8 @@ def run_design(basedir, rundir, design, resultsdir, hpxml, debug, skip_simulatio
   Dir.mkdir(rundir)
 
   OpenStudio::Logger.instance.standardOutLogger.setLogLevel(OpenStudio::Fatal)
+  os_log = OpenStudio::StringStreamLogSink.new
+  os_log.setLogLevel(OpenStudio::Warn)
 
   output_hpxml_path = get_output_hpxml_path(resultsdir, rundir)
 
@@ -80,6 +82,7 @@ def run_design(basedir, rundir, design, resultsdir, hpxml, debug, skip_simulatio
   # Apply measures
   success = apply_measures(measures_dir, measures, runner, model, true, 'OpenStudio::Measure::ModelMeasure')
   report_measure_errors_warnings(runner, rundir, debug)
+  report_os_warnings(os_log, rundir)
 
   return if skip_simulation
 
@@ -105,7 +108,7 @@ def run_design(basedir, rundir, design, resultsdir, hpxml, debug, skip_simulatio
 
   # getEnergyPlusDirectory can be unreliable, using getOpenStudioCLI instead
   ep_path = File.absolute_path(File.join(OpenStudio.getOpenStudioCLI.to_s, '..', '..', 'EnergyPlus', 'energyplus'))
-  command = "cd #{rundir} && #{ep_path} -w in.epw in.idf > stdout-energyplus"
+  command = "cd \"#{rundir}\" && \"#{ep_path}\" -w in.epw in.idf > stdout-energyplus"
   system(command, err: File::NULL)
 
   puts 'Processing output...'
@@ -114,6 +117,7 @@ def run_design(basedir, rundir, design, resultsdir, hpxml, debug, skip_simulatio
   runner.setLastEnergyPlusSqlFilePath(File.join(rundir, 'eplusout.sql'))
   success = apply_measures(measures_dir, measures, runner, model, true, 'OpenStudio::Measure::ReportingMeasure')
   report_measure_errors_warnings(runner, rundir, debug)
+  report_os_warnings(os_log, rundir)
 
   if not success
     fail 'Processing output unsuccessful.'
@@ -211,6 +215,19 @@ def report_ft_errors_warnings(forward_translator, rundir)
       f << "FT Error: #{s.logMessage}\n"
     end
   end
+end
+
+def report_os_warnings(os_log, rundir)
+  File.open(File.join(rundir, 'run.log'), 'a') do |f|
+    os_log.logMessages.each do |s|
+      next if s.logMessage.include?("Object of type 'Schedule:Constant' and named 'Always") && s.logMessage.include?('points to an object named') && s.logMessage.include?('but that object cannot be located')
+      next if s.logMessage.include? 'Cannot find current Workflow Step'
+      next if s.logMessage.include? 'WorkflowStepResult value called with undefined stepResult'
+
+      f << "OS Message: #{s.logMessage}\n"
+    end
+  end
+  os_log.resetStringStream
 end
 
 def download_epws

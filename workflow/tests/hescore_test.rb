@@ -80,6 +80,15 @@ class HEScoreTest < Minitest::Unit::TestCase
       _test_schema_validation(parent_dir, xml, schemas_dir)
       _test_schema_validation(parent_dir, hes_hpxml, schemas_dir)
 
+      # Check run.log for messages
+      File.readlines(File.join(parent_dir, 'HEScoreDesign', 'run.log')).each do |log_line|
+        next if log_line.include? 'Warning: Could not load nokogiri, no HPXML validation performed.'
+        # FIXME: Remove this warning when window/skylight U-factors are reasonable
+        next if log_line.include?('Warning: Glazing U-factor') && log_line.include?('above maximum expected value. U-factor decreased')
+
+        flunk "Unexpected warning found in run.log: #{log_line}"
+      end
+
       # Add results.json to zip file for storage on CI
       zipfile.addFile(OpenStudio::Path.new(results_json), OpenStudio::Path.new(File.basename(xml.gsub('.xml', '_results.json'))))
 
