@@ -2,7 +2,6 @@
 # http://nrel.github.io/OpenStudio-user-documentation/reference/measure_writing_guide/
 
 require 'openstudio'
-require 'oga'
 
 require_relative 'resources/geometry'
 require_relative 'resources/schedules'
@@ -2845,6 +2844,8 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     if !runner.validateUserArguments(arguments(model), user_arguments)
       return false
     end
+
+    require 'oga'
 
     # Check for correct versions of OS
     os_version = '3.0.1'
