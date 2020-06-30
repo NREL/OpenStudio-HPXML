@@ -19,7 +19,7 @@ def apply_measures(measures_dir, measures, runner, model, show_measure_calls = t
         print_measure_call(args, measure_subdir, runner)
       end
 
-      if not run_measure(model, measure, argument_map, runner)
+      if not run_measure(model, measure, argument_map, runner, measure_subdir)
         return false
       end
     end
@@ -150,15 +150,24 @@ def get_argument_map(model, measure, provided_args, lookup_file, measure_name, r
   return argument_map
 end
 
-def run_measure(model, measure, argument_map, runner)
+def run_measure(model, measure, argument_map, runner, measure_subdir)
   require 'openstudio'
   begin
     # run the measure
-    runner_child = OpenStudio::Measure::OSRunner.new(OpenStudio::WorkflowJSON.new)
+    super_class_name = measure.class.superclass.name.to_s
+
+    measure_type = super_class_name.split('::')[-1]
+    model_measure = OpenStudio::MeasureType.new(measure_type)
+    measure_steps = OpenStudio::MeasureStepVector.new
+    measure_steps.push(OpenStudio::MeasureStep.new(measure_subdir))
+    workflow_json = OpenStudio::WorkflowJSON.new
+    workflow_json.setMeasureSteps(model_measure, measure_steps)
+
+    runner_child = OpenStudio::Measure::OSRunner.new(workflow_json)
     if model.instance_of? OpenStudio::Workspace
       runner_child.setLastOpenStudioModel(runner.lastOpenStudioModel.get)
     end
-    if measure.class.superclass.name.to_s == 'OpenStudio::Measure::ReportingMeasure'
+    if super_class_name == 'OpenStudio::Measure::ReportingMeasure'
       runner_child.setLastOpenStudioModel(model)
       runner_child.setLastEnergyPlusSqlFilePath(runner.lastEnergyPlusSqlFile.get.path)
       measure.run(runner_child, argument_map)
