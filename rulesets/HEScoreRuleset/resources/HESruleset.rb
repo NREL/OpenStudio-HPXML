@@ -569,7 +569,7 @@ class HEScoreRuleset
       fraction_cool_load_served = orig_hp.fraction_cool_load_served
       fraction_heat_load_served = orig_hp.fraction_heat_load_served
 
-      if heat_pump_type == HPXML::HVACTypeHeatPumpAirToAir
+      if [HPXML::HVACTypeHeatPumpAirToAir, HPXML::HVACTypeHeatPumpMiniSplit].include? heat_pump_type
         if not cooling_efficiency_seer.nil?
           # Do nothing, we have the SEER
         elsif energy_star
@@ -900,6 +900,7 @@ def lookup_hvac_efficiency(year, hvac_type, fuel_type, units, performance_id = '
   type_id = { HPXML::HVACTypeCentralAirConditioner => 'split_dx',
               HPXML::HVACTypeRoomAirConditioner => 'packaged_dx',
               HPXML::HVACTypeHeatPumpAirToAir => 'heat_pump',
+              HPXML::HVACTypeHeatPumpMiniSplit => 'mini_split',
               HPXML::HVACTypeFurnace => 'central_furnace',
               HPXML::HVACTypeWallFurnace => 'wall_furnace',
               HPXML::HVACTypeBoiler => 'boiler' }[hvac_type]
