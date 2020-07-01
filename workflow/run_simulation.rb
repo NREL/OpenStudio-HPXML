@@ -226,6 +226,7 @@ def report_os_warnings(os_log, rundir)
       next if s.logMessage.include? 'WorkflowStepResult value called with undefined stepResult'
       next if s.logMessage.include? 'Data will be treated as typical (TMY)'
       next if s.logMessage.include? "'Propane' is deprecated for Coil_Heating_GasFields:FuelType, use 'Propane' instead"
+      next if s.logMessage.include? 'Appears there are no design condition fields in the EPW file'
 
       f << "OS Message: #{s.logMessage}\n"
     end
