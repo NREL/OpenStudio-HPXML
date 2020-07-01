@@ -314,7 +314,7 @@ class HPXMLTest < MiniTest::Test
 
     # Apply measure
     success = apply_measures(measures_dir, measures, runner, model)
-    sizing_results = _get_sizing_results(runner)
+    sizing_results = _get_sizing_results(runner) unless expect_error
     report_measure_errors_warnings(runner, rundir, false)
 
     if expect_error
