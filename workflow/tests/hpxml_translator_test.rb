@@ -314,6 +314,7 @@ class HPXMLTest < MiniTest::Test
 
     # Apply measure
     success = apply_measures(measures_dir, measures, runner, model)
+    sizing_results = _get_sizing_results(runner)
     report_measure_errors_warnings(runner, rundir, false)
 
     if expect_error
@@ -431,9 +432,6 @@ class HPXMLTest < MiniTest::Test
 
     # Verify simulation outputs
     _verify_simulation_outputs(runner, rundir, xml, results)
-
-    # Get HVAC sizing outputs
-    sizing_results = _get_sizing_results(runner)
 
     return results, sizing_results
   end
