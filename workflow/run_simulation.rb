@@ -225,6 +225,7 @@ def report_os_warnings(os_log, rundir)
       next if s.logMessage.include? 'Cannot find current Workflow Step'
       next if s.logMessage.include? 'WorkflowStepResult value called with undefined stepResult'
       next if s.logMessage.include? 'Data will be treated as typical (TMY)'
+      next if s.logMessage.include? "'Propane' is deprecated for Coil_Heating_GasFields:FuelType, use 'Propane' instead"
 
       f << "OS Message: #{s.logMessage}\n"
     end
