@@ -440,7 +440,7 @@ class HPXMLTest < MiniTest::Test
 
   def report_measure_errors_warnings(runner, rundir, debug)
     # Report warnings/errors
-    File.open(File.join(rundir, 'run.log'), 'w') do |f|
+    File.open(File.join(rundir, 'run.log'), 'a') do |f|
       if debug
         runner.result.stepInfo.each do |s|
           f << "Info: #{s}\n"
@@ -453,6 +453,7 @@ class HPXMLTest < MiniTest::Test
         f << "Error: #{s}\n"
       end
     end
+    runner.reset
   end
 
   def report_ft_errors_warnings(forward_translator, rundir)
