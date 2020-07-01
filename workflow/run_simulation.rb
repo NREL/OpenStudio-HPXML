@@ -190,7 +190,7 @@ end
 
 def report_measure_errors_warnings(runner, rundir, debug)
   # Report warnings/errors
-  File.open(File.join(rundir, 'run.log'), 'w') do |f|
+  File.open(File.join(rundir, 'run.log'), 'a') do |f|
     if debug
       runner.result.stepInfo.each do |s|
         f << "Info: #{s}\n"
@@ -203,6 +203,7 @@ def report_measure_errors_warnings(runner, rundir, debug)
       f << "Error: #{s}\n"
     end
   end
+  runner.reset
 end
 
 def report_ft_errors_warnings(forward_translator, rundir)
@@ -223,6 +224,7 @@ def report_os_warnings(os_log, rundir)
       next if s.logMessage.include?("Object of type 'Schedule:Constant' and named 'Always") && s.logMessage.include?('points to an object named') && s.logMessage.include?('but that object cannot be located')
       next if s.logMessage.include? 'Cannot find current Workflow Step'
       next if s.logMessage.include? 'WorkflowStepResult value called with undefined stepResult'
+      next if s.logMessage.include? 'Data will be treated as typical (TMY)'
 
       f << "OS Message: #{s.logMessage}\n"
     end
