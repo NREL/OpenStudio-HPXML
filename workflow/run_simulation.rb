@@ -31,19 +31,8 @@ def get_output_hpxml_path(resultsdir, rundir)
 end
 
 def run_design(basedir, rundir, design, resultsdir, hpxml, debug, skip_simulation)
-  puts 'Creating input...'
-
-  Dir.mkdir(rundir)
-
-  OpenStudio::Logger.instance.standardOutLogger.setLogLevel(OpenStudio::Fatal)
-  os_log = OpenStudio::StringStreamLogSink.new
-  os_log.setLogLevel(OpenStudio::Warn)
-
-  output_hpxml_path = get_output_hpxml_path(resultsdir, rundir)
-
-  model = OpenStudio::Model::Model.new
-  runner = OpenStudio::Measure::OSRunner.new(OpenStudio::WorkflowJSON.new)
   measures_dir = File.join(basedir, '..')
+  output_hpxml_path = get_output_hpxml_path(resultsdir, rundir)
 
   measures = {}
 
@@ -79,49 +68,9 @@ def run_design(basedir, rundir, design, resultsdir, hpxml, debug, skip_simulatio
     update_args_hash(measures, measure_subdir, args)
   end
 
-  # Apply measures
-  success = apply_measures(measures_dir, measures, runner, model, true, 'OpenStudio::Measure::ModelMeasure')
-  report_measure_errors_warnings(runner, rundir, debug)
-  report_os_warnings(os_log, rundir)
+  run_hpxml_workflow(basedir, rundir, hpxml, measures, measures_dir, debug, [], skip_simulation)
 
   return if skip_simulation
-
-  if not success
-    fail 'Simulation unsuccessful.'
-  end
-
-  # Translate model to IDF
-  forward_translator = OpenStudio::EnergyPlus::ForwardTranslator.new
-  forward_translator.setExcludeLCCObjects(true)
-  model_idf = forward_translator.translateModel(model)
-  report_ft_errors_warnings(forward_translator, rundir)
-
-  # Apply reporting measure output requests
-  apply_energyplus_output_requests(measures_dir, measures, runner, model, model_idf)
-
-  # Write IDF to file
-  File.open(File.join(rundir, 'in.idf'), 'w') { |f| f << model_idf.to_s }
-
-  return if skip_simulation
-
-  puts 'Running simulation...'
-
-  # getEnergyPlusDirectory can be unreliable, using getOpenStudioCLI instead
-  ep_path = File.absolute_path(File.join(OpenStudio.getOpenStudioCLI.to_s, '..', '..', 'EnergyPlus', 'energyplus'))
-  command = "cd \"#{rundir}\" && \"#{ep_path}\" -w in.epw in.idf > stdout-energyplus"
-  system(command, err: File::NULL)
-
-  puts 'Processing output...'
-
-  # Apply reporting measures
-  runner.setLastEnergyPlusSqlFilePath(File.join(rundir, 'eplusout.sql'))
-  success = apply_measures(measures_dir, measures, runner, model, true, 'OpenStudio::Measure::ReportingMeasure')
-  report_measure_errors_warnings(runner, rundir, debug)
-  report_os_warnings(os_log, rundir)
-
-  if not success
-    fail 'Processing output unsuccessful.'
-  end
 
   units_map = get_units_map()
   output_map = get_output_map()
@@ -186,52 +135,6 @@ def run_design(basedir, rundir, design, resultsdir, hpxml, debug, skip_simulatio
   File.open(File.join(resultsdir, 'results.json'), 'w') do |f|
     f.write(JSON.pretty_generate(data))
   end
-end
-
-def report_measure_errors_warnings(runner, rundir, debug)
-  # Report warnings/errors
-  File.open(File.join(rundir, 'run.log'), 'a') do |f|
-    if debug
-      runner.result.stepInfo.each do |s|
-        f << "Info: #{s}\n"
-      end
-    end
-    runner.result.stepWarnings.each do |s|
-      f << "Warning: #{s}\n"
-    end
-    runner.result.stepErrors.each do |s|
-      f << "Error: #{s}\n"
-    end
-  end
-  runner.reset
-end
-
-def report_ft_errors_warnings(forward_translator, rundir)
-  # Report warnings/errors
-  File.open(File.join(rundir, 'run.log'), 'a') do |f|
-    forward_translator.warnings.each do |s|
-      f << "FT Warning: #{s.logMessage}\n"
-    end
-    forward_translator.errors.each do |s|
-      f << "FT Error: #{s.logMessage}\n"
-    end
-  end
-end
-
-def report_os_warnings(os_log, rundir)
-  File.open(File.join(rundir, 'run.log'), 'a') do |f|
-    os_log.logMessages.each do |s|
-      next if s.logMessage.include?("Object of type 'Schedule:Constant' and named 'Always") && s.logMessage.include?('points to an object named') && s.logMessage.include?('but that object cannot be located')
-      next if s.logMessage.include? 'Cannot find current Workflow Step'
-      next if s.logMessage.include? 'WorkflowStepResult value called with undefined stepResult'
-      next if s.logMessage.include? 'Data will be treated as typical (TMY)'
-      next if s.logMessage.include? "'Propane' is deprecated for Coil_Heating_GasFields:FuelType, use 'Propane' instead"
-      next if s.logMessage.include? 'Appears there are no design condition fields in the EPW file'
-
-      f << "OS Message: #{s.logMessage}\n"
-    end
-  end
-  os_log.resetStringStream
 end
 
 def download_epws
@@ -364,7 +267,7 @@ Dir.mkdir(resultsdir)
 puts "HPXML: #{options[:hpxml]}"
 design = 'HEScoreDesign'
 rundir = get_rundir(options[:output_dir], design)
-rm_path(rundir)
+
 rundir = run_design(basedir, rundir, design, resultsdir, options[:hpxml], options[:debug], options[:skip_simulation])
 
 puts "Completed in #{(Time.now - start_time).round(1)} seconds."
