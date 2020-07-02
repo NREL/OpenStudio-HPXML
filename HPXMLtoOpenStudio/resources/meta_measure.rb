@@ -1,9 +1,11 @@
 # frozen_string_literal: true
 
+require 'fileutils'
+
 def run_hpxml_workflow(rundir, hpxml, measures, measures_dir, debug: false, output_vars: [],
                        output_meters: [], run_measures_only: false, print_prefix: '')
   rm_path(rundir)
-  Dir.mkdir(rundir)
+  FileUtils.mkdir_p(rundir)
 
   # Use print instead of puts in here in case running inside
   # a Parallel process (see https://stackoverflow.com/a/5044669)
