@@ -469,12 +469,15 @@ class SimulationOutputReport < OpenStudio::Measure::ReportingMeasure
     end
 
     # Unmet loads (heating/cooling energy delivered by backup ideal air system)
-    sys_ids = []
-    @model.getZoneHVACIdealLoadsAirSystems.each do |ideal_sys|
-      sys_ids << ideal_sys.name.to_s.upcase
-    end
+    key = Constants.ObjectNameIdealAirSystemResidual.upcase
     @unmet_loads.each do |load_type, unmet_load|
-      unmet_load.annual_output = get_report_variable_data_annual(sys_ids, [unmet_load.variable])
+      unmet_load.annual_output = get_report_variable_data_annual([key], [unmet_load.variable])
+    end
+
+    # Ideal system loads (expected fraction of loads that are not met by HVAC)
+    key = Constants.ObjectNameIdealAirSystem.upcase
+    @ideal_system_loads.each do |load_type, unmet_load|
+      unmet_load.annual_output = get_report_variable_data_annual([key], [unmet_load.variable])
     end
 
     # Peak Building Space Heating/Cooling Loads (total heating/cooling energy delivered including backup ideal air system)
@@ -766,6 +769,7 @@ class SimulationOutputReport < OpenStudio::Measure::ReportingMeasure
   def check_for_errors(runner, outputs)
     all_total = @fuels.values.map { |x| x.annual_output }.inject(:+)
     all_total += @unmet_loads.values.map { |x| x.annual_output }.inject(:+)
+    all_total += @ideal_system_loads.values.map { |x| x.annual_output }.inject(:+)
     if all_total == 0
       runner.registerError('Simulation unsuccessful.')
       return false
@@ -1543,11 +1547,12 @@ class SimulationOutputReport < OpenStudio::Measure::ReportingMeasure
 
   def add_object_output_variables(timeseries_frequency)
     hvac_output_vars = [OutputVars.SpaceHeatingElectricity,
-                        OutputVars.SpaceHeatingNaturalGas,
-                        OutputVars.SpaceHeatingFuelOil,
-                        OutputVars.SpaceHeatingPropane,
-                        OutputVars.SpaceHeatingWoodCord,
-                        OutputVars.SpaceHeatingWoodPellets,
+                        OutputVars.SpaceHeatingFuel(EPlus::FuelTypeNaturalGas),
+                        OutputVars.SpaceHeatingFuel(EPlus::FuelTypeOil),
+                        OutputVars.SpaceHeatingFuel(EPlus::FuelTypePropane),
+                        OutputVars.SpaceHeatingFuel(EPlus::FuelTypeWoodCord),
+                        OutputVars.SpaceHeatingFuel(EPlus::FuelTypeWoodPellets),
+                        OutputVars.SpaceHeatingFuel(EPlus::FuelTypeCoal),
                         OutputVars.SpaceHeatingDFHPPrimaryLoad,
                         OutputVars.SpaceHeatingDFHPBackupLoad,
                         OutputVars.SpaceCoolingElectricity,
@@ -1556,11 +1561,12 @@ class SimulationOutputReport < OpenStudio::Measure::ReportingMeasure
     dhw_output_vars = [OutputVars.WaterHeatingElectricity,
                        OutputVars.WaterHeatingElectricityRecircPump,
                        OutputVars.WaterHeatingElectricitySolarThermalPump,
-                       OutputVars.WaterHeatingNaturalGas,
-                       OutputVars.WaterHeatingFuelOil,
-                       OutputVars.WaterHeatingPropane,
-                       OutputVars.WaterHeatingWoodCord,
-                       OutputVars.WaterHeatingWoodPellets,
+                       OutputVars.WaterHeatingFuel(EPlus::FuelTypeNaturalGas),
+                       OutputVars.WaterHeatingFuel(EPlus::FuelTypeOil),
+                       OutputVars.WaterHeatingFuel(EPlus::FuelTypePropane),
+                       OutputVars.WaterHeatingFuel(EPlus::FuelTypeWoodCord),
+                       OutputVars.WaterHeatingFuel(EPlus::FuelTypeWoodPellets),
+                       OutputVars.WaterHeatingFuel(EPlus::FuelTypeCoal),
                        OutputVars.WaterHeatingLoad,
                        OutputVars.WaterHeatingLoadTankLosses,
                        OutputVars.WaterHeaterLoadDesuperheater,
@@ -1777,15 +1783,23 @@ class SimulationOutputReport < OpenStudio::Measure::ReportingMeasure
       return 'kBtu'
     end
 
+    ep_fuel_names = { FT::Gas => EPlus.output_fuel_map(EPlus::FuelTypeNaturalGas),
+                      FT::Oil => EPlus.output_fuel_map(EPlus::FuelTypeOil),
+                      FT::Propane => EPlus.output_fuel_map(EPlus::FuelTypePropane),
+                      FT::WoodCord => EPlus.output_fuel_map(EPlus::FuelTypeWoodCord),
+                      FT::WoodPellets => EPlus.output_fuel_map(EPlus::FuelTypeWoodPellets),
+                      FT::Coal => EPlus.output_fuel_map(EPlus::FuelTypeCoal) }
+
     # Fuels
 
     @fuels = {}
     @fuels[FT::Elec] = Fuel.new(meter: 'Electricity:Facility')
-    @fuels[FT::Gas] = Fuel.new(meter: 'Gas:Facility')
-    @fuels[FT::Oil] = Fuel.new(meter: 'FuelOil#1:Facility')
-    @fuels[FT::Propane] = Fuel.new(meter: 'Propane:Facility')
-    @fuels[FT::WoodCord] = Fuel.new(meter: 'OtherFuel1:Facility')
-    @fuels[FT::WoodPellets] = Fuel.new(meter: 'OtherFuel2:Facility')
+    @fuels[FT::Gas] = Fuel.new(meter: "#{ep_fuel_names[FT::Gas]}:Facility")
+    @fuels[FT::Oil] = Fuel.new(meter: "#{ep_fuel_names[FT::Oil]}:Facility")
+    @fuels[FT::Propane] = Fuel.new(meter: "#{ep_fuel_names[FT::Propane]}:Facility")
+    @fuels[FT::WoodCord] = Fuel.new(meter: "#{ep_fuel_names[FT::WoodCord]}:Facility")
+    @fuels[FT::WoodPellets] = Fuel.new(meter: "#{ep_fuel_names[FT::WoodPellets]}:Facility")
+    @fuels[FT::Coal] = Fuel.new(meter: "#{ep_fuel_names[FT::Coal]}:Facility")
 
     @fuels.each do |fuel_type, fuel|
       fuel.name = "#{fuel_type}: Total"
@@ -1831,52 +1845,61 @@ class SimulationOutputReport < OpenStudio::Measure::ReportingMeasure
       @end_uses[[FT::Elec, EUT::HotTubPump]] = EndUse.new(meter: "#{Constants.ObjectNameMiscHotTubPump}:InteriorEquipment:Electricity")
     end
     @end_uses[[FT::Elec, EUT::PV]] = EndUse.new(meter: 'ElectricityProduced:Facility')
-    @end_uses[[FT::Gas, EUT::Heating]] = EndUse.new(variable: OutputVars.SpaceHeatingNaturalGas)
-    @end_uses[[FT::Gas, EUT::HotWater]] = EndUse.new(variable: OutputVars.WaterHeatingNaturalGas)
-    @end_uses[[FT::Gas, EUT::ClothesDryer]] = EndUse.new(meter: "#{Constants.ObjectNameClothesDryer}:InteriorEquipment:Gas")
-    @end_uses[[FT::Gas, EUT::RangeOven]] = EndUse.new(meter: "#{Constants.ObjectNameCookingRange}:InteriorEquipment:Gas")
+    @end_uses[[FT::Gas, EUT::Heating]] = EndUse.new(variable: OutputVars.SpaceHeatingFuel(EPlus::FuelTypeNaturalGas))
+    @end_uses[[FT::Gas, EUT::HotWater]] = EndUse.new(variable: OutputVars.WaterHeatingFuel(EPlus::FuelTypeNaturalGas))
+    @end_uses[[FT::Gas, EUT::ClothesDryer]] = EndUse.new(meter: "#{Constants.ObjectNameClothesDryer}:InteriorEquipment:#{ep_fuel_names[FT::Gas]}")
+    @end_uses[[FT::Gas, EUT::RangeOven]] = EndUse.new(meter: "#{Constants.ObjectNameCookingRange}:InteriorEquipment:#{ep_fuel_names[FT::Gas]}")
     if @eri_design.nil? # Skip end uses not used by ERI
-      @end_uses[[FT::Gas, EUT::PoolHeater]] = EndUse.new(meter: "#{Constants.ObjectNameMiscPoolHeater}:InteriorEquipment:Gas")
-      @end_uses[[FT::Gas, EUT::HotTubHeater]] = EndUse.new(meter: "#{Constants.ObjectNameMiscHotTubHeater}:InteriorEquipment:Gas")
-      @end_uses[[FT::Gas, EUT::Grill]] = EndUse.new(meter: "#{Constants.ObjectNameMiscGrill}:InteriorEquipment:Gas")
-      @end_uses[[FT::Gas, EUT::Lighting]] = EndUse.new(meter: "#{Constants.ObjectNameMiscLighting}:InteriorEquipment:Gas")
-      @end_uses[[FT::Gas, EUT::Fireplace]] = EndUse.new(meter: "#{Constants.ObjectNameMiscFireplace}:InteriorEquipment:Gas")
+      @end_uses[[FT::Gas, EUT::PoolHeater]] = EndUse.new(meter: "#{Constants.ObjectNameMiscPoolHeater}:InteriorEquipment:#{ep_fuel_names[FT::Gas]}")
+      @end_uses[[FT::Gas, EUT::HotTubHeater]] = EndUse.new(meter: "#{Constants.ObjectNameMiscHotTubHeater}:InteriorEquipment:#{ep_fuel_names[FT::Gas]}")
+      @end_uses[[FT::Gas, EUT::Grill]] = EndUse.new(meter: "#{Constants.ObjectNameMiscGrill}:InteriorEquipment:#{ep_fuel_names[FT::Gas]}")
+      @end_uses[[FT::Gas, EUT::Lighting]] = EndUse.new(meter: "#{Constants.ObjectNameMiscLighting}:InteriorEquipment:#{ep_fuel_names[FT::Gas]}")
+      @end_uses[[FT::Gas, EUT::Fireplace]] = EndUse.new(meter: "#{Constants.ObjectNameMiscFireplace}:InteriorEquipment:#{ep_fuel_names[FT::Gas]}")
     end
-    @end_uses[[FT::Oil, EUT::Heating]] = EndUse.new(variable: OutputVars.SpaceHeatingFuelOil)
-    @end_uses[[FT::Oil, EUT::HotWater]] = EndUse.new(variable: OutputVars.WaterHeatingFuelOil)
-    @end_uses[[FT::Oil, EUT::ClothesDryer]] = EndUse.new(meter: "#{Constants.ObjectNameClothesDryer}:InteriorEquipment:FuelOil#1")
-    @end_uses[[FT::Oil, EUT::RangeOven]] = EndUse.new(meter: "#{Constants.ObjectNameCookingRange}:InteriorEquipment:FuelOil#1")
+    @end_uses[[FT::Oil, EUT::Heating]] = EndUse.new(variable: OutputVars.SpaceHeatingFuel(EPlus::FuelTypeOil))
+    @end_uses[[FT::Oil, EUT::HotWater]] = EndUse.new(variable: OutputVars.WaterHeatingFuel(EPlus::FuelTypeOil))
+    @end_uses[[FT::Oil, EUT::ClothesDryer]] = EndUse.new(meter: "#{Constants.ObjectNameClothesDryer}:InteriorEquipment:#{ep_fuel_names[FT::Oil]}")
+    @end_uses[[FT::Oil, EUT::RangeOven]] = EndUse.new(meter: "#{Constants.ObjectNameCookingRange}:InteriorEquipment:#{ep_fuel_names[FT::Oil]}")
     if @eri_design.nil? # Skip end uses not used by ERI
-      @end_uses[[FT::Oil, EUT::Grill]] = EndUse.new(meter: "#{Constants.ObjectNameMiscGrill}:InteriorEquipment:FuelOil#1")
-      @end_uses[[FT::Oil, EUT::Lighting]] = EndUse.new(meter: "#{Constants.ObjectNameMiscLighting}:InteriorEquipment:FuelOil#1")
-      @end_uses[[FT::Oil, EUT::Fireplace]] = EndUse.new(meter: "#{Constants.ObjectNameMiscFireplace}:InteriorEquipment:FuelOil#1")
+      @end_uses[[FT::Oil, EUT::Grill]] = EndUse.new(meter: "#{Constants.ObjectNameMiscGrill}:InteriorEquipment:#{ep_fuel_names[FT::Oil]}")
+      @end_uses[[FT::Oil, EUT::Lighting]] = EndUse.new(meter: "#{Constants.ObjectNameMiscLighting}:InteriorEquipment:#{ep_fuel_names[FT::Oil]}")
+      @end_uses[[FT::Oil, EUT::Fireplace]] = EndUse.new(meter: "#{Constants.ObjectNameMiscFireplace}:InteriorEquipment:#{ep_fuel_names[FT::Oil]}")
     end
-    @end_uses[[FT::Propane, EUT::Heating]] = EndUse.new(variable: OutputVars.SpaceHeatingPropane)
-    @end_uses[[FT::Propane, EUT::HotWater]] = EndUse.new(variable: OutputVars.WaterHeatingPropane)
-    @end_uses[[FT::Propane, EUT::ClothesDryer]] = EndUse.new(meter: "#{Constants.ObjectNameClothesDryer}:InteriorEquipment:Propane")
-    @end_uses[[FT::Propane, EUT::RangeOven]] = EndUse.new(meter: "#{Constants.ObjectNameCookingRange}:InteriorEquipment:Propane")
+    @end_uses[[FT::Propane, EUT::Heating]] = EndUse.new(variable: OutputVars.SpaceHeatingFuel(EPlus::FuelTypePropane))
+    @end_uses[[FT::Propane, EUT::HotWater]] = EndUse.new(variable: OutputVars.WaterHeatingFuel(EPlus::FuelTypePropane))
+    @end_uses[[FT::Propane, EUT::ClothesDryer]] = EndUse.new(meter: "#{Constants.ObjectNameClothesDryer}:InteriorEquipment:#{ep_fuel_names[FT::Propane]}")
+    @end_uses[[FT::Propane, EUT::RangeOven]] = EndUse.new(meter: "#{Constants.ObjectNameCookingRange}:InteriorEquipment:#{ep_fuel_names[FT::Propane]}")
     if @eri_design.nil? # Skip end uses not used by ERI
-      @end_uses[[FT::Propane, EUT::Grill]] = EndUse.new(meter: "#{Constants.ObjectNameMiscGrill}:InteriorEquipment:Propane")
-      @end_uses[[FT::Propane, EUT::Lighting]] = EndUse.new(meter: "#{Constants.ObjectNameMiscLighting}:InteriorEquipment:Propane")
-      @end_uses[[FT::Propane, EUT::Fireplace]] = EndUse.new(meter: "#{Constants.ObjectNameMiscFireplace}:InteriorEquipment:Propane")
+      @end_uses[[FT::Propane, EUT::Grill]] = EndUse.new(meter: "#{Constants.ObjectNameMiscGrill}:InteriorEquipment:#{ep_fuel_names[FT::Propane]}")
+      @end_uses[[FT::Propane, EUT::Lighting]] = EndUse.new(meter: "#{Constants.ObjectNameMiscLighting}:InteriorEquipment:#{ep_fuel_names[FT::Propane]}")
+      @end_uses[[FT::Propane, EUT::Fireplace]] = EndUse.new(meter: "#{Constants.ObjectNameMiscFireplace}:InteriorEquipment:#{ep_fuel_names[FT::Propane]}")
     end
-    @end_uses[[FT::WoodCord, EUT::Heating]] = EndUse.new(variable: OutputVars.SpaceHeatingWoodCord)
-    @end_uses[[FT::WoodCord, EUT::HotWater]] = EndUse.new(variable: OutputVars.WaterHeatingWoodCord)
-    @end_uses[[FT::WoodCord, EUT::ClothesDryer]] = EndUse.new(meter: "#{Constants.ObjectNameClothesDryer}:InteriorEquipment:OtherFuel1")
-    @end_uses[[FT::WoodCord, EUT::RangeOven]] = EndUse.new(meter: "#{Constants.ObjectNameCookingRange}:InteriorEquipment:OtherFuel1")
+    @end_uses[[FT::WoodCord, EUT::Heating]] = EndUse.new(variable: OutputVars.SpaceHeatingFuel(EPlus::FuelTypeWoodCord))
+    @end_uses[[FT::WoodCord, EUT::HotWater]] = EndUse.new(variable: OutputVars.WaterHeatingFuel(EPlus::FuelTypeWoodCord))
+    @end_uses[[FT::WoodCord, EUT::ClothesDryer]] = EndUse.new(meter: "#{Constants.ObjectNameClothesDryer}:InteriorEquipment:#{ep_fuel_names[FT::WoodCord]}")
+    @end_uses[[FT::WoodCord, EUT::RangeOven]] = EndUse.new(meter: "#{Constants.ObjectNameCookingRange}:InteriorEquipment:#{ep_fuel_names[FT::WoodCord]}")
     if @eri_design.nil? # Skip end uses not used by ERI
-      @end_uses[[FT::WoodCord, EUT::Grill]] = EndUse.new(meter: "#{Constants.ObjectNameMiscGrill}:InteriorEquipment:OtherFuel1")
-      @end_uses[[FT::WoodCord, EUT::Lighting]] = EndUse.new(meter: "#{Constants.ObjectNameMiscLighting}:InteriorEquipment:OtherFuel1")
-      @end_uses[[FT::WoodCord, EUT::Fireplace]] = EndUse.new(meter: "#{Constants.ObjectNameMiscFireplace}:InteriorEquipment:OtherFuel1")
+      @end_uses[[FT::WoodCord, EUT::Grill]] = EndUse.new(meter: "#{Constants.ObjectNameMiscGrill}:InteriorEquipment:#{ep_fuel_names[FT::WoodCord]}")
+      @end_uses[[FT::WoodCord, EUT::Lighting]] = EndUse.new(meter: "#{Constants.ObjectNameMiscLighting}:InteriorEquipment:#{ep_fuel_names[FT::WoodCord]}")
+      @end_uses[[FT::WoodCord, EUT::Fireplace]] = EndUse.new(meter: "#{Constants.ObjectNameMiscFireplace}:InteriorEquipment:#{ep_fuel_names[FT::WoodCord]}")
     end
-    @end_uses[[FT::WoodPellets, EUT::Heating]] = EndUse.new(variable: OutputVars.SpaceHeatingWoodPellets)
-    @end_uses[[FT::WoodPellets, EUT::HotWater]] = EndUse.new(variable: OutputVars.WaterHeatingWoodPellets)
-    @end_uses[[FT::WoodPellets, EUT::ClothesDryer]] = EndUse.new(meter: "#{Constants.ObjectNameClothesDryer}:InteriorEquipment:OtherFuel2")
-    @end_uses[[FT::WoodPellets, EUT::RangeOven]] = EndUse.new(meter: "#{Constants.ObjectNameCookingRange}:InteriorEquipment:OtherFuel2")
+    @end_uses[[FT::WoodPellets, EUT::Heating]] = EndUse.new(variable: OutputVars.SpaceHeatingFuel(EPlus::FuelTypeWoodPellets))
+    @end_uses[[FT::WoodPellets, EUT::HotWater]] = EndUse.new(variable: OutputVars.WaterHeatingFuel(EPlus::FuelTypeWoodPellets))
+    @end_uses[[FT::WoodPellets, EUT::ClothesDryer]] = EndUse.new(meter: "#{Constants.ObjectNameClothesDryer}:InteriorEquipment:#{ep_fuel_names[FT::WoodPellets]}")
+    @end_uses[[FT::WoodPellets, EUT::RangeOven]] = EndUse.new(meter: "#{Constants.ObjectNameCookingRange}:InteriorEquipment:#{ep_fuel_names[FT::WoodPellets]}")
     if @eri_design.nil? # Skip end uses not used by ERI
-      @end_uses[[FT::WoodPellets, EUT::Grill]] = EndUse.new(meter: "#{Constants.ObjectNameMiscGrill}:InteriorEquipment:OtherFuel2")
-      @end_uses[[FT::WoodPellets, EUT::Lighting]] = EndUse.new(meter: "#{Constants.ObjectNameMiscLighting}:InteriorEquipment:OtherFuel2")
-      @end_uses[[FT::WoodPellets, EUT::Fireplace]] = EndUse.new(meter: "#{Constants.ObjectNameMiscFireplace}:InteriorEquipment:OtherFuel2")
+      @end_uses[[FT::WoodPellets, EUT::Grill]] = EndUse.new(meter: "#{Constants.ObjectNameMiscGrill}:InteriorEquipment:#{ep_fuel_names[FT::WoodPellets]}")
+      @end_uses[[FT::WoodPellets, EUT::Lighting]] = EndUse.new(meter: "#{Constants.ObjectNameMiscLighting}:InteriorEquipment:#{ep_fuel_names[FT::WoodPellets]}")
+      @end_uses[[FT::WoodPellets, EUT::Fireplace]] = EndUse.new(meter: "#{Constants.ObjectNameMiscFireplace}:InteriorEquipment:#{ep_fuel_names[FT::WoodPellets]}")
+    end
+    @end_uses[[FT::Coal, EUT::Heating]] = EndUse.new(variable: OutputVars.SpaceHeatingFuel(EPlus::FuelTypeCoal))
+    @end_uses[[FT::Coal, EUT::HotWater]] = EndUse.new(variable: OutputVars.WaterHeatingFuel(EPlus::FuelTypeCoal))
+    @end_uses[[FT::Coal, EUT::ClothesDryer]] = EndUse.new(meter: "#{Constants.ObjectNameClothesDryer}:InteriorEquipment:#{ep_fuel_names[FT::Coal]}")
+    @end_uses[[FT::Coal, EUT::RangeOven]] = EndUse.new(meter: "#{Constants.ObjectNameCookingRange}:InteriorEquipment:#{ep_fuel_names[FT::Coal]}")
+    if @eri_design.nil? # Skip end uses not used by ERI
+      @end_uses[[FT::Coal, EUT::Grill]] = EndUse.new(meter: "#{Constants.ObjectNameMiscGrill}:InteriorEquipment:#{ep_fuel_names[FT::Coal]}")
+      @end_uses[[FT::Coal, EUT::Lighting]] = EndUse.new(meter: "#{Constants.ObjectNameMiscLighting}:InteriorEquipment:#{ep_fuel_names[FT::Coal]}")
+      @end_uses[[FT::Coal, EUT::Fireplace]] = EndUse.new(meter: "#{Constants.ObjectNameMiscFireplace}:InteriorEquipment:#{ep_fuel_names[FT::Coal]}")
     end
 
     @end_uses.each do |key, end_use|
@@ -1982,6 +2005,16 @@ class SimulationOutputReport < OpenStudio::Measure::ReportingMeasure
       unmet_load.annual_units = 'MBtu'
     end
 
+    # Ideal System Loads (expected fraction of loads that are not met by HVAC)
+    @ideal_system_loads = {}
+    @ideal_system_loads[LT::Heating] = UnmetLoad.new(variable: 'Zone Ideal Loads Zone Sensible Heating Energy')
+    @ideal_system_loads[LT::Cooling] = UnmetLoad.new(variable: 'Zone Ideal Loads Zone Sensible Cooling Energy')
+
+    @ideal_system_loads.each do |load_type, unmet_load|
+      unmet_load.name = "Ideal System Load: #{load_type}"
+      unmet_load.annual_units = 'MBtu'
+    end
+
     # Peak Loads
     @peak_loads = {}
     @peak_loads[LT::Heating] = PeakLoad.new(meter: 'Heating:EnergyTransfer')
@@ -2041,34 +2074,11 @@ class SimulationOutputReport < OpenStudio::Measure::ReportingMeasure
                'OpenStudio::Model::BoilerHotWater' => ['Boiler Electric Energy'] }
     end
 
-    def self.SpaceHeatingNaturalGas
-      return { 'OpenStudio::Model::CoilHeatingGas' => ['Heating Coil Gas Energy'],
-               'OpenStudio::Model::ZoneHVACBaseboardConvectiveElectric' => ['Baseboard Gas Energy'],
-               'OpenStudio::Model::BoilerHotWater' => ['Boiler Gas Energy'] }
-    end
-
-    def self.SpaceHeatingFuelOil
-      return { 'OpenStudio::Model::CoilHeatingGas' => ['Heating Coil FuelOil#1 Energy'],
-               'OpenStudio::Model::ZoneHVACBaseboardConvectiveElectric' => ['Baseboard FuelOil#1 Energy'],
-               'OpenStudio::Model::BoilerHotWater' => ['Boiler FuelOil#1 Energy'] }
-    end
-
-    def self.SpaceHeatingPropane
-      return { 'OpenStudio::Model::CoilHeatingGas' => ['Heating Coil Propane Energy'],
-               'OpenStudio::Model::ZoneHVACBaseboardConvectiveElectric' => ['Baseboard Propane Energy'],
-               'OpenStudio::Model::BoilerHotWater' => ['Boiler Propane Energy'] }
-    end
-
-    def self.SpaceHeatingWoodCord
-      return { 'OpenStudio::Model::CoilHeatingGas' => ['Heating Coil OtherFuel1 Energy'],
-               'OpenStudio::Model::ZoneHVACBaseboardConvectiveElectric' => ['Baseboard OtherFuel1 Energy'],
-               'OpenStudio::Model::BoilerHotWater' => ['Boiler OtherFuel1 Energy'] }
-    end
-
-    def self.SpaceHeatingWoodPellets
-      return { 'OpenStudio::Model::CoilHeatingGas' => ['Heating Coil OtherFuel2 Energy'],
-               'OpenStudio::Model::ZoneHVACBaseboardConvectiveElectric' => ['Baseboard OtherFuel2 Energy'],
-               'OpenStudio::Model::BoilerHotWater' => ['Boiler OtherFuel2 Energy'] }
+    def self.SpaceHeatingFuel(fuel)
+      fuel = EPlus.output_fuel_map(fuel)
+      return { 'OpenStudio::Model::CoilHeatingGas' => ["Heating Coil #{fuel} Energy"],
+               'OpenStudio::Model::ZoneHVACBaseboardConvectiveElectric' => ["Baseboard #{fuel} Energy"],
+               'OpenStudio::Model::BoilerHotWater' => ["Boiler #{fuel} Energy"] }
     end
 
     def self.SpaceHeatingDFHPPrimaryLoad
@@ -2106,29 +2116,10 @@ class SimulationOutputReport < OpenStudio::Measure::ReportingMeasure
       return { 'OpenStudio::Model::ElectricEquipment' => ['Electric Equipment Electric Energy'] }
     end
 
-    def self.WaterHeatingNaturalGas
-      return { 'OpenStudio::Model::WaterHeaterMixed' => ['Water Heater Gas Energy'],
-               'OpenStudio::Model::WaterHeaterStratified' => ['Water Heater Gas Energy'] }
-    end
-
-    def self.WaterHeatingFuelOil
-      return { 'OpenStudio::Model::WaterHeaterMixed' => ['Water Heater FuelOil#1 Energy'],
-               'OpenStudio::Model::WaterHeaterStratified' => ['Water Heater FuelOil#1 Energy'] }
-    end
-
-    def self.WaterHeatingPropane
-      return { 'OpenStudio::Model::WaterHeaterMixed' => ['Water Heater Propane Energy'],
-               'OpenStudio::Model::WaterHeaterStratified' => ['Water Heater Propane Energy'] }
-    end
-
-    def self.WaterHeatingWoodCord
-      return { 'OpenStudio::Model::WaterHeaterMixed' => ['Water Heater OtherFuel1 Energy'],
-               'OpenStudio::Model::WaterHeaterStratified' => ['Water Heater OtherFuel1 Energy'] }
-    end
-
-    def self.WaterHeatingWoodPellets
-      return { 'OpenStudio::Model::WaterHeaterMixed' => ['Water Heater OtherFuel2 Energy'],
-               'OpenStudio::Model::WaterHeaterStratified' => ['Water Heater OtherFuel2 Energy'] }
+    def self.WaterHeatingFuel(fuel)
+      fuel = EPlus.output_fuel_map(fuel)
+      return { 'OpenStudio::Model::WaterHeaterMixed' => ["Water Heater #{fuel} Energy"],
+               'OpenStudio::Model::WaterHeaterStratified' => ["Water Heater #{fuel} Energy"] }
     end
 
     def self.WaterHeatingLoad
