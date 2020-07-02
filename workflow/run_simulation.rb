@@ -68,7 +68,8 @@ def run_design(basedir, rundir, design, resultsdir, hpxml, debug, skip_simulatio
     update_args_hash(measures, measure_subdir, args)
   end
 
-  run_hpxml_workflow(basedir, rundir, hpxml, measures, measures_dir, debug, [], skip_simulation)
+  run_hpxml_workflow(rundir, hpxml, measures, measures_dir,
+                     debug: debug, run_measures_only: skip_simulation)
 
   return if skip_simulation
 
