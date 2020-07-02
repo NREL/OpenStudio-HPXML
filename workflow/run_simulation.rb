@@ -38,7 +38,7 @@ def run_workflow(basedir, rundir, hpxml, debug, hourly_outputs)
   args['include_timeseries_weather'] = hourly_outputs.include? 'weather'
   update_args_hash(measures, measure_subdir, args)
 
-  run_hpxml_workflow(basedir, rundir, hpxml, measures, measures_dir, debug)
+  run_hpxml_workflow(rundir, hpxml, measures, measures_dir, debug: debug)
 end
 
 hourly_types = ['ALL', 'fuels', 'enduses', 'hotwater', 'loads', 'componentloads', 'temperatures', 'airflows', 'weather']
