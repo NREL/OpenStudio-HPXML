@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-def run_hpxml_workflow(basedir, rundir, hpxml, measures, measures_dir, debug, output_vars = [], expect_error = false)
+def run_hpxml_workflow(basedir, rundir, hpxml, measures, measures_dir, debug, output_vars = [], run_measures_only = false)
   rm_path(rundir)
   Dir.mkdir(rundir)
 
@@ -18,7 +18,7 @@ def run_hpxml_workflow(basedir, rundir, hpxml, measures, measures_dir, debug, ou
   report_measure_errors_warnings(runner, rundir, debug)
   report_os_warnings(os_log, rundir)
 
-  if expect_error
+  if run_measures_only
     return { success: success, runner: runner }
   end
 
