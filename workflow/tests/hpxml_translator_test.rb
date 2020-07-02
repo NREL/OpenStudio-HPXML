@@ -21,7 +21,7 @@ class HPXMLTest < MiniTest::Test
   def test_simulations
     this_dir = File.dirname(__FILE__)
     results_dir = File.join(this_dir, 'results')
-    _rm_path(results_dir)
+    rm_path(results_dir)
 
     sample_files_dir = File.absolute_path(File.join(this_dir, '..', 'sample_files'))
     autosize_dir = File.absolute_path(File.join(this_dir, '..', 'sample_files', 'hvac_autosizing'))
@@ -57,13 +57,15 @@ class HPXMLTest < MiniTest::Test
     os_cli = OpenStudio.getOpenStudioCLI
     rb_path = File.join(File.dirname(__FILE__), '..', 'run_simulation.rb')
     xml = File.join(File.dirname(__FILE__), '..', 'sample_files', 'base.xml')
-    command = "#{os_cli} #{rb_path} -x #{xml} --debug"
+    command = "#{os_cli} #{rb_path} -x #{xml} --debug --hourly ALL"
     system(command, err: File::NULL)
 
     # Check for output files
     sql_path = File.join(File.dirname(xml), 'run', 'eplusout.sql')
     assert(File.exist? sql_path)
     csv_output_path = File.join(File.dirname(xml), 'run', 'results_annual.csv')
+    assert(File.exist? csv_output_path)
+    csv_output_path = File.join(File.dirname(xml), 'run', 'results_timeseries.csv')
     assert(File.exist? csv_output_path)
 
     # Check for debug files
@@ -212,7 +214,89 @@ class HPXMLTest < MiniTest::Test
     print "Testing #{File.basename(xml)}...\n"
     rundir = File.join(this_dir, 'run')
     _test_schema_validation(this_dir, xml) unless expect_error
-    results, sizing_results = _test_simulation(this_dir, xml, rundir, expect_error, expect_error_msgs)
+
+    measures_dir = File.join(this_dir, '..', '..')
+
+    measures = {}
+
+    # Add HPXML translator measure to workflow
+    measure_subdir = 'HPXMLtoOpenStudio'
+    args = {}
+    args['hpxml_path'] = xml
+    args['weather_dir'] = 'weather'
+    args['output_dir'] = File.absolute_path(rundir)
+    args['debug'] = true
+    update_args_hash(measures, measure_subdir, args)
+
+    # Add reporting measure to workflow
+    measure_subdir = 'SimulationOutputReport'
+    args = {}
+    args['timeseries_frequency'] = 'hourly'
+    args['include_timeseries_fuel_consumptions'] = true
+    args['include_timeseries_end_use_consumptions'] = false
+    args['include_timeseries_hot_water_uses'] = false
+    args['include_timeseries_total_loads'] = false
+    args['include_timeseries_component_loads'] = false
+    args['include_timeseries_zone_temperatures'] = false
+    args['include_timeseries_airflows'] = false
+    args['include_timeseries_weather'] = false
+    update_args_hash(measures, measure_subdir, args)
+
+    # # Add output variables for combi system energy check
+    output_vars = [['Water Heater Source Side Heat Transfer Energy', 'runperiod', '*'],
+                   ['Baseboard Total Heating Energy', 'runperiod', '*'],
+                   ['Boiler Heating Energy', 'runperiod', '*'],
+                   ['Fluid Heat Exchanger Heat Transfer Energy', 'runperiod', '*']]
+
+    # Run workflow
+    workflow_start = Time.now
+    results = run_hpxml_workflow(this_dir, rundir, xml, measures, measures_dir, true, output_vars, expect_error)
+    workflow_time = Time.now - workflow_start
+    success = results[:success]
+    runner = results[:runner]
+    sim_time = results[:sim_time]
+
+    # Check results
+    if expect_error
+      assert_equal(false, success)
+
+      if expect_error_msgs.nil?
+        flunk "No error message defined for #{File.basename(xml)}."
+      else
+        run_log = File.readlines(File.join(rundir, 'run.log')).map(&:strip)
+        expect_error_msgs.each do |error_msg|
+          found_error_msg = false
+          run_log.each do |run_line|
+            next unless run_line.include? error_msg
+
+            found_error_msg = true
+            break
+          end
+          assert(found_error_msg)
+        end
+      end
+
+      return
+    else
+      show_output(runner.result) unless success
+      assert_equal(true, success)
+    end
+
+    show_output(runner.result) unless success
+
+    # Check for output files
+    annual_csv_path = File.join(rundir, 'results_annual.csv')
+    timeseries_csv_path = File.join(rundir, 'results_timeseries.csv')
+    assert(File.exist? annual_csv_path)
+    assert(File.exist? timeseries_csv_path)
+
+    # Get results
+    results = _get_results(rundir, sim_time, workflow_time, annual_csv_path, xml)
+    sizing_results = _get_sizing_results(rundir)
+
+    # Check outputs
+    _verify_outputs(runner, rundir, xml, results)
+
     return results, sizing_results
   end
 
@@ -270,232 +354,25 @@ class HPXMLTest < MiniTest::Test
     return results
   end
 
-  def _test_simulation(this_dir, xml, rundir, expect_error, expect_error_msgs)
-    # Uses meta_measure workflow for faster simulations
-    # TODO: Merge code with workflow/run_simulation.rb
-
-    # Setup
-    _rm_path(rundir)
-    Dir.mkdir(rundir)
-
-    workflow_start = Time.now
-    model = OpenStudio::Model::Model.new
-    runner = OpenStudio::Measure::OSRunner.new(OpenStudio::WorkflowJSON.new)
-    measures_dir = File.join(this_dir, '..', '..')
-
-    measures = {}
-
-    # Add HPXML translator measure to workflow
-    measure_subdir = 'HPXMLtoOpenStudio'
-    args = {}
-    args['hpxml_path'] = xml
-    if xml.include? 'ASHRAE_Standard_140'
-      args['weather_dir'] = File.join(File.dirname(xml), 'weather')
-    else
-      args['weather_dir'] = 'weather'
-    end
-    args['output_dir'] = File.absolute_path(rundir)
-    args['debug'] = true
-    update_args_hash(measures, measure_subdir, args)
-
-    # Add reporting measure to workflow
-    measure_subdir = 'SimulationOutputReport'
-    args = {}
-    args['timeseries_frequency'] = 'hourly'
-    args['include_timeseries_fuel_consumptions'] = true
-    args['include_timeseries_end_use_consumptions'] = false
-    args['include_timeseries_hot_water_uses'] = false
-    args['include_timeseries_total_loads'] = false
-    args['include_timeseries_component_loads'] = false
-    args['include_timeseries_zone_temperatures'] = false
-    args['include_timeseries_airflows'] = false
-    args['include_timeseries_weather'] = false
-    update_args_hash(measures, measure_subdir, args)
-
-    # Apply measure
-    success = apply_measures(measures_dir, measures, runner, model)
-    sizing_results = _get_sizing_results(runner) unless expect_error
-    report_measure_errors_warnings(runner, rundir, false)
-
-    if expect_error
-      assert_equal(false, success)
-
-      if expect_error_msgs.nil?
-        flunk "No error message defined for #{File.basename(xml)}."
-      else
-        run_log = File.readlines(File.join(rundir, 'run.log')).map(&:strip)
-        expect_error_msgs.each do |error_msg|
-          found_error_msg = false
-          run_log.each do |run_line|
-            next unless run_line.include? error_msg
-
-            found_error_msg = true
-            break
-          end
-          assert(found_error_msg)
-        end
-      end
-
-      return
-    else
-      show_output(runner.result) unless success
-      assert_equal(true, success)
-    end
-
-    # Add output variables for CFIS tests
-    if xml.include? 'cfis'
-      infil_program = nil
-      model.getEnergyManagementSystemPrograms.each do |ems_program|
-        next unless ems_program.name.to_s.start_with? Constants.ObjectNameInfiltration
-
-        infil_program = ems_program
-      end
-
-      ems_output_var = OpenStudio::Model::EnergyManagementSystemOutputVariable.new(model, 'CFIS_fan_w')
-      ems_output_var.setName("#{Constants.ObjectNameMechanicalVentilation} cfis fan power".gsub(' ', '_'))
-      ems_output_var.setTypeOfDataInVariable('Averaged')
-      ems_output_var.setUpdateFrequency('ZoneTimestep')
-      ems_output_var.setEMSProgramOrSubroutineName(infil_program)
-      ems_output_var.setUnits('W')
-
-      @cfis_fan_power_output_var = OpenStudio::Model::OutputVariable.new(ems_output_var.name.to_s, model)
-      @cfis_fan_power_output_var.setReportingFrequency('runperiod')
-      @cfis_fan_power_output_var.setKeyValue('EMS')
-
-      ems_output_var = OpenStudio::Model::EnergyManagementSystemOutputVariable.new(model, 'QWHV')
-      ems_output_var.setName("#{Constants.ObjectNameMechanicalVentilation} cfis flow rate".gsub(' ', '_'))
-      ems_output_var.setTypeOfDataInVariable('Averaged')
-      ems_output_var.setUpdateFrequency('ZoneTimestep')
-      ems_output_var.setEMSProgramOrSubroutineName(infil_program)
-      ems_output_var.setUnits('m3/s')
-
-      @cfis_flow_rate_output_var = OpenStudio::Model::OutputVariable.new(ems_output_var.name.to_s, model)
-      @cfis_flow_rate_output_var.setReportingFrequency('runperiod')
-      @cfis_flow_rate_output_var.setKeyValue('EMS')
-    end
-
-    # Add output variables for combi system energy check
-    output_var = OpenStudio::Model::OutputVariable.new('Water Heater Source Side Heat Transfer Energy', model)
-    output_var.setReportingFrequency('runperiod')
-    output_var.setKeyValue('*')
-    output_var = OpenStudio::Model::OutputVariable.new('Baseboard Total Heating Energy', model)
-    output_var.setReportingFrequency('runperiod')
-    output_var.setKeyValue('*')
-    output_var = OpenStudio::Model::OutputVariable.new('Boiler Heating Energy', model) # This is needed for energy checking if there's boiler not connected to combi systems.
-    output_var.setReportingFrequency('runperiod')
-    output_var.setKeyValue('*')
-    model.getHeatExchangerFluidToFluids.each do |hx|
-      output_var = OpenStudio::Model::OutputVariable.new('Fluid Heat Exchanger Heat Transfer Energy', model)
-      output_var.setReportingFrequency('runperiod')
-      output_var.setKeyValue(hx.name.to_s)
-    end
-
-    # Translate model to IDF
-    forward_translator = OpenStudio::EnergyPlus::ForwardTranslator.new
-    forward_translator.setExcludeLCCObjects(true)
-    model_idf = forward_translator.translateModel(model)
-    report_ft_errors_warnings(forward_translator, rundir)
-
-    # Apply reporting measure output requests
-    apply_energyplus_output_requests(measures_dir, measures, runner, model, model_idf)
-
-    # Write IDF to file
-    File.open(File.join(rundir, 'in.idf'), 'w') { |f| f << model_idf.to_s }
-
-    # Run EnergyPlus
-    # getEnergyPlusDirectory can be unreliable, using getOpenStudioCLI instead
-    ep_path = File.absolute_path(File.join(OpenStudio.getOpenStudioCLI.to_s, '..', '..', 'EnergyPlus', 'energyplus'))
-    command = "cd #{rundir} && #{ep_path} -w in.epw in.idf > stdout-energyplus"
-    simulation_start = Time.now
-    system(command, err: File::NULL)
-    sim_time = (Time.now - simulation_start).round(1)
-    workflow_time = (Time.now - workflow_start).round(1)
-    puts "Completed #{File.basename(xml)} simulation in #{sim_time}, workflow in #{workflow_time}s."
-
-    # Apply reporting measures
-    runner.setLastEnergyPlusSqlFilePath(File.join(rundir, 'eplusout.sql'))
-    success = apply_measures(measures_dir, measures, runner, model, true, 'OpenStudio::Measure::ReportingMeasure')
-    report_measure_errors_warnings(runner, rundir, false)
-    runner.resetLastEnergyPlusSqlFilePath
-
-    show_output(runner.result) unless success
-    assert_equal(true, success)
-
-    report_os_warnings(rundir)
-
-    annual_csv_path = File.join(rundir, 'results_annual.csv')
-    timeseries_csv_path = File.join(rundir, 'results_timeseries.csv')
-    assert(File.exist? annual_csv_path)
-    assert(File.exist? timeseries_csv_path)
-
-    results = _get_results(rundir, sim_time, workflow_time, annual_csv_path, xml)
-
-    # Verify simulation outputs
-    _verify_simulation_outputs(runner, rundir, xml, results)
-
-    return results, sizing_results
-  end
-
-  def report_measure_errors_warnings(runner, rundir, debug)
-    # Report warnings/errors
-    File.open(File.join(rundir, 'run.log'), 'a') do |f|
-      if debug
-        runner.result.stepInfo.each do |s|
-          f << "Info: #{s}\n"
-        end
-      end
-      runner.result.stepWarnings.each do |s|
-        f << "Warning: #{s}\n"
-      end
-      runner.result.stepErrors.each do |s|
-        f << "Error: #{s}\n"
-      end
-    end
-    runner.reset
-  end
-
-  def report_ft_errors_warnings(forward_translator, rundir)
-    # Report warnings/errors
-    File.open(File.join(rundir, 'run.log'), 'a') do |f|
-      forward_translator.warnings.each do |s|
-        f << "FT Warning: #{s.logMessage}\n"
-      end
-      forward_translator.errors.each do |s|
-        f << "FT Error: #{s.logMessage}\n"
-      end
-    end
-  end
-
-  def report_os_warnings(rundir)
-    File.open(File.join(rundir, 'run.log'), 'a') do |f|
-      @@os_log.logMessages.each do |s|
-        f << "OS Message: #{s.logMessage}\n"
-      end
-    end
-    @@os_log.resetStringStream
-  end
-
-  def _get_sizing_results(runner)
+  def _get_sizing_results(rundir)
     results = {}
-    runner.result.stepInfo.each do |s_info|
-      s_info.split("\n").each do |s|
-        next unless s.start_with?('Heat ') || s.start_with?('Cool ')
-        next unless s.include? '='
+    File.readlines(File.join(rundir, 'run.log')).each do |s|
+      next unless s.start_with?('Heat ') || s.start_with?('Cool ')
+      next unless s.include? '='
 
-        vals = s.split('=')
-        prop = vals[0].strip
-        vals = vals[1].split(' ')
-        value = Float(vals[0].strip)
-        prop += " [#{vals[1].strip}]" # add units
-        results[prop] = 0.0 if results[prop].nil?
-        results[prop] += value
-      end
+      vals = s.split('=')
+      prop = vals[0].strip
+      vals = vals[1].split(' ')
+      value = Float(vals[0].strip)
+      prop += " [#{vals[1].strip}]" # add units
+      results[prop] = 0.0 if results[prop].nil?
+      results[prop] += value
     end
     assert(!results.empty?)
     return results
   end
 
-  def _verify_simulation_outputs(runner, rundir, hpxml_path, results)
+  def _verify_outputs(runner, rundir, hpxml_path, results)
     # Check that eplusout.err has no lines that include "Blank Schedule Type Limits Name input"
     # Check that eplusout.err has no lines that include "FixViewFactors: View factors not complete"
     # Check that eplusout.err has no lines that include "GetHTSurfaceData: Surfaces with interface to Ground found but no "Ground Temperatures" were input"
@@ -510,16 +387,12 @@ class HPXMLTest < MiniTest::Test
 
     # Check run.log warnings
     File.readlines(File.join(rundir, 'run.log')).each do |log_line|
+      next if log_line.strip.empty?
       next if log_line.include? 'Warning: Could not load nokogiri, no HPXML validation performed.'
-      next if log_line.include? 'Cannot find current Workflow Step'
-      next if log_line.include? 'Data will be treated as typical (TMY)'
-      next if log_line.include? 'WorkflowStepResult value called with undefined stepResult'
-      next if log_line.include?("Object of type 'Schedule:Constant' and named 'Always") && log_line.include?('points to an object named') && log_line.include?('but that object cannot be located')
+      next if log_line.start_with?('Info: ')
+      next if (log_line.start_with?('Heat ') || log_line.start_with?('Cool ')) && log_line.include?('=')
       next if log_line.include? "-cache.csv' could not be found; regenerating it."
-      next if log_line.include? 'Appears there are no design condition fields in the EPW file'
       next if log_line.include?('Warning: HVACDistribution') && log_line.include?('has ducts entirely within conditioned space but there is non-zero leakage to the outside.')
-      # TODO: Remove once https://github.com/NREL/OpenStudio/pull/3999 is available
-      next if log_line.include? "OS Message: 'Propane' is deprecated for Coil_Heating_GasFields:FuelType, use 'Propane' instead"
 
       flunk "Unexpected warning found in run.log: #{log_line}"
     end
@@ -979,23 +852,21 @@ class HPXMLTest < MiniTest::Test
     assert_equal(hpxml.total_fraction_cool_load_served > 0, clg_energy > 0)
 
     # Water Heater
-    if hpxml.water_heating_systems.size > 0
+    if hpxml.water_heating_systems.select { |wh| [HPXML::WaterHeaterTypeCombiStorage, HPXML::WaterHeaterTypeCombiTankless].include? wh.water_heater_type }.size > 0
       query = "SELECT SUM(ABS(VariableValue)/1000000000) FROM ReportVariableData WHERE ReportVariableDataDictionaryIndex IN (SELECT ReportVariableDataDictionaryIndex FROM ReportVariableDataDictionary WHERE VariableType='Sum' AND VariableName='Fluid Heat Exchanger Heat Transfer Energy' AND ReportingFrequency='Run Period' AND VariableUnits='J')"
       combi_hx_load = sqlFile.execAndReturnFirstDouble(query).get.round(2)
       query = "SELECT SUM(ABS(VariableValue)/1000000000) FROM ReportVariableData WHERE ReportVariableDataDictionaryIndex IN (SELECT ReportVariableDataDictionaryIndex FROM ReportVariableDataDictionary WHERE VariableType='Sum' AND VariableName='Boiler Heating Energy' AND ReportingFrequency='Run Period' AND VariableUnits='J')"
       combi_htg_load = sqlFile.execAndReturnFirstDouble(query).get.round(2)
 
-      if (combi_htg_load > 0) && (combi_hx_load > 0)
-        # Check combi system energy balance
-        query = "SELECT SUM(ABS(VariableValue)/1000000000) FROM ReportVariableData WHERE ReportVariableDataDictionaryIndex IN (SELECT ReportVariableDataDictionaryIndex FROM ReportVariableDataDictionary WHERE VariableType='Sum' AND VariableName='Water Heater Source Side Heat Transfer Energy' AND VariableUnits='J')"
-        combi_tank_source_load = sqlFile.execAndReturnFirstDouble(query).get.round(2)
-        assert_in_epsilon(combi_hx_load, combi_tank_source_load, 0.02)
+      # Check combi system energy balance
+      query = "SELECT SUM(ABS(VariableValue)/1000000000) FROM ReportVariableData WHERE ReportVariableDataDictionaryIndex IN (SELECT ReportVariableDataDictionaryIndex FROM ReportVariableDataDictionary WHERE VariableType='Sum' AND VariableName='Water Heater Source Side Heat Transfer Energy' AND VariableUnits='J')"
+      combi_tank_source_load = sqlFile.execAndReturnFirstDouble(query).get.round(2)
+      assert_in_epsilon(combi_hx_load, combi_tank_source_load, 0.02)
 
-        # Check boiler, hx, pump, heating coil energy balance
-        query = "SELECT SUM(ABS(VariableValue)/1000000000) FROM ReportVariableData WHERE ReportVariableDataDictionaryIndex IN (SELECT ReportVariableDataDictionaryIndex FROM ReportVariableDataDictionary WHERE VariableType='Sum' AND VariableName='Baseboard Total Heating Energy' AND VariableUnits='J')"
-        boiler_space_heating_load = sqlFile.execAndReturnFirstDouble(query).get.round(2)
-        assert_in_epsilon(combi_hx_load + boiler_space_heating_load, combi_htg_load, 0.02)
-      end
+      # Check boiler, hx, pump, heating coil energy balance
+      query = "SELECT SUM(ABS(VariableValue)/1000000000) FROM ReportVariableData WHERE ReportVariableDataDictionaryIndex IN (SELECT ReportVariableDataDictionaryIndex FROM ReportVariableDataDictionary WHERE VariableType='Sum' AND VariableName='Baseboard Total Heating Energy' AND VariableUnits='J')"
+      boiler_space_heating_load = sqlFile.execAndReturnFirstDouble(query).get.round(2)
+      assert_in_epsilon(combi_hx_load + boiler_space_heating_load, combi_htg_load, 0.02)
     end
 
     # Mechanical Ventilation
@@ -1025,18 +896,6 @@ class HPXMLTest < MiniTest::Test
         else
           assert_equal(mv_energy, 0.0)
         end
-
-        # CFIS Fan power
-        hpxml_value = vent_fan_whole_house.fan_power
-        query = "SELECT Value FROM ReportData WHERE ReportDataDictionaryIndex IN (SELECT ReportDataDictionaryIndex FROM ReportDataDictionary WHERE Name='#{@cfis_fan_power_output_var.variableName}' AND ReportingFrequency='Run Period')"
-        sql_value = sqlFile.execAndReturnFirstDouble(query).get
-        assert_in_delta(hpxml_value, sql_value, 0.01)
-
-        # CFIS Flow rate
-        hpxml_value = vent_fan_whole_house.tested_flow_rate * vent_fan_whole_house.hours_in_operation / 24.0
-        query = "SELECT Value FROM ReportData WHERE ReportDataDictionaryIndex IN (SELECT ReportDataDictionaryIndex FROM ReportDataDictionary WHERE Name='#{@cfis_flow_rate_output_var.variableName}' AND ReportingFrequency='Run Period')"
-        sql_value = UnitConversions.convert(sqlFile.execAndReturnFirstDouble(query).get, 'm^3/s', 'cfm')
-        assert_in_delta(hpxml_value, sql_value, 0.01)
       else
         # Supply, exhaust, ERV, HRV, etc., check for appropriate mech vent energy
         fan_gj = 0
@@ -1262,116 +1121,10 @@ class HPXMLTest < MiniTest::Test
 
     puts "Wrote ASHRAE 140 results to #{csv_out}."
 
-    # TODO: Uncomment stringent HERS test ranges when E+ version w/
-    # simple window model bugfix is available
-
-    # # Annual Heating Loads
-    # assert_operator(htg_loads['L100AC'], :<=, 59.87)
-    # assert_operator(htg_loads['L100AC'], :>=, 45.28)
-    # assert_operator(htg_loads['L110AC'], :<=, 80.16)
-    # assert_operator(htg_loads['L110AC'], :>=, 71.51)
-    # assert_operator(htg_loads['L120AC'], :<=, 46.86)
-    # assert_operator(htg_loads['L120AC'], :>=, 33.76)
-    # assert_operator(htg_loads['L130AC'], :<=, 48.38)
-    # assert_operator(htg_loads['L130AC'], :>=, 37.75)
-    # assert_operator(htg_loads['L140AC'], :<=, 50.78)
-    # assert_operator(htg_loads['L140AC'], :>=, 44.86)
-    # assert_operator(htg_loads['L150AC'], :<=, 53.91)
-    # assert_operator(htg_loads['L150AC'], :>=, 35.50)
-    # assert_operator(htg_loads['L155AC'], :<=, 56.39)
-    # assert_operator(htg_loads['L155AC'], :>=, 39.17)
-    # assert_operator(htg_loads['L160AC'], :<=, 61.86)
-    # assert_operator(htg_loads['L160AC'], :>=, 45.63)
-    # assert_operator(htg_loads['L170AC'], :<=, 74.39)
-    # assert_operator(htg_loads['L170AC'], :>=, 54.16)
-    # assert_operator(htg_loads['L200AC'], :<=, 137.77)
-    # assert_operator(htg_loads['L200AC'], :>=, 116.32)
-    # assert_operator(htg_loads['L202AC'], :<=, 146.82)
-    # assert_operator(htg_loads['L202AC'], :>=, 121.72)
-    # assert_operator(htg_loads['L302XC'], :<=, 67.50)
-    # assert_operator(htg_loads['L302XC'], :>=, 14.52)
-    # assert_operator(htg_loads['L304XC'], :<=, 55.59)
-    # assert_operator(htg_loads['L304XC'], :>=, 18.84)
-    # assert_operator(htg_loads['L322XC'], :<=, 87.82)
-    # assert_operator(htg_loads['L322XC'], :>=, 16.79)
-    # assert_operator(htg_loads['L324XC'], :<=, 52.50)
-    # assert_operator(htg_loads['L324XC'], :>=, 30.50)
-
-    # # Annual Heating Load Deltas
-    # assert_operator(htg_loads['L110AC'] - htg_loads['L100AC'], :<=, 28.08)
-    # assert_operator(htg_loads['L110AC'] - htg_loads['L100AC'], :>=, 18.66)
-    # assert_operator(htg_loads['L120AC'] - htg_loads['L100AC'], :<=, -9.17)
-    # assert_operator(htg_loads['L120AC'] - htg_loads['L100AC'], :>=, -15.62)
-    # assert_operator(htg_loads['L130AC'] - htg_loads['L100AC'], :<=, -5.68)
-    # assert_operator(htg_loads['L130AC'] - htg_loads['L100AC'], :>=, -12.81)
-    # assert_operator(htg_loads['L140AC'] - htg_loads['L100AC'], :<=, 1.86)
-    # assert_operator(htg_loads['L140AC'] - htg_loads['L100AC'], :>=, -11.58)
-    # assert_operator(htg_loads['L150AC'] - htg_loads['L100AC'], :<=, -3.75)
-    # assert_operator(htg_loads['L150AC'] - htg_loads['L100AC'], :>=, -11.48)
-    # assert_operator(htg_loads['L155AC'] - htg_loads['L150AC'], :<=, 6.68)
-    # assert_operator(htg_loads['L155AC'] - htg_loads['L150AC'], :>=, -0.39)
-    # assert_operator(htg_loads['L160AC'] - htg_loads['L100AC'], :<=, 4.45)
-    # assert_operator(htg_loads['L160AC'] - htg_loads['L100AC'], :>=, -1.84)
-    # assert_operator(htg_loads['L170AC'] - htg_loads['L100AC'], :<=, 16.15)
-    # assert_operator(htg_loads['L170AC'] - htg_loads['L100AC'], :>=, 8.01)
-    # assert_operator(htg_loads['L200AC'] - htg_loads['L100AC'], :<=, 79.57)
-    # assert_operator(htg_loads['L200AC'] - htg_loads['L100AC'], :>=, 70.04)
-    # assert_operator(htg_loads['L202AC'] - htg_loads['L200AC'], :<=, 11.10)
-    # assert_operator(htg_loads['L202AC'] - htg_loads['L200AC'], :>=, 3.57)
-    # assert_operator(htg_loads['L302XC'] - htg_loads['L100AC'], :<=, 8.83)
-    # assert_operator(htg_loads['L302XC'] - htg_loads['L100AC'], :>=, -31.96)
-    # assert_operator(htg_loads['L302XC'] - htg_loads['L304XC'], :<=, 12.18)
-    # assert_operator(htg_loads['L302XC'] - htg_loads['L304XC'], :>=, -4.60)
-    # assert_operator(htg_loads['L322XC'] - htg_loads['L100AC'], :<=, 30.76)
-    # assert_operator(htg_loads['L322XC'] - htg_loads['L100AC'], :>=, -31.30)
-    # assert_operator(htg_loads['L322XC'] - htg_loads['L324XC'], :<=, 35.86)
-    # assert_operator(htg_loads['L322XC'] - htg_loads['L324XC'], :>=, -14.25)
-
-    # # Annual Cooling Loads
-    # assert_operator(clg_loads['L100AL'], :<=, 59.99)
-    # assert_operator(clg_loads['L100AL'], :>=, 39.53)
-    # assert_operator(clg_loads['L110AL'], :<=, 62.53)
-    # assert_operator(clg_loads['L110AL'], :>=, 43.86)
-    # assert_operator(clg_loads['L120AL'], :<=, 52.85)
-    # assert_operator(clg_loads['L120AL'], :>=, 38.08)
-    # assert_operator(clg_loads['L130AL'], :<=, 42.94)
-    # assert_operator(clg_loads['L130AL'], :>=, 29.19)
-    # assert_operator(clg_loads['L140AL'], :<=, 28.59)
-    # assert_operator(clg_loads['L140AL'], :>=, 19.44)
-    # assert_operator(clg_loads['L150AL'], :<=, 77.56)
-    # assert_operator(clg_loads['L150AL'], :>=, 48.53)
-    # assert_operator(clg_loads['L155AL'], :<=, 62.12)
-    # assert_operator(clg_loads['L155AL'], :>=, 33.19)
-    # assert_operator(clg_loads['L160AL'], :<=, 69.47)
-    # assert_operator(clg_loads['L160AL'], :>=, 49.62)
-    # assert_operator(clg_loads['L170AL'], :<=, 47.64)
-    # assert_operator(clg_loads['L170AL'], :>=, 32.00)
-    # assert_operator(clg_loads['L200AL'], :<=, 74.01)
-    # assert_operator(clg_loads['L200AL'], :>=, 52.49)
-    # assert_operator(clg_loads['L202AL'], :<=, 60.19)
-    # assert_operator(clg_loads['L202AL'], :>=, 44.99)
-
-    # # Annual Cooling Load Deltas
-    # assert_operator(clg_loads['L110AL'] - clg_loads['L100AL'], :<=, 6.26)
-    # assert_operator(clg_loads['L110AL'] - clg_loads['L100AL'], :>=, 0.44)
-    # assert_operator(clg_loads['L120AL'] - clg_loads['L100AL'], :<=, -0.29)
-    # assert_operator(clg_loads['L120AL'] - clg_loads['L100AL'], :>=, -8.13)
-    # assert_operator(clg_loads['L130AL'] - clg_loads['L100AL'], :<=, -9.53)
-    # assert_operator(clg_loads['L130AL'] - clg_loads['L100AL'], :>=, -18.50)
-    # assert_operator(clg_loads['L140AL'] - clg_loads['L100AL'], :<=, -19.76)
-    # assert_operator(clg_loads['L140AL'] - clg_loads['L100AL'], :>=, -31.75)
-    # assert_operator(clg_loads['L150AL'] - clg_loads['L100AL'], :<=, 18.26)
-    # assert_operator(clg_loads['L150AL'] - clg_loads['L100AL'], :>=, 8.83)
-    # assert_operator(clg_loads['L155AL'] - clg_loads['L150AL'], :<=, -12.68)
-    # assert_operator(clg_loads['L155AL'] - clg_loads['L150AL'], :>=, -18.01)
-    # assert_operator(clg_loads['L160AL'] - clg_loads['L100AL'], :<=, 12.58)
-    # assert_operator(clg_loads['L160AL'] - clg_loads['L100AL'], :>=, 7.06)
-    # assert_operator(clg_loads['L170AL'] - clg_loads['L100AL'], :<=, -6.49)
-    # assert_operator(clg_loads['L170AL'] - clg_loads['L100AL'], :>=, -13.75)
-    # assert_operator(clg_loads['L200AL'] - clg_loads['L100AL'], :<=, 16.46)
-    # assert_operator(clg_loads['L200AL'] - clg_loads['L100AL'], :>=, 10.34)
-    # assert_operator(clg_loads['L200AL'] - clg_loads['L202AL'], :<=, 14.76)
-    # assert_operator(clg_loads['L200AL'] - clg_loads['L202AL'], :>=, 5.93)
+    # TODO: Add updated HERS acceptance criteria once the E+ simple
+    # window model bugfix is available.
+    # FUTURE: Switch to stringent HERS acceptance criteria once it's based on
+    # TMY3.
   end
 
   def _test_schema_validation(this_dir, xml)
@@ -1393,17 +1146,6 @@ class HPXMLTest < MiniTest::Test
   def _display_result_delta(xml, result1, result2, key)
     delta = (result1 - result2).abs
     puts "#{xml}: delta=#{delta.round(5)} [#{key}]"
-  end
-
-  def _rm_path(path)
-    if Dir.exist?(path)
-      FileUtils.rm_r(path)
-    end
-    while true
-      break if not Dir.exist?(path)
-
-      sleep(0.01)
-    end
   end
 end
 

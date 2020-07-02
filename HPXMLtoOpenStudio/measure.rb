@@ -2120,9 +2120,9 @@ class OSModel
       cooling_load_frac = 1.0
       heating_load_frac = 1.0
       if @apply_ashrae140_assumptions
-        if epw_path.end_with? 'TMY-Colorad-v5.0.epw'
+        if epw_path.end_with? 'USA_CO_Colorado.Springs-Peterson.Field.724660_TMY3.epw'
           cooling_load_frac = 0.0
-        elsif epw_path.end_with? 'TMY-Lasvega-v5.0.epw'
+        elsif epw_path.end_with? 'USA_NV_Las.Vegas-McCarran.Intl.AP.723860_TMY3.epw'
           heating_load_frac = 0.0
         else
           fail 'Unexpected weather file for ASHRAE 140 run.'
