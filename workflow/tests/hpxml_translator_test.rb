@@ -250,7 +250,9 @@ class HPXMLTest < MiniTest::Test
 
     # Run workflow
     workflow_start = Time.now
-    results = run_hpxml_workflow(this_dir, rundir, xml, measures, measures_dir, true, output_vars, expect_error)
+    results = run_hpxml_workflow(rundir, xml, measures, measures_dir,
+                                 debug: true, output_vars: output_vars,
+                                 run_measures_only: expect_error)
     workflow_time = Time.now - workflow_start
     success = results[:success]
     runner = results[:runner]
@@ -389,7 +391,8 @@ class HPXMLTest < MiniTest::Test
     File.readlines(File.join(rundir, 'run.log')).each do |log_line|
       next if log_line.strip.empty?
       next if log_line.include? 'Warning: Could not load nokogiri, no HPXML validation performed.'
-      next if log_line.start_with?('Info: ')
+      next if log_line.start_with? 'Info: '
+      next if log_line.start_with? 'Executing command'
       next if (log_line.start_with?('Heat ') || log_line.start_with?('Cool ')) && log_line.include?('=')
       next if log_line.include? "-cache.csv' could not be found; regenerating it."
       next if log_line.include?('Warning: HVACDistribution') && log_line.include?('has ducts entirely within conditioned space but there is non-zero leakage to the outside.')
