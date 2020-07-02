@@ -1,10 +1,13 @@
 # frozen_string_literal: true
 
-def run_hpxml_workflow(basedir, rundir, hpxml, measures, measures_dir, debug, output_vars = [], run_measures_only = false)
+def run_hpxml_workflow(rundir, hpxml, measures, measures_dir, debug: false, output_vars: [],
+                       output_meters: [], run_measures_only: false, print_prefix: '')
   rm_path(rundir)
   Dir.mkdir(rundir)
 
-  puts 'Creating input...'
+  # Use print instead of puts in here in case running inside
+  # a Parallel process (see https://stackoverflow.com/a/5044669)
+  print "#{print_prefix}Creating input...\n"
 
   OpenStudio::Logger.instance.standardOutLogger.setLogLevel(OpenStudio::Fatal)
   os_log = OpenStudio::StringStreamLogSink.new
@@ -23,7 +26,8 @@ def run_hpxml_workflow(basedir, rundir, hpxml, measures, measures_dir, debug, ou
   end
 
   if not success
-    fail 'Simulation unsuccessful.'
+    print "#{print_prefix}Creating input unsuccessful.\n"
+    return { success: false, runner: runner }
   end
 
   # Apply any additional output variables
@@ -31,6 +35,13 @@ def run_hpxml_workflow(basedir, rundir, hpxml, measures, measures_dir, debug, ou
     ov = OpenStudio::Model::OutputVariable.new(output_var[0], model)
     ov.setReportingFrequency(output_var[1])
     ov.setKeyValue(output_var[2])
+  end
+
+  # Apply any additional output meters
+  output_meters.each do |output_meter|
+    om = OpenStudio::Model::OutputMeter.new(model)
+    om.setName(output_meter[0])
+    om.setReportingFrequency(output_meter[1])
   end
 
   # Translate model to IDF
@@ -45,16 +56,26 @@ def run_hpxml_workflow(basedir, rundir, hpxml, measures, measures_dir, debug, ou
   # Write IDF to file
   File.open(File.join(rundir, 'in.idf'), 'w') { |f| f << model_idf.to_s }
 
-  puts 'Running simulation...'
+  print "#{print_prefix}Running simulation...\n"
 
   # getEnergyPlusDirectory can be unreliable, using getOpenStudioCLI instead
   ep_path = File.absolute_path(File.join(OpenStudio.getOpenStudioCLI.to_s, '..', '..', 'EnergyPlus', 'energyplus'))
   simulation_start = Time.now
-  command = "cd \"#{rundir}\" && \"#{ep_path}\" -w in.epw in.idf > stdout-energyplus"
-  system(command, err: File::NULL)
+  command = "\"#{ep_path}\" -w in.epw in.idf > stdout-energyplus"
+  if debug
+    File.open(File.join(rundir, 'run.log'), 'a') do |f|
+      f << "Executing command '#{command}' from working directory '#{rundir}'"
+    end
+  end
+  pwd = Dir.pwd
+  Dir.chdir(rundir) do
+    system(command, err: IO.sysopen(File.join(rundir, 'stderr-energyplus'), 'w'))
+  end
+  Dir.chdir(pwd) # Prevent OS "restoring original_directory" warning
   sim_time = (Time.now - simulation_start).round(1)
+  print "#{print_prefix}Completed simulation in #{sim_time}s.\n"
 
-  puts 'Processing output...'
+  print "#{print_prefix}Processing output...\n"
 
   # Apply reporting measures
   runner.setLastEnergyPlusSqlFilePath(File.join(rundir, 'eplusout.sql'))
@@ -62,21 +83,23 @@ def run_hpxml_workflow(basedir, rundir, hpxml, measures, measures_dir, debug, ou
   report_measure_errors_warnings(runner, rundir, debug)
   report_os_warnings(os_log, rundir)
   runner.resetLastEnergyPlusSqlFilePath
-  puts "Completed simulation in #{sim_time}s."
 
   annual_csv_path = File.join(rundir, 'results_annual.csv')
   if File.exist? annual_csv_path
-    puts "Wrote output file: #{annual_csv_path}."
+    print "#{print_prefix}Wrote output file: #{annual_csv_path}.\n"
   end
 
   timeseries_csv_path = File.join(rundir, 'results_timeseries.csv')
   if File.exist? timeseries_csv_path
-    puts "Wrote output file: #{timeseries_csv_path}."
+    print "#{print_prefix}Wrote output file: #{timeseries_csv_path}.\n"
   end
 
   if not success
-    fail 'Processing output unsuccessful.'
+    print "#{print_prefix}Processing output unsuccessful.\n"
+    return { success: false, runner: runner }
   end
+
+  print "#{print_prefix}Done.\n"
 
   return { success: true, runner: runner, sim_time: sim_time }
 end
