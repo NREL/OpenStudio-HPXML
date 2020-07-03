@@ -205,7 +205,7 @@
       <sch:assert test="count(h:Insulation/h:AssemblyEffectiveRValue) = 1">element 'Insulation/AssemblyEffectiveRValue' is REQUIRED</sch:assert>
     </sch:rule>
     <!-- [FrameFloorAdjacentToOther] -->
-    <!-- FIXME: Rule context below doesn't work. Seems like rule context below is not considered as distinct context (Ref: A rule element must have a @context attribute that is distinct from other rule elements in your Schematron file.) -->
+    <!-- FIXME: Review the rule context below; For each context node, only the first matching rule within a pattern is used (Ref: A rule element must have a @context attribute that is distinct from other rule elements in your Schematron file.) -->
     <!-- <sch:rule context="/h:HPXML/h:Building/h:BuildingDetails/h:Enclosure/h:FrameFloors/h:FrameFloor[h:ExteriorAdjacentTo[text()='other housing unit' or text()='other heated space' or text()='other multifamily buffer space' or text()='other non-freezing space']]"> -->
     <sch:rule context="/h:HPXML/h:Building/h:BuildingDetails/h:Enclosure/h:FrameFloors/h:FrameFloor/h:ExteriorAdjacentTo[text()='other housing unit' or text()='other heated space' or text()='other multifamily buffer space' or text()='other non-freezing space']">
       <sch:assert test="count(../h:extension/h:OtherSpaceAboveOrBelow[text()='above' or text()='below']) = 1">element 'extension/OtherSpaceAboveOrBelow' is REQUIRED</sch:assert>
@@ -423,14 +423,14 @@
       <sch:assert test="count(h:extension/h:CeilingFanSetpointTempCoolingSeasonOffset) &lt;= 1">element 'extension/CeilingFanSetpointTempCoolingSeasonOffset' is REQUIRED</sch:assert> <!-- deg F -->
     </sch:rule>
     <!-- [HVACControlType=HeatingSetback] -->
-    <!-- FIXME: Review the rule context below -->
+    <!-- FIXME: Review the rule context below; For each context node, only the first matching rule within a pattern is used -->
     <!-- <sch:rule context="/h:HPXML/h:Building/h:BuildingDetails/h:Systems/h:HVAC/h:HVACControl[h:SetbackTempHeatingSeason]"> -->
     <sch:rule context="/h:HPXML/h:Building/h:BuildingDetails/h:Systems/h:HVAC/h:HVACControl/h:SetbackTempHeatingSeason">
       <sch:assert test="count(../h:TotalSetbackHoursperWeekHeating) = 1">element 'TotalSetbackHoursperWeekHeating' is REQUIRED</sch:assert>
       <sch:assert test="count(../h:extension/h:SetbackStartHourHeating) = 1">element 'extension/SetbackStartHourHeating' is REQUIRED</sch:assert> <!-- 0 = midnight. 12 = noon -->
     </sch:rule>
     <!-- [HVACControlType=CoolingSetup] -->
-    <!-- FIXME: Review the rule context below -->
+    <!-- FIXME: Review the rule context below; For each context node, only the first matching rule within a pattern is used -->
     <!-- <sch:rule context="/h:HPXML/h:Building/h:BuildingDetails/h:Systems/h:HVAC/h:HVACControl[h:SetupTempCoolingSeason]"> -->
     <sch:rule context="/h:HPXML/h:Building/h:BuildingDetails/h:Systems/h:HVAC/h:HVACControl/h:SetupTempCoolingSeason">
       <sch:assert test="count(../h:TotalSetupHoursperWeekCooling) = 1">element 'TotalSetupHoursperWeekCooling' is REQUIRED</sch:assert>
@@ -521,8 +521,7 @@
       <sch:assert test="count(h:UsesDesuperheater) &lt;= 1">element 'UsesDesuperheater' is OPTIONAL</sch:assert> <!-- See [Desuperheater] -->
     </sch:rule>
     <!-- [WHType=Tank] -->
-    <!-- FIXME: Review the rule context below -->
-    <!-- Only the order of rule elements is significant; For each context node, only the first matching rule within a pattern is used -->
+    <!-- FIXME: Review the rule context below; For each context node, only the first matching rule within a pattern is used -->
     <!-- <sch:rule context="/h:HPXML/h:Building/h:BuildingDetails/h:Systems/h:WaterHeating/h:WaterHeatingSystem[h:WaterHeaterType='storage water heater']"> -->
     <sch:rule context="/h:HPXML/h:Building/h:BuildingDetails/h:Systems/h:WaterHeating/h:WaterHeatingSystem/h:WaterHeaterType[text()='storage water heater']">
       <sch:assert test="count(../h:FuelType[text()='natural gas' or text()='fuel oil' or text()='propane' or text()='electricity' or text()='wood' or text()='wood pellets']) = 1">element 'FuelType' is REQUIRED</sch:assert>
@@ -533,7 +532,7 @@
       <sch:assert test="count(../h:WaterHeaterInsulation/h:Jacket/h:JacketRValue) &lt;= 1">element 'WaterHeaterInsulation/Jacket/JacketRValue' is OPTIONAL</sch:assert> <!-- Capable to model tank wrap insulation -->
     </sch:rule>
     <!-- [WHType=Tankless] -->
-    <!-- FIXME: Review the rule context below -->
+    <!-- FIXME: Review the rule context below; For each context node, only the first matching rule within a pattern is used -->
     <!-- <sch:rule context="/h:HPXML/h:Building/h:BuildingDetails/h:Systems/h:WaterHeating/h:WaterHeatingSystem[h:WaterHeaterType='instantaneous water heater']"> -->
     <sch:rule context="/h:HPXML/h:Building/h:BuildingDetails/h:Systems/h:WaterHeating/h:WaterHeatingSystem/h:WaterHeaterType[text()='instantaneous water heater']">
       <sch:assert test="count(../h:FuelType[text()='natural gas' or text()='fuel oil' or text()='propane' or text()='electricity' or text()='wood' or text()='wood pellets']) = 1">element 'FuelType' is REQUIRED</sch:assert>
@@ -541,7 +540,7 @@
       <sch:assert test="count(../h:EnergyFactor | ../h:UniformEnergyFactor) = 1">element 'EnergyFactor | UniformEnergyFactor' is REQUIRED</sch:assert>
     </sch:rule>
     <!-- [WHType=HeatPump] -->
-    <!-- FIXME: Review the rule context below -->
+    <!-- FIXME: Review the rule context below; For each context node, only the first matching rule within a pattern is used -->
     <!-- <sch:rule context="/h:HPXML/h:Building/h:BuildingDetails/h:Systems/h:WaterHeating/h:WaterHeatingSystem[h:WaterHeaterType='heat pump water heater']"> -->
     <sch:rule context="/h:HPXML/h:Building/h:BuildingDetails/h:Systems/h:WaterHeating/h:WaterHeatingSystem/h:WaterHeaterType[text()='heat pump water heater']">
       <sch:assert test="count(../h:FuelType[text()='electricity']) = 1">element 'FuelType' is REQUIRED</sch:assert>
@@ -550,7 +549,7 @@
       <sch:assert test="count(../h:WaterHeaterInsulation/h:Jacket/h:JacketRValue) &lt;= 1">element 'WaterHeaterInsulation/Jacket/JacketRValue' is OPTIONAL</sch:assert> <!-- Capable to model tank wrap insulation -->
     </sch:rule>
     <!-- [WHType=Indirect] -->
-    <!-- FIXME: Review the rule context below -->
+    <!-- FIXME: Review the rule context below; For each context node, only the first matching rule within a pattern is used -->
     <!-- <sch:rule context="/h:HPXML/h:Building/h:BuildingDetails/h:Systems/h:WaterHeating/h:WaterHeatingSystem[h:WaterHeaterType='space-heating boiler with storage tank']"> -->
     <sch:rule context="/h:HPXML/h:Building/h:BuildingDetails/h:Systems/h:WaterHeating/h:WaterHeatingSystem/h:WaterHeaterType[text()='space-heating boiler with storage tank']">
       <sch:assert test="count(../h:RelatedHVACSystem) = 1">element 'RelatedHVACSystem' is REQUIRED</sch:assert> <!-- HeatingSystem (boiler) -->
@@ -559,13 +558,13 @@
       <sch:assert test="count(../h:StandbyLoss) &lt;= 1">element 'StandbyLoss' is OPTIONAL</sch:assert> <!-- Refer to https://www.ahridirectory.org/NewSearch?programId=28&searchTypeId=3 -->
     </sch:rule>
     <!-- [WHType=CombiTankless] -->
-    <!-- FIXME: Review the rule context below -->
+    <!-- FIXME: Review the rule context below; For each context node, only the first matching rule within a pattern is used -->
     <!-- <sch:rule context="/h:HPXML/h:Building/h:BuildingDetails/h:Systems/h:WaterHeating/h:WaterHeatingSystem[h:WaterHeaterType='space-heating boiler with tankless coil']"> -->
     <sch:rule context="/h:HPXML/h:Building/h:BuildingDetails/h:Systems/h:WaterHeating/h:WaterHeatingSystem/h:WaterHeaterType[text()='space-heating boiler with tankless coil']">
       <sch:assert test="count(../h:RelatedHVACSystem) = 1">element 'RelatedHVACSystem' is REQUIRED</sch:assert> <!-- HeatingSystem (boiler) -->
     </sch:rule>
     <!-- [Desuperheater] -->
-    <!-- FIXME: Review the rule context below -->
+    <!-- FIXME: Review the rule context below; For each context node, only the first matching rule within a pattern is used -->
     <!-- <sch:rule context="/h:HPXML/h:Building/h:BuildingDetails/h:Systems/h:WaterHeating/h:WaterHeatingSystem[h:UsesDesuperheater='true']"> -->
     <sch:rule context="/h:HPXML/h:Building/h:BuildingDetails/h:Systems/h:WaterHeating/h:WaterHeatingSystem/h:UsesDesuperheater[text()='true']">
       <sch:assert test="count(../h:WaterHeaterType[text()='storage water heater' or text()='instantaneous water heater' or text()='heat pump water heater']) = 1">element 'WaterHeaterType' is REQUIRED</sch:assert> <!-- Desuperheater is supported with storage water heater, tankless water heater and heat pump water heater -->
