@@ -29,6 +29,7 @@ def run_hpxml_workflow(rundir, hpxml, measures, measures_dir, debug: false, outp
 
   if not success
     print "#{print_prefix}Creating input unsuccessful.\n"
+    print "#{print_prefix}See #{File.join(rundir, 'run.log')} for details.\n"
     return { success: false, runner: runner }
   end
 
@@ -58,12 +59,11 @@ def run_hpxml_workflow(rundir, hpxml, measures, measures_dir, debug: false, outp
   # Write IDF to file
   File.open(File.join(rundir, 'in.idf'), 'w') { |f| f << model_idf.to_s }
 
+  # Run simulation
   print "#{print_prefix}Running simulation...\n"
-
-  # getEnergyPlusDirectory can be unreliable, using getOpenStudioCLI instead
-  ep_path = File.absolute_path(File.join(OpenStudio.getOpenStudioCLI.to_s, '..', '..', 'EnergyPlus', 'energyplus'))
+  ep_path = File.absolute_path(File.join(OpenStudio.getOpenStudioCLI.to_s, '..', '..', 'EnergyPlus', 'energyplus')) # getEnergyPlusDirectory can be unreliable, using getOpenStudioCLI instead
   simulation_start = Time.now
-  command = "\"#{ep_path}\" -w in.epw in.idf > stdout-energyplus"
+  command = "\"#{ep_path}\" -w in.epw in.idf > stdout-energyplus.log"
   if debug
     File.open(File.join(rundir, 'run.log'), 'a') do |f|
       f << "Executing command '#{command}' from working directory '#{rundir}'"
@@ -71,11 +71,26 @@ def run_hpxml_workflow(rundir, hpxml, measures, measures_dir, debug: false, outp
   end
   pwd = Dir.pwd
   Dir.chdir(rundir) do
-    system(command, err: IO.sysopen(File.join(rundir, 'stderr-energyplus'), 'w'))
+    system(command, err: IO.sysopen(File.join(rundir, 'stderr-energyplus.log'), 'w'))
   end
   Dir.chdir(pwd) # Prevent OS "restoring original_directory" warning
   sim_time = (Time.now - simulation_start).round(1)
-  print "#{print_prefix}Completed simulation in #{sim_time}s.\n"
+
+  # Check if simulation successful
+  sim_success = false
+  File.readlines(File.join(rundir, 'eplusout.err')).map(&:strip).each do |stdout_line|
+    next unless stdout_line.include? 'EnergyPlus Completed Successfully'
+
+    sim_success = true
+    break
+  end
+  if sim_success
+    print "#{print_prefix}Completed simulation in #{sim_time}s.\n"
+  else
+    print "#{print_prefix}Simulation unsuccessful.\n"
+    print "#{print_prefix}See #{File.join(rundir, 'eplusout.err')} for details.\n"
+    return { success: false, runner: runner }
+  end
 
   print "#{print_prefix}Processing output...\n"
 
@@ -98,6 +113,7 @@ def run_hpxml_workflow(rundir, hpxml, measures, measures_dir, debug: false, outp
 
   if not success
     print "#{print_prefix}Processing output unsuccessful.\n"
+    print "#{print_prefix}See #{File.join(rundir, 'run.log')} for details.\n"
     return { success: false, runner: runner }
   end
 
