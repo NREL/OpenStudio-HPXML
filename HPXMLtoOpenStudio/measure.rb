@@ -275,12 +275,12 @@ class OSModel
 
     # HVAC
 
-    add_ideal_system_for_partial_hvac(runner, model, spaces)
+    add_ideal_system(runner, model, spaces, epw_path)
     add_cooling_system(runner, model, spaces)
     add_heating_system(runner, model, spaces)
     add_heat_pump(runner, model, weather, spaces)
     add_dehumidifier(runner, model, spaces)
-    add_residual_hvac(runner, model, spaces)
+    add_residual_ideal_system(runner, model, spaces)
     add_ceiling_fans(runner, model, weather, spaces)
 
     # Hot Water
@@ -2110,13 +2110,25 @@ class OSModel
     end
   end
 
-  def self.add_ideal_system_for_partial_hvac(runner, model, spaces)
-    # Adds an ideal air system to meet expected unmet load (i.e., because the sum of fractions load served is less than 1)
+  def self.add_ideal_system(runner, model, spaces, epw_path)
+    # Adds an ideal air system as needed to meet the load (i.e., because the sum of fractions load
+    # served is less than 1 or because we're using an ideal air system for e.g. ASHRAE 140 loads).
     living_zone = spaces[HPXML::LocationLivingSpace].thermalZone.get
     obj_name = Constants.ObjectNameIdealAirSystem
 
     if @hpxml.building_construction.use_only_ideal_air_system
-      HVAC.apply_ideal_air_loads(model, runner, obj_name, 1, 1, living_zone)
+      cooling_load_frac = 1.0
+      heating_load_frac = 1.0
+      if @apply_ashrae140_assumptions
+        if epw_path.end_with? 'USA_CO_Colorado.Springs-Peterson.Field.724660_TMY3.epw'
+          cooling_load_frac = 0.0
+        elsif epw_path.end_with? 'USA_NV_Las.Vegas-McCarran.Intl.AP.723860_TMY3.epw'
+          heating_load_frac = 0.0
+        else
+          fail 'Unexpected weather file for ASHRAE 140 run.'
+        end
+      end
+      HVAC.apply_ideal_air_loads(model, runner, obj_name, cooling_load_frac, heating_load_frac, living_zone)
       return
     end
 
@@ -2140,15 +2152,16 @@ class OSModel
     end
   end
 
-  def self.add_residual_hvac(runner, model, spaces)
+  def self.add_residual_ideal_system(runner, model, spaces)
+    # Adds an ideal air system to meet unexpected load (i.e., because the HVAC systems are undersized to meet the load)
+    #
+    # Addressing unmet load ensures we can correctly calculate total heating/cooling loads without having
+    # to run an additional EnergyPlus simulation solely for that purpose, as well as allows us to report
+    # the unmet load (i.e., the energy delivered by the ideal air system).
+
     living_zone = spaces[HPXML::LocationLivingSpace].thermalZone.get
     obj_name = Constants.ObjectNameIdealAirSystemResidual
 
-    # Adds an ideal air system to meet unexpected load (i.e., because the HVAC systems are undersized to meet the load)
-    #
-    # Addressing unmet load ensures we can correctly calculate heating/cooling loads without having to run
-    # an additional EnergyPlus simulation solely for that purpose, as well as allows us to report
-    # the unmet load (i.e., the energy delivered by the ideal air system).
     if @remaining_cool_load_frac < 1.0
       sequential_cool_load_frac = 1
     else
