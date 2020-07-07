@@ -419,6 +419,9 @@ class HPXMLDefaults
     hpxml.ventilation_fans.each do |vent_fan|
       next unless (vent_fan.used_for_local_ventilation && (vent_fan.fan_location == HPXML::LocationKitchen))
 
+      if vent_fan.quantity.nil?
+        vent_fan.quantity = 1
+      end
       if vent_fan.rated_flow_rate.nil?
         vent_fan.rated_flow_rate = 100.0 # cfm, per BA HSP
       end

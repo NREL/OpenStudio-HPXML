@@ -3147,6 +3147,14 @@ class HPXML < Object
       fail "Attached HVAC distribution system '#{@distribution_system_idref}' not found for ventilation fan '#{@id}'."
     end
 
+    def flow_rate
+      if not @tested_flow_rate.nil?
+        return @tested_flow_rate
+      else
+        return @rated_flow_rate
+      end
+    end
+
     def delete
       @hpxml_object.ventilation_fans.delete(self)
     end
