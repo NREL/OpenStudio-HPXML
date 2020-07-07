@@ -1510,7 +1510,6 @@ class Airflow
 
     # Calculate cfm weighted average effectiveness for hvac sizing
     # Please review this, and its integration with hvac_sizing
-    weighted_vent_mech_tot_eff = 0.0
     weighted_vent_mech_lat_eff = 0.0
     weighted_vent_mech_apparent_sens_eff = 0.0
 
@@ -1520,14 +1519,12 @@ class Airflow
       vent_mech_fan_w = vent_mech.fan_power * (vent_mech.hours_in_operation / 24.0)
       vent_mech_sens_eff, vent_mech_lat_eff, vent_mech_apparent_sens_eff = calc_hrv_erv_effectiveness(vent_mech, vent_mech_cfm, vent_mech_fan_w)
       # No need to add balanced system here to average because their effectivenesses are all 0.0
-      weighted_vent_mech_tot_eff += vent_mech_cfm / tot_bal_cfm * vent_mech.total_recovery_efficiency.to_f
       weighted_vent_mech_lat_eff += vent_mech_cfm / tot_bal_cfm * vent_mech_lat_eff
       weighted_vent_mech_apparent_sens_eff += vent_mech_cfm / tot_bal_cfm * vent_mech_apparent_sens_eff
 
       infil_program = apply_erv_hrv_load_to_infil_program(model, infil_program, vent_mech_cfm, vent_mech_sens_eff, vent_mech_lat_eff, erv_sens_load_actuator, erv_lat_load_actuator)
     end
 
-    model.getBuilding.additionalProperties.setFeature(Constants.SizingInfoMechVentTotalEfficiency, weighted_vent_mech_tot_eff)
     model.getBuilding.additionalProperties.setFeature(Constants.SizingInfoMechVentLatentEffectiveness, weighted_vent_mech_lat_eff)
     model.getBuilding.additionalProperties.setFeature(Constants.SizingInfoMechVentApparentSensibleEffectiveness, weighted_vent_mech_apparent_sens_eff)
 

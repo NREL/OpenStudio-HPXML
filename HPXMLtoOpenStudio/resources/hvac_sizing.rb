@@ -1758,7 +1758,6 @@ class HVACSizing
 
     q_unb = get_feature(model.getBuilding, Constants.SizingInfoMechVentWholeHouseRateUnbalanced, 'double')
     q_b = get_feature(model.getBuilding, Constants.SizingInfoMechVentWholeHouseRateBalanced, 'double')
-    totalEfficiency = get_feature(model.getBuilding, Constants.SizingInfoMechVentTotalEfficiency, 'double')
     apparentSensibleEffectiveness = get_feature(model.getBuilding, Constants.SizingInfoMechVentApparentSensibleEffectiveness, 'double')
     latentEffectiveness = get_feature(model.getBuilding, Constants.SizingInfoMechVentLatentEffectiveness, 'double')
 
