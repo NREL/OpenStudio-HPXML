@@ -161,7 +161,6 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
       is_valid = false
     end
 
-    puts "hpxml.doc: #{hpxml.doc}"
     # Validate input HPXML against EnergyPlus Use Case
     errors = EnergyPlusValidator.run_validator(hpxml.doc)
     errors.each do |error|
