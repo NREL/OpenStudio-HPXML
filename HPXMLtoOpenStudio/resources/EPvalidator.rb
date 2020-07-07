@@ -112,6 +112,13 @@ class EnergyPlusValidator
         'Timestep' => zero_or_one, # minutes; must be a divisor of 60
         'BeginMonth | BeginDayOfMonth' => zero_or_two, # integer
         'EndMonth | EndDayOfMonth' => zero_or_two, # integer
+        'DaylightSaving' => zero_or_one, # See [DaylightSaving]
+      },
+
+      # [DaylightSaving]
+      '/HPXML/SoftwareInfo/extension/SimulationControl/DaylightSaving' => {
+        'Enabled' => one,
+        'BeginMonth | BeginDayOfMonth | EndMonth | EndDayOfMonth' => zero_or_four, # integer
       },
 
       # [Site]
@@ -790,7 +797,7 @@ class EnergyPlusValidator
       },
 
       ## [LightingGroup]
-      'LightingGroup[LightingType[LightEmittingDiode | CompactFluorescent | FluorescentTube] and Location[text()="interior" or text()="exterior" or text()="garage"]]' => {
+      '/HPXML/Building/BuildingDetails/Lighting/LightingGroup[LightingType[LightEmittingDiode | CompactFluorescent | FluorescentTube] and Location[text()="interior" or text()="exterior" or text()="garage"]]' => {
         'SystemIdentifier' => one, # Required by HPXML schema
         'FractionofUnitsInLocation' => one,
       },
