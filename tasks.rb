@@ -1184,7 +1184,8 @@ def set_hpxml_walls(hpxml_file, hpxml)
                   HPXML::WallTypeSteelStud => 8.1,
                   HPXML::WallTypeStone => 5.4,
                   HPXML::WallTypeStrawBale => 58.8,
-                  HPXML::WallTypeBrick => 7.9 }
+                  HPXML::WallTypeBrick => 7.9,
+                  HPXML::WallTypeAdobe => 5.0 }
     siding_types = [[HPXML::SidingTypeAluminum, HPXML::ColorReflective],
                     [HPXML::SidingTypeBrick, HPXML::ColorMediumDark],
                     [HPXML::SidingTypeFiberCement, HPXML::ColorMedium],
