@@ -135,6 +135,7 @@ def create_osws
     'base-hvac-evap-cooler-only.osw' => 'base.osw',
     'base-hvac-evap-cooler-only-ducted.osw' => 'base.osw',
     'base-hvac-fireplace-wood-only.osw' => 'base.osw',
+    'base-hvac-fixed-heater-electric-only.osw' => 'base.osw',
     'base-hvac-floor-furnace-propane-only.osw' => 'base.osw',
     # 'base-hvac-flowrate.osw' => 'base.osw', # Not going to support in the measure
     'base-hvac-furnace-elec-central-ac-1-speed.osw' => 'base.osw',
@@ -1353,6 +1354,10 @@ def get_values(osw_file, step)
     step.setArgument('heating_system_fuel', HPXML::FuelTypeWoodCord)
     step.setArgument('heating_system_heating_efficiency', 0.8)
     step.setArgument('cooling_system_type', 'none')
+  elsif ['base-hvac-fixed-heater-electric-only.osw'].include? osw_file
+    step.setArgument('heating_system_type', HPXML::HVACTypeFixedHeater)
+    step.setArgument('heating_system_fuel', HPXML::FuelTypeElectricity)
+    step.setArgument('heating_system_heating_efficiency', 1.0)
   elsif ['base-hvac-floor-furnace-propane-only.osw'].include? osw_file
     step.setArgument('heating_system_type', HPXML::HVACTypeFloorFurnace)
     step.setArgument('heating_system_fuel', HPXML::FuelTypePropane)
