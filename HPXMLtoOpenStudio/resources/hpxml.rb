@@ -223,6 +223,7 @@ class HPXML < Object
   UnitsKwhPerYear = 'kWh/year'
   UnitsPercent = 'Percent'
   UnitsThermPerYear = 'therm/year'
+  WallTypeAdobe = 'Adobe'
   WallTypeBrick = 'StructuralBrick'
   WallTypeCMU = 'ConcreteMasonryUnit'
   WallTypeConcrete = 'SolidConcrete'

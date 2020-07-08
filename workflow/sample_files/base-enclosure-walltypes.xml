@@ -180,7 +180,7 @@
             <WallType>
               <ConcreteMasonryUnit/>
             </WallType>
-            <Area>120.0</Area>
+            <Area>109.0</Area>
             <Siding>aluminum siding</Siding>
             <Color>reflective</Color>
             <Emittance>0.92</Emittance>
@@ -196,7 +196,7 @@
             <WallType>
               <DoubleWoodStud/>
             </WallType>
-            <Area>120.0</Area>
+            <Area>109.0</Area>
             <Siding>brick veneer</Siding>
             <Color>medium dark</Color>
             <Emittance>0.92</Emittance>
@@ -212,7 +212,7 @@
             <WallType>
               <InsulatedConcreteForms/>
             </WallType>
-            <Area>120.0</Area>
+            <Area>109.0</Area>
             <Siding>fiber cement siding</Siding>
             <Color>medium</Color>
             <Emittance>0.92</Emittance>
@@ -228,7 +228,7 @@
             <WallType>
               <LogWall/>
             </WallType>
-            <Area>120.0</Area>
+            <Area>109.0</Area>
             <Siding>stucco</Siding>
             <Color>light</Color>
             <Emittance>0.92</Emittance>
@@ -244,7 +244,7 @@
             <WallType>
               <StructurallyInsulatedPanel/>
             </WallType>
-            <Area>120.0</Area>
+            <Area>109.0</Area>
             <Siding>vinyl siding</Siding>
             <Color>dark</Color>
             <Emittance>0.92</Emittance>
@@ -260,7 +260,7 @@
             <WallType>
               <SolidConcrete/>
             </WallType>
-            <Area>120.0</Area>
+            <Area>109.0</Area>
             <Siding>aluminum siding</Siding>
             <Color>reflective</Color>
             <Emittance>0.92</Emittance>
@@ -276,7 +276,7 @@
             <WallType>
               <SteelFrame/>
             </WallType>
-            <Area>120.0</Area>
+            <Area>109.0</Area>
             <Siding>brick veneer</Siding>
             <Color>medium dark</Color>
             <Emittance>0.92</Emittance>
@@ -292,7 +292,7 @@
             <WallType>
               <Stone/>
             </WallType>
-            <Area>120.0</Area>
+            <Area>109.0</Area>
             <Siding>fiber cement siding</Siding>
             <Color>medium</Color>
             <Emittance>0.92</Emittance>
@@ -308,7 +308,7 @@
             <WallType>
               <StrawBale/>
             </WallType>
-            <Area>120.0</Area>
+            <Area>109.0</Area>
             <Siding>stucco</Siding>
             <Color>light</Color>
             <Emittance>0.92</Emittance>
@@ -324,13 +324,29 @@
             <WallType>
               <StructuralBrick/>
             </WallType>
-            <Area>120.0</Area>
+            <Area>109.0</Area>
             <Siding>vinyl siding</Siding>
             <Color>dark</Color>
             <Emittance>0.92</Emittance>
             <Insulation>
               <SystemIdentifier id='Wall10Insulation'/>
               <AssemblyEffectiveRValue>7.9</AssemblyEffectiveRValue>
+            </Insulation>
+          </Wall>
+          <Wall>
+            <SystemIdentifier id='Wall11'/>
+            <ExteriorAdjacentTo>outside</ExteriorAdjacentTo>
+            <InteriorAdjacentTo>living space</InteriorAdjacentTo>
+            <WallType>
+              <Adobe/>
+            </WallType>
+            <Area>109.0</Area>
+            <Siding>aluminum siding</Siding>
+            <Color>reflective</Color>
+            <Emittance>0.92</Emittance>
+            <Insulation>
+              <SystemIdentifier id='Wall11Insulation'/>
+              <AssemblyEffectiveRValue>5.0</AssemblyEffectiveRValue>
             </Insulation>
           </Wall>
           <Wall>
