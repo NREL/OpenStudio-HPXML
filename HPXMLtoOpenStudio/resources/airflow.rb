@@ -266,7 +266,6 @@ class Airflow
     whf_flow_actuator.setName("#{whf_flow.name} act")
 
     # Electric Equipment (for whole house fan electricity consumption)
-    # Do we still want to create it if there's no fan in HPXML? Reporting purpose?
     whf_equip_def = OpenStudio::Model::ElectricEquipmentDefinition.new(model)
     whf_equip_def.setName(Constants.ObjectNameWholeHouseFan)
     whf_equip = OpenStudio::Model::ElectricEquipment.new(whf_equip_def)
@@ -753,7 +752,7 @@ class Airflow
       duct_actuators = {}
       [false, true].each do |is_cfis|
         if is_cfis
-          next unless ((not @cfis_airloop.empty?) && (@cfis_airloop.values.include? air_loop))
+          next unless @cfis_airloop.values.include? air_loop
 
           prefix = 'cfis_'
         else
@@ -793,7 +792,7 @@ class Airflow
 
       [false, true].each do |is_cfis|
         if is_cfis
-          next unless ((not @cfis_airloop.empty?) && (@cfis_airloop.values.include? air_loop))
+          next unless @cfis_airloop.values.include? air_loop
 
           prefix = 'cfis_'
         else
@@ -993,7 +992,7 @@ class Airflow
         duct_program.addLine("Set #{duct_actuators['liv_to_dz_flow_rate'].name} = #{duct_vars['liv_to_dz_flow_rate'].name}")
       end
 
-      if (not @cfis_airloop.empty?) && (@cfis_airloop.values.include? air_loop)
+      if @cfis_airloop.values.include? air_loop
 
         # Calculate CFIS duct losses
         cfis_id = @cfis_airloop.key(air_loop)
@@ -1447,7 +1446,6 @@ class Airflow
     unbal_cfm = combined_unbal_cfm + cfis_cfm
 
     # Store info for HVAC Sizing measure
-    # Please review this, and its integration with hvac_sizing
     model.getBuilding.additionalProperties.setFeature(Constants.SizingInfoMechVentWholeHouseRateBalanced, tot_bal_cfm)
     model.getBuilding.additionalProperties.setFeature(Constants.SizingInfoMechVentWholeHouseRateUnbalanced, unbal_cfm.abs)
     model.getBuilding.additionalProperties.setFeature(Constants.SizingInfoMechVentExist, (not vent_fans_mech.empty?))
@@ -1490,10 +1488,9 @@ class Airflow
 
       # ERV/HRV EMS load model
       # E+ ERV model is using standard density for MFR calculation, caused discrepancy with other system types.
-      # E+ ERV model also does not meet setpoint perfectly.
       # Therefore ERV is modeled within EMS infiltration program
-      # Air property at inlet nodes in two sides of ERV
 
+      # Air property at inlet nodes in two sides of ERV
       # Common part across multiple erv/hrv programs, create only once
       infil_program.addLine("Set ERVSupInPb = #{@pbar_sensor.name}") # oa barometric pressure
       infil_program.addLine("Set ERVSupInTemp = #{@tout_sensor.name}") # oa db temperature

@@ -267,8 +267,8 @@ class HPXMLtoOpenStudioAirflowTest < MiniTest::Test
     bath_fan_cfm = bath_fan.rated_flow_rate * bath_fan.quantity
     bath_fan_power = bath_fan.fan_power * bath_fan.quantity
     kitchen_fan = hpxml.ventilation_fans.select { |f| f.used_for_local_ventilation && f.fan_location == HPXML::LocationKitchen }[0]
-    kitchen_fan_cfm = kitchen_fan.rated_flow_rate
-    kitchen_fan_power = kitchen_fan.fan_power
+    kitchen_fan_cfm = kitchen_fan.rated_flow_rate * (kitchen_fan.quantity.nil? ? 1 : kitchen_fan.quantity)
+    kitchen_fan_power = kitchen_fan.fan_power * (kitchen_fan.quantity.nil? ? 1 : kitchen_fan.quantity)
 
     # Check infiltration/ventilation program
     program_values = get_ems_values(model.getEnergyManagementSystemPrograms, "#{Constants.ObjectNameInfiltration} program")
