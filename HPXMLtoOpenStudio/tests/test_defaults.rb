@@ -487,14 +487,16 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
     kitchen_fan.rated_flow_rate = 300
     kitchen_fan.fan_power = 20
     kitchen_fan.start_hour = 12
+    kitchen_fan.quantity = 2
     bath_fan = hpxml.ventilation_fans.select { |f| f.used_for_local_ventilation && f.fan_location == HPXML::LocationBath }[0]
     bath_fan.rated_flow_rate = 80
     bath_fan.fan_power = 33
     bath_fan.start_hour = 6
+    bath_fan.quantity = 3
     XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
     hpxml_default = _test_measure()
-    _test_default_kitchen_fan_values(hpxml_default, 1, 300, 1.5, 20, 12)
-    _test_default_bath_fan_values(hpxml_default, 2, 80, 1.5, 33, 6)
+    _test_default_kitchen_fan_values(hpxml_default, 2, 300, 1.5, 20, 12)
+    _test_default_bath_fan_values(hpxml_default, 3, 80, 1.5, 33, 6)
 
     # Test defaults
     hpxml = apply_hpxml_defaults('base-mechvent-bath-kitchen-fans.xml')
