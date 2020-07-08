@@ -343,8 +343,8 @@ class HPXMLTest < MiniTest::Test
 
     # Check discrepancy between total load and sum of component loads
     if not xml.include? 'ASHRAE_Standard_140'
-      sum_component_htg_loads = results.select { |k, v| k.start_with? 'Component Load: Heating:' }.map { |k, v| v }.sum
-      sum_component_clg_loads = results.select { |k, v| k.start_with? 'Component Load: Cooling:' }.map { |k, v| v }.sum
+      sum_component_htg_loads = results.select { |k, v| k.start_with? 'Component Load: Heating:' }.map { |k, v| v }.sum(0.0)
+      sum_component_clg_loads = results.select { |k, v| k.start_with? 'Component Load: Cooling:' }.map { |k, v| v }.sum(0.0)
       residual_htg_load = results['Load: Heating (MBtu)'] - sum_component_htg_loads
       residual_clg_load = results['Load: Cooling (MBtu)'] - sum_component_clg_loads
       assert_operator(residual_htg_load.abs, :<, 0.5)
@@ -849,10 +849,10 @@ class HPXMLTest < MiniTest::Test
 
     # HVAC Load Fractions
     if not hpxml_path.include? 'location-miami'
-      htg_energy = results.select { |k, v| (k.include?(': Heating (MBtu)') || k.include?(': Heating Fans/Pumps (MBtu)')) && !k.include?('Load') }.map { |k, v| v }.sum
+      htg_energy = results.select { |k, v| (k.include?(': Heating (MBtu)') || k.include?(': Heating Fans/Pumps (MBtu)')) && !k.include?('Load') }.map { |k, v| v }.sum(0.0)
       assert_equal(hpxml.total_fraction_heat_load_served > 0, htg_energy > 0)
     end
-    clg_energy = results.select { |k, v| (k.include?(': Cooling (MBtu)') || k.include?(': Cooling Fans/Pumps (MBtu)')) && !k.include?('Load') }.map { |k, v| v }.sum
+    clg_energy = results.select { |k, v| (k.include?(': Cooling (MBtu)') || k.include?(': Cooling Fans/Pumps (MBtu)')) && !k.include?('Load') }.map { |k, v| v }.sum(0.0)
     assert_equal(hpxml.total_fraction_cool_load_served > 0, clg_energy > 0)
 
     # Water Heater
@@ -889,7 +889,7 @@ class HPXMLTest < MiniTest::Test
         # CFIS Fan energy
         query = "SELECT SUM(ABS(VariableValue)/1000000000) FROM ReportVariableData WHERE ReportVariableDataDictionaryIndex IN (SELECT ReportVariableDataDictionaryIndex FROM ReportVariableDataDictionary WHERE VariableType='Sum' AND KeyValue='#{Constants.ObjectNameMechanicalVentilationHouseFanCFIS.upcase}' AND VariableName='Electric Equipment Electric Energy' AND ReportingFrequency='Run Period' AND VariableUnits='J')"
         cfis_energy = sqlFile.execAndReturnFirstDouble(query).get
-        fan_gj = fan_cfis.map { |vent_mech| UnitConversions.convert(vent_mech.fan_power * vent_mech.hours_in_operation * 365.0, 'Wh', 'GJ') }.sum
+        fan_gj = fan_cfis.map { |vent_mech| UnitConversions.convert(vent_mech.fan_power * vent_mech.hours_in_operation * 365.0, 'Wh', 'GJ') }.sum(0.0)
         if fan_gj > 0
           assert_operator(cfis_energy, :>, 0)
           assert_operator(cfis_energy, :<, fan_gj)
@@ -903,19 +903,19 @@ class HPXMLTest < MiniTest::Test
       # Supply, exhaust, ERV, HRV, etc., check for appropriate mech vent energy
       fan_gj = 0
       if not fan_sup.empty?
-        fan_gj += fan_sup.map { |vent_mech| UnitConversions.convert(vent_mech.fan_power * vent_mech.hours_in_operation * 365.0, 'Wh', 'GJ') }.sum
+        fan_gj += fan_sup.map { |vent_mech| UnitConversions.convert(vent_mech.fan_power * vent_mech.hours_in_operation * 365.0, 'Wh', 'GJ') }.sum(0.0)
       end
       if not fan_exh.empty?
-        fan_gj += fan_exh.map { |vent_mech| UnitConversions.convert(vent_mech.fan_power * vent_mech.hours_in_operation * 365.0, 'Wh', 'GJ') }.sum
+        fan_gj += fan_exh.map { |vent_mech| UnitConversions.convert(vent_mech.fan_power * vent_mech.hours_in_operation * 365.0, 'Wh', 'GJ') }.sum(0.0)
       end
       if not fan_bal.empty?
-        fan_gj += fan_bal.map { |vent_mech| UnitConversions.convert(vent_mech.fan_power * vent_mech.hours_in_operation * 365.0, 'Wh', 'GJ') }.sum
+        fan_gj += fan_bal.map { |vent_mech| UnitConversions.convert(vent_mech.fan_power * vent_mech.hours_in_operation * 365.0, 'Wh', 'GJ') }.sum(0.0)
       end
       if not vent_fan_kitchen.empty?
-        fan_gj += vent_fan_kitchen.map { |vent_kitchen| UnitConversions.convert(vent_kitchen.fan_power * vent_kitchen.hours_in_operation * vent_kitchen.quantity * 365.0, 'Wh', 'GJ') }.sum
+        fan_gj += vent_fan_kitchen.map { |vent_kitchen| UnitConversions.convert(vent_kitchen.fan_power * vent_kitchen.hours_in_operation * vent_kitchen.quantity * 365.0, 'Wh', 'GJ') }.sum(0.0)
       end
       if not vent_fan_bath.empty?
-        fan_gj += vent_fan_bath.map { |vent_bath| UnitConversions.convert(vent_bath.fan_power * vent_bath.hours_in_operation * vent_bath.quantity * 365.0, 'Wh', 'GJ') }.sum
+        fan_gj += vent_fan_bath.map { |vent_bath| UnitConversions.convert(vent_bath.fan_power * vent_bath.hours_in_operation * vent_bath.quantity * 365.0, 'Wh', 'GJ') }.sum(0.0)
       end
       # Maximum error that can be caused by rounding
       assert_in_delta(mv_energy, fan_gj, 0.006)
@@ -982,7 +982,7 @@ class HPXMLTest < MiniTest::Test
     end
 
     # Lighting
-    ltg_energy = results.select { |k, v| k.include? 'Electricity: Lighting' }.map { |k, v| v }.sum
+    ltg_energy = results.select { |k, v| k.include? 'Electricity: Lighting' }.map { |k, v| v }.sum(0.0)
     assert_equal(hpxml.lighting_groups.size > 0, ltg_energy > 0)
 
     # Get fuels

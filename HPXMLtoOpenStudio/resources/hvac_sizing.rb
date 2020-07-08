@@ -574,7 +574,7 @@ class HVACSizing
     end # window
 
     # Daily Average Load (DAL)
-    dal = afl_hr.inject { |sum, n| sum + n } / afl_hr.size
+    dal = afl_hr.sum(0.0) / afl_hr.size
 
     # Excursion Limit line (ELL)
     ell = 1.3 * dal
@@ -649,7 +649,7 @@ class HVACSizing
     end # skylight
 
     # Daily Average Load (DAL)
-    dal = afl_hr.inject { |sum, n| sum + n } / afl_hr.size
+    dal = afl_hr.sum(0.0) / afl_hr.size
 
     # Excursion Limit line (ELL)
     ell = 1.3 * dal
@@ -873,7 +873,7 @@ class HVACSizing
         k_soil = UnitConversions.convert(BaseMaterial.Soil.k_in, 'in', 'ft')
         r_other = Material.Concrete(4.0).rvalue + Material.AirFilmFloorAverage.rvalue
         foundation_walls = @hpxml.foundation_walls.select { |fw| fw.is_thermal_boundary }
-        z_f = foundation_walls.map { |fw| fw.depth_below_grade }.inject(:+) / foundation_walls.size # Average below-grade depth
+        z_f = foundation_walls.map { |fw| fw.depth_below_grade }.sum(0.0) / foundation_walls.size # Average below-grade depth
         sqrt_term = [slab.exposed_perimeter**2 - 16.0 * slab.area, 0.0].max
         length = slab.exposed_perimeter / 4.0 + Math.sqrt(sqrt_term) / 4.0
         width = slab.exposed_perimeter / 4.0 - Math.sqrt(sqrt_term) / 4.0
@@ -1869,7 +1869,7 @@ class HVACSizing
 
     leakage_fracs = leakage_fracs.split(',').map(&:to_f)
     leakage_cfm25s = leakage_cfm25s.split(',').map(&:to_f)
-    if leakage_fracs.inject { |sum, n| sum + n } == 0.0
+    if leakage_fracs.sum(0.0) == 0.0
       leakage_fracs = [nil] * leakage_fracs.size
     else
       leakage_cfm25s = [nil] * leakage_cfm25s.size

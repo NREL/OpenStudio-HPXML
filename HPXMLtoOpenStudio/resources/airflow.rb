@@ -1418,10 +1418,10 @@ class Airflow
     vent_mech_bal = vent_fans_mech.select { |vent_mech| vent_mech.fan_type == HPXML::MechVentTypeBalanced }
     vent_mech_erv_hrv = vent_fans_mech.select { |vent_mech| [HPXML::MechVentTypeERV, HPXML::MechVentTypeHRV].include? vent_mech.fan_type }
 
-    sup_vent_mech_fan_w = vent_mech_sup.map { |vent_mech| vent_mech.fan_power * (vent_mech.hours_in_operation / 24.0) }.inject(0.0, :+)
-    exh_vent_mech_fan_w = vent_mech_exh.map { |vent_mech| vent_mech.fan_power * (vent_mech.hours_in_operation / 24.0) }.inject(0.0, :+)
+    sup_vent_mech_fan_w = vent_mech_sup.map { |vent_mech| vent_mech.fan_power * (vent_mech.hours_in_operation / 24.0) }.sum(0.0)
+    exh_vent_mech_fan_w = vent_mech_exh.map { |vent_mech| vent_mech.fan_power * (vent_mech.hours_in_operation / 24.0) }.sum(0.0)
     # ERV/HRV and balanced system fan power combined altogether
-    bal_vent_mech_fan_w = (vent_mech_bal + vent_mech_erv_hrv).map { |vent_mech| vent_mech.fan_power * (vent_mech.hours_in_operation / 24.0) }.inject(0.0, :+)
+    bal_vent_mech_fan_w = (vent_mech_bal + vent_mech_erv_hrv).map { |vent_mech| vent_mech.fan_power * (vent_mech.hours_in_operation / 24.0) }.sum(0.0)
     total_sup_exh_bal_w = sup_vent_mech_fan_w + exh_vent_mech_fan_w + bal_vent_mech_fan_w
     # 1.0: Fan heat does not enter space, 0.0: Fan heat does enter space, 0.5: Supply fan heat enters space
     if total_sup_exh_bal_w > 0.0
@@ -1432,11 +1432,11 @@ class Airflow
     add_ee_for_vent_fan_power(model, Constants.ObjectNameMechanicalVentilationHouseFan, fan_heat_lost_fraction, false, total_sup_exh_bal_w)
 
     # get cfms
-    sup_cfm = vent_mech_sup.map { |vent_mech| vent_mech.flow_rate * (vent_mech.hours_in_operation / 24.0) }.inject(0.0, :+)
-    exh_cfm = vent_mech_exh.map { |vent_mech| vent_mech.flow_rate * (vent_mech.hours_in_operation / 24.0) }.inject(0.0, :+)
-    bal_cfm = vent_mech_bal.map { |vent_mech| vent_mech.flow_rate * (vent_mech.hours_in_operation / 24.0) }.inject(0.0, :+)
-    erv_hrv_cfm = vent_mech_erv_hrv.map { |vent_mech| vent_mech.flow_rate * (vent_mech.hours_in_operation / 24.0) }.inject(0.0, :+)
-    cfis_cfm = vent_mech_cfis.map { |vent_mech| vent_mech.flow_rate }.inject(0.0, :+)
+    sup_cfm = vent_mech_sup.map { |vent_mech| vent_mech.flow_rate * (vent_mech.hours_in_operation / 24.0) }.sum(0.0)
+    exh_cfm = vent_mech_exh.map { |vent_mech| vent_mech.flow_rate * (vent_mech.hours_in_operation / 24.0) }.sum(0.0)
+    bal_cfm = vent_mech_bal.map { |vent_mech| vent_mech.flow_rate * (vent_mech.hours_in_operation / 24.0) }.sum(0.0)
+    erv_hrv_cfm = vent_mech_erv_hrv.map { |vent_mech| vent_mech.flow_rate * (vent_mech.hours_in_operation / 24.0) }.sum(0.0)
+    cfis_cfm = vent_mech_cfis.map { |vent_mech| vent_mech.flow_rate }.sum(0.0)
 
     # Combine exhaust and supply
     combined_bal_cfm = [sup_cfm, exh_cfm].min
