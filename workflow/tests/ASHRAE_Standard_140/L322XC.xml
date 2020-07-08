@@ -71,6 +71,7 @@
             <InteriorAdjacentTo>attic - vented</InteriorAdjacentTo>
             <Area>811.1</Area>
             <Azimuth>0</Azimuth>
+            <RoofType>asphalt or fiberglass shingles</RoofType>
             <SolarAbsorptance>0.6</SolarAbsorptance>
             <Emittance>0.9</Emittance>
             <Pitch>4.0</Pitch>
@@ -85,6 +86,7 @@
             <InteriorAdjacentTo>attic - vented</InteriorAdjacentTo>
             <Area>811.1</Area>
             <Azimuth>180</Azimuth>
+            <RoofType>asphalt or fiberglass shingles</RoofType>
             <SolarAbsorptance>0.6</SolarAbsorptance>
             <Emittance>0.9</Emittance>
             <Pitch>4.0</Pitch>
@@ -102,6 +104,7 @@
             <InteriorAdjacentTo>basement - conditioned</InteriorAdjacentTo>
             <Area>42.75</Area>
             <Azimuth>0</Azimuth>
+            <Siding>wood siding</Siding>
             <SolarAbsorptance>0.6</SolarAbsorptance>
             <Emittance>0.9</Emittance>
             <Insulation>
@@ -115,6 +118,7 @@
             <InteriorAdjacentTo>basement - conditioned</InteriorAdjacentTo>
             <Area>20.25</Area>
             <Azimuth>90</Azimuth>
+            <Siding>wood siding</Siding>
             <SolarAbsorptance>0.6</SolarAbsorptance>
             <Emittance>0.9</Emittance>
             <Insulation>
@@ -128,6 +132,7 @@
             <InteriorAdjacentTo>basement - conditioned</InteriorAdjacentTo>
             <Area>42.75</Area>
             <Azimuth>180</Azimuth>
+            <Siding>wood siding</Siding>
             <SolarAbsorptance>0.6</SolarAbsorptance>
             <Emittance>0.9</Emittance>
             <Insulation>
@@ -141,6 +146,7 @@
             <InteriorAdjacentTo>basement - conditioned</InteriorAdjacentTo>
             <Area>20.25</Area>
             <Azimuth>270</Azimuth>
+            <Siding>wood siding</Siding>
             <SolarAbsorptance>0.6</SolarAbsorptance>
             <Emittance>0.9</Emittance>
             <Insulation>
@@ -159,6 +165,7 @@
             </WallType>
             <Area>456.0</Area>
             <Azimuth>0</Azimuth>
+            <Siding>wood siding</Siding>
             <SolarAbsorptance>0.6</SolarAbsorptance>
             <Emittance>0.9</Emittance>
             <Insulation>
@@ -175,6 +182,7 @@
             </WallType>
             <Area>216.0</Area>
             <Azimuth>90</Azimuth>
+            <Siding>wood siding</Siding>
             <SolarAbsorptance>0.6</SolarAbsorptance>
             <Emittance>0.9</Emittance>
             <Insulation>
@@ -191,6 +199,7 @@
             </WallType>
             <Area>456.0</Area>
             <Azimuth>180</Azimuth>
+            <Siding>wood siding</Siding>
             <SolarAbsorptance>0.6</SolarAbsorptance>
             <Emittance>0.9</Emittance>
             <Insulation>
@@ -207,6 +216,7 @@
             </WallType>
             <Area>216.0</Area>
             <Azimuth>270</Azimuth>
+            <Siding>wood siding</Siding>
             <SolarAbsorptance>0.6</SolarAbsorptance>
             <Emittance>0.9</Emittance>
             <Insulation>
@@ -223,6 +233,7 @@
             </WallType>
             <Area>60.75</Area>
             <Azimuth>90</Azimuth>
+            <Siding>wood siding</Siding>
             <SolarAbsorptance>0.6</SolarAbsorptance>
             <Emittance>0.9</Emittance>
             <Insulation>
@@ -239,6 +250,7 @@
             </WallType>
             <Area>60.75</Area>
             <Azimuth>270</Azimuth>
+            <Siding>wood siding</Siding>
             <SolarAbsorptance>0.6</SolarAbsorptance>
             <Emittance>0.9</Emittance>
             <Insulation>
@@ -501,13 +513,11 @@
           <extension>
             <FracSensible>0.82</FracSensible>
             <FracLatent>0.18</FracLatent>
+            <WeekdayScheduleFractions>0.020, 0.020, 0.020, 0.020, 0.020, 0.034, 0.043, 0.085, 0.050, 0.030, 0.030, 0.041, 0.030, 0.025, 0.026, 0.026, 0.039, 0.042, 0.045, 0.070, 0.070, 0.073, 0.073, 0.066</WeekdayScheduleFractions>
+            <WeekendScheduleFractions>0.020, 0.020, 0.020, 0.020, 0.020, 0.034, 0.043, 0.085, 0.050, 0.030, 0.030, 0.041, 0.030, 0.025, 0.026, 0.026, 0.039, 0.042, 0.045, 0.070, 0.070, 0.073, 0.073, 0.066</WeekendScheduleFractions>
+            <MonthlyScheduleMultipliers>1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0</MonthlyScheduleMultipliers>
           </extension>
         </PlugLoad>
-        <extension>
-          <WeekdayScheduleFractions>0.020, 0.020, 0.020, 0.020, 0.020, 0.034, 0.043, 0.085, 0.050, 0.030, 0.030, 0.041, 0.030, 0.025, 0.026, 0.026, 0.039, 0.042, 0.045, 0.070, 0.070, 0.073, 0.073, 0.066</WeekdayScheduleFractions>
-          <WeekendScheduleFractions>0.020, 0.020, 0.020, 0.020, 0.020, 0.034, 0.043, 0.085, 0.050, 0.030, 0.030, 0.041, 0.030, 0.025, 0.026, 0.026, 0.039, 0.042, 0.045, 0.070, 0.070, 0.073, 0.073, 0.066</WeekendScheduleFractions>
-          <MonthlyScheduleMultipliers>1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0</MonthlyScheduleMultipliers>
-        </extension>
       </MiscLoads>
     </BuildingDetails>
   </Building>
