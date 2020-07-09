@@ -1437,18 +1437,17 @@ class Airflow
     exh_cfm = vent_mech_exh.map { |vent_mech| vent_mech.average_flow_rate }.sum(0.0)
     bal_cfm = vent_mech_bal.map { |vent_mech| vent_mech.average_flow_rate }.sum(0.0)
     erv_hrv_cfm = vent_mech_erv_hrv.map { |vent_mech| vent_mech.average_flow_rate }.sum(0.0)
-    cfis_cfm = vent_mech_cfis.map { |vent_mech| vent_mech.flow_rate }.sum(0.0)
+    cfis_cfm = vent_mech_cfis.map { |vent_mech| vent_mech.average_flow_rate }.sum(0.0)
 
-    # Combine exhaust and supply
-    combined_bal_cfm = [sup_cfm, exh_cfm].min
-    combined_unbal_cfm = sup_cfm - exh_cfm
     # Balanced and unbalanced airflow calculated for hvac sizing
-    tot_bal_cfm = bal_cfm + erv_hrv_cfm + combined_bal_cfm
-    unbal_cfm = combined_unbal_cfm + cfis_cfm
+    tot_sup_cfm = sup_cfm + bal_cfm + erv_hrv_cfm + cfis_cfm
+    tot_exh_cfm = exh_cfm + bal_cfm + erv_hrv_cfm
+    tot_bal_cfm = [tot_sup_cfm, tot_exh_cfm].min
+    tot_unbal_cfm = (tot_sup_cfm - tot_exh_cfm).abs
 
     # Store info for HVAC Sizing measure
     model.getBuilding.additionalProperties.setFeature(Constants.SizingInfoMechVentWholeHouseRateBalanced, tot_bal_cfm)
-    model.getBuilding.additionalProperties.setFeature(Constants.SizingInfoMechVentWholeHouseRateUnbalanced, unbal_cfm.abs)
+    model.getBuilding.additionalProperties.setFeature(Constants.SizingInfoMechVentWholeHouseRateUnbalanced, tot_unbal_cfm)
     model.getBuilding.additionalProperties.setFeature(Constants.SizingInfoMechVentExist, (not vent_fans_mech.empty?))
 
     # Fan Actuators
