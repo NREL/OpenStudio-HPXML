@@ -1234,51 +1234,64 @@ class OSModel
       # Apply construction
 
       if frame_floor.is_ceiling
-        inside_film = Material.AirFilmFloorAverage
-      else
-        inside_film = Material.AirFilmFloorReduced
-      end
-      if frame_floor.is_ceiling
-        outside_film = Material.AirFilmFloorAverage
-      elsif frame_floor.is_exterior
-        outside_film = Material.AirFilmOutside
-      else
-        outside_film = Material.AirFilmFloorReduced
-      end
-      if frame_floor.is_floor && (frame_floor.interior_adjacent_to == HPXML::LocationLivingSpace)
-        covering = Material.CoveringBare
-      end
-      if @apply_ashrae140_assumptions
-        if frame_floor.is_exterior # Raised floor
+        if @apply_ashrae140_assumptions
+          # Attic floor
+          inside_film = Material.AirFilmFloorASHRAE140
+          outside_film = Material.AirFilmFloorASHRAE140
+        else
+          inside_film = Material.AirFilmFloorAverage
+          outside_film = Material.AirFilmFloorAverage
+        end
+        constr_sets = [
+          WoodStudConstructionSet.new(Material.Stud2x6, 0.10, 0.0, 0.0, 0.5, nil),  # 2x6, 24" o.c.
+          WoodStudConstructionSet.new(Material.Stud2x4, 0.13, 0.0, 0.0, 0.5, nil),  # 2x4, 16" o.c.
+          WoodStudConstructionSet.new(Material.Stud2x4, 0.01, 0.0, 0.0, 0.0, nil), # Fallback
+        ]
+      else # Floor
+        if @apply_ashrae140_assumptions
+          # Raised floor
           inside_film = Material.AirFilmFloorASHRAE140
           outside_film = Material.AirFilmFloorZeroWindASHRAE140
           surface.setWindExposure('NoWind')
           covering = Material.CoveringBare(1.0)
-        elsif frame_floor.is_ceiling # Attic floor
-          inside_film = Material.AirFilmFloorASHRAE140
-          outside_film = Material.AirFilmFloorASHRAE140
+        else
+          inside_film = Material.AirFilmFloorReduced
+          if frame_floor.is_exterior
+            outside_film = Material.AirFilmOutside
+          else
+            outside_film = Material.AirFilmFloorReduced
+          end
+          if frame_floor.interior_adjacent_to == HPXML::LocationLivingSpace
+            covering = Material.CoveringBare
+          end
         end
+        constr_sets = [
+          WoodStudConstructionSet.new(Material.Stud2x6, 0.10, 10.0, 0.75, 0.0, covering), # 2x6, 24" o.c. + R10
+          WoodStudConstructionSet.new(Material.Stud2x6, 0.10, 0.0, 0.75, 0.0, covering),  # 2x6, 24" o.c.
+          WoodStudConstructionSet.new(Material.Stud2x4, 0.13, 0.0, 0.5, 0.0, covering),   # 2x4, 16" o.c.
+          WoodStudConstructionSet.new(Material.Stud2x4, 0.01, 0.0, 0.0, 0.0, nil), # Fallback
+        ]
       end
       assembly_r = frame_floor.insulation_assembly_r_value
 
-      constr_sets = [
-        WoodStudConstructionSet.new(Material.Stud2x6, 0.10, 10.0, 0.75, 0.0, covering), # 2x6, 24" o.c. + R10
-        WoodStudConstructionSet.new(Material.Stud2x6, 0.10, 0.0, 0.75, 0.0, covering),  # 2x6, 24" o.c.
-        WoodStudConstructionSet.new(Material.Stud2x4, 0.13, 0.0, 0.5, 0.0, covering),   # 2x4, 16" o.c.
-        WoodStudConstructionSet.new(Material.Stud2x4, 0.01, 0.0, 0.0, 0.0, nil), # Fallback
-      ]
       match, constr_set, cavity_r = pick_wood_stud_construction_set(assembly_r, constr_sets, inside_film, outside_film, frame_floor.id)
 
-      mat_floor_covering = nil
       install_grade = 1
+      if frame_floor.is_ceiling
+        Constructions.apply_ceiling(runner, model, [surface], "#{frame_floor.id} construction",
+                                    cavity_r, install_grade,
+                                    constr_set.stud.thick_in, constr_set.framing_factor,
+                                    constr_set.stud.thick_in, constr_set.drywall_thick_in,
+                                    inside_film, outside_film)
 
-      # Floor
-      Constructions.apply_floor(runner, model, [surface], "#{frame_floor.id} construction",
-                                cavity_r, install_grade,
-                                constr_set.framing_factor, constr_set.stud.thick_in,
-                                constr_set.osb_thick_in, constr_set.rigid_r,
-                                mat_floor_covering, constr_set.exterior_material,
-                                inside_film, outside_film)
+      else # Floor
+        Constructions.apply_floor(runner, model, [surface], "#{frame_floor.id} construction",
+                                  cavity_r, install_grade,
+                                  constr_set.framing_factor, constr_set.stud.thick_in,
+                                  constr_set.osb_thick_in, constr_set.rigid_r,
+                                  constr_set.exterior_material, inside_film, outside_film)
+      end
+
       check_surface_assembly_rvalue(runner, [surface], inside_film, outside_film, assembly_r, match)
     end
   end
@@ -1875,7 +1888,7 @@ class OSModel
     elsif type == 'floor'
       Constructions.apply_floor(runner, model, surfaces, 'AdiabaticFloorConstruction',
                                 0, 1, 0.07, 5.5, 0.75, 99,
-                                Material.FloorWood, Material.CoveringBare,
+                                Material.CoveringBare,
                                 Material.AirFilmFloorReduced,
                                 Material.AirFilmFloorReduced)
     elsif type == 'roof'
