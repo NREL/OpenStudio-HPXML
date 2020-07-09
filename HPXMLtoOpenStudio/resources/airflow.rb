@@ -266,7 +266,6 @@ class Airflow
     whf_flow_actuator.setName("#{whf_flow.name} act")
 
     # Electric Equipment (for whole house fan electricity consumption)
-    # Do we still want to create it if there's no fan in HPXML? Reporting purpose?
     whf_equip_def = OpenStudio::Model::ElectricEquipmentDefinition.new(model)
     whf_equip_def.setName(Constants.ObjectNameWholeHouseFan)
     whf_equip = OpenStudio::Model::ElectricEquipment.new(whf_equip_def)
@@ -753,7 +752,7 @@ class Airflow
       duct_actuators = {}
       [false, true].each do |is_cfis|
         if is_cfis
-          next unless ((not @cfis_airloop.empty?) && (@cfis_airloop.values.include? air_loop))
+          next unless @cfis_airloop.values.include? air_loop
 
           prefix = 'cfis_'
         else
@@ -793,7 +792,7 @@ class Airflow
 
       [false, true].each do |is_cfis|
         if is_cfis
-          next unless ((not @cfis_airloop.empty?) && (@cfis_airloop.values.include? air_loop))
+          next unless @cfis_airloop.values.include? air_loop
 
           prefix = 'cfis_'
         else
@@ -993,7 +992,7 @@ class Airflow
         duct_program.addLine("Set #{duct_actuators['liv_to_dz_flow_rate'].name} = #{duct_vars['liv_to_dz_flow_rate'].name}")
       end
 
-      if (not @cfis_airloop.empty?) && (@cfis_airloop.values.include? air_loop)
+      if @cfis_airloop.values.include? air_loop
 
         # Calculate CFIS duct losses
         cfis_id = @cfis_airloop.key(air_loop)
@@ -1199,7 +1198,8 @@ class Airflow
     return obj_sch_sensors
   end
 
-  def self.calc_hrv_erv_effectiveness(vent_mech, vent_mech_cfm, vent_mech_fan_w)
+  def self.calc_hrv_erv_effectiveness(vent_mech)
+    vent_mech_cfm = vent_mech.average_flow_rate
     if (vent_mech_cfm > 0)
       # Must assume an operating condition (HVI seems to use CSA 439)
       t_sup_in = 0.0
@@ -1207,7 +1207,7 @@ class Airflow
       t_exh_in = 22.0
       w_exh_in = 0.0065
       cp_a = 1006.0
-      p_fan = vent_mech_fan_w # Watts
+      p_fan = vent_mech.average_fan_power # Watts
 
       m_fan = UnitConversions.convert(vent_mech_cfm, 'cfm', 'm^3/s') * 16.02 * Psychrometrics.rhoD_fT_w_P(UnitConversions.convert(t_sup_in, 'C', 'F'), w_sup_in, 14.7) # kg/s
 
@@ -1419,10 +1419,10 @@ class Airflow
     vent_mech_bal = vent_fans_mech.select { |vent_mech| vent_mech.fan_type == HPXML::MechVentTypeBalanced }
     vent_mech_erv_hrv = vent_fans_mech.select { |vent_mech| [HPXML::MechVentTypeERV, HPXML::MechVentTypeHRV].include? vent_mech.fan_type }
 
-    sup_vent_mech_fan_w = vent_mech_sup.map { |vent_mech| vent_mech.fan_power * (vent_mech.hours_in_operation / 24.0) }.inject(0.0, :+)
-    exh_vent_mech_fan_w = vent_mech_exh.map { |vent_mech| vent_mech.fan_power * (vent_mech.hours_in_operation / 24.0) }.inject(0.0, :+)
+    sup_vent_mech_fan_w = vent_mech_sup.map { |vent_mech| vent_mech.average_fan_power }.sum(0.0)
+    exh_vent_mech_fan_w = vent_mech_exh.map { |vent_mech| vent_mech.average_fan_power }.sum(0.0)
     # ERV/HRV and balanced system fan power combined altogether
-    bal_vent_mech_fan_w = (vent_mech_bal + vent_mech_erv_hrv).map { |vent_mech| vent_mech.fan_power * (vent_mech.hours_in_operation / 24.0) }.inject(0.0, :+)
+    bal_vent_mech_fan_w = (vent_mech_bal + vent_mech_erv_hrv).map { |vent_mech| vent_mech.average_fan_power }.sum(0.0)
     total_sup_exh_bal_w = sup_vent_mech_fan_w + exh_vent_mech_fan_w + bal_vent_mech_fan_w
     # 1.0: Fan heat does not enter space, 0.0: Fan heat does enter space, 0.5: Supply fan heat enters space
     if total_sup_exh_bal_w > 0.0
@@ -1433,23 +1433,21 @@ class Airflow
     add_ee_for_vent_fan_power(model, Constants.ObjectNameMechanicalVentilationHouseFan, fan_heat_lost_fraction, false, total_sup_exh_bal_w)
 
     # get cfms
-    sup_cfm = vent_mech_sup.map { |vent_mech| vent_mech.flow_rate * (vent_mech.hours_in_operation / 24.0) }.inject(0.0, :+)
-    exh_cfm = vent_mech_exh.map { |vent_mech| vent_mech.flow_rate * (vent_mech.hours_in_operation / 24.0) }.inject(0.0, :+)
-    bal_cfm = vent_mech_bal.map { |vent_mech| vent_mech.flow_rate * (vent_mech.hours_in_operation / 24.0) }.inject(0.0, :+)
-    erv_hrv_cfm = vent_mech_erv_hrv.map { |vent_mech| vent_mech.flow_rate * (vent_mech.hours_in_operation / 24.0) }.inject(0.0, :+)
-    cfis_cfm = vent_mech_cfis.map { |vent_mech| vent_mech.flow_rate }.inject(0.0, :+)
+    sup_cfm = vent_mech_sup.map { |vent_mech| vent_mech.average_flow_rate }.sum(0.0)
+    exh_cfm = vent_mech_exh.map { |vent_mech| vent_mech.average_flow_rate }.sum(0.0)
+    bal_cfm = vent_mech_bal.map { |vent_mech| vent_mech.average_flow_rate }.sum(0.0)
+    erv_hrv_cfm = vent_mech_erv_hrv.map { |vent_mech| vent_mech.average_flow_rate }.sum(0.0)
+    cfis_cfm = vent_mech_cfis.map { |vent_mech| vent_mech.average_flow_rate }.sum(0.0)
 
-    # Combine exhaust and supply
-    combined_bal_cfm = [sup_cfm, exh_cfm].min
-    combined_unbal_cfm = sup_cfm - exh_cfm
     # Balanced and unbalanced airflow calculated for hvac sizing
-    tot_bal_cfm = bal_cfm + erv_hrv_cfm + combined_bal_cfm
-    unbal_cfm = combined_unbal_cfm + cfis_cfm
+    tot_sup_cfm = sup_cfm + bal_cfm + erv_hrv_cfm + cfis_cfm
+    tot_exh_cfm = exh_cfm + bal_cfm + erv_hrv_cfm
+    tot_bal_cfm = [tot_sup_cfm, tot_exh_cfm].min
+    tot_unbal_cfm = (tot_sup_cfm - tot_exh_cfm).abs
 
     # Store info for HVAC Sizing measure
-    # Please review this, and its integration with hvac_sizing
     model.getBuilding.additionalProperties.setFeature(Constants.SizingInfoMechVentWholeHouseRateBalanced, tot_bal_cfm)
-    model.getBuilding.additionalProperties.setFeature(Constants.SizingInfoMechVentWholeHouseRateUnbalanced, unbal_cfm.abs)
+    model.getBuilding.additionalProperties.setFeature(Constants.SizingInfoMechVentWholeHouseRateUnbalanced, tot_unbal_cfm)
     model.getBuilding.additionalProperties.setFeature(Constants.SizingInfoMechVentExist, (not vent_fans_mech.empty?))
 
     # Fan Actuators
@@ -1490,10 +1488,9 @@ class Airflow
 
       # ERV/HRV EMS load model
       # E+ ERV model is using standard density for MFR calculation, caused discrepancy with other system types.
-      # E+ ERV model also does not meet setpoint perfectly.
       # Therefore ERV is modeled within EMS infiltration program
-      # Air property at inlet nodes in two sides of ERV
 
+      # Air property at inlet nodes in two sides of ERV
       # Common part across multiple erv/hrv programs, create only once
       infil_program.addLine("Set ERVSupInPb = #{@pbar_sensor.name}") # oa barometric pressure
       infil_program.addLine("Set ERVSupInTemp = #{@tout_sensor.name}") # oa db temperature
@@ -1510,24 +1507,19 @@ class Airflow
 
     # Calculate cfm weighted average effectiveness for hvac sizing
     # Please review this, and its integration with hvac_sizing
-    weighted_vent_mech_tot_eff = 0.0
     weighted_vent_mech_lat_eff = 0.0
     weighted_vent_mech_apparent_sens_eff = 0.0
 
     # Apply ERV/HRV mechanical ventilation
     vent_mech_erv_hrv.each do |vent_mech|
-      vent_mech_cfm = vent_mech.flow_rate * (vent_mech.hours_in_operation / 24.0)
-      vent_mech_fan_w = vent_mech.fan_power * (vent_mech.hours_in_operation / 24.0)
-      vent_mech_sens_eff, vent_mech_lat_eff, vent_mech_apparent_sens_eff = calc_hrv_erv_effectiveness(vent_mech, vent_mech_cfm, vent_mech_fan_w)
+      vent_mech_sens_eff, vent_mech_lat_eff, vent_mech_apparent_sens_eff = calc_hrv_erv_effectiveness(vent_mech)
       # No need to add balanced system here to average because their effectivenesses are all 0.0
-      weighted_vent_mech_tot_eff += vent_mech_cfm / tot_bal_cfm * vent_mech.total_recovery_efficiency.to_f
-      weighted_vent_mech_lat_eff += vent_mech_cfm / tot_bal_cfm * vent_mech_lat_eff
-      weighted_vent_mech_apparent_sens_eff += vent_mech_cfm / tot_bal_cfm * vent_mech_apparent_sens_eff
+      weighted_vent_mech_lat_eff += vent_mech.average_flow_rate / tot_bal_cfm * vent_mech_lat_eff
+      weighted_vent_mech_apparent_sens_eff += vent_mech.average_flow_rate / tot_bal_cfm * vent_mech_apparent_sens_eff
 
-      infil_program = apply_erv_hrv_load_to_infil_program(model, infil_program, vent_mech_cfm, vent_mech_sens_eff, vent_mech_lat_eff, erv_sens_load_actuator, erv_lat_load_actuator)
+      infil_program = apply_erv_hrv_load_to_infil_program(model, infil_program, vent_mech.average_flow_rate, vent_mech_sens_eff, vent_mech_lat_eff, erv_sens_load_actuator, erv_lat_load_actuator)
     end
 
-    model.getBuilding.additionalProperties.setFeature(Constants.SizingInfoMechVentTotalEfficiency, weighted_vent_mech_tot_eff)
     model.getBuilding.additionalProperties.setFeature(Constants.SizingInfoMechVentLatentEffectiveness, weighted_vent_mech_lat_eff)
     model.getBuilding.additionalProperties.setFeature(Constants.SizingInfoMechVentApparentSensibleEffectiveness, weighted_vent_mech_apparent_sens_eff)
 

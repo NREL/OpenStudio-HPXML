@@ -521,10 +521,6 @@ class Constants
     return __method__.to_s
   end
 
-  def self.SizingInfoMechVentTotalEfficiency
-    return __method__.to_s
-  end
-
   def self.SizingInfoMechVentWholeHouseRateBalanced
     return __method__.to_s
   end

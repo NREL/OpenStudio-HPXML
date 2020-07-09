@@ -426,7 +426,7 @@ class OSModel
     spaces.keys.each do |space_type|
       next unless [HPXML::LocationBasementUnconditioned, HPXML::LocationCrawlspaceUnvented, HPXML::LocationCrawlspaceVented, HPXML::LocationGarage].include? space_type
 
-      floor_area = @hpxml.slabs.select { |s| s.interior_adjacent_to == space_type }.map { |s| s.area }.inject(:+)
+      floor_area = @hpxml.slabs.select { |s| s.interior_adjacent_to == space_type }.map { |s| s.area }.sum(0.0)
       if space_type == HPXML::LocationGarage
         height = 8.0
       else
@@ -440,9 +440,9 @@ class OSModel
     spaces.keys.each do |space_type|
       next unless [HPXML::LocationAtticUnvented, HPXML::LocationAtticVented].include? space_type
 
-      floor_area = @hpxml.frame_floors.select { |f| [f.interior_adjacent_to, f.exterior_adjacent_to].include? space_type }.map { |s| s.area }.inject(:+)
+      floor_area = @hpxml.frame_floors.select { |f| [f.interior_adjacent_to, f.exterior_adjacent_to].include? space_type }.map { |s| s.area }.sum(0.0)
       roofs = @hpxml.roofs.select { |r| r.interior_adjacent_to == space_type }
-      avg_pitch = roofs.map { |r| r.pitch }.inject(:+) / roofs.size
+      avg_pitch = roofs.map { |r| r.pitch }.sum(0.0) / roofs.size
 
       # Assume square hip roof for volume calculations; energy results are very insensitive to actual volume
       length = floor_area**0.5
@@ -905,7 +905,7 @@ class OSModel
     if num_occ > 0
       occ_gain, hrs_per_day, sens_frac, lat_frac = Geometry.get_occupancy_default_values()
       weekday_sch = '1.00000, 1.00000, 1.00000, 1.00000, 1.00000, 1.00000, 1.00000, 0.88310, 0.40861, 0.24189, 0.24189, 0.24189, 0.24189, 0.24189, 0.24189, 0.24189, 0.29498, 0.55310, 0.89693, 0.89693, 0.89693, 1.00000, 1.00000, 1.00000'
-      weekday_sch_sum = weekday_sch.split(',').map(&:to_f).inject(0, :+)
+      weekday_sch_sum = weekday_sch.split(',').map(&:to_f).sum(0.0)
       if (weekday_sch_sum - hrs_per_day).abs > 0.1
         fail 'Occupancy schedule inconsistent with hrs_per_day.'
       end
@@ -1318,9 +1318,9 @@ class OSModel
         slab_exp_perims[slab] = slab.exposed_perimeter
         slab_areas[slab] = slab.area
       end
-      total_slab_exp_perim = slab_exp_perims.values.inject(0, :+)
-      total_slab_area = slab_areas.values.inject(0, :+)
-      total_fnd_wall_length = fnd_wall_lengths.values.inject(0, :+)
+      total_slab_exp_perim = slab_exp_perims.values.sum(0.0)
+      total_slab_area = slab_areas.values.sum(0.0)
+      total_fnd_wall_length = fnd_wall_lengths.values.sum(0.0)
 
       no_wall_slab_exp_perim = {}
 
@@ -1630,7 +1630,7 @@ class OSModel
   end
 
   def self.add_thermal_mass(runner, model, spaces)
-    cfa_basement = @hpxml.slabs.select { |s| s.interior_adjacent_to == HPXML::LocationBasementConditioned }.map { |s| s.area }.inject(0, :+)
+    cfa_basement = @hpxml.slabs.select { |s| s.interior_adjacent_to == HPXML::LocationBasementConditioned }.map { |s| s.area }.sum(0.0)
     if @apply_ashrae140_assumptions
       # 1024 ft2 of interior partition wall mass, no furniture mass
       drywall_thick_in = 0.5
@@ -2050,6 +2050,7 @@ class OSModel
 
       elsif (heating_system.heating_system_type == HPXML::HVACTypeStove ||
              heating_system.heating_system_type == HPXML::HVACTypePortableHeater ||
+             heating_system.heating_system_type == HPXML::HVACTypeFixedHeater ||
              heating_system.heating_system_type == HPXML::HVACTypeWallFurnace ||
              heating_system.heating_system_type == HPXML::HVACTypeFloorFurnace ||
              heating_system.heating_system_type == HPXML::HVACTypeFireplace)
@@ -2319,7 +2320,7 @@ class OSModel
     end
 
     air_infils = @hpxml.air_infiltration_measurements
-    window_area = @hpxml.windows.map { |w| w.area }.inject(0, :+)
+    window_area = @hpxml.windows.map { |w| w.area }.sum(0.0)
     open_window_area = window_area * @frac_windows_operable * 0.5 * 0.2 # Assume A) 50% of the area of an operable window can be open, and B) 20% of openable window area is actually open
     site_type = @hpxml.site.site_type
     shelter_coef = @hpxml.site.shelter_coefficient
@@ -3095,7 +3096,7 @@ class OSModel
                                    constr_set.drywall_thick_in, constr_set.osb_thick_in,
                                    constr_set.rigid_r, constr_set.exterior_material,
                                    inside_film, outside_film)
-    elsif [HPXML::WallTypeConcrete, HPXML::WallTypeBrick, HPXML::WallTypeStrawBale, HPXML::WallTypeStone, HPXML::WallTypeLog].include? wall_type
+    elsif [HPXML::WallTypeConcrete, HPXML::WallTypeBrick, HPXML::WallTypeAdobe, HPXML::WallTypeStrawBale, HPXML::WallTypeStone, HPXML::WallTypeLog].include? wall_type
       constr_sets = [
         GenericConstructionSet.new(10.0, 0.5, drywall_thick_in, mat_ext_finish), # w/R-10 rigid
         GenericConstructionSet.new(0.0, 0.5, drywall_thick_in, mat_ext_finish),  # Standard
@@ -3109,6 +3110,9 @@ class OSModel
       elsif wall_type == HPXML::WallTypeBrick
         thick_in = 8.0
         base_mat = BaseMaterial.Brick
+      elsif wall_type == HPXML::WallTypeAdobe
+        thick_in = 10.0
+        base_mat = BaseMaterial.Soil
       elsif wall_type == HPXML::WallTypeStrawBale
         thick_in = 23.0
         base_mat = BaseMaterial.StrawBale
