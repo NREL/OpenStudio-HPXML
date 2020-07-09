@@ -14,15 +14,13 @@
       <sch:assert test="count(h:extension/h:SimulationControl) &lt;= 1">element 'extension/SimulationControl' is OPTIONAL</sch:assert> <!-- See [SimulationControl] -->
     </sch:rule>
     <sch:rule context="/h:HPXML">
-      <sch:assert test="count(h:Building) = 1">element 'Building' is REQUIRED</sch:assert> <!-- FIXME: Does this need to be count(h:Building) &gt;= 1? -->
+      <sch:assert test="count(h:Building) = 1">element 'Building' is REQUIRED</sch:assert>
       <sch:assert test="count(h:Building/h:BuildingID) = 1">element 'Building/BuildingID' is REQUIRED</sch:assert> <!-- Required by HPXML schema -->
       <sch:assert test="count(h:Building/h:ProjectStatus/h:EventType) = 1">element 'Building/ProjectStatus/EventType' is REQUIRED</sch:assert> <!-- Required by HPXML schema -->
     </sch:rule>
     <sch:rule context="/h:HPXML/h:Building/h:BuildingDetails/h:BuildingSummary">
-      <sch:assert test="not(h:Site/h:SiteType) or count(h:Site/h:SiteType[text()='urban' or text()='suburban' or text()='rural']) = 1">element 'Site/SiteType' is OPTIONAL</sch:assert>
-      <sch:assert test="count(h:Site/h:extension/h:ShelterCoefficient) &lt;= 1">element 'extension/ShelterCoefficient' is OPTIONAL</sch:assert>
-      <sch:assert test="count(h:Site/h:extension/h:Neighbors) &lt;= 1">element 'extension/Neighbors' is OPTIONAL</sch:assert> <!-- See [Neighbors] -->
-      <sch:assert test="count(h:BuildingOccupancy/h:NumberofResidents) &lt;= 1">element 'BuildingOccupancy/NumberofResidents' is OPTIONAL</sch:assert>
+      <sch:assert test="not(h:Site) or count(h:Site) = 1">element 'Site' is OPTIONAL</sch:assert> <!-- See [Site] -->
+      <sch:assert test="count(h:BuildingOccupancy) &lt;= 1">element 'BuildingOccupancy' is OPTIONAL</sch:assert> <!-- See [BuildingOccupancy]-->
       <sch:assert test="count(h:BuildingConstruction) = 1">element 'BuildingConstruction' is REQUIRED</sch:assert> <!-- See [BuildingConstruction] -->
     </sch:rule>
     <sch:rule context="/h:HPXML/h:Building/h:BuildingDetails/h:ClimateandRiskZones">
@@ -50,13 +48,11 @@
       <sch:assert test="count(h:HVACControl) &lt;= 1">element 'HVACControl' is OPTIONAL</sch:assert> <!-- see [HVACControl] -->
       <sch:assert test="count(h:HVACDistribution) &gt;= 0">element 'HVACDistribution' is OPTIONAL</sch:assert> <!-- see [HVACDistribution] -->
     </sch:rule>
-    <sch:rule context="/h:HPXML/h:Building/h:BuildingDetails/h:Systems/h:MechanicalVentilation/h:VentilationFans">
-      <sch:assert test="count(h:VentilationFan[h:UsedForWholeBuildingVentilation='true']) &lt;= 1">element 'VentilationFan[UsedForWholeBuildingVentilation='true']' is OPTIONAL</sch:assert> <!-- See [MechanicalVentilation] -->
-      <sch:assert test="count(h:VentilationFan[h:UsedForLocalVentilation='true' and h:FanLocation='kitchen']) &lt;= 1">element 'VentilationFan[UsedForLocalVentilation='true' and FanLocation='kitchen']' is OPTIONAL</sch:assert> <!-- See [KitchenRangeFan] -->
-      <sch:assert test="count(h:VentilationFan[h:UsedForLocalVentilation='true' and h:FanLocation='bath']) &lt;= 1">element 'VentilationFan[UsedForLocalVentilation='true' and FanLocation='bath']' is OPTIONAL</sch:assert> <!-- See [BathFan] -->
-      <sch:assert test="count(h:VentilationFan[h:UsedForSeasonalCoolingLoadReduction='true']) &lt;= 1">element 'VentilationFan[UsedForSeasonalCoolingLoadReduction='true']' is OPTIONAL</sch:assert> <!-- See [WholeHouseFan] -->
-    </sch:rule>
     <sch:rule context="/h:HPXML/h:Building/h:BuildingDetails/h:Systems">
+      <sch:assert test="count(h:MechanicalVentilation/h:VentilationFans/h:VentilationFan[h:UsedForWholeBuildingVentilation='true']) &lt;= 1">element 'VentilationFan[UsedForWholeBuildingVentilation='true']' is OPTIONAL</sch:assert> <!-- See [MechanicalVentilation] -->
+      <sch:assert test="count(h:MechanicalVentilation/h:VentilationFans/h:VentilationFan[h:UsedForLocalVentilation='true' and h:FanLocation='kitchen']) &lt;= 1">element 'VentilationFan[UsedForLocalVentilation='true' and FanLocation='kitchen']' is OPTIONAL</sch:assert> <!-- See [KitchenRangeFan] -->
+      <sch:assert test="count(h:MechanicalVentilation/h:VentilationFans/h:VentilationFan[h:UsedForLocalVentilation='true' and h:FanLocation='bath']) &lt;= 1">element 'VentilationFan[UsedForLocalVentilation='true' and FanLocation='bath']' is OPTIONAL</sch:assert> <!-- See [BathFan] -->
+      <sch:assert test="count(h:MechanicalVentilation/h:VentilationFans/h:VentilationFan[h:UsedForSeasonalCoolingLoadReduction='true']) &lt;= 1">element 'VentilationFan[UsedForSeasonalCoolingLoadReduction='true']' is OPTIONAL</sch:assert> <!-- See [WholeHouseFan] -->
       <sch:assert test="count(h:WaterHeating/h:WaterHeatingSystem) &gt;= 0">element 'WaterHeating/WaterHeatingSystem' is OPTIONAL</sch:assert> <!-- See [WaterHeatingSystem] -->
       <sch:assert test="count(h:WaterHeating/h:HotWaterDistribution) &lt;= 1">element 'WaterHeating/HotWaterDistribution' is OPTIONAL</sch:assert> <!-- See [HotWaterDistribution] -->
       <sch:assert test="count(h:WaterHeating/h:WaterFixture) &gt;= 0">element 'WaterHeating/WaterFixture' is OPTIONAL</sch:assert> <!-- See [WaterFixture] -->
@@ -67,26 +63,58 @@
       <sch:assert test="count(h:ClothesWasher) &lt;= 1">element 'ClothesWasher' is OPTIONAL</sch:assert> <!-- See [ClothesWasher] -->
       <sch:assert test="count(h:ClothesDryer) &lt;= 1">element 'ClothesDryer' is OPTIONAL</sch:assert> <!-- See [ClothesDryer] -->
       <sch:assert test="count(h:Dishwasher) &lt;= 1">element 'Dishwasher' is OPTIONAL</sch:assert> <!-- See [Dishwasher] -->
-      <sch:assert test="count(h:Refrigerator) &lt;= 1">element 'Refrigerator' is OPTIONAL</sch:assert> <!-- See [Refrigerator] -->
+      <sch:assert test="count(h:Refrigerator) &gt;= 0">element 'Refrigerator' is OPTIONAL</sch:assert> <!-- See [Refrigerator] -->
+      <sch:assert test="count(h:Freezer) &gt;= 0">element 'Freezer' is OPTIONAL</sch:assert> <!-- See [Freezer] -->
       <sch:assert test="count(h:Dehumidifier) &lt;= 1">element 'Dehumidifier' is OPTIONAL</sch:assert> <!-- See [Dehumidifier] -->
       <sch:assert test="count(h:CookingRange) &lt;= 1">element 'CookingRange' is OPTIONAL</sch:assert> <!-- See [CookingRange] -->
+      <sch:assert test="count(h:Oven) &lt;= 1">element 'Oven' is OPTIONAL</sch:assert> <!-- See [Oven] -->
     </sch:rule>
     <sch:rule context="/h:HPXML/h:Building/h:BuildingDetails">
       <sch:assert test="count(h:Lighting) &lt;= 1">element 'Lighting' is OPTIONAL</sch:assert> <!-- See [Lighting] -->
       <sch:assert test="count(h:Lighting/h:CeilingFan) &lt;= 1">element 'Lighting/CeilingFan' is OPTIONAL</sch:assert> <!-- See [CeilingFan] -->
     </sch:rule>
+    <sch:rule context="/h:HPXML/h:Building/h:BuildingDetails/h:Pools">
+      <sch:assert test="count(h:Pool) &lt;= 1">element 'Pool' is OPTIONAL</sch:assert> <!-- See [Pool] -->
+    </sch:rule>
+    <sch:rule context="/h:HPXML/h:Building/h:BuildingDetails/h:HotTubs">
+      <sch:assert test="count(h:HotTub) &lt;= 1">element 'HotTub' is OPTIONAL</sch:assert> <!-- See [HotTub] -->
+    </sch:rule>
     <sch:rule context="/h:HPXML/h:Building/h:BuildingDetails/h:MiscLoads">
-      <sch:assert test="count(h:PlugLoad[h:PlugLoadType='other']) &lt;= 1">element 'PlugLoad[PlugLoadType='other']' is OPTIONAL</sch:assert> <!-- See [PlugLoads] -->
-      <sch:assert test="count(h:PlugLoad[h:PlugLoadType='TV other']) &lt;= 1">element 'PlugLoad[PlugLoadType='TV other']' is OPTIONAL</sch:assert> <!-- See [Television] -->
+      <sch:assert test="count(h:PlugLoad[h:PlugLoadType='other']) &lt;= 1">element 'PlugLoad[PlugLoadType='other']' is OPTIONAL</sch:assert> <!-- See [PlugLoad] -->
+      <sch:assert test="count(h:PlugLoad[h:PlugLoadType='TV other']) &lt;= 1">element 'PlugLoad[PlugLoadType='TV other']' is OPTIONAL</sch:assert> <!-- See [PlugLoad] -->
+      <sch:assert test="count(h:PlugLoad[h:PlugLoadType='electric vehicle charging']) &lt;= 1">element 'PlugLoad[PlugLoadType='electric vehicle charging']' is OPTIONAL</sch:assert> <!-- See [PlugLoad] -->
+      <sch:assert test="count(h:PlugLoad[h:PlugLoadType='well pump']) &lt;= 1">element 'PlugLoad[PlugLoadType='well pump']' is OPTIONAL</sch:assert> <!-- See [PlugLoad] -->
+      <sch:assert test="count(h:FuelLoad[h:FuelLoadType='grill']) &lt;= 1">element 'FuelLoad[FuelLoadType='grill']' is OPTIONAL</sch:assert> <!-- See [FuelLoad] -->
+      <sch:assert test="count(h:FuelLoad[h:FuelLoadType='lighting']) &lt;= 1">element 'FuelLoad[FuelLoadType='lighting']' is OPTIONAL</sch:assert> <!-- See [FuelLoad] -->
+      <sch:assert test="count(h:FuelLoad[h:FuelLoadType='fireplace']) &lt;= 1">element 'FuelLoad[FuelLoadType='fireplace']' is OPTIONAL</sch:assert> <!-- See [FuelLoad] -->
     </sch:rule>
 
     <!-- [SimulationControl] -->
     <sch:rule context="/h:HPXML/h:SoftwareInfo/h:extension/h:SimulationControl">
-      <sch:assert test="count(h:Timestep) &lt;= 1">element 'Timestep' is OPTIONAL</sch:assert>
-      <sch:assert test="((count(h:BeginMonth) = 0 and count(h:BeginDayOfMonth) = 0) or (count(h:BeginMonth) = 1 and count(h:BeginDayOfMonth) = 1))">Both 'BeginMonth' and 'BeginDayOfMonth' must be either blank or provided</sch:assert>
-      <sch:assert test="((count(h:EndMonth) = 0 and count(h:EndDayOfMonth) = 0) or (count(h:EndMonth) = 1 and count(h:EndDayOfMonth) = 1))">Both 'EndMonth' and 'EndDayOfMonth' must be either blank or provided</sch:assert>
+      <sch:assert test="count(h:Timestep) &lt;= 1">element 'Timestep' is OPTIONAL</sch:assert> <!-- minutes; must be a divisor of 60 -->
+      <sch:assert test="((count(h:BeginMonth) = 0 and count(h:BeginDayOfMonth) = 0) or (count(h:BeginMonth) = 1 and count(h:BeginDayOfMonth) = 1))">Both 'BeginMonth' and 'BeginDayOfMonth' must be either blank or provided</sch:assert> <!-- integer -->
+      <sch:assert test="((count(h:EndMonth) = 0 and count(h:EndDayOfMonth) = 0) or (count(h:EndMonth) = 1 and count(h:EndDayOfMonth) = 1))">Both 'EndMonth' and 'EndDayOfMonth' must be either blank or provided</sch:assert> <!-- integer -->
+      <sch:assert test="count(h:DaylightSaving) &lt;= 1">element 'DaylightSaving' is OPTIONAL</sch:assert> <!-- See [DaylightSaving] -->
     </sch:rule>
 
+    <!-- [DaylightSaving] -->
+    <sch:rule context="/h:HPXML/h:SoftwareInfo/h:extension/h:SimulationControl/h:DaylightSaving">
+      <sch:assert test="count(h:Enabled) = 1">element 'Enabled' is REQUIRED</sch:assert>
+      <sch:assert test="((count(h:BeginMonth) = 0 and count(h:BeginDayOfMonth) = 0 and count(h:EndMonth) = 0 and count(h:EndDayOfMonth) = 0) or (count(h:BeginMonth) = 1 and count(h:BeginDayOfMonth) = 1 and count(h:EndMonth) = 1 and count(h:EndDayOfMonth) = 1))">elements 'BeginMonth', 'BeginDayOfMonth', 'EndMonth' and 'EndDayOfMonth' must be either blank or provided</sch:assert> <!-- integer -->
+    </sch:rule>
+
+    <!-- [Site] -->
+    <sch:rule context="/h:HPXML/h:Building/h:BuildingDetails/h:BuildingSummary/h:Site">
+      <sch:assert test="not(h:SiteType) or count(h:SiteType[text()='urban' or text()='suburban' or text()='rural']) = 1">element 'SiteType' is OPTIONAL</sch:assert>
+      <sch:assert test="count(h:extension/h:ShelterCoefficient) &lt;= 1">element 'extension/ShelterCoefficient' is OPTIONAL</sch:assert>
+      <sch:assert test="count(h:extension/h:Neighbors) &lt;= 1">element 'extension/Neighbors' is OPTIONAL</sch:assert> <!-- See [Neighbors] -->
+    </sch:rule>
+    
+    <!-- [BuildingOccupancy] -->
+    <sch:rule context="/h:HPXML/h:Building/h:BuildingDetails/h:BuildingSummary/h:BuildingOccupancy">
+      <sch:assert test="count(h:NumberofResidents) &lt;= 1">element 'NumberofResidents' is OPTIONAL</sch:assert>
+    </sch:rule>
+  
     <!-- [BuildingConstruction] -->
     <sch:rule context="/h:HPXML/h:Building/h:BuildingDetails/h:BuildingSummary/h:BuildingConstruction">
       <sch:assert test="count(h:NumberofConditionedFloors) = 1">element 'NumberofConditionedFloors' is REQUIRED</sch:assert>
@@ -94,25 +122,20 @@
       <sch:assert test="count(h:NumberofBedrooms) = 1">element 'NumberofBedrooms' is REQUIRED</sch:assert>
       <sch:assert test="count(h:NumberofBathrooms) &lt;= 1">element 'NumberofBathrooms' is OPTIONAL</sch:assert>
       <sch:assert test="count(h:ConditionedFloorArea) = 1">element 'ConditionedFloorArea' is REQUIRED</sch:assert>
-      <sch:assert test="not(count(h:ConditionedBuildingVolume) = 0 and count(h:AverageCeilingHeight) = 0)">either element 'ConditionedBuildingVolume' or element 'AverageCeilingHeight' must be provided</sch:assert>
-    </sch:rule>
-
-    <!-- [Neighbors] -->
-    <sch:rule context="/h:HPXML/h:Building/h:BuildingDetails/h:BuildingSummary/h:Site/h:extension/h:Neighbors">
-      <sch:assert test="count(h:NeighborBuilding) &gt;= 1">element 'NeighborBuilding' is REQUIRED</sch:assert>
-    </sch:rule>
-
-    <!-- [NeighborBuilding] -->
-    <sch:rule context="/h:HPXML/h:Building/h:BuildingDetails/h:BuildingSummary/h:Site/h:extension/h:Neighbors/h:NeighborBuilding">
-      <sch:assert test="count(h:Azimuth) = 1">element 'Azimuth' is REQUIRED</sch:assert>
-      <sch:assert test="count(h:Distance) = 1">element 'Distance' is REQUIRED</sch:assert> <!-- ft -->
-      <sch:assert test="count(h:Height) &lt;= 1">element 'Height' is OPTIONAL</sch:assert> <!-- ft; if omitted, the neighbor is the same height as the main building -->
+      <sch:assert test="not(count(h:ConditionedBuildingVolume) = 0 and count(h:AverageCeilingHeight) = 0)">either element 'ConditionedBuildingVolume' or 'AverageCeilingHeight' must be provided</sch:assert>
     </sch:rule>
 
     <!-- [ClimateZone] -->
     <sch:rule context="/h:HPXML/h:Building/h:BuildingDetails/h:ClimateandRiskZones/h:ClimateZoneIECC">
       <sch:assert test="count(h:Year) = 1">element 'Year' is REQUIRED</sch:assert>
       <sch:assert test="count(h:ClimateZone[text()='1A' or text()='1B' or text()='1C' or text()='2A' or text()='2B' or text()='2C' or text()='3A' or text()='3B' or text()='3C' or text()='4A' or text()='4B' or text()='4C' or text()='5A' or text()='5B' or text()='5C' or text()='6A' or text()='6B' or text()='6C' or text()='7' or text()='8']) = 1">element 'ClimateZone' is REQUIRED</sch:assert>
+    </sch:rule>
+
+    <!-- [WeatherStation] -->
+    <sch:rule context="/h:HPXML/h:Building/h:BuildingDetails/h:ClimateandRiskZones/h:WeatherStation">
+      <sch:assert test="count(h:SystemIdentifier) = 1">element 'SystemIdentifier' is REQUIRED</sch:assert> <!-- Required by HPXML schema -->
+      <sch:assert test="count(h:Name) = 1">element 'Name' is REQUIRED</sch:assert> <!-- Required by HPXML schema -->
+      <sch:assert test="(count(h:WMO) = 1 or count(h:extension/h:EPWFilePath) = 1)">either element 'WMO' or element 'extension/EPWFilePath' is REQUIRED</sch:assert> <!-- Reference weather/data.csv for the list of acceptable WMO station numbers -->
     </sch:rule>
 
     <!-- [AirInfiltration] -->
@@ -133,7 +156,8 @@
       <sch:assert test="count(h:InteriorAdjacentTo[text()='attic - vented' or text()='attic - unvented' or text()='living space' or text()='garage']) = 1">element 'InteriorAdjacentTo' is REQUIRED</sch:assert>
       <sch:assert test="count(h:Area) = 1">element 'Area' is REQUIRED</sch:assert>
       <sch:assert test="count(h:Azimuth) &lt;= 1">element 'Azimuth' is OPTIONAL</sch:assert>
-      <sch:assert test="count(h:SolarAbsorptance) = 1">element 'SolarAbsorptance' is REQUIRED</sch:assert>
+      <sch:assert test="not(h:RoofType) or count(h:RoofType[text()='asphalt or fiberglass shingles' or text()='wood shingles or shakes' or text()='slate or tile shingles' or text()='metal surfacing']) = 1">element 'RoofType' is OPTIONAL</sch:assert>
+      <sch:assert test="count(h:RoofColor | h:SolarAbsorptance) &gt;= 1">element 'RoofColor | SolarAbsorptance' MUST be greater than or equal to 1</sch:assert>
       <sch:assert test="count(h:Emittance) = 1">element 'Emittance' is REQUIRED</sch:assert>
       <sch:assert test="count(h:Pitch) = 1">element 'Pitch' is REQUIRED</sch:assert>
       <sch:assert test="count(h:RadiantBarrier) = 1">element 'RadiantBarrier' is REQUIRED</sch:assert>
@@ -141,20 +165,16 @@
       <sch:assert test="count(h:Insulation/h:AssemblyEffectiveRValue) = 1">element 'Insulation/AssemblyEffectiveRValue' is REQUIRED</sch:assert>
     </sch:rule>
 
-    <!-- [VentedAttic] -->
-    <sch:rule context="/h:HPXML/h:Building/h:BuildingDetails/h:Enclosure/h:Roofs/h:Roof/h:InteriorAdjacentTo[text()='attic - vented']">
-      <sch:assert test="count(/h:HPXML/h:Building/h:BuildingDetails/h:Enclosure/h:Attics/h:Attic[h:AtticType/h:Attic[h:Vented='true']]/h:VentilationRate[h:UnitofMeasure='SLA' or h:UnitofMeasure='ACHnatural']/h:Value) &lt;= 1">element 'Attic/VentilationRate/Value' is OPTIONAL</sch:assert>
-    </sch:rule>
-
     <!-- [Wall] -->
     <sch:rule context="/h:HPXML/h:Building/h:BuildingDetails/h:Enclosure/h:Walls/h:Wall">
       <sch:assert test="count(h:SystemIdentifier) = 1">element 'SystemIdentifier' is REQUIRED</sch:assert> <!-- Required by HPXML schema -->
       <sch:assert test="count(h:ExteriorAdjacentTo[text()='outside' or text()='attic - vented' or text()='attic - unvented' or text()='basement - conditioned' or text()='basement - unconditioned' or text()='crawlspace - vented' or text()='crawlspace - unvented' or text()='garage' or text()='other housing unit' or text()='other heated space' or text()='other multifamily buffer space' or text()='other non-freezing space']) = 1">element 'ExteriorAdjacentTo' is REQUIRED</sch:assert>
       <sch:assert test="count(h:InteriorAdjacentTo[text()='living space' or text()='attic - vented' or text()='attic - unvented' or text()='basement - conditioned' or text()='basement - unconditioned' or text()='crawlspace - vented' or text()='crawlspace - unvented' or text()='garage']) = 1">element 'InteriorAdjacentTo' is REQUIRED</sch:assert>
-      <sch:assert test="count(h:WallType[h:WoodStud | h:DoubleWoodStud | h:ConcreteMasonryUnit | h:StructurallyInsulatedPanel | h:InsulatedConcreteForms | h:SteelFrame | h:SolidConcrete | h:StructuralBrick | h:StrawBale | h:Stone | h:LogWall]) = 1">element 'WallType' is REQUIRED</sch:assert>
+      <sch:assert test="count(h:WallType[h:WoodStud | h:DoubleWoodStud | h:ConcreteMasonryUnit | h:StructurallyInsulatedPanel | h:InsulatedConcreteForms | h:SteelFrame | h:SolidConcrete | h:StructuralBrick | h:StrawBale | h:Stone | h:LogWall | h:Adobe]) = 1">element 'WallType' is REQUIRED</sch:assert>
       <sch:assert test="count(h:Area) = 1">element 'Area' is REQUIRED</sch:assert>
       <sch:assert test="count(h:Azimuth) &lt;= 1">element 'Azimuth' is OPTIONAL</sch:assert>
-      <sch:assert test="count(h:SolarAbsorptance) = 1">element 'SolarAbsorptance' is REQUIRED</sch:assert>
+      <sch:assert test="not(h:Siding) or count(h:Siding[text()='wood siding' or text()='vinyl siding' or text()='stucco' or text()='fiber cement siding' or text()='brick veneer' or text()='aluminum siding']) = 1">element 'Siding' is OPTIONAL</sch:assert>
+      <sch:assert test="count(h:Color | h:SolarAbsorptance) &gt;= 1">element 'Color | SolarAbsorptance' MUST be greater than or equal to 1</sch:assert>
       <sch:assert test="count(h:Emittance) = 1">element 'Emittance' is REQUIRED</sch:assert>
       <sch:assert test="count(h:Insulation/h:SystemIdentifier) = 1">element 'Insulation/SystemIdentifier' is REQUIRED</sch:assert> <!-- Required by HPXML schema -->
       <sch:assert test="count(h:Insulation/h:AssemblyEffectiveRValue) = 1">element 'Insulation/AssemblyEffectiveRValue' is REQUIRED</sch:assert>
@@ -167,7 +187,8 @@
       <sch:assert test="count(h:InteriorAdjacentTo[text()='living space' or text()='attic - vented' or text()='attic - unvented' or text()='basement - conditioned' or text()='basement - unconditioned' or text()='crawlspace - vented' or text()='crawlspace - unvented' or text()='garage']) = 1">element 'InteriorAdjacentTo' is REQUIRED</sch:assert>
       <sch:assert test="count(h:Area) = 1">element 'Area' is REQUIRED</sch:assert>
       <sch:assert test="count(h:Azimuth) &lt;= 1">element 'Azimuth' is OPTIONAL</sch:assert>
-      <sch:assert test="count(h:SolarAbsorptance) = 1">element 'SolarAbsorptance' is REQUIRED</sch:assert>
+      <sch:assert test="not(h:Siding) or count(h:Siding[text()='wood siding' or text()='vinyl siding' or text()='stucco' or text()='fiber cement siding' or text()='brick veneer' or text()='aluminum siding']) = 1">element 'Siding' is OPTIONAL</sch:assert>
+      <sch:assert test="count(h:Color | h:SolarAbsorptance) &gt;= 1">element 'Color | SolarAbsorptance' MUST be greater than or equal to 1</sch:assert>
       <sch:assert test="count(h:Emittance) = 1">element 'Emittance' is REQUIRED</sch:assert>
       <sch:assert test="count(h:Insulation/h:SystemIdentifier) = 1">element 'Insulation/SystemIdentifier' is REQUIRED</sch:assert> <!-- Required by HPXML schema -->
       <sch:assert test="count(h:Insulation/h:AssemblyEffectiveRValue) = 1">element 'Insulation/AssemblyEffectiveRValue' is REQUIRED</sch:assert>
@@ -189,21 +210,9 @@
       <sch:assert test="count(h:Insulation/h:Layer[h:InstallationType='continuous - exterior'] | h:Insulation/h:AssemblyEffectiveRValue) = 1">element 'Insulation/Layer[InstallationType='continuous - exterior']' or 'Insulation/AssemblyEffectiveRValue' is REQUIRED</sch:assert> <!-- See [FoundationWallInsLayer] -->
     </sch:rule>
 
-    <!-- [VentedCrawlspace] -->
-    <sch:rule context="/h:HPXML/h:Building/h:BuildingDetails/h:Enclosure/h:FoundationWalls/h:FoundationWall/h:InteriorAdjacentTo[text()='crawlspace - vented']">
-      <sch:assert test="count(/h:HPXML/h:Building/h:BuildingDetails/h:Enclosure/h:Foundations/h:Foundation[h:FoundationType/h:Crawlspace[h:Vented='true']]/h:VentilationRate[h:UnitofMeasure='SLA']/h:Value) &lt;= 1">element 'Crawlspace/VentilationRate/Value' is OPTIONAL</sch:assert>
-    </sch:rule>
-
-    <!-- [FoundationWallInsLayer] -->
-    <sch:rule context="/h:HPXML/h:Building/h:BuildingDetails/h:Enclosure/h:FoundationWalls/h:FoundationWall/h:Insulation/h:Layer[h:InstallationType='continuous - exterior' or h:InstallationType='continuous - interior']">
-      <sch:assert test="count(h:NominalRValue) = 1">element 'NominalRValue' is REQUIRED</sch:assert>
-      <sch:assert test="count(h:extension/h:DistanceToTopOfInsulation) = 1">element 'extension/DistanceToTopOfInsulation' is REQUIRED</sch:assert> <!-- ft -->
-      <sch:assert test="count(h:extension/h:DistanceToBottomOfInsulation) = 1">element 'extension/DistanceToBottomOfInsulation' is REQUIRED</sch:assert> <!-- ft -->
-    </sch:rule>
-
     <!-- [FrameFloor] -->
     <sch:rule context="/h:HPXML/h:Building/h:BuildingDetails/h:Enclosure/h:FrameFloors/h:FrameFloor">
-      <sch:assert test="count(h:SystemIdentifier) = 1">element 'SystemIdentifier' is REQUIRED</sch:assert>
+      <sch:assert test="count(h:SystemIdentifier) = 1">element 'SystemIdentifier' is REQUIRED</sch:assert> <!-- Required by HPXML schema -->
       <sch:assert test="count(h:ExteriorAdjacentTo[text()='outside' or text()='attic - vented' or text()='attic - unvented' or text()='basement - conditioned' or text()='basement - unconditioned' or text()='crawlspace - vented' or text()='crawlspace - unvented' or text()='garage' or text()='other housing unit' or text()='other heated space' or text()='other multifamily buffer space' or text()='other non-freezing space']) = 1">element 'ExteriorAdjacentTo' is REQUIRED</sch:assert> <!-- See [FrameFloorAdjacentToOther] -->
       <sch:assert test="count(h:InteriorAdjacentTo[text()='living space' or text()='attic - vented' or text()='attic - unvented' or text()='basement - conditioned' or text()='basement - unconditioned' or text()='crawlspace - vented' or text()='crawlspace - unvented' or text()='garage']) = 1">element 'InteriorAdjacentTo' is REQUIRED</sch:assert>
       <sch:assert test="count(h:Area) = 1">element 'Area' is REQUIRED</sch:assert>
@@ -236,18 +245,11 @@
       <sch:assert test="count(h:Azimuth) = 1">element 'Azimuth' is REQUIRED</sch:assert>
       <sch:assert test="count(h:UFactor) = 1">element 'UFactor' is REQUIRED</sch:assert>
       <sch:assert test="count(h:SHGC) = 1">element 'SHGC' is REQUIRED</sch:assert>
-      <sch:assert test="count(h:InteriorShading/h:SummerShadingCoefficient) &lt;= 1">element 'InteriorShading/SummerShadingCoefficient' is OPTIONAL</sch:assert> <!-- Uses ERI assumption if not provided -->
-      <sch:assert test="count(h:InteriorShading/h:WinterShadingCoefficient) &lt;= 1">element 'InteriorShading/WinterShadingCoefficient' is OPTIONAL</sch:assert> <!-- Uses ERI assumption if not provided -->
+      <sch:assert test="count(h:InteriorShading/h:SummerShadingCoefficient) &lt;= 1">element 'InteriorShading/SummerShadingCoefficient' is OPTIONAL</sch:assert>
+      <sch:assert test="count(h:InteriorShading/h:WinterShadingCoefficient) &lt;= 1">element 'InteriorShading/WinterShadingCoefficient' is OPTIONAL</sch:assert>
       <sch:assert test="count(h:Overhangs) &lt;= 1">element 'Overhangs' is OPTIONAL</sch:assert> <!-- See [WindowOverhang] -->
       <sch:assert test="count(h:FractionOperable) &lt;= 1">element 'FractionOperable' is OPTIONAL</sch:assert>
       <sch:assert test="count(h:AttachedToWall) = 1">element 'AttachedToWall' is REQUIRED</sch:assert>
-    </sch:rule>
-
-    <!-- [WindowOverhang] -->
-    <sch:rule context="/h:HPXML/h:Building/h:BuildingDetails/h:Enclosure/h:Windows/h:Window/h:Overhangs">
-      <sch:assert test="count(h:Depth) = 1">element 'Depth' is REQUIRED</sch:assert> <!-- See [WindowOverhang] -->
-      <sch:assert test="count(h:DistanceToTopOfWindow) = 1">element 'DistanceToTopOfWindow' is REQUIRED</sch:assert>
-      <sch:assert test="count(h:DistanceToBottomOfWindow) = 1">element 'DistanceToBottomOfWindow' is REQUIRED</sch:assert>
     </sch:rule>
 
     <!-- [Skylight] -->
@@ -257,6 +259,8 @@
       <sch:assert test="count(h:Azimuth) = 1">element 'Azimuth' is REQUIRED</sch:assert>
       <sch:assert test="count(h:UFactor) = 1">element 'UFactor' is REQUIRED</sch:assert>
       <sch:assert test="count(h:SHGC) = 1">element 'SHGC' is REQUIRED</sch:assert>
+      <sch:assert test="count(h:InteriorShading/h:SummerShadingCoefficient) &lt;= 1">element 'InteriorShading/SummerShadingCoefficient' is OPTIONAL</sch:assert>
+      <sch:assert test="count(h:InteriorShading/h:WinterShadingCoefficient) &lt;= 1">element 'InteriorShading/WinterShadingCoefficient' is OPTIONAL</sch:assert>
       <sch:assert test="count(h:AttachedToRoof) = 1">element 'AttachedToRoof' is REQUIRED</sch:assert>
     </sch:rule>
 
@@ -271,9 +275,9 @@
 
     <!-- [HeatingSystem] -->
     <sch:rule context="/h:HPXML/h:Building/h:BuildingDetails/h:Systems/h:HVAC/h:HVACPlant/h:HeatingSystem">
-      <sch:assert test="count(h:SystemIdentifier) = 1">element 'SystemIdentifier' is REQUIRED</sch:assert>
+      <sch:assert test="count(h:SystemIdentifier) = 1">element 'SystemIdentifier' is REQUIRED</sch:assert> <!-- Required by HPXML schema -->
       <sch:assert test="count(../../h:HVACControl) = 1">element 'HVACControl' is REQUIRED</sch:assert> <!-- See [HVACControl] -->
-      <sch:assert test="count(h:HeatingSystemType[h:ElectricResistance | h:Furnace | h:WallFurnace | h:FloorFurnace | h:Boiler | h:Stove | h:PortableHeater | h:Fireplace]) = 1">element 'HeatingSystemType' is REQUIRED</sch:assert> <!-- See [HeatingType=Resistance] or [HeatingType=Furnace] or [HeatingType=WallFurnace] or [HeatingType=FloorFurnace] or [HeatingType=Boiler] or [HeatingType=Stove] or [HeatingType=PortableHeater] or [HeatingType=Fireplace] -->
+      <sch:assert test="count(h:HeatingSystemType[h:ElectricResistance | h:Furnace | h:WallFurnace | h:FloorFurnace | h:Boiler | h:Stove | h:PortableHeater | h:FixedHeater | h:Fireplace]) = 1">element 'HeatingSystemType' is REQUIRED</sch:assert> <!-- See [HeatingType=Resistance] or [HeatingType=Furnace] or [HeatingType=WallFurnace] or [HeatingType=FloorFurnace] or [HeatingType=Boiler] or [HeatingType=Stove] or [HeatingType=PortableHeater] or [HeatingType=FixedHeater] or [HeatingType=Fireplace] -->
       <sch:assert test="count(h:HeatingCapacity) &lt;= 1">element 'HeatingCapacity' is OPTIONAL</sch:assert>
       <sch:assert test="count(h:FractionHeatLoadServed) = 1">element 'FractionHeatLoadServed' is REQUIRED</sch:assert> <!-- Must sum to <= 1 across all HeatingSystems and HeatPumps -->
       <sch:assert test="count(h:ElectricAuxiliaryEnergy) &lt;= 1">element 'ElectricAuxiliaryEnergy' is OPTIONAL</sch:assert> <!-- If not provided, uses 301 defaults for fuel furnace/boiler and zero otherwise -->
@@ -297,7 +301,7 @@
       <sch:assert test="count(h:HeatingCapacity) &lt;= 1">element 'HeatingCapacity' is OPTIONAL</sch:assert>
       <sch:assert test="count(h:CoolingCapacity) &lt;= 1">element 'CoolingCapacity' is OPTIONAL</sch:assert>
       <sch:assert test="count(h:CoolingSensibleHeatFraction) &lt;= 1">element 'CoolingSensibleHeatFraction' is OPTIONAL</sch:assert>
-      <sch:assert test="not(h:BackupSystemFuel) or count(h:BackupSystemFuel[text()='electricity' or text()='natural gas' or text()='fuel oil' or text()='propane' or text()='wood' or text()='wood pellets']) = 1">element [not(BackupSystemFuel)] | BackupSystemFuel[text()='electricity' or text()='natural gas' or text()='fuel oil' or text()='propane' or text()='wood' or text()='wood pellets'] is OPTIONAL</sch:assert> <!-- See [HeatPumpBackup] -->
+      <sch:assert test="not(h:BackupSystemFuel) or count(h:BackupSystemFuel[text()='electricity' or text()='natural gas' or text()='fuel oil' or text()='fuel oil 1' or text()='fuel oil 2' or text()='fuel oil 4' or text()='fuel oil 5/6' or text()='diesel' or text()='propane' or text()='kerosene' or text()='wood' or text()='wood pellets']) = 1">element [not(BackupSystemFuel)] | BackupSystemFuel[text()='electricity' or text()='natural gas' or text()='fuel oil' or text()='fuel oil 1' or text()='fuel oil 2' or text()='fuel oil 4' or text()='fuel oil 5/6' or text()='diesel' or text()='propane' or text()='kerosene' or text()='wood' or text()='wood pellets'] is OPTIONAL</sch:assert> <!-- See [HeatPumpBackup] -->
       <sch:assert test="count(h:FractionHeatLoadServed) = 1">element 'FractionHeatLoadServed' is REQUIRED</sch:assert> <!-- Must sum to <= 1 across all HeatPumps and HeatingSystems -->
       <sch:assert test="count(h:FractionCoolLoadServed) = 1">element 'FractionCoolLoadServed' is REQUIRED</sch:assert> <!-- Must sum to <= 1 across all HeatPumps and CoolingSystems -->
     </sch:rule>
@@ -353,26 +357,6 @@
       <sch:assert test="count(h:DrainWaterHeatRecovery) &lt;= 1">element 'DrainWaterHeatRecovery' is OPTIONAL</sch:assert> <!-- See [DrainWaterHeatRecovery] -->
     </sch:rule>
 
-    <!-- [HWDistType=Standard] -->
-    <sch:rule context="/h:HPXML/h:Building/h:BuildingDetails/h:Systems/h:WaterHeating/h:HotWaterDistribution/h:SystemType/h:Standard">
-      <sch:assert test="count(h:PipingLength) &lt;= 1">element 'PipingLength' is OPTIONAL</sch:assert>
-    </sch:rule>
-
-    <!-- [HWDistType=Recirculation] -->
-    <sch:rule context="/h:HPXML/h:Building/h:BuildingDetails/h:Systems/h:WaterHeating/h:HotWaterDistribution/h:SystemType/h:Recirculation">
-      <sch:assert test="count(h:ControlType[text()='manual demand control' or text()='presence sensor demand control' or text()='temperature' or text()='timer' or text()='no control']) = 1">element 'ControlType' is REQUIRED</sch:assert>
-      <sch:assert test="count(h:RecirculationPipingLoopLength) &lt;= 1">element 'RecirculationPipingLoopLength' is OPTIONAL</sch:assert>
-      <sch:assert test="count(h:BranchPipingLoopLength) &lt;= 1">element 'BranchPipingLoopLength' is OPTIONAL</sch:assert>
-      <sch:assert test="count(h:PumpPower) &lt;= 1">element 'PumpPower' is OPTIONAL</sch:assert>
-    </sch:rule>
-
-    <!-- [DrainWaterHeatRecovery] -->
-    <sch:rule context="/h:HPXML/h:Building/h:BuildingDetails/h:Systems/h:WaterHeating/h:HotWaterDistribution/h:DrainWaterHeatRecovery">
-      <sch:assert test="count(h:FacilitiesConnected) = 1">element 'FacilitiesConnected' is REQUIRED</sch:assert>
-      <sch:assert test="count(h:EqualFlow) = 1">element 'EqualFlow' is REQUIRED</sch:assert>
-      <sch:assert test="count(h:Efficiency) = 1">element 'Efficiency' is REQUIRED</sch:assert>
-    </sch:rule>
-
     <!-- [WaterFixture] -->
     <sch:rule context="/h:HPXML/h:Building/h:BuildingDetails/h:Systems/h:WaterHeating/h:WaterFixture">
       <sch:assert test="count(h:SystemIdentifier) = 1">element 'SystemIdentifier' is REQUIRED</sch:assert> <!-- Required by HPXML schema -->
@@ -398,7 +382,7 @@
       <sch:assert test="count(h:ArrayTilt) = 1">element 'ArrayTilt' is REQUIRED</sch:assert>
       <sch:assert test="count(h:MaxPowerOutput) = 1">element 'MaxPowerOutput' is REQUIRED</sch:assert>
       <sch:assert test="count(h:InverterEfficiency) &lt;= 1">element 'InverterEfficiency' is OPTIONAL</sch:assert>
-      <sch:assert test="count(h:SystemLossesFraction | h:YearModulesManufactured) &gt;= 0">element '' is OPTIONAL</sch:assert>
+      <sch:assert test="count(h:SystemLossesFraction | h:YearModulesManufactured) &gt;= 0">element 'SystemLossesFraction | YearModulesManufactured' is OPTIONAL</sch:assert>
     </sch:rule>
 
     <!-- [ClothesWasher] -->
@@ -412,9 +396,10 @@
 
     <!-- [ClothesDryer] -->
     <sch:rule context="/h:HPXML/h:Building/h:BuildingDetails/h:Appliances/h:ClothesDryer">
+      <sch:assert test="count(../h:ClothesWasher) = 1">element '../ClothesWasher' is REQUIRED</sch:assert>
       <sch:assert test="count(h:SystemIdentifier) = 1">element 'SystemIdentifier' is REQUIRED</sch:assert> <!-- Required by HPXML schema -->
       <sch:assert test="not(h:Location) or (count(h:Location[text()='living space' or text()='basement - conditioned' or text()='basement - unconditioned' or text()='garage' or text()='other']) = 1)">element 'Location' is OPTIONAL</sch:assert>
-      <sch:assert test="count(h:FuelType[text()='natural gas' or text()='fuel oil' or text()='propane' or text()='electricity' or text()='wood' or text()='wood pellets']) = 1">element 'FuelType' is REQUIRED</sch:assert>
+      <sch:assert test="count(h:FuelType[text()='natural gas' or text()='fuel oil' or text()='fuel oil 1' or text()='fuel oil 2' or text()='fuel oil 4' or text()='fuel oil 5/6' or text()='diesel' or text()='propane' or text()='kerosene' or text()='coal' or text()='coke' or text()='bituminous coal' or text()='anthracite coal' or text()='electricity' or text()='wood' or text()='wood pellets']) = 1">element 'FuelType' is REQUIRED</sch:assert>
       <sch:assert test="count(h:EnergyFactor | h:CombinedEnergyFactor) &lt;= 1">element 'EnergyFactor | CombinedEnergyFactor' is OPTIONAL</sch:assert>
       <sch:assert test="((count(h:EnergyFactor | h:CombinedEnergyFactor | h:ControlType) = 0) or (count(h:EnergyFactor | h:CombinedEnergyFactor | h:ControlType) = 2))">element 'EnergyFactor | CombinedEnergyFactor | ControlType' MUST be zero or equal to 2</sch:assert>
       <sch:assert test="count(h:extension/h:UsageMultiplier) &lt;= 1">element 'extension/UsageMultiplier' is OPTIONAL</sch:assert>
@@ -434,10 +419,22 @@
       <sch:assert test="count(h:SystemIdentifier) = 1">element 'SystemIdentifier' is REQUIRED</sch:assert> <!-- Required by HPXML schema -->
       <sch:assert test="not(h:Location) or (count(h:Location[text()='living space' or text()='basement - conditioned' or text()='basement - unconditioned' or text()='garage' or text()='other']) = 1)">element 'Location' is OPTIONAL</sch:assert>
       <sch:assert test="count(h:RatedAnnualkWh | h:extension/h:AdjustedAnnualkWh) &gt;= 0">element 'RatedAnnualkWh | extension/AdjustedAnnualkWh' is OPTIONAL</sch:assert>
+      <sch:assert test="count(h:PrimaryIndicator) &lt;= 1">element 'PrimaryIndicator' is OPTIONAL</sch:assert>
       <sch:assert test="count(h:extension/h:UsageMultiplier) &lt;= 1">element 'extension/UsageMultiplier' is OPTIONAL</sch:assert>
-      <sch:assert test="count(h:extension/h:WeekdayScheduleFractions) &lt;= 1">element 'extension/WeekdayScheduleFractions' is OPTIONAL</sch:assert> <!-- Uses ERI Reference Home if not provided -->
-      <sch:assert test="count(h:extension/h:WeekendScheduleFractions) &lt;= 1">element 'extension/WeekendScheduleFractions' is OPTIONAL</sch:assert> <!-- Uses ERI Reference Home if not provided -->
-      <sch:assert test="count(h:extension/h:MonthlyScheduleMultipliers) &lt;= 1">element 'extension/MonthlyScheduleMultipliers' is OPTIONAL</sch:assert> <!-- Uses ERI Reference Home if not provided -->
+      <sch:assert test="count(h:extension/h:WeekdayScheduleFractions) &lt;= 1">element 'extension/WeekdayScheduleFractions' is OPTIONAL</sch:assert>
+      <sch:assert test="count(h:extension/h:WeekendScheduleFractions) &lt;= 1">element 'extension/WeekendScheduleFractions' is OPTIONAL</sch:assert>
+      <sch:assert test="count(h:extension/h:MonthlyScheduleMultipliers) &lt;= 1">element 'extension/MonthlyScheduleMultipliers' is OPTIONAL</sch:assert>
+    </sch:rule>
+
+    <!-- [Freezer] -->
+    <sch:rule context="/h:HPXML/h:Building/h:BuildingDetails/h:Appliances/h:Freezer">
+      <sch:assert test="count(h:SystemIdentifier) = 1">element 'SystemIdentifier' is REQUIRED</sch:assert> <!-- Required by HPXML schema -->
+      <sch:assert test="not(h:Location) or (count(h:Location[text()='living space' or text()='basement - conditioned' or text()='basement - unconditioned' or text()='garage' or text()='other']) = 1)">element 'Location' is OPTIONAL</sch:assert>
+      <sch:assert test="count(h:RatedAnnualkWh | h:extension/h:AdjustedAnnualkWh) &gt;= 0">element 'RatedAnnualkWh | extension/AdjustedAnnualkWh' is OPTIONAL</sch:assert>
+      <sch:assert test="count(h:extension/h:UsageMultiplier) &lt;= 1">element 'extension/UsageMultiplier' is OPTIONAL</sch:assert>
+      <sch:assert test="count(h:extension/h:WeekdayScheduleFractions) &lt;= 1">element 'extension/WeekdayScheduleFractions' is OPTIONAL</sch:assert>
+      <sch:assert test="count(h:extension/h:WeekendScheduleFractions) &lt;= 1">element 'extension/WeekendScheduleFractions' is OPTIONAL</sch:assert>
+      <sch:assert test="count(h:extension/h:MonthlyScheduleMultipliers) &lt;= 1">element 'extension/MonthlyScheduleMultipliers' is OPTIONAL</sch:assert>
     </sch:rule>
 
     <!-- [Dehumidifier] -->
@@ -451,65 +448,113 @@
 
     <!-- [CookingRange] -->
     <sch:rule context="/h:HPXML/h:Building/h:BuildingDetails/h:Appliances/h:CookingRange">
+      <sch:assert test="count(../h:Oven) = 1">element '../Oven' is REQUIRED</sch:assert> <!-- See [Oven] -->
       <sch:assert test="count(h:SystemIdentifier) = 1">element 'SystemIdentifier' is REQUIRED</sch:assert> <!-- Required by HPXML schema -->
       <sch:assert test="not(h:Location) or (count(h:Location[text()='living space' or text()='basement - conditioned' or text()='basement - unconditioned' or text()='garage' or text()='other']) = 1)">element 'Location' is OPTIONAL</sch:assert>
-      <sch:assert test="count(h:FuelType[text()='natural gas' or text()='fuel oil' or text()='propane' or text()='electricity' or text()='wood' or text()='wood pellets']) = 1">element 'FuelType' is REQUIRED</sch:assert>
+      <sch:assert test="count(h:FuelType[text()='natural gas' or text()='fuel oil' or text()='fuel oil 1' or text()='fuel oil 2' or text()='fuel oil 4' or text()='fuel oil 5/6' or text()='diesel' or text()='propane' or text()='kerosene' or text()='coal' or text()='coke' or text()='bituminous coal' or text()='anthracite coal' or text()='electricity' or text()='wood' or text()='wood pellets']) = 1">element 'FuelType' is REQUIRED</sch:assert>
       <sch:assert test="count(h:IsInduction) &lt;= 1">element 'IsInduction' is OPTIONAL</sch:assert>
       <sch:assert test="count(h:extension/h:UsageMultiplier) &lt;= 1">element 'extension/UsageMultiplier' is OPTIONAL</sch:assert>
-      <sch:assert test="count(h:extension/h:WeekdayScheduleFractions) &lt;= 1">element 'extension/WeekdayScheduleFractions' is OPTIONAL</sch:assert> <!-- Uses ERI Reference Home if not provided -->
-      <sch:assert test="count(h:extension/h:WeekendScheduleFractions) &lt;= 1">element 'extension/WeekendScheduleFractions' is OPTIONAL</sch:assert> <!-- Uses ERI Reference Home if not provided -->
-      <sch:assert test="count(h:extension/h:MonthlyScheduleMultipliers) &lt;= 1">element 'extension/MonthlyScheduleMultipliers' is OPTIONAL</sch:assert> <!-- Uses ERI Reference Home if not provided -->
-      <sch:assert test="count(../h:Oven/h:IsConvection) &lt;= 1">element '../Oven/IsConvection' is OPTIONAL</sch:assert>
+      <sch:assert test="count(h:extension/h:WeekdayScheduleFractions) &lt;= 1">element 'extension/WeekdayScheduleFractions' is OPTIONAL</sch:assert>
+      <sch:assert test="count(h:extension/h:WeekendScheduleFractions) &lt;= 1">element 'extension/WeekendScheduleFractions' is OPTIONAL</sch:assert>
+      <sch:assert test="count(h:extension/h:MonthlyScheduleMultipliers) &lt;= 1">element 'extension/MonthlyScheduleMultipliers' is OPTIONAL</sch:assert>
     </sch:rule>
 
+    <!-- [Oven] -->
+    <sch:rule context="/h:HPXML/h:Building/h:BuildingDetails/h:Appliances/h:Oven">
+      <sch:assert test="count(../h:CookingRange) = 1">element '../CookingRange' is REQUIRED</sch:assert> <!-- See [CookingRange] -->
+      <sch:assert test="count(h:SystemIdentifier) = 1">element 'SystemIdentifier' is REQUIRED</sch:assert> <!-- Required by HPXML schema -->
+      <sch:assert test="count(h:IsConvection) &lt;= 1">element 'IsConvection' is OPTIONAL</sch:assert>
+    </sch:rule>
+    
     <!-- [Lighting] -->
     <sch:rule context="/h:HPXML/h:Building/h:BuildingDetails/h:Lighting">
       <sch:assert test="count(h:LightingGroup[h:LightingType[h:LightEmittingDiode | h:CompactFluorescent | h:FluorescentTube] and h:Location[text()='interior' or text()='exterior' or text()='garage']]) = 9">the number of element 'h:LightingGroup[LightingType[LightEmittingDiode | CompactFluorescent | FluorescentTube] and Location[text()='interior' or text()='exterior' or text()='garage']]' MUST be 9</sch:assert>
       <sch:assert test="count(h:extension/h:UsageMultiplier) &lt;= 1">element 'extension/UsageMultiplier' is OPTIONAL</sch:assert>
     </sch:rule>
 
-    <!-- [LightingGroup] -->
-    <sch:rule context="/h:HPXML/h:Building/h:BuildingDetails/h:Lighting/h:LightingGroup[h:LightingType[h:LightEmittingDiode | h:CompactFluorescent | h:FluorescentTube] and h:Location[text()='interior' or text()='exterior' or text()='garage']]">
-      <sch:assert test="count(h:SystemIdentifier) = 1">element 'SystemIdentifier' is REQUIRED</sch:assert> <!-- Required by HPXML schema -->
-      <sch:assert test="count(h:FractionofUnitsInLocation) = 1">element 'FractionofUnitsInLocation' is REQUIRED</sch:assert>
-    </sch:rule>
-
     <!-- [CeilingFan] -->
     <sch:rule context="/h:HPXML/h:Building/h:BuildingDetails/h:Lighting/h:CeilingFan">
       <sch:assert test="count(h:SystemIdentifier) = 1">element 'SystemIdentifier' is REQUIRED</sch:assert> <!-- Required by HPXML schema -->
-      <sch:assert test="count(h:Airflow[h:FanSpeed='medium']/h:Efficiency) &lt;= 1">element 'Airflow[FanSpeed='medium']/Efficiency' is OPTIONAL</sch:assert> <!-- Uses Reference Home if not provided -->
-      <sch:assert test="count(h:Quantity) &lt;= 1">element 'Quantity' is OPTIONAL</sch:assert> <!-- Uses Reference Home if not provided -->
+      <sch:assert test="count(h:Airflow[h:FanSpeed='medium']/h:Efficiency) &lt;= 1">element 'Airflow[FanSpeed='medium']/Efficiency' is OPTIONAL</sch:assert>
+      <sch:assert test="count(h:Quantity) &lt;= 1">element 'Quantity' is OPTIONAL</sch:assert>
     </sch:rule>
 
-    <!-- [PlugLoads] -->
-    <sch:rule context="/h:HPXML/h:Building/h:BuildingDetails/h:MiscLoads/h:PlugLoad[h:PlugLoadType='other']">
+    <!-- [Pool] -->
+    <sch:rule context="/h:HPXML/h:Building/h:BuildingDetails/h:Pools/h:Pool">
       <sch:assert test="count(h:SystemIdentifier) = 1">element 'SystemIdentifier' is REQUIRED</sch:assert> <!-- Required by HPXML schema -->
-      <sch:assert test="count(h:Load[h:Units='kWh/year']/h:Value) &lt;= 1">element 'Load[Units='kWh/year']/Value' is OPTIONAL</sch:assert> <!-- Uses ERI Reference Home if not provided -->
-      <sch:assert test="count(h:extension/h:FracSensible) &lt;= 1">element 'extension/FracSensible' is OPTIONAL</sch:assert> <!-- Uses ERI Reference Home if not provided -->
-      <sch:assert test="count(h:extension/h:FracLatent) &lt;= 1">element 'extension/FracLatent' is OPTIONAL</sch:assert> <!-- Uses ERI Reference Home if not provided -->
-      <sch:assert test="count(h:extension/h:UsageMultiplier) &lt;= 1">element 'extension/UsageMultiplier' is OPTIONAL</sch:assert>
-      <sch:assert test="count(../h:extension/h:WeekdayScheduleFractions) &lt;= 1">element '../extension/WeekdayScheduleFractions' is OPTIONAL</sch:assert> <!-- Uses ERI Reference Home if not provided -->
-      <sch:assert test="count(../h:extension/h:WeekendScheduleFractions) &lt;= 1">element '../extension/WeekendScheduleFractions' is OPTIONAL</sch:assert> <!-- Uses ERI Reference Home if not provided -->
-      <sch:assert test="count(../h:extension/h:MonthlyScheduleMultipliers) &lt;= 1">element '../extension/MonthlyScheduleMultipliers' is OPTIONAL</sch:assert> <!-- Uses ERI Reference Home if not provided -->
+      <sch:assert test="count(h:PoolPumps/h:PoolPump) = 1">element 'PoolPumps/PoolPump' is REQUIRED</sch:assert> <!-- See [PoolPump] -->
+      <sch:assert test="count(h:Heater) &lt;= 1">element 'Heater' is OPTIONAL</sch:assert> <!-- See [PoolHeater] -->
     </sch:rule>
 
-    <!-- [Television] -->
-    <sch:rule context="/h:HPXML/h:Building/h:BuildingDetails/h:MiscLoads/h:PlugLoad[h:PlugLoadType='TV other']">
+    <!-- [HotTub] -->
+    <sch:rule context="/h:HPXML/h:Building/h:BuildingDetails/h:HotTubs/h:HotTub">
       <sch:assert test="count(h:SystemIdentifier) = 1">element 'SystemIdentifier' is REQUIRED</sch:assert> <!-- Required by HPXML schema -->
-      <sch:assert test="count(h:Load[h:Units='kWh/year']/h:Value) &lt;= 1">element 'Load[Units='kWh/year']/Value' is OPTIONAL</sch:assert> <!-- Uses ERI Reference Home if not provided -->
+      <sch:assert test="count(h:HotTubPumps/h:HotTubPump) = 1">element 'HotTubPumps/HotTubPump' is REQUIRED</sch:assert> <!-- See [HotTubPump] -->
+      <sch:assert test="count(h:Heater) &lt;= 1">element 'Heater' is OPTIONAL</sch:assert> <!-- See [HotTubHeater] -->
+    </sch:rule>
+
+    <!-- [PlugLoad] -->
+    <sch:rule context="/h:HPXML/h:Building/h:BuildingDetails/h:MiscLoads/h:PlugLoad[h:PlugLoadType='other' or h:PlugLoadType='TV other' or h:PlugLoadType='electric vehicle charging' or h:PlugLoadType='well pump']">
+      <sch:assert test="count(h:SystemIdentifier) = 1">element 'SystemIdentifier' is REQUIRED</sch:assert> <!-- Required by HPXML schema -->
+      <sch:assert test="count(h:Location[text()='interior' or text()='exterior']) &lt;= 1">element 'Location[text()='interior' or text()='exterior']' is OPTIONAL</sch:assert>
+      <sch:assert test="count(h:Load[h:Units='kWh/year']/h:Value) &lt;= 1">element 'Load[Units='kWh/year']/Value' is OPTIONAL</sch:assert>
+      <sch:assert test="count(h:extension/h:FracSensible) &lt;= 1">element 'extension/FracSensible' is OPTIONAL</sch:assert>
+      <sch:assert test="count(h:extension/h:FracLatent) &lt;= 1">element 'extension/FracLatent' is OPTIONAL</sch:assert>
       <sch:assert test="count(h:extension/h:UsageMultiplier) &lt;= 1">element 'extension/UsageMultiplier' is OPTIONAL</sch:assert>
-      <sch:assert test="count(../h:extension/h:WeekdayScheduleFractions) &lt;= 1">element '../extension/WeekdayScheduleFractions' is OPTIONAL</sch:assert> <!-- Uses ERI Reference Home if not provided -->
-      <sch:assert test="count(../h:extension/h:WeekendScheduleFractions) &lt;= 1">element '../extension/WeekendScheduleFractions' is OPTIONAL</sch:assert> <!-- Uses ERI Reference Home if not provided -->
-      <sch:assert test="count(../h:extension/h:MonthlyScheduleMultipliers) &lt;= 1">element '../extension/MonthlyScheduleMultipliers' is OPTIONAL</sch:assert> <!-- Uses ERI Reference Home if not provided -->
+      <sch:assert test="count(h:extension/h:WeekdayScheduleFractions) &lt;= 1">element 'extension/WeekdayScheduleFractions' is OPTIONAL</sch:assert>
+      <sch:assert test="count(h:extension/h:WeekendScheduleFractions) &lt;= 1">element 'extension/WeekendScheduleFractions' is OPTIONAL</sch:assert>
+      <sch:assert test="count(h:extension/h:MonthlyScheduleMultipliers) &lt;= 1">element 'extension/MonthlyScheduleMultipliers' is OPTIONAL</sch:assert>
+    </sch:rule>
+
+    <!-- [FuelLoad] -->
+    <sch:rule context="/h:HPXML/h:Building/h:BuildingDetails/h:MiscLoads/h:FuelLoad[h:FuelLoadType='grill' or h:FuelLoadType='lighting' or h:FuelLoadType='fireplace']">
+      <sch:assert test="count(h:SystemIdentifier) = 1">element 'SystemIdentifier' is REQUIRED</sch:assert> <!-- Required by HPXML schema -->
+      <sch:assert test="count(h:Location[text()='interior' or text()='exterior']) &lt;= 1">element 'Location[text()='interior' or text()='exterior']' is OPTIONAL</sch:assert>
+      <sch:assert test="count(h:Load[h:Units='therm/year']/h:Value) &lt;= 1">element 'Load[Units='therm/year']/Value' is OPTIONAL</sch:assert>
+      <sch:assert test="count(h:FuelType[text()='natural gas' or text()='fuel oil' or text()='fuel oil 1' or text()='fuel oil 2' or text()='fuel oil 4' or text()='fuel oil 5/6' or text()='diesel' or text()='propane' or text()='kerosene' or text()='coal' or text()='coke' or text()='bituminous coal' or text()='anthracite coal' or text()='wood' or text()='wood pellets']) = 1">element 'FuelType' is REQUIRED</sch:assert>
+      <sch:assert test="count(h:extension/h:UsageMultiplier) &lt;= 1">element 'extension/UsageMultiplier' is OPTIONAL</sch:assert>
+      <sch:assert test="count(h:extension/h:WeekdayScheduleFractions) &lt;= 1">element 'extension/WeekdayScheduleFractions' is OPTIONAL</sch:assert>
+      <sch:assert test="count(h:extension/h:WeekendScheduleFractions) &lt;= 1">element 'extension/WeekendScheduleFractions' is OPTIONAL</sch:assert>
+      <sch:assert test="count(h:extension/h:MonthlyScheduleMultipliers) &lt;= 1">element 'extension/MonthlyScheduleMultipliers' is OPTIONAL</sch:assert>
     </sch:rule>
   </sch:pattern>
   
-  <sch:pattern name="[WeatherStation]">
-    <!-- [WeatherStation] -->
-    <sch:rule context="/h:HPXML/h:Building/h:BuildingDetails/h:ClimateandRiskZones/h:WeatherStation">
-      <sch:assert test="count(h:SystemIdentifier) = 1">element 'SystemIdentifier' is REQUIRED</sch:assert> <!-- Required by HPXML schema -->
-      <sch:assert test="count(h:Name) = 1">element 'Name' is REQUIRED</sch:assert> <!-- Required by HPXML schema -->
-      <sch:assert test="(count(h:WMO) = 1 or count(h:extension/h:EPWFilePath) = 1)">either element 'WMO' or element 'extension/EPWFilePath' is REQUIRED</sch:assert> <!-- Reference weather/data.csv for the list of acceptable WMO station numbers -->
+  <sch:pattern name="[Neighbors]">
+    <!-- [Neighbors] -->
+    <sch:rule context="/h:HPXML/h:Building/h:BuildingDetails/h:BuildingSummary/h:Site/h:extension/h:Neighbors">
+      <sch:assert test="count(h:NeighborBuilding) &gt;= 1">element 'NeighborBuilding' MUST be greater than or equal to 1</sch:assert> <!-- See [NeighborBuilding] -->
+    </sch:rule>
+  </sch:pattern>
+
+  <sch:pattern name="[NeighborBuilding]">
+    <!-- [NeighborBuilding] -->
+    <sch:rule context="/h:HPXML/h:Building/h:BuildingDetails/h:BuildingSummary/h:Site/h:extension/h:Neighbors/h:NeighborBuilding">
+      <sch:assert test="count(h:Azimuth) = 1">element 'Azimuth' is REQUIRED</sch:assert>
+      <sch:assert test="count(h:Distance) = 1">element 'Distance' is REQUIRED</sch:assert> <!-- ft -->
+      <sch:assert test="count(h:Height) &lt;= 1">element 'Height' is OPTIONAL</sch:assert> <!-- ft; if omitted, the neighbor is the same height as the main building -->
+    </sch:rule>
+  </sch:pattern>
+
+  <sch:pattern name="[VentedAttic]">
+    <!-- [VentedAttic] -->
+    <sch:rule context="/h:HPXML/h:Building/h:BuildingDetails/h:Enclosure/h:Roofs/h:Roof[h:InteriorAdjacentTo='attic - vented']">
+      <sch:assert test="count(../../h:Attics/h:Attic[h:AtticType/h:Attic[h:Vented='true']]/h:VentilationRate[h:UnitofMeasure='SLA' or h:UnitofMeasure='ACHnatural']/h:Value) &lt;= 1">element 'Attic/VentilationRate/Value' is OPTIONAL</sch:assert>
+    </sch:rule>
+  </sch:pattern>
+  
+  <sch:pattern name="[VentedCrawlspace]">
+    <!-- [VentedCrawlspace] -->
+    <sch:rule context="/h:HPXML/h:Building/h:BuildingDetails/h:Enclosure/h:FoundationWalls/h:FoundationWall[h:InteriorAdjacentTo='crawlspace - vented']">
+      <sch:assert test="count(../../h:Foundations/h:Foundation[h:FoundationType/h:Crawlspace[h:Vented='true']]/h:VentilationRate[h:UnitofMeasure='SLA']/h:Value) &lt;= 1">element 'Crawlspace/VentilationRate/Value' is OPTIONAL</sch:assert>
+    </sch:rule>
+  </sch:pattern>
+
+  <sch:pattern name="[FoundationWallInsLayer]">
+    <!-- [FoundationWallInsLayer] -->
+    <sch:rule context="/h:HPXML/h:Building/h:BuildingDetails/h:Enclosure/h:FoundationWalls/h:FoundationWall/h:Insulation/h:Layer[h:InstallationType='continuous - exterior' or h:InstallationType='continuous - interior']">
+      <sch:assert test="count(h:NominalRValue) = 1">element 'NominalRValue' is REQUIRED</sch:assert>
+      <sch:assert test="count(h:extension/h:DistanceToTopOfInsulation) = 1">element 'extension/DistanceToTopOfInsulation' is REQUIRED</sch:assert> <!-- ft -->
+      <sch:assert test="count(h:extension/h:DistanceToBottomOfInsulation) = 1">element 'extension/DistanceToBottomOfInsulation' is REQUIRED</sch:assert> <!-- ft -->
     </sch:rule>
   </sch:pattern>
 
@@ -517,6 +562,15 @@
     <!-- [FrameFloorAdjacentToOther] -->
     <sch:rule context="/h:HPXML/h:Building/h:BuildingDetails/h:Enclosure/h:FrameFloors/h:FrameFloor[h:ExteriorAdjacentTo[text()='other housing unit' or text()='other heated space' or text()='other multifamily buffer space' or text()='other non-freezing space']]">
       <sch:assert test="count(h:extension/h:OtherSpaceAboveOrBelow[text()='above' or text()='below']) = 1">element 'extension/OtherSpaceAboveOrBelow' is REQUIRED</sch:assert>
+    </sch:rule>
+  </sch:pattern>
+
+  <sch:pattern name="[WindowOverhang]">
+    <!-- [WindowOverhang] -->
+    <sch:rule context="/h:HPXML/h:Building/h:BuildingDetails/h:Enclosure/h:Windows/h:Window/h:Overhangs">
+      <sch:assert test="count(h:Depth) = 1">element 'Depth' is REQUIRED</sch:assert>
+      <sch:assert test="count(h:DistanceToTopOfWindow) = 1">element 'DistanceToTopOfWindow' is REQUIRED</sch:assert>
+      <sch:assert test="count(h:DistanceToBottomOfWindow) = 1">element 'DistanceToBottomOfWindow' is REQUIRED</sch:assert>
     </sch:rule>
   </sch:pattern>
 
@@ -534,7 +588,7 @@
     <sch:rule context="/h:HPXML/h:Building/h:BuildingDetails/h:Systems/h:HVAC/h:HVACPlant/h:HeatingSystem[h:HeatingSystemType/h:Furnace]">
       <sch:assert test="count(../../h:HVACDistribution[h:DistributionSystemType/h:AirDistribution | h:DistributionSystemType[h:Other='DSE']]) &gt;= 1">the number of element '../../HVACDistribution[DistributionSystemType/AirDistribution | DistributionSystemType[Other='DSE']]' MUST be greater than or equal to 1</sch:assert> <!-- See [HVACDistribution] -->
       <sch:assert test="count(h:DistributionSystem) = 1">element 'DistributionSystem' is REQUIRED</sch:assert>
-      <sch:assert test="count(h:HeatingSystemFuel[text()='natural gas' or text()='fuel oil' or text()='propane' or text()='electricity' or text()='wood' or text()='wood pellets']) = 1">element 'HeatingSystemFuel' is REQUIRED</sch:assert>
+      <sch:assert test="count(h:HeatingSystemFuel[text()='natural gas' or text()='fuel oil' or text()='fuel oil 1' or text()='fuel oil 2' or text()='fuel oil 4' or text()='fuel oil 5/6' or text()='diesel' or text()='propane' or text()='kerosene' or text()='electricity' or text()='wood' or text()='wood pellets']) = 1">element 'HeatingSystemFuel' is REQUIRED</sch:assert>
       <sch:assert test="count(h:AnnualHeatingEfficiency[h:Units='AFUE']/h:Value) = 1">element 'AnnualHeatingEfficiency[Units='AFUE']/Value' is REQUIRED</sch:assert>
     </sch:rule>
   </sch:pattern>
@@ -543,7 +597,7 @@
     <!-- [HeatingType=WallFurnace] -->
     <sch:rule context="/h:HPXML/h:Building/h:BuildingDetails/h:Systems/h:HVAC/h:HVACPlant/h:HeatingSystem[h:HeatingSystemType/h:WallFurnace]">
       <sch:assert test="count(h:DistributionSystem) = 0">element 'DistributionSystem' MUST be zero</sch:assert>
-      <sch:assert test="count(h:HeatingSystemFuel[text()='natural gas' or text()='fuel oil' or text()='propane' or text()='electricity' or text()='wood' or text()='wood pellets']) = 1">element 'HeatingSystemFuel' is REQUIRED</sch:assert>
+      <sch:assert test="count(h:HeatingSystemFuel[text()='natural gas' or text()='fuel oil' or text()='fuel oil 1' or text()='fuel oil 2' or text()='fuel oil 4' or text()='fuel oil 5/6' or text()='diesel' or text()='propane' or text()='kerosene' or text()='electricity' or text()='wood' or text()='wood pellets']) = 1">element 'HeatingSystemFuel' is REQUIRED</sch:assert>
       <sch:assert test="count(h:AnnualHeatingEfficiency[h:Units='AFUE']/h:Value) = 1">element 'AnnualHeatingEfficiency[Units='AFUE']/Value' is REQUIRED</sch:assert>
     </sch:rule>
   </sch:pattern>
@@ -552,7 +606,7 @@
     <!-- [HeatingType=FloorFurnace] -->
     <sch:rule context="/h:HPXML/h:Building/h:BuildingDetails/h:Systems/h:HVAC/h:HVACPlant/h:HeatingSystem[h:HeatingSystemType/h:FloorFurnace]">
       <sch:assert test="count(h:DistributionSystem) = 0">element 'DistributionSystem' MUST be zero</sch:assert>
-      <sch:assert test="count(h:HeatingSystemFuel[text()='natural gas' or text()='fuel oil' or text()='propane' or text()='electricity' or text()='wood' or text()='wood pellets']) = 1">element 'HeatingSystemFuel' is REQUIRED</sch:assert>
+      <sch:assert test="count(h:HeatingSystemFuel[text()='natural gas' or text()='fuel oil' or text()='fuel oil 1' or text()='fuel oil 2' or text()='fuel oil 4' or text()='fuel oil 5/6' or text()='diesel' or text()='propane' or text()='kerosene' or text()='electricity' or text()='wood' or text()='wood pellets']) = 1">element 'HeatingSystemFuel' is REQUIRED</sch:assert>
       <sch:assert test="count(h:AnnualHeatingEfficiency[h:Units='AFUE']/h:Value) = 1">element 'AnnualHeatingEfficiency[Units='AFUE']/Value' is REQUIRED</sch:assert>
     </sch:rule>
   </sch:pattern>
@@ -562,7 +616,7 @@
     <sch:rule context="/h:HPXML/h:Building/h:BuildingDetails/h:Systems/h:HVAC/h:HVACPlant/h:HeatingSystem[h:HeatingSystemType/h:Boiler]">
       <sch:assert test="count(../../h:HVACDistribution[h:DistributionSystemType/h:HydronicDistribution | h:DistributionSystemType[h:Other='DSE']]) &gt;= 1">element '../../HVACDistribution[DistributionSystemType/HydronicDistribution | DistributionSystemType[Other='DSE']]' MUST be greater than or equal to 1</sch:assert> <!-- See [HVACDistribution] -->
       <sch:assert test="count(h:DistributionSystem) = 1">element 'DistributionSystem' is REQUIRED</sch:assert>
-      <sch:assert test="count(h:HeatingSystemFuel[text()='natural gas' or text()='fuel oil' or text()='propane' or text()='electricity' or text()='wood' or text()='wood pellets']) = 1">element 'HeatingSystemFuel' is REQUIRED</sch:assert>
+      <sch:assert test="count(h:HeatingSystemFuel[text()='natural gas' or text()='fuel oil' or text()='fuel oil 1' or text()='fuel oil 2' or text()='fuel oil 4' or text()='fuel oil 5/6' or text()='diesel' or text()='propane' or text()='kerosene' or text()='coal' or text()='coke' or text()='bituminous coal' or text()='anthracite coal' or text()='electricity' or text()='wood' or text()='wood pellets']) = 1">element 'HeatingSystemFuel' is REQUIRED</sch:assert>
       <sch:assert test="count(h:AnnualHeatingEfficiency[h:Units='AFUE']/h:Value) = 1">element 'AnnualHeatingEfficiency[Units='AFUE']/Value' is REQUIRED</sch:assert>
     </sch:rule>
   </sch:pattern>
@@ -571,7 +625,7 @@
     <!-- [HeatingType=Stove] -->
     <sch:rule context="/h:HPXML/h:Building/h:BuildingDetails/h:Systems/h:HVAC/h:HVACPlant/h:HeatingSystem[h:HeatingSystemType/h:Stove]">
       <sch:assert test="count(h:DistributionSystem) = 0">element 'DistributionSystem' MUST be zero</sch:assert>
-      <sch:assert test="count(h:HeatingSystemFuel[text()='natural gas' or text()='fuel oil' or text()='propane' or text()='electricity' or text()='wood' or text()='wood pellets']) = 1">element 'HeatingSystemFuel' is REQUIRED</sch:assert>
+      <sch:assert test="count(h:HeatingSystemFuel[text()='natural gas' or text()='fuel oil' or text()='fuel oil 1' or text()='fuel oil 2' or text()='fuel oil 4' or text()='fuel oil 5/6' or text()='diesel' or text()='propane' or text()='kerosene' or text()='electricity' or text()='wood' or text()='wood pellets']) = 1">element 'HeatingSystemFuel' is REQUIRED</sch:assert>
       <sch:assert test="count(h:AnnualHeatingEfficiency[h:Units='Percent']/h:Value) = 1">element 'AnnualHeatingEfficiency[Units='Percent']/Value' is REQUIRED</sch:assert>
     </sch:rule>
   </sch:pattern>
@@ -580,7 +634,16 @@
     <!-- [HeatingType=PortableHeater] -->
     <sch:rule context="/h:HPXML/h:Building/h:BuildingDetails/h:Systems/h:HVAC/h:HVACPlant/h:HeatingSystem[h:HeatingSystemType/h:PortableHeater]">
       <sch:assert test="count(h:DistributionSystem) = 0">element 'DistributionSystem' MUST be zero</sch:assert>
-      <sch:assert test="count(h:HeatingSystemFuel[text()='natural gas' or text()='fuel oil' or text()='propane' or text()='electricity' or text()='wood' or text()='wood pellets']) = 1">element 'HeatingSystemFuel' is REQUIRED</sch:assert>
+      <sch:assert test="count(h:HeatingSystemFuel[text()='natural gas' or text()='fuel oil' or text()='fuel oil 1' or text()='fuel oil 2' or text()='fuel oil 4' or text()='fuel oil 5/6' or text()='diesel' or text()='propane' or text()='kerosene' or text()='electricity' or text()='wood' or text()='wood pellets']) = 1">element 'HeatingSystemFuel' is REQUIRED</sch:assert>
+      <sch:assert test="count(h:AnnualHeatingEfficiency[h:Units='Percent']/h:Value) = 1">element 'AnnualHeatingEfficiency[Units='Percent']/Value' is REQUIRED</sch:assert>
+    </sch:rule>
+  </sch:pattern>
+
+  <sch:pattern name="[HeatingType=FixedHeater]">
+    <!-- [HeatingType=FixedHeater] -->
+    <sch:rule context="/h:HPXML/h:Building/h:BuildingDetails/h:Systems/h:HVAC/h:HVACPlant/h:HeatingSystem[h:HeatingSystemType/h:FixedHeater]">
+      <sch:assert test="count(h:DistributionSystem) = 0">element 'DistributionSystem' MUST be zero</sch:assert>
+      <sch:assert test="count(h:HeatingSystemFuel[text()='natural gas' or text()='fuel oil' or text()='fuel oil 1' or text()='fuel oil 2' or text()='fuel oil 4' or text()='fuel oil 5/6' or text()='diesel' or text()='propane' or text()='kerosene' or text()='electricity' or text()='wood' or text()='wood pellets']) = 1">element 'HeatingSystemFuel' is REQUIRED</sch:assert>
       <sch:assert test="count(h:AnnualHeatingEfficiency[h:Units='Percent']/h:Value) = 1">element 'AnnualHeatingEfficiency[Units='Percent']/Value' is REQUIRED</sch:assert>
     </sch:rule>
   </sch:pattern>
@@ -589,7 +652,7 @@
     <!-- [HeatingType=Fireplace] -->
     <sch:rule context="/h:HPXML/h:Building/h:BuildingDetails/h:Systems/h:HVAC/h:HVACPlant/h:HeatingSystem[h:HeatingSystemType/h:Fireplace]">
       <sch:assert test="count(h:DistributionSystem) = 0">element 'DistributionSystem' MUST be zero</sch:assert>
-      <sch:assert test="count(h:HeatingSystemFuel[text()='natural gas' or text()='fuel oil' or text()='propane' or text()='electricity' or text()='wood' or text()='wood pellets']) = 1">element 'HeatingSystemFuel' is REQUIRED</sch:assert>
+      <sch:assert test="count(h:HeatingSystemFuel[text()='natural gas' or text()='fuel oil' or text()='fuel oil 1' or text()='fuel oil 2' or text()='fuel oil 4' or text()='fuel oil 5/6' or text()='diesel' or text()='propane' or text()='kerosene' or text()='electricity' or text()='wood' or text()='wood pellets']) = 1">element 'HeatingSystemFuel' is REQUIRED</sch:assert>
       <sch:assert test="count(h:AnnualHeatingEfficiency[h:Units='Percent']/h:Value) = 1">element 'AnnualHeatingEfficiency[Units='Percent']/Value' is REQUIRED</sch:assert>
     </sch:rule>
   </sch:pattern>
@@ -628,7 +691,7 @@
   <sch:pattern name="[HeatPumpType=ASHP]">
     <!-- [HeatPumpType=ASHP] -->
     <sch:rule context="/h:HPXML/h:Building/h:BuildingDetails/h:Systems/h:HVAC/h:HVACPlant/h:HeatPump[h:HeatPumpType='air-to-air']">
-      <sch:assert test="count(../../h:HVACDistribution[h:DistributionSystemType/h:AirDistribution | h:DistributionSystemType[h:Other='DSE']]) &gt;= 1">element '../../HVACDistribution[DistributionSystemType/AirDistribution | DistributionSystemType[Other='DSE']]' MUST be greater than 1</sch:assert> <!-- See [HVACDistribution] -->
+      <sch:assert test="count(../../h:HVACDistribution[h:DistributionSystemType/h:AirDistribution | h:DistributionSystemType[h:Other='DSE']]) &gt;= 1">element '../../HVACDistribution[DistributionSystemType/AirDistribution | DistributionSystemType[Other='DSE']]' MUST be greater than or equal to 1</sch:assert> <!-- See [HVACDistribution] -->
       <sch:assert test="count(h:DistributionSystem) = 1">element 'DistributionSystem' is REQUIRED</sch:assert>
       <sch:assert test="not(h:CompressorType) or count(h:CompressorType[text()='single stage' or text()='two stage' or text()='variable speed']) = 1">element 'CompressorType' is OPTIONAL</sch:assert>
       <sch:assert test="count(h:AnnualCoolingEfficiency[h:Units='SEER']/h:Value) = 1">element 'AnnualCoolingEfficiency[Units='SEER']/Value' is REQUIRED</sch:assert>
@@ -651,7 +714,7 @@
   <sch:pattern name="[HeatPumpType=GSHP]">
     <!-- [HeatPumpType=GSHP] -->
     <sch:rule context="/h:HPXML/h:Building/h:BuildingDetails/h:Systems/h:HVAC/h:HVACPlant/h:HeatPump[h:HeatPumpType='ground-to-air']">
-      <sch:assert test="count(../../h:HVACDistribution[h:DistributionSystemType/h:AirDistribution | h:DistributionSystemType[h:Other='DSE']]) &gt;= 1">element '../../HVACDistribution[DistributionSystemType/AirDistribution | DistributionSystemType[Other='DSE']]' MUST be greater than 1</sch:assert> <!-- See [HVACDistribution] -->
+      <sch:assert test="count(../../h:HVACDistribution[h:DistributionSystemType/h:AirDistribution | h:DistributionSystemType[h:Other='DSE']]) &gt;= 1">element '../../HVACDistribution[DistributionSystemType/AirDistribution | DistributionSystemType[Other='DSE']]' MUST be greater than or equal to 1</sch:assert> <!-- See [HVACDistribution] -->
       <sch:assert test="count(h:DistributionSystem) = 1">element 'DistributionSystem' is REQUIRED</sch:assert>
       <sch:assert test="count(h:BackupHeatingSwitchoverTemperature) = 0">element 'BackupHeatingSwitchoverTemperature' MUST NOT be provided</sch:assert>
       <sch:assert test="count(h:AnnualCoolingEfficiency[h:Units='EER']/h:Value) = 1">element 'AnnualCoolingEfficiency[Units='EER']/Value' is REQUIRED</sch:assert>
@@ -692,7 +755,7 @@
       <sch:assert test="count(h:DuctLeakageMeasurement[h:DuctType='return']/h:DuctLeakage[(h:Units='CFM25' or h:Units='Percent') and h:TotalOrToOutside='to outside']/h:Value) &lt;= 1">element 'DuctLeakageMeasurement[DuctType='return']/DuctLeakage[(Units='CFM25' or Units='Percent') and TotalOrToOutside='to outside']/Value' is OPTIONAL</sch:assert>
       <sch:assert test="count(h:Ducts[h:DuctType='supply']) &gt;= 0">element 'Ducts[DuctType='supply']' is OPTIONAL</sch:assert> <!-- See [HVACDuct] -->
       <sch:assert test="count(h:Ducts[h:DuctType='return']) &gt;= 0">element 'Ducts[DuctType='return']' is OPTIONAL</sch:assert> <!-- See [HVACDuct] -->
-      <sch:assert test="count(h:NumberofReturnRegisters) &lt;= 1">element 'NumberofReturnRegisters' is OPTIONAL</sch:assert> <!-- See [HVACDuct] -->
+      <sch:assert test="count(h:NumberofReturnRegisters) &lt;= 1">element 'NumberofReturnRegisters' is OPTIONAL</sch:assert>
     </sch:rule>
   </sch:pattern>
 
@@ -761,7 +824,7 @@
   <sch:pattern name="[WHType=Tank]">
     <!-- [WHType=Tank] -->
     <sch:rule context="/h:HPXML/h:Building/h:BuildingDetails/h:Systems/h:WaterHeating/h:WaterHeatingSystem[h:WaterHeaterType='storage water heater']">
-      <sch:assert test="count(h:FuelType[text()='natural gas' or text()='fuel oil' or text()='propane' or text()='electricity' or text()='wood' or text()='wood pellets']) = 1">element 'FuelType' is REQUIRED</sch:assert>
+      <sch:assert test="count(h:FuelType[text()='natural gas' or text()='fuel oil' or text()='fuel oil 1' or text()='fuel oil 2' or text()='fuel oil 4' or text()='fuel oil 5/6' or text()='diesel' or text()='propane' or text()='kerosene' or text()='coal' or text()='coke' or text()='bituminous coal' or text()='anthracite coal' or text()='electricity' or text()='wood' or text()='wood pellets']) = 1">element 'FuelType' is REQUIRED</sch:assert>
       <sch:assert test="count(h:TankVolume) &lt;= 1">element 'TankVolume' is OPTIONAL</sch:assert>
       <sch:assert test="count(h:HeatingCapacity) &lt;= 1">element 'HeatingCapacity' is OPTIONAL</sch:assert>
       <sch:assert test="count(h:EnergyFactor | h:UniformEnergyFactor) = 1">element 'EnergyFactor | UniformEnergyFactor' is REQUIRED</sch:assert>
@@ -773,7 +836,7 @@
   <sch:pattern name="[WHType=Tankless]">
     <!-- [WHType=Tankless] -->
     <sch:rule context="/h:HPXML/h:Building/h:BuildingDetails/h:Systems/h:WaterHeating/h:WaterHeatingSystem[h:WaterHeaterType='instantaneous water heater']">
-      <sch:assert test="count(h:FuelType[text()='natural gas' or text()='fuel oil' or text()='propane' or text()='electricity' or text()='wood' or text()='wood pellets']) = 1">element 'FuelType' is REQUIRED</sch:assert>
+      <sch:assert test="count(h:FuelType[text()='natural gas' or text()='fuel oil' or text()='fuel oil 1' or text()='fuel oil 2' or text()='fuel oil 4' or text()='fuel oil 5/6' or text()='diesel' or text()='propane' or text()='kerosene' or text()='coal' or text()='coke' or text()='bituminous coal' or text()='anthracite coal' or text()='electricity' or text()='wood' or text()='wood pellets']) = 1">element 'FuelType' is REQUIRED</sch:assert>
       <sch:assert test="count(h:PerformanceAdjustment) &lt;= 1">element 'PerformanceAdjustment' is OPTIONAL</sch:assert> <!-- Uses ERI assumption for tankless cycling derate if not provided -->
       <sch:assert test="count(h:EnergyFactor | h:UniformEnergyFactor) = 1">element 'EnergyFactor | UniformEnergyFactor' is REQUIRED</sch:assert>
     </sch:rule>
@@ -814,6 +877,32 @@
     </sch:rule>
   </sch:pattern>
 
+  <sch:pattern name="[HWDistType=Standard]">
+    <!-- [HWDistType=Standard] -->
+    <sch:rule context="/h:HPXML/h:Building/h:BuildingDetails/h:Systems/h:WaterHeating/h:HotWaterDistribution/h:SystemType/h:Standard">
+      <sch:assert test="count(h:PipingLength) &lt;= 1">element 'PipingLength' is OPTIONAL</sch:assert>
+    </sch:rule>
+  </sch:pattern>
+
+  <sch:pattern name="[HWDistType=Recirculation]">
+    <!-- [HWDistType=Recirculation] -->
+    <sch:rule context="/h:HPXML/h:Building/h:BuildingDetails/h:Systems/h:WaterHeating/h:HotWaterDistribution/h:SystemType/h:Recirculation">
+      <sch:assert test="count(h:ControlType[text()='manual demand control' or text()='presence sensor demand control' or text()='temperature' or text()='timer' or text()='no control']) = 1">element 'ControlType' is REQUIRED</sch:assert>
+      <sch:assert test="count(h:RecirculationPipingLoopLength) &lt;= 1">element 'RecirculationPipingLoopLength' is OPTIONAL</sch:assert>
+      <sch:assert test="count(h:BranchPipingLoopLength) &lt;= 1">element 'BranchPipingLoopLength' is OPTIONAL</sch:assert>
+      <sch:assert test="count(h:PumpPower) &lt;= 1">element 'PumpPower' is OPTIONAL</sch:assert>
+    </sch:rule>
+  </sch:pattern>
+
+  <sch:pattern name="[DrainWaterHeatRecovery]">
+    <!-- [DrainWaterHeatRecovery] -->
+    <sch:rule context="/h:HPXML/h:Building/h:BuildingDetails/h:Systems/h:WaterHeating/h:HotWaterDistribution/h:DrainWaterHeatRecovery">
+      <sch:assert test="count(h:FacilitiesConnected) = 1">element 'FacilitiesConnected' is REQUIRED</sch:assert>
+      <sch:assert test="count(h:EqualFlow) = 1">element 'EqualFlow' is REQUIRED</sch:assert>
+      <sch:assert test="count(h:Efficiency) = 1">element 'Efficiency' is REQUIRED</sch:assert>
+    </sch:rule>
+  </sch:pattern>
+
   <sch:pattern name="[SolarThermal=Detailed]">
     <!-- [SolarThermal=Detailed] -->
     <sch:rule context="/h:HPXML/h:Building/h:BuildingDetails/h:Systems/h:SolarThermal/h:SolarThermalSystem[h:CollectorArea]">
@@ -833,5 +922,63 @@
     <sch:rule context="/h:HPXML/h:Building/h:BuildingDetails/h:Systems/h:SolarThermal/h:SolarThermalSystem[h:SolarFraction]">
       <sch:assert test="count(h:ConnectedTo) &lt;= 1">element 'ConnectedTo' is OPTIONAL</sch:assert> <!-- WaterHeatingSystem (any type) -->
     </sch:rule>
-  </sch:pattern>  
+  </sch:pattern>
+  
+  <sch:pattern name="[LightingGroup]">
+    <!-- [LightingGroup] -->
+    <sch:rule context="/h:HPXML/h:Building/h:BuildingDetails/h:Lighting/h:LightingGroup[h:LightingType[h:LightEmittingDiode | h:CompactFluorescent | h:FluorescentTube] and h:Location[text()='interior' or text()='exterior' or text()='garage']]">
+      <sch:assert test="count(h:SystemIdentifier) = 1">element 'SystemIdentifier' is REQUIRED</sch:assert> <!-- Required by HPXML schema -->
+      <sch:assert test="count(h:FractionofUnitsInLocation) = 1">element 'FractionofUnitsInLocation' is REQUIRED</sch:assert>
+    </sch:rule>
+  </sch:pattern>
+
+  <sch:pattern name="[PoolPump]">
+    <!-- [PoolPump] -->
+    <sch:rule context="/h:HPXML/h:Building/h:BuildingDetails/h:Pools/h:Pool/h:PoolPumps/h:PoolPump">
+      <sch:assert test="count(h:SystemIdentifier) = 1">element 'SystemIdentifier' is REQUIRED</sch:assert> <!-- Required by HPXML schema -->
+      <sch:assert test="count(h:Load[h:Units='kWh/year']/h:Value) &lt;= 1">element 'Load[Units='kWh/year']/Value' is OPTIONAL</sch:assert>
+      <sch:assert test="count(h:extension/h:UsageMultiplier) &lt;= 1">element 'extension/UsageMultiplier' is OPTIONAL</sch:assert>
+      <sch:assert test="count(h:extension/h:WeekdayScheduleFractions) &lt;= 1">element 'extension/WeekdayScheduleFractions' is OPTIONAL</sch:assert>
+      <sch:assert test="count(h:extension/h:WeekendScheduleFractions) &lt;= 1">element 'extension/WeekendScheduleFractions' is OPTIONAL</sch:assert>
+      <sch:assert test="count(h:extension/h:MonthlyScheduleMultipliers) &lt;= 1">element 'extension/MonthlyScheduleMultipliers' is OPTIONAL</sch:assert>
+    </sch:rule>
+  </sch:pattern>
+  
+  <sch:pattern name="[PoolHeater]">
+    <!-- [PoolHeater] -->
+    <sch:rule context="/h:HPXML/h:Building/h:BuildingDetails/h:Pools/h:Pool/h:Heater">
+      <sch:assert test="count(h:SystemIdentifier) = 1">element 'SystemIdentifier' is REQUIRED</sch:assert> <!-- Required by HPXML schema -->
+      <sch:assert test="count(h:Type[text()='gas fired' or text()='electric resistance' or text()='heat pump']) = 1">element 'Type[text()="gas fired" or text()="electric resistance" or text()="heat pump"]' is REQUIRED</sch:assert>
+      <sch:assert test="count(h:Load[h:Units='kWh/year' or h:Units='therm/year']/h:Value) &lt;= 1">element 'Load[Units='kWh/year' or Units='therm/year']/Value' is OPTIONAL</sch:assert>
+      <sch:assert test="count(h:extension/h:UsageMultiplier) &lt;= 1">element 'extension/UsageMultiplier' is OPTIONAL</sch:assert>
+      <sch:assert test="count(h:extension/h:WeekdayScheduleFractions) &lt;= 1">element 'extension/WeekdayScheduleFractions' is OPTIONAL</sch:assert>
+      <sch:assert test="count(h:extension/h:WeekendScheduleFractions) &lt;= 1">element 'extension/WeekendScheduleFractions' is OPTIONAL</sch:assert>
+      <sch:assert test="count(h:extension/h:MonthlyScheduleMultipliers) &lt;= 1">element 'extension/MonthlyScheduleMultipliers' is OPTIONAL</sch:assert>
+    </sch:rule>
+  </sch:pattern>
+    
+  <sch:pattern name="[HotTubPump]">
+    <!-- [HotTubPump] -->
+    <sch:rule context="/h:HPXML/h:Building/h:BuildingDetails/h:HotTubs/h:HotTub/h:HotTubPumps/h:HotTubPump">
+      <sch:assert test="count(h:SystemIdentifier) = 1">element 'SystemIdentifier' is REQUIRED</sch:assert> <!-- Required by HPXML schema -->
+      <sch:assert test="count(h:Load[h:Units='kWh/year']/h:Value) &lt;= 1">element 'Load[Units='kWh/year']/Value' is OPTIONAL</sch:assert>
+      <sch:assert test="count(h:extension/h:UsageMultiplier) &lt;= 1">element 'extension/UsageMultiplier' is OPTIONAL</sch:assert>
+      <sch:assert test="count(h:extension/h:WeekdayScheduleFractions) &lt;= 1">element 'extension/WeekdayScheduleFractions' is OPTIONAL</sch:assert>
+      <sch:assert test="count(h:extension/h:WeekendScheduleFractions) &lt;= 1">element 'extension/WeekendScheduleFractions' is OPTIONAL</sch:assert>
+      <sch:assert test="count(h:extension/h:MonthlyScheduleMultipliers) &lt;= 1">element 'extension/MonthlyScheduleMultipliers' is OPTIONAL</sch:assert>
+    </sch:rule>
+  </sch:pattern>
+
+  <sch:pattern name="[HotTubHeater]">
+    <!-- [HotTubHeater] -->
+    <sch:rule context="/h:HPXML/h:Building/h:BuildingDetails/h:HotTubs/h:HotTub/h:Heater">
+      <sch:assert test="count(h:SystemIdentifier) = 1">element 'SystemIdentifier' is REQUIRED</sch:assert> <!-- Required by HPXML schema -->
+      <sch:assert test="count(h:Type[text()='gas fired' or text()='electric resistance' or text()='heat pump']) = 1">element 'Type[text()="gas fired" or text()="electric resistance" or text()="heat pump"]' is REQUIRED</sch:assert>
+      <sch:assert test="count(h:Load[h:Units='kWh/year' or h:Units='therm/year']/h:Value) &lt;= 1">element 'Load[Units='kWh/year' or Units='therm/year']/Value' is OPTIONAL</sch:assert>
+      <sch:assert test="count(h:extension/h:UsageMultiplier) &lt;= 1">element 'extension/UsageMultiplier' is OPTIONAL</sch:assert>
+      <sch:assert test="count(h:extension/h:WeekdayScheduleFractions) &lt;= 1">element 'extension/WeekdayScheduleFractions' is OPTIONAL</sch:assert>
+      <sch:assert test="count(h:extension/h:WeekendScheduleFractions) &lt;= 1">element 'extension/WeekendScheduleFractions' is OPTIONAL</sch:assert>
+      <sch:assert test="count(h:extension/h:MonthlyScheduleMultipliers) &lt;= 1">element 'extension/MonthlyScheduleMultipliers' is OPTIONAL</sch:assert>
+    </sch:rule>
+  </sch:pattern>
 </sch:schema>

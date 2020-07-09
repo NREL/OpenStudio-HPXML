@@ -26,11 +26,13 @@ class HPXMLtoOpenStudioSchematronTest < MiniTest::Test
       return 'base-appliances-dehumidifier.xml'
     elsif key.include? '/HPXML/Building/BuildingDetails/BuildingSummary/Site/extension/Neighbors'
       return 'base-misc-neighbor-shading.xml'
+    elsif key.include? '/HPXML/SoftwareInfo/extension/SimulationControl/DaylightSaving/Enabled'
+      return 'base-simcontrol-daylight-saving-custom.xml'
     elsif key == '/HPXML/Building/BuildingDetails/Enclosure/FrameFloors/FrameFloor[ExteriorAdjacentTo[text()="other housing unit"]]/extension/OtherSpaceAboveOrBelow'
       return 'base-enclosure-other-housing-unit.xml'
-    elsif key.include? '/HPXML/Building/BuildingDetails/Enclosure/Foundations' # FIXME: Review this!
+    elsif key.include? '/HPXML/Building/BuildingDetails/Enclosure/Foundations'
       return 'base-foundation-vented-crawlspace.xml'
-    elsif key.include? '/HPXML/Building/BuildingDetails/Enclosure/Attics' # FIXME: Review this!
+    elsif key.include? '/HPXML/Building/BuildingDetails/Enclosure/Attics'
       return 'base-atticroof-vented.xml'
     elsif key.include? '/HPXML/Building/BuildingDetails/Lighting/CeilingFan'
       return 'base-misc-ceiling-fans.xml'
@@ -56,8 +58,8 @@ class HPXMLtoOpenStudioSchematronTest < MiniTest::Test
       return 'base-mechvent-cfis.xml'
     elsif key.include? '/HPXML/Building/BuildingDetails/Systems/MechanicalVentilation/VentilationFans/VentilationFan[UsedForSeasonalCoolingLoadReduction="true"]'
       return 'base-misc-whole-house-fan.xml'
-    elsif key.include? '/HPXML/Building/BuildingDetails/Systems/MechanicalVentilation/VentilationFans/VentilationFan[UsedForLocalVentilation="true" and FanLocation="kitchen"]' or
-      key.include? '/HPXML/Building/BuildingDetails/Systems/MechanicalVentilation/VentilationFans/VentilationFan[UsedForLocalVentilation="true" and FanLocation="bath"]'
+    elsif ['/HPXML/Building/BuildingDetails/Systems/MechanicalVentilation/VentilationFans/VentilationFan[UsedForLocalVentilation="true" and FanLocation="kitchen"]', 
+      '/HPXML/Building/BuildingDetails/Systems/MechanicalVentilation/VentilationFans/VentilationFan[UsedForLocalVentilation="true" and FanLocation="bath"]'].any? { |i| key.include? i }
       return 'base-mechvent-bath-kitchen-fans.xml'
     elsif key.include? '/HPXML/Building/BuildingDetails/Enclosure/Windows/Window/Overhangs'
       return 'base-enclosure-overhangs.xml'
@@ -79,11 +81,14 @@ class HPXMLtoOpenStudioSchematronTest < MiniTest::Test
       return 'base-dhw-dwhr.xml'
     elsif key.include? '/HPXML/Building/BuildingDetails/Systems/SolarThermal/SolarThermalSystem[SolarFraction]'
       return 'base-dhw-solar-fraction.xml'
-    elsif key.include? '/HPXML/Building/BuildingDetails/Systems/SolarThermal/SolarThermalSystem' or
-      key.include? '/HPXML/Building/BuildingDetails/Systems/SolarThermal/SolarThermalSystem[CollectorArea]'
+    elsif ['/HPXML/Building/BuildingDetails/Systems/SolarThermal/SolarThermalSystem', 
+      '/HPXML/Building/BuildingDetails/Systems/SolarThermal/SolarThermalSystem[CollectorArea]'].any? { |i| key.include? i }
       return 'base-dhw-solar-direct-flat-plate.xml'
     elsif key.include? '/HPXML/Building/BuildingDetails/Systems/Photovoltaics/PVSystem'
       return 'base-pv.xml'
+    elsif ['/HPXML/Building/BuildingDetails/Appliances/Freezer', '/HPXML/Building/BuildingDetails/Pools/Pool', 
+      '/HPXML/Building/BuildingDetails/HotTubs/HotTub', '/HPXML/Building/BuildingDetails/MiscLoads/FuelLoad'].any? { |i| key.include? i }
+      return 'base-misc-large-uncommon-loads.xml'
     else
       return 'base.xml'
     end
@@ -95,8 +100,14 @@ class HPXMLtoOpenStudioSchematronTest < MiniTest::Test
     Dir["#{sample_files_dir}/*.xml"].sort.each do |xml|
       hpxmls << File.absolute_path(xml)
     end
-    hpxmls.each do |hpxml|
-      _test_schematron_validation(hpxml)
+    hpxmls.each do |hpxml_path|
+      # Schematron validation
+      _test_schematron_validation(hpxml_path)
+
+      # .rb validator validation
+      hpxml = HPXML.new(hpxml_path: File.join(@root_path, 'workflow', 'sample_files', File.basename(hpxml_path)))
+      hpxml_doc = hpxml.to_oga()
+      _test_ruby_validation(hpxml_doc)
     end
   end
 
@@ -115,12 +126,13 @@ class HPXMLtoOpenStudioSchematronTest < MiniTest::Test
       ['/HPXML/Building/BuildingDetails/Enclosure/AirInfiltration/AirInfiltrationMeasurement/HousePressure'] => "Air leakage must be provided in one of three ways: (a) nACH (natural air changes per hour), (b) ACH50 (air changes per hour at 50Pa), or (c) CFM50 (cubic feet per minute at 50Pa)",
       ['/HPXML/Building/BuildingDetails/Enclosure/AirInfiltration/AirInfiltrationMeasurement/BuildingAirLeakage/UnitofMeasure'] => "Air leakage must be provided in one of three ways: (a) nACH (natural air changes per hour), (b) ACH50 (air changes per hour at 50Pa), or (c) CFM50 (cubic feet per minute at 50Pa)",
       ['/HPXML/Building/BuildingDetails/Enclosure/Walls/Wall'] => "the number of element 'Walls/Wall' MUST be greater than or equal to 1",
+      ['/HPXML/SoftwareInfo/extension/SimulationControl/DaylightSaving/Enabled'] => "element 'Enabled' is REQUIRED",
       ['/HPXML/Building/BuildingDetails/BuildingSummary/BuildingConstruction/NumberofConditionedFloors'] => "element 'NumberofConditionedFloors' is REQUIRED",
       ['/HPXML/Building/BuildingDetails/BuildingSummary/BuildingConstruction/NumberofConditionedFloorsAboveGrade'] => "element 'NumberofConditionedFloorsAboveGrade' is REQUIRED",
       ['/HPXML/Building/BuildingDetails/BuildingSummary/BuildingConstruction/NumberofBedrooms'] => "element 'NumberofBedrooms' is REQUIRED",
       ['/HPXML/Building/BuildingDetails/BuildingSummary/BuildingConstruction/ConditionedFloorArea'] => "element 'ConditionedFloorArea' is REQUIRED",
-      ['/HPXML/Building/BuildingDetails/BuildingSummary/BuildingConstruction/ConditionedBuildingVolume'] => "either element 'ConditionedBuildingVolume' or element 'AverageCeilingHeight' must be provided",
-      ['/HPXML/Building/BuildingDetails/BuildingSummary/Site/extension/Neighbors/NeighborBuilding'] => "element 'NeighborBuilding' is REQUIRED",
+      ['/HPXML/Building/BuildingDetails/BuildingSummary/BuildingConstruction/ConditionedBuildingVolume'] => "either element 'ConditionedBuildingVolume' or 'AverageCeilingHeight' must be provided",
+      ['/HPXML/Building/BuildingDetails/BuildingSummary/Site/extension/Neighbors/NeighborBuilding'] => "element 'NeighborBuilding' MUST be greater than or equal to 1",
       ['/HPXML/Building/BuildingDetails/BuildingSummary/Site/extension/Neighbors/NeighborBuilding/Azimuth'] => "element 'Azimuth' is REQUIRED",
       ['/HPXML/Building/BuildingDetails/BuildingSummary/Site/extension/Neighbors/NeighborBuilding/Distance'] => "element 'Distance' is REQUIRED",
       ['/HPXML/Building/BuildingDetails/ClimateandRiskZones/ClimateZoneIECC/Year'] => "element 'Year' is REQUIRED",
@@ -133,7 +145,7 @@ class HPXMLtoOpenStudioSchematronTest < MiniTest::Test
       ['/HPXML/Building/BuildingDetails/Enclosure/Roofs/Roof/SystemIdentifier'] => "element 'SystemIdentifier' is REQUIRED",
       ['/HPXML/Building/BuildingDetails/Enclosure/Roofs/Roof/InteriorAdjacentTo'] => "element 'InteriorAdjacentTo' is REQUIRED",
       ['/HPXML/Building/BuildingDetails/Enclosure/Roofs/Roof/Area'] => "element 'Area' is REQUIRED",
-      ['/HPXML/Building/BuildingDetails/Enclosure/Roofs/Roof/SolarAbsorptance'] => "element 'SolarAbsorptance' is REQUIRED",
+      ['/HPXML/Building/BuildingDetails/Enclosure/Roofs/Roof/SolarAbsorptance'] => "element 'RoofColor | SolarAbsorptance' MUST be greater than or equal to 1",
       ['/HPXML/Building/BuildingDetails/Enclosure/Roofs/Roof/Emittance'] => "element 'Emittance' is REQUIRED",
       ['/HPXML/Building/BuildingDetails/Enclosure/Roofs/Roof/Pitch'] => "element 'Pitch' is REQUIRED",
       ['/HPXML/Building/BuildingDetails/Enclosure/Roofs/Roof/RadiantBarrier'] => "element 'RadiantBarrier' is REQUIRED",
@@ -144,7 +156,7 @@ class HPXMLtoOpenStudioSchematronTest < MiniTest::Test
       ['/HPXML/Building/BuildingDetails/Enclosure/Walls/Wall/InteriorAdjacentTo'] => "element 'InteriorAdjacentTo' is REQUIRED",
       ['/HPXML/Building/BuildingDetails/Enclosure/Walls/Wall/WallType/WoodStud'] => "element 'WallType' is REQUIRED",
       ['/HPXML/Building/BuildingDetails/Enclosure/Walls/Wall/Area'] => "element 'Area' is REQUIRED",
-      ['/HPXML/Building/BuildingDetails/Enclosure/Walls/Wall/SolarAbsorptance'] => "element 'SolarAbsorptance' is REQUIRED",
+      ['/HPXML/Building/BuildingDetails/Enclosure/Walls/Wall/SolarAbsorptance'] => "element 'Color | SolarAbsorptance' MUST be greater than or equal to 1",
       ['/HPXML/Building/BuildingDetails/Enclosure/Walls/Wall/Emittance'] => "element 'Emittance' is REQUIRED",
       ['/HPXML/Building/BuildingDetails/Enclosure/Walls/Wall/Insulation/SystemIdentifier'] => "element 'Insulation/SystemIdentifier' is REQUIRED",
       ['/HPXML/Building/BuildingDetails/Enclosure/Walls/Wall/Insulation/AssemblyEffectiveRValue'] => "element 'Insulation/AssemblyEffectiveRValue' is REQUIRED",
@@ -152,7 +164,7 @@ class HPXMLtoOpenStudioSchematronTest < MiniTest::Test
       ['/HPXML/Building/BuildingDetails/Enclosure/RimJoists/RimJoist/ExteriorAdjacentTo'] => "element 'ExteriorAdjacentTo' is REQUIRED",
       ['/HPXML/Building/BuildingDetails/Enclosure/RimJoists/RimJoist/InteriorAdjacentTo'] => "element 'InteriorAdjacentTo' is REQUIRED",
       ['/HPXML/Building/BuildingDetails/Enclosure/RimJoists/RimJoist/Area'] => "element 'Area' is REQUIRED",
-      ['/HPXML/Building/BuildingDetails/Enclosure/RimJoists/RimJoist/SolarAbsorptance'] => "element 'SolarAbsorptance' is REQUIRED",
+      ['/HPXML/Building/BuildingDetails/Enclosure/RimJoists/RimJoist/SolarAbsorptance'] => "element 'Color | SolarAbsorptance' MUST be greater than or equal to 1",
       ['/HPXML/Building/BuildingDetails/Enclosure/RimJoists/RimJoist/Emittance'] => "element 'Emittance' is REQUIRED",
       ['/HPXML/Building/BuildingDetails/Enclosure/RimJoists/RimJoist/Insulation/SystemIdentifier'] => "element 'Insulation/SystemIdentifier' is REQUIRED",
       ['/HPXML/Building/BuildingDetails/Enclosure/RimJoists/RimJoist/Insulation/AssemblyEffectiveRValue'] => "element 'Insulation/AssemblyEffectiveRValue' is REQUIRED",
@@ -217,7 +229,7 @@ class HPXMLtoOpenStudioSchematronTest < MiniTest::Test
       ['/HPXML/Building/BuildingDetails/Systems/HVAC/HVACPlant/HeatingSystem[HeatingSystemType/Furnace]/AnnualHeatingEfficiency[Units="AFUE"]/Value'] => "element 'AnnualHeatingEfficiency[Units='AFUE']/Value' is REQUIRED",
       ['/HPXML/Building/BuildingDetails/Systems/HVAC/HVACPlant/CoolingSystem[CoolingSystemType="central air conditioner"]/SystemIdentifier'] => "element 'SystemIdentifier' is REQUIRED",
       ['/HPXML/Building/BuildingDetails/Systems/HVAC/HVACPlant/CoolingSystem[CoolingSystemType="central air conditioner"]/CoolingSystemType[text()="central air conditioner" or text()="room air conditioner" or text()="evaporative cooler"]'] => "element 'CoolingSystemType[text()='central air conditioner' or text()='room air conditioner' or text()='evaporative cooler']' is REQUIRED",
-      ['/HPXML/Building/BuildingDetails/Systems/HVAC/HVACPlant/CoolingSystem[CoolingSystemType="central air conditioner"]/CoolingSystemFuel[text()="electricity"]'] => "element 'CoolingSystemFuel[text()='electricity']' is REQUIRED",
+      ['/HPXML/Building/BuildingDetails/Systems/HVAC/HVACPlant/CoolingSystem[CoolingSystemType="central air conditioner"]/CoolingSystemFuel'] => "element 'CoolingSystemFuel[text()='electricity']' is REQUIRED",
       ['/HPXML/Building/BuildingDetails/Systems/HVAC/HVACPlant/CoolingSystem[CoolingSystemType="central air conditioner"]/FractionCoolLoadServed'] => "element 'FractionCoolLoadServed' is REQUIRED",
       ['/HPXML/Building/BuildingDetails/Systems/HVAC/HVACDistribution[DistributionSystemType/AirDistribution | DistributionSystemType[Other="DSE"]]'] => "the number of element '../../HVACDistribution[DistributionSystemType/AirDistribution | DistributionSystemType[Other='DSE']]' MUST be greater than or equal to 1",
       ['/HPXML/Building/BuildingDetails/Systems/HVAC/HVACPlant/CoolingSystem[CoolingSystemType="central air conditioner"]/DistributionSystem'] => "element 'DistributionSystem' is REQUIRED",
@@ -305,23 +317,41 @@ class HPXMLtoOpenStudioSchematronTest < MiniTest::Test
       ['/HPXML/Building/BuildingDetails/Systems/Photovoltaics/PVSystem/MaxPowerOutput'] => "element 'MaxPowerOutput' is REQUIRED",
       ['/HPXML/Building/BuildingDetails/Appliances/ClothesWasher/SystemIdentifier'] => "element 'SystemIdentifier' is REQUIRED",
       ['/HPXML/Building/BuildingDetails/Appliances/ClothesWasher/IntegratedModifiedEnergyFactor'] => "element 'ModifiedEnergyFactor | IntegratedModifiedEnergyFactor | RatedAnnualkWh | LabelElectricRate | LabelGasRate | LabelAnnualGasCost | LabelUsage | Capacity' MUST be zero or equal to seven",
+      ['/HPXML/Building/BuildingDetails/Appliances/ClothesWasher'] => "element '../ClothesWasher' is REQUIRED",
       ['/HPXML/Building/BuildingDetails/Appliances/ClothesDryer/SystemIdentifier'] => "element 'SystemIdentifier' is REQUIRED",
       ['/HPXML/Building/BuildingDetails/Appliances/ClothesDryer/FuelType[text()="natural gas" or text()="fuel oil" or text()="propane" or text()="electricity" or text()="wood" or text()="wood pellets"]'] => "element 'FuelType' is REQUIRED",
       ['/HPXML/Building/BuildingDetails/Appliances/Dishwasher/SystemIdentifier'] => "element 'SystemIdentifier' is REQUIRED",
       ['/HPXML/Building/BuildingDetails/Appliances/Dishwasher/RatedAnnualkWh'] => "element 'RatedAnnualkWh | EnergyFactor | LabelElectricRate | LabelGasRate | LabelAnnualGasCost | LabelUsage | PlaceSettingCapacity' MUST be zero or equal to 6",
       ['/HPXML/Building/BuildingDetails/Appliances/Refrigerator/SystemIdentifier'] => "element 'SystemIdentifier' is REQUIRED",
+      ['/HPXML/Building/BuildingDetails/Appliances/Freezer/SystemIdentifier'] => "element 'SystemIdentifier' is REQUIRED",
       ['/HPXML/Building/BuildingDetails/Appliances/Dehumidifier/Capacity'] => "element 'Capacity' is REQUIRED",
       ['/HPXML/Building/BuildingDetails/Appliances/Dehumidifier/EnergyFactor | IntegratedEnergyFactor'] => "element 'EnergyFactor | IntegratedEnergyFactor' is REQUIRED",
       ['/HPXML/Building/BuildingDetails/Appliances/Dehumidifier/DehumidistatSetpoint'] => "element 'DehumidistatSetpoint' is REQUIRED",
       ['/HPXML/Building/BuildingDetails/Appliances/Dehumidifier/FractionDehumidificationLoadServed'] => "element 'FractionDehumidificationLoadServed' is REQUIRED",
+      ['/HPXML/Building/BuildingDetails/Appliances/Oven'] => "element '../Oven' is REQUIRED",
       ['/HPXML/Building/BuildingDetails/Appliances/CookingRange/SystemIdentifier'] => "element 'SystemIdentifier' is REQUIRED",
-      ['/HPXML/Building/BuildingDetails/Appliances/CookingRange/FuelType[text()="natural gas" or text()="fuel oil" or text()="propane" or text()="electricity" or text()="wood" or text()="wood pellets"]'] => "element 'FuelType' is REQUIRED",
+      ['/HPXML/Building/BuildingDetails/Appliances/CookingRange/FuelType'] => "element 'FuelType' is REQUIRED",
+      ['/HPXML/Building/BuildingDetails/Appliances/CookingRange'] => "element '../CookingRange' is REQUIRED",
+      ['/HPXML/Building/BuildingDetails/Appliances/Oven/SystemIdentifier'] => "element 'SystemIdentifier' is REQUIRED",
       ['/HPXML/Building/BuildingDetails/Lighting/LightingGroup[LightingType[LightEmittingDiode | CompactFluorescent | FluorescentTube] and Location[text()="interior" or text()="exterior" or text()="garage"]]'] => "the number of element 'h:LightingGroup[LightingType[LightEmittingDiode | CompactFluorescent | FluorescentTube] and Location[text()='interior' or text()='exterior' or text()='garage']]' MUST be 9",
       ['/HPXML/Building/BuildingDetails/Lighting/LightingGroup[LightingType[LightEmittingDiode | CompactFluorescent | FluorescentTube] and Location[text()="interior" or text()="exterior" or text()="garage"]]/SystemIdentifier'] => "element 'SystemIdentifier' is REQUIRED",
       ['/HPXML/Building/BuildingDetails/Lighting/LightingGroup[LightingType[LightEmittingDiode | CompactFluorescent | FluorescentTube] and Location[text()="interior" or text()="exterior" or text()="garage"]]/FractionofUnitsInLocation'] => "element 'FractionofUnitsInLocation' is REQUIRED",
       ['/HPXML/Building/BuildingDetails/Lighting/CeilingFan/SystemIdentifier'] => "element 'SystemIdentifier' is REQUIRED",
+      ['/HPXML/Building/BuildingDetails/Pools/Pool/SystemIdentifier'] => "element 'SystemIdentifier' is REQUIRED",
+      ['/HPXML/Building/BuildingDetails/Pools/Pool/PoolPumps/PoolPump'] => "element 'PoolPumps/PoolPump' is REQUIRED",
+      ['/HPXML/Building/BuildingDetails/Pools/Pool/PoolPumps/PoolPump/SystemIdentifier'] => "element 'SystemIdentifier' is REQUIRED",
+      ['/HPXML/Building/BuildingDetails/Pools/Pool/Heater/SystemIdentifier'] => "element 'SystemIdentifier' is REQUIRED",
+      ['/HPXML/Building/BuildingDetails/Pools/Pool/Heater/Type'] => "element 'Type[text()=\"gas fired\" or text()=\"electric resistance\" or text()=\"heat pump\"]' is REQUIRED",
+      ['/HPXML/Building/BuildingDetails/HotTubs/HotTub/SystemIdentifier'] => "element 'SystemIdentifier' is REQUIRED",
+      ['/HPXML/Building/BuildingDetails/HotTubs/HotTub/HotTubPumps/HotTubPump'] => "element 'HotTubPumps/HotTubPump' is REQUIRED",
+      ['/HPXML/Building/BuildingDetails/HotTubs/HotTub/HotTubPumps/HotTubPump/SystemIdentifier'] => "element 'SystemIdentifier' is REQUIRED",
+      ['/HPXML/Building/BuildingDetails/HotTubs/HotTub/Heater/SystemIdentifier'] => "element 'SystemIdentifier' is REQUIRED",
+      ['/HPXML/Building/BuildingDetails/HotTubs/HotTub/Heater/Type'] => "element 'Type[text()=\"gas fired\" or text()=\"electric resistance\" or text()=\"heat pump\"]' is REQUIRED",
       ['/HPXML/Building/BuildingDetails/MiscLoads/PlugLoad[PlugLoadType="other"]/SystemIdentifier'] => "element 'SystemIdentifier' is REQUIRED",
       ['/HPXML/Building/BuildingDetails/MiscLoads/PlugLoad[PlugLoadType="TV other"]/SystemIdentifier'] => "element 'SystemIdentifier' is REQUIRED",
+      ['/HPXML/Building/BuildingDetails/MiscLoads/FuelLoad[FuelLoadType="grill"]/SystemIdentifier'] => "element 'SystemIdentifier' is REQUIRED",
+      ['/HPXML/Building/BuildingDetails/MiscLoads/FuelLoad[FuelLoadType="lighting"]/SystemIdentifier'] => "element 'SystemIdentifier' is REQUIRED",
+      ['/HPXML/Building/BuildingDetails/MiscLoads/FuelLoad[FuelLoadType="fireplace"]/SystemIdentifier'] => "element 'SystemIdentifier' is REQUIRED",
     }
     
     expected_error_msgs.each do |keys, value|
@@ -338,12 +368,10 @@ class HPXMLtoOpenStudioSchematronTest < MiniTest::Test
     # Test for optional elements (i.e. zero_or_one, zero_or_two, etc.)
     expected_error_msgs_optional = {
       ['/HPXML/SoftwareInfo/extension/SimulationControl', nil] => "element 'extension/SimulationControl' is OPTIONAL",
-      ['/HPXML/Building/BuildingDetails/BuildingSummary/Site', 'SiteType="suburban"'] => "element 'Site/SiteType' is OPTIONAL",
-      ['/HPXML/Building/BuildingDetails/BuildingSummary/Site/extension/ShelterCoefficient', nil] => "element 'extension/ShelterCoefficient' is OPTIONAL",
-      ['/HPXML/Building/BuildingDetails/BuildingSummary/Site/extension/Neighbors', nil] => "element 'extension/Neighbors' is OPTIONAL",
-      ['/HPXML/Building/BuildingDetails/BuildingSummary/BuildingOccupancy/NumberofResidents', nil] => "element 'BuildingOccupancy/NumberofResidents' is OPTIONAL",
+      ['/HPXML/Building/BuildingDetails/BuildingSummary/Site', nil] => "element 'Site' is OPTIONAL",
+      ['/HPXML/Building/BuildingDetails/BuildingSummary/BuildingOccupancy', nil] => "element 'BuildingOccupancy' is OPTIONAL",
       ['/HPXML/Building/BuildingDetails/ClimateandRiskZones/ClimateZoneIECC', nil] => "element 'ClimateZoneIECC' is OPTIONAL",
-      ['/HPXML/Building/BuildingDetails/Systems/HVAC/HVACControl', nil] => "element 'HVACControl' is OPTIONAL", # FIXME: Need to review this case
+      ['/HPXML/Building/BuildingDetails/Systems/HVAC/HVACControl', nil] => "element 'HVACControl' is OPTIONAL",
       ['/HPXML/Building/BuildingDetails/Systems/MechanicalVentilation/VentilationFans/VentilationFan', 'UsedForWholeBuildingVentilation="true"'] => "element 'VentilationFan[UsedForWholeBuildingVentilation='true']' is OPTIONAL",
       ['/HPXML/Building/BuildingDetails/Systems/MechanicalVentilation/VentilationFans/VentilationFan', 'UsedForLocalVentilation="true" and FanLocation="kitchen"'] => "element 'VentilationFan[UsedForLocalVentilation='true' and FanLocation='kitchen']' is OPTIONAL",
       ['/HPXML/Building/BuildingDetails/Systems/MechanicalVentilation/VentilationFans/VentilationFan', 'UsedForLocalVentilation="true" and FanLocation="bath"'] => "element 'VentilationFan[UsedForLocalVentilation='true' and FanLocation='bath']' is OPTIONAL",
@@ -352,29 +380,45 @@ class HPXMLtoOpenStudioSchematronTest < MiniTest::Test
       ['/HPXML/Building/BuildingDetails/Appliances/ClothesWasher', nil] => "element 'ClothesWasher' is OPTIONAL",
       ['/HPXML/Building/BuildingDetails/Appliances/ClothesDryer', nil] => "element 'ClothesDryer' is OPTIONAL",
       ['/HPXML/Building/BuildingDetails/Appliances/Dishwasher', nil] => "element 'Dishwasher' is OPTIONAL",
-      ['/HPXML/Building/BuildingDetails/Appliances/Refrigerator', nil] => "element 'Refrigerator' is OPTIONAL",
       ['/HPXML/Building/BuildingDetails/Appliances/Dehumidifier', nil] => "element 'Dehumidifier' is OPTIONAL",
       ['/HPXML/Building/BuildingDetails/Appliances/CookingRange', nil] => "element 'CookingRange' is OPTIONAL",
+      ['/HPXML/Building/BuildingDetails/Appliances/Oven', nil] => "element 'Oven' is OPTIONAL",
       ['/HPXML/Building/BuildingDetails/Lighting', nil] => "element 'Lighting' is OPTIONAL",
       ['/HPXML/Building/BuildingDetails/Lighting/CeilingFan', nil] => "element 'Lighting/CeilingFan' is OPTIONAL",
+      ['/HPXML/Building/BuildingDetails/Pools/Pool', nil] => "element 'Pool' is OPTIONAL",
+      ['/HPXML/Building/BuildingDetails/HotTubs/HotTub', nil] => "element 'HotTub' is OPTIONAL",
       ['/HPXML/Building/BuildingDetails/MiscLoads/PlugLoad', 'PlugLoadType="other"'] => "element 'PlugLoad[PlugLoadType='other']' is OPTIONAL",
       ['/HPXML/Building/BuildingDetails/MiscLoads/PlugLoad', 'PlugLoadType="TV other"'] => "element 'PlugLoad[PlugLoadType='TV other']' is OPTIONAL",
+      ['/HPXML/Building/BuildingDetails/MiscLoads/FuelLoad', 'FuelLoadType="grill"'] => "element 'FuelLoad[FuelLoadType='grill']' is OPTIONAL",
+      ['/HPXML/Building/BuildingDetails/MiscLoads/FuelLoad', 'FuelLoadType="lighting"'] => "element 'FuelLoad[FuelLoadType='lighting']' is OPTIONAL",
+      ['/HPXML/Building/BuildingDetails/MiscLoads/FuelLoad', 'FuelLoadType="fireplace"'] => "element 'FuelLoad[FuelLoadType='fireplace']' is OPTIONAL",
       ['/HPXML/SoftwareInfo/extension/SimulationControl/Timestep', nil] => "element 'Timestep' is OPTIONAL",
       ['/HPXML/SoftwareInfo/extension/SimulationControl', 'BeginMonth=1'] => "Both 'BeginMonth' and 'BeginDayOfMonth' must be either blank or provided",
       ['/HPXML/SoftwareInfo/extension/SimulationControl', 'EndMonth=12'] => "Both 'EndMonth' and 'EndDayOfMonth' must be either blank or provided",
+      ['/HPXML/SoftwareInfo/extension/SimulationControl/DaylightSaving', nil] => "element 'DaylightSaving' is OPTIONAL",
+      ['/HPXML/SoftwareInfo/extension/SimulationControl/DaylightSaving', 'BeginMonth=1'] => "elements 'BeginMonth', 'BeginDayOfMonth', 'EndMonth' and 'EndDayOfMonth' must be either blank or provided",
+      ['/HPXML/Building/BuildingDetails/BuildingSummary/Site', 'SiteType="suburban" and SiteType="rural"'] => "element 'SiteType' is OPTIONAL",
+      ['/HPXML/Building/BuildingDetails/BuildingSummary/Site/extension/ShelterCoefficient', nil] => "element 'extension/ShelterCoefficient' is OPTIONAL",
+      ['/HPXML/Building/BuildingDetails/BuildingSummary/Site/extension/Neighbors', nil] => "element 'extension/Neighbors' is OPTIONAL",
+      ['/HPXML/Building/BuildingDetails/BuildingSummary/BuildingOccupancy/NumberofResidents', nil] => "element 'NumberofResidents' is OPTIONAL",
       ['/HPXML/Building/BuildingDetails/BuildingSummary/BuildingConstruction/NumberofBathrooms', nil] => "element 'NumberofBathrooms' is OPTIONAL",
       ['/HPXML/Building/BuildingDetails/BuildingSummary/Site/extension/Neighbors/NeighborBuilding/Height', nil] => "element 'Height' is OPTIONAL",
-      ['/HPXML/Building/BuildingDetails/Enclosure/AirInfiltration/AirInfiltrationMeasurement/InfiltrationVolume', nil] => "element 'InfiltrationVolume' is OPTIONAL", # FIXME: Need to review parent Xpath
+      ['/HPXML/Building/BuildingDetails/Enclosure/AirInfiltration/AirInfiltrationMeasurement/InfiltrationVolume', nil] => "element 'InfiltrationVolume' is OPTIONAL",
       ['/HPXML/Building/BuildingDetails/Enclosure/Roofs/Roof/Azimuth', nil] => "element 'Azimuth' is OPTIONAL",
-      ['/HPXML/Building/BuildingDetails/Enclosure/Attics/Attic/VentilationRate/Value', nil] => "element 'Attic/VentilationRate/Value' is OPTIONAL", # FIXME: Review this!
+      ['/HPXML/Building/BuildingDetails/Enclosure/Roofs/Roof', 'RoofType="asphalt or fiberglass shingles" and RoofType="slate or tile shingles"'] => "element 'RoofType' is OPTIONAL",
+      ['/HPXML/Building/BuildingDetails/Enclosure/Attics/Attic/VentilationRate/Value', nil] => "element 'Attic/VentilationRate/Value' is OPTIONAL",
       ['/HPXML/Building/BuildingDetails/Enclosure/Walls/Wall/Azimuth', nil] => "element 'Azimuth' is OPTIONAL",
+      ['/HPXML/Building/BuildingDetails/Enclosure/Walls/Wall', 'Siding="wood siding" and Siding="stucco"'] => "element 'Siding' is OPTIONAL",
       ['/HPXML/Building/BuildingDetails/Enclosure/RimJoists/RimJoist/Azimuth', nil] => "element 'Azimuth' is OPTIONAL",
+      ['/HPXML/Building/BuildingDetails/Enclosure/RimJoists/RimJoist', 'Siding="wood siding" and Siding="stucco"'] => "element 'Siding' is OPTIONAL",
       ['/HPXML/Building/BuildingDetails/Enclosure/FoundationWalls/FoundationWall/Azimuth', nil] => "element 'Azimuth' is OPTIONAL",
-      ['/HPXML/Building/BuildingDetails/Enclosure/Foundations/Foundation/VentilationRate/Value', nil] => "element 'Crawlspace/VentilationRate/Value' is OPTIONAL", # FIXME: Review this!
+      ['/HPXML/Building/BuildingDetails/Enclosure/Foundations/Foundation/VentilationRate/Value', nil] => "element 'Crawlspace/VentilationRate/Value' is OPTIONAL",
       ['/HPXML/Building/BuildingDetails/Enclosure/Windows/Window/InteriorShading/SummerShadingCoefficient', nil] => "element 'InteriorShading/SummerShadingCoefficient' is OPTIONAL",
       ['/HPXML/Building/BuildingDetails/Enclosure/Windows/Window/InteriorShading/WinterShadingCoefficient', nil] => "element 'InteriorShading/WinterShadingCoefficient' is OPTIONAL",
       ['/HPXML/Building/BuildingDetails/Enclosure/Windows/Window/Overhangs', nil] => "element 'Overhangs' is OPTIONAL",
       ['/HPXML/Building/BuildingDetails/Enclosure/Windows/Window/FractionOperable', nil] => "element 'FractionOperable' is OPTIONAL",
+      ['/HPXML/Building/BuildingDetails/Enclosure/Skylights/Skylight/InteriorShading/SummerShadingCoefficient', nil] => "element 'InteriorShading/SummerShadingCoefficient' is OPTIONAL",
+      ['/HPXML/Building/BuildingDetails/Enclosure/Skylights/Skylight/InteriorShading/WinterShadingCoefficient', nil] => "element 'InteriorShading/WinterShadingCoefficient' is OPTIONAL",
       ['/HPXML/Building/BuildingDetails/Systems/HVAC/HVACPlant/HeatingSystem/HeatingCapacity', nil] => "element 'HeatingCapacity' is OPTIONAL",
       ['/HPXML/Building/BuildingDetails/Systems/HVAC/HVACPlant/HeatingSystem/ElectricAuxiliaryEnergy', nil] => "element 'ElectricAuxiliaryEnergy' is OPTIONAL",
       ['/HPXML/Building/BuildingDetails/Systems/HVAC/HVACPlant/CoolingSystem[CoolingSystemType="central air conditioner"]/CoolingCapacity', nil] => "element 'CoolingCapacity' is OPTIONAL",
@@ -436,27 +480,70 @@ class HPXMLtoOpenStudioSchematronTest < MiniTest::Test
       ['/HPXML/Building/BuildingDetails/Appliances/Refrigerator/extension/WeekdayScheduleFractions', nil] => "element 'extension/WeekdayScheduleFractions' is OPTIONAL",
       ['/HPXML/Building/BuildingDetails/Appliances/Refrigerator/extension/WeekendScheduleFractions', nil] => "element 'extension/WeekendScheduleFractions' is OPTIONAL",
       ['/HPXML/Building/BuildingDetails/Appliances/Refrigerator/extension/MonthlyScheduleMultipliers', nil] => "element 'extension/MonthlyScheduleMultipliers' is OPTIONAL",
+      ['/HPXML/Building/BuildingDetails/Appliances/Freezer/extension/UsageMultiplier', nil] => "element 'extension/UsageMultiplier' is OPTIONAL",
+      ['/HPXML/Building/BuildingDetails/Appliances/Freezer/extension/WeekdayScheduleFractions', nil] => "element 'extension/WeekdayScheduleFractions' is OPTIONAL",
+      ['/HPXML/Building/BuildingDetails/Appliances/Freezer/extension/WeekendScheduleFractions', nil] => "element 'extension/WeekendScheduleFractions' is OPTIONAL",
+      ['/HPXML/Building/BuildingDetails/Appliances/Freezer/extension/MonthlyScheduleMultipliers', nil] => "element 'extension/MonthlyScheduleMultipliers' is OPTIONAL",
       ['/HPXML/Building/BuildingDetails/Appliances/CookingRange/IsInduction', nil] => "element 'IsInduction' is OPTIONAL",
       ['/HPXML/Building/BuildingDetails/Appliances/CookingRange/extension/UsageMultiplier', nil] => "element 'extension/UsageMultiplier' is OPTIONAL",
       ['/HPXML/Building/BuildingDetails/Appliances/CookingRange/extension/WeekdayScheduleFractions', nil] => "element 'extension/WeekdayScheduleFractions' is OPTIONAL",
       ['/HPXML/Building/BuildingDetails/Appliances/CookingRange/extension/WeekendScheduleFractions', nil] => "element 'extension/WeekendScheduleFractions' is OPTIONAL",
       ['/HPXML/Building/BuildingDetails/Appliances/CookingRange/extension/MonthlyScheduleMultipliers', nil] => "element 'extension/MonthlyScheduleMultipliers' is OPTIONAL",
-      ['/HPXML/Building/BuildingDetails/Appliances/CookingRange/../Oven/IsConvection', nil] => "element '../Oven/IsConvection' is OPTIONAL",
+      ['/HPXML/Building/BuildingDetails/Appliances/Oven/IsConvection', nil] => "element 'IsConvection' is OPTIONAL",
       ['/HPXML/Building/BuildingDetails/Lighting/extension/UsageMultiplier', nil] => "element 'extension/UsageMultiplier' is OPTIONAL",
       ['/HPXML/Building/BuildingDetails/Lighting/CeilingFan/Airflow/Efficiency', nil] => "element 'Airflow[FanSpeed='medium']/Efficiency' is OPTIONAL",
       ['/HPXML/Building/BuildingDetails/Lighting/CeilingFan/Quantity', nil] => "element 'Quantity' is OPTIONAL",
+      ['/HPXML/Building/BuildingDetails/Pools/Pool/Heater', nil] => "element 'Heater' is OPTIONAL",
+      ['/HPXML/Building/BuildingDetails/Pools/Pool/PoolPumps/PoolPump/Load/Value', nil] => "element 'Load[Units='kWh/year']/Value' is OPTIONAL",
+      ['/HPXML/Building/BuildingDetails/Pools/Pool/PoolPumps/PoolPump/extension/UsageMultiplier'] => "element 'extension/UsageMultiplier' is OPTIONAL",
+      ['/HPXML/Building/BuildingDetails/Pools/Pool/PoolPumps/PoolPump/extension/WeekdayScheduleFractions'] => "element 'extension/WeekdayScheduleFractions' is OPTIONAL",
+      ['/HPXML/Building/BuildingDetails/Pools/Pool/PoolPumps/PoolPump/extension/WeekendScheduleFractions'] => "element 'extension/WeekendScheduleFractions' is OPTIONAL",
+      ['/HPXML/Building/BuildingDetails/Pools/Pool/PoolPumps/PoolPump/extension/MonthlyScheduleMultipliers'] => "element 'extension/MonthlyScheduleMultipliers' is OPTIONAL",
+      ['/HPXML/Building/BuildingDetails/Pools/Pool/Heater/Load/Value', nil] => "element 'Load[Units='kWh/year' or Units='therm/year']/Value' is OPTIONAL",
+      ['/HPXML/Building/BuildingDetails/Pools/Pool/Heater/extension/UsageMultiplier'] => "element 'extension/UsageMultiplier' is OPTIONAL",
+      ['/HPXML/Building/BuildingDetails/Pools/Pool/Heater/extension/WeekdayScheduleFractions'] => "element 'extension/WeekdayScheduleFractions' is OPTIONAL",
+      ['/HPXML/Building/BuildingDetails/Pools/Pool/Heater/extension/WeekendScheduleFractions'] => "element 'extension/WeekendScheduleFractions' is OPTIONAL",
+      ['/HPXML/Building/BuildingDetails/Pools/Pool/Heater/extension/MonthlyScheduleMultipliers'] => "element 'extension/MonthlyScheduleMultipliers' is OPTIONAL",
+      ['/HPXML/Building/BuildingDetails/HotTubs/HotTub/Heater', nil] => "element 'Heater' is OPTIONAL",
+      ['/HPXML/Building/BuildingDetails/HotTubs/HotTub/HotTubPumps/HotTubPump/Load/Value', nil] => "element 'Load[Units='kWh/year']/Value' is OPTIONAL",
+      ['/HPXML/Building/BuildingDetails/HotTubs/HotTub/HotTubPumps/HotTubPump/extension/UsageMultiplier'] => "element 'extension/UsageMultiplier' is OPTIONAL",
+      ['/HPXML/Building/BuildingDetails/HotTubs/HotTub/HotTubPumps/HotTubPump/extension/WeekdayScheduleFractions'] => "element 'extension/WeekdayScheduleFractions' is OPTIONAL",
+      ['/HPXML/Building/BuildingDetails/HotTubs/HotTub/HotTubPumps/HotTubPump/extension/WeekendScheduleFractions'] => "element 'extension/WeekendScheduleFractions' is OPTIONAL",
+      ['/HPXML/Building/BuildingDetails/HotTubs/HotTub/HotTubPumps/HotTubPump/extension/MonthlyScheduleMultipliers'] => "element 'extension/MonthlyScheduleMultipliers' is OPTIONAL",
+      ['/HPXML/Building/BuildingDetails/HotTubs/HotTub/Heater/Load/Value', nil] => "element 'Load[Units='kWh/year' or Units='therm/year']/Value' is OPTIONAL",
+      ['/HPXML/Building/BuildingDetails/HotTubs/HotTub/Heater/extension/UsageMultiplier'] => "element 'extension/UsageMultiplier' is OPTIONAL",
+      ['/HPXML/Building/BuildingDetails/HotTubs/HotTub/Heater/extension/WeekdayScheduleFractions'] => "element 'extension/WeekdayScheduleFractions' is OPTIONAL",
+      ['/HPXML/Building/BuildingDetails/HotTubs/HotTub/Heater/extension/WeekendScheduleFractions'] => "element 'extension/WeekendScheduleFractions' is OPTIONAL",
+      ['/HPXML/Building/BuildingDetails/HotTubs/HotTub/Heater/extension/MonthlyScheduleMultipliers'] => "element 'extension/MonthlyScheduleMultipliers' is OPTIONAL",
+      ['/HPXML/Building/BuildingDetails/MiscLoads/PlugLoad', 'Location="interior" and Location="exterior"'] => "element 'Location[text()='interior' or text()='exterior']' is OPTIONAL",
       ['/HPXML/Building/BuildingDetails/MiscLoads/PlugLoad[PlugLoadType="other"]/Load/Value', nil] => "element 'Load[Units='kWh/year']/Value' is OPTIONAL",
       ['/HPXML/Building/BuildingDetails/MiscLoads/PlugLoad[PlugLoadType="other"]/extension/FracSensible', nil] => "element 'extension/FracSensible' is OPTIONAL",
       ['/HPXML/Building/BuildingDetails/MiscLoads/PlugLoad[PlugLoadType="other"]/extension/FracLatent', nil] => "element 'extension/FracLatent' is OPTIONAL",
       ['/HPXML/Building/BuildingDetails/MiscLoads/PlugLoad[PlugLoadType="other"]/extension/UsageMultiplier', nil] => "element 'extension/UsageMultiplier' is OPTIONAL",
-      ['/HPXML/Building/BuildingDetails/MiscLoads/PlugLoad[PlugLoadType="other"]/../extension/WeekdayScheduleFractions', nil] => "element '../extension/WeekdayScheduleFractions' is OPTIONAL",
-      ['/HPXML/Building/BuildingDetails/MiscLoads/PlugLoad[PlugLoadType="other"]/../extension/WeekendScheduleFractions', nil] => "element '../extension/WeekendScheduleFractions' is OPTIONAL",
-      ['/HPXML/Building/BuildingDetails/MiscLoads/PlugLoad[PlugLoadType="other"]/../extension/MonthlyScheduleMultipliers', nil] => "element '../extension/MonthlyScheduleMultipliers' is OPTIONAL",
+      ['/HPXML/Building/BuildingDetails/MiscLoads/PlugLoad[PlugLoadType="other"]/extension/WeekdayScheduleFractions', nil] => "element 'extension/WeekdayScheduleFractions' is OPTIONAL",
+      ['/HPXML/Building/BuildingDetails/MiscLoads/PlugLoad[PlugLoadType="other"]/extension/WeekendScheduleFractions', nil] => "element 'extension/WeekendScheduleFractions' is OPTIONAL",
+      ['/HPXML/Building/BuildingDetails/MiscLoads/PlugLoad[PlugLoadType="other"]/extension/MonthlyScheduleMultipliers', nil] => "element 'extension/MonthlyScheduleMultipliers' is OPTIONAL",
       ['/HPXML/Building/BuildingDetails/MiscLoads/PlugLoad[PlugLoadType="TV other"]/Load/Value', nil] => "element 'Load[Units='kWh/year']/Value' is OPTIONAL",
       ['/HPXML/Building/BuildingDetails/MiscLoads/PlugLoad[PlugLoadType="TV other"]/extension/UsageMultiplier', nil] => "element 'extension/UsageMultiplier' is OPTIONAL",
-      ['/HPXML/Building/BuildingDetails/MiscLoads/PlugLoad[PlugLoadType="TV other"]/../extension/WeekdayScheduleFractions', nil] => "element '../extension/WeekdayScheduleFractions' is OPTIONAL",
-      ['/HPXML/Building/BuildingDetails/MiscLoads/PlugLoad[PlugLoadType="TV other"]/../extension/WeekendScheduleFractions', nil] => "element '../extension/WeekendScheduleFractions' is OPTIONAL",
-      ['/HPXML/Building/BuildingDetails/MiscLoads/PlugLoad[PlugLoadType="TV other"]/../extension/MonthlyScheduleMultipliers', nil] => "element '../extension/MonthlyScheduleMultipliers' is OPTIONAL",
+      ['/HPXML/Building/BuildingDetails/MiscLoads/PlugLoad[PlugLoadType="TV other"]/extension/WeekdayScheduleFractions', nil] => "element 'extension/WeekdayScheduleFractions' is OPTIONAL",
+      ['/HPXML/Building/BuildingDetails/MiscLoads/PlugLoad[PlugLoadType="TV other"]/extension/WeekendScheduleFractions', nil] => "element 'extension/WeekendScheduleFractions' is OPTIONAL",
+      ['/HPXML/Building/BuildingDetails/MiscLoads/PlugLoad[PlugLoadType="TV other"]/extension/MonthlyScheduleMultipliers', nil] => "element 'extension/MonthlyScheduleMultipliers' is OPTIONAL",
+      ['/HPXML/Building/BuildingDetails/MiscLoads/FuelLoad', 'Location="interior" and Location="exterior"'] => "element 'Location[text()='interior' or text()='exterior']' is OPTIONAL",
+      ['/HPXML/Building/BuildingDetails/MiscLoads/FuelLoad[FuelLoadType="grill"]/Load/Value', nil] => "element 'Load[Units='therm/year']/Value' is OPTIONAL",
+      ['/HPXML/Building/BuildingDetails/MiscLoads/FuelLoad[FuelLoadType="grill"]/extension/UsageMultiplier', nil] => "element 'extension/UsageMultiplier' is OPTIONAL",
+      ['/HPXML/Building/BuildingDetails/MiscLoads/FuelLoad[FuelLoadType="grill"]/extension/WeekdayScheduleFractions', nil] => "element 'extension/WeekdayScheduleFractions' is OPTIONAL",
+      ['/HPXML/Building/BuildingDetails/MiscLoads/FuelLoad[FuelLoadType="grill"]/extension/WeekendScheduleFractions', nil] => "element 'extension/WeekendScheduleFractions' is OPTIONAL",
+      ['/HPXML/Building/BuildingDetails/MiscLoads/FuelLoad[FuelLoadType="grill"]/extension/MonthlyScheduleMultipliers', nil] => "element 'extension/MonthlyScheduleMultipliers' is OPTIONAL",
+      ['/HPXML/Building/BuildingDetails/MiscLoads/FuelLoad[FuelLoadType="lighting"]/Load/Value', nil] => "element 'Load[Units='therm/year']/Value' is OPTIONAL",
+      ['/HPXML/Building/BuildingDetails/MiscLoads/FuelLoad[FuelLoadType="lighting"]/extension/UsageMultiplier', nil] => "element 'extension/UsageMultiplier' is OPTIONAL",
+      ['/HPXML/Building/BuildingDetails/MiscLoads/FuelLoad[FuelLoadType="lighting"]/extension/WeekdayScheduleFractions', nil] => "element 'extension/WeekdayScheduleFractions' is OPTIONAL",
+      ['/HPXML/Building/BuildingDetails/MiscLoads/FuelLoad[FuelLoadType="lighting"]/extension/WeekendScheduleFractions', nil] => "element 'extension/WeekendScheduleFractions' is OPTIONAL",
+      ['/HPXML/Building/BuildingDetails/MiscLoads/FuelLoad[FuelLoadType="lighting"]/extension/MonthlyScheduleMultipliers', nil] => "element 'extension/MonthlyScheduleMultipliers' is OPTIONAL",
+      ['/HPXML/Building/BuildingDetails/MiscLoads/FuelLoad[FuelLoadType="fireplace"]/Load/Value', nil] => "element 'Load[Units='therm/year']/Value' is OPTIONAL",
+      ['/HPXML/Building/BuildingDetails/MiscLoads/FuelLoad[FuelLoadType="fireplace"]/extension/UsageMultiplier', nil] => "element 'extension/UsageMultiplier' is OPTIONAL",
+      ['/HPXML/Building/BuildingDetails/MiscLoads/FuelLoad[FuelLoadType="fireplace"]/extension/WeekdayScheduleFractions', nil] => "element 'extension/WeekdayScheduleFractions' is OPTIONAL",
+      ['/HPXML/Building/BuildingDetails/MiscLoads/FuelLoad[FuelLoadType="fireplace"]/extension/WeekendScheduleFractions', nil] => "element 'extension/WeekendScheduleFractions' is OPTIONAL",
+      ['/HPXML/Building/BuildingDetails/MiscLoads/FuelLoad[FuelLoadType="fireplace"]/extension/MonthlyScheduleMultipliers', nil] => "element 'extension/MonthlyScheduleMultipliers' is OPTIONAL",
     }
 
     expected_error_msgs_optional.each do |key, value|
@@ -472,10 +559,11 @@ class HPXMLtoOpenStudioSchematronTest < MiniTest::Test
 
       if not child_elements_with_values.nil?
         child_elements_with_values.split(' and ')
-
         XMLHelper.get_elements(parent, elements.split('/')[-1]).each do |e|
           child_elements_with_values.split(' and ').each do |element_with_value|
-            XMLHelper.add_element(e, element_with_value.split('=')[0], element_with_value.split('=')[1].gsub!(/\A"|"\Z/, ''))
+            unless (XMLHelper.has_element(e, element_with_value.split('=')[0])) && (XMLHelper.get_value(e, element_with_value.split('=')[0]) == element_with_value.split('=')[1].gsub!(/\A"|"\Z/, ''))
+              XMLHelper.add_element(e, element_with_value.split('=')[0], element_with_value.split('=')[1].gsub!(/\A"|"\Z/, ''))
+            end
           end
         end
       end
@@ -497,6 +585,7 @@ class HPXMLtoOpenStudioSchematronTest < MiniTest::Test
       ['/HPXML/Building/BuildingDetails/Enclosure/AirInfiltration/AirInfiltrationMeasurement/HousePressure'] => "Expected [1] element(s) but found 0 element(s) for xpath: /HPXML/Building/BuildingDetails/Enclosure/AirInfiltration/AirInfiltrationMeasurement[number(HousePressure)=50 and BuildingAirLeakage/UnitofMeasure[text()=\"ACH\" or text()=\"CFM\"]] | /HPXML/Building/BuildingDetails/Enclosure/AirInfiltration/AirInfiltrationMeasurement[BuildingAirLeakage/UnitofMeasure[text()=\"ACHnatural\"]]",
       ['/HPXML/Building/BuildingDetails/Enclosure/AirInfiltration/AirInfiltrationMeasurement/BuildingAirLeakage/UnitofMeasure'] => "Expected [1] element(s) but found 0 element(s) for xpath: /HPXML/Building/BuildingDetails/Enclosure/AirInfiltration/AirInfiltrationMeasurement[number(HousePressure)=50 and BuildingAirLeakage/UnitofMeasure[text()=\"ACH\" or text()=\"CFM\"]] | /HPXML/Building/BuildingDetails/Enclosure/AirInfiltration/AirInfiltrationMeasurement[BuildingAirLeakage/UnitofMeasure[text()=\"ACHnatural\"]]",
       ['/HPXML/Building/BuildingDetails/Enclosure/Walls/Wall'] => "Expected 1 or more element(s) but found 0 elements for xpath: /HPXML/Building/BuildingDetails/Enclosure/Walls/Wall",
+      ['/HPXML/SoftwareInfo/extension/SimulationControl/DaylightSaving/Enabled'] => "Expected [1] element(s) but found 0 element(s) for xpath: /HPXML/SoftwareInfo/extension/SimulationControl/DaylightSaving: Enabled",
       ['/HPXML/Building/BuildingDetails/BuildingSummary/BuildingConstruction/NumberofConditionedFloors'] => "Expected [1] element(s) but found 0 element(s) for xpath: /HPXML/Building/BuildingDetails/BuildingSummary/BuildingConstruction: NumberofConditionedFloors",
       ['/HPXML/Building/BuildingDetails/BuildingSummary/BuildingConstruction/NumberofConditionedFloorsAboveGrade'] => "Expected [1] element(s) but found 0 element(s) for xpath: /HPXML/Building/BuildingDetails/BuildingSummary/BuildingConstruction: NumberofConditionedFloorsAboveGrade",
       ['/HPXML/Building/BuildingDetails/BuildingSummary/BuildingConstruction/NumberofBedrooms'] => "Expected [1] element(s) but found 0 element(s) for xpath: /HPXML/Building/BuildingDetails/BuildingSummary/BuildingConstruction: NumberofBedrooms",
@@ -515,7 +604,7 @@ class HPXMLtoOpenStudioSchematronTest < MiniTest::Test
       ['/HPXML/Building/BuildingDetails/Enclosure/Roofs/Roof/SystemIdentifier'] => "Expected [1] element(s) but found 0 element(s) for xpath: /HPXML/Building/BuildingDetails/Enclosure/Roofs/Roof: SystemIdentifier",
       ['/HPXML/Building/BuildingDetails/Enclosure/Roofs/Roof/InteriorAdjacentTo'] => "Expected [1] element(s) but found 0 element(s) for xpath: /HPXML/Building/BuildingDetails/Enclosure/Roofs/Roof: InteriorAdjacentTo[text()=\"attic - vented\" or text()=\"attic - unvented\" or text()=\"living space\" or text()=\"garage\"]",
       ['/HPXML/Building/BuildingDetails/Enclosure/Roofs/Roof/Area'] => "Expected [1] element(s) but found 0 element(s) for xpath: /HPXML/Building/BuildingDetails/Enclosure/Roofs/Roof: Area",
-      ['/HPXML/Building/BuildingDetails/Enclosure/Roofs/Roof/SolarAbsorptance'] => "Expected [1] element(s) but found 0 element(s) for xpath: /HPXML/Building/BuildingDetails/Enclosure/Roofs/Roof: SolarAbsorptance",
+      ['/HPXML/Building/BuildingDetails/Enclosure/Roofs/Roof/SolarAbsorptance'] => "Expected 1 or more element(s) but found 0 elements for xpath: /HPXML/Building/BuildingDetails/Enclosure/Roofs/Roof: RoofColor | SolarAbsorptance",
       ['/HPXML/Building/BuildingDetails/Enclosure/Roofs/Roof/Emittance'] => "Expected [1] element(s) but found 0 element(s) for xpath: /HPXML/Building/BuildingDetails/Enclosure/Roofs/Roof: Emittance",
       ['/HPXML/Building/BuildingDetails/Enclosure/Roofs/Roof/Pitch'] => "Expected [1] element(s) but found 0 element(s) for xpath: /HPXML/Building/BuildingDetails/Enclosure/Roofs/Roof: Pitch",
       ['/HPXML/Building/BuildingDetails/Enclosure/Roofs/Roof/RadiantBarrier'] => "Expected [1] element(s) but found 0 element(s) for xpath: /HPXML/Building/BuildingDetails/Enclosure/Roofs/Roof: RadiantBarrier",
@@ -524,9 +613,9 @@ class HPXMLtoOpenStudioSchematronTest < MiniTest::Test
       ['/HPXML/Building/BuildingDetails/Enclosure/Walls/Wall/SystemIdentifier'] => "Expected [1] element(s) but found 0 element(s) for xpath: /HPXML/Building/BuildingDetails/Enclosure/Walls/Wall: SystemIdentifier",
       ['/HPXML/Building/BuildingDetails/Enclosure/Walls/Wall/ExteriorAdjacentTo'] => "Expected [1] element(s) but found 0 element(s) for xpath: /HPXML/Building/BuildingDetails/Enclosure/Walls/Wall: ExteriorAdjacentTo[text()=\"outside\" or text()=\"attic - vented\" or text()=\"attic - unvented\" or text()=\"basement - conditioned\" or text()=\"basement - unconditioned\" or text()=\"crawlspace - vented\" or text()=\"crawlspace - unvented\" or text()=\"garage\" or text()=\"other housing unit\" or text()=\"other heated space\" or text()=\"other multifamily buffer space\" or text()=\"other non-freezing space\"]",
       ['/HPXML/Building/BuildingDetails/Enclosure/Walls/Wall/InteriorAdjacentTo'] => "Expected [1] element(s) but found 0 element(s) for xpath: /HPXML/Building/BuildingDetails/Enclosure/Walls/Wall: InteriorAdjacentTo[text()=\"living space\" or text()=\"attic - vented\" or text()=\"attic - unvented\" or text()=\"basement - conditioned\" or text()=\"basement - unconditioned\" or text()=\"crawlspace - vented\" or text()=\"crawlspace - unvented\" or text()=\"garage\"]",
-      ['/HPXML/Building/BuildingDetails/Enclosure/Walls/Wall/WallType/WoodStud'] => "Expected [1] element(s) but found 0 element(s) for xpath: /HPXML/Building/BuildingDetails/Enclosure/Walls/Wall: WallType[WoodStud | DoubleWoodStud | ConcreteMasonryUnit | StructurallyInsulatedPanel | InsulatedConcreteForms | SteelFrame | SolidConcrete | StructuralBrick | StrawBale | Stone | LogWall]",
+      ['/HPXML/Building/BuildingDetails/Enclosure/Walls/Wall/WallType/WoodStud'] => "Expected [1] element(s) but found 0 element(s) for xpath: /HPXML/Building/BuildingDetails/Enclosure/Walls/Wall: WallType[WoodStud | DoubleWoodStud | ConcreteMasonryUnit | StructurallyInsulatedPanel | InsulatedConcreteForms | SteelFrame | SolidConcrete | StructuralBrick | StrawBale | Stone | LogWall | Adobe]",
       ['/HPXML/Building/BuildingDetails/Enclosure/Walls/Wall/Area'] => "Expected [1] element(s) but found 0 element(s) for xpath: /HPXML/Building/BuildingDetails/Enclosure/Walls/Wall: Area",
-      ['/HPXML/Building/BuildingDetails/Enclosure/Walls/Wall/SolarAbsorptance'] => "Expected [1] element(s) but found 0 element(s) for xpath: /HPXML/Building/BuildingDetails/Enclosure/Walls/Wall: SolarAbsorptance",
+      ['/HPXML/Building/BuildingDetails/Enclosure/Walls/Wall/SolarAbsorptance'] => "Expected 1 or more element(s) but found 0 elements for xpath: /HPXML/Building/BuildingDetails/Enclosure/Walls/Wall: Color | SolarAbsorptance",
       ['/HPXML/Building/BuildingDetails/Enclosure/Walls/Wall/Emittance'] => "Expected [1] element(s) but found 0 element(s) for xpath: /HPXML/Building/BuildingDetails/Enclosure/Walls/Wall: Emittance",
       ['/HPXML/Building/BuildingDetails/Enclosure/Walls/Wall/Insulation/SystemIdentifier'] => "Expected [1] element(s) but found 0 element(s) for xpath: /HPXML/Building/BuildingDetails/Enclosure/Walls/Wall: Insulation/SystemIdentifier",
       ['/HPXML/Building/BuildingDetails/Enclosure/Walls/Wall/Insulation/AssemblyEffectiveRValue'] => "Expected [1] element(s) but found 0 element(s) for xpath: /HPXML/Building/BuildingDetails/Enclosure/Walls/Wall: Insulation/AssemblyEffectiveRValue",
@@ -534,7 +623,7 @@ class HPXMLtoOpenStudioSchematronTest < MiniTest::Test
       ['/HPXML/Building/BuildingDetails/Enclosure/RimJoists/RimJoist/ExteriorAdjacentTo'] => "Expected [1] element(s) but found 0 element(s) for xpath: /HPXML/Building/BuildingDetails/Enclosure/RimJoists/RimJoist: ExteriorAdjacentTo[text()=\"outside\" or text()=\"attic - vented\" or text()=\"attic - unvented\" or text()=\"basement - conditioned\" or text()=\"basement - unconditioned\" or text()=\"crawlspace - vented\" or text()=\"crawlspace - unvented\" or text()=\"garage\" or text()=\"other housing unit\" or text()=\"other heated space\" or text()=\"other multifamily buffer space\" or text()=\"other non-freezing space\"]",
       ['/HPXML/Building/BuildingDetails/Enclosure/RimJoists/RimJoist/InteriorAdjacentTo'] => "Expected [1] element(s) but found 0 element(s) for xpath: /HPXML/Building/BuildingDetails/Enclosure/RimJoists/RimJoist: InteriorAdjacentTo[text()=\"living space\" or text()=\"attic - vented\" or text()=\"attic - unvented\" or text()=\"basement - conditioned\" or text()=\"basement - unconditioned\" or text()=\"crawlspace - vented\" or text()=\"crawlspace - unvented\" or text()=\"garage\"]",
       ['/HPXML/Building/BuildingDetails/Enclosure/RimJoists/RimJoist/Area'] => "Expected [1] element(s) but found 0 element(s) for xpath: /HPXML/Building/BuildingDetails/Enclosure/RimJoists/RimJoist: Area",
-      ['/HPXML/Building/BuildingDetails/Enclosure/RimJoists/RimJoist/SolarAbsorptance'] => "Expected [1] element(s) but found 0 element(s) for xpath: /HPXML/Building/BuildingDetails/Enclosure/RimJoists/RimJoist: SolarAbsorptance",
+      ['/HPXML/Building/BuildingDetails/Enclosure/RimJoists/RimJoist/SolarAbsorptance'] => "Expected 1 or more element(s) but found 0 elements for xpath: /HPXML/Building/BuildingDetails/Enclosure/RimJoists/RimJoist: Color | SolarAbsorptance",
       ['/HPXML/Building/BuildingDetails/Enclosure/RimJoists/RimJoist/Emittance'] => "Expected [1] element(s) but found 0 element(s) for xpath: /HPXML/Building/BuildingDetails/Enclosure/RimJoists/RimJoist: Emittance",
       ['/HPXML/Building/BuildingDetails/Enclosure/RimJoists/RimJoist/Insulation/SystemIdentifier'] => "Expected [1] element(s) but found 0 element(s) for xpath: /HPXML/Building/BuildingDetails/Enclosure/RimJoists/RimJoist: Insulation/SystemIdentifier",
       ['/HPXML/Building/BuildingDetails/Enclosure/RimJoists/RimJoist/Insulation/AssemblyEffectiveRValue'] => "Expected [1] element(s) but found 0 element(s) for xpath: /HPXML/Building/BuildingDetails/Enclosure/RimJoists/RimJoist: Insulation/AssemblyEffectiveRValue",
@@ -591,11 +680,11 @@ class HPXMLtoOpenStudioSchematronTest < MiniTest::Test
       ['/HPXML/Building/BuildingDetails/Enclosure/Skylights/Skylight/AttachedToRoof'] => "Expected [1] element(s) but found 0 element(s) for xpath: /HPXML/Building/BuildingDetails/Enclosure/Skylights/Skylight: AttachedToRoof",
       ['/HPXML/Building/BuildingDetails/Systems/HVAC/HVACPlant/HeatingSystem/SystemIdentifier'] => "Expected [1] element(s) but found 0 element(s) for xpath: /HPXML/Building/BuildingDetails/Systems/HVAC/HVACPlant/HeatingSystem: SystemIdentifier",
       ['/HPXML/Building/BuildingDetails/Systems/HVAC/HVACControl'] => "Expected [1] element(s) but found 0 element(s) for xpath: /HPXML/Building/BuildingDetails/Systems/HVAC/HVACPlant/HeatingSystem: ../../HVACControl",
-      ['/HPXML/Building/BuildingDetails/Systems/HVAC/HVACPlant/HeatingSystem/HeatingSystemType/Furnace'] => "Expected [1] element(s) but found 0 element(s) for xpath: /HPXML/Building/BuildingDetails/Systems/HVAC/HVACPlant/HeatingSystem: HeatingSystemType[ElectricResistance | Furnace | WallFurnace | FloorFurnace | Boiler | Stove | PortableHeater | Fireplace]",
+      ['/HPXML/Building/BuildingDetails/Systems/HVAC/HVACPlant/HeatingSystem/HeatingSystemType/Furnace'] => "Expected [1] element(s) but found 0 element(s) for xpath: /HPXML/Building/BuildingDetails/Systems/HVAC/HVACPlant/HeatingSystem: HeatingSystemType[ElectricResistance | Furnace | WallFurnace | FloorFurnace | Boiler | Stove | PortableHeater | FixedHeater | Fireplace]",
       ['/HPXML/Building/BuildingDetails/Systems/HVAC/HVACPlant/HeatingSystem/FractionHeatLoadServed'] => "Expected [1] element(s) but found 0 element(s) for xpath: /HPXML/Building/BuildingDetails/Systems/HVAC/HVACPlant/HeatingSystem: FractionHeatLoadServed",
       ['/HPXML/Building/BuildingDetails/Systems/HVAC/HVACDistribution[DistributionSystemType/AirDistribution]'] => "Expected 1 or more element(s) but found 0 elements for xpath: /HPXML/Building/BuildingDetails/Systems/HVAC/HVACPlant/HeatingSystem[HeatingSystemType/Furnace]: ../../HVACDistribution[DistributionSystemType/AirDistribution | DistributionSystemType[Other=\"DSE\"]]",
       ['/HPXML/Building/BuildingDetails/Systems/HVAC/HVACPlant/HeatingSystem[HeatingSystemType/Furnace]/DistributionSystem'] => "Expected [1] element(s) but found 0 element(s) for xpath: /HPXML/Building/BuildingDetails/Systems/HVAC/HVACPlant/HeatingSystem[HeatingSystemType/Furnace]: DistributionSystem",
-      ['/HPXML/Building/BuildingDetails/Systems/HVAC/HVACPlant/HeatingSystem[HeatingSystemType/Furnace]/HeatingSystemFuel'] => "Expected [1] element(s) but found 0 element(s) for xpath: /HPXML/Building/BuildingDetails/Systems/HVAC/HVACPlant/HeatingSystem[HeatingSystemType/Furnace]: HeatingSystemFuel[text()=\"natural gas\" or text()=\"fuel oil\" or text()=\"propane\" or text()=\"electricity\" or text()=\"wood\" or text()=\"wood pellets\"]",
+      ['/HPXML/Building/BuildingDetails/Systems/HVAC/HVACPlant/HeatingSystem[HeatingSystemType/Furnace]/HeatingSystemFuel'] => "Expected [1] element(s) but found 0 element(s) for xpath: /HPXML/Building/BuildingDetails/Systems/HVAC/HVACPlant/HeatingSystem[HeatingSystemType/Furnace]: HeatingSystemFuel[text()=\"natural gas\" or text()=\"fuel oil\" or text()=\"fuel oil 1\" or text()=\"fuel oil 2\" or text()=\"fuel oil 4\" or text()=\"fuel oil 5/6\" or text()=\"diesel\" or text()=\"propane\" or text()=\"kerosene\" or text()=\"electricity\" or text()=\"wood\" or text()=\"wood pellets\"]",
       ['/HPXML/Building/BuildingDetails/Systems/HVAC/HVACPlant/HeatingSystem[HeatingSystemType/Furnace]/AnnualHeatingEfficiency[Units="AFUE"]/Value'] => "Expected [1] element(s) but found 0 element(s) for xpath: /HPXML/Building/BuildingDetails/Systems/HVAC/HVACPlant/HeatingSystem[HeatingSystemType/Furnace]: AnnualHeatingEfficiency[Units=\"AFUE\"]/Value",
       ['/HPXML/Building/BuildingDetails/Systems/HVAC/HVACPlant/CoolingSystem[CoolingSystemType="central air conditioner"]/SystemIdentifier'] => "Expected [1] element(s) but found 0 element(s) for xpath: /HPXML/Building/BuildingDetails/Systems/HVAC/HVACPlant/CoolingSystem: SystemIdentifier",
       ['/HPXML/Building/BuildingDetails/Systems/HVAC/HVACPlant/CoolingSystem[CoolingSystemType="central air conditioner"]/CoolingSystemType[text()="central air conditioner" or text()="room air conditioner" or text()="evaporative cooler"]'] => "Expected [1] element(s) but found 0 element(s) for xpath: /HPXML/Building/BuildingDetails/Systems/HVAC/HVACPlant/CoolingSystem: CoolingSystemType[text()=\"central air conditioner\" or text()=\"room air conditioner\" or text()=\"evaporative cooler\"]",
@@ -645,9 +734,9 @@ class HPXMLtoOpenStudioSchematronTest < MiniTest::Test
       ['/HPXML/Building/BuildingDetails/Systems/WaterHeating/WaterHeatingSystem/SystemIdentifier'] => "Expected [1] element(s) but found 0 element(s) for xpath: /HPXML/Building/BuildingDetails/Systems/WaterHeating/WaterHeatingSystem: SystemIdentifier",
       ['/HPXML/Building/BuildingDetails/Systems/WaterHeating/WaterHeatingSystem/WaterHeaterType'] => "Expected [1] element(s) but found 0 element(s) for xpath: /HPXML/Building/BuildingDetails/Systems/WaterHeating/WaterHeatingSystem: WaterHeaterType[text()=\"storage water heater\" or text()=\"instantaneous water heater\" or text()=\"heat pump water heater\" or text()=\"space-heating boiler with storage tank\" or text()=\"space-heating boiler with tankless coil\"]",
       ['/HPXML/Building/BuildingDetails/Systems/WaterHeating/WaterHeatingSystem/FractionDHWLoadServed'] => "Expected [1] element(s) but found 0 element(s) for xpath: /HPXML/Building/BuildingDetails/Systems/WaterHeating/WaterHeatingSystem: FractionDHWLoadServed",
-      ['/HPXML/Building/BuildingDetails/Systems/WaterHeating/WaterHeatingSystem[WaterHeaterType="storage water heater"]/FuelType'] => "Expected [1] element(s) but found 0 element(s) for xpath: /HPXML/Building/BuildingDetails/Systems/WaterHeating/WaterHeatingSystem[WaterHeaterType=\"storage water heater\"]: FuelType[text()=\"natural gas\" or text()=\"fuel oil\" or text()=\"propane\" or text()=\"electricity\" or text()=\"wood\" or text()=\"wood pellets\"]",
+      ['/HPXML/Building/BuildingDetails/Systems/WaterHeating/WaterHeatingSystem[WaterHeaterType="storage water heater"]/FuelType'] => "Expected [1] element(s) but found 0 element(s) for xpath: /HPXML/Building/BuildingDetails/Systems/WaterHeating/WaterHeatingSystem[WaterHeaterType=\"storage water heater\"]: FuelType[text()=\"natural gas\" or text()=\"fuel oil\" or text()=\"fuel oil 1\" or text()=\"fuel oil 2\" or text()=\"fuel oil 4\" or text()=\"fuel oil 5/6\" or text()=\"diesel\" or text()=\"propane\" or text()=\"kerosene\" or text()=\"coal\" or text()=\"coke\" or text()=\"bituminous coal\" or text()=\"anthracite coal\" or text()=\"electricity\" or text()=\"wood\" or text()=\"wood pellets\"]",
       ['/HPXML/Building/BuildingDetails/Systems/WaterHeating/WaterHeatingSystem[WaterHeaterType="storage water heater"]/EnergyFactor'] => "Expected [1] element(s) but found 0 element(s) for xpath: /HPXML/Building/BuildingDetails/Systems/WaterHeating/WaterHeatingSystem[WaterHeaterType=\"storage water heater\"]: EnergyFactor | UniformEnergyFactor",
-      ['/HPXML/Building/BuildingDetails/Systems/WaterHeating/WaterHeatingSystem[WaterHeaterType="instantaneous water heater"]/FuelType'] => "Expected [1] element(s) but found 0 element(s) for xpath: /HPXML/Building/BuildingDetails/Systems/WaterHeating/WaterHeatingSystem[WaterHeaterType=\"instantaneous water heater\"]: FuelType[text()=\"natural gas\" or text()=\"fuel oil\" or text()=\"propane\" or text()=\"electricity\" or text()=\"wood\" or text()=\"wood pellets\"]",
+      ['/HPXML/Building/BuildingDetails/Systems/WaterHeating/WaterHeatingSystem[WaterHeaterType="instantaneous water heater"]/FuelType'] => "Expected [1] element(s) but found 0 element(s) for xpath: /HPXML/Building/BuildingDetails/Systems/WaterHeating/WaterHeatingSystem[WaterHeaterType=\"instantaneous water heater\"]: FuelType[text()=\"natural gas\" or text()=\"fuel oil\" or text()=\"fuel oil 1\" or text()=\"fuel oil 2\" or text()=\"fuel oil 4\" or text()=\"fuel oil 5/6\" or text()=\"diesel\" or text()=\"propane\" or text()=\"kerosene\" or text()=\"coal\" or text()=\"coke\" or text()=\"bituminous coal\" or text()=\"anthracite coal\" or text()=\"electricity\" or text()=\"wood\" or text()=\"wood pellets\"]",
       ['/HPXML/Building/BuildingDetails/Systems/WaterHeating/WaterHeatingSystem[WaterHeaterType="instantaneous water heater"]/EnergyFactor'] => "Expected [1] element(s) but found 0 element(s) for xpath: /HPXML/Building/BuildingDetails/Systems/WaterHeating/WaterHeatingSystem[WaterHeaterType=\"instantaneous water heater\"]: EnergyFactor | UniformEnergyFactor",
       ['/HPXML/Building/BuildingDetails/Systems/WaterHeating/WaterHeatingSystem[WaterHeaterType="heat pump water heater"]/FuelType'] => "Expected [1] element(s) but found 0 element(s) for xpath: /HPXML/Building/BuildingDetails/Systems/WaterHeating/WaterHeatingSystem[WaterHeaterType=\"heat pump water heater\"]: FuelType[text()=\"electricity\"]",
       ['/HPXML/Building/BuildingDetails/Systems/WaterHeating/WaterHeatingSystem[WaterHeaterType="heat pump water heater"]/TankVolume'] => "Expected [1] element(s) but found 0 element(s) for xpath: /HPXML/Building/BuildingDetails/Systems/WaterHeating/WaterHeatingSystem[WaterHeaterType=\"heat pump water heater\"]: TankVolume",
@@ -686,23 +775,41 @@ class HPXMLtoOpenStudioSchematronTest < MiniTest::Test
       ['/HPXML/Building/BuildingDetails/Systems/Photovoltaics/PVSystem/MaxPowerOutput'] => "Expected [1] element(s) but found 0 element(s) for xpath: /HPXML/Building/BuildingDetails/Systems/Photovoltaics/PVSystem: MaxPowerOutput",
       ['/HPXML/Building/BuildingDetails/Appliances/ClothesWasher/SystemIdentifier'] => "Expected [1] element(s) but found 0 element(s) for xpath: /HPXML/Building/BuildingDetails/Appliances/ClothesWasher: SystemIdentifier",
       ['/HPXML/Building/BuildingDetails/Appliances/ClothesWasher/IntegratedModifiedEnergyFactor'] => "Expected [0, 7] element(s) but found 6 element(s) for xpath: /HPXML/Building/BuildingDetails/Appliances/ClothesWasher: ModifiedEnergyFactor | IntegratedModifiedEnergyFactor | RatedAnnualkWh | LabelElectricRate | LabelGasRate | LabelAnnualGasCost | LabelUsage | Capacity",
+      ['/HPXML/Building/BuildingDetails/Appliances/ClothesWasher'] => "Expected [1] element(s) but found 0 element(s) for xpath: /HPXML/Building/BuildingDetails/Appliances/ClothesDryer: ../ClothesWasher",
       ['/HPXML/Building/BuildingDetails/Appliances/ClothesDryer/SystemIdentifier'] => "Expected [1] element(s) but found 0 element(s) for xpath: /HPXML/Building/BuildingDetails/Appliances/ClothesDryer: SystemIdentifier",
-      ['/HPXML/Building/BuildingDetails/Appliances/ClothesDryer/FuelType[text()="natural gas" or text()="fuel oil" or text()="propane" or text()="electricity" or text()="wood" or text()="wood pellets"]'] => "Expected [1] element(s) but found 0 element(s) for xpath: /HPXML/Building/BuildingDetails/Appliances/ClothesDryer: FuelType[text()=\"natural gas\" or text()=\"fuel oil\" or text()=\"propane\" or text()=\"electricity\" or text()=\"wood\" or text()=\"wood pellets\"]",
+      ['/HPXML/Building/BuildingDetails/Appliances/ClothesDryer/FuelType[text()="natural gas" or text()="fuel oil" or text()="propane" or text()="electricity" or text()="wood" or text()="wood pellets"]'] => "Expected [1] element(s) but found 0 element(s) for xpath: /HPXML/Building/BuildingDetails/Appliances/ClothesDryer: FuelType[text()=\"natural gas\" or text()=\"fuel oil\" or text()=\"fuel oil 1\" or text()=\"fuel oil 2\" or text()=\"fuel oil 4\" or text()=\"fuel oil 5/6\" or text()=\"diesel\" or text()=\"propane\" or text()=\"kerosene\" or text()=\"coal\" or text()=\"coke\" or text()=\"bituminous coal\" or text()=\"anthracite coal\" or text()=\"electricity\" or text()=\"wood\" or text()=\"wood pellets\"]",
       ['/HPXML/Building/BuildingDetails/Appliances/Dishwasher/SystemIdentifier'] => "Expected [1] element(s) but found 0 element(s) for xpath: /HPXML/Building/BuildingDetails/Appliances/Dishwasher: SystemIdentifier",
       ['/HPXML/Building/BuildingDetails/Appliances/Dishwasher/RatedAnnualkWh'] => "Expected [0, 6] element(s) but found 5 element(s) for xpath: /HPXML/Building/BuildingDetails/Appliances/Dishwasher: RatedAnnualkWh | EnergyFactor | LabelElectricRate | LabelGasRate | LabelAnnualGasCost | LabelUsage | PlaceSettingCapacity",
       ['/HPXML/Building/BuildingDetails/Appliances/Refrigerator/SystemIdentifier'] => "Expected [1] element(s) but found 0 element(s) for xpath: /HPXML/Building/BuildingDetails/Appliances/Refrigerator: SystemIdentifier",
+      ['/HPXML/Building/BuildingDetails/Appliances/Freezer/SystemIdentifier'] => "Expected [1] element(s) but found 0 element(s) for xpath: /HPXML/Building/BuildingDetails/Appliances/Freezer: SystemIdentifier",
       ['/HPXML/Building/BuildingDetails/Appliances/Dehumidifier/Capacity'] => "Expected [1] element(s) but found 0 element(s) for xpath: /HPXML/Building/BuildingDetails/Appliances/Dehumidifier: Capacity",
       ['/HPXML/Building/BuildingDetails/Appliances/Dehumidifier/EnergyFactor | IntegratedEnergyFactor'] => "Expected [1] element(s) but found 0 element(s) for xpath: /HPXML/Building/BuildingDetails/Appliances/Dehumidifier: EnergyFactor | IntegratedEnergyFactor",
       ['/HPXML/Building/BuildingDetails/Appliances/Dehumidifier/DehumidistatSetpoint'] => "Expected [1] element(s) but found 0 element(s) for xpath: /HPXML/Building/BuildingDetails/Appliances/Dehumidifier: DehumidistatSetpoint",
       ['/HPXML/Building/BuildingDetails/Appliances/Dehumidifier/FractionDehumidificationLoadServed'] => "Expected [1] element(s) but found 0 element(s) for xpath: /HPXML/Building/BuildingDetails/Appliances/Dehumidifier: FractionDehumidificationLoadServed",
+      ['/HPXML/Building/BuildingDetails/Appliances/Oven'] => "Expected [1] element(s) but found 0 element(s) for xpath: /HPXML/Building/BuildingDetails/Appliances/CookingRange: ../Oven",
       ['/HPXML/Building/BuildingDetails/Appliances/CookingRange/SystemIdentifier'] => "Expected [1] element(s) but found 0 element(s) for xpath: /HPXML/Building/BuildingDetails/Appliances/CookingRange: SystemIdentifier",
-      ['/HPXML/Building/BuildingDetails/Appliances/CookingRange/FuelType[text()="natural gas" or text()="fuel oil" or text()="propane" or text()="electricity" or text()="wood" or text()="wood pellets"]'] => "Expected [1] element(s) but found 0 element(s) for xpath: /HPXML/Building/BuildingDetails/Appliances/CookingRange: FuelType[text()=\"natural gas\" or text()=\"fuel oil\" or text()=\"propane\" or text()=\"electricity\" or text()=\"wood\" or text()=\"wood pellets\"]",
+      ['/HPXML/Building/BuildingDetails/Appliances/CookingRange/FuelType'] => "Expected [1] element(s) but found 0 element(s) for xpath: /HPXML/Building/BuildingDetails/Appliances/CookingRange: FuelType[text()=\"natural gas\" or text()=\"fuel oil\" or text()=\"fuel oil 1\" or text()=\"fuel oil 2\" or text()=\"fuel oil 4\" or text()=\"fuel oil 5/6\" or text()=\"diesel\" or text()=\"propane\" or text()=\"kerosene\" or text()=\"coal\" or text()=\"coke\" or text()=\"bituminous coal\" or text()=\"anthracite coal\" or text()=\"electricity\" or text()=\"wood\" or text()=\"wood pellets\"]",
+      ['/HPXML/Building/BuildingDetails/Appliances/CookingRange'] => "Expected [1] element(s) but found 0 element(s) for xpath: /HPXML/Building/BuildingDetails/Appliances/Oven: ../CookingRange",
+      ['/HPXML/Building/BuildingDetails/Appliances/Oven/SystemIdentifier'] => "Expected [1] element(s) but found 0 element(s) for xpath: /HPXML/Building/BuildingDetails/Appliances/Oven: SystemIdentifier",
       ['/HPXML/Building/BuildingDetails/Lighting/LightingGroup[LightingType[LightEmittingDiode | CompactFluorescent | FluorescentTube] and Location[text()="interior" or text()="exterior" or text()="garage"]]'] => "Expected [9] element(s) but found 0 element(s) for xpath: /HPXML/Building/BuildingDetails/Lighting: LightingGroup[LightingType[LightEmittingDiode | CompactFluorescent | FluorescentTube] and Location[text()=\"interior\" or text()=\"exterior\" or text()=\"garage\"]]",
       ['/HPXML/Building/BuildingDetails/Lighting/LightingGroup[LightingType[LightEmittingDiode | CompactFluorescent | FluorescentTube] and Location[text()="interior" or text()="exterior" or text()="garage"]]/SystemIdentifier'] => "Expected [1] element(s) but found 0 element(s) for xpath: /HPXML/Building/BuildingDetails/Lighting/LightingGroup[LightingType[LightEmittingDiode | CompactFluorescent | FluorescentTube] and Location[text()=\"interior\" or text()=\"exterior\" or text()=\"garage\"]]: SystemIdentifier",
       ['/HPXML/Building/BuildingDetails/Lighting/LightingGroup[LightingType[LightEmittingDiode | CompactFluorescent | FluorescentTube] and Location[text()="interior" or text()="exterior" or text()="garage"]]/FractionofUnitsInLocation'] => "Expected [1] element(s) but found 0 element(s) for xpath: /HPXML/Building/BuildingDetails/Lighting/LightingGroup[LightingType[LightEmittingDiode | CompactFluorescent | FluorescentTube] and Location[text()=\"interior\" or text()=\"exterior\" or text()=\"garage\"]]: FractionofUnitsInLocation",
       ['/HPXML/Building/BuildingDetails/Lighting/CeilingFan/SystemIdentifier'] => "Expected [1] element(s) but found 0 element(s) for xpath: /HPXML/Building/BuildingDetails/Lighting/CeilingFan: SystemIdentifier",
-      ['/HPXML/Building/BuildingDetails/MiscLoads/PlugLoad[PlugLoadType="other"]/SystemIdentifier'] => "Expected [1] element(s) but found 0 element(s) for xpath: /HPXML/Building/BuildingDetails/MiscLoads/PlugLoad[PlugLoadType=\"other\"]: SystemIdentifier",
-      ['/HPXML/Building/BuildingDetails/MiscLoads/PlugLoad[PlugLoadType="TV other"]/SystemIdentifier'] => "Expected [1] element(s) but found 0 element(s) for xpath: /HPXML/Building/BuildingDetails/MiscLoads/PlugLoad[PlugLoadType=\"TV other\"]: SystemIdentifier",
+      ['/HPXML/Building/BuildingDetails/Pools/Pool/SystemIdentifier'] => "Expected [1] element(s) but found 0 element(s) for xpath: /HPXML/Building/BuildingDetails/Pools/Pool: SystemIdentifier",
+      ['/HPXML/Building/BuildingDetails/Pools/Pool/PoolPumps/PoolPump'] => "Expected [1] element(s) but found 0 element(s) for xpath: /HPXML/Building/BuildingDetails/Pools/Pool: PoolPumps/PoolPump",
+      ['/HPXML/Building/BuildingDetails/Pools/Pool/PoolPumps/PoolPump/SystemIdentifier'] => "Expected [1] element(s) but found 0 element(s) for xpath: /HPXML/Building/BuildingDetails/Pools/Pool/PoolPumps/PoolPump: SystemIdentifier",
+      ['/HPXML/Building/BuildingDetails/Pools/Pool/Heater/SystemIdentifier'] => "Expected [1] element(s) but found 0 element(s) for xpath: /HPXML/Building/BuildingDetails/Pools/Pool/Heater: SystemIdentifier",
+      ['/HPXML/Building/BuildingDetails/Pools/Pool/Heater/Type'] => "Expected [1] element(s) but found 0 element(s) for xpath: /HPXML/Building/BuildingDetails/Pools/Pool/Heater: Type[text()=\"gas fired\" or text()=\"electric resistance\" or text()=\"heat pump\"]",
+      ['/HPXML/Building/BuildingDetails/HotTubs/HotTub/SystemIdentifier'] => "Expected [1] element(s) but found 0 element(s) for xpath: /HPXML/Building/BuildingDetails/HotTubs/HotTub: SystemIdentifier",
+      ['/HPXML/Building/BuildingDetails/HotTubs/HotTub/HotTubPumps/HotTubPump'] => "Expected [1] element(s) but found 0 element(s) for xpath: /HPXML/Building/BuildingDetails/HotTubs/HotTub: HotTubPumps/HotTubPump",
+      ['/HPXML/Building/BuildingDetails/HotTubs/HotTub/HotTubPumps/HotTubPump/SystemIdentifier'] => "Expected [1] element(s) but found 0 element(s) for xpath: /HPXML/Building/BuildingDetails/HotTubs/HotTub/HotTubPumps/HotTubPump: SystemIdentifier",
+      ['/HPXML/Building/BuildingDetails/HotTubs/HotTub/Heater/SystemIdentifier'] => "Expected [1] element(s) but found 0 element(s) for xpath: /HPXML/Building/BuildingDetails/HotTubs/HotTub/Heater: SystemIdentifier",
+      ['/HPXML/Building/BuildingDetails/HotTubs/HotTub/Heater/Type'] => "Expected [1] element(s) but found 0 element(s) for xpath: /HPXML/Building/BuildingDetails/HotTubs/HotTub/Heater: Type[text()=\"gas fired\" or text()=\"electric resistance\" or text()=\"heat pump\"]",
+      ['/HPXML/Building/BuildingDetails/MiscLoads/PlugLoad[PlugLoadType="other"]/SystemIdentifier'] => "Expected [1] element(s) but found 0 element(s) for xpath: /HPXML/Building/BuildingDetails/MiscLoads/PlugLoad[PlugLoadType=\"other\" or PlugLoadType=\"TV other\" or PlugLoadType=\"electric vehicle charging\" or PlugLoadType=\"well pump\"]: SystemIdentifier",
+      ['/HPXML/Building/BuildingDetails/MiscLoads/PlugLoad[PlugLoadType="TV other"]/SystemIdentifier'] => "Expected [1] element(s) but found 0 element(s) for xpath: /HPXML/Building/BuildingDetails/MiscLoads/PlugLoad[PlugLoadType=\"other\" or PlugLoadType=\"TV other\" or PlugLoadType=\"electric vehicle charging\" or PlugLoadType=\"well pump\"]: SystemIdentifier",
+      ['/HPXML/Building/BuildingDetails/MiscLoads/FuelLoad[FuelLoadType="grill"]/SystemIdentifier'] => "Expected [1] element(s) but found 0 element(s) for xpath: /HPXML/Building/BuildingDetails/MiscLoads/FuelLoad[FuelLoadType=\"grill\" or FuelLoadType=\"lighting\" or FuelLoadType=\"fireplace\"]: SystemIdentifier",
+      ['/HPXML/Building/BuildingDetails/MiscLoads/FuelLoad[FuelLoadType="lighting"]/SystemIdentifier'] => "Expected [1] element(s) but found 0 element(s) for xpath: /HPXML/Building/BuildingDetails/MiscLoads/FuelLoad[FuelLoadType=\"grill\" or FuelLoadType=\"lighting\" or FuelLoadType=\"fireplace\"]: SystemIdentifier",
+      ['/HPXML/Building/BuildingDetails/MiscLoads/FuelLoad[FuelLoadType="fireplace"]/SystemIdentifier'] => "Expected [1] element(s) but found 0 element(s) for xpath: /HPXML/Building/BuildingDetails/MiscLoads/FuelLoad[FuelLoadType=\"grill\" or FuelLoadType=\"lighting\" or FuelLoadType=\"fireplace\"]: SystemIdentifier",
     }
     
     expected_error_msgs.each do |keys, value|
@@ -719,12 +826,10 @@ class HPXMLtoOpenStudioSchematronTest < MiniTest::Test
     # Test for optional elements (i.e. zero_or_one, zero_or_two, etc.)
     expected_error_msgs_optional = {
       ['/HPXML/SoftwareInfo/extension/SimulationControl', nil] => "Expected [0, 1] element(s) but found 2 element(s) for xpath: /HPXML/SoftwareInfo/extension/SimulationControl",
-      ['/HPXML/Building/BuildingDetails/BuildingSummary/Site', 'SiteType="suburban"'] => "Expected [0, 1] element(s) but found 2 element(s) for xpath: /HPXML/Building/BuildingDetails/BuildingSummary/Site/SiteType[text()=\"urban\" or text()=\"suburban\" or text()=\"rural\"]",
-      ['/HPXML/Building/BuildingDetails/BuildingSummary/Site/extension/ShelterCoefficient', nil] => "Expected [0, 1] element(s) but found 2 element(s) for xpath: /HPXML/Building/BuildingDetails/BuildingSummary/Site/extension/ShelterCoefficient",
-      ['/HPXML/Building/BuildingDetails/BuildingSummary/Site/extension/Neighbors', nil] => "Expected [0, 1] element(s) but found 2 element(s) for xpath: /HPXML/Building/BuildingDetails/BuildingSummary/Site/extension/Neighbors",
-      ['/HPXML/Building/BuildingDetails/BuildingSummary/BuildingOccupancy/NumberofResidents', nil] => "Expected [0, 1] element(s) but found 2 element(s) for xpath: /HPXML/Building/BuildingDetails/BuildingSummary/BuildingOccupancy/NumberofResidents",
+      ['/HPXML/Building/BuildingDetails/BuildingSummary/Site', nil] => "Expected [0, 1] element(s) but found 2 element(s) for xpath: /HPXML/Building/BuildingDetails/BuildingSummary/Site",
+      ['/HPXML/Building/BuildingDetails/BuildingSummary/BuildingOccupancy', nil] => "Expected [0, 1] element(s) but found 2 element(s) for xpath: /HPXML/Building/BuildingDetails/BuildingSummary/BuildingOccupancy",
       ['/HPXML/Building/BuildingDetails/ClimateandRiskZones/ClimateZoneIECC', nil] => "Expected [0, 1] element(s) but found 2 element(s) for xpath: /HPXML/Building/BuildingDetails/ClimateandRiskZones/ClimateZoneIECC",
-      ['/HPXML/Building/BuildingDetails/Systems/HVAC/HVACControl', nil] => "Expected [0, 1] element(s) but found 2 element(s) for xpath: /HPXML/Building/BuildingDetails/Systems/HVAC/HVACControl", # FIXME: Need to review this case
+      ['/HPXML/Building/BuildingDetails/Systems/HVAC/HVACControl', nil] => "Expected [0, 1] element(s) but found 2 element(s) for xpath: /HPXML/Building/BuildingDetails/Systems/HVAC/HVACControl",
       ['/HPXML/Building/BuildingDetails/Systems/MechanicalVentilation/VentilationFans/VentilationFan', 'UsedForWholeBuildingVentilation="true"'] => "Expected [0, 1] element(s) but found 2 element(s) for xpath: /HPXML/Building/BuildingDetails/Systems/MechanicalVentilation/VentilationFans/VentilationFan[UsedForWholeBuildingVentilation=\"true\"]",
       ['/HPXML/Building/BuildingDetails/Systems/MechanicalVentilation/VentilationFans/VentilationFan', 'UsedForLocalVentilation="true" and FanLocation="kitchen"'] => "Expected [0, 1] element(s) but found 2 element(s) for xpath: /HPXML/Building/BuildingDetails/Systems/MechanicalVentilation/VentilationFans/VentilationFan[UsedForLocalVentilation=\"true\" and FanLocation=\"kitchen\"]",
       ['/HPXML/Building/BuildingDetails/Systems/MechanicalVentilation/VentilationFans/VentilationFan', 'UsedForLocalVentilation="true" and FanLocation="bath"'] => "Expected [0, 1] element(s) but found 2 element(s) for xpath: /HPXML/Building/BuildingDetails/Systems/MechanicalVentilation/VentilationFans/VentilationFan[UsedForLocalVentilation=\"true\" and FanLocation=\"bath\"]",
@@ -733,29 +838,45 @@ class HPXMLtoOpenStudioSchematronTest < MiniTest::Test
       ['/HPXML/Building/BuildingDetails/Appliances/ClothesWasher', nil] => "Expected [0, 1] element(s) but found 2 element(s) for xpath: /HPXML/Building/BuildingDetails/Appliances/ClothesWasher",
       ['/HPXML/Building/BuildingDetails/Appliances/ClothesDryer', nil] => "Expected [0, 1] element(s) but found 2 element(s) for xpath: /HPXML/Building/BuildingDetails/Appliances/ClothesDryer",
       ['/HPXML/Building/BuildingDetails/Appliances/Dishwasher', nil] => "Expected [0, 1] element(s) but found 2 element(s) for xpath: /HPXML/Building/BuildingDetails/Appliances/Dishwasher",
-      ['/HPXML/Building/BuildingDetails/Appliances/Refrigerator', nil] => "Expected [0, 1] element(s) but found 2 element(s) for xpath: /HPXML/Building/BuildingDetails/Appliances/Refrigerator",
       ['/HPXML/Building/BuildingDetails/Appliances/Dehumidifier', nil] => "Expected [0, 1] element(s) but found 2 element(s) for xpath: /HPXML/Building/BuildingDetails/Appliances/Dehumidifier",
       ['/HPXML/Building/BuildingDetails/Appliances/CookingRange', nil] => "Expected [0, 1] element(s) but found 2 element(s) for xpath: /HPXML/Building/BuildingDetails/Appliances/CookingRange",
+      ['/HPXML/Building/BuildingDetails/Appliances/Oven', nil] => "Expected [1] element(s) but found 2 element(s) for xpath: /HPXML/Building/BuildingDetails/Appliances/CookingRange: ../Oven",
       ['/HPXML/Building/BuildingDetails/Lighting', nil] => "Expected [0, 1] element(s) but found 2 element(s) for xpath: /HPXML/Building/BuildingDetails/Lighting",
       ['/HPXML/Building/BuildingDetails/Lighting/CeilingFan', nil] => "Expected [0, 1] element(s) but found 2 element(s) for xpath: /HPXML/Building/BuildingDetails/Lighting/CeilingFan",
+      ['/HPXML/Building/BuildingDetails/Pools/Pool', nil] => "Expected [0, 1] element(s) but found 2 element(s) for xpath: /HPXML/Building/BuildingDetails/Pools/Pool",
+      ['/HPXML/Building/BuildingDetails/HotTubs/HotTub', nil] => "Expected [0, 1] element(s) but found 2 element(s) for xpath: /HPXML/Building/BuildingDetails/HotTubs/HotTub",
       ['/HPXML/Building/BuildingDetails/MiscLoads/PlugLoad', 'PlugLoadType="other"'] => "Expected [0, 1] element(s) but found 2 element(s) for xpath: /HPXML/Building/BuildingDetails/MiscLoads/PlugLoad[PlugLoadType=\"other\"]",
       ['/HPXML/Building/BuildingDetails/MiscLoads/PlugLoad', 'PlugLoadType="TV other"'] => "Expected [0, 1] element(s) but found 2 element(s) for xpath: /HPXML/Building/BuildingDetails/MiscLoads/PlugLoad[PlugLoadType=\"TV other\"]",
+      ['/HPXML/Building/BuildingDetails/MiscLoads/FuelLoad', 'FuelLoadType="grill"'] => "Expected [0, 1] element(s) but found 2 element(s) for xpath: /HPXML/Building/BuildingDetails/MiscLoads/FuelLoad[FuelLoadType=\"grill\"]",
+      ['/HPXML/Building/BuildingDetails/MiscLoads/FuelLoad', 'FuelLoadType="lighting"'] => "Expected [0, 1] element(s) but found 2 element(s) for xpath: /HPXML/Building/BuildingDetails/MiscLoads/FuelLoad[FuelLoadType=\"lighting\"]",
+      ['/HPXML/Building/BuildingDetails/MiscLoads/FuelLoad', 'FuelLoadType="fireplace"'] => "Expected [0, 1] element(s) but found 2 element(s) for xpath: /HPXML/Building/BuildingDetails/MiscLoads/FuelLoad[FuelLoadType=\"fireplace\"]",
       ['/HPXML/SoftwareInfo/extension/SimulationControl/Timestep', nil] => "Expected [0, 1] element(s) but found 2 element(s) for xpath: /HPXML/SoftwareInfo/extension/SimulationControl: Timestep",
       ['/HPXML/SoftwareInfo/extension/SimulationControl', 'BeginMonth=1'] => "Expected [0, 2] element(s) but found 1 element(s) for xpath: /HPXML/SoftwareInfo/extension/SimulationControl: BeginMonth | BeginDayOfMonth",
       ['/HPXML/SoftwareInfo/extension/SimulationControl', 'EndMonth=12'] => "Expected [0, 2] element(s) but found 1 element(s) for xpath: /HPXML/SoftwareInfo/extension/SimulationControl: EndMonth | EndDayOfMonth",
+      ['/HPXML/SoftwareInfo/extension/SimulationControl/DaylightSaving', nil] => "Expected [0, 1] element(s) but found 2 element(s) for xpath: /HPXML/SoftwareInfo/extension/SimulationControl: DaylightSaving",
+      ['/HPXML/SoftwareInfo/extension/SimulationControl/DaylightSaving', 'BeginMonth=1'] => "Expected [0, 4] element(s) but found 1 element(s) for xpath: /HPXML/SoftwareInfo/extension/SimulationControl/DaylightSaving: BeginMonth | BeginDayOfMonth | EndMonth | EndDayOfMonth",
+      ['/HPXML/Building/BuildingDetails/BuildingSummary/Site', 'SiteType="suburban" and SiteType="rural"'] => "Expected [0, 1] element(s) but found 2 element(s) for xpath: /HPXML/Building/BuildingDetails/BuildingSummary/Site: SiteType[text()=\"urban\" or text()=\"suburban\" or text()=\"rural\"]",
+      ['/HPXML/Building/BuildingDetails/BuildingSummary/Site/extension/ShelterCoefficient', nil] => "Expected [0, 1] element(s) but found 2 element(s) for xpath: /HPXML/Building/BuildingDetails/BuildingSummary/Site: extension/ShelterCoefficient",
+      ['/HPXML/Building/BuildingDetails/BuildingSummary/Site/extension/Neighbors', nil] => "Expected [0, 1] element(s) but found 2 element(s) for xpath: /HPXML/Building/BuildingDetails/BuildingSummary/Site: extension/Neighbors",
+      ['/HPXML/Building/BuildingDetails/BuildingSummary/BuildingOccupancy/NumberofResidents', nil] => "Expected [0, 1] element(s) but found 2 element(s) for xpath: /HPXML/Building/BuildingDetails/BuildingSummary/BuildingOccupancy: NumberofResidents",
       ['/HPXML/Building/BuildingDetails/BuildingSummary/BuildingConstruction/NumberofBathrooms', nil] => "Expected [0, 1] element(s) but found 2 element(s) for xpath: /HPXML/Building/BuildingDetails/BuildingSummary/BuildingConstruction: NumberofBathrooms",
       ['/HPXML/Building/BuildingDetails/BuildingSummary/Site/extension/Neighbors/NeighborBuilding/Height', nil] => "Expected [0, 1] element(s) but found 2 element(s) for xpath: /HPXML/Building/BuildingDetails/BuildingSummary/Site/extension/Neighbors/NeighborBuilding: Height",
-      ['/HPXML/Building/BuildingDetails/Enclosure/AirInfiltration/AirInfiltrationMeasurement/InfiltrationVolume', nil] => "Expected [0, 1] element(s) but found 2 element(s) for xpath: /HPXML/Building/BuildingDetails/Enclosure/AirInfiltration/AirInfiltrationMeasurement[number(HousePressure)=50 and BuildingAirLeakage/UnitofMeasure[text()=\"ACH\" or text()=\"CFM\"]] | /HPXML/Building/BuildingDetails/Enclosure/AirInfiltration/AirInfiltrationMeasurement[BuildingAirLeakage/UnitofMeasure[text()=\"ACHnatural\"]]: InfiltrationVolume", # FIXME: Need to review parent Xpath
+      ['/HPXML/Building/BuildingDetails/Enclosure/AirInfiltration/AirInfiltrationMeasurement/InfiltrationVolume', nil] => "Expected [0, 1] element(s) but found 2 element(s) for xpath: /HPXML/Building/BuildingDetails/Enclosure/AirInfiltration/AirInfiltrationMeasurement[number(HousePressure)=50 and BuildingAirLeakage/UnitofMeasure[text()=\"ACH\" or text()=\"CFM\"]] | /HPXML/Building/BuildingDetails/Enclosure/AirInfiltration/AirInfiltrationMeasurement[BuildingAirLeakage/UnitofMeasure[text()=\"ACHnatural\"]]: InfiltrationVolume",
       ['/HPXML/Building/BuildingDetails/Enclosure/Roofs/Roof/Azimuth', nil] => "Expected [0, 1] element(s) but found 2 element(s) for xpath: /HPXML/Building/BuildingDetails/Enclosure/Roofs/Roof: Azimuth",
-      ['/HPXML/Building/BuildingDetails/Enclosure/Attics/Attic/VentilationRate/Value', nil] => "Expected [0, 1] element(s) but found 2 element(s) for xpath: /HPXML/Building/BuildingDetails/Enclosure/Roofs/Roof[InteriorAdjacentTo=\"attic - vented\"]: ../../Attics/Attic[AtticType/Attic[Vented=\"true\"]]/VentilationRate[UnitofMeasure=\"SLA\" or UnitofMeasure=\"ACHnatural\"]/Value", # FIXME: Review this!
+      ['/HPXML/Building/BuildingDetails/Enclosure/Roofs/Roof', 'RoofType="slate or tile shingles" and RoofType="asphalt or fiberglass shingles"'] => "Expected [1] element(s) but found 2 element(s) for xpath: /HPXML/Building/BuildingDetails/Enclosure/Roofs/Roof: [not(RoofType)] | RoofType[text()=\"asphalt or fiberglass shingles\" or text()=\"wood shingles or shakes\" or text()=\"slate or tile shingles\" or text()=\"metal surfacing\"]",
+      ['/HPXML/Building/BuildingDetails/Enclosure/Attics/Attic/VentilationRate/Value', nil] => "Expected [0, 1] element(s) but found 2 element(s) for xpath: /HPXML/Building/BuildingDetails/Enclosure/Roofs/Roof[InteriorAdjacentTo=\"attic - vented\"]: ../../Attics/Attic[AtticType/Attic[Vented=\"true\"]]/VentilationRate[UnitofMeasure=\"SLA\" or UnitofMeasure=\"ACHnatural\"]/Value",
       ['/HPXML/Building/BuildingDetails/Enclosure/Walls/Wall/Azimuth', nil] => "Expected [0, 1] element(s) but found 2 element(s) for xpath: /HPXML/Building/BuildingDetails/Enclosure/Walls/Wall: Azimuth",
+      ['/HPXML/Building/BuildingDetails/Enclosure/Walls/Wall', 'Siding="wood siding" and Siding="stucco"'] => "Expected [1] element(s) but found 2 element(s) for xpath: /HPXML/Building/BuildingDetails/Enclosure/Walls/Wall: [not(Siding)] | Siding[text()=\"wood siding\" or text()=\"vinyl siding\" or text()=\"stucco\" or text()=\"fiber cement siding\" or text()=\"brick veneer\" or text()=\"aluminum siding\"]",
       ['/HPXML/Building/BuildingDetails/Enclosure/RimJoists/RimJoist/Azimuth', nil] => "Expected [0, 1] element(s) but found 2 element(s) for xpath: /HPXML/Building/BuildingDetails/Enclosure/RimJoists/RimJoist: Azimuth",
+      ['/HPXML/Building/BuildingDetails/Enclosure/RimJoists/RimJoist', 'Siding="wood siding" and Siding="stucco"'] => "Expected [1] element(s) but found 2 element(s) for xpath: /HPXML/Building/BuildingDetails/Enclosure/RimJoists/RimJoist: [not(Siding)] | Siding[text()=\"wood siding\" or text()=\"vinyl siding\" or text()=\"stucco\" or text()=\"fiber cement siding\" or text()=\"brick veneer\" or text()=\"aluminum siding\"]",
       ['/HPXML/Building/BuildingDetails/Enclosure/FoundationWalls/FoundationWall/Azimuth', nil] => "Expected [0, 1] element(s) but found 2 element(s) for xpath: /HPXML/Building/BuildingDetails/Enclosure/FoundationWalls/FoundationWall: Azimuth",
-      ['/HPXML/Building/BuildingDetails/Enclosure/Foundations/Foundation/VentilationRate/Value', nil] => "Expected [0, 1] element(s) but found 2 element(s) for xpath: /HPXML/Building/BuildingDetails/Enclosure/FoundationWalls/FoundationWall[InteriorAdjacentTo=\"crawlspace - vented\"]: ../../Foundations/Foundation[FoundationType/Crawlspace[Vented=\"true\"]]/VentilationRate[UnitofMeasure=\"SLA\"]/Value", # FIXME: Review this!
+      ['/HPXML/Building/BuildingDetails/Enclosure/Foundations/Foundation/VentilationRate/Value', nil] => "Expected [0, 1] element(s) but found 2 element(s) for xpath: /HPXML/Building/BuildingDetails/Enclosure/FoundationWalls/FoundationWall[InteriorAdjacentTo=\"crawlspace - vented\"]: ../../Foundations/Foundation[FoundationType/Crawlspace[Vented=\"true\"]]/VentilationRate[UnitofMeasure=\"SLA\"]/Value",
       ['/HPXML/Building/BuildingDetails/Enclosure/Windows/Window/InteriorShading/SummerShadingCoefficient', nil] => "Expected [0, 1] element(s) but found 2 element(s) for xpath: /HPXML/Building/BuildingDetails/Enclosure/Windows/Window: InteriorShading/SummerShadingCoefficient",
       ['/HPXML/Building/BuildingDetails/Enclosure/Windows/Window/InteriorShading/WinterShadingCoefficient', nil] => "Expected [0, 1] element(s) but found 2 element(s) for xpath: /HPXML/Building/BuildingDetails/Enclosure/Windows/Window: InteriorShading/WinterShadingCoefficient",
       ['/HPXML/Building/BuildingDetails/Enclosure/Windows/Window/Overhangs', nil] => "Expected [0, 1] element(s) but found 2 element(s) for xpath: /HPXML/Building/BuildingDetails/Enclosure/Windows/Window: Overhangs",
       ['/HPXML/Building/BuildingDetails/Enclosure/Windows/Window/FractionOperable', nil] => "Expected [0, 1] element(s) but found 2 element(s) for xpath: /HPXML/Building/BuildingDetails/Enclosure/Windows/Window: FractionOperable",
+      ['/HPXML/Building/BuildingDetails/Enclosure/Skylights/Skylight/InteriorShading/SummerShadingCoefficient', nil] => "Expected [0, 1] element(s) but found 2 element(s) for xpath: /HPXML/Building/BuildingDetails/Enclosure/Skylights/Skylight: InteriorShading/SummerShadingCoefficient",
+      ['/HPXML/Building/BuildingDetails/Enclosure/Skylights/Skylight/InteriorShading/WinterShadingCoefficient', nil] => "Expected [0, 1] element(s) but found 2 element(s) for xpath: /HPXML/Building/BuildingDetails/Enclosure/Skylights/Skylight: InteriorShading/WinterShadingCoefficient",
       ['/HPXML/Building/BuildingDetails/Systems/HVAC/HVACPlant/HeatingSystem/HeatingCapacity', nil] => "Expected [0, 1] element(s) but found 2 element(s) for xpath: /HPXML/Building/BuildingDetails/Systems/HVAC/HVACPlant/HeatingSystem: HeatingCapacity",
       ['/HPXML/Building/BuildingDetails/Systems/HVAC/HVACPlant/HeatingSystem/ElectricAuxiliaryEnergy', nil] => "Expected [0, 1] element(s) but found 2 element(s) for xpath: /HPXML/Building/BuildingDetails/Systems/HVAC/HVACPlant/HeatingSystem: ElectricAuxiliaryEnergy",
       ['/HPXML/Building/BuildingDetails/Systems/HVAC/HVACPlant/CoolingSystem[CoolingSystemType="central air conditioner"]/CoolingCapacity', nil] => "Expected [0, 1] element(s) but found 2 element(s) for xpath: /HPXML/Building/BuildingDetails/Systems/HVAC/HVACPlant/CoolingSystem[CoolingSystemType=\"central air conditioner\"]: CoolingCapacity",
@@ -817,27 +938,70 @@ class HPXMLtoOpenStudioSchematronTest < MiniTest::Test
       ['/HPXML/Building/BuildingDetails/Appliances/Refrigerator/extension/WeekdayScheduleFractions', nil] => "Expected [0, 1] element(s) but found 2 element(s) for xpath: /HPXML/Building/BuildingDetails/Appliances/Refrigerator: extension/WeekdayScheduleFractions",
       ['/HPXML/Building/BuildingDetails/Appliances/Refrigerator/extension/WeekendScheduleFractions', nil] => "Expected [0, 1] element(s) but found 2 element(s) for xpath: /HPXML/Building/BuildingDetails/Appliances/Refrigerator: extension/WeekendScheduleFractions",
       ['/HPXML/Building/BuildingDetails/Appliances/Refrigerator/extension/MonthlyScheduleMultipliers', nil] => "Expected [0, 1] element(s) but found 2 element(s) for xpath: /HPXML/Building/BuildingDetails/Appliances/Refrigerator: extension/MonthlyScheduleMultipliers",
+      ['/HPXML/Building/BuildingDetails/Appliances/Freezer/extension/UsageMultiplier', nil] => "Expected [0, 1] element(s) but found 2 element(s) for xpath: /HPXML/Building/BuildingDetails/Appliances/Freezer: extension/UsageMultiplier",
+      ['/HPXML/Building/BuildingDetails/Appliances/Freezer/extension/WeekdayScheduleFractions', nil] => "Expected [0, 1] element(s) but found 2 element(s) for xpath: /HPXML/Building/BuildingDetails/Appliances/Freezer: extension/WeekdayScheduleFractions",
+      ['/HPXML/Building/BuildingDetails/Appliances/Freezer/extension/WeekendScheduleFractions', nil] => "Expected [0, 1] element(s) but found 2 element(s) for xpath: /HPXML/Building/BuildingDetails/Appliances/Freezer: extension/WeekendScheduleFractions",
+      ['/HPXML/Building/BuildingDetails/Appliances/Freezer/extension/MonthlyScheduleMultipliers', nil] => "Expected [0, 1] element(s) but found 2 element(s) for xpath: /HPXML/Building/BuildingDetails/Appliances/Freezer: extension/MonthlyScheduleMultipliers",
       ['/HPXML/Building/BuildingDetails/Appliances/CookingRange/IsInduction', nil] => "Expected [0, 1] element(s) but found 2 element(s) for xpath: /HPXML/Building/BuildingDetails/Appliances/CookingRange: IsInduction",
       ['/HPXML/Building/BuildingDetails/Appliances/CookingRange/extension/UsageMultiplier', nil] => "Expected [0, 1] element(s) but found 2 element(s) for xpath: /HPXML/Building/BuildingDetails/Appliances/CookingRange: extension/UsageMultiplier",
       ['/HPXML/Building/BuildingDetails/Appliances/CookingRange/extension/WeekdayScheduleFractions', nil] => "Expected [0, 1] element(s) but found 2 element(s) for xpath: /HPXML/Building/BuildingDetails/Appliances/CookingRange: extension/WeekdayScheduleFractions",
       ['/HPXML/Building/BuildingDetails/Appliances/CookingRange/extension/WeekendScheduleFractions', nil] => "Expected [0, 1] element(s) but found 2 element(s) for xpath: /HPXML/Building/BuildingDetails/Appliances/CookingRange: extension/WeekendScheduleFractions",
       ['/HPXML/Building/BuildingDetails/Appliances/CookingRange/extension/MonthlyScheduleMultipliers', nil] => "Expected [0, 1] element(s) but found 2 element(s) for xpath: /HPXML/Building/BuildingDetails/Appliances/CookingRange: extension/MonthlyScheduleMultipliers",
-      ['/HPXML/Building/BuildingDetails/Appliances/CookingRange/../Oven/IsConvection', nil] => "Expected [0, 1] element(s) but found 2 element(s) for xpath: /HPXML/Building/BuildingDetails/Appliances/CookingRange: ../Oven/IsConvection",
+      ['/HPXML/Building/BuildingDetails/Appliances/CookingRange/../Oven/IsConvection', nil] => "Expected [0, 1] element(s) but found 2 element(s) for xpath: /HPXML/Building/BuildingDetails/Appliances/Oven: IsConvection",
       ['/HPXML/Building/BuildingDetails/Lighting/extension/UsageMultiplier', nil] => "Expected [0, 1] element(s) but found 2 element(s) for xpath: /HPXML/Building/BuildingDetails/Lighting: extension/UsageMultiplier",
       ['/HPXML/Building/BuildingDetails/Lighting/CeilingFan/Airflow/Efficiency', nil] => "Expected [0, 1] element(s) but found 2 element(s) for xpath: /HPXML/Building/BuildingDetails/Lighting/CeilingFan: Airflow[FanSpeed=\"medium\"]/Efficiency",
       ['/HPXML/Building/BuildingDetails/Lighting/CeilingFan/Quantity', nil] => "Expected [0, 1] element(s) but found 2 element(s) for xpath: /HPXML/Building/BuildingDetails/Lighting/CeilingFan: Quantity",
-      ['/HPXML/Building/BuildingDetails/MiscLoads/PlugLoad[PlugLoadType="other"]/Load/Value', nil] => "Expected [0, 1] element(s) but found 2 element(s) for xpath: /HPXML/Building/BuildingDetails/MiscLoads/PlugLoad[PlugLoadType=\"other\"]: Load[Units=\"kWh/year\"]/Value",
-      ['/HPXML/Building/BuildingDetails/MiscLoads/PlugLoad[PlugLoadType="other"]/extension/FracSensible', nil] => "Expected [0, 1] element(s) but found 2 element(s) for xpath: /HPXML/Building/BuildingDetails/MiscLoads/PlugLoad[PlugLoadType=\"other\"]: extension/FracSensible",
-      ['/HPXML/Building/BuildingDetails/MiscLoads/PlugLoad[PlugLoadType="other"]/extension/FracLatent', nil] => "Expected [0, 1] element(s) but found 2 element(s) for xpath: /HPXML/Building/BuildingDetails/MiscLoads/PlugLoad[PlugLoadType=\"other\"]: extension/FracLatent",
-      ['/HPXML/Building/BuildingDetails/MiscLoads/PlugLoad[PlugLoadType="other"]/extension/UsageMultiplier', nil] => "Expected [0, 1] element(s) but found 2 element(s) for xpath: /HPXML/Building/BuildingDetails/MiscLoads/PlugLoad[PlugLoadType=\"other\"]: extension/UsageMultiplier",
-      ['/HPXML/Building/BuildingDetails/MiscLoads/PlugLoad[PlugLoadType="other"]/../extension/WeekdayScheduleFractions', nil] => "Expected [0, 1] element(s) but found 2 element(s) for xpath: /HPXML/Building/BuildingDetails/MiscLoads/PlugLoad[PlugLoadType=\"other\"]: ../extension/WeekdayScheduleFractions",
-      ['/HPXML/Building/BuildingDetails/MiscLoads/PlugLoad[PlugLoadType="other"]/../extension/WeekendScheduleFractions', nil] => "Expected [0, 1] element(s) but found 2 element(s) for xpath: /HPXML/Building/BuildingDetails/MiscLoads/PlugLoad[PlugLoadType=\"other\"]: ../extension/WeekendScheduleFractions",
-      ['/HPXML/Building/BuildingDetails/MiscLoads/PlugLoad[PlugLoadType="other"]/../extension/MonthlyScheduleMultipliers', nil] => "Expected [0, 1] element(s) but found 2 element(s) for xpath: /HPXML/Building/BuildingDetails/MiscLoads/PlugLoad[PlugLoadType=\"other\"]: ../extension/MonthlyScheduleMultipliers",
-      ['/HPXML/Building/BuildingDetails/MiscLoads/PlugLoad[PlugLoadType="TV other"]/Load/Value', nil] => "Expected [0, 1] element(s) but found 2 element(s) for xpath: /HPXML/Building/BuildingDetails/MiscLoads/PlugLoad[PlugLoadType=\"TV other\"]: Load[Units=\"kWh/year\"]/Value",
-      ['/HPXML/Building/BuildingDetails/MiscLoads/PlugLoad[PlugLoadType="TV other"]/extension/UsageMultiplier', nil] => "Expected [0, 1] element(s) but found 2 element(s) for xpath: /HPXML/Building/BuildingDetails/MiscLoads/PlugLoad[PlugLoadType=\"TV other\"]: extension/UsageMultiplier",
-      ['/HPXML/Building/BuildingDetails/MiscLoads/PlugLoad[PlugLoadType="TV other"]/../extension/WeekdayScheduleFractions', nil] => "Expected [0, 1] element(s) but found 2 element(s) for xpath: /HPXML/Building/BuildingDetails/MiscLoads/PlugLoad[PlugLoadType=\"TV other\"]: ../extension/WeekdayScheduleFractions",
-      ['/HPXML/Building/BuildingDetails/MiscLoads/PlugLoad[PlugLoadType="TV other"]/../extension/WeekendScheduleFractions', nil] => "Expected [0, 1] element(s) but found 2 element(s) for xpath: /HPXML/Building/BuildingDetails/MiscLoads/PlugLoad[PlugLoadType=\"TV other\"]: ../extension/WeekendScheduleFractions",
-      ['/HPXML/Building/BuildingDetails/MiscLoads/PlugLoad[PlugLoadType="TV other"]/../extension/MonthlyScheduleMultipliers', nil] => "Expected [0, 1] element(s) but found 2 element(s) for xpath: /HPXML/Building/BuildingDetails/MiscLoads/PlugLoad[PlugLoadType=\"TV other\"]: ../extension/MonthlyScheduleMultipliers",
+      ['/HPXML/Building/BuildingDetails/Pools/Pool/Heater', nil] => "Expected [0, 1] element(s) but found 2 element(s) for xpath: /HPXML/Building/BuildingDetails/Pools/Pool: Heater",
+      ['/HPXML/Building/BuildingDetails/Pools/Pool/PoolPumps/PoolPump/Load/Value', nil] => "Expected [0, 1] element(s) but found 2 element(s) for xpath: /HPXML/Building/BuildingDetails/Pools/Pool/PoolPumps/PoolPump: Load[Units=\"kWh/year\"]/Value",
+      ['/HPXML/Building/BuildingDetails/Pools/Pool/PoolPumps/PoolPump/extension/UsageMultiplier'] => "Expected [0, 1] element(s) but found 2 element(s) for xpath: /HPXML/Building/BuildingDetails/Pools/Pool/PoolPumps/PoolPump: extension/UsageMultiplier",
+      ['/HPXML/Building/BuildingDetails/Pools/Pool/PoolPumps/PoolPump/extension/WeekdayScheduleFractions'] => "Expected [0, 1] element(s) but found 2 element(s) for xpath: /HPXML/Building/BuildingDetails/Pools/Pool/PoolPumps/PoolPump: extension/WeekdayScheduleFractions",
+      ['/HPXML/Building/BuildingDetails/Pools/Pool/PoolPumps/PoolPump/extension/WeekendScheduleFractions'] => "Expected [0, 1] element(s) but found 2 element(s) for xpath: /HPXML/Building/BuildingDetails/Pools/Pool/PoolPumps/PoolPump: extension/WeekendScheduleFractions",
+      ['/HPXML/Building/BuildingDetails/Pools/Pool/PoolPumps/PoolPump/extension/MonthlyScheduleMultipliers'] => "Expected [0, 1] element(s) but found 2 element(s) for xpath: /HPXML/Building/BuildingDetails/Pools/Pool/PoolPumps/PoolPump: extension/MonthlyScheduleMultipliers",
+      ['/HPXML/Building/BuildingDetails/Pools/Pool/Heater/Load/Value', nil] => "Expected [0, 1] element(s) but found 2 element(s) for xpath: /HPXML/Building/BuildingDetails/Pools/Pool/Heater: Load[Units=\"kWh/year\" or Units=\"therm/year\"]/Value",
+      ['/HPXML/Building/BuildingDetails/Pools/Pool/Heater/extension/UsageMultiplier'] => "Expected [0, 1] element(s) but found 2 element(s) for xpath: /HPXML/Building/BuildingDetails/Pools/Pool/Heater: extension/UsageMultiplier",
+      ['/HPXML/Building/BuildingDetails/Pools/Pool/Heater/extension/WeekdayScheduleFractions'] => "Expected [0, 1] element(s) but found 2 element(s) for xpath: /HPXML/Building/BuildingDetails/Pools/Pool/Heater: extension/WeekdayScheduleFractions",
+      ['/HPXML/Building/BuildingDetails/Pools/Pool/Heater/extension/WeekendScheduleFractions'] => "Expected [0, 1] element(s) but found 2 element(s) for xpath: /HPXML/Building/BuildingDetails/Pools/Pool/Heater: extension/WeekendScheduleFractions",
+      ['/HPXML/Building/BuildingDetails/Pools/Pool/Heater/extension/MonthlyScheduleMultipliers'] => "Expected [0, 1] element(s) but found 2 element(s) for xpath: /HPXML/Building/BuildingDetails/Pools/Pool/Heater: extension/MonthlyScheduleMultipliers",
+      ['/HPXML/Building/BuildingDetails/HotTubs/HotTub/Heater', nil] => "Expected [0, 1] element(s) but found 2 element(s) for xpath: /HPXML/Building/BuildingDetails/HotTubs/HotTub: Heater",
+      ['/HPXML/Building/BuildingDetails/HotTubs/HotTub/HotTubPumps/HotTubPump/Load/Value', nil] => "Expected [0, 1] element(s) but found 2 element(s) for xpath: /HPXML/Building/BuildingDetails/HotTubs/HotTub/HotTubPumps/HotTubPump: Load[Units=\"kWh/year\"]/Value",
+      ['/HPXML/Building/BuildingDetails/HotTubs/HotTub/HotTubPumps/HotTubPump/extension/UsageMultiplier'] => "Expected [0, 1] element(s) but found 2 element(s) for xpath: /HPXML/Building/BuildingDetails/HotTubs/HotTub/HotTubPumps/HotTubPump: extension/UsageMultiplier",
+      ['/HPXML/Building/BuildingDetails/HotTubs/HotTub/HotTubPumps/HotTubPump/extension/WeekdayScheduleFractions'] => "Expected [0, 1] element(s) but found 2 element(s) for xpath: /HPXML/Building/BuildingDetails/HotTubs/HotTub/HotTubPumps/HotTubPump: extension/WeekdayScheduleFractions",
+      ['/HPXML/Building/BuildingDetails/HotTubs/HotTub/HotTubPumps/HotTubPump/extension/WeekendScheduleFractions'] => "Expected [0, 1] element(s) but found 2 element(s) for xpath: /HPXML/Building/BuildingDetails/HotTubs/HotTub/HotTubPumps/HotTubPump: extension/WeekendScheduleFractions",
+      ['/HPXML/Building/BuildingDetails/HotTubs/HotTub/HotTubPumps/HotTubPump/extension/MonthlyScheduleMultipliers'] => "Expected [0, 1] element(s) but found 2 element(s) for xpath: /HPXML/Building/BuildingDetails/HotTubs/HotTub/HotTubPumps/HotTubPump: extension/MonthlyScheduleMultipliers",
+      ['/HPXML/Building/BuildingDetails/HotTubs/HotTub/Heater/Load/Value', nil] => "Expected [0, 1] element(s) but found 2 element(s) for xpath: /HPXML/Building/BuildingDetails/HotTubs/HotTub/Heater: Load[Units=\"kWh/year\" or Units=\"therm/year\"]/Value",
+      ['/HPXML/Building/BuildingDetails/HotTubs/HotTub/Heater/extension/UsageMultiplier'] => "Expected [0, 1] element(s) but found 2 element(s) for xpath: /HPXML/Building/BuildingDetails/HotTubs/HotTub/Heater: extension/UsageMultiplier",
+      ['/HPXML/Building/BuildingDetails/HotTubs/HotTub/Heater/extension/WeekdayScheduleFractions'] => "Expected [0, 1] element(s) but found 2 element(s) for xpath: /HPXML/Building/BuildingDetails/HotTubs/HotTub/Heater: extension/WeekdayScheduleFractions",
+      ['/HPXML/Building/BuildingDetails/HotTubs/HotTub/Heater/extension/WeekendScheduleFractions'] => "Expected [0, 1] element(s) but found 2 element(s) for xpath: /HPXML/Building/BuildingDetails/HotTubs/HotTub/Heater: extension/WeekendScheduleFractions",
+      ['/HPXML/Building/BuildingDetails/HotTubs/HotTub/Heater/extension/MonthlyScheduleMultipliers'] => "Expected [0, 1] element(s) but found 2 element(s) for xpath: /HPXML/Building/BuildingDetails/HotTubs/HotTub/Heater: extension/MonthlyScheduleMultipliers",
+      ['/HPXML/Building/BuildingDetails/MiscLoads/PlugLoad', 'Location="interior" and Location="exterior"'] => "Expected [0, 1] element(s) but found 2 element(s) for xpath: /HPXML/Building/BuildingDetails/MiscLoads/PlugLoad[PlugLoadType=\"other\" or PlugLoadType=\"TV other\" or PlugLoadType=\"electric vehicle charging\" or PlugLoadType=\"well pump\"]: Location[text()=\"interior\" or text()=\"exterior\"]",
+      ['/HPXML/Building/BuildingDetails/MiscLoads/PlugLoad[PlugLoadType="other"]/Load/Value', nil] => "Expected [0, 1] element(s) but found 2 element(s) for xpath: /HPXML/Building/BuildingDetails/MiscLoads/PlugLoad[PlugLoadType=\"other\" or PlugLoadType=\"TV other\" or PlugLoadType=\"electric vehicle charging\" or PlugLoadType=\"well pump\"]: Load[Units=\"kWh/year\"]/Value",
+      ['/HPXML/Building/BuildingDetails/MiscLoads/PlugLoad[PlugLoadType="other"]/extension/FracSensible', nil] => "Expected [0, 1] element(s) but found 2 element(s) for xpath: /HPXML/Building/BuildingDetails/MiscLoads/PlugLoad[PlugLoadType=\"other\" or PlugLoadType=\"TV other\" or PlugLoadType=\"electric vehicle charging\" or PlugLoadType=\"well pump\"]: extension/FracSensible",
+      ['/HPXML/Building/BuildingDetails/MiscLoads/PlugLoad[PlugLoadType="other"]/extension/FracLatent', nil] => "Expected [0, 1] element(s) but found 2 element(s) for xpath: /HPXML/Building/BuildingDetails/MiscLoads/PlugLoad[PlugLoadType=\"other\" or PlugLoadType=\"TV other\" or PlugLoadType=\"electric vehicle charging\" or PlugLoadType=\"well pump\"]: extension/FracLatent",
+      ['/HPXML/Building/BuildingDetails/MiscLoads/PlugLoad[PlugLoadType="other"]/extension/UsageMultiplier', nil] => "Expected [0, 1] element(s) but found 2 element(s) for xpath: /HPXML/Building/BuildingDetails/MiscLoads/PlugLoad[PlugLoadType=\"other\" or PlugLoadType=\"TV other\" or PlugLoadType=\"electric vehicle charging\" or PlugLoadType=\"well pump\"]: extension/UsageMultiplier",
+      ['/HPXML/Building/BuildingDetails/MiscLoads/PlugLoad[PlugLoadType="other"]/extension/WeekdayScheduleFractions', nil] => "Expected [0, 1] element(s) but found 2 element(s) for xpath: /HPXML/Building/BuildingDetails/MiscLoads/PlugLoad[PlugLoadType=\"other\" or PlugLoadType=\"TV other\" or PlugLoadType=\"electric vehicle charging\" or PlugLoadType=\"well pump\"]: extension/WeekdayScheduleFractions",
+      ['/HPXML/Building/BuildingDetails/MiscLoads/PlugLoad[PlugLoadType="other"]/extension/WeekendScheduleFractions', nil] => "Expected [0, 1] element(s) but found 2 element(s) for xpath: /HPXML/Building/BuildingDetails/MiscLoads/PlugLoad[PlugLoadType=\"other\" or PlugLoadType=\"TV other\" or PlugLoadType=\"electric vehicle charging\" or PlugLoadType=\"well pump\"]: extension/WeekendScheduleFractions",
+      ['/HPXML/Building/BuildingDetails/MiscLoads/PlugLoad[PlugLoadType="other"]/extension/MonthlyScheduleMultipliers', nil] => "Expected [0, 1] element(s) but found 2 element(s) for xpath: /HPXML/Building/BuildingDetails/MiscLoads/PlugLoad[PlugLoadType=\"other\" or PlugLoadType=\"TV other\" or PlugLoadType=\"electric vehicle charging\" or PlugLoadType=\"well pump\"]: extension/MonthlyScheduleMultipliers",
+      ['/HPXML/Building/BuildingDetails/MiscLoads/PlugLoad[PlugLoadType="TV other"]/Load/Value', nil] => "Expected [0, 1] element(s) but found 2 element(s) for xpath: /HPXML/Building/BuildingDetails/MiscLoads/PlugLoad[PlugLoadType=\"other\" or PlugLoadType=\"TV other\" or PlugLoadType=\"electric vehicle charging\" or PlugLoadType=\"well pump\"]: Load[Units=\"kWh/year\"]/Value",
+      ['/HPXML/Building/BuildingDetails/MiscLoads/PlugLoad[PlugLoadType="TV other"]/extension/UsageMultiplier', nil] => "Expected [0, 1] element(s) but found 2 element(s) for xpath: /HPXML/Building/BuildingDetails/MiscLoads/PlugLoad[PlugLoadType=\"other\" or PlugLoadType=\"TV other\" or PlugLoadType=\"electric vehicle charging\" or PlugLoadType=\"well pump\"]: extension/UsageMultiplier",
+      ['/HPXML/Building/BuildingDetails/MiscLoads/PlugLoad[PlugLoadType="TV other"]/extension/WeekdayScheduleFractions', nil] => "Expected [0, 1] element(s) but found 2 element(s) for xpath: /HPXML/Building/BuildingDetails/MiscLoads/PlugLoad[PlugLoadType=\"other\" or PlugLoadType=\"TV other\" or PlugLoadType=\"electric vehicle charging\" or PlugLoadType=\"well pump\"]: extension/WeekdayScheduleFractions",
+      ['/HPXML/Building/BuildingDetails/MiscLoads/PlugLoad[PlugLoadType="TV other"]/extension/WeekendScheduleFractions', nil] => "Expected [0, 1] element(s) but found 2 element(s) for xpath: /HPXML/Building/BuildingDetails/MiscLoads/PlugLoad[PlugLoadType=\"other\" or PlugLoadType=\"TV other\" or PlugLoadType=\"electric vehicle charging\" or PlugLoadType=\"well pump\"]: extension/WeekendScheduleFractions",
+      ['/HPXML/Building/BuildingDetails/MiscLoads/PlugLoad[PlugLoadType="TV other"]/extension/MonthlyScheduleMultipliers', nil] => "Expected [0, 1] element(s) but found 2 element(s) for xpath: /HPXML/Building/BuildingDetails/MiscLoads/PlugLoad[PlugLoadType=\"other\" or PlugLoadType=\"TV other\" or PlugLoadType=\"electric vehicle charging\" or PlugLoadType=\"well pump\"]: extension/MonthlyScheduleMultipliers",
+      ['/HPXML/Building/BuildingDetails/MiscLoads/FuelLoad', 'Location="interior" and Location="exterior"'] => "Expected [0, 1] element(s) but found 2 element(s) for xpath: /HPXML/Building/BuildingDetails/MiscLoads/FuelLoad[FuelLoadType=\"grill\" or FuelLoadType=\"lighting\" or FuelLoadType=\"fireplace\"]: Location[text()=\"interior\" or text()=\"exterior\"]",
+      ['/HPXML/Building/BuildingDetails/MiscLoads/FuelLoad[FuelLoadType="grill"]/Load/Value', nil] => "Expected [0, 1] element(s) but found 2 element(s) for xpath: /HPXML/Building/BuildingDetails/MiscLoads/FuelLoad[FuelLoadType=\"grill\" or FuelLoadType=\"lighting\" or FuelLoadType=\"fireplace\"]: Load[Units=\"therm/year\"]/Value",
+      ['/HPXML/Building/BuildingDetails/MiscLoads/FuelLoad[FuelLoadType="grill"]/extension/UsageMultiplier', nil] => "Expected [0, 1] element(s) but found 2 element(s) for xpath: /HPXML/Building/BuildingDetails/MiscLoads/FuelLoad[FuelLoadType=\"grill\" or FuelLoadType=\"lighting\" or FuelLoadType=\"fireplace\"]: extension/UsageMultiplier",
+      ['/HPXML/Building/BuildingDetails/MiscLoads/FuelLoad[FuelLoadType="grill"]/extension/WeekdayScheduleFractions', nil] => "Expected [0, 1] element(s) but found 2 element(s) for xpath: /HPXML/Building/BuildingDetails/MiscLoads/FuelLoad[FuelLoadType=\"grill\" or FuelLoadType=\"lighting\" or FuelLoadType=\"fireplace\"]: extension/WeekdayScheduleFractions",
+      ['/HPXML/Building/BuildingDetails/MiscLoads/FuelLoad[FuelLoadType="grill"]/extension/WeekendScheduleFractions', nil] => "Expected [0, 1] element(s) but found 2 element(s) for xpath: /HPXML/Building/BuildingDetails/MiscLoads/FuelLoad[FuelLoadType=\"grill\" or FuelLoadType=\"lighting\" or FuelLoadType=\"fireplace\"]: extension/WeekendScheduleFractions",
+      ['/HPXML/Building/BuildingDetails/MiscLoads/FuelLoad[FuelLoadType="grill"]/extension/MonthlyScheduleMultipliers', nil] => "Expected [0, 1] element(s) but found 2 element(s) for xpath: /HPXML/Building/BuildingDetails/MiscLoads/FuelLoad[FuelLoadType=\"grill\" or FuelLoadType=\"lighting\" or FuelLoadType=\"fireplace\"]: extension/MonthlyScheduleMultipliers",
+      ['/HPXML/Building/BuildingDetails/MiscLoads/FuelLoad[FuelLoadType="lighting"]/Load/Value', nil] => "Expected [0, 1] element(s) but found 2 element(s) for xpath: /HPXML/Building/BuildingDetails/MiscLoads/FuelLoad[FuelLoadType=\"grill\" or FuelLoadType=\"lighting\" or FuelLoadType=\"fireplace\"]: Load[Units=\"therm/year\"]/Value",
+      ['/HPXML/Building/BuildingDetails/MiscLoads/FuelLoad[FuelLoadType="lighting"]/extension/UsageMultiplier', nil] => "Expected [0, 1] element(s) but found 2 element(s) for xpath: /HPXML/Building/BuildingDetails/MiscLoads/FuelLoad[FuelLoadType=\"grill\" or FuelLoadType=\"lighting\" or FuelLoadType=\"fireplace\"]: extension/UsageMultiplier",
+      ['/HPXML/Building/BuildingDetails/MiscLoads/FuelLoad[FuelLoadType="lighting"]/extension/WeekdayScheduleFractions', nil] => "Expected [0, 1] element(s) but found 2 element(s) for xpath: /HPXML/Building/BuildingDetails/MiscLoads/FuelLoad[FuelLoadType=\"grill\" or FuelLoadType=\"lighting\" or FuelLoadType=\"fireplace\"]: extension/WeekdayScheduleFractions",
+      ['/HPXML/Building/BuildingDetails/MiscLoads/FuelLoad[FuelLoadType="lighting"]/extension/WeekendScheduleFractions', nil] => "Expected [0, 1] element(s) but found 2 element(s) for xpath: /HPXML/Building/BuildingDetails/MiscLoads/FuelLoad[FuelLoadType=\"grill\" or FuelLoadType=\"lighting\" or FuelLoadType=\"fireplace\"]: extension/WeekendScheduleFractions",
+      ['/HPXML/Building/BuildingDetails/MiscLoads/FuelLoad[FuelLoadType="lighting"]/extension/MonthlyScheduleMultipliers', nil] => "Expected [0, 1] element(s) but found 2 element(s) for xpath: /HPXML/Building/BuildingDetails/MiscLoads/FuelLoad[FuelLoadType=\"grill\" or FuelLoadType=\"lighting\" or FuelLoadType=\"fireplace\"]: extension/MonthlyScheduleMultipliers",
+      ['/HPXML/Building/BuildingDetails/MiscLoads/FuelLoad[FuelLoadType="fireplace"]/Load/Value', nil] => "Expected [0, 1] element(s) but found 2 element(s) for xpath: /HPXML/Building/BuildingDetails/MiscLoads/FuelLoad[FuelLoadType=\"grill\" or FuelLoadType=\"lighting\" or FuelLoadType=\"fireplace\"]: Load[Units=\"therm/year\"]/Value",
+      ['/HPXML/Building/BuildingDetails/MiscLoads/FuelLoad[FuelLoadType="fireplace"]/extension/UsageMultiplier', nil] => "Expected [0, 1] element(s) but found 2 element(s) for xpath: /HPXML/Building/BuildingDetails/MiscLoads/FuelLoad[FuelLoadType=\"grill\" or FuelLoadType=\"lighting\" or FuelLoadType=\"fireplace\"]: extension/UsageMultiplier",
+      ['/HPXML/Building/BuildingDetails/MiscLoads/FuelLoad[FuelLoadType="fireplace"]/extension/WeekdayScheduleFractions', nil] => "Expected [0, 1] element(s) but found 2 element(s) for xpath: /HPXML/Building/BuildingDetails/MiscLoads/FuelLoad[FuelLoadType=\"grill\" or FuelLoadType=\"lighting\" or FuelLoadType=\"fireplace\"]: extension/WeekdayScheduleFractions",
+      ['/HPXML/Building/BuildingDetails/MiscLoads/FuelLoad[FuelLoadType="fireplace"]/extension/WeekendScheduleFractions', nil] => "Expected [0, 1] element(s) but found 2 element(s) for xpath: /HPXML/Building/BuildingDetails/MiscLoads/FuelLoad[FuelLoadType=\"grill\" or FuelLoadType=\"lighting\" or FuelLoadType=\"fireplace\"]: extension/WeekendScheduleFractions",
+      ['/HPXML/Building/BuildingDetails/MiscLoads/FuelLoad[FuelLoadType="fireplace"]/extension/MonthlyScheduleMultipliers', nil] => "Expected [0, 1] element(s) but found 2 element(s) for xpath: /HPXML/Building/BuildingDetails/MiscLoads/FuelLoad[FuelLoadType=\"grill\" or FuelLoadType=\"lighting\" or FuelLoadType=\"fireplace\"]: extension/MonthlyScheduleMultipliers",
     }
     
     expected_error_msgs_optional.each do |key, value|
@@ -854,7 +1018,9 @@ class HPXMLtoOpenStudioSchematronTest < MiniTest::Test
       if not child_elements_with_values.nil?
         XMLHelper.get_elements(parent, elements.split('/')[-1]).each do |e|
           child_elements_with_values.split(' and ').each do |element_with_value|
-            XMLHelper.add_element(e, element_with_value.split('=')[0], element_with_value.split('=')[1].gsub!(/\A"|"\Z/, '')) if not XMLHelper.has_element(e, element_with_value.split('=')[0])
+            unless (XMLHelper.has_element(e, element_with_value.split('=')[0])) && (XMLHelper.get_value(e, element_with_value.split('=')[0]) == element_with_value.split('=')[1].gsub!(/\A"|"\Z/, ''))
+              XMLHelper.add_element(e, element_with_value.split('=')[0], element_with_value.split('=')[1].gsub!(/\A"|"\Z/, ''))
+            end
           end
         end
       end
