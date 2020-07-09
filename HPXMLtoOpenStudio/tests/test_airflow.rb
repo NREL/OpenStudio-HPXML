@@ -304,17 +304,17 @@ class HPXMLtoOpenStudioAirflowTest < MiniTest::Test
 
     # Get HPXML values
     vent_fan_sup = hpxml.ventilation_fans.select { |f| f.used_for_whole_building_ventilation && (f.fan_type == HPXML::MechVentTypeSupply) }
-    vent_fan_cfm_sup = vent_fan_sup.map { |f| f.flow_rate * (f.hours_in_operation / 24.0) }.sum(0.0)
-    vent_fan_power_sup = vent_fan_sup.map { |f| f.fan_power * (f.hours_in_operation / 24.0) }.sum(0.0)
+    vent_fan_cfm_sup = vent_fan_sup.map { |f| f.average_flow_rate }.sum(0.0)
+    vent_fan_power_sup = vent_fan_sup.map { |f| f.average_fan_power }.sum(0.0)
     vent_fan_exh = hpxml.ventilation_fans.select { |f| f.used_for_whole_building_ventilation && (f.fan_type == HPXML::MechVentTypeExhaust) }
-    vent_fan_cfm_exh = vent_fan_exh.map { |f| f.flow_rate * (f.hours_in_operation / 24.0) }.sum(0.0)
-    vent_fan_power_exh = vent_fan_exh.map { |f| f.fan_power * (f.hours_in_operation / 24.0) }.sum(0.0)
+    vent_fan_cfm_exh = vent_fan_exh.map { |f| f.average_flow_rate }.sum(0.0)
+    vent_fan_power_exh = vent_fan_exh.map { |f| f.average_fan_power }.sum(0.0)
     vent_fan_bal = hpxml.ventilation_fans.select { |f| f.used_for_whole_building_ventilation && (f.fan_type == HPXML::MechVentTypeBalanced) }
-    vent_fan_cfm_bal = vent_fan_bal.map { |f| f.flow_rate * (f.hours_in_operation / 24.0) }.sum(0.0)
-    vent_fan_power_bal = vent_fan_bal.map { |f| f.fan_power * (f.hours_in_operation / 24.0) }.sum(0.0)
+    vent_fan_cfm_bal = vent_fan_bal.map { |f| f.average_flow_rate }.sum(0.0)
+    vent_fan_power_bal = vent_fan_bal.map { |f| f.average_fan_power }.sum(0.0)
     vent_fan_ervhrv = hpxml.ventilation_fans.select { |f| f.used_for_whole_building_ventilation && [HPXML::MechVentTypeERV, HPXML::MechVentTypeHRV].include?(f.fan_type) }
-    vent_fan_cfm_ervhrv = vent_fan_ervhrv.map { |f| f.flow_rate * (f.hours_in_operation / 24.0) }.sum(0.0)
-    vent_fan_power_ervhrv = vent_fan_ervhrv.map { |f| f.fan_power * (f.hours_in_operation / 24.0) }.sum(0.0)
+    vent_fan_cfm_ervhrv = vent_fan_ervhrv.map { |f| f.average_flow_rate }.sum(0.0)
+    vent_fan_power_ervhrv = vent_fan_ervhrv.map { |f| f.average_fan_power }.sum(0.0)
     vent_fan_cfis = hpxml.ventilation_fans.select { |f| f.used_for_whole_building_ventilation && (f.fan_type == HPXML::MechVentTypeCFIS) }
     vent_fan_cfm_cfis = vent_fan_cfis.map { |f| f.flow_rate }.sum(0.0)
     vent_fan_power_cfis = vent_fan_cfis.map { |f| f.fan_power }.sum(0.0)

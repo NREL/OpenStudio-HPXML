@@ -3157,6 +3157,14 @@ class HPXML < Object
       end
     end
 
+    def average_flow_rate
+      return flow_rate * (@hours_in_operation / 24.0)
+    end
+
+    def average_fan_power
+      return @fan_power * (@hours_in_operation / 24.0)
+    end
+
     def delete
       @hpxml_object.ventilation_fans.delete(self)
     end
