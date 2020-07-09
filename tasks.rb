@@ -81,6 +81,7 @@ def create_hpxmls
     'invalid_files/invalid-window-height.xml' => 'base-enclosure-overhangs.xml',
     'invalid_files/invalid-window-interior-shading.xml' => 'base.xml',
     'invalid_files/invalid-wmo.xml' => 'base.xml',
+    'invalid_files/invalid-daylight-saving.xml' => 'base.xml',
     'invalid_files/lighting-fractions.xml' => 'base.xml',
     'invalid_files/missing-elements.xml' => 'base.xml',
     'invalid_files/net-area-negative-roof.xml' => 'base-enclosure-skylights.xml',
@@ -229,6 +230,7 @@ def create_hpxmls
     'base-hvac-evap-cooler-only.xml' => 'base.xml',
     'base-hvac-evap-cooler-only-ducted.xml' => 'base.xml',
     'base-hvac-fireplace-wood-only.xml' => 'base.xml',
+    'base-hvac-fixed-heater-electric-only.xml' => 'base.xml',
     'base-hvac-floor-furnace-propane-only.xml' => 'base.xml',
     'base-hvac-flowrate.xml' => 'base.xml',
     'base-hvac-furnace-elec-central-ac-1-speed.xml' => 'base.xml',
@@ -280,15 +282,17 @@ def create_hpxmls
     'base-misc-ceiling-fans.xml' => 'base.xml',
     'base-misc-defaults.xml' => 'base.xml',
     'base-misc-defaults2.xml' => 'base-dhw-recirc-demand.xml',
+    'base-misc-detailed-schedules.xml' => 'base.xml',
     'base-misc-large-uncommon-loads.xml' => 'base-enclosure-garage.xml',
     'base-misc-large-uncommon-loads2.xml' => 'base-misc-large-uncommon-loads.xml',
-    'base-misc-timestep-10-mins.xml' => 'base.xml',
-    'base-misc-runperiod-1-month.xml' => 'base.xml',
+    'base-misc-neighbor-shading.xml' => 'base.xml',
     'base-misc-usage-multiplier.xml' => 'base.xml',
     'base-misc-whole-house-fan.xml' => 'base.xml',
     'base-pv.xml' => 'base.xml',
-    'base-misc-neighbor-shading.xml' => 'base.xml',
-    'base-misc-detailed-schedules.xml' => 'base.xml',
+    'base-simcontrol-daylight-saving-custom.xml' => 'base.xml',
+    'base-simcontrol-daylight-saving-disabled.xml' => 'base.xml',
+    'base-simcontrol-runperiod-1-month.xml' => 'base.xml',
+    'base-simcontrol-timestep-10-mins.xml' => 'base.xml',
 
     'hvac_autosizing/base-autosize.xml' => 'base.xml',
     'hvac_autosizing/base-hvac-air-to-air-heat-pump-1-speed-autosize.xml' => 'base-hvac-air-to-air-heat-pump-1-speed.xml',
@@ -456,16 +460,27 @@ def set_hpxml_header(hpxml_file, hpxml)
     else
       hpxml.header.apply_ashrae140_assumptions = true
     end
-  elsif ['base-misc-timestep-10-mins.xml'].include? hpxml_file
+  elsif ['base-simcontrol-daylight-saving-custom.xml'].include? hpxml_file
+    hpxml.header.dst_enabled = true
+    hpxml.header.dst_begin_month = 3
+    hpxml.header.dst_begin_day_of_month = 10
+    hpxml.header.dst_end_month = 11
+    hpxml.header.dst_end_day_of_month = 6
+  elsif ['base-simcontrol-daylight-saving-disabled.xml'].include? hpxml_file
+    hpxml.header.dst_enabled = false
+  elsif ['base-simcontrol-timestep-10-mins.xml'].include? hpxml_file
     hpxml.header.timestep = 10
-  elsif ['base-misc-runperiod-1-month.xml'].include? hpxml_file
-    hpxml.header.end_month = 1
-    hpxml.header.end_day_of_month = 31
+  elsif ['base-simcontrol-runperiod-1-month.xml'].include? hpxml_file
+    hpxml.header.sim_end_month = 1
+    hpxml.header.sim_end_day_of_month = 31
   elsif ['invalid_files/invalid-timestep.xml'].include? hpxml_file
     hpxml.header.timestep = 45
   elsif ['invalid_files/invalid-runperiod.xml'].include? hpxml_file
-    hpxml.header.end_month = 4
-    hpxml.header.end_day_of_month = 31
+    hpxml.header.sim_end_month = 4
+    hpxml.header.sim_end_day_of_month = 31
+  elsif ['invalid_files/invalid-daylight-saving.xml'].include? hpxml_file
+    hpxml.header.dst_end_month = 4
+    hpxml.header.dst_end_day_of_month = 31
   elsif ['base-misc-defaults.xml'].include? hpxml_file
     hpxml.header.timestep = nil
   end
@@ -1172,7 +1187,8 @@ def set_hpxml_walls(hpxml_file, hpxml)
                   HPXML::WallTypeSteelStud => 8.1,
                   HPXML::WallTypeStone => 5.4,
                   HPXML::WallTypeStrawBale => 58.8,
-                  HPXML::WallTypeBrick => 7.9 }
+                  HPXML::WallTypeBrick => 7.9,
+                  HPXML::WallTypeAdobe => 5.0 }
     siding_types = [[HPXML::SidingTypeAluminum, HPXML::ColorReflective],
                     [HPXML::SidingTypeBrick, HPXML::ColorMediumDark],
                     [HPXML::SidingTypeFiberCement, HPXML::ColorMedium],
@@ -2540,6 +2556,12 @@ def set_hpxml_heating_systems(hpxml_file, hpxml)
   elsif ['base-hvac-portable-heater-electric-only.xml'].include? hpxml_file
     hpxml.heating_systems[0].distribution_system_idref = nil
     hpxml.heating_systems[0].heating_system_type = HPXML::HVACTypePortableHeater
+    hpxml.heating_systems[0].heating_system_fuel = HPXML::FuelTypeElectricity
+    hpxml.heating_systems[0].heating_efficiency_afue = nil
+    hpxml.heating_systems[0].heating_efficiency_percent = 1.0
+  elsif ['base-hvac-fixed-heater-electric-only.xml'].include? hpxml_file
+    hpxml.heating_systems[0].distribution_system_idref = nil
+    hpxml.heating_systems[0].heating_system_type = HPXML::HVACTypeFixedHeater
     hpxml.heating_systems[0].heating_system_fuel = HPXML::FuelTypeElectricity
     hpxml.heating_systems[0].heating_efficiency_afue = nil
     hpxml.heating_systems[0].heating_efficiency_percent = 1.0
@@ -4209,8 +4231,8 @@ def set_hpxml_plug_loads(hpxml_file, hpxml)
       hpxml.plug_loads[0].weekday_fractions = '0.035, 0.033, 0.032, 0.031, 0.032, 0.033, 0.037, 0.042, 0.043, 0.043, 0.043, 0.044, 0.045, 0.045, 0.044, 0.046, 0.048, 0.052, 0.053, 0.05, 0.047, 0.045, 0.04, 0.036'
       hpxml.plug_loads[0].weekend_fractions = '0.035, 0.033, 0.032, 0.031, 0.032, 0.033, 0.037, 0.042, 0.043, 0.043, 0.043, 0.044, 0.045, 0.045, 0.044, 0.046, 0.048, 0.052, 0.053, 0.05, 0.047, 0.045, 0.04, 0.036'
       hpxml.plug_loads[0].monthly_multipliers = '1.248, 1.257, 0.993, 0.989, 0.993, 0.827, 0.821, 0.821, 0.827, 0.99, 0.987, 1.248'
-      hpxml.plug_loads[1].weekday_fractions = '0.045, 0.019, 0.01, 0.001, 0.001, 0.001, 0.005, 0.009, 0.018, 0.026, 0.032, 0.038, 0.04, 0.041, 0.043, 0.045, 0.5, 0.055, 0.07, 0.085, 0.097, 0.108, 0.089, 0.07'
-      hpxml.plug_loads[1].weekend_fractions = '0.045, 0.019, 0.01, 0.001, 0.001, 0.001, 0.005, 0.009, 0.018, 0.026, 0.032, 0.038, 0.04, 0.041, 0.043, 0.045, 0.5, 0.055, 0.07, 0.085, 0.097, 0.108, 0.089, 0.07'
+      hpxml.plug_loads[1].weekday_fractions = '0.045, 0.019, 0.01, 0.001, 0.001, 0.001, 0.005, 0.009, 0.018, 0.026, 0.032, 0.038, 0.04, 0.041, 0.043, 0.045, 0.05, 0.055, 0.07, 0.085, 0.097, 0.108, 0.089, 0.07'
+      hpxml.plug_loads[1].weekend_fractions = '0.045, 0.019, 0.01, 0.001, 0.001, 0.001, 0.005, 0.009, 0.018, 0.026, 0.032, 0.038, 0.04, 0.041, 0.043, 0.045, 0.05, 0.055, 0.07, 0.085, 0.097, 0.108, 0.089, 0.07'
       hpxml.plug_loads[1].monthly_multipliers = '1.137, 1.129, 0.961, 0.969, 0.961, 0.993, 0.996, 0.96, 0.993, 0.867, 0.86, 1.137'
       hpxml.plug_loads.add(id: 'PlugLoadMisc3',
                            plug_load_type: HPXML::PlugLoadTypeElectricVehicleCharging,
