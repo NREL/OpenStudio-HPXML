@@ -272,12 +272,44 @@ class HPXMLDefaults
       hvac.airflow_defect_ratio = 0.0
     end
 
-    # Fan power (RESNET Standard 301 default value (W/cfm))
-    (hpxml.cooling_systems + hpxml.heating_systems + hpxml.heat_pumps).each do |hvac|
-      next unless hvac.blower_watt_cfm.nil?
+    # Fan power
+    hpxml.cooling_systems.each do |cooling_system|
+      next unless cooling_system.blower_watt_cfm.nil?
 
-      # TODO: Only apply to certain types
-      hvac.blower_watt_cfm = 0.58
+      if cooling_system.cooling_system_type == HPXML::HVACTypeCentralAirConditioner
+        if cooling_system.cooling_efficiency_seer <= 15
+          cooling_system.blower_watt_cfm = 0.5 # W/cfm
+        else
+          cooling_system.blower_watt_cfm = 0.3 # W/cfm
+        end
+      end
+    end
+    hpxml.heating_systems.each do |heating_system|
+      next unless heating_system.blower_watt_cfm.nil?
+
+      if heating_system.heating_system_type == HPXML::HVACTypeFurnace
+        # TODO: Only set if not attached to an AC?
+        heating_system.blower_watt_cfm = 0.5 # W/cfm
+      end
+    end
+    hpxml.heat_pumps.each do |heat_pump|
+      next unless heat_pump.blower_watt_cfm.nil?
+
+      if heat_pump.heat_pump_type == HPXML::HVACTypeHeatPumpAirToAir
+        if heat_pump.cooling_efficiency_seer <= 15
+          heat_pump.blower_watt_cfm = 0.5 # W/cfm
+        else
+          heat_pump.blower_watt_cfm = 0.3 # W/cfm
+        end
+      elsif heat_pump.heat_pump_type == HPXML::HVACTypeHeatPumpGroundToAir
+        heat_pump.blower_watt_cfm = 0.5 # W/cfm
+      elsif heat_pump.heat_pump_type == HPXML::HVACTypeHeatPumpMiniSplit
+        if not heat_pump.distribution_system.nil?
+          heat_pump.blower_watt_cfm = 0.18 # W/cfm, ducted
+        else
+          heat_pump.blower_watt_cfm = 0.07 # W/cfm, ductless
+        end
+      end
     end
 
     # Electric auxiliary energy (for boilers)
@@ -285,9 +317,7 @@ class HPXMLDefaults
       next unless heating_system.heating_system_type == HPXML::HVACTypeBoiler
       next unless heating_system.electric_auxiliary_energy.nil?
 
-      puts 'HELLO?'
       heating_system.electric_auxiliary_energy = HVAC.get_default_boiler_eae(heating_system.heating_system_fuel, heating_system.fraction_heat_load_served)
-      puts "heating_system.electric_auxiliary_energy #{heating_system.electric_auxiliary_energy}"
     end
 
     # HVAC capacities
