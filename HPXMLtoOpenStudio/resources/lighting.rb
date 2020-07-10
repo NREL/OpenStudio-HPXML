@@ -1,24 +1,173 @@
 # frozen_string_literal: true
 
-require_relative 'schedules'
-require_relative 'geometry'
-require_relative 'unit_conversions'
-
 class Lighting
-  def self.apply(model, weather, interior_kwh, garage_kwh, exterior_kwh, cfa, gfa,
-                 living_space, garage_space)
-    lat = weather.header.Latitude
-    long = weather.header.Longitude
-    tz = weather.header.Timezone
-    std_long = -tz * 15
-    pi = Math::PI
+  def self.apply(model, weather, spaces, lighting_groups, usage_multiplier, eri_version)
+    fractions = {}
+    lighting_groups.each do |lg|
+      fractions[[lg.location, lg.lighting_type]] = lg.fraction_of_units_in_location
+    end
 
+    return if fractions[[HPXML::LocationInterior, HPXML::LightingTypeCFL]].nil? # Not the lighting group(s) we're interested in
+
+    living_space = spaces[HPXML::LocationLivingSpace]
+    garage_space = spaces[HPXML::LocationGarage]
+
+    cfa = UnitConversions.convert(living_space.floorArea, 'm^2', 'ft^2')
+    if not garage_space.nil?
+      gfa = UnitConversions.convert(garage_space.floorArea, 'm^2', 'ft^2')
+    else
+      gfa = 0
+    end
+
+    int_kwh, ext_kwh, grg_kwh = calc_energy(eri_version, cfa, gfa,
+                                            fractions[[HPXML::LocationInterior, HPXML::LightingTypeCFL]],
+                                            fractions[[HPXML::LocationExterior, HPXML::LightingTypeCFL]],
+                                            fractions[[HPXML::LocationGarage, HPXML::LightingTypeCFL]],
+                                            fractions[[HPXML::LocationInterior, HPXML::LightingTypeLFL]],
+                                            fractions[[HPXML::LocationExterior, HPXML::LightingTypeLFL]],
+                                            fractions[[HPXML::LocationGarage, HPXML::LightingTypeLFL]],
+                                            fractions[[HPXML::LocationInterior, HPXML::LightingTypeLED]],
+                                            fractions[[HPXML::LocationExterior, HPXML::LightingTypeLED]],
+                                            fractions[[HPXML::LocationGarage, HPXML::LightingTypeLED]],
+                                            usage_multiplier)
+
+    sch = create_schedule(model, weather)
+
+    # Add lighting to each conditioned space
+    if int_kwh > 0
+      space_design_level = sch.calcDesignLevel(sch.maxval * int_kwh)
+
+      # Add lighting
+      ltg_def = OpenStudio::Model::LightsDefinition.new(model)
+      ltg = OpenStudio::Model::Lights.new(ltg_def)
+      ltg.setName(Constants.ObjectNameInteriorLighting)
+      ltg.setSpace(living_space)
+      ltg.setEndUseSubcategory(Constants.ObjectNameInteriorLighting)
+      ltg_def.setName(Constants.ObjectNameInteriorLighting)
+      ltg_def.setLightingLevel(space_design_level)
+      ltg_def.setFractionRadiant(0.6)
+      ltg_def.setFractionVisible(0.2)
+      ltg_def.setReturnAirFraction(0.0)
+      ltg.setSchedule(sch.schedule)
+    end
+
+    # Add lighting to each garage space
+    if grg_kwh > 0
+      space_design_level = sch.calcDesignLevel(sch.maxval * grg_kwh)
+
+      # Add lighting
+      ltg_def = OpenStudio::Model::LightsDefinition.new(model)
+      ltg = OpenStudio::Model::Lights.new(ltg_def)
+      ltg.setName(Constants.ObjectNameGarageLighting)
+      ltg.setSpace(garage_space)
+      ltg.setEndUseSubcategory(Constants.ObjectNameGarageLighting)
+      ltg_def.setName(Constants.ObjectNameGarageLighting)
+      ltg_def.setLightingLevel(space_design_level)
+      ltg_def.setFractionRadiant(0.6)
+      ltg_def.setFractionVisible(0.2)
+      ltg_def.setReturnAirFraction(0.0)
+      ltg.setSchedule(sch.schedule)
+    end
+
+    if ext_kwh > 0
+      space_design_level = sch.calcDesignLevel(sch.maxval * ext_kwh)
+
+      # Add exterior lighting
+      ltg_def = OpenStudio::Model::ExteriorLightsDefinition.new(model)
+      ltg = OpenStudio::Model::ExteriorLights.new(ltg_def)
+      ltg.setName(Constants.ObjectNameExteriorLighting)
+      ltg_def.setName(Constants.ObjectNameExteriorLighting)
+      ltg_def.setDesignLevel(space_design_level)
+      ltg.setSchedule(sch.schedule)
+    end
+  end
+
+  def self.get_default_fractions()
+    ltg_fracs = {}
+    [HPXML::LocationInterior, HPXML::LocationExterior, HPXML::LocationGarage].each do |location|
+      [HPXML::LightingTypeCFL, HPXML::LightingTypeLFL, HPXML::LightingTypeLED].each do |lighting_type|
+        if (location == HPXML::LocationInterior) && (lighting_type == HPXML::LightingTypeCFL)
+          ltg_fracs[[location, lighting_type]] = 0.1
+        else
+          ltg_fracs[[location, lighting_type]] = 0
+        end
+      end
+    end
+    return ltg_fracs
+  end
+
+  private
+
+  def self.calc_energy(eri_version, cfa, gfa, f_int_cfl, f_ext_cfl, f_grg_cfl, f_int_lfl, f_ext_lfl, f_grg_lfl,
+                       f_int_led, f_ext_led, f_grg_led, usage_multiplier = 1.0)
+
+    if Constants.ERIVersions.index(eri_version) >= Constants.ERIVersions.index('2014ADEG')
+      # Calculate fluorescent (CFL + LFL) fractions
+      f_int_fl = f_int_cfl + f_int_lfl
+      f_ext_fl = f_ext_cfl + f_ext_lfl
+      f_grg_fl = f_grg_cfl + f_grg_lfl
+
+      # Calculate incandescent fractions
+      f_int_inc = 1.0 - f_int_fl - f_int_led
+      f_ext_inc = 1.0 - f_ext_fl - f_ext_led
+      f_grg_inc = 1.0 - f_grg_fl - f_grg_led
+
+      # Efficacies (lm/W)
+      eff_inc = 15.0
+      eff_fl = 60.0
+      eff_led = 90.0
+
+      # Efficacy ratios
+      eff_ratio_inc = eff_inc / eff_inc
+      eff_ratio_fl = eff_inc / eff_fl
+      eff_ratio_led = eff_inc / eff_led
+
+      # Fractions of lamps that are hardwired vs plug-in
+      frac_hw = 0.9
+      frac_pl = 1.0 - frac_hw
+
+      # Efficiency lighting adjustments
+      int_adj = (f_int_inc * eff_ratio_inc) + (f_int_fl * eff_ratio_fl) + (f_int_led * eff_ratio_led)
+      ext_adj = (f_ext_inc * eff_ratio_inc) + (f_ext_fl * eff_ratio_fl) + (f_ext_led * eff_ratio_led)
+      grg_adj = (f_grg_inc * eff_ratio_inc) + (f_grg_fl * eff_ratio_fl) + (f_grg_led * eff_ratio_led)
+
+      # Calculate energy use
+      int_kwh = (0.9 / 0.925 * (455.0 + 0.8 * cfa) * int_adj) + (0.1 * (455.0 + 0.8 * cfa))
+      ext_kwh = (100.0 + 0.05 * cfa) * ext_adj
+      grg_kwh = 0.0
+      if gfa > 0
+        grg_kwh = 100.0 * grg_adj
+      end
+    else
+      # Calculate efficient lighting fractions
+      fF_int = f_int_cfl + f_int_lfl + f_int_led
+      fF_ext = f_ext_cfl + f_ext_lfl + f_ext_led
+      fF_grg = f_grg_cfl + f_grg_lfl + f_grg_led
+
+      # Calculate energy use
+      int_kwh = 0.8 * ((4.0 - 3.0 * fF_int) / 3.7) * (455.0 + 0.8 * cfa) + 0.2 * (455.0 + 0.8 * cfa)
+      ext_kwh = (100.0 + 0.05 * cfa) * (1.0 - fF_ext) + 0.25 * (100.0 + 0.05 * cfa) * fF_ext
+      grg_kwh = 0.0
+      if gfa > 0
+        grg_kwh = 100.0 * (1.0 - fF_grg) + 25.0 * fF_grg
+      end
+    end
+
+    int_kwh *= usage_multiplier
+    ext_kwh *= usage_multiplier
+    grg_kwh *= usage_multiplier
+
+    return int_kwh, ext_kwh, grg_kwh
+  end
+
+  def self.create_schedule(model, weather)
     # Sunrise and sunset hours
     sunrise_hour = []
     sunset_hour = []
+    std_long = -weather.header.Timezone * 15
     normalized_hourly_lighting = [[1..24], [1..24], [1..24], [1..24], [1..24], [1..24], [1..24], [1..24], [1..24], [1..24], [1..24], [1..24]]
     for month in 0..11
-      if lat < 51.49
+      if weather.header.Latitude < 51.49
         m_num = month + 1
         jul_day = m_num * 30 - 15
         if not ((m_num < 4) || (m_num > 10))
@@ -27,13 +176,13 @@ class Lighting
           offset = 0
         end
         declination = 23.45 * Math.sin(0.9863 * (284 + jul_day) * 0.01745329)
-        deg_rad = pi / 180
+        deg_rad = Math::PI / 180
         rad_deg = 1 / deg_rad
         b = (jul_day - 1) * 0.9863
         equation_of_time = (0.01667 * (0.01719 + 0.42815 * Math.cos(deg_rad * b) - 7.35205 * Math.sin(deg_rad * b) - 3.34976 * Math.cos(deg_rad * (2 * b)) - 9.37199 * Math.sin(deg_rad * (2 * b))))
-        sunset_hour_angle = rad_deg * Math.acos(-1 * Math.tan(deg_rad * lat) * Math.tan(deg_rad * declination))
-        sunrise_hour[month] = offset + (12.0 - 1 * sunset_hour_angle / 15.0) - equation_of_time - (std_long + long) / 15
-        sunset_hour[month] = offset + (12.0 + 1 * sunset_hour_angle / 15.0) - equation_of_time - (std_long + long) / 15
+        sunset_hour_angle = rad_deg * Math.acos(-1 * Math.tan(deg_rad * weather.header.Latitude) * Math.tan(deg_rad * declination))
+        sunrise_hour[month] = offset + (12.0 - 1 * sunset_hour_angle / 15.0) - equation_of_time - (std_long + weather.header.Longitude) / 15
+        sunset_hour[month] = offset + (12.0 + 1 * sunset_hour_angle / 15.0) - equation_of_time - (std_long + weather.header.Longitude) / 15
       else
         sunrise_hour = [8.125726064, 7.449258072, 6.388688653, 6.232405257, 5.27722936, 4.84705384, 5.127512162, 5.860163988, 6.684378904, 7.521267411, 7.390441945, 8.080667697]
         sunset_hour = [16.22214058, 17.08642353, 17.98324493, 19.83547864, 20.65149672, 21.20662992, 21.12124777, 20.37458274, 19.25834757, 18.08155615, 16.14359164, 15.75571306]
@@ -51,7 +200,7 @@ class Lighting
     stdDevCons2 = 2.36567663279954
 
     monthly_kwh_per_day = []
-    days_m = [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31]
+    days_m = Constants.MonthNumDays
     wtd_avg_monthly_kwh_per_day = 0
     for monthNum in 1..12
       month = monthNum - 1
@@ -61,20 +210,20 @@ class Lighting
       end
       for hourNum in 9..17
         hour = (hourNum + 1.0) * 0.5
-        monthHalfHourKWHs[hourNum] = (monthHalfHourKWHs[8] - (0.15 / (2 * pi)) * Math.sin((2 * pi) * (hour - 4.5) / 3.5) + (0.15 / 3.5) * (hour - 4.5)) * lighting_seasonal_multiplier[month]
+        monthHalfHourKWHs[hourNum] = (monthHalfHourKWHs[8] - (0.15 / (2 * Math::PI)) * Math.sin((2 * Math::PI) * (hour - 4.5) / 3.5) + (0.15 / 3.5) * (hour - 4.5)) * lighting_seasonal_multiplier[month]
       end
       for hourNum in 17..29
         hour = (hourNum + 1.0) * 0.5
-        monthHalfHourKWHs[hourNum] = (monthHalfHourKWHs[16] - (-0.02 / (2 * pi)) * Math.sin((2 * pi) * (hour - 8.5) / 5.5) + (-0.02 / 5.5) * (hour - 8.5)) * lighting_seasonal_multiplier[month]
+        monthHalfHourKWHs[hourNum] = (monthHalfHourKWHs[16] - (-0.02 / (2 * Math::PI)) * Math.sin((2 * Math::PI) * (hour - 8.5) / 5.5) + (-0.02 / 5.5) * (hour - 8.5)) * lighting_seasonal_multiplier[month]
       end
       for hourNum in 29..45
         hour = (hourNum + 1.0) * 0.5
-        monthHalfHourKWHs[hourNum] = (monthHalfHourKWHs[28] + amplConst1 * Math.exp((-1.0 * (hour - (sunset_hour[month] + sunsetLag1))**2) / (2.0 * ((25.5 / ((6.5 - monthNum).abs + 20.0)) * stdDevCons1)**2)) / ((25.5 / ((6.5 - monthNum).abs + 20.0)) * stdDevCons1 * (2.0 * pi)**0.5))
+        monthHalfHourKWHs[hourNum] = (monthHalfHourKWHs[28] + amplConst1 * Math.exp((-1.0 * (hour - (sunset_hour[month] + sunsetLag1))**2) / (2.0 * ((25.5 / ((6.5 - monthNum).abs + 20.0)) * stdDevCons1)**2)) / ((25.5 / ((6.5 - monthNum).abs + 20.0)) * stdDevCons1 * (2.0 * Math::PI)**0.5))
       end
       for hourNum in 45..46
         hour = (hourNum + 1.0) * 0.5
-        temp1 = (monthHalfHourKWHs[44] + amplConst1 * Math.exp((-1.0 * (hour - (sunset_hour[month] + sunsetLag1))**2) / (2.0 * ((25.5 / ((6.5 - monthNum).abs + 20.0)) * stdDevCons1)**2)) / ((25.5 / ((6.5 - monthNum).abs + 20.0)) * stdDevCons1 * (2.0 * pi)**0.5))
-        temp2 = (0.04 + amplConst2 * Math.exp((-1.0 * (hour - sunsetLag2)**2) / (2.0 * stdDevCons2**2)) / (stdDevCons2 * (2.0 * pi)**0.5))
+        temp1 = (monthHalfHourKWHs[44] + amplConst1 * Math.exp((-1.0 * (hour - (sunset_hour[month] + sunsetLag1))**2) / (2.0 * ((25.5 / ((6.5 - monthNum).abs + 20.0)) * stdDevCons1)**2)) / ((25.5 / ((6.5 - monthNum).abs + 20.0)) * stdDevCons1 * (2.0 * Math::PI)**0.5))
+        temp2 = (0.04 + amplConst2 * Math.exp((-1.0 * (hour - sunsetLag2)**2) / (2.0 * stdDevCons2**2)) / (stdDevCons2 * (2.0 * Math::PI)**0.5))
         if sunsetLag2 < sunset_hour[month] + sunsetLag1
           monthHalfHourKWHs[hourNum] = [temp1, temp2].min
         else
@@ -83,7 +232,7 @@ class Lighting
       end
       for hourNum in 46..47
         hour = (hourNum + 1) * 0.5
-        monthHalfHourKWHs[hourNum] = (0.04 + amplConst2 * Math.exp((-1.0 * (hour - sunsetLag2)**2) / (2.0 * stdDevCons2**2)) / (stdDevCons2 * (2.0 * pi)**0.5))
+        monthHalfHourKWHs[hourNum] = (0.04 + amplConst2 * Math.exp((-1.0 * (hour - sunsetLag2)**2) / (2.0 * stdDevCons2**2)) / (stdDevCons2 * (2.0 * Math::PI)**0.5))
       end
 
       sum_kWh = 0.0
@@ -111,7 +260,7 @@ class Lighting
       normalized_monthly_lighting[month] = seasonal_multiplier[month] * days_m[month] / sumproduct_seasonal_multiplier
     end
 
-    # Calc schedule values
+    # Calculate schedule values
     lighting_sch = [[], [], [], [], [], [], [], [], [], [], [], []]
     for month in 0..11
       for hour in 0..23
@@ -122,97 +271,6 @@ class Lighting
     # Create schedule
     sch = HourlyByMonthSchedule.new(model, 'lighting schedule', lighting_sch, lighting_sch, true, true, Constants.ScheduleTypeLimitsFraction)
 
-    # Add lighting to each conditioned space
-    if interior_kwh > 0
-      space_design_level = sch.calcDesignLevel(sch.maxval * interior_kwh)
-
-      # Add lighting
-      ltg_def = OpenStudio::Model::LightsDefinition.new(model)
-      ltg = OpenStudio::Model::Lights.new(ltg_def)
-      ltg.setName(Constants.ObjectNameInteriorLighting)
-      ltg.setSpace(living_space)
-      ltg.setEndUseSubcategory(Constants.ObjectNameInteriorLighting)
-      ltg_def.setName(Constants.ObjectNameInteriorLighting)
-      ltg_def.setLightingLevel(space_design_level)
-      ltg_def.setFractionRadiant(0.6)
-      ltg_def.setFractionVisible(0.2)
-      ltg_def.setReturnAirFraction(0.0)
-      ltg.setSchedule(sch.schedule)
-    end
-
-    # Add lighting to each garage space
-    if garage_kwh > 0
-      space_design_level = sch.calcDesignLevel(sch.maxval * garage_kwh)
-
-      # Add lighting
-      ltg_def = OpenStudio::Model::LightsDefinition.new(model)
-      ltg = OpenStudio::Model::Lights.new(ltg_def)
-      ltg.setName(Constants.ObjectNameGarageLighting)
-      ltg.setSpace(garage_space)
-      ltg.setEndUseSubcategory(Constants.ObjectNameGarageLighting)
-      ltg_def.setName(Constants.ObjectNameGarageLighting)
-      ltg_def.setLightingLevel(space_design_level)
-      ltg_def.setFractionRadiant(0.6)
-      ltg_def.setFractionVisible(0.2)
-      ltg_def.setReturnAirFraction(0.0)
-      ltg.setSchedule(sch.schedule)
-    end
-
-    if exterior_kwh > 0
-      space_design_level = sch.calcDesignLevel(sch.maxval * exterior_kwh)
-
-      # Add exterior lighting
-      ltg_def = OpenStudio::Model::ExteriorLightsDefinition.new(model)
-      ltg = OpenStudio::Model::ExteriorLights.new(ltg_def)
-      ltg.setName(Constants.ObjectNameExteriorLighting)
-      ltg_def.setName(Constants.ObjectNameExteriorLighting)
-      ltg_def.setDesignLevel(space_design_level)
-      ltg.setSchedule(sch.schedule)
-    end
-  end
-
-  def self.get_reference_fractions()
-    fFI_int = 0.10
-    fFI_ext = 0.0
-    fFI_grg = 0.0
-    fFII_int = 0.0
-    fFII_ext = 0.0
-    fFII_grg = 0.0
-    return fFI_int, fFI_ext, fFI_grg, fFII_int, fFII_ext, fFII_grg
-  end
-
-  def self.get_iad_fractions()
-    fFI_int = 0.75
-    fFI_ext = 0.75
-    fFI_grg = 0.75
-    fFII_int = 0.0
-    fFII_ext = 0.0
-    fFII_grg = 0.0
-    return fFI_int, fFI_ext, fFI_grg, fFII_int, fFII_ext, fFII_grg
-  end
-
-  def self.calc_lighting_energy(eri_version, cfa, gfa, fFI_int, fFI_ext, fFI_grg, fFII_int, fFII_ext, fFII_grg, usage_multiplier = 1.0)
-    if Constants.ERIVersions.index(eri_version) >= Constants.ERIVersions.index('2014ADEG')
-      # ANSI/RESNET/ICC 301-2014 Addendum G-2018, Solid State Lighting
-      int_kwh = 0.9 / 0.925 * (455.0 + 0.8 * cfa) * ((1.0 - fFII_int - fFI_int) + fFI_int * 15.0 / 60.0 + fFII_int * 15.0 / 90.0) + 0.1 * (455.0 + 0.8 * cfa) # Eq 4.2-2)
-      ext_kwh = (100.0 + 0.05 * cfa) * (1.0 - fFI_ext - fFII_ext) + 15.0 / 60.0 * (100.0 + 0.05 * cfa) * fFI_ext + 15.0 / 90.0 * (100.0 + 0.05 * cfa) * fFII_ext # Eq 4.2-3
-      grg_kwh = 0.0
-      if gfa > 0
-        grg_kwh = 100.0 * ((1.0 - fFI_grg - fFII_grg) + 15.0 / 60.0 * fFI_grg + 15.0 / 90.0 * fFII_grg) # Eq 4.2-4
-      end
-    else
-      int_kwh = 0.8 * ((4.0 - 3.0 * (fFI_int + fFII_int)) / 3.7) * (455.0 + 0.8 * cfa) + 0.2 * (455.0 + 0.8 * cfa) # Eq 4.2-2
-      ext_kwh = (100.0 + 0.05 * cfa) * (1.0 - (fFI_ext + fFII_ext)) + 0.25 * (100.0 + 0.05 * cfa) * (fFI_ext + fFII_ext) # Eq 4.2-3
-      grg_kwh = 0.0
-      if gfa > 0
-        grg_kwh = 100.0 * (1.0 - (fFI_grg + fFII_grg)) + 25.0 * (fFI_grg + fFII_grg) # Eq 4.2-4
-      end
-    end
-
-    int_kwh *= usage_multiplier
-    ext_kwh *= usage_multiplier
-    grg_kwh *= usage_multiplier
-
-    return int_kwh, ext_kwh, grg_kwh
+    return sch
   end
 end

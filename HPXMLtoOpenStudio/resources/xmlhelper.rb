@@ -1,7 +1,5 @@
 # frozen_string_literal: true
 
-require 'oga'
-
 class XMLHelper
   # Adds the child element with 'element_name' and sets its value. Returns the
   # child element.
@@ -97,6 +95,7 @@ class XMLHelper
   # Returns the value of the attribute
   def self.get_attribute_value(element, attr_name)
     return if element.nil?
+
     return element.get(attr_name)
   end
 
@@ -199,18 +198,4 @@ class XMLHelper
       f << doc_s
     end
   end
-end
-
-def Boolean(val)
-  if val.is_a? TrueClass
-    return true
-  elsif val.is_a? FalseClass
-    return false
-  elsif (val.downcase.to_s == 'true') || (val == '1')
-    return true
-  elsif (val.downcase.to_s == 'false') || (val == '0')
-    return false
-  end
-
-  raise TypeError.new("can't convert '#{val}' to Boolean")
 end

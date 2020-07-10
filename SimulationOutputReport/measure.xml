@@ -3,8 +3,8 @@
   <schema_version>3.0</schema_version>
   <name>simulation_output_report</name>
   <uid>df9d170c-c21a-4130-866d-0d46b06073fd</uid>
-  <version_id>b1bde40b-0b71-4f7f-98c7-b559c27199bd</version_id>
-  <version_modified>20200427T163313Z</version_modified>
+  <version_id>b544e6f5-0b91-40f8-b2f6-7b864dec4d6d</version_id>
+  <version_modified>20200630T141629Z</version_modified>
   <xml_checksum>9BF1E6AC</xml_checksum>
   <class_name>SimulationOutputReport</class_name>
   <display_name>HPXML Simulation Output Report</display_name>
@@ -14,12 +14,16 @@
     <argument>
       <name>timeseries_frequency</name>
       <display_name>Timeseries Reporting Frequency</display_name>
-      <description>The frequency at which to report timeseries output data.</description>
+      <description>The frequency at which to report timeseries output data. Using 'none' will disable timeseries outputs.</description>
       <type>Choice</type>
       <required>true</required>
       <model_dependent>false</model_dependent>
-      <default_value>hourly</default_value>
+      <default_value>none</default_value>
       <choices>
+        <choice>
+          <value>none</value>
+          <display_name>none</display_name>
+        </choice>
         <choice>
           <value>timestep</value>
           <display_name>timestep</display_name>
@@ -35,25 +39,6 @@
         <choice>
           <value>monthly</value>
           <display_name>monthly</display_name>
-        </choice>
-      </choices>
-    </argument>
-    <argument>
-      <name>include_timeseries_zone_temperatures</name>
-      <display_name>Generate Timeseries Output: Zone Temperatures</display_name>
-      <description>Generates timeseries temperatures for each thermal zone.</description>
-      <type>Boolean</type>
-      <required>true</required>
-      <model_dependent>false</model_dependent>
-      <default_value>false</default_value>
-      <choices>
-        <choice>
-          <value>true</value>
-          <display_name>true</display_name>
-        </choice>
-        <choice>
-          <value>false</value>
-          <display_name>false</display_name>
         </choice>
       </choices>
     </argument>
@@ -152,6 +137,63 @@
         </choice>
       </choices>
     </argument>
+    <argument>
+      <name>include_timeseries_zone_temperatures</name>
+      <display_name>Generate Timeseries Output: Zone Temperatures</display_name>
+      <description>Generates timeseries temperatures for each thermal zone.</description>
+      <type>Boolean</type>
+      <required>true</required>
+      <model_dependent>false</model_dependent>
+      <default_value>false</default_value>
+      <choices>
+        <choice>
+          <value>true</value>
+          <display_name>true</display_name>
+        </choice>
+        <choice>
+          <value>false</value>
+          <display_name>false</display_name>
+        </choice>
+      </choices>
+    </argument>
+    <argument>
+      <name>include_timeseries_airflows</name>
+      <display_name>Generate Timeseries Output: Airflows</display_name>
+      <description>Generates timeseries airflows.</description>
+      <type>Boolean</type>
+      <required>true</required>
+      <model_dependent>false</model_dependent>
+      <default_value>false</default_value>
+      <choices>
+        <choice>
+          <value>true</value>
+          <display_name>true</display_name>
+        </choice>
+        <choice>
+          <value>false</value>
+          <display_name>false</display_name>
+        </choice>
+      </choices>
+    </argument>
+    <argument>
+      <name>include_timeseries_weather</name>
+      <display_name>Generate Timeseries Output: Weather</display_name>
+      <description>Generates timeseries weather data.</description>
+      <type>Boolean</type>
+      <required>true</required>
+      <model_dependent>false</model_dependent>
+      <default_value>false</default_value>
+      <choices>
+        <choice>
+          <value>true</value>
+          <display_name>true</display_name>
+        </choice>
+        <choice>
+          <value>false</value>
+          <display_name>false</display_name>
+        </choice>
+      </choices>
+    </argument>
   </arguments>
   <outputs>
     <output>
@@ -183,9 +225,9 @@
       <model_dependent>false</model_dependent>
     </output>
     <output>
-      <name>Wood: Total MBtu</name>
-      <display_name>Wood: Total MBtu</display_name>
-      <short_name>Wood: Total MBtu</short_name>
+      <name>Wood Cord: Total MBtu</name>
+      <display_name>Wood Cord: Total MBtu</display_name>
+      <short_name>Wood Cord: Total MBtu</short_name>
       <type>Double</type>
       <model_dependent>false</model_dependent>
     </output>
@@ -193,6 +235,13 @@
       <name>Wood Pellets: Total MBtu</name>
       <display_name>Wood Pellets: Total MBtu</display_name>
       <short_name>Wood Pellets: Total MBtu</short_name>
+      <type>Double</type>
+      <model_dependent>false</model_dependent>
+    </output>
+    <output>
+      <name>Coal: Total MBtu</name>
+      <display_name>Coal: Total MBtu</display_name>
+      <short_name>Coal: Total MBtu</short_name>
       <type>Double</type>
       <model_dependent>false</model_dependent>
     </output>
@@ -288,6 +337,13 @@
       <model_dependent>false</model_dependent>
     </output>
     <output>
+      <name>Electricity: Freezer MBtu</name>
+      <display_name>Electricity: Freezer MBtu</display_name>
+      <short_name>Electricity: Freezer MBtu</short_name>
+      <type>Double</type>
+      <model_dependent>false</model_dependent>
+    </output>
+    <output>
       <name>Electricity: Dehumidifier MBtu</name>
       <display_name>Electricity: Dehumidifier MBtu</display_name>
       <short_name>Electricity: Dehumidifier MBtu</short_name>
@@ -344,6 +400,48 @@
       <model_dependent>false</model_dependent>
     </output>
     <output>
+      <name>Electricity: Electric Vehicle Charging MBtu</name>
+      <display_name>Electricity: Electric Vehicle Charging MBtu</display_name>
+      <short_name>Electricity: Electric Vehicle Charging MBtu</short_name>
+      <type>Double</type>
+      <model_dependent>false</model_dependent>
+    </output>
+    <output>
+      <name>Electricity: Well Pump MBtu</name>
+      <display_name>Electricity: Well Pump MBtu</display_name>
+      <short_name>Electricity: Well Pump MBtu</short_name>
+      <type>Double</type>
+      <model_dependent>false</model_dependent>
+    </output>
+    <output>
+      <name>Electricity: Pool Heater MBtu</name>
+      <display_name>Electricity: Pool Heater MBtu</display_name>
+      <short_name>Electricity: Pool Heater MBtu</short_name>
+      <type>Double</type>
+      <model_dependent>false</model_dependent>
+    </output>
+    <output>
+      <name>Electricity: Pool Pump MBtu</name>
+      <display_name>Electricity: Pool Pump MBtu</display_name>
+      <short_name>Electricity: Pool Pump MBtu</short_name>
+      <type>Double</type>
+      <model_dependent>false</model_dependent>
+    </output>
+    <output>
+      <name>Electricity: Hot Tub Heater MBtu</name>
+      <display_name>Electricity: Hot Tub Heater MBtu</display_name>
+      <short_name>Electricity: Hot Tub Heater MBtu</short_name>
+      <type>Double</type>
+      <model_dependent>false</model_dependent>
+    </output>
+    <output>
+      <name>Electricity: Hot Tub Pump MBtu</name>
+      <display_name>Electricity: Hot Tub Pump MBtu</display_name>
+      <short_name>Electricity: Hot Tub Pump MBtu</short_name>
+      <type>Double</type>
+      <model_dependent>false</model_dependent>
+    </output>
+    <output>
       <name>Electricity: PV MBtu</name>
       <display_name>Electricity: PV MBtu</display_name>
       <short_name>Electricity: PV MBtu</short_name>
@@ -379,6 +477,41 @@
       <model_dependent>false</model_dependent>
     </output>
     <output>
+      <name>Natural Gas: Pool Heater MBtu</name>
+      <display_name>Natural Gas: Pool Heater MBtu</display_name>
+      <short_name>Natural Gas: Pool Heater MBtu</short_name>
+      <type>Double</type>
+      <model_dependent>false</model_dependent>
+    </output>
+    <output>
+      <name>Natural Gas: Hot Tub Heater MBtu</name>
+      <display_name>Natural Gas: Hot Tub Heater MBtu</display_name>
+      <short_name>Natural Gas: Hot Tub Heater MBtu</short_name>
+      <type>Double</type>
+      <model_dependent>false</model_dependent>
+    </output>
+    <output>
+      <name>Natural Gas: Grill MBtu</name>
+      <display_name>Natural Gas: Grill MBtu</display_name>
+      <short_name>Natural Gas: Grill MBtu</short_name>
+      <type>Double</type>
+      <model_dependent>false</model_dependent>
+    </output>
+    <output>
+      <name>Natural Gas: Lighting MBtu</name>
+      <display_name>Natural Gas: Lighting MBtu</display_name>
+      <short_name>Natural Gas: Lighting MBtu</short_name>
+      <type>Double</type>
+      <model_dependent>false</model_dependent>
+    </output>
+    <output>
+      <name>Natural Gas: Fireplace MBtu</name>
+      <display_name>Natural Gas: Fireplace MBtu</display_name>
+      <short_name>Natural Gas: Fireplace MBtu</short_name>
+      <type>Double</type>
+      <model_dependent>false</model_dependent>
+    </output>
+    <output>
       <name>Fuel Oil: Heating MBtu</name>
       <display_name>Fuel Oil: Heating MBtu</display_name>
       <short_name>Fuel Oil: Heating MBtu</short_name>
@@ -403,6 +536,27 @@
       <name>Fuel Oil: Range/Oven MBtu</name>
       <display_name>Fuel Oil: Range/Oven MBtu</display_name>
       <short_name>Fuel Oil: Range/Oven MBtu</short_name>
+      <type>Double</type>
+      <model_dependent>false</model_dependent>
+    </output>
+    <output>
+      <name>Fuel Oil: Grill MBtu</name>
+      <display_name>Fuel Oil: Grill MBtu</display_name>
+      <short_name>Fuel Oil: Grill MBtu</short_name>
+      <type>Double</type>
+      <model_dependent>false</model_dependent>
+    </output>
+    <output>
+      <name>Fuel Oil: Lighting MBtu</name>
+      <display_name>Fuel Oil: Lighting MBtu</display_name>
+      <short_name>Fuel Oil: Lighting MBtu</short_name>
+      <type>Double</type>
+      <model_dependent>false</model_dependent>
+    </output>
+    <output>
+      <name>Fuel Oil: Fireplace MBtu</name>
+      <display_name>Fuel Oil: Fireplace MBtu</display_name>
+      <short_name>Fuel Oil: Fireplace MBtu</short_name>
       <type>Double</type>
       <model_dependent>false</model_dependent>
     </output>
@@ -435,30 +589,72 @@
       <model_dependent>false</model_dependent>
     </output>
     <output>
-      <name>Wood: Heating MBtu</name>
-      <display_name>Wood: Heating MBtu</display_name>
-      <short_name>Wood: Heating MBtu</short_name>
+      <name>Propane: Grill MBtu</name>
+      <display_name>Propane: Grill MBtu</display_name>
+      <short_name>Propane: Grill MBtu</short_name>
       <type>Double</type>
       <model_dependent>false</model_dependent>
     </output>
     <output>
-      <name>Wood: Hot Water MBtu</name>
-      <display_name>Wood: Hot Water MBtu</display_name>
-      <short_name>Wood: Hot Water MBtu</short_name>
+      <name>Propane: Lighting MBtu</name>
+      <display_name>Propane: Lighting MBtu</display_name>
+      <short_name>Propane: Lighting MBtu</short_name>
       <type>Double</type>
       <model_dependent>false</model_dependent>
     </output>
     <output>
-      <name>Wood: Clothes Dryer MBtu</name>
-      <display_name>Wood: Clothes Dryer MBtu</display_name>
-      <short_name>Wood: Clothes Dryer MBtu</short_name>
+      <name>Propane: Fireplace MBtu</name>
+      <display_name>Propane: Fireplace MBtu</display_name>
+      <short_name>Propane: Fireplace MBtu</short_name>
       <type>Double</type>
       <model_dependent>false</model_dependent>
     </output>
     <output>
-      <name>Wood: Range/Oven MBtu</name>
-      <display_name>Wood: Range/Oven MBtu</display_name>
-      <short_name>Wood: Range/Oven MBtu</short_name>
+      <name>Wood Cord: Heating MBtu</name>
+      <display_name>Wood Cord: Heating MBtu</display_name>
+      <short_name>Wood Cord: Heating MBtu</short_name>
+      <type>Double</type>
+      <model_dependent>false</model_dependent>
+    </output>
+    <output>
+      <name>Wood Cord: Hot Water MBtu</name>
+      <display_name>Wood Cord: Hot Water MBtu</display_name>
+      <short_name>Wood Cord: Hot Water MBtu</short_name>
+      <type>Double</type>
+      <model_dependent>false</model_dependent>
+    </output>
+    <output>
+      <name>Wood Cord: Clothes Dryer MBtu</name>
+      <display_name>Wood Cord: Clothes Dryer MBtu</display_name>
+      <short_name>Wood Cord: Clothes Dryer MBtu</short_name>
+      <type>Double</type>
+      <model_dependent>false</model_dependent>
+    </output>
+    <output>
+      <name>Wood Cord: Range/Oven MBtu</name>
+      <display_name>Wood Cord: Range/Oven MBtu</display_name>
+      <short_name>Wood Cord: Range/Oven MBtu</short_name>
+      <type>Double</type>
+      <model_dependent>false</model_dependent>
+    </output>
+    <output>
+      <name>Wood Cord: Grill MBtu</name>
+      <display_name>Wood Cord: Grill MBtu</display_name>
+      <short_name>Wood Cord: Grill MBtu</short_name>
+      <type>Double</type>
+      <model_dependent>false</model_dependent>
+    </output>
+    <output>
+      <name>Wood Cord: Lighting MBtu</name>
+      <display_name>Wood Cord: Lighting MBtu</display_name>
+      <short_name>Wood Cord: Lighting MBtu</short_name>
+      <type>Double</type>
+      <model_dependent>false</model_dependent>
+    </output>
+    <output>
+      <name>Wood Cord: Fireplace MBtu</name>
+      <display_name>Wood Cord: Fireplace MBtu</display_name>
+      <short_name>Wood Cord: Fireplace MBtu</short_name>
       <type>Double</type>
       <model_dependent>false</model_dependent>
     </output>
@@ -466,6 +662,97 @@
       <name>Wood Pellets: Heating MBtu</name>
       <display_name>Wood Pellets: Heating MBtu</display_name>
       <short_name>Wood Pellets: Heating MBtu</short_name>
+      <type>Double</type>
+      <model_dependent>false</model_dependent>
+    </output>
+    <output>
+      <name>Wood Pellets: Hot Water MBtu</name>
+      <display_name>Wood Pellets: Hot Water MBtu</display_name>
+      <short_name>Wood Pellets: Hot Water MBtu</short_name>
+      <type>Double</type>
+      <model_dependent>false</model_dependent>
+    </output>
+    <output>
+      <name>Wood Pellets: Clothes Dryer MBtu</name>
+      <display_name>Wood Pellets: Clothes Dryer MBtu</display_name>
+      <short_name>Wood Pellets: Clothes Dryer MBtu</short_name>
+      <type>Double</type>
+      <model_dependent>false</model_dependent>
+    </output>
+    <output>
+      <name>Wood Pellets: Range/Oven MBtu</name>
+      <display_name>Wood Pellets: Range/Oven MBtu</display_name>
+      <short_name>Wood Pellets: Range/Oven MBtu</short_name>
+      <type>Double</type>
+      <model_dependent>false</model_dependent>
+    </output>
+    <output>
+      <name>Wood Pellets: Grill MBtu</name>
+      <display_name>Wood Pellets: Grill MBtu</display_name>
+      <short_name>Wood Pellets: Grill MBtu</short_name>
+      <type>Double</type>
+      <model_dependent>false</model_dependent>
+    </output>
+    <output>
+      <name>Wood Pellets: Lighting MBtu</name>
+      <display_name>Wood Pellets: Lighting MBtu</display_name>
+      <short_name>Wood Pellets: Lighting MBtu</short_name>
+      <type>Double</type>
+      <model_dependent>false</model_dependent>
+    </output>
+    <output>
+      <name>Wood Pellets: Fireplace MBtu</name>
+      <display_name>Wood Pellets: Fireplace MBtu</display_name>
+      <short_name>Wood Pellets: Fireplace MBtu</short_name>
+      <type>Double</type>
+      <model_dependent>false</model_dependent>
+    </output>
+    <output>
+      <name>Coal: Heating MBtu</name>
+      <display_name>Coal: Heating MBtu</display_name>
+      <short_name>Coal: Heating MBtu</short_name>
+      <type>Double</type>
+      <model_dependent>false</model_dependent>
+    </output>
+    <output>
+      <name>Coal: Hot Water MBtu</name>
+      <display_name>Coal: Hot Water MBtu</display_name>
+      <short_name>Coal: Hot Water MBtu</short_name>
+      <type>Double</type>
+      <model_dependent>false</model_dependent>
+    </output>
+    <output>
+      <name>Coal: Clothes Dryer MBtu</name>
+      <display_name>Coal: Clothes Dryer MBtu</display_name>
+      <short_name>Coal: Clothes Dryer MBtu</short_name>
+      <type>Double</type>
+      <model_dependent>false</model_dependent>
+    </output>
+    <output>
+      <name>Coal: Range/Oven MBtu</name>
+      <display_name>Coal: Range/Oven MBtu</display_name>
+      <short_name>Coal: Range/Oven MBtu</short_name>
+      <type>Double</type>
+      <model_dependent>false</model_dependent>
+    </output>
+    <output>
+      <name>Coal: Grill MBtu</name>
+      <display_name>Coal: Grill MBtu</display_name>
+      <short_name>Coal: Grill MBtu</short_name>
+      <type>Double</type>
+      <model_dependent>false</model_dependent>
+    </output>
+    <output>
+      <name>Coal: Lighting MBtu</name>
+      <display_name>Coal: Lighting MBtu</display_name>
+      <short_name>Coal: Lighting MBtu</short_name>
+      <type>Double</type>
+      <model_dependent>false</model_dependent>
+    </output>
+    <output>
+      <name>Coal: Fireplace MBtu</name>
+      <display_name>Coal: Fireplace MBtu</display_name>
+      <short_name>Coal: Fireplace MBtu</short_name>
       <type>Double</type>
       <model_dependent>false</model_dependent>
     </output>
@@ -496,7 +783,13 @@
       <filename>constants.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>301A7C10</checksum>
+      <checksum>BFBDB9E1</checksum>
+    </file>
+    <file>
+      <filename>output_report_test.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>test</usage_type>
+      <checksum>34FC690F</checksum>
     </file>
     <file>
       <version>
@@ -507,13 +800,7 @@
       <filename>measure.rb</filename>
       <filetype>rb</filetype>
       <usage_type>script</usage_type>
-      <checksum>2213ED0C</checksum>
-    </file>
-    <file>
-      <filename>output_report_test.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>test</usage_type>
-      <checksum>4C895D3B</checksum>
+      <checksum>E54E4E22</checksum>
     </file>
   </files>
 </measure>

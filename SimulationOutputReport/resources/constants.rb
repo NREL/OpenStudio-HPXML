@@ -6,8 +6,9 @@ class FT
   Gas = 'Natural Gas'
   Oil = 'Fuel Oil'
   Propane = 'Propane'
-  Wood = 'Wood'
+  WoodCord = 'Wood Cord'
   WoodPellets = 'Wood Pellets'
+  Coal = 'Coal'
 end
 
 class EUT
@@ -25,6 +26,7 @@ class EUT
   MechVent = 'Mech Vent'
   WholeHouseFan = 'Whole House Fan'
   Refrigerator = 'Refrigerator'
+  Freezer = 'Freezer'
   Dehumidifier = 'Dehumidifier'
   Dishwasher = 'Dishwasher'
   ClothesWasher = 'Clothes Washer'
@@ -33,6 +35,15 @@ class EUT
   CeilingFan = 'Ceiling Fan'
   Television = 'Television'
   PlugLoads = 'Plug Loads'
+  Vehicle = 'Electric Vehicle Charging'
+  WellPump = 'Well Pump'
+  PoolHeater = 'Pool Heater'
+  PoolPump = 'Pool Pump'
+  HotTubHeater = 'Hot Tub Heater'
+  HotTubPump = 'Hot Tub Pump'
+  Grill = 'Grill'
+  Lighting = 'Lighting'
+  Fireplace = 'Fireplace'
   PV = 'PV'
 end
 
@@ -79,4 +90,22 @@ class PFT
   # Peak Fuel Types
   Summer = 'Summer'
   Winter = 'Winter'
+end
+
+class AFT
+  # Airflow Types
+  Infiltration = 'Infiltration'
+  MechanicalVentilation = 'Mechanical Ventilation'
+  NaturalVentilation = 'Natural Ventilation'
+  WholeHouseFan = 'Whole House Fan'
+end
+
+class WT
+  # Weather Types
+  DrybulbTemp = 'Drybulb Temperature'
+  WetbulbTemp = 'Wetbulb Temperature'
+  RelativeHumidity = 'Relative Humidity'
+  WindSpeed = 'Wind Speed'
+  DiffuseSolar = 'Diffuse Solar Radiation'
+  DirectSolar = 'Direct Solar Radiation'
 end
