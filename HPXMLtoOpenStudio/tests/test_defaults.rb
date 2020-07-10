@@ -248,7 +248,25 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
     _test_default_skylight_values(hpxml_default, [1.0] * n_skylights, [1.0] * n_skylights)
   end
 
-  def test_ducts
+  def test_hvac
+    # Test inputs not overridden by defaults
+    hpxml_name = 'base.xml'
+    hpxml = HPXML.new(hpxml_path: File.join(@root_path, 'workflow', 'sample_files', hpxml_name))
+    hpxml.cooling_systems[0].cooling_shr = 0.88
+    hpxml.cooling_systems[0].compressor_type = HPXML::HVACCompressorTypeVariableSpeed
+    XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
+    hpxml_default = _test_measure()
+    _test_default_cooling_system_values(hpxml_default, 0.88, HPXML::HVACCompressorTypeVariableSpeed)
+    _test_default_heating_system_values(hpxml_default)
+
+    # Test defaults
+    hpxml = apply_hpxml_defaults('base-misc-defaults.xml')
+    XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
+    hpxml_default = _test_measure()
+    _test_default_cooling_system_values(hpxml_default, 0.73, HPXML::HVACCompressorTypeSingleStage)
+  end
+
+  def test_hvac_distribution
     # Test inputs not overridden by defaults
     hpxml_name = 'base.xml'
     hpxml = HPXML.new(hpxml_path: File.join(@root_path, 'workflow', 'sample_files', hpxml_name))
@@ -850,6 +868,17 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
 
   def _test_default_occupancy_values(hpxml, num_occupants)
     assert_equal(num_occupants, hpxml.building_occupancy.number_of_residents)
+  end
+
+  def _test_default_cooling_system_values(hpxml, shr, compressor_type)
+    assert_equal(shr, hpxml.cooling_systems[0].cooling_shr)
+    assert_equal(compressor_type, hpxml.cooling_systems[0].compressor_type)
+  end
+
+  def _test_default_heating_system_values(hpxml)
+  end
+
+  def _test_default_heat_pump_values(hpxml)
   end
 
   def _test_default_duct_values(hpxml, supply_locations, return_locations, supply_areas, return_areas, n_return_registers)
