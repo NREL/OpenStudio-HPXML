@@ -90,9 +90,9 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
     tear_down_model(model, runner)
 
     # Check for correct versions of OS
-    os_version = '3.0.1'
-    if OpenStudio.openStudioVersion != os_version
-      fail "OpenStudio version #{os_version} is required."
+    os_version = '3.0'
+    if not OpenStudio.openStudioVersion.start_with? os_version
+      fail "OpenStudio version #{os_version}.X is required."
     end
 
     # assign the user inputs to variables
