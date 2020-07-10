@@ -290,6 +290,9 @@ class HPXMLDefaults
       if heating_system.heating_system_type == HPXML::HVACTypeFurnace
         # TODO: Only set if not attached to an AC?
         heating_system.blower_watt_cfm = 0.5 # W/cfm
+      else
+        # TODO: What value to use for stoves, wall/floor furnaces, space heaters, etc?
+        heating_system.blower_watt_cfm = 0.5 # W/cfm
       end
     end
     hpxml.heat_pumps.each do |heat_pump|
