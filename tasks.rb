@@ -157,7 +157,6 @@ def create_osws
     # 'base-hvac-multiple.osw' => 'base.osw', # Not supporting multiple heating/cooling systems for now
     # 'base-hvac-multiple2.osw' => 'base.osw', # Not supporting multiple heating/cooling systems for now
     'base-hvac-none.osw' => 'base.osw',
-    # 'base-hvac-none-no-fuel-access.osw' => 'base.osw', # Doesn't affect model
     'base-hvac-portable-heater-electric-only.osw' => 'base.osw',
     'base-hvac-programmable-thermostat.osw' => 'base.osw',
     'base-hvac-room-ac-only.osw' => 'base.osw',
@@ -241,7 +240,7 @@ def create_osws
 
       workflow = OpenStudio::WorkflowJSON.new
       workflow.setOswPath(osw_path)
-      workflow.addMeasurePath('.')
+      workflow.addMeasurePath('../..')
       steps = OpenStudio::WorkflowStepVector.new
       step = OpenStudio::MeasureStep.new('BuildResidentialHPXML')
 
