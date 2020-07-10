@@ -3,8 +3,8 @@
   <schema_version>3.0</schema_version>
   <name>build_residential_hpxml</name>
   <uid>a13a8983-2b01-4930-8af2-42030b6e4233</uid>
-  <version_id>a57c8121-006e-49e3-bb94-4904fc1a91ce</version_id>
-  <version_modified>20200710T183002Z</version_modified>
+  <version_id>ef99643b-8a35-4120-bea3-c0531fac3f1e</version_id>
+  <version_modified>20200710T185853Z</version_modified>
   <xml_checksum>2C38F48B</xml_checksum>
   <class_name>BuildResidentialHPXML</class_name>
   <display_name>HPXML Builder</display_name>
@@ -5455,29 +5455,6 @@
       <checksum>A89C38C4</checksum>
     </file>
     <file>
-      <filename>base-hvac-fixed-heater-electric-only.osw</filename>
-      <filetype>osw</filetype>
-      <usage_type>test</usage_type>
-      <checksum>4A5BEA0E</checksum>
-    </file>
-    <file>
-      <filename>out.osw</filename>
-      <filetype>osw</filetype>
-      <usage_type>test</usage_type>
-      <checksum>8268906E</checksum>
-    </file>
-    <file>
-      <version>
-        <software_program>OpenStudio</software_program>
-        <identifier>2.9.0</identifier>
-        <min_compatible>2.9.0</min_compatible>
-      </version>
-      <filename>measure.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>script</usage_type>
-      <checksum>29CC249E</checksum>
-    </file>
-    <file>
       <filename>base-misc-defaults.osw</filename>
       <filetype>osw</filetype>
       <usage_type>test</usage_type>
@@ -6432,22 +6409,39 @@
       <checksum>7EA06E09</checksum>
     </file>
     <file>
+      <filename>base-hvac-fixed-heater-electric-only.osw</filename>
+      <filetype>osw</filetype>
+      <usage_type>test</usage_type>
+      <checksum>88C2A62D</checksum>
+    </file>
+    <file>
       <filename>build_residential_hpxml_test.rb</filename>
       <filetype>rb</filetype>
       <usage_type>test</usage_type>
       <checksum>FC2F62F0</checksum>
     </file>
     <file>
+      <version>
+        <software_program>OpenStudio</software_program>
+        <identifier>2.9.0</identifier>
+        <min_compatible>2.9.0</min_compatible>
+      </version>
+      <filename>measure.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>script</usage_type>
+      <checksum>2D7749A9</checksum>
+    </file>
+    <file>
       <filename>extra-second-heating-system-fireplace.osw</filename>
       <filetype>osw</filetype>
       <usage_type>test</usage_type>
-      <checksum>478E5780</checksum>
+      <checksum>8FBFA5D4</checksum>
     </file>
     <file>
       <filename>extra-second-heating-system-portable-heater.osw</filename>
       <filetype>osw</filetype>
       <usage_type>test</usage_type>
-      <checksum>71436E26</checksum>
+      <checksum>874260CF</checksum>
     </file>
   </files>
 </measure>
