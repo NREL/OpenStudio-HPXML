@@ -929,11 +929,12 @@ class EnergyPlusValidator
     if expected_sizes.size > 0
       return if expected_sizes.include?(actual_size)
 
-      errors << "Expected #{expected_sizes} element(s) but found #{actual_size} element(s) for xpath: #{xpath}"
+      expected_sizes_string = expected_sizes.size == 1 ? expected_sizes[0] : expected_sizes.join(" or ")
+      errors << "Expected #{expected_sizes_string} element(s) for xpath: #{xpath}"
     else
       return if actual_size > 0
 
-      errors << "Expected 1 or more element(s) but found 0 elements for xpath: #{xpath}"
+      errors << "Expected 1 or more element(s) for xpath: #{xpath}"
     end
   end
 
@@ -942,7 +943,7 @@ class EnergyPlusValidator
       return child
     end
 
-    return [parent, child].join(': ')
+    return [parent, child].join('/')
   end
 
   def self.update_leading_predicates(str)
