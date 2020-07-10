@@ -135,6 +135,7 @@ def create_osws
     'base-hvac-evap-cooler-only.osw' => 'base.osw',
     'base-hvac-evap-cooler-only-ducted.osw' => 'base.osw',
     'base-hvac-fireplace-wood-only.osw' => 'base.osw',
+    'base-hvac-fixed-heater-electric-only.osw' => 'base.osw',
     'base-hvac-floor-furnace-propane-only.osw' => 'base.osw',
     # 'base-hvac-flowrate.osw' => 'base.osw', # Not going to support in the measure
     'base-hvac-furnace-elec-central-ac-1-speed.osw' => 'base.osw',
@@ -156,7 +157,6 @@ def create_osws
     # 'base-hvac-multiple.osw' => 'base.osw', # Not supporting multiple heating/cooling systems for now
     # 'base-hvac-multiple2.osw' => 'base.osw', # Not supporting multiple heating/cooling systems for now
     'base-hvac-none.osw' => 'base.osw',
-    # 'base-hvac-none-no-fuel-access.osw' => 'base.osw', # Doesn't affect model
     'base-hvac-portable-heater-electric-only.osw' => 'base.osw',
     'base-hvac-programmable-thermostat.osw' => 'base.osw',
     'base-hvac-room-ac-only.osw' => 'base.osw',
@@ -243,7 +243,7 @@ def create_osws
 
       workflow = OpenStudio::WorkflowJSON.new
       workflow.setOswPath(osw_path)
-      workflow.addMeasurePath('.')
+      workflow.addMeasurePath('../..')
       steps = OpenStudio::WorkflowStepVector.new
       step = OpenStudio::MeasureStep.new('BuildResidentialHPXML')
 
@@ -1362,6 +1362,10 @@ def get_values(osw_file, step)
     step.setArgument('heating_system_fuel', HPXML::FuelTypeWoodCord)
     step.setArgument('heating_system_heating_efficiency', 0.8)
     step.setArgument('cooling_system_type', 'none')
+  elsif ['base-hvac-fixed-heater-electric-only.osw'].include? osw_file
+    step.setArgument('heating_system_type', HPXML::HVACTypeFixedHeater)
+    step.setArgument('heating_system_fuel', HPXML::FuelTypeElectricity)
+    step.setArgument('heating_system_heating_efficiency', 1.0)
   elsif ['base-hvac-floor-furnace-propane-only.osw'].include? osw_file
     step.setArgument('heating_system_type', HPXML::HVACTypeFloorFurnace)
     step.setArgument('heating_system_fuel', HPXML::FuelTypePropane)
@@ -1677,8 +1681,8 @@ def get_values(osw_file, step)
     step.setArgument('plug_loads_other_weekday_fractions', '0.035, 0.033, 0.032, 0.031, 0.032, 0.033, 0.037, 0.042, 0.043, 0.043, 0.043, 0.044, 0.045, 0.045, 0.044, 0.046, 0.048, 0.052, 0.053, 0.05, 0.047, 0.045, 0.04, 0.036')
     step.setArgument('plug_loads_other_weekend_fractions', '0.035, 0.033, 0.032, 0.031, 0.032, 0.033, 0.037, 0.042, 0.043, 0.043, 0.043, 0.044, 0.045, 0.045, 0.044, 0.046, 0.048, 0.052, 0.053, 0.05, 0.047, 0.045, 0.04, 0.036')
     step.setArgument('plug_loads_other_monthly_multipliers', '1.248, 1.257, 0.993, 0.989, 0.993, 0.827, 0.821, 0.821, 0.827, 0.99, 0.987, 1.248')
-    step.setArgument('plug_loads_television_weekday_fractions', '0.045, 0.019, 0.01, 0.001, 0.001, 0.001, 0.005, 0.009, 0.018, 0.026, 0.032, 0.038, 0.04, 0.041, 0.043, 0.045, 0.5, 0.055, 0.07, 0.085, 0.097, 0.108, 0.089, 0.07')
-    step.setArgument('plug_loads_television_weekend_fractions', '0.045, 0.019, 0.01, 0.001, 0.001, 0.001, 0.005, 0.009, 0.018, 0.026, 0.032, 0.038, 0.04, 0.041, 0.043, 0.045, 0.5, 0.055, 0.07, 0.085, 0.097, 0.108, 0.089, 0.07')
+    step.setArgument('plug_loads_television_weekday_fractions', '0.045, 0.019, 0.01, 0.001, 0.001, 0.001, 0.005, 0.009, 0.018, 0.026, 0.032, 0.038, 0.04, 0.041, 0.043, 0.045, 0.05, 0.055, 0.07, 0.085, 0.097, 0.108, 0.089, 0.07')
+    step.setArgument('plug_loads_television_weekend_fractions', '0.045, 0.019, 0.01, 0.001, 0.001, 0.001, 0.005, 0.009, 0.018, 0.026, 0.032, 0.038, 0.04, 0.041, 0.043, 0.045, 0.05, 0.055, 0.07, 0.085, 0.097, 0.108, 0.089, 0.07')
     step.setArgument('plug_loads_television_monthly_multipliers', '1.137, 1.129, 0.961, 0.969, 0.961, 0.993, 0.996, 0.96, 0.993, 0.867, 0.86, 1.137')
     step.setArgument('plug_loads_well_pump_present', true)
     step.setArgument('plug_loads_well_pump_annual_kwh', '475.0')
@@ -2078,6 +2082,7 @@ def create_hpxmls
     'base-hvac-evap-cooler-only.xml' => 'base.xml',
     'base-hvac-evap-cooler-only-ducted.xml' => 'base.xml',
     'base-hvac-fireplace-wood-only.xml' => 'base.xml',
+    'base-hvac-fixed-heater-electric-only.xml' => 'base.xml',
     'base-hvac-floor-furnace-propane-only.xml' => 'base.xml',
     'base-hvac-flowrate.xml' => 'base.xml',
     'base-hvac-furnace-elec-central-ac-1-speed.xml' => 'base.xml',
@@ -3034,7 +3039,8 @@ def set_hpxml_walls(hpxml_file, hpxml)
                   HPXML::WallTypeSteelStud => 8.1,
                   HPXML::WallTypeStone => 5.4,
                   HPXML::WallTypeStrawBale => 58.8,
-                  HPXML::WallTypeBrick => 7.9 }
+                  HPXML::WallTypeBrick => 7.9,
+                  HPXML::WallTypeAdobe => 5.0 }
     siding_types = [[HPXML::SidingTypeAluminum, HPXML::ColorReflective],
                     [HPXML::SidingTypeBrick, HPXML::ColorMediumDark],
                     [HPXML::SidingTypeFiberCement, HPXML::ColorMedium],
@@ -4403,6 +4409,12 @@ def set_hpxml_heating_systems(hpxml_file, hpxml)
   elsif ['base-hvac-portable-heater-electric-only.xml'].include? hpxml_file
     hpxml.heating_systems[0].distribution_system_idref = nil
     hpxml.heating_systems[0].heating_system_type = HPXML::HVACTypePortableHeater
+    hpxml.heating_systems[0].heating_system_fuel = HPXML::FuelTypeElectricity
+    hpxml.heating_systems[0].heating_efficiency_afue = nil
+    hpxml.heating_systems[0].heating_efficiency_percent = 1.0
+  elsif ['base-hvac-fixed-heater-electric-only.xml'].include? hpxml_file
+    hpxml.heating_systems[0].distribution_system_idref = nil
+    hpxml.heating_systems[0].heating_system_type = HPXML::HVACTypeFixedHeater
     hpxml.heating_systems[0].heating_system_fuel = HPXML::FuelTypeElectricity
     hpxml.heating_systems[0].heating_efficiency_afue = nil
     hpxml.heating_systems[0].heating_efficiency_percent = 1.0
@@ -6049,8 +6061,8 @@ def set_hpxml_plug_loads(hpxml_file, hpxml)
       hpxml.plug_loads[0].weekday_fractions = '0.035, 0.033, 0.032, 0.031, 0.032, 0.033, 0.037, 0.042, 0.043, 0.043, 0.043, 0.044, 0.045, 0.045, 0.044, 0.046, 0.048, 0.052, 0.053, 0.05, 0.047, 0.045, 0.04, 0.036'
       hpxml.plug_loads[0].weekend_fractions = '0.035, 0.033, 0.032, 0.031, 0.032, 0.033, 0.037, 0.042, 0.043, 0.043, 0.043, 0.044, 0.045, 0.045, 0.044, 0.046, 0.048, 0.052, 0.053, 0.05, 0.047, 0.045, 0.04, 0.036'
       hpxml.plug_loads[0].monthly_multipliers = '1.248, 1.257, 0.993, 0.989, 0.993, 0.827, 0.821, 0.821, 0.827, 0.99, 0.987, 1.248'
-      hpxml.plug_loads[1].weekday_fractions = '0.045, 0.019, 0.01, 0.001, 0.001, 0.001, 0.005, 0.009, 0.018, 0.026, 0.032, 0.038, 0.04, 0.041, 0.043, 0.045, 0.5, 0.055, 0.07, 0.085, 0.097, 0.108, 0.089, 0.07'
-      hpxml.plug_loads[1].weekend_fractions = '0.045, 0.019, 0.01, 0.001, 0.001, 0.001, 0.005, 0.009, 0.018, 0.026, 0.032, 0.038, 0.04, 0.041, 0.043, 0.045, 0.5, 0.055, 0.07, 0.085, 0.097, 0.108, 0.089, 0.07'
+      hpxml.plug_loads[1].weekday_fractions = '0.045, 0.019, 0.01, 0.001, 0.001, 0.001, 0.005, 0.009, 0.018, 0.026, 0.032, 0.038, 0.04, 0.041, 0.043, 0.045, 0.05, 0.055, 0.07, 0.085, 0.097, 0.108, 0.089, 0.07'
+      hpxml.plug_loads[1].weekend_fractions = '0.045, 0.019, 0.01, 0.001, 0.001, 0.001, 0.005, 0.009, 0.018, 0.026, 0.032, 0.038, 0.04, 0.041, 0.043, 0.045, 0.05, 0.055, 0.07, 0.085, 0.097, 0.108, 0.089, 0.07'
       hpxml.plug_loads[1].monthly_multipliers = '1.137, 1.129, 0.961, 0.969, 0.961, 0.993, 0.996, 0.96, 0.993, 0.867, 0.86, 1.137'
       hpxml.plug_loads.add(id: 'PlugLoadMisc3',
                            plug_load_type: HPXML::PlugLoadTypeElectricVehicleCharging,
