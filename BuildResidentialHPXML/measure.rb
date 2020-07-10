@@ -3958,7 +3958,7 @@ class HPXMLFile
 
   def self.set_windows(hpxml, runner, model, args)
     model.getSurfaces.sort.each do |surface|
-      surface.subSurfaces.each do |sub_surface|
+      surface.subSurfaces.sort.each do |sub_surface|
         next if sub_surface.subSurfaceType != 'FixedWindow'
 
         sub_surface_height = Geometry.get_surface_height(sub_surface)
@@ -4040,7 +4040,7 @@ class HPXMLFile
 
   def self.set_skylights(hpxml, runner, model, args)
     model.getSurfaces.sort.each do |surface|
-      surface.subSurfaces.each do |sub_surface|
+      surface.subSurfaces.sort.each do |sub_surface|
         next if sub_surface.subSurfaceType != 'Skylight'
 
         sub_surface_facade = Geometry.get_facade_for_surface(sub_surface)
@@ -4057,7 +4057,7 @@ class HPXMLFile
 
   def self.set_doors(hpxml, runner, model, args)
     model.getSurfaces.sort.each do |surface|
-      surface.subSurfaces.each do |sub_surface|
+      surface.subSurfaces.sort.each do |sub_surface|
         next if sub_surface.subSurfaceType != 'Door'
 
         sub_surface_facade = Geometry.get_facade_for_surface(sub_surface)
