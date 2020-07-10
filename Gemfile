@@ -4,7 +4,7 @@ source 'http://rubygems.org'
 
 gem 'nokogiri', '~> 1.10'
 gem 'oga'
-gem 'schematron-nokogiri', :git => 'http://github.com/shorowit/schematron.git'
+gem 'schematron', :git => 'http://github.com/shorowit/schematron.git'
 gem 'rake'
 gem 'minitest', '~> 5.9'
 gem 'ci_reporter_minitest', '~> 1.0.0'
