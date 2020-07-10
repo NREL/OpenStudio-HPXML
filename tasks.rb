@@ -4402,7 +4402,7 @@ def download_epws
   exit!
 end
 
-command_list = [:update_measures, :cache_weather, :create_release_zips, :update_version, :download_weather]
+command_list = [:update_measures, :cache_weather, :create_release_zips, :download_weather]
 
 def display_usage(command_list)
   puts "Usage: openstudio #{File.basename(__FILE__)} [COMMAND]\nCommands:\n  " + command_list.join("\n  ")
@@ -4482,24 +4482,6 @@ end
 
 if ARGV[0].to_sym == :download_weather
   download_epws
-end
-
-if ARGV[0].to_sym == :update_version
-  version_change = { from: '0.9.0',
-                     to: '0.10.0' }
-
-  file_names = ['workflow/run_simulation.rb']
-
-  file_names.each do |file_name|
-    text = File.read(file_name)
-    new_contents = text.gsub(version_change[:from], version_change[:to])
-
-    # To write changes to the file, use:
-    File.open(file_name, 'w') { |file| file.puts new_contents }
-    puts "Updated from version #{version_change[:from]} to version #{version_change[:to]} in #{file_name}."
-  end
-
-  puts 'Done. Now check all changed files before committing.'
 end
 
 if ARGV[0].to_sym == :create_release_zips
