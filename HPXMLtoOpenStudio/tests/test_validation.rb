@@ -7,7 +7,8 @@ require 'minitest/autorun'
 require 'fileutils'
 require_relative '../measure.rb'
 require_relative '../resources/util.rb'
-require 'schematron'
+require 'bundler/setup'
+require 'schematron-nokogiri'
 
 class HPXMLtoOpenStudioSchematronTest < MiniTest::Test
   def before_setup
