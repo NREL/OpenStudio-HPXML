@@ -28,6 +28,7 @@ require_relative 'resources/schedules'
 require_relative 'resources/simcontrols'
 require_relative 'resources/unit_conversions'
 require_relative 'resources/util'
+require_relative 'resources/version'
 require_relative 'resources/waterheater'
 require_relative 'resources/weather'
 require_relative 'resources/xmlhelper'
@@ -89,11 +90,7 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
 
     tear_down_model(model, runner)
 
-    # Check for correct versions of OS
-    os_version = '3.0.0'
-    if OpenStudio.openStudioVersion != os_version
-      fail "OpenStudio version #{os_version} is required."
-    end
+    Version.check_openstudio_version()
 
     # assign the user inputs to variables
     hpxml_path = runner.getStringArgumentValue('hpxml_path', user_arguments)
