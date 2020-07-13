@@ -2896,11 +2896,7 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
       return false
     end
 
-    # Check for correct versions of OS
-    os_version = '3.0'
-    if not OpenStudio.openStudioVersion.start_with? os_version
-      fail "OpenStudio version #{os_version}.X is required."
-    end
+    Version.check_openstudio_version()
 
     # assign the user inputs to variables
     args = get_argument_values(runner, user_arguments)
