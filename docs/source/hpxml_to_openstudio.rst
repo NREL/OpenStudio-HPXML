@@ -1047,18 +1047,19 @@ Lighting Calculation Option 2 uses a location-dependent normalized hourly interi
 Optional ``Lighting/extension/GarageWeekdayScheduleFractions``, ``Lighting/extension/GarageWeekendScheduleFractions``, and ``Lighting/extension/GarageMonthlyScheduleMultipliers`` can be provided; if not provided, values from Appendix C Table 8 of the `Title 24 2016 Residential Alternative Calculation Method Reference Manual <https://ww2.energy.ca.gov/2015publications/CEC-400-2015-024/CEC-400-2015-024-CMF-REV2.pdf>`_ are used.
 Optional ``Lighting/extension/ExteriorWeekdayScheduleFractions``, ``Lighting/extension/ExteriorWeekendScheduleFractions``, and ``Lighting/extension/ExteriorMonthlyScheduleMultipliers`` can be provided; if not provided, values from Appendix C Table 8 of the `Title 24 2016 Residential Alternative Calculation Method Reference Manual <https://ww2.energy.ca.gov/2015publications/CEC-400-2015-024/CEC-400-2015-024-CMF-REV2.pdf>`_ are used.
 Optional ``Lighting/extension/ExteriorHolidayLighting`` can also be provided; If not provided, none will be modeled. 
-If provided (indicating there is exterior holiday lighting), ``HolidayDailyEnergyUse``, ``HolidayPeriodBeginMonth``, ``HolidayPeriodBeginDayOfMonth``, ``HolidayPeriodEndMonth``, ``HolidayPeriodEndDayOfMonth``, and ``HolidayScheduleFactions`` can be optionally provided. 
+If provided (indicating there is exterior holiday lighting), ``Load[Units='kWh/day']/Value``, ``PeriodBeginMonth``, ``PeriodBeginDayOfMonth``, ``PeriodEndMonth``, ``PeriodEndDayOfMonth``, ``WeekdayScheduleFractions``, and ``WeekendScheduleFractions`` can be optionally provided. 
 If the complete set of exterior holiday lighting inputs is not provided, the following default values will be used.
 
 =============================================  =============================================================================================================================================================
 Element Name                                   Default Value
 =============================================  =============================================================================================================================================================
-HolidayDailyEnergyUse                          1.1 for SFD; 0.5 for SFA or MF  
-HolidayPeriodBeginMonth                        11  
-HolidayPeriodBeginDayOfMonth                   24  
-HolidayPeriodEndMonth                          1  
-HolidayPeriodEndDayOfMonth                     6
-HolidayScheduleFactions                        0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.008168, 0.098016, 0.168028, 0.193699, 0.283547, 0.192532, 0.03734, 0.01867  
+Load[Units='kWh/day']/Value                    1.1 for SFD; 0.5 for SFA or MF  
+PeriodBeginMonth                               11  
+PeriodBeginDayOfMonth                          24  
+PeriodEndMonth                                 1  
+PeriodEndDayOfMonth                            6
+WeekdayScheduleFractions                       0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.008168, 0.098016, 0.168028, 0.193699, 0.283547, 0.192532, 0.03734, 0.01867  
+WeekendScheduleFractions                       0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.008168, 0.098016, 0.168028, 0.193699, 0.283547, 0.192532, 0.03734, 0.01867  
 =============================================  =============================================================================================================================================================
 
 HPXML Ceiling Fans

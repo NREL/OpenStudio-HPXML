@@ -4104,7 +4104,7 @@ class HPXML < Object
              :interior_weekday_fractions, :interior_weekend_fractions, :interior_monthly_multipliers,
              :garage_weekday_fractions, :garage_weekend_fractions, :garage_monthly_multipliers,
              :exterior_weekday_fractions, :exterior_weekend_fractions, :exterior_monthly_multipliers,
-             :holiday_kwh_per_day, :holiday_period_begin_month, :holiday_period_begin_day_of_month,
+             :holiday_exists, :holiday_kwh_per_day, :holiday_period_begin_month, :holiday_period_begin_day_of_month,
              :holiday_period_end_month, :holiday_period_end_day_of_month, :holiday_weekday_fractions, :holiday_weekend_fractions]
     attr_accessor(*ATTRS)
 
@@ -4132,11 +4132,9 @@ class HPXML < Object
                                          'ExteriorMonthlyScheduleMultipliers' => @exterior_monthly_multipliers })
       if not @holiday_kwh_per_day.nil?
         exterior_holiday_lighting = XMLHelper.create_elements_as_needed(doc, ['HPXML', 'Building', 'BuildingDetails', 'Lighting', 'extension', 'ExteriorHolidayLighting'])
-        if not @holiday_kwh_per_day.nil?
-          holiday_lighting_load = XMLHelper.add_element(exterior_holiday_lighting, 'Load')
-          XMLHelper.add_element(holiday_lighting_load, 'Units', 'kWh/day')
-          XMLHelper.add_element(holiday_lighting_load, 'Value', to_float_or_nil(@holiday_kwh_per_day))
-        end
+        holiday_lighting_load = XMLHelper.add_element(exterior_holiday_lighting, 'Load')
+        XMLHelper.add_element(holiday_lighting_load, 'Units', 'kWh/day')
+        XMLHelper.add_element(holiday_lighting_load, 'Value', to_float_or_nil(@holiday_kwh_per_day))
         XMLHelper.add_element(exterior_holiday_lighting, 'PeriodBeginMonth', to_integer_or_nil(@holiday_period_begin_month)) unless @holiday_period_begin_month.nil?
         XMLHelper.add_element(exterior_holiday_lighting, 'PeriodBeginDayOfMonth', to_integer_or_nil(@holiday_period_begin_day_of_month)) unless @holiday_period_begin_day_of_month.nil?
         XMLHelper.add_element(exterior_holiday_lighting, 'PeriodEndMonth', to_integer_or_nil(@holiday_period_end_month)) unless @holiday_period_end_month.nil?
@@ -4171,6 +4169,11 @@ class HPXML < Object
       @holiday_period_end_day_of_month = to_integer_or_nil(XMLHelper.get_value(lighting, 'extension/ExteriorHolidayLighting/PeriodEndDayOfMonth'))
       @holiday_weekday_fractions = XMLHelper.get_value(lighting, 'extension/ExteriorHolidayLighting/WeekdayScheduleFractions')
       @holiday_weekend_fractions = XMLHelper.get_value(lighting, 'extension/ExteriorHolidayLighting/WeekendScheduleFractions')
+      if not XMLHelper.get_element(hpxml, 'Building/BuildingDetails/Lighting/extension/ExteriorHolidayLighting').nil?
+        @holiday_exists = true
+      else
+        @holiday_exists = false
+      end
     end
   end
 

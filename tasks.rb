@@ -288,7 +288,7 @@ def create_hpxmls
     'base-misc-whole-house-fan.xml' => 'base.xml',
     'base-pv.xml' => 'base.xml',
     'base-misc-neighbor-shading.xml' => 'base.xml',
-    'base-misc-detailed-schedules.xml' => 'base.xml',
+    'base-misc-lighting-detailed.xml' => 'base.xml',
 
     'hvac_autosizing/base-autosize.xml' => 'base.xml',
     'hvac_autosizing/base-hvac-air-to-air-heat-pump-1-speed-autosize.xml' => 'base-hvac-air-to-air-heat-pump-1-speed.xml',
@@ -4157,7 +4157,7 @@ def set_hpxml_hot_tubs(hpxml_file, hpxml)
 end
 
 def set_hpxml_lighting_schedule(hpxml_file, hpxml)
-  if ['base-misc-detailed-schedules.xml'].include? hpxml_file
+  if ['base-misc-lighting-detailed.xml'].include? hpxml_file
     hpxml.lighting.interior_weekday_fractions = '0.20, 0.20, 0.20, 0.20, 0.20, 0.20, 0.20, 0.90, 0.90, 0.90, 0.90, 0.90, 0.90, 0.90, 0.90, 0.90, 0.70, 0.70, 0.50, 0.50, 0.20, 0.20, 0.20, 0.20'
     hpxml.lighting.interior_weekend_fractions = '0.20, 0.20, 0.20, 0.20, 0.20, 0.20, 0.20, 0.90, 0.90, 0.90, 0.90, 0.90, 0.90, 0.90, 0.90, 0.90, 0.70, 0.70, 0.50, 0.50, 0.20, 0.20, 0.20, 0.20'
     hpxml.lighting.interior_monthly_multipliers = '1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0'

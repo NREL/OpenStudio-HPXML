@@ -359,15 +359,11 @@ class MonthWeekdayWeekendSchedule
           wknd_vals[h] = (@monthly_values[m - 1] * @weekend_hourly_values[h - 1] * @mult_weekend) / @maxval
         end
 
-        # FIXME: Extending end date of current rule(s) doesn't seem to allow non-contiguous holiday schedules (e.g. 1/1-1/6 and 11/24-12/31).
-        # Cont'd: Because schedules for a period of 1/1-1/6 are identical to those for 11/24-12/31 and the end date of schedule rule for period 1/1-1/6 gets extended to 12/31.
-        # Cont'd: I have a limited understanding of this part of the code, so I wonder if this part is necessary. Commenting this out may have an adverse effect on simulation runtime?
-        # if (wkdy_vals == prev_wkdy_vals) && (wknd_vals == prev_wknd_vals)
-        #   # Extend end date of current rule(s)
-        #   prev_wkdy_rule.setEndDate(date_e) unless prev_wkdy_rule.nil?
-        #   prev_wknd_rule.setEndDate(date_e) unless prev_wknd_rule.nil?
-        # elsif wkdy_vals == wknd_vals
-        if wkdy_vals == wknd_vals
+        if (wkdy_vals == prev_wkdy_vals) && (wknd_vals == prev_wknd_vals)
+          # Extend end date of current rule(s)
+          prev_wkdy_rule.setEndDate(date_e) unless prev_wkdy_rule.nil?
+          prev_wknd_rule.setEndDate(date_e) unless prev_wknd_rule.nil?
+        elsif wkdy_vals == wknd_vals
           # Alldays
           wkdy_rule = OpenStudio::Model::ScheduleRule.new(schedule)
           wkdy_rule.setName(@sch_name + " #{Schedule.allday_name} ruleset#{m}")
