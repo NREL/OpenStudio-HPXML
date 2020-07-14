@@ -652,6 +652,7 @@ class HPXML < Object
 
       { 'Run Period' => @sim_begin_month, 'Daylight Saving' => @dst_begin_month }.each do |sim_ctl, begin_month|
         next unless not begin_month.nil?
+
         valid_months = (1..12).to_a
         if not valid_months.include? begin_month
           fail "#{sim_ctl} Begin Month (#{begin_month}) must be one of: #{valid_months.join(', ')}."
@@ -660,6 +661,7 @@ class HPXML < Object
 
       { 'Run Period' => @sim_end_month, 'Daylight Saving' => @dst_end_month }.each do |sim_ctl, end_month|
         next unless not end_month.nil?
+
         valid_months = (1..12).to_a
         if not valid_months.include? end_month
           fail "#{sim_ctl} End Month (#{end_month}) must be one of: #{valid_months.join(', ')}."
