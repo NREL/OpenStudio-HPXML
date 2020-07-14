@@ -230,6 +230,7 @@ def create_hpxmls
     'base-hvac-evap-cooler-only.xml' => 'base.xml',
     'base-hvac-evap-cooler-only-ducted.xml' => 'base.xml',
     'base-hvac-fireplace-wood-only.xml' => 'base.xml',
+    'base-hvac-fixed-heater-electric-only.xml' => 'base.xml',
     'base-hvac-floor-furnace-propane-only.xml' => 'base.xml',
     'base-hvac-flowrate.xml' => 'base.xml',
     'base-hvac-furnace-elec-central-ac-1-speed.xml' => 'base.xml',
@@ -278,6 +279,7 @@ def create_hpxmls
     'base-mechvent-hrv-asre.xml' => 'base.xml',
     'base-mechvent-supply.xml' => 'base.xml',
     'base-mechvent-bath-kitchen-fans.xml' => 'base.xml',
+    'base-mechvent-multiple.xml' => 'base-mechvent-bath-kitchen-fans.xml',
     'base-misc-ceiling-fans.xml' => 'base.xml',
     'base-misc-defaults.xml' => 'base.xml',
     'base-misc-defaults2.xml' => 'base-dhw-recirc-demand.xml',
@@ -1184,7 +1186,8 @@ def set_hpxml_walls(hpxml_file, hpxml)
                   HPXML::WallTypeSteelStud => 8.1,
                   HPXML::WallTypeStone => 5.4,
                   HPXML::WallTypeStrawBale => 58.8,
-                  HPXML::WallTypeBrick => 7.9 }
+                  HPXML::WallTypeBrick => 7.9,
+                  HPXML::WallTypeAdobe => 5.0 }
     siding_types = [[HPXML::SidingTypeAluminum, HPXML::ColorReflective],
                     [HPXML::SidingTypeBrick, HPXML::ColorMediumDark],
                     [HPXML::SidingTypeFiberCement, HPXML::ColorMedium],
@@ -2535,6 +2538,12 @@ def set_hpxml_heating_systems(hpxml_file, hpxml)
                               heating_capacity: 3200,
                               heating_efficiency_percent: 1,
                               fraction_heat_load_served: 0.1)
+  elsif ['base-mechvent-multiple.xml'].include? hpxml_file
+    hpxml.heating_systems[0].heating_capacity /= 2.0
+    hpxml.heating_systems[0].fraction_heat_load_served /= 2.0
+    hpxml.heating_systems << hpxml.heating_systems[0].dup
+    hpxml.heating_systems[1].id = 'HeatingSystem2'
+    hpxml.heating_systems[1].distribution_system_idref = 'HVACDistribution2'
   elsif ['invalid_files/hvac-frac-load-served.xml'].include? hpxml_file
     hpxml.heating_systems[0].fraction_heat_load_served += 0.1
   elsif ['base-hvac-fireplace-wood-only.xml'].include? hpxml_file
@@ -2552,6 +2561,12 @@ def set_hpxml_heating_systems(hpxml_file, hpxml)
   elsif ['base-hvac-portable-heater-electric-only.xml'].include? hpxml_file
     hpxml.heating_systems[0].distribution_system_idref = nil
     hpxml.heating_systems[0].heating_system_type = HPXML::HVACTypePortableHeater
+    hpxml.heating_systems[0].heating_system_fuel = HPXML::FuelTypeElectricity
+    hpxml.heating_systems[0].heating_efficiency_afue = nil
+    hpxml.heating_systems[0].heating_efficiency_percent = 1.0
+  elsif ['base-hvac-fixed-heater-electric-only.xml'].include? hpxml_file
+    hpxml.heating_systems[0].distribution_system_idref = nil
+    hpxml.heating_systems[0].heating_system_type = HPXML::HVACTypeFixedHeater
     hpxml.heating_systems[0].heating_system_fuel = HPXML::FuelTypeElectricity
     hpxml.heating_systems[0].heating_efficiency_afue = nil
     hpxml.heating_systems[0].heating_efficiency_percent = 1.0
@@ -2707,6 +2722,12 @@ def set_hpxml_cooling_systems(hpxml_file, hpxml)
                               fraction_cool_load_served: 0.25,
                               cooling_efficiency_seer: 13,
                               cooling_shr: 0.65)
+  elsif ['base-mechvent-multiple.xml'].include? hpxml_file
+    hpxml.cooling_systems[0].fraction_cool_load_served /= 2.0
+    hpxml.cooling_systems[0].cooling_capacity /= 2.0
+    hpxml.cooling_systems << hpxml.cooling_systems[0].dup
+    hpxml.cooling_systems[1].id += '2'
+    hpxml.cooling_systems[1].distribution_system_idref = 'HVACDistribution2'
   elsif ['invalid_files/hvac-frac-load-served.xml'].include? hpxml_file
     hpxml.cooling_systems[0].fraction_cool_load_served += 0.2
   elsif ['invalid_files/hvac-dse-multiple-attached-cooling.xml'].include? hpxml_file
@@ -3097,6 +3118,10 @@ def set_hpxml_hvac_distributions(hpxml_file, hpxml)
     hpxml.hvac_distributions[-1].id = 'HVACDistribution4'
     hpxml.hvac_distributions << hpxml.hvac_distributions[0].dup
     hpxml.hvac_distributions[-1].id = 'HVACDistribution5'
+  elsif ['base-mechvent-multiple.xml'].include? hpxml_file
+    hpxml.hvac_distributions[0].conditioned_floor_area_served /= 2.0
+    hpxml.hvac_distributions << hpxml.hvac_distributions[0].dup
+    hpxml.hvac_distributions[1].id = 'HVACDistribution2'
   elsif ['base-hvac-dse.xml',
          'base-dhw-indirect-dse.xml'].include? hpxml_file
     hpxml.hvac_distributions[0].distribution_system_type = HPXML::HVACDistributionTypeDSE
@@ -3365,6 +3390,67 @@ def set_hpxml_ventilation_fans(hpxml_file, hpxml)
     hpxml.ventilation_fans.add(id: 'BathFans',
                                fan_location: HPXML::LocationBath,
                                used_for_local_ventilation: true)
+  elsif ['base-mechvent-multiple.xml'].include? hpxml_file
+    hpxml.ventilation_fans.add(id: 'WholeHouseFan',
+                               rated_flow_rate: 2000,
+                               fan_power: 150,
+                               used_for_seasonal_cooling_load_reduction: true)
+    hpxml.ventilation_fans.add(id: 'Supply',
+                               fan_type: HPXML::MechVentTypeSupply,
+                               tested_flow_rate: 110,
+                               hours_in_operation: 24,
+                               fan_power: 30,
+                               used_for_whole_building_ventilation: true)
+    hpxml.ventilation_fans.add(id: 'Exhaust',
+                               fan_type: HPXML::MechVentTypeExhaust,
+                               rated_flow_rate: 50,
+                               hours_in_operation: 14,
+                               fan_power: 10,
+                               used_for_whole_building_ventilation: true)
+    hpxml.ventilation_fans.add(id: 'Balanced',
+                               fan_type: HPXML::MechVentTypeBalanced,
+                               tested_flow_rate: 110,
+                               hours_in_operation: 24,
+                               fan_power: 60,
+                               used_for_whole_building_ventilation: true)
+    hpxml.ventilation_fans.add(id: 'ERV',
+                               fan_type: HPXML::MechVentTypeERV,
+                               tested_flow_rate: 50,
+                               hours_in_operation: 24,
+                               total_recovery_efficiency: 0.48,
+                               sensible_recovery_efficiency: 0.72,
+                               fan_power: 30,
+                               used_for_whole_building_ventilation: true)
+    hpxml.ventilation_fans.add(id: 'HRV',
+                               fan_type: HPXML::MechVentTypeHRV,
+                               tested_flow_rate: 60,
+                               hours_in_operation: 24,
+                               sensible_recovery_efficiency: 0.72,
+                               fan_power: 30,
+                               used_for_whole_building_ventilation: true)
+    hpxml.ventilation_fans.reverse_each do |vent_fan|
+      vent_fan.fan_power /= 2.0
+      vent_fan.rated_flow_rate /= 2.0 unless vent_fan.rated_flow_rate.nil?
+      vent_fan.tested_flow_rate /= 2.0 unless vent_fan.tested_flow_rate.nil?
+      hpxml.ventilation_fans << vent_fan.dup
+      hpxml.ventilation_fans[-1].id = "#{vent_fan.id} 2"
+      hpxml.ventilation_fans[-1].start_hour = vent_fan.start_hour - 1 unless vent_fan.start_hour.nil?
+      hpxml.ventilation_fans[-1].hours_in_operation = vent_fan.hours_in_operation - 1 unless vent_fan.hours_in_operation.nil?
+    end
+    hpxml.ventilation_fans.add(id: 'CFIS1',
+                               fan_type: HPXML::MechVentTypeCFIS,
+                               tested_flow_rate: 160,
+                               hours_in_operation: 8,
+                               fan_power: 150,
+                               used_for_whole_building_ventilation: true,
+                               distribution_system_idref: 'HVACDistribution')
+    hpxml.ventilation_fans.add(id: 'CFIS2',
+                               fan_type: HPXML::MechVentTypeCFIS,
+                               tested_flow_rate: 170,
+                               hours_in_operation: 8,
+                               fan_power: 150,
+                               used_for_whole_building_ventilation: true,
+                               distribution_system_idref: 'HVACDistribution2')
   end
 end
 
@@ -4269,44 +4355,15 @@ def set_hpxml_fuel_loads(hpxml_file, hpxml)
 end
 
 def download_epws
-  weather_dir = File.join(File.dirname(__FILE__), 'weather')
+  require_relative 'HPXMLtoOpenStudio/resources/util'
 
-  require 'net/http'
   require 'tempfile'
-
   tmpfile = Tempfile.new('epw')
 
-  url = URI.parse('https://data.nrel.gov/files/128/tmy3s-cache-csv.zip')
-  http = Net::HTTP.new(url.host, url.port)
-  http.use_ssl = true
-  http.verify_mode = OpenSSL::SSL::VERIFY_NONE
-
-  params = { 'User-Agent' => 'curl/7.43.0', 'Accept-Encoding' => 'identity' }
-  request = Net::HTTP::Get.new(url.path, params)
-  request.content_type = 'application/zip, application/octet-stream'
-
-  http.request request do |response|
-    total = response.header['Content-Length'].to_i
-    if total == 0
-      fail 'Did not successfully download zip file.'
-    end
-
-    size = 0
-    progress = 0
-    open tmpfile, 'wb' do |io|
-      response.read_body do |chunk|
-        io.write chunk
-        size += chunk.size
-        new_progress = (size * 100) / total
-        unless new_progress == progress
-          puts 'Downloading %s (%3d%%) ' % [url.path, new_progress]
-        end
-        progress = new_progress
-      end
-    end
-  end
+  UrlResolver.fetch('https://data.nrel.gov/system/files/128/tmy3s-cache-csv.zip', tmpfile)
 
   puts 'Extracting weather files...'
+  weather_dir = File.join(File.dirname(__FILE__), 'weather')
   unzip_file = OpenStudio::UnzipFile.new(tmpfile.path.to_s)
   unzip_file.extractAllFiles(OpenStudio::toPath(weather_dir))
 
@@ -4316,7 +4373,7 @@ def download_epws
   exit!
 end
 
-command_list = [:update_measures, :cache_weather, :create_release_zips, :update_version, :download_weather]
+command_list = [:update_measures, :cache_weather, :create_release_zips, :download_weather]
 
 def display_usage(command_list)
   puts "Usage: openstudio #{File.basename(__FILE__)} [COMMAND]\nCommands:\n  " + command_list.join("\n  ")
@@ -4396,24 +4453,6 @@ end
 
 if ARGV[0].to_sym == :download_weather
   download_epws
-end
-
-if ARGV[0].to_sym == :update_version
-  version_change = { from: '0.9.0',
-                     to: '0.10.0' }
-
-  file_names = ['workflow/run_simulation.rb']
-
-  file_names.each do |file_name|
-    text = File.read(file_name)
-    new_contents = text.gsub(version_change[:from], version_change[:to])
-
-    # To write changes to the file, use:
-    File.open(file_name, 'w') { |file| file.puts new_contents }
-    puts "Updated from version #{version_change[:from]} to version #{version_change[:to]} in #{file_name}."
-  end
-
-  puts 'Done. Now check all changed files before committing.'
 end
 
 if ARGV[0].to_sym == :create_release_zips
