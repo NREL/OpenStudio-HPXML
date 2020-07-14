@@ -553,6 +553,7 @@ class HPXML < Object
     def method_missing(meth, *args)
       # Complain if no value has been set rather than just returning nil
       raise NoMethodError, "undefined method '#{meth}' for #{self}" unless meth.to_s.end_with?('=')
+
       super
     end
   end
@@ -653,6 +654,7 @@ class HPXML < Object
 
       { 'Run Period' => @sim_begin_month, 'Daylight Saving' => @dst_begin_month }.each do |sim_ctl, begin_month|
         next unless not begin_month.nil?
+
         valid_months = (1..12).to_a
         if not valid_months.include? begin_month
           fail "#{sim_ctl} Begin Month (#{begin_month}) must be one of: #{valid_months.join(', ')}."
@@ -661,6 +663,7 @@ class HPXML < Object
 
       { 'Run Period' => @sim_end_month, 'Daylight Saving' => @dst_end_month }.each do |sim_ctl, end_month|
         next unless not end_month.nil?
+
         valid_months = (1..12).to_a
         if not valid_months.include? end_month
           fail "#{sim_ctl} End Month (#{end_month}) must be one of: #{valid_months.join(', ')}."
