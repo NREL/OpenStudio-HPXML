@@ -64,13 +64,21 @@ class HPXMLtoOpenStudioLightingTest < MiniTest::Test
   end
 
   def test_exterior_holiday_lighting
-    args_hash = {}
-    args_hash['hpxml_path'] = File.absolute_path(File.join(sample_files_dir, 'base-misc-detailed-schedules.xml'))
-    model, hpxml = _test_measure(args_hash)
+    ['base.xml',
+     'base-misc-defaults.xml',
+     'base-misc-detailed-schedules.xml'].each do |hpxml_name|
+      args_hash = {}
+      args_hash['hpxml_path'] = File.absolute_path(File.join(sample_files_dir, hpxml_name))
+      model, hpxml = _test_measure(args_hash)
 
-    # Check exterior holiday lighting
-    ext_holiday_kwh_yr = get_kwh_per_year(model, Constants.ObjectNameLightingExteriorHoliday)
-    assert_in_delta(58.3, ext_holiday_kwh_yr, 1.0)
+      if hpxml_name == 'base-misc-detailed-schedules.xml'
+        # Check exterior holiday lighting
+        ext_holiday_kwh_yr = get_kwh_per_year(model, Constants.ObjectNameLightingExteriorHoliday)
+        assert_in_delta(58.3, ext_holiday_kwh_yr, 1.0)
+      else
+        assert_equal(false, hpxml.lighting.holiday_exists)
+      end
+    end
   end
 
   def _test_measure(args_hash)

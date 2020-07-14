@@ -123,6 +123,7 @@ class HPXML < Object
   HVACTypeElectricResistance = 'ElectricResistance'
   HVACTypeEvaporativeCooler = 'evaporative cooler'
   HVACTypeFireplace = 'Fireplace'
+  HVACTypeFixedHeater = 'FixedHeater'
   HVACTypeFloorFurnace = 'FloorFurnace'
   HVACTypeFurnace = 'Furnace'
   HVACTypeHeatPumpAirToAir = 'air-to-air'
@@ -223,6 +224,7 @@ class HPXML < Object
   UnitsKwhPerYear = 'kWh/year'
   UnitsPercent = 'Percent'
   UnitsThermPerYear = 'therm/year'
+  WallTypeAdobe = 'Adobe'
   WallTypeBrick = 'StructuralBrick'
   WallTypeCMU = 'ConcreteMasonryUnit'
   WallTypeConcrete = 'SolidConcrete'
@@ -311,13 +313,21 @@ class HPXML < Object
   def fraction_of_windows_operable()
     # Calculates the fraction of windows that are operable.
     # Since we don't have quantity available, we use area as an approximation.
-    window_area_total = @windows.map { |w| w.area }.inject(0, :+)
-    window_area_operable = @windows.map { |w| w.fraction_operable * w.area }.inject(0, :+)
+    window_area_total = @windows.map { |w| w.area }.sum(0.0)
+    window_area_operable = @windows.map { |w| w.fraction_operable * w.area }.sum(0.0)
     if window_area_total <= 0
       return 0.0
     end
 
     return window_area_operable / window_area_total
+  end
+
+  def total_fraction_cool_load_served()
+    return @cooling_systems.total_fraction_cool_load_served + @heat_pumps.total_fraction_cool_load_served
+  end
+
+  def total_fraction_heat_load_served()
+    return @heating_systems.total_fraction_heat_load_served + @heat_pumps.total_fraction_heat_load_served
   end
 
   def has_walkout_basement()
@@ -625,7 +635,8 @@ class HPXML < Object
     ATTRS = [:xml_type, :xml_generated_by, :created_date_and_time, :transaction,
              :software_program_used, :software_program_version, :eri_calculation_version,
              :eri_design, :timestep, :building_id, :event_type, :state_code,
-             :begin_month, :begin_day_of_month, :end_month, :end_day_of_month,
+             :sim_begin_month, :sim_begin_day_of_month, :sim_end_month, :sim_end_day_of_month,
+             :dst_enabled, :dst_begin_month, :dst_begin_day_of_month, :dst_end_month, :dst_end_day_of_month,
              :apply_ashrae140_assumptions]
     attr_accessor(*ATTRS)
 
@@ -639,44 +650,49 @@ class HPXML < Object
         end
       end
 
-      if not @begin_month.nil?
+      { 'Run Period' => @sim_begin_month, 'Daylight Saving' => @dst_begin_month }.each do |sim_ctl, begin_month|
+        next unless not begin_month.nil?
         valid_months = (1..12).to_a
-        if not valid_months.include? @begin_month
-          fail "Begin Month (#{@begin_month}) must be one of: #{valid_months.join(', ')}."
+        if not valid_months.include? begin_month
+          fail "#{sim_ctl} Begin Month (#{begin_month}) must be one of: #{valid_months.join(', ')}."
         end
       end
 
-      if not @end_month.nil?
+      { 'Run Period' => @sim_end_month, 'Daylight Saving' => @dst_end_month }.each do |sim_ctl, end_month|
+        next unless not end_month.nil?
         valid_months = (1..12).to_a
-        if not valid_months.include? @end_month
-          fail "End Month (#{@end_month}) must be one of: #{valid_months.join(', ')}."
+        if not valid_months.include? end_month
+          fail "#{sim_ctl} End Month (#{end_month}) must be one of: #{valid_months.join(', ')}."
         end
       end
 
       months_days = { [1, 3, 5, 7, 8, 10, 12] => (1..31).to_a, [4, 6, 9, 11] => (1..30).to_a, [2] => (1..28).to_a }
       months_days.each do |months, valid_days|
-        if (not @begin_day_of_month.nil?) && (months.include? @begin_month)
-          if not valid_days.include? @begin_day_of_month
-            fail "Begin Day of Month (#{@begin_day_of_month}) must be one of: #{valid_days.join(', ')}."
+        { 'Run Period' => [@sim_begin_month, @sim_begin_day_of_month, @sim_end_month, @sim_end_day_of_month], 'Daylight Saving' => [@dst_begin_month, @dst_begin_day_of_month, @dst_end_month, @dst_end_day_of_month] }.each do |sim_ctl, months_and_days|
+          begin_month, begin_day_of_month, end_month, end_day_of_month = months_and_days
+          if (not begin_day_of_month.nil?) && (months.include? begin_month)
+            if not valid_days.include? begin_day_of_month
+              fail "#{sim_ctl} Begin Day of Month (#{begin_day_of_month}) must be one of: #{valid_days.join(', ')}."
+            end
           end
-        end
-        next unless (not @end_day_of_month.nil?) && (months.include? @end_month)
-        if not valid_days.include? @end_day_of_month
-          fail "End Day of Month (#{@end_day_of_month}) must be one of: #{valid_days.join(', ')}."
+          next unless (not end_day_of_month.nil?) && (months.include? end_month)
+          if not valid_days.include? end_day_of_month
+            fail "#{sim_ctl} End Day of Month (#{end_day_of_month}) must be one of: #{valid_days.join(', ')}."
+          end
         end
       end
 
-      if (not @begin_month.nil?) && (not @end_month.nil?)
-        if @begin_month > @end_month
-          fail "Begin Month (#{@begin_month}) cannot come after End Month (#{@end_month})."
+      { 'Run Period' => [@sim_begin_month, @sim_begin_day_of_month, @sim_end_month, @sim_end_day_of_month] }.each do |sim_ctl, months_and_days|
+        begin_month, begin_day_of_month, end_month, end_day_of_month = months_and_days
+        next unless (not begin_month.nil?) && (not end_month.nil?)
+        if begin_month > end_month
+          fail "#{sim_ctl} Begin Month (#{begin_month}) cannot come after #{sim_ctl} End Month (#{end_month})."
         end
 
-        if (not @begin_day_of_month.nil?) && (not @end_day_of_month.nil?)
-          if @begin_month == @end_month
-            if @begin_day_of_month > @end_day_of_month
-              fail "Begin Day of Month (#{@begin_day_of_month}) cannot come after End Day of Month (#{@end_day_of_month}) for the same month (#{@begin_month})."
-            end
-          end
+        next unless (not begin_day_of_month.nil?) && (not end_day_of_month.nil?)
+        next unless begin_month == end_month
+        if begin_day_of_month > end_day_of_month
+          fail "#{sim_ctl} Begin Day of Month (#{begin_day_of_month}) cannot come after #{sim_ctl} End Day of Month (#{end_day_of_month}) for the same month (#{begin_month})."
         end
       end
 
@@ -707,13 +723,21 @@ class HPXML < Object
         XMLHelper.add_element(eri_calculation, 'Version', @eri_calculation_version) unless @eri_calculation_version.nil?
         XMLHelper.add_element(eri_calculation, 'Design', @eri_design) unless @eri_design.nil?
       end
-      if (not @timestep.nil?) || (not @begin_month.nil?) || (not @begin_day_of_month.nil?) || (not @end_month.nil?) || (not @end_day_of_month.nil?)
+      if (not @timestep.nil?) || (not @sim_begin_month.nil?) || (not @sim_begin_day_of_month.nil?) || (not @sim_end_month.nil?) || (not @sim_end_day_of_month.nil?) || (not @dst_enabled.nil?) || (not @dst_begin_month.nil?) || (not @dst_begin_day_of_month.nil?) || (not @dst_end_month.nil?) || (not @dst_end_day_of_month.nil?)
         simulation_control = XMLHelper.add_element(extension, 'SimulationControl')
         XMLHelper.add_element(simulation_control, 'Timestep', to_integer_or_nil(@timestep)) unless @timestep.nil?
-        XMLHelper.add_element(simulation_control, 'BeginMonth', to_integer_or_nil(@begin_month)) unless @begin_month.nil?
-        XMLHelper.add_element(simulation_control, 'BeginDayOfMonth', to_integer_or_nil(@begin_day_of_month)) unless @begin_day_of_month.nil?
-        XMLHelper.add_element(simulation_control, 'EndMonth', to_integer_or_nil(@end_month)) unless @end_month.nil?
-        XMLHelper.add_element(simulation_control, 'EndDayOfMonth', to_integer_or_nil(@end_day_of_month)) unless @end_day_of_month.nil?
+        XMLHelper.add_element(simulation_control, 'BeginMonth', to_integer_or_nil(@sim_begin_month)) unless @sim_begin_month.nil?
+        XMLHelper.add_element(simulation_control, 'BeginDayOfMonth', to_integer_or_nil(@sim_begin_day_of_month)) unless @sim_begin_day_of_month.nil?
+        XMLHelper.add_element(simulation_control, 'EndMonth', to_integer_or_nil(@sim_end_month)) unless @sim_end_month.nil?
+        XMLHelper.add_element(simulation_control, 'EndDayOfMonth', to_integer_or_nil(@sim_end_day_of_month)) unless @sim_end_day_of_month.nil?
+        if (not @dst_enabled.nil?) || (not @dst_begin_month.nil?) || (not @dst_begin_day_of_month.nil?) || (not @dst_end_month.nil?) || (not @dst_end_day_of_month.nil?)
+          daylight_saving = XMLHelper.add_element(simulation_control, 'DaylightSaving')
+          XMLHelper.add_element(daylight_saving, 'Enabled', to_bool_or_nil(@dst_enabled)) unless @dst_enabled.nil?
+          XMLHelper.add_element(daylight_saving, 'BeginMonth', to_integer_or_nil(@dst_begin_month)) unless @dst_begin_month.nil?
+          XMLHelper.add_element(daylight_saving, 'BeginDayOfMonth', to_integer_or_nil(@dst_begin_day_of_month)) unless @dst_begin_day_of_month.nil?
+          XMLHelper.add_element(daylight_saving, 'EndMonth', to_integer_or_nil(@dst_end_month)) unless @dst_end_month.nil?
+          XMLHelper.add_element(daylight_saving, 'EndDayOfMonth', to_integer_or_nil(@dst_end_day_of_month)) unless @dst_end_day_of_month.nil?
+        end
       end
       if XMLHelper.get_element(extension, 'ERICalculation').nil? && XMLHelper.get_element(extension, 'SimulationControl').nil? && @apply_ashrae140_assumptions.nil?
         extension.remove
@@ -745,10 +769,15 @@ class HPXML < Object
       @eri_calculation_version = XMLHelper.get_value(hpxml, 'SoftwareInfo/extension/ERICalculation/Version')
       @eri_design = XMLHelper.get_value(hpxml, 'SoftwareInfo/extension/ERICalculation/Design')
       @timestep = to_integer_or_nil(XMLHelper.get_value(hpxml, 'SoftwareInfo/extension/SimulationControl/Timestep'))
-      @begin_month = to_integer_or_nil(XMLHelper.get_value(hpxml, 'SoftwareInfo/extension/SimulationControl/BeginMonth'))
-      @begin_day_of_month = to_integer_or_nil(XMLHelper.get_value(hpxml, 'SoftwareInfo/extension/SimulationControl/BeginDayOfMonth'))
-      @end_month = to_integer_or_nil(XMLHelper.get_value(hpxml, 'SoftwareInfo/extension/SimulationControl/EndMonth'))
-      @end_day_of_month = to_integer_or_nil(XMLHelper.get_value(hpxml, 'SoftwareInfo/extension/SimulationControl/EndDayOfMonth'))
+      @sim_begin_month = to_integer_or_nil(XMLHelper.get_value(hpxml, 'SoftwareInfo/extension/SimulationControl/BeginMonth'))
+      @sim_begin_day_of_month = to_integer_or_nil(XMLHelper.get_value(hpxml, 'SoftwareInfo/extension/SimulationControl/BeginDayOfMonth'))
+      @sim_end_month = to_integer_or_nil(XMLHelper.get_value(hpxml, 'SoftwareInfo/extension/SimulationControl/EndMonth'))
+      @sim_end_day_of_month = to_integer_or_nil(XMLHelper.get_value(hpxml, 'SoftwareInfo/extension/SimulationControl/EndDayOfMonth'))
+      @dst_enabled = to_bool_or_nil(XMLHelper.get_value(hpxml, 'SoftwareInfo/extension/SimulationControl/DaylightSaving/Enabled'))
+      @dst_begin_month = to_integer_or_nil(XMLHelper.get_value(hpxml, 'SoftwareInfo/extension/SimulationControl/DaylightSaving/BeginMonth'))
+      @dst_begin_day_of_month = to_integer_or_nil(XMLHelper.get_value(hpxml, 'SoftwareInfo/extension/SimulationControl/DaylightSaving/BeginDayOfMonth'))
+      @dst_end_month = to_integer_or_nil(XMLHelper.get_value(hpxml, 'SoftwareInfo/extension/SimulationControl/DaylightSaving/EndMonth'))
+      @dst_end_day_of_month = to_integer_or_nil(XMLHelper.get_value(hpxml, 'SoftwareInfo/extension/SimulationControl/DaylightSaving/EndDayOfMonth'))
       @apply_ashrae140_assumptions = to_bool_or_nil(XMLHelper.get_value(hpxml, 'SoftwareInfo/extension/ApplyASHRAE140Assumptions'))
       @building_id = HPXML::get_id(hpxml, 'Building/BuildingID')
       @event_type = XMLHelper.get_value(hpxml, 'Building/ProjectStatus/EventType')
@@ -2385,6 +2414,10 @@ class HPXML < Object
         self << HeatingSystem.new(@hpxml_object, heating_system)
       end
     end
+
+    def total_fraction_heat_load_served
+      map { |htg_sys| htg_sys.fraction_heat_load_served }.sum(0.0)
+    end
   end
 
   class HeatingSystem < BaseElement
@@ -2454,7 +2487,7 @@ class HPXML < Object
       if [HVACTypeFurnace, HVACTypeWallFurnace, HVACTypeFloorFurnace, HVACTypeBoiler].include? @heating_system_type
         efficiency_units = 'AFUE'
         efficiency_value = @heating_efficiency_afue
-      elsif [HVACTypeElectricResistance, HVACTypeStove, HVACTypePortableHeater, HVACTypeFireplace].include? @heating_system_type
+      elsif [HVACTypeElectricResistance, HVACTypeStove, HVACTypePortableHeater, HVACTypeFixedHeater, HVACTypeFireplace].include? @heating_system_type
         efficiency_units = UnitsPercent
         efficiency_value = @heating_efficiency_percent
       end
@@ -2482,7 +2515,7 @@ class HPXML < Object
       @heating_capacity = to_float_or_nil(XMLHelper.get_value(heating_system, 'HeatingCapacity'))
       if [HVACTypeFurnace, HVACTypeWallFurnace, HVACTypeFloorFurnace, HVACTypeBoiler].include? @heating_system_type
         @heating_efficiency_afue = to_float_or_nil(XMLHelper.get_value(heating_system, "AnnualHeatingEfficiency[Units='AFUE']/Value"))
-      elsif [HVACTypeElectricResistance, HVACTypeStove, HVACTypePortableHeater, HVACTypeFireplace].include? @heating_system_type
+      elsif [HVACTypeElectricResistance, HVACTypeStove, HVACTypePortableHeater, HVACTypeFixedHeater, HVACTypeFireplace].include? @heating_system_type
         @heating_efficiency_percent = to_float_or_nil(XMLHelper.get_value(heating_system, "AnnualHeatingEfficiency[Units='Percent']/Value"))
       end
       @fraction_heat_load_served = to_float_or_nil(XMLHelper.get_value(heating_system, 'FractionHeatLoadServed'))
@@ -2504,6 +2537,10 @@ class HPXML < Object
       XMLHelper.get_elements(hpxml, 'Building/BuildingDetails/Systems/HVAC/HVACPlant/CoolingSystem').each do |cooling_system|
         self << CoolingSystem.new(@hpxml_object, cooling_system)
       end
+    end
+
+    def total_fraction_cool_load_served
+      map { |clg_sys| clg_sys.fraction_cool_load_served }.sum(0.0)
     end
   end
 
@@ -2623,6 +2660,14 @@ class HPXML < Object
       XMLHelper.get_elements(hpxml, 'Building/BuildingDetails/Systems/HVAC/HVACPlant/HeatPump').each do |heat_pump|
         self << HeatPump.new(@hpxml_object, heat_pump)
       end
+    end
+
+    def total_fraction_heat_load_served
+      map { |hp| hp.fraction_heat_load_served }.sum(0.0)
+    end
+
+    def total_fraction_cool_load_served
+      map { |hp| hp.fraction_cool_load_served }.sum(0.0)
     end
   end
 
@@ -3103,6 +3148,22 @@ class HPXML < Object
         return hvac_distribution
       end
       fail "Attached HVAC distribution system '#{@distribution_system_idref}' not found for ventilation fan '#{@id}'."
+    end
+
+    def flow_rate
+      if not @tested_flow_rate.nil?
+        return @tested_flow_rate
+      else
+        return @rated_flow_rate
+      end
+    end
+
+    def average_flow_rate
+      return flow_rate * (@hours_in_operation / 24.0)
+    end
+
+    def average_fan_power
+      return @fan_power * (@hours_in_operation / 24.0)
     end
 
     def delete
@@ -4695,19 +4756,17 @@ class HPXML < Object
     end
 
     # Check sum of HVAC FractionCoolLoadServeds <= 1
-    frac_cool_load = (@cooling_systems + @heat_pumps).map { |hvac| hvac.fraction_cool_load_served }.inject(0, :+)
-    if frac_cool_load > 1.01 # Use 1.01 in case of rounding
-      errors << "Expected FractionCoolLoadServed to sum to <= 1, but calculated sum is #{frac_cool_load.round(2)}."
+    if total_fraction_cool_load_served > 1.01 # Use 1.01 in case of rounding
+      errors << "Expected FractionCoolLoadServed to sum to <= 1, but calculated sum is #{total_fraction_cool_load_served.round(2)}."
     end
 
     # Check sum of HVAC FractionHeatLoadServeds <= 1
-    frac_heat_load = (@heating_systems + @heat_pumps).map { |hvac| hvac.fraction_heat_load_served }.inject(0, :+)
-    if frac_heat_load > 1.01 # Use 1.01 in case of rounding
-      errors << "Expected FractionHeatLoadServed to sum to <= 1, but calculated sum is #{frac_heat_load.round(2)}."
+    if total_fraction_heat_load_served > 1.01 # Use 1.01 in case of rounding
+      errors << "Expected FractionHeatLoadServed to sum to <= 1, but calculated sum is #{total_fraction_heat_load_served.round(2)}."
     end
 
     # Check sum of HVAC FractionDHWLoadServed == 1
-    frac_dhw_load = @water_heating_systems.map { |dhw| dhw.fraction_dhw_load_served }.inject(0, :+)
+    frac_dhw_load = @water_heating_systems.map { |dhw| dhw.fraction_dhw_load_served }.sum(0.0)
     if (frac_dhw_load > 0) && ((frac_dhw_load < 0.99) || (frac_dhw_load > 1.01)) # Use 0.99/1.01 in case of rounding
       errors << "Expected FractionDHWLoadServed to sum to 1, but calculated sum is #{frac_dhw_load.round(2)}."
     end
@@ -4754,8 +4813,8 @@ class HPXML < Object
         cooling_dist << dist
       end
     end
-    heating_total_dist_cfa_served = heating_dist.map { |htg_dist| htg_dist.conditioned_floor_area_served.to_f }.inject(0, :+)
-    cooling_total_dist_cfa_served = cooling_dist.map { |clg_dist| clg_dist.conditioned_floor_area_served.to_f }.inject(0, :+)
+    heating_total_dist_cfa_served = heating_dist.map { |htg_dist| htg_dist.conditioned_floor_area_served.to_f }.sum(0.0)
+    cooling_total_dist_cfa_served = cooling_dist.map { |clg_dist| clg_dist.conditioned_floor_area_served.to_f }.sum(0.0)
     if (heating_total_dist_cfa_served > @building_construction.conditioned_floor_area.to_f)
       errors << 'The total conditioned floor area served by the HVAC distribution system(s) for heating is larger than the conditioned floor area of the building.'
     end

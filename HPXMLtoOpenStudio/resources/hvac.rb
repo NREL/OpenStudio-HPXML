@@ -118,7 +118,7 @@ class HVAC
         htg_coil.setGasBurnerEfficiency(heating_system.heating_efficiency_afue)
         htg_coil.setParasiticElectricLoad(0)
         htg_coil.setParasiticGasLoad(0)
-        htg_coil.setFuelType(EnergyPlus.input_fuel_map(heating_system.heating_system_fuel))
+        htg_coil.setFuelType(EPlus.input_fuel_map(heating_system.heating_system_fuel))
       end
       htg_coil.setName(obj_name + ' htg coil')
       if not heating_system.heating_capacity.nil?
@@ -999,7 +999,7 @@ class HVAC
 
     boiler = OpenStudio::Model::BoilerHotWater.new(model)
     boiler.setName(obj_name)
-    boiler.setFuelType(EnergyPlus.input_fuel_map(heating_system.heating_system_fuel))
+    boiler.setFuelType(EPlus.input_fuel_map(heating_system.heating_system_fuel))
     if not heating_system.heating_capacity.nil?
       boiler.setNominalCapacity(UnitConversions.convert([heating_system.heating_capacity, Constants.small].max, 'Btu/hr', 'W')) # Used by HVACSizing measure
     end
@@ -1142,7 +1142,7 @@ class HVAC
       htg_coil.setGasBurnerEfficiency(efficiency)
       htg_coil.setParasiticElectricLoad(0.0)
       htg_coil.setParasiticGasLoad(0)
-      htg_coil.setFuelType(EnergyPlus.input_fuel_map(heating_system.heating_system_fuel))
+      htg_coil.setFuelType(EPlus.input_fuel_map(heating_system.heating_system_fuel))
     end
     htg_coil.setName(obj_name + ' htg coil')
     if not heating_system.heating_capacity.nil?
@@ -1171,10 +1171,8 @@ class HVAC
     unitary_system.additionalProperties.setFeature(Constants.SizingInfoHVACHeatType, Constants.ObjectNameUnitHeater)
   end
 
-  def self.apply_ideal_air_loads(model, runner, sequential_cool_load_frac,
+  def self.apply_ideal_air_loads(model, runner, obj_name, sequential_cool_load_frac,
                                  sequential_heat_load_frac, control_zone)
-
-    obj_name = Constants.ObjectNameIdealAirSystem
 
     # Ideal Air System
 
@@ -1184,8 +1182,18 @@ class HVAC
     ideal_air.setMinimumCoolingSupplyAirTemperature(10)
     ideal_air.setMaximumHeatingSupplyAirHumidityRatio(0.015)
     ideal_air.setMinimumCoolingSupplyAirHumidityRatio(0.01)
-    ideal_air.setHeatingLimit('NoLimit')
-    ideal_air.setCoolingLimit('NoLimit')
+    if sequential_heat_load_frac > 0
+      ideal_air.setHeatingLimit('NoLimit')
+    else
+      ideal_air.setHeatingLimit('LimitCapacity')
+      ideal_air.setMaximumSensibleHeatingCapacity(0)
+    end
+    if sequential_cool_load_frac > 0
+      ideal_air.setCoolingLimit('NoLimit')
+    else
+      ideal_air.setCoolingLimit('LimitCapacity')
+      ideal_air.setMaximumTotalCoolingCapacity(0)
+    end
     ideal_air.setDehumidificationControlType('None')
     ideal_air.setHumidificationControlType('None')
     ideal_air.addToThermalZone(control_zone)
@@ -1257,11 +1265,11 @@ class HVAC
     medium_cfm = 3000.0
     weekday_sch = [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.5, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 0.0, 0.0, 0.0, 0.0]
     weekend_sch = weekday_sch
-    hrs_per_day = weekday_sch.inject(0, :+)
+    hrs_per_day = weekday_sch.sum(0.0)
     cfm_per_w = ceiling_fan.efficiency
     quantity = ceiling_fan.quantity
     annual_kwh = UnitConversions.convert(quantity * medium_cfm / cfm_per_w * hrs_per_day * 365.0, 'Wh', 'kWh')
-    annual_kwh *= monthly_sch.inject(:+) / 12.0
+    annual_kwh *= monthly_sch.sum(0.0) / 12.0
 
     ceiling_fan_sch = MonthWeekdayWeekendSchedule.new(model, obj_name + ' schedule', weekday_sch, weekend_sch, monthly_sch, 1.0, 1.0, true, true, Constants.ScheduleTypeLimitsFraction)
 
@@ -1616,9 +1624,9 @@ class HVAC
     if htg_object.nil?
       htg_object_sensor = nil
     else
-      var = "Heating Coil #{EnergyPlus.output_fuel_map(EnergyPlus::FuelTypeElectricity)} Energy"
+      var = "Heating Coil #{EPlus.output_fuel_map(EPlus::FuelTypeElectricity)} Energy"
       if htg_object.is_a? OpenStudio::Model::CoilHeatingGas
-        var = "Heating Coil #{EnergyPlus.output_fuel_map(htg_object.fuelType)} Energy"
+        var = "Heating Coil #{EPlus.output_fuel_map(htg_object.fuelType)} Energy"
       elsif htg_object.is_a? OpenStudio::Model::ZoneHVACBaseboardConvectiveWater
         var = 'Baseboard Total Heating Energy'
       end
@@ -1632,9 +1640,9 @@ class HVAC
     if backup_htg_object.nil?
       backup_htg_object_sensor = nil
     else
-      var = "Heating Coil #{EnergyPlus.output_fuel_map(EnergyPlus::FuelTypeElectricity)} Energy"
+      var = "Heating Coil #{EPlus.output_fuel_map(EPlus::FuelTypeElectricity)} Energy"
       if backup_htg_object.is_a? OpenStudio::Model::CoilHeatingGas
-        var = "Heating Coil #{EnergyPlus.output_fuel_map(backup_htg_object.fuelType)} Energy"
+        var = "Heating Coil #{EPlus.output_fuel_map(backup_htg_object.fuelType)} Energy"
       end
 
       backup_htg_object_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, var)
@@ -1765,7 +1773,7 @@ class HVAC
       htg_supp_coil.setGasBurnerEfficiency(efficiency)
       htg_supp_coil.setParasiticElectricLoad(0)
       htg_supp_coil.setParasiticGasLoad(0)
-      htg_supp_coil.setFuelType(EnergyPlus.input_fuel_map(fuel))
+      htg_supp_coil.setFuelType(EPlus.input_fuel_map(fuel))
     end
     htg_supp_coil.setName(obj_name + ' ' + Constants.ObjectNameBackupHeatingCoil)
     if not capacity.nil?
@@ -1869,8 +1877,8 @@ class HVAC
     # Curved values under EF test conditions
     curve_value_ef = 1 # Curves are nomalized to 1.0 under EF test conditions, 80F, 60%
     # Curve values under IEF test conditions
-    ef_curve_value_ief = var_array_ief.zip(ef_coeff).map { |var, coeff| var * coeff }.inject(0, :+)
-    water_removal_curve_value_ief = var_array_ief.zip(w_coeff).map { |var, coeff| var * coeff }.inject(0, :+)
+    ef_curve_value_ief = var_array_ief.zip(ef_coeff).map { |var, coeff| var * coeff }.sum(0.0)
+    water_removal_curve_value_ief = var_array_ief.zip(w_coeff).map { |var, coeff| var * coeff }.sum(0.0)
 
     # E+ inputs under EF test conditions
     ef_input = ief / ef_curve_value_ief * curve_value_ef
@@ -2947,7 +2955,7 @@ class HVAC
           clg_coil = OpenStudio::Model::CoilCoolingDXMultiSpeed.new(model)
           clg_coil.setApplyPartLoadFractiontoSpeedsGreaterthan1(false)
           clg_coil.setApplyLatentDegradationtoSpeedsGreaterthan1(false)
-          clg_coil.setFuelType(EnergyPlus::FuelTypeElectricity)
+          clg_coil.setFuelType(EPlus::FuelTypeElectricity)
           clg_coil.setAvailabilitySchedule(model.alwaysOnDiscreteSchedule)
           if not crankcase_temp.nil?
             clg_coil.setMaximumOutdoorDryBulbTemperatureforCrankcaseHeaterOperation(UnitConversions.convert(crankcase_temp, 'F', 'C'))
@@ -3007,7 +3015,7 @@ class HVAC
       else
         if htg_coil.nil?
           htg_coil = OpenStudio::Model::CoilHeatingDXMultiSpeed.new(model)
-          htg_coil.setFuelType(EnergyPlus::FuelTypeElectricity)
+          htg_coil.setFuelType(EPlus::FuelTypeElectricity)
           htg_coil.setApplyPartLoadFractiontoSpeedsGreaterthan1(false)
           htg_coil.setAvailabilitySchedule(model.alwaysOnDiscreteSchedule)
           if not crankcase_temp.nil?

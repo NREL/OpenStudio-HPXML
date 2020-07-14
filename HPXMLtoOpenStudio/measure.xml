@@ -319,12 +319,6 @@
       <checksum>8B1ACB99</checksum>
     </file>
     <file>
-      <filename>meta_measure.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>5FA33833</checksum>
-    </file>
-    <file>
       <filename>minitest_helper.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
@@ -355,16 +349,16 @@
       <checksum>5AE1EAFB</checksum>
     </file>
     <file>
-      <filename>test_airflow.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>test</usage_type>
-      <checksum>C289056D</checksum>
-    </file>
-    <file>
       <filename>geometry.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
       <checksum>CB76A185</checksum>
+    </file>
+    <file>
+      <filename>materials.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>FC4DE789</checksum>
     </file>
     <file>
       <filename>weather.rb</filename>
@@ -373,16 +367,22 @@
       <checksum>C9E02189</checksum>
     </file>
     <file>
-      <filename>location.rb</filename>
+      <filename>test_miscloads.rb</filename>
       <filetype>rb</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>D7B8D025</checksum>
+      <usage_type>test</usage_type>
+      <checksum>179766A0</checksum>
     </file>
     <file>
-      <filename>materials.rb</filename>
+      <filename>unit_conversions.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>FC4DE789</checksum>
+      <checksum>6F263948</checksum>
+    </file>
+    <file>
+      <filename>util.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>B31D4F58</checksum>
     </file>
     <file>
       <filename>airflow.rb</filename>
@@ -392,6 +392,12 @@
     </file>
     <file>
       <filename>hvac_sizing.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>test</usage_type>
+      <checksum>80D63CDA</checksum>
+    </file>
+    <file>
+      <filename>simcontrols.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
       <checksum>A64041BA</checksum>
@@ -412,7 +418,7 @@
       <filename>test_miscloads.rb</filename>
       <filetype>rb</filetype>
       <usage_type>test</usage_type>
-      <checksum>179766A0</checksum>
+      <checksum>F4076C68</checksum>
     </file>
     <file>
       <filename>HPXMLDataTypes.xsd</filename>
@@ -434,6 +440,12 @@
     </file>
     <file>
       <filename>schedules.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>test</usage_type>
+      <checksum>2B6B4C0A</checksum>
+    </file>
+    <file>
+      <filename>waterheater.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
       <checksum>50D6094F</checksum>
@@ -477,13 +489,13 @@
       <filename>misc_loads.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>15069FF8</checksum>
+      <checksum>ECAC1EA4</checksum>
     </file>
     <file>
-      <filename>hotwater_appliances.rb</filename>
+      <filename>hvac.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>8F139D16</checksum>
+      <checksum>838B8150</checksum>
     </file>
     <file>
       <filename>EPvalidator.rb</filename>
