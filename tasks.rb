@@ -1281,6 +1281,7 @@ def set_hpxml_walls(hpxml_file, hpxml)
                     exterior_adjacent_to: HPXML::LocationOutside,
                     interior_adjacent_to: HPXML::LocationAtticUnvented,
                     wall_type: HPXML::WallTypeWoodStud,
+                    siding: HPXML::SidingTypeWood,
                     area: 113,
                     solar_absorptance: 0.7,
                     emittance: 0.92,
@@ -4336,8 +4337,6 @@ def set_hpxml_plug_loads(hpxml_file, hpxml)
 
       kWh_per_year, frac_sensible, frac_latent = MiscLoads.get_televisions_default_values(cfa, nbeds)
       hpxml.plug_loads[1].kWh_per_year = kWh_per_year
-      hpxml.plug_loads[1].frac_sensible = frac_sensible.round(3)
-      hpxml.plug_loads[1].frac_latent = frac_latent.round(3)
     end
   end
   if hpxml_file.include?('ASHRAE_Standard_140')
