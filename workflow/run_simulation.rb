@@ -7,6 +7,7 @@ require 'optparse'
 require 'pathname'
 require 'csv'
 require_relative '../hpxml-measures/HPXMLtoOpenStudio/resources/meta_measure'
+require_relative '../hpxml-measures/HPXMLtoOpenStudio/resources/version'
 require_relative 'hescore_lib'
 
 basedir = File.expand_path(File.dirname(__FILE__))
@@ -139,6 +140,8 @@ def run_design(basedir, rundir, design, resultsdir, hpxml, debug, skip_simulatio
 end
 
 def download_epws
+  require_relative '../hpxml-measures/HPXMLtoOpenStudio/resources/util'
+  
   weather_dir = File.join(File.dirname(__FILE__), '..', 'weather')
 
   num_epws_expected = File.readlines(File.join(weather_dir, 'data.csv')).size - 1
@@ -152,40 +155,10 @@ def download_epws
     exit!
   end
 
-  require 'net/http'
   require 'tempfile'
-
   tmpfile = Tempfile.new('epw')
-
-  url = URI.parse('https://data.nrel.gov/files/128/tmy3s-cache-csv.zip')
-  http = Net::HTTP.new(url.host, url.port)
-  http.use_ssl = true
-  http.verify_mode = OpenSSL::SSL::VERIFY_NONE
-
-  params = { 'User-Agent' => 'curl/7.43.0', 'Accept-Encoding' => 'identity' }
-  request = Net::HTTP::Get.new(url.path, params)
-  request.content_type = 'application/zip, application/octet-stream'
-
-  http.request request do |response|
-    total = response.header['Content-Length'].to_i
-    if total == 0
-      fail 'Did not successfully download zip file.'
-    end
-
-    size = 0
-    progress = 0
-    open tmpfile, 'wb' do |io|
-      response.read_body do |chunk|
-        io.write chunk
-        size += chunk.size
-        new_progress = (size * 100) / total
-        unless new_progress == progress
-          puts 'Downloading %s (%3d%%) ' % [url.path, new_progress]
-        end
-        progress = new_progress
-      end
-    end
-  end
+  
+  UrlResolver.fetch('https://data.nrel.gov/system/files/128/tmy3s-cache-csv.zip', tmpfile)
 
   puts 'Extracting weather files...'
   unzip_file = OpenStudio::UnzipFile.new(tmpfile.path.to_s)
@@ -245,10 +218,7 @@ unless File.exist?(options[:hpxml]) && options[:hpxml].downcase.end_with?('.xml'
 end
 
 # Check for correct versions of OS
-os_version = '3.0.0'
-if OpenStudio.openStudioVersion != os_version
-  fail "OpenStudio version #{os_version} is required."
-end
+Version.check_openstudio_version()
 
 if options[:output_dir].nil?
   options[:output_dir] = basedir # default
