@@ -573,8 +573,6 @@
             <Value>620.0</Value>
           </Load>
           <extension>
-            <FracSensible>1.0</FracSensible>
-            <FracLatent>0.0</FracLatent>
             <UsageMultiplier>0.9</UsageMultiplier>
           </extension>
         </PlugLoad>
