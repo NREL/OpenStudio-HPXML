@@ -3158,11 +3158,36 @@ class HPXML < Object
     end
 
     def average_flow_rate
-      return flow_rate * (@hours_in_operation / 24.0)
+      if (not flow_rate.nil?) && (not @hours_in_operation.nil?)
+        return flow_rate * (@hours_in_operation / 24.0)
+      end
     end
 
     def average_fan_power
-      return @fan_power * (@hours_in_operation / 24.0)
+      if (not @fan_power.nil?) && (not @hours_in_operation.nil?)
+        return @fan_power * (@hours_in_operation / 24.0)
+      end
+    end
+
+    def includes_supply_air?
+      if [MechVentTypeSupply, MechVentTypeCFIS, MechVentTypeBalanced, MechVentTypeERV, MechVentTypeHRV].include? @fan_type
+        return true
+      end
+      return false
+    end
+
+    def includes_exhaust_air?
+      if [MechVentTypeExhaust, MechVentTypeBalanced, MechVentTypeERV, MechVentTypeHRV].include? @fan_type
+        return true
+      end
+      return false
+    end
+
+    def is_balanced?
+      if includes_supply_air? && includes_exhaust_air?
+        return true
+      end
+      return false
     end
 
     def delete
