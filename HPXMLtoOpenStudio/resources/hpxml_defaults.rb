@@ -257,6 +257,7 @@ class HPXMLDefaults
     end
 
     # HVAC capacities
+    # Transition capacity elements from -1 to nil
     hpxml.heating_systems.each do |heating_system|
       if (not heating_system.heating_capacity.nil?) && (heating_system.heating_capacity < 0)
         heating_system.heating_capacity = nil
