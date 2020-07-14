@@ -7,7 +7,6 @@ require 'minitest/autorun'
 require 'fileutils'
 require_relative '../measure.rb'
 require_relative '../resources/util.rb'
-require 'bundler/setup'
 require 'schematron-nokogiri'
 
 class HPXMLtoOpenStudioSchematronTest < MiniTest::Test
@@ -101,7 +100,9 @@ class HPXMLtoOpenStudioSchematronTest < MiniTest::Test
     Dir["#{sample_files_dir}/*.xml"].sort.each do |xml|
       hpxmls << File.absolute_path(xml)
     end
+    puts "Testing #{hpxmls.size} HPXML files..."
     hpxmls.each do |hpxml_path|
+      print '.'
       # Schematron validation
       _test_schematron_validation(hpxml_path)
 
@@ -112,6 +113,7 @@ class HPXMLtoOpenStudioSchematronTest < MiniTest::Test
       # Schematron validation
       _test_schematron_validation(hpxml_path)
     end
+    puts
   end
 
   def test_invalid_files
@@ -360,10 +362,6 @@ class HPXMLtoOpenStudioSchematronTest < MiniTest::Test
       ['/HPXML/Building/BuildingDetails/BuildingSummary/BuildingOccupancy', nil] => 'Expected 0 or 1 element(s) for xpath: /HPXML/Building/BuildingDetails/BuildingSummary/BuildingOccupancy',
       ['/HPXML/Building/BuildingDetails/ClimateandRiskZones/ClimateZoneIECC', nil] => 'Expected 0 or 1 element(s) for xpath: /HPXML/Building/BuildingDetails/ClimateandRiskZones/ClimateZoneIECC',
       ['/HPXML/Building/BuildingDetails/Systems/HVAC/HVACControl', nil] => 'Expected 0 or 1 element(s) for xpath: /HPXML/Building/BuildingDetails/Systems/HVAC/HVACControl',
-      ['/HPXML/Building/BuildingDetails/Systems/MechanicalVentilation/VentilationFans/VentilationFan', 'UsedForWholeBuildingVentilation="true"'] => 'Expected 0 or 1 element(s) for xpath: /HPXML/Building/BuildingDetails/Systems/MechanicalVentilation/VentilationFans/VentilationFan[UsedForWholeBuildingVentilation="true"]',
-      ['/HPXML/Building/BuildingDetails/Systems/MechanicalVentilation/VentilationFans/VentilationFan', 'UsedForLocalVentilation="true" and FanLocation="kitchen"'] => 'Expected 0 or 1 element(s) for xpath: /HPXML/Building/BuildingDetails/Systems/MechanicalVentilation/VentilationFans/VentilationFan[UsedForLocalVentilation="true" and FanLocation="kitchen"]',
-      ['/HPXML/Building/BuildingDetails/Systems/MechanicalVentilation/VentilationFans/VentilationFan', 'UsedForLocalVentilation="true" and FanLocation="bath"'] => 'Expected 0 or 1 element(s) for xpath: /HPXML/Building/BuildingDetails/Systems/MechanicalVentilation/VentilationFans/VentilationFan[UsedForLocalVentilation="true" and FanLocation="bath"]',
-      ['/HPXML/Building/BuildingDetails/Systems/MechanicalVentilation/VentilationFans/VentilationFan', 'UsedForSeasonalCoolingLoadReduction="true"'] => 'Expected 0 or 1 element(s) for xpath: /HPXML/Building/BuildingDetails/Systems/MechanicalVentilation/VentilationFans/VentilationFan[UsedForSeasonalCoolingLoadReduction="true"]',
       ['/HPXML/Building/BuildingDetails/Systems/SolarThermal/SolarThermalSystem', nil] => 'Expected 0 or 1 element(s) for xpath: /HPXML/Building/BuildingDetails/Systems/SolarThermal/SolarThermalSystem',
       ['/HPXML/Building/BuildingDetails/Appliances/ClothesWasher', nil] => 'Expected 0 or 1 element(s) for xpath: /HPXML/Building/BuildingDetails/Appliances/ClothesWasher',
       ['/HPXML/Building/BuildingDetails/Appliances/ClothesDryer', nil] => 'Expected 0 or 1 element(s) for xpath: /HPXML/Building/BuildingDetails/Appliances/ClothesDryer',
@@ -428,6 +426,7 @@ class HPXMLtoOpenStudioSchematronTest < MiniTest::Test
       ['/HPXML/Building/BuildingDetails/Systems/HVAC/HVACDistribution/DistributionSystemType/AirDistribution/DuctLeakageMeasurement[DuctType="return"]/DuctLeakage[(Units="CFM25" or Units="Percent") and TotalOrToOutside="to outside"]/Value', nil] => 'Expected 0 or 1 element(s) for xpath: /HPXML/Building/BuildingDetails/Systems/HVAC/HVACDistribution/DistributionSystemType/AirDistribution/DuctLeakageMeasurement[DuctType="return"]/DuctLeakage[(Units="CFM25" or Units="Percent") and TotalOrToOutside="to outside"]/Value',
       ['/HPXML/Building/BuildingDetails/Systems/HVAC/HVACDistribution/DistributionSystemType/AirDistribution/NumberofReturnRegisters', nil] => 'Expected 0 or 1 element(s) for xpath: /HPXML/Building/BuildingDetails/Systems/HVAC/HVACDistribution/DistributionSystemType/AirDistribution/NumberofReturnRegisters',
       ['/HPXML/Building/BuildingDetails/Systems/HVAC/HVACDistribution/DistributionSystemType/AirDistribution/Ducts[DuctType="supply" or DuctType="return"]/DuctSurfaceArea', nil] => 'Expected 0 or 2 element(s) for xpath: /HPXML/Building/BuildingDetails/Systems/HVAC/HVACDistribution/DistributionSystemType/AirDistribution/Ducts[DuctType="supply" or DuctType="return"]/DuctSurfaceArea | DuctLocation[text()="living space" or text()="basement - conditioned" or text()="basement - unconditioned" or text()="crawlspace - vented" or text()="crawlspace - unvented" or text()="attic - vented" or text()="attic - unvented" or text()="garage" or text()="exterior wall" or text()="under slab" or text()="roof deck" or text()="outside" or text()="other housing unit" or text()="other heated space" or text()="other multifamily buffer space" or text()="other non-freezing space"]',
+      ['/HPXML/Building/BuildingDetails/Systems/MechanicalVentilation/VentilationFans/VentilationFan[UsedForLocalVentilation="true" and FanLocation="kitchen"]/Quantity', nil] => 'Expected 0 or 1 element(s) for xpath: /HPXML/Building/BuildingDetails/Systems/MechanicalVentilation/VentilationFans/VentilationFan[UsedForLocalVentilation="true" and FanLocation="kitchen"]/Quantity',
       ['/HPXML/Building/BuildingDetails/Systems/MechanicalVentilation/VentilationFans/VentilationFan[UsedForLocalVentilation="true" and FanLocation="kitchen"]/RatedFlowRate', nil] => 'Expected 0 or 1 element(s) for xpath: /HPXML/Building/BuildingDetails/Systems/MechanicalVentilation/VentilationFans/VentilationFan[UsedForLocalVentilation="true" and FanLocation="kitchen"]/RatedFlowRate',
       ['/HPXML/Building/BuildingDetails/Systems/MechanicalVentilation/VentilationFans/VentilationFan[UsedForLocalVentilation="true" and FanLocation="kitchen"]/HoursInOperation', nil] => 'Expected 0 or 1 element(s) for xpath: /HPXML/Building/BuildingDetails/Systems/MechanicalVentilation/VentilationFans/VentilationFan[UsedForLocalVentilation="true" and FanLocation="kitchen"]/HoursInOperation',
       ['/HPXML/Building/BuildingDetails/Systems/MechanicalVentilation/VentilationFans/VentilationFan[UsedForLocalVentilation="true" and FanLocation="kitchen"]/FanPower', nil] => 'Expected 0 or 1 element(s) for xpath: /HPXML/Building/BuildingDetails/Systems/MechanicalVentilation/VentilationFans/VentilationFan[UsedForLocalVentilation="true" and FanLocation="kitchen"]/FanPower',
@@ -534,8 +533,11 @@ class HPXMLtoOpenStudioSchematronTest < MiniTest::Test
       ['/HPXML/Building/BuildingDetails/MiscLoads/FuelLoad[FuelLoadType="fireplace"]/extension/MonthlyScheduleMultipliers', nil] => 'Expected 0 or 1 element(s) for xpath: /HPXML/Building/BuildingDetails/MiscLoads/FuelLoad[FuelLoadType="grill" or FuelLoadType="lighting" or FuelLoadType="fireplace"]/extension/MonthlyScheduleMultipliers',
     }
 
+    puts "Testing #{expected_error_msgs.size + expected_error_msgs_optional.size} HPXML elements..."
+
     # tests for required elements
     expected_error_msgs.each do |keys, value|
+      print '.'
       hpxml_name = get_hpxml_file_name(keys[0])
       hpxml = HPXML.new(hpxml_path: File.join(@root_path, 'workflow', 'sample_files', hpxml_name))
       hpxml_doc = hpxml.to_oga()
@@ -552,6 +554,7 @@ class HPXMLtoOpenStudioSchematronTest < MiniTest::Test
 
     # tests for optional elements (i.e. zero_or_one, zero_or_two, etc.)
     expected_error_msgs_optional.each do |key, value|
+      print '.'
       elements = key[0]
       child_elements_with_values = key[1]
       hpxml_name = get_hpxml_file_name(elements)
@@ -579,6 +582,8 @@ class HPXMLtoOpenStudioSchematronTest < MiniTest::Test
       # schematron validation
       _test_schematron_validation(@tmp_hpxml_path, value)
     end
+
+    puts
   end
 
   def _test_schematron_validation(hpxml_path, expected_error_msgs = nil)

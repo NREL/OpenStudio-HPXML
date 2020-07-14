@@ -49,10 +49,10 @@
       <sch:assert test="count(h:HVACDistribution) &gt;= 0">Expected 0 or more element(s): HVACDistribution</sch:assert> <!-- see [HVACDistribution] -->
     </sch:rule>
     <sch:rule context="/h:HPXML/h:Building/h:BuildingDetails/h:Systems">
-      <sch:assert test="count(h:MechanicalVentilation/h:VentilationFans/h:VentilationFan[h:UsedForWholeBuildingVentilation='true']) &lt;= 1">Expected 0 or 1 element(s): MechanicalVentilation/VentilationFans/VentilationFan[UsedForWholeBuildingVentilation="true"]</sch:assert> <!-- See [MechanicalVentilation] -->
-      <sch:assert test="count(h:MechanicalVentilation/h:VentilationFans/h:VentilationFan[h:UsedForLocalVentilation='true' and h:FanLocation='kitchen']) &lt;= 1">Expected 0 or 1 element(s): MechanicalVentilation/VentilationFans/VentilationFan[UsedForLocalVentilation="true" and FanLocation="kitchen"]</sch:assert> <!-- See [KitchenRangeFan] -->
-      <sch:assert test="count(h:MechanicalVentilation/h:VentilationFans/h:VentilationFan[h:UsedForLocalVentilation='true' and h:FanLocation='bath']) &lt;= 1">Expected 0 or 1 element(s): MechanicalVentilation/VentilationFans/VentilationFan[UsedForLocalVentilation="true" and FanLocation="bath"]</sch:assert> <!-- See [BathFan] -->
-      <sch:assert test="count(h:MechanicalVentilation/h:VentilationFans/h:VentilationFan[h:UsedForSeasonalCoolingLoadReduction='true']) &lt;= 1">Expected 0 or 1 element(s): MechanicalVentilation/VentilationFans/VentilationFan[UsedForSeasonalCoolingLoadReduction="true"]</sch:assert> <!-- See [WholeHouseFan] -->
+      <sch:assert test="count(h:MechanicalVentilation/h:VentilationFans/h:VentilationFan[h:UsedForWholeBuildingVentilation='true']) &gt;= 0">Expected 0 or more element(s): MechanicalVentilation/VentilationFans/VentilationFan[UsedForWholeBuildingVentilation="true"]</sch:assert> <!-- See [MechanicalVentilation] -->
+      <sch:assert test="count(h:MechanicalVentilation/h:VentilationFans/h:VentilationFan[h:UsedForLocalVentilation='true' and h:FanLocation='kitchen']) &gt;= 0">Expected 0 or more element(s): MechanicalVentilation/VentilationFans/VentilationFan[UsedForLocalVentilation="true" and FanLocation="kitchen"]</sch:assert> <!-- See [KitchenRangeFan] -->
+      <sch:assert test="count(h:MechanicalVentilation/h:VentilationFans/h:VentilationFan[h:UsedForLocalVentilation='true' and h:FanLocation='bath']) &gt;= 0">Expected 0 or more element(s): MechanicalVentilation/VentilationFans/VentilationFan[UsedForLocalVentilation="true" and FanLocation="bath"]</sch:assert> <!-- See [BathFan] -->
+      <sch:assert test="count(h:MechanicalVentilation/h:VentilationFans/h:VentilationFan[h:UsedForSeasonalCoolingLoadReduction='true']) &gt;= 0">Expected 0 or more element(s): MechanicalVentilation/VentilationFans/VentilationFan[UsedForSeasonalCoolingLoadReduction="true"]</sch:assert> <!-- See [WholeHouseFan] -->
       <sch:assert test="count(h:WaterHeating/h:WaterHeatingSystem) &gt;= 0">Expected 0 or more element(s): WaterHeating/WaterHeatingSystem</sch:assert> <!-- See [WaterHeatingSystem] -->
       <sch:assert test="count(h:WaterHeating/h:HotWaterDistribution) &lt;= 1">Expected 0 or 1 element(s): WaterHeating/HotWaterDistribution</sch:assert> <!-- See [HotWaterDistribution] -->
       <sch:assert test="count(h:WaterHeating/h:WaterFixture) &gt;= 0">Expected 0 or more element(s): WaterHeating/WaterFixture</sch:assert> <!-- See [WaterFixture] -->
@@ -788,6 +788,7 @@
     <!-- [KitchenRangeFan] -->
     <sch:rule context='/h:HPXML/h:Building/h:BuildingDetails/h:Systems/h:MechanicalVentilation/h:VentilationFans/h:VentilationFan[h:UsedForLocalVentilation="true" and h:FanLocation="kitchen"]'>
       <sch:assert test="count(h:SystemIdentifier) = 1">Expected 1 element(s): SystemIdentifier</sch:assert> <!-- Required by HPXML schema -->
+      <sch:assert test="count(h:Quantity) &lt;= 1">Expected 0 or 1 element(s): Quantity</sch:assert>
       <sch:assert test="count(h:RatedFlowRate) &lt;= 1">Expected 0 or 1 element(s): RatedFlowRate</sch:assert>
       <sch:assert test="count(h:HoursInOperation) &lt;= 1">Expected 0 or 1 element(s): HoursInOperation</sch:assert>
       <sch:assert test="count(h:FanPower) &lt;= 1">Expected 0 or 1 element(s): FanPower</sch:assert>

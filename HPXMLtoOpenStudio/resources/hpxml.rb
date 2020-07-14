@@ -42,6 +42,8 @@ XMLHelper.write_file(hpxml.to_oga, "out.xml")
 
 '''
 
+require 'ostruct'
+
 class HPXML < Object
   HPXML_ATTRS = [:header, :site, :neighbor_buildings, :building_occupancy, :building_construction,
                  :climate_and_risk_zones, :air_infiltration_measurements, :attics, :foundations,

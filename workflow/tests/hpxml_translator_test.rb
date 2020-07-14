@@ -131,20 +131,20 @@ class HPXMLTest < MiniTest::Test
     this_dir = File.dirname(__FILE__)
     sample_files_dir = File.join(this_dir, '..', 'sample_files')
 
-    expected_error_msgs = { 'appliances-location-unconditioned-space.xml' => ['Expected [1] element(s) but found 0 element(s) for xpath: /HPXML/Building/BuildingDetails/Appliances/ClothesWasher: [not(Location)] |',
-                                                                              'Expected [1] element(s) but found 0 element(s) for xpath: /HPXML/Building/BuildingDetails/Appliances/ClothesDryer: [not(Location)] |',
-                                                                              'Expected [1] element(s) but found 0 element(s) for xpath: /HPXML/Building/BuildingDetails/Appliances/Dishwasher: [not(Location)] |',
-                                                                              'Expected [1] element(s) but found 0 element(s) for xpath: /HPXML/Building/BuildingDetails/Appliances/Refrigerator: [not(Location)] |',
-                                                                              'Expected [1] element(s) but found 0 element(s) for xpath: /HPXML/Building/BuildingDetails/Appliances/CookingRange: [not(Location)] |'],
+    expected_error_msgs = { 'appliances-location-unconditioned-space.xml' => ['Expected 1 element(s) for xpath: /HPXML/Building/BuildingDetails/Appliances/ClothesWasher/[not(Location)] |',
+                                                                              'Expected 1 element(s) for xpath: /HPXML/Building/BuildingDetails/Appliances/ClothesDryer/[not(Location)] |',
+                                                                              'Expected 1 element(s) for xpath: /HPXML/Building/BuildingDetails/Appliances/Dishwasher/[not(Location)] |',
+                                                                              'Expected 1 element(s) for xpath: /HPXML/Building/BuildingDetails/Appliances/Refrigerator/[not(Location)] |',
+                                                                              'Expected 1 element(s) for xpath: /HPXML/Building/BuildingDetails/Appliances/CookingRange/[not(Location)] |'],
                             'cfis-with-hydronic-distribution.xml' => ["Attached HVAC distribution system 'HVACDistribution' cannot be hydronic for ventilation fan 'MechanicalVentilation'."],
                             'clothes-dryer-location.xml' => ["ClothesDryer location is 'garage' but building does not have this location specified."],
                             'clothes-washer-location.xml' => ["ClothesWasher location is 'garage' but building does not have this location specified."],
-                            'coal-for-non-boiler-heating.xml' => ['Expected [1] element(s) but found 0 element(s) for xpath: /HPXML/Building/BuildingDetails/Systems/HVAC/HVACPlant/HeatingSystem[HeatingSystemType/Stove]: HeatingSystemFuel[text()='], # FIXME: Allow this when E+/OS is updated
+                            'coal-for-non-boiler-heating.xml' => ['Expected 1 element(s) for xpath: /HPXML/Building/BuildingDetails/Systems/HVAC/HVACPlant/HeatingSystem[HeatingSystemType/Stove]/HeatingSystemFuel[text()='], # FIXME: Allow this when E+/OS is updated
                             'cooking-range-location.xml' => ["CookingRange location is 'garage' but building does not have this location specified."],
                             'dishwasher-location.xml' => ["Dishwasher location is 'garage' but building does not have this location specified."],
                             'dhw-frac-load-served.xml' => ['Expected FractionDHWLoadServed to sum to 1, but calculated sum is 1.15.'],
                             'duct-location.xml' => ["Duct location is 'garage' but building does not have this location specified."],
-                            'duct-location-unconditioned-space.xml' => ['Expected [0, 2] element(s) but found 1 element(s) for xpath: /HPXML/Building/BuildingDetails/Systems/HVAC/HVACDistribution/DistributionSystemType/AirDistribution/Ducts[DuctType="supply" or DuctType="return"]: DuctSurfaceArea | DuctLocation[text()='],
+                            'duct-location-unconditioned-space.xml' => ['Expected 0 or 2 element(s) for xpath: /HPXML/Building/BuildingDetails/Systems/HVAC/HVACDistribution/DistributionSystemType/AirDistribution/Ducts[DuctType="supply" or DuctType="return"]/DuctSurfaceArea | DuctLocation[text()='],
                             'duplicate-id.xml' => ["Duplicate SystemIdentifier IDs detected for 'Wall'."],
                             'enclosure-attic-missing-roof.xml' => ['There must be at least one roof adjacent to attic - unvented.'],
                             'enclosure-basement-missing-exterior-foundation-wall.xml' => ['There must be at least one exterior foundation wall adjacent to basement - unconditioned.'],
@@ -179,9 +179,9 @@ class HPXMLTest < MiniTest::Test
                             'invalid-daylight-saving.xml' => ['Daylight Saving End Day of Month (31) must be one of: 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30.'],
                             'lighting-fractions.xml' => ['Sum of fractions of interior lighting (1.15) is greater than 1.'],
                             'mismatched-slab-and-foundation-wall.xml' => ["Foundation wall 'FoundationWall' is adjacent to 'basement - conditioned' but no corresponding slab was found adjacent to"],
-                            'missing-elements.xml' => ['Expected [1] element(s) but found 0 element(s) for xpath: /HPXML/Building/BuildingDetails/BuildingSummary/BuildingConstruction: NumberofConditionedFloors',
-                                                       'Expected [1] element(s) but found 0 element(s) for xpath: /HPXML/Building/BuildingDetails/BuildingSummary/BuildingConstruction: ConditionedFloorArea'],
-                            'missing-duct-location.xml' => ['Expected [0, 2] element(s) but found 1 element(s) for xpath: /HPXML/Building/BuildingDetails/Systems/HVAC/HVACDistribution/DistributionSystemType/AirDistribution/Ducts[DuctType="supply" or DuctType="return"]: DuctSurfaceArea | DuctLocation[text()='],
+                            'missing-elements.xml' => ['Expected 1 element(s) for xpath: /HPXML/Building/BuildingDetails/BuildingSummary/BuildingConstruction/NumberofConditionedFloors',
+                                                       'Expected 1 element(s) for xpath: /HPXML/Building/BuildingDetails/BuildingSummary/BuildingConstruction/ConditionedFloorArea'],
+                            'missing-duct-location.xml' => ['Expected 0 or 2 element(s) for xpath: /HPXML/Building/BuildingDetails/Systems/HVAC/HVACDistribution/DistributionSystemType/AirDistribution/Ducts[DuctType="supply" or DuctType="return"]/DuctSurfaceArea | DuctLocation[text()='],
                             'missing-duct-location-and-surface-area.xml' => ['Error: The location and surface area of all ducts must be provided or blank.'],
                             'net-area-negative-wall.xml' => ["Calculated a negative net surface area for surface 'Wall'."],
                             'net-area-negative-roof.xml' => ["Calculated a negative net surface area for surface 'Roof'."],
@@ -200,7 +200,7 @@ class HPXMLTest < MiniTest::Test
                             'unattached-solar-thermal-system.xml' => ["Attached water heating system 'foobar' not found for solar thermal system 'SolarThermalSystem'."],
                             'unattached-window.xml' => ["Attached wall 'foobar' not found for window 'WindowNorth'."],
                             'water-heater-location.xml' => ["WaterHeatingSystem location is 'crawlspace - vented' but building does not have this location specified."],
-                            'water-heater-location-other.xml' => ['Expected [1] element(s) but found 0 element(s) for xpath: /HPXML/Building/BuildingDetails/Systems/WaterHeating/WaterHeatingSystem: [not(Location)] |'],
+                            'water-heater-location-other.xml' => ['Expected 1 element(s) for xpath: /HPXML/Building/BuildingDetails/Systems/WaterHeating/WaterHeatingSystem/[not(Location)] |'],
                             'refrigerators-multiple-primary.xml' => ['More than one refrigerator designated as the primary.'],
                             'refrigerators-no-primary.xml' => ['Could not find a primary refrigerator.'] }
 
