@@ -167,7 +167,7 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
       is_valid = false
     end
 
-    # TODO: Add Schematron validation 
+    # TODO: Add Schematron validation
     # # load the schematron xml
     # stron_doc = Nokogiri::XML File.open(File.join(schemas_dir, 'EPvalidator.stron'))  # "/path/to/schema.stron"
     # # make a schematron object
@@ -182,7 +182,7 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
     #   runner.registerError("#{hpxml_path}: #{error[:line]}, #{error[:message]}")
     #   is_valid = false
     # end
-    
+
     # Check for additional errors
     errors = hpxml.check_for_errors()
     errors.each do |error|

@@ -930,7 +930,7 @@ class EnergyPlusValidator
     if expected_sizes.size > 0
       return if expected_sizes.include?(actual_size)
 
-      expected_sizes_string = expected_sizes.size == 1 ? expected_sizes[0] : expected_sizes.join(" or ")
+      expected_sizes_string = expected_sizes.size == 1 ? expected_sizes[0] : expected_sizes.join(' or ')
       errors << "Expected #{expected_sizes_string} element(s) for xpath: #{xpath}"
     else
       return if actual_size > 0
