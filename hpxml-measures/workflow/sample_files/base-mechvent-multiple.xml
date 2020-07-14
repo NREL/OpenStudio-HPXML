@@ -107,246 +107,34 @@
         </Roofs>
         <RimJoists>
           <RimJoist>
-            <SystemIdentifier id='RimJoistFoundation1'/>
+            <SystemIdentifier id='RimJoistFoundation'/>
             <ExteriorAdjacentTo>outside</ExteriorAdjacentTo>
             <InteriorAdjacentTo>basement - conditioned</InteriorAdjacentTo>
-            <Area>23.0</Area>
-            <Siding>aluminum siding</Siding>
-            <Color>dark</Color>
+            <Area>116.0</Area>
+            <Siding>wood siding</Siding>
+            <SolarAbsorptance>0.7</SolarAbsorptance>
             <Emittance>0.92</Emittance>
             <Insulation>
-              <SystemIdentifier id='RimJoistFoundation1Insulation'/>
-              <AssemblyEffectiveRValue>23.0</AssemblyEffectiveRValue>
-            </Insulation>
-          </RimJoist>
-          <RimJoist>
-            <SystemIdentifier id='RimJoistFoundation2'/>
-            <ExteriorAdjacentTo>outside</ExteriorAdjacentTo>
-            <InteriorAdjacentTo>basement - conditioned</InteriorAdjacentTo>
-            <Area>23.0</Area>
-            <Siding>brick veneer</Siding>
-            <Color>reflective</Color>
-            <Emittance>0.92</Emittance>
-            <Insulation>
-              <SystemIdentifier id='RimJoistFoundation2Insulation'/>
-              <AssemblyEffectiveRValue>23.0</AssemblyEffectiveRValue>
-            </Insulation>
-          </RimJoist>
-          <RimJoist>
-            <SystemIdentifier id='RimJoistFoundation3'/>
-            <ExteriorAdjacentTo>outside</ExteriorAdjacentTo>
-            <InteriorAdjacentTo>basement - conditioned</InteriorAdjacentTo>
-            <Area>23.0</Area>
-            <Siding>fiber cement siding</Siding>
-            <Color>medium dark</Color>
-            <Emittance>0.92</Emittance>
-            <Insulation>
-              <SystemIdentifier id='RimJoistFoundation3Insulation'/>
-              <AssemblyEffectiveRValue>23.0</AssemblyEffectiveRValue>
-            </Insulation>
-          </RimJoist>
-          <RimJoist>
-            <SystemIdentifier id='RimJoistFoundation4'/>
-            <ExteriorAdjacentTo>outside</ExteriorAdjacentTo>
-            <InteriorAdjacentTo>basement - conditioned</InteriorAdjacentTo>
-            <Area>23.0</Area>
-            <Siding>stucco</Siding>
-            <Color>medium</Color>
-            <Emittance>0.92</Emittance>
-            <Insulation>
-              <SystemIdentifier id='RimJoistFoundation4Insulation'/>
-              <AssemblyEffectiveRValue>23.0</AssemblyEffectiveRValue>
-            </Insulation>
-          </RimJoist>
-          <RimJoist>
-            <SystemIdentifier id='RimJoistFoundation5'/>
-            <ExteriorAdjacentTo>outside</ExteriorAdjacentTo>
-            <InteriorAdjacentTo>basement - conditioned</InteriorAdjacentTo>
-            <Area>23.0</Area>
-            <Siding>vinyl siding</Siding>
-            <Color>light</Color>
-            <Emittance>0.92</Emittance>
-            <Insulation>
-              <SystemIdentifier id='RimJoistFoundation5Insulation'/>
+              <SystemIdentifier id='RimJoistFoundationInsulation'/>
               <AssemblyEffectiveRValue>23.0</AssemblyEffectiveRValue>
             </Insulation>
           </RimJoist>
         </RimJoists>
         <Walls>
           <Wall>
-            <SystemIdentifier id='Wall1'/>
+            <SystemIdentifier id='Wall'/>
             <ExteriorAdjacentTo>outside</ExteriorAdjacentTo>
             <InteriorAdjacentTo>living space</InteriorAdjacentTo>
             <WallType>
-              <ConcreteMasonryUnit/>
+              <WoodStud/>
             </WallType>
-            <Area>109.0</Area>
-            <Siding>aluminum siding</Siding>
-            <Color>reflective</Color>
+            <Area>1200.0</Area>
+            <Siding>wood siding</Siding>
+            <SolarAbsorptance>0.7</SolarAbsorptance>
             <Emittance>0.92</Emittance>
             <Insulation>
-              <SystemIdentifier id='Wall1Insulation'/>
-              <AssemblyEffectiveRValue>12.0</AssemblyEffectiveRValue>
-            </Insulation>
-          </Wall>
-          <Wall>
-            <SystemIdentifier id='Wall2'/>
-            <ExteriorAdjacentTo>outside</ExteriorAdjacentTo>
-            <InteriorAdjacentTo>living space</InteriorAdjacentTo>
-            <WallType>
-              <DoubleWoodStud/>
-            </WallType>
-            <Area>109.0</Area>
-            <Siding>brick veneer</Siding>
-            <Color>medium dark</Color>
-            <Emittance>0.92</Emittance>
-            <Insulation>
-              <SystemIdentifier id='Wall2Insulation'/>
-              <AssemblyEffectiveRValue>28.7</AssemblyEffectiveRValue>
-            </Insulation>
-          </Wall>
-          <Wall>
-            <SystemIdentifier id='Wall3'/>
-            <ExteriorAdjacentTo>outside</ExteriorAdjacentTo>
-            <InteriorAdjacentTo>living space</InteriorAdjacentTo>
-            <WallType>
-              <InsulatedConcreteForms/>
-            </WallType>
-            <Area>109.0</Area>
-            <Siding>fiber cement siding</Siding>
-            <Color>medium</Color>
-            <Emittance>0.92</Emittance>
-            <Insulation>
-              <SystemIdentifier id='Wall3Insulation'/>
-              <AssemblyEffectiveRValue>21.0</AssemblyEffectiveRValue>
-            </Insulation>
-          </Wall>
-          <Wall>
-            <SystemIdentifier id='Wall4'/>
-            <ExteriorAdjacentTo>outside</ExteriorAdjacentTo>
-            <InteriorAdjacentTo>living space</InteriorAdjacentTo>
-            <WallType>
-              <LogWall/>
-            </WallType>
-            <Area>109.0</Area>
-            <Siding>stucco</Siding>
-            <Color>light</Color>
-            <Emittance>0.92</Emittance>
-            <Insulation>
-              <SystemIdentifier id='Wall4Insulation'/>
-              <AssemblyEffectiveRValue>7.1</AssemblyEffectiveRValue>
-            </Insulation>
-          </Wall>
-          <Wall>
-            <SystemIdentifier id='Wall5'/>
-            <ExteriorAdjacentTo>outside</ExteriorAdjacentTo>
-            <InteriorAdjacentTo>living space</InteriorAdjacentTo>
-            <WallType>
-              <StructurallyInsulatedPanel/>
-            </WallType>
-            <Area>109.0</Area>
-            <Siding>vinyl siding</Siding>
-            <Color>dark</Color>
-            <Emittance>0.92</Emittance>
-            <Insulation>
-              <SystemIdentifier id='Wall5Insulation'/>
-              <AssemblyEffectiveRValue>16.1</AssemblyEffectiveRValue>
-            </Insulation>
-          </Wall>
-          <Wall>
-            <SystemIdentifier id='Wall6'/>
-            <ExteriorAdjacentTo>outside</ExteriorAdjacentTo>
-            <InteriorAdjacentTo>living space</InteriorAdjacentTo>
-            <WallType>
-              <SolidConcrete/>
-            </WallType>
-            <Area>109.0</Area>
-            <Siding>aluminum siding</Siding>
-            <Color>reflective</Color>
-            <Emittance>0.92</Emittance>
-            <Insulation>
-              <SystemIdentifier id='Wall6Insulation'/>
-              <AssemblyEffectiveRValue>1.35</AssemblyEffectiveRValue>
-            </Insulation>
-          </Wall>
-          <Wall>
-            <SystemIdentifier id='Wall7'/>
-            <ExteriorAdjacentTo>outside</ExteriorAdjacentTo>
-            <InteriorAdjacentTo>living space</InteriorAdjacentTo>
-            <WallType>
-              <SteelFrame/>
-            </WallType>
-            <Area>109.0</Area>
-            <Siding>brick veneer</Siding>
-            <Color>medium dark</Color>
-            <Emittance>0.92</Emittance>
-            <Insulation>
-              <SystemIdentifier id='Wall7Insulation'/>
-              <AssemblyEffectiveRValue>8.1</AssemblyEffectiveRValue>
-            </Insulation>
-          </Wall>
-          <Wall>
-            <SystemIdentifier id='Wall8'/>
-            <ExteriorAdjacentTo>outside</ExteriorAdjacentTo>
-            <InteriorAdjacentTo>living space</InteriorAdjacentTo>
-            <WallType>
-              <Stone/>
-            </WallType>
-            <Area>109.0</Area>
-            <Siding>fiber cement siding</Siding>
-            <Color>medium</Color>
-            <Emittance>0.92</Emittance>
-            <Insulation>
-              <SystemIdentifier id='Wall8Insulation'/>
-              <AssemblyEffectiveRValue>5.4</AssemblyEffectiveRValue>
-            </Insulation>
-          </Wall>
-          <Wall>
-            <SystemIdentifier id='Wall9'/>
-            <ExteriorAdjacentTo>outside</ExteriorAdjacentTo>
-            <InteriorAdjacentTo>living space</InteriorAdjacentTo>
-            <WallType>
-              <StrawBale/>
-            </WallType>
-            <Area>109.0</Area>
-            <Siding>stucco</Siding>
-            <Color>light</Color>
-            <Emittance>0.92</Emittance>
-            <Insulation>
-              <SystemIdentifier id='Wall9Insulation'/>
-              <AssemblyEffectiveRValue>58.8</AssemblyEffectiveRValue>
-            </Insulation>
-          </Wall>
-          <Wall>
-            <SystemIdentifier id='Wall10'/>
-            <ExteriorAdjacentTo>outside</ExteriorAdjacentTo>
-            <InteriorAdjacentTo>living space</InteriorAdjacentTo>
-            <WallType>
-              <StructuralBrick/>
-            </WallType>
-            <Area>109.0</Area>
-            <Siding>vinyl siding</Siding>
-            <Color>dark</Color>
-            <Emittance>0.92</Emittance>
-            <Insulation>
-              <SystemIdentifier id='Wall10Insulation'/>
-              <AssemblyEffectiveRValue>7.9</AssemblyEffectiveRValue>
-            </Insulation>
-          </Wall>
-          <Wall>
-            <SystemIdentifier id='Wall11'/>
-            <ExteriorAdjacentTo>outside</ExteriorAdjacentTo>
-            <InteriorAdjacentTo>living space</InteriorAdjacentTo>
-            <WallType>
-              <Adobe/>
-            </WallType>
-            <Area>109.0</Area>
-            <Siding>aluminum siding</Siding>
-            <Color>reflective</Color>
-            <Emittance>0.92</Emittance>
-            <Insulation>
-              <SystemIdentifier id='Wall11Insulation'/>
-              <AssemblyEffectiveRValue>5.0</AssemblyEffectiveRValue>
+              <SystemIdentifier id='WallInsulation'/>
+              <AssemblyEffectiveRValue>23.0</AssemblyEffectiveRValue>
             </Insulation>
           </Wall>
           <Wall>
@@ -440,52 +228,72 @@
         <Windows>
           <Window>
             <SystemIdentifier id='WindowNorth'/>
-            <Area>13.0</Area>
+            <Area>108.0</Area>
             <Azimuth>0</Azimuth>
             <UFactor>0.33</UFactor>
             <SHGC>0.45</SHGC>
+            <InteriorShading>
+              <SystemIdentifier id='WindowNorthInteriorShading'/>
+              <SummerShadingCoefficient>0.7</SummerShadingCoefficient>
+              <WinterShadingCoefficient>0.85</WinterShadingCoefficient>
+            </InteriorShading>
             <FractionOperable>0.67</FractionOperable>
-            <AttachedToWall idref='Wall1'/>
+            <AttachedToWall idref='Wall'/>
           </Window>
           <Window>
             <SystemIdentifier id='WindowSouth'/>
-            <Area>13.0</Area>
+            <Area>108.0</Area>
             <Azimuth>180</Azimuth>
             <UFactor>0.33</UFactor>
             <SHGC>0.45</SHGC>
+            <InteriorShading>
+              <SystemIdentifier id='WindowSouthInteriorShading'/>
+              <SummerShadingCoefficient>0.7</SummerShadingCoefficient>
+              <WinterShadingCoefficient>0.85</WinterShadingCoefficient>
+            </InteriorShading>
             <FractionOperable>0.67</FractionOperable>
-            <AttachedToWall idref='Wall2'/>
+            <AttachedToWall idref='Wall'/>
           </Window>
           <Window>
             <SystemIdentifier id='WindowEast'/>
-            <Area>9.0</Area>
+            <Area>72.0</Area>
             <Azimuth>90</Azimuth>
             <UFactor>0.33</UFactor>
             <SHGC>0.45</SHGC>
+            <InteriorShading>
+              <SystemIdentifier id='WindowEastInteriorShading'/>
+              <SummerShadingCoefficient>0.7</SummerShadingCoefficient>
+              <WinterShadingCoefficient>0.85</WinterShadingCoefficient>
+            </InteriorShading>
             <FractionOperable>0.67</FractionOperable>
-            <AttachedToWall idref='Wall3'/>
+            <AttachedToWall idref='Wall'/>
           </Window>
           <Window>
             <SystemIdentifier id='WindowWest'/>
-            <Area>9.0</Area>
+            <Area>72.0</Area>
             <Azimuth>270</Azimuth>
             <UFactor>0.33</UFactor>
             <SHGC>0.45</SHGC>
+            <InteriorShading>
+              <SystemIdentifier id='WindowWestInteriorShading'/>
+              <SummerShadingCoefficient>0.7</SummerShadingCoefficient>
+              <WinterShadingCoefficient>0.85</WinterShadingCoefficient>
+            </InteriorShading>
             <FractionOperable>0.67</FractionOperable>
-            <AttachedToWall idref='Wall4'/>
+            <AttachedToWall idref='Wall'/>
           </Window>
         </Windows>
         <Doors>
           <Door>
             <SystemIdentifier id='DoorNorth'/>
-            <AttachedToWall idref='Wall9'/>
+            <AttachedToWall idref='Wall'/>
             <Area>40.0</Area>
             <Azimuth>0</Azimuth>
             <RValue>4.4</RValue>
           </Door>
           <Door>
             <SystemIdentifier id='DoorSouth'/>
-            <AttachedToWall idref='Wall10'/>
+            <AttachedToWall idref='Wall'/>
             <Area>40.0</Area>
             <Azimuth>180</Azimuth>
             <RValue>4.4</RValue>
@@ -502,21 +310,49 @@
                 <Furnace/>
               </HeatingSystemType>
               <HeatingSystemFuel>natural gas</HeatingSystemFuel>
-              <HeatingCapacity>64000.0</HeatingCapacity>
+              <HeatingCapacity>32000.0</HeatingCapacity>
               <AnnualHeatingEfficiency>
                 <Units>AFUE</Units>
                 <Value>0.92</Value>
               </AnnualHeatingEfficiency>
-              <FractionHeatLoadServed>1.0</FractionHeatLoadServed>
+              <FractionHeatLoadServed>0.5</FractionHeatLoadServed>
+            </HeatingSystem>
+            <HeatingSystem>
+              <SystemIdentifier id='HeatingSystem2'/>
+              <DistributionSystem idref='HVACDistribution2'/>
+              <HeatingSystemType>
+                <Furnace/>
+              </HeatingSystemType>
+              <HeatingSystemFuel>natural gas</HeatingSystemFuel>
+              <HeatingCapacity>32000.0</HeatingCapacity>
+              <AnnualHeatingEfficiency>
+                <Units>AFUE</Units>
+                <Value>0.92</Value>
+              </AnnualHeatingEfficiency>
+              <FractionHeatLoadServed>0.5</FractionHeatLoadServed>
             </HeatingSystem>
             <CoolingSystem>
               <SystemIdentifier id='CoolingSystem'/>
               <DistributionSystem idref='HVACDistribution'/>
               <CoolingSystemType>central air conditioner</CoolingSystemType>
               <CoolingSystemFuel>electricity</CoolingSystemFuel>
-              <CoolingCapacity>48000.0</CoolingCapacity>
+              <CoolingCapacity>24000.0</CoolingCapacity>
               <CompressorType>single stage</CompressorType>
-              <FractionCoolLoadServed>1.0</FractionCoolLoadServed>
+              <FractionCoolLoadServed>0.5</FractionCoolLoadServed>
+              <AnnualCoolingEfficiency>
+                <Units>SEER</Units>
+                <Value>13.0</Value>
+              </AnnualCoolingEfficiency>
+              <SensibleHeatFraction>0.73</SensibleHeatFraction>
+            </CoolingSystem>
+            <CoolingSystem>
+              <SystemIdentifier id='CoolingSystem2'/>
+              <DistributionSystem idref='HVACDistribution2'/>
+              <CoolingSystemType>central air conditioner</CoolingSystemType>
+              <CoolingSystemFuel>electricity</CoolingSystemFuel>
+              <CoolingCapacity>24000.0</CoolingCapacity>
+              <CompressorType>single stage</CompressorType>
+              <FractionCoolLoadServed>0.5</FractionCoolLoadServed>
               <AnnualCoolingEfficiency>
                 <Units>SEER</Units>
                 <Value>13.0</Value>
@@ -564,9 +400,211 @@
                 </Ducts>
               </AirDistribution>
             </DistributionSystemType>
-            <ConditionedFloorAreaServed>2700.0</ConditionedFloorAreaServed>
+            <ConditionedFloorAreaServed>1350.0</ConditionedFloorAreaServed>
+          </HVACDistribution>
+          <HVACDistribution>
+            <SystemIdentifier id='HVACDistribution2'/>
+            <DistributionSystemType>
+              <AirDistribution>
+                <DuctLeakageMeasurement>
+                  <DuctType>supply</DuctType>
+                  <DuctLeakage>
+                    <Units>CFM25</Units>
+                    <Value>75.0</Value>
+                    <TotalOrToOutside>to outside</TotalOrToOutside>
+                  </DuctLeakage>
+                </DuctLeakageMeasurement>
+                <DuctLeakageMeasurement>
+                  <DuctType>return</DuctType>
+                  <DuctLeakage>
+                    <Units>CFM25</Units>
+                    <Value>25.0</Value>
+                    <TotalOrToOutside>to outside</TotalOrToOutside>
+                  </DuctLeakage>
+                </DuctLeakageMeasurement>
+                <Ducts>
+                  <DuctType>supply</DuctType>
+                  <DuctInsulationRValue>4.0</DuctInsulationRValue>
+                  <DuctLocation>attic - unvented</DuctLocation>
+                  <DuctSurfaceArea>150.0</DuctSurfaceArea>
+                </Ducts>
+                <Ducts>
+                  <DuctType>return</DuctType>
+                  <DuctInsulationRValue>0.0</DuctInsulationRValue>
+                  <DuctLocation>attic - unvented</DuctLocation>
+                  <DuctSurfaceArea>50.0</DuctSurfaceArea>
+                </Ducts>
+              </AirDistribution>
+            </DistributionSystemType>
+            <ConditionedFloorAreaServed>1350.0</ConditionedFloorAreaServed>
           </HVACDistribution>
         </HVAC>
+        <MechanicalVentilation>
+          <VentilationFans>
+            <VentilationFan>
+              <SystemIdentifier id='KitchenRangeFan'/>
+              <RatedFlowRate>50.0</RatedFlowRate>
+              <HoursInOperation>1.5</HoursInOperation>
+              <FanLocation>kitchen</FanLocation>
+              <UsedForLocalVentilation>true</UsedForLocalVentilation>
+              <FanPower>15.0</FanPower>
+              <extension>
+                <StartHour>18</StartHour>
+              </extension>
+            </VentilationFan>
+            <VentilationFan>
+              <SystemIdentifier id='BathFans'/>
+              <Quantity>2</Quantity>
+              <RatedFlowRate>25.0</RatedFlowRate>
+              <HoursInOperation>1.5</HoursInOperation>
+              <FanLocation>bath</FanLocation>
+              <UsedForLocalVentilation>true</UsedForLocalVentilation>
+              <FanPower>7.5</FanPower>
+              <extension>
+                <StartHour>7</StartHour>
+              </extension>
+            </VentilationFan>
+            <VentilationFan>
+              <SystemIdentifier id='WholeHouseFan'/>
+              <RatedFlowRate>1000.0</RatedFlowRate>
+              <UsedForSeasonalCoolingLoadReduction>true</UsedForSeasonalCoolingLoadReduction>
+              <FanPower>75.0</FanPower>
+            </VentilationFan>
+            <VentilationFan>
+              <SystemIdentifier id='Supply'/>
+              <FanType>supply only</FanType>
+              <TestedFlowRate>55.0</TestedFlowRate>
+              <HoursInOperation>24.0</HoursInOperation>
+              <UsedForWholeBuildingVentilation>true</UsedForWholeBuildingVentilation>
+              <FanPower>15.0</FanPower>
+            </VentilationFan>
+            <VentilationFan>
+              <SystemIdentifier id='Exhaust'/>
+              <FanType>exhaust only</FanType>
+              <RatedFlowRate>25.0</RatedFlowRate>
+              <HoursInOperation>14.0</HoursInOperation>
+              <UsedForWholeBuildingVentilation>true</UsedForWholeBuildingVentilation>
+              <FanPower>5.0</FanPower>
+            </VentilationFan>
+            <VentilationFan>
+              <SystemIdentifier id='Balanced'/>
+              <FanType>balanced</FanType>
+              <TestedFlowRate>55.0</TestedFlowRate>
+              <HoursInOperation>24.0</HoursInOperation>
+              <UsedForWholeBuildingVentilation>true</UsedForWholeBuildingVentilation>
+              <FanPower>30.0</FanPower>
+            </VentilationFan>
+            <VentilationFan>
+              <SystemIdentifier id='ERV'/>
+              <FanType>energy recovery ventilator</FanType>
+              <TestedFlowRate>25.0</TestedFlowRate>
+              <HoursInOperation>24.0</HoursInOperation>
+              <UsedForWholeBuildingVentilation>true</UsedForWholeBuildingVentilation>
+              <TotalRecoveryEfficiency>0.48</TotalRecoveryEfficiency>
+              <SensibleRecoveryEfficiency>0.72</SensibleRecoveryEfficiency>
+              <FanPower>15.0</FanPower>
+            </VentilationFan>
+            <VentilationFan>
+              <SystemIdentifier id='HRV'/>
+              <FanType>heat recovery ventilator</FanType>
+              <TestedFlowRate>30.0</TestedFlowRate>
+              <HoursInOperation>24.0</HoursInOperation>
+              <UsedForWholeBuildingVentilation>true</UsedForWholeBuildingVentilation>
+              <SensibleRecoveryEfficiency>0.72</SensibleRecoveryEfficiency>
+              <FanPower>15.0</FanPower>
+            </VentilationFan>
+            <VentilationFan>
+              <SystemIdentifier id='HRV_2'/>
+              <FanType>heat recovery ventilator</FanType>
+              <TestedFlowRate>30.0</TestedFlowRate>
+              <HoursInOperation>23.0</HoursInOperation>
+              <UsedForWholeBuildingVentilation>true</UsedForWholeBuildingVentilation>
+              <SensibleRecoveryEfficiency>0.72</SensibleRecoveryEfficiency>
+              <FanPower>15.0</FanPower>
+            </VentilationFan>
+            <VentilationFan>
+              <SystemIdentifier id='ERV_2'/>
+              <FanType>energy recovery ventilator</FanType>
+              <TestedFlowRate>25.0</TestedFlowRate>
+              <HoursInOperation>23.0</HoursInOperation>
+              <UsedForWholeBuildingVentilation>true</UsedForWholeBuildingVentilation>
+              <TotalRecoveryEfficiency>0.48</TotalRecoveryEfficiency>
+              <SensibleRecoveryEfficiency>0.72</SensibleRecoveryEfficiency>
+              <FanPower>15.0</FanPower>
+            </VentilationFan>
+            <VentilationFan>
+              <SystemIdentifier id='Balanced_2'/>
+              <FanType>balanced</FanType>
+              <TestedFlowRate>55.0</TestedFlowRate>
+              <HoursInOperation>23.0</HoursInOperation>
+              <UsedForWholeBuildingVentilation>true</UsedForWholeBuildingVentilation>
+              <FanPower>30.0</FanPower>
+            </VentilationFan>
+            <VentilationFan>
+              <SystemIdentifier id='Exhaust_2'/>
+              <FanType>exhaust only</FanType>
+              <RatedFlowRate>25.0</RatedFlowRate>
+              <HoursInOperation>13.0</HoursInOperation>
+              <UsedForWholeBuildingVentilation>true</UsedForWholeBuildingVentilation>
+              <FanPower>5.0</FanPower>
+            </VentilationFan>
+            <VentilationFan>
+              <SystemIdentifier id='Supply_2'/>
+              <FanType>supply only</FanType>
+              <TestedFlowRate>55.0</TestedFlowRate>
+              <HoursInOperation>23.0</HoursInOperation>
+              <UsedForWholeBuildingVentilation>true</UsedForWholeBuildingVentilation>
+              <FanPower>15.0</FanPower>
+            </VentilationFan>
+            <VentilationFan>
+              <SystemIdentifier id='WholeHouseFan_2'/>
+              <RatedFlowRate>1000.0</RatedFlowRate>
+              <UsedForSeasonalCoolingLoadReduction>true</UsedForSeasonalCoolingLoadReduction>
+              <FanPower>75.0</FanPower>
+            </VentilationFan>
+            <VentilationFan>
+              <SystemIdentifier id='BathFans_2'/>
+              <Quantity>2</Quantity>
+              <RatedFlowRate>25.0</RatedFlowRate>
+              <HoursInOperation>0.5</HoursInOperation>
+              <FanLocation>bath</FanLocation>
+              <UsedForLocalVentilation>true</UsedForLocalVentilation>
+              <FanPower>7.5</FanPower>
+              <extension>
+                <StartHour>6</StartHour>
+              </extension>
+            </VentilationFan>
+            <VentilationFan>
+              <SystemIdentifier id='KitchenRangeFan_2'/>
+              <RatedFlowRate>50.0</RatedFlowRate>
+              <HoursInOperation>0.5</HoursInOperation>
+              <FanLocation>kitchen</FanLocation>
+              <UsedForLocalVentilation>true</UsedForLocalVentilation>
+              <FanPower>15.0</FanPower>
+              <extension>
+                <StartHour>17</StartHour>
+              </extension>
+            </VentilationFan>
+            <VentilationFan>
+              <SystemIdentifier id='CFIS1'/>
+              <FanType>central fan integrated supply</FanType>
+              <TestedFlowRate>160.0</TestedFlowRate>
+              <HoursInOperation>8.0</HoursInOperation>
+              <UsedForWholeBuildingVentilation>true</UsedForWholeBuildingVentilation>
+              <FanPower>150.0</FanPower>
+              <AttachedToHVACDistributionSystem idref='HVACDistribution'/>
+            </VentilationFan>
+            <VentilationFan>
+              <SystemIdentifier id='CFIS2'/>
+              <FanType>central fan integrated supply</FanType>
+              <TestedFlowRate>170.0</TestedFlowRate>
+              <HoursInOperation>8.0</HoursInOperation>
+              <UsedForWholeBuildingVentilation>true</UsedForWholeBuildingVentilation>
+              <FanPower>150.0</FanPower>
+              <AttachedToHVACDistributionSystem idref='HVACDistribution2'/>
+            </VentilationFan>
+          </VentilationFans>
+        </MechanicalVentilation>
         <WaterHeating>
           <WaterHeatingSystem>
             <SystemIdentifier id='WaterHeater'/>

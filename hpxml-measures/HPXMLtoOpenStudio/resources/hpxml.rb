@@ -123,6 +123,7 @@ class HPXML < Object
   HVACTypeElectricResistance = 'ElectricResistance'
   HVACTypeEvaporativeCooler = 'evaporative cooler'
   HVACTypeFireplace = 'Fireplace'
+  HVACTypeFixedHeater = 'FixedHeater'
   HVACTypeFloorFurnace = 'FloorFurnace'
   HVACTypeFurnace = 'Furnace'
   HVACTypeHeatPumpAirToAir = 'air-to-air'
@@ -223,6 +224,7 @@ class HPXML < Object
   UnitsKwhPerYear = 'kWh/year'
   UnitsPercent = 'Percent'
   UnitsThermPerYear = 'therm/year'
+  WallTypeAdobe = 'Adobe'
   WallTypeBrick = 'StructuralBrick'
   WallTypeCMU = 'ConcreteMasonryUnit'
   WallTypeConcrete = 'SolidConcrete'
@@ -311,8 +313,8 @@ class HPXML < Object
   def fraction_of_windows_operable()
     # Calculates the fraction of windows that are operable.
     # Since we don't have quantity available, we use area as an approximation.
-    window_area_total = @windows.map { |w| w.area }.inject(0, :+)
-    window_area_operable = @windows.map { |w| w.fraction_operable * w.area }.inject(0, :+)
+    window_area_total = @windows.map { |w| w.area }.sum(0.0)
+    window_area_operable = @windows.map { |w| w.fraction_operable * w.area }.sum(0.0)
     if window_area_total <= 0
       return 0.0
     end
@@ -2413,7 +2415,7 @@ class HPXML < Object
     end
 
     def total_fraction_heat_load_served
-      map { |htg_sys| htg_sys.fraction_heat_load_served }.inject(0.0, :+)
+      map { |htg_sys| htg_sys.fraction_heat_load_served }.sum(0.0)
     end
   end
 
@@ -2484,7 +2486,7 @@ class HPXML < Object
       if [HVACTypeFurnace, HVACTypeWallFurnace, HVACTypeFloorFurnace, HVACTypeBoiler].include? @heating_system_type
         efficiency_units = 'AFUE'
         efficiency_value = @heating_efficiency_afue
-      elsif [HVACTypeElectricResistance, HVACTypeStove, HVACTypePortableHeater, HVACTypeFireplace].include? @heating_system_type
+      elsif [HVACTypeElectricResistance, HVACTypeStove, HVACTypePortableHeater, HVACTypeFixedHeater, HVACTypeFireplace].include? @heating_system_type
         efficiency_units = UnitsPercent
         efficiency_value = @heating_efficiency_percent
       end
@@ -2512,7 +2514,7 @@ class HPXML < Object
       @heating_capacity = to_float_or_nil(XMLHelper.get_value(heating_system, 'HeatingCapacity'))
       if [HVACTypeFurnace, HVACTypeWallFurnace, HVACTypeFloorFurnace, HVACTypeBoiler].include? @heating_system_type
         @heating_efficiency_afue = to_float_or_nil(XMLHelper.get_value(heating_system, "AnnualHeatingEfficiency[Units='AFUE']/Value"))
-      elsif [HVACTypeElectricResistance, HVACTypeStove, HVACTypePortableHeater, HVACTypeFireplace].include? @heating_system_type
+      elsif [HVACTypeElectricResistance, HVACTypeStove, HVACTypePortableHeater, HVACTypeFixedHeater, HVACTypeFireplace].include? @heating_system_type
         @heating_efficiency_percent = to_float_or_nil(XMLHelper.get_value(heating_system, "AnnualHeatingEfficiency[Units='Percent']/Value"))
       end
       @fraction_heat_load_served = to_float_or_nil(XMLHelper.get_value(heating_system, 'FractionHeatLoadServed'))
@@ -2537,7 +2539,7 @@ class HPXML < Object
     end
 
     def total_fraction_cool_load_served
-      map { |clg_sys| clg_sys.fraction_cool_load_served }.inject(0.0, :+)
+      map { |clg_sys| clg_sys.fraction_cool_load_served }.sum(0.0)
     end
   end
 
@@ -2660,11 +2662,11 @@ class HPXML < Object
     end
 
     def total_fraction_heat_load_served
-      map { |hp| hp.fraction_heat_load_served }.inject(0.0, :+)
+      map { |hp| hp.fraction_heat_load_served }.sum(0.0)
     end
 
     def total_fraction_cool_load_served
-      map { |hp| hp.fraction_cool_load_served }.inject(0.0, :+)
+      map { |hp| hp.fraction_cool_load_served }.sum(0.0)
     end
   end
 
@@ -3145,6 +3147,22 @@ class HPXML < Object
         return hvac_distribution
       end
       fail "Attached HVAC distribution system '#{@distribution_system_idref}' not found for ventilation fan '#{@id}'."
+    end
+
+    def flow_rate
+      if not @tested_flow_rate.nil?
+        return @tested_flow_rate
+      else
+        return @rated_flow_rate
+      end
+    end
+
+    def average_flow_rate
+      return flow_rate * (@hours_in_operation / 24.0)
+    end
+
+    def average_fan_power
+      return @fan_power * (@hours_in_operation / 24.0)
     end
 
     def delete
@@ -4696,7 +4714,7 @@ class HPXML < Object
     end
 
     # Check sum of HVAC FractionDHWLoadServed == 1
-    frac_dhw_load = @water_heating_systems.map { |dhw| dhw.fraction_dhw_load_served }.inject(0, :+)
+    frac_dhw_load = @water_heating_systems.map { |dhw| dhw.fraction_dhw_load_served }.sum(0.0)
     if (frac_dhw_load > 0) && ((frac_dhw_load < 0.99) || (frac_dhw_load > 1.01)) # Use 0.99/1.01 in case of rounding
       errors << "Expected FractionDHWLoadServed to sum to 1, but calculated sum is #{frac_dhw_load.round(2)}."
     end
@@ -4743,8 +4761,8 @@ class HPXML < Object
         cooling_dist << dist
       end
     end
-    heating_total_dist_cfa_served = heating_dist.map { |htg_dist| htg_dist.conditioned_floor_area_served.to_f }.inject(0, :+)
-    cooling_total_dist_cfa_served = cooling_dist.map { |clg_dist| clg_dist.conditioned_floor_area_served.to_f }.inject(0, :+)
+    heating_total_dist_cfa_served = heating_dist.map { |htg_dist| htg_dist.conditioned_floor_area_served.to_f }.sum(0.0)
+    cooling_total_dist_cfa_served = cooling_dist.map { |clg_dist| clg_dist.conditioned_floor_area_served.to_f }.sum(0.0)
     if (heating_total_dist_cfa_served > @building_construction.conditioned_floor_area.to_f)
       errors << 'The total conditioned floor area served by the HVAC distribution system(s) for heating is larger than the conditioned floor area of the building.'
     end
