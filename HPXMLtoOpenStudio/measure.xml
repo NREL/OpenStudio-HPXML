@@ -349,10 +349,10 @@
       <checksum>5AE1EAFB</checksum>
     </file>
     <file>
-      <filename>geometry.rb</filename>
+      <filename>weather.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>CB76A185</checksum>
+      <checksum>C9E02189</checksum>
     </file>
     <file>
       <filename>materials.rb</filename>
@@ -468,19 +468,19 @@
       <checksum>2B6B4C0A</checksum>
     </file>
     <file>
-      <filename>misc_loads.rb</filename>
+      <filename>test_hvac.rb</filename>
       <filetype>rb</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>4E587243</checksum>
+      <usage_type>test</usage_type>
+      <checksum>C3BC236A</checksum>
     </file>
     <file>
-      <filename>EPvalidator.rb</filename>
+      <filename>energyplus.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
       <checksum>F6DE04E7</checksum>
     </file>
     <file>
-      <filename>constructions.rb</filename>
+      <filename>hvac.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
       <checksum>4012AD47</checksum>
@@ -498,7 +498,7 @@
       <checksum>1268C4BC</checksum>
     </file>
     <file>
-      <filename>energyplus.rb</filename>
+      <filename>schedules.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
       <checksum>0C1B7A80</checksum>

@@ -283,6 +283,7 @@ def create_hpxmls
     'base-misc-ceiling-fans.xml' => 'base.xml',
     'base-misc-defaults.xml' => 'base.xml',
     'base-misc-defaults2.xml' => 'base-dhw-recirc-demand.xml',
+    'base-misc-detailed-schedules.xml' => 'base.xml',
     'base-misc-large-uncommon-loads.xml' => 'base-enclosure-garage.xml',
     'base-misc-large-uncommon-loads2.xml' => 'base-misc-large-uncommon-loads.xml',
     'base-misc-neighbor-shading.xml' => 'base.xml',
