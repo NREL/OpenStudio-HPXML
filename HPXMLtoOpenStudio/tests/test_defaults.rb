@@ -248,7 +248,25 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
     _test_default_skylight_values(hpxml_default, [1.0] * n_skylights, [1.0] * n_skylights)
   end
 
-  def test_ducts
+  def test_hvac
+    # Test inputs not overridden by defaults
+    hpxml_name = 'base.xml'
+    hpxml = HPXML.new(hpxml_path: File.join(@root_path, 'workflow', 'sample_files', hpxml_name))
+    hpxml.cooling_systems[0].cooling_shr = 0.88
+    hpxml.cooling_systems[0].compressor_type = HPXML::HVACCompressorTypeVariableSpeed
+    XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
+    hpxml_default = _test_measure()
+    _test_default_cooling_system_values(hpxml_default, 0.88, HPXML::HVACCompressorTypeVariableSpeed)
+    _test_default_heating_system_values(hpxml_default)
+
+    # Test defaults
+    hpxml = apply_hpxml_defaults('base-misc-defaults.xml')
+    XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
+    hpxml_default = _test_measure()
+    _test_default_cooling_system_values(hpxml_default, 0.73, HPXML::HVACCompressorTypeSingleStage)
+  end
+
+  def test_hvac_distribution
     # Test inputs not overridden by defaults
     hpxml_name = 'base.xml'
     hpxml = HPXML.new(hpxml_path: File.join(@root_path, 'workflow', 'sample_files', hpxml_name))
@@ -487,20 +505,22 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
     kitchen_fan.rated_flow_rate = 300
     kitchen_fan.fan_power = 20
     kitchen_fan.start_hour = 12
+    kitchen_fan.quantity = 2
     bath_fan = hpxml.ventilation_fans.select { |f| f.used_for_local_ventilation && f.fan_location == HPXML::LocationBath }[0]
     bath_fan.rated_flow_rate = 80
     bath_fan.fan_power = 33
     bath_fan.start_hour = 6
+    bath_fan.quantity = 3
     XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
     hpxml_default = _test_measure()
-    _test_default_kitchen_fan_values(hpxml_default, 300, 1.5, 20, 12)
-    _test_default_bath_fan_values(hpxml_default, 2, 80, 1.5, 33, 6)
+    _test_default_kitchen_fan_values(hpxml_default, 2, 300, 1.5, 20, 12)
+    _test_default_bath_fan_values(hpxml_default, 3, 80, 1.5, 33, 6)
 
     # Test defaults
     hpxml = apply_hpxml_defaults('base-mechvent-bath-kitchen-fans.xml')
     XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
     hpxml_default = _test_measure()
-    _test_default_kitchen_fan_values(hpxml_default, 100, 1, 30, 18)
+    _test_default_kitchen_fan_values(hpxml_default, 1, 100, 1, 30, 18)
     _test_default_bath_fan_values(hpxml_default, 2, 50, 1, 15, 7)
   end
 
@@ -850,6 +870,17 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
     assert_equal(num_occupants, hpxml.building_occupancy.number_of_residents)
   end
 
+  def _test_default_cooling_system_values(hpxml, shr, compressor_type)
+    assert_equal(shr, hpxml.cooling_systems[0].cooling_shr)
+    assert_equal(compressor_type, hpxml.cooling_systems[0].compressor_type)
+  end
+
+  def _test_default_heating_system_values(hpxml)
+  end
+
+  def _test_default_heat_pump_values(hpxml)
+  end
+
   def _test_default_duct_values(hpxml, supply_locations, return_locations, supply_areas, return_areas, n_return_registers)
     supply_duct_idx = 0
     return_duct_idx = 0
@@ -1079,8 +1110,9 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
     assert_in_epsilon(storage_volume, hpxml.solar_thermal_systems[0].storage_volume)
   end
 
-  def _test_default_kitchen_fan_values(hpxml, rated_flow_rate, hours_in_operation, fan_power, start_hour)
+  def _test_default_kitchen_fan_values(hpxml, quantity, rated_flow_rate, hours_in_operation, fan_power, start_hour)
     kitchen_fan = hpxml.ventilation_fans.select { |f| f.used_for_local_ventilation && f.fan_location == HPXML::LocationKitchen }[0]
+    assert_equal(quantity, kitchen_fan.quantity)
     assert_equal(rated_flow_rate, kitchen_fan.rated_flow_rate)
     assert_equal(hours_in_operation, kitchen_fan.hours_in_operation)
     assert_equal(fan_power, kitchen_fan.fan_power)
