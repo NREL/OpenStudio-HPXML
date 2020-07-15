@@ -150,6 +150,8 @@ def create_osws
     # 'base-hvac-furnace-x3-dse.osw' => 'base.osw', # Not going to support DSE
     'base-hvac-ground-to-air-heat-pump.osw' => 'base.osw',
     # 'base-hvac-ideal-air.osw' => 'base.osw',
+    'base-hvac-mini-split-air-conditioner-only-ducted.osw' => 'base.osw',
+    'base-hvac-mini-split-air-conditioner-only-ductless.osw' => 'base-hvac-mini-split-air-conditioner-only-ducted.osw',
     'base-hvac-mini-split-heat-pump-ducted.osw' => 'base.osw',
     'base-hvac-mini-split-heat-pump-ducted-cooling-only.osw' => 'base.osw',
     'base-hvac-mini-split-heat-pump-ducted-heating-only.osw' => 'base.osw',
@@ -405,7 +407,7 @@ def get_values(osw_file, step)
     step.setArgument('cooling_system_cooling_sensible_heat_fraction', 0.73)
     step.setArgument('cooling_system_cooling_capacity', '48000.0')
     step.setArgument('cooling_system_fraction_cool_load_served', 1)
-    step.setArgument('cooling_system_evap_cooler_is_ducted', false)
+    step.setArgument('cooling_system_is_ducted', false)
     step.setArgument('heat_pump_type', 'none')
     step.setArgument('heat_pump_heating_efficiency_hspf', 7.7)
     step.setArgument('heat_pump_heating_efficiency_cop', 3.6)
@@ -1356,7 +1358,7 @@ def get_values(osw_file, step)
     step.setArgument('cooling_system_type', HPXML::HVACTypeEvaporativeCooler)
     step.removeArgument('cooling_system_cooling_compressor_type')
     step.removeArgument('cooling_system_cooling_sensible_heat_fraction')
-    step.setArgument('cooling_system_evap_cooler_is_ducted', true)
+    step.setArgument('cooling_system_is_ducted', true)
   elsif ['base-hvac-fireplace-wood-only.osw'].include? osw_file
     step.setArgument('heating_system_type', HPXML::HVACTypeFireplace)
     step.setArgument('heating_system_fuel', HPXML::FuelTypeWoodCord)
@@ -1402,6 +1404,20 @@ def get_values(osw_file, step)
   elsif ['base-hvac-furnace-wood-only.osw'].include? osw_file
     step.setArgument('heating_system_fuel', HPXML::FuelTypeWoodCord)
     step.setArgument('cooling_system_type', 'none')
+  elsif ['base-hvac-mini-split-air-conditioner-only-ducted.osw'].include? osw_file
+    step.setArgument('heating_system_type', 'none')
+    step.setArgument('cooling_system_type', HPXML::HVACTypeMiniSplitAirConditioner)
+    step.setArgument('cooling_system_cooling_efficiency_seer', 19.0)
+    step.removeArgument('cooling_system_cooling_compressor_type')
+    step.setArgument('cooling_system_is_ducted', true)
+    step.setArgument('ducts_supply_leakage_value', 15.0)
+    step.setArgument('ducts_return_leakage_value', 5.0)
+    step.setArgument('ducts_supply_insulation_r', 0.0)
+    step.setArgument('ducts_supply_surface_area', '30.0')
+    step.setArgument('ducts_return_surface_area', '10.0')
+  elsif ['base-hvac-mini-split-air-conditioner-only-ductless.osw'].include? osw_file
+    step.setArgument('cooling_system_is_ducted', false)
+    step.removeArgument('cooling_system_cooling_compressor_type')
   elsif ['base-hvac-ground-to-air-heat-pump.osw'].include? osw_file
     step.setArgument('heating_system_type', 'none')
     step.setArgument('cooling_system_type', 'none')
@@ -1548,7 +1564,7 @@ def get_values(osw_file, step)
     step.setArgument('cooling_system_type', HPXML::HVACTypeEvaporativeCooler)
     step.removeArgument('cooling_system_cooling_compressor_type')
     step.removeArgument('cooling_system_cooling_sensible_heat_fraction')
-    step.setArgument('cooling_system_evap_cooler_is_ducted', true)
+    step.setArgument('cooling_system_is_ducted', true)
     step.setArgument('mech_vent_fan_type', HPXML::MechVentTypeCFIS)
     step.setArgument('mech_vent_flow_rate', 330)
     step.setArgument('mech_vent_hours_in_operation', 8)
