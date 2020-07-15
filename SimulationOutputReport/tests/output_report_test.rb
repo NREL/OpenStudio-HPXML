@@ -17,6 +17,7 @@ class SimulationOutputReportTest < MiniTest::Test
     'Propane: Total (MBtu)',
     'Wood Cord: Total (MBtu)',
     'Wood Pellets: Total (MBtu)',
+    'Coal: Total (MBtu)',
     'Electricity: Heating (MBtu)',
     'Electricity: Heating Fans/Pumps (MBtu)',
     'Electricity: Cooling (MBtu)',
@@ -83,6 +84,13 @@ class SimulationOutputReportTest < MiniTest::Test
     'Wood Pellets: Grill (MBtu)',
     'Wood Pellets: Lighting (MBtu)',
     'Wood Pellets: Fireplace (MBtu)',
+    'Coal: Heating (MBtu)',
+    'Coal: Hot Water (MBtu)',
+    'Coal: Clothes Dryer (MBtu)',
+    'Coal: Range/Oven (MBtu)',
+    'Coal: Grill (MBtu)',
+    'Coal: Lighting (MBtu)',
+    'Coal: Fireplace (MBtu)',
     'Load: Heating (MBtu)',
     'Load: Cooling (MBtu)',
     'Load: Hot Water: Delivered (MBtu)',
@@ -142,6 +150,7 @@ class SimulationOutputReportTest < MiniTest::Test
     'Propane: Total',
     'Wood Cord: Total',
     'Wood Pellets: Total',
+    'Coal: Total',
   ]
 
   TimeseriesColsEndUses = [
@@ -211,6 +220,13 @@ class SimulationOutputReportTest < MiniTest::Test
     'Wood Pellets: Grill',
     'Wood Pellets: Lighting',
     'Wood Pellets: Fireplace',
+    'Coal: Heating',
+    'Coal: Hot Water',
+    'Coal: Clothes Dryer',
+    'Coal: Range/Oven',
+    'Coal: Grill',
+    'Coal: Lighting',
+    'Coal: Fireplace',
   ]
 
   TimeseriesColsWaterUses = [
@@ -302,6 +318,7 @@ class SimulationOutputReportTest < MiniTest::Test
     'fuelPropane',
     'fuelWoodCord',
     'fuelWoodPellets',
+    'fuelCoal',
     'enduseElectricityHeating',
     'enduseElectricityHeatingFansPumps',
     'enduseElectricityCooling',
@@ -315,7 +332,6 @@ class SimulationOutputReportTest < MiniTest::Test
     'enduseElectricityMechVent',
     'enduseElectricityWholeHouseFan',
     'enduseElectricityRefrigerator',
-    'enduseElectricityFreezer',
     'enduseElectricityDehumidifier',
     'enduseElectricityDishwasher',
     'enduseElectricityClothesWasher',
@@ -324,50 +340,31 @@ class SimulationOutputReportTest < MiniTest::Test
     'enduseElectricityCeilingFan',
     'enduseElectricityTelevision',
     'enduseElectricityPlugLoads',
-    'enduseElectricityElectricVehicleCharging',
-    'enduseElectricityWellPump',
-    'enduseElectricityPoolHeater',
-    'enduseElectricityPoolPump',
-    'enduseElectricityHotTubHeater',
-    'enduseElectricityHotTubPump',
     'enduseElectricityPV',
     'enduseNaturalGasHeating',
     'enduseNaturalGasHotWater',
     'enduseNaturalGasClothesDryer',
     'enduseNaturalGasRangeOven',
-    'enduseNaturalGasPoolHeater',
-    'enduseNaturalGasHotTubHeater',
-    'enduseNaturalGasGrill',
-    'enduseNaturalGasLighting',
-    'enduseNaturalGasFireplace',
     'enduseFuelOilHeating',
     'enduseFuelOilHotWater',
     'enduseFuelOilClothesDryer',
     'enduseFuelOilRangeOven',
-    'enduseFuelOilGrill',
-    'enduseFuelOilLighting',
-    'enduseFuelOilFireplace',
     'endusePropaneHeating',
     'endusePropaneHotWater',
     'endusePropaneClothesDryer',
     'endusePropaneRangeOven',
-    'endusePropaneGrill',
-    'endusePropaneLighting',
-    'endusePropaneFireplace',
     'enduseWoodCordHeating',
     'enduseWoodCordHotWater',
     'enduseWoodCordClothesDryer',
     'enduseWoodCordRangeOven',
-    'enduseWoodCordGrill',
-    'enduseWoodCordLighting',
-    'enduseWoodCordFireplace',
     'enduseWoodPelletsHeating',
     'enduseWoodPelletsHotWater',
     'enduseWoodPelletsClothesDryer',
     'enduseWoodPelletsRangeOven',
-    'enduseWoodPelletsGrill',
-    'enduseWoodPelletsLighting',
-    'enduseWoodPelletsFireplace',
+    'enduseCoalHeating',
+    'enduseCoalHotWater',
+    'enduseCoalClothesDryer',
+    'enduseCoalRangeOven',
     'loadHeating',
     'loadCooling',
     'loadHotWaterDelivered',
@@ -758,7 +755,7 @@ class SimulationOutputReportTest < MiniTest::Test
   end
 
   def test_timeseries_timestep_ALL_10min
-    args_hash = { 'hpxml_path' => '../workflow/sample_files/base-misc-timestep-10-mins.xml',
+    args_hash = { 'hpxml_path' => '../workflow/sample_files/base-simcontrol-timestep-10-mins.xml',
                   'timeseries_frequency' => 'timestep',
                   'include_timeseries_fuel_consumptions' => true,
                   'include_timeseries_end_use_consumptions' => true,
@@ -778,7 +775,7 @@ class SimulationOutputReportTest < MiniTest::Test
   end
 
   def test_timeseries_hourly_ALL_runperiod_Jan
-    args_hash = { 'hpxml_path' => '../workflow/sample_files/base-misc-runperiod-1-month.xml',
+    args_hash = { 'hpxml_path' => '../workflow/sample_files/base-simcontrol-runperiod-1-month.xml',
                   'timeseries_frequency' => 'hourly',
                   'include_timeseries_fuel_consumptions' => true,
                   'include_timeseries_end_use_consumptions' => true,
@@ -798,7 +795,7 @@ class SimulationOutputReportTest < MiniTest::Test
   end
 
   def test_timeseries_daily_ALL_runperiod_Jan
-    args_hash = { 'hpxml_path' => '../workflow/sample_files/base-misc-runperiod-1-month.xml',
+    args_hash = { 'hpxml_path' => '../workflow/sample_files/base-simcontrol-runperiod-1-month.xml',
                   'timeseries_frequency' => 'daily',
                   'include_timeseries_fuel_consumptions' => true,
                   'include_timeseries_end_use_consumptions' => true,
@@ -818,7 +815,7 @@ class SimulationOutputReportTest < MiniTest::Test
   end
 
   def test_timeseries_monthly_ALL_runperiod_Jan
-    args_hash = { 'hpxml_path' => '../workflow/sample_files/base-misc-runperiod-1-month.xml',
+    args_hash = { 'hpxml_path' => '../workflow/sample_files/base-simcontrol-runperiod-1-month.xml',
                   'timeseries_frequency' => 'monthly',
                   'include_timeseries_fuel_consumptions' => true,
                   'include_timeseries_end_use_consumptions' => true,
@@ -838,7 +835,7 @@ class SimulationOutputReportTest < MiniTest::Test
   end
 
   def test_timeseries_timestep_ALL_60min_runperiod_Jan
-    args_hash = { 'hpxml_path' => '../workflow/sample_files/base-misc-runperiod-1-month.xml',
+    args_hash = { 'hpxml_path' => '../workflow/sample_files/base-simcontrol-runperiod-1-month.xml',
                   'timeseries_frequency' => 'timestep',
                   'include_timeseries_fuel_consumptions' => true,
                   'include_timeseries_end_use_consumptions' => true,
@@ -1019,7 +1016,7 @@ class SimulationOutputReportTest < MiniTest::Test
       end
     end
     timeseries_cols.each do |col|
-      avg_value = values[col].inject(:+) / values[col].size
+      avg_value = values[col].sum(0.0) / values[col].size
       assert_operator(avg_value, :!=, 0)
     end
   end

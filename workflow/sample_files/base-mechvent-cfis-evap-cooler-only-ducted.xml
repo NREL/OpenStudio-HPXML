@@ -15,6 +15,12 @@
   </SoftwareInfo>
   <Building>
     <BuildingID id='MyBuilding'/>
+    <Site>
+      <SiteID id='SiteID'/>
+      <Address>
+        <StateCode>CO</StateCode>
+      </Address>
+    </Site>
     <ProjectStatus>
       <EventType>proposed workscope</EventType>
     </ProjectStatus>
@@ -522,10 +528,6 @@
             <Units>kWh/year</Units>
             <Value>620.0</Value>
           </Load>
-          <extension>
-            <FracSensible>1.0</FracSensible>
-            <FracLatent>0.0</FracLatent>
-          </extension>
         </PlugLoad>
       </MiscLoads>
     </BuildingDetails>
