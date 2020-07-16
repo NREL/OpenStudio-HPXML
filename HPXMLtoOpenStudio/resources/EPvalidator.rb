@@ -97,10 +97,10 @@ class EnergyPlusValidator
         '/HPXML/Building/BuildingDetails/Pools/Pool' => zero_or_one, # See [Pool]
         '/HPXML/Building/BuildingDetails/HotTubs/HotTub' => zero_or_one, # See [HotTub]
 
-        '/HPXML/Building/BuildingDetails/MiscLoads/PlugLoad[PlugLoadType="other"]' => zero_or_one, # See [PlugLoad]
-        '/HPXML/Building/BuildingDetails/MiscLoads/PlugLoad[PlugLoadType="TV other"]' => zero_or_one, # See [PlugLoad]
-        '/HPXML/Building/BuildingDetails/MiscLoads/PlugLoad[PlugLoadType="electric vehicle charging"]' => zero_or_one, # See [PlugLoad]
-        '/HPXML/Building/BuildingDetails/MiscLoads/PlugLoad[PlugLoadType="well pump"]' => zero_or_one, # See [PlugLoad]
+        '/HPXML/Building/BuildingDetails/MiscLoads/PlugLoad[PlugLoadType[text()="other"]]' => zero_or_one, # See [PlugLoad]
+        '/HPXML/Building/BuildingDetails/MiscLoads/PlugLoad[PlugLoadType[text()="TV other"]]' => zero_or_one, # See [PlugLoad]
+        '/HPXML/Building/BuildingDetails/MiscLoads/PlugLoad[PlugLoadType[text()="electric vehicle charging"]]' => zero_or_one, # See [PlugLoad]
+        '/HPXML/Building/BuildingDetails/MiscLoads/PlugLoad[PlugLoadType[text()="well pump"]]' => zero_or_one, # See [PlugLoad]
 
         '/HPXML/Building/BuildingDetails/MiscLoads/FuelLoad[FuelLoadType="grill"]' => zero_or_one, # See [FuelLoad]
         '/HPXML/Building/BuildingDetails/MiscLoads/FuelLoad[FuelLoadType="lighting"]' => zero_or_one, # See [FuelLoad]
@@ -123,7 +123,7 @@ class EnergyPlusValidator
 
       # [Site]
       '/HPXML/Building/BuildingDetails/BuildingSummary/Site' => {
-        'SiteType[text()="urban" or text()="suburban" or text()="rural"]' => zero_or_one,
+        '[not(SiteType)] | SiteType[text()="urban" or text()="suburban" or text()="rural"]' => one,
         'extension/ShelterCoefficient' => zero_or_one,
         'extension/Neighbors' => zero_or_one, # See [Neighbors]
       },
@@ -944,7 +944,7 @@ class EnergyPlusValidator
       return child
     end
 
-    return [parent, child].join('/')
+    return [parent, child].join(': ')
   end
 
   def self.update_leading_predicates(str)

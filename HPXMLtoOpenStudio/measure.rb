@@ -7,7 +7,6 @@ require 'openstudio'
 require 'pathname'
 require 'csv'
 require 'oga'
-# require 'schematron-nokogiri'
 require_relative 'resources/airflow'
 require_relative 'resources/constants'
 require_relative 'resources/constructions'
@@ -166,22 +165,6 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
       runner.registerError("#{hpxml_path}: #{error}")
       is_valid = false
     end
-
-    # TODO: Add Schematron validation
-    # # load the schematron xml
-    # stron_doc = Nokogiri::XML File.open(File.join(schemas_dir, 'EPvalidator.stron'))  # "/path/to/schema.stron"
-    # # make a schematron object
-    # stron = SchematronNokogiri::Schema.new stron_doc
-    # # load the xml document you wish to validate
-    # xml_doc = Nokogiri::XML File.open(hpxml.doc)  # "/path/to/xml_document.xml"
-    # # validate it
-    # results = stron.validate xml_doc
-    # # print out the results (Try this)
-    # results.each do |error|
-    #   puts "#{error[:line]}: #{error[:message]}"
-    #   runner.registerError("#{hpxml_path}: #{error[:line]}, #{error[:message]}")
-    #   is_valid = false
-    # end
 
     # Check for additional errors
     errors = hpxml.check_for_errors()
