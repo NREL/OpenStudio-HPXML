@@ -218,6 +218,9 @@ def create_hpxmls
     'base-hvac-central-ac-only-2-speed.xml' => 'base.xml',
     'base-hvac-central-ac-only-var-speed.xml' => 'base.xml',
     'base-hvac-central-ac-plus-air-to-air-heat-pump-heating.xml' => 'base-hvac-central-ac-only-1-speed.xml',
+    'base-hvac-chiller-only-ducted-seer.xml' => 'base-enclosure-attached-multifamily.xml',
+    'base-hvac-chiller-only-hydronic-seer.xml' => 'base-hvac-chiller-only-ducted-seer.xml',
+    'base-hvac-chiller-only-ducted-kw-per-ton.xml' => 'base-hvac-chiller-only-ducted-seer.xml',
     'base-hvac-dse.xml' => 'base.xml',
     'base-hvac-dual-fuel-air-to-air-heat-pump-1-speed.xml' => 'base-hvac-air-to-air-heat-pump-1-speed.xml',
     'base-hvac-dual-fuel-air-to-air-heat-pump-1-speed-electric.xml' => 'base-hvac-dual-fuel-air-to-air-heat-pump-1-speed.xml',
@@ -318,10 +321,10 @@ def create_hpxmls
     'hvac_autosizing/base-hvac-furnace-gas-only-autosize.xml' => 'base-hvac-furnace-gas-only.xml',
     'hvac_autosizing/base-hvac-furnace-gas-room-ac-autosize.xml' => 'base-hvac-furnace-gas-room-ac.xml',
     'hvac_autosizing/base-hvac-ground-to-air-heat-pump-autosize.xml' => 'base-hvac-ground-to-air-heat-pump.xml',
+    'hvac_autosizing/base-hvac-mini-split-air-conditioner-only-ducted-autosize.xml' => 'base-hvac-mini-split-air-conditioner-only-ducted.xml',
     'hvac_autosizing/base-hvac-mini-split-heat-pump-ducted-autosize.xml' => 'base-hvac-mini-split-heat-pump-ducted.xml',
     'hvac_autosizing/base-hvac-mini-split-heat-pump-ducted-heating-only-autosize.xml' => 'base-hvac-mini-split-heat-pump-ducted-heating-only.xml',
     'hvac_autosizing/base-hvac-mini-split-heat-pump-ducted-cooling-only-autosize.xml' => 'base-hvac-mini-split-heat-pump-ducted-cooling-only.xml',
-    'hvac_autosizing/base-hvac-mini-split-air-conditioner-only-ducted-autosize.xml' => 'base-hvac-mini-split-air-conditioner-only-ducted.xml',
     'hvac_autosizing/base-hvac-room-ac-only-autosize.xml' => 'base-hvac-room-ac-only.xml',
     'hvac_autosizing/base-hvac-stove-oil-only-autosize.xml' => 'base-hvac-stove-oil-only.xml',
     'hvac_autosizing/base-hvac-wall-furnace-elec-only-autosize.xml' => 'base-hvac-wall-furnace-elec-only.xml',
@@ -2416,6 +2419,7 @@ def set_hpxml_heating_systems(hpxml_file, hpxml)
          'base-hvac-central-ac-only-1-speed.xml',
          'base-hvac-central-ac-only-2-speed.xml',
          'base-hvac-central-ac-only-var-speed.xml',
+         'base-hvac-chiller-only-ducted-seer.xml',
          'base-hvac-evap-cooler-only.xml',
          'base-hvac-evap-cooler-only-ducted.xml',
          'base-hvac-ground-to-air-heat-pump.xml',
@@ -2696,6 +2700,18 @@ def set_hpxml_cooling_systems(hpxml_file, hpxml)
     hpxml.cooling_systems[0].cooling_efficiency_eer = 8.5
     hpxml.cooling_systems[0].cooling_shr = 0.65
     hpxml.cooling_systems[0].compressor_type = nil
+  elsif ['base-hvac-chiller-only-ducted-seer.xml'].include? hpxml_file
+    hpxml.cooling_systems[0].cooling_system_type = HPXML::HVACTypeChiller
+    hpxml.cooling_systems[0].cooling_efficiency_seer = 18
+    hpxml.cooling_systems[0].cooling_shr = nil
+    hpxml.cooling_systems[0].compressor_type = nil
+  elsif ['base-hvac-chiller-only-ducted-kw-per-ton.xml'].include? hpxml_file
+    hpxml.cooling_systems[0].cooling_efficiency_seer = nil
+    hpxml.cooling_systems[0].cooling_efficiency_kw_per_ton = 0.52
+    hpxml.cooling_systems[0].number_of_units_served = 5
+    hpxml.cooling_systems[0].building_cooling_capacity = 5 * hpxml.cooling_systems[0].cooling_capacity
+    hpxml.cooling_systems[0].aux_power = 1000
+    hpxml.cooling_systems[0].aux_power_dweq = 300
   elsif ['base-hvac-room-ac-only-33percent.xml'].include? hpxml_file
     hpxml.cooling_systems[0].fraction_cool_load_served = 0.33
   elsif ['base-hvac-evap-cooler-only-ducted.xml',
@@ -3020,7 +3036,8 @@ def set_hpxml_hvac_distributions(hpxml_file, hpxml)
          'base-hvac-boiler-gas-only.xml',
          'base-hvac-boiler-oil-only.xml',
          'base-hvac-boiler-propane-only.xml',
-         'base-hvac-boiler-wood-only.xml'].include? hpxml_file
+         'base-hvac-boiler-wood-only.xml',
+         'base-hvac-chiller-only-hydronic-seer.xml'].include? hpxml_file
     hpxml.hvac_distributions[0].distribution_system_type = HPXML::HVACDistributionTypeHydronic
     hpxml.hvac_distributions[0].duct_leakage_measurements.clear
     hpxml.hvac_distributions[0].ducts.clear

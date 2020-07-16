@@ -1969,11 +1969,17 @@ class OSModel
     Waterheater.apply_combi_system_EMS(model, @dhw_map, @hpxml.water_heating_systems)
   end
 
-  def self.is_central_air_conditioner_and_furnace(heating_system, cooling_system)
-    if not (@hpxml.heating_systems.include?(heating_system) && (heating_system.heating_system_type == HPXML::HVACTypeFurnace))
+  def self.is_combined_central_heating_and_cooling(heating_system, cooling_system)
+    # True if this is an air distribution system with both heating and cooling
+    # systems attached. Used to model a single E+ AirLoop UnitarySystem with both
+    # heating and cooling coils (and thus, a single duct system).
+    if not @hpxml.heating_systems.include? heating_system
       return false
     end
-    if not (@hpxml.cooling_systems.include?(cooling_system) && (cooling_system.cooling_system_type == HPXML::HVACTypeCentralAirConditioner))
+    if not @hpxml.cooling_systems.include? cooling_system
+      return false
+    end
+    if heating_system.distribution_system.distribution_system_type != HPXML::HVACDistributionTypeAir
       return false
     end
 
@@ -1986,16 +1992,23 @@ class OSModel
     @hpxml.cooling_systems.each do |cooling_system|
       check_distribution_system(cooling_system.distribution_system, cooling_system.cooling_system_type)
 
-      if cooling_system.cooling_system_type == HPXML::HVACTypeCentralAirConditioner
+      if [HPXML::HVACTypeCentralAirConditioner, HPXML::HVACTypeChiller].include? cooling_system.cooling_system_type
+        # Cooling systems that may share an air distribution with a heating system
 
         heating_system = cooling_system.attached_heating_system
-        if not is_central_air_conditioner_and_furnace(heating_system, cooling_system)
+        if not is_combined_central_heating_and_cooling(heating_system, cooling_system)
           heating_system = nil
         end
 
-        HVAC.apply_central_air_conditioner_furnace(model, runner, cooling_system, heating_system,
-                                                   @remaining_cool_load_frac, @remaining_heat_load_frac,
-                                                   living_zone, @hvac_map)
+        if cooling_system.cooling_system_type == HPXML::HVACTypeCentralAirConditioner
+          HVAC.apply_central_air_conditioner_furnace(model, runner, cooling_system, heating_system,
+                                                     @remaining_cool_load_frac, @remaining_heat_load_frac,
+                                                     living_zone, @hvac_map)
+        elsif cooling_system.cooling_system_type == HPXML::HVACTypeChiller
+          HVAC.apply_chiller_furnace(model, runner, cooling_system, heating_system,
+                                     @remaining_cool_load_frac, @remaining_heat_load_frac,
+                                     living_zone, @hvac_map)
+        end
 
         if not heating_system.nil?
           @remaining_heat_load_frac -= heating_system.fraction_heat_load_served
@@ -2033,7 +2046,7 @@ class OSModel
       if heating_system.heating_system_type == HPXML::HVACTypeFurnace
 
         cooling_system = heating_system.attached_cooling_system
-        if is_central_air_conditioner_and_furnace(heating_system, cooling_system)
+        if is_combined_central_heating_and_cooling(heating_system, cooling_system)
           next # Already processed combined AC+furnace
         end
 
@@ -2212,6 +2225,7 @@ class OSModel
     hvac_distribution_type_map = { HPXML::HVACTypeFurnace => [HPXML::HVACDistributionTypeAir, HPXML::HVACDistributionTypeDSE],
                                    HPXML::HVACTypeBoiler => [HPXML::HVACDistributionTypeHydronic, HPXML::HVACDistributionTypeDSE],
                                    HPXML::HVACTypeCentralAirConditioner => [HPXML::HVACDistributionTypeAir, HPXML::HVACDistributionTypeDSE],
+                                   HPXML::HVACTypeChiller => [HPXML::HVACDistributionTypeAir, HPXML::HVACDistributionTypeHydronic, HPXML::HVACDistributionTypeDSE],
                                    HPXML::HVACTypeEvaporativeCooler => [HPXML::HVACDistributionTypeAir, HPXML::HVACDistributionTypeDSE],
                                    HPXML::HVACTypeMiniSplitAirConditioner => [HPXML::HVACDistributionTypeAir, HPXML::HVACDistributionTypeDSE],
                                    HPXML::HVACTypeHeatPumpAirToAir => [HPXML::HVACDistributionTypeAir, HPXML::HVACDistributionTypeDSE],

@@ -3,16 +3,18 @@
 class HVAC
   def self.apply_central_air_conditioner_furnace(model, runner, cooling_system, heating_system,
                                                  remaining_cool_load_frac, remaining_heat_load_frac,
-                                                 control_zone, hvac_map)
+                                                 control_zone, hvac_map,
+                                                 clg_obj_name = Constants.ObjectNameCentralAirConditioner,
+                                                 htg_obj_name = Constants.ObjectNameFurnace)
 
     hvac_map[cooling_system.id] = [] unless cooling_system.nil?
     hvac_map[heating_system.id] = [] unless heating_system.nil?
-    if heating_system.nil?
-      obj_name = Constants.ObjectNameCentralAirConditioner
-    elsif cooling_system.nil?
-      obj_name = Constants.ObjectNameFurnace
+    if (not clg_obj_name.nil?) && (not htg_obj_name.nil?)
+      obj_name = "#{clg_obj_name} and #{htg_obj_name}"
+    elsif not clg_obj_name.nil?
+      obj_name = clg_obj_name
     else
-      obj_name = Constants.ObjectNameCentralAirConditionerAndFurnace
+      obj_name = htg_obj_name
     end
 
     if not heating_system.nil?
@@ -179,6 +181,22 @@ class HVAC
       air_loop_unitary.additionalProperties.setFeature(Constants.SizingInfoHVACFracHeatLoadServed, heating_system.fraction_heat_load_served)
       air_loop_unitary.additionalProperties.setFeature(Constants.SizingInfoHVACHeatType, Constants.ObjectNameFurnace)
     end
+  end
+
+  def self.apply_chiller_furnace(model, runner, cooling_system, heating_system,
+                                 remaining_cool_load_frac, remaining_heat_load_frac,
+                                 control_zone, hvac_map)
+
+    if (not cooling_system.nil?) && cooling_system.cooling_efficiency_seer.nil?
+      # Calculate equivalent SEER
+      cooling_system.cooling_efficiency_seer = calc_chiller_equivalent_seer(cooling_system)
+    end
+
+    # Modeled as a central AC w/ equivalent SEER
+    apply_central_air_conditioner_furnace(model, runner, cooling_system, heating_system,
+                                          remaining_cool_load_frac, remaining_heat_load_frac,
+                                          control_zone, hvac_map,
+                                          Constants.ObjectNameChiller)
   end
 
   def self.apply_room_air_conditioner(model, runner, cooling_system,
@@ -531,16 +549,17 @@ class HVAC
 
     apply_mini_split_heat_pump(model, runner, heat_pump, 0,
                                remaining_cool_load_frac,
-                               control_zone, hvac_map)
+                               control_zone, hvac_map,
+                               Constants.ObjectNameMiniSplitAirConditioner)
   end
 
   def self.apply_mini_split_heat_pump(model, runner, heat_pump,
                                       remaining_heat_load_frac,
                                       remaining_cool_load_frac,
-                                      control_zone, hvac_map)
+                                      control_zone, hvac_map,
+                                      obj_name = Constants.ObjectNameMiniSplitHeatPump)
 
     hvac_map[heat_pump.id] = []
-    obj_name = Constants.ObjectNameMiniSplitHeatPump
     sequential_heat_load_frac = calc_sequential_load_fraction(heat_pump.fraction_heat_load_served, remaining_heat_load_frac)
     sequential_cool_load_frac = calc_sequential_load_fraction(heat_pump.fraction_cool_load_served, remaining_cool_load_frac)
     num_speeds = 10
@@ -588,43 +607,47 @@ class HVAC
 
     # Heating Coil
 
-    # cop/eir as a function of temperature
-    # Generic curves (=Daikin from lab data)
-    heat_eir_ft_spec = [[0.9999941697687026, 0.004684593830254383, 5.901286675833333e-05, -0.0028624467783091973, 1.3041120194135802e-05, -0.00016172918478765433]] * num_speeds
-    heat_cap_fflow_spec = [[1, 0, 0]] * num_speeds
-    heat_eir_fflow_spec = [[1, 0, 0]] * num_speeds
+    if obj_name == Constants.ObjectNameMiniSplitHeatPump
 
-    # Derive coefficients from user input for capacity retention at outdoor drybulb temperature X [C].
-    # Biquadratic: capacity multiplier = a + b*IAT + c*IAT^2 + d*OAT + e*OAT^2 + f*IAT*OAT
-    x_A = UnitConversions.convert(cap_retention_temp, 'F', 'C')
-    y_A = cap_retention_frac
-    x_B = UnitConversions.convert(47.0, 'F', 'C') # 47F is the rating point
-    y_B = 1.0 # Maximum capacity factor is 1 at the rating point, by definition (this is maximum capacity, not nominal capacity)
-    oat_slope = (y_B - y_A) / (x_B - x_A)
-    oat_intercept = y_A - (x_A * oat_slope)
+      # cop/eir as a function of temperature
+      # Generic curves (=Daikin from lab data)
+      heat_eir_ft_spec = [[0.9999941697687026, 0.004684593830254383, 5.901286675833333e-05, -0.0028624467783091973, 1.3041120194135802e-05, -0.00016172918478765433]] * num_speeds
+      heat_cap_fflow_spec = [[1, 0, 0]] * num_speeds
+      heat_eir_fflow_spec = [[1, 0, 0]] * num_speeds
 
-    # Coefficients for the indoor temperature relationship are retained from the generic curve (Daikin lab data).
-    iat_slope = -0.010386676170938
-    iat_intercept = 0.219274275
-    a = oat_intercept + iat_intercept
-    b = iat_slope
-    c = 0
-    d = oat_slope
-    e = 0
-    f = 0
-    heat_cap_ft_spec = [convert_curve_biquadratic([a, b, c, d, e, f], false)] * num_speeds
+      # Derive coefficients from user input for capacity retention at outdoor drybulb temperature X [C].
+      # Biquadratic: capacity multiplier = a + b*IAT + c*IAT^2 + d*OAT + e*OAT^2 + f*IAT*OAT
+      x_A = UnitConversions.convert(cap_retention_temp, 'F', 'C')
+      y_A = cap_retention_frac
+      x_B = UnitConversions.convert(47.0, 'F', 'C') # 47F is the rating point
+      y_B = 1.0 # Maximum capacity factor is 1 at the rating point, by definition (this is maximum capacity, not nominal capacity)
+      oat_slope = (y_B - y_A) / (x_B - x_A)
+      oat_intercept = y_A - (x_A * oat_slope)
 
-    heat_c_d = get_heat_c_d(num_speeds, heat_pump.heating_efficiency_hspf)
-    heat_closs_fplr_spec = [calc_plr_coefficients(heat_c_d)] * num_speeds
-    heat_cfms_ton_rated, heat_capacity_ratios = calc_mshp_cfms_ton_heating(min_heating_capacity, max_heating_capacity, min_heating_airflow_rate, max_heating_airflow_rate, num_speeds)
-    heat_eirs = calc_mshp_heat_eirs(runner, heat_pump.heating_efficiency_hspf, fan_power_installed, hp_min_temp, heat_c_d, cool_cfms_ton_rated, num_speeds, heat_capacity_ratios, heat_cfms_ton_rated, heat_eir_ft_spec, heat_cap_ft_spec)
-    htg_coil = create_dx_heating_coil(model, obj_name, mshp_indices, heat_eirs, heat_cap_ft_spec, heat_eir_ft_spec, heat_closs_fplr_spec, heat_cap_fflow_spec, heat_eir_fflow_spec, heat_pump.heating_capacity, 0.0, nil, nil, hp_min_temp)
-    hvac_map[heat_pump.id] << htg_coil
+      # Coefficients for the indoor temperature relationship are retained from the generic curve (Daikin lab data).
+      iat_slope = -0.010386676170938
+      iat_intercept = 0.219274275
+      a = oat_intercept + iat_intercept
+      b = iat_slope
+      c = 0
+      d = oat_slope
+      e = 0
+      f = 0
+      heat_cap_ft_spec = [convert_curve_biquadratic([a, b, c, d, e, f], false)] * num_speeds
 
-    # Supplemental Heating Coil
+      heat_c_d = get_heat_c_d(num_speeds, heat_pump.heating_efficiency_hspf)
+      heat_closs_fplr_spec = [calc_plr_coefficients(heat_c_d)] * num_speeds
+      heat_cfms_ton_rated, heat_capacity_ratios = calc_mshp_cfms_ton_heating(min_heating_capacity, max_heating_capacity, min_heating_airflow_rate, max_heating_airflow_rate, num_speeds)
+      heat_eirs = calc_mshp_heat_eirs(runner, heat_pump.heating_efficiency_hspf, fan_power_installed, hp_min_temp, heat_c_d, cool_cfms_ton_rated, num_speeds, heat_capacity_ratios, heat_cfms_ton_rated, heat_eir_ft_spec, heat_cap_ft_spec)
+      htg_coil = create_dx_heating_coil(model, obj_name, mshp_indices, heat_eirs, heat_cap_ft_spec, heat_eir_ft_spec, heat_closs_fplr_spec, heat_cap_fflow_spec, heat_eir_fflow_spec, heat_pump.heating_capacity, 0.0, nil, nil, hp_min_temp)
+      hvac_map[heat_pump.id] << htg_coil
 
-    htg_supp_coil = create_supp_heating_coil(model, obj_name, heat_pump)
-    hvac_map[heat_pump.id] << htg_supp_coil
+      # Supplemental Heating Coil
+
+      htg_supp_coil = create_supp_heating_coil(model, obj_name, heat_pump)
+      hvac_map[heat_pump.id] << htg_supp_coil
+
+    end
 
     # Fan
 
@@ -648,7 +671,11 @@ class HVAC
     perf = OpenStudio::Model::UnitarySystemPerformanceMultispeed.new(model)
     perf.setSingleModeOperation(false)
     mshp_indices.each do |mshp_index|
-      ratio_heating = heat_cfms_ton_rated[mshp_index] / heat_cfms_ton_rated[mshp_indices[-1]]
+      if obj_name == Constants.ObjectNameMiniSplitHeatPump
+        ratio_heating = heat_cfms_ton_rated[mshp_index] / heat_cfms_ton_rated[mshp_indices[-1]]
+      else
+        ratio_heating = 1.0
+      end
       ratio_cooling = cool_cfms_ton_rated[mshp_index] / cool_cfms_ton_rated[mshp_indices[-1]]
       f = OpenStudio::Model::SupplyAirflowRatioField.new(ratio_heating, ratio_cooling)
       perf.addSupplyAirflowRatioField(f)
@@ -660,7 +687,7 @@ class HVAC
     air_loop = create_air_loop(model, obj_name, air_loop_unitary, control_zone, sequential_heat_load_frac, sequential_cool_load_frac)
     hvac_map[heat_pump.id] << air_loop
 
-    if pan_heater_power > 0
+    if (pan_heater_power > 0) && (obj_name == Constants.ObjectNameMiniSplitHeatPump)
 
       mshp_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Heating Coil Electric Energy')
       mshp_sensor.setName("#{obj_name} vrf energy sensor")
@@ -712,29 +739,33 @@ class HVAC
     end
 
     # Store info for HVAC Sizing measure
-    heat_capacity_ratios_4 = []
     cool_capacity_ratios_4 = []
-    heat_cfms_ton_rated_4 = []
     cool_cfms_ton_rated_4 = []
     cool_shrs_rated_gross_4 = []
     mshp_indices.each do |mshp_index|
-      heat_capacity_ratios_4 << heat_capacity_ratios[mshp_index]
       cool_capacity_ratios_4 << cool_capacity_ratios[mshp_index]
-      heat_cfms_ton_rated_4 << heat_cfms_ton_rated[mshp_index]
       cool_cfms_ton_rated_4 << cool_cfms_ton_rated[mshp_index]
       cool_shrs_rated_gross_4 << cool_shrs_rated_gross[mshp_index]
     end
     air_loop_unitary.additionalProperties.setFeature(Constants.SizingInfoHVACSystemIsDucted, !heat_pump.distribution_system_idref.nil?)
-    air_loop_unitary.additionalProperties.setFeature(Constants.SizingInfoHVACCapacityRatioHeating, heat_capacity_ratios_4.join(','))
     air_loop_unitary.additionalProperties.setFeature(Constants.SizingInfoHVACCapacityRatioCooling, cool_capacity_ratios_4.join(','))
-    air_loop_unitary.additionalProperties.setFeature(Constants.SizingInfoHVACHeatingCFMs, heat_cfms_ton_rated_4.join(','))
     air_loop_unitary.additionalProperties.setFeature(Constants.SizingInfoHVACCoolingCFMs, cool_cfms_ton_rated_4.join(','))
-    air_loop_unitary.additionalProperties.setFeature(Constants.SizingInfoHVACHeatingCapacityOffset, heating_capacity_offset)
-    air_loop_unitary.additionalProperties.setFeature(Constants.SizingInfoHVACFracHeatLoadServed, heat_pump.fraction_heat_load_served)
     air_loop_unitary.additionalProperties.setFeature(Constants.SizingInfoHVACFracCoolLoadServed, heat_pump.fraction_cool_load_served)
     air_loop_unitary.additionalProperties.setFeature(Constants.SizingInfoHVACSHR, cool_shrs_rated_gross_4.join(','))
-    air_loop_unitary.additionalProperties.setFeature(Constants.SizingInfoHVACCoolType, Constants.ObjectNameMiniSplitHeatPump)
-    air_loop_unitary.additionalProperties.setFeature(Constants.SizingInfoHVACHeatType, Constants.ObjectNameMiniSplitHeatPump)
+    air_loop_unitary.additionalProperties.setFeature(Constants.SizingInfoHVACCoolType, obj_name)
+    if obj_name == Constants.ObjectNameMiniSplitHeatPump
+      heat_capacity_ratios_4 = []
+      heat_cfms_ton_rated_4 = []
+      mshp_indices.each do |mshp_index|
+        heat_capacity_ratios_4 << heat_capacity_ratios[mshp_index]
+        heat_cfms_ton_rated_4 << heat_cfms_ton_rated[mshp_index]
+      end
+      air_loop_unitary.additionalProperties.setFeature(Constants.SizingInfoHVACCapacityRatioHeating, heat_capacity_ratios_4.join(','))
+      air_loop_unitary.additionalProperties.setFeature(Constants.SizingInfoHVACHeatingCFMs, heat_cfms_ton_rated_4.join(','))
+      air_loop_unitary.additionalProperties.setFeature(Constants.SizingInfoHVACHeatingCapacityOffset, heating_capacity_offset)
+      air_loop_unitary.additionalProperties.setFeature(Constants.SizingInfoHVACFracHeatLoadServed, heat_pump.fraction_heat_load_served)
+      air_loop_unitary.additionalProperties.setFeature(Constants.SizingInfoHVACHeatType, obj_name)
+    end
   end
 
   def self.apply_ground_to_air_heat_pump(model, runner, weather, heat_pump,
@@ -3438,7 +3469,9 @@ class HVAC
       return true
     elsif Constants.ObjectNameFurnace == hvac_type_heat
       return true
-    elsif [Constants.ObjectNameMiniSplitHeatPump, Constants.ObjectNameEvaporativeCooler].include? hvac_type_cool
+    elsif [Constants.ObjectNameMiniSplitHeatPump,
+           Constants.ObjectNameMiniSplitAirConditioner,
+           Constants.ObjectNameEvaporativeCooler].include? hvac_type_cool
       is_ducted = system.additionalProperties.getFeatureAsBoolean(Constants.SizingInfoHVACSystemIsDucted).get
       if is_ducted
         return true
@@ -3903,5 +3936,18 @@ class HVAC
     secondary_duct_location = HPXML::LocationLivingSpace
 
     return primary_duct_location, secondary_duct_location
+  end
+
+  def self.calc_chiller_equivalent_seer(cooling_system)
+    cap = cooling_system.building_cooling_capacity # Btu/hr
+    aux = cooling_system.aux_power # W
+    aux_dweq = cooling_system.aux_power_dweq # W
+    input = UnitConversions.convert(cooling_system.cooling_efficiency_kw_per_ton, 'kW', 'W') * UnitConversions.convert(cap, 'Btu/hr', 'ton') # W
+    n_dweq = cooling_system.number_of_units_served.to_f
+
+    # FROM ANSI/RESNET/ICC 301-2019
+    seer_equiv = ((cap - (aux * 3.41)) - (aux_dweq * 3.41 * n_dweq)) /
+                 ((input + aux) + (aux_dweq * n_dweq))
+    return seer_equiv
   end
 end

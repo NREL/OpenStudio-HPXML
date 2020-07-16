@@ -94,7 +94,7 @@ class Constants
   end
 
   def self.ObjectNameAirSourceHeatPump
-    return 'ashp'
+    return 'air source hp'
   end
 
   def self.ObjectNameBackupHeatingCoil
@@ -117,8 +117,8 @@ class Constants
     return 'central ac'
   end
 
-  def self.ObjectNameCentralAirConditionerAndFurnace
-    return 'central ac and furnace'
+  def self.ObjectNameChiller
+    return 'chiller'
   end
 
   def self.ObjectNameClothesWasher
@@ -218,7 +218,7 @@ class Constants
   end
 
   def self.ObjectNameGroundSourceHeatPump
-    return 'gshp'
+    return 'ground source hp'
   end
 
   def self.ObjectNameHeatingSeason
@@ -269,8 +269,12 @@ class Constants
     return 'mech vent range fan'
   end
 
+  def self.ObjectNameMiniSplitAirConditioner
+    return 'mini split ac'
+  end
+
   def self.ObjectNameMiniSplitHeatPump
-    return 'mshp'
+    return 'mini split hp'
   end
 
   def self.ObjectNameMiscGrill

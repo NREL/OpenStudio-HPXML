@@ -210,10 +210,17 @@ class HPXMLDefaults
   def self.apply_hvac(hpxml)
     # Default AC/HP compressor type
     hpxml.cooling_systems.each do |cooling_system|
-      next unless cooling_system.cooling_system_type == HPXML::HVACTypeCentralAirConditioner
       next unless cooling_system.compressor_type.nil?
 
-      cooling_system.compressor_type = HVAC.get_default_compressor_type(cooling_system.cooling_efficiency_seer)
+      if cooling_system.cooling_system_type == HPXML::HVACTypeCentralAirConditioner
+        cooling_system.compressor_type = HVAC.get_default_compressor_type(cooling_system.cooling_efficiency_seer)
+      elsif cooling_system.cooling_system_type == HPXML::HVACTypeChiller
+        seer = cooling_system.cooling_efficiency_seer
+        if seer.nil?
+          seer = HVAC.calc_chiller_equivalent_seer(cooling_system)
+        end
+        cooling_system.compressor_type = HVAC.get_default_compressor_type(seer)
+      end
     end
     hpxml.heat_pumps.each do |heat_pump|
       next unless heat_pump.heat_pump_type == HPXML::HVACTypeHeatPumpAirToAir
@@ -226,7 +233,7 @@ class HPXMLDefaults
     hpxml.cooling_systems.each do |cooling_system|
       next unless cooling_system.cooling_shr.nil?
 
-      if cooling_system.cooling_system_type == HPXML::HVACTypeCentralAirConditioner
+      if [HPXML::HVACTypeChiller, HPXML::HVACTypeCentralAirConditioner].include? cooling_system.cooling_system_type
         if cooling_system.compressor_type == HPXML::HVACCompressorTypeSingleStage
           cooling_system.cooling_shr = 0.73
         elsif cooling_system.compressor_type == HPXML::HVACCompressorTypeTwoStage

@@ -406,7 +406,7 @@ class EnergyPlusValidator
       '/HPXML/Building/BuildingDetails/Systems/HVAC/HVACPlant/CoolingSystem' => {
         'SystemIdentifier' => one, # Required by HPXML schema
         '../../HVACControl' => one, # See [HVACControl]
-        'CoolingSystemType[text()="central air conditioner" or text()="room air conditioner" or text()="evaporative cooler" or text()="mini-split"]' => one, # See [CoolingType=CentralAC] or [CoolingType=RoomAC] or [CoolingType=EvapCooler] or [CoolingType=MiniSplitAC]
+        'CoolingSystemType[text()="central air conditioner" or text()="room air conditioner" or text()="evaporative cooler" or text()="mini-split" or text()="chiller"]' => one, # See [CoolingType=CentralAC] or [CoolingType=RoomAC] or [CoolingType=EvapCooler] or [CoolingType=MiniSplitAC] or [CoolingType=Chiller]
         'CoolingSystemFuel[text()="electricity"]' => one,
         'FractionCoolLoadServed' => one, # Must sum to <= 1 across all CoolingSystems and HeatPumps
       },
@@ -443,6 +443,21 @@ class EnergyPlusValidator
         'CoolingCapacity' => zero_or_one,
         '[not(CompressorType)] | CompressorType[text()="single stage" or text()="two stage" or text()="variable speed"]' => one,
         'AnnualCoolingEfficiency[Units="SEER"]/Value' => one,
+        'SensibleHeatFraction' => zero_or_one,
+      },
+
+      ## [CoolingType=Chiller]
+      '/HPXML/Building/BuildingDetails/Systems/HVAC/HVACPlant/CoolingSystem[CoolingSystemType="chiller"]' => {
+        '../../HVACDistribution[DistributionSystemType/AirDistribution | DistributionSystemType/HydronicDistribution | DistributionSystemType[Other="DSE"]]' => one_or_more, # See [HVACDistribution]
+        'DistributionSystem' => one,
+        'CoolingCapacity[@scope="unit"]' => zero_or_one,
+        '[not(CompressorType)] | CompressorType[text()="single stage" or text()="two stage" or text()="variable speed"]' => one,
+        # Either SEER equivalent or detailed inputs:
+        'AnnualCoolingEfficiency[Units="SEER"]/Value | AnnualCoolingEfficiency[Units="kW/ton"]/Value' => one,
+        'AnnualCoolingEfficiency[Units="SEER"]/Value | NumberofUnitsServed' => one,
+        'AnnualCoolingEfficiency[Units="SEER"]/Value | CoolingCapacity[@scope="building"]' => one,
+        'AnnualCoolingEfficiency[Units="SEER"]/Value | extension/AuxPower' => one,
+        'AnnualCoolingEfficiency[Units="SEER"]/Value | extension/AuxPowerDweq' => one,
         'SensibleHeatFraction' => zero_or_one,
       },
 

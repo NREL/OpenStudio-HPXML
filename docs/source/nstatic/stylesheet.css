@@ -5,6 +5,7 @@
 div.math {
     position: relative;
     padding-right: 2.5em;
+    text-align: left;
 }
 .eqno {
     height: 100%;

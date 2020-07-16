@@ -1245,8 +1245,10 @@ class HVACSizing
 
     # Cooling
     if hvac.has_type([Constants.ObjectNameCentralAirConditioner,
+                      Constants.ObjectNameChiller,
                       Constants.ObjectNameAirSourceHeatPump,
                       Constants.ObjectNameMiniSplitHeatPump,
+                      Constants.ObjectNameMiniSplitAirConditioner,
                       Constants.ObjectNameRoomAirConditioner,
                       Constants.ObjectNameGroundSourceHeatPump])
 
@@ -1265,6 +1267,7 @@ class HVACSizing
       end
 
       if hvac.has_type([Constants.ObjectNameCentralAirConditioner,
+                        Constants.ObjectNameChiller,
                         Constants.ObjectNameAirSourceHeatPump])
 
         hvac.SizingSpeed = get_sizing_speed(hvac)
@@ -1364,7 +1367,7 @@ class HVACSizing
           hvac_final_values.Cool_Airflow = 201.0 * UnitConversions.convert(hvac_final_values.Cool_Capacity, 'Btu/hr', 'ton')      # CFM
         end
 
-      elsif hvac.has_type(Constants.ObjectNameMiniSplitHeatPump)
+      elsif hvac.has_type(Constants.ObjectNameMiniSplitHeatPump) || hvac.has_type(Constants.ObjectNameMiniSplitAirConditioner)
 
         hvac.SizingSpeed = get_sizing_speed(hvac)
         coefficients = hvac.COOL_CAP_FT_SPEC[hvac.SizingSpeed]
@@ -2104,7 +2107,7 @@ class HVACSizing
         end
         hvac.COOL_CAP_FT_SPEC = get_2d_vector_from_CAP_FT_SPEC_curves(curves, hvac.NumSpeedsCooling)
 
-        if hvac.CoolType == Constants.ObjectNameMiniSplitHeatPump
+        if [Constants.ObjectNameMiniSplitHeatPump, Constants.ObjectNameMiniSplitAirConditioner].include? hvac.CoolType
           coolingCFMs = get_feature(equip, Constants.SizingInfoHVACCoolingCFMs, 'string')
           hvac.CoolingCFMs = coolingCFMs.split(',').map(&:to_f)
         end
@@ -3223,9 +3226,9 @@ class HVACSizing
     elsif clg_coil.is_a? OpenStudio::Model::CoilCoolingDXMultiSpeed
       clg_coil.stages.each_with_index do |stage, speed|
         stage.setGrossRatedTotalCoolingCapacity(UnitConversions.convert(hvac_final_values.Cool_Capacity, 'Btu/hr', 'W') * hvac.CapacityRatioCooling[speed])
-        if clg_coil.name.to_s.start_with?(Constants.ObjectNameAirSourceHeatPump) || clg_coil.name.to_s.start_with?(Constants.ObjectNameCentralAirConditioner)
+        if clg_coil.name.to_s.start_with?(Constants.ObjectNameAirSourceHeatPump) || clg_coil.name.to_s.start_with?(Constants.ObjectNameCentralAirConditioner) || clg_coil.name.to_s.start_with?(Constants.ObjectNameChiller)
           stage.setRatedAirFlowRate(UnitConversions.convert(hvac_final_values.Cool_Capacity, 'Btu/hr', 'ton') * UnitConversions.convert(hvac.RatedCFMperTonCooling[speed], 'cfm', 'm^3/s') * hvac.CapacityRatioCooling[speed])
-        elsif clg_coil.name.to_s.start_with? Constants.ObjectNameMiniSplitHeatPump
+        elsif clg_coil.name.to_s.start_with?(Constants.ObjectNameMiniSplitHeatPump) || clg_coil.name.to_s.start_with?(Constants.ObjectNameMiniSplitAirConditioner)
           stage.setRatedAirFlowRate(UnitConversions.convert(hvac_final_values.Cool_Capacity, 'Btu/hr', 'ton') * UnitConversions.convert(hvac.CoolingCFMs[speed], 'cfm', 'm^3/s'))
         end
       end
