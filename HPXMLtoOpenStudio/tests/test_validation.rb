@@ -38,7 +38,7 @@ class HPXMLtoOpenStudioSchematronTest < MiniTest::Test
       # Schematron validation
       _test_schematron_validation(hpxml_path)
     end
-    
+
     puts
   end
 
@@ -61,10 +61,7 @@ class HPXMLtoOpenStudioSchematronTest < MiniTest::Test
           if assertion.start_with?('Expected 0') || assertion.partition(': ').last.start_with?('[not')
             next if assertion.start_with?('Expected 0 or more') # no tests needed
 
-            parent, element_with_value = get_parent_and_element_with_value(target_xpath, expected_error_message)
-            target_xpath_with_value = [parent, element_with_value]
-            
-            expected_error_msgs_by_element_addition[target_xpath_with_value] = expected_error_message
+            expected_error_msgs_by_element_addition[target_xpath] = expected_error_message
           else
             expected_error_msgs_by_element_deletion[target_xpath] = expected_error_message
           end
@@ -89,9 +86,8 @@ class HPXMLtoOpenStudioSchematronTest < MiniTest::Test
     # Tests by element addition (i.e. zero_or_one, zero_or_two, etc.)
     expected_error_msgs_by_element_addition.each do |key, value|
       print '.'
-      elements = key[0]
-      child_elements_with_values = key[1]
-      hpxml_name = get_hpxml_file_name(elements)
+      hpxml_name = get_hpxml_file_name(key)
+      elements, child_elements_with_values = get_parent_and_element_with_value(key)
       hpxml = HPXML.new(hpxml_path: File.join(@root_path, 'workflow', 'sample_files', hpxml_name))
       hpxml_doc = hpxml.to_oga()
       # create the child element twice
@@ -196,6 +192,8 @@ class HPXMLtoOpenStudioSchematronTest < MiniTest::Test
       return 'base-hvac-room-ac-only.xml'
     elsif key.include? '/HPXML/Building/BuildingDetails/Systems/HVAC/HVACPlant/CoolingSystem[CoolingSystemType="evaporative cooler"]'
       return 'base-hvac-evap-cooler-furnace-gas.xml'
+    elsif key.include? '/HPXML/Building/BuildingDetails/Systems/HVAC/HVACPlant/CoolingSystem[CoolingSystemType="mini-split"]'
+      return 'base-hvac-mini-split-air-conditioner-only-ducted.xml'
     elsif key.include? '/HPXML/Building/BuildingDetails/Systems/HVAC/HVACPlant/HeatPump[HeatPumpType="mini-split"]'
       return 'base-hvac-mini-split-heat-pump-ducted.xml'
     elsif key.include? '/HPXML/Building/BuildingDetails/Systems/HVAC/HVACPlant/HeatPump[HeatPumpType="ground-to-air"]'
@@ -285,64 +283,65 @@ class HPXMLtoOpenStudioSchematronTest < MiniTest::Test
     return target_xpath, expected_error_message
   end
 
-  def get_parent_and_element_with_value(target_xpath, expected_error_message)
+  def get_parent_and_element_with_value(target_xpath)
     parent = target_xpath
     element_with_value = nil
     # Set up parent xpaths and elements with value as needed for specific tests
-    if expected_error_message.include?('[PlugLoadType[text()="other"]]')
+    # TODO: Clean this up
+    if target_xpath.include?('[PlugLoadType[text()="other"]]')
       parent = target_xpath.sub(/(?<=\[).*(?=\])/){|s| s.gsub(/\[.*\]/, "")}
       element_with_value = 'PlugLoadType="other"'
-    elsif expected_error_message.include?('[PlugLoadType[text()="TV other"]]')
+    elsif target_xpath.include?('[PlugLoadType[text()="TV other"]]')
       parent = target_xpath.sub(/(?<=\[).*(?=\])/){|s| s.gsub(/\[.*\]/, "")}
       element_with_value = 'PlugLoadType="TV other"'
-    elsif expected_error_message.include?('[PlugLoadType[text()="electric vehicle charging"]]')
+    elsif target_xpath.include?('[PlugLoadType[text()="electric vehicle charging"]]')
       parent = target_xpath.sub(/(?<=\[).*(?=\])/){|s| s.gsub(/\[.*\]/, "")}
       element_with_value = 'PlugLoadType="electric vehicle charging"'
-    elsif expected_error_message.include?('[PlugLoadType[text()="well pump"]]')
+    elsif target_xpath.include?('[PlugLoadType[text()="well pump"]]')
       parent = target_xpath.sub(/(?<=\[).*(?=\])/){|s| s.gsub(/\[.*\]/, "")}
       element_with_value = 'PlugLoadType="well pump"'
-    elsif ['[PlugLoadType="other" or PlugLoadType="TV other" or PlugLoadType="electric vehicle charging" or PlugLoadType="well pump"]: Location[text()="interior" or text()="exterior"]',
-           '[FuelLoadType="grill" or FuelLoadType="lighting" or FuelLoadType="fireplace"]: Location[text()="interior" or text()="exterior"]'].any? { |i| expected_error_message.include? i }
+    elsif ['[PlugLoadType="other" or PlugLoadType="TV other" or PlugLoadType="electric vehicle charging" or PlugLoadType="well pump"]/Location[text()="interior" or text()="exterior"]',
+           '[FuelLoadType="grill" or FuelLoadType="lighting" or FuelLoadType="fireplace"]/Location[text()="interior" or text()="exterior"]'].any? { |i| target_xpath.include? i }
       parent = target_xpath.gsub(/\[.*?\]/, "").split('/')[0...-1].join('/')
       element_with_value = 'Location="interior" and Location="exterior"'
-    elsif expected_error_message.include?('[FuelLoadType="grill"]')
+    elsif target_xpath.include?('[FuelLoadType="grill"]')
       parent = target_xpath.gsub(/\[.*?\]/, "")
       element_with_value = 'FuelLoadType="grill"'
-    elsif expected_error_message.include?('[FuelLoadType="lighting"]')
+    elsif target_xpath.include?('[FuelLoadType="lighting"]')
       parent = target_xpath.gsub(/\[.*?\]/, "")
       element_with_value = 'FuelLoadType="lighting"'
-    elsif expected_error_message.include?('[FuelLoadType="fireplace"]')
+    elsif target_xpath.include?('[FuelLoadType="fireplace"]')
       parent = target_xpath.gsub(/\[.*?\]/, "")
       element_with_value = 'FuelLoadType="fireplace"'
-    elsif expected_error_message.include?('not(Location)')
+    elsif target_xpath.include?('/Location')  # exclude "/*Location" (e.g. /FanLocation)
       parent = target_xpath.gsub(/\[.*?\]/, "").split('/')[0...-1].join('/')
       element_with_value = 'Location="living space" and Location="basement - conditioned"'
-    elsif expected_error_message.include?('SiteType')
+    elsif target_xpath.include?('SiteType')
       parent = target_xpath.gsub(/\[.*?\]/, "").split('/')[0...-1].join('/')
       element_with_value = 'SiteType="suburban" and SiteType="rural"'
-    elsif expected_error_message.include?('RoofType')
+    elsif target_xpath.include?('RoofType')
       parent = target_xpath.gsub(/\[.*?\]/, "").split('/')[0...-1].join('/')
       element_with_value = 'RoofType="slate or tile shingles" and RoofType="asphalt or fiberglass shingles"'
-    elsif expected_error_message.include?('Siding')
+    elsif target_xpath.include?('Siding')
       parent = target_xpath.gsub(/\[.*?\]/, "").split('/')[0...-1].join('/')
       element_with_value = 'Siding="wood siding" and Siding="stucco"'
-    elsif expected_error_message.include?('not(BackupSystemFuel)')
+    elsif target_xpath.include?('/BackupSystemFuel')  # exclude HeatPump[BackupSystemFuel]
       parent = target_xpath.gsub(/\[.*?\]/, "").split('/')[0...-1].join('/')
       element_with_value = 'BackupSystemFuel="electricity" and BackupSystemFuel="natural gas"'
-    elsif expected_error_message.include?('CompressorType')
+    elsif target_xpath.include?('CompressorType')
       parent = target_xpath.gsub(/\[.*?\]/, "").split('/')[0...-1].join('/')
       element_with_value = 'CompressorType="single stage" and CompressorType="two stage"'
-    elsif expected_error_message.include?('SimulationControl: BeginMonth')
+    elsif target_xpath.include?('SimulationControl/BeginMonth')
       parent = target_xpath.gsub(/\[.*?\]/, "").split('/')[0...-1].join('/')
       element_with_value = 'BeginMonth="1"'
-    elsif expected_error_message.include?('SimulationControl: EndMonth')
+    elsif target_xpath.include?('SimulationControl/EndMonth')
       parent = target_xpath.gsub(/\[.*?\]/, "").split('/')[0...-1].join('/')
       element_with_value = 'EndMonth="12"'
     elsif ['AirInfiltrationMeasurement[number(HousePressure)=50 and BuildingAirLeakage/UnitofMeasure[text()="ACH" or text()="CFM"]]',
            'Attics/Attic[AtticType/Attic[Vented="true"]]/VentilationRate[UnitofMeasure="SLA" or UnitofMeasure="ACHnatural"]/Value',
-           'Foundations/Foundation[FoundationType/Crawlspace[Vented="true"]]/VentilationRate[UnitofMeasure="SLA"]/Value'].any? { |i| expected_error_message.include? i }
+           'Foundations/Foundation[FoundationType/Crawlspace[Vented="true"]]/VentilationRate[UnitofMeasure="SLA"]/Value'].any? { |i| target_xpath.include? i }
       parent = target_xpath.sub(/(?<=\[).*(?=\])/){|s| s.gsub(/\[.*\]/, "")}
-    elsif expected_error_message.include?('[Units="kWh/year"]')
+    elsif target_xpath.include?('[Units="kWh/year"]')
       parent = target_xpath.gsub(/\[.*?\]/, "")
     end
 

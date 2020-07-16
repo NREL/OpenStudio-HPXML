@@ -343,12 +343,6 @@
       <checksum>E03578EA</checksum>
     </file>
     <file>
-      <filename>xmlhelper.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>EC54E7CF</checksum>
-    </file>
-    <file>
       <filename>pv.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
@@ -469,12 +463,6 @@
       <checksum>1268C4BC</checksum>
     </file>
     <file>
-      <filename>hvac.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>838B8150</checksum>
-    </file>
-    <file>
       <filename>meta_measure.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
@@ -505,7 +493,13 @@
       <checksum>9BC2008E</checksum>
     </file>
     <file>
-      <filename>EPvalidator.rb</filename>
+      <filename>test_defaults.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>test</usage_type>
+      <checksum>290CD5E5</checksum>
+    </file>
+    <file>
+      <filename>version.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
       <checksum>A3FB1227</checksum>

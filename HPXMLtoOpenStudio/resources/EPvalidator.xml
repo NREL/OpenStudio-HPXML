@@ -267,7 +267,7 @@
     <sch:rule context="/h:HPXML/h:Building/h:BuildingDetails/h:Systems/h:HVAC/h:HVACPlant/h:CoolingSystem">
       <sch:assert test="count(h:SystemIdentifier) = 1">Expected 1 element(s): SystemIdentifier</sch:assert> <!-- Required by HPXML schema -->
       <sch:assert test="count(../../h:HVACControl) = 1">Expected 1 element(s): ../../HVACControl</sch:assert> <!-- See [HVACControl] -->
-      <sch:assert test="count(h:CoolingSystemType[text()='central air conditioner' or text()='room air conditioner' or text()='evaporative cooler']) = 1">Expected 1 element(s): CoolingSystemType[text()="central air conditioner" or text()="room air conditioner" or text()="evaporative cooler"]</sch:assert> <!-- See [CoolingType=CentralAC] or [CoolingType=RoomAC] or [CoolingType=EvapCooler] -->
+      <sch:assert test="count(h:CoolingSystemType[text()='central air conditioner' or text()='room air conditioner' or text()='evaporative cooler' or text()='mini-split']) = 1">Expected 1 element(s): CoolingSystemType[text()="central air conditioner" or text()="room air conditioner" or text()="evaporative cooler" or text()="mini-split"]</sch:assert> <!-- See [CoolingType=CentralAC] or [CoolingType=RoomAC] or [CoolingType=EvapCooler] or [CoolingType=MiniSplitAC] -->
       <sch:assert test="count(h:CoolingSystemFuel[text()='electricity']) = 1">Expected 1 element(s): CoolingSystemFuel[text()="electricity"]</sch:assert>
       <sch:assert test="count(h:FractionCoolLoadServed) = 1">Expected 1 element(s): FractionCoolLoadServed</sch:assert> <!-- Must sum to <= 1 across all CoolingSystems and HeatPumps -->
     </sch:rule>
@@ -646,6 +646,17 @@
       <sch:assert test="count(../../h:HVACDistribution[h:DistributionSystemType/h:AirDistribution | h:DistributionSystemType[h:Other='DSE']]) &gt;= 0">Expected 0 or more element(s): ../../HVACDistribution[DistributionSystemType/AirDistribution | DistributionSystemType[Other="DSE"]]</sch:assert> <!-- See [HVACDistribution] -->
       <sch:assert test="count(h:DistributionSystem) &lt;= 1">Expected 0 or 1 element(s): DistributionSystem</sch:assert>
       <sch:assert test="count(h:CoolingCapacity) = 0">Expected 0 element(s): CoolingCapacity</sch:assert>
+    </sch:rule>
+  </sch:pattern>
+
+  <sch:pattern name="[CoolingType=MiniSplitAC]">
+    <sch:rule context='/h:HPXML/h:Building/h:BuildingDetails/h:Systems/h:HVAC/h:HVACPlant/h:CoolingSystem[h:CoolingSystemType="mini-split"]'>
+      <sch:assert test="count(../../h:HVACDistribution[h:DistributionSystemType/h:AirDistribution | h:DistributionSystemType[h:Other='DSE']]) &gt;= 0">Expected 0 or more element(s): ../../HVACDistribution[DistributionSystemType/AirDistribution | DistributionSystemType[Other="DSE"]]</sch:assert> <!-- See [HVACDistribution] -->
+      <sch:assert test="count(h:DistributionSystem) &lt;= 1">Expected 0 or 1 element(s): DistributionSystem</sch:assert>
+      <sch:assert test="count(h:CoolingCapacity) &lt;= 1">Expected 0 or 1 element(s): CoolingCapacity</sch:assert>
+      <sch:assert test="not(h:CompressorType) or count(h:CompressorType[text()='single stage' or text()='two stage' or text()='variable speed']) = 1">Expected 1 element(s): [not(CompressorType)] | CompressorType[text()="single stage" or text()="two stage" or text()="variable speed"]</sch:assert>
+      <sch:assert test="count(h:AnnualCoolingEfficiency[h:Units='SEER']/h:Value) = 1">Expected 1 element(s): AnnualCoolingEfficiency[Units="SEER"]/Value</sch:assert>
+      <sch:assert test="count(h:SensibleHeatFraction) &lt;= 1">Expected 0 or 1 element(s): SensibleHeatFraction</sch:assert>
     </sch:rule>
   </sch:pattern>
 
