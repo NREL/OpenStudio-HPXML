@@ -255,6 +255,7 @@ class HPXMLtoOpenStudioSchematronTest < MiniTest::Test
       target_xpath = [rule_context.gsub('h:', '').gsub('/*', ''), assertion.partition(': ').last].join()
       expected_error_message = [[[assertion.partition(': ').first, ' for xpath: '].join(), rule_context.gsub('h:', '').gsub('/*', '')].join(), assertion.partition(': ').last].join()
     else
+      # TODO: Clean this up
       if assertion.partition(': ').last.start_with?('[not')
         element_name = assertion.partition(': ').last.partition(' | ').last
       elsif assertion.include?('SolarAbsorptance')
