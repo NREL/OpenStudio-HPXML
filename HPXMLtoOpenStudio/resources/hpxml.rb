@@ -3161,12 +3161,31 @@ class HPXML < Object
       end
     end
 
+    def unit_flow_rate_ratio
+      if not @building_tested_flow_rate.nil?
+        return flow_rate / @building_tested_flow_rate
+      elsif not @building_rated_flow_rate.nil?
+        return flow_rate / @building_rated_flow_rate
+      else
+        return 1.0
+      end
+    end
+
+    def unit_fan_power
+      if not @fan_power.nil?
+        return @fan_power
+      elsif not @building_fan_power.nil?
+        # only building level fan power is provided
+        return @building_fan_power * unit_flow_rate_ratio
+      end
+    end
+
     def average_flow_rate
       return flow_rate * (@hours_in_operation / 24.0)
     end
 
     def average_fan_power
-      return @fan_power * (@hours_in_operation / 24.0)
+      return unit_fan_power * (@hours_in_operation / 24.0)
     end
 
     def delete

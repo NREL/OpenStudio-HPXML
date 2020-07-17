@@ -1283,6 +1283,7 @@ class Airflow
 
   def self.apply_cfis_to_infil_program(infil_program, vent_mech, cfis_fan_actuator)
     infil_program.addLine("Set fan_rtf_hvac = #{@fan_rtf_sensor[@cfis_airloop[vent_mech.id]].name}")
+    # TODO: Address shared system integration
     infil_program.addLine("Set CFIS_fan_w = #{vent_mech.fan_power}") # W
 
     infil_program.addLine('If @ABS(Minute - ZoneTimeStep*60) < 0.1')
