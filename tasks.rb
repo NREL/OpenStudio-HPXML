@@ -281,6 +281,7 @@ def create_hpxmls
     'base-mechvent-hrv-asre.xml' => 'base.xml',
     'base-mechvent-supply.xml' => 'base.xml',
     'base-mechvent-bath-kitchen-fans.xml' => 'base.xml',
+    'base-mechvent-shared.xml' => 'base.xml',
     'base-mechvent-multiple.xml' => 'base-mechvent-bath-kitchen-fans.xml',
     'base-misc-ceiling-fans.xml' => 'base.xml',
     'base-misc-defaults.xml' => 'base.xml',
@@ -3406,6 +3407,17 @@ def set_hpxml_ventilation_fans(hpxml_file, hpxml)
     hpxml.ventilation_fans.add(id: 'BathFans',
                                fan_location: HPXML::LocationBath,
                                used_for_local_ventilation: true)
+  elsif ['base-mechvent-shared.xml'].include? hpxml_file
+    # TODO: Add preconditioning system
+    hpxml.ventilation_fans.add(id: 'MechanicalVentilation',
+                               fan_type: HPXML::MechVentTypeSupply,
+                               is_shared_system: true,
+                               tested_flow_rate: 110,
+                               building_rated_flow_rate: 1100,
+                               hours_in_operation: 24,
+                               building_fan_power: 300,
+                               used_for_whole_building_ventilation: true,
+                               fraction_oa: 0.8)
   elsif ['base-mechvent-multiple.xml'].include? hpxml_file
     hpxml.ventilation_fans.add(id: 'WholeHouseFan',
                                rated_flow_rate: 2000,
