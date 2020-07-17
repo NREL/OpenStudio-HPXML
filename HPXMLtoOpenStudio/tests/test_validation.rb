@@ -30,7 +30,7 @@ class HPXMLtoOpenStudioSchematronTest < MiniTest::Test
     puts "Testing #{hpxmls.size} HPXML files..."
     hpxmls.each do |hpxml_path|
       print '.'
-      
+
       # .rb validator validation
       hpxml = HPXML.new(hpxml_path: File.join(@root_path, 'workflow', 'sample_files', File.basename(hpxml_path)))
       hpxml_doc = hpxml.to_oga()
@@ -52,12 +52,13 @@ class HPXMLtoOpenStudioSchematronTest < MiniTest::Test
       XMLHelper.get_elements(pattern, 'sch:rule').each do |rule|
         rule_context = XMLHelper.get_attribute_value(rule, 'context')
 
-        next if rule_context.include?('Other="DSE"')  # FIXME: Need to add this test case.  Will need to remove both AnnualHeatingDistributionSystemEfficiency and AnnualCoolingDistributionSystemEfficiency for testing
+        next if rule_context.include?('Other="DSE"') # FIXME: Need to add this test case.  Will need to remove both AnnualHeatingDistributionSystemEfficiency and AnnualCoolingDistributionSystemEfficiency for testing
+
         # ['/HPXML/Building/BuildingDetails/Systems/HVAC/HVACDistribution[DistributionSystemType[Other="DSE"]]/AnnualHeatingDistributionSystemEfficiency', '/HPXML/Building/BuildingDetails/Systems/HVAC/HVACDistribution[DistributionSystemType[Other="DSE"]]/AnnualCoolingDistributionSystemEfficiency'] => 'Expected 1 or more element(s) for xpath: /HPXML/Building/BuildingDetails/Systems/HVAC/HVACDistribution[DistributionSystemType[Other="DSE"]]/AnnualHeatingDistributionSystemEfficiency | AnnualCoolingDistributionSystemEfficiency'
-        
+
         XMLHelper.get_values(rule, 'sch:assert').each do |assertion|
           target_xpath, expected_error_message = get_target_xpath_and_expected_error_message(rule_context, assertion)
-          
+
           if assertion.start_with?('Expected 0') || assertion.partition(': ').last.start_with?('[not')
             next if assertion.start_with?('Expected 0 or more') # no tests needed
 
@@ -91,9 +92,9 @@ class HPXMLtoOpenStudioSchematronTest < MiniTest::Test
       hpxml = HPXML.new(hpxml_path: File.join(@root_path, 'workflow', 'sample_files', hpxml_name))
       hpxml_doc = hpxml.to_oga()
       # create the child element twice
-      XMLHelper.create_elements_as_needed(hpxml_doc, elements.gsub(/\[.*?\]/, "").split('/')[1..-1])
+      XMLHelper.create_elements_as_needed(hpxml_doc, elements.gsub(/\[.*?\]/, '').split('/')[1..-1])
       parent = XMLHelper.get_element(hpxml_doc, elements.split('/')[1...-1].join('/'))
-      XMLHelper.add_element(parent, elements.gsub(/\[.*?\]/, "").split('/')[-1])
+      XMLHelper.add_element(parent, elements.gsub(/\[.*?\]/, '').split('/')[-1])
 
       if not child_elements_with_values.nil?
         child_elements_with_values.split(' and ')
@@ -158,7 +159,7 @@ class HPXMLtoOpenStudioSchematronTest < MiniTest::Test
     elsif key.include? '/HPXML/Building/BuildingDetails/Enclosure/Foundations'
       return 'base-foundation-vented-crawlspace.xml'
     elsif ['/HPXML/Building/BuildingDetails/Enclosure/Attics',
-      '/HPXML/Building/BuildingDetails/Enclosure/Roofs/Roof[InteriorAdjacentTo="attic - vented"]'].any? { |i| key.include? i }
+           '/HPXML/Building/BuildingDetails/Enclosure/Roofs/Roof[InteriorAdjacentTo="attic - vented"]'].any? { |i| key.include? i }
       return 'base-atticroof-vented.xml'
     elsif key.include? '/HPXML/Building/BuildingDetails/Enclosure/FoundationWalls/FoundationWall[InteriorAdjacentTo="crawlspace - vented"]'
       return 'base-foundation-vented-crawlspace.xml'
@@ -201,7 +202,7 @@ class HPXMLtoOpenStudioSchematronTest < MiniTest::Test
     elsif key.include? '/HPXML/Building/BuildingDetails/Systems/HVAC/HVACPlant/HeatPump[BackupSystemFuel]'
       return 'base-hvac-dual-fuel-air-to-air-heat-pump-1-speed.xml'
     elsif ['/HPXML/Building/BuildingDetails/Systems/HVAC/HVACPlant/HeatPump',
-      '/HPXML/Building/BuildingDetails/Systems/HVAC/HVACPlant/HeatPump[HeatPumpType="air-to-air"]'].any? { |i| key.include? i }
+           '/HPXML/Building/BuildingDetails/Systems/HVAC/HVACPlant/HeatPump[HeatPumpType="air-to-air"]'].any? { |i| key.include? i }
       return 'base-hvac-air-to-air-heat-pump-1-speed.xml'
     elsif key.include? '/HPXML/Building/BuildingDetails/Systems/MechanicalVentilation/VentilationFans/VentilationFan[UsedForWholeBuildingVentilation="true"]'
       return 'base-mechvent-balanced.xml'
@@ -271,7 +272,7 @@ class HPXMLtoOpenStudioSchematronTest < MiniTest::Test
       else
         element_name = assertion.partition(': ').last.partition(' | ').first
       end
-      
+
       if rule_context.gsub('h:', '').include? 'AirInfiltrationMeasurement[number(HousePressure)=50 and BuildingAirLeakage/UnitofMeasure[text()="ACH" or text()="CFM"]]'
         target_xpath = [rule_context.gsub('h:', '').partition(' | ').first, element_name].join('/')
       else
@@ -289,60 +290,61 @@ class HPXMLtoOpenStudioSchematronTest < MiniTest::Test
     # Set up parent xpaths and elements with value as needed for specific tests
     # TODO: Clean this up
     if target_xpath.include?('[PlugLoadType[text()="other"]]')
-      parent = target_xpath.sub(/(?<=\[).*(?=\])/){|s| s.gsub(/\[.*\]/, "")}
+      parent = target_xpath.sub(/(?<=\[).*(?=\])/) { |s| s.gsub(/\[.*\]/, '') }
       element_with_value = 'PlugLoadType="other"'
     elsif target_xpath.include?('[PlugLoadType[text()="TV other"]]')
-      parent = target_xpath.sub(/(?<=\[).*(?=\])/){|s| s.gsub(/\[.*\]/, "")}
+      parent = target_xpath.sub(/(?<=\[).*(?=\])/) { |s| s.gsub(/\[.*\]/, '') }
       element_with_value = 'PlugLoadType="TV other"'
     elsif target_xpath.include?('[PlugLoadType[text()="electric vehicle charging"]]')
-      parent = target_xpath.sub(/(?<=\[).*(?=\])/){|s| s.gsub(/\[.*\]/, "")}
+      parent = target_xpath.sub(/(?<=\[).*(?=\])/) { |s| s.gsub(/\[.*\]/, '') }
       element_with_value = 'PlugLoadType="electric vehicle charging"'
     elsif target_xpath.include?('[PlugLoadType[text()="well pump"]]')
-      parent = target_xpath.sub(/(?<=\[).*(?=\])/){|s| s.gsub(/\[.*\]/, "")}
+      parent = target_xpath.sub(/(?<=\[).*(?=\])/) { |s| s.gsub(/\[.*\]/, '') }
       element_with_value = 'PlugLoadType="well pump"'
     elsif ['[PlugLoadType="other" or PlugLoadType="TV other" or PlugLoadType="electric vehicle charging" or PlugLoadType="well pump"]/Location[text()="interior" or text()="exterior"]',
            '[FuelLoadType="grill" or FuelLoadType="lighting" or FuelLoadType="fireplace"]/Location[text()="interior" or text()="exterior"]'].any? { |i| target_xpath.include? i }
-      parent = target_xpath.gsub(/\[.*?\]/, "").split('/')[0...-1].join('/')
+      parent = target_xpath.gsub(/\[.*?\]/, '').split('/')[0...-1].join('/')
       element_with_value = 'Location="interior" and Location="exterior"'
     elsif target_xpath.include?('[FuelLoadType="grill"]')
-      parent = target_xpath.gsub(/\[.*?\]/, "")
+      parent = target_xpath.gsub(/\[.*?\]/, '')
       element_with_value = 'FuelLoadType="grill"'
     elsif target_xpath.include?('[FuelLoadType="lighting"]')
-      parent = target_xpath.gsub(/\[.*?\]/, "")
+      parent = target_xpath.gsub(/\[.*?\]/, '')
       element_with_value = 'FuelLoadType="lighting"'
     elsif target_xpath.include?('[FuelLoadType="fireplace"]')
-      parent = target_xpath.gsub(/\[.*?\]/, "")
+      parent = target_xpath.gsub(/\[.*?\]/, '')
       element_with_value = 'FuelLoadType="fireplace"'
-    elsif target_xpath.include?('/Location')  # exclude "/*Location" (e.g. /FanLocation)
-      parent = target_xpath.gsub(/\[.*?\]/, "").split('/')[0...-1].join('/')
+    elsif ['WaterHeatingSystem/Location', 'ClothesWasher/Location', 'ClothesDryer/Location',
+           'Dishwasher/Location', 'Refrigerator/Location', 'Freezer/Location', 'CookingRange/Location'].any? { |i| target_xpath.include? i }
+      parent = target_xpath.gsub(/\[.*?\]/, '').split('/')[0...-1].join('/')
       element_with_value = 'Location="living space" and Location="basement - conditioned"'
     elsif target_xpath.include?('SiteType')
-      parent = target_xpath.gsub(/\[.*?\]/, "").split('/')[0...-1].join('/')
+      parent = target_xpath.gsub(/\[.*?\]/, '').split('/')[0...-1].join('/')
       element_with_value = 'SiteType="suburban" and SiteType="rural"'
     elsif target_xpath.include?('RoofType')
-      parent = target_xpath.gsub(/\[.*?\]/, "").split('/')[0...-1].join('/')
+      parent = target_xpath.gsub(/\[.*?\]/, '').split('/')[0...-1].join('/')
       element_with_value = 'RoofType="slate or tile shingles" and RoofType="asphalt or fiberglass shingles"'
     elsif target_xpath.include?('Siding')
-      parent = target_xpath.gsub(/\[.*?\]/, "").split('/')[0...-1].join('/')
+      parent = target_xpath.gsub(/\[.*?\]/, '').split('/')[0...-1].join('/')
       element_with_value = 'Siding="wood siding" and Siding="stucco"'
-    elsif target_xpath.include?('/BackupSystemFuel')  # exclude HeatPump[BackupSystemFuel]
-      parent = target_xpath.gsub(/\[.*?\]/, "").split('/')[0...-1].join('/')
+    elsif target_xpath.include?('HeatPump/BackupSystemFuel') # exclude HeatPump[BackupSystemFuel]
+      parent = target_xpath.gsub(/\[.*?\]/, '').split('/')[0...-1].join('/')
       element_with_value = 'BackupSystemFuel="electricity" and BackupSystemFuel="natural gas"'
     elsif target_xpath.include?('CompressorType')
-      parent = target_xpath.gsub(/\[.*?\]/, "").split('/')[0...-1].join('/')
+      parent = target_xpath.gsub(/\[.*?\]/, '').split('/')[0...-1].join('/')
       element_with_value = 'CompressorType="single stage" and CompressorType="two stage"'
     elsif target_xpath.include?('SimulationControl/BeginMonth')
-      parent = target_xpath.gsub(/\[.*?\]/, "").split('/')[0...-1].join('/')
+      parent = target_xpath.gsub(/\[.*?\]/, '').split('/')[0...-1].join('/')
       element_with_value = 'BeginMonth="1"'
     elsif target_xpath.include?('SimulationControl/EndMonth')
-      parent = target_xpath.gsub(/\[.*?\]/, "").split('/')[0...-1].join('/')
+      parent = target_xpath.gsub(/\[.*?\]/, '').split('/')[0...-1].join('/')
       element_with_value = 'EndMonth="12"'
     elsif ['AirInfiltrationMeasurement[number(HousePressure)=50 and BuildingAirLeakage/UnitofMeasure[text()="ACH" or text()="CFM"]]',
            'Attics/Attic[AtticType/Attic[Vented="true"]]/VentilationRate[UnitofMeasure="SLA" or UnitofMeasure="ACHnatural"]/Value',
            'Foundations/Foundation[FoundationType/Crawlspace[Vented="true"]]/VentilationRate[UnitofMeasure="SLA"]/Value'].any? { |i| target_xpath.include? i }
-      parent = target_xpath.sub(/(?<=\[).*(?=\])/){|s| s.gsub(/\[.*\]/, "")}
+      parent = target_xpath.sub(/(?<=\[).*(?=\])/) { |s| s.gsub(/\[.*\]/, '') }
     elsif target_xpath.include?('[Units="kWh/year"]')
-      parent = target_xpath.gsub(/\[.*?\]/, "")
+      parent = target_xpath.gsub(/\[.*?\]/, '')
     end
 
     return parent, element_with_value
