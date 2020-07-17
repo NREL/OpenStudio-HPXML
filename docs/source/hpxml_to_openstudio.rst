@@ -1043,26 +1043,30 @@ The fractions for a given location cannot sum to greater than 1.
 If the fractions sum to less than 1, the remainder is assumed to be incandescent lighting.
 Garage lighting values are ignored if the building has no garage.
 
-Optional ``Lighting/extension/InteriorUsageMultiplier``, ``Lighting/extension/ExteriorUsageMultiplier``, and ``Lighting/extension/GarageUsageMultiplier`` can be provided that scales energy usage; if not provided, they are assumed to be 1.0.
-Optional ``Lighting/extension/InteriorWeekdayScheduleFractions``, ``Lighting/extension/InteriorWeekendScheduleFractions``, and ``Lighting/extension/InteriorMonthlyScheduleMultipliers`` can be provided; if not provided, values will be calculated by Lighting Calculation Option 2 of the `Building America House Simulation Protocols <https://www1.eere.energy.gov/buildings/publications/pdfs/building_america/house_simulation.pdf>`_ are used.
-Lighting Calculation Option 2 uses a location-dependent normalized hourly interior hard-wired lighting profile derived from a 100-house study in the United Kingdom (Stokes et al. 2004).
-Optional ``Lighting/extension/GarageWeekdayScheduleFractions``, ``Lighting/extension/GarageWeekendScheduleFractions``, and ``Lighting/extension/GarageMonthlyScheduleMultipliers`` can be provided; if not provided, values from Appendix C Table 8 of the `Title 24 2016 Residential Alternative Calculation Method Reference Manual <https://ww2.energy.ca.gov/2015publications/CEC-400-2015-024/CEC-400-2015-024-CMF-REV2.pdf>`_ are used.
-Optional ``Lighting/extension/ExteriorWeekdayScheduleFractions``, ``Lighting/extension/ExteriorWeekendScheduleFractions``, and ``Lighting/extension/ExteriorMonthlyScheduleMultipliers`` can be provided; if not provided, values from Appendix C Table 8 of the `Title 24 2016 Residential Alternative Calculation Method Reference Manual <https://ww2.energy.ca.gov/2015publications/CEC-400-2015-024/CEC-400-2015-024-CMF-REV2.pdf>`_ are used.
-Optional ``Lighting/extension/ExteriorHolidayLighting`` can also be provided; If not provided, none will be modeled. 
-If provided (indicating there is exterior holiday lighting), ``Load[Units='kWh/day']/Value``, ``PeriodBeginMonth``, ``PeriodBeginDayOfMonth``, ``PeriodEndMonth``, ``PeriodEndDayOfMonth``, ``WeekdayScheduleFractions``, and ``WeekendScheduleFractions`` can be optionally provided. 
-If the complete set of exterior holiday lighting inputs is not provided, the following default values will be used.
+Optional ``extension/InteriorUsageMultiplier``, ``extension/ExteriorUsageMultiplier``, and ``extension/GarageUsageMultiplier`` can be provided that scales energy usage; if not provided, they are assumed to be 1.0.
 
-=============================================  =============================================================================================================================================================
+An optional ``extension/ExteriorHolidayLighting`` can also be provided to define additional exterior holiday lighting; if not provided, none will be modeled. 
+If provided, child elements ``Load[Units='kWh/day']/Value``, ``PeriodBeginMonth``, ``PeriodBeginDayOfMonth``, ``PeriodEndMonth``, ``PeriodEndDayOfMonth``, ``WeekdayScheduleFractions``, and ``WeekendScheduleFractions`` can be optionally provided. 
+If the complete set of child elements is not provided, the following default values will be used.
+
+=============================================  ======================================================================================================
 Element Name                                   Default Value
-=============================================  =============================================================================================================================================================
+=============================================  ======================================================================================================
 Load[Units='kWh/day']/Value                    1.1 for SFD; 0.5 for SFA or MF  
 PeriodBeginMonth                               11  
 PeriodBeginDayOfMonth                          24  
 PeriodEndMonth                                 1  
 PeriodEndDayOfMonth                            6
-WeekdayScheduleFractions                       0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.008168, 0.098016, 0.168028, 0.193699, 0.283547, 0.192532, 0.03734, 0.01867  
-WeekendScheduleFractions                       0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.008168, 0.098016, 0.168028, 0.193699, 0.283547, 0.192532, 0.03734, 0.01867  
-=============================================  =============================================================================================================================================================
+WeekdayScheduleFractions                       0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0.008, 0.098, 0.168, 0.194, 0.284, 0.192, 0.037, 0.019
+WeekendScheduleFractions                       0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0.008, 0.098, 0.168, 0.194, 0.284, 0.192, 0.037, 0.019
+=============================================  ======================================================================================================
+
+Finally, optional schedules can be defined:
+
+- **Interior**: Optional ``extension/InteriorWeekdayScheduleFractions``, ``extension/InteriorWeekendScheduleFractions``, and ``extension/InteriorMonthlyScheduleMultipliers`` can be provided; if not provided, values will be calculated using Lighting Calculation Option 2 (location-dependent lighting profile) of the `Building America House Simulation Protocols <https://www1.eere.energy.gov/buildings/publications/pdfs/building_america/house_simulation.pdf>`_.
+- **Garage**: Optional ``extension/GarageWeekdayScheduleFractions``, ``extension/GarageWeekendScheduleFractions``, and ``extension/GarageMonthlyScheduleMultipliers`` can be provided; if not provided, values from Appendix C Table 8 of the `Title 24 2016 Residential Alternative Calculation Method Reference Manual <https://ww2.energy.ca.gov/2015publications/CEC-400-2015-024/CEC-400-2015-024-CMF-REV2.pdf>`_ are used.
+- **Exterior**: Optional ``extension/ExteriorWeekdayScheduleFractions``, ``extension/ExteriorWeekendScheduleFractions``, and ``extension/ExteriorMonthlyScheduleMultipliers`` can be provided; if not provided, values from Appendix C Table 8 of the `Title 24 2016 Residential Alternative Calculation Method Reference Manual <https://ww2.energy.ca.gov/2015publications/CEC-400-2015-024/CEC-400-2015-024-CMF-REV2.pdf>`_ are used.
+
 
 HPXML Ceiling Fans
 ******************
