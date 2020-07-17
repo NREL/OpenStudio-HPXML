@@ -907,19 +907,19 @@ class HPXMLTest < MiniTest::Test
       # Supply, exhaust, ERV, HRV, etc., check for appropriate mech vent energy
       fan_gj = 0
       if not fan_sup.empty?
-        fan_gj += fan_sup.map { |vent_mech| UnitConversions.convert(vent_mech.fan_power * vent_mech.hours_in_operation * 365.0, 'Wh', 'GJ') }.sum(0.0)
+        fan_gj += fan_sup.map { |vent_mech| UnitConversions.convert(vent_mech.unit_fan_power * vent_mech.hours_in_operation * 365.0, 'Wh', 'GJ') }.sum(0.0)
       end
       if not fan_exh.empty?
-        fan_gj += fan_exh.map { |vent_mech| UnitConversions.convert(vent_mech.fan_power * vent_mech.hours_in_operation * 365.0, 'Wh', 'GJ') }.sum(0.0)
+        fan_gj += fan_exh.map { |vent_mech| UnitConversions.convert(vent_mech.unit_fan_power * vent_mech.hours_in_operation * 365.0, 'Wh', 'GJ') }.sum(0.0)
       end
       if not fan_bal.empty?
-        fan_gj += fan_bal.map { |vent_mech| UnitConversions.convert(vent_mech.fan_power * vent_mech.hours_in_operation * 365.0, 'Wh', 'GJ') }.sum(0.0)
+        fan_gj += fan_bal.map { |vent_mech| UnitConversions.convert(vent_mech.unit_fan_power * vent_mech.hours_in_operation * 365.0, 'Wh', 'GJ') }.sum(0.0)
       end
       if not vent_fan_kitchen.empty?
-        fan_gj += vent_fan_kitchen.map { |vent_kitchen| UnitConversions.convert(vent_kitchen.fan_power * vent_kitchen.hours_in_operation * vent_kitchen.quantity * 365.0, 'Wh', 'GJ') }.sum(0.0)
+        fan_gj += vent_fan_kitchen.map { |vent_kitchen| UnitConversions.convert(vent_kitchen.unit_fan_power * vent_kitchen.hours_in_operation * vent_kitchen.quantity * 365.0, 'Wh', 'GJ') }.sum(0.0)
       end
       if not vent_fan_bath.empty?
-        fan_gj += vent_fan_bath.map { |vent_bath| UnitConversions.convert(vent_bath.fan_power * vent_bath.hours_in_operation * vent_bath.quantity * 365.0, 'Wh', 'GJ') }.sum(0.0)
+        fan_gj += vent_fan_bath.map { |vent_bath| UnitConversions.convert(vent_bath.unit_fan_power * vent_bath.hours_in_operation * vent_bath.quantity * 365.0, 'Wh', 'GJ') }.sum(0.0)
       end
       # Maximum error that can be caused by rounding
       assert_in_delta(mv_energy, fan_gj, 0.006)

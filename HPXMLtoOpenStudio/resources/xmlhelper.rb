@@ -101,7 +101,6 @@ class XMLHelper
 
   def self.valid_attr(attr)
     attr = attr.to_s
-    attr = attr.gsub(' ', '_')
     attr = attr.gsub('|', '_')
     return attr
   end

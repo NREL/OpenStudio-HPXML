@@ -556,9 +556,9 @@ class EnergyPlusValidator
 
       ## [SharedSystem=true]
       '/HPXML/Building/BuildingDetails/Systems/MechanicalVentilation/VentilationFans/VentilationFan[UsedForWholeBuildingVentilation="true" and IsSharedSystem="true"]' => {
-        'TestedFlowRate[@scope="unit"] | RatedFlowRate[@scope="unit"]' => one_or_more, # Use scope attribute to describe at which level data is provided
-        'TestedFlowRate[@scope="building"] | RatedFlowRate[@scope="building"]' => one_or_more, # Use scope attribute to describe at which level data is provided
-        'FanPower[@scope="building"] | FanPower[@scope="unit"]' => one_or_more, # Use scope attribute to describe at which level data is provided
+        'TestedFlowRate[@scope="single unit"] | RatedFlowRate[@scope="single unit"]' => one_or_more, # Use scope attribute to describe at which level data is provided
+        'TestedFlowRate[@scope="multiple units"] | RatedFlowRate[@scope="multiple units"]' => one_or_more, # Use scope attribute to describe at which level data is provided
+        'FanPower[@scope="multiple units"] | FanPower[@scope="single unit"]' => one_or_more, # Use scope attribute to describe at which level data is provided
         'FractionOutdoorAir | FractionRecirculation' => one_or_more,
         'AttachedToPreconditioningHeatingSystem' => zero_or_one,
         'AttachedToPreconditioningCoolingSystem' => zero_or_one,

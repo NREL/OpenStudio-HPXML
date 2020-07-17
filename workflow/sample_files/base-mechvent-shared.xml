@@ -380,13 +380,13 @@
             <VentilationFan>
               <SystemIdentifier id='MechanicalVentilation'/>
               <FanType>supply only</FanType>
-              <RatedFlowRate scope='multiple_units'>1100.0</RatedFlowRate>
-              <TestedFlowRate scope='unit'>110.0</TestedFlowRate>
+              <RatedFlowRate scope='multiple units'>1100.0</RatedFlowRate>
+              <TestedFlowRate scope='single unit'>110.0</TestedFlowRate>
               <HoursInOperation>24.0</HoursInOperation>
               <UsedForWholeBuildingVentilation>true</UsedForWholeBuildingVentilation>
               <IsSharedSystem>true</IsSharedSystem>
               <FractionOutdoorAir>0.8</FractionOutdoorAir>
-              <FanPower scope='multiple_units'>300.0</FanPower>
+              <FanPower scope='multiple units'>300.0</FanPower>
             </VentilationFan>
           </VentilationFans>
         </MechanicalVentilation>

@@ -3463,7 +3463,7 @@ def set_hpxml_ventilation_fans(hpxml_file, hpxml)
       vent_fan.rated_flow_rate /= 2.0 unless vent_fan.rated_flow_rate.nil?
       vent_fan.tested_flow_rate /= 2.0 unless vent_fan.tested_flow_rate.nil?
       hpxml.ventilation_fans << vent_fan.dup
-      hpxml.ventilation_fans[-1].id = "#{vent_fan.id} 2"
+      hpxml.ventilation_fans[-1].id = "#{vent_fan.id}_2"
       hpxml.ventilation_fans[-1].start_hour = vent_fan.start_hour - 1 unless vent_fan.start_hour.nil?
       hpxml.ventilation_fans[-1].hours_in_operation = vent_fan.hours_in_operation - 1 unless vent_fan.hours_in_operation.nil?
     end

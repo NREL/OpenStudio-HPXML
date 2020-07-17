@@ -3212,12 +3212,12 @@ class HPXML < Object
       XMLHelper.add_element(ventilation_fan, 'FanType', @fan_type) unless @fan_type.nil?
       if @is_shared_system
         rated_fr = XMLHelper.add_element(ventilation_fan, 'RatedFlowRate', to_float(@rated_flow_rate)) unless @rated_flow_rate.nil?
-        XMLHelper.add_attribute(rated_fr, 'scope', 'unit') unless rated_fr.nil?
+        XMLHelper.add_attribute(rated_fr, 'scope', 'single unit') unless rated_fr.nil?
         bldg_rated_fr = XMLHelper.add_element(ventilation_fan, 'RatedFlowRate', to_float(@building_rated_flow_rate)) unless @building_rated_flow_rate.nil?
         XMLHelper.add_attribute(bldg_rated_fr, 'scope', 'multiple units') unless bldg_rated_fr.nil?
 
         tested_fr = XMLHelper.add_element(ventilation_fan, 'TestedFlowRate', to_float(@tested_flow_rate)) unless @tested_flow_rate.nil?
-        XMLHelper.add_attribute(tested_fr, 'scope', 'unit') unless tested_fr.nil?
+        XMLHelper.add_attribute(tested_fr, 'scope', 'single unit') unless tested_fr.nil?
         bldg_tested_fr = XMLHelper.add_element(ventilation_fan, 'TestedFlowRate', to_float(@building_tested_flow_rate)) unless @building_tested_flow_rate.nil?
         XMLHelper.add_attribute(bldg_tested_fr, 'scope', 'multiple units') unless bldg_tested_fr.nil?
       else
@@ -3238,7 +3238,7 @@ class HPXML < Object
       XMLHelper.add_element(ventilation_fan, 'AdjustedSensibleRecoveryEfficiency', to_float(@sensible_recovery_efficiency_adjusted)) unless @sensible_recovery_efficiency_adjusted.nil?
       if @is_shared_system
         fan_pow = XMLHelper.add_element(ventilation_fan, 'FanPower', to_float(@fan_power)) unless @fan_power.nil?
-        XMLHelper.add_attribute(fan_pow, 'scope', 'unit') unless fan_pow.nil?
+        XMLHelper.add_attribute(fan_pow, 'scope', 'single unit') unless fan_pow.nil?
         bldg_fan_pow = XMLHelper.add_element(ventilation_fan, 'FanPower', to_float(@building_fan_power)) unless @building_fan_power.nil?
         XMLHelper.add_attribute(bldg_fan_pow, 'scope', 'multiple units') unless bldg_fan_pow.nil?
       else
@@ -3268,11 +3268,11 @@ class HPXML < Object
       @fan_type = XMLHelper.get_value(ventilation_fan, 'FanType')
       @is_shared_system = to_bool_or_nil(XMLHelper.get_value(ventilation_fan, 'IsSharedSystem'))
       if @is_shared_system
-        @rated_flow_rate = to_float_or_nil(XMLHelper.get_value(ventilation_fan, 'RatedFlowRate[@scope="unit"]'))
+        @rated_flow_rate = to_float_or_nil(XMLHelper.get_value(ventilation_fan, 'RatedFlowRate[@scope="single unit"]'))
         @building_rated_flow_rate = to_float_or_nil(XMLHelper.get_value(ventilation_fan, 'RatedFlowRate[@scope="multiple units"]'))
-        @tested_flow_rate = to_float_or_nil(XMLHelper.get_value(ventilation_fan, 'TestedFlowRate[@scope="unit"]'))
+        @tested_flow_rate = to_float_or_nil(XMLHelper.get_value(ventilation_fan, 'TestedFlowRate[@scope="single unit"]'))
         @building_tested_flow_rate = to_float_or_nil(XMLHelper.get_value(ventilation_fan, 'TestedFlowRate[@scope="multiple units"]'))
-        @fan_power = to_float_or_nil(XMLHelper.get_value(ventilation_fan, 'FanPower[@scope="unit"]'))
+        @fan_power = to_float_or_nil(XMLHelper.get_value(ventilation_fan, 'FanPower[@scope="single unit"]'))
         @building_fan_power = to_float_or_nil(XMLHelper.get_value(ventilation_fan, 'FanPower[@scope="multiple units"]'))
       else
         @rated_flow_rate = to_float_or_nil(XMLHelper.get_value(ventilation_fan, 'RatedFlowRate'))
