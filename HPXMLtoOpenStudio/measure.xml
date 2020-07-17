@@ -524,6 +524,12 @@
     <file>
       <filename>energyplus.rb</filename>
       <filetype>rb</filetype>
+      <usage_type>test</usage_type>
+      <checksum>290CD5E5</checksum>
+    </file>
+    <file>
+      <filename>version.rb</filename>
+      <filetype>rb</filetype>
       <usage_type>resource</usage_type>
       <checksum>0C1B7A80</checksum>
     </file>

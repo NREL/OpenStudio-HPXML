@@ -25,7 +25,7 @@ The following building features/technologies are available for modeling via the 
 - HVAC
 
   - Heating Systems (Electric Resistance, Central/Wall/Floor Furnaces, Stoves, Boilers, Portable/Fixed Heaters, Fireplaces)
-  - Cooling Systems (Central Air Conditioners, Room Air Conditioners, Evaporative Coolers)
+  - Cooling Systems (Central Air Conditioners, Room Air Conditioners, Evaporative Coolers, Mini Split Air Conditioners)
   - Heat Pumps (Air Source, Mini Split, Ground Source, Dual-Fuel)
   - Setpoints
   - Ducts
@@ -490,6 +490,7 @@ CoolingSystemType        DistributionSystem                 CoolingSystemFuel  A
 central air conditioner  AirDistribution or DSE             electricity        SEER                     (optional)
 room air conditioner                                        electricity        EER                      (optional)
 evaporative cooler       AirDistribution or DSE (optional)  electricity
+mini-split               AirDistribution or DSE (optional)  electricity        SEER                     (optional)
 =======================  =================================  =================  =======================  ====================
 
 Central air conditioners can also have the ``CompressorType`` specified; if not provided, it is assumed as follows:
