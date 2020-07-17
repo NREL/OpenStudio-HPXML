@@ -814,17 +814,7 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
     _test_default_lighting_values(hpxml_default, 1.0, 1.0, 1.0,
                                   { ext_wk_sch: '0.046, 0.046, 0.046, 0.046, 0.046, 0.037, 0.035, 0.034, 0.033, 0.028, 0.022, 0.015, 0.012, 0.011, 0.011, 0.012, 0.019, 0.037, 0.049, 0.065, 0.091, 0.105, 0.091, 0.063',
                                     ext_wknd_sch: '0.046, 0.046, 0.045, 0.045, 0.046, 0.045, 0.044, 0.041, 0.036, 0.03, 0.024, 0.016, 0.012, 0.011, 0.011, 0.012, 0.019, 0.038, 0.048, 0.06, 0.083, 0.098, 0.085, 0.059',
-                                    ext_month_mult: '1.248, 1.257, 0.993, 0.989, 0.993, 0.827, 0.821, 0.821, 0.827, 0.99, 0.987, 1.248',
-                                    grg_wk_sch: nil,
-                                    grg_wknd_sch: nil,
-                                    grg_month_mult: nil,
-                                    hol_kwh_per_day: nil,
-                                    hol_begin_month: nil,
-                                    hol_begin_day_of_month: nil,
-                                    hol_end_month: nil,
-                                    hol_end_day_of_month: nil,
-                                    hol_wk_sch: nil,
-                                    hol_wknd_sch: nil })
+                                    ext_month_mult: '1.248, 1.257, 0.993, 0.989, 0.993, 0.827, 0.821, 0.821, 0.827, 0.99, 0.987, 1.248' })
 
     # Test defaults w/ garage
     hpxml = apply_hpxml_defaults('base-enclosure-garage.xml')
@@ -836,14 +826,7 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
                                     ext_month_mult: '1.248, 1.257, 0.993, 0.989, 0.993, 0.827, 0.821, 0.821, 0.827, 0.99, 0.987, 1.248',
                                     grg_wk_sch: '0.046, 0.046, 0.046, 0.046, 0.046, 0.037, 0.035, 0.034, 0.033, 0.028, 0.022, 0.015, 0.012, 0.011, 0.011, 0.012, 0.019, 0.037, 0.049, 0.065, 0.091, 0.105, 0.091, 0.063',
                                     grg_wknd_sch: '0.046, 0.046, 0.045, 0.045, 0.046, 0.045, 0.044, 0.041, 0.036, 0.03, 0.024, 0.016, 0.012, 0.011, 0.011, 0.012, 0.019, 0.038, 0.048, 0.06, 0.083, 0.098, 0.085, 0.059',
-                                    grg_month_mult: '1.248, 1.257, 0.993, 0.989, 0.993, 0.827, 0.821, 0.821, 0.827, 0.99, 0.987, 1.248',
-                                    hol_kwh_per_day: nil,
-                                    hol_begin_month: nil,
-                                    hol_begin_day_of_month: nil,
-                                    hol_end_month: nil,
-                                    hol_end_day_of_month: nil,
-                                    hol_wk_sch: nil,
-                                    hol_wknd_sch: nil })
+                                    grg_month_mult: '1.248, 1.257, 0.993, 0.989, 0.993, 0.827, 0.821, 0.821, 0.827, 0.99, 0.987, 1.248' })
   end
 
   def test_pv
