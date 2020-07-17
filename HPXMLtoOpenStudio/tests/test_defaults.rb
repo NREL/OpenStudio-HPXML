@@ -779,6 +779,7 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
     hpxml.lighting.garage_weekday_fractions = '0.04, 0.04, 0.04, 0.04, 0.04, 0.03, 0.03, 0.03, 0.03, 0.03, 0.02, 0.01, 0.01, 0.01, 0.01, 0.01, 0.01, 0.03, 0.04, 0.06, 0.09, 0.10, 0.09, 0.06'
     hpxml.lighting.garage_weekend_fractions = '0.04, 0.04, 0.04, 0.04, 0.04, 0.04, 0.04, 0.04, 0.03, 0.03, 0.02, 0.01, 0.01, 0.01, 0.01, 0.01, 0.02, 0.03, 0.05, 0.06, 0.08, 0.09, 0.08, 0.05'
     hpxml.lighting.garage_monthly_multipliers = '1.2, 1.2, 1.2 1.2, 1.2, 1.2, 1.2, 1.2, 1.2, 1.2, 1.2, 1.2'
+    hpxml.lighting.holiday_exists = true
     hpxml.lighting.holiday_kwh_per_day = 0.7
     hpxml.lighting.holiday_period_begin_month = 11
     hpxml.lighting.holiday_period_begin_day_of_month = 19
@@ -830,7 +831,10 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
     XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
     hpxml_default = _test_measure()
     _test_default_lighting_values(hpxml_default, 1.0, 1.0, 1.0,
-                                  { grg_wk_sch: '0.046, 0.046, 0.046, 0.046, 0.046, 0.037, 0.035, 0.034, 0.033, 0.028, 0.022, 0.015, 0.012, 0.011, 0.011, 0.012, 0.019, 0.037, 0.049, 0.065, 0.091, 0.105, 0.091, 0.063',
+                                  { ext_wk_sch: '0.046, 0.046, 0.046, 0.046, 0.046, 0.037, 0.035, 0.034, 0.033, 0.028, 0.022, 0.015, 0.012, 0.011, 0.011, 0.012, 0.019, 0.037, 0.049, 0.065, 0.091, 0.105, 0.091, 0.063',
+                                    ext_wknd_sch: '0.046, 0.046, 0.045, 0.045, 0.046, 0.045, 0.044, 0.041, 0.036, 0.03, 0.024, 0.016, 0.012, 0.011, 0.011, 0.012, 0.019, 0.038, 0.048, 0.06, 0.083, 0.098, 0.085, 0.059',
+                                    ext_month_mult: '1.248, 1.257, 0.993, 0.989, 0.993, 0.827, 0.821, 0.821, 0.827, 0.99, 0.987, 1.248',
+                                    grg_wk_sch: '0.046, 0.046, 0.046, 0.046, 0.046, 0.037, 0.035, 0.034, 0.033, 0.028, 0.022, 0.015, 0.012, 0.011, 0.011, 0.012, 0.019, 0.037, 0.049, 0.065, 0.091, 0.105, 0.091, 0.063',
                                     grg_wknd_sch: '0.046, 0.046, 0.045, 0.045, 0.046, 0.045, 0.044, 0.041, 0.036, 0.03, 0.024, 0.016, 0.012, 0.011, 0.011, 0.012, 0.019, 0.038, 0.048, 0.06, 0.083, 0.098, 0.085, 0.059',
                                     grg_month_mult: '1.248, 1.257, 0.993, 0.989, 0.993, 0.827, 0.821, 0.821, 0.827, 0.99, 0.987, 1.248',
                                     hol_kwh_per_day: nil,
@@ -1158,42 +1162,68 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
     assert_equal(exterior_usage_multiplier, hpxml.lighting.exterior_usage_multiplier)
     if not schedules[:grg_wk_sch].nil?
       assert_equal(schedules[:grg_wk_sch], hpxml.lighting.garage_weekday_fractions)
+    else
+      assert_nil(hpxml.lighting.garage_weekday_fractions)
     end
     if not schedules[:grg_wknd_sch].nil?
       assert_equal(schedules[:grg_wknd_sch], hpxml.lighting.garage_weekend_fractions)
+    else
+      assert_nil(hpxml.lighting.garage_weekend_fractions)
     end
     if not schedules[:grg_month_mult].nil?
       assert_equal(schedules[:grg_month_mult], hpxml.lighting.garage_monthly_multipliers)
+    else
+      assert_nil(hpxml.lighting.garage_monthly_multipliers)
     end
     if not schedules[:ext_wk_sch].nil?
       assert_equal(schedules[:ext_wk_sch], hpxml.lighting.exterior_weekday_fractions)
+    else
+      assert_nil(hpxml.lighting.exterior_weekday_fractions)
     end
     if not schedules[:ext_wknd_sch].nil?
       assert_equal(schedules[:ext_wknd_sch], hpxml.lighting.exterior_weekend_fractions)
+    else
+      assert_nil(hpxml.lighting.exterior_weekday_fractions)
     end
     if not schedules[:ext_month_mult].nil?
       assert_equal(schedules[:ext_month_mult], hpxml.lighting.exterior_monthly_multipliers)
+    else
+      assert_nil(hpxml.lighting.exterior_monthly_multipliers)
     end
     if not schedules[:hol_kwh_per_day].nil?
       assert_equal(schedules[:hol_kwh_per_day], hpxml.lighting.holiday_kwh_per_day)
+    else
+      assert_nil(hpxml.lighting.holiday_kwh_per_day)
     end
     if not schedules[:hol_begin_month].nil?
       assert_equal(schedules[:hol_begin_month], hpxml.lighting.holiday_period_begin_month)
+    else
+      assert_nil(hpxml.lighting.holiday_period_begin_month)
     end
     if not schedules[:hol_begin_day_of_month].nil?
       assert_equal(schedules[:hol_begin_day_of_month], hpxml.lighting.holiday_period_begin_day_of_month)
+    else
+      assert_nil(hpxml.lighting.holiday_period_begin_day_of_month)
     end
     if not schedules[:hol_end_month].nil?
       assert_equal(schedules[:hol_end_month], hpxml.lighting.holiday_period_end_month)
+    else
+      assert_nil(hpxml.lighting.holiday_period_end_month)
     end
     if not schedules[:hol_end_day_of_month].nil?
       assert_equal(schedules[:hol_end_day_of_month], hpxml.lighting.holiday_period_end_day_of_month)
+    else
+      assert_nil(hpxml.lighting.holiday_period_end_day_of_month)
     end
     if not schedules[:hol_wk_sch].nil?
       assert_equal(schedules[:hol_wk_sch], hpxml.lighting.holiday_weekday_fractions)
+    else
+      assert_nil(hpxml.lighting.holiday_weekday_fractions)
     end
     if not schedules[:hol_wknd_sch].nil?
       assert_equal(schedules[:hol_wknd_sch], hpxml.lighting.holiday_weekend_fractions)
+    else
+      assert_nil(hpxml.lighting.holiday_weekend_fractions)
     end
   end
 
