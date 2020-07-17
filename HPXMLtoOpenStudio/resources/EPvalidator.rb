@@ -549,8 +549,9 @@ class EnergyPlusValidator
       '/HPXML/Building/BuildingDetails/Systems/MechanicalVentilation/VentilationFans/VentilationFan[UsedForWholeBuildingVentilation="true"]' => {
         'SystemIdentifier' => one, # Required by HPXML schema
         'FanType[text()="energy recovery ventilator" or text()="heat recovery ventilator" or text()="exhaust only" or text()="supply only" or text()="balanced" or text()="central fan integrated supply"]' => one, # See [MechVentType=HRV] or [MechVentType=ERV] or [MechVentType=CFIS]
+        'TestedFlowRate | RatedFlowRate' => one_or_more,
         'HoursInOperation' => one,
-        'IsSharedSystem' => one, # See [SharedSystem]
+        'FanPower' => one,
       },
 
       ## [SharedSystem=true]
@@ -561,13 +562,6 @@ class EnergyPlusValidator
         'FractionOutdoorAir | FractionRecirculation' => one_or_more,
         'AttachedToPreconditioningHeatingSystem' => zero_or_one,
         'AttachedToPreconditioningCoolingSystem' => zero_or_one,
-
-      },
-
-      ## [SharedSystem=false]
-      '/HPXML/Building/BuildingDetails/Systems/MechanicalVentilation/VentilationFans/VentilationFan[UsedForWholeBuildingVentilation="true" and IsSharedSystem="false"]' => {
-        'TestedFlowRate | RatedFlowRate' => one_or_more,
-        'FanPower' => one,
       },
 
       ## [MechVentType=HRV]
