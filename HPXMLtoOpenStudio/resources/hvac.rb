@@ -1452,21 +1452,23 @@ class HVAC
     living_zone.setThermostatSetpointDualSetpoint(thermostat_setpoint)
   end
 
-  def self.apply_eae_to_heating_fan(runner, eae_hvacs, eae, fuel, load_frac, htg_type)
+  def self.apply_eae_to_heating_fan(runner, hvac_objects, heating_system)
     # Applies Electric Auxiliary Energy (EAE) for fuel heating equipment to fan power.
 
-    if htg_type == HPXML::HVACTypeBoiler
+    eae = heating_system.electric_auxiliary_energy
+
+    if heating_system.heating_system_type == HPXML::HVACTypeBoiler
 
       if eae.nil?
-        eae = get_default_eae(htg_type, fuel, load_frac, nil)
+        eae = get_default_eae(heating_system, nil)
       end
 
       elec_power = (eae / 2.08) # W
 
-      eae_hvacs.each do |eae_hvac|
-        next unless eae_hvac.is_a? OpenStudio::Model::PlantLoop
+      hvac_objects.each do |hvac_object|
+        next unless hvac_object.is_a? OpenStudio::Model::PlantLoop
 
-        eae_hvac.components.each do |plc|
+        hvac_object.components.each do |plc|
           if plc.to_BoilerHotWater.is_initialized
             boiler = plc.to_BoilerHotWater.get
             boiler.setParasiticElectricLoad(0.0)
@@ -1485,11 +1487,11 @@ class HVAC
     else # Furnace/WallFurnace/FloorFurnace/Stove
 
       unitary_systems = []
-      eae_hvacs.each do |eae_hvac|
-        if eae_hvac.is_a? OpenStudio::Model::AirLoopHVAC # Furnace
-          unitary_systems << get_unitary_system_from_air_loop_hvac(eae_hvac)
-        elsif eae_hvac.is_a? OpenStudio::Model::AirLoopHVACUnitarySystem # WallFurnace/FloorFurnace/Stove
-          unitary_systems << eae_hvac
+      hvac_objects.each do |hvac_object|
+        if hvac_object.is_a? OpenStudio::Model::AirLoopHVAC # Furnace
+          unitary_systems << get_unitary_system_from_air_loop_hvac(hvac_object)
+        elsif hvac_object.is_a? OpenStudio::Model::AirLoopHVACUnitarySystem # WallFurnace/FloorFurnace/Stove
+          unitary_systems << hvac_object
         end
       end
 
@@ -1497,7 +1499,7 @@ class HVAC
         if eae.nil?
           htg_coil = unitary_system.heatingCoil.get.to_CoilHeatingGas.get
           htg_capacity = UnitConversions.convert(htg_coil.nominalCapacity.get, 'W', 'kBtu/hr')
-          eae = get_default_eae(htg_type, fuel, load_frac, htg_capacity)
+          eae = get_default_eae(heating_system, htg_capacity)
         end
         elec_power = eae / 2.08 # W
 
@@ -1943,36 +1945,61 @@ class HVAC
     return ef_input, water_removal_rate_input
   end
 
-  def self.get_default_eae(htg_type, fuel, load_frac, furnace_capacity_kbtuh)
-    # From ANSI/RESNET/ICC 301 Standard
-    if htg_type == HPXML::HVACTypeBoiler
-      if [HPXML::FuelTypeNaturalGas,
-          HPXML::FuelTypePropane].include? fuel
-        return 170.0 * load_frac # kWh/yr
-      elsif [HPXML::FuelTypeOil,
-             HPXML::FuelTypeOil1,
-             HPXML::FuelTypeOil2,
-             HPXML::FuelTypeOil4,
-             HPXML::FuelTypeOil5or6,
-             HPXML::FuelTypeDiesel,
-             HPXML::FuelTypeKerosene].include? fuel
-        return 330.0 * load_frac # kWh/yr
+  def self.get_default_eae(heating_system, furnace_capacity_kbtuh)
+    # From ANSI/RESNET/ICC 301-2019 Standard
+    eae = 0.0
+    return eae if heating_system.heating_system_fuel == HPXML::FuelTypeElectricity
+
+    if heating_system.heating_system_type == HPXML::HVACTypeBoiler
+      if heating_system.is_shared_system && (not heating_system.boiler_shared_pump_watts.nil?)
+        # Calculate EAE for shared boiler from detailed inputs
+        hlh = 2080 # FIXME
+        eae = UnitConversions.convert(heating_system.boiler_shared_pump_watts / heating_system.number_of_units_served + heating_system.boiler_aux_in_watts, 'W', 'kW') * hlh
+      else
+        # Use defaults
+        if [HPXML::FuelTypeNaturalGas,
+            HPXML::FuelTypePropane].include? heating_system.heating_system_fuel
+          if heating_system.is_shared_system
+            hydronic_type = heating_system.distribution_system.hydronic_distribution_type
+            if [HPXML::HydronicTypeBaseboard,
+                HPXML::HydronicTypeRadiantCeiling,
+                HPXML::HydronicTypeRadiantFloor,
+                HPXML::HydronicTypeRadiator].include? hydronic_type
+              eae = 220.0 # Gas boiler (shared, in-unit baseboard)
+            elsif [HPXML::HydronicTypeFanCoil].include? hydronic_type
+              eae = 438.0 # Gas boiler (shared, in-unit fan coil)
+            elsif [HPXML::HydronicTypeWaterLoopHeatPump].include? hydronic_type
+              eae = 265.0 # Gas boiler (shared, in-unit WLHP)
+            end
+          else
+            eae = 170.0 # Gas boiler (serves one unit)
+          end
+        elsif [HPXML::FuelTypeOil,
+               HPXML::FuelTypeOil1,
+               HPXML::FuelTypeOil2,
+               HPXML::FuelTypeOil4,
+               HPXML::FuelTypeOil5or6,
+               HPXML::FuelTypeDiesel,
+               HPXML::FuelTypeKerosene].include? heating_system.heating_system_fuel
+          eae = 330.0 # Oil boiler
+        end
       end
-    elsif htg_type == HPXML::HVACTypeFurnace
+    elsif heating_system.heating_system_type == HPXML::HVACTypeFurnace
       if [HPXML::FuelTypeNaturalGas,
-          HPXML::FuelTypePropane].include? fuel
-        return (149.0 + 10.3 * furnace_capacity_kbtuh) * load_frac # kWh/yr
+          HPXML::FuelTypePropane].include? heating_system.heating_system_fuel
+        eae = 149.0 + 10.3 * furnace_capacity_kbtuh # Gas furnace
       elsif [HPXML::FuelTypeOil,
              HPXML::FuelTypeOil1,
              HPXML::FuelTypeOil2,
              HPXML::FuelTypeOil4,
              HPXML::FuelTypeOil5or6,
              HPXML::FuelTypeDiesel,
-             HPXML::FuelTypeKerosene].include? fuel
-        return (439.0 + 5.5 * furnace_capacity_kbtuh) * load_frac # kWh/yr
+             HPXML::FuelTypeKerosene].include? heating_system.heating_system_fuel
+        eae = 439.0 + 5.5 * furnace_capacity_kbtuh # Oil furnace
       end
     end
-    return 0.0
+
+    return eae * heating_system.fraction_heat_load_served # kWh/yr
   end
 
   def self.calc_heat_cap_ft_spec_using_capacity_17F(num_speeds, heat_pump)
@@ -3940,8 +3967,8 @@ class HVAC
 
   def self.calc_chiller_equivalent_seer(cooling_system)
     cap = cooling_system.building_cooling_capacity # Btu/hr
-    aux = cooling_system.aux_power # W
-    aux_dweq = cooling_system.aux_power_dweq # W
+    aux = cooling_system.chiller_aux_watts # W
+    aux_dweq = cooling_system.chiller_aux_dweq_watts # W
     input = UnitConversions.convert(cooling_system.cooling_efficiency_kw_per_ton, 'kW', 'W') * UnitConversions.convert(cap, 'Btu/hr', 'ton') # W
     n_dweq = cooling_system.number_of_units_served.to_f
 

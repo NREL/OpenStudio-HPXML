@@ -1761,6 +1761,7 @@
 			<xs:enumeration value="room air conditioner"/>
 			<xs:enumeration value="evaporative cooler"/>
 			<xs:enumeration value="chiller"/>
+			<xs:enumeration value="cooling tower"/>
 			<xs:enumeration value="other"/>
 		</xs:restriction>
 	</xs:simpleType>
@@ -1844,13 +1845,14 @@
 	</xs:complexType>
 	<xs:simpleType name="HeatPumpType_simple">
 		<xs:restriction base="xs:string">
+			<xs:enumeration value="water-to-air"/>
+			<xs:enumeration value="water-to-water"/>
 			<xs:enumeration value="air-to-air"/>
 			<xs:enumeration value="air-to-water"/>
 			<xs:enumeration value="mini-split"/>
 			<xs:enumeration value="ground-to-air"/>
 			<xs:enumeration value="ground-to-water"/>
-			<xs:enumeration value="water-to-air"/>
-			<xs:enumeration value="water-to-water"/>
+			<xs:enumeration value="variable refrigerant flow"/>
 		</xs:restriction>
 	</xs:simpleType>
 	<xs:complexType name="HeatPumpType">
@@ -2755,6 +2757,8 @@
 			<xs:enumeration value="baseboard"/>
 			<xs:enumeration value="radiant floor"/>
 			<xs:enumeration value="radiant ceiling"/>
+			<xs:enumeration value="fan coil"/>
+			<xs:enumeration value="water loop heat pump"/>
 			<xs:enumeration value="other"/>
 		</xs:restriction>
 	</xs:simpleType>
@@ -3806,6 +3810,32 @@
 			</xs:extension>
 		</xs:simpleContent>
 	</xs:complexType>
+	<xs:simpleType name="VentilationFlowRate_simple">
+		<xs:restriction base="xs:double">
+			<xs:minInclusive value="0"/>
+		</xs:restriction>
+	</xs:simpleType>
+	<xs:complexType name="VentilationFlowRate">
+		<xs:simpleContent>
+			<xs:extension base="FlowRate_simple">
+				<xs:attribute name="dataSource" type="DataSource"/>
+				<xs:attribute name="scope" type="DataScope"/>
+			</xs:extension>
+		</xs:simpleContent>
+	</xs:complexType>
+	<xs:simpleType name="VentilationFanPower_simple">
+		<xs:restriction base="xs:double">
+			<xs:minInclusive value="0"/>
+		</xs:restriction>
+	</xs:simpleType>
+	<xs:complexType name="VentilationFanPower">
+		<xs:simpleContent>
+			<xs:extension base="VentilationFanPower_simple">
+				<xs:attribute name="dataSource" type="DataSource"/>
+				<xs:attribute name="scope" type="DataScope"/>
+			</xs:extension>
+		</xs:simpleContent>
+	</xs:complexType>
 	<xs:simpleType name="eGridRegions_simple">
 		<xs:restriction base="xs:string">
 			<xs:enumeration value="Alaska"/>
@@ -4640,8 +4670,8 @@
 	</xs:complexType>
 	<xs:simpleType name="DataScope">
 		<xs:restriction base="xs:string">
-			<xs:enumeration value="building"/>
-			<xs:enumeration value="unit"/>
+			<xs:enumeration value="single unit"/>
+			<xs:enumeration value="multiple units"/>
 		</xs:restriction>
 	</xs:simpleType>
 </xs:schema>

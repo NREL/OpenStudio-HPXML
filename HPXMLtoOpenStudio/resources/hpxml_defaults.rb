@@ -265,6 +265,14 @@ class HPXMLDefaults
       end
     end
 
+    # TODO: Default Electric Auxiliary Energy (EAE; for boilers only; furnaces require autosized HVAC capacity)
+    hpxml.heating_systems.each do |heating_system|
+      next unless heating_system.electric_auxiliary_energy.nil?
+      next unless heating_system.heating_system_type == HPXML::HVACTypeBoiler
+
+      heating_system.electric_auxiliary_energy = HVAC.get_default_eae(heating_system, nil)
+    end
+
     # HVAC capacities
     # Transition capacity elements from -1 to nil
     hpxml.heating_systems.each do |heating_system|
@@ -298,7 +306,6 @@ class HPXMLDefaults
     end
 
     # TODO: Default HeatingCapacity17F
-    # TODO: Default Electric Auxiliary Energy (EAE; requires autosized HVAC capacity)
   end
 
   def self.apply_hvac_distribution(hpxml, ncfl, ncfl_ag)

@@ -24,9 +24,9 @@ The following building features/technologies are available for modeling via the 
   
 - HVAC
 
-  - Heating Systems (Electric Resistance, Central/Wall/Floor Furnaces, Stoves, Boilers, Portable/Fixed Heaters, Fireplaces)
-  - Cooling Systems (Central ACs, Room ACs, Evaporative Coolers, Mini Split ACs, Chillers)
-  - Heat Pumps (Air Source, Mini Split, Ground Source, Dual-Fuel)
+  - Heating Systems (Electric Resistance, Central/Wall/Floor Furnaces, Stoves, Unit/Shared Boilers, Portable/Fixed Heaters, Fireplaces)
+  - Cooling Systems (Central/Room/Mini-Split ACs, Room ACs, Evaporative Coolers, Chillers)
+  - Heat Pumps (Air Source, Mini-Split, Ground Source, Dual-Fuel)
   - Setpoints
   - Ducts
   
@@ -458,43 +458,70 @@ HPXML Heating Systems
 
 Each heating system (other than heat pumps) should be entered as a ``Systems/HVAC/HVACPlant/HeatingSystem``.
 Inputs including ``HeatingSystemType``, and ``FractionHeatLoadServed`` must be provided.
+
 ``HeatingCapacity`` may be provided; if not, the system will be auto-sized via ACCA Manual J/S.
+If provided for a shared system, the capacity of the *dwelling unit's* terminal distribution equipment (e.g., fan coil, terminal heat pump, radiator/baseboard), not the total system capacity, should be entered as ``HeatingCapacity[@scope='single unit']``.
 
 Depending on the type of heating system specified, additional elements are used:
 
-==================  ===========================  =================  =======================
-HeatingSystemType   DistributionSystem           HeatingSystemFuel  AnnualHeatingEfficiency 
-==================  ===========================  =================  =======================
+==================  ===========================  =================  =======================  ==============
+HeatingSystemType   DistributionSystem           HeatingSystemFuel  AnnualHeatingEfficiency  IsSharedSystem
+==================  ===========================  =================  =======================  ==============
 ElectricResistance                               electricity        Percent
 Furnace             AirDistribution or DSE       <any>              AFUE
 WallFurnace                                      <any>              AFUE
 FloorFurnace                                     <any>              AFUE
-Boiler              HydronicDistribution or DSE  <any>              AFUE
+Boiler              HydronicDistribution or DSE  <any>              AFUE                     required
 Stove                                            <any>              Percent
 PortableHeater                                   <any>              Percent
 Fireplace                                        <any>              Percent
-==================  ===========================  =================  =======================
+==================  ===========================  =================  =======================  ==============
 
-If a non-electric heating system is specified, the ``ElectricAuxiliaryEnergy`` element may be provided if available. 
+If a non-electric heating system is specified, the ``ElectricAuxiliaryEnergy`` element may be provided if available.
+For shared boilers, the electric auxiliary energy can be calculated using the following equation from `ANSI/RESNET/ICC 301-2019 <https://codes.iccsafe.org/content/RESNETICC3012019>`_:
+
+  | :math:`EAE = (\frac{SP}{N_{dweq}} + aux_{in}) \cdot 2080`
+  | where, 
+  |   :math:`SP` = Shared pump power [W]
+  |   :math:`N_{dweq}` = Number of units served by the shared system
+  |   :math:`aux_{in}` = In-unit fan coil power [W]
+
+Alternatively, the shared boiler's EAE can be automatically calculated by providing the above set of inputs as: ``extension/BoilerSharedPumpWatts``, ``NumberofUnitsServed``, and ``extension/BoilerAuxInWatts``.
+
+If not provided, the electric auxiliary energy is defaulted as follows according to `ANSI/RESNET/ICC 301-2019 <https://codes.iccsafe.org/content/RESNETICC3012019>`_:
+
+=========================================================  ==============================
+System type                                                Electric Auxiliary Energy
+=========================================================  ==============================
+Gas/propane boiler (serves one unit)                       170
+Gas/propane boiler (shared, in-unit baseboard)             220
+Gas/propane boiler (shared, in-unit water loop heat pump)  265
+Gas/propane boiler (shared, in-unit fan coil)              438
+Other fuel boiler                                          330
+Gas/propane furnace                                        149 + 10.3 * Capacity (kBtu/h)
+Other fuel furnace                                         439 + 5.5 * Capacity (kBtu/h)
+=========================================================  ==============================
 
 HPXML Cooling Systems
 *********************
 
 Each cooling system (other than heat pumps) should be entered as a ``Systems/HVAC/HVACPlant/CoolingSystem``.
 Inputs including ``CoolingSystemType`` and ``FractionCoolLoadServed`` must be provided.
+
 For all systems other than evaporative coolers, ``CoolingCapacity`` may be provided; if not, the system will be auto-sized via ACCA Manual J/S.
+If provided for a shared system, the capacity of the *dwelling unit's* terminal distribution equipment (e.g., fan coil, terminal heat pump, radiator/baseboard), not the total system capacity, should be entered as ``CoolingCapacity[@scope='single unit']``.
 
 Depending on the type of cooling system specified, additional elements are used:
 
-=======================  ==============================================  =================  ==========================  ====================
-CoolingSystemType        DistributionSystem                              CoolingSystemFuel  AnnualCoolingEfficiency     SensibleHeatFraction
-=======================  ==============================================  =================  ==========================  ====================
-central air conditioner  AirDistribution or DSE                          electricity        SEER                        (optional)
-room air conditioner                                                     electricity        EER                         (optional)
-evaporative cooler       AirDistribution or DSE (optional)               electricity
-mini-split               AirDistribution or DSE (optional)               electricity        SEER                        (optional)
-chiller                  AirDistribution or HydronicDistribution or DSE  electricity        SEER (optional, see below)  (optional)
-=======================  ==============================================  =================  ==========================  ====================
+=======================  =================================  =================  ==========================  ====================  ==============
+CoolingSystemType        DistributionSystem                 CoolingSystemFuel  AnnualCoolingEfficiency     SensibleHeatFraction  IsSharedSystem
+=======================  =================================  =================  ==========================  ====================  ==============
+central air conditioner  AirDistribution or DSE             electricity        SEER                        (optional)
+room air conditioner                                        electricity        EER                         (optional)
+evaporative cooler       AirDistribution or DSE (optional)  electricity
+mini-split               AirDistribution or DSE (optional)  electricity        SEER                        (optional)
+chiller                  HydronicDistribution or DSE        electricity        SEER or kW/ton (see below)  (optional)            required
+=======================  =================================  =================  ==========================  ====================  ==============
 
 Central air conditioners can also have the ``CompressorType`` specified; if not provided, it is assumed as follows:
 
@@ -512,7 +539,7 @@ The chiller efficiency can be provided as a SEER equivalent using the following 
   |   :math:`Input` = Chiller system power [W]
   |   :math:`N_{dweq}` = Number of units served by the shared system
 
-Alternatively, the chiller's SEER equivalent can be automatically calculated by providing the above inputs as: ``CoolingCapacity[@scope="building"]``, ``extension/AuxPower``, ``extension/AuxPowerDweq``, ``AnnualCoolingEfficiency[Units='kW/ton']/Value``, and ``NumberofUnitsServed``.
+Alternatively, the chiller's SEER equivalent can be automatically calculated by providing the above set of inputs as: ``AnnualCoolingEfficiency[Units='kW/ton']/Value``, ``CoolingCapacity[@scope="multiple units"]``, ``extension/ChillerAuxWatts``, ``extension/ChillerAuxDweqWatts``, and ``NumberofUnitsServed``.
 
 HPXML Heat Pumps
 ****************
@@ -628,7 +655,9 @@ DuctSurfaceArea (secondary return ducts)  :math:`b_r \cdot (1 - F_{out}) \cdot C
 Hydronic Distribution
 ~~~~~~~~~~~~~~~~~~~~~
 
-``HydronicDistribution`` systems do not require any additional inputs.
+``HydronicDistribution`` systems are defined by:
+
+- ``HydronicDistributionType``
 
 Distribution System Efficiency
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

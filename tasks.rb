@@ -218,9 +218,6 @@ def create_hpxmls
     'base-hvac-central-ac-only-2-speed.xml' => 'base.xml',
     'base-hvac-central-ac-only-var-speed.xml' => 'base.xml',
     'base-hvac-central-ac-plus-air-to-air-heat-pump-heating.xml' => 'base-hvac-central-ac-only-1-speed.xml',
-    'base-hvac-chiller-only-ducted-seer.xml' => 'base-enclosure-attached-multifamily.xml',
-    'base-hvac-chiller-only-hydronic-seer.xml' => 'base-hvac-chiller-only-ducted-seer.xml',
-    'base-hvac-chiller-only-ducted-kw-per-ton.xml' => 'base-hvac-chiller-only-ducted-seer.xml',
     'base-hvac-dse.xml' => 'base.xml',
     'base-hvac-dual-fuel-air-to-air-heat-pump-1-speed.xml' => 'base-hvac-air-to-air-heat-pump-1-speed.xml',
     'base-hvac-dual-fuel-air-to-air-heat-pump-1-speed-electric.xml' => 'base-hvac-dual-fuel-air-to-air-heat-pump-1-speed.xml',
@@ -262,6 +259,12 @@ def create_hpxmls
     'base-hvac-room-ac-only.xml' => 'base.xml',
     'base-hvac-room-ac-only-33percent.xml' => 'base-hvac-room-ac-only.xml',
     'base-hvac-setpoints.xml' => 'base.xml',
+    'base-hvac-shared-boiler-gas-only-baseboard.xml' => 'base-enclosure-attached-multifamily.xml',
+    'base-hvac-shared-boiler-gas-only-baseboard-detailed.xml' => 'base-hvac-shared-boiler-gas-only-baseboard.xml',
+    'base-hvac-shared-boiler-gas-only-fan-coil.xml' => 'base-hvac-shared-boiler-gas-only-baseboard.xml',
+    'base-hvac-shared-chiller-only-baseboard.xml' => 'base-enclosure-attached-multifamily.xml',
+    'base-hvac-shared-chiller-only-baseboard-detailed.xml' => 'base-hvac-shared-chiller-only-baseboard.xml',
+    'base-hvac-shared-chiller-only-fan-coil.xml' => 'base-hvac-shared-chiller-only-baseboard.xml',
     'base-hvac-stove-oil-only.xml' => 'base.xml',
     'base-hvac-stove-wood-pellets-only.xml' => 'base.xml',
     'base-hvac-undersized.xml' => 'base.xml',
@@ -326,6 +329,7 @@ def create_hpxmls
     'hvac_autosizing/base-hvac-mini-split-heat-pump-ducted-heating-only-autosize.xml' => 'base-hvac-mini-split-heat-pump-ducted-heating-only.xml',
     'hvac_autosizing/base-hvac-mini-split-heat-pump-ducted-cooling-only-autosize.xml' => 'base-hvac-mini-split-heat-pump-ducted-cooling-only.xml',
     'hvac_autosizing/base-hvac-room-ac-only-autosize.xml' => 'base-hvac-room-ac-only.xml',
+    'hvac_autosizing/base-hvac-shared-chiller-only-ducted-autosize.xml' => 'base-hvac-shared-chiller-only-fan-coil.xml',
     'hvac_autosizing/base-hvac-stove-oil-only-autosize.xml' => 'base-hvac-stove-oil-only.xml',
     'hvac_autosizing/base-hvac-wall-furnace-elec-only-autosize.xml' => 'base-hvac-wall-furnace-elec-only.xml',
   }
@@ -2419,7 +2423,6 @@ def set_hpxml_heating_systems(hpxml_file, hpxml)
          'base-hvac-central-ac-only-1-speed.xml',
          'base-hvac-central-ac-only-2-speed.xml',
          'base-hvac-central-ac-only-var-speed.xml',
-         'base-hvac-chiller-only-ducted-seer.xml',
          'base-hvac-evap-cooler-only.xml',
          'base-hvac-evap-cooler-only-ducted.xml',
          'base-hvac-ground-to-air-heat-pump.xml',
@@ -2428,28 +2431,42 @@ def set_hpxml_heating_systems(hpxml_file, hpxml)
          'base-hvac-ideal-air.xml',
          'base-hvac-none.xml',
          'base-hvac-room-ac-only.xml',
+         'base-hvac-shared-chiller-only-baseboard.xml',
          'invalid_files/orphaned-hvac-distribution.xml'].include? hpxml_file
     hpxml.heating_systems.clear
   elsif ['base-hvac-boiler-elec-only.xml'].include? hpxml_file
     hpxml.heating_systems[0].heating_system_type = HPXML::HVACTypeBoiler
     hpxml.heating_systems[0].heating_system_fuel = HPXML::FuelTypeElectricity
     hpxml.heating_systems[0].heating_efficiency_afue = 1
+    hpxml.heating_systems[0].is_shared_system = false
   elsif ['base-hvac-boiler-gas-central-ac-1-speed.xml',
          'base-hvac-boiler-gas-only.xml'].include? hpxml_file
     hpxml.heating_systems[0].heating_system_type = HPXML::HVACTypeBoiler
     hpxml.heating_systems[0].electric_auxiliary_energy = 200
+    hpxml.heating_systems[0].is_shared_system = false
+  elsif ['base-hvac-shared-boiler-gas-only-baseboard.xml'].include? hpxml_file
+    hpxml.heating_systems[0].heating_system_type = HPXML::HVACTypeBoiler
+    hpxml.heating_systems[0].is_shared_system = true
+  elsif ['base-hvac-shared-boiler-gas-only-baseboard-detailed.xml'].include? hpxml_file
+    hpxml.heating_systems[0].number_of_units_served = 5
+    hpxml.heating_systems[0].boiler_shared_pump_watts = 1500
+    hpxml.heating_systems[0].boiler_aux_in_watts = 300
   elsif ['base-hvac-boiler-oil-only.xml'].include? hpxml_file
     hpxml.heating_systems[0].heating_system_type = HPXML::HVACTypeBoiler
     hpxml.heating_systems[0].heating_system_fuel = HPXML::FuelTypeOil
+    hpxml.heating_systems[0].is_shared_system = false
   elsif ['base-hvac-boiler-propane-only.xml'].include? hpxml_file
     hpxml.heating_systems[0].heating_system_type = HPXML::HVACTypeBoiler
     hpxml.heating_systems[0].heating_system_fuel = HPXML::FuelTypePropane
+    hpxml.heating_systems[0].is_shared_system = false
   elsif ['base-hvac-boiler-coal-only.xml'].include? hpxml_file
     hpxml.heating_systems[0].heating_system_type = HPXML::HVACTypeBoiler
     hpxml.heating_systems[0].heating_system_fuel = HPXML::FuelTypeCoal
+    hpxml.heating_systems[0].is_shared_system = false
   elsif ['base-hvac-boiler-wood-only.xml'].include? hpxml_file
     hpxml.heating_systems[0].heating_system_type = HPXML::HVACTypeBoiler
     hpxml.heating_systems[0].heating_system_fuel = HPXML::FuelTypeWoodCord
+    hpxml.heating_systems[0].is_shared_system = false
   elsif ['base-hvac-elec-resistance-only.xml'].include? hpxml_file
     hpxml.heating_systems[0].distribution_system_idref = nil
     hpxml.heating_systems[0].heating_system_type = HPXML::HVACTypeElectricResistance
@@ -2490,7 +2507,8 @@ def set_hpxml_heating_systems(hpxml_file, hpxml)
                               heating_system_fuel: HPXML::FuelTypeElectricity,
                               heating_capacity: 6400,
                               heating_efficiency_afue: 1,
-                              fraction_heat_load_served: 0.1)
+                              fraction_heat_load_served: 0.1,
+                              is_shared_system: false)
     hpxml.heating_systems.add(id: 'HeatingSystem4',
                               distribution_system_idref: 'HVACDistribution4',
                               heating_system_type: HPXML::HVACTypeBoiler,
@@ -2498,7 +2516,8 @@ def set_hpxml_heating_systems(hpxml_file, hpxml)
                               heating_capacity: 6400,
                               heating_efficiency_afue: 0.92,
                               fraction_heat_load_served: 0.1,
-                              electric_auxiliary_energy: 200)
+                              electric_auxiliary_energy: 200,
+                              is_shared_system: false)
     hpxml.heating_systems.add(id: 'HeatingSystem5',
                               heating_system_type: HPXML::HVACTypeElectricResistance,
                               heating_system_fuel: HPXML::FuelTypeElectricity,
@@ -2542,7 +2561,8 @@ def set_hpxml_heating_systems(hpxml_file, hpxml)
                               heating_system_fuel: HPXML::FuelTypeElectricity,
                               heating_capacity: 6400,
                               heating_efficiency_afue: 1,
-                              fraction_heat_load_served: 0.2)
+                              fraction_heat_load_served: 0.2,
+                              is_shared_system: false)
     hpxml.heating_systems.add(id: 'HeatingSystem4',
                               heating_system_type: HPXML::HVACTypeElectricResistance,
                               heating_system_fuel: HPXML::FuelTypeElectricity,
@@ -2669,6 +2689,7 @@ def set_hpxml_cooling_systems(hpxml_file, hpxml)
          'base-hvac-mini-split-heat-pump-ducted.xml',
          'base-hvac-ideal-air.xml',
          'base-hvac-none.xml',
+         'base-hvac-shared-boiler-gas-only-baseboard.xml',
          'base-hvac-stove-oil-only.xml',
          'base-hvac-stove-wood-pellets-only.xml',
          'base-hvac-wall-furnace-elec-only.xml'].include? hpxml_file
@@ -2700,18 +2721,19 @@ def set_hpxml_cooling_systems(hpxml_file, hpxml)
     hpxml.cooling_systems[0].cooling_efficiency_eer = 8.5
     hpxml.cooling_systems[0].cooling_shr = 0.65
     hpxml.cooling_systems[0].compressor_type = nil
-  elsif ['base-hvac-chiller-only-ducted-seer.xml'].include? hpxml_file
+  elsif ['base-hvac-shared-chiller-only-baseboard.xml'].include? hpxml_file
     hpxml.cooling_systems[0].cooling_system_type = HPXML::HVACTypeChiller
+    hpxml.cooling_systems[0].is_shared_system = true
     hpxml.cooling_systems[0].cooling_efficiency_seer = 18
     hpxml.cooling_systems[0].cooling_shr = nil
     hpxml.cooling_systems[0].compressor_type = nil
-  elsif ['base-hvac-chiller-only-ducted-kw-per-ton.xml'].include? hpxml_file
+  elsif ['base-hvac-shared-chiller-only-baseboard-detailed.xml'].include? hpxml_file
     hpxml.cooling_systems[0].cooling_efficiency_seer = nil
     hpxml.cooling_systems[0].cooling_efficiency_kw_per_ton = 0.52
     hpxml.cooling_systems[0].number_of_units_served = 5
     hpxml.cooling_systems[0].building_cooling_capacity = 5 * hpxml.cooling_systems[0].cooling_capacity
-    hpxml.cooling_systems[0].aux_power = 1000
-    hpxml.cooling_systems[0].aux_power_dweq = 300
+    hpxml.cooling_systems[0].chiller_aux_watts = 1000
+    hpxml.cooling_systems[0].chiller_aux_dweq_watts = 300
   elsif ['base-hvac-room-ac-only-33percent.xml'].include? hpxml_file
     hpxml.cooling_systems[0].fraction_cool_load_served = 0.33
   elsif ['base-hvac-evap-cooler-only-ducted.xml',
@@ -3037,12 +3059,18 @@ def set_hpxml_hvac_distributions(hpxml_file, hpxml)
          'base-hvac-boiler-oil-only.xml',
          'base-hvac-boiler-propane-only.xml',
          'base-hvac-boiler-wood-only.xml',
-         'base-hvac-chiller-only-hydronic-seer.xml'].include? hpxml_file
+         'base-hvac-shared-boiler-gas-only-baseboard.xml',
+         'base-hvac-shared-chiller-only-baseboard.xml'].include? hpxml_file
     hpxml.hvac_distributions[0].distribution_system_type = HPXML::HVACDistributionTypeHydronic
+    hpxml.hvac_distributions[0].hydronic_distribution_type = HPXML::HydronicTypeBaseboard
     hpxml.hvac_distributions[0].duct_leakage_measurements.clear
     hpxml.hvac_distributions[0].ducts.clear
+  elsif ['base-hvac-shared-boiler-gas-only-fan-coil.xml',
+         'base-hvac-shared-chiller-only-fan-coil.xml'].include? hpxml_file
+    hpxml.hvac_distributions[0].hydronic_distribution_type = HPXML::HydronicTypeFanCoil
   elsif ['base-hvac-boiler-gas-central-ac-1-speed.xml'].include? hpxml_file
     hpxml.hvac_distributions[0].distribution_system_type = HPXML::HVACDistributionTypeHydronic
+    hpxml.hvac_distributions[0].hydronic_distribution_type = HPXML::HydronicTypeBaseboard
     hpxml.hvac_distributions[0].duct_leakage_measurements.clear
     hpxml.hvac_distributions[0].ducts.clear
     hpxml.hvac_distributions.add(id: 'HVACDistribution2',
@@ -3107,9 +3135,11 @@ def set_hpxml_hvac_distributions(hpxml_file, hpxml)
     hpxml.hvac_distributions << hpxml.hvac_distributions[0].dup
     hpxml.hvac_distributions[-1].id = 'HVACDistribution2'
     hpxml.hvac_distributions.add(id: 'HVACDistribution3',
-                                 distribution_system_type: HPXML::HVACDistributionTypeHydronic)
+                                 distribution_system_type: HPXML::HVACDistributionTypeHydronic,
+                                 hydronic_distribution_type: HPXML::HydronicTypeBaseboard)
     hpxml.hvac_distributions.add(id: 'HVACDistribution4',
-                                 distribution_system_type: HPXML::HVACDistributionTypeHydronic)
+                                 distribution_system_type: HPXML::HVACDistributionTypeHydronic,
+                                 hydronic_distribution_type: HPXML::HydronicTypeBaseboard)
     hpxml.hvac_distributions << hpxml.hvac_distributions[0].dup
     hpxml.hvac_distributions[-1].id = 'HVACDistribution5'
     hpxml.hvac_distributions << hpxml.hvac_distributions[0].dup
@@ -3145,7 +3175,8 @@ def set_hpxml_hvac_distributions(hpxml_file, hpxml)
     hpxml.hvac_distributions << hpxml.hvac_distributions[0].dup
     hpxml.hvac_distributions[-1].id = 'HVACDistribution2'
     hpxml.hvac_distributions.add(id: 'HVACDistribution3',
-                                 distribution_system_type: HPXML::HVACDistributionTypeHydronic)
+                                 distribution_system_type: HPXML::HVACDistributionTypeHydronic,
+                                 hydronic_distribution_type: HPXML::HydronicTypeBaseboard)
     hpxml.hvac_distributions << hpxml.hvac_distributions[0].dup
     hpxml.hvac_distributions[-1].id = 'HVACDistribution4'
     hpxml.hvac_distributions << hpxml.hvac_distributions[0].dup
@@ -3274,7 +3305,8 @@ def set_hpxml_hvac_distributions(hpxml_file, hpxml)
     end
   elsif ['invalid_files/hvac-invalid-distribution-system-type.xml'].include? hpxml_file
     hpxml.hvac_distributions.add(id: 'HVACDistribution2',
-                                 distribution_system_type: HPXML::HVACDistributionTypeHydronic)
+                                 distribution_system_type: HPXML::HVACDistributionTypeHydronic,
+                                 hydronic_distribution_type: HPXML::HydronicTypeBaseboard)
   elsif ['invalid_files/hvac-distribution-return-duct-leakage-missing.xml'].include? hpxml_file
     hpxml.hvac_distributions[0].ducts.add(duct_type: HPXML::DuctTypeReturn,
                                           duct_insulation_r_value: 0,

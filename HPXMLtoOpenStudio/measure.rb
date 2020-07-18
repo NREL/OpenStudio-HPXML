@@ -2225,7 +2225,7 @@ class OSModel
     hvac_distribution_type_map = { HPXML::HVACTypeFurnace => [HPXML::HVACDistributionTypeAir, HPXML::HVACDistributionTypeDSE],
                                    HPXML::HVACTypeBoiler => [HPXML::HVACDistributionTypeHydronic, HPXML::HVACDistributionTypeDSE],
                                    HPXML::HVACTypeCentralAirConditioner => [HPXML::HVACDistributionTypeAir, HPXML::HVACDistributionTypeDSE],
-                                   HPXML::HVACTypeChiller => [HPXML::HVACDistributionTypeAir, HPXML::HVACDistributionTypeHydronic, HPXML::HVACDistributionTypeDSE],
+                                   HPXML::HVACTypeChiller => [HPXML::HVACDistributionTypeHydronic, HPXML::HVACDistributionTypeDSE],
                                    HPXML::HVACTypeEvaporativeCooler => [HPXML::HVACDistributionTypeAir, HPXML::HVACDistributionTypeDSE],
                                    HPXML::HVACTypeMiniSplitAirConditioner => [HPXML::HVACDistributionTypeAir, HPXML::HVACDistributionTypeDSE],
                                    HPXML::HVACTypeHeatPumpAirToAir => [HPXML::HVACDistributionTypeAir, HPXML::HVACDistributionTypeDSE],
@@ -2443,18 +2443,10 @@ class OSModel
 
     @hpxml.heating_systems.each do |heating_system|
       next unless heating_system.fraction_heat_load_served > 0
+      next unless [HPXML::HVACTypeFurnace, HPXML::HVACTypeWallFurnace, HPXML::HVACTypeFloorFurnace, HPXML::HVACTypeStove, HPXML::HVACTypeBoiler].include? heating_system.heating_system_type
+      next unless heating_system.heating_system_fuel != HPXML::FuelTypeElectricity
 
-      htg_type = heating_system.heating_system_type
-      next unless [HPXML::HVACTypeFurnace, HPXML::HVACTypeWallFurnace, HPXML::HVACTypeFloorFurnace, HPXML::HVACTypeStove, HPXML::HVACTypeBoiler].include? htg_type
-
-      fuel = heating_system.heating_system_fuel
-      next if fuel == HPXML::FuelTypeElectricity
-
-      fuel_eae = heating_system.electric_auxiliary_energy
-      load_frac = heating_system.fraction_heat_load_served
-      sys_id = heating_system.id
-
-      HVAC.apply_eae_to_heating_fan(runner, @hvac_map[sys_id], fuel_eae, fuel, load_frac, htg_type)
+      HVAC.apply_eae_to_heating_fan(runner, @hvac_map[heating_system.id], heating_system)
     end
   end
 

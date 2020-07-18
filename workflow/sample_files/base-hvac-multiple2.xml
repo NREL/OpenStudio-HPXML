@@ -335,6 +335,7 @@
             <HeatingSystem>
               <SystemIdentifier id='HeatingSystem3'/>
               <DistributionSystem idref='HVACDistribution3'/>
+              <IsSharedSystem>false</IsSharedSystem>
               <HeatingSystemType>
                 <Boiler/>
               </HeatingSystemType>
@@ -544,7 +545,9 @@
           <HVACDistribution>
             <SystemIdentifier id='HVACDistribution3'/>
             <DistributionSystemType>
-              <HydronicDistribution/>
+              <HydronicDistribution>
+                <HydronicDistributionType>baseboard</HydronicDistributionType>
+              </HydronicDistribution>
             </DistributionSystemType>
           </HVACDistribution>
           <HVACDistribution>

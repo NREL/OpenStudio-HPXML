@@ -110,6 +110,9 @@ class HPXML < Object
   FuelTypePropane = 'propane'
   FuelTypeWoodCord = 'wood'
   FuelTypeWoodPellets = 'wood pellets'
+  HeaterTypeElectricResistance = 'electric resistance'
+  HeaterTypeGas = 'gas fired'
+  HeaterTypeHeatPump = 'heat pump'
   HVACCompressorTypeSingleStage = 'single stage'
   HVACCompressorTypeTwoStage = 'two stage'
   HVACCompressorTypeVariableSpeed = 'variable speed'
@@ -135,6 +138,12 @@ class HPXML < Object
   HVACTypeRoomAirConditioner = 'room air conditioner'
   HVACTypeStove = 'Stove'
   HVACTypeWallFurnace = 'WallFurnace'
+  HydronicTypeBaseboard = 'baseboard'
+  HydronicTypeFanCoil = 'fan coil'
+  HydronicTypeRadiantCeiling = 'radiant ceiling'
+  HydronicTypeRadiantFloor = 'radiant floor'
+  HydronicTypeRadiator = 'radiator'
+  HydronicTypeWaterLoopHeatPump = 'water loop heat pump'
   LeakinessTight = 'tight'
   LeakinessAverage = 'average'
   LightingTypeCFL = 'CompactFluorescent'
@@ -183,9 +192,6 @@ class HPXML < Object
   PlugLoadTypeOther = 'other'
   PlugLoadTypeTelevision = 'TV other'
   PlugLoadTypeWellPump = 'well pump'
-  HeaterTypeElectricResistance = 'electric resistance'
-  HeaterTypeGas = 'gas fired'
-  HeaterTypeHeatPump = 'heat pump'
   PVModuleTypePremium = 'premium'
   PVModuleTypeStandard = 'standard'
   PVModuleTypeThinFilm = 'thin film'
@@ -724,7 +730,7 @@ class HPXML < Object
       XMLHelper.add_element(software_info, 'SoftwareProgramUsed', @software_program_used) unless @software_program_used.nil?
       XMLHelper.add_element(software_info, 'SoftwareProgramVersion', software_program_version) unless software_program_version.nil?
       extension = XMLHelper.add_element(software_info, 'extension')
-      XMLHelper.add_element(extension, 'ApplyASHRAE140Assumptions', to_bool_or_nil(@apply_ashrae140_assumptions)) unless @apply_ashrae140_assumptions.nil?
+      XMLHelper.add_element(extension, 'ApplyASHRAE140Assumptions', to_boolean_or_nil(@apply_ashrae140_assumptions)) unless @apply_ashrae140_assumptions.nil?
       if (not @eri_calculation_version.nil?) || (not @eri_design.nil?)
         eri_calculation = XMLHelper.add_element(extension, 'ERICalculation')
         XMLHelper.add_element(eri_calculation, 'Version', @eri_calculation_version) unless @eri_calculation_version.nil?
@@ -739,7 +745,7 @@ class HPXML < Object
         XMLHelper.add_element(simulation_control, 'EndDayOfMonth', to_integer_or_nil(@sim_end_day_of_month)) unless @sim_end_day_of_month.nil?
         if (not @dst_enabled.nil?) || (not @dst_begin_month.nil?) || (not @dst_begin_day_of_month.nil?) || (not @dst_end_month.nil?) || (not @dst_end_day_of_month.nil?)
           daylight_saving = XMLHelper.add_element(simulation_control, 'DaylightSaving')
-          XMLHelper.add_element(daylight_saving, 'Enabled', to_bool_or_nil(@dst_enabled)) unless @dst_enabled.nil?
+          XMLHelper.add_element(daylight_saving, 'Enabled', to_boolean_or_nil(@dst_enabled)) unless @dst_enabled.nil?
           XMLHelper.add_element(daylight_saving, 'BeginMonth', to_integer_or_nil(@dst_begin_month)) unless @dst_begin_month.nil?
           XMLHelper.add_element(daylight_saving, 'BeginDayOfMonth', to_integer_or_nil(@dst_begin_day_of_month)) unless @dst_begin_day_of_month.nil?
           XMLHelper.add_element(daylight_saving, 'EndMonth', to_integer_or_nil(@dst_end_month)) unless @dst_end_month.nil?
@@ -780,12 +786,12 @@ class HPXML < Object
       @sim_begin_day_of_month = to_integer_or_nil(XMLHelper.get_value(hpxml, 'SoftwareInfo/extension/SimulationControl/BeginDayOfMonth'))
       @sim_end_month = to_integer_or_nil(XMLHelper.get_value(hpxml, 'SoftwareInfo/extension/SimulationControl/EndMonth'))
       @sim_end_day_of_month = to_integer_or_nil(XMLHelper.get_value(hpxml, 'SoftwareInfo/extension/SimulationControl/EndDayOfMonth'))
-      @dst_enabled = to_bool_or_nil(XMLHelper.get_value(hpxml, 'SoftwareInfo/extension/SimulationControl/DaylightSaving/Enabled'))
+      @dst_enabled = to_boolean_or_nil(XMLHelper.get_value(hpxml, 'SoftwareInfo/extension/SimulationControl/DaylightSaving/Enabled'))
       @dst_begin_month = to_integer_or_nil(XMLHelper.get_value(hpxml, 'SoftwareInfo/extension/SimulationControl/DaylightSaving/BeginMonth'))
       @dst_begin_day_of_month = to_integer_or_nil(XMLHelper.get_value(hpxml, 'SoftwareInfo/extension/SimulationControl/DaylightSaving/BeginDayOfMonth'))
       @dst_end_month = to_integer_or_nil(XMLHelper.get_value(hpxml, 'SoftwareInfo/extension/SimulationControl/DaylightSaving/EndMonth'))
       @dst_end_day_of_month = to_integer_or_nil(XMLHelper.get_value(hpxml, 'SoftwareInfo/extension/SimulationControl/DaylightSaving/EndDayOfMonth'))
-      @apply_ashrae140_assumptions = to_bool_or_nil(XMLHelper.get_value(hpxml, 'SoftwareInfo/extension/ApplyASHRAE140Assumptions'))
+      @apply_ashrae140_assumptions = to_boolean_or_nil(XMLHelper.get_value(hpxml, 'SoftwareInfo/extension/ApplyASHRAE140Assumptions'))
       @building_id = HPXML::get_id(hpxml, 'Building/BuildingID')
       @event_type = XMLHelper.get_value(hpxml, 'Building/ProjectStatus/EventType')
       @state_code = XMLHelper.get_value(hpxml, 'Building/Site/Address/StateCode')
@@ -925,7 +931,7 @@ class HPXML < Object
       XMLHelper.add_element(building_construction, 'ConditionedFloorArea', to_float(@conditioned_floor_area)) unless @conditioned_floor_area.nil?
       XMLHelper.add_element(building_construction, 'ConditionedBuildingVolume', to_float(@conditioned_building_volume)) unless @conditioned_building_volume.nil?
       HPXML::add_extension(parent: building_construction,
-                           extensions: { 'UseOnlyIdealAirSystem' => to_bool_or_nil(@use_only_ideal_air_system) })
+                           extensions: { 'UseOnlyIdealAirSystem' => to_boolean_or_nil(@use_only_ideal_air_system) })
     end
 
     def from_oga(hpxml)
@@ -942,7 +948,7 @@ class HPXML < Object
       @number_of_bathrooms = to_integer_or_nil(XMLHelper.get_value(building_construction, 'NumberofBathrooms'))
       @conditioned_floor_area = to_float_or_nil(XMLHelper.get_value(building_construction, 'ConditionedFloorArea'))
       @conditioned_building_volume = to_float_or_nil(XMLHelper.get_value(building_construction, 'ConditionedBuildingVolume'))
-      @use_only_ideal_air_system = to_bool_or_nil(XMLHelper.get_value(building_construction, 'extension/UseOnlyIdealAirSystem'))
+      @use_only_ideal_air_system = to_boolean_or_nil(XMLHelper.get_value(building_construction, 'extension/UseOnlyIdealAirSystem'))
       @residential_facility_type = XMLHelper.get_value(building_construction, 'ResidentialFacilityType')
     end
   end
@@ -1178,7 +1184,7 @@ class HPXML < Object
         @vented_attic_sla = to_float_or_nil(XMLHelper.get_value(attic, "VentilationRate[UnitofMeasure='SLA']/Value"))
         @vented_attic_ach = to_float_or_nil(XMLHelper.get_value(attic, "VentilationRate[UnitofMeasure='ACHnatural']/Value"))
       end
-      @within_infiltration_volume = to_bool_or_nil(XMLHelper.get_value(attic, 'WithinInfiltrationVolume'))
+      @within_infiltration_volume = to_boolean_or_nil(XMLHelper.get_value(attic, 'WithinInfiltrationVolume'))
       @attached_to_roof_idrefs = []
       XMLHelper.get_elements(attic, 'AttachedToRoof').each do |roof|
         @attached_to_roof_idrefs << HPXML::get_idref(roof)
@@ -1344,7 +1350,7 @@ class HPXML < Object
       elsif @foundation_type == FoundationTypeBasementUnconditioned
         @unconditioned_basement_thermal_boundary = XMLHelper.get_value(foundation, 'ThermalBoundary')
       end
-      @within_infiltration_volume = to_bool_or_nil(XMLHelper.get_value(foundation, 'WithinInfiltrationVolume'))
+      @within_infiltration_volume = to_boolean_or_nil(XMLHelper.get_value(foundation, 'WithinInfiltrationVolume'))
       @attached_to_slab_idrefs = []
       XMLHelper.get_elements(foundation, 'AttachedToSlab').each do |slab|
         @attached_to_slab_idrefs << HPXML::get_idref(slab)
@@ -1471,7 +1477,7 @@ class HPXML < Object
       @solar_absorptance = to_float_or_nil(XMLHelper.get_value(roof, 'SolarAbsorptance'))
       @emittance = to_float_or_nil(XMLHelper.get_value(roof, 'Emittance'))
       @pitch = to_float_or_nil(XMLHelper.get_value(roof, 'Pitch'))
-      @radiant_barrier = to_bool_or_nil(XMLHelper.get_value(roof, 'RadiantBarrier'))
+      @radiant_barrier = to_boolean_or_nil(XMLHelper.get_value(roof, 'RadiantBarrier'))
       insulation = XMLHelper.get_element(roof, 'Insulation')
       if not insulation.nil?
         @insulation_id = HPXML::get_id(insulation)
@@ -1690,7 +1696,7 @@ class HPXML < Object
       @exterior_adjacent_to = XMLHelper.get_value(wall, 'ExteriorAdjacentTo')
       @interior_adjacent_to = XMLHelper.get_value(wall, 'InteriorAdjacentTo')
       @wall_type = XMLHelper.get_child_name(wall, 'WallType')
-      @optimum_value_engineering = to_bool_or_nil(XMLHelper.get_value(wall, 'WallType/WoodStud/OptimumValueEngineering'))
+      @optimum_value_engineering = to_boolean_or_nil(XMLHelper.get_value(wall, 'WallType/WoodStud/OptimumValueEngineering'))
       @area = to_float_or_nil(XMLHelper.get_value(wall, 'Area'))
       @orientation = XMLHelper.get_value(wall, 'Orientation')
       @azimuth = to_integer_or_nil(XMLHelper.get_value(wall, 'Azimuth'))
@@ -2081,7 +2087,7 @@ class HPXML < Object
       @exposed_perimeter = to_float_or_nil(XMLHelper.get_value(slab, 'ExposedPerimeter'))
       @perimeter_insulation_depth = to_float_or_nil(XMLHelper.get_value(slab, 'PerimeterInsulationDepth'))
       @under_slab_insulation_width = to_float_or_nil(XMLHelper.get_value(slab, 'UnderSlabInsulationWidth'))
-      @under_slab_insulation_spans_entire_slab = to_bool_or_nil(XMLHelper.get_value(slab, 'UnderSlabInsulationSpansEntireSlab'))
+      @under_slab_insulation_spans_entire_slab = to_boolean_or_nil(XMLHelper.get_value(slab, 'UnderSlabInsulationSpansEntireSlab'))
       @depth_below_grade = to_float_or_nil(XMLHelper.get_value(slab, 'DepthBelowGrade'))
       @carpet_fraction = to_float_or_nil(XMLHelper.get_value(slab, 'extension/CarpetFraction'))
       @carpet_r_value = to_float_or_nil(XMLHelper.get_value(slab, 'extension/CarpetRValue'))
@@ -2208,7 +2214,7 @@ class HPXML < Object
       @azimuth = to_integer_or_nil(XMLHelper.get_value(window, 'Azimuth'))
       @orientation = XMLHelper.get_value(window, 'Orientation')
       @frame_type = XMLHelper.get_child_name(window, 'FrameType')
-      @aluminum_thermal_break = to_bool_or_nil(XMLHelper.get_value(window, 'FrameType/Aluminum/ThermalBreak'))
+      @aluminum_thermal_break = to_boolean_or_nil(XMLHelper.get_value(window, 'FrameType/Aluminum/ThermalBreak'))
       @glass_layers = XMLHelper.get_value(window, 'GlassLayers')
       @glass_type = XMLHelper.get_value(window, 'GlassType')
       @gas_fill = XMLHelper.get_value(window, 'GasFill')
@@ -2314,7 +2320,7 @@ class HPXML < Object
       @azimuth = to_integer_or_nil(XMLHelper.get_value(skylight, 'Azimuth'))
       @orientation = XMLHelper.get_value(skylight, 'Orientation')
       @frame_type = XMLHelper.get_child_name(skylight, 'FrameType')
-      @aluminum_thermal_break = to_bool_or_nil(XMLHelper.get_value(skylight, 'FrameType/Aluminum/ThermalBreak'))
+      @aluminum_thermal_break = to_boolean_or_nil(XMLHelper.get_value(skylight, 'FrameType/Aluminum/ThermalBreak'))
       @glass_layers = XMLHelper.get_value(skylight, 'GlassLayers')
       @glass_type = XMLHelper.get_value(skylight, 'GlassType')
       @gas_fill = XMLHelper.get_value(skylight, 'GasFill')
@@ -2431,7 +2437,8 @@ class HPXML < Object
     ATTRS = [:id, :distribution_system_idref, :year_installed, :heating_system_type,
              :heating_system_fuel, :heating_capacity, :heating_efficiency_afue,
              :heating_efficiency_percent, :fraction_heat_load_served, :electric_auxiliary_energy,
-             :heating_cfm, :energy_star, :seed_id]
+             :heating_cfm, :energy_star, :seed_id, :is_shared_system,
+             :boiler_shared_pump_watts, :boiler_aux_in_watts, :number_of_units_served]
     attr_accessor(*ATTRS)
 
     def distribution_system
@@ -2482,12 +2489,21 @@ class HPXML < Object
         distribution_system = XMLHelper.add_element(heating_system, 'DistributionSystem')
         XMLHelper.add_attribute(distribution_system, 'idref', @distribution_system_idref)
       end
+      XMLHelper.add_element(heating_system, 'IsSharedSystem', to_boolean(@is_shared_system)) unless @is_shared_system.nil?
+      XMLHelper.add_element(heating_system, 'NumberofUnitsServed', to_integer(@number_of_units_served)) unless @number_of_units_served.nil?
       if not @heating_system_type.nil?
         heating_system_type_e = XMLHelper.add_element(heating_system, 'HeatingSystemType')
         XMLHelper.add_element(heating_system_type_e, @heating_system_type)
       end
       XMLHelper.add_element(heating_system, 'HeatingSystemFuel', @heating_system_fuel) unless @heating_system_fuel.nil?
-      XMLHelper.add_element(heating_system, 'HeatingCapacity', to_float(@heating_capacity)) unless @heating_capacity.nil?
+      if (@heating_system_type == HVACTypeBoiler) && @is_shared_system
+        if not heating_capacity.nil?
+          cap = XMLHelper.add_element(heating_system, 'HeatingCapacity', to_float(@heating_capacity))
+          XMLHelper.add_attribute(cap, 'scope', 'single unit')
+        end
+      else
+        XMLHelper.add_element(heating_system, 'HeatingCapacity', to_float(@heating_capacity)) unless @heating_capacity.nil?
+      end
 
       efficiency_units = nil
       efficiency_value = nil
@@ -2508,7 +2524,9 @@ class HPXML < Object
       XMLHelper.add_element(heating_system, 'ElectricAuxiliaryEnergy', to_float(@electric_auxiliary_energy)) unless @electric_auxiliary_energy.nil?
       HPXML::add_extension(parent: heating_system,
                            extensions: { 'HeatingFlowRate' => to_float_or_nil(@heating_cfm),
-                                         'SeedId' => @seed_id })
+                                         'SeedId' => @seed_id,
+                                         'BoilerSharedPumpWatts' => to_float_or_nil(@boiler_shared_pump_watts),
+                                         'BoilerAuxInWatts' => to_float_or_nil(@boiler_aux_in_watts) })
     end
 
     def from_oga(heating_system)
@@ -2517,6 +2535,8 @@ class HPXML < Object
       @id = HPXML::get_id(heating_system)
       @distribution_system_idref = HPXML::get_idref(XMLHelper.get_element(heating_system, 'DistributionSystem'))
       @year_installed = to_integer_or_nil(XMLHelper.get_value(heating_system, 'YearInstalled'))
+      @is_shared_system = to_boolean_or_nil(XMLHelper.get_value(heating_system, 'IsSharedSystem'))
+      @number_of_units_served = to_integer_or_nil(XMLHelper.get_value(heating_system, 'NumberofUnitsServed'))
       @heating_system_type = XMLHelper.get_child_name(heating_system, 'HeatingSystemType')
       @heating_system_fuel = XMLHelper.get_value(heating_system, 'HeatingSystemFuel')
       @heating_capacity = to_float_or_nil(XMLHelper.get_value(heating_system, 'HeatingCapacity'))
@@ -2530,6 +2550,8 @@ class HPXML < Object
       @heating_cfm = to_float_or_nil(XMLHelper.get_value(heating_system, 'extension/HeatingFlowRate'))
       @energy_star = XMLHelper.get_values(heating_system, 'ThirdPartyCertification').include?('Energy Star')
       @seed_id = XMLHelper.get_value(heating_system, 'extension/SeedId')
+      @boiler_shared_pump_watts = to_float_or_nil(XMLHelper.get_value(heating_system, 'extension/BoilerSharedPumpWatts'))
+      @boiler_aux_in_watts = to_float_or_nil(XMLHelper.get_value(heating_system, 'extension/BoilerAuxInWatts'))
     end
   end
 
@@ -2555,8 +2577,8 @@ class HPXML < Object
     ATTRS = [:id, :distribution_system_idref, :year_installed, :cooling_system_type,
              :cooling_system_fuel, :cooling_capacity, :compressor_type, :fraction_cool_load_served,
              :cooling_efficiency_seer, :cooling_efficiency_eer, :cooling_efficiency_kw_per_ton,
-             :cooling_shr, :cooling_cfm, :energy_star, :seed_id, :building_cooling_capacity,
-             :aux_power, :aux_power_dweq, :number_of_units_served]
+             :cooling_shr, :cooling_cfm, :energy_star, :seed_id, :is_shared_system,
+             :building_cooling_capacity, :chiller_aux_watts, :chiller_aux_dweq_watts, :number_of_units_served]
     attr_accessor(*ATTRS)
 
     def distribution_system
@@ -2607,6 +2629,7 @@ class HPXML < Object
         distribution_system = XMLHelper.add_element(cooling_system, 'DistributionSystem')
         XMLHelper.add_attribute(distribution_system, 'idref', @distribution_system_idref)
       end
+      XMLHelper.add_element(cooling_system, 'IsSharedSystem', to_boolean(@is_shared_system)) unless @is_shared_system.nil?
       XMLHelper.add_element(cooling_system, 'NumberofUnitsServed', to_integer(@number_of_units_served)) unless @number_of_units_served.nil?
       XMLHelper.add_element(cooling_system, 'CoolingSystemType', @cooling_system_type) unless @cooling_system_type.nil?
       XMLHelper.add_element(cooling_system, 'CoolingSystemFuel', @cooling_system_fuel) unless @cooling_system_fuel.nil?
@@ -2615,11 +2638,11 @@ class HPXML < Object
       else
         if not @cooling_capacity.nil?
           cap = XMLHelper.add_element(cooling_system, 'CoolingCapacity', to_float(@cooling_capacity))
-          XMLHelper.add_attribute(cap, 'scope', 'unit')
+          XMLHelper.add_attribute(cap, 'scope', 'single unit')
         end
         if not @building_cooling_capacity.nil?
           cap = XMLHelper.add_element(cooling_system, 'CoolingCapacity', to_float(@building_cooling_capacity))
-          XMLHelper.add_attribute(cap, 'scope', 'building')
+          XMLHelper.add_attribute(cap, 'scope', 'multiple units')
         end
       end
       XMLHelper.add_element(cooling_system, 'CompressorType', @compressor_type) unless @compressor_type.nil?
@@ -2652,8 +2675,8 @@ class HPXML < Object
       HPXML::add_extension(parent: cooling_system,
                            extensions: { 'CoolingFlowRate' => to_float_or_nil(@cooling_cfm),
                                          'SeedId' => @seed_id,
-                                         'AuxPower' => to_float_or_nil(@aux_power),
-                                         'AuxPowerDweq' => to_float_or_nil(@aux_power_dweq) })
+                                         'ChillerAuxWatts' => to_float_or_nil(@chiller_aux_watts),
+                                         'ChillerAuxDweqWatts' => to_float_or_nil(@chiller_aux_dweq_watts) })
     end
 
     def from_oga(cooling_system)
@@ -2662,14 +2685,15 @@ class HPXML < Object
       @id = HPXML::get_id(cooling_system)
       @distribution_system_idref = HPXML::get_idref(XMLHelper.get_element(cooling_system, 'DistributionSystem'))
       @year_installed = to_integer_or_nil(XMLHelper.get_value(cooling_system, 'YearInstalled'))
+      @is_shared_system = to_boolean_or_nil(XMLHelper.get_value(cooling_system, 'IsSharedSystem'))
       @number_of_units_served = to_integer_or_nil(XMLHelper.get_value(cooling_system, 'NumberofUnitsServed'))
       @cooling_system_type = XMLHelper.get_value(cooling_system, 'CoolingSystemType')
       @cooling_system_fuel = XMLHelper.get_value(cooling_system, 'CoolingSystemFuel')
       if @cooling_system_type != HVACTypeChiller
         @cooling_capacity = to_float_or_nil(XMLHelper.get_value(cooling_system, 'CoolingCapacity'))
       else
-        @cooling_capacity = to_float_or_nil(XMLHelper.get_value(cooling_system, 'CoolingCapacity[@scope="unit"]'))
-        @building_cooling_capacity = to_float_or_nil(XMLHelper.get_value(cooling_system, 'CoolingCapacity[@scope="building"]'))
+        @cooling_capacity = to_float_or_nil(XMLHelper.get_value(cooling_system, 'CoolingCapacity[@scope="single unit"]'))
+        @building_cooling_capacity = to_float_or_nil(XMLHelper.get_value(cooling_system, 'CoolingCapacity[@scope="multiple units"]'))
       end
       @compressor_type = XMLHelper.get_value(cooling_system, 'CompressorType')
       @fraction_cool_load_served = to_float_or_nil(XMLHelper.get_value(cooling_system, 'FractionCoolLoadServed'))
@@ -2685,8 +2709,8 @@ class HPXML < Object
       @cooling_cfm = to_float_or_nil(XMLHelper.get_value(cooling_system, 'extension/CoolingFlowRate'))
       @energy_star = XMLHelper.get_values(cooling_system, 'ThirdPartyCertification').include?('Energy Star')
       @seed_id = XMLHelper.get_value(cooling_system, 'extension/SeedId')
-      @aux_power = to_float_or_nil(XMLHelper.get_value(cooling_system, 'extension/AuxPower'))
-      @aux_power_dweq = to_float_or_nil(XMLHelper.get_value(cooling_system, 'extension/AuxPowerDweq'))
+      @chiller_aux_watts = to_float_or_nil(XMLHelper.get_value(cooling_system, 'extension/ChillerAuxWatts'))
+      @chiller_aux_dweq_watts = to_float_or_nil(XMLHelper.get_value(cooling_system, 'extension/ChillerAuxDweqWatts'))
     end
   end
 
@@ -2935,9 +2959,10 @@ class HPXML < Object
       @ducts = Ducts.new(hpxml_object)
       super(hpxml_object, *args)
     end
-    ATTRS = [:id, :distribution_system_type, :annual_heating_dse,
-             :annual_cooling_dse, :duct_system_sealed, :duct_leakage_testing_exemption,
-             :conditioned_floor_area_served, :number_of_return_registers]
+    ATTRS = [:id, :distribution_system_type, :annual_heating_dse, :annual_cooling_dse,
+             :duct_system_sealed, :duct_leakage_testing_exemption,
+             :conditioned_floor_area_served, :number_of_return_registers,
+             :hydronic_distribution_type]
     attr_accessor(*ATTRS)
     attr_reader(:duct_leakage_measurements, :ducts)
 
@@ -3017,14 +3042,17 @@ class HPXML < Object
       end
 
       air_distribution = XMLHelper.get_element(hvac_distribution, 'DistributionSystemType/AirDistribution')
-      return if air_distribution.nil?
+      hydronic_distribution = XMLHelper.get_element(hvac_distribution, 'DistributionSystemType/HydronicDistribution')
 
-      @duct_leakage_measurements.to_oga(air_distribution)
-      @ducts.to_oga(air_distribution)
-      XMLHelper.add_element(air_distribution, 'NumberofReturnRegisters', Integer(@number_of_return_registers)) unless @number_of_return_registers.nil?
-
-      HPXML::add_extension(parent: air_distribution,
-                           extensions: { 'DuctLeakageTestingExemption' => to_bool_or_nil(@duct_leakage_testing_exemption) })
+      if not air_distribution.nil?
+        @duct_leakage_measurements.to_oga(air_distribution)
+        @ducts.to_oga(air_distribution)
+        XMLHelper.add_element(air_distribution, 'NumberofReturnRegisters', Integer(@number_of_return_registers)) unless @number_of_return_registers.nil?
+        HPXML::add_extension(parent: air_distribution,
+                             extensions: { 'DuctLeakageTestingExemption' => to_boolean_or_nil(@duct_leakage_testing_exemption) })
+      elsif not hydronic_distribution.nil?
+        XMLHelper.add_element(hydronic_distribution, 'HydronicDistributionType', @hydronic_distribution_type) unless @hydronic_distribution_type.nil?
+      end
     end
 
     def from_oga(hvac_distribution)
@@ -3037,13 +3065,20 @@ class HPXML < Object
       end
       @annual_heating_dse = to_float_or_nil(XMLHelper.get_value(hvac_distribution, 'AnnualHeatingDistributionSystemEfficiency'))
       @annual_cooling_dse = to_float_or_nil(XMLHelper.get_value(hvac_distribution, 'AnnualCoolingDistributionSystemEfficiency'))
-      @duct_system_sealed = to_bool_or_nil(XMLHelper.get_value(hvac_distribution, 'HVACDistributionImprovement/DuctSystemSealed'))
+      @duct_system_sealed = to_boolean_or_nil(XMLHelper.get_value(hvac_distribution, 'HVACDistributionImprovement/DuctSystemSealed'))
       @conditioned_floor_area_served = to_float_or_nil(XMLHelper.get_value(hvac_distribution, 'ConditionedFloorAreaServed'))
-      @number_of_return_registers = to_integer_or_nil(XMLHelper.get_value(hvac_distribution, 'DistributionSystemType/AirDistribution/NumberofReturnRegisters'))
-      @duct_leakage_testing_exemption = to_bool_or_nil(XMLHelper.get_value(hvac_distribution, 'DistributionSystemType/AirDistribution/extension/DuctLeakageTestingExemption'))
 
-      @duct_leakage_measurements.from_oga(hvac_distribution)
-      @ducts.from_oga(hvac_distribution)
+      air_distribution = XMLHelper.get_element(hvac_distribution, 'DistributionSystemType/AirDistribution')
+      hydronic_distribution = XMLHelper.get_element(hvac_distribution, 'DistributionSystemType/HydronicDistribution')
+
+      if not air_distribution.nil?
+        @number_of_return_registers = to_integer_or_nil(XMLHelper.get_value(air_distribution, 'NumberofReturnRegisters'))
+        @duct_leakage_testing_exemption = to_boolean_or_nil(XMLHelper.get_value(air_distribution, 'extension/DuctLeakageTestingExemption'))
+        @duct_leakage_measurements.from_oga(hvac_distribution)
+        @ducts.from_oga(hvac_distribution)
+      elsif not hydronic_distribution.nil?
+        @hydronic_distribution_type = XMLHelper.get_value(hydronic_distribution, 'HydronicDistributionType')
+      end
     end
   end
 
@@ -3256,9 +3291,9 @@ class HPXML < Object
       @tested_flow_rate = to_float_or_nil(XMLHelper.get_value(ventilation_fan, 'TestedFlowRate'))
       @hours_in_operation = to_float_or_nil(XMLHelper.get_value(ventilation_fan, 'HoursInOperation'))
       @fan_location = XMLHelper.get_value(ventilation_fan, 'FanLocation')
-      @used_for_local_ventilation = to_bool_or_nil(XMLHelper.get_value(ventilation_fan, 'UsedForLocalVentilation'))
-      @used_for_whole_building_ventilation = to_bool_or_nil(XMLHelper.get_value(ventilation_fan, 'UsedForWholeBuildingVentilation'))
-      @used_for_seasonal_cooling_load_reduction = to_bool_or_nil(XMLHelper.get_value(ventilation_fan, 'UsedForSeasonalCoolingLoadReduction'))
+      @used_for_local_ventilation = to_boolean_or_nil(XMLHelper.get_value(ventilation_fan, 'UsedForLocalVentilation'))
+      @used_for_whole_building_ventilation = to_boolean_or_nil(XMLHelper.get_value(ventilation_fan, 'UsedForWholeBuildingVentilation'))
+      @used_for_seasonal_cooling_load_reduction = to_boolean_or_nil(XMLHelper.get_value(ventilation_fan, 'UsedForSeasonalCoolingLoadReduction'))
       @total_recovery_efficiency = to_float_or_nil(XMLHelper.get_value(ventilation_fan, 'TotalRecoveryEfficiency'))
       @total_recovery_efficiency_adjusted = to_float_or_nil(XMLHelper.get_value(ventilation_fan, 'AdjustedTotalRecoveryEfficiency'))
       @sensible_recovery_efficiency = to_float_or_nil(XMLHelper.get_value(ventilation_fan, 'SensibleRecoveryEfficiency'))
@@ -3362,7 +3397,7 @@ class HPXML < Object
       @energy_factor = to_float_or_nil(XMLHelper.get_value(water_heating_system, 'EnergyFactor'))
       @uniform_energy_factor = to_float_or_nil(XMLHelper.get_value(water_heating_system, 'UniformEnergyFactor'))
       @recovery_efficiency = to_float_or_nil(XMLHelper.get_value(water_heating_system, 'RecoveryEfficiency'))
-      @uses_desuperheater = to_bool_or_nil(XMLHelper.get_value(water_heating_system, 'UsesDesuperheater'))
+      @uses_desuperheater = to_boolean_or_nil(XMLHelper.get_value(water_heating_system, 'UsesDesuperheater'))
       @jacket_r_value = to_float_or_nil(XMLHelper.get_value(water_heating_system, 'WaterHeaterInsulation/Jacket/JacketRValue'))
       @related_hvac_idref = HPXML::get_idref(XMLHelper.get_element(water_heating_system, 'RelatedHVACSystem'))
       @energy_star = XMLHelper.get_values(water_heating_system, 'ThirdPartyCertification').include?('Energy Star')
@@ -3447,7 +3482,7 @@ class HPXML < Object
       @recirculation_branch_piping_length = to_float_or_nil(XMLHelper.get_value(hot_water_distribution, 'SystemType/Recirculation/BranchPipingLoopLength'))
       @recirculation_pump_power = to_float_or_nil(XMLHelper.get_value(hot_water_distribution, 'SystemType/Recirculation/PumpPower'))
       @dwhr_facilities_connected = XMLHelper.get_value(hot_water_distribution, 'DrainWaterHeatRecovery/FacilitiesConnected')
-      @dwhr_equal_flow = to_bool_or_nil(XMLHelper.get_value(hot_water_distribution, 'DrainWaterHeatRecovery/EqualFlow'))
+      @dwhr_equal_flow = to_boolean_or_nil(XMLHelper.get_value(hot_water_distribution, 'DrainWaterHeatRecovery/EqualFlow'))
       @dwhr_efficiency = to_float_or_nil(XMLHelper.get_value(hot_water_distribution, 'DrainWaterHeatRecovery/Efficiency'))
     end
   end
@@ -3495,7 +3530,7 @@ class HPXML < Object
 
       @id = HPXML::get_id(water_fixture)
       @water_fixture_type = XMLHelper.get_value(water_fixture, 'WaterFixtureType')
-      @low_flow = to_bool_or_nil(XMLHelper.get_value(water_fixture, 'LowFlow'))
+      @low_flow = to_boolean_or_nil(XMLHelper.get_value(water_fixture, 'LowFlow'))
     end
   end
 
@@ -3924,7 +3959,7 @@ class HPXML < Object
       @id = HPXML::get_id(refrigerator)
       @location = XMLHelper.get_value(refrigerator, 'Location')
       @rated_annual_kwh = to_float_or_nil(XMLHelper.get_value(refrigerator, 'RatedAnnualkWh'))
-      @primary_indicator = to_bool_or_nil(XMLHelper.get_value(refrigerator, 'PrimaryIndicator'))
+      @primary_indicator = to_boolean_or_nil(XMLHelper.get_value(refrigerator, 'PrimaryIndicator'))
       @adjusted_annual_kwh = to_float_or_nil(XMLHelper.get_value(refrigerator, 'extension/AdjustedAnnualkWh'))
       @usage_multiplier = to_float_or_nil(XMLHelper.get_value(refrigerator, 'extension/UsageMultiplier'))
       @weekday_fractions = XMLHelper.get_value(refrigerator, 'extension/WeekdayScheduleFractions')
@@ -4096,7 +4131,7 @@ class HPXML < Object
       @id = HPXML::get_id(cooking_range)
       @location = XMLHelper.get_value(cooking_range, 'Location')
       @fuel_type = XMLHelper.get_value(cooking_range, 'FuelType')
-      @is_induction = to_bool_or_nil(XMLHelper.get_value(cooking_range, 'IsInduction'))
+      @is_induction = to_boolean_or_nil(XMLHelper.get_value(cooking_range, 'IsInduction'))
       @usage_multiplier = to_float_or_nil(XMLHelper.get_value(cooking_range, 'extension/UsageMultiplier'))
       @weekday_fractions = XMLHelper.get_value(cooking_range, 'extension/WeekdayScheduleFractions')
       @weekend_fractions = XMLHelper.get_value(cooking_range, 'extension/WeekendScheduleFractions')
@@ -4145,7 +4180,7 @@ class HPXML < Object
       return if oven.nil?
 
       @id = HPXML::get_id(oven)
-      @is_convection = to_bool_or_nil(XMLHelper.get_value(oven, 'IsConvection'))
+      @is_convection = to_boolean_or_nil(XMLHelper.get_value(oven, 'IsConvection'))
     end
   end
 
@@ -4922,7 +4957,7 @@ def to_integer_or_nil(value)
   return to_integer(value)
 end
 
-def to_bool_or_nil(value)
+def to_boolean_or_nil(value)
   return if value.nil?
 
   return to_boolean(value)
