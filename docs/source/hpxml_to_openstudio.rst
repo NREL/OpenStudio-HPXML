@@ -25,7 +25,7 @@ The following building features/technologies are available for modeling via the 
 - HVAC
 
   - Heating Systems (Electric Resistance, Central/Wall/Floor Furnaces, Stoves, Boilers, Portable/Fixed Heaters, Fireplaces)
-  - Cooling Systems (Central Air Conditioners, Room Air Conditioners, Evaporative Coolers)
+  - Cooling Systems (Central Air Conditioners, Room Air Conditioners, Evaporative Coolers, Mini Split Air Conditioners)
   - Heat Pumps (Air Source, Mini Split, Ground Source, Dual-Fuel)
   - Setpoints
   - Ducts
@@ -490,6 +490,7 @@ CoolingSystemType        DistributionSystem                 CoolingSystemFuel  A
 central air conditioner  AirDistribution or DSE             electricity        SEER                     (optional)
 room air conditioner                                        electricity        EER                      (optional)
 evaporative cooler       AirDistribution or DSE (optional)  electricity
+mini-split               AirDistribution or DSE (optional)  electricity        SEER                     (optional)
 =======================  =================================  =================  =======================  ====================
 
 Central air conditioners can also have the ``CompressorType`` specified; if not provided, it is assumed as follows:
@@ -1042,7 +1043,30 @@ The fractions for a given location cannot sum to greater than 1.
 If the fractions sum to less than 1, the remainder is assumed to be incandescent lighting.
 Garage lighting values are ignored if the building has no garage.
 
-A ``extension/UsageMultiplier`` can also be optionally provided that scales energy usage; if not provided, it is assumed to be 1.0.
+Optional ``extension/InteriorUsageMultiplier``, ``extension/ExteriorUsageMultiplier``, and ``extension/GarageUsageMultiplier`` can be provided that scales energy usage; if not provided, they are assumed to be 1.0.
+
+An optional ``extension/ExteriorHolidayLighting`` can also be provided to define additional exterior holiday lighting; if not provided, none will be modeled. 
+If provided, child elements ``Load[Units='kWh/day']/Value``, ``PeriodBeginMonth``, ``PeriodBeginDayOfMonth``, ``PeriodEndMonth``, ``PeriodEndDayOfMonth``, ``WeekdayScheduleFractions``, and ``WeekendScheduleFractions`` can be optionally provided. 
+If the complete set of child elements is not provided, the following default values will be used.
+
+=============================================  ======================================================================================================
+Element Name                                   Default Value
+=============================================  ======================================================================================================
+Load[Units='kWh/day']/Value                    1.1 for SFD; 0.5 for SFA or MF  
+PeriodBeginMonth                               11  
+PeriodBeginDayOfMonth                          24  
+PeriodEndMonth                                 1  
+PeriodEndDayOfMonth                            6
+WeekdayScheduleFractions                       0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0.008, 0.098, 0.168, 0.194, 0.284, 0.192, 0.037, 0.019
+WeekendScheduleFractions                       0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0.008, 0.098, 0.168, 0.194, 0.284, 0.192, 0.037, 0.019
+=============================================  ======================================================================================================
+
+Finally, optional schedules can be defined:
+
+- **Interior**: Optional ``extension/InteriorWeekdayScheduleFractions``, ``extension/InteriorWeekendScheduleFractions``, and ``extension/InteriorMonthlyScheduleMultipliers`` can be provided; if not provided, values will be calculated using Lighting Calculation Option 2 (location-dependent lighting profile) of the `Building America House Simulation Protocols <https://www1.eere.energy.gov/buildings/publications/pdfs/building_america/house_simulation.pdf>`_.
+- **Garage**: Optional ``extension/GarageWeekdayScheduleFractions``, ``extension/GarageWeekendScheduleFractions``, and ``extension/GarageMonthlyScheduleMultipliers`` can be provided; if not provided, values from Appendix C Table 8 of the `Title 24 2016 Residential Alternative Calculation Method Reference Manual <https://ww2.energy.ca.gov/2015publications/CEC-400-2015-024/CEC-400-2015-024-CMF-REV2.pdf>`_ are used.
+- **Exterior**: Optional ``extension/ExteriorWeekdayScheduleFractions``, ``extension/ExteriorWeekendScheduleFractions``, and ``extension/ExteriorMonthlyScheduleMultipliers`` can be provided; if not provided, values from Appendix C Table 8 of the `Title 24 2016 Residential Alternative Calculation Method Reference Manual <https://ww2.energy.ca.gov/2015publications/CEC-400-2015-024/CEC-400-2015-024-CMF-REV2.pdf>`_ are used.
+
 
 HPXML Ceiling Fans
 ******************

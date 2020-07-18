@@ -303,31 +303,15 @@
       <Systems>
         <HVAC>
           <HVACPlant>
-            <HeatingSystem>
-              <SystemIdentifier id='HeatingSystem'/>
-              <DistributionSystem idref='HVACDistribution'/>
-              <HeatingSystemType>
-                <Furnace/>
-              </HeatingSystemType>
-              <HeatingSystemFuel>natural gas</HeatingSystemFuel>
-              <HeatingCapacity>64000.0</HeatingCapacity>
-              <AnnualHeatingEfficiency>
-                <Units>AFUE</Units>
-                <Value>0.92</Value>
-              </AnnualHeatingEfficiency>
-              <FractionHeatLoadServed>1.0</FractionHeatLoadServed>
-            </HeatingSystem>
             <CoolingSystem>
               <SystemIdentifier id='CoolingSystem'/>
-              <DistributionSystem idref='HVACDistribution'/>
-              <CoolingSystemType>central air conditioner</CoolingSystemType>
+              <CoolingSystemType>mini-split</CoolingSystemType>
               <CoolingSystemFuel>electricity</CoolingSystemFuel>
               <CoolingCapacity>48000.0</CoolingCapacity>
-              <CompressorType>single stage</CompressorType>
               <FractionCoolLoadServed>1.0</FractionCoolLoadServed>
               <AnnualCoolingEfficiency>
                 <Units>SEER</Units>
-                <Value>13.0</Value>
+                <Value>19.0</Value>
               </AnnualCoolingEfficiency>
               <SensibleHeatFraction>0.73</SensibleHeatFraction>
             </CoolingSystem>
@@ -338,42 +322,6 @@
             <SetpointTempHeatingSeason>68.0</SetpointTempHeatingSeason>
             <SetpointTempCoolingSeason>78.0</SetpointTempCoolingSeason>
           </HVACControl>
-          <HVACDistribution>
-            <SystemIdentifier id='HVACDistribution'/>
-            <DistributionSystemType>
-              <AirDistribution>
-                <DuctLeakageMeasurement>
-                  <DuctType>supply</DuctType>
-                  <DuctLeakage>
-                    <Units>CFM25</Units>
-                    <Value>75.0</Value>
-                    <TotalOrToOutside>to outside</TotalOrToOutside>
-                  </DuctLeakage>
-                </DuctLeakageMeasurement>
-                <DuctLeakageMeasurement>
-                  <DuctType>return</DuctType>
-                  <DuctLeakage>
-                    <Units>CFM25</Units>
-                    <Value>25.0</Value>
-                    <TotalOrToOutside>to outside</TotalOrToOutside>
-                  </DuctLeakage>
-                </DuctLeakageMeasurement>
-                <Ducts>
-                  <DuctType>supply</DuctType>
-                  <DuctInsulationRValue>4.0</DuctInsulationRValue>
-                  <DuctLocation>attic - unvented</DuctLocation>
-                  <DuctSurfaceArea>150.0</DuctSurfaceArea>
-                </Ducts>
-                <Ducts>
-                  <DuctType>return</DuctType>
-                  <DuctInsulationRValue>0.0</DuctInsulationRValue>
-                  <DuctLocation>attic - unvented</DuctLocation>
-                  <DuctSurfaceArea>50.0</DuctSurfaceArea>
-                </Ducts>
-              </AirDistribution>
-            </DistributionSystemType>
-            <ConditionedFloorAreaServed>2700.0</ConditionedFloorAreaServed>
-          </HVACDistribution>
         </HVAC>
         <WaterHeating>
           <WaterHeatingSystem>
@@ -408,9 +356,6 @@
             <WaterFixtureType>faucet</WaterFixtureType>
             <LowFlow>false</LowFlow>
           </WaterFixture>
-          <extension>
-            <WaterFixturesUsageMultiplier>0.9</WaterFixturesUsageMultiplier>
-          </extension>
         </WaterHeating>
       </Systems>
       <Appliances>
@@ -424,9 +369,6 @@
           <LabelAnnualGasCost>27.0</LabelAnnualGasCost>
           <LabelUsage>6.0</LabelUsage>
           <Capacity>3.2</Capacity>
-          <extension>
-            <UsageMultiplier>0.9</UsageMultiplier>
-          </extension>
         </ClothesWasher>
         <ClothesDryer>
           <SystemIdentifier id='ClothesDryer'/>
@@ -434,9 +376,6 @@
           <FuelType>electricity</FuelType>
           <CombinedEnergyFactor>3.73</CombinedEnergyFactor>
           <ControlType>timer</ControlType>
-          <extension>
-            <UsageMultiplier>0.9</UsageMultiplier>
-          </extension>
         </ClothesDryer>
         <Dishwasher>
           <SystemIdentifier id='Dishwasher'/>
@@ -447,27 +386,18 @@
           <LabelGasRate>1.09</LabelGasRate>
           <LabelAnnualGasCost>22.32</LabelAnnualGasCost>
           <LabelUsage>4.0</LabelUsage>
-          <extension>
-            <UsageMultiplier>0.9</UsageMultiplier>
-          </extension>
         </Dishwasher>
         <Refrigerator>
           <SystemIdentifier id='Refrigerator'/>
           <Location>living space</Location>
           <RatedAnnualkWh>650.0</RatedAnnualkWh>
           <PrimaryIndicator>true</PrimaryIndicator>
-          <extension>
-            <UsageMultiplier>0.9</UsageMultiplier>
-          </extension>
         </Refrigerator>
         <CookingRange>
           <SystemIdentifier id='Range'/>
           <Location>living space</Location>
           <FuelType>electricity</FuelType>
           <IsInduction>false</IsInduction>
-          <extension>
-            <UsageMultiplier>0.9</UsageMultiplier>
-          </extension>
         </CookingRange>
         <Oven>
           <SystemIdentifier id='Oven'/>
@@ -547,11 +477,6 @@
             <LightEmittingDiode/>
           </LightingType>
         </LightingGroup>
-        <extension>
-          <InteriorUsageMultiplier>0.9</InteriorUsageMultiplier>
-          <GarageUsageMultiplier>0.9</GarageUsageMultiplier>
-          <ExteriorUsageMultiplier>0.9</ExteriorUsageMultiplier>
-        </extension>
       </Lighting>
       <MiscLoads>
         <PlugLoad>
@@ -564,7 +489,6 @@
           <extension>
             <FracSensible>0.855</FracSensible>
             <FracLatent>0.045</FracLatent>
-            <UsageMultiplier>0.9</UsageMultiplier>
           </extension>
         </PlugLoad>
         <PlugLoad>
@@ -574,9 +498,6 @@
             <Units>kWh/year</Units>
             <Value>620.0</Value>
           </Load>
-          <extension>
-            <UsageMultiplier>0.9</UsageMultiplier>
-          </extension>
         </PlugLoad>
       </MiscLoads>
     </BuildingDetails>
