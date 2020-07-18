@@ -433,7 +433,7 @@ class HPXMLTest < MiniTest::Test
       if hpxml_path.include? 'ASHRAE_Standard_140'
         next if err_line.include?('SurfaceProperty:ExposedFoundationPerimeter') && err_line.include?('Total Exposed Perimeter is greater than the perimeter')
       end
-      # Stratified water heater bug in EnergyPlus; no way to prevent this via OS.
+      # FUTURE: Remove when https://github.com/NREL/EnergyPlus/issues/8163 is addressed
       if (hpxml.solar_thermal_systems.size > 0) || (hpxml.water_heating_systems.select { |wh| wh.water_heater_type == HPXML::WaterHeaterTypeHeatPump }.size > 0)
         next if err_line.include? 'More Additional Loss Coefficients were entered than the number of nodes; extra coefficients will not be used'
       end
@@ -443,7 +443,10 @@ class HPXMLTest < MiniTest::Test
       end
       next if err_line.include? 'Missing temperature setpoint for LeavingSetpointModulated mode' # These warnings are fine, simulation continues with assigning plant loop setpoint to boiler, which is the expected one
       if hpxml.cooling_systems.select { |c| c.cooling_system_type == HPXML::HVACTypeEvaporativeCooler }.size > 0
-        # Evap cooler model is not really using Controller:MechanicalVentilation object, so these warnings of ignoring some features are fine. OS requires a Controller:MechanicalVentilation to be attached to the oa controller, however, it's not required by E+, removing Controller:MechanicalVentilation from idf eliminates these two warnings. Question: Can OS allow removing it in the future?
+        # Evap cooler model is not really using Controller:MechanicalVentilation object, so these warnings of ignoring some features are fine.
+        # OS requires a Controller:MechanicalVentilation to be attached to the oa controller, however it's not required by E+.
+        # Manually removing Controller:MechanicalVentilation from idf eliminates these two warnings.
+        # FUTURE: Can we update OS to allow removing it?
         next if err_line.include?('Zone') && err_line.include?('is not accounted for by Controller:MechanicalVentilation object')
         next if err_line.include?('PEOPLE object for zone') && err_line.include?('is not accounted for by Controller:MechanicalVentilation object')
         # "The only valid controller type for an AirLoopHVAC is Controller:WaterCoil.", evap cooler doesn't need one.
@@ -455,7 +458,7 @@ class HPXMLTest < MiniTest::Test
       next if err_line.include?('Glycol: Temperature') && err_line.include?('out of range (too high) for fluid')
       next if err_line.include? 'Plant loop exceeding upper temperature limit'
       if hpxml.cooling_systems.select { |c| c.cooling_system_type == HPXML::HVACTypeRoomAirConditioner }.size > 0
-        next if err_line.include? 'GetDXCoils: Coil:Cooling:DX:SingleSpeed="ROOM AC CLG COIL" curve values' # TODO: Check w/ Jon
+        next if err_line.include? 'GetDXCoils: Coil:Cooling:DX:SingleSpeed="ROOM AC CLG COIL" curve values' # TODO: Double-check curves
       end
       next if err_line.include?('Foundation:Kiva') && err_line.include?('wall surfaces with more than four vertices') # TODO: Check alternative approach
       if hpxml_path.include?('base-simcontrol-timestep-10-mins.xml') || hpxml_path.include?('ASHRAE_Standard_140')
