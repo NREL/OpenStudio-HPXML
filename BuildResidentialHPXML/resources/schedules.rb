@@ -24,7 +24,7 @@ class ScheduleGenerator
   end
 
   def get_simulation_parameters
-    min_per_step = 1
+    min_per_step = 1 # FIXME: get min_per_step from hpxml, not model (since it hasn't been set yet)
     if @model.getSimulationControl.timestep.is_initialized
       min_per_step = 60 / @model.getSimulationControl.timestep.get.numberOfTimestepsPerHour
     end

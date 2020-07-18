@@ -639,7 +639,7 @@ class HPXML < Object
              :eri_design, :timestep, :building_id, :event_type, :state_code,
              :sim_begin_month, :sim_begin_day_of_month, :sim_end_month, :sim_end_day_of_month,
              :dst_enabled, :dst_begin_month, :dst_begin_day_of_month, :dst_end_month, :dst_end_day_of_month,
-             :apply_ashrae140_assumptions]
+             :apply_ashrae140_assumptions, :schedules_output_path]
     attr_accessor(*ATTRS)
 
     def check_for_errors
@@ -743,7 +743,10 @@ class HPXML < Object
           XMLHelper.add_element(daylight_saving, 'EndDayOfMonth', to_integer_or_nil(@dst_end_day_of_month)) unless @dst_end_day_of_month.nil?
         end
       end
-      if XMLHelper.get_element(extension, 'ERICalculation').nil? && XMLHelper.get_element(extension, 'SimulationControl').nil? && @apply_ashrae140_assumptions.nil?
+      if (not @schedules_output_path.nil?)
+        XMLHelper.add_element(extension, 'SchedulesOutputPath', @schedules_output_path) unless @schedules_output_path.nil?
+      end
+      if XMLHelper.get_element(extension, 'ERICalculation').nil? && XMLHelper.get_element(extension, 'SimulationControl').nil? && @apply_ashrae140_assumptions.nil? && @schedules_output_path.nil?
         extension.remove
       end
 
@@ -783,6 +786,7 @@ class HPXML < Object
       @dst_end_month = to_integer_or_nil(XMLHelper.get_value(hpxml, 'SoftwareInfo/extension/SimulationControl/DaylightSaving/EndMonth'))
       @dst_end_day_of_month = to_integer_or_nil(XMLHelper.get_value(hpxml, 'SoftwareInfo/extension/SimulationControl/DaylightSaving/EndDayOfMonth'))
       @apply_ashrae140_assumptions = to_bool_or_nil(XMLHelper.get_value(hpxml, 'SoftwareInfo/extension/ApplyASHRAE140Assumptions'))
+      @schedules_output_path = XMLHelper.get_value(hpxml, 'SoftwareInfo/extension/SchedulesOutputPath')
       @building_id = HPXML::get_id(hpxml, 'Building/BuildingID')
       @event_type = XMLHelper.get_value(hpxml, 'Building/ProjectStatus/EventType')
       @state_code = XMLHelper.get_value(hpxml, 'Building/Site/Address/StateCode')
@@ -872,7 +876,7 @@ class HPXML < Object
   end
 
   class BuildingOccupancy < BaseElement
-    ATTRS = [:number_of_residents, :schedules_output_path, :schedules_column_name]
+    ATTRS = [:number_of_residents, :schedules_column_name]
     attr_accessor(*ATTRS)
 
     def check_for_errors
@@ -886,8 +890,7 @@ class HPXML < Object
       building_occupancy = XMLHelper.create_elements_as_needed(doc, ['HPXML', 'Building', 'BuildingDetails', 'BuildingSummary', 'BuildingOccupancy'])
       XMLHelper.add_element(building_occupancy, 'NumberofResidents', to_float(@number_of_residents)) unless @number_of_residents.nil?
       HPXML::add_extension(parent: building_occupancy,
-                           extensions: { 'SchedulesOutputPath' => schedules_output_path,
-                                         'SchedulesColumnName' => schedules_column_name })
+                           extensions: { 'SchedulesColumnName' => schedules_column_name })
     end
 
     def from_oga(hpxml)
@@ -897,7 +900,6 @@ class HPXML < Object
       return if building_occupancy.nil?
 
       @number_of_residents = to_float_or_nil(XMLHelper.get_value(building_occupancy, 'NumberofResidents'))
-      @schedules_output_path = XMLHelper.get_value(building_occupancy, 'extension/SchedulesOutputPath')
       @schedules_column_name = XMLHelper.get_value(building_occupancy, 'extension/SchedulesColumnName')
     end
   end
@@ -3845,7 +3847,7 @@ class HPXML < Object
   class Refrigerator < BaseElement
     ATTRS = [:id, :location, :rated_annual_kwh, :adjusted_annual_kwh, :usage_multiplier, :primary_indicator,
              :weekday_fractions, :weekend_fractions, :monthly_multipliers,
-             :schedules_output_path, :schedules_column_name]
+             :schedules_column_name]
     attr_accessor(*ATTRS)
 
     def delete
@@ -3885,7 +3887,6 @@ class HPXML < Object
                                          'WeekdayScheduleFractions' => @weekday_fractions,
                                          'WeekendScheduleFractions' => @weekend_fractions,
                                          'MonthlyScheduleMultipliers' => @monthly_multipliers,
-                                         'SchedulesOutputPath' => @schedules_output_path,
                                          'SchedulesColumnName' => @schedules_column_name })
     end
 
@@ -3901,7 +3902,6 @@ class HPXML < Object
       @weekday_fractions = XMLHelper.get_value(refrigerator, 'extension/WeekdayScheduleFractions')
       @weekend_fractions = XMLHelper.get_value(refrigerator, 'extension/WeekendScheduleFractions')
       @monthly_multipliers = XMLHelper.get_value(refrigerator, 'extension/MonthlyScheduleMultipliers')
-      @schedules_output_path = XMLHelper.get_value(refrigerator, 'extension/SchedulesOutputPath')
       @schedules_column_name = XMLHelper.get_value(refrigerator, 'extension/SchedulesColumnName')
     end
   end

@@ -3663,8 +3663,12 @@ class HPXMLFile
     set_hot_tub(hpxml, runner, args)
 
     if args[:schedules_output_path].is_initialized
+      args[:schedules_output_path] = File.expand_path(args[:schedules_output_path].get)
+
       success = create_schedules(runner, model, weather, args)
       return false if not success
+
+      set_schedules(hpxml, runner, args)
     end
 
     # Check for errors in the HPXML object
@@ -3720,11 +3724,20 @@ class HPXMLFile
     return false if not success
 
     # export the schedule
-    output_path = File.expand_path(args[:schedules_output_path].get)
-    success = schedule_generator.export(output_path: output_path)
+    success = schedule_generator.export(output_path: args[:schedules_output_path])
     return false if not success
 
     return true
+  end
+
+  def self.set_schedules(hpxml, runner, args)
+    hpxml.header.schedules_output_path = args[:schedules_output_path]
+
+    hpxml.building_occupancy.schedules_column_name = 'occupants'
+
+    hpxml.refrigerators.each do |refrigerator|
+      refrigerator.schedules_column_name = 'refrigerator'
+    end
   end
 
   def self.set_header(hpxml, runner, args)
@@ -3819,8 +3832,6 @@ class HPXMLFile
     if args[:geometry_num_occupants] != Constants.Auto
       hpxml.building_occupancy.number_of_residents = args[:geometry_num_occupants]
     end
-    hpxml.building_occupancy.schedules_output_path = args[:schedules_output_path]
-    hpxml.building_occupancy.schedules_column_name = 'occupants'
   end
 
   def self.set_building_construction(hpxml, runner, args)
@@ -5250,9 +5261,7 @@ class HPXMLFile
                             usage_multiplier: usage_multiplier,
                             weekday_fractions: refrigerator_weekday_fractions,
                             weekend_fractions: refrigerator_weekend_fractions,
-                            monthly_multipliers: refrigerator_monthly_multipliers,
-                            schedules_output_path: args[:schedules_output_path],
-                            schedules_column_name: 'refrigerator')
+                            monthly_multipliers: refrigerator_monthly_multipliers)
   end
 
   def self.set_extra_refrigerator(hpxml, runner, args)
