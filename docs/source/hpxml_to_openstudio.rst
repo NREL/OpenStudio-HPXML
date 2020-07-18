@@ -1046,13 +1046,13 @@ Garage lighting values are ignored if the building has no garage.
 Optional ``extension/InteriorUsageMultiplier``, ``extension/ExteriorUsageMultiplier``, and ``extension/GarageUsageMultiplier`` can be provided that scales energy usage; if not provided, they are assumed to be 1.0.
 
 An optional ``extension/ExteriorHolidayLighting`` can also be provided to define additional exterior holiday lighting; if not provided, none will be modeled. 
-If provided, child elements ``Load[Units='kWh/day']/Value``, ``PeriodBeginMonth``, ``PeriodBeginDayOfMonth``, ``PeriodEndMonth``, ``PeriodEndDayOfMonth``, ``WeekdayScheduleFractions``, and ``WeekendScheduleFractions`` can be optionally provided. 
-If the complete set of child elements is not provided, the following default values will be used.
+If provided, child elements ``Load[Units='kWh/day']/Value``, ``PeriodBeginMonth``/``PeriodBeginDayOfMonth``, ``PeriodEndMonth``/``PeriodEndDayOfMonth``, ``WeekdayScheduleFractions``, and ``WeekendScheduleFractions`` can be optionally provided. 
+For the child elements not provided, the following default values will be used.
 
 =============================================  ======================================================================================================
 Element Name                                   Default Value
 =============================================  ======================================================================================================
-Load[Units='kWh/day']/Value                    1.1 for SFD; 0.5 for SFA or MF  
+Load[Units='kWh/day']/Value                    1.1 for single-family detached and 0.55 for others
 PeriodBeginMonth                               11  
 PeriodBeginDayOfMonth                          24  
 PeriodEndMonth                                 1  
