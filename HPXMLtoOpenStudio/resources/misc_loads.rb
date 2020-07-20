@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 class MiscLoads
-  def self.apply_plug(model, plug_load, obj_name, cfa, living_space)
+  def self.apply_plug(model, plug_load, obj_name, cfa, living_space, schedules_file)
     kwh = 0
     if not plug_load.nil?
       kwh = plug_load.kWh_per_year * plug_load.usage_multiplier
@@ -31,6 +31,11 @@ class MiscLoads
     end
 
     space_design_level = sch.calcDesignLevelFromDailykWh(kwh / 365.0)
+    sch = sch.schedule
+
+    if not plug_load.schedules_column_name.nil?
+      sch = schedules_file.create_schedule_file(col_name: plug_load.schedules_column_name)
+    end
 
     # Add electric equipment for the mel
     mel_def = OpenStudio::Model::ElectricEquipmentDefinition.new(model)
@@ -43,7 +48,7 @@ class MiscLoads
     mel_def.setFractionRadiant(0.6 * sens_frac)
     mel_def.setFractionLatent(lat_frac)
     mel_def.setFractionLost(1 - sens_frac - lat_frac)
-    mel.setSchedule(sch.schedule)
+    mel.setSchedule(sch)
   end
 
   def self.apply_fuel(model, fuel_load, obj_name, living_space)

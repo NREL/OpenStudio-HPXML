@@ -908,7 +908,7 @@ class OSModel
         fail 'Occupancy schedule inconsistent with hrs_per_day.'
       end
 
-      if not @hpxml.header.schedules_output_path.nil?
+      if not @hpxml.building_occupancy.schedules_column_name.nil?
         schedules_file = SchedulesFile.new(runner: runner, model: model, schedules_path: @hpxml.header.schedules_output_path)
         people_sch = schedules_file.create_schedule_file(col_name: @hpxml.building_occupancy.schedules_column_name)
       end
@@ -2236,6 +2236,10 @@ class OSModel
   end
 
   def self.add_mels(runner, model, spaces)
+    if not @hpxml.header.schedules_output_path.nil?
+      schedules_file = SchedulesFile.new(runner: runner, model: model, schedules_path: @hpxml.header.schedules_output_path)
+    end
+
     # Misc
     @hpxml.plug_loads.each do |plug_load|
       if plug_load.plug_load_type == HPXML::PlugLoadTypeOther
@@ -2252,7 +2256,7 @@ class OSModel
         next
       end
 
-      MiscLoads.apply_plug(model, plug_load, obj_name, @cfa, spaces[HPXML::LocationLivingSpace])
+      MiscLoads.apply_plug(model, plug_load, obj_name, @cfa, spaces[HPXML::LocationLivingSpace], schedules_file)
     end
   end
 

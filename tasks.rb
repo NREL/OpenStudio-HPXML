@@ -6281,6 +6281,8 @@ def set_hpxml_plug_loads(hpxml_file, hpxml)
     hpxml.plug_loads[0].weekday_fractions = nil
     hpxml.plug_loads[0].weekend_fractions = nil
     hpxml.plug_loads[0].monthly_multipliers = nil
+  elsif ['base-simcontrol-generated-schedule.xml'].include? hpxml_file
+    hpxml.plug_loads[0].schedules_column_name = 'plug_loads'
   end
 end
 

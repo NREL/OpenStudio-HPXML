@@ -4516,7 +4516,7 @@ class HPXML < Object
 
   class PlugLoad < BaseElement
     ATTRS = [:id, :plug_load_type, :kWh_per_year, :frac_sensible, :frac_latent, :usage_multiplier,
-             :weekday_fractions, :weekend_fractions, :monthly_multipliers, :location]
+             :weekday_fractions, :weekend_fractions, :monthly_multipliers, :location, :schedules_column_name]
     attr_accessor(*ATTRS)
 
     def delete
@@ -4548,7 +4548,8 @@ class HPXML < Object
                                          'UsageMultiplier' => to_float_or_nil(@usage_multiplier),
                                          'WeekdayScheduleFractions' => @weekday_fractions,
                                          'WeekendScheduleFractions' => @weekend_fractions,
-                                         'MonthlyScheduleMultipliers' => @monthly_multipliers })
+                                         'MonthlyScheduleMultipliers' => @monthly_multipliers,
+                                         'SchedulesColumnName' => @schedules_column_name })
     end
 
     def from_oga(plug_load)
@@ -4562,6 +4563,7 @@ class HPXML < Object
       @weekday_fractions = XMLHelper.get_value(plug_load, 'extension/WeekdayScheduleFractions')
       @weekend_fractions = XMLHelper.get_value(plug_load, 'extension/WeekendScheduleFractions')
       @monthly_multipliers = XMLHelper.get_value(plug_load, 'extension/MonthlyScheduleMultipliers')
+      @schedules_column_name = XMLHelper.get_value(plug_load, 'extension/SchedulesColumnName')
     end
   end
 

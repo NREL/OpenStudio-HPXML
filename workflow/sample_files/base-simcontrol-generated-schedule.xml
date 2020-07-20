@@ -548,6 +548,7 @@
           <extension>
             <FracSensible>0.855</FracSensible>
             <FracLatent>0.045</FracLatent>
+            <SchedulesColumnName>plug_loads</SchedulesColumnName>
           </extension>
         </PlugLoad>
         <PlugLoad>

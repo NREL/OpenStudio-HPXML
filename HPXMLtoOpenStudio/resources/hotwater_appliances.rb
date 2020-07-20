@@ -237,7 +237,7 @@ class HotWaterAndAppliances
       cook_design_level_f = cook_schedule.calcDesignLevelFromDailyTherm(cook_annual_therm / 365.0)
       cook_schedule = cook_schedule.schedule
 
-      if not schedules_file.nil?
+      if not cooking_range.schedules_column_name.nil?
         cook_schedule = schedules_file.create_schedule_file(col_name: cooking_range.schedules_column_name)
       end
 

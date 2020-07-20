@@ -3738,6 +3738,12 @@ class HPXMLFile
     hpxml.cooking_ranges.each do |cooking_range|
       cooking_range.schedules_column_name = 'cooking_range'
     end
+
+    hpxml.plug_loads.each do |plug_load|
+      next if plug_load.plug_load_type != HPXML::PlugLoadTypeOther
+
+      plug_load.schedules_column_name = 'plug_loads'
+    end
   end
 
   def self.set_header(hpxml, runner, args)
