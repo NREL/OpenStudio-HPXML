@@ -34,6 +34,7 @@ class MiscLoads
     sch = sch.schedule
 
     if not plug_load.schedules_column_name.nil?
+      space_design_level = schedules_file.calc_design_level_from_annual_kwh(col_name: plug_load.schedules_column_name, annual_kwh: kwh)
       sch = schedules_file.create_schedule_file(col_name: plug_load.schedules_column_name)
     end
 

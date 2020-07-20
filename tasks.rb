@@ -6210,6 +6210,11 @@ def set_hpxml_lighting_schedule(hpxml_file, hpxml)
     hpxml.lighting.holiday_period_end_day_of_month = 6
     hpxml.lighting.holiday_weekday_fractions = '0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.008, 0.098, 0.168, 0.194, 0.284, 0.192, 0.037, 0.019'
     hpxml.lighting.holiday_weekend_fractions = '0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.008, 0.098, 0.168, 0.194, 0.284, 0.192, 0.037, 0.019'
+  elsif ['base-simcontrol-generated-schedule.xml'].include? hpxml_file
+    hpxml.lighting.interior_schedules_column_name = 'lighting_interior'
+    hpxml.lighting.exterior_schedules_column_name = 'lighting_exterior'
+    hpxml.lighting.garage_schedules_column_name = 'lighting_garage'
+    hpxml.lighting.holiday_schedules_column_name = 'lighting_exterior_holiday'
   end
 end
 

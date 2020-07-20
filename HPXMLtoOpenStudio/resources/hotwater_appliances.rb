@@ -238,6 +238,8 @@ class HotWaterAndAppliances
       cook_schedule = cook_schedule.schedule
 
       if not cooking_range.schedules_column_name.nil?
+        cook_design_level_e = schedules_file.calc_design_level_from_annual_kwh(col_name: cooking_range.schedules_column_name, annual_kwh: cook_annual_kwh)
+        cook_design_level_f = schedules_file.calc_design_level_from_annual_therm(col_name: cooking_range.schedules_column_name, annual_therm: cook_annual_therm)
         cook_schedule = schedules_file.create_schedule_file(col_name: cooking_range.schedules_column_name)
       end
 

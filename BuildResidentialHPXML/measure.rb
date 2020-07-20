@@ -3739,6 +3739,11 @@ class HPXMLFile
       cooking_range.schedules_column_name = 'cooking_range'
     end
 
+    hpxml.lighting.interior_schedules_column_name = 'lighting_interior'
+    hpxml.lighting.exterior_schedules_column_name = 'lighting_exterior'
+    hpxml.lighting.garage_schedules_column_name = 'lighting_garage'
+    hpxml.lighting.holiday_schedules_column_name = 'lighting_exterior_holiday'
+
     hpxml.plug_loads.each do |plug_load|
       next if plug_load.plug_load_type != HPXML::PlugLoadTypeOther
 

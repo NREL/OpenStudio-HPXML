@@ -2280,8 +2280,12 @@ class OSModel
   end
 
   def self.add_lighting(runner, model, weather, spaces)
+    if not @hpxml.header.schedules_output_path.nil?
+      schedules_file = SchedulesFile.new(runner: runner, model: model, schedules_path: @hpxml.header.schedules_output_path)
+    end
+
     Lighting.apply(model, weather, spaces, @hpxml.lighting_groups,
-                   @hpxml.lighting, @eri_version)
+                   @hpxml.lighting, @eri_version, schedules_file)
   end
 
   def self.add_pools_and_hot_tubs(runner, model, spaces)

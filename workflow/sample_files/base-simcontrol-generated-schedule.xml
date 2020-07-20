@@ -536,6 +536,11 @@
             <LightEmittingDiode/>
           </LightingType>
         </LightingGroup>
+        <extension>
+          <InteriorSchedulesColumnName>lighting_interior</InteriorSchedulesColumnName>
+          <GarageSchedulesColumnName>lighting_garage</GarageSchedulesColumnName>
+          <ExteriorSchedulesColumnName>lighting_exterior</ExteriorSchedulesColumnName>
+        </extension>
       </Lighting>
       <MiscLoads>
         <PlugLoad>
