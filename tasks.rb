@@ -198,6 +198,7 @@ def create_osws
     'base-pv.osw' => 'base.osw',
     'base-simcontrol-daylight-saving-custom.osw' => 'base.osw',
     'base-simcontrol-daylight-saving-disabled.osw' => 'base.osw',
+    'base-simcontrol-generated-schedule.osw' => 'base.osw',
     'base-simcontrol-runperiod-1-month.osw' => 'base.osw',
     'base-simcontrol-timestep-10-mins.osw' => 'base.osw',
 
@@ -208,7 +209,6 @@ def create_osws
     'extra-second-refrigerator.osw' => 'base.osw',
     'extra-second-heating-system-portable-heater.osw' => 'base.osw',
     'extra-second-heating-system-fireplace.osw' => 'base.osw',
-    'extra-generated-schedule.osw' => 'base.osw',
 
     'invalid_files/non-electric-heat-pump-water-heater.osw' => 'base.osw',
     'invalid_files/multiple-heating-and-cooling-systems.osw' => 'base.osw',
@@ -1821,6 +1821,8 @@ def get_values(osw_file, step)
     step.setArgument('simulation_control_daylight_saving_end_day_of_month', 6)
   elsif ['base-simcontrol-daylight-saving-disabled.osw'].include? osw_file
     step.setArgument('simulation_control_daylight_saving_enabled', false)
+  elsif ['base-simcontrol-generated-schedule.osw'].include? osw_file
+    step.setArgument('schedules_output_path', 'BuildResidentialHPXML/resources/schedules/schedules.csv')
   elsif ['base-simcontrol-runperiod-1-month.osw'].include? osw_file
     step.setArgument('simulation_control_run_period_end_month', 1)
     step.setArgument('simulation_control_run_period_end_day_of_month', 31)
@@ -1865,8 +1867,6 @@ def get_values(osw_file, step)
     step.setArgument('heating_system_fraction_heat_load_served', 0.75)
     step.setArgument('heating_system_type_2', HPXML::HVACTypeFireplace)
     step.setArgument('heating_system_heating_capacity_2', '16000.0')
-  elsif ['extra-generated-schedule.osw'].include? osw_file
-    step.setArgument('schedules_output_path', 'BuildResidentialHPXML/tests/run/schedules.csv')
   elsif ['invalid_files/non-electric-heat-pump-water-heater.osw'].include? osw_file
     step.setArgument('water_heater_type', HPXML::WaterHeaterTypeHeatPump)
     step.setArgument('water_heater_fuel_type', HPXML::FuelTypeNaturalGas)
@@ -2203,6 +2203,7 @@ def create_hpxmls
     'base-pv.xml' => 'base.xml',
     'base-simcontrol-daylight-saving-custom.xml' => 'base.xml',
     'base-simcontrol-daylight-saving-disabled.xml' => 'base.xml',
+    'base-simcontrol-generated-schedule.xml' => 'base.xml',
     'base-simcontrol-runperiod-1-month.xml' => 'base.xml',
     'base-simcontrol-timestep-10-mins.xml' => 'base.xml',
     'base-misc-lighting-detailed.xml' => 'base.xml',
@@ -2384,6 +2385,8 @@ def set_hpxml_header(hpxml_file, hpxml)
     hpxml.header.dst_end_day_of_month = 6
   elsif ['base-simcontrol-daylight-saving-disabled.xml'].include? hpxml_file
     hpxml.header.dst_enabled = false
+  elsif ['base-simcontrol-generated-schedule.xml'].include? hpxml_file
+    hpxml.header.schedules_output_path = 'BuildResidentialHPXML/resources/schedules/schedules.csv'
   elsif ['base-simcontrol-timestep-10-mins.xml'].include? hpxml_file
     hpxml.header.timestep = 10
   elsif ['base-simcontrol-runperiod-1-month.xml'].include? hpxml_file
@@ -2496,6 +2499,8 @@ def set_hpxml_building_occupancy(hpxml_file, hpxml)
     hpxml.building_occupancy.number_of_residents = 0
   elsif ['base-misc-defaults.xml'].include? hpxml_file
     hpxml.building_occupancy.number_of_residents = nil
+  elsif ['base-simcontrol-generated-schedule.xml'].include? hpxml_file
+    hpxml.building_occupancy.schedules_column_name = 'occupants'
   else
     hpxml.building_occupancy.number_of_residents = hpxml.building_construction.number_of_bedrooms
   end
@@ -6060,6 +6065,8 @@ def set_hpxml_cooking_range(hpxml_file, hpxml)
   elsif ['base-enclosure-garage.xml',
          'invalid_files/cooking-range-location.xml'].include? hpxml_file
     hpxml.cooking_ranges[0].location = HPXML::LocationGarage
+  elsif ['base-simcontrol-generated-schedule.xml'].include? hpxml_file
+    hpxml.cooking_ranges[0].schedules_column_name = 'cooking_range'
   elsif ['invalid_files/appliances-location-unconditioned-space.xml'].include? hpxml_file
     hpxml.cooking_ranges[0].location = 'unconditioned space'
   elsif ['base-misc-defaults.xml'].include? hpxml_file

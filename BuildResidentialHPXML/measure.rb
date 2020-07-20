@@ -3663,7 +3663,7 @@ class HPXMLFile
     set_hot_tub(hpxml, runner, args)
 
     if args[:schedules_output_path].is_initialized
-      args[:schedules_output_path] = File.expand_path(args[:schedules_output_path].get)
+      args[:schedules_output_path] = args[:schedules_output_path].get
 
       success = create_schedules(runner, model, weather, args)
       return false if not success
@@ -3724,7 +3724,7 @@ class HPXMLFile
     return false if not success
 
     # export the schedule
-    success = schedule_generator.export(output_path: args[:schedules_output_path])
+    success = schedule_generator.export(output_path: File.expand_path(args[:schedules_output_path]))
     return false if not success
 
     return true
@@ -3735,8 +3735,8 @@ class HPXMLFile
 
     hpxml.building_occupancy.schedules_column_name = 'occupants'
 
-    hpxml.refrigerators.each do |refrigerator|
-      refrigerator.schedules_column_name = 'refrigerator'
+    hpxml.cooking_ranges.each do |cooking_range|
+      cooking_range.schedules_column_name = 'cooking_range'
     end
   end
 

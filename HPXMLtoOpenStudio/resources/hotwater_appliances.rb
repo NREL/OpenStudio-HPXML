@@ -6,7 +6,7 @@ class HotWaterAndAppliances
                  clothes_dryers, dishwashers, refrigerators,
                  freezers, cooking_ranges, ovens, fixtures_usage_multiplier,
                  water_fixtures, water_heating_systems, hot_water_distribution,
-                 solar_thermal_system, eri_version, dhw_map)
+                 solar_thermal_system, eri_version, dhw_map, schedules_file)
 
     # Map plant loops to sys_ids
     dhw_loops = {}
@@ -200,6 +200,7 @@ class HotWaterAndAppliances
 
         rf_space = refrigerator.additional_properties.space
         rf_space = living_space if rf_space.nil? # appliance is outdoors, so we need to assign the equipment to an arbitrary space
+
         add_electric_equipment(model, fridge_name, rf_space, fridge_design_level, rf_frac_sens, rf_frac_lat, fridge_schedule.schedule)
       end
     end
@@ -234,11 +235,16 @@ class HotWaterAndAppliances
       cook_schedule = MonthWeekdayWeekendSchedule.new(model, cook_name, cook_weekday_sch, cook_weekend_sch, cook_monthly_sch, 1.0, 1.0, true, true, Constants.ScheduleTypeLimitsFraction)
       cook_design_level_e = cook_schedule.calcDesignLevelFromDailykWh(cook_annual_kwh / 365.0)
       cook_design_level_f = cook_schedule.calcDesignLevelFromDailyTherm(cook_annual_therm / 365.0)
+      cook_schedule = cook_schedule.schedule
+
+      if not schedules_file.nil?
+        cook_schedule = schedules_file.create_schedule_file(col_name: cooking_range.schedules_column_name)
+      end
 
       cook_space = cooking_range.additional_properties.space
       cook_space = living_space if cook_space.nil? # appliance is outdoors, so we need to assign the equipment to an arbitrary space
-      add_electric_equipment(model, cook_name, cook_space, cook_design_level_e, cook_frac_sens, cook_frac_lat, cook_schedule.schedule)
-      add_other_equipment(model, cook_name, cook_space, cook_design_level_f, cook_frac_sens, cook_frac_lat, cook_schedule.schedule, cooking_range.fuel_type)
+      add_electric_equipment(model, cook_name, cook_space, cook_design_level_e, cook_frac_sens, cook_frac_lat, cook_schedule)
+      add_other_equipment(model, cook_name, cook_space, cook_design_level_f, cook_frac_sens, cook_frac_lat, cook_schedule, cooking_range.fuel_type)
     end
   end
 

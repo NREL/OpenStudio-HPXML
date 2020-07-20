@@ -3846,8 +3846,7 @@ class HPXML < Object
 
   class Refrigerator < BaseElement
     ATTRS = [:id, :location, :rated_annual_kwh, :adjusted_annual_kwh, :usage_multiplier, :primary_indicator,
-             :weekday_fractions, :weekend_fractions, :monthly_multipliers,
-             :schedules_column_name]
+             :weekday_fractions, :weekend_fractions, :monthly_multipliers]
     attr_accessor(*ATTRS)
 
     def delete
@@ -3886,8 +3885,7 @@ class HPXML < Object
                                          'UsageMultiplier' => to_float_or_nil(@usage_multiplier),
                                          'WeekdayScheduleFractions' => @weekday_fractions,
                                          'WeekendScheduleFractions' => @weekend_fractions,
-                                         'MonthlyScheduleMultipliers' => @monthly_multipliers,
-                                         'SchedulesColumnName' => @schedules_column_name })
+                                         'MonthlyScheduleMultipliers' => @monthly_multipliers })
     end
 
     def from_oga(refrigerator)
@@ -3902,7 +3900,6 @@ class HPXML < Object
       @weekday_fractions = XMLHelper.get_value(refrigerator, 'extension/WeekdayScheduleFractions')
       @weekend_fractions = XMLHelper.get_value(refrigerator, 'extension/WeekendScheduleFractions')
       @monthly_multipliers = XMLHelper.get_value(refrigerator, 'extension/MonthlyScheduleMultipliers')
-      @schedules_column_name = XMLHelper.get_value(refrigerator, 'extension/SchedulesColumnName')
     end
   end
 
@@ -4034,7 +4031,7 @@ class HPXML < Object
 
   class CookingRange < BaseElement
     ATTRS = [:id, :location, :fuel_type, :is_induction, :usage_multiplier,
-             :weekday_fractions, :weekend_fractions, :monthly_multipliers]
+             :weekday_fractions, :weekend_fractions, :monthly_multipliers, :schedules_column_name]
     attr_accessor(*ATTRS)
 
     def delete
@@ -4060,7 +4057,8 @@ class HPXML < Object
                            extensions: { 'UsageMultiplier' => to_float_or_nil(@usage_multiplier),
                                          'WeekdayScheduleFractions' => @weekday_fractions,
                                          'WeekendScheduleFractions' => @weekend_fractions,
-                                         'MonthlyScheduleMultipliers' => @monthly_multipliers })
+                                         'MonthlyScheduleMultipliers' => @monthly_multipliers,
+                                         'SchedulesColumnName' => @schedules_column_name })
     end
 
     def from_oga(cooking_range)
@@ -4074,6 +4072,7 @@ class HPXML < Object
       @weekday_fractions = XMLHelper.get_value(cooking_range, 'extension/WeekdayScheduleFractions')
       @weekend_fractions = XMLHelper.get_value(cooking_range, 'extension/WeekendScheduleFractions')
       @monthly_multipliers = XMLHelper.get_value(cooking_range, 'extension/MonthlyScheduleMultipliers')
+      @schedules_column_name = XMLHelper.get_value(cooking_range, 'extension/SchedulesColumnName')
     end
   end
 

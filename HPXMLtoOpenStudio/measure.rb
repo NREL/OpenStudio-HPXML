@@ -32,6 +32,7 @@ require_relative 'resources/version'
 require_relative 'resources/waterheater'
 require_relative 'resources/weather'
 require_relative 'resources/xmlhelper'
+require_relative '../BuildResidentialHPXML/resources/constants'
 
 # start the measure
 class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
@@ -907,9 +908,14 @@ class OSModel
         fail 'Occupancy schedule inconsistent with hrs_per_day.'
       end
 
+      if not @hpxml.header.schedules_output_path.nil?
+        schedules_file = SchedulesFile.new(runner: runner, model: model, schedules_path: @hpxml.header.schedules_output_path)
+        people_sch = schedules_file.create_schedule_file(col_name: @hpxml.building_occupancy.schedules_column_name)
+      end
+
       weekend_sch = weekday_sch
       monthly_sch = '1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0'
-      Geometry.process_occupants(model, num_occ, occ_gain, sens_frac, lat_frac, weekday_sch, weekend_sch, monthly_sch, @cfa, @nbeds, spaces[HPXML::LocationLivingSpace])
+      Geometry.process_occupants(model, num_occ, occ_gain, sens_frac, lat_frac, weekday_sch, weekend_sch, monthly_sch, @cfa, @nbeds, spaces[HPXML::LocationLivingSpace], people_sch)
     end
   end
 
@@ -1952,13 +1958,17 @@ class OSModel
       end
     end
 
+    if not @hpxml.header.schedules_output_path.nil?
+      schedules_file = SchedulesFile.new(runner: runner, model: model, schedules_path: @hpxml.header.schedules_output_path)
+    end
+
     fixtures_usage_multiplier = @hpxml.water_heating.water_fixtures_usage_multiplier
     HotWaterAndAppliances.apply(model, runner, weather, spaces[HPXML::LocationLivingSpace],
                                 @cfa, @nbeds, @ncfl, @has_uncond_bsmnt, @hpxml.clothes_washers,
                                 @hpxml.clothes_dryers, @hpxml.dishwashers, @hpxml.refrigerators,
                                 @hpxml.freezers, @hpxml.cooking_ranges, @hpxml.ovens, fixtures_usage_multiplier,
                                 @hpxml.water_fixtures, @hpxml.water_heating_systems, hot_water_distribution,
-                                solar_thermal_system, @eri_version, @dhw_map)
+                                solar_thermal_system, @eri_version, @dhw_map, schedules_file)
 
     if (not solar_thermal_system.nil?) && (not solar_thermal_system.collector_area.nil?) # Detailed solar water heater
       loc_space, loc_schedule = get_space_or_schedule_from_location(solar_thermal_system.water_heating_system.location, 'WaterHeatingSystem', model, spaces)
