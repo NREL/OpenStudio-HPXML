@@ -406,11 +406,17 @@
             <SystemIdentifier id='WaterFixture'/>
             <WaterFixtureType>shower head</WaterFixtureType>
             <LowFlow>true</LowFlow>
+            <extension>
+              <SchedulesColumnName>showers</SchedulesColumnName>
+            </extension>
           </WaterFixture>
           <WaterFixture>
             <SystemIdentifier id='WaterFixture2'/>
             <WaterFixtureType>faucet</WaterFixtureType>
             <LowFlow>false</LowFlow>
+            <extension>
+              <SchedulesColumnName>sinks</SchedulesColumnName>
+            </extension>
           </WaterFixture>
         </WaterHeating>
       </Systems>
@@ -425,6 +431,10 @@
           <LabelAnnualGasCost>27.0</LabelAnnualGasCost>
           <LabelUsage>6.0</LabelUsage>
           <Capacity>3.2</Capacity>
+          <extension>
+            <WaterSchedulesColumnName>clothes_washer</WaterSchedulesColumnName>
+            <PowerSchedulesColumnName>clothes_washer_power</PowerSchedulesColumnName>
+          </extension>
         </ClothesWasher>
         <ClothesDryer>
           <SystemIdentifier id='ClothesDryer'/>
@@ -442,6 +452,10 @@
           <LabelGasRate>1.09</LabelGasRate>
           <LabelAnnualGasCost>22.32</LabelAnnualGasCost>
           <LabelUsage>4.0</LabelUsage>
+          <extension>
+            <WaterSchedulesColumnName>dishwasher</WaterSchedulesColumnName>
+            <PowerSchedulesColumnName>dishwasher_power</PowerSchedulesColumnName>
+          </extension>
         </Dishwasher>
         <Refrigerator>
           <SystemIdentifier id='Refrigerator'/>

@@ -3735,6 +3735,24 @@ class HPXMLFile
 
     hpxml.building_occupancy.schedules_column_name = 'occupants'
 
+    hpxml.water_fixtures.each do |water_fixture|
+      if water_fixture.water_fixture_type == HPXML::WaterFixtureTypeShowerhead
+        water_fixture.schedules_column_name = 'showers'
+      elsif water_fixture.water_fixture_type == HPXML::WaterFixtureTypeFaucet
+        water_fixture.schedules_column_name = 'sinks'
+      end
+    end
+
+    hpxml.clothes_washers.each do |clothes_washer|
+      clothes_washer.water_schedules_column_name = 'clothes_washer'
+      clothes_washer.power_schedules_column_name = 'clothes_washer_power'
+    end
+
+    hpxml.dishwashers.each do |dishwasher|
+      dishwasher.water_schedules_column_name = 'dishwasher'
+      dishwasher.power_schedules_column_name = 'dishwasher_power'
+    end
+
     hpxml.cooking_ranges.each do |cooking_range|
       cooking_range.schedules_column_name = 'cooking_range'
     end

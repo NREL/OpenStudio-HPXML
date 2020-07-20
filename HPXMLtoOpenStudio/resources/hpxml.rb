@@ -3437,7 +3437,7 @@ class HPXML < Object
   end
 
   class WaterFixture < BaseElement
-    ATTRS = [:id, :water_fixture_type, :low_flow]
+    ATTRS = [:id, :water_fixture_type, :low_flow, :schedules_column_name]
     attr_accessor(*ATTRS)
 
     def delete
@@ -3458,6 +3458,10 @@ class HPXML < Object
       XMLHelper.add_attribute(sys_id, 'id', @id)
       XMLHelper.add_element(water_fixture, 'WaterFixtureType', @water_fixture_type) unless @water_fixture_type.nil?
       XMLHelper.add_element(water_fixture, 'LowFlow', to_boolean(@low_flow)) unless @low_flow.nil?
+      if (not @schedules_column_name.nil?)
+        HPXML::add_extension(parent: water_fixture,
+                             extensions: { 'SchedulesColumnName' => @schedules_column_name })
+      end
     end
 
     def from_oga(water_fixture)
@@ -3466,6 +3470,7 @@ class HPXML < Object
       @id = HPXML::get_id(water_fixture)
       @water_fixture_type = XMLHelper.get_value(water_fixture, 'WaterFixtureType')
       @low_flow = to_bool_or_nil(XMLHelper.get_value(water_fixture, 'LowFlow'))
+      @schedules_column_name = XMLHelper.get_value(water_fixture, 'extension/SchedulesColumnName')
     end
   end
 
@@ -3660,7 +3665,7 @@ class HPXML < Object
   class ClothesWasher < BaseElement
     ATTRS = [:id, :location, :modified_energy_factor, :integrated_modified_energy_factor,
              :rated_annual_kwh, :label_electric_rate, :label_gas_rate, :label_annual_gas_cost,
-             :capacity, :label_usage, :usage_multiplier]
+             :capacity, :label_usage, :usage_multiplier, :water_schedules_column_name, :power_schedules_column_name]
     attr_accessor(*ATTRS)
 
     def delete
@@ -3689,7 +3694,9 @@ class HPXML < Object
       XMLHelper.add_element(clothes_washer, 'LabelUsage', to_float(@label_usage)) unless @label_usage.nil?
       XMLHelper.add_element(clothes_washer, 'Capacity', to_float(@capacity)) unless @capacity.nil?
       HPXML::add_extension(parent: clothes_washer,
-                           extensions: { 'UsageMultiplier' => to_float_or_nil(@usage_multiplier) })
+                           extensions: { 'UsageMultiplier' => to_float_or_nil(@usage_multiplier),
+                                         'WaterSchedulesColumnName' => @water_schedules_column_name,
+                                         'PowerSchedulesColumnName' => @power_schedules_column_name })
     end
 
     def from_oga(clothes_washer)
@@ -3706,6 +3713,8 @@ class HPXML < Object
       @label_usage = to_float_or_nil(XMLHelper.get_value(clothes_washer, 'LabelUsage'))
       @capacity = to_float_or_nil(XMLHelper.get_value(clothes_washer, 'Capacity'))
       @usage_multiplier = to_float_or_nil(XMLHelper.get_value(clothes_washer, 'extension/UsageMultiplier'))
+      @water_schedules_column_name = XMLHelper.get_value(clothes_washer, 'extension/WaterSchedulesColumnName')
+      @power_schedules_column_name = XMLHelper.get_value(clothes_washer, 'extension/PowerSchedulesColumnName')
     end
   end
 
@@ -3783,7 +3792,7 @@ class HPXML < Object
   class Dishwasher < BaseElement
     ATTRS = [:id, :location, :energy_factor, :rated_annual_kwh, :place_setting_capacity,
              :label_electric_rate, :label_gas_rate, :label_annual_gas_cost,
-             :label_usage, :usage_multiplier]
+             :label_usage, :usage_multiplier, :water_schedules_column_name, :power_schedules_column_name]
     attr_accessor(*ATTRS)
 
     def delete
@@ -3811,7 +3820,9 @@ class HPXML < Object
       XMLHelper.add_element(dishwasher, 'LabelAnnualGasCost', to_float(@label_annual_gas_cost)) unless @label_annual_gas_cost.nil?
       XMLHelper.add_element(dishwasher, 'LabelUsage', to_float(@label_usage)) unless @label_usage.nil?
       HPXML::add_extension(parent: dishwasher,
-                           extensions: { 'UsageMultiplier' => to_float_or_nil(@usage_multiplier) })
+                           extensions: { 'UsageMultiplier' => to_float_or_nil(@usage_multiplier),
+                                         'WaterSchedulesColumnName' => @water_schedules_column_name,
+                                         'PowerSchedulesColumnName' => @power_schedules_column_name })
     end
 
     def from_oga(dishwasher)
@@ -3827,6 +3838,8 @@ class HPXML < Object
       @label_annual_gas_cost = to_float_or_nil(XMLHelper.get_value(dishwasher, 'LabelAnnualGasCost'))
       @label_usage = to_float_or_nil(XMLHelper.get_value(dishwasher, 'LabelUsage'))
       @usage_multiplier = to_float_or_nil(XMLHelper.get_value(dishwasher, 'extension/UsageMultiplier'))
+      @water_schedules_column_name = XMLHelper.get_value(dishwasher, 'extension/WaterSchedulesColumnName')
+      @power_schedules_column_name = XMLHelper.get_value(dishwasher, 'extension/PowerSchedulesColumnName')
     end
   end
 

@@ -791,16 +791,13 @@ end
 class SchedulesFile
   def initialize(runner:,
                  model:,
-                 schedules_path: nil,
+                 schedules_path:,
                  **remainder)
 
     @validated = true
     @runner = runner
     @model = model
     @schedules_path = schedules_path
-    if @schedules_path.nil?
-      @schedules_path = get_schedules_path
-    end
     @external_file = get_external_file
     @schedules = {}
   end
@@ -1065,19 +1062,5 @@ class SchedulesFile
         csv << row
       end
     end
-  end
-
-  def get_schedules_path
-    sch_path = @model.getBuilding.additionalProperties.getFeatureAsString('Schedules Path')
-    if not sch_path.is_initialized # ResidentialScheduleGenerator not in workflow
-      if @model.getYearDescription.isLeapYear
-        sch_path = File.join(File.dirname(__FILE__), '../../../../files/8784.csv')
-      else
-        sch_path = File.join(File.dirname(__FILE__), '../../../../files/8760.csv')
-      end
-    else
-      sch_path = sch_path.get
-    end
-    return sch_path
   end
 end

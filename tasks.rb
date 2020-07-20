@@ -5668,6 +5668,9 @@ def set_hpxml_water_fixtures(hpxml_file, hpxml)
     hpxml.water_fixtures.clear
   elsif ['base-misc-usage-multiplier.xml'].include? hpxml_file
     hpxml.water_heating.water_fixtures_usage_multiplier = 0.9
+  elsif ['base-simcontrol-generated-schedule.xml'].include? hpxml_file
+    hpxml.water_fixtures[0].schedules_column_name = 'showers'
+    hpxml.water_fixtures[1].schedules_column_name = 'sinks'
   end
 end
 
@@ -5825,6 +5828,9 @@ def set_hpxml_clothes_washer(hpxml_file, hpxml)
     hpxml.clothes_washers[0].label_usage = nil
   elsif ['base-misc-usage-multiplier.xml'].include? hpxml_file
     hpxml.clothes_washers[0].usage_multiplier = 0.9
+  elsif ['base-simcontrol-generated-schedule.xml'].include? hpxml_file
+    hpxml.clothes_washers[0].water_schedules_column_name = 'clothes_washer'
+    hpxml.clothes_washers[0].power_schedules_column_name = 'clothes_washer_power'
   end
 end
 
@@ -5936,6 +5942,9 @@ def set_hpxml_dishwasher(hpxml_file, hpxml)
     hpxml.dishwashers[0].label_usage = nil
   elsif ['base-misc-usage-multiplier.xml'].include? hpxml_file
     hpxml.dishwashers[0].usage_multiplier = 0.9
+  elsif ['base-simcontrol-generated-schedule.xml'].include? hpxml_file
+    hpxml.dishwashers[0].water_schedules_column_name = 'dishwasher'
+    hpxml.dishwashers[0].power_schedules_column_name = 'dishwasher_power'
   end
 end
 
