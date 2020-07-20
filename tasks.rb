@@ -3877,12 +3877,21 @@ def set_hpxml_clothes_washer(hpxml_file, hpxml)
                               label_usage: 6)
   elsif ['base-appliances-none.xml'].include? hpxml_file
     hpxml.clothes_washers.clear
-  elsif ['base-enclosure-attached-multifamily.xml',
-         'base-enclosure-other-housing-unit.xml',
+  elsif ['base-enclosure-attached-multifamily.xml'].include? hpxml_file
+    hpxml.clothes_washers[0].location = HPXML::LocationOtherHousingUnit
+  elsif ['base-enclosure-other-housing-unit.xml',
          'base-enclosure-other-heated-space.xml',
          'base-enclosure-other-non-freezing-space.xml',
          'base-enclosure-other-multifamily-buffer-space.xml'].include? hpxml_file
-    hpxml.clothes_washers[0].location = HPXML::LocationOther
+    if ['base-enclosure-other-housing-unit.xml'].include? hpxml_file
+      hpxml.clothes_washers[0].location = HPXML::LocationOtherHousingUnit
+    elsif ['base-enclosure-other-heated-space.xml'].include? hpxml_file
+      hpxml.clothes_washers[0].location = HPXML::LocationOtherHeatedSpace
+    elsif ['base-enclosure-other-non-freezing-space.xml'].include? hpxml_file
+      hpxml.clothes_washers[0].location = HPXML::LocationOtherNonFreezingSpace
+    elsif ['base-enclosure-other-multifamily-buffer-space.xml'].include? hpxml_file
+      hpxml.clothes_washers[0].location = HPXML::LocationOtherMultifamilyBufferSpace
+    end
   elsif ['base-appliances-modified.xml'].include? hpxml_file
     imef = hpxml.clothes_washers[0].integrated_modified_energy_factor
     hpxml.clothes_washers[0].integrated_modified_energy_factor = nil
@@ -3920,12 +3929,21 @@ def set_hpxml_clothes_dryer(hpxml_file, hpxml)
                              control_type: HPXML::ClothesDryerControlTypeTimer)
   elsif ['base-appliances-none.xml'].include? hpxml_file
     hpxml.clothes_dryers.clear
-  elsif ['base-enclosure-attached-multifamily.xml',
-         'base-enclosure-other-housing-unit.xml',
+  elsif ['base-enclosure-attached-multifamily.xml'].include? hpxml_file
+    hpxml.clothes_dryers[0].location = HPXML::LocationOtherHeatedSpace
+  elsif ['base-enclosure-other-housing-unit.xml',
          'base-enclosure-other-heated-space.xml',
          'base-enclosure-other-non-freezing-space.xml',
          'base-enclosure-other-multifamily-buffer-space.xml'].include? hpxml_file
-    hpxml.clothes_dryers[0].location = HPXML::LocationOther
+    if ['base-enclosure-other-housing-unit.xml'].include? hpxml_file
+      hpxml.clothes_dryers[0].location = HPXML::LocationOtherHousingUnit
+    elsif ['base-enclosure-other-heated-space.xml'].include? hpxml_file
+      hpxml.clothes_dryers[0].location = HPXML::LocationOtherHeatedSpace
+    elsif ['base-enclosure-other-non-freezing-space.xml'].include? hpxml_file
+      hpxml.clothes_dryers[0].location = HPXML::LocationOtherNonFreezingSpace
+    elsif ['base-enclosure-other-multifamily-buffer-space.xml'].include? hpxml_file
+      hpxml.clothes_dryers[0].location = HPXML::LocationOtherMultifamilyBufferSpace
+    end
   elsif ['base-appliances-modified.xml'].include? hpxml_file
     cef = hpxml.clothes_dryers[-1].combined_energy_factor
     hpxml.clothes_dryers.clear
@@ -3993,12 +4011,21 @@ def set_hpxml_dishwasher(hpxml_file, hpxml)
     hpxml.dishwashers[0].rated_annual_kwh = nil
     hpxml.dishwashers[0].energy_factor = HotWaterAndAppliances.calc_dishwasher_ef_from_annual_kwh(rated_annual_kwh).round(2)
     hpxml.dishwashers[0].place_setting_capacity = 6 # Compact
-  elsif ['base-enclosure-attached-multifamily.xml',
-         'base-enclosure-other-housing-unit.xml',
+  elsif ['base-enclosure-attached-multifamily.xml'].include? hpxml_file
+    hpxml.dishwashers[0].location = HPXML::LocationOtherMultifamilyBufferSpace
+  elsif ['base-enclosure-other-housing-unit.xml',
          'base-enclosure-other-heated-space.xml',
          'base-enclosure-other-non-freezing-space.xml',
          'base-enclosure-other-multifamily-buffer-space.xml'].include? hpxml_file
-    hpxml.dishwashers[0].location = HPXML::LocationOther
+    if ['base-enclosure-other-housing-unit.xml'].include? hpxml_file
+      hpxml.dishwashers[0].location = HPXML::LocationOtherHousingUnit
+    elsif ['base-enclosure-other-heated-space.xml'].include? hpxml_file
+      hpxml.dishwashers[0].location = HPXML::LocationOtherHeatedSpace
+    elsif ['base-enclosure-other-non-freezing-space.xml'].include? hpxml_file
+      hpxml.dishwashers[0].location = HPXML::LocationOtherNonFreezingSpace
+    elsif ['base-enclosure-other-multifamily-buffer-space.xml'].include? hpxml_file
+      hpxml.dishwashers[0].location = HPXML::LocationOtherMultifamilyBufferSpace
+    end
   elsif ['base-appliances-none.xml'].include? hpxml_file
     hpxml.dishwashers.clear
   elsif ['base-foundation-unconditioned-basement.xml'].include? hpxml_file
@@ -4032,12 +4059,21 @@ def set_hpxml_refrigerator(hpxml_file, hpxml)
     hpxml.refrigerators[0].adjusted_annual_kwh = 600
   elsif ['base-appliances-none.xml'].include? hpxml_file
     hpxml.refrigerators.clear
-  elsif ['base-enclosure-attached-multifamily.xml',
-         'base-enclosure-other-housing-unit.xml',
+  elsif ['base-enclosure-attached-multifamily.xml'].include? hpxml_file
+    hpxml.refrigerators[0].location = HPXML::LocationOtherNonFreezingSpace
+  elsif ['base-enclosure-other-housing-unit.xml',
          'base-enclosure-other-heated-space.xml',
          'base-enclosure-other-non-freezing-space.xml',
          'base-enclosure-other-multifamily-buffer-space.xml'].include? hpxml_file
-    hpxml.refrigerators[0].location = HPXML::LocationOther
+    if ['base-enclosure-other-housing-unit.xml'].include? hpxml_file
+      hpxml.refrigerators[0].location = HPXML::LocationOtherHousingUnit
+    elsif ['base-enclosure-other-heated-space.xml'].include? hpxml_file
+      hpxml.refrigerators[0].location = HPXML::LocationOtherHeatedSpace
+    elsif ['base-enclosure-other-non-freezing-space.xml'].include? hpxml_file
+      hpxml.refrigerators[0].location = HPXML::LocationOtherNonFreezingSpace
+    elsif ['base-enclosure-other-multifamily-buffer-space.xml'].include? hpxml_file
+      hpxml.refrigerators[0].location = HPXML::LocationOtherMultifamilyBufferSpace
+    end
   elsif ['base-foundation-unconditioned-basement.xml'].include? hpxml_file
     hpxml.refrigerators[0].location = HPXML::LocationBasementUnconditioned
   elsif ['base-atticroof-conditioned.xml'].include? hpxml_file
@@ -4122,12 +4158,21 @@ def set_hpxml_cooking_range(hpxml_file, hpxml)
                              is_induction: false)
   elsif ['base-appliances-none.xml'].include? hpxml_file
     hpxml.cooking_ranges.clear
-  elsif ['base-enclosure-attached-multifamily.xml',
-         'base-enclosure-other-housing-unit.xml',
+  elsif ['base-enclosure-attached-multifamily.xml'].include? hpxml_file
+    hpxml.cooking_ranges[0].location = HPXML::LocationOtherHousingUnit
+  elsif ['base-enclosure-other-housing-unit.xml',
          'base-enclosure-other-heated-space.xml',
          'base-enclosure-other-non-freezing-space.xml',
          'base-enclosure-other-multifamily-buffer-space.xml'].include? hpxml_file
-    hpxml.cooking_ranges[0].location = HPXML::LocationOther
+    if ['base-enclosure-other-housing-unit.xml'].include? hpxml_file
+      hpxml.cooking_ranges[0].location = HPXML::LocationOtherHousingUnit
+    elsif ['base-enclosure-other-heated-space.xml'].include? hpxml_file
+      hpxml.cooking_ranges[0].location = HPXML::LocationOtherHeatedSpace
+    elsif ['base-enclosure-other-non-freezing-space.xml'].include? hpxml_file
+      hpxml.cooking_ranges[0].location = HPXML::LocationOtherNonFreezingSpace
+    elsif ['base-enclosure-other-multifamily-buffer-space.xml'].include? hpxml_file
+      hpxml.cooking_ranges[0].location = HPXML::LocationOtherMultifamilyBufferSpace
+    end
   elsif ['base-appliances-gas.xml'].include? hpxml_file
     hpxml.cooking_ranges[0].fuel_type = HPXML::FuelTypeNaturalGas
     hpxml.cooking_ranges[0].is_induction = false

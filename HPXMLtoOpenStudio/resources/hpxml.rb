@@ -154,7 +154,6 @@ class HPXML < Object
   LocationInterior = 'interior'
   LocationKitchen = 'kitchen'
   LocationLivingSpace = 'living space'
-  LocationOther = 'other'
   LocationOtherExterior = 'other exterior'
   LocationOtherHousingUnit = 'other housing unit'
   LocationOtherHeatedSpace = 'other heated space'
@@ -3652,8 +3651,16 @@ class HPXML < Object
   class ClothesWasher < BaseElement
     ATTRS = [:id, :location, :modified_energy_factor, :integrated_modified_energy_factor,
              :rated_annual_kwh, :label_electric_rate, :label_gas_rate, :label_annual_gas_cost,
-             :capacity, :label_usage, :usage_multiplier]
+             :capacity, :label_usage, :usage_multiplier, :ratio_of_units_to_clothes_washers]
     attr_accessor(*ATTRS)
+
+    def is_shared
+      # In a MF location?
+      return [LocationOtherHeatedSpace,
+              LocationOtherHousingUnit,
+              LocationOtherMultifamilyBufferSpace,
+              LocationOtherNonFreezingSpace].include? @location
+    end
 
     def delete
       @hpxml_object.clothes_washers.delete(self)
@@ -3681,7 +3688,8 @@ class HPXML < Object
       XMLHelper.add_element(clothes_washer, 'LabelUsage', to_float(@label_usage)) unless @label_usage.nil?
       XMLHelper.add_element(clothes_washer, 'Capacity', to_float(@capacity)) unless @capacity.nil?
       HPXML::add_extension(parent: clothes_washer,
-                           extensions: { 'UsageMultiplier' => to_float_or_nil(@usage_multiplier) })
+                           extensions: { 'UsageMultiplier' => to_float_or_nil(@usage_multiplier),
+                                         'RatioOfDwellingUnitsToSharedClothesWashers' => to_integer_or_nil(@ratio_of_units_to_clothes_washers) })
     end
 
     def from_oga(clothes_washer)
@@ -3698,6 +3706,7 @@ class HPXML < Object
       @label_usage = to_float_or_nil(XMLHelper.get_value(clothes_washer, 'LabelUsage'))
       @capacity = to_float_or_nil(XMLHelper.get_value(clothes_washer, 'Capacity'))
       @usage_multiplier = to_float_or_nil(XMLHelper.get_value(clothes_washer, 'extension/UsageMultiplier'))
+      @ratio_of_units_to_clothes_washers = to_integer_or_nil(XMLHelper.get_value(clothes_washer, 'extension/RatioOfDwellingUnitsToSharedClothesWashers'))
     end
   end
 
@@ -3717,8 +3726,16 @@ class HPXML < Object
 
   class ClothesDryer < BaseElement
     ATTRS = [:id, :location, :fuel_type, :energy_factor, :combined_energy_factor, :control_type,
-             :usage_multiplier]
+             :usage_multiplier, :ratio_of_units_to_clothes_dryers]
     attr_accessor(*ATTRS)
+
+    def is_shared
+      # In a MF location?
+      return [LocationOtherHeatedSpace,
+              LocationOtherHousingUnit,
+              LocationOtherMultifamilyBufferSpace,
+              LocationOtherNonFreezingSpace].include? @location
+    end
 
     def delete
       @hpxml_object.clothes_dryers.delete(self)
@@ -3742,7 +3759,8 @@ class HPXML < Object
       XMLHelper.add_element(clothes_dryer, 'CombinedEnergyFactor', to_float(@combined_energy_factor)) unless @combined_energy_factor.nil?
       XMLHelper.add_element(clothes_dryer, 'ControlType', @control_type) unless @control_type.nil?
       HPXML::add_extension(parent: clothes_dryer,
-                           extensions: { 'UsageMultiplier' => to_float_or_nil(@usage_multiplier) })
+                           extensions: { 'UsageMultiplier' => to_float_or_nil(@usage_multiplier),
+                                         'RatioOfDwellingUnitsToSharedClothesDryers' => to_integer_or_nil(@ratio_of_units_to_clothes_dryers) })
     end
 
     def from_oga(clothes_dryer)
@@ -3755,6 +3773,7 @@ class HPXML < Object
       @combined_energy_factor = to_float_or_nil(XMLHelper.get_value(clothes_dryer, 'CombinedEnergyFactor'))
       @control_type = XMLHelper.get_value(clothes_dryer, 'ControlType')
       @usage_multiplier = to_float_or_nil(XMLHelper.get_value(clothes_dryer, 'extension/UsageMultiplier'))
+      @ratio_of_units_to_clothes_dryers = to_integer_or_nil(XMLHelper.get_value(clothes_dryer, 'extension/RatioOfDwellingUnitsToSharedClothesDryers'))
     end
   end
 

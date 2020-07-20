@@ -877,15 +877,20 @@ This section describes elements specified in HPXML's ``Appliances``.
 
 The ``Location`` for each appliance can be optionally provided as one of the following:
 
-==============================  ====================================================================
-Location                        Description                                                         
-==============================  ====================================================================
+==============================  ===========================================
+Location                        Description
+==============================  ===========================================
 living space                    Above-grade conditioned floor area
 basement - conditioned          Below-grade conditioned floor area
 basement - unconditioned  
 garage                    
-other                           Any attached/multifamily space outside the unit, in which internal gains are neglected
-==============================  ====================================================================
+other housing unit              E.g., adjacent unit or conditioned corridor
+other heated space              E.g., shared laundry/equipment space
+other multifamily buffer space  E.g., enclosed unconditioned stairwell
+other non-freezing space        E.g., parking garage ceiling
+==============================  ===========================================
+
+Appliances in any of the "other ..." locations will have their internal gains neglected.
 
 If the location is not specified, the appliance is assumed to be in the living space.
 
