@@ -1053,10 +1053,8 @@ For the child elements not provided, the following default values will be used.
 Element Name                                   Default Value
 =============================================  ======================================================================================================
 Load[Units='kWh/day']/Value                    1.1 for single-family detached and 0.55 for others
-PeriodBeginMonth                               11  
-PeriodBeginDayOfMonth                          24  
-PeriodEndMonth                                 1  
-PeriodEndDayOfMonth                            6
+PeriodBeginMonth/PeriodBeginDayOfMonth         11/24 (November 24) 
+PeriodEndMonth/PeriodEndDayOfMonth             1/6 (January 6) 
 WeekdayScheduleFractions                       0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0.008, 0.098, 0.168, 0.194, 0.284, 0.192, 0.037, 0.019
 WeekendScheduleFractions                       0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0.008, 0.098, 0.168, 0.194, 0.284, 0.192, 0.037, 0.019
 =============================================  ======================================================================================================

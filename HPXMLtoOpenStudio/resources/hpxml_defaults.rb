@@ -907,7 +907,7 @@ class HPXMLDefaults
     if hpxml.lighting.exterior_monthly_multipliers.nil?
       hpxml.lighting.exterior_monthly_multipliers = default_exterior_lighting_monthly_multipliers
     end
-    if (hpxml.lighting.holiday_exists == true) 
+    if hpxml.lighting.holiday_exists
       if hpxml.lighting.holiday_kwh_per_day.nil?
         # From LA100 repo (2017)
         if hpxml.building_construction.residential_facility_type == HPXML::ResidentialTypeSFD
