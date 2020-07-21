@@ -995,6 +995,7 @@ class Constructions
     color_map = {}
     map.each do |key, value|
       next unless key[1] == roof_type
+
       color_map[key[0]] = value
     end
     color = color_map.min_by { |k, v| (v - solar_absorptance).abs }[0]
@@ -1259,9 +1260,9 @@ class Construction
     @name = name
     @path_widths = path_widths
     @path_fracs = []
-    @sum_path_fracs = @path_widths.inject(:+)
+    @sum_path_fracs = @path_widths.sum(0.0)
     path_widths.each do |path_width|
-      @path_fracs << path_width / path_widths.inject { |sum, n| sum + n }
+      @path_fracs << path_width / path_widths.sum(0.0)
     end
     @layers_names = []
     @layers_materials = []

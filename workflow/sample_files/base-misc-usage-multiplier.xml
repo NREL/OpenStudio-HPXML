@@ -548,7 +548,9 @@
           </LightingType>
         </LightingGroup>
         <extension>
-          <UsageMultiplier>0.9</UsageMultiplier>
+          <InteriorUsageMultiplier>0.9</InteriorUsageMultiplier>
+          <GarageUsageMultiplier>0.9</GarageUsageMultiplier>
+          <ExteriorUsageMultiplier>0.9</ExteriorUsageMultiplier>
         </extension>
       </Lighting>
       <MiscLoads>
@@ -573,8 +575,6 @@
             <Value>620.0</Value>
           </Load>
           <extension>
-            <FracSensible>1.0</FracSensible>
-            <FracLatent>0.0</FracLatent>
             <UsageMultiplier>0.9</UsageMultiplier>
           </extension>
         </PlugLoad>

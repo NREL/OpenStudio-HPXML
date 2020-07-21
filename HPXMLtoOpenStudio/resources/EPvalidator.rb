@@ -72,10 +72,10 @@ class EnergyPlusValidator
         '/HPXML/Building/BuildingDetails/Systems/HVAC/HVACControl' => zero_or_one, # See [HVACControl]
         '/HPXML/Building/BuildingDetails/Systems/HVAC/HVACDistribution' => zero_or_more, # See [HVACDistribution]
 
-        '/HPXML/Building/BuildingDetails/Systems/MechanicalVentilation/VentilationFans/VentilationFan[UsedForWholeBuildingVentilation="true"]' => zero_or_one, # See [MechanicalVentilation]
-        '/HPXML/Building/BuildingDetails/Systems/MechanicalVentilation/VentilationFans/VentilationFan[UsedForLocalVentilation="true" and FanLocation="kitchen"]' => zero_or_one, # See [KitchenRangeFan]
-        '/HPXML/Building/BuildingDetails/Systems/MechanicalVentilation/VentilationFans/VentilationFan[UsedForLocalVentilation="true" and FanLocation="bath"]' => zero_or_one, # See [BathFan]
-        '/HPXML/Building/BuildingDetails/Systems/MechanicalVentilation/VentilationFans/VentilationFan[UsedForSeasonalCoolingLoadReduction="true"]' => zero_or_one, # See [WholeHouseFan]
+        '/HPXML/Building/BuildingDetails/Systems/MechanicalVentilation/VentilationFans/VentilationFan[UsedForWholeBuildingVentilation="true"]' => zero_or_more, # See [MechanicalVentilation]
+        '/HPXML/Building/BuildingDetails/Systems/MechanicalVentilation/VentilationFans/VentilationFan[UsedForLocalVentilation="true" and FanLocation="kitchen"]' => zero_or_more, # See [KitchenRangeFan]
+        '/HPXML/Building/BuildingDetails/Systems/MechanicalVentilation/VentilationFans/VentilationFan[UsedForLocalVentilation="true" and FanLocation="bath"]' => zero_or_more, # See [BathFan]
+        '/HPXML/Building/BuildingDetails/Systems/MechanicalVentilation/VentilationFans/VentilationFan[UsedForSeasonalCoolingLoadReduction="true"]' => zero_or_more, # See [WholeHouseFan]
         '/HPXML/Building/BuildingDetails/Systems/WaterHeating/WaterHeatingSystem' => zero_or_more, # See [WaterHeatingSystem]
         '/HPXML/Building/BuildingDetails/Systems/WaterHeating/HotWaterDistribution' => zero_or_one, # See [HotWaterDistribution]
         '/HPXML/Building/BuildingDetails/Systems/WaterHeating/WaterFixture' => zero_or_more, # See [WaterFixture]
@@ -406,7 +406,7 @@ class EnergyPlusValidator
       '/HPXML/Building/BuildingDetails/Systems/HVAC/HVACPlant/CoolingSystem' => {
         'SystemIdentifier' => one, # Required by HPXML schema
         '../../HVACControl' => one, # See [HVACControl]
-        'CoolingSystemType[text()="central air conditioner" or text()="room air conditioner" or text()="evaporative cooler"]' => one, # See [CoolingType=CentralAC] or [CoolingType=RoomAC] or [CoolingType=EvapCooler]
+        'CoolingSystemType[text()="central air conditioner" or text()="room air conditioner" or text()="evaporative cooler" or text()="mini-split"]' => one, # See [CoolingType=CentralAC] or [CoolingType=RoomAC] or [CoolingType=EvapCooler] or [CoolingType=MiniSplitAC]
         'CoolingSystemFuel[text()="electricity"]' => one,
         'FractionCoolLoadServed' => one, # Must sum to <= 1 across all CoolingSystems and HeatPumps
       },
@@ -434,6 +434,16 @@ class EnergyPlusValidator
         '../../HVACDistribution[DistributionSystemType/AirDistribution | DistributionSystemType[Other="DSE"]]' => zero_or_more, # See [HVACDistribution]
         'DistributionSystem' => zero_or_one,
         'CoolingCapacity' => zero,
+      },
+
+      ## [CoolingType=MiniSplitAC]
+      '/HPXML/Building/BuildingDetails/Systems/HVAC/HVACPlant/CoolingSystem[CoolingSystemType="mini-split"]' => {
+        '../../HVACDistribution[DistributionSystemType/AirDistribution | DistributionSystemType[Other="DSE"]]' => zero_or_more, # See [HVACDistribution]
+        'DistributionSystem' => zero_or_one,
+        'CoolingCapacity' => zero_or_one,
+        '[not(CompressorType)] | CompressorType[text()="single stage" or text()="two stage" or text()="variable speed"]' => one,
+        'AnnualCoolingEfficiency[Units="SEER"]/Value' => one,
+        'SensibleHeatFraction' => zero_or_one,
       },
 
       # [HeatPump]
@@ -563,6 +573,7 @@ class EnergyPlusValidator
       # [KitchenRangeFan]
       '/HPXML/Building/BuildingDetails/Systems/MechanicalVentilation/VentilationFans/VentilationFan[UsedForLocalVentilation="true" and FanLocation="kitchen"]' => {
         'SystemIdentifier' => one, # Required by HPXML schema
+        'Quantity' => zero_or_one,
         'RatedFlowRate' => zero_or_one,
         'HoursInOperation' => zero_or_one,
         'FanPower' => zero_or_one,
@@ -799,13 +810,34 @@ class EnergyPlusValidator
       # [Lighting]
       '/HPXML/Building/BuildingDetails/Lighting' => {
         'LightingGroup[LightingType[LightEmittingDiode | CompactFluorescent | FluorescentTube] and Location[text()="interior" or text()="exterior" or text()="garage"]]' => nine, # See [LightingGroup]
-        'extension/UsageMultiplier' => zero_or_one,
+        'extension/InteriorUsageMultiplier' => zero_or_one,
+        'extension/GarageUsageMultiplier' => zero_or_one,
+        'extension/ExteriorUsageMultiplier' => zero_or_one,
+        'extension/InteriorWeekdayScheduleFractions' => zero_or_one,
+        'extension/InteriorWeekendScheduleFractions' => zero_or_one,
+        'extension/InteriorMonthlyScheduleMultipliers' => zero_or_one,
+        'extension/GarageWeekdayScheduleFractions' => zero_or_one,
+        'extension/GarageWeekendScheduleFractions' => zero_or_one,
+        'extension/GarageMonthlyScheduleMultipliers' => zero_or_one,
+        'extension/ExteriorWeekdayScheduleFractions' => zero_or_one,
+        'extension/ExteriorWeekendScheduleFractions' => zero_or_one,
+        'extension/ExteriorMonthlyScheduleMultipliers' => zero_or_one,
+        'extension/ExteriorHolidayLighting' => zero_or_one, # See [ExteriorHolidayLighting]
       },
 
       ## [LightingGroup]
       '/HPXML/Building/BuildingDetails/Lighting/LightingGroup[LightingType[LightEmittingDiode | CompactFluorescent | FluorescentTube] and Location[text()="interior" or text()="exterior" or text()="garage"]]' => {
         'SystemIdentifier' => one, # Required by HPXML schema
         'FractionofUnitsInLocation' => one,
+      },
+
+      ## [ExteriorHolidayLighting]
+      '/HPXML/Building/BuildingDetails/Lighting/extension/ExteriorHolidayLighting' => {
+        'Load[Units="kWh/day"]/Value' => zero_or_one,
+        'PeriodBeginMonth | PeriodBeginDayOfMonth' => zero_or_two, # integer
+        'PeriodEndMonth | PeriodEndDayOfMonth' => zero_or_two, # integer
+        'WeekdayScheduleFractions' => zero_or_one,
+        'WeekendScheduleFractions' => zero_or_one,
       },
 
       # [CeilingFan]
