@@ -1370,7 +1370,7 @@ class HPXML < Object
   end
 
   class Roof < BaseElement
-    ATTRS = [:id, :exterior_adjacent_to, :interior_adjacent_to, :area, :azimuth, :roof_type,
+    ATTRS = [:id, :interior_adjacent_to, :area, :azimuth, :roof_type,
              :roof_color, :solar_absorptance, :emittance, :pitch, :radiant_barrier,
              :insulation_id, :insulation_assembly_r_value, :insulation_cavity_r_value,
              :insulation_continuous_r_value]
@@ -4867,6 +4867,31 @@ class HPXML < Object
     end
     if (cooling_total_dist_cfa_served > @building_construction.conditioned_floor_area.to_f)
       errors << 'The total conditioned floor area served by the HVAC distribution system(s) for cooling is larger than the conditioned floor area of the building.'
+    end
+
+    # Check for objects referencing SFA/MF spaces where the building type is not SFA/MF
+    if [ResidentialTypeSFD, ResidentialTypeManufactured].include? @building_construction.residential_facility_type
+      mf_spaces = [LocationOtherHeatedSpace, LocationOtherHousingUnit, LocationOtherMultifamilyBufferSpace, LocationOtherNonFreezingSpace]
+      (@roofs + @rim_joists + @walls + @foundation_walls + @frame_floors + @slabs).each do |surface|
+        if mf_spaces.include? surface.interior_adjacent_to
+          errors << "The building is of type '#{@building_construction.residential_facility_type}' but the surface '#{surface.id}' is adjacent to the SFA/MF space '#{surface.interior_adjacent_to}'."
+        end
+        if mf_spaces.include? surface.exterior_adjacent_to
+          errors << "The building is of type '#{@building_construction.residential_facility_type}' but the surface '#{surface.id}' is adjacent to the SFA/MF space '#{surface.exterior_adjacent_to}'."
+        end
+      end
+      (@water_heating_systems + @clothes_washers + @clothes_dryers + @dishwashers + @refrigerators + @cooking_ranges).each do |object|
+        if mf_spaces.include? object.location
+          errors << "The building is of type '#{@building_construction.residential_facility_type}' but the object '#{object.id}' is located in the SFA/MF space '#{object.location}'."
+        end
+      end
+      @hvac_distributions.each do |hvac_distribution|
+        hvac_distribution.ducts.each do |duct|
+          if mf_spaces.include? duct.duct_location
+            errors << "The building is of type '#{@building_construction.residential_facility_type}' but the HVAC distribution #{hvac_distribution.id} has a duct located in the SFA/MF space '#{duct.duct_location}'."
+          end
+        end
+      end
     end
 
     # ------------------------------- #
