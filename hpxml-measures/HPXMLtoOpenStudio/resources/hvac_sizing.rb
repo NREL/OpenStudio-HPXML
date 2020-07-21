@@ -181,10 +181,12 @@ class HVACSizing
       area_conditioned = 0.0
       @hpxml.roofs.each do |roof|
         next unless roof.interior_adjacent_to == space_type
+
         area_total += roof.area
       end
       @hpxml.frame_floors.each do |frame_floor|
         next unless [frame_floor.interior_adjacent_to, frame_floor.exterior_adjacent_to].include? space_type
+
         area_total += frame_floor.area
         area_conditioned += frame_floor.area if frame_floor.is_thermal_boundary
       end
@@ -775,6 +777,7 @@ class HVACSizing
     # Foundation walls
     @hpxml.foundation_walls.each do |foundation_wall|
       next unless foundation_wall.is_exterior_thermal_boundary
+
       u_wall_with_soil, u_wall_without_soil = get_foundation_wall_properties(foundation_wall)
       zone_loads.Heat_Walls += u_wall_with_soil * foundation_wall.net_area * @htd
     end
@@ -3126,6 +3129,9 @@ class HVACSizing
         air_loop.setDesignSupplyAirFlowRate(vfr)
         fan = air_loop.supplyFan.get.to_FanVariableVolume.get
         fan.setMaximumFlowRate(vfr)
+        oa_system = air_loop.components.select { |comp| comp.to_AirLoopHVACOutdoorAirSystem.is_initialized }[0].to_AirLoopHVACOutdoorAirSystem.get
+        oa_controller = oa_system.getControllerOutdoorAir
+        oa_controller.setMaximumOutdoorAirFlowRate(vfr)
 
         # Fan pressure rise calculation (based on design cfm)
         fan_power = [2.79 * hvac_final_values.Cool_Airflow**-0.29, 0.6].min # fit of efficacy to air flow from the CEC listed equipment  W/cfm
