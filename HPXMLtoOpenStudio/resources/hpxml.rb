@@ -4287,7 +4287,7 @@ class HPXML < Object
   end
 
   class CeilingFan < BaseElement
-    ATTRS = [:id, :efficiency, :quantity]
+    ATTRS = [:id, :efficiency, :quantity, :schedules_column_name]
     attr_accessor(*ATTRS)
 
     def delete
@@ -4312,12 +4312,15 @@ class HPXML < Object
         XMLHelper.add_element(airflow, 'Efficiency', to_float(@efficiency))
       end
       XMLHelper.add_element(ceiling_fan, 'Quantity', to_integer(@quantity)) unless @quantity.nil?
+      HPXML::add_extension(parent: ceiling_fan,
+                           extensions: { 'SchedulesColumnName' => @schedules_column_name })
     end
 
     def from_oga(ceiling_fan)
       @id = HPXML::get_id(ceiling_fan)
       @efficiency = to_float_or_nil(XMLHelper.get_value(ceiling_fan, "Airflow[FanSpeed='medium']/Efficiency"))
       @quantity = to_integer_or_nil(XMLHelper.get_value(ceiling_fan, 'Quantity'))
+      @schedules_column_name = XMLHelper.get_value(ceiling_fan, 'extension/SchedulesColumnName')
     end
   end
 

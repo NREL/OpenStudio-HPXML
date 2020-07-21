@@ -3800,6 +3800,10 @@ class HPXMLFile
 
       plug_load.schedules_column_name = 'plug_loads'
     end
+
+    hpxml.ceiling_fans.each do |ceiling_fan|
+      ceiling_fan.schedules_column_name = 'ceiling_fan'
+    end
   end
 
   def self.set_header(hpxml, runner, args)
