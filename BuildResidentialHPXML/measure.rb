@@ -3781,6 +3781,10 @@ class HPXMLFile
       clothes_washer.power_schedules_column_name = 'clothes_washer_power'
     end
 
+    hpxml.clothes_dryers.each do |clothes_dryer|
+      clothes_dryer.power_schedules_column_name = 'clothes_dryer'
+    end
+
     hpxml.dishwashers.each do |dishwasher|
       dishwasher.water_schedules_column_name = 'dishwasher'
       dishwasher.power_schedules_column_name = 'dishwasher_power'
