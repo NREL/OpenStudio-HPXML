@@ -3,8 +3,13 @@
   <schema_version>3.0</schema_version>
   <name>hpxm_lto_openstudio</name>
   <uid>b1543b30-9465-45ff-ba04-1d1f85e763bc</uid>
+<<<<<<< HEAD
   <version_id>f8c3a928-f687-46c2-853f-9b52542049b9</version_id>
   <version_modified>20200718T144819Z</version_modified>
+=======
+  <version_id>56152577-6661-4326-b9be-29ecd28f1345</version_id>
+  <version_modified>20200720T163822Z</version_modified>
+>>>>>>> 59aa54b5601464b5b46ad7e820bd8f8e9636abf5
   <xml_checksum>D8922A73</xml_checksum>
   <class_name>HPXMLtoOpenStudio</class_name>
   <display_name>HPXML to OpenStudio Translator</display_name>
@@ -516,10 +521,17 @@
       <checksum>9BC2008E</checksum>
     </file>
     <file>
+<<<<<<< HEAD
       <filename>EPvalidator.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
       <checksum>38A1E912</checksum>
+=======
+      <filename>hvac.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>4708151E</checksum>
+>>>>>>> 59aa54b5601464b5b46ad7e820bd8f8e9636abf5
     </file>
     <file>
       <filename>energyplus.rb</filename>
@@ -534,16 +546,22 @@
       <checksum>2C3820DF</checksum>
     </file>
     <file>
-      <filename>hpxml_defaults.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>5B72B234</checksum>
-    </file>
-    <file>
       <filename>test_defaults.rb</filename>
       <filetype>rb</filetype>
       <usage_type>test</usage_type>
       <checksum>8AC20974</checksum>
+    </file>
+    <file>
+      <filename>EPvalidator.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>F30A847E</checksum>
+    </file>
+    <file>
+      <filename>hpxml_defaults.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>3B0A2738</checksum>
     </file>
     <file>
       <filename>airflow.rb</filename>
