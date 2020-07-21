@@ -141,7 +141,7 @@ end
 
 def download_epws
   require_relative '../hpxml-measures/HPXMLtoOpenStudio/resources/util'
-  
+
   weather_dir = File.join(File.dirname(__FILE__), '..', 'weather')
 
   num_epws_expected = File.readlines(File.join(weather_dir, 'data.csv')).size - 1
@@ -157,7 +157,7 @@ def download_epws
 
   require 'tempfile'
   tmpfile = Tempfile.new('epw')
-  
+
   UrlResolver.fetch('https://data.nrel.gov/system/files/128/tmy3s-cache-csv.zip', tmpfile)
 
   puts 'Extracting weather files...'

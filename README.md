@@ -26,9 +26,3 @@ Upon completion, simulation results disaggregated by end use and month are avail
 There is also a `workflow/results/HEScoreDesign.xml`, which is the result of applying the HEScore ruleset (e.g., geometry assumptions, etc.) and is the input to the EnergyPlus simulation.
 
 Finally, there is a `workflow/HEScoreDesign` directory that contains the EnergyPlus input and output files.
-
-## Software Developers
-
-To use this workflow, software tools must produce a valid HPXML file. HPXML is an flexible and extensible format, where nearly all fields in the schema are optional and custom fields can be included. Because of this, a HEScore Use Case for HPXML is available that specifies the specific HPXML fields required to run this workflow. The [HPXML HEScore Use Case](https://github.com/NREL/OpenStudio-HEScore/blob/master/measures/HEScoreRuleset/resources/HESvalidator.rb) is defined as a set of conditional XPath expressions.
-
-It is expected that the HEScore API will be providing HPXML files that are consistent with these requirements.
