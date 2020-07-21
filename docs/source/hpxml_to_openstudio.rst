@@ -890,8 +890,6 @@ other multifamily buffer space  E.g., enclosed unconditioned stairwell       Att
 other non-freezing space        E.g., parking garage ceiling                 Attached/Multifamily only
 ==============================  ===========================================  =========================
 
-Appliances in any of the "other ..." locations will have their internal gains neglected.
-
 If the location is not specified, the appliance is assumed to be in the living space.
 
 HPXML Clothes Washer
