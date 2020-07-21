@@ -84,6 +84,10 @@ def create_hpxmls
     'invalid_files/invalid-daylight-saving.xml' => 'base.xml',
     'invalid_files/lighting-fractions.xml' => 'base.xml',
     'invalid_files/missing-elements.xml' => 'base.xml',
+    'invalid_files/multifamily-reference-appliance.xml' => 'base.xml',
+    'invalid_files/multifamily-reference-duct.xml' => 'base.xml',
+    'invalid_files/multifamily-reference-surface.xml' => 'base.xml',
+    'invalid_files/multifamily-reference-water-heater.xml' => 'base.xml',
     'invalid_files/net-area-negative-roof.xml' => 'base-enclosure-skylights.xml',
     'invalid_files/net-area-negative-wall.xml' => 'base.xml',
     'invalid_files/orphaned-hvac-distribution.xml' => 'base-hvac-furnace-gas-room-ac.xml',
@@ -1811,6 +1815,9 @@ def set_hpxml_frame_floors(hpxml_file, hpxml)
   elsif ['invalid_files/enclosure-basement-missing-ceiling.xml',
          'invalid_files/enclosure-garage-missing-roof-ceiling.xml'].include? hpxml_file
     hpxml.frame_floors[1].delete
+  elsif ['invalid_files/multifamily-reference-surface.xml'].include? hpxml_file
+    hpxml.frame_floors[0].exterior_adjacent_to = HPXML::LocationOtherHeatedSpace
+    hpxml.frame_floors[0].other_space_above_or_below = HPXML::FrameFloorOtherSpaceAbove
   end
 end
 
@@ -3287,6 +3294,8 @@ def set_hpxml_hvac_distributions(hpxml_file, hpxml)
 
       hvac_distribution.ducts[1].duct_location = nil
     end
+  elsif ['invalid_files/multifamily-reference-duct.xml'].include? hpxml_file
+    hpxml.hvac_distributions[0].ducts[0].duct_location = HPXML::LocationOtherMultifamilyBufferSpace
   end
 
   # Set ConditionedFloorAreaServed
@@ -3681,6 +3690,8 @@ def set_hpxml_water_heating_systems(hpxml_file, hpxml)
       hpxml.water_heating_systems[0].energy_factor = nil
       hpxml.water_heating_systems[0].uniform_energy_factor = 0.93
     end
+  elsif ['invalid_files/multifamily-reference-water-heater.xml'].include? hpxml_file
+    hpxml.water_heating_systems[0].location = HPXML::LocationOtherNonFreezingSpace
   end
 end
 
@@ -3917,6 +3928,8 @@ def set_hpxml_clothes_washer(hpxml_file, hpxml)
     hpxml.clothes_washers[0].label_usage = nil
   elsif ['base-misc-usage-multiplier.xml'].include? hpxml_file
     hpxml.clothes_washers[0].usage_multiplier = 0.9
+  elsif ['invalid_files/multifamily-reference-appliance.xml'].include? hpxml_file
+    hpxml.clothes_washers[0].location = HPXML::LocationOtherHousingUnit
   end
 end
 
