@@ -475,7 +475,7 @@ class HEScoreRuleset
       elsif heating_system_type == HPXML::HVACTypeStove
         if not heating_efficiency_percent.nil?
           # Do nothing, we already have the heating efficiency percent
-        elsif heating_system_fuel == HPXML::FuelTypeWood
+        elsif heating_system_fuel == HPXML::FuelTypeWoodCord
           heating_efficiency_percent = 0.60
         elsif heating_system_fuel == HPXML::FuelTypeWoodPellets
           heating_efficiency_percent = 0.78
@@ -647,21 +647,8 @@ class HEScoreRuleset
       new_hpxml.hvac_distributions.add(id: orig_dist.id,
                                        distribution_system_type: HPXML::HVACDistributionTypeAir)
 
-      # Calculate ConditionedFloorAreaServed
-      fractions_load_served = []
-      orig_dist.hvac_systems.each do |hvac_system|
-        if hvac_system.respond_to? :fraction_heat_load_served
-          fractions_load_served << hvac_system.fraction_heat_load_served unless hvac_system.fraction_heat_load_served == 0
-        end
-        if hvac_system.respond_to? :fraction_cool_load_served
-          fractions_load_served << hvac_system.fraction_cool_load_served unless hvac_system.fraction_cool_load_served == 0
-        end
-      end
-      fractions_load_served.uniq!
-      if fractions_load_served.size != 1
-        fail 'Could not calculate ConditionedFloorAreaServed for distribution system.'
-      end
-      new_hpxml.hvac_distributions[-1].conditioned_floor_area_served = fractions_load_served[0]
+      hvac_fraction = get_hvac_fraction(orig_hpxml, orig_dist.id)
+      new_hpxml.hvac_distributions[-1].conditioned_floor_area_served = hvac_fraction * @cfa
 
       frac_inside = 0.0
       orig_dist.ducts.each do |orig_duct|
@@ -1089,11 +1076,11 @@ end
 def get_roof_assembly_r(r_cavity, r_cont, material, has_radiant_barrier)
   # Roof Assembly R-value
   materials_map = {
-    HPXML::RoofMaterialAsphaltShingles => 'co',  # Composition Shingles
-    HPXML::RoofMaterialWoodShingles => 'wo',     # Wood Shakes
-    HPXML::RoofMaterialClayTile => 'rc',         # Clay Tile
-    HPXML::RoofMaterialConcrete => 'lc',         # Concrete Tile
-    HPXML::RoofMaterialPlasticRubber => 'tg'     # Tar and Gravel
+    HPXML::RoofTypeAsphaltShingles => 'co',  # Composition Shingles
+    HPXML::RoofTypeWoodShingles => 'wo',     # Wood Shakes
+    HPXML::RoofTypeClayTile => 'rc',         # Clay Tile
+    HPXML::RoofTypeConcrete => 'lc',         # Concrete Tile
+    HPXML::RoofTypePlasticRubber => 'tg'     # Tar and Gravel
   }
   has_r_cont = !r_cont.nil?
   if (not has_r_cont) && (not has_radiant_barrier)
@@ -1205,11 +1192,11 @@ end
 
 def get_roof_solar_absorptance(roof_color)
   # FIXME: Verify
-  val = { HPXML::WindowGlazingReflective => 0.35,
-          HPXML::RoofColorLight => 0.55,
-          HPXML::RoofColorMedium => 0.7,
-          HPXML::RoofColorMediumDark => 0.8,
-          HPXML::RoofColorDark => 0.9 }[roof_color]
+  val = { HPXML::ColorReflective => 0.35,
+          HPXML::ColorLight => 0.55,
+          HPXML::ColorMedium => 0.7,
+          HPXML::ColorMediumDark => 0.8,
+          HPXML::ColorDark => 0.9 }[roof_color]
   return val if not val.nil?
 
   fail "Could not get roof absorptance for color '#{roof_color}'"
@@ -1430,18 +1417,24 @@ end
 def get_hvac_fraction(orig_hpxml, dist_id)
   orig_hpxml.heating_systems.each do |orig_heating|
     next unless orig_heating.distribution_system_idref == dist_id
+    next unless orig_heating.fraction_heat_load_served > 0
 
     return orig_heating.fraction_heat_load_served
   end
   orig_hpxml.cooling_systems.each do |orig_cooling|
     next unless orig_cooling.distribution_system_idref == dist_id
+    next unless orig_cooling.fraction_cool_load_served > 0
 
     return orig_cooling.fraction_cool_load_served
   end
   orig_hpxml.heat_pumps.each do |orig_hp|
     next unless orig_hp.distribution_system_idref == dist_id
 
-    return orig_hp.fraction_cool_load_served
+    if orig_hp.fraction_cool_load_served > 0
+      return orig_hp.fraction_cool_load_served
+    elsif orig_hp.fraction_heat_load_served > 0
+      return orig_hp.fraction_heat_load_served
+    end
   end
   return
 end

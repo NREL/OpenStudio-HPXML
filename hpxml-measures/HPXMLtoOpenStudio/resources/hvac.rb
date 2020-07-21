@@ -118,7 +118,7 @@ class HVAC
         htg_coil.setGasBurnerEfficiency(heating_system.heating_efficiency_afue)
         htg_coil.setParasiticElectricLoad(0)
         htg_coil.setParasiticGasLoad(0)
-        htg_coil.setFuelType(HelperMethods.eplus_fuel_map(heating_system.heating_system_fuel))
+        htg_coil.setFuelType(EPlus.input_fuel_map(heating_system.heating_system_fuel))
       end
       htg_coil.setName(obj_name + ' htg coil')
       if not heating_system.heating_capacity.nil?
@@ -278,7 +278,7 @@ class HVAC
     # Air Loop
 
     air_loop = create_air_loop(model, obj_name, evap_cooler, control_zone, 0, sequential_cool_load_frac)
-    air_loop.additionalProperties.setFeature(Constants.OptionallyDuctedSystemIsDucted, !cooling_system.distribution_system_idref.nil?)
+    air_loop.additionalProperties.setFeature(Constants.SizingInfoHVACSystemIsDucted, !cooling_system.distribution_system_idref.nil?)
     air_loop.additionalProperties.setFeature(Constants.SizingInfoHVACCoolType, Constants.ObjectNameEvaporativeCooler)
     hvac_map[cooling_system.id] << air_loop
 
@@ -301,7 +301,6 @@ class HVAC
     # Outdoor air intake system
     oa_intake_controller = OpenStudio::Model::ControllerOutdoorAir.new(model)
     oa_intake_controller.setName("#{air_loop.name} OA Controller")
-    oa_intake_controller.setMaximumOutdoorAirFlowRate(10) # Set an extreme large value here, will be reset by E+ using sized value
     oa_intake_controller.setMinimumLimitType('FixedMinimum')
     oa_intake_controller.resetEconomizerMinimumLimitDryBulbTemperature
     oa_intake_controller.setMinimumFractionofOutdoorAirSchedule(model.alwaysOnDiscreteSchedule)
@@ -464,7 +463,7 @@ class HVAC
     heat_cfms_ton_rated = calc_cfms_ton_rated(heat_rated_airflow_rate, heat_fan_speed_ratios, heat_capacity_ratios)
     heat_eirs = calc_heat_eirs(num_speeds, heat_cops, fan_power_rated)
     heat_closs_fplr_spec = [calc_plr_coefficients(heat_c_d)] * num_speeds
-    htg_coil = create_dx_heating_coil(model, obj_name, (0...num_speeds).to_a, heat_eirs, heat_cap_ft_spec, heat_eir_ft_spec, heat_closs_fplr_spec, heat_cap_fflow_spec, heat_eir_fflow_spec, heat_pump.heating_capacity, crankcase_kw, crankcase_temp, fan_power_rated, hp_min_temp)
+    htg_coil = create_dx_heating_coil(model, obj_name, (0...num_speeds).to_a, heat_eirs, heat_cap_ft_spec, heat_eir_ft_spec, heat_closs_fplr_spec, heat_cap_fflow_spec, heat_eir_fflow_spec, heat_pump.heating_capacity, crankcase_kw, crankcase_temp, fan_power_rated, hp_min_temp, heat_pump.fraction_heat_load_served)
     hvac_map[heat_pump.id] << htg_coil
 
     # Supplemental Heating Coil
@@ -507,6 +506,31 @@ class HVAC
     air_loop_unitary.additionalProperties.setFeature(Constants.SizingInfoHVACFracCoolLoadServed, heat_pump.fraction_cool_load_served)
     air_loop_unitary.additionalProperties.setFeature(Constants.SizingInfoHVACCoolType, Constants.ObjectNameAirSourceHeatPump)
     air_loop_unitary.additionalProperties.setFeature(Constants.SizingInfoHVACHeatType, Constants.ObjectNameAirSourceHeatPump)
+  end
+
+  def self.apply_mini_split_air_conditioner(model, runner, cooling_system,
+                                            remaining_cool_load_frac,
+                                            control_zone, hvac_map)
+
+    # Shoehorn cooling_system object into a corresponding heat_pump object
+    heat_pump = HPXML::HeatPump.new(nil)
+    heat_pump.id = cooling_system.id
+    heat_pump.heat_pump_type = HPXML::HVACTypeHeatPumpMiniSplit
+    heat_pump.heat_pump_fuel = cooling_system.cooling_system_fuel
+    heat_pump.cooling_capacity = cooling_system.cooling_capacity
+    if !heat_pump.cooling_capacity.nil?
+      heat_pump.heating_capacity = 0
+    end
+    heat_pump.cooling_shr = cooling_system.cooling_shr
+    heat_pump.fraction_heat_load_served = 0
+    heat_pump.fraction_cool_load_served = cooling_system.fraction_cool_load_served
+    heat_pump.cooling_efficiency_seer = cooling_system.cooling_efficiency_seer
+    heat_pump.heating_efficiency_hspf = 7.7 # Arbitrary; shouldn't affect energy use  TODO: Allow nil
+    heat_pump.distribution_system_idref = cooling_system.distribution_system_idref
+
+    apply_mini_split_heat_pump(model, runner, heat_pump, 0,
+                               remaining_cool_load_frac,
+                               control_zone, hvac_map)
   end
 
   def self.apply_mini_split_heat_pump(model, runner, heat_pump,
@@ -593,7 +617,7 @@ class HVAC
     heat_closs_fplr_spec = [calc_plr_coefficients(heat_c_d)] * num_speeds
     heat_cfms_ton_rated, heat_capacity_ratios = calc_mshp_cfms_ton_heating(min_heating_capacity, max_heating_capacity, min_heating_airflow_rate, max_heating_airflow_rate, num_speeds)
     heat_eirs = calc_mshp_heat_eirs(runner, heat_pump.heating_efficiency_hspf, fan_power_installed, hp_min_temp, heat_c_d, cool_cfms_ton_rated, num_speeds, heat_capacity_ratios, heat_cfms_ton_rated, heat_eir_ft_spec, heat_cap_ft_spec)
-    htg_coil = create_dx_heating_coil(model, obj_name, mshp_indices, heat_eirs, heat_cap_ft_spec, heat_eir_ft_spec, heat_closs_fplr_spec, heat_cap_fflow_spec, heat_eir_fflow_spec, heat_pump.heating_capacity, 0.0, nil, nil, hp_min_temp)
+    htg_coil = create_dx_heating_coil(model, obj_name, mshp_indices, heat_eirs, heat_cap_ft_spec, heat_eir_ft_spec, heat_closs_fplr_spec, heat_cap_fflow_spec, heat_eir_fflow_spec, heat_pump.heating_capacity, 0.0, nil, nil, hp_min_temp, heat_pump.fraction_heat_load_served)
     hvac_map[heat_pump.id] << htg_coil
 
     # Supplemental Heating Coil
@@ -699,7 +723,7 @@ class HVAC
       cool_cfms_ton_rated_4 << cool_cfms_ton_rated[mshp_index]
       cool_shrs_rated_gross_4 << cool_shrs_rated_gross[mshp_index]
     end
-    air_loop_unitary.additionalProperties.setFeature(Constants.OptionallyDuctedSystemIsDucted, !heat_pump.distribution_system_idref.nil?)
+    air_loop_unitary.additionalProperties.setFeature(Constants.SizingInfoHVACSystemIsDucted, !heat_pump.distribution_system_idref.nil?)
     air_loop_unitary.additionalProperties.setFeature(Constants.SizingInfoHVACCapacityRatioHeating, heat_capacity_ratios_4.join(','))
     air_loop_unitary.additionalProperties.setFeature(Constants.SizingInfoHVACCapacityRatioCooling, cool_capacity_ratios_4.join(','))
     air_loop_unitary.additionalProperties.setFeature(Constants.SizingInfoHVACHeatingCFMs, heat_cfms_ton_rated_4.join(','))
@@ -734,8 +758,6 @@ class HVAC
     frac_glycol = 0.3
     design_delta_t = 10.0
     pump_head = 50.0
-    u_tube_leg_spacing = 0.9661
-    u_tube_spacing_type = 'b'
     fan_power_installed = 0.5 # W/cfm
     chw_design = [85.0, weather.design.CoolingDrybulb - 15.0, weather.data.AnnualAvgDrybulb + 10.0].max # Temperature of water entering indoor coil,use 85F as lower bound
     if fluid_type == Constants.FluidWater
@@ -755,6 +777,19 @@ class HVAC
       pipe_od = 1.660
       pipe_id = 1.358
     end
+    u_tube_spacing_type = 'b'
+    # Calculate distance between pipes
+    if u_tube_spacing_type == 'as'
+      # Two tubes, spaced 1/8” apart at the center of the borehole
+      u_tube_spacing = 0.125
+    elsif u_tube_spacing_type == 'b'
+      # Two tubes equally spaced between the borehole edges
+      u_tube_spacing = 0.9661
+    elsif u_tube_spacing_type == 'c'
+      # Both tubes placed against outer edge of borehole
+      u_tube_spacing = bore_diameter - 2 * pipe_od
+    end
+    shank_spacing = u_tube_spacing + pipe_od # Distance from center of pipe to center of pipe
 
     if frac_glycol == 0
       fluid_type = Constants.FluidWater
@@ -845,7 +880,7 @@ class HVAC
     ground_heat_exch_vert.setGroutThermalConductivity(UnitConversions.convert(grout_conductivity, 'Btu/(hr*ft*R)', 'W/(m*K)'))
     ground_heat_exch_vert.setPipeThermalConductivity(UnitConversions.convert(pipe_cond, 'Btu/(hr*ft*R)', 'W/(m*K)'))
     ground_heat_exch_vert.setPipeOutDiameter(UnitConversions.convert(pipe_od, 'in', 'm'))
-    ground_heat_exch_vert.setUTubeDistance(UnitConversions.convert(u_tube_leg_spacing, 'in', 'm'))
+    ground_heat_exch_vert.setUTubeDistance(UnitConversions.convert(shank_spacing, 'in', 'm'))
     ground_heat_exch_vert.setPipeThickness(UnitConversions.convert((pipe_od - pipe_id) / 2.0, 'in', 'm'))
     ground_heat_exch_vert.setMaximumLengthofSimulation(1)
     ground_heat_exch_vert.setGFunctionReferenceRatio(0.0005)
@@ -949,17 +984,13 @@ class HVAC
     hvac_map[heating_system.id] = []
     obj_name = Constants.ObjectNameBoiler
     sequential_heat_load_frac = calc_sequential_load_fraction(heating_system.fraction_heat_load_served, remaining_heat_load_frac)
-    system_type = Constants.BoilerTypeForcedDraft
+    is_condensing = false
     oat_reset_enabled = false
     oat_high = nil
     oat_low = nil
     oat_hwst_high = nil
     oat_hwst_low = nil
     design_temp = 180.0 # deg-F
-
-    if system_type == Constants.BoilerTypeSteam
-      fail 'Cannot currently model steam boilers.'
-    end
 
     if oat_reset_enabled
       if oat_high.nil? || oat_low.nil? || oat_hwst_low.nil? || oat_hwst_high.nil?
@@ -1003,11 +1034,11 @@ class HVAC
 
     boiler = OpenStudio::Model::BoilerHotWater.new(model)
     boiler.setName(obj_name)
-    boiler.setFuelType(HelperMethods.eplus_fuel_map(heating_system.heating_system_fuel))
+    boiler.setFuelType(EPlus.input_fuel_map(heating_system.heating_system_fuel))
     if not heating_system.heating_capacity.nil?
       boiler.setNominalCapacity(UnitConversions.convert([heating_system.heating_capacity, Constants.small].max, 'Btu/hr', 'W')) # Used by HVACSizing measure
     end
-    if system_type == Constants.BoilerTypeCondensing
+    if is_condensing
       # Convert Rated Efficiency at 80F and 1.0PLR where the performance curves are derived from to Design condition as input
       boiler_RatedHWRT = UnitConversions.convert(80.0 - 32.0, 'R', 'K')
       plr_Rated = 1.0
@@ -1035,7 +1066,7 @@ class HVAC
     plant_loop.addSupplyBranchForComponent(boiler)
     hvac_map[heating_system.id] << boiler
 
-    if (system_type == Constants.BoilerTypeCondensing) && oat_reset_enabled
+    if is_condensing && oat_reset_enabled
       setpoint_manager_oar = OpenStudio::Model::SetpointManagerOutdoorAirReset.new(model)
       setpoint_manager_oar.setName(obj_name + ' outdoor reset')
       setpoint_manager_oar.setControlVariable('Temperature')
@@ -1146,7 +1177,7 @@ class HVAC
       htg_coil.setGasBurnerEfficiency(efficiency)
       htg_coil.setParasiticElectricLoad(0.0)
       htg_coil.setParasiticGasLoad(0)
-      htg_coil.setFuelType(HelperMethods.eplus_fuel_map(heating_system.heating_system_fuel))
+      htg_coil.setFuelType(EPlus.input_fuel_map(heating_system.heating_system_fuel))
     end
     htg_coil.setName(obj_name + ' htg coil')
     if not heating_system.heating_capacity.nil?
@@ -1175,10 +1206,8 @@ class HVAC
     unitary_system.additionalProperties.setFeature(Constants.SizingInfoHVACHeatType, Constants.ObjectNameUnitHeater)
   end
 
-  def self.apply_ideal_air_loads(model, runner, sequential_cool_load_frac,
+  def self.apply_ideal_air_loads(model, runner, obj_name, sequential_cool_load_frac,
                                  sequential_heat_load_frac, control_zone)
-
-    obj_name = Constants.ObjectNameIdealAirSystem
 
     # Ideal Air System
 
@@ -1188,8 +1217,18 @@ class HVAC
     ideal_air.setMinimumCoolingSupplyAirTemperature(10)
     ideal_air.setMaximumHeatingSupplyAirHumidityRatio(0.015)
     ideal_air.setMinimumCoolingSupplyAirHumidityRatio(0.01)
-    ideal_air.setHeatingLimit('NoLimit')
-    ideal_air.setCoolingLimit('NoLimit')
+    if sequential_heat_load_frac > 0
+      ideal_air.setHeatingLimit('NoLimit')
+    else
+      ideal_air.setHeatingLimit('LimitCapacity')
+      ideal_air.setMaximumSensibleHeatingCapacity(0)
+    end
+    if sequential_cool_load_frac > 0
+      ideal_air.setCoolingLimit('NoLimit')
+    else
+      ideal_air.setCoolingLimit('LimitCapacity')
+      ideal_air.setMaximumTotalCoolingCapacity(0)
+    end
     ideal_air.setDehumidificationControlType('None')
     ideal_air.setHumidificationControlType('None')
     ideal_air.addToThermalZone(control_zone)
@@ -1203,6 +1242,8 @@ class HVAC
   end
 
   def self.apply_dehumidifier(model, runner, dehumidifier, living_space, hvac_map)
+    hvac_map[dehumidifier.id] = []
+
     water_removal_rate = dehumidifier.capacity
     energy_factor = dehumidifier.energy_factor
 
@@ -1253,13 +1294,21 @@ class HVAC
     end
   end
 
-  def self.apply_ceiling_fans(model, runner, annual_kWh, weekday_sch, weekend_sch, monthly_sch,
-                              cfa, living_space)
+  def self.apply_ceiling_fans(model, runner, weather, ceiling_fan, living_space)
     obj_name = Constants.ObjectNameCeilingFan
+    monthly_sch = get_default_ceiling_fan_months(weather)
+    medium_cfm = 3000.0
+    weekday_sch = [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.5, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 0.0, 0.0, 0.0, 0.0]
+    weekend_sch = weekday_sch
+    hrs_per_day = weekday_sch.sum(0.0)
+    cfm_per_w = ceiling_fan.efficiency
+    quantity = ceiling_fan.quantity
+    annual_kwh = UnitConversions.convert(quantity * medium_cfm / cfm_per_w * hrs_per_day * 365.0, 'Wh', 'kWh')
+    annual_kwh *= monthly_sch.sum(0.0) / 12.0
 
     ceiling_fan_sch = MonthWeekdayWeekendSchedule.new(model, obj_name + ' schedule', weekday_sch, weekend_sch, monthly_sch, 1.0, 1.0, true, true, Constants.ScheduleTypeLimitsFraction)
 
-    space_design_level = ceiling_fan_sch.calcDesignLevelFromDailykWh(annual_kWh / 365.0)
+    space_design_level = ceiling_fan_sch.calcDesignLevelFromDailykWh(annual_kwh / 365.0)
 
     equip_def = OpenStudio::Model::ElectricEquipmentDefinition.new(model)
     equip_def.setName(obj_name)
@@ -1274,73 +1323,112 @@ class HVAC
     equip.setSchedule(ceiling_fan_sch.schedule)
   end
 
-  def self.apply_setpoints(model, runner, weather, living_zone,
-                           htg_wkdy_monthly, htg_wked_monthly, htg_start_month, htg_end_month,
-                           clg_wkdy_monthly, clg_wked_monthly, clg_start_month, clg_end_month)
+  def self.apply_setpoints(model, runner, weather, hvac_control, living_zone)
+    # Assume heating/cooling seasons are year-round
+    htg_start_month = 1
+    htg_end_month = 12
+    clg_start_month = 1
+    clg_end_month = 12
 
-    # Get heating season
+    # Base heating setpoint
+    htg_setpoint = hvac_control.heating_setpoint_temp
+    htg_weekday_setpoints = [[htg_setpoint] * 24] * 12
+
+    # Apply heating setback?
+    htg_setback = hvac_control.heating_setback_temp
+    if not htg_setback.nil?
+      htg_setback_hrs_per_week = hvac_control.heating_setback_hours_per_week
+      htg_setback_start_hr = hvac_control.heating_setback_start_hour
+      for m in 1..12
+        for hr in htg_setback_start_hr..htg_setback_start_hr + Integer(htg_setback_hrs_per_week / 7.0) - 1
+          htg_weekday_setpoints[m - 1][hr % 24] = htg_setback
+        end
+      end
+    end
+    htg_weekend_setpoints = htg_weekday_setpoints
+
+    # Base cooling setpoint
+    clg_setpoint = hvac_control.cooling_setpoint_temp
+    clg_weekday_setpoints = [[clg_setpoint] * 24] * 12
+
+    # Apply cooling setup?
+    clg_setup = hvac_control.cooling_setup_temp
+    if not clg_setup.nil?
+      clg_setup_hrs_per_week = hvac_control.cooling_setup_hours_per_week
+      clg_setup_start_hr = hvac_control.cooling_setup_start_hour
+      for m in 1..12
+        for hr in clg_setup_start_hr..clg_setup_start_hr + Integer(clg_setup_hrs_per_week / 7.0) - 1
+          clg_weekday_setpoints[m - 1][hr % 24] = clg_setup
+        end
+      end
+    end
+
+    # Apply cooling setpoint offset due to ceiling fan?
+    clg_ceiling_fan_offset = hvac_control.ceiling_fan_cooling_setpoint_temp_offset
+    if not clg_ceiling_fan_offset.nil?
+      HVAC.get_default_ceiling_fan_months(weather).each_with_index do |operation, m|
+        next unless operation == 1
+
+        clg_weekday_setpoints[m] = [clg_weekday_setpoints[m], Array.new(24, clg_ceiling_fan_offset)].transpose.map { |i| i.reduce(:+) }
+      end
+    end
+    clg_weekend_setpoints = clg_weekday_setpoints
+
+    # Create heating season schedule
     if htg_start_month <= htg_end_month
       heating_season = Array.new(htg_start_month - 1, 0) + Array.new(htg_end_month - htg_start_month + 1, 1) + Array.new(12 - htg_end_month, 0)
     else
       heating_season = Array.new(htg_end_month, 1) + Array.new(htg_start_month - htg_end_month - 1, 0) + Array.new(12 - htg_start_month + 1, 1)
     end
+    heating_season_sch = MonthWeekdayWeekendSchedule.new(model, Constants.ObjectNameHeatingSeason, Array.new(24, 1), Array.new(24, 1), heating_season, 1.0, 1.0, false, true, Constants.ScheduleTypeLimitsOnOff)
 
-    # Get cooling season
+    # Create cooling season schedule
     if clg_start_month <= clg_end_month
       cooling_season = Array.new(clg_start_month - 1, 0) + Array.new(clg_end_month - clg_start_month + 1, 1) + Array.new(12 - clg_end_month, 0)
     else
       cooling_season = Array.new(clg_end_month, 1) + Array.new(clg_start_month - clg_end_month - 1, 0) + Array.new(12 - clg_start_month + 1, 1)
     end
-
-    heating_season_sch = MonthWeekdayWeekendSchedule.new(model, Constants.ObjectNameHeatingSeason, Array.new(24, 1), Array.new(24, 1), heating_season, 1.0, 1.0, false, true, Constants.ScheduleTypeLimitsOnOff)
     cooling_season_sch = MonthWeekdayWeekendSchedule.new(model, Constants.ObjectNameCoolingSeason, Array.new(24, 1), Array.new(24, 1), cooling_season, 1.0, 1.0, false, true, Constants.ScheduleTypeLimitsOnOff)
 
-    htg_wkdy_monthly = htg_wkdy_monthly.map { |i| i.map { |j| UnitConversions.convert(j, 'F', 'C') } }
-    htg_wked_monthly = htg_wked_monthly.map { |i| i.map { |j| UnitConversions.convert(j, 'F', 'C') } }
-    clg_wkdy_monthly = clg_wkdy_monthly.map { |i| i.map { |j| UnitConversions.convert(j, 'F', 'C') } }
-    clg_wked_monthly = clg_wked_monthly.map { |i| i.map { |j| UnitConversions.convert(j, 'F', 'C') } }
-
+    # Create setpoint schedules
     (0..11).to_a.each do |i|
       if (heating_season[i] == 1) && (cooling_season[i] == 1) # overlap seasons
-        htg_wkdy = htg_wkdy_monthly[i].zip(clg_wkdy_monthly[i]).map { |h, c| c < h ? (h + c) / 2.0 : h }
-        htg_wked = htg_wked_monthly[i].zip(clg_wked_monthly[i]).map { |h, c| c < h ? (h + c) / 2.0 : h }
-        clg_wkdy = htg_wkdy_monthly[i].zip(clg_wkdy_monthly[i]).map { |h, c| c < h ? (h + c) / 2.0 : c }
-        clg_wked = htg_wked_monthly[i].zip(clg_wked_monthly[i]).map { |h, c| c < h ? (h + c) / 2.0 : c }
+        htg_wkdy = htg_weekday_setpoints[i].zip(clg_weekday_setpoints[i]).map { |h, c| c < h ? (h + c) / 2.0 : h }
+        htg_wked = htg_weekend_setpoints[i].zip(clg_weekend_setpoints[i]).map { |h, c| c < h ? (h + c) / 2.0 : h }
+        clg_wkdy = htg_weekday_setpoints[i].zip(clg_weekday_setpoints[i]).map { |h, c| c < h ? (h + c) / 2.0 : c }
+        clg_wked = htg_weekend_setpoints[i].zip(clg_weekend_setpoints[i]).map { |h, c| c < h ? (h + c) / 2.0 : c }
       elsif heating_season[i] == 1 # heating only seasons; cooling has minimum of heating
-        htg_wkdy = htg_wkdy_monthly[i].zip(clg_wkdy_monthly[i]).map { |h, c| c < h ? h : h }
-        htg_wked = htg_wked_monthly[i].zip(clg_wked_monthly[i]).map { |h, c| c < h ? h : h }
-        clg_wkdy = htg_wkdy_monthly[i].zip(clg_wkdy_monthly[i]).map { |h, c| c < h ? h : c }
-        clg_wked = htg_wked_monthly[i].zip(clg_wked_monthly[i]).map { |h, c| c < h ? h : c }
+        htg_wkdy = htg_weekday_setpoints[i].zip(clg_weekday_setpoints[i]).map { |h, c| c < h ? h : h }
+        htg_wked = htg_weekend_setpoints[i].zip(clg_weekend_setpoints[i]).map { |h, c| c < h ? h : h }
+        clg_wkdy = htg_weekday_setpoints[i].zip(clg_weekday_setpoints[i]).map { |h, c| c < h ? h : c }
+        clg_wked = htg_weekend_setpoints[i].zip(clg_weekend_setpoints[i]).map { |h, c| c < h ? h : c }
       elsif cooling_season[i] == 1 # cooling only seasons; heating has maximum of cooling
-        htg_wkdy = htg_wkdy_monthly[i].zip(clg_wkdy_monthly[i]).map { |h, c| c < h ? c : h }
-        htg_wked = htg_wked_monthly[i].zip(clg_wked_monthly[i]).map { |h, c| c < h ? c : h }
-        clg_wkdy = htg_wkdy_monthly[i].zip(clg_wkdy_monthly[i]).map { |h, c| c < h ? c : c }
-        clg_wked = htg_wked_monthly[i].zip(clg_wked_monthly[i]).map { |h, c| c < h ? c : c }
+        htg_wkdy = htg_weekday_setpoints[i].zip(clg_weekday_setpoints[i]).map { |h, c| c < h ? c : h }
+        htg_wked = htg_weekend_setpoints[i].zip(clg_weekend_setpoints[i]).map { |h, c| c < h ? c : h }
+        clg_wkdy = htg_weekday_setpoints[i].zip(clg_weekday_setpoints[i]).map { |h, c| c < h ? c : c }
+        clg_wked = htg_weekend_setpoints[i].zip(clg_weekend_setpoints[i]).map { |h, c| c < h ? c : c }
       else
         fail 'Unhandled case.'
       end
-      htg_wkdy_monthly[i] = htg_wkdy
-      htg_wked_monthly[i] = htg_wked
-      clg_wkdy_monthly[i] = clg_wkdy
-      clg_wked_monthly[i] = clg_wked
+      htg_weekday_setpoints[i] = htg_wkdy
+      htg_weekend_setpoints[i] = htg_wked
+      clg_weekday_setpoints[i] = clg_wkdy
+      clg_weekend_setpoints[i] = clg_wked
     end
-
-    heating_setpoint = HourlyByMonthSchedule.new(model, Constants.ObjectNameHeatingSetpoint, htg_wkdy_monthly, htg_wked_monthly, normalize_values = false)
-    cooling_setpoint = HourlyByMonthSchedule.new(model, Constants.ObjectNameCoolingSetpoint, clg_wkdy_monthly, clg_wked_monthly, normalize_values = false)
+    htg_weekday_setpoints = htg_weekday_setpoints.map { |i| i.map { |j| UnitConversions.convert(j, 'F', 'C') } }
+    htg_weekend_setpoints = htg_weekend_setpoints.map { |i| i.map { |j| UnitConversions.convert(j, 'F', 'C') } }
+    clg_weekday_setpoints = clg_weekday_setpoints.map { |i| i.map { |j| UnitConversions.convert(j, 'F', 'C') } }
+    clg_weekend_setpoints = clg_weekend_setpoints.map { |i| i.map { |j| UnitConversions.convert(j, 'F', 'C') } }
+    heating_setpoint = HourlyByMonthSchedule.new(model, Constants.ObjectNameHeatingSetpoint, htg_weekday_setpoints, htg_weekend_setpoints, normalize_values = false)
+    cooling_setpoint = HourlyByMonthSchedule.new(model, Constants.ObjectNameCoolingSetpoint, clg_weekday_setpoints, clg_weekend_setpoints, normalize_values = false)
 
     # Set the setpoint schedules
     thermostat_setpoint = living_zone.thermostatSetpointDualSetpoint
-    if thermostat_setpoint.is_initialized
-      thermostat_setpoint = thermostat_setpoint.get
-      thermostat_setpoint.setHeatingSetpointTemperatureSchedule(heating_setpoint.schedule)
-      thermostat_setpoint.setCoolingSetpointTemperatureSchedule(cooling_setpoint.schedule)
-    else
-      thermostat_setpoint = OpenStudio::Model::ThermostatSetpointDualSetpoint.new(model)
-      thermostat_setpoint.setName("#{living_zone.name} temperature setpoint")
-      thermostat_setpoint.setHeatingSetpointTemperatureSchedule(heating_setpoint.schedule)
-      thermostat_setpoint.setCoolingSetpointTemperatureSchedule(cooling_setpoint.schedule)
-      living_zone.setThermostatSetpointDualSetpoint(thermostat_setpoint)
-    end
+    thermostat_setpoint = OpenStudio::Model::ThermostatSetpointDualSetpoint.new(model)
+    thermostat_setpoint.setName("#{living_zone.name} temperature setpoint")
+    thermostat_setpoint.setHeatingSetpointTemperatureSchedule(heating_setpoint.schedule)
+    thermostat_setpoint.setCoolingSetpointTemperatureSchedule(cooling_setpoint.schedule)
+    living_zone.setThermostatSetpointDualSetpoint(thermostat_setpoint)
   end
 
   def self.apply_eae_to_heating_fan(runner, eae_hvacs, eae, fuel, load_frac, htg_type)
@@ -1568,19 +1656,12 @@ class HVAC
       hvac_objects << clg_object_sensor
     end
 
-    var_map = { 'NaturalGas' => 'Heating Coil Gas Energy',
-                'Propane' => 'Heating Coil Propane Energy',
-                'FuelOilNo1' => 'Heating Coil FuelOil#1 Energy',
-                'OtherFuel1' => 'Heating Coil OtherFuel1 Energy',
-                'OtherFuel2' => 'Heating Coil OtherFuel2 Energy' }
-
     if htg_object.nil?
       htg_object_sensor = nil
     else
-      var = 'Heating Coil Electric Energy'
+      var = "Heating Coil #{EPlus.output_fuel_map(EPlus::FuelTypeElectricity)} Energy"
       if htg_object.is_a? OpenStudio::Model::CoilHeatingGas
-        var = var_map[htg_object.fuelType]
-        fail "Unexpected heating coil '#{htg_object.name}'." if var.nil?
+        var = "Heating Coil #{EPlus.output_fuel_map(htg_object.fuelType)} Energy"
       elsif htg_object.is_a? OpenStudio::Model::ZoneHVACBaseboardConvectiveWater
         var = 'Baseboard Total Heating Energy'
       end
@@ -1594,10 +1675,9 @@ class HVAC
     if backup_htg_object.nil?
       backup_htg_object_sensor = nil
     else
-      var = 'Heating Coil Electric Energy'
+      var = "Heating Coil #{EPlus.output_fuel_map(EPlus::FuelTypeElectricity)} Energy"
       if backup_htg_object.is_a? OpenStudio::Model::CoilHeatingGas
-        var = var_map[backup_htg_object.fuelType]
-        fail "Unexpected heating coil '#{backup_htg_object.name}'." if var.nil?
+        var = "Heating Coil #{EPlus.output_fuel_map(backup_htg_object.fuelType)} Energy"
       end
 
       backup_htg_object_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, var)
@@ -1728,7 +1808,7 @@ class HVAC
       htg_supp_coil.setGasBurnerEfficiency(efficiency)
       htg_supp_coil.setParasiticElectricLoad(0)
       htg_supp_coil.setParasiticGasLoad(0)
-      htg_supp_coil.setFuelType(HelperMethods.eplus_fuel_map(fuel))
+      htg_supp_coil.setFuelType(EPlus.input_fuel_map(fuel))
     end
     htg_supp_coil.setName(obj_name + ' ' + Constants.ObjectNameBackupHeatingCoil)
     if not capacity.nil?
@@ -1810,6 +1890,7 @@ class HVAC
     else
       air_terminal = OpenStudio::Model::AirTerminalSingleDuctVAVNoReheat.new(model, model.alwaysOnDiscreteSchedule)
       air_terminal.setConstantMinimumAirFlowFraction(0)
+      air_terminal.setFixedMinimumAirFlowRate(0)
     end
     air_terminal.setName(obj_name + ' terminal')
     air_loop.multiAddBranchForZone(control_zone, air_terminal)
@@ -1832,8 +1913,8 @@ class HVAC
     # Curved values under EF test conditions
     curve_value_ef = 1 # Curves are nomalized to 1.0 under EF test conditions, 80F, 60%
     # Curve values under IEF test conditions
-    ef_curve_value_ief = var_array_ief.zip(ef_coeff).map { |var, coeff| var * coeff }.inject(0, :+)
-    water_removal_curve_value_ief = var_array_ief.zip(w_coeff).map { |var, coeff| var * coeff }.inject(0, :+)
+    ef_curve_value_ief = var_array_ief.zip(ef_coeff).map { |var, coeff| var * coeff }.sum(0.0)
+    water_removal_curve_value_ief = var_array_ief.zip(w_coeff).map { |var, coeff| var * coeff }.sum(0.0)
 
     # E+ inputs under EF test conditions
     ef_input = ief / ef_curve_value_ief * curve_value_ef
@@ -1845,15 +1926,29 @@ class HVAC
   def self.get_default_eae(htg_type, fuel, load_frac, furnace_capacity_kbtuh)
     # From ANSI/RESNET/ICC 301 Standard
     if htg_type == HPXML::HVACTypeBoiler
-      if (fuel == HPXML::FuelTypeNaturalGas) || (fuel == HPXML::FuelTypePropane)
+      if [HPXML::FuelTypeNaturalGas,
+          HPXML::FuelTypePropane].include? fuel
         return 170.0 * load_frac # kWh/yr
-      elsif fuel == HPXML::FuelTypeOil
+      elsif [HPXML::FuelTypeOil,
+             HPXML::FuelTypeOil1,
+             HPXML::FuelTypeOil2,
+             HPXML::FuelTypeOil4,
+             HPXML::FuelTypeOil5or6,
+             HPXML::FuelTypeDiesel,
+             HPXML::FuelTypeKerosene].include? fuel
         return 330.0 * load_frac # kWh/yr
       end
     elsif htg_type == HPXML::HVACTypeFurnace
-      if (fuel == HPXML::FuelTypeNaturalGas) || (fuel == HPXML::FuelTypePropane)
+      if [HPXML::FuelTypeNaturalGas,
+          HPXML::FuelTypePropane].include? fuel
         return (149.0 + 10.3 * furnace_capacity_kbtuh) * load_frac # kWh/yr
-      elsif fuel == HPXML::FuelTypeOil
+      elsif [HPXML::FuelTypeOil,
+             HPXML::FuelTypeOil1,
+             HPXML::FuelTypeOil2,
+             HPXML::FuelTypeOil4,
+             HPXML::FuelTypeOil5or6,
+             HPXML::FuelTypeDiesel,
+             HPXML::FuelTypeKerosene].include? fuel
         return (439.0 + 5.5 * furnace_capacity_kbtuh) * load_frac # kWh/yr
       end
     end
@@ -2896,7 +2991,7 @@ class HVAC
           clg_coil = OpenStudio::Model::CoilCoolingDXMultiSpeed.new(model)
           clg_coil.setApplyPartLoadFractiontoSpeedsGreaterthan1(false)
           clg_coil.setApplyLatentDegradationtoSpeedsGreaterthan1(false)
-          clg_coil.setFuelType('electricity')
+          clg_coil.setFuelType(EPlus::FuelTypeElectricity)
           clg_coil.setAvailabilitySchedule(model.alwaysOnDiscreteSchedule)
           if not crankcase_temp.nil?
             clg_coil.setMaximumOutdoorDryBulbTemperatureforCrankcaseHeaterOperation(UnitConversions.convert(crankcase_temp, 'F', 'C'))
@@ -2924,7 +3019,8 @@ class HVAC
     return clg_coil
   end
 
-  def self.create_dx_heating_coil(model, obj_name, speed_indices, eirs, cap_ft_spec, eir_ft_spec, closs_fplr_spec, cap_fflow_spec, eir_fflow_spec, capacity, crankcase_kw, crankcase_temp, fan_power_rated, hp_min_temp)
+  def self.create_dx_heating_coil(model, obj_name, speed_indices, eirs, cap_ft_spec, eir_ft_spec, closs_fplr_spec, cap_fflow_spec, eir_fflow_spec,
+                                  capacity, crankcase_kw, crankcase_temp, fan_power_rated, hp_min_temp, fraction_heat_load_served)
     num_speeds = speed_indices.size
 
     if num_speeds > 1
@@ -2956,7 +3052,7 @@ class HVAC
       else
         if htg_coil.nil?
           htg_coil = OpenStudio::Model::CoilHeatingDXMultiSpeed.new(model)
-          htg_coil.setFuelType('electricity')
+          htg_coil.setFuelType(EPlus::FuelTypeElectricity)
           htg_coil.setApplyPartLoadFractiontoSpeedsGreaterthan1(false)
           htg_coil.setAvailabilitySchedule(model.alwaysOnDiscreteSchedule)
           if not crankcase_temp.nil?
@@ -2976,11 +3072,14 @@ class HVAC
     htg_coil.setName(obj_name + ' htg coil')
     htg_coil.setMinimumOutdoorDryBulbTemperatureforCompressorOperation(UnitConversions.convert(hp_min_temp, 'F', 'C'))
     htg_coil.setMaximumOutdoorDryBulbTemperatureforDefrostOperation(UnitConversions.convert(40.0, 'F', 'C'))
-    defrost_eir_curve = create_curve_biquadratic(model, [0.1528, 0, 0, 0, 0, 0], 'Defrosteir', -100, 100, -100, 100) # Heating defrost curve for reverse cycle
-    htg_coil.setDefrostEnergyInputRatioFunctionofTemperatureCurve(defrost_eir_curve)
-    htg_coil.setDefrostStrategy('ReverseCycle')
-    htg_coil.setDefrostControl('Timed')
-    htg_coil.setCrankcaseHeaterCapacity(0)
+    if fraction_heat_load_served > 0
+      defrost_eir_curve = create_curve_biquadratic(model, [0.1528, 0, 0, 0, 0, 0], 'Defrosteir', -100, 100, -100, 100) # Heating defrost curve for reverse cycle
+      htg_coil.setDefrostEnergyInputRatioFunctionofTemperatureCurve(defrost_eir_curve)
+      htg_coil.setDefrostStrategy('ReverseCycle')
+      htg_coil.setDefrostControl('Timed')
+    else
+      htg_coil.setDefrostTimePeriodFraction(0)
+    end
     htg_coil.setCrankcaseHeaterCapacity(UnitConversions.convert(crankcase_kw, 'kW', 'W'))
 
     return htg_coil
@@ -3355,7 +3454,7 @@ class HVAC
     elsif Constants.ObjectNameFurnace == hvac_type_heat
       return true
     elsif [Constants.ObjectNameMiniSplitHeatPump, Constants.ObjectNameEvaporativeCooler].include? hvac_type_cool
-      is_ducted = system.additionalProperties.getFeatureAsBoolean(Constants.OptionallyDuctedSystemIsDucted).get
+      is_ducted = system.additionalProperties.getFeatureAsBoolean(Constants.SizingInfoHVACSystemIsDucted).get
       if is_ducted
         return true
       end

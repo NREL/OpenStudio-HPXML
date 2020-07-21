@@ -7,6 +7,7 @@ require 'optparse'
 require 'pathname'
 require 'csv'
 require_relative '../hpxml-measures/HPXMLtoOpenStudio/resources/meta_measure'
+require_relative '../hpxml-measures/HPXMLtoOpenStudio/resources/version'
 require_relative 'hescore_lib'
 
 basedir = File.expand_path(File.dirname(__FILE__))
@@ -31,17 +32,8 @@ def get_output_hpxml_path(resultsdir, rundir)
 end
 
 def run_design(basedir, rundir, design, resultsdir, hpxml, debug, skip_simulation)
-  puts 'Creating input...'
-
-  Dir.mkdir(rundir)
-
-  OpenStudio::Logger.instance.standardOutLogger.setLogLevel(OpenStudio::Fatal)
-
-  output_hpxml_path = get_output_hpxml_path(resultsdir, rundir)
-
-  model = OpenStudio::Model::Model.new
-  runner = OpenStudio::Measure::OSRunner.new(OpenStudio::WorkflowJSON.new)
   measures_dir = File.join(basedir, '..')
+  output_hpxml_path = get_output_hpxml_path(resultsdir, rundir)
 
   measures = {}
 
@@ -77,47 +69,10 @@ def run_design(basedir, rundir, design, resultsdir, hpxml, debug, skip_simulatio
     update_args_hash(measures, measure_subdir, args)
   end
 
-  # Apply measures
-  success = apply_measures(measures_dir, measures, runner, model, true, 'OpenStudio::Measure::ModelMeasure')
-  report_measure_errors_warnings(runner, rundir, debug)
+  run_hpxml_workflow(rundir, hpxml, measures, measures_dir,
+                     debug: debug, run_measures_only: skip_simulation)
 
   return if skip_simulation
-
-  if not success
-    fail 'Simulation unsuccessful.'
-  end
-
-  # Translate model to IDF
-  forward_translator = OpenStudio::EnergyPlus::ForwardTranslator.new
-  forward_translator.setExcludeLCCObjects(true)
-  model_idf = forward_translator.translateModel(model)
-  report_ft_errors_warnings(forward_translator, rundir)
-
-  # Apply reporting measure output requests
-  apply_energyplus_output_requests(measures_dir, measures, runner, model, model_idf)
-
-  # Write IDF to file
-  File.open(File.join(rundir, 'in.idf'), 'w') { |f| f << model_idf.to_s }
-
-  return if skip_simulation
-
-  puts 'Running simulation...'
-
-  # getEnergyPlusDirectory can be unreliable, using getOpenStudioCLI instead
-  ep_path = File.absolute_path(File.join(OpenStudio.getOpenStudioCLI.to_s, '..', '..', 'EnergyPlus', 'energyplus'))
-  command = "cd #{rundir} && #{ep_path} -w in.epw in.idf > stdout-energyplus"
-  system(command, err: File::NULL)
-
-  puts 'Processing output...'
-
-  # Apply reporting measures
-  runner.setLastEnergyPlusSqlFilePath(File.join(rundir, 'eplusout.sql'))
-  success = apply_measures(measures_dir, measures, runner, model, true, 'OpenStudio::Measure::ReportingMeasure')
-  report_measure_errors_warnings(runner, rundir, debug)
-
-  if not success
-    fail 'Processing output unsuccessful.'
-  end
 
   units_map = get_units_map()
   output_map = get_output_map()
@@ -184,36 +139,9 @@ def run_design(basedir, rundir, design, resultsdir, hpxml, debug, skip_simulatio
   end
 end
 
-def report_measure_errors_warnings(runner, rundir, debug)
-  # Report warnings/errors
-  File.open(File.join(rundir, 'run.log'), 'w') do |f|
-    if debug
-      runner.result.stepInfo.each do |s|
-        f << "Info: #{s}\n"
-      end
-    end
-    runner.result.stepWarnings.each do |s|
-      f << "Warning: #{s}\n"
-    end
-    runner.result.stepErrors.each do |s|
-      f << "Error: #{s}\n"
-    end
-  end
-end
-
-def report_ft_errors_warnings(forward_translator, rundir)
-  # Report warnings/errors
-  File.open(File.join(rundir, 'run.log'), 'a') do |f|
-    forward_translator.warnings.each do |s|
-      f << "FT Warning: #{s.logMessage}\n"
-    end
-    forward_translator.errors.each do |s|
-      f << "FT Error: #{s.logMessage}\n"
-    end
-  end
-end
-
 def download_epws
+  require_relative '../hpxml-measures/HPXMLtoOpenStudio/resources/util'
+
   weather_dir = File.join(File.dirname(__FILE__), '..', 'weather')
 
   num_epws_expected = File.readlines(File.join(weather_dir, 'data.csv')).size - 1
@@ -227,40 +155,10 @@ def download_epws
     exit!
   end
 
-  require 'net/http'
   require 'tempfile'
-
   tmpfile = Tempfile.new('epw')
 
-  url = URI.parse('https://data.nrel.gov/files/128/tmy3s-cache-csv.zip')
-  http = Net::HTTP.new(url.host, url.port)
-  http.use_ssl = true
-  http.verify_mode = OpenSSL::SSL::VERIFY_NONE
-
-  params = { 'User-Agent' => 'curl/7.43.0', 'Accept-Encoding' => 'identity' }
-  request = Net::HTTP::Get.new(url.path, params)
-  request.content_type = 'application/zip, application/octet-stream'
-
-  http.request request do |response|
-    total = response.header['Content-Length'].to_i
-    if total == 0
-      fail 'Did not successfully download zip file.'
-    end
-
-    size = 0
-    progress = 0
-    open tmpfile, 'wb' do |io|
-      response.read_body do |chunk|
-        io.write chunk
-        size += chunk.size
-        new_progress = (size * 100) / total
-        unless new_progress == progress
-          puts 'Downloading %s (%3d%%) ' % [url.path, new_progress]
-        end
-        progress = new_progress
-      end
-    end
-  end
+  UrlResolver.fetch('https://data.nrel.gov/system/files/128/tmy3s-cache-csv.zip', tmpfile)
 
   puts 'Extracting weather files...'
   unzip_file = OpenStudio::UnzipFile.new(tmpfile.path.to_s)
@@ -320,10 +218,7 @@ unless File.exist?(options[:hpxml]) && options[:hpxml].downcase.end_with?('.xml'
 end
 
 # Check for correct versions of OS
-os_version = '3.0.0'
-if OpenStudio.openStudioVersion != os_version
-  fail "OpenStudio version #{os_version} is required."
-end
+Version.check_openstudio_version()
 
 if options[:output_dir].nil?
   options[:output_dir] = basedir # default
@@ -343,7 +238,7 @@ Dir.mkdir(resultsdir)
 puts "HPXML: #{options[:hpxml]}"
 design = 'HEScoreDesign'
 rundir = get_rundir(options[:output_dir], design)
-rm_path(rundir)
+
 rundir = run_design(basedir, rundir, design, resultsdir, options[:hpxml], options[:debug], options[:skip_simulation])
 
 puts "Completed in #{(Time.now - start_time).round(1)} seconds."
