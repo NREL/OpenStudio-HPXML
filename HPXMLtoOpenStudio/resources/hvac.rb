@@ -3077,6 +3077,8 @@ class HVAC
       htg_coil.setDefrostEnergyInputRatioFunctionofTemperatureCurve(defrost_eir_curve)
       htg_coil.setDefrostStrategy('ReverseCycle')
       htg_coil.setDefrostControl('Timed')
+    else
+      htg_coil.setDefrostTimePeriodFraction(0)
     end
     htg_coil.setCrankcaseHeaterCapacity(UnitConversions.convert(crankcase_kw, 'kW', 'W'))
 
