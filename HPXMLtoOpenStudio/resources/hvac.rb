@@ -463,7 +463,7 @@ class HVAC
     heat_cfms_ton_rated = calc_cfms_ton_rated(heat_rated_airflow_rate, heat_fan_speed_ratios, heat_capacity_ratios)
     heat_eirs = calc_heat_eirs(num_speeds, heat_cops, fan_power_rated)
     heat_closs_fplr_spec = [calc_plr_coefficients(heat_c_d)] * num_speeds
-    htg_coil = create_dx_heating_coil(model, obj_name, (0...num_speeds).to_a, heat_eirs, heat_cap_ft_spec, heat_eir_ft_spec, heat_closs_fplr_spec, heat_cap_fflow_spec, heat_eir_fflow_spec, heat_pump.heating_capacity, crankcase_kw, crankcase_temp, fan_power_rated, hp_min_tempm, heat_pump.fraction_heat_load_served)
+    htg_coil = create_dx_heating_coil(model, obj_name, (0...num_speeds).to_a, heat_eirs, heat_cap_ft_spec, heat_eir_ft_spec, heat_closs_fplr_spec, heat_cap_fflow_spec, heat_eir_fflow_spec, heat_pump.heating_capacity, crankcase_kw, crankcase_temp, fan_power_rated, hp_min_temp, heat_pump.fraction_heat_load_served)
     hvac_map[heat_pump.id] << htg_coil
 
     # Supplemental Heating Coil
