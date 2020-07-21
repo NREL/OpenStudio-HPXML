@@ -406,7 +406,7 @@ class EnergyPlusValidator
       '/HPXML/Building/BuildingDetails/Systems/HVAC/HVACPlant/CoolingSystem' => {
         'SystemIdentifier' => one, # Required by HPXML schema
         '../../HVACControl' => one, # See [HVACControl]
-        'CoolingSystemType[text()="central air conditioner" or text()="room air conditioner" or text()="evaporative cooler"]' => one, # See [CoolingType=CentralAC] or [CoolingType=RoomAC] or [CoolingType=EvapCooler]
+        'CoolingSystemType[text()="central air conditioner" or text()="room air conditioner" or text()="evaporative cooler" or text()="mini-split"]' => one, # See [CoolingType=CentralAC] or [CoolingType=RoomAC] or [CoolingType=EvapCooler] or [CoolingType=MiniSplitAC]
         'CoolingSystemFuel[text()="electricity"]' => one,
         'FractionCoolLoadServed' => one, # Must sum to <= 1 across all CoolingSystems and HeatPumps
       },
@@ -434,6 +434,16 @@ class EnergyPlusValidator
         '../../HVACDistribution[DistributionSystemType/AirDistribution | DistributionSystemType[Other="DSE"]]' => zero_or_more, # See [HVACDistribution]
         'DistributionSystem' => zero_or_one,
         'CoolingCapacity' => zero,
+      },
+
+      ## [CoolingType=MiniSplitAC]
+      '/HPXML/Building/BuildingDetails/Systems/HVAC/HVACPlant/CoolingSystem[CoolingSystemType="mini-split"]' => {
+        '../../HVACDistribution[DistributionSystemType/AirDistribution | DistributionSystemType[Other="DSE"]]' => zero_or_more, # See [HVACDistribution]
+        'DistributionSystem' => zero_or_one,
+        'CoolingCapacity' => zero_or_one,
+        '[not(CompressorType)] | CompressorType[text()="single stage" or text()="two stage" or text()="variable speed"]' => one,
+        'AnnualCoolingEfficiency[Units="SEER"]/Value' => one,
+        'SensibleHeatFraction' => zero_or_one,
       },
 
       # [HeatPump]
@@ -719,7 +729,7 @@ class EnergyPlusValidator
       # [ClothesWasher]
       '/HPXML/Building/BuildingDetails/Appliances/ClothesWasher' => {
         'SystemIdentifier' => one, # Required by HPXML schema
-        '[not(Location)] | Location[text()="living space" or text()="basement - conditioned" or text()="basement - unconditioned" or text()="garage" or text()="other"]' => one,
+        '[not(Location)] | Location[text()="living space" or text()="basement - conditioned" or text()="basement - unconditioned" or text()="garage" or text()="other housing unit" or text()="other heated space" or text()="other multifamily buffer space" or text()="other non-freezing space"]' => one,
         'ModifiedEnergyFactor | IntegratedModifiedEnergyFactor' => zero_or_one,
         'ModifiedEnergyFactor | IntegratedModifiedEnergyFactor | RatedAnnualkWh | LabelElectricRate | LabelGasRate | LabelAnnualGasCost | LabelUsage | Capacity' => zero_or_seven,
         'extension/UsageMultiplier' => zero_or_one,
@@ -729,7 +739,7 @@ class EnergyPlusValidator
       '/HPXML/Building/BuildingDetails/Appliances/ClothesDryer' => {
         '../ClothesWasher' => one,
         'SystemIdentifier' => one, # Required by HPXML schema
-        '[not(Location)] | Location[text()="living space" or text()="basement - conditioned" or text()="basement - unconditioned" or text()="garage" or text()="other"]' => one,
+        '[not(Location)] | Location[text()="living space" or text()="basement - conditioned" or text()="basement - unconditioned" or text()="garage" or text()="other housing unit" or text()="other heated space" or text()="other multifamily buffer space" or text()="other non-freezing space"]' => one,
         'FuelType[text()="natural gas" or text()="fuel oil" or text()="fuel oil 1" or text()="fuel oil 2" or text()="fuel oil 4" or text()="fuel oil 5/6" or text()="diesel" or text()="propane" or text()="kerosene" or text()="coal" or text()="coke" or text()="bituminous coal" or text()="anthracite coal" or text()="electricity" or text()="wood" or text()="wood pellets"]' => one,
         'EnergyFactor | CombinedEnergyFactor' => zero_or_one,
         'EnergyFactor | CombinedEnergyFactor | ControlType' => zero_or_two,
@@ -739,7 +749,7 @@ class EnergyPlusValidator
       # [Dishwasher]
       '/HPXML/Building/BuildingDetails/Appliances/Dishwasher' => {
         'SystemIdentifier' => one, # Required by HPXML schema
-        '[not(Location)] | Location[text()="living space" or text()="basement - conditioned" or text()="basement - unconditioned" or text()="garage" or text()="other"]' => one,
+        '[not(Location)] | Location[text()="living space" or text()="basement - conditioned" or text()="basement - unconditioned" or text()="garage" or text()="other housing unit" or text()="other heated space" or text()="other multifamily buffer space" or text()="other non-freezing space"]' => one,
         'RatedAnnualkWh | EnergyFactor' => zero_or_one,
         'RatedAnnualkWh | EnergyFactor | LabelElectricRate | LabelGasRate | LabelAnnualGasCost | LabelUsage | PlaceSettingCapacity' => zero_or_six,
         'extension/UsageMultiplier' => zero_or_one,
@@ -748,7 +758,7 @@ class EnergyPlusValidator
       # [Refrigerator]
       '/HPXML/Building/BuildingDetails/Appliances/Refrigerator' => {
         'SystemIdentifier' => one, # Required by HPXML schema
-        '[not(Location)] | Location[text()="living space" or text()="basement - conditioned" or text()="basement - unconditioned" or text()="garage" or text()="other"]' => one,
+        '[not(Location)] | Location[text()="living space" or text()="basement - conditioned" or text()="basement - unconditioned" or text()="garage" or text()="other housing unit" or text()="other heated space" or text()="other multifamily buffer space" or text()="other non-freezing space"]' => one,
         'RatedAnnualkWh | extension/AdjustedAnnualkWh' => zero_or_more,
         'PrimaryIndicator' => zero_or_one,
         'extension/UsageMultiplier' => zero_or_one,
@@ -760,7 +770,7 @@ class EnergyPlusValidator
       # [Freezer]
       '/HPXML/Building/BuildingDetails/Appliances/Freezer' => {
         'SystemIdentifier' => one, # Required by HPXML schema
-        '[not(Location)] | Location[text()="living space" or text()="basement - conditioned" or text()="basement - unconditioned" or text()="garage" or text()="other"]' => one,
+        '[not(Location)] | Location[text()="living space" or text()="basement - conditioned" or text()="basement - unconditioned" or text()="garage" or text()="other housing unit" or text()="other heated space" or text()="other multifamily buffer space" or text()="other non-freezing space"]' => one,
         'RatedAnnualkWh | extension/AdjustedAnnualkWh' => zero_or_more,
         'extension/UsageMultiplier' => zero_or_one,
         'extension/WeekdayScheduleFractions' => zero_or_one,
@@ -781,7 +791,7 @@ class EnergyPlusValidator
       '/HPXML/Building/BuildingDetails/Appliances/CookingRange' => {
         '../Oven' => one, # See [Oven]
         'SystemIdentifier' => one, # Required by HPXML schema
-        '[not(Location)] | Location[text()="living space" or text()="basement - conditioned" or text()="basement - unconditioned" or text()="garage" or text()="other"]' => one,
+        '[not(Location)] | Location[text()="living space" or text()="basement - conditioned" or text()="basement - unconditioned" or text()="garage" or text()="other housing unit" or text()="other heated space" or text()="other multifamily buffer space" or text()="other non-freezing space"]' => one,
         'FuelType[text()="natural gas" or text()="fuel oil" or text()="fuel oil 1" or text()="fuel oil 2" or text()="fuel oil 4" or text()="fuel oil 5/6" or text()="diesel" or text()="propane" or text()="kerosene" or text()="coal" or text()="coke" or text()="bituminous coal" or text()="anthracite coal" or text()="electricity" or text()="wood" or text()="wood pellets"]' => one,
         'IsInduction' => zero_or_one,
         'extension/UsageMultiplier' => zero_or_one,
@@ -800,13 +810,34 @@ class EnergyPlusValidator
       # [Lighting]
       '/HPXML/Building/BuildingDetails/Lighting' => {
         'LightingGroup[LightingType[LightEmittingDiode | CompactFluorescent | FluorescentTube] and Location[text()="interior" or text()="exterior" or text()="garage"]]' => nine, # See [LightingGroup]
-        'extension/UsageMultiplier' => zero_or_one,
+        'extension/InteriorUsageMultiplier' => zero_or_one,
+        'extension/GarageUsageMultiplier' => zero_or_one,
+        'extension/ExteriorUsageMultiplier' => zero_or_one,
+        'extension/InteriorWeekdayScheduleFractions' => zero_or_one,
+        'extension/InteriorWeekendScheduleFractions' => zero_or_one,
+        'extension/InteriorMonthlyScheduleMultipliers' => zero_or_one,
+        'extension/GarageWeekdayScheduleFractions' => zero_or_one,
+        'extension/GarageWeekendScheduleFractions' => zero_or_one,
+        'extension/GarageMonthlyScheduleMultipliers' => zero_or_one,
+        'extension/ExteriorWeekdayScheduleFractions' => zero_or_one,
+        'extension/ExteriorWeekendScheduleFractions' => zero_or_one,
+        'extension/ExteriorMonthlyScheduleMultipliers' => zero_or_one,
+        'extension/ExteriorHolidayLighting' => zero_or_one, # See [ExteriorHolidayLighting]
       },
 
       ## [LightingGroup]
       '/HPXML/Building/BuildingDetails/Lighting/LightingGroup[LightingType[LightEmittingDiode | CompactFluorescent | FluorescentTube] and Location[text()="interior" or text()="exterior" or text()="garage"]]' => {
         'SystemIdentifier' => one, # Required by HPXML schema
         'FractionofUnitsInLocation' => one,
+      },
+
+      ## [ExteriorHolidayLighting]
+      '/HPXML/Building/BuildingDetails/Lighting/extension/ExteriorHolidayLighting' => {
+        'Load[Units="kWh/day"]/Value' => zero_or_one,
+        'PeriodBeginMonth | PeriodBeginDayOfMonth' => zero_or_two, # integer
+        'PeriodEndMonth | PeriodEndDayOfMonth' => zero_or_two, # integer
+        'WeekdayScheduleFractions' => zero_or_one,
+        'WeekendScheduleFractions' => zero_or_one,
       },
 
       # [CeilingFan]

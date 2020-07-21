@@ -793,22 +793,26 @@ class HPXMLTest < MiniTest::Test
     end
     hpxml.cooling_systems.each do |cooling_system|
       clg_sys_cap = cooling_system.cooling_capacity.to_f
+      clg_cap_mult = 1.0
+      if cooling_system.cooling_system_type == HPXML::HVACTypeMiniSplitAirConditioner
+        # TODO: Generalize this
+        clg_cap_mult = 1.20
+      end
       if clg_sys_cap > 0
         clg_cap = 0 if clg_cap.nil?
-        clg_cap += Float(clg_sys_cap)
+        clg_cap += (clg_sys_cap * clg_cap_mult)
       end
     end
     hpxml.heat_pumps.each do |heat_pump|
-      hp_type = heat_pump.heat_pump_type
       hp_cap_clg = heat_pump.cooling_capacity.to_f
       hp_cap_htg = heat_pump.heating_capacity.to_f
       clg_cap_mult = 1.0
       htg_cap_mult = 1.0
-      if hp_type == HPXML::HVACTypeHeatPumpMiniSplit
+      if heat_pump.heat_pump_type == HPXML::HVACTypeHeatPumpMiniSplit
         # TODO: Generalize this
         clg_cap_mult = 1.20
         htg_cap_mult = 1.20
-      elsif (hp_type == HPXML::HVACTypeHeatPumpAirToAir) && (heat_pump.cooling_efficiency_seer > 21)
+      elsif (heat_pump.heat_pump_type == HPXML::HVACTypeHeatPumpAirToAir) && (heat_pump.cooling_efficiency_seer > 21)
         # TODO: Generalize this
         htg_cap_mult = 1.17
       end
@@ -925,7 +929,7 @@ class HPXMLTest < MiniTest::Test
     if (hpxml.clothes_washers.size > 0) && (hpxml.water_heating_systems.size > 0)
       # Location
       hpxml_value = hpxml.clothes_washers[0].location
-      if hpxml_value.nil? || (hpxml_value == HPXML::LocationBasementConditioned) || (hpxml_value == HPXML::LocationOther)
+      if hpxml_value.nil? || [HPXML::LocationBasementConditioned, HPXML::LocationOtherHousingUnit, HPXML::LocationOtherHeatedSpace, HPXML::LocationOtherMultifamilyBufferSpace, HPXML::LocationOtherNonFreezingSpace].include?(hpxml_value)
         hpxml_value = HPXML::LocationLivingSpace
       end
       query = "SELECT Value FROM TabularDataWithStrings WHERE TableName='ElectricEquipment Internal Gains Nominal' AND ColumnName='Zone Name' AND RowName=(SELECT RowName FROM TabularDataWithStrings WHERE TableName='ElectricEquipment Internal Gains Nominal' AND ColumnName='Name' AND Value='#{Constants.ObjectNameClothesWasher.upcase}')"
@@ -937,7 +941,7 @@ class HPXMLTest < MiniTest::Test
     if (hpxml.clothes_dryers.size > 0) && (hpxml.water_heating_systems.size > 0)
       # Location
       hpxml_value = hpxml.clothes_dryers[0].location
-      if hpxml_value.nil? || (hpxml_value == HPXML::LocationBasementConditioned) || (hpxml_value == HPXML::LocationOther)
+      if hpxml_value.nil? || [HPXML::LocationBasementConditioned, HPXML::LocationOtherHousingUnit, HPXML::LocationOtherHeatedSpace, HPXML::LocationOtherMultifamilyBufferSpace, HPXML::LocationOtherNonFreezingSpace].include?(hpxml_value)
         hpxml_value = HPXML::LocationLivingSpace
       end
       query = "SELECT Value FROM TabularDataWithStrings WHERE TableName='ElectricEquipment Internal Gains Nominal' AND ColumnName='Zone Name' AND RowName=(SELECT RowName FROM TabularDataWithStrings WHERE TableName='ElectricEquipment Internal Gains Nominal' AND ColumnName='Name' AND Value='#{Constants.ObjectNameClothesDryer.upcase}')"
@@ -949,7 +953,7 @@ class HPXMLTest < MiniTest::Test
     if hpxml.refrigerators.size > 0
       # Location
       hpxml_value = hpxml.refrigerators[0].location
-      if hpxml_value.nil? || (hpxml_value == HPXML::LocationBasementConditioned) || (hpxml_value == HPXML::LocationOther)
+      if hpxml_value.nil? || [HPXML::LocationBasementConditioned, HPXML::LocationOtherHousingUnit, HPXML::LocationOtherHeatedSpace, HPXML::LocationOtherMultifamilyBufferSpace, HPXML::LocationOtherNonFreezingSpace].include?(hpxml_value)
         hpxml_value = HPXML::LocationLivingSpace
       end
       query = "SELECT Value FROM TabularDataWithStrings WHERE TableName='ElectricEquipment Internal Gains Nominal' AND ColumnName='Zone Name' AND RowName=(SELECT RowName FROM TabularDataWithStrings WHERE TableName='ElectricEquipment Internal Gains Nominal' AND ColumnName='Name' AND Value='#{Constants.ObjectNameRefrigerator.upcase}')"
@@ -961,7 +965,7 @@ class HPXMLTest < MiniTest::Test
     if (hpxml.dishwashers.size > 0) && (hpxml.water_heating_systems.size > 0)
       # Location
       hpxml_value = hpxml.dishwashers[0].location
-      if hpxml_value.nil? || (hpxml_value == HPXML::LocationBasementConditioned) || (hpxml_value == HPXML::LocationOther)
+      if hpxml_value.nil? || [HPXML::LocationBasementConditioned, HPXML::LocationOtherHousingUnit, HPXML::LocationOtherHeatedSpace, HPXML::LocationOtherMultifamilyBufferSpace, HPXML::LocationOtherNonFreezingSpace].include?(hpxml_value)
         hpxml_value = HPXML::LocationLivingSpace
       end
       query = "SELECT Value FROM TabularDataWithStrings WHERE TableName='ElectricEquipment Internal Gains Nominal' AND ColumnName='Zone Name' AND RowName=(SELECT RowName FROM TabularDataWithStrings WHERE TableName='ElectricEquipment Internal Gains Nominal' AND ColumnName='Name' AND Value='#{Constants.ObjectNameDishwasher.upcase}')"
@@ -973,7 +977,7 @@ class HPXMLTest < MiniTest::Test
     if hpxml.cooking_ranges.size > 0
       # Location
       hpxml_value = hpxml.cooking_ranges[0].location
-      if hpxml_value.nil? || (hpxml_value == HPXML::LocationBasementConditioned) || (hpxml_value == HPXML::LocationOther)
+      if hpxml_value.nil? || [HPXML::LocationBasementConditioned, HPXML::LocationOtherHousingUnit, HPXML::LocationOtherHeatedSpace, HPXML::LocationOtherMultifamilyBufferSpace, HPXML::LocationOtherNonFreezingSpace].include?(hpxml_value)
         hpxml_value = HPXML::LocationLivingSpace
       end
       query = "SELECT Value FROM TabularDataWithStrings WHERE TableName='ElectricEquipment Internal Gains Nominal' AND ColumnName='Zone Name' AND RowName=(SELECT RowName FROM TabularDataWithStrings WHERE TableName='ElectricEquipment Internal Gains Nominal' AND ColumnName='Name' AND Value='#{Constants.ObjectNameCookingRange.upcase}')"
