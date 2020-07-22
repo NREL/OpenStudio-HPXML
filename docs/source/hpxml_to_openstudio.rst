@@ -25,7 +25,7 @@ The following building features/technologies are available for modeling via the 
 - HVAC
 
   - Heating Systems (Electric Resistance, Central/Wall/Floor Furnaces, Stoves, Boilers, Portable/Fixed Heaters, Fireplaces)
-  - Cooling Systems (Central Air Conditioners, Room Air Conditioners, Evaporative Coolers)
+  - Cooling Systems (Central Air Conditioners, Room Air Conditioners, Evaporative Coolers, Mini Split Air Conditioners)
   - Heat Pumps (Air Source, Mini Split, Ground Source, Dual-Fuel)
   - Setpoints
   - Ducts
@@ -68,28 +68,6 @@ The `HPXML Toolbox website <https://hpxml.nrel.gov/>`_ also provides several res
 #. An interactive schema validator
 #. A data dictionary
 #. An implementation guide
-
-Scope (Dwelling Units)
-**********************
-
-The OpenStudio-HPXML workflow is intended to be used to model individual residential dwelling units -- either a single-family detached (SFD) building, or a single unit of a single-family attached (SFA) or multifamily (MF) building.
-This approach was taken because:
-
-- It is required/desired for certain projects.
-- It improves runtime speed by being able to simulate individual units in parallel (as opposed to simulating the entire building).
-- It doesn't necessarily preclude the possibility of running a single integrated EnergyPlus simulation.
-
-To model units of SFA/MF buildings, current capabilities include:
-
-- Defining surfaces adjacent to generic SFA/MF space types (e.g., "other housing unit" or "other multifamily buffer space").
-- Locating various building components (e.g., ducts, water heaters, appliances) in these spaces.
-
-Note that only the energy use attributed to each dwelling unit is calculated.
-Other OpenStudio capabilities should be used to supplement this workflow if the energy use of non-residential dwelling spaces (e.g., gyms, elevators, corridors, etc.) are of interest.
-In the near future, the OpenStudio-HPXML workflow will also begin supporting shared systems (HVAC, water heating, mechanical ventilation, etc.) by approximating the energy use attributed to the unit.
-
-For situations where more complex, integrated modeling is required, it is possible to merge multiple OpenStudio models together into a single model, such that one could merge all residential OSMs together and potentially combine it with a commercial OSM.
-That capability is outside the scope of this project.
 
 Input Defaults
 **************
@@ -200,7 +178,7 @@ The ``ClimateandRiskZones/WeatherStation`` element specifies the EnergyPlus weat
 The weather file can be entered in one of two ways:
 
 #. Using ``WeatherStation/WMO``, which must be one of the acceptable TMY3 WMO station numbers found in the ``weather/data.csv`` file.
-   The full set of U.S. TMY3 weather files can be `downloaded here <https://data.nrel.gov/files/128/tmy3s-cache-csv.zip>`_.
+   The full set of U.S. TMY3 weather files can be `downloaded here <https://data.nrel.gov/system/files/128/tmy3s-cache-csv.zip>`_.
 #. Using ``WeatherStation/extension/EPWFilePath``.
 
 HPXML Enclosure
@@ -501,6 +479,7 @@ CoolingSystemType        DistributionSystem                 CoolingSystemFuel  A
 central air conditioner  AirDistribution or DSE             electricity        SEER                     (optional)
 room air conditioner                                        electricity        EER                      (optional)
 evaporative cooler       AirDistribution or DSE (optional)  electricity
+mini-split               AirDistribution or DSE (optional)  electricity        SEER                     (optional)
 =======================  =================================  =================  =======================  ====================
 
 Central air conditioners can also have the ``CompressorType`` specified; if not provided, it is assumed as follows:
@@ -636,13 +615,14 @@ HPXML Mechanical Ventilation
 ****************************
 
 This section describes elements specified in HPXML's ``Systems/MechanicalVentilation``.
-``Systems/MechanicalVentilation/VentilationFans/VentilationFan`` elements can be used to specify whole-house mechanical ventilation systems, kitchen/bathroom fans, and whole house fans.
+``Systems/MechanicalVentilation/VentilationFans/VentilationFan`` elements can be used to specify whole building ventilation, local ventilation, and/or cooling load reduction.
 
 Whole Building Ventilation
 ~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-A single whole-house mechanical ventilation system may be specified as a ``Systems/MechanicalVentilation/VentilationFans/VentilationFan`` with ``UsedForWholeBuildingVentilation='true'``.
+Mechanical ventilation systems that provide whole building ventilation may each be specified as a ``Systems/MechanicalVentilation/VentilationFans/VentilationFan`` with ``UsedForWholeBuildingVentilation='true'``.
 Inputs including ``FanType``, ``TestedFlowRate`` (or ``RatedFlowRate``), ``HoursInOperation``, and ``FanPower`` must be provided.
+For a CFIS system, the flow rate should equal the amount of outdoor air provided to the distribution system.
 
 Depending on the type of mechanical ventilation specified, additional elements are required:
 
@@ -659,26 +639,24 @@ central fan integrated supply (CFIS)                                            
 
 Note that ``AdjustedSensibleRecoveryEfficiency`` and ``AdjustedTotalRecoveryEfficiency`` can be provided instead of ``SensibleRecoveryEfficiency`` and ``TotalRecoveryEfficiency``.
 
-In many situations, the rated flow rate should be the value derived from actual testing of the system.
-For a CFIS system, the rated flow rate should equal the amount of outdoor air provided to the distribution system.
-
 Local Ventilation
 ~~~~~~~~~~~~~~~~~
 
-A kitchen range fan may be specified as a ``Systems/MechanicalVentilation/VentilationFans/VentilationFan`` with ``FanLocation='kitchen'`` and ``UsedForLocalVentilation='true'``.
+Kitchen range fans that provide local ventilation may each be specified as a ``Systems/MechanicalVentilation/VentilationFans/VentilationFan`` with ``FanLocation='kitchen'`` and ``UsedForLocalVentilation='true'``.
 
 Additional fields may be provided per the table below. If not provided, default values will be assumed based on the `Building America House Simulation Protocols <https://www1.eere.energy.gov/buildings/publications/pdfs/building_america/house_simulation.pdf>`_.
 
 =========================== ========================
 Element Name                Default Value
 =========================== ========================
+Quantity [#]                1
 RatedFlowRate [cfm]         100
 HoursInOperation [hrs/day]  1
 FanPower [W]                0.3 * RatedFlowRate
 extension/StartHour [0-23]  18
 =========================== ========================
 
-Bathroom fans may be specified as a ``Systems/MechanicalVentilation/VentilationFans/VentilationFan`` with ``FanLocation='bath'`` and ``UsedForLocalVentilation='true'``.
+Bathroom fans that provide local ventilation may each be specified as a ``Systems/MechanicalVentilation/VentilationFans/VentilationFan`` with ``FanLocation='bath'`` and ``UsedForLocalVentilation='true'``.
 
 Additional fields may be provided per the table below. If not provided, default values will be assumed based on the `Building America House Simulation Protocols <https://www1.eere.energy.gov/buildings/publications/pdfs/building_america/house_simulation.pdf>`_.
 
@@ -695,11 +673,10 @@ extension/StartHour [0-23]  7
 Cooling Load Reduction
 ~~~~~~~~~~~~~~~~~~~~~~
 
-A single whole house fan may be specified as a ``Systems/MechanicalVentilation/VentilationFans/VentilationFan`` with ``UsedForSeasonalCoolingLoadReduction='true'``.
+Whole house fans that provide cooling load reduction may each be specified as a ``Systems/MechanicalVentilation/VentilationFans/VentilationFan`` with ``UsedForSeasonalCoolingLoadReduction='true'``.
 Required elements include ``RatedFlowRate`` and ``FanPower``.
 
-The whole house fan is assumed to operate during hours of favorable outdoor conditions.
-If available, it will take priority over natural ventilation.
+The whole house fan is assumed to operate during hours of favorable outdoor conditions and will take priority over operable windows (natural ventilation).
 
 HPXML Water Heating Systems
 ***************************
@@ -1055,7 +1032,28 @@ The fractions for a given location cannot sum to greater than 1.
 If the fractions sum to less than 1, the remainder is assumed to be incandescent lighting.
 Garage lighting values are ignored if the building has no garage.
 
-A ``extension/UsageMultiplier`` can also be optionally provided that scales energy usage; if not provided, it is assumed to be 1.0.
+Optional ``extension/InteriorUsageMultiplier``, ``extension/ExteriorUsageMultiplier``, and ``extension/GarageUsageMultiplier`` can be provided that scales energy usage; if not provided, they are assumed to be 1.0.
+
+An optional ``extension/ExteriorHolidayLighting`` can also be provided to define additional exterior holiday lighting; if not provided, none will be modeled. 
+If provided, child elements ``Load[Units='kWh/day']/Value``, ``PeriodBeginMonth``/``PeriodBeginDayOfMonth``, ``PeriodEndMonth``/``PeriodEndDayOfMonth``, ``WeekdayScheduleFractions``, and ``WeekendScheduleFractions`` can be optionally provided. 
+For the child elements not provided, the following default values will be used.
+
+=============================================  ======================================================================================================
+Element Name                                   Default Value
+=============================================  ======================================================================================================
+Load[Units='kWh/day']/Value                    1.1 for single-family detached and 0.55 for others
+PeriodBeginMonth/PeriodBeginDayOfMonth         11/24 (November 24) 
+PeriodEndMonth/PeriodEndDayOfMonth             1/6 (January 6) 
+WeekdayScheduleFractions                       0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0.008, 0.098, 0.168, 0.194, 0.284, 0.192, 0.037, 0.019
+WeekendScheduleFractions                       0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0.008, 0.098, 0.168, 0.194, 0.284, 0.192, 0.037, 0.019
+=============================================  ======================================================================================================
+
+Finally, optional schedules can be defined:
+
+- **Interior**: Optional ``extension/InteriorWeekdayScheduleFractions``, ``extension/InteriorWeekendScheduleFractions``, and ``extension/InteriorMonthlyScheduleMultipliers`` can be provided; if not provided, values will be calculated using Lighting Calculation Option 2 (location-dependent lighting profile) of the `Building America House Simulation Protocols <https://www1.eere.energy.gov/buildings/publications/pdfs/building_america/house_simulation.pdf>`_.
+- **Garage**: Optional ``extension/GarageWeekdayScheduleFractions``, ``extension/GarageWeekendScheduleFractions``, and ``extension/GarageMonthlyScheduleMultipliers`` can be provided; if not provided, values from Appendix C Table 8 of the `Title 24 2016 Residential Alternative Calculation Method Reference Manual <https://ww2.energy.ca.gov/2015publications/CEC-400-2015-024/CEC-400-2015-024-CMF-REV2.pdf>`_ are used.
+- **Exterior**: Optional ``extension/ExteriorWeekdayScheduleFractions``, ``extension/ExteriorWeekendScheduleFractions``, and ``extension/ExteriorMonthlyScheduleMultipliers`` can be provided; if not provided, values from Appendix C Table 8 of the `Title 24 2016 Residential Alternative Calculation Method Reference Manual <https://ww2.energy.ca.gov/2015publications/CEC-400-2015-024/CEC-400-2015-024-CMF-REV2.pdf>`_ are used.
+
 
 HPXML Ceiling Fans
 ******************
@@ -1151,7 +1149,8 @@ The electric vehicle charging default kWh/year is calculated using:
 where AnnualMiles=4500, kWhPerMile=0.3, EVChargerEfficiency=0.9, and EVBatteryEfficiency=0.9.
 
 An ``extension/UsageMultiplier`` can also be optionally provided that scales energy usage; if not provided, it is assumed to be 1.0.
-Optional ``extension/WeekdayScheduleFractions``, ``extension/WeekendScheduleFractions``, and ``extension/MonthlyScheduleMultipliers`` can be provided; if not provided, values from Figures 23 & 24 of the `Building America House Simulation Protocols <https://www1.eere.energy.gov/buildings/publications/pdfs/building_america/house_simulation.pdf>`_ are used.
+Optional ``extension/WeekdayScheduleFractions``, ``extension/WeekendScheduleFractions``, and ``extension/MonthlyScheduleMultipliers`` can be provided.
+If not provided, values from Figures 23 & 24 of the `Building America House Simulation Protocols <https://www1.eere.energy.gov/buildings/publications/pdfs/building_america/house_simulation.pdf>`_ are used for ``PlugLoadType='other'``, ``PlugLoadType='electric vehicle charging'``, and ``PlugLoadType='well pump'``; values from the `American Time Use Survey <https://www.bls.gov/tus>`_ are used for ``PlugLoadType='TV other'``.
 
 HPXML Fuel Loads
 ****************

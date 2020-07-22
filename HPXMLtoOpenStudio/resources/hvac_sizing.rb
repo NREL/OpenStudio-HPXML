@@ -181,10 +181,12 @@ class HVACSizing
       area_conditioned = 0.0
       @hpxml.roofs.each do |roof|
         next unless roof.interior_adjacent_to == space_type
+
         area_total += roof.area
       end
       @hpxml.frame_floors.each do |frame_floor|
         next unless [frame_floor.interior_adjacent_to, frame_floor.exterior_adjacent_to].include? space_type
+
         area_total += frame_floor.area
         area_conditioned += frame_floor.area if frame_floor.is_thermal_boundary
       end
@@ -574,7 +576,7 @@ class HVACSizing
     end # window
 
     # Daily Average Load (DAL)
-    dal = afl_hr.inject { |sum, n| sum + n } / afl_hr.size
+    dal = afl_hr.sum(0.0) / afl_hr.size
 
     # Excursion Limit line (ELL)
     ell = 1.3 * dal
@@ -649,7 +651,7 @@ class HVACSizing
     end # skylight
 
     # Daily Average Load (DAL)
-    dal = afl_hr.inject { |sum, n| sum + n } / afl_hr.size
+    dal = afl_hr.sum(0.0) / afl_hr.size
 
     # Excursion Limit line (ELL)
     ell = 1.3 * dal
@@ -775,6 +777,7 @@ class HVACSizing
     # Foundation walls
     @hpxml.foundation_walls.each do |foundation_wall|
       next unless foundation_wall.is_exterior_thermal_boundary
+
       u_wall_with_soil, u_wall_without_soil = get_foundation_wall_properties(foundation_wall)
       zone_loads.Heat_Walls += u_wall_with_soil * foundation_wall.net_area * @htd
     end
@@ -873,7 +876,7 @@ class HVACSizing
         k_soil = UnitConversions.convert(BaseMaterial.Soil.k_in, 'in', 'ft')
         r_other = Material.Concrete(4.0).rvalue + Material.AirFilmFloorAverage.rvalue
         foundation_walls = @hpxml.foundation_walls.select { |fw| fw.is_thermal_boundary }
-        z_f = foundation_walls.map { |fw| fw.depth_below_grade }.inject(:+) / foundation_walls.size # Average below-grade depth
+        z_f = foundation_walls.map { |fw| fw.depth_below_grade }.sum(0.0) / foundation_walls.size # Average below-grade depth
         sqrt_term = [slab.exposed_perimeter**2 - 16.0 * slab.area, 0.0].max
         length = slab.exposed_perimeter / 4.0 + Math.sqrt(sqrt_term) / 4.0
         width = slab.exposed_perimeter / 4.0 - Math.sqrt(sqrt_term) / 4.0
@@ -1753,23 +1756,16 @@ class HVACSizing
   end
 
   def self.get_ventilation_rates(model)
-    mechVentType = get_feature(model.getBuilding, Constants.SizingInfoMechVentType, 'string', false)
-    return [0.0, 0.0, 0.0] if mechVentType.nil?
+    mechVentExist = get_feature(model.getBuilding, Constants.SizingInfoMechVentExist, 'boolean')
+    return [0.0, 0.0, 0.0] unless mechVentExist
 
-    mechVentWholeHouseRate = get_feature(model.getBuilding, Constants.SizingInfoMechVentWholeHouseRate, 'double')
+    q_unb = get_feature(model.getBuilding, Constants.SizingInfoMechVentWholeHouseRateUnbalanced, 'double')
+    q_b = get_feature(model.getBuilding, Constants.SizingInfoMechVentWholeHouseRateBalanced, 'double')
+    apparentSensibleEffectiveness = get_feature(model.getBuilding, Constants.SizingInfoMechVentApparentSensibleEffectiveness, 'double')
+    latentEffectiveness = get_feature(model.getBuilding, Constants.SizingInfoMechVentLatentEffectiveness, 'double')
 
-    if [HPXML::MechVentTypeExhaust, HPXML::MechVentTypeSupply, HPXML::MechVentTypeCFIS].include? mechVentType
-      q_unb = mechVentWholeHouseRate
-      q_bal_sens = 0.0
-      q_bal_lat = 0.0
-    elsif [HPXML::MechVentTypeBalanced, HPXML::MechVentTypeERV, HPXML::MechVentTypeHRV].include? mechVentType
-      totalEfficiency = get_feature(model.getBuilding, Constants.SizingInfoMechVentTotalEfficiency, 'double')
-      apparentSensibleEffectiveness = get_feature(model.getBuilding, Constants.SizingInfoMechVentApparentSensibleEffectiveness, 'double')
-      latentEffectiveness = get_feature(model.getBuilding, Constants.SizingInfoMechVentLatentEffectiveness, 'double')
-      q_unb = 0.0
-      q_bal_sens = mechVentWholeHouseRate * (1.0 - apparentSensibleEffectiveness)
-      q_bal_lat = mechVentWholeHouseRate * (1.0 - latentEffectiveness)
-    end
+    q_bal_sens = q_b * (1.0 - apparentSensibleEffectiveness)
+    q_bal_lat = q_b * (1.0 - latentEffectiveness)
 
     return [q_unb, q_bal_sens, q_bal_lat]
   end
@@ -1876,7 +1872,7 @@ class HVACSizing
 
     leakage_fracs = leakage_fracs.split(',').map(&:to_f)
     leakage_cfm25s = leakage_cfm25s.split(',').map(&:to_f)
-    if leakage_fracs.inject { |sum, n| sum + n } == 0.0
+    if leakage_fracs.sum(0.0) == 0.0
       leakage_fracs = [nil] * leakage_fracs.size
     else
       leakage_cfm25s = [nil] * leakage_cfm25s.size
@@ -3133,6 +3129,9 @@ class HVACSizing
         air_loop.setDesignSupplyAirFlowRate(vfr)
         fan = air_loop.supplyFan.get.to_FanVariableVolume.get
         fan.setMaximumFlowRate(vfr)
+        oa_system = air_loop.components.select { |comp| comp.to_AirLoopHVACOutdoorAirSystem.is_initialized }[0].to_AirLoopHVACOutdoorAirSystem.get
+        oa_controller = oa_system.getControllerOutdoorAir
+        oa_controller.setMaximumOutdoorAirFlowRate(vfr)
 
         # Fan pressure rise calculation (based on design cfm)
         fan_power = [2.79 * hvac_final_values.Cool_Airflow**-0.29, 0.6].min # fit of efficacy to air flow from the CEC listed equipment  W/cfm

@@ -573,7 +573,7 @@ class Constructions
       constr.add_layer(mat_osb)
     end
     if framing_thick_in > 0
-      constr.add_layer([mat_framing, mat_cavity, mat_gap], 'RoofUARoofIns')
+      constr.add_layer([mat_framing, mat_cavity, mat_gap], 'RoofStudAndCavity')
     end
     if not mat_rb.nil?
       constr.add_layer(mat_rb)
@@ -637,7 +637,7 @@ class Constructions
     if not mat_osb.nil?
       constr.add_layer(mat_osb)
     end
-    constr.add_layer([mat_framing, mat_cavity, mat_gap], 'RoofIns')
+    constr.add_layer([mat_framing, mat_cavity, mat_gap], 'RoofStudAndCavity')
     if drywall_thick_in > 0
       constr.add_layer(Material.GypsumWall(drywall_thick_in))
     end
@@ -653,7 +653,7 @@ class Constructions
   def self.apply_ceiling(runner, model, surfaces, constr_name,
                          cavity_r, install_grade, ins_thick_in,
                          framing_factor, joist_height_in,
-                         drywall_thick_in)
+                         drywall_thick_in, inside_film, outside_film)
 
     # Drywall below, open cavity above (e.g., attic floor)
 
@@ -667,7 +667,7 @@ class Constructions
       if ins_thick_in > joist_height_in
         # If there is additional insulation beyond the rafter height,
         # these inputs are used for defining an additional layer
-        mat_addtl_ins = Material.new(name = 'FloorUAAdditionalCeilingIns', thick_in = (ins_thick_in - joist_height_in), mat_base = BaseMaterial.InsulationGenericLoosefill, k_in = cavity_k)
+        mat_addtl_ins = Material.new(name = 'CeilingAdditionalIns', thick_in = (ins_thick_in - joist_height_in), mat_base = BaseMaterial.InsulationGenericLoosefill, k_in = cavity_k)
       end
       mat_cavity = Material.new(name = nil, thick_in = joist_height_in, mat_base = BaseMaterial.InsulationGenericLoosefill, k_in = cavity_k)
     else
@@ -687,15 +687,15 @@ class Constructions
 
     # Define construction
     constr = Construction.new(constr_name, path_fracs)
-    constr.add_layer(Material.AirFilmFloorAverage)
+    constr.add_layer(outside_film)
     if not mat_addtl_ins.nil?
       constr.add_layer(mat_addtl_ins)
     end
-    constr.add_layer([mat_framing, mat_cavity, mat_gap], 'FloorUATrussandIns')
+    constr.add_layer([mat_framing, mat_cavity, mat_gap], 'CeilingStudAndCavity')
     if drywall_thick_in > 0
       constr.add_layer(Material.GypsumWall(drywall_thick_in))
     end
-    constr.add_layer(Material.AirFilmFloorAverage)
+    constr.add_layer(inside_film)
 
     # Create and assign construction to ceiling surfaces
     constr.create_and_assign_constructions(runner, surfaces, model)
@@ -705,7 +705,7 @@ class Constructions
                        cavity_r, install_grade,
                        framing_factor, joist_height_in,
                        plywood_thick_in, rigid_r, mat_floor_covering,
-                       mat_carpet, inside_film, outside_film)
+                       inside_film, outside_film)
 
     # Open cavity below, floor covering above (e.g., crawlspace ceiling)
 
@@ -723,7 +723,7 @@ class Constructions
     mat_rigid = nil
     if rigid_r > 0
       rigid_thick_in = rigid_r * BaseMaterial.InsulationRigid.k_in
-      mat_rigid = Material.new(name = 'WallRigidIns', thick_in = rigid_thick_in, mat_base = BaseMaterial.InsulationRigid, k_in = rigid_thick_in / rigid_r)
+      mat_rigid = Material.new(name = 'FloorRigidIns', thick_in = rigid_thick_in, mat_base = BaseMaterial.InsulationRigid, k_in = rigid_thick_in / rigid_r)
     end
 
     # Set paths
@@ -733,7 +733,7 @@ class Constructions
     # Define construction
     constr = Construction.new(constr_name, path_fracs)
     constr.add_layer(outside_film)
-    constr.add_layer([mat_framing, mat_cavity, mat_gap], 'FloorIns')
+    constr.add_layer([mat_framing, mat_cavity, mat_gap], 'FloorStudAndCavity')
     if not mat_rigid.nil?
       constr.add_layer(mat_rigid)
     end
@@ -742,9 +742,6 @@ class Constructions
     end
     if not mat_floor_covering.nil?
       constr.add_layer(mat_floor_covering)
-    end
-    if not mat_carpet.nil?
-      constr.add_layer(mat_carpet)
     end
     constr.add_layer(inside_film)
 
@@ -1000,6 +997,7 @@ class Constructions
     color_map = {}
     map.each do |key, value|
       next unless key[1] == roof_type
+
       color_map[key[0]] = value
     end
     color = color_map.min_by { |k, v| (v - solar_absorptance).abs }[0]
@@ -1264,9 +1262,9 @@ class Construction
     @name = name
     @path_widths = path_widths
     @path_fracs = []
-    @sum_path_fracs = @path_widths.inject(:+)
+    @sum_path_fracs = @path_widths.sum(0.0)
     path_widths.each do |path_width|
-      @path_fracs << path_width / path_widths.inject { |sum, n| sum + n }
+      @path_fracs << path_width / path_widths.sum(0.0)
     end
     @layers_names = []
     @layers_materials = []

@@ -249,12 +249,20 @@ class Constants
     return 'interior lighting'
   end
 
+  def self.ObjectNameLightingExteriorHoliday
+    return 'exterior holiday lighting'
+  end
+
   def self.ObjectNameMechanicalVentilation
     return 'mech vent'
   end
 
   def self.ObjectNameMechanicalVentilationHouseFan
     return 'mech vent house fan'
+  end
+
+  def self.ObjectNameMechanicalVentilationHouseFanCFIS
+    return 'mech vent house fan cfis'
   end
 
   def self.ObjectNameMechanicalVentilationBathFan
@@ -505,7 +513,7 @@ class Constants
     return __method__.to_s
   end
 
-  def self.SizingInfoMechVentType
+  def self.SizingInfoMechVentExist
     return __method__.to_s
   end
 
@@ -517,11 +525,11 @@ class Constants
     return __method__.to_s
   end
 
-  def self.SizingInfoMechVentTotalEfficiency
+  def self.SizingInfoMechVentWholeHouseRateBalanced
     return __method__.to_s
   end
 
-  def self.SizingInfoMechVentWholeHouseRate
+  def self.SizingInfoMechVentWholeHouseRateUnbalanced
     return __method__.to_s
   end
 

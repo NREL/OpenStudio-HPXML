@@ -129,6 +129,7 @@ class HPXML < Object
   HVACTypeHeatPumpAirToAir = 'air-to-air'
   HVACTypeHeatPumpGroundToAir = 'ground-to-air'
   HVACTypeHeatPumpMiniSplit = 'mini-split'
+  HVACTypeMiniSplitAirConditioner = 'mini-split'
   HVACTypePortableHeater = 'PortableHeater'
   HVACTypeRoomAirConditioner = 'room air conditioner'
   HVACTypeStove = 'Stove'
@@ -313,8 +314,8 @@ class HPXML < Object
   def fraction_of_windows_operable()
     # Calculates the fraction of windows that are operable.
     # Since we don't have quantity available, we use area as an approximation.
-    window_area_total = @windows.map { |w| w.area }.inject(0, :+)
-    window_area_operable = @windows.map { |w| w.fraction_operable * w.area }.inject(0, :+)
+    window_area_total = @windows.map { |w| w.area }.sum(0.0)
+    window_area_operable = @windows.map { |w| w.fraction_operable * w.area }.sum(0.0)
     if window_area_total <= 0
       return 0.0
     end
@@ -487,8 +488,8 @@ class HPXML < Object
     @cooking_ranges.to_oga(@doc)
     @ovens.to_oga(@doc)
     @lighting_groups.to_oga(@doc)
-    @lighting.to_oga(@doc)
     @ceiling_fans.to_oga(@doc)
+    @lighting.to_oga(@doc)
     @pools.to_oga(@doc)
     @hot_tubs.to_oga(@doc)
     @plug_loads.to_oga(@doc)
@@ -536,8 +537,8 @@ class HPXML < Object
     @cooking_ranges = CookingRanges.new(self, hpxml)
     @ovens = Ovens.new(self, hpxml)
     @lighting_groups = LightingGroups.new(self, hpxml)
-    @lighting = Lighting.new(self, hpxml)
     @ceiling_fans = CeilingFans.new(self, hpxml)
+    @lighting = Lighting.new(self, hpxml)
     @pools = Pools.new(self, hpxml)
     @hot_tubs = HotTubs.new(self, hpxml)
     @plug_loads = PlugLoads.new(self, hpxml)
@@ -551,6 +552,7 @@ class HPXML < Object
     def method_missing(meth, *args)
       # Complain if no value has been set rather than just returning nil
       raise NoMethodError, "undefined method '#{meth}' for #{self}" unless meth.to_s.end_with?('=')
+
       super
     end
   end
@@ -651,6 +653,7 @@ class HPXML < Object
 
       { 'Run Period' => @sim_begin_month, 'Daylight Saving' => @dst_begin_month }.each do |sim_ctl, begin_month|
         next unless not begin_month.nil?
+
         valid_months = (1..12).to_a
         if not valid_months.include? begin_month
           fail "#{sim_ctl} Begin Month (#{begin_month}) must be one of: #{valid_months.join(', ')}."
@@ -659,6 +662,7 @@ class HPXML < Object
 
       { 'Run Period' => @sim_end_month, 'Daylight Saving' => @dst_end_month }.each do |sim_ctl, end_month|
         next unless not end_month.nil?
+
         valid_months = (1..12).to_a
         if not valid_months.include? end_month
           fail "#{sim_ctl} End Month (#{end_month}) must be one of: #{valid_months.join(', ')}."
@@ -2431,7 +2435,7 @@ class HPXML < Object
     end
 
     def total_fraction_heat_load_served
-      map { |htg_sys| htg_sys.fraction_heat_load_served }.inject(0.0, :+)
+      map { |htg_sys| htg_sys.fraction_heat_load_served }.sum(0.0)
     end
   end
 
@@ -2555,7 +2559,7 @@ class HPXML < Object
     end
 
     def total_fraction_cool_load_served
-      map { |clg_sys| clg_sys.fraction_cool_load_served }.inject(0.0, :+)
+      map { |clg_sys| clg_sys.fraction_cool_load_served }.sum(0.0)
     end
   end
 
@@ -2622,7 +2626,7 @@ class HPXML < Object
 
       efficiency_units = nil
       efficiency_value = nil
-      if [HVACTypeCentralAirConditioner].include? @cooling_system_type
+      if [HVACTypeCentralAirConditioner, HVACTypeMiniSplitAirConditioner].include? @cooling_system_type
         efficiency_units = 'SEER'
         efficiency_value = @cooling_efficiency_seer
       elsif [HVACTypeRoomAirConditioner].include? @cooling_system_type
@@ -2652,7 +2656,7 @@ class HPXML < Object
       @cooling_capacity = to_float_or_nil(XMLHelper.get_value(cooling_system, 'CoolingCapacity'))
       @compressor_type = XMLHelper.get_value(cooling_system, 'CompressorType')
       @fraction_cool_load_served = to_float_or_nil(XMLHelper.get_value(cooling_system, 'FractionCoolLoadServed'))
-      if [HVACTypeCentralAirConditioner].include? @cooling_system_type
+      if [HVACTypeCentralAirConditioner, HVACTypeMiniSplitAirConditioner].include? @cooling_system_type
         @cooling_efficiency_seer = to_float_or_nil(XMLHelper.get_value(cooling_system, "AnnualCoolingEfficiency[Units='SEER']/Value"))
       elsif [HVACTypeRoomAirConditioner].include? @cooling_system_type
         @cooling_efficiency_eer = to_float_or_nil(XMLHelper.get_value(cooling_system, "AnnualCoolingEfficiency[Units='EER']/Value"))
@@ -2678,11 +2682,11 @@ class HPXML < Object
     end
 
     def total_fraction_heat_load_served
-      map { |hp| hp.fraction_heat_load_served }.inject(0.0, :+)
+      map { |hp| hp.fraction_heat_load_served }.sum(0.0)
     end
 
     def total_fraction_cool_load_served
-      map { |hp| hp.fraction_cool_load_served }.inject(0.0, :+)
+      map { |hp| hp.fraction_cool_load_served }.sum(0.0)
     end
   end
 
@@ -3163,6 +3167,22 @@ class HPXML < Object
         return hvac_distribution
       end
       fail "Attached HVAC distribution system '#{@distribution_system_idref}' not found for ventilation fan '#{@id}'."
+    end
+
+    def flow_rate
+      if not @tested_flow_rate.nil?
+        return @tested_flow_rate
+      else
+        return @rated_flow_rate
+      end
+    end
+
+    def average_flow_rate
+      return flow_rate * (@hours_in_operation / 24.0)
+    end
+
+    def average_fan_power
+      return @fan_power * (@hours_in_operation / 24.0)
     end
 
     def delete
@@ -4160,7 +4180,12 @@ class HPXML < Object
   end
 
   class Lighting < BaseElement
-    ATTRS = [:usage_multiplier]
+    ATTRS = [:interior_usage_multiplier, :garage_usage_multiplier, :exterior_usage_multiplier,
+             :interior_weekday_fractions, :interior_weekend_fractions, :interior_monthly_multipliers,
+             :garage_weekday_fractions, :garage_weekend_fractions, :garage_monthly_multipliers,
+             :exterior_weekday_fractions, :exterior_weekend_fractions, :exterior_monthly_multipliers,
+             :holiday_exists, :holiday_kwh_per_day, :holiday_period_begin_month, :holiday_period_begin_day_of_month,
+             :holiday_period_end_month, :holiday_period_end_day_of_month, :holiday_weekday_fractions, :holiday_weekend_fractions]
     attr_accessor(*ATTRS)
 
     def check_for_errors
@@ -4173,7 +4198,30 @@ class HPXML < Object
 
       lighting = XMLHelper.create_elements_as_needed(doc, ['HPXML', 'Building', 'BuildingDetails', 'Lighting'])
       HPXML::add_extension(parent: lighting,
-                           extensions: { 'UsageMultiplier' => to_float_or_nil(@usage_multiplier) })
+                           extensions: { 'InteriorUsageMultiplier' => to_float_or_nil(@interior_usage_multiplier),
+                                         'GarageUsageMultiplier' => to_float_or_nil(@garage_usage_multiplier),
+                                         'ExteriorUsageMultiplier' => to_float_or_nil(@exterior_usage_multiplier),
+                                         'InteriorWeekdayScheduleFractions' => @interior_weekday_fractions,
+                                         'InteriorWeekendScheduleFractions' => @interior_weekend_fractions,
+                                         'InteriorMonthlyScheduleMultipliers' => @interior_monthly_multipliers,
+                                         'GarageWeekdayScheduleFractions' => @garage_weekday_fractions,
+                                         'GarageWeekendScheduleFractions' => @garage_weekend_fractions,
+                                         'GarageMonthlyScheduleMultipliers' => @garage_monthly_multipliers,
+                                         'ExteriorWeekdayScheduleFractions' => @exterior_weekday_fractions,
+                                         'ExteriorWeekendScheduleFractions' => @exterior_weekend_fractions,
+                                         'ExteriorMonthlyScheduleMultipliers' => @exterior_monthly_multipliers })
+      if @holiday_exists
+        exterior_holiday_lighting = XMLHelper.create_elements_as_needed(doc, ['HPXML', 'Building', 'BuildingDetails', 'Lighting', 'extension', 'ExteriorHolidayLighting'])
+        holiday_lighting_load = XMLHelper.add_element(exterior_holiday_lighting, 'Load')
+        XMLHelper.add_element(holiday_lighting_load, 'Units', 'kWh/day')
+        XMLHelper.add_element(holiday_lighting_load, 'Value', to_float_or_nil(@holiday_kwh_per_day))
+        XMLHelper.add_element(exterior_holiday_lighting, 'PeriodBeginMonth', to_integer_or_nil(@holiday_period_begin_month)) unless @holiday_period_begin_month.nil?
+        XMLHelper.add_element(exterior_holiday_lighting, 'PeriodBeginDayOfMonth', to_integer_or_nil(@holiday_period_begin_day_of_month)) unless @holiday_period_begin_day_of_month.nil?
+        XMLHelper.add_element(exterior_holiday_lighting, 'PeriodEndMonth', to_integer_or_nil(@holiday_period_end_month)) unless @holiday_period_end_month.nil?
+        XMLHelper.add_element(exterior_holiday_lighting, 'PeriodEndDayOfMonth', to_integer_or_nil(@holiday_period_end_day_of_month)) unless @holiday_period_end_day_of_month.nil?
+        XMLHelper.add_element(exterior_holiday_lighting, 'WeekdayScheduleFractions', @holiday_weekday_fractions) unless @holiday_weekday_fractions.nil?
+        XMLHelper.add_element(exterior_holiday_lighting, 'WeekendScheduleFractions', @holiday_weekend_fractions) unless @holiday_weekend_fractions.nil?
+      end
     end
 
     def from_oga(hpxml)
@@ -4182,7 +4230,30 @@ class HPXML < Object
       lighting = XMLHelper.get_element(hpxml, 'Building/BuildingDetails/Lighting')
       return if lighting.nil?
 
-      @usage_multiplier = to_float_or_nil(XMLHelper.get_value(lighting, 'extension/UsageMultiplier'))
+      @interior_usage_multiplier = to_float_or_nil(XMLHelper.get_value(lighting, 'extension/InteriorUsageMultiplier'))
+      @garage_usage_multiplier = to_float_or_nil(XMLHelper.get_value(lighting, 'extension/GarageUsageMultiplier'))
+      @exterior_usage_multiplier = to_float_or_nil(XMLHelper.get_value(lighting, 'extension/ExteriorUsageMultiplier'))
+      @interior_weekday_fractions = XMLHelper.get_value(lighting, 'extension/InteriorWeekdayScheduleFractions')
+      @interior_weekend_fractions = XMLHelper.get_value(lighting, 'extension/InteriorWeekendScheduleFractions')
+      @interior_monthly_multipliers = XMLHelper.get_value(lighting, 'extension/InteriorMonthlyScheduleMultipliers')
+      @garage_weekday_fractions = XMLHelper.get_value(lighting, 'extension/GarageWeekdayScheduleFractions')
+      @garage_weekend_fractions = XMLHelper.get_value(lighting, 'extension/GarageWeekendScheduleFractions')
+      @garage_monthly_multipliers = XMLHelper.get_value(lighting, 'extension/GarageMonthlyScheduleMultipliers')
+      @exterior_weekday_fractions = XMLHelper.get_value(lighting, 'extension/ExteriorWeekdayScheduleFractions')
+      @exterior_weekend_fractions = XMLHelper.get_value(lighting, 'extension/ExteriorWeekendScheduleFractions')
+      @exterior_monthly_multipliers = XMLHelper.get_value(lighting, 'extension/ExteriorMonthlyScheduleMultipliers')
+      if not XMLHelper.get_element(hpxml, 'Building/BuildingDetails/Lighting/extension/ExteriorHolidayLighting').nil?
+        @holiday_exists = true
+        @holiday_kwh_per_day = to_float_or_nil(XMLHelper.get_value(lighting, 'extension/ExteriorHolidayLighting/Load[Units="kWh/day"]/Value'))
+        @holiday_period_begin_month = to_integer_or_nil(XMLHelper.get_value(lighting, 'extension/ExteriorHolidayLighting/PeriodBeginMonth'))
+        @holiday_period_begin_day_of_month = to_integer_or_nil(XMLHelper.get_value(lighting, 'extension/ExteriorHolidayLighting/PeriodBeginDayOfMonth'))
+        @holiday_period_end_month = to_integer_or_nil(XMLHelper.get_value(lighting, 'extension/ExteriorHolidayLighting/PeriodEndMonth'))
+        @holiday_period_end_day_of_month = to_integer_or_nil(XMLHelper.get_value(lighting, 'extension/ExteriorHolidayLighting/PeriodEndDayOfMonth'))
+        @holiday_weekday_fractions = XMLHelper.get_value(lighting, 'extension/ExteriorHolidayLighting/WeekdayScheduleFractions')
+        @holiday_weekend_fractions = XMLHelper.get_value(lighting, 'extension/ExteriorHolidayLighting/WeekendScheduleFractions')
+      else
+        @holiday_exists = false
+      end
     end
   end
 
@@ -4714,7 +4785,7 @@ class HPXML < Object
     end
 
     # Check sum of HVAC FractionDHWLoadServed == 1
-    frac_dhw_load = @water_heating_systems.map { |dhw| dhw.fraction_dhw_load_served }.inject(0, :+)
+    frac_dhw_load = @water_heating_systems.map { |dhw| dhw.fraction_dhw_load_served }.sum(0.0)
     if (frac_dhw_load > 0) && ((frac_dhw_load < 0.99) || (frac_dhw_load > 1.01)) # Use 0.99/1.01 in case of rounding
       errors << "Expected FractionDHWLoadServed to sum to 1, but calculated sum is #{frac_dhw_load.round(2)}."
     end
@@ -4761,8 +4832,8 @@ class HPXML < Object
         cooling_dist << dist
       end
     end
-    heating_total_dist_cfa_served = heating_dist.map { |htg_dist| htg_dist.conditioned_floor_area_served.to_f }.inject(0, :+)
-    cooling_total_dist_cfa_served = cooling_dist.map { |clg_dist| clg_dist.conditioned_floor_area_served.to_f }.inject(0, :+)
+    heating_total_dist_cfa_served = heating_dist.map { |htg_dist| htg_dist.conditioned_floor_area_served.to_f }.sum(0.0)
+    cooling_total_dist_cfa_served = cooling_dist.map { |clg_dist| clg_dist.conditioned_floor_area_served.to_f }.sum(0.0)
     if (heating_total_dist_cfa_served > @building_construction.conditioned_floor_area.to_f)
       errors << 'The total conditioned floor area served by the HVAC distribution system(s) for heating is larger than the conditioned floor area of the building.'
     end
