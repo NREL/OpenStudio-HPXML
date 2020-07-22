@@ -90,7 +90,7 @@ class HPXMLtoOpenStudioSchematronTest < MiniTest::Test
 
       # .rb validator validation
       _test_ruby_validation(hpxml_doc, expected_error_message)
-      # schematron validation
+      # Schematron validation
       _test_schematron_validation(@stron_doc, @tmp_hpxml_path, expected_error_message)
     end
 
@@ -104,16 +104,16 @@ class HPXMLtoOpenStudioSchematronTest < MiniTest::Test
       child_element = target_xpath[1]
 
       # make sure target elements exist in HPXML
-      child_element_name_without_predicates = child_element.gsub(/\[.*?\]/, '').gsub('[', '').gsub(']', '')
+      child_element_name_without_predicates = child_element.gsub(/\[.*?\]|\[|\]/, '') # gsub '[...]' or '[' or ']'
       child_element_name_without_predicates_array = child_element_name_without_predicates.split('/')[0...-1].reject(&:empty?)
-      sub_parent_name = child_element.split('/')[0...-1].reject(&:empty?)
       XMLHelper.create_elements_as_needed(parent_element, child_element_name_without_predicates_array)
 
       # add child element
+      sub_parent_name = child_element.gsub(/\[text().*?\]/, '').split('/')[0...-1].reject(&:empty?) # gsub [text()=foo or ...]
       mod_parent_name = [target_xpath[0], sub_parent_name].join('/').chomp('/')
       mod_parent_element = XMLHelper.get_element(hpxml_doc, mod_parent_name)
-      mod_child_name = child_element.gsub(/\[.*?\]/, '').gsub('[', '').gsub(']', '').split('/')[-1]
-      max_number_of_elements_allowed = expected_error_message.gsub(/\[.*?\]/, '').scan(/\d+/).max.to_i
+      mod_child_name = child_element.gsub(/\[.*?\]|\[|\]/, '').split('/')[-1]
+      max_number_of_elements_allowed = expected_error_message.gsub(/\[.*?\]|\[|\]/, '').scan(/\d+/).max.to_i
       (max_number_of_elements_allowed + 1).times { XMLHelper.add_element(mod_parent_element, mod_child_name) }
 
       child_element_with_value = get_child_element_with_value(target_xpath, max_number_of_elements_allowed)
@@ -139,7 +139,7 @@ class HPXMLtoOpenStudioSchematronTest < MiniTest::Test
 
       # .rb validator validation
       _test_ruby_validation(hpxml_doc, expected_error_message)
-      # schematron validation
+      # Schematron validation
       _test_schematron_validation(@stron_doc, @tmp_hpxml_path, expected_error_message)
     end
 
@@ -275,6 +275,8 @@ class HPXMLtoOpenStudioSchematronTest < MiniTest::Test
     elsif ['/HPXML/Building/BuildingDetails/Appliances/Freezer', '/HPXML/Building/BuildingDetails/Pools/Pool',
            '/HPXML/Building/BuildingDetails/HotTubs/HotTub', '/HPXML/Building/BuildingDetails/MiscLoads/FuelLoad'].any? { |i| target_xpath_combined.include? i }
       return 'base-misc-large-uncommon-loads.xml'
+    elsif target_xpath_combined.include? '/HPXML/Building/BuildingDetails/Lighting/extension/ExteriorHolidayLighting'
+      return 'base-misc-lighting-detailed.xml'
     else
       return 'base.xml'
     end
@@ -306,8 +308,8 @@ class HPXMLtoOpenStudioSchematronTest < MiniTest::Test
     element_with_value = nil
 
     if target_xpath[1].split('/')[-1].include? 'text()='
-      element_name = target_xpath[1].split('/')[-1].split('text()=')[0].gsub('[', '/').gsub(']', '').split('/')[-1]
-      element_value = target_xpath[1].split('/')[-1].split('text()=')[1].gsub('[', '').gsub(']', '').gsub('" or ', '"') # FIXME: Is there another way to handle this?
+      element_name = target_xpath[1].split('text()=')[0].gsub(/\[|\]/, '/').chomp('/').split('/')[-1] # pull 'bar' from foo/bar[text()=baz or text()=fum or ...]
+      element_value = target_xpath[1].split('text()=')[1].gsub(/\[|\]/, '').gsub('" or ', '"') # pull 'baz' from foo/bar[text()=baz or text()=fum or ...]; FIXME: Is there another way to handle this?
       element_with_value = []
       (max_number_of_elements_allowed + 1).times { element_with_value << [element_name, element_value].join('=') }
     end
