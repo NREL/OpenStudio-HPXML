@@ -4,11 +4,12 @@ class Constructions
   # Container class for walls, floors/ceilings, roofs, etc.
 
   def self.apply_wood_stud_wall(runner, model, surfaces, wall, constr_name,
-                                cavity_r, install_grade, cavity_depth_in, cavity_filled,
-                                framing_factor, drywall_thick_in, osb_thick_in,
-                                rigid_r, mat_ext_finish, otherside_drywall_thick_in,
-                                inside_film, outside_film)
-
+                                cavity_r:, install_grade:, cavity_depth_in:, 
+                                cavity_filled:, framing_factor:, 
+                                rigid_r:, sheathing_thick_in:, mat_ext_finish:, 
+                                inside_drywall_thick_in:, outside_drywall_thick_in:,
+                                inside_film:, outside_film:)
+    # FIXME: Need to add descriptions of each argument
     return if surfaces.empty?
 
     # Define materials
@@ -27,8 +28,8 @@ class Constructions
     mat_framing = Material.new(name = nil, thick_in = cavity_depth_in, mat_base = BaseMaterial.Wood)
     mat_gap = Material.AirCavityClosed(cavity_depth_in)
     mat_osb = nil
-    if osb_thick_in > 0
-      mat_osb = Material.new(name = 'WallSheathing', thick_in = osb_thick_in, mat_base = BaseMaterial.Wood)
+    if sheathing_thick_in > 0
+      mat_osb = Material.new(name = 'WallSheathing', thick_in = sheathing_thick_in, mat_base = BaseMaterial.Wood)
     end
     mat_rigid = nil
     if rigid_r > 0
@@ -46,8 +47,8 @@ class Constructions
     if not mat_ext_finish.nil?
       constr.add_layer(mat_ext_finish)
     end
-    if otherside_drywall_thick_in > 0 # E.g., interior partition wall
-      constr.add_layer(Material.GypsumWall(otherside_drywall_thick_in))
+    if outside_drywall_thick_in > 0 # E.g., interior partition wall
+      constr.add_layer(Material.GypsumWall(outside_drywall_thick_in))
     end
     if not mat_rigid.nil?
       constr.add_layer(mat_rigid)
@@ -56,8 +57,8 @@ class Constructions
       constr.add_layer(mat_osb)
     end
     constr.add_layer([mat_framing, mat_cavity, mat_gap], 'WallStudAndCavity')
-    if drywall_thick_in > 0
-      constr.add_layer(Material.GypsumWall(drywall_thick_in))
+    if inside_drywall_thick_in > 0
+      constr.add_layer(Material.GypsumWall(inside_drywall_thick_in))
     end
     constr.add_layer(inside_film)
 
@@ -902,10 +903,11 @@ class Constructions
     end
 
     apply_wood_stud_wall(runner, model, imdefs, nil, constr_name,
-                         0, 1, 3.5, false, 0.16,
-                         drywall_thick_in, 0, 0, nil, drywall_thick_in,
-                         Material.AirFilmVertical,
-                         Material.AirFilmVertical)
+                         cavity_r: 0, cavity_depth_in: 3.5, cavity_filled: false, install_grade: 1, 
+                         framing_factor: 0.16, sheathing_thick_in: 0,
+                         rigid_r: 0, mat_ext_finish: nil, 
+                         inside_drywall_thick_in: drywall_thick_in, outside_drywall_thick_in: drywall_thick_in,
+                         inside_film: Material.AirFilmVertical, outside_film: Material.AirFilmVertical)
   end
 
   def self.apply_furniture(runner, model, mass_lb_per_sqft, density_lb_per_cuft,

@@ -207,7 +207,33 @@ class EnergyPlusValidator
         'Color | SolarAbsorptance' => one_or_more,
         'Emittance' => one,
         'Insulation/SystemIdentifier' => one, # Required by HPXML schema
-        'Insulation/AssemblyEffectiveRValue' => one,
+        # Insulation: either specify continuous and cavity layers OR assembly R-value:
+        'Insulation/AssemblyEffectiveRValue | Insulation/Layer[InsulationType="cavity"]' => one, # See [WallCavityInsLayer]
+        'Insulation/AssemblyEffectiveRValue | Insulation/Layer[InsulationType="continuous"]' => one, # See [WallRigidInsLayer]
+      },
+
+      ## [WallCavityInsLayer]
+      '/HPXML/Building/BuildingDetails/Enclosure/Walls/Wall/Insulation/Layer[InsulationType="cavity"]' => {
+        'InsulationMaterial[Batt | LooseFill | Rigid | SprayFoam | Other]' => one, # Required by HPXML schema
+        'NominalRValue' => one,
+        'Thickness' => one, # cavity insulation thickness in inches
+        'not(../InsulationGrade) | ../InsulationGrade[text()="I" or text()="II" or text()="III"]' => one, # cavity insulation installation grade
+        'not(../../Studs/Size) | ../../Studs/Size[text()="2x2" or text()="2x3" or text()="2x4" or text()="2x6" or text()="2x8" or text()="2x10" or text()="2x12" or text()="2x14" or text()="2x16"]' => one,
+        'not(../../Studs/Spacing) | ../../Studs/Spacing' => one,
+        'not(../../Studs/FramingFactor) | ../../Studs/FramingFactor' => one,
+        'not(../../Studs/Material) | ../../Studs/Material[text()="wood" or text()="metal"]' => one,
+        '../../extension/WoodSheathing' => zero_or_one, # See [WallWoodSheathing]
+      },
+
+      ## [WallRigidInsLayer]
+      '/HPXML/Building/BuildingDetails/Enclosure/Walls/Wall/Insulation/Layer[InsulationType="continuous"]' => {
+        'InsulationMaterial[Batt | LooseFill | Rigid | SprayFoam | Other]' => one, # Required by HPXML schema
+        'NominalRValue' => one,
+      },
+
+      ## [WallWoodSheathing]
+      '/HPXML/Building/BuildingDetails/Enclosure/Walls/Wall/extension/WoodSheathing' => {
+        'Thickness' => one,
       },
 
       # [RimJoist]
