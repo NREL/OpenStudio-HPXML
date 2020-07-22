@@ -842,11 +842,11 @@ class Constructions
     surface.createSurfacePropertyExposedFoundationPerimeter('TotalExposedPerimeter', UnitConversions.convert(exposed_perimeter, 'ft', 'm'))
   end
 
-  def self.apply_door(runner, model, subsurfaces, constr_name, ufactor)
-    return if subsurfaces.empty?
+  def self.apply_door(runner, model, subsurface, constr_name, ufactor, inside_film_r, outside_film_r)
+    return if subsurface.nil?
 
     # Define materials
-    door_Rvalue = 1.0 / ufactor - Material.AirFilmOutside.rvalue - Material.AirFilmVertical.rvalue
+    door_Rvalue = 1.0 / ufactor - inside_film_r - outside_film_r
     door_thickness = 1.75 # in
     fin_door_mat = Material.new(name = 'DoorMaterial', thick_in = door_thickness, mat_base = BaseMaterial.Wood, k_in = 1.0 / door_Rvalue * door_thickness)
 
@@ -858,7 +858,7 @@ class Constructions
     constr.add_layer(fin_door_mat)
 
     # Create and assign construction to subsurfaces
-    constr.create_and_assign_constructions(runner, subsurfaces, model)
+    constr.create_and_assign_constructions(runner, [subsurface], model)
   end
 
   def self.apply_window(runner, model, subsurfaces, constr_name, weather,

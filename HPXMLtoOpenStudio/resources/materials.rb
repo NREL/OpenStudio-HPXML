@@ -79,6 +79,12 @@ class Material
     return self.AirFilm(rvalue)
   end
 
+  def self.AirFilmMFSpaces
+    combined_film_u = 8.3
+    outside_film_r = 1.0 / UnitConversions.convert(combined_film_u, 'W/(m^2*K)', 'Btu/(hr*ft^2*F)')
+    return self.AirFilm(outside_film_r)
+  end
+
   def self.AirFilmOutsideASHRAE140
     return self.AirFilm(0.174)
   end

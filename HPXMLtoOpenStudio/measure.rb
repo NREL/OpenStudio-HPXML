@@ -1111,6 +1111,9 @@ class OSModel
       if wall.is_exterior
         outside_film = Material.AirFilmOutside
         mat_ext_finish = Material.ExteriorFinishMaterial(wall.siding, wall.emittance, wall.solar_absorptance)
+      elsif [HPXML::LocationOtherHeatedSpace, HPXML::LocationOtherMultifamilyBufferSpace, HPXML::LocationOtherNonFreezingSpace].include? wall.exterior_adjacent_to
+        outside_film = Material.AirFilmMFSpaces
+        mat_ext_finish = nil
       else
         outside_film = Material.AirFilmVertical
         mat_ext_finish = nil
@@ -1175,6 +1178,9 @@ class OSModel
       if rim_joist.is_exterior
         outside_film = Material.AirFilmOutside
         mat_ext_finish = Material.ExteriorFinishMaterial(rim_joist.siding, rim_joist.emittance, rim_joist.solar_absorptance)
+      elsif [HPXML::LocationOtherHeatedSpace, HPXML::LocationOtherMultifamilyBufferSpace, HPXML::LocationOtherNonFreezingSpace].include? rim_joist.exterior_adjacent_to
+        outside_film = Material.AirFilmMFSpaces
+        mat_ext_finish = nil
       else
         outside_film = Material.AirFilmVertical
         mat_ext_finish = nil
@@ -1239,6 +1245,8 @@ class OSModel
         outside_film = Material.AirFilmFloorAverage
       elsif frame_floor.is_exterior
         outside_film = Material.AirFilmOutside
+      elsif [HPXML::LocationOtherHeatedSpace, HPXML::LocationOtherMultifamilyBufferSpace, HPXML::LocationOtherNonFreezingSpace].include? frame_floor.exterior_adjacent_to
+        outside_film = Material.AirFilmMFSpaces
       else
         outside_film = Material.AirFilmFloorReduced
       end
@@ -1412,7 +1420,11 @@ class OSModel
           drywall_thick_in = 0.0
         end
         inside_film = Material.AirFilmVertical
-        outside_film = Material.AirFilmVertical
+        if [HPXML::LocationOtherHeatedSpace, HPXML::LocationOtherMultifamilyBufferSpace, HPXML::LocationOtherNonFreezingSpace].include? foundation_wall.exterior_adjacent_to
+          outside_film = Material.AirFilmMFSpaces
+        else
+          outside_film = Material.AirFilmVertical
+        end
         assembly_r = foundation_wall.insulation_assembly_r_value
         if assembly_r.nil?
           concrete_thick_in = foundation_wall.thickness
@@ -1770,7 +1782,7 @@ class OSModel
         surfaces << surface
 
         # Apply construction
-        Constructions.apply_door(runner, model, [sub_surface], 'Window', window.ufactor)
+        Constructions.apply_door(runner, model, sub_surface, 'Window', window.ufactor, 0, 0)
       end
     end
 
@@ -1850,7 +1862,15 @@ class OSModel
 
       # Apply construction
       ufactor = 1.0 / door.r_value
-      Constructions.apply_door(runner, model, [sub_surface], 'Door', ufactor)
+      inside_film_r = Material.AirFilmVertical.rvalue
+      if door.wall.is_exterior
+        outside_film_r = Material.AirFilmOutside.rvalue
+      elsif [HPXML::LocationOtherHeatedSpace, HPXML::LocationOtherMultifamilyBufferSpace, HPXML::LocationOtherNonFreezingSpace].include? door.wall.exterior_adjacent_to
+        outside_film_r = Material.AirFilmMFSpaces.rvalue
+      else
+        outside_film_r = inside_film_r
+      end
+      Constructions.apply_door(runner, model, sub_surface, 'Door', ufactor, inside_film_r, outside_film_r)
     end
 
     apply_adiabatic_construction(runner, model, surfaces, 'wall')
