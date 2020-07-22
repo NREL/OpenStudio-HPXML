@@ -56,6 +56,7 @@ class HPXMLtoOpenStudioSchematronTest < MiniTest::Test
         rule_context = XMLHelper.get_attribute_value(rule, 'context')
 
         next if rule_context.include?('Other="DSE"') # FIXME: Need to add this test case.  Will need to remove both AnnualHeatingDistributionSystemEfficiency and AnnualCoolingDistributionSystemEfficiency for testing
+
         # ['/HPXML/Building/BuildingDetails/Systems/HVAC/HVACDistribution[DistributionSystemType[Other="DSE"]]/AnnualHeatingDistributionSystemEfficiency', '/HPXML/Building/BuildingDetails/Systems/HVAC/HVACDistribution[DistributionSystemType[Other="DSE"]]/AnnualCoolingDistributionSystemEfficiency'] => 'Expected 1 or more element(s) for xpath: /HPXML/Building/BuildingDetails/Systems/HVAC/HVACDistribution[DistributionSystemType[Other="DSE"]]/AnnualHeatingDistributionSystemEfficiency | AnnualCoolingDistributionSystemEfficiency'
 
         XMLHelper.get_values(rule, 'sch:assert').each do |assertion|
@@ -63,15 +64,15 @@ class HPXMLtoOpenStudioSchematronTest < MiniTest::Test
           element_name = get_element_name(assertion)
           target_xpath = [parent_xpath, element_name]
           expected_error_message = get_expected_error_message(parent_xpath, assertion)
-          
+
           if assertion.start_with?('Expected 0') || assertion.partition(': ').last.start_with?('[not') # FIXME: Is there another way to do this?
             next if assertion.start_with?('Expected 0 or more') # no tests needed
 
             expected_error_msgs_by_element_addition[target_xpath] = expected_error_message
           elsif assertion.start_with?('Expected 1') || assertion.start_with?('Expected 9')
             expected_error_msgs_by_element_deletion[target_xpath] = expected_error_message
-          else 
-            fail "Invalid expected error message."
+          else
+            fail 'Invalid expected error message.'
           end
         end
       end
@@ -82,7 +83,7 @@ class HPXMLtoOpenStudioSchematronTest < MiniTest::Test
       hpxml_name = get_hpxml_file_name(target_xpath)
       hpxml = HPXML.new(hpxml_path: File.join(@root_path, 'workflow', 'sample_files', hpxml_name))
       hpxml_doc = hpxml.to_oga()
-      parent_element = target_xpath[0] == "" ? hpxml_doc : XMLHelper.get_element(hpxml_doc, target_xpath[0])
+      parent_element = target_xpath[0] == '' ? hpxml_doc : XMLHelper.get_element(hpxml_doc, target_xpath[0])
       child_element = target_xpath[1]
       XMLHelper.delete_element(parent_element, child_element)
       XMLHelper.write_file(hpxml_doc, @tmp_hpxml_path)
@@ -99,15 +100,15 @@ class HPXMLtoOpenStudioSchematronTest < MiniTest::Test
       hpxml_name = get_hpxml_file_name(target_xpath)
       hpxml = HPXML.new(hpxml_path: File.join(@root_path, 'workflow', 'sample_files', hpxml_name))
       hpxml_doc = hpxml.to_oga()
-      parent_element = target_xpath[0] == "" ? hpxml_doc : XMLHelper.get_element(hpxml_doc, target_xpath[0])
+      parent_element = target_xpath[0] == '' ? hpxml_doc : XMLHelper.get_element(hpxml_doc, target_xpath[0])
       child_element = target_xpath[1]
-      
+
       # make sure target elements exist in HPXML
       child_element_name_without_predicates = child_element.gsub(/\[.*?\]/, '').gsub('[', '').gsub(']', '')
       child_element_name_without_predicates_array = child_element_name_without_predicates.split('/')[0...-1].reject(&:empty?)
       sub_parent_name = child_element.split('/')[0...-1].reject(&:empty?)
       XMLHelper.create_elements_as_needed(parent_element, child_element_name_without_predicates_array)
-      
+
       # add child element
       mod_parent_name = [target_xpath[0], sub_parent_name].join('/').chomp('/')
       mod_parent_element = XMLHelper.get_element(hpxml_doc, mod_parent_name)
@@ -175,7 +176,7 @@ class HPXMLtoOpenStudioSchematronTest < MiniTest::Test
 
   def get_hpxml_file_name(target_xpath)
     target_xpath_combined = target_xpath.join('/')
-    
+
     if target_xpath_combined.include? '/HPXML/Building/BuildingDetails/Appliances/Dehumidifier'
       return 'base-appliances-dehumidifier.xml'
     elsif target_xpath_combined.include? '/HPXML/Building/BuildingDetails/BuildingSummary/Site/extension/Neighbors'
@@ -198,7 +199,7 @@ class HPXMLtoOpenStudioSchematronTest < MiniTest::Test
     elsif target_xpath_combined.include? '/HPXML/Building/BuildingDetails/Lighting/CeilingFan'
       return 'base-misc-ceiling-fans.xml'
     elsif ['/HPXML/Building/BuildingDetails/Systems/HVAC/HVACPlant/HeatingSystem[HeatingSystemType/ElectricResistance]',
-      '/HPXML/Building/BuildingDetails/Systems/HVAC/HVACPlant/HeatingSystem/HeatingSystemType[ElectricResistance]'].any? { |i| target_xpath_combined.include? i }
+           '/HPXML/Building/BuildingDetails/Systems/HVAC/HVACPlant/HeatingSystem/HeatingSystemType[ElectricResistance]'].any? { |i| target_xpath_combined.include? i }
       return 'base-hvac-elec-resistance-only.xml'
     elsif target_xpath_combined.include? '/HPXML/Building/BuildingDetails/Systems/HVAC/HVACPlant/HeatingSystem[HeatingSystemType/WallFurnace]'
       return 'base-hvac-wall-furnace-elec-only.xml'

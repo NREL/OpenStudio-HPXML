@@ -810,13 +810,34 @@ class EnergyPlusValidator
       # [Lighting]
       '/HPXML/Building/BuildingDetails/Lighting' => {
         'LightingGroup[LightingType[LightEmittingDiode | CompactFluorescent | FluorescentTube] and Location[text()="interior" or text()="exterior" or text()="garage"]]' => nine, # See [LightingGroup]
-        'extension/UsageMultiplier' => zero_or_one,
+        'extension/InteriorUsageMultiplier' => zero_or_one,
+        'extension/GarageUsageMultiplier' => zero_or_one,
+        'extension/ExteriorUsageMultiplier' => zero_or_one,
+        'extension/InteriorWeekdayScheduleFractions' => zero_or_one,
+        'extension/InteriorWeekendScheduleFractions' => zero_or_one,
+        'extension/InteriorMonthlyScheduleMultipliers' => zero_or_one,
+        'extension/GarageWeekdayScheduleFractions' => zero_or_one,
+        'extension/GarageWeekendScheduleFractions' => zero_or_one,
+        'extension/GarageMonthlyScheduleMultipliers' => zero_or_one,
+        'extension/ExteriorWeekdayScheduleFractions' => zero_or_one,
+        'extension/ExteriorWeekendScheduleFractions' => zero_or_one,
+        'extension/ExteriorMonthlyScheduleMultipliers' => zero_or_one,
+        'extension/ExteriorHolidayLighting' => zero_or_one, # See [ExteriorHolidayLighting]
       },
 
       ## [LightingGroup]
       '/HPXML/Building/BuildingDetails/Lighting/LightingGroup[LightingType[LightEmittingDiode | CompactFluorescent | FluorescentTube] and Location[text()="interior" or text()="exterior" or text()="garage"]]' => {
         'SystemIdentifier' => one, # Required by HPXML schema
         'FractionofUnitsInLocation' => one,
+      },
+
+      ## [ExteriorHolidayLighting]
+      '/HPXML/Building/BuildingDetails/Lighting/extension/ExteriorHolidayLighting' => {
+        'Load[Units="kWh/day"]/Value' => zero_or_one,
+        'PeriodBeginMonth | PeriodBeginDayOfMonth' => zero_or_two, # integer
+        'PeriodEndMonth | PeriodEndDayOfMonth' => zero_or_two, # integer
+        'WeekdayScheduleFractions' => zero_or_one,
+        'WeekendScheduleFractions' => zero_or_one,
       },
 
       # [CeilingFan]
