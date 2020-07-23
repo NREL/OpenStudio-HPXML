@@ -303,7 +303,9 @@ Walls can be defined by ``Area`` and the choice of input modes. Two input modes 
 If the input mode of ``Insulation/Layer[InsulationType="cavity"]`` and ``Insulation/Layer[InsulationType="continuous"]`` is selected, additional inputs are required as follows:
 - Cavity insulation ``NominalRValue``
 - Cavity insulation ``Thickness`` in inches
-- Continuous rigid insulation ``NominalRValue``
+- Continuous insulation ``NominalRValue``
+- Optional Cavity insulation ``InsulationMaterial``
+- Optional Continuous insulation ``InsulationMaterial``
 - Optional ``InsulationGrade``
 - Optional ``Studs/Size``
 - Optional ``Studs/Spacing``

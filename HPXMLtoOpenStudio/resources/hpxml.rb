@@ -1694,9 +1694,9 @@ class HPXML < Object
       if not @insulation_cavity_r_value.nil?
         layer = XMLHelper.add_element(insulation, 'Layer')
         XMLHelper.add_element(layer, 'InstallationType', 'cavity')
+        XMLHelper.add_element(layer, 'InsulationMaterial', @insulation_cavity_material)
         XMLHelper.add_element(layer, 'NominalRValue', to_float(@insulation_cavity_r_value))
         XMLHelper.add_element(layer, 'Thickness', to_float(@insulation_cavity_thickness))
-        XMLHelper.add_element(layer, 'InsulationMaterial', @insulation_cavity_material)
         if not @wood_sheathing_thickness.nil?
           wood_sheathing = XMLHelper.create_elements_as_needed(doc, ['HPXML', 'Building', 'BuildingDetails', 'Enclosure', 'Walls', 'Wall', 'extension', 'WoodSheathing'])
           XMLHelper.add_element(wood_sheathing, 'Thickness', to_float(@wood_sheathing_thickness))
@@ -1705,8 +1705,8 @@ class HPXML < Object
       if not @insulation_continuous_r_value.nil?
         layer = XMLHelper.add_element(insulation, 'Layer')
         XMLHelper.add_element(layer, 'InstallationType', 'continuous')
-        XMLHelper.add_element(layer, 'NominalRValue', to_float(@insulation_continuous_r_value))
         XMLHelper.add_element(layer, 'InsulationMaterial', @insulation_continuous_material)
+        XMLHelper.add_element(layer, 'NominalRValue', to_float(@insulation_continuous_r_value))
       end
     end
 
