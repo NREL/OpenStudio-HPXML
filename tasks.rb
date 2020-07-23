@@ -3319,7 +3319,8 @@ def set_hpxml_ventilation_fans(hpxml_file, hpxml)
                                tested_flow_rate: 110,
                                hours_in_operation: 24,
                                fan_power: 60,
-                               used_for_whole_building_ventilation: true)
+                               used_for_whole_building_ventilation: true,
+                               is_shared_system: false)
   elsif ['invalid_files/unattached-cfis.xml',
          'invalid_files/cfis-with-hydronic-distribution.xml',
          'base-mechvent-cfis.xml',
@@ -3331,7 +3332,8 @@ def set_hpxml_ventilation_fans(hpxml_file, hpxml)
                                hours_in_operation: 8,
                                fan_power: 300,
                                used_for_whole_building_ventilation: true,
-                               distribution_system_idref: 'HVACDistribution')
+                               distribution_system_idref: 'HVACDistribution',
+                               is_shared_system: false)
     if ['invalid_files/unattached-cfis.xml'].include? hpxml_file
       hpxml.ventilation_fans[0].distribution_system_idref = 'foobar'
     end
@@ -3343,7 +3345,8 @@ def set_hpxml_ventilation_fans(hpxml_file, hpxml)
                                total_recovery_efficiency: 0.48,
                                sensible_recovery_efficiency: 0.72,
                                fan_power: 60,
-                               used_for_whole_building_ventilation: true)
+                               used_for_whole_building_ventilation: true,
+                               is_shared_system: false)
   elsif ['base-mechvent-erv-atre-asre.xml'].include? hpxml_file
     hpxml.ventilation_fans.add(id: 'MechanicalVentilation',
                                fan_type: HPXML::MechVentTypeERV,
@@ -3352,21 +3355,24 @@ def set_hpxml_ventilation_fans(hpxml_file, hpxml)
                                total_recovery_efficiency_adjusted: 0.526,
                                sensible_recovery_efficiency_adjusted: 0.79,
                                fan_power: 60,
-                               used_for_whole_building_ventilation: true)
+                               used_for_whole_building_ventilation: true,
+                               is_shared_system: false)
   elsif ['base-mechvent-exhaust.xml'].include? hpxml_file
     hpxml.ventilation_fans.add(id: 'MechanicalVentilation',
                                fan_type: HPXML::MechVentTypeExhaust,
                                tested_flow_rate: 110,
                                hours_in_operation: 24,
                                fan_power: 30,
-                               used_for_whole_building_ventilation: true)
+                               used_for_whole_building_ventilation: true,
+                               is_shared_system: false)
   elsif ['base-mechvent-exhaust-rated-flow-rate.xml'].include? hpxml_file
     hpxml.ventilation_fans.add(id: 'MechanicalVentilation',
                                fan_type: HPXML::MechVentTypeExhaust,
                                rated_flow_rate: 110,
                                hours_in_operation: 24,
                                fan_power: 30,
-                               used_for_whole_building_ventilation: true)
+                               used_for_whole_building_ventilation: true,
+                               is_shared_system: false)
   elsif ['base-mechvent-hrv.xml'].include? hpxml_file
     hpxml.ventilation_fans.add(id: 'MechanicalVentilation',
                                fan_type: HPXML::MechVentTypeHRV,
@@ -3374,7 +3380,8 @@ def set_hpxml_ventilation_fans(hpxml_file, hpxml)
                                hours_in_operation: 24,
                                sensible_recovery_efficiency: 0.72,
                                fan_power: 60,
-                               used_for_whole_building_ventilation: true)
+                               used_for_whole_building_ventilation: true,
+                               is_shared_system: false)
   elsif ['base-mechvent-hrv-asre.xml'].include? hpxml_file
     hpxml.ventilation_fans.add(id: 'MechanicalVentilation',
                                fan_type: HPXML::MechVentTypeHRV,
@@ -3382,14 +3389,16 @@ def set_hpxml_ventilation_fans(hpxml_file, hpxml)
                                hours_in_operation: 24,
                                sensible_recovery_efficiency_adjusted: 0.790,
                                fan_power: 60,
-                               used_for_whole_building_ventilation: true)
+                               used_for_whole_building_ventilation: true,
+                               is_shared_system: false)
   elsif ['base-mechvent-supply.xml'].include? hpxml_file
     hpxml.ventilation_fans.add(id: 'MechanicalVentilation',
                                fan_type: HPXML::MechVentTypeSupply,
                                tested_flow_rate: 110,
                                hours_in_operation: 24,
                                fan_power: 30,
-                               used_for_whole_building_ventilation: true)
+                               used_for_whole_building_ventilation: true,
+                               is_shared_system: false)
   elsif ['base-misc-whole-house-fan.xml'].include? hpxml_file
     hpxml.ventilation_fans.add(id: 'WholeHouseFan',
                                rated_flow_rate: 4500,
@@ -3439,19 +3448,22 @@ def set_hpxml_ventilation_fans(hpxml_file, hpxml)
                                tested_flow_rate: 110,
                                hours_in_operation: 24,
                                fan_power: 30,
-                               used_for_whole_building_ventilation: true)
+                               used_for_whole_building_ventilation: true,
+                               is_shared_system: false)
     hpxml.ventilation_fans.add(id: 'Exhaust',
                                fan_type: HPXML::MechVentTypeExhaust,
                                rated_flow_rate: 50,
                                hours_in_operation: 14,
                                fan_power: 10,
-                               used_for_whole_building_ventilation: true)
+                               used_for_whole_building_ventilation: true,
+                               is_shared_system: false)
     hpxml.ventilation_fans.add(id: 'Balanced',
                                fan_type: HPXML::MechVentTypeBalanced,
                                tested_flow_rate: 110,
                                hours_in_operation: 24,
                                fan_power: 60,
-                               used_for_whole_building_ventilation: true)
+                               used_for_whole_building_ventilation: true,
+                               is_shared_system: false)
     hpxml.ventilation_fans.add(id: 'ERV',
                                fan_type: HPXML::MechVentTypeERV,
                                tested_flow_rate: 50,
@@ -3459,14 +3471,16 @@ def set_hpxml_ventilation_fans(hpxml_file, hpxml)
                                total_recovery_efficiency: 0.48,
                                sensible_recovery_efficiency: 0.72,
                                fan_power: 30,
-                               used_for_whole_building_ventilation: true)
+                               used_for_whole_building_ventilation: true,
+                               is_shared_system: false)
     hpxml.ventilation_fans.add(id: 'HRV',
                                fan_type: HPXML::MechVentTypeHRV,
                                tested_flow_rate: 60,
                                hours_in_operation: 24,
                                sensible_recovery_efficiency: 0.72,
                                fan_power: 30,
-                               used_for_whole_building_ventilation: true)
+                               used_for_whole_building_ventilation: true,
+                               is_shared_system: false)
     hpxml.ventilation_fans.reverse_each do |vent_fan|
       vent_fan.fan_power /= 2.0
       vent_fan.rated_flow_rate /= 2.0 unless vent_fan.rated_flow_rate.nil?
@@ -3482,14 +3496,16 @@ def set_hpxml_ventilation_fans(hpxml_file, hpxml)
                                hours_in_operation: 8,
                                fan_power: 150,
                                used_for_whole_building_ventilation: true,
-                               distribution_system_idref: 'HVACDistribution')
+                               distribution_system_idref: 'HVACDistribution',
+                               is_shared_system: false)
     hpxml.ventilation_fans.add(id: 'CFIS2',
                                fan_type: HPXML::MechVentTypeCFIS,
                                tested_flow_rate: 170,
                                hours_in_operation: 8,
                                fan_power: 150,
                                used_for_whole_building_ventilation: true,
-                               distribution_system_idref: 'HVACDistribution2')
+                               distribution_system_idref: 'HVACDistribution2',
+                               is_shared_system: false)
   end
 end
 
