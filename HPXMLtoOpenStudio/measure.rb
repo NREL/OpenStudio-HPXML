@@ -3560,7 +3560,10 @@ class OSModel
   # Should be called when the object's energy use is NOT sensitive to ambient temperature
   # (e.g., appliances).
   def self.get_space_from_location(location, object_name, model, spaces)
-    return if location == HPXML::LocationOther
+    return if [HPXML::LocationOtherHeatedSpace,
+               HPXML::LocationOtherHousingUnit,
+               HPXML::LocationOtherMultifamilyBufferSpace,
+               HPXML::LocationOtherNonFreezingSpace].include? location
 
     num_orig_spaces = spaces.size
 
