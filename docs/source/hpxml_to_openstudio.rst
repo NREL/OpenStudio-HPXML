@@ -69,28 +69,6 @@ The `HPXML Toolbox website <https://hpxml.nrel.gov/>`_ also provides several res
 #. A data dictionary
 #. An implementation guide
 
-Scope (Dwelling Units)
-**********************
-
-The OpenStudio-HPXML workflow is intended to be used to model individual residential dwelling units -- either a single-family detached (SFD) building, or a single unit of a single-family attached (SFA) or multifamily (MF) building.
-This approach was taken because:
-
-- It is required/desired for certain projects.
-- It improves runtime speed by being able to simulate individual units in parallel (as opposed to simulating the entire building).
-- It doesn't necessarily preclude the possibility of running a single integrated EnergyPlus simulation.
-
-To model units of SFA/MF buildings, current capabilities include:
-
-- Defining surfaces adjacent to generic SFA/MF space types (e.g., "other housing unit" or "other multifamily buffer space").
-- Locating various building components (e.g., ducts, water heaters, appliances) in these spaces.
-
-Note that only the energy use attributed to each dwelling unit is calculated.
-Other OpenStudio capabilities should be used to supplement this workflow if the energy use of non-residential dwelling spaces (e.g., gyms, elevators, corridors, etc.) are of interest.
-In the near future, the OpenStudio-HPXML workflow will also begin supporting shared systems (HVAC, water heating, mechanical ventilation, etc.) by approximating the energy use attributed to the unit.
-
-For situations where more complex, integrated modeling is required, it is possible to merge multiple OpenStudio models together into a single model, such that one could merge all residential OSMs together and potentially combine it with a commercial OSM.
-That capability is outside the scope of this project.
-
 Input Defaults
 **************
 
@@ -214,22 +192,22 @@ For software tools that do not collect sufficient inputs for every required surf
 
 The space types used in the HPXML building description are:
 
-==============================  =============================================  ========================================================
-Space Type                      Description                                    Temperature
-==============================  =============================================  ========================================================
-living space                    Above-grade conditioned floor area             EnergyPlus calculation
-attic - vented                                                                 EnergyPlus calculation
-attic - unvented                                                               EnergyPlus calculation
-basement - conditioned          Below-grade conditioned floor area             EnergyPlus calculation
-basement - unconditioned                                                       EnergyPlus calculation
-crawlspace - vented                                                            EnergyPlus calculation
-crawlspace - unvented                                                          EnergyPlus calculation
-garage                                                                         EnergyPlus calculation
-other housing unit              E.g., adjacent unit or conditioned corridor    Same as conditioned space
-other heated space              E.g., shared laundry/equipment space           Average of conditioned space and outside; minimum of 68F
-other multifamily buffer space  E.g., enclosed unconditioned stairwell         Average of conditioned space and outside; minimum of 50F
-other non-freezing space        E.g., parking garage ceiling                   Floats with outside; minimum of 40F
-==============================  =============================================  ========================================================
+==============================  =============================================  ========================================================  =========================
+Space Type                      Description                                    Temperature                                               Building Type
+==============================  =============================================  ========================================================  =========================
+living space                    Above-grade conditioned floor area             EnergyPlus calculation                                    Any
+attic - vented                                                                 EnergyPlus calculation                                    Any
+attic - unvented                                                               EnergyPlus calculation                                    Any
+basement - conditioned          Below-grade conditioned floor area             EnergyPlus calculation                                    Any
+basement - unconditioned                                                       EnergyPlus calculation                                    Any
+crawlspace - vented                                                            EnergyPlus calculation                                    Any
+crawlspace - unvented                                                          EnergyPlus calculation                                    Any
+garage                                                                         EnergyPlus calculation                                    Any
+other housing unit              E.g., adjacent unit or conditioned corridor    Same as conditioned space                                 Attached/Multifamily only
+other heated space              E.g., shared laundry/equipment space           Average of conditioned space and outside; minimum of 68F  Attached/Multifamily only
+other multifamily buffer space  E.g., enclosed unconditioned stairwell         Average of conditioned space and outside; minimum of 50F  Attached/Multifamily only
+other non-freezing space        E.g., parking garage ceiling                   Floats with outside; minimum of 40F                       Attached/Multifamily only
+==============================  =============================================  ========================================================  =========================
 
 .. warning::
 
@@ -571,26 +549,26 @@ For each duct, ``DuctInsulationRValue`` must be provided.
 ``DuctLocation`` and ``DuctSurfaceArea`` can be optionally provided.
 The provided ``DuctLocation`` can be one of the following:
 
-==============================  =============================================  =========================================================  ================
-Location                        Description                                    Temperature                                                Default Priority
-==============================  =============================================  =========================================================  ================
-living space                    Above-grade conditioned floor area             EnergyPlus calculation                                     8
-basement - conditioned          Below-grade conditioned floor area             EnergyPlus calculation                                     1
-basement - unconditioned                                                       EnergyPlus calculation                                     2
-crawlspace - unvented                                                          EnergyPlus calculation                                     4
-crawlspace - vented                                                            EnergyPlus calculation                                     3
-attic - unvented                                                               EnergyPlus calculation                                     6
-attic - vented                                                                 EnergyPlus calculation                                     5
-garage                                                                         EnergyPlus calculation                                     7
-outside                                                                        Outside
-exterior wall                                                                  Average of conditioned space and outside
-under slab                                                                     Ground
-roof deck                                                                      Outside
-other housing unit              E.g., adjacent unit or conditioned corridor    Same as conditioned space
-other heated space              E.g., shared laundry/equipment space           Average of conditioned space and outside; minimum of 68F
-other multifamily buffer space  E.g., enclosed unconditioned stairwell         Average of conditioned space and outside; minimum of 50F
-other non-freezing space        E.g., parking garage ceiling                   Floats with outside; minimum of 40F
-==============================  =============================================  =========================================================  ================
+==============================  =============================================  =========================================================  =========================  ================
+Location                        Description                                    Temperature                                                Building Type              Default Priority
+==============================  =============================================  =========================================================  =========================  ================
+living space                    Above-grade conditioned floor area             EnergyPlus calculation                                     Any                        8
+basement - conditioned          Below-grade conditioned floor area             EnergyPlus calculation                                     Any                        1
+basement - unconditioned                                                       EnergyPlus calculation                                     Any                        2
+crawlspace - unvented                                                          EnergyPlus calculation                                     Any                        4
+crawlspace - vented                                                            EnergyPlus calculation                                     Any                        3
+attic - unvented                                                               EnergyPlus calculation                                     Any                        6
+attic - vented                                                                 EnergyPlus calculation                                     Any                        5
+garage                                                                         EnergyPlus calculation                                     Any                        7
+outside                                                                        Outside                                                    Any
+exterior wall                                                                  Average of conditioned space and outside                   Any
+under slab                                                                     Ground                                                     Any
+roof deck                                                                      Outside                                                    Any
+other housing unit              E.g., adjacent unit or conditioned corridor    Same as conditioned space                                  Attached/Multifamily only
+other heated space              E.g., shared laundry/equipment space           Average of conditioned space and outside; minimum of 68F   Attached/Multifamily only
+other multifamily buffer space  E.g., enclosed unconditioned stairwell         Average of conditioned space and outside; minimum of 50F   Attached/Multifamily only
+other non-freezing space        E.g., parking garage ceiling                   Floats with outside; minimum of 40F                        Attached/Multifamily only
+==============================  =============================================  =========================================================  =========================  ================
 
 If ``DuctLocation`` is not provided, the primary duct location will be chosen based on the presence of spaces and the "Default Priority" indicated above.
 For a 2+ story home, secondary ducts will also be located in the living space.
@@ -728,23 +706,23 @@ For water heaters that are connected to a desuperheater, the ``RelatedHVACSystem
 
 The water heater ``Location`` can be optionally entered as one of the following:
 
-==============================  =============================================  =========================================================
-Location                        Description                                    Temperature
-==============================  =============================================  =========================================================
-living space                    Above-grade conditioned floor area             EnergyPlus calculation
-basement - conditioned          Below-grade conditioned floor area             EnergyPlus calculation
-basement - unconditioned                                                       EnergyPlus calculation
-attic - unvented                                                               EnergyPlus calculation
-attic - vented                                                                 EnergyPlus calculation
-garage                                                                         EnergyPlus calculation
-crawlspace - unvented                                                          EnergyPlus calculation
-crawlspace - vented                                                            EnergyPlus calculation
-other exterior                  Outside                                        EnergyPlus calculation
-other housing unit              E.g., adjacent unit or conditioned corridor    Same as conditioned space
-other heated space              E.g., shared laundry/equipment space           Average of conditioned space and outside; minimum of 68F
-other multifamily buffer space  E.g., enclosed unconditioned stairwell         Average of conditioned space and outside; minimum of 50F
-other non-freezing space        E.g., parking garage ceiling                   Floats with outside; minimum of 40F
-==============================  =============================================  =========================================================
+==============================  =============================================  =========================================================  =========================
+Location                        Description                                    Temperature                                                Building Type
+==============================  =============================================  =========================================================  =========================
+living space                    Above-grade conditioned floor area             EnergyPlus calculation                                     Any
+basement - conditioned          Below-grade conditioned floor area             EnergyPlus calculation                                     Any
+basement - unconditioned                                                       EnergyPlus calculation                                     Any
+attic - unvented                                                               EnergyPlus calculation                                     Any
+attic - vented                                                                 EnergyPlus calculation                                     Any
+garage                                                                         EnergyPlus calculation                                     Any
+crawlspace - unvented                                                          EnergyPlus calculation                                     Any
+crawlspace - vented                                                            EnergyPlus calculation                                     Any
+other exterior                  Outside                                        EnergyPlus calculation                                     Any
+other housing unit              E.g., adjacent unit or conditioned corridor    Same as conditioned space                                  Attached/Multifamily only
+other heated space              E.g., shared laundry/equipment space           Average of conditioned space and outside; minimum of 68F   Attached/Multifamily only
+other multifamily buffer space  E.g., enclosed unconditioned stairwell         Average of conditioned space and outside; minimum of 50F   Attached/Multifamily only
+other non-freezing space        E.g., parking garage ceiling                   Floats with outside; minimum of 40F                        Attached/Multifamily only
+==============================  =============================================  =========================================================  =========================
 
 If the location is not provided, a default water heater location will be assumed based on IECC climate zone:
 
@@ -877,15 +855,18 @@ This section describes elements specified in HPXML's ``Appliances``.
 
 The ``Location`` for each appliance can be optionally provided as one of the following:
 
-==============================  ====================================================================
-Location                        Description                                                         
-==============================  ====================================================================
-living space                    Above-grade conditioned floor area
-basement - conditioned          Below-grade conditioned floor area
-basement - unconditioned  
-garage                    
-other                           Any attached/multifamily space outside the unit, in which internal gains are neglected
-==============================  ====================================================================
+==============================  ===========================================  =========================
+Location                        Description                                  Building Type
+==============================  ===========================================  =========================
+living space                    Above-grade conditioned floor area           Any
+basement - conditioned          Below-grade conditioned floor area           Any
+basement - unconditioned                                                     Any
+garage                                                                       Any
+other housing unit              E.g., adjacent unit or conditioned corridor  Attached/Multifamily only
+other heated space              E.g., shared laundry/equipment space         Attached/Multifamily only
+other multifamily buffer space  E.g., enclosed unconditioned stairwell       Attached/Multifamily only
+other non-freezing space        E.g., parking garage ceiling                 Attached/Multifamily only
+==============================  ===========================================  =========================
 
 If the location is not specified, the appliance is assumed to be in the living space.
 
@@ -1046,17 +1027,15 @@ Garage lighting values are ignored if the building has no garage.
 Optional ``extension/InteriorUsageMultiplier``, ``extension/ExteriorUsageMultiplier``, and ``extension/GarageUsageMultiplier`` can be provided that scales energy usage; if not provided, they are assumed to be 1.0.
 
 An optional ``extension/ExteriorHolidayLighting`` can also be provided to define additional exterior holiday lighting; if not provided, none will be modeled. 
-If provided, child elements ``Load[Units='kWh/day']/Value``, ``PeriodBeginMonth``, ``PeriodBeginDayOfMonth``, ``PeriodEndMonth``, ``PeriodEndDayOfMonth``, ``WeekdayScheduleFractions``, and ``WeekendScheduleFractions`` can be optionally provided. 
-If the complete set of child elements is not provided, the following default values will be used.
+If provided, child elements ``Load[Units='kWh/day']/Value``, ``PeriodBeginMonth``/``PeriodBeginDayOfMonth``, ``PeriodEndMonth``/``PeriodEndDayOfMonth``, ``WeekdayScheduleFractions``, and ``WeekendScheduleFractions`` can be optionally provided. 
+For the child elements not provided, the following default values will be used.
 
 =============================================  ======================================================================================================
 Element Name                                   Default Value
 =============================================  ======================================================================================================
-Load[Units='kWh/day']/Value                    1.1 for SFD; 0.5 for SFA or MF  
-PeriodBeginMonth                               11  
-PeriodBeginDayOfMonth                          24  
-PeriodEndMonth                                 1  
-PeriodEndDayOfMonth                            6
+Load[Units='kWh/day']/Value                    1.1 for single-family detached and 0.55 for others
+PeriodBeginMonth/PeriodBeginDayOfMonth         11/24 (November 24) 
+PeriodEndMonth/PeriodEndDayOfMonth             1/6 (January 6) 
 WeekdayScheduleFractions                       0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0.008, 0.098, 0.168, 0.194, 0.284, 0.192, 0.037, 0.019
 WeekendScheduleFractions                       0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0.008, 0.098, 0.168, 0.194, 0.284, 0.192, 0.037, 0.019
 =============================================  ======================================================================================================
