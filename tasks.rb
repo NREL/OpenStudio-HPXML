@@ -191,6 +191,7 @@ def create_hpxmls
     'base-enclosure-windows-interior-shading.xml' => 'base.xml',
     'base-enclosure-windows-none.xml' => 'base.xml',
     'base-enclosure-attached-multifamily.xml' => 'base.xml',
+    'base-enclosure-walls-detailed.xml' => 'base.xml',
     'base-foundation-multiple.xml' => 'base-foundation-unconditioned-basement.xml',
     'base-foundation-ambient.xml' => 'base.xml',
     'base-foundation-conditioned-basement-slab-insulation.xml' => 'base.xml',
@@ -942,6 +943,16 @@ def set_hpxml_rim_joists(hpxml_file, hpxml)
                            emittance: 0.92,
                            insulation_assembly_r_value: 23.0)
     end
+  elsif ['base-enclosure-walls-detailed.xml'].include? hpxml_file
+    hpxml.walls[0].insulation_assembly_r_value = nil
+    hpxml.walls[0].insulation_cavity_r_value = 19
+    hpxml.walls[0].insulation_cavity_thickness = 5.5
+    hpxml.walls[0].insulation_continuous_r_value = 0
+    hpxml.walls[0].insulation_grade = 3
+    hpxml.walls[0].stud_size = '2x6'
+    hpxml.walls[0].stud_framing_factor = 0.1988
+    hpxml.walls[0].stud_material = 'wood'
+    hpxml.walls[0].wood_sheathing_thickness = 0.5
   elsif ['base-foundation-ambient.xml',
          'base-foundation-slab.xml'].include? hpxml_file
     hpxml.rim_joists.clear

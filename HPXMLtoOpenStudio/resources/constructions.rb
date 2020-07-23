@@ -4,9 +4,9 @@ class Constructions
   # Container class for walls, floors/ceilings, roofs, etc.
 
   def self.apply_wood_stud_wall(runner, model, surfaces, wall, constr_name,
-                                cavity_r:, install_grade:, cavity_depth_in:, 
-                                cavity_filled:, framing_factor:, 
-                                rigid_r:, sheathing_thick_in:, mat_ext_finish:, 
+                                cavity_r:, install_grade:, cavity_depth_in:,
+                                cavity_filled:, framing_factor:,
+                                rigid_r:, sheathing_thick_in:, mat_ext_finish:,
                                 inside_drywall_thick_in:, outside_drywall_thick_in:,
                                 inside_film:, outside_film:)
     # FIXME: Need to add descriptions of each argument
@@ -67,6 +67,7 @@ class Constructions
 
     # Store info for HVAC Sizing measure
     if not wall.nil?
+      wall.ufactor = 1.0 / constr.assembly_rvalue # parallel path overall ufactor calculation
       wall.insulation_cavity_r_value = cavity_r
       wall.insulation_continuous_r_value = rigid_r
     end
@@ -511,6 +512,7 @@ class Constructions
     constr.create_and_assign_constructions(runner, surfaces, model)
 
     # Store info for HVAC Sizing measure
+    rim_joist.ufactor = 1.0 / constr.assembly_rvalue # parallel path overall ufactor calculation
     rim_joist.insulation_continuous_r_value = rigid_r
     rim_joist.insulation_cavity_r_value = cavity_r
   end
@@ -900,9 +902,9 @@ class Constructions
     end
 
     apply_wood_stud_wall(runner, model, imdefs, nil, constr_name,
-                         cavity_r: 0, cavity_depth_in: 3.5, cavity_filled: false, install_grade: 1, 
+                         cavity_r: 0, cavity_depth_in: 3.5, cavity_filled: false, install_grade: 1,
                          framing_factor: 0.16, sheathing_thick_in: 0,
-                         rigid_r: 0, mat_ext_finish: nil, 
+                         rigid_r: 0, mat_ext_finish: nil,
                          inside_drywall_thick_in: drywall_thick_in, outside_drywall_thick_in: drywall_thick_in,
                          inside_film: Material.AirFilmVertical, outside_film: Material.AirFilmVertical)
   end

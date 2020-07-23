@@ -764,12 +764,12 @@ class HVACSizing
         end
 
         if wall.is_exterior
-          zone_loads.Cool_Walls += (1.0 / wall.insulation_assembly_r_value) * wall_area / azimuths.size * cltd
-          zone_loads.Heat_Walls += (1.0 / wall.insulation_assembly_r_value) * wall_area / azimuths.size * @htd
+          zone_loads.Cool_Walls += wall.ufactor * wall_area / azimuths.size * cltd
+          zone_loads.Heat_Walls += wall.ufactor * wall_area / azimuths.size * @htd
         else
           adjacent_space = wall.exterior_adjacent_to
-          zone_loads.Cool_Walls += (1.0 / wall.insulation_assembly_r_value) * wall_area / azimuths.size * (@cool_design_temps[adjacent_space] - @cool_setpoint)
-          zone_loads.Heat_Walls += (1.0 / wall.insulation_assembly_r_value) * wall_area / azimuths.size * (@heat_setpoint - @heat_design_temps[adjacent_space])
+          zone_loads.Cool_Walls += wall.ufactor * wall_area / azimuths.size * (@cool_design_temps[adjacent_space] - @cool_setpoint)
+          zone_loads.Heat_Walls += wall.ufactor * wall_area / azimuths.size * (@heat_setpoint - @heat_design_temps[adjacent_space])
         end
       end
     end
@@ -2437,7 +2437,7 @@ class HVACSizing
       wall_type = wall.wall_type
     end
 
-    wall_ufactor = 1.0 / wall.insulation_assembly_r_value
+    wall_ufactor = 1.0 / wall.insulation_assembly_r_value unless wall.insulation_assembly_r_value.nil?
 
     # The following correlations were estimated by analyzing MJ8 construction tables.
     if [HPXML::WallTypeWoodStud, HPXML::WallTypeSteelStud].include? wall_type

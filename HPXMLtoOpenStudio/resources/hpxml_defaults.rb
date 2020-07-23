@@ -163,6 +163,12 @@ class HPXMLDefaults
       elsif wall.solar_absorptance.nil?
         wall.solar_absorptance = Constructions.get_default_wall_solar_absorptance(wall.color)
       end
+      if wall.insulation_cavity_material.nil?
+        wall.insulation_cavity_material = HPXML::InsulationMaterialBatt
+      end
+      if wall.insulation_continuous_material.nil?
+        wall.insulation_continuous_material = HPXML::InsulationMaterialRigid
+      end
     end
   end
 
