@@ -3190,6 +3190,38 @@ class HPXML < Object
       return unit_fan_power * (@hours_in_operation / 24.0)
     end
 
+    def preconditioning_cooling_system
+      return if @preconditioning_cooling_system_idref.nil?
+      return unless @is_shared_system
+
+      (@hpxml_object.cooling_systems + @hpxml_object.heat_pumps).each do |clg_sys|
+        next unless clg_sys.id == @preconditioning_cooling_system_idref
+
+        return clg_sys
+      end
+      fail "Attached preconditioning cooling system '#{@preconditioning_cooling_system_idref}' not found for ventilation fan '#{@id}'."
+    end
+
+    def preconditioning_heating_system
+      return if @preconditioning_heating_system_idref.nil?
+      return unless @is_shared_system
+
+      (@hpxml_object.heating_systems + @hpxml_object.heat_pumps).each do |htg_sys|
+        next unless htg_sys.id == @preconditioning_heating_system_idref
+
+        return htg_sys
+      end
+      fail "Attached preconditioning heating system '#{@preconditioning_heating_system_idref}' not found for ventilation fan '#{@id}'."
+    end
+
+    def check_oa_recirc_sum
+      return if @fraction_oa.nil?
+      return if @fraction_recirculation.nil?
+      if (@fraction_oa + @fraction_recirculation - 1.0).abs > 0.001
+        fail "Fraction of outdoor air and fraction of recirculation doesn't sum to one for ventilation fan '#{@id}'."
+      end
+    end
+
     def delete
       @hpxml_object.ventilation_fans.delete(self)
     end
@@ -3197,6 +3229,9 @@ class HPXML < Object
     def check_for_errors
       errors = []
       begin; distribution_system; rescue StandardError => e; errors << e.message; end
+      begin; preconditioning_cooling_system; rescue StandardError => e; errors << e.message; end
+      begin; preconditioning_heating_system; rescue StandardError => e; errors << e.message; end
+      begin; check_oa_recirc_sum; rescue StandardError => e; errors << e.message; end
       return errors
     end
 
