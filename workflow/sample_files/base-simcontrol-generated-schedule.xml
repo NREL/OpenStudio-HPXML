@@ -11,7 +11,7 @@
       <SimulationControl>
         <Timestep>60</Timestep>
       </SimulationControl>
-      <SchedulesOutputPath>BuildResidentialHPXML/resources/schedules/schedules.csv</SchedulesOutputPath>
+      <SchedulesPath>BuildResidentialHPXML/resources/schedules/schedules.csv</SchedulesPath>
     </extension>
   </SoftwareInfo>
   <Building>
@@ -37,7 +37,7 @@
         <BuildingOccupancy>
           <NumberofResidents>3.0</NumberofResidents>
           <extension>
-            <SchedulesColumnName>occupants</SchedulesColumnName>
+            <Schedule>occupants</Schedule>
           </extension>
         </BuildingOccupancy>
         <BuildingConstruction>
@@ -413,9 +413,7 @@
             <LowFlow>false</LowFlow>
           </WaterFixture>
           <extension>
-            <ShowersSchedulesColumnName>showers</ShowersSchedulesColumnName>
-            <SinksSchedulesColumnName>sinks</SinksSchedulesColumnName>
-            <BathsSchedulesColumnName>baths</BathsSchedulesColumnName>
+            <WaterFixturesSchedule>fixtures</WaterFixturesSchedule>
           </extension>
         </WaterHeating>
       </Systems>
@@ -431,8 +429,8 @@
           <LabelUsage>6.0</LabelUsage>
           <Capacity>3.2</Capacity>
           <extension>
-            <WaterSchedulesColumnName>clothes_washer</WaterSchedulesColumnName>
-            <PowerSchedulesColumnName>clothes_washer_power</PowerSchedulesColumnName>
+            <WaterSchedule>clothes_washer</WaterSchedule>
+            <PowerSchedule>clothes_washer_power</PowerSchedule>
           </extension>
         </ClothesWasher>
         <ClothesDryer>
@@ -442,7 +440,7 @@
           <CombinedEnergyFactor>3.73</CombinedEnergyFactor>
           <ControlType>timer</ControlType>
           <extension>
-            <PowerSchedulesColumnName>clothes_dryer</PowerSchedulesColumnName>
+            <PowerSchedule>clothes_dryer</PowerSchedule>
           </extension>
         </ClothesDryer>
         <Dishwasher>
@@ -455,8 +453,8 @@
           <LabelAnnualGasCost>22.32</LabelAnnualGasCost>
           <LabelUsage>4.0</LabelUsage>
           <extension>
-            <WaterSchedulesColumnName>dishwasher</WaterSchedulesColumnName>
-            <PowerSchedulesColumnName>dishwasher_power</PowerSchedulesColumnName>
+            <WaterSchedule>dishwasher</WaterSchedule>
+            <PowerSchedule>dishwasher_power</PowerSchedule>
           </extension>
         </Dishwasher>
         <Refrigerator>
@@ -471,7 +469,7 @@
           <FuelType>electricity</FuelType>
           <IsInduction>false</IsInduction>
           <extension>
-            <SchedulesColumnName>cooking_range</SchedulesColumnName>
+            <Schedule>cooking_range</Schedule>
           </extension>
         </CookingRange>
         <Oven>
@@ -553,8 +551,8 @@
           </LightingType>
         </LightingGroup>
         <extension>
-          <InteriorSchedulesColumnName>lighting_interior</InteriorSchedulesColumnName>
-          <ExteriorSchedulesColumnName>lighting_exterior</ExteriorSchedulesColumnName>
+          <InteriorSchedule>lighting_interior</InteriorSchedule>
+          <ExteriorSchedule>lighting_exterior</ExteriorSchedule>
         </extension>
       </Lighting>
       <MiscLoads>
@@ -568,7 +566,7 @@
           <extension>
             <FracSensible>0.855</FracSensible>
             <FracLatent>0.045</FracLatent>
-            <SchedulesColumnName>plug_loads</SchedulesColumnName>
+            <Schedule>plug_loads</Schedule>
           </extension>
         </PlugLoad>
         <PlugLoad>
