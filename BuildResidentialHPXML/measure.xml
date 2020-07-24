@@ -3,8 +3,8 @@
   <schema_version>3.0</schema_version>
   <name>build_residential_hpxml</name>
   <uid>a13a8983-2b01-4930-8af2-42030b6e4233</uid>
-  <version_id>da583104-9e57-4995-912a-5143f70966a3</version_id>
-  <version_modified>20200721T145026Z</version_modified>
+  <version_id>f8ddedc9-df9f-45a7-9e6a-705ab73677a3</version_id>
+  <version_modified>20200724T223401Z</version_modified>
   <xml_checksum>2C38F48B</xml_checksum>
   <class_name>BuildResidentialHPXML</class_name>
   <display_name>HPXML Builder</display_name>
@@ -16,33 +16,48 @@
       <display_name>HPXML File Path</display_name>
       <description>Absolute/relative path of the HPXML file.</description>
       <type>String</type>
+      <units></units>
       <required>true</required>
       <model_dependent>false</model_dependent>
+      <default_value></default_value>
+      <min_value></min_value>
+      <max_value></max_value>
     </argument>
     <argument>
       <name>weather_dir</name>
       <display_name>Weather Directory</display_name>
       <description>Absolute/relative path of the weather directory.</description>
       <type>String</type>
+      <units></units>
       <required>true</required>
       <model_dependent>false</model_dependent>
       <default_value>weather</default_value>
+      <min_value></min_value>
+      <max_value></max_value>
     </argument>
     <argument>
       <name>software_program_used</name>
       <display_name>Software Program Used</display_name>
       <description>The name of the software program used.</description>
       <type>String</type>
+      <units></units>
       <required>false</required>
       <model_dependent>false</model_dependent>
+      <default_value></default_value>
+      <min_value></min_value>
+      <max_value></max_value>
     </argument>
     <argument>
       <name>software_program_version</name>
       <display_name>Software Program Version</display_name>
       <description>The version of the software program used.</description>
       <type>String</type>
+      <units></units>
       <required>false</required>
       <model_dependent>false</model_dependent>
+      <default_value></default_value>
+      <min_value></min_value>
+      <max_value></max_value>
     </argument>
     <argument>
       <name>simulation_control_timestep</name>
@@ -52,6 +67,9 @@
       <units>min</units>
       <required>false</required>
       <model_dependent>false</model_dependent>
+      <default_value></default_value>
+      <min_value></min_value>
+      <max_value></max_value>
     </argument>
     <argument>
       <name>simulation_control_run_period_begin_month</name>
@@ -61,6 +79,9 @@
       <units>month</units>
       <required>false</required>
       <model_dependent>false</model_dependent>
+      <default_value></default_value>
+      <min_value></min_value>
+      <max_value></max_value>
     </argument>
     <argument>
       <name>simulation_control_run_period_begin_day_of_month</name>
@@ -70,6 +91,9 @@
       <units>day</units>
       <required>false</required>
       <model_dependent>false</model_dependent>
+      <default_value></default_value>
+      <min_value></min_value>
+      <max_value></max_value>
     </argument>
     <argument>
       <name>simulation_control_run_period_end_month</name>
@@ -79,6 +103,9 @@
       <units>month</units>
       <required>false</required>
       <model_dependent>false</model_dependent>
+      <default_value></default_value>
+      <min_value></min_value>
+      <max_value></max_value>
     </argument>
     <argument>
       <name>simulation_control_run_period_end_day_of_month</name>
@@ -88,14 +115,19 @@
       <units>day</units>
       <required>false</required>
       <model_dependent>false</model_dependent>
+      <default_value></default_value>
+      <min_value></min_value>
+      <max_value></max_value>
     </argument>
     <argument>
       <name>simulation_control_daylight_saving_enabled</name>
       <display_name>Simulation Control: Daylight Saving Enabled</display_name>
       <description>Whether to use daylight saving.</description>
       <type>Boolean</type>
+      <units></units>
       <required>false</required>
       <model_dependent>false</model_dependent>
+      <default_value></default_value>
       <choices>
         <choice>
           <value>true</value>
@@ -106,6 +138,8 @@
           <display_name>false</display_name>
         </choice>
       </choices>
+      <min_value></min_value>
+      <max_value></max_value>
     </argument>
     <argument>
       <name>simulation_control_daylight_saving_begin_month</name>
@@ -115,6 +149,9 @@
       <units>month</units>
       <required>false</required>
       <model_dependent>false</model_dependent>
+      <default_value></default_value>
+      <min_value></min_value>
+      <max_value></max_value>
     </argument>
     <argument>
       <name>simulation_control_daylight_saving_begin_day_of_month</name>
@@ -124,6 +161,9 @@
       <units>day</units>
       <required>false</required>
       <model_dependent>false</model_dependent>
+      <default_value></default_value>
+      <min_value></min_value>
+      <max_value></max_value>
     </argument>
     <argument>
       <name>simulation_control_daylight_saving_end_month</name>
@@ -133,6 +173,9 @@
       <units>month</units>
       <required>false</required>
       <model_dependent>false</model_dependent>
+      <default_value></default_value>
+      <min_value></min_value>
+      <max_value></max_value>
     </argument>
     <argument>
       <name>simulation_control_daylight_saving_end_day_of_month</name>
@@ -142,32 +185,43 @@
       <units>day</units>
       <required>false</required>
       <model_dependent>false</model_dependent>
+      <default_value></default_value>
+      <min_value></min_value>
+      <max_value></max_value>
     </argument>
     <argument>
       <name>schedules_output_path</name>
       <display_name>Schedules Output File Path</display_name>
       <description>Absolute (or relative) path of the output schedules file.</description>
       <type>String</type>
+      <units></units>
       <required>true</required>
       <model_dependent>false</model_dependent>
       <default_value>../schedules.csv</default_value>
+      <min_value></min_value>
+      <max_value></max_value>
     </argument>
     <argument>
       <name>weather_station_epw_filepath</name>
       <display_name>EnergyPlus Weather (EPW) Filepath</display_name>
       <description>Name of the EPW file.</description>
       <type>String</type>
+      <units></units>
       <required>true</required>
       <model_dependent>false</model_dependent>
       <default_value>USA_CO_Denver.Intl.AP.725650_TMY3.epw</default_value>
+      <min_value></min_value>
+      <max_value></max_value>
     </argument>
     <argument>
       <name>site_type</name>
       <display_name>Site: Type</display_name>
       <description>The type of site.</description>
       <type>Choice</type>
+      <units></units>
       <required>false</required>
       <model_dependent>false</model_dependent>
+      <default_value></default_value>
       <choices>
         <choice>
           <value>suburban</value>
@@ -182,12 +236,15 @@
           <display_name>rural</display_name>
         </choice>
       </choices>
+      <min_value></min_value>
+      <max_value></max_value>
     </argument>
     <argument>
       <name>geometry_unit_type</name>
       <display_name>Geometry: Unit Type</display_name>
       <description>The type of unit.</description>
       <type>Choice</type>
+      <units></units>
       <required>true</required>
       <model_dependent>false</model_dependent>
       <default_value>single-family detached</default_value>
@@ -205,6 +262,8 @@
           <display_name>multi-family - uncategorized</display_name>
         </choice>
       </choices>
+      <min_value></min_value>
+      <max_value></max_value>
     </argument>
     <argument>
       <name>geometry_num_units</name>
@@ -214,6 +273,9 @@
       <units>#</units>
       <required>false</required>
       <model_dependent>false</model_dependent>
+      <default_value></default_value>
+      <min_value></min_value>
+      <max_value></max_value>
     </argument>
     <argument>
       <name>geometry_cfa</name>
@@ -224,6 +286,8 @@
       <required>true</required>
       <model_dependent>false</model_dependent>
       <default_value>2000</default_value>
+      <min_value></min_value>
+      <max_value></max_value>
     </argument>
     <argument>
       <name>geometry_num_floors_above_grade</name>
@@ -234,6 +298,8 @@
       <required>true</required>
       <model_dependent>false</model_dependent>
       <default_value>2</default_value>
+      <min_value></min_value>
+      <max_value></max_value>
     </argument>
     <argument>
       <name>geometry_wall_height</name>
@@ -244,6 +310,8 @@
       <required>true</required>
       <model_dependent>false</model_dependent>
       <default_value>8</default_value>
+      <min_value></min_value>
+      <max_value></max_value>
     </argument>
     <argument>
       <name>geometry_orientation</name>
@@ -254,6 +322,8 @@
       <required>true</required>
       <model_dependent>false</model_dependent>
       <default_value>180</default_value>
+      <min_value></min_value>
+      <max_value></max_value>
     </argument>
     <argument>
       <name>geometry_aspect_ratio</name>
@@ -264,12 +334,15 @@
       <required>true</required>
       <model_dependent>false</model_dependent>
       <default_value>2</default_value>
+      <min_value></min_value>
+      <max_value></max_value>
     </argument>
     <argument>
       <name>geometry_level</name>
       <display_name>Geometry: Level</display_name>
       <description>The level of the multi-family - uncategorized unit.</description>
       <type>Choice</type>
+      <units></units>
       <required>true</required>
       <model_dependent>false</model_dependent>
       <default_value>Bottom</default_value>
@@ -287,12 +360,15 @@
           <display_name>Top</display_name>
         </choice>
       </choices>
+      <min_value></min_value>
+      <max_value></max_value>
     </argument>
     <argument>
       <name>geometry_horizontal_location</name>
       <display_name>Geometry: Horizontal Location</display_name>
       <description>The horizontal location of the single-family attached or multi-family - uncategorized unit when viewing the front of the building.</description>
       <type>Choice</type>
+      <units></units>
       <required>true</required>
       <model_dependent>false</model_dependent>
       <default_value>Left</default_value>
@@ -310,12 +386,15 @@
           <display_name>Right</display_name>
         </choice>
       </choices>
+      <min_value></min_value>
+      <max_value></max_value>
     </argument>
     <argument>
       <name>geometry_corridor_position</name>
       <display_name>Geometry: Corridor Position</display_name>
       <description>The position of the corridor.</description>
       <type>Choice</type>
+      <units></units>
       <required>true</required>
       <model_dependent>false</model_dependent>
       <default_value>Double-Loaded Interior</default_value>
@@ -337,6 +416,8 @@
           <display_name>None</display_name>
         </choice>
       </choices>
+      <min_value></min_value>
+      <max_value></max_value>
     </argument>
     <argument>
       <name>geometry_corridor_width</name>
@@ -347,6 +428,8 @@
       <required>true</required>
       <model_dependent>false</model_dependent>
       <default_value>10</default_value>
+      <min_value></min_value>
+      <max_value></max_value>
     </argument>
     <argument>
       <name>geometry_inset_width</name>
@@ -357,6 +440,8 @@
       <required>true</required>
       <model_dependent>false</model_dependent>
       <default_value>0</default_value>
+      <min_value></min_value>
+      <max_value></max_value>
     </argument>
     <argument>
       <name>geometry_inset_depth</name>
@@ -367,12 +452,15 @@
       <required>true</required>
       <model_dependent>false</model_dependent>
       <default_value>0</default_value>
+      <min_value></min_value>
+      <max_value></max_value>
     </argument>
     <argument>
       <name>geometry_inset_position</name>
       <display_name>Geometry: Inset Position</display_name>
       <description>The position of the inset.</description>
       <type>Choice</type>
+      <units></units>
       <required>true</required>
       <model_dependent>false</model_dependent>
       <default_value>Right</default_value>
@@ -386,6 +474,8 @@
           <display_name>Left</display_name>
         </choice>
       </choices>
+      <min_value></min_value>
+      <max_value></max_value>
     </argument>
     <argument>
       <name>geometry_balcony_depth</name>
@@ -396,6 +486,8 @@
       <required>true</required>
       <model_dependent>false</model_dependent>
       <default_value>0</default_value>
+      <min_value></min_value>
+      <max_value></max_value>
     </argument>
     <argument>
       <name>geometry_garage_width</name>
@@ -406,6 +498,8 @@
       <required>true</required>
       <model_dependent>false</model_dependent>
       <default_value>0</default_value>
+      <min_value></min_value>
+      <max_value></max_value>
     </argument>
     <argument>
       <name>geometry_garage_depth</name>
@@ -416,6 +510,8 @@
       <required>true</required>
       <model_dependent>false</model_dependent>
       <default_value>20</default_value>
+      <min_value></min_value>
+      <max_value></max_value>
     </argument>
     <argument>
       <name>geometry_garage_protrusion</name>
@@ -426,12 +522,15 @@
       <required>true</required>
       <model_dependent>false</model_dependent>
       <default_value>0</default_value>
+      <min_value></min_value>
+      <max_value></max_value>
     </argument>
     <argument>
       <name>geometry_garage_position</name>
       <display_name>Geometry: Garage Position</display_name>
       <description>The position of the garage.</description>
       <type>Choice</type>
+      <units></units>
       <required>true</required>
       <model_dependent>false</model_dependent>
       <default_value>Right</default_value>
@@ -445,12 +544,15 @@
           <display_name>Left</display_name>
         </choice>
       </choices>
+      <min_value></min_value>
+      <max_value></max_value>
     </argument>
     <argument>
       <name>geometry_foundation_type</name>
       <display_name>Geometry: Foundation Type</display_name>
       <description>The foundation type of the building.</description>
       <type>Choice</type>
+      <units></units>
       <required>true</required>
       <model_dependent>false</model_dependent>
       <default_value>SlabOnGrade</default_value>
@@ -480,6 +582,8 @@
           <display_name>Ambient</display_name>
         </choice>
       </choices>
+      <min_value></min_value>
+      <max_value></max_value>
     </argument>
     <argument>
       <name>geometry_foundation_height</name>
@@ -490,6 +594,8 @@
       <required>true</required>
       <model_dependent>false</model_dependent>
       <default_value>0</default_value>
+      <min_value></min_value>
+      <max_value></max_value>
     </argument>
     <argument>
       <name>geometry_foundation_height_above_grade</name>
@@ -500,12 +606,15 @@
       <required>true</required>
       <model_dependent>false</model_dependent>
       <default_value>0</default_value>
+      <min_value></min_value>
+      <max_value></max_value>
     </argument>
     <argument>
       <name>geometry_roof_type</name>
       <display_name>Geometry: Roof Type</display_name>
       <description>The roof type of the building.</description>
       <type>Choice</type>
+      <units></units>
       <required>true</required>
       <model_dependent>false</model_dependent>
       <default_value>gable</default_value>
@@ -523,12 +632,15 @@
           <display_name>flat</display_name>
         </choice>
       </choices>
+      <min_value></min_value>
+      <max_value></max_value>
     </argument>
     <argument>
       <name>geometry_roof_pitch</name>
       <display_name>Geometry: Roof Pitch</display_name>
       <description>The roof pitch of the attic. Ignored if the building has a flat roof.</description>
       <type>Choice</type>
+      <units></units>
       <required>true</required>
       <model_dependent>false</model_dependent>
       <default_value>6:12</default_value>
@@ -582,12 +694,15 @@
           <display_name>12:12</display_name>
         </choice>
       </choices>
+      <min_value></min_value>
+      <max_value></max_value>
     </argument>
     <argument>
       <name>geometry_roof_structure</name>
       <display_name>Geometry: Roof Structure</display_name>
       <description>The roof structure of the building. Ignored if the building has a flat roof.</description>
       <type>Choice</type>
+      <units></units>
       <required>true</required>
       <model_dependent>false</model_dependent>
       <default_value>truss, cantilever</default_value>
@@ -601,12 +716,15 @@
           <display_name>rafter</display_name>
         </choice>
       </choices>
+      <min_value></min_value>
+      <max_value></max_value>
     </argument>
     <argument>
       <name>geometry_attic_type</name>
       <display_name>Geometry: Attic Type</display_name>
       <description>The attic type of the building. Ignored if the building has a flat roof.</description>
       <type>Choice</type>
+      <units></units>
       <required>true</required>
       <model_dependent>false</model_dependent>
       <default_value>VentedAttic</default_value>
@@ -624,6 +742,8 @@
           <display_name>ConditionedAttic</display_name>
         </choice>
       </choices>
+      <min_value></min_value>
+      <max_value></max_value>
     </argument>
     <argument>
       <name>geometry_eaves_depth</name>
@@ -634,33 +754,44 @@
       <required>true</required>
       <model_dependent>false</model_dependent>
       <default_value>2</default_value>
+      <min_value></min_value>
+      <max_value></max_value>
     </argument>
     <argument>
       <name>geometry_num_bedrooms</name>
       <display_name>Geometry: Number of Bedrooms</display_name>
       <description>Specify the number of bedrooms. Used to determine the energy usage of appliances and plug loads, hot water usage, etc.</description>
       <type>Integer</type>
+      <units></units>
       <required>true</required>
       <model_dependent>false</model_dependent>
       <default_value>3</default_value>
+      <min_value></min_value>
+      <max_value></max_value>
     </argument>
     <argument>
       <name>geometry_num_bathrooms</name>
       <display_name>Geometry: Number of Bathrooms</display_name>
       <description>Specify the number of bathrooms.</description>
       <type>String</type>
+      <units></units>
       <required>true</required>
       <model_dependent>false</model_dependent>
       <default_value>auto</default_value>
+      <min_value></min_value>
+      <max_value></max_value>
     </argument>
     <argument>
       <name>geometry_num_occupants</name>
       <display_name>Geometry: Number of Occupants</display_name>
       <description>Specify the number of occupants. A value of 'auto' will calculate the average number of occupants from the number of bedrooms. Used to specify the internal gains from people only.</description>
       <type>String</type>
+      <units></units>
       <required>true</required>
       <model_dependent>false</model_dependent>
       <default_value>auto</default_value>
+      <min_value></min_value>
+      <max_value></max_value>
     </argument>
     <argument>
       <name>floor_assembly_r</name>
@@ -671,6 +802,8 @@
       <required>true</required>
       <model_dependent>false</model_dependent>
       <default_value>30</default_value>
+      <min_value></min_value>
+      <max_value></max_value>
     </argument>
     <argument>
       <name>foundation_wall_insulation_r</name>
@@ -681,6 +814,8 @@
       <required>true</required>
       <model_dependent>false</model_dependent>
       <default_value>0</default_value>
+      <min_value></min_value>
+      <max_value></max_value>
     </argument>
     <argument>
       <name>foundation_wall_insulation_distance_to_top</name>
@@ -691,6 +826,8 @@
       <required>true</required>
       <model_dependent>false</model_dependent>
       <default_value>0</default_value>
+      <min_value></min_value>
+      <max_value></max_value>
     </argument>
     <argument>
       <name>foundation_wall_insulation_distance_to_bottom</name>
@@ -701,6 +838,8 @@
       <required>true</required>
       <model_dependent>false</model_dependent>
       <default_value>0</default_value>
+      <min_value></min_value>
+      <max_value></max_value>
     </argument>
     <argument>
       <name>foundation_wall_assembly_r</name>
@@ -710,6 +849,9 @@
       <units>h-ft^2-R/Btu</units>
       <required>false</required>
       <model_dependent>false</model_dependent>
+      <default_value></default_value>
+      <min_value></min_value>
+      <max_value></max_value>
     </argument>
     <argument>
       <name>slab_perimeter_insulation_r</name>
@@ -720,6 +862,8 @@
       <required>true</required>
       <model_dependent>false</model_dependent>
       <default_value>0</default_value>
+      <min_value></min_value>
+      <max_value></max_value>
     </argument>
     <argument>
       <name>slab_perimeter_depth</name>
@@ -730,6 +874,8 @@
       <required>true</required>
       <model_dependent>false</model_dependent>
       <default_value>0</default_value>
+      <min_value></min_value>
+      <max_value></max_value>
     </argument>
     <argument>
       <name>slab_under_insulation_r</name>
@@ -740,6 +886,8 @@
       <required>true</required>
       <model_dependent>false</model_dependent>
       <default_value>0</default_value>
+      <min_value></min_value>
+      <max_value></max_value>
     </argument>
     <argument>
       <name>slab_under_width</name>
@@ -750,6 +898,8 @@
       <required>true</required>
       <model_dependent>false</model_dependent>
       <default_value>0</default_value>
+      <min_value></min_value>
+      <max_value></max_value>
     </argument>
     <argument>
       <name>slab_carpet_fraction</name>
@@ -760,6 +910,8 @@
       <required>true</required>
       <model_dependent>false</model_dependent>
       <default_value>0</default_value>
+      <min_value></min_value>
+      <max_value></max_value>
     </argument>
     <argument>
       <name>slab_carpet_r</name>
@@ -770,6 +922,8 @@
       <required>true</required>
       <model_dependent>false</model_dependent>
       <default_value>0</default_value>
+      <min_value></min_value>
+      <max_value></max_value>
     </argument>
     <argument>
       <name>ceiling_assembly_r</name>
@@ -780,14 +934,18 @@
       <required>true</required>
       <model_dependent>false</model_dependent>
       <default_value>30</default_value>
+      <min_value></min_value>
+      <max_value></max_value>
     </argument>
     <argument>
       <name>roof_material_type</name>
       <display_name>Roof: Material Type</display_name>
       <description>The material type of the roof.</description>
       <type>Choice</type>
+      <units></units>
       <required>false</required>
       <model_dependent>false</model_dependent>
+      <default_value></default_value>
       <choices>
         <choice>
           <value>asphalt or fiberglass shingles</value>
@@ -814,12 +972,15 @@
           <display_name>wood shingles or shakes</display_name>
         </choice>
       </choices>
+      <min_value></min_value>
+      <max_value></max_value>
     </argument>
     <argument>
       <name>roof_color</name>
       <display_name>Roof: Color</display_name>
       <description>The color of the roof.</description>
       <type>Choice</type>
+      <units></units>
       <required>true</required>
       <model_dependent>false</model_dependent>
       <default_value>auto</default_value>
@@ -849,6 +1010,8 @@
           <display_name>reflective</display_name>
         </choice>
       </choices>
+      <min_value></min_value>
+      <max_value></max_value>
     </argument>
     <argument>
       <name>roof_assembly_r</name>
@@ -859,30 +1022,39 @@
       <required>true</required>
       <model_dependent>false</model_dependent>
       <default_value>2.3</default_value>
+      <min_value></min_value>
+      <max_value></max_value>
     </argument>
     <argument>
       <name>roof_solar_absorptance</name>
       <display_name>Roof: Solar Absorptance</display_name>
       <description>The solar absorptance of the roof.</description>
       <type>String</type>
+      <units></units>
       <required>true</required>
       <model_dependent>false</model_dependent>
       <default_value>auto</default_value>
+      <min_value></min_value>
+      <max_value></max_value>
     </argument>
     <argument>
       <name>roof_emittance</name>
       <display_name>Roof: Emittance</display_name>
       <description>The emittance of the roof.</description>
       <type>Double</type>
+      <units></units>
       <required>true</required>
       <model_dependent>false</model_dependent>
       <default_value>0.92</default_value>
+      <min_value></min_value>
+      <max_value></max_value>
     </argument>
     <argument>
       <name>roof_radiant_barrier</name>
       <display_name>Roof: Has Radiant Barrier</display_name>
       <description>Specifies whether the attic has a radiant barrier.</description>
       <type>Boolean</type>
+      <units></units>
       <required>true</required>
       <model_dependent>false</model_dependent>
       <default_value>false</default_value>
@@ -896,6 +1068,8 @@
           <display_name>false</display_name>
         </choice>
       </choices>
+      <min_value></min_value>
+      <max_value></max_value>
     </argument>
     <argument>
       <name>neighbor_front_distance</name>
@@ -906,6 +1080,8 @@
       <required>true</required>
       <model_dependent>false</model_dependent>
       <default_value>0</default_value>
+      <min_value></min_value>
+      <max_value></max_value>
     </argument>
     <argument>
       <name>neighbor_back_distance</name>
@@ -916,6 +1092,8 @@
       <required>true</required>
       <model_dependent>false</model_dependent>
       <default_value>0</default_value>
+      <min_value></min_value>
+      <max_value></max_value>
     </argument>
     <argument>
       <name>neighbor_left_distance</name>
@@ -926,6 +1104,8 @@
       <required>true</required>
       <model_dependent>false</model_dependent>
       <default_value>10</default_value>
+      <min_value></min_value>
+      <max_value></max_value>
     </argument>
     <argument>
       <name>neighbor_right_distance</name>
@@ -936,6 +1116,8 @@
       <required>true</required>
       <model_dependent>false</model_dependent>
       <default_value>10</default_value>
+      <min_value></min_value>
+      <max_value></max_value>
     </argument>
     <argument>
       <name>neighbor_front_height</name>
@@ -946,6 +1128,8 @@
       <required>true</required>
       <model_dependent>false</model_dependent>
       <default_value>auto</default_value>
+      <min_value></min_value>
+      <max_value></max_value>
     </argument>
     <argument>
       <name>neighbor_back_height</name>
@@ -956,6 +1140,8 @@
       <required>true</required>
       <model_dependent>false</model_dependent>
       <default_value>auto</default_value>
+      <min_value></min_value>
+      <max_value></max_value>
     </argument>
     <argument>
       <name>neighbor_left_height</name>
@@ -966,6 +1152,8 @@
       <required>true</required>
       <model_dependent>false</model_dependent>
       <default_value>auto</default_value>
+      <min_value></min_value>
+      <max_value></max_value>
     </argument>
     <argument>
       <name>neighbor_right_height</name>
@@ -976,12 +1164,15 @@
       <required>true</required>
       <model_dependent>false</model_dependent>
       <default_value>auto</default_value>
+      <min_value></min_value>
+      <max_value></max_value>
     </argument>
     <argument>
       <name>wall_type</name>
       <display_name>Walls: Type</display_name>
       <description>The type of exterior walls.</description>
       <type>Choice</type>
+      <units></units>
       <required>true</required>
       <model_dependent>false</model_dependent>
       <default_value>WoodStud</default_value>
@@ -1031,14 +1222,18 @@
           <display_name>StructuralBrick</display_name>
         </choice>
       </choices>
+      <min_value></min_value>
+      <max_value></max_value>
     </argument>
     <argument>
       <name>wall_siding_type</name>
       <display_name>Wall: Siding Type</display_name>
       <description>The siding type of the exterior walls.</description>
       <type>Choice</type>
+      <units></units>
       <required>false</required>
       <model_dependent>false</model_dependent>
+      <default_value></default_value>
       <choices>
         <choice>
           <value>aluminum siding</value>
@@ -1065,12 +1260,15 @@
           <display_name>wood siding</display_name>
         </choice>
       </choices>
+      <min_value></min_value>
+      <max_value></max_value>
     </argument>
     <argument>
       <name>wall_color</name>
       <display_name>Wall: Color</display_name>
       <description>The color of the exterior walls.</description>
       <type>Choice</type>
+      <units></units>
       <required>true</required>
       <model_dependent>false</model_dependent>
       <default_value>auto</default_value>
@@ -1100,6 +1298,8 @@
           <display_name>reflective</display_name>
         </choice>
       </choices>
+      <min_value></min_value>
+      <max_value></max_value>
     </argument>
     <argument>
       <name>wall_assembly_r</name>
@@ -1110,113 +1310,152 @@
       <required>true</required>
       <model_dependent>false</model_dependent>
       <default_value>13</default_value>
+      <min_value></min_value>
+      <max_value></max_value>
     </argument>
     <argument>
       <name>wall_solar_absorptance</name>
       <display_name>Wall: Solar Absorptance</display_name>
       <description>The solar absorptance of the exterior walls.</description>
       <type>String</type>
+      <units></units>
       <required>true</required>
       <model_dependent>false</model_dependent>
       <default_value>auto</default_value>
+      <min_value></min_value>
+      <max_value></max_value>
     </argument>
     <argument>
       <name>wall_emittance</name>
       <display_name>Wall: Emittance</display_name>
       <description>The emittance of the exterior walls.</description>
       <type>Double</type>
+      <units></units>
       <required>true</required>
       <model_dependent>false</model_dependent>
       <default_value>0.92</default_value>
+      <min_value></min_value>
+      <max_value></max_value>
     </argument>
     <argument>
       <name>window_front_wwr</name>
       <display_name>Windows: Front Window-to-Wall Ratio</display_name>
       <description>The ratio of window area to wall area for the building's front facade. Enter 0 if specifying Front Window Area instead.</description>
       <type>Double</type>
+      <units></units>
       <required>true</required>
       <model_dependent>false</model_dependent>
       <default_value>0.18</default_value>
+      <min_value></min_value>
+      <max_value></max_value>
     </argument>
     <argument>
       <name>window_back_wwr</name>
       <display_name>Windows: Back Window-to-Wall Ratio</display_name>
       <description>The ratio of window area to wall area for the building's back facade. Enter 0 if specifying Back Window Area instead.</description>
       <type>Double</type>
+      <units></units>
       <required>true</required>
       <model_dependent>false</model_dependent>
       <default_value>0.18</default_value>
+      <min_value></min_value>
+      <max_value></max_value>
     </argument>
     <argument>
       <name>window_left_wwr</name>
       <display_name>Windows: Left Window-to-Wall Ratio</display_name>
       <description>The ratio of window area to wall area for the building's left facade. Enter 0 if specifying Left Window Area instead.</description>
       <type>Double</type>
+      <units></units>
       <required>true</required>
       <model_dependent>false</model_dependent>
       <default_value>0.18</default_value>
+      <min_value></min_value>
+      <max_value></max_value>
     </argument>
     <argument>
       <name>window_right_wwr</name>
       <display_name>Windows: Right Window-to-Wall Ratio</display_name>
       <description>The ratio of window area to wall area for the building's right facade. Enter 0 if specifying Right Window Area instead.</description>
       <type>Double</type>
+      <units></units>
       <required>true</required>
       <model_dependent>false</model_dependent>
       <default_value>0.18</default_value>
+      <min_value></min_value>
+      <max_value></max_value>
     </argument>
     <argument>
       <name>window_area_front</name>
       <display_name>Windows: Front Window Area</display_name>
       <description>The amount of window area on the building's front facade. Enter 0 if specifying Front Window-to-Wall Ratio instead.</description>
       <type>Double</type>
+      <units></units>
       <required>true</required>
       <model_dependent>false</model_dependent>
       <default_value>0</default_value>
+      <min_value></min_value>
+      <max_value></max_value>
     </argument>
     <argument>
       <name>window_area_back</name>
       <display_name>Windows: Back Window Area</display_name>
       <description>The amount of window area on the building's back facade. Enter 0 if specifying Back Window-to-Wall Ratio instead.</description>
       <type>Double</type>
+      <units></units>
       <required>true</required>
       <model_dependent>false</model_dependent>
       <default_value>0</default_value>
+      <min_value></min_value>
+      <max_value></max_value>
     </argument>
     <argument>
       <name>window_area_left</name>
       <display_name>Windows: Left Window Area</display_name>
       <description>The amount of window area on the building's left facade. Enter 0 if specifying Left Window-to-Wall Ratio instead.</description>
       <type>Double</type>
+      <units></units>
       <required>true</required>
       <model_dependent>false</model_dependent>
       <default_value>0</default_value>
+      <min_value></min_value>
+      <max_value></max_value>
     </argument>
     <argument>
       <name>window_area_right</name>
       <display_name>Windows: Right Window Area</display_name>
       <description>The amount of window area on the building's right facade. Enter 0 if specifying Right Window-to-Wall Ratio instead.</description>
       <type>Double</type>
+      <units></units>
       <required>true</required>
       <model_dependent>false</model_dependent>
       <default_value>0</default_value>
+      <min_value></min_value>
+      <max_value></max_value>
     </argument>
     <argument>
       <name>window_aspect_ratio</name>
       <display_name>Windows: Aspect Ratio</display_name>
       <description>Ratio of window height to width.</description>
       <type>Double</type>
+      <units></units>
       <required>true</required>
       <model_dependent>false</model_dependent>
       <default_value>1.333</default_value>
+      <min_value></min_value>
+      <max_value></max_value>
     </argument>
     <argument>
       <name>window_fraction_operable</name>
       <display_name>Windows: Fraction Operable</display_name>
       <description>Fraction of windows that are operable.</description>
       <type>Double</type>
+      <units></units>
       <required>false</required>
       <model_dependent>false</model_dependent>
+      <default_value></default_value>
+      <min_value></min_value>
+      <max_value></max_value>
     </argument>
     <argument>
       <name>window_ufactor</name>
@@ -1227,139 +1466,188 @@
       <required>true</required>
       <model_dependent>false</model_dependent>
       <default_value>0.37</default_value>
+      <min_value></min_value>
+      <max_value></max_value>
     </argument>
     <argument>
       <name>window_shgc</name>
       <display_name>Windows: SHGC</display_name>
       <description>The ratio of solar heat gain through a glazing system compared to that of an unobstructed opening, for windows.</description>
       <type>Double</type>
+      <units></units>
       <required>true</required>
       <model_dependent>false</model_dependent>
       <default_value>0.3</default_value>
+      <min_value></min_value>
+      <max_value></max_value>
     </argument>
     <argument>
       <name>window_interior_shading_winter</name>
       <display_name>Windows: Winter Interior Shading</display_name>
       <description>Interior shading multiplier for the heating season. 1.0 indicates no reduction in solar gain, 0.85 indicates 15% reduction, etc.</description>
       <type>Double</type>
+      <units></units>
       <required>false</required>
       <model_dependent>false</model_dependent>
+      <default_value></default_value>
+      <min_value></min_value>
+      <max_value></max_value>
     </argument>
     <argument>
       <name>window_interior_shading_summer</name>
       <display_name>Windows: Summer Interior Shading</display_name>
       <description>Interior shading multiplier for the cooling season. 1.0 indicates no reduction in solar gain, 0.85 indicates 15% reduction, etc.</description>
       <type>Double</type>
+      <units></units>
       <required>false</required>
       <model_dependent>false</model_dependent>
+      <default_value></default_value>
+      <min_value></min_value>
+      <max_value></max_value>
     </argument>
     <argument>
       <name>overhangs_front_depth</name>
       <display_name>Overhangs: Front Facade Depth</display_name>
       <description>Specifies the depth of overhangs for windows on the front facade.</description>
       <type>Double</type>
+      <units></units>
       <required>true</required>
       <model_dependent>false</model_dependent>
       <default_value>0</default_value>
+      <min_value></min_value>
+      <max_value></max_value>
     </argument>
     <argument>
       <name>overhangs_front_distance_to_top_of_window</name>
       <display_name>Overhangs: Front Facade Distance to Top of Window</display_name>
       <description>Specifies the distance to the top of window of overhangs for windows on the front facade.</description>
       <type>Double</type>
+      <units></units>
       <required>true</required>
       <model_dependent>false</model_dependent>
       <default_value>0</default_value>
+      <min_value></min_value>
+      <max_value></max_value>
     </argument>
     <argument>
       <name>overhangs_back_depth</name>
       <display_name>Overhangs: Back Facade Depth</display_name>
       <description>Specifies the depth of overhangs for windows on the back facade.</description>
       <type>Double</type>
+      <units></units>
       <required>true</required>
       <model_dependent>false</model_dependent>
       <default_value>0</default_value>
+      <min_value></min_value>
+      <max_value></max_value>
     </argument>
     <argument>
       <name>overhangs_back_distance_to_top_of_window</name>
       <display_name>Overhangs: Back Facade Distance to Top of Window</display_name>
       <description>Specifies the distance to the top of window of overhangs for windows on the back facade.</description>
       <type>Double</type>
+      <units></units>
       <required>true</required>
       <model_dependent>false</model_dependent>
       <default_value>0</default_value>
+      <min_value></min_value>
+      <max_value></max_value>
     </argument>
     <argument>
       <name>overhangs_left_depth</name>
       <display_name>Overhangs: Left Facade Depth</display_name>
       <description>Specifies the depth of overhangs for windows on the left facade.</description>
       <type>Double</type>
+      <units></units>
       <required>true</required>
       <model_dependent>false</model_dependent>
       <default_value>0</default_value>
+      <min_value></min_value>
+      <max_value></max_value>
     </argument>
     <argument>
       <name>overhangs_left_distance_to_top_of_window</name>
       <display_name>Overhangs: Left Facade Distance to Top of Window</display_name>
       <description>Specifies the distance to the top of window of overhangs for windows on the left facade.</description>
       <type>Double</type>
+      <units></units>
       <required>true</required>
       <model_dependent>false</model_dependent>
       <default_value>0</default_value>
+      <min_value></min_value>
+      <max_value></max_value>
     </argument>
     <argument>
       <name>overhangs_right_depth</name>
       <display_name>Overhangs: Right Facade Depth</display_name>
       <description>Specifies the depth of overhangs for windows on the right facade.</description>
       <type>Double</type>
+      <units></units>
       <required>true</required>
       <model_dependent>false</model_dependent>
       <default_value>0</default_value>
+      <min_value></min_value>
+      <max_value></max_value>
     </argument>
     <argument>
       <name>overhangs_right_distance_to_top_of_window</name>
       <display_name>Overhangs: Right Facade Distance to Top of Window</display_name>
       <description>Specifies the distance to the top of window of overhangs for windows on the right facade.</description>
       <type>Double</type>
+      <units></units>
       <required>true</required>
       <model_dependent>false</model_dependent>
       <default_value>0</default_value>
+      <min_value></min_value>
+      <max_value></max_value>
     </argument>
     <argument>
       <name>skylight_area_front</name>
       <display_name>Skylights: Front Roof Area</display_name>
       <description>The amount of skylight area on the building's front conditioned roof facade.</description>
       <type>Double</type>
+      <units></units>
       <required>true</required>
       <model_dependent>false</model_dependent>
       <default_value>0</default_value>
+      <min_value></min_value>
+      <max_value></max_value>
     </argument>
     <argument>
       <name>skylight_area_back</name>
       <display_name>Skylights: Back Roof Area</display_name>
       <description>The amount of skylight area on the building's back conditioned roof facade.</description>
       <type>Double</type>
+      <units></units>
       <required>true</required>
       <model_dependent>false</model_dependent>
       <default_value>0</default_value>
+      <min_value></min_value>
+      <max_value></max_value>
     </argument>
     <argument>
       <name>skylight_area_left</name>
       <display_name>Skylights: Left Roof Area</display_name>
       <description>The amount of skylight area on the building's left conditioned roof facade.</description>
       <type>Double</type>
+      <units></units>
       <required>true</required>
       <model_dependent>false</model_dependent>
       <default_value>0</default_value>
+      <min_value></min_value>
+      <max_value></max_value>
     </argument>
     <argument>
       <name>skylight_area_right</name>
       <display_name>Skylights: Right Roof Area</display_name>
       <description>The amount of skylight area on the building's right conditioned roof facade.</description>
       <type>Double</type>
+      <units></units>
       <required>true</required>
       <model_dependent>false</model_dependent>
       <default_value>0</default_value>
+      <min_value></min_value>
+      <max_value></max_value>
     </argument>
     <argument>
       <name>skylight_ufactor</name>
@@ -1370,15 +1658,20 @@
       <required>true</required>
       <model_dependent>false</model_dependent>
       <default_value>0.33</default_value>
+      <min_value></min_value>
+      <max_value></max_value>
     </argument>
     <argument>
       <name>skylight_shgc</name>
       <display_name>Skylights: SHGC</display_name>
       <description>The ratio of solar heat gain through a glazing system compared to that of an unobstructed opening, for skylights.</description>
       <type>Double</type>
+      <units></units>
       <required>true</required>
       <model_dependent>false</model_dependent>
       <default_value>0.45</default_value>
+      <min_value></min_value>
+      <max_value></max_value>
     </argument>
     <argument>
       <name>door_area</name>
@@ -1389,6 +1682,8 @@
       <required>true</required>
       <model_dependent>false</model_dependent>
       <default_value>20</default_value>
+      <min_value></min_value>
+      <max_value></max_value>
     </argument>
     <argument>
       <name>door_rvalue</name>
@@ -1399,12 +1694,15 @@
       <required>true</required>
       <model_dependent>false</model_dependent>
       <default_value>5</default_value>
+      <min_value></min_value>
+      <max_value></max_value>
     </argument>
     <argument>
       <name>air_leakage_units</name>
       <display_name>Air Leakage: Units</display_name>
       <description>The unit of measure for the above-grade living air leakage.</description>
       <type>Choice</type>
+      <units></units>
       <required>true</required>
       <model_dependent>false</model_dependent>
       <default_value>ACH</default_value>
@@ -1422,15 +1720,20 @@
           <display_name>ACHnatural</display_name>
         </choice>
       </choices>
+      <min_value></min_value>
+      <max_value></max_value>
     </argument>
     <argument>
       <name>air_leakage_value</name>
       <display_name>Air Leakage: Value</display_name>
       <description>Air exchange rate, in ACH or CFM at 50 Pascals.</description>
       <type>Double</type>
+      <units></units>
       <required>true</required>
       <model_dependent>false</model_dependent>
       <default_value>3</default_value>
+      <min_value></min_value>
+      <max_value></max_value>
     </argument>
     <argument>
       <name>air_leakage_shelter_coefficient</name>
@@ -1441,12 +1744,15 @@
       <required>true</required>
       <model_dependent>false</model_dependent>
       <default_value>auto</default_value>
+      <min_value></min_value>
+      <max_value></max_value>
     </argument>
     <argument>
       <name>heating_system_type</name>
       <display_name>Heating System: Type</display_name>
       <description>The type of heating system. Use 'none' if there is no heating system.</description>
       <type>Choice</type>
+      <units></units>
       <required>true</required>
       <model_dependent>false</model_dependent>
       <default_value>Furnace</default_value>
@@ -1492,12 +1798,15 @@
           <display_name>FixedHeater</display_name>
         </choice>
       </choices>
+      <min_value></min_value>
+      <max_value></max_value>
     </argument>
     <argument>
       <name>heating_system_fuel</name>
       <display_name>Heating System: Fuel Type</display_name>
       <description>The fuel type of the heating system. Ignored for ElectricResistance.</description>
       <type>Choice</type>
+      <units></units>
       <required>true</required>
       <model_dependent>false</model_dependent>
       <default_value>natural gas</default_value>
@@ -1531,6 +1840,8 @@
           <display_name>coal</display_name>
         </choice>
       </choices>
+      <min_value></min_value>
+      <max_value></max_value>
     </argument>
     <argument>
       <name>heating_system_heating_efficiency</name>
@@ -1541,6 +1852,8 @@
       <required>true</required>
       <model_dependent>false</model_dependent>
       <default_value>0.78</default_value>
+      <min_value></min_value>
+      <max_value></max_value>
     </argument>
     <argument>
       <name>heating_system_heating_capacity</name>
@@ -1551,6 +1864,8 @@
       <required>true</required>
       <model_dependent>false</model_dependent>
       <default_value>auto</default_value>
+      <min_value></min_value>
+      <max_value></max_value>
     </argument>
     <argument>
       <name>heating_system_fraction_heat_load_served</name>
@@ -1561,6 +1876,8 @@
       <required>true</required>
       <model_dependent>false</model_dependent>
       <default_value>1</default_value>
+      <min_value></min_value>
+      <max_value></max_value>
     </argument>
     <argument>
       <name>heating_system_electric_auxiliary_energy</name>
@@ -1570,12 +1887,16 @@
       <units>kWh/yr</units>
       <required>false</required>
       <model_dependent>false</model_dependent>
+      <default_value></default_value>
+      <min_value></min_value>
+      <max_value></max_value>
     </argument>
     <argument>
       <name>cooling_system_type</name>
       <display_name>Cooling System: Type</display_name>
       <description>The type of cooling system. Use 'none' if there is no cooling system.</description>
       <type>Choice</type>
+      <units></units>
       <required>true</required>
       <model_dependent>false</model_dependent>
       <default_value>central air conditioner</default_value>
@@ -1601,6 +1922,8 @@
           <display_name>mini-split</display_name>
         </choice>
       </choices>
+      <min_value></min_value>
+      <max_value></max_value>
     </argument>
     <argument>
       <name>cooling_system_cooling_efficiency_seer</name>
@@ -1611,6 +1934,8 @@
       <required>true</required>
       <model_dependent>false</model_dependent>
       <default_value>13</default_value>
+      <min_value></min_value>
+      <max_value></max_value>
     </argument>
     <argument>
       <name>cooling_system_cooling_efficiency_eer</name>
@@ -1621,14 +1946,18 @@
       <required>true</required>
       <model_dependent>false</model_dependent>
       <default_value>8.5</default_value>
+      <min_value></min_value>
+      <max_value></max_value>
     </argument>
     <argument>
       <name>cooling_system_cooling_compressor_type</name>
       <display_name>Cooling System: Cooling Compressor Type</display_name>
       <description>The compressor type of the cooling system. Only applies to central air conditioner.</description>
       <type>Choice</type>
+      <units></units>
       <required>false</required>
       <model_dependent>false</model_dependent>
+      <default_value></default_value>
       <choices>
         <choice>
           <value>single stage</value>
@@ -1643,6 +1972,8 @@
           <display_name>variable speed</display_name>
         </choice>
       </choices>
+      <min_value></min_value>
+      <max_value></max_value>
     </argument>
     <argument>
       <name>cooling_system_cooling_sensible_heat_fraction</name>
@@ -1652,6 +1983,9 @@
       <units>Frac</units>
       <required>false</required>
       <model_dependent>false</model_dependent>
+      <default_value></default_value>
+      <min_value></min_value>
+      <max_value></max_value>
     </argument>
     <argument>
       <name>cooling_system_cooling_capacity</name>
@@ -1662,6 +1996,8 @@
       <required>true</required>
       <model_dependent>false</model_dependent>
       <default_value>auto</default_value>
+      <min_value></min_value>
+      <max_value></max_value>
     </argument>
     <argument>
       <name>cooling_system_fraction_cool_load_served</name>
@@ -1672,12 +2008,15 @@
       <required>true</required>
       <model_dependent>false</model_dependent>
       <default_value>1</default_value>
+      <min_value></min_value>
+      <max_value></max_value>
     </argument>
     <argument>
       <name>cooling_system_is_ducted</name>
       <display_name>Cooling System: Is Ducted</display_name>
       <description>Whether the cooling system is ducted or not. Only used for evaporative cooler and mini-split.</description>
       <type>Boolean</type>
+      <units></units>
       <required>true</required>
       <model_dependent>false</model_dependent>
       <default_value>false</default_value>
@@ -1691,12 +2030,15 @@
           <display_name>false</display_name>
         </choice>
       </choices>
+      <min_value></min_value>
+      <max_value></max_value>
     </argument>
     <argument>
       <name>heat_pump_type</name>
       <display_name>Heat Pump: Type</display_name>
       <description>The type of heat pump. Use 'none' if there is no heat pump.</description>
       <type>Choice</type>
+      <units></units>
       <required>true</required>
       <model_dependent>false</model_dependent>
       <default_value>none</default_value>
@@ -1718,6 +2060,8 @@
           <display_name>ground-to-air</display_name>
         </choice>
       </choices>
+      <min_value></min_value>
+      <max_value></max_value>
     </argument>
     <argument>
       <name>heat_pump_heating_efficiency_hspf</name>
@@ -1728,6 +2072,8 @@
       <required>true</required>
       <model_dependent>false</model_dependent>
       <default_value>7.7</default_value>
+      <min_value></min_value>
+      <max_value></max_value>
     </argument>
     <argument>
       <name>heat_pump_heating_efficiency_cop</name>
@@ -1738,6 +2084,8 @@
       <required>true</required>
       <model_dependent>false</model_dependent>
       <default_value>3.6</default_value>
+      <min_value></min_value>
+      <max_value></max_value>
     </argument>
     <argument>
       <name>heat_pump_cooling_efficiency_seer</name>
@@ -1748,6 +2096,8 @@
       <required>true</required>
       <model_dependent>false</model_dependent>
       <default_value>13</default_value>
+      <min_value></min_value>
+      <max_value></max_value>
     </argument>
     <argument>
       <name>heat_pump_cooling_efficiency_eer</name>
@@ -1758,14 +2108,18 @@
       <required>true</required>
       <model_dependent>false</model_dependent>
       <default_value>16.6</default_value>
+      <min_value></min_value>
+      <max_value></max_value>
     </argument>
     <argument>
       <name>heat_pump_cooling_compressor_type</name>
       <display_name>Heat Pump: Cooling Compressor Type</display_name>
       <description>The compressor type of the heat pump. Only applies to air-to-air and mini-split.</description>
       <type>Choice</type>
+      <units></units>
       <required>false</required>
       <model_dependent>false</model_dependent>
+      <default_value></default_value>
       <choices>
         <choice>
           <value>single stage</value>
@@ -1780,6 +2134,8 @@
           <display_name>variable speed</display_name>
         </choice>
       </choices>
+      <min_value></min_value>
+      <max_value></max_value>
     </argument>
     <argument>
       <name>heat_pump_cooling_sensible_heat_fraction</name>
@@ -1789,6 +2145,9 @@
       <units>Frac</units>
       <required>false</required>
       <model_dependent>false</model_dependent>
+      <default_value></default_value>
+      <min_value></min_value>
+      <max_value></max_value>
     </argument>
     <argument>
       <name>heat_pump_heating_capacity</name>
@@ -1799,6 +2158,8 @@
       <required>true</required>
       <model_dependent>false</model_dependent>
       <default_value>auto</default_value>
+      <min_value></min_value>
+      <max_value></max_value>
     </argument>
     <argument>
       <name>heat_pump_heating_capacity_17F</name>
@@ -1809,6 +2170,8 @@
       <required>true</required>
       <model_dependent>false</model_dependent>
       <default_value>auto</default_value>
+      <min_value></min_value>
+      <max_value></max_value>
     </argument>
     <argument>
       <name>heat_pump_cooling_capacity</name>
@@ -1819,6 +2182,8 @@
       <required>true</required>
       <model_dependent>false</model_dependent>
       <default_value>auto</default_value>
+      <min_value></min_value>
+      <max_value></max_value>
     </argument>
     <argument>
       <name>heat_pump_fraction_heat_load_served</name>
@@ -1829,6 +2194,8 @@
       <required>true</required>
       <model_dependent>false</model_dependent>
       <default_value>1</default_value>
+      <min_value></min_value>
+      <max_value></max_value>
     </argument>
     <argument>
       <name>heat_pump_fraction_cool_load_served</name>
@@ -1839,12 +2206,15 @@
       <required>true</required>
       <model_dependent>false</model_dependent>
       <default_value>1</default_value>
+      <min_value></min_value>
+      <max_value></max_value>
     </argument>
     <argument>
       <name>heat_pump_backup_fuel</name>
       <display_name>Heat Pump: Backup Fuel Type</display_name>
       <description>The backup fuel type of the heat pump. Use 'none' if there is no backup heating.</description>
       <type>Choice</type>
+      <units></units>
       <required>true</required>
       <model_dependent>false</model_dependent>
       <default_value>none</default_value>
@@ -1870,15 +2240,20 @@
           <display_name>propane</display_name>
         </choice>
       </choices>
+      <min_value></min_value>
+      <max_value></max_value>
     </argument>
     <argument>
       <name>heat_pump_backup_heating_efficiency</name>
       <display_name>Heat Pump: Backup Rated Efficiency</display_name>
       <description>The backup rated efficiency value of the heat pump. Percent for electricity fuel type. AFUE otherwise.</description>
       <type>Double</type>
+      <units></units>
       <required>true</required>
       <model_dependent>false</model_dependent>
       <default_value>1</default_value>
+      <min_value></min_value>
+      <max_value></max_value>
     </argument>
     <argument>
       <name>heat_pump_backup_heating_capacity</name>
@@ -1889,6 +2264,8 @@
       <required>true</required>
       <model_dependent>false</model_dependent>
       <default_value>auto</default_value>
+      <min_value></min_value>
+      <max_value></max_value>
     </argument>
     <argument>
       <name>heat_pump_backup_heating_switchover_temp</name>
@@ -1898,12 +2275,16 @@
       <units>deg-F</units>
       <required>false</required>
       <model_dependent>false</model_dependent>
+      <default_value></default_value>
+      <min_value></min_value>
+      <max_value></max_value>
     </argument>
     <argument>
       <name>heat_pump_mini_split_is_ducted</name>
       <display_name>Heat Pump: Mini-Split Is Ducted</display_name>
       <description>Whether the mini-split heat pump is ducted or not.</description>
       <type>Boolean</type>
+      <units></units>
       <required>true</required>
       <model_dependent>false</model_dependent>
       <default_value>false</default_value>
@@ -1917,6 +2298,8 @@
           <display_name>false</display_name>
         </choice>
       </choices>
+      <min_value></min_value>
+      <max_value></max_value>
     </argument>
     <argument>
       <name>setpoint_heating_temp</name>
@@ -1927,6 +2310,8 @@
       <required>true</required>
       <model_dependent>false</model_dependent>
       <default_value>71</default_value>
+      <min_value></min_value>
+      <max_value></max_value>
     </argument>
     <argument>
       <name>setpoint_heating_setback_temp</name>
@@ -1937,24 +2322,32 @@
       <required>true</required>
       <model_dependent>false</model_dependent>
       <default_value>71</default_value>
+      <min_value></min_value>
+      <max_value></max_value>
     </argument>
     <argument>
       <name>setpoint_heating_setback_hours_per_week</name>
       <display_name>Setpoint: Heating Setback Hours per Week</display_name>
       <description>Specify the heating setback number of hours per week value.</description>
       <type>Double</type>
+      <units></units>
       <required>true</required>
       <model_dependent>false</model_dependent>
       <default_value>0</default_value>
+      <min_value></min_value>
+      <max_value></max_value>
     </argument>
     <argument>
       <name>setpoint_heating_setback_start_hour</name>
       <display_name>Setpoint: Heating Setback Start Hour</display_name>
       <description>Specify the heating setback start hour value. 0 = midnight, 12 = noon</description>
       <type>Double</type>
+      <units></units>
       <required>true</required>
       <model_dependent>false</model_dependent>
       <default_value>23</default_value>
+      <min_value></min_value>
+      <max_value></max_value>
     </argument>
     <argument>
       <name>setpoint_cooling_temp</name>
@@ -1965,6 +2358,8 @@
       <required>true</required>
       <model_dependent>false</model_dependent>
       <default_value>76</default_value>
+      <min_value></min_value>
+      <max_value></max_value>
     </argument>
     <argument>
       <name>setpoint_cooling_setup_temp</name>
@@ -1975,30 +2370,39 @@
       <required>true</required>
       <model_dependent>false</model_dependent>
       <default_value>76</default_value>
+      <min_value></min_value>
+      <max_value></max_value>
     </argument>
     <argument>
       <name>setpoint_cooling_setup_hours_per_week</name>
       <display_name>Setpoint: Cooling Setup Hours per Week</display_name>
       <description>Specify the cooling setup number of hours per week value.</description>
       <type>Double</type>
+      <units></units>
       <required>true</required>
       <model_dependent>false</model_dependent>
       <default_value>0</default_value>
+      <min_value></min_value>
+      <max_value></max_value>
     </argument>
     <argument>
       <name>setpoint_cooling_setup_start_hour</name>
       <display_name>Setpoint: Cooling Setup Start Hour</display_name>
       <description>Specify the cooling setup start hour value. 0 = midnight, 12 = noon</description>
       <type>Double</type>
+      <units></units>
       <required>true</required>
       <model_dependent>false</model_dependent>
       <default_value>9</default_value>
+      <min_value></min_value>
+      <max_value></max_value>
     </argument>
     <argument>
       <name>ducts_supply_leakage_units</name>
       <display_name>Ducts: Supply Leakage Units</display_name>
       <description>The leakage units of the supply ducts.</description>
       <type>Choice</type>
+      <units></units>
       <required>true</required>
       <model_dependent>false</model_dependent>
       <default_value>CFM25</default_value>
@@ -2012,12 +2416,15 @@
           <display_name>Percent</display_name>
         </choice>
       </choices>
+      <min_value></min_value>
+      <max_value></max_value>
     </argument>
     <argument>
       <name>ducts_return_leakage_units</name>
       <display_name>Ducts: Return Leakage Units</display_name>
       <description>The leakage units of the return ducts.</description>
       <type>Choice</type>
+      <units></units>
       <required>true</required>
       <model_dependent>false</model_dependent>
       <default_value>CFM25</default_value>
@@ -2031,24 +2438,32 @@
           <display_name>Percent</display_name>
         </choice>
       </choices>
+      <min_value></min_value>
+      <max_value></max_value>
     </argument>
     <argument>
       <name>ducts_supply_leakage_value</name>
       <display_name>Ducts: Supply Leakage Value</display_name>
       <description>The leakage value to outside of the supply ducts.</description>
       <type>Double</type>
+      <units></units>
       <required>true</required>
       <model_dependent>false</model_dependent>
       <default_value>75</default_value>
+      <min_value></min_value>
+      <max_value></max_value>
     </argument>
     <argument>
       <name>ducts_return_leakage_value</name>
       <display_name>Ducts: Return Leakage Value</display_name>
       <description>The leakage value to outside of the return ducts.</description>
       <type>Double</type>
+      <units></units>
       <required>true</required>
       <model_dependent>false</model_dependent>
       <default_value>25</default_value>
+      <min_value></min_value>
+      <max_value></max_value>
     </argument>
     <argument>
       <name>ducts_supply_insulation_r</name>
@@ -2059,6 +2474,8 @@
       <required>true</required>
       <model_dependent>false</model_dependent>
       <default_value>0</default_value>
+      <min_value></min_value>
+      <max_value></max_value>
     </argument>
     <argument>
       <name>ducts_return_insulation_r</name>
@@ -2069,12 +2486,15 @@
       <required>true</required>
       <model_dependent>false</model_dependent>
       <default_value>0</default_value>
+      <min_value></min_value>
+      <max_value></max_value>
     </argument>
     <argument>
       <name>ducts_supply_location</name>
       <display_name>Ducts: Supply Location</display_name>
       <description>The location of the supply ducts.</description>
       <type>Choice</type>
+      <units></units>
       <required>true</required>
       <model_dependent>false</model_dependent>
       <default_value>auto</default_value>
@@ -2124,12 +2544,15 @@
           <display_name>under slab</display_name>
         </choice>
       </choices>
+      <min_value></min_value>
+      <max_value></max_value>
     </argument>
     <argument>
       <name>ducts_return_location</name>
       <display_name>Ducts: Return Location</display_name>
       <description>The location of the return ducts.</description>
       <type>Choice</type>
+      <units></units>
       <required>true</required>
       <model_dependent>false</model_dependent>
       <default_value>auto</default_value>
@@ -2179,6 +2602,8 @@
           <display_name>under slab</display_name>
         </choice>
       </choices>
+      <min_value></min_value>
+      <max_value></max_value>
     </argument>
     <argument>
       <name>ducts_supply_surface_area</name>
@@ -2189,6 +2614,8 @@
       <required>true</required>
       <model_dependent>false</model_dependent>
       <default_value>auto</default_value>
+      <min_value></min_value>
+      <max_value></max_value>
     </argument>
     <argument>
       <name>ducts_return_surface_area</name>
@@ -2199,6 +2626,8 @@
       <required>true</required>
       <model_dependent>false</model_dependent>
       <default_value>auto</default_value>
+      <min_value></min_value>
+      <max_value></max_value>
     </argument>
     <argument>
       <name>ducts_number_of_return_registers</name>
@@ -2209,6 +2638,8 @@
       <required>true</required>
       <model_dependent>false</model_dependent>
       <default_value>auto</default_value>
+      <min_value></min_value>
+      <max_value></max_value>
     </argument>
     <argument>
       <name>ducts_cfa_served</name>
@@ -2218,12 +2649,16 @@
       <units>ft^2</units>
       <required>false</required>
       <model_dependent>false</model_dependent>
+      <default_value></default_value>
+      <min_value></min_value>
+      <max_value></max_value>
     </argument>
     <argument>
       <name>heating_system_type_2</name>
       <display_name>Heating System 2: Type</display_name>
       <description>The type of the second heating system.</description>
       <type>Choice</type>
+      <units></units>
       <required>true</required>
       <model_dependent>false</model_dependent>
       <default_value>none</default_value>
@@ -2257,12 +2692,15 @@
           <display_name>Fireplace</display_name>
         </choice>
       </choices>
+      <min_value></min_value>
+      <max_value></max_value>
     </argument>
     <argument>
       <name>heating_system_fuel_2</name>
       <display_name>Heating System 2: Fuel Type</display_name>
       <description>The fuel type of the second heating system. Ignored for ElectricResistance.</description>
       <type>Choice</type>
+      <units></units>
       <required>true</required>
       <model_dependent>false</model_dependent>
       <default_value>electricity</default_value>
@@ -2296,6 +2734,8 @@
           <display_name>coal</display_name>
         </choice>
       </choices>
+      <min_value></min_value>
+      <max_value></max_value>
     </argument>
     <argument>
       <name>heating_system_heating_efficiency_2</name>
@@ -2306,6 +2746,8 @@
       <required>true</required>
       <model_dependent>false</model_dependent>
       <default_value>1</default_value>
+      <min_value></min_value>
+      <max_value></max_value>
     </argument>
     <argument>
       <name>heating_system_heating_capacity_2</name>
@@ -2316,6 +2758,8 @@
       <required>true</required>
       <model_dependent>false</model_dependent>
       <default_value>auto</default_value>
+      <min_value></min_value>
+      <max_value></max_value>
     </argument>
     <argument>
       <name>heating_system_fraction_heat_load_served_2</name>
@@ -2326,6 +2770,8 @@
       <required>true</required>
       <model_dependent>false</model_dependent>
       <default_value>0.25</default_value>
+      <min_value></min_value>
+      <max_value></max_value>
     </argument>
     <argument>
       <name>heating_system_electric_auxiliary_energy_2</name>
@@ -2335,12 +2781,16 @@
       <units>kWh/yr</units>
       <required>false</required>
       <model_dependent>false</model_dependent>
+      <default_value></default_value>
+      <min_value></min_value>
+      <max_value></max_value>
     </argument>
     <argument>
       <name>mech_vent_fan_type</name>
       <display_name>Mechanical Ventilation: Fan Type</display_name>
       <description>The type of the mechanical ventilation. Use 'none' if there is no mechanical ventilation system.</description>
       <type>Choice</type>
+      <units></units>
       <required>true</required>
       <model_dependent>false</model_dependent>
       <default_value>none</default_value>
@@ -2374,6 +2824,8 @@
           <display_name>central fan integrated supply</display_name>
         </choice>
       </choices>
+      <min_value></min_value>
+      <max_value></max_value>
     </argument>
     <argument>
       <name>mech_vent_flow_rate</name>
@@ -2384,6 +2836,8 @@
       <required>true</required>
       <model_dependent>false</model_dependent>
       <default_value>110</default_value>
+      <min_value></min_value>
+      <max_value></max_value>
     </argument>
     <argument>
       <name>mech_vent_hours_in_operation</name>
@@ -2394,12 +2848,15 @@
       <required>true</required>
       <model_dependent>false</model_dependent>
       <default_value>24</default_value>
+      <min_value></min_value>
+      <max_value></max_value>
     </argument>
     <argument>
       <name>mech_vent_total_recovery_efficiency_type</name>
       <display_name>Mechanical Ventilation: Total Recovery Efficiency Type</display_name>
       <description>The total recovery efficiency type of the mechanical ventilation.</description>
       <type>Choice</type>
+      <units></units>
       <required>true</required>
       <model_dependent>false</model_dependent>
       <default_value>Unadjusted</default_value>
@@ -2413,6 +2870,8 @@
           <display_name>Adjusted</display_name>
         </choice>
       </choices>
+      <min_value></min_value>
+      <max_value></max_value>
     </argument>
     <argument>
       <name>mech_vent_total_recovery_efficiency</name>
@@ -2423,12 +2882,15 @@
       <required>true</required>
       <model_dependent>false</model_dependent>
       <default_value>0.48</default_value>
+      <min_value></min_value>
+      <max_value></max_value>
     </argument>
     <argument>
       <name>mech_vent_sensible_recovery_efficiency_type</name>
       <display_name>Mechanical Ventilation: Sensible Recovery Efficiency Type</display_name>
       <description>The sensible recovery efficiency type of the mechanical ventilation.</description>
       <type>Choice</type>
+      <units></units>
       <required>true</required>
       <model_dependent>false</model_dependent>
       <default_value>Unadjusted</default_value>
@@ -2442,6 +2904,8 @@
           <display_name>Adjusted</display_name>
         </choice>
       </choices>
+      <min_value></min_value>
+      <max_value></max_value>
     </argument>
     <argument>
       <name>mech_vent_sensible_recovery_efficiency</name>
@@ -2452,6 +2916,8 @@
       <required>true</required>
       <model_dependent>false</model_dependent>
       <default_value>0.72</default_value>
+      <min_value></min_value>
+      <max_value></max_value>
     </argument>
     <argument>
       <name>mech_vent_fan_power</name>
@@ -2462,12 +2928,15 @@
       <required>true</required>
       <model_dependent>false</model_dependent>
       <default_value>30</default_value>
+      <min_value></min_value>
+      <max_value></max_value>
     </argument>
     <argument>
       <name>kitchen_fan_present</name>
       <display_name>Whole House Fan: Present</display_name>
       <description>Whether there is a kitchen fan.</description>
       <type>Boolean</type>
+      <units></units>
       <required>true</required>
       <model_dependent>false</model_dependent>
       <default_value>false</default_value>
@@ -2481,6 +2950,8 @@
           <display_name>false</display_name>
         </choice>
       </choices>
+      <min_value></min_value>
+      <max_value></max_value>
     </argument>
     <argument>
       <name>kitchen_fan_flow_rate</name>
@@ -2490,6 +2961,9 @@
       <units>CFM</units>
       <required>false</required>
       <model_dependent>false</model_dependent>
+      <default_value></default_value>
+      <min_value></min_value>
+      <max_value></max_value>
     </argument>
     <argument>
       <name>kitchen_fan_hours_in_operation</name>
@@ -2499,6 +2973,9 @@
       <units>hrs</units>
       <required>false</required>
       <model_dependent>false</model_dependent>
+      <default_value></default_value>
+      <min_value></min_value>
+      <max_value></max_value>
     </argument>
     <argument>
       <name>kitchen_fan_power</name>
@@ -2508,6 +2985,9 @@
       <units>W</units>
       <required>false</required>
       <model_dependent>false</model_dependent>
+      <default_value></default_value>
+      <min_value></min_value>
+      <max_value></max_value>
     </argument>
     <argument>
       <name>kitchen_fan_start_hour</name>
@@ -2517,12 +2997,16 @@
       <units>hr</units>
       <required>false</required>
       <model_dependent>false</model_dependent>
+      <default_value></default_value>
+      <min_value></min_value>
+      <max_value></max_value>
     </argument>
     <argument>
       <name>bathroom_fans_present</name>
       <display_name>Bathroom Fans: Present</display_name>
       <description>Whether there are bathroom fans.</description>
       <type>Boolean</type>
+      <units></units>
       <required>true</required>
       <model_dependent>false</model_dependent>
       <default_value>false</default_value>
@@ -2536,6 +3020,8 @@
           <display_name>false</display_name>
         </choice>
       </choices>
+      <min_value></min_value>
+      <max_value></max_value>
     </argument>
     <argument>
       <name>bathroom_fans_flow_rate</name>
@@ -2545,6 +3031,9 @@
       <units>CFM</units>
       <required>false</required>
       <model_dependent>false</model_dependent>
+      <default_value></default_value>
+      <min_value></min_value>
+      <max_value></max_value>
     </argument>
     <argument>
       <name>bathroom_fans_hours_in_operation</name>
@@ -2554,6 +3043,9 @@
       <units>hrs</units>
       <required>false</required>
       <model_dependent>false</model_dependent>
+      <default_value></default_value>
+      <min_value></min_value>
+      <max_value></max_value>
     </argument>
     <argument>
       <name>bathroom_fans_power</name>
@@ -2563,6 +3055,9 @@
       <units>W</units>
       <required>false</required>
       <model_dependent>false</model_dependent>
+      <default_value></default_value>
+      <min_value></min_value>
+      <max_value></max_value>
     </argument>
     <argument>
       <name>bathroom_fans_start_hour</name>
@@ -2572,6 +3067,9 @@
       <units>hr</units>
       <required>false</required>
       <model_dependent>false</model_dependent>
+      <default_value></default_value>
+      <min_value></min_value>
+      <max_value></max_value>
     </argument>
     <argument>
       <name>bathroom_fans_quantity</name>
@@ -2581,12 +3079,16 @@
       <units>#</units>
       <required>false</required>
       <model_dependent>false</model_dependent>
+      <default_value></default_value>
+      <min_value></min_value>
+      <max_value></max_value>
     </argument>
     <argument>
       <name>whole_house_fan_present</name>
       <display_name>Whole House Fan: Present</display_name>
       <description>Whether there is a whole house fan.</description>
       <type>Boolean</type>
+      <units></units>
       <required>true</required>
       <model_dependent>false</model_dependent>
       <default_value>false</default_value>
@@ -2600,6 +3102,8 @@
           <display_name>false</display_name>
         </choice>
       </choices>
+      <min_value></min_value>
+      <max_value></max_value>
     </argument>
     <argument>
       <name>whole_house_fan_flow_rate</name>
@@ -2610,6 +3114,8 @@
       <required>true</required>
       <model_dependent>false</model_dependent>
       <default_value>4500</default_value>
+      <min_value></min_value>
+      <max_value></max_value>
     </argument>
     <argument>
       <name>whole_house_fan_power</name>
@@ -2620,12 +3126,15 @@
       <required>true</required>
       <model_dependent>false</model_dependent>
       <default_value>300</default_value>
+      <min_value></min_value>
+      <max_value></max_value>
     </argument>
     <argument>
       <name>water_heater_type</name>
       <display_name>Water Heater: Type</display_name>
       <description>The type of water heater. Use 'none' if there is no water heater.</description>
       <type>Choice</type>
+      <units></units>
       <required>true</required>
       <model_dependent>false</model_dependent>
       <default_value>storage water heater</default_value>
@@ -2655,12 +3164,15 @@
           <display_name>space-heating boiler with tankless coil</display_name>
         </choice>
       </choices>
+      <min_value></min_value>
+      <max_value></max_value>
     </argument>
     <argument>
       <name>water_heater_fuel_type</name>
       <display_name>Water Heater: Fuel Type</display_name>
       <description>The fuel type of water heater. Ignored for heat pump water heater.</description>
       <type>Choice</type>
+      <units></units>
       <required>true</required>
       <model_dependent>false</model_dependent>
       <default_value>natural gas</default_value>
@@ -2690,12 +3202,15 @@
           <display_name>coal</display_name>
         </choice>
       </choices>
+      <min_value></min_value>
+      <max_value></max_value>
     </argument>
     <argument>
       <name>water_heater_location</name>
       <display_name>Water Heater: Location</display_name>
       <description>The location of water heater.</description>
       <type>Choice</type>
+      <units></units>
       <required>true</required>
       <model_dependent>false</model_dependent>
       <default_value>auto</default_value>
@@ -2741,6 +3256,8 @@
           <display_name>other exterior</display_name>
         </choice>
       </choices>
+      <min_value></min_value>
+      <max_value></max_value>
     </argument>
     <argument>
       <name>water_heater_tank_volume</name>
@@ -2751,6 +3268,8 @@
       <required>true</required>
       <model_dependent>false</model_dependent>
       <default_value>auto</default_value>
+      <min_value></min_value>
+      <max_value></max_value>
     </argument>
     <argument>
       <name>water_heater_heating_capacity</name>
@@ -2761,12 +3280,15 @@
       <required>true</required>
       <model_dependent>false</model_dependent>
       <default_value>auto</default_value>
+      <min_value></min_value>
+      <max_value></max_value>
     </argument>
     <argument>
       <name>water_heater_efficiency_type</name>
       <display_name>Water Heater: Efficiency Type</display_name>
       <description>The efficiency type of water heater. Does not apply to space-heating boilers.</description>
       <type>Choice</type>
+      <units></units>
       <required>true</required>
       <model_dependent>false</model_dependent>
       <default_value>EnergyFactor</default_value>
@@ -2780,24 +3302,32 @@
           <display_name>UniformEnergyFactor</display_name>
         </choice>
       </choices>
+      <min_value></min_value>
+      <max_value></max_value>
     </argument>
     <argument>
       <name>water_heater_efficiency_ef</name>
       <display_name>Water Heater: Energy Factor</display_name>
       <description>Ratio of useful energy output from water heater to the total amount of energy delivered from the water heater.</description>
       <type>Double</type>
+      <units></units>
       <required>true</required>
       <model_dependent>false</model_dependent>
       <default_value>0.67</default_value>
+      <min_value></min_value>
+      <max_value></max_value>
     </argument>
     <argument>
       <name>water_heater_efficiency_uef</name>
       <display_name>Water Heater: Uniform Energy Factor</display_name>
       <description>The uniform energy factor of water heater. Does not apply to space-heating boilers.</description>
       <type>Double</type>
+      <units></units>
       <required>true</required>
       <model_dependent>false</model_dependent>
       <default_value>0.67</default_value>
+      <min_value></min_value>
+      <max_value></max_value>
     </argument>
     <argument>
       <name>water_heater_recovery_efficiency</name>
@@ -2808,6 +3338,8 @@
       <required>true</required>
       <model_dependent>false</model_dependent>
       <default_value>auto</default_value>
+      <min_value></min_value>
+      <max_value></max_value>
     </argument>
     <argument>
       <name>water_heater_standby_loss</name>
@@ -2817,6 +3349,9 @@
       <units>deg-F/hr</units>
       <required>false</required>
       <model_dependent>false</model_dependent>
+      <default_value></default_value>
+      <min_value></min_value>
+      <max_value></max_value>
     </argument>
     <argument>
       <name>water_heater_jacket_rvalue</name>
@@ -2826,6 +3361,9 @@
       <units>h-ft^2-R/Btu</units>
       <required>false</required>
       <model_dependent>false</model_dependent>
+      <default_value></default_value>
+      <min_value></min_value>
+      <max_value></max_value>
     </argument>
     <argument>
       <name>water_heater_setpoint_temperature</name>
@@ -2836,12 +3374,15 @@
       <required>true</required>
       <model_dependent>false</model_dependent>
       <default_value>auto</default_value>
+      <min_value></min_value>
+      <max_value></max_value>
     </argument>
     <argument>
       <name>dhw_distribution_system_type</name>
       <display_name>Hot Water Distribution: System Type</display_name>
       <description>The type of the hot water distribution system.</description>
       <type>Choice</type>
+      <units></units>
       <required>true</required>
       <model_dependent>false</model_dependent>
       <default_value>Standard</default_value>
@@ -2855,6 +3396,8 @@
           <display_name>Recirculation</display_name>
         </choice>
       </choices>
+      <min_value></min_value>
+      <max_value></max_value>
     </argument>
     <argument>
       <name>dhw_distribution_standard_piping_length</name>
@@ -2865,12 +3408,15 @@
       <required>true</required>
       <model_dependent>false</model_dependent>
       <default_value>auto</default_value>
+      <min_value></min_value>
+      <max_value></max_value>
     </argument>
     <argument>
       <name>dhw_distribution_recirc_control_type</name>
       <display_name>Hot Water Distribution: Recirculation Control Type</display_name>
       <description>If the distribution system is Recirculation, the type of hot water recirculation control, if any.</description>
       <type>Choice</type>
+      <units></units>
       <required>true</required>
       <model_dependent>false</model_dependent>
       <default_value>no control</default_value>
@@ -2896,6 +3442,8 @@
           <display_name>manual demand control</display_name>
         </choice>
       </choices>
+      <min_value></min_value>
+      <max_value></max_value>
     </argument>
     <argument>
       <name>dhw_distribution_recirc_piping_length</name>
@@ -2906,6 +3454,8 @@
       <required>true</required>
       <model_dependent>false</model_dependent>
       <default_value>auto</default_value>
+      <min_value></min_value>
+      <max_value></max_value>
     </argument>
     <argument>
       <name>dhw_distribution_recirc_branch_piping_length</name>
@@ -2916,6 +3466,8 @@
       <required>true</required>
       <model_dependent>false</model_dependent>
       <default_value>auto</default_value>
+      <min_value></min_value>
+      <max_value></max_value>
     </argument>
     <argument>
       <name>dhw_distribution_recirc_pump_power</name>
@@ -2926,6 +3478,8 @@
       <required>true</required>
       <model_dependent>false</model_dependent>
       <default_value>auto</default_value>
+      <min_value></min_value>
+      <max_value></max_value>
     </argument>
     <argument>
       <name>dhw_distribution_pipe_r</name>
@@ -2936,12 +3490,15 @@
       <required>true</required>
       <model_dependent>false</model_dependent>
       <default_value>0</default_value>
+      <min_value></min_value>
+      <max_value></max_value>
     </argument>
     <argument>
       <name>dwhr_facilities_connected</name>
       <display_name>Drain Water Heat Recovery: Facilities Connected</display_name>
       <description>Which facilities are connected for the drain water heat recovery. Use 'none' if there is no drawin water heat recovery system.</description>
       <type>Choice</type>
+      <units></units>
       <required>true</required>
       <model_dependent>false</model_dependent>
       <default_value>none</default_value>
@@ -2959,12 +3516,15 @@
           <display_name>all</display_name>
         </choice>
       </choices>
+      <min_value></min_value>
+      <max_value></max_value>
     </argument>
     <argument>
       <name>dwhr_equal_flow</name>
       <display_name>Drain Water Heat Recovery: Equal Flow</display_name>
       <description>Whether the drain water heat recovery has equal flow.</description>
       <type>Boolean</type>
+      <units></units>
       <required>true</required>
       <model_dependent>false</model_dependent>
       <default_value>true</default_value>
@@ -2978,6 +3538,8 @@
           <display_name>false</display_name>
         </choice>
       </choices>
+      <min_value></min_value>
+      <max_value></max_value>
     </argument>
     <argument>
       <name>dwhr_efficiency</name>
@@ -2988,12 +3550,15 @@
       <required>true</required>
       <model_dependent>false</model_dependent>
       <default_value>0.55</default_value>
+      <min_value></min_value>
+      <max_value></max_value>
     </argument>
     <argument>
       <name>water_fixtures_shower_low_flow</name>
       <display_name>Hot Water Fixtures: Is Shower Low Flow</display_name>
       <description>Whether the shower fixture is low flow.</description>
       <type>Boolean</type>
+      <units></units>
       <required>true</required>
       <model_dependent>false</model_dependent>
       <default_value>false</default_value>
@@ -3007,12 +3572,15 @@
           <display_name>false</display_name>
         </choice>
       </choices>
+      <min_value></min_value>
+      <max_value></max_value>
     </argument>
     <argument>
       <name>water_fixtures_sink_low_flow</name>
       <display_name>Hot Water Fixtures: Is Sink Low Flow</display_name>
       <description>Whether the sink fixture is low flow.</description>
       <type>Boolean</type>
+      <units></units>
       <required>true</required>
       <model_dependent>false</model_dependent>
       <default_value>false</default_value>
@@ -3026,21 +3594,27 @@
           <display_name>false</display_name>
         </choice>
       </choices>
+      <min_value></min_value>
+      <max_value></max_value>
     </argument>
     <argument>
       <name>water_fixtures_usage_multiplier</name>
       <display_name>Hot Water Fixtures: Usage Multiplier</display_name>
       <description>Multiplier on the hot water usage that can reflect, e.g., high/low usage occupants.</description>
       <type>Double</type>
+      <units></units>
       <required>true</required>
       <model_dependent>false</model_dependent>
       <default_value>1</default_value>
+      <min_value></min_value>
+      <max_value></max_value>
     </argument>
     <argument>
       <name>solar_thermal_system_type</name>
       <display_name>Solar Thermal: System Type</display_name>
       <description>The type of solar thermal system. Use 'none' if there is no solar thermal system.</description>
       <type>Choice</type>
+      <units></units>
       <required>true</required>
       <model_dependent>false</model_dependent>
       <default_value>none</default_value>
@@ -3054,6 +3628,8 @@
           <display_name>hot water</display_name>
         </choice>
       </choices>
+      <min_value></min_value>
+      <max_value></max_value>
     </argument>
     <argument>
       <name>solar_thermal_collector_area</name>
@@ -3064,12 +3640,15 @@
       <required>true</required>
       <model_dependent>false</model_dependent>
       <default_value>40</default_value>
+      <min_value></min_value>
+      <max_value></max_value>
     </argument>
     <argument>
       <name>solar_thermal_collector_loop_type</name>
       <display_name>Solar Thermal: Collector Loop Type</display_name>
       <description>The collector loop type of the solar thermal system.</description>
       <type>Choice</type>
+      <units></units>
       <required>true</required>
       <model_dependent>false</model_dependent>
       <default_value>liquid direct</default_value>
@@ -3087,12 +3666,15 @@
           <display_name>passive thermosyphon</display_name>
         </choice>
       </choices>
+      <min_value></min_value>
+      <max_value></max_value>
     </argument>
     <argument>
       <name>solar_thermal_collector_type</name>
       <display_name>Solar Thermal: Collector Type</display_name>
       <description>The collector type of the solar thermal system.</description>
       <type>Choice</type>
+      <units></units>
       <required>true</required>
       <model_dependent>false</model_dependent>
       <default_value>evacuated tube</default_value>
@@ -3114,6 +3696,8 @@
           <display_name>integrated collector storage</display_name>
         </choice>
       </choices>
+      <min_value></min_value>
+      <max_value></max_value>
     </argument>
     <argument>
       <name>solar_thermal_collector_azimuth</name>
@@ -3124,6 +3708,8 @@
       <required>true</required>
       <model_dependent>false</model_dependent>
       <default_value>180</default_value>
+      <min_value></min_value>
+      <max_value></max_value>
     </argument>
     <argument>
       <name>solar_thermal_collector_tilt</name>
@@ -3134,6 +3720,8 @@
       <required>true</required>
       <model_dependent>false</model_dependent>
       <default_value>RoofPitch</default_value>
+      <min_value></min_value>
+      <max_value></max_value>
     </argument>
     <argument>
       <name>solar_thermal_collector_rated_optical_efficiency</name>
@@ -3144,6 +3732,8 @@
       <required>true</required>
       <model_dependent>false</model_dependent>
       <default_value>0.5</default_value>
+      <min_value></min_value>
+      <max_value></max_value>
     </argument>
     <argument>
       <name>solar_thermal_collector_rated_thermal_losses</name>
@@ -3154,6 +3744,8 @@
       <required>true</required>
       <model_dependent>false</model_dependent>
       <default_value>0.2799</default_value>
+      <min_value></min_value>
+      <max_value></max_value>
     </argument>
     <argument>
       <name>solar_thermal_storage_volume</name>
@@ -3164,6 +3756,8 @@
       <required>true</required>
       <model_dependent>false</model_dependent>
       <default_value>auto</default_value>
+      <min_value></min_value>
+      <max_value></max_value>
     </argument>
     <argument>
       <name>solar_thermal_solar_fraction</name>
@@ -3174,12 +3768,15 @@
       <required>true</required>
       <model_dependent>false</model_dependent>
       <default_value>0</default_value>
+      <min_value></min_value>
+      <max_value></max_value>
     </argument>
     <argument>
       <name>pv_system_module_type_1</name>
       <display_name>Photovoltaics 1: Module Type</display_name>
       <description>Module type of the PV system 1. Use 'none' if there is no PV system 1.</description>
       <type>Choice</type>
+      <units></units>
       <required>true</required>
       <model_dependent>false</model_dependent>
       <default_value>none</default_value>
@@ -3201,12 +3798,15 @@
           <display_name>thin film</display_name>
         </choice>
       </choices>
+      <min_value></min_value>
+      <max_value></max_value>
     </argument>
     <argument>
       <name>pv_system_location_1</name>
       <display_name>Photovoltaics 1: Location</display_name>
       <description>Location of the PV system 1.</description>
       <type>Choice</type>
+      <units></units>
       <required>true</required>
       <model_dependent>false</model_dependent>
       <default_value>roof</default_value>
@@ -3220,12 +3820,15 @@
           <display_name>ground</display_name>
         </choice>
       </choices>
+      <min_value></min_value>
+      <max_value></max_value>
     </argument>
     <argument>
       <name>pv_system_tracking_1</name>
       <display_name>Photovoltaics 1: Tracking</display_name>
       <description>Tracking of the PV system 1.</description>
       <type>Choice</type>
+      <units></units>
       <required>true</required>
       <model_dependent>false</model_dependent>
       <default_value>fixed</default_value>
@@ -3247,6 +3850,8 @@
           <display_name>2-axis</display_name>
         </choice>
       </choices>
+      <min_value></min_value>
+      <max_value></max_value>
     </argument>
     <argument>
       <name>pv_system_array_azimuth_1</name>
@@ -3257,6 +3862,8 @@
       <required>true</required>
       <model_dependent>false</model_dependent>
       <default_value>180</default_value>
+      <min_value></min_value>
+      <max_value></max_value>
     </argument>
     <argument>
       <name>pv_system_array_tilt_1</name>
@@ -3267,6 +3874,8 @@
       <required>true</required>
       <model_dependent>false</model_dependent>
       <default_value>RoofPitch</default_value>
+      <min_value></min_value>
+      <max_value></max_value>
     </argument>
     <argument>
       <name>pv_system_max_power_output_1</name>
@@ -3277,6 +3886,8 @@
       <required>true</required>
       <model_dependent>false</model_dependent>
       <default_value>4000</default_value>
+      <min_value></min_value>
+      <max_value></max_value>
     </argument>
     <argument>
       <name>pv_system_inverter_efficiency_1</name>
@@ -3286,6 +3897,9 @@
       <units>Frac</units>
       <required>false</required>
       <model_dependent>false</model_dependent>
+      <default_value></default_value>
+      <min_value></min_value>
+      <max_value></max_value>
     </argument>
     <argument>
       <name>pv_system_system_losses_fraction_1</name>
@@ -3295,6 +3909,9 @@
       <units>Frac</units>
       <required>false</required>
       <model_dependent>false</model_dependent>
+      <default_value></default_value>
+      <min_value></min_value>
+      <max_value></max_value>
     </argument>
     <argument>
       <name>pv_system_year_modules_manufactured_1</name>
@@ -3304,12 +3921,16 @@
       <units>Year</units>
       <required>false</required>
       <model_dependent>false</model_dependent>
+      <default_value></default_value>
+      <min_value></min_value>
+      <max_value></max_value>
     </argument>
     <argument>
       <name>pv_system_module_type_2</name>
       <display_name>Photovoltaics 2: Module Type</display_name>
       <description>Module type of the PV system 2. Use 'none' if there is no PV system 2.</description>
       <type>Choice</type>
+      <units></units>
       <required>true</required>
       <model_dependent>false</model_dependent>
       <default_value>none</default_value>
@@ -3331,12 +3952,15 @@
           <display_name>thin film</display_name>
         </choice>
       </choices>
+      <min_value></min_value>
+      <max_value></max_value>
     </argument>
     <argument>
       <name>pv_system_location_2</name>
       <display_name>Photovoltaics 2: Location</display_name>
       <description>Location of the PV system 2.</description>
       <type>Choice</type>
+      <units></units>
       <required>true</required>
       <model_dependent>false</model_dependent>
       <default_value>roof</default_value>
@@ -3350,12 +3974,15 @@
           <display_name>ground</display_name>
         </choice>
       </choices>
+      <min_value></min_value>
+      <max_value></max_value>
     </argument>
     <argument>
       <name>pv_system_tracking_2</name>
       <display_name>Photovoltaics 2: Tracking</display_name>
       <description>Tracking of the PV system 2.</description>
       <type>Choice</type>
+      <units></units>
       <required>true</required>
       <model_dependent>false</model_dependent>
       <default_value>fixed</default_value>
@@ -3377,6 +4004,8 @@
           <display_name>2-axis</display_name>
         </choice>
       </choices>
+      <min_value></min_value>
+      <max_value></max_value>
     </argument>
     <argument>
       <name>pv_system_array_azimuth_2</name>
@@ -3387,6 +4016,8 @@
       <required>true</required>
       <model_dependent>false</model_dependent>
       <default_value>180</default_value>
+      <min_value></min_value>
+      <max_value></max_value>
     </argument>
     <argument>
       <name>pv_system_array_tilt_2</name>
@@ -3397,6 +4028,8 @@
       <required>true</required>
       <model_dependent>false</model_dependent>
       <default_value>RoofPitch</default_value>
+      <min_value></min_value>
+      <max_value></max_value>
     </argument>
     <argument>
       <name>pv_system_max_power_output_2</name>
@@ -3407,6 +4040,8 @@
       <required>true</required>
       <model_dependent>false</model_dependent>
       <default_value>4000</default_value>
+      <min_value></min_value>
+      <max_value></max_value>
     </argument>
     <argument>
       <name>pv_system_inverter_efficiency_2</name>
@@ -3416,6 +4051,9 @@
       <units>Frac</units>
       <required>false</required>
       <model_dependent>false</model_dependent>
+      <default_value></default_value>
+      <min_value></min_value>
+      <max_value></max_value>
     </argument>
     <argument>
       <name>pv_system_system_losses_fraction_2</name>
@@ -3425,6 +4063,9 @@
       <units>Frac</units>
       <required>false</required>
       <model_dependent>false</model_dependent>
+      <default_value></default_value>
+      <min_value></min_value>
+      <max_value></max_value>
     </argument>
     <argument>
       <name>pv_system_year_modules_manufactured_2</name>
@@ -3434,201 +4075,268 @@
       <units>Year</units>
       <required>false</required>
       <model_dependent>false</model_dependent>
+      <default_value></default_value>
+      <min_value></min_value>
+      <max_value></max_value>
     </argument>
     <argument>
       <name>lighting_fraction_cfl_interior</name>
       <display_name>Lighting: Fraction CFL Interior</display_name>
       <description>Fraction of all lamps (interior) that are compact fluorescent. Lighting not specified as CFL, LFL, or LED is assumed to be incandescent.</description>
       <type>Double</type>
+      <units></units>
       <required>true</required>
       <model_dependent>false</model_dependent>
       <default_value>0.4</default_value>
+      <min_value></min_value>
+      <max_value></max_value>
     </argument>
     <argument>
       <name>lighting_fraction_lfl_interior</name>
       <display_name>Lighting: Fraction LFL Interior</display_name>
       <description>Fraction of all lamps (interior) that are linear fluorescent. Lighting not specified as CFL, LFL, or LED is assumed to be incandescent.</description>
       <type>Double</type>
+      <units></units>
       <required>true</required>
       <model_dependent>false</model_dependent>
       <default_value>0.1</default_value>
+      <min_value></min_value>
+      <max_value></max_value>
     </argument>
     <argument>
       <name>lighting_fraction_led_interior</name>
       <display_name>Lighting: Fraction LED Interior</display_name>
       <description>Fraction of all lamps (interior) that are light emitting diodes. Lighting not specified as CFL, LFL, or LED is assumed to be incandescent.</description>
       <type>Double</type>
+      <units></units>
       <required>true</required>
       <model_dependent>false</model_dependent>
       <default_value>0.25</default_value>
+      <min_value></min_value>
+      <max_value></max_value>
     </argument>
     <argument>
       <name>lighting_usage_multiplier_interior</name>
       <display_name>Lighting: Usage Multiplier Interior</display_name>
       <description>Multiplier on the lighting energy usage (interior) that can reflect, e.g., high/low usage occupants.</description>
       <type>Double</type>
+      <units></units>
       <required>true</required>
       <model_dependent>false</model_dependent>
       <default_value>1</default_value>
+      <min_value></min_value>
+      <max_value></max_value>
     </argument>
     <argument>
       <name>lighting_weekday_fractions_interior</name>
       <display_name>Lighting: Weekday Schedule Interior</display_name>
       <description>Specify the 24-hour weekday schedule.</description>
       <type>String</type>
+      <units></units>
       <required>true</required>
       <model_dependent>false</model_dependent>
       <default_value>auto</default_value>
+      <min_value></min_value>
+      <max_value></max_value>
     </argument>
     <argument>
       <name>lighting_weekend_fractions_interior</name>
       <display_name>Lighting: Weekend Schedule Interior</display_name>
       <description>Specify the 24-hour weekend schedule.</description>
       <type>String</type>
+      <units></units>
       <required>true</required>
       <model_dependent>false</model_dependent>
       <default_value>auto</default_value>
+      <min_value></min_value>
+      <max_value></max_value>
     </argument>
     <argument>
       <name>lighting_monthly_multipliers_interior</name>
       <display_name>Lighting: Month Schedule Interior</display_name>
       <description>Specify the 12-month schedule.</description>
       <type>String</type>
+      <units></units>
       <required>true</required>
       <model_dependent>false</model_dependent>
       <default_value>auto</default_value>
+      <min_value></min_value>
+      <max_value></max_value>
     </argument>
     <argument>
       <name>lighting_fraction_cfl_exterior</name>
       <display_name>Lighting: Fraction CFL Exterior</display_name>
       <description>Fraction of all lamps (exterior) that are compact fluorescent. Lighting not specified as CFL, LFL, or LED is assumed to be incandescent.</description>
       <type>Double</type>
+      <units></units>
       <required>true</required>
       <model_dependent>false</model_dependent>
       <default_value>0.4</default_value>
+      <min_value></min_value>
+      <max_value></max_value>
     </argument>
     <argument>
       <name>lighting_fraction_lfl_exterior</name>
       <display_name>Lighting: Fraction LFL Exterior</display_name>
       <description>Fraction of all lamps (exterior) that are linear fluorescent. Lighting not specified as CFL, LFL, or LED is assumed to be incandescent.</description>
       <type>Double</type>
+      <units></units>
       <required>true</required>
       <model_dependent>false</model_dependent>
       <default_value>0.1</default_value>
+      <min_value></min_value>
+      <max_value></max_value>
     </argument>
     <argument>
       <name>lighting_fraction_led_exterior</name>
       <display_name>Lighting: Fraction LED Exterior</display_name>
       <description>Fraction of all lamps (exterior) that are light emitting diodes. Lighting not specified as CFL, LFL, or LED is assumed to be incandescent.</description>
       <type>Double</type>
+      <units></units>
       <required>true</required>
       <model_dependent>false</model_dependent>
       <default_value>0.25</default_value>
+      <min_value></min_value>
+      <max_value></max_value>
     </argument>
     <argument>
       <name>lighting_usage_multiplier_exterior</name>
       <display_name>Lighting: Usage Multiplier Exterior</display_name>
       <description>Multiplier on the lighting energy usage (exterior) that can reflect, e.g., high/low usage occupants.</description>
       <type>Double</type>
+      <units></units>
       <required>true</required>
       <model_dependent>false</model_dependent>
       <default_value>1</default_value>
+      <min_value></min_value>
+      <max_value></max_value>
     </argument>
     <argument>
       <name>lighting_weekday_fractions_exterior</name>
       <display_name>Lighting: Weekday Schedule Exterior</display_name>
       <description>Specify the 24-hour weekday schedule.</description>
       <type>String</type>
+      <units></units>
       <required>true</required>
       <model_dependent>false</model_dependent>
       <default_value>auto</default_value>
+      <min_value></min_value>
+      <max_value></max_value>
     </argument>
     <argument>
       <name>lighting_weekend_fractions_exterior</name>
       <display_name>Lighting: Weekend Schedule Exterior</display_name>
       <description>Specify the 24-hour weekend schedule.</description>
       <type>String</type>
+      <units></units>
       <required>true</required>
       <model_dependent>false</model_dependent>
       <default_value>auto</default_value>
+      <min_value></min_value>
+      <max_value></max_value>
     </argument>
     <argument>
       <name>lighting_monthly_multipliers_exterior</name>
       <display_name>Lighting: Month Schedule Exterior</display_name>
       <description>Specify the 12-month schedule.</description>
       <type>String</type>
+      <units></units>
       <required>true</required>
       <model_dependent>false</model_dependent>
       <default_value>auto</default_value>
+      <min_value></min_value>
+      <max_value></max_value>
     </argument>
     <argument>
       <name>lighting_fraction_cfl_garage</name>
       <display_name>Lighting: Fraction CFL Garage</display_name>
       <description>Fraction of all lamps (garage) that are compact fluorescent. Lighting not specified as CFL, LFL, or LED is assumed to be incandescent.</description>
       <type>Double</type>
+      <units></units>
       <required>true</required>
       <model_dependent>false</model_dependent>
       <default_value>0.4</default_value>
+      <min_value></min_value>
+      <max_value></max_value>
     </argument>
     <argument>
       <name>lighting_fraction_lfl_garage</name>
       <display_name>Lighting: Fraction LFL Garage</display_name>
       <description>Fraction of all lamps (garage) that are linear fluorescent. Lighting not specified as CFL, LFL, or LED is assumed to be incandescent.</description>
       <type>Double</type>
+      <units></units>
       <required>true</required>
       <model_dependent>false</model_dependent>
       <default_value>0.1</default_value>
+      <min_value></min_value>
+      <max_value></max_value>
     </argument>
     <argument>
       <name>lighting_fraction_led_garage</name>
       <display_name>Lighting: Fraction LED Garage</display_name>
       <description>Fraction of all lamps (garage) that are light emitting diodes. Lighting not specified as CFL, LFL, or LED is assumed to be incandescent.</description>
       <type>Double</type>
+      <units></units>
       <required>true</required>
       <model_dependent>false</model_dependent>
       <default_value>0.25</default_value>
+      <min_value></min_value>
+      <max_value></max_value>
     </argument>
     <argument>
       <name>lighting_usage_multiplier_garage</name>
       <display_name>Lighting: Usage Multiplier Garage</display_name>
       <description>Multiplier on the lighting energy usage (garage) that can reflect, e.g., high/low usage occupants.</description>
       <type>Double</type>
+      <units></units>
       <required>true</required>
       <model_dependent>false</model_dependent>
       <default_value>1</default_value>
+      <min_value></min_value>
+      <max_value></max_value>
     </argument>
     <argument>
       <name>lighting_weekday_fractions_garage</name>
       <display_name>Lighting: Weekday Schedule Garage</display_name>
       <description>Specify the 24-hour weekday schedule.</description>
       <type>String</type>
+      <units></units>
       <required>true</required>
       <model_dependent>false</model_dependent>
       <default_value>auto</default_value>
+      <min_value></min_value>
+      <max_value></max_value>
     </argument>
     <argument>
       <name>lighting_weekend_fractions_garage</name>
       <display_name>Lighting: Weekend Schedule Garage</display_name>
       <description>Specify the 24-hour weekend schedule.</description>
       <type>String</type>
+      <units></units>
       <required>true</required>
       <model_dependent>false</model_dependent>
       <default_value>auto</default_value>
+      <min_value></min_value>
+      <max_value></max_value>
     </argument>
     <argument>
       <name>lighting_monthly_multipliers_garage</name>
       <display_name>Lighting: Month Schedule Garage</display_name>
       <description>Specify the 12-month schedule.</description>
       <type>String</type>
+      <units></units>
       <required>true</required>
       <model_dependent>false</model_dependent>
       <default_value>auto</default_value>
+      <min_value></min_value>
+      <max_value></max_value>
     </argument>
     <argument>
       <name>holiday_lighting_present</name>
       <display_name>Holiday Lighting: Present</display_name>
       <description>Whether there is holiday lighting.</description>
       <type>Boolean</type>
+      <units></units>
       <required>true</required>
       <model_dependent>false</model_dependent>
       <default_value>false</default_value>
@@ -3642,6 +4350,8 @@
           <display_name>false</display_name>
         </choice>
       </choices>
+      <min_value></min_value>
+      <max_value></max_value>
     </argument>
     <argument>
       <name>holiday_lighting_daily_kwh</name>
@@ -3652,6 +4362,8 @@
       <required>true</required>
       <model_dependent>false</model_dependent>
       <default_value>auto</default_value>
+      <min_value></min_value>
+      <max_value></max_value>
     </argument>
     <argument>
       <name>holiday_lighting_period_begin_month</name>
@@ -3662,6 +4374,8 @@
       <required>true</required>
       <model_dependent>false</model_dependent>
       <default_value>auto</default_value>
+      <min_value></min_value>
+      <max_value></max_value>
     </argument>
     <argument>
       <name>holiday_lighting_period_begin_day_of_month</name>
@@ -3672,6 +4386,8 @@
       <required>true</required>
       <model_dependent>false</model_dependent>
       <default_value>auto</default_value>
+      <min_value></min_value>
+      <max_value></max_value>
     </argument>
     <argument>
       <name>holiday_lighting_period_end_month</name>
@@ -3682,6 +4398,8 @@
       <required>true</required>
       <model_dependent>false</model_dependent>
       <default_value>auto</default_value>
+      <min_value></min_value>
+      <max_value></max_value>
     </argument>
     <argument>
       <name>holiday_lighting_period_end_day_of_month</name>
@@ -3692,30 +4410,39 @@
       <required>true</required>
       <model_dependent>false</model_dependent>
       <default_value>auto</default_value>
+      <min_value></min_value>
+      <max_value></max_value>
     </argument>
     <argument>
       <name>holiday_lighting_weekday_fractions_exterior</name>
       <display_name>Holiday Lighting: Weekday Schedule Exterior</display_name>
       <description>Specify the 24-hour weekday schedule.</description>
       <type>String</type>
+      <units></units>
       <required>true</required>
       <model_dependent>false</model_dependent>
       <default_value>auto</default_value>
+      <min_value></min_value>
+      <max_value></max_value>
     </argument>
     <argument>
       <name>holiday_lighting_weekend_fractions_exterior</name>
       <display_name>Holiday Lighting: Weekend Schedule Exterior</display_name>
       <description>Specify the 24-hour weekend schedule.</description>
       <type>String</type>
+      <units></units>
       <required>true</required>
       <model_dependent>false</model_dependent>
       <default_value>auto</default_value>
+      <min_value></min_value>
+      <max_value></max_value>
     </argument>
     <argument>
       <name>dehumidifier_present</name>
       <display_name>Dehumidifier: Present</display_name>
       <description>Whether there is a dehumidifier.</description>
       <type>Boolean</type>
+      <units></units>
       <required>true</required>
       <model_dependent>false</model_dependent>
       <default_value>false</default_value>
@@ -3729,12 +4456,15 @@
           <display_name>false</display_name>
         </choice>
       </choices>
+      <min_value></min_value>
+      <max_value></max_value>
     </argument>
     <argument>
       <name>dehumidifier_efficiency_type</name>
       <display_name>Dehumidifier: Efficiency Type</display_name>
       <description>The efficiency type of dehumidifier.</description>
       <type>Choice</type>
+      <units></units>
       <required>true</required>
       <model_dependent>false</model_dependent>
       <default_value>EnergyFactor</default_value>
@@ -3748,6 +4478,8 @@
           <display_name>IntegratedEnergyFactor</display_name>
         </choice>
       </choices>
+      <min_value></min_value>
+      <max_value></max_value>
     </argument>
     <argument>
       <name>dehumidifier_efficiency_ef</name>
@@ -3758,6 +4490,8 @@
       <required>true</required>
       <model_dependent>false</model_dependent>
       <default_value>1.8</default_value>
+      <min_value></min_value>
+      <max_value></max_value>
     </argument>
     <argument>
       <name>dehumidifier_efficiency_ief</name>
@@ -3768,6 +4502,8 @@
       <required>true</required>
       <model_dependent>false</model_dependent>
       <default_value>1.5</default_value>
+      <min_value></min_value>
+      <max_value></max_value>
     </argument>
     <argument>
       <name>dehumidifier_capacity</name>
@@ -3778,6 +4514,8 @@
       <required>true</required>
       <model_dependent>false</model_dependent>
       <default_value>40</default_value>
+      <min_value></min_value>
+      <max_value></max_value>
     </argument>
     <argument>
       <name>dehumidifier_rh_setpoint</name>
@@ -3788,6 +4526,8 @@
       <required>true</required>
       <model_dependent>false</model_dependent>
       <default_value>0.5</default_value>
+      <min_value></min_value>
+      <max_value></max_value>
     </argument>
     <argument>
       <name>dehumidifier_fraction_dehumidification_load_served</name>
@@ -3798,12 +4538,15 @@
       <required>true</required>
       <model_dependent>false</model_dependent>
       <default_value>1</default_value>
+      <min_value></min_value>
+      <max_value></max_value>
     </argument>
     <argument>
       <name>clothes_washer_present</name>
       <display_name>Clothes Washer: Present</display_name>
       <description>Whether there is a clothes washer.</description>
       <type>Boolean</type>
+      <units></units>
       <required>true</required>
       <model_dependent>false</model_dependent>
       <default_value>true</default_value>
@@ -3817,12 +4560,15 @@
           <display_name>false</display_name>
         </choice>
       </choices>
+      <min_value></min_value>
+      <max_value></max_value>
     </argument>
     <argument>
       <name>clothes_washer_location</name>
       <display_name>Clothes Washer: Location</display_name>
       <description>The space type for the clothes washer location.</description>
       <type>Choice</type>
+      <units></units>
       <required>true</required>
       <model_dependent>false</model_dependent>
       <default_value>auto</default_value>
@@ -3852,12 +4598,15 @@
           <display_name>other</display_name>
         </choice>
       </choices>
+      <min_value></min_value>
+      <max_value></max_value>
     </argument>
     <argument>
       <name>clothes_washer_efficiency_type</name>
       <display_name>Clothes Washer: Efficiency Type</display_name>
       <description>The efficiency type of clothes washer.</description>
       <type>Choice</type>
+      <units></units>
       <required>true</required>
       <model_dependent>false</model_dependent>
       <default_value>IntegratedModifiedEnergyFactor</default_value>
@@ -3871,6 +4620,8 @@
           <display_name>IntegratedModifiedEnergyFactor</display_name>
         </choice>
       </choices>
+      <min_value></min_value>
+      <max_value></max_value>
     </argument>
     <argument>
       <name>clothes_washer_efficiency_mef</name>
@@ -3881,15 +4632,20 @@
       <required>true</required>
       <model_dependent>false</model_dependent>
       <default_value>auto</default_value>
+      <min_value></min_value>
+      <max_value></max_value>
     </argument>
     <argument>
       <name>clothes_washer_efficiency_imef</name>
       <display_name>Clothes Washer: Integrated Modified Energy Factor</display_name>
       <description>The energy performance metric for ENERGY STAR certified residential clothes washers as of March 7, 2015.</description>
       <type>String</type>
+      <units></units>
       <required>true</required>
       <model_dependent>false</model_dependent>
       <default_value>auto</default_value>
+      <min_value></min_value>
+      <max_value></max_value>
     </argument>
     <argument>
       <name>clothes_washer_rated_annual_kwh</name>
@@ -3900,6 +4656,8 @@
       <required>true</required>
       <model_dependent>false</model_dependent>
       <default_value>auto</default_value>
+      <min_value></min_value>
+      <max_value></max_value>
     </argument>
     <argument>
       <name>clothes_washer_label_electric_rate</name>
@@ -3910,6 +4668,8 @@
       <required>true</required>
       <model_dependent>false</model_dependent>
       <default_value>auto</default_value>
+      <min_value></min_value>
+      <max_value></max_value>
     </argument>
     <argument>
       <name>clothes_washer_label_gas_rate</name>
@@ -3920,6 +4680,8 @@
       <required>true</required>
       <model_dependent>false</model_dependent>
       <default_value>auto</default_value>
+      <min_value></min_value>
+      <max_value></max_value>
     </argument>
     <argument>
       <name>clothes_washer_label_annual_gas_cost</name>
@@ -3930,6 +4692,8 @@
       <required>true</required>
       <model_dependent>false</model_dependent>
       <default_value>auto</default_value>
+      <min_value></min_value>
+      <max_value></max_value>
     </argument>
     <argument>
       <name>clothes_washer_label_usage</name>
@@ -3940,6 +4704,8 @@
       <required>true</required>
       <model_dependent>false</model_dependent>
       <default_value>auto</default_value>
+      <min_value></min_value>
+      <max_value></max_value>
     </argument>
     <argument>
       <name>clothes_washer_capacity</name>
@@ -3950,21 +4716,27 @@
       <required>true</required>
       <model_dependent>false</model_dependent>
       <default_value>auto</default_value>
+      <min_value></min_value>
+      <max_value></max_value>
     </argument>
     <argument>
       <name>clothes_washer_usage_multiplier</name>
       <display_name>Clothes Washer: Usage Multiplier</display_name>
       <description>Multiplier on the clothes washer energy and hot water usage that can reflect, e.g., high/low usage occupants.</description>
       <type>Double</type>
+      <units></units>
       <required>true</required>
       <model_dependent>false</model_dependent>
       <default_value>1</default_value>
+      <min_value></min_value>
+      <max_value></max_value>
     </argument>
     <argument>
       <name>clothes_dryer_present</name>
       <display_name>Clothes Dryer: Present</display_name>
       <description>Whether there is a clothes dryer.</description>
       <type>Boolean</type>
+      <units></units>
       <required>true</required>
       <model_dependent>false</model_dependent>
       <default_value>true</default_value>
@@ -3978,12 +4750,15 @@
           <display_name>false</display_name>
         </choice>
       </choices>
+      <min_value></min_value>
+      <max_value></max_value>
     </argument>
     <argument>
       <name>clothes_dryer_location</name>
       <display_name>Clothes Dryer: Location</display_name>
       <description>The space type for the clothes dryer location.</description>
       <type>Choice</type>
+      <units></units>
       <required>true</required>
       <model_dependent>false</model_dependent>
       <default_value>auto</default_value>
@@ -4013,12 +4788,15 @@
           <display_name>other</display_name>
         </choice>
       </choices>
+      <min_value></min_value>
+      <max_value></max_value>
     </argument>
     <argument>
       <name>clothes_dryer_fuel_type</name>
       <display_name>Clothes Dryer: Fuel Type</display_name>
       <description>Type of fuel used by the clothes dryer.</description>
       <type>Choice</type>
+      <units></units>
       <required>true</required>
       <model_dependent>false</model_dependent>
       <default_value>natural gas</default_value>
@@ -4048,12 +4826,15 @@
           <display_name>coal</display_name>
         </choice>
       </choices>
+      <min_value></min_value>
+      <max_value></max_value>
     </argument>
     <argument>
       <name>clothes_dryer_efficiency_type</name>
       <display_name>Clothes Dryer: Efficiency Type</display_name>
       <description>The efficiency type of clothes dryer.</description>
       <type>Choice</type>
+      <units></units>
       <required>true</required>
       <model_dependent>false</model_dependent>
       <default_value>CombinedEnergyFactor</default_value>
@@ -4067,6 +4848,8 @@
           <display_name>CombinedEnergyFactor</display_name>
         </choice>
       </choices>
+      <min_value></min_value>
+      <max_value></max_value>
     </argument>
     <argument>
       <name>clothes_dryer_efficiency_ef</name>
@@ -4077,6 +4860,8 @@
       <required>true</required>
       <model_dependent>false</model_dependent>
       <default_value>3.4615</default_value>
+      <min_value></min_value>
+      <max_value></max_value>
     </argument>
     <argument>
       <name>clothes_dryer_efficiency_cef</name>
@@ -4087,12 +4872,15 @@
       <required>true</required>
       <model_dependent>false</model_dependent>
       <default_value>auto</default_value>
+      <min_value></min_value>
+      <max_value></max_value>
     </argument>
     <argument>
       <name>clothes_dryer_control_type</name>
       <display_name>Clothes Dryer: Control Type</display_name>
       <description>Type of control used by the clothes dryer.</description>
       <type>Choice</type>
+      <units></units>
       <required>true</required>
       <model_dependent>false</model_dependent>
       <default_value>auto</default_value>
@@ -4110,21 +4898,27 @@
           <display_name>moisture</display_name>
         </choice>
       </choices>
+      <min_value></min_value>
+      <max_value></max_value>
     </argument>
     <argument>
       <name>clothes_dryer_usage_multiplier</name>
       <display_name>Clothes Dryer: Usage Multiplier</display_name>
       <description>Multiplier on the clothes dryer energy usage that can reflect, e.g., high/low usage occupants.</description>
       <type>Double</type>
+      <units></units>
       <required>true</required>
       <model_dependent>false</model_dependent>
       <default_value>1</default_value>
+      <min_value></min_value>
+      <max_value></max_value>
     </argument>
     <argument>
       <name>dishwasher_present</name>
       <display_name>Dishwasher: Present</display_name>
       <description>Whether there is a dishwasher.</description>
       <type>Boolean</type>
+      <units></units>
       <required>true</required>
       <model_dependent>false</model_dependent>
       <default_value>true</default_value>
@@ -4138,12 +4932,15 @@
           <display_name>false</display_name>
         </choice>
       </choices>
+      <min_value></min_value>
+      <max_value></max_value>
     </argument>
     <argument>
       <name>dishwasher_location</name>
       <display_name>Dishwasher: Location</display_name>
       <description>The space type for the dishwasher location.</description>
       <type>Choice</type>
+      <units></units>
       <required>true</required>
       <model_dependent>false</model_dependent>
       <default_value>auto</default_value>
@@ -4173,12 +4970,15 @@
           <display_name>other</display_name>
         </choice>
       </choices>
+      <min_value></min_value>
+      <max_value></max_value>
     </argument>
     <argument>
       <name>dishwasher_efficiency_type</name>
       <display_name>Dishwasher: Efficiency Type</display_name>
       <description>The efficiency type of dishwasher.</description>
       <type>Choice</type>
+      <units></units>
       <required>true</required>
       <model_dependent>false</model_dependent>
       <default_value>RatedAnnualkWh</default_value>
@@ -4192,24 +4992,32 @@
           <display_name>EnergyFactor</display_name>
         </choice>
       </choices>
+      <min_value></min_value>
+      <max_value></max_value>
     </argument>
     <argument>
       <name>dishwasher_efficiency_kwh</name>
       <display_name>Dishwasher: Rated Annual kWh</display_name>
       <description>The rated annual kWh of the dishwasher.</description>
       <type>String</type>
+      <units></units>
       <required>true</required>
       <model_dependent>false</model_dependent>
       <default_value>auto</default_value>
+      <min_value></min_value>
+      <max_value></max_value>
     </argument>
     <argument>
       <name>dishwasher_efficiency_ef</name>
       <display_name>Dishwasher: Energy Factor</display_name>
       <description>The energy factor of the dishwasher.</description>
       <type>Double</type>
+      <units></units>
       <required>true</required>
       <model_dependent>false</model_dependent>
       <default_value>0.46</default_value>
+      <min_value></min_value>
+      <max_value></max_value>
     </argument>
     <argument>
       <name>dishwasher_label_electric_rate</name>
@@ -4220,6 +5028,8 @@
       <required>true</required>
       <model_dependent>false</model_dependent>
       <default_value>auto</default_value>
+      <min_value></min_value>
+      <max_value></max_value>
     </argument>
     <argument>
       <name>dishwasher_label_gas_rate</name>
@@ -4230,6 +5040,8 @@
       <required>true</required>
       <model_dependent>false</model_dependent>
       <default_value>auto</default_value>
+      <min_value></min_value>
+      <max_value></max_value>
     </argument>
     <argument>
       <name>dishwasher_label_annual_gas_cost</name>
@@ -4240,6 +5052,8 @@
       <required>true</required>
       <model_dependent>false</model_dependent>
       <default_value>auto</default_value>
+      <min_value></min_value>
+      <max_value></max_value>
     </argument>
     <argument>
       <name>dishwasher_label_usage</name>
@@ -4250,6 +5064,8 @@
       <required>true</required>
       <model_dependent>false</model_dependent>
       <default_value>auto</default_value>
+      <min_value></min_value>
+      <max_value></max_value>
     </argument>
     <argument>
       <name>dishwasher_place_setting_capacity</name>
@@ -4260,21 +5076,27 @@
       <required>true</required>
       <model_dependent>false</model_dependent>
       <default_value>auto</default_value>
+      <min_value></min_value>
+      <max_value></max_value>
     </argument>
     <argument>
       <name>dishwasher_usage_multiplier</name>
       <display_name>Dishwasher: Usage Multiplier</display_name>
       <description>Multiplier on the dishwasher energy usage that can reflect, e.g., high/low usage occupants.</description>
       <type>Double</type>
+      <units></units>
       <required>true</required>
       <model_dependent>false</model_dependent>
       <default_value>1</default_value>
+      <min_value></min_value>
+      <max_value></max_value>
     </argument>
     <argument>
       <name>refrigerator_present</name>
       <display_name>Refrigerator: Present</display_name>
       <description>Whether there is a refrigerator.</description>
       <type>Boolean</type>
+      <units></units>
       <required>true</required>
       <model_dependent>false</model_dependent>
       <default_value>true</default_value>
@@ -4288,12 +5110,15 @@
           <display_name>false</display_name>
         </choice>
       </choices>
+      <min_value></min_value>
+      <max_value></max_value>
     </argument>
     <argument>
       <name>refrigerator_location</name>
       <display_name>Refrigerator: Location</display_name>
       <description>The space type for the refrigerator location.</description>
       <type>Choice</type>
+      <units></units>
       <required>true</required>
       <model_dependent>false</model_dependent>
       <default_value>auto</default_value>
@@ -4323,6 +5148,8 @@
           <display_name>other</display_name>
         </choice>
       </choices>
+      <min_value></min_value>
+      <max_value></max_value>
     </argument>
     <argument>
       <name>refrigerator_rated_annual_kwh</name>
@@ -4333,48 +5160,63 @@
       <required>true</required>
       <model_dependent>false</model_dependent>
       <default_value>auto</default_value>
+      <min_value></min_value>
+      <max_value></max_value>
     </argument>
     <argument>
       <name>refrigerator_usage_multiplier</name>
       <display_name>Refrigerator: Usage Multiplier</display_name>
       <description>Multiplier on the refrigerator energy usage that can reflect, e.g., high/low usage occupants.</description>
       <type>Double</type>
+      <units></units>
       <required>true</required>
       <model_dependent>false</model_dependent>
       <default_value>1</default_value>
+      <min_value></min_value>
+      <max_value></max_value>
     </argument>
     <argument>
       <name>refrigerator_weekday_fractions</name>
       <display_name>Refrigerator: Weekday Schedule</display_name>
       <description>Specify the 24-hour weekday schedule.</description>
       <type>String</type>
+      <units></units>
       <required>true</required>
       <model_dependent>false</model_dependent>
       <default_value>auto</default_value>
+      <min_value></min_value>
+      <max_value></max_value>
     </argument>
     <argument>
       <name>refrigerator_weekend_fractions</name>
       <display_name>Refrigerator: Weekend Schedule</display_name>
       <description>Specify the 24-hour weekend schedule.</description>
       <type>String</type>
+      <units></units>
       <required>true</required>
       <model_dependent>false</model_dependent>
       <default_value>auto</default_value>
+      <min_value></min_value>
+      <max_value></max_value>
     </argument>
     <argument>
       <name>refrigerator_monthly_multipliers</name>
       <display_name>Refrigerator: Month Schedule</display_name>
       <description>Specify the 12-month schedule.</description>
       <type>String</type>
+      <units></units>
       <required>true</required>
       <model_dependent>false</model_dependent>
       <default_value>auto</default_value>
+      <min_value></min_value>
+      <max_value></max_value>
     </argument>
     <argument>
       <name>extra_refrigerator_present</name>
       <display_name>Extra Refrigerator: Present</display_name>
       <description>Whether there is an extra refrigerator.</description>
       <type>Boolean</type>
+      <units></units>
       <required>true</required>
       <model_dependent>false</model_dependent>
       <default_value>false</default_value>
@@ -4388,12 +5230,15 @@
           <display_name>false</display_name>
         </choice>
       </choices>
+      <min_value></min_value>
+      <max_value></max_value>
     </argument>
     <argument>
       <name>extra_refrigerator_location</name>
       <display_name>Extra Refrigerator: Location</display_name>
       <description>The space type for the extra refrigerator location.</description>
       <type>Choice</type>
+      <units></units>
       <required>true</required>
       <model_dependent>false</model_dependent>
       <default_value>auto</default_value>
@@ -4423,6 +5268,8 @@
           <display_name>other</display_name>
         </choice>
       </choices>
+      <min_value></min_value>
+      <max_value></max_value>
     </argument>
     <argument>
       <name>extra_refrigerator_rated_annual_kwh</name>
@@ -4433,48 +5280,63 @@
       <required>true</required>
       <model_dependent>false</model_dependent>
       <default_value>auto</default_value>
+      <min_value></min_value>
+      <max_value></max_value>
     </argument>
     <argument>
       <name>extra_refrigerator_usage_multiplier</name>
       <display_name>Extra Refrigerator: Usage Multiplier</display_name>
       <description>Multiplier on the extra refrigerator energy usage that can reflect, e.g., high/low usage occupants.</description>
       <type>Double</type>
+      <units></units>
       <required>true</required>
       <model_dependent>false</model_dependent>
       <default_value>1</default_value>
+      <min_value></min_value>
+      <max_value></max_value>
     </argument>
     <argument>
       <name>extra_refrigerator_weekday_fractions</name>
       <display_name>Extra Refrigerator: Weekday Schedule</display_name>
       <description>Specify the 24-hour weekday schedule.</description>
       <type>String</type>
+      <units></units>
       <required>true</required>
       <model_dependent>false</model_dependent>
       <default_value>auto</default_value>
+      <min_value></min_value>
+      <max_value></max_value>
     </argument>
     <argument>
       <name>extra_refrigerator_weekend_fractions</name>
       <display_name>Extra Refrigerator: Weekend Schedule</display_name>
       <description>Specify the 24-hour weekend schedule.</description>
       <type>String</type>
+      <units></units>
       <required>true</required>
       <model_dependent>false</model_dependent>
       <default_value>auto</default_value>
+      <min_value></min_value>
+      <max_value></max_value>
     </argument>
     <argument>
       <name>extra_refrigerator_monthly_multipliers</name>
       <display_name>Extra Refrigerator: Month Schedule</display_name>
       <description>Specify the 12-month schedule.</description>
       <type>String</type>
+      <units></units>
       <required>true</required>
       <model_dependent>false</model_dependent>
       <default_value>auto</default_value>
+      <min_value></min_value>
+      <max_value></max_value>
     </argument>
     <argument>
       <name>freezer_present</name>
       <display_name>Freezer: Present</display_name>
       <description>Whether there is a freezer.</description>
       <type>Boolean</type>
+      <units></units>
       <required>true</required>
       <model_dependent>false</model_dependent>
       <default_value>false</default_value>
@@ -4488,12 +5350,15 @@
           <display_name>false</display_name>
         </choice>
       </choices>
+      <min_value></min_value>
+      <max_value></max_value>
     </argument>
     <argument>
       <name>freezer_location</name>
       <display_name>Freezer: Location</display_name>
       <description>The space type for the freezer location.</description>
       <type>Choice</type>
+      <units></units>
       <required>true</required>
       <model_dependent>false</model_dependent>
       <default_value>auto</default_value>
@@ -4523,6 +5388,8 @@
           <display_name>other</display_name>
         </choice>
       </choices>
+      <min_value></min_value>
+      <max_value></max_value>
     </argument>
     <argument>
       <name>freezer_rated_annual_kwh</name>
@@ -4533,48 +5400,63 @@
       <required>true</required>
       <model_dependent>false</model_dependent>
       <default_value>auto</default_value>
+      <min_value></min_value>
+      <max_value></max_value>
     </argument>
     <argument>
       <name>freezer_usage_multiplier</name>
       <display_name>Freezer: Usage Multiplier</display_name>
       <description>Multiplier on the freezer energy usage that can reflect, e.g., high/low usage occupants.</description>
       <type>Double</type>
+      <units></units>
       <required>true</required>
       <model_dependent>false</model_dependent>
       <default_value>1</default_value>
+      <min_value></min_value>
+      <max_value></max_value>
     </argument>
     <argument>
       <name>freezer_weekday_fractions</name>
       <display_name>Freezer: Weekday Schedule</display_name>
       <description>Specify the 24-hour weekday schedule.</description>
       <type>String</type>
+      <units></units>
       <required>true</required>
       <model_dependent>false</model_dependent>
       <default_value>auto</default_value>
+      <min_value></min_value>
+      <max_value></max_value>
     </argument>
     <argument>
       <name>freezer_weekend_fractions</name>
       <display_name>Freezer: Weekend Schedule</display_name>
       <description>Specify the 24-hour weekend schedule.</description>
       <type>String</type>
+      <units></units>
       <required>true</required>
       <model_dependent>false</model_dependent>
       <default_value>auto</default_value>
+      <min_value></min_value>
+      <max_value></max_value>
     </argument>
     <argument>
       <name>freezer_monthly_multipliers</name>
       <display_name>Freezer: Month Schedule</display_name>
       <description>Specify the 12-month schedule.</description>
       <type>String</type>
+      <units></units>
       <required>true</required>
       <model_dependent>false</model_dependent>
       <default_value>auto</default_value>
+      <min_value></min_value>
+      <max_value></max_value>
     </argument>
     <argument>
       <name>cooking_range_oven_present</name>
       <display_name>Cooking Range/Oven: Present</display_name>
       <description>Whether there is a cooking range/oven.</description>
       <type>Boolean</type>
+      <units></units>
       <required>true</required>
       <model_dependent>false</model_dependent>
       <default_value>true</default_value>
@@ -4588,12 +5470,15 @@
           <display_name>false</display_name>
         </choice>
       </choices>
+      <min_value></min_value>
+      <max_value></max_value>
     </argument>
     <argument>
       <name>cooking_range_oven_location</name>
       <display_name>Cooking Range/Oven: Location</display_name>
       <description>The space type for the cooking range/oven location.</description>
       <type>Choice</type>
+      <units></units>
       <required>true</required>
       <model_dependent>false</model_dependent>
       <default_value>auto</default_value>
@@ -4623,12 +5508,15 @@
           <display_name>other</display_name>
         </choice>
       </choices>
+      <min_value></min_value>
+      <max_value></max_value>
     </argument>
     <argument>
       <name>cooking_range_oven_fuel_type</name>
       <display_name>Cooking Range/Oven: Fuel Type</display_name>
       <description>Type of fuel used by the cooking range/oven.</description>
       <type>Choice</type>
+      <units></units>
       <required>true</required>
       <model_dependent>false</model_dependent>
       <default_value>natural gas</default_value>
@@ -4658,14 +5546,18 @@
           <display_name>coal</display_name>
         </choice>
       </choices>
+      <min_value></min_value>
+      <max_value></max_value>
     </argument>
     <argument>
       <name>cooking_range_oven_is_induction</name>
       <display_name>Cooking Range/Oven: Is Induction</display_name>
       <description>Whether the cooking range is induction.</description>
       <type>Boolean</type>
+      <units></units>
       <required>false</required>
       <model_dependent>false</model_dependent>
+      <default_value></default_value>
       <choices>
         <choice>
           <value>true</value>
@@ -4676,14 +5568,18 @@
           <display_name>false</display_name>
         </choice>
       </choices>
+      <min_value></min_value>
+      <max_value></max_value>
     </argument>
     <argument>
       <name>cooking_range_oven_is_convection</name>
       <display_name>Cooking Range/Oven: Is Convection</display_name>
       <description>Whether the oven is convection.</description>
       <type>Boolean</type>
+      <units></units>
       <required>false</required>
       <model_dependent>false</model_dependent>
+      <default_value></default_value>
       <choices>
         <choice>
           <value>true</value>
@@ -4694,48 +5590,63 @@
           <display_name>false</display_name>
         </choice>
       </choices>
+      <min_value></min_value>
+      <max_value></max_value>
     </argument>
     <argument>
       <name>cooking_range_oven_usage_multiplier</name>
       <display_name>Cooking Range/Oven: Usage Multiplier</display_name>
       <description>Multiplier on the cooking range/oven energy usage that can reflect, e.g., high/low usage occupants.</description>
       <type>Double</type>
+      <units></units>
       <required>true</required>
       <model_dependent>false</model_dependent>
       <default_value>1</default_value>
+      <min_value></min_value>
+      <max_value></max_value>
     </argument>
     <argument>
       <name>cooking_range_oven_weekday_fractions</name>
       <display_name>Cooking Range/Oven: Weekday Schedule</display_name>
       <description>Specify the 24-hour weekday schedule.</description>
       <type>String</type>
+      <units></units>
       <required>true</required>
       <model_dependent>false</model_dependent>
       <default_value>auto</default_value>
+      <min_value></min_value>
+      <max_value></max_value>
     </argument>
     <argument>
       <name>cooking_range_oven_weekend_fractions</name>
       <display_name>Cooking Range/Oven: Weekend Schedule</display_name>
       <description>Specify the 24-hour weekend schedule.</description>
       <type>String</type>
+      <units></units>
       <required>true</required>
       <model_dependent>false</model_dependent>
       <default_value>auto</default_value>
+      <min_value></min_value>
+      <max_value></max_value>
     </argument>
     <argument>
       <name>cooking_range_oven_monthly_multipliers</name>
       <display_name>Cooking Range/Oven: Month Schedule</display_name>
       <description>Specify the 12-month schedule.</description>
       <type>String</type>
+      <units></units>
       <required>true</required>
       <model_dependent>false</model_dependent>
       <default_value>auto</default_value>
+      <min_value></min_value>
+      <max_value></max_value>
     </argument>
     <argument>
       <name>ceiling_fan_present</name>
       <display_name>Ceiling Fan: Present</display_name>
       <description>Whether there is are any ceiling fans.</description>
       <type>Boolean</type>
+      <units></units>
       <required>true</required>
       <model_dependent>false</model_dependent>
       <default_value>true</default_value>
@@ -4749,6 +5660,8 @@
           <display_name>false</display_name>
         </choice>
       </choices>
+      <min_value></min_value>
+      <max_value></max_value>
     </argument>
     <argument>
       <name>ceiling_fan_efficiency</name>
@@ -4759,6 +5672,8 @@
       <required>true</required>
       <model_dependent>false</model_dependent>
       <default_value>auto</default_value>
+      <min_value></min_value>
+      <max_value></max_value>
     </argument>
     <argument>
       <name>ceiling_fan_quantity</name>
@@ -4769,6 +5684,8 @@
       <required>true</required>
       <model_dependent>false</model_dependent>
       <default_value>auto</default_value>
+      <min_value></min_value>
+      <max_value></max_value>
     </argument>
     <argument>
       <name>ceiling_fan_cooling_setpoint_temp_offset</name>
@@ -4779,6 +5696,8 @@
       <required>true</required>
       <model_dependent>false</model_dependent>
       <default_value>0.5</default_value>
+      <min_value></min_value>
+      <max_value></max_value>
     </argument>
     <argument>
       <name>plug_loads_television_annual_kwh</name>
@@ -4789,42 +5708,56 @@
       <required>true</required>
       <model_dependent>false</model_dependent>
       <default_value>auto</default_value>
+      <min_value></min_value>
+      <max_value></max_value>
     </argument>
     <argument>
       <name>plug_loads_television_usage_multiplier</name>
       <display_name>Plug Loads: Television Usage Multiplier</display_name>
       <description>Multiplier on the television energy usage that can reflect, e.g., high/low usage occupants.</description>
       <type>Double</type>
+      <units></units>
       <required>true</required>
       <model_dependent>false</model_dependent>
       <default_value>1</default_value>
+      <min_value></min_value>
+      <max_value></max_value>
     </argument>
     <argument>
       <name>plug_loads_television_weekday_fractions</name>
       <display_name>Plug Loads: Television Weekday Schedule</display_name>
       <description>Specify the 24-hour weekday schedule.</description>
       <type>String</type>
+      <units></units>
       <required>true</required>
       <model_dependent>false</model_dependent>
       <default_value>auto</default_value>
+      <min_value></min_value>
+      <max_value></max_value>
     </argument>
     <argument>
       <name>plug_loads_television_weekend_fractions</name>
       <display_name>Plug Loads: Television Weekend Schedule</display_name>
       <description>Specify the 24-hour weekend schedule.</description>
       <type>String</type>
+      <units></units>
       <required>true</required>
       <model_dependent>false</model_dependent>
       <default_value>auto</default_value>
+      <min_value></min_value>
+      <max_value></max_value>
     </argument>
     <argument>
       <name>plug_loads_television_monthly_multipliers</name>
       <display_name>Plug Loads: Television Month Schedule</display_name>
       <description>Specify the 12-month schedule.</description>
       <type>String</type>
+      <units></units>
       <required>true</required>
       <model_dependent>false</model_dependent>
       <default_value>auto</default_value>
+      <min_value></min_value>
+      <max_value></max_value>
     </argument>
     <argument>
       <name>plug_loads_other_annual_kwh</name>
@@ -4835,6 +5768,8 @@
       <required>true</required>
       <model_dependent>false</model_dependent>
       <default_value>auto</default_value>
+      <min_value></min_value>
+      <max_value></max_value>
     </argument>
     <argument>
       <name>plug_loads_other_frac_sensible</name>
@@ -4845,6 +5780,8 @@
       <required>true</required>
       <model_dependent>false</model_dependent>
       <default_value>auto</default_value>
+      <min_value></min_value>
+      <max_value></max_value>
     </argument>
     <argument>
       <name>plug_loads_other_frac_latent</name>
@@ -4855,48 +5792,63 @@
       <required>true</required>
       <model_dependent>false</model_dependent>
       <default_value>auto</default_value>
+      <min_value></min_value>
+      <max_value></max_value>
     </argument>
     <argument>
       <name>plug_loads_other_usage_multiplier</name>
       <display_name>Plug Loads: Other Usage Multiplier</display_name>
       <description>Multiplier on the other energy usage that can reflect, e.g., high/low usage occupants.</description>
       <type>Double</type>
+      <units></units>
       <required>true</required>
       <model_dependent>false</model_dependent>
       <default_value>1</default_value>
+      <min_value></min_value>
+      <max_value></max_value>
     </argument>
     <argument>
       <name>plug_loads_other_weekday_fractions</name>
       <display_name>Plug Loads: Other Weekday Schedule</display_name>
       <description>Specify the 24-hour weekday schedule.</description>
       <type>String</type>
+      <units></units>
       <required>true</required>
       <model_dependent>false</model_dependent>
       <default_value>auto</default_value>
+      <min_value></min_value>
+      <max_value></max_value>
     </argument>
     <argument>
       <name>plug_loads_other_weekend_fractions</name>
       <display_name>Plug Loads: Other Weekend Schedule</display_name>
       <description>Specify the 24-hour weekend schedule.</description>
       <type>String</type>
+      <units></units>
       <required>true</required>
       <model_dependent>false</model_dependent>
       <default_value>auto</default_value>
+      <min_value></min_value>
+      <max_value></max_value>
     </argument>
     <argument>
       <name>plug_loads_other_monthly_multipliers</name>
       <display_name>Plug Loads: Other Month Schedule</display_name>
       <description>Specify the 12-month schedule.</description>
       <type>String</type>
+      <units></units>
       <required>true</required>
       <model_dependent>false</model_dependent>
       <default_value>auto</default_value>
+      <min_value></min_value>
+      <max_value></max_value>
     </argument>
     <argument>
       <name>plug_loads_well_pump_present</name>
       <display_name>Plug Loads: Well Pump Present</display_name>
       <description>Whether there is a well pump.</description>
       <type>Boolean</type>
+      <units></units>
       <required>true</required>
       <model_dependent>false</model_dependent>
       <default_value>false</default_value>
@@ -4910,6 +5862,8 @@
           <display_name>false</display_name>
         </choice>
       </choices>
+      <min_value></min_value>
+      <max_value></max_value>
     </argument>
     <argument>
       <name>plug_loads_well_pump_annual_kwh</name>
@@ -4920,48 +5874,63 @@
       <required>true</required>
       <model_dependent>false</model_dependent>
       <default_value>auto</default_value>
+      <min_value></min_value>
+      <max_value></max_value>
     </argument>
     <argument>
       <name>plug_loads_well_pump_usage_multiplier</name>
       <display_name>Plug Loads: Well Pump Usage Multiplier</display_name>
       <description>Multiplier on the well_pump energy usage that can reflect, e.g., high/low usage occupants.</description>
       <type>Double</type>
+      <units></units>
       <required>true</required>
       <model_dependent>false</model_dependent>
       <default_value>1</default_value>
+      <min_value></min_value>
+      <max_value></max_value>
     </argument>
     <argument>
       <name>plug_loads_well_pump_weekday_fractions</name>
       <display_name>Plug Loads: Well Pump Weekday Schedule</display_name>
       <description>Specify the 24-hour weekday schedule.</description>
       <type>String</type>
+      <units></units>
       <required>true</required>
       <model_dependent>false</model_dependent>
       <default_value>auto</default_value>
+      <min_value></min_value>
+      <max_value></max_value>
     </argument>
     <argument>
       <name>plug_loads_well_pump_weekend_fractions</name>
       <display_name>Plug Loads: Well Pump Weekend Schedule</display_name>
       <description>Specify the 24-hour weekend schedule.</description>
       <type>String</type>
+      <units></units>
       <required>true</required>
       <model_dependent>false</model_dependent>
       <default_value>auto</default_value>
+      <min_value></min_value>
+      <max_value></max_value>
     </argument>
     <argument>
       <name>plug_loads_well_pump_monthly_multipliers</name>
       <display_name>Plug Loads: Well Pump Month Schedule</display_name>
       <description>Specify the 12-month schedule.</description>
       <type>String</type>
+      <units></units>
       <required>true</required>
       <model_dependent>false</model_dependent>
       <default_value>auto</default_value>
+      <min_value></min_value>
+      <max_value></max_value>
     </argument>
     <argument>
       <name>plug_loads_vehicle_present</name>
       <display_name>Plug Loads: Vehicle Present</display_name>
       <description>Whether there is a vehicle.</description>
       <type>Boolean</type>
+      <units></units>
       <required>true</required>
       <model_dependent>false</model_dependent>
       <default_value>false</default_value>
@@ -4975,6 +5944,8 @@
           <display_name>false</display_name>
         </choice>
       </choices>
+      <min_value></min_value>
+      <max_value></max_value>
     </argument>
     <argument>
       <name>plug_loads_vehicle_annual_kwh</name>
@@ -4985,48 +5956,63 @@
       <required>true</required>
       <model_dependent>false</model_dependent>
       <default_value>auto</default_value>
+      <min_value></min_value>
+      <max_value></max_value>
     </argument>
     <argument>
       <name>plug_loads_vehicle_usage_multiplier</name>
       <display_name>Plug Loads: Vehicle Usage Multiplier</display_name>
       <description>Multiplier on the well_pump energy usage that can reflect, e.g., high/low usage occupants.</description>
       <type>Double</type>
+      <units></units>
       <required>true</required>
       <model_dependent>false</model_dependent>
       <default_value>1</default_value>
+      <min_value></min_value>
+      <max_value></max_value>
     </argument>
     <argument>
       <name>plug_loads_vehicle_weekday_fractions</name>
       <display_name>Plug Loads: Vehicle Weekday Schedule</display_name>
       <description>Specify the 24-hour weekday schedule.</description>
       <type>String</type>
+      <units></units>
       <required>true</required>
       <model_dependent>false</model_dependent>
       <default_value>auto</default_value>
+      <min_value></min_value>
+      <max_value></max_value>
     </argument>
     <argument>
       <name>plug_loads_vehicle_weekend_fractions</name>
       <display_name>Plug Loads: Vehicle Weekend Schedule</display_name>
       <description>Specify the 24-hour weekend schedule.</description>
       <type>String</type>
+      <units></units>
       <required>true</required>
       <model_dependent>false</model_dependent>
       <default_value>auto</default_value>
+      <min_value></min_value>
+      <max_value></max_value>
     </argument>
     <argument>
       <name>plug_loads_vehicle_monthly_multipliers</name>
       <display_name>Plug Loads: Vehicle Month Schedule</display_name>
       <description>Specify the 12-month schedule.</description>
       <type>String</type>
+      <units></units>
       <required>true</required>
       <model_dependent>false</model_dependent>
       <default_value>auto</default_value>
+      <min_value></min_value>
+      <max_value></max_value>
     </argument>
     <argument>
       <name>fuel_loads_grill_present</name>
       <display_name>Fuel Loads: Grill Present</display_name>
       <description>Whether there is a fuel loads grill.</description>
       <type>Boolean</type>
+      <units></units>
       <required>true</required>
       <model_dependent>false</model_dependent>
       <default_value>false</default_value>
@@ -5040,12 +6026,15 @@
           <display_name>false</display_name>
         </choice>
       </choices>
+      <min_value></min_value>
+      <max_value></max_value>
     </argument>
     <argument>
       <name>fuel_loads_grill_fuel_type</name>
       <display_name>Fuel Loads: Grill Fuel Type</display_name>
       <description>The fuel type of the fuel loads grill.</description>
       <type>Choice</type>
+      <units></units>
       <required>true</required>
       <model_dependent>false</model_dependent>
       <default_value>natural gas</default_value>
@@ -5071,6 +6060,8 @@
           <display_name>wood pellets</display_name>
         </choice>
       </choices>
+      <min_value></min_value>
+      <max_value></max_value>
     </argument>
     <argument>
       <name>fuel_loads_grill_annual_therm</name>
@@ -5081,48 +6072,63 @@
       <required>true</required>
       <model_dependent>false</model_dependent>
       <default_value>auto</default_value>
+      <min_value></min_value>
+      <max_value></max_value>
     </argument>
     <argument>
       <name>fuel_loads_grill_usage_multiplier</name>
       <display_name>Fuel Loads: Grill Usage Multiplier</display_name>
       <description>Multiplier on the fuel loads grill energy usage that can reflect, e.g., high/low usage occupants.</description>
       <type>Double</type>
+      <units></units>
       <required>true</required>
       <model_dependent>false</model_dependent>
       <default_value>1</default_value>
+      <min_value></min_value>
+      <max_value></max_value>
     </argument>
     <argument>
       <name>fuel_loads_grill_weekday_fractions</name>
       <display_name>Fuel Loads: Grill Weekday Schedule</display_name>
       <description>Specify the 24-hour weekday schedule.</description>
       <type>String</type>
+      <units></units>
       <required>true</required>
       <model_dependent>false</model_dependent>
       <default_value>auto</default_value>
+      <min_value></min_value>
+      <max_value></max_value>
     </argument>
     <argument>
       <name>fuel_loads_grill_weekend_fractions</name>
       <display_name>Fuel Loads: Grill Weekend Schedule</display_name>
       <description>Specify the 24-hour weekend schedule.</description>
       <type>String</type>
+      <units></units>
       <required>true</required>
       <model_dependent>false</model_dependent>
       <default_value>auto</default_value>
+      <min_value></min_value>
+      <max_value></max_value>
     </argument>
     <argument>
       <name>fuel_loads_grill_monthly_multipliers</name>
       <display_name>Fuel Loads: Grill Month Schedule</display_name>
       <description>Specify the 12-month schedule.</description>
       <type>String</type>
+      <units></units>
       <required>true</required>
       <model_dependent>false</model_dependent>
       <default_value>auto</default_value>
+      <min_value></min_value>
+      <max_value></max_value>
     </argument>
     <argument>
       <name>fuel_loads_lighting_present</name>
       <display_name>Fuel Loads: Lighting Present</display_name>
       <description>Whether there is fuel loads lighting.</description>
       <type>Boolean</type>
+      <units></units>
       <required>true</required>
       <model_dependent>false</model_dependent>
       <default_value>false</default_value>
@@ -5136,12 +6142,15 @@
           <display_name>false</display_name>
         </choice>
       </choices>
+      <min_value></min_value>
+      <max_value></max_value>
     </argument>
     <argument>
       <name>fuel_loads_lighting_fuel_type</name>
       <display_name>Fuel Loads: Lighting Fuel Type</display_name>
       <description>The fuel type of the fuel loads lighting.</description>
       <type>Choice</type>
+      <units></units>
       <required>true</required>
       <model_dependent>false</model_dependent>
       <default_value>natural gas</default_value>
@@ -5167,6 +6176,8 @@
           <display_name>wood pellets</display_name>
         </choice>
       </choices>
+      <min_value></min_value>
+      <max_value></max_value>
     </argument>
     <argument>
       <name>fuel_loads_lighting_annual_therm</name>
@@ -5177,48 +6188,63 @@
       <required>true</required>
       <model_dependent>false</model_dependent>
       <default_value>auto</default_value>
+      <min_value></min_value>
+      <max_value></max_value>
     </argument>
     <argument>
       <name>fuel_loads_lighting_usage_multiplier</name>
       <display_name>Fuel Loads: Lighting Usage Multiplier</display_name>
       <description>Multiplier on the fuel loads lighting energy usage that can reflect, e.g., high/low usage occupants.</description>
       <type>Double</type>
+      <units></units>
       <required>true</required>
       <model_dependent>false</model_dependent>
       <default_value>1</default_value>
+      <min_value></min_value>
+      <max_value></max_value>
     </argument>
     <argument>
       <name>fuel_loads_lighting_weekday_fractions</name>
       <display_name>Fuel Loads: Lighting Weekday Schedule</display_name>
       <description>Specify the 24-hour weekday schedule.</description>
       <type>String</type>
+      <units></units>
       <required>true</required>
       <model_dependent>false</model_dependent>
       <default_value>auto</default_value>
+      <min_value></min_value>
+      <max_value></max_value>
     </argument>
     <argument>
       <name>fuel_loads_lighting_weekend_fractions</name>
       <display_name>Fuel Loads: Lighting Weekend Schedule</display_name>
       <description>Specify the 24-hour weekend schedule.</description>
       <type>String</type>
+      <units></units>
       <required>true</required>
       <model_dependent>false</model_dependent>
       <default_value>auto</default_value>
+      <min_value></min_value>
+      <max_value></max_value>
     </argument>
     <argument>
       <name>fuel_loads_lighting_monthly_multipliers</name>
       <display_name>Fuel Loads: Lighting Month Schedule</display_name>
       <description>Specify the 12-month schedule.</description>
       <type>String</type>
+      <units></units>
       <required>true</required>
       <model_dependent>false</model_dependent>
       <default_value>auto</default_value>
+      <min_value></min_value>
+      <max_value></max_value>
     </argument>
     <argument>
       <name>fuel_loads_fireplace_present</name>
       <display_name>Fuel Loads: Fireplace Present</display_name>
       <description>Whether there is fuel loads fireplace.</description>
       <type>Boolean</type>
+      <units></units>
       <required>true</required>
       <model_dependent>false</model_dependent>
       <default_value>false</default_value>
@@ -5232,12 +6258,15 @@
           <display_name>false</display_name>
         </choice>
       </choices>
+      <min_value></min_value>
+      <max_value></max_value>
     </argument>
     <argument>
       <name>fuel_loads_fireplace_fuel_type</name>
       <display_name>Fuel Loads: Fireplace Fuel Type</display_name>
       <description>The fuel type of the fuel loads fireplace.</description>
       <type>Choice</type>
+      <units></units>
       <required>true</required>
       <model_dependent>false</model_dependent>
       <default_value>natural gas</default_value>
@@ -5263,6 +6292,8 @@
           <display_name>wood pellets</display_name>
         </choice>
       </choices>
+      <min_value></min_value>
+      <max_value></max_value>
     </argument>
     <argument>
       <name>fuel_loads_fireplace_annual_therm</name>
@@ -5273,48 +6304,63 @@
       <required>true</required>
       <model_dependent>false</model_dependent>
       <default_value>auto</default_value>
+      <min_value></min_value>
+      <max_value></max_value>
     </argument>
     <argument>
       <name>fuel_loads_fireplace_usage_multiplier</name>
       <display_name>Fuel Loads: Fireplace Usage Multiplier</display_name>
       <description>Multiplier on the fuel loads fireplace energy usage that can reflect, e.g., high/low usage occupants.</description>
       <type>Double</type>
+      <units></units>
       <required>true</required>
       <model_dependent>false</model_dependent>
       <default_value>1</default_value>
+      <min_value></min_value>
+      <max_value></max_value>
     </argument>
     <argument>
       <name>fuel_loads_fireplace_weekday_fractions</name>
       <display_name>Fuel Loads: Fireplace Weekday Schedule</display_name>
       <description>Specify the 24-hour weekday schedule.</description>
       <type>String</type>
+      <units></units>
       <required>true</required>
       <model_dependent>false</model_dependent>
       <default_value>auto</default_value>
+      <min_value></min_value>
+      <max_value></max_value>
     </argument>
     <argument>
       <name>fuel_loads_fireplace_weekend_fractions</name>
       <display_name>Fuel Loads: Fireplace Weekend Schedule</display_name>
       <description>Specify the 24-hour weekend schedule.</description>
       <type>String</type>
+      <units></units>
       <required>true</required>
       <model_dependent>false</model_dependent>
       <default_value>auto</default_value>
+      <min_value></min_value>
+      <max_value></max_value>
     </argument>
     <argument>
       <name>fuel_loads_fireplace_monthly_multipliers</name>
       <display_name>Fuel Loads: Fireplace Month Schedule</display_name>
       <description>Specify the 12-month schedule.</description>
       <type>String</type>
+      <units></units>
       <required>true</required>
       <model_dependent>false</model_dependent>
       <default_value>auto</default_value>
+      <min_value></min_value>
+      <max_value></max_value>
     </argument>
     <argument>
       <name>pool_present</name>
       <display_name>Pool: Present</display_name>
       <description>Whether there is a pool.</description>
       <type>Boolean</type>
+      <units></units>
       <required>true</required>
       <model_dependent>false</model_dependent>
       <default_value>false</default_value>
@@ -5328,6 +6374,8 @@
           <display_name>false</display_name>
         </choice>
       </choices>
+      <min_value></min_value>
+      <max_value></max_value>
     </argument>
     <argument>
       <name>pool_pump_annual_kwh</name>
@@ -5338,48 +6386,63 @@
       <required>true</required>
       <model_dependent>false</model_dependent>
       <default_value>auto</default_value>
+      <min_value></min_value>
+      <max_value></max_value>
     </argument>
     <argument>
       <name>pool_pump_usage_multiplier</name>
       <display_name>Pool: Pump Usage Multiplier</display_name>
       <description>Multiplier on the pool pump energy usage that can reflect, e.g., high/low usage occupants.</description>
       <type>Double</type>
+      <units></units>
       <required>true</required>
       <model_dependent>false</model_dependent>
       <default_value>1</default_value>
+      <min_value></min_value>
+      <max_value></max_value>
     </argument>
     <argument>
       <name>pool_pump_weekday_fractions</name>
       <display_name>Pool: Pump Weekday Schedule</display_name>
       <description>Specify the 24-hour weekday schedule.</description>
       <type>String</type>
+      <units></units>
       <required>true</required>
       <model_dependent>false</model_dependent>
       <default_value>auto</default_value>
+      <min_value></min_value>
+      <max_value></max_value>
     </argument>
     <argument>
       <name>pool_pump_weekend_fractions</name>
       <display_name>Pool: Pump Weekend Schedule</display_name>
       <description>Specify the 24-hour weekend schedule.</description>
       <type>String</type>
+      <units></units>
       <required>true</required>
       <model_dependent>false</model_dependent>
       <default_value>auto</default_value>
+      <min_value></min_value>
+      <max_value></max_value>
     </argument>
     <argument>
       <name>pool_pump_monthly_multipliers</name>
       <display_name>Pool: Pump Month Schedule</display_name>
       <description>Specify the 12-month schedule.</description>
       <type>String</type>
+      <units></units>
       <required>true</required>
       <model_dependent>false</model_dependent>
       <default_value>auto</default_value>
+      <min_value></min_value>
+      <max_value></max_value>
     </argument>
     <argument>
       <name>pool_heater_type</name>
       <display_name>Pool: Heater Type</display_name>
       <description>The type of pool heater. Use 'none' if there is no pool heater.</description>
       <type>Choice</type>
+      <units></units>
       <required>true</required>
       <model_dependent>false</model_dependent>
       <default_value>none</default_value>
@@ -5401,6 +6464,8 @@
           <display_name>heat pump</display_name>
         </choice>
       </choices>
+      <min_value></min_value>
+      <max_value></max_value>
     </argument>
     <argument>
       <name>pool_heater_annual_kwh</name>
@@ -5411,6 +6476,8 @@
       <required>true</required>
       <model_dependent>false</model_dependent>
       <default_value>auto</default_value>
+      <min_value></min_value>
+      <max_value></max_value>
     </argument>
     <argument>
       <name>pool_heater_annual_therm</name>
@@ -5421,48 +6488,63 @@
       <required>true</required>
       <model_dependent>false</model_dependent>
       <default_value>auto</default_value>
+      <min_value></min_value>
+      <max_value></max_value>
     </argument>
     <argument>
       <name>pool_heater_usage_multiplier</name>
       <display_name>Pool: Heater Usage Multiplier</display_name>
       <description>Multiplier on the pool heater energy usage that can reflect, e.g., high/low usage occupants.</description>
       <type>Double</type>
+      <units></units>
       <required>true</required>
       <model_dependent>false</model_dependent>
       <default_value>1</default_value>
+      <min_value></min_value>
+      <max_value></max_value>
     </argument>
     <argument>
       <name>pool_heater_weekday_fractions</name>
       <display_name>Pool: Heater Weekday Schedule</display_name>
       <description>Specify the 24-hour weekday schedule.</description>
       <type>String</type>
+      <units></units>
       <required>true</required>
       <model_dependent>false</model_dependent>
       <default_value>auto</default_value>
+      <min_value></min_value>
+      <max_value></max_value>
     </argument>
     <argument>
       <name>pool_heater_weekend_fractions</name>
       <display_name>Pool: Heater Weekend Schedule</display_name>
       <description>Specify the 24-hour weekend schedule.</description>
       <type>String</type>
+      <units></units>
       <required>true</required>
       <model_dependent>false</model_dependent>
       <default_value>auto</default_value>
+      <min_value></min_value>
+      <max_value></max_value>
     </argument>
     <argument>
       <name>pool_heater_monthly_multipliers</name>
       <display_name>Pool: Heater Month Schedule</display_name>
       <description>Specify the 12-month schedule.</description>
       <type>String</type>
+      <units></units>
       <required>true</required>
       <model_dependent>false</model_dependent>
       <default_value>auto</default_value>
+      <min_value></min_value>
+      <max_value></max_value>
     </argument>
     <argument>
       <name>hot_tub_present</name>
       <display_name>Hot Tub: Present</display_name>
       <description>Whether there is a hot tub.</description>
       <type>Boolean</type>
+      <units></units>
       <required>true</required>
       <model_dependent>false</model_dependent>
       <default_value>false</default_value>
@@ -5476,6 +6558,8 @@
           <display_name>false</display_name>
         </choice>
       </choices>
+      <min_value></min_value>
+      <max_value></max_value>
     </argument>
     <argument>
       <name>hot_tub_pump_annual_kwh</name>
@@ -5486,48 +6570,63 @@
       <required>true</required>
       <model_dependent>false</model_dependent>
       <default_value>auto</default_value>
+      <min_value></min_value>
+      <max_value></max_value>
     </argument>
     <argument>
       <name>hot_tub_pump_usage_multiplier</name>
       <display_name>Hot Tub: Pump Usage Multiplier</display_name>
       <description>Multiplier on the hot tub pump energy usage that can reflect, e.g., high/low usage occupants.</description>
       <type>Double</type>
+      <units></units>
       <required>true</required>
       <model_dependent>false</model_dependent>
       <default_value>1</default_value>
+      <min_value></min_value>
+      <max_value></max_value>
     </argument>
     <argument>
       <name>hot_tub_pump_weekday_fractions</name>
       <display_name>Hot Tub: Pump Weekday Schedule</display_name>
       <description>Specify the 24-hour weekday schedule.</description>
       <type>String</type>
+      <units></units>
       <required>true</required>
       <model_dependent>false</model_dependent>
       <default_value>auto</default_value>
+      <min_value></min_value>
+      <max_value></max_value>
     </argument>
     <argument>
       <name>hot_tub_pump_weekend_fractions</name>
       <display_name>Hot Tub: Pump Weekend Schedule</display_name>
       <description>Specify the 24-hour weekend schedule.</description>
       <type>String</type>
+      <units></units>
       <required>true</required>
       <model_dependent>false</model_dependent>
       <default_value>auto</default_value>
+      <min_value></min_value>
+      <max_value></max_value>
     </argument>
     <argument>
       <name>hot_tub_pump_monthly_multipliers</name>
       <display_name>Hot Tub: Pump Month Schedule</display_name>
       <description>Specify the 12-month schedule.</description>
       <type>String</type>
+      <units></units>
       <required>true</required>
       <model_dependent>false</model_dependent>
       <default_value>auto</default_value>
+      <min_value></min_value>
+      <max_value></max_value>
     </argument>
     <argument>
       <name>hot_tub_heater_type</name>
       <display_name>Hot Tub: Heater Type</display_name>
       <description>The type of hot tub heater. Use 'none' if there is no hot tub heater.</description>
       <type>Choice</type>
+      <units></units>
       <required>true</required>
       <model_dependent>false</model_dependent>
       <default_value>none</default_value>
@@ -5549,6 +6648,8 @@
           <display_name>heat pump</display_name>
         </choice>
       </choices>
+      <min_value></min_value>
+      <max_value></max_value>
     </argument>
     <argument>
       <name>hot_tub_heater_annual_kwh</name>
@@ -5559,6 +6660,8 @@
       <required>true</required>
       <model_dependent>false</model_dependent>
       <default_value>auto</default_value>
+      <min_value></min_value>
+      <max_value></max_value>
     </argument>
     <argument>
       <name>hot_tub_heater_annual_therm</name>
@@ -5569,42 +6672,56 @@
       <required>true</required>
       <model_dependent>false</model_dependent>
       <default_value>auto</default_value>
+      <min_value></min_value>
+      <max_value></max_value>
     </argument>
     <argument>
       <name>hot_tub_heater_usage_multiplier</name>
       <display_name>Hot Tub: Heater Usage Multiplier</display_name>
       <description>Multiplier on the hot tub heater energy usage that can reflect, e.g., high/low usage occupants.</description>
       <type>Double</type>
+      <units></units>
       <required>true</required>
       <model_dependent>false</model_dependent>
       <default_value>1</default_value>
+      <min_value></min_value>
+      <max_value></max_value>
     </argument>
     <argument>
       <name>hot_tub_heater_weekday_fractions</name>
       <display_name>Hot Tub: Heater Weekday Schedule</display_name>
       <description>Specify the 24-hour weekday schedule.</description>
       <type>String</type>
+      <units></units>
       <required>true</required>
       <model_dependent>false</model_dependent>
       <default_value>auto</default_value>
+      <min_value></min_value>
+      <max_value></max_value>
     </argument>
     <argument>
       <name>hot_tub_heater_weekend_fractions</name>
       <display_name>Hot Tub: Heater Weekend Schedule</display_name>
       <description>Specify the 24-hour weekend schedule.</description>
       <type>String</type>
+      <units></units>
       <required>true</required>
       <model_dependent>false</model_dependent>
       <default_value>auto</default_value>
+      <min_value></min_value>
+      <max_value></max_value>
     </argument>
     <argument>
       <name>hot_tub_heater_monthly_multipliers</name>
       <display_name>Hot Tub: Heater Month Schedule</display_name>
       <description>Specify the 12-month schedule.</description>
       <type>String</type>
+      <units></units>
       <required>true</required>
       <model_dependent>false</model_dependent>
       <default_value>auto</default_value>
+      <min_value></min_value>
+      <max_value></max_value>
     </argument>
   </arguments>
   <outputs />
@@ -6651,5 +7768,18 @@
       <usage_type>test</usage_type>
       <checksum>DFC89C0B</checksum>
     </file>
+    <file>
+      <filename>test_measure.xml</filename>
+      <filetype>xml</filetype>
+      <usage_type>test</usage_type>
+      <checksum>07B326F5</checksum>
+    </file>
+    <file>
+      <filename>test_rakefile.xml</filename>
+      <filetype>xml</filetype>
+      <usage_type>test</usage_type>
+      <checksum>4997F82E</checksum>
+    </file>
   </files>
 </measure>
+<error>uninitialized constant HPXML::LocationOther</error>
