@@ -3770,13 +3770,9 @@ class HPXMLFile
 
     hpxml.building_occupancy.schedules_column_name = 'occupants'
 
-    hpxml.water_fixtures.each do |water_fixture|
-      if water_fixture.water_fixture_type == HPXML::WaterFixtureTypeShowerhead
-        water_fixture.schedules_column_name = 'showers'
-      elsif water_fixture.water_fixture_type == HPXML::WaterFixtureTypeFaucet
-        water_fixture.schedules_column_name = 'sinks'
-      end
-    end
+    hpxml.water_heating.showers_schedules_column_name = 'showers'
+    hpxml.water_heating.sinks_schedules_column_name = 'sinks'
+    hpxml.water_heating.baths_schedules_column_name = 'baths'
 
     hpxml.clothes_washers.each do |clothes_washer|
       clothes_washer.water_schedules_column_name = 'clothes_washer'
@@ -3798,7 +3794,9 @@ class HPXMLFile
 
     hpxml.lighting.interior_schedules_column_name = 'lighting_interior'
     hpxml.lighting.exterior_schedules_column_name = 'lighting_exterior'
-    hpxml.lighting.garage_schedules_column_name = 'lighting_garage'
+    if args[:geometry_unit_type] == HPXML::ResidentialTypeSFD && args[:geometry_garage_width] > 0
+      hpxml.lighting.garage_schedules_column_name = 'lighting_garage'
+    end
     if hpxml.lighting.holiday_exists
       hpxml.lighting.holiday_schedules_column_name = 'lighting_exterior_holiday'
     end

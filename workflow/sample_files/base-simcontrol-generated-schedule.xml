@@ -406,18 +406,17 @@
             <SystemIdentifier id='WaterFixture'/>
             <WaterFixtureType>shower head</WaterFixtureType>
             <LowFlow>true</LowFlow>
-            <extension>
-              <SchedulesColumnName>showers</SchedulesColumnName>
-            </extension>
           </WaterFixture>
           <WaterFixture>
             <SystemIdentifier id='WaterFixture2'/>
             <WaterFixtureType>faucet</WaterFixtureType>
             <LowFlow>false</LowFlow>
-            <extension>
-              <SchedulesColumnName>sinks</SchedulesColumnName>
-            </extension>
           </WaterFixture>
+          <extension>
+            <ShowersSchedulesColumnName>showers</ShowersSchedulesColumnName>
+            <SinksSchedulesColumnName>sinks</SinksSchedulesColumnName>
+            <BathsSchedulesColumnName>baths</BathsSchedulesColumnName>
+          </extension>
         </WaterHeating>
       </Systems>
       <Appliances>
@@ -555,7 +554,6 @@
         </LightingGroup>
         <extension>
           <InteriorSchedulesColumnName>lighting_interior</InteriorSchedulesColumnName>
-          <GarageSchedulesColumnName>lighting_garage</GarageSchedulesColumnName>
           <ExteriorSchedulesColumnName>lighting_exterior</ExteriorSchedulesColumnName>
         </extension>
       </Lighting>

@@ -5676,8 +5676,9 @@ def set_hpxml_water_fixtures(hpxml_file, hpxml)
   elsif ['base-misc-usage-multiplier.xml'].include? hpxml_file
     hpxml.water_heating.water_fixtures_usage_multiplier = 0.9
   elsif ['base-simcontrol-generated-schedule.xml'].include? hpxml_file
-    hpxml.water_fixtures[0].schedules_column_name = 'showers'
-    hpxml.water_fixtures[1].schedules_column_name = 'sinks'
+    hpxml.water_heating.showers_schedules_column_name = 'showers'
+    hpxml.water_heating.sinks_schedules_column_name = 'sinks'
+    hpxml.water_heating.baths_schedules_column_name = 'baths'
   end
 end
 
@@ -6231,7 +6232,6 @@ def set_hpxml_lighting_schedule(hpxml_file, hpxml)
   elsif ['base-simcontrol-generated-schedule.xml'].include? hpxml_file
     hpxml.lighting.interior_schedules_column_name = 'lighting_interior'
     hpxml.lighting.exterior_schedules_column_name = 'lighting_exterior'
-    hpxml.lighting.garage_schedules_column_name = 'lighting_garage'
     hpxml.lighting.holiday_schedules_column_name = 'lighting_exterior_holiday'
   end
 end

@@ -3437,7 +3437,7 @@ class HPXML < Object
   end
 
   class WaterFixture < BaseElement
-    ATTRS = [:id, :water_fixture_type, :low_flow, :schedules_column_name]
+    ATTRS = [:id, :water_fixture_type, :low_flow]
     attr_accessor(*ATTRS)
 
     def delete
@@ -3458,10 +3458,6 @@ class HPXML < Object
       XMLHelper.add_attribute(sys_id, 'id', @id)
       XMLHelper.add_element(water_fixture, 'WaterFixtureType', @water_fixture_type) unless @water_fixture_type.nil?
       XMLHelper.add_element(water_fixture, 'LowFlow', to_boolean(@low_flow)) unless @low_flow.nil?
-      if (not @schedules_column_name.nil?)
-        HPXML::add_extension(parent: water_fixture,
-                             extensions: { 'SchedulesColumnName' => @schedules_column_name })
-      end
     end
 
     def from_oga(water_fixture)
@@ -3470,12 +3466,12 @@ class HPXML < Object
       @id = HPXML::get_id(water_fixture)
       @water_fixture_type = XMLHelper.get_value(water_fixture, 'WaterFixtureType')
       @low_flow = to_bool_or_nil(XMLHelper.get_value(water_fixture, 'LowFlow'))
-      @schedules_column_name = XMLHelper.get_value(water_fixture, 'extension/SchedulesColumnName')
     end
   end
 
   class WaterHeating < BaseElement
-    ATTRS = [:water_fixtures_usage_multiplier]
+    ATTRS = [:water_fixtures_usage_multiplier, :showers_schedules_column_name,
+             :sinks_schedules_column_name, :baths_schedules_column_name]
     attr_accessor(*ATTRS)
 
     def check_for_errors
@@ -3488,7 +3484,10 @@ class HPXML < Object
 
       water_heating = XMLHelper.create_elements_as_needed(doc, ['HPXML', 'Building', 'BuildingDetails', 'Systems', 'WaterHeating'])
       HPXML::add_extension(parent: water_heating,
-                           extensions: { 'WaterFixturesUsageMultiplier' => to_float_or_nil(@water_fixtures_usage_multiplier) })
+                           extensions: { 'WaterFixturesUsageMultiplier' => to_float_or_nil(@water_fixtures_usage_multiplier),
+                                         'ShowersSchedulesColumnName' => @showers_schedules_column_name,
+                                         'SinksSchedulesColumnName' => @sinks_schedules_column_name,
+                                         'BathsSchedulesColumnName' => @baths_schedules_column_name })
     end
 
     def from_oga(hpxml)
@@ -3498,6 +3497,9 @@ class HPXML < Object
       return if water_heating.nil?
 
       @water_fixtures_usage_multiplier = to_float_or_nil(XMLHelper.get_value(water_heating, 'extension/WaterFixturesUsageMultiplier'))
+      @showers_schedules_column_name = XMLHelper.get_value(water_heating, 'extension/ShowersSchedulesColumnName')
+      @sinks_schedules_column_name = XMLHelper.get_value(water_heating, 'extension/SinksSchedulesColumnName')
+      @baths_schedules_column_name = XMLHelper.get_value(water_heating, 'extension/BathsSchedulesColumnName')
     end
   end
 
