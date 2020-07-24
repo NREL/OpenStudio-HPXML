@@ -85,10 +85,10 @@ def create_osws
     'base-enclosure-garage.osw' => 'base.osw',
     'base-enclosure-infil-cfm50.osw' => 'base.osw',
     'base-enclosure-infil-natural-ach.osw' => 'base.osw',
-    # 'base-enclosure-other-heated-space.osw' => 'base.osw',
-    # 'base-enclosure-other-housing-unit.osw' => 'base.osw',
-    # 'base-enclosure-other-multifamily-buffer-space.osw' => 'base.osw',
-    # 'base-enclosure-other-non-freezing-space.osw' => 'base.osw',
+    # 'base-enclosure-other-heated-space.osw' => 'base.osw', # TODO: uncomment when we can model multifamily with ambient foundation
+    # 'base-enclosure-other-housing-unit.osw' => 'base-foundation-ambient.osw', # TODO: uncomment when we can model multifamily with ambient foundation
+    # 'base-enclosure-other-multifamily-buffer-space.osw' => 'base.osw', # TODO: uncomment when we can model multifamily with ambient foundation
+    # 'base-enclosure-other-non-freezing-space.osw' => 'base.osw', # TODO: uncomment when we can model multifamily with ambient foundation
     'base-enclosure-overhangs.osw' => 'base.osw',
     # 'base-enclosure-rooftypes.osw' => 'base.osw',
     # 'base-enclosure-skylights.osw' => 'base.osw', # There are no front roof surfaces, but 15.0 ft^2 of skylights were specified.
@@ -709,7 +709,7 @@ def get_values(osw_file, step)
     step.setArgument('window_area_left', 0)
     step.setArgument('window_area_right', 0)
   elsif ['base-multifamily.osw'].include? osw_file
-    step.setArgument('geometry_unit_type', HPXML::ResidentialTypeMF)
+    step.setArgument('geometry_unit_type', HPXML::ResidentialTypeApartment)
     step.setArgument('geometry_cfa', 900.0)
     step.setArgument('geometry_num_units', 3)
     step.setArgument('geometry_corridor_position', 'None')
@@ -1082,13 +1082,48 @@ def get_values(osw_file, step)
     step.setArgument('air_leakage_units', HPXML::UnitsACHNatural)
     step.setArgument('air_leakage_value', 0.67)
   elsif ['base-enclosure-other-heated-space.osw'].include? osw_file
-
+    step.setArgument('geometry_unit_type', HPXML::ResidentialTypeApartment)
+    step.setArgument('geometry_other_exterior_adjacent', HPXML::LocationOtherHeatedSpace)
+    step.setArgument('ducts_supply_location', HPXML::LocationOtherHeatedSpace)
+    step.setArgument('ducts_return_location', HPXML::LocationOtherHeatedSpace)
+    step.setArgument('water_heater_location', HPXML::LocationOtherHeatedSpace)
+    step.setArgument('clothes_washer_location', HPXML::LocationOtherHeatedSpace)
+    step.setArgument('clothes_dryer_location', HPXML::LocationOtherHeatedSpace)
+    step.setArgument('dishwasher_location', HPXML::LocationOtherHeatedSpace)
+    step.setArgument('refrigerator_location', HPXML::LocationOtherHeatedSpace)
+    step.setArgument('cooking_range_oven_location', HPXML::LocationOtherHeatedSpace)
   elsif ['base-enclosure-other-housing-unit.osw'].include? osw_file
-
+    step.setArgument('geometry_unit_type', HPXML::ResidentialTypeApartment)
+    step.setArgument('ducts_supply_location', HPXML::LocationOtherHousingUnit)
+    step.setArgument('ducts_return_location', HPXML::LocationOtherHousingUnit)
+    step.setArgument('water_heater_location', HPXML::LocationOtherHousingUnit)
+    step.setArgument('clothes_washer_location', HPXML::LocationOtherHousingUnit)
+    step.setArgument('clothes_dryer_location', HPXML::LocationOtherHousingUnit)
+    step.setArgument('dishwasher_location', HPXML::LocationOtherHousingUnit)
+    step.setArgument('refrigerator_location', HPXML::LocationOtherHousingUnit)
+    step.setArgument('cooking_range_oven_location', HPXML::LocationOtherHousingUnit)
   elsif ['base-enclosure-other-multifamily-buffer-space.osw'].include? osw_file
-
+    step.setArgument('geometry_unit_type', HPXML::ResidentialTypeApartment)
+    step.setArgument('geometry_other_exterior_adjacent', HPXML::LocationOtherMultifamilyBufferSpace)
+    step.setArgument('ducts_supply_location', HPXML::LocationOtherMultifamilyBufferSpace)
+    step.setArgument('ducts_return_location', HPXML::LocationOtherMultifamilyBufferSpace)
+    step.setArgument('water_heater_location', HPXML::LocationOtherMultifamilyBufferSpace)
+    step.setArgument('clothes_washer_location', HPXML::LocationOtherMultifamilyBufferSpace)
+    step.setArgument('clothes_dryer_location', HPXML::LocationOtherMultifamilyBufferSpace)
+    step.setArgument('dishwasher_location', HPXML::LocationOtherMultifamilyBufferSpace)
+    step.setArgument('refrigerator_location', HPXML::LocationOtherMultifamilyBufferSpace)
+    step.setArgument('cooking_range_oven_location', HPXML::LocationOtherMultifamilyBufferSpace)
   elsif ['base-enclosure-other-non-freezing-space.osw'].include? osw_file
-
+    step.setArgument('geometry_unit_type', HPXML::ResidentialTypeApartment)
+    step.setArgument('geometry_other_exterior_adjacent', HPXML::LocationOtherNonFreezingSpace)
+    step.setArgument('ducts_supply_location', HPXML::LocationOtherNonFreezingSpace)
+    step.setArgument('ducts_return_location', HPXML::LocationOtherNonFreezingSpace)
+    step.setArgument('water_heater_location', HPXML::LocationOtherNonFreezingSpace)
+    step.setArgument('clothes_washer_location', HPXML::LocationOtherNonFreezingSpace)
+    step.setArgument('clothes_dryer_location', HPXML::LocationOtherNonFreezingSpace)
+    step.setArgument('dishwasher_location', HPXML::LocationOtherNonFreezingSpace)
+    step.setArgument('refrigerator_location', HPXML::LocationOtherNonFreezingSpace)
+    step.setArgument('cooking_range_oven_location', HPXML::LocationOtherNonFreezingSpace)
   elsif ['base-enclosure-overhangs.osw'].include? osw_file
     step.setArgument('overhangs_back_depth', 2.5)
     step.setArgument('overhangs_left_depth', 1.5)
@@ -1884,12 +1919,12 @@ def get_values(osw_file, step)
     step.setArgument('geometry_corridor_position', 'None')
     step.setArgument('geometry_foundation_type', HPXML::FoundationTypeAmbient)
   elsif ['invalid_files/multifamily-bottom-slab-non-zero-foundation-height.osw'].include? osw_file
-    step.setArgument('geometry_unit_type', HPXML::ResidentialTypeMF)
+    step.setArgument('geometry_unit_type', HPXML::ResidentialTypeApartment)
     step.setArgument('geometry_corridor_position', 'None')
     step.setArgument('geometry_foundation_type', HPXML::FoundationTypeSlab)
     step.setArgument('geometry_foundation_height_above_grade', 0.0)
   elsif ['invalid_files/multifamily-bottom-crawlspace-zero-foundation-height.osw'].include? osw_file
-    step.setArgument('geometry_unit_type', HPXML::ResidentialTypeMF)
+    step.setArgument('geometry_unit_type', HPXML::ResidentialTypeApartment)
     step.setArgument('geometry_corridor_position', 'None')
     step.setArgument('geometry_foundation_type', HPXML::FoundationTypeCrawlspaceUnvented)
     step.setArgument('geometry_foundation_height', 0.0)

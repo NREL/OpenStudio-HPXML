@@ -193,7 +193,6 @@ class HPXML < Object
   PVTrackingType2Axis = '2-axis'
   ResidentialTypeApartment = 'apartment unit'
   ResidentialTypeManufactured = 'manufactured home'
-  ResidentialTypeMF = 'multi-family - uncategorized'
   ResidentialTypeSFA = 'single-family attached'
   ResidentialTypeSFD = 'single-family detached'
   RoofTypeAsphaltShingles = 'asphalt or fiberglass shingles'
