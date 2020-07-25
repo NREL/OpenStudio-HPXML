@@ -9,7 +9,10 @@ class Constructions
                                 rigid_r:, osb_thick_in:, mat_ext_finish:,
                                 inside_drywall_thick_in:, outside_drywall_thick_in:,
                                 inside_film:, outside_film:)
-    # FIXME: Need to add descriptions of each argument
+    # install_grade handles RESNET insulation grading. This value is for considering defects occurred in the process of insulation installation. This value determines the relative area occupied by void insulation.
+    # cavity_depth_in is equivalent to stud_depth_in
+    # framing_factor is equivalent to stud_fraction (FIXME: Need to confirm)
+
     return if surfaces.empty?
 
     # Define materials
@@ -74,10 +77,13 @@ class Constructions
   end
 
   def self.apply_double_stud_wall(runner, model, surfaces, wall, constr_name,
-                                  cavity_r, install_grade, stud_depth_in, gap_depth_in,
-                                  framing_factor, framing_spacing, is_staggered,
-                                  drywall_thick_in, osb_thick_in, rigid_r,
-                                  mat_ext_finish, inside_film, outside_film)
+                                  cavity_r:, install_grade:, stud_depth_in:, gap_depth_in:,
+                                  framing_factor:, stud_spacing:, is_staggered:,
+                                  inside_drywall_thick_in:, osb_thick_in:, rigid_r:,
+                                  mat_ext_finish:, inside_film:, outside_film:)
+    # install_grade handles RESNET insulation grading. This value is for considering defects occurred in the process of insulation installation. This value determines the relative area occupied by void insulation.
+    # cavity_depth_in is calculated using stud_depth_in and gap_depth_in. Please see below.
+    # framing_factor includes stud_fraction and miscellaneous framing factor (i.e. framing doors, windows, and etc.)
 
     return if surfaces.empty?
 
@@ -102,7 +108,7 @@ class Constructions
     end
 
     # Set paths
-    stud_frac = 1.5 / framing_spacing
+    stud_frac = 1.5 / stud_spacing
     misc_framing_factor = framing_factor - stud_frac
     if misc_framing_factor < 0
       fail "Framing Factor (#{framing_factor}) is less than the framing solely provided by the studs (#{stud_frac})."
@@ -132,8 +138,8 @@ class Constructions
       constr.add_layer([mat_framing_middle, mat_ins_middle, mat_ins_middle, mat_gap_middle, mat_ins_middle], 'WallCavity')
     end
     constr.add_layer([mat_framing_inner_outer, mat_stud, mat_ins_inner_outer, mat_gap_inner_outer, mat_ins_inner_outer], 'WallStudandCavityInner')
-    if drywall_thick_in > 0
-      constr.add_layer(Material.GypsumWall(drywall_thick_in))
+    if inside_drywall_thick_in > 0
+      constr.add_layer(Material.GypsumWall(inside_drywall_thick_in))
     end
     constr.add_layer(inside_film)
 

@@ -310,12 +310,15 @@ HPXML Walls
 Any wall that has no contact with the ground and bounds a space type should be specified as an ``Enclosure/Walls/Wall``. 
 Interior walls (for example, walls solely within the conditioned space of the building) are not required.
 
-Walls can be defined by ``Area`` and the choice of input modes. Two input modes are available: (a) ``Insulation/AssemblyEffectiveRValue`` and (b) ``Insulation/Layer[InsulationType="cavity"]`` and ``Insulation/Layer[InsulationType="continuous"]``.
-If the input mode of ``Insulation/Layer[InsulationType="cavity"]`` and ``Insulation/Layer[InsulationType="continuous"]`` is selected, additional inputs are required as follows:
+Walls can be defined by ``Area`` and the choice of input modes. Two input modes are available: ``Insulation/AssemblyEffectiveRValue`` and ``Insulation/Layer[InsulationType="cavity"]``.
+If the input mode of ``Insulation/Layer[InsulationType="cavity"]`` is selected, additional inputs are required as follows:
 - Cavity insulation ``NominalRValue``
 - Cavity insulation ``Thickness`` in inches
 - Continuous insulation ``NominalRValue``
+- ``DoubleWoodStud/Staggered`` (only for ``DoubleWoodStud`` walls)
+- ``DoubleWoodStud/GapDepth`` (only for ``DoubleWoodStud`` walls)
 - Optional Cavity insulation ``InsulationMaterial``
+- Optional Continuous insulation ``Insulation/Layer[InsulationType="continuous"]``
 - Optional Continuous insulation ``InsulationMaterial``
 - Optional ``InsulationGrade``
 - Optional ``Studs/Size``

@@ -166,6 +166,9 @@ class HPXMLDefaults
       if wall.insulation_cavity_material.nil?
         wall.insulation_cavity_material = HPXML::InsulationMaterialBatt
       end
+      if wall.insulation_continuous_r_value.nil?
+        wall.insulation_continuous_r_value = 0.0
+      end
       if wall.insulation_continuous_material.nil?
         wall.insulation_continuous_material = HPXML::InsulationMaterialRigid
       end
@@ -186,6 +189,9 @@ class HPXMLDefaults
       end
       if rim_joist.insulation_cavity_material.nil?
         rim_joist.insulation_cavity_material = HPXML::InsulationMaterialBatt
+      end
+      if rim_joist.insulation_continuous_r_value.nil?
+        rim_joist.insulation_continuous_r_value = 0.0
       end
       if rim_joist.insulation_continuous_material.nil?
         rim_joist.insulation_continuous_material = HPXML::InsulationMaterialRigid

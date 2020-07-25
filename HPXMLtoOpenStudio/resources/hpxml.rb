@@ -1629,7 +1629,7 @@ class HPXML < Object
              :area, :orientation, :azimuth, :siding, :color, :solar_absorptance, :emittance, :insulation_id,
              :ufactor, :insulation_assembly_r_value, :insulation_cavity_r_value, :insulation_continuous_r_value,
              :insulation_cavity_thickness, :insulation_grade, :insulation_cavity_material, :insulation_continuous_material,
-             :stud_size, :stud_spacing, :stud_material, :framing_factor, :osb_thickness]
+             :stud_size, :stud_spacing, :stud_material, :framing_factor, :osb_thickness, :double_stud_is_staggered, :double_stud_gap_depth]
     attr_accessor(*ATTRS)
 
     def windows
@@ -1701,6 +1701,12 @@ class HPXML < Object
         wall_type_e = XMLHelper.add_element(wall, 'WallType')
         XMLHelper.add_element(wall_type_e, @wall_type)
       end
+      if (not @insulation_cavity_r_value.nil?) && @wall_type == HPXML::WallTypeDoubleWoodStud
+        double_stud_wall = XMLHelper.create_elements_as_needed(wall, ['WallType', 'DoubleWoodStud'])
+        XMLHelper.add_element(double_stud_wall, 'Staggered', @double_stud_is_staggered) unless @double_stud_is_staggered.nil?
+        extension = XMLHelper.add_element(double_stud_wall, 'extension')
+        XMLHelper.add_element(extension, 'GapDepth', @double_stud_gap_depth) unless @double_stud_gap_depth.nil?
+      end
       XMLHelper.add_element(wall, 'Area', to_float(@area)) unless @area.nil?
       XMLHelper.add_element(wall, 'Azimuth', to_integer(@azimuth)) unless @azimuth.nil?
       if not @insulation_cavity_r_value.nil?
@@ -1728,7 +1734,7 @@ class HPXML < Object
         XMLHelper.add_element(layer, 'InstallationType', 'cavity')
         XMLHelper.add_element(layer, 'InsulationMaterial', @insulation_cavity_material) unless @insulation_cavity_material.nil?
         XMLHelper.add_element(layer, 'NominalRValue', to_float(@insulation_cavity_r_value))
-        XMLHelper.add_element(layer, 'Thickness', to_float(@insulation_cavity_thickness))
+        XMLHelper.add_element(layer, 'Thickness', to_float(@insulation_cavity_thickness)) unless @insulation_cavity_thickness.nil?
       end
       if not @insulation_continuous_r_value.nil?
         layer = XMLHelper.add_element(insulation, 'Layer')
@@ -1737,7 +1743,7 @@ class HPXML < Object
         XMLHelper.add_element(layer, 'NominalRValue', to_float(@insulation_continuous_r_value))
       end
       if not @osb_thickness.nil?
-        osb = XMLHelper.create_elements_as_needed(doc, ['HPXML', 'Building', 'BuildingDetails', 'Enclosure', 'Walls', 'Wall', 'extension', 'OrientedStrandBoard'])
+        osb = XMLHelper.create_elements_as_needed(wall, ['extension', 'OrientedStrandBoard'])
         XMLHelper.add_element(osb, 'Thickness', to_float(@osb_thickness))
       end
     end
@@ -1772,6 +1778,8 @@ class HPXML < Object
         @framing_factor = to_float_or_nil(XMLHelper.get_value(wall, 'Studs/FramingFactor'))
         @stud_material = XMLHelper.get_value(wall, 'Studs/Material')
         @osb_thickness = to_float_or_nil(XMLHelper.get_value(wall, 'extension/OrientedStrandBoard/Thickness'))
+        @double_stud_is_staggered = to_bool_or_nil(XMLHelper.get_value(wall, 'WallType/DoubleWoodStud/Staggered'))
+        @double_stud_gap_depth = to_float_or_nil(XMLHelper.get_value(wall, 'WallType/DoubleWoodStud/extension/GapDepth'))
       end
     end
   end
@@ -1792,7 +1800,7 @@ class HPXML < Object
 
   class FoundationWall < BaseElement
     ATTRS = [:id, :exterior_adjacent_to, :interior_adjacent_to, :height, :area, :azimuth, :thickness,
-             :depth_below_grade, :insulation_id, :insulation_r_value, :insulation_interior_r_value,
+             :ufactor, :depth_below_grade, :insulation_id, :insulation_r_value, :insulation_interior_r_value,
              :insulation_interior_distance_to_top, :insulation_interior_distance_to_bottom,
              :insulation_exterior_r_value, :insulation_exterior_distance_to_top,
              :insulation_exterior_distance_to_bottom, :insulation_assembly_r_value,

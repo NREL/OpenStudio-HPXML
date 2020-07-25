@@ -200,26 +200,32 @@ class EnergyPlusValidator
         'SystemIdentifier' => one, # Required by HPXML schema
         'ExteriorAdjacentTo[text()="outside" or text()="attic - vented" or text()="attic - unvented" or text()="basement - conditioned" or text()="basement - unconditioned" or text()="crawlspace - vented" or text()="crawlspace - unvented" or text()="garage" or text()="other housing unit" or text()="other heated space" or text()="other multifamily buffer space" or text()="other non-freezing space"]' => one,
         'InteriorAdjacentTo[text()="living space" or text()="attic - vented" or text()="attic - unvented" or text()="basement - conditioned" or text()="basement - unconditioned" or text()="crawlspace - vented" or text()="crawlspace - unvented" or text()="garage"]' => one,
-        'WallType[WoodStud | DoubleWoodStud | ConcreteMasonryUnit | StructurallyInsulatedPanel | InsulatedConcreteForms | SteelFrame | SolidConcrete | StructuralBrick | StrawBale | Stone | LogWall | Adobe]' => one,
+        'WallType[WoodStud | DoubleWoodStud | ConcreteMasonryUnit | StructurallyInsulatedPanel | InsulatedConcreteForms | SteelFrame | SolidConcrete | StructuralBrick | StrawBale | Stone | LogWall | Adobe]' => one, # See [DoubleWoodStud]
         'Area' => one,
         'Azimuth' => zero_or_one,
         '[not(Siding)] | Siding[text()="wood siding" or text()="vinyl siding" or text()="stucco" or text()="fiber cement siding" or text()="brick veneer" or text()="aluminum siding"]' => one,
         'Color | SolarAbsorptance' => one_or_more,
         'Emittance' => one,
         'Insulation/SystemIdentifier' => one, # Required by HPXML schema
-        # Insulation: either specify continuous and cavity layers OR assembly R-value:
         'Insulation/AssemblyEffectiveRValue | Insulation/Layer[InstallationType="cavity"]' => one, # See [WallCavityInsLayer]
-        'Insulation/AssemblyEffectiveRValue | Insulation/Layer[InstallationType="continuous"]' => one, # See [WallRigidInsLayer]
+      },
+
+      ## [DoubleWoodStud]
+      '/HPXML/Building/BuildingDetails/Enclosure/Walls/Wall[WallType/DoubleWoodStud]/Insulation/Layer[InstallationType="cavity"]' => {
+        '../../WallType/DoubleWoodStud/Staggered' => one,
+        '../../WallType/DoubleWoodStud/extension/GapDepth' => one,
       },
 
       ## [WallCavityInsLayer]
       '/HPXML/Building/BuildingDetails/Enclosure/Walls/Wall/Insulation/Layer[InstallationType="cavity"]' => {
+        '[InstallationType="continuous"]' => zero_or_one, # See [WallRigidInsLayer]
         'InsulationMaterial[Batt | LooseFill | Rigid | SprayFoam | Other]' => zero_or_one, # Required by HPXML schema
         'NominalRValue' => one,
         'Thickness' => one, # cavity insulation thickness in inches
         '../InsulationGrade' => one, # cavity insulation installation grade; integer
         '../../Studs/Size[text()="2x2" or text()="2x3" or text()="2x4" or text()="2x6" or text()="2x8" or text()="2x10" or text()="2x12" or text()="2x14" or text()="2x16"]' => one,
-        '../../Studs/Spacing | ../../Studs/FramingFactor' => one,
+        '../../Studs/Spacing' => one,
+        '../../Studs/FramingFactor' => one,
         '../../Studs/Material[text()="wood" or text()="metal"]' => one,
         '../../extension/OrientedStrandBoard' => zero_or_one, # See [WallOrientedStrandBoard]
       },
@@ -246,18 +252,18 @@ class EnergyPlusValidator
         'Color | SolarAbsorptance' => one_or_more,
         'Emittance' => one,
         'Insulation/SystemIdentifier' => one, # Required by HPXML schema
-        # Insulation: either specify continuous and cavity layers OR assembly R-value:
         'Insulation/AssemblyEffectiveRValue | Insulation/Layer[InstallationType="cavity"]' => one, # See [RimJoistCavityInsLayer]
-        'Insulation/AssemblyEffectiveRValue | Insulation/Layer[InstallationType="continuous"]' => one, # See [RimJoistRigidInsLayer]
       },
 
       ## [RimJoistCavityInsLayer]
       '/HPXML/Building/BuildingDetails/Enclosure/RimJoists/RimJoist/Insulation/Layer[InstallationType="cavity"]' => {
+        '[InstallationType="continuous"]' => zero_or_one, # See [RimJoistRigidInsLayer]
         'InsulationMaterial[Batt | LooseFill | Rigid | SprayFoam | Other]' => zero_or_one, # Required by HPXML schema
         'NominalRValue' => one,
         '../InsulationGrade' => one, # cavity insulation installation grade; integer
         '../../FloorJoists/Size[text()="2x2" or text()="2x3" or text()="2x4" or text()="2x6" or text()="2x8" or text()="2x10" or text()="2x12" or text()="2x14" or text()="2x16"]' => one,
-        '../../FloorJoists/Spacing | ../../FloorJoists/FramingFactor' => one,
+        '../../FloorJoists/Spacing' => one,
+        '../../FloorJoists/FramingFactor' => one,
         '../../FloorJoists/Material[text()="wood" or text()="metal"]' => one,
         '../../extension/OrientedStrandBoard' => zero_or_one, # See [RimJoistOrientedStrandBoard]
       },
