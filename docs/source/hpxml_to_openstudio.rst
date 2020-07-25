@@ -276,7 +276,18 @@ HPXML Rim Joists
 Rim joists, the perimeter of floor joists typically found between stories of a building or on top of a foundation wall, are specified as an ``Enclosure/RimJoists/RimJoist``.
 The ``InteriorAdjacentTo`` element should typically be "living space" for rim joists between stories of a building and "basement - conditioned", "basement - unconditioned", "crawlspace - vented", or "crawlspace - unvented" for rim joists on top of a foundation wall.
 
-Rim joists are defined by their ``Area`` and ``Insulation/AssemblyEffectiveRValue``.
+Rim joists can be defined by ``Area`` and the choice of input modes. Two input modes are available: (a) ``Insulation/AssemblyEffectiveRValue`` and (b) ``Insulation/Layer[InsulationType="cavity"]`` and ``Insulation/Layer[InsulationType="continuous"]``.
+If the input mode of ``Insulation/Layer[InsulationType="cavity"]`` and ``Insulation/Layer[InsulationType="continuous"]`` is selected, additional inputs are required as follows:
+- Cavity insulation ``NominalRValue``
+- Continuous insulation ``NominalRValue``
+- Optional Cavity insulation ``InsulationMaterial``
+- Optional Continuous insulation ``InsulationMaterial``
+- Optional ``InsulationGrade``
+- Optional ``FloorJoists/Size``
+- Optional ``FloorJoists/Spacing``
+- Optional ``FloorJoists/FramingFactor``
+- Optional ``FloorJoists/Material``
+- Optional ``extension/OrientedStrandBoard``; if provided, ``Thickness`` of ``OrientedStrandBoard`` must be provided.
 
 Rim joists must have either ``Color`` and/or ``SolarAbsorptance`` defined.
 If ``Color`` or ``SolarAbsorptance`` is not provided, it is defaulted based on the mapping below:
@@ -311,7 +322,7 @@ If the input mode of ``Insulation/Layer[InsulationType="cavity"]`` and ``Insulat
 - Optional ``Studs/Spacing``
 - Optional ``Studs/FramingFactor``
 - Optional ``Studs/Material``
-- Optional ``WoodSheathing``; if provided, Thickness of WoodSheathing must be provided.
+- Optional ``extension/OrientedStrandBoard``; if provided, ``Thickness`` of ``OrientedStrandBoard`` must be provided.
 
 The choice of ``WallType`` has a secondary effect on heat transfer in that it informs the assumption of wall thermal mass.
 
