@@ -954,9 +954,17 @@ def set_hpxml_rim_joists(hpxml_file, hpxml)
     hpxml.walls[0].insulation_continuous_r_value = 0
     hpxml.walls[0].insulation_grade = 3
     hpxml.walls[0].stud_size = '2x6'
-    hpxml.walls[0].stud_framing_factor = 0.1988
+    hpxml.walls[0].framing_factor = 0.1988
     hpxml.walls[0].stud_material = 'wood'
-    hpxml.walls[0].wood_sheathing_thickness = 0.5
+    hpxml.walls[0].osb_thickness = 0.5
+    hpxml.rim_joists[0].insulation_assembly_r_value = nil
+    hpxml.rim_joists[0].insulation_cavity_r_value = 19
+    hpxml.rim_joists[0].insulation_continuous_r_value = 0
+    hpxml.rim_joists[0].insulation_grade = 3
+    hpxml.rim_joists[0].joist_size = '2x6'
+    hpxml.rim_joists[0].framing_factor = 0.1988
+    hpxml.rim_joists[0].joist_material = 'wood'
+    hpxml.rim_joists[0].osb_thickness = 0.5
   elsif ['base-foundation-ambient.xml',
          'base-foundation-slab.xml'].include? hpxml_file
     hpxml.rim_joists.clear

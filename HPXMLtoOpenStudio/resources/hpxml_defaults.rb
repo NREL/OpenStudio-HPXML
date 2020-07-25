@@ -184,6 +184,12 @@ class HPXMLDefaults
       elsif rim_joist.solar_absorptance.nil?
         rim_joist.solar_absorptance = Constructions.get_default_wall_solar_absorptance(rim_joist.color)
       end
+      if rim_joist.insulation_cavity_material.nil?
+        rim_joist.insulation_cavity_material = HPXML::InsulationMaterialBatt
+      end
+      if rim_joist.insulation_continuous_material.nil?
+        rim_joist.insulation_continuous_material = HPXML::InsulationMaterialRigid
+      end
     end
   end
 

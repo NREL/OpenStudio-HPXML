@@ -221,7 +221,7 @@ class EnergyPlusValidator
         '../../Studs/Size[text()="2x2" or text()="2x3" or text()="2x4" or text()="2x6" or text()="2x8" or text()="2x10" or text()="2x12" or text()="2x14" or text()="2x16"]' => one,
         '../../Studs/Spacing | ../../Studs/FramingFactor' => one,
         '../../Studs/Material[text()="wood" or text()="metal"]' => one,
-        '../../extension/WoodSheathing' => zero_or_one, # See [WallWoodSheathing]
+        '../../extension/OrientedStrandBoard' => zero_or_one, # See [WallOrientedStrandBoard]
       },
 
       ## [WallRigidInsLayer]
@@ -230,8 +230,8 @@ class EnergyPlusValidator
         'NominalRValue' => one,
       },
 
-      ## [WallWoodSheathing]
-      '/HPXML/Building/BuildingDetails/Enclosure/Walls/Wall/extension/WoodSheathing' => {
+      ## [WallOrientedStrandBoard]
+      '/HPXML/Building/BuildingDetails/Enclosure/Walls/Wall/extension/OrientedStrandBoard' => {
         'Thickness' => one,
       },
 
@@ -246,7 +246,31 @@ class EnergyPlusValidator
         'Color | SolarAbsorptance' => one_or_more,
         'Emittance' => one,
         'Insulation/SystemIdentifier' => one, # Required by HPXML schema
-        'Insulation/AssemblyEffectiveRValue' => one,
+        # Insulation: either specify continuous and cavity layers OR assembly R-value:
+        'Insulation/AssemblyEffectiveRValue | Insulation/Layer[InstallationType="cavity"]' => one, # See [RimJoistCavityInsLayer]
+        'Insulation/AssemblyEffectiveRValue | Insulation/Layer[InstallationType="continuous"]' => one, # See [RimJoistRigidInsLayer]
+      },
+
+      ## [RimJoistCavityInsLayer]
+      '/HPXML/Building/BuildingDetails/Enclosure/RimJoists/RimJoist/Insulation/Layer[InstallationType="cavity"]' => {
+        'InsulationMaterial[Batt | LooseFill | Rigid | SprayFoam | Other]' => zero_or_one, # Required by HPXML schema
+        'NominalRValue' => one,
+        '../InsulationGrade' => one, # cavity insulation installation grade; integer
+        '../../FloorJoists/Size[text()="2x2" or text()="2x3" or text()="2x4" or text()="2x6" or text()="2x8" or text()="2x10" or text()="2x12" or text()="2x14" or text()="2x16"]' => one,
+        '../../FloorJoists/Spacing | ../../FloorJoists/FramingFactor' => one,
+        '../../FloorJoists/Material[text()="wood" or text()="metal"]' => one,
+        '../../extension/OrientedStrandBoard' => zero_or_one, # See [RimJoistOrientedStrandBoard]
+      },
+
+      ## [RimJoistRigidInsLayer]
+      '/HPXML/Building/BuildingDetails/Enclosure/RimJoists/RimJoist/Insulation/Layer[InstallationType="continuous"]' => {
+        'InsulationMaterial[Batt | LooseFill | Rigid | SprayFoam | Other]' => zero_or_one, # Required by HPXML schema
+        'NominalRValue' => one,
+      },
+
+      ## [RimJoistOrientedStrandBoard]
+      '/HPXML/Building/BuildingDetails/Enclosure/RimJoists/RimJoist/extension/OrientedStrandBoard' => {
+        'Thickness' => one,
       },
 
       # [FoundationWall]

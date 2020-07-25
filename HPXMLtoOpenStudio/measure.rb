@@ -1123,8 +1123,8 @@ class OSModel
       if (not wall.insulation_cavity_r_value.nil?) || (not wall.insulation_continuous_r_value.nil?)
         apply_wall_construction_by_quick_fill(runner, model, surfaces, wall, wall.id, wall.wall_type,
                                               cavity_r: wall.insulation_cavity_r_value, install_grade: wall.insulation_grade, cavity_ins_thick_in: wall.insulation_cavity_thickness,
-                                              rigid_r: wall.insulation_continuous_r_value, stud_size: wall.stud_size, framing_factor: wall.stud_framing_factor,
-                                              sheathing_thick_in: wall.wood_sheathing_thickness, mat_ext_finish: mat_ext_finish,
+                                              rigid_r: wall.insulation_continuous_r_value, stud_size: wall.stud_size, framing_factor: wall.framing_factor,
+                                              osb_thick_in: wall.osb_thickness, mat_ext_finish: mat_ext_finish,
                                               inside_drywall_thick_in: inside_drywall_thick_in, outside_drywall_thick_in: 0,
                                               inside_film: inside_film, outside_film: outside_film)
       else
@@ -1190,23 +1190,31 @@ class OSModel
         mat_ext_finish = nil
       end
 
-      assembly_r = rim_joist.insulation_assembly_r_value
+      if (not rim_joist.insulation_cavity_r_value.nil?) || (not rim_joist.insulation_continuous_r_value.nil?) # apply rim joist using Layer
+        Constructions.apply_rim_joist(runner, model, surfaces, rim_joist, rim_joist.id,
+                                      cavity_r: rim_joist.insulation_cavity_r_value, install_grade: rim_joist.insulation_grade, framing_factor: rim_joist.framing_factor,
+                                      inside_drywall_thick_in: inside_drywall_thick_in, osb_thick_in: rim_joist.osb_thickness,
+                                      rigid_r: rim_joist.insulation_continuous_r_value, mat_ext_finish: mat_ext_finish,
+                                      inside_film: inside_film, outside_film: outside_film)
+      else
+        assembly_r = rim_joist.insulation_assembly_r_value
 
-      constr_sets = [
-        WoodStudConstructionSet.new(Material.Stud2x(2.0), 0.17, 10.0, 2.0, inside_drywall_thick_in, mat_ext_finish),  # 2x4 + R10
-        WoodStudConstructionSet.new(Material.Stud2x(2.0), 0.17, 5.0, 2.0, inside_drywall_thick_in, mat_ext_finish),   # 2x4 + R5
-        WoodStudConstructionSet.new(Material.Stud2x(2.0), 0.17, 0.0, 2.0, inside_drywall_thick_in, mat_ext_finish),   # 2x4
-        WoodStudConstructionSet.new(Material.Stud2x(2.0), 0.01, 0.0, 0.0, 0.0, mat_ext_finish), # Fallback
-      ]
-      match, constr_set, cavity_r = pick_wood_stud_construction_set(assembly_r, constr_sets, inside_film, outside_film, rim_joist.id)
-      install_grade = 1
+        constr_sets = [
+          WoodStudConstructionSet.new(Material.Stud2x(2.0), 0.17, 10.0, 2.0, inside_drywall_thick_in, mat_ext_finish),  # 2x4 + R10
+          WoodStudConstructionSet.new(Material.Stud2x(2.0), 0.17, 5.0, 2.0, inside_drywall_thick_in, mat_ext_finish),   # 2x4 + R5
+          WoodStudConstructionSet.new(Material.Stud2x(2.0), 0.17, 0.0, 2.0, inside_drywall_thick_in, mat_ext_finish),   # 2x4
+          WoodStudConstructionSet.new(Material.Stud2x(2.0), 0.01, 0.0, 0.0, 0.0, mat_ext_finish), # Fallback
+        ]
+        match, constr_set, cavity_r = pick_wood_stud_construction_set(assembly_r, constr_sets, inside_film, outside_film, rim_joist.id)
+        install_grade = 1
 
-      Constructions.apply_rim_joist(runner, model, surfaces, rim_joist, "#{rim_joist.id} construction",
-                                    cavity_r, install_grade, constr_set.framing_factor,
-                                    constr_set.inside_drywall_thick_in, constr_set.osb_thick_in,
-                                    constr_set.rigid_r, constr_set.exterior_material,
-                                    inside_film, outside_film)
-      check_surface_assembly_rvalue(runner, surfaces, inside_film, outside_film, assembly_r, match)
+        Constructions.apply_rim_joist(runner, model, surfaces, rim_joist, "#{rim_joist.id} construction",
+                                      cavity_r: cavity_r, install_grade: install_grade, framing_factor: constr_set.framing_factor,
+                                      inside_drywall_thick_in: constr_set.inside_drywall_thick_in, osb_thick_in: constr_set.osb_thick_in,
+                                      rigid_r: constr_set.rigid_r, mat_ext_finish: constr_set.exterior_material,
+                                      inside_film: inside_film, outside_film: outside_film)
+        check_surface_assembly_rvalue(runner, surfaces, inside_film, outside_film, assembly_r, match)
+      end
     end
   end
 
@@ -1890,7 +1898,7 @@ class OSModel
       Constructions.apply_wood_stud_wall(runner, model, surfaces, nil, 'AdiabaticWallConstruction',
                                          cavity_r: 0, install_grade: 1, cavity_depth_in: 3.5,
                                          cavity_filled: true, framing_factor: 0.1,
-                                         rigid_r: 99, sheathing_thick_in: 0, mat_ext_finish: Material.ExteriorFinishMaterial(HPXML::SidingTypeWood, 0.90, 0.75),
+                                         rigid_r: 99, osb_thick_in: 0, mat_ext_finish: Material.ExteriorFinishMaterial(HPXML::SidingTypeWood, 0.90, 0.75),
                                          inside_drywall_thick_in: 0.5, outside_drywall_thick_in: 0,
                                          inside_film: Material.AirFilmVertical, outside_film: Material.AirFilmVertical)
     elsif type == 'floor'
@@ -3037,7 +3045,7 @@ class OSModel
       Constructions.apply_wood_stud_wall(runner, model, surfaces, wall, "#{wall_id} construction",
                                          cavity_r: cavity_r, install_grade: install_grade, cavity_depth_in: constr_set.stud.thick_in,
                                          cavity_filled: cavity_filled, framing_factor: constr_set.framing_factor,
-                                         sheathing_thick_in: constr_set.osb_thick_in, rigid_r: constr_set.rigid_r, mat_ext_finish: constr_set.exterior_material,
+                                         osb_thick_in: constr_set.osb_thick_in, rigid_r: constr_set.rigid_r, mat_ext_finish: constr_set.exterior_material,
                                          inside_drywall_thick_in: constr_set.inside_drywall_thick_in, outside_drywall_thick_in: 0,
                                          inside_film: inside_film, outside_film: outside_film)
     elsif wall_type == HPXML::WallTypeSteelStud
@@ -3175,7 +3183,7 @@ class OSModel
   def self.apply_wall_construction_by_quick_fill(runner, model, surfaces, wall, wall_id, wall_type,
                                                  cavity_r:, install_grade:, cavity_ins_thick_in:,
                                                  rigid_r:, stud_size:, framing_factor:,
-                                                 sheathing_thick_in:, mat_ext_finish:,
+                                                 osb_thick_in:, mat_ext_finish:,
                                                  inside_drywall_thick_in:, outside_drywall_thick_in:,
                                                  inside_film:, outside_film:)
 
@@ -3192,7 +3200,7 @@ class OSModel
       Constructions.apply_wood_stud_wall(runner, model, surfaces, wall, "#{wall_id} construction",
                                          cavity_r: cavity_r, install_grade: install_grade, cavity_depth_in: stud_depth_in,
                                          cavity_filled: cavity_filled, framing_factor: framing_factor,
-                                         sheathing_thick_in: sheathing_thick_in, rigid_r: rigid_r, mat_ext_finish: mat_ext_finish,
+                                         osb_thick_in: osb_thick_in, rigid_r: rigid_r, mat_ext_finish: mat_ext_finish,
                                          inside_drywall_thick_in: inside_drywall_thick_in, outside_drywall_thick_in: 0,
                                          inside_film: inside_film, outside_film: outside_film)
     else

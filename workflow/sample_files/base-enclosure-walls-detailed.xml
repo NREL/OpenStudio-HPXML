@@ -116,8 +116,26 @@
             <Emittance>0.92</Emittance>
             <Insulation>
               <SystemIdentifier id='RimJoistFoundationInsulation'/>
-              <AssemblyEffectiveRValue>23.0</AssemblyEffectiveRValue>
+              <InsulationGrade>3</InsulationGrade>
+              <Layer>
+                <InstallationType>cavity</InstallationType>
+                <NominalRValue>19.0</NominalRValue>
+              </Layer>
+              <Layer>
+                <InstallationType>continuous</InstallationType>
+                <NominalRValue>0.0</NominalRValue>
+              </Layer>
             </Insulation>
+            <FloorJoists>
+              <Size>2x6</Size>
+              <FramingFactor>0.1988</FramingFactor>
+              <Material>wood</Material>
+            </FloorJoists>
+            <extension>
+              <OrientedStrandBoard>
+                <Thickness>0.5</Thickness>
+              </OrientedStrandBoard>
+            </extension>
           </RimJoist>
         </RimJoists>
         <Walls>
@@ -151,9 +169,9 @@
               </Layer>
             </Insulation>
             <extension>
-              <WoodSheathing>
+              <OrientedStrandBoard>
                 <Thickness>0.5</Thickness>
-              </WoodSheathing>
+              </OrientedStrandBoard>
             </extension>
           </Wall>
           <Wall>

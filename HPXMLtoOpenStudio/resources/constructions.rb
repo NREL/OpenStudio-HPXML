@@ -6,7 +6,7 @@ class Constructions
   def self.apply_wood_stud_wall(runner, model, surfaces, wall, constr_name,
                                 cavity_r:, install_grade:, cavity_depth_in:,
                                 cavity_filled:, framing_factor:,
-                                rigid_r:, sheathing_thick_in:, mat_ext_finish:,
+                                rigid_r:, osb_thick_in:, mat_ext_finish:,
                                 inside_drywall_thick_in:, outside_drywall_thick_in:,
                                 inside_film:, outside_film:)
     # FIXME: Need to add descriptions of each argument
@@ -28,8 +28,8 @@ class Constructions
     mat_framing = Material.new(name = nil, thick_in = cavity_depth_in, mat_base = BaseMaterial.Wood)
     mat_gap = Material.AirCavityClosed(cavity_depth_in)
     mat_osb = nil
-    if sheathing_thick_in > 0
-      mat_osb = Material.new(name = 'WallSheathing', thick_in = sheathing_thick_in, mat_base = BaseMaterial.Wood)
+    if osb_thick_in > 0
+      mat_osb = Material.new(name = 'WallSheathing', thick_in = osb_thick_in, mat_base = BaseMaterial.Wood)
     end
     mat_rigid = nil
     if rigid_r > 0
@@ -141,6 +141,7 @@ class Constructions
     constr.create_and_assign_constructions(runner, surfaces, model)
 
     # Store info for HVAC Sizing measure
+    wall.ufactor = 1.0 / constr.assembly_rvalue # parallel path overall ufactor calculation
     wall.insulation_continuous_r_value = rigid_r
   end
 
@@ -211,6 +212,7 @@ class Constructions
     constr.create_and_assign_constructions(runner, surfaces, model)
 
     # Store info for HVAC Sizing measure
+    wall.ufactor = 1.0 / constr.assembly_rvalue # parallel path overall ufactor calculation
     wall.insulation_cavity_r_value = furring_r
     wall.insulation_continuous_r_value = rigid_r
   end
@@ -264,6 +266,7 @@ class Constructions
     constr.create_and_assign_constructions(runner, surfaces, model)
 
     # Store info for HVAC Sizing measure
+    wall.ufactor = 1.0 / constr.assembly_rvalue # parallel path overall ufactor calculation
     wall.insulation_continuous_r_value = rigid_r
   end
 
@@ -321,6 +324,9 @@ class Constructions
 
     # Create and assign construction to surfaces
     constr.create_and_assign_constructions(runner, surfaces, model)
+
+    # Store info for HVAC Sizing measure
+    wall.ufactor = 1.0 / constr.assembly_rvalue # parallel path overall ufactor calculation
   end
 
   def self.apply_steel_stud_wall(runner, model, surfaces, wall, constr_name,
@@ -382,6 +388,7 @@ class Constructions
     constr.create_and_assign_constructions(runner, surfaces, model)
 
     # Store info for HVAC Sizing measure
+    wall.ufactor = 1.0 / constr.assembly_rvalue # parallel path overall ufactor calculation
     wall.insulation_cavity_r_value = cavity_r
     wall.insulation_continuous_r_value = rigid_r
   end
@@ -452,15 +459,15 @@ class Constructions
     constr.create_and_assign_constructions(runner, surfaces, model)
 
     # Store info for HVAC Sizing measure
+    wall.ufactor = 1.0 / constr.assembly_rvalue # parallel path overall ufactor calculation
     wall.insulation_continuous_r_value = rigid_r
   end
 
   def self.apply_rim_joist(runner, model, surfaces, rim_joist, constr_name,
-                           cavity_r, install_grade, framing_factor,
-                           drywall_thick_in, osb_thick_in,
-                           rigid_r, mat_ext_finish, inside_film,
-                           outside_film)
-
+                           cavity_r:, install_grade:, framing_factor:,
+                           inside_drywall_thick_in:, osb_thick_in:,
+                           rigid_r:, mat_ext_finish:,
+                           inside_film:, outside_film:)
     return if surfaces.empty?
 
     # Define materials
@@ -503,8 +510,8 @@ class Constructions
       constr.add_layer(mat_osb)
     end
     constr.add_layer([mat_framing, mat_cavity, mat_gap], 'RimJoistStudAndCavity')
-    if drywall_thick_in > 0
-      constr.add_layer(Material.GypsumWall(drywall_thick_in))
+    if inside_drywall_thick_in > 0
+      constr.add_layer(Material.GypsumWall(inside_drywall_thick_in))
     end
     constr.add_layer(inside_film)
 
@@ -903,7 +910,7 @@ class Constructions
 
     apply_wood_stud_wall(runner, model, imdefs, nil, constr_name,
                          cavity_r: 0, cavity_depth_in: 3.5, cavity_filled: false, install_grade: 1,
-                         framing_factor: 0.16, sheathing_thick_in: 0,
+                         framing_factor: 0.16, osb_thick_in: 0,
                          rigid_r: 0, mat_ext_finish: nil,
                          inside_drywall_thick_in: drywall_thick_in, outside_drywall_thick_in: drywall_thick_in,
                          inside_film: Material.AirFilmVertical, outside_film: Material.AirFilmVertical)

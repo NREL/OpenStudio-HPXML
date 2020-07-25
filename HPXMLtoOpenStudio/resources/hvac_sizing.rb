@@ -763,13 +763,6 @@ class HVACSizing
           cltd = [cltd + cltd_corr, 0.0].max # Assume zero cooling load for negative CLTD's
         end
 
-        # FIXME: Remove the following if statement when complete ufactor implementation for all wall types
-        if (not wall.is_a? HPXML::RimJoist) 
-          unless wall.wall_type == HPXML::WallTypeWoodStud
-            wall.ufactor = 1 / wall.insulation_assembly_r_value
-          end
-        end
-
         if wall.is_exterior
           zone_loads.Cool_Walls += wall.ufactor * wall_area / azimuths.size * cltd
           zone_loads.Heat_Walls += wall.ufactor * wall_area / azimuths.size * @htd
