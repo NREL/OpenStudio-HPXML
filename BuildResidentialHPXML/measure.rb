@@ -3709,20 +3709,18 @@ class HPXMLFile
       args[:geometry_foundation_height_above_grade] = 0.0
     end
 
+    if args[:geometry_other_exterior_adjacent].is_initialized
+      args[:geometry_other_exterior_adjacent] = args[:geometry_other_exterior_adjacent].get
+    else
+      args[:geometry_other_exterior_adjacent] = HPXML::LocationOtherHousingUnit
+    end
+
     if args[:geometry_unit_type] == HPXML::ResidentialTypeSFD
       success = Geometry.create_single_family_detached(runner: runner, model: model, **args)
     elsif args[:geometry_unit_type] == HPXML::ResidentialTypeSFA
       success = Geometry.create_single_family_attached(runner: runner, model: model, **args)
-      args[:geometry_other_exterior_adjacent] = HPXML::LocationOtherHousingUnit
-      if args[:geometry_other_exterior_adjacent].is_initialized
-        args[:geometry_other_exterior_adjacent] = args[:geometry_other_exterior_adjacent].get
-      end
     elsif args[:geometry_unit_type] == HPXML::ResidentialTypeApartment
       success = Geometry.create_multifamily(runner: runner, model: model, **args)
-      args[:geometry_other_exterior_adjacent] = HPXML::LocationOtherHousingUnit
-      if args[:geometry_other_exterior_adjacent].is_initialized
-        args[:geometry_other_exterior_adjacent] = args[:geometry_other_exterior_adjacent].get
-      end
     end
     return false if not success
 
