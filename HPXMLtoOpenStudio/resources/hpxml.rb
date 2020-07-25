@@ -1792,7 +1792,7 @@ class HPXML < Object
 
   class FoundationWall < BaseElement
     ATTRS = [:id, :exterior_adjacent_to, :interior_adjacent_to, :height, :area, :azimuth, :thickness,
-             :depth_below_grade, :insulation_id, :insulation_r_value, :insulation_interior_r_value,
+             :ufactor, :depth_below_grade, :insulation_id, :insulation_r_value, :insulation_interior_r_value,
              :insulation_interior_distance_to_top, :insulation_interior_distance_to_bottom,
              :insulation_exterior_r_value, :insulation_exterior_distance_to_top,
              :insulation_exterior_distance_to_bottom, :insulation_assembly_r_value,
