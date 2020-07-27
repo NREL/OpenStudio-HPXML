@@ -154,7 +154,6 @@ class HPXML < Object
   LocationInterior = 'interior'
   LocationKitchen = 'kitchen'
   LocationLivingSpace = 'living space'
-  LocationOther = 'other'
   LocationOtherExterior = 'other exterior'
   LocationOtherHousingUnit = 'other housing unit'
   LocationOtherHeatedSpace = 'other heated space'
@@ -194,7 +193,6 @@ class HPXML < Object
   PVTrackingType2Axis = '2-axis'
   ResidentialTypeApartment = 'apartment unit'
   ResidentialTypeManufactured = 'manufactured home'
-  ResidentialTypeMF = 'multi-family - uncategorized'
   ResidentialTypeSFA = 'single-family attached'
   ResidentialTypeSFD = 'single-family detached'
   RoofTypeAsphaltShingles = 'asphalt or fiberglass shingles'
@@ -1379,7 +1377,7 @@ class HPXML < Object
   end
 
   class Roof < BaseElement
-    ATTRS = [:id, :exterior_adjacent_to, :interior_adjacent_to, :area, :azimuth, :roof_type,
+    ATTRS = [:id, :interior_adjacent_to, :area, :azimuth, :roof_type,
              :roof_color, :solar_absorptance, :emittance, :pitch, :radiant_barrier,
              :insulation_id, :insulation_assembly_r_value, :insulation_cavity_r_value,
              :insulation_continuous_r_value]
@@ -3662,8 +3660,17 @@ class HPXML < Object
   class ClothesWasher < BaseElement
     ATTRS = [:id, :location, :modified_energy_factor, :integrated_modified_energy_factor,
              :rated_annual_kwh, :label_electric_rate, :label_gas_rate, :label_annual_gas_cost,
-             :capacity, :label_usage, :usage_multiplier, :water_schedule, :power_schedule]
+             :capacity, :label_usage, :usage_multiplier, :ratio_of_units_to_clothes_washers,
+             :water_schedule, :power_schedule]
     attr_accessor(*ATTRS)
+
+    def is_shared
+      # In a MF location?
+      return [LocationOtherHeatedSpace,
+              LocationOtherHousingUnit,
+              LocationOtherMultifamilyBufferSpace,
+              LocationOtherNonFreezingSpace].include? @location
+    end
 
     def delete
       @hpxml_object.clothes_washers.delete(self)
@@ -3692,6 +3699,7 @@ class HPXML < Object
       XMLHelper.add_element(clothes_washer, 'Capacity', to_float(@capacity)) unless @capacity.nil?
       HPXML::add_extension(parent: clothes_washer,
                            extensions: { 'UsageMultiplier' => to_float_or_nil(@usage_multiplier),
+                                         'RatioOfDwellingUnitsToSharedClothesWashers' => to_integer_or_nil(@ratio_of_units_to_clothes_washers),
                                          'WaterSchedule' => @water_schedule,
                                          'PowerSchedule' => @power_schedule })
     end
@@ -3710,6 +3718,7 @@ class HPXML < Object
       @label_usage = to_float_or_nil(XMLHelper.get_value(clothes_washer, 'LabelUsage'))
       @capacity = to_float_or_nil(XMLHelper.get_value(clothes_washer, 'Capacity'))
       @usage_multiplier = to_float_or_nil(XMLHelper.get_value(clothes_washer, 'extension/UsageMultiplier'))
+      @ratio_of_units_to_clothes_washers = to_integer_or_nil(XMLHelper.get_value(clothes_washer, 'extension/RatioOfDwellingUnitsToSharedClothesWashers'))
       @water_schedule = XMLHelper.get_value(clothes_washer, 'extension/WaterSchedule')
       @power_schedule = XMLHelper.get_value(clothes_washer, 'extension/PowerSchedule')
     end
@@ -3731,8 +3740,17 @@ class HPXML < Object
 
   class ClothesDryer < BaseElement
     ATTRS = [:id, :location, :fuel_type, :energy_factor, :combined_energy_factor, :control_type,
-             :usage_multiplier, :power_schedule, :exhaust_schedule]
+             :usage_multiplier, :ratio_of_units_to_clothes_dryers,
+             :power_schedule, :exhaust_schedule]
     attr_accessor(*ATTRS)
+
+    def is_shared
+      # In a MF location?
+      return [LocationOtherHeatedSpace,
+              LocationOtherHousingUnit,
+              LocationOtherMultifamilyBufferSpace,
+              LocationOtherNonFreezingSpace].include? @location
+    end
 
     def delete
       @hpxml_object.clothes_dryers.delete(self)
@@ -3757,6 +3775,7 @@ class HPXML < Object
       XMLHelper.add_element(clothes_dryer, 'ControlType', @control_type) unless @control_type.nil?
       HPXML::add_extension(parent: clothes_dryer,
                            extensions: { 'UsageMultiplier' => to_float_or_nil(@usage_multiplier),
+                                         'RatioOfDwellingUnitsToSharedClothesDryers' => to_integer_or_nil(@ratio_of_units_to_clothes_dryers),
                                          'PowerSchedule' => @power_schedule,
                                          'ExhaustSchedule' => @exhaust_schedule })
     end
@@ -3771,6 +3790,7 @@ class HPXML < Object
       @combined_energy_factor = to_float_or_nil(XMLHelper.get_value(clothes_dryer, 'CombinedEnergyFactor'))
       @control_type = XMLHelper.get_value(clothes_dryer, 'ControlType')
       @usage_multiplier = to_float_or_nil(XMLHelper.get_value(clothes_dryer, 'extension/UsageMultiplier'))
+      @ratio_of_units_to_clothes_dryers = to_integer_or_nil(XMLHelper.get_value(clothes_dryer, 'extension/RatioOfDwellingUnitsToSharedClothesDryers'))
       @power_schedule = XMLHelper.get_value(clothes_dryer, 'extension/PowerSchedule')
       @exhaust_schedule = XMLHelper.get_value(clothes_dryer, 'extension/ExhaustSchedule')
     end
@@ -4860,6 +4880,31 @@ class HPXML < Object
     end
     if (cooling_total_dist_cfa_served > @building_construction.conditioned_floor_area.to_f)
       errors << 'The total conditioned floor area served by the HVAC distribution system(s) for cooling is larger than the conditioned floor area of the building.'
+    end
+
+    # Check for objects referencing SFA/MF spaces where the building type is not SFA/MF
+    if [ResidentialTypeSFD, ResidentialTypeManufactured].include? @building_construction.residential_facility_type
+      mf_spaces = [LocationOtherHeatedSpace, LocationOtherHousingUnit, LocationOtherMultifamilyBufferSpace, LocationOtherNonFreezingSpace]
+      (@roofs + @rim_joists + @walls + @foundation_walls + @frame_floors + @slabs).each do |surface|
+        if mf_spaces.include? surface.interior_adjacent_to
+          errors << "The building is of type '#{@building_construction.residential_facility_type}' but the surface '#{surface.id}' is adjacent to the SFA/MF space '#{surface.interior_adjacent_to}'."
+        end
+        if mf_spaces.include? surface.exterior_adjacent_to
+          errors << "The building is of type '#{@building_construction.residential_facility_type}' but the surface '#{surface.id}' is adjacent to the SFA/MF space '#{surface.exterior_adjacent_to}'."
+        end
+      end
+      (@water_heating_systems + @clothes_washers + @clothes_dryers + @dishwashers + @refrigerators + @cooking_ranges).each do |object|
+        if mf_spaces.include? object.location
+          errors << "The building is of type '#{@building_construction.residential_facility_type}' but the object '#{object.id}' is located in the SFA/MF space '#{object.location}'."
+        end
+      end
+      @hvac_distributions.each do |hvac_distribution|
+        hvac_distribution.ducts.each do |duct|
+          if mf_spaces.include? duct.duct_location
+            errors << "The building is of type '#{@building_construction.residential_facility_type}' but the HVAC distribution #{hvac_distribution.id} has a duct located in the SFA/MF space '#{duct.duct_location}'."
+          end
+        end
+      end
     end
 
     # ------------------------------- #

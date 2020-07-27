@@ -85,10 +85,10 @@ def create_osws
     'base-enclosure-garage.osw' => 'base.osw',
     'base-enclosure-infil-cfm50.osw' => 'base.osw',
     'base-enclosure-infil-natural-ach.osw' => 'base.osw',
-    # 'base-enclosure-other-heated-space.osw' => 'base.osw',
-    # 'base-enclosure-other-housing-unit.osw' => 'base.osw',
-    # 'base-enclosure-other-multifamily-buffer-space.osw' => 'base.osw',
-    # 'base-enclosure-other-non-freezing-space.osw' => 'base.osw',
+    # 'base-enclosure-other-heated-space.osw' => 'base.osw', # TODO: uncomment when we can model multifamily with ambient foundation?
+    # 'base-enclosure-other-housing-unit.osw' => 'base-foundation-ambient.osw', # TODO: uncomment when we can model multifamily with ambient foundation?
+    # 'base-enclosure-other-multifamily-buffer-space.osw' => 'base.osw', # TODO: uncomment when we can model multifamily with ambient foundation?
+    # 'base-enclosure-other-non-freezing-space.osw' => 'base.osw', # TODO: uncomment when we can model multifamily with ambient foundation?
     'base-enclosure-overhangs.osw' => 'base.osw',
     # 'base-enclosure-rooftypes.osw' => 'base.osw',
     # 'base-enclosure-skylights.osw' => 'base.osw', # There are no front roof surfaces, but 15.0 ft^2 of skylights were specified.
@@ -710,7 +710,7 @@ def get_values(osw_file, step)
     step.setArgument('window_area_left', 0)
     step.setArgument('window_area_right', 0)
   elsif ['base-multifamily.osw'].include? osw_file
-    step.setArgument('geometry_unit_type', HPXML::ResidentialTypeMF)
+    step.setArgument('geometry_unit_type', HPXML::ResidentialTypeApartment)
     step.setArgument('geometry_cfa', 900.0)
     step.setArgument('geometry_num_units', 3)
     step.setArgument('geometry_corridor_position', 'None')
@@ -1083,13 +1083,45 @@ def get_values(osw_file, step)
     step.setArgument('air_leakage_units', HPXML::UnitsACHNatural)
     step.setArgument('air_leakage_value', 0.67)
   elsif ['base-enclosure-other-heated-space.osw'].include? osw_file
-
+    step.setArgument('geometry_unit_type', HPXML::ResidentialTypeApartment)
+    step.setArgument('ducts_supply_location', HPXML::LocationOtherHeatedSpace)
+    step.setArgument('ducts_return_location', HPXML::LocationOtherHeatedSpace)
+    step.setArgument('water_heater_location', HPXML::LocationOtherHeatedSpace)
+    step.setArgument('clothes_washer_location', HPXML::LocationOtherHeatedSpace)
+    step.setArgument('clothes_dryer_location', HPXML::LocationOtherHeatedSpace)
+    step.setArgument('dishwasher_location', HPXML::LocationOtherHeatedSpace)
+    step.setArgument('refrigerator_location', HPXML::LocationOtherHeatedSpace)
+    step.setArgument('cooking_range_oven_location', HPXML::LocationOtherHeatedSpace)
   elsif ['base-enclosure-other-housing-unit.osw'].include? osw_file
-
+    step.setArgument('geometry_unit_type', HPXML::ResidentialTypeApartment)
+    step.setArgument('ducts_supply_location', HPXML::LocationOtherHousingUnit)
+    step.setArgument('ducts_return_location', HPXML::LocationOtherHousingUnit)
+    step.setArgument('water_heater_location', HPXML::LocationOtherHousingUnit)
+    step.setArgument('clothes_washer_location', HPXML::LocationOtherHousingUnit)
+    step.setArgument('clothes_dryer_location', HPXML::LocationOtherHousingUnit)
+    step.setArgument('dishwasher_location', HPXML::LocationOtherHousingUnit)
+    step.setArgument('refrigerator_location', HPXML::LocationOtherHousingUnit)
+    step.setArgument('cooking_range_oven_location', HPXML::LocationOtherHousingUnit)
   elsif ['base-enclosure-other-multifamily-buffer-space.osw'].include? osw_file
-
+    step.setArgument('geometry_unit_type', HPXML::ResidentialTypeApartment)
+    step.setArgument('ducts_supply_location', HPXML::LocationOtherMultifamilyBufferSpace)
+    step.setArgument('ducts_return_location', HPXML::LocationOtherMultifamilyBufferSpace)
+    step.setArgument('water_heater_location', HPXML::LocationOtherMultifamilyBufferSpace)
+    step.setArgument('clothes_washer_location', HPXML::LocationOtherMultifamilyBufferSpace)
+    step.setArgument('clothes_dryer_location', HPXML::LocationOtherMultifamilyBufferSpace)
+    step.setArgument('dishwasher_location', HPXML::LocationOtherMultifamilyBufferSpace)
+    step.setArgument('refrigerator_location', HPXML::LocationOtherMultifamilyBufferSpace)
+    step.setArgument('cooking_range_oven_location', HPXML::LocationOtherMultifamilyBufferSpace)
   elsif ['base-enclosure-other-non-freezing-space.osw'].include? osw_file
-
+    step.setArgument('geometry_unit_type', HPXML::ResidentialTypeApartment)
+    step.setArgument('ducts_supply_location', HPXML::LocationOtherNonFreezingSpace)
+    step.setArgument('ducts_return_location', HPXML::LocationOtherNonFreezingSpace)
+    step.setArgument('water_heater_location', HPXML::LocationOtherNonFreezingSpace)
+    step.setArgument('clothes_washer_location', HPXML::LocationOtherNonFreezingSpace)
+    step.setArgument('clothes_dryer_location', HPXML::LocationOtherNonFreezingSpace)
+    step.setArgument('dishwasher_location', HPXML::LocationOtherNonFreezingSpace)
+    step.setArgument('refrigerator_location', HPXML::LocationOtherNonFreezingSpace)
+    step.setArgument('cooking_range_oven_location', HPXML::LocationOtherNonFreezingSpace)
   elsif ['base-enclosure-overhangs.osw'].include? osw_file
     step.setArgument('overhangs_back_depth', 2.5)
     step.setArgument('overhangs_left_depth', 1.5)
@@ -1893,12 +1925,12 @@ def get_values(osw_file, step)
     step.setArgument('geometry_corridor_position', 'None')
     step.setArgument('geometry_foundation_type', HPXML::FoundationTypeAmbient)
   elsif ['invalid_files/multifamily-bottom-slab-non-zero-foundation-height.osw'].include? osw_file
-    step.setArgument('geometry_unit_type', HPXML::ResidentialTypeMF)
+    step.setArgument('geometry_unit_type', HPXML::ResidentialTypeApartment)
     step.setArgument('geometry_corridor_position', 'None')
     step.setArgument('geometry_foundation_type', HPXML::FoundationTypeSlab)
     step.setArgument('geometry_foundation_height_above_grade', 0.0)
   elsif ['invalid_files/multifamily-bottom-crawlspace-zero-foundation-height.osw'].include? osw_file
-    step.setArgument('geometry_unit_type', HPXML::ResidentialTypeMF)
+    step.setArgument('geometry_unit_type', HPXML::ResidentialTypeApartment)
     step.setArgument('geometry_corridor_position', 'None')
     step.setArgument('geometry_foundation_type', HPXML::FoundationTypeCrawlspaceUnvented)
     step.setArgument('geometry_foundation_height', 0.0)
@@ -2001,6 +2033,10 @@ def create_hpxmls
     'invalid_files/invalid-daylight-saving.xml' => 'base.xml',
     'invalid_files/lighting-fractions.xml' => 'base.xml',
     'invalid_files/missing-elements.xml' => 'base.xml',
+    'invalid_files/multifamily-reference-appliance.xml' => 'base.xml',
+    'invalid_files/multifamily-reference-duct.xml' => 'base.xml',
+    'invalid_files/multifamily-reference-surface.xml' => 'base.xml',
+    'invalid_files/multifamily-reference-water-heater.xml' => 'base.xml',
     'invalid_files/net-area-negative-roof.xml' => 'base-enclosure-skylights.xml',
     'invalid_files/net-area-negative-wall.xml' => 'base.xml',
     'invalid_files/orphaned-hvac-distribution.xml' => 'base-hvac-furnace-gas-room-ac.xml',
@@ -3735,6 +3771,9 @@ def set_hpxml_frame_floors(hpxml_file, hpxml)
   elsif ['invalid_files/enclosure-basement-missing-ceiling.xml',
          'invalid_files/enclosure-garage-missing-roof-ceiling.xml'].include? hpxml_file
     hpxml.frame_floors[1].delete
+  elsif ['invalid_files/multifamily-reference-surface.xml'].include? hpxml_file
+    hpxml.frame_floors[0].exterior_adjacent_to = HPXML::LocationOtherHeatedSpace
+    hpxml.frame_floors[0].other_space_above_or_below = HPXML::FrameFloorOtherSpaceAbove
   end
 end
 
@@ -5211,6 +5250,8 @@ def set_hpxml_hvac_distributions(hpxml_file, hpxml)
 
       hvac_distribution.ducts[1].duct_location = nil
     end
+  elsif ['invalid_files/multifamily-reference-duct.xml'].include? hpxml_file
+    hpxml.hvac_distributions[0].ducts[0].duct_location = HPXML::LocationOtherMultifamilyBufferSpace
   end
 
   # Set ConditionedFloorAreaServed
@@ -5605,6 +5646,8 @@ def set_hpxml_water_heating_systems(hpxml_file, hpxml)
       hpxml.water_heating_systems[0].energy_factor = nil
       hpxml.water_heating_systems[0].uniform_energy_factor = 0.93
     end
+  elsif ['invalid_files/multifamily-reference-water-heater.xml'].include? hpxml_file
+    hpxml.water_heating_systems[0].location = HPXML::LocationOtherNonFreezingSpace
   end
 end
 
@@ -5803,12 +5846,21 @@ def set_hpxml_clothes_washer(hpxml_file, hpxml)
                               label_usage: 6)
   elsif ['base-appliances-none.xml'].include? hpxml_file
     hpxml.clothes_washers.clear
-  elsif ['base-enclosure-attached-multifamily.xml',
-         'base-enclosure-other-housing-unit.xml',
+  elsif ['base-enclosure-attached-multifamily.xml'].include? hpxml_file
+    hpxml.clothes_washers[0].location = HPXML::LocationOtherHousingUnit
+  elsif ['base-enclosure-other-housing-unit.xml',
          'base-enclosure-other-heated-space.xml',
          'base-enclosure-other-non-freezing-space.xml',
          'base-enclosure-other-multifamily-buffer-space.xml'].include? hpxml_file
-    hpxml.clothes_washers[0].location = HPXML::LocationOther
+    if ['base-enclosure-other-housing-unit.xml'].include? hpxml_file
+      hpxml.clothes_washers[0].location = HPXML::LocationOtherHousingUnit
+    elsif ['base-enclosure-other-heated-space.xml'].include? hpxml_file
+      hpxml.clothes_washers[0].location = HPXML::LocationOtherHeatedSpace
+    elsif ['base-enclosure-other-non-freezing-space.xml'].include? hpxml_file
+      hpxml.clothes_washers[0].location = HPXML::LocationOtherNonFreezingSpace
+    elsif ['base-enclosure-other-multifamily-buffer-space.xml'].include? hpxml_file
+      hpxml.clothes_washers[0].location = HPXML::LocationOtherMultifamilyBufferSpace
+    end
   elsif ['base-appliances-modified.xml'].include? hpxml_file
     imef = hpxml.clothes_washers[0].integrated_modified_energy_factor
     hpxml.clothes_washers[0].integrated_modified_energy_factor = nil
@@ -5834,6 +5886,8 @@ def set_hpxml_clothes_washer(hpxml_file, hpxml)
     hpxml.clothes_washers[0].label_usage = nil
   elsif ['base-misc-usage-multiplier.xml'].include? hpxml_file
     hpxml.clothes_washers[0].usage_multiplier = 0.9
+  elsif ['invalid_files/multifamily-reference-appliance.xml'].include? hpxml_file
+    hpxml.clothes_washers[0].location = HPXML::LocationOtherHousingUnit
   elsif ['base-simcontrol-generated-schedule.xml'].include? hpxml_file
     hpxml.clothes_washers[0].water_schedule = 'clothes_washer'
     hpxml.clothes_washers[0].power_schedule = 'clothes_washer_power'
@@ -5849,12 +5903,21 @@ def set_hpxml_clothes_dryer(hpxml_file, hpxml)
                              control_type: HPXML::ClothesDryerControlTypeTimer)
   elsif ['base-appliances-none.xml'].include? hpxml_file
     hpxml.clothes_dryers.clear
-  elsif ['base-enclosure-attached-multifamily.xml',
-         'base-enclosure-other-housing-unit.xml',
+  elsif ['base-enclosure-attached-multifamily.xml'].include? hpxml_file
+    hpxml.clothes_dryers[0].location = HPXML::LocationOtherHeatedSpace
+  elsif ['base-enclosure-other-housing-unit.xml',
          'base-enclosure-other-heated-space.xml',
          'base-enclosure-other-non-freezing-space.xml',
          'base-enclosure-other-multifamily-buffer-space.xml'].include? hpxml_file
-    hpxml.clothes_dryers[0].location = HPXML::LocationOther
+    if ['base-enclosure-other-housing-unit.xml'].include? hpxml_file
+      hpxml.clothes_dryers[0].location = HPXML::LocationOtherHousingUnit
+    elsif ['base-enclosure-other-heated-space.xml'].include? hpxml_file
+      hpxml.clothes_dryers[0].location = HPXML::LocationOtherHeatedSpace
+    elsif ['base-enclosure-other-non-freezing-space.xml'].include? hpxml_file
+      hpxml.clothes_dryers[0].location = HPXML::LocationOtherNonFreezingSpace
+    elsif ['base-enclosure-other-multifamily-buffer-space.xml'].include? hpxml_file
+      hpxml.clothes_dryers[0].location = HPXML::LocationOtherMultifamilyBufferSpace
+    end
   elsif ['base-appliances-modified.xml'].include? hpxml_file
     cef = hpxml.clothes_dryers[-1].combined_energy_factor
     hpxml.clothes_dryers.clear
@@ -5924,12 +5987,21 @@ def set_hpxml_dishwasher(hpxml_file, hpxml)
     hpxml.dishwashers[0].rated_annual_kwh = nil
     hpxml.dishwashers[0].energy_factor = HotWaterAndAppliances.calc_dishwasher_ef_from_annual_kwh(rated_annual_kwh).round(2)
     hpxml.dishwashers[0].place_setting_capacity = 6 # Compact
-  elsif ['base-enclosure-attached-multifamily.xml',
-         'base-enclosure-other-housing-unit.xml',
+  elsif ['base-enclosure-attached-multifamily.xml'].include? hpxml_file
+    hpxml.dishwashers[0].location = HPXML::LocationOtherMultifamilyBufferSpace
+  elsif ['base-enclosure-other-housing-unit.xml',
          'base-enclosure-other-heated-space.xml',
          'base-enclosure-other-non-freezing-space.xml',
          'base-enclosure-other-multifamily-buffer-space.xml'].include? hpxml_file
-    hpxml.dishwashers[0].location = HPXML::LocationOther
+    if ['base-enclosure-other-housing-unit.xml'].include? hpxml_file
+      hpxml.dishwashers[0].location = HPXML::LocationOtherHousingUnit
+    elsif ['base-enclosure-other-heated-space.xml'].include? hpxml_file
+      hpxml.dishwashers[0].location = HPXML::LocationOtherHeatedSpace
+    elsif ['base-enclosure-other-non-freezing-space.xml'].include? hpxml_file
+      hpxml.dishwashers[0].location = HPXML::LocationOtherNonFreezingSpace
+    elsif ['base-enclosure-other-multifamily-buffer-space.xml'].include? hpxml_file
+      hpxml.dishwashers[0].location = HPXML::LocationOtherMultifamilyBufferSpace
+    end
   elsif ['base-appliances-none.xml'].include? hpxml_file
     hpxml.dishwashers.clear
   elsif ['base-foundation-unconditioned-basement.xml'].include? hpxml_file
@@ -5966,12 +6038,21 @@ def set_hpxml_refrigerator(hpxml_file, hpxml)
     hpxml.refrigerators[0].adjusted_annual_kwh = 600
   elsif ['base-appliances-none.xml'].include? hpxml_file
     hpxml.refrigerators.clear
-  elsif ['base-enclosure-attached-multifamily.xml',
-         'base-enclosure-other-housing-unit.xml',
+  elsif ['base-enclosure-attached-multifamily.xml'].include? hpxml_file
+    hpxml.refrigerators[0].location = HPXML::LocationOtherNonFreezingSpace
+  elsif ['base-enclosure-other-housing-unit.xml',
          'base-enclosure-other-heated-space.xml',
          'base-enclosure-other-non-freezing-space.xml',
          'base-enclosure-other-multifamily-buffer-space.xml'].include? hpxml_file
-    hpxml.refrigerators[0].location = HPXML::LocationOther
+    if ['base-enclosure-other-housing-unit.xml'].include? hpxml_file
+      hpxml.refrigerators[0].location = HPXML::LocationOtherHousingUnit
+    elsif ['base-enclosure-other-heated-space.xml'].include? hpxml_file
+      hpxml.refrigerators[0].location = HPXML::LocationOtherHeatedSpace
+    elsif ['base-enclosure-other-non-freezing-space.xml'].include? hpxml_file
+      hpxml.refrigerators[0].location = HPXML::LocationOtherNonFreezingSpace
+    elsif ['base-enclosure-other-multifamily-buffer-space.xml'].include? hpxml_file
+      hpxml.refrigerators[0].location = HPXML::LocationOtherMultifamilyBufferSpace
+    end
   elsif ['base-foundation-unconditioned-basement.xml'].include? hpxml_file
     hpxml.refrigerators[0].location = HPXML::LocationBasementUnconditioned
   elsif ['base-atticroof-conditioned.xml'].include? hpxml_file
@@ -6056,12 +6137,21 @@ def set_hpxml_cooking_range(hpxml_file, hpxml)
                              is_induction: false)
   elsif ['base-appliances-none.xml'].include? hpxml_file
     hpxml.cooking_ranges.clear
-  elsif ['base-enclosure-attached-multifamily.xml',
-         'base-enclosure-other-housing-unit.xml',
+  elsif ['base-enclosure-attached-multifamily.xml'].include? hpxml_file
+    hpxml.cooking_ranges[0].location = HPXML::LocationOtherHousingUnit
+  elsif ['base-enclosure-other-housing-unit.xml',
          'base-enclosure-other-heated-space.xml',
          'base-enclosure-other-non-freezing-space.xml',
          'base-enclosure-other-multifamily-buffer-space.xml'].include? hpxml_file
-    hpxml.cooking_ranges[0].location = HPXML::LocationOther
+    if ['base-enclosure-other-housing-unit.xml'].include? hpxml_file
+      hpxml.cooking_ranges[0].location = HPXML::LocationOtherHousingUnit
+    elsif ['base-enclosure-other-heated-space.xml'].include? hpxml_file
+      hpxml.cooking_ranges[0].location = HPXML::LocationOtherHeatedSpace
+    elsif ['base-enclosure-other-non-freezing-space.xml'].include? hpxml_file
+      hpxml.cooking_ranges[0].location = HPXML::LocationOtherNonFreezingSpace
+    elsif ['base-enclosure-other-multifamily-buffer-space.xml'].include? hpxml_file
+      hpxml.cooking_ranges[0].location = HPXML::LocationOtherMultifamilyBufferSpace
+    end
   elsif ['base-appliances-gas.xml'].include? hpxml_file
     hpxml.cooking_ranges[0].fuel_type = HPXML::FuelTypeNaturalGas
     hpxml.cooking_ranges[0].is_induction = false
