@@ -85,10 +85,10 @@ def create_osws
     'base-enclosure-garage.osw' => 'base.osw',
     'base-enclosure-infil-cfm50.osw' => 'base.osw',
     'base-enclosure-infil-natural-ach.osw' => 'base.osw',
-    # 'base-enclosure-other-heated-space.osw' => 'base.osw', # TODO: uncomment when we can model multifamily with ambient foundation
-    # 'base-enclosure-other-housing-unit.osw' => 'base-foundation-ambient.osw', # TODO: uncomment when we can model multifamily with ambient foundation
-    # 'base-enclosure-other-multifamily-buffer-space.osw' => 'base.osw', # TODO: uncomment when we can model multifamily with ambient foundation
-    # 'base-enclosure-other-non-freezing-space.osw' => 'base.osw', # TODO: uncomment when we can model multifamily with ambient foundation
+    # 'base-enclosure-other-heated-space.osw' => 'base.osw', # TODO: uncomment when we can model multifamily with ambient foundation?
+    # 'base-enclosure-other-housing-unit.osw' => 'base-foundation-ambient.osw', # TODO: uncomment when we can model multifamily with ambient foundation?
+    # 'base-enclosure-other-multifamily-buffer-space.osw' => 'base.osw', # TODO: uncomment when we can model multifamily with ambient foundation?
+    # 'base-enclosure-other-non-freezing-space.osw' => 'base.osw', # TODO: uncomment when we can model multifamily with ambient foundation?
     'base-enclosure-overhangs.osw' => 'base.osw',
     # 'base-enclosure-rooftypes.osw' => 'base.osw',
     # 'base-enclosure-skylights.osw' => 'base.osw', # There are no front roof surfaces, but 15.0 ft^2 of skylights were specified.
@@ -1083,7 +1083,6 @@ def get_values(osw_file, step)
     step.setArgument('air_leakage_value', 0.67)
   elsif ['base-enclosure-other-heated-space.osw'].include? osw_file
     step.setArgument('geometry_unit_type', HPXML::ResidentialTypeApartment)
-    step.setArgument('geometry_other_exterior_adjacent', HPXML::LocationOtherHeatedSpace)
     step.setArgument('ducts_supply_location', HPXML::LocationOtherHeatedSpace)
     step.setArgument('ducts_return_location', HPXML::LocationOtherHeatedSpace)
     step.setArgument('water_heater_location', HPXML::LocationOtherHeatedSpace)
@@ -1104,7 +1103,6 @@ def get_values(osw_file, step)
     step.setArgument('cooking_range_oven_location', HPXML::LocationOtherHousingUnit)
   elsif ['base-enclosure-other-multifamily-buffer-space.osw'].include? osw_file
     step.setArgument('geometry_unit_type', HPXML::ResidentialTypeApartment)
-    step.setArgument('geometry_other_exterior_adjacent', HPXML::LocationOtherMultifamilyBufferSpace)
     step.setArgument('ducts_supply_location', HPXML::LocationOtherMultifamilyBufferSpace)
     step.setArgument('ducts_return_location', HPXML::LocationOtherMultifamilyBufferSpace)
     step.setArgument('water_heater_location', HPXML::LocationOtherMultifamilyBufferSpace)
@@ -1115,7 +1113,6 @@ def get_values(osw_file, step)
     step.setArgument('cooking_range_oven_location', HPXML::LocationOtherMultifamilyBufferSpace)
   elsif ['base-enclosure-other-non-freezing-space.osw'].include? osw_file
     step.setArgument('geometry_unit_type', HPXML::ResidentialTypeApartment)
-    step.setArgument('geometry_other_exterior_adjacent', HPXML::LocationOtherNonFreezingSpace)
     step.setArgument('ducts_supply_location', HPXML::LocationOtherNonFreezingSpace)
     step.setArgument('ducts_return_location', HPXML::LocationOtherNonFreezingSpace)
     step.setArgument('water_heater_location', HPXML::LocationOtherNonFreezingSpace)

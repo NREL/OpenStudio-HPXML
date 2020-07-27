@@ -218,17 +218,6 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     arg.setDefaultValue('Left')
     args << arg
 
-    other_exterior_adjacent_choices = OpenStudio::StringVector.new
-    other_exterior_adjacent_choices << HPXML::LocationOtherHousingUnit
-    other_exterior_adjacent_choices << HPXML::LocationOtherHeatedSpace
-    other_exterior_adjacent_choices << HPXML::LocationOtherMultifamilyBufferSpace
-    other_exterior_adjacent_choices << HPXML::LocationOtherNonFreezingSpace
-
-    arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('geometry_other_exterior_adjacent', other_exterior_adjacent_choices, false)
-    arg.setDisplayName('Geometry: Other Exterior Adjacent')
-    arg.setDescription("The exterior adjacent location for #{HPXML::ResidentialTypeSFA} or #{HPXML::ResidentialTypeApartment}.")
-    args << arg
-
     corridor_position_choices = OpenStudio::StringVector.new
     corridor_position_choices << 'Double-Loaded Interior'
     corridor_position_choices << 'Single Exterior (Front)'
@@ -3138,7 +3127,6 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
              geometry_aspect_ratio: runner.getDoubleArgumentValue('geometry_aspect_ratio', user_arguments),
              geometry_level: runner.getStringArgumentValue('geometry_level', user_arguments),
              geometry_horizontal_location: runner.getStringArgumentValue('geometry_horizontal_location', user_arguments),
-             geometry_other_exterior_adjacent: runner.getOptionalStringArgumentValue('geometry_other_exterior_adjacent', user_arguments),
              geometry_corridor_position: runner.getStringArgumentValue('geometry_corridor_position', user_arguments),
              geometry_corridor_width: runner.getDoubleArgumentValue('geometry_corridor_width', user_arguments),
              geometry_inset_width: runner.getDoubleArgumentValue('geometry_inset_width', user_arguments),
@@ -3709,12 +3697,6 @@ class HPXMLFile
       args[:geometry_foundation_height_above_grade] = 0.0
     end
 
-    if args[:geometry_other_exterior_adjacent].is_initialized
-      args[:geometry_other_exterior_adjacent] = args[:geometry_other_exterior_adjacent].get
-    else
-      args[:geometry_other_exterior_adjacent] = HPXML::LocationOtherHousingUnit
-    end
-
     if args[:geometry_unit_type] == HPXML::ResidentialTypeSFD
       success = Geometry.create_single_family_detached(runner: runner, model: model, **args)
     elsif args[:geometry_unit_type] == HPXML::ResidentialTypeSFA
@@ -4009,7 +3991,7 @@ class HPXMLFile
       if surface.adjacentSurface.is_initialized
         exterior_adjacent_to = get_adjacent_to(model, surface.adjacentSurface.get)
       elsif surface.outsideBoundaryCondition == 'Adiabatic'
-        exterior_adjacent_to = args[:geometry_other_exterior_adjacent]
+        exterior_adjacent_to = HPXML::LocationOtherHousingUnit
       end
       next if interior_adjacent_to == exterior_adjacent_to
       next if [HPXML::LocationLivingSpace, HPXML::LocationBasementConditioned].include? exterior_adjacent_to
@@ -4107,7 +4089,7 @@ class HPXMLFile
       if surface.adjacentSurface.is_initialized
         exterior_adjacent_to = get_adjacent_to(model, surface.adjacentSurface.get)
       elsif surface.outsideBoundaryCondition == 'Adiabatic'
-        exterior_adjacent_to = args[:geometry_other_exterior_adjacent]
+        exterior_adjacent_to = HPXML::LocationOtherHousingUnit
         if surface.surfaceType == 'Floor'
           other_space_above_or_below = HPXML::FrameFloorOtherSpaceBelow
         elsif surface.surfaceType == 'RoofCeiling'
