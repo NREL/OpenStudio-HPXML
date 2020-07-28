@@ -12,16 +12,11 @@ require 'schematron-nokogiri'
 class HPXMLtoOpenStudioSchematronTest < MiniTest::Test
   def before_setup
     @root_path = File.absolute_path(File.join(File.dirname(__FILE__), '..', '..'))
-    @tmp_output_path = File.join(@root_path, 'workflow', 'sample_files', 'tmp_output')
-    FileUtils.mkdir_p(@tmp_output_path)
-    @tmp_hpxml_path = File.join(@tmp_output_path, 'tmp.xml')
 
     # load the schematron xml
-    @stron_doc = Nokogiri::XML File.open(File.join(@root_path, 'HPXMLtoOpenStudio', 'resources', 'EPvalidator.xml'))
-  end
-
-  def after_teardown
-    FileUtils.rm_rf(@tmp_output_path)
+    @stron_path = File.join(@root_path, 'HPXMLtoOpenStudio', 'resources', 'EPvalidator.xml')
+    # make a Schematron object
+    @stron_doc = SchematronNokogiri::Schema.new Nokogiri::XML File.open(@stron_path)
   end
 
   def test_valid_sample_files
@@ -39,7 +34,7 @@ class HPXMLtoOpenStudioSchematronTest < MiniTest::Test
       hpxml_doc = hpxml.to_oga()
       _test_ruby_validation(hpxml_doc)
       # Schematron validation
-      _test_schematron_validation(@stron_doc, hpxml_path)
+      _test_schematron_validation(@stron_doc, hpxml_doc.to_xml)
     end
 
     puts
@@ -47,17 +42,12 @@ class HPXMLtoOpenStudioSchematronTest < MiniTest::Test
 
   def test_invalid_files
     # build up expected error messages hashes by parsing EPvalidator.xml
-    stron_xml_epvalidator = File.join(@root_path, 'HPXMLtoOpenStudio', 'resources', 'EPvalidator.xml')
-    doc = XMLHelper.parse_file(stron_xml_epvalidator)
+    doc = XMLHelper.parse_file(@stron_path)
     expected_error_msgs_by_element_addition = {}
     expected_error_msgs_by_element_deletion = {}
     XMLHelper.get_elements(doc, '/sch:schema/sch:pattern').each do |pattern|
       XMLHelper.get_elements(pattern, 'sch:rule').each do |rule|
         rule_context = XMLHelper.get_attribute_value(rule, 'context')
-
-        next if rule_context.include?('Other="DSE"') # FIXME: Need to add this test case.  Will need to remove both AnnualHeatingDistributionSystemEfficiency and AnnualCoolingDistributionSystemEfficiency for testing
-
-        # ['/HPXML/Building/BuildingDetails/Systems/HVAC/HVACDistribution[DistributionSystemType[Other="DSE"]]/AnnualHeatingDistributionSystemEfficiency', '/HPXML/Building/BuildingDetails/Systems/HVAC/HVACDistribution[DistributionSystemType[Other="DSE"]]/AnnualCoolingDistributionSystemEfficiency'] => 'Expected 1 or more element(s) for xpath: /HPXML/Building/BuildingDetails/Systems/HVAC/HVACDistribution[DistributionSystemType[Other="DSE"]]/AnnualHeatingDistributionSystemEfficiency | AnnualCoolingDistributionSystemEfficiency'
 
         XMLHelper.get_values(rule, 'sch:assert').each do |assertion|
           parent_xpath = rule_context.gsub('h:', '').gsub('/*', '')
@@ -80,18 +70,20 @@ class HPXMLtoOpenStudioSchematronTest < MiniTest::Test
 
     # Tests by element deletion
     expected_error_msgs_by_element_deletion.each do |target_xpath, expected_error_message|
+      print '.' 
       hpxml_name = get_hpxml_file_name(target_xpath)
       hpxml = HPXML.new(hpxml_path: File.join(@root_path, 'workflow', 'sample_files', hpxml_name))
       hpxml_doc = hpxml.to_oga()
       parent_element = target_xpath[0] == '' ? hpxml_doc : XMLHelper.get_element(hpxml_doc, target_xpath[0])
-      child_element = target_xpath[1]
-      XMLHelper.delete_element(parent_element, child_element)
-      XMLHelper.write_file(hpxml_doc, @tmp_hpxml_path)
-
+      child_elements = target_xpath[1]
+      child_elements.each do |child_element|
+        XMLHelper.delete_element(parent_element, child_element)
+      end
+      
       # .rb validator validation
       _test_ruby_validation(hpxml_doc, expected_error_message)
       # Schematron validation
-      _test_schematron_validation(@stron_doc, @tmp_hpxml_path, expected_error_message)
+      _test_schematron_validation(@stron_doc, hpxml_doc.to_xml, expected_error_message)
     end
 
     # Tests by element addition (i.e. zero_or_one, zero_or_two, etc.)
@@ -101,65 +93,63 @@ class HPXMLtoOpenStudioSchematronTest < MiniTest::Test
       hpxml = HPXML.new(hpxml_path: File.join(@root_path, 'workflow', 'sample_files', hpxml_name))
       hpxml_doc = hpxml.to_oga()
       parent_element = target_xpath[0] == '' ? hpxml_doc : XMLHelper.get_element(hpxml_doc, target_xpath[0])
-      child_element = target_xpath[1]
+      child_elements = target_xpath[1]
 
-      # make sure target elements exist in HPXML
-      child_element_name_without_predicates = child_element.gsub(/\[.*?\]|\[|\]/, '') # gsub '[...]' or '[' or ']'
-      child_element_name_without_predicates_array = child_element_name_without_predicates.split('/')[0...-1].reject(&:empty?)
-      XMLHelper.create_elements_as_needed(parent_element, child_element_name_without_predicates_array)
+      child_elements.each do |child_element|
+        # make sure parent elements of the last child element exist in HPXML
+        child_element_without_predicates = child_element.gsub(/\[.*?\]|\[|\]/, '') # gsub '[...]' or '[' or ']'
+        child_element_without_predicates_array = child_element_without_predicates.split('/')[0...-1].reject(&:empty?)
+        XMLHelper.create_elements_as_needed(parent_element, child_element_without_predicates_array)
 
-      # add child element
-      sub_parent_name = child_element.gsub(/\[text().*?\]/, '').split('/')[0...-1].reject(&:empty?) # gsub [text()=foo or ...]
-      mod_parent_name = [target_xpath[0], sub_parent_name].join('/').chomp('/')
-      mod_parent_element = XMLHelper.get_element(hpxml_doc, mod_parent_name)
-      mod_child_name = child_element.gsub(/\[.*?\]|\[|\]/, '').split('/')[-1]
-      max_number_of_elements_allowed = expected_error_message.gsub(/\[.*?\]|\[|\]/, '').scan(/\d+/).max.to_i
-      (max_number_of_elements_allowed + 1).times { XMLHelper.add_element(mod_parent_element, mod_child_name) }
+        # add child element
+        additional_parent_element = child_element.gsub(/\[text().*?\]/, '').split('/')[0...-1].reject(&:empty?).join('/').chomp('/') # gsub [text()=foo or ...] and select from 0th to the 2nd last element
+        mod_parent_element = additional_parent_element.empty? ? parent_element : XMLHelper.get_element(parent_element, additional_parent_element)
+        mod_child_name = child_element_without_predicates.split('/')[-1]
+        max_number_of_elements_allowed = expected_error_message.gsub(/\[.*?\]|\[|\]/, '').scan(/\d+/).max.to_i # scan numbers outside brackets and then find the maximum
+        (max_number_of_elements_allowed + 1).times { XMLHelper.add_element(mod_parent_element, mod_child_name) }
 
-      child_element_with_value = get_child_element_with_value(target_xpath, max_number_of_elements_allowed)
-
-      if not child_element_with_value.nil?
-        if child_element_name_without_predicates.include? '/'
-          XMLHelper.get_elements(parent_element, child_element_name_without_predicates).each do |e|
-            child_element_with_value.each do |element_with_value|
-              this_child_name = element_with_value.split('=')[0]
-              this_child_value = element_with_value.split('=')[1].gsub!(/\A"|"\Z/, '')
+        # add a value to the child element as needed
+        child_element_with_value = get_child_element_with_value(target_xpath, max_number_of_elements_allowed)
+        if not child_element_with_value.nil?
+          child_element_with_value.each do |element_with_value|
+            this_child_name = element_with_value[:name]
+            this_child_value = element_with_value[:value]
+            
+            this_parents = []
+            if child_element_without_predicates == this_child_name # in case where child_element_without_predicates is foo[text()=bar or ...]
+              this_parents << parent_element
+            else  # in case where child_element_without_predicates is foo/bar[text()=baz or ...]
+              this_parents = XMLHelper.get_elements(parent_element, child_element_without_predicates)
+            end
+            
+            this_parents.each do |e|
               XMLHelper.add_element(e, this_child_name, this_child_value)
             end
           end
-        else
-          child_element_with_value.each do |element_with_value|
-            this_child_name = element_with_value.split('=')[0]
-            this_child_value = element_with_value.split('=')[1].gsub!(/\A"|"\Z/, '')
-            XMLHelper.add_element(parent_element, this_child_name, this_child_value)
-          end
         end
       end
-      XMLHelper.write_file(hpxml_doc, @tmp_hpxml_path)
-
+      
       # .rb validator validation
       _test_ruby_validation(hpxml_doc, expected_error_message)
       # Schematron validation
-      _test_schematron_validation(@stron_doc, @tmp_hpxml_path, expected_error_message)
+      _test_schematron_validation(@stron_doc, hpxml_doc.to_xml, expected_error_message)
     end
 
     puts
   end
 
-  def _test_schematron_validation(stron_doc, hpxml_path, expected_error_msgs = nil)
-    # make a schematron object
-    stron = SchematronNokogiri::Schema.new stron_doc
+  def _test_schematron_validation(stron_doc, hpxml, expected_error_msgs = nil)
     # load the xml document you wish to validate
-    xml_doc = Nokogiri::XML File.open(hpxml_path) # FIXME: Instead of opening a file, pass in an xml string. Looks like validate method requires Nokogiri::XML
+    xml_doc = Nokogiri::XML hpxml
     # validate it
-    results = stron.validate xml_doc
+    results = stron_doc.validate xml_doc
     # assertions
     if expected_error_msgs.nil?
       assert_empty(results)
     else
       idx_of_interest = results.index { |i| i[:message].gsub(': ', [': ', i[:context_path].gsub('h:', '').concat(': ').gsub('/*: ', '')].join('')) == expected_error_msgs }
-      actual_error_msgs = results[idx_of_interest][:message].gsub(': ', [': ', results[idx_of_interest][:context_path].gsub('h:', '').concat(': ').gsub('/*: ', '')].join(''))
-      assert_equal(expected_error_msgs, actual_error_msgs)
+      error_msg_of_interest = results[idx_of_interest][:message].gsub(': ', [': ', results[idx_of_interest][:context_path].gsub('h:', '').concat(': ').gsub('/*: ', '')].join(''))
+      assert_equal(expected_error_msgs, error_msg_of_interest)
     end
   end
 
@@ -170,7 +160,8 @@ class HPXMLtoOpenStudioSchematronTest < MiniTest::Test
       assert_empty(results)
     else
       idx_of_interest = results.index { |i| i == expected_error_msgs }
-      assert_equal(expected_error_msgs, results[idx_of_interest])
+      error_msg_of_interest = results[idx_of_interest]
+      assert_equal(expected_error_msgs, error_msg_of_interest)
     end
   end
 
@@ -283,17 +274,26 @@ class HPXMLtoOpenStudioSchematronTest < MiniTest::Test
   end
 
   def get_element_name(assertion)
+    element_names = []
     if assertion.partition(': ').last.start_with?('[not')
-      return assertion.partition(': ').last.partition(' | ').last
+      element_names << assertion.partition(': ').last.partition(' | ').last
     else
       element_name = assertion.partition(': ').last.partition(' | ').first
       if element_name.count('[') != element_name.count(']')
         diff = element_name.count('[') - element_name.count(']')
         diff.times { element_name.concat(']') }
       end
+      element_names << element_name
 
-      return element_name
+      # exception: need to remove both AnnualHeatingDistributionSystemEfficiency and AnnualCoolingDistributionSystemEfficiency
+      # FIXME: Is there another way to handle this?
+      if assertion.partition(': ').last.include? 'AnnualHeatingDistributionSystemEfficiency'
+        add_element_name = assertion.partition(': ').last.partition(' | ').last
+        element_names << add_element_name
+      end
     end
+
+    return element_names
   end
 
   def get_expected_error_message(parent_xpath, assertion)
@@ -305,13 +305,16 @@ class HPXMLtoOpenStudioSchematronTest < MiniTest::Test
   end
 
   def get_child_element_with_value(target_xpath, max_number_of_elements_allowed)
-    element_with_value = nil
+    element_with_value = []
 
-    if target_xpath[1].split('/')[-1].include? 'text()='
-      element_name = target_xpath[1].split('text()=')[0].gsub(/\[|\]/, '/').chomp('/').split('/')[-1] # pull 'bar' from foo/bar[text()=baz or text()=fum or ...]
-      element_value = target_xpath[1].split('text()=')[1].gsub(/\[|\]/, '').gsub('" or ', '"') # pull 'baz' from foo/bar[text()=baz or text()=fum or ...]; FIXME: Is there another way to handle this?
-      element_with_value = []
-      (max_number_of_elements_allowed + 1).times { element_with_value << [element_name, element_value].join('=') }
+    child_elements = target_xpath[1]
+    child_elements.each do |child_element|
+      child_element_last = child_element.split('/')[-1]
+      if child_element_last.include? 'text()='
+        element_name = child_element.split('text()=')[0].gsub(/\[|\]/, '/').chomp('/').split('/')[-1] # pull 'bar' from foo/bar[text()=baz or text()=fum or ...]
+        element_value = child_element.split('text()=')[1].gsub(/\[|\]/, '').gsub('" or ', '"').gsub!(/\A"|"\Z/, '') # pull 'baz' from foo/bar[text()=baz or text()=fum or ...]; FIXME: Is there another way to handle this?
+        (max_number_of_elements_allowed + 1).times { element_with_value << {name: element_name, value: element_value} }
+      end
     end
 
     return element_with_value
