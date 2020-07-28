@@ -3197,16 +3197,13 @@ def set_hpxml_hvac_distributions(hpxml_file, hpxml)
     hpxml.hvac_distributions << hpxml.hvac_distributions[0].dup
     hpxml.hvac_distributions[-1].id = 'HVACDistribution5'
   elsif ['base-mechvent-multiple.xml'].include? hpxml_file
-    hpxml.hvac_distributions[0].conditioned_floor_area_served /= 2.0
     hpxml.hvac_distributions << hpxml.hvac_distributions[0].dup
     hpxml.hvac_distributions[1].id = 'HVACDistribution2'
   elsif ['base-mechvent-shared.xml'].include? hpxml_file
     hpxml.hvac_distributions << hpxml.hvac_distributions[0].dup
     hpxml.hvac_distributions[-1].id = 'HVACDistributionPreconditioningCooling'
-    hpxml.hvac_distributions[-1].conditioned_floor_area_served = 0.0
     hpxml.hvac_distributions << hpxml.hvac_distributions[-1].dup
     hpxml.hvac_distributions[-1].id = 'HVACDistributionPreconditioningHeating'
-    hpxml.hvac_distributions[-1].conditioned_floor_area_served = 0.0
   elsif ['base-hvac-dse.xml',
          'base-dhw-indirect-dse.xml'].include? hpxml_file
     hpxml.hvac_distributions[0].distribution_system_type = HPXML::HVACDistributionTypeDSE
