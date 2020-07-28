@@ -1190,7 +1190,7 @@ class OSModel
         mat_ext_finish = nil
       end
 
-      if not rim_joist.insulation_cavity_r_value.nil?# apply rim joist using Layer
+      if not rim_joist.insulation_cavity_r_value.nil? # apply rim joist using Layer
         Constructions.apply_rim_joist(runner, model, surfaces, rim_joist, rim_joist.id,
                                       cavity_r: rim_joist.insulation_cavity_r_value, install_grade: rim_joist.insulation_grade, framing_factor: rim_joist.framing_factor,
                                       inside_drywall_thick_in: inside_drywall_thick_in, osb_thick_in: rim_joist.osb_thickness,
