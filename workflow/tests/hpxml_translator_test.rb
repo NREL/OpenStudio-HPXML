@@ -183,6 +183,10 @@ class HPXMLTest < MiniTest::Test
                                                        'Expected 1 element(s) for xpath: /HPXML/Building/BuildingDetails/BuildingSummary/BuildingConstruction: ConditionedFloorArea'],
                             'missing-duct-location.xml' => ['Expected 0 or 2 element(s) for xpath: /HPXML/Building/BuildingDetails/Systems/HVAC/HVACDistribution/DistributionSystemType/AirDistribution/Ducts[DuctType="supply" or DuctType="return"]: DuctSurfaceArea | DuctLocation[text()='],
                             'missing-duct-location-and-surface-area.xml' => ['Error: The location and surface area of all ducts must be provided or blank.'],
+                            'multifamily-reference-appliance.xml' => ["The building is of type 'single-family detached' but"],
+                            'multifamily-reference-duct.xml' => ["The building is of type 'single-family detached' but"],
+                            'multifamily-reference-surface.xml' => ["The building is of type 'single-family detached' but"],
+                            'multifamily-reference-water-heater.xml' => ["The building is of type 'single-family detached' but"],
                             'net-area-negative-wall.xml' => ["Calculated a negative net surface area for surface 'Wall'."],
                             'net-area-negative-roof.xml' => ["Calculated a negative net surface area for surface 'Roof'."],
                             'orphaned-hvac-distribution.xml' => ["Distribution system 'HVACDistribution' found but no HVAC system attached to it."],
@@ -987,7 +991,7 @@ class HPXMLTest < MiniTest::Test
     if (hpxml.clothes_washers.size > 0) && (hpxml.water_heating_systems.size > 0)
       # Location
       hpxml_value = hpxml.clothes_washers[0].location
-      if hpxml_value.nil? || (hpxml_value == HPXML::LocationBasementConditioned) || (hpxml_value == HPXML::LocationOther)
+      if hpxml_value.nil? || [HPXML::LocationBasementConditioned, HPXML::LocationOtherHousingUnit, HPXML::LocationOtherHeatedSpace, HPXML::LocationOtherMultifamilyBufferSpace, HPXML::LocationOtherNonFreezingSpace].include?(hpxml_value)
         hpxml_value = HPXML::LocationLivingSpace
       end
       query = "SELECT Value FROM TabularDataWithStrings WHERE TableName='ElectricEquipment Internal Gains Nominal' AND ColumnName='Zone Name' AND RowName=(SELECT RowName FROM TabularDataWithStrings WHERE TableName='ElectricEquipment Internal Gains Nominal' AND ColumnName='Name' AND Value='#{Constants.ObjectNameClothesWasher.upcase}')"
@@ -999,7 +1003,7 @@ class HPXMLTest < MiniTest::Test
     if (hpxml.clothes_dryers.size > 0) && (hpxml.water_heating_systems.size > 0)
       # Location
       hpxml_value = hpxml.clothes_dryers[0].location
-      if hpxml_value.nil? || (hpxml_value == HPXML::LocationBasementConditioned) || (hpxml_value == HPXML::LocationOther)
+      if hpxml_value.nil? || [HPXML::LocationBasementConditioned, HPXML::LocationOtherHousingUnit, HPXML::LocationOtherHeatedSpace, HPXML::LocationOtherMultifamilyBufferSpace, HPXML::LocationOtherNonFreezingSpace].include?(hpxml_value)
         hpxml_value = HPXML::LocationLivingSpace
       end
       query = "SELECT Value FROM TabularDataWithStrings WHERE TableName='ElectricEquipment Internal Gains Nominal' AND ColumnName='Zone Name' AND RowName=(SELECT RowName FROM TabularDataWithStrings WHERE TableName='ElectricEquipment Internal Gains Nominal' AND ColumnName='Name' AND Value='#{Constants.ObjectNameClothesDryer.upcase}')"
@@ -1011,7 +1015,7 @@ class HPXMLTest < MiniTest::Test
     if hpxml.refrigerators.size > 0
       # Location
       hpxml_value = hpxml.refrigerators[0].location
-      if hpxml_value.nil? || (hpxml_value == HPXML::LocationBasementConditioned) || (hpxml_value == HPXML::LocationOther)
+      if hpxml_value.nil? || [HPXML::LocationBasementConditioned, HPXML::LocationOtherHousingUnit, HPXML::LocationOtherHeatedSpace, HPXML::LocationOtherMultifamilyBufferSpace, HPXML::LocationOtherNonFreezingSpace].include?(hpxml_value)
         hpxml_value = HPXML::LocationLivingSpace
       end
       query = "SELECT Value FROM TabularDataWithStrings WHERE TableName='ElectricEquipment Internal Gains Nominal' AND ColumnName='Zone Name' AND RowName=(SELECT RowName FROM TabularDataWithStrings WHERE TableName='ElectricEquipment Internal Gains Nominal' AND ColumnName='Name' AND Value='#{Constants.ObjectNameRefrigerator.upcase}')"
@@ -1023,7 +1027,7 @@ class HPXMLTest < MiniTest::Test
     if (hpxml.dishwashers.size > 0) && (hpxml.water_heating_systems.size > 0)
       # Location
       hpxml_value = hpxml.dishwashers[0].location
-      if hpxml_value.nil? || (hpxml_value == HPXML::LocationBasementConditioned) || (hpxml_value == HPXML::LocationOther)
+      if hpxml_value.nil? || [HPXML::LocationBasementConditioned, HPXML::LocationOtherHousingUnit, HPXML::LocationOtherHeatedSpace, HPXML::LocationOtherMultifamilyBufferSpace, HPXML::LocationOtherNonFreezingSpace].include?(hpxml_value)
         hpxml_value = HPXML::LocationLivingSpace
       end
       query = "SELECT Value FROM TabularDataWithStrings WHERE TableName='ElectricEquipment Internal Gains Nominal' AND ColumnName='Zone Name' AND RowName=(SELECT RowName FROM TabularDataWithStrings WHERE TableName='ElectricEquipment Internal Gains Nominal' AND ColumnName='Name' AND Value='#{Constants.ObjectNameDishwasher.upcase}')"
@@ -1035,7 +1039,7 @@ class HPXMLTest < MiniTest::Test
     if hpxml.cooking_ranges.size > 0
       # Location
       hpxml_value = hpxml.cooking_ranges[0].location
-      if hpxml_value.nil? || (hpxml_value == HPXML::LocationBasementConditioned) || (hpxml_value == HPXML::LocationOther)
+      if hpxml_value.nil? || [HPXML::LocationBasementConditioned, HPXML::LocationOtherHousingUnit, HPXML::LocationOtherHeatedSpace, HPXML::LocationOtherMultifamilyBufferSpace, HPXML::LocationOtherNonFreezingSpace].include?(hpxml_value)
         hpxml_value = HPXML::LocationLivingSpace
       end
       query = "SELECT Value FROM TabularDataWithStrings WHERE TableName='ElectricEquipment Internal Gains Nominal' AND ColumnName='Zone Name' AND RowName=(SELECT RowName FROM TabularDataWithStrings WHERE TableName='ElectricEquipment Internal Gains Nominal' AND ColumnName='Name' AND Value='#{Constants.ObjectNameCookingRange.upcase}')"

@@ -70,7 +70,7 @@ class HPXMLtoOpenStudioSchematronTest < MiniTest::Test
 
     # Tests by element deletion
     expected_error_msgs_by_element_deletion.each do |target_xpath, expected_error_message|
-      print '.' 
+      print '.'
       hpxml_name = get_hpxml_file_name(target_xpath)
       hpxml = HPXML.new(hpxml_path: File.join(@root_path, 'workflow', 'sample_files', hpxml_name))
       hpxml_doc = hpxml.to_oga()
@@ -79,7 +79,7 @@ class HPXMLtoOpenStudioSchematronTest < MiniTest::Test
       child_elements.each do |child_element|
         XMLHelper.delete_element(parent_element, child_element)
       end
-      
+
       # .rb validator validation
       _test_ruby_validation(hpxml_doc, expected_error_message)
       # Schematron validation
@@ -110,25 +110,25 @@ class HPXMLtoOpenStudioSchematronTest < MiniTest::Test
 
         # add a value to the child element as needed
         child_element_with_value = get_child_element_with_value(target_xpath, max_number_of_elements_allowed)
-        if not child_element_with_value.nil?
-          child_element_with_value.each do |element_with_value|
-            this_child_name = element_with_value[:name]
-            this_child_value = element_with_value[:value]
-            
-            this_parents = []
-            if child_element_without_predicates == this_child_name # in case where child_element_without_predicates is foo[text()=bar or ...]
-              this_parents << parent_element
-            else  # in case where child_element_without_predicates is foo/bar[text()=baz or ...]
-              this_parents = XMLHelper.get_elements(parent_element, child_element_without_predicates)
-            end
-            
-            this_parents.each do |e|
-              XMLHelper.add_element(e, this_child_name, this_child_value)
-            end
+        next unless not child_element_with_value.nil?
+
+        child_element_with_value.each do |element_with_value|
+          this_child_name = element_with_value[:name]
+          this_child_value = element_with_value[:value]
+
+          this_parents = []
+          if child_element_without_predicates == this_child_name # in case where child_element_without_predicates is foo[text()=bar or ...]
+            this_parents << parent_element
+          else # in case where child_element_without_predicates is foo/bar[text()=baz or ...]
+            this_parents = XMLHelper.get_elements(parent_element, child_element_without_predicates)
+          end
+
+          this_parents.each do |e|
+            XMLHelper.add_element(e, this_child_name, this_child_value)
           end
         end
       end
-      
+
       # .rb validator validation
       _test_ruby_validation(hpxml_doc, expected_error_message)
       # Schematron validation
@@ -310,11 +310,11 @@ class HPXMLtoOpenStudioSchematronTest < MiniTest::Test
     child_elements = target_xpath[1]
     child_elements.each do |child_element|
       child_element_last = child_element.split('/')[-1]
-      if child_element_last.include? 'text()='
-        element_name = child_element.split('text()=')[0].gsub(/\[|\]/, '/').chomp('/').split('/')[-1] # pull 'bar' from foo/bar[text()=baz or text()=fum or ...]
-        element_value = child_element.split('text()=')[1].gsub(/\[|\]/, '').gsub('" or ', '"').gsub!(/\A"|"\Z/, '') # pull 'baz' from foo/bar[text()=baz or text()=fum or ...]; FIXME: Is there another way to handle this?
-        (max_number_of_elements_allowed + 1).times { element_with_value << {name: element_name, value: element_value} }
-      end
+      next unless child_element_last.include? 'text()='
+
+      element_name = child_element.split('text()=')[0].gsub(/\[|\]/, '/').chomp('/').split('/')[-1] # pull 'bar' from foo/bar[text()=baz or text()=fum or ...]
+      element_value = child_element.split('text()=')[1].gsub(/\[|\]/, '').gsub('" or ', '"').gsub!(/\A"|"\Z/, '') # pull 'baz' from foo/bar[text()=baz or text()=fum or ...]; FIXME: Is there another way to handle this?
+      (max_number_of_elements_allowed + 1).times { element_with_value << { name: element_name, value: element_value } }
     end
 
     return element_with_value
