@@ -145,9 +145,20 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     arg.setDescription('This numeric field should contain the ending day of the ending month (must be valid for month) for the vacancy period desired.')
     args << arg
 
-    arg = OpenStudio::Measure::OSArgument.makeStringArgument('schedules_output_path', false)
-    arg.setDisplayName('Schedules Output File Path')
-    arg.setDescription('Absolute (or relative) path of the output schedules file.')
+    schedules_type_choices = OpenStudio::StringVector.new
+    schedules_type_choices << 'user-specified'
+    schedules_type_choices << 'average'
+    schedules_type_choices << 'stochastic'
+
+    arg = OpenStudio::Measure::OSArgument.makeStringArgument('schedules_type', schedules_type_choices, true)
+    arg.setDisplayName('Schedules: Type')
+    arg.setDescription('The type of schedules to use.')
+    arg.setDefaultValue('user-specified')
+    args << arg
+
+    arg = OpenStudio::Measure::OSArgument.makeStringArgument('schedules_path', false)
+    arg.setDisplayName('Schedules: Path')
+    arg.setDescription('Absolute (or relative) path of the user-specified schedules file.')
     args << arg
 
     arg = OpenStudio::Measure::OSArgument.makeStringArgument('weather_station_epw_filepath', true)
@@ -2726,7 +2737,7 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     args[:weather_dir] = runner.getStringArgumentValue('weather_dir', user_arguments)
     args[:software_program_used] = runner.getOptionalStringArgumentValue('software_program_used', user_arguments)
     args[:software_program_version] = runner.getOptionalStringArgumentValue('software_program_version', user_arguments)
-    args[:schedules_output_path] = runner.getOptionalStringArgumentValue('schedules_output_path', user_arguments)
+    args[:schedules_path] = runner.getOptionalStringArgumentValue('schedules_path', user_arguments)
     args[:geometry_roof_pitch] = { '1:12' => 1.0 / 12.0, '2:12' => 2.0 / 12.0, '3:12' => 3.0 / 12.0, '4:12' => 4.0 / 12.0, '5:12' => 5.0 / 12.0, '6:12' => 6.0 / 12.0, '7:12' => 7.0 / 12.0, '8:12' => 8.0 / 12.0, '9:12' => 9.0 / 12.0, '10:12' => 10.0 / 12.0, '11:12' => 11.0 / 12.0, '12:12' => 12.0 / 12.0 }[args[:geometry_roof_pitch]]
 
     # Argument error checks
@@ -2807,6 +2818,7 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
              simulation_control_vacancy_begin_day_of_month: runner.getOptionalIntegerArgumentValue('simulation_control_vacancy_begin_day_of_month', user_arguments),
              simulation_control_vacancy_end_month: runner.getOptionalIntegerArgumentValue('simulation_control_vacancy_end_month', user_arguments),
              simulation_control_vacancy_end_day_of_month: runner.getOptionalIntegerArgumentValue('simulation_control_vacancy_end_day_of_month', user_arguments),
+             schedules_type: runner.getStringArgumentValue('schedules_type', user_arguments),
              weather_station_epw_filepath: runner.getStringArgumentValue('weather_station_epw_filepath', user_arguments),
              site_type: runner.getOptionalStringArgumentValue('site_type', user_arguments),
              geometry_unit_type: runner.getStringArgumentValue('geometry_unit_type', user_arguments),
@@ -3319,8 +3331,6 @@ class HPXMLFile
         success = create_schedules(runner, model, weather, args)
         return false if not success
       end
-
-      set_schedules(hpxml, runner, args)
     end
 
     # Check for errors in the HPXML object
@@ -3387,51 +3397,6 @@ class HPXMLFile
     return true
   end
 
-  def self.set_schedules(hpxml, runner, args)
-    hpxml.header.schedules_path = args[:schedules_output_path]
-
-    hpxml.building_occupancy.schedule = 'occupants'
-
-    hpxml.water_heating.water_fixtures_schedule = 'fixtures'
-
-    hpxml.clothes_washers.each do |clothes_washer|
-      clothes_washer.water_schedule = 'clothes_washer'
-      clothes_washer.power_schedule = 'clothes_washer_power'
-    end
-
-    hpxml.clothes_dryers.each do |clothes_dryer|
-      clothes_dryer.power_schedule = 'clothes_dryer'
-    end
-
-    hpxml.dishwashers.each do |dishwasher|
-      dishwasher.water_schedule = 'dishwasher'
-      dishwasher.power_schedule = 'dishwasher_power'
-    end
-
-    hpxml.cooking_ranges.each do |cooking_range|
-      cooking_range.schedule = 'cooking_range'
-    end
-
-    hpxml.lighting.interior_schedule = 'lighting_interior'
-    hpxml.lighting.exterior_schedule = 'lighting_exterior'
-    if args[:geometry_unit_type] == HPXML::ResidentialTypeSFD && args[:geometry_garage_width] > 0
-      hpxml.lighting.garage_schedule = 'lighting_garage'
-    end
-    if hpxml.lighting.holiday_exists
-      hpxml.lighting.holiday_schedule = 'lighting_exterior_holiday'
-    end
-
-    hpxml.plug_loads.each do |plug_load|
-      next if plug_load.plug_load_type != HPXML::PlugLoadTypeOther
-
-      plug_load.schedule = 'plug_loads'
-    end
-
-    hpxml.ceiling_fans.each do |ceiling_fan|
-      ceiling_fan.schedule = 'ceiling_fan'
-    end
-  end
-
   def self.set_header(hpxml, runner, args)
     hpxml.header.xml_type = 'HPXML'
     hpxml.header.xml_generated_by = 'BuildResidentialHPXML'
@@ -3480,6 +3445,7 @@ class HPXMLFile
 
     hpxml.header.building_id = 'MyBuilding'
     hpxml.header.event_type = 'proposed workscope'
+    hpxml.header.schedules_path = args[:schedules_output_path]
   end
 
   def self.set_site(hpxml, runner, args)
@@ -4898,6 +4864,7 @@ class HPXMLFile
   end
 
   def self.set_extra_refrigerator(hpxml, runner, args)
+    return unless args[:extra_refrigerator_present]
     return unless args[:extra_refrigerator_present]
 
     if args[:extra_refrigerator_rated_annual_kwh] != Constants.Auto
