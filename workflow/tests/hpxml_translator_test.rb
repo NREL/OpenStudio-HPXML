@@ -235,8 +235,8 @@ class HPXMLTest < MiniTest::Test
     # Add reporting measure to workflow
     measure_subdir = 'SimulationOutputReport'
     args = {}
-    args['timeseries_frequency'] = 'hourly'
-    args['include_timeseries_fuel_consumptions'] = true
+    args['timeseries_frequency'] = 'none'
+    args['include_timeseries_fuel_consumptions'] = false
     args['include_timeseries_end_use_consumptions'] = false
     args['include_timeseries_hot_water_uses'] = false
     args['include_timeseries_total_loads'] = false
@@ -258,11 +258,11 @@ class HPXMLTest < MiniTest::Test
     results = run_hpxml_workflow(rundir, xml, measures, measures_dir,
                                  debug: true, output_vars: output_vars,
                                  run_measures_only: expect_error)
-    workflow_time = Time.now - workflow_start
+    workflow_time = (Time.now - workflow_start).round(1)
     success = results[:success]
     runner = results[:runner]
     sim_time = results[:sim_time]
-    puts "Completed in #{workflow_time.round(1)} seconds."
+    puts "Completed in #{workflow_time} seconds."
     puts
 
     # Check results
