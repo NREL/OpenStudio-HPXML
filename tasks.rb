@@ -200,6 +200,8 @@ def create_osws
     'base-simcontrol-daylight-saving-disabled.osw' => 'base.osw',
     'base-simcontrol-runperiod-1-month.osw' => 'base.osw',
     'base-simcontrol-timestep-10-mins.osw' => 'base.osw',
+    'base-stochastic-schedules.osw' => 'base.osw',
+    'base-user-specified-schedules.osw' => 'base.osw',
 
     # Extra test files that don't correspond with sample files
     'extra-auto.osw' => 'base.osw',
@@ -299,7 +301,8 @@ def get_values(osw_file, step)
   if ['base.osw'].include? osw_file
     step.setArgument('weather_dir', 'weather')
     step.setArgument('simulation_control_timestep', '60')
-    step.setArgument('schedules_type', 'user-specified')
+    step.setArgument('schedules_type', 'average')
+    step.setArgument('schedules_path', 'BuildResidentialHPXML/tests/schedules/average.csv')
     step.setArgument('weather_station_epw_filepath', 'USA_CO_Denver.Intl.AP.725650_TMY3.epw')
     step.setArgument('site_type', HPXML::SiteTypeSuburban)
     step.setArgument('geometry_unit_type', HPXML::ResidentialTypeSFD)
@@ -1742,10 +1745,12 @@ def get_values(osw_file, step)
     step.setArgument('simulation_control_daylight_saving_end_day_of_month', 6)
   elsif ['base-simcontrol-daylight-saving-disabled.osw'].include? osw_file
     step.setArgument('simulation_control_daylight_saving_enabled', false)
-  elsif ['base-average-schedules.osw'].include? osw_file
-    step.setArgument('schedules_type', 'average')
   elsif ['base-stochastic-schedules.osw'].include? osw_file
     step.setArgument('schedules_type', 'stochastic')
+    step.setArgument('schedules_path', 'BuildResidentialHPXML/tests/schedules/stochastic.csv')
+  elsif ['base-user-specified-schedules.osw'].include? osw_file
+    step.setArgument('schedules_type', 'user-specified')
+    step.setArgument('schedules_path', 'BuildResidentialHPXML/tests/schedules/user-specified.csv')
   elsif ['base-simcontrol-runperiod-1-month.osw'].include? osw_file
     step.setArgument('simulation_control_run_period_end_month', 1)
     step.setArgument('simulation_control_run_period_end_day_of_month', 31)
@@ -2139,6 +2144,8 @@ def create_hpxmls
     'base-simcontrol-runperiod-1-month.xml' => 'base.xml',
     'base-simcontrol-timestep-10-mins.xml' => 'base.xml',
     'base-misc-lighting-detailed.xml' => 'base.xml',
+    'base-stochastic-schedules.xml' => 'base.xml',
+    'base-user-specified-schedules.xml' => 'base.xml',
 
     'hvac_autosizing/base-autosize.xml' => 'base.xml',
     'hvac_autosizing/base-hvac-air-to-air-heat-pump-1-speed-autosize.xml' => 'base-hvac-air-to-air-heat-pump-1-speed.xml',
@@ -2332,6 +2339,10 @@ def set_hpxml_header(hpxml_file, hpxml)
     hpxml.header.dst_end_day_of_month = 31
   elsif ['base-misc-defaults.xml'].include? hpxml_file
     hpxml.header.timestep = nil
+  elsif ['base-stochastic-schedules.xml'].include? hpxml_file
+    hpxml.header.schedules_path = 'BuildResidentialHPXML/tests/schedules/stochastic.csv'
+  elsif ['base-user-specified-schedules.xml'].include? hpxml_file
+    hpxml.header.schedules_path = 'BuildResidentialHPXML/tests/schedules/user-specified.csv'
   end
 end
 

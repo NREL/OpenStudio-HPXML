@@ -913,9 +913,9 @@ class OSModel
         fail 'Occupancy schedule inconsistent with hrs_per_day.'
       end
 
-      if not @hpxml.building_occupancy.schedule.nil?
+      if not @hpxml.header.schedules_path.nil?
         schedules_file = SchedulesFile.new(runner: runner, model: model, schedules_path: @hpxml.header.schedules_path)
-        people_sch = schedules_file.create_schedule_file(col_name: @hpxml.building_occupancy.schedule)
+        people_sch = schedules_file.create_schedule_file(col_name: 'occupants')
       end
 
       weekend_sch = weekday_sch

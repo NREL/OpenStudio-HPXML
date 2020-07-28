@@ -146,19 +146,19 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     args << arg
 
     schedules_type_choices = OpenStudio::StringVector.new
-    schedules_type_choices << 'user-specified'
     schedules_type_choices << 'average'
     schedules_type_choices << 'stochastic'
+    schedules_type_choices << 'user-specified'
 
-    arg = OpenStudio::Measure::OSArgument.makeStringArgument('schedules_type', schedules_type_choices, true)
+    arg = OpenStudio::Measure::OSArgument.makeChoiceArgument('schedules_type', schedules_type_choices, true)
     arg.setDisplayName('Schedules: Type')
     arg.setDescription('The type of schedules to use.')
-    arg.setDefaultValue('user-specified')
+    arg.setDefaultValue('average')
     args << arg
 
     arg = OpenStudio::Measure::OSArgument.makeStringArgument('schedules_path', false)
     arg.setDisplayName('Schedules: Path')
-    arg.setDescription('Absolute (or relative) path of the user-specified schedules file.')
+    arg.setDescription('Absolute (or relative) path of the user-specified schedules csv file.')
     args << arg
 
     arg = OpenStudio::Measure::OSArgument.makeStringArgument('weather_station_epw_filepath', true)
@@ -3276,6 +3276,9 @@ class HPXMLFile
     success = create_geometry_envelope(runner, model_geometry, args)
     return false if not success
 
+    success = create_schedules(runner, model, weather, args)
+    return false if not success
+
     hpxml = HPXML.new
 
     set_header(hpxml, runner, args)
@@ -3324,15 +3327,6 @@ class HPXMLFile
     set_pool(hpxml, runner, args)
     set_hot_tub(hpxml, runner, args)
 
-    if args[:schedules_output_path].is_initialized
-      args[:schedules_output_path] = args[:schedules_output_path].get
-
-      if not File.exist?(File.expand_path(args[:schedules_output_path]))
-        success = create_schedules(runner, model, weather, args)
-        return false if not success
-      end
-    end
-
     # Check for errors in the HPXML object
     errors = hpxml.check_for_errors()
     if errors.size > 0
@@ -3369,13 +3363,19 @@ class HPXMLFile
   end
 
   def self.create_schedules(runner, model, weather, args)
+    if args[:schedules_type] == 'user-specified'
+      args[:schedules_path] = args[:schedules_path].get
+      return true
+    end
+
     if args[:geometry_num_occupants] == Constants.Auto
       args[:geometry_num_occupants] = Geometry.get_occupancy_default_num(args[:geometry_num_bedrooms])
     else
       args[:geometry_num_occupants] = Integer(args[:geometry_num_occupants])
     end
 
-    args[:schedules_path] = File.join(File.dirname(__FILE__), 'resources/schedules')
+    args[:schedules_resources_path] = File.join(File.dirname(__FILE__), 'resources/schedules')
+    args[:schedules_path] = '../resources'
 
     year_description = model.getYearDescription
     year_description.setCalendarYear(2007) # default to TMY
@@ -3391,7 +3391,7 @@ class HPXMLFile
     return false if not success
 
     # export the schedule
-    success = schedule_generator.export(output_path: File.expand_path(args[:schedules_output_path]))
+    success = schedule_generator.export(output_path: File.expand_path(args[:schedules_path]))
     return false if not success
 
     return true
@@ -3445,7 +3445,7 @@ class HPXMLFile
 
     hpxml.header.building_id = 'MyBuilding'
     hpxml.header.event_type = 'proposed workscope'
-    hpxml.header.schedules_path = args[:schedules_output_path]
+    hpxml.header.schedules_path = args[:schedules_path]
   end
 
   def self.set_site(hpxml, runner, args)
