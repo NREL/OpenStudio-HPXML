@@ -305,6 +305,7 @@
           <HVACPlant>
             <CoolingSystem>
               <SystemIdentifier id='CoolingSystem'/>
+              <IsVentilationPreconditioningSystem>false</IsVentilationPreconditioningSystem>
               <CoolingSystemType>evaporative cooler</CoolingSystemType>
               <CoolingSystemFuel>electricity</CoolingSystemFuel>
               <FractionCoolLoadServed>1.0</FractionCoolLoadServed>

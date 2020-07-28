@@ -2418,15 +2418,16 @@ class HPXML < Object
     end
 
     def total_fraction_heat_load_served
-      map { |htg_sys| htg_sys.fraction_heat_load_served }.sum(0.0)
+      select{|htg_sys| not htg_sys.is_ventilation_preconditioning}.map { |htg_sys| htg_sys.fraction_heat_load_served }.sum(0.0)
     end
   end
 
   class HeatingSystem < BaseElement
     ATTRS = [:id, :distribution_system_idref, :year_installed, :heating_system_type,
-             :heating_system_fuel, :heating_capacity, :heating_efficiency_afue,
-             :heating_efficiency_percent, :fraction_heat_load_served, :electric_auxiliary_energy,
-             :heating_cfm, :energy_star, :seed_id]
+             :heating_system_fuel, :heating_capacity, :heating_capacity_building, 
+             :heating_efficiency_afue, :heating_efficiency_percent, :fraction_heat_load_served,
+             :electric_auxiliary_energy, :heating_cfm, :energy_star, :seed_id, 
+             :is_ventilation_preconditioning]
     attr_accessor(*ATTRS)
 
     def distribution_system
@@ -2477,13 +2478,20 @@ class HPXML < Object
         distribution_system = XMLHelper.add_element(heating_system, 'DistributionSystem')
         XMLHelper.add_attribute(distribution_system, 'idref', @distribution_system_idref)
       end
+      XMLHelper.add_element(heating_system, 'IsVentilationPreconditioningSystem', to_boolean(@is_ventilation_preconditioning)) unless @is_ventilation_preconditioning.nil?
       if not @heating_system_type.nil?
         heating_system_type_e = XMLHelper.add_element(heating_system, 'HeatingSystemType')
         XMLHelper.add_element(heating_system_type_e, @heating_system_type)
       end
       XMLHelper.add_element(heating_system, 'HeatingSystemFuel', @heating_system_fuel) unless @heating_system_fuel.nil?
-      XMLHelper.add_element(heating_system, 'HeatingCapacity', to_float(@heating_capacity)) unless @heating_capacity.nil?
-
+      if @is_ventilation_preconditioning
+        cap = XMLHelper.add_element(heating_system, 'HeatingCapacity', to_float(@heating_capacity)) unless @heating_capacity.nil?
+        XMLHelper.add_attribute(cap, 'scope', 'single unit') unless cap.nil?
+        bldg_cap = XMLHelper.add_element(heating_system, 'HeatingCapacity', to_float(@heating_capacity_building)) unless @heating_capacity_building
+        XMLHelper.add_attribute(bldg_cap, 'scope', 'multiple units') unless bldg_cap.nil?
+      else
+        XMLHelper.add_element(heating_system, 'HeatingCapacity', to_float(@heating_capacity)) unless @heating_capacity.nil?
+      end
       efficiency_units = nil
       efficiency_value = nil
       if [HVACTypeFurnace, HVACTypeWallFurnace, HVACTypeFloorFurnace, HVACTypeBoiler].include? @heating_system_type
@@ -2511,10 +2519,16 @@ class HPXML < Object
 
       @id = HPXML::get_id(heating_system)
       @distribution_system_idref = HPXML::get_idref(XMLHelper.get_element(heating_system, 'DistributionSystem'))
+      @is_ventilation_preconditioning = to_boolean(XMLHelper.get_value(heating_system, 'IsVentilationPreconditioningSystem'))
       @year_installed = to_integer_or_nil(XMLHelper.get_value(heating_system, 'YearInstalled'))
       @heating_system_type = XMLHelper.get_child_name(heating_system, 'HeatingSystemType')
       @heating_system_fuel = XMLHelper.get_value(heating_system, 'HeatingSystemFuel')
-      @heating_capacity = to_float_or_nil(XMLHelper.get_value(heating_system, 'HeatingCapacity'))
+      if @is_ventilation_preconditioning
+        @heating_capacity = to_float_or_nil(XMLHelper.get_value(heating_system, 'HeatingCapacity[@scope="single unit"]'))
+        @heating_capacity_building = to_float_or_nil(XMLHelper.get_value(heating_system, 'HeatingCapacity[@scope="multiple units"]'))
+      else
+        @heating_capacity = to_float_or_nil(XMLHelper.get_value(heating_system, 'HeatingCapacity'))
+      end
       if [HVACTypeFurnace, HVACTypeWallFurnace, HVACTypeFloorFurnace, HVACTypeBoiler].include? @heating_system_type
         @heating_efficiency_afue = to_float_or_nil(XMLHelper.get_value(heating_system, "AnnualHeatingEfficiency[Units='AFUE']/Value"))
       elsif [HVACTypeElectricResistance, HVACTypeStove, HVACTypePortableHeater, HVACTypeFixedHeater, HVACTypeFireplace].include? @heating_system_type
@@ -2542,15 +2556,15 @@ class HPXML < Object
     end
 
     def total_fraction_cool_load_served
-      map { |clg_sys| clg_sys.fraction_cool_load_served }.sum(0.0)
+      select{|clg_sys| not clg_sys.is_ventilation_preconditioning}.map { |clg_sys| clg_sys.fraction_cool_load_served }.sum(0.0)
     end
   end
 
   class CoolingSystem < BaseElement
-    ATTRS = [:id, :distribution_system_idref, :year_installed, :cooling_system_type,
-             :cooling_system_fuel, :cooling_capacity, :compressor_type, :fraction_cool_load_served,
-             :cooling_efficiency_seer, :cooling_efficiency_eer, :cooling_shr, :cooling_cfm,
-             :energy_star, :seed_id]
+    ATTRS = [:id, :distribution_system_idref, :year_installed, :cooling_system_type, 
+             :cooling_system_fuel, :cooling_capacity, :cooling_capacity_building, :compressor_type,
+             :fraction_cool_load_served, :cooling_efficiency_seer, :cooling_efficiency_eer, 
+             :cooling_shr, :cooling_cfm, :energy_star, :seed_id, :is_ventilation_preconditioning]
     attr_accessor(*ATTRS)
 
     def distribution_system
@@ -2601,9 +2615,17 @@ class HPXML < Object
         distribution_system = XMLHelper.add_element(cooling_system, 'DistributionSystem')
         XMLHelper.add_attribute(distribution_system, 'idref', @distribution_system_idref)
       end
+      XMLHelper.add_element(cooling_system, 'IsVentilationPreconditioningSystem', to_boolean(@is_ventilation_preconditioning)) unless @is_ventilation_preconditioning.nil?
       XMLHelper.add_element(cooling_system, 'CoolingSystemType', @cooling_system_type) unless @cooling_system_type.nil?
       XMLHelper.add_element(cooling_system, 'CoolingSystemFuel', @cooling_system_fuel) unless @cooling_system_fuel.nil?
-      XMLHelper.add_element(cooling_system, 'CoolingCapacity', to_float(@cooling_capacity)) unless @cooling_capacity.nil?
+      if @is_ventilation_preconditioning
+        cap = XMLHelper.add_element(cooling_system, 'CoolingCapacity', to_float(@cooling_capacity)) unless @cooling_capacity.nil?
+        XMLHelper.add_attribute(cap, 'scope', 'single unit') unless cap.nil?
+        bldg_cap = XMLHelper.add_element(cooling_system, 'CoolingCapacity', to_float(@cooling_capacity_building)) unless @cooling_capacity_building
+        XMLHelper.add_attribute(bldg_cap, 'scope', 'multiple units') unless bldg_cap.nil?
+      else
+        XMLHelper.add_element(cooling_system, 'CoolingCapacity', to_float(@cooling_capacity)) unless @cooling_capacity.nil?
+      end
       XMLHelper.add_element(cooling_system, 'CompressorType', @compressor_type) unless @compressor_type.nil?
       XMLHelper.add_element(cooling_system, 'FractionCoolLoadServed', to_float(@fraction_cool_load_served)) unless @fraction_cool_load_served.nil?
 
@@ -2633,10 +2655,16 @@ class HPXML < Object
 
       @id = HPXML::get_id(cooling_system)
       @distribution_system_idref = HPXML::get_idref(XMLHelper.get_element(cooling_system, 'DistributionSystem'))
+      @is_ventilation_preconditioning = to_boolean(XMLHelper.get_value(cooling_system, 'IsVentilationPreconditioningSystem'))
       @year_installed = to_integer_or_nil(XMLHelper.get_value(cooling_system, 'YearInstalled'))
       @cooling_system_type = XMLHelper.get_value(cooling_system, 'CoolingSystemType')
       @cooling_system_fuel = XMLHelper.get_value(cooling_system, 'CoolingSystemFuel')
-      @cooling_capacity = to_float_or_nil(XMLHelper.get_value(cooling_system, 'CoolingCapacity'))
+      if @is_ventilation_preconditioning
+        @cooling_capacity = to_float_or_nil(XMLHelper.get_value(cooling_system, 'CoolingCapacity[@scope="single unit"]'))
+        @cooling_capacity_building = to_float_or_nil(XMLHelper.get_value(cooling_system, 'CoolingCapacity[@scope="multiple units"]'))
+      else
+        @cooling_capacity = to_float_or_nil(XMLHelper.get_value(cooling_system, 'CoolingCapacity'))
+      end
       @compressor_type = XMLHelper.get_value(cooling_system, 'CompressorType')
       @fraction_cool_load_served = to_float_or_nil(XMLHelper.get_value(cooling_system, 'FractionCoolLoadServed'))
       if [HVACTypeCentralAirConditioner, HVACTypeMiniSplitAirConditioner].include? @cooling_system_type
@@ -2665,22 +2693,23 @@ class HPXML < Object
     end
 
     def total_fraction_heat_load_served
-      map { |hp| hp.fraction_heat_load_served }.sum(0.0)
+      select{|hp| not hp.is_ventilation_preconditioning}.map { |hp| hp.fraction_heat_load_served }.sum(0.0)
     end
 
     def total_fraction_cool_load_served
-      map { |hp| hp.fraction_cool_load_served }.sum(0.0)
+      select{|hp| not hp.is_ventilation_preconditioning}.map { |hp| hp.fraction_cool_load_served }.sum(0.0)
     end
   end
 
   class HeatPump < BaseElement
     ATTRS = [:id, :distribution_system_idref, :year_installed, :heat_pump_type, :heat_pump_fuel,
-             :heating_capacity, :heating_capacity_17F, :cooling_capacity, :compressor_type,
+             :heating_capacity, :heating_capacity_17F, :cooling_capacity, :heating_capacity_building, 
+             :heating_capacity_17F_building, :cooling_capacity_building, :compressor_type,
              :cooling_shr, :backup_heating_fuel, :backup_heating_capacity,
              :backup_heating_efficiency_percent, :backup_heating_efficiency_afue,
              :backup_heating_switchover_temp, :fraction_heat_load_served, :fraction_cool_load_served,
              :cooling_efficiency_seer, :cooling_efficiency_eer, :heating_efficiency_hspf,
-             :heating_efficiency_cop, :energy_star, :seed_id]
+             :heating_efficiency_cop, :energy_star, :seed_id, :is_ventilation_preconditioning]
     attr_accessor(*ATTRS)
 
     def distribution_system
@@ -2720,11 +2749,29 @@ class HPXML < Object
         distribution_system = XMLHelper.add_element(heat_pump, 'DistributionSystem')
         XMLHelper.add_attribute(distribution_system, 'idref', @distribution_system_idref)
       end
+      XMLHelper.add_element(heat_pump, 'IsVentilationPreconditioningSystem', to_boolean(@is_ventilation_preconditioning)) unless @is_ventilation_preconditioning.nil?
       XMLHelper.add_element(heat_pump, 'HeatPumpType', @heat_pump_type) unless @heat_pump_type.nil?
       XMLHelper.add_element(heat_pump, 'HeatPumpFuel', @heat_pump_fuel) unless @heat_pump_fuel.nil?
+      if @is_ventilation_preconditioning
+        htg_cap = XMLHelper.add_element(heat_pump, 'HeatingCapacity', to_float(@heating_capacity)) unless @heating_capacity.nil?
+        XMLHelper.add_attribute(htg_cap, 'scope', 'single unit') unless htg_cap.nil?
+        htg_bldg_cap = XMLHelper.add_element(heat_pump, 'HeatingCapacity', to_float(@heating_capacity_building)) unless @heating_capacity_building
+        XMLHelper.add_attribute(htg_bldg_cap, 'scope', 'multiple units') unless htg_bldg_cap.nil?
+
+        htg_cap_17 = XMLHelper.add_element(heat_pump, 'HeatingCapacity17F', to_float(@heating_capacity_17F)) unless @heating_capacity_17F.nil?
+        XMLHelper.add_attribute(htg_cap_17, 'scope', 'single unit') unless htg_cap_17.nil?
+        htg_bldg_cap_17 = XMLHelper.add_element(heat_pump, 'HeatingCapacity17F', to_float(@heating_capacity_17F_building)) unless @heating_capacity_17F_building
+        XMLHelper.add_attribute(htg_bldg_cap_17, 'scope', 'multiple units') unless htg_bldg_cap_17.nil?
+
+        clg_cap = XMLHelper.add_element(heat_pump, 'CoolingCapacity', to_float(@cooling_capacity)) unless @cooling_capacity.nil?
+        XMLHelper.add_attribute(clg_cap, 'scope', 'single unit') unless clg_cap.nil?
+        clg_bldg_cap = XMLHelper.add_element(heat_pump, 'cooling_capacity', to_float(@cooling_capacity_building)) unless @cooling_capacity_building
+        XMLHelper.add_attribute(clg_bldg_cap, 'scope', 'multiple units') unless clg_bldg_cap.nil?
+      else
       XMLHelper.add_element(heat_pump, 'HeatingCapacity', to_float(@heating_capacity)) unless @heating_capacity.nil?
       XMLHelper.add_element(heat_pump, 'HeatingCapacity17F', to_float(@heating_capacity_17F)) unless @heating_capacity_17F.nil?
       XMLHelper.add_element(heat_pump, 'CoolingCapacity', to_float(@cooling_capacity)) unless @cooling_capacity.nil?
+      end
       XMLHelper.add_element(heat_pump, 'CompressorType', @compressor_type) unless @compressor_type.nil?
       XMLHelper.add_element(heat_pump, 'CoolingSensibleHeatFraction', to_float(@cooling_shr)) unless @cooling_shr.nil?
       if not @backup_heating_fuel.nil?
@@ -2779,6 +2826,7 @@ class HPXML < Object
 
       @id = HPXML::get_id(heat_pump)
       @distribution_system_idref = HPXML::get_idref(XMLHelper.get_element(heat_pump, 'DistributionSystem'))
+      @is_ventilation_preconditioning = to_boolean(XMLHelper.get_value(heat_pump, 'IsVentilationPreconditioningSystem'))
       @year_installed = to_integer_or_nil(XMLHelper.get_value(heat_pump, 'YearInstalled'))
       @heat_pump_type = XMLHelper.get_value(heat_pump, 'HeatPumpType')
       @heat_pump_fuel = XMLHelper.get_value(heat_pump, 'HeatPumpFuel')
@@ -3183,7 +3231,15 @@ class HPXML < Object
     end
 
     def average_flow_rate
-      return flow_rate * (@hours_in_operation / 24.0)
+      if @is_shared_system
+        if not @fraction_oa.nil?
+          return flow_rate * (@hours_in_operation / 24.0) * @fraction_oa
+        elsif not @fraction_recirculation.nil?
+          return flow_rate * (@hours_in_operation / 24.0) * (1 - @fraction_recirculation)
+        end
+      else
+        return flow_rate * (@hours_in_operation / 24.0)
+      end
     end
 
     def average_fan_power

@@ -2419,7 +2419,8 @@ def set_hpxml_heating_systems(hpxml_file, hpxml)
                               heating_system_fuel: HPXML::FuelTypeNaturalGas,
                               heating_capacity: 64000,
                               heating_efficiency_afue: 0.92,
-                              fraction_heat_load_served: 1)
+                              fraction_heat_load_served: 1,
+                              is_ventilation_preconditioning: false)
   elsif ['base-hvac-air-to-air-heat-pump-1-speed.xml',
          'base-hvac-air-to-air-heat-pump-2-speed.xml',
          'base-hvac-air-to-air-heat-pump-var-speed.xml',
@@ -2481,7 +2482,8 @@ def set_hpxml_heating_systems(hpxml_file, hpxml)
                               heating_system_fuel: HPXML::FuelTypeElectricity,
                               heating_capacity: 6400,
                               heating_efficiency_afue: 1,
-                              fraction_heat_load_served: 0.1)
+                              fraction_heat_load_served: 0.1,
+                              is_ventilation_preconditioning: false)
     hpxml.heating_systems.add(id: 'HeatingSystem2',
                               distribution_system_idref: 'HVACDistribution2',
                               heating_system_type: HPXML::HVACTypeFurnace,
@@ -2489,14 +2491,16 @@ def set_hpxml_heating_systems(hpxml_file, hpxml)
                               heating_capacity: 6400,
                               heating_efficiency_afue: 0.92,
                               fraction_heat_load_served: 0.1,
-                              electric_auxiliary_energy: 700)
+                              electric_auxiliary_energy: 700,
+                              is_ventilation_preconditioning: false)
     hpxml.heating_systems.add(id: 'HeatingSystem3',
                               distribution_system_idref: 'HVACDistribution3',
                               heating_system_type: HPXML::HVACTypeBoiler,
                               heating_system_fuel: HPXML::FuelTypeElectricity,
                               heating_capacity: 6400,
                               heating_efficiency_afue: 1,
-                              fraction_heat_load_served: 0.1)
+                              fraction_heat_load_served: 0.1,
+                              is_ventilation_preconditioning: false)
     hpxml.heating_systems.add(id: 'HeatingSystem4',
                               distribution_system_idref: 'HVACDistribution4',
                               heating_system_type: HPXML::HVACTypeBoiler,
@@ -2504,27 +2508,31 @@ def set_hpxml_heating_systems(hpxml_file, hpxml)
                               heating_capacity: 6400,
                               heating_efficiency_afue: 0.92,
                               fraction_heat_load_served: 0.1,
-                              electric_auxiliary_energy: 200)
+                              electric_auxiliary_energy: 200,
+                              is_ventilation_preconditioning: false)
     hpxml.heating_systems.add(id: 'HeatingSystem5',
                               heating_system_type: HPXML::HVACTypeElectricResistance,
                               heating_system_fuel: HPXML::FuelTypeElectricity,
                               heating_capacity: 6400,
                               heating_efficiency_percent: 1,
-                              fraction_heat_load_served: 0.1)
+                              fraction_heat_load_served: 0.1,
+                              is_ventilation_preconditioning: false)
     hpxml.heating_systems.add(id: 'HeatingSystem6',
                               heating_system_type: HPXML::HVACTypeStove,
                               heating_system_fuel: HPXML::FuelTypeOil,
                               heating_capacity: 6400,
                               heating_efficiency_percent: 0.8,
                               fraction_heat_load_served: 0.1,
-                              electric_auxiliary_energy: 200)
+                              electric_auxiliary_energy: 200,
+                              is_ventilation_preconditioning: false)
     hpxml.heating_systems.add(id: 'HeatingSystem7',
                               heating_system_type: HPXML::HVACTypeWallFurnace,
                               heating_system_fuel: HPXML::FuelTypePropane,
                               heating_capacity: 6400,
                               heating_efficiency_afue: 0.8,
                               fraction_heat_load_served: 0.1,
-                              electric_auxiliary_energy: 200)
+                              electric_auxiliary_energy: 200,
+                              is_ventilation_preconditioning: false)
   elsif ['base-hvac-multiple2.xml'].include? hpxml_file
     hpxml.heating_systems.clear
     hpxml.heating_systems.add(id: 'HeatingSystem',
@@ -2533,7 +2541,8 @@ def set_hpxml_heating_systems(hpxml_file, hpxml)
                               heating_system_fuel: HPXML::FuelTypeElectricity,
                               heating_capacity: 6400,
                               heating_efficiency_afue: 1,
-                              fraction_heat_load_served: 0.2)
+                              fraction_heat_load_served: 0.2,
+                              is_ventilation_preconditioning: false)
     hpxml.heating_systems.add(id: 'HeatingSystem2',
                               distribution_system_idref: 'HVACDistribution2',
                               heating_system_type: HPXML::HVACTypeFurnace,
@@ -2541,20 +2550,23 @@ def set_hpxml_heating_systems(hpxml_file, hpxml)
                               heating_capacity: 6400,
                               heating_efficiency_afue: 0.92,
                               fraction_heat_load_served: 0.2,
-                              electric_auxiliary_energy: 700)
+                              electric_auxiliary_energy: 700,
+                              is_ventilation_preconditioning: false)
     hpxml.heating_systems.add(id: 'HeatingSystem3',
                               distribution_system_idref: 'HVACDistribution3',
                               heating_system_type: HPXML::HVACTypeBoiler,
                               heating_system_fuel: HPXML::FuelTypeElectricity,
                               heating_capacity: 6400,
                               heating_efficiency_afue: 1,
-                              fraction_heat_load_served: 0.2)
+                              fraction_heat_load_served: 0.2,
+                              is_ventilation_preconditioning: false)
     hpxml.heating_systems.add(id: 'HeatingSystem4',
                               heating_system_type: HPXML::HVACTypeElectricResistance,
                               heating_system_fuel: HPXML::FuelTypeElectricity,
                               heating_capacity: 3200,
                               heating_efficiency_percent: 1,
-                              fraction_heat_load_served: 0.1)
+                              fraction_heat_load_served: 0.1,
+                              is_ventilation_preconditioning: false)
   elsif ['base-mechvent-multiple.xml'].include? hpxml_file
     hpxml.heating_systems[0].heating_capacity /= 2.0
     hpxml.heating_systems[0].fraction_heat_load_served /= 2.0
@@ -2653,7 +2665,8 @@ def set_hpxml_cooling_systems(hpxml_file, hpxml)
                               fraction_cool_load_served: 1,
                               cooling_efficiency_seer: 13,
                               cooling_shr: 0.73,
-                              compressor_type: HPXML::HVACCompressorTypeSingleStage)
+                              compressor_type: HPXML::HVACCompressorTypeSingleStage,
+                              is_ventilation_preconditioning: false)
   elsif ['base-hvac-air-to-air-heat-pump-1-speed.xml',
          'base-hvac-air-to-air-heat-pump-2-speed.xml',
          'base-hvac-air-to-air-heat-pump-var-speed.xml',
@@ -2733,7 +2746,8 @@ def set_hpxml_cooling_systems(hpxml_file, hpxml)
                               cooling_capacity: 9600,
                               fraction_cool_load_served: 0.2,
                               cooling_efficiency_eer: 8.5,
-                              cooling_shr: 0.65)
+                              cooling_shr: 0.65,
+                              is_ventilation_preconditioning: false)
   elsif ['base-hvac-multiple2.xml'].include? hpxml_file
     hpxml.cooling_systems[0].distribution_system_idref = 'HVACDistribution'
     hpxml.cooling_systems[0].fraction_cool_load_served = 0.25
@@ -2745,13 +2759,24 @@ def set_hpxml_cooling_systems(hpxml_file, hpxml)
                               cooling_capacity: 9600,
                               fraction_cool_load_served: 0.25,
                               cooling_efficiency_seer: 13,
-                              cooling_shr: 0.65)
+                              cooling_shr: 0.65,
+                              is_ventilation_preconditioning: false)
   elsif ['base-mechvent-multiple.xml'].include? hpxml_file
     hpxml.cooling_systems[0].fraction_cool_load_served /= 2.0
     hpxml.cooling_systems[0].cooling_capacity /= 2.0
     hpxml.cooling_systems << hpxml.cooling_systems[0].dup
     hpxml.cooling_systems[1].id += '2'
     hpxml.cooling_systems[1].distribution_system_idref = 'HVACDistribution2'
+  elsif ['base-mechvent-shared.xml'].include? hpxml_file
+    hpxml.cooling_systems.add(id: 'Preconditioning Cooling',
+                              distribution_system_idref: 'HVACDistributionPreconditioningCooling',
+                              cooling_system_type: HPXML::HVACTypeCentralAirConditioner,
+                              cooling_system_fuel: HPXML::FuelTypeElectricity,
+                              cooling_capacity_building: 9600,
+                              fraction_cool_load_served: 0.2,
+                              cooling_efficiency_seer: 13,
+                              cooling_shr: 0.65,
+                              is_ventilation_preconditioning: true)
   elsif ['invalid_files/hvac-frac-load-served.xml'].include? hpxml_file
     hpxml.cooling_systems[0].fraction_cool_load_served += 0.2
   elsif ['invalid_files/hvac-dse-multiple-attached-cooling.xml'].include? hpxml_file
@@ -2788,10 +2813,29 @@ def set_hpxml_heat_pumps(hpxml_file, hpxml)
                          cooling_efficiency_seer: 13,
                          heating_capacity_17F: 42000 * 0.630, # Based on OAT slope of default curves
                          cooling_shr: 0.73,
-                         compressor_type: HPXML::HVACCompressorTypeSingleStage)
+                         compressor_type: HPXML::HVACCompressorTypeSingleStage,
+                         is_ventilation_preconditioning: false)
     if hpxml_file == 'base-hvac-central-ac-plus-air-to-air-heat-pump-heating.xml'
       hpxml.heat_pumps[0].fraction_cool_load_served = 0
     end
+  elsif ['base-mechvent-shared.xml'].include? hpxml_file
+    hpxml.heat_pumps.add(id: 'Preconditioning Heating',
+                         distribution_system_idref: 'HVACDistributionPreconditioningHeating',
+                         heat_pump_type: HPXML::HVACTypeHeatPumpAirToAir,
+                         heat_pump_fuel: HPXML::FuelTypeElectricity,
+                         heating_capacity_building: 42000,
+                         cooling_capacity_building: 48000,
+                         backup_heating_fuel: HPXML::FuelTypeElectricity,
+                         backup_heating_capacity: 34121,
+                         backup_heating_efficiency_percent: 1.0,
+                         fraction_heat_load_served: 0.2,
+                         fraction_cool_load_served: 0.0,
+                         heating_efficiency_hspf: 7.7,
+                         cooling_efficiency_seer: 13,
+                         heating_capacity_17F_building: 42000 * 0.630, # Based on OAT slope of default curves
+                         cooling_shr: 0.73,
+                         compressor_type: HPXML::HVACCompressorTypeSingleStage,
+                         is_ventilation_preconditioning: true)
   elsif ['base-hvac-air-to-air-heat-pump-2-speed.xml'].include? hpxml_file
     hpxml.heat_pumps.add(id: 'HeatPump',
                          distribution_system_idref: 'HVACDistribution',
@@ -2808,7 +2852,8 @@ def set_hpxml_heat_pumps(hpxml_file, hpxml)
                          cooling_efficiency_seer: 18,
                          heating_capacity_17F: 42000 * 0.590, # Based on OAT slope of default curves
                          cooling_shr: 0.73,
-                         compressor_type: HPXML::HVACCompressorTypeTwoStage)
+                         compressor_type: HPXML::HVACCompressorTypeTwoStage,
+                         is_ventilation_preconditioning: false)
   elsif ['base-hvac-air-to-air-heat-pump-var-speed.xml'].include? hpxml_file
     hpxml.heat_pumps.add(id: 'HeatPump',
                          distribution_system_idref: 'HVACDistribution',
@@ -2825,7 +2870,8 @@ def set_hpxml_heat_pumps(hpxml_file, hpxml)
                          cooling_efficiency_seer: 22,
                          heating_capacity_17F: 42000 * 0.640, # Based on OAT slope of default curves
                          cooling_shr: 0.78,
-                         compressor_type: HPXML::HVACCompressorTypeVariableSpeed)
+                         compressor_type: HPXML::HVACCompressorTypeVariableSpeed,
+                         is_ventilation_preconditioning: false)
   elsif ['base-hvac-ground-to-air-heat-pump.xml'].include? hpxml_file
     hpxml.heat_pumps.add(id: 'HeatPump',
                          distribution_system_idref: 'HVACDistribution',
@@ -2840,7 +2886,8 @@ def set_hpxml_heat_pumps(hpxml_file, hpxml)
                          fraction_cool_load_served: 1,
                          heating_efficiency_cop: 3.6,
                          cooling_efficiency_eer: 16.6,
-                         cooling_shr: 0.73)
+                         cooling_shr: 0.73,
+                         is_ventilation_preconditioning: false)
   elsif ['base-hvac-mini-split-heat-pump-ducted.xml'].include? hpxml_file
     f = 1.0 - (1.0 - 0.25) / (47.0 + 5.0) * (47.0 - 17.0)
     hpxml.heat_pumps.add(id: 'HeatPump',
@@ -2857,7 +2904,8 @@ def set_hpxml_heat_pumps(hpxml_file, hpxml)
                          heating_efficiency_hspf: 10,
                          cooling_efficiency_seer: 19,
                          heating_capacity_17F: 52000 * f,
-                         cooling_shr: 0.73)
+                         cooling_shr: 0.73,
+                         is_ventilation_preconditioning: false)
   elsif ['base-hvac-mini-split-heat-pump-ducted-heating-only.xml'].include? hpxml_file
     hpxml.heat_pumps[0].cooling_capacity = 0
     hpxml.heat_pumps[0].fraction_cool_load_served = 0
@@ -2891,7 +2939,8 @@ def set_hpxml_heat_pumps(hpxml_file, hpxml)
                          cooling_efficiency_seer: 13,
                          heating_capacity_17F: 4800 * 0.630, # Based on OAT slope of default curves
                          cooling_shr: 0.73,
-                         compressor_type: HPXML::HVACCompressorTypeSingleStage)
+                         compressor_type: HPXML::HVACCompressorTypeSingleStage,
+                         is_ventilation_preconditioning: false)
     hpxml.heat_pumps.add(id: 'HeatPump2',
                          distribution_system_idref: 'HVACDistribution6',
                          heat_pump_type: HPXML::HVACTypeHeatPumpGroundToAir,
@@ -2905,7 +2954,8 @@ def set_hpxml_heat_pumps(hpxml_file, hpxml)
                          fraction_cool_load_served: 0.2,
                          heating_efficiency_cop: 3.6,
                          cooling_efficiency_eer: 16.6,
-                         cooling_shr: 0.73)
+                         cooling_shr: 0.73,
+                         is_ventilation_preconditioning: false)
     f = 1.0 - (1.0 - 0.25) / (47.0 + 5.0) * (47.0 - 17.0)
     hpxml.heat_pumps.add(id: 'HeatPump3',
                          heat_pump_type: HPXML::HVACTypeHeatPumpMiniSplit,
@@ -2920,7 +2970,8 @@ def set_hpxml_heat_pumps(hpxml_file, hpxml)
                          heating_efficiency_hspf: 10,
                          cooling_efficiency_seer: 19,
                          heating_capacity_17F: 4800 * f,
-                         cooling_shr: 0.73)
+                         cooling_shr: 0.73,
+                         is_ventilation_preconditioning: false)
   elsif ['base-hvac-multiple2.xml'].include? hpxml_file
     hpxml.heat_pumps.add(id: 'HeatPump',
                          distribution_system_idref: 'HVACDistribution4',
@@ -2937,7 +2988,8 @@ def set_hpxml_heat_pumps(hpxml_file, hpxml)
                          cooling_efficiency_seer: 13,
                          heating_capacity_17F: 4800 * 0.630, # Based on OAT slope of default curves
                          cooling_shr: 0.73,
-                         compressor_type: HPXML::HVACCompressorTypeSingleStage)
+                         compressor_type: HPXML::HVACCompressorTypeSingleStage,
+                         is_ventilation_preconditioning: false)
     hpxml.heat_pumps.add(id: 'HeatPump2',
                          distribution_system_idref: 'HVACDistribution5',
                          heat_pump_type: HPXML::HVACTypeHeatPumpGroundToAir,
@@ -2951,7 +3003,8 @@ def set_hpxml_heat_pumps(hpxml_file, hpxml)
                          fraction_cool_load_served: 0.2,
                          heating_efficiency_cop: 3.6,
                          cooling_efficiency_eer: 16.6,
-                         cooling_shr: 0.73)
+                         cooling_shr: 0.73,
+                         is_ventilation_preconditioning: false)
   elsif ['invalid_files/hvac-distribution-multiple-attached-heating.xml'].include? hpxml_file
     hpxml.heat_pumps[0].distribution_system_idref = 'HVACDistribution'
   elsif ['invalid_files/hvac-distribution-multiple-attached-cooling.xml'].include? hpxml_file
@@ -3147,6 +3200,13 @@ def set_hpxml_hvac_distributions(hpxml_file, hpxml)
     hpxml.hvac_distributions[0].conditioned_floor_area_served /= 2.0
     hpxml.hvac_distributions << hpxml.hvac_distributions[0].dup
     hpxml.hvac_distributions[1].id = 'HVACDistribution2'
+  elsif ['base-mechvent-shared.xml'].include? hpxml_file
+    hpxml.hvac_distributions << hpxml.hvac_distributions[0].dup
+    hpxml.hvac_distributions[-1].id = 'HVACDistributionPreconditioningCooling'
+    hpxml.hvac_distributions[-1].conditioned_floor_area_served = 0.0
+    hpxml.hvac_distributions << hpxml.hvac_distributions[-1].dup
+    hpxml.hvac_distributions[-1].id = 'HVACDistributionPreconditioningHeating'
+    hpxml.hvac_distributions[-1].conditioned_floor_area_served = 0.0
   elsif ['base-hvac-dse.xml',
          'base-dhw-indirect-dse.xml'].include? hpxml_file
     hpxml.hvac_distributions[0].distribution_system_type = HPXML::HVACDistributionTypeDSE
@@ -3437,7 +3497,9 @@ def set_hpxml_ventilation_fans(hpxml_file, hpxml)
                                hours_in_operation: 24,
                                building_fan_power: 300,
                                used_for_whole_building_ventilation: true,
-                               fraction_oa: 0.8)
+                               fraction_oa: 0.8,
+                               preconditioning_cooling_system_idref: 'Preconditioning Cooling',
+                               preconditioning_heating_system_idref: 'Preconditioning Heating')
   elsif ['base-mechvent-multiple.xml'].include? hpxml_file
     hpxml.ventilation_fans.add(id: 'WholeHouseFan',
                                rated_flow_rate: 2000,

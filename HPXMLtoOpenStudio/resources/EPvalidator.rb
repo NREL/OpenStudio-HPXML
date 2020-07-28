@@ -335,6 +335,12 @@ class EnergyPlusValidator
         'HeatingCapacity' => zero_or_one,
         'FractionHeatLoadServed' => one, # Must sum to <= 1 across all HeatingSystems and HeatPumps
         'ElectricAuxiliaryEnergy' => zero_or_one, # If not provided, uses 301 defaults for fuel furnace/boiler and zero otherwise
+        'IsVentilationPreconditioningSystem' => one, # See [PreconditioningSystem], true if this system only provides preconditioning for shared mechanical ventilation system
+      },
+
+      ## [PreconditioningSystem]
+      '/HPXML/Building/BuildingDetails/Systems/HVAC/HVACPlant/HeatingSystem[IsVentilationPreconditioningSystem="true"]' => {
+        'HeatingCapacity[not(@scope)]' => zero, # Use scope attribute to describe at which level data is provided
       },
 
       ## [HeatingType=Resistance]
@@ -409,6 +415,12 @@ class EnergyPlusValidator
         'CoolingSystemType[text()="central air conditioner" or text()="room air conditioner" or text()="evaporative cooler" or text()="mini-split"]' => one, # See [CoolingType=CentralAC] or [CoolingType=RoomAC] or [CoolingType=EvapCooler] or [CoolingType=MiniSplitAC]
         'CoolingSystemFuel[text()="electricity"]' => one,
         'FractionCoolLoadServed' => one, # Must sum to <= 1 across all CoolingSystems and HeatPumps
+        'IsVentilationPreconditioningSystem' => one, # See [PreconditioningSystem], true if this system only provides preconditioning for shared mechanical ventilation system
+      },
+
+      ## [PreconditioningSystem]
+      '/HPXML/Building/BuildingDetails/Systems/HVAC/HVACPlant/CoolingSystem[IsVentilationPreconditioningSystem="true"]' => {
+        'CoolingCapacity[not(@scope)]' => zero, # Use scope attribute to describe at which level data is provided
       },
 
       ## [CoolingType=CentralAC]
@@ -458,6 +470,14 @@ class EnergyPlusValidator
         '[not(BackupSystemFuel)] | BackupSystemFuel[text()="electricity" or text()="natural gas" or text()="fuel oil" or text()="fuel oil 1" or text()="fuel oil 2" or text()="fuel oil 4" or text()="fuel oil 5/6" or text()="diesel" or text()="propane" or text()="kerosene" or text()="wood" or text()="wood pellets"]' => one, # See [HeatPumpBackup]
         'FractionHeatLoadServed' => one, # Must sum to <= 1 across all HeatPumps and HeatingSystems
         'FractionCoolLoadServed' => one, # Must sum to <= 1 across all HeatPumps and CoolingSystems
+        'IsVentilationPreconditioningSystem' => one, # See [PreconditioningSystem], true if this system only provides preconditioning for shared mechanical ventilation system
+      },
+
+      ## [PreconditioningSystem]
+      '/HPXML/Building/BuildingDetails/Systems/HVAC/HVACPlant/HeatPump[IsVentilationPreconditioningSystem="true"]' => {
+        'CoolingCapacity[not(@scope)]' => zero, # Use scope attribute to describe at which level data is provided
+        'HeatingCapacity[not(@scope)]' => zero, # Use scope attribute to describe at which level data is provided
+        'HeatingCapacity17F[not(@scope)]' => zero, # Use scope attribute to describe at which level data is provided
       },
 
       ## [HeatPumpType=ASHP]
@@ -525,6 +545,7 @@ class EnergyPlusValidator
 
       ## [HVACDistType=Air]
       '/HPXML/Building/BuildingDetails/Systems/HVAC/HVACDistribution/DistributionSystemType/AirDistribution' => {
+        # TODO: Resolve ConditionedFloorAreaServed and DuctLocation outside of unit scope for hvac distribution connected to a preconditioning hvac equipment.
         '../../ConditionedFloorAreaServed' => one,
         'DuctLeakageMeasurement[DuctType="supply"]/DuctLeakage[(Units="CFM25" or Units="Percent") and TotalOrToOutside="to outside"]/Value' => one,
         'DuctLeakageMeasurement[DuctType="return"]/DuctLeakage[(Units="CFM25" or Units="Percent") and TotalOrToOutside="to outside"]/Value' => zero_or_one,

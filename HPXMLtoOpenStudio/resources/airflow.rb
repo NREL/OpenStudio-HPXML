@@ -1293,6 +1293,7 @@ class Airflow
 
     cfis_open_time = [vent_mech.hours_in_operation / 24.0 * 60.0, 59.999].min # Minimum open time in minutes
     infil_program.addLine("Set CFIS_t_min_hr_open = #{cfis_open_time}") # minutes per hour the CFIS damper is open
+    # TODO: Address shared system integration
     infil_program.addLine("Set CFIS_Q_duct = #{UnitConversions.convert(vent_mech.flow_rate, 'cfm', 'm^3/s')}")
     infil_program.addLine('Set cfis_f_damper_open = 0') # fraction of the timestep the CFIS damper is open
     infil_program.addLine("Set #{@cfis_f_damper_extra_open_var[vent_mech.id].name} = 0") # additional runtime fraction to meet min/hr
