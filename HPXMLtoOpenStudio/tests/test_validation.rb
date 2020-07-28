@@ -13,7 +13,7 @@ class HPXMLtoOpenStudioSchematronTest < MiniTest::Test
   def before_setup
     @root_path = File.absolute_path(File.join(File.dirname(__FILE__), '..', '..'))
 
-    # load the schematron xml
+    # load the Schematron xml
     @stron_path = File.join(@root_path, 'HPXMLtoOpenStudio', 'resources', 'EPvalidator.xml')
     # make a Schematron object
     @stron_doc = SchematronNokogiri::Schema.new Nokogiri::XML File.open(@stron_path)
@@ -108,7 +108,7 @@ class HPXMLtoOpenStudioSchematronTest < MiniTest::Test
         max_number_of_elements_allowed = expected_error_message.gsub(/\[.*?\]|\[|\]/, '').scan(/\d+/).max.to_i # scan numbers outside brackets and then find the maximum
         (max_number_of_elements_allowed + 1).times { XMLHelper.add_element(mod_parent_element, mod_child_name) }
 
-        # add a value to the child element as needed
+        # add a value to child elements as needed
         child_element_with_value = get_child_element_with_value(target_xpath, max_number_of_elements_allowed)
         next unless not child_element_with_value.nil?
 
@@ -288,8 +288,8 @@ class HPXMLtoOpenStudioSchematronTest < MiniTest::Test
       # exception: need to remove both AnnualHeatingDistributionSystemEfficiency and AnnualCoolingDistributionSystemEfficiency
       # FIXME: Is there another way to handle this?
       if assertion.partition(': ').last.include? 'AnnualHeatingDistributionSystemEfficiency'
-        add_element_name = assertion.partition(': ').last.partition(' | ').last
-        element_names << add_element_name
+        element_name_additional = assertion.partition(': ').last.partition(' | ').last
+        element_names << element_name_additional
       end
     end
 
