@@ -339,6 +339,7 @@
               <IsVentilationPreconditioningSystem>true</IsVentilationPreconditioningSystem>
               <CoolingSystemType>central air conditioner</CoolingSystemType>
               <CoolingSystemFuel>electricity</CoolingSystemFuel>
+              <CoolingCapacity scope='multiple units'>9600.0</CoolingCapacity>
               <FractionCoolLoadServed>0.2</FractionCoolLoadServed>
               <AnnualCoolingEfficiency>
                 <Units>SEER</Units>
@@ -352,6 +353,9 @@
               <IsVentilationPreconditioningSystem>true</IsVentilationPreconditioningSystem>
               <HeatPumpType>air-to-air</HeatPumpType>
               <HeatPumpFuel>electricity</HeatPumpFuel>
+              <HeatingCapacity scope='multiple units'>42000.0</HeatingCapacity>
+              <HeatingCapacity17F scope='multiple units'>26460.0</HeatingCapacity17F>
+              <cooling_capacity scope='multiple units'>48000.0</cooling_capacity>
               <CompressorType>single stage</CompressorType>
               <CoolingSensibleHeatFraction>0.73</CoolingSensibleHeatFraction>
               <BackupSystemFuel>electricity</BackupSystemFuel>

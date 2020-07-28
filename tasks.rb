@@ -422,6 +422,9 @@ def create_hpxmls
         end
 
         # Check for additional errors
+        if hpxml_path.include? 'mechvent-shared'
+          hpxml.adjust_hvac_with_ventilation_preconditioning()
+        end
         errors = hpxml.check_for_errors()
         if errors.size > 0
           fail "ERRORS: #{errors}"

@@ -273,6 +273,7 @@ class HPXML < Object
     if collapse_enclosure
       collapse_enclosure_surfaces()
     end
+    adjust_hvac_with_ventilation_preconditioning()
   end
 
   def has_space_type(space_type)
@@ -2418,7 +2419,7 @@ class HPXML < Object
     end
 
     def total_fraction_heat_load_served
-      select { |htg_sys| not htg_sys.is_ventilation_preconditioning }.map { |htg_sys| htg_sys.fraction_heat_load_served }.sum(0.0)
+      map { |htg_sys| htg_sys.fraction_heat_load_served }.sum(0.0)
     end
   end
 
@@ -2487,7 +2488,7 @@ class HPXML < Object
       if @is_ventilation_preconditioning
         cap = XMLHelper.add_element(heating_system, 'HeatingCapacity', to_float(@heating_capacity)) unless @heating_capacity.nil?
         XMLHelper.add_attribute(cap, 'scope', 'single unit') unless cap.nil?
-        bldg_cap = XMLHelper.add_element(heating_system, 'HeatingCapacity', to_float(@heating_capacity_building)) unless @heating_capacity_building
+        bldg_cap = XMLHelper.add_element(heating_system, 'HeatingCapacity', to_float(@heating_capacity_building)) unless @heating_capacity_building.nil?
         XMLHelper.add_attribute(bldg_cap, 'scope', 'multiple units') unless bldg_cap.nil?
       else
         XMLHelper.add_element(heating_system, 'HeatingCapacity', to_float(@heating_capacity)) unless @heating_capacity.nil?
@@ -2556,7 +2557,7 @@ class HPXML < Object
     end
 
     def total_fraction_cool_load_served
-      select { |clg_sys| not clg_sys.is_ventilation_preconditioning }.map { |clg_sys| clg_sys.fraction_cool_load_served }.sum(0.0)
+      map { |clg_sys| clg_sys.fraction_cool_load_served }.sum(0.0)
     end
   end
 
@@ -2621,7 +2622,7 @@ class HPXML < Object
       if @is_ventilation_preconditioning
         cap = XMLHelper.add_element(cooling_system, 'CoolingCapacity', to_float(@cooling_capacity)) unless @cooling_capacity.nil?
         XMLHelper.add_attribute(cap, 'scope', 'single unit') unless cap.nil?
-        bldg_cap = XMLHelper.add_element(cooling_system, 'CoolingCapacity', to_float(@cooling_capacity_building)) unless @cooling_capacity_building
+        bldg_cap = XMLHelper.add_element(cooling_system, 'CoolingCapacity', to_float(@cooling_capacity_building)) unless @cooling_capacity_building.nil?
         XMLHelper.add_attribute(bldg_cap, 'scope', 'multiple units') unless bldg_cap.nil?
       else
         XMLHelper.add_element(cooling_system, 'CoolingCapacity', to_float(@cooling_capacity)) unless @cooling_capacity.nil?
@@ -2693,11 +2694,11 @@ class HPXML < Object
     end
 
     def total_fraction_heat_load_served
-      select { |hp| not hp.is_ventilation_preconditioning }.map { |hp| hp.fraction_heat_load_served }.sum(0.0)
+      map { |hp| hp.fraction_heat_load_served }.sum(0.0)
     end
 
     def total_fraction_cool_load_served
-      select { |hp| not hp.is_ventilation_preconditioning }.map { |hp| hp.fraction_cool_load_served }.sum(0.0)
+      map { |hp| hp.fraction_cool_load_served }.sum(0.0)
     end
   end
 
@@ -2755,17 +2756,17 @@ class HPXML < Object
       if @is_ventilation_preconditioning
         htg_cap = XMLHelper.add_element(heat_pump, 'HeatingCapacity', to_float(@heating_capacity)) unless @heating_capacity.nil?
         XMLHelper.add_attribute(htg_cap, 'scope', 'single unit') unless htg_cap.nil?
-        htg_bldg_cap = XMLHelper.add_element(heat_pump, 'HeatingCapacity', to_float(@heating_capacity_building)) unless @heating_capacity_building
+        htg_bldg_cap = XMLHelper.add_element(heat_pump, 'HeatingCapacity', to_float(@heating_capacity_building)) unless @heating_capacity_building.nil?
         XMLHelper.add_attribute(htg_bldg_cap, 'scope', 'multiple units') unless htg_bldg_cap.nil?
 
         htg_cap_17 = XMLHelper.add_element(heat_pump, 'HeatingCapacity17F', to_float(@heating_capacity_17F)) unless @heating_capacity_17F.nil?
         XMLHelper.add_attribute(htg_cap_17, 'scope', 'single unit') unless htg_cap_17.nil?
-        htg_bldg_cap_17 = XMLHelper.add_element(heat_pump, 'HeatingCapacity17F', to_float(@heating_capacity_17F_building)) unless @heating_capacity_17F_building
+        htg_bldg_cap_17 = XMLHelper.add_element(heat_pump, 'HeatingCapacity17F', to_float(@heating_capacity_17F_building)) unless @heating_capacity_17F_building.nil?
         XMLHelper.add_attribute(htg_bldg_cap_17, 'scope', 'multiple units') unless htg_bldg_cap_17.nil?
 
         clg_cap = XMLHelper.add_element(heat_pump, 'CoolingCapacity', to_float(@cooling_capacity)) unless @cooling_capacity.nil?
         XMLHelper.add_attribute(clg_cap, 'scope', 'single unit') unless clg_cap.nil?
-        clg_bldg_cap = XMLHelper.add_element(heat_pump, 'cooling_capacity', to_float(@cooling_capacity_building)) unless @cooling_capacity_building
+        clg_bldg_cap = XMLHelper.add_element(heat_pump, 'cooling_capacity', to_float(@cooling_capacity_building)) unless @cooling_capacity_building.nil?
         XMLHelper.add_attribute(clg_bldg_cap, 'scope', 'multiple units') unless clg_bldg_cap.nil?
       else
         XMLHelper.add_element(heat_pump, 'HeatingCapacity', to_float(@heating_capacity)) unless @heating_capacity.nil?
@@ -2830,9 +2831,18 @@ class HPXML < Object
       @year_installed = to_integer_or_nil(XMLHelper.get_value(heat_pump, 'YearInstalled'))
       @heat_pump_type = XMLHelper.get_value(heat_pump, 'HeatPumpType')
       @heat_pump_fuel = XMLHelper.get_value(heat_pump, 'HeatPumpFuel')
-      @heating_capacity = to_float_or_nil(XMLHelper.get_value(heat_pump, 'HeatingCapacity'))
-      @heating_capacity_17F = to_float_or_nil(XMLHelper.get_value(heat_pump, 'HeatingCapacity17F'))
-      @cooling_capacity = to_float_or_nil(XMLHelper.get_value(heat_pump, 'CoolingCapacity'))
+      if @is_ventilation_preconditioning
+        @heating_capacity = to_float_or_nil(XMLHelper.get_value(heat_pump, 'HeatingCapacity[@scope="single unit"]'))
+        @heating_capacity_building = to_float_or_nil(XMLHelper.get_value(heat_pump, 'HeatingCapacity[@scope="multiple units"]'))
+        @heating_capacity_17F = to_float_or_nil(XMLHelper.get_value(heat_pump, 'HeatingCapacity17F[@scope="single unit"]'))
+        @heating_capacity_17F_building = to_float_or_nil(XMLHelper.get_value(heat_pump, 'HeatingCapacity17F[@scope="multiple units"]'))
+        @cooling_capacity = to_float_or_nil(XMLHelper.get_value(heat_pump, 'CoolingCapacity[@scope="single unit"]'))
+        @cooling_capacity_building = to_float_or_nil(XMLHelper.get_value(heat_pump, 'CoolingCapacity[@scope="multiple units"]'))
+      else
+        @heating_capacity = to_float_or_nil(XMLHelper.get_value(heat_pump, 'HeatingCapacity'))
+        @heating_capacity_17F = to_float_or_nil(XMLHelper.get_value(heat_pump, 'HeatingCapacity17F'))
+        @cooling_capacity = to_float_or_nil(XMLHelper.get_value(heat_pump, 'CoolingCapacity'))
+      end
       @compressor_type = XMLHelper.get_value(heat_pump, 'CompressorType')
       @cooling_shr = to_float_or_nil(XMLHelper.get_value(heat_pump, 'CoolingSensibleHeatFraction'))
       @backup_heating_fuel = XMLHelper.get_value(heat_pump, 'BackupSystemFuel')
@@ -3252,6 +3262,9 @@ class HPXML < Object
 
       (@hpxml_object.cooling_systems + @hpxml_object.heat_pumps).each do |clg_sys|
         next unless clg_sys.id == @preconditioning_cooling_system_idref
+        if not clg_sys.is_ventilation_preconditioning
+          fail "Cooling system '#{@preconditioning_cooling_system_idref}' attached to ventilation fan '#{@id}' is not a Ventilation Preconditioning System."
+        end
 
         return clg_sys
       end
@@ -3264,6 +3277,9 @@ class HPXML < Object
 
       (@hpxml_object.heating_systems + @hpxml_object.heat_pumps).each do |htg_sys|
         next unless htg_sys.id == @preconditioning_heating_system_idref
+        if not htg_sys.is_ventilation_preconditioning
+          fail "Heating system '#{@preconditioning_heating_system_idref}' attached to ventilation fan '#{@id}' is not a Ventilation Preconditioning System."
+        end
 
         return htg_sys
       end
@@ -3338,13 +3354,15 @@ class HPXML < Object
         attached_to_hvac_distribution_system = XMLHelper.add_element(ventilation_fan, 'AttachedToHVACDistributionSystem')
         XMLHelper.add_attribute(attached_to_hvac_distribution_system, 'idref', @distribution_system_idref)
       end
-      if not @preconditioning_heating_system_idref.nil?
-        attached_to_preconditioning_htg_system = XMLHelper.add_element(ventilation_fan, 'AttachedToPreconditioningHeatingSystem')
-        XMLHelper.add_attribute(attached_to_preconditioning_htg_system, 'idref', @preconditioning_heating_system_idref)
-      end
-      if not @preconditioning_cooling_system_idref.nil?
-        attached_to_preconditioning_clg_system = XMLHelper.add_element(ventilation_fan, 'AttachedToPreconditioningCoolingSystem')
-        XMLHelper.add_attribute(attached_to_preconditioning_clg_system, 'idref', @preconditioning_cooling_system_idref)
+      if @is_shared_system
+        if not @preconditioning_heating_system_idref.nil?
+          attached_to_preconditioning_htg_system = XMLHelper.add_element(ventilation_fan, 'AttachedToPreconditioningHeatingSystem')
+          XMLHelper.add_attribute(attached_to_preconditioning_htg_system, 'idref', @preconditioning_heating_system_idref)
+        end
+        if not @preconditioning_cooling_system_idref.nil?
+          attached_to_preconditioning_clg_system = XMLHelper.add_element(ventilation_fan, 'AttachedToPreconditioningCoolingSystem')
+          XMLHelper.add_attribute(attached_to_preconditioning_clg_system, 'idref', @preconditioning_cooling_system_idref)
+        end
       end
       HPXML::add_extension(parent: ventilation_fan,
                            extensions: { 'StartHour' => to_integer_or_nil(@start_hour) })
@@ -3381,8 +3399,10 @@ class HPXML < Object
       @sensible_recovery_efficiency = to_float_or_nil(XMLHelper.get_value(ventilation_fan, 'SensibleRecoveryEfficiency'))
       @sensible_recovery_efficiency_adjusted = to_float_or_nil(XMLHelper.get_value(ventilation_fan, 'AdjustedSensibleRecoveryEfficiency'))
       @distribution_system_idref = HPXML::get_idref(XMLHelper.get_element(ventilation_fan, 'AttachedToHVACDistributionSystem'))
-      @preconditioning_heating_system_idref = HPXML::get_idref(XMLHelper.get_element(ventilation_fan, 'AttachedToPreconditioningHeatingSystem'))
-      @preconditioning_cooling_system_idref = HPXML::get_idref(XMLHelper.get_element(ventilation_fan, 'AttachedToPreconditioningCoolingSystem'))
+      if @is_shared_system
+        @preconditioning_heating_system_idref = HPXML::get_idref(XMLHelper.get_element(ventilation_fan, 'AttachedToPreconditioningHeatingSystem'))
+        @preconditioning_cooling_system_idref = HPXML::get_idref(XMLHelper.get_element(ventilation_fan, 'AttachedToPreconditioningCoolingSystem'))
+      end
       @start_hour = to_integer_or_nil(XMLHelper.get_value(ventilation_fan, 'extension/StartHour'))
     end
   end
@@ -4908,6 +4928,102 @@ class HPXML < Object
 
       window.delete
     end
+  end
+
+  def adjust_hvac_with_ventilation_preconditioning()
+    # adjust fractions to sum to 1.0 with preconditioning hvac equipment
+    precond_frac_htg = (@heating_systems + @heat_pumps).select { |htg_sys| htg_sys.is_ventilation_preconditioning }.map { |htg_sys| htg_sys.fraction_heat_load_served }.sum
+    primary_frac_htg = 1 - precond_frac_htg
+    precond_frac_clg = (@cooling_systems + @heat_pumps).select { |clg_sys| clg_sys.is_ventilation_preconditioning }.map { |clg_sys| clg_sys.fraction_cool_load_served }.sum
+    primary_frac_clg = 1 - precond_frac_clg
+    @heating_systems.each do |htg_sys|
+      # Preconditioning system, assign heating system unit capacity if not provided
+      if htg_sys.is_ventilation_preconditioning
+        attached_fan = find_ventilation_fan_for_preconditioning_htg_clg_sys(htg_sys)
+        # scale building capacity down to unit capacity
+        if htg_sys.heating_capacity.nil? && (not htg_sys.heating_capacity_building.nil?)
+          htg_sys.heating_capacity = htg_sys.heating_capacity_building * attached_fan.unit_flow_rate_ratio
+        end
+      # Primary systems, scale the fractions based on preconditioning heating fraction
+      else
+        htg_sys.fraction_heat_load_served *= primary_frac_htg
+      end
+    end
+
+    @cooling_systems.each do |clg_sys|
+      # Preconditioning system, assign heating system unit capacity if not provided
+      if clg_sys.is_ventilation_preconditioning
+        # assign cooling system unit capacity if not provided
+        attached_fan = find_ventilation_fan_for_preconditioning_htg_clg_sys(clg_sys)
+        # scale building capacity down to unit capacity
+        if clg_sys.cooling_capacity.nil? && (not clg_sys.cooling_capacity_building.nil?)
+          clg_sys.cooling_capacity = clg_sys.cooling_capacity_building * attached_fan.unit_flow_rate_ratio
+        end
+      # Primary systems, scale the fractions based on preconditioning heating fraction
+      else
+        clg_sys.fraction_cool_load_served *= primary_frac_clg
+      end
+
+      @heat_pumps.each do |hp|
+        # Preconditioning system, assign unit capacity if not provided
+        if hp.is_ventilation_preconditioning
+          attached_fan_htg, attached_fan_clg = find_ventilation_fan_for_preconditioning_hp(hp)
+          # zero the load fraction if not attached to ventilation system
+          if attached_fan_htg.empty?
+            hp.fraction_heat_load_served = 0.0
+          end
+          if attached_fan_clg.empty?
+            hp.fraction_cool_load_served = 0.0
+          end
+          # scale building capacity down to unit capacity
+          if not attached_fan_htg.empty?
+            if hp.heating_capacity.nil? && (not hp.heating_capacity_building.nil?)
+              hp.heating_capacity = hp.heating_capacity_building * attached_fan_htg[0].unit_flow_rate_ratio
+            end
+            if hp.heating_capacity_17F.nil? && (not hp.heating_capacity_17F_building.nil?)
+              hp.heating_capacity_17F = hp.heating_capacity_17F_building * attached_fan_htg[0].unit_flow_rate_ratio
+            end
+          end
+          if not attached_fan_clg.empty?
+            if hp.cooling_capacity.nil? && (not hp.cooling_capacity_building.nil?)
+              hp.cooling_capacity = hp.cooling_capacity_building * attached_fan_clg[0].unit_flow_rate_ratio
+            end
+          end
+        else
+          hp.fraction_heat_load_served *= primary_frac_htg
+          hp.fraction_cool_load_served *= primary_frac_clg
+        end
+      end
+    end
+  end
+
+  def find_ventilation_fan_for_preconditioning_htg_clg_sys(hvac_sys)
+    if @heating_systems.include? hvac_sys
+      sys_type = 'heating'
+      fans = @ventilation_fans.select { |fan| fan.preconditioning_heating_system_idref == hvac_sys.id }
+    else
+      sys_type = 'cooling'
+      fans = @ventilation_fans.select { |fan| fan.preconditioning_cooling_system_idref == hvac_sys.id }
+    end
+    if fans.empty?
+      fail "Ventilation preconditioning #{sys_type} system #{hvac_sys.id} is not attached to any ventilation fan."
+    end
+    if fans.size > 1
+      fail "Ventilation preconditioning #{sys_type} system #{hvac_sys.id} is attached to multiple ventilation fans."
+    end
+    return fans[0]
+  end
+
+  def find_ventilation_fan_for_preconditioning_hp(hp)
+    fans_htg = @ventilation_fans.select { |fan| fan.preconditioning_heating_system_idref == hp.id }
+    fans_clg = @ventilation_fans.select { |fan| fan.preconditioning_cooling_system_idref == hp.id }
+    if (fans_htg + fans_clg).empty?
+      fail "Ventilation preconditioning heat pump #{hp.id} is not attached to any ventilation fan."
+    end
+    if (fans_htg.size > 1) || (fans_clg.size > 1)
+      fail "Ventilation preconditioning heat pump #{hp.id} is attached to multiple ventilation fans for either cooling or heating."
+    end
+    return fans_htg, fans_clg
   end
 
   def check_for_errors()
