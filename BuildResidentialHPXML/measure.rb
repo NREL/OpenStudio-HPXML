@@ -14,6 +14,7 @@ require_relative '../HPXMLtoOpenStudio/resources/constructions'
 require_relative '../HPXMLtoOpenStudio/resources/EPvalidator'
 require_relative '../HPXMLtoOpenStudio/resources/geometry'
 require_relative '../HPXMLtoOpenStudio/resources/hpxml'
+require_relative '../HPXMLtoOpenStudio/resources/hvac'
 require_relative '../HPXMLtoOpenStudio/resources/schedules'
 require_relative '../HPXMLtoOpenStudio/resources/unit_conversions'
 require_relative '../HPXMLtoOpenStudio/resources/version'
@@ -3336,15 +3337,6 @@ class HPXMLFile
       return true
     end
 
-    if args[:geometry_num_occupants] == Constants.Auto
-      args[:geometry_num_occupants] = Geometry.get_occupancy_default_num(args[:geometry_num_bedrooms])
-    else
-      args[:geometry_num_occupants] = Integer(args[:geometry_num_occupants])
-    end
-
-    args[:schedules_resources_path] = File.join(File.dirname(__FILE__), 'resources/schedules')
-    args[:schedules_path] = '../schedules.csv'
-
     year_description = model.getYearDescription
     year_description.setCalendarYear(2007) # default to TMY
     epw_file = OpenStudio::EpwFile.new(args[:weather_station_epw_filepath])
@@ -3352,14 +3344,21 @@ class HPXMLFile
       year_description.setCalendarYear(epw_file.startDateActualYear.get)
     end
 
-    schedule_generator = ScheduleGenerator.new(runner: runner, model: model, weather: weather, **args)
+    schedule_generator = ScheduleGenerator.new(runner: runner, model: model, weather: weather)
 
     # create the schedule
-    success = schedule_generator.create
+    if args[:geometry_num_occupants] == Constants.Auto
+      args[:geometry_num_occupants] = Geometry.get_occupancy_default_num(args[:geometry_num_bedrooms])
+    else
+      args[:geometry_num_occupants] = Integer(args[:geometry_num_occupants])
+    end
+    args[:resources_path] = File.join(File.dirname(__FILE__), 'resources/schedules')
+    success = schedule_generator.create(args: args)
     return false if not success
 
     # export the schedule
-    success = schedule_generator.export(output_path: File.expand_path(args[:schedules_path]))
+    args[:schedules_path] = '../schedules.csv'
+    success = schedule_generator.export(schedules_path: File.expand_path(args[:schedules_path]))
     return false if not success
 
     return true

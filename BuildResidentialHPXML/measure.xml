@@ -3,8 +3,8 @@
   <schema_version>3.0</schema_version>
   <name>build_residential_hpxml</name>
   <uid>a13a8983-2b01-4930-8af2-42030b6e4233</uid>
-  <version_id>72c7d142-4dfe-4c1e-830a-d83fe9fecb16</version_id>
-  <version_modified>20200729T160025Z</version_modified>
+  <version_id>faec51a9-0cea-4901-86b7-ca58a8b32dc8</version_id>
+  <version_modified>20200729T174414Z</version_modified>
   <xml_checksum>2C38F48B</xml_checksum>
   <class_name>BuildResidentialHPXML</class_name>
   <display_name>HPXML Builder</display_name>
@@ -5305,23 +5305,6 @@
       <checksum>1DD2A8EE</checksum>
     </file>
     <file>
-      <filename>schedules.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>7B1535A8</checksum>
-    </file>
-    <file>
-      <version>
-        <software_program>OpenStudio</software_program>
-        <identifier>2.9.0</identifier>
-        <min_compatible>2.9.0</min_compatible>
-      </version>
-      <filename>measure.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>script</usage_type>
-      <checksum>79C33674</checksum>
-    </file>
-    <file>
       <filename>base-misc-defaults.osw</filename>
       <filetype>osw</filetype>
       <usage_type>test</usage_type>
@@ -6312,12 +6295,6 @@
       <checksum>F869F03B</checksum>
     </file>
     <file>
-      <filename>extra-vacancy-6-months.osw</filename>
-      <filetype>osw</filetype>
-      <usage_type>test</usage_type>
-      <checksum>2CEF7038</checksum>
-    </file>
-    <file>
       <filename>base-schedules-average.osw</filename>
       <filetype>osw</filetype>
       <usage_type>test</usage_type>
@@ -6330,12 +6307,6 @@
       <checksum>A791ACAF</checksum>
     </file>
     <file>
-      <filename>build_residential_hpxml_test.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>test</usage_type>
-      <checksum>053ED291</checksum>
-    </file>
-    <file>
       <filename>test_measure.xml</filename>
       <filetype>xml</filetype>
       <usage_type>test</usage_type>
@@ -6346,6 +6317,35 @@
       <filetype>xml</filetype>
       <usage_type>test</usage_type>
       <checksum>631B97CD</checksum>
+    </file>
+    <file>
+      <filename>schedules.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>80F9B1A7</checksum>
+    </file>
+    <file>
+      <version>
+        <software_program>OpenStudio</software_program>
+        <identifier>2.9.0</identifier>
+        <min_compatible>2.9.0</min_compatible>
+      </version>
+      <filename>measure.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>script</usage_type>
+      <checksum>DEFE1193</checksum>
+    </file>
+    <file>
+      <filename>extra-vacancy-6-months.osw</filename>
+      <filetype>osw</filetype>
+      <usage_type>test</usage_type>
+      <checksum>CF798D3C</checksum>
+    </file>
+    <file>
+      <filename>build_residential_hpxml_test.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>test</usage_type>
+      <checksum>AD0536BF</checksum>
     </file>
   </files>
 </measure>

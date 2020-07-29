@@ -31,8 +31,17 @@ class MiscLoads
     end
 
     if (not schedules_file.nil?)
-      space_design_level = schedules_file.calc_design_level_from_annual_kwh(col_name: 'plug_loads', annual_kwh: kwh)
-      sch = schedules_file.create_schedule_file(col_name: 'plug_loads')
+      if plug_load.plug_load_type == HPXML::PlugLoadTypeOther
+        col_name = 'plug_loads_other'
+      elsif plug_load.plug_load_type == HPXML::PlugLoadTypeTelevision
+        col_name = 'plug_loads_tv'
+      elsif plug_load.plug_load_type == HPXML::PlugLoadTypeElectricVehicleCharging
+        col_name = 'plug_loads_vehicle'
+      elsif plug_load.plug_load_type == HPXML::PlugLoadTypeWellPump
+        col_name = 'plug_loads_well_pump'
+      end
+      space_design_level = schedules_file.calc_design_level_from_annual_kwh(col_name: col_name, annual_kwh: kwh)
+      sch = schedules_file.create_schedule_file(col_name: col_name)
     else
       space_design_level = sch.calcDesignLevelFromDailykWh(kwh / 365.0)
       sch = sch.schedule

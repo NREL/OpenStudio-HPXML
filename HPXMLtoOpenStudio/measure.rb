@@ -912,15 +912,14 @@ class OSModel
       if (weekday_sch_sum - hrs_per_day).abs > 0.1
         fail 'Occupancy schedule inconsistent with hrs_per_day.'
       end
+      weekend_sch = weekday_sch
+      monthly_sch = '1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0'
 
       if not @hpxml.header.schedules_path.nil?
         schedules_file = SchedulesFile.new(runner: runner, model: model, schedules_path: @hpxml.header.schedules_path)
-        people_sch = schedules_file.create_schedule_file(col_name: 'occupants')
       end
 
-      weekend_sch = weekday_sch
-      monthly_sch = '1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0'
-      Geometry.process_occupants(model, num_occ, occ_gain, sens_frac, lat_frac, weekday_sch, weekend_sch, monthly_sch, @cfa, @nbeds, spaces[HPXML::LocationLivingSpace], people_sch)
+      Geometry.process_occupants(model, num_occ, occ_gain, sens_frac, lat_frac, weekday_sch, weekend_sch, monthly_sch, @cfa, @nbeds, spaces[HPXML::LocationLivingSpace], schedules_file)
     end
   end
 
@@ -3011,11 +3010,13 @@ class OSModel
     return if @hpxml.header.schedules_path.nil?
 
     schedules_file = SchedulesFile.new(runner: runner, model: model, schedules_path: @hpxml.header.schedules_path)
-
     col_names = [
       'occupants',
       'cooking_range',
-      'plug_loads',
+      'plug_loads_other',
+      'plug_loads_tv',
+      'plug_loads_vehicle',
+      'plug_loads_well_pump',
       'lighting_interior',
       'lighting_exterior',
       'lighting_garage',
@@ -3030,7 +3031,17 @@ class OSModel
       'ceiling_fan',
       'clothes_dryer_exhaust',
       'clothes_washer_power',
-      'dishwasher_power'
+      'dishwasher_power',
+      'refrigerator',
+      'extra_refrigerator',
+      'freezer',
+      'fuel_loads_grill',
+      'fuel_loads_lighting',
+      'fuel_loads_fireplace',
+      'pool_pump',
+      'pool_heater',
+      'hot_tub_pump',
+      'hot_tub_heater'
     ]
 
     schedules_file.import(col_names: col_names)
