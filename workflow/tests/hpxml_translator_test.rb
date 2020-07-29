@@ -396,7 +396,7 @@ class HPXMLTest < MiniTest::Test
 
     sqlFile = OpenStudio::SqlFile.new(sql_path, false)
     hpxml_defaults_path = File.join(rundir, 'in.xml')
-    hpxml = HPXML.new(hpxml_path: hpxml_defaults_path)
+    hpxml = HPXML.new(hpxml_path: hpxml_defaults_path, adjust_hvac_for_preconditioning: false)
 
     # Collapse windows further using same logic as measure.rb
     hpxml.windows.each do |window|

@@ -254,7 +254,7 @@ class HPXML < Object
   WindowLayersSinglePane = 'single-pane'
   WindowLayersTriplePane = 'triple-pane'
 
-  def initialize(hpxml_path: nil, collapse_enclosure: true)
+  def initialize(hpxml_path: nil, collapse_enclosure: true, adjust_hvac_for_preconditioning: true)
     @doc = nil
     @hpxml_path = hpxml_path
 
@@ -273,7 +273,9 @@ class HPXML < Object
     if collapse_enclosure
       collapse_enclosure_surfaces()
     end
-    adjust_hvac_with_ventilation_preconditioning()
+    if adjust_hvac_for_preconditioning
+      adjust_hvac_with_ventilation_preconditioning()
+    end
   end
 
   def has_space_type(space_type)
@@ -2766,7 +2768,7 @@ class HPXML < Object
 
         clg_cap = XMLHelper.add_element(heat_pump, 'CoolingCapacity', to_float(@cooling_capacity)) unless @cooling_capacity.nil?
         XMLHelper.add_attribute(clg_cap, 'scope', 'single unit') unless clg_cap.nil?
-        clg_bldg_cap = XMLHelper.add_element(heat_pump, 'cooling_capacity', to_float(@cooling_capacity_building)) unless @cooling_capacity_building.nil?
+        clg_bldg_cap = XMLHelper.add_element(heat_pump, 'CoolingCapacity', to_float(@cooling_capacity_building)) unless @cooling_capacity_building.nil?
         XMLHelper.add_attribute(clg_bldg_cap, 'scope', 'multiple units') unless clg_bldg_cap.nil?
       else
         XMLHelper.add_element(heat_pump, 'HeatingCapacity', to_float(@heating_capacity)) unless @heating_capacity.nil?
@@ -4933,9 +4935,10 @@ class HPXML < Object
   def adjust_hvac_with_ventilation_preconditioning()
     # adjust fractions to sum to 1.0 with preconditioning hvac equipment
     precond_frac_htg = (@heating_systems + @heat_pumps).select { |htg_sys| htg_sys.is_ventilation_preconditioning }.map { |htg_sys| htg_sys.fraction_heat_load_served }.sum
-    primary_frac_htg = 1 - precond_frac_htg
+    primary_frac_htg = 1.0 - precond_frac_htg
     precond_frac_clg = (@cooling_systems + @heat_pumps).select { |clg_sys| clg_sys.is_ventilation_preconditioning }.map { |clg_sys| clg_sys.fraction_cool_load_served }.sum
-    primary_frac_clg = 1 - precond_frac_clg
+    primary_frac_clg = 1.0 - precond_frac_clg
+    return if (precond_frac_htg == 0.0) && (precond_frac_clg == 0.0)
     @heating_systems.each do |htg_sys|
       # Preconditioning system, assign heating system unit capacity if not provided
       if htg_sys.is_ventilation_preconditioning

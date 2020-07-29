@@ -2771,7 +2771,7 @@ def set_hpxml_cooling_systems(hpxml_file, hpxml)
     hpxml.cooling_systems[1].id += '2'
     hpxml.cooling_systems[1].distribution_system_idref = 'HVACDistribution2'
   elsif ['base-mechvent-shared.xml'].include? hpxml_file
-    hpxml.cooling_systems.add(id: 'Preconditioning Cooling',
+    hpxml.cooling_systems.add(id: 'PreconditioningCooling',
                               distribution_system_idref: 'HVACDistributionPreconditioningCooling',
                               cooling_system_type: HPXML::HVACTypeCentralAirConditioner,
                               cooling_system_fuel: HPXML::FuelTypeElectricity,
@@ -2822,7 +2822,7 @@ def set_hpxml_heat_pumps(hpxml_file, hpxml)
       hpxml.heat_pumps[0].fraction_cool_load_served = 0
     end
   elsif ['base-mechvent-shared.xml'].include? hpxml_file
-    hpxml.heat_pumps.add(id: 'Preconditioning Heating',
+    hpxml.heat_pumps.add(id: 'PreconditioningHeating',
                          distribution_system_idref: 'HVACDistributionPreconditioningHeating',
                          heat_pump_type: HPXML::HVACTypeHeatPumpAirToAir,
                          heat_pump_fuel: HPXML::FuelTypeElectricity,
@@ -3488,7 +3488,6 @@ def set_hpxml_ventilation_fans(hpxml_file, hpxml)
                                fan_location: HPXML::LocationBath,
                                used_for_local_ventilation: true)
   elsif ['base-mechvent-shared.xml'].include? hpxml_file
-    # TODO: Add preconditioning system
     hpxml.ventilation_fans.add(id: 'MechanicalVentilation',
                                fan_type: HPXML::MechVentTypeSupply,
                                is_shared_system: true,
@@ -3498,8 +3497,8 @@ def set_hpxml_ventilation_fans(hpxml_file, hpxml)
                                building_fan_power: 300,
                                used_for_whole_building_ventilation: true,
                                fraction_oa: 0.8,
-                               preconditioning_cooling_system_idref: 'Preconditioning Cooling',
-                               preconditioning_heating_system_idref: 'Preconditioning Heating')
+                               preconditioning_cooling_system_idref: 'PreconditioningCooling',
+                               preconditioning_heating_system_idref: 'PreconditioningHeating')
   elsif ['base-mechvent-multiple.xml'].include? hpxml_file
     hpxml.ventilation_fans.add(id: 'WholeHouseFan',
                                rated_flow_rate: 2000,
