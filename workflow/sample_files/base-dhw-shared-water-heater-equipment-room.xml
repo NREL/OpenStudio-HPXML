@@ -626,7 +626,7 @@
             <SystemIdentifier id='WaterHeater'/>
             <FuelType>electricity</FuelType>
             <WaterHeaterType>storage water heater</WaterHeaterType>
-            <Location>other multifamily buffer space</Location>
+            <Location>living space</Location>
             <IsSharedSystem>false</IsSharedSystem>
             <TankVolume>40.0</TankVolume>
             <FractionDHWLoadServed>0.9</FractionDHWLoadServed>
