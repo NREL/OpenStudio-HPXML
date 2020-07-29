@@ -48,29 +48,29 @@ class ScheduleGenerator
   def col_names
     return [
       'occupants',
-      'cooking_range',
-      'plug_loads_other',
-      'plug_loads_tv',
-      'plug_loads_vehicle',
-      'plug_loads_well_pump',
       'lighting_interior',
       'lighting_exterior',
       'lighting_garage',
       'lighting_exterior_holiday',
-      'clothes_washer',
-      'clothes_dryer',
+      'cooking_range',
+      'refrigerator',
+      'extra_refrigerator',
+      'freezer',
       'dishwasher',
+      'dishwasher_power',
+      'clothes_washer',
+      'clothes_washer_power',
+      'clothes_dryer',
+      'clothes_dryer_exhaust',
       'baths',
       'showers',
       'sinks',
       'fixtures',
       'ceiling_fan',
-      'clothes_dryer_exhaust',
-      'clothes_washer_power',
-      'dishwasher_power',
-      'refrigerator',
-      'extra_refrigerator',
-      'freezer',
+      'plug_loads_other',
+      'plug_loads_tv',
+      'plug_loads_vehicle',
+      'plug_loads_well_pump',
       'fuel_loads_grill',
       'fuel_loads_lighting',
       'fuel_loads_fireplace',
@@ -113,11 +113,106 @@ class ScheduleGenerator
     create_timeseries_from_weekday_weekend_monthly(sch_name: 'occupants', weekday_sch: weekday_sch, weekend_sch: weekend_sch, monthly_sch: monthly_sch)
   end
 
+  def create_average_lighting_interior
+    lighting_sch = Lighting.get_schedule(@model, @weather)
+    create_timeseries_from_months(sch_name: 'lighting_interior', month_schs: lighting_sch)
+  end
+
+  def create_average_lighting_exterior
+    weekday_sch = '0.046, 0.046, 0.046, 0.046, 0.046, 0.037, 0.035, 0.034, 0.033, 0.028, 0.022, 0.015, 0.012, 0.011, 0.011, 0.012, 0.019, 0.037, 0.049, 0.065, 0.091, 0.105, 0.091, 0.063'
+    weekend_sch = '0.046, 0.046, 0.045, 0.045, 0.046, 0.045, 0.044, 0.041, 0.036, 0.03, 0.024, 0.016, 0.012, 0.011, 0.011, 0.012, 0.019, 0.038, 0.048, 0.06, 0.083, 0.098, 0.085, 0.059'
+    monthly_sch = '1.248, 1.257, 0.993, 0.989, 0.993, 0.827, 0.821, 0.821, 0.827, 0.99, 0.987, 1.248'
+    create_timeseries_from_weekday_weekend_monthly(sch_name: 'lighting_exterior', weekday_sch: weekday_sch, weekend_sch: weekend_sch, monthly_sch: monthly_sch)
+  end
+
+  def create_average_lighting_garage
+    weekday_sch = '0.046, 0.046, 0.046, 0.046, 0.046, 0.037, 0.035, 0.034, 0.033, 0.028, 0.022, 0.015, 0.012, 0.011, 0.011, 0.012, 0.019, 0.037, 0.049, 0.065, 0.091, 0.105, 0.091, 0.063'
+    weekend_sch = '0.046, 0.046, 0.045, 0.045, 0.046, 0.045, 0.044, 0.041, 0.036, 0.03, 0.024, 0.016, 0.012, 0.011, 0.011, 0.012, 0.019, 0.038, 0.048, 0.06, 0.083, 0.098, 0.085, 0.059'
+    monthly_sch = '1.248, 1.257, 0.993, 0.989, 0.993, 0.827, 0.821, 0.821, 0.827, 0.99, 0.987, 1.248'
+    create_timeseries_from_weekday_weekend_monthly(sch_name: 'lighting_garage', weekday_sch: weekday_sch, weekend_sch: weekend_sch, monthly_sch: monthly_sch)
+  end
+
+  def create_average_lighting_exterior_holiday
+    weekday_sch = '0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.008, 0.098, 0.168, 0.194, 0.284, 0.192, 0.037, 0.019'
+    weekend_sch = weekday_sch
+    monthly_sch = '1.248, 1.257, 0.993, 0.989, 0.993, 0.827, 0.821, 0.821, 0.827, 0.99, 0.987, 1.248'
+    begin_month = 11
+    begin_day_of_month = 24
+    end_month = 1
+    end_day_of_month = 6
+    create_timeseries_from_weekday_weekend_monthly(sch_name: 'lighting_exterior_holiday', weekday_sch: weekday_sch, weekend_sch: weekend_sch, monthly_sch: monthly_sch, begin_month: begin_month, begin_day_of_month: begin_day_of_month, end_month: end_month, end_day_of_month: end_day_of_month)
+  end
+
   def create_average_cooking_range
     weekday_sch = '0.007, 0.007, 0.004, 0.004, 0.007, 0.011, 0.025, 0.042, 0.046, 0.048, 0.042, 0.050, 0.057, 0.046, 0.057, 0.044, 0.092, 0.150, 0.117, 0.060, 0.035, 0.025, 0.016, 0.011'
     weekend_sch = weekday_sch
     monthly_sch = '1.097, 1.097, 0.991, 0.987, 0.991, 0.890, 0.896, 0.896, 0.890, 1.085, 1.085, 1.097'
     create_timeseries_from_weekday_weekend_monthly(sch_name: 'cooking_range', weekday_sch: weekday_sch, weekend_sch: weekend_sch, monthly_sch: monthly_sch)
+  end
+
+  def create_average_refrigerator
+    weekday_sch = '0.040, 0.039, 0.038, 0.037, 0.036, 0.036, 0.038, 0.040, 0.041, 0.041, 0.040, 0.040, 0.042, 0.042, 0.042, 0.041, 0.044, 0.048, 0.050, 0.048, 0.047, 0.046, 0.044, 0.041'
+    weekend_sch = weekday_sch
+    monthly_sch = '0.837, 0.835, 1.084, 1.084, 1.084, 1.096, 1.096, 1.096, 1.096, 0.931, 0.925, 0.837'
+    create_timeseries_from_weekday_weekend_monthly(sch_name: 'refrigerator', weekday_sch: weekday_sch, weekend_sch: weekend_sch, monthly_sch: monthly_sch)
+  end
+
+  def create_average_extra_refrigerator
+    weekday_sch = '0.040, 0.039, 0.038, 0.037, 0.036, 0.036, 0.038, 0.040, 0.041, 0.041, 0.040, 0.040, 0.042, 0.042, 0.042, 0.041, 0.044, 0.048, 0.050, 0.048, 0.047, 0.046, 0.044, 0.041'
+    weekend_sch = weekday_sch
+    monthly_sch = '0.837, 0.835, 1.084, 1.084, 1.084, 1.096, 1.096, 1.096, 1.096, 0.931, 0.925, 0.837'
+    create_timeseries_from_weekday_weekend_monthly(sch_name: 'extra_refrigerator', weekday_sch: weekday_sch, weekend_sch: weekend_sch, monthly_sch: monthly_sch)
+  end
+
+  def create_average_freezer
+    weekday_sch = '0.040, 0.039, 0.038, 0.037, 0.036, 0.036, 0.038, 0.040, 0.041, 0.041, 0.040, 0.040, 0.042, 0.042, 0.042, 0.041, 0.044, 0.048, 0.050, 0.048, 0.047, 0.046, 0.044, 0.041'
+    weekend_sch = weekday_sch
+    monthly_sch = '0.837, 0.835, 1.084, 1.084, 1.084, 1.096, 1.096, 1.096, 1.096, 0.931, 0.925, 0.837'
+    create_timeseries_from_weekday_weekend_monthly(sch_name: 'freezer', weekday_sch: weekday_sch, weekend_sch: weekend_sch, monthly_sch: monthly_sch)
+  end
+
+  def create_average_dishwasher
+    @schedules['dishwasher'] = Array.new(@total_days_in_year * @steps_in_day) { rand(0..0.1) } # FIXME
+  end
+
+  def create_average_dishwasher_power
+    @schedules['dishwasher_power'] = Array.new(@total_days_in_year * @steps_in_day) { rand(0..0.1) } # FIXME
+  end
+
+  def create_average_clothes_washer
+    @schedules['clothes_washer'] = Array.new(@total_days_in_year * @steps_in_day) { rand(0..0.1) } # FIXME
+  end
+
+  def create_average_clothes_washer_power
+    @schedules['clothes_washer_power'] = Array.new(@total_days_in_year * @steps_in_day) { rand(0..0.1) } # FIXME
+  end
+
+  def create_average_clothes_dryer
+    @schedules['clothes_dryer'] = Array.new(@total_days_in_year * @steps_in_day) { rand(0..0.1) } # FIXME
+  end
+
+  def create_average_clothes_dryer_exhaust
+    @schedules['clothes_dryer_exhaust'] = Array.new(@total_days_in_year * @steps_in_day) { rand(0..0.1) } # FIXME
+  end
+
+  def create_average_baths
+  end
+
+  def create_average_showers
+  end
+
+  def create_average_sinks
+  end
+
+  def create_average_fixtures
+    @schedules['fixtures'] = Array.new(@total_days_in_year * @steps_in_day) { rand(0..0.1) } # FIXME
+  end
+
+  def create_average_ceiling_fan
+    weekday_sch = '0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.5, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 0.0, 0.0, 0.0, 0.0'
+    weekend_sch = weekday_sch
+    monthly_sch = HVAC.get_default_ceiling_fan_months(@weather).join(',')
+    create_timeseries_from_weekday_weekend_monthly(sch_name: 'ceiling_fan', weekday_sch: weekday_sch, weekend_sch: weekend_sch, monthly_sch: monthly_sch)
   end
 
   def create_average_plug_loads_other
@@ -146,84 +241,6 @@ class ScheduleGenerator
     weekend_sch = weekday_sch
     monthly_sch = '1.154, 1.161, 1.013, 1.010, 1.013, 0.888, 0.883, 0.883, 0.888, 0.978, 0.974, 1.154'
     create_timeseries_from_weekday_weekend_monthly(sch_name: 'plug_loads_well_pump', weekday_sch: weekday_sch, weekend_sch: weekend_sch, monthly_sch: monthly_sch)
-  end
-
-  def create_average_lighting_interior
-  end
-
-  def create_average_lighting_exterior
-    weekday_sch = '0.046, 0.046, 0.046, 0.046, 0.046, 0.037, 0.035, 0.034, 0.033, 0.028, 0.022, 0.015, 0.012, 0.011, 0.011, 0.012, 0.019, 0.037, 0.049, 0.065, 0.091, 0.105, 0.091, 0.063'
-    weekend_sch = '0.046, 0.046, 0.045, 0.045, 0.046, 0.045, 0.044, 0.041, 0.036, 0.03, 0.024, 0.016, 0.012, 0.011, 0.011, 0.012, 0.019, 0.038, 0.048, 0.06, 0.083, 0.098, 0.085, 0.059'
-    monthly_sch = '1.248, 1.257, 0.993, 0.989, 0.993, 0.827, 0.821, 0.821, 0.827, 0.99, 0.987, 1.248'
-    create_timeseries_from_weekday_weekend_monthly(sch_name: 'lighting_exterior', weekday_sch: weekday_sch, weekend_sch: weekend_sch, monthly_sch: monthly_sch)
-  end
-
-  def create_average_lighting_garage
-    weekday_sch = '0.046, 0.046, 0.046, 0.046, 0.046, 0.037, 0.035, 0.034, 0.033, 0.028, 0.022, 0.015, 0.012, 0.011, 0.011, 0.012, 0.019, 0.037, 0.049, 0.065, 0.091, 0.105, 0.091, 0.063'
-    weekend_sch = '0.046, 0.046, 0.045, 0.045, 0.046, 0.045, 0.044, 0.041, 0.036, 0.03, 0.024, 0.016, 0.012, 0.011, 0.011, 0.012, 0.019, 0.038, 0.048, 0.06, 0.083, 0.098, 0.085, 0.059'
-    monthly_sch = '1.248, 1.257, 0.993, 0.989, 0.993, 0.827, 0.821, 0.821, 0.827, 0.99, 0.987, 1.248'
-    create_timeseries_from_weekday_weekend_monthly(sch_name: 'lighting_garage', weekday_sch: weekday_sch, weekend_sch: weekend_sch, monthly_sch: monthly_sch)
-  end
-
-  def create_average_lighting_exterior_holiday
-  end
-
-  def create_average_clothes_washer
-  end
-
-  def create_average_clothes_dryer
-  end
-
-  def create_average_dishwasher
-  end
-
-  def create_average_baths
-  end
-
-  def create_average_showers
-  end
-
-  def create_average_sinks
-  end
-
-  def create_average_fixtures
-  end
-
-  def create_average_ceiling_fan
-    weekday_sch = '0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.5, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 0.0, 0.0, 0.0, 0.0'
-    weekend_sch = weekday_sch
-    monthly_sch = HVAC.get_default_ceiling_fan_months(@weather).join(',')
-    create_timeseries_from_weekday_weekend_monthly(sch_name: 'ceiling_fan', weekday_sch: weekday_sch, weekend_sch: weekend_sch, monthly_sch: monthly_sch)
-  end
-
-  def create_average_clothes_dryer_exhaust
-  end
-
-  def create_average_clothes_washer_power
-  end
-
-  def create_average_dishwasher_power
-  end
-
-  def create_average_refrigerator
-    weekday_sch = '0.040, 0.039, 0.038, 0.037, 0.036, 0.036, 0.038, 0.040, 0.041, 0.041, 0.040, 0.040, 0.042, 0.042, 0.042, 0.041, 0.044, 0.048, 0.050, 0.048, 0.047, 0.046, 0.044, 0.041'
-    weekend_sch = weekday_sch
-    monthly_sch = '0.837, 0.835, 1.084, 1.084, 1.084, 1.096, 1.096, 1.096, 1.096, 0.931, 0.925, 0.837'
-    create_timeseries_from_weekday_weekend_monthly(sch_name: 'refrigerator', weekday_sch: weekday_sch, weekend_sch: weekend_sch, monthly_sch: monthly_sch)
-  end
-
-  def create_average_extra_refrigerator
-    weekday_sch = '0.040, 0.039, 0.038, 0.037, 0.036, 0.036, 0.038, 0.040, 0.041, 0.041, 0.040, 0.040, 0.042, 0.042, 0.042, 0.041, 0.044, 0.048, 0.050, 0.048, 0.047, 0.046, 0.044, 0.041'
-    weekend_sch = weekday_sch
-    monthly_sch = '0.837, 0.835, 1.084, 1.084, 1.084, 1.096, 1.096, 1.096, 1.096, 0.931, 0.925, 0.837'
-    create_timeseries_from_weekday_weekend_monthly(sch_name: 'extra_refrigerator', weekday_sch: weekday_sch, weekend_sch: weekend_sch, monthly_sch: monthly_sch)
-  end
-
-  def create_average_freezer
-    weekday_sch = '0.040, 0.039, 0.038, 0.037, 0.036, 0.036, 0.038, 0.040, 0.041, 0.041, 0.040, 0.040, 0.042, 0.042, 0.042, 0.041, 0.044, 0.048, 0.050, 0.048, 0.047, 0.046, 0.044, 0.041'
-    weekend_sch = weekday_sch
-    monthly_sch = '0.837, 0.835, 1.084, 1.084, 1.084, 1.096, 1.096, 1.096, 1.096, 0.931, 0.925, 0.837'
-    create_timeseries_from_weekday_weekend_monthly(sch_name: 'freezer', weekday_sch: weekday_sch, weekend_sch: weekend_sch, monthly_sch: monthly_sch)
   end
 
   def create_average_fuel_loads_grill
@@ -278,22 +295,63 @@ class ScheduleGenerator
   def create_timeseries_from_weekday_weekend_monthly(sch_name:,
                                                      weekday_sch:,
                                                      weekend_sch:,
-                                                     monthly_sch:)
+                                                     monthly_sch:,
+                                                     begin_month: nil,
+                                                     begin_day_of_month: nil,
+                                                     end_month: nil,
+                                                     end_day_of_month: nil)
 
     daily_sch = { 'weekday_sch' => weekday_sch.split(',').map { |i| i.to_f },
                   'weekend_sch' => weekend_sch.split(',').map { |i| i.to_f },
                   'monthly_multiplier' => monthly_sch.split(',').map { |i| i.to_f } }
 
     sim_year = @model.getYearDescription.calendarYear.get
+
+    if begin_month.nil? && begin_day_of_month.nil? && end_month.nil? && end_day_of_month.nil?
+      begin_day = DateTime.new(sim_year, 1, 1)
+      end_day = DateTime.new(sim_year, 12, 31)
+    else
+      begin_day = DateTime.new(sim_year, begin_month, begin_day_of_month)
+      end_day = DateTime.new(sim_year, end_month, end_day_of_month)
+    end
+
     start_day = DateTime.new(sim_year, 1, 1)
     @total_days_in_year.times do |day|
       today = start_day + day
+      if begin_day <= end_day
+        next if not (begin_day <= today && today <= end_day)
+      else
+        next if not (begin_day <= today || today <= end_day)
+      end
       month = today.month
       day_of_week = today.wday
       [0, 6].include?(day_of_week) ? is_weekday = false : is_weekday = true
       @steps_in_day.times do |step|
         minute = day * 1440 + step * @minutes_per_steps
         @schedules[sch_name][day * @steps_in_day + step] = get_value_from_daily_sch(daily_sch, month, is_weekday, minute, 1)
+      end
+    end
+    @schedules[sch_name] = normalize(@schedules[sch_name])
+  end
+
+  def create_timeseries_from_months(sch_name:,
+                                    month_schs:)
+
+    num_days_in_months = Constants.NumDaysInMonths(@model.getYearDescription)
+    sch = []
+    for month in 0..11
+      sch << month_schs[month] * num_days_in_months[month]
+    end
+    sch = sch.flatten
+    m = sch.max
+    sch = sch.map { |s| s / m }
+
+    sim_year = @model.getYearDescription.calendarYear.get
+    start_day = DateTime.new(sim_year, 1, 1)
+    @total_days_in_year.times do |day|
+      @steps_in_day.times do |step|
+        minute = day * 1440 + step * @minutes_per_steps
+        @schedules[sch_name][day * @steps_in_day + step] = scale_lighting_by_occupancy(sch, minute, 1)
       end
     end
     @schedules[sch_name] = normalize(@schedules[sch_name])
@@ -1019,10 +1077,10 @@ class ScheduleGenerator
     return arr
   end
 
-  def scale_lighting_by_occupancy(lighting_sch, minute, active_occupant_percentage)
+  def scale_lighting_by_occupancy(sch, minute, active_occupant_percentage)
     day_start = minute / 1440
-    day_sch = lighting_sch[day_start * 24, 24]
-    current_val = lighting_sch[minute / 60]
+    day_sch = sch[day_start * 24, 24]
+    current_val = sch[minute / 60]
     return day_sch.min + (current_val - day_sch.min) * active_occupant_percentage
   end
 
