@@ -217,7 +217,6 @@ class HPXMLTest < MiniTest::Test
   def _run_xml(xml, this_dir, expect_error = false, expect_error_msgs = nil)
     print "Testing #{File.basename(xml)}...\n"
     rundir = File.join(this_dir, 'run')
-    _test_schema_validation(this_dir, xml) unless expect_error
 
     measures_dir = File.join(this_dir, '..', '..')
 
@@ -1200,17 +1199,6 @@ class HPXMLTest < MiniTest::Test
     # window model bugfix is available.
     # FUTURE: Switch to stringent HERS acceptance criteria once it's based on
     # TMY3.
-  end
-
-  def _test_schema_validation(this_dir, xml)
-    # TODO: Remove this when schema validation is included with CLI calls
-    schemas_dir = File.absolute_path(File.join(this_dir, '..', '..', 'HPXMLtoOpenStudio', 'resources'))
-    hpxml_doc = Oga.parse_xml(File.read(xml))
-    errors = XMLHelper.validate(hpxml_doc.to_xml, File.join(schemas_dir, 'HPXML.xsd'), nil)
-    if errors.size > 0
-      puts "#{xml}: #{errors}"
-    end
-    assert_equal(0, errors.size)
   end
 
   def _display_result_epsilon(xml, result1, result2, key)
