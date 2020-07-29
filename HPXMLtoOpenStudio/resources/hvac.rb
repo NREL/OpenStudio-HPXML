@@ -123,14 +123,18 @@ class HVAC
 
     # Fan
 
-    if not cooling_system.is_ventilation_preconditioning
-      if not cooling_system.nil?
+    if not cooling_system.nil?
+      if not cooling_system.is_ventilation_preconditioning
         fan_power_installed = get_fan_power_installed(cooling_system.cooling_efficiency_seer)
       else
-        fan_power_installed = 0.5 # W/cfm; For fuel furnaces, will be overridden by EAE later
+        fan_power_installed = 0.0
       end
     else
-      fan_power_installed = 0.0
+      if not heating_system.is_ventilation_preconditioning
+        fan_power_installed = 0.5 # W/cfm; For fuel furnaces, will be overridden by EAE later
+      else
+        fan_power_installed = 0.0
+      end
     end
     fan = create_supply_fan(model, obj_name, num_speeds, fan_power_installed)
     if not cooling_system.nil?
