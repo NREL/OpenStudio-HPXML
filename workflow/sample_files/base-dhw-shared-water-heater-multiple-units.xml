@@ -624,11 +624,11 @@
         <WaterHeating>
           <WaterHeatingSystem>
             <SystemIdentifier id='SharedWaterHeater'/>
-            <IsSharedSystem>true</IsSharedSystem>
-            <NumberofUnitsServed>6</NumberofUnitsServed>
             <FuelType>natural gas</FuelType>
             <WaterHeaterType>storage water heater</WaterHeaterType>
             <Location>other multifamily buffer space</Location>
+            <IsSharedSystem>true</IsSharedSystem>
+            <NumberofUnitsServed>6</NumberofUnitsServed>
             <TankVolume>50.0</TankVolume>
             <FractionDHWLoadServed>1.0</FractionDHWLoadServed>
             <HeatingCapacity>40000.0</HeatingCapacity>

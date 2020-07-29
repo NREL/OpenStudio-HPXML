@@ -3295,11 +3295,11 @@ class HPXML < Object
       water_heating_system = XMLHelper.add_element(water_heating, 'WaterHeatingSystem')
       sys_id = XMLHelper.add_element(water_heating_system, 'SystemIdentifier')
       XMLHelper.add_attribute(sys_id, 'id', @id)
-      XMLHelper.add_element(water_heating_system, 'IsSharedSystem', to_boolean(@is_shared_system)) unless @is_shared_system.nil?
-      XMLHelper.add_element(water_heating_system, 'NumberofUnitsServed', to_integer(@number_of_units_served)) unless @number_of_units_served.nil?
       XMLHelper.add_element(water_heating_system, 'FuelType', @fuel_type) unless @fuel_type.nil?
       XMLHelper.add_element(water_heating_system, 'WaterHeaterType', @water_heater_type) unless @water_heater_type.nil?
       XMLHelper.add_element(water_heating_system, 'Location', @location) unless @location.nil?
+      XMLHelper.add_element(water_heating_system, 'IsSharedSystem', to_boolean(@is_shared_system)) unless @is_shared_system.nil?
+      XMLHelper.add_element(water_heating_system, 'NumberofUnitsServed', to_integer(@number_of_units_served)) unless @number_of_units_served.nil?
       XMLHelper.add_element(water_heating_system, 'PerformanceAdjustment', to_float(@performance_adjustment)) unless @performance_adjustment.nil?
       XMLHelper.add_element(water_heating_system, 'TankVolume', to_float(@tank_volume)) unless @tank_volume.nil?
       XMLHelper.add_element(water_heating_system, 'FractionDHWLoadServed', to_float(@fraction_dhw_load_served)) unless @fraction_dhw_load_served.nil?
@@ -3325,12 +3325,12 @@ class HPXML < Object
       return if water_heating_system.nil?
 
       @id = HPXML::get_id(water_heating_system)
-      @is_shared_system = to_boolean_or_nil(XMLHelper.get_value(water_heating_system, 'IsSharedSystem'))
-      @number_of_units_served = to_integer_or_nil(XMLHelper.get_value(water_heating_system, 'NumberofUnitsServed'))
       @year_installed = to_integer_or_nil(XMLHelper.get_value(water_heating_system, 'YearInstalled'))
       @fuel_type = XMLHelper.get_value(water_heating_system, 'FuelType')
       @water_heater_type = XMLHelper.get_value(water_heating_system, 'WaterHeaterType')
       @location = XMLHelper.get_value(water_heating_system, 'Location')
+      @is_shared_system = to_boolean_or_nil(XMLHelper.get_value(water_heating_system, 'IsSharedSystem'))
+      @number_of_units_served = to_integer_or_nil(XMLHelper.get_value(water_heating_system, 'NumberofUnitsServed'))
       @performance_adjustment = to_float_or_nil(XMLHelper.get_value(water_heating_system, 'PerformanceAdjustment'))
       @tank_volume = to_float_or_nil(XMLHelper.get_value(water_heating_system, 'TankVolume'))
       @fraction_dhw_load_served = to_float_or_nil(XMLHelper.get_value(water_heating_system, 'FractionDHWLoadServed'))

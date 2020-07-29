@@ -3711,8 +3711,9 @@ def set_hpxml_water_heating_systems(hpxml_file, hpxml)
     hpxml.water_heating_systems << hpxml.water_heating_systems[0].dup
     hpxml.water_heating_systems[0].fraction_dhw_load_served = 0.9
     hpxml.water_heating_systems[1].id = 'SharedLaundryWaterHeater'
-    hpxml.water_heating_systems[1].fraction_dhw_load_served = 0.1
+    hpxml.water_heating_systems[1].is_shared_system = true
     hpxml.water_heating_systems[1].number_of_units_served = 0
+    hpxml.water_heating_systems[1].fraction_dhw_load_served = 0.1
   elsif ['invalid_files/multifamily-reference-water-heater.xml'].include? hpxml_file
     hpxml.water_heating_systems[0].location = HPXML::LocationOtherNonFreezingSpace
   end
