@@ -602,7 +602,7 @@ class EnergyPlusValidator
         '../HotWaterDistribution' => one, # See [HotWaterDistribution]
         '../WaterFixture' => one_or_more, # See [WaterFixture]
         'SystemIdentifier' => one, # Required by HPXML schema
-        'IsSharedSystem' => zero_or_one, # See [WaterHeatingSystem=Shared]
+        'IsSharedSystem' => one, # See [WaterHeatingSystem=Shared]
         'WaterHeaterType[text()="storage water heater" or text()="instantaneous water heater" or text()="heat pump water heater" or text()="space-heating boiler with storage tank" or text()="space-heating boiler with tankless coil"]' => one, # See [WHType=Tank] or [WHType=Tankless] or [WHType=HeatPump] or [WHType=Indirect] or [WHType=CombiTankless]
         '[not(Location)] | Location[text()="living space" or text()="basement - unconditioned" or text()="basement - conditioned" or text()="attic - unvented" or text()="attic - vented" or text()="garage" or text()="crawlspace - unvented" or text()="crawlspace - vented" or text()="other exterior" or text()="other housing unit" or text()="other heated space" or text()="other multifamily buffer space" or text()="other non-freezing space"]' => one,
         'FractionDHWLoadServed' => one,
@@ -665,7 +665,7 @@ class EnergyPlusValidator
         'SystemType/Standard | SystemType/Recirculation' => one, # See [HWDistType=Standard] or [HWDistType=Recirculation]
         'PipeInsulation/PipeRValue' => one,
         'DrainWaterHeatRecovery' => zero_or_one, # See [DrainWaterHeatRecovery]
-        'extension/SharedRecirculation' => zero_or_one, # See [HWDistType=SharedRecirculation]
+        'extension/SharedRecirculation' => zero_or_one, # See [SharedRecirculation]
       },
 
       ## [HWDistType=Standard]
@@ -681,18 +681,18 @@ class EnergyPlusValidator
         'PumpPower' => zero_or_one,
       },
 
-      ## [HWDistType=SharedRecirculation]
-      '/HPXML/Building/BuildingDetails/Systems/WaterHeating/HotWaterDistribution[extension/SharedRecirculation]' => {
-        'extension/SharedRecirculation/NumberofUnitsServed' => one,
-        'extension/SharedRecirculation/PumpPower' => zero_or_one,
-        'extension/SharedRecirculation/ControlType[text()="manual demand control" or text()="presence sensor demand control" or text()="temperature" or text()="timer" or text()="no control"]' => one,
-      },
-
       ## [DrainWaterHeatRecovery]
       '/HPXML/Building/BuildingDetails/Systems/WaterHeating/HotWaterDistribution/DrainWaterHeatRecovery' => {
         'FacilitiesConnected' => one,
         'EqualFlow' => one,
         'Efficiency' => one,
+      },
+
+      ## [SharedRecirculation]
+      '/HPXML/Building/BuildingDetails/Systems/WaterHeating/HotWaterDistribution[extension/SharedRecirculation]' => {
+        'extension/SharedRecirculation/NumberofUnitsServed' => one,
+        'extension/SharedRecirculation/PumpPower' => zero_or_one,
+        'extension/SharedRecirculation/ControlType[text()="manual demand control" or text()="presence sensor demand control" or text()="temperature" or text()="timer" or text()="no control"]' => one,
       },
 
       # [WaterFixture]

@@ -380,6 +380,7 @@
             <SystemIdentifier id='WaterHeater'/>
             <FuelType>electricity</FuelType>
             <WaterHeaterType>storage water heater</WaterHeaterType>
+            <IsSharedSystem>false</IsSharedSystem>
             <FractionDHWLoadServed>1.0</FractionDHWLoadServed>
             <UniformEnergyFactor>0.93</UniformEnergyFactor>
           </WaterHeatingSystem>

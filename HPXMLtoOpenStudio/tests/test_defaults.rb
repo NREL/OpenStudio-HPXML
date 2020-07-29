@@ -366,33 +366,31 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
       wh.heating_capacity = 15000.0
       wh.tank_volume = 40.0
       wh.recovery_efficiency = 0.95
-      wh.is_shared_system = true
-      wh.number_of_units_served = 2
     end
     XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
     hpxml_default = _test_measure()
-    _test_default_water_heater_values(hpxml_default, [15000.0, 40.0, 0.95, true, 2])
+    _test_default_water_heater_values(hpxml_default, [15000.0, 40.0, 0.95])
     _test_default_number_of_bathrooms(hpxml_default, 2.0)
 
     # Test defaults w/ 3-bedroom house & electric storage water heater
     hpxml = apply_hpxml_defaults('base.xml')
     XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
     hpxml_default = _test_measure()
-    _test_default_water_heater_values(hpxml_default, [18766.7, 50.0, 0.98, false, nil])
+    _test_default_water_heater_values(hpxml_default, [18766.7, 50.0, 0.98])
     _test_default_number_of_bathrooms(hpxml_default, 2.0)
 
     # Test defaults w/ 5-bedroom house & electric storage water heater
     hpxml = apply_hpxml_defaults('base-enclosure-beds-5.xml')
     XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
     hpxml_default = _test_measure()
-    _test_default_water_heater_values(hpxml_default, [18766.7, 66.0, 0.98, false, nil])
+    _test_default_water_heater_values(hpxml_default, [18766.7, 66.0, 0.98])
     _test_default_number_of_bathrooms(hpxml_default, 3.0)
 
     # Test defaults w/ 3-bedroom house & 2 storage water heaters (1 electric and 1 natural gas)
     hpxml = apply_hpxml_defaults('base-dhw-multiple.xml')
     XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
     hpxml_default = _test_measure()
-    _test_default_water_heater_values(hpxml_default, [15354.6, 50.0, 0.98, false, nil],
+    _test_default_water_heater_values(hpxml_default, [15354.6, 50.0, 0.98],
                                       [36000.0, 40.0, 0.756])
     _test_default_number_of_bathrooms(hpxml_default, 2.0)
   end
@@ -1375,15 +1373,10 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
     storage_water_heaters = hpxml.water_heating_systems.select { |w| w.water_heater_type == HPXML::WaterHeaterTypeStorage }
     assert_equal(expected_wh_values.size, storage_water_heaters.size)
     storage_water_heaters.each_with_index do |wh_system, idx|
-      heating_capacity, tank_volume, recovery_efficiency, is_shared, n_units_served = expected_wh_values[idx]
+      heating_capacity, tank_volume, recovery_efficiency = expected_wh_values[idx]
       assert_in_epsilon(heating_capacity, wh_system.heating_capacity, 0.01)
       assert_equal(tank_volume, wh_system.tank_volume)
       assert_in_epsilon(recovery_efficiency, wh_system.recovery_efficiency, 0.01)
-      if n_units_served.nil?
-        assert_nil(wh_system.number_of_units_served)
-      else
-        assert_equal(n_units_served, wh_system.number_of_units_served)
-      end
     end
   end
 

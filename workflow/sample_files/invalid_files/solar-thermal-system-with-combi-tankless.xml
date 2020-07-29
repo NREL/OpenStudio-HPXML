@@ -337,6 +337,7 @@
             <SystemIdentifier id='WaterHeater'/>
             <WaterHeaterType>space-heating boiler with tankless coil</WaterHeaterType>
             <Location>living space</Location>
+            <IsSharedSystem>false</IsSharedSystem>
             <FractionDHWLoadServed>1.0</FractionDHWLoadServed>
             <HotWaterTemperature>125.0</HotWaterTemperature>
             <RelatedHVACSystem idref='HeatingSystem'/>
