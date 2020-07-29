@@ -3716,13 +3716,13 @@ def set_hpxml_water_heating_systems(hpxml_file, hpxml)
                                     recovery_efficiency: 0.76,
                                     temperature: Waterheater.get_default_hot_water_temperature(Constants.ERIVersions[-1]))
   elsif ['base-dhw-shared-water-heater-equipment-room.xml'].include? hpxml_file
-    hpxml.water_heating_systems[0].location = HPXML::LocationOtherHeatedSpace
     hpxml.water_heating_systems << hpxml.water_heating_systems[0].dup
     hpxml.water_heating_systems[0].fraction_dhw_load_served = 0.9
     hpxml.water_heating_systems[1].id = 'SharedLaundryWaterHeater'
     hpxml.water_heating_systems[1].is_shared_system = true
     hpxml.water_heating_systems[1].number_of_units_served = 6
     hpxml.water_heating_systems[1].fraction_dhw_load_served = 0.1
+    hpxml.water_heating_systems[1].location = HPXML::LocationOtherHeatedSpace
   elsif ['invalid_files/multifamily-reference-water-heater.xml'].include? hpxml_file
     hpxml.water_heating_systems[0].location = HPXML::LocationOtherNonFreezingSpace
   end
@@ -3730,7 +3730,7 @@ end
 
 def set_hpxml_hot_water_distribution(hpxml_file, hpxml)
   if ['base.xml'].include? hpxml_file
-    hpxml.hot_water_distributions.add(id: 'HotWaterDstribution',
+    hpxml.hot_water_distributions.add(id: 'HotWaterDistribution',
                                       system_type: HPXML::DHWDistTypeStandard,
                                       standard_piping_length: 50, # Chosen to test a negative EC_adj
                                       pipe_r_value: 0.0)
