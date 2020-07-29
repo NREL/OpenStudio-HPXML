@@ -148,6 +148,8 @@ def create_hpxmls
     'base-dhw-recirc-nocontrol.xml' => 'base.xml',
     'base-dhw-recirc-temperature.xml' => 'base.xml',
     'base-dhw-recirc-timer.xml' => 'base.xml',
+    'base-dhw-shared-water-heater-multiple-units.xml' => 'base-enclosure-attached-multifamily.xml',
+    'base-dhw-shared-water-heater-equipment-room.xml' => 'base-enclosure-attached-multifamily.xml',
     'base-dhw-solar-direct-evacuated-tube.xml' => 'base.xml',
     'base-dhw-solar-direct-flat-plate.xml' => 'base.xml',
     'base-dhw-solar-direct-ics.xml' => 'base.xml',
@@ -412,6 +414,8 @@ def create_hpxmls
         hpxml_path = File.join(sample_files_dir, derivative)
       end
 
+      XMLHelper.write_file(hpxml_doc, hpxml_path)
+
       if not hpxml_path.include? 'invalid_files'
         # Validate file against HPXML schema
         schemas_dir = File.absolute_path(File.join(File.dirname(__FILE__), 'HPXMLtoOpenStudio/resources'))
@@ -426,8 +430,6 @@ def create_hpxmls
           fail "ERRORS: #{errors}"
         end
       end
-
-      XMLHelper.write_file(hpxml_doc, hpxml_path)
     rescue Exception => e
       puts "\n#{e}\n#{e.backtrace.join('\n')}"
       puts "\nError: Did not successfully generate #{derivative}."
@@ -3690,6 +3692,27 @@ def set_hpxml_water_heating_systems(hpxml_file, hpxml)
       hpxml.water_heating_systems[0].energy_factor = nil
       hpxml.water_heating_systems[0].uniform_energy_factor = 0.93
     end
+  elsif ['base-dhw-shared-water-heater-multiple-units.xml'].include? hpxml_file
+    hpxml.water_heating_systems.clear
+    hpxml.water_heating_systems.add(id: 'SharedWaterHeater',
+                                    is_shared_system: true,
+                                    number_of_units_served: 6,
+                                    fuel_type: HPXML::FuelTypeNaturalGas,
+                                    water_heater_type: HPXML::WaterHeaterTypeStorage,
+                                    location: HPXML::LocationOtherMultifamilyBufferSpace,
+                                    tank_volume: 50,
+                                    fraction_dhw_load_served: 1.0,
+                                    heating_capacity: 40000,
+                                    energy_factor: 0.59,
+                                    recovery_efficiency: 0.76,
+                                    temperature: Waterheater.get_default_hot_water_temperature(Constants.ERIVersions[-1]))
+  elsif ['base-dhw-shared-water-heater-equipment-room.xml'].include? hpxml_file
+    hpxml.water_heating_systems[0].location = HPXML::LocationOtherHeatedSpace
+    hpxml.water_heating_systems << hpxml.water_heating_systems[0].dup
+    hpxml.water_heating_systems[0].fraction_dhw_load_served = 0.9
+    hpxml.water_heating_systems[1].id = 'SharedLaundryWaterHeater'
+    hpxml.water_heating_systems[1].fraction_dhw_load_served = 0.1
+    hpxml.water_heating_systems[1].number_of_units_served = 0
   elsif ['invalid_files/multifamily-reference-water-heater.xml'].include? hpxml_file
     hpxml.water_heating_systems[0].location = HPXML::LocationOtherNonFreezingSpace
   end
@@ -3928,6 +3951,8 @@ def set_hpxml_clothes_washer(hpxml_file, hpxml)
     hpxml.clothes_washers[0].label_usage = nil
   elsif ['base-misc-usage-multiplier.xml'].include? hpxml_file
     hpxml.clothes_washers[0].usage_multiplier = 0.9
+  elsif ['base-dhw-shared-water-heater-equipment-room.xml'].include? hpxml_file
+    hpxml.clothes_washers[0].location = HPXML::LocationOtherHeatedSpace
   elsif ['invalid_files/multifamily-reference-appliance.xml'].include? hpxml_file
     hpxml.clothes_washers[0].location = HPXML::LocationOtherHousingUnit
   end
@@ -4004,6 +4029,8 @@ def set_hpxml_clothes_dryer(hpxml_file, hpxml)
     hpxml.clothes_dryers[0].energy_factor = nil
     hpxml.clothes_dryers[0].combined_energy_factor = nil
     hpxml.clothes_dryers[0].control_type = nil
+  elsif ['base-dhw-shared-water-heater-equipment-room.xml'].include? hpxml_file
+    hpxml.clothes_dryers[0].location = HPXML::LocationOtherHeatedSpace
   elsif ['base-misc-usage-multiplier.xml'].include? hpxml_file
     hpxml.clothes_dryers[0].usage_multiplier = 0.9
   end
@@ -4057,6 +4084,8 @@ def set_hpxml_dishwasher(hpxml_file, hpxml)
     hpxml.dishwashers[0].label_annual_gas_cost = nil
     hpxml.dishwashers[0].place_setting_capacity = nil
     hpxml.dishwashers[0].label_usage = nil
+  elsif ['base-dhw-shared-water-heater-equipment-room.xml'].include? hpxml_file
+    hpxml.dishwashers[0].location = HPXML::LocationOtherHeatedSpace
   elsif ['base-misc-usage-multiplier.xml'].include? hpxml_file
     hpxml.dishwashers[0].usage_multiplier = 0.9
   end
