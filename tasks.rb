@@ -948,6 +948,18 @@ def set_hpxml_rim_joists(hpxml_file, hpxml)
                            insulation_assembly_r_value: 23.0)
     end
   elsif ['base-enclosure-walls-detailed.xml'].include? hpxml_file
+    hpxml.walls[0].insulation_assembly_r_value = nil
+    hpxml.walls[0].insulation_cavity_r_value = 19
+    hpxml.walls[0].insulation_cavity_thickness = 5.5
+    hpxml.walls[0].insulation_grade = 3
+    hpxml.walls[0].stud_size = '2x6'
+    hpxml.walls[0].stud_spacing = 16
+    hpxml.walls[0].framing_factor = 0.1988
+    hpxml.walls[0].stud_material = 'wood'
+    hpxml.walls[0].osb_thickness = 0.5
+    hpxml.walls[0].cmu_thickness = 8
+    hpxml.walls[0].cmu_conductivity = 7.70
+    hpxml.walls[0].cmu_density = 119.0
     hpxml.walls[1].insulation_assembly_r_value = nil
     hpxml.walls[1].insulation_cavity_r_value = 19
     hpxml.walls[1].insulation_cavity_thickness = 5.5

@@ -193,16 +193,38 @@
             <ExteriorAdjacentTo>outside</ExteriorAdjacentTo>
             <InteriorAdjacentTo>living space</InteriorAdjacentTo>
             <WallType>
-              <ConcreteMasonryUnit/>
+              <ConcreteMasonryUnit>
+                <extension>
+                  <Thickness>8</Thickness>
+                  <Conductivity>7.7</Conductivity>
+                  <Density>119.0</Density>
+                </extension>
+              </ConcreteMasonryUnit>
             </WallType>
             <Area>109.0</Area>
+            <Studs>
+              <Size>2x6</Size>
+              <Spacing>16.0</Spacing>
+              <FramingFactor>0.1988</FramingFactor>
+              <Material>wood</Material>
+            </Studs>
             <Siding>aluminum siding</Siding>
             <Color>reflective</Color>
             <Emittance>0.92</Emittance>
             <Insulation>
               <SystemIdentifier id='Wall1Insulation'/>
-              <AssemblyEffectiveRValue>12.0</AssemblyEffectiveRValue>
+              <InsulationGrade>3</InsulationGrade>
+              <Layer>
+                <InstallationType>cavity</InstallationType>
+                <NominalRValue>19.0</NominalRValue>
+                <Thickness>5.5</Thickness>
+              </Layer>
             </Insulation>
+            <extension>
+              <OrientedStrandBoard>
+                <Thickness>0.5</Thickness>
+              </OrientedStrandBoard>
+            </extension>
           </Wall>
           <Wall>
             <SystemIdentifier id='Wall2'/>

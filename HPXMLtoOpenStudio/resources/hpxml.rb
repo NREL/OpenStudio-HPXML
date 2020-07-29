@@ -1629,7 +1629,9 @@ class HPXML < Object
              :area, :orientation, :azimuth, :siding, :color, :solar_absorptance, :emittance, :insulation_id,
              :ufactor, :insulation_assembly_r_value, :insulation_cavity_r_value, :insulation_continuous_r_value,
              :insulation_cavity_thickness, :insulation_grade, :insulation_cavity_material, :insulation_continuous_material,
-             :stud_size, :stud_spacing, :stud_material, :framing_factor, :osb_thickness, :double_stud_is_staggered, :double_stud_gap_depth]
+             :stud_size, :stud_spacing, :stud_material, :framing_factor, :osb_thickness,
+             :double_stud_is_staggered, :double_stud_gap_depth,
+             :cmu_thickness, :cmu_conductivity, :cmu_density]
     attr_accessor(*ATTRS)
 
     def windows
@@ -1707,6 +1709,12 @@ class HPXML < Object
         extension = XMLHelper.add_element(double_stud_wall, 'extension')
         XMLHelper.add_element(extension, 'GapDepth', @double_stud_gap_depth) unless @double_stud_gap_depth.nil?
       end
+      if (not @insulation_cavity_r_value.nil?) && @wall_type == HPXML::WallTypeCMU
+        cmu_wall_extension = XMLHelper.create_elements_as_needed(wall, ['WallType', 'ConcreteMasonryUnit', 'extension'])
+        XMLHelper.add_element(cmu_wall_extension, 'Thickness', @cmu_thickness) unless @cmu_thickness.nil?
+        XMLHelper.add_element(cmu_wall_extension, 'Conductivity', @cmu_conductivity) unless @cmu_conductivity.nil?
+        XMLHelper.add_element(cmu_wall_extension, 'Density', @cmu_density) unless @cmu_density.nil?
+      end
       XMLHelper.add_element(wall, 'Area', to_float(@area)) unless @area.nil?
       XMLHelper.add_element(wall, 'Azimuth', to_integer(@azimuth)) unless @azimuth.nil?
       if not @insulation_cavity_r_value.nil?
@@ -1780,6 +1788,9 @@ class HPXML < Object
         @osb_thickness = to_float_or_nil(XMLHelper.get_value(wall, 'extension/OrientedStrandBoard/Thickness'))
         @double_stud_is_staggered = to_bool_or_nil(XMLHelper.get_value(wall, 'WallType/DoubleWoodStud/Staggered'))
         @double_stud_gap_depth = to_float_or_nil(XMLHelper.get_value(wall, 'WallType/DoubleWoodStud/extension/GapDepth'))
+        @cmu_thickness = to_float_or_nil(XMLHelper.get_value(wall, 'WallType/ConcreteMasonryUnit/extension/Thickness'))
+        @cmu_conductivity = to_float_or_nil(XMLHelper.get_value(wall, 'WallType/ConcreteMasonryUnit/extension/Conductivity'))
+        @cmu_density = to_float_or_nil(XMLHelper.get_value(wall, 'WallType/ConcreteMasonryUnit/extension/Density'))
       end
     end
   end

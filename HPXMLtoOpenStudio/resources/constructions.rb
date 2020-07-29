@@ -12,6 +12,9 @@ class Constructions
     # install_grade handles RESNET insulation grading. This value is for considering defects occurred in the process of insulation installation. This value determines the relative area occupied by void insulation.
     # cavity_depth_in is equivalent to stud_depth_in
     # framing_factor is equivalent to stud_fraction (FIXME: Need to confirm)
+    # Plan view of parallel path layer:
+    # path fraction | framing_factor | 1 - framing_factor - gapFactor | gapFactor |
+    # layer         |     frame      |           insulation           |    gap    |
 
     return if surfaces.empty?
 
@@ -83,7 +86,17 @@ class Constructions
                                   mat_ext_finish:, inside_film:, outside_film:)
     # install_grade handles RESNET insulation grading. This value is for considering defects occurred in the process of insulation installation. This value determines the relative area occupied by void insulation.
     # cavity_depth_in is calculated using stud_depth_in and gap_depth_in. Please see below.
-    # framing_factor includes stud_fraction and miscellaneous framing factor (i.e. framing doors, windows, and etc.)
+    # framing_factor includes stud_fraction and miscellaneous framing factor (i.e. framing around doors, windows, and etc.)
+    # Plan view of parallel path layer when "is_staggered" is true:
+    # path fraction | misc_framing_factor | stud_frac  | stud_frac  |  dsGapFactor  | 1.0 - (2 * stud_frac + misc_framing_factor + dsGapFactor |
+    # outer layer   |       frame         | insulation |    stud    |      gap      |                        insulation                        |
+    # gap layer     |       frame         | insulation | insulation |      gap      |                        insulation                        |
+    # inner layer   |       frame         |    stud    | insulation |      gap      |                        insulation                        |
+    # Plan view of parallel path layer when "is_staggered" is false:
+    # path fraction | misc_framing_factor | stud_frac  | stud_frac  |  dsGapFactor  | 1.0 - (2 * stud_frac + misc_framing_factor + dsGapFactor |
+    # outer layer   |       frame         |    stud    | insulation |      gap      |                        insulation                        |
+    # gap layer     |       frame         | insulation | insulation |      gap      |                        insulation                        |
+    # inner layer   |       frame         |    stud    | insulation |      gap      |                        insulation                        |
 
     return if surfaces.empty?
 
@@ -152,16 +165,25 @@ class Constructions
   end
 
   def self.apply_cmu_wall(runner, model, surfaces, wall, constr_name,
-                          thick_in, conductivity, density, framing_factor,
-                          furring_r, furring_cavity_depth, furring_spacing,
-                          drywall_thick_in, osb_thick_in, rigid_r,
-                          mat_ext_finish, inside_film, outside_film)
+                          cmu_thick_in:, cmu_conductivity:, cmu_density:, framing_factor:,
+                          furring_r:, furring_cavity_depth:, furring_spacing:,
+                          inside_drywall_thick_in:, osb_thick_in:, rigid_r:,
+                          mat_ext_finish:, inside_film:, outside_film:)
+    # framing_factor includes the framing of cmu and the framing around doors, windows, and etc.
+    # stud_frac refers to the framing of furring.
+    # Plan view of parallel path layer when the wall has furring:
+    # path fraction | framing_factor | stud_frac | 1.0 - (stud_frac + framing_factor) |
+    # layer         |     frame      |    cmu    |                 cmu                |
+    # inner layer   |    furring     |  furring  |           furring cavity           |
+    # Plan view of parallel path layer when the wall has no furring:
+    # path fraction | framing_factor | 1.0 - framing_factor |
+    # layer         |     frame      |         cmu          |
 
     return if surfaces.empty?
 
     # Define materials
-    mat_cmu = Material.new(name = nil, thick_in = thick_in, mat_base = BaseMaterial.Concrete, k_in = conductivity, rho = density)
-    mat_framing = Material.new(name = nil, thick_in = thick_in, mat_base = BaseMaterial.Wood)
+    mat_cmu = Material.new(name = nil, thick_in = cmu_thick_in, mat_base = BaseMaterial.Concrete, k_in = cmu_conductivity, rho = cmu_density)
+    mat_framing = Material.new(name = nil, thick_in = cmu_thick_in, mat_base = BaseMaterial.Wood)
     mat_furring = nil
     mat_furring_cavity = nil
     if furring_cavity_depth != 0
@@ -209,8 +231,8 @@ class Constructions
     else
       constr.add_layer([mat_framing, mat_cmu], 'WallCMU')
     end
-    if drywall_thick_in > 0
-      constr.add_layer(Material.GypsumWall(drywall_thick_in))
+    if inside_drywall_thick_in > 0
+      constr.add_layer(Material.GypsumWall(inside_drywall_thick_in))
     end
     constr.add_layer(inside_film)
 
