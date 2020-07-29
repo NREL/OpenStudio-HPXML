@@ -50,9 +50,9 @@ class Lighting
     # Add lighting to each conditioned space
     if int_kwh > 0
 
-      if not lighting.interior_schedule.nil?
-        design_level = schedules_file.calc_design_level_from_annual_kwh(col_name: lighting.interior_schedule, annual_kwh: int_kwh)
-        interior_sch = schedules_file.create_schedule_file(col_name: lighting.interior_schedule)
+      if (not schedules_file.nil?)
+        design_level = schedules_file.calc_design_level_from_annual_kwh(col_name: 'lighting_interior', annual_kwh: int_kwh)
+        interior_sch = schedules_file.create_schedule_file(col_name: 'lighting_interior')
       else
         if lighting.interior_weekday_fractions.nil?
           design_level = interior_sch.calcDesignLevel(interior_sch.maxval * int_kwh)
@@ -79,9 +79,9 @@ class Lighting
     # Add lighting to each garage space
     if grg_kwh > 0
 
-      if not lighting.garage_schedule.nil?
-        design_level = schedules_file.calc_design_level_from_annual_kwh(col_name: lighting.garage_schedule, annual_kwh: grg_kwh)
-        garage_sch = schedules_file.create_schedule_file(col_name: lighting.garage_schedule)
+      if (not schedules_file.nil?)
+        design_level = schedules_file.calc_design_level_from_annual_kwh(col_name: 'lighting_garage', annual_kwh: grg_kwh)
+        garage_sch = schedules_file.create_schedule_file(col_name: 'lighting_garage')
       else
         design_level = garage_sch.calcDesignLevelFromDailykWh(grg_kwh / 365.0)
         garage_sch = garage_sch.schedule
@@ -103,9 +103,9 @@ class Lighting
 
     if ext_kwh > 0
 
-      if not lighting.exterior_schedule.nil?
-        design_level = schedules_file.calc_design_level_from_annual_kwh(col_name: lighting.exterior_schedule, annual_kwh: ext_kwh)
-        exterior_sch = schedules_file.create_schedule_file(col_name: lighting.exterior_schedule)
+      if (not schedules_file.nil?)
+        design_level = schedules_file.calc_design_level_from_annual_kwh(col_name: 'lighting_exterior', annual_kwh: ext_kwh)
+        exterior_sch = schedules_file.create_schedule_file(col_name: 'lighting_exterior')
       else
         design_level = exterior_sch.calcDesignLevelFromDailykWh(ext_kwh / 365.0)
         exterior_sch = exterior_sch.schedule
@@ -122,9 +122,9 @@ class Lighting
 
     if not lighting.holiday_kwh_per_day.nil?
 
-      if not lighting.holiday_schedule.nil?
-        design_level = schedules_file.calc_design_level_from_daily_kwh(col_name: lighting.holiday_schedule, daily_kwh: lighting.holiday_kwh_per_day)
-        exterior_holiday_sch = schedules_file.create_schedule_file(col_name: lighting.holiday_schedule)
+      if (not schedules_file.nil?)
+        design_level = schedules_file.calc_design_level_from_daily_kwh(col_name: 'lighting_exterior_holiday', daily_kwh: lighting.holiday_kwh_per_day)
+        exterior_holiday_sch = schedules_file.create_schedule_file(col_name: 'lighting_exterior_holiday')
       else
         design_level = exterior_holiday_sch.calcDesignLevelFromDailykWh(lighting.holiday_kwh_per_day)
         exterior_holiday_sch = exterior_holiday_sch.schedule

@@ -248,11 +248,65 @@ class BuildResidentialHPXMLTest < MiniTest::Test
       end
       hpxml.refrigerators.each do |refrigerator|
         refrigerator.primary_indicator = nil
+        refrigerator.weekday_fractions = nil
+        refrigerator.weekend_fractions = nil
+        refrigerator.monthly_multipliers = nil
       end
       if hpxml.freezers.length > 0
         (1..hpxml.freezers.length).to_a.reverse.each do |i|
           hpxml.freezers.delete_at(i) # Only compare first freezer
         end
+      end
+      hpxml.freezers.each do |freezer|
+        freezer.weekday_fractions = nil
+        freezer.weekend_fractions = nil
+        freezer.monthly_multipliers = nil
+      end
+      hpxml.cooking_ranges.each do |cooking_range|
+        cooking_range.weekday_fractions = nil
+        cooking_range.weekend_fractions = nil
+        cooking_range.monthly_multipliers = nil
+      end
+      hpxml.pools.each do |pool|
+        pool.pump_weekday_fractions = nil
+        pool.pump_weekend_fractions = nil
+        pool.pump_monthly_multipliers = nil
+        pool.heater_weekday_fractions = nil
+        pool.heater_weekend_fractions = nil
+        pool.heater_monthly_multipliers = nil
+      end
+      hpxml.hot_tubs.each do |hot_tub|
+        hot_tub.pump_weekday_fractions = nil
+        hot_tub.pump_weekend_fractions = nil
+        hot_tub.pump_monthly_multipliers = nil
+        hot_tub.heater_weekday_fractions = nil
+        hot_tub.heater_weekend_fractions = nil
+        hot_tub.heater_monthly_multipliers = nil
+      end
+      hpxml.lighting.interior_weekday_fractions = nil
+      hpxml.lighting.interior_weekend_fractions = nil
+      hpxml.lighting.interior_monthly_multipliers = nil
+      hpxml.lighting.exterior_weekday_fractions = nil
+      hpxml.lighting.exterior_weekend_fractions = nil
+      hpxml.lighting.exterior_monthly_multipliers = nil
+      hpxml.lighting.garage_weekday_fractions = nil
+      hpxml.lighting.garage_weekend_fractions = nil
+      hpxml.lighting.garage_monthly_multipliers = nil
+      hpxml.lighting.holiday_period_begin_month = nil
+      hpxml.lighting.holiday_period_begin_day_of_month = nil
+      hpxml.lighting.holiday_period_end_month = nil
+      hpxml.lighting.holiday_period_end_day_of_month = nil
+      hpxml.lighting.holiday_weekday_fractions = nil
+      hpxml.lighting.holiday_weekend_fractions = nil
+      hpxml.plug_loads.each do |plug_load|
+        plug_load.weekday_fractions = nil
+        plug_load.weekend_fractions = nil
+        plug_load.monthly_multipliers = nil
+      end
+      hpxml.fuel_loads.each do |fuel_load|
+        fuel_load.weekday_fractions = nil
+        fuel_load.weekend_fractions = nil
+        fuel_load.monthly_multipliers = nil
       end
       hpxml.collapse_enclosure_surfaces()
 

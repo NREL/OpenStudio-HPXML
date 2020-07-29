@@ -468,8 +468,7 @@ class HPXMLTest < MiniTest::Test
       if hpxml_path.include?('base-simcontrol-timestep-10-mins.xml') || hpxml_path.include?('ASHRAE_Standard_140')
         next if err_line.include? 'Temperature out of range [-100. to 200.] (PsyPsatFnTemp)'
       end
-      # FUTURE: ensure schedules.csv reflects dst
-      if hpxml_path.include?('base-simcontrol-generated-schedule.xml')
+      if hpxml_path.include?('base-schedules-average.xml') || hpxml_path.include?('base-schedules-stochastic.xml')
         next if err_line.include?('GetCurrentScheduleValue: Schedule=') && err_line.include?('is a Schedule:File')
       end
 

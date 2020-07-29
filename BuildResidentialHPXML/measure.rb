@@ -2002,34 +2002,6 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     arg.setDefaultValue(Constants.Auto)
     args << arg
 
-    arg = OpenStudio::Measure::OSArgument::makeStringArgument('holiday_lighting_period_begin_month', true)
-    arg.setDisplayName('Holiday Lighting: Period Begin Month')
-    arg.setUnits('month')
-    arg.setDescription('This numeric field should contain the starting month number (1 = January, 2 = February, etc.) for the holiday lighting period desired.')
-    arg.setDefaultValue(Constants.Auto)
-    args << arg
-
-    arg = OpenStudio::Measure::OSArgument::makeStringArgument('holiday_lighting_period_begin_day_of_month', true)
-    arg.setDisplayName('Holiday Lighting: Period Begin Day of Month')
-    arg.setUnits('day')
-    arg.setDescription('This numeric field should contain the starting day of the starting month (must be valid for month) for the holiday lighting period desired.')
-    arg.setDefaultValue(Constants.Auto)
-    args << arg
-
-    arg = OpenStudio::Measure::OSArgument::makeStringArgument('holiday_lighting_period_end_month', true)
-    arg.setDisplayName('Holiday Lighting: Period End Month')
-    arg.setUnits('month')
-    arg.setDescription('This numeric field should contain the end month number (1 = January, 2 = February, etc.) for the holiday lighting period desired.')
-    arg.setDefaultValue(Constants.Auto)
-    args << arg
-
-    arg = OpenStudio::Measure::OSArgument::makeStringArgument('holiday_lighting_period_end_day_of_month', true)
-    arg.setDisplayName('Holiday Lighting: Period End Day of Month')
-    arg.setUnits('day')
-    arg.setDescription('This numeric field should contain the ending day of the ending month (must be valid for month) for the holiday lighting period desired.')
-    arg.setDefaultValue(Constants.Auto)
-    args << arg
-
     arg = OpenStudio::Measure::OSArgument::makeBoolArgument('dehumidifier_present', true)
     arg.setDisplayName('Dehumidifier: Present')
     arg.setDescription('Whether there is a dehumidifier.')
@@ -2737,7 +2709,6 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     args[:weather_dir] = runner.getStringArgumentValue('weather_dir', user_arguments)
     args[:software_program_used] = runner.getOptionalStringArgumentValue('software_program_used', user_arguments)
     args[:software_program_version] = runner.getOptionalStringArgumentValue('software_program_version', user_arguments)
-    args[:schedules_path] = runner.getOptionalStringArgumentValue('schedules_path', user_arguments)
     args[:geometry_roof_pitch] = { '1:12' => 1.0 / 12.0, '2:12' => 2.0 / 12.0, '3:12' => 3.0 / 12.0, '4:12' => 4.0 / 12.0, '5:12' => 5.0 / 12.0, '6:12' => 6.0 / 12.0, '7:12' => 7.0 / 12.0, '8:12' => 8.0 / 12.0, '9:12' => 9.0 / 12.0, '10:12' => 10.0 / 12.0, '11:12' => 11.0 / 12.0, '12:12' => 12.0 / 12.0 }[args[:geometry_roof_pitch]]
 
     # Argument error checks
@@ -2819,6 +2790,7 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
              simulation_control_vacancy_end_month: runner.getOptionalIntegerArgumentValue('simulation_control_vacancy_end_month', user_arguments),
              simulation_control_vacancy_end_day_of_month: runner.getOptionalIntegerArgumentValue('simulation_control_vacancy_end_day_of_month', user_arguments),
              schedules_type: runner.getStringArgumentValue('schedules_type', user_arguments),
+             schedules_path: runner.getOptionalStringArgumentValue('schedules_path', user_arguments),
              weather_station_epw_filepath: runner.getStringArgumentValue('weather_station_epw_filepath', user_arguments),
              site_type: runner.getOptionalStringArgumentValue('site_type', user_arguments),
              geometry_unit_type: runner.getStringArgumentValue('geometry_unit_type', user_arguments),
@@ -3062,10 +3034,6 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
              lighting_usage_multiplier_garage: runner.getDoubleArgumentValue('lighting_usage_multiplier_garage', user_arguments),
              holiday_lighting_present: runner.getBoolArgumentValue('holiday_lighting_present', user_arguments),
              holiday_lighting_daily_kwh: runner.getStringArgumentValue('holiday_lighting_daily_kwh', user_arguments),
-             holiday_lighting_period_begin_month: runner.getStringArgumentValue('holiday_lighting_period_begin_month', user_arguments),
-             holiday_lighting_period_begin_day_of_month: runner.getStringArgumentValue('holiday_lighting_period_begin_day_of_month', user_arguments),
-             holiday_lighting_period_end_month: runner.getStringArgumentValue('holiday_lighting_period_end_month', user_arguments),
-             holiday_lighting_period_end_day_of_month: runner.getStringArgumentValue('holiday_lighting_period_end_day_of_month', user_arguments),
              dehumidifier_present: runner.getBoolArgumentValue('dehumidifier_present', user_arguments),
              dehumidifier_efficiency_type: runner.getStringArgumentValue('dehumidifier_efficiency_type', user_arguments),
              dehumidifier_efficiency_ef: runner.getDoubleArgumentValue('dehumidifier_efficiency_ef', user_arguments),
@@ -3375,7 +3343,7 @@ class HPXMLFile
     end
 
     args[:schedules_resources_path] = File.join(File.dirname(__FILE__), 'resources/schedules')
-    args[:schedules_path] = '../resources'
+    args[:schedules_path] = '../schedules.csv'
 
     year_description = model.getYearDescription
     year_description.setCalendarYear(2007) # default to TMY
@@ -4660,22 +4628,6 @@ class HPXMLFile
 
     if args[:holiday_lighting_daily_kwh] != Constants.Auto
       hpxml.lighting.holiday_kwh_per_day = args[:holiday_lighting_daily_kwh]
-    end
-
-    if args[:holiday_lighting_period_begin_month] != Constants.Auto
-      hpxml.lighting.holiday_period_begin_month = args[:holiday_lighting_period_begin_month]
-    end
-
-    if args[:holiday_lighting_period_begin_day_of_month] != Constants.Auto
-      hpxml.lighting.holiday_period_begin_day_of_month = args[:holiday_lighting_period_begin_day_of_month]
-    end
-
-    if args[:holiday_lighting_period_end_month] != Constants.Auto
-      hpxml.lighting.holiday_period_end_month = args[:holiday_lighting_period_end_month]
-    end
-
-    if args[:holiday_lighting_period_end_day_of_month] != Constants.Auto
-      hpxml.lighting.holiday_period_end_day_of_month = args[:holiday_lighting_period_end_day_of_month]
     end
   end
 
