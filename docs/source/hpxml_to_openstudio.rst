@@ -737,7 +737,7 @@ The setpoint temperature may be provided as ``HotWaterTemperature``; if not prov
 
 If the water heater is a shared system (i.e., serving multiple dwelling units or a shared laundry/equipment room), it should be described using ``IsSharedSystem='true'``.
 In addition, the ``NumberofUnitsServed`` must be specified.
-For a water heater only serving a shared laundry/equipment room, the number of units served should be 0; otherwise the number of units served should be greater than 1.
+For a water heater serving a shared laundry/equipment room, the number of units served should be 0; otherwise it should be greater than 1.
 
 HPXML Hot Water Distribution
 ****************************
