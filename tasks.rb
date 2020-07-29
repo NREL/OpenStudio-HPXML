@@ -149,6 +149,7 @@ def create_hpxmls
     'base-dhw-recirc-temperature.xml' => 'base.xml',
     'base-dhw-recirc-timer.xml' => 'base.xml',
     'base-dhw-shared-water-heater-multiple-units.xml' => 'base-enclosure-attached-multifamily.xml',
+    'base-dhw-shared-water-heater-multiple-units-recirc.xml' => 'base-dhw-shared-water-heater-multiple-units.xml',
     'base-dhw-shared-water-heater-equipment-room.xml' => 'base-enclosure-attached-multifamily.xml',
     'base-dhw-solar-direct-evacuated-tube.xml' => 'base.xml',
     'base-dhw-solar-direct-flat-plate.xml' => 'base.xml',
@@ -3714,7 +3715,7 @@ def set_hpxml_water_heating_systems(hpxml_file, hpxml)
     hpxml.water_heating_systems[0].fraction_dhw_load_served = 0.9
     hpxml.water_heating_systems[1].id = 'SharedLaundryWaterHeater'
     hpxml.water_heating_systems[1].is_shared_system = true
-    hpxml.water_heating_systems[1].number_of_units_served = 0
+    hpxml.water_heating_systems[1].number_of_units_served = 6
     hpxml.water_heating_systems[1].fraction_dhw_load_served = 0.1
   elsif ['invalid_files/multifamily-reference-water-heater.xml'].include? hpxml_file
     hpxml.water_heating_systems[0].location = HPXML::LocationOtherNonFreezingSpace
@@ -3763,6 +3764,11 @@ def set_hpxml_hot_water_distribution(hpxml_file, hpxml)
     hpxml.hot_water_distributions[0].recirculation_piping_length = 50
     hpxml.hot_water_distributions[0].recirculation_branch_piping_length = 50
     hpxml.hot_water_distributions[0].recirculation_pump_power = 50
+  elsif ['base-dhw-shared-water-heater-multiple-units-recirc.xml'].include? hpxml_file
+    hpxml.hot_water_distributions[0].has_shared_recirculation = true
+    hpxml.hot_water_distributions[0].shared_recirculation_number_of_units_served = 6
+    hpxml.hot_water_distributions[0].shared_recirculation_pump_power = 220
+    hpxml.hot_water_distributions[0].shared_recirculation_control_type = HPXML::DHWRecirControlTypeTimer
   elsif ['base-dhw-none.xml'].include? hpxml_file
     hpxml.hot_water_distributions.clear
   elsif ['base-misc-defaults.xml'].include? hpxml_file

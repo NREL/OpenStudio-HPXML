@@ -736,8 +736,7 @@ IECC Climate Zone  Location (default)
 The setpoint temperature may be provided as ``HotWaterTemperature``; if not provided, 125F is assumed.
 
 If the water heater is a shared system (i.e., serving multiple dwelling units or a shared laundry/equipment room), it should be described using ``IsSharedSystem='true'``.
-In addition, the ``NumberofUnitsServed`` must be specified.
-For a water heater serving a shared laundry/equipment room, the number of units served should be 0; otherwise it should be greater than 1.
+In addition, the ``NumberofUnitsServed`` must be specified, where the value is the number of dwelling units served either indirectly (e.g., via shared laundry/equipment room) or directly.
 
 HPXML Hot Water Distribution
 ****************************
@@ -748,9 +747,9 @@ Inputs including ``SystemType`` and ``PipeInsulation/PipeRValue`` must be provid
 Standard
 ~~~~~~~~
 
-For a ``SystemType/Standard`` (non-recirculating) system, the following element are used:
+For a ``SystemType/Standard`` (non-recirculating) system within the dwelling unit, the following element are used:
 
-- ``PipingLength``: Optional. Measured length of hot water piping from the hot water heater to the farthest hot water fixture, measured longitudinally from plans, assuming the hot water piping does not run diagonally, plus 10 feet of piping for each floor level, plus 5 feet of piping for unconditioned basements (if any)
+- ``PipingLength``: Optional. Measured length of hot water piping from the hot water heater (or from a shared recirculation loop serving multiple dwelling units) to the farthest hot water fixture, measured longitudinally from plans, assuming the hot water piping does not run diagonally, plus 10 feet of piping for each floor level, plus 5 feet of piping for unconditioned basements (if any)
   If not provided, a default ``PipingLength`` will be calculated using the following equation from `ANSI/RESNET/ICC 301-2019 <https://codes.iccsafe.org/content/RESNETICC3012019>`_.
 
   .. math:: PipeL = 2.0 \cdot (\frac{CFA}{NCfl})^{0.5} + 10.0 \cdot NCfl + 5.0 \cdot bsmnt
@@ -764,9 +763,9 @@ For a ``SystemType/Standard`` (non-recirculating) system, the following element 
 Recirculation
 ~~~~~~~~~~~~~
 
-For a ``SystemType/Recirculation`` system, the following elements are used:
+For a ``SystemType/Recirculation`` system within the dwelling unit, the following elements are used:
 
-- ``ControlType``
+- ``ControlType``: One of "manual demand control", "presence sensor demand control", "temperature", "timer", or "no control".
 - ``RecirculationPipingLoopLength``: Optional. If not provided, the default value will be calculated by using the equation shown in the table below. Measured recirculation loop length including both supply and return sides, measured longitudinally from plans, assuming the hot water piping does not run diagonally, plus 20 feet of piping for each floor level greater than one plus 10 feet of piping for unconditioned basements.
 - ``BranchPipingLoopLength``: Optional. If not provided, the default value will be assumed as shown in the table below. Measured length of the branch hot water piping from the recirculation loop to the farthest hot water fixture from the recirculation loop, measured longitudinally from plans, assuming the branch hot water piping does not run diagonally.
 - ``PumpPower``: Optional. If not provided, the default value will be assumed as shown in the table below. 
@@ -778,6 +777,21 @@ For a ``SystemType/Recirculation`` system, the following elements are used:
   BranchPipingLoopLength [ft]         10 
   Pump Power [W]                      50 
   ==================================  ====================================================================================================
+
+Shared Recirculation
+~~~~~~~~~~~~~~~~~~~~
+
+In addition to the hot water distribution systems within the dwelling unit, the pump energy use of a shared recirculation system can also be described using the following elements:
+
+- `extension/SharedRecirculation/NumberofUnitsServed`: Number of dwelling units served by the shared pump.
+- `extension/SharedRecirculation/PumpPower`: Optional. If not provided, the default value will be assumed as shown in the table below. Shared pump power in Watts.
+- `extension/SharedRecirculation/ControlType`: One of "manual demand control", "presence sensor demand control", "temperature", "timer", or "no control".
+
+  ==================================  ==========================================
+  Element Name                        Default Value
+  ==================================  ==========================================
+  Pump Power [W]                      220 (0.25 HP pump w/ 85% motor efficiency)
+  ==================================  ==========================================
 
 Drain Water Heat Recovery
 ~~~~~~~~~~~~~~~~~~~~~~~~~

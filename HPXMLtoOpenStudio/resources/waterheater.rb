@@ -1467,8 +1467,8 @@ class Waterheater
       ua = apply_tank_jacket(water_heating_system, ua, a_side)
     end
     ua *= (1.0 - solar_fraction)
-    if water_heating_system.is_shared_system && (water_heating_system.number_of_units_served > 1)
-      # Apportion energy use due to tank losses to the dwelling unit
+    if water_heating_system.is_shared_system
+      # Apportion shared water heater energy use due to tank losses to the dwelling unit
       ua /= water_heating_system.number_of_units_served.to_f
     end
     u = ua / surface_area # Btu/hr-ft^2-F

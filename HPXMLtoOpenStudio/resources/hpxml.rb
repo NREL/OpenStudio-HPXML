@@ -3365,7 +3365,8 @@ class HPXML < Object
     ATTRS = [:id, :system_type, :pipe_r_value, :standard_piping_length, :recirculation_control_type,
              :recirculation_piping_length, :recirculation_branch_piping_length,
              :recirculation_pump_power, :dwhr_facilities_connected, :dwhr_equal_flow,
-             :dwhr_efficiency]
+             :dwhr_efficiency, :has_shared_recirculation, :shared_recirculation_number_of_units_served,
+             :shared_recirculation_pump_power, :shared_recirculation_control_type]
     attr_accessor(*ATTRS)
 
     def delete
@@ -3409,6 +3410,13 @@ class HPXML < Object
         XMLHelper.add_element(drain_water_heat_recovery, 'EqualFlow', to_boolean(@dwhr_equal_flow)) unless @dwhr_equal_flow.nil?
         XMLHelper.add_element(drain_water_heat_recovery, 'Efficiency', to_float(@dwhr_efficiency)) unless @dwhr_efficiency.nil?
       end
+      if @has_shared_recirculation
+        extension = XMLHelper.add_element(hot_water_distribution, 'extension')
+        shared_recirculation = XMLHelper.add_element(extension, 'SharedRecirculation')
+        XMLHelper.add_element(shared_recirculation, 'NumberofUnitsServed', to_integer(@shared_recirculation_number_of_units_served)) unless @shared_recirculation_number_of_units_served.nil?
+        XMLHelper.add_element(shared_recirculation, 'PumpPower', to_float(@shared_recirculation_pump_power)) unless @shared_recirculation_pump_power.nil?
+        XMLHelper.add_element(shared_recirculation, 'ControlType', @shared_recirculation_control_type) unless @shared_recirculation_control_type.nil?
+      end
     end
 
     def from_oga(hot_water_distribution)
@@ -3417,14 +3425,23 @@ class HPXML < Object
       @id = HPXML::get_id(hot_water_distribution)
       @system_type = XMLHelper.get_child_name(hot_water_distribution, 'SystemType')
       @pipe_r_value = to_float_or_nil(XMLHelper.get_value(hot_water_distribution, 'PipeInsulation/PipeRValue'))
-      @standard_piping_length = to_float_or_nil(XMLHelper.get_value(hot_water_distribution, 'SystemType/Standard/PipingLength'))
-      @recirculation_control_type = XMLHelper.get_value(hot_water_distribution, 'SystemType/Recirculation/ControlType')
-      @recirculation_piping_length = to_float_or_nil(XMLHelper.get_value(hot_water_distribution, 'SystemType/Recirculation/RecirculationPipingLoopLength'))
-      @recirculation_branch_piping_length = to_float_or_nil(XMLHelper.get_value(hot_water_distribution, 'SystemType/Recirculation/BranchPipingLoopLength'))
-      @recirculation_pump_power = to_float_or_nil(XMLHelper.get_value(hot_water_distribution, 'SystemType/Recirculation/PumpPower'))
+      if @system_type == 'Standard'
+        @standard_piping_length = to_float_or_nil(XMLHelper.get_value(hot_water_distribution, 'SystemType/Standard/PipingLength'))
+      elsif @system_type == 'Recirculation'
+        @recirculation_control_type = XMLHelper.get_value(hot_water_distribution, 'SystemType/Recirculation/ControlType')
+        @recirculation_piping_length = to_float_or_nil(XMLHelper.get_value(hot_water_distribution, 'SystemType/Recirculation/RecirculationPipingLoopLength'))
+        @recirculation_branch_piping_length = to_float_or_nil(XMLHelper.get_value(hot_water_distribution, 'SystemType/Recirculation/BranchPipingLoopLength'))
+        @recirculation_pump_power = to_float_or_nil(XMLHelper.get_value(hot_water_distribution, 'SystemType/Recirculation/PumpPower'))
+      end
       @dwhr_facilities_connected = XMLHelper.get_value(hot_water_distribution, 'DrainWaterHeatRecovery/FacilitiesConnected')
       @dwhr_equal_flow = to_boolean_or_nil(XMLHelper.get_value(hot_water_distribution, 'DrainWaterHeatRecovery/EqualFlow'))
       @dwhr_efficiency = to_float_or_nil(XMLHelper.get_value(hot_water_distribution, 'DrainWaterHeatRecovery/Efficiency'))
+      @has_shared_recirculation = XMLHelper.has_element(hot_water_distribution, 'extension/SharedRecirculation')
+      if @has_shared_recirculation
+        @shared_recirculation_number_of_units_served = to_integer_or_nil(XMLHelper.get_value(hot_water_distribution, 'extension/SharedRecirculation/NumberofUnitsServed'))
+        @shared_recirculation_pump_power = to_float_or_nil(XMLHelper.get_value(hot_water_distribution, 'extension/SharedRecirculation/PumpPower'))
+        @shared_recirculation_control_type = XMLHelper.get_value(hot_water_distribution, 'extension/SharedRecirculation/ControlType')
+      end
     end
   end
 

@@ -587,6 +587,14 @@ class HotWaterAndAppliances
     return 50.0  # Watts
   end
 
+  def self.get_default_shared_recirc_pump_power()
+    # From ANSI/RESNET 301-2019 Equation 4.2-15b
+    pump_horsepower = 0.25
+    motor_efficiency = 0.85
+    pump_kw = pump_horsepower * 0.746 / motor_efficiency
+    return UnitConversions.convert(pump_kw, 'kW', 'W')
+  end
+
   private
 
   def self.add_electric_equipment(model, obj_name, space, design_level_w, frac_sens, frac_lat, schedule)
@@ -716,24 +724,47 @@ class HotWaterAndAppliances
   end
 
   def self.get_hwdist_recirc_pump_energy(hot_water_distribution)
-    # ANSI/RESNET 301-2014 Addendum A-2015
-    # Amendment on Domestic Hot Water (DHW) Systems
-    # Table 4.2.2.5.2.11(5) Annual electricity consumption factor for hot water recirculation system pumps
+    dist_pump_annual_kwh = 0.0
+
+    # Annual electricity consumption factor for hot water recirculation system pumps
     if hot_water_distribution.system_type == HPXML::DHWDistTypeRecirc
       if (hot_water_distribution.recirculation_control_type == HPXML::DHWRecirControlTypeNone) ||
          (hot_water_distribution.recirculation_control_type == HPXML::DHWRecirControlTypeTimer)
-        return 8.76 * hot_water_distribution.recirculation_pump_power
+        dist_pump_annual_kwh += (8.76 * hot_water_distribution.recirculation_pump_power)
       elsif hot_water_distribution.recirculation_control_type == HPXML::DHWRecirControlTypeTemperature
-        return 1.46 * hot_water_distribution.recirculation_pump_power
+        dist_pump_annual_kwh += (1.46 * hot_water_distribution.recirculation_pump_power)
       elsif hot_water_distribution.recirculation_control_type == HPXML::DHWRecirControlTypeSensor
-        return 0.15 * hot_water_distribution.recirculation_pump_power
+        dist_pump_annual_kwh += (0.15 * hot_water_distribution.recirculation_pump_power)
       elsif hot_water_distribution.recirculation_control_type == HPXML::DHWRecirControlTypeManual
-        return 0.10 * hot_water_distribution.recirculation_pump_power
+        dist_pump_annual_kwh += (0.10 * hot_water_distribution.recirculation_pump_power)
+      else
+        fail 'Unexpected hot water distribution system.'
       end
     elsif hot_water_distribution.system_type == HPXML::DHWDistTypeStandard
-      return 0.0
+      # nop
+    else
+      fail 'Unexpected hot water distribution system.'
     end
-    fail 'Unexpected hot water distribution system.'
+
+    # Shared recirculation system pump energy
+    if hot_water_distribution.has_shared_recirculation
+      n_dweq = hot_water_distribution.shared_recirculation_number_of_units_served
+      if (hot_water_distribution.shared_recirculation_control_type == HPXML::DHWRecirControlTypeNone) ||
+         (hot_water_distribution.shared_recirculation_control_type == HPXML::DHWRecirControlTypeTimer)
+        op_hrs = 8760.0
+      elsif (hot_water_distribution.shared_recirculation_control_type == HPXML::DHWRecirControlTypeSensor) ||
+            (hot_water_distribution.shared_recirculation_control_type == HPXML::DHWRecirControlTypeManual)
+        op_hrs = 730.0
+      elsif hot_water_distribution.shared_recirculation_control_type == HPXML::DHWRecirControlTypeTemperature
+        fail 'No annual pump operating hours value provided by RESNET for shared recirculation system w/ temperature control.'
+      else
+        fail 'Unexpected hot water distribution system.'
+      end
+      shared_pump_kw = UnitConversions.convert(hot_water_distribution.shared_recirculation_pump_power, 'W', 'kW')
+      dist_pump_annual_kwh += (shared_pump_kw * op_hrs / n_dweq.to_f)
+    end
+
+    return dist_pump_annual_kwh
   end
 
   def self.get_fixtures_effectiveness(fixtures_all_low_flow)

@@ -612,7 +612,7 @@ class EnergyPlusValidator
 
       ## [WaterHeatingSystem=Shared]
       '/HPXML/Building/BuildingDetails/Systems/WaterHeating/WaterHeatingSystem[IsSharedSystem="true"]' => {
-        'NumberofUnitsServed' => one
+        'NumberofUnitsServed[text() > 1]' => one,
       },
 
       ## [WHType=Tank]
@@ -665,6 +665,7 @@ class EnergyPlusValidator
         'SystemType/Standard | SystemType/Recirculation' => one, # See [HWDistType=Standard] or [HWDistType=Recirculation]
         'PipeInsulation/PipeRValue' => one,
         'DrainWaterHeatRecovery' => zero_or_one, # See [DrainWaterHeatRecovery]
+        'extension/SharedRecirculation' => zero_or_one, # See [HWDistType=SharedRecirculation]
       },
 
       ## [HWDistType=Standard]
@@ -678,6 +679,13 @@ class EnergyPlusValidator
         'RecirculationPipingLoopLength' => zero_or_one,
         'BranchPipingLoopLength' => zero_or_one,
         'PumpPower' => zero_or_one,
+      },
+
+      ## [HWDistType=SharedRecirculation]
+      '/HPXML/Building/BuildingDetails/Systems/WaterHeating/HotWaterDistribution[extension/SharedRecirculation]' => {
+        'extension/SharedRecirculation/NumberofUnitsServed' => one,
+        'extension/SharedRecirculation/PumpPower' => zero_or_one,
+        'extension/SharedRecirculation/ControlType[text()="manual demand control" or text()="presence sensor demand control" or text()="temperature" or text()="timer" or text()="no control"]' => one,
       },
 
       ## [DrainWaterHeatRecovery]
