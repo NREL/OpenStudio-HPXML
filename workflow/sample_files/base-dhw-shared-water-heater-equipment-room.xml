@@ -672,7 +672,7 @@
       </Systems>
       <Appliances>
         <ClothesWasher>
-          <SystemIdentifier id='ClothesWasher'/>
+          <SystemIdentifier id='SharedClothesWasher'/>
           <Location>other heated space</Location>
           <IntegratedModifiedEnergyFactor>1.21</IntegratedModifiedEnergyFactor>
           <RatedAnnualkWh>380.0</RatedAnnualkWh>
@@ -683,14 +683,14 @@
           <Capacity>3.2</Capacity>
         </ClothesWasher>
         <ClothesDryer>
-          <SystemIdentifier id='ClothesDryer'/>
+          <SystemIdentifier id='SharedClothesDryer'/>
           <Location>other heated space</Location>
           <FuelType>electricity</FuelType>
           <CombinedEnergyFactor>3.73</CombinedEnergyFactor>
           <ControlType>timer</ControlType>
         </ClothesDryer>
         <Dishwasher>
-          <SystemIdentifier id='Dishwasher'/>
+          <SystemIdentifier id='SharedDishwasher'/>
           <Location>other heated space</Location>
           <RatedAnnualkWh>307.0</RatedAnnualkWh>
           <PlaceSettingCapacity>12</PlaceSettingCapacity>
@@ -701,13 +701,13 @@
         </Dishwasher>
         <Refrigerator>
           <SystemIdentifier id='Refrigerator'/>
-          <Location>other non-freezing space</Location>
+          <Location>living space</Location>
           <RatedAnnualkWh>650.0</RatedAnnualkWh>
           <PrimaryIndicator>true</PrimaryIndicator>
         </Refrigerator>
         <CookingRange>
           <SystemIdentifier id='Range'/>
-          <Location>other housing unit</Location>
+          <Location>living space</Location>
           <FuelType>electricity</FuelType>
           <IsInduction>false</IsInduction>
         </CookingRange>

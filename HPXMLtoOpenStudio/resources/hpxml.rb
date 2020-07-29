@@ -3708,17 +3708,9 @@ class HPXML < Object
   class ClothesWasher < BaseElement
     ATTRS = [:id, :location, :modified_energy_factor, :integrated_modified_energy_factor,
              :rated_annual_kwh, :label_electric_rate, :label_gas_rate, :label_annual_gas_cost,
-             :capacity, :label_usage, :usage_multiplier, :ratio_of_units_to_clothes_washers,
-             :water_heating_system_idref]
+             :capacity, :label_usage, :usage_multiplier, :is_shared_appliance,
+             :ratio_of_units_to_clothes_washers, :water_heating_system_idref]
     attr_accessor(*ATTRS)
-
-    def is_shared
-      # In a MF location?
-      return [LocationOtherHeatedSpace,
-              LocationOtherHousingUnit,
-              LocationOtherMultifamilyBufferSpace,
-              LocationOtherNonFreezingSpace].include? @location
-    end
 
     def water_heating_system
       return if @water_heating_system_idref.nil?
@@ -3747,6 +3739,7 @@ class HPXML < Object
       clothes_washer = XMLHelper.add_element(appliances, 'ClothesWasher')
       sys_id = XMLHelper.add_element(clothes_washer, 'SystemIdentifier')
       XMLHelper.add_attribute(sys_id, 'id', @id)
+      XMLHelper.add_element(clothes_washer, 'IsSharedAppliance', to_boolean(@is_shared_appliance)) unless @is_shared_appliance.nil?
       XMLHelper.add_element(clothes_washer, 'AttachedToWaterHeatingSystem', @water_heating_system_idref) unless @water_heating_system_idref.nil?
       XMLHelper.add_element(clothes_washer, 'Location', @location) unless @location.nil?
       XMLHelper.add_element(clothes_washer, 'ModifiedEnergyFactor', to_float(@modified_energy_factor)) unless @modified_energy_factor.nil?
@@ -3766,6 +3759,7 @@ class HPXML < Object
       return if clothes_washer.nil?
 
       @id = HPXML::get_id(clothes_washer)
+      @is_shared_appliance = to_boolean_or_nil(XMLHelper.get_value(clothes_washer, 'IsSharedAppliance'))
       @location = XMLHelper.get_value(clothes_washer, 'Location')
       @modified_energy_factor = to_float_or_nil(XMLHelper.get_value(clothes_washer, 'ModifiedEnergyFactor'))
       @integrated_modified_energy_factor = to_float_or_nil(XMLHelper.get_value(clothes_washer, 'IntegratedModifiedEnergyFactor'))
@@ -3797,16 +3791,8 @@ class HPXML < Object
 
   class ClothesDryer < BaseElement
     ATTRS = [:id, :location, :fuel_type, :energy_factor, :combined_energy_factor, :control_type,
-             :usage_multiplier, :ratio_of_units_to_clothes_dryers]
+             :usage_multiplier, :is_shared_appliance, :ratio_of_units_to_clothes_dryers]
     attr_accessor(*ATTRS)
-
-    def is_shared
-      # In a MF location?
-      return [LocationOtherHeatedSpace,
-              LocationOtherHousingUnit,
-              LocationOtherMultifamilyBufferSpace,
-              LocationOtherNonFreezingSpace].include? @location
-    end
 
     def delete
       @hpxml_object.clothes_dryers.delete(self)
@@ -3824,6 +3810,7 @@ class HPXML < Object
       clothes_dryer = XMLHelper.add_element(appliances, 'ClothesDryer')
       sys_id = XMLHelper.add_element(clothes_dryer, 'SystemIdentifier')
       XMLHelper.add_attribute(sys_id, 'id', @id)
+      XMLHelper.add_element(clothes_dryer, 'IsSharedAppliance', to_boolean(@is_shared_appliance)) unless @is_shared_appliance.nil?
       XMLHelper.add_element(clothes_dryer, 'Location', @location) unless @location.nil?
       XMLHelper.add_element(clothes_dryer, 'FuelType', @fuel_type) unless @fuel_type.nil?
       XMLHelper.add_element(clothes_dryer, 'EnergyFactor', to_float(@energy_factor)) unless @energy_factor.nil?
@@ -3838,6 +3825,7 @@ class HPXML < Object
       return if clothes_dryer.nil?
 
       @id = HPXML::get_id(clothes_dryer)
+      @is_shared_appliance = to_boolean_or_nil(XMLHelper.get_value(clothes_dryer, 'IsSharedAppliance'))
       @location = XMLHelper.get_value(clothes_dryer, 'Location')
       @fuel_type = XMLHelper.get_value(clothes_dryer, 'FuelType')
       @energy_factor = to_float_or_nil(XMLHelper.get_value(clothes_dryer, 'EnergyFactor'))
@@ -3865,16 +3853,8 @@ class HPXML < Object
   class Dishwasher < BaseElement
     ATTRS = [:id, :location, :energy_factor, :rated_annual_kwh, :place_setting_capacity,
              :label_electric_rate, :label_gas_rate, :label_annual_gas_cost,
-             :label_usage, :usage_multiplier, :water_heating_system_idref]
+             :label_usage, :usage_multiplier, :is_shared_appliance, :water_heating_system_idref]
     attr_accessor(*ATTRS)
-
-    def is_shared
-      # In a MF location?
-      return [LocationOtherHeatedSpace,
-              LocationOtherHousingUnit,
-              LocationOtherMultifamilyBufferSpace,
-              LocationOtherNonFreezingSpace].include? @location
-    end
 
     def water_heating_system
       return if @water_heating_system_idref.nil?
@@ -3903,6 +3883,7 @@ class HPXML < Object
       dishwasher = XMLHelper.add_element(appliances, 'Dishwasher')
       sys_id = XMLHelper.add_element(dishwasher, 'SystemIdentifier')
       XMLHelper.add_attribute(sys_id, 'id', @id)
+      XMLHelper.add_element(dishwasher, 'IsSharedAppliance', to_boolean(@is_shared_appliance)) unless @is_shared_appliance.nil?
       XMLHelper.add_element(dishwasher, 'AttachedToWaterHeatingSystem', @water_heating_system_idref) unless @water_heating_system_idref.nil?
       XMLHelper.add_element(dishwasher, 'Location', @location) unless @location.nil?
       XMLHelper.add_element(dishwasher, 'RatedAnnualkWh', to_float(@rated_annual_kwh)) unless @rated_annual_kwh.nil?
@@ -3920,6 +3901,7 @@ class HPXML < Object
       return if dishwasher.nil?
 
       @id = HPXML::get_id(dishwasher)
+      @is_shared_appliance = to_boolean_or_nil(XMLHelper.get_value(dishwasher, 'IsSharedAppliance'))
       @location = XMLHelper.get_value(dishwasher, 'Location')
       @rated_annual_kwh = to_float_or_nil(XMLHelper.get_value(dishwasher, 'RatedAnnualkWh'))
       @energy_factor = to_float_or_nil(XMLHelper.get_value(dishwasher, 'EnergyFactor'))

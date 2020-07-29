@@ -3674,7 +3674,7 @@ def set_hpxml_water_heating_systems(hpxml_file, hpxml)
   elsif ['base-enclosure-garage.xml'].include? hpxml_file
     hpxml.water_heating_systems[0].location = HPXML::LocationGarage
   elsif ['base-enclosure-attached-multifamily.xml'].include? hpxml_file
-    hpxml.water_heating_systems[0].location = HPXML::LocationOtherMultifamilyBufferSpace
+    hpxml.water_heating_systems[0].location = HPXML::LocationLivingSpace
   elsif ['base-enclosure-other-housing-unit.xml',
          'base-enclosure-other-heated-space.xml',
          'base-enclosure-other-non-freezing-space.xml',
@@ -3708,7 +3708,7 @@ def set_hpxml_water_heating_systems(hpxml_file, hpxml)
                                     number_of_units_served: 6,
                                     fuel_type: HPXML::FuelTypeNaturalGas,
                                     water_heater_type: HPXML::WaterHeaterTypeStorage,
-                                    location: HPXML::LocationOtherMultifamilyBufferSpace,
+                                    location: HPXML::LocationLivingSpace,
                                     tank_volume: 50,
                                     fraction_dhw_load_served: 1.0,
                                     heating_capacity: 40000,
@@ -3928,7 +3928,7 @@ def set_hpxml_clothes_washer(hpxml_file, hpxml)
   elsif ['base-appliances-none.xml'].include? hpxml_file
     hpxml.clothes_washers.clear
   elsif ['base-enclosure-attached-multifamily.xml'].include? hpxml_file
-    hpxml.clothes_washers[0].location = HPXML::LocationOtherHousingUnit
+    hpxml.clothes_washers[0].location = HPXML::LocationLivingSpace
   elsif ['base-enclosure-other-housing-unit.xml',
          'base-enclosure-other-heated-space.xml',
          'base-enclosure-other-non-freezing-space.xml',
@@ -3968,6 +3968,7 @@ def set_hpxml_clothes_washer(hpxml_file, hpxml)
   elsif ['base-misc-loads-usage-multiplier.xml'].include? hpxml_file
     hpxml.clothes_washers[0].usage_multiplier = 0.9
   elsif ['base-dhw-shared-water-heater-equipment-room.xml'].include? hpxml_file
+    hpxml.clothes_washers[0].id = 'SharedClothesWasher'
     hpxml.clothes_washers[0].location = HPXML::LocationOtherHeatedSpace
   elsif ['invalid_files/multifamily-reference-appliance.xml'].include? hpxml_file
     hpxml.clothes_washers[0].location = HPXML::LocationOtherHousingUnit
@@ -3984,7 +3985,7 @@ def set_hpxml_clothes_dryer(hpxml_file, hpxml)
   elsif ['base-appliances-none.xml'].include? hpxml_file
     hpxml.clothes_dryers.clear
   elsif ['base-enclosure-attached-multifamily.xml'].include? hpxml_file
-    hpxml.clothes_dryers[0].location = HPXML::LocationOtherHeatedSpace
+    hpxml.clothes_dryers[0].location = HPXML::LocationLivingSpace
   elsif ['base-enclosure-other-housing-unit.xml',
          'base-enclosure-other-heated-space.xml',
          'base-enclosure-other-non-freezing-space.xml',
@@ -4046,6 +4047,7 @@ def set_hpxml_clothes_dryer(hpxml_file, hpxml)
     hpxml.clothes_dryers[0].combined_energy_factor = nil
     hpxml.clothes_dryers[0].control_type = nil
   elsif ['base-dhw-shared-water-heater-equipment-room.xml'].include? hpxml_file
+    hpxml.clothes_dryers[0].id = 'SharedClothesDryer'
     hpxml.clothes_dryers[0].location = HPXML::LocationOtherHeatedSpace
   elsif ['base-misc-loads-usage-multiplier.xml'].include? hpxml_file
     hpxml.clothes_dryers[0].usage_multiplier = 0.9
@@ -4068,7 +4070,7 @@ def set_hpxml_dishwasher(hpxml_file, hpxml)
     hpxml.dishwashers[0].energy_factor = HotWaterAndAppliances.calc_dishwasher_ef_from_annual_kwh(rated_annual_kwh).round(2)
     hpxml.dishwashers[0].place_setting_capacity = 6 # Compact
   elsif ['base-enclosure-attached-multifamily.xml'].include? hpxml_file
-    hpxml.dishwashers[0].location = HPXML::LocationOtherMultifamilyBufferSpace
+    hpxml.dishwashers[0].location = HPXML::LocationLivingSpace
   elsif ['base-enclosure-other-housing-unit.xml',
          'base-enclosure-other-heated-space.xml',
          'base-enclosure-other-non-freezing-space.xml',
@@ -4101,6 +4103,7 @@ def set_hpxml_dishwasher(hpxml_file, hpxml)
     hpxml.dishwashers[0].place_setting_capacity = nil
     hpxml.dishwashers[0].label_usage = nil
   elsif ['base-dhw-shared-water-heater-equipment-room.xml'].include? hpxml_file
+    hpxml.dishwashers[0].id = 'SharedDishwasher'
     hpxml.dishwashers[0].location = HPXML::LocationOtherHeatedSpace
   elsif ['base-misc-loads-usage-multiplier.xml'].include? hpxml_file
     hpxml.dishwashers[0].usage_multiplier = 0.9
@@ -4118,7 +4121,7 @@ def set_hpxml_refrigerator(hpxml_file, hpxml)
   elsif ['base-appliances-none.xml'].include? hpxml_file
     hpxml.refrigerators.clear
   elsif ['base-enclosure-attached-multifamily.xml'].include? hpxml_file
-    hpxml.refrigerators[0].location = HPXML::LocationOtherNonFreezingSpace
+    hpxml.refrigerators[0].location = HPXML::LocationLivingSpace
   elsif ['base-enclosure-other-housing-unit.xml',
          'base-enclosure-other-heated-space.xml',
          'base-enclosure-other-non-freezing-space.xml',
@@ -4217,7 +4220,7 @@ def set_hpxml_cooking_range(hpxml_file, hpxml)
   elsif ['base-appliances-none.xml'].include? hpxml_file
     hpxml.cooking_ranges.clear
   elsif ['base-enclosure-attached-multifamily.xml'].include? hpxml_file
-    hpxml.cooking_ranges[0].location = HPXML::LocationOtherHousingUnit
+    hpxml.cooking_ranges[0].location = HPXML::LocationLivingSpace
   elsif ['base-enclosure-other-housing-unit.xml',
          'base-enclosure-other-heated-space.xml',
          'base-enclosure-other-non-freezing-space.xml',
