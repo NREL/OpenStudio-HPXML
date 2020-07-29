@@ -2281,6 +2281,10 @@ class OSModel
   end
 
   def self.add_mfls(runner, model, spaces)
+    if not @hpxml.header.schedules_path.nil?
+      schedules_file = SchedulesFile.new(runner: runner, model: model, schedules_path: @hpxml.header.schedules_path)
+    end
+
     # Misc
     @hpxml.fuel_loads.each do |fuel_load|
       if fuel_load.fuel_load_type == HPXML::FuelLoadTypeGrill
@@ -2295,7 +2299,7 @@ class OSModel
         next
       end
 
-      MiscLoads.apply_fuel(model, fuel_load, obj_name, spaces[HPXML::LocationLivingSpace])
+      MiscLoads.apply_fuel(model, fuel_load, obj_name, spaces[HPXML::LocationLivingSpace], schedules_file)
     end
   end
 
@@ -2309,14 +2313,18 @@ class OSModel
   end
 
   def self.add_pools_and_hot_tubs(runner, model, spaces)
+    if not @hpxml.header.schedules_path.nil?
+      schedules_file = SchedulesFile.new(runner: runner, model: model, schedules_path: @hpxml.header.schedules_path)
+    end
+
     @hpxml.pools.each do |pool|
-      MiscLoads.apply_pool_or_hot_tub_heater(model, pool, Constants.ObjectNameMiscPoolHeater, spaces[HPXML::LocationLivingSpace])
-      MiscLoads.apply_pool_or_hot_tub_pump(model, pool, Constants.ObjectNameMiscPoolPump, spaces[HPXML::LocationLivingSpace])
+      MiscLoads.apply_pool_or_hot_tub_heater(model, pool, Constants.ObjectNameMiscPoolHeater, spaces[HPXML::LocationLivingSpace], schedules_file)
+      MiscLoads.apply_pool_or_hot_tub_pump(model, pool, Constants.ObjectNameMiscPoolPump, spaces[HPXML::LocationLivingSpace], schedules_file)
     end
 
     @hpxml.hot_tubs.each do |hot_tub|
-      MiscLoads.apply_pool_or_hot_tub_heater(model, hot_tub, Constants.ObjectNameMiscHotTubHeater, spaces[HPXML::LocationLivingSpace])
-      MiscLoads.apply_pool_or_hot_tub_pump(model, hot_tub, Constants.ObjectNameMiscHotTubPump, spaces[HPXML::LocationLivingSpace])
+      MiscLoads.apply_pool_or_hot_tub_heater(model, hot_tub, Constants.ObjectNameMiscHotTubHeater, spaces[HPXML::LocationLivingSpace], schedules_file)
+      MiscLoads.apply_pool_or_hot_tub_pump(model, hot_tub, Constants.ObjectNameMiscHotTubPump, spaces[HPXML::LocationLivingSpace], schedules_file)
     end
   end
 

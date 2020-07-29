@@ -230,15 +230,22 @@ class HotWaterAndAppliances
       fridge_name = Constants.ObjectNameRefrigerator
       refrigerators.each do |refrigerator|
         rf_annual_kwh, rf_frac_sens, rf_frac_lat = calc_refrigerator_or_freezer_energy(refrigerator, refrigerator.additional_properties.space.nil?)
-        fridge_weekday_sch = refrigerator.weekday_fractions
-        fridge_weekend_sch = refrigerator.weekend_fractions
-        fridge_monthly_sch = refrigerator.monthly_multipliers
-        fridge_schedule = MonthWeekdayWeekendSchedule.new(model, fridge_name, fridge_weekday_sch, fridge_weekend_sch, fridge_monthly_sch, 1.0, 1.0, true, true, Constants.ScheduleTypeLimitsFraction)
-        fridge_design_level = fridge_schedule.calcDesignLevelFromDailykWh(rf_annual_kwh / 365.0)
+
+        if (not schedules_file.nil?)
+          fridge_design_level = schedules_file.calc_design_level_from_annual_kwh(col_name: 'refrigerator', annual_kwh: rf_annual_kwh)
+          fridge_schedule = schedules_file.create_schedule_file(col_name: 'refrigerator')
+        else
+          fridge_weekday_sch = refrigerator.weekday_fractions
+          fridge_weekend_sch = refrigerator.weekend_fractions
+          fridge_monthly_sch = refrigerator.monthly_multipliers
+          fridge_schedule = MonthWeekdayWeekendSchedule.new(model, fridge_name, fridge_weekday_sch, fridge_weekend_sch, fridge_monthly_sch, 1.0, 1.0, true, true, Constants.ScheduleTypeLimitsFraction)
+          fridge_design_level = fridge_schedule.calcDesignLevelFromDailykWh(rf_annual_kwh / 365.0)
+          fridge_schedule = fridge_schedule.schedule
+        end
 
         rf_space = refrigerator.additional_properties.space
         rf_space = living_space if rf_space.nil? # appliance is outdoors, so we need to assign the equipment to an arbitrary space
-        add_electric_equipment(model, fridge_name, rf_space, fridge_design_level, rf_frac_sens, rf_frac_lat, fridge_schedule.schedule)
+        add_electric_equipment(model, fridge_name, rf_space, fridge_design_level, rf_frac_sens, rf_frac_lat, fridge_schedule)
       end
     end
 
@@ -247,15 +254,22 @@ class HotWaterAndAppliances
       freezer_name = Constants.ObjectNameFreezer
       freezers.each do |freezer|
         fz_annual_kwh, fz_frac_sens, fz_frac_lat = calc_refrigerator_or_freezer_energy(freezer, freezer.additional_properties.space.nil?)
-        freezer_weekday_sch = freezer.weekday_fractions
-        freezer_weekend_sch = freezer.weekend_fractions
-        freezer_monthly_sch = freezer.monthly_multipliers
-        freezer_schedule = MonthWeekdayWeekendSchedule.new(model, freezer_name, freezer_weekday_sch, freezer_weekend_sch, freezer_monthly_sch, 1.0, 1.0, true, true, Constants.ScheduleTypeLimitsFraction)
-        freezer_design_level = freezer_schedule.calcDesignLevelFromDailykWh(fz_annual_kwh / 365.0)
+
+        if (not schedules_file.nil?)
+          freezer_design_level = schedules_file.calc_design_level_from_annual_kwh(col_name: 'freezer', annual_kwh: fz_annual_kwh)
+          freezer_schedule = schedules_file.create_schedule_file(col_name: 'freezer')
+        else
+          freezer_weekday_sch = freezer.weekday_fractions
+          freezer_weekend_sch = freezer.weekend_fractions
+          freezer_monthly_sch = freezer.monthly_multipliers
+          freezer_schedule = MonthWeekdayWeekendSchedule.new(model, freezer_name, freezer_weekday_sch, freezer_weekend_sch, freezer_monthly_sch, 1.0, 1.0, true, true, Constants.ScheduleTypeLimitsFraction)
+          freezer_design_level = freezer_schedule.calcDesignLevelFromDailykWh(fz_annual_kwh / 365.0)
+          freezer_schedule = freezer_schedule.schedule
+        end
 
         fz_space = freezer.additional_properties.space
         fz_space = living_space if fz_space.nil? # appliance is outdoors, so we need to assign the equipment to an arbitrary space
-        add_electric_equipment(model, freezer_name, fz_space, freezer_design_level, fz_frac_sens, fz_frac_lat, freezer_schedule.schedule)
+        add_electric_equipment(model, freezer_name, fz_space, freezer_design_level, fz_frac_sens, fz_frac_lat, freezer_schedule)
       end
     end
 
