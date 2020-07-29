@@ -768,7 +768,7 @@ For a ``SystemType/Recirculation`` system within the dwelling unit, the followin
 - ``ControlType``: One of "manual demand control", "presence sensor demand control", "temperature", "timer", or "no control".
 - ``RecirculationPipingLoopLength``: Optional. If not provided, the default value will be calculated by using the equation shown in the table below. Measured recirculation loop length including both supply and return sides, measured longitudinally from plans, assuming the hot water piping does not run diagonally, plus 20 feet of piping for each floor level greater than one plus 10 feet of piping for unconditioned basements.
 - ``BranchPipingLoopLength``: Optional. If not provided, the default value will be assumed as shown in the table below. Measured length of the branch hot water piping from the recirculation loop to the farthest hot water fixture from the recirculation loop, measured longitudinally from plans, assuming the branch hot water piping does not run diagonally.
-- ``PumpPower``: Optional. If not provided, the default value will be assumed as shown in the table below. 
+- ``PumpPower``: Optional. If not provided, the default value will be assumed as shown in the table below. Pump Power in Watts.
 
   ==================================  ====================================================================================================
   Element Name                        Default Value
