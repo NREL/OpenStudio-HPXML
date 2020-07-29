@@ -337,6 +337,7 @@
             <SystemIdentifier id='WaterHeater'/>
             <WaterHeaterType>space-heating boiler with storage tank</WaterHeaterType>
             <Location>living space</Location>
+            <IsSharedSystem>false</IsSharedSystem>
             <TankVolume>50.0</TankVolume>
             <FractionDHWLoadServed>0.5</FractionDHWLoadServed>
             <HotWaterTemperature>125.0</HotWaterTemperature>
@@ -346,6 +347,7 @@
             <SystemIdentifier id='WaterHeater2'/>
             <WaterHeaterType>space-heating boiler with storage tank</WaterHeaterType>
             <Location>living space</Location>
+            <IsSharedSystem>false</IsSharedSystem>
             <TankVolume>50.0</TankVolume>
             <FractionDHWLoadServed>0.5</FractionDHWLoadServed>
             <HotWaterTemperature>125.0</HotWaterTemperature>

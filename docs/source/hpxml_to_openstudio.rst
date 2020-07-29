@@ -671,7 +671,7 @@ HPXML Water Heating Systems
 ***************************
 
 Each water heater should be entered as a ``Systems/WaterHeating/WaterHeatingSystem``.
-Inputs including ``WaterHeaterType`` and ``FractionDHWLoadServed`` must be provided.
+Inputs including ``WaterHeaterType``, ``IsSharedSystem``, and ``FractionDHWLoadServed`` must be provided.
 
 Depending on the type of water heater specified, additional elements are required/available:
 

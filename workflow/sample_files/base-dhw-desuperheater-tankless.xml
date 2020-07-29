@@ -367,6 +367,7 @@
             <FuelType>electricity</FuelType>
             <WaterHeaterType>instantaneous water heater</WaterHeaterType>
             <Location>living space</Location>
+            <IsSharedSystem>false</IsSharedSystem>
             <FractionDHWLoadServed>1.0</FractionDHWLoadServed>
             <EnergyFactor>0.99</EnergyFactor>
             <HotWaterTemperature>125.0</HotWaterTemperature>

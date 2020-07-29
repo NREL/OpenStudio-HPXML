@@ -367,6 +367,7 @@
             <FuelType>electricity</FuelType>
             <WaterHeaterType>storage water heater</WaterHeaterType>
             <Location>living space</Location>
+            <IsSharedSystem>false</IsSharedSystem>
             <TankVolume>40.0</TankVolume>
             <FractionDHWLoadServed>0.5</FractionDHWLoadServed>
             <HeatingCapacity>18767.0</HeatingCapacity>
@@ -380,6 +381,7 @@
             <FuelType>electricity</FuelType>
             <WaterHeaterType>storage water heater</WaterHeaterType>
             <Location>living space</Location>
+            <IsSharedSystem>false</IsSharedSystem>
             <TankVolume>40.0</TankVolume>
             <FractionDHWLoadServed>0.5</FractionDHWLoadServed>
             <HeatingCapacity>18767.0</HeatingCapacity>
