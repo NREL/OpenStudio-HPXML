@@ -346,6 +346,9 @@ class HPXMLDefaults
 
   def self.apply_water_heaters(hpxml, nbeds, eri_version)
     hpxml.water_heating_systems.each do |water_heating_system|
+      if water_heating_system.is_shared_system.nil?
+        water_heating_system.is_shared_system = false
+      end
       if water_heating_system.temperature.nil?
         water_heating_system.temperature = Waterheater.get_default_hot_water_temperature(eri_version)
       end
@@ -394,6 +397,12 @@ class HPXMLDefaults
       end
       if hot_water_distribution.recirculation_pump_power.nil?
         hot_water_distribution.recirculation_pump_power = HotWaterAndAppliances.get_default_recirc_pump_power()
+      end
+    end
+
+    if hot_water_distribution.has_shared_recirculation
+      if hot_water_distribution.shared_recirculation_pump_power.nil?
+        hot_water_distribution.shared_recirculation_pump_power = HotWaterAndAppliances.get_default_shared_recirc_pump_power()
       end
     end
   end
