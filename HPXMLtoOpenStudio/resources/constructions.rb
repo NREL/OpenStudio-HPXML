@@ -12,6 +12,9 @@ class Constructions
     # install_grade handles RESNET insulation grading. This value is for considering defects occurred in the process of insulation installation. This value determines the relative area occupied by void insulation.
     # cavity_depth_in is equivalent to stud_depth_in
     # framing_factor is equivalent to stud_fraction (FIXME: Need to confirm)
+    # Parallel path layer configuration:
+    # path fraction | framing_factor | 1 - framing_factor - gapFactor | gapFactor |
+    # layer         |     frame      |           insulation           |    gap    |
 
     return if surfaces.empty?
 
@@ -83,7 +86,17 @@ class Constructions
                                   mat_ext_finish:, inside_film:, outside_film:)
     # install_grade handles RESNET insulation grading. This value is for considering defects occurred in the process of insulation installation. This value determines the relative area occupied by void insulation.
     # cavity_depth_in is calculated using stud_depth_in and gap_depth_in. Please see below.
-    # framing_factor includes stud_fraction and miscellaneous framing factor (i.e. framing doors, windows, and etc.)
+    # framing_factor includes stud_fraction and miscellaneous framing factor (i.e. framing around doors, windows, etc.)
+    # Parallel path layer configuration when "is_staggered" is true:
+    # path fraction | misc_framing_factor | stud_frac  | stud_frac  |  dsGapFactor  | 1.0 - (2 * stud_frac + misc_framing_factor + dsGapFactor |
+    # outer layer   |       frame         | insulation |    stud    |      gap      |                        insulation                        |
+    # gap layer     |       frame         | insulation | insulation |      gap      |                        insulation                        |
+    # inner layer   |       frame         |    stud    | insulation |      gap      |                        insulation                        |
+    # Parallel path layer configuration when "is_staggered" is false:
+    # path fraction | misc_framing_factor | stud_frac  | stud_frac  |  dsGapFactor  | 1.0 - (2 * stud_frac + misc_framing_factor + dsGapFactor |
+    # outer layer   |       frame         |    stud    | insulation |      gap      |                        insulation                        |
+    # gap layer     |       frame         | insulation | insulation |      gap      |                        insulation                        |
+    # inner layer   |       frame         |    stud    | insulation |      gap      |                        insulation                        |
 
     return if surfaces.empty?
 
@@ -152,16 +165,25 @@ class Constructions
   end
 
   def self.apply_cmu_wall(runner, model, surfaces, wall, constr_name,
-                          thick_in, conductivity, density, framing_factor,
-                          furring_r, furring_cavity_depth, furring_spacing,
-                          drywall_thick_in, osb_thick_in, rigid_r,
-                          mat_ext_finish, inside_film, outside_film)
+                          cmu_thick_in:, cmu_conductivity:, cmu_density:, framing_factor:,
+                          furring_r:, furring_cavity_depth:, furring_spacing:,
+                          inside_drywall_thick_in:, osb_thick_in:, rigid_r:,
+                          mat_ext_finish:, inside_film:, outside_film:)
+    # framing_factor includes the framing of cmu and the framing around doors, windows, etc.
+    # stud_frac refers to the framing of furring.
+    # Parallel path layer configuration when the wall has furring:
+    # path fraction | framing_factor | stud_frac | 1.0 - (stud_frac + framing_factor) |
+    # outer layer   |     frame      |    cmu    |                 cmu                |
+    # inner layer   |    furring     |  furring  |           furring cavity           |
+    # Parallel path layer configuration when the wall has no furring:
+    # path fraction | framing_factor | 1.0 - framing_factor |
+    # layer         |     frame      |         cmu          |
 
     return if surfaces.empty?
 
     # Define materials
-    mat_cmu = Material.new(name = nil, thick_in = thick_in, mat_base = BaseMaterial.Concrete, k_in = conductivity, rho = density)
-    mat_framing = Material.new(name = nil, thick_in = thick_in, mat_base = BaseMaterial.Wood)
+    mat_cmu = Material.new(name = nil, thick_in = cmu_thick_in, mat_base = BaseMaterial.Concrete, k_in = cmu_conductivity, rho = cmu_density)
+    mat_framing = Material.new(name = nil, thick_in = cmu_thick_in, mat_base = BaseMaterial.Wood)
     mat_furring = nil
     mat_furring_cavity = nil
     if furring_cavity_depth != 0
@@ -209,8 +231,8 @@ class Constructions
     else
       constr.add_layer([mat_framing, mat_cmu], 'WallCMU')
     end
-    if drywall_thick_in > 0
-      constr.add_layer(Material.GypsumWall(drywall_thick_in))
+    if inside_drywall_thick_in > 0
+      constr.add_layer(Material.GypsumWall(inside_drywall_thick_in))
     end
     constr.add_layer(inside_film)
 
@@ -224,17 +246,23 @@ class Constructions
   end
 
   def self.apply_icf_wall(runner, model, surfaces, wall, constr_name,
-                          icf_r, ins_thick_in, concrete_thick_in, framing_factor,
-                          drywall_thick_in, osb_thick_in, rigid_r,
-                          mat_ext_finish, inside_film, outside_film)
+                          icf_r:, icf_ins_thick_in:, icf_concrete_thick_in:, framing_factor:,
+                          inside_drywall_thick_in:, osb_thick_in:, rigid_r:,
+                          mat_ext_finish:, inside_film:, outside_film:)
+    # framing_factor includes the framing of icf and the framing around doors, windows, etc.
+    # Parallel path layer configuration:
+    # path fraction | framing_factor | 1.0 - framing_factor |
+    # outer layer   |     frame      |     insulation       |
+    # layer         |     frame      |      concrete        |
+    # inner layer   |     frame      |     insulation       |
 
     return if surfaces.empty?
 
     # Define materials
-    mat_ins = Material.new(name = nil, thick_in = ins_thick_in, mat_base = BaseMaterial.InsulationRigid, k_in = ins_thick_in / icf_r)
-    mat_conc = Material.new(name = nil, thick_in = concrete_thick_in, mat_base = BaseMaterial.Concrete)
-    mat_framing_inner_outer = Material.new(name = nil, thick_in = ins_thick_in, mat_base = BaseMaterial.Wood)
-    mat_framing_middle = Material.new(name = nil, thick_in = concrete_thick_in, mat_base = BaseMaterial.Wood)
+    mat_ins = Material.new(name = nil, thick_in = icf_ins_thick_in, mat_base = BaseMaterial.InsulationRigid, k_in = icf_ins_thick_in / icf_r)
+    mat_conc = Material.new(name = nil, thick_in = icf_concrete_thick_in, mat_base = BaseMaterial.Concrete)
+    mat_framing_inner_outer = Material.new(name = nil, thick_in = icf_ins_thick_in, mat_base = BaseMaterial.Wood)
+    mat_framing_middle = Material.new(name = nil, thick_in = icf_concrete_thick_in, mat_base = BaseMaterial.Wood)
     mat_osb = nil
     if osb_thick_in > 0
       mat_osb = Material.new(name = 'WallSheathing', thick_in = osb_thick_in, mat_base = BaseMaterial.Wood)
@@ -263,8 +291,8 @@ class Constructions
     constr.add_layer([mat_framing_inner_outer, mat_ins], 'WallICFInsFormOuter')
     constr.add_layer([mat_framing_middle, mat_conc], 'WallICFConcrete')
     constr.add_layer([mat_framing_inner_outer, mat_ins], 'WallICFInsFormInner')
-    if drywall_thick_in > 0
-      constr.add_layer(Material.GypsumWall(drywall_thick_in))
+    if inside_drywall_thick_in > 0
+      constr.add_layer(Material.GypsumWall(inside_drywall_thick_in))
     end
     constr.add_layer(inside_film)
 
@@ -276,10 +304,16 @@ class Constructions
     wall.insulation_continuous_r_value = rigid_r
   end
 
-  def self.apply_sip_wall(runner, model, surfaces, wall, constr_name, sip_r,
-                          sip_thick_in, framing_factor, sheathing_thick_in,
-                          drywall_thick_in, osb_thick_in, rigid_r,
-                          mat_ext_finish, inside_film, outside_film)
+  def self.apply_sip_wall(runner, model, surfaces, wall, constr_name, 
+                          sip_r:, sip_thick_in:, framing_factor:, sheathing_thick_in:,
+                          inside_drywall_thick_in:, osb_thick_in:, rigid_r:,
+                          mat_ext_finish:, inside_film:, outside_film:)
+    # framing_factor includes the framing of sip and the framing around doors, windows, etc.
+    # Parallel path layer configuration:
+    # path fraction | framing_factor | spline_frac | 1 - (spline_frac + framing_factor) |
+    # outer layer   |     frame      |   spline    |            insulation              |
+    # layer         |     frame      | insulation  |            insulation              |
+    # inner layer   |     frame      |   spline    |            insulation              |
 
     return if surfaces.empty?
 
@@ -323,8 +357,8 @@ class Constructions
     constr.add_layer([mat_framing_middle, mat_ins_middle, mat_ins_middle], 'WallIns')
     constr.add_layer([mat_framing_inner_outer, mat_spline, mat_ins_inner_outer], 'WallSplineLayerInner')
     constr.add_layer(mat_int_sheath)
-    if drywall_thick_in > 0
-      constr.add_layer(Material.GypsumWall(drywall_thick_in))
+    if inside_drywall_thick_in > 0
+      constr.add_layer(Material.GypsumWall(inside_drywall_thick_in))
     end
     constr.add_layer(inside_film)
 
@@ -415,19 +449,7 @@ class Constructions
 
     # Define materials
     mats = []
-    mats << Material.new(name = 'WallLayer1', thick_in = thick_ins[0], mat_base = nil, k_in = conds[0], rho = denss[0], cp = specheats[0])
-    if not thick_ins[1].nil?
-      mats << Material.new(name = 'WallLayer2', thick_in = thick_ins[1], mat_base = nil, k_in = conds[1], rho = denss[1], cp = specheats[1])
-    end
-    if not thick_ins[2].nil?
-      mats << Material.new(name = 'WallLayer3', thick_in = thick_ins[2], mat_base = nil, k_in = conds[2], rho = denss[2], cp = specheats[2])
-    end
-    if not thick_ins[3].nil?
-      mats << Material.new(name = 'WallLayer4', thick_in = thick_ins[3], mat_base = nil, k_in = conds[3], rho = denss[3], cp = specheats[3])
-    end
-    if not thick_ins[4].nil?
-      mats << Material.new(name = 'WallLayer5', thick_in = thick_ins[4], mat_base = nil, k_in = conds[4], rho = denss[4], cp = specheats[4])
-    end
+    thick_ins.size.times { |i| mats << Material.new(name = "WallLayer#{i + 1}", thick_in = thick_ins[i], mat_base = nil, k_in = conds[i], rho = denss[i], cp = specheats[i]) }
     mat_osb = nil
     if osb_thick_in > 0
       mat_osb = Material.new(name = 'WallSheathing', thick_in = osb_thick_in, mat_base = BaseMaterial.Wood)

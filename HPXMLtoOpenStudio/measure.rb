@@ -1124,6 +1124,9 @@ class OSModel
                                               cavity_r: wall.insulation_cavity_r_value, install_grade: wall.insulation_grade, cavity_ins_thick_in: wall.insulation_cavity_thickness,
                                               rigid_r: wall.insulation_continuous_r_value, stud_size: wall.stud_size, framing_factor: wall.framing_factor,
                                               stud_spacing: wall.stud_spacing, is_staggered: wall.double_stud_is_staggered, gap_depth_in: wall.double_stud_gap_depth,
+                                              cmu_thick_in: wall.cmu_thickness, cmu_conductivity: wall.cmu_conductivity, cmu_density: wall.cmu_density,
+                                              icf_r: wall.icf_r_value, icf_ins_thick_in: wall.icf_ins_thickness, icf_concrete_thick_in: wall.icf_concrete_thickness,
+                                              sip_r: wall.sip_r_value, sip_thick_in: wall.sip_thickness, sheathing_thick_in: wall.sip_sheathing_thickness,
                                               osb_thick_in: wall.osb_thickness, mat_ext_finish: mat_ext_finish,
                                               inside_drywall_thick_in: inside_drywall_thick_in, outside_drywall_thick_in: 0,
                                               inside_film: inside_film, outside_film: outside_film)
@@ -3096,12 +3099,10 @@ class OSModel
       match, constr_set, rigid_r = pick_cmu_construction_set(assembly_r, constr_sets, inside_film, outside_film, wall_id)
 
       Constructions.apply_cmu_wall(runner, model, surfaces, wall, "#{wall_id} construction",
-                                   constr_set.thick_in, constr_set.cond_in, density,
-                                   constr_set.framing_factor, furring_r,
-                                   furring_cavity_depth_in, furring_spacing,
-                                   constr_set.inside_drywall_thick_in, constr_set.osb_thick_in,
-                                   rigid_r, constr_set.exterior_material, inside_film,
-                                   outside_film)
+                                   cmu_thick_in: constr_set.thick_in, cmu_conductivity: constr_set.cond_in, cmu_density: density, framing_factor: constr_set.framing_factor,
+                                   furring_r: furring_r, furring_cavity_depth: furring_cavity_depth_in, furring_spacing: furring_spacing,
+                                   inside_drywall_thick_in: constr_set.inside_drywall_thick_in, osb_thick_in: constr_set.osb_thick_in, rigid_r: rigid_r,
+                                   mat_ext_finish: constr_set.exterior_material, inside_film: inside_film, outside_film: outside_film)
     elsif wall_type == HPXML::WallTypeSIP
       sheathing_thick_in = 0.44
 
@@ -3113,10 +3114,9 @@ class OSModel
       match, constr_set, cavity_r = pick_sip_construction_set(assembly_r, constr_sets, inside_film, outside_film, wall_id)
 
       Constructions.apply_sip_wall(runner, model, surfaces, wall, "#{wall_id} construction",
-                                   cavity_r, constr_set.thick_in, constr_set.framing_factor,
-                                   constr_set.sheath_thick_in, constr_set.inside_drywall_thick_in,
-                                   constr_set.osb_thick_in, constr_set.rigid_r,
-                                   constr_set.exterior_material, inside_film, outside_film)
+                                   sip_r: cavity_r, sip_thick_in: constr_set.thick_in, framing_factor: constr_set.framing_factor, sheathing_thick_in: constr_set.sheath_thick_in,
+                                   inside_drywall_thick_in: constr_set.inside_drywall_thick_in, osb_thick_in: constr_set.osb_thick_in, rigid_r: constr_set.rigid_r,
+                                   mat_ext_finish: constr_set.exterior_material, inside_film: inside_film, outside_film: outside_film)
     elsif wall_type == HPXML::WallTypeICF
       constr_sets = [
         ICFConstructionSet.new(2.0, 4.0, 0.08, 0.0, 0.5, inside_drywall_thick_in, mat_ext_finish), # ICF w/4" concrete and 2" rigid ins layers
@@ -3125,11 +3125,9 @@ class OSModel
       match, constr_set, icf_r = pick_icf_construction_set(assembly_r, constr_sets, inside_film, outside_film, wall_id)
 
       Constructions.apply_icf_wall(runner, model, surfaces, wall, "#{wall_id} construction",
-                                   icf_r, constr_set.ins_thick_in,
-                                   constr_set.concrete_thick_in, constr_set.framing_factor,
-                                   constr_set.inside_drywall_thick_in, constr_set.osb_thick_in,
-                                   constr_set.rigid_r, constr_set.exterior_material,
-                                   inside_film, outside_film)
+                                   icf_r: icf_r, icf_ins_thick_in: constr_set.ins_thick_in, icf_concrete_thick_in: constr_set.concrete_thick_in, framing_factor: constr_set.framing_factor,
+                                   inside_drywall_thick_in: constr_set.inside_drywall_thick_in, osb_thick_in: constr_set.osb_thick_in, rigid_r: constr_set.rigid_r,
+                                   mat_ext_finish: constr_set.exterior_material, inside_film: inside_film, outside_film: outside_film)
     elsif [HPXML::WallTypeConcrete, HPXML::WallTypeBrick, HPXML::WallTypeAdobe, HPXML::WallTypeStrawBale, HPXML::WallTypeStone, HPXML::WallTypeLog].include? wall_type
       constr_sets = [
         GenericConstructionSet.new(10.0, 0.5, inside_drywall_thick_in, mat_ext_finish), # w/R-10 rigid
@@ -3181,14 +3179,17 @@ class OSModel
   def self.apply_wall_construction_by_quick_fill(runner, model, surfaces, wall, wall_id, wall_type,
                                                  cavity_r:, install_grade:, cavity_ins_thick_in:,
                                                  rigid_r:, stud_size:, framing_factor:, stud_spacing:, is_staggered:, gap_depth_in:,
+                                                 cmu_thick_in:, cmu_conductivity:, cmu_density:,
+                                                 icf_r:, icf_ins_thick_in:, icf_concrete_thick_in:,
+                                                 sip_r:, sip_thick_in:, sheathing_thick_in:,
                                                  osb_thick_in:, mat_ext_finish:,
                                                  inside_drywall_thick_in:, outside_drywall_thick_in:,
                                                  inside_film:, outside_film:)
 
-    if wall_type == HPXML::WallTypeWoodStud
-      stud_depth_in = stud_size.split('x').last.to_f - 0.5
-      stud_width_in = stud_size.split('x').first.to_f - 0.5
+    stud_depth_in = stud_size.split('x').last.to_f - 0.5
+    stud_width_in = stud_size.split('x').first.to_f - 0.5
 
+    if wall_type == HPXML::WallTypeWoodStud
       if cavity_ins_thick_in < stud_depth_in
         cavity_filled = false
       else
@@ -3203,14 +3204,31 @@ class OSModel
                                          inside_film: inside_film, outside_film: outside_film)
 
     elsif wall_type == HPXML::WallTypeDoubleWoodStud
-      stud_depth_in = stud_size.split('x').last.to_f - 0.5
-
       Constructions.apply_double_stud_wall(runner, model, surfaces, wall, "#{wall_id} construction",
                                            cavity_r: cavity_r, install_grade: install_grade, stud_depth_in: stud_depth_in, gap_depth_in: gap_depth_in,
                                            framing_factor: framing_factor, stud_spacing: stud_spacing, is_staggered: is_staggered,
                                            inside_drywall_thick_in: inside_drywall_thick_in, osb_thick_in: osb_thick_in, rigid_r: rigid_r,
                                            mat_ext_finish: mat_ext_finish, inside_film: inside_film, outside_film: outside_film)
 
+    elsif wall_type == HPXML::WallTypeCMU
+      # FIXME: use cavity_r, stud_depth_in, and stud_spacing as furring_r, furring_cavity_depth, and furring_spacing, respectively.
+      Constructions.apply_cmu_wall(runner, model, surfaces, wall, "#{wall_id} construction",
+                                   cmu_thick_in: cmu_thick_in, cmu_conductivity: cmu_conductivity, cmu_density: cmu_density, framing_factor: framing_factor,
+                                   furring_r: cavity_r, furring_cavity_depth: stud_depth_in, furring_spacing: stud_spacing,
+                                   inside_drywall_thick_in: inside_drywall_thick_in, osb_thick_in: osb_thick_in, rigid_r: rigid_r,
+                                   mat_ext_finish: mat_ext_finish, inside_film: inside_film, outside_film: outside_film)
+
+    elsif wall_type == HPXML::WallTypeICF
+      Constructions.apply_icf_wall(runner, model, surfaces, wall, "#{wall_id} construction",
+                                   icf_r: icf_r, icf_ins_thick_in: icf_ins_thick_in, icf_concrete_thick_in: icf_concrete_thick_in, framing_factor: framing_factor,
+                                   inside_drywall_thick_in: inside_drywall_thick_in, osb_thick_in: osb_thick_in, rigid_r: rigid_r,
+                                   mat_ext_finish: mat_ext_finish, inside_film: inside_film, outside_film: outside_film)
+
+    elsif wall_type == HPXML::WallTypeSIP
+      Constructions.apply_sip_wall(runner, model, surfaces, wall, "#{wall_id} construction",
+                                    sip_r: sip_r, sip_thick_in: sip_thick_in, framing_factor: framing_factor, sheathing_thick_in: sheathing_thick_in,
+                                    inside_drywall_thick_in: inside_drywall_thick_in, osb_thick_in: osb_thick_in, rigid_r: rigid_r,
+                                    mat_ext_finish: mat_ext_finish, inside_film: inside_film, outside_film: outside_film)
     else
       fail "Unexpected wall type '#{wall_type}'."
     end

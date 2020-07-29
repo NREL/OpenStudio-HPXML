@@ -200,7 +200,7 @@ class EnergyPlusValidator
         'SystemIdentifier' => one, # Required by HPXML schema
         'ExteriorAdjacentTo[text()="outside" or text()="attic - vented" or text()="attic - unvented" or text()="basement - conditioned" or text()="basement - unconditioned" or text()="crawlspace - vented" or text()="crawlspace - unvented" or text()="garage" or text()="other housing unit" or text()="other heated space" or text()="other multifamily buffer space" or text()="other non-freezing space"]' => one,
         'InteriorAdjacentTo[text()="living space" or text()="attic - vented" or text()="attic - unvented" or text()="basement - conditioned" or text()="basement - unconditioned" or text()="crawlspace - vented" or text()="crawlspace - unvented" or text()="garage"]' => one,
-        'WallType[WoodStud | DoubleWoodStud | ConcreteMasonryUnit | StructurallyInsulatedPanel | InsulatedConcreteForms | SteelFrame | SolidConcrete | StructuralBrick | StrawBale | Stone | LogWall | Adobe]' => one, # See [DoubleWoodStud]
+        'WallType[WoodStud | DoubleWoodStud | ConcreteMasonryUnit | StructurallyInsulatedPanel | InsulatedConcreteForms | SteelFrame | SolidConcrete | StructuralBrick | StrawBale | Stone | LogWall | Adobe]' => one, # See [DoubleWoodStud], [ConcreteMasonryUnit], [InsulatedConcreteForms]
         'Area' => one,
         'Azimuth' => zero_or_one,
         '[not(Siding)] | Siding[text()="wood siding" or text()="vinyl siding" or text()="stucco" or text()="fiber cement siding" or text()="brick veneer" or text()="aluminum siding"]' => one,
@@ -214,6 +214,27 @@ class EnergyPlusValidator
       '/HPXML/Building/BuildingDetails/Enclosure/Walls/Wall[WallType/DoubleWoodStud]/Insulation/Layer[InstallationType="cavity"]' => {
         '../../WallType/DoubleWoodStud/Staggered' => one,
         '../../WallType/DoubleWoodStud/extension/GapDepth' => one,
+      },
+
+      ## [ConcreteMasonryUnit]
+      '/HPXML/Building/BuildingDetails/Enclosure/Walls/Wall[WallType/ConcreteMasonryUnit]/Insulation/Layer[InstallationType="cavity"]' => {
+        '../../WallType/ConcreteMasonryUnit/extension/Thickness' => one, # inch
+        '../../WallType/ConcreteMasonryUnit/extension/Conductivity' => one, # Btu/hr-ft-F
+        '../../WallType/ConcreteMasonryUnit/extension/Density' => one, # lb/ft^3
+      },
+
+      ## [InsulatedConcreteForms]
+      '/HPXML/Building/BuildingDetails/Enclosure/Walls/Wall[WallType/InsulatedConcreteForms]/Insulation/Layer[InstallationType="cavity"]' => {
+        '../../WallType/InsulatedConcreteForms/extension/NominalRValue' => one, # inch
+        '../../WallType/InsulatedConcreteForms/extension/InsulationThickness' => one, # Btu/hr-ft-F
+        '../../WallType/InsulatedConcreteForms/extension/ConcreteThickness' => one, # lb/ft^3
+      },
+
+      ## [StructurallyInsulatedPanel]
+      '/HPXML/Building/BuildingDetails/Enclosure/Walls/Wall[WallType/StructurallyInsulatedPanel]/Insulation/Layer[InstallationType="cavity"]' => {
+        '../../WallType/StructurallyInsulatedPanel/extension/NominalRValue' => one, # inch
+        '../../WallType/StructurallyInsulatedPanel/extension/Thickness' => one, # Btu/hr-ft-F
+        '../../WallType/StructurallyInsulatedPanel/extension/SheathingThickness' => one, # lb/ft^3
       },
 
       ## [WallCavityInsLayer]
