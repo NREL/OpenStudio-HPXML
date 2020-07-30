@@ -3,9 +3,9 @@
 
 require 'openstudio'
 require 'oga'
+require 'csv'
 
 require_relative 'resources/geometry'
-require_relative 'resources/schedules'
 require_relative 'resources/constants'
 require_relative 'resources/location'
 
@@ -119,12 +119,6 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     arg.setDisplayName('Simulation Control: Daylight Saving End Day of Month')
     arg.setUnits('day')
     arg.setDescription('This numeric field should contain the ending day of the ending month (must be valid for month) for the daylight saving period desired.')
-    args << arg
-
-    arg = OpenStudio::Measure::OSArgument.makeStringArgument('schedules_output_path', true)
-    arg.setDisplayName('Schedules Output File Path')
-    arg.setDescription('Absolute (or relative) path of the output schedules file.')
-    arg.setDefaultValue('../schedules.csv')
     args << arg
 
     arg = OpenStudio::Measure::OSArgument.makeStringArgument('weather_station_epw_filepath', true)
@@ -3039,7 +3033,6 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     args[:weather_dir] = runner.getStringArgumentValue('weather_dir', user_arguments)
     args[:software_program_used] = runner.getOptionalStringArgumentValue('software_program_used', user_arguments)
     args[:software_program_version] = runner.getOptionalStringArgumentValue('software_program_version', user_arguments)
-    args[:schedules_output_path] = runner.getStringArgumentValue('schedules_output_path', user_arguments)
     args[:geometry_roof_pitch] = { '1:12' => 1.0 / 12.0, '2:12' => 2.0 / 12.0, '3:12' => 3.0 / 12.0, '4:12' => 4.0 / 12.0, '5:12' => 5.0 / 12.0, '6:12' => 6.0 / 12.0, '7:12' => 7.0 / 12.0, '8:12' => 8.0 / 12.0, '9:12' => 9.0 / 12.0, '10:12' => 10.0 / 12.0, '11:12' => 11.0 / 12.0, '12:12' => 12.0 / 12.0 }[args[:geometry_roof_pitch]]
 
     # Argument error checks
@@ -3629,9 +3622,6 @@ class HPXMLFile
     success = create_geometry_envelope(runner, model_geometry, args)
     return false if not success
 
-    # success = create_schedules(runner, model, args)
-    # return false if not success
-
     hpxml = HPXML.new
 
     set_header(hpxml, runner, args)
@@ -3710,21 +3700,6 @@ class HPXMLFile
     return false if not success
 
     success = Geometry.create_doors(runner: runner, model: model, **args)
-    return false if not success
-
-    return true
-  end
-
-  def self.create_schedules(runner, model, args)
-    schedule_file = SchedulesFile.new(runner: runner, model: model, **args)
-
-    success = schedule_file.create_occupant_schedule
-    return false if not success
-
-    success = schedule_file.create_refrigerator_schedule
-    return false if not success
-
-    success = schedule_file.export
     return false if not success
 
     return true
@@ -3822,8 +3797,6 @@ class HPXMLFile
     if args[:geometry_num_occupants] != Constants.Auto
       hpxml.building_occupancy.number_of_residents = args[:geometry_num_occupants]
     end
-    hpxml.building_occupancy.schedules_output_path = args[:schedules_output_path]
-    hpxml.building_occupancy.schedules_column_name = 'occupants'
   end
 
   def self.set_building_construction(hpxml, runner, args)
@@ -5253,9 +5226,7 @@ class HPXMLFile
                             usage_multiplier: usage_multiplier,
                             weekday_fractions: refrigerator_weekday_fractions,
                             weekend_fractions: refrigerator_weekend_fractions,
-                            monthly_multipliers: refrigerator_monthly_multipliers,
-                            schedules_output_path: args[:schedules_output_path],
-                            schedules_column_name: 'refrigerator')
+                            monthly_multipliers: refrigerator_monthly_multipliers)
   end
 
   def self.set_extra_refrigerator(hpxml, runner, args)
