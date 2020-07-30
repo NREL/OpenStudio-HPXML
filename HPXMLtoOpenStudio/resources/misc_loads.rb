@@ -197,7 +197,7 @@ class MiscLoads
     end
 
     if pump_kwh > 0
-      if (not schedules_file?)
+      if (not schedules_file.nil?)
         space_design_level = schedules_file.calc_design_level_from_annual_kwh(col_name: col_name, annual_kwh: pump_kwh)
       else
         space_design_level = pump_sch.calcDesignLevelFromDailykWh(pump_kwh / 365.0)
