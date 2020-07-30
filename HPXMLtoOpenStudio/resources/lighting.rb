@@ -39,7 +39,7 @@ class Lighting
     else
       lighting_sch = get_schedule(model, weather)
       # Create schedule
-      sch = HourlyByMonthSchedule.new(model, 'lighting schedule', lighting_sch, lighting_sch, true, true, Constants.ScheduleTypeLimitsFraction)
+      interior_sch = HourlyByMonthSchedule.new(model, 'lighting schedule', lighting_sch, lighting_sch, true, true, Constants.ScheduleTypeLimitsFraction)
     end
     exterior_sch = MonthWeekdayWeekendSchedule.new(model, Constants.ObjectNameExteriorLighting + ' schedule', lighting.exterior_weekday_fractions, lighting.exterior_weekend_fractions, lighting.exterior_monthly_multipliers, 1.0, 1.0, true, true, Constants.ScheduleTypeLimitsFraction)
     if not garage_space.nil?
