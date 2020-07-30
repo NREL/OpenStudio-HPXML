@@ -2022,8 +2022,11 @@ class OSModel
       end
 
       if cooling_system.cooling_system_type == HPXML::HVACTypeCentralAirConditioner
-
-        heating_system = cooling_system.attached_heating_system
+        if cooling_system.is_ventilation_preconditioning
+          heating_system = cooling_system.attached_preconditioning_heating_system
+        else
+          heating_system = cooling_system.attached_heating_system
+        end
         if not is_central_air_conditioner_and_furnace(heating_system, cooling_system)
           heating_system = nil
         end
@@ -2069,8 +2072,11 @@ class OSModel
       end
 
       if heating_system.heating_system_type == HPXML::HVACTypeFurnace
-
-        cooling_system = heating_system.attached_cooling_system
+        if heating_system.is_ventilation_preconditioning
+          cooling_system = heating_system.attached_preconditioning_cooling_system
+        else
+          cooling_system = heating_system.attached_cooling_system
+        end
         if is_central_air_conditioner_and_furnace(heating_system, cooling_system)
           next # Already processed combined AC+furnace
         end
