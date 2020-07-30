@@ -2013,10 +2013,13 @@ class OSModel
   end
 
   def self.add_cooling_system(runner, model, spaces)
-    living_zone = spaces[HPXML::LocationLivingSpace].thermalZone.get
-
     @hpxml.cooling_systems.each do |cooling_system|
-      check_distribution_system(cooling_system.distribution_system, cooling_system.cooling_system_type)
+      if cooling_system.is_ventilation_preconditioning
+        living_zone = create_or_get_space(model, spaces, HPXML::LocationMechanicalVentilationSpace).thermalZone.get
+      else
+        living_zone = spaces[HPXML::LocationLivingSpace].thermalZone.get
+        check_distribution_system(cooling_system.distribution_system, cooling_system.cooling_system_type)
+      end
 
       if cooling_system.cooling_system_type == HPXML::HVACTypeCentralAirConditioner
 
@@ -2057,10 +2060,13 @@ class OSModel
   end
 
   def self.add_heating_system(runner, model, spaces)
-    living_zone = spaces[HPXML::LocationLivingSpace].thermalZone.get
-
     @hpxml.heating_systems.each do |heating_system|
-      check_distribution_system(heating_system.distribution_system, heating_system.heating_system_type)
+      if heating_system.is_ventilation_preconditioning
+        living_zone = create_or_get_space(model, spaces, HPXML::LocationMechanicalVentilationSpace).thermalZone.get
+      else
+        living_zone = spaces[HPXML::LocationLivingSpace].thermalZone.get
+        check_distribution_system(heating_system.distribution_system, heating_system.heating_system_type)
+      end
 
       if heating_system.heating_system_type == HPXML::HVACTypeFurnace
 

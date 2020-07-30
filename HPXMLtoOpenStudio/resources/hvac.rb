@@ -16,12 +16,20 @@ class HVAC
     end
 
     if not heating_system.nil?
-      sequential_heat_load_frac = calc_sequential_load_fraction(heating_system.fraction_heat_load_served, remaining_heat_load_frac)
+      if heating_system.is_ventilation_preconditioning
+        sequential_heat_load_frac = 1.0
+      else
+        sequential_heat_load_frac = calc_sequential_load_fraction(heating_system.fraction_heat_load_served, remaining_heat_load_frac)
+      end
     else
       sequential_heat_load_frac = 0.0
     end
     if not cooling_system.nil?
-      sequential_cool_load_frac = calc_sequential_load_fraction(cooling_system.fraction_cool_load_served, remaining_cool_load_frac)
+      if cooling_system.is_ventilation_preconditioning
+        sequential_cool_load_frac = 1.0
+      else
+        sequential_cool_load_frac = calc_sequential_load_fraction(cooling_system.fraction_cool_load_served, remaining_cool_load_frac)
+      end
     else
       sequential_cool_load_frac = 0.0
     end

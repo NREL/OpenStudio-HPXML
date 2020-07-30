@@ -333,15 +333,20 @@ class EnergyPlusValidator
         '../../HVACControl' => one, # See [HVACControl]
         'HeatingSystemType[ElectricResistance | Furnace | WallFurnace | FloorFurnace | Boiler | Stove | PortableHeater | FixedHeater | Fireplace]' => one, # See [HeatingType=Resistance] or [HeatingType=Furnace] or [HeatingType=WallFurnace] or [HeatingType=FloorFurnace] or [HeatingType=Boiler] or [HeatingType=Stove] or [HeatingType=PortableHeater] or [HeatingType=FixedHeater] or [HeatingType=Fireplace]
         'HeatingCapacity' => zero_or_one,
-        'FractionHeatLoadServed' => one, # Must sum to <= 1 across all HeatingSystems and HeatPumps
         'ElectricAuxiliaryEnergy' => zero_or_one, # If not provided, uses 301 defaults for fuel furnace/boiler and zero otherwise
         'IsVentilationPreconditioningSystem' => one, # See [PreconditioningSystem], true if this system only provides preconditioning for shared mechanical ventilation system
       },
 
-      ## [PreconditioningSystem]
+      ## [PreconditioningSystem="true"]
       '/HPXML/Building/BuildingDetails/Systems/HVAC/HVACPlant/HeatingSystem[IsVentilationPreconditioningSystem="true"]' => {
         'HeatingCapacity[not(@scope)]' => zero, # Use scope attribute to describe at which level data is provided
         'DistributionSystem' => zero,
+        'FractionHeatLoadServed' => zero, # Don't need fraction for preconditioning equipment
+      },
+
+      ## [PreconditioningSystem="false"]
+      '/HPXML/Building/BuildingDetails/Systems/HVAC/HVACPlant/HeatingSystem[IsVentilationPreconditioningSystem="false"]' => {
+        'FractionHeatLoadServed' => one, # Must sum to <= 1 across all HeatingSystems and HeatPumps
       },
 
       ## [HeatingType=Resistance]
@@ -427,14 +432,19 @@ class EnergyPlusValidator
         '../../HVACControl' => one, # See [HVACControl]
         'CoolingSystemType[text()="central air conditioner" or text()="room air conditioner" or text()="evaporative cooler" or text()="mini-split"]' => one, # See [CoolingType=CentralAC] or [CoolingType=RoomAC] or [CoolingType=EvapCooler] or [CoolingType=MiniSplitAC]
         'CoolingSystemFuel[text()="electricity"]' => one,
-        'FractionCoolLoadServed' => one, # Must sum to <= 1 across all CoolingSystems and HeatPumps
         'IsVentilationPreconditioningSystem' => one, # See [PreconditioningSystem], true if this system only provides preconditioning for shared mechanical ventilation system
       },
 
-      ## [PreconditioningSystem]
+      ## [PreconditioningSystem="true"]
       '/HPXML/Building/BuildingDetails/Systems/HVAC/HVACPlant/CoolingSystem[IsVentilationPreconditioningSystem="true"]' => {
         'CoolingCapacity[not(@scope)]' => zero, # Use scope attribute to describe at which level data is provided
         'DistributionSystem' => zero,
+        'FractionCoolLoadServed' => zero, # Don't need fraction for preconditioning equipment
+      },
+
+      ## [PreconditioningSystem="false"]
+      '/HPXML/Building/BuildingDetails/Systems/HVAC/HVACPlant/CoolingSystem[IsVentilationPreconditioningSystem="false"]' => {
+        'FractionCoolLoadServed' => zero, # Don't need fraction for preconditioning equipment
       },
 
       ## [CoolingType=CentralAC and IsVentilationPreconditioningSystem="false"]
