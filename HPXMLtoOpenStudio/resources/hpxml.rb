@@ -3740,7 +3740,10 @@ class HPXML < Object
       sys_id = XMLHelper.add_element(clothes_washer, 'SystemIdentifier')
       XMLHelper.add_attribute(sys_id, 'id', @id)
       XMLHelper.add_element(clothes_washer, 'IsSharedAppliance', to_boolean(@is_shared_appliance)) unless @is_shared_appliance.nil?
-      XMLHelper.add_element(clothes_washer, 'AttachedToWaterHeatingSystem', @water_heating_system_idref) unless @water_heating_system_idref.nil?
+      if not @water_heating_system_idref.nil?
+        attached_water_heater = XMLHelper.add_element(clothes_washer, 'AttachedToWaterHeatingSystem')
+        XMLHelper.add_attribute(attached_water_heater, 'idref', @water_heating_system_idref)
+      end
       XMLHelper.add_element(clothes_washer, 'Location', @location) unless @location.nil?
       XMLHelper.add_element(clothes_washer, 'ModifiedEnergyFactor', to_float(@modified_energy_factor)) unless @modified_energy_factor.nil?
       XMLHelper.add_element(clothes_washer, 'IntegratedModifiedEnergyFactor', to_float(@integrated_modified_energy_factor)) unless @integrated_modified_energy_factor.nil?
@@ -3771,7 +3774,7 @@ class HPXML < Object
       @capacity = to_float_or_nil(XMLHelper.get_value(clothes_washer, 'Capacity'))
       @usage_multiplier = to_float_or_nil(XMLHelper.get_value(clothes_washer, 'extension/UsageMultiplier'))
       @ratio_of_units_to_clothes_washers = to_integer_or_nil(XMLHelper.get_value(clothes_washer, 'extension/RatioOfDwellingUnitsToSharedClothesWashers'))
-      @water_heating_system_idref = XMLHelper.get_value(clothes_washer, 'AttachedToWaterHeatingSystem')
+      @water_heating_system_idref = HPXML::get_idref(XMLHelper.get_element(clothes_washer, 'AttachedToWaterHeatingSystem'))
     end
   end
 
@@ -3884,7 +3887,10 @@ class HPXML < Object
       sys_id = XMLHelper.add_element(dishwasher, 'SystemIdentifier')
       XMLHelper.add_attribute(sys_id, 'id', @id)
       XMLHelper.add_element(dishwasher, 'IsSharedAppliance', to_boolean(@is_shared_appliance)) unless @is_shared_appliance.nil?
-      XMLHelper.add_element(dishwasher, 'AttachedToWaterHeatingSystem', @water_heating_system_idref) unless @water_heating_system_idref.nil?
+      if not @water_heating_system_idref.nil?
+        attached_water_heater = XMLHelper.add_element(dishwasher, 'AttachedToWaterHeatingSystem')
+        XMLHelper.add_attribute(attached_water_heater, 'idref', @water_heating_system_idref)
+      end
       XMLHelper.add_element(dishwasher, 'Location', @location) unless @location.nil?
       XMLHelper.add_element(dishwasher, 'RatedAnnualkWh', to_float(@rated_annual_kwh)) unless @rated_annual_kwh.nil?
       XMLHelper.add_element(dishwasher, 'EnergyFactor', to_float(@energy_factor)) unless @energy_factor.nil?
@@ -3911,7 +3917,7 @@ class HPXML < Object
       @label_annual_gas_cost = to_float_or_nil(XMLHelper.get_value(dishwasher, 'LabelAnnualGasCost'))
       @label_usage = to_float_or_nil(XMLHelper.get_value(dishwasher, 'LabelUsage'))
       @usage_multiplier = to_float_or_nil(XMLHelper.get_value(dishwasher, 'extension/UsageMultiplier'))
-      @water_heating_system_idref = XMLHelper.get_value(dishwasher, 'AttachedToWaterHeatingSystem')
+      @water_heating_system_idref = HPXML::get_idref(XMLHelper.get_element(dishwasher, 'AttachedToWaterHeatingSystem'))
     end
   end
 
