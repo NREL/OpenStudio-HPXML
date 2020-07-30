@@ -2774,7 +2774,6 @@ def set_hpxml_cooling_systems(hpxml_file, hpxml)
     hpxml.cooling_systems[1].distribution_system_idref = 'HVACDistribution2'
   elsif ['base-mechvent-shared.xml'].include? hpxml_file
     hpxml.cooling_systems.add(id: 'PreconditioningCooling',
-                              distribution_system_idref: 'HVACDistributionPreconditioningCooling',
                               cooling_system_type: HPXML::HVACTypeCentralAirConditioner,
                               cooling_system_fuel: HPXML::FuelTypeElectricity,
                               cooling_capacity_building: 9600,
@@ -2825,7 +2824,6 @@ def set_hpxml_heat_pumps(hpxml_file, hpxml)
     end
   elsif ['base-mechvent-shared.xml'].include? hpxml_file
     hpxml.heat_pumps.add(id: 'PreconditioningHeating',
-                         distribution_system_idref: 'HVACDistributionPreconditioningHeating',
                          heat_pump_type: HPXML::HVACTypeHeatPumpAirToAir,
                          heat_pump_fuel: HPXML::FuelTypeElectricity,
                          heating_capacity_building: 42000,
@@ -3204,11 +3202,6 @@ def set_hpxml_hvac_distributions(hpxml_file, hpxml)
   elsif ['base-mechvent-multiple.xml'].include? hpxml_file
     hpxml.hvac_distributions << hpxml.hvac_distributions[0].dup
     hpxml.hvac_distributions[1].id = 'HVACDistribution2'
-  elsif ['base-mechvent-shared.xml'].include? hpxml_file
-    hpxml.hvac_distributions << hpxml.hvac_distributions[0].dup
-    hpxml.hvac_distributions[-1].id = 'HVACDistributionPreconditioningCooling'
-    hpxml.hvac_distributions << hpxml.hvac_distributions[-1].dup
-    hpxml.hvac_distributions[-1].id = 'HVACDistributionPreconditioningHeating'
   elsif ['base-hvac-dse.xml',
          'base-dhw-indirect-dse.xml'].include? hpxml_file
     hpxml.hvac_distributions[0].distribution_system_type = HPXML::HVACDistributionTypeDSE

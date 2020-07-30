@@ -341,6 +341,7 @@ class EnergyPlusValidator
       ## [PreconditioningSystem]
       '/HPXML/Building/BuildingDetails/Systems/HVAC/HVACPlant/HeatingSystem[IsVentilationPreconditioningSystem="true"]' => {
         'HeatingCapacity[not(@scope)]' => zero, # Use scope attribute to describe at which level data is provided
+        'DistributionSystem' => zero,
       },
 
       ## [HeatingType=Resistance]
@@ -350,10 +351,16 @@ class EnergyPlusValidator
         'AnnualHeatingEfficiency[Units="Percent"]/Value' => one,
       },
 
-      ## [HeatingType=Furnace]
-      '/HPXML/Building/BuildingDetails/Systems/HVAC/HVACPlant/HeatingSystem[HeatingSystemType/Furnace]' => {
+      ## [HeatingType=Furnace and IsVentilationPreconditioningSystem="false"]
+      '/HPXML/Building/BuildingDetails/Systems/HVAC/HVACPlant/HeatingSystem[HeatingSystemType/Furnace and IsVentilationPreconditioningSystem="false"]' => {
         '../../HVACDistribution[DistributionSystemType/AirDistribution | DistributionSystemType[Other="DSE"]]' => one_or_more, # See [HVACDistribution]
         'DistributionSystem' => one,
+        'HeatingSystemFuel[text()="natural gas" or text()="fuel oil" or text()="fuel oil 1" or text()="fuel oil 2" or text()="fuel oil 4" or text()="fuel oil 5/6" or text()="diesel" or text()="propane" or text()="kerosene" or text()="electricity" or text()="wood" or text()="wood pellets"]' => one,
+        'AnnualHeatingEfficiency[Units="AFUE"]/Value' => one,
+      },
+
+      ## [HeatingType=Furnace and IsVentilationPreconditioningSystem="true"]
+      '/HPXML/Building/BuildingDetails/Systems/HVAC/HVACPlant/HeatingSystem[HeatingSystemType/Furnace and IsVentilationPreconditioningSystem="true"]' => {
         'HeatingSystemFuel[text()="natural gas" or text()="fuel oil" or text()="fuel oil 1" or text()="fuel oil 2" or text()="fuel oil 4" or text()="fuel oil 5/6" or text()="diesel" or text()="propane" or text()="kerosene" or text()="electricity" or text()="wood" or text()="wood pellets"]' => one,
         'AnnualHeatingEfficiency[Units="AFUE"]/Value' => one,
       },
@@ -372,10 +379,16 @@ class EnergyPlusValidator
         'AnnualHeatingEfficiency[Units="AFUE"]/Value' => one,
       },
 
-      ## [HeatingType=Boiler]
-      '/HPXML/Building/BuildingDetails/Systems/HVAC/HVACPlant/HeatingSystem[HeatingSystemType/Boiler]' => {
+      ## [HeatingType=Boiler and IsVentilationPreconditioningSystem="false"]
+      '/HPXML/Building/BuildingDetails/Systems/HVAC/HVACPlant/HeatingSystem[HeatingSystemType/Boiler and IsVentilationPreconditioningSystem="false"]' => {
         '../../HVACDistribution[DistributionSystemType/HydronicDistribution | DistributionSystemType[Other="DSE"]]' => one_or_more, # See [HVACDistribution]
         'DistributionSystem' => one,
+        'HeatingSystemFuel[text()="natural gas" or text()="fuel oil" or text()="fuel oil 1" or text()="fuel oil 2" or text()="fuel oil 4" or text()="fuel oil 5/6" or text()="diesel" or text()="propane" or text()="kerosene" or text()="coal" or text()="coke" or text()="bituminous coal" or text()="anthracite coal" or text()="electricity" or text()="wood" or text()="wood pellets"]' => one,
+        'AnnualHeatingEfficiency[Units="AFUE"]/Value' => one,
+      },
+
+      ## [HeatingType=Boiler and IsVentilationPreconditioningSystem="true"]
+      '/HPXML/Building/BuildingDetails/Systems/HVAC/HVACPlant/HeatingSystem[HeatingSystemType/Boiler and IsVentilationPreconditioningSystem="true"]' => {
         'HeatingSystemFuel[text()="natural gas" or text()="fuel oil" or text()="fuel oil 1" or text()="fuel oil 2" or text()="fuel oil 4" or text()="fuel oil 5/6" or text()="diesel" or text()="propane" or text()="kerosene" or text()="coal" or text()="coke" or text()="bituminous coal" or text()="anthracite coal" or text()="electricity" or text()="wood" or text()="wood pellets"]' => one,
         'AnnualHeatingEfficiency[Units="AFUE"]/Value' => one,
       },
@@ -421,12 +434,21 @@ class EnergyPlusValidator
       ## [PreconditioningSystem]
       '/HPXML/Building/BuildingDetails/Systems/HVAC/HVACPlant/CoolingSystem[IsVentilationPreconditioningSystem="true"]' => {
         'CoolingCapacity[not(@scope)]' => zero, # Use scope attribute to describe at which level data is provided
+        'DistributionSystem' => zero,
       },
 
-      ## [CoolingType=CentralAC]
-      '/HPXML/Building/BuildingDetails/Systems/HVAC/HVACPlant/CoolingSystem[CoolingSystemType="central air conditioner"]' => {
+      ## [CoolingType=CentralAC and IsVentilationPreconditioningSystem="false"]
+      '/HPXML/Building/BuildingDetails/Systems/HVAC/HVACPlant/CoolingSystem[CoolingSystemType="central air conditioner" and IsVentilationPreconditioningSystem="false"]' => {
         '../../HVACDistribution[DistributionSystemType/AirDistribution | DistributionSystemType[Other="DSE"]]' => one_or_more, # See [HVACDistribution]
         'DistributionSystem' => one,
+        'CoolingCapacity' => zero_or_one,
+        '[not(CompressorType)] | CompressorType[text()="single stage" or text()="two stage" or text()="variable speed"]' => one,
+        'AnnualCoolingEfficiency[Units="SEER"]/Value' => one,
+        'SensibleHeatFraction' => zero_or_one,
+      },
+
+      ## [CoolingType=CentralAC  and IsVentilationPreconditioningSystem="true"]
+      '/HPXML/Building/BuildingDetails/Systems/HVAC/HVACPlant/CoolingSystem[CoolingSystemType="central air conditioner" and IsVentilationPreconditioningSystem="true"]' => {
         'CoolingCapacity' => zero_or_one,
         '[not(CompressorType)] | CompressorType[text()="single stage" or text()="two stage" or text()="variable speed"]' => one,
         'AnnualCoolingEfficiency[Units="SEER"]/Value' => one,
@@ -441,17 +463,30 @@ class EnergyPlusValidator
         'SensibleHeatFraction' => zero_or_one,
       },
 
-      ## [CoolingType=EvapCooler]
-      '/HPXML/Building/BuildingDetails/Systems/HVAC/HVACPlant/CoolingSystem[CoolingSystemType="evaporative cooler"]' => {
+      ## [CoolingType=EvapCooler and IsVentilationPreconditioningSystem="false"]
+      '/HPXML/Building/BuildingDetails/Systems/HVAC/HVACPlant/CoolingSystem[CoolingSystemType="evaporative cooler" and IsVentilationPreconditioningSystem="false"]' => {
         '../../HVACDistribution[DistributionSystemType/AirDistribution | DistributionSystemType[Other="DSE"]]' => zero_or_more, # See [HVACDistribution]
         'DistributionSystem' => zero_or_one,
         'CoolingCapacity' => zero,
       },
 
-      ## [CoolingType=MiniSplitAC]
-      '/HPXML/Building/BuildingDetails/Systems/HVAC/HVACPlant/CoolingSystem[CoolingSystemType="mini-split"]' => {
+      ## [CoolingType=EvapCooler and IsVentilationPreconditioningSystem="true"]
+      '/HPXML/Building/BuildingDetails/Systems/HVAC/HVACPlant/CoolingSystem[CoolingSystemType="evaporative cooler" and IsVentilationPreconditioningSystem="true"]' => {
+        'CoolingCapacity' => zero,
+      },
+
+      ## [CoolingType=MiniSplitAC and IsVentilationPreconditioningSystem="false"]
+      '/HPXML/Building/BuildingDetails/Systems/HVAC/HVACPlant/CoolingSystem[CoolingSystemType="mini-split" and IsVentilationPreconditioningSystem="false"]' => {
         '../../HVACDistribution[DistributionSystemType/AirDistribution | DistributionSystemType[Other="DSE"]]' => zero_or_more, # See [HVACDistribution]
         'DistributionSystem' => zero_or_one,
+        'CoolingCapacity' => zero_or_one,
+        '[not(CompressorType)] | CompressorType[text()="single stage" or text()="two stage" or text()="variable speed"]' => one,
+        'AnnualCoolingEfficiency[Units="SEER"]/Value' => one,
+        'SensibleHeatFraction' => zero_or_one,
+      },
+
+      ## [CoolingType=MiniSplitAC and IsVentilationPreconditioningSystem="true"]
+      '/HPXML/Building/BuildingDetails/Systems/HVAC/HVACPlant/CoolingSystem[CoolingSystemType="mini-split" and IsVentilationPreconditioningSystem="true"]' => {
         'CoolingCapacity' => zero_or_one,
         '[not(CompressorType)] | CompressorType[text()="single stage" or text()="two stage" or text()="variable speed"]' => one,
         'AnnualCoolingEfficiency[Units="SEER"]/Value' => one,
@@ -478,10 +513,11 @@ class EnergyPlusValidator
         'CoolingCapacity[not(@scope)]' => zero, # Use scope attribute to describe at which level data is provided
         'HeatingCapacity[not(@scope)]' => zero, # Use scope attribute to describe at which level data is provided
         'HeatingCapacity17F[not(@scope)]' => zero, # Use scope attribute to describe at which level data is provided
+        'DistributionSystem' => zero,
       },
 
-      ## [HeatPumpType=ASHP]
-      '/HPXML/Building/BuildingDetails/Systems/HVAC/HVACPlant/HeatPump[HeatPumpType="air-to-air"]' => {
+      ## [HeatPumpType=ASHP and IsVentilationPreconditioningSystem="false"]
+      '/HPXML/Building/BuildingDetails/Systems/HVAC/HVACPlant/HeatPump[HeatPumpType="air-to-air" and IsVentilationPreconditioningSystem="false"]' => {
         '../../HVACDistribution[DistributionSystemType/AirDistribution | DistributionSystemType[Other="DSE"]]' => one_or_more, # See [HVACDistribution]
         'DistributionSystem' => one,
         '[not(CompressorType)] | CompressorType[text()="single stage" or text()="two stage" or text()="variable speed"]' => one,
@@ -490,8 +526,16 @@ class EnergyPlusValidator
         'HeatingCapacity17F' => zero_or_one
       },
 
-      ## [HeatPumpType=MSHP]
-      '/HPXML/Building/BuildingDetails/Systems/HVAC/HVACPlant/HeatPump[HeatPumpType="mini-split"]' => {
+      ## [HeatPumpType=ASHP and IsVentilationPreconditioningSystem="true"]
+      '/HPXML/Building/BuildingDetails/Systems/HVAC/HVACPlant/HeatPump[HeatPumpType="air-to-air" and IsVentilationPreconditioningSystem="true"]' => {
+        '[not(CompressorType)] | CompressorType[text()="single stage" or text()="two stage" or text()="variable speed"]' => one,
+        'AnnualCoolingEfficiency[Units="SEER"]/Value' => one,
+        'AnnualHeatingEfficiency[Units="HSPF"]/Value' => one,
+        'HeatingCapacity17F' => zero_or_one
+      },
+
+      ## [HeatPumpType=MSHP and IsVentilationPreconditioningSystem="false"]
+      '/HPXML/Building/BuildingDetails/Systems/HVAC/HVACPlant/HeatPump[HeatPumpType="mini-split" and IsVentilationPreconditioningSystem="false"]' => {
         '../../HVACDistribution[DistributionSystemType/AirDistribution | DistributionSystemType[Other="DSE"]]' => zero_or_more, # See [HVACDistribution]
         'DistributionSystem' => zero_or_one,
         'AnnualCoolingEfficiency[Units="SEER"]/Value' => one,
@@ -499,10 +543,24 @@ class EnergyPlusValidator
         'HeatingCapacity17F' => zero_or_one
       },
 
-      ## [HeatPumpType=GSHP]
-      '/HPXML/Building/BuildingDetails/Systems/HVAC/HVACPlant/HeatPump[HeatPumpType="ground-to-air"]' => {
+      ## [HeatPumpType=MSHP and IsVentilationPreconditioningSystem="true"]
+      '/HPXML/Building/BuildingDetails/Systems/HVAC/HVACPlant/HeatPump[HeatPumpType="mini-split" and IsVentilationPreconditioningSystem="true"]' => {
+        'AnnualCoolingEfficiency[Units="SEER"]/Value' => one,
+        'AnnualHeatingEfficiency[Units="HSPF"]/Value' => one,
+        'HeatingCapacity17F' => zero_or_one
+      },
+
+      ## [HeatPumpType=GSHP and IsVentilationPreconditioningSystem="false"]
+      '/HPXML/Building/BuildingDetails/Systems/HVAC/HVACPlant/HeatPump[HeatPumpType="ground-to-air" and IsVentilationPreconditioningSystem="false"]' => {
         '../../HVACDistribution[DistributionSystemType/AirDistribution | DistributionSystemType[Other="DSE"]]' => one_or_more, # See [HVACDistribution]
         'DistributionSystem' => one,
+        'BackupHeatingSwitchoverTemperature' => zero,
+        'AnnualCoolingEfficiency[Units="EER"]/Value' => one,
+        'AnnualHeatingEfficiency[Units="COP"]/Value' => one,
+      },
+
+      ## [HeatPumpType=GSHP and IsVentilationPreconditioningSystem="true"]
+      '/HPXML/Building/BuildingDetails/Systems/HVAC/HVACPlant/HeatPump[HeatPumpType="ground-to-air" and IsVentilationPreconditioningSystem="true"]' => {
         'BackupHeatingSwitchoverTemperature' => zero,
         'AnnualCoolingEfficiency[Units="EER"]/Value' => one,
         'AnnualHeatingEfficiency[Units="COP"]/Value' => one,
