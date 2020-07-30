@@ -3,9 +3,9 @@
 
 require 'openstudio'
 require 'oga'
+require 'csv'
 
 require_relative 'resources/geometry'
-require_relative 'resources/schedules'
 require_relative 'resources/constants'
 require_relative 'resources/location'
 

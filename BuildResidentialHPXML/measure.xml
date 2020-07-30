@@ -3,8 +3,8 @@
   <schema_version>3.0</schema_version>
   <name>build_residential_hpxml</name>
   <uid>a13a8983-2b01-4930-8af2-42030b6e4233</uid>
-  <version_id>193c20e1-3db5-4954-a4bd-f0f88f24feb4</version_id>
-  <version_modified>20200730T161032Z</version_modified>
+  <version_id>294d103b-3c9f-401e-9b8d-dff2f196544f</version_id>
+  <version_modified>20200730T191032Z</version_modified>
   <xml_checksum>2C38F48B</xml_checksum>
   <class_name>BuildResidentialHPXML</class_name>
   <display_name>HPXML Builder</display_name>
@@ -5311,69 +5311,10 @@
       <checksum>BFC47683</checksum>
     </file>
     <file>
-      <filename>schedules.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>71F92DF4</checksum>
-    </file>
-    <file>
       <filename>constants.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
       <checksum>1DD2A8EE</checksum>
-    </file>
-    <file>
-      <filename>build_residential_hpxml_test.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>test</usage_type>
-      <checksum>053ED291</checksum>
-    </file>
-    <file>
-      <version>
-        <software_program>OpenStudio</software_program>
-        <identifier>2.9.0</identifier>
-        <min_compatible>2.9.0</min_compatible>
-      </version>
-      <filename>measure.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>script</usage_type>
-      <checksum>2EB2E1CB</checksum>
-    </file>
-    <file>
-      <filename>base-lighting-ceiling-fans.osw</filename>
-      <filetype>osw</filetype>
-      <usage_type>test</usage_type>
-      <checksum>2E913BCF</checksum>
-    </file>
-    <file>
-      <filename>base-lighting-detailed.osw</filename>
-      <filetype>osw</filetype>
-      <usage_type>test</usage_type>
-      <checksum>E0A42C84</checksum>
-    </file>
-    <file>
-      <filename>base-mechvent-whole-house-fan.osw</filename>
-      <filetype>osw</filetype>
-      <usage_type>test</usage_type>
-      <checksum>A85A39D7</checksum>
-    </file>
-    <file>
-      <filename>base-misc-loads-large-uncommon.osw</filename>
-      <filetype>osw</filetype>
-      <usage_type>test</usage_type>
-      <checksum>7596DC7D</checksum>
-    </file>
-    <file>
-      <filename>base-misc-loads-large-uncommon2.osw</filename>
-      <filetype>osw</filetype>
-      <usage_type>test</usage_type>
-      <checksum>F09ACE0A</checksum>
-    </file>
-    <file>
-      <filename>base-misc-loads-usage-multiplier.osw</filename>
-      <filetype>osw</filetype>
-      <usage_type>test</usage_type>
-      <checksum>E949EB06</checksum>
     </file>
     <file>
       <filename>base-misc-defaults.osw</filename>
@@ -6330,6 +6271,59 @@
       <checksum>88BED38F</checksum>
     </file>
     <file>
+      <filename>base-lighting-ceiling-fans.osw</filename>
+      <filetype>osw</filetype>
+      <usage_type>test</usage_type>
+      <checksum>2E913BCF</checksum>
+    </file>
+    <file>
+      <filename>base-lighting-detailed.osw</filename>
+      <filetype>osw</filetype>
+      <usage_type>test</usage_type>
+      <checksum>0F52B3C9</checksum>
+    </file>
+    <file>
+      <filename>base-mechvent-whole-house-fan.osw</filename>
+      <filetype>osw</filetype>
+      <usage_type>test</usage_type>
+      <checksum>A85A39D7</checksum>
+    </file>
+    <file>
+      <filename>base-misc-loads-large-uncommon.osw</filename>
+      <filetype>osw</filetype>
+      <usage_type>test</usage_type>
+      <checksum>7596DC7D</checksum>
+    </file>
+    <file>
+      <filename>base-misc-loads-large-uncommon2.osw</filename>
+      <filetype>osw</filetype>
+      <usage_type>test</usage_type>
+      <checksum>F09ACE0A</checksum>
+    </file>
+    <file>
+      <filename>base-misc-loads-usage-multiplier.osw</filename>
+      <filetype>osw</filetype>
+      <usage_type>test</usage_type>
+      <checksum>E949EB06</checksum>
+    </file>
+    <file>
+      <filename>build_residential_hpxml_test.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>test</usage_type>
+      <checksum>053ED291</checksum>
+    </file>
+    <file>
+      <version>
+        <software_program>OpenStudio</software_program>
+        <identifier>2.9.0</identifier>
+        <min_compatible>2.9.0</min_compatible>
+      </version>
+      <filename>measure.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>script</usage_type>
+      <checksum>EB6B7CC0</checksum>
+    </file>
+    <file>
       <filename>base-schedules-average.osw</filename>
       <filetype>osw</filetype>
       <usage_type>test</usage_type>
@@ -6346,6 +6340,12 @@
       <filetype>osw</filetype>
       <usage_type>test</usage_type>
       <checksum>CF798D3C</checksum>
+    </file>
+    <file>
+      <filename>schedules.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>71F92DF4</checksum>
     </file>
   </files>
 </measure>
