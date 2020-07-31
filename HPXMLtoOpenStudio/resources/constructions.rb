@@ -304,7 +304,7 @@ class Constructions
     wall.insulation_continuous_r_value = rigid_r
   end
 
-  def self.apply_sip_wall(runner, model, surfaces, wall, constr_name, 
+  def self.apply_sip_wall(runner, model, surfaces, wall, constr_name,
                           sip_r:, sip_thick_in:, framing_factor:, sheathing_thick_in:,
                           inside_drywall_thick_in:, osb_thick_in:, rigid_r:,
                           mat_ext_finish:, inside_film:, outside_film:)
