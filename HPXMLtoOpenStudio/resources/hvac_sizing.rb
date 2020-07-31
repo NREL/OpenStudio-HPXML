@@ -2437,7 +2437,11 @@ class HVACSizing
       wall_type = wall.wall_type
     end
 
-    wall_ufactor = 1.0 / wall.insulation_assembly_r_value unless wall.insulation_assembly_r_value.nil?
+    if not wall.insulation_assembly_r_value.nil?
+      wall_ufactor = 1.0 / wall.insulation_assembly_r_value
+    else
+      wall_ufactor = wall.ufactor
+    end
 
     # The following correlations were estimated by analyzing MJ8 construction tables.
     if [HPXML::WallTypeWoodStud, HPXML::WallTypeSteelStud].include? wall_type

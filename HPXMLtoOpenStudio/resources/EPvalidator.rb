@@ -200,55 +200,131 @@ class EnergyPlusValidator
         'SystemIdentifier' => one, # Required by HPXML schema
         'ExteriorAdjacentTo[text()="outside" or text()="attic - vented" or text()="attic - unvented" or text()="basement - conditioned" or text()="basement - unconditioned" or text()="crawlspace - vented" or text()="crawlspace - unvented" or text()="garage" or text()="other housing unit" or text()="other heated space" or text()="other multifamily buffer space" or text()="other non-freezing space"]' => one,
         'InteriorAdjacentTo[text()="living space" or text()="attic - vented" or text()="attic - unvented" or text()="basement - conditioned" or text()="basement - unconditioned" or text()="crawlspace - vented" or text()="crawlspace - unvented" or text()="garage"]' => one,
-        'WallType[WoodStud | DoubleWoodStud | ConcreteMasonryUnit | StructurallyInsulatedPanel | InsulatedConcreteForms | SteelFrame | SolidConcrete | StructuralBrick | StrawBale | Stone | LogWall | Adobe]' => one, # See [DoubleWoodStud], [ConcreteMasonryUnit], [InsulatedConcreteForms]
+        'WallType[WoodStud | DoubleWoodStud | ConcreteMasonryUnit | StructurallyInsulatedPanel | InsulatedConcreteForms | SteelFrame | SolidConcrete | StructuralBrick | StrawBale | Stone | LogWall | Adobe]' => one,
         'Area' => one,
         'Azimuth' => zero_or_one,
         '[not(Siding)] | Siding[text()="wood siding" or text()="vinyl siding" or text()="stucco" or text()="fiber cement siding" or text()="brick veneer" or text()="aluminum siding"]' => one,
         'Color | SolarAbsorptance' => one_or_more,
         'Emittance' => one,
+        'extension/OrientedStrandBoard' => zero_or_one, # See [WallOrientedStrandBoard]
         'Insulation/SystemIdentifier' => one, # Required by HPXML schema
-        'Insulation/AssemblyEffectiveRValue | Insulation/Layer[InstallationType="cavity"]' => one, # See [WallCavityInsLayer]
+        'Insulation/AssemblyEffectiveRValue | Insulation/Layer' => one, # See [QuickFillWoodStud] or [QuickFillDoubleWoodStud] or [QuickFillConcreteMasonryUnit] or [QuickFillInsulatedConcreteForms] or [QuickFillStructurallyInsulatedPanel] or [QuickFillSteelFrame] or [QuickFillSolidConcrete] or [QuickFillStructuralBrick] or [QuickFillStrawBale] or [QuickFillStone] or [QuickFillLogWall] or [QuickFillAdobe]
       },
 
-      ## [DoubleWoodStud]
-      '/HPXML/Building/BuildingDetails/Enclosure/Walls/Wall[WallType/DoubleWoodStud]/Insulation/Layer[InstallationType="cavity"]' => {
+      ## [QuickFillWoodStud]
+      '/HPXML/Building/BuildingDetails/Enclosure/Walls/Wall[WallType/WoodStud]/Insulation/Layer' => {
+        '[InstallationType="cavity"]' => one, # See [WallCavityInsLayer]
+        '[InstallationType="continuous"]' => zero_or_one, # See [WallRigidInsLayer]
+        '../../Studs/Size[text()="2x2" or text()="2x3" or text()="2x4" or text()="2x6" or text()="2x8" or text()="2x10" or text()="2x12" or text()="2x14" or text()="2x16"]' => one,
+        '../../Studs/Spacing' => one,
+        '../../Studs/FramingFactor' => one,
+      },
+
+      ## [QuickFillDoubleWoodStud]
+      '/HPXML/Building/BuildingDetails/Enclosure/Walls/Wall[WallType/DoubleWoodStud]/Insulation/Layer' => {
+        '[InstallationType="cavity"]' => one, # See [WallCavityInsLayer]
+        '[InstallationType="continuous"]' => zero_or_one, # See [WallRigidInsLayer]
+        '../../Studs/Size[text()="2x2" or text()="2x3" or text()="2x4" or text()="2x6" or text()="2x8" or text()="2x10" or text()="2x12" or text()="2x14" or text()="2x16"]' => one,
+        '../../Studs/Spacing' => one,
+        '../../Studs/FramingFactor' => one,
         '../../WallType/DoubleWoodStud/Staggered' => one,
         '../../WallType/DoubleWoodStud/extension/GapDepth' => one,
       },
 
-      ## [ConcreteMasonryUnit]
-      '/HPXML/Building/BuildingDetails/Enclosure/Walls/Wall[WallType/ConcreteMasonryUnit]/Insulation/Layer[InstallationType="cavity"]' => {
+      ## [QuickFillConcreteMasonryUnit]
+      '/HPXML/Building/BuildingDetails/Enclosure/Walls/Wall[WallType/ConcreteMasonryUnit]/Insulation/Layer' => {
+        '[InstallationType="cavity"]' => one, # See [WallCavityInsLayer]
+        '[InstallationType="continuous"]' => zero_or_one, # See [WallRigidInsLayer]
+        '../../Studs/Size[text()="2x2" or text()="2x3" or text()="2x4" or text()="2x6" or text()="2x8" or text()="2x10" or text()="2x12" or text()="2x14" or text()="2x16"]' => one,
+        '../../Studs/Spacing' => one,
+        '../../Studs/FramingFactor' => one,
         '../../WallType/ConcreteMasonryUnit/extension/Thickness' => one, # inch
         '../../WallType/ConcreteMasonryUnit/extension/Conductivity' => one, # Btu/hr-ft-F
         '../../WallType/ConcreteMasonryUnit/extension/Density' => one, # lb/ft^3
       },
 
-      ## [InsulatedConcreteForms]
-      '/HPXML/Building/BuildingDetails/Enclosure/Walls/Wall[WallType/InsulatedConcreteForms]/Insulation/Layer[InstallationType="cavity"]' => {
+      ## [QuickFillInsulatedConcreteForms]
+      '/HPXML/Building/BuildingDetails/Enclosure/Walls/Wall[WallType/InsulatedConcreteForms]/Insulation/Layer' => {
+        '[InstallationType="continuous"]' => zero_or_one, # See [WallRigidInsLayer]
+        '../../Studs/FramingFactor' => one,
         '../../WallType/InsulatedConcreteForms/extension/NominalRValue' => one, # inch
         '../../WallType/InsulatedConcreteForms/extension/InsulationThickness' => one, # Btu/hr-ft-F
         '../../WallType/InsulatedConcreteForms/extension/ConcreteThickness' => one, # lb/ft^3
       },
 
-      ## [StructurallyInsulatedPanel]
-      '/HPXML/Building/BuildingDetails/Enclosure/Walls/Wall[WallType/StructurallyInsulatedPanel]/Insulation/Layer[InstallationType="cavity"]' => {
+      ## [QuickFillStructurallyInsulatedPanel]
+      '/HPXML/Building/BuildingDetails/Enclosure/Walls/Wall[WallType/StructurallyInsulatedPanel]/Insulation/Layer' => {
+        '[InstallationType="continuous"]' => zero_or_one, # See [WallRigidInsLayer]
+        '../../Studs/FramingFactor' => one,
         '../../WallType/StructurallyInsulatedPanel/extension/NominalRValue' => one, # inch
         '../../WallType/StructurallyInsulatedPanel/extension/Thickness' => one, # Btu/hr-ft-F
         '../../WallType/StructurallyInsulatedPanel/extension/SheathingThickness' => one, # lb/ft^3
       },
 
-      ## [WallCavityInsLayer]
-      '/HPXML/Building/BuildingDetails/Enclosure/Walls/Wall/Insulation/Layer[InstallationType="cavity"]' => {
+      ## [QuickFillSteelFrame]
+      '/HPXML/Building/BuildingDetails/Enclosure/Walls/Wall[WallType/SteelFrame]/Insulation/Layer' => {
+        '[InstallationType="cavity"]' => one, # See [WallCavityInsLayer]
         '[InstallationType="continuous"]' => zero_or_one, # See [WallRigidInsLayer]
-        'InsulationMaterial[Batt | LooseFill | Rigid | SprayFoam | Other]' => zero_or_one, # Required by HPXML schema
-        'NominalRValue' => one,
-        'Thickness' => one, # cavity insulation thickness in inches
-        '../InsulationGrade' => one, # cavity insulation installation grade; integer
         '../../Studs/Size[text()="2x2" or text()="2x3" or text()="2x4" or text()="2x6" or text()="2x8" or text()="2x10" or text()="2x12" or text()="2x14" or text()="2x16"]' => one,
         '../../Studs/Spacing' => one,
         '../../Studs/FramingFactor' => one,
-        '../../Studs/Material[text()="wood" or text()="metal"]' => one,
-        '../../extension/OrientedStrandBoard' => zero_or_one, # See [WallOrientedStrandBoard]
+        '../../WallType/SteelFrame/extension/CorrectionFactor' => one_or_more,
+      },
+
+      ## [QuickFillSolidConcrete]
+      '/HPXML/Building/BuildingDetails/Enclosure/Walls/Wall[WallType/SolidConcrete]/Insulation/Layer' => {
+        '../../WallType/SolidConcrete/extension/Thickness' => one_or_more,
+        '../../WallType/SolidConcrete/extension/Conductivity' => one_or_more,
+        '../../WallType/SolidConcrete/extension/Density' => one_or_more,
+        '../../WallType/SolidConcrete/extension/SpecificHeat' => one_or_more,
+      },
+
+      ## [QuickFillStructuralBrick]
+      '/HPXML/Building/BuildingDetails/Enclosure/Walls/Wall[WallType/StructuralBrick]/Insulation/Layer' => {
+        '../../WallType/StructuralBrick/extension/Thickness' => one_or_more,
+        '../../WallType/StructuralBrick/extension/Conductivity' => one_or_more,
+        '../../WallType/StructuralBrick/extension/Density' => one_or_more,
+        '../../WallType/StructuralBrick/extension/SpecificHeat' => one_or_more,
+      },
+
+      ## [QuickFillStrawBale]
+      '/HPXML/Building/BuildingDetails/Enclosure/Walls/Wall[WallType/StrawBale]/Insulation/Layer' => {
+        '../../WallType/StrawBale/extension/Thickness' => one_or_more,
+        '../../WallType/StrawBale/extension/Conductivity' => one_or_more,
+        '../../WallType/StrawBale/extension/Density' => one_or_more,
+        '../../WallType/StrawBale/extension/SpecificHeat' => one_or_more,
+      },
+
+      ## [QuickFillStone]
+      '/HPXML/Building/BuildingDetails/Enclosure/Walls/Wall[WallType/Stone]/Insulation/Layer' => {
+        '../../WallType/Stone/extension/Thickness' => one_or_more,
+        '../../WallType/Stone/extension/Conductivity' => one_or_more,
+        '../../WallType/Stone/extension/Density' => one_or_more,
+        '../../WallType/Stone/extension/SpecificHeat' => one_or_more,
+      },
+
+      ## [QuickFillLogWall]
+      '/HPXML/Building/BuildingDetails/Enclosure/Walls/Wall[WallType/LogWall]/Insulation/Layer' => {
+        '../../WallType/LogWall/extension/Thickness' => one_or_more,
+        '../../WallType/LogWall/extension/Conductivity' => one_or_more,
+        '../../WallType/LogWall/extension/Density' => one_or_more,
+        '../../WallType/LogWall/extension/SpecificHeat' => one_or_more,
+      },
+
+      ## [QuickFillAdobe]
+      '/HPXML/Building/BuildingDetails/Enclosure/Walls/Wall[WallType/Adobe]/Insulation/Layer' => {
+        '../../WallType/Adobe/extension/Thickness' => one_or_more,
+        '../../WallType/Adobe/extension/Conductivity' => one_or_more,
+        '../../WallType/Adobe/extension/Density' => one_or_more,
+        '../../WallType/Adobe/extension/SpecificHeat' => one_or_more,
+      },
+
+      ## [WallCavityInsLayer]
+      '/HPXML/Building/BuildingDetails/Enclosure/Walls/Wall/Insulation/Layer[InstallationType="cavity"]' => {
+        'InsulationMaterial[Batt | LooseFill | Rigid | SprayFoam | Other]' => zero_or_one, # Required by HPXML schema
+        'NominalRValue' => one,
+        'Thickness' => one, # cavity insulation thickness [inch]
+        '../InsulationGrade' => one, # cavity insulation installation grade; integer
       },
 
       ## [WallRigidInsLayer]
@@ -272,6 +348,7 @@ class EnergyPlusValidator
         '[not(Siding)] | Siding[text()="wood siding" or text()="vinyl siding" or text()="stucco" or text()="fiber cement siding" or text()="brick veneer" or text()="aluminum siding"]' => one,
         'Color | SolarAbsorptance' => one_or_more,
         'Emittance' => one,
+        'extension/OrientedStrandBoard' => zero_or_one, # See [RimJoistOrientedStrandBoard]
         'Insulation/SystemIdentifier' => one, # Required by HPXML schema
         'Insulation/AssemblyEffectiveRValue | Insulation/Layer[InstallationType="cavity"]' => one, # See [RimJoistCavityInsLayer]
       },
@@ -285,8 +362,6 @@ class EnergyPlusValidator
         '../../FloorJoists/Size[text()="2x2" or text()="2x3" or text()="2x4" or text()="2x6" or text()="2x8" or text()="2x10" or text()="2x12" or text()="2x14" or text()="2x16"]' => one,
         '../../FloorJoists/Spacing' => one,
         '../../FloorJoists/FramingFactor' => one,
-        '../../FloorJoists/Material[text()="wood" or text()="metal"]' => one,
-        '../../extension/OrientedStrandBoard' => zero_or_one, # See [RimJoistOrientedStrandBoard]
       },
 
       ## [RimJoistRigidInsLayer]

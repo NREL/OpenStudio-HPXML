@@ -134,6 +134,8 @@ class HPXML < Object
   HVACTypeRoomAirConditioner = 'room air conditioner'
   HVACTypeStove = 'Stove'
   HVACTypeWallFurnace = 'WallFurnace'
+  InputModeAssemblyRValue = 'AssemblyRValue'
+  InputModeQuickFill = 'QuickFill'
   InsulationMaterialBatt = 'Batt'
   InsulationMaterialLooseFill = 'LooseFill'
   InsulationMaterialRigid = 'Rigid'
@@ -1501,7 +1503,7 @@ class HPXML < Object
              :solar_absorptance, :emittance, :insulation_id, :insulation_assembly_r_value,
              :ufactor, :insulation_assembly_r_value, :insulation_cavity_r_value, :insulation_continuous_r_value,
              :insulation_grade, :insulation_cavity_material, :insulation_continuous_material,
-             :joist_size, :joist_spacing, :joist_material, :framing_factor, :osb_thickness]
+             :joist_size, :joist_spacing, :framing_factor, :osb_thickness]
     attr_accessor(*ATTRS)
 
     def is_exterior
@@ -1566,7 +1568,6 @@ class HPXML < Object
         XMLHelper.add_element(floor_joists, 'Size', @joist_size) unless @joist_size.nil?
         XMLHelper.add_element(floor_joists, 'Spacing', to_float(@joist_spacing)) unless @joist_spacing.nil?
         XMLHelper.add_element(floor_joists, 'FramingFactor', to_float(@framing_factor)) unless @framing_factor.nil?
-        XMLHelper.add_element(floor_joists, 'Material', @joist_material) unless @joist_material.nil?
       end
       if not @insulation_continuous_r_value.nil?
         layer = XMLHelper.add_element(insulation, 'Layer')
@@ -1604,7 +1605,6 @@ class HPXML < Object
         @joist_size = XMLHelper.get_value(rim_joist, 'FloorJoists/Size')
         @joist_spacing = to_float_or_nil(XMLHelper.get_value(rim_joist, 'FloorJoists/Spacing'))
         @framing_factor = to_float_or_nil(XMLHelper.get_value(rim_joist, 'FloorJoists/FramingFactor'))
-        @joist_material = XMLHelper.get_value(rim_joist, 'FloorJoists/Material')
         @osb_thickness = to_float_or_nil(XMLHelper.get_value(rim_joist, 'extension/OrientedStrandBoard/Thickness'))
       end
     end
@@ -1625,15 +1625,21 @@ class HPXML < Object
   end
 
   class Wall < BaseElement
-    ATTRS = [:id, :exterior_adjacent_to, :interior_adjacent_to, :wall_type, :optimum_value_engineering,
+    ATTRS = [:id, :exterior_adjacent_to, :interior_adjacent_to, :wall_type, :optimum_value_engineering, :wall_quick_fill,
              :area, :orientation, :azimuth, :siding, :color, :solar_absorptance, :emittance, :insulation_id,
              :ufactor, :insulation_assembly_r_value, :insulation_cavity_r_value, :insulation_continuous_r_value,
              :insulation_cavity_thickness, :insulation_grade, :insulation_cavity_material, :insulation_continuous_material,
-             :stud_size, :stud_spacing, :stud_material, :framing_factor, :osb_thickness,
+             :stud_size, :stud_spacing, :framing_factor, :osb_thickness, :steel_frame_correction_factor,
              :double_stud_is_staggered, :double_stud_gap_depth,
              :cmu_thickness, :cmu_conductivity, :cmu_density,
              :icf_r_value, :icf_ins_thickness, :icf_concrete_thickness,
-             :sip_r_value, :sip_thickness, :sip_sheathing_thickness]
+             :sip_r_value, :sip_thickness, :sip_sheathing_thickness,
+             :conc_thickness_list, :conc_cond_list, :conc_den_list, :conc_spec_heat_list,
+             :brick_thickness_list, :brick_cond_list, :brick_den_list, :brick_spec_heat_list,
+             :strawbale_thickness_list, :strawbale_cond_list, :strawbale_den_list, :strawbale_spec_heat_list,
+             :stone_thickness_list, :stone_cond_list, :stone_den_list, :stone_spec_heat_list,
+             :logwall_thickness_list, :logwall_cond_list, :logwall_den_list, :logwall_spec_heat_list,
+             :adobe_thickness_list, :adobe_cond_list, :adobe_den_list, :adobe_spec_heat_list]
     attr_accessor(*ATTRS)
 
     def windows
@@ -1705,38 +1711,123 @@ class HPXML < Object
         wall_type_e = XMLHelper.add_element(wall, 'WallType')
         XMLHelper.add_element(wall_type_e, @wall_type)
       end
-      if (not @insulation_cavity_r_value.nil?) && @wall_type == HPXML::WallTypeDoubleWoodStud
-        double_stud_wall = XMLHelper.create_elements_as_needed(wall, ['WallType', 'DoubleWoodStud'])
-        XMLHelper.add_element(double_stud_wall, 'Staggered', @double_stud_is_staggered) unless @double_stud_is_staggered.nil?
-        extension = XMLHelper.add_element(double_stud_wall, 'extension')
-        XMLHelper.add_element(extension, 'GapDepth', @double_stud_gap_depth) unless @double_stud_gap_depth.nil?
-      end
-      if (not @insulation_cavity_r_value.nil?) && @wall_type == HPXML::WallTypeCMU
-        cmu_wall_extension = XMLHelper.create_elements_as_needed(wall, ['WallType', 'ConcreteMasonryUnit', 'extension'])
-        XMLHelper.add_element(cmu_wall_extension, 'Thickness', @cmu_thickness) unless @cmu_thickness.nil?
-        XMLHelper.add_element(cmu_wall_extension, 'Conductivity', @cmu_conductivity) unless @cmu_conductivity.nil?
-        XMLHelper.add_element(cmu_wall_extension, 'Density', @cmu_density) unless @cmu_density.nil?
-      end
-      if (not @insulation_cavity_r_value.nil?) && @wall_type == HPXML::WallTypeICF
-        icf_wall_extension = XMLHelper.create_elements_as_needed(wall, ['WallType', 'InsulatedConcreteForms', 'extension'])
-        XMLHelper.add_element(icf_wall_extension, 'NominalRValue', @icf_r_value) unless @icf_r_value.nil?
-        XMLHelper.add_element(icf_wall_extension, 'InsulationThickness', @icf_ins_thickness) unless @icf_ins_thickness.nil?
-        XMLHelper.add_element(icf_wall_extension, 'ConcreteThickness', @icf_concrete_thickness) unless @icf_concrete_thickness.nil?
-      end
-      if (not @insulation_cavity_r_value.nil?) && @wall_type == HPXML::WallTypeSIP
-        sip_wall_extension = XMLHelper.create_elements_as_needed(wall, ['WallType', 'StructurallyInsulatedPanel', 'extension'])
-        XMLHelper.add_element(sip_wall_extension, 'NominalRValue', @sip_r_value) unless @sip_r_value.nil?
-        XMLHelper.add_element(sip_wall_extension, 'Thickness', @sip_thickness) unless @sip_thickness.nil?
-        XMLHelper.add_element(sip_wall_extension, 'SheathingThickness', @sip_sheathing_thickness) unless @sip_sheathing_thickness.nil?
+      if @wall_quick_fill
+        if @wall_type == HPXML::WallTypeDoubleWoodStud
+          double_stud_wall = XMLHelper.create_elements_as_needed(wall, ['WallType', 'DoubleWoodStud'])
+          XMLHelper.add_element(double_stud_wall, 'Staggered', @double_stud_is_staggered) unless @double_stud_is_staggered.nil?
+          extension = XMLHelper.add_element(double_stud_wall, 'extension')
+          XMLHelper.add_element(extension, 'GapDepth', @double_stud_gap_depth) unless @double_stud_gap_depth.nil?
+        elsif @wall_type == HPXML::WallTypeSteelStud
+          steel_frame_wall_extension = XMLHelper.create_elements_as_needed(wall, ['WallType', 'SteelFrame', 'extension'])
+          XMLHelper.add_element(steel_frame_wall_extension, 'CorrectionFactor', @steel_frame_correction_factor) unless @steel_frame_correction_factor.nil?
+        elsif @wall_type == HPXML::WallTypeCMU
+          cmu_wall_extension = XMLHelper.create_elements_as_needed(wall, ['WallType', 'ConcreteMasonryUnit', 'extension'])
+          XMLHelper.add_element(cmu_wall_extension, 'Thickness', @cmu_thickness) unless @cmu_thickness.nil?
+          XMLHelper.add_element(cmu_wall_extension, 'Conductivity', @cmu_conductivity) unless @cmu_conductivity.nil?
+          XMLHelper.add_element(cmu_wall_extension, 'Density', @cmu_density) unless @cmu_density.nil?
+        elsif @wall_type == HPXML::WallTypeICF
+          icf_wall_extension = XMLHelper.create_elements_as_needed(wall, ['WallType', 'InsulatedConcreteForms', 'extension'])
+          XMLHelper.add_element(icf_wall_extension, 'NominalRValue', @icf_r_value) unless @icf_r_value.nil?
+          XMLHelper.add_element(icf_wall_extension, 'InsulationThickness', @icf_ins_thickness) unless @icf_ins_thickness.nil?
+          XMLHelper.add_element(icf_wall_extension, 'ConcreteThickness', @icf_concrete_thickness) unless @icf_concrete_thickness.nil?
+        elsif @wall_type == HPXML::WallTypeSIP
+          sip_wall_extension = XMLHelper.create_elements_as_needed(wall, ['WallType', 'StructurallyInsulatedPanel', 'extension'])
+          XMLHelper.add_element(sip_wall_extension, 'NominalRValue', @sip_r_value) unless @sip_r_value.nil?
+          XMLHelper.add_element(sip_wall_extension, 'Thickness', @sip_thickness) unless @sip_thickness.nil?
+          XMLHelper.add_element(sip_wall_extension, 'SheathingThickness', @sip_sheathing_thickness) unless @sip_sheathing_thickness.nil?
+        elsif @wall_type == HPXML::WallTypeConcrete
+          conc_wall_extension = XMLHelper.create_elements_as_needed(wall, ['WallType', 'SolidConcrete', 'extension'])
+          @conc_thickness_list.each do |conc_thickness|
+            XMLHelper.add_element(conc_wall_extension, 'Thickness', conc_thickness)
+          end
+          @conc_cond_list.each do |conc_cond|
+            XMLHelper.add_element(conc_wall_extension, 'Conductivity', conc_cond)
+          end
+          @conc_den_list.each do |conc_den|
+            XMLHelper.add_element(conc_wall_extension, 'Density', conc_den)
+          end
+          @conc_spec_heat_list.each do |conc_spec_heat|
+            XMLHelper.add_element(conc_wall_extension, 'SpecificHeat', conc_spec_heat)
+          end
+        elsif @wall_type == HPXML::WallTypeBrick
+          brick_wall_extension = XMLHelper.create_elements_as_needed(wall, ['WallType', 'StructuralBrick', 'extension'])
+          @brick_thickness_list.each do |brick_thickness|
+            XMLHelper.add_element(brick_wall_extension, 'Thickness', brick_thickness)
+          end
+          @brick_cond_list.each do |brick_cond|
+            XMLHelper.add_element(brick_wall_extension, 'Conductivity', brick_cond)
+          end
+          @brick_den_list.each do |brick_den|
+            XMLHelper.add_element(brick_wall_extension, 'Density', brick_den)
+          end
+          @brick_spec_heat_list.each do |brick_spec_heat|
+            XMLHelper.add_element(brick_wall_extension, 'SpecificHeat', brick_spec_heat)
+          end
+        elsif @wall_type == HPXML::WallTypeStrawBale
+          strawbale_wall_extension = XMLHelper.create_elements_as_needed(wall, ['WallType', 'StrawBale', 'extension'])
+          @strawbale_thickness_list.each do |strawbale_thickness|
+            XMLHelper.add_element(strawbale_wall_extension, 'Thickness', strawbale_thickness)
+          end
+          @strawbale_cond_list.each do |strawbale_cond|
+            XMLHelper.add_element(strawbale_wall_extension, 'Conductivity', strawbale_cond)
+          end
+          @strawbale_den_list.each do |strawbale_den|
+            XMLHelper.add_element(strawbale_wall_extension, 'Density', strawbale_den)
+          end
+          @strawbale_spec_heat_list.each do |strawbale_spec_heat|
+            XMLHelper.add_element(strawbale_wall_extension, 'SpecificHeat', strawbale_spec_heat)
+          end
+        elsif @wall_type == HPXML::WallTypeStone
+          stone_wall_extension = XMLHelper.create_elements_as_needed(wall, ['WallType', 'Stone', 'extension'])
+          @stone_thickness_list.each do |stone_thickness|
+            XMLHelper.add_element(stone_wall_extension, 'Thickness', stone_thickness)
+          end
+          @stone_cond_list.each do |stone_cond|
+            XMLHelper.add_element(stone_wall_extension, 'Conductivity', stone_cond)
+          end
+          @stone_den_list.each do |stone_den|
+            XMLHelper.add_element(stone_wall_extension, 'Density', stone_den)
+          end
+          @stone_spec_heat_list.each do |stone_spec_heat|
+            XMLHelper.add_element(stone_wall_extension, 'SpecificHeat', stone_spec_heat)
+          end
+        elsif @wall_type == HPXML::WallTypeLog
+          logwall_wall_extension = XMLHelper.create_elements_as_needed(wall, ['WallType', 'LogWall', 'extension'])
+          @logwall_thickness_list.each do |logwall_thickness|
+            XMLHelper.add_element(logwall_wall_extension, 'Thickness', logwall_thickness)
+          end
+          @logwall_cond_list.each do |logwall_cond|
+            XMLHelper.add_element(logwall_wall_extension, 'Conductivity', logwall_cond)
+          end
+          @logwall_den_list.each do |logwall_den|
+            XMLHelper.add_element(logwall_wall_extension, 'Density', logwall_den)
+          end
+          @logwall_spec_heat_list.each do |logwall_spec_heat|
+            XMLHelper.add_element(logwall_wall_extension, 'SpecificHeat', logwall_spec_heat)
+          end
+        elsif @wall_type == HPXML::WallTypeAdobe
+          adobe_wall_extension = XMLHelper.create_elements_as_needed(wall, ['WallType', 'Adobe', 'extension'])
+          @adobe_thickness_list.each do |adobe_thickness|
+            XMLHelper.add_element(adobe_wall_extension, 'Thickness', adobe_thickness)
+          end
+          @adobe_cond_list.each do |adobe_cond|
+            XMLHelper.add_element(adobe_wall_extension, 'Conductivity', adobe_cond)
+          end
+          @adobe_den_list.each do |adobe_den|
+            XMLHelper.add_element(adobe_wall_extension, 'Density', adobe_den)
+          end
+          @adobe_spec_heat_list.each do |adobe_spec_heat|
+            XMLHelper.add_element(adobe_wall_extension, 'SpecificHeat', adobe_spec_heat)
+          end
+        end
       end
       XMLHelper.add_element(wall, 'Area', to_float(@area)) unless @area.nil?
       XMLHelper.add_element(wall, 'Azimuth', to_integer(@azimuth)) unless @azimuth.nil?
-      if not @insulation_cavity_r_value.nil?
+      if @wall_quick_fill
         stud = XMLHelper.add_element(wall, 'Studs')
         XMLHelper.add_element(stud, 'Size', @stud_size) unless @stud_size.nil?
         XMLHelper.add_element(stud, 'Spacing', to_float(@stud_spacing)) unless @stud_spacing.nil?
         XMLHelper.add_element(stud, 'FramingFactor', to_float(@framing_factor)) unless @framing_factor.nil?
-        XMLHelper.add_element(stud, 'Material', @stud_material) unless @stud_material.nil?
       end
       XMLHelper.add_element(wall, 'Siding', @siding) unless @siding.nil?
       XMLHelper.add_element(wall, 'Color', @color) unless @color.nil?
@@ -1786,9 +1877,13 @@ class HPXML < Object
       @solar_absorptance = to_float_or_nil(XMLHelper.get_value(wall, 'SolarAbsorptance'))
       @emittance = to_float_or_nil(XMLHelper.get_value(wall, 'Emittance'))
       insulation = XMLHelper.get_element(wall, 'Insulation')
-      if not insulation.nil?
+      if not XMLHelper.get_element(wall, 'Insulation/Layer').nil?
+        @wall_quick_fill = true
+      end
+      if not @wall_quick_fill
         @insulation_id = HPXML::get_id(insulation)
         @insulation_assembly_r_value = to_float_or_nil(XMLHelper.get_value(insulation, 'AssemblyEffectiveRValue'))
+      elsif @wall_quick_fill
         @insulation_cavity_r_value = to_float_or_nil(XMLHelper.get_value(insulation, "Layer[InstallationType='cavity']/NominalRValue"))
         @insulation_cavity_thickness = to_float_or_nil(XMLHelper.get_value(insulation, "Layer[InstallationType='cavity']/Thickness"))
         @insulation_cavity_material = XMLHelper.get_value(insulation, "Layer[InstallationType='cavity']/InsulationMaterial")
@@ -1798,8 +1893,8 @@ class HPXML < Object
         @stud_size = XMLHelper.get_value(wall, 'Studs/Size')
         @stud_spacing = to_float_or_nil(XMLHelper.get_value(wall, 'Studs/Spacing'))
         @framing_factor = to_float_or_nil(XMLHelper.get_value(wall, 'Studs/FramingFactor'))
-        @stud_material = XMLHelper.get_value(wall, 'Studs/Material')
         @osb_thickness = to_float_or_nil(XMLHelper.get_value(wall, 'extension/OrientedStrandBoard/Thickness'))
+        @steel_frame_correction_factor = to_float_or_nil(XMLHelper.get_value(wall, 'WallType/SteelFrame/extension/CorrectionFactor'))
         @double_stud_is_staggered = to_bool_or_nil(XMLHelper.get_value(wall, 'WallType/DoubleWoodStud/Staggered'))
         @double_stud_gap_depth = to_float_or_nil(XMLHelper.get_value(wall, 'WallType/DoubleWoodStud/extension/GapDepth'))
         @cmu_thickness = to_float_or_nil(XMLHelper.get_value(wall, 'WallType/ConcreteMasonryUnit/extension/Thickness'))
@@ -1811,6 +1906,30 @@ class HPXML < Object
         @sip_r_value = to_float_or_nil(XMLHelper.get_value(wall, 'WallType/StructurallyInsulatedPanel/extension/NominalRValue'))
         @sip_thickness = to_float_or_nil(XMLHelper.get_value(wall, 'WallType/StructurallyInsulatedPanel/extension/Thickness'))
         @sip_sheathing_thickness = to_float_or_nil(XMLHelper.get_value(wall, 'WallType/StructurallyInsulatedPanel/extension/SheathingThickness'))
+        @conc_thickness_list = XMLHelper.get_values(wall, 'WallType/SolidConcrete/extension/Thickness').collect { |i| i.to_f }
+        @conc_cond_list = XMLHelper.get_values(wall, 'WallType/SolidConcrete/extension/Conductivity').collect { |i| i.to_f }
+        @conc_den_list = XMLHelper.get_values(wall, 'WallType/SolidConcrete/extension/Density').collect { |i| i.to_f }
+        @conc_spec_heat_list = XMLHelper.get_values(wall, 'WallType/SolidConcrete/extension/SpecificHeat').collect { |i| i.to_f }
+        @brick_thickness_list = XMLHelper.get_values(wall, 'WallType/StructuralBrick/extension/Thickness').collect { |i| i.to_f }
+        @brick_cond_list = XMLHelper.get_values(wall, 'WallType/StructuralBrick/extension/Conductivity').collect { |i| i.to_f }
+        @brick_den_list = XMLHelper.get_values(wall, 'WallType/StructuralBrick/extension/Density').collect { |i| i.to_f }
+        @brick_spec_heat_list = XMLHelper.get_values(wall, 'WallType/StructuralBrick/extension/SpecificHeat').collect { |i| i.to_f }
+        @strawbale_thickness_list = XMLHelper.get_values(wall, 'WallType/StrawBale/extension/Thickness').collect { |i| i.to_f }
+        @strawbale_cond_list = XMLHelper.get_values(wall, 'WallType/StrawBale/extension/Conductivity').collect { |i| i.to_f }
+        @strawbale_den_list = XMLHelper.get_values(wall, 'WallType/StrawBale/extension/Density').collect { |i| i.to_f }
+        @strawbale_spec_heat_list = XMLHelper.get_values(wall, 'WallType/StrawBale/extension/SpecificHeat').collect { |i| i.to_f }
+        @stone_thickness_list = XMLHelper.get_values(wall, 'WallType/Stone/extension/Thickness').collect { |i| i.to_f }
+        @stone_cond_list = XMLHelper.get_values(wall, 'WallType/Stone/extension/Conductivity').collect { |i| i.to_f }
+        @stone_den_list = XMLHelper.get_values(wall, 'WallType/Stone/extension/Density').collect { |i| i.to_f }
+        @stone_spec_heat_list = XMLHelper.get_values(wall, 'WallType/Stone/extension/SpecificHeat').collect { |i| i.to_f }
+        @logwall_thickness_list = XMLHelper.get_values(wall, 'WallType/LogWall/extension/Thickness').collect { |i| i.to_f }
+        @logwall_cond_list = XMLHelper.get_values(wall, 'WallType/LogWall/extension/Conductivity').collect { |i| i.to_f }
+        @logwall_den_list = XMLHelper.get_values(wall, 'WallType/LogWall/extension/Density').collect { |i| i.to_f }
+        @logwall_spec_heat_list = XMLHelper.get_values(wall, 'WallType/LogWall/extension/SpecificHeat').collect { |i| i.to_f }
+        @adobe_thickness_list = XMLHelper.get_values(wall, 'WallType/Adobe/extension/Thickness').collect { |i| i.to_f }
+        @adobe_cond_list = XMLHelper.get_values(wall, 'WallType/Adobe/extension/Conductivity').collect { |i| i.to_f }
+        @adobe_den_list = XMLHelper.get_values(wall, 'WallType/Adobe/extension/Density').collect { |i| i.to_f }
+        @adobe_spec_heat_list = XMLHelper.get_values(wall, 'WallType/Adobe/extension/SpecificHeat').collect { |i| i.to_f }
       end
     end
   end

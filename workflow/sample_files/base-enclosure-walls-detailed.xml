@@ -126,7 +126,6 @@
               <Size>2x6</Size>
               <Spacing>16.0</Spacing>
               <FramingFactor>0.1988</FramingFactor>
-              <Material>wood</Material>
             </FloorJoists>
             <extension>
               <OrientedStrandBoard>
@@ -206,7 +205,6 @@
               <Size>2x6</Size>
               <Spacing>16.0</Spacing>
               <FramingFactor>0.1988</FramingFactor>
-              <Material>wood</Material>
             </Studs>
             <Siding>aluminum siding</Siding>
             <Color>reflective</Color>
@@ -243,7 +241,6 @@
               <Size>2x6</Size>
               <Spacing>16.0</Spacing>
               <FramingFactor>0.1988</FramingFactor>
-              <Material>wood</Material>
             </Studs>
             <Siding>brick veneer</Siding>
             <Color>medium dark</Color>
@@ -281,7 +278,6 @@
               <Size>2x6</Size>
               <Spacing>16.0</Spacing>
               <FramingFactor>0.1988</FramingFactor>
-              <Material>wood</Material>
             </Studs>
             <Siding>fiber cement siding</Siding>
             <Color>medium</Color>
@@ -306,16 +302,42 @@
             <ExteriorAdjacentTo>outside</ExteriorAdjacentTo>
             <InteriorAdjacentTo>living space</InteriorAdjacentTo>
             <WallType>
-              <LogWall/>
+              <LogWall>
+                <extension>
+                  <Thickness>6.0</Thickness>
+                  <Thickness>6.0</Thickness>
+                  <Conductivity>0.8</Conductivity>
+                  <Conductivity>0.8</Conductivity>
+                  <Density>32.0</Density>
+                  <Density>32.0</Density>
+                  <SpecificHeat>0.29</SpecificHeat>
+                  <SpecificHeat>0.29</SpecificHeat>
+                </extension>
+              </LogWall>
             </WallType>
             <Area>109.0</Area>
+            <Studs>
+              <Size>2x6</Size>
+              <Spacing>16.0</Spacing>
+              <FramingFactor>0.1988</FramingFactor>
+            </Studs>
             <Siding>stucco</Siding>
             <Color>light</Color>
             <Emittance>0.92</Emittance>
             <Insulation>
               <SystemIdentifier id='Wall4Insulation'/>
-              <AssemblyEffectiveRValue>7.1</AssemblyEffectiveRValue>
+              <InsulationGrade>3</InsulationGrade>
+              <Layer>
+                <InstallationType>cavity</InstallationType>
+                <NominalRValue>19.0</NominalRValue>
+                <Thickness>5.5</Thickness>
+              </Layer>
             </Insulation>
+            <extension>
+              <OrientedStrandBoard>
+                <Thickness>0.5</Thickness>
+              </OrientedStrandBoard>
+            </extension>
           </Wall>
           <Wall>
             <SystemIdentifier id='Wall5'/>
@@ -441,7 +463,6 @@
               <Size>2x6</Size>
               <Spacing>16.0</Spacing>
               <FramingFactor>0.1988</FramingFactor>
-              <Material>wood</Material>
             </Studs>
             <Siding>wood siding</Siding>
             <SolarAbsorptance>0.7</SolarAbsorptance>

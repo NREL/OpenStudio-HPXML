@@ -317,6 +317,7 @@ If the input mode of ``Insulation/Layer[InsulationType="cavity"]`` is selected, 
 - Continuous insulation ``NominalRValue``
 - ``DoubleWoodStud/Staggered`` (only for ``DoubleWoodStud`` walls)
 - ``DoubleWoodStud/GapDepth`` (only for ``DoubleWoodStud`` walls)
+- ``SteelFrame/extension/CorrectionFactor`` (only for ``SteelFrame`` walls)
 - Optional Cavity insulation ``InsulationMaterial``
 - Optional Continuous insulation ``Insulation/Layer[InsulationType="continuous"]``
 - Optional Continuous insulation ``InsulationMaterial``

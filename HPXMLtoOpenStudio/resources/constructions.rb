@@ -9,9 +9,20 @@ class Constructions
                                 rigid_r:, osb_thick_in:, mat_ext_finish:,
                                 inside_drywall_thick_in:, outside_drywall_thick_in:,
                                 inside_film:, outside_film:)
-    # install_grade handles RESNET insulation grading. This value is for considering defects occurred in the process of insulation installation. This value determines the relative area occupied by void insulation.
-    # cavity_depth_in is equivalent to stud_depth_in
-    # framing_factor is equivalent to stud_fraction (FIXME: Need to confirm)
+    # Parameters:
+    # cavity_r - the R-value of the cavity insulation
+    # install_grade - RESNET insulation grading. This value is for considering defects occurred in the process of insulation installation. This value determines the relative area occupied by void insulation.
+    # cavity_depth_in - the cavity depth [inch].
+    # cavity_filled - true if insulation thickness < cavity depth, and false otherwise
+    # framing_factor - is equivalent to stud_fraction (FIXME: Need to confirm)
+    # rigid_r - the continuous insulation R-value per inch [hr-ft^2-F/Btu-in]
+    # osb_thick_in - the oriented strand board (OSB) thickness [inch]
+    # mat_ext_finish - exterior finish material
+    # inside_drywall_thick_in - the inside drywall thickness [inch]
+    # outside_drywall_thick_in - the outside drywall thickness [inch]
+    # inside_film - the inside film R-value per inch [hr-ft^2-F/Btu-in]
+    # outside_film - the outside film R-value per inch [hr-ft^2-F/Btu-in]
+
     # Parallel path layer configuration:
     # path fraction | framing_factor | 1 - framing_factor - gapFactor | gapFactor |
     # layer         |     frame      |           insulation           |    gap    |
@@ -84,9 +95,21 @@ class Constructions
                                   framing_factor:, stud_spacing:, is_staggered:,
                                   inside_drywall_thick_in:, osb_thick_in:, rigid_r:,
                                   mat_ext_finish:, inside_film:, outside_film:)
-    # install_grade handles RESNET insulation grading. This value is for considering defects occurred in the process of insulation installation. This value determines the relative area occupied by void insulation.
-    # cavity_depth_in is calculated using stud_depth_in and gap_depth_in. Please see below.
-    # framing_factor includes stud_fraction and miscellaneous framing factor (i.e. framing around doors, windows, etc.)
+    # Parameters:
+    # cavity_r - the R-value of the cavity insulation
+    # install_grade - RESNET insulation grading. This value is for considering defects occurred in the process of insulation installation. This value determines the relative area occupied by void insulation.
+    # stud_depth_in - the stud depth [inch].
+    # gap_depth_in - the gap depth [inch].
+    # framing_factor - includes stud_fraction and miscellaneous framing factor (i.e. framing around doors, windows, etc.).
+    # stud_spacing - the stud spacing on center [inch]
+    # is_staggered - true if the stud is staggered, and false otherwise
+    # inside_drywall_thick_in - the inside drywall thickness [inch]
+    # osb_thick_in - the oriented strand board (OSB) thickness [inch]
+    # rigid_r - the continuous insulation R-value per inch [hr-ft^2-F/Btu-in]
+    # mat_ext_finish - exterior finish material
+    # inside_film - the inside film R-value per inch [hr-ft^2-F/Btu-in]
+    # outside_film - the outside film R-value per inch [hr-ft^2-F/Btu-in]
+
     # Parallel path layer configuration when "is_staggered" is true:
     # path fraction | misc_framing_factor | stud_frac  | stud_frac  |  dsGapFactor  | 1.0 - (2 * stud_frac + misc_framing_factor + dsGapFactor |
     # outer layer   |       frame         | insulation |    stud    |      gap      |                        insulation                        |
@@ -166,11 +189,24 @@ class Constructions
 
   def self.apply_cmu_wall(runner, model, surfaces, wall, constr_name,
                           cmu_thick_in:, cmu_conductivity:, cmu_density:, framing_factor:,
-                          furring_r:, furring_cavity_depth:, furring_spacing:,
+                          furring_r:, furring_cavity_depth_in:, furring_spacing:,
                           inside_drywall_thick_in:, osb_thick_in:, rigid_r:,
                           mat_ext_finish:, inside_film:, outside_film:)
-    # framing_factor includes the framing of cmu and the framing around doors, windows, etc.
-    # stud_frac refers to the framing of furring.
+    # Parameters:
+    # cmu_thick_in - the Concrete Masonry Unit (CMU) thickness [inch]
+    # cmu_conductivity - the CMU conductivity [Btu/hr-ft-F]
+    # cmu_density - the CMU density [lb/ft^3]
+    # framing_factor - fraction of the framing of the CMU and the framing around doors, windows, etc.
+    # furring_r - the furring R-value per inch [hr-ft^2-F/Btu-in]
+    # furring_cavity_depth_in - the furring cavity depth [inch]
+    # furring_spacing - the furring spacing on center [inch]
+    # inside_drywall_thick_in - the inside drywall thickness [inch]
+    # osb_thick_in - the oriented strand board (OSB) thickness [inch]
+    # rigid_r - the continuous insulation R-value per inch [hr-ft^2-F/Btu-in]
+    # mat_ext_finish - exterior finish material
+    # inside_film - the inside film R-value per inch [hr-ft^2-F/Btu-in]
+    # outside_film - the outside film R-value per inch [hr-ft^2-F/Btu-in]
+
     # Parallel path layer configuration when the wall has furring:
     # path fraction | framing_factor | stud_frac | 1.0 - (stud_frac + framing_factor) |
     # outer layer   |     frame      |    cmu    |                 cmu                |
@@ -186,12 +222,12 @@ class Constructions
     mat_framing = Material.new(name = nil, thick_in = cmu_thick_in, mat_base = BaseMaterial.Wood)
     mat_furring = nil
     mat_furring_cavity = nil
-    if furring_cavity_depth != 0
-      mat_furring = Material.new(name = nil, thick_in = furring_cavity_depth, mat_base = BaseMaterial.Wood)
+    if furring_cavity_depth_in != 0
+      mat_furring = Material.new(name = nil, thick_in = furring_cavity_depth_in, mat_base = BaseMaterial.Wood)
       if furring_r == 0
-        mat_furring_cavity = Material.AirCavityClosed(furring_cavity_depth)
+        mat_furring_cavity = Material.AirCavityClosed(furring_cavity_depth_in)
       else
-        mat_furring_cavity = Material.new(name = nil, thick_in = furring_cavity_depth, mat_base = BaseMaterial.InsulationGenericDensepack, k_in = furring_cavity_depth / furring_r)
+        mat_furring_cavity = Material.new(name = nil, thick_in = furring_cavity_depth_in, mat_base = BaseMaterial.InsulationGenericDensepack, k_in = furring_cavity_depth_in / furring_r)
       end
     end
     mat_osb = nil
@@ -249,7 +285,18 @@ class Constructions
                           icf_r:, icf_ins_thick_in:, icf_concrete_thick_in:, framing_factor:,
                           inside_drywall_thick_in:, osb_thick_in:, rigid_r:,
                           mat_ext_finish:, inside_film:, outside_film:)
-    # framing_factor includes the framing of icf and the framing around doors, windows, etc.
+    # Parameters:
+    # icf_r - the R-value of the Insulated Concrete Forms (ICF)
+    # icf_ins_thick_in - the ICF insulation layer thickness [inch]
+    # icf_concrete_thick_in - the ICF concrete layer thickness [inch]
+    # framing_factor - fraction of the framing of the ICF and the framing around doors, windows, etc.
+    # inside_drywall_thick_in - the inside drywall thickness [inch]
+    # osb_thick_in - the oriented strand board (OSB) thickness [inch]
+    # rigid_r - the continuous insulation R-value per inch [hr-ft^2-F/Btu-in]
+    # mat_ext_finish - exterior finish material
+    # inside_film - the inside film R-value per inch [hr-ft^2-F/Btu-in]
+    # outside_film - the outside film R-value per inch [hr-ft^2-F/Btu-in]
+
     # Parallel path layer configuration:
     # path fraction | framing_factor | 1.0 - framing_factor |
     # outer layer   |     frame      |     insulation       |
@@ -308,7 +355,18 @@ class Constructions
                           sip_r:, sip_thick_in:, framing_factor:, sheathing_thick_in:,
                           inside_drywall_thick_in:, osb_thick_in:, rigid_r:,
                           mat_ext_finish:, inside_film:, outside_film:)
-    # framing_factor includes the framing of sip and the framing around doors, windows, etc.
+    # Parameters:
+    # sip_r - the R-value of the Structurally Insulated Panel (SIP)
+    # sip_thick_in - the SIP thickness [inch]
+    # framing_factor - fraction of the framing of the SIP and the framing around doors, windows, etc.
+    # sheathing_thick_in - the sheathing thickness [inch]
+    # inside_drywall_thick_in - the inside drywall thickness [inch]
+    # osb_thick_in - the oriented strand board (OSB) thickness [inch]
+    # rigid_r - the continuous insulation R-value per inch [hr-ft^2-F/Btu-in]
+    # mat_ext_finish - exterior finish material
+    # inside_film - the inside film R-value per inch [hr-ft^2-F/Btu-in]
+    # outside_film - the outside film R-value per inch [hr-ft^2-F/Btu-in]
+
     # Parallel path layer configuration:
     # path fraction | framing_factor | spline_frac | 1 - (spline_frac + framing_factor) |
     # outer layer   |     frame      |   spline    |            insulation              |
@@ -370,10 +428,27 @@ class Constructions
   end
 
   def self.apply_steel_stud_wall(runner, model, surfaces, wall, constr_name,
-                                 cavity_r, install_grade, cavity_depth,
-                                 cavity_filled, framing_factor, correction_factor,
-                                 drywall_thick_in, osb_thick_in, rigid_r,
-                                 mat_ext_finish, inside_film, outside_film)
+                                 cavity_r:, install_grade:, cavity_depth_in:,
+                                 cavity_filled:, framing_factor:, correction_factor:,
+                                 inside_drywall_thick_in:, osb_thick_in:, rigid_r:,
+                                 mat_ext_finish:, inside_film:, outside_film:)
+    # Parameters:
+    # cavity_r - the R-value of the cavity insulation
+    # install_grade - RESNET insulation grading. This value is for considering defects occurred in the process of insulation installation. This value determines the relative area occupied by void insulation.
+    # cavity_depth_in - cavity depth [inch].
+    # cavity_filled - true if insulation thickness < cavity depth, and false otherwise
+    # framing_factor - is equivalent to stud_fraction. (FIXME: Need to confirm)
+    # correction_factor - is used to calculate the effective R-value of the cavity insulation with steel stud framing.
+    # inside_drywall_thick_in - the inside drywall thickness [inch]
+    # osb_thick_in - the oriented strand board (OSB) thickness [inch]
+    # rigid_r - the continuous insulation R-value per inch [hr-ft^2-F/Btu-in]
+    # mat_ext_finish - exterior finish material
+    # inside_film - the inside film R-value per inch [hr-ft^2-F/Btu-in]
+    # outside_film - the outside film R-value per inch [hr-ft^2-F/Btu-in]
+
+    # Parallel path layer configuration:
+    # path fraction |            1 - gapFactor              | gapFactor |
+    # layer         |  insulation with steel stud framing   |    gap    |
 
     return if surfaces.empty?
 
@@ -382,16 +457,16 @@ class Constructions
     if eR > 0
       if cavity_filled
         # Insulation
-        mat_cavity = Material.new(name = nil, thick_in = cavity_depth, mat_base = BaseMaterial.InsulationGenericDensepack, k_in = cavity_depth / eR)
+        mat_cavity = Material.new(name = nil, thick_in = cavity_depth_in, mat_base = BaseMaterial.InsulationGenericDensepack, k_in = cavity_depth_in / eR)
       else
         # Insulation plus air gap when insulation thickness < cavity depth
-        mat_cavity = Material.new(name = nil, thick_in = cavity_depth, mat_base = BaseMaterial.InsulationGenericDensepack, k_in = cavity_depth / (eR + Gas.AirGapRvalue))
+        mat_cavity = Material.new(name = nil, thick_in = cavity_depth_in, mat_base = BaseMaterial.InsulationGenericDensepack, k_in = cavity_depth_in / (eR + Gas.AirGapRvalue))
       end
     else
       # Empty cavity
-      mat_cavity = Material.AirCavityClosed(cavity_depth)
+      mat_cavity = Material.AirCavityClosed(cavity_depth_in)
     end
-    mat_gap = Material.AirCavityClosed(cavity_depth)
+    mat_gap = Material.AirCavityClosed(cavity_depth_in)
     mat_osb = nil
     if osb_thick_in > 0
       mat_osb = Material.new(name = 'WallSheathing', thick_in = osb_thick_in, mat_base = BaseMaterial.Wood)
@@ -419,8 +494,8 @@ class Constructions
       constr.add_layer(mat_osb)
     end
     constr.add_layer([mat_cavity, mat_gap], 'WallStudAndCavity')
-    if drywall_thick_in > 0
-      constr.add_layer(Material.GypsumWall(drywall_thick_in))
+    if inside_drywall_thick_in > 0
+      constr.add_layer(Material.GypsumWall(inside_drywall_thick_in))
     end
     constr.add_layer(inside_film)
 
@@ -434,22 +509,40 @@ class Constructions
   end
 
   def self.apply_generic_layered_wall(runner, model, surfaces, wall, constr_name,
-                                      thick_ins, conds, denss, specheats,
-                                      drywall_thick_in, osb_thick_in, rigid_r,
-                                      mat_ext_finish, inside_film, outside_film)
+                                      mats_thick_in:, mats_cond:, mats_den:, mats_spec_heat:,
+                                      inside_drywall_thick_in:, osb_thick_in:, rigid_r:,
+                                      mat_ext_finish:, inside_film:, outside_film:)
+    # Parameters:
+    # mats_thick_in - the list of thickness of materials [inch]
+    # mats_cond - the list of conductivity of materials [Btu/hr-ft-F]
+    # mats_den - the list of density of materials [lb/ft^3]
+    # mats_spec_heat - the list of specific heat of materials [J/K-kg]
+    # mat_ext_finish - exterior finish material
+    # inside_drywall_thick_in - the inside drywall thickness [inch]
+    # osb_thick_in - the oriented strand board (OSB) thickness [inch]
+    # rigid_r - the continuous insulation R-value per inch [hr-ft^2-F/Btu-in]
+    # mat_ext_finish - exterior finish material
+    # inside_film - the inside film R-value per inch [hr-ft^2-F/Btu-in]
+    # outside_film - the outside film R-value per inch [hr-ft^2-F/Btu-in]
+
+    # Parallel path layer configuration:
+    # path fraction |       1       |
+    # layer 1       |  material[0]  |
+    # layer 2       |  material[1]  |
+    # layer n       | material[n-1] |
 
     return if surfaces.empty?
 
     # Validate inputs
-    for idx in 0..4
-      if (thick_ins[idx].nil? != conds[idx].nil?) || (thick_ins[idx].nil? != denss[idx].nil?) || (thick_ins[idx].nil? != specheats[idx].nil?)
+    for idx in 0..mats_thick_in.size
+      if (mats_thick_in[idx].nil? != mats_cond[idx].nil?) || (mats_thick_in[idx].nil? != mats_den[idx].nil?) || (mats_thick_in[idx].nil? != mats_spec_heat[idx].nil?)
         fail "Layer #{idx + 1} does not have all four properties (thickness, conductivity, density, specific heat) entered."
       end
     end
 
     # Define materials
     mats = []
-    thick_ins.size.times { |i| mats << Material.new(name = "WallLayer#{i + 1}", thick_in = thick_ins[i], mat_base = nil, k_in = conds[i], rho = denss[i], cp = specheats[i]) }
+    mats_thick_in.size.times { |i| mats << Material.new(name = "WallLayer#{i + 1}", thick_in = mats_thick_in[i], mat_base = nil, k_in = mats_cond[i], rho = mats_den[i], cp = mats_spec_heat[i]) }
     mat_osb = nil
     if osb_thick_in > 0
       mat_osb = Material.new(name = 'WallSheathing', thick_in = osb_thick_in, mat_base = BaseMaterial.Wood)
@@ -478,8 +571,8 @@ class Constructions
     mats.each do |mat|
       constr.add_layer(mat)
     end
-    if drywall_thick_in > 0
-      constr.add_layer(Material.GypsumWall(drywall_thick_in))
+    if inside_drywall_thick_in > 0
+      constr.add_layer(Material.GypsumWall(inside_drywall_thick_in))
     end
     constr.add_layer(inside_film)
 
