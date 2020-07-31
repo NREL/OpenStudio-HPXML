@@ -15,26 +15,16 @@ class HVAC
       obj_name = Constants.ObjectNameCentralAirConditionerAndFurnace
     end
 
-    if not heating_system.nil?
-      if heating_system.is_ventilation_preconditioning
-        sequential_heat_load_frac = 1.0
-      else
-        sequential_heat_load_frac = calc_sequential_load_fraction(heating_system.fraction_heat_load_served, remaining_heat_load_frac)
-      end
-    else
-      sequential_heat_load_frac = 0.0
-    end
     if not cooling_system.nil?
       if cooling_system.is_ventilation_preconditioning
         sequential_cool_load_frac = 1.0
+        # FIXME: crankcase_kw and crankcase_temp assumption for preconditioning equipment
+        crankcase_kw, crankcase_temp = 0, nil
       else
         sequential_cool_load_frac = calc_sequential_load_fraction(cooling_system.fraction_cool_load_served, remaining_cool_load_frac)
+        crankcase_kw, crankcase_temp = get_crankcase_assumptions(cooling_system.fraction_cool_load_served)
       end
-    else
-      sequential_cool_load_frac = 0.0
-    end
 
-    if not cooling_system.nil?
       if cooling_system.compressor_type == HPXML::HVACCompressorTypeSingleStage
         num_speeds = 1
       elsif cooling_system.compressor_type == HPXML::HVACCompressorTypeTwoStage
@@ -43,7 +33,6 @@ class HVAC
         num_speeds = 4
       end
       fan_power_rated = get_fan_power_rated(cooling_system.cooling_efficiency_seer)
-      crankcase_kw, crankcase_temp = get_crankcase_assumptions(cooling_system.fraction_cool_load_served)
 
       # Cooling Coil
 
@@ -105,9 +94,17 @@ class HVAC
       cool_closs_fplr_spec = [calc_plr_coefficients(cool_c_d)] * num_speeds
       clg_coil = create_dx_cooling_coil(model, obj_name, (0...num_speeds).to_a, cool_eirs, cool_cap_ft_spec, cool_eir_ft_spec, cool_closs_fplr_spec, cool_cap_fflow_spec, cool_eir_fflow_spec, cool_shrs_rated_gross, cooling_system.cooling_capacity, crankcase_kw, crankcase_temp, fan_power_rated)
       hvac_map[cooling_system.id] << clg_coil
+    else
+      sequential_cool_load_frac = 0.0
     end
 
     if not heating_system.nil?
+      if heating_system.is_ventilation_preconditioning
+        sequential_heat_load_frac = 1.0
+      else
+        sequential_heat_load_frac = calc_sequential_load_fraction(heating_system.fraction_heat_load_served, remaining_heat_load_frac)
+      end
+
       heat_cfm = heating_system.heating_cfm
 
       # Heating Coil
@@ -127,6 +124,8 @@ class HVAC
         htg_coil.setNominalCapacity(UnitConversions.convert([heating_system.heating_capacity, Constants.small].max, 'Btu/hr', 'W')) # Used by HVACSizing measure
       end
       hvac_map[heating_system.id] << htg_coil
+    else
+      sequential_heat_load_frac = 0.0
     end
 
     # Fan
@@ -202,7 +201,11 @@ class HVAC
 
     hvac_map[cooling_system.id] = []
     obj_name = Constants.ObjectNameRoomAirConditioner
-    sequential_cool_load_frac = calc_sequential_load_fraction(cooling_system.fraction_cool_load_served, remaining_cool_load_frac)
+    if cooling_system.is_ventilation_preconditioning
+      sequential_cool_load_frac = 1.0
+    else
+      sequential_cool_load_frac = calc_sequential_load_fraction(cooling_system.fraction_cool_load_served, remaining_cool_load_frac)
+    end
     airflow_rate = 350.0 # cfm/ton; assumed
 
     # Performance curves
@@ -278,7 +281,11 @@ class HVAC
 
     hvac_map[cooling_system.id] = []
     obj_name = Constants.ObjectNameEvaporativeCooler
-    sequential_cool_load_frac = calc_sequential_load_fraction(cooling_system.fraction_cool_load_served, remaining_cool_load_frac)
+    if cooling_system.is_ventilation_preconditioning
+      sequential_cool_load_frac = 1.0
+    else
+      sequential_cool_load_frac = calc_sequential_load_fraction(cooling_system.fraction_cool_load_served, remaining_cool_load_frac)
+    end
 
     # Evap Cooler
 
@@ -344,8 +351,26 @@ class HVAC
 
     hvac_map[heat_pump.id] = []
     obj_name = Constants.ObjectNameAirSourceHeatPump
-    sequential_heat_load_frac = calc_sequential_load_fraction(heat_pump.fraction_heat_load_served, remaining_heat_load_frac)
-    sequential_cool_load_frac = calc_sequential_load_fraction(heat_pump.fraction_cool_load_served, remaining_cool_load_frac)
+    if heat_pump.is_ventilation_preconditioning
+      sequential_heat_load_frac = 0.0
+      sequential_cool_load_frac = 0.0
+      if heat_pump.ventilation_fan.preconditioning_heating_system_idref == heat_pump.id
+        sequential_heat_load_frac = 1.0
+      end
+      if heat_pump.ventilation_fan.preconditioning_cooling_system_idref == heat_pump.id
+        sequential_cool_load_frac = 1.0
+      end
+      # FIXME: crankcase_kw and crankcase_temp assumption for preconditioning equipment
+      crankcase_kw, crankcase_temp = 0, nil
+    else
+      sequential_heat_load_frac = calc_sequential_load_fraction(heat_pump.fraction_heat_load_served, remaining_heat_load_frac)
+      sequential_cool_load_frac = calc_sequential_load_fraction(heat_pump.fraction_cool_load_served, remaining_cool_load_frac)
+      if heat_pump.fraction_heat_load_served <= 0
+        crankcase_kw, crankcase_temp = 0, nil
+      else
+        crankcase_kw, crankcase_temp = get_crankcase_assumptions(heat_pump.fraction_cool_load_served)
+      end
+    end
     if heat_pump.compressor_type == HPXML::HVACCompressorTypeSingleStage
       num_speeds = 1
     elsif heat_pump.compressor_type == HPXML::HVACCompressorTypeTwoStage
@@ -354,11 +379,6 @@ class HVAC
       num_speeds = 4
     end
     fan_power_rated = get_fan_power_rated(heat_pump.cooling_efficiency_seer)
-    if heat_pump.fraction_heat_load_served <= 0
-      crankcase_kw, crankcase_temp = 0, nil
-    else
-      crankcase_kw, crankcase_temp = get_crankcase_assumptions(heat_pump.fraction_cool_load_served)
-    end
     hp_min_temp, supp_max_temp = get_heatpump_temp_assumptions(heat_pump)
 
     # Cooling Coil
@@ -558,8 +578,19 @@ class HVAC
 
     hvac_map[heat_pump.id] = []
     obj_name = Constants.ObjectNameMiniSplitHeatPump
-    sequential_heat_load_frac = calc_sequential_load_fraction(heat_pump.fraction_heat_load_served, remaining_heat_load_frac)
-    sequential_cool_load_frac = calc_sequential_load_fraction(heat_pump.fraction_cool_load_served, remaining_cool_load_frac)
+    if heat_pump.is_ventilation_preconditioning
+      sequential_heat_load_frac = 0.0
+      sequential_cool_load_frac = 0.0
+      if heat_pump.ventilation_fan.preconditioning_heating_system_idref == heat_pump.id
+        sequential_heat_load_frac = 1.0
+      end
+      if heat_pump.ventilation_fan.preconditioning_cooling_system_idref == heat_pump.id
+        sequential_cool_load_frac = 1.0
+      end
+    else
+      sequential_heat_load_frac = calc_sequential_load_fraction(heat_pump.fraction_heat_load_served, remaining_heat_load_frac)
+      sequential_cool_load_frac = calc_sequential_load_fraction(heat_pump.fraction_cool_load_served, remaining_cool_load_frac)
+    end
     num_speeds = 10
     mshp_indices = [1, 3, 5, 9]
     hp_min_temp, supp_max_temp = get_heatpump_temp_assumptions(heat_pump)
@@ -762,8 +793,19 @@ class HVAC
 
     hvac_map[heat_pump.id] = []
     obj_name = Constants.ObjectNameGroundSourceHeatPump
-    sequential_heat_load_frac = calc_sequential_load_fraction(heat_pump.fraction_heat_load_served, remaining_heat_load_frac)
-    sequential_cool_load_frac = calc_sequential_load_fraction(heat_pump.fraction_cool_load_served, remaining_cool_load_frac)
+    if heat_pump.is_ventilation_preconditioning
+      sequential_heat_load_frac = 0.0
+      sequential_cool_load_frac = 0.0
+      if heat_pump.ventilation_fan.preconditioning_heating_system_idref == heat_pump.id
+        sequential_heat_load_frac = 1.0
+      end
+      if heat_pump.ventilation_fan.preconditioning_cooling_system_idref == heat_pump.id
+        sequential_cool_load_frac = 1.0
+      end
+    else
+      sequential_heat_load_frac = calc_sequential_load_fraction(heat_pump.fraction_heat_load_served, remaining_heat_load_frac)
+      sequential_cool_load_frac = calc_sequential_load_fraction(heat_pump.fraction_cool_load_served, remaining_cool_load_frac)
+    end
     pipe_cond = 0.23 # Pipe thermal conductivity, default to high density polyethylene
     ground_conductivity = 0.6
     grout_conductivity = 0.4
@@ -1007,7 +1049,11 @@ class HVAC
 
     hvac_map[heating_system.id] = []
     obj_name = Constants.ObjectNameBoiler
-    sequential_heat_load_frac = calc_sequential_load_fraction(heating_system.fraction_heat_load_served, remaining_heat_load_frac)
+    if heating_system.is_ventilation_preconditioning
+      sequential_heat_load_frac = 1.0
+    else
+      sequential_heat_load_frac = calc_sequential_load_fraction(heating_system.fraction_heat_load_served, remaining_heat_load_frac)
+    end
     is_condensing = false
     oat_reset_enabled = false
     oat_high = nil
@@ -1154,7 +1200,11 @@ class HVAC
 
     hvac_map[heating_system.id] = []
     obj_name = Constants.ObjectNameElectricBaseboard
-    sequential_heat_load_frac = calc_sequential_load_fraction(heating_system.fraction_heat_load_served, remaining_heat_load_frac)
+    if heating_system.is_ventilation_preconditioning
+      sequential_heat_load_frac = 1.0
+    else
+      sequential_heat_load_frac = calc_sequential_load_fraction(heating_system.fraction_heat_load_served, remaining_heat_load_frac)
+    end
 
     # Baseboard
 
@@ -1181,7 +1231,11 @@ class HVAC
 
     hvac_map[heating_system.id] = []
     obj_name = Constants.ObjectNameUnitHeater
-    sequential_heat_load_frac = calc_sequential_load_fraction(heating_system.fraction_heat_load_served, remaining_heat_load_frac)
+    if heating_system.is_ventilation_preconditioning
+      sequential_heat_load_frac = 1.0
+    else
+      sequential_heat_load_frac = calc_sequential_load_fraction(heating_system.fraction_heat_load_served, remaining_heat_load_frac)
+    end
     if not heating_system.is_ventilation_preconditioning
       fan_power_installed = 0.5 # W/cfm # For fuel equipment, will be overridden by EAE later
     else
@@ -3100,7 +3154,7 @@ class HVAC
     htg_coil.setName(obj_name + ' htg coil')
     htg_coil.setMinimumOutdoorDryBulbTemperatureforCompressorOperation(UnitConversions.convert(hp_min_temp, 'F', 'C'))
     htg_coil.setMaximumOutdoorDryBulbTemperatureforDefrostOperation(UnitConversions.convert(40.0, 'F', 'C'))
-    if fraction_heat_load_served > 0
+    if not fraction_heat_load_served.nil? and fraction_heat_load_served > 0
       defrost_eir_curve = create_curve_biquadratic(model, [0.1528, 0, 0, 0, 0, 0], 'Defrosteir', -100, 100, -100, 100) # Heating defrost curve for reverse cycle
       htg_coil.setDefrostEnergyInputRatioFunctionofTemperatureCurve(defrost_eir_curve)
       htg_coil.setDefrostStrategy('ReverseCycle')

@@ -2015,7 +2015,8 @@ class OSModel
   def self.add_cooling_system(runner, model, spaces)
     @hpxml.cooling_systems.each do |cooling_system|
       if cooling_system.is_ventilation_preconditioning
-        living_zone = create_or_get_space(model, spaces, HPXML::LocationMechanicalVentilationSpace).thermalZone.get
+        fan_index = @hpxml.ventilation_fans.find_index(cooling_system.ventilation_fan)
+        living_zone = create_or_get_space(model, spaces, HPXML::LocationMechanicalVentilationSpace + "#{fan_index}").thermalZone.get
       else
         living_zone = spaces[HPXML::LocationLivingSpace].thermalZone.get
         check_distribution_system(cooling_system.distribution_system, cooling_system.cooling_system_type)
@@ -2035,7 +2036,7 @@ class OSModel
                                                    @remaining_cool_load_frac, @remaining_heat_load_frac,
                                                    living_zone, @hvac_map)
 
-        if not heating_system.nil?
+        if not heating_system.nil? and not heating_system.is_ventilation_preconditioning
           @remaining_heat_load_frac -= heating_system.fraction_heat_load_served
         end
 
@@ -2058,14 +2059,17 @@ class OSModel
                                               living_zone, @hvac_map)
       end
 
-      @remaining_cool_load_frac -= cooling_system.fraction_cool_load_served
+      if not cooling_system.is_ventilation_preconditioning
+        @remaining_cool_load_frac -= cooling_system.fraction_cool_load_served
+      end
     end
   end
 
   def self.add_heating_system(runner, model, spaces)
     @hpxml.heating_systems.each do |heating_system|
       if heating_system.is_ventilation_preconditioning
-        living_zone = create_or_get_space(model, spaces, HPXML::LocationMechanicalVentilationSpace).thermalZone.get
+        fan_index = @hpxml.ventilation_fans.find_index(heating_system.ventilation_fan)
+        living_zone = create_or_get_space(model, spaces, HPXML::LocationMechanicalVentilationSpace + "#{fan_index}").thermalZone.get
       else
         living_zone = spaces[HPXML::LocationLivingSpace].thermalZone.get
         check_distribution_system(heating_system.distribution_system, heating_system.heating_system_type)
@@ -2106,7 +2110,9 @@ class OSModel
                                @remaining_heat_load_frac, living_zone, @hvac_map)
       end
 
-      @remaining_heat_load_frac -= heating_system.fraction_heat_load_served
+      if not heating_system.is_ventilation_preconditioning
+        @remaining_heat_load_frac -= heating_system.fraction_heat_load_served
+      end
     end
   end
 
@@ -2128,7 +2134,13 @@ class OSModel
         end
       end
 
-      check_distribution_system(heat_pump.distribution_system, heat_pump.heat_pump_type)
+      if heat_pump.is_ventilation_preconditioning
+        fan_index = @hpxml.ventilation_fans.find_index(heat_pump.ventilation_fan)
+        living_zone = create_or_get_space(model, spaces, HPXML::LocationMechanicalVentilationSpace + "#{fan_index}").thermalZone.get
+      else
+        living_zone = spaces[HPXML::LocationLivingSpace].thermalZone.get
+        check_distribution_system(heat_pump.distribution_system, heat_pump.heat_pump_type)
+      end
 
       if heat_pump.heat_pump_type == HPXML::HVACTypeHeatPumpAirToAir
 
@@ -2153,8 +2165,10 @@ class OSModel
 
       end
 
-      @remaining_heat_load_frac -= heat_pump.fraction_heat_load_served
-      @remaining_cool_load_frac -= heat_pump.fraction_cool_load_served
+      if not heat_pump.is_ventilation_preconditioning
+        @remaining_heat_load_frac -= heat_pump.fraction_heat_load_served
+        @remaining_cool_load_frac -= heat_pump.fraction_cool_load_served
+      end
     end
   end
 

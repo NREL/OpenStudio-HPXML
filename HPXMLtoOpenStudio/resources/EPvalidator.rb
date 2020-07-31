@@ -444,7 +444,7 @@ class EnergyPlusValidator
 
       ## [PreconditioningSystem="false"]
       '/HPXML/Building/BuildingDetails/Systems/HVAC/HVACPlant/CoolingSystem[IsVentilationPreconditioningSystem="false"]' => {
-        'FractionCoolLoadServed' => zero, # Don't need fraction for preconditioning equipment
+        'FractionCoolLoadServed' => one, # Must sum to <= 1 across all CoolingSystems and HeatPumps
       },
 
       ## [CoolingType=CentralAC and IsVentilationPreconditioningSystem="false"]
@@ -513,17 +513,23 @@ class EnergyPlusValidator
         'CoolingCapacity' => zero_or_one,
         'CoolingSensibleHeatFraction' => zero_or_one,
         '[not(BackupSystemFuel)] | BackupSystemFuel[text()="electricity" or text()="natural gas" or text()="fuel oil" or text()="fuel oil 1" or text()="fuel oil 2" or text()="fuel oil 4" or text()="fuel oil 5/6" or text()="diesel" or text()="propane" or text()="kerosene" or text()="wood" or text()="wood pellets"]' => one, # See [HeatPumpBackup]
-        'FractionHeatLoadServed' => one, # Must sum to <= 1 across all HeatPumps and HeatingSystems
-        'FractionCoolLoadServed' => one, # Must sum to <= 1 across all HeatPumps and CoolingSystems
         'IsVentilationPreconditioningSystem' => one, # See [PreconditioningSystem], true if this system only provides preconditioning for shared mechanical ventilation system
       },
 
-      ## [PreconditioningSystem]
+      ## [PreconditioningSystem="true"]
       '/HPXML/Building/BuildingDetails/Systems/HVAC/HVACPlant/HeatPump[IsVentilationPreconditioningSystem="true"]' => {
         'CoolingCapacity[not(@scope)]' => zero, # Use scope attribute to describe at which level data is provided
         'HeatingCapacity[not(@scope)]' => zero, # Use scope attribute to describe at which level data is provided
         'HeatingCapacity17F[not(@scope)]' => zero, # Use scope attribute to describe at which level data is provided
         'DistributionSystem' => zero,
+        'FractionCoolLoadServed' => zero, # Don't need fraction for preconditioning equipment
+        'FractionHeatLoadServed' => zero, # Don't need fraction for preconditioning equipment
+      },
+
+      ## [PreconditioningSystem="false"]
+      '/HPXML/Building/BuildingDetails/Systems/HVAC/HVACPlant/CoolingSystem[IsVentilationPreconditioningSystem="false"]' => {
+        'FractionHeatLoadServed' => one, # Must sum to <= 1 across all HeatPumps and HeatingSystems
+        'FractionCoolLoadServed' => one, # Must sum to <= 1 across all HeatPumps and CoolingSystems
       },
 
       ## [HeatPumpType=ASHP and IsVentilationPreconditioningSystem="false"]

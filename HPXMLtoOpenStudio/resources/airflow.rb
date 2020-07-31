@@ -1416,6 +1416,9 @@ class Airflow
     bath_sch_sensors_map = apply_local_ventilation(model, vent_fans_bath, Constants.ObjectNameMechanicalVentilationBathFan)
 
     # Get mechanical ventilation
+    vent_fans_living_space = vent_fans_mech.select {|vent_mech| vent_mech.preconditioning_heating_system_idref.nil? and vent_mech.preconditioning_cooling_system_idref.nil?}
+    vent_fans_mechvent_space = vent_fans_mech.select {|vent_mech| not vent_mech.preconditioning_heating_system_idref.nil? or not vent_mech.preconditioning_cooling_system_idref.nil?}
+
     vent_mech_sup = vent_fans_mech.select { |vent_mech| vent_mech.fan_type == HPXML::MechVentTypeSupply }
     vent_mech_exh = vent_fans_mech.select { |vent_mech| vent_mech.fan_type == HPXML::MechVentTypeExhaust }
     vent_mech_cfis = vent_fans_mech.select { |vent_mech| vent_mech.fan_type == HPXML::MechVentTypeCFIS }
