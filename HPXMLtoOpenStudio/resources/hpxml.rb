@@ -1499,9 +1499,9 @@ class HPXML < Object
   end
 
   class RimJoist < BaseElement
-    ATTRS = [:id, :exterior_adjacent_to, :interior_adjacent_to, :area, :azimuth, :siding, :color,
+    ATTRS = [:id,  :quick_fill, :exterior_adjacent_to, :interior_adjacent_to, :area, :azimuth, :siding, :color,
              :solar_absorptance, :emittance, :insulation_id, :insulation_assembly_r_value,
-             :ufactor, :insulation_assembly_r_value, :insulation_cavity_r_value, :insulation_continuous_r_value,
+             :ufactor, :insulation_assembly_r_value, :insulation_cavity_r_value, :insulation_cavity_thickness, :insulation_continuous_r_value,
              :insulation_grade, :insulation_cavity_material, :insulation_continuous_material,
              :joist_size, :joist_spacing, :framing_factor, :osb_thickness]
     attr_accessor(*ATTRS)
@@ -1559,21 +1559,24 @@ class HPXML < Object
       end
       XMLHelper.add_element(insulation, 'AssemblyEffectiveRValue', to_float(@insulation_assembly_r_value)) unless @insulation_assembly_r_value.nil?
       XMLHelper.add_element(insulation, 'InsulationGrade', to_integer(@insulation_grade)) unless @insulation_grade.nil?
-      if not @insulation_cavity_r_value.nil?
-        layer = XMLHelper.add_element(insulation, 'Layer')
-        XMLHelper.add_element(layer, 'InstallationType', 'cavity')
-        XMLHelper.add_element(layer, 'InsulationMaterial', @insulation_cavity_material) unless @insulation_cavity_material.nil?
-        XMLHelper.add_element(layer, 'NominalRValue', to_float(@insulation_cavity_r_value))
+      if @quick_fill
+        if not @insulation_cavity_r_value.nil?
+          layer = XMLHelper.add_element(insulation, 'Layer')
+          XMLHelper.add_element(layer, 'InstallationType', 'cavity')
+          XMLHelper.add_element(layer, 'InsulationMaterial', @insulation_cavity_material) unless @insulation_cavity_material.nil?
+          XMLHelper.add_element(layer, 'NominalRValue', to_float(@insulation_cavity_r_value))
+          XMLHelper.add_element(layer, 'Thickness', @insulation_cavity_thickness) unless @insulation_cavity_thickness.nil?
+        end
         floor_joists = XMLHelper.add_element(rim_joist, 'FloorJoists')
         XMLHelper.add_element(floor_joists, 'Size', @joist_size) unless @joist_size.nil?
         XMLHelper.add_element(floor_joists, 'Spacing', to_float(@joist_spacing)) unless @joist_spacing.nil?
         XMLHelper.add_element(floor_joists, 'FramingFactor', to_float(@framing_factor)) unless @framing_factor.nil?
-      end
-      if not @insulation_continuous_r_value.nil?
-        layer = XMLHelper.add_element(insulation, 'Layer')
-        XMLHelper.add_element(layer, 'InstallationType', 'continuous')
-        XMLHelper.add_element(layer, 'InsulationMaterial', @insulation_continuous_material) unless @insulation_continuous_material.nil?
-        XMLHelper.add_element(layer, 'NominalRValue', to_float(@insulation_continuous_r_value))
+        if not @insulation_continuous_r_value.nil?
+          layer = XMLHelper.add_element(insulation, 'Layer')
+          XMLHelper.add_element(layer, 'InstallationType', 'continuous')
+          XMLHelper.add_element(layer, 'InsulationMaterial', @insulation_continuous_material) unless @insulation_continuous_material.nil?
+          XMLHelper.add_element(layer, 'NominalRValue', to_float(@insulation_continuous_r_value))
+        end
       end
       if not @osb_thickness.nil?
         osb = XMLHelper.create_elements_as_needed(doc, ['HPXML', 'Building', 'BuildingDetails', 'Enclosure', 'RimJoists', 'RimJoist', 'extension', 'OrientedStrandBoard'])
@@ -1596,9 +1599,16 @@ class HPXML < Object
       insulation = XMLHelper.get_element(rim_joist, 'Insulation')
       if not insulation.nil?
         @insulation_id = HPXML::get_id(insulation)
+      end
+      if not XMLHelper.get_element(rim_joist, 'Insulation/Layer').nil?
+        @quick_fill = true
+      end
+      if not @quick_fill
         @insulation_assembly_r_value = to_float_or_nil(XMLHelper.get_value(insulation, 'AssemblyEffectiveRValue'))
+      else
         @insulation_cavity_r_value = to_float_or_nil(XMLHelper.get_value(insulation, "Layer[InstallationType='cavity']/NominalRValue"))
         @insulation_cavity_material = XMLHelper.get_value(insulation, "Layer[InstallationType='cavity']/InsulationMaterial")
+        @insulation_cavity_thickness = XMLHelper.get_value(insulation, "Layer[InstallationType='cavity']/Thickness")
         @insulation_continuous_r_value = to_float_or_nil(XMLHelper.get_value(insulation, "Layer[InstallationType='continuous']/NominalRValue"))
         @insulation_continuous_material = XMLHelper.get_value(insulation, "Layer[InstallationType='continuous']/InsulationMaterial")
         @insulation_grade = to_integer_or_nil(XMLHelper.get_value(insulation, 'InsulationGrade'))
@@ -1625,7 +1635,7 @@ class HPXML < Object
   end
 
   class Wall < BaseElement
-    ATTRS = [:id, :exterior_adjacent_to, :interior_adjacent_to, :wall_type, :optimum_value_engineering, :wall_quick_fill,
+    ATTRS = [:id, :exterior_adjacent_to, :interior_adjacent_to, :wall_type, :optimum_value_engineering, :quick_fill,
              :area, :orientation, :azimuth, :siding, :color, :solar_absorptance, :emittance, :insulation_id,
              :ufactor, :insulation_assembly_r_value, :insulation_cavity_r_value, :insulation_continuous_r_value,
              :insulation_cavity_thickness, :insulation_grade, :insulation_cavity_material, :insulation_continuous_material,
@@ -1711,7 +1721,7 @@ class HPXML < Object
         wall_type_e = XMLHelper.add_element(wall, 'WallType')
         XMLHelper.add_element(wall_type_e, @wall_type)
       end
-      if @wall_quick_fill
+      if @quick_fill
         if @wall_type == HPXML::WallTypeDoubleWoodStud
           double_stud_wall = XMLHelper.create_elements_as_needed(wall, ['WallType', 'DoubleWoodStud'])
           XMLHelper.add_element(double_stud_wall, 'Staggered', @double_stud_is_staggered) unless @double_stud_is_staggered.nil?
@@ -1823,7 +1833,7 @@ class HPXML < Object
       end
       XMLHelper.add_element(wall, 'Area', to_float(@area)) unless @area.nil?
       XMLHelper.add_element(wall, 'Azimuth', to_integer(@azimuth)) unless @azimuth.nil?
-      if @wall_quick_fill
+      if @quick_fill
         stud = XMLHelper.add_element(wall, 'Studs')
         XMLHelper.add_element(stud, 'Size', @stud_size) unless @stud_size.nil?
         XMLHelper.add_element(stud, 'Spacing', to_float(@stud_spacing)) unless @stud_spacing.nil?
@@ -1877,13 +1887,15 @@ class HPXML < Object
       @solar_absorptance = to_float_or_nil(XMLHelper.get_value(wall, 'SolarAbsorptance'))
       @emittance = to_float_or_nil(XMLHelper.get_value(wall, 'Emittance'))
       insulation = XMLHelper.get_element(wall, 'Insulation')
-      if not XMLHelper.get_element(wall, 'Insulation/Layer').nil?
-        @wall_quick_fill = true
-      end
-      if not @wall_quick_fill
+      if not insulation.nil?
         @insulation_id = HPXML::get_id(insulation)
+      end
+      if not XMLHelper.get_element(wall, 'Insulation/Layer').nil?
+        @quick_fill = true
+      end
+      if not @quick_fill
         @insulation_assembly_r_value = to_float_or_nil(XMLHelper.get_value(insulation, 'AssemblyEffectiveRValue'))
-      elsif @wall_quick_fill
+      else
         @insulation_cavity_r_value = to_float_or_nil(XMLHelper.get_value(insulation, "Layer[InstallationType='cavity']/NominalRValue"))
         @insulation_cavity_thickness = to_float_or_nil(XMLHelper.get_value(insulation, "Layer[InstallationType='cavity']/Thickness"))
         @insulation_cavity_material = XMLHelper.get_value(insulation, "Layer[InstallationType='cavity']/InsulationMaterial")

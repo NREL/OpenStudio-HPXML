@@ -45,11 +45,11 @@ class Constructions
     mat_framing = Material.new(name = nil, thick_in = cavity_depth_in, mat_base = BaseMaterial.Wood)
     mat_gap = Material.AirCavityClosed(cavity_depth_in)
     mat_osb = nil
-    if osb_thick_in > 0
+    if (not osb_thick_in.nil?) && osb_thick_in > 0
       mat_osb = Material.new(name = 'WallSheathing', thick_in = osb_thick_in, mat_base = BaseMaterial.Wood)
     end
     mat_rigid = nil
-    if rigid_r > 0
+    if (not rigid_r.nil?) && rigid_r > 0
       rigid_thick_in = rigid_r * BaseMaterial.InsulationRigid.k_in
       mat_rigid = Material.new(name = 'WallRigidIns', thick_in = rigid_thick_in, mat_base = BaseMaterial.InsulationRigid, k_in = rigid_thick_in / rigid_r)
     end
@@ -134,11 +134,11 @@ class Constructions
     mat_gap_inner_outer = Material.new(name = nil, thick_in = stud_depth_in, mat_base = nil, k_in = stud_depth_in / (mat_gap_total.rvalue * stud_depth_in / cavity_depth_in), rho = Gas.Air.rho, cp = Gas.Air.cp)
     mat_gap_middle = Material.new(name = nil, thick_in = gap_depth_in, mat_base = nil, k_in = gap_depth_in / (mat_gap_total.rvalue * gap_depth_in / cavity_depth_in), rho = Gas.Air.rho, cp = Gas.Air.cp)
     mat_osb = nil
-    if osb_thick_in > 0
+    if (not osb_thick_in.nil?) && osb_thick_in > 0
       mat_osb = Material.new(name = 'WallSheathing', thick_in = osb_thick_in, mat_base = BaseMaterial.Wood)
     end
     mat_rigid = nil
-    if rigid_r > 0
+    if (not rigid_r.nil?) && rigid_r > 0
       rigid_thick_in = rigid_r * BaseMaterial.InsulationRigid.k_in
       mat_rigid = Material.new(name = 'WallRigidIns', thick_in = rigid_thick_in, mat_base = BaseMaterial.InsulationRigid, k_in = rigid_thick_in / rigid_r)
     end
@@ -235,7 +235,7 @@ class Constructions
       mat_osb = Material.new(name = 'WallSheathing', thick_in = osb_thick_in, mat_base = BaseMaterial.Wood)
     end
     mat_rigid = nil
-    if rigid_r > 0
+    if (not rigid_r.nil?) && rigid_r > 0
       rigid_thick_in = rigid_r * BaseMaterial.InsulationRigid.k_in
       mat_rigid = Material.new(name = 'WallRigidIns', thick_in = rigid_thick_in, mat_base = BaseMaterial.InsulationRigid, k_in = rigid_thick_in / rigid_r)
     end
@@ -311,11 +311,11 @@ class Constructions
     mat_framing_inner_outer = Material.new(name = nil, thick_in = icf_ins_thick_in, mat_base = BaseMaterial.Wood)
     mat_framing_middle = Material.new(name = nil, thick_in = icf_concrete_thick_in, mat_base = BaseMaterial.Wood)
     mat_osb = nil
-    if osb_thick_in > 0
+    if (not osb_thick_in.nil?) && osb_thick_in > 0
       mat_osb = Material.new(name = 'WallSheathing', thick_in = osb_thick_in, mat_base = BaseMaterial.Wood)
     end
     mat_rigid = nil
-    if rigid_r > 0
+    if (not rigid_r.nil?) && rigid_r > 0
       rigid_thick_in = rigid_r * BaseMaterial.InsulationRigid.k_in
       mat_rigid = Material.new(name = 'WallRigidIns', thick_in = rigid_thick_in, mat_base = BaseMaterial.InsulationRigid, k_in = rigid_thick_in / rigid_r)
     end
@@ -385,11 +385,11 @@ class Constructions
     mat_ins_inner_outer = Material.new(name = nil, thick_in = spline_thick_in, mat_base = BaseMaterial.InsulationRigid, k_in = sip_thick_in / sip_r)
     mat_ins_middle = Material.new(name = nil, thick_in = ins_thick_in, mat_base = BaseMaterial.InsulationRigid, k_in = sip_thick_in / sip_r)
     mat_osb = nil
-    if osb_thick_in > 0
+    if (not osb_thick_in.nil?) && osb_thick_in > 0
       mat_osb = Material.new(name = 'WallSheathing', thick_in = osb_thick_in, mat_base = BaseMaterial.Wood)
     end
     mat_rigid = nil
-    if rigid_r > 0
+    if (not rigid_r.nil?) && rigid_r > 0
       rigid_thick_in = rigid_r * BaseMaterial.InsulationRigid.k_in
       mat_rigid = Material.new(name = 'WallRigidIns', thick_in = rigid_thick_in, mat_base = BaseMaterial.InsulationRigid, k_in = rigid_thick_in / rigid_r)
     end
@@ -468,11 +468,11 @@ class Constructions
     end
     mat_gap = Material.AirCavityClosed(cavity_depth_in)
     mat_osb = nil
-    if osb_thick_in > 0
+    if (not osb_thick_in.nil?) && osb_thick_in > 0
       mat_osb = Material.new(name = 'WallSheathing', thick_in = osb_thick_in, mat_base = BaseMaterial.Wood)
     end
     mat_rigid = nil
-    if rigid_r > 0
+    if (not rigid_r.nil?) && rigid_r > 0
       rigid_thick_in = rigid_r * BaseMaterial.InsulationRigid.k_in
       mat_rigid = Material.new(name = 'WallRigidIns', thick_in = rigid_thick_in, mat_base = BaseMaterial.InsulationRigid, k_in = rigid_thick_in / rigid_r)
     end
@@ -544,11 +544,11 @@ class Constructions
     mats = []
     mats_thick_in.size.times { |i| mats << Material.new(name = "WallLayer#{i + 1}", thick_in = mats_thick_in[i], mat_base = nil, k_in = mats_cond[i], rho = mats_den[i], cp = mats_spec_heat[i]) }
     mat_osb = nil
-    if osb_thick_in > 0
+    if (not osb_thick_in.nil?) && osb_thick_in > 0
       mat_osb = Material.new(name = 'WallSheathing', thick_in = osb_thick_in, mat_base = BaseMaterial.Wood)
     end
     mat_rigid = nil
-    if rigid_r > 0
+    if (not rigid_r.nil?) && rigid_r > 0
       rigid_thick_in = rigid_r * BaseMaterial.InsulationRigid.k_in
       mat_rigid = Material.new(name = 'WallRigidIns', thick_in = rigid_thick_in, mat_base = BaseMaterial.InsulationRigid, k_in = rigid_thick_in / rigid_r)
     end
@@ -605,11 +605,11 @@ class Constructions
     mat_framing = Material.new(name = nil, thick_in = framing_thick_in, mat_base = BaseMaterial.Wood)
     mat_gap = Material.AirCavityClosed(framing_thick_in)
     mat_osb = nil
-    if osb_thick_in > 0
+    if (not osb_thick_in.nil?) && osb_thick_in > 0
       mat_osb = Material.new(name = 'RimJoistSheathing', thick_in = osb_thick_in, mat_base = BaseMaterial.Wood)
     end
     mat_rigid = nil
-    if rigid_r > 0
+    if (not rigid_r.nil?) && rigid_r > 0
       rigid_thick_in = rigid_r * BaseMaterial.InsulationRigid.k_in
       mat_rigid = Material.new(name = 'RimJoistRigidIns', thick_in = rigid_thick_in, mat_base = BaseMaterial.InsulationRigid, k_in = rigid_thick_in / rigid_r)
     end

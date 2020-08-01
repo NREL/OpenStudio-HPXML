@@ -950,8 +950,10 @@ def set_hpxml_rim_joists(hpxml_file, hpxml)
                            insulation_assembly_r_value: 23.0)
     end
   elsif ['base-enclosure-walls-detailed.xml'].include? hpxml_file
+    hpxml.rim_joists[0].quick_fill = true
     hpxml.rim_joists[0].insulation_assembly_r_value = nil
     hpxml.rim_joists[0].insulation_cavity_r_value = 19
+    hpxml.rim_joists[0].insulation_cavity_thickness = 5.5
     hpxml.rim_joists[0].insulation_grade = 3
     hpxml.rim_joists[0].joist_size = '2x6'
     hpxml.rim_joists[0].joist_spacing = 16
@@ -1358,7 +1360,7 @@ def set_hpxml_walls(hpxml_file, hpxml)
     end
   elsif ['base-enclosure-walls-detailed.xml'].include? hpxml_file
     [0, 1, 2, 3, -1].each do |idx|
-      hpxml.walls[idx].wall_quick_fill = true
+      hpxml.walls[idx].quick_fill = true
       hpxml.walls[idx].insulation_assembly_r_value = nil
       hpxml.walls[idx].insulation_cavity_r_value = 19
       hpxml.walls[idx].insulation_cavity_thickness = 5.5

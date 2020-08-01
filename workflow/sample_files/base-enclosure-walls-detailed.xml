@@ -120,6 +120,7 @@
               <Layer>
                 <InstallationType>cavity</InstallationType>
                 <NominalRValue>19.0</NominalRValue>
+                <Thickness>5.5</Thickness>
               </Layer>
             </Insulation>
             <FloorJoists>

@@ -163,13 +163,16 @@ class HPXMLDefaults
       elsif wall.solar_absorptance.nil?
         wall.solar_absorptance = Constructions.get_default_wall_solar_absorptance(wall.color)
       end
-      if wall.insulation_cavity_material.nil?
+
+      next unless wall.quick_fill
+
+      if (not wall.insulation_cavity_r_value.nil?) && wall.insulation_cavity_material.nil?
         wall.insulation_cavity_material = HPXML::InsulationMaterialBatt
       end
-      if wall.insulation_continuous_r_value.nil?
-        wall.insulation_continuous_r_value = 0.0
+      if wall.insulation_continuous_r_value.nil? # FIXME: This value is being used in hvac_sizing.rb. Is there a better way to handle this?
+        wall.insulation_continuous_r_value = 0
       end
-      if wall.insulation_continuous_material.nil?
+      if (not wall.insulation_continuous_r_value.nil?) && wall.insulation_continuous_material.nil?
         wall.insulation_continuous_material = HPXML::InsulationMaterialRigid
       end
     end
