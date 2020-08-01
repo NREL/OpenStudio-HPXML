@@ -255,7 +255,7 @@ class HPXML < Object
   WindowLayersSinglePane = 'single-pane'
   WindowLayersTriplePane = 'triple-pane'
 
-  def initialize(hpxml_path: nil, collapse_enclosure: true)
+  def initialize(hpxml_path: nil, collapse_enclosure: true, adjust_hvac_for_preconditioning: true)
     @doc = nil
     @hpxml_path = hpxml_path
 
@@ -274,6 +274,7 @@ class HPXML < Object
     if collapse_enclosure
       collapse_enclosure_surfaces()
     end
+    adjust_hvac_for_ventilation_preconditioning()
   end
 
   def has_space_type(space_type)
@@ -2419,7 +2420,7 @@ class HPXML < Object
     end
 
     def total_fraction_heat_load_served
-      select{|htg_sys| not htg_sys.is_ventilation_preconditioning }.map { |htg_sys| htg_sys.fraction_heat_load_served }.sum(0.0)
+      select { |htg_sys| not htg_sys.is_ventilation_preconditioning }.map { |htg_sys| htg_sys.fraction_heat_load_served }.sum(0.0)
     end
   end
 
@@ -2576,7 +2577,7 @@ class HPXML < Object
     end
 
     def total_fraction_cool_load_served
-      select.{ |clg_sys| not clg_sys.is_ventilation_preconditioning }.map { |clg_sys| clg_sys.fraction_cool_load_served }.sum(0.0)
+      select { |clg_sys| not clg_sys.is_ventilation_preconditioning }.map { |clg_sys| clg_sys.fraction_cool_load_served }.sum(0.0)
     end
   end
 
@@ -2732,11 +2733,11 @@ class HPXML < Object
     end
 
     def total_fraction_heat_load_served
-      select{ |hp| not hp.is_ventilation_preconditioning }.map { |hp| hp.fraction_heat_load_served }.sum(0.0)
+      select { |hp| not hp.is_ventilation_preconditioning }.map { |hp| hp.fraction_heat_load_served }.sum(0.0)
     end
 
     def total_fraction_cool_load_served
-      select{ |hp| not hp.is_ventilation_preconditioning }.map { |hp| hp.fraction_cool_load_served }.sum(0.0)
+      select { |hp| not hp.is_ventilation_preconditioning }.map { |hp| hp.fraction_cool_load_served }.sum(0.0)
     end
   end
 
@@ -2765,7 +2766,7 @@ class HPXML < Object
     def ventilation_fan
       return if not @is_ventilation_preconditioning
 
-      attached_fans = @hpxml_object.ventilation_fans.select { |fan| (fan.preconditioning_cooling_system_idref == @id) or (fan.preconditioning_heating_system_idref == @id) }
+      attached_fans = @hpxml_object.ventilation_fans.select { |fan| (fan.preconditioning_cooling_system_idref == @id) || (fan.preconditioning_heating_system_idref == @id) }
       if attached_fans.empty?
         fail "Ventilation preconditioning heat pump #{@id} is not attached to any ventilation fan."
       elsif attached_fans.size > 1
@@ -4990,6 +4991,40 @@ class HPXML < Object
       next if window.wall.exterior_adjacent_to != HPXML::LocationOtherHousingUnit
 
       window.delete
+    end
+  end
+
+  def adjust_hvac_for_ventilation_preconditioning()
+    precond_htg_sys = @heating_systems.select { |htg_sys| htg_sys.is_ventilation_preconditioning }
+    precond_clg_sys = @cooling_systems.select { |clg_sys| clg_sys.is_ventilation_preconditioning }
+    precond_hp = @heat_pumps.select { |hp| hp.is_ventilation_preconditioning }
+    return if precond_htg_sys.empty? && precond_clg_sys.empty? && precond_hp.empty?
+    precond_htg_sys.each do |htg_sys|
+      # Preconditioning system, assign heating system unit capacity if not provided
+      # scale building capacity down to unit capacity
+      if htg_sys.heating_capacity.nil? && (not htg_sys.heating_capacity_building.nil?)
+        htg_sys.heating_capacity = htg_sys.heating_capacity_building * htg_sys.ventilation_fan.unit_flow_rate_ratio
+      end
+    end
+    precond_clg_sys.each do |clg_sys|
+      # Preconditioning system, assign cooling system unit capacity if not provided
+      # scale building capacity down to unit capacity
+      if clg_sys.cooling_capacity.nil? && (not clg_sys.cooling_capacity_building.nil?)
+        clg_sys.cooling_capacity = clg_sys.cooling_capacity_building * clg_sys.ventilation_fan.unit_flow_rate_ratio
+      end
+    end
+    precond_hp.each do |hp|
+      # Preconditioning system, assign unit capacity if not provided
+      # scale building capacity down to unit capacity
+      if hp.heating_capacity.nil? && (not hp.heating_capacity_building.nil?)
+        hp.heating_capacity = hp.heating_capacity_building * hp.ventilation_fan.unit_flow_rate_ratio
+      end
+      if hp.heating_capacity_17F.nil? && (not hp.heating_capacity_17F_building.nil?)
+        hp.heating_capacity_17F = hp.heating_capacity_17F_building * hp.ventilation_fan.unit_flow_rate_ratio
+      end
+      if hp.cooling_capacity.nil? && (not hp.cooling_capacity_building.nil?)
+        hp.cooling_capacity = hp.cooling_capacity_building * hp.ventilation_fan.unit_flow_rate_ratio
+      end
     end
   end
 

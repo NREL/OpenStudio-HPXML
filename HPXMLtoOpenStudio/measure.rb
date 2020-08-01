@@ -762,18 +762,45 @@ class OSModel
   end
 
   # FUTURE: Move this method and many below to geometry.rb
-  def self.create_space_and_zone(model, spaces, space_type)
+  def self.create_space_and_zone(model, spaces, space_type, default_surface)
     if not spaces.keys.include? space_type
       thermal_zone = OpenStudio::Model::ThermalZone.new(model)
       thermal_zone.setName(space_type)
 
-      space = OpenStudio::Model::Space.new(model)
-      space.setName(space_type)
+      if default_surface
+        floor_polygon = OpenStudio::Point3dVector.new
+        floor_polygon << OpenStudio::Point3d.new(0, 0, 0)
+        floor_polygon << OpenStudio::Point3d.new(0, 1.0, 0)
+        floor_polygon << OpenStudio::Point3d.new(1.0, 1.0, 0)
+        floor_polygon << OpenStudio::Point3d.new(1.0, 0, 0)
 
+        space = OpenStudio::Model::Space::fromFloorPrint(floor_polygon, 1, model)
+        space = space.get
+        space.setName(space_type)
+
+        adiabatic_mat = OpenStudio::Model::MasslessOpaqueMaterial.new(model, 'Rough', 176.1)
+        adiabatic_mat.setName('Adiabatic')
+        adiabatic_const = OpenStudio::Model::Construction.new(model)
+        adiabatic_const.setName('AdiabaticConst')
+        adiabatic_const.insertLayer(0, adiabatic_mat)
+
+        space.surfaces.each do |surface|
+          surface.setConstruction(adiabatic_const)
+          surface.setOutsideBoundaryCondition('Adiabatic')
+          surface.setSunExposure('NoSun')
+          surface.setWindExposure('NoWind')
+          surface_property_convection_coefficients = OpenStudio::Model::SurfacePropertyConvectionCoefficients.new(surface)
+          surface_property_convection_coefficients.setConvectionCoefficient1Location('Inside')
+          surface_property_convection_coefficients.setConvectionCoefficient1Type('Value')
+          surface_property_convection_coefficients.setConvectionCoefficient1(30)
+        end
+      else
+        space = OpenStudio::Model::Space.new(model)
+      end
+      space.setName(space_type)
       st = OpenStudio::Model::SpaceType.new(model)
       st.setStandardsSpaceType(space_type)
       space.setSpaceType(st)
-
       space.setThermalZone(thermal_zone)
       spaces[space_type] = space
     end
@@ -949,9 +976,9 @@ class OSModel
     return azimuth
   end
 
-  def self.create_or_get_space(model, spaces, spacetype)
+  def self.create_or_get_space(model, spaces, spacetype, default_surface = false)
     if spaces[spacetype].nil?
-      create_space_and_zone(model, spaces, spacetype)
+      create_space_and_zone(model, spaces, spacetype, default_surface)
     end
     return spaces[spacetype]
   end
@@ -2016,15 +2043,19 @@ class OSModel
     @hpxml.cooling_systems.each do |cooling_system|
       if cooling_system.is_ventilation_preconditioning
         fan_index = @hpxml.ventilation_fans.find_index(cooling_system.ventilation_fan)
-        living_zone = create_or_get_space(model, spaces, HPXML::LocationMechanicalVentilationSpace + "#{fan_index}").thermalZone.get
+        mechvent_space = create_or_get_space(model, spaces, HPXML::LocationMechanicalVentilationSpace + " #{fan_index}", true)
+        thermal_zone = mechvent_space.thermalZone.get
+        cooling_system.ventilation_fan.additional_properties.space = mechvent_space
+        cooling_system.fraction_cool_load_served = 0.0
       else
-        living_zone = spaces[HPXML::LocationLivingSpace].thermalZone.get
+        thermal_zone = spaces[HPXML::LocationLivingSpace].thermalZone.get
         check_distribution_system(cooling_system.distribution_system, cooling_system.cooling_system_type)
       end
 
       if cooling_system.cooling_system_type == HPXML::HVACTypeCentralAirConditioner
         if cooling_system.is_ventilation_preconditioning
           heating_system = cooling_system.attached_preconditioning_heating_system
+          heating_system.fraction_heat_load_served = 0.0
         else
           heating_system = cooling_system.attached_heating_system
         end
@@ -2034,29 +2065,29 @@ class OSModel
 
         HVAC.apply_central_air_conditioner_furnace(model, runner, cooling_system, heating_system,
                                                    @remaining_cool_load_frac, @remaining_heat_load_frac,
-                                                   living_zone, @hvac_map)
+                                                   thermal_zone, @hvac_map)
 
-        if not heating_system.nil? and not heating_system.is_ventilation_preconditioning
+        if (not heating_system.nil?) && (not heating_system.is_ventilation_preconditioning)
           @remaining_heat_load_frac -= heating_system.fraction_heat_load_served
         end
 
       elsif cooling_system.cooling_system_type == HPXML::HVACTypeRoomAirConditioner
 
         HVAC.apply_room_air_conditioner(model, runner, cooling_system,
-                                        @remaining_cool_load_frac, living_zone,
+                                        @remaining_cool_load_frac, thermal_zone,
                                         @hvac_map)
 
       elsif cooling_system.cooling_system_type == HPXML::HVACTypeEvaporativeCooler
 
         HVAC.apply_evaporative_cooler(model, runner, cooling_system,
-                                      @remaining_cool_load_frac, living_zone,
+                                      @remaining_cool_load_frac, thermal_zone,
                                       @hvac_map)
 
       elsif cooling_system.cooling_system_type == HPXML::HVACTypeMiniSplitAirConditioner
 
         HVAC.apply_mini_split_air_conditioner(model, runner, cooling_system,
                                               @remaining_cool_load_frac,
-                                              living_zone, @hvac_map)
+                                              thermal_zone, @hvac_map)
       end
 
       if not cooling_system.is_ventilation_preconditioning
@@ -2069,9 +2100,12 @@ class OSModel
     @hpxml.heating_systems.each do |heating_system|
       if heating_system.is_ventilation_preconditioning
         fan_index = @hpxml.ventilation_fans.find_index(heating_system.ventilation_fan)
-        living_zone = create_or_get_space(model, spaces, HPXML::LocationMechanicalVentilationSpace + "#{fan_index}").thermalZone.get
+        mechvent_space = create_or_get_space(model, spaces, HPXML::LocationMechanicalVentilationSpace + " #{fan_index}", true)
+        thermal_zone = mechvent_space.thermalZone.get
+        heating_system.ventilation_fan.additional_properties.space = mechvent_space
+        heating_system.fraction_heat_load_served = 0.0
       else
-        living_zone = spaces[HPXML::LocationLivingSpace].thermalZone.get
+        thermal_zone = spaces[HPXML::LocationLivingSpace].thermalZone.get
         check_distribution_system(heating_system.distribution_system, heating_system.heating_system_type)
       end
 
@@ -2087,17 +2121,17 @@ class OSModel
 
         HVAC.apply_central_air_conditioner_furnace(model, runner, nil, heating_system,
                                                    nil, @remaining_heat_load_frac,
-                                                   living_zone, @hvac_map)
+                                                   thermal_zone, @hvac_map)
 
       elsif heating_system.heating_system_type == HPXML::HVACTypeBoiler
 
         HVAC.apply_boiler(model, runner, heating_system,
-                          @remaining_heat_load_frac, living_zone, @hvac_map)
+                          @remaining_heat_load_frac, thermal_zone, @hvac_map)
 
       elsif heating_system.heating_system_type == HPXML::HVACTypeElectricResistance
 
         HVAC.apply_electric_baseboard(model, runner, heating_system,
-                                      @remaining_heat_load_frac, living_zone, @hvac_map)
+                                      @remaining_heat_load_frac, thermal_zone, @hvac_map)
 
       elsif (heating_system.heating_system_type == HPXML::HVACTypeStove ||
              heating_system.heating_system_type == HPXML::HVACTypePortableHeater ||
@@ -2107,7 +2141,7 @@ class OSModel
              heating_system.heating_system_type == HPXML::HVACTypeFireplace)
 
         HVAC.apply_unit_heater(model, runner, heating_system,
-                               @remaining_heat_load_frac, living_zone, @hvac_map)
+                               @remaining_heat_load_frac, thermal_zone, @hvac_map)
       end
 
       if not heating_system.is_ventilation_preconditioning
@@ -2117,8 +2151,6 @@ class OSModel
   end
 
   def self.add_heat_pump(runner, model, weather, spaces)
-    living_zone = spaces[HPXML::LocationLivingSpace].thermalZone.get
-
     @hpxml.heat_pumps.each do |heat_pump|
       # TODO: Move these checks into hvac.rb
       if not heat_pump.heating_capacity_17F.nil?
@@ -2136,9 +2168,13 @@ class OSModel
 
       if heat_pump.is_ventilation_preconditioning
         fan_index = @hpxml.ventilation_fans.find_index(heat_pump.ventilation_fan)
-        living_zone = create_or_get_space(model, spaces, HPXML::LocationMechanicalVentilationSpace + "#{fan_index}").thermalZone.get
+        mechvent_space = create_or_get_space(model, spaces, HPXML::LocationMechanicalVentilationSpace + " #{fan_index}", true)
+        thermal_zone = mechvent_space.thermalZone.get
+        heat_pump.ventilation_fan.additional_properties.space = mechvent_space
+        heat_pump.fraction_heat_load_served = 0.0
+        heat_pump.fraction_cool_load_served = 0.0
       else
-        living_zone = spaces[HPXML::LocationLivingSpace].thermalZone.get
+        thermal_zone = spaces[HPXML::LocationLivingSpace].thermalZone.get
         check_distribution_system(heat_pump.distribution_system, heat_pump.heat_pump_type)
       end
 
@@ -2147,21 +2183,21 @@ class OSModel
         HVAC.apply_central_air_to_air_heat_pump(model, runner, heat_pump,
                                                 @remaining_heat_load_frac,
                                                 @remaining_cool_load_frac,
-                                                living_zone, @hvac_map)
+                                                thermal_zone, @hvac_map)
 
       elsif heat_pump.heat_pump_type == HPXML::HVACTypeHeatPumpMiniSplit
 
         HVAC.apply_mini_split_heat_pump(model, runner, heat_pump,
                                         @remaining_heat_load_frac,
                                         @remaining_cool_load_frac,
-                                        living_zone, @hvac_map)
+                                        thermal_zone, @hvac_map)
 
       elsif heat_pump.heat_pump_type == HPXML::HVACTypeHeatPumpGroundToAir
 
         HVAC.apply_ground_to_air_heat_pump(model, runner, weather, heat_pump,
                                            @remaining_heat_load_frac,
                                            @remaining_cool_load_frac,
-                                           living_zone, @hvac_map)
+                                           thermal_zone, @hvac_map)
 
       end
 
@@ -2720,13 +2756,12 @@ class OSModel
         whf_flow_actuators << actuator
       end
     end
-    if (infil_flow_actuators.size != 1) || (natvent_flow_actuators.size != 1) || (mechvent_flow_actuators.size != 1) || (whf_flow_actuators.size != 1)
+    if (infil_flow_actuators.size != 1) || (natvent_flow_actuators.size != 1) || (whf_flow_actuators.size != 1)
       fail 'Could not find actuator for component loads.'
     end
 
     infil_flow_actuator = infil_flow_actuators[0]
     natvent_flow_actuator = natvent_flow_actuators[0]
-    mechvent_flow_actuator = mechvent_flow_actuators[0]
     whf_flow_actuator = whf_flow_actuators[0]
 
     # EMS Sensors: Ducts
@@ -2952,12 +2987,13 @@ class OSModel
     end
 
     # EMS program: Infiltration, Natural Ventilation, Mechanical Ventilation, Ducts
-    program.addLine("Set hr_airflow_rate = #{infil_flow_actuator.name} + #{mechvent_flow_actuator.name} + #{natvent_flow_actuator.name} + #{whf_flow_actuator.name}")
+    mechvent_flow_actuator_names = mechvent_flow_actuators.map { |mechvent_act| mechvent_act.name }.join(' + ')
+    program.addLine("Set hr_airflow_rate = #{infil_flow_actuator.name} + #{mechvent_flow_actuator_names} + #{natvent_flow_actuator.name} + #{whf_flow_actuator.name}")
     program.addLine('If hr_airflow_rate > 0')
     program.addLine("  Set hr_infil = (#{air_loss_sensor.name} - #{air_gain_sensor.name}) * #{infil_flow_actuator.name} / hr_airflow_rate") # Airflow heat attributed to infiltration
     program.addLine("  Set hr_natvent = (#{air_loss_sensor.name} - #{air_gain_sensor.name}) * #{natvent_flow_actuator.name} / hr_airflow_rate") # Airflow heat attributed to natural ventilation
     program.addLine("  Set hr_whf = (#{air_loss_sensor.name} - #{air_gain_sensor.name}) * #{whf_flow_actuator.name} / hr_airflow_rate") # Airflow heat attributed to whole house fan
-    program.addLine("  Set hr_mechvent = ((#{air_loss_sensor.name} - #{air_gain_sensor.name}) * #{mechvent_flow_actuator.name} / hr_airflow_rate)") # Airflow heat attributed to mechanical ventilation
+    program.addLine("  Set hr_mechvent = ((#{air_loss_sensor.name} - #{air_gain_sensor.name}) * (#{mechvent_flow_actuator_names}) / hr_airflow_rate)") # Airflow heat attributed to mechanical ventilation
     program.addLine('Else')
     program.addLine('  Set hr_infil = 0')
     program.addLine('  Set hr_natvent = 0')

@@ -424,9 +424,6 @@ def create_hpxmls
         end
 
         # Check for additional errors
-        if hpxml_path.include? 'mechvent-shared'
-          hpxml.adjust_hvac_with_ventilation_preconditioning()
-        end
         errors = hpxml.check_for_errors()
         if errors.size > 0
           fail "ERRORS: #{errors}"
@@ -2777,7 +2774,6 @@ def set_hpxml_cooling_systems(hpxml_file, hpxml)
                               cooling_system_type: HPXML::HVACTypeCentralAirConditioner,
                               cooling_system_fuel: HPXML::FuelTypeElectricity,
                               cooling_capacity_building: 9600,
-                              fraction_cool_load_served: 0.2,
                               cooling_efficiency_seer: 13,
                               cooling_shr: 0.65,
                               is_ventilation_preconditioning: true)
@@ -2831,8 +2827,6 @@ def set_hpxml_heat_pumps(hpxml_file, hpxml)
                          backup_heating_fuel: HPXML::FuelTypeElectricity,
                          backup_heating_capacity: 34121,
                          backup_heating_efficiency_percent: 1.0,
-                         fraction_heat_load_served: 0.2,
-                         fraction_cool_load_served: 0.0,
                          heating_efficiency_hspf: 7.7,
                          cooling_efficiency_seer: 13,
                          heating_capacity_17F_building: 42000 * 0.630, # Based on OAT slope of default curves

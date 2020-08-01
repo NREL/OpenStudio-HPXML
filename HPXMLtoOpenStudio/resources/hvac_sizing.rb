@@ -128,6 +128,7 @@ class HVACSizing
 
     @spaces.each do |space_type, space|
       next unless space.is_a? OpenStudio::Model::Space
+      next if space.name.get.include? HPXML::LocationMechanicalVentilationSpace
 
       @cool_design_temps[space_type] = process_design_temp_cooling(weather, space_type)
       @heat_design_temps[space_type] = process_design_temp_heating(weather, space_type)

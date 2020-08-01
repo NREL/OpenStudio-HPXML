@@ -64,7 +64,9 @@ class Geometry
     maxzs = []
     spaces.each do |space|
       zvalues = getSurfaceZValues(space.surfaces)
-      maxzs << zvalues.max + UnitConversions.convert(space.zOrigin, 'm', 'ft')
+      if not zvalues.empty?
+        maxzs << zvalues.max + UnitConversions.convert(space.zOrigin, 'm', 'ft')
+      end
     end
     return maxzs.max
   end

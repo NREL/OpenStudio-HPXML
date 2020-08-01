@@ -527,7 +527,7 @@ class EnergyPlusValidator
       },
 
       ## [PreconditioningSystem="false"]
-      '/HPXML/Building/BuildingDetails/Systems/HVAC/HVACPlant/CoolingSystem[IsVentilationPreconditioningSystem="false"]' => {
+      '/HPXML/Building/BuildingDetails/Systems/HVAC/HVACPlant/HeatPump[IsVentilationPreconditioningSystem="false"]' => {
         'FractionHeatLoadServed' => one, # Must sum to <= 1 across all HeatPumps and HeatingSystems
         'FractionCoolLoadServed' => one, # Must sum to <= 1 across all HeatPumps and CoolingSystems
       },

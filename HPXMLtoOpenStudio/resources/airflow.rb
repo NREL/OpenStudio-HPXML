@@ -1384,47 +1384,25 @@ class Airflow
     return infil_program
   end
 
-  def self.apply_infiltration_and_ventilation_fans(model, weather, vent_fans_mech, vent_fans_kitchen, vent_fans_bath, has_flue_chimney, air_infils, vented_attic, vented_crawl)
-    # Get living space infiltration
-    living_ach50 = nil
-    living_const_ach = nil
-    air_infils.each do |air_infil|
-      if (air_infil.unit_of_measure == HPXML::UnitsACH) && (air_infil.house_pressure == 50)
-        living_ach50 = air_infil.air_leakage
-      elsif (air_infil.unit_of_measure == HPXML::UnitsCFM) && (air_infil.house_pressure == 50)
-        living_ach50 = air_infil.air_leakage * 60.0 / @infil_volume # Convert CFM50 to ACH50
-      elsif air_infil.unit_of_measure == HPXML::UnitsACHNatural
-        if @apply_ashrae140_assumptions
-          living_const_ach = air_infil.air_leakage
-        else
-          sla = get_infiltration_SLA_from_ACH(air_infil.air_leakage, @infil_height, weather)
-          living_ach50 = get_infiltration_ACH50_from_SLA(sla, 0.65, @cfa, @infil_volume)
-        end
-      end
+  def self.apply_mechvent_fans_and_airflows(vent_mech_erv_hrv, vent_mech_sup, vent_mech_exh, vent_mech_cfis, vent_mech_bal, vent_fans_kitchen, vent_fans_bath, model, infil_program, space, is_living)
+    # Airflow actuators
+    if is_living
+      infil_flow = OpenStudio::Model::SpaceInfiltrationDesignFlowRate.new(model)
+      infil_flow.setName(Constants.ObjectNameInfiltration + ' flow')
+      infil_flow.setSchedule(model.alwaysOnDiscreteSchedule)
+      infil_flow.setSpace(space)
+      infil_flow_actuator = OpenStudio::Model::EnergyManagementSystemActuator.new(infil_flow, 'Zone Infiltration', 'Air Exchange Flow Rate')
+      infil_flow_actuator.setName("#{infil_flow.name} act")
     end
 
-    # Infiltration for unconditioned spaces
-    apply_infiltration_to_garage(model, weather, living_ach50)
-    apply_infiltration_to_unconditioned_basement(model, weather)
-    apply_infiltration_to_vented_crawlspace(model, weather, vented_crawl)
-    apply_infiltration_to_unvented_crawlspace(model, weather)
-    apply_infiltration_to_vented_attic(model, weather, vented_attic)
-    apply_infiltration_to_unvented_attic(model, weather)
+    mechvent_flow = OpenStudio::Model::SpaceInfiltrationDesignFlowRate.new(model)
+    mechvent_flow.setName(Constants.ObjectNameMechanicalVentilation + ' flow')
+    mechvent_flow.setSchedule(model.alwaysOnDiscreteSchedule)
+    mechvent_flow.setSpace(space)
+    mechvent_flow_actuator = OpenStudio::Model::EnergyManagementSystemActuator.new(mechvent_flow, 'Zone Infiltration', 'Air Exchange Flow Rate')
+    mechvent_flow_actuator.setName("#{mechvent_flow.name} act")
 
-    # Local ventilation
-    range_sch_sensors_map = apply_local_ventilation(model, vent_fans_kitchen, Constants.ObjectNameMechanicalVentilationRangeFan)
-    bath_sch_sensors_map = apply_local_ventilation(model, vent_fans_bath, Constants.ObjectNameMechanicalVentilationBathFan)
-
-    # Get mechanical ventilation
-    vent_fans_living_space = vent_fans_mech.select {|vent_mech| vent_mech.preconditioning_heating_system_idref.nil? and vent_mech.preconditioning_cooling_system_idref.nil?}
-    vent_fans_mechvent_space = vent_fans_mech.select {|vent_mech| not vent_mech.preconditioning_heating_system_idref.nil? or not vent_mech.preconditioning_cooling_system_idref.nil?}
-
-    vent_mech_sup = vent_fans_mech.select { |vent_mech| vent_mech.fan_type == HPXML::MechVentTypeSupply }
-    vent_mech_exh = vent_fans_mech.select { |vent_mech| vent_mech.fan_type == HPXML::MechVentTypeExhaust }
-    vent_mech_cfis = vent_fans_mech.select { |vent_mech| vent_mech.fan_type == HPXML::MechVentTypeCFIS }
-    vent_mech_bal = vent_fans_mech.select { |vent_mech| vent_mech.fan_type == HPXML::MechVentTypeBalanced }
-    vent_mech_erv_hrv = vent_fans_mech.select { |vent_mech| [HPXML::MechVentTypeERV, HPXML::MechVentTypeHRV].include? vent_mech.fan_type }
-
+    # Fan watts
     sup_vent_mech_fan_w = vent_mech_sup.map { |vent_mech| vent_mech.average_fan_power }.sum(0.0)
     exh_vent_mech_fan_w = vent_mech_exh.map { |vent_mech| vent_mech.average_fan_power }.sum(0.0)
     # ERV/HRV and balanced system fan power combined altogether
@@ -1437,57 +1415,39 @@ class Airflow
       fan_heat_lost_fraction = 1.0
     end
     add_ee_for_vent_fan_power(model, Constants.ObjectNameMechanicalVentilationHouseFan, fan_heat_lost_fraction, false, total_sup_exh_bal_w)
+    # CFIS fan Actuators
+    cfis_fan_actuator = add_ee_for_vent_fan_power(model, Constants.ObjectNameMechanicalVentilationHouseFanCFIS, 0.0, true)
 
-    # get cfms
+    # CFMs
+    # get cfms (for living space)
     sup_cfm = vent_mech_sup.map { |vent_mech| vent_mech.average_flow_rate }.sum(0.0)
     exh_cfm = vent_mech_exh.map { |vent_mech| vent_mech.average_flow_rate }.sum(0.0)
     bal_cfm = vent_mech_bal.map { |vent_mech| vent_mech.average_flow_rate }.sum(0.0)
     erv_hrv_cfm = vent_mech_erv_hrv.map { |vent_mech| vent_mech.average_flow_rate }.sum(0.0)
     cfis_cfm = vent_mech_cfis.map { |vent_mech| vent_mech.average_flow_rate }.sum(0.0)
 
-    # Balanced and unbalanced airflow calculated for hvac sizing
-    tot_sup_cfm = sup_cfm + bal_cfm + erv_hrv_cfm + cfis_cfm
-    tot_exh_cfm = exh_cfm + bal_cfm + erv_hrv_cfm
-    tot_bal_cfm = [tot_sup_cfm, tot_exh_cfm].min
-    tot_unbal_cfm = (tot_sup_cfm - tot_exh_cfm).abs
+    if is_living
+      # Balanced and unbalanced airflow calculated for hvac sizing
+      tot_sup_cfm = sup_cfm + bal_cfm + erv_hrv_cfm + cfis_cfm
+      tot_exh_cfm = exh_cfm + bal_cfm + erv_hrv_cfm
+      tot_bal_cfm = [tot_sup_cfm, tot_exh_cfm].min
+      tot_unbal_cfm = (tot_sup_cfm - tot_exh_cfm).abs
 
-    # Store info for HVAC Sizing measure
-    model.getBuilding.additionalProperties.setFeature(Constants.SizingInfoMechVentWholeHouseRateBalanced, tot_bal_cfm)
-    model.getBuilding.additionalProperties.setFeature(Constants.SizingInfoMechVentWholeHouseRateUnbalanced, tot_unbal_cfm)
-    model.getBuilding.additionalProperties.setFeature(Constants.SizingInfoMechVentExist, (not vent_fans_mech.empty?))
-
-    # Fan Actuators
-    cfis_fan_actuator = add_ee_for_vent_fan_power(model, Constants.ObjectNameMechanicalVentilationHouseFanCFIS, 0.0, true)
-
-    infil_flow = OpenStudio::Model::SpaceInfiltrationDesignFlowRate.new(model)
-    infil_flow.setName(Constants.ObjectNameInfiltration + ' flow')
-    infil_flow.setSchedule(model.alwaysOnDiscreteSchedule)
-    infil_flow.setSpace(@living_space)
-    infil_flow_actuator = OpenStudio::Model::EnergyManagementSystemActuator.new(infil_flow, 'Zone Infiltration', 'Air Exchange Flow Rate')
-    infil_flow_actuator.setName("#{infil_flow.name} act")
-
-    mechvent_flow = OpenStudio::Model::SpaceInfiltrationDesignFlowRate.new(model)
-    mechvent_flow.setName(Constants.ObjectNameMechanicalVentilation + ' flow')
-    mechvent_flow.setSchedule(model.alwaysOnDiscreteSchedule)
-    mechvent_flow.setSpace(@living_space)
-    mechvent_flow_actuator = OpenStudio::Model::EnergyManagementSystemActuator.new(mechvent_flow, 'Zone Infiltration', 'Air Exchange Flow Rate')
-    mechvent_flow_actuator.setName("#{mechvent_flow.name} act")
-
-    # Living Space Infiltration Calculation/Program
-    infil_program = OpenStudio::Model::EnergyManagementSystemProgram.new(model)
-    infil_program.setName(Constants.ObjectNameInfiltration + ' program')
-
-    infil_program = apply_infiltration_to_living(living_ach50, living_const_ach, infil_program, weather, has_flue_chimney)
+      # Store info for HVAC Sizing measure
+      model.getBuilding.additionalProperties.setFeature(Constants.SizingInfoMechVentWholeHouseRateBalanced, tot_bal_cfm)
+      model.getBuilding.additionalProperties.setFeature(Constants.SizingInfoMechVentWholeHouseRateUnbalanced, tot_unbal_cfm)
+      model.getBuilding.additionalProperties.setFeature(Constants.SizingInfoMechVentExist, (not (vent_mech_erv_hrv + vent_mech_sup + vent_mech_exh + vent_mech_cfis + vent_mech_bal).empty?))
+    end
 
     infil_program.addLine('Set QWHV_ervhrv = 0.0')
     if not vent_mech_erv_hrv.empty?
       # Actuators for ERV/HRV
       sens_name = "#{Constants.ObjectNameERVHRV} sensible load"
       erv_sens_load_var = OpenStudio::Model::EnergyManagementSystemGlobalVariable.new(model, sens_name.gsub(' ', '_'))
-      erv_sens_load_actuator = create_sens_lat_load_actuator_and_equipment(model, sens_name, @living_space, 0.0, 0.0)
+      erv_sens_load_actuator = create_sens_lat_load_actuator_and_equipment(model, sens_name, space, 0.0, 0.0)
       lat_name = "#{Constants.ObjectNameERVHRV} latent load"
       erv_lat_load_var = OpenStudio::Model::EnergyManagementSystemGlobalVariable.new(model, lat_name.gsub(' ', '_'))
-      erv_lat_load_actuator = create_sens_lat_load_actuator_and_equipment(model, lat_name, @living_space, 1.0, 0.0)
+      erv_lat_load_actuator = create_sens_lat_load_actuator_and_equipment(model, lat_name, space, 1.0, 0.0)
 
       infil_program.addLine("Set #{erv_sens_load_actuator.name} = 0.0")
       infil_program.addLine("Set #{erv_lat_load_actuator.name} = 0.0")
@@ -1558,33 +1518,110 @@ class Airflow
 
     # Calculate adjusted infiltration based on mechanical ventilation system
     infil_program.addLine('Set Qfan = (@Max Qexhaust Qsupply)')
-    if Constants.ERIVersions.index(@eri_version) >= Constants.ERIVersions.index('2019')
-      # Follow ASHRAE 62.2-2016, Normative Appendix C equations for time-varying total airflow
-      infil_program.addLine('If Qfan > 0')
-      # Balanced system if the total supply airflow and total exhaust airflow are within 10% of their average.
-      infil_program.addLine('  Set Qavg = ((Qexhaust + Qsupply) / 2.0)')
-      infil_program.addLine('  If ((@Abs (Qexhaust - Qavg)) / Qavg) <= 0.1') # Only need to check Qexhaust, Qsupply will give same result
-      infil_program.addLine('    Set phi = 1')
-      infil_program.addLine('  Else')
-      infil_program.addLine('    Set phi = (Qinf / (Qinf + Qfan))')
-      infil_program.addLine('  EndIf')
-      infil_program.addLine('  Set Qinf_adj = phi * Qinf')
-      infil_program.addLine('Else')
-      infil_program.addLine('  Set Qinf_adj = Qinf')
-      infil_program.addLine('EndIf')
-    else
-      infil_program.addLine('Set Qu = (@Abs (Qexhaust - Qsupply))') # Unbalanced flow
-      infil_program.addLine('Set Qb = Qfan - Qu') # Balanced flow
-      infil_program.addLine('Set Qtot = (((Qu^2) + (Qinf^2)) ^ 0.5) + Qb')
-      infil_program.addLine('Set Qinf_adj = Qtot - Qu - Qb')
-    end
     infil_program.addLine("Set #{mechvent_flow_actuator.name} = Qfan - QWHV_ervhrv") # QWHV load captured by ERV/HRV program
-    infil_program.addLine("Set #{infil_flow_actuator.name} = Qinf_adj")
+    if is_living
+      if Constants.ERIVersions.index(@eri_version) >= Constants.ERIVersions.index('2019')
+        # Follow ASHRAE 62.2-2016, Normative Appendix C equations for time-varying total airflow
+        infil_program.addLine('If Qfan > 0')
+        # Balanced system if the total supply airflow and total exhaust airflow are within 10% of their average.
+        infil_program.addLine('  Set Qavg = ((Qexhaust + Qsupply) / 2.0)')
+        infil_program.addLine('  If ((@Abs (Qexhaust - Qavg)) / Qavg) <= 0.1') # Only need to check Qexhaust, Qsupply will give same result
+        infil_program.addLine('    Set phi = 1')
+        infil_program.addLine('  Else')
+        infil_program.addLine('    Set phi = (Qinf / (Qinf + Qfan))')
+        infil_program.addLine('  EndIf')
+        infil_program.addLine('  Set Qinf_adj = phi * Qinf')
+        infil_program.addLine('Else')
+        infil_program.addLine('  Set Qinf_adj = Qinf')
+        infil_program.addLine('EndIf')
+      else
+        infil_program.addLine('Set Qu = (@Abs (Qexhaust - Qsupply))') # Unbalanced flow
+        infil_program.addLine('Set Qb = Qfan - Qu') # Balanced flow
+        infil_program.addLine('Set Qtot = (((Qu^2) + (Qinf^2)) ^ 0.5) + Qb')
+        infil_program.addLine('Set Qinf_adj = Qtot - Qu - Qb')
+      end
+      infil_program.addLine("Set #{infil_flow_actuator.name} = Qinf_adj")
+    end
+    return infil_program
+  end
 
+  def self.apply_infiltration_and_ventilation_fans(model, weather, vent_fans_mech, vent_fans_kitchen, vent_fans_bath, has_flue_chimney, air_infils, vented_attic, vented_crawl)
+    # Get living space infiltration
+    living_ach50 = nil
+    living_const_ach = nil
+    air_infils.each do |air_infil|
+      if (air_infil.unit_of_measure == HPXML::UnitsACH) && (air_infil.house_pressure == 50)
+        living_ach50 = air_infil.air_leakage
+      elsif (air_infil.unit_of_measure == HPXML::UnitsCFM) && (air_infil.house_pressure == 50)
+        living_ach50 = air_infil.air_leakage * 60.0 / @infil_volume # Convert CFM50 to ACH50
+      elsif air_infil.unit_of_measure == HPXML::UnitsACHNatural
+        if @apply_ashrae140_assumptions
+          living_const_ach = air_infil.air_leakage
+        else
+          sla = get_infiltration_SLA_from_ACH(air_infil.air_leakage, @infil_height, weather)
+          living_ach50 = get_infiltration_ACH50_from_SLA(sla, 0.65, @cfa, @infil_volume)
+        end
+      end
+    end
+
+    # Infiltration for unconditioned spaces
+    apply_infiltration_to_garage(model, weather, living_ach50)
+    apply_infiltration_to_unconditioned_basement(model, weather)
+    apply_infiltration_to_vented_crawlspace(model, weather, vented_crawl)
+    apply_infiltration_to_unvented_crawlspace(model, weather)
+    apply_infiltration_to_vented_attic(model, weather, vented_attic)
+    apply_infiltration_to_unvented_attic(model, weather)
+
+    # Local ventilation
+    range_sch_sensors_map = apply_local_ventilation(model, vent_fans_kitchen, Constants.ObjectNameMechanicalVentilationRangeFan)
+    bath_sch_sensors_map = apply_local_ventilation(model, vent_fans_bath, Constants.ObjectNameMechanicalVentilationBathFan)
+
+    # Get mechanical ventilation
+    vent_fans_living_space = vent_fans_mech.select { |vent_mech| vent_mech.preconditioning_heating_system_idref.nil? && vent_mech.preconditioning_cooling_system_idref.nil? }
+    # Use new mech vent space for preconditioning
+    vent_fans_mechvent_space = vent_fans_mech.select { |vent_mech| (not vent_mech.preconditioning_heating_system_idref.nil?) || (not vent_mech.preconditioning_cooling_system_idref.nil?) }
+
+    vent_mech_sup_lv = vent_fans_living_space.select { |vent_mech| vent_mech.fan_type == HPXML::MechVentTypeSupply }
+    vent_mech_exh_lv = vent_fans_living_space.select { |vent_mech| vent_mech.fan_type == HPXML::MechVentTypeExhaust }
+    vent_mech_cfis_lv = vent_fans_living_space.select { |vent_mech| vent_mech.fan_type == HPXML::MechVentTypeCFIS }
+    vent_mech_bal_lv = vent_fans_living_space.select { |vent_mech| vent_mech.fan_type == HPXML::MechVentTypeBalanced }
+    vent_mech_erv_hrv_lv = vent_fans_living_space.select { |vent_mech| [HPXML::MechVentTypeERV, HPXML::MechVentTypeHRV].include? vent_mech.fan_type }
+    vent_mech_sup_mechvent = vent_fans_mechvent_space.select { |vent_mech| vent_mech.fan_type == HPXML::MechVentTypeSupply }
+    vent_mech_exh_mechvent = vent_fans_mechvent_space.select { |vent_mech| vent_mech.fan_type == HPXML::MechVentTypeExhaust }
+    vent_mech_cfis_mechvent = vent_fans_mechvent_space.select { |vent_mech| vent_mech.fan_type == HPXML::MechVentTypeCFIS }
+    vent_mech_bal_mechvent = vent_fans_mechvent_space.select { |vent_mech| vent_mech.fan_type == HPXML::MechVentTypeBalanced }
+    vent_mech_erv_hrv_mechvent = vent_fans_mechvent_space.select { |vent_mech| [HPXML::MechVentTypeERV, HPXML::MechVentTypeHRV].include? vent_mech.fan_type }
+
+    # Living Space Infiltration Calculation/Program
+    infil_program_lv = OpenStudio::Model::EnergyManagementSystemProgram.new(model)
+    infil_program_lv.setName(Constants.ObjectNameInfiltration + ' living program')
+    infil_program_lv = apply_infiltration_to_living(living_ach50, living_const_ach, infil_program_lv, weather, has_flue_chimney)
+    infil_program_lv = apply_mechvent_fans_and_airflows(vent_mech_erv_hrv_lv, vent_mech_sup_lv, vent_mech_exh_lv, vent_mech_cfis_lv, vent_mech_bal_lv, vent_fans_kitchen, vent_fans_bath, model, infil_program_lv, @living_space, true)
     program_calling_manager = OpenStudio::Model::EnergyManagementSystemProgramCallingManager.new(model)
-    program_calling_manager.setName("#{infil_program.name} calling manager")
+    program_calling_manager.setName("#{Constants.ObjectNameInfiltration} program calling manager")
     program_calling_manager.setCallingPoint('BeginTimestepBeforePredictor')
-    program_calling_manager.addProgram(infil_program)
+    program_calling_manager.addProgram(infil_program_lv)
+    if not vent_fans_mechvent_space.empty?
+      i = 0
+      vent_fans_mechvent_space.each do |fan|
+        space = fan.additional_properties.space
+        infil_program_mechvent = OpenStudio::Model::EnergyManagementSystemProgram.new(model)
+        infil_program_mechvent.setName(Constants.ObjectNameInfiltration + " mechvent program #{i}")
+        infil_program_mechvent.addLine('Set Qinf = 0')
+        if vent_mech_erv_hrv_mechvent.include? fan
+          infil_program_mechvent = apply_mechvent_fans_and_airflows([fan], [], [], [], [], [], [], model, infil_program_mechvent, space, false)
+        elsif vent_mech_sup_mechvent.include? fan
+          infil_program_mechvent = apply_mechvent_fans_and_airflows([], [fan], [], [], [], [], [], model, infil_program_mechvent, space, false)
+        elsif vent_mech_exh_mechvent.include? fan
+          infil_program_mechvent = apply_mechvent_fans_and_airflows([], [], [fan], [], [], [], [], model, infil_program_mechvent, space, false)
+        elsif vent_mech_cfis_mechvent.include? fan
+          infil_program_mechvent = apply_mechvent_fans_and_airflows([], [], [], [fan], [], [], [], model, infil_program_mechvent, space, false)
+        elsif vent_mech_bal_mechvent.include? fan
+          infil_program_mechvent = apply_mechvent_fans_and_airflows([], [], [], [], [fan], [], [], model, infil_program_mechvent, space, false)
+        end
+        program_calling_manager.addProgram(infil_program_mechvent)
+      end
+    end
   end
 
   def self.apply_infiltration_to_living(living_ach50, living_const_ach, infil_program, weather, has_flue_chimney)
