@@ -144,12 +144,6 @@ class EnergyPlusValidator
       # [BuildingOccupancy]
       '/HPXML/Building/BuildingDetails/BuildingSummary/BuildingOccupancy' => {
         'NumberofResidents' => zero_or_one,
-        'extension/Schedule' => zero_or_one, # See [OccupancySchedule]
-      },
-
-      # [OccupancySchedule]
-      '/HPXML/Building/BuildingDetails/BuildingSummary/BuildingOccupancy/extension/Schedule' => {
-        '/HPXML/SoftwareInfo/extension/SchedulesPath' => one,
       },
 
       # [BuildingConstruction]
@@ -694,12 +688,6 @@ class EnergyPlusValidator
         'WaterFixtureType[text()="shower head" or text()="faucet"]' => one, # Required by HPXML schema
         'LowFlow' => one,
         '../extension/WaterFixturesUsageMultiplier' => zero_or_one,
-        '../extension/WaterFixturesSchedule' => zero_or_one, # See [FixturesSchedule]
-      },
-
-      # [FixturesSchedule]
-      '/HPXML/Building/BuildingDetails/Systems/WaterHeating/extension/WaterFixturesSchedule' => {
-        '/HPXML/SoftwareInfo/extension/SchedulesPath' => one,
       },
 
       # [SolarThermalSystem]
@@ -746,15 +734,6 @@ class EnergyPlusValidator
         'ModifiedEnergyFactor | IntegratedModifiedEnergyFactor' => zero_or_one,
         'ModifiedEnergyFactor | IntegratedModifiedEnergyFactor | RatedAnnualkWh | LabelElectricRate | LabelGasRate | LabelAnnualGasCost | LabelUsage | Capacity' => zero_or_seven,
         'extension/UsageMultiplier' => zero_or_one,
-        'extension/WaterSchedule | extension/PowerSchedule' => zero_or_two, # See [ClothesWasherSchedules]
-      },
-
-      # [ClothesWasherSchedules]
-      '/HPXML/Building/BuildingDetails/Appliances/ClothesWasher/extension/WaterSchedule' => {
-        '/HPXML/SoftwareInfo/extension/SchedulesPath' => one,
-      },
-      '/HPXML/Building/BuildingDetails/Appliances/ClothesWasher/extension/PowerSchedule' => {
-        '/HPXML/SoftwareInfo/extension/SchedulesPath' => one,
       },
 
       # [ClothesDryer]
@@ -766,12 +745,6 @@ class EnergyPlusValidator
         'EnergyFactor | CombinedEnergyFactor' => zero_or_one,
         'EnergyFactor | CombinedEnergyFactor | ControlType' => zero_or_two,
         'extension/UsageMultiplier' => zero_or_one,
-        'extension/PowerSchedule' => zero_or_one, # See [ClothesDryerSchedules]
-      },
-
-      # [ClothesDryerSchedules]
-      '/HPXML/Building/BuildingDetails/Appliances/ClothesDryer/extension/PowerSchedule' => {
-        '/HPXML/SoftwareInfo/extension/SchedulesPath' => one,
       },
 
       # [Dishwasher]
@@ -781,15 +754,6 @@ class EnergyPlusValidator
         'RatedAnnualkWh | EnergyFactor' => zero_or_one,
         'RatedAnnualkWh | EnergyFactor | LabelElectricRate | LabelGasRate | LabelAnnualGasCost | LabelUsage | PlaceSettingCapacity' => zero_or_six,
         'extension/UsageMultiplier' => zero_or_one,
-        'extension/WaterSchedule | extension/PowerSchedule' => zero_or_two, # See [DishwasherSchedules]
-      },
-
-      # [DishwasherSchedules]
-      '/HPXML/Building/BuildingDetails/Appliances/Dishwasher/extension/WaterSchedule' => {
-        '/HPXML/SoftwareInfo/extension/SchedulesPath' => one,
-      },
-      '/HPXML/Building/BuildingDetails/Appliances/Dishwasher/extension/PowerSchedule' => {
-        '/HPXML/SoftwareInfo/extension/SchedulesPath' => one,
       },
 
       # [Refrigerator]
@@ -835,12 +799,6 @@ class EnergyPlusValidator
         'extension/WeekdayScheduleFractions' => zero_or_one,
         'extension/WeekendScheduleFractions' => zero_or_one,
         'extension/MonthlyScheduleMultipliers' => zero_or_one,
-        'extension/Schedule' => zero_or_one, # See [CookingRangeSchedule]
-      },
-
-      # [CookingRangeSchedule]
-      '/HPXML/Building/BuildingDetails/Appliances/CookingRange/extension/Schedule' => {
-        '/HPXML/SoftwareInfo/extension/SchedulesPath' => one,
       },
 
       # [Oven]
@@ -866,24 +824,6 @@ class EnergyPlusValidator
         'extension/ExteriorWeekendScheduleFractions' => zero_or_one,
         'extension/ExteriorMonthlyScheduleMultipliers' => zero_or_one,
         'extension/ExteriorHolidayLighting' => zero_or_one, # See [ExteriorHolidayLighting]
-        'extension/InteriorSchedule' => zero_or_one, # See [InteriorSchedule]
-        'extension/ExteriorSchedule' => zero_or_one, # See [ExteriorSchedule]
-        'extension/GarageSchedule' => zero_or_one, # See [GarageSchedule]
-      },
-
-      # [InteriorSchedule]
-      '/HPXML/Building/BuildingDetails/Lighting/extension/InteriorSchedule' => {
-        '/HPXML/SoftwareInfo/extension/SchedulesPath' => one,
-      },
-
-      # [ExteriorSchedule]
-      '/HPXML/Building/BuildingDetails/Lighting/extension/ExteriorSchedule' => {
-        '/HPXML/SoftwareInfo/extension/SchedulesPath' => one,
-      },
-
-      # [GarageSchedule]
-      '/HPXML/Building/BuildingDetails/Lighting/extension/GarageSchedule' => {
-        '/HPXML/SoftwareInfo/extension/SchedulesPath' => one,
       },
 
       ## [LightingGroup]
@@ -899,12 +839,6 @@ class EnergyPlusValidator
         'PeriodEndMonth | PeriodEndDayOfMonth' => zero_or_two, # integer
         'WeekdayScheduleFractions' => zero_or_one,
         'WeekendScheduleFractions' => zero_or_one,
-        'Schedule' => zero_or_one, # See [ExteriorHolidaySchedule]
-      },
-
-      # [ExteriorHolidaySchedule]
-      '/HPXML/Building/BuildingDetails/Lighting/extension/ExteriorHolidayLighting/Schedule' => {
-        '/HPXML/SoftwareInfo/extension/SchedulesPath' => one,
       },
 
       # [CeilingFan]
@@ -912,12 +846,6 @@ class EnergyPlusValidator
         'SystemIdentifier' => one, # Required by HPXML schema
         'Airflow[FanSpeed="medium"]/Efficiency' => zero_or_one,
         'Quantity' => zero_or_one,
-        'extension/Schedule' => zero_or_one, # See [CeilingFanSchedule]
-      },
-
-      # [CeilingFanSchedule]
-      '/HPXML/Building/BuildingDetails/Lighting/CeilingFan/extension/Schedule' => {
-        '/HPXML/SoftwareInfo/extension/SchedulesPath' => one,
       },
 
       # [Pool]
@@ -987,12 +915,6 @@ class EnergyPlusValidator
         'extension/WeekdayScheduleFractions' => zero_or_one,
         'extension/WeekendScheduleFractions' => zero_or_one,
         'extension/MonthlyScheduleMultipliers' => zero_or_one,
-        'extension/Schedule' => zero_or_one, # See [PlugLoadSchedule]
-      },
-
-      # [PlugLoadSchedule]
-      '/HPXML/Building/BuildingDetails/MiscLoads/PlugLoad[PlugLoadType="other" or PlugLoadType="TV other" or PlugLoadType="electric vehicle charging" or PlugLoadType="well pump"]/extension/Schedule' => {
-        '/HPXML/SoftwareInfo/extension/SchedulesPath' => one,
       },
 
       # [FuelLoad]
