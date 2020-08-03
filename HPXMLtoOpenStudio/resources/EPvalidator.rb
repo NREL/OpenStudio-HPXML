@@ -763,9 +763,9 @@ class EnergyPlusValidator
         'RatedAnnualkWh | extension/AdjustedAnnualkWh' => zero_or_more,
         'PrimaryIndicator' => zero_or_one,
         'extension/UsageMultiplier' => zero_or_one,
-        'extension/WeekdayScheduleFractions' => zero_or_one,
-        'extension/WeekendScheduleFractions' => zero_or_one,
-        'extension/MonthlyScheduleMultipliers' => zero_or_one,
+        'extension/WeekdayScheduleFractions | /HPXML/SoftwareInfo/extension/SchedulesPath' => zero_or_one,
+        'extension/WeekendScheduleFractions | /HPXML/SoftwareInfo/extension/SchedulesPath' => zero_or_one,
+        'extension/MonthlyScheduleMultipliers | /HPXML/SoftwareInfo/extension/SchedulesPath' => zero_or_one,
       },
 
       # [Freezer]
@@ -774,9 +774,9 @@ class EnergyPlusValidator
         '[not(Location)] | Location[text()="living space" or text()="basement - conditioned" or text()="basement - unconditioned" or text()="garage" or text()="other housing unit" or text()="other heated space" or text()="other multifamily buffer space" or text()="other non-freezing space"]' => one,
         'RatedAnnualkWh | extension/AdjustedAnnualkWh' => zero_or_more,
         'extension/UsageMultiplier' => zero_or_one,
-        'extension/WeekdayScheduleFractions' => zero_or_one,
-        'extension/WeekendScheduleFractions' => zero_or_one,
-        'extension/MonthlyScheduleMultipliers' => zero_or_one,
+        'extension/WeekdayScheduleFractions | /HPXML/SoftwareInfo/extension/SchedulesPath' => zero_or_one,
+        'extension/WeekendScheduleFractions | /HPXML/SoftwareInfo/extension/SchedulesPath' => zero_or_one,
+        'extension/MonthlyScheduleMultipliers | /HPXML/SoftwareInfo/extension/SchedulesPath' => zero_or_one,
       },
 
       # [Dehumidifier]
@@ -796,9 +796,9 @@ class EnergyPlusValidator
         'FuelType[text()="natural gas" or text()="fuel oil" or text()="fuel oil 1" or text()="fuel oil 2" or text()="fuel oil 4" or text()="fuel oil 5/6" or text()="diesel" or text()="propane" or text()="kerosene" or text()="coal" or text()="coke" or text()="bituminous coal" or text()="anthracite coal" or text()="electricity" or text()="wood" or text()="wood pellets"]' => one,
         'IsInduction' => zero_or_one,
         'extension/UsageMultiplier' => zero_or_one,
-        'extension/WeekdayScheduleFractions' => zero_or_one,
-        'extension/WeekendScheduleFractions' => zero_or_one,
-        'extension/MonthlyScheduleMultipliers' => zero_or_one,
+        'extension/WeekdayScheduleFractions | /HPXML/SoftwareInfo/extension/SchedulesPath' => zero_or_one,
+        'extension/WeekendScheduleFractions | /HPXML/SoftwareInfo/extension/SchedulesPath' => zero_or_one,
+        'extension/MonthlyScheduleMultipliers | /HPXML/SoftwareInfo/extension/SchedulesPath' => zero_or_one,
       },
 
       # [Oven]
@@ -814,15 +814,15 @@ class EnergyPlusValidator
         'extension/InteriorUsageMultiplier' => zero_or_one,
         'extension/GarageUsageMultiplier' => zero_or_one,
         'extension/ExteriorUsageMultiplier' => zero_or_one,
-        'extension/InteriorWeekdayScheduleFractions' => zero_or_one,
-        'extension/InteriorWeekendScheduleFractions' => zero_or_one,
-        'extension/InteriorMonthlyScheduleMultipliers' => zero_or_one,
-        'extension/GarageWeekdayScheduleFractions' => zero_or_one,
-        'extension/GarageWeekendScheduleFractions' => zero_or_one,
-        'extension/GarageMonthlyScheduleMultipliers' => zero_or_one,
-        'extension/ExteriorWeekdayScheduleFractions' => zero_or_one,
-        'extension/ExteriorWeekendScheduleFractions' => zero_or_one,
-        'extension/ExteriorMonthlyScheduleMultipliers' => zero_or_one,
+        'extension/InteriorWeekdayScheduleFractions | /HPXML/SoftwareInfo/extension/SchedulesPath' => zero_or_one,
+        'extension/InteriorWeekendScheduleFractions | /HPXML/SoftwareInfo/extension/SchedulesPath' => zero_or_one,
+        'extension/InteriorMonthlyScheduleMultipliers | /HPXML/SoftwareInfo/extension/SchedulesPath' => zero_or_one,
+        'extension/GarageWeekdayScheduleFractions | /HPXML/SoftwareInfo/extension/SchedulesPath' => zero_or_one,
+        'extension/GarageWeekendScheduleFractions | /HPXML/SoftwareInfo/extension/SchedulesPath' => zero_or_one,
+        'extension/GarageMonthlyScheduleMultipliers | /HPXML/SoftwareInfo/extension/SchedulesPath' => zero_or_one,
+        'extension/ExteriorWeekdayScheduleFractions | /HPXML/SoftwareInfo/extension/SchedulesPath' => zero_or_one,
+        'extension/ExteriorWeekendScheduleFractions | /HPXML/SoftwareInfo/extension/SchedulesPath' => zero_or_one,
+        'extension/ExteriorMonthlyScheduleMultipliers | /HPXML/SoftwareInfo/extension/SchedulesPath' => zero_or_one,
         'extension/ExteriorHolidayLighting' => zero_or_one, # See [ExteriorHolidayLighting]
       },
 
@@ -835,10 +835,10 @@ class EnergyPlusValidator
       ## [ExteriorHolidayLighting]
       '/HPXML/Building/BuildingDetails/Lighting/extension/ExteriorHolidayLighting' => {
         'Load[Units="kWh/day"]/Value' => zero_or_one,
-        'PeriodBeginMonth | PeriodBeginDayOfMonth' => zero_or_two, # integer
-        'PeriodEndMonth | PeriodEndDayOfMonth' => zero_or_two, # integer
-        'WeekdayScheduleFractions' => zero_or_one,
-        'WeekendScheduleFractions' => zero_or_one,
+        '[PeriodBeginMonth and PeriodBeginDayOfMonth] | /HPXML/SoftwareInfo/extension/SchedulesPath' => zero_or_one, # integer
+        '[PeriodEndMonth and PeriodEndDayOfMonth] | /HPXML/SoftwareInfo/extension/SchedulesPath' => zero_or_one, # integer
+        'WeekdayScheduleFractions | /HPXML/SoftwareInfo/extension/SchedulesPath' => zero_or_one,
+        'WeekendScheduleFractions | /HPXML/SoftwareInfo/extension/SchedulesPath' => zero_or_one,
       },
 
       # [CeilingFan]
@@ -860,9 +860,9 @@ class EnergyPlusValidator
         'SystemIdentifier' => one, # Required by HPXML schema
         'Load[Units="kWh/year"]/Value' => zero_or_one,
         'extension/UsageMultiplier' => zero_or_one,
-        'extension/WeekdayScheduleFractions' => zero_or_one,
-        'extension/WeekendScheduleFractions' => zero_or_one,
-        'extension/MonthlyScheduleMultipliers' => zero_or_one,
+        'extension/WeekdayScheduleFractions | /HPXML/SoftwareInfo/extension/SchedulesPath' => zero_or_one,
+        'extension/WeekendScheduleFractions | /HPXML/SoftwareInfo/extension/SchedulesPath' => zero_or_one,
+        'extension/MonthlyScheduleMultipliers | /HPXML/SoftwareInfo/extension/SchedulesPath' => zero_or_one,
       },
 
       ## [PoolHeater]
@@ -871,9 +871,9 @@ class EnergyPlusValidator
         'Type[text()="gas fired" or text()="electric resistance" or text()="heat pump"]' => one,
         'Load[Units="kWh/year" or Units="therm/year"]/Value' => zero_or_one,
         'extension/UsageMultiplier' => zero_or_one,
-        'extension/WeekdayScheduleFractions' => zero_or_one,
-        'extension/WeekendScheduleFractions' => zero_or_one,
-        'extension/MonthlyScheduleMultipliers' => zero_or_one,
+        'extension/WeekdayScheduleFractions | /HPXML/SoftwareInfo/extension/SchedulesPath' => zero_or_one,
+        'extension/WeekendScheduleFractions | /HPXML/SoftwareInfo/extension/SchedulesPath' => zero_or_one,
+        'extension/MonthlyScheduleMultipliers | /HPXML/SoftwareInfo/extension/SchedulesPath' => zero_or_one,
       },
 
       # [HotTub]
@@ -888,9 +888,9 @@ class EnergyPlusValidator
         'SystemIdentifier' => one, # Required by HPXML schema
         'Load[Units="kWh/year"]/Value' => zero_or_one,
         'extension/UsageMultiplier' => zero_or_one,
-        'extension/WeekdayScheduleFractions' => zero_or_one,
-        'extension/WeekendScheduleFractions' => zero_or_one,
-        'extension/MonthlyScheduleMultipliers' => zero_or_one,
+        'extension/WeekdayScheduleFractions | /HPXML/SoftwareInfo/extension/SchedulesPath' => zero_or_one,
+        'extension/WeekendScheduleFractions | /HPXML/SoftwareInfo/extension/SchedulesPath' => zero_or_one,
+        'extension/MonthlyScheduleMultipliers | /HPXML/SoftwareInfo/extension/SchedulesPath' => zero_or_one,
       },
 
       ## [HotTubHeater]
@@ -899,9 +899,9 @@ class EnergyPlusValidator
         'Type[text()="gas fired" or text()="electric resistance" or text()="heat pump"]' => one,
         'Load[Units="kWh/year" or Units="therm/year"]/Value' => zero_or_one,
         'extension/UsageMultiplier' => zero_or_one,
-        'extension/WeekdayScheduleFractions' => zero_or_one,
-        'extension/WeekendScheduleFractions' => zero_or_one,
-        'extension/MonthlyScheduleMultipliers' => zero_or_one,
+        'extension/WeekdayScheduleFractions | /HPXML/SoftwareInfo/extension/SchedulesPath' => zero_or_one,
+        'extension/WeekendScheduleFractions | /HPXML/SoftwareInfo/extension/SchedulesPath' => zero_or_one,
+        'extension/MonthlyScheduleMultipliers | /HPXML/SoftwareInfo/extension/SchedulesPath' => zero_or_one,
       },
 
       # [PlugLoad]
@@ -912,9 +912,9 @@ class EnergyPlusValidator
         'extension/FracSensible' => zero_or_one,
         'extension/FracLatent' => zero_or_one,
         'extension/UsageMultiplier' => zero_or_one,
-        'extension/WeekdayScheduleFractions' => zero_or_one,
-        'extension/WeekendScheduleFractions' => zero_or_one,
-        'extension/MonthlyScheduleMultipliers' => zero_or_one,
+        'extension/WeekdayScheduleFractions | /HPXML/SoftwareInfo/extension/SchedulesPath' => zero_or_one,
+        'extension/WeekendScheduleFractions | /HPXML/SoftwareInfo/extension/SchedulesPath' => zero_or_one,
+        'extension/MonthlyScheduleMultipliers | /HPXML/SoftwareInfo/extension/SchedulesPath' => zero_or_one,
       },
 
       # [FuelLoad]
@@ -924,9 +924,9 @@ class EnergyPlusValidator
         'Load[Units="therm/year"]/Value' => zero_or_one,
         'FuelType[text()="natural gas" or text()="fuel oil" or text()="fuel oil 1" or text()="fuel oil 2" or text()="fuel oil 4" or text()="fuel oil 5/6" or text()="diesel" or text()="propane" or text()="kerosene" or text()="coal" or text()="coke" or text()="bituminous coal" or text()="anthracite coal" or text()="wood" or text()="wood pellets"]' => one,
         'extension/UsageMultiplier' => zero_or_one,
-        'extension/WeekdayScheduleFractions' => zero_or_one,
-        'extension/WeekendScheduleFractions' => zero_or_one,
-        'extension/MonthlyScheduleMultipliers' => zero_or_one,
+        'extension/WeekdayScheduleFractions | /HPXML/SoftwareInfo/extension/SchedulesPath' => zero_or_one,
+        'extension/WeekendScheduleFractions | /HPXML/SoftwareInfo/extension/SchedulesPath' => zero_or_one,
+        'extension/MonthlyScheduleMultipliers | /HPXML/SoftwareInfo/extension/SchedulesPath' => zero_or_one,
       },
     }
 

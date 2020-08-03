@@ -3,8 +3,8 @@
   <schema_version>3.0</schema_version>
   <name>hpxm_lto_openstudio</name>
   <uid>b1543b30-9465-45ff-ba04-1d1f85e763bc</uid>
-  <version_id>f3d59c36-b1b2-4dcc-84d4-32584d9766b4</version_id>
-  <version_modified>20200730T191032Z</version_modified>
+  <version_id>3bfad12e-129e-4220-bb9a-47946237feb6</version_id>
+  <version_modified>20200803T165737Z</version_modified>
   <xml_checksum>D8922A73</xml_checksum>
   <class_name>HPXMLtoOpenStudio</class_name>
   <display_name>HPXML to OpenStudio Translator</display_name>
@@ -547,12 +547,6 @@
       <checksum>76CB8EC8</checksum>
     </file>
     <file>
-      <filename>EPvalidator.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>DE8460CD</checksum>
-    </file>
-    <file>
       <filename>lighting.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
@@ -574,6 +568,12 @@
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
       <checksum>EDB75F31</checksum>
+    </file>
+    <file>
+      <filename>EPvalidator.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>D0EC186E</checksum>
     </file>
   </files>
 </measure>
