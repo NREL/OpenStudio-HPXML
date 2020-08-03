@@ -738,12 +738,12 @@ class HotWaterAndAppliances
       elsif hot_water_distribution.recirculation_control_type == HPXML::DHWRecirControlTypeManual
         dist_pump_annual_kwh += (0.10 * hot_water_distribution.recirculation_pump_power)
       else
-        fail 'Unexpected hot water distribution system.'
+        fail "Unexpected hot water distribution system recirculation type: '#{hot_water_distribution.recirculation_control_type}'."
       end
     elsif hot_water_distribution.system_type == HPXML::DHWDistTypeStandard
       # nop
     else
-      fail 'Unexpected hot water distribution system.'
+      fail "Unexpected hot water distribution system type: '#{hot_water_distribution.system_type}'."
     end
 
     # Shared recirculation system pump energy
@@ -755,10 +755,8 @@ class HotWaterAndAppliances
       elsif (hot_water_distribution.shared_recirculation_control_type == HPXML::DHWRecirControlTypeSensor) ||
             (hot_water_distribution.shared_recirculation_control_type == HPXML::DHWRecirControlTypeManual)
         op_hrs = 730.0
-      elsif hot_water_distribution.shared_recirculation_control_type == HPXML::DHWRecirControlTypeTemperature
-        fail 'No annual pump operating hours value provided by RESNET for shared recirculation system w/ temperature control.'
       else
-        fail 'Unexpected hot water distribution system.'
+        fail "Unexpected hot water distribution system shared recirculation type: '#{hot_water_distribution.shared_recirculation_control_type}'."
       end
       shared_pump_kw = UnitConversions.convert(hot_water_distribution.shared_recirculation_pump_power, 'W', 'kW')
       dist_pump_annual_kwh += (shared_pump_kw * op_hrs / n_dweq.to_f)

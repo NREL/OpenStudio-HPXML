@@ -785,7 +785,7 @@ In addition to the hot water distribution systems within the dwelling unit, the 
 
 - `extension/SharedRecirculation/NumberofUnitsServed`: Number of dwelling units served by the shared pump.
 - `extension/SharedRecirculation/PumpPower`: Optional. If not provided, the default value will be assumed as shown in the table below. Shared pump power in Watts.
-- `extension/SharedRecirculation/ControlType`: One of "manual demand control", "presence sensor demand control", "temperature", "timer", or "no control".
+- `extension/SharedRecirculation/ControlType`: One of "manual demand control", "presence sensor demand control", "timer", or "no control".
 
   ==================================  ==========================================
   Element Name                        Default Value

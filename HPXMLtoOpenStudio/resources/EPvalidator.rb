@@ -692,7 +692,7 @@ class EnergyPlusValidator
       '/HPXML/Building/BuildingDetails/Systems/WaterHeating/HotWaterDistribution[extension/SharedRecirculation]' => {
         'extension/SharedRecirculation/NumberofUnitsServed' => one,
         'extension/SharedRecirculation/PumpPower' => zero_or_one,
-        'extension/SharedRecirculation/ControlType[text()="manual demand control" or text()="presence sensor demand control" or text()="temperature" or text()="timer" or text()="no control"]' => one,
+        'extension/SharedRecirculation/ControlType[text()="manual demand control" or text()="presence sensor demand control" or text()="timer" or text()="no control"]' => one,
       },
 
       # [WaterFixture]
