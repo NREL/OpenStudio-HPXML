@@ -15,18 +15,16 @@ class ScheduleGenerator
   end
 
   def get_simulation_parameters(simulation_control_timestep:)
-    min_per_step = 60
+    @minutes_per_step = 60
     if simulation_control_timestep.is_initialized
-      min_per_step = simulation_control_timestep.get
+      @minutes_per_step = simulation_control_timestep.get
     end
-    steps_in_day = 24 * 60 / min_per_step
+    @steps_in_day = 24 * 60 / @minutes_per_step
 
-    mkc_ts_per_day = 96
-    mkc_ts_per_hour = mkc_ts_per_day / 24
+    @mkc_ts_per_day = 96
+    @mkc_ts_per_hour = @mkc_ts_per_day / 24
 
-    @model.getYearDescription.isLeapYear ? total_days_in_year = 366 : total_days_in_year = 365
-
-    return min_per_step, steps_in_day, mkc_ts_per_day, mkc_ts_per_hour, total_days_in_year
+    @model.getYearDescription.isLeapYear ? @total_days_in_year = 366 : @total_days_in_year = 365
   end
 
   def get_building_id
@@ -84,11 +82,45 @@ class ScheduleGenerator
   end
 
   def initialize_schedules(num_ts:)
-    schedules = {}
+    @schedules = {}
+
     col_names.each do |col_name|
-      schedules[col_name] = Array.new(num_ts, 0.0)
+      @schedules[col_name] = Array.new(num_ts, 0.0)
     end
-    return schedules
+
+    create_average_occupants
+    create_average_cooking_range
+    create_average_plug_loads_other
+    create_average_plug_loads_tv
+    create_average_plug_loads_vehicle
+    create_average_plug_loads_well_pump
+    create_average_lighting_interior
+    create_average_lighting_exterior
+    create_average_lighting_garage
+    create_average_lighting_exterior_holiday
+    create_average_clothes_washer
+    create_average_clothes_dryer
+    create_average_dishwasher
+    create_average_baths
+    create_average_showers
+    create_average_sinks
+    create_average_fixtures
+    create_average_ceiling_fan
+    create_average_clothes_dryer_exhaust
+    create_average_clothes_washer_power
+    create_average_dishwasher_power
+    create_average_refrigerator
+    create_average_extra_refrigerator
+    create_average_freezer
+    create_average_fuel_loads_grill
+    create_average_fuel_loads_lighting
+    create_average_fuel_loads_fireplace
+    create_average_pool_pump
+    create_average_pool_heater
+    create_average_hot_tub_pump
+    create_average_hot_tub_heater
+
+    return @schedules
   end
 
   def schedules
@@ -96,14 +128,15 @@ class ScheduleGenerator
   end
 
   def create(args:)
-    @minutes_per_steps, @steps_in_day, @mkc_ts_per_day, @mkc_ts_per_hour, @total_days_in_year = get_simulation_parameters(simulation_control_timestep: args[:simulation_control_timestep])
-    @schedules = initialize_schedules(num_ts: @total_days_in_year * @steps_in_day)
+    get_simulation_parameters(simulation_control_timestep: args[:simulation_control_timestep])
+    initialize_schedules(num_ts: @total_days_in_year * @steps_in_day)
 
-    if args[:schedules_type] == 'average'
-      create_average_schedules(args: args)
-    elsif args[:schedules_type] == 'stochastic'
-      create_stochastic_schedules(args: args)
+    if args[:schedules_type] == 'stochastic'
+      success = create_stochastic_schedules(args: args)
+      return false if not success
     end
+
+    return true
   end
 
   def create_average_occupants
@@ -196,16 +229,19 @@ class ScheduleGenerator
   end
 
   def create_average_baths
+    @schedules['baths'] = Array.new(@total_days_in_year * @steps_in_day) { rand(0..0.1) } # FIXME
   end
 
   def create_average_showers
+    @schedules['showers'] = Array.new(@total_days_in_year * @steps_in_day) { rand(0..0.1) } # FIXME
   end
 
   def create_average_sinks
+    @schedules['sinks'] = Array.new(@total_days_in_year * @steps_in_day) { rand(0..0.1) } # FIXME
   end
 
   def create_average_fixtures
-    @schedules['fixtures'] = Array.new(@total_days_in_year * @steps_in_day) { rand(0..0.1) } # FIXME
+    @schedules['fixtures'] = [@schedules['showers'], @schedules['sinks'], @schedules['baths']].transpose.map { |flow| flow.reduce(:+) } # FIXME
   end
 
   def create_average_ceiling_fan
@@ -327,7 +363,7 @@ class ScheduleGenerator
       day_of_week = today.wday
       [0, 6].include?(day_of_week) ? is_weekday = false : is_weekday = true
       @steps_in_day.times do |step|
-        minute = day * 1440 + step * @minutes_per_steps
+        minute = day * 1440 + step * @minutes_per_step
         @schedules[sch_name][day * @steps_in_day + step] = get_value_from_daily_sch(daily_sch, month, is_weekday, minute, 1)
       end
     end
@@ -350,47 +386,11 @@ class ScheduleGenerator
     start_day = DateTime.new(sim_year, 1, 1)
     @total_days_in_year.times do |day|
       @steps_in_day.times do |step|
-        minute = day * 1440 + step * @minutes_per_steps
+        minute = day * 1440 + step * @minutes_per_step
         @schedules[sch_name][day * @steps_in_day + step] = scale_lighting_by_occupancy(sch, minute, 1)
       end
     end
     @schedules[sch_name] = normalize(@schedules[sch_name])
-  end
-
-  def create_average_schedules(args:)
-    create_average_occupants
-    create_average_cooking_range
-    create_average_plug_loads_other
-    create_average_plug_loads_tv
-    create_average_plug_loads_vehicle
-    create_average_plug_loads_well_pump
-    create_average_lighting_interior
-    create_average_lighting_exterior
-    create_average_lighting_garage
-    create_average_lighting_exterior_holiday
-    create_average_clothes_washer
-    create_average_clothes_dryer
-    create_average_dishwasher
-    create_average_baths
-    create_average_showers
-    create_average_sinks
-    create_average_fixtures
-    create_average_ceiling_fan
-    create_average_clothes_dryer_exhaust
-    create_average_clothes_washer_power
-    create_average_dishwasher_power
-    create_average_refrigerator
-    create_average_extra_refrigerator
-    create_average_freezer
-    create_average_fuel_loads_grill
-    create_average_fuel_loads_lighting
-    create_average_fuel_loads_fireplace
-    create_average_pool_pump
-    create_average_pool_heater
-    create_average_hot_tub_pump
-    create_average_hot_tub_heater
-
-    return true
   end
 
   def create_stochastic_schedules(args:)
@@ -499,7 +499,7 @@ class ScheduleGenerator
       day_of_week = today.wday
       [0, 6].include?(day_of_week) ? is_weekday = false : is_weekday = true
       @steps_in_day.times do |step|
-        minute = day * 1440 + step * @minutes_per_steps
+        minute = day * 1440 + step * @minutes_per_step
         index_15 = (minute / 15).to_i
         sleep = sum_across_occupants(all_simulated_values, 0, index_15).to_f / args[:geometry_num_occupants]
         @schedules['sleep'][day * @steps_in_day + step] = sleep
@@ -817,67 +817,53 @@ class ScheduleGenerator
     offset_range = 30
     random_offset = (prng.rand * 2 * offset_range).to_i - offset_range
     sink_activity_sch = sink_activity_sch.rotate(-4 * 60 + random_offset) # 4 am shifting
-    sink_activity_sch = aggregate_array(sink_activity_sch, @minutes_per_steps)
+    sink_activity_sch = aggregate_array(sink_activity_sch, @minutes_per_step)
     @schedules['sinks'] = sink_activity_sch.map { |flow| flow / Constants.PeakFlowRate }
 
     random_offset = (prng.rand * 2 * offset_range).to_i - offset_range
     dw_activity_sch = dw_activity_sch.rotate(random_offset)
-    dw_activity_sch = aggregate_array(dw_activity_sch, @minutes_per_steps)
+    dw_activity_sch = aggregate_array(dw_activity_sch, @minutes_per_step)
     @schedules['dishwasher'] = dw_activity_sch.map { |flow| flow / Constants.PeakFlowRate }
 
     random_offset = (prng.rand * 2 * offset_range).to_i - offset_range
     cw_activity_sch = cw_activity_sch.rotate(random_offset)
-    cw_activity_sch = aggregate_array(cw_activity_sch, @minutes_per_steps)
+    cw_activity_sch = aggregate_array(cw_activity_sch, @minutes_per_step)
     @schedules['clothes_washer'] = cw_activity_sch.map { |flow| flow / Constants.PeakFlowRate }
 
     random_offset = (prng.rand * 2 * offset_range).to_i - offset_range
     shower_activity_sch = shower_activity_sch.rotate(random_offset)
-    shower_activity_sch = aggregate_array(shower_activity_sch, @minutes_per_steps)
+    shower_activity_sch = aggregate_array(shower_activity_sch, @minutes_per_step)
     @schedules['showers'] = shower_activity_sch.map { |flow| flow / Constants.PeakFlowRate }
 
     random_offset = (prng.rand * 2 * offset_range).to_i - offset_range
     bath_activity_sch = bath_activity_sch.rotate(random_offset)
-    bath_activity_sch = aggregate_array(bath_activity_sch, @minutes_per_steps)
+    bath_activity_sch = aggregate_array(bath_activity_sch, @minutes_per_step)
     @schedules['baths'] = bath_activity_sch.map { |flow| flow / Constants.PeakFlowRate }
 
     random_offset = (prng.rand * 2 * offset_range).to_i - offset_range
     cooking_power_sch = cooking_power_sch.rotate(random_offset)
-    cooking_power_sch = aggregate_array(cooking_power_sch, @minutes_per_steps)
+    cooking_power_sch = aggregate_array(cooking_power_sch, @minutes_per_step)
     @schedules['cooking_range'] = cooking_power_sch.map { |power| power / Constants.PeakPower }
 
     random_offset = (prng.rand * 2 * offset_range).to_i - offset_range
     cw_power_sch = cw_power_sch.rotate(random_offset)
-    cw_power_sch = aggregate_array(cw_power_sch, @minutes_per_steps)
+    cw_power_sch = aggregate_array(cw_power_sch, @minutes_per_step)
     @schedules['clothes_washer_power'] = cw_power_sch.map { |power| power / Constants.PeakPower }
 
     random_offset = (prng.rand * 2 * offset_range).to_i - offset_range
     cd_power_sch = cd_power_sch.rotate(random_offset)
-    cd_power_sch = aggregate_array(cd_power_sch, @minutes_per_steps)
+    cd_power_sch = aggregate_array(cd_power_sch, @minutes_per_step)
     @schedules['clothes_dryer'] = cd_power_sch.map { |power| power / Constants.PeakPower }
     @schedules['clothes_dryer_exhaust'] = @schedules['clothes_dryer']
 
     random_offset = (prng.rand * 2 * offset_range).to_i - offset_range
     dw_power_sch = dw_power_sch.rotate(random_offset)
-    dw_power_sch = aggregate_array(dw_power_sch, @minutes_per_steps)
+    dw_power_sch = aggregate_array(dw_power_sch, @minutes_per_step)
     @schedules['dishwasher_power'] = dw_power_sch.map { |power| power / Constants.PeakPower }
 
     @schedules['occupants'] = away_schedule.map { |i| 1.0 - i }
 
     @schedules['fixtures'] = [@schedules['showers'], @schedules['sinks'], @schedules['baths']].transpose.map { |flow| flow.reduce(:+) }
-
-    create_average_plug_loads_tv
-    create_average_plug_loads_vehicle
-    create_average_plug_loads_well_pump
-    create_average_refrigerator
-    create_average_extra_refrigerator
-    create_average_freezer
-    create_average_fuel_loads_grill
-    create_average_fuel_loads_lighting
-    create_average_fuel_loads_fireplace
-    create_average_pool_pump
-    create_average_pool_heater
-    create_average_hot_tub_pump
-    create_average_hot_tub_heater
 
     success = set_vacancy(args: args, sim_year: sim_year)
     return false if not success
@@ -892,7 +878,7 @@ class ScheduleGenerator
         vacancy_start_date = Time.new(sim_year, args[:simulation_control_vacancy_begin_month].get, args[:simulation_control_vacancy_begin_day_of_month].get)
         vacancy_end_date = Time.new(sim_year, args[:simulation_control_vacancy_end_month].get, args[:simulation_control_vacancy_end_day_of_month].get, 24)
 
-        sec_per_step = @minutes_per_steps * 60.0
+        sec_per_step = @minutes_per_step * 60.0
         ts = Time.new(sim_year, 'Jan', 1)
         @schedules['vacancy'].each_with_index do |step, i|
           if vacancy_start_date <= ts && ts <= vacancy_end_date # in the vacancy period
