@@ -2827,7 +2827,7 @@ class HPXML < Object
     ATTRS = [:id, :control_type, :heating_setpoint_temp, :heating_setback_temp,
              :heating_setback_hours_per_week, :heating_setback_start_hour, :cooling_setpoint_temp,
              :cooling_setup_temp, :cooling_setup_hours_per_week, :cooling_setup_start_hour,
-             :ceiling_fan_cooling_setpoint_temp_offset]
+             :ceiling_fan_cooling_setpoint_temp_offset, :onoff_thermostat_deadband]
     attr_accessor(*ATTRS)
 
     def delete
@@ -2856,7 +2856,8 @@ class HPXML < Object
       HPXML::add_extension(parent: hvac_control,
                            extensions: { 'SetbackStartHourHeating' => to_integer_or_nil(@heating_setback_start_hour),
                                          'SetupStartHourCooling' => to_integer_or_nil(@cooling_setup_start_hour),
-                                         'CeilingFanSetpointTempCoolingSeasonOffset' => to_float_or_nil(@ceiling_fan_cooling_setpoint_temp_offset) })
+                                         'CeilingFanSetpointTempCoolingSeasonOffset' => to_float_or_nil(@ceiling_fan_cooling_setpoint_temp_offset),
+                                         'OnOffThermostatDeadband' => to_float_or_nil(@onoff_thermostat_deadband) })
     end
 
     def from_oga(hvac_control)
@@ -2873,6 +2874,7 @@ class HPXML < Object
       @cooling_setup_hours_per_week = to_integer_or_nil(XMLHelper.get_value(hvac_control, 'TotalSetupHoursperWeekCooling'))
       @cooling_setup_start_hour = to_integer_or_nil(XMLHelper.get_value(hvac_control, 'extension/SetupStartHourCooling'))
       @ceiling_fan_cooling_setpoint_temp_offset = to_float_or_nil(XMLHelper.get_value(hvac_control, 'extension/CeilingFanSetpointTempCoolingSeasonOffset'))
+      @onoff_thermostat_deadband = to_float_or_nil(XMLHelper.get_value(hvac_control, 'extension/OnOffThermostatDeadband'))
     end
   end
 

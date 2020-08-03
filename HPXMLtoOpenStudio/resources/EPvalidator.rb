@@ -497,12 +497,15 @@ class EnergyPlusValidator
 
       # [HVACControl]
       '/HPXML/Building/BuildingDetails/Systems/HVAC/HVACControl' => {
+        # Is "ControlType" element missing here? It is unused in modeling but was specified in base-hvac-programmable-thermostat.xml
+        # 'ControlType[text()="manual thermostat" or text()="programmable thermostat"]' => zero_or_one,
         'SystemIdentifier' => one, # Required by HPXML schema
         'SetpointTempHeatingSeason' => one,
         'SetbackTempHeatingSeason' => zero_or_one, # See [HVACControlType=HeatingSetback]
         'SetupTempCoolingSeason' => zero_or_one, # See [HVACControlType=CoolingSetup]
         'SetpointTempCoolingSeason' => one,
         'extension/CeilingFanSetpointTempCoolingSeasonOffset' => zero_or_one, # deg-F
+        'extension/OnOffThermostatDeadband' => zero_or_one, # degrees F, specify a positive value of deadband between setpoint and cutout temperature to model on/off thermostat behavior. The sama value applies to both heating and cooling.
       },
 
       ## [HVACControlType=HeatingSetback]

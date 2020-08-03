@@ -1345,7 +1345,6 @@ class HVAC
         end
       end
     end
-    htg_weekend_setpoints = htg_weekday_setpoints
 
     # Base cooling setpoint
     clg_setpoint = hvac_control.cooling_setpoint_temp
@@ -1372,7 +1371,17 @@ class HVAC
         clg_weekday_setpoints[m] = [clg_weekday_setpoints[m], Array.new(24, clg_ceiling_fan_offset)].transpose.map { |i| i.reduce(:+) }
       end
     end
+
+    # Apply thermostat offset due to onoff control
+    offset_db = hvac_control.onoff_thermostat_deadband
+    if not offset_db.nil?
+      for m in 1..12
+        clg_weekday_setpoints[m - 1] = clg_weekday_setpoints[m - 1].map { |i| i + offset_db / 2.0 }
+        htg_weekday_setpoints[m - 1] = htg_weekday_setpoints[m - 1].map { |i| i - offset_db / 2.0 }
+      end
+    end
     clg_weekend_setpoints = clg_weekday_setpoints
+    htg_weekend_setpoints = htg_weekday_setpoints
 
     # Create heating season schedule
     if htg_start_month <= htg_end_month
@@ -1428,6 +1437,9 @@ class HVAC
     thermostat_setpoint.setName("#{living_zone.name} temperature setpoint")
     thermostat_setpoint.setHeatingSetpointTemperatureSchedule(heating_setpoint.schedule)
     thermostat_setpoint.setCoolingSetpointTemperatureSchedule(cooling_setpoint.schedule)
+    if not offset_db.nil?
+      thermostat_setpoint.setTemperatureDifferenceBetweenCutoutAndSetpoint(UnitConversions.convert(offset_db, 'r', 'k'))
+    end
     living_zone.setThermostatSetpointDualSetpoint(thermostat_setpoint)
   end
 
