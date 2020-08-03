@@ -268,7 +268,7 @@ class EnergyPlusValidator
         '../../Studs/Size[text()="2x2" or text()="2x3" or text()="2x4" or text()="2x6" or text()="2x8" or text()="2x10" or text()="2x12" or text()="2x14" or text()="2x16"]' => one,
         '../../Studs/Spacing' => one,
         '../../Studs/FramingFactor' => one,
-        '../../WallType/SteelFrame/extension/CorrectionFactor' => one_or_more,
+        '../../WallType/SteelFrame/extension/CorrectionFactor' => one,
       },
 
       ## [QuickFillSolidConcrete]

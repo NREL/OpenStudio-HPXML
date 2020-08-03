@@ -10,7 +10,7 @@ class Constructions
                                 inside_drywall_thick_in:, outside_drywall_thick_in:,
                                 inside_film:, outside_film:)
     # Parameters:
-    # cavity_r - the R-value of the cavity insulation
+    # cavity_r - the cavity insulation R-value per inch [hr-ft^2-F/Btu-in]
     # install_grade - RESNET insulation grading. This value is for considering defects occurred in the process of insulation installation. This value determines the relative area occupied by void insulation.
     # cavity_depth_in - the cavity depth [inch].
     # cavity_filled - true if insulation thickness < cavity depth, and false otherwise
@@ -96,7 +96,7 @@ class Constructions
                                   inside_drywall_thick_in:, osb_thick_in:, rigid_r:,
                                   mat_ext_finish:, inside_film:, outside_film:)
     # Parameters:
-    # cavity_r - the R-value of the cavity insulation
+    # cavity_r - the cavity insulation R-value per inch [hr-ft^2-F/Btu-in]
     # install_grade - RESNET insulation grading. This value is for considering defects occurred in the process of insulation installation. This value determines the relative area occupied by void insulation.
     # stud_depth_in - the stud depth [inch].
     # gap_depth_in - the gap depth [inch].
@@ -286,7 +286,7 @@ class Constructions
                           inside_drywall_thick_in:, osb_thick_in:, rigid_r:,
                           mat_ext_finish:, inside_film:, outside_film:)
     # Parameters:
-    # icf_r - the R-value of the Insulated Concrete Forms (ICF)
+    # icf_r - the Insulated Concrete Forms (ICF) R-value per inch [hr-ft^2-F/Btu-in]
     # icf_ins_thick_in - the ICF insulation layer thickness [inch]
     # icf_concrete_thick_in - the ICF concrete layer thickness [inch]
     # framing_factor - fraction of the framing of the ICF and the framing around doors, windows, etc.
@@ -356,7 +356,7 @@ class Constructions
                           inside_drywall_thick_in:, osb_thick_in:, rigid_r:,
                           mat_ext_finish:, inside_film:, outside_film:)
     # Parameters:
-    # sip_r - the R-value of the Structurally Insulated Panel (SIP)
+    # sip_r - the Structurally Insulated Panel (SIP) R-value per inch [hr-ft^2-F/Btu-in]
     # sip_thick_in - the SIP thickness [inch]
     # framing_factor - fraction of the framing of the SIP and the framing around doors, windows, etc.
     # sheathing_thick_in - the sheathing thickness [inch]
@@ -433,7 +433,7 @@ class Constructions
                                  inside_drywall_thick_in:, osb_thick_in:, rigid_r:,
                                  mat_ext_finish:, inside_film:, outside_film:)
     # Parameters:
-    # cavity_r - the R-value of the cavity insulation
+    # cavity_r - the cavity insulation R-value per inch [hr-ft^2-F/Btu-in]
     # install_grade - RESNET insulation grading. This value is for considering defects occurred in the process of insulation installation. This value determines the relative area occupied by void insulation.
     # cavity_depth_in - cavity depth [inch].
     # cavity_filled - true if insulation thickness < cavity depth, and false otherwise
@@ -516,7 +516,7 @@ class Constructions
     # mats_thick_in - the list of thickness of materials [inch]
     # mats_cond - the list of conductivity of materials [Btu/hr-ft-F]
     # mats_den - the list of density of materials [lb/ft^3]
-    # mats_spec_heat - the list of specific heat of materials [J/K-kg]
+    # mats_spec_heat - the list of specific heat of materials [Btu/lb-F]
     # mat_ext_finish - exterior finish material
     # inside_drywall_thick_in - the inside drywall thickness [inch]
     # osb_thick_in - the oriented strand board (OSB) thickness [inch]
