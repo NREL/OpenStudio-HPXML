@@ -83,7 +83,7 @@ class ScheduleGenerator
   def initialize_schedules(args:)
     @schedules = {}
 
-    col_names.each do |col_name|
+    ScheduleGenerator.col_names.each do |col_name|
       @schedules[col_name] = Array.new(@total_days_in_year * @steps_in_day, 0.0)
     end
 
@@ -149,11 +149,11 @@ class ScheduleGenerator
   end
 
   def create_average_lighting_exterior_holiday
-    create_timeseries_from_weekday_weekend_monthly(sch_name: 'lighting_exterior_holiday', weekday_sch: weekday_sch, weekend_sch: weekday_sch, monthly_sch: monthly_sch, begin_month: 11, begin_day_of_month: 24, end_month: 1, end_day_of_month: 6)
+    create_timeseries_from_weekday_weekend_monthly(sch_name: 'lighting_exterior_holiday', weekday_sch: Schedule.LightingExteriorHolidayWeekdayFractions, weekend_sch: Schedule.LightingExteriorHolidayWeekendFractions, monthly_sch: Schedule.LightingExteriorHolidayMonthlyMultipliers, begin_month: 11, begin_day_of_month: 24, end_month: 1, end_day_of_month: 6)
   end
 
   def create_average_cooking_range
-    create_timeseries_from_weekday_weekend_monthly(sch_name: 'cooking_range', weekday_sch: weekday_sch, weekend_sch: weekday_sch, monthly_sch: monthly_sch)
+    create_timeseries_from_weekday_weekend_monthly(sch_name: 'cooking_range', weekday_sch: Schedule.CookingRangeWeekdayFractions, weekend_sch: Schedule.CookingRangeWeekendFractions, monthly_sch: Schedule.CookingRangeMonthlyMultipliers)
   end
 
   def create_average_refrigerator
@@ -967,8 +967,8 @@ class ScheduleGenerator
 
   def export(schedules_path:)
     CSV.open(schedules_path, 'w') do |csv|
-      csv << @Schedule.keys
-      rows = @Schedule.values.transpose
+      csv << @schedules.keys
+      rows = @schedules.values.transpose
       rows.each do |row|
         csv << row
       end

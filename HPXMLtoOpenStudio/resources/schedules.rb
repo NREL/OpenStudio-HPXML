@@ -941,7 +941,7 @@ class Schedule
     return '0.004, 0.001, 0.001, 0.002, 0.007, 0.012, 0.029, 0.046, 0.044, 0.041, 0.044, 0.046, 0.042, 0.038, 0.049, 0.059, 0.110, 0.161, 0.115, 0.070, 0.044, 0.019, 0.013, 0.007'
   end
   
-  def self.FuelLoadsGrillMonthyMultipliers
+  def self.FuelLoadsGrillMonthlyMultipliers
     return '1.097, 1.097, 0.991, 0.987, 0.991, 0.890, 0.896, 0.896, 0.890, 1.085, 1.085, 1.097'
   end
   
