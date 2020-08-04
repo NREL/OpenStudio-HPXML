@@ -195,7 +195,7 @@ def create_hpxmls
     'base-enclosure-windows-interior-shading.xml' => 'base.xml',
     'base-enclosure-windows-none.xml' => 'base.xml',
     'base-enclosure-attached-multifamily.xml' => 'base.xml',
-    'base-enclosure-walls-detailed.xml' => 'base-enclosure-walltypes.xml',
+    'base-enclosure-detailed.xml' => 'base-enclosure-walltypes.xml',
     'base-foundation-multiple.xml' => 'base-foundation-unconditioned-basement.xml',
     'base-foundation-ambient.xml' => 'base.xml',
     'base-foundation-conditioned-basement-slab-insulation.xml' => 'base.xml',
@@ -949,7 +949,7 @@ def set_hpxml_rim_joists(hpxml_file, hpxml)
                            emittance: 0.92,
                            insulation_assembly_r_value: 23.0)
     end
-  elsif ['base-enclosure-walls-detailed.xml'].include? hpxml_file
+  elsif ['base-enclosure-detailed.xml'].include? hpxml_file
     hpxml.rim_joists[0].quick_fill = true
     hpxml.rim_joists[0].insulation_assembly_r_value = nil
     hpxml.rim_joists[0].insulation_cavity_r_value = 19
@@ -1358,7 +1358,7 @@ def set_hpxml_walls(hpxml_file, hpxml)
       wall.solar_absorptance = nil
       wall.color = HPXML::ColorMedium
     end
-  elsif ['base-enclosure-walls-detailed.xml'].include? hpxml_file
+  elsif ['base-enclosure-detailed.xml'].include? hpxml_file
     [0, 1, 2, 3, -1].each do |idx|
       hpxml.walls[idx].quick_fill = true
       hpxml.walls[idx].insulation_assembly_r_value = nil
@@ -1745,6 +1745,15 @@ def set_hpxml_frame_floors(hpxml_file, hpxml)
                            interior_adjacent_to: HPXML::LocationGarage,
                            area: 600,
                            insulation_assembly_r_value: 2.1)
+  elsif ['base-enclosure-detailed.xml'].include? hpxml_file
+    hpxml.frame_floors[0].quick_fill = true
+    hpxml.frame_floors[0].insulation_assembly_r_value = nil
+    hpxml.frame_floors[0].insulation_cavity_r_value = 19
+    hpxml.frame_floors[0].insulation_cavity_thickness = 5.5
+    hpxml.frame_floors[0].insulation_grade = 3
+    hpxml.frame_floors[0].floor_joists_size = '2x6'
+    hpxml.frame_floors[0].framing_factor = 0.1988
+    hpxml.frame_floors[0].inside_drywall_thickness = 0.5
   elsif ['base-foundation-ambient.xml'].include? hpxml_file
     hpxml.frame_floors.add(id: 'FloorAboveAmbient',
                            exterior_adjacent_to: HPXML::LocationOutside,

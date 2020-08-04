@@ -2112,8 +2112,10 @@ class HPXML < Object
   end
 
   class FrameFloor < BaseElement
-    ATTRS = [:id, :exterior_adjacent_to, :interior_adjacent_to, :area, :insulation_id,
-             :insulation_assembly_r_value, :insulation_cavity_r_value, :insulation_continuous_r_value,
+    ATTRS = [:id, :exterior_adjacent_to, :interior_adjacent_to, :area, :insulation_id, :quick_fill,
+             :ufactor, :insulation_assembly_r_value, :insulation_cavity_r_value, :insulation_continuous_r_value,
+             :insulation_grade, :insulation_cavity_thickness, :insulation_cavity_material, :insulation_continuous_material,
+             :floor_joists_size, :framing_factor, :plywood_thickness, :inside_drywall_thickness, :floor_covering,
              :other_space_above_or_below]
     attr_accessor(*ATTRS)
 
@@ -2177,6 +2179,12 @@ class HPXML < Object
       XMLHelper.add_attribute(sys_id, 'id', @id)
       XMLHelper.add_element(frame_floor, 'ExteriorAdjacentTo', @exterior_adjacent_to) unless @exterior_adjacent_to.nil?
       XMLHelper.add_element(frame_floor, 'InteriorAdjacentTo', @interior_adjacent_to) unless @interior_adjacent_to.nil?
+      if @quick_fill
+        floor_joists = XMLHelper.create_elements_as_needed(frame_floor, ['FloorJoists'])
+        XMLHelper.add_element(floor_joists, 'Size', @floor_joists_size) unless @floor_joists_size.nil?
+        XMLHelper.add_element(floor_joists, 'FramingFactor', @framing_factor) unless @framing_factor.nil?
+        XMLHelper.add_element(frame_floor, 'FloorCovering', @floor_covering) unless @floor_covering.nil?
+      end
       XMLHelper.add_element(frame_floor, 'Area', to_float(@area)) unless @area.nil?
       insulation = XMLHelper.add_element(frame_floor, 'Insulation')
       sys_id = XMLHelper.add_element(insulation, 'SystemIdentifier')
@@ -2186,6 +2194,28 @@ class HPXML < Object
         XMLHelper.add_attribute(sys_id, 'id', @id + 'Insulation')
       end
       XMLHelper.add_element(insulation, 'AssemblyEffectiveRValue', to_float(@insulation_assembly_r_value)) unless @insulation_assembly_r_value.nil?
+      XMLHelper.add_element(insulation, 'InsulationGrade', to_integer(@insulation_grade)) unless @insulation_grade.nil?
+      if not @insulation_cavity_r_value.nil?
+        layer = XMLHelper.add_element(insulation, 'Layer')
+        XMLHelper.add_element(layer, 'InstallationType', 'cavity')
+        XMLHelper.add_element(layer, 'InsulationMaterial', @insulation_cavity_material) unless @insulation_cavity_material.nil?
+        XMLHelper.add_element(layer, 'NominalRValue', to_float(@insulation_cavity_r_value))
+        XMLHelper.add_element(layer, 'Thickness', to_float(@insulation_cavity_thickness)) unless @insulation_cavity_thickness.nil?
+      end
+      if not @insulation_continuous_r_value.nil?
+        layer = XMLHelper.add_element(insulation, 'Layer')
+        XMLHelper.add_element(layer, 'InstallationType', 'continuous')
+        XMLHelper.add_element(layer, 'InsulationMaterial', @insulation_continuous_material) unless @insulation_continuous_material.nil?
+        XMLHelper.add_element(layer, 'NominalRValue', to_float(@insulation_continuous_r_value))
+      end
+      if not @plywood_thickness.nil?
+        plywood = XMLHelper.create_elements_as_needed(frame_floor, ['extension', 'Plywood'])
+        XMLHelper.add_element(plywood, 'Thickness', to_float(@plywood_thickness))
+      end
+      if not @inside_drywall_thickness.nil?
+        inside_drywall = XMLHelper.create_elements_as_needed(frame_floor, ['extension', 'InsideDryWall'])
+        XMLHelper.add_element(inside_drywall, 'Thickness', to_float(@inside_drywall_thickness))
+      end
       HPXML::add_extension(parent: frame_floor,
                            extensions: { 'OtherSpaceAboveOrBelow' => @other_space_above_or_below })
     end
@@ -2200,9 +2230,24 @@ class HPXML < Object
       insulation = XMLHelper.get_element(frame_floor, 'Insulation')
       if not insulation.nil?
         @insulation_id = HPXML::get_id(insulation)
+      end
+      if not XMLHelper.get_element(frame_floor, 'Insulation/Layer').nil?
+        @quick_fill = true
+      end
+      if not @quick_fill
         @insulation_assembly_r_value = to_float_or_nil(XMLHelper.get_value(insulation, 'AssemblyEffectiveRValue'))
+      else
         @insulation_cavity_r_value = to_float_or_nil(XMLHelper.get_value(insulation, "Layer[InstallationType='cavity']/NominalRValue"))
+        @insulation_cavity_thickness = to_float_or_nil(XMLHelper.get_value(insulation, "Layer[InstallationType='cavity']/Thickness"))
+        @insulation_cavity_material = XMLHelper.get_value(insulation, "Layer[InstallationType='cavity']/InsulationMaterial")
         @insulation_continuous_r_value = to_float_or_nil(XMLHelper.get_value(insulation, "Layer[InstallationType='continuous']/NominalRValue"))
+        @insulation_continuous_material = XMLHelper.get_value(insulation, "Layer[InstallationType='continuous']/InsulationMaterial")
+        @insulation_grade = to_integer_or_nil(XMLHelper.get_value(insulation, 'InsulationGrade'))
+        @floor_joists_size = XMLHelper.get_value(frame_floor, 'FloorJoists/Size')
+        @framing_factor = to_float_or_nil(XMLHelper.get_value(frame_floor, 'FloorJoists/FramingFactor'))
+        @floor_covering = XMLHelper.get_value(frame_floor, 'FloorCovering')
+        @plywood_thickness = to_float_or_nil(XMLHelper.get_value(frame_floor, 'extension/Plywood/Thickness'))
+        @inside_drywall_thickness = to_float_or_nil(XMLHelper.get_value(frame_floor, 'extension/InsideDryWall/Thickness'))
       end
       @other_space_above_or_below = XMLHelper.get_value(frame_floor, 'extension/OtherSpaceAboveOrBelow')
     end

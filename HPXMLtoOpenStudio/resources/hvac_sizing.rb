@@ -855,12 +855,12 @@ class HVACSizing
       next unless frame_floor.is_thermal_boundary
 
       if frame_floor.is_exterior
-        zone_loads.Cool_Floors += (1.0 / frame_floor.insulation_assembly_r_value) * frame_floor.area * (@ctd - 5.0 + @daily_range_temp_adjust[@daily_range_num])
-        zone_loads.Heat_Floors += (1.0 / frame_floor.insulation_assembly_r_value) * frame_floor.area * @htd
+        zone_loads.Cool_Floors += (1.0 / frame_floor.ufactor) * frame_floor.area * (@ctd - 5.0 + @daily_range_temp_adjust[@daily_range_num])
+        zone_loads.Heat_Floors += (1.0 / frame_floor.ufactor) * frame_floor.area * @htd
       else
         adjacent_space = frame_floor.exterior_adjacent_to
-        zone_loads.Cool_Floors += (1.0 / frame_floor.insulation_assembly_r_value) * frame_floor.area * (@cool_design_temps[adjacent_space] - @cool_setpoint)
-        zone_loads.Heat_Floors += (1.0 / frame_floor.insulation_assembly_r_value) * frame_floor.area * (@heat_setpoint - @heat_design_temps[adjacent_space])
+        zone_loads.Cool_Floors += (1.0 / frame_floor.ufactor) * frame_floor.area * (@cool_design_temps[adjacent_space] - @cool_setpoint)
+        zone_loads.Heat_Floors += (1.0 / frame_floor.ufactor) * frame_floor.area * (@heat_setpoint - @heat_design_temps[adjacent_space])
       end
     end
 
@@ -2926,7 +2926,7 @@ class HVACSizing
       if not surface.insulation_assembly_r_value.nil?
         surfaces_ua += (1.0 / surface.insulation_assembly_r_value) * surface.area
       else
-        surfaces_ua += (1.0 / (surface.insulation_interior_r_value + surface.insulation_exterior_r_value)) * surface.area
+        surfaces_ua += surface.ufactor * surface.area
       end
     end
     return surfaces_a / surfaces_ua

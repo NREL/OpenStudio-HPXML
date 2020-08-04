@@ -206,9 +206,9 @@ class EnergyPlusValidator
         '[not(Siding)] | Siding[text()="wood siding" or text()="vinyl siding" or text()="stucco" or text()="fiber cement siding" or text()="brick veneer" or text()="aluminum siding"]' => one,
         'Color | SolarAbsorptance' => one_or_more,
         'Emittance' => one,
-        'extension/OrientedStrandBoard' => zero_or_one, # See [WallOrientedStrandBoard]
         'Insulation/SystemIdentifier' => one, # Required by HPXML schema
         'Insulation/AssemblyEffectiveRValue | Insulation/Layer' => one, # See [QuickFillWoodStud] or [QuickFillDoubleWoodStud] or [QuickFillConcreteMasonryUnit] or [QuickFillInsulatedConcreteForms] or [QuickFillStructurallyInsulatedPanel] or [QuickFillSteelFrame] or [QuickFillSolidConcrete] or [QuickFillStructuralBrick] or [QuickFillStrawBale] or [QuickFillStone] or [QuickFillLogWall] or [QuickFillAdobe]
+        'extension/OrientedStrandBoard' => zero_or_one, # See [WallOrientedStrandBoard]
       },
 
       ## [QuickFillWoodStud]
@@ -348,9 +348,9 @@ class EnergyPlusValidator
         '[not(Siding)] | Siding[text()="wood siding" or text()="vinyl siding" or text()="stucco" or text()="fiber cement siding" or text()="brick veneer" or text()="aluminum siding"]' => one,
         'Color | SolarAbsorptance' => one_or_more,
         'Emittance' => one,
-        'extension/OrientedStrandBoard' => zero_or_one, # See [RimJoistOrientedStrandBoard]
         'Insulation/SystemIdentifier' => one, # Required by HPXML schema
         'Insulation/AssemblyEffectiveRValue | Insulation/Layer' => one, # See [QuickFillRimJoist]
+        'extension/OrientedStrandBoard' => zero_or_one, # See [RimJoistOrientedStrandBoard]
       },
 
       ## [QuickFillRimJoist]
@@ -416,7 +416,41 @@ class EnergyPlusValidator
         'InteriorAdjacentTo[text()="living space" or text()="attic - vented" or text()="attic - unvented" or text()="basement - conditioned" or text()="basement - unconditioned" or text()="crawlspace - vented" or text()="crawlspace - unvented" or text()="garage"]' => one,
         'Area' => one,
         'Insulation/SystemIdentifier' => one, # Required by HPXML schema
-        'Insulation/AssemblyEffectiveRValue' => one,
+        'Insulation/AssemblyEffectiveRValue | Insulation/Layer' => one, # See [QuickFillFrameFloor]
+        'extension/Plywood' => zero_or_one, # See [FrameFloorPlywood]
+        'extension/InsideDryWall' => zero_or_one, # See [FrameFloorInsideDryWall]
+      },
+
+      ## [QuickFillFrameFloor]
+      '/HPXML/Building/BuildingDetails/Enclosure/FrameFloors/FrameFloor/Insulation/Layer' => {
+        '[InstallationType="cavity"]' => one, # See [FrameFloorCavityInsLayer]
+        '[InstallationType="continuous"]' => zero_or_one, # See [FrameFloorRigidInsLayer]
+        '../../FloorJoists/Size[text()="2x2" or text()="2x3" or text()="2x4" or text()="2x6" or text()="2x8" or text()="2x10" or text()="2x12" or text()="2x14" or text()="2x16"]' => one,
+        '../../FloorJoists/FramingFactor' => one,
+      },
+
+      ## [FrameFloorCavityInsLayer]
+      '/HPXML/Building/BuildingDetails/Enclosure/FrameFloors/FrameFloor/Insulation/Layer[InstallationType="cavity"]' => {
+        'InsulationMaterial[Batt | LooseFill | Rigid | SprayFoam | Other]' => zero_or_one, # Required by HPXML schema
+        'NominalRValue' => one,
+        'Thickness' => one, # cavity insulation thickness [inch]
+        '../InsulationGrade' => one, # cavity insulation installation grade; integer
+      },
+
+      ## [FrameFloorRigidInsLayer]
+      '/HPXML/Building/BuildingDetails/Enclosure/FrameFloors/FrameFloor/Insulation/Layer[InstallationType="continuous"]' => {
+        'InsulationMaterial[Batt | LooseFill | Rigid | SprayFoam | Other]' => zero_or_one, # Required by HPXML schema
+        'NominalRValue' => one,
+      },
+
+      ## [FrameFloorPlywood]
+      '/HPXML/Building/BuildingDetails/Enclosure/FrameFloors/FrameFloor/extension/Plywood' => {
+        'Thickness' => one,
+      },
+
+      ## [FrameFloorInsideDryWall]
+      '/HPXML/Building/BuildingDetails/Enclosure/FrameFloors/FrameFloor/extension/InsideDryWall' => {
+        'Thickness' => one,
       },
 
       ## [FrameFloorAdjacentToOther]

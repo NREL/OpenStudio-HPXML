@@ -1119,7 +1119,7 @@ class OSModel
         inside_film = Material.AirFilmVerticalASHRAE140
         outside_film = Material.AirFilmOutsideASHRAE140
       end
-      if not wall.insulation_cavity_r_value.nil?
+      if wall.quick_fill
         mats_thick_in, mats_cond, mats_den, mats_spec_heat = get_generic_wall_material_properties(wall)
 
         apply_wall_construction_by_quick_fill(runner, model, surfaces, wall, wall.id, wall.wall_type,
@@ -1233,7 +1233,7 @@ class OSModel
         mat_ext_finish = nil
       end
 
-      if not rim_joist.insulation_cavity_r_value.nil? # apply rim joist using Layer
+      if rim_joist.quick_fill # apply rim joist using Layer
         Constructions.apply_rim_joist(runner, model, surfaces, rim_joist, rim_joist.id,
                                       cavity_r: rim_joist.insulation_cavity_r_value, install_grade: rim_joist.insulation_grade, framing_factor: rim_joist.framing_factor,
                                       inside_drywall_thick_in: inside_drywall_thick_in, osb_thick_in: rim_joist.osb_thickness,
@@ -1290,7 +1290,6 @@ class OSModel
       end
 
       # Apply construction
-
       if frame_floor.is_ceiling
         if @apply_ashrae140_assumptions
           # Attic floor
@@ -1300,11 +1299,6 @@ class OSModel
           inside_film = Material.AirFilmFloorAverage
           outside_film = Material.AirFilmFloorAverage
         end
-        constr_sets = [
-          WoodStudConstructionSet.new(Material.Stud2x6, 0.10, 0.0, 0.0, 0.5, nil),  # 2x6, 24" o.c.
-          WoodStudConstructionSet.new(Material.Stud2x4, 0.13, 0.0, 0.0, 0.5, nil),  # 2x4, 16" o.c.
-          WoodStudConstructionSet.new(Material.Stud2x4, 0.01, 0.0, 0.0, 0.0, nil), # Fallback
-        ]
       else # Floor
         if @apply_ashrae140_assumptions
           # Raised floor
@@ -1323,34 +1317,60 @@ class OSModel
             covering = Material.CoveringBare
           end
         end
-        constr_sets = [
-          WoodStudConstructionSet.new(Material.Stud2x6, 0.10, 10.0, 0.75, 0.0, covering), # 2x6, 24" o.c. + R10
-          WoodStudConstructionSet.new(Material.Stud2x6, 0.10, 0.0, 0.75, 0.0, covering),  # 2x6, 24" o.c.
-          WoodStudConstructionSet.new(Material.Stud2x4, 0.13, 0.0, 0.5, 0.0, covering),   # 2x4, 16" o.c.
-          WoodStudConstructionSet.new(Material.Stud2x4, 0.01, 0.0, 0.0, 0.0, nil), # Fallback
-        ]
       end
-      assembly_r = frame_floor.insulation_assembly_r_value
+      if frame_floor.quick_fill # apply frame_floor or ceiling using Layer
+        floor_joists_height = frame_floor.floor_joists_size.split('x').last.to_f - 0.5
+        if frame_floor.is_ceiling
+          Constructions.apply_ceiling(runner, model, [surface], frame_floor, "#{frame_floor.id} construction",
+                                      cavity_r: frame_floor.insulation_cavity_r_value, install_grade: frame_floor.insulation_grade,
+                                      ins_thick_in: frame_floor.insulation_cavity_thickness, framing_factor: frame_floor.framing_factor,
+                                      joist_height_in: floor_joists_height, inside_drywall_thick_in: frame_floor.inside_drywall_thickness,
+                                      inside_film: inside_film, outside_film: outside_film)
 
-      match, constr_set, cavity_r = pick_wood_stud_construction_set(assembly_r, constr_sets, inside_film, outside_film, frame_floor.id)
+        else # Floor
+          Constructions.apply_floor(runner, model, [surface], frame_floor, "#{frame_floor.id} construction",
+                                    cavity_r: frame_floor.insulation_cavity_r_value, install_grade: frame_floor.insulation_grade,
+                                    framing_factor: frame_floor.framing_factor, joist_height_in: floor_joists_height,
+                                    plywood_thick_in: frame_floor.plywood_thickness, rigid_r: frame_floor.insulation_continuous_r_value,
+                                    mat_floor_covering: frame_floor.floor_covering, inside_film: inside_film, outside_film: outside_film)
+        end
+      else
+        if frame_floor.is_ceiling
+          constr_sets = [
+            WoodStudConstructionSet.new(Material.Stud2x6, 0.10, 0.0, 0.0, 0.5, nil),  # 2x6, 24" o.c.
+            WoodStudConstructionSet.new(Material.Stud2x4, 0.13, 0.0, 0.0, 0.5, nil),  # 2x4, 16" o.c.
+            WoodStudConstructionSet.new(Material.Stud2x4, 0.01, 0.0, 0.0, 0.0, nil), # Fallback
+          ]
+        else # Floor
+          constr_sets = [
+            WoodStudConstructionSet.new(Material.Stud2x6, 0.10, 10.0, 0.75, 0.0, covering), # 2x6, 24" o.c. + R10
+            WoodStudConstructionSet.new(Material.Stud2x6, 0.10, 0.0, 0.75, 0.0, covering),  # 2x6, 24" o.c.
+            WoodStudConstructionSet.new(Material.Stud2x4, 0.13, 0.0, 0.5, 0.0, covering),   # 2x4, 16" o.c.
+            WoodStudConstructionSet.new(Material.Stud2x4, 0.01, 0.0, 0.0, 0.0, nil), # Fallback
+          ]
+        end
+        assembly_r = frame_floor.insulation_assembly_r_value
 
-      install_grade = 1
-      if frame_floor.is_ceiling
-        Constructions.apply_ceiling(runner, model, [surface], "#{frame_floor.id} construction",
-                                    cavity_r, install_grade,
-                                    constr_set.stud.thick_in, constr_set.framing_factor,
-                                    constr_set.stud.thick_in, constr_set.inside_drywall_thick_in,
-                                    inside_film, outside_film)
+        match, constr_set, cavity_r = pick_wood_stud_construction_set(assembly_r, constr_sets, inside_film, outside_film, frame_floor.id)
 
-      else # Floor
-        Constructions.apply_floor(runner, model, [surface], "#{frame_floor.id} construction",
-                                  cavity_r, install_grade,
-                                  constr_set.framing_factor, constr_set.stud.thick_in,
-                                  constr_set.osb_thick_in, constr_set.rigid_r,
-                                  constr_set.exterior_material, inside_film, outside_film)
+        install_grade = 1
+        if frame_floor.is_ceiling
+          Constructions.apply_ceiling(runner, model, [surface], frame_floor, "#{frame_floor.id} construction",
+                                      cavity_r: cavity_r, install_grade: install_grade,
+                                      ins_thick_in: constr_set.stud.thick_in, framing_factor: constr_set.framing_factor,
+                                      joist_height_in: constr_set.stud.thick_in, inside_drywall_thick_in: constr_set.inside_drywall_thick_in,
+                                      inside_film: inside_film, outside_film: outside_film)
+
+        else # Floor
+          Constructions.apply_floor(runner, model, [surface], frame_floor, "#{frame_floor.id} construction",
+                                    cavity_r: cavity_r, install_grade: install_grade,
+                                    framing_factor: constr_set.framing_factor, stud_thick_in: constr_set.stud.thick_in,
+                                    osb_thick_in: constr_set.osb_thick_in, rigid_r: constr_set.rigid_r,
+                                    mat_ext_finish: constr_set.exterior_material, inside_film: inside_film, outside_film: outside_film)
+        end
+
+        check_surface_assembly_rvalue(runner, [surface], inside_film, outside_film, assembly_r, match)
       end
-
-      check_surface_assembly_rvalue(runner, [surface], inside_film, outside_film, assembly_r, match)
     end
   end
 
@@ -1945,11 +1965,11 @@ class OSModel
                                          inside_drywall_thick_in: 0.5, outside_drywall_thick_in: 0,
                                          inside_film: Material.AirFilmVertical, outside_film: Material.AirFilmVertical)
     elsif type == 'floor'
-      Constructions.apply_floor(runner, model, surfaces, 'AdiabaticFloorConstruction',
-                                0, 1, 0.07, 5.5, 0.75, 99,
-                                Material.CoveringBare,
-                                Material.AirFilmFloorReduced,
-                                Material.AirFilmFloorReduced)
+      Constructions.apply_floor(runner, model, surfaces, nil, 'AdiabaticFloorConstruction',
+                                cavity_r: 0, install_grade: 1, framing_factor: 0.07, joist_height_in: 5.5, plywood_thick_in: 0.75, rigid_r: 99,
+                                mat_floor_covering: Material.CoveringBare,
+                                inside_film: Material.AirFilmFloorReduced,
+                                outside_film: Material.AirFilmFloorReduced)
     elsif type == 'roof'
       Constructions.apply_open_cavity_roof(runner, model, surfaces, 'AdiabaticRoofConstruction',
                                            0, 1, 7.25, 0.07, 7.25, 0.75, 99,
