@@ -14,10 +14,10 @@ class ScheduleGenerator
     @building_id = building_id
   end
 
-  def get_simulation_parameters(simulation_control_timestep:)
+  def get_simulation_parameters
     @minutes_per_step = 60
-    if simulation_control_timestep.is_initialized
-      @minutes_per_step = simulation_control_timestep.get
+    if @model.getSimulationControl.timestep.is_initialized
+      @minutes_per_step = 60 / @model.getSimulationControl.timestep.get.numberOfTimestepsPerHour
     end
     @steps_in_day = 24 * 60 / @minutes_per_step
 
@@ -81,11 +81,11 @@ class ScheduleGenerator
     ]
   end
 
-  def initialize_schedules(num_ts:)
+  def initialize_schedules(args:)
     @schedules = {}
 
     col_names.each do |col_name|
-      @schedules[col_name] = Array.new(num_ts, 0.0)
+      @schedules[col_name] = Array.new(@total_days_in_year * @steps_in_day, 0.0)
     end
 
     create_average_occupants
@@ -98,17 +98,17 @@ class ScheduleGenerator
     create_average_lighting_exterior
     create_average_lighting_garage
     create_average_lighting_exterior_holiday
-    create_average_clothes_washer
-    create_average_clothes_dryer
-    create_average_dishwasher
-    create_average_baths
-    create_average_showers
-    create_average_sinks
-    create_average_fixtures
+    create_average_clothes_washer(args: args)
+    create_average_clothes_dryer(args: args)
+    create_average_dishwasher(args: args)
+    create_average_baths(args: args)
+    create_average_showers(args: args)
+    create_average_sinks(args: args)
+    create_average_fixtures(args: args)
     create_average_ceiling_fan
-    create_average_clothes_dryer_exhaust
-    create_average_clothes_washer_power
-    create_average_dishwasher_power
+    create_average_clothes_dryer_exhaust(args: args)
+    create_average_clothes_washer_power(args: args)
+    create_average_dishwasher_power(args: args)
     create_average_refrigerator
     create_average_extra_refrigerator
     create_average_freezer
@@ -128,8 +128,8 @@ class ScheduleGenerator
   end
 
   def create(args:)
-    get_simulation_parameters(simulation_control_timestep: args[:simulation_control_timestep])
-    initialize_schedules(num_ts: @total_days_in_year * @steps_in_day)
+    get_simulation_parameters
+    initialize_schedules(args: args)
 
     if args[:schedules_type] == 'stochastic'
       success = create_stochastic_schedules(args: args)
@@ -204,44 +204,44 @@ class ScheduleGenerator
     create_timeseries_from_weekday_weekend_monthly(sch_name: 'freezer', weekday_sch: weekday_sch, weekend_sch: weekend_sch, monthly_sch: monthly_sch)
   end
 
-  def create_average_dishwasher
-    @schedules['dishwasher'] = Array.new(@total_days_in_year * @steps_in_day) { rand(0..0.1) } # FIXME
+  def create_average_dishwasher(args:)
+    create_timeseries_from_minutely(sch_name: 'dishwasher', obj_name: Constants.ObjectNameDishwasher, args: args)
   end
 
-  def create_average_dishwasher_power
-    @schedules['dishwasher_power'] = Array.new(@total_days_in_year * @steps_in_day) { rand(0..0.1) } # FIXME
+  def create_average_dishwasher_power(args:)
+    create_timeseries_from_minutely(sch_name: 'dishwasher_power', obj_name: Constants.ObjectNameDishwasher, args: args) # FIXME
   end
 
-  def create_average_clothes_washer
-    @schedules['clothes_washer'] = Array.new(@total_days_in_year * @steps_in_day) { rand(0..0.1) } # FIXME
+  def create_average_clothes_washer(args:)
+    create_timeseries_from_minutely(sch_name: 'clothes_washer', obj_name: Constants.ObjectNameClothesWasher, args: args)
   end
 
-  def create_average_clothes_washer_power
-    @schedules['clothes_washer_power'] = Array.new(@total_days_in_year * @steps_in_day) { rand(0..0.1) } # FIXME
+  def create_average_clothes_washer_power(args:)
+    create_timeseries_from_minutely(sch_name: 'clothes_washer_power', obj_name: Constants.ObjectNameClothesWasher, args: args) # FIXME
   end
 
-  def create_average_clothes_dryer
-    @schedules['clothes_dryer'] = Array.new(@total_days_in_year * @steps_in_day) { rand(0..0.1) } # FIXME
+  def create_average_clothes_dryer(args:)
+    create_timeseries_from_minutely(sch_name: 'clothes_dryer', obj_name: Constants.ObjectNameClothesDryer, args: args)
   end
 
-  def create_average_clothes_dryer_exhaust
-    @schedules['clothes_dryer_exhaust'] = Array.new(@total_days_in_year * @steps_in_day) { rand(0..0.1) } # FIXME
+  def create_average_clothes_dryer_exhaust(args:)
+    create_timeseries_from_minutely(sch_name: 'clothes_dryer_exhaust', obj_name: Constants.ObjectNameClothesDryer, args: args) # FIXME
   end
 
-  def create_average_baths
-    @schedules['baths'] = Array.new(@total_days_in_year * @steps_in_day) { rand(0..0.1) } # FIXME
+  def create_average_baths(args:)
+    create_timeseries_from_minutely(sch_name: 'baths', obj_name: Constants.ObjectNameBath, args: args)
   end
 
-  def create_average_showers
-    @schedules['showers'] = Array.new(@total_days_in_year * @steps_in_day) { rand(0..0.1) } # FIXME
+  def create_average_showers(args:)
+    create_timeseries_from_minutely(sch_name: 'showers', obj_name: Constants.ObjectNameShower, args: args)
   end
 
-  def create_average_sinks
-    @schedules['sinks'] = Array.new(@total_days_in_year * @steps_in_day) { rand(0..0.1) } # FIXME
+  def create_average_sinks(args:)
+    create_timeseries_from_minutely(sch_name: 'sinks', obj_name: Constants.ObjectNameSink, args: args)
   end
 
-  def create_average_fixtures
-    @schedules['fixtures'] = [@schedules['showers'], @schedules['sinks'], @schedules['baths']].transpose.map { |flow| flow.reduce(:+) } # FIXME
+  def create_average_fixtures(args:)
+    create_timeseries_from_minutely(sch_name: 'fixtures', obj_name: Constants.ObjectNameFixtures, args: args)
   end
 
   def create_average_ceiling_fan
@@ -391,6 +391,46 @@ class ScheduleGenerator
       end
     end
     @schedules[sch_name] = normalize(@schedules[sch_name])
+  end
+
+  def create_timeseries_from_minutely(sch_name:,
+                                      obj_name:,
+                                      args:)
+
+    nbeds = args[:geometry_num_bedrooms]
+    days_shift = 0
+    create_sch_object = false
+    sch = HotWaterSchedule.new(@model, obj_name, nbeds, days_shift, create_sch_object)
+
+    weeks = 1 # use a single week that repeats
+
+    year_description = @model.getYearDescription
+    last_day_of_year = 365
+    last_day_of_year += 1 if year_description.isLeapYear
+
+    time = []
+    (@minutes_per_step..24 * 60).step(@minutes_per_step).to_a.each_with_index do |m, i|
+      time[i] = OpenStudio::Time.new(0, 0, m, 0)
+    end
+
+    data = sch.data
+
+    unique_day_schedule = []
+    for d in 1..7 * weeks # how many unique day schedules
+      next if d > last_day_of_year
+
+      time.each_with_index do |m, i|
+        previous_value = data[i + (d - 1) * 24 * 60 / @minutes_per_step]
+        unique_day_schedule << previous_value
+      end
+    end
+
+    repeated_schedule = []
+    for w in 0..52 # max num of weeks
+      repeated_schedule += unique_day_schedule
+    end
+
+    @schedules[sch_name] = repeated_schedule[0...@total_days_in_year * @steps_in_day]
   end
 
   def create_stochastic_schedules(args:)

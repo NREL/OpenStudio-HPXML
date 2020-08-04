@@ -454,11 +454,15 @@ class HotWaterSchedule
     timestep_minutes = (60 / @model.getTimestep.numberOfTimestepsPerHour).to_i
     weeks = 1 # use a single week that repeats
 
-    data = loadMinuteDrawProfileFromFile(timestep_minutes, days_shift, weeks)
+    @data = loadMinuteDrawProfileFromFile(timestep_minutes, days_shift, weeks)
     @totflow, @maxflow, @ontime = loadDrawProfileStatsFromFile()
     if create_sch_object
-      @schedule = createSchedule(data, timestep_minutes, weeks)
+      @schedule = createSchedule(@data, timestep_minutes, weeks)
     end
+  end
+
+  def data
+    return @data
   end
 
   def calcDesignLevelFromDailykWh(daily_kWh)

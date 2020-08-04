@@ -3339,11 +3339,19 @@ class HPXMLFile
       return true
     end
 
+    # set the calendar year
     year_description = model.getYearDescription
     year_description.setCalendarYear(2007) # default to TMY
     epw_file = OpenStudio::EpwFile.new(args[:weather_station_epw_filepath])
     if epw_file.startDateActualYear.is_initialized # AMY
       year_description.setCalendarYear(epw_file.startDateActualYear.get)
+    end
+
+    # set the timestep
+    timestep = model.getTimestep
+    timestep.setNumberOfTimestepsPerHour(1)
+    if args[:simulation_control_timestep].is_initialized
+      timestep.setNumberOfTimestepsPerHour(60 / args[:simulation_control_timestep].get)
     end
 
     schedule_generator = ScheduleGenerator.new(runner: runner, model: model, weather: weather)
