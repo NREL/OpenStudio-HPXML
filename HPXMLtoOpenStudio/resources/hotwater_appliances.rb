@@ -176,8 +176,8 @@ class HotWaterAndAppliances
         dw_name = Constants.ObjectNameDishwasher
 
         if (not schedules_file.nil?)
-          dw_peak_flow = schedules_file.calc_peak_flow_from_daily_gpm(col_name: 'dishwasher', daily_water: cw_gpd)
-          dw_design_level_w = schedules_file.calc_design_level_from_daily_kwh(col_name: 'dishwasher_power', daily_kwh: cw_annual_kwh / 365.0)
+          dw_peak_flow = schedules_file.calc_peak_flow_from_daily_gpm(col_name: 'dishwasher', daily_water: dw_gpd)
+          dw_design_level_w = schedules_file.calc_design_level_from_daily_kwh(col_name: 'dishwasher_power', daily_kwh: dw_annual_kwh / 365.0)
           water_dw_schedule = schedules_file.create_schedule_file(col_name: 'dishwasher')
           power_dw_schedule = schedules_file.create_schedule_file(col_name: 'dishwasher_power')
         else

@@ -43,7 +43,7 @@ class ScheduleGenerator
     return building_id
   end
 
-  def col_names
+  def self.col_names
     return [
       'occupants',
       'lighting_interior',
@@ -52,7 +52,6 @@ class ScheduleGenerator
       'lighting_exterior_holiday',
       'cooking_range',
       'refrigerator',
-      'extra_refrigerator',
       'freezer',
       'dishwasher',
       'dishwasher_power',
@@ -103,10 +102,7 @@ class ScheduleGenerator
     create_average_dishwasher(args: args)
     create_average_fixtures(args: args)
     create_average_ceiling_fan
-    create_average_clothes_washer_power(args: args)
-    create_average_dishwasher_power(args: args)
     create_average_refrigerator
-    create_average_extra_refrigerator
     create_average_freezer
     create_average_fuel_loads_grill
     create_average_fuel_loads_lighting
@@ -136,9 +132,7 @@ class ScheduleGenerator
   end
 
   def create_average_occupants
-    weekday_sch = '1.00000, 1.00000, 1.00000, 1.00000, 1.00000, 1.00000, 1.00000, 0.88310, 0.40861, 0.24189, 0.24189, 0.24189, 0.24189, 0.24189, 0.24189, 0.24189, 0.29498, 0.55310, 0.89693, 0.89693, 0.89693, 1.00000, 1.00000, 1.00000'
-    monthly_sch = '1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0'
-    create_timeseries_from_weekday_weekend_monthly(sch_name: 'occupants', weekday_sch: weekday_sch, weekend_sch: weekday_sch, monthly_sch: monthly_sch)
+    create_timeseries_from_weekday_weekend_monthly(sch_name: 'occupants', weekday_sch: Schedule.OccupantsWeekdayFractions, weekend_sch: Schedule.OccupantsWeekendFractions, monthly_sch: Schedule.OccupantsMonthlyMultipliers)
   end
 
   def create_average_lighting_interior
@@ -147,73 +141,41 @@ class ScheduleGenerator
   end
 
   def create_average_lighting_exterior
-    weekday_sch = '0.046, 0.046, 0.046, 0.046, 0.046, 0.037, 0.035, 0.034, 0.033, 0.028, 0.022, 0.015, 0.012, 0.011, 0.011, 0.012, 0.019, 0.037, 0.049, 0.065, 0.091, 0.105, 0.091, 0.063'
-    weekend_sch = '0.046, 0.046, 0.045, 0.045, 0.046, 0.045, 0.044, 0.041, 0.036, 0.03, 0.024, 0.016, 0.012, 0.011, 0.011, 0.012, 0.019, 0.038, 0.048, 0.06, 0.083, 0.098, 0.085, 0.059'
-    monthly_sch = '1.248, 1.257, 0.993, 0.989, 0.993, 0.827, 0.821, 0.821, 0.827, 0.99, 0.987, 1.248'
-    create_timeseries_from_weekday_weekend_monthly(sch_name: 'lighting_exterior', weekday_sch: weekday_sch, weekend_sch: weekend_sch, monthly_sch: monthly_sch)
+    create_timeseries_from_weekday_weekend_monthly(sch_name: 'lighting_exterior', weekday_sch: Schedule.LightingExteriorWeekdayFractions, weekend_sch: Schedule.LightingExteriorWeekendFractions, monthly_sch: Schedule.LightingExteriorMonthlyMultipliers)
   end
 
   def create_average_lighting_garage
-    weekday_sch = '0.046, 0.046, 0.046, 0.046, 0.046, 0.037, 0.035, 0.034, 0.033, 0.028, 0.022, 0.015, 0.012, 0.011, 0.011, 0.012, 0.019, 0.037, 0.049, 0.065, 0.091, 0.105, 0.091, 0.063'
-    weekend_sch = '0.046, 0.046, 0.045, 0.045, 0.046, 0.045, 0.044, 0.041, 0.036, 0.03, 0.024, 0.016, 0.012, 0.011, 0.011, 0.012, 0.019, 0.038, 0.048, 0.06, 0.083, 0.098, 0.085, 0.059'
-    monthly_sch = '1.248, 1.257, 0.993, 0.989, 0.993, 0.827, 0.821, 0.821, 0.827, 0.99, 0.987, 1.248'
-    create_timeseries_from_weekday_weekend_monthly(sch_name: 'lighting_garage', weekday_sch: weekday_sch, weekend_sch: weekend_sch, monthly_sch: monthly_sch)
+    create_timeseries_from_weekday_weekend_monthly(sch_name: 'lighting_garage', weekday_sch: Schedule.LightingExteriorWeekdayFractions, weekend_sch: Schedule.LightingExteriorWeekendFractions, monthly_sch: Schedule.LightingExteriorMonthlyMultipliers)
   end
 
   def create_average_lighting_exterior_holiday
-    weekday_sch = '0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.008, 0.098, 0.168, 0.194, 0.284, 0.192, 0.037, 0.019'
-    monthly_sch = '1.248, 1.257, 0.993, 0.989, 0.993, 0.827, 0.821, 0.821, 0.827, 0.99, 0.987, 1.248'
-    begin_month = 11
-    begin_day_of_month = 24
-    end_month = 1
-    end_day_of_month = 6
-    create_timeseries_from_weekday_weekend_monthly(sch_name: 'lighting_exterior_holiday', weekday_sch: weekday_sch, weekend_sch: weekday_sch, monthly_sch: monthly_sch, begin_month: begin_month, begin_day_of_month: begin_day_of_month, end_month: end_month, end_day_of_month: end_day_of_month)
+    create_timeseries_from_weekday_weekend_monthly(sch_name: 'lighting_exterior_holiday', weekday_sch: weekday_sch, weekend_sch: weekday_sch, monthly_sch: monthly_sch, begin_month: 11, begin_day_of_month: 24, end_month: 1, end_day_of_month: 6)
   end
 
   def create_average_cooking_range
-    weekday_sch = '0.007, 0.007, 0.004, 0.004, 0.007, 0.011, 0.025, 0.042, 0.046, 0.048, 0.042, 0.050, 0.057, 0.046, 0.057, 0.044, 0.092, 0.150, 0.117, 0.060, 0.035, 0.025, 0.016, 0.011'
-    monthly_sch = '1.097, 1.097, 0.991, 0.987, 0.991, 0.890, 0.896, 0.896, 0.890, 1.085, 1.085, 1.097'
     create_timeseries_from_weekday_weekend_monthly(sch_name: 'cooking_range', weekday_sch: weekday_sch, weekend_sch: weekday_sch, monthly_sch: monthly_sch)
   end
 
   def create_average_refrigerator
-    weekday_sch = '0.040, 0.039, 0.038, 0.037, 0.036, 0.036, 0.038, 0.040, 0.041, 0.041, 0.040, 0.040, 0.042, 0.042, 0.042, 0.041, 0.044, 0.048, 0.050, 0.048, 0.047, 0.046, 0.044, 0.041'
-    monthly_sch = '0.837, 0.835, 1.084, 1.084, 1.084, 1.096, 1.096, 1.096, 1.096, 0.931, 0.925, 0.837'
-    create_timeseries_from_weekday_weekend_monthly(sch_name: 'refrigerator', weekday_sch: weekday_sch, weekend_sch: weekday_sch, monthly_sch: monthly_sch)
-  end
-
-  def create_average_extra_refrigerator
-    weekday_sch = '0.040, 0.039, 0.038, 0.037, 0.036, 0.036, 0.038, 0.040, 0.041, 0.041, 0.040, 0.040, 0.042, 0.042, 0.042, 0.041, 0.044, 0.048, 0.050, 0.048, 0.047, 0.046, 0.044, 0.041'
-    monthly_sch = '0.837, 0.835, 1.084, 1.084, 1.084, 1.096, 1.096, 1.096, 1.096, 0.931, 0.925, 0.837'
-    create_timeseries_from_weekday_weekend_monthly(sch_name: 'extra_refrigerator', weekday_sch: weekday_sch, weekend_sch: weekday_sch, monthly_sch: monthly_sch)
+    create_timeseries_from_weekday_weekend_monthly(sch_name: 'refrigerator', weekday_sch: Schedule.RefrigeratorWeekdayFractions, weekend_sch: Schedule.RefrigeratorWeekendFractions, monthly_sch: Schedule.RefrigeratorMonthlyMultipliers)
   end
 
   def create_average_freezer
-    weekday_sch = '0.040, 0.039, 0.038, 0.037, 0.036, 0.036, 0.038, 0.040, 0.041, 0.041, 0.040, 0.040, 0.042, 0.042, 0.042, 0.041, 0.044, 0.048, 0.050, 0.048, 0.047, 0.046, 0.044, 0.041'
-    monthly_sch = '0.837, 0.835, 1.084, 1.084, 1.084, 1.096, 1.096, 1.096, 1.096, 0.931, 0.925, 0.837'
-    create_timeseries_from_weekday_weekend_monthly(sch_name: 'freezer', weekday_sch: weekday_sch, weekend_sch: weekday_sch, monthly_sch: monthly_sch)
+    create_timeseries_from_weekday_weekend_monthly(sch_name: 'freezer', weekday_sch: Schedule.FreezerWeekdayFractions, weekend_sch: Schedule.FreezerWeekendFractions, monthly_sch: Schedule.FreezerMonthlyMultipliers)
   end
 
   def create_average_dishwasher(args:)
     create_timeseries_from_minutely(sch_name: 'dishwasher', obj_name: Constants.ObjectNameDishwasher, args: args)
-  end
-
-  def create_average_dishwasher_power(args:)
-    create_timeseries_from_minutely(sch_name: 'dishwasher_power', obj_name: Constants.ObjectNameDishwasher, args: args) # FIXME
+    create_timeseries_from_minutely(sch_name: 'dishwasher_power', obj_name: Constants.ObjectNameDishwasher, args: args)
   end
 
   def create_average_clothes_washer(args:)
     create_timeseries_from_minutely(sch_name: 'clothes_washer', obj_name: Constants.ObjectNameClothesWasher, args: args)
-  end
-
-  def create_average_clothes_washer_power(args:)
-    create_timeseries_from_minutely(sch_name: 'clothes_washer_power', obj_name: Constants.ObjectNameClothesWasher, args: args) # FIXME
+    create_timeseries_from_minutely(sch_name: 'clothes_washer_power', obj_name: Constants.ObjectNameClothesWasher, args: args)
   end
 
   def create_average_clothes_dryer(args:)
-    weekday_sch = '0.010, 0.006, 0.004, 0.002, 0.004, 0.006, 0.016, 0.032, 0.048, 0.068, 0.078, 0.081, 0.074, 0.067, 0.057, 0.061, 0.055, 0.054, 0.051, 0.051, 0.052, 0.054, 0.044, 0.024'
-    monthly_sch = '1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0'
-    create_timeseries_from_weekday_weekend_monthly(sch_name: 'clothes_dryer', weekday_sch: weekday_sch, weekend_sch: weekday_sch, monthly_sch: monthly_sch)
+    create_timeseries_from_weekday_weekend_monthly(sch_name: 'clothes_dryer', weekday_sch: Schedule.ClothesDryerWeekdayFractions, weekend_sch: Schedule.ClothesDryerWeekendFractions, monthly_sch: Schedule.ClothesDryerMonthlyMultipliers)
   end
 
   def create_average_fixtures(args:)
@@ -221,76 +183,51 @@ class ScheduleGenerator
   end
 
   def create_average_ceiling_fan
-    weekday_sch = '0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.5, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 0.0, 0.0, 0.0, 0.0'
-    monthly_sch = HVAC.get_default_ceiling_fan_months(@weather).join(',')
-    create_timeseries_from_weekday_weekend_monthly(sch_name: 'ceiling_fan', weekday_sch: weekday_sch, weekend_sch: weekday_sch, monthly_sch: monthly_sch)
+    create_timeseries_from_weekday_weekend_monthly(sch_name: 'ceiling_fan', weekday_sch: Schedule.CeilingFanWeekdayFractions, weekend_sch: Schedule.CeilingFanWeekendFractions, monthly_sch: Schedule.CeilingFanMonthlyMultipliers(weather: @weather))
   end
 
   def create_average_plug_loads_other
-    weekday_sch = '0.035, 0.033, 0.032, 0.031, 0.032, 0.033, 0.037, 0.042, 0.043, 0.043, 0.043, 0.044, 0.045, 0.045, 0.044, 0.046, 0.048, 0.052, 0.053, 0.05, 0.047, 0.045, 0.04, 0.036'
-    monthly_sch = '1.248, 1.257, 0.993, 0.989, 0.993, 0.827, 0.821, 0.821, 0.827, 0.99, 0.987, 1.248'
-    create_timeseries_from_weekday_weekend_monthly(sch_name: 'plug_loads_other', weekday_sch: weekday_sch, weekend_sch: weekday_sch, monthly_sch: monthly_sch)
+    create_timeseries_from_weekday_weekend_monthly(sch_name: 'plug_loads_other', weekday_sch: Schedule.PlugLoadsOtherWeekdayFractions, weekend_sch: Schedule.PlugLoadsOtherWeekendFractions, monthly_sch: Schedule.PlugLoadsOtherMonthlyMultipliers)
   end
 
   def create_average_plug_loads_tv
-    weekday_sch = '0.037, 0.018, 0.009, 0.007, 0.011, 0.018, 0.029, 0.040, 0.049, 0.058, 0.065, 0.072, 0.076, 0.086, 0.091, 0.102, 0.127, 0.156, 0.210, 0.294, 0.363, 0.344, 0.208, 0.090'
-    weekend_sch = '0.044, 0.022, 0.012, 0.008, 0.011, 0.014, 0.024, 0.043, 0.071, 0.094, 0.112, 0.123, 0.132, 0.156, 0.178, 0.196, 0.206, 0.213, 0.251, 0.330, 0.388, 0.358, 0.226, 0.103'
-    monthly_sch = '1.137, 1.129, 0.961, 0.969, 0.961, 0.993, 0.996, 0.96, 0.993, 0.867, 0.86, 1.137'
-    create_timeseries_from_weekday_weekend_monthly(sch_name: 'plug_loads_tv', weekday_sch: weekday_sch, weekend_sch: weekend_sch, monthly_sch: monthly_sch)
+    create_timeseries_from_weekday_weekend_monthly(sch_name: 'plug_loads_tv', weekday_sch: Schedule.PlugLoadsTVWeekdayFractions, weekend_sch: Schedule.PlugLoadsTVWeekendFractions, monthly_sch: Schedule.PlugLoadsTVMonthlyMultipliers)
   end
 
   def create_average_plug_loads_vehicle
-    weekday_sch = '0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042'
-    monthly_sch = '1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1'
-    create_timeseries_from_weekday_weekend_monthly(sch_name: 'plug_loads_vehicle', weekday_sch: weekday_sch, weekend_sch: weekday_sch, monthly_sch: monthly_sch)
+    create_timeseries_from_weekday_weekend_monthly(sch_name: 'plug_loads_vehicle', weekday_sch: Schedule.PlugLoadsVehicleWeekdayFractions, weekend_sch: Schedule.PlugLoadsVehicleWeekendFractions, monthly_sch: Schedule.PlugLoadsVehicleMonthlyMultipliers)
   end
 
   def create_average_plug_loads_well_pump
-    weekday_sch = '0.044, 0.023, 0.019, 0.015, 0.016, 0.018, 0.026, 0.033, 0.033, 0.032, 0.033, 0.033, 0.032, 0.032, 0.032, 0.033, 0.045, 0.057, 0.066, 0.076, 0.081, 0.086, 0.075, 0.065'
-    monthly_sch = '1.154, 1.161, 1.013, 1.010, 1.013, 0.888, 0.883, 0.883, 0.888, 0.978, 0.974, 1.154'
-    create_timeseries_from_weekday_weekend_monthly(sch_name: 'plug_loads_well_pump', weekday_sch: weekday_sch, weekend_sch: weekday_sch, monthly_sch: monthly_sch)
+    create_timeseries_from_weekday_weekend_monthly(sch_name: 'plug_loads_well_pump', weekday_sch: Schedule.PlugLoadsWellPumpWeekdayFractions, weekend_sch: Schedule.PlugLoadsWellPumpWeekendFractions, monthly_sch: Schedule.PlugLoadsWellPumpMonthlyMultipliers)
   end
 
   def create_average_fuel_loads_grill
-    weekday_sch = '0.004, 0.001, 0.001, 0.002, 0.007, 0.012, 0.029, 0.046, 0.044, 0.041, 0.044, 0.046, 0.042, 0.038, 0.049, 0.059, 0.110, 0.161, 0.115, 0.070, 0.044, 0.019, 0.013, 0.007'
-    monthly_sch = '1.097, 1.097, 0.991, 0.987, 0.991, 0.890, 0.896, 0.896, 0.890, 1.085, 1.085, 1.097'
-    create_timeseries_from_weekday_weekend_monthly(sch_name: 'fuel_loads_grill', weekday_sch: weekday_sch, weekend_sch: weekday_sch, monthly_sch: monthly_sch)
+    create_timeseries_from_weekday_weekend_monthly(sch_name: 'fuel_loads_grill', weekday_sch: Schedule.FuelLoadsGrillWeekdayFractions, weekend_sch: Schedule.FuelLoadsGrillWeekendFractions, monthly_sch: Schedule.FuelLoadsGrillMonthlyMultipliers)
   end
 
   def create_average_fuel_loads_lighting
-    weekday_sch = '0.044, 0.023, 0.019, 0.015, 0.016, 0.018, 0.026, 0.033, 0.033, 0.032, 0.033, 0.033, 0.032, 0.032, 0.032, 0.033, 0.045, 0.057, 0.066, 0.076, 0.081, 0.086, 0.075, 0.065'
-    monthly_sch = '1.154, 1.161, 1.013, 1.010, 1.013, 0.888, 0.883, 0.883, 0.888, 0.978, 0.974, 1.154'
-    create_timeseries_from_weekday_weekend_monthly(sch_name: 'fuel_loads_lighting', weekday_sch: weekday_sch, weekend_sch: weekday_sch, monthly_sch: monthly_sch)
+    create_timeseries_from_weekday_weekend_monthly(sch_name: 'fuel_loads_lighting', weekday_sch: Schedule.FuelLoadsLightingWeekdayFractions, weekend_sch: Schedule.FuelLoadsLightingWeekendFractions, monthly_sch: Schedule.FuelLoadsLightingMonthlyMultipliers)
   end
 
   def create_average_fuel_loads_fireplace
-    weekday_sch = '0.044, 0.023, 0.019, 0.015, 0.016, 0.018, 0.026, 0.033, 0.033, 0.032, 0.033, 0.033, 0.032, 0.032, 0.032, 0.033, 0.045, 0.057, 0.066, 0.076, 0.081, 0.086, 0.075, 0.065'
-    monthly_sch = '1.154, 1.161, 1.013, 1.010, 1.013, 0.888, 0.883, 0.883, 0.888, 0.978, 0.974, 1.154'
-    create_timeseries_from_weekday_weekend_monthly(sch_name: 'fuel_loads_fireplace', weekday_sch: weekday_sch, weekend_sch: weekday_sch, monthly_sch: monthly_sch)
+    create_timeseries_from_weekday_weekend_monthly(sch_name: 'fuel_loads_fireplace', weekday_sch: Schedule.FuelLoadsFireplaceWeekdayFractions, weekend_sch: Schedule.FuelLoadsFireplaceWeekendFractions, monthly_sch: Schedule.FuelLoadsFireplaceMonthlyMultipliers)
   end
 
   def create_average_pool_pump
-    weekday_sch = '0.003, 0.003, 0.003, 0.004, 0.008, 0.015, 0.026, 0.044, 0.084, 0.121, 0.127, 0.121, 0.120, 0.090, 0.075, 0.061, 0.037, 0.023, 0.013, 0.008, 0.004, 0.003, 0.003, 0.003'
-    monthly_sch = '1.154, 1.161, 1.013, 1.010, 1.013, 0.888, 0.883, 0.883, 0.888, 0.978, 0.974, 1.154'
-    create_timeseries_from_weekday_weekend_monthly(sch_name: 'pool_pump', weekday_sch: weekday_sch, weekend_sch: weekday_sch, monthly_sch: monthly_sch)
+    create_timeseries_from_weekday_weekend_monthly(sch_name: 'pool_pump', weekday_sch: Schedule.PoolPumpWeekdayFractions, weekend_sch: Schedule.PoolPumpWeekendFractions, monthly_sch: Schedule.PoolPumpMonthlyMultipliers)
   end
 
   def create_average_pool_heater
-    weekday_sch = '0.003, 0.003, 0.003, 0.004, 0.008, 0.015, 0.026, 0.044, 0.084, 0.121, 0.127, 0.121, 0.120, 0.090, 0.075, 0.061, 0.037, 0.023, 0.013, 0.008, 0.004, 0.003, 0.003, 0.003'
-    monthly_sch = '1.154, 1.161, 1.013, 1.010, 1.013, 0.888, 0.883, 0.883, 0.888, 0.978, 0.974, 1.154'
-    create_timeseries_from_weekday_weekend_monthly(sch_name: 'pool_heater', weekday_sch: weekday_sch, weekend_sch: weekday_sch, monthly_sch: monthly_sch)
+    create_timeseries_from_weekday_weekend_monthly(sch_name: 'pool_heater', weekday_sch: Schedule.PoolPumpWeekdayFractions, weekend_sch: Schedule.PoolPumpWeekendFractions, monthly_sch: Schedule.PoolHeaterMonthlyMultipliers)
   end
 
   def create_average_hot_tub_pump
-    weekday_sch = '0.024, 0.029, 0.024, 0.029, 0.047, 0.067, 0.057, 0.024, 0.024, 0.019, 0.015, 0.014, 0.014, 0.014, 0.024, 0.058, 0.126, 0.122, 0.068, 0.061, 0.051, 0.043, 0.024, 0.024'
-    monthly_sch = '0.921, 0.928, 0.921, 0.915, 0.921, 1.160, 1.158, 1.158, 1.160, 0.921, 0.915, 0.921'
-    create_timeseries_from_weekday_weekend_monthly(sch_name: 'hot_tub_pump', weekday_sch: weekday_sch, weekend_sch: weekday_sch, monthly_sch: monthly_sch)
+    create_timeseries_from_weekday_weekend_monthly(sch_name: 'hot_tub_pump', weekday_sch: Schedule.HotTubPumpWeekdayFractions, weekend_sch: Schedule.HotTubPumpWeekendFractions, monthly_sch: Schedule.HotTubPumpMonthlyMultipliers)
   end
 
   def create_average_hot_tub_heater
-    weekday_sch = '0.024, 0.029, 0.024, 0.029, 0.047, 0.067, 0.057, 0.024, 0.024, 0.019, 0.015, 0.014, 0.014, 0.014, 0.024, 0.058, 0.126, 0.122, 0.068, 0.061, 0.051, 0.043, 0.024, 0.024'
-    monthly_sch = '0.837, 0.835, 1.084, 1.084, 1.084, 1.096, 1.096, 1.096, 1.096, 0.931, 0.925, 0.837'
-    create_timeseries_from_weekday_weekend_monthly(sch_name: 'hot_tub_heater', weekday_sch: weekday_sch, weekend_sch: weekday_sch, monthly_sch: monthly_sch)
+    create_timeseries_from_weekday_weekend_monthly(sch_name: 'hot_tub_heater', weekday_sch: Schedule.HotTubHeaterWeekdayFractions, weekend_sch: Schedule.HotTubHeaterWeekendFractions, monthly_sch: Schedule.HotTubHeaterMonthlyMultipliers)
   end
 
   def create_timeseries_from_weekday_weekend_monthly(sch_name:,
@@ -1030,8 +967,8 @@ class ScheduleGenerator
 
   def export(schedules_path:)
     CSV.open(schedules_path, 'w') do |csv|
-      csv << @schedules.keys
-      rows = @schedules.values.transpose
+      csv << @Schedule.keys
+      rows = @Schedule.values.transpose
       rows.each do |row|
         csv << row
       end

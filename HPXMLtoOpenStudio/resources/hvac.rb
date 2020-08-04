@@ -1296,10 +1296,10 @@ class HVAC
 
   def self.apply_ceiling_fans(model, runner, weather, ceiling_fan, living_space, schedules_file)
     obj_name = Constants.ObjectNameCeilingFan
-    monthly_sch = get_default_ceiling_fan_months(weather)
+    monthly_sch = Schedules.CeilingFanMonthlyMultipliers(weather: weather).split(',').map { |i| i.to_f }
     medium_cfm = 3000.0
-    weekday_sch = [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.5, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 0.0, 0.0, 0.0, 0.0]
-    weekend_sch = weekday_sch
+    weekday_sch = Schedules.CeilingFanWeekdayFractions.split(',').map { |i| i.to_f }
+    weekend_sch = Schedules.CeilingFanWeekendFractions.split(',').map { |i| i.to_f }
     hrs_per_day = weekday_sch.sum(0.0)
     cfm_per_w = ceiling_fan.efficiency
     quantity = ceiling_fan.quantity
