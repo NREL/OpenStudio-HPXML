@@ -10,18 +10,18 @@ class Constructions
                                 inside_drywall_thick_in:, outside_drywall_thick_in:,
                                 inside_film:, outside_film:)
     # Parameters:
-    # cavity_r - the cavity insulation R-value per inch [hr-ft^2-F/Btu-in]
+    # cavity_r - the cavity insulation R-value [hr-ft^2-F/Btu]
     # install_grade - RESNET insulation grading. This value is for considering defects occurred in the process of insulation installation. This value determines the relative area occupied by void insulation.
     # cavity_depth_in - the cavity depth [inch].
     # cavity_filled - true if insulation thickness < cavity depth, and false otherwise
     # framing_factor - is equivalent to stud_fraction (FIXME: Need to confirm)
-    # rigid_r - the continuous insulation R-value per inch [hr-ft^2-F/Btu-in]
+    # rigid_r - the continuous insulation R-value [hr-ft^2-F/Btu]
     # osb_thick_in - the oriented strand board (OSB) thickness [inch]
     # mat_ext_finish - exterior finish material
     # inside_drywall_thick_in - the inside drywall thickness [inch]
     # outside_drywall_thick_in - the outside drywall thickness [inch]
-    # inside_film - the inside film R-value per inch [hr-ft^2-F/Btu-in]
-    # outside_film - the outside film R-value per inch [hr-ft^2-F/Btu-in]
+    # inside_film - the inside film R-value [hr-ft^2-F/Btu]
+    # outside_film - the outside film R-value [hr-ft^2-F/Btu]
 
     # Parallel path layer configuration:
     # path fraction | framing_factor | 1 - framing_factor - gapFactor | gapFactor |
@@ -96,7 +96,7 @@ class Constructions
                                   inside_drywall_thick_in:, osb_thick_in:, rigid_r:,
                                   mat_ext_finish:, inside_film:, outside_film:)
     # Parameters:
-    # cavity_r - the cavity insulation R-value per inch [hr-ft^2-F/Btu-in]
+    # cavity_r - the cavity insulation R-value [hr-ft^2-F/Btu]
     # install_grade - RESNET insulation grading. This value is for considering defects occurred in the process of insulation installation. This value determines the relative area occupied by void insulation.
     # stud_depth_in - the stud depth [inch].
     # gap_depth_in - the gap depth [inch].
@@ -105,10 +105,10 @@ class Constructions
     # is_staggered - true if the stud is staggered, and false otherwise
     # inside_drywall_thick_in - the inside drywall thickness [inch]
     # osb_thick_in - the oriented strand board (OSB) thickness [inch]
-    # rigid_r - the continuous insulation R-value per inch [hr-ft^2-F/Btu-in]
+    # rigid_r - the continuous insulation R-value [hr-ft^2-F/Btu]
     # mat_ext_finish - exterior finish material
-    # inside_film - the inside film R-value per inch [hr-ft^2-F/Btu-in]
-    # outside_film - the outside film R-value per inch [hr-ft^2-F/Btu-in]
+    # inside_film - the inside film R-value [hr-ft^2-F/Btu]
+    # outside_film - the outside film R-value [hr-ft^2-F/Btu]
 
     # Parallel path layer configuration when "is_staggered" is true:
     # path fraction | misc_framing_factor | stud_frac  | stud_frac  |  dsGapFactor  | 1.0 - (2 * stud_frac + misc_framing_factor + dsGapFactor |
@@ -197,15 +197,15 @@ class Constructions
     # cmu_conductivity - the CMU conductivity [Btu/hr-ft-F]
     # cmu_density - the CMU density [lb/ft^3]
     # framing_factor - fraction of the framing of the CMU and the framing around doors, windows, etc.
-    # furring_r - the furring R-value per inch [hr-ft^2-F/Btu-in]
+    # furring_r - the furring R-value [hr-ft^2-F/Btu]
     # furring_cavity_depth_in - the furring cavity depth [inch]
     # furring_spacing - the furring spacing on center [inch]
     # inside_drywall_thick_in - the inside drywall thickness [inch]
     # osb_thick_in - the oriented strand board (OSB) thickness [inch]
-    # rigid_r - the continuous insulation R-value per inch [hr-ft^2-F/Btu-in]
+    # rigid_r - the continuous insulation R-value [hr-ft^2-F/Btu]
     # mat_ext_finish - exterior finish material
-    # inside_film - the inside film R-value per inch [hr-ft^2-F/Btu-in]
-    # outside_film - the outside film R-value per inch [hr-ft^2-F/Btu-in]
+    # inside_film - the inside film R-value [hr-ft^2-F/Btu]
+    # outside_film - the outside film R-value [hr-ft^2-F/Btu]
 
     # Parallel path layer configuration when the wall has furring:
     # path fraction | framing_factor | stud_frac | 1.0 - (stud_frac + framing_factor) |
@@ -286,16 +286,16 @@ class Constructions
                           inside_drywall_thick_in:, osb_thick_in:, rigid_r:,
                           mat_ext_finish:, inside_film:, outside_film:)
     # Parameters:
-    # icf_r - the Insulated Concrete Forms (ICF) R-value per inch [hr-ft^2-F/Btu-in]
+    # icf_r - the Insulated Concrete Forms (ICF) R-value [hr-ft^2-F/Btu]
     # icf_ins_thick_in - the ICF insulation layer thickness [inch]
     # icf_concrete_thick_in - the ICF concrete layer thickness [inch]
     # framing_factor - fraction of the framing of the ICF and the framing around doors, windows, etc.
     # inside_drywall_thick_in - the inside drywall thickness [inch]
     # osb_thick_in - the oriented strand board (OSB) thickness [inch]
-    # rigid_r - the continuous insulation R-value per inch [hr-ft^2-F/Btu-in]
+    # rigid_r - the continuous insulation R-value [hr-ft^2-F/Btu]
     # mat_ext_finish - exterior finish material
-    # inside_film - the inside film R-value per inch [hr-ft^2-F/Btu-in]
-    # outside_film - the outside film R-value per inch [hr-ft^2-F/Btu-in]
+    # inside_film - the inside film R-value [hr-ft^2-F/Btu]
+    # outside_film - the outside film R-value [hr-ft^2-F/Btu]
 
     # Parallel path layer configuration:
     # path fraction | framing_factor | 1.0 - framing_factor |
@@ -356,16 +356,16 @@ class Constructions
                           inside_drywall_thick_in:, osb_thick_in:, rigid_r:,
                           mat_ext_finish:, inside_film:, outside_film:)
     # Parameters:
-    # sip_r - the Structurally Insulated Panel (SIP) R-value per inch [hr-ft^2-F/Btu-in]
+    # sip_r - the Structurally Insulated Panel (SIP) R-value [hr-ft^2-F/Btu]
     # sip_thick_in - the SIP thickness [inch]
     # framing_factor - fraction of the framing of the SIP and the framing around doors, windows, etc.
     # sheathing_thick_in - the sheathing thickness [inch]
     # inside_drywall_thick_in - the inside drywall thickness [inch]
     # osb_thick_in - the oriented strand board (OSB) thickness [inch]
-    # rigid_r - the continuous insulation R-value per inch [hr-ft^2-F/Btu-in]
+    # rigid_r - the continuous insulation R-value [hr-ft^2-F/Btu]
     # mat_ext_finish - exterior finish material
-    # inside_film - the inside film R-value per inch [hr-ft^2-F/Btu-in]
-    # outside_film - the outside film R-value per inch [hr-ft^2-F/Btu-in]
+    # inside_film - the inside film R-value [hr-ft^2-F/Btu]
+    # outside_film - the outside film R-value [hr-ft^2-F/Btu]
 
     # Parallel path layer configuration:
     # path fraction | framing_factor | spline_frac | 1 - (spline_frac + framing_factor) |
@@ -433,7 +433,7 @@ class Constructions
                                  inside_drywall_thick_in:, osb_thick_in:, rigid_r:,
                                  mat_ext_finish:, inside_film:, outside_film:)
     # Parameters:
-    # cavity_r - the cavity insulation R-value per inch [hr-ft^2-F/Btu-in]
+    # cavity_r - the cavity insulation R-value [hr-ft^2-F/Btu]
     # install_grade - RESNET insulation grading. This value is for considering defects occurred in the process of insulation installation. This value determines the relative area occupied by void insulation.
     # cavity_depth_in - cavity depth [inch].
     # cavity_filled - true if insulation thickness < cavity depth, and false otherwise
@@ -441,10 +441,10 @@ class Constructions
     # correction_factor - is used to calculate the effective R-value of the cavity insulation with steel stud framing.
     # inside_drywall_thick_in - the inside drywall thickness [inch]
     # osb_thick_in - the oriented strand board (OSB) thickness [inch]
-    # rigid_r - the continuous insulation R-value per inch [hr-ft^2-F/Btu-in]
+    # rigid_r - the continuous insulation R-value [hr-ft^2-F/Btu]
     # mat_ext_finish - exterior finish material
-    # inside_film - the inside film R-value per inch [hr-ft^2-F/Btu-in]
-    # outside_film - the outside film R-value per inch [hr-ft^2-F/Btu-in]
+    # inside_film - the inside film R-value [hr-ft^2-F/Btu]
+    # outside_film - the outside film R-value [hr-ft^2-F/Btu]
 
     # Parallel path layer configuration:
     # path fraction |            1 - gapFactor              | gapFactor |
@@ -520,10 +520,10 @@ class Constructions
     # mat_ext_finish - exterior finish material
     # inside_drywall_thick_in - the inside drywall thickness [inch]
     # osb_thick_in - the oriented strand board (OSB) thickness [inch]
-    # rigid_r - the continuous insulation R-value per inch [hr-ft^2-F/Btu-in]
+    # rigid_r - the continuous insulation R-value [hr-ft^2-F/Btu]
     # mat_ext_finish - exterior finish material
-    # inside_film - the inside film R-value per inch [hr-ft^2-F/Btu-in]
-    # outside_film - the outside film R-value per inch [hr-ft^2-F/Btu-in]
+    # inside_film - the inside film R-value [hr-ft^2-F/Btu]
+    # outside_film - the outside film R-value [hr-ft^2-F/Btu]
 
     # Parallel path layer configuration:
     # path fraction |       1       |
