@@ -430,11 +430,10 @@ class MonthWeekdayWeekendSchedule
 end
 
 class HotWaterSchedule
-  def initialize(model, obj_name, nbeds, days_shift = 0, create_sch_object = true)
+  def initialize(model, obj_name, nbeds, create_sch_object = true)
     @model = model
     @sch_name = "#{obj_name} schedule"
     @schedule = nil
-    @days_shift = days_shift
     if nbeds < 1
       @nbeds = 1
     elsif nbeds > 5
@@ -454,7 +453,7 @@ class HotWaterSchedule
     timestep_minutes = (60 / @model.getTimestep.numberOfTimestepsPerHour).to_i
     weeks = 1 # use a single week that repeats
 
-    @data = loadMinuteDrawProfileFromFile(timestep_minutes, days_shift, weeks)
+    @data = loadMinuteDrawProfileFromFile(timestep_minutes, weeks)
     @totflow, @maxflow, @ontime = loadDrawProfileStatsFromFile()
     if create_sch_object
       @schedule = createSchedule(@data, timestep_minutes, weeks)
@@ -491,7 +490,7 @@ class HotWaterSchedule
 
   private
 
-  def loadMinuteDrawProfileFromFile(timestep_minutes, days_shift, weeks)
+  def loadMinuteDrawProfileFromFile(timestep_minutes, weeks)
     data = []
     if @file_prefix.nil?
       return data
@@ -508,7 +507,6 @@ class HotWaterSchedule
 
     # Read data into minute array
     skippedheader = false
-    min_shift = 24 * 60 * (days_shift % 365) # For MF homes, shift each unit by an additional week
     items = [0] * minutes_in_year
     File.open(minute_draw_profile).each do |line|
       linedata = line.strip.split(',')
@@ -516,7 +514,7 @@ class HotWaterSchedule
         skippedheader = true
         next
       end
-      shifted_minute = linedata[0].to_i - min_shift
+      shifted_minute = linedata[0].to_i
       if shifted_minute < 0
         stored_minute = shifted_minute + minutes_in_year
       else
