@@ -332,7 +332,6 @@ class EnergyPlusValidator
         'SystemIdentifier' => one, # Required by HPXML schema
         '../../HVACControl' => one, # See [HVACControl]
         'HeatingSystemType[ElectricResistance | Furnace | WallFurnace | FloorFurnace | Boiler | Stove | PortableHeater | FixedHeater | Fireplace]' => one, # See [HeatingType=Resistance] or [HeatingType=Furnace] or [HeatingType=WallFurnace] or [HeatingType=FloorFurnace] or [HeatingType=Boiler] or [HeatingType=Stove] or [HeatingType=PortableHeater] or [HeatingType=FixedHeater] or [HeatingType=Fireplace]
-        'HeatingCapacity' => zero_or_one,
         'ElectricAuxiliaryEnergy' => zero_or_one, # If not provided, uses 301 defaults for fuel furnace/boiler and zero otherwise
         'IsVentilationPreconditioningSystem' => one, # See [PreconditioningSystem], true if this system only provides preconditioning for shared mechanical ventilation system
       },
@@ -340,6 +339,7 @@ class EnergyPlusValidator
       ## [PreconditioningSystem="true"]
       '/HPXML/Building/BuildingDetails/Systems/HVAC/HVACPlant/HeatingSystem[IsVentilationPreconditioningSystem="true"]' => {
         'HeatingCapacity[not(@scope)]' => zero, # Use scope attribute to describe at which level data is provided
+        'HeatingCapacity' => one, # Use scope attribute to describe at which level data is provided
         'DistributionSystem' => zero,
         'FractionHeatLoadServed' => zero, # Don't need fraction for preconditioning equipment
       },
@@ -347,6 +347,7 @@ class EnergyPlusValidator
       ## [PreconditioningSystem="false"]
       '/HPXML/Building/BuildingDetails/Systems/HVAC/HVACPlant/HeatingSystem[IsVentilationPreconditioningSystem="false"]' => {
         'FractionHeatLoadServed' => one, # Must sum to <= 1 across all HeatingSystems and HeatPumps
+        'HeatingCapacity' => zero_or_one,
       },
 
       ## [HeatingType=Resistance]
@@ -430,7 +431,6 @@ class EnergyPlusValidator
       '/HPXML/Building/BuildingDetails/Systems/HVAC/HVACPlant/CoolingSystem' => {
         'SystemIdentifier' => one, # Required by HPXML schema
         '../../HVACControl' => one, # See [HVACControl]
-        'CoolingSystemType[text()="central air conditioner" or text()="room air conditioner" or text()="evaporative cooler" or text()="mini-split"]' => one, # See [CoolingType=CentralAC] or [CoolingType=RoomAC] or [CoolingType=EvapCooler] or [CoolingType=MiniSplitAC]
         'CoolingSystemFuel[text()="electricity"]' => one,
         'IsVentilationPreconditioningSystem' => one, # See [PreconditioningSystem], true if this system only provides preconditioning for shared mechanical ventilation system
       },
@@ -438,13 +438,16 @@ class EnergyPlusValidator
       ## [PreconditioningSystem="true"]
       '/HPXML/Building/BuildingDetails/Systems/HVAC/HVACPlant/CoolingSystem[IsVentilationPreconditioningSystem="true"]' => {
         'CoolingCapacity[not(@scope)]' => zero, # Use scope attribute to describe at which level data is provided
+        'CoolingCapacity' => one,
         'DistributionSystem' => zero,
         'FractionCoolLoadServed' => zero, # Don't need fraction for preconditioning equipment
+        'CoolingSystemType[text()="central air conditioner" or text()="room air conditioner" or text()="mini-split"]' => one, # See [CoolingType=CentralAC] or [CoolingType=RoomAC] or [CoolingType=MiniSplitAC], evap cooler is not supported because capacity is required for preconditioning systems
       },
 
       ## [PreconditioningSystem="false"]
       '/HPXML/Building/BuildingDetails/Systems/HVAC/HVACPlant/CoolingSystem[IsVentilationPreconditioningSystem="false"]' => {
         'FractionCoolLoadServed' => one, # Must sum to <= 1 across all CoolingSystems and HeatPumps
+        'CoolingSystemType[text()="central air conditioner" or text()="room air conditioner" or text()="evaporative cooler" or text()="mini-split"]' => one, # See [CoolingType=CentralAC] or [CoolingType=RoomAC] or [CoolingType=EvapCooler] or [CoolingType=MiniSplitAC]
       },
 
       ## [CoolingType=CentralAC and IsVentilationPreconditioningSystem="false"]
@@ -459,7 +462,6 @@ class EnergyPlusValidator
 
       ## [CoolingType=CentralAC  and IsVentilationPreconditioningSystem="true"]
       '/HPXML/Building/BuildingDetails/Systems/HVAC/HVACPlant/CoolingSystem[CoolingSystemType="central air conditioner" and IsVentilationPreconditioningSystem="true"]' => {
-        'CoolingCapacity' => zero_or_one,
         '[not(CompressorType)] | CompressorType[text()="single stage" or text()="two stage" or text()="variable speed"]' => one,
         'AnnualCoolingEfficiency[Units="SEER"]/Value' => one,
         'SensibleHeatFraction' => zero_or_one,
@@ -473,15 +475,10 @@ class EnergyPlusValidator
         'SensibleHeatFraction' => zero_or_one,
       },
 
-      ## [CoolingType=EvapCooler and IsVentilationPreconditioningSystem="false"]
-      '/HPXML/Building/BuildingDetails/Systems/HVAC/HVACPlant/CoolingSystem[CoolingSystemType="evaporative cooler" and IsVentilationPreconditioningSystem="false"]' => {
+      ## [CoolingType=EvapCooler]
+      '/HPXML/Building/BuildingDetails/Systems/HVAC/HVACPlant/CoolingSystem[CoolingSystemType="evaporative cooler"]' => {
         '../../HVACDistribution[DistributionSystemType/AirDistribution | DistributionSystemType[Other="DSE"]]' => zero_or_more, # See [HVACDistribution]
         'DistributionSystem' => zero_or_one,
-        'CoolingCapacity' => zero,
-      },
-
-      ## [CoolingType=EvapCooler and IsVentilationPreconditioningSystem="true"]
-      '/HPXML/Building/BuildingDetails/Systems/HVAC/HVACPlant/CoolingSystem[CoolingSystemType="evaporative cooler" and IsVentilationPreconditioningSystem="true"]' => {
         'CoolingCapacity' => zero,
       },
 
@@ -497,7 +494,6 @@ class EnergyPlusValidator
 
       ## [CoolingType=MiniSplitAC and IsVentilationPreconditioningSystem="true"]
       '/HPXML/Building/BuildingDetails/Systems/HVAC/HVACPlant/CoolingSystem[CoolingSystemType="mini-split" and IsVentilationPreconditioningSystem="true"]' => {
-        'CoolingCapacity' => zero_or_one,
         '[not(CompressorType)] | CompressorType[text()="single stage" or text()="two stage" or text()="variable speed"]' => one,
         'AnnualCoolingEfficiency[Units="SEER"]/Value' => one,
         'SensibleHeatFraction' => zero_or_one,
@@ -509,8 +505,6 @@ class EnergyPlusValidator
         '../../HVACControl' => one, # See [HVACControl]
         'HeatPumpType[text()="air-to-air" or text()="mini-split" or text()="ground-to-air"]' => one, # See [HeatPumpType=ASHP] or [HeatPumpType=MSHP] or [HeatPumpType=GSHP]
         'HeatPumpFuel[text()="electricity"]' => one,
-        'HeatingCapacity' => zero_or_one,
-        'CoolingCapacity' => zero_or_one,
         'CoolingSensibleHeatFraction' => zero_or_one,
         '[not(BackupSystemFuel)] | BackupSystemFuel[text()="electricity" or text()="natural gas" or text()="fuel oil" or text()="fuel oil 1" or text()="fuel oil 2" or text()="fuel oil 4" or text()="fuel oil 5/6" or text()="diesel" or text()="propane" or text()="kerosene" or text()="wood" or text()="wood pellets"]' => one, # See [HeatPumpBackup]
         'IsVentilationPreconditioningSystem' => one, # See [PreconditioningSystem], true if this system only provides preconditioning for shared mechanical ventilation system
@@ -518,6 +512,8 @@ class EnergyPlusValidator
 
       ## [PreconditioningSystem="true"]
       '/HPXML/Building/BuildingDetails/Systems/HVAC/HVACPlant/HeatPump[IsVentilationPreconditioningSystem="true"]' => {
+        'CoolingCapacity' => one, # Use scope attribute to describe at which level data is provided
+        'HeatingCapacity' => one, # Use scope attribute to describe at which level data is provided
         'CoolingCapacity[not(@scope)]' => zero, # Use scope attribute to describe at which level data is provided
         'HeatingCapacity[not(@scope)]' => zero, # Use scope attribute to describe at which level data is provided
         'HeatingCapacity17F[not(@scope)]' => zero, # Use scope attribute to describe at which level data is provided
@@ -530,6 +526,8 @@ class EnergyPlusValidator
       '/HPXML/Building/BuildingDetails/Systems/HVAC/HVACPlant/HeatPump[IsVentilationPreconditioningSystem="false"]' => {
         'FractionHeatLoadServed' => one, # Must sum to <= 1 across all HeatPumps and HeatingSystems
         'FractionCoolLoadServed' => one, # Must sum to <= 1 across all HeatPumps and CoolingSystems
+        'HeatingCapacity' => zero_or_one,
+        'CoolingCapacity' => zero_or_one,
       },
 
       ## [HeatPumpType=ASHP and IsVentilationPreconditioningSystem="false"]
@@ -547,7 +545,7 @@ class EnergyPlusValidator
         '[not(CompressorType)] | CompressorType[text()="single stage" or text()="two stage" or text()="variable speed"]' => one,
         'AnnualCoolingEfficiency[Units="SEER"]/Value' => one,
         'AnnualHeatingEfficiency[Units="HSPF"]/Value' => one,
-        'HeatingCapacity17F' => zero_or_one
+        'HeatingCapacity17F' => one
       },
 
       ## [HeatPumpType=MSHP and IsVentilationPreconditioningSystem="false"]
@@ -563,7 +561,7 @@ class EnergyPlusValidator
       '/HPXML/Building/BuildingDetails/Systems/HVAC/HVACPlant/HeatPump[HeatPumpType="mini-split" and IsVentilationPreconditioningSystem="true"]' => {
         'AnnualCoolingEfficiency[Units="SEER"]/Value' => one,
         'AnnualHeatingEfficiency[Units="HSPF"]/Value' => one,
-        'HeatingCapacity17F' => zero_or_one
+        'HeatingCapacity17F' => one
       },
 
       ## [HeatPumpType=GSHP and IsVentilationPreconditioningSystem="false"]
