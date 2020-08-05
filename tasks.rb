@@ -4034,7 +4034,8 @@ def set_hpxml_clothes_dryer(hpxml_file, hpxml)
                              fuel_type: HPXML::FuelTypeElectricity,
                              combined_energy_factor: 3.73,
                              control_type: HPXML::ClothesDryerControlTypeTimer)
-  elsif ['base-appliances-none.xml'].include? hpxml_file
+  elsif ['base-appliances-none.xml',
+         'base-dhw-none.xml'].include? hpxml_file
     hpxml.clothes_dryers.clear
   elsif ['base-enclosure-attached-multifamily.xml'].include? hpxml_file
     hpxml.clothes_dryers[0].location = HPXML::LocationLivingSpace

@@ -377,13 +377,6 @@
         </HVAC>
       </Systems>
       <Appliances>
-        <ClothesDryer>
-          <SystemIdentifier id='ClothesDryer'/>
-          <Location>living space</Location>
-          <FuelType>electricity</FuelType>
-          <CombinedEnergyFactor>3.73</CombinedEnergyFactor>
-          <ControlType>timer</ControlType>
-        </ClothesDryer>
         <Refrigerator>
           <SystemIdentifier id='Refrigerator'/>
           <Location>living space</Location>

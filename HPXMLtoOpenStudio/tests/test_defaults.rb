@@ -446,7 +446,7 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
     # Test defaults w/ recirculation & unconditioned basement
     hpxml = apply_hpxml_defaults('base-foundation-unconditioned-basement.xml')
     hpxml.hot_water_distributions.clear
-    hpxml.hot_water_distributions.add(id: 'HotWaterDstribution',
+    hpxml.hot_water_distributions.add(id: hpxml.water_heating_systems[0].hot_water_distribution_idref,
                                       system_type: HPXML::DHWDistTypeRecirc,
                                       recirculation_control_type: HPXML::DHWRecirControlTypeSensor,
                                       pipe_r_value: 3.0)
@@ -457,7 +457,7 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
     # Test defaults w/ recirculation & 2-story building
     hpxml = apply_hpxml_defaults('base-enclosure-2stories.xml')
     hpxml.hot_water_distributions.clear
-    hpxml.hot_water_distributions.add(id: 'HotWaterDstribution',
+    hpxml.hot_water_distributions.add(id: hpxml.water_heating_systems[0].hot_water_distribution_idref,
                                       system_type: HPXML::DHWDistTypeRecirc,
                                       recirculation_control_type: HPXML::DHWRecirControlTypeSensor,
                                       pipe_r_value: 3.0)
