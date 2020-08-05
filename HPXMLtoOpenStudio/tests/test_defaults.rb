@@ -412,7 +412,7 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
     _test_default_recirc_distribution_values(hpxml_default, 50.0, 50.0, 65.0)
 
     # Test inputs not overridden by defaults -- shared recirculation
-    hpxml_name = 'base-dhw-shared-water-heater-multiple-units-recirc.xml'
+    hpxml_name = 'base-dhw-shared-water-heater-recirc.xml'
     hpxml = HPXML.new(hpxml_path: File.join(@root_path, 'workflow', 'sample_files', hpxml_name))
     hpxml.hot_water_distributions[0].shared_recirculation_pump_power = 333.0
     XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
@@ -446,7 +446,7 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
     # Test defaults w/ recirculation & unconditioned basement
     hpxml = apply_hpxml_defaults('base-foundation-unconditioned-basement.xml')
     hpxml.hot_water_distributions.clear
-    hpxml.hot_water_distributions.add(id: 'HotWaterDstribution',
+    hpxml.hot_water_distributions.add(id: hpxml.water_heating_systems[0].hot_water_distribution_idref,
                                       system_type: HPXML::DHWDistTypeRecirc,
                                       recirculation_control_type: HPXML::DHWRecirControlTypeSensor,
                                       pipe_r_value: 3.0)
@@ -457,7 +457,7 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
     # Test defaults w/ recirculation & 2-story building
     hpxml = apply_hpxml_defaults('base-enclosure-2stories.xml')
     hpxml.hot_water_distributions.clear
-    hpxml.hot_water_distributions.add(id: 'HotWaterDstribution',
+    hpxml.hot_water_distributions.add(id: hpxml.water_heating_systems[0].hot_water_distribution_idref,
                                       system_type: HPXML::DHWDistTypeRecirc,
                                       recirculation_control_type: HPXML::DHWRecirControlTypeSensor,
                                       pipe_r_value: 3.0)
@@ -466,7 +466,7 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
     _test_default_recirc_distribution_values(hpxml_default, 186.96, 10.0, 50.0)
 
     # Test defaults w/ shared recirculation
-    hpxml = apply_hpxml_defaults('base-dhw-shared-water-heater-multiple-units-recirc.xml')
+    hpxml = apply_hpxml_defaults('base-dhw-shared-water-heater-recirc.xml')
     XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
     hpxml_default = _test_measure()
     _test_default_shared_recirc_distribution_values(hpxml_default, 220.0)

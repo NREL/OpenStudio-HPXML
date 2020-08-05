@@ -35,7 +35,9 @@ class HotWaterAndAppliances
     end
 
     # Add hot water loads for each DHW loop (i.e., for each water heater)
-    water_schedule = HotWaterSchedule.new(model, Constants.ObjectNameFixtures, nbeds)
+    if not dhw_loops.empty?
+      water_schedule = HotWaterSchedule.new(model, Constants.ObjectNameFixtures, nbeds)
+    end
     dhw_loops.each do |sys_id, dhw_loop|
       # Init
       water_use_connections = OpenStudio::Model::WaterUseConnections.new(model)
