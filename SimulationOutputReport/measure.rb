@@ -168,6 +168,11 @@ class SimulationOutputReport < OpenStudio::Measure::ReportingMeasure
       result << OpenStudio::IdfObject.load("Output:Variable,#{unmet_load.key},#{unmet_load.variable},runperiod;").get
     end
 
+    # Add ideal air system load outputs
+    @ideal_system_loads.each do |load_type, ideal_load|
+      result << OpenStudio::IdfObject.load("Output:Variable,#{ideal_load.key},#{ideal_load.variable},runperiod;").get
+    end
+
     # Add peak electricity outputs
     @peak_fuels.each do |key, peak_fuel|
       result << OpenStudio::IdfObject.load("Output:Table:Monthly,#{peak_fuel.report},2,#{peak_fuel.meter},HoursPositive,Electricity:Facility,MaximumDuringHoursShown;").get
@@ -475,8 +480,8 @@ class SimulationOutputReport < OpenStudio::Measure::ReportingMeasure
     end
 
     # Ideal system loads (expected fraction of loads that are not met by HVAC)
-    @ideal_system_loads.each do |load_type, unmet_load|
-      unmet_load.annual_output = get_report_variable_data_annual([unmet_load.key.upcase], [unmet_load.variable])
+    @ideal_system_loads.each do |load_type, ideal_load|
+      ideal_load.annual_output = get_report_variable_data_annual([ideal_load.key.upcase], [ideal_load.variable])
     end
 
     # Peak Building Space Heating/Cooling Loads (total heating/cooling energy delivered including backup ideal air system)
@@ -1989,7 +1994,7 @@ class SimulationOutputReport < OpenStudio::Measure::ReportingMeasure
       comp_load.timeseries_units = 'kBtu'
     end
 
-    # Unmet Loads
+    # Unmet Loads (unexpected load that should have been met by HVAC)
     @unmet_loads = {}
     @unmet_loads[LT::Heating] = UnmetLoad.new(key: Constants.ObjectNameIdealAirSystemResidual, variable: 'Zone Ideal Loads Zone Sensible Heating Energy')
     @unmet_loads[LT::Cooling] = UnmetLoad.new(key: Constants.ObjectNameIdealAirSystemResidual, variable: 'Zone Ideal Loads Zone Sensible Cooling Energy')
@@ -1999,14 +2004,14 @@ class SimulationOutputReport < OpenStudio::Measure::ReportingMeasure
       unmet_load.annual_units = 'MBtu'
     end
 
-    # Ideal System Loads (expected fraction of loads that are not met by HVAC)
+    # Ideal System Loads (expected load that is not met by HVAC)
     @ideal_system_loads = {}
     @ideal_system_loads[LT::Heating] = UnmetLoad.new(key: Constants.ObjectNameIdealAirSystem, variable: 'Zone Ideal Loads Zone Sensible Heating Energy')
     @ideal_system_loads[LT::Cooling] = UnmetLoad.new(key: Constants.ObjectNameIdealAirSystem, variable: 'Zone Ideal Loads Zone Sensible Cooling Energy')
 
-    @ideal_system_loads.each do |load_type, unmet_load|
-      unmet_load.name = "Ideal System Load: #{load_type}"
-      unmet_load.annual_units = 'MBtu'
+    @ideal_system_loads.each do |load_type, ideal_load|
+      ideal_load.name = "Ideal System Load: #{load_type}"
+      ideal_load.annual_units = 'MBtu'
     end
 
     # Peak Loads
