@@ -153,9 +153,9 @@ def create_hpxmls
     'base-dhw-recirc-nocontrol.xml' => 'base.xml',
     'base-dhw-recirc-temperature.xml' => 'base.xml',
     'base-dhw-recirc-timer.xml' => 'base.xml',
-    'base-dhw-shared-water-heater-multiple-units.xml' => 'base-enclosure-attached-multifamily.xml',
-    'base-dhw-shared-water-heater-multiple-units-recirc.xml' => 'base-dhw-shared-water-heater-multiple-units.xml',
-    'base-dhw-shared-water-heater-shared-laundry-room.xml' => 'base-enclosure-attached-multifamily.xml',
+    'base-dhw-shared-water-heater.xml' => 'base-enclosure-attached-multifamily.xml',
+    'base-dhw-shared-water-heater-recirc.xml' => 'base-dhw-shared-water-heater.xml',
+    'base-dhw-shared-laundry-room.xml' => 'base-enclosure-attached-multifamily.xml',
     'base-dhw-solar-direct-evacuated-tube.xml' => 'base.xml',
     'base-dhw-solar-direct-flat-plate.xml' => 'base.xml',
     'base-dhw-solar-direct-ics.xml' => 'base.xml',
@@ -3717,7 +3717,7 @@ def set_hpxml_water_heating_systems(hpxml_file, hpxml)
       hpxml.water_heating_systems[0].energy_factor = nil
       hpxml.water_heating_systems[0].uniform_energy_factor = 0.93
     end
-  elsif ['base-dhw-shared-water-heater-multiple-units.xml'].include? hpxml_file
+  elsif ['base-dhw-shared-water-heater.xml'].include? hpxml_file
     hpxml.water_heating_systems.clear
     hpxml.water_heating_systems.add(id: 'SharedWaterHeater',
                                     hot_water_distribution_idref: 'SharedHotWaterDistribution',
@@ -3732,7 +3732,7 @@ def set_hpxml_water_heating_systems(hpxml_file, hpxml)
                                     energy_factor: 0.59,
                                     recovery_efficiency: 0.76,
                                     temperature: Waterheater.get_default_hot_water_temperature(Constants.ERIVersions[-1]))
-  elsif ['base-dhw-shared-water-heater-shared-laundry-room.xml'].include? hpxml_file
+  elsif ['base-dhw-shared-laundry-room.xml'].include? hpxml_file
     hpxml.water_heating_systems[0].location = HPXML::LocationLivingSpace
     hpxml.water_heating_systems << hpxml.water_heating_systems[0].dup
     hpxml.water_heating_systems[1].id = 'SharedWaterHeater'
@@ -3790,13 +3790,13 @@ def set_hpxml_hot_water_distribution(hpxml_file, hpxml)
     hpxml.hot_water_distributions[0].recirculation_piping_length = 50
     hpxml.hot_water_distributions[0].recirculation_branch_piping_length = 50
     hpxml.hot_water_distributions[0].recirculation_pump_power = 50
-  elsif ['base-dhw-shared-water-heater-multiple-units.xml'].include? hpxml_file
+  elsif ['base-dhw-shared-water-heater.xml'].include? hpxml_file
     hpxml.hot_water_distributions[0].id = 'SharedHotWaterDistribution'
-  elsif ['base-dhw-shared-water-heater-shared-laundry-room.xml'].include? hpxml_file
+  elsif ['base-dhw-shared-laundry-room.xml'].include? hpxml_file
     hpxml.hot_water_distributions << hpxml.hot_water_distributions[0].dup
     hpxml.hot_water_distributions[-1].id = 'SharedHotWaterDistribution'
     hpxml.hot_water_distributions[-1].standard_piping_length = 0.0
-  elsif ['base-dhw-shared-water-heater-multiple-units-recirc.xml'].include? hpxml_file
+  elsif ['base-dhw-shared-water-heater-recirc.xml'].include? hpxml_file
     hpxml.hot_water_distributions[0].has_shared_recirculation = true
     hpxml.hot_water_distributions[0].shared_recirculation_number_of_units_served = 6
     hpxml.hot_water_distributions[0].shared_recirculation_pump_power = 220
@@ -3825,7 +3825,7 @@ def set_hpxml_water_fixtures(hpxml_file, hpxml)
                              hot_water_distribution_idref: 'HotWaterDistribution',
                              water_fixture_type: HPXML::WaterFixtureTypeFaucet,
                              low_flow: false)
-  elsif ['base-dhw-shared-water-heater-multiple-units.xml'].include? hpxml_file
+  elsif ['base-dhw-shared-water-heater.xml'].include? hpxml_file
     hpxml.water_fixtures.each do |water_fixture|
       water_fixture.hot_water_distribution_idref = 'SharedHotWaterDistribution'
     end
@@ -4014,9 +4014,9 @@ def set_hpxml_clothes_washer(hpxml_file, hpxml)
     hpxml.clothes_washers[0].hot_water_distribution_idref += '2'
   elsif ['base-misc-loads-usage-multiplier.xml'].include? hpxml_file
     hpxml.clothes_washers[0].usage_multiplier = 0.9
-  elsif ['base-dhw-shared-water-heater-multiple-units.xml'].include? hpxml_file
+  elsif ['base-dhw-shared-water-heater.xml'].include? hpxml_file
     hpxml.clothes_washers[0].hot_water_distribution_idref = 'SharedHotWaterDistribution'
-  elsif ['base-dhw-shared-water-heater-shared-laundry-room.xml'].include? hpxml_file
+  elsif ['base-dhw-shared-laundry-room.xml'].include? hpxml_file
     hpxml.clothes_washers[0].id = 'SharedClothesWasher'
     hpxml.clothes_washers[0].location = HPXML::LocationOtherHeatedSpace
     hpxml.clothes_washers[0].hot_water_distribution_idref = 'SharedHotWaterDistribution'
@@ -4099,7 +4099,7 @@ def set_hpxml_clothes_dryer(hpxml_file, hpxml)
     hpxml.clothes_dryers[0].energy_factor = nil
     hpxml.clothes_dryers[0].combined_energy_factor = nil
     hpxml.clothes_dryers[0].control_type = nil
-  elsif ['base-dhw-shared-water-heater-shared-laundry-room.xml'].include? hpxml_file
+  elsif ['base-dhw-shared-laundry-room.xml'].include? hpxml_file
     hpxml.clothes_dryers[0].id = 'SharedClothesDryer'
     hpxml.clothes_dryers[0].location = HPXML::LocationOtherHeatedSpace
   elsif ['base-misc-loads-usage-multiplier.xml'].include? hpxml_file
@@ -4159,9 +4159,9 @@ def set_hpxml_dishwasher(hpxml_file, hpxml)
     hpxml.dishwashers[0].label_annual_gas_cost = nil
     hpxml.dishwashers[0].place_setting_capacity = nil
     hpxml.dishwashers[0].label_usage = nil
-  elsif ['base-dhw-shared-water-heater-multiple-units.xml'].include? hpxml_file
+  elsif ['base-dhw-shared-water-heater.xml'].include? hpxml_file
     hpxml.dishwashers[0].hot_water_distribution_idref = 'SharedHotWaterDistribution'
-  elsif ['base-dhw-shared-water-heater-shared-laundry-room.xml'].include? hpxml_file
+  elsif ['base-dhw-shared-laundry-room.xml'].include? hpxml_file
     hpxml.dishwashers[0].id = 'SharedDishwasher'
     hpxml.dishwashers[0].location = HPXML::LocationOtherHeatedSpace
     hpxml.dishwashers[0].hot_water_distribution_idref = 'SharedHotWaterDistribution'

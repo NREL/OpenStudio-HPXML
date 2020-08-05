@@ -68,7 +68,39 @@ class HPXMLtoOpenStudioHotWaterApplianceTest < MiniTest::Test
     return
   end
 
-  def test_recirc_demand
+  def test_dhw_low_flow_fixtures
+    args_hash = {}
+    args_hash['hpxml_path'] = File.absolute_path(File.join(sample_files_dir, 'base-dhw-low-flow-fixtures.xml'))
+    model, hpxml = _test_measure(args_hash)
+
+    # water use equipment peak flows
+    fixture_gpd = 42.39
+    dist_gpd = 9.7261
+    assert_in_epsilon(fixture_gpd, get_wu_gpd(model, Constants.ObjectNameFixtures), 0.001)
+    assert_in_epsilon(dist_gpd, get_wu_gpd(model, Constants.ObjectNameDistributionWaste), 0.001)
+
+    # mains temperature
+    avg_tmains = 57.58
+    assert_in_epsilon(avg_tmains, UnitConversions.convert(model.getSiteWaterMainsTemperature.temperatureSchedule.get.to_ScheduleInterval.get.timeSeries.averageValue, 'C', 'F'), 0.001)
+  end
+
+  def test_dhw_dwhr
+    args_hash = {}
+    args_hash['hpxml_path'] = File.absolute_path(File.join(sample_files_dir, 'base-dhw-dwhr.xml'))
+    model, hpxml = _test_measure(args_hash)
+
+    # water use equipment peak flows
+    fixture_gpd = 44.60
+    dist_gpd = 10.2343
+    assert_in_epsilon(fixture_gpd, get_wu_gpd(model, Constants.ObjectNameFixtures), 0.001)
+    assert_in_epsilon(dist_gpd, get_wu_gpd(model, Constants.ObjectNameDistributionWaste), 0.001)
+
+    # mains temperature
+    avg_tmains = 70.49
+    assert_in_epsilon(avg_tmains, UnitConversions.convert(model.getSiteWaterMainsTemperature.temperatureSchedule.get.to_ScheduleInterval.get.timeSeries.averageValue, 'C', 'F'), 0.001)
+  end
+
+  def test_dhw_recirc_demand
     args_hash = {}
     args_hash['hpxml_path'] = File.absolute_path(File.join(sample_files_dir, 'base-dhw-recirc-demand.xml'))
     model, hpxml = _test_measure(args_hash)
@@ -79,7 +111,7 @@ class HPXMLtoOpenStudioHotWaterApplianceTest < MiniTest::Test
     assert_in_epsilon(pump_kwh_yr, get_ee_kwh_per_year(model, 'dhw recirc pump'), 0.001)
   end
 
-  def test_recirc_manual
+  def test_dhw_recirc_manual
     args_hash = {}
     args_hash['hpxml_path'] = File.absolute_path(File.join(sample_files_dir, 'base-dhw-recirc-manual.xml'))
     model, hpxml = _test_measure(args_hash)
@@ -90,7 +122,7 @@ class HPXMLtoOpenStudioHotWaterApplianceTest < MiniTest::Test
     assert_in_epsilon(pump_kwh_yr, get_ee_kwh_per_year(model, 'dhw recirc pump'), 0.001)
   end
 
-  def test_recirc_no_control
+  def test_dhw_recirc_no_control
     args_hash = {}
     args_hash['hpxml_path'] = File.absolute_path(File.join(sample_files_dir, 'base-dhw-recirc-nocontrol.xml'))
     model, hpxml = _test_measure(args_hash)
@@ -101,7 +133,7 @@ class HPXMLtoOpenStudioHotWaterApplianceTest < MiniTest::Test
     assert_in_epsilon(pump_kwh_yr, get_ee_kwh_per_year(model, 'dhw recirc pump'), 0.001)
   end
 
-  def test_recirc_timer
+  def test_dhw_recirc_timer
     args_hash = {}
     args_hash['hpxml_path'] = File.absolute_path(File.join(sample_files_dir, 'base-dhw-recirc-timer.xml'))
     model, hpxml = _test_measure(args_hash)
@@ -112,7 +144,7 @@ class HPXMLtoOpenStudioHotWaterApplianceTest < MiniTest::Test
     assert_in_epsilon(pump_kwh_yr, get_ee_kwh_per_year(model, 'dhw recirc pump'), 0.001)
   end
 
-  def test_recirc_temp
+  def test_dhw_recirc_temp
     args_hash = {}
     args_hash['hpxml_path'] = File.absolute_path(File.join(sample_files_dir, 'base-dhw-recirc-temperature.xml'))
     model, hpxml = _test_measure(args_hash)
@@ -123,9 +155,9 @@ class HPXMLtoOpenStudioHotWaterApplianceTest < MiniTest::Test
     assert_in_epsilon(pump_kwh_yr, get_ee_kwh_per_year(model, 'dhw recirc pump'), 0.001)
   end
 
-  def test_shared_recirc
+  def test_dhw_recirc_shared
     args_hash = {}
-    args_hash['hpxml_path'] = File.absolute_path(File.join(sample_files_dir, 'base-dhw-shared-water-heater-multiple-units-recirc.xml'))
+    args_hash['hpxml_path'] = File.absolute_path(File.join(sample_files_dir, 'base-dhw-shared-water-heater-recirc.xml'))
     model, hpxml = _test_measure(args_hash)
 
     # Get HPXML values
@@ -140,10 +172,6 @@ class HPXMLtoOpenStudioHotWaterApplianceTest < MiniTest::Test
     model, hpxml = _test_measure(args_hash)
 
     # water use equipment peak flows
-    fixture_gpd = 44.60
-    dist_peak_gpd = 10.2343
-    assert_in_epsilon(fixture_gpd, get_wu_gpd(model, Constants.ObjectNameFixtures), 0.001)
-    assert_in_epsilon(dist_peak_gpd, get_wu_gpd(model, Constants.ObjectNameDistributionWaste), 0.001)
     assert_nil(get_wu_gpd(model, Constants.ObjectNameClothesWasher))
     assert_nil(get_wu_gpd(model, Constants.ObjectNameDishwasher))
 
@@ -175,18 +203,14 @@ class HPXMLtoOpenStudioHotWaterApplianceTest < MiniTest::Test
     assert_in_epsilon(1.0, get_oe_fractions(model, Constants.ObjectNameWater + ' Latent')[1], 0.001)
   end
 
-  def test_base_appliances
+  def test_appliances_base
     args_hash = {}
     args_hash['hpxml_path'] = File.absolute_path(File.join(sample_files_dir, 'base.xml'))
     model, hpxml = _test_measure(args_hash)
 
     # water use equipment peak flows
-    fixture_gpd = 44.60
-    dist_gpd = 10.2343
     cw_gpd = 3.7116
     dw_gpd = 2.7342
-    assert_in_epsilon(fixture_gpd, get_wu_gpd(model, Constants.ObjectNameFixtures), 0.001)
-    assert_in_epsilon(dist_gpd, get_wu_gpd(model, Constants.ObjectNameDistributionWaste), 0.001)
     assert_in_epsilon(cw_gpd, get_wu_gpd(model, Constants.ObjectNameClothesWasher), 0.001)
     assert_in_epsilon(dw_gpd, get_wu_gpd(model, Constants.ObjectNameDishwasher), 0.001)
 
@@ -244,12 +268,8 @@ class HPXMLtoOpenStudioHotWaterApplianceTest < MiniTest::Test
     model, hpxml = _test_measure(args_hash)
 
     # water use equipment peak flows
-    fixture_gpd = 44.60
-    dist_gpd = 10.2343
     cw_gpd = 3.7116
     dw_gpd = 5.475
-    assert_in_epsilon(fixture_gpd, get_wu_gpd(model, Constants.ObjectNameFixtures), 0.001)
-    assert_in_epsilon(dist_gpd, get_wu_gpd(model, Constants.ObjectNameDistributionWaste), 0.001)
     assert_in_epsilon(cw_gpd, get_wu_gpd(model, Constants.ObjectNameClothesWasher), 0.001)
     assert_in_epsilon(dw_gpd, get_wu_gpd(model, Constants.ObjectNameDishwasher), 0.001)
 
@@ -307,12 +327,8 @@ class HPXMLtoOpenStudioHotWaterApplianceTest < MiniTest::Test
     model, hpxml = _test_measure(args_hash)
 
     # water use equipment peak flows
-    fixture_gpd = 44.60
-    dist_gpd = 10.2343
     cw_gpd = 3.7116
     dw_gpd = 2.7342
-    assert_in_epsilon(fixture_gpd, get_wu_gpd(model, Constants.ObjectNameFixtures), 0.001)
-    assert_in_epsilon(dist_gpd, get_wu_gpd(model, Constants.ObjectNameDistributionWaste), 0.001)
     assert_in_epsilon(cw_gpd, get_wu_gpd(model, Constants.ObjectNameClothesWasher), 0.001)
     assert_in_epsilon(dw_gpd, get_wu_gpd(model, Constants.ObjectNameDishwasher), 0.001)
 
@@ -382,12 +398,8 @@ class HPXMLtoOpenStudioHotWaterApplianceTest < MiniTest::Test
     model, hpxml = _test_measure(args_hash)
 
     # water use equipment peak flows
-    fixture_gpd = 44.60
-    dist_gpd = 10.2343
     cw_gpd = 3.7116
     dw_gpd = 2.7342
-    assert_in_epsilon(fixture_gpd, get_wu_gpd(model, Constants.ObjectNameFixtures), 0.001)
-    assert_in_epsilon(dist_gpd, get_wu_gpd(model, Constants.ObjectNameDistributionWaste), 0.001)
     assert_in_epsilon(cw_gpd, get_wu_gpd(model, Constants.ObjectNameClothesWasher), 0.001)
     assert_in_epsilon(dw_gpd, get_wu_gpd(model, Constants.ObjectNameDishwasher), 0.001)
 
@@ -457,12 +469,8 @@ class HPXMLtoOpenStudioHotWaterApplianceTest < MiniTest::Test
     model, hpxml = _test_measure(args_hash)
 
     # water use equipment peak flows
-    fixture_gpd = 44.60
-    dist_gpd = 10.2343
     cw_gpd = 3.7116
     dw_gpd = 2.7342
-    assert_in_epsilon(fixture_gpd, get_wu_gpd(model, Constants.ObjectNameFixtures), 0.001)
-    assert_in_epsilon(dist_gpd, get_wu_gpd(model, Constants.ObjectNameDistributionWaste), 0.001)
     assert_in_epsilon(cw_gpd, get_wu_gpd(model, Constants.ObjectNameClothesWasher), 0.001)
     assert_in_epsilon(dw_gpd, get_wu_gpd(model, Constants.ObjectNameDishwasher), 0.001)
 
@@ -532,12 +540,8 @@ class HPXMLtoOpenStudioHotWaterApplianceTest < MiniTest::Test
     model, hpxml = _test_measure(args_hash)
 
     # water use equipment peak flows
-    fixture_gpd = 44.60
-    dist_gpd = 10.2343
     cw_gpd = 3.7116
     dw_gpd = 2.7342
-    assert_in_epsilon(fixture_gpd, get_wu_gpd(model, Constants.ObjectNameFixtures), 0.001)
-    assert_in_epsilon(dist_gpd, get_wu_gpd(model, Constants.ObjectNameDistributionWaste), 0.001)
     assert_in_epsilon(cw_gpd, get_wu_gpd(model, Constants.ObjectNameClothesWasher), 0.001)
     assert_in_epsilon(dw_gpd, get_wu_gpd(model, Constants.ObjectNameDishwasher), 0.001)
 
@@ -607,12 +611,8 @@ class HPXMLtoOpenStudioHotWaterApplianceTest < MiniTest::Test
     model, hpxml = _test_measure(args_hash)
 
     # water use equipment peak flows
-    fixture_gpd = 44.60
-    dist_gpd = 10.2343
     cw_gpd = 3.7116
     dw_gpd = 2.7342
-    assert_in_epsilon(fixture_gpd, get_wu_gpd(model, Constants.ObjectNameFixtures), 0.001)
-    assert_in_epsilon(dist_gpd, get_wu_gpd(model, Constants.ObjectNameDistributionWaste), 0.001)
     assert_in_epsilon(cw_gpd, get_wu_gpd(model, Constants.ObjectNameClothesWasher), 0.001)
     assert_in_epsilon(dw_gpd, get_wu_gpd(model, Constants.ObjectNameDishwasher), 0.001)
 

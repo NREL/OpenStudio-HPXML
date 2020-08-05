@@ -3,8 +3,8 @@
   <schema_version>3.0</schema_version>
   <name>hpxm_lto_openstudio</name>
   <uid>b1543b30-9465-45ff-ba04-1d1f85e763bc</uid>
-  <version_id>2d039f68-62e4-4329-9a83-90ef9c7a882c</version_id>
-  <version_modified>20200805T182218Z</version_modified>
+  <version_id>c8581024-bba3-4095-be06-e83e172fdcc0</version_id>
+  <version_modified>20200805T200749Z</version_modified>
   <xml_checksum>D8922A73</xml_checksum>
   <class_name>HPXMLtoOpenStudio</class_name>
   <display_name>HPXML to OpenStudio Translator</display_name>
@@ -505,12 +505,6 @@
       <checksum>E1E2EDA2</checksum>
     </file>
     <file>
-      <filename>test_water_heater.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>test</usage_type>
-      <checksum>7EA45D38</checksum>
-    </file>
-    <file>
       <filename>waterheater.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
@@ -521,12 +515,6 @@
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
       <checksum>EACF059A</checksum>
-    </file>
-    <file>
-      <filename>test_hotwater_appliance.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>test</usage_type>
-      <checksum>DEC2C84B</checksum>
     </file>
     <file>
       <filename>hpxml_defaults.rb</filename>
@@ -564,16 +552,28 @@
       <checksum>08DAC9A9</checksum>
     </file>
     <file>
-      <filename>test_defaults.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>test</usage_type>
-      <checksum>028169AC</checksum>
-    </file>
-    <file>
       <filename>hotwater_appliances.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
       <checksum>DE312EFE</checksum>
+    </file>
+    <file>
+      <filename>test_defaults.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>test</usage_type>
+      <checksum>72790357</checksum>
+    </file>
+    <file>
+      <filename>test_water_heater.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>test</usage_type>
+      <checksum>D2475223</checksum>
+    </file>
+    <file>
+      <filename>test_hotwater_appliance.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>test</usage_type>
+      <checksum>4EBC935B</checksum>
     </file>
   </files>
 </measure>
