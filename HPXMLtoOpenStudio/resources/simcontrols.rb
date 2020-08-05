@@ -20,6 +20,7 @@ class SimControls
 
     zonecap = model.getZoneCapacitanceMultiplierResearchSpecial
     zonecap.setHumidityCapacityMultiplier(15)
+    zonecap.setTemperatureCapacityMultiplier(3.6)
 
     convlim = model.getConvergenceLimits
     convlim.setMinimumSystemTimestep(0)
