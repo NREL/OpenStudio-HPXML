@@ -507,7 +507,7 @@ class SimulationOutputReport < OpenStudio::Measure::ReportingMeasure
       keys = @model.getWaterUseEquipments.select { |wue| wue.waterUseEquipmentDefinition.endUseSubcategory == hot_water.subcat }.map { |d| d.name.to_s.upcase }
       hot_water.annual_output = get_report_variable_data_annual(keys, [hot_water.variable], UnitConversions.convert(1.0, 'm^3', hot_water.annual_units))
       if include_timeseries_hot_water_uses
-        hot_water.timeseries_output = get_report_variable_data_timeseries([hot_water.key.upcase], [hot_water.variable], UnitConversions.convert(1.0, 'm^3', hot_water.timeseries_units), 0, timeseries_frequency)
+        hot_water.timeseries_output = get_report_variable_data_timeseries(keys, [hot_water.variable], UnitConversions.convert(1.0, 'm^3', hot_water.timeseries_units), 0, timeseries_frequency)
       end
     end
 
