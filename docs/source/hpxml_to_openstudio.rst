@@ -671,7 +671,11 @@ HPXML Water Heating Systems
 ***************************
 
 Each water heater should be entered as a ``Systems/WaterHeating/WaterHeatingSystem``.
-Inputs including ``WaterHeaterType``, ``IsSharedSystem``, and ``FractionDHWLoadServed`` must be provided.
+Inputs including ``WaterHeaterType``, ``HotWaterDistributionSystem``, ``IsSharedSystem``, and ``FractionDHWLoadServed`` must be provided.
+
+.. warning::
+
+  ``FractionDHWLoadServed`` represents the fraction of the hot water **fixtures** load (i.e., not the total load) served by the water heater. The load from an attached clothes washer and/or dishwasher will be automatically assigned to the attached water heater(s).
 
 Depending on the type of water heater specified, additional elements are required/available:
 
@@ -741,7 +745,8 @@ In addition, the ``NumberofUnitsServed`` must be specified, where the value is t
 HPXML Hot Water Distribution
 ****************************
 
-A ``Systems/WaterHeating/HotWaterDistribution`` must be provided if any water heating systems are specified.
+Each separate hot water distribution system should be specified as a ``Systems/WaterHeating/HotWaterDistribution``.
+One or more water heaters can be connected to each distribution system.
 Inputs including ``SystemType`` and ``PipeInsulation/PipeRValue`` must be provided.
 
 Standard
@@ -807,7 +812,7 @@ HPXML Water Fixtures
 ********************
 
 Water fixtures should be entered as ``Systems/WaterHeating/WaterFixture`` elements.
-Each fixture must have ``WaterFixtureType`` and ``LowFlow`` elements provided.
+Each fixture must have ``WaterFixtureType``, ``LowFlow``, and ``AttachedToHotWaterDistribution`` elements provided.
 Fixtures should be specified as low flow if they are <= 2.0 gpm.
 
 A ``WaterHeating/extension/WaterFixturesUsageMultiplier`` can also be optionally provided that scales hot water usage; if not provided, it is assumed to be 1.0.
@@ -893,6 +898,8 @@ HPXML Clothes Washer
 
 An ``Appliances/ClothesWasher`` element can be specified; if not provided, a clothes washer will not be modeled.
 
+The ``AttachedToHotWaterDistribution`` element must be provided.
+
 Several EnergyGuide label inputs describing the efficiency of the appliance can be provided.
 If the complete set of efficiency inputs is not provided, the following default values representing a standard clothes washer from 2006 will be used.
 
@@ -940,6 +947,8 @@ HPXML Dishwasher
 ****************
 
 An ``Appliances/Dishwasher`` element can be specified; if not provided, a dishwasher will not be modeled.
+
+The ``AttachedToHotWaterDistribution`` element must be provided.
 
 Several EnergyGuide label inputs describing the efficiency of the appliance can be provided.
 If the complete set of efficiency inputs is not provided, the following default values representing a standard dishwasher from 2006 will be used.
