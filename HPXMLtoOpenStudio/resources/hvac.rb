@@ -92,7 +92,23 @@ class HVAC
       cool_shrs_rated_gross = calc_shrs_rated_gross(num_speeds, cool_shrs, fan_power_rated, cool_cfms_ton_rated)
       cool_eirs = calc_cool_eirs(num_speeds, cool_eers, fan_power_rated)
       cool_closs_fplr_spec = [calc_plr_coefficients(cool_c_d)] * num_speeds
-      clg_coil = create_dx_cooling_coil(model, obj_name, (0...num_speeds).to_a, cool_eirs, cool_cap_ft_spec, cool_eir_ft_spec, cool_closs_fplr_spec, cool_cap_fflow_spec, cool_eir_fflow_spec, cool_shrs_rated_gross, cooling_system.cooling_capacity, crankcase_kw, crankcase_temp, fan_power_rated)
+      clg_coil = create_dx_cooling_coil(model: model, 
+                                        obj_name: obj_name, 
+                                        speed_indices: (0...num_speeds).to_a, 
+                                        eirs: cool_eirs, 
+                                        cap_ft_spec: cool_cap_ft_spec, 
+                                        eir_ft_spec: cool_eir_ft_spec, 
+                                        closs_fplr_spec: cool_closs_fplr_spec, 
+                                        cap_fflow_spec: cool_cap_fflow_spec, 
+                                        eir_fflow_spec: cool_eir_fflow_spec, 
+                                        shrs_rated_gross: cool_shrs_rated_gross, 
+                                        capacity: cooling_system.cooling_capacity, 
+                                        crankcase_kw: crankcase_kw, 
+                                        crankcase_temp: crankcase_temp, 
+                                        fan_power_rated: fan_power_rated, 
+                                        is_fixed_flow_rate: cooling_system.is_ventilation_preconditioning, 
+                                        cool_cfms_ton_rated: cool_cfms_ton_rated, 
+                                        cool_capacity_ratios: cool_capacity_ratios)
       hvac_map[cooling_system.id] << clg_coil
     else
       sequential_cool_load_frac = 0.0
@@ -188,6 +204,25 @@ class HVAC
       air_loop_unitary.additionalProperties.setFeature(Constants.SizingInfoHVACRatedCFMperTonCooling, cool_cfms_ton_rated.join(','))
       air_loop_unitary.additionalProperties.setFeature(Constants.SizingInfoHVACFracCoolLoadServed, cooling_system.fraction_cool_load_served)
       air_loop_unitary.additionalProperties.setFeature(Constants.SizingInfoHVACCoolType, Constants.ObjectNameCentralAirConditioner)
+      # add airflow with ventilation fan cfm (skip autosizing)
+      if cooling_system.is_ventilation_preconditioning
+        air_loop_unitary.setSupplyAirFlowRateMethodDuringCoolingOperation('SupplyAirFlowRate')
+        air_loop_unitary.setSupplyAirFlowRateMethodDuringHeatingOperation('SupplyAirFlowRate')
+        air_cfm = cooling_system.ventilation_fan.average_flow_rate
+        air_loop_unitary.setSupplyAirFlowRateDuringCoolingOperation(UnitConversions.convert(air_cfm, 'cfm', 'm^3/s'))
+        air_loop_unitary.setSupplyAirFlowRateDuringCoolingOperation(UnitConversions.convert(air_cfm, 'cfm', 'm^3/s'))
+        fan.setMaximumFlowRate(UnitConversions.convert(air_cfm + 0.01, 'cfm', 'm^3/s'))
+        air_loop.setDesignSupplyAirFlowRate(UnitConversions.convert(air_cfm, 'cfm', 'm^3/s'))
+        cond_zone.airLoopHVACTerminals.each do |aterm|
+          next if air_loop != aterm.airLoopHVAC.get
+          next unless aterm.to_AirTerminalSingleDuctUncontrolled.is_initialized
+
+          # Air Terminal
+          aterm = aterm.to_AirTerminalSingleDuctUncontrolled.get
+          aterm.setMaximumAirFlowRate(UnitConversions.convert(air_cfm, 'cfm', 'm^3/s'))
+        end
+        
+      end
     end
     if not heating_system.nil?
       air_loop_unitary.additionalProperties.setFeature(Constants.SizingInfoHVACFracHeatLoadServed, heating_system.fraction_heat_load_served)
@@ -438,7 +473,21 @@ class HVAC
     cool_shrs_rated_gross = calc_shrs_rated_gross(num_speeds, cool_shrs, fan_power_rated, cool_cfms_ton_rated)
     cool_eirs = calc_cool_eirs(num_speeds, cool_eers, fan_power_rated)
     cool_closs_fplr_spec = [calc_plr_coefficients(cool_c_d)] * num_speeds
-    clg_coil = create_dx_cooling_coil(model, obj_name, (0...num_speeds).to_a, cool_eirs, cool_cap_ft_spec, cool_eir_ft_spec, cool_closs_fplr_spec, cool_cap_fflow_spec, cool_eir_fflow_spec, cool_shrs_rated_gross, heat_pump.cooling_capacity, 0, nil, fan_power_rated)
+    clg_coil = create_dx_cooling_coil(model: model, 
+                                      obj_name: obj_name, 
+                                      speed_indices: (0...num_speeds).to_a, 
+                                      eirs: cool_eirs, 
+                                      cap_ft_spec: cool_cap_ft_spec, 
+                                      eir_ft_spec: cool_eir_ft_spec, 
+                                      closs_fplr_spec: cool_closs_fplr_spec, 
+                                      cap_fflow_spec: cool_cap_fflow_spec, 
+                                      eir_fflow_spec: cool_eir_fflow_spec, 
+                                      shrs_rated_gross: cool_shrs_rated_gross, 
+                                      capacity: heat_pump.cooling_capacity,  
+                                      fan_power_rated: fan_power_rated, 
+                                      is_fixed_flow_rate: heat_pump.is_ventilation_preconditioning, 
+                                      cool_cfms_ton_rated: cool_cfms_ton_rated, 
+                                      cool_capacity_ratios: cool_capacity_ratios)
     hvac_map[heat_pump.id] << clg_coil
 
     # Heating Coil
@@ -497,7 +546,24 @@ class HVAC
     heat_cfms_ton_rated = calc_cfms_ton_rated(heat_rated_airflow_rate, heat_fan_speed_ratios, heat_capacity_ratios)
     heat_eirs = calc_heat_eirs(num_speeds, heat_cops, fan_power_rated)
     heat_closs_fplr_spec = [calc_plr_coefficients(heat_c_d)] * num_speeds
-    htg_coil = create_dx_heating_coil(model, obj_name, (0...num_speeds).to_a, heat_eirs, heat_cap_ft_spec, heat_eir_ft_spec, heat_closs_fplr_spec, heat_cap_fflow_spec, heat_eir_fflow_spec, heat_pump.heating_capacity, crankcase_kw, crankcase_temp, fan_power_rated, hp_min_temp, heat_pump.fraction_heat_load_served)
+    htg_coil = create_dx_heating_coil(model: model,
+                                      obj_name: obj_name, 
+                                      speed_indices: (0...num_speeds).to_a, 
+                                      eirs: heat_eirs, 
+                                      cap_ft_spec: heat_cap_ft_spec, 
+                                      eir_ft_spec: heat_eir_ft_spec, 
+                                      closs_fplr_spec: heat_closs_fplr_spec, 
+                                      cap_fflow_spec: heat_cap_fflow_spec, 
+                                      eir_fflow_spec: heat_eir_fflow_spec,
+                                      capacity: heat_pump.heating_capacity, 
+                                      crankcase_kw: crankcase_kw, 
+                                      crankcase_temp: crankcase_temp, 
+                                      fan_power_rated: fan_power_rated, 
+                                      hp_min_temp: hp_min_temp, 
+                                      fraction_heat_load_served: heat_pump.fraction_heat_load_served,
+                                      is_fixed_flow_rate: heating_system.is_ventilation_preconditioning,
+                                      heat_cfms_ton_rated: heat_cfms_ton_rated,
+                                      heat_capacity_ratios: heat_capacity_ratios)
     hvac_map[heat_pump.id] << htg_coil
 
     # Supplemental Heating Coil
@@ -631,7 +697,21 @@ class HVAC
     wB_rated = 67.0 # deg-F
     cool_cfms_ton_rated, cool_capacity_ratios, cool_shrs_rated_gross = calc_mshp_cfms_ton_cooling(min_cooling_capacity, max_cooling_capacity, min_cooling_airflow_rate, max_cooling_airflow_rate, num_speeds, dB_rated, wB_rated, heat_pump.cooling_shr)
     cool_eirs = calc_mshp_cool_eirs(runner, heat_pump.cooling_efficiency_seer, fan_power_installed, cool_c_d, num_speeds, cool_capacity_ratios, cool_cfms_ton_rated, cool_eir_ft_spec, cool_cap_ft_spec)
-    clg_coil = create_dx_cooling_coil(model, obj_name, mshp_indices, cool_eirs, cool_cap_ft_spec, cool_eir_ft_spec, cool_closs_fplr_spec, cool_cap_fflow_spec, cool_eir_fflow_spec, cool_shrs_rated_gross, heat_pump.cooling_capacity, 0.0, nil, nil)
+    clg_coil = create_dx_cooling_coil(model: model, 
+                                      obj_name: obj_name, 
+                                      speed_indices: mshp_indices, 
+                                      eirs: cool_eirs, 
+                                      cap_ft_spec: cool_cap_ft_spec, 
+                                      eir_ft_spec: cool_eir_ft_spec, 
+                                      closs_fplr_spec: cool_closs_fplr_spec, 
+                                      cap_fflow_spec: cool_cap_fflow_spec, 
+                                      eir_fflow_spec: cool_eir_fflow_spec, 
+                                      shrs_rated_gross: cool_shrs_rated_gross, 
+                                      capacity: heat_pump.cooling_capacity, 
+                                      fan_power_rated: nil, 
+                                      is_fixed_flow_rate: heat_pump.is_ventilation_preconditioning, 
+                                      cool_cfms_ton_rated: cool_cfms_ton_rated, 
+                                      cool_capacity_ratios: cool_capacity_ratios)
     hvac_map[heat_pump.id] << clg_coil
 
     # Heating Coil
@@ -666,7 +746,22 @@ class HVAC
     heat_closs_fplr_spec = [calc_plr_coefficients(heat_c_d)] * num_speeds
     heat_cfms_ton_rated, heat_capacity_ratios = calc_mshp_cfms_ton_heating(min_heating_capacity, max_heating_capacity, min_heating_airflow_rate, max_heating_airflow_rate, num_speeds)
     heat_eirs = calc_mshp_heat_eirs(runner, heat_pump.heating_efficiency_hspf, fan_power_installed, hp_min_temp, heat_c_d, cool_cfms_ton_rated, num_speeds, heat_capacity_ratios, heat_cfms_ton_rated, heat_eir_ft_spec, heat_cap_ft_spec)
-    htg_coil = create_dx_heating_coil(model, obj_name, mshp_indices, heat_eirs, heat_cap_ft_spec, heat_eir_ft_spec, heat_closs_fplr_spec, heat_cap_fflow_spec, heat_eir_fflow_spec, heat_pump.heating_capacity, 0.0, nil, nil, hp_min_temp, heat_pump.fraction_heat_load_served)
+    htg_coil = create_dx_heating_coil(model: model,
+                                      obj_name: obj_name, 
+                                      speed_indices: mshp_indices, 
+                                      eirs: heat_eirs, 
+                                      cap_ft_spec: heat_cap_ft_spec, 
+                                      eir_ft_spec: heat_eir_ft_spec, 
+                                      closs_fplr_spec: heat_closs_fplr_spec, 
+                                      cap_fflow_spec: heat_cap_fflow_spec, 
+                                      eir_fflow_spec: heat_eir_fflow_spec,
+                                      capacity: heat_pump.heating_capacity,
+                                      fan_power_rated: nil, 
+                                      hp_min_temp: hp_min_temp, 
+                                      fraction_heat_load_served: heat_pump.fraction_heat_load_served,
+                                      is_fixed_flow_rate: heating_system.is_ventilation_preconditioning,
+                                      heat_cfms_ton_rated: heat_cfms_ton_rated,
+                                      heat_capacity_ratios: heat_capacity_ratios)
     hvac_map[heat_pump.id] << htg_coil
 
     # Supplemental Heating Coil
@@ -3034,7 +3129,7 @@ class HVAC
     return curve
   end
 
-  def self.create_dx_cooling_coil(model, obj_name, speed_indices, eirs, cap_ft_spec, eir_ft_spec, closs_fplr_spec, cap_fflow_spec, eir_fflow_spec, shrs_rated_gross, capacity, crankcase_kw, crankcase_temp, fan_power_rated)
+  def self.create_dx_cooling_coil(model:, obj_name:, speed_indices:, eirs:, cap_ft_spec:, eir_ft_spec:, closs_fplr_spec:, cap_fflow_spec:, eir_fflow_spec:, shrs_rated_gross:, capacity:, crankcase_kw: 0.0, crankcase_temp:  nil, fan_power_rated:, is_fixed_flow_rate:, cool_cfms_ton_rated:, cool_capacity_ratios:)
     num_speeds = speed_indices.size
 
     if num_speeds > 1
@@ -3068,6 +3163,9 @@ class HVAC
         clg_coil.setRatioOfInitialMoistureEvaporationRateAndSteadyStateLatentCapacity(1.5)
         clg_coil.setMaximumCyclingRate(3.0)
         clg_coil.setLatentCapacityTimeConstant(45.0)
+        if is_fixed_flow_rate
+          clg_coil.setRatedAirFlowRate(UnitConversions.convert([capacity, Constants.small].max, 'Btu/hr', 'ton') * UnitConversions.convert(cool_cfms_ton_rated[0], 'cfm', 'm^3/s'))
+        end
       else
         if clg_coil.nil?
           clg_coil = OpenStudio::Model::CoilCoolingDXMultiSpeed.new(model)
@@ -3090,6 +3188,13 @@ class HVAC
         stage.setRatedWasteHeatFractionofPowerInput(0.2)
         stage.setMaximumCyclingRate(3.0)
         stage.setLatentCapacityTimeConstant(45.0)
+        if is_fixed_flow_rate
+          if obj_name == Constants.ObjectNameMiniSplitHeatPump
+            stage.setRatedAirFlowRate(UnitConversions.convert([capacity, Constants.small].max, 'Btu/hr', 'ton') * UnitConversions.convert(cool_cfms_ton_rated[speed_idx], 'cfm', 'm^3/s'))
+          else
+            stage.setRatedAirFlowRate(UnitConversions.convert([capacity, Constants.small].max, 'Btu/hr', 'ton') * UnitConversions.convert(cool_cfms_ton_rated[speed_idx], 'cfm', 'm^3/s') * cool_capacity_ratios[speed_idx])
+          end
+        end
         clg_coil.addStage(stage)
       end
     end
@@ -3101,8 +3206,8 @@ class HVAC
     return clg_coil
   end
 
-  def self.create_dx_heating_coil(model, obj_name, speed_indices, eirs, cap_ft_spec, eir_ft_spec, closs_fplr_spec, cap_fflow_spec, eir_fflow_spec,
-                                  capacity, crankcase_kw, crankcase_temp, fan_power_rated, hp_min_temp, fraction_heat_load_served)
+  def self.create_dx_heating_coil(model:, obj_name:, speed_indices:, eirs:, cap_ft_spec:, eir_ft_spec:, closs_fplr_spec:, cap_fflow_spec:, eir_fflow_spec:,
+                                  capacity:, crankcase_kw: 0.0, crankcase_temp: nil, fan_power_rated:, hp_min_temp:, fraction_heat_load_served:, is_fixed_flow_rate:, heat_cfms_ton_rated:, heat_capacity_ratios:)
     num_speeds = speed_indices.size
 
     if num_speeds > 1
@@ -3131,6 +3236,9 @@ class HVAC
         if not crankcase_temp.nil?
           htg_coil.setMaximumOutdoorDryBulbTemperatureforCrankcaseHeaterOperation(UnitConversions.convert(crankcase_temp, 'F', 'C'))
         end
+        if is_fixed_flow_rate
+          htg_coil.setRatedAirFlowRate(UnitConversions.convert([capacity, Constants.small].max, 'Btu/hr', 'ton') * UnitConversions.convert(heat_cfms_ton_rated[0], 'cfm', 'm^3/s'))
+        end
       else
         if htg_coil.nil?
           htg_coil = OpenStudio::Model::CoilHeatingDXMultiSpeed.new(model)
@@ -3145,6 +3253,13 @@ class HVAC
         stage.setGrossRatedHeatingCOP(1.0 / eirs[speed_idx])
         if not capacity.nil?
           stage.setGrossRatedHeatingCapacity(UnitConversions.convert([capacity, Constants.small].max, 'Btu/hr', 'W')) # Used by HVACSizing measure
+        end
+        if is_fixed_flow_rate
+          if obj_name == Constants.ObjectNameMiniSplitHeatPump
+            stage.setRatedAirFlowRate(UnitConversions.convert([capacity, Constants.small].max, 'Btu/hr', 'ton') * UnitConversions.convert(heat_cfms_ton_rated[speed_idx], 'cfm', 'm^3/s'))
+          else
+            stage.setRatedAirFlowRate(UnitConversions.convert([capacity, Constants.small].max, 'Btu/hr', 'ton') * UnitConversions.convert(heat_cfms_ton_rated[speed_idx], 'cfm', 'm^3/s') * cool_capacity_ratios[speed_idx])
+          end
         end
         stage.setRatedWasteHeatFractionofPowerInput(0.2)
         htg_coil.addStage(stage)

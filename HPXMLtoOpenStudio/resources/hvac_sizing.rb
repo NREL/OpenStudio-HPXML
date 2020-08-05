@@ -3058,7 +3058,6 @@ class HVACSizing
 
         # Coils
         setCoilsObjectValues(model, hvac, object, hvac_final_values)
-
         if hvac.has_type(Constants.ObjectNameGroundSourceHeatPump)
 
           clg_coil, htg_coil, supp_htg_coil = HVAC.get_coils_from_hvac_equip(model, object)
