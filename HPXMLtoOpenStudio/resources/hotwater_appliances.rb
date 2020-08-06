@@ -178,8 +178,7 @@ class HotWaterAndAppliances
         fx_gpd *= fixtures_usage_multiplier
         fx_peak_flow = water_schedule.calcPeakFlowFromDailygpm(fx_gpd)
         hot_water_distribution.attached_water_heaters.each do |water_heater|
-          fixtures_fraction = water_heater.fraction_dhw_load_served
-          loop_peak_flow = fx_peak_flow * fixtures_fraction * (1.0 - solar_fractions[water_heater.id])
+          loop_peak_flow = fx_peak_flow * water_heater.fraction_dhw_load_served * (1.0 - solar_fractions[water_heater.id])
           add_water_use_equipment(model, Constants.ObjectNameFixtures, loop_peak_flow, water_schedule.schedule, mw_schedule, water_use_connections[water_heater.id])
         end
 
@@ -188,8 +187,7 @@ class HotWaterAndAppliances
         w_gpd *= fixtures_usage_multiplier # Fixture draws are the primary cause of distribution waste, so scale this too
         dist_water_peak_flow = water_schedule.calcPeakFlowFromDailygpm(w_gpd)
         hot_water_distribution.attached_water_heaters.each do |water_heater|
-          fixtures_fraction = water_heater.fraction_dhw_load_served
-          loop_peak_flow = dist_water_peak_flow * fixtures_fraction * (1.0 - solar_fractions[water_heater.id])
+          loop_peak_flow = dist_water_peak_flow * water_heater.fraction_dhw_load_served * (1.0 - solar_fractions[water_heater.id])
           add_water_use_equipment(model, Constants.ObjectNameDistributionWaste, loop_peak_flow, water_schedule.schedule, mw_schedule, water_use_connections[water_heater.id])
         end
       end
@@ -198,8 +196,7 @@ class HotWaterAndAppliances
       if not hot_water_distribution.attached_clothes_washers.empty?
         cw_peak_flow = cw_schedule.calcPeakFlowFromDailygpm(cw_gpd)
         hot_water_distribution.attached_water_heaters.each do |water_heater|
-          loop_load_frac = water_heater.fraction_dhw_load_served / hot_water_distribution.fraction_dhw_load_served # Apportion to each attached water heater on this distribution system
-          loop_peak_flow = cw_peak_flow * loop_load_frac * (1.0 - solar_fractions[water_heater.id])
+          loop_peak_flow = cw_peak_flow * get_water_heater_load_fraction_of_distribution(water_heater) * (1.0 - solar_fractions[water_heater.id])
           add_water_use_equipment(model, Constants.ObjectNameClothesWasher, loop_peak_flow, cw_schedule.schedule, setpoint_scheds[water_heater.id], water_use_connections[water_heater.id])
         end
       end
@@ -208,8 +205,7 @@ class HotWaterAndAppliances
       if not hot_water_distribution.attached_dishwashers.empty?
         dw_peak_flow = dw_schedule.calcPeakFlowFromDailygpm(dw_gpd)
         hot_water_distribution.attached_water_heaters.each do |water_heater|
-          loop_load_frac = water_heater.fraction_dhw_load_served / hot_water_distribution.fraction_dhw_load_served # Apportion to each attached water heater on this distribution system
-          loop_peak_flow = dw_peak_flow * loop_load_frac * (1.0 - solar_fractions[water_heater.id])
+          loop_peak_flow = dw_peak_flow * get_water_heater_load_fraction_of_distribution(water_heater) * (1.0 - solar_fractions[water_heater.id])
           add_water_use_equipment(model, Constants.ObjectNameDishwasher, loop_peak_flow, dw_schedule.schedule, setpoint_scheds[water_heater.id], water_use_connections[water_heater.id])
         end
       end
@@ -222,7 +218,7 @@ class HotWaterAndAppliances
       dist_pump_schedule = MonthWeekdayWeekendSchedule.new(model, Constants.ObjectNameHotWaterRecircPump, dist_pump_weekday_sch, dist_pump_weekday_sch, dist_pump_monthly_sch, 1.0, 1.0)
       dist_pump_design_level = dist_pump_schedule.calcDesignLevelFromDailykWh(dist_pump_annual_kwh / 365.0)
       hot_water_distribution.attached_water_heaters.each do |water_heater|
-        loop_load_frac = water_heater.fraction_dhw_load_served / hot_water_distribution.fraction_dhw_load_served # Apportion to each attached water heater on this distribution system
+        loop_load_frac = get_water_heater_load_fraction_of_distribution(water_heater)
         loop_design_level = dist_pump_design_level * loop_load_frac
         dist_pump = add_electric_equipment(model, Constants.ObjectNameHotWaterRecircPump, living_space, loop_design_level, 0.0, 0.0, dist_pump_schedule.schedule)
         dhw_map[water_heater.id] << dist_pump unless dist_pump.nil?
@@ -237,6 +233,15 @@ class HotWaterAndAppliances
       water_design_level_lat = water_schedule.calcDesignLevelFromDailykWh(UnitConversions.convert(water_lat_btu, 'Btu', 'kWh') / 365.0)
       add_other_equipment(model, "#{Constants.ObjectNameWater} Sensible", living_space, water_design_level_sens, 1.0, 0.0, water_schedule.schedule, nil)
       add_other_equipment(model, "#{Constants.ObjectNameWater} Latent", living_space, water_design_level_lat, 0.0, 1.0, water_schedule.schedule, nil)
+    end
+  end
+
+  def self.get_water_heater_load_fraction_of_distribution(water_heater)
+    hot_water_distribution = water_heater.hot_water_distribution
+    if hot_water_distribution.fraction_dhw_load_served <= 0
+      return 1.0 / hot_water_distribution.attached_water_heaters.size
+    else
+      return water_heater.fraction_dhw_load_served / hot_water_distribution.fraction_dhw_load_served
     end
   end
 
