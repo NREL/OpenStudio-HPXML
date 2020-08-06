@@ -739,8 +739,8 @@ IECC Climate Zone  Location (default)
 
 The setpoint temperature may be provided as ``HotWaterTemperature``; if not provided, 125F is assumed.
 
-If the water heater is a shared system (i.e., serving multiple dwelling units or a shared laundry/equipment room), it should be described using ``IsSharedSystem='true'``.
-In addition, the ``NumberofUnitsServed`` must be specified, where the value is the number of dwelling units served either indirectly (e.g., via shared laundry/equipment room) or directly.
+If the water heater is a shared system (i.e., serving multiple dwelling units or a shared laundry room), it should be described using ``IsSharedSystem='true'``.
+In addition, the ``NumberofUnitsServed`` must be specified, where the value is the number of dwelling units served either indirectly (e.g., via shared laundry room) or directly.
 
 HPXML Hot Water Distribution
 ****************************
