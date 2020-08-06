@@ -5,7 +5,7 @@ class HotWaterAndAppliances
                  cfa, nbeds, ncfl, has_uncond_bsmnt, clothes_washers,
                  clothes_dryers, dishwashers, refrigerators,
                  freezers, cooking_ranges, ovens, fixtures_usage_multiplier,
-                 water_heating_systems, solar_thermal_system, eri_version, dhw_map)
+                 hot_water_distributions, solar_thermal_system, eri_version, dhw_map)
 
     # Get appliances
     if not clothes_washers.empty?
@@ -24,47 +24,129 @@ class HotWaterAndAppliances
       oven = ovens[0]
     end
 
-    # Map plant loops to sys_ids
-    dhw_loops = {}
+    # For each water heater (plant loop):
+    # 1. Create WaterUseConnections object
+    # 2. Obtain setpoint schedule
+    water_use_connections = {}
+    setpoint_scheds = {}
     dhw_map.each do |sys_id, dhw_objects|
       dhw_objects.each do |dhw_object|
-        next unless dhw_object.is_a? OpenStudio::Model::PlantLoop
-
-        dhw_loops[sys_id] = dhw_object
-      end
-    end
-
-    # Add hot water loads for each DHW loop (i.e., for each water heater)
-    if not dhw_loops.empty?
-      water_schedule = HotWaterSchedule.new(model, Constants.ObjectNameFixtures, nbeds)
-    end
-    dhw_loops.each do |sys_id, dhw_loop|
-      # Init
-      water_use_connections = OpenStudio::Model::WaterUseConnections.new(model)
-      dhw_loop.addDemandBranchForComponent(water_use_connections)
-      dhw_map[sys_id] << water_use_connections
-
-      # Get water heater setpoint schedule
-      setpoint_sched = nil
-      dhw_map[sys_id].each do |dhw_object|
-        if dhw_object.is_a? OpenStudio::Model::WaterHeaterMixed
-          setpoint_sched = dhw_object.setpointTemperatureSchedule.get
-        elsif dhw_object.is_a? OpenStudio::Model::WaterHeaterHeatPumpWrappedCondenser
-          setpoint_sched = dhw_object.compressorSetpointTemperatureSchedule
+        if dhw_object.is_a? OpenStudio::Model::PlantLoop
+          water_use_connections[sys_id] = OpenStudio::Model::WaterUseConnections.new(model)
+          dhw_map[sys_id] << water_use_connections[sys_id]
+          dhw_object.addDemandBranchForComponent(water_use_connections[sys_id])
+        else
+          # Get water heater setpoint schedule
+          if dhw_object.is_a? OpenStudio::Model::WaterHeaterMixed
+            setpoint_scheds[sys_id] = dhw_object.setpointTemperatureSchedule.get
+          elsif dhw_object.is_a? OpenStudio::Model::WaterHeaterHeatPumpWrappedCondenser
+            setpoint_scheds[sys_id] = dhw_object.compressorSetpointTemperatureSchedule
+          end
         end
       end
-      fail 'Could not find setpoint schedule.' if setpoint_sched.nil?
+    end
 
-      # Get info for DHW loop
-      water_heating_system = water_heating_systems.select { |wh| wh.id == sys_id }[0]
-      hot_water_distribution = water_heating_system.hot_water_distribution
-      solar_fraction = Waterheater.get_water_heater_solar_fraction(water_heating_system, solar_thermal_system)
-      fixtures_all_low_flow = true # default
-      hot_water_distribution.attached_water_fixtures.each do |water_fixture|
-        next unless [HPXML::WaterFixtureTypeShowerhead, HPXML::WaterFixtureTypeFaucet].include? water_fixture.water_fixture_type
+    # Clothes washer energy
+    if not clothes_washer.nil?
+      cw_annual_kwh, cw_frac_sens, cw_frac_lat, cw_gpd = calc_clothes_washer_energy_gpd(eri_version, nbeds, clothes_washer, clothes_washer.additional_properties.space.nil?)
+      cw_schedule = HotWaterSchedule.new(model, Constants.ObjectNameClothesWasher, nbeds)
+      cw_design_level_w = cw_schedule.calcDesignLevelFromDailykWh(cw_annual_kwh / 365.0)
 
-        fixtures_all_low_flow = false if not water_fixture.low_flow
+      cw_space = clothes_washer.additional_properties.space
+      cw_space = living_space if cw_space.nil? # appliance is outdoors, so we need to assign the equipment to an arbitrary space
+      add_electric_equipment(model, Constants.ObjectNameClothesWasher, cw_space, cw_design_level_w, cw_frac_sens, cw_frac_lat, cw_schedule.schedule)
+    end
+
+    # Clothes dryer energy
+    if not clothes_dryer.nil?
+      cd_annual_kwh, cd_annual_therm, cd_frac_sens, cd_frac_lat = calc_clothes_dryer_energy(eri_version, nbeds, clothes_dryer, clothes_washer, clothes_dryer.additional_properties.space.nil?)
+      cd_weekday_sch = '0.010, 0.006, 0.004, 0.002, 0.004, 0.006, 0.016, 0.032, 0.048, 0.068, 0.078, 0.081, 0.074, 0.067, 0.057, 0.061, 0.055, 0.054, 0.051, 0.051, 0.052, 0.054, 0.044, 0.024'
+      cd_monthly_sch = '1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0'
+      cd_schedule = MonthWeekdayWeekendSchedule.new(model, Constants.ObjectNameClothesDryer, cd_weekday_sch, cd_weekday_sch, cd_monthly_sch, 1.0, 1.0, true, true, Constants.ScheduleTypeLimitsFraction)
+      cd_design_level_e = cd_schedule.calcDesignLevelFromDailykWh(cd_annual_kwh / 365.0)
+      cd_design_level_f = cd_schedule.calcDesignLevelFromDailyTherm(cd_annual_therm / 365.0)
+
+      cd_space = clothes_dryer.additional_properties.space
+      cd_space = living_space if cd_space.nil? # appliance is outdoors, so we need to assign the equipment to an arbitrary space
+      add_electric_equipment(model, Constants.ObjectNameClothesDryer, cd_space, cd_design_level_e, cd_frac_sens, cd_frac_lat, cd_schedule.schedule)
+      add_other_equipment(model, Constants.ObjectNameClothesDryer, cd_space, cd_design_level_f, cd_frac_sens, cd_frac_lat, cd_schedule.schedule, clothes_dryer.fuel_type)
+    end
+
+    # Dishwasher energy
+    if not dishwasher.nil?
+      dw_annual_kwh, dw_frac_sens, dw_frac_lat, dw_gpd = calc_dishwasher_energy_gpd(eri_version, nbeds, dishwasher, dishwasher.additional_properties.space.nil?)
+      dw_schedule = HotWaterSchedule.new(model, Constants.ObjectNameDishwasher, nbeds)
+      dw_design_level_w = dw_schedule.calcDesignLevelFromDailykWh(dw_annual_kwh / 365.0)
+
+      dw_space = dishwasher.additional_properties.space
+      dw_space = living_space if dw_space.nil? # appliance is outdoors, so we need to assign the equipment to an arbitrary space
+      add_electric_equipment(model, Constants.ObjectNameDishwasher, dw_space, dw_design_level_w, dw_frac_sens, dw_frac_lat, dw_schedule.schedule)
+    end
+
+    # Refrigerator(s) energy
+    refrigerators.each do |refrigerator|
+      rf_annual_kwh, rf_frac_sens, rf_frac_lat = calc_refrigerator_or_freezer_energy(refrigerator, refrigerator.additional_properties.space.nil?)
+      fridge_weekday_sch = refrigerator.weekday_fractions
+      fridge_weekend_sch = refrigerator.weekend_fractions
+      fridge_monthly_sch = refrigerator.monthly_multipliers
+      fridge_schedule = MonthWeekdayWeekendSchedule.new(model, Constants.ObjectNameRefrigerator, fridge_weekday_sch, fridge_weekend_sch, fridge_monthly_sch, 1.0, 1.0, true, true, Constants.ScheduleTypeLimitsFraction)
+      fridge_design_level = fridge_schedule.calcDesignLevelFromDailykWh(rf_annual_kwh / 365.0)
+
+      rf_space = refrigerator.additional_properties.space
+      rf_space = living_space if rf_space.nil? # appliance is outdoors, so we need to assign the equipment to an arbitrary space
+      add_electric_equipment(model, Constants.ObjectNameRefrigerator, rf_space, fridge_design_level, rf_frac_sens, rf_frac_lat, fridge_schedule.schedule)
+    end
+
+    # Freezer(s) energy
+    freezers.each do |freezer|
+      fz_annual_kwh, fz_frac_sens, fz_frac_lat = calc_refrigerator_or_freezer_energy(freezer, freezer.additional_properties.space.nil?)
+      freezer_weekday_sch = freezer.weekday_fractions
+      freezer_weekend_sch = freezer.weekend_fractions
+      freezer_monthly_sch = freezer.monthly_multipliers
+      freezer_schedule = MonthWeekdayWeekendSchedule.new(model, Constants.ObjectNameFreezer, freezer_weekday_sch, freezer_weekend_sch, freezer_monthly_sch, 1.0, 1.0, true, true, Constants.ScheduleTypeLimitsFraction)
+      freezer_design_level = freezer_schedule.calcDesignLevelFromDailykWh(fz_annual_kwh / 365.0)
+
+      fz_space = freezer.additional_properties.space
+      fz_space = living_space if fz_space.nil? # appliance is outdoors, so we need to assign the equipment to an arbitrary space
+      add_electric_equipment(model, Constants.ObjectNameFreezer, fz_space, freezer_design_level, fz_frac_sens, fz_frac_lat, freezer_schedule.schedule)
+    end
+
+    # Cooking Range energy
+    if not cooking_range.nil?
+      cook_annual_kwh, cook_annual_therm, cook_frac_sens, cook_frac_lat = calc_range_oven_energy(nbeds, cooking_range, oven, cooking_range.additional_properties.space.nil?)
+      cook_weekday_sch = cooking_range.weekday_fractions
+      cook_weekend_sch = cooking_range.weekend_fractions
+      cook_monthly_sch = cooking_range.monthly_multipliers
+      cook_schedule = MonthWeekdayWeekendSchedule.new(model, Constants.ObjectNameCookingRange, cook_weekday_sch, cook_weekend_sch, cook_monthly_sch, 1.0, 1.0, true, true, Constants.ScheduleTypeLimitsFraction)
+      cook_design_level_e = cook_schedule.calcDesignLevelFromDailykWh(cook_annual_kwh / 365.0)
+      cook_design_level_f = cook_schedule.calcDesignLevelFromDailyTherm(cook_annual_therm / 365.0)
+
+      cook_space = cooking_range.additional_properties.space
+      cook_space = living_space if cook_space.nil? # appliance is outdoors, so we need to assign the equipment to an arbitrary space
+      add_electric_equipment(model, Constants.ObjectNameCookingRange, cook_space, cook_design_level_e, cook_frac_sens, cook_frac_lat, cook_schedule.schedule)
+      add_other_equipment(model, Constants.ObjectNameCookingRange, cook_space, cook_design_level_f, cook_frac_sens, cook_frac_lat, cook_schedule.schedule, cooking_range.fuel_type)
+    end
+
+    # Fixtures schedule
+    if not hot_water_distributions.empty?
+      water_schedule = HotWaterSchedule.new(model, Constants.ObjectNameFixtures, nbeds)
+    end
+
+    # Hot water use for each hot water distribution system
+    hot_water_distributions.each do |hot_water_distribution|
+      # Init
+      solar_fractions = {}
+      hot_water_distribution.attached_water_heaters.each do |water_heating_system|
+        solar_fractions[water_heating_system.id] = Waterheater.get_water_heater_solar_fraction(water_heating_system, solar_thermal_system)
       end
+      if hot_water_distribution.fraction_dhw_load_served <= 0
+        # No fixtures
+        fixtures_all_low_flow = false
+      else
+        hwdist_fixtures = hot_water_distribution.attached_water_fixtures.select { |f| [HPXML::WaterFixtureTypeShowerhead, HPXML::WaterFixtureTypeFaucet].include? f.water_fixture_type }
+        fixtures_all_low_flow = hwdist_fixtures.all? { |f| f.low_flow }
+      end
+      hwdist_fixtures_fraction = hot_water_distribution.fraction_dhw_load_served # sum of fixtures load fractions for all attached water heaters
 
       # Calculate mixed water fractions
       t_mix = 105.0 # F, Temperature of mixed water at fixtures
@@ -78,146 +160,83 @@ class HotWaterAndAppliances
       daily_mw_fractions = calc_mixed_water_daily_fractions(daily_wh_inlet_temperatures, setpoint_temp, t_mix)
 
       # Schedules
-      start_date = OpenStudio::Date.new(OpenStudio::MonthOfYear.new(1), 1, model.getYearDescription.assumedYear)
-      timestep_day = OpenStudio::Time.new(1, 0)
       # Replace mains water temperature schedule with water heater inlet temperature schedule.
       # These are identical unless there is a DWHR.
+      start_date = OpenStudio::Date.new(OpenStudio::MonthOfYear.new(1), 1, model.getYearDescription.assumedYear)
+      timestep_day = OpenStudio::Time.new(1, 0)
       time_series_tmains = OpenStudio::TimeSeries.new(start_date, timestep_day, OpenStudio::createVector(daily_wh_inlet_temperatures_c), 'C')
       schedule_tmains = OpenStudio::Model::ScheduleInterval.fromTimeSeries(time_series_tmains, model).get
       schedule_tmains.setName('mains temperature schedule')
       model.getSiteWaterMainsTemperature.setTemperatureSchedule(schedule_tmains)
-
       mw_schedule = OpenStudio::Model::ScheduleConstant.new(model)
       mw_schedule.setValue(UnitConversions.convert(t_mix, 'F', 'C'))
       Schedule.set_schedule_type_limits(model, mw_schedule, Constants.ScheduleTypeLimitsTemperature)
 
-      fixtures_load_frac = water_heating_system.fraction_dhw_load_served
-      if fixtures_load_frac > 0
-
+      if hot_water_distribution.fraction_dhw_load_served > 0
         # Fixtures (showers, sinks, baths)
-        fx_name = Constants.ObjectNameFixtures
         fx_gpd = get_fixtures_gpd(eri_version, nbeds, fixtures_all_low_flow, daily_mw_fractions)
         fx_gpd *= fixtures_usage_multiplier
         fx_peak_flow = water_schedule.calcPeakFlowFromDailygpm(fx_gpd)
-        add_water_use_equipment(model, fx_name, fx_peak_flow * fixtures_load_frac * (1.0 - solar_fraction), water_schedule.schedule, mw_schedule, water_use_connections)
+        hot_water_distribution.attached_water_heaters.each do |water_heater|
+          fixtures_fraction = water_heater.fraction_dhw_load_served
+          loop_peak_flow = fx_peak_flow * fixtures_fraction * (1.0 - solar_fractions[water_heater.id])
+          add_water_use_equipment(model, Constants.ObjectNameFixtures, loop_peak_flow, water_schedule.schedule, mw_schedule, water_use_connections[water_heater.id])
+        end
 
         # Distribution waste
-        dist_water_name = Constants.ObjectNameDistributionWaste
         w_gpd = get_dist_waste_gpd(eri_version, nbeds, has_uncond_bsmnt, cfa, ncfl, hot_water_distribution, fixtures_all_low_flow)
-        w_gpd *= fixtures_usage_multiplier # Fixture draws are the reason for most distribution waste, so scale this too
+        w_gpd *= fixtures_usage_multiplier # Fixture draws are the primary cause of distribution waste, so scale this too
         dist_water_peak_flow = water_schedule.calcPeakFlowFromDailygpm(w_gpd)
-        add_water_use_equipment(model, dist_water_name, dist_water_peak_flow * fixtures_load_frac * (1.0 - solar_fraction), water_schedule.schedule, mw_schedule, water_use_connections)
-
-        # Internal gains
-        # Floor mopping, shower evaporation, water films on showers, tubs & sinks surfaces, plant watering, etc.
-        water_sens_btu, water_lat_btu = get_water_gains_sens_lat(nbeds)
-        water_design_level_sens = water_schedule.calcDesignLevelFromDailykWh(UnitConversions.convert(water_sens_btu, 'Btu', 'kWh') / 365.0)
-        water_design_level_lat = water_schedule.calcDesignLevelFromDailykWh(UnitConversions.convert(water_lat_btu, 'Btu', 'kWh') / 365.0)
-        add_other_equipment(model, "#{Constants.ObjectNameWater} Sensible", living_space, water_design_level_sens * fixtures_load_frac, 1.0, 0.0, water_schedule.schedule, nil)
-        add_other_equipment(model, "#{Constants.ObjectNameWater} Latent", living_space, water_design_level_lat * fixtures_load_frac, 0.0, 1.0, water_schedule.schedule, nil)
-
-        # Recirculation pump
-        dist_pump_annual_kwh = get_hwdist_recirc_pump_energy(hot_water_distribution)
-        if dist_pump_annual_kwh > 0
-          dist_pump_name = Constants.ObjectNameHotWaterRecircPump
-          dist_pump_weekday_sch = '0.010, 0.006, 0.004, 0.002, 0.004, 0.006, 0.016, 0.032, 0.048, 0.068, 0.078, 0.081, 0.074, 0.067, 0.057, 0.061, 0.055, 0.054, 0.051, 0.051, 0.052, 0.054, 0.044, 0.024'
-          dist_pump_monthly_sch = '1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0'
-          dist_pump_schedule = MonthWeekdayWeekendSchedule.new(model, dist_pump_name, dist_pump_weekday_sch, dist_pump_weekday_sch, dist_pump_monthly_sch, 1.0, 1.0)
-          dist_pump_design_level = dist_pump_schedule.calcDesignLevelFromDailykWh(dist_pump_annual_kwh / 365.0)
-          dist_pump = add_electric_equipment(model, dist_pump_name, living_space, dist_pump_design_level * fixtures_load_frac * (1.0 - solar_fraction), 0.0, 0.0, dist_pump_schedule.schedule)
-          dhw_map[sys_id] << dist_pump unless dist_pump.nil?
+        hot_water_distribution.attached_water_heaters.each do |water_heater|
+          fixtures_fraction = water_heater.fraction_dhw_load_served
+          loop_peak_flow = dist_water_peak_flow * fixtures_fraction * (1.0 - solar_fractions[water_heater.id])
+          add_water_use_equipment(model, Constants.ObjectNameDistributionWaste, loop_peak_flow, water_schedule.schedule, mw_schedule, water_use_connections[water_heater.id])
         end
       end
 
       # Clothes washer
       if not hot_water_distribution.attached_clothes_washers.empty?
-        cw_annual_kwh, cw_frac_sens, cw_frac_lat, cw_gpd = calc_clothes_washer_energy_gpd(eri_version, nbeds, clothes_washer, clothes_washer.additional_properties.space.nil?)
-        cw_name = Constants.ObjectNameClothesWasher
-        cw_schedule = HotWaterSchedule.new(model, cw_name, nbeds)
         cw_peak_flow = cw_schedule.calcPeakFlowFromDailygpm(cw_gpd)
-        cw_design_level_w = cw_schedule.calcDesignLevelFromDailykWh(cw_annual_kwh / 365.0)
-
-        cw_space = clothes_washer.additional_properties.space
-        cw_space = living_space if cw_space.nil? # appliance is outdoors, so we need to assign the equipment to an arbitrary space
-        add_electric_equipment(model, cw_name, cw_space, cw_design_level_w, cw_frac_sens, cw_frac_lat, cw_schedule.schedule)
-        add_water_use_equipment(model, cw_name, cw_peak_flow * (1.0 - solar_fraction), cw_schedule.schedule, setpoint_sched, water_use_connections)
+        hot_water_distribution.attached_water_heaters.each do |water_heater|
+          loop_load_frac = water_heater.fraction_dhw_load_served / hot_water_distribution.fraction_dhw_load_served # Apportion to each attached water heater on this distribution system
+          loop_peak_flow = cw_peak_flow * loop_load_frac * (1.0 - solar_fractions[water_heater.id])
+          add_water_use_equipment(model, Constants.ObjectNameClothesWasher, loop_peak_flow, cw_schedule.schedule, setpoint_scheds[water_heater.id], water_use_connections[water_heater.id])
+        end
       end
 
       # Dishwasher
-      next unless not hot_water_distribution.attached_dishwashers.empty?
-      dw_annual_kwh, dw_frac_sens, dw_frac_lat, dw_gpd = calc_dishwasher_energy_gpd(eri_version, nbeds, dishwasher, dishwasher.additional_properties.space.nil?)
-      dw_name = Constants.ObjectNameDishwasher
-      dw_schedule = HotWaterSchedule.new(model, dw_name, nbeds)
-      dw_peak_flow = dw_schedule.calcPeakFlowFromDailygpm(dw_gpd)
-      dw_design_level_w = dw_schedule.calcDesignLevelFromDailykWh(dw_annual_kwh / 365.0)
+      if not hot_water_distribution.attached_dishwashers.empty?
+        dw_peak_flow = dw_schedule.calcPeakFlowFromDailygpm(dw_gpd)
+        hot_water_distribution.attached_water_heaters.each do |water_heater|
+          loop_load_frac = water_heater.fraction_dhw_load_served / hot_water_distribution.fraction_dhw_load_served # Apportion to each attached water heater on this distribution system
+          loop_peak_flow = dw_peak_flow * loop_load_frac * (1.0 - solar_fractions[water_heater.id])
+          add_water_use_equipment(model, Constants.ObjectNameDishwasher, loop_peak_flow, dw_schedule.schedule, setpoint_scheds[water_heater.id], water_use_connections[water_heater.id])
+        end
+      end
 
-      dw_space = dishwasher.additional_properties.space
-      dw_space = living_space if dw_space.nil? # appliance is outdoors, so we need to assign the equipment to an arbitrary space
-      add_electric_equipment(model, dw_name, dw_space, dw_design_level_w, dw_frac_sens, dw_frac_lat, dw_schedule.schedule)
-      add_water_use_equipment(model, dw_name, dw_peak_flow * (1.0 - solar_fraction), dw_schedule.schedule, setpoint_sched, water_use_connections)
+      # Recirculation pump
+      dist_pump_annual_kwh = get_hwdist_recirc_pump_energy(hot_water_distribution)
+      next unless dist_pump_annual_kwh > 0
+      dist_pump_weekday_sch = '0.010, 0.006, 0.004, 0.002, 0.004, 0.006, 0.016, 0.032, 0.048, 0.068, 0.078, 0.081, 0.074, 0.067, 0.057, 0.061, 0.055, 0.054, 0.051, 0.051, 0.052, 0.054, 0.044, 0.024'
+      dist_pump_monthly_sch = '1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0'
+      dist_pump_schedule = MonthWeekdayWeekendSchedule.new(model, Constants.ObjectNameHotWaterRecircPump, dist_pump_weekday_sch, dist_pump_weekday_sch, dist_pump_monthly_sch, 1.0, 1.0)
+      dist_pump_design_level = dist_pump_schedule.calcDesignLevelFromDailykWh(dist_pump_annual_kwh / 365.0)
+      hot_water_distribution.attached_water_heaters.each do |water_heater|
+        loop_load_frac = water_heater.fraction_dhw_load_served / hot_water_distribution.fraction_dhw_load_served # Apportion to each attached water heater on this distribution system
+        loop_design_level = dist_pump_design_level * loop_load_frac
+        dist_pump = add_electric_equipment(model, Constants.ObjectNameHotWaterRecircPump, living_space, loop_design_level, 0.0, 0.0, dist_pump_schedule.schedule)
+        dhw_map[water_heater.id] << dist_pump unless dist_pump.nil?
+      end
     end
 
-    # Clothes dryer
-    if not clothes_dryer.nil?
-      cd_annual_kwh, cd_annual_therm, cd_frac_sens, cd_frac_lat = calc_clothes_dryer_energy(eri_version, nbeds, clothes_dryer, clothes_washer, clothes_dryer.additional_properties.space.nil?)
-      cd_name = Constants.ObjectNameClothesDryer
-      cd_weekday_sch = '0.010, 0.006, 0.004, 0.002, 0.004, 0.006, 0.016, 0.032, 0.048, 0.068, 0.078, 0.081, 0.074, 0.067, 0.057, 0.061, 0.055, 0.054, 0.051, 0.051, 0.052, 0.054, 0.044, 0.024'
-      cd_monthly_sch = '1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0'
-      cd_schedule = MonthWeekdayWeekendSchedule.new(model, cd_name, cd_weekday_sch, cd_weekday_sch, cd_monthly_sch, 1.0, 1.0, true, true, Constants.ScheduleTypeLimitsFraction)
-      cd_design_level_e = cd_schedule.calcDesignLevelFromDailykWh(cd_annual_kwh / 365.0)
-      cd_design_level_f = cd_schedule.calcDesignLevelFromDailyTherm(cd_annual_therm / 365.0)
-
-      cd_space = clothes_dryer.additional_properties.space
-      cd_space = living_space if cd_space.nil? # appliance is outdoors, so we need to assign the equipment to an arbitrary space
-      add_electric_equipment(model, cd_name, cd_space, cd_design_level_e, cd_frac_sens, cd_frac_lat, cd_schedule.schedule)
-      add_other_equipment(model, cd_name, cd_space, cd_design_level_f, cd_frac_sens, cd_frac_lat, cd_schedule.schedule, clothes_dryer.fuel_type)
-    end
-
-    # Refrigerator(s)
-    refrigerators.each do |refrigerator|
-      fridge_name = Constants.ObjectNameRefrigerator
-      rf_annual_kwh, rf_frac_sens, rf_frac_lat = calc_refrigerator_or_freezer_energy(refrigerator, refrigerator.additional_properties.space.nil?)
-      fridge_weekday_sch = refrigerator.weekday_fractions
-      fridge_weekend_sch = refrigerator.weekend_fractions
-      fridge_monthly_sch = refrigerator.monthly_multipliers
-      fridge_schedule = MonthWeekdayWeekendSchedule.new(model, fridge_name, fridge_weekday_sch, fridge_weekend_sch, fridge_monthly_sch, 1.0, 1.0, true, true, Constants.ScheduleTypeLimitsFraction)
-      fridge_design_level = fridge_schedule.calcDesignLevelFromDailykWh(rf_annual_kwh / 365.0)
-
-      rf_space = refrigerator.additional_properties.space
-      rf_space = living_space if rf_space.nil? # appliance is outdoors, so we need to assign the equipment to an arbitrary space
-      add_electric_equipment(model, fridge_name, rf_space, fridge_design_level, rf_frac_sens, rf_frac_lat, fridge_schedule.schedule)
-    end
-
-    # Freezer(s)
-    freezers.each do |freezer|
-      freezer_name = Constants.ObjectNameFreezer
-      fz_annual_kwh, fz_frac_sens, fz_frac_lat = calc_refrigerator_or_freezer_energy(freezer, freezer.additional_properties.space.nil?)
-      freezer_weekday_sch = freezer.weekday_fractions
-      freezer_weekend_sch = freezer.weekend_fractions
-      freezer_monthly_sch = freezer.monthly_multipliers
-      freezer_schedule = MonthWeekdayWeekendSchedule.new(model, freezer_name, freezer_weekday_sch, freezer_weekend_sch, freezer_monthly_sch, 1.0, 1.0, true, true, Constants.ScheduleTypeLimitsFraction)
-      freezer_design_level = freezer_schedule.calcDesignLevelFromDailykWh(fz_annual_kwh / 365.0)
-
-      fz_space = freezer.additional_properties.space
-      fz_space = living_space if fz_space.nil? # appliance is outdoors, so we need to assign the equipment to an arbitrary space
-      add_electric_equipment(model, freezer_name, fz_space, freezer_design_level, fz_frac_sens, fz_frac_lat, freezer_schedule.schedule)
-    end
-
-    # Cooking Range
-    if not cooking_range.nil?
-      cook_annual_kwh, cook_annual_therm, cook_frac_sens, cook_frac_lat = calc_range_oven_energy(nbeds, cooking_range, oven, cooking_range.additional_properties.space.nil?)
-      cook_name = Constants.ObjectNameCookingRange
-      cook_weekday_sch = cooking_range.weekday_fractions
-      cook_weekend_sch = cooking_range.weekend_fractions
-      cook_monthly_sch = cooking_range.monthly_multipliers
-      cook_schedule = MonthWeekdayWeekendSchedule.new(model, cook_name, cook_weekday_sch, cook_weekend_sch, cook_monthly_sch, 1.0, 1.0, true, true, Constants.ScheduleTypeLimitsFraction)
-      cook_design_level_e = cook_schedule.calcDesignLevelFromDailykWh(cook_annual_kwh / 365.0)
-      cook_design_level_f = cook_schedule.calcDesignLevelFromDailyTherm(cook_annual_therm / 365.0)
-
-      cook_space = cooking_range.additional_properties.space
-      cook_space = living_space if cook_space.nil? # appliance is outdoors, so we need to assign the equipment to an arbitrary space
-      add_electric_equipment(model, cook_name, cook_space, cook_design_level_e, cook_frac_sens, cook_frac_lat, cook_schedule.schedule)
-      add_other_equipment(model, cook_name, cook_space, cook_design_level_f, cook_frac_sens, cook_frac_lat, cook_schedule.schedule, cooking_range.fuel_type)
+    # General water use internal gains
+    # Floor mopping, shower evaporation, water films on showers, tubs & sinks surfaces, plant watering, etc.
+    if not hot_water_distributions.empty?
+      water_sens_btu, water_lat_btu = get_water_gains_sens_lat(nbeds)
+      water_design_level_sens = water_schedule.calcDesignLevelFromDailykWh(UnitConversions.convert(water_sens_btu, 'Btu', 'kWh') / 365.0)
+      water_design_level_lat = water_schedule.calcDesignLevelFromDailykWh(UnitConversions.convert(water_lat_btu, 'Btu', 'kWh') / 365.0)
+      add_other_equipment(model, "#{Constants.ObjectNameWater} Sensible", living_space, water_design_level_sens, 1.0, 0.0, water_schedule.schedule, nil)
+      add_other_equipment(model, "#{Constants.ObjectNameWater} Latent", living_space, water_design_level_lat, 0.0, 1.0, water_schedule.schedule, nil)
     end
   end
 
