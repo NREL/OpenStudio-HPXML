@@ -231,8 +231,8 @@ class HotWaterAndAppliances
       water_sens_btu, water_lat_btu = get_water_gains_sens_lat(nbeds)
       water_design_level_sens = water_schedule.calcDesignLevelFromDailykWh(UnitConversions.convert(water_sens_btu, 'Btu', 'kWh') / 365.0)
       water_design_level_lat = water_schedule.calcDesignLevelFromDailykWh(UnitConversions.convert(water_lat_btu, 'Btu', 'kWh') / 365.0)
-      add_other_equipment(model, "#{Constants.ObjectNameWater} Sensible", living_space, water_design_level_sens, 1.0, 0.0, water_schedule.schedule, nil)
-      add_other_equipment(model, "#{Constants.ObjectNameWater} Latent", living_space, water_design_level_lat, 0.0, 1.0, water_schedule.schedule, nil)
+      add_other_equipment(model, Constants.ObjectNameWaterSensible, living_space, water_design_level_sens, 1.0, 0.0, water_schedule.schedule, nil)
+      add_other_equipment(model, Constants.ObjectNameWaterLatent, living_space, water_design_level_lat, 0.0, 1.0, water_schedule.schedule, nil)
     end
   end
 
