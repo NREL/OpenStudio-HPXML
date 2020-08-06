@@ -235,6 +235,7 @@
 					<xs:documentation>Does the appliance serve multiple building/dwelling units?</xs:documentation>
 				</xs:annotation>
 			</xs:element>
+			<xs:element minOccurs="0" name="NumberofUnitsServed" type="xs:integer"/>
 		</xs:sequence>
 		<xs:attribute name="dataSource" type="DataSource"/>
 	</xs:complexType>
@@ -1844,7 +1845,15 @@
 											<xs:documentation>[gal]</xs:documentation>
 										</xs:annotation>
 									</xs:element>
-									<xs:element minOccurs="0" name="ConnectedTo" type="LocalReference"/>
+									<xs:choice minOccurs="0">
+										<xs:element name="AttachedToWaterHeatingSystem" type="LocalReference"/>
+										<xs:element name="AttachedToHotWaterDistribution" type="LocalReference"/>
+									</xs:choice>
+									<xs:element minOccurs="0" name="ConnectedTo" type="LocalReference">
+										<xs:annotation>
+											<xs:documentation>DEPRECATED. This will be removed in v4.0. Use AttachedToWaterHeatingSystem or AttachedToHotWaterDistribution instead.</xs:documentation>
+										</xs:annotation>
+									</xs:element>
 									<xs:element minOccurs="0" name="SolarFraction" type="SolarFraction">
 										<xs:annotation>
 											<xs:documentation>The Solar Fraction is the portion of the total conventional hot water heating load (delivered energy and tank standby losses). The higher

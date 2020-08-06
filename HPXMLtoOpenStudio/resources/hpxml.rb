@@ -3772,7 +3772,7 @@ class HPXML < Object
     ATTRS = [:id, :location, :modified_energy_factor, :integrated_modified_energy_factor,
              :rated_annual_kwh, :label_electric_rate, :label_gas_rate, :label_annual_gas_cost,
              :capacity, :label_usage, :usage_multiplier, :is_shared_appliance,
-             :ratio_of_units_to_clothes_washers, :hot_water_distribution_idref]
+             :number_of_units, :number_of_units_served, :hot_water_distribution_idref]
     attr_accessor(*ATTRS)
 
     def hot_water_distribution
@@ -3803,7 +3803,9 @@ class HPXML < Object
       clothes_washer = XMLHelper.add_element(appliances, 'ClothesWasher')
       sys_id = XMLHelper.add_element(clothes_washer, 'SystemIdentifier')
       XMLHelper.add_attribute(sys_id, 'id', @id)
+      XMLHelper.add_element(clothes_washer, 'NumberofUnits', to_integer(@number_of_units)) unless @number_of_units.nil?
       XMLHelper.add_element(clothes_washer, 'IsSharedAppliance', to_boolean(@is_shared_appliance)) unless @is_shared_appliance.nil?
+      XMLHelper.add_element(clothes_washer, 'NumberofUnitsServed', to_integer(@number_of_units_served)) unless @number_of_units_served.nil?
       if not @hot_water_distribution_idref.nil?
         attached_hot_water_distribution = XMLHelper.add_element(clothes_washer, 'AttachedToHotWaterDistribution')
         XMLHelper.add_attribute(attached_hot_water_distribution, 'idref', @hot_water_distribution_idref)
@@ -3818,15 +3820,16 @@ class HPXML < Object
       XMLHelper.add_element(clothes_washer, 'LabelUsage', to_float(@label_usage)) unless @label_usage.nil?
       XMLHelper.add_element(clothes_washer, 'Capacity', to_float(@capacity)) unless @capacity.nil?
       HPXML::add_extension(parent: clothes_washer,
-                           extensions: { 'UsageMultiplier' => to_float_or_nil(@usage_multiplier),
-                                         'RatioOfDwellingUnitsToSharedClothesWashers' => to_integer_or_nil(@ratio_of_units_to_clothes_washers) })
+                           extensions: { 'UsageMultiplier' => to_float_or_nil(@usage_multiplier) })
     end
 
     def from_oga(clothes_washer)
       return if clothes_washer.nil?
 
       @id = HPXML::get_id(clothes_washer)
+      @number_of_units = to_integer_or_nil(XMLHelper.get_value(clothes_washer, 'NumberofUnits'))
       @is_shared_appliance = to_boolean_or_nil(XMLHelper.get_value(clothes_washer, 'IsSharedAppliance'))
+      @number_of_units_served = to_integer_or_nil(XMLHelper.get_value(clothes_washer, 'NumberofUnitsServed'))
       @location = XMLHelper.get_value(clothes_washer, 'Location')
       @modified_energy_factor = to_float_or_nil(XMLHelper.get_value(clothes_washer, 'ModifiedEnergyFactor'))
       @integrated_modified_energy_factor = to_float_or_nil(XMLHelper.get_value(clothes_washer, 'IntegratedModifiedEnergyFactor'))
@@ -3837,7 +3840,6 @@ class HPXML < Object
       @label_usage = to_float_or_nil(XMLHelper.get_value(clothes_washer, 'LabelUsage'))
       @capacity = to_float_or_nil(XMLHelper.get_value(clothes_washer, 'Capacity'))
       @usage_multiplier = to_float_or_nil(XMLHelper.get_value(clothes_washer, 'extension/UsageMultiplier'))
-      @ratio_of_units_to_clothes_washers = to_integer_or_nil(XMLHelper.get_value(clothes_washer, 'extension/RatioOfDwellingUnitsToSharedClothesWashers'))
       @hot_water_distribution_idref = HPXML::get_idref(XMLHelper.get_element(clothes_washer, 'AttachedToHotWaterDistribution'))
     end
   end
@@ -3858,7 +3860,7 @@ class HPXML < Object
 
   class ClothesDryer < BaseElement
     ATTRS = [:id, :location, :fuel_type, :energy_factor, :combined_energy_factor, :control_type,
-             :usage_multiplier, :is_shared_appliance, :ratio_of_units_to_clothes_dryers]
+             :usage_multiplier, :is_shared_appliance, :number_of_units, :number_of_units_served]
     attr_accessor(*ATTRS)
 
     def delete
@@ -3877,29 +3879,31 @@ class HPXML < Object
       clothes_dryer = XMLHelper.add_element(appliances, 'ClothesDryer')
       sys_id = XMLHelper.add_element(clothes_dryer, 'SystemIdentifier')
       XMLHelper.add_attribute(sys_id, 'id', @id)
+      XMLHelper.add_element(clothes_dryer, 'NumberofUnits', to_integer(@number_of_units)) unless @number_of_units.nil?
       XMLHelper.add_element(clothes_dryer, 'IsSharedAppliance', to_boolean(@is_shared_appliance)) unless @is_shared_appliance.nil?
+      XMLHelper.add_element(clothes_dryer, 'NumberofUnitsServed', to_integer(@number_of_units_served)) unless @number_of_units_served.nil?
       XMLHelper.add_element(clothes_dryer, 'Location', @location) unless @location.nil?
       XMLHelper.add_element(clothes_dryer, 'FuelType', @fuel_type) unless @fuel_type.nil?
       XMLHelper.add_element(clothes_dryer, 'EnergyFactor', to_float(@energy_factor)) unless @energy_factor.nil?
       XMLHelper.add_element(clothes_dryer, 'CombinedEnergyFactor', to_float(@combined_energy_factor)) unless @combined_energy_factor.nil?
       XMLHelper.add_element(clothes_dryer, 'ControlType', @control_type) unless @control_type.nil?
       HPXML::add_extension(parent: clothes_dryer,
-                           extensions: { 'UsageMultiplier' => to_float_or_nil(@usage_multiplier),
-                                         'RatioOfDwellingUnitsToSharedClothesDryers' => to_integer_or_nil(@ratio_of_units_to_clothes_dryers) })
+                           extensions: { 'UsageMultiplier' => to_float_or_nil(@usage_multiplier) })
     end
 
     def from_oga(clothes_dryer)
       return if clothes_dryer.nil?
 
       @id = HPXML::get_id(clothes_dryer)
+      @number_of_units = to_integer_or_nil(XMLHelper.get_value(clothes_dryer, 'NumberofUnits'))
       @is_shared_appliance = to_boolean_or_nil(XMLHelper.get_value(clothes_dryer, 'IsSharedAppliance'))
+      @number_of_units_served = to_integer_or_nil(XMLHelper.get_value(clothes_dryer, 'NumberofUnitsServed'))
       @location = XMLHelper.get_value(clothes_dryer, 'Location')
       @fuel_type = XMLHelper.get_value(clothes_dryer, 'FuelType')
       @energy_factor = to_float_or_nil(XMLHelper.get_value(clothes_dryer, 'EnergyFactor'))
       @combined_energy_factor = to_float_or_nil(XMLHelper.get_value(clothes_dryer, 'CombinedEnergyFactor'))
       @control_type = XMLHelper.get_value(clothes_dryer, 'ControlType')
       @usage_multiplier = to_float_or_nil(XMLHelper.get_value(clothes_dryer, 'extension/UsageMultiplier'))
-      @ratio_of_units_to_clothes_dryers = to_integer_or_nil(XMLHelper.get_value(clothes_dryer, 'extension/RatioOfDwellingUnitsToSharedClothesDryers'))
     end
   end
 
