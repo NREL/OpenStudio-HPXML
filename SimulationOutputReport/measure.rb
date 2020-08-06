@@ -451,6 +451,7 @@ class SimulationOutputReport < OpenStudio::Measure::ReportingMeasure
     end
 
     # Total loads
+    # Discussion required: Should we include preconditioning heating/cooling loads into EMS load program?
     @loads.each do |load_type, load|
       next if load.ems_variable.nil?
 
@@ -1028,7 +1029,7 @@ class SimulationOutputReport < OpenStudio::Measure::ReportingMeasure
 
       # Get all HVAC systems attached to it
       @hpxml.heating_systems.each do |htg_system|
-        next unless htg_system.fraction_heat_load_served > 0
+        next unless (not htg_system.fraction_heat_load_served.nil?) and (htg_system.fraction_heat_load_served > 0)
         next if htg_system.distribution_system_idref.nil?
         next unless dist_id == htg_system.distribution_system_idref
 
@@ -1036,7 +1037,7 @@ class SimulationOutputReport < OpenStudio::Measure::ReportingMeasure
         dse_heats[sys_id] = dse_heat
       end
       @hpxml.heat_pumps.each do |heat_pump|
-        next unless heat_pump.fraction_heat_load_served > 0
+        next unless (not heat_pump.fraction_heat_load_served.nil?) and (heat_pump.fraction_heat_load_served > 0)
         next if heat_pump.distribution_system_idref.nil?
         next unless dist_id == heat_pump.distribution_system_idref
 
@@ -1069,7 +1070,7 @@ class SimulationOutputReport < OpenStudio::Measure::ReportingMeasure
 
       # Get all HVAC systems attached to it
       @hpxml.cooling_systems.each do |clg_system|
-        next unless clg_system.fraction_cool_load_served > 0
+        next unless (not clg_system.fraction_cool_load_served.nil?) and (clg_system.fraction_cool_load_served > 0)
         next if clg_system.distribution_system_idref.nil?
         next unless dist_id == clg_system.distribution_system_idref
 
@@ -1077,7 +1078,7 @@ class SimulationOutputReport < OpenStudio::Measure::ReportingMeasure
         dse_cools[sys_id] = dse_cool
       end
       @hpxml.heat_pumps.each do |heat_pump|
-        next unless heat_pump.fraction_cool_load_served > 0
+        next unless (not heat_pump.fraction_cool_load_served.nil?) and (heat_pump.fraction_cool_load_served > 0)
         next if heat_pump.distribution_system_idref.nil?
         next unless dist_id == heat_pump.distribution_system_idref
 
@@ -1093,13 +1094,15 @@ class SimulationOutputReport < OpenStudio::Measure::ReportingMeasure
     heat_fuels = {}
 
     @hpxml.heating_systems.each do |htg_system|
-      next unless htg_system.fraction_heat_load_served > 0
+      # Preconditioning hvac equipment doesn't have fraction load served
+      next unless (htg_system.fraction_heat_load_served.nil?) or (htg_system.fraction_heat_load_served > 0)
 
       sys_id = get_system_or_seed_id(htg_system)
       heat_fuels[sys_id] = htg_system.heating_system_fuel
     end
     @hpxml.heat_pumps.each do |heat_pump|
-      next unless heat_pump.fraction_heat_load_served > 0
+      # Preconditioning hvac equipment doesn't have fraction load served
+      next unless (heat_pump.fraction_heat_load_served.nil?) or (heat_pump.fraction_heat_load_served > 0)
 
       sys_id = get_system_or_seed_id(heat_pump)
       heat_fuels[sys_id] = heat_pump.heat_pump_fuel
@@ -1136,12 +1139,14 @@ class SimulationOutputReport < OpenStudio::Measure::ReportingMeasure
     sys_ids = []
 
     @hpxml.heating_systems.each do |htg_system|
-      next unless htg_system.fraction_heat_load_served > 0
+      # Preconditioning hvac equipment doesn't have fraction load served
+      next unless (htg_system.fraction_heat_load_served.nil?) or (htg_system.fraction_heat_load_served > 0)
 
       sys_ids << get_system_or_seed_id(htg_system)
     end
     @hpxml.heat_pumps.each do |heat_pump|
-      next unless heat_pump.fraction_heat_load_served > 0
+      # Preconditioning hvac equipment doesn't have fraction load served
+      next unless (heat_pump.fraction_heat_load_served.nil?) or (heat_pump.fraction_heat_load_served > 0)
 
       sys_ids << get_system_or_seed_id(heat_pump)
       if is_dfhp(heat_pump)
@@ -1156,12 +1161,14 @@ class SimulationOutputReport < OpenStudio::Measure::ReportingMeasure
     sys_ids = []
 
     @hpxml.cooling_systems.each do |clg_system|
-      next unless clg_system.fraction_cool_load_served > 0
+      # Preconditioning hvac equipment doesn't have fraction load served
+      next unless (clg_system.fraction_cool_load_served.nil?) or (clg_system.fraction_cool_load_served > 0)
 
       sys_ids << get_system_or_seed_id(clg_system)
     end
     @hpxml.heat_pumps.each do |heat_pump|
-      next unless heat_pump.fraction_cool_load_served > 0
+      # Preconditioning hvac equipment doesn't have fraction load served
+      next unless (heat_pump.fraction_cool_load_served.nil?) or (heat_pump.fraction_cool_load_served > 0)
 
       sys_ids << get_system_or_seed_id(heat_pump)
     end
@@ -1185,7 +1192,8 @@ class SimulationOutputReport < OpenStudio::Measure::ReportingMeasure
     eec_heats = {}
 
     @hpxml.heating_systems.each do |htg_system|
-      next unless htg_system.fraction_heat_load_served > 0
+      # Preconditioning hvac equipment doesn't have fraction load served
+      next unless (htg_system.fraction_heat_load_served.nil?) or (htg_system.fraction_heat_load_served > 0)
 
       sys_id = get_system_or_seed_id(htg_system)
       if not htg_system.heating_efficiency_afue.nil?
@@ -1195,7 +1203,8 @@ class SimulationOutputReport < OpenStudio::Measure::ReportingMeasure
       end
     end
     @hpxml.heat_pumps.each do |heat_pump|
-      next unless heat_pump.fraction_heat_load_served > 0
+      # Preconditioning hvac equipment doesn't have fraction load served
+      next unless (heat_pump.fraction_heat_load_served.nil?) or (heat_pump.fraction_heat_load_served > 0)
 
       sys_id = get_system_or_seed_id(heat_pump)
       if not heat_pump.heating_efficiency_hspf.nil?
@@ -1219,7 +1228,8 @@ class SimulationOutputReport < OpenStudio::Measure::ReportingMeasure
     eec_cools = {}
 
     @hpxml.cooling_systems.each do |clg_system|
-      next unless clg_system.fraction_cool_load_served > 0
+      # Preconditioning hvac equipment doesn't have fraction load served
+      next unless (clg_system.fraction_cool_load_served.nil?) or (clg_system.fraction_cool_load_served > 0)
 
       sys_id = get_system_or_seed_id(clg_system)
       if not clg_system.cooling_efficiency_seer.nil?
@@ -1233,7 +1243,8 @@ class SimulationOutputReport < OpenStudio::Measure::ReportingMeasure
       end
     end
     @hpxml.heat_pumps.each do |heat_pump|
-      next unless heat_pump.fraction_cool_load_served > 0
+      # Preconditioning hvac equipment doesn't have fraction load served
+      next unless (heat_pump.fraction_cool_load_served.nil?) or (heat_pump.fraction_cool_load_served > 0)
 
       sys_id = get_system_or_seed_id(heat_pump)
       if not heat_pump.cooling_efficiency_seer.nil?
@@ -1406,13 +1417,13 @@ class SimulationOutputReport < OpenStudio::Measure::ReportingMeasure
 
   def split_htg_load_to_system_by_fraction(sys_id, bldg_load, dfhp_loads)
     @hpxml.heating_systems.each do |htg_system|
-      next unless htg_system.fraction_heat_load_served > 0
+      next unless (not htg_system.fraction_heat_load_served.nil?) and (htg_system.fraction_heat_load_served > 0)
       next unless get_system_or_seed_id(htg_system) == sys_id
 
       return bldg_load * htg_system.fraction_heat_load_served
     end
     @hpxml.heat_pumps.each do |heat_pump|
-      next unless heat_pump.fraction_heat_load_served > 0
+      next unless (not heat_pump.fraction_heat_load_served.nil?) and (heat_pump.fraction_heat_load_served > 0)
 
       load_fraction = 1.0
       if is_dfhp(heat_pump)
@@ -1432,13 +1443,13 @@ class SimulationOutputReport < OpenStudio::Measure::ReportingMeasure
 
   def split_clg_load_to_system_by_fraction(sys_id, bldg_load)
     @hpxml.cooling_systems.each do |clg_system|
-      next unless clg_system.fraction_cool_load_served > 0
+      next unless (not clg_system.fraction_cool_load_served.nil?) and (clg_system.fraction_cool_load_served > 0)
       next unless get_system_or_seed_id(clg_system) == sys_id
 
       return bldg_load * clg_system.fraction_cool_load_served
     end
     @hpxml.heat_pumps.each do |heat_pump|
-      next unless heat_pump.fraction_cool_load_served > 0
+      next unless (not heat_pump.fraction_cool_load_served.nil?) and (heat_pump.fraction_cool_load_served > 0)
       next unless get_system_or_seed_id(heat_pump) == sys_id
 
       return bldg_load * heat_pump.fraction_cool_load_served

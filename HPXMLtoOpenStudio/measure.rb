@@ -248,9 +248,9 @@ class OSModel
     # Conditioned space/zone
 
     spaces = {}
-    create_or_get_space(model, spaces, HPXML::LocationLivingSpace)
+    cond_spaces = create_or_get_conditioned_space(model, spaces)
     set_foundation_and_walls_top()
-    add_setpoints(runner, model, weather, spaces)
+    add_setpoints(runner, model, weather, spaces, cond_spaces)
 
     # Geometry/Envelope
     add_roofs(runner, model, spaces)
@@ -974,6 +974,20 @@ class OSModel
       azimuth -= 360
     end
     return azimuth
+  end
+
+  def self.create_or_get_conditioned_space(model, spaces)
+    cond_zones = []
+    cond_zones << create_or_get_space(model, spaces, HPXML::LocationLivingSpace)
+    # Create conditioned space for mech vent preconditioned shared systems
+    preconditioned_fans = @hpxml.ventilation_fans.select { |fan| (not fan.preconditioning_cooling_system.nil?) || (not fan.preconditioning_heating_system.nil?) }
+    index = 0
+    preconditioned_fans.each do |fan|
+      mechvent_space = create_or_get_space(model, spaces, HPXML::LocationMechanicalVentilationSpace + " #{index}", true)
+      fan.additional_properties.space = mechvent_space
+      cond_zones << mechvent_space
+    end
+    return cond_zones
   end
 
   def self.create_or_get_space(model, spaces, spacetype, default_surface = false)
@@ -2279,13 +2293,13 @@ class OSModel
     end
   end
 
-  def self.add_setpoints(runner, model, weather, spaces)
+  def self.add_setpoints(runner, model, weather, spaces, cond_spaces)
     return if @hpxml.hvac_controls.size == 0
 
     hvac_control = @hpxml.hvac_controls[0]
-    living_zone = spaces[HPXML::LocationLivingSpace].thermalZone.get
+    cond_zones = cond_spaces.map { |space| space.thermalZone.get }
 
-    HVAC.apply_setpoints(model, runner, weather, hvac_control, living_zone)
+    HVAC.apply_setpoints(model, runner, weather, hvac_control, cond_zones)
   end
 
   def self.add_ceiling_fans(runner, model, weather, spaces)
