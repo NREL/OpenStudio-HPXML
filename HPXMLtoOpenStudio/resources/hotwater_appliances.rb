@@ -168,14 +168,12 @@ class HotWaterAndAppliances
       gpd_frac = water_heating_system.fraction_dhw_load_served # Fixtures fraction
       if gpd_frac > 0
         # Fixtures (showers, sinks, baths)
-        fx_gpd = get_fixtures_gpd(eri_version, nbeds, fixtures_all_low_flow, daily_mw_fractions)
-        fx_gpd *= fixtures_usage_multiplier
+        fx_gpd = get_fixtures_gpd(eri_version, nbeds, fixtures_all_low_flow, daily_mw_fractions, fixtures_usage_multiplier)
         fx_peak_flow = water_schedule.calcPeakFlowFromDailygpm(fx_gpd)
         add_water_use_equipment(model, Constants.ObjectNameFixtures, fx_peak_flow * gpd_frac * non_solar_fraction, water_schedule.schedule, mw_schedule, water_use_connections[water_heating_system.id])
 
         # Distribution waste (primary driven by fixture draws)
-        w_gpd = get_dist_waste_gpd(eri_version, nbeds, has_uncond_bsmnt, cfa, ncfl, hot_water_distribution, fixtures_all_low_flow)
-        w_gpd *= fixtures_usage_multiplier
+        w_gpd = get_dist_waste_gpd(eri_version, nbeds, has_uncond_bsmnt, cfa, ncfl, hot_water_distribution, fixtures_all_low_flow, fixtures_usage_multiplier)
         dist_water_peak_flow = water_schedule.calcPeakFlowFromDailygpm(w_gpd)
         add_water_use_equipment(model, Constants.ObjectNameDistributionWaste, dist_water_peak_flow * gpd_frac * non_solar_fraction, water_schedule.schedule, mw_schedule, water_use_connections[water_heating_system.id])
 
@@ -764,19 +762,19 @@ class HotWaterAndAppliances
     return f_eff
   end
 
-  def self.get_fixtures_gpd(eri_version, nbeds, fixtures_all_low_flow, daily_mw_fractions)
+  def self.get_fixtures_gpd(eri_version, nbeds, fixtures_all_low_flow, daily_mw_fractions, fixtures_usage_multiplier = 1.0)
     if Constants.ERIVersions.index(eri_version) < Constants.ERIVersions.index('2014A')
       hw_gpd = 30.0 + 10.0 * nbeds # Table 4.2.2(1) Service water heating systems
       # Convert to mixed water gpd
       avg_mw_fraction = daily_mw_fractions.reduce(:+) / daily_mw_fractions.size.to_f
-      return hw_gpd / avg_mw_fraction
+      return hw_gpd / avg_mw_fraction * fixtures_usage_multiplier
     end
 
     # ANSI/RESNET 301-2014 Addendum A-2015
     # Amendment on Domestic Hot Water (DHW) Systems
     ref_f_gpd = 14.6 + 10.0 * nbeds # Eq. 4.2-2 (refFgpd)
     f_eff = get_fixtures_effectiveness(fixtures_all_low_flow)
-    return f_eff * ref_f_gpd
+    return f_eff * ref_f_gpd * fixtures_usage_multiplier
   end
 
   def self.get_water_gains_sens_lat(nbeds)
@@ -786,8 +784,8 @@ class HotWaterAndAppliances
     return sens_gains * 365.0, lat_gains * 365.0
   end
 
-  def self.get_dist_waste_gpd(eri_version, nbeds, has_uncond_bsmnt, cfa, ncfl,
-                              hot_water_distribution, fixtures_all_low_flow)
+  def self.get_dist_waste_gpd(eri_version, nbeds, has_uncond_bsmnt, cfa, ncfl, hot_water_distribution,
+                              fixtures_all_low_flow, fixtures_usage_multiplier = 1.0)
     if Constants.ERIVersions.index(eri_version) <= Constants.ERIVersions.index('2014')
       return 0.0
     end
@@ -833,7 +831,7 @@ class HotWaterAndAppliances
 
     mw_gpd = f_eff * (o_w_gpd + s_w_gpd * wd_eff) # Eq. 4.2-11
 
-    return mw_gpd
+    return mw_gpd * fixtures_usage_multiplier
   end
 
   def self.get_dist_energy_waste_factor(hot_water_distribution)

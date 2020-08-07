@@ -1,10 +1,5 @@
 # frozen_string_literal: true
 
-# FIXME:
-# add invalid files
-# - shared CW/DW attached to non-shared WH
-# - CW/DW bad water heater idref
-
 def create_hpxmls
   require 'oga'
   require_relative 'HPXMLtoOpenStudio/resources/constants'
@@ -305,8 +300,8 @@ def create_hpxmls
     'base-misc-loads-large-uncommon.xml' => 'base-enclosure-garage.xml',
     'base-misc-loads-large-uncommon2.xml' => 'base-misc-loads-large-uncommon.xml',
     'base-misc-loads-none.xml' => 'base.xml',
-    'base-misc-loads-usage-multiplier.xml' => 'base.xml',
     'base-misc-neighbor-shading.xml' => 'base.xml',
+    'base-misc-usage-multiplier.xml' => 'base.xml',
     'base-pv.xml' => 'base.xml',
     'base-simcontrol-daylight-saving-custom.xml' => 'base.xml',
     'base-simcontrol-daylight-saving-disabled.xml' => 'base.xml',
@@ -3807,7 +3802,7 @@ def set_hpxml_water_fixtures(hpxml_file, hpxml)
     hpxml.water_fixtures[1].low_flow = true
   elsif ['base-dhw-none.xml'].include? hpxml_file
     hpxml.water_fixtures.clear
-  elsif ['base-misc-loads-usage-multiplier.xml'].include? hpxml_file
+  elsif ['base-misc-usage-multiplier.xml'].include? hpxml_file
     hpxml.water_heating.water_fixtures_usage_multiplier = 0.9
   end
 end
@@ -3975,7 +3970,7 @@ def set_hpxml_clothes_washer(hpxml_file, hpxml)
     hpxml.clothes_washers[0].label_annual_gas_cost = nil
     hpxml.clothes_washers[0].capacity = nil
     hpxml.clothes_washers[0].label_usage = nil
-  elsif ['base-misc-loads-usage-multiplier.xml'].include? hpxml_file
+  elsif ['base-misc-usage-multiplier.xml'].include? hpxml_file
     hpxml.clothes_washers[0].usage_multiplier = 0.9
   elsif ['base-dhw-shared-laundry-room.xml'].include? hpxml_file
     hpxml.clothes_washers[0].is_shared_appliance = true
@@ -4064,7 +4059,7 @@ def set_hpxml_clothes_dryer(hpxml_file, hpxml)
   elsif ['base-dhw-shared-laundry-room.xml'].include? hpxml_file
     hpxml.clothes_dryers[0].id = 'SharedClothesDryer'
     hpxml.clothes_dryers[0].location = HPXML::LocationOtherHeatedSpace
-  elsif ['base-misc-loads-usage-multiplier.xml'].include? hpxml_file
+  elsif ['base-misc-usage-multiplier.xml'].include? hpxml_file
     hpxml.clothes_dryers[0].usage_multiplier = 0.9
   end
 end
@@ -4119,7 +4114,7 @@ def set_hpxml_dishwasher(hpxml_file, hpxml)
     hpxml.dishwashers[0].label_annual_gas_cost = nil
     hpxml.dishwashers[0].place_setting_capacity = nil
     hpxml.dishwashers[0].label_usage = nil
-  elsif ['base-misc-loads-usage-multiplier.xml'].include? hpxml_file
+  elsif ['base-misc-usage-multiplier.xml'].include? hpxml_file
     hpxml.dishwashers[0].usage_multiplier = 0.9
   elsif ['base-dhw-shared-laundry-room.xml'].include? hpxml_file
     hpxml.dishwashers[0].is_shared_appliance = true
@@ -4170,7 +4165,7 @@ def set_hpxml_refrigerator(hpxml_file, hpxml)
     hpxml.refrigerators[0].location = nil
     hpxml.refrigerators[0].rated_annual_kwh = nil
     hpxml.refrigerators[0].adjusted_annual_kwh = nil
-  elsif ['base-misc-loads-usage-multiplier.xml'].include? hpxml_file
+  elsif ['base-misc-usage-multiplier.xml'].include? hpxml_file
     hpxml.refrigerators[0].usage_multiplier = 0.9
   elsif ['base-misc-loads-large-uncommon.xml'].include? hpxml_file
     hpxml.refrigerators[0].weekday_fractions = '0.040, 0.039, 0.038, 0.037, 0.036, 0.036, 0.038, 0.040, 0.041, 0.041, 0.040, 0.040, 0.042, 0.042, 0.042, 0.041, 0.044, 0.048, 0.050, 0.048, 0.047, 0.046, 0.044, 0.041'
@@ -4279,7 +4274,7 @@ def set_hpxml_cooking_range(hpxml_file, hpxml)
     hpxml.cooking_ranges[0].location = 'unconditioned space'
   elsif ['base-misc-defaults.xml'].include? hpxml_file
     hpxml.cooking_ranges[0].is_induction = nil
-  elsif ['base-misc-loads-usage-multiplier.xml'].include? hpxml_file
+  elsif ['base-misc-usage-multiplier.xml'].include? hpxml_file
     hpxml.cooking_ranges[0].usage_multiplier = 0.9
   elsif ['base-misc-loads-large-uncommon.xml'].include? hpxml_file
     hpxml.cooking_ranges[0].weekday_fractions = '0.007, 0.007, 0.004, 0.004, 0.007, 0.011, 0.025, 0.042, 0.046, 0.048, 0.042, 0.050, 0.057, 0.046, 0.057, 0.044, 0.092, 0.150, 0.117, 0.060, 0.035, 0.025, 0.016, 0.011'
@@ -4339,7 +4334,7 @@ def set_hpxml_lighting(hpxml_file, hpxml)
                               lighting_type: HPXML::LightingTypeLED)
   elsif ['invalid_files/lighting-fractions.xml'].include? hpxml_file
     hpxml.lighting_groups[0].fraction_of_units_in_location = 0.8
-  elsif ['base-misc-loads-usage-multiplier.xml'].include? hpxml_file
+  elsif ['base-misc-usage-multiplier.xml'].include? hpxml_file
     hpxml.lighting.interior_usage_multiplier = 0.9
     hpxml.lighting.garage_usage_multiplier = 0.9
     hpxml.lighting.exterior_usage_multiplier = 0.9
@@ -4440,7 +4435,7 @@ def set_hpxml_plug_loads(hpxml_file, hpxml)
                            plug_load_type: HPXML::PlugLoadTypeOther)
       hpxml.plug_loads.add(id: 'PlugLoadMisc2',
                            plug_load_type: HPXML::PlugLoadTypeTelevision)
-    elsif ['base-misc-loads-usage-multiplier.xml'].include? hpxml_file
+    elsif ['base-misc-usage-multiplier.xml'].include? hpxml_file
       hpxml.plug_loads.each do |plug_load|
         plug_load.usage_multiplier = 0.9
       end

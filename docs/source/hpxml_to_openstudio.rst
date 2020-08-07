@@ -897,6 +897,7 @@ HPXML Clothes Washer
 ********************
 
 An ``Appliances/ClothesWasher`` element can be specified; if not provided, a clothes washer will not be modeled.
+The ``IsSharedAppliance`` element must be provided.
 
 Several EnergyGuide label inputs describing the efficiency of the appliance can be provided.
 If the complete set of efficiency inputs is not provided, the following default values representing a standard clothes washer from 2006 will be used.
@@ -919,7 +920,6 @@ If ``ModifiedEnergyFactor`` is provided instead of ``IntegratedModifiedEnergyFac
 
 An ``extension/UsageMultiplier`` can also be optionally provided that scales energy and hot water usage; if not provided, it is assumed to be 1.0.
 
-The ``IsSharedAppliance`` element must be provided.
 If the clothes washer is a shared appliance (i.e., in a shared laundry room), it should be described using ``IsSharedAppliance='true'``.
 In addition, the ``AttachedToWaterHeatingSystem`` must be specified and must reference a shared water heater.
 
@@ -949,6 +949,7 @@ HPXML Dishwasher
 ****************
 
 An ``Appliances/Dishwasher`` element can be specified; if not provided, a dishwasher will not be modeled.
+The ``IsSharedAppliance`` element must be provided.
 
 Several EnergyGuide label inputs describing the efficiency of the appliance can be provided.
 If the complete set of efficiency inputs is not provided, the following default values representing a standard dishwasher from 2006 will be used.
@@ -970,7 +971,6 @@ If ``EnergyFactor`` is provided instead of ``RatedAnnualkWh``, it will be conver
 
 An ``extension/UsageMultiplier`` can also be optionally provided that scales energy and hot water usage; if not provided, it is assumed to be 1.0.
 
-The ``IsSharedAppliance`` element must be provided.
 If the dishwasher is a shared appliance (i.e., in a shared laundry room), it should be described using ``IsSharedAppliance='true'``.
 In addition, the ``AttachedToWaterHeatingSystem`` must be specified and must reference a shared water heater.
 

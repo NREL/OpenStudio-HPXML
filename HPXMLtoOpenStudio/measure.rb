@@ -1938,9 +1938,8 @@ class OSModel
       cooking_range.additional_properties.space = get_space_from_location(cooking_range.location, 'CookingRange', model, spaces)
     end
 
-    # Hot water distribution
-    hot_water_distribution = nil
-    if @hpxml.hot_water_distributions.size > 0
+    # Distribution
+    if @hpxml.water_heating_systems.size > 0
       hot_water_distribution = @hpxml.hot_water_distributions[0]
     end
 
