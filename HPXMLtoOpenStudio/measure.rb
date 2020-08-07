@@ -2370,7 +2370,10 @@ class OSModel
     open_window_area = window_area * @frac_windows_operable * 0.5 * 0.2 # Assume A) 50% of the area of an operable window can be open, and B) 20% of openable window area is actually open
     site_type = @hpxml.site.site_type
     shelter_coef = @hpxml.site.shelter_coefficient
-    has_flue_chimney = false # FUTURE: Expose as HPXML input
+    if @hpxml.building_construction.has_flue_or_chimney.nil?
+      @hpxml.building_construction.has_flue_or_chimney = false
+    end
+    has_flue_chimney = @hpxml.building_construction.has_flue_or_chimney
     @infil_volume = air_infils.select { |i| !i.infiltration_volume.nil? }[0].infiltration_volume
     infil_height = @hpxml.inferred_infiltration_height(@infil_volume)
     Airflow.apply(model, runner, weather, spaces, air_infils, @hpxml.ventilation_fans,
