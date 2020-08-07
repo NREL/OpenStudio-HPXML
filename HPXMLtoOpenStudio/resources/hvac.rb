@@ -786,7 +786,7 @@ class HVAC
                                       fan_power_rated: nil,
                                       hp_min_temp: hp_min_temp,
                                       fraction_heat_load_served: heat_pump.fraction_heat_load_served,
-                                      is_fixed_flow_rate: heating_system.is_ventilation_preconditioning,
+                                      is_fixed_flow_rate: heat_pump.is_ventilation_preconditioning,
                                       heat_cfms_ton_rated: heat_cfms_ton_rated,
                                       heat_capacity_ratios: heat_capacity_ratios)
     hvac_map[heat_pump.id] << htg_coil

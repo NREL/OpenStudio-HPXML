@@ -221,11 +221,19 @@ class SimulationOutputReport < OpenStudio::Measure::ReportingMeasure
     end
 
     if include_timeseries_airflows
+      # index used to distinguish different EMS programs with the same variable names
       @airflows.each do |airflow_type, airflow|
-        ems_program = @model.getModelObjectByName(airflow.ems_program.gsub(' ', '_')).get.to_EnergyManagementSystemProgram.get
-        airflow.ems_variables.each do |ems_variable|
-          result << OpenStudio::IdfObject.load("EnergyManagementSystem:OutputVariable,#{ems_variable}_timeseries_outvar,#{ems_variable},Summed,ZoneTimestep,#{ems_program.name},m^3/s;").get
-          result << OpenStudio::IdfObject.load("Output:Variable,*,#{ems_variable}_timeseries_outvar,#{timeseries_frequency};").get
+        index = 0
+        airflow.ems_programs.each do |ems_program_name|
+          ems_programs = @model.getEnergyManagementSystemPrograms.select { |ems_program| ems_program.name.get.include? ems_program_name.gsub(' ', '_') }
+          ems_programs.each do |ems_program|
+            airflow.ems_variables.each do |ems_variable|
+              outvar_name = "#{ems_variable}_timeseries_outvar_#{index}"
+              result << OpenStudio::IdfObject.load("EnergyManagementSystem:OutputVariable,#{outvar_name},#{ems_variable},Summed,ZoneTimestep,#{ems_program.name},m^3/s;").get
+              result << OpenStudio::IdfObject.load("Output:Variable,*,#{ems_variable}_timeseries_outvar_#{index},#{timeseries_frequency};").get
+            end
+            index += 1
+          end
         end
       end
     end
@@ -747,7 +755,7 @@ class SimulationOutputReport < OpenStudio::Measure::ReportingMeasure
 
     if include_timeseries_airflows
       @airflows.each do |airflow_type, airflow|
-        airflow.timeseries_output = get_report_variable_data_timeseries(['EMS'], airflow.ems_variables.map { |var| "#{var}_timeseries_outvar" }, UnitConversions.convert(1.0, 'm^3/s', 'cfm'), 0, timeseries_frequency)
+        airflow.timeseries_output = get_report_variable_data_timeseries(['EMS'], airflow.ems_output_var_names, UnitConversions.convert(1.0, 'm^3/s', 'cfm'), 0, timeseries_frequency)
       end
     end
 
@@ -1029,7 +1037,7 @@ class SimulationOutputReport < OpenStudio::Measure::ReportingMeasure
 
       # Get all HVAC systems attached to it
       @hpxml.heating_systems.each do |htg_system|
-        next unless (not htg_system.fraction_heat_load_served.nil?) and (htg_system.fraction_heat_load_served > 0)
+        next unless (not htg_system.fraction_heat_load_served.nil?) && (htg_system.fraction_heat_load_served > 0)
         next if htg_system.distribution_system_idref.nil?
         next unless dist_id == htg_system.distribution_system_idref
 
@@ -1037,7 +1045,7 @@ class SimulationOutputReport < OpenStudio::Measure::ReportingMeasure
         dse_heats[sys_id] = dse_heat
       end
       @hpxml.heat_pumps.each do |heat_pump|
-        next unless (not heat_pump.fraction_heat_load_served.nil?) and (heat_pump.fraction_heat_load_served > 0)
+        next unless (not heat_pump.fraction_heat_load_served.nil?) && (heat_pump.fraction_heat_load_served > 0)
         next if heat_pump.distribution_system_idref.nil?
         next unless dist_id == heat_pump.distribution_system_idref
 
@@ -1070,7 +1078,7 @@ class SimulationOutputReport < OpenStudio::Measure::ReportingMeasure
 
       # Get all HVAC systems attached to it
       @hpxml.cooling_systems.each do |clg_system|
-        next unless (not clg_system.fraction_cool_load_served.nil?) and (clg_system.fraction_cool_load_served > 0)
+        next unless (not clg_system.fraction_cool_load_served.nil?) && (clg_system.fraction_cool_load_served > 0)
         next if clg_system.distribution_system_idref.nil?
         next unless dist_id == clg_system.distribution_system_idref
 
@@ -1078,7 +1086,7 @@ class SimulationOutputReport < OpenStudio::Measure::ReportingMeasure
         dse_cools[sys_id] = dse_cool
       end
       @hpxml.heat_pumps.each do |heat_pump|
-        next unless (not heat_pump.fraction_cool_load_served.nil?) and (heat_pump.fraction_cool_load_served > 0)
+        next unless (not heat_pump.fraction_cool_load_served.nil?) && (heat_pump.fraction_cool_load_served > 0)
         next if heat_pump.distribution_system_idref.nil?
         next unless dist_id == heat_pump.distribution_system_idref
 
@@ -1095,14 +1103,14 @@ class SimulationOutputReport < OpenStudio::Measure::ReportingMeasure
 
     @hpxml.heating_systems.each do |htg_system|
       # Preconditioning hvac equipment doesn't have fraction load served
-      next unless (htg_system.fraction_heat_load_served.nil?) or (htg_system.fraction_heat_load_served > 0)
+      next unless htg_system.fraction_heat_load_served.nil? || (htg_system.fraction_heat_load_served > 0)
 
       sys_id = get_system_or_seed_id(htg_system)
       heat_fuels[sys_id] = htg_system.heating_system_fuel
     end
     @hpxml.heat_pumps.each do |heat_pump|
       # Preconditioning hvac equipment doesn't have fraction load served
-      next unless (heat_pump.fraction_heat_load_served.nil?) or (heat_pump.fraction_heat_load_served > 0)
+      next unless heat_pump.fraction_heat_load_served.nil? || (heat_pump.fraction_heat_load_served > 0)
 
       sys_id = get_system_or_seed_id(heat_pump)
       heat_fuels[sys_id] = heat_pump.heat_pump_fuel
@@ -1140,13 +1148,13 @@ class SimulationOutputReport < OpenStudio::Measure::ReportingMeasure
 
     @hpxml.heating_systems.each do |htg_system|
       # Preconditioning hvac equipment doesn't have fraction load served
-      next unless (htg_system.fraction_heat_load_served.nil?) or (htg_system.fraction_heat_load_served > 0)
+      next unless htg_system.fraction_heat_load_served.nil? || (htg_system.fraction_heat_load_served > 0)
 
       sys_ids << get_system_or_seed_id(htg_system)
     end
     @hpxml.heat_pumps.each do |heat_pump|
       # Preconditioning hvac equipment doesn't have fraction load served
-      next unless (heat_pump.fraction_heat_load_served.nil?) or (heat_pump.fraction_heat_load_served > 0)
+      next unless heat_pump.fraction_heat_load_served.nil? || (heat_pump.fraction_heat_load_served > 0)
 
       sys_ids << get_system_or_seed_id(heat_pump)
       if is_dfhp(heat_pump)
@@ -1162,13 +1170,13 @@ class SimulationOutputReport < OpenStudio::Measure::ReportingMeasure
 
     @hpxml.cooling_systems.each do |clg_system|
       # Preconditioning hvac equipment doesn't have fraction load served
-      next unless (clg_system.fraction_cool_load_served.nil?) or (clg_system.fraction_cool_load_served > 0)
+      next unless clg_system.fraction_cool_load_served.nil? || (clg_system.fraction_cool_load_served > 0)
 
       sys_ids << get_system_or_seed_id(clg_system)
     end
     @hpxml.heat_pumps.each do |heat_pump|
       # Preconditioning hvac equipment doesn't have fraction load served
-      next unless (heat_pump.fraction_cool_load_served.nil?) or (heat_pump.fraction_cool_load_served > 0)
+      next unless heat_pump.fraction_cool_load_served.nil? || (heat_pump.fraction_cool_load_served > 0)
 
       sys_ids << get_system_or_seed_id(heat_pump)
     end
@@ -1193,7 +1201,7 @@ class SimulationOutputReport < OpenStudio::Measure::ReportingMeasure
 
     @hpxml.heating_systems.each do |htg_system|
       # Preconditioning hvac equipment doesn't have fraction load served
-      next unless (htg_system.fraction_heat_load_served.nil?) or (htg_system.fraction_heat_load_served > 0)
+      next unless htg_system.fraction_heat_load_served.nil? || (htg_system.fraction_heat_load_served > 0)
 
       sys_id = get_system_or_seed_id(htg_system)
       if not htg_system.heating_efficiency_afue.nil?
@@ -1204,7 +1212,7 @@ class SimulationOutputReport < OpenStudio::Measure::ReportingMeasure
     end
     @hpxml.heat_pumps.each do |heat_pump|
       # Preconditioning hvac equipment doesn't have fraction load served
-      next unless (heat_pump.fraction_heat_load_served.nil?) or (heat_pump.fraction_heat_load_served > 0)
+      next unless heat_pump.fraction_heat_load_served.nil? || (heat_pump.fraction_heat_load_served > 0)
 
       sys_id = get_system_or_seed_id(heat_pump)
       if not heat_pump.heating_efficiency_hspf.nil?
@@ -1229,7 +1237,7 @@ class SimulationOutputReport < OpenStudio::Measure::ReportingMeasure
 
     @hpxml.cooling_systems.each do |clg_system|
       # Preconditioning hvac equipment doesn't have fraction load served
-      next unless (clg_system.fraction_cool_load_served.nil?) or (clg_system.fraction_cool_load_served > 0)
+      next unless clg_system.fraction_cool_load_served.nil? || (clg_system.fraction_cool_load_served > 0)
 
       sys_id = get_system_or_seed_id(clg_system)
       if not clg_system.cooling_efficiency_seer.nil?
@@ -1244,7 +1252,7 @@ class SimulationOutputReport < OpenStudio::Measure::ReportingMeasure
     end
     @hpxml.heat_pumps.each do |heat_pump|
       # Preconditioning hvac equipment doesn't have fraction load served
-      next unless (heat_pump.fraction_cool_load_served.nil?) or (heat_pump.fraction_cool_load_served > 0)
+      next unless heat_pump.fraction_cool_load_served.nil? || (heat_pump.fraction_cool_load_served > 0)
 
       sys_id = get_system_or_seed_id(heat_pump)
       if not heat_pump.cooling_efficiency_seer.nil?
@@ -1417,13 +1425,13 @@ class SimulationOutputReport < OpenStudio::Measure::ReportingMeasure
 
   def split_htg_load_to_system_by_fraction(sys_id, bldg_load, dfhp_loads)
     @hpxml.heating_systems.each do |htg_system|
-      next unless (not htg_system.fraction_heat_load_served.nil?) and (htg_system.fraction_heat_load_served > 0)
+      next unless (not htg_system.fraction_heat_load_served.nil?) && (htg_system.fraction_heat_load_served > 0)
       next unless get_system_or_seed_id(htg_system) == sys_id
 
       return bldg_load * htg_system.fraction_heat_load_served
     end
     @hpxml.heat_pumps.each do |heat_pump|
-      next unless (not heat_pump.fraction_heat_load_served.nil?) and (heat_pump.fraction_heat_load_served > 0)
+      next unless (not heat_pump.fraction_heat_load_served.nil?) && (heat_pump.fraction_heat_load_served > 0)
 
       load_fraction = 1.0
       if is_dfhp(heat_pump)
@@ -1443,13 +1451,13 @@ class SimulationOutputReport < OpenStudio::Measure::ReportingMeasure
 
   def split_clg_load_to_system_by_fraction(sys_id, bldg_load)
     @hpxml.cooling_systems.each do |clg_system|
-      next unless (not clg_system.fraction_cool_load_served.nil?) and (clg_system.fraction_cool_load_served > 0)
+      next unless (not clg_system.fraction_cool_load_served.nil?) && (clg_system.fraction_cool_load_served > 0)
       next unless get_system_or_seed_id(clg_system) == sys_id
 
       return bldg_load * clg_system.fraction_cool_load_served
     end
     @hpxml.heat_pumps.each do |heat_pump|
-      next unless (not heat_pump.fraction_cool_load_served.nil?) and (heat_pump.fraction_cool_load_served > 0)
+      next unless (not heat_pump.fraction_cool_load_served.nil?) && (heat_pump.fraction_cool_load_served > 0)
       next unless get_system_or_seed_id(heat_pump) == sys_id
 
       return bldg_load * heat_pump.fraction_cool_load_served
@@ -1767,12 +1775,13 @@ class SimulationOutputReport < OpenStudio::Measure::ReportingMeasure
   end
 
   class Airflow < BaseOutput
-    def initialize(ems_program:, ems_variables:)
+    def initialize(ems_programs:, ems_variables:)
       super()
-      @ems_program = ems_program
+      @ems_programs = ems_programs
       @ems_variables = ems_variables
+      @ems_output_var_names = []
     end
-    attr_accessor(:ems_program, :ems_variables)
+    attr_accessor(:ems_programs, :ems_variables, :ems_output_var_names)
   end
 
   class Weather < BaseOutput
@@ -2042,14 +2051,27 @@ class SimulationOutputReport < OpenStudio::Measure::ReportingMeasure
 
     # Airflows
     @airflows = {}
-    @airflows[AFT::Infiltration] = Airflow.new(ems_program: Constants.ObjectNameInfiltration + ' program', ems_variables: [(Constants.ObjectNameInfiltration + ' flow act').gsub(' ', '_')])
-    @airflows[AFT::MechanicalVentilation] = Airflow.new(ems_program: Constants.ObjectNameInfiltration + ' program', ems_variables: [(Constants.ObjectNameMechanicalVentilation + ' flow act').gsub(' ', '_'), 'QWHV_ervhrv'])
-    @airflows[AFT::NaturalVentilation] = Airflow.new(ems_program: Constants.ObjectNameNaturalVentilation + ' program', ems_variables: [(Constants.ObjectNameNaturalVentilation + ' flow act').gsub(' ', '_')])
-    @airflows[AFT::WholeHouseFan] = Airflow.new(ems_program: Constants.ObjectNameNaturalVentilation + ' program', ems_variables: [(Constants.ObjectNameWholeHouseFan + ' flow act').gsub(' ', '_')])
+    @airflows[AFT::Infiltration] = Airflow.new(ems_programs: [Constants.ObjectNameInfiltration + ' living program'], ems_variables: [(Constants.ObjectNameInfiltration + ' flow act').gsub(' ', '_')])
+    @airflows[AFT::MechanicalVentilation] = Airflow.new(ems_programs: [Constants.ObjectNameInfiltration + ' living program', Constants.ObjectNameInfiltration + ' mechvent program '], ems_variables: ['Qfan'])
+    @airflows[AFT::NaturalVentilation] = Airflow.new(ems_programs: [Constants.ObjectNameNaturalVentilation + ' program'], ems_variables: [(Constants.ObjectNameNaturalVentilation + ' flow act').gsub(' ', '_')])
+    @airflows[AFT::WholeHouseFan] = Airflow.new(ems_programs: [Constants.ObjectNameNaturalVentilation + ' program'], ems_variables: [(Constants.ObjectNameWholeHouseFan + ' flow act').gsub(' ', '_')])
 
     @airflows.each do |airflow_type, airflow|
       airflow.name = "Airflow: #{airflow_type}"
       airflow.timeseries_units = 'cfm'
+
+      # index used to distinguish different EMS programs with the same variable names
+      index = 0
+      airflow.ems_programs.each do |ems_program_name|
+        ems_programs = @model.getEnergyManagementSystemPrograms.select { |ems_program| ems_program.name.get.include? ems_program_name.gsub(' ', '_') }
+        ems_programs.each do |ems_program|
+          airflow.ems_variables.each do |ems_variable|
+            outvar_name = "#{ems_variable}_timeseries_outvar_#{index}"
+            airflow.ems_output_var_names << outvar_name
+          end
+          index += 1
+        end
+      end
     end
 
     # Weather

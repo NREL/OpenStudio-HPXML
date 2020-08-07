@@ -986,6 +986,7 @@ class OSModel
       mechvent_space = create_or_get_space(model, spaces, HPXML::LocationMechanicalVentilationSpace + " #{index}", true)
       fan.additional_properties.space = mechvent_space
       cond_zones << mechvent_space
+      index += 1
     end
     return cond_zones
   end
