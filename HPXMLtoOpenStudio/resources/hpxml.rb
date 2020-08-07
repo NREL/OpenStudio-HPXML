@@ -3275,7 +3275,7 @@ class HPXML < Object
              :tank_volume, :fraction_dhw_load_served, :heating_capacity, :energy_factor,
              :uniform_energy_factor, :recovery_efficiency, :uses_desuperheater, :jacket_r_value,
              :related_hvac_idref, :energy_star, :standby_loss, :temperature, :is_shared_system,
-             :number_of_units_served, :hot_water_distribution_idref]
+             :number_of_units_served]
     attr_accessor(*ATTRS)
 
     def related_hvac_system
@@ -3287,17 +3287,6 @@ class HPXML < Object
         return hvac_system
       end
       fail "RelatedHVACSystem '#{@related_hvac_idref}' not found for water heating system '#{@id}'."
-    end
-
-    def hot_water_distribution
-      return if @hot_water_distribution_idref.nil?
-
-      @hpxml_object.hot_water_distributions.each do |dhw_dist|
-        next unless dhw_dist.id == @hot_water_distribution_idref
-
-        return dhw_dist
-      end
-      fail "HotWaterDistributionSystem '#{@hot_water_distribution_idref}' not found for water heating system '#{@id}'."
     end
 
     def delete
@@ -3312,7 +3301,6 @@ class HPXML < Object
     def check_for_errors
       errors = []
       begin; related_hvac_system; rescue StandardError => e; errors << e.message; end
-      begin; hot_water_distribution; rescue StandardError => e; errors << e.message; end
       return errors
     end
 
@@ -3323,10 +3311,6 @@ class HPXML < Object
       water_heating_system = XMLHelper.add_element(water_heating, 'WaterHeatingSystem')
       sys_id = XMLHelper.add_element(water_heating_system, 'SystemIdentifier')
       XMLHelper.add_attribute(sys_id, 'id', @id)
-      if not @hot_water_distribution_idref.nil?
-        hot_water_distribution = XMLHelper.add_element(water_heating_system, 'HotWaterDistributionSystem')
-        XMLHelper.add_attribute(hot_water_distribution, 'idref', @hot_water_distribution_idref)
-      end
       XMLHelper.add_element(water_heating_system, 'FuelType', @fuel_type) unless @fuel_type.nil?
       XMLHelper.add_element(water_heating_system, 'WaterHeaterType', @water_heater_type) unless @water_heater_type.nil?
       XMLHelper.add_element(water_heating_system, 'Location', @location) unless @location.nil?
@@ -3376,7 +3360,6 @@ class HPXML < Object
       @energy_star = XMLHelper.get_values(water_heating_system, 'ThirdPartyCertification').include?('Energy Star')
       @standby_loss = to_float_or_nil(XMLHelper.get_value(water_heating_system, 'StandbyLoss'))
       @temperature = to_float_or_nil(XMLHelper.get_value(water_heating_system, 'HotWaterTemperature'))
-      @hot_water_distribution_idref = HPXML::get_idref(XMLHelper.get_element(water_heating_system, 'HotWaterDistributionSystem'))
     end
   end
 
@@ -3402,46 +3385,8 @@ class HPXML < Object
              :shared_recirculation_pump_power, :shared_recirculation_control_type]
     attr_accessor(*ATTRS)
 
-    def attached_water_heaters
-      list = @hpxml_object.water_heating_systems.select { |wh| wh.hot_water_distribution_idref == @id }
-
-      if list.empty?
-        fail "HotWaterDistribution '#{@id}' has no water heating systems attached to it."
-      end
-
-      return list
-    end
-
-    def attached_water_fixtures
-      return @hpxml_object.water_fixtures.select { |wf| wf.hot_water_distribution_idref == @id }
-    end
-
-    def attached_clothes_washers
-      return @hpxml_object.clothes_washers.select { |cw| cw.hot_water_distribution_idref == @id }
-    end
-
-    def attached_dishwashers
-      return @hpxml_object.dishwashers.select { |dw| dw.hot_water_distribution_idref == @id }
-    end
-
-    def fraction_dhw_load_served
-      return attached_water_heaters.map { |wh| wh.fraction_dhw_load_served.to_f }.sum(0.0)
-    end
-
     def delete
       @hpxml_object.hot_water_distributions.delete(self)
-      attached_water_heaters.each do |water_heating_system|
-        water_heating_system.hot_water_distribution_idref = nil
-      end
-      attached_water_fixtures.each do |water_fixture|
-        water_fixture.hot_water_distribution_idref = nil
-      end
-      attached_clothes_washers.each do |clothes_washer|
-        clothes_washer.hot_water_distribution_idref = nil
-      end
-      attached_dishwashers.each do |dishwasher|
-        dishwasher.hot_water_distribution_idref = nil
-      end
     end
 
     def check_for_errors
@@ -3531,19 +3476,8 @@ class HPXML < Object
   end
 
   class WaterFixture < BaseElement
-    ATTRS = [:id, :water_fixture_type, :low_flow, :hot_water_distribution_idref]
+    ATTRS = [:id, :water_fixture_type, :low_flow]
     attr_accessor(*ATTRS)
-
-    def hot_water_distribution
-      return if @hot_water_distribution_idref.nil?
-
-      @hpxml_object.hot_water_distributions.each do |dhw_dist|
-        next unless dhw_dist.id == @hot_water_distribution_idref
-
-        return dhw_dist
-      end
-      fail "Attached hot water distribution '#{@hot_water_distribution_idref}' not found for water fixture '#{@id}'."
-    end
 
     def delete
       @hpxml_object.water_fixtures.delete(self)
@@ -3551,7 +3485,6 @@ class HPXML < Object
 
     def check_for_errors
       errors = []
-      begin; hot_water_distribution; rescue StandardError => e; errors << e.message; end
       return errors
     end
 
@@ -3562,10 +3495,6 @@ class HPXML < Object
       water_fixture = XMLHelper.add_element(water_heating, 'WaterFixture')
       sys_id = XMLHelper.add_element(water_fixture, 'SystemIdentifier')
       XMLHelper.add_attribute(sys_id, 'id', @id)
-      if not @hot_water_distribution_idref.nil?
-        attached_hot_water_distribution = XMLHelper.add_element(water_fixture, 'AttachedToHotWaterDistribution')
-        XMLHelper.add_attribute(attached_hot_water_distribution, 'idref', @hot_water_distribution_idref)
-      end
       XMLHelper.add_element(water_fixture, 'WaterFixtureType', @water_fixture_type) unless @water_fixture_type.nil?
       XMLHelper.add_element(water_fixture, 'LowFlow', to_boolean(@low_flow)) unless @low_flow.nil?
     end
@@ -3574,7 +3503,6 @@ class HPXML < Object
       return if water_fixture.nil?
 
       @id = HPXML::get_id(water_fixture)
-      @hot_water_distribution_idref = HPXML::get_idref(XMLHelper.get_element(water_fixture, 'AttachedToHotWaterDistribution'))
       @water_fixture_type = XMLHelper.get_value(water_fixture, 'WaterFixtureType')
       @low_flow = to_boolean_or_nil(XMLHelper.get_value(water_fixture, 'LowFlow'))
     end
@@ -3772,18 +3700,18 @@ class HPXML < Object
     ATTRS = [:id, :location, :modified_energy_factor, :integrated_modified_energy_factor,
              :rated_annual_kwh, :label_electric_rate, :label_gas_rate, :label_annual_gas_cost,
              :capacity, :label_usage, :usage_multiplier, :is_shared_appliance,
-             :number_of_units, :number_of_units_served, :hot_water_distribution_idref]
+             :number_of_units, :number_of_units_served, :water_heating_system_idref]
     attr_accessor(*ATTRS)
 
-    def hot_water_distribution
-      return if @hot_water_distribution_idref.nil?
+    def water_heating_system
+      return if @water_heating_system_idref.nil?
 
-      @hpxml_object.hot_water_distributions.each do |dhw_dist|
-        next unless dhw_dist.id == @hot_water_distribution_idref
+      @hpxml_object.water_heating_systems.each do |water_heater|
+        next unless water_heater.id == @water_heating_system_idref
 
-        return dhw_dist
+        return water_heater
       end
-      fail "Attached hot water distribution '#{@hot_water_distribution_idref}' not found for clothes washer '#{@id}'."
+      fail "Attached water heating system '#{@water_heating_system_idref}' not found for clothes washer '#{@id}'."
     end
 
     def delete
@@ -3792,7 +3720,7 @@ class HPXML < Object
 
     def check_for_errors
       errors = []
-      begin; hot_water_distribution; rescue StandardError => e; errors << e.message; end
+      begin; water_heating_system; rescue StandardError => e; errors << e.message; end
       return errors
     end
 
@@ -3806,9 +3734,9 @@ class HPXML < Object
       XMLHelper.add_element(clothes_washer, 'NumberofUnits', to_integer(@number_of_units)) unless @number_of_units.nil?
       XMLHelper.add_element(clothes_washer, 'IsSharedAppliance', to_boolean(@is_shared_appliance)) unless @is_shared_appliance.nil?
       XMLHelper.add_element(clothes_washer, 'NumberofUnitsServed', to_integer(@number_of_units_served)) unless @number_of_units_served.nil?
-      if not @hot_water_distribution_idref.nil?
-        attached_hot_water_distribution = XMLHelper.add_element(clothes_washer, 'AttachedToHotWaterDistribution')
-        XMLHelper.add_attribute(attached_hot_water_distribution, 'idref', @hot_water_distribution_idref)
+      if not @water_heating_system_idref.nil?
+        attached_water_heater = XMLHelper.add_element(clothes_washer, 'AttachedToWaterHeatingSystem')
+        XMLHelper.add_attribute(attached_water_heater, 'idref', @water_heating_system_idref)
       end
       XMLHelper.add_element(clothes_washer, 'Location', @location) unless @location.nil?
       XMLHelper.add_element(clothes_washer, 'ModifiedEnergyFactor', to_float(@modified_energy_factor)) unless @modified_energy_factor.nil?
@@ -3840,7 +3768,7 @@ class HPXML < Object
       @label_usage = to_float_or_nil(XMLHelper.get_value(clothes_washer, 'LabelUsage'))
       @capacity = to_float_or_nil(XMLHelper.get_value(clothes_washer, 'Capacity'))
       @usage_multiplier = to_float_or_nil(XMLHelper.get_value(clothes_washer, 'extension/UsageMultiplier'))
-      @hot_water_distribution_idref = HPXML::get_idref(XMLHelper.get_element(clothes_washer, 'AttachedToHotWaterDistribution'))
+      @water_heating_system_idref = HPXML::get_idref(XMLHelper.get_element(clothes_washer, 'AttachedToWaterHeatingSystem'))
     end
   end
 
@@ -3924,18 +3852,18 @@ class HPXML < Object
   class Dishwasher < BaseElement
     ATTRS = [:id, :location, :energy_factor, :rated_annual_kwh, :place_setting_capacity,
              :label_electric_rate, :label_gas_rate, :label_annual_gas_cost,
-             :label_usage, :usage_multiplier, :is_shared_appliance, :hot_water_distribution_idref]
+             :label_usage, :usage_multiplier, :is_shared_appliance, :water_heating_system_idref]
     attr_accessor(*ATTRS)
 
-    def hot_water_distribution
-      return if @hot_water_distribution_idref.nil?
+    def water_heating_system
+      return if @water_heating_system_idref.nil?
 
-      @hpxml_object.hot_water_distributions.each do |dhw_dist|
-        next unless dhw_dist.id == @hot_water_distribution_idref
+      @hpxml_object.water_heating_systems.each do |water_heater|
+        next unless water_heater.id == @water_heating_system_idref
 
-        return dhw_dist
+        return water_heater
       end
-      fail "Attached hot water distribution '#{@hot_water_distribution_idref}' not found for dishwasher '#{@id}'."
+      fail "Attached water heating system '#{@water_heating_system_idref}' not found for dishwasher '#{@id}'."
     end
 
     def delete
@@ -3944,7 +3872,7 @@ class HPXML < Object
 
     def check_for_errors
       errors = []
-      begin; hot_water_distribution; rescue StandardError => e; errors << e.message; end
+      begin; water_heating_system; rescue StandardError => e; errors << e.message; end
       return errors
     end
 
@@ -3956,9 +3884,9 @@ class HPXML < Object
       sys_id = XMLHelper.add_element(dishwasher, 'SystemIdentifier')
       XMLHelper.add_attribute(sys_id, 'id', @id)
       XMLHelper.add_element(dishwasher, 'IsSharedAppliance', to_boolean(@is_shared_appliance)) unless @is_shared_appliance.nil?
-      if not @hot_water_distribution_idref.nil?
-        attached_hot_water_distribution = XMLHelper.add_element(dishwasher, 'AttachedToHotWaterDistribution')
-        XMLHelper.add_attribute(attached_hot_water_distribution, 'idref', @hot_water_distribution_idref)
+      if not @water_heating_system_idref.nil?
+        attached_water_heater = XMLHelper.add_element(dishwasher, 'AttachedToWaterHeatingSystem')
+        XMLHelper.add_attribute(attached_water_heater, 'idref', @water_heating_system_idref)
       end
       XMLHelper.add_element(dishwasher, 'Location', @location) unless @location.nil?
       XMLHelper.add_element(dishwasher, 'RatedAnnualkWh', to_float(@rated_annual_kwh)) unless @rated_annual_kwh.nil?
@@ -3986,7 +3914,7 @@ class HPXML < Object
       @label_annual_gas_cost = to_float_or_nil(XMLHelper.get_value(dishwasher, 'LabelAnnualGasCost'))
       @label_usage = to_float_or_nil(XMLHelper.get_value(dishwasher, 'LabelUsage'))
       @usage_multiplier = to_float_or_nil(XMLHelper.get_value(dishwasher, 'extension/UsageMultiplier'))
-      @hot_water_distribution_idref = HPXML::get_idref(XMLHelper.get_element(dishwasher, 'AttachedToHotWaterDistribution'))
+      @water_heating_system_idref = HPXML::get_idref(XMLHelper.get_element(dishwasher, 'AttachedToWaterHeatingSystem'))
     end
   end
 

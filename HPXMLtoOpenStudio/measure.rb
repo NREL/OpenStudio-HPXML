@@ -1938,6 +1938,12 @@ class OSModel
       cooking_range.additional_properties.space = get_space_from_location(cooking_range.location, 'CookingRange', model, spaces)
     end
 
+    # Hot water distribution
+    hot_water_distribution = nil
+    if @hpxml.hot_water_distributions.size > 0
+      hot_water_distribution = @hpxml.hot_water_distributions[0]
+    end
+
     # Solar thermal system
     solar_thermal_system = nil
     if @hpxml.solar_thermal_systems.size > 0
@@ -1948,7 +1954,7 @@ class OSModel
     @hpxml.water_heating_systems.each do |water_heating_system|
       loc_space, loc_schedule = get_space_or_schedule_from_location(water_heating_system.location, 'WaterHeatingSystem', model, spaces)
 
-      ec_adj = HotWaterAndAppliances.get_dist_energy_consumption_adjustment(@has_uncond_bsmnt, @cfa, @ncfl, water_heating_system.hot_water_distribution)
+      ec_adj = HotWaterAndAppliances.get_dist_energy_consumption_adjustment(@has_uncond_bsmnt, @cfa, @ncfl, water_heating_system, hot_water_distribution)
 
       if water_heating_system.water_heater_type == HPXML::WaterHeaterTypeStorage
 
@@ -1985,7 +1991,8 @@ class OSModel
                                 @cfa, @nbeds, @ncfl, @has_uncond_bsmnt, @hpxml.clothes_washers,
                                 @hpxml.clothes_dryers, @hpxml.dishwashers, @hpxml.refrigerators,
                                 @hpxml.freezers, @hpxml.cooking_ranges, @hpxml.ovens, fixtures_usage_multiplier,
-                                @hpxml.hot_water_distributions, solar_thermal_system, @eri_version, @dhw_map)
+                                @hpxml.water_heating_systems, hot_water_distribution, @hpxml.water_fixtures,
+                                solar_thermal_system, @eri_version, @dhw_map)
 
     if (not solar_thermal_system.nil?) && (not solar_thermal_system.collector_area.nil?) # Detailed solar water heater
       loc_space, loc_schedule = get_space_or_schedule_from_location(solar_thermal_system.water_heating_system.location, 'WaterHeatingSystem', model, spaces)
