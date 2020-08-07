@@ -1384,7 +1384,7 @@ class Airflow
     return infil_program
   end
 
-  def self.apply_mechvent_fans_and_airflows(vent_mech_erv_hrv, vent_mech_sup, vent_mech_exh, vent_mech_cfis, vent_mech_bal, vent_fans_kitchen, vent_fans_bath, model, infil_program, space, is_living)
+  def self.apply_mechvent_fans_and_airflows(vent_mech_erv_hrv: [], vent_mech_sup: [], vent_mech_exh: [], vent_mech_cfis: [], vent_mech_bal: [], vent_fans_kitchen: [], vent_fans_bath: [], model:, infil_program:, space:, is_living:)
     # Airflow actuators
     if is_living
       infil_flow = OpenStudio::Model::SpaceInfiltrationDesignFlowRate.new(model)
@@ -1498,13 +1498,20 @@ class Airflow
     end
 
     infil_program.addLine('Set Qrange = 0')
-    vent_fans_kitchen.each do |vent_kitchen|
-      infil_program.addLine("Set Qrange = Qrange + #{UnitConversions.convert(vent_kitchen.rated_flow_rate * vent_kitchen.quantity, 'cfm', 'm^3/s').round(4)} * #{range_sch_sensors_map[vent_kitchen.id].name}")
-    end
-
     infil_program.addLine('Set Qbath = 0')
-    vent_fans_bath.each do |vent_bath|
-      infil_program.addLine("Set Qbath = Qbath + #{UnitConversions.convert(vent_bath.rated_flow_rate * vent_bath.quantity, 'cfm', 'm^3/s').round(4)} * #{bath_sch_sensors_map[vent_bath.id].name}")
+
+    if is_living
+      # Local ventilation
+      range_sch_sensors_map = apply_local_ventilation(model, vent_fans_kitchen, Constants.ObjectNameMechanicalVentilationRangeFan)
+      bath_sch_sensors_map = apply_local_ventilation(model, vent_fans_bath, Constants.ObjectNameMechanicalVentilationBathFan)
+
+      vent_fans_kitchen.each do |vent_kitchen|
+        infil_program.addLine("Set Qrange = Qrange + #{UnitConversions.convert(vent_kitchen.rated_flow_rate * vent_kitchen.quantity, 'cfm', 'm^3/s').round(4)} * #{range_sch_sensors_map[vent_kitchen.id].name}")
+      end
+
+      vent_fans_bath.each do |vent_bath|
+        infil_program.addLine("Set Qbath = Qbath + #{UnitConversions.convert(vent_bath.rated_flow_rate * vent_bath.quantity, 'cfm', 'm^3/s').round(4)} * #{bath_sch_sensors_map[vent_bath.id].name}")
+      end
     end
 
     infil_program.addLine('Set Qexhaust = Qrange+Qbath')
@@ -1572,10 +1579,6 @@ class Airflow
     apply_infiltration_to_vented_attic(model, weather, vented_attic)
     apply_infiltration_to_unvented_attic(model, weather)
 
-    # Local ventilation
-    range_sch_sensors_map = apply_local_ventilation(model, vent_fans_kitchen, Constants.ObjectNameMechanicalVentilationRangeFan)
-    bath_sch_sensors_map = apply_local_ventilation(model, vent_fans_bath, Constants.ObjectNameMechanicalVentilationBathFan)
-
     # Get mechanical ventilation
     vent_fans_living_space = vent_fans_mech.select { |vent_mech| vent_mech.preconditioning_heating_system_idref.nil? && vent_mech.preconditioning_cooling_system_idref.nil? }
     # Use new mech vent space for preconditioning
@@ -1596,28 +1599,37 @@ class Airflow
     infil_program_lv = OpenStudio::Model::EnergyManagementSystemProgram.new(model)
     infil_program_lv.setName(Constants.ObjectNameInfiltration + ' living program')
     infil_program_lv = apply_infiltration_to_living(living_ach50, living_const_ach, infil_program_lv, weather, has_flue_chimney)
-    infil_program_lv = apply_mechvent_fans_and_airflows(vent_mech_erv_hrv_lv, vent_mech_sup_lv, vent_mech_exh_lv, vent_mech_cfis_lv, vent_mech_bal_lv, vent_fans_kitchen, vent_fans_bath, model, infil_program_lv, @living_space, true)
+    infil_program_lv = apply_mechvent_fans_and_airflows(vent_mech_erv_hrv: vent_mech_erv_hrv_lv,
+                                                        vent_mech_sup: vent_mech_sup_lv,
+                                                        vent_mech_exh: vent_mech_exh_lv,
+                                                        vent_mech_cfis: vent_mech_cfis_lv,
+                                                        vent_mech_bal: vent_mech_bal_lv,
+                                                        vent_fans_kitchen: vent_fans_kitchen,
+                                                        vent_fans_bath: vent_fans_bath,
+                                                        model: model,
+                                                        infil_program: infil_program_lv,
+                                                        space: @living_space,
+                                                        is_living: true)
     program_calling_manager = OpenStudio::Model::EnergyManagementSystemProgramCallingManager.new(model)
     program_calling_manager.setName("#{Constants.ObjectNameInfiltration} program calling manager")
     program_calling_manager.setCallingPoint('BeginTimestepBeforePredictor')
     program_calling_manager.addProgram(infil_program_lv)
     if not vent_fans_mechvent_space.empty?
-      i = 0
       vent_fans_mechvent_space.each do |fan|
         space = fan.additional_properties.space
         infil_program_mechvent = OpenStudio::Model::EnergyManagementSystemProgram.new(model)
-        infil_program_mechvent.setName(Constants.ObjectNameInfiltration + " mechvent program #{i}")
+        infil_program_mechvent.setName(Constants.ObjectNameInfiltration + ' mechvent program')
         infil_program_mechvent.addLine('Set Qinf = 0')
         if vent_mech_erv_hrv_mechvent.include? fan
-          infil_program_mechvent = apply_mechvent_fans_and_airflows([fan], [], [], [], [], [], [], model, infil_program_mechvent, space, false)
+          infil_program_mechvent = apply_mechvent_fans_and_airflows(vent_mech_erv_hrv: [fan], model: model, infil_program: infil_program_mechvent, space: space, is_living: false)
         elsif vent_mech_sup_mechvent.include? fan
-          infil_program_mechvent = apply_mechvent_fans_and_airflows([], [fan], [], [], [], [], [], model, infil_program_mechvent, space, false)
+          infil_program_mechvent = apply_mechvent_fans_and_airflows(vent_mech_sup: [fan], model: model, infil_program: infil_program_mechvent, space: space, is_living: false)
         elsif vent_mech_exh_mechvent.include? fan
-          infil_program_mechvent = apply_mechvent_fans_and_airflows([], [], [fan], [], [], [], [], model, infil_program_mechvent, space, false)
+          infil_program_mechvent = apply_mechvent_fans_and_airflows(vent_mech_exh: [fan], model: model, infil_program: infil_program_mechvent, space: space, is_living: false)
         elsif vent_mech_cfis_mechvent.include? fan
-          infil_program_mechvent = apply_mechvent_fans_and_airflows([], [], [], [fan], [], [], [], model, infil_program_mechvent, space, false)
+          infil_program_mechvent = apply_mechvent_fans_and_airflows(vent_mech_cfis: [fan], model: model, infil_program: infil_program_mechvent, space: space, is_living: false)
         elsif vent_mech_bal_mechvent.include? fan
-          infil_program_mechvent = apply_mechvent_fans_and_airflows([], [], [], [], [fan], [], [], model, infil_program_mechvent, space, false)
+          infil_program_mechvent = apply_mechvent_fans_and_airflows(vent_mech_bal: [fan], model: model, infil_program: infil_program_mechvent, space: space, is_living: false)
         end
         program_calling_manager.addProgram(infil_program_mechvent)
       end

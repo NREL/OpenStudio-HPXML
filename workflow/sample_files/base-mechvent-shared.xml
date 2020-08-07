@@ -370,6 +370,30 @@
                 <Value>7.7</Value>
               </AnnualHeatingEfficiency>
             </HeatPump>
+            <HeatPump>
+              <SystemIdentifier id='Preconditioning2'/>
+              <IsVentilationPreconditioningSystem>true</IsVentilationPreconditioningSystem>
+              <HeatPumpType>mini-split</HeatPumpType>
+              <HeatPumpFuel>electricity</HeatPumpFuel>
+              <HeatingCapacity scope='multiple units'>52000.0</HeatingCapacity>
+              <HeatingCapacity17F scope='multiple units'>29500.0</HeatingCapacity17F>
+              <CoolingCapacity scope='multiple units'>48000.0</CoolingCapacity>
+              <CoolingSensibleHeatFraction>0.73</CoolingSensibleHeatFraction>
+              <BackupSystemFuel>electricity</BackupSystemFuel>
+              <BackupAnnualHeatingEfficiency>
+                <Units>Percent</Units>
+                <Value>1.0</Value>
+              </BackupAnnualHeatingEfficiency>
+              <BackupHeatingCapacity>34121.0</BackupHeatingCapacity>
+              <AnnualCoolingEfficiency>
+                <Units>SEER</Units>
+                <Value>19.0</Value>
+              </AnnualCoolingEfficiency>
+              <AnnualHeatingEfficiency>
+                <Units>HSPF</Units>
+                <Value>10.0</Value>
+              </AnnualHeatingEfficiency>
+            </HeatPump>
           </HVACPlant>
           <HVACControl>
             <SystemIdentifier id='HVACControl'/>
@@ -419,8 +443,8 @@
             <VentilationFan>
               <SystemIdentifier id='MechanicalVentilation'/>
               <FanType>supply only</FanType>
-              <RatedFlowRate scope='multiple units'>1100.0</RatedFlowRate>
-              <TestedFlowRate scope='single unit'>110.0</TestedFlowRate>
+              <RatedFlowRate scope='multiple units'>600.0</RatedFlowRate>
+              <TestedFlowRate scope='single unit'>60.0</TestedFlowRate>
               <HoursInOperation>24.0</HoursInOperation>
               <UsedForWholeBuildingVentilation>true</UsedForWholeBuildingVentilation>
               <IsSharedSystem>true</IsSharedSystem>
@@ -428,6 +452,19 @@
               <FanPower scope='multiple units'>300.0</FanPower>
               <AttachedToPreconditioningHeatingSystem idref='PreconditioningHeating'/>
               <AttachedToPreconditioningCoolingSystem idref='PreconditioningCooling'/>
+            </VentilationFan>
+            <VentilationFan>
+              <SystemIdentifier id='MechanicalVentilation2'/>
+              <FanType>exhaust only</FanType>
+              <RatedFlowRate scope='multiple units'>500.0</RatedFlowRate>
+              <TestedFlowRate scope='single unit'>50.0</TestedFlowRate>
+              <HoursInOperation>24.0</HoursInOperation>
+              <UsedForWholeBuildingVentilation>true</UsedForWholeBuildingVentilation>
+              <IsSharedSystem>true</IsSharedSystem>
+              <FractionOutdoorAir>0.4</FractionOutdoorAir>
+              <FanPower scope='multiple units'>250.0</FanPower>
+              <AttachedToPreconditioningHeatingSystem idref='Preconditioning2'/>
+              <AttachedToPreconditioningCoolingSystem idref='Preconditioning2'/>
             </VentilationFan>
           </VentilationFans>
         </MechanicalVentilation>

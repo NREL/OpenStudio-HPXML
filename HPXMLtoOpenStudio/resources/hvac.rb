@@ -797,13 +797,15 @@ class HVAC
     hvac_map[heat_pump.id] << htg_supp_coil
 
     # Fan
-    if heat_pump.is_ventilation_preconditioning
-      fan_power_installed = 0.0
-    end
     fan_power_curve = create_curve_exponent(model, [0, 1, 3], obj_name + ' fan power curve', -100, 100)
     fan_eff_curve = create_curve_cubic(model, [0, 1, 0, 0], obj_name + ' fan eff curve', 0, 1, 0.01, 1)
     fan = OpenStudio::Model::FanOnOff.new(model, model.alwaysOnDiscreteSchedule, fan_power_curve, fan_eff_curve)
-    fan_eff = UnitConversions.convert(UnitConversions.convert(0.1, 'inH2O', 'Pa') / fan_power_installed, 'cfm', 'm^3/s') # Overall Efficiency of the Fan, Motor and Drive
+    if heat_pump.is_ventilation_preconditioning
+      fan_power_installed = 0.0
+      fan_eff = 1.0
+    else
+      fan_eff = UnitConversions.convert(UnitConversions.convert(0.1, 'inH2O', 'Pa') / fan_power_installed, 'cfm', 'm^3/s') # Overall Efficiency of the Fan, Motor and Drive
+    end
     fan.setName(obj_name + ' supply fan')
     fan.setEndUseSubcategory('supply fan')
     fan.setFanEfficiency(fan_eff)
