@@ -412,7 +412,7 @@ class OSModel
   end
 
   def self.add_simulation_params(model)
-    SimControls.apply(model, @hpxml.header)
+    SimControls.apply(model, @hpxml.header, @apply_ashrae140_assumptions)
   end
 
   def self.set_zone_volumes(runner, model, spaces)
