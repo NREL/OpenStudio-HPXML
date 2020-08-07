@@ -671,11 +671,11 @@ HPXML Water Heating Systems
 ***************************
 
 Each water heater should be entered as a ``Systems/WaterHeating/WaterHeatingSystem``.
-Inputs including ``WaterHeaterType``, ``HotWaterDistributionSystem``, ``IsSharedSystem``, and ``FractionDHWLoadServed`` must be provided.
+Inputs including ``WaterHeaterType``, ``IsSharedSystem``, and ``FractionDHWLoadServed`` must be provided.
 
 .. warning::
 
-  ``FractionDHWLoadServed`` represents the fraction of the hot water **fixtures** load (i.e., not the total load) served by the water heater. The load from an attached clothes washer and/or dishwasher will be automatically assigned to the attached water heater(s).
+  ``FractionDHWLoadServed`` represents only the fraction of the hot water load associated with the hot water **fixtures**. Additional hot water load from the clothes washer/dishwasher will be automatically assigned to the appropriate water heater(s).
 
 Depending on the type of water heater specified, additional elements are required/available:
 
@@ -739,15 +739,15 @@ IECC Climate Zone  Location (default)
 
 The setpoint temperature may be provided as ``HotWaterTemperature``; if not provided, 125F is assumed.
 
-If the water heater is a shared system (i.e., serving multiple dwelling units or a shared laundry/equipment room), it should be described using ``IsSharedSystem='true'``.
-In addition, the ``NumberofUnitsServed`` must be specified, where the value is the number of dwelling units served either indirectly (e.g., via shared laundry/equipment room) or directly.
+If the water heater is a shared system (i.e., serving multiple dwelling units or a shared laundry room), it should be described using ``IsSharedSystem='true'``.
+In addition, the ``NumberofUnitsServed`` must be specified, where the value is the number of dwelling units served either indirectly (e.g., via shared laundry room) or directly.
 
 HPXML Hot Water Distribution
 ****************************
 
-Each separate hot water distribution system should be specified as a ``Systems/WaterHeating/HotWaterDistribution``.
-One or more water heaters can be connected to each distribution system.
+A single ``Systems/WaterHeating/HotWaterDistribution`` must be provided if any water heating systems are specified.
 Inputs including ``SystemType`` and ``PipeInsulation/PipeRValue`` must be provided.
+Note: Any hot water distribution associated with a shared laundry room in attached/multifamily buildings should not be defined.
 
 Standard
 ~~~~~~~~
@@ -812,7 +812,7 @@ HPXML Water Fixtures
 ********************
 
 Water fixtures should be entered as ``Systems/WaterHeating/WaterFixture`` elements.
-Each fixture must have ``WaterFixtureType``, ``LowFlow``, and ``AttachedToHotWaterDistribution`` elements provided.
+Each fixture must have ``WaterFixtureType`` and ``LowFlow`` elements provided.
 Fixtures should be specified as low flow if they are <= 2.0 gpm.
 
 A ``WaterHeating/extension/WaterFixturesUsageMultiplier`` can also be optionally provided that scales hot water usage; if not provided, it is assumed to be 1.0.
@@ -897,8 +897,7 @@ HPXML Clothes Washer
 ********************
 
 An ``Appliances/ClothesWasher`` element can be specified; if not provided, a clothes washer will not be modeled.
-
-The ``AttachedToHotWaterDistribution`` element must be provided.
+The ``IsSharedAppliance`` element must be provided.
 
 Several EnergyGuide label inputs describing the efficiency of the appliance can be provided.
 If the complete set of efficiency inputs is not provided, the following default values representing a standard clothes washer from 2006 will be used.
@@ -920,6 +919,9 @@ If ``ModifiedEnergyFactor`` is provided instead of ``IntegratedModifiedEnergyFac
 .. math:: IntegratedModifiedEnergyFactor = \frac{ModifiedEnergyFactor - 0.503}{0.95}
 
 An ``extension/UsageMultiplier`` can also be optionally provided that scales energy and hot water usage; if not provided, it is assumed to be 1.0.
+
+If the clothes washer is a shared appliance (i.e., in a shared laundry room), it should be described using ``IsSharedAppliance='true'``.
+In addition, the ``AttachedToWaterHeatingSystem`` must be specified and must reference a shared water heater.
 
 HPXML Clothes Dryer
 *******************
@@ -947,8 +949,7 @@ HPXML Dishwasher
 ****************
 
 An ``Appliances/Dishwasher`` element can be specified; if not provided, a dishwasher will not be modeled.
-
-The ``AttachedToHotWaterDistribution`` element must be provided.
+The ``IsSharedAppliance`` element must be provided.
 
 Several EnergyGuide label inputs describing the efficiency of the appliance can be provided.
 If the complete set of efficiency inputs is not provided, the following default values representing a standard dishwasher from 2006 will be used.
@@ -969,6 +970,9 @@ If ``EnergyFactor`` is provided instead of ``RatedAnnualkWh``, it will be conver
 .. math:: RatedAnnualkWh = \frac{215.0}{EnergyFactor}
 
 An ``extension/UsageMultiplier`` can also be optionally provided that scales energy and hot water usage; if not provided, it is assumed to be 1.0.
+
+If the dishwasher is a shared appliance (i.e., in a shared laundry room), it should be described using ``IsSharedAppliance='true'``.
+In addition, the ``AttachedToWaterHeatingSystem`` must be specified and must reference a shared water heater.
 
 HPXML Refrigerators
 *******************

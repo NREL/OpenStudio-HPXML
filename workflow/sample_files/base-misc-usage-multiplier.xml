@@ -378,7 +378,6 @@
         <WaterHeating>
           <WaterHeatingSystem>
             <SystemIdentifier id='WaterHeater'/>
-            <HotWaterDistributionSystem idref='foobar'/>
             <FuelType>electricity</FuelType>
             <WaterHeaterType>storage water heater</WaterHeaterType>
             <Location>living space</Location>
@@ -402,22 +401,23 @@
           </HotWaterDistribution>
           <WaterFixture>
             <SystemIdentifier id='WaterFixture'/>
-            <AttachedToHotWaterDistribution idref='HotWaterDistribution'/>
             <WaterFixtureType>shower head</WaterFixtureType>
             <LowFlow>true</LowFlow>
           </WaterFixture>
           <WaterFixture>
             <SystemIdentifier id='WaterFixture2'/>
-            <AttachedToHotWaterDistribution idref='HotWaterDistribution'/>
             <WaterFixtureType>faucet</WaterFixtureType>
             <LowFlow>false</LowFlow>
           </WaterFixture>
+          <extension>
+            <WaterFixturesUsageMultiplier>0.9</WaterFixturesUsageMultiplier>
+          </extension>
         </WaterHeating>
       </Systems>
       <Appliances>
         <ClothesWasher>
           <SystemIdentifier id='ClothesWasher'/>
-          <AttachedToHotWaterDistribution idref='HotWaterDistribution'/>
+          <IsSharedAppliance>false</IsSharedAppliance>
           <Location>living space</Location>
           <IntegratedModifiedEnergyFactor>1.21</IntegratedModifiedEnergyFactor>
           <RatedAnnualkWh>380.0</RatedAnnualkWh>
@@ -426,6 +426,9 @@
           <LabelAnnualGasCost>27.0</LabelAnnualGasCost>
           <LabelUsage>6.0</LabelUsage>
           <Capacity>3.2</Capacity>
+          <extension>
+            <UsageMultiplier>0.9</UsageMultiplier>
+          </extension>
         </ClothesWasher>
         <ClothesDryer>
           <SystemIdentifier id='ClothesDryer'/>
@@ -433,10 +436,13 @@
           <FuelType>electricity</FuelType>
           <CombinedEnergyFactor>3.73</CombinedEnergyFactor>
           <ControlType>timer</ControlType>
+          <extension>
+            <UsageMultiplier>0.9</UsageMultiplier>
+          </extension>
         </ClothesDryer>
         <Dishwasher>
           <SystemIdentifier id='Dishwasher'/>
-          <AttachedToHotWaterDistribution idref='HotWaterDistribution'/>
+          <IsSharedAppliance>false</IsSharedAppliance>
           <Location>living space</Location>
           <RatedAnnualkWh>307.0</RatedAnnualkWh>
           <PlaceSettingCapacity>12</PlaceSettingCapacity>
@@ -444,18 +450,27 @@
           <LabelGasRate>1.09</LabelGasRate>
           <LabelAnnualGasCost>22.32</LabelAnnualGasCost>
           <LabelUsage>4.0</LabelUsage>
+          <extension>
+            <UsageMultiplier>0.9</UsageMultiplier>
+          </extension>
         </Dishwasher>
         <Refrigerator>
           <SystemIdentifier id='Refrigerator'/>
           <Location>living space</Location>
           <RatedAnnualkWh>650.0</RatedAnnualkWh>
           <PrimaryIndicator>true</PrimaryIndicator>
+          <extension>
+            <UsageMultiplier>0.9</UsageMultiplier>
+          </extension>
         </Refrigerator>
         <CookingRange>
           <SystemIdentifier id='Range'/>
           <Location>living space</Location>
           <FuelType>electricity</FuelType>
           <IsInduction>false</IsInduction>
+          <extension>
+            <UsageMultiplier>0.9</UsageMultiplier>
+          </extension>
         </CookingRange>
         <Oven>
           <SystemIdentifier id='Oven'/>
@@ -535,6 +550,11 @@
             <LightEmittingDiode/>
           </LightingType>
         </LightingGroup>
+        <extension>
+          <InteriorUsageMultiplier>0.9</InteriorUsageMultiplier>
+          <GarageUsageMultiplier>0.9</GarageUsageMultiplier>
+          <ExteriorUsageMultiplier>0.9</ExteriorUsageMultiplier>
+        </extension>
       </Lighting>
       <MiscLoads>
         <PlugLoad>
@@ -547,6 +567,7 @@
           <extension>
             <FracSensible>0.855</FracSensible>
             <FracLatent>0.045</FracLatent>
+            <UsageMultiplier>0.9</UsageMultiplier>
           </extension>
         </PlugLoad>
         <PlugLoad>
@@ -556,6 +577,9 @@
             <Units>kWh/year</Units>
             <Value>620.0</Value>
           </Load>
+          <extension>
+            <UsageMultiplier>0.9</UsageMultiplier>
+          </extension>
         </PlugLoad>
       </MiscLoads>
     </BuildingDetails>

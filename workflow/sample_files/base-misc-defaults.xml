@@ -326,7 +326,6 @@
         <WaterHeating>
           <WaterHeatingSystem>
             <SystemIdentifier id='WaterHeater'/>
-            <HotWaterDistributionSystem idref='HotWaterDistribution'/>
             <FuelType>electricity</FuelType>
             <WaterHeaterType>storage water heater</WaterHeaterType>
             <IsSharedSystem>false</IsSharedSystem>
@@ -344,13 +343,11 @@
           </HotWaterDistribution>
           <WaterFixture>
             <SystemIdentifier id='WaterFixture'/>
-            <AttachedToHotWaterDistribution idref='HotWaterDistribution'/>
             <WaterFixtureType>shower head</WaterFixtureType>
             <LowFlow>true</LowFlow>
           </WaterFixture>
           <WaterFixture>
             <SystemIdentifier id='WaterFixture2'/>
-            <AttachedToHotWaterDistribution idref='HotWaterDistribution'/>
             <WaterFixtureType>faucet</WaterFixtureType>
             <LowFlow>false</LowFlow>
           </WaterFixture>
@@ -385,7 +382,7 @@
       <Appliances>
         <ClothesWasher>
           <SystemIdentifier id='ClothesWasher'/>
-          <AttachedToHotWaterDistribution idref='HotWaterDistribution'/>
+          <IsSharedAppliance>false</IsSharedAppliance>
         </ClothesWasher>
         <ClothesDryer>
           <SystemIdentifier id='ClothesDryer'/>
@@ -393,7 +390,7 @@
         </ClothesDryer>
         <Dishwasher>
           <SystemIdentifier id='Dishwasher'/>
-          <AttachedToHotWaterDistribution idref='HotWaterDistribution'/>
+          <IsSharedAppliance>false</IsSharedAppliance>
           <Location>living space</Location>
         </Dishwasher>
         <Refrigerator>
