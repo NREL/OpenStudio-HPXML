@@ -855,12 +855,12 @@ class HVACSizing
       next unless frame_floor.is_thermal_boundary
 
       if frame_floor.is_exterior
-        zone_loads.Cool_Floors += (1.0 / frame_floor.ufactor) * frame_floor.area * (@ctd - 5.0 + @daily_range_temp_adjust[@daily_range_num])
-        zone_loads.Heat_Floors += (1.0 / frame_floor.ufactor) * frame_floor.area * @htd
+        zone_loads.Cool_Floors += frame_floor.ufactor * frame_floor.area * (@ctd - 5.0 + @daily_range_temp_adjust[@daily_range_num])
+        zone_loads.Heat_Floors += frame_floor.ufactor * frame_floor.area * @htd
       else
         adjacent_space = frame_floor.exterior_adjacent_to
-        zone_loads.Cool_Floors += (1.0 / frame_floor.ufactor) * frame_floor.area * (@cool_design_temps[adjacent_space] - @cool_setpoint)
-        zone_loads.Heat_Floors += (1.0 / frame_floor.ufactor) * frame_floor.area * (@heat_setpoint - @heat_design_temps[adjacent_space])
+        zone_loads.Cool_Floors += frame_floor.ufactor * frame_floor.area * (@cool_design_temps[adjacent_space] - @cool_setpoint)
+        zone_loads.Heat_Floors += frame_floor.ufactor * frame_floor.area * (@heat_setpoint - @heat_design_temps[adjacent_space])
       end
     end
 
