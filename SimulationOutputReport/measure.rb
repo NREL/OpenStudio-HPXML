@@ -886,17 +886,47 @@ class SimulationOutputReport < OpenStudio::Measure::ReportingMeasure
       return s
     end
 
+    def ordered_values(hash, sys_ids)
+      vals = []
+      sys_ids.each do |sys_id|
+        vals << hash[sys_id]
+        fail 'Could not look up data.' if vals[-1].nil?
+      end
+      return vals
+    end
+
+    def get_sys_ids(type, heat_sys_ids, cool_sys_ids, dhw_sys_ids)
+      if type.downcase.include? 'hot water'
+        return dhw_sys_ids
+      elsif type.downcase.include? 'heating'
+        return heat_sys_ids
+      elsif type.downcase.include? 'cooling'
+        return cool_sys_ids
+      end
+      fail "Unhandled type: '#{type}'."
+    end
+
     results_out = []
 
+    heat_sys_ids = outputs[:hpxml_heat_sys_ids]
+    cool_sys_ids = outputs[:hpxml_cool_sys_ids]
+    dhw_sys_ids = outputs[:hpxml_dhw_sys_ids]
+
+    # Sys IDS
+    results_out << ['hpxml_heat_sys_ids', heat_sys_ids.to_s]
+    results_out << ['hpxml_cool_sys_ids', cool_sys_ids.to_s]
+    results_out << ['hpxml_dhw_sys_ids', dhw_sys_ids.to_s]
+    results_out << [line_break]
+
     # EECs
-    results_out << ['hpxml_eec_heats', outputs[:hpxml_eec_heats].values.to_s]
-    results_out << ['hpxml_eec_cools', outputs[:hpxml_eec_cools].values.to_s]
-    results_out << ['hpxml_eec_dhws', outputs[:hpxml_eec_dhws].values.to_s]
+    results_out << ['hpxml_eec_heats', ordered_values(outputs[:hpxml_eec_heats], heat_sys_ids).to_s]
+    results_out << ['hpxml_eec_cools', ordered_values(outputs[:hpxml_eec_cools], cool_sys_ids).to_s]
+    results_out << ['hpxml_eec_dhws', ordered_values(outputs[:hpxml_eec_dhws], dhw_sys_ids).to_s]
     results_out << [line_break]
 
     # Fuel types
-    results_out << ['hpxml_heat_fuels', outputs[:hpxml_heat_fuels].values.to_s]
-    results_out << ['hpxml_dwh_fuels', outputs[:hpxml_dwh_fuels].values.to_s]
+    results_out << ['hpxml_heat_fuels', ordered_values(outputs[:hpxml_heat_fuels], heat_sys_ids).to_s]
+    results_out << ['hpxml_dwh_fuels', ordered_values(outputs[:hpxml_dwh_fuels], dhw_sys_ids).to_s]
     results_out << [line_break]
 
     # Fuel uses
@@ -911,7 +941,8 @@ class SimulationOutputReport < OpenStudio::Measure::ReportingMeasure
       fuel_type, end_use_type = key
       key_name = sanitize_string("enduse#{fuel_type}#{end_use_type}")
       if not end_use.annual_output_by_system.empty?
-        results_out << [key_name, end_use.annual_output_by_system.values.to_s]
+        sys_ids = get_sys_ids(end_use_type, heat_sys_ids, cool_sys_ids, dhw_sys_ids)
+        results_out << [key_name, ordered_values(end_use.annual_output_by_system, sys_ids).to_s]
       else
         results_out << [key_name, end_use.annual_output.to_s]
       end
@@ -922,7 +953,8 @@ class SimulationOutputReport < OpenStudio::Measure::ReportingMeasure
     @loads.each do |load_type, load|
       key_name = sanitize_string("load#{load_type}")
       if not load.annual_output_by_system.empty?
-        results_out << [key_name, load.annual_output_by_system.values.to_s]
+        sys_ids = get_sys_ids(load_type, heat_sys_ids, cool_sys_ids, dhw_sys_ids)
+        results_out << [key_name, ordered_values(load.annual_output_by_system, sys_ids).to_s]
       end
     end
     results_out << [line_break]
