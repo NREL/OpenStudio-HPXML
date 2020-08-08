@@ -313,6 +313,18 @@ class HPXML < Object
     return fuel_fracs.key(fuel_fracs.values.max)
   end
 
+  def predominant_water_heating_fuel
+    fuel_fracs = {}
+    @water_heating_systems.each do |water_heating_system|
+      fuel = water_heating_system.fuel_type
+      fuel_fracs[fuel] = 0.0 if fuel_fracs[fuel].nil?
+      fuel_fracs[fuel] += water_heating_system.fraction_dhw_load_served
+    end
+    return FuelTypeElectricity if fuel_fracs.empty?
+
+    return fuel_fracs.key(fuel_fracs.values.max)
+  end
+
   def fraction_of_windows_operable()
     # Calculates the fraction of windows that are operable.
     # Since we don't have quantity available, we use area as an approximation.
