@@ -1349,11 +1349,11 @@ class OSModel
             WoodStudConstructionSet.new(Material.Stud2x4, 0.01, 0.0, 0.0, 0.0, nil), # Fallback
           ]
         end
+
         assembly_r = frame_floor.insulation_assembly_r_value
-
         match, constr_set, cavity_r = pick_wood_stud_construction_set(assembly_r, constr_sets, inside_film, outside_film, frame_floor.id)
-
         install_grade = 1
+
         if frame_floor.is_ceiling
           Constructions.apply_ceiling(runner, model, [surface], frame_floor, "#{frame_floor.id} construction",
                                       cavity_r: cavity_r, install_grade: install_grade,
@@ -1364,9 +1364,9 @@ class OSModel
         else # Floor
           Constructions.apply_floor(runner, model, [surface], frame_floor, "#{frame_floor.id} construction",
                                     cavity_r: cavity_r, install_grade: install_grade,
-                                    framing_factor: constr_set.framing_factor, stud_thick_in: constr_set.stud.thick_in,
-                                    osb_thick_in: constr_set.osb_thick_in, rigid_r: constr_set.rigid_r,
-                                    mat_ext_finish: constr_set.exterior_material, inside_film: inside_film, outside_film: outside_film)
+                                    framing_factor: constr_set.framing_factor, joist_height_in: constr_set.stud.thick_in,
+                                    plywood_thick_in: constr_set.osb_thick_in, rigid_r: constr_set.rigid_r,
+                                    mat_floor_covering: constr_set.exterior_material, inside_film: inside_film, outside_film: outside_film)
         end
 
         check_surface_assembly_rvalue(runner, [surface], inside_film, outside_film, assembly_r, match)
