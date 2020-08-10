@@ -159,6 +159,9 @@ The local shelter coefficient can be entered as ``Site/extension/ShelterCoeffici
 The shelter coefficient is defined by the AIM-2 infiltration model to account for nearby buildings, trees and obstructions.
 If not provided, the value of 0.5 will be assumed.
 
+Whether there is a flue or chimney (associated with the heating system or water heater) can be optionally specified with ``HasFlueOrChimney``.
+If not provided, it is assumed that there is no flue or chimney.
+
 ===================  =========================================================================
 Shelter Coefficient  Description
 ===================  =========================================================================
