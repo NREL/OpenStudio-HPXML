@@ -87,6 +87,27 @@ class ScheduleGenerator
       @schedules[col_name] = Array.new(@total_days_in_year * @steps_in_day, 0.0)
     end
 
+    return @schedules
+  end
+
+  def schedules
+    return @schedules
+  end
+
+  def create(args:)
+    get_simulation_parameters
+    initialize_schedules(args: args)
+
+    success = create_average_schedules(args: args)
+    return false if not success
+
+    success = create_stochastic_schedules(args: args)
+    return false if not success
+
+    return true
+  end
+
+  def create_average_schedules(args:)
     create_average_occupants
     create_average_cooking_range
     create_average_plug_loads_other
@@ -111,24 +132,6 @@ class ScheduleGenerator
     create_average_pool_heater
     create_average_hot_tub_pump
     create_average_hot_tub_heater
-
-    return @schedules
-  end
-
-  def schedules
-    return @schedules
-  end
-
-  def create(args:)
-    get_simulation_parameters
-    initialize_schedules(args: args)
-
-    if args[:schedules_type] == 'stochastic'
-      success = create_stochastic_schedules(args: args)
-      return false if not success
-    end
-
-    return true
   end
 
   def create_average_occupants

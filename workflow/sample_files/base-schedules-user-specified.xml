@@ -11,6 +11,7 @@
       <SimulationControl>
         <Timestep>60</Timestep>
       </SimulationControl>
+      <SchedulesPath>BuildResidentialHPXML/tests/schedules/user-specified.csv</SchedulesPath>
     </extension>
   </SoftwareInfo>
   <Building>

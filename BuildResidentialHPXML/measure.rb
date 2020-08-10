@@ -3334,8 +3334,10 @@ class HPXMLFile
   end
 
   def self.create_schedules(runner, model, weather, args)
-    if args[:schedules_type] == 'user-specified'
-      args[:schedules_path] = args[:schedules_path].get
+    if ['average', 'user-specified'].include? args[:schedules_type]
+      if args[:schedules_type] == 'user-specified'
+        args[:schedules_path] = args[:schedules_path].get
+      end
       return true
     end
 
