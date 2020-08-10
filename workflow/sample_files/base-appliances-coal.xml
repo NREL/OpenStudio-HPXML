@@ -428,6 +428,9 @@
           <FuelType>coal</FuelType>
           <CombinedEnergyFactor>3.3</CombinedEnergyFactor>
           <ControlType>moisture</ControlType>
+          <extension>
+            <RatedFlowRate>100.0</RatedFlowRate>
+          </extension>
         </ClothesDryer>
         <Dishwasher>
           <SystemIdentifier id='Dishwasher'/>
