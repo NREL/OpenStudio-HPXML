@@ -1022,6 +1022,7 @@ class SchedulesFile
   def initialize(runner:,
                  model:,
                  schedules_path:,
+                 col_names:,
                  **remainder)
 
     @validated = true
@@ -1029,7 +1030,7 @@ class SchedulesFile
     @model = model
     @schedules_path = schedules_path
     @external_file = get_external_file
-    @schedules = {}
+    import(col_names: col_names)
   end
 
   def validated?
@@ -1060,8 +1061,6 @@ class SchedulesFile
       return schedule_file
     end
 
-    import(col_names: [col_name])
-
     if @schedules[col_name].nil?
       @runner.registerError("Could not find the '#{col_name}' schedule.")
       return false
@@ -1085,7 +1084,7 @@ class SchedulesFile
 
   # the equivalent number of hours in the year, if the schedule was at full load (1.0)
   def annual_equivalent_full_load_hrs(col_name:)
-    import(col_names: [col_name])
+    # import(col_names: [col_name])
 
     year_description = @model.getYearDescription
     num_hrs_in_year = Constants.NumHoursInYear(year_description.isLeapYear)
@@ -1242,6 +1241,7 @@ class SchedulesFile
   end
 
   def import(col_names:)
+    @schedules = {}
     col_names += ['vacancy']
     columns = CSV.read(@schedules_path).transpose
     columns.each do |col|
