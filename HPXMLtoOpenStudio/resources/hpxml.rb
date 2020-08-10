@@ -940,7 +940,7 @@ class HPXML < Object
       @conditioned_building_volume = to_float_or_nil(XMLHelper.get_value(building_construction, 'ConditionedBuildingVolume'))
       @use_only_ideal_air_system = to_bool_or_nil(XMLHelper.get_value(building_construction, 'extension/UseOnlyIdealAirSystem'))
       @residential_facility_type = XMLHelper.get_value(building_construction, 'ResidentialFacilityType')
-      @has_flue_or_chimney = to_bool_or_nil(XMLHelper.get_value(building_construction, 'HasFlueOrChimney'))
+      @has_flue_or_chimney = to_bool_or_nil(XMLHelper.get_value(building_construction, 'extension/HasFlueOrChimney'))
     end
   end
 

@@ -3,8 +3,8 @@
   <schema_version>3.0</schema_version>
   <name>hpxm_lto_openstudio</name>
   <uid>b1543b30-9465-45ff-ba04-1d1f85e763bc</uid>
-  <version_id>bc1721e6-9360-4058-b273-ac8aa122f5c3</version_id>
-  <version_modified>20200807T230223Z</version_modified>
+  <version_id>dcc055b4-4f2a-4355-85ae-2cc3976c474f</version_id>
+  <version_modified>20200810T155020Z</version_modified>
   <xml_checksum>D8922A73</xml_checksum>
   <class_name>HPXMLtoOpenStudio</class_name>
   <display_name>HPXML to OpenStudio Translator</display_name>
@@ -397,12 +397,6 @@
       <checksum>C3BC236A</checksum>
     </file>
     <file>
-      <filename>test_airflow.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>test</usage_type>
-      <checksum>3F3CC21D</checksum>
-    </file>
-    <file>
       <filename>test_location.rb</filename>
       <filetype>rb</filetype>
       <usage_type>test</usage_type>
@@ -475,12 +469,6 @@
       <checksum>3B0A2738</checksum>
     </file>
     <file>
-      <filename>airflow.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>D7D62328</checksum>
-    </file>
-    <file>
       <filename>waterheater.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
@@ -521,12 +509,6 @@
       <filetype>xsd</filetype>
       <usage_type>resource</usage_type>
       <checksum>1F6650C3</checksum>
-    </file>
-    <file>
-      <filename>EPvalidator.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>7B5922E4</checksum>
     </file>
     <file>
       <filename>lighting.rb</filename>
@@ -574,6 +556,24 @@
       <filetype>rb</filetype>
       <usage_type>script</usage_type>
       <checksum>0177C9C6</checksum>
+    </file>
+    <file>
+      <filename>test_airflow.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>test</usage_type>
+      <checksum>9EB48D92</checksum>
+    </file>
+    <file>
+      <filename>EPvalidator.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>6C462844</checksum>
+    </file>
+    <file>
+      <filename>airflow.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>E241CA51</checksum>
     </file>
   </files>
 </measure>
