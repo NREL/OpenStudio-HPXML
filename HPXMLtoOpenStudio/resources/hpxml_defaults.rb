@@ -76,6 +76,9 @@ class HPXMLDefaults
       hpxml.building_construction.conditioned_building_volume = cfa * hpxml.building_construction.average_ceiling_height
     end
     hpxml.building_construction.number_of_bathrooms = Float(Waterheater.get_default_num_bathrooms(nbeds)).to_i if hpxml.building_construction.number_of_bathrooms.nil?
+    if hpxml.building_construction.has_flue_or_chimney.nil?
+      hpxml.building_construction.has_flue_or_chimney = false
+    end
   end
 
   def self.apply_attics(hpxml)
