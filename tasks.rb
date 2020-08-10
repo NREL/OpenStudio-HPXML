@@ -872,6 +872,7 @@ def set_hpxml_roofs(hpxml_file, hpxml)
     hpxml.roofs[-1].area = 0.05
   elsif ['base-atticroof-radiant-barrier.xml'].include? hpxml_file
     hpxml.roofs[0].radiant_barrier = true
+    hpxml.roofs[0].radiant_barrier_grade = 2
   elsif ['invalid_files/enclosure-attic-missing-roof.xml'].include? hpxml_file
     hpxml.roofs[0].delete
   elsif ['base-misc-defaults.xml'].include? hpxml_file
