@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 class Airflow
-  def self.apply(model, runner, weather, spaces, air_infils, vent_fans,
+  def self.apply(model, runner, weather, spaces, air_infils, vent_fans, clothes_dryers, nbeds,
                  duct_systems, infil_volume, infil_height, open_window_area,
                  nv_clg_ssn_sensor, min_neighbor_distance, vented_attic, vented_crawl,
                  site_type, shelter_coef, has_flue_chimney, hvac_map, eri_version,
@@ -16,6 +16,7 @@ class Airflow
     @infil_height = infil_height
     @living_space = spaces[HPXML::LocationLivingSpace]
     @living_zone = @living_space.thermalZone.get
+    @nbeds = nbeds
     @eri_version = eri_version
     @apply_ashrae140_assumptions = apply_ashrae140_assumptions
     @cfa = UnitConversions.convert(@living_space.floorArea, 'm^2', 'ft^2')
@@ -86,7 +87,7 @@ class Airflow
 
     @wind_speed = set_wind_speed_correction(model, site_type, shelter_coef, min_neighbor_distance)
     apply_natural_ventilation_and_whole_house_fan(model, weather, vent_fans_whf, open_window_area, nv_clg_ssn_sensor)
-    apply_infiltration_and_ventilation_fans(model, weather, vent_fans_mech, vent_fans_kitchen, vent_fans_bath, has_flue_chimney, air_infils, vented_attic, vented_crawl)
+    apply_infiltration_and_ventilation_fans(model, weather, vent_fans_mech, vent_fans_kitchen, vent_fans_bath, clothes_dryers, has_flue_chimney, air_infils, vented_attic, vented_crawl)
   end
 
   def self.get_default_shelter_coefficient()
@@ -1199,6 +1200,21 @@ class Airflow
     return obj_sch_sensors
   end
 
+  def self.apply_dryer_exhaust(model, dryer_object_array, obj_type_name)
+    obj_sch_sensors = {}
+    dryer_object_array.each_with_index do |dryer_object, index|
+      obj_name = "#{obj_type_name} #{index}"
+      obj_sch = HotWaterSchedule.new(model, obj_type_name, @nbeds)
+      Schedule.set_schedule_type_limits(model, obj_sch.schedule, Constants.ScheduleTypeLimitsTemperature)
+      obj_sch_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Schedule Value')
+      obj_sch_sensor.setName("#{obj_name} sch s")
+      obj_sch_sensor.setKeyName(obj_sch.schedule.name.to_s)
+      obj_sch_sensors[dryer_object.id] = obj_sch_sensor
+    end
+
+    return obj_sch_sensors
+  end
+
   def self.calc_hrv_erv_effectiveness(vent_mech)
     vent_mech_cfm = vent_mech.average_flow_rate
     if (vent_mech_cfm > 0)
@@ -1382,7 +1398,7 @@ class Airflow
     return infil_program
   end
 
-  def self.apply_infiltration_and_ventilation_fans(model, weather, vent_fans_mech, vent_fans_kitchen, vent_fans_bath, has_flue_chimney, air_infils, vented_attic, vented_crawl)
+  def self.apply_infiltration_and_ventilation_fans(model, weather, vent_fans_mech, vent_fans_kitchen, vent_fans_bath, clothes_dryers, has_flue_chimney, air_infils, vented_attic, vented_crawl)
     # Get living space infiltration
     living_ach50 = nil
     living_const_ach = nil
@@ -1412,6 +1428,9 @@ class Airflow
     # Local ventilation
     range_sch_sensors_map = apply_local_ventilation(model, vent_fans_kitchen, Constants.ObjectNameMechanicalVentilationRangeFan)
     bath_sch_sensors_map = apply_local_ventilation(model, vent_fans_bath, Constants.ObjectNameMechanicalVentilationBathFan)
+
+    # Clothes dryer exhaust
+    dryer_sch_sensors_map = apply_dryer_exhaust(model, clothes_dryers, Constants.ObjectNameClothesDryerExhaust)
 
     # Get mechanical ventilation
     vent_mech_sup = vent_fans_mech.select { |vent_mech| vent_mech.fan_type == HPXML::MechVentTypeSupply }
@@ -1542,7 +1561,12 @@ class Airflow
       infil_program.addLine("Set Qbath = Qbath + #{UnitConversions.convert(vent_bath.rated_flow_rate * vent_bath.quantity, 'cfm', 'm^3/s').round(4)} * #{bath_sch_sensors_map[vent_bath.id].name}")
     end
 
-    infil_program.addLine('Set Qexhaust = Qrange+Qbath')
+    infil_program.addLine('Set Qdryer = 0')
+    clothes_dryers.each do |clothes_dryer|
+      infil_program.addLine("Set Qdryer = Qdryer + #{UnitConversions.convert(clothes_dryer.rated_flow_rate, 'cfm', 'm^3/s').round(4)} * #{dryer_sch_sensors_map[clothes_dryer.id].name}")
+    end
+
+    infil_program.addLine('Set Qexhaust = Qrange+Qbath+Qdryer')
     infil_program.addLine('Set Qsupply = 0')
     infil_program.addLine("Set QWHV_sup = #{UnitConversions.convert(sup_cfm, 'cfm', 'm^3/s').round(4)}")
     infil_program.addLine("Set QWHV_exh = #{UnitConversions.convert(exh_cfm, 'cfm', 'm^3/s').round(4)}")

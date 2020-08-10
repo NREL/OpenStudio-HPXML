@@ -758,6 +758,9 @@ class HPXMLDefaults
       if clothes_dryer.usage_multiplier.nil?
         clothes_dryer.usage_multiplier = 1.0
       end
+      if clothes_dryer.rated_flow_rate.nil?
+        clothes_dryer.rated_flow_rate = 0.0
+      end
     end
 
     # Default dishwasher

@@ -524,6 +524,23 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
     _test_default_bath_fan_values(hpxml_default, 2, 50, 1, 15, 7)
   end
 
+  def test_clothes_dryer_exhaust
+    # Test inputs not overridden by defaults
+    hpxml_name = 'base-appliances-gas.xml'
+    hpxml = HPXML.new(hpxml_path: File.join(@root_path, 'workflow', 'sample_files', hpxml_name))
+    clothes_dryer = hpxml.clothes_dryers[0]
+    clothes_dryer.rated_flow_rate = 300
+    XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
+    hpxml_default = _test_measure()
+    _test_default_clothes_dryer_exhaust_values(hpxml_default, 300)
+
+    # Test defaults
+    hpxml = apply_hpxml_defaults('base-appliances-gas.xml')
+    XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
+    hpxml_default = _test_measure()
+    _test_default_clothes_dryer_exhaust_values(hpxml_default, 0)
+  end
+
   def test_ceiling_fans
     # Test inputs not overridden by defaults
     hpxml_name = 'base-lighting-ceiling-fans.xml'
@@ -1246,6 +1263,11 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
     assert_equal(start_hour, bath_fan.start_hour)
   end
 
+  def _test_default_clothes_dryer_exhaust_values(hpxml, rated_flow_rate)
+    clothes_dryer = hpxml.clothes_dryers[0]
+    assert_equal(rated_flow_rate, clothes_dryer.rated_flow_rate)
+  end
+
   def _test_default_ceiling_fan_values(hpxml, quantity, efficiency)
     assert_equal(quantity, hpxml.ceiling_fans[0].quantity)
     assert_in_epsilon(efficiency, hpxml.ceiling_fans[0].efficiency, 0.01)
@@ -1482,6 +1504,7 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
     hpxml.clothes_dryers[0].control_type = nil
     hpxml.clothes_dryers[0].combined_energy_factor = nil
     hpxml.clothes_dryers[0].usage_multiplier = nil
+    hpxml.clothes_dryers[0].rated_flow_rate = nil
 
     hpxml.dishwashers[0].location = nil
     hpxml.dishwashers[0].rated_annual_kwh = nil

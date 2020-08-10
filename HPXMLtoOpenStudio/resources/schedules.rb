@@ -444,6 +444,7 @@ class HotWaterSchedule
     end
     file_prefixes = { Constants.ObjectNameClothesWasher => 'ClothesWasher',
                       Constants.ObjectNameClothesDryer => 'ClothesWasher',
+                      Constants.ObjectNameClothesDryerExhaust => 'ClothesDryerExhaust',
                       Constants.ObjectNameDishwasher => 'Dishwasher',
                       Constants.ObjectNameShower => 'Shower',
                       Constants.ObjectNameSink => 'Sink',

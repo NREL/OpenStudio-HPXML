@@ -2373,7 +2373,7 @@ class OSModel
     has_flue_chimney = false # FUTURE: Expose as HPXML input
     @infil_volume = air_infils.select { |i| !i.infiltration_volume.nil? }[0].infiltration_volume
     infil_height = @hpxml.inferred_infiltration_height(@infil_volume)
-    Airflow.apply(model, runner, weather, spaces, air_infils, @hpxml.ventilation_fans,
+    Airflow.apply(model, runner, weather, spaces, air_infils, @hpxml.ventilation_fans, @hpxml.clothes_dryers, @nbeds,
                   duct_systems, @infil_volume, infil_height, open_window_area,
                   @clg_ssn_sensor, @min_neighbor_distance, vented_attic, vented_crawl,
                   site_type, shelter_coef, has_flue_chimney, @hvac_map, @eri_version,
