@@ -153,6 +153,7 @@ class EnergyPlusValidator
         'NumberofBathrooms' => zero_or_one,
         'ConditionedFloorArea' => one,
         'ConditionedBuildingVolume | AverageCeilingHeight' => one_or_more,
+        'HasFlueOrChimney' => zero_or_one,
       },
 
       # [ClimateZone]
