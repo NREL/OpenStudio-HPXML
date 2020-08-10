@@ -1317,11 +1317,8 @@ class SimulationOutputReport < OpenStudio::Measure::ReportingMeasure
   end
 
   def get_system_or_seed_id(sys)
-    if [Constants.CalcTypeERIReferenceHome,
-        Constants.CalcTypeERIIndexAdjustmentReferenceHome].include? @eri_design
-      if not sys.seed_id.nil?
-        return sys.seed_id
-      end
+    if not sys.seed_id.nil?
+      return sys.seed_id
     end
     return sys.id
   end
