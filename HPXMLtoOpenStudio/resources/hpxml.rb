@@ -1375,7 +1375,7 @@ class HPXML < Object
     ATTRS = [:id, :interior_adjacent_to, :area, :azimuth, :roof_type,
              :roof_color, :solar_absorptance, :emittance, :pitch, :radiant_barrier,
              :insulation_id, :insulation_assembly_r_value, :insulation_cavity_r_value,
-             :insulation_continuous_r_value]
+             :insulation_continuous_r_value, :radiant_barrier_grade]
     attr_accessor(*ATTRS)
 
     def skylights
@@ -1446,6 +1446,7 @@ class HPXML < Object
       XMLHelper.add_element(roof, 'Emittance', to_float(@emittance)) unless @emittance.nil?
       XMLHelper.add_element(roof, 'Pitch', to_float(@pitch)) unless @pitch.nil?
       XMLHelper.add_element(roof, 'RadiantBarrier', to_boolean(@radiant_barrier)) unless @radiant_barrier.nil?
+      XMLHelper.add_element(roof, 'RadiantBarrierGrade', to_integer(@radiant_barrier_grade)) unless @radiant_barrier_grade.nil?
       insulation = XMLHelper.add_element(roof, 'Insulation')
       sys_id = XMLHelper.add_element(insulation, 'SystemIdentifier')
       if not @insulation_id.nil?
@@ -1469,6 +1470,7 @@ class HPXML < Object
       @emittance = to_float_or_nil(XMLHelper.get_value(roof, 'Emittance'))
       @pitch = to_float_or_nil(XMLHelper.get_value(roof, 'Pitch'))
       @radiant_barrier = to_bool_or_nil(XMLHelper.get_value(roof, 'RadiantBarrier'))
+      @radiant_barrier_grade = to_integer_or_nil(XMLHelper.get_value(roof, 'RadiantBarrierGrade'))
       insulation = XMLHelper.get_element(roof, 'Insulation')
       if not insulation.nil?
         @insulation_id = HPXML::get_id(insulation)
