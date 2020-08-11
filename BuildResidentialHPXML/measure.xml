@@ -3,8 +3,8 @@
   <schema_version>3.0</schema_version>
   <name>build_residential_hpxml</name>
   <uid>a13a8983-2b01-4930-8af2-42030b6e4233</uid>
-  <version_id>266d32f3-75d1-47f6-a4d3-8bf704cb58f0</version_id>
-  <version_modified>20200806T234840Z</version_modified>
+  <version_id>025679ed-470a-41ed-8447-a9af9befeebe</version_id>
+  <version_modified>20200811T172232Z</version_modified>
   <xml_checksum>2C38F48B</xml_checksum>
   <class_name>BuildResidentialHPXML</class_name>
   <display_name>HPXML Builder</display_name>
@@ -889,6 +889,29 @@
         <choice>
           <value>false</value>
           <display_name>false</display_name>
+        </choice>
+      </choices>
+    </argument>
+    <argument>
+      <name>roof_radiant_barrier_grade</name>
+      <display_name>Roof: Radiant Barrier Grade</display_name>
+      <description>The grade of the radiant barrier, if it exists.</description>
+      <type>Choice</type>
+      <units>2</units>
+      <required>true</required>
+      <model_dependent>false</model_dependent>
+      <choices>
+        <choice>
+          <value>1</value>
+          <display_name>1</display_name>
+        </choice>
+        <choice>
+          <value>2</value>
+          <display_name>2</display_name>
+        </choice>
+        <choice>
+          <value>3</value>
+          <display_name>3</display_name>
         </choice>
       </choices>
     </argument>
@@ -6786,7 +6809,7 @@
       <filename>measure.rb</filename>
       <filetype>rb</filetype>
       <usage_type>script</usage_type>
-      <checksum>1E0558BB</checksum>
+      <checksum>E551B70A</checksum>
     </file>
   </files>
 </measure>
