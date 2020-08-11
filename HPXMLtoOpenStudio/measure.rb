@@ -1012,6 +1012,9 @@ class OSModel
       solar_abs = roof.solar_absorptance
       emitt = roof.emittance
       has_radiant_barrier = roof.radiant_barrier
+      if has_radiant_barrier
+        radiant_barrier_grade = roof.radiant_barrier_grade
+      end
       inside_film = Material.AirFilmRoof(Geometry.get_roof_pitch([surfaces[0]]))
       outside_film = Material.AirFilmOutside
       mat_roofing = Material.RoofMaterial(roof.roof_type, emitt, solar_abs)
@@ -1041,7 +1044,7 @@ class OSModel
                                                constr_set.drywall_thick_in,
                                                constr_set.osb_thick_in, constr_set.rigid_r,
                                                constr_set.exterior_material, has_radiant_barrier,
-                                               inside_film, outside_film)
+                                               inside_film, outside_film, radiant_barrier_grade)
       else
         constr_sets = [
           GenericConstructionSet.new(10.0, 0.5, 0.0, mat_roofing), # w/R-10 rigid
@@ -1060,7 +1063,7 @@ class OSModel
                                              framing_factor, framing_thick_in,
                                              constr_set.osb_thick_in, layer_r + constr_set.rigid_r,
                                              mat_roofing, has_radiant_barrier,
-                                             inside_film, outside_film)
+                                             inside_film, outside_film, radiant_barrier_grade)
       end
       check_surface_assembly_rvalue(runner, surfaces, inside_film, outside_film, assembly_r, match)
     end
@@ -1905,7 +1908,7 @@ class OSModel
                                            Material.RoofMaterial(HPXML::RoofTypeAsphaltShingles, 0.90, 0.75),
                                            false,
                                            Material.AirFilmOutside,
-                                           Material.AirFilmRoof(Geometry.get_roof_pitch(surfaces)))
+                                           Material.AirFilmRoof(Geometry.get_roof_pitch(surfaces)), nil)
     end
   end
 

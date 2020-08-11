@@ -186,7 +186,7 @@ class EnergyPlusValidator
         'RoofColor | SolarAbsorptance' => one_or_more,
         'Emittance' => one,
         'Pitch' => one,
-        'RadiantBarrier' => one,
+        'RadiantBarrier' => one, # See [RadiantBarrier]
         'Insulation/SystemIdentifier' => one, # Required by HPXML schema
         'Insulation/AssemblyEffectiveRValue' => one,
       },
@@ -194,6 +194,11 @@ class EnergyPlusValidator
       ## [VentedAttic]
       '/HPXML/Building/BuildingDetails/Enclosure/Roofs/Roof[InteriorAdjacentTo="attic - vented"]' => {
         '../../Attics/Attic[AtticType/Attic[Vented="true"]]/VentilationRate[UnitofMeasure="SLA" or UnitofMeasure="ACHnatural"]/Value' => zero_or_one,
+      },
+
+      ## [RadiantBarrier]
+      '/HPXML/Building/BuildingDetails/Enclosure/Roofs/Roof[RadiantBarrier="true"]' => {
+        'RadiantBarrierGrade' => one,
       },
 
       # [Wall]

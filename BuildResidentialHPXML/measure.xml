@@ -3,8 +3,8 @@
   <schema_version>3.0</schema_version>
   <name>build_residential_hpxml</name>
   <uid>a13a8983-2b01-4930-8af2-42030b6e4233</uid>
-  <version_id>c8f1ccc7-de14-46f7-baeb-1b08f98f0496</version_id>
-  <version_modified>20200810T195709Z</version_modified>
+  <version_id>3aa987ad-6742-4535-9ff2-970c30a5cf7e</version_id>
+  <version_modified>20200811T170918Z</version_modified>
   <xml_checksum>2C38F48B</xml_checksum>
   <class_name>BuildResidentialHPXML</class_name>
   <display_name>HPXML Builder</display_name>
@@ -5311,29 +5311,6 @@
       <checksum>053ED291</checksum>
     </file>
     <file>
-      <filename>base-schedules-average.osw</filename>
-      <filetype>osw</filetype>
-      <usage_type>test</usage_type>
-      <checksum>6A569C19</checksum>
-    </file>
-    <file>
-      <filename>base-schedules-stochastic.osw</filename>
-      <filetype>osw</filetype>
-      <usage_type>test</usage_type>
-      <checksum>A791ACAF</checksum>
-    </file>
-    <file>
-      <version>
-        <software_program>OpenStudio</software_program>
-        <identifier>2.9.0</identifier>
-        <min_compatible>2.9.0</min_compatible>
-      </version>
-      <filename>measure.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>script</usage_type>
-      <checksum>008D4516</checksum>
-    </file>
-    <file>
       <filename>base-misc-defaults.osw</filename>
       <filetype>osw</filetype>
       <usage_type>test</usage_type>
@@ -6324,6 +6301,35 @@
       <checksum>B291D087</checksum>
     </file>
     <file>
+      <version>
+        <software_program>OpenStudio</software_program>
+        <identifier>2.9.0</identifier>
+        <min_compatible>2.9.0</min_compatible>
+      </version>
+      <filename>measure.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>script</usage_type>
+      <checksum>E9F514CB</checksum>
+    </file>
+    <file>
+      <filename>base-schedules-average.osw</filename>
+      <filetype>osw</filetype>
+      <usage_type>test</usage_type>
+      <checksum>6A569C19</checksum>
+    </file>
+    <file>
+      <filename>base-schedules-stochastic.osw</filename>
+      <filetype>osw</filetype>
+      <usage_type>test</usage_type>
+      <checksum>A791ACAF</checksum>
+    </file>
+    <file>
+      <filename>base-schedules-user-specified.osw</filename>
+      <filetype>osw</filetype>
+      <usage_type>test</usage_type>
+      <checksum>8D237735</checksum>
+    </file>
+    <file>
       <filename>extra-vacancy-6-months.osw</filename>
       <filetype>osw</filetype>
       <usage_type>test</usage_type>
@@ -6333,13 +6339,7 @@
       <filename>schedules.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>C28C2D00</checksum>
-    </file>
-    <file>
-      <filename>base-schedules-user-specified.osw</filename>
-      <filetype>osw</filetype>
-      <usage_type>test</usage_type>
-      <checksum>8D237735</checksum>
+      <checksum>4905F269</checksum>
     </file>
   </files>
 </measure>

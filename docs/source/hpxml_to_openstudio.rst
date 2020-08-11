@@ -308,7 +308,7 @@ reflective  slate or tile shingles, metal surfacing                 0.30
 =========== ======================================================= ================
 
 Roofs can also have optional elements provided for ``RadiantBarrier and ``RoofType``.
-If ``RadiantBarrier`` is not provided, it is defaulted to not present.
+If ``RadiantBarrier`` is not provided, it is defaulted to not present; if it is provided, ``RadiantBarrierGrade`` must also be provided.
 If ``RoofType`` is not provided, it is defaulted to "asphalt or fiberglass shingles".
 
 HPXML Rim Joists

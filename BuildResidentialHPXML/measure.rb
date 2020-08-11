@@ -3546,7 +3546,7 @@ class HPXMLFile
                                             infiltration_volume: infiltration_volume)
   end
 
-  def self.get_adjacent_to(model, surface)
+  def self.get_adjacent_to(surface)
     space = surface.space.get
     st = space.spaceType.get
     space_type = st.standardsSpaceType.get
@@ -3583,7 +3583,8 @@ class HPXMLFile
       next unless ['Outdoors'].include? surface.outsideBoundaryCondition
       next if surface.surfaceType != 'RoofCeiling'
 
-      interior_adjacent_to = get_adjacent_to(model, surface)
+      interior_adjacent_to = get_adjacent_to(surface)
+      next if [HPXML::LocationOtherHousingUnit].include? interior_adjacent_to
 
       pitch = args[:geometry_roof_pitch] * 12.0
       if args[:geometry_roof_type] == 'flat'
@@ -3607,7 +3608,7 @@ class HPXMLFile
       end
 
       hpxml.roofs.add(id: "#{surface.name}",
-                      interior_adjacent_to: get_adjacent_to(model, surface),
+                      interior_adjacent_to: get_adjacent_to(surface),
                       area: UnitConversions.convert(surface.grossArea, 'm^2', 'ft^2').round,
                       roof_type: roof_type,
                       roof_color: roof_color,
@@ -3629,16 +3630,32 @@ class HPXMLFile
     model.getSurfaces.sort.each do |surface|
       next if surface.surfaceType != 'Wall'
 
-      interior_adjacent_to = get_adjacent_to(model, surface)
-      next unless [HPXML::LocationLivingSpace, HPXML::LocationAtticUnvented, HPXML::LocationAtticVented, HPXML::LocationGarage].include? interior_adjacent_to
+      interior_adjacent_to = get_adjacent_to(surface)
+      if [HPXML::LocationOtherHousingUnit].include? interior_adjacent_to
+        has_door = false
+        surface.subSurfaces.each do |sub_surface|
+          next if sub_surface.subSurfaceType != 'Door'
+
+          has_door = true
+        end
+        next unless has_door
+      else
+        next unless [HPXML::LocationLivingSpace, HPXML::LocationAtticUnvented, HPXML::LocationAtticVented, HPXML::LocationGarage].include? interior_adjacent_to
+      end
 
       exterior_adjacent_to = HPXML::LocationOutside
       if surface.adjacentSurface.is_initialized
-        exterior_adjacent_to = get_adjacent_to(model, surface.adjacentSurface.get)
+        exterior_adjacent_to = get_adjacent_to(surface.adjacentSurface.get)
       elsif surface.outsideBoundaryCondition == 'Adiabatic'
         exterior_adjacent_to = HPXML::LocationOtherHousingUnit
       end
-      next if interior_adjacent_to == exterior_adjacent_to
+
+      if interior_adjacent_to == HPXML::LocationOtherHousingUnit && exterior_adjacent_to == HPXML::LocationOtherHousingUnit
+        interior_adjacent_to = HPXML::LocationLivingSpace
+        exterior_adjacent_to == HPXML::LocationOtherHousingUnit
+      else
+        next if interior_adjacent_to == exterior_adjacent_to
+      end
       next if [HPXML::LocationLivingSpace, HPXML::LocationBasementConditioned].include? exterior_adjacent_to
 
       wall_type = args[:wall_type]
@@ -3707,7 +3724,7 @@ class HPXMLFile
 
       hpxml.foundation_walls.add(id: "#{surface.name}",
                                  exterior_adjacent_to: HPXML::LocationGround,
-                                 interior_adjacent_to: get_adjacent_to(model, surface),
+                                 interior_adjacent_to: get_adjacent_to(surface),
                                  height: args[:geometry_foundation_height],
                                  area: UnitConversions.convert(surface.grossArea, 'm^2', 'ft^2').round,
                                  thickness: 8,
@@ -3727,12 +3744,12 @@ class HPXMLFile
       next if surface.outsideBoundaryCondition == 'Foundation'
       next unless ['Floor', 'RoofCeiling'].include? surface.surfaceType
 
-      interior_adjacent_to = get_adjacent_to(model, surface)
+      interior_adjacent_to = get_adjacent_to(surface)
       next unless [HPXML::LocationLivingSpace, HPXML::LocationGarage].include? interior_adjacent_to
 
       exterior_adjacent_to = HPXML::LocationOutside
       if surface.adjacentSurface.is_initialized
-        exterior_adjacent_to = get_adjacent_to(model, surface.adjacentSurface.get)
+        exterior_adjacent_to = get_adjacent_to(surface.adjacentSurface.get)
       elsif surface.outsideBoundaryCondition == 'Adiabatic'
         exterior_adjacent_to = HPXML::LocationOtherHousingUnit
         if surface.surfaceType == 'Floor'
@@ -3769,8 +3786,8 @@ class HPXMLFile
       next unless ['Foundation'].include? surface.outsideBoundaryCondition
       next if surface.surfaceType != 'Floor'
 
-      interior_adjacent_to = get_adjacent_to(model, surface)
-      next if [HPXML::LocationOutside].include? interior_adjacent_to
+      interior_adjacent_to = get_adjacent_to(surface)
+      next if [HPXML::LocationOutside, HPXML::LocationOtherHousingUnit].include? interior_adjacent_to
 
       has_foundation_walls = false
       if [HPXML::LocationCrawlspaceVented, HPXML::LocationCrawlspaceUnvented, HPXML::LocationBasementUnconditioned, HPXML::LocationBasementConditioned].include? interior_adjacent_to
