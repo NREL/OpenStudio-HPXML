@@ -759,7 +759,16 @@ class HPXMLDefaults
         clothes_dryer.usage_multiplier = 1.0
       end
       if clothes_dryer.rated_flow_rate.nil?
-        clothes_dryer.rated_flow_rate = 0.0
+        if not clothes_dryer.combined_energy_factor.nil?
+          if clothes_dryer.combined_energy_factor < 4.5
+            clothes_dryer.rated_flow_rate = 100.0
+          end
+        end
+        if not clothes_dryer.energy_factor.nil?
+          if clothes_dryer.energy_factor < 5.175
+            clothes_dryer.rated_flow_rate = 100.0
+          end
+        end
       end
     end
 

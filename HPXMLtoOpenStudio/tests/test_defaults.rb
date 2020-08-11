@@ -538,7 +538,7 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
     hpxml = apply_hpxml_defaults('base-appliances-gas.xml')
     XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
     hpxml_default = _test_measure()
-    _test_default_clothes_dryer_exhaust_values(hpxml_default, 0)
+    _test_default_clothes_dryer_exhaust_values(hpxml_default, 100)
   end
 
   def test_ceiling_fans
