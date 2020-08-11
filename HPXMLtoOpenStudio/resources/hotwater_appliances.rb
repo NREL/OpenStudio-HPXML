@@ -534,8 +534,8 @@ class HotWaterAndAppliances
   def self.get_dist_energy_consumption_adjustment(has_uncond_bsmnt, cfa, ncfl,
                                                   water_heating_system, hot_water_distribution)
 
-    if water_heating_system.is_shared_system
-      # Not accounting for distribution system
+    if water_heating_system.fraction_dhw_load_served <= 0
+      # No fixtures; not accounting for distribution system
       return 1.0
     end
 

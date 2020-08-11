@@ -617,7 +617,7 @@ class EnergyPlusValidator
 
       ## [WaterHeatingSystem=Shared]
       '/HPXML/Building/BuildingDetails/Systems/WaterHeating/WaterHeatingSystem[IsSharedSystem="true"]' => {
-        'NumberofUnitsServed[text() > 1]' => one,
+        'NumberofUnitsServed' => one,
       },
 
       ## [WHType=Tank]
@@ -627,7 +627,7 @@ class EnergyPlusValidator
         'HeatingCapacity' => zero_or_one,
         'EnergyFactor | UniformEnergyFactor' => one,
         'RecoveryEfficiency' => zero_or_one,
-        'WaterHeaterInsulation/Jacket/JacketRValue' => zero_or_one, # Capable to model tank wrap insulation
+        'WaterHeaterInsulation/Jacket/JacketRValue' => zero_or_one,
       },
 
       ## [WHType=Tankless]
@@ -642,14 +642,14 @@ class EnergyPlusValidator
         'FuelType[text()="electricity"]' => one,
         'TankVolume' => one,
         'EnergyFactor | UniformEnergyFactor' => one,
-        'WaterHeaterInsulation/Jacket/JacketRValue' => zero_or_one, # Capable to model tank wrap insulation
+        'WaterHeaterInsulation/Jacket/JacketRValue' => zero_or_one,
       },
 
       ## [WHType=Indirect]
       '/HPXML/Building/BuildingDetails/Systems/WaterHeating/WaterHeatingSystem[WaterHeaterType="space-heating boiler with storage tank"]' => {
         'RelatedHVACSystem' => one, # HeatingSystem (boiler)
         'TankVolume' => one,
-        'WaterHeaterInsulation/Jacket/JacketRValue' => zero_or_one, # Capable to model tank wrap insulation
+        'WaterHeaterInsulation/Jacket/JacketRValue' => zero_or_one,
         'StandbyLoss' => zero_or_one, # Refer to https://www.ahridirectory.org/NewSearch?programId=28&searchTypeId=3
       },
 
