@@ -576,6 +576,17 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     arg.setDefaultValue(false)
     args << arg
 
+    roof_radiant_barrier_grade_choices = OpenStudio::StringVector.new
+    roof_radiant_barrier_grade_choices << '1'
+    roof_radiant_barrier_grade_choices << '2'
+    roof_radiant_barrier_grade_choices << '3'
+
+    arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('roof_radiant_barrier_grade', roof_radiant_barrier_grade_choices, true)
+    arg.setDisplayName('Roof: Radiant Barrier Grade')
+    arg.setDescription('The grade of the radiant barrier, if it exists.')
+    arg.setUnits('2')
+    args << arg
+
     arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('neighbor_front_distance', true)
     arg.setDisplayName('Neighbor: Front Distance')
     arg.setUnits('ft')
@@ -2844,6 +2855,7 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
              roof_solar_absorptance: runner.getStringArgumentValue('roof_solar_absorptance', user_arguments),
              roof_emittance: runner.getDoubleArgumentValue('roof_emittance', user_arguments),
              roof_radiant_barrier: runner.getBoolArgumentValue('roof_radiant_barrier', user_arguments),
+             roof_radiant_barrier_grade: runner.getStringArgumentValue('roof_radiant_barrier_grade', user_arguments),
              neighbor_front_distance: runner.getDoubleArgumentValue('neighbor_front_distance', user_arguments),
              neighbor_back_distance: runner.getDoubleArgumentValue('neighbor_back_distance', user_arguments),
              neighbor_left_distance: runner.getDoubleArgumentValue('neighbor_left_distance', user_arguments),
@@ -3607,6 +3619,10 @@ class HPXMLFile
         solar_absorptance = args[:roof_solar_absorptance]
       end
 
+      if args[:roof_radiant_barrier]
+        radiant_barrier_grade = args[:roof_radiant_barrier_grade]
+      end
+
       hpxml.roofs.add(id: "#{surface.name}",
                       interior_adjacent_to: get_adjacent_to(surface),
                       area: UnitConversions.convert(surface.grossArea, 'm^2', 'ft^2').round,
@@ -3616,6 +3632,7 @@ class HPXMLFile
                       emittance: args[:roof_emittance],
                       pitch: pitch,
                       radiant_barrier: args[:roof_radiant_barrier],
+                      radiant_barrier_grade: radiant_barrier_grade,
                       insulation_assembly_r_value: args[:roof_assembly_r])
     end
   end

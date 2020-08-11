@@ -256,6 +256,7 @@
         "roof_color": "light",
         "roof_emittance": 0.92,
         "roof_radiant_barrier": false,
+        "roof_radiant_barrier_grade": "2",
         "roof_solar_absorptance": "auto",
         "schedules_type": "average",
         "setpoint_cooling_setup_hours_per_week": 0,
