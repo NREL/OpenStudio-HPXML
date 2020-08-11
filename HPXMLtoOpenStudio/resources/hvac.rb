@@ -204,7 +204,7 @@ class HVAC
       if cooling_system.is_ventilation_preconditioning
         air_loop_unitary.setSupplyAirFlowRateMethodDuringCoolingOperation('SupplyAirFlowRate')
         air_loop_unitary.setSupplyAirFlowRateMethodDuringHeatingOperation('SupplyAirFlowRate')
-        air_cfm = cooling_system.ventilation_fan.average_flow_rate
+        air_cfm = cooling_system.ventilation_fan.flow_rate
         air_loop_unitary.setSupplyAirFlowRateDuringCoolingOperation(UnitConversions.convert(air_cfm, 'cfm', 'm^3/s'))
         air_loop_unitary.setSupplyAirFlowRateDuringHeatingOperation(UnitConversions.convert(air_cfm, 'cfm', 'm^3/s'))
         fan.setMaximumFlowRate(UnitConversions.convert(air_cfm + 0.01, 'cfm', 'm^3/s'))
@@ -306,7 +306,7 @@ class HVAC
     # Store info for HVAC Sizing measure
     if cooling_system.is_ventilation_preconditioning
       clg_coil.setRatedAirFlowRate(UnitConversions.convert([cooling_system.cooling_capacity, Constants.small].max, 'Btu/hr', 'ton') * UnitConversions.convert(cfms_ton_rated[0], 'cfm', 'm^3/s'))
-      fan.setMaximumFlowRate(UnitConversions.convert(cooling_system.ventilation_fan.average_flow_rate, 'cfm', 'm^3/s'))
+      fan.setMaximumFlowRate(UnitConversions.convert(cooling_system.ventilation_fan.flow_rate, 'cfm', 'm^3/s'))
       htg_coil.setNominalCapacity(0.0)
     else
       ptac.additionalProperties.setFeature(Constants.SizingInfoHVACCoolingCFMs, airflow_rate.to_s)
@@ -561,13 +561,11 @@ class HVAC
                                       closs_fplr_spec: heat_closs_fplr_spec,
                                       cap_fflow_spec: heat_cap_fflow_spec,
                                       eir_fflow_spec: heat_eir_fflow_spec,
-                                      capacity: heat_pump.heating_capacity,
+                                      heat_pump: heat_pump,
                                       crankcase_kw: crankcase_kw,
                                       crankcase_temp: crankcase_temp,
                                       fan_power_rated: fan_power_rated,
                                       hp_min_temp: hp_min_temp,
-                                      fraction_heat_load_served: heat_pump.fraction_heat_load_served,
-                                      is_fixed_flow_rate: heat_pump.is_ventilation_preconditioning,
                                       heat_cfms_ton_rated: heat_cfms_ton_rated,
                                       heat_capacity_ratios: heat_capacity_ratios)
     hvac_map[heat_pump.id] << htg_coil
@@ -614,7 +612,7 @@ class HVAC
     if heat_pump.is_ventilation_preconditioning
       air_loop_unitary.setSupplyAirFlowRateMethodDuringCoolingOperation('SupplyAirFlowRate')
       air_loop_unitary.setSupplyAirFlowRateMethodDuringHeatingOperation('SupplyAirFlowRate')
-      air_cfm = heat_pump.ventilation_fan.average_flow_rate
+      air_cfm = heat_pump.ventilation_fan.flow_rate
       air_loop_unitary.setSupplyAirFlowRateDuringCoolingOperation(UnitConversions.convert(air_cfm, 'cfm', 'm^3/s'))
       air_loop_unitary.setSupplyAirFlowRateDuringHeatingOperation(UnitConversions.convert(air_cfm, 'cfm', 'm^3/s'))
       fan.setMaximumFlowRate(UnitConversions.convert(air_cfm + 0.01, 'cfm', 'm^3/s'))
@@ -671,6 +669,26 @@ class HVAC
 
     hvac_map[heat_pump.id] = []
     obj_name = Constants.ObjectNameMiniSplitHeatPump
+    num_speeds = 10
+    mshp_indices = [1, 3, 5, 9]
+    hp_min_temp, supp_max_temp = get_heatpump_temp_assumptions(heat_pump)
+    fan_power_installed = 0.07 # W/cfm
+    pan_heater_power = 0.0 # W, disabled
+
+    # Calculate generic inputs
+    if heat_pump.heating_capacity.nil?
+      heating_capacity_offset = 2300.0 # Btu/hr
+    else
+      heating_capacity_offset = heat_pump.heating_capacity - heat_pump.cooling_capacity
+    end
+    if heat_pump.heating_capacity_17F.nil?
+      cap_retention_frac = 0.25 # frac
+      cap_retention_temp = -5.0 # deg-F
+    else
+      cap_retention_frac = heat_pump.heating_capacity_17F / heat_pump.heating_capacity
+      cap_retention_temp = 17.0 # deg-F
+    end
+
     if heat_pump.is_ventilation_preconditioning
       sequential_heat_load_frac = 0.0
       sequential_cool_load_frac = 0.0
@@ -684,33 +702,14 @@ class HVAC
       sequential_heat_load_frac = calc_sequential_load_fraction(heat_pump.fraction_heat_load_served, remaining_heat_load_frac)
       sequential_cool_load_frac = calc_sequential_load_fraction(heat_pump.fraction_cool_load_served, remaining_cool_load_frac)
     end
-    num_speeds = 10
-    mshp_indices = [1, 3, 5, 9]
-    hp_min_temp, supp_max_temp = get_heatpump_temp_assumptions(heat_pump)
-    fan_power_installed = 0.07 # W/cfm
-    pan_heater_power = 0.0 # W, disabled
-
-    # Calculate generic inputs
     min_cooling_capacity = 0.4 # frac
-    max_cooling_capacity = 1.2 # frac
-    min_cooling_airflow_rate = 200.0
-    max_cooling_airflow_rate = 425.0
     min_heating_capacity = 0.3 # frac
+    max_cooling_capacity = 1.2 # frac
     max_heating_capacity = 1.2 # frac
+    min_cooling_airflow_rate = 200.0
     min_heating_airflow_rate = 200.0
+    max_cooling_airflow_rate = 425.0
     max_heating_airflow_rate = 400.0
-    if heat_pump.heating_capacity.nil?
-      heating_capacity_offset = 2300.0 # Btu/hr
-    else
-      heating_capacity_offset = heat_pump.heating_capacity - heat_pump.cooling_capacity
-    end
-    if heat_pump.heating_capacity_17F.nil?
-      cap_retention_frac = 0.25 # frac
-      cap_retention_temp = -5.0 # deg-F
-    else
-      cap_retention_frac = heat_pump.heating_capacity_17F / heat_pump.heating_capacity
-      cap_retention_temp = 17.0 # deg-F
-    end
 
     # Cooling Coil
 
@@ -782,11 +781,9 @@ class HVAC
                                       closs_fplr_spec: heat_closs_fplr_spec,
                                       cap_fflow_spec: heat_cap_fflow_spec,
                                       eir_fflow_spec: heat_eir_fflow_spec,
-                                      capacity: heat_pump.heating_capacity,
+                                      heat_pump: heat_pump,
                                       fan_power_rated: nil,
                                       hp_min_temp: hp_min_temp,
-                                      fraction_heat_load_served: heat_pump.fraction_heat_load_served,
-                                      is_fixed_flow_rate: heat_pump.is_ventilation_preconditioning,
                                       heat_cfms_ton_rated: heat_cfms_ton_rated,
                                       heat_capacity_ratios: heat_capacity_ratios)
     hvac_map[heat_pump.id] << htg_coil
@@ -888,7 +885,7 @@ class HVAC
     if heat_pump.is_ventilation_preconditioning
       air_loop_unitary.setSupplyAirFlowRateMethodDuringCoolingOperation('SupplyAirFlowRate')
       air_loop_unitary.setSupplyAirFlowRateMethodDuringHeatingOperation('SupplyAirFlowRate')
-      air_cfm = heat_pump.ventilation_fan.average_flow_rate
+      air_cfm = heat_pump.ventilation_fan.flow_rate
       air_loop_unitary.setSupplyAirFlowRateDuringCoolingOperation(UnitConversions.convert(air_cfm, 'cfm', 'm^3/s'))
       air_loop_unitary.setSupplyAirFlowRateDuringHeatingOperation(UnitConversions.convert(air_cfm, 'cfm', 'm^3/s'))
       fan.setMaximumFlowRate(UnitConversions.convert(air_cfm + 0.01, 'cfm', 'm^3/s'))
@@ -1173,7 +1170,7 @@ class HVAC
     if heat_pump.is_ventilation_preconditioning
       air_loop_unitary.setSupplyAirFlowRateMethodDuringCoolingOperation('SupplyAirFlowRate')
       air_loop_unitary.setSupplyAirFlowRateMethodDuringHeatingOperation('SupplyAirFlowRate')
-      air_cfm = heat_pump.ventilation_fan.average_flow_rate
+      air_cfm = heat_pump.ventilation_fan.flow_rate
       air_loop_unitary.setSupplyAirFlowRateDuringCoolingOperation(UnitConversions.convert(air_cfm, 'cfm', 'm^3/s'))
       air_loop_unitary.setSupplyAirFlowRateDuringHeatingOperation(UnitConversions.convert(air_cfm, 'cfm', 'm^3/s'))
       fan.setMaximumFlowRate(UnitConversions.convert(air_cfm + 0.01, 'cfm', 'm^3/s'))
@@ -1470,7 +1467,7 @@ class HVAC
       unitary_system.setSupplyAirFlowRateMethodDuringCoolingOperation('SupplyAirFlowRate')
       unitary_system.setSupplyAirFlowRateMethodDuringHeatingOperation('SupplyAirFlowRate')
       unitary_system.setSupplyAirFlowRateDuringCoolingOperation(0.0)
-      airflow = heating_system.ventilation_fan.average_flow_rate
+      airflow = heating_system.ventilation_fan.flow_rate
       unitary_system.setSupplyAirFlowRateDuringHeatingOperation(UnitConversions.convert(airflow, 'cfm', 'm^3/s'))
       fan.setMaximumFlowRate(UnitConversions.convert(airflow + 0.01, 'cfm', 'm^3/s'))
     else
@@ -3288,11 +3285,14 @@ class HVAC
         stage.setMaximumCyclingRate(3.0)
         stage.setLatentCapacityTimeConstant(45.0)
         if is_fixed_flow_rate
+          stage.setGrossRatedTotalCoolingCapacity(UnitConversions.convert([capacity, Constants.small].max, 'Btu/hr', 'W') * cool_capacity_ratios[speed_idx])
           if obj_name == Constants.ObjectNameMiniSplitHeatPump
             stage.setRatedAirFlowRate(UnitConversions.convert([capacity, Constants.small].max, 'Btu/hr', 'ton') * UnitConversions.convert(cool_cfms_ton_rated[speed_idx], 'cfm', 'm^3/s'))
           else
             stage.setRatedAirFlowRate(UnitConversions.convert([capacity, Constants.small].max, 'Btu/hr', 'ton') * UnitConversions.convert(cool_cfms_ton_rated[speed_idx], 'cfm', 'm^3/s') * cool_capacity_ratios[speed_idx])
           end
+        elsif not capacity.nil?
+          stage.setGrossRatedTotalCoolingCapacity(UnitConversions.convert([capacity, Constants.small].max, 'Btu/hr', 'W')) # Used by HVACSizing measure
         end
         clg_coil.addStage(stage)
       end
@@ -3306,7 +3306,7 @@ class HVAC
   end
 
   def self.create_dx_heating_coil(model:, obj_name:, speed_indices:, eirs:, cap_ft_spec:, eir_ft_spec:, closs_fplr_spec:, cap_fflow_spec:, eir_fflow_spec:,
-                                  capacity:, crankcase_kw: 0.0, crankcase_temp: nil, fan_power_rated:, hp_min_temp:, fraction_heat_load_served:, is_fixed_flow_rate:, heat_cfms_ton_rated:, heat_capacity_ratios:)
+                                  heat_pump:, crankcase_kw: 0.0, crankcase_temp: nil, fan_power_rated:, hp_min_temp:, heat_cfms_ton_rated:, heat_capacity_ratios:)
     num_speeds = speed_indices.size
 
     if num_speeds > 1
@@ -3329,14 +3329,14 @@ class HVAC
         htg_coil = OpenStudio::Model::CoilHeatingDXSingleSpeed.new(model, model.alwaysOnDiscreteSchedule, cap_ft_curve, cap_fff_curve, eir_ft_curve, eir_fff_curve, plf_fplr_curve)
         htg_coil.setRatedSupplyFanPowerPerVolumeFlowRate(fan_power_rated / UnitConversions.convert(1.0, 'cfm', 'm^3/s'))
         htg_coil.setRatedCOP(1.0 / eirs[speed_idx])
-        if not capacity.nil?
-          htg_coil.setRatedTotalHeatingCapacity(UnitConversions.convert([capacity, Constants.small].max, 'Btu/hr', 'W')) # Used by HVACSizing measure
+        if not heat_pump.heating_capacity.nil?
+          htg_coil.setRatedTotalHeatingCapacity(UnitConversions.convert([heat_pump.heating_capacity, Constants.small].max, 'Btu/hr', 'W')) # Used by HVACSizing measure
         end
         if not crankcase_temp.nil?
           htg_coil.setMaximumOutdoorDryBulbTemperatureforCrankcaseHeaterOperation(UnitConversions.convert(crankcase_temp, 'F', 'C'))
         end
-        if is_fixed_flow_rate
-          htg_coil.setRatedAirFlowRate(UnitConversions.convert([capacity, Constants.small].max, 'Btu/hr', 'ton') * UnitConversions.convert(heat_cfms_ton_rated[0], 'cfm', 'm^3/s'))
+        if heat_pump.is_ventilation_preconditioning
+          htg_coil.setRatedAirFlowRate(UnitConversions.convert([heat_pump.heating_capacity, Constants.small].max, 'Btu/hr', 'ton') * UnitConversions.convert(heat_cfms_ton_rated[0], 'cfm', 'm^3/s'))
         end
       else
         if htg_coil.nil?
@@ -3350,15 +3350,16 @@ class HVAC
         end
         stage = OpenStudio::Model::CoilHeatingDXMultiSpeedStageData.new(model, cap_ft_curve, cap_fff_curve, eir_ft_curve, eir_fff_curve, plf_fplr_curve, constant_biquadratic)
         stage.setGrossRatedHeatingCOP(1.0 / eirs[speed_idx])
-        if not capacity.nil?
-          stage.setGrossRatedHeatingCapacity(UnitConversions.convert([capacity, Constants.small].max, 'Btu/hr', 'W')) # Used by HVACSizing measure
-        end
-        if is_fixed_flow_rate
+
+        if heat_pump.is_ventilation_preconditioning
+          stage.setGrossRatedHeatingCapacity(UnitConversions.convert([heat_pump.heating_capacity, Constants.small].max, 'Btu/hr', 'W') * heat_capacity_ratios[speed_idx]) # Used by HVACSizing measure
           if obj_name == Constants.ObjectNameMiniSplitHeatPump
-            stage.setRatedAirFlowRate(UnitConversions.convert([capacity, Constants.small].max, 'Btu/hr', 'ton') * UnitConversions.convert(heat_cfms_ton_rated[speed_idx], 'cfm', 'm^3/s'))
+            stage.setRatedAirFlowRate(UnitConversions.convert([heat_pump.heating_capacity, Constants.small].max, 'Btu/hr', 'ton') * UnitConversions.convert(heat_cfms_ton_rated[speed_idx], 'cfm', 'm^3/s'))
           else
-            stage.setRatedAirFlowRate(UnitConversions.convert([capacity, Constants.small].max, 'Btu/hr', 'ton') * UnitConversions.convert(heat_cfms_ton_rated[speed_idx], 'cfm', 'm^3/s') * cool_capacity_ratios[speed_idx])
+            stage.setRatedAirFlowRate(UnitConversions.convert([heat_pump.heating_capacity, Constants.small].max, 'Btu/hr', 'ton') * UnitConversions.convert(heat_cfms_ton_rated[speed_idx], 'cfm', 'm^3/s') * heat_capacity_ratios[speed_idx])
           end
+        elsif not heat_pump.heating_capacity.nil?
+          stage.setGrossRatedHeatingCapacity(UnitConversions.convert([heat_pump.heating_capacity, Constants.small].max, 'Btu/hr', 'W')) # Used by HVACSizing measure
         end
         stage.setRatedWasteHeatFractionofPowerInput(0.2)
         htg_coil.addStage(stage)
@@ -3368,7 +3369,7 @@ class HVAC
     htg_coil.setName(obj_name + ' htg coil')
     htg_coil.setMinimumOutdoorDryBulbTemperatureforCompressorOperation(UnitConversions.convert(hp_min_temp, 'F', 'C'))
     htg_coil.setMaximumOutdoorDryBulbTemperatureforDefrostOperation(UnitConversions.convert(40.0, 'F', 'C'))
-    if (not fraction_heat_load_served.nil?) && (fraction_heat_load_served > 0)
+    if (heat_pump.fraction_heat_load_served > 0) || heat_pump.is_ventilation_preconditioning
       defrost_eir_curve = create_curve_biquadratic(model, [0.1528, 0, 0, 0, 0, 0], 'Defrosteir', -100, 100, -100, 100) # Heating defrost curve for reverse cycle
       htg_coil.setDefrostEnergyInputRatioFunctionofTemperatureCurve(defrost_eir_curve)
       htg_coil.setDefrostStrategy('ReverseCycle')

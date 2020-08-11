@@ -248,7 +248,7 @@ class OSModel
     # Conditioned space/zone
 
     spaces = {}
-    cond_spaces = create_or_get_conditioned_space(model, spaces)
+    cond_spaces = create_or_get_conditioned_spaces(model, spaces)
     set_foundation_and_walls_top()
     add_setpoints(runner, model, weather, spaces, cond_spaces)
 
@@ -976,7 +976,7 @@ class OSModel
     return azimuth
   end
 
-  def self.create_or_get_conditioned_space(model, spaces)
+  def self.create_or_get_conditioned_spaces(model, spaces)
     cond_zones = []
     cond_zones << create_or_get_space(model, spaces, HPXML::LocationLivingSpace)
     # Create conditioned space for mech vent preconditioned shared systems
@@ -2057,10 +2057,7 @@ class OSModel
   def self.add_cooling_system(runner, model, spaces)
     @hpxml.cooling_systems.each do |cooling_system|
       if cooling_system.is_ventilation_preconditioning
-        fan_index = @hpxml.ventilation_fans.find_index(cooling_system.ventilation_fan)
-        mechvent_space = create_or_get_space(model, spaces, HPXML::LocationMechanicalVentilationSpace + " #{fan_index}", true)
-        thermal_zone = mechvent_space.thermalZone.get
-        cooling_system.ventilation_fan.additional_properties.space = mechvent_space
+        thermal_zone = cooling_system.ventilation_fan.additional_properties.space.thermalZone.get
         cooling_system.fraction_cool_load_served = 0.0
       else
         thermal_zone = spaces[HPXML::LocationLivingSpace].thermalZone.get
@@ -2114,10 +2111,7 @@ class OSModel
   def self.add_heating_system(runner, model, spaces)
     @hpxml.heating_systems.each do |heating_system|
       if heating_system.is_ventilation_preconditioning
-        fan_index = @hpxml.ventilation_fans.find_index(heating_system.ventilation_fan)
-        mechvent_space = create_or_get_space(model, spaces, HPXML::LocationMechanicalVentilationSpace + " #{fan_index}", true)
-        thermal_zone = mechvent_space.thermalZone.get
-        heating_system.ventilation_fan.additional_properties.space = mechvent_space
+        thermal_zone = heating_system.ventilation_fan.additional_properties.space.thermalZone.get
         heating_system.fraction_heat_load_served = 0.0
       else
         thermal_zone = spaces[HPXML::LocationLivingSpace].thermalZone.get
@@ -2182,10 +2176,7 @@ class OSModel
       end
 
       if heat_pump.is_ventilation_preconditioning
-        fan_index = @hpxml.ventilation_fans.find_index(heat_pump.ventilation_fan)
-        mechvent_space = create_or_get_space(model, spaces, HPXML::LocationMechanicalVentilationSpace + " #{fan_index}", true)
-        thermal_zone = mechvent_space.thermalZone.get
-        heat_pump.ventilation_fan.additional_properties.space = mechvent_space
+        thermal_zone = heat_pump.ventilation_fan.additional_properties.space.thermalZone.get
         heat_pump.fraction_heat_load_served = 0.0
         heat_pump.fraction_cool_load_served = 0.0
       else
@@ -2590,6 +2581,8 @@ class OSModel
   end
 
   def self.add_component_loads_output(runner, model, spaces)
+    cond_spaces = create_or_get_conditioned_spaces(model, spaces)
+    cond_zones = cond_spaces.map { |space| space.thermalZone.get }
     living_zone = spaces[HPXML::LocationLivingSpace].thermalZone.get
 
     # Prevent certain objects (e.g., OtherEquipment) from being counted towards both, e.g., ducts and internal gains
@@ -2597,13 +2590,18 @@ class OSModel
 
     # EMS Sensors: Global
 
-    liv_load_sensors = {}
+    cond_load_htg_sensors = []
+    cond_load_clg_sensors = []
 
-    liv_load_sensors[:htg] = OpenStudio::Model::EnergyManagementSystemSensor.new(model, "Heating:EnergyTransfer:Zone:#{living_zone.name.to_s.upcase}")
-    liv_load_sensors[:htg].setName('htg_load_liv')
+    cond_zones.each do |cond_zone|
+      cond_load_htg_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, "Heating:EnergyTransfer:Zone:#{cond_zone.name.to_s.upcase}")
+      cond_load_htg_sensor.setName("htg_load_#{cond_zone.name}")
+      cond_load_htg_sensors << cond_load_htg_sensor
 
-    liv_load_sensors[:clg] = OpenStudio::Model::EnergyManagementSystemSensor.new(model, "Cooling:EnergyTransfer:Zone:#{living_zone.name.to_s.upcase}")
-    liv_load_sensors[:clg].setName('clg_load_liv')
+      cond_load_clg_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, "Cooling:EnergyTransfer:Zone:#{cond_zone.name.to_s.upcase}")
+      cond_load_clg_sensor.setName("clg_load_#{cond_zone.name}")
+      cond_load_clg_sensors << cond_load_clg_sensor
+    end
 
     tot_load_sensors = {}
 
@@ -2718,14 +2716,20 @@ class OSModel
     end
 
     # EMS Sensors: Infiltration, Mechanical Ventilation, Natural Ventilation, Whole House Fan
+    # Multiple zones can be assigned for mech ventilation due to preconditioning
+    air_gain_sensors = []
+    air_loss_sensors = []
+    cond_zones.each_with_index do |cond_zone, index|
+      air_gain_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Zone Infiltration Sensible Heat Gain Energy')
+      air_gain_sensor.setName("airflow_gain_#{index}")
+      air_gain_sensor.setKeyName(cond_zone.name.to_s)
+      air_gain_sensors << air_gain_sensor
 
-    air_gain_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Zone Infiltration Sensible Heat Gain Energy')
-    air_gain_sensor.setName('airflow_gain')
-    air_gain_sensor.setKeyName(living_zone.name.to_s)
-
-    air_loss_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Zone Infiltration Sensible Heat Loss Energy')
-    air_loss_sensor.setName('airflow_loss')
-    air_loss_sensor.setKeyName(living_zone.name.to_s)
+      air_loss_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Zone Infiltration Sensible Heat Loss Energy')
+      air_loss_sensor.setName("airflow_loss_#{index}")
+      air_loss_sensor.setKeyName(cond_zone.name.to_s)
+      air_loss_sensors << air_loss_sensor
+    end
 
     mechvent_sensors = []
     model.getElectricEquipments.sort.each do |o|
@@ -3005,10 +3009,12 @@ class OSModel
     mechvent_flow_actuator_names = mechvent_flow_actuators.map { |mechvent_act| mechvent_act.name }.join(' + ')
     program.addLine("Set hr_airflow_rate = #{infil_flow_actuator.name} + #{mechvent_flow_actuator_names} + #{natvent_flow_actuator.name} + #{whf_flow_actuator.name}")
     program.addLine('If hr_airflow_rate > 0')
-    program.addLine("  Set hr_infil = (#{air_loss_sensor.name} - #{air_gain_sensor.name}) * #{infil_flow_actuator.name} / hr_airflow_rate") # Airflow heat attributed to infiltration
-    program.addLine("  Set hr_natvent = (#{air_loss_sensor.name} - #{air_gain_sensor.name}) * #{natvent_flow_actuator.name} / hr_airflow_rate") # Airflow heat attributed to natural ventilation
-    program.addLine("  Set hr_whf = (#{air_loss_sensor.name} - #{air_gain_sensor.name}) * #{whf_flow_actuator.name} / hr_airflow_rate") # Airflow heat attributed to whole house fan
-    program.addLine("  Set hr_mechvent = ((#{air_loss_sensor.name} - #{air_gain_sensor.name}) * (#{mechvent_flow_actuator_names}) / hr_airflow_rate)") # Airflow heat attributed to mechanical ventilation
+    air_loss_sensor_names = air_loss_sensors.map { |air_loss_sensor| air_loss_sensor.name }.join(' + ')
+    air_gain_sensor_names = air_gain_sensors.map { |air_gain_sensor| air_gain_sensor.name }.join(' + ')
+    program.addLine("  Set hr_infil = ((#{air_loss_sensor_names}) - (#{air_gain_sensor_names})) * #{infil_flow_actuator.name} / hr_airflow_rate") # Airflow heat attributed to infiltration
+    program.addLine("  Set hr_natvent = ((#{air_loss_sensor_names}) - (#{air_gain_sensor_names})) * #{natvent_flow_actuator.name} / hr_airflow_rate") # Airflow heat attributed to natural ventilation
+    program.addLine("  Set hr_whf = ((#{air_loss_sensor_names}) - (#{air_gain_sensor_names})) * #{whf_flow_actuator.name} / hr_airflow_rate") # Airflow heat attributed to whole house fan
+    program.addLine("  Set hr_mechvent = ((#{air_loss_sensor_names}) - (#{air_gain_sensor_names})) * (#{mechvent_flow_actuator_names}) / hr_airflow_rate") # Airflow heat attributed to mechanical ventilation
     program.addLine('Else')
     program.addLine('  Set hr_infil = 0')
     program.addLine('  Set hr_natvent = 0')
@@ -3035,9 +3041,9 @@ class OSModel
     # EMS program: Heating vs Cooling logic
     program.addLine('Set htg_mode = 0')
     program.addLine('Set clg_mode = 0')
-    program.addLine("If (#{liv_load_sensors[:htg].name} > 0)") # Assign hour to heating if heating load
+    program.addLine("If ((#{cond_load_htg_sensors.map { |ss| ss.name }.join(' + ')}) > 0)") # Assign hour to heating if heating load
     program.addLine('  Set htg_mode = 1')
-    program.addLine("ElseIf (#{liv_load_sensors[:clg].name} > 0)") # Assign hour to cooling if cooling load
+    program.addLine("ElseIf ((#{cond_load_clg_sensors.map { |ss| ss.name }.join(' + ')}) > 0)") # Assign hour to cooling if cooling load
     program.addLine('  Set clg_mode = 1')
     program.addLine("ElseIf (#{@clg_ssn_sensor.name} > 0)") # No load, assign hour to cooling if in cooling season definition (Note: natural ventilation & whole house fan only operate during the cooling season)
     program.addLine('  Set clg_mode = 1')
@@ -3062,7 +3068,7 @@ class OSModel
     # EMS program: Total loads
     program.addLine('Set loads_htg_tot = 0')
     program.addLine('Set loads_clg_tot = 0')
-    program.addLine("If #{liv_load_sensors[:htg].name} > 0")
+    program.addLine('If htg_mode > 0')
     s = "  Set loads_htg_tot = #{tot_load_sensors[:htg].name} - #{tot_load_sensors[:clg].name}"
     load_adj_sensors.each do |key, adj_sensor|
       if ['dehumidifier'].include? key.to_s
@@ -3070,7 +3076,7 @@ class OSModel
       end
     end
     program.addLine(s)
-    program.addLine("ElseIf #{liv_load_sensors[:clg].name} > 0")
+    program.addLine('ElseIf clg_mode > 0')
     s = "  Set loads_clg_tot = #{tot_load_sensors[:clg].name} - #{tot_load_sensors[:htg].name}"
     load_adj_sensors.each do |key, adj_sensor|
       if ['dehumidifier'].include? key.to_s
