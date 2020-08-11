@@ -918,6 +918,8 @@ If ``EnergyFactor`` is provided instead of ``CombinedEnergyFactor``, it will be 
 
 An ``extension/UsageMultiplier`` can also be optionally provided that scales energy usage; if not provided, it is assumed to be 1.0.
 
+An ``extension/RatedFlowRate`` can also be optionally provided that indicates whether there is exhaust. If not provided, it is assumed that there is no exhaust.
+
 HPXML Dishwasher
 ****************
 
