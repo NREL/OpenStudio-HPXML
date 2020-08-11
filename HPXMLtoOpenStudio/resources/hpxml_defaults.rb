@@ -396,6 +396,12 @@ class HPXMLDefaults
         hot_water_distribution.recirculation_pump_power = HotWaterAndAppliances.get_default_recirc_pump_power()
       end
     end
+
+    if hot_water_distribution.has_shared_recirculation
+      if hot_water_distribution.shared_recirculation_pump_power.nil?
+        hot_water_distribution.shared_recirculation_pump_power = HotWaterAndAppliances.get_default_shared_recirc_pump_power()
+      end
+    end
   end
 
   def self.apply_water_fixtures(hpxml)
