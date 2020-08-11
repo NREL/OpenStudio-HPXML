@@ -78,6 +78,22 @@ class HPXMLDefaults
     hpxml.building_construction.number_of_bathrooms = Float(Waterheater.get_default_num_bathrooms(nbeds)).to_i if hpxml.building_construction.number_of_bathrooms.nil?
     if hpxml.building_construction.has_flue_or_chimney.nil?
       hpxml.building_construction.has_flue_or_chimney = false
+      hpxml.heating_systems.each do |heating_system|
+        if [HPXML::HVACTypeFurnace, HPXML::HVACTypeBoiler].include? heating_system.heating_system_type
+          next if heating_system.heating_efficiency_afue.nil?
+          next if heating_system.heating_efficiency_afue >= 0.89
+
+          hpxml.building_construction.has_flue_or_chimney = true
+        elsif [HPXML::HVACTypeFireplace].include? heating_system.heating_system_type
+          hpxml.building_construction.has_flue_or_chimney = true
+        end
+      end
+      hpxml.water_heating_systems.each do |water_heating_system|
+        next if water_heating_system.energy_factor.nil?
+        next if water_heating_system.energy_factor >= 0.63
+
+        hpxml.building_construction.has_flue_or_chimney = true
+      end
     end
   end
 
