@@ -373,6 +373,9 @@ class HPXMLDefaults
 
   def self.apply_water_heaters(hpxml, nbeds, eri_version)
     hpxml.water_heating_systems.each do |water_heating_system|
+      if water_heating_system.is_shared_system.nil?
+        water_heating_system.is_shared_system = false
+      end
       if water_heating_system.temperature.nil?
         water_heating_system.temperature = Waterheater.get_default_hot_water_temperature(eri_version)
       end
@@ -759,6 +762,9 @@ class HPXMLDefaults
     # Default clothes washer
     if hpxml.clothes_washers.size > 0
       clothes_washer = hpxml.clothes_washers[0]
+      if clothes_washer.is_shared_appliance.nil?
+        clothes_washer.is_shared_appliance = false
+      end
       if clothes_washer.location.nil?
         clothes_washer.location = HPXML::LocationLivingSpace
       end
@@ -796,6 +802,9 @@ class HPXMLDefaults
     # Default dishwasher
     if hpxml.dishwashers.size > 0
       dishwasher = hpxml.dishwashers[0]
+      if dishwasher.is_shared_appliance.nil?
+        dishwasher.is_shared_appliance = false
+      end
       if dishwasher.location.nil?
         dishwasher.location = HPXML::LocationLivingSpace
       end

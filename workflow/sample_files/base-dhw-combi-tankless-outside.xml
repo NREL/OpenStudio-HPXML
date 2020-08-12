@@ -337,7 +337,6 @@
             <SystemIdentifier id='WaterHeater'/>
             <WaterHeaterType>space-heating boiler with tankless coil</WaterHeaterType>
             <Location>other exterior</Location>
-            <IsSharedSystem>false</IsSharedSystem>
             <FractionDHWLoadServed>1.0</FractionDHWLoadServed>
             <HotWaterTemperature>125.0</HotWaterTemperature>
             <RelatedHVACSystem idref='HeatingSystem'/>
@@ -368,7 +367,6 @@
       <Appliances>
         <ClothesWasher>
           <SystemIdentifier id='ClothesWasher'/>
-          <IsSharedAppliance>false</IsSharedAppliance>
           <Location>living space</Location>
           <IntegratedModifiedEnergyFactor>1.21</IntegratedModifiedEnergyFactor>
           <RatedAnnualkWh>380.0</RatedAnnualkWh>
@@ -387,7 +385,6 @@
         </ClothesDryer>
         <Dishwasher>
           <SystemIdentifier id='Dishwasher'/>
-          <IsSharedAppliance>false</IsSharedAppliance>
           <Location>living space</Location>
           <RatedAnnualkWh>307.0</RatedAnnualkWh>
           <PlaceSettingCapacity>12</PlaceSettingCapacity>
