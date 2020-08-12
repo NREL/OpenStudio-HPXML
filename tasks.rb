@@ -87,6 +87,7 @@ def create_osws
     'base-enclosure-beds-5.osw' => 'base.osw',
     'base-enclosure-garage.osw' => 'base.osw',
     'base-enclosure-infil-cfm50.osw' => 'base.osw',
+    'base-enclosure-infil-flue.osw' => 'base.osw',
     'base-enclosure-infil-natural-ach.osw' => 'base.osw',
     # 'base-enclosure-other-heated-space.osw' => 'base.osw', # TODO: uncomment when we can model multifamily with ambient foundation?
     # 'base-enclosure-other-housing-unit.osw' => 'base-foundation-ambient.osw', # TODO: uncomment when we can model multifamily with ambient foundation?
@@ -353,7 +354,7 @@ def get_values(osw_file, step)
     step.setArgument('roof_solar_absorptance', Constants.Auto)
     step.setArgument('roof_emittance', 0.92)
     step.setArgument('roof_radiant_barrier', false)
-    step.setArgument('roof_radiant_barrier_grade', '2')
+    step.setArgument('roof_radiant_barrier_grade', '1')
     step.setArgument('neighbor_front_distance', 0)
     step.setArgument('neighbor_back_distance', 0)
     step.setArgument('neighbor_left_distance', 0)
@@ -407,6 +408,7 @@ def get_values(osw_file, step)
     step.setArgument('heating_system_heating_capacity', '64000.0')
     step.setArgument('heating_system_fraction_heat_load_served', 1)
     step.setArgument('heating_system_electric_auxiliary_energy', 0)
+    step.setArgument('heating_system_has_flue_or_chimney', false)
     step.setArgument('cooling_system_type', HPXML::HVACTypeCentralAirConditioner)
     step.setArgument('cooling_system_cooling_efficiency_seer', 13.0)
     step.setArgument('cooling_system_cooling_efficiency_eer', 8.5)
@@ -456,6 +458,7 @@ def get_values(osw_file, step)
     step.setArgument('heating_system_heating_capacity_2', Constants.Auto)
     step.setArgument('heating_system_fraction_heat_load_served_2', 0.25)
     step.setArgument('heating_system_electric_auxiliary_energy_2', 0)
+    step.setArgument('heating_system_has_flue_or_chimney_2', false)
     step.setArgument('mech_vent_fan_type', 'none')
     step.setArgument('mech_vent_flow_rate', 110)
     step.setArgument('mech_vent_hours_in_operation', 24)
@@ -490,6 +493,7 @@ def get_values(osw_file, step)
     step.setArgument('water_heater_standby_loss', 0)
     step.setArgument('water_heater_jacket_rvalue', 0)
     step.setArgument('water_heater_setpoint_temperature', '125')
+    step.setArgument('water_heater_has_flue_or_chimney', false)
     step.setArgument('water_heater_is_shared_system', false)
     step.setArgument('dhw_distribution_system_type', HPXML::DHWDistTypeStandard)
     step.setArgument('dhw_distribution_standard_piping_length', '50')
@@ -812,6 +816,7 @@ def get_values(osw_file, step)
   elsif ['base-atticroof-radiant-barrier.osw'].include? osw_file
     step.setArgument('weather_station_epw_filepath', 'USA_TX_Dallas-Fort.Worth.Intl.AP.722590_TMY3.epw')
     step.setArgument('roof_radiant_barrier', true)
+    step.setArgument('roof_radiant_barrier_grade', '2')
   elsif ['base-atticroof-unvented-insulated-roof.osw'].include? osw_file
     step.setArgument('ceiling_assembly_r', 2.1)
     step.setArgument('roof_assembly_r', 25.8)
@@ -1086,6 +1091,8 @@ def get_values(osw_file, step)
   elsif ['base-enclosure-infil-cfm50.osw'].include? osw_file
     step.setArgument('air_leakage_units', HPXML::UnitsCFM)
     step.setArgument('air_leakage_value', 1080)
+  elsif ['base-enclosure-infil-flue.osw'].include? osw_file
+    step.setArgument('heating_system_has_flue_or_chimney', true)
   elsif ['base-enclosure-infil-natural-ach.osw'].include? osw_file
     step.setArgument('air_leakage_units', HPXML::UnitsACHNatural)
     step.setArgument('air_leakage_value', 0.67)
@@ -2141,6 +2148,7 @@ def create_hpxmls
     'base-enclosure-beds-5.xml' => 'base.xml',
     'base-enclosure-garage.xml' => 'base.xml',
     'base-enclosure-infil-cfm50.xml' => 'base.xml',
+    'base-enclosure-infil-flue.xml' => 'base.xml',
     'base-enclosure-infil-natural-ach.xml' => 'base.xml',
     'base-enclosure-overhangs.xml' => 'base.xml',
     'base-enclosure-rooftypes.xml' => 'base.xml',
@@ -2629,6 +2637,8 @@ def set_hpxml_air_infiltration_measurements(hpxml_file, hpxml)
                                             house_pressure: 50,
                                             unit_of_measure: HPXML::UnitsCFM,
                                             air_leakage: 3.0 / 60.0 * infil_volume)
+  elsif ['base-enclosure-infil-flue.xml'].include? hpxml_file
+    hpxml.building_construction.has_flue_or_chimney = true
   end
   if ['base-misc-defaults.xml'].include? hpxml_file
     hpxml.air_infiltration_measurements[0].infiltration_volume = nil

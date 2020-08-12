@@ -541,7 +541,7 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('roof_radiant_barrier_grade', roof_radiant_barrier_grade_choices, true)
     arg.setDisplayName('Roof: Radiant Barrier Grade')
     arg.setDescription('The grade of the radiant barrier, if it exists.')
-    arg.setUnits('2')
+    arg.setDefaultValue('1')
     args << arg
 
     arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('neighbor_front_distance', true)
@@ -934,6 +934,12 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     arg.setUnits('kWh/yr')
     args << arg
 
+    arg = OpenStudio::Measure::OSArgument::makeBoolArgument('heating_system_has_flue_or_chimney', true)
+    arg.setDisplayName('Heating System: Has Flue or Chimney')
+    arg.setDescription('Whether the heating system has a flue or chimney.')
+    arg.setDefaultValue(false)
+    args << arg
+
     arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('cooling_system_type', cooling_system_type_choices, true)
     arg.setDisplayName('Cooling System: Type')
     arg.setDescription("The type of cooling system. Use 'none' if there is no cooling system.")
@@ -1312,6 +1318,12 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     arg.setUnits('kWh/yr')
     args << arg
 
+    arg = OpenStudio::Measure::OSArgument::makeBoolArgument('heating_system_has_flue_or_chimney_2', true)
+    arg.setDisplayName('Heating System 2: Has Flue or Chimney')
+    arg.setDescription('Whether the second heating system has a flue or chimney.')
+    arg.setDefaultValue(false)
+    args << arg
+
     mech_vent_fan_type_choices = OpenStudio::StringVector.new
     mech_vent_fan_type_choices << 'none'
     mech_vent_fan_type_choices << HPXML::MechVentTypeExhaust
@@ -1574,6 +1586,12 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     arg.setDescription('The setpoint temperature of water heater.')
     arg.setUnits('deg-F')
     arg.setDefaultValue(Constants.Auto)
+    args << arg
+
+    arg = OpenStudio::Measure::OSArgument::makeBoolArgument('water_heater_has_flue_or_chimney', true)
+    arg.setDisplayName('Water Heater: Has Flue or Chimney')
+    arg.setDescription('Whether the water heater has a flue or chimney.')
+    arg.setDefaultValue(false)
     args << arg
 
     arg = OpenStudio::Measure::OSArgument::makeBoolArgument('water_heater_is_shared_system', true)
@@ -3230,6 +3248,7 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
              heating_system_heating_capacity: runner.getStringArgumentValue('heating_system_heating_capacity', user_arguments),
              heating_system_fraction_heat_load_served: runner.getDoubleArgumentValue('heating_system_fraction_heat_load_served', user_arguments),
              heating_system_electric_auxiliary_energy: runner.getOptionalDoubleArgumentValue('heating_system_electric_auxiliary_energy', user_arguments),
+             heating_system_has_flue_or_chimney: runner.getBoolArgumentValue('heating_system_has_flue_or_chimney', user_arguments),
              cooling_system_type: runner.getStringArgumentValue('cooling_system_type', user_arguments),
              cooling_system_cooling_efficiency_seer: runner.getDoubleArgumentValue('cooling_system_cooling_efficiency_seer', user_arguments),
              cooling_system_cooling_efficiency_eer: runner.getDoubleArgumentValue('cooling_system_cooling_efficiency_eer', user_arguments),
@@ -3281,6 +3300,7 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
              heating_system_heating_capacity_2: runner.getStringArgumentValue('heating_system_heating_capacity_2', user_arguments),
              heating_system_fraction_heat_load_served_2: runner.getDoubleArgumentValue('heating_system_fraction_heat_load_served_2', user_arguments),
              heating_system_electric_auxiliary_energy_2: runner.getOptionalDoubleArgumentValue('heating_system_electric_auxiliary_energy_2', user_arguments),
+             heating_system_has_flue_or_chimney_2: runner.getBoolArgumentValue('heating_system_has_flue_or_chimney_2', user_arguments),
              mech_vent_fan_type: runner.getStringArgumentValue('mech_vent_fan_type', user_arguments),
              mech_vent_flow_rate: runner.getDoubleArgumentValue('mech_vent_flow_rate', user_arguments),
              mech_vent_hours_in_operation: runner.getDoubleArgumentValue('mech_vent_hours_in_operation', user_arguments),
@@ -3315,6 +3335,7 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
              water_heater_standby_loss: runner.getOptionalDoubleArgumentValue('water_heater_standby_loss', user_arguments),
              water_heater_jacket_rvalue: runner.getOptionalDoubleArgumentValue('water_heater_jacket_rvalue', user_arguments),
              water_heater_setpoint_temperature: runner.getStringArgumentValue('water_heater_setpoint_temperature', user_arguments),
+             water_heater_has_flue_or_chimney: runner.getBoolArgumentValue('water_heater_has_flue_or_chimney', user_arguments),
              water_heater_is_shared_system: runner.getBoolArgumentValue('water_heater_is_shared_system', user_arguments),
              dhw_distribution_system_type: runner.getStringArgumentValue('dhw_distribution_system_type', user_arguments),
              dhw_distribution_standard_piping_length: runner.getStringArgumentValue('dhw_distribution_standard_piping_length', user_arguments),
@@ -3840,6 +3861,12 @@ class HPXMLFile
     hpxml.building_construction.conditioned_building_volume = conditioned_building_volume
     hpxml.building_construction.average_ceiling_height = args[:geometry_wall_height]
     hpxml.building_construction.residential_facility_type = args[:geometry_unit_type]
+
+    if (args[:heating_system_type] != 'none' && args[:heating_system_has_flue_or_chimney]) ||
+       (args[:heating_system_type_2] != 'none' && args[:heating_system_has_flue_or_chimney_2]) ||
+       (args[:water_heater_type] != 'none' && args[:water_heater_has_flue_or_chimney])
+      hpxml.building_construction.has_flue_or_chimney = true
+    end
   end
 
   def self.set_climate_and_risk_zones(hpxml, runner, args, weather)
