@@ -1393,6 +1393,8 @@ class Airflow
       infil_flow.setSpace(space)
       infil_flow_actuator = OpenStudio::Model::EnergyManagementSystemActuator.new(infil_flow, 'Zone Infiltration', 'Air Exchange Flow Rate')
       infil_flow_actuator.setName("#{infil_flow.name} act")
+      # CFIS fan Actuators
+      cfis_fan_actuator = add_ee_for_vent_fan_power(model, Constants.ObjectNameMechanicalVentilationHouseFanCFIS, 0.0, true)
     end
 
     mechvent_flow = OpenStudio::Model::SpaceInfiltrationDesignFlowRate.new(model)
@@ -1414,25 +1416,23 @@ class Airflow
     else
       fan_heat_lost_fraction = 1.0
     end
+    # Fixme: Should we add ee to living or mech vent zones? I think it mostly depends on location of fan and hvac systems, now assuming fan is placed behind hvac system
     add_ee_for_vent_fan_power(model, Constants.ObjectNameMechanicalVentilationHouseFan, fan_heat_lost_fraction, false, total_sup_exh_bal_w)
-    # CFIS fan Actuators
-    cfis_fan_actuator = add_ee_for_vent_fan_power(model, Constants.ObjectNameMechanicalVentilationHouseFanCFIS, 0.0, true)
 
     # CFMs
-    # get cfms (for living space)
     sup_cfm = vent_mech_sup.map { |vent_mech| vent_mech.average_flow_rate }.sum(0.0)
     exh_cfm = vent_mech_exh.map { |vent_mech| vent_mech.average_flow_rate }.sum(0.0)
     bal_cfm = vent_mech_bal.map { |vent_mech| vent_mech.average_flow_rate }.sum(0.0)
     erv_hrv_cfm = vent_mech_erv_hrv.map { |vent_mech| vent_mech.average_flow_rate }.sum(0.0)
     cfis_cfm = vent_mech_cfis.map { |vent_mech| vent_mech.average_flow_rate }.sum(0.0)
 
-    if is_living
-      # Balanced and unbalanced airflow calculated for hvac sizing
-      tot_sup_cfm = sup_cfm + bal_cfm + erv_hrv_cfm + cfis_cfm
-      tot_exh_cfm = exh_cfm + bal_cfm + erv_hrv_cfm
-      tot_bal_cfm = [tot_sup_cfm, tot_exh_cfm].min
-      tot_unbal_cfm = (tot_sup_cfm - tot_exh_cfm).abs
+    # Balanced and unbalanced airflow calculated for hvac sizing
+    tot_sup_cfm = sup_cfm + bal_cfm + erv_hrv_cfm + cfis_cfm
+    tot_exh_cfm = exh_cfm + bal_cfm + erv_hrv_cfm
+    tot_bal_cfm = [tot_sup_cfm, tot_exh_cfm].min
+    tot_unbal_cfm = (tot_sup_cfm - tot_exh_cfm).abs
 
+    if is_living
       # Store info for HVAC Sizing measure
       model.getBuilding.additionalProperties.setFeature(Constants.SizingInfoMechVentWholeHouseRateBalanced, tot_bal_cfm)
       model.getBuilding.additionalProperties.setFeature(Constants.SizingInfoMechVentWholeHouseRateUnbalanced, tot_unbal_cfm)
@@ -1443,10 +1443,8 @@ class Airflow
     if not vent_mech_erv_hrv.empty?
       # Actuators for ERV/HRV
       sens_name = "#{Constants.ObjectNameERVHRV} sensible load"
-      erv_sens_load_var = OpenStudio::Model::EnergyManagementSystemGlobalVariable.new(model, sens_name.gsub(' ', '_'))
       erv_sens_load_actuator = create_sens_lat_load_actuator_and_equipment(model, sens_name, space, 0.0, 0.0)
       lat_name = "#{Constants.ObjectNameERVHRV} latent load"
-      erv_lat_load_var = OpenStudio::Model::EnergyManagementSystemGlobalVariable.new(model, lat_name.gsub(' ', '_'))
       erv_lat_load_actuator = create_sens_lat_load_actuator_and_equipment(model, lat_name, space, 1.0, 0.0)
 
       infil_program.addLine("Set #{erv_sens_load_actuator.name} = 0.0")
@@ -1491,10 +1489,12 @@ class Airflow
 
     # Apply CFIS
     infil_program.addLine('Set QWHV_cfis = 0.0')
-    infil_program.addLine("Set #{cfis_fan_actuator.name} = 0.0")
+    if is_living
+      infil_program.addLine("Set #{cfis_fan_actuator.name} = 0.0")
 
-    vent_mech_cfis.each do |vent_mech|
-      infil_program = apply_cfis_to_infil_program(infil_program, vent_mech, cfis_fan_actuator)
+      vent_mech_cfis.each do |vent_mech|
+        infil_program = apply_cfis_to_infil_program(infil_program, vent_mech, cfis_fan_actuator)
+      end
     end
 
     infil_program.addLine('Set Qrange = 0')

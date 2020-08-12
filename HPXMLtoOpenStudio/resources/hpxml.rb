@@ -2749,7 +2749,7 @@ class HPXML < Object
              :backup_heating_efficiency_percent, :backup_heating_efficiency_afue,
              :backup_heating_switchover_temp, :fraction_heat_load_served, :fraction_cool_load_served,
              :cooling_efficiency_seer, :cooling_efficiency_eer, :heating_efficiency_hspf,
-             :heating_efficiency_cop, :energy_star, :seed_id, :is_ventilation_preconditioning]
+             :heating_efficiency_cop, :energy_star, :seed_id, :is_ventilation_preconditioning, :backup_heating_capacity_building]
     attr_accessor(*ATTRS)
 
     def distribution_system
@@ -2850,7 +2850,14 @@ class HPXML < Object
           XMLHelper.add_element(backup_eff, 'Units', units)
           XMLHelper.add_element(backup_eff, 'Value', to_float(value))
         end
-        XMLHelper.add_element(heat_pump, 'BackupHeatingCapacity', to_float(@backup_heating_capacity)) unless @backup_heating_capacity.nil?
+        if @is_ventilation_preconditioning
+          backup_htg_cap = XMLHelper.add_element(heat_pump, 'BackupHeatingCapacity', to_float(@backup_heating_capacity)) unless @backup_heating_capacity.nil?
+          XMLHelper.add_attribute(backup_htg_cap, 'scope', 'single unit') unless backup_htg_cap.nil?
+          backup_htg_bldg_cap = XMLHelper.add_element(heat_pump, 'BackupHeatingCapacity', to_float(@backup_heating_capacity_building)) unless @backup_heating_capacity_building.nil?
+          XMLHelper.add_attribute(backup_htg_bldg_cap, 'scope', 'multiple units') unless backup_htg_bldg_cap.nil?
+        else
+          XMLHelper.add_element(heat_pump, 'BackupHeatingCapacity', to_float(@backup_heating_capacity)) unless @backup_heating_capacity.nil?
+        end
         XMLHelper.add_element(heat_pump, 'BackupHeatingSwitchoverTemperature', to_float(@backup_heating_switchover_temp)) unless @backup_heating_switchover_temp.nil?
       end
       XMLHelper.add_element(heat_pump, 'FractionHeatLoadServed', to_float(@fraction_heat_load_served)) unless @fraction_heat_load_served.nil?
@@ -2902,15 +2909,17 @@ class HPXML < Object
         @heating_capacity_17F_building = to_float_or_nil(XMLHelper.get_value(heat_pump, 'HeatingCapacity17F[@scope="multiple units"]'))
         @cooling_capacity = to_float_or_nil(XMLHelper.get_value(heat_pump, 'CoolingCapacity[@scope="single unit"]'))
         @cooling_capacity_building = to_float_or_nil(XMLHelper.get_value(heat_pump, 'CoolingCapacity[@scope="multiple units"]'))
+        @backup_heating_capacity = to_float_or_nil(XMLHelper.get_value(heat_pump, 'BackupHeatingCapacity[@scope="single unit"]'))
+        @backup_heating_capacity_building = to_float_or_nil(XMLHelper.get_value(heat_pump, 'BackupHeatingCapacity[@scope="multiple units"]'))
       else
         @heating_capacity = to_float_or_nil(XMLHelper.get_value(heat_pump, 'HeatingCapacity'))
         @heating_capacity_17F = to_float_or_nil(XMLHelper.get_value(heat_pump, 'HeatingCapacity17F'))
         @cooling_capacity = to_float_or_nil(XMLHelper.get_value(heat_pump, 'CoolingCapacity'))
+        @backup_heating_capacity = to_float_or_nil(XMLHelper.get_value(heat_pump, 'BackupHeatingCapacity'))
       end
       @compressor_type = XMLHelper.get_value(heat_pump, 'CompressorType')
       @cooling_shr = to_float_or_nil(XMLHelper.get_value(heat_pump, 'CoolingSensibleHeatFraction'))
       @backup_heating_fuel = XMLHelper.get_value(heat_pump, 'BackupSystemFuel')
-      @backup_heating_capacity = to_float_or_nil(XMLHelper.get_value(heat_pump, 'BackupHeatingCapacity'))
       @backup_heating_efficiency_percent = to_float_or_nil(XMLHelper.get_value(heat_pump, "BackupAnnualHeatingEfficiency[Units='Percent']/Value"))
       @backup_heating_efficiency_afue = to_float_or_nil(XMLHelper.get_value(heat_pump, "BackupAnnualHeatingEfficiency[Units='AFUE']/Value"))
       @backup_heating_switchover_temp = to_float_or_nil(XMLHelper.get_value(heat_pump, 'BackupHeatingSwitchoverTemperature'))
@@ -5024,6 +5033,9 @@ class HPXML < Object
       end
       if hp.cooling_capacity.nil? && (not hp.cooling_capacity_building.nil?)
         hp.cooling_capacity = hp.cooling_capacity_building * hp.ventilation_fan.unit_flow_rate_ratio
+      end
+      if hp.backup_heating_capacity.nil? && (not hp.backup_heating_capacity_building.nil?)
+        hp.backup_heating_capacity = hp.backup_heating_capacity_building * hp.ventilation_fan.unit_flow_rate_ratio
       end
     end
   end

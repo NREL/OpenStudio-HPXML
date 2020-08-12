@@ -525,6 +525,9 @@ class HPXMLTest < MiniTest::Test
       # Subtract duct return plenum conditioned floor area
       query = "SELECT SUM(Value) FROM TabularDataWithStrings WHERE ReportName='InputVerificationandResultsSummary' AND ReportForString='Entire Facility' AND TableName='Zone Summary' AND RowName LIKE '%RET AIR ZONE' AND ColumnName='Area' AND Units='m2'"
       sql_value -= UnitConversions.convert(sqlFile.execAndReturnFirstDouble(query).get, 'm^2', 'ft^2')
+      # Subtract mech vent conditioned floor area
+      query = "SELECT SUM(Value) FROM TabularDataWithStrings WHERE ReportName='InputVerificationandResultsSummary' AND ReportForString='Entire Facility' AND TableName='Zone Summary' AND RowName LIKE 'MECH VENT SPACE%' AND ColumnName='Area' AND Units='m2'"
+      sql_value -= UnitConversions.convert(sqlFile.execAndReturnFirstDouble(query).get, 'm^2', 'ft^2')
       assert_in_epsilon(hpxml_value, sql_value, 0.01)
     end
 
@@ -836,7 +839,7 @@ class HPXMLTest < MiniTest::Test
       htg_sys_fuel = heating_system.heating_system_fuel
       htg_load_frac = heating_system.fraction_heat_load_served
 
-      next unless htg_load_frac > 0
+      next unless (htg_load_frac.nil? || (htg_load_frac > 0))
 
       # Electric Auxiliary Energy
       # For now, skip if multiple equipment

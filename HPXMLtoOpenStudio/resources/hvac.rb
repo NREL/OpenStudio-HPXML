@@ -203,10 +203,8 @@ class HVAC
       # add airflow with ventilation fan cfm (skip autosizing)
       if cooling_system.is_ventilation_preconditioning
         air_loop_unitary.setSupplyAirFlowRateMethodDuringCoolingOperation('SupplyAirFlowRate')
-        air_loop_unitary.setSupplyAirFlowRateMethodDuringHeatingOperation('SupplyAirFlowRate')
         air_cfm = cooling_system.ventilation_fan.flow_rate
         air_loop_unitary.setSupplyAirFlowRateDuringCoolingOperation(UnitConversions.convert(air_cfm, 'cfm', 'm^3/s'))
-        air_loop_unitary.setSupplyAirFlowRateDuringHeatingOperation(UnitConversions.convert(air_cfm, 'cfm', 'm^3/s'))
         fan.setMaximumFlowRate(UnitConversions.convert(air_cfm + 0.01, 'cfm', 'm^3/s'))
         air_loop.setDesignSupplyAirFlowRate(UnitConversions.convert(air_cfm, 'cfm', 'm^3/s'))
         control_zone.airLoopHVACTerminals.each do |aterm|
@@ -225,8 +223,24 @@ class HVAC
       end
     end
     if not heating_system.nil?
-      air_loop_unitary.additionalProperties.setFeature(Constants.SizingInfoHVACFracHeatLoadServed, heating_system.fraction_heat_load_served)
-      air_loop_unitary.additionalProperties.setFeature(Constants.SizingInfoHVACHeatType, Constants.ObjectNameFurnace)
+      if heating_system.is_ventilation_preconditioning
+        air_loop_unitary.setSupplyAirFlowRateMethodDuringHeatingOperation('SupplyAirFlowRate')
+        air_cfm = heating_system.ventilation_fan.flow_rate
+        air_loop_unitary.setSupplyAirFlowRateDuringHeatingOperation(UnitConversions.convert(air_cfm, 'cfm', 'm^3/s'))
+        fan.setMaximumFlowRate(UnitConversions.convert(air_cfm + 0.01, 'cfm', 'm^3/s'))
+        air_loop.setDesignSupplyAirFlowRate(UnitConversions.convert(air_cfm, 'cfm', 'm^3/s'))
+        control_zone.airLoopHVACTerminals.each do |aterm|
+          next if air_loop != aterm.airLoopHVAC.get
+          next unless aterm.to_AirTerminalSingleDuctUncontrolled.is_initialized
+
+          # Air Terminal
+          aterm = aterm.to_AirTerminalSingleDuctUncontrolled.get
+          aterm.setMaximumAirFlowRate(UnitConversions.convert(air_cfm, 'cfm', 'm^3/s'))
+        end
+      else
+        air_loop_unitary.additionalProperties.setFeature(Constants.SizingInfoHVACFracHeatLoadServed, heating_system.fraction_heat_load_served)
+        air_loop_unitary.additionalProperties.setFeature(Constants.SizingInfoHVACHeatType, Constants.ObjectNameFurnace)
+      end
     end
   end
 
@@ -305,6 +319,13 @@ class HVAC
 
     # Store info for HVAC Sizing measure
     if cooling_system.is_ventilation_preconditioning
+      air_cfm = cooling_system.ventilation_fan.flow_rate
+      ptac.setSupplyAirFlowRateDuringCoolingOperation(UnitConversions.convert(air_cfm, 'cfm', 'm^3/s'))
+      ptac.setSupplyAirFlowRateDuringHeatingOperation(0.00001)
+      ptac.setSupplyAirFlowRateWhenNoCoolingorHeatingisNeeded(0.0)
+      ptac.setOutdoorAirFlowRateDuringCoolingOperation(0.0)
+      ptac.setOutdoorAirFlowRateDuringHeatingOperation(0.0)
+      ptac.setOutdoorAirFlowRateWhenNoCoolingorHeatingisNeeded(0.0)
       clg_coil.setRatedAirFlowRate(UnitConversions.convert([cooling_system.cooling_capacity, Constants.small].max, 'Btu/hr', 'ton') * UnitConversions.convert(cfms_ton_rated[0], 'cfm', 'm^3/s'))
       fan.setMaximumFlowRate(UnitConversions.convert(cooling_system.ventilation_fan.flow_rate, 'cfm', 'm^3/s'))
       htg_coil.setNominalCapacity(0.0)
@@ -647,6 +668,10 @@ class HVAC
     heat_pump.heat_pump_type = HPXML::HVACTypeHeatPumpMiniSplit
     heat_pump.heat_pump_fuel = cooling_system.cooling_system_fuel
     heat_pump.cooling_capacity = cooling_system.cooling_capacity
+    heat_pump.is_ventilation_preconditioning = cooling_system.is_ventilation_preconditioning
+    if heat_pump.is_ventilation_preconditioning
+      heat_pump.additional_properties.ventilation_fan = cooling_system.ventilation_fan
+    end
     if !heat_pump.cooling_capacity.nil?
       heat_pump.heating_capacity = 0
     end
@@ -659,13 +684,13 @@ class HVAC
 
     apply_mini_split_heat_pump(model, runner, heat_pump, 0,
                                remaining_cool_load_frac,
-                               control_zone, hvac_map)
+                               control_zone, hvac_map, true)
   end
 
   def self.apply_mini_split_heat_pump(model, runner, heat_pump,
                                       remaining_heat_load_frac,
                                       remaining_cool_load_frac,
-                                      control_zone, hvac_map)
+                                      control_zone, hvac_map, is_msac = false)
 
     hvac_map[heat_pump.id] = []
     obj_name = Constants.ObjectNameMiniSplitHeatPump
@@ -692,10 +717,15 @@ class HVAC
     if heat_pump.is_ventilation_preconditioning
       sequential_heat_load_frac = 0.0
       sequential_cool_load_frac = 0.0
-      if heat_pump.ventilation_fan.preconditioning_heating_system_idref == heat_pump.id
+      if is_msac
+        ventilation_fan = heat_pump.additional_properties.ventilation_fan
+      else
+        ventilation_fan = heat_pump.ventilation_fan
+      end
+      if ventilation_fan.preconditioning_heating_system_idref == heat_pump.id
         sequential_heat_load_frac = 1.0
       end
-      if heat_pump.ventilation_fan.preconditioning_cooling_system_idref == heat_pump.id
+      if ventilation_fan.preconditioning_cooling_system_idref == heat_pump.id
         sequential_cool_load_frac = 1.0
       end
     else
@@ -885,7 +915,7 @@ class HVAC
     if heat_pump.is_ventilation_preconditioning
       air_loop_unitary.setSupplyAirFlowRateMethodDuringCoolingOperation('SupplyAirFlowRate')
       air_loop_unitary.setSupplyAirFlowRateMethodDuringHeatingOperation('SupplyAirFlowRate')
-      air_cfm = heat_pump.ventilation_fan.flow_rate
+      air_cfm = ventilation_fan.flow_rate
       air_loop_unitary.setSupplyAirFlowRateDuringCoolingOperation(UnitConversions.convert(air_cfm, 'cfm', 'm^3/s'))
       air_loop_unitary.setSupplyAirFlowRateDuringHeatingOperation(UnitConversions.convert(air_cfm, 'cfm', 'm^3/s'))
       fan.setMaximumFlowRate(UnitConversions.convert(air_cfm + 0.01, 'cfm', 'm^3/s'))

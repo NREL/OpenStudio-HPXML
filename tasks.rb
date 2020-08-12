@@ -2575,6 +2575,25 @@ def set_hpxml_heating_systems(hpxml_file, hpxml)
     hpxml.heating_systems << hpxml.heating_systems[0].dup
     hpxml.heating_systems[1].id = 'HeatingSystem2'
     hpxml.heating_systems[1].distribution_system_idref = 'HVACDistribution2'
+  elsif ['base-mechvent-shared.xml'].include? hpxml_file
+    hpxml.heating_systems.add(id: 'PreconditioningFurnace',
+                              heating_system_type: HPXML::HVACTypeFurnace,
+                              heating_system_fuel: HPXML::FuelTypeElectricity,
+                              heating_capacity_building: 6400,
+                              heating_efficiency_afue: 1,
+                              is_ventilation_preconditioning: true)
+    hpxml.heating_systems.add(id: 'PreconditioningBoiler',
+                              heating_system_type: HPXML::HVACTypeBoiler,
+                              heating_system_fuel: HPXML::FuelTypeElectricity,
+                              heating_capacity_building: 6400,
+                              heating_efficiency_afue: 1,
+                              is_ventilation_preconditioning: true)
+    hpxml.heating_systems.add(id: 'PreconditioningPortableHeater',
+                              heating_system_type: HPXML::HVACTypePortableHeater,
+                              heating_system_fuel: HPXML::FuelTypeElectricity,
+                              heating_capacity_building: 6400,
+                              heating_efficiency_percent: 1.0,
+                              is_ventilation_preconditioning: true)
   elsif ['invalid_files/hvac-frac-load-served.xml'].include? hpxml_file
     hpxml.heating_systems[0].fraction_heat_load_served += 0.1
   elsif ['base-hvac-fireplace-wood-only.xml'].include? hpxml_file
@@ -2770,12 +2789,33 @@ def set_hpxml_cooling_systems(hpxml_file, hpxml)
     hpxml.cooling_systems[1].id += '2'
     hpxml.cooling_systems[1].distribution_system_idref = 'HVACDistribution2'
   elsif ['base-mechvent-shared.xml'].include? hpxml_file
-    hpxml.cooling_systems.add(id: 'PreconditioningCooling',
+    hpxml.cooling_systems.add(id: 'PreconditioningCentralAC',
                               cooling_system_type: HPXML::HVACTypeCentralAirConditioner,
                               cooling_system_fuel: HPXML::FuelTypeElectricity,
                               cooling_capacity_building: 9600,
                               cooling_efficiency_seer: 13,
                               cooling_shr: 0.65,
+                              is_ventilation_preconditioning: true)
+    hpxml.cooling_systems.add(id: 'PreconditioningCentralAC2',
+                              cooling_system_type: HPXML::HVACTypeCentralAirConditioner,
+                              cooling_system_fuel: HPXML::FuelTypeElectricity,
+                              cooling_capacity_building: 9600,
+                              cooling_efficiency_seer: 13,
+                              cooling_shr: 0.65,
+                              is_ventilation_preconditioning: true)
+    hpxml.cooling_systems.add(id: 'PreconditioningRoomAC',
+                              cooling_system_type: HPXML::HVACTypeRoomAirConditioner,
+                              cooling_system_fuel: HPXML::FuelTypeElectricity,
+                              cooling_capacity_building: 9600,
+                              cooling_efficiency_eer: 8.5,
+                              cooling_shr: 0.65,
+                              is_ventilation_preconditioning: true)
+    hpxml.cooling_systems.add(id: 'PreconditioningCoolingMSHP',
+                              cooling_system_type: HPXML::HVACTypeMiniSplitAirConditioner,
+                              cooling_system_fuel: HPXML::FuelTypeElectricity,
+                              cooling_capacity_building: 9600,
+                              cooling_efficiency_seer: 19,
+                              cooling_shr: 0.73,
                               is_ventilation_preconditioning: true)
   elsif ['invalid_files/hvac-frac-load-served.xml'].include? hpxml_file
     hpxml.cooling_systems[0].fraction_cool_load_served += 0.2
@@ -2819,13 +2859,13 @@ def set_hpxml_heat_pumps(hpxml_file, hpxml)
       hpxml.heat_pumps[0].fraction_cool_load_served = 0
     end
   elsif ['base-mechvent-shared.xml'].include? hpxml_file
-    hpxml.heat_pumps.add(id: 'PreconditioningHeating',
+    hpxml.heat_pumps.add(id: 'PreconditioningASHP',
                          heat_pump_type: HPXML::HVACTypeHeatPumpAirToAir,
                          heat_pump_fuel: HPXML::FuelTypeElectricity,
                          heating_capacity_building: 42000,
                          cooling_capacity_building: 48000,
                          backup_heating_fuel: HPXML::FuelTypeElectricity,
-                         backup_heating_capacity: 34121,
+                         backup_heating_capacity_building: 34121,
                          backup_heating_efficiency_percent: 1.0,
                          heating_efficiency_hspf: 7.7,
                          cooling_efficiency_seer: 13,
@@ -2834,17 +2874,29 @@ def set_hpxml_heat_pumps(hpxml_file, hpxml)
                          compressor_type: HPXML::HVACCompressorTypeSingleStage,
                          is_ventilation_preconditioning: true)
     f = 1.0 - (1.0 - 0.25) / (47.0 + 5.0) * (47.0 - 17.0)
-    hpxml.heat_pumps.add(id: 'Preconditioning2',
+    hpxml.heat_pumps.add(id: 'PreconditioningMSHP',
                          heat_pump_type: HPXML::HVACTypeHeatPumpMiniSplit,
                          heat_pump_fuel: HPXML::FuelTypeElectricity,
                          heating_capacity_building: 52000,
                          cooling_capacity_building: 48000,
                          backup_heating_fuel: HPXML::FuelTypeElectricity,
-                         backup_heating_capacity: 34121,
+                         backup_heating_capacity_building: 34121,
                          backup_heating_efficiency_percent: 1.0,
                          heating_efficiency_hspf: 10,
                          cooling_efficiency_seer: 19,
                          heating_capacity_17F_building: 52000 * f,
+                         cooling_shr: 0.73,
+                         is_ventilation_preconditioning: true)
+    hpxml.heat_pumps.add(id: 'PreconditioningGSHP',
+                         heat_pump_type: HPXML::HVACTypeHeatPumpGroundToAir,
+                         heat_pump_fuel: HPXML::FuelTypeElectricity,
+                         heating_capacity_building: 42000,
+                         cooling_capacity_building: 48000,
+                         backup_heating_fuel: HPXML::FuelTypeElectricity,
+                         backup_heating_capacity_building: 34121,
+                         backup_heating_efficiency_percent: 1.0,
+                         heating_efficiency_cop: 3.6,
+                         cooling_efficiency_eer: 16.6,
                          cooling_shr: 0.73,
                          is_ventilation_preconditioning: true)
   elsif ['base-hvac-air-to-air-heat-pump-2-speed.xml'].include? hpxml_file
@@ -3500,8 +3552,8 @@ def set_hpxml_ventilation_fans(hpxml_file, hpxml)
                                building_fan_power: 300,
                                used_for_whole_building_ventilation: true,
                                fraction_oa: 0.8,
-                               preconditioning_cooling_system_idref: 'PreconditioningCooling',
-                               preconditioning_heating_system_idref: 'PreconditioningHeating')
+                               preconditioning_cooling_system_idref: 'PreconditioningCentralAC',
+                               preconditioning_heating_system_idref: 'PreconditioningASHP')
     hpxml.ventilation_fans.add(id: 'MechanicalVentilation2',
                                fan_type: HPXML::MechVentTypeExhaust,
                                is_shared_system: true,
@@ -3511,8 +3563,55 @@ def set_hpxml_ventilation_fans(hpxml_file, hpxml)
                                building_fan_power: 250,
                                used_for_whole_building_ventilation: true,
                                fraction_oa: 0.4,
-                               preconditioning_cooling_system_idref: 'Preconditioning2',
-                               preconditioning_heating_system_idref: 'Preconditioning2')
+                               preconditioning_cooling_system_idref: 'PreconditioningMSHP',
+                               preconditioning_heating_system_idref: 'PreconditioningMSHP')
+    hpxml.ventilation_fans.add(id: 'MechanicalVentilation3',
+                               fan_type: HPXML::MechVentTypeBalanced,
+                               is_shared_system: true,
+                               tested_flow_rate: 40,
+                               building_rated_flow_rate: 400,
+                               hours_in_operation: 24,
+                               building_fan_power: 300,
+                               used_for_whole_building_ventilation: true,
+                               fraction_oa: 1.0,
+                               preconditioning_cooling_system_idref: 'PreconditioningGSHP',
+                               preconditioning_heating_system_idref: 'PreconditioningGSHP')
+    hpxml.ventilation_fans.add(id: 'MechanicalVentilation4',
+                               fan_type: HPXML::MechVentTypeBalanced,
+                               is_shared_system: true,
+                               tested_flow_rate: 40,
+                               building_rated_flow_rate: 400,
+                               hours_in_operation: 24,
+                               building_fan_power: 300,
+                               used_for_whole_building_ventilation: true,
+                               fraction_oa: 1.0,
+                               preconditioning_cooling_system_idref: 'PreconditioningRoomAC',
+                               preconditioning_heating_system_idref: 'PreconditioningFurnace')
+    hpxml.ventilation_fans.add(id: 'MechanicalVentilation5',
+                               fan_type: HPXML::MechVentTypeERV,
+                               is_shared_system: true,
+                               tested_flow_rate: 50,
+                               building_rated_flow_rate: 500,
+                               hours_in_operation: 24,
+                               building_fan_power: 300,
+                               total_recovery_efficiency: 0.48,
+                               sensible_recovery_efficiency: 0.72,
+                               used_for_whole_building_ventilation: true,
+                               fraction_oa: 1.0,
+                               preconditioning_cooling_system_idref: 'PreconditioningCoolingMSHP',
+                               preconditioning_heating_system_idref: 'PreconditioningBoiler')
+    hpxml.ventilation_fans.add(id: 'MechanicalVentilation6',
+                               fan_type: HPXML::MechVentTypeHRV,
+                               is_shared_system: true,
+                               tested_flow_rate: 30,
+                               building_rated_flow_rate: 300,
+                               hours_in_operation: 24,
+                               building_fan_power: 300,
+                               sensible_recovery_efficiency: 0.72,
+                               used_for_whole_building_ventilation: true,
+                               fraction_oa: 1.0,
+                               preconditioning_cooling_system_idref: 'PreconditioningCentralAC2',
+                               preconditioning_heating_system_idref: 'PreconditioningPortableHeater')
   elsif ['base-mechvent-multiple.xml'].include? hpxml_file
     hpxml.ventilation_fans.add(id: 'WholeHouseFan',
                                rated_flow_rate: 2000,
