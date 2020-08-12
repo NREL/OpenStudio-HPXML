@@ -4010,7 +4010,8 @@ def set_hpxml_clothes_dryer(hpxml_file, hpxml)
                              location: HPXML::LocationLivingSpace,
                              fuel_type: HPXML::FuelTypeElectricity,
                              energy_factor: HotWaterAndAppliances.calc_clothes_dryer_ef_from_cef(cef).round(2),
-                             control_type: HPXML::ClothesDryerControlTypeMoisture)
+                             control_type: HPXML::ClothesDryerControlTypeMoisture,
+                             is_vented: false)
   elsif ['base-appliances-coal.xml',
          'base-appliances-gas.xml',
          'base-appliances-propane.xml',
@@ -4021,7 +4022,8 @@ def set_hpxml_clothes_dryer(hpxml_file, hpxml)
                              location: HPXML::LocationLivingSpace,
                              combined_energy_factor: 3.30,
                              control_type: HPXML::ClothesDryerControlTypeMoisture,
-                             rated_flow_rate: 100)
+                             is_vented: true,
+                             vented_flow_rate: 100)
     if hpxml_file == 'base-appliances-coal.xml'
       hpxml.clothes_dryers[0].fuel_type = HPXML::FuelTypeCoal
     elsif hpxml_file == 'base-appliances-gas.xml'

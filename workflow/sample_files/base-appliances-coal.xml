@@ -429,7 +429,8 @@
           <CombinedEnergyFactor>3.3</CombinedEnergyFactor>
           <ControlType>moisture</ControlType>
           <extension>
-            <RatedFlowRate>100.0</RatedFlowRate>
+            <IsVented>true</IsVented>
+            <VentedFlowRate>100.0</VentedFlowRate>
           </extension>
         </ClothesDryer>
         <Dishwasher>
