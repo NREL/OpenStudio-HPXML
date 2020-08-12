@@ -379,6 +379,7 @@
         "water_heater_efficiency_uef": 0.93,
         "water_heater_fuel_type": "natural gas",
         "water_heater_heating_capacity": "18767",
+        "water_heater_is_shared_system": false,
         "water_heater_jacket_rvalue": 0,
         "water_heater_location": "living space",
         "water_heater_recovery_efficiency": "0.76",

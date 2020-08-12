@@ -53,6 +53,9 @@ def create_osws
     'base-dhw-recirc-nocontrol.osw' => 'base.osw',
     'base-dhw-recirc-temperature.osw' => 'base.osw',
     'base-dhw-recirc-timer.osw' => 'base.osw',
+    # 'base-dhw-shared-laundry-room.osw' => 'base.osw',
+    # 'base-dhw-shared-water-heater.osw' => 'base.osw',
+    # 'base-dhw-shared-water-heater-recirc.osw' => 'base.osw',
     'base-dhw-solar-direct-evacuated-tube.osw' => 'base.osw',
     'base-dhw-solar-direct-flat-plate.osw' => 'base.osw',
     'base-dhw-solar-direct-ics.osw' => 'base.osw',
@@ -194,7 +197,7 @@ def create_osws
     'base-misc-defaults2.osw' => 'base.osw',
     'base-misc-loads-large-uncommon.osw' => 'base-enclosure-garage.osw',
     'base-misc-loads-large-uncommon2.osw' => 'base-misc-loads-large-uncommon.osw',
-    'base-misc-loads-usage-multiplier.osw' => 'base.osw',
+    'base-misc-usage-multiplier.osw' => 'base.osw',
     # 'base-misc-loads-none.osw' => 'base.osw',
     'base-misc-neighbor-shading.osw' => 'base.osw',
     'base-pv.osw' => 'base.osw',
@@ -207,6 +210,7 @@ def create_osws
     'extra-auto.osw' => 'base.osw',
     'extra-pv-roofpitch.osw' => 'base.osw',
     'extra-dhw-solar-latitude.osw' => 'base.osw',
+    'extra-dhw-shared-water-heater.osw' => 'base.osw',
     'extra-second-refrigerator.osw' => 'base.osw',
     'extra-second-heating-system-portable-heater.osw' => 'base.osw',
     'extra-second-heating-system-fireplace.osw' => 'base.osw',
@@ -486,6 +490,7 @@ def get_values(osw_file, step)
     step.setArgument('water_heater_standby_loss', 0)
     step.setArgument('water_heater_jacket_rvalue', 0)
     step.setArgument('water_heater_setpoint_temperature', '125')
+    step.setArgument('water_heater_is_shared_system', false)
     step.setArgument('dhw_distribution_system_type', HPXML::DHWDistTypeStandard)
     step.setArgument('dhw_distribution_standard_piping_length', '50')
     step.setArgument('dhw_distribution_recirc_control_type', HPXML::DHWRecirControlTypeNone)
@@ -883,6 +888,7 @@ def get_values(osw_file, step)
     step.setArgument('water_fixtures_sink_low_flow', true)
   elsif ['base-dhw-none.osw'].include? osw_file
     step.setArgument('water_heater_type', 'none')
+    step.setArgument('dishwasher_present', false)
   elsif ['base-dhw-recirc-demand.osw'].include? osw_file
     step.setArgument('dhw_distribution_system_type', HPXML::DHWDistTypeRecirc)
     step.setArgument('dhw_distribution_recirc_control_type', HPXML::DHWRecirControlTypeSensor)
@@ -1826,7 +1832,7 @@ def get_values(osw_file, step)
     step.setArgument('hot_tub_heater_annual_kwh', '260.0')
     step.setArgument('fuel_loads_grill_fuel_type', HPXML::FuelTypeOil)
     step.setArgument('fuel_loads_fireplace_fuel_type', HPXML::FuelTypeWoodPellets)
-  elsif ['base-misc-loads-usage-multiplier.osw'].include? osw_file
+  elsif ['base-misc-usage-multiplier.osw'].include? osw_file
     step.setArgument('water_fixtures_usage_multiplier', 0.9)
     step.setArgument('lighting_usage_multiplier_interior', 0.9)
     step.setArgument('lighting_usage_multiplier_exterior', 0.9)
@@ -1880,6 +1886,8 @@ def get_values(osw_file, step)
   elsif ['extra-dhw-solar-latitude.osw'].include? osw_file
     step.setArgument('solar_thermal_system_type', 'hot water')
     step.setArgument('solar_thermal_collector_tilt', 'latitude-15')
+  elsif ['extra-dhw-shared-water-heater.osw'].include? osw_file
+    step.setArgument('water_heater_is_shared_system', true)
   elsif ['extra-second-refrigerator.osw'].include? osw_file
     step.setArgument('extra_refrigerator_present', true)
   elsif ['extra-second-heating-system-portable-heater.osw'].include? osw_file
