@@ -143,7 +143,7 @@ HPXML Building Summary
 ----------------------
 
 This section describes elements specified in HPXML's ``BuildingSummary``. 
-It is used for high-level building information including conditioned floor area, number of bedrooms, number of residents, number of conditioned floors, etc.
+It is used for high-level building information including conditioned floor area, number of bedrooms, number of residents, number of conditioned floors, presence of flue or chimney, etc.
 Most occupancy assumptions are based on the number of bedrooms, while the number of residents is solely used to determine heat gains from the occupants themselves.
 Note that a walkout basement should be included in ``NumberofConditionedFloorsAboveGrade``.
 
@@ -170,6 +170,13 @@ Shelter Coefficient  Description
 ===================  =========================================================================
 
 The terrain surrounding the building can be entered as ``Site/SiteType``; if not provided, it is assumed to be suburban.
+
+Whether there is a flue or chimney (associated with the heating system or water heater) can be optionally specified with ``extension/HasFlueOrChimney``.
+If not provided, it is assumed that there is a flue or chimney if any of the following conditions are met:
+
+- heating system type is non-electric ``Furnace``, ``Boiler``, ``WallFurnace``, ``FloorFurnace``, ``Stove``, or ``FixedHeater`` and AFUE/Percent is less than 89%
+- heating system type is non-electric ``Fireplace`` 
+- water heater is non-electric with energy factor (or equivalent uniform energy factor) less than 0.63
 
 HPXML Weather Station
 ---------------------
