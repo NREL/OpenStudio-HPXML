@@ -1120,8 +1120,6 @@ class OSModel
         outside_film = Material.AirFilmOutsideASHRAE140
       end
       if wall.quick_fill
-        mats_thick_in, mats_cond, mats_den, mats_spec_heat = get_generic_wall_material_properties(wall)
-
         apply_wall_construction_by_quick_fill(runner, model, surfaces, wall, wall.id, wall.wall_type,
                                               cavity_r: wall.insulation_cavity_r_value, install_grade: wall.insulation_grade, cavity_ins_thick_in: wall.insulation_cavity_thickness,
                                               rigid_r: wall.insulation_continuous_r_value, stud_size: wall.stud_size, framing_factor: wall.framing_factor,
@@ -1130,7 +1128,6 @@ class OSModel
                                               cmu_thick_in: wall.cmu_thickness, cmu_conductivity: wall.cmu_conductivity, cmu_density: wall.cmu_density,
                                               icf_r: wall.icf_r_value, icf_ins_thick_in: wall.icf_ins_thickness, icf_concrete_thick_in: wall.icf_concrete_thickness,
                                               sip_r: wall.sip_r_value, sip_thick_in: wall.sip_thickness, sheathing_thick_in: wall.sip_sheathing_thickness,
-                                              mats_thick_in: mats_thick_in, mats_cond: mats_cond, mats_den: mats_den, mats_spec_heat: mats_spec_heat,
                                               osb_thick_in: wall.osb_thickness, mat_ext_finish: mat_ext_finish,
                                               inside_drywall_thick_in: inside_drywall_thick_in, outside_drywall_thick_in: 0,
                                               inside_film: inside_film, outside_film: outside_film)
@@ -1140,42 +1137,6 @@ class OSModel
                                                     inside_film: inside_film, outside_film: outside_film, mat_ext_finish: mat_ext_finish)
       end
     end
-  end
-
-  def self.get_generic_wall_material_properties(wall)
-    if wall.wall_type == HPXML::WallTypeConcrete
-      mats_thick_in = wall.conc_thickness_list
-      mats_cond = wall.conc_cond_list
-      mats_den = wall.conc_den_list
-      mats_spec_heat = wall.conc_spec_heat_list
-    elsif wall.wall_type == HPXML::WallTypeBrick
-      mats_thick_in = wall.brick_thickness_list
-      mats_cond = wall.brick_cond_list
-      mats_den = wall.brick_den_list
-      mats_spec_heat = wall.brick_spec_heat_list
-    elsif wall.wall_type == HPXML::WallTypeStrawBale
-      mats_thick_in = wall.strawbale_thickness_list
-      mats_cond = wall.strawbale_cond_list
-      mats_den = wall.strawbale_den_list
-      mats_spec_heat = wall.strawbale_spec_heat_list
-    elsif wall.wall_type == HPXML::WallTypeStone
-      mats_thick_in = wall.stone_thickness_list
-      mats_cond = wall.stone_cond_list
-      mats_den = wall.stone_den_list
-      mats_spec_heat = wall.stone_spec_heat_list
-    elsif wall.wall_type == HPXML::WallTypeLog
-      mats_thick_in = wall.logwall_thickness_list
-      mats_cond = wall.logwall_cond_list
-      mats_den = wall.logwall_den_list
-      mats_spec_heat = wall.logwall_spec_heat_list
-    elsif wall.wall_type == HPXML::WallTypeAdobe
-      mats_thick_in = wall.adobe_thickness_list
-      mats_cond = wall.adobe_cond_list
-      mats_den = wall.adobe_den_list
-      mats_spec_heat = wall.adobe_spec_heat_list
-    end
-
-    return mats_thick_in, mats_cond, mats_den, mats_spec_heat
   end
 
   def self.add_rim_joists(runner, model, spaces)
@@ -3269,7 +3230,6 @@ class OSModel
                                                  correction_factor:, cmu_thick_in:, cmu_conductivity:, cmu_density:,
                                                  icf_r:, icf_ins_thick_in:, icf_concrete_thick_in:,
                                                  sip_r:, sip_thick_in:, sheathing_thick_in:,
-                                                 mats_thick_in:, mats_cond:, mats_den:, mats_spec_heat:,
                                                  osb_thick_in:, mat_ext_finish:,
                                                  inside_drywall_thick_in:, outside_drywall_thick_in:,
                                                  inside_film:, outside_film:)
@@ -3326,6 +3286,8 @@ class OSModel
                                    inside_drywall_thick_in: inside_drywall_thick_in, osb_thick_in: osb_thick_in, rigid_r: rigid_r,
                                    mat_ext_finish: mat_ext_finish, inside_film: inside_film, outside_film: outside_film)
     elsif [HPXML::WallTypeConcrete, HPXML::WallTypeBrick, HPXML::WallTypeStrawBale, HPXML::WallTypeStone, HPXML::WallTypeLog, HPXML::WallTypeAdobe].include? wall_type
+      mats_thick_in, mats_cond, mats_den, mats_spec_heat = get_generic_wall_material_properties(wall)
+      
       Constructions.apply_generic_layered_wall(runner, model, surfaces, wall, "#{wall_id} construction",
                                                mats_thick_in: mats_thick_in, mats_cond: mats_cond, mats_den: mats_den, mats_spec_heat: mats_spec_heat,
                                                inside_drywall_thick_in: inside_drywall_thick_in, osb_thick_in: osb_thick_in, rigid_r: rigid_r,
@@ -3333,6 +3295,42 @@ class OSModel
     else
       fail "Unexpected wall type '#{wall_type}'."
     end
+  end
+
+  def self.get_generic_wall_material_properties(wall)
+    if wall.wall_type == HPXML::WallTypeConcrete
+      mats_thick_in = wall.conc_thickness_list
+      mats_cond = wall.conc_cond_list
+      mats_den = wall.conc_den_list
+      mats_spec_heat = wall.conc_spec_heat_list
+    elsif wall.wall_type == HPXML::WallTypeBrick
+      mats_thick_in = wall.brick_thickness_list
+      mats_cond = wall.brick_cond_list
+      mats_den = wall.brick_den_list
+      mats_spec_heat = wall.brick_spec_heat_list
+    elsif wall.wall_type == HPXML::WallTypeStrawBale
+      mats_thick_in = wall.strawbale_thickness_list
+      mats_cond = wall.strawbale_cond_list
+      mats_den = wall.strawbale_den_list
+      mats_spec_heat = wall.strawbale_spec_heat_list
+    elsif wall.wall_type == HPXML::WallTypeStone
+      mats_thick_in = wall.stone_thickness_list
+      mats_cond = wall.stone_cond_list
+      mats_den = wall.stone_den_list
+      mats_spec_heat = wall.stone_spec_heat_list
+    elsif wall.wall_type == HPXML::WallTypeLog
+      mats_thick_in = wall.logwall_thickness_list
+      mats_cond = wall.logwall_cond_list
+      mats_den = wall.logwall_den_list
+      mats_spec_heat = wall.logwall_spec_heat_list
+    elsif wall.wall_type == HPXML::WallTypeAdobe
+      mats_thick_in = wall.adobe_thickness_list
+      mats_cond = wall.adobe_cond_list
+      mats_den = wall.adobe_den_list
+      mats_spec_heat = wall.adobe_spec_heat_list
+    end
+
+    return mats_thick_in, mats_cond, mats_den, mats_spec_heat
   end
 
   def self.pick_wood_stud_construction_set(assembly_r, constr_sets, inside_film, outside_film, surface_name)
