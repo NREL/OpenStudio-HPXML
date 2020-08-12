@@ -1563,7 +1563,9 @@ class Airflow
 
     infil_program.addLine('Set Qdryer = 0')
     clothes_dryers.each do |clothes_dryer|
-      infil_program.addLine("Set Qdryer = Qdryer + #{UnitConversions.convert(clothes_dryer.rated_flow_rate, 'cfm', 'm^3/s').round(4)} * #{dryer_sch_sensors_map[clothes_dryer.id].name}")
+      next unless clothes_dryer.is_vented
+
+      infil_program.addLine("Set Qdryer = Qdryer + #{UnitConversions.convert(clothes_dryer.vented_flow_rate, 'cfm', 'm^3/s').round(4)} * #{dryer_sch_sensors_map[clothes_dryer.id].name}")
     end
 
     infil_program.addLine('Set Qexhaust = Qrange+Qbath+Qdryer')

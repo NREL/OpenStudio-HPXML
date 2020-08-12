@@ -545,7 +545,7 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
     hpxml_name = 'base-appliances-gas.xml'
     hpxml = HPXML.new(hpxml_path: File.join(@root_path, 'workflow', 'sample_files', hpxml_name))
     clothes_dryer = hpxml.clothes_dryers[0]
-    clothes_dryer.rated_flow_rate = 300
+    clothes_dryer.vented_flow_rate = 300
     XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
     hpxml_default = _test_measure()
     _test_default_clothes_dryer_exhaust_values(hpxml_default, 300)
@@ -1314,9 +1314,9 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
     assert_equal(start_hour, bath_fan.start_hour)
   end
 
-  def _test_default_clothes_dryer_exhaust_values(hpxml, rated_flow_rate)
+  def _test_default_clothes_dryer_exhaust_values(hpxml, vented_flow_rate)
     clothes_dryer = hpxml.clothes_dryers[0]
-    assert_equal(rated_flow_rate, clothes_dryer.rated_flow_rate)
+    assert_equal(vented_flow_rate, clothes_dryer.vented_flow_rate)
   end
 
   def _test_default_ceiling_fan_values(hpxml, quantity, efficiency)
@@ -1557,7 +1557,8 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
     clothes_dryer.control_type = nil
     clothes_dryer.combined_energy_factor = nil
     clothes_dryer.usage_multiplier = nil
-    clothes_dryer.rated_flow_rate = nil
+    clothes_dryer.is_vented = nil
+    clothes_dryer.vented_flow_rate = nil
 
     dishwasher = hpxml.dishwashers[0]
     dishwasher.is_shared_appliance = nil

@@ -409,7 +409,10 @@ class HotWaterAndAppliances
     annual_therm *= clothes_dryer.usage_multiplier
 
     if not is_outside
-      frac_lost = 0.85
+      frac_lost = 0.0
+      if clothes_dryer.is_vented
+        frac_lost = 0.85
+      end
       if clothes_dryer.fuel_type == HPXML::FuelTypeElectricity
         frac_sens = (1.0 - frac_lost) * 0.90
       else

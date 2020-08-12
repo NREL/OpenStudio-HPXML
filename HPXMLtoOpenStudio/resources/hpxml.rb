@@ -3790,7 +3790,8 @@ class HPXML < Object
 
   class ClothesDryer < BaseElement
     ATTRS = [:id, :location, :fuel_type, :energy_factor, :combined_energy_factor, :control_type,
-             :usage_multiplier, :is_shared_appliance, :number_of_units, :number_of_units_served, :rated_flow_rate]
+             :usage_multiplier, :is_shared_appliance, :number_of_units, :number_of_units_served,
+             :is_vented, :vented_flow_rate]
     attr_accessor(*ATTRS)
 
     def delete
@@ -3819,7 +3820,8 @@ class HPXML < Object
       XMLHelper.add_element(clothes_dryer, 'ControlType', @control_type) unless @control_type.nil?
       HPXML::add_extension(parent: clothes_dryer,
                            extensions: { 'UsageMultiplier' => to_float_or_nil(@usage_multiplier),
-                                         'RatedFlowRate' => to_float_or_nil(@rated_flow_rate) })
+                                         'IsVented' => to_boolean_or_nil(@is_vented),
+                                         'VentedFlowRate' => to_float_or_nil(@vented_flow_rate) })
     end
 
     def from_oga(clothes_dryer)
@@ -3835,7 +3837,8 @@ class HPXML < Object
       @combined_energy_factor = to_float_or_nil(XMLHelper.get_value(clothes_dryer, 'CombinedEnergyFactor'))
       @control_type = XMLHelper.get_value(clothes_dryer, 'ControlType')
       @usage_multiplier = to_float_or_nil(XMLHelper.get_value(clothes_dryer, 'extension/UsageMultiplier'))
-      @rated_flow_rate = to_float_or_nil(XMLHelper.get_value(clothes_dryer, 'extension/RatedFlowRate'))
+      @is_vented = to_boolean_or_nil(XMLHelper.get_value(clothes_dryer, 'extension/IsVented'))
+      @vented_flow_rate = to_float_or_nil(XMLHelper.get_value(clothes_dryer, 'extension/VentedFlowRate'))
     end
   end
 

@@ -772,7 +772,8 @@ class EnergyPlusValidator
         'EnergyFactor | CombinedEnergyFactor' => zero_or_one,
         'EnergyFactor | CombinedEnergyFactor | ControlType' => zero_or_two,
         'extension/UsageMultiplier' => zero_or_one,
-        'extension/RatedFlowRate' => zero_or_one,
+        'extension/IsVented' => zero_or_one,
+        'extension/VentedFlowRate' => zero_or_one,
       },
 
       # [Dishwasher]
