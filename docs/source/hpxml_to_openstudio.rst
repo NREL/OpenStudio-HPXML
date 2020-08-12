@@ -171,7 +171,7 @@ Shelter Coefficient  Description
 
 The terrain surrounding the building can be entered as ``Site/SiteType``; if not provided, it is assumed to be suburban.
 
-Whether there is a flue or chimney (associated with the heating system or water heater) can be optionally specified with ``HasFlueOrChimney``.
+Whether there is a flue or chimney (associated with the heating system or water heater) can be optionally specified with ``extension/HasFlueOrChimney``.
 If not provided, it is assumed that there is a flue or chimney if any of the following conditions are met:
 
 - heating system type is non-electric ``Furnace``, ``Boiler``, ``WallFurnace``, ``FloorFurnace``, ``Stove``, or ``FixedHeater`` and AFUE/Percent is less than 89%
