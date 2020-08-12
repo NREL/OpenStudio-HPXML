@@ -296,7 +296,7 @@ class HPXMLtoOpenStudioAirflowTest < MiniTest::Test
 
     # Get HPXML values
     clothes_dryer = hpxml.clothes_dryers[0]
-    clothes_dryer_cfm = clothes_dryer.rated_flow_rate
+    clothes_dryer_cfm = clothes_dryer.vented_flow_rate
 
     # Check infiltration/ventilation program
     program_values = get_ems_values(model.getEnergyManagementSystemPrograms, "#{Constants.ObjectNameInfiltration} program")
