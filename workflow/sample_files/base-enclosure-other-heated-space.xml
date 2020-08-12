@@ -300,7 +300,6 @@
             <FuelType>electricity</FuelType>
             <WaterHeaterType>storage water heater</WaterHeaterType>
             <Location>other heated space</Location>
-            <IsSharedSystem>false</IsSharedSystem>
             <TankVolume>40.0</TankVolume>
             <FractionDHWLoadServed>1.0</FractionDHWLoadServed>
             <HeatingCapacity>18767.0</HeatingCapacity>
@@ -333,7 +332,6 @@
       <Appliances>
         <ClothesWasher>
           <SystemIdentifier id='ClothesWasher'/>
-          <IsSharedAppliance>false</IsSharedAppliance>
           <Location>other heated space</Location>
           <IntegratedModifiedEnergyFactor>1.21</IntegratedModifiedEnergyFactor>
           <RatedAnnualkWh>380.0</RatedAnnualkWh>
@@ -352,7 +350,6 @@
         </ClothesDryer>
         <Dishwasher>
           <SystemIdentifier id='Dishwasher'/>
-          <IsSharedAppliance>false</IsSharedAppliance>
           <Location>other heated space</Location>
           <RatedAnnualkWh>307.0</RatedAnnualkWh>
           <PlaceSettingCapacity>12</PlaceSettingCapacity>

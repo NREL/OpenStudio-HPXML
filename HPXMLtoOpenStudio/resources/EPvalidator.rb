@@ -607,7 +607,7 @@ class EnergyPlusValidator
         '../HotWaterDistribution' => one, # See [HotWaterDistribution]
         '../WaterFixture' => one_or_more, # See [WaterFixture]
         'SystemIdentifier' => one, # Required by HPXML schema
-        'IsSharedSystem' => one, # See [WaterHeatingSystem=Shared]
+        'IsSharedSystem' => zero_or_one, # See [WaterHeatingSystem=Shared]
         'WaterHeaterType[text()="storage water heater" or text()="instantaneous water heater" or text()="heat pump water heater" or text()="space-heating boiler with storage tank" or text()="space-heating boiler with tankless coil"]' => one, # See [WHType=Tank] or [WHType=Tankless] or [WHType=HeatPump] or [WHType=Indirect] or [WHType=CombiTankless]
         '[not(Location)] | Location[text()="living space" or text()="basement - unconditioned" or text()="basement - conditioned" or text()="attic - unvented" or text()="attic - vented" or text()="garage" or text()="crawlspace - unvented" or text()="crawlspace - vented" or text()="other exterior" or text()="other housing unit" or text()="other heated space" or text()="other multifamily buffer space" or text()="other non-freezing space"]' => one,
         'FractionDHWLoadServed' => one,
@@ -761,7 +761,7 @@ class EnergyPlusValidator
       '/HPXML/Building/BuildingDetails/Appliances/ClothesWasher' => {
         '../../Systems/WaterHeating/HotWaterDistribution' => one, # See [HotWaterDistribution]
         'SystemIdentifier' => one, # Required by HPXML schema
-        'IsSharedAppliance' => one, # See [ClothesWasher=Shared]
+        'IsSharedAppliance' => zero_or_one, # See [ClothesWasher=Shared]
         '[not(Location)] | Location[text()="living space" or text()="basement - conditioned" or text()="basement - unconditioned" or text()="garage" or text()="other housing unit" or text()="other heated space" or text()="other multifamily buffer space" or text()="other non-freezing space"]' => one,
         'ModifiedEnergyFactor | IntegratedModifiedEnergyFactor' => zero_or_one,
         'ModifiedEnergyFactor | IntegratedModifiedEnergyFactor | RatedAnnualkWh | LabelElectricRate | LabelGasRate | LabelAnnualGasCost | LabelUsage | Capacity' => zero_or_seven,
@@ -788,7 +788,7 @@ class EnergyPlusValidator
       # [Dishwasher]
       '/HPXML/Building/BuildingDetails/Appliances/Dishwasher' => {
         'SystemIdentifier' => one, # Required by HPXML schema
-        'IsSharedAppliance' => one, # See [Dishwasher=Shared]
+        'IsSharedAppliance' => zero_or_one, # See [Dishwasher=Shared]
         '[not(Location)] | Location[text()="living space" or text()="basement - conditioned" or text()="basement - unconditioned" or text()="garage" or text()="other housing unit" or text()="other heated space" or text()="other multifamily buffer space" or text()="other non-freezing space"]' => one,
         'RatedAnnualkWh | EnergyFactor' => zero_or_one,
         'RatedAnnualkWh | EnergyFactor | LabelElectricRate | LabelGasRate | LabelAnnualGasCost | LabelUsage | PlaceSettingCapacity' => zero_or_six,

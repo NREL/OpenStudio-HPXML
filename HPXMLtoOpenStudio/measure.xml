@@ -3,8 +3,8 @@
   <schema_version>3.0</schema_version>
   <name>hpxm_lto_openstudio</name>
   <uid>b1543b30-9465-45ff-ba04-1d1f85e763bc</uid>
-  <version_id>67241ee6-c65e-445c-8e7b-b950c3c46f18</version_id>
-  <version_modified>20200812T001153Z</version_modified>
+  <version_id>9df14e5a-6408-430a-be5d-cd22fff4b1ee</version_id>
+  <version_modified>20200812T190100Z</version_modified>
   <xml_checksum>D8922A73</xml_checksum>
   <class_name>HPXMLtoOpenStudio</class_name>
   <display_name>HPXML to OpenStudio Translator</display_name>
@@ -487,12 +487,6 @@
       <checksum>D2475223</checksum>
     </file>
     <file>
-      <filename>hpxml_defaults.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>1A75AA43</checksum>
-    </file>
-    <file>
       <filename>waterheater.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
@@ -505,12 +499,6 @@
       <checksum>EACF059A</checksum>
     </file>
     <file>
-      <filename>test_defaults.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>test</usage_type>
-      <checksum>6E47D004</checksum>
-    </file>
-    <file>
       <filename>meta_measure.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
@@ -521,6 +509,48 @@
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
       <checksum>DAE60D04</checksum>
+    </file>
+    <file>
+      <filename>hpxml_defaults.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>E65807FC</checksum>
+    </file>
+    <file>
+      <filename>test_defaults.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>test</usage_type>
+      <checksum>6FD28957</checksum>
+    </file>
+    <file>
+      <filename>test_pv.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>test</usage_type>
+      <checksum>14BB9D9B</checksum>
+    </file>
+    <file>
+      <filename>pv.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>FE2813DC</checksum>
+    </file>
+    <file>
+      <filename>xmlhelper.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>AE298605</checksum>
+    </file>
+    <file>
+      <filename>HPXMLDataTypes.xsd</filename>
+      <filetype>xsd</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>C83C2AAC</checksum>
+    </file>
+    <file>
+      <filename>BaseElements.xsd</filename>
+      <filetype>xsd</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>A88DA4D7</checksum>
     </file>
     <file>
       <filename>hpxml.rb</filename>
@@ -540,40 +570,10 @@
       <checksum>976E84A9</checksum>
     </file>
     <file>
-      <filename>xmlhelper.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>AE298605</checksum>
-    </file>
-    <file>
       <filename>EPvalidator.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>1061300D</checksum>
-    </file>
-    <file>
-      <filename>test_pv.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>test</usage_type>
-      <checksum>14BB9D9B</checksum>
-    </file>
-    <file>
-      <filename>HPXMLDataTypes.xsd</filename>
-      <filetype>xsd</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>C83C2AAC</checksum>
-    </file>
-    <file>
-      <filename>BaseElements.xsd</filename>
-      <filetype>xsd</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>A88DA4D7</checksum>
-    </file>
-    <file>
-      <filename>pv.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>FE2813DC</checksum>
+      <checksum>65008595</checksum>
     </file>
   </files>
 </measure>
