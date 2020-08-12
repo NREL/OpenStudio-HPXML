@@ -3,8 +3,8 @@
   <schema_version>3.0</schema_version>
   <name>build_residential_hpxml</name>
   <uid>a13a8983-2b01-4930-8af2-42030b6e4233</uid>
-  <version_id>a16106a8-ff28-47e2-aed7-52b40f626fd4</version_id>
-  <version_modified>20200812T170003Z</version_modified>
+  <version_id>e6e007d5-883b-4d99-8d62-7be4390b6041</version_id>
+  <version_modified>20200812T200443Z</version_modified>
   <xml_checksum>2C38F48B</xml_checksum>
   <class_name>BuildResidentialHPXML</class_name>
   <display_name>HPXML Builder</display_name>
@@ -5937,12 +5937,6 @@
       <checksum>52A91EF6</checksum>
     </file>
     <file>
-      <filename>base-dhw-none.osw</filename>
-      <filetype>osw</filetype>
-      <usage_type>test</usage_type>
-      <checksum>84561D8B</checksum>
-    </file>
-    <file>
       <filename>base-dhw-recirc-demand.osw</filename>
       <filetype>osw</filetype>
       <usage_type>test</usage_type>
@@ -6795,10 +6789,10 @@
       <checksum>BCBEB055</checksum>
     </file>
     <file>
-      <filename>base-misc-loads-usage-multiplier.osw</filename>
+      <filename>base-dhw-none.osw</filename>
       <filetype>osw</filetype>
       <usage_type>test</usage_type>
-      <checksum>91F0C4C5</checksum>
+      <checksum>9DBC3455</checksum>
     </file>
     <file>
       <version>
@@ -6809,7 +6803,13 @@
       <filename>measure.rb</filename>
       <filetype>rb</filetype>
       <usage_type>script</usage_type>
-      <checksum>50A1A9A0</checksum>
+      <checksum>94225359</checksum>
+    </file>
+    <file>
+      <filename>base-misc-usage-multiplier.osw</filename>
+      <filetype>osw</filetype>
+      <usage_type>test</usage_type>
+      <checksum>42401A01</checksum>
     </file>
   </files>
 </measure>

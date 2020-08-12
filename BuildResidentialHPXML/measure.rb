@@ -5082,6 +5082,10 @@ class HPXMLFile
   end
 
   def self.set_clothes_washer(hpxml, runner, args)
+    if args[:water_heater_type] == 'none'
+      args[:clothes_washer_present] = false
+    end
+
     return unless args[:clothes_washer_present]
 
     if args[:clothes_washer_rated_annual_kwh] != Constants.Auto
@@ -5140,6 +5144,7 @@ class HPXMLFile
   end
 
   def self.set_clothes_dryer(hpxml, runner, args)
+    return unless args[:clothes_washer_present]
     return unless args[:clothes_dryer_present]
 
     if args[:clothes_dryer_efficiency_type] == 'EnergyFactor'

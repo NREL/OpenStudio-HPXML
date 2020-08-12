@@ -194,7 +194,7 @@ def create_osws
     'base-misc-defaults2.osw' => 'base.osw',
     'base-misc-loads-large-uncommon.osw' => 'base-enclosure-garage.osw',
     'base-misc-loads-large-uncommon2.osw' => 'base-misc-loads-large-uncommon.osw',
-    'base-misc-loads-usage-multiplier.osw' => 'base.osw',
+    'base-misc-usage-multiplier.osw' => 'base.osw',
     # 'base-misc-loads-none.osw' => 'base.osw',
     'base-misc-neighbor-shading.osw' => 'base.osw',
     'base-pv.osw' => 'base.osw',
@@ -883,6 +883,7 @@ def get_values(osw_file, step)
     step.setArgument('water_fixtures_sink_low_flow', true)
   elsif ['base-dhw-none.osw'].include? osw_file
     step.setArgument('water_heater_type', 'none')
+    step.setArgument('dishwasher_present', false)
   elsif ['base-dhw-recirc-demand.osw'].include? osw_file
     step.setArgument('dhw_distribution_system_type', HPXML::DHWDistTypeRecirc)
     step.setArgument('dhw_distribution_recirc_control_type', HPXML::DHWRecirControlTypeSensor)
@@ -1826,7 +1827,7 @@ def get_values(osw_file, step)
     step.setArgument('hot_tub_heater_annual_kwh', '260.0')
     step.setArgument('fuel_loads_grill_fuel_type', HPXML::FuelTypeOil)
     step.setArgument('fuel_loads_fireplace_fuel_type', HPXML::FuelTypeWoodPellets)
-  elsif ['base-misc-loads-usage-multiplier.osw'].include? osw_file
+  elsif ['base-misc-usage-multiplier.osw'].include? osw_file
     step.setArgument('water_fixtures_usage_multiplier', 0.9)
     step.setArgument('lighting_usage_multiplier_interior', 0.9)
     step.setArgument('lighting_usage_multiplier_exterior', 0.9)
