@@ -855,6 +855,7 @@ HPXML Photovoltaics
 Each solar electric (photovoltaic) system should be entered as a ``Systems/Photovoltaics/PVSystem``.
 The following elements, some adopted from the `PVWatts model <https://pvwatts.nrel.gov>`_, are required for each PV system:
 
+- ``IsSharedSystem``: true or false
 - ``Location``: 'ground' or 'roof' mounted
 - ``ModuleType``: 'standard', 'premium', or 'thin film'
 - ``Tracking``: 'fixed' or '1-axis' or '1-axis backtracked' or '2-axis'
@@ -870,6 +871,10 @@ If neither ``SystemLossesFraction`` or ``YearModulesManufactured`` are provided,
 If ``SystemLossesFraction`` is not provided but ``YearModulesManufactured`` is provided, ``SystemLossesFraction`` will be calculated using the following equation.
 
 .. math:: System Losses Fraction = 1.0 - (1.0 - 0.14) \cdot (1.0 - (1.0 - 0.995^{(CurrentYear - YearModulesManufactured)}))
+
+If the PV system is a shared system (i.e., serving multiple dwelling units), it should be described using ``IsSharedSystem='true'``.
+In addition, the total output power of the system must be entered as ``MaxPowerOutput[@scope='multiple units']`` and the total number of bedrooms across all dwelling units must be entered as ``extension/NumberofBedroomsServed``.
+The PV generation will be apportioned to the dwelling unit using its number of bedrooms divided by the total number of bedrooms in the building.
 
 HPXML Appliances
 ----------------
