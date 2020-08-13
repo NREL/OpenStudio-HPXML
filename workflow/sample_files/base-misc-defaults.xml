@@ -334,7 +334,7 @@
             <EnergyFactor>0.95</EnergyFactor>
           </WaterHeatingSystem>
           <HotWaterDistribution>
-            <SystemIdentifier id='HotWaterDstribution'/>
+            <SystemIdentifier id='HotWaterDistribution'/>
             <SystemType>
               <Standard/>
             </SystemType>
@@ -370,6 +370,7 @@
         <Photovoltaics>
           <PVSystem>
             <SystemIdentifier id='PVSystem'/>
+            <IsSharedSystem>false</IsSharedSystem>
             <Location>roof</Location>
             <ModuleType>standard</ModuleType>
             <Tracking>fixed</Tracking>
