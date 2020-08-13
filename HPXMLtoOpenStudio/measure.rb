@@ -1001,6 +1001,9 @@ class OSModel
       solar_abs = roof.solar_absorptance
       emitt = roof.emittance
       has_radiant_barrier = roof.radiant_barrier
+      if has_radiant_barrier
+        radiant_barrier_grade = roof.radiant_barrier_grade
+      end
       inside_film = Material.AirFilmRoof(Geometry.get_roof_pitch([surfaces[0]]))
       outside_film = Material.AirFilmOutside
       mat_roofing = Material.RoofMaterial(roof.roof_type, emitt, solar_abs)
@@ -1030,7 +1033,7 @@ class OSModel
                                                constr_set.drywall_thick_in,
                                                constr_set.osb_thick_in, constr_set.rigid_r,
                                                constr_set.exterior_material, has_radiant_barrier,
-                                               inside_film, outside_film)
+                                               inside_film, outside_film, radiant_barrier_grade)
       else
         constr_sets = [
           GenericConstructionSet.new(10.0, 0.5, 0.0, mat_roofing), # w/R-10 rigid
@@ -1049,7 +1052,7 @@ class OSModel
                                              framing_factor, framing_thick_in,
                                              constr_set.osb_thick_in, layer_r + constr_set.rigid_r,
                                              mat_roofing, has_radiant_barrier,
-                                             inside_film, outside_film)
+                                             inside_film, outside_film, radiant_barrier_grade)
       end
       check_surface_assembly_rvalue(runner, surfaces, inside_film, outside_film, assembly_r, match)
     end
@@ -1894,11 +1897,30 @@ class OSModel
                                            Material.RoofMaterial(HPXML::RoofTypeAsphaltShingles, 0.90, 0.75),
                                            false,
                                            Material.AirFilmOutside,
-                                           Material.AirFilmRoof(Geometry.get_roof_pitch(surfaces)))
+                                           Material.AirFilmRoof(Geometry.get_roof_pitch(surfaces)), nil)
     end
   end
 
   def self.add_hot_water_and_appliances(runner, model, weather, spaces)
+    if @hpxml.clothes_washers.empty?
+      runner.registerWarning('No clothes washer specified, the model will not include clothes washer energy use.')
+    end
+    if @hpxml.clothes_dryers.empty?
+      runner.registerWarning('No clothes dryer specified, the model will not include clothes dryer energy use.')
+    end
+    if @hpxml.dishwashers.empty?
+      runner.registerWarning('No dishwasher specified, the model will not include dishwasher energy use.')
+    end
+    if @hpxml.refrigerators.empty?
+      runner.registerWarning('No refrigerator specified, the model will not include refrigerator energy use.')
+    end
+    if @hpxml.cooking_ranges.empty?
+      runner.registerWarning('No cooking range specified, the model will not include cooking range/oven energy use.')
+    end
+    if @hpxml.water_heating_systems.empty?
+      runner.registerWarning('No water heater specified, the model will not include water heating energy use.')
+    end
+
     # Assign spaces
     @hpxml.clothes_washers.each do |clothes_washer|
       clothes_washer.additional_properties.space = get_space_from_location(clothes_washer.location, 'ClothesWasher', model, spaces)
@@ -1934,7 +1956,7 @@ class OSModel
     @hpxml.water_heating_systems.each do |water_heating_system|
       loc_space, loc_schedule = get_space_or_schedule_from_location(water_heating_system.location, 'WaterHeatingSystem', model, spaces)
 
-      ec_adj = HotWaterAndAppliances.get_dist_energy_consumption_adjustment(@has_uncond_bsmnt, @cfa, @ncfl, hot_water_distribution)
+      ec_adj = HotWaterAndAppliances.get_dist_energy_consumption_adjustment(@has_uncond_bsmnt, @cfa, @ncfl, water_heating_system, hot_water_distribution)
 
       if water_heating_system.water_heater_type == HPXML::WaterHeaterTypeStorage
 
@@ -1965,12 +1987,13 @@ class OSModel
       end
     end
 
+    # Hot water fixtures and appliances
     fixtures_usage_multiplier = @hpxml.water_heating.water_fixtures_usage_multiplier
     HotWaterAndAppliances.apply(model, runner, weather, spaces[HPXML::LocationLivingSpace],
                                 @cfa, @nbeds, @ncfl, @has_uncond_bsmnt, @hpxml.clothes_washers,
                                 @hpxml.clothes_dryers, @hpxml.dishwashers, @hpxml.refrigerators,
                                 @hpxml.freezers, @hpxml.cooking_ranges, @hpxml.ovens, fixtures_usage_multiplier,
-                                @hpxml.water_fixtures, @hpxml.water_heating_systems, hot_water_distribution,
+                                @hpxml.water_heating_systems, hot_water_distribution, @hpxml.water_fixtures,
                                 solar_thermal_system, @eri_version, @dhw_map)
 
     if (not solar_thermal_system.nil?) && (not solar_thermal_system.collector_area.nil?) # Detailed solar water heater
@@ -2083,7 +2106,7 @@ class OSModel
     living_zone = spaces[HPXML::LocationLivingSpace].thermalZone.get
 
     @hpxml.heat_pumps.each do |heat_pump|
-      # TODO: Move these checks into hvac.rb
+      # FUTURE: Move these checks into hvac.rb
       if not heat_pump.heating_capacity_17F.nil?
         if heat_pump.heating_capacity.nil?
           fail "HeatPump '#{heat_pump.id}' must have both HeatingCapacity and HeatingCapacity17F provided or not provided."
@@ -2183,12 +2206,14 @@ class OSModel
       sequential_cool_load_frac = 1
     else
       sequential_cool_load_frac = 0 # no cooling system, don't add ideal air for cooling either
+      runner.registerWarning('No cooling system specified, the model will not include space cooling energy use.')
     end
 
     if @remaining_heat_load_frac < 1.0
       sequential_heat_load_frac = 1
     else
       sequential_heat_load_frac = 0 # no heating system, don't add ideal air for heating either
+      runner.registerWarning('No heating system specified, the model will not include space heating energy use.')
     end
     if (sequential_heat_load_frac > 0) || (sequential_cool_load_frac > 0)
       HVAC.apply_ideal_air_loads(model, runner, obj_name, sequential_cool_load_frac, sequential_heat_load_frac,
@@ -2240,6 +2265,7 @@ class OSModel
 
   def self.add_mels(runner, model, spaces)
     # Misc
+    modeled_mels = []
     @hpxml.plug_loads.each do |plug_load|
       if plug_load.plug_load_type == HPXML::PlugLoadTypeOther
         obj_name = Constants.ObjectNameMiscPlugLoads
@@ -2251,11 +2277,18 @@ class OSModel
         obj_name = Constants.ObjectNameMiscWellPump
       end
       if obj_name.nil?
-        runner.registerWarning("Unexpected plug load '#{plug_load.id}'. The plug load will not be modeled.")
+        runner.registerWarning("Unexpected plug load type '#{plug_load.plug_load_type}'. The plug load will not be modeled.")
         next
       end
+      modeled_mels << plug_load.plug_load_type
 
       MiscLoads.apply_plug(model, plug_load, obj_name, @cfa, spaces[HPXML::LocationLivingSpace])
+    end
+    if not modeled_mels.include? HPXML::PlugLoadTypeOther
+      runner.registerWarning("No '#{HPXML::PlugLoadTypeOther}' plug loads specified, the model will not include misc plug load energy use.")
+    end
+    if not modeled_mels.include? HPXML::PlugLoadTypeTelevision
+      runner.registerWarning("No '#{HPXML::PlugLoadTypeTelevision}' plug loads specified, the model will not include television plug load energy use.")
     end
   end
 
@@ -2270,7 +2303,7 @@ class OSModel
         obj_name = Constants.ObjectNameMiscFireplace
       end
       if obj_name.nil?
-        runner.registerWarning("Unexpected fuel load '#{fuel_load.id}'. The fuel load will not be modeled.")
+        runner.registerWarning("Unexpected fuel load type '#{fuel_load.fuel_load_type}'. The fuel load will not be modeled.")
         next
       end
 
@@ -2279,7 +2312,7 @@ class OSModel
   end
 
   def self.add_lighting(runner, model, weather, spaces)
-    Lighting.apply(model, weather, spaces, @hpxml.lighting_groups,
+    Lighting.apply(runner, model, weather, spaces, @hpxml.lighting_groups,
                    @hpxml.lighting, @eri_version)
   end
 
@@ -2981,7 +3014,7 @@ class OSModel
     program_calling_manager.addProgram(program)
   end
 
-  # FIXME: Move all of these construction methods to constructions.rb
+  # FUTURE: Move all of these construction methods to constructions.rb
   def self.calc_non_cavity_r(film_r, constr_set)
     # Calculate R-value for all non-cavity layers
     non_cavity_r = film_r
@@ -3593,7 +3626,7 @@ class OSModel
   end
 end
 
-# FIXME: Move all of these construction classes to constructions.rb
+# FUTURE: Move all of these construction classes to constructions.rb
 class WoodStudConstructionSet
   def initialize(stud, framing_factor, rigid_r, osb_thick_in, drywall_thick_in, exterior_material)
     @stud = stud

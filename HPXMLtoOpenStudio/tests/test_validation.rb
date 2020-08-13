@@ -112,7 +112,7 @@ class HPXMLtoOpenStudioValidationTest < MiniTest::Test
 
         # add a value to child elements as needed
         child_element_with_value = _get_child_element_with_value(target_xpath, max_number_of_elements_allowed)
-        next unless not child_element_with_value.nil?
+        next if child_element_with_value.nil?
 
         child_element_with_value.each do |element_with_value|
           this_child_name = element_with_value[:name]
