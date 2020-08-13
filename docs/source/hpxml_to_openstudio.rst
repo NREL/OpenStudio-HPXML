@@ -143,17 +143,14 @@ HPXML Building Summary
 ----------------------
 
 This section describes elements specified in HPXML's ``BuildingSummary``. 
-It is used for high-level building information including conditioned floor area, number of bedrooms, number of residents, number of conditioned floors, presence of flue or chimney, etc.
-Most occupancy assumptions are based on the number of bedrooms, while the number of residents is solely used to determine heat gains from the occupants themselves.
-Note that a walkout basement should be included in ``NumberofConditionedFloorsAboveGrade``.
+These elements include ``Site``, ``BuildingOccupancy``, and ``BuildingConstruction``.
 
-If ``NumberofBathrooms`` is not provided, it is calculated using the following equation based on the `Building America House Simulation Protocols <https://www1.eere.energy.gov/buildings/publications/pdfs/building_america/house_simulation.pdf>`_.
+HPXML Site
+**********
 
-.. math:: NumberofBathrooms = \frac{NumberofBedrooms}{2} + 0.5
+The ``Site`` element is used to describe the terrain and local shelter conditions as well as the presence of neighbors.
 
-Shading due to neighboring buildings can be defined inside an ``Site/extension/Neighbors`` element.
-Each ``Neighbors/NeighborBuilding`` element is required to have an ``Azimuth`` and ``Distance`` from the house.
-A ``Height`` is also optionally allowed; if not provided, the neighbor is assumed to be the same height as the house.
+The terrain surrounding the building can be optionally entered as ``Site/SiteType``; if not provided, it is assumed to be "suburban".
 
 The local shelter coefficient can be entered as ``Site/extension/ShelterCoefficient``.
 The shelter coefficient is defined by the AIM-2 infiltration model to account for nearby buildings, trees and obstructions.
@@ -169,14 +166,41 @@ Shelter Coefficient  Description
 0.3                  Complete shielding with large buildings immediately adjacent
 ===================  =========================================================================
 
-The terrain surrounding the building can be entered as ``Site/SiteType``; if not provided, it is assumed to be suburban.
+Shading due to neighboring buildings can be defined inside an ``extension/Neighbors`` element.
+Each ``Neighbors/NeighborBuilding`` element is required to have an ``Azimuth`` and ``Distance`` from the house.
+A ``Height`` is also optionally allowed; if not provided, the neighboring building is assumed to have the same height as the house.
 
-Whether there is a flue or chimney (associated with the heating system or water heater) can be optionally specified with ``extension/HasFlueOrChimney``.
-If not provided, it is assumed that there is a flue or chimney if any of the following conditions are met:
+HPXML Building Occupancy
+************************
 
-- heating system type is non-electric ``Furnace``, ``Boiler``, ``WallFurnace``, ``FloorFurnace``, ``Stove``, or ``FixedHeater`` and AFUE/Percent is less than 89%
-- heating system type is non-electric ``Fireplace`` 
-- water heater is non-electric with energy factor (or equivalent uniform energy factor) less than 0.63
+The ``BuildingOccupancy`` element is used to describe the occupants.
+
+The number of occupants can be optionally provided as ``NumberofResidents``; if not provided, it is assumed that the number of occupants equal the number of bedrooms.
+
+.. note::
+
+  Most occupancy assumptions (e.g., plug loads, appliance usage, hot water usage, etc.) are based on the number of bedrooms. The number of residents is solely used to determine heat gains from the occupants themselves.
+
+HPXML Building Construction
+***************************
+
+The ``BuildingConstruction`` element is used to describe high-level building information.
+Fields include:
+
+- ``ResidentialFacilityType``: "single-family detached", "single-family attached", "apartment unit", or "manufactured home"
+- ``NumberofConditionedFloors``
+- ``NumberofConditionedFloorsAboveGrade``: Note that this should include a walkout basement if present.
+- ``NumberofBedrooms``
+- ``NumberofBathrooms``: Optional. If not provided, it is calculated as :math:`\frac{NumberofBedrooms}{2} + 0.5` based on the `Building America House Simulation Protocols <https://www1.eere.energy.gov/buildings/publications/pdfs/building_america/house_simulation.pdf>`_.
+- ``ConditionedFloorArea``
+- ``ConditionedBuildingVolume`` or ``AverageCeilingHeight``
+- ``extension/HasFlueOrChimney``: Optional. Specifies whether there is a flue (associated with heating system or water heater) or chimney.
+
+If ``extension/HasFlueOrChimney`` is not provided, it is assumed to be true if any of the following conditions are met:
+
+- heating system is non-electric ``Furnace``, ``Boiler``, ``WallFurnace``, ``FloorFurnace``, ``Stove``, or ``FixedHeater`` and AFUE/Percent is less than 0.89
+- heating system is non-electric ``Fireplace`` 
+- water heater is non-electric with energy factor (or equivalent calculated from uniform energy factor) less than 0.63
 
 HPXML Weather Station
 ---------------------
@@ -957,6 +981,9 @@ If ``EnergyFactor`` is provided instead of ``CombinedEnergyFactor``, it will be 
 .. math:: CombinedEnergyFactor = \frac{EnergyFactor}{1.15}
 
 An ``extension/UsageMultiplier`` can also be optionally provided that scales energy usage; if not provided, it is assumed to be 1.0.
+
+The clothes dryer may be optionally described as a shared appliance (i.e., in a shared laundry room) using ``IsSharedAppliance``.
+If not provided, it is assumed to be false.
 
 HPXML Dishwasher
 ****************
