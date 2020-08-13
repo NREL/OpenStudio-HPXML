@@ -3320,21 +3320,21 @@ class HPXML < Object
 
     def average_flow_rate
       if (not flow_rate.nil?) && (not @hours_in_operation.nil?)
-      if @is_shared_system
-        if not @fraction_oa.nil?
-          return flow_rate * (@hours_in_operation / 24.0) * @fraction_oa
-        elsif not @fraction_recirculation.nil?
-          return flow_rate * (@hours_in_operation / 24.0) * (1 - @fraction_recirculation)
+        if @is_shared_system
+          if not @fraction_oa.nil?
+            return flow_rate * (@hours_in_operation / 24.0) * @fraction_oa
+          elsif not @fraction_recirculation.nil?
+            return flow_rate * (@hours_in_operation / 24.0) * (1 - @fraction_recirculation)
+          end
+        else
+          return flow_rate * (@hours_in_operation / 24.0)
         end
-      else
-        return flow_rate * (@hours_in_operation / 24.0)
-      end
     end
     end
 
     def average_fan_power
       if not @hours_in_operation.nil?
-      return unit_fan_power * (@hours_in_operation / 24.0)
+        return unit_fan_power * (@hours_in_operation / 24.0)
     end
     end
 
@@ -3696,12 +3696,12 @@ class HPXML < Object
       @system_type = XMLHelper.get_child_name(hot_water_distribution, 'SystemType')
       @pipe_r_value = to_float_or_nil(XMLHelper.get_value(hot_water_distribution, 'PipeInsulation/PipeRValue'))
       if @system_type == 'Standard'
-      @standard_piping_length = to_float_or_nil(XMLHelper.get_value(hot_water_distribution, 'SystemType/Standard/PipingLength'))
+        @standard_piping_length = to_float_or_nil(XMLHelper.get_value(hot_water_distribution, 'SystemType/Standard/PipingLength'))
       elsif @system_type == 'Recirculation'
-      @recirculation_control_type = XMLHelper.get_value(hot_water_distribution, 'SystemType/Recirculation/ControlType')
-      @recirculation_piping_length = to_float_or_nil(XMLHelper.get_value(hot_water_distribution, 'SystemType/Recirculation/RecirculationPipingLoopLength'))
-      @recirculation_branch_piping_length = to_float_or_nil(XMLHelper.get_value(hot_water_distribution, 'SystemType/Recirculation/BranchPipingLoopLength'))
-      @recirculation_pump_power = to_float_or_nil(XMLHelper.get_value(hot_water_distribution, 'SystemType/Recirculation/PumpPower'))
+        @recirculation_control_type = XMLHelper.get_value(hot_water_distribution, 'SystemType/Recirculation/ControlType')
+        @recirculation_piping_length = to_float_or_nil(XMLHelper.get_value(hot_water_distribution, 'SystemType/Recirculation/RecirculationPipingLoopLength'))
+        @recirculation_branch_piping_length = to_float_or_nil(XMLHelper.get_value(hot_water_distribution, 'SystemType/Recirculation/BranchPipingLoopLength'))
+        @recirculation_pump_power = to_float_or_nil(XMLHelper.get_value(hot_water_distribution, 'SystemType/Recirculation/PumpPower'))
       end
       @dwhr_facilities_connected = XMLHelper.get_value(hot_water_distribution, 'DrainWaterHeatRecovery/FacilitiesConnected')
       @dwhr_equal_flow = to_boolean_or_nil(XMLHelper.get_value(hot_water_distribution, 'DrainWaterHeatRecovery/EqualFlow'))
@@ -3915,7 +3915,7 @@ class HPXML < Object
       XMLHelper.add_element(pv_system, 'ArrayAzimuth', to_integer(@array_azimuth)) unless @array_azimuth.nil?
       XMLHelper.add_element(pv_system, 'ArrayTilt', to_float(@array_tilt)) unless @array_tilt.nil?
       if not @is_shared_system
-      XMLHelper.add_element(pv_system, 'MaxPowerOutput', to_float(@max_power_output)) unless @max_power_output.nil?
+        XMLHelper.add_element(pv_system, 'MaxPowerOutput', to_float(@max_power_output)) unless @max_power_output.nil?
       else
         if not @max_power_output.nil?
           power = XMLHelper.add_element(pv_system, 'MaxPowerOutput', to_float(@max_power_output))
@@ -3945,7 +3945,7 @@ class HPXML < Object
       @array_azimuth = to_integer_or_nil(XMLHelper.get_value(pv_system, 'ArrayAzimuth'))
       @array_tilt = to_float_or_nil(XMLHelper.get_value(pv_system, 'ArrayTilt'))
       if not @is_shared_system
-      @max_power_output = to_float_or_nil(XMLHelper.get_value(pv_system, 'MaxPowerOutput'))
+        @max_power_output = to_float_or_nil(XMLHelper.get_value(pv_system, 'MaxPowerOutput'))
       else
         @max_power_output = to_float_or_nil(XMLHelper.get_value(pv_system, 'MaxPowerOutput[@scope="single unit"]'))
         @building_max_power_output = to_float_or_nil(XMLHelper.get_value(pv_system, 'MaxPowerOutput[@scope="multiple units"]'))
@@ -4569,8 +4569,8 @@ class HPXML < Object
       if @holiday_exists
         exterior_holiday_lighting = XMLHelper.create_elements_as_needed(doc, ['HPXML', 'Building', 'BuildingDetails', 'Lighting', 'extension', 'ExteriorHolidayLighting'])
         if not @holiday_kwh_per_day.nil?
-        holiday_lighting_load = XMLHelper.add_element(exterior_holiday_lighting, 'Load')
-        XMLHelper.add_element(holiday_lighting_load, 'Units', 'kWh/day')
+          holiday_lighting_load = XMLHelper.add_element(exterior_holiday_lighting, 'Load')
+          XMLHelper.add_element(holiday_lighting_load, 'Units', 'kWh/day')
           XMLHelper.add_element(holiday_lighting_load, 'Value', to_float(@holiday_kwh_per_day))
         end
         XMLHelper.add_element(exterior_holiday_lighting, 'PeriodBeginMonth', to_integer(@holiday_period_begin_month)) unless @holiday_period_begin_month.nil?
