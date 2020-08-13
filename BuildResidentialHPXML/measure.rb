@@ -4982,7 +4982,8 @@ class HPXMLFile
                            max_power_output: [args[:pv_system_max_power_output_1], args[:pv_system_max_power_output_2]][i],
                            inverter_efficiency: inverter_efficiency,
                            system_losses_fraction: system_losses_fraction,
-                           year_modules_manufactured: year_modules_manufactured)
+                           year_modules_manufactured: year_modules_manufactured,
+                           is_shared_system: false)
     end
   end
 
