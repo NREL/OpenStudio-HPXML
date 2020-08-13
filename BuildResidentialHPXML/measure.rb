@@ -1849,6 +1849,12 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     arg.setDescription('Year modules manufactured of the PV system 1.')
     args << arg
 
+    arg = OpenStudio::Measure::OSArgument::makeBoolArgument('pv_system_is_shared_1', true)
+    arg.setDisplayName('Photovoltaics 1: Is Shared System')
+    arg.setDescription('Whether PV system 1 is shared. If true, assumed to serve all the units in the building.')
+    arg.setDefaultValue(false)
+    args << arg
+
     arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('pv_system_module_type_2', pv_system_module_type_choices, true)
     arg.setDisplayName('Photovoltaics 2: Module Type')
     arg.setDescription("Module type of the PV system 2. Use 'none' if there is no PV system 2.")
@@ -1904,6 +1910,12 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     arg.setDisplayName('Photovoltaics 2: Year Modules Manufactured')
     arg.setUnits('Year')
     arg.setDescription('Year modules manufactured of the PV system 2.')
+    args << arg
+
+    arg = OpenStudio::Measure::OSArgument::makeBoolArgument('pv_system_is_shared_2', true)
+    arg.setDisplayName('Photovoltaics 2: Is Shared System')
+    arg.setDescription('Whether PV system 2 is shared. If true, assumed to serve all the units in the building.')
+    arg.setDefaultValue(false)
     args << arg
 
     arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('lighting_fraction_cfl_interior', true)
@@ -3362,6 +3374,7 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
              pv_system_inverter_efficiency_1: runner.getOptionalDoubleArgumentValue('pv_system_inverter_efficiency_1', user_arguments),
              pv_system_system_losses_fraction_1: runner.getOptionalDoubleArgumentValue('pv_system_system_losses_fraction_1', user_arguments),
              pv_system_year_modules_manufactured_1: runner.getOptionalIntegerArgumentValue('pv_system_year_modules_manufactured_1', user_arguments),
+             pv_system_is_shared_1: runner.getBoolArgumentValue('pv_system_is_shared_1', user_arguments),
              pv_system_module_type_2: runner.getStringArgumentValue('pv_system_module_type_2', user_arguments),
              pv_system_location_2: runner.getStringArgumentValue('pv_system_location_2', user_arguments),
              pv_system_tracking_2: runner.getStringArgumentValue('pv_system_tracking_2', user_arguments),
@@ -3371,6 +3384,7 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
              pv_system_inverter_efficiency_2: runner.getOptionalDoubleArgumentValue('pv_system_inverter_efficiency_2', user_arguments),
              pv_system_system_losses_fraction_2: runner.getOptionalDoubleArgumentValue('pv_system_system_losses_fraction_2', user_arguments),
              pv_system_year_modules_manufactured_2: runner.getOptionalIntegerArgumentValue('pv_system_year_modules_manufactured_2', user_arguments),
+             pv_system_is_shared_2: runner.getBoolArgumentValue('pv_system_is_shared_2', user_arguments),
              lighting_fraction_cfl_interior: runner.getDoubleArgumentValue('lighting_fraction_cfl_interior', user_arguments),
              lighting_fraction_lfl_interior: runner.getDoubleArgumentValue('lighting_fraction_lfl_interior', user_arguments),
              lighting_fraction_led_interior: runner.getDoubleArgumentValue('lighting_fraction_led_interior', user_arguments),
@@ -4959,6 +4973,11 @@ class HPXMLFile
         year_modules_manufactured = [args[:pv_system_year_modules_manufactured_1], args[:pv_system_year_modules_manufactured_2]][i].get
       end
 
+      if [args[:pv_system_is_shared_1], args[:pv_system_is_shared_2]][i]
+        is_shared_system = [args[:pv_system_is_shared_1], args[:pv_system_is_shared_2]][i]
+        number_of_bedrooms_served = args[:geometry_num_bedrooms] * args[:geometry_num_units]
+      end
+
       hpxml.pv_systems.add(id: "PVSystem#{i + 1}",
                            location: [args[:pv_system_location_1], args[:pv_system_location_2]][i],
                            module_type: module_type,
@@ -4968,7 +4987,9 @@ class HPXMLFile
                            max_power_output: [args[:pv_system_max_power_output_1], args[:pv_system_max_power_output_2]][i],
                            inverter_efficiency: inverter_efficiency,
                            system_losses_fraction: system_losses_fraction,
-                           year_modules_manufactured: year_modules_manufactured)
+                           year_modules_manufactured: year_modules_manufactured,
+                           is_shared_system: is_shared_system,
+                           number_of_bedrooms_served: number_of_bedrooms_served)
     end
   end
 
