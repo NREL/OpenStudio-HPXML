@@ -4973,6 +4973,7 @@ class HPXMLFile
         year_modules_manufactured = [args[:pv_system_year_modules_manufactured_1], args[:pv_system_year_modules_manufactured_2]][i].get
       end
 
+      is_shared_system = false
       if [args[:pv_system_is_shared_1], args[:pv_system_is_shared_2]][i]
         is_shared_system = [args[:pv_system_is_shared_1], args[:pv_system_is_shared_2]][i]
         number_of_bedrooms_served = args[:geometry_num_bedrooms] * args[:geometry_num_units]
