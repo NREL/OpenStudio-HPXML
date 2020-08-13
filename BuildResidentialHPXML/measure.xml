@@ -3,8 +3,8 @@
   <schema_version>3.0</schema_version>
   <name>build_residential_hpxml</name>
   <uid>a13a8983-2b01-4930-8af2-42030b6e4233</uid>
-  <version_id>bbc3b59c-c939-4ea8-aafd-9d11ada824d1</version_id>
-  <version_modified>20200812T231145Z</version_modified>
+  <version_id>3c4f6baf-c56a-49c0-8be9-7ddd216cf250</version_id>
+  <version_modified>20200813T191320Z</version_modified>
   <xml_checksum>2C38F48B</xml_checksum>
   <class_name>BuildResidentialHPXML</class_name>
   <display_name>HPXML Builder</display_name>
@@ -2979,7 +2979,7 @@
     <argument>
       <name>water_heater_is_shared_system</name>
       <display_name>Water Heater: Is Shared System</display_name>
-      <description>Whether the water heater is a shared system.</description>
+      <description>Whether the water heater is a shared system. If true, assumed to serve all the units in the building.</description>
       <type>Boolean</type>
       <required>true</required>
       <model_dependent>false</model_dependent>
@@ -6891,13 +6891,13 @@
       <filename>measure.rb</filename>
       <filetype>rb</filetype>
       <usage_type>script</usage_type>
-      <checksum>7BA2D165</checksum>
+      <checksum>1B8BB61B</checksum>
     </file>
     <file>
       <filename>extra-dhw-shared-water-heater.osw</filename>
       <filetype>osw</filetype>
       <usage_type>test</usage_type>
-      <checksum>B05B027F</checksum>
+      <checksum>A7626ABD</checksum>
     </file>
   </files>
 </measure>

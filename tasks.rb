@@ -211,7 +211,7 @@ def create_osws
     'extra-auto.osw' => 'base.osw',
     'extra-pv-roofpitch.osw' => 'base.osw',
     'extra-dhw-solar-latitude.osw' => 'base.osw',
-    'extra-dhw-shared-water-heater.osw' => 'base.osw',
+    'extra-dhw-shared-water-heater.osw' => 'base-single-family-attached.osw',
     'extra-second-refrigerator.osw' => 'base.osw',
     'extra-second-heating-system-portable-heater.osw' => 'base.osw',
     'extra-second-heating-system-fireplace.osw' => 'base.osw',
@@ -222,9 +222,9 @@ def create_osws
     'invalid_files/non-integer-ceiling-fan-quantity.osw' => 'base.osw',
     'invalid_files/single-family-detached-slab-non-zero-foundation-height.osw' => 'base.osw',
     'invalid_files/single-family-detached-finished-basement-zero-foundation-height.osw' => 'base.osw',
-    'invalid_files/single-family-attached-ambient.osw' => 'base.osw',
-    'invalid_files/multifamily-bottom-slab-non-zero-foundation-height.osw' => 'base.osw',
-    'invalid_files/multifamily-bottom-crawlspace-zero-foundation-height.osw' => 'base.osw',
+    'invalid_files/single-family-attached-ambient.osw' => 'base-single-family-attached.osw',
+    'invalid_files/multifamily-bottom-slab-non-zero-foundation-height.osw' => 'base-multifamily.osw',
+    'invalid_files/multifamily-bottom-crawlspace-zero-foundation-height.osw' => 'base-multifamily.osw',
     'invalid_files/slab-non-zero-foundation-height-above-grade.osw' => 'base.osw',
     'invalid_files/ducts-location-and-areas-not-same-type.osw' => 'base.osw',
     'invalid_files/second-heating-system-serves-majority-heat.osw' => 'base.osw'
@@ -1929,17 +1929,11 @@ def get_values(osw_file, step)
   elsif ['invalid_files/single-family-detached-finished-basement-zero-foundation-height.osw'].include? osw_file
     step.setArgument('geometry_foundation_height', 0.0)
   elsif ['invalid_files/single-family-attached-ambient.osw'].include? osw_file
-    step.setArgument('geometry_unit_type', HPXML::ResidentialTypeSFA)
-    step.setArgument('geometry_corridor_position', 'None')
     step.setArgument('geometry_foundation_type', HPXML::FoundationTypeAmbient)
   elsif ['invalid_files/multifamily-bottom-slab-non-zero-foundation-height.osw'].include? osw_file
-    step.setArgument('geometry_unit_type', HPXML::ResidentialTypeApartment)
-    step.setArgument('geometry_corridor_position', 'None')
     step.setArgument('geometry_foundation_type', HPXML::FoundationTypeSlab)
     step.setArgument('geometry_foundation_height_above_grade', 0.0)
   elsif ['invalid_files/multifamily-bottom-crawlspace-zero-foundation-height.osw'].include? osw_file
-    step.setArgument('geometry_unit_type', HPXML::ResidentialTypeApartment)
-    step.setArgument('geometry_corridor_position', 'None')
     step.setArgument('geometry_foundation_type', HPXML::FoundationTypeCrawlspaceUnvented)
     step.setArgument('geometry_foundation_height', 0.0)
   elsif ['invalid_files/slab-non-zero-foundation-height-above-grade.osw'].include? osw_file
