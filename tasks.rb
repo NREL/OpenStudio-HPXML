@@ -595,6 +595,8 @@ def set_hpxml_building_construction(hpxml_file, hpxml)
     hpxml.building_construction.residential_facility_type = HPXML::ResidentialTypeApartment
   elsif ['base-foundation-walkout-basement.xml'].include? hpxml_file
     hpxml.building_construction.number_of_conditioned_floors_above_grade += 1
+  elsif ['base-mechvent-shared.xml'].include? hpxml_file
+    hpxml.building_construction.residential_facility_type = HPXML::ResidentialTypeApartment
   end
 end
 
@@ -2839,7 +2841,7 @@ def set_hpxml_heat_pumps(hpxml_file, hpxml)
                          heating_capacity_building: 42000,
                          cooling_capacity_building: 48000,
                          backup_heating_fuel: HPXML::FuelTypeElectricity,
-                         backup_heating_capacity: 34121,
+                         backup_heating_capacity_building: 34121,
                          backup_heating_efficiency_percent: 1.0,
                          fraction_heat_load_served: 0.2,
                          fraction_cool_load_served: 0.0,

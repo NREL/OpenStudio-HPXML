@@ -647,6 +647,7 @@ class EnergyPlusValidator
         'FractionOutdoorAir | FractionRecirculation' => one_or_more,
         'AttachedToPreconditioningHeatingSystem' => zero_or_one,
         'AttachedToPreconditioningCoolingSystem' => zero_or_one,
+        '../../../../BuildingSummary/BuildingConstruction[ResidentialFacilityType[text()="single-family attached" or text()="apartment unit"]]' => one,
       },
 
       ## [SharedSystem=false]

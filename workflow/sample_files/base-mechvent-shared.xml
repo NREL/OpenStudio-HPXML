@@ -37,7 +37,7 @@
           <NumberofResidents>3.0</NumberofResidents>
         </BuildingOccupancy>
         <BuildingConstruction>
-          <ResidentialFacilityType>single-family detached</ResidentialFacilityType>
+          <ResidentialFacilityType>apartment unit</ResidentialFacilityType>
           <NumberofConditionedFloors>2</NumberofConditionedFloors>
           <NumberofConditionedFloorsAboveGrade>1</NumberofConditionedFloorsAboveGrade>
           <NumberofBedrooms>3</NumberofBedrooms>
@@ -361,7 +361,7 @@
                 <Units>Percent</Units>
                 <Value>1.0</Value>
               </BackupAnnualHeatingEfficiency>
-              <BackupHeatingCapacity>34121.0</BackupHeatingCapacity>
+              <BackupHeatingCapacity scope='multiple units'>34121.0</BackupHeatingCapacity>
               <FractionHeatLoadServed>0.2</FractionHeatLoadServed>
               <FractionCoolLoadServed>0.0</FractionCoolLoadServed>
               <AnnualCoolingEfficiency>
@@ -447,7 +447,7 @@
             <HotWaterTemperature>125.0</HotWaterTemperature>
           </WaterHeatingSystem>
           <HotWaterDistribution>
-            <SystemIdentifier id='HotWaterDstribution'/>
+            <SystemIdentifier id='HotWaterDistribution'/>
             <SystemType>
               <Standard>
                 <PipingLength>50.0</PipingLength>

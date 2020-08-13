@@ -2757,7 +2757,7 @@ class HPXML < Object
              :backup_heating_efficiency_percent, :backup_heating_efficiency_afue,
              :backup_heating_switchover_temp, :fraction_heat_load_served, :fraction_cool_load_served,
              :cooling_efficiency_seer, :cooling_efficiency_eer, :heating_efficiency_hspf,
-             :heating_efficiency_cop, :energy_star, :seed_id, :is_ventilation_preconditioning]
+             :heating_efficiency_cop, :energy_star, :seed_id, :is_ventilation_preconditioning, :backup_heating_capacity_building]
     attr_accessor(*ATTRS)
 
     def distribution_system
@@ -2861,7 +2861,14 @@ class HPXML < Object
           XMLHelper.add_element(backup_eff, 'Units', units)
           XMLHelper.add_element(backup_eff, 'Value', to_float(value))
         end
-        XMLHelper.add_element(heat_pump, 'BackupHeatingCapacity', to_float(@backup_heating_capacity)) unless @backup_heating_capacity.nil?
+        if @is_ventilation_preconditioning
+          backup_htg_cap = XMLHelper.add_element(heat_pump, 'BackupHeatingCapacity', to_float(@backup_heating_capacity)) unless @backup_heating_capacity.nil?
+          XMLHelper.add_attribute(backup_htg_cap, 'scope', 'single unit') unless backup_htg_cap.nil?
+          backup_htg_bldg_cap = XMLHelper.add_element(heat_pump, 'BackupHeatingCapacity', to_float(@backup_heating_capacity_building)) unless @backup_heating_capacity_building.nil?
+          XMLHelper.add_attribute(backup_htg_bldg_cap, 'scope', 'multiple units') unless backup_htg_bldg_cap.nil?
+        else
+          XMLHelper.add_element(heat_pump, 'BackupHeatingCapacity', to_float(@backup_heating_capacity)) unless @backup_heating_capacity.nil?
+        end
         XMLHelper.add_element(heat_pump, 'BackupHeatingSwitchoverTemperature', to_float(@backup_heating_switchover_temp)) unless @backup_heating_switchover_temp.nil?
       end
       XMLHelper.add_element(heat_pump, 'FractionHeatLoadServed', to_float(@fraction_heat_load_served)) unless @fraction_heat_load_served.nil?
@@ -2913,15 +2920,17 @@ class HPXML < Object
         @heating_capacity_17F_building = to_float_or_nil(XMLHelper.get_value(heat_pump, 'HeatingCapacity17F[@scope="multiple units"]'))
         @cooling_capacity = to_float_or_nil(XMLHelper.get_value(heat_pump, 'CoolingCapacity[@scope="single unit"]'))
         @cooling_capacity_building = to_float_or_nil(XMLHelper.get_value(heat_pump, 'CoolingCapacity[@scope="multiple units"]'))
+        @backup_heating_capacity = to_float_or_nil(XMLHelper.get_value(heat_pump, 'BackupHeatingCapacity[@scope="single unit"]'))
+        @backup_heating_capacity_building = to_float_or_nil(XMLHelper.get_value(heat_pump, 'BackupHeatingCapacity[@scope="multiple units"]'))
       else
         @heating_capacity = to_float_or_nil(XMLHelper.get_value(heat_pump, 'HeatingCapacity'))
         @heating_capacity_17F = to_float_or_nil(XMLHelper.get_value(heat_pump, 'HeatingCapacity17F'))
         @cooling_capacity = to_float_or_nil(XMLHelper.get_value(heat_pump, 'CoolingCapacity'))
+        @backup_heating_capacity = to_float_or_nil(XMLHelper.get_value(heat_pump, 'BackupHeatingCapacity'))
       end
       @compressor_type = XMLHelper.get_value(heat_pump, 'CompressorType')
       @cooling_shr = to_float_or_nil(XMLHelper.get_value(heat_pump, 'CoolingSensibleHeatFraction'))
       @backup_heating_fuel = XMLHelper.get_value(heat_pump, 'BackupSystemFuel')
-      @backup_heating_capacity = to_float_or_nil(XMLHelper.get_value(heat_pump, 'BackupHeatingCapacity'))
       @backup_heating_efficiency_percent = to_float_or_nil(XMLHelper.get_value(heat_pump, "BackupAnnualHeatingEfficiency[Units='Percent']/Value"))
       @backup_heating_efficiency_afue = to_float_or_nil(XMLHelper.get_value(heat_pump, "BackupAnnualHeatingEfficiency[Units='AFUE']/Value"))
       @backup_heating_switchover_temp = to_float_or_nil(XMLHelper.get_value(heat_pump, 'BackupHeatingSwitchoverTemperature'))
@@ -3315,21 +3324,21 @@ class HPXML < Object
 
     def average_flow_rate
       if (not flow_rate.nil?) && (not @hours_in_operation.nil?)
-      if @is_shared_system
-        if not @fraction_oa.nil?
-          return flow_rate * (@hours_in_operation / 24.0) * @fraction_oa
-        elsif not @fraction_recirculation.nil?
-          return flow_rate * (@hours_in_operation / 24.0) * (1 - @fraction_recirculation)
+        if @is_shared_system
+          if not @fraction_oa.nil?
+            return flow_rate * (@hours_in_operation / 24.0) * @fraction_oa
+          elsif not @fraction_recirculation.nil?
+            return flow_rate * (@hours_in_operation / 24.0) * (1 - @fraction_recirculation)
+          end
+        else
+          return flow_rate * (@hours_in_operation / 24.0)
         end
-      else
-        return flow_rate * (@hours_in_operation / 24.0)
-      end
       end
     end
 
     def average_fan_power
-      if (not @fan_power.nil?) && (not @hours_in_operation.nil?)
-      return unit_fan_power * (@hours_in_operation / 24.0)
+      if not @hours_in_operation.nil?
+        return unit_fan_power * (@hours_in_operation / 24.0)
       end
     end
 
@@ -3472,7 +3481,7 @@ class HPXML < Object
       @id = HPXML::get_id(ventilation_fan)
       @quantity = to_integer_or_nil(XMLHelper.get_value(ventilation_fan, 'Quantity'))
       @fan_type = XMLHelper.get_value(ventilation_fan, 'FanType')
-      @is_shared_system = to_bool_or_nil(XMLHelper.get_value(ventilation_fan, 'IsSharedSystem'))
+      @is_shared_system = to_boolean_or_nil(XMLHelper.get_value(ventilation_fan, 'IsSharedSystem'))
       if @is_shared_system
         @rated_flow_rate = to_float_or_nil(XMLHelper.get_value(ventilation_fan, 'RatedFlowRate[@scope="single unit"]'))
         @building_rated_flow_rate = to_float_or_nil(XMLHelper.get_value(ventilation_fan, 'RatedFlowRate[@scope="multiple units"]'))
@@ -3691,12 +3700,12 @@ class HPXML < Object
       @system_type = XMLHelper.get_child_name(hot_water_distribution, 'SystemType')
       @pipe_r_value = to_float_or_nil(XMLHelper.get_value(hot_water_distribution, 'PipeInsulation/PipeRValue'))
       if @system_type == 'Standard'
-      @standard_piping_length = to_float_or_nil(XMLHelper.get_value(hot_water_distribution, 'SystemType/Standard/PipingLength'))
+        @standard_piping_length = to_float_or_nil(XMLHelper.get_value(hot_water_distribution, 'SystemType/Standard/PipingLength'))
       elsif @system_type == 'Recirculation'
-      @recirculation_control_type = XMLHelper.get_value(hot_water_distribution, 'SystemType/Recirculation/ControlType')
-      @recirculation_piping_length = to_float_or_nil(XMLHelper.get_value(hot_water_distribution, 'SystemType/Recirculation/RecirculationPipingLoopLength'))
-      @recirculation_branch_piping_length = to_float_or_nil(XMLHelper.get_value(hot_water_distribution, 'SystemType/Recirculation/BranchPipingLoopLength'))
-      @recirculation_pump_power = to_float_or_nil(XMLHelper.get_value(hot_water_distribution, 'SystemType/Recirculation/PumpPower'))
+        @recirculation_control_type = XMLHelper.get_value(hot_water_distribution, 'SystemType/Recirculation/ControlType')
+        @recirculation_piping_length = to_float_or_nil(XMLHelper.get_value(hot_water_distribution, 'SystemType/Recirculation/RecirculationPipingLoopLength'))
+        @recirculation_branch_piping_length = to_float_or_nil(XMLHelper.get_value(hot_water_distribution, 'SystemType/Recirculation/BranchPipingLoopLength'))
+        @recirculation_pump_power = to_float_or_nil(XMLHelper.get_value(hot_water_distribution, 'SystemType/Recirculation/PumpPower'))
       end
       @dwhr_facilities_connected = XMLHelper.get_value(hot_water_distribution, 'DrainWaterHeatRecovery/FacilitiesConnected')
       @dwhr_equal_flow = to_boolean_or_nil(XMLHelper.get_value(hot_water_distribution, 'DrainWaterHeatRecovery/EqualFlow'))
@@ -3910,7 +3919,7 @@ class HPXML < Object
       XMLHelper.add_element(pv_system, 'ArrayAzimuth', to_integer(@array_azimuth)) unless @array_azimuth.nil?
       XMLHelper.add_element(pv_system, 'ArrayTilt', to_float(@array_tilt)) unless @array_tilt.nil?
       if not @is_shared_system
-      XMLHelper.add_element(pv_system, 'MaxPowerOutput', to_float(@max_power_output)) unless @max_power_output.nil?
+        XMLHelper.add_element(pv_system, 'MaxPowerOutput', to_float(@max_power_output)) unless @max_power_output.nil?
       else
         if not @max_power_output.nil?
           power = XMLHelper.add_element(pv_system, 'MaxPowerOutput', to_float(@max_power_output))
@@ -3940,7 +3949,7 @@ class HPXML < Object
       @array_azimuth = to_integer_or_nil(XMLHelper.get_value(pv_system, 'ArrayAzimuth'))
       @array_tilt = to_float_or_nil(XMLHelper.get_value(pv_system, 'ArrayTilt'))
       if not @is_shared_system
-      @max_power_output = to_float_or_nil(XMLHelper.get_value(pv_system, 'MaxPowerOutput'))
+        @max_power_output = to_float_or_nil(XMLHelper.get_value(pv_system, 'MaxPowerOutput'))
       else
         @max_power_output = to_float_or_nil(XMLHelper.get_value(pv_system, 'MaxPowerOutput[@scope="single unit"]'))
         @building_max_power_output = to_float_or_nil(XMLHelper.get_value(pv_system, 'MaxPowerOutput[@scope="multiple units"]'))
@@ -4564,8 +4573,8 @@ class HPXML < Object
       if @holiday_exists
         exterior_holiday_lighting = XMLHelper.create_elements_as_needed(doc, ['HPXML', 'Building', 'BuildingDetails', 'Lighting', 'extension', 'ExteriorHolidayLighting'])
         if not @holiday_kwh_per_day.nil?
-        holiday_lighting_load = XMLHelper.add_element(exterior_holiday_lighting, 'Load')
-        XMLHelper.add_element(holiday_lighting_load, 'Units', 'kWh/day')
+          holiday_lighting_load = XMLHelper.add_element(exterior_holiday_lighting, 'Load')
+          XMLHelper.add_element(holiday_lighting_load, 'Units', 'kWh/day')
           XMLHelper.add_element(holiday_lighting_load, 'Value', to_float(@holiday_kwh_per_day))
         end
         XMLHelper.add_element(exterior_holiday_lighting, 'PeriodBeginMonth', to_integer(@holiday_period_begin_month)) unless @holiday_period_begin_month.nil?
@@ -5155,6 +5164,9 @@ class HPXML < Object
           end
           if hp.heating_capacity_17F.nil? && (not hp.heating_capacity_17F_building.nil?)
             hp.heating_capacity_17F = hp.heating_capacity_17F_building * attached_fan_htg[0].unit_flow_rate_ratio
+          end
+          if hp.backup_heating_capacity.nil? && (not hp.backup_heating_capacity_building.nil?)
+            hp.backup_heating_capacity = hp.backup_heating_capacity_building * attached_fan_htg[0].unit_flow_rate_ratio
           end
         end
         if not attached_fan_clg.empty?
