@@ -212,7 +212,7 @@ def create_osws
     'extra-second-refrigerator.osw' => 'base.osw',
     'extra-second-heating-system-portable-heater.osw' => 'base.osw',
     'extra-second-heating-system-fireplace.osw' => 'base.osw',
-    'extra-pv-shared.osw' => 'base.osw',
+    'extra-pv-shared.osw' => 'base-single-family-attached.osw',
 
     'invalid_files/non-electric-heat-pump-water-heater.osw' => 'base.osw',
     'invalid_files/multiple-heating-and-cooling-systems.osw' => 'base.osw',
@@ -220,9 +220,9 @@ def create_osws
     'invalid_files/non-integer-ceiling-fan-quantity.osw' => 'base.osw',
     'invalid_files/single-family-detached-slab-non-zero-foundation-height.osw' => 'base.osw',
     'invalid_files/single-family-detached-finished-basement-zero-foundation-height.osw' => 'base.osw',
-    'invalid_files/single-family-attached-ambient.osw' => 'base.osw',
-    'invalid_files/multifamily-bottom-slab-non-zero-foundation-height.osw' => 'base.osw',
-    'invalid_files/multifamily-bottom-crawlspace-zero-foundation-height.osw' => 'base.osw',
+    'invalid_files/single-family-attached-ambient.osw' => 'base-single-family-attached.osw',
+    'invalid_files/multifamily-bottom-slab-non-zero-foundation-height.osw' => 'base-multifamily.osw',
+    'invalid_files/multifamily-bottom-crawlspace-zero-foundation-height.osw' => 'base-multifamily.osw',
     'invalid_files/slab-non-zero-foundation-height-above-grade.osw' => 'base.osw',
     'invalid_files/ducts-location-and-areas-not-same-type.osw' => 'base.osw',
     'invalid_files/second-heating-system-serves-majority-heat.osw' => 'base.osw'
@@ -306,7 +306,6 @@ def get_values(osw_file, step)
     step.setArgument('weather_station_epw_filepath', 'USA_CO_Denver.Intl.AP.725650_TMY3.epw')
     step.setArgument('site_type', HPXML::SiteTypeSuburban)
     step.setArgument('geometry_unit_type', HPXML::ResidentialTypeSFD)
-    step.setArgument('geometry_num_units', 1)
     step.setArgument('geometry_cfa', 2700.0)
     step.setArgument('geometry_num_floors_above_grade', 1)
     step.setArgument('geometry_wall_height', 8.0)
@@ -524,6 +523,7 @@ def get_values(osw_file, step)
     step.setArgument('pv_system_inverter_efficiency_1', 0.96)
     step.setArgument('pv_system_system_losses_fraction_1', 0.14)
     step.setArgument('pv_system_is_shared_1', false)
+    step.setArgument('pv_system_building_max_power_output_1', 4000)
     step.setArgument('pv_system_module_type_2', 'none')
     step.setArgument('pv_system_location_2', HPXML::LocationRoof)
     step.setArgument('pv_system_tracking_2', HPXML::PVTrackingTypeFixed)
@@ -533,6 +533,7 @@ def get_values(osw_file, step)
     step.setArgument('pv_system_inverter_efficiency_2', 0.96)
     step.setArgument('pv_system_system_losses_fraction_2', 0.14)
     step.setArgument('pv_system_is_shared_2', false)
+    step.setArgument('pv_system_building_max_power_output_2', 4000)
     step.setArgument('lighting_fraction_cfl_interior', 0.4)
     step.setArgument('lighting_fraction_lfl_interior', 0.1)
     step.setArgument('lighting_fraction_led_interior', 0.25)
@@ -708,7 +709,7 @@ def get_values(osw_file, step)
   elsif ['base-single-family-attached.osw'].include? osw_file
     step.setArgument('geometry_unit_type', HPXML::ResidentialTypeSFA)
     step.setArgument('geometry_cfa', 900.0)
-    step.setArgument('geometry_num_units', 3)
+    step.setArgument('geometry_building_num_units', 3)
     step.setArgument('geometry_corridor_position', 'None')
     step.setArgument('window_front_wwr', 0.18)
     step.setArgument('window_back_wwr', 0.18)
@@ -721,7 +722,7 @@ def get_values(osw_file, step)
   elsif ['base-multifamily.osw'].include? osw_file
     step.setArgument('geometry_unit_type', HPXML::ResidentialTypeApartment)
     step.setArgument('geometry_cfa', 900.0)
-    step.setArgument('geometry_num_units', 3)
+    step.setArgument('geometry_building_num_units', 3)
     step.setArgument('geometry_corridor_position', 'None')
     step.setArgument('geometry_foundation_type', HPXML::FoundationTypeBasementUnconditioned)
     step.setArgument('window_front_wwr', 0.18)
@@ -1912,6 +1913,8 @@ def get_values(osw_file, step)
     step.setArgument('heating_system_type_2', HPXML::HVACTypeFireplace)
     step.setArgument('heating_system_heating_capacity_2', '16000.0')
   elsif ['extra-pv-shared.osw'].include? osw_file
+    step.setArgument('geometry_building_num_bedrooms', 9)
+    step.setArgument('pv_system_module_type_1', HPXML::PVModuleTypeStandard)
     step.setArgument('pv_system_is_shared_1', true)
   elsif ['invalid_files/non-electric-heat-pump-water-heater.osw'].include? osw_file
     step.setArgument('water_heater_type', HPXML::WaterHeaterTypeHeatPump)
@@ -1928,17 +1931,11 @@ def get_values(osw_file, step)
   elsif ['invalid_files/single-family-detached-finished-basement-zero-foundation-height.osw'].include? osw_file
     step.setArgument('geometry_foundation_height', 0.0)
   elsif ['invalid_files/single-family-attached-ambient.osw'].include? osw_file
-    step.setArgument('geometry_unit_type', HPXML::ResidentialTypeSFA)
-    step.setArgument('geometry_corridor_position', 'None')
     step.setArgument('geometry_foundation_type', HPXML::FoundationTypeAmbient)
   elsif ['invalid_files/multifamily-bottom-slab-non-zero-foundation-height.osw'].include? osw_file
-    step.setArgument('geometry_unit_type', HPXML::ResidentialTypeApartment)
-    step.setArgument('geometry_corridor_position', 'None')
     step.setArgument('geometry_foundation_type', HPXML::FoundationTypeSlab)
     step.setArgument('geometry_foundation_height_above_grade', 0.0)
   elsif ['invalid_files/multifamily-bottom-crawlspace-zero-foundation-height.osw'].include? osw_file
-    step.setArgument('geometry_unit_type', HPXML::ResidentialTypeApartment)
-    step.setArgument('geometry_corridor_position', 'None')
     step.setArgument('geometry_foundation_type', HPXML::FoundationTypeCrawlspaceUnvented)
     step.setArgument('geometry_foundation_height', 0.0)
   elsif ['invalid_files/slab-non-zero-foundation-height-above-grade.osw'].include? osw_file
