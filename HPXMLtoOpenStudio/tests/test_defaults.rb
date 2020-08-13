@@ -96,13 +96,28 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
     hpxml = HPXML.new(hpxml_path: File.join(@root_path, 'workflow', 'sample_files', hpxml_name))
     XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
     hpxml_default = _test_measure()
-    _test_default_building_construction_values(hpxml_default, 21600)
+    _test_default_building_construction_values(hpxml_default, 21600, false)
 
     # Test defaults w/ average ceiling height
     hpxml = apply_hpxml_defaults('base.xml')
     XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
     hpxml_default = _test_measure()
-    _test_default_building_construction_values(hpxml_default, 27000)
+    _test_default_building_construction_values(hpxml_default, 27000, false)
+  end
+
+  def test_flue_or_chimney
+    # Test inputs not overridden by defaults
+    hpxml_name = 'base-enclosure-infil-flue.xml'
+    hpxml = HPXML.new(hpxml_path: File.join(@root_path, 'workflow', 'sample_files', hpxml_name))
+    XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
+    hpxml_default = _test_measure()
+    _test_default_building_construction_values(hpxml_default, 21600, true)
+
+    # Test defaults
+    hpxml = apply_hpxml_defaults('base-enclosure-infil-flue.xml')
+    XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
+    hpxml_default = _test_measure()
+    _test_default_building_construction_values(hpxml_default, 27000, false)
   end
 
   def test_attics
@@ -1009,8 +1024,9 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
     end
   end
 
-  def _test_default_building_construction_values(hpxml, building_volume)
+  def _test_default_building_construction_values(hpxml, building_volume, has_flue_or_chimney)
     assert_equal(building_volume, hpxml.building_construction.conditioned_building_volume)
+    assert_equal(has_flue_or_chimney, hpxml.building_construction.has_flue_or_chimney)
   end
 
   def _test_default_attic_values(hpxml, sla)
@@ -1454,6 +1470,7 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
     hpxml.building_construction.conditioned_building_volume = nil
     hpxml.building_construction.average_ceiling_height = 10
     hpxml.building_construction.number_of_bathrooms = nil
+    hpxml.building_construction.has_flue_or_chimney = nil
 
     hpxml.attics.each do |attic|
       attic.vented_attic_sla = nil
