@@ -3880,26 +3880,6 @@ class HPXMLFile
     hpxml.climate_and_risk_zones.weather_station_epw_filepath = args[:weather_station_epw_filepath]
   end
 
-  def self.set_attics(hpxml, runner, model, args)
-    return if args[:geometry_unit_type] == HPXML::ResidentialTypeApartment
-    return if args[:geometry_unit_type] == HPXML::ResidentialTypeSFA # TODO: remove when we can model single-family attached units
-
-    if args[:geometry_roof_type] == 'flat'
-      hpxml.attics.add(id: HPXML::AtticTypeFlatRoof,
-                       attic_type: HPXML::AtticTypeFlatRoof)
-    else
-      hpxml.attics.add(id: args[:geometry_attic_type],
-                       attic_type: args[:geometry_attic_type])
-    end
-  end
-
-  def self.set_foundations(hpxml, runner, model, args)
-    return if args[:geometry_unit_type] == HPXML::ResidentialTypeApartment
-
-    hpxml.foundations.add(id: args[:geometry_foundation_type],
-                          foundation_type: args[:geometry_foundation_type])
-  end
-
   def self.set_air_infiltration_measurements(hpxml, runner, args)
     if args[:air_leakage_units] == HPXML::UnitsACH
       house_pressure = 50
@@ -3920,36 +3900,24 @@ class HPXMLFile
                                             infiltration_volume: infiltration_volume)
   end
 
-  def self.get_adjacent_to(surface)
-    space = surface.space.get
-    st = space.spaceType.get
-    space_type = st.standardsSpaceType.get
+  def self.set_attics(hpxml, runner, model, args)
+    return if args[:geometry_unit_type] == HPXML::ResidentialTypeApartment
+    return if args[:geometry_unit_type] == HPXML::ResidentialTypeSFA # TODO: remove when we can model single-family attached units
 
-    if ['vented crawlspace'].include? space_type
-      return HPXML::LocationCrawlspaceVented
-    elsif ['unvented crawlspace'].include? space_type
-      return HPXML::LocationCrawlspaceUnvented
-    elsif ['garage'].include? space_type
-      return HPXML::LocationGarage
-    elsif ['living space'].include? space_type
-      if Geometry.space_is_below_grade(space)
-        return HPXML::LocationBasementConditioned
-      else
-        return HPXML::LocationLivingSpace
-      end
-    elsif ['vented attic'].include? space_type
-      return HPXML::LocationAtticVented
-    elsif ['unvented attic'].include? space_type
-      return HPXML::LocationAtticUnvented
-    elsif ['unconditioned basement'].include? space_type
-      return HPXML::LocationBasementUnconditioned
-    elsif ['corridor'].include? space_type
-      return HPXML::LocationOtherHousingUnit
-    elsif ['ambient'].include? space_type
-      return HPXML::LocationOutside
+    if args[:geometry_roof_type] == 'flat'
+      hpxml.attics.add(id: HPXML::AtticTypeFlatRoof,
+                       attic_type: HPXML::AtticTypeFlatRoof)
     else
-      fail "Unhandled SpaceType value (#{space_type}) for surface '#{surface.name}'."
+      hpxml.attics.add(id: args[:geometry_attic_type],
+                       attic_type: args[:geometry_attic_type])
     end
+  end
+
+  def self.set_foundations(hpxml, runner, model, args)
+    return if args[:geometry_unit_type] == HPXML::ResidentialTypeApartment
+
+    hpxml.foundations.add(id: args[:geometry_foundation_type],
+                          foundation_type: args[:geometry_foundation_type])
   end
 
   def self.set_roofs(hpxml, runner, model, args)
@@ -3985,7 +3953,7 @@ class HPXMLFile
         radiant_barrier_grade = args[:roof_radiant_barrier_grade]
       end
 
-      hpxml.roofs.add(id: "#{surface.name}",
+      hpxml.roofs.add(id: valid_attr(surface.name),
                       interior_adjacent_to: get_adjacent_to(surface),
                       area: UnitConversions.convert(surface.grossArea, 'm^2', 'ft^2').round,
                       roof_type: roof_type,
@@ -4058,7 +4026,7 @@ class HPXMLFile
         solar_absorptance = args[:wall_solar_absorptance]
       end
 
-      hpxml.walls.add(id: "#{surface.name}",
+      hpxml.walls.add(id: valid_attr(surface.name),
                       exterior_adjacent_to: exterior_adjacent_to,
                       interior_adjacent_to: interior_adjacent_to,
                       wall_type: wall_type,
@@ -4101,7 +4069,7 @@ class HPXMLFile
         insulation_interior_distance_to_bottom = 0
       end
 
-      hpxml.foundation_walls.add(id: "#{surface.name}",
+      hpxml.foundation_walls.add(id: valid_attr(surface.name),
                                  exterior_adjacent_to: HPXML::LocationGround,
                                  interior_adjacent_to: get_adjacent_to(surface),
                                  height: args[:geometry_foundation_height],
@@ -4142,7 +4110,7 @@ class HPXMLFile
       next if (surface.surfaceType == 'RoofCeiling') && (exterior_adjacent_to == HPXML::LocationOutside)
       next if [HPXML::LocationLivingSpace, HPXML::LocationBasementConditioned].include? exterior_adjacent_to
 
-      hpxml.frame_floors.add(id: "#{surface.name}",
+      hpxml.frame_floors.add(id: valid_attr(surface.name),
                              exterior_adjacent_to: exterior_adjacent_to,
                              interior_adjacent_to: interior_adjacent_to,
                              area: UnitConversions.convert(surface.grossArea, 'm^2', 'ft^2').round,
@@ -4189,7 +4157,7 @@ class HPXMLFile
         thickness = 0.0 # Assume soil
       end
 
-      hpxml.slabs.add(id: "#{surface.name}",
+      hpxml.slabs.add(id: valid_attr(surface.name),
                       interior_adjacent_to: interior_adjacent_to,
                       area: UnitConversions.convert(surface.grossArea, 'm^2', 'ft^2').round,
                       thickness: thickness,
@@ -4271,7 +4239,7 @@ class HPXMLFile
           fraction_operable = args[:window_fraction_operable].get
         end
 
-        hpxml.windows.add(id: "#{sub_surface.name}_#{sub_surface_facade}",
+        hpxml.windows.add(id: "#{valid_attr(sub_surface.name)}_#{sub_surface_facade}",
                           area: UnitConversions.convert(sub_surface.grossArea, 'm^2', 'ft^2').round(1),
                           azimuth: azimuth,
                           ufactor: args[:window_ufactor],
@@ -4282,7 +4250,7 @@ class HPXMLFile
                           interior_shading_factor_winter: interior_shading_factor_winter,
                           interior_shading_factor_summer: interior_shading_factor_summer,
                           fraction_operable: fraction_operable,
-                          wall_idref: "#{surface.name}")
+                          wall_idref: valid_attr(surface.name))
       end # sub_surfaces
     end # surfaces
   end
@@ -4294,12 +4262,12 @@ class HPXMLFile
 
         sub_surface_facade = Geometry.get_facade_for_surface(sub_surface)
 
-        hpxml.skylights.add(id: "#{sub_surface.name}_#{sub_surface_facade}",
+        hpxml.skylights.add(id: "#{valid_attr(sub_surface.name)}_#{sub_surface_facade}",
                             area: UnitConversions.convert(sub_surface.grossArea, 'm^2', 'ft^2').round,
                             azimuth: UnitConversions.convert(sub_surface.azimuth, 'rad', 'deg').round,
                             ufactor: args[:skylight_ufactor],
                             shgc: args[:skylight_shgc],
-                            roof_idref: "#{surface.name}")
+                            roof_idref: valid_attr(surface.name))
       end
     end
   end
@@ -4311,8 +4279,8 @@ class HPXMLFile
 
         sub_surface_facade = Geometry.get_facade_for_surface(sub_surface)
 
-        hpxml.doors.add(id: "#{sub_surface.name}_#{sub_surface_facade}",
-                        wall_idref: "#{surface.name}",
+        hpxml.doors.add(id: "#{valid_attr(sub_surface.name)}_#{sub_surface_facade}",
+                        wall_idref: valid_attr(surface.name),
                         area: UnitConversions.convert(sub_surface.grossArea, 'm^2', 'ft^2').round,
                         azimuth: args[:geometry_orientation],
                         r_value: args[:door_rvalue])
@@ -5804,6 +5772,45 @@ class HPXMLFile
                        heater_weekday_fractions: heater_weekday_fractions,
                        heater_weekend_fractions: heater_weekend_fractions,
                        heater_monthly_multipliers: heater_monthly_multipliers)
+  end
+
+  def self.valid_attr(attr)
+    attr = attr.to_s
+    attr = attr.gsub(' ', '_')
+    attr = attr.gsub('|', '_')
+    return attr
+  end
+
+  def self.get_adjacent_to(surface)
+    space = surface.space.get
+    st = space.spaceType.get
+    space_type = st.standardsSpaceType.get
+
+    if ['vented crawlspace'].include? space_type
+      return HPXML::LocationCrawlspaceVented
+    elsif ['unvented crawlspace'].include? space_type
+      return HPXML::LocationCrawlspaceUnvented
+    elsif ['garage'].include? space_type
+      return HPXML::LocationGarage
+    elsif ['living space'].include? space_type
+      if Geometry.space_is_below_grade(space)
+        return HPXML::LocationBasementConditioned
+      else
+        return HPXML::LocationLivingSpace
+      end
+    elsif ['vented attic'].include? space_type
+      return HPXML::LocationAtticVented
+    elsif ['unvented attic'].include? space_type
+      return HPXML::LocationAtticUnvented
+    elsif ['unconditioned basement'].include? space_type
+      return HPXML::LocationBasementUnconditioned
+    elsif ['corridor'].include? space_type
+      return HPXML::LocationOtherHousingUnit
+    elsif ['ambient'].include? space_type
+      return HPXML::LocationOutside
+    else
+      fail "Unhandled SpaceType value (#{space_type}) for surface '#{surface.name}'."
+    end
   end
 end
 
