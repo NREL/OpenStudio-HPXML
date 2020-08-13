@@ -194,7 +194,7 @@ Fields include:
 - ``NumberofBathrooms``: Optional. If not provided, it is calculated as :math:`\frac{NumberofBedrooms}{2} + 0.5` based on the `Building America House Simulation Protocols <https://www1.eere.energy.gov/buildings/publications/pdfs/building_america/house_simulation.pdf>`_.
 - ``ConditionedFloorArea``
 - ``ConditionedBuildingVolume`` or ``AverageCeilingHeight``
-- ``extension/HasFlueOrChimney``: Optional. Specifies whether there is a flue (associated with heating system or water heater) or chimney. if not provided, it is assumed to be true if any of the following conditions are met: 
+- ``extension/HasFlueOrChimney``: Optional. Specifies whether there is a flue (associated with heating system or water heater) or chimney. If not provided, it is assumed to be true if any of the following conditions are met: 
 
   - heating system is non-electric ``Furnace``, ``Boiler``, ``WallFurnace``, ``FloorFurnace``, ``Stove``, or ``FixedHeater`` and AFUE/Percent is less than 0.89
   - heating system is non-electric ``Fireplace`` 
