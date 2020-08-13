@@ -1596,7 +1596,7 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
 
     arg = OpenStudio::Measure::OSArgument::makeBoolArgument('water_heater_is_shared_system', true)
     arg.setDisplayName('Water Heater: Is Shared System')
-    arg.setDescription('Whether the water heater is a shared system. If true, assumed to served all the units in the building.')
+    arg.setDescription('Whether the water heater is a shared system. If true, assumed to serve all the units in the building.')
     arg.setDefaultValue(false)
     args << arg
 
