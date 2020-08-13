@@ -1996,6 +1996,7 @@ class SimulationOutputReport < OpenStudio::Measure::ReportingMeasure
     @component_loads[[LT::Heating, CLT::NaturalVentilation]] = ComponentLoad.new(ems_variable: 'loads_htg_natvent')
     @component_loads[[LT::Heating, CLT::MechanicalVentilation]] = ComponentLoad.new(ems_variable: 'loads_htg_mechvent')
     @component_loads[[LT::Heating, CLT::WholeHouseFan]] = ComponentLoad.new(ems_variable: 'loads_htg_whf')
+    @component_loads[[LT::Heating, CLT::ClothesDryerExhaust]] = ComponentLoad.new(ems_variable: 'loads_htg_cd')
     @component_loads[[LT::Heating, CLT::Ducts]] = ComponentLoad.new(ems_variable: 'loads_htg_ducts')
     @component_loads[[LT::Heating, CLT::InternalGains]] = ComponentLoad.new(ems_variable: 'loads_htg_intgains')
     @component_loads[[LT::Cooling, CLT::Roofs]] = ComponentLoad.new(ems_variable: 'loads_clg_roofs')
@@ -2013,6 +2014,7 @@ class SimulationOutputReport < OpenStudio::Measure::ReportingMeasure
     @component_loads[[LT::Cooling, CLT::NaturalVentilation]] = ComponentLoad.new(ems_variable: 'loads_clg_natvent')
     @component_loads[[LT::Cooling, CLT::MechanicalVentilation]] = ComponentLoad.new(ems_variable: 'loads_clg_mechvent')
     @component_loads[[LT::Cooling, CLT::WholeHouseFan]] = ComponentLoad.new(ems_variable: 'loads_clg_whf')
+    @component_loads[[LT::Cooling, CLT::ClothesDryerExhaust]] = ComponentLoad.new(ems_variable: 'loads_clg_cd')
     @component_loads[[LT::Cooling, CLT::Ducts]] = ComponentLoad.new(ems_variable: 'loads_clg_ducts')
     @component_loads[[LT::Cooling, CLT::InternalGains]] = ComponentLoad.new(ems_variable: 'loads_clg_intgains')
 
@@ -2063,6 +2065,7 @@ class SimulationOutputReport < OpenStudio::Measure::ReportingMeasure
     @airflows[AFT::MechanicalVentilation] = Airflow.new(ems_program: Constants.ObjectNameInfiltration + ' program', ems_variables: [(Constants.ObjectNameMechanicalVentilation + ' flow act').gsub(' ', '_'), 'QWHV_ervhrv'])
     @airflows[AFT::NaturalVentilation] = Airflow.new(ems_program: Constants.ObjectNameNaturalVentilation + ' program', ems_variables: [(Constants.ObjectNameNaturalVentilation + ' flow act').gsub(' ', '_')])
     @airflows[AFT::WholeHouseFan] = Airflow.new(ems_program: Constants.ObjectNameNaturalVentilation + ' program', ems_variables: [(Constants.ObjectNameWholeHouseFan + ' flow act').gsub(' ', '_')])
+    @airflows[AFT::ClothesDryerExhaust] = Airflow.new(ems_program: Constants.ObjectNameInfiltration + ' program', ems_variables: [(Constants.ObjectNameClothesDryerExhaust + ' flow act').gsub(' ', '_')])
 
     @airflows.each do |airflow_type, airflow|
       airflow.name = "Airflow: #{airflow_type}"

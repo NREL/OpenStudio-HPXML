@@ -1487,6 +1487,13 @@ class Airflow
     mechvent_flow_actuator = OpenStudio::Model::EnergyManagementSystemActuator.new(mechvent_flow, 'Zone Infiltration', 'Air Exchange Flow Rate')
     mechvent_flow_actuator.setName("#{mechvent_flow.name} act")
 
+    cd_flow = OpenStudio::Model::SpaceInfiltrationDesignFlowRate.new(model)
+    cd_flow.setName(Constants.ObjectNameClothesDryerExhaust + ' flow')
+    cd_flow.setSchedule(model.alwaysOnDiscreteSchedule)
+    cd_flow.setSpace(@living_space)
+    cd_flow_actuator = OpenStudio::Model::EnergyManagementSystemActuator.new(cd_flow, 'Zone Infiltration', 'Air Exchange Flow Rate')
+    cd_flow_actuator.setName("#{cd_flow.name} act")
+
     # Living Space Infiltration Calculation/Program
     infil_program = OpenStudio::Model::EnergyManagementSystemProgram.new(model)
     infil_program.setName(Constants.ObjectNameInfiltration + ' program')
@@ -1599,8 +1606,9 @@ class Airflow
       infil_program.addLine('Set Qtot = (((Qu^2) + (Qinf^2)) ^ 0.5) + Qb')
       infil_program.addLine('Set Qinf_adj = Qtot - Qu - Qb')
     end
-    infil_program.addLine("Set #{mechvent_flow_actuator.name} = Qfan - QWHV_ervhrv") # QWHV load captured by ERV/HRV program
+    infil_program.addLine("Set #{mechvent_flow_actuator.name} = Qfan - QWHV_ervhrv - Qdryer") # QWHV load captured by ERV/HRV program
     infil_program.addLine("Set #{infil_flow_actuator.name} = Qinf_adj")
+    infil_program.addLine("Set #{cd_flow_actuator.name} = Qdryer")
 
     program_calling_manager = OpenStudio::Model::EnergyManagementSystemProgramCallingManager.new(model)
     program_calling_manager.setName("#{infil_program.name} calling manager")
