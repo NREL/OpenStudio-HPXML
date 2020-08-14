@@ -3079,14 +3079,6 @@ class HVACSizing
           for i in 0..(hvac_final_values.GSHP_G_Functions[0].size - 1)
             hvac.GSHP_HXVertical.addGFunction(hvac_final_values.GSHP_G_Functions[0][i], hvac_final_values.GSHP_G_Functions[1][i])
           end
-
-          plant_loop.supplyComponents.each do |plc|
-            next unless plc.to_PumpVariableSpeed.is_initialized
-
-            # Pump
-            pump = plc.to_PumpVariableSpeed.get
-            pump.setRatedFlowRate(UnitConversions.convert(hvac_final_values.GSHP_Loop_flow, 'gal/min', 'm^3/s'))
-          end
         end
 
       elsif object.is_a? OpenStudio::Model::AirLoopHVACUnitarySystem
@@ -3168,12 +3160,6 @@ class HVACSizing
           if component.to_BoilerHotWater.is_initialized
             boiler = component.to_BoilerHotWater.get
             boiler.setNominalCapacity(UnitConversions.convert(hvac_final_values.Heat_Capacity, 'Btu/hr', 'W'))
-          end
-
-          # Pump
-          if component.to_PumpVariableSpeed.is_initialized
-            pump = component.to_PumpVariableSpeed.get
-            pump.setRatedFlowRate(UnitConversions.convert(hvac_final_values.Heat_Capacity / 20.0 / 500.0, 'gal/min', 'm^3/s'))
           end
         end
 

@@ -757,7 +757,6 @@ class HVAC
     fluid_type = Constants.FluidPropyleneGlycol
     frac_glycol = 0.3
     design_delta_t = 10.0
-    pump_head = 50.0
     fan_power_installed = 0.5 # W/cfm
     chw_design = [85.0, weather.design.CoolingDrybulb - 15.0, weather.data.AnnualAvgDrybulb + 10.0].max # Temperature of water entering indoor coil,use 85F as lower bound
     if fluid_type == Constants.FluidWater
@@ -919,10 +918,13 @@ class HVAC
 
     # Pump
 
+    pump_w = 100.0 # FIXME
     pump = OpenStudio::Model::PumpVariableSpeed.new(model)
     pump.setName(obj_name + ' pump')
-    pump.setRatedPumpHead(pump_head)
-    pump.setMotorEfficiency(0.77 * 0.6)
+    pump.setRatedPowerConsumption(pump_w)
+    pump.setMotorEfficiency(0.9)
+    pump.setRatedPumpHead(20000)
+    pump.setRatedFlowRate(calc_pump_rated_flow_rate(0.75, pump_w, pump.ratedPumpHead)) # FIXME: Double-check impact on results
     pump.setFractionofMotorInefficienciestoFluidStream(0)
     pump.setCoefficient1ofthePartLoadPerformanceCurve(0)
     pump.setCoefficient2ofthePartLoadPerformanceCurve(1)
@@ -956,6 +958,7 @@ class HVAC
 
     air_loop_unitary = create_air_loop_unitary_system(model, obj_name, fan, htg_coil, clg_coil, htg_supp_coil, 40.0)
     hvac_map[heat_pump.id] << air_loop_unitary
+    set_pump_power_ems_program(model, pump_w, pump, air_loop_unitary)
 
     # Air Loop
 
@@ -1017,10 +1020,17 @@ class HVAC
 
     # Pump
 
+    eae = heating_system.electric_auxiliary_energy
+    if eae.nil?
+      eae = get_default_eae(heating_system.heating_system_type, heating_system.heating_system_fuel, heating_system.fraction_heat_load_served, nil)
+    end
+    pump_w = eae / 2.08
     pump = OpenStudio::Model::PumpVariableSpeed.new(model)
     pump.setName(obj_name + ' hydronic pump')
-    pump.setRatedPumpHead(20000)
+    pump.setRatedPowerConsumption(pump_w)
     pump.setMotorEfficiency(0.9)
+    pump.setRatedPumpHead(20000)
+    pump.setRatedFlowRate(calc_pump_rated_flow_rate(0.75, pump_w, pump.ratedPumpHead)) # FIXME: Double-check impact on results
     pump.setFractionofMotorInefficienciestoFluidStream(0)
     pump.setCoefficient1ofthePartLoadPerformanceCurve(0)
     pump.setCoefficient2ofthePartLoadPerformanceCurve(1)
@@ -1065,6 +1075,7 @@ class HVAC
     boiler.setParasiticElectricLoad(0)
     plant_loop.addSupplyBranchForComponent(boiler)
     hvac_map[heating_system.id] << boiler
+    set_pump_power_ems_program(model, pump_w, pump, boiler)
 
     if is_condensing && oat_reset_enabled
       setpoint_manager_oar = OpenStudio::Model::SetpointManagerOutdoorAirReset.new(model)
@@ -1434,71 +1445,40 @@ class HVAC
   def self.apply_eae_to_heating_fan(runner, eae_hvacs, eae, fuel, load_frac, htg_type)
     # Applies Electric Auxiliary Energy (EAE) for fuel heating equipment to fan power.
 
-    if htg_type == HPXML::HVACTypeBoiler
+    unitary_systems = []
+    eae_hvacs.each do |eae_hvac|
+      if eae_hvac.is_a? OpenStudio::Model::AirLoopHVAC # Furnace
+        unitary_systems << get_unitary_system_from_air_loop_hvac(eae_hvac)
+      elsif eae_hvac.is_a? OpenStudio::Model::AirLoopHVACUnitarySystem # WallFurnace/FloorFurnace/Stove
+        unitary_systems << eae_hvac
+      end
+    end
 
+    unitary_systems.each do |unitary_system|
       if eae.nil?
-        eae = get_default_eae(htg_type, fuel, load_frac, nil)
-      end
-
-      elec_power = (eae / 2.08) # W
-
-      eae_hvacs.each do |eae_hvac|
-        next unless eae_hvac.is_a? OpenStudio::Model::PlantLoop
-
-        eae_hvac.components.each do |plc|
-          if plc.to_BoilerHotWater.is_initialized
-            boiler = plc.to_BoilerHotWater.get
-            boiler.setParasiticElectricLoad(0.0)
-          elsif plc.to_PumpVariableSpeed.is_initialized
-            pump = plc.to_PumpVariableSpeed.get
-            pump_eff = 0.9
-            pump_gpm = UnitConversions.convert(pump.ratedFlowRate.get, 'm^3/s', 'gal/min')
-            pump_w_gpm = elec_power / pump_gpm # W/gpm
-            pump.setRatedPowerConsumption(elec_power)
-            pump.setRatedPumpHead(calc_pump_head(pump_eff, pump_w_gpm))
-            pump.setMotorEfficiency(1.0)
-          end
-        end
-      end
-
-    else # Furnace/WallFurnace/FloorFurnace/Stove
-
-      unitary_systems = []
-      eae_hvacs.each do |eae_hvac|
-        if eae_hvac.is_a? OpenStudio::Model::AirLoopHVAC # Furnace
-          unitary_systems << get_unitary_system_from_air_loop_hvac(eae_hvac)
-        elsif eae_hvac.is_a? OpenStudio::Model::AirLoopHVACUnitarySystem # WallFurnace/FloorFurnace/Stove
-          unitary_systems << eae_hvac
-        end
-      end
-
-      unitary_systems.each do |unitary_system|
-        if eae.nil?
-          htg_coil = unitary_system.heatingCoil.get.to_CoilHeatingGas.get
-          htg_capacity = UnitConversions.convert(htg_coil.nominalCapacity.get, 'W', 'kBtu/hr')
-          eae = get_default_eae(htg_type, fuel, load_frac, htg_capacity)
-        end
-        elec_power = eae / 2.08 # W
-
         htg_coil = unitary_system.heatingCoil.get.to_CoilHeatingGas.get
-        htg_coil.setParasiticElectricLoad(0.0)
-
-        htg_cfm = UnitConversions.convert(unitary_system.supplyAirFlowRateDuringHeatingOperation.get, 'm^3/s', 'cfm')
-
-        fan = unitary_system.supplyFan.get.to_FanOnOff.get
-        if elec_power > 0
-          fan_eff = 0.75 # Overall Efficiency of the Fan, Motor and Drive
-          fan_w_cfm = elec_power / htg_cfm # W/cfm
-          fan.setFanEfficiency(fan_eff)
-          fan.setPressureRise(calc_fan_pressure_rise(fan_eff, fan_w_cfm))
-        else
-          fan.setFanEfficiency(1)
-          fan.setPressureRise(0)
-        end
-        fan.setMotorEfficiency(1.0)
-        fan.setMotorInAirstreamFraction(1.0)
+        htg_capacity = UnitConversions.convert(htg_coil.nominalCapacity.get, 'W', 'kBtu/hr')
+        eae = get_default_eae(htg_type, fuel, load_frac, htg_capacity)
       end
+      elec_power = eae / 2.08 # W
 
+      htg_coil = unitary_system.heatingCoil.get.to_CoilHeatingGas.get
+      htg_coil.setParasiticElectricLoad(0.0)
+
+      htg_cfm = UnitConversions.convert(unitary_system.supplyAirFlowRateDuringHeatingOperation.get, 'm^3/s', 'cfm')
+
+      fan = unitary_system.supplyFan.get.to_FanOnOff.get
+      if elec_power > 0
+        fan_eff = 0.75 # Overall Efficiency of the Fan, Motor and Drive
+        fan_w_cfm = elec_power / htg_cfm # W/cfm
+        fan.setFanEfficiency(fan_eff)
+        fan.setPressureRise(calc_fan_pressure_rise(fan_eff, fan_w_cfm))
+      else
+        fan.setFanEfficiency(1)
+        fan.setPressureRise(0)
+      end
+      fan.setMotorEfficiency(1.0)
+      fan.setMotorInAirstreamFraction(1.0)
     end
   end
 
@@ -1625,6 +1605,75 @@ class HVAC
   end
 
   private
+
+  def self.set_pump_power_ems_program(model, pump_w, pump, heating_object)
+    # EMS is used to set the pump power.
+    # Without EMS, the pump power will vary according to the plant loop part load ratio
+    # (based on flow rate) rather than the boiler part load ratio (based on load).
+
+    # Sensors
+    if heating_object.is_a? OpenStudio::Model::BoilerHotWater
+      heating_plr_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Boiler Part Load Ratio')
+      heating_plr_sensor.setName("#{heating_object.name} plr s")
+      heating_plr_sensor.setKeyName(heating_object.name.to_s)
+    elsif heating_object.is_a? OpenStudio::Model::AirLoopHVACUnitarySystem
+      heating_plr_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Unitary System Part Load Ratio')
+      heating_plr_sensor.setName("#{heating_object.name} plr s")
+      heating_plr_sensor.setKeyName(heating_object.name.to_s)
+    end
+
+    pump_mfr_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Pump Mass Flow Rate')
+    pump_mfr_sensor.setName("#{pump.name} mfr s")
+    pump_mfr_sensor.setKeyName(pump.name.to_s)
+
+    # Internal variable
+    pump_rated_mfr_var = OpenStudio::Model::EnergyManagementSystemInternalVariable.new(model, 'Pump Maximum Mass Flow Rate')
+    pump_rated_mfr_var.setName("#{pump.name} rated mfr")
+    pump_rated_mfr_var.setInternalDataIndexKeyName(pump.name.to_s)
+
+    # Actuator
+    pump_pressure_rise_act = OpenStudio::Model::EnergyManagementSystemActuator.new(pump, 'Pump', 'Pump Pressure Rise')
+    pump_pressure_rise_act.setName("#{pump.name} pressure rise act")
+
+    # Program
+    # See https://bigladdersoftware.com/epx/docs/9-3/ems-application-guide/hvac-systems-001.html#pump
+    pump_program = OpenStudio::Model::EnergyManagementSystemProgram.new(model)
+    pump_program.setName("#{pump.name} power program")
+    pump_program.addLine("Set heating_plr = #{heating_plr_sensor.name}")
+    pump_program.addLine("Set pump_total_eff = #{pump_rated_mfr_var.name} / 1000 * #{pump.ratedPumpHead} / #{pump.ratedPowerConsumption.get}")
+    pump_program.addLine("Set pump_vfr = #{pump_mfr_sensor.name} / 1000")
+    pump_program.addLine('If pump_vfr > 0')
+    pump_program.addLine("  Set #{pump_pressure_rise_act.name} = #{pump_w} * heating_plr * pump_total_eff / pump_vfr")
+    pump_program.addLine('Else')
+    pump_program.addLine("  Set #{pump_pressure_rise_act.name} = 0")
+    pump_program.addLine('EndIf')
+
+    # Calling Point
+    pump_program_calling_manager = OpenStudio::Model::EnergyManagementSystemProgramCallingManager.new(model)
+    pump_program_calling_manager.setName("#{pump.name} power program calling manager")
+    pump_program_calling_manager.setCallingPoint('EndOfSystemTimestepBeforeHVACReporting')
+    pump_program_calling_manager.addProgram(pump_program)
+
+    puts 'HELLO'
+
+    # DEBUG
+    # oems = model.getOutputEnergyManagementSystem
+    # oems.setActuatorAvailabilityDictionaryReporting('Verbose')
+    # oems.setInternalVariableAvailabilityDictionaryReporting('Verbose')
+    # oems.setEMSRuntimeLanguageDebugOutputLevel('Verbose')
+
+    # outputVariable = OpenStudio::Model::OutputVariable.new('Boiler Part Load Ratio', model)
+    # outputVariable.setReportingFrequency('hourly')
+    # outputVariable.setKeyValue(heating_object.name.to_s)
+
+    # outputVariable = OpenStudio::Model::OutputVariable.new('Pump Electric Energy', model)
+    # outputVariable.setReportingFrequency('hourly')
+    # outputVariable.setKeyValue(pump.name.to_s)
+
+    # outputVariable = OpenStudio::Model::OutputVariable.new('Pump Electric Power', model)
+    # outputVariable.setReportingFrequency('hourly')
+    # outputVariable.setKeyValue(pump.name.to_s)
+  end
 
   def self.disaggregate_fan_or_pump(model, fan_or_pump, htg_object, clg_object, backup_htg_object)
     # Disaggregate into heating/cooling output energy use.
@@ -1927,7 +1976,8 @@ class HVAC
     # From ANSI/RESNET/ICC 301 Standard
     if htg_type == HPXML::HVACTypeBoiler
       if [HPXML::FuelTypeNaturalGas,
-          HPXML::FuelTypePropane].include? fuel
+          HPXML::FuelTypePropane,
+          HPXML::FuelTypeElectricity].include? fuel
         return 170.0 * load_frac # kWh/yr
       elsif [HPXML::FuelTypeOil,
              HPXML::FuelTypeOil1,
@@ -3185,11 +3235,10 @@ class HVAC
     return fan_eff * fan_power / UnitConversions.convert(1.0, 'cfm', 'm^3/s') # Pa
   end
 
-  def self.calc_pump_head(pump_eff, pump_power)
-    # Calculate needed pump head to achieve a given pump power with an assumed efficiency.
-    # Previously we calculated the pump efficiency from an assumed pump head, which could lead to
-    # errors (pump efficiencies > 1).
-    return pump_eff * pump_power / UnitConversions.convert(1.0, 'gal/min', 'm^3/s') # Pa
+  def self.calc_pump_rated_flow_rate(pump_eff, pump_w, pump_head_pa)
+    # Calculate needed pump rated flow rate to achieve a given pump power with an assumed
+    # efficiency and pump head.
+    return pump_eff * pump_w / pump_head_pa # m3/s
   end
 
   def self.existing_equipment(model, thermal_zone, runner)
