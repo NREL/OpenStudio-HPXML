@@ -3614,6 +3614,14 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     warning = (args[:heating_system_type_2] != 'none') && (args[:heating_system_fraction_heat_load_served_2] >= 0.5)
     warnings << "heating_system_type_2=#{args[:heating_system_type_2]} and heating_system_fraction_heat_load_served_2=#{args[:heating_system_fraction_heat_load_served_2]}" if warning
 
+    # single-family attached and num units, horizontal location not specified
+    error = (args[:geometry_unit_type] == HPXML::ResidentialTypeSFA) && ((!args[:geometry_num_units].is_initialized) || (!args[:geometry_horizontal_location].is_initialized))
+    errors << "geometry_unit_type=#{args[:geometry_unit_type]} and geometry_num_units=#{args[:geometry_num_units].is_initialized} and geometry_horizontal_location=#{args[:geometry_horizontal_location].is_initialized}" if error
+
+    # apartment unit and num units, level, horizontal location not specified
+    error = (args[:geometry_unit_type] == HPXML::ResidentialTypeApartment) && ((!args[:geometry_num_units].is_initialized) || (!args[:geometry_level].is_initialized) || (!args[:geometry_horizontal_location].is_initialized))
+    errors << "geometry_unit_type=#{args[:geometry_unit_type]} and geometry_num_units=#{args[:geometry_num_units].is_initialized} and geometry_level=#{args[:geometry_level].is_initialized} and geometry_horizontal_location=#{args[:geometry_horizontal_location].is_initialized}" if error
+
     return warnings, errors
   end
 

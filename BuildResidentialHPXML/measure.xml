@@ -3,8 +3,8 @@
   <schema_version>3.0</schema_version>
   <name>build_residential_hpxml</name>
   <uid>a13a8983-2b01-4930-8af2-42030b6e4233</uid>
-  <version_id>f4f98cf1-b9dc-4376-b855-7c38416c935a</version_id>
-  <version_modified>20200814T174511Z</version_modified>
+  <version_id>7bf55125-207d-4366-bfab-9c0e593c82bb</version_id>
+  <version_modified>20200814T180816Z</version_modified>
   <xml_checksum>2C38F48B</xml_checksum>
   <class_name>BuildResidentialHPXML</class_name>
   <display_name>HPXML Builder</display_name>
@@ -5873,12 +5873,6 @@
       <checksum>A89C38C4</checksum>
     </file>
     <file>
-      <filename>build_residential_hpxml_test.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>test</usage_type>
-      <checksum>8B47D2BD</checksum>
-    </file>
-    <file>
       <filename>base-multifamily.osw</filename>
       <filetype>osw</filetype>
       <usage_type>test</usage_type>
@@ -6881,6 +6875,18 @@
       <checksum>3369870D</checksum>
     </file>
     <file>
+      <filename>extra-dhw-shared-water-heater.osw</filename>
+      <filetype>osw</filetype>
+      <usage_type>test</usage_type>
+      <checksum>6CBA4F4F</checksum>
+    </file>
+    <file>
+      <filename>build_residential_hpxml_test.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>test</usage_type>
+      <checksum>392E7299</checksum>
+    </file>
+    <file>
       <version>
         <software_program>OpenStudio</software_program>
         <identifier>2.9.0</identifier>
@@ -6889,13 +6895,7 @@
       <filename>measure.rb</filename>
       <filetype>rb</filetype>
       <usage_type>script</usage_type>
-      <checksum>1C2308FD</checksum>
-    </file>
-    <file>
-      <filename>extra-dhw-shared-water-heater.osw</filename>
-      <filetype>osw</filetype>
-      <usage_type>test</usage_type>
-      <checksum>6CBA4F4F</checksum>
+      <checksum>133E8EAE</checksum>
     </file>
   </files>
 </measure>

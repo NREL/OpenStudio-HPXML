@@ -227,7 +227,9 @@ def create_osws
     'invalid_files/multifamily-bottom-crawlspace-zero-foundation-height.osw' => 'base-multifamily.osw',
     'invalid_files/slab-non-zero-foundation-height-above-grade.osw' => 'base.osw',
     'invalid_files/ducts-location-and-areas-not-same-type.osw' => 'base.osw',
-    'invalid_files/second-heating-system-serves-majority-heat.osw' => 'base.osw'
+    'invalid_files/second-heating-system-serves-majority-heat.osw' => 'base.osw',
+    'invalid_files/single-family-attached-no-building-orientation.osw' => 'base-single-family-attached.osw',
+    'invalid_files/multifamily-no-building-orientation.osw' => 'base-multifamily.osw'
   }
 
   puts "Generating #{osws_files.size} OSW files..."
@@ -1945,6 +1947,13 @@ def get_values(osw_file, step)
     step.setArgument('heating_system_fraction_heat_load_served', 0.4)
     step.setArgument('heating_system_type_2', HPXML::HVACTypeFireplace)
     step.setArgument('heating_system_fraction_heat_load_served_2', 0.6)
+  elsif ['invalid_files/single-family-attached-no-building-orientation.osw'].include? osw_file
+    step.removeArgument('geometry_num_units')
+    step.removeArgument('geometry_horizontal_location')
+  elsif ['invalid_files/multifamily-no-building-orientation.osw'].include? osw_file
+    step.removeArgument('geometry_num_units')
+    step.removeArgument('geometry_level')
+    step.removeArgument('geometry_horizontal_location')
   end
   return step
 end
