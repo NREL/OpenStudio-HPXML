@@ -97,6 +97,10 @@
             <RoofType>asphalt or fiberglass shingles</RoofType>
             <SolarAbsorptance>0.7</SolarAbsorptance>
             <Emittance>0.92</Emittance>
+            <Rafters>
+              <Size>2x6</Size>
+              <FramingFactor>0.1988</FramingFactor>
+            </Rafters>
             <Pitch>6.0</Pitch>
             <RadiantBarrier>false</RadiantBarrier>
             <Insulation>
@@ -108,10 +112,6 @@
                 <Thickness>5.5</Thickness>
               </Layer>
             </Insulation>
-            <Rafters>
-              <Size>2x6</Size>
-              <FramingFactor>0.1988</FramingFactor>
-            </Rafters>
             <extension>
               <OrientedStrandBoard>
                 <Thickness>0.5</Thickness>
