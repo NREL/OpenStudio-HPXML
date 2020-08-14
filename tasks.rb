@@ -53,6 +53,9 @@ def create_osws
     'base-dhw-recirc-nocontrol.osw' => 'base.osw',
     'base-dhw-recirc-temperature.osw' => 'base.osw',
     'base-dhw-recirc-timer.osw' => 'base.osw',
+    # 'base-dhw-shared-laundry-room.osw' => 'base.osw',
+    # 'base-dhw-shared-water-heater.osw' => 'base.osw',
+    # 'base-dhw-shared-water-heater-recirc.osw' => 'base.osw',
     'base-dhw-solar-direct-evacuated-tube.osw' => 'base.osw',
     'base-dhw-solar-direct-flat-plate.osw' => 'base.osw',
     'base-dhw-solar-direct-ics.osw' => 'base.osw',
@@ -209,6 +212,7 @@ def create_osws
     'extra-auto.osw' => 'base.osw',
     'extra-pv-roofpitch.osw' => 'base.osw',
     'extra-dhw-solar-latitude.osw' => 'base.osw',
+    'extra-dhw-shared-water-heater.osw' => 'base-single-family-attached.osw',
     'extra-second-refrigerator.osw' => 'base.osw',
     'extra-second-heating-system-portable-heater.osw' => 'base.osw',
     'extra-second-heating-system-fireplace.osw' => 'base.osw',
@@ -491,6 +495,7 @@ def get_values(osw_file, step)
     step.setArgument('water_heater_jacket_rvalue', 0)
     step.setArgument('water_heater_setpoint_temperature', '125')
     step.setArgument('water_heater_has_flue_or_chimney', false)
+    step.setArgument('water_heater_is_shared_system', false)
     step.setArgument('dhw_distribution_system_type', HPXML::DHWDistTypeStandard)
     step.setArgument('dhw_distribution_standard_piping_length', '50')
     step.setArgument('dhw_distribution_recirc_control_type', HPXML::DHWRecirControlTypeNone)
@@ -1893,6 +1898,8 @@ def get_values(osw_file, step)
   elsif ['extra-dhw-solar-latitude.osw'].include? osw_file
     step.setArgument('solar_thermal_system_type', 'hot water')
     step.setArgument('solar_thermal_collector_tilt', 'latitude-15')
+  elsif ['extra-dhw-shared-water-heater.osw'].include? osw_file
+    step.setArgument('water_heater_is_shared_system', true)
   elsif ['extra-second-refrigerator.osw'].include? osw_file
     step.setArgument('extra_refrigerator_present', true)
   elsif ['extra-second-heating-system-portable-heater.osw'].include? osw_file
@@ -2027,6 +2034,7 @@ def create_hpxmls
     'invalid_files/hvac-frac-load-served.xml' => 'base-hvac-multiple.xml',
     'invalid_files/invalid-daylight-saving.xml' => 'base.xml',
     'invalid_files/invalid-epw-filepath.xml' => 'base-location-epw-filepath.xml',
+    'invalid_files/invalid-facility-type.xml' => 'base-dhw-shared-laundry-room.xml',
     'invalid_files/invalid-neighbor-shading-azimuth.xml' => 'base-misc-neighbor-shading.xml',
     'invalid_files/invalid-relatedhvac-dhw-indirect.xml' => 'base-dhw-indirect.xml',
     'invalid_files/invalid-relatedhvac-desuperheater.xml' => 'base-hvac-central-ac-only-1-speed.xml',
@@ -2544,6 +2552,8 @@ def set_hpxml_building_construction(hpxml_file, hpxml)
     hpxml.building_construction.residential_facility_type = HPXML::ResidentialTypeApartment
   elsif ['base-foundation-walkout-basement.xml'].include? hpxml_file
     hpxml.building_construction.number_of_conditioned_floors_above_grade += 1
+  elsif ['invalid_files/invalid-facility-type.xml'].include? hpxml_file
+    hpxml.building_construction.residential_facility_type = HPXML::ResidentialTypeSFD
   end
 end
 
@@ -6029,6 +6039,8 @@ def set_hpxml_clothes_dryer(hpxml_file, hpxml)
     hpxml.clothes_dryers[0].location = HPXML::LocationOtherHeatedSpace
   elsif ['base-misc-usage-multiplier.xml'].include? hpxml_file
     hpxml.clothes_dryers[0].usage_multiplier = 0.9
+  elsif ['base-dhw-shared-laundry-room.xml'].include? hpxml_file
+    hpxml.clothes_dryers[0].is_shared_appliance = true
   end
 end
 

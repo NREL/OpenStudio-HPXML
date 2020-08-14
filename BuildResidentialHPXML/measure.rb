@@ -1603,6 +1603,12 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     arg.setDefaultValue(false)
     args << arg
 
+    arg = OpenStudio::Measure::OSArgument::makeBoolArgument('water_heater_is_shared_system', true)
+    arg.setDisplayName('Water Heater: Is Shared System')
+    arg.setDescription('Whether the water heater is a shared system. If true, assumed to serve all the units in the building.')
+    arg.setDefaultValue(false)
+    args << arg
+
     dhw_distribution_system_type_choices = OpenStudio::StringVector.new
     dhw_distribution_system_type_choices << HPXML::DHWDistTypeStandard
     dhw_distribution_system_type_choices << HPXML::DHWDistTypeRecirc
@@ -3364,6 +3370,7 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
              water_heater_jacket_rvalue: runner.getOptionalDoubleArgumentValue('water_heater_jacket_rvalue', user_arguments),
              water_heater_setpoint_temperature: runner.getStringArgumentValue('water_heater_setpoint_temperature', user_arguments),
              water_heater_has_flue_or_chimney: runner.getBoolArgumentValue('water_heater_has_flue_or_chimney', user_arguments),
+             water_heater_is_shared_system: runner.getBoolArgumentValue('water_heater_is_shared_system', user_arguments),
              dhw_distribution_system_type: runner.getStringArgumentValue('dhw_distribution_system_type', user_arguments),
              dhw_distribution_standard_piping_length: runner.getStringArgumentValue('dhw_distribution_standard_piping_length', user_arguments),
              dhw_distribution_recirc_control_type: runner.getStringArgumentValue('dhw_distribution_recirc_control_type', user_arguments),
@@ -4826,6 +4833,11 @@ class HPXMLFile
       end
     end
 
+    if args[:water_heater_is_shared_system]
+      is_shared_system = args[:water_heater_is_shared_system]
+      number_of_units_served = args[:geometry_building_num_units].get
+    end
+
     hpxml.water_heating_systems.add(id: 'WaterHeater',
                                     water_heater_type: water_heater_type,
                                     fuel_type: fuel_type,
@@ -4839,7 +4851,9 @@ class HPXMLFile
                                     related_hvac_idref: related_hvac_idref,
                                     standby_loss: standby_loss,
                                     jacket_r_value: jacket_r_value,
-                                    temperature: temperature)
+                                    temperature: temperature,
+                                    is_shared_system: is_shared_system,
+                                    number_of_units_served: number_of_units_served)
   end
 
   def self.set_hot_water_distribution(hpxml, runner, args)
