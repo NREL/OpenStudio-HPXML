@@ -2925,8 +2925,10 @@ class HVACSizing
       surfaces_a += surface.area
       if not surface.insulation_assembly_r_value.nil?
         surfaces_ua += (1.0 / surface.insulation_assembly_r_value) * surface.area
-      else
+      elsif not surface.ufactor.nil?
         surfaces_ua += surface.ufactor * surface.area
+      else # FIXME: It seems that we need this to be able to handle adiabatic surfaces.
+        surfaces_ua += (1.0 / (surface.insulation_interior_r_value + surface.insulation_exterior_r_value)) * surface.area
       end
     end
     return surfaces_a / surfaces_ua
