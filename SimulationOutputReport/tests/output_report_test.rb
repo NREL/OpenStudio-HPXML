@@ -257,6 +257,7 @@ class SimulationOutputReportTest < MiniTest::Test
     'Component Load: Heating: Natural Ventilation',
     'Component Load: Heating: Mechanical Ventilation',
     'Component Load: Heating: Whole House Fan',
+    'Component Load: Heating: Clothes Dryer Exhaust',
     'Component Load: Heating: Ducts',
     'Component Load: Heating: Internal Gains',
     'Component Load: Cooling: Roofs',
@@ -274,6 +275,7 @@ class SimulationOutputReportTest < MiniTest::Test
     'Component Load: Cooling: Natural Ventilation',
     'Component Load: Cooling: Mechanical Ventilation',
     'Component Load: Cooling: Whole House Fan',
+    'Component Load: Cooling: Clothes Dryer Exhaust',
     'Component Load: Cooling: Ducts',
     'Component Load: Cooling: Internal Gains',
   ]
