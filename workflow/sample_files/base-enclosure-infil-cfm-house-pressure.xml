@@ -62,8 +62,8 @@
             <SystemIdentifier id='InfiltrationMeasurement'/>
             <HousePressure>45.0</HousePressure>
             <BuildingAirLeakage>
-              <UnitofMeasure>ACH</UnitofMeasure>
-              <AirLeakage>2.8</AirLeakage>
+              <UnitofMeasure>CFM</UnitofMeasure>
+              <AirLeakage>1008.5039999999999</AirLeakage>
             </BuildingAirLeakage>
             <InfiltrationVolume>21600.0</InfiltrationVolume>
           </AirInfiltrationMeasurement>
