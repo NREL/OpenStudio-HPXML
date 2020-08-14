@@ -1001,6 +1001,9 @@ class OSModel
       solar_abs = roof.solar_absorptance
       emitt = roof.emittance
       has_radiant_barrier = roof.radiant_barrier
+      if has_radiant_barrier
+        radiant_barrier_grade = roof.radiant_barrier_grade
+      end
       inside_film = Material.AirFilmRoof(Geometry.get_roof_pitch([surfaces[0]]))
       outside_film = Material.AirFilmOutside
       mat_roofing = Material.RoofMaterial(roof.roof_type, emitt, solar_abs)
@@ -1025,14 +1028,14 @@ class OSModel
                                                  cavity_filled: cavity_filled, framing_factor: roof.framing_factor, inside_drywall_thick_in: roof.inside_drywall_thickness,
                                                  osb_thick_in: roof.osb_thickness, rigid_r: roof.insulation_continuous_r_value,
                                                  mat_roofing: mat_roofing, has_radiant_barrier: roof.radiant_barrier,
-                                                 inside_film: inside_film, outside_film: outside_film)
+                                                 inside_film: inside_film, outside_film: outside_film, radiant_barrier_grade: roof.radiant_barrier_grade)
         else
           Constructions.apply_open_cavity_roof(runner, model, surfaces, roof, "#{roof.id} construction",
                                                cavity_r: roof.insulation_cavity_r_value, install_grade: roof.insulation_grade, cavity_ins_thick_in: roof.insulation_cavity_thickness,
                                                framing_factor: roof.framing_factor, framing_thick_in: rafters_depth_in,
                                                osb_thick_in: roof.osb_thickness, rigid_r: roof.insulation_continuous_r_value,
                                                mat_roofing: mat_roofing, has_radiant_barrier: roof.radiant_barrier,
-                                               inside_film: inside_film, outside_film: outside_film)
+                                               inside_film: inside_film, outside_film: outside_film, radiant_barrier_grade: roof.radiant_barrier_grade)
         end
       else
         install_grade = 1
@@ -1054,7 +1057,7 @@ class OSModel
                                                  cavity_filled: true, framing_factor: constr_set.framing_factor, inside_drywall_thick_in: constr_set.inside_drywall_thick_in,
                                                  osb_thick_in: constr_set.osb_thick_in, rigid_r: constr_set.rigid_r,
                                                  mat_roofing: constr_set.exterior_material, has_radiant_barrier: has_radiant_barrier,
-                                                 inside_film: inside_film, outside_film: outside_film)
+                                                 inside_film: inside_film, outside_film: outside_film, radiant_barrier_grade: radiant_barrier_grade)
         else
           constr_sets = [
             GenericConstructionSet.new(10.0, 0.5, 0.0, mat_roofing), # w/R-10 rigid
@@ -1073,7 +1076,7 @@ class OSModel
                                                framing_factor: framing_factor, framing_thick_in: framing_thick_in,
                                                osb_thick_in: constr_set.osb_thick_in, rigid_r: layer_r + constr_set.rigid_r,
                                                mat_roofing: mat_roofing, has_radiant_barrier: has_radiant_barrier,
-                                               inside_film: inside_film, outside_film: outside_film)
+                                               inside_film: inside_film, outside_film: outside_film, radiant_barrier_grade: radiant_barrier_grade)
         end
         check_surface_assembly_rvalue(runner, surfaces, inside_film, outside_film, assembly_r, match)
       end
@@ -1962,7 +1965,7 @@ class OSModel
                                            Material.RoofMaterial(HPXML::RoofTypeAsphaltShingles, 0.90, 0.75),
                                            false,
                                            Material.AirFilmOutside,
-                                           Material.AirFilmRoof(Geometry.get_roof_pitch(surfaces)))
+                                           Material.AirFilmRoof(Geometry.get_roof_pitch(surfaces)), nil)
     end
   end
 
@@ -2021,7 +2024,7 @@ class OSModel
     @hpxml.water_heating_systems.each do |water_heating_system|
       loc_space, loc_schedule = get_space_or_schedule_from_location(water_heating_system.location, 'WaterHeatingSystem', model, spaces)
 
-      ec_adj = HotWaterAndAppliances.get_dist_energy_consumption_adjustment(@has_uncond_bsmnt, @cfa, @ncfl, hot_water_distribution)
+      ec_adj = HotWaterAndAppliances.get_dist_energy_consumption_adjustment(@has_uncond_bsmnt, @cfa, @ncfl, water_heating_system, hot_water_distribution)
 
       if water_heating_system.water_heater_type == HPXML::WaterHeaterTypeStorage
 
@@ -2052,12 +2055,13 @@ class OSModel
       end
     end
 
+    # Hot water fixtures and appliances
     fixtures_usage_multiplier = @hpxml.water_heating.water_fixtures_usage_multiplier
     HotWaterAndAppliances.apply(model, runner, weather, spaces[HPXML::LocationLivingSpace],
                                 @cfa, @nbeds, @ncfl, @has_uncond_bsmnt, @hpxml.clothes_washers,
                                 @hpxml.clothes_dryers, @hpxml.dishwashers, @hpxml.refrigerators,
                                 @hpxml.freezers, @hpxml.cooking_ranges, @hpxml.ovens, fixtures_usage_multiplier,
-                                @hpxml.water_fixtures, @hpxml.water_heating_systems, hot_water_distribution,
+                                @hpxml.water_heating_systems, hot_water_distribution, @hpxml.water_fixtures,
                                 solar_thermal_system, @eri_version, @dhw_map)
 
     if (not solar_thermal_system.nil?) && (not solar_thermal_system.collector_area.nil?) # Detailed solar water heater
@@ -2170,7 +2174,7 @@ class OSModel
     living_zone = spaces[HPXML::LocationLivingSpace].thermalZone.get
 
     @hpxml.heat_pumps.each do |heat_pump|
-      # TODO: Move these checks into hvac.rb
+      # FUTURE: Move these checks into hvac.rb
       if not heat_pump.heating_capacity_17F.nil?
         if heat_pump.heating_capacity.nil?
           fail "HeatPump '#{heat_pump.id}' must have both HeatingCapacity and HeatingCapacity17F provided or not provided."
@@ -2438,13 +2442,12 @@ class OSModel
     open_window_area = window_area * @frac_windows_operable * 0.5 * 0.2 # Assume A) 50% of the area of an operable window can be open, and B) 20% of openable window area is actually open
     site_type = @hpxml.site.site_type
     shelter_coef = @hpxml.site.shelter_coefficient
-    has_flue_chimney = false # FUTURE: Expose as HPXML input
     @infil_volume = air_infils.select { |i| !i.infiltration_volume.nil? }[0].infiltration_volume
     infil_height = @hpxml.inferred_infiltration_height(@infil_volume)
     Airflow.apply(model, runner, weather, spaces, air_infils, @hpxml.ventilation_fans,
                   duct_systems, @infil_volume, infil_height, open_window_area,
                   @clg_ssn_sensor, @min_neighbor_distance, vented_attic, vented_crawl,
-                  site_type, shelter_coef, has_flue_chimney, @hvac_map, @eri_version,
+                  site_type, shelter_coef, @hpxml.building_construction.has_flue_or_chimney, @hvac_map, @eri_version,
                   @apply_ashrae140_assumptions)
   end
 
@@ -2556,7 +2559,7 @@ class OSModel
 
   def self.add_photovoltaics(runner, model)
     @hpxml.pv_systems.each do |pv_system|
-      PV.apply(model, pv_system)
+      PV.apply(model, @nbeds, pv_system)
     end
   end
 
@@ -3078,7 +3081,7 @@ class OSModel
     program_calling_manager.addProgram(program)
   end
 
-  # FIXME: Move all of these construction methods to constructions.rb
+  # FUTURE: Move all of these construction methods to constructions.rb
   def self.calc_non_cavity_r(film_r, constr_set)
     # Calculate R-value for all non-cavity layers
     non_cavity_r = film_r
@@ -3790,7 +3793,7 @@ class OSModel
   end
 end
 
-# FIXME: Move all of these construction classes to constructions.rb
+# FUTURE: Move all of these construction classes to constructions.rb
 class WoodStudConstructionSet
   def initialize(stud, framing_factor, rigid_r, osb_thick_in, inside_drywall_thick_in, exterior_material)
     @stud = stud
