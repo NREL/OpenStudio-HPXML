@@ -187,7 +187,35 @@ class EnergyPlusValidator
         'Pitch' => one,
         'RadiantBarrier' => one,
         'Insulation/SystemIdentifier' => one, # Required by HPXML schema
-        'Insulation/AssemblyEffectiveRValue' => one,
+        'Insulation/AssemblyEffectiveRValue | Insulation/Layer ' => one, # See [QuickFillRoof]
+        'extension/OrientedStrandBoard' => zero_or_one, # See [RoofOrientedStrandBoard]
+      },
+
+      ## [QuickFillRoof]
+      '/HPXML/Building/BuildingDetails/Enclosure/Roofs/Roof/Insulation/Layer' => {
+        '[InstallationType="cavity"]' => one, # See [RoofCavityInsLayer]
+        '[InstallationType="continuous"]' => zero_or_one, # See [RoofRigidInsLayer]
+        '../../Rafters/Size[text()="2x2" or text()="2x3" or text()="2x4" or text()="2x6" or text()="2x8" or text()="2x10" or text()="2x12" or text()="2x14" or text()="2x16"]' => one,
+        '../../Rafters/FramingFactor' => one,
+      },
+
+      ## [RoofCavityInsLayer]
+      '/HPXML/Building/BuildingDetails/Enclosure/Roofs/Roof/Insulation/Layer[InstallationType="cavity"]' => {
+        'InsulationMaterial[Batt | LooseFill | Rigid | SprayFoam | Other]' => zero_or_one, # Required by HPXML schema
+        'NominalRValue' => one,
+        'Thickness' => one, # cavity insulation thickness [inch]
+        '../InsulationGrade' => one, # cavity insulation installation grade; integer
+      },
+
+      ## [RoofRigidInsLayer]
+      '/HPXML/Building/BuildingDetails/Enclosure/Roofs/Roof/Insulation/Layer[InstallationType="continuous"]' => {
+        'InsulationMaterial[Batt | LooseFill | Rigid | SprayFoam | Other]' => zero_or_one, # Required by HPXML schema
+        'NominalRValue' => one,
+      },
+
+      ## [RoofOrientedStrandBoard]
+      '/HPXML/Building/BuildingDetails/Enclosure/Roofs/Roof/extension/OrientedStrandBoard' => {
+        'Thickness' => one,
       },
 
       ## [VentedAttic]

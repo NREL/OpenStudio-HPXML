@@ -3,8 +3,8 @@
   <schema_version>3.0</schema_version>
   <name>hpxm_lto_openstudio</name>
   <uid>b1543b30-9465-45ff-ba04-1d1f85e763bc</uid>
-  <version_id>9b4e30cc-50f7-480f-a895-3cb580ff5543</version_id>
-  <version_modified>20200808T030321Z</version_modified>
+  <version_id>218114cb-7354-471b-8c01-13a53fe62be5</version_id>
+  <version_modified>20200814T042345Z</version_modified>
   <xml_checksum>D8922A73</xml_checksum>
   <class_name>HPXMLtoOpenStudio</class_name>
   <display_name>HPXML to OpenStudio Translator</display_name>
@@ -538,7 +538,7 @@
       <filename>hpxml_defaults.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>2AE61D82</checksum>
+      <checksum>77836EF5</checksum>
     </file>
     <file>
       <version>
@@ -549,31 +549,31 @@
       <filename>measure.rb</filename>
       <filetype>rb</filetype>
       <usage_type>script</usage_type>
-      <checksum>137F95E6</checksum>
+      <checksum>37F1B330</checksum>
     </file>
     <file>
       <filename>hvac_sizing.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>2482638D</checksum>
+      <checksum>BACF4516</checksum>
     </file>
     <file>
       <filename>EPvalidator.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>D07D4EFC</checksum>
+      <checksum>8B2F7FA5</checksum>
     </file>
     <file>
       <filename>constructions.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>5E8F5F31</checksum>
+      <checksum>68D82439</checksum>
     </file>
     <file>
       <filename>hpxml.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>613348B1</checksum>
+      <checksum>3B567DF7</checksum>
     </file>
   </files>
 </measure>

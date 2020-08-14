@@ -101,8 +101,22 @@
             <RadiantBarrier>false</RadiantBarrier>
             <Insulation>
               <SystemIdentifier id='RoofInsulation'/>
-              <AssemblyEffectiveRValue>2.3</AssemblyEffectiveRValue>
+              <InsulationGrade>3</InsulationGrade>
+              <Layer>
+                <InstallationType>cavity</InstallationType>
+                <NominalRValue>19.0</NominalRValue>
+                <Thickness>5.5</Thickness>
+              </Layer>
             </Insulation>
+            <Rafters>
+              <Size>2x6</Size>
+              <FramingFactor>0.1988</FramingFactor>
+            </Rafters>
+            <extension>
+              <OrientedStrandBoard>
+                <Thickness>0.5</Thickness>
+              </OrientedStrandBoard>
+            </extension>
           </Roof>
         </Roofs>
         <RimJoists>

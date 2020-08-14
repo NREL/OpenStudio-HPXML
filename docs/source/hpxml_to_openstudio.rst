@@ -246,8 +246,24 @@ HPXML Roofs
 Pitched or flat roof surfaces that are exposed to ambient conditions should be specified as an ``Enclosure/Roofs/Roof``. 
 For a multifamily building where the dwelling unit has another dwelling unit above it, the surface between the two dwelling units should be considered a ``FrameFloor`` and not a ``Roof``.
 
-Roofs are defined by their ``Area``, ``Pitch``, ``Insulation/AssemblyEffectiveRValue``, ``SolarAbsorptance``, and ``Emittance``.
+Roofs can be defined in two ways:
 
+Option 1. An ``Insulation/Layer`` (Quick Fill Method).
+In this case, additional inputs are required as follows:
+- ``Insulation/Layer[InsulationType="cavity"]``
+- ``Insulation/Layer[InsulationType="cavity"]/NominalRValue``
+- ``Insulation/Layer[InsulationType="cavity"]/Thickness``
+- ``InsulationGrade``
+- ``Rafters/Size``
+- ``Rafters/FramingFactor``
+- Optional ``Insulation/Layer[InsulationType="cavity"]/InsulationMaterial``
+- Optional ``Insulation/Layer[InsulationType="continuous"]``; if provided, ``Insulation/Layer[InsulationType="continuous"]/NominalRValue`` must be provided and ``Insulation/Layer[InsulationType="continuous"]/InsulationMaterial`` can be optionally provided.
+- Optional ``extension/OrientedStrandBoard``; if provided, ``Thickness`` must be provided.
+
+Option 2. An ``AssemblyEffectiveRValue``
+The assembly effective R-value should include all construction materials and interior and exterior air film resistances. 
+
+Roofs must have ``Area``, ``Pitch``, and ``Emittance`` defined.
 Roofs must have either ``RoofColor`` and/or ``SolarAbsorptance`` defined.
 If ``RoofColor`` or ``SolarAbsorptance`` is not provided, it is defaulted based on the mapping below:
 
@@ -288,7 +304,7 @@ In this case, additional inputs are required as follows:
 - ``FloorJoists/Spacing``
 - ``FloorJoists/FramingFactor``
 - Optional ``Insulation/Layer[InsulationType="cavity"]/InsulationMaterial``
-- Optional ``Insulation/Layer[InsulationType="continuous"]``; if provided, ``NominalRValue`` must be provided and ``InsulationMaterial`` can be optionally provided.
+- Optional ``Insulation/Layer[InsulationType="continuous"]``; if provided, ``Insulation/Layer[InsulationType="continuous"]/NominalRValue`` must be provided and ``Insulation/Layer[InsulationType="continuous"]/InsulationMaterial`` can be optionally provided.
 - Optional ``extension/OrientedStrandBoard``; if provided, ``Thickness`` must be provided.
 
 Option 2. An ``AssemblyEffectiveRValue``
@@ -335,7 +351,7 @@ In this case, additional inputs are required as follows:
 - ``extension/Density`` (only for ``SolidConcrete``, ``StructuralBrick``, ``StrawBale``, ``Stone``, ``LogWall`, and ``Adobe`` walls)
 - ``extension/SpecificHeat`` (only for ``SolidConcrete``, ``StructuralBrick``, ``StrawBale``, ``Stone``, ``LogWall`, and ``Adobe`` walls)
 - Optional ``Insulation/Layer[InsulationType="cavity"]/InsulationMaterial``
-- Optional ``Insulation/Layer[InsulationType="continuous"]``; if provided, ``NominalRValue`` must be provided and ``InsulationMaterial`` can be optionally provided.
+- Optional ``Insulation/Layer[InsulationType="continuous"]``; if provided, ``Insulation/Layer[InsulationType="continuous"]/NominalRValue`` must be provided and ``Insulation/Layer[InsulationType="continuous"]/InsulationMaterial`` can be optionally provided.
 - Optional ``extension/OrientedStrandBoard``; if provided, ``Thickness`` must be provided.
 
 Option 2. An ``AssemblyEffectiveRValue``
@@ -405,7 +421,7 @@ In this case, additional inputs are required as follows:
 - ``FloorJoists/FramingFactor``
 - ``FloorCovering``
 - Optional ``Insulation/Layer[InsulationType="cavity"]/InsulationMaterial``
-- Optional ``Insulation/Layer[InsulationType="continuous"]``; if provided, ``NominalRValue`` must be provided and ``InsulationMaterial`` can be optionally provided. 
+- Optional ``Insulation/Layer[InsulationType="continuous"]``; if provided, ``Insulation/Layer[InsulationType="continuous"]/NominalRValue`` must be provided and ``Insulation/Layer[InsulationType="continuous"]/InsulationMaterial`` can be optionally provided. 
 - Optional ``extension/Plywood``; if provided, ``Thickness`` must be provided.
 - Optional ``extension/InsideDryWall``; if provided, ``Thickness`` must be provided.
 

@@ -149,6 +149,18 @@ class HPXMLDefaults
       elsif roof.solar_absorptance.nil?
         roof.solar_absorptance = Constructions.get_default_roof_solar_absorptance(roof.roof_type, roof.roof_color)
       end
+
+      next unless roof.quick_fill
+
+      if (not roof.insulation_cavity_r_value.nil?) && roof.insulation_cavity_material.nil?
+        roof.insulation_cavity_material = HPXML::InsulationMaterialBatt
+      end
+      if roof.insulation_continuous_r_value.nil? # FIXME: This value is being used in hvac_sizing.rb. Is there a better way to handle this?
+        roof.insulation_continuous_r_value = 0
+      end
+      if (not roof.insulation_continuous_r_value.nil?) && roof.insulation_continuous_material.nil?
+        roof.insulation_continuous_material = HPXML::InsulationMaterialRigid
+      end
     end
   end
 

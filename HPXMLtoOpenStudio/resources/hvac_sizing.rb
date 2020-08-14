@@ -2926,11 +2926,7 @@ class HVACSizing
       if not surface.insulation_assembly_r_value.nil?
         surfaces_ua += (1.0 / surface.insulation_assembly_r_value) * surface.area
       else
-        if not surface.ufactor.nil? # FIXME: Remove when complete allowing roof described using layers
-          surfaces_ua += surface.ufactor * surface.area
-        else 
-          surfaces_ua += (1.0 / (surface.insulation_interior_r_value + surface.insulation_exterior_r_value)) * surface.area
-        end
+        surfaces_ua += surface.ufactor * surface.area
       end
     end
     return surfaces_a / surfaces_ua

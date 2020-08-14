@@ -1377,10 +1377,12 @@ class HPXML < Object
   end
 
   class Roof < BaseElement
-    ATTRS = [:id, :interior_adjacent_to, :area, :azimuth, :roof_type,
-             :roof_color, :solar_absorptance, :emittance, :pitch, :radiant_barrier,
-             :insulation_id, :insulation_assembly_r_value, :insulation_cavity_r_value,
-             :insulation_continuous_r_value]
+    ATTRS = [:id, :quick_fill, :interior_adjacent_to, :area, :azimuth, :roof_type,
+             :ufactor, :roof_color, :solar_absorptance, :emittance, :pitch, :radiant_barrier,
+             :insulation_id, :insulation_assembly_r_value,
+             :insulation_cavity_r_value, :insulation_cavity_thickness, :insulation_continuous_r_value,
+             :insulation_cavity_material, :insulation_continuous_material,
+             :rafters_size, :insulation_grade, :framing_factor, :inside_drywall_thickness, :osb_thickness]
     attr_accessor(*ATTRS)
 
     def skylights
@@ -1459,6 +1461,29 @@ class HPXML < Object
         XMLHelper.add_attribute(sys_id, 'id', @id + 'Insulation')
       end
       XMLHelper.add_element(insulation, 'AssemblyEffectiveRValue', to_float(@insulation_assembly_r_value)) unless @insulation_assembly_r_value.nil?
+      XMLHelper.add_element(insulation, 'InsulationGrade', to_integer(@insulation_grade)) unless @insulation_grade.nil?
+      if @quick_fill
+        if not @insulation_cavity_r_value.nil?
+          layer = XMLHelper.add_element(insulation, 'Layer')
+          XMLHelper.add_element(layer, 'InstallationType', 'cavity')
+          XMLHelper.add_element(layer, 'InsulationMaterial', @insulation_cavity_material) unless @insulation_cavity_material.nil?
+          XMLHelper.add_element(layer, 'NominalRValue', to_float(@insulation_cavity_r_value))
+          XMLHelper.add_element(layer, 'Thickness', @insulation_cavity_thickness) unless @insulation_cavity_thickness.nil?
+        end
+        rafters = XMLHelper.add_element(roof, 'Rafters')
+        XMLHelper.add_element(rafters, 'Size', @rafters_size) unless @rafters_size.nil?
+        XMLHelper.add_element(rafters, 'FramingFactor', to_float(@framing_factor)) unless @framing_factor.nil?
+        if not @insulation_continuous_r_value.nil?
+          layer = XMLHelper.add_element(insulation, 'Layer')
+          XMLHelper.add_element(layer, 'InstallationType', 'continuous')
+          XMLHelper.add_element(layer, 'InsulationMaterial', @insulation_continuous_material) unless @insulation_continuous_material.nil?
+          XMLHelper.add_element(layer, 'NominalRValue', to_float(@insulation_continuous_r_value))
+        end
+      end
+      if not @osb_thickness.nil?
+        osb = XMLHelper.create_elements_as_needed(doc, ['HPXML', 'Building', 'BuildingDetails', 'Enclosure', 'Roofs', 'Roof', 'extension', 'OrientedStrandBoard'])
+        XMLHelper.add_element(osb, 'Thickness', to_float(@osb_thickness))
+      end
     end
 
     def from_oga(roof)
@@ -1477,9 +1502,23 @@ class HPXML < Object
       insulation = XMLHelper.get_element(roof, 'Insulation')
       if not insulation.nil?
         @insulation_id = HPXML::get_id(insulation)
+      end
+      if not XMLHelper.get_element(roof, 'Insulation/Layer').nil?
+        @quick_fill = true
+      end
+      if not @quick_fill
         @insulation_assembly_r_value = to_float_or_nil(XMLHelper.get_value(insulation, 'AssemblyEffectiveRValue'))
+      else
         @insulation_cavity_r_value = to_float_or_nil(XMLHelper.get_value(insulation, "Layer[InstallationType='cavity']/NominalRValue"))
+        @insulation_cavity_material = XMLHelper.get_value(insulation, "Layer[InstallationType='cavity']/InsulationMaterial")
+        @insulation_cavity_thickness = to_float_or_nil(XMLHelper.get_value(insulation, "Layer[InstallationType='cavity']/Thickness"))
         @insulation_continuous_r_value = to_float_or_nil(XMLHelper.get_value(insulation, "Layer[InstallationType='continuous']/NominalRValue"))
+        @insulation_continuous_material = XMLHelper.get_value(insulation, "Layer[InstallationType='continuous']/InsulationMaterial")
+        @insulation_grade = to_integer_or_nil(XMLHelper.get_value(insulation, 'InsulationGrade'))
+        @rafters_size = XMLHelper.get_value(roof, 'Rafters/Size')
+        @framing_factor = to_float_or_nil(XMLHelper.get_value(roof, 'Rafters/FramingFactor'))
+        @osb_thickness = to_float_or_nil(XMLHelper.get_value(roof, 'extension/OrientedStrandBoard/Thickness'))
+        @inside_drywall_thickness = to_float_or_nil(XMLHelper.get_value(roof, 'extension/InsideDryWall/Thickness'))
       end
     end
   end
@@ -1608,7 +1647,7 @@ class HPXML < Object
       else
         @insulation_cavity_r_value = to_float_or_nil(XMLHelper.get_value(insulation, "Layer[InstallationType='cavity']/NominalRValue"))
         @insulation_cavity_material = XMLHelper.get_value(insulation, "Layer[InstallationType='cavity']/InsulationMaterial")
-        @insulation_cavity_thickness = XMLHelper.get_value(insulation, "Layer[InstallationType='cavity']/Thickness")
+        @insulation_cavity_thickness = to_float_or_nil(XMLHelper.get_value(insulation, "Layer[InstallationType='cavity']/Thickness"))
         @insulation_continuous_r_value = to_float_or_nil(XMLHelper.get_value(insulation, "Layer[InstallationType='continuous']/NominalRValue"))
         @insulation_continuous_material = XMLHelper.get_value(insulation, "Layer[InstallationType='continuous']/InsulationMaterial")
         @insulation_grade = to_integer_or_nil(XMLHelper.get_value(insulation, 'InsulationGrade'))

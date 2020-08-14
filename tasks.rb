@@ -855,6 +855,15 @@ def set_hpxml_roofs(hpxml_file, hpxml)
          'base-enclosure-other-non-freezing-space.xml',
          'base-enclosure-other-multifamily-buffer-space.xml'].include? hpxml_file
     hpxml.roofs.clear
+  elsif ['base-enclosure-detailed.xml'].include? hpxml_file
+    hpxml.roofs[0].quick_fill = true
+    hpxml.roofs[0].insulation_assembly_r_value = nil
+    hpxml.roofs[0].insulation_cavity_r_value = 19
+    hpxml.roofs[0].insulation_cavity_thickness = 5.5
+    hpxml.roofs[0].insulation_grade = 3
+    hpxml.roofs[0].rafters_size = '2x6'
+    hpxml.roofs[0].framing_factor = 0.1988
+    hpxml.roofs[0].osb_thickness = 0.5
   elsif ['base-enclosure-split-surfaces.xml'].include? hpxml_file
     for n in 1..hpxml.roofs.size
       hpxml.roofs[n - 1].area /= 9.0
