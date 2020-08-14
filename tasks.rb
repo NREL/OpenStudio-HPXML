@@ -191,6 +191,8 @@ def create_hpxmls
     'base-enclosure-beds-4.xml' => 'base.xml',
     'base-enclosure-beds-5.xml' => 'base.xml',
     'base-enclosure-garage.xml' => 'base.xml',
+    'base-enclosure-infil-ach-house-pressure.xml' => 'base.xml',
+    'base-enclosure-infil-cfm-house-pressure.xml' => 'base-enclosure-infil-cfm50.xml',
     'base-enclosure-infil-cfm50.xml' => 'base.xml',
     'base-enclosure-infil-flue.xml' => 'base.xml',
     'base-enclosure-infil-natural-ach.xml' => 'base.xml',
@@ -682,6 +684,12 @@ def set_hpxml_air_infiltration_measurements(hpxml_file, hpxml)
                                             house_pressure: 50,
                                             unit_of_measure: HPXML::UnitsCFM,
                                             air_leakage: 3.0 / 60.0 * infil_volume)
+  elsif ['base-enclosure-infil-ach-house-pressure.xml'].include? hpxml_file
+    hpxml.air_infiltration_measurements[0].house_pressure = 45
+    hpxml.air_infiltration_measurements[0].air_leakage *= 0.9338
+  elsif ['base-enclosure-infil-cfm-house-pressure.xml'].include? hpxml_file
+    hpxml.air_infiltration_measurements[0].house_pressure = 45
+    hpxml.air_infiltration_measurements[0].air_leakage *= 0.9338
   elsif ['base-enclosure-infil-flue.xml'].include? hpxml_file
     hpxml.building_construction.has_flue_or_chimney = true
   end
