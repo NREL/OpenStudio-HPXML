@@ -357,6 +357,19 @@
                 <Value>1.0</Value>
               </AnnualHeatingEfficiency>
             </HeatingSystem>
+            <HeatingSystem>
+              <SystemIdentifier id='PreconditioningResistance'/>
+              <IsVentilationPreconditioningSystem>true</IsVentilationPreconditioningSystem>
+              <HeatingSystemType>
+                <ElectricResistance/>
+              </HeatingSystemType>
+              <HeatingSystemFuel>electricity</HeatingSystemFuel>
+              <HeatingCapacity scope='multiple units'>3200.0</HeatingCapacity>
+              <AnnualHeatingEfficiency>
+                <Units>Percent</Units>
+                <Value>1.0</Value>
+              </AnnualHeatingEfficiency>
+            </HeatingSystem>
             <CoolingSystem>
               <SystemIdentifier id='CoolingSystem'/>
               <DistributionSystem idref='HVACDistribution'/>
@@ -410,6 +423,18 @@
             </CoolingSystem>
             <CoolingSystem>
               <SystemIdentifier id='PreconditioningCoolingMSHP'/>
+              <IsVentilationPreconditioningSystem>true</IsVentilationPreconditioningSystem>
+              <CoolingSystemType>mini-split</CoolingSystemType>
+              <CoolingSystemFuel>electricity</CoolingSystemFuel>
+              <CoolingCapacity scope='multiple units'>9600.0</CoolingCapacity>
+              <AnnualCoolingEfficiency>
+                <Units>SEER</Units>
+                <Value>19.0</Value>
+              </AnnualCoolingEfficiency>
+              <SensibleHeatFraction>0.73</SensibleHeatFraction>
+            </CoolingSystem>
+            <CoolingSystem>
+              <SystemIdentifier id='PreconditioningCoolingMSHP2'/>
               <IsVentilationPreconditioningSystem>true</IsVentilationPreconditioningSystem>
               <CoolingSystemType>mini-split</CoolingSystemType>
               <CoolingSystemFuel>electricity</CoolingSystemFuel>
@@ -539,6 +564,15 @@
         <MechanicalVentilation>
           <VentilationFans>
             <VentilationFan>
+              <SystemIdentifier id='MechanicalVentilationLiving'/>
+              <FanType>supply only</FanType>
+              <TestedFlowRate>20.0</TestedFlowRate>
+              <HoursInOperation>24.0</HoursInOperation>
+              <UsedForWholeBuildingVentilation>true</UsedForWholeBuildingVentilation>
+              <IsSharedSystem>false</IsSharedSystem>
+              <FanPower>10.0</FanPower>
+            </VentilationFan>
+            <VentilationFan>
               <SystemIdentifier id='MechanicalVentilation'/>
               <FanType>supply only</FanType>
               <RatedFlowRate scope='multiple units'>600.0</RatedFlowRate>
@@ -559,7 +593,7 @@
               <HoursInOperation>24.0</HoursInOperation>
               <UsedForWholeBuildingVentilation>true</UsedForWholeBuildingVentilation>
               <IsSharedSystem>true</IsSharedSystem>
-              <FractionOutdoorAir>0.4</FractionOutdoorAir>
+              <FractionOutdoorAir>1.0</FractionOutdoorAir>
               <FanPower scope='multiple units'>250.0</FanPower>
               <AttachedToPreconditioningHeatingSystem idref='PreconditioningMSHP'/>
               <AttachedToPreconditioningCoolingSystem idref='PreconditioningMSHP'/>
@@ -618,6 +652,19 @@
               <FanPower scope='multiple units'>300.0</FanPower>
               <AttachedToPreconditioningHeatingSystem idref='PreconditioningPortableHeater'/>
               <AttachedToPreconditioningCoolingSystem idref='PreconditioningCentralAC2'/>
+            </VentilationFan>
+            <VentilationFan>
+              <SystemIdentifier id='MechanicalVentilation7'/>
+              <FanType>supply only</FanType>
+              <RatedFlowRate scope='multiple units'>350.0</RatedFlowRate>
+              <TestedFlowRate scope='single unit'>35.0</TestedFlowRate>
+              <HoursInOperation>24.0</HoursInOperation>
+              <UsedForWholeBuildingVentilation>true</UsedForWholeBuildingVentilation>
+              <IsSharedSystem>true</IsSharedSystem>
+              <FractionOutdoorAir>0.6</FractionOutdoorAir>
+              <FanPower scope='multiple units'>150.0</FanPower>
+              <AttachedToPreconditioningHeatingSystem idref='PreconditioningResistance'/>
+              <AttachedToPreconditioningCoolingSystem idref='PreconditioningCoolingMSHP2'/>
             </VentilationFan>
           </VentilationFans>
         </MechanicalVentilation>

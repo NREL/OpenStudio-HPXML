@@ -3329,13 +3329,13 @@ class HPXML < Object
         else
           return flow_rate * (@hours_in_operation / 24.0)
         end
-    end
+      end
     end
 
     def average_fan_power
       if not @hours_in_operation.nil?
         return unit_fan_power * (@hours_in_operation / 24.0)
-    end
+      end
     end
 
     def includes_supply_air?

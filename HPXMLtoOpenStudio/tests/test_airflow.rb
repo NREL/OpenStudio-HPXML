@@ -68,7 +68,7 @@ class HPXMLtoOpenStudioAirflowTest < MiniTest::Test
     model, hpxml = _test_measure(args_hash)
 
     # Check infiltration/ventilation program
-    program_values = get_ems_values(model.getEnergyManagementSystemPrograms, "#{Constants.ObjectNameInfiltration} program")
+    program_values = get_ems_values(model.getEnergyManagementSystemPrograms, "#{Constants.ObjectNameInfiltration} living program")
     assert_in_epsilon(0.0436, program_values['c'].sum, 0.01)
     assert_in_epsilon(0.0818, program_values['Cs'].sum, 0.01)
     assert_in_epsilon(0.1323, program_values['Cw'].sum, 0.01)
@@ -363,6 +363,51 @@ class HPXMLtoOpenStudioAirflowTest < MiniTest::Test
     assert_in_epsilon(1.0, bath_fan_eeds[1].fractionLost, 0.01)
     # CFIS minutes
     assert_in_epsilon(vent_fan_mins_cfis, program_values['CFIS_t_min_hr_open'].sum, 0.01)
+  end
+
+  def test_shared_mechvent
+    args_hash = {}
+    args_hash['hpxml_path'] = File.absolute_path(File.join(sample_files_dir, 'base-mechvent-shared.xml'))
+    model, hpxml = _test_measure(args_hash)
+
+    # Get HPXML values
+    vent_fan_lv = hpxml.ventilation_fans.select { |f| not f.is_shared_system }[0]
+    vent_fan_cfm = vent_fan_lv.average_flow_rate
+    vent_fan_power = vent_fan_lv.average_fan_power
+    vent_fans_shared = hpxml.ventilation_fans.select { |f| f.is_shared_system }
+    total_mechvent_pow = hpxml.ventilation_fans.map { |f| f.average_fan_power }.sum(0.0)
+
+    # Fan power implementation
+    # All shared systems are attached with preconditioning hvac systems in the test file
+    assert_in_epsilon(vent_fans_shared.size + 1, get_eed_for_ventilation(model, Constants.ObjectNameMechanicalVentilationHouseFan).size, 0.01)
+    assert_in_epsilon(total_mechvent_pow, get_eed_for_ventilation(model, Constants.ObjectNameMechanicalVentilationHouseFan).map { |eed| eed.designLevel.get }.sum, 0.01)
+
+    # Check infiltration/ventilation program
+    # living zone CFMs
+    program_values = get_ems_values(model.getEnergyManagementSystemPrograms, "#{Constants.ObjectNameInfiltration} living program")
+    assert_in_epsilon(vent_fan_cfm, UnitConversions.convert(program_values['QWHV_sup'].sum, 'm^3/s', 'cfm'), 0.01)
+    assert_in_epsilon(0.0, UnitConversions.convert(program_values['QWHV_bal'].sum, 'm^3/s', 'cfm'), 0.01)
+    assert_in_epsilon(0.0, UnitConversions.convert(program_values['QWHV_exh'].sum, 'm^3/s', 'cfm'), 0.01)
+    assert_in_epsilon(0.0, UnitConversions.convert(program_values['QWHV_ervhrv'].sum, 'm^3/s', 'cfm'), 0.01)
+    assert_in_epsilon(0.0, UnitConversions.convert(program_values['Qrange'].sum, 'm^3/s', 'cfm'), 0.01)
+    assert_in_epsilon(0.0, UnitConversions.convert(program_values['Qbath'].sum, 'm^3/s', 'cfm'), 0.01)
+    # EMS program values for preconditioned mech vent zones
+    vent_fans_shared.each_with_index do |vent_fan, i|
+      if i == 0
+        program_values = get_ems_values(model.getEnergyManagementSystemPrograms, "#{Constants.ObjectNameInfiltration} mechvent program")
+      else
+        program_values = get_ems_values(model.getEnergyManagementSystemPrograms, "#{Constants.ObjectNameInfiltration} mechvent program #{i}")
+      end
+      if vent_fan.fan_type == HPXML::MechVentTypeSupply
+        assert_in_epsilon(vent_fan.average_flow_rate, UnitConversions.convert(program_values['QWHV_sup'].sum, 'm^3/s', 'cfm'), 0.01)
+      elsif vent_fan.fan_type == HPXML::MechVentTypeExhaust
+        assert_in_epsilon(vent_fan.average_flow_rate, UnitConversions.convert(program_values['QWHV_exh'].sum, 'm^3/s', 'cfm'), 0.01)
+      elsif vent_fan.fan_type == HPXML::MechVentTypeBalanced
+        assert_in_epsilon(vent_fan.average_flow_rate, UnitConversions.convert(program_values['QWHV_bal'].sum, 'm^3/s', 'cfm'), 0.01)
+      elsif (vent_fan.fan_type == HPXML::MechVentTypeERV) || (vent_fan.fan_type == HPXML::MechVentTypeHRV)
+        assert_in_epsilon(vent_fan.average_flow_rate, UnitConversions.convert(program_values['QWHV_ervhrv'].sum, 'm^3/s', 'cfm'), 0.01)
+      end
+    end
   end
 
   def test_ducts_leakage_cfm25

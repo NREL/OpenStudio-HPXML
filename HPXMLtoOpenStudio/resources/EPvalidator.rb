@@ -587,9 +587,16 @@ class EnergyPlusValidator
       },
 
       ## [HeatPumpBackup]
-      '/HPXML/Building/BuildingDetails/Systems/HVAC/HVACPlant/HeatPump[BackupSystemFuel]' => {
+      '/HPXML/Building/BuildingDetails/Systems/HVAC/HVACPlant/HeatPump[BackupSystemFuel and IsVentilationPreconditioningSystem="false"]' => {
         'BackupAnnualHeatingEfficiency[Units="Percent" or Units="AFUE"]/Value' => one,
         'BackupHeatingCapacity' => zero_or_one,
+        'BackupHeatingSwitchoverTemperature' => zero_or_one, # Use if dual-fuel heat pump
+      },
+
+      ## [HeatPumpBackup]
+      '/HPXML/Building/BuildingDetails/Systems/HVAC/HVACPlant/HeatPump[BackupSystemFuel and IsVentilationPreconditioningSystem="true"]' => {
+        'BackupAnnualHeatingEfficiency[Units="Percent" or Units="AFUE"]/Value' => one,
+        'BackupHeatingCapacity' => one,
         'BackupHeatingSwitchoverTemperature' => zero_or_one, # Use if dual-fuel heat pump
       },
 
