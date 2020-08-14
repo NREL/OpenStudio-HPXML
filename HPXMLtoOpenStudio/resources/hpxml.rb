@@ -1456,6 +1456,11 @@ class HPXML < Object
       XMLHelper.add_element(roof, 'RoofColor', @roof_color) unless @roof_color.nil?
       XMLHelper.add_element(roof, 'SolarAbsorptance', to_float(@solar_absorptance)) unless @solar_absorptance.nil?
       XMLHelper.add_element(roof, 'Emittance', to_float(@emittance)) unless @emittance.nil?
+      if @quick_fill
+        rafters = XMLHelper.add_element(roof, 'Rafters')
+        XMLHelper.add_element(rafters, 'Size', @rafters_size) unless @rafters_size.nil?
+        XMLHelper.add_element(rafters, 'FramingFactor', to_float(@framing_factor)) unless @framing_factor.nil?
+      end
       XMLHelper.add_element(roof, 'Pitch', to_float(@pitch)) unless @pitch.nil?
       XMLHelper.add_element(roof, 'RadiantBarrier', to_boolean(@radiant_barrier)) unless @radiant_barrier.nil?
       XMLHelper.add_element(roof, 'RadiantBarrierGrade', to_integer(@radiant_barrier_grade)) unless @radiant_barrier_grade.nil?
@@ -1476,9 +1481,6 @@ class HPXML < Object
           XMLHelper.add_element(layer, 'NominalRValue', to_float(@insulation_cavity_r_value))
           XMLHelper.add_element(layer, 'Thickness', @insulation_cavity_thickness) unless @insulation_cavity_thickness.nil?
         end
-        rafters = XMLHelper.add_element(roof, 'Rafters')
-        XMLHelper.add_element(rafters, 'Size', @rafters_size) unless @rafters_size.nil?
-        XMLHelper.add_element(rafters, 'FramingFactor', to_float(@framing_factor)) unless @framing_factor.nil?
         if not @insulation_continuous_r_value.nil?
           layer = XMLHelper.add_element(insulation, 'Layer')
           XMLHelper.add_element(layer, 'InstallationType', 'continuous')
