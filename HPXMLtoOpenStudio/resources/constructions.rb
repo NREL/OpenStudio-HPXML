@@ -183,8 +183,10 @@ class Constructions
     constr.create_and_assign_constructions(runner, surfaces, model)
 
     # Store info for HVAC Sizing measure
-    wall.ufactor = 1.0 / constr.assembly_rvalue # parallel path overall ufactor calculation
-    wall.insulation_continuous_r_value = rigid_r
+    if not wall.nil?
+      wall.ufactor = 1.0 / constr.assembly_rvalue # parallel path overall ufactor calculation
+      wall.insulation_continuous_r_value = rigid_r
+    end
   end
 
   def self.apply_cmu_wall(runner, model, surfaces, wall, constr_name,
@@ -276,9 +278,11 @@ class Constructions
     constr.create_and_assign_constructions(runner, surfaces, model)
 
     # Store info for HVAC Sizing measure
-    wall.ufactor = 1.0 / constr.assembly_rvalue # parallel path overall ufactor calculation
-    wall.insulation_cavity_r_value = furring_r
-    wall.insulation_continuous_r_value = rigid_r
+    if not wall.nil?
+      wall.ufactor = 1.0 / constr.assembly_rvalue # parallel path overall ufactor calculation
+      wall.insulation_cavity_r_value = furring_r
+      wall.insulation_continuous_r_value = rigid_r
+    end
   end
 
   def self.apply_icf_wall(runner, model, surfaces, wall, constr_name,
@@ -347,8 +351,10 @@ class Constructions
     constr.create_and_assign_constructions(runner, surfaces, model)
 
     # Store info for HVAC Sizing measure
-    wall.ufactor = 1.0 / constr.assembly_rvalue # parallel path overall ufactor calculation
-    wall.insulation_continuous_r_value = rigid_r
+    if not wall.nil?
+      wall.ufactor = 1.0 / constr.assembly_rvalue # parallel path overall ufactor calculation
+      wall.insulation_continuous_r_value = rigid_r
+    end
   end
 
   def self.apply_sip_wall(runner, model, surfaces, wall, constr_name,
@@ -424,7 +430,9 @@ class Constructions
     constr.create_and_assign_constructions(runner, surfaces, model)
 
     # Store info for HVAC Sizing measure
-    wall.ufactor = 1.0 / constr.assembly_rvalue # parallel path overall ufactor calculation
+    if not wall.nil?
+      wall.ufactor = 1.0 / constr.assembly_rvalue # parallel path overall ufactor calculation
+    end
   end
 
   def self.apply_steel_stud_wall(runner, model, surfaces, wall, constr_name,
@@ -503,9 +511,11 @@ class Constructions
     constr.create_and_assign_constructions(runner, surfaces, model)
 
     # Store info for HVAC Sizing measure
-    wall.ufactor = 1.0 / constr.assembly_rvalue # parallel path overall ufactor calculation
-    wall.insulation_cavity_r_value = cavity_r
-    wall.insulation_continuous_r_value = rigid_r
+    if not wall.nil?
+      wall.ufactor = 1.0 / constr.assembly_rvalue # parallel path overall ufactor calculation
+      wall.insulation_cavity_r_value = cavity_r
+      wall.insulation_continuous_r_value = rigid_r
+    end
   end
 
   def self.apply_generic_layered_wall(runner, model, surfaces, wall, constr_name,
@@ -580,8 +590,10 @@ class Constructions
     constr.create_and_assign_constructions(runner, surfaces, model)
 
     # Store info for HVAC Sizing measure
-    wall.ufactor = 1.0 / constr.assembly_rvalue # parallel path overall ufactor calculation
-    wall.insulation_continuous_r_value = rigid_r
+    if not wall.nil?
+      wall.ufactor = 1.0 / constr.assembly_rvalue # parallel path overall ufactor calculation
+      wall.insulation_continuous_r_value = rigid_r
+    end
   end
 
   def self.apply_rim_joist(runner, model, surfaces, rim_joist, constr_name,
@@ -655,9 +667,11 @@ class Constructions
     constr.create_and_assign_constructions(runner, surfaces, model)
 
     # Store info for HVAC Sizing measure
-    rim_joist.ufactor = 1.0 / constr.assembly_rvalue # parallel path overall ufactor calculation
-    rim_joist.insulation_continuous_r_value = rigid_r
-    rim_joist.insulation_cavity_r_value = cavity_r
+    if not rim_joist.nil?
+      rim_joist.ufactor = 1.0 / constr.assembly_rvalue # parallel path overall ufactor calculation
+      rim_joist.insulation_continuous_r_value = rigid_r
+      rim_joist.insulation_cavity_r_value = cavity_r
+    end
   end
 
   def self.apply_open_cavity_roof(runner, model, surfaces, roof, constr_name,
@@ -746,7 +760,9 @@ class Constructions
     constr.create_and_assign_constructions(runner, surfaces, model)
 
     # Store info for HVAC Sizing measure
-    roof.ufactor = 1.0 / constr.assembly_rvalue # parallel path overall ufactor calculation
+    if not roof.nil?
+      roof.ufactor = 1.0 / constr.assembly_rvalue # parallel path overall ufactor calculation
+    end
   end
 
   def self.apply_closed_cavity_roof(runner, model, surfaces, roof, constr_name,
@@ -833,7 +849,9 @@ class Constructions
     constr.create_and_assign_constructions(runner, surfaces, model)
 
     # Store info for HVAC Sizing measure
-    roof.ufactor = 1.0 / constr.assembly_rvalue # parallel path overall ufactor calculation
+    if not roof.nil?
+      roof.ufactor = 1.0 / constr.assembly_rvalue # parallel path overall ufactor calculation
+    end
   end
 
   def self.apply_ceiling(runner, model, surfaces, frame_floor, constr_name,

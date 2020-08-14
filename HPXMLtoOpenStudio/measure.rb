@@ -1961,11 +1961,11 @@ class OSModel
                                 outside_film: Material.AirFilmFloorReduced)
     elsif type == 'roof'
       Constructions.apply_open_cavity_roof(runner, model, surfaces, nil, 'AdiabaticRoofConstruction',
-                                           0, 1, 7.25, 0.07, 7.25, 0.75, 99,
-                                           Material.RoofMaterial(HPXML::RoofTypeAsphaltShingles, 0.90, 0.75),
-                                           false,
-                                           Material.AirFilmOutside,
-                                           Material.AirFilmRoof(Geometry.get_roof_pitch(surfaces)), nil)
+                                           cavity_r: 0, install_grade: 1, cavity_ins_thick_in: 7.25, framing_factor: 0.07, framing_thick_in: 7.25, osb_thick_in: 0.75, rigid_r: 99,
+                                           mat_roofing: Material.RoofMaterial(HPXML::RoofTypeAsphaltShingles, 0.90, 0.75),
+                                           has_radiant_barrier: false,
+                                           inside_film: Material.AirFilmOutside,
+                                           outside_film: Material.AirFilmRoof(Geometry.get_roof_pitch(surfaces)), radiant_barrier_grade: nil)
     end
   end
 
