@@ -982,7 +982,7 @@ class Constructions
     end
   end
 
-  def self.apply_foundation_wall(runner, model, wall_surfaces, wall_constr_name,
+  def self.apply_foundation_wall(runner, model, wall_surfaces, foundation_wall, wall_constr_name,
                                  ext_rigid_ins_offset, int_rigid_ins_offset, ext_rigid_ins_height,
                                  int_rigid_ins_height, ext_rigid_r, int_rigid_r, wall_drywall_thick_in, wall_concrete_thick_in, wall_height_above_grade)
 
@@ -1008,6 +1008,11 @@ class Constructions
     # Assign surfaces to Kiva foundation
     wall_surfaces.each do |wall_surface|
       wall_surface.setAdjacentFoundation(foundation)
+    end
+
+    # Store info for HVAC Sizing measure
+    if not foundation_wall.nil?
+      foundation_wall.additional_properties.ufactor = nil
     end
   end
 

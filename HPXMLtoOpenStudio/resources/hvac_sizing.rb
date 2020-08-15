@@ -2927,7 +2927,7 @@ class HVACSizing
         surfaces_ua += (1.0 / surface.insulation_assembly_r_value) * surface.area
       elsif not surface.additional_properties.ufactor.nil?
         surfaces_ua += surface.additional_properties.ufactor * surface.area
-      else # FIXME: It seems that we need this to be able to handle adiabatic surfaces.
+      else # FIXME: It seems that we need this to be able to handle foundation walls.
         surfaces_ua += (1.0 / (surface.insulation_interior_r_value + surface.insulation_exterior_r_value)) * surface.area
       end
     end

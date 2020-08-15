@@ -2009,7 +2009,7 @@ class HPXML < Object
   end
 
   class FoundationWall < BaseElement
-    ATTRS = [:id, :exterior_adjacent_to, :interior_adjacent_to, :height, :area, :azimuth, :thickness,
+    ATTRS = [:id, :quick_fill, :exterior_adjacent_to, :interior_adjacent_to, :height, :area, :azimuth, :thickness,
              :depth_below_grade, :insulation_id, :insulation_r_value, :insulation_interior_r_value,
              :insulation_interior_distance_to_top, :insulation_interior_distance_to_bottom,
              :insulation_exterior_r_value, :insulation_exterior_distance_to_top,
@@ -2132,6 +2132,13 @@ class HPXML < Object
       insulation = XMLHelper.get_element(foundation_wall, 'Insulation')
       if not insulation.nil?
         @insulation_id = HPXML::get_id(insulation)
+      end
+      if not XMLHelper.get_element(foundation_wall, 'Insulation/Layer[InstallationType="continuous - interior"]').nil?
+        @quick_fill = true
+      end
+      if not @quick_fill
+        @insulation_assembly_r_value = to_float_or_nil(XMLHelper.get_value(insulation, 'AssemblyEffectiveRValue'))
+      else
         @insulation_r_value = to_float_or_nil(XMLHelper.get_value(insulation, "Layer[InstallationType='continuous']/NominalRValue"))
         @insulation_interior_r_value = to_float_or_nil(XMLHelper.get_value(insulation, "Layer[InstallationType='continuous - interior']/NominalRValue"))
         @insulation_interior_distance_to_top = to_float_or_nil(XMLHelper.get_value(insulation, "Layer[InstallationType='continuous - interior']/extension/DistanceToTopOfInsulation"))
@@ -2140,7 +2147,6 @@ class HPXML < Object
         @insulation_exterior_distance_to_top = to_float_or_nil(XMLHelper.get_value(insulation, "Layer[InstallationType='continuous - exterior']/extension/DistanceToTopOfInsulation"))
         @insulation_exterior_distance_to_bottom = to_float_or_nil(XMLHelper.get_value(insulation, "Layer[InstallationType='continuous - exterior']/extension/DistanceToBottomOfInsulation"))
         @insulation_continuous_r_value = to_float_or_nil(XMLHelper.get_value(insulation, "Layer[InstallationType='continuous']/NominalRValue"))
-        @insulation_assembly_r_value = to_float_or_nil(XMLHelper.get_value(insulation, 'AssemblyEffectiveRValue'))
       end
     end
   end

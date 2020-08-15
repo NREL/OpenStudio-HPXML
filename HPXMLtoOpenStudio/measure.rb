@@ -1585,7 +1585,7 @@ class OSModel
       int_rigid_r = foundation_wall.insulation_interior_r_value
     end
 
-    Constructions.apply_foundation_wall(runner, model, [surface], "#{foundation_wall.id} construction",
+    Constructions.apply_foundation_wall(runner, model, [surface], foundation_wall, "#{foundation_wall.id} construction",
                                         ext_rigid_offset, int_rigid_offset, ext_rigid_height, int_rigid_height,
                                         ext_rigid_r, int_rigid_r, inside_drywall_thick_in, concrete_thick_in, height_ag)
 
