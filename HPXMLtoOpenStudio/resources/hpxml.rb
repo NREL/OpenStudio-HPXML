@@ -1383,7 +1383,7 @@ class HPXML < Object
 
   class Roof < BaseElement
     ATTRS = [:id, :quick_fill, :interior_adjacent_to, :area, :azimuth, :roof_type,
-             :ufactor, :roof_color, :solar_absorptance, :emittance, :pitch, :radiant_barrier,
+             :roof_color, :solar_absorptance, :emittance, :pitch, :radiant_barrier,
              :insulation_id, :insulation_assembly_r_value,
              :insulation_cavity_r_value, :insulation_cavity_thickness, :insulation_continuous_r_value,
              :insulation_cavity_material, :insulation_continuous_material,
@@ -1549,7 +1549,7 @@ class HPXML < Object
   class RimJoist < BaseElement
     ATTRS = [:id,  :quick_fill, :exterior_adjacent_to, :interior_adjacent_to, :area, :azimuth, :siding, :color,
              :solar_absorptance, :emittance, :insulation_id, :insulation_assembly_r_value,
-             :ufactor, :insulation_assembly_r_value, :insulation_cavity_r_value, :insulation_cavity_thickness, :insulation_continuous_r_value,
+             :insulation_assembly_r_value, :insulation_cavity_r_value, :insulation_cavity_thickness, :insulation_continuous_r_value,
              :insulation_grade, :insulation_cavity_material, :insulation_continuous_material,
              :joist_size, :joist_spacing, :framing_factor, :osb_thickness]
     attr_accessor(*ATTRS)
@@ -1685,7 +1685,7 @@ class HPXML < Object
   class Wall < BaseElement
     ATTRS = [:id, :exterior_adjacent_to, :interior_adjacent_to, :wall_type, :optimum_value_engineering, :quick_fill,
              :area, :orientation, :azimuth, :siding, :color, :solar_absorptance, :emittance, :insulation_id,
-             :ufactor, :insulation_assembly_r_value, :insulation_cavity_r_value, :insulation_continuous_r_value,
+             :insulation_assembly_r_value, :insulation_cavity_r_value, :insulation_continuous_r_value,
              :insulation_cavity_thickness, :insulation_grade, :insulation_cavity_material, :insulation_continuous_material,
              :stud_size, :stud_spacing, :framing_factor, :osb_thickness, :steel_frame_correction_factor,
              :double_stud_is_staggered, :double_stud_gap_depth,
@@ -2010,7 +2010,7 @@ class HPXML < Object
 
   class FoundationWall < BaseElement
     ATTRS = [:id, :exterior_adjacent_to, :interior_adjacent_to, :height, :area, :azimuth, :thickness,
-             :ufactor, :depth_below_grade, :insulation_id, :insulation_r_value, :insulation_interior_r_value,
+             :depth_below_grade, :insulation_id, :insulation_r_value, :insulation_interior_r_value,
              :insulation_interior_distance_to_top, :insulation_interior_distance_to_bottom,
              :insulation_exterior_r_value, :insulation_exterior_distance_to_top,
              :insulation_exterior_distance_to_bottom, :insulation_assembly_r_value,
@@ -2161,7 +2161,7 @@ class HPXML < Object
 
   class FrameFloor < BaseElement
     ATTRS = [:id, :exterior_adjacent_to, :interior_adjacent_to, :area, :insulation_id, :quick_fill,
-             :ufactor, :insulation_assembly_r_value, :insulation_cavity_r_value, :insulation_continuous_r_value,
+             :insulation_assembly_r_value, :insulation_cavity_r_value, :insulation_continuous_r_value,
              :insulation_grade, :insulation_cavity_thickness, :insulation_cavity_material, :insulation_continuous_material,
              :floor_joists_size, :framing_factor, :plywood_thickness, :inside_drywall_thickness, :floor_covering,
              :other_space_above_or_below]

@@ -764,12 +764,12 @@ class HVACSizing
             cltd = [cltd + cltd_corr, 0.0].max # Assume zero cooling load for negative CLTD's
           end
 
-          zone_loads.Cool_Walls += wall.ufactor * wall_area / azimuths.size * cltd
-          zone_loads.Heat_Walls += wall.ufactor * wall_area / azimuths.size * @htd
+          zone_loads.Cool_Walls += wall.additional_properties.ufactor * wall_area / azimuths.size * cltd
+          zone_loads.Heat_Walls += wall.additional_properties.ufactor * wall_area / azimuths.size * @htd
         else
           adjacent_space = wall.exterior_adjacent_to
-          zone_loads.Cool_Walls += wall.ufactor * wall_area / azimuths.size * (@cool_design_temps[adjacent_space] - @cool_setpoint)
-          zone_loads.Heat_Walls += wall.ufactor * wall_area / azimuths.size * (@heat_setpoint - @heat_design_temps[adjacent_space])
+          zone_loads.Cool_Walls += wall.additional_properties.ufactor * wall_area / azimuths.size * (@cool_design_temps[adjacent_space] - @cool_setpoint)
+          zone_loads.Heat_Walls += wall.additional_properties.ufactor * wall_area / azimuths.size * (@heat_setpoint - @heat_design_temps[adjacent_space])
         end
       end
     end
@@ -855,12 +855,12 @@ class HVACSizing
       next unless frame_floor.is_thermal_boundary
 
       if frame_floor.is_exterior
-        zone_loads.Cool_Floors += frame_floor.ufactor * frame_floor.area * (@ctd - 5.0 + @daily_range_temp_adjust[@daily_range_num])
-        zone_loads.Heat_Floors += frame_floor.ufactor * frame_floor.area * @htd
+        zone_loads.Cool_Floors += frame_floor.additional_properties.ufactor * frame_floor.area * (@ctd - 5.0 + @daily_range_temp_adjust[@daily_range_num])
+        zone_loads.Heat_Floors += frame_floor.additional_properties.ufactor * frame_floor.area * @htd
       else
         adjacent_space = frame_floor.exterior_adjacent_to
-        zone_loads.Cool_Floors += frame_floor.ufactor * frame_floor.area * (@cool_design_temps[adjacent_space] - @cool_setpoint)
-        zone_loads.Heat_Floors += frame_floor.ufactor * frame_floor.area * (@heat_setpoint - @heat_design_temps[adjacent_space])
+        zone_loads.Cool_Floors += frame_floor.additional_properties.ufactor * frame_floor.area * (@cool_design_temps[adjacent_space] - @cool_setpoint)
+        zone_loads.Heat_Floors += frame_floor.additional_properties.ufactor * frame_floor.area * (@heat_setpoint - @heat_design_temps[adjacent_space])
       end
     end
 
@@ -2440,7 +2440,7 @@ class HVACSizing
     if not wall.insulation_assembly_r_value.nil?
       wall_ufactor = 1.0 / wall.insulation_assembly_r_value
     else
-      wall_ufactor = wall.ufactor
+      wall_ufactor = wall.additional_properties.ufactor
     end
 
     # The following correlations were estimated by analyzing MJ8 construction tables.
@@ -2925,8 +2925,8 @@ class HVACSizing
       surfaces_a += surface.area
       if not surface.insulation_assembly_r_value.nil?
         surfaces_ua += (1.0 / surface.insulation_assembly_r_value) * surface.area
-      elsif not surface.ufactor.nil?
-        surfaces_ua += surface.ufactor * surface.area
+      elsif not surface.additional_properties.ufactor.nil?
+        surfaces_ua += surface.additional_properties.ufactor * surface.area
       else # FIXME: It seems that we need this to be able to handle adiabatic surfaces.
         surfaces_ua += (1.0 / (surface.insulation_interior_r_value + surface.insulation_exterior_r_value)) * surface.area
       end
