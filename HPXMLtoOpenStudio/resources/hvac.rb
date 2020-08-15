@@ -1653,26 +1653,6 @@ class HVAC
     pump_program_calling_manager.setName("#{pump.name} power program calling manager")
     pump_program_calling_manager.setCallingPoint('EndOfSystemTimestepBeforeHVACReporting')
     pump_program_calling_manager.addProgram(pump_program)
-
-    puts 'HELLO'
-
-    # DEBUG
-    # oems = model.getOutputEnergyManagementSystem
-    # oems.setActuatorAvailabilityDictionaryReporting('Verbose')
-    # oems.setInternalVariableAvailabilityDictionaryReporting('Verbose')
-    # oems.setEMSRuntimeLanguageDebugOutputLevel('Verbose')
-
-    # outputVariable = OpenStudio::Model::OutputVariable.new('Boiler Part Load Ratio', model)
-    # outputVariable.setReportingFrequency('hourly')
-    # outputVariable.setKeyValue(heating_object.name.to_s)
-
-    # outputVariable = OpenStudio::Model::OutputVariable.new('Pump Electric Energy', model)
-    # outputVariable.setReportingFrequency('hourly')
-    # outputVariable.setKeyValue(pump.name.to_s)
-
-    # outputVariable = OpenStudio::Model::OutputVariable.new('Pump Electric Power', model)
-    # outputVariable.setReportingFrequency('hourly')
-    # outputVariable.setKeyValue(pump.name.to_s)
   end
 
   def self.disaggregate_fan_or_pump(model, fan_or_pump, htg_object, clg_object, backup_htg_object)

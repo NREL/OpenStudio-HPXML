@@ -307,6 +307,12 @@ class OSModel
       File.write(osm_output_path, model.to_s)
       runner.registerInfo("Wrote file: #{osm_output_path}")
     end
+
+    # Uncomment to debug EMS
+    # oems = model.getOutputEnergyManagementSystem
+    # oems.setActuatorAvailabilityDictionaryReporting('Verbose')
+    # oems.setInternalVariableAvailabilityDictionaryReporting('Verbose')
+    # oems.setEMSRuntimeLanguageDebugOutputLevel('Verbose')
   end
 
   private
