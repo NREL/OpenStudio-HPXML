@@ -171,7 +171,7 @@
               <SystemIdentifier id='FoundationWallInsulation'/>
               <Layer>
                 <InstallationType>continuous - exterior</InstallationType>
-                <NominalRValue>8.9</NominalRValue>
+                <NominalRValue>0.0</NominalRValue>
                 <extension>
                   <DistanceToTopOfInsulation>0.0</DistanceToTopOfInsulation>
                   <DistanceToBottomOfInsulation>4.0</DistanceToBottomOfInsulation>

@@ -229,7 +229,14 @@ def create_osws
     'invalid_files/ducts-location-and-areas-not-same-type.osw' => 'base.osw',
     'invalid_files/second-heating-system-serves-majority-heat.osw' => 'base.osw',
     'invalid_files/single-family-attached-no-building-orientation.osw' => 'base-single-family-attached.osw',
-    'invalid_files/multifamily-no-building-orientation.osw' => 'base-multifamily.osw'
+    'invalid_files/multifamily-no-building-orientation.osw' => 'base-multifamily.osw',
+    'invalid_files/vented-crawlspace-with-wall-and-ceiling-insulation.osw' => 'base.osw',
+    'invalid_files/unvented-crawlspace-with-wall-and-ceiling-insulation.osw' => 'base.osw',
+    'invalid_files/unconditioned-basement-with-wall-and-ceiling-insulation.osw' => 'base.osw',
+    'invalid_files/vented-attic-with-floor-and-roof-insulation.osw' => 'base.osw',
+    'invalid_files/unvented-attic-with-floor-and-roof-insulation.osw' => 'base.osw',
+    'invalid_files/conditioned-basement-with-ceiling-insulation.osw' => 'base.osw',
+    'invalid_files/conditioned-attic-with-floor-insulation.osw' => 'base.osw'
   }
 
   puts "Generating #{osws_files.size} OSW files..."
@@ -1954,6 +1961,28 @@ def get_values(osw_file, step)
     step.removeArgument('geometry_num_units')
     step.removeArgument('geometry_level')
     step.removeArgument('geometry_horizontal_location')
+  elsif ['invalid_files/vented-crawlspace-with-wall-and-ceiling-insulation.osw'].include? osw_file
+    step.setArgument('geometry_foundation_type', HPXML::FoundationTypeCrawlspaceVented)
+    step.setArgument('geometry_foundation_height', 3.0)
+    step.setArgument('floor_assembly_r', 10)
+  elsif ['invalid_files/unvented-crawlspace-with-ceiling-insulation.osw'].include? osw_file
+    step.setArgument('geometry_foundation_type', HPXML::FoundationTypeCrawlspaceUnvented)
+    step.setArgument('geometry_foundation_height', 3.0)
+    step.setArgument('floor_assembly_r', 10)
+  elsif ['invalid_files/unconditioned-basement-with-wall-and-ceiling-insulation.osw'].include? osw_file
+    step.setArgument('geometry_foundation_type', HPXML::FoundationTypeBasementUnconditioned)
+    step.setArgument('floor_assembly_r', 10)
+  elsif ['invalid_files/vented-attic-with-floor-and-roof-insulation.osw'].include? osw_file
+    step.setArgument('geometry_attic_type', HPXML::AtticTypeVented)
+    step.setArgument('roof_assembly_r', 10)
+  elsif ['invalid_files/unvented-attic-with-floor-and-roof-insulation.osw'].include? osw_file
+    step.setArgument('geometry_attic_type', HPXML::AtticTypeUnvented)
+    step.setArgument('roof_assembly_r', 10)
+  elsif ['invalid_files/conditioned-basement-with-ceiling-insulation.osw'].include? osw_file
+    step.setArgument('geometry_foundation_type', HPXML::FoundationTypeBasementConditioned)
+    step.setArgument('floor_assembly_r', 10)
+  elsif ['invalid_files/conditioned-attic-with-floor-insulation.osw'].include? osw_file
+    step.setArgument('geometry_attic_type', HPXML::AtticTypeConditioned)
   end
   return step
 end
@@ -3477,6 +3506,7 @@ def set_hpxml_foundation_walls(hpxml_file, hpxml)
       hpxml.foundation_walls[0].interior_adjacent_to = HPXML::LocationCrawlspaceUnvented
     else
       hpxml.foundation_walls[0].interior_adjacent_to = HPXML::LocationCrawlspaceVented
+      hpxml.foundation_walls[0].insulation_exterior_r_value = 0
     end
     hpxml.foundation_walls[0].height -= 4
     hpxml.foundation_walls[0].area /= 2.0
@@ -3701,7 +3731,7 @@ def set_hpxml_frame_floors(hpxml_file, hpxml)
                            exterior_adjacent_to: HPXML::LocationCrawlspaceUnvented,
                            interior_adjacent_to: HPXML::LocationLivingSpace,
                            area: 1350,
-                           insulation_assembly_r_value: 18.7)
+                           insulation_assembly_r_value: 2.1)
   elsif ['base-foundation-vented-crawlspace.xml'].include? hpxml_file
     hpxml.frame_floors.add(id: 'FloorAboveVentedCrawl',
                            exterior_adjacent_to: HPXML::LocationCrawlspaceVented,
