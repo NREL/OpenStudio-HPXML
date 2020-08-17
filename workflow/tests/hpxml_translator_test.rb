@@ -347,7 +347,7 @@ class HPXMLTest < MiniTest::Test
 
     # Check discrepancy between total load and sum of component loads
     # On-off thermostat control can have majority of timesteps not meeting "load" assigned, because the internal "setpoint" is swinging up an down due to deadband.
-    if not xml.include? 'ASHRAE_Standard_140' and not xml.include? 'onoff-thermostat-deadband'
+    if (not xml.include? 'ASHRAE_Standard_140') && (not xml.include? 'onoff-thermostat-deadband')
       sum_component_htg_loads = results.select { |k, v| k.start_with? 'Component Load: Heating:' }.map { |k, v| v }.sum(0.0)
       sum_component_clg_loads = results.select { |k, v| k.start_with? 'Component Load: Cooling:' }.map { |k, v| v }.sum(0.0)
       residual_htg_load = results['Load: Heating (MBtu)'] - sum_component_htg_loads

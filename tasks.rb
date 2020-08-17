@@ -260,7 +260,7 @@ def create_hpxmls
     'base-hvac-none.xml' => 'base.xml',
     'base-hvac-portable-heater-electric-only.xml' => 'base.xml',
     'base-hvac-programmable-thermostat.xml' => 'base.xml',
-    'base-hvac-onoff-thermostat-deadband.xml' => 'base.xml',
+    'base-hvac-onoff-thermostat-deadband.xml' => 'base-hvac-air-to-air-heat-pump-1-speed.xml',
     'base-hvac-room-ac-only.xml' => 'base.xml',
     'base-hvac-room-ac-only-33percent.xml' => 'base-hvac-room-ac-only.xml',
     'base-hvac-setpoints.xml' => 'base.xml',
@@ -496,6 +496,8 @@ def set_hpxml_header(hpxml_file, hpxml)
     hpxml.header.dst_end_day_of_month = 31
   elsif ['base-misc-defaults.xml'].include? hpxml_file
     hpxml.header.timestep = nil
+  elsif ['base-hvac-onoff-thermostat-deadband.xml'].include? hpxml_file
+    hpxml.header.timestep = 1
   end
 end
 
