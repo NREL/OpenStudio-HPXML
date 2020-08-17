@@ -285,6 +285,18 @@ class HPXMLDefaults
       end
     end
 
+    # Default GSHP pump/fan power
+    hpxml.heat_pumps.each do |heat_pump|
+      next unless heat_pump.heat_pump_type == HPXML::HVACTypeHeatPumpGroundToAir
+
+      if heat_pump.fan_watts_per_cfm.nil?
+        heat_pump.fan_watts_per_cfm = HVAC.get_default_gshp_fan_power()
+      end
+      if heat_pump.pump_watts.nil?
+        heat_pump.pump_watts = HVAC.get_default_gshp_pump_power(heat_pump.cooling_capacity)
+      end
+    end
+
     # HVAC capacities
     # Transition capacity elements from -1 to nil
     hpxml.heating_systems.each do |heating_system|

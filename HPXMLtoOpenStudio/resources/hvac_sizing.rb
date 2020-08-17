@@ -2249,6 +2249,7 @@ class HVACSizing
         if hvac.GSHP_HXDTDesign.nil? || hvac.GSHP_HXCHWDesign.nil? || hvac.GSHP_HXHWDesign.nil?
           fail 'Could not find GSHP plant loop.'
         end
+        hvac.GSHP_PumpPower = get_feature(equip, Constants.SizingInfoHVACPumpPower, 'double')
 
       elsif not htg_coil.nil?
         fail "Unexpected heating coil: #{htg_coil.name}."
@@ -3079,6 +3080,21 @@ class HVACSizing
           for i in 0..(hvac_final_values.GSHP_G_Functions[0].size - 1)
             hvac.GSHP_HXVertical.addGFunction(hvac_final_values.GSHP_G_Functions[0][i], hvac_final_values.GSHP_G_Functions[1][i])
           end
+
+          plant_loop.supplyComponents.each do |plc|
+            next unless plc.to_PumpVariableSpeed.is_initialized
+
+            # Pump
+            pump_w = hvac.GSHP_PumpPower
+            if pump_w <= 0
+              cooling_capacity_btuh = UnitConversions.convert(clg_coil.ratedTotalCoolingCapacity.get, 'W', 'Btu/hr')
+              pump_w = HVAC.get_default_gshp_pump_power(cooling_capacity_btuh)
+            end
+            pump = plc.to_PumpVariableSpeed.get
+            pump.setRatedPowerConsumption(pump_w)
+            pump.setRatedFlowRate(HVAC.calc_pump_rated_flow_rate(0.75, pump_w, pump.ratedPumpHead))
+            HVAC.set_pump_power_ems_program(model, pump_w, pump, object)
+          end
         end
 
       elsif object.is_a? OpenStudio::Model::AirLoopHVACUnitarySystem
@@ -3375,7 +3391,7 @@ class HVACInfo
                 :SHRRated, :CapacityRatioCooling, :CapacityRatioHeating,
                 :HeatingCapacityOffset, :OverSizeLimit, :OverSizeDelta, :FanspeedRatioCooling,
                 :BoilerDesignTemp, :CoilBF, :HeatingEIR, :CoolingEIR, :SizingSpeed,
-                :GSHP_HXVertical, :GSHP_HXDTDesign, :GSHP_HXCHWDesign, :GSHP_HXHWDesign,
+                :GSHP_PumpPower, :GSHP_HXVertical, :GSHP_HXDTDesign, :GSHP_HXCHWDesign, :GSHP_HXHWDesign,
                 :GSHP_BoreSpacing, :GSHP_BoreHoles, :GSHP_BoreDepth, :GSHP_BoreConfig, :GSHP_SpacingType,
                 :HeatingLoadFraction, :CoolingLoadFraction, :SupplyAirTemp, :LeavingAirTemp,
                 :EvapCoolerEffectiveness)

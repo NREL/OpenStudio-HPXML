@@ -494,6 +494,8 @@ class EnergyPlusValidator
         'BackupHeatingSwitchoverTemperature' => zero,
         'AnnualCoolingEfficiency[Units="EER"]/Value' => one,
         'AnnualHeatingEfficiency[Units="COP"]/Value' => one,
+        'extension/PumpPowerInWatts' => zero_or_one,
+        'extension/FanPowerInWattsPerCFM' => zero_or_one,
       },
 
       ## [HeatPumpBackup]

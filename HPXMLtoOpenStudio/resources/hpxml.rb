@@ -2687,7 +2687,7 @@ class HPXML < Object
              :backup_heating_efficiency_percent, :backup_heating_efficiency_afue,
              :backup_heating_switchover_temp, :fraction_heat_load_served, :fraction_cool_load_served,
              :cooling_efficiency_seer, :cooling_efficiency_eer, :heating_efficiency_hspf,
-             :heating_efficiency_cop, :energy_star, :seed_id]
+             :heating_efficiency_cop, :energy_star, :seed_id, :pump_watts, :fan_watts_per_cfm]
     attr_accessor(*ATTRS)
 
     def distribution_system
@@ -2778,7 +2778,9 @@ class HPXML < Object
       end
 
       HPXML::add_extension(parent: heat_pump,
-                           extensions: { 'SeedId' => @seed_id })
+                           extensions: { 'PumpPowerInWatts' => to_float_or_nil(@pump_watts),
+                                         'FanPowerInWattsPerCFM' => to_float_or_nil(@fan_watts_per_cfm),
+                                         'SeedId' => @seed_id })
     end
 
     def from_oga(heat_pump)
@@ -2812,6 +2814,8 @@ class HPXML < Object
         @heating_efficiency_cop = to_float_or_nil(XMLHelper.get_value(heat_pump, "AnnualHeatingEfficiency[Units='COP']/Value"))
       end
       @energy_star = XMLHelper.get_values(heat_pump, 'ThirdPartyCertification').include?('Energy Star')
+      @pump_watts = to_float_or_nil(XMLHelper.get_value(heat_pump, 'extension/PumpPowerInWatts'))
+      @fan_watts_per_cfm = to_float_or_nil(XMLHelper.get_value(heat_pump, 'extension/FanPowerInWattsPerCFM'))
       @seed_id = XMLHelper.get_value(heat_pump, 'extension/SeedId')
     end
   end

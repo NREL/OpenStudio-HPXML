@@ -524,6 +524,11 @@ mini-split     AirDistribution or DSE (optional)  electricity   SEER            
 ground-to-air  AirDistribution or DSE             electricity   EER                      COP                      (optional)
 =============  =================================  ============  =======================  =======================  ===========================  ==================
 
+Ground-to-air heat pumps also have a few other inputs:
+
+- ``extension/PumpPowerInWatts``: Optional. Ground loop circulator pump power during operation of the heat pump in Watts. Defaults to 25 Watts per ton of cooling capacity.
+- ``extension/FanPowerInWattsPerCFM``: Optional. Blower fan power in Watts/cfm. Defaults to 0.2 W/cfm per `ANSI/RESNET/ICC 301-2019 <https://codes.iccsafe.org/content/RESNETICC3012019>`_.
+
 Air-to-air heat pumps can also have the ``CompressorType`` specified; if not provided, it is assumed as follows:
 
 - "single stage": SEER <= 15

@@ -757,7 +757,6 @@ class HVAC
     fluid_type = Constants.FluidPropyleneGlycol
     frac_glycol = 0.3
     design_delta_t = 10.0
-    fan_power_installed = 0.5 # W/cfm
     chw_design = [85.0, weather.design.CoolingDrybulb - 15.0, weather.data.AnnualAvgDrybulb + 10.0].max # Temperature of water entering indoor coil,use 85F as lower bound
     if fluid_type == Constants.FluidWater
       hw_design = [45.0, weather.design.HeatingDrybulb + 35.0, weather.data.AnnualAvgDrybulb - 10.0].max # Temperature of fluid entering indoor coil, use 45F as lower bound for water
@@ -806,6 +805,7 @@ class HVAC
     gshp_cool_power_fT_coeff = convert_curve_gshp(cool_power_ft_spec, false)
     gshp_cool_SH_fT_coeff = convert_curve_gshp(cool_SH_ft_spec, false)
 
+    # FUTURE: Reconcile pump_adjust_kw with ANSI/RESNET/ICC 301-2019 Section 4.4.5
     fan_adjust_kw = UnitConversions.convert(400.0, 'Btu/hr', 'ton') * UnitConversions.convert(1.0, 'cfm', 'm^3/s') * 1000.0 * 0.35 * 249.0 / 300.0 # Adjustment per ISO 13256-1 Internal pressure drop across heat pump assumed to be 0.5 in. w.g.
     pump_adjust_kw = UnitConversions.convert(3.0, 'Btu/hr', 'ton') * UnitConversions.convert(1.0, 'gal/min', 'm^3/s') * 1000.0 * 6.0 * 2990.0 / 3000.0 # Adjustment per ISO 13256-1 Internal Pressure drop across heat pump coil assumed to be 11ft w.g.
     cooling_eir = UnitConversions.convert((1.0 - heat_pump.cooling_efficiency_eer * (fan_adjust_kw + pump_adjust_kw)) / (heat_pump.cooling_efficiency_eer * (1.0 + UnitConversions.convert(fan_adjust_kw, 'Wh', 'Btu'))), 'Wh', 'Btu')
@@ -918,13 +918,11 @@ class HVAC
 
     # Pump
 
-    pump_w = 100.0 # FIXME
+    # Pump power set in hvac_sizing.rb
     pump = OpenStudio::Model::PumpVariableSpeed.new(model)
     pump.setName(obj_name + ' pump')
-    pump.setRatedPowerConsumption(pump_w)
-    pump.setMotorEfficiency(0.9)
+    pump.setMotorEfficiency(0.85)
     pump.setRatedPumpHead(20000)
-    pump.setRatedFlowRate(calc_pump_rated_flow_rate(0.75, pump_w, pump.ratedPumpHead))
     pump.setFractionofMotorInefficienciestoFluidStream(0)
     pump.setCoefficient1ofthePartLoadPerformanceCurve(0)
     pump.setCoefficient2ofthePartLoadPerformanceCurve(1)
@@ -951,14 +949,13 @@ class HVAC
 
     # Fan
 
-    fan = create_supply_fan(model, obj_name, 1, fan_power_installed)
+    fan = create_supply_fan(model, obj_name, 1, heat_pump.fan_watts_per_cfm)
     hvac_map[heat_pump.id] += disaggregate_fan_or_pump(model, fan, htg_coil, clg_coil, htg_supp_coil)
 
     # Unitary System
 
     air_loop_unitary = create_air_loop_unitary_system(model, obj_name, fan, htg_coil, clg_coil, htg_supp_coil, 40.0)
     hvac_map[heat_pump.id] << air_loop_unitary
-    set_pump_power_ems_program(model, pump_w, pump, air_loop_unitary)
 
     # Air Loop
 
@@ -978,6 +975,7 @@ class HVAC
     air_loop_unitary.additionalProperties.setFeature(Constants.SizingInfoGSHPUTubeSpacingType, u_tube_spacing_type)
     air_loop_unitary.additionalProperties.setFeature(Constants.SizingInfoHVACCoolType, Constants.ObjectNameGroundSourceHeatPump)
     air_loop_unitary.additionalProperties.setFeature(Constants.SizingInfoHVACHeatType, Constants.ObjectNameGroundSourceHeatPump)
+    air_loop_unitary.additionalProperties.setFeature(Constants.SizingInfoHVACPumpPower, heat_pump.pump_watts.to_f)
   end
 
   def self.apply_boiler(model, runner, heating_system,
@@ -1028,7 +1026,7 @@ class HVAC
     pump = OpenStudio::Model::PumpVariableSpeed.new(model)
     pump.setName(obj_name + ' hydronic pump')
     pump.setRatedPowerConsumption(pump_w)
-    pump.setMotorEfficiency(0.9)
+    pump.setMotorEfficiency(0.85)
     pump.setRatedPumpHead(20000)
     pump.setRatedFlowRate(calc_pump_rated_flow_rate(0.75, pump_w, pump.ratedPumpHead))
     pump.setFractionofMotorInefficienciestoFluidStream(0)
@@ -3949,5 +3947,18 @@ class HVAC
     secondary_duct_location = HPXML::LocationLivingSpace
 
     return primary_duct_location, secondary_duct_location
+  end
+
+  def self.get_default_gshp_pump_power(cooling_capacity_btuh)
+    return if cooling_capacity_btuh.nil?
+    return if cooling_capacity_btuh.to_f < 0
+
+    pump_power = 25.0 # W/ton
+    cooling_capacity_tons = UnitConversions.convert(cooling_capacity_btuh, 'Btu/hr', 'ton')
+    return pump_power * cooling_capacity_tons
+  end
+
+  def self.get_default_gshp_fan_power()
+    return 0.2 # W/cfm, per ANSI/RESNET/ICC 301-2019 Section 4.4.5
   end
 end
