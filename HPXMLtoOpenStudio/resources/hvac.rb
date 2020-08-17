@@ -924,7 +924,7 @@ class HVAC
     pump.setRatedPowerConsumption(pump_w)
     pump.setMotorEfficiency(0.9)
     pump.setRatedPumpHead(20000)
-    pump.setRatedFlowRate(calc_pump_rated_flow_rate(0.75, pump_w, pump.ratedPumpHead)) # FIXME: Double-check impact on results
+    pump.setRatedFlowRate(calc_pump_rated_flow_rate(0.75, pump_w, pump.ratedPumpHead))
     pump.setFractionofMotorInefficienciestoFluidStream(0)
     pump.setCoefficient1ofthePartLoadPerformanceCurve(0)
     pump.setCoefficient2ofthePartLoadPerformanceCurve(1)
@@ -1030,7 +1030,7 @@ class HVAC
     pump.setRatedPowerConsumption(pump_w)
     pump.setMotorEfficiency(0.9)
     pump.setRatedPumpHead(20000)
-    pump.setRatedFlowRate(calc_pump_rated_flow_rate(0.75, pump_w, pump.ratedPumpHead)) # FIXME: Double-check impact on results
+    pump.setRatedFlowRate(calc_pump_rated_flow_rate(0.75, pump_w, pump.ratedPumpHead))
     pump.setFractionofMotorInefficienciestoFluidStream(0)
     pump.setCoefficient1ofthePartLoadPerformanceCurve(0)
     pump.setCoefficient2ofthePartLoadPerformanceCurve(1)
