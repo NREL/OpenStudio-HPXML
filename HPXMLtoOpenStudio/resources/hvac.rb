@@ -1965,7 +1965,8 @@ class HVAC
              HPXML::FuelTypeOil4,
              HPXML::FuelTypeOil5or6,
              HPXML::FuelTypeDiesel,
-             HPXML::FuelTypeKerosene].include? fuel
+             HPXML::FuelTypeKerosene,
+             HPXML::FuelTypeCoal].include? fuel
         return 330.0 * load_frac # kWh/yr
       end
     elsif htg_type == HPXML::HVACTypeFurnace
@@ -1978,7 +1979,8 @@ class HVAC
              HPXML::FuelTypeOil4,
              HPXML::FuelTypeOil5or6,
              HPXML::FuelTypeDiesel,
-             HPXML::FuelTypeKerosene].include? fuel
+             HPXML::FuelTypeKerosene,
+             HPXML::FuelTypeCoal].include? fuel
         return (439.0 + 5.5 * furnace_capacity_kbtuh) * load_frac # kWh/yr
       end
     end
