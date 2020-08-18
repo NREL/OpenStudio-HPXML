@@ -3955,10 +3955,6 @@ class HPXMLFile
   end
 
   def self.set_roofs(hpxml, runner, model, args)
-    if [HPXML::AtticTypeVented].include?(args[:geometry_attic_type]) && (args[:geometry_roof_type] != 'flat') && (args[:ceiling_assembly_r] > 2.1) && (args[:roof_assembly_r] > 2.3)
-      args[:roof_assembly_r] = 2.3 # Uninsulated
-    end
-
     model.getSurfaces.sort.each do |surface|
       next unless ['Outdoors'].include? surface.outsideBoundaryCondition
       next if surface.surfaceType != 'RoofCeiling'
@@ -4092,10 +4088,6 @@ class HPXMLFile
   end
 
   def self.set_foundation_walls(hpxml, runner, model, args)
-    if [HPXML::FoundationTypeCrawlspaceVented, HPXML::FoundationTypeBasementUnconditioned].include?(args[:geometry_foundation_type]) && ((args[:foundation_wall_insulation_r] > 0) || (args[:foundation_wall_assembly_r].is_initialized && (args[:foundation_wall_assembly_r].get > 0))) && (args[:floor_assembly_r] > 2.1)
-      args[:foundation_wall_insulation_r] = 0
-    end
-
     model.getSurfaces.sort.each do |surface|
       next unless ['Foundation'].include? surface.outsideBoundaryCondition
       next if surface.surfaceType != 'Wall'
@@ -4129,19 +4121,11 @@ class HPXMLFile
   end
 
   def self.set_frame_floors(hpxml, runner, model, args)
-    if [HPXML::FoundationTypeCrawlspaceUnvented].include?(args[:geometry_foundation_type]) && ((args[:foundation_wall_insulation_r] > 0) || (args[:foundation_wall_assembly_r].is_initialized && (args[:foundation_wall_assembly_r].get > 0))) && (args[:floor_assembly_r] > 2.1)
-      args[:floor_assembly_r] = 2.1 # Uninsulated
-    end
-
     if [HPXML::FoundationTypeBasementConditioned].include?(args[:geometry_foundation_type]) && (args[:floor_assembly_r] > 2.1)
       args[:floor_assembly_r] = 2.1 # Uninsulated
     end
 
-    if [HPXML::AtticTypeUnvented].include?(args[:geometry_attic_type]) && (args[:geometry_roof_type] != 'flat') && (args[:ceiling_assembly_r] > 2.1) && (args[:roof_assembly_r] > 2.3)
-      args[:ceiling_assembly_r] = 2.1 # Uninsulated
-    end
-
-    if (args[:geometry_attic_type] == HPXML::AtticTypeConditioned) && (args[:geometry_roof_type] != 'flat') && (args[:ceiling_assembly_r] > 2.1)
+    if [HPXML::AtticTypeConditioned].include?(args[:geometry_attic_type]) && (args[:geometry_roof_type] != 'flat') && (args[:ceiling_assembly_r] > 2.1)
       args[:ceiling_assembly_r] = 2.1 # Uninsulated
     end
 

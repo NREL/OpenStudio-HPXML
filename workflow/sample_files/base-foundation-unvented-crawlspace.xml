@@ -203,7 +203,7 @@
             <Area>1350.0</Area>
             <Insulation>
               <SystemIdentifier id='FloorAboveUnventedCrawlInsulation'/>
-              <AssemblyEffectiveRValue>2.1</AssemblyEffectiveRValue>
+              <AssemblyEffectiveRValue>18.7</AssemblyEffectiveRValue>
             </Insulation>
           </FrameFloor>
         </FrameFloors>

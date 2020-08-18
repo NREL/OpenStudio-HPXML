@@ -3523,7 +3523,6 @@ def set_hpxml_foundation_walls(hpxml_file, hpxml)
       hpxml.foundation_walls[0].interior_adjacent_to = HPXML::LocationCrawlspaceUnvented
     else
       hpxml.foundation_walls[0].interior_adjacent_to = HPXML::LocationCrawlspaceVented
-      hpxml.foundation_walls[0].insulation_exterior_r_value = 0
     end
     hpxml.foundation_walls[0].height -= 4
     hpxml.foundation_walls[0].area /= 2.0
@@ -3748,7 +3747,7 @@ def set_hpxml_frame_floors(hpxml_file, hpxml)
                            exterior_adjacent_to: HPXML::LocationCrawlspaceUnvented,
                            interior_adjacent_to: HPXML::LocationLivingSpace,
                            area: 1350,
-                           insulation_assembly_r_value: 2.1)
+                           insulation_assembly_r_value: 18.7)
   elsif ['base-foundation-vented-crawlspace.xml'].include? hpxml_file
     hpxml.frame_floors.add(id: 'FloorAboveVentedCrawl',
                            exterior_adjacent_to: HPXML::LocationCrawlspaceVented,
