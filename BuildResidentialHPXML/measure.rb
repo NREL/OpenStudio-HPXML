@@ -847,9 +847,16 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     arg.setDefaultValue(HPXML::UnitsACH)
     args << arg
 
+    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('air_leakage_house_pressure', true)
+    arg.setDisplayName('Air Leakage: House Pressure')
+    arg.setUnits('Pa')
+    arg.setDescription("The pressure of the house for the above-grade living air leakage when the air leakage units are #{HPXML::UnitsACH} or #{HPXML::UnitsCFM}.")
+    arg.setDefaultValue(50)
+    args << arg
+
     arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('air_leakage_value', true)
     arg.setDisplayName('Air Leakage: Value')
-    arg.setDescription('Air exchange rate, in ACH or CFM at 50 Pascals.')
+    arg.setDescription('Air exchange rate, in ACH or CFM at the specified house pressure.')
     arg.setDefaultValue(3)
     args << arg
 
@@ -3238,6 +3245,7 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
              door_area: runner.getDoubleArgumentValue('door_area', user_arguments),
              door_rvalue: runner.getDoubleArgumentValue('door_rvalue', user_arguments),
              air_leakage_units: runner.getStringArgumentValue('air_leakage_units', user_arguments),
+             air_leakage_house_pressure: runner.getDoubleArgumentValue('air_leakage_house_pressure', user_arguments),
              air_leakage_value: runner.getDoubleArgumentValue('air_leakage_value', user_arguments),
              air_leakage_shelter_coefficient: runner.getStringArgumentValue('air_leakage_shelter_coefficient', user_arguments),
              heating_system_type: runner.getStringArgumentValue('heating_system_type', user_arguments),
@@ -3908,10 +3916,10 @@ class HPXMLFile
 
   def self.set_air_infiltration_measurements(hpxml, runner, args)
     if args[:air_leakage_units] == HPXML::UnitsACH
-      house_pressure = 50
+      house_pressure = args[:air_leakage_house_pressure]
       unit_of_measure = HPXML::UnitsACH
     elsif args[:air_leakage_units] == HPXML::UnitsCFM
-      house_pressure = 50
+      house_pressure = args[:air_leakage_house_pressure]
       unit_of_measure = HPXML::UnitsCFM
     elsif args[:air_leakage_units] == HPXML::UnitsACHNatural
       house_pressure = nil
