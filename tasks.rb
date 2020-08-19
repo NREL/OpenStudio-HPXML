@@ -204,6 +204,7 @@ def create_osws
     # 'base-misc-loads-none.osw' => 'base.osw',
     'base-misc-neighbor-shading.osw' => 'base.osw',
     'base-pv.osw' => 'base.osw',
+    # 'base-pv-shared.osw' => 'base.osw',
     'base-simcontrol-daylight-saving-custom.osw' => 'base.osw',
     'base-simcontrol-daylight-saving-disabled.osw' => 'base.osw',
     'base-simcontrol-runperiod-1-month.osw' => 'base.osw',
@@ -217,6 +218,7 @@ def create_osws
     'extra-second-refrigerator.osw' => 'base.osw',
     'extra-second-heating-system-portable-heater.osw' => 'base.osw',
     'extra-second-heating-system-fireplace.osw' => 'base.osw',
+    'extra-pv-shared.osw' => 'base-single-family-attached.osw',
 
     'invalid_files/non-electric-heat-pump-water-heater.osw' => 'base.osw',
     'invalid_files/multiple-heating-and-cooling-systems.osw' => 'base.osw',
@@ -535,6 +537,7 @@ def get_values(osw_file, step)
     step.setArgument('pv_system_max_power_output_1', 4000)
     step.setArgument('pv_system_inverter_efficiency_1', 0.96)
     step.setArgument('pv_system_system_losses_fraction_1', 0.14)
+    step.setArgument('pv_system_is_shared_1', false)
     step.setArgument('pv_system_module_type_2', 'none')
     step.setArgument('pv_system_location_2', HPXML::LocationRoof)
     step.setArgument('pv_system_tracking_2', HPXML::PVTrackingTypeFixed)
@@ -543,6 +546,7 @@ def get_values(osw_file, step)
     step.setArgument('pv_system_max_power_output_2', 4000)
     step.setArgument('pv_system_inverter_efficiency_2', 0.96)
     step.setArgument('pv_system_system_losses_fraction_2', 0.14)
+    step.setArgument('pv_system_is_shared_2', false)
     step.setArgument('lighting_fraction_cfl_interior', 0.4)
     step.setArgument('lighting_fraction_lfl_interior', 0.1)
     step.setArgument('lighting_fraction_led_interior', 0.25)
@@ -718,9 +722,9 @@ def get_values(osw_file, step)
   elsif ['base-single-family-attached.osw'].include? osw_file
     step.setArgument('geometry_unit_type', HPXML::ResidentialTypeSFA)
     step.setArgument('geometry_cfa', 900.0)
-    step.setArgument('geometry_num_units', 3)
-    step.setArgument('geometry_horizontal_location', 'Left')
     step.setArgument('geometry_corridor_position', 'None')
+    step.setArgument('geometry_building_num_units', 3)
+    step.setArgument('geometry_horizontal_location', 'Left')
     step.setArgument('window_front_wwr', 0.18)
     step.setArgument('window_back_wwr', 0.18)
     step.setArgument('window_left_wwr', 0.18)
@@ -732,11 +736,11 @@ def get_values(osw_file, step)
   elsif ['base-multifamily.osw'].include? osw_file
     step.setArgument('geometry_unit_type', HPXML::ResidentialTypeApartment)
     step.setArgument('geometry_cfa', 900.0)
-    step.setArgument('geometry_num_units', 3)
-    step.setArgument('geometry_level', 'Bottom')
-    step.setArgument('geometry_horizontal_location', 'Left')
     step.setArgument('geometry_corridor_position', 'None')
     step.setArgument('geometry_foundation_type', HPXML::FoundationTypeBasementUnconditioned)
+    step.setArgument('geometry_level', 'Bottom')
+    step.setArgument('geometry_horizontal_location', 'Left')
+    step.setArgument('geometry_building_num_units', 3)
     step.setArgument('window_front_wwr', 0.18)
     step.setArgument('window_back_wwr', 0.18)
     step.setArgument('window_left_wwr', 0.18)
@@ -1742,7 +1746,6 @@ def get_values(osw_file, step)
     step.setArgument('pv_system_module_type_1', HPXML::PVModuleTypeStandard)
     step.removeArgument('pv_system_inverter_efficiency_1')
     step.removeArgument('pv_system_system_losses_fraction_1')
-    step.setArgument('pv_system_year_modules_manufactured_1', 2015)
     step.setArgument('clothes_washer_location', Constants.Auto)
     step.setArgument('clothes_washer_efficiency_mef', Constants.Auto)
     step.setArgument('clothes_washer_efficiency_imef', Constants.Auto)
@@ -1932,6 +1935,10 @@ def get_values(osw_file, step)
     step.setArgument('heating_system_fraction_heat_load_served', 0.75)
     step.setArgument('heating_system_type_2', HPXML::HVACTypeFireplace)
     step.setArgument('heating_system_heating_capacity_2', '16000.0')
+  elsif ['extra-pv-shared.osw'].include? osw_file
+    step.setArgument('geometry_building_num_bedrooms', 9)
+    step.setArgument('pv_system_module_type_1', HPXML::PVModuleTypeStandard)
+    step.setArgument('pv_system_is_shared_1', true)
   elsif ['invalid_files/non-electric-heat-pump-water-heater.osw'].include? osw_file
     step.setArgument('water_heater_type', HPXML::WaterHeaterTypeHeatPump)
     step.setArgument('water_heater_fuel_type', HPXML::FuelTypeNaturalGas)
@@ -1964,10 +1971,10 @@ def get_values(osw_file, step)
     step.setArgument('heating_system_type_2', HPXML::HVACTypeFireplace)
     step.setArgument('heating_system_fraction_heat_load_served_2', 0.6)
   elsif ['invalid_files/single-family-attached-no-building-orientation.osw'].include? osw_file
-    step.removeArgument('geometry_num_units')
+    step.removeArgument('geometry_building_num_units')
     step.removeArgument('geometry_horizontal_location')
   elsif ['invalid_files/multifamily-no-building-orientation.osw'].include? osw_file
-    step.removeArgument('geometry_num_units')
+    step.removeArgument('geometry_building_num_units')
     step.removeArgument('geometry_level')
     step.removeArgument('geometry_horizontal_location')
   elsif ['invalid_files/vented-crawlspace-with-wall-and-ceiling-insulation.osw'].include? osw_file
