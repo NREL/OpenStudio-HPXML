@@ -297,7 +297,6 @@ class OSModel
     add_lighting(runner, model, weather, spaces)
 
     # Pools & Hot Tubs
-
     add_pools_and_hot_tubs(runner, model, spaces)
 
     # Other
@@ -310,7 +309,6 @@ class OSModel
     add_component_loads_output(runner, model, spaces)
 
     # Vacancy
-
     set_vacancy(runner, model)
 
     if debug && (not output_dir.nil?)

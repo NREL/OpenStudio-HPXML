@@ -1589,7 +1589,6 @@ class Geometry
         os_facade = Geometry.get_facade_for_surface(surface)
         next unless surface.surfaceType == 'Wall'
         next unless adb_facade.include? os_facade
-
         x_ft = UnitConversions.convert(x, 'm', 'ft')
         max_x = Geometry.getSurfaceXValues([surface]).max
         min_x = Geometry.getSurfaceXValues([surface]).min
@@ -1710,7 +1709,6 @@ class Geometry
       spaces = model.getSpaces
       spaces.each do |space|
         next unless Geometry.get_space_floor_z(space) + UnitConversions.convert(space.zOrigin, 'm', 'ft') < 0
-
         surfaces = space.surfaces
         surfaces.each do |surface|
           next if surface.surfaceType.downcase != 'wall'
@@ -1771,7 +1769,6 @@ class Geometry
       os_facade = Geometry.get_facade_for_surface(surface)
       next unless surface.surfaceType == 'Wall'
       next unless adb_facade.include? os_facade
-
       x_ft = UnitConversions.convert(x, 'm', 'ft')
       max_x = Geometry.getSurfaceXValues([surface]).max
       min_x = Geometry.getSurfaceXValues([surface]).min
