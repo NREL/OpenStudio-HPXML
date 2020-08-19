@@ -76,6 +76,33 @@ class HPXMLDefaults
       hpxml.building_construction.conditioned_building_volume = cfa * hpxml.building_construction.average_ceiling_height
     end
     hpxml.building_construction.number_of_bathrooms = Float(Waterheater.get_default_num_bathrooms(nbeds)).to_i if hpxml.building_construction.number_of_bathrooms.nil?
+    if hpxml.building_construction.has_flue_or_chimney.nil?
+      hpxml.building_construction.has_flue_or_chimney = false
+      hpxml.heating_systems.each do |heating_system|
+        if [HPXML::HVACTypeFurnace, HPXML::HVACTypeBoiler, HPXML::HVACTypeWallFurnace, HPXML::HVACTypeFloorFurnace, HPXML::HVACTypeStove, HPXML::HVACTypeFixedHeater].include? heating_system.heating_system_type
+          if not heating_system.heating_efficiency_afue.nil?
+            next if heating_system.heating_efficiency_afue >= 0.89
+          elsif not heating_system.heating_efficiency_percent.nil?
+            next if heating_system.heating_efficiency_percent >= 0.89
+          end
+
+          hpxml.building_construction.has_flue_or_chimney = true
+        elsif [HPXML::HVACTypeFireplace].include? heating_system.heating_system_type
+          next if heating_system.heating_system_fuel == HPXML::FuelTypeElectricity
+
+          hpxml.building_construction.has_flue_or_chimney = true
+        end
+      end
+      hpxml.water_heating_systems.each do |water_heating_system|
+        if not water_heating_system.energy_factor.nil?
+          next if water_heating_system.energy_factor >= 0.63
+        elsif not water_heating_system.uniform_energy_factor.nil?
+          next if Waterheater.calc_ef_from_uef(water_heating_system) >= 0.63
+        end
+
+        hpxml.building_construction.has_flue_or_chimney = true
+      end
+    end
   end
 
   def self.apply_attics(hpxml)
@@ -120,10 +147,10 @@ class HPXMLDefaults
     measurements = []
     infil_volume = nil
     hpxml.air_infiltration_measurements.each do |measurement|
-      is_ach50 = ((measurement.unit_of_measure == HPXML::UnitsACH) && (measurement.house_pressure == 50))
-      is_cfm50 = ((measurement.unit_of_measure == HPXML::UnitsCFM) && (measurement.house_pressure == 50))
+      is_ach = ((measurement.unit_of_measure == HPXML::UnitsACH) && !measurement.house_pressure.nil?)
+      is_cfm = ((measurement.unit_of_measure == HPXML::UnitsCFM) && !measurement.house_pressure.nil?)
       is_nach = (measurement.unit_of_measure == HPXML::UnitsACHNatural)
-      next unless (is_ach50 || is_cfm50 || is_nach)
+      next unless (is_ach || is_cfm || is_nach)
 
       measurements << measurement
       next if measurement.infiltration_volume.nil?
@@ -346,6 +373,9 @@ class HPXMLDefaults
 
   def self.apply_water_heaters(hpxml, nbeds, eri_version)
     hpxml.water_heating_systems.each do |water_heating_system|
+      if water_heating_system.is_shared_system.nil?
+        water_heating_system.is_shared_system = false
+      end
       if water_heating_system.temperature.nil?
         water_heating_system.temperature = Waterheater.get_default_hot_water_temperature(eri_version)
       end
@@ -394,6 +424,12 @@ class HPXMLDefaults
       end
       if hot_water_distribution.recirculation_pump_power.nil?
         hot_water_distribution.recirculation_pump_power = HotWaterAndAppliances.get_default_recirc_pump_power()
+      end
+    end
+
+    if hot_water_distribution.has_shared_recirculation
+      if hot_water_distribution.shared_recirculation_pump_power.nil?
+        hot_water_distribution.shared_recirculation_pump_power = HotWaterAndAppliances.get_default_shared_recirc_pump_power()
       end
     end
   end
@@ -726,6 +762,9 @@ class HPXMLDefaults
     # Default clothes washer
     if hpxml.clothes_washers.size > 0
       clothes_washer = hpxml.clothes_washers[0]
+      if clothes_washer.is_shared_appliance.nil?
+        clothes_washer.is_shared_appliance = false
+      end
       if clothes_washer.location.nil?
         clothes_washer.location = HPXML::LocationLivingSpace
       end
@@ -747,6 +786,9 @@ class HPXMLDefaults
     # Default clothes dryer
     if hpxml.clothes_dryers.size > 0
       clothes_dryer = hpxml.clothes_dryers[0]
+      if clothes_dryer.is_shared_appliance.nil?
+        clothes_dryer.is_shared_appliance = false
+      end
       if clothes_dryer.location.nil?
         clothes_dryer.location = HPXML::LocationLivingSpace
       end
@@ -763,6 +805,9 @@ class HPXMLDefaults
     # Default dishwasher
     if hpxml.dishwashers.size > 0
       dishwasher = hpxml.dishwashers[0]
+      if dishwasher.is_shared_appliance.nil?
+        dishwasher.is_shared_appliance = false
+      end
       if dishwasher.location.nil?
         dishwasher.location = HPXML::LocationLivingSpace
       end

@@ -1457,7 +1457,7 @@ class Geometry
     num_units = geometry_num_units.get
     num_floors = geometry_num_floors_above_grade
     aspect_ratio = geometry_aspect_ratio
-    horizontal_location = geometry_horizontal_location
+    horizontal_location = geometry_horizontal_location.get
     corridor_position = geometry_corridor_position
     foundation_type = geometry_foundation_type
     foundation_height = geometry_foundation_height
@@ -1589,6 +1589,7 @@ class Geometry
         os_facade = Geometry.get_facade_for_surface(surface)
         next unless surface.surfaceType == 'Wall'
         next unless adb_facade.include? os_facade
+
         x_ft = UnitConversions.convert(x, 'm', 'ft')
         max_x = Geometry.getSurfaceXValues([surface]).max
         min_x = Geometry.getSurfaceXValues([surface]).min
@@ -1709,6 +1710,7 @@ class Geometry
       spaces = model.getSpaces
       spaces.each do |space|
         next unless Geometry.get_space_floor_z(space) + UnitConversions.convert(space.zOrigin, 'm', 'ft') < 0
+
         surfaces = space.surfaces
         surfaces.each do |surface|
           next if surface.surfaceType.downcase != 'wall'
@@ -1769,6 +1771,7 @@ class Geometry
       os_facade = Geometry.get_facade_for_surface(surface)
       next unless surface.surfaceType == 'Wall'
       next unless adb_facade.include? os_facade
+
       x_ft = UnitConversions.convert(x, 'm', 'ft')
       max_x = Geometry.getSurfaceXValues([surface]).max
       min_x = Geometry.getSurfaceXValues([surface]).min
@@ -1960,8 +1963,8 @@ class Geometry
     num_units = geometry_num_units.get
     num_floors = geometry_num_floors_above_grade
     aspect_ratio = geometry_aspect_ratio
-    level = geometry_level
-    horizontal_location = geometry_horizontal_location
+    level = geometry_level.get
+    horizontal_location = geometry_horizontal_location.get
     corridor_position = geometry_corridor_position
     corridor_width = geometry_corridor_width
     inset_width = geometry_inset_width

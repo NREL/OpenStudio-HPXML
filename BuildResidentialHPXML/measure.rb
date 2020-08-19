@@ -192,12 +192,6 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     arg.setDefaultValue(HPXML::ResidentialTypeSFD)
     args << arg
 
-    arg = OpenStudio::Measure::OSArgument::makeIntegerArgument('geometry_num_units', false)
-    arg.setDisplayName('Geometry: Number of Units')
-    arg.setUnits('#')
-    arg.setDescription("The number of units in the building. This is required for #{HPXML::ResidentialTypeSFA} and #{HPXML::ResidentialTypeApartment} buildings.")
-    args << arg
-
     arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('geometry_cfa', true)
     arg.setDisplayName('Geometry: Conditioned Floor Area')
     arg.setUnits('ft^2')
@@ -233,15 +227,20 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     arg.setDefaultValue(2.0)
     args << arg
 
+    arg = OpenStudio::Measure::OSArgument::makeIntegerArgument('geometry_num_units', false)
+    arg.setDisplayName('Geometry: Number of Units')
+    arg.setUnits('#')
+    arg.setDescription("The number of units in the building. This is required for #{HPXML::ResidentialTypeSFA} and #{HPXML::ResidentialTypeApartment} buildings.")
+    args << arg
+
     level_choices = OpenStudio::StringVector.new
     level_choices << 'Bottom'
     level_choices << 'Middle'
     level_choices << 'Top'
 
-    arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('geometry_level', level_choices, true)
+    arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('geometry_level', level_choices, false)
     arg.setDisplayName('Geometry: Level')
     arg.setDescription("The level of the #{HPXML::ResidentialTypeApartment} unit.")
-    arg.setDefaultValue('Bottom')
     args << arg
 
     horizontal_location_choices = OpenStudio::StringVector.new
@@ -249,10 +248,9 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     horizontal_location_choices << 'Middle'
     horizontal_location_choices << 'Right'
 
-    arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('geometry_horizontal_location', horizontal_location_choices, true)
+    arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('geometry_horizontal_location', horizontal_location_choices, false)
     arg.setDisplayName('Geometry: Horizontal Location')
     arg.setDescription("The horizontal location of the #{HPXML::ResidentialTypeSFA} or #{HPXML::ResidentialTypeApartment} unit when viewing the front of the building.")
-    arg.setDefaultValue('Left')
     args << arg
 
     corridor_position_choices = OpenStudio::StringVector.new
@@ -584,7 +582,7 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('roof_radiant_barrier_grade', roof_radiant_barrier_grade_choices, true)
     arg.setDisplayName('Roof: Radiant Barrier Grade')
     arg.setDescription('The grade of the radiant barrier, if it exists.')
-    arg.setUnits('2')
+    arg.setDefaultValue('1')
     args << arg
 
     arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('neighbor_front_distance', true)
@@ -892,9 +890,16 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     arg.setDefaultValue(HPXML::UnitsACH)
     args << arg
 
+    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('air_leakage_house_pressure', true)
+    arg.setDisplayName('Air Leakage: House Pressure')
+    arg.setUnits('Pa')
+    arg.setDescription("The pressure of the house for the above-grade living air leakage when the air leakage units are #{HPXML::UnitsACH} or #{HPXML::UnitsCFM}.")
+    arg.setDefaultValue(50)
+    args << arg
+
     arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('air_leakage_value', true)
     arg.setDisplayName('Air Leakage: Value')
-    arg.setDescription('Air exchange rate, in ACH or CFM at 50 Pascals.')
+    arg.setDescription('Air exchange rate, in ACH or CFM at the specified house pressure.')
     arg.setDefaultValue(3)
     args << arg
 
@@ -975,6 +980,12 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     arg.setDisplayName('Heating System: Electric Auxiliary Energy')
     arg.setDescription('The electric auxiliary energy of the heating system.')
     arg.setUnits('kWh/yr')
+    args << arg
+
+    arg = OpenStudio::Measure::OSArgument::makeBoolArgument('heating_system_has_flue_or_chimney', true)
+    arg.setDisplayName('Heating System: Has Flue or Chimney')
+    arg.setDescription('Whether the heating system has a flue or chimney.')
+    arg.setDefaultValue(false)
     args << arg
 
     arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('cooling_system_type', cooling_system_type_choices, true)
@@ -1355,6 +1366,12 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     arg.setUnits('kWh/yr')
     args << arg
 
+    arg = OpenStudio::Measure::OSArgument::makeBoolArgument('heating_system_has_flue_or_chimney_2', true)
+    arg.setDisplayName('Heating System 2: Has Flue or Chimney')
+    arg.setDescription('Whether the second heating system has a flue or chimney.')
+    arg.setDefaultValue(false)
+    args << arg
+
     mech_vent_fan_type_choices = OpenStudio::StringVector.new
     mech_vent_fan_type_choices << 'none'
     mech_vent_fan_type_choices << HPXML::MechVentTypeExhaust
@@ -1617,6 +1634,18 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     arg.setDescription('The setpoint temperature of water heater.')
     arg.setUnits('deg-F')
     arg.setDefaultValue(Constants.Auto)
+    args << arg
+
+    arg = OpenStudio::Measure::OSArgument::makeBoolArgument('water_heater_has_flue_or_chimney', true)
+    arg.setDisplayName('Water Heater: Has Flue or Chimney')
+    arg.setDescription('Whether the water heater has a flue or chimney.')
+    arg.setDefaultValue(false)
+    args << arg
+
+    arg = OpenStudio::Measure::OSArgument::makeBoolArgument('water_heater_is_shared_system', true)
+    arg.setDisplayName('Water Heater: Is Shared System')
+    arg.setDescription('Whether the water heater is a shared system. If true, assumed to serve all the units in the building.')
+    arg.setDefaultValue(false)
     args << arg
 
     dhw_distribution_system_type_choices = OpenStudio::StringVector.new
@@ -2808,14 +2837,14 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
              weather_station_epw_filepath: runner.getStringArgumentValue('weather_station_epw_filepath', user_arguments),
              site_type: runner.getOptionalStringArgumentValue('site_type', user_arguments),
              geometry_unit_type: runner.getStringArgumentValue('geometry_unit_type', user_arguments),
-             geometry_num_units: runner.getOptionalIntegerArgumentValue('geometry_num_units', user_arguments),
              geometry_cfa: runner.getDoubleArgumentValue('geometry_cfa', user_arguments),
              geometry_num_floors_above_grade: runner.getIntegerArgumentValue('geometry_num_floors_above_grade', user_arguments),
              geometry_wall_height: runner.getDoubleArgumentValue('geometry_wall_height', user_arguments),
              geometry_orientation: runner.getDoubleArgumentValue('geometry_orientation', user_arguments),
              geometry_aspect_ratio: runner.getDoubleArgumentValue('geometry_aspect_ratio', user_arguments),
-             geometry_level: runner.getStringArgumentValue('geometry_level', user_arguments),
-             geometry_horizontal_location: runner.getStringArgumentValue('geometry_horizontal_location', user_arguments),
+             geometry_num_units: runner.getOptionalIntegerArgumentValue('geometry_num_units', user_arguments),
+             geometry_level: runner.getOptionalStringArgumentValue('geometry_level', user_arguments),
+             geometry_horizontal_location: runner.getOptionalStringArgumentValue('geometry_horizontal_location', user_arguments),
              geometry_corridor_position: runner.getStringArgumentValue('geometry_corridor_position', user_arguments),
              geometry_corridor_width: runner.getDoubleArgumentValue('geometry_corridor_width', user_arguments),
              geometry_inset_width: runner.getDoubleArgumentValue('geometry_inset_width', user_arguments),
@@ -2901,6 +2930,7 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
              door_area: runner.getDoubleArgumentValue('door_area', user_arguments),
              door_rvalue: runner.getDoubleArgumentValue('door_rvalue', user_arguments),
              air_leakage_units: runner.getStringArgumentValue('air_leakage_units', user_arguments),
+             air_leakage_house_pressure: runner.getDoubleArgumentValue('air_leakage_house_pressure', user_arguments),
              air_leakage_value: runner.getDoubleArgumentValue('air_leakage_value', user_arguments),
              air_leakage_shelter_coefficient: runner.getStringArgumentValue('air_leakage_shelter_coefficient', user_arguments),
              heating_system_type: runner.getStringArgumentValue('heating_system_type', user_arguments),
@@ -2909,6 +2939,7 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
              heating_system_heating_capacity: runner.getStringArgumentValue('heating_system_heating_capacity', user_arguments),
              heating_system_fraction_heat_load_served: runner.getDoubleArgumentValue('heating_system_fraction_heat_load_served', user_arguments),
              heating_system_electric_auxiliary_energy: runner.getOptionalDoubleArgumentValue('heating_system_electric_auxiliary_energy', user_arguments),
+             heating_system_has_flue_or_chimney: runner.getBoolArgumentValue('heating_system_has_flue_or_chimney', user_arguments),
              cooling_system_type: runner.getStringArgumentValue('cooling_system_type', user_arguments),
              cooling_system_cooling_efficiency_seer: runner.getDoubleArgumentValue('cooling_system_cooling_efficiency_seer', user_arguments),
              cooling_system_cooling_efficiency_eer: runner.getDoubleArgumentValue('cooling_system_cooling_efficiency_eer', user_arguments),
@@ -2960,6 +2991,7 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
              heating_system_heating_capacity_2: runner.getStringArgumentValue('heating_system_heating_capacity_2', user_arguments),
              heating_system_fraction_heat_load_served_2: runner.getDoubleArgumentValue('heating_system_fraction_heat_load_served_2', user_arguments),
              heating_system_electric_auxiliary_energy_2: runner.getOptionalDoubleArgumentValue('heating_system_electric_auxiliary_energy_2', user_arguments),
+             heating_system_has_flue_or_chimney_2: runner.getBoolArgumentValue('heating_system_has_flue_or_chimney_2', user_arguments),
              mech_vent_fan_type: runner.getStringArgumentValue('mech_vent_fan_type', user_arguments),
              mech_vent_flow_rate: runner.getDoubleArgumentValue('mech_vent_flow_rate', user_arguments),
              mech_vent_hours_in_operation: runner.getDoubleArgumentValue('mech_vent_hours_in_operation', user_arguments),
@@ -2994,6 +3026,8 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
              water_heater_standby_loss: runner.getOptionalDoubleArgumentValue('water_heater_standby_loss', user_arguments),
              water_heater_jacket_rvalue: runner.getOptionalDoubleArgumentValue('water_heater_jacket_rvalue', user_arguments),
              water_heater_setpoint_temperature: runner.getStringArgumentValue('water_heater_setpoint_temperature', user_arguments),
+             water_heater_has_flue_or_chimney: runner.getBoolArgumentValue('water_heater_has_flue_or_chimney', user_arguments),
+             water_heater_is_shared_system: runner.getBoolArgumentValue('water_heater_is_shared_system', user_arguments),
              dhw_distribution_system_type: runner.getStringArgumentValue('dhw_distribution_system_type', user_arguments),
              dhw_distribution_standard_piping_length: runner.getStringArgumentValue('dhw_distribution_standard_piping_length', user_arguments),
              dhw_distribution_recirc_control_type: runner.getStringArgumentValue('dhw_distribution_recirc_control_type', user_arguments),
@@ -3186,12 +3220,16 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     errors << "geometry_unit_type=#{args[:geometry_unit_type]} and geometry_foundation_type=#{args[:geometry_foundation_type]}" if error
 
     # multifamily, bottom, slab, foundation height > 0
-    warning = (args[:geometry_unit_type] == HPXML::ResidentialTypeApartment) && (args[:geometry_level] == 'Bottom') && (args[:geometry_foundation_type] == HPXML::FoundationTypeSlab) && (args[:geometry_foundation_height] > 0)
-    warnings << "geometry_unit_type=#{args[:geometry_unit_type]} and geometry_level=#{args[:geometry_level]} and geometry_foundation_type=#{args[:geometry_foundation_type]} and geometry_foundation_height=#{args[:geometry_foundation_height]}" if warning
+    if args[:geometry_level].is_initialized
+      warning = (args[:geometry_unit_type] == HPXML::ResidentialTypeApartment) && (args[:geometry_level].get == 'Bottom') && (args[:geometry_foundation_type] == HPXML::FoundationTypeSlab) && (args[:geometry_foundation_height] > 0)
+      warnings << "geometry_unit_type=#{args[:geometry_unit_type]} and geometry_level=#{args[:geometry_level].get} and geometry_foundation_type=#{args[:geometry_foundation_type]} and geometry_foundation_height=#{args[:geometry_foundation_height]}" if warning
+    end
 
     # multifamily, bottom, non slab, foundation height = 0
-    error = (args[:geometry_unit_type] == HPXML::ResidentialTypeApartment) && (args[:geometry_level] == 'Bottom') && (args[:geometry_foundation_type] != HPXML::FoundationTypeSlab) && (args[:geometry_foundation_height] == 0)
-    errors << "geometry_unit_type=#{args[:geometry_unit_type]} and geometry_level=#{args[:geometry_level]} and geometry_foundation_type=#{args[:geometry_foundation_type]} and geometry_foundation_height=#{args[:geometry_foundation_height]}" if error
+    if args[:geometry_level].is_initialized
+      error = (args[:geometry_unit_type] == HPXML::ResidentialTypeApartment) && (args[:geometry_level].get == 'Bottom') && (args[:geometry_foundation_type] != HPXML::FoundationTypeSlab) && (args[:geometry_foundation_height] == 0)
+      errors << "geometry_unit_type=#{args[:geometry_unit_type]} and geometry_level=#{args[:geometry_level].get} and geometry_foundation_type=#{args[:geometry_foundation_type]} and geometry_foundation_height=#{args[:geometry_foundation_height]}" if error
+    end
 
     # multifamily and finished basement
     error = (args[:geometry_unit_type] == HPXML::ResidentialTypeApartment) && (args[:geometry_foundation_type] == HPXML::FoundationTypeBasementConditioned)
@@ -3208,6 +3246,30 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     # second heating system fraction heat load served non less than 50%
     warning = (args[:heating_system_type_2] != 'none') && (args[:heating_system_fraction_heat_load_served_2] >= 0.5)
     warnings << "heating_system_type_2=#{args[:heating_system_type_2]} and heating_system_fraction_heat_load_served_2=#{args[:heating_system_fraction_heat_load_served_2]}" if warning
+
+    # single-family attached and num units, horizontal location not specified
+    error = (args[:geometry_unit_type] == HPXML::ResidentialTypeSFA) && (!args[:geometry_num_units].is_initialized || !args[:geometry_horizontal_location].is_initialized)
+    errors << "geometry_unit_type=#{args[:geometry_unit_type]} and geometry_num_units=#{args[:geometry_num_units].is_initialized} and geometry_horizontal_location=#{args[:geometry_horizontal_location].is_initialized}" if error
+
+    # apartment unit and num units, level, horizontal location not specified
+    error = (args[:geometry_unit_type] == HPXML::ResidentialTypeApartment) && (!args[:geometry_num_units].is_initialized || !args[:geometry_level].is_initialized || !args[:geometry_horizontal_location].is_initialized)
+    errors << "geometry_unit_type=#{args[:geometry_unit_type]} and geometry_num_units=#{args[:geometry_num_units].is_initialized} and geometry_level=#{args[:geometry_level].is_initialized} and geometry_horizontal_location=#{args[:geometry_horizontal_location].is_initialized}" if error
+
+    # crawlspace or unconditioned basement with foundation wall and ceiling insulation
+    warning = [HPXML::FoundationTypeCrawlspaceVented, HPXML::FoundationTypeCrawlspaceUnvented, HPXML::FoundationTypeBasementUnconditioned].include?(args[:geometry_foundation_type]) && ((args[:foundation_wall_insulation_r] > 0) || (args[:foundation_wall_assembly_r].is_initialized && (args[:foundation_wall_assembly_r].get > 0))) && (args[:floor_assembly_r] > 2.1)
+    warnings << "geometry_foundation_type=#{args[:geometry_foundation_type]} and foundation_wall_insulation_r=#{args[:foundation_wall_insulation_r]} and foundation_wall_assembly_r=#{args[:foundation_wall_assembly_r].is_initialized} and floor_assembly_r=#{args[:floor_assembly_r]}" if warning
+
+    # vented/unvented attic with floor and roof insulation
+    warning = [HPXML::AtticTypeVented, HPXML::AtticTypeUnvented].include?(args[:geometry_attic_type]) && (args[:geometry_roof_type] != 'flat') && (args[:ceiling_assembly_r] > 2.1) && (args[:roof_assembly_r] > 2.3)
+    warnings << "geometry_attic_type=#{args[:geometry_attic_type]} and ceiling_assembly_r=#{args[:ceiling_assembly_r]} and roof_assembly_r=#{args[:roof_assembly_r]}" if warning
+
+    # conditioned basement with ceiling insulation
+    warning = (args[:geometry_foundation_type] == HPXML::FoundationTypeBasementConditioned) && (args[:floor_assembly_r] > 2.1)
+    warnings << "geometry_foundation_type=#{args[:geometry_foundation_type]} and floor_assembly_r=#{args[:floor_assembly_r]}" if warning
+
+    # conditioned attic with floor insulation
+    warning = (args[:geometry_attic_type] == HPXML::AtticTypeConditioned) && (args[:geometry_roof_type] != 'flat') && (args[:ceiling_assembly_r] > 2.1)
+    warnings << "geometry_attic_type=#{args[:geometry_attic_type]} and ceiling_assembly_r=#{args[:ceiling_assembly_r]}" if warning
 
     return warnings, errors
   end
@@ -3505,6 +3567,12 @@ class HPXMLFile
     hpxml.building_construction.conditioned_building_volume = conditioned_building_volume
     hpxml.building_construction.average_ceiling_height = args[:geometry_wall_height]
     hpxml.building_construction.residential_facility_type = args[:geometry_unit_type]
+
+    if (args[:heating_system_type] != 'none' && args[:heating_system_has_flue_or_chimney]) ||
+       (args[:heating_system_type_2] != 'none' && args[:heating_system_has_flue_or_chimney_2]) ||
+       (args[:water_heater_type] != 'none' && args[:water_heater_has_flue_or_chimney])
+      hpxml.building_construction.has_flue_or_chimney = true
+    end
   end
 
   def self.set_climate_and_risk_zones(hpxml, runner, args, weather)
@@ -3516,6 +3584,26 @@ class HPXMLFile
     end
     hpxml.climate_and_risk_zones.weather_station_name = File.basename(args[:weather_station_epw_filepath]).gsub('.epw', '')
     hpxml.climate_and_risk_zones.weather_station_epw_filepath = File.basename(args[:weather_station_epw_filepath])
+  end
+
+  def self.set_air_infiltration_measurements(hpxml, runner, args)
+    if args[:air_leakage_units] == HPXML::UnitsACH
+      house_pressure = args[:air_leakage_house_pressure]
+      unit_of_measure = HPXML::UnitsACH
+    elsif args[:air_leakage_units] == HPXML::UnitsCFM
+      house_pressure = args[:air_leakage_house_pressure]
+      unit_of_measure = HPXML::UnitsCFM
+    elsif args[:air_leakage_units] == HPXML::UnitsACHNatural
+      house_pressure = nil
+      unit_of_measure = HPXML::UnitsACHNatural
+    end
+    infiltration_volume = args[:geometry_cfa] * args[:geometry_wall_height]
+
+    hpxml.air_infiltration_measurements.add(id: 'InfiltrationMeasurement',
+                                            house_pressure: house_pressure,
+                                            unit_of_measure: unit_of_measure,
+                                            air_leakage: args[:air_leakage_value],
+                                            infiltration_volume: infiltration_volume)
   end
 
   def self.set_attics(hpxml, runner, model, args)
@@ -3536,58 +3624,6 @@ class HPXMLFile
 
     hpxml.foundations.add(id: args[:geometry_foundation_type],
                           foundation_type: args[:geometry_foundation_type])
-  end
-
-  def self.set_air_infiltration_measurements(hpxml, runner, args)
-    if args[:air_leakage_units] == HPXML::UnitsACH
-      house_pressure = 50
-      unit_of_measure = HPXML::UnitsACH
-    elsif args[:air_leakage_units] == HPXML::UnitsCFM
-      house_pressure = 50
-      unit_of_measure = HPXML::UnitsCFM
-    elsif args[:air_leakage_units] == HPXML::UnitsACHNatural
-      house_pressure = nil
-      unit_of_measure = HPXML::UnitsACHNatural
-    end
-    infiltration_volume = args[:geometry_cfa] * args[:geometry_wall_height]
-
-    hpxml.air_infiltration_measurements.add(id: 'InfiltrationMeasurement',
-                                            house_pressure: house_pressure,
-                                            unit_of_measure: unit_of_measure,
-                                            air_leakage: args[:air_leakage_value],
-                                            infiltration_volume: infiltration_volume)
-  end
-
-  def self.get_adjacent_to(surface)
-    space = surface.space.get
-    st = space.spaceType.get
-    space_type = st.standardsSpaceType.get
-
-    if ['vented crawlspace'].include? space_type
-      return HPXML::LocationCrawlspaceVented
-    elsif ['unvented crawlspace'].include? space_type
-      return HPXML::LocationCrawlspaceUnvented
-    elsif ['garage'].include? space_type
-      return HPXML::LocationGarage
-    elsif ['living space'].include? space_type
-      if Geometry.space_is_below_grade(space)
-        return HPXML::LocationBasementConditioned
-      else
-        return HPXML::LocationLivingSpace
-      end
-    elsif ['vented attic'].include? space_type
-      return HPXML::LocationAtticVented
-    elsif ['unvented attic'].include? space_type
-      return HPXML::LocationAtticUnvented
-    elsif ['unconditioned basement'].include? space_type
-      return HPXML::LocationBasementUnconditioned
-    elsif ['corridor'].include? space_type
-      return HPXML::LocationOtherHousingUnit
-    elsif ['ambient'].include? space_type
-      return HPXML::LocationOutside
-    else
-      fail "Unhandled SpaceType value (#{space_type}) for surface '#{surface.name}'."
-    end
   end
 
   def self.set_roofs(hpxml, runner, model, args)
@@ -3623,7 +3659,7 @@ class HPXMLFile
         radiant_barrier_grade = args[:roof_radiant_barrier_grade]
       end
 
-      hpxml.roofs.add(id: "#{surface.name}",
+      hpxml.roofs.add(id: valid_attr(surface.name),
                       interior_adjacent_to: get_adjacent_to(surface),
                       area: UnitConversions.convert(surface.grossArea, 'm^2', 'ft^2').round,
                       roof_type: roof_type,
@@ -3696,7 +3732,7 @@ class HPXMLFile
         solar_absorptance = args[:wall_solar_absorptance]
       end
 
-      hpxml.walls.add(id: "#{surface.name}",
+      hpxml.walls.add(id: valid_attr(surface.name),
                       exterior_adjacent_to: exterior_adjacent_to,
                       interior_adjacent_to: interior_adjacent_to,
                       wall_type: wall_type,
@@ -3739,7 +3775,7 @@ class HPXMLFile
         insulation_interior_distance_to_bottom = 0
       end
 
-      hpxml.foundation_walls.add(id: "#{surface.name}",
+      hpxml.foundation_walls.add(id: valid_attr(surface.name),
                                  exterior_adjacent_to: HPXML::LocationGround,
                                  interior_adjacent_to: get_adjacent_to(surface),
                                  height: args[:geometry_foundation_height],
@@ -3757,6 +3793,14 @@ class HPXMLFile
   end
 
   def self.set_frame_floors(hpxml, runner, model, args)
+    if [HPXML::FoundationTypeBasementConditioned].include?(args[:geometry_foundation_type]) && (args[:floor_assembly_r] > 2.1)
+      args[:floor_assembly_r] = 2.1 # Uninsulated
+    end
+
+    if [HPXML::AtticTypeConditioned].include?(args[:geometry_attic_type]) && (args[:geometry_roof_type] != 'flat') && (args[:ceiling_assembly_r] > 2.1)
+      args[:ceiling_assembly_r] = 2.1 # Uninsulated
+    end
+
     model.getSurfaces.sort.each do |surface|
       next if surface.outsideBoundaryCondition == 'Foundation'
       next unless ['Floor', 'RoofCeiling'].include? surface.surfaceType
@@ -3780,7 +3824,7 @@ class HPXMLFile
       next if (surface.surfaceType == 'RoofCeiling') && (exterior_adjacent_to == HPXML::LocationOutside)
       next if [HPXML::LocationLivingSpace, HPXML::LocationBasementConditioned].include? exterior_adjacent_to
 
-      hpxml.frame_floors.add(id: "#{surface.name}",
+      hpxml.frame_floors.add(id: valid_attr(surface.name),
                              exterior_adjacent_to: exterior_adjacent_to,
                              interior_adjacent_to: interior_adjacent_to,
                              area: UnitConversions.convert(surface.grossArea, 'm^2', 'ft^2').round,
@@ -3827,7 +3871,7 @@ class HPXMLFile
         thickness = 0.0 # Assume soil
       end
 
-      hpxml.slabs.add(id: "#{surface.name}",
+      hpxml.slabs.add(id: valid_attr(surface.name),
                       interior_adjacent_to: interior_adjacent_to,
                       area: UnitConversions.convert(surface.grossArea, 'm^2', 'ft^2').round,
                       thickness: thickness,
@@ -3909,7 +3953,7 @@ class HPXMLFile
           fraction_operable = args[:window_fraction_operable].get
         end
 
-        hpxml.windows.add(id: "#{sub_surface.name}_#{sub_surface_facade}",
+        hpxml.windows.add(id: "#{valid_attr(sub_surface.name)}_#{sub_surface_facade}",
                           area: UnitConversions.convert(sub_surface.grossArea, 'm^2', 'ft^2').round(1),
                           azimuth: azimuth,
                           ufactor: args[:window_ufactor],
@@ -3920,7 +3964,7 @@ class HPXMLFile
                           interior_shading_factor_winter: interior_shading_factor_winter,
                           interior_shading_factor_summer: interior_shading_factor_summer,
                           fraction_operable: fraction_operable,
-                          wall_idref: "#{surface.name}")
+                          wall_idref: valid_attr(surface.name))
       end # sub_surfaces
     end # surfaces
   end
@@ -3932,12 +3976,12 @@ class HPXMLFile
 
         sub_surface_facade = Geometry.get_facade_for_surface(sub_surface)
 
-        hpxml.skylights.add(id: "#{sub_surface.name}_#{sub_surface_facade}",
+        hpxml.skylights.add(id: "#{valid_attr(sub_surface.name)}_#{sub_surface_facade}",
                             area: UnitConversions.convert(sub_surface.grossArea, 'm^2', 'ft^2').round,
                             azimuth: UnitConversions.convert(sub_surface.azimuth, 'rad', 'deg').round,
                             ufactor: args[:skylight_ufactor],
                             shgc: args[:skylight_shgc],
-                            roof_idref: "#{surface.name}")
+                            roof_idref: valid_attr(surface.name))
       end
     end
   end
@@ -3949,8 +3993,8 @@ class HPXMLFile
 
         sub_surface_facade = Geometry.get_facade_for_surface(sub_surface)
 
-        hpxml.doors.add(id: "#{sub_surface.name}_#{sub_surface_facade}",
-                        wall_idref: "#{surface.name}",
+        hpxml.doors.add(id: "#{valid_attr(sub_surface.name)}_#{sub_surface_facade}",
+                        wall_idref: valid_attr(surface.name),
                         area: UnitConversions.convert(sub_surface.grossArea, 'm^2', 'ft^2').round,
                         azimuth: args[:geometry_orientation],
                         r_value: args[:door_rvalue])
@@ -4465,6 +4509,11 @@ class HPXMLFile
       end
     end
 
+    if args[:water_heater_is_shared_system]
+      is_shared_system = args[:water_heater_is_shared_system]
+      number_of_units_served = args[:geometry_num_units].get
+    end
+
     hpxml.water_heating_systems.add(id: 'WaterHeater',
                                     water_heater_type: water_heater_type,
                                     fuel_type: fuel_type,
@@ -4478,7 +4527,9 @@ class HPXMLFile
                                     related_hvac_idref: related_hvac_idref,
                                     standby_loss: standby_loss,
                                     jacket_r_value: jacket_r_value,
-                                    temperature: temperature)
+                                    temperature: temperature,
+                                    is_shared_system: is_shared_system,
+                                    number_of_units_served: number_of_units_served)
   end
 
   def self.set_hot_water_distribution(hpxml, runner, args)
@@ -4613,7 +4664,8 @@ class HPXMLFile
                            max_power_output: [args[:pv_system_max_power_output_1], args[:pv_system_max_power_output_2]][i],
                            inverter_efficiency: inverter_efficiency,
                            system_losses_fraction: system_losses_fraction,
-                           year_modules_manufactured: year_modules_manufactured)
+                           year_modules_manufactured: year_modules_manufactured,
+                           is_shared_system: false)
     end
   end
 
@@ -4694,6 +4746,10 @@ class HPXMLFile
   end
 
   def self.set_clothes_washer(hpxml, runner, args)
+    if args[:water_heater_type] == 'none'
+      args[:clothes_washer_present] = false
+    end
+
     return unless args[:clothes_washer_present]
 
     if args[:clothes_washer_rated_annual_kwh] != Constants.Auto
@@ -4752,6 +4808,7 @@ class HPXMLFile
   end
 
   def self.set_clothes_dryer(hpxml, runner, args)
+    return unless args[:clothes_washer_present]
     return unless args[:clothes_dryer_present]
 
     if args[:clothes_dryer_efficiency_type] == 'EnergyFactor'
@@ -5145,6 +5202,45 @@ class HPXMLFile
                        heater_load_units: heater_load_units,
                        heater_load_value: heater_load_value,
                        heater_usage_multiplier: heater_usage_multiplier)
+  end
+
+  def self.valid_attr(attr)
+    attr = attr.to_s
+    attr = attr.gsub(' ', '_')
+    attr = attr.gsub('|', '_')
+    return attr
+  end
+
+  def self.get_adjacent_to(surface)
+    space = surface.space.get
+    st = space.spaceType.get
+    space_type = st.standardsSpaceType.get
+
+    if ['vented crawlspace'].include? space_type
+      return HPXML::LocationCrawlspaceVented
+    elsif ['unvented crawlspace'].include? space_type
+      return HPXML::LocationCrawlspaceUnvented
+    elsif ['garage'].include? space_type
+      return HPXML::LocationGarage
+    elsif ['living space'].include? space_type
+      if Geometry.space_is_below_grade(space)
+        return HPXML::LocationBasementConditioned
+      else
+        return HPXML::LocationLivingSpace
+      end
+    elsif ['vented attic'].include? space_type
+      return HPXML::LocationAtticVented
+    elsif ['unvented attic'].include? space_type
+      return HPXML::LocationAtticUnvented
+    elsif ['unconditioned basement'].include? space_type
+      return HPXML::LocationBasementUnconditioned
+    elsif ['corridor'].include? space_type
+      return HPXML::LocationOtherHousingUnit
+    elsif ['ambient'].include? space_type
+      return HPXML::LocationOutside
+    else
+      fail "Unhandled SpaceType value (#{space_type}) for surface '#{surface.name}'."
+    end
   end
 end
 
