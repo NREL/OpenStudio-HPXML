@@ -894,8 +894,8 @@ class EnergyPlusValidator
       ## [ExteriorHolidayLighting]
       '/HPXML/Building/BuildingDetails/Lighting/extension/ExteriorHolidayLighting' => {
         'Load[Units="kWh/day"]/Value' => zero_or_one,
-        '[PeriodBeginMonth and PeriodBeginDayOfMonth] | /HPXML/SoftwareInfo/extension/SchedulesPath' => zero_or_one, # integer
-        '[PeriodEndMonth and PeriodEndDayOfMonth] | /HPXML/SoftwareInfo/extension/SchedulesPath' => zero_or_one, # integer
+        'PeriodBeginMonth | PeriodBeginDayOfMonth' => zero_or_two, # integer
+        'PeriodEndMonth | PeriodEndDayOfMonth' => zero_or_two, # integer
         'WeekdayScheduleFractions | /HPXML/SoftwareInfo/extension/SchedulesPath' => zero_or_one,
         'WeekendScheduleFractions | /HPXML/SoftwareInfo/extension/SchedulesPath' => zero_or_one,
       },

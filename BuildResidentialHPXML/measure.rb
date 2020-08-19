@@ -4919,7 +4919,6 @@ class HPXMLFile
 
   def self.set_extra_refrigerator(hpxml, runner, args)
     return unless args[:extra_refrigerator_present]
-    return unless args[:extra_refrigerator_present]
 
     if args[:extra_refrigerator_rated_annual_kwh] != Constants.Auto
       rated_annual_kwh = args[:extra_refrigerator_rated_annual_kwh]

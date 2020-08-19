@@ -744,7 +744,7 @@ class HPXML < Object
           XMLHelper.add_element(daylight_saving, 'EndDayOfMonth', to_integer(@dst_end_day_of_month)) unless @dst_end_day_of_month.nil?
         end
       end
-      if (not @schedules_path.nil?)
+      if not @schedules_path.nil?
         XMLHelper.add_element(extension, 'SchedulesPath', @schedules_path) unless @schedules_path.nil?
       end
       if XMLHelper.get_element(extension, 'ERICalculation').nil? && XMLHelper.get_element(extension, 'SimulationControl').nil? && @apply_ashrae140_assumptions.nil? && @schedules_path.nil?
@@ -3185,7 +3185,6 @@ class HPXML < Object
       if [MechVentTypeSupply, MechVentTypeCFIS, MechVentTypeBalanced, MechVentTypeERV, MechVentTypeHRV].include? @fan_type
         return true
       end
-
       return false
     end
 
@@ -3193,7 +3192,6 @@ class HPXML < Object
       if [MechVentTypeExhaust, MechVentTypeBalanced, MechVentTypeERV, MechVentTypeHRV].include? @fan_type
         return true
       end
-
       return false
     end
 
@@ -3201,7 +3199,6 @@ class HPXML < Object
       if includes_supply_air? && includes_exhaust_air?
         return true
       end
-
       return false
     end
 
