@@ -254,11 +254,15 @@ def create_osws
 
     begin
       osw_files = [derivative]
-      osw_files.unshift(parent) unless parent.nil?
-      until parent.nil?
-        next unless osws_files.key?(parent)
+      unless parent.nil?
+        osw_files.unshift(parent)
+      end
+      while not parent.nil?
+        next unless osws_files.keys.include? parent
 
-        osw_files.unshift(osws_files[parent]) unless osws_files[parent].nil?
+        unless osws_files[parent].nil?
+          osw_files.unshift(osws_files[parent])
+        end
         parent = osws_files[parent]
       end
 
@@ -2245,11 +2249,15 @@ def create_hpxmls
 
     begin
       hpxml_files = [derivative]
-      hpxml_files.unshift(parent) unless parent.nil?
-      until parent.nil?
-        next unless hpxmls_files.key?(parent)
+      unless parent.nil?
+        hpxml_files.unshift(parent)
+      end
+      while not parent.nil?
+        next unless hpxmls_files.keys.include? parent
 
-        hpxml_files.unshift(hpxmls_files[parent]) unless hpxmls_files[parent].nil?
+        unless hpxmls_files[parent].nil?
+          hpxml_files.unshift(hpxmls_files[parent])
+        end
         parent = hpxmls_files[parent]
       end
 
@@ -2301,30 +2309,34 @@ def create_hpxmls
         set_hpxml_fuel_loads(hpxml_file, hpxml)
       end
 
-      hpxml_doc = hpxml.to_oga
+      hpxml_doc = hpxml.to_oga()
 
       if ['invalid_files/missing-elements.xml'].include? derivative
         XMLHelper.delete_element(hpxml_doc, '/HPXML/Building/BuildingDetails/BuildingSummary/BuildingConstruction/NumberofConditionedFloors')
         XMLHelper.delete_element(hpxml_doc, '/HPXML/Building/BuildingDetails/BuildingSummary/BuildingConstruction/ConditionedFloorArea')
       end
 
-      hpxml_path = if derivative.include? 'ASHRAE_Standard_140'
-                     File.join(sample_files_dir, '../tests', derivative)
-                   else
-                     File.join(sample_files_dir, derivative)
-                   end
+      if derivative.include? 'ASHRAE_Standard_140'
+        hpxml_path = File.join(sample_files_dir, '../tests', derivative)
+      else
+        hpxml_path = File.join(sample_files_dir, derivative)
+      end
 
       XMLHelper.write_file(hpxml_doc, hpxml_path)
 
-      unless hpxml_path.include? 'invalid_files'
+      if not hpxml_path.include? 'invalid_files'
         # Validate file against HPXML schema
         schemas_dir = File.absolute_path(File.join(File.dirname(__FILE__), 'HPXMLtoOpenStudio/resources'))
         errors = XMLHelper.validate(hpxml_doc.to_s, File.join(schemas_dir, 'HPXML.xsd'), nil)
-        raise "ERRORS: #{errors}" if !errors.empty?
+        if errors.size > 0
+          fail "ERRORS: #{errors}"
+        end
 
         # Check for additional errors
-        errors = hpxml.check_for_errors
-        raise "ERRORS: #{errors}" if !errors.empty?
+        errors = hpxml.check_for_errors()
+        if errors.size > 0
+          fail "ERRORS: #{errors}"
+        end
       end
     rescue Exception => e
       puts "\n#{e}\n#{e.backtrace.join('\n')}"
@@ -2426,13 +2438,13 @@ def set_hpxml_building_construction(hpxml_file, hpxml)
     hpxml.building_construction.number_of_conditioned_floors_above_grade = 1
     hpxml.building_construction.number_of_bedrooms = 3
     hpxml.building_construction.conditioned_floor_area = 1539
-    hpxml.building_construction.conditioned_building_volume = 12_312
+    hpxml.building_construction.conditioned_building_volume = 12312
     hpxml.building_construction.residential_facility_type = HPXML::ResidentialTypeSFD
     hpxml.building_construction.use_only_ideal_air_system = true
   elsif ['ASHRAE_Standard_140/L322XC.xml'].include? hpxml_file
     hpxml.building_construction.number_of_conditioned_floors = 2
     hpxml.building_construction.conditioned_floor_area = 3078
-    hpxml.building_construction.conditioned_building_volume = 24_624
+    hpxml.building_construction.conditioned_building_volume = 24624
   elsif ['base.xml'].include? hpxml_file
     hpxml.building_construction.residential_facility_type = HPXML::ResidentialTypeSFD
     hpxml.building_construction.number_of_conditioned_floors = 2
@@ -2464,7 +2476,7 @@ def set_hpxml_building_construction(hpxml_file, hpxml)
     hpxml.building_construction.conditioned_floor_area += 900
     hpxml.building_construction.conditioned_building_volume += 2250
   elsif ['base-atticroof-cathedral.xml'].include? hpxml_file
-    hpxml.building_construction.conditioned_building_volume += 10_800
+    hpxml.building_construction.conditioned_building_volume += 10800
   elsif ['base-enclosure-2stories.xml'].include? hpxml_file
     hpxml.building_construction.number_of_conditioned_floors += 1
     hpxml.building_construction.number_of_conditioned_floors_above_grade += 1
@@ -2490,13 +2502,13 @@ def set_hpxml_building_construction(hpxml_file, hpxml)
 end
 
 def set_hpxml_building_occupancy(hpxml_file, hpxml)
-  hpxml.building_occupancy.number_of_residents = if hpxml_file.include?('ASHRAE_Standard_140')
-                                                   0
-                                                 elsif ['base-misc-defaults.xml'].include? hpxml_file
-                                                   nil
-                                                 else
-                                                   hpxml.building_construction.number_of_bedrooms
-                                                 end
+  if hpxml_file.include?('ASHRAE_Standard_140')
+    hpxml.building_occupancy.number_of_residents = 0
+  elsif ['base-misc-defaults.xml'].include? hpxml_file
+    hpxml.building_occupancy.number_of_residents = nil
+  else
+    hpxml.building_occupancy.number_of_residents = hpxml.building_construction.number_of_bedrooms
+  end
 end
 
 def set_hpxml_climate_and_risk_zones(hpxml_file, hpxml)
@@ -2585,11 +2597,11 @@ def set_hpxml_air_infiltration_measurements(hpxml_file, hpxml)
   elsif ['base-enclosure-infil-flue.xml'].include? hpxml_file
     hpxml.building_construction.has_flue_or_chimney = true
   end
-  hpxml.air_infiltration_measurements[0].infiltration_volume = if ['base-misc-defaults.xml'].include? hpxml_file
-                                                                 nil
-                                                               else
-                                                                 infil_volume
-                                                               end
+  if ['base-misc-defaults.xml'].include? hpxml_file
+    hpxml.air_infiltration_measurements[0].infiltration_volume = nil
+  else
+    hpxml.air_infiltration_measurements[0].infiltration_volume = infil_volume
+  end
 end
 
 def set_hpxml_attics(hpxml_file, hpxml)
@@ -2692,7 +2704,7 @@ def set_hpxml_roofs(hpxml_file, hpxml)
                     insulation_assembly_r_value: 1.99)
   elsif ['ASHRAE_Standard_140/L202AC.xml',
          'ASHRAE_Standard_140/L202AL.xml'].include? hpxml_file
-    (0..hpxml.roofs.size - 1).each do |i|
+    for i in 0..hpxml.roofs.size - 1
       hpxml.roofs[i].solar_absorptance = 0.2
     end
   elsif ['base.xml'].include? hpxml_file
@@ -2767,9 +2779,9 @@ def set_hpxml_roofs(hpxml_file, hpxml)
          'base-enclosure-other-multifamily-buffer-space.xml'].include? hpxml_file
     hpxml.roofs.clear
   elsif ['base-enclosure-split-surfaces.xml'].include? hpxml_file
-    (1..hpxml.roofs.size).each do |n|
+    for n in 1..hpxml.roofs.size
       hpxml.roofs[n - 1].area /= 9.0
-      (2..9).each do |i|
+      for i in 2..9
         hpxml.roofs << hpxml.roofs[n - 1].dup
         hpxml.roofs[-1].id += i.to_s
       end
@@ -2830,7 +2842,7 @@ def set_hpxml_rim_joists(hpxml_file, hpxml)
                          emittance: 0.9,
                          insulation_assembly_r_value: 5.01)
   elsif ['ASHRAE_Standard_140/L324XC.xml'].include? hpxml_file
-    (0..hpxml.rim_joists.size - 1).each do |i|
+    for i in 0..hpxml.rim_joists.size - 1
       hpxml.rim_joists[i].insulation_assembly_r_value = 13.14
     end
   elsif ['base.xml'].include? hpxml_file
@@ -2868,20 +2880,20 @@ def set_hpxml_rim_joists(hpxml_file, hpxml)
     hpxml.rim_joists[0].exterior_adjacent_to = HPXML::LocationOtherNonFreezingSpace
     hpxml.rim_joists[0].siding = nil
   elsif ['base-foundation-unconditioned-basement.xml'].include? hpxml_file
-    (0..hpxml.rim_joists.size - 1).each do |i|
+    for i in 0..hpxml.rim_joists.size - 1
       hpxml.rim_joists[i].interior_adjacent_to = HPXML::LocationBasementUnconditioned
       hpxml.rim_joists[i].insulation_assembly_r_value = 2.3
     end
   elsif ['base-foundation-unconditioned-basement-wall-insulation.xml'].include? hpxml_file
-    (0..hpxml.rim_joists.size - 1).each do |i|
+    for i in 0..hpxml.rim_joists.size - 1
       hpxml.rim_joists[i].insulation_assembly_r_value = 23.0
     end
   elsif ['base-foundation-unvented-crawlspace.xml'].include? hpxml_file
-    (0..hpxml.rim_joists.size - 1).each do |i|
+    for i in 0..hpxml.rim_joists.size - 1
       hpxml.rim_joists[i].interior_adjacent_to = HPXML::LocationCrawlspaceUnvented
     end
   elsif ['base-foundation-vented-crawlspace.xml'].include? hpxml_file
-    (0..hpxml.rim_joists.size - 1).each do |i|
+    for i in 0..hpxml.rim_joists.size - 1
       hpxml.rim_joists[i].interior_adjacent_to = HPXML::LocationCrawlspaceVented
     end
   elsif ['base-foundation-multiple.xml'].include? hpxml_file
@@ -2905,9 +2917,9 @@ def set_hpxml_rim_joists(hpxml_file, hpxml)
                          emittance: 0.92,
                          insulation_assembly_r_value: 23.0)
   elsif ['base-enclosure-split-surfaces.xml'].include? hpxml_file
-    (1..hpxml.rim_joists.size).each do |n|
+    for n in 1..hpxml.rim_joists.size
       hpxml.rim_joists[n - 1].area /= 9.0
-      (2..9).each do |i|
+      for i in 2..9
         hpxml.rim_joists << hpxml.rim_joists[n - 1].dup
         hpxml.rim_joists[-1].id += i.to_s
       end
@@ -2925,7 +2937,7 @@ def set_hpxml_rim_joists(hpxml_file, hpxml)
   hpxml.rim_joists.each do |rim_joist|
     next unless rim_joist.is_interior
 
-    raise "Interior rim joist '#{rim_joist.id}' in #{hpxml_file} should not have siding." unless rim_joist.siding.nil?
+    fail "Interior rim joist '#{rim_joist.id}' in #{hpxml_file} should not have siding." unless rim_joist.siding.nil?
   end
 end
 
@@ -2994,17 +3006,17 @@ def set_hpxml_walls(hpxml_file, hpxml)
                     insulation_assembly_r_value: 2.15)
   elsif ['ASHRAE_Standard_140/L120AC.xml',
          'ASHRAE_Standard_140/L120AL.xml'].include? hpxml_file
-    (0..hpxml.walls.size - 3).each do |i|
+    for i in 0..hpxml.walls.size - 3
       hpxml.walls[i].insulation_assembly_r_value = 23.58
     end
   elsif ['ASHRAE_Standard_140/L200AC.xml',
          'ASHRAE_Standard_140/L200AL.xml'].include? hpxml_file
-    (0..hpxml.walls.size - 3).each do |i|
+    for i in 0..hpxml.walls.size - 3
       hpxml.walls[i].insulation_assembly_r_value = 4.84
     end
   elsif ['ASHRAE_Standard_140/L202AC.xml',
          'ASHRAE_Standard_140/L202AL.xml'].include? hpxml_file
-    (0..hpxml.walls.size - 1).each do |i|
+    for i in 0..hpxml.walls.size - 1
       hpxml.walls[i].solar_absorptance = 0.2
     end
   elsif ['base.xml'].include? hpxml_file
@@ -3238,9 +3250,9 @@ def set_hpxml_walls(hpxml_file, hpxml)
       hpxml.walls[-1].insulation_assembly_r_value = 23
     end
   elsif ['base-enclosure-split-surfaces.xml'].include? hpxml_file
-    (1..hpxml.walls.size).each do |n|
+    for n in 1..hpxml.walls.size
       hpxml.walls[n - 1].area /= 9.0
-      (2..9).each do |i|
+      for i in 2..9
         hpxml.walls << hpxml.walls[n - 1].dup
         hpxml.walls[-1].id += i.to_s
       end
@@ -3264,7 +3276,7 @@ def set_hpxml_walls(hpxml_file, hpxml)
   hpxml.walls.each do |wall|
     next unless wall.is_interior
 
-    raise "Interior wall '#{wall.id}' in #{hpxml_file} should not have siding." unless wall.siding.nil?
+    fail "Interior wall '#{wall.id}' in #{hpxml_file} should not have siding." unless wall.siding.nil?
   end
 end
 
@@ -3327,7 +3339,7 @@ def set_hpxml_foundation_walls(hpxml_file, hpxml)
                                insulation_exterior_distance_to_top: 0,
                                insulation_exterior_distance_to_bottom: 0)
   elsif ['ASHRAE_Standard_140/L324XC.xml'].include? hpxml_file
-    (0..hpxml.foundation_walls.size - 1).each do |i|
+    for i in 0..hpxml.foundation_walls.size - 1
       hpxml.foundation_walls[i].insulation_interior_r_value = 10.2
       hpxml.foundation_walls[i].insulation_interior_distance_to_top = 0.0
       hpxml.foundation_walls[i].insulation_interior_distance_to_bottom = 7.25
@@ -3411,11 +3423,11 @@ def set_hpxml_foundation_walls(hpxml_file, hpxml)
     hpxml.foundation_walls[0].depth_below_grade = 4
   elsif ['base-foundation-unvented-crawlspace.xml',
          'base-foundation-vented-crawlspace.xml'].include? hpxml_file
-    hpxml.foundation_walls[0].interior_adjacent_to = if ['base-foundation-unvented-crawlspace.xml'].include? hpxml_file
-                                                       HPXML::LocationCrawlspaceUnvented
-                                                     else
-                                                       HPXML::LocationCrawlspaceVented
-                                                     end
+    if ['base-foundation-unvented-crawlspace.xml'].include? hpxml_file
+      hpxml.foundation_walls[0].interior_adjacent_to = HPXML::LocationCrawlspaceUnvented
+    else
+      hpxml.foundation_walls[0].interior_adjacent_to = HPXML::LocationCrawlspaceVented
+    end
     hpxml.foundation_walls[0].height -= 4
     hpxml.foundation_walls[0].area /= 2.0
     hpxml.foundation_walls[0].depth_below_grade -= 4
@@ -3560,9 +3572,9 @@ def set_hpxml_foundation_walls(hpxml_file, hpxml)
                                insulation_exterior_distance_to_bottom: 4,
                                insulation_exterior_r_value: 8.9)
   elsif ['base-enclosure-split-surfaces.xml'].include? hpxml_file
-    (1..hpxml.foundation_walls.size).each do |n|
+    for n in 1..hpxml.foundation_walls.size
       hpxml.foundation_walls[n - 1].area /= 9.0
-      (2..9).each do |i|
+      for i in 2..9
         hpxml.foundation_walls << hpxml.foundation_walls[n - 1].dup
         hpxml.foundation_walls[-1].id += i.to_s
       end
@@ -3709,9 +3721,9 @@ def set_hpxml_frame_floors(hpxml_file, hpxml)
                            insulation_assembly_r_value: 2.1,
                            other_space_above_or_below: HPXML::FrameFloorOtherSpaceBelow)
   elsif ['base-enclosure-split-surfaces.xml'].include? hpxml_file
-    (1..hpxml.frame_floors.size).each do |n|
+    for n in 1..hpxml.frame_floors.size
       hpxml.frame_floors[n - 1].area /= 9.0
-      (2..9).each do |i|
+      for i in 2..9
         hpxml.frame_floors << hpxml.frame_floors[n - 1].dup
         hpxml.frame_floors[-1].id += i.to_s
       end
@@ -3794,11 +3806,11 @@ def set_hpxml_slabs(hpxml_file, hpxml)
     hpxml.slabs[0].carpet_r_value = 2.5
   elsif ['base-foundation-unvented-crawlspace.xml',
          'base-foundation-vented-crawlspace.xml'].include? hpxml_file
-    hpxml.slabs[0].interior_adjacent_to = if ['base-foundation-unvented-crawlspace.xml'].include? hpxml_file
-                                            HPXML::LocationCrawlspaceUnvented
-                                          else
-                                            HPXML::LocationCrawlspaceVented
-                                          end
+    if ['base-foundation-unvented-crawlspace.xml'].include? hpxml_file
+      hpxml.slabs[0].interior_adjacent_to = HPXML::LocationCrawlspaceUnvented
+    else
+      hpxml.slabs[0].interior_adjacent_to = HPXML::LocationCrawlspaceVented
+    end
     hpxml.slabs[0].thickness = 0
     hpxml.slabs[0].carpet_r_value = 2.5
   elsif ['base-foundation-multiple.xml'].include? hpxml_file
@@ -3882,10 +3894,10 @@ def set_hpxml_slabs(hpxml_file, hpxml)
                     carpet_fraction: 0,
                     carpet_r_value: 0)
   elsif ['base-enclosure-split-surfaces.xml'].include? hpxml_file
-    (1..hpxml.slabs.size).each do |n|
+    for n in 1..hpxml.slabs.size
       hpxml.slabs[n - 1].area /= 9.0
       hpxml.slabs[n - 1].exposed_perimeter /= 9.0
-      (2..9).each do |i|
+      for i in 2..9
         hpxml.slabs << hpxml.slabs[n - 1].dup
         hpxml.slabs[-1].id += i.to_s
       end
@@ -3927,7 +3939,7 @@ def set_hpxml_windows(hpxml_file, hpxml)
     end
   elsif ['ASHRAE_Standard_140/L130AC.xml',
          'ASHRAE_Standard_140/L130AL.xml'].include? hpxml_file
-    (0..hpxml.windows.size - 1).each do |i|
+    for i in 0..hpxml.windows.size - 1
       hpxml.windows[i].ufactor = 0.3
       hpxml.windows[i].shgc = 0.335
     end
@@ -4119,14 +4131,16 @@ def set_hpxml_windows(hpxml_file, hpxml)
     hpxml.windows[0].wall_idref = 'foobar'
   elsif ['base-enclosure-split-surfaces.xml'].include? hpxml_file
     area_adjustments = []
-    (1..hpxml.windows.size).each do |n|
+    for n in 1..hpxml.windows.size
       hpxml.windows[n - 1].area /= 9.0
       hpxml.windows[n - 1].fraction_operable = 0.0
-      (2..9).each do |i|
+      for i in 2..9
         hpxml.windows << hpxml.windows[n - 1].dup
         hpxml.windows[-1].id += i.to_s
         hpxml.windows[-1].wall_idref += i.to_s
-        hpxml.windows[-1].fraction_operable = 1.0 if i >= 4
+        if i >= 4
+          hpxml.windows[-1].fraction_operable = 1.0
+        end
       end
     end
     hpxml.windows << hpxml.windows[-1].dup
@@ -4208,12 +4222,12 @@ def set_hpxml_skylights(hpxml_file, hpxml)
   elsif ['invalid_files/unattached-skylight.xml'].include? hpxml_file
     hpxml.skylights[0].roof_idref = 'foobar'
   elsif ['base-enclosure-split-surfaces.xml'].include? hpxml_file
-    (1..hpxml.skylights.size).each do |n|
+    for n in 1..hpxml.skylights.size
       hpxml.skylights[n - 1].area /= 9.0
-      (2..9).each do |i|
+      for i in 2..9
         hpxml.skylights << hpxml.skylights[n - 1].dup
         hpxml.skylights[-1].id += i.to_s
-        hpxml.skylights[-1].roof_idref += i.to_s if i.even?
+        hpxml.skylights[-1].roof_idref += i.to_s if i % 2 == 0
       end
     end
     hpxml.skylights << hpxml.skylights[-1].dup
@@ -4297,9 +4311,9 @@ def set_hpxml_doors(hpxml_file, hpxml)
     hpxml.doors[0].wall_idref = 'foobar'
   elsif ['base-enclosure-split-surfaces.xml'].include? hpxml_file
     area_adjustments = []
-    (1..hpxml.doors.size).each do |n|
+    for n in 1..hpxml.doors.size
       hpxml.doors[n - 1].area /= 9.0
-      (2..9).each do |i|
+      for i in 2..9
         hpxml.doors << hpxml.doors[n - 1].dup
         hpxml.doors[-1].id += i.to_s
         hpxml.doors[-1].wall_idref += i.to_s
@@ -4329,7 +4343,7 @@ def set_hpxml_heating_systems(hpxml_file, hpxml)
                               distribution_system_idref: 'HVACDistribution',
                               heating_system_type: HPXML::HVACTypeFurnace,
                               heating_system_fuel: HPXML::FuelTypeNaturalGas,
-                              heating_capacity: 64_000,
+                              heating_capacity: 64000,
                               heating_efficiency_afue: 0.92,
                               fraction_heat_load_served: 1)
   elsif ['base-hvac-air-to-air-heat-pump-1-speed.xml',
@@ -4524,14 +4538,14 @@ def set_hpxml_heating_systems(hpxml_file, hpxml)
     hpxml.heating_systems[1].distribution_system_idref = 'HVACDistribution2'
     hpxml.heating_systems[2].id = 'HeatingSystem3'
     hpxml.heating_systems[2].distribution_system_idref = 'HVACDistribution3'
-    (0..2).each do |i|
+    for i in 0..2
       hpxml.heating_systems[i].heating_capacity /= 3.0
       # Test a file where sum is slightly greater than 1
-      hpxml.heating_systems[i].fraction_heat_load_served = if i < 2
-                                                             0.33
-                                                           else
-                                                             0.35
-                                                           end
+      if i < 2
+        hpxml.heating_systems[i].fraction_heat_load_served = 0.33
+      else
+        hpxml.heating_systems[i].fraction_heat_load_served = 0.35
+      end
     end
   elsif ['base-hvac-furnace-elec-central-ac-1-speed.xml'].include? hpxml_file
     hpxml.heating_systems[0].heating_system_fuel = HPXML::FuelTypeElectricity
@@ -4549,8 +4563,8 @@ def set_hpxml_heating_systems(hpxml_file, hpxml)
   elsif ['base-hvac-undersized.xml'].include? hpxml_file
     hpxml.heating_systems[0].heating_capacity /= 10.0
   elsif ['base-hvac-flowrate.xml'].include? hpxml_file
-    hpxml.heating_systems[0].heating_cfm = hpxml.heating_systems[0].heating_capacity * 360.0 / 12_000.0
-  elsif hpxml_file.include?('hvac_autosizing') && !hpxml.heating_systems.nil? && !hpxml.heating_systems.empty?
+    hpxml.heating_systems[0].heating_cfm = hpxml.heating_systems[0].heating_capacity * 360.0 / 12000.0
+  elsif hpxml_file.include?('hvac_autosizing') && (not hpxml.heating_systems.nil?) && (hpxml.heating_systems.size > 0)
     hpxml.heating_systems[0].heating_capacity = nil
   end
 end
@@ -4561,7 +4575,7 @@ def set_hpxml_cooling_systems(hpxml_file, hpxml)
                               distribution_system_idref: 'HVACDistribution',
                               cooling_system_type: HPXML::HVACTypeCentralAirConditioner,
                               cooling_system_fuel: HPXML::FuelTypeElectricity,
-                              cooling_capacity: 48_000,
+                              cooling_capacity: 48000,
                               fraction_cool_load_served: 1,
                               cooling_efficiency_seer: 13,
                               cooling_shr: 0.73,
@@ -4673,11 +4687,11 @@ def set_hpxml_cooling_systems(hpxml_file, hpxml)
   elsif ['base-hvac-undersized.xml'].include? hpxml_file
     hpxml.cooling_systems[0].cooling_capacity /= 10.0
   elsif ['base-hvac-flowrate.xml'].include? hpxml_file
-    hpxml.cooling_systems[0].cooling_cfm = hpxml.cooling_systems[0].cooling_capacity * 360.0 / 12_000.0
+    hpxml.cooling_systems[0].cooling_cfm = hpxml.cooling_systems[0].cooling_capacity * 360.0 / 12000.0
   elsif ['base-misc-defaults.xml'].include? hpxml_file
     hpxml.cooling_systems[0].cooling_shr = nil
     hpxml.cooling_systems[0].compressor_type = nil
-  elsif hpxml_file.include?('hvac_autosizing') && !hpxml.cooling_systems.nil? && !hpxml.cooling_systems.empty?
+  elsif hpxml_file.include?('hvac_autosizing') && (not hpxml.cooling_systems.nil?) && (hpxml.cooling_systems.size > 0)
     hpxml.cooling_systems[0].cooling_capacity = nil
   end
 end
@@ -4689,34 +4703,36 @@ def set_hpxml_heat_pumps(hpxml_file, hpxml)
                          distribution_system_idref: 'HVACDistribution',
                          heat_pump_type: HPXML::HVACTypeHeatPumpAirToAir,
                          heat_pump_fuel: HPXML::FuelTypeElectricity,
-                         heating_capacity: 42_000,
-                         cooling_capacity: 48_000,
+                         heating_capacity: 42000,
+                         cooling_capacity: 48000,
                          backup_heating_fuel: HPXML::FuelTypeElectricity,
-                         backup_heating_capacity: 34_121,
+                         backup_heating_capacity: 34121,
                          backup_heating_efficiency_percent: 1.0,
                          fraction_heat_load_served: 1,
                          fraction_cool_load_served: 1,
                          heating_efficiency_hspf: 7.7,
                          cooling_efficiency_seer: 13,
-                         heating_capacity_17F: 42_000 * 0.630, # Based on OAT slope of default curves
+                         heating_capacity_17F: 42000 * 0.630, # Based on OAT slope of default curves
                          cooling_shr: 0.73,
                          compressor_type: HPXML::HVACCompressorTypeSingleStage)
-    hpxml.heat_pumps[0].fraction_cool_load_served = 0 if hpxml_file == 'base-hvac-central-ac-plus-air-to-air-heat-pump-heating.xml'
+    if hpxml_file == 'base-hvac-central-ac-plus-air-to-air-heat-pump-heating.xml'
+      hpxml.heat_pumps[0].fraction_cool_load_served = 0
+    end
   elsif ['base-hvac-air-to-air-heat-pump-2-speed.xml'].include? hpxml_file
     hpxml.heat_pumps.add(id: 'HeatPump',
                          distribution_system_idref: 'HVACDistribution',
                          heat_pump_type: HPXML::HVACTypeHeatPumpAirToAir,
                          heat_pump_fuel: HPXML::FuelTypeElectricity,
-                         heating_capacity: 42_000,
-                         cooling_capacity: 48_000,
+                         heating_capacity: 42000,
+                         cooling_capacity: 48000,
                          backup_heating_fuel: HPXML::FuelTypeElectricity,
-                         backup_heating_capacity: 34_121,
+                         backup_heating_capacity: 34121,
                          backup_heating_efficiency_percent: 1.0,
                          fraction_heat_load_served: 1,
                          fraction_cool_load_served: 1,
                          heating_efficiency_hspf: 9.3,
                          cooling_efficiency_seer: 18,
-                         heating_capacity_17F: 42_000 * 0.590, # Based on OAT slope of default curves
+                         heating_capacity_17F: 42000 * 0.590, # Based on OAT slope of default curves
                          cooling_shr: 0.73,
                          compressor_type: HPXML::HVACCompressorTypeTwoStage)
   elsif ['base-hvac-air-to-air-heat-pump-var-speed.xml'].include? hpxml_file
@@ -4724,16 +4740,16 @@ def set_hpxml_heat_pumps(hpxml_file, hpxml)
                          distribution_system_idref: 'HVACDistribution',
                          heat_pump_type: HPXML::HVACTypeHeatPumpAirToAir,
                          heat_pump_fuel: HPXML::FuelTypeElectricity,
-                         heating_capacity: 42_000,
-                         cooling_capacity: 48_000,
+                         heating_capacity: 42000,
+                         cooling_capacity: 48000,
                          backup_heating_fuel: HPXML::FuelTypeElectricity,
-                         backup_heating_capacity: 34_121,
+                         backup_heating_capacity: 34121,
                          backup_heating_efficiency_percent: 1.0,
                          fraction_heat_load_served: 1,
                          fraction_cool_load_served: 1,
                          heating_efficiency_hspf: 10,
                          cooling_efficiency_seer: 22,
-                         heating_capacity_17F: 42_000 * 0.640, # Based on OAT slope of default curves
+                         heating_capacity_17F: 42000 * 0.640, # Based on OAT slope of default curves
                          cooling_shr: 0.78,
                          compressor_type: HPXML::HVACCompressorTypeVariableSpeed)
   elsif ['base-hvac-ground-to-air-heat-pump.xml'].include? hpxml_file
@@ -4741,10 +4757,10 @@ def set_hpxml_heat_pumps(hpxml_file, hpxml)
                          distribution_system_idref: 'HVACDistribution',
                          heat_pump_type: HPXML::HVACTypeHeatPumpGroundToAir,
                          heat_pump_fuel: HPXML::FuelTypeElectricity,
-                         heating_capacity: 42_000,
-                         cooling_capacity: 48_000,
+                         heating_capacity: 42000,
+                         cooling_capacity: 48000,
                          backup_heating_fuel: HPXML::FuelTypeElectricity,
-                         backup_heating_capacity: 34_121,
+                         backup_heating_capacity: 34121,
                          backup_heating_efficiency_percent: 1.0,
                          fraction_heat_load_served: 1,
                          fraction_cool_load_served: 1,
@@ -4757,16 +4773,16 @@ def set_hpxml_heat_pumps(hpxml_file, hpxml)
                          distribution_system_idref: 'HVACDistribution',
                          heat_pump_type: HPXML::HVACTypeHeatPumpMiniSplit,
                          heat_pump_fuel: HPXML::FuelTypeElectricity,
-                         heating_capacity: 52_000,
-                         cooling_capacity: 48_000,
+                         heating_capacity: 52000,
+                         cooling_capacity: 48000,
                          backup_heating_fuel: HPXML::FuelTypeElectricity,
-                         backup_heating_capacity: 34_121,
+                         backup_heating_capacity: 34121,
                          backup_heating_efficiency_percent: 1.0,
                          fraction_heat_load_served: 1,
                          fraction_cool_load_served: 1,
                          heating_efficiency_hspf: 10,
                          cooling_efficiency_seer: 19,
-                         heating_capacity_17F: 52_000 * f,
+                         heating_capacity_17F: 52000 * f,
                          cooling_shr: 0.73)
   elsif ['base-hvac-mini-split-heat-pump-ducted-heating-only.xml'].include? hpxml_file
     hpxml.heat_pumps[0].cooling_capacity = 0
@@ -4782,7 +4798,7 @@ def set_hpxml_heat_pumps(hpxml_file, hpxml)
   elsif ['invalid_files/heat-pump-mixed-fixed-and-autosize-capacities.xml'].include? hpxml_file
     hpxml.heat_pumps[0].cooling_capacity = nil
     hpxml.heat_pumps[0].heating_capacity = nil
-    hpxml.heat_pumps[0].heating_capacity_17F = 25_000
+    hpxml.heat_pumps[0].heating_capacity_17F = 25000
   elsif ['invalid_files/heat-pump-mixed-fixed-and-autosize-capacities2.xml'].include? hpxml_file
     hpxml.heat_pumps[0].backup_heating_capacity = nil
   elsif ['base-hvac-multiple.xml'].include? hpxml_file
@@ -4871,14 +4887,14 @@ def set_hpxml_heat_pumps(hpxml_file, hpxml)
          'base-hvac-dual-fuel-air-to-air-heat-pump-var-speed.xml',
          'base-hvac-dual-fuel-mini-split-heat-pump-ducted.xml'].include? hpxml_file
     hpxml.heat_pumps[0].backup_heating_fuel = HPXML::FuelTypeNaturalGas
-    hpxml.heat_pumps[0].backup_heating_capacity = 36_000
+    hpxml.heat_pumps[0].backup_heating_capacity = 36000
     hpxml.heat_pumps[0].backup_heating_efficiency_percent = nil
     hpxml.heat_pumps[0].backup_heating_efficiency_afue = 0.95
     hpxml.heat_pumps[0].backup_heating_switchover_temp = 25
   elsif ['base-hvac-dual-fuel-air-to-air-heat-pump-1-speed-electric.xml'].include? hpxml_file
     hpxml.heat_pumps[0].backup_heating_fuel = HPXML::FuelTypeElectricity
     hpxml.heat_pumps[0].backup_heating_efficiency_afue = 1.0
-  elsif hpxml_file.include?('hvac_autosizing') && !hpxml.heat_pumps.nil? && !hpxml.heat_pumps.empty?
+  elsif hpxml_file.include?('hvac_autosizing') && (not hpxml.heat_pumps.nil?) && (hpxml.heat_pumps.size > 0)
     hpxml.heat_pumps[0].cooling_capacity = nil
     hpxml.heat_pumps[0].heating_capacity = nil
     hpxml.heat_pumps[0].heating_capacity_17F = nil
@@ -5211,11 +5227,15 @@ def set_hpxml_hvac_distributions(hpxml_file, hpxml)
 
   # Set ConditionedFloorAreaServed
   hpxml.hvac_distributions.each do |hvac_distribution|
-    hvac_distribution.conditioned_floor_area_served = if hvac_distribution.distribution_system_type == HPXML::HVACDistributionTypeAir
-                                                        hpxml.building_construction.conditioned_floor_area / hpxml.hvac_distributions.size
-                                                      end
+    if hvac_distribution.distribution_system_type == HPXML::HVACDistributionTypeAir
+      hvac_distribution.conditioned_floor_area_served = hpxml.building_construction.conditioned_floor_area / hpxml.hvac_distributions.size
+    else
+      hvac_distribution.conditioned_floor_area_served = nil
+    end
   end
-  hpxml.hvac_distributions[0].conditioned_floor_area_served = hpxml.building_construction.conditioned_floor_area + 0.1 if ['invalid_files/invalid-distribution-cfa-served.xml'].include? hpxml_file
+  if ['invalid_files/invalid-distribution-cfa-served.xml'].include? hpxml_file
+    hpxml.hvac_distributions[0].conditioned_floor_area_served = hpxml.building_construction.conditioned_floor_area + 0.1
+  end
 end
 
 def set_hpxml_ventilation_fans(hpxml_file, hpxml)
@@ -5238,7 +5258,9 @@ def set_hpxml_ventilation_fans(hpxml_file, hpxml)
                                fan_power: 300,
                                used_for_whole_building_ventilation: true,
                                distribution_system_idref: 'HVACDistribution')
-    hpxml.ventilation_fans[0].distribution_system_idref = 'foobar' if ['invalid_files/unattached-cfis.xml'].include? hpxml_file
+    if ['invalid_files/unattached-cfis.xml'].include? hpxml_file
+      hpxml.ventilation_fans[0].distribution_system_idref = 'foobar'
+    end
   elsif ['base-mechvent-erv.xml'].include? hpxml_file
     hpxml.ventilation_fans.add(id: 'MechanicalVentilation',
                                fan_type: HPXML::MechVentTypeERV,
@@ -5394,7 +5416,7 @@ def set_hpxml_water_heating_systems(hpxml_file, hpxml)
                                     location: HPXML::LocationLivingSpace,
                                     tank_volume: 40,
                                     fraction_dhw_load_served: 1,
-                                    heating_capacity: 18_767,
+                                    heating_capacity: 18767,
                                     energy_factor: 0.95,
                                     temperature: Waterheater.get_default_hot_water_temperature(Constants.ERIVersions[-1]))
   elsif ['base-dhw-multiple.xml'].include? hpxml_file
@@ -5405,7 +5427,7 @@ def set_hpxml_water_heating_systems(hpxml_file, hpxml)
                                     location: HPXML::LocationLivingSpace,
                                     tank_volume: 50,
                                     fraction_dhw_load_served: 0.2,
-                                    heating_capacity: 40_000,
+                                    heating_capacity: 40000,
                                     energy_factor: 0.59,
                                     recovery_efficiency: 0.76,
                                     temperature: Waterheater.get_default_hot_water_temperature(Constants.ERIVersions[-1]))
@@ -5446,33 +5468,39 @@ def set_hpxml_water_heating_systems(hpxml_file, hpxml)
          'base-dhw-tank-oil.xml',
          'base-dhw-tank-wood.xml'].include? hpxml_file
     hpxml.water_heating_systems[0].tank_volume = 50
-    hpxml.water_heating_systems[0].heating_capacity = 40_000
+    hpxml.water_heating_systems[0].heating_capacity = 40000
     hpxml.water_heating_systems[0].energy_factor = 0.59
     hpxml.water_heating_systems[0].recovery_efficiency = 0.76
-    hpxml.water_heating_systems[0].location = HPXML::LocationOtherExterior if hpxml_file == 'base-dhw-tank-gas-outside.xml'
-    hpxml.water_heating_systems[0].fuel_type = if hpxml_file == 'base-dhw-tank-coal.xml'
-                                                 HPXML::FuelTypeCoal
-                                               elsif hpxml_file == 'base-dhw-tank-oil.xml'
-                                                 HPXML::FuelTypeOil
-                                               elsif hpxml_file == 'base-dhw-tank-wood.xml'
-                                                 HPXML::FuelTypeWoodCord
-                                               else
-                                                 HPXML::FuelTypeNaturalGas
-                                               end
+    if hpxml_file == 'base-dhw-tank-gas-outside.xml'
+      hpxml.water_heating_systems[0].location = HPXML::LocationOtherExterior
+    end
+    if hpxml_file == 'base-dhw-tank-coal.xml'
+      hpxml.water_heating_systems[0].fuel_type = HPXML::FuelTypeCoal
+    elsif hpxml_file == 'base-dhw-tank-oil.xml'
+      hpxml.water_heating_systems[0].fuel_type = HPXML::FuelTypeOil
+    elsif hpxml_file == 'base-dhw-tank-wood.xml'
+      hpxml.water_heating_systems[0].fuel_type = HPXML::FuelTypeWoodCord
+    else
+      hpxml.water_heating_systems[0].fuel_type = HPXML::FuelTypeNaturalGas
+    end
   elsif ['base-dhw-tank-heat-pump.xml',
          'base-dhw-tank-heat-pump-outside.xml'].include? hpxml_file
     hpxml.water_heating_systems[0].water_heater_type = HPXML::WaterHeaterTypeHeatPump
     hpxml.water_heating_systems[0].tank_volume = 80
     hpxml.water_heating_systems[0].heating_capacity = nil
     hpxml.water_heating_systems[0].energy_factor = 2.3
-    hpxml.water_heating_systems[0].location = HPXML::LocationOtherExterior if hpxml_file == 'base-dhw-tank-heat-pump-outside.xml'
+    if hpxml_file == 'base-dhw-tank-heat-pump-outside.xml'
+      hpxml.water_heating_systems[0].location = HPXML::LocationOtherExterior
+    end
   elsif ['base-dhw-tankless-electric.xml',
          'base-dhw-tankless-electric-outside.xml'].include? hpxml_file
     hpxml.water_heating_systems[0].water_heater_type = HPXML::WaterHeaterTypeTankless
     hpxml.water_heating_systems[0].tank_volume = nil
     hpxml.water_heating_systems[0].heating_capacity = nil
     hpxml.water_heating_systems[0].energy_factor = 0.99
-    hpxml.water_heating_systems[0].location = HPXML::LocationOtherExterior if hpxml_file == 'base-dhw-tankless-electric-outside.xml'
+    if hpxml_file == 'base-dhw-tankless-electric-outside.xml'
+      hpxml.water_heating_systems[0].location = HPXML::LocationOtherExterior
+    end
   elsif ['base-dhw-tankless-gas.xml',
          'base-dhw-tankless-propane.xml'].include? hpxml_file
     hpxml.water_heating_systems[0].water_heater_type = HPXML::WaterHeaterTypeTankless
@@ -5516,14 +5544,18 @@ def set_hpxml_water_heating_systems(hpxml_file, hpxml)
     hpxml.water_heating_systems[0].energy_factor = nil
     hpxml.water_heating_systems[0].fuel_type = nil
     hpxml.water_heating_systems[0].related_hvac_idref = 'HeatingSystem'
-    hpxml.water_heating_systems[0].location = HPXML::LocationOtherExterior if hpxml_file == 'base-dhw-indirect-outside.xml'
+    if hpxml_file == 'base-dhw-indirect-outside.xml'
+      hpxml.water_heating_systems[0].location = HPXML::LocationOtherExterior
+    end
   elsif ['base-dhw-indirect-standbyloss.xml'].include? hpxml_file
     hpxml.water_heating_systems[0].standby_loss = 1.0
   elsif ['base-dhw-combi-tankless.xml',
          'base-dhw-combi-tankless-outside.xml'].include? hpxml_file
     hpxml.water_heating_systems[0].water_heater_type = HPXML::WaterHeaterTypeCombiTankless
     hpxml.water_heating_systems[0].tank_volume = nil
-    hpxml.water_heating_systems[0].location = HPXML::LocationOtherExterior if hpxml_file == 'base-dhw-combi-tankless-outside.xml'
+    if hpxml_file == 'base-dhw-combi-tankless-outside.xml'
+      hpxml.water_heating_systems[0].location = HPXML::LocationOtherExterior
+    end
   elsif ['base-foundation-unconditioned-basement.xml'].include? hpxml_file
     hpxml.water_heating_systems[0].location = HPXML::LocationBasementUnconditioned
   elsif ['base-foundation-unvented-crawlspace.xml'].include? hpxml_file
@@ -5595,7 +5627,7 @@ def set_hpxml_water_heating_systems(hpxml_file, hpxml)
                                     location: HPXML::LocationLivingSpace,
                                     tank_volume: 50,
                                     fraction_dhw_load_served: 1.0,
-                                    heating_capacity: 40_000,
+                                    heating_capacity: 40000,
                                     energy_factor: 0.59,
                                     recovery_efficiency: 0.76,
                                     temperature: Waterheater.get_default_hot_water_temperature(Constants.ERIVersions[-1]))
@@ -5743,11 +5775,11 @@ def set_hpxml_solar_thermal_system(hpxml_file, hpxml)
                                     collector_frul: 0.2799,
                                     storage_volume: 60,
                                     water_heating_system_idref: 'WaterHeater')
-    hpxml.solar_thermal_systems[0].collector_loop_type = if hpxml_file == 'base-dhw-solar-direct-evacuated-tube.xml'
-                                                           HPXML::SolarThermalLoopTypeDirect
-                                                         else
-                                                           HPXML::SolarThermalLoopTypeIndirect
-                                                         end
+    if hpxml_file == 'base-dhw-solar-direct-evacuated-tube.xml'
+      hpxml.solar_thermal_systems[0].collector_loop_type = HPXML::SolarThermalLoopTypeDirect
+    else
+      hpxml.solar_thermal_systems[0].collector_loop_type = HPXML::SolarThermalLoopTypeIndirect
+    end
   elsif ['base-dhw-solar-direct-ics.xml'].include? hpxml_file
     hpxml.solar_thermal_systems.add(id: 'SolarThermalSystem',
                                     system_type: 'hot water',
@@ -5807,7 +5839,7 @@ def set_hpxml_pv_systems(hpxml_file, hpxml)
                          tracking: HPXML::PVTrackingTypeFixed,
                          array_azimuth: 225,
                          array_tilt: 30,
-                         building_max_power_output: 30_000,
+                         building_max_power_output: 30000,
                          inverter_efficiency: 0.96,
                          system_losses_fraction: 0.14,
                          number_of_bedrooms_served: 20)
@@ -6326,7 +6358,7 @@ def set_hpxml_plug_loads(hpxml_file, hpxml)
   elsif ['ASHRAE_Standard_140/L170AC.xml',
          'ASHRAE_Standard_140/L170AL.xml'].include? hpxml_file
     hpxml.plug_loads[0].kWh_per_year = 0
-  elsif !hpxml_file.include?('ASHRAE_Standard_140')
+  elsif not hpxml_file.include?('ASHRAE_Standard_140')
     if ['base.xml'].include? hpxml_file
       hpxml.plug_loads.add(id: 'PlugLoadMisc',
                            plug_load_type: HPXML::PlugLoadTypeOther)
@@ -6428,7 +6460,7 @@ def download_epws
   puts 'Extracting weather files...'
   weather_dir = File.join(File.dirname(__FILE__), 'weather')
   unzip_file = OpenStudio::UnzipFile.new(tmpfile.path.to_s)
-  unzip_file.extractAllFiles(OpenStudio.toPath(weather_dir))
+  unzip_file.extractAllFiles(OpenStudio::toPath(weather_dir))
 
   num_epws_actual = Dir[File.join(weather_dir, '*.epw')].count
   puts "#{num_epws_actual} weather files are available in the weather directory."
@@ -6436,13 +6468,13 @@ def download_epws
   exit!
 end
 
-command_list = %i[update_measures cache_weather create_release_zips download_weather]
+command_list = [:update_measures, :cache_weather, :create_release_zips, :download_weather]
 
 def display_usage(command_list)
   puts "Usage: openstudio #{File.basename(__FILE__)} [COMMAND]\nCommands:\n  " + command_list.join("\n  ")
 end
 
-if ARGV.empty?
+if ARGV.size == 0
   puts 'ERROR: Missing command.'
   display_usage(command_list)
   exit!
@@ -6450,7 +6482,7 @@ elsif ARGV.size > 1
   puts 'ERROR: Too many commands.'
   display_usage(command_list)
   exit!
-elsif !command_list.include? ARGV[0].to_sym
+elsif not command_list.include? ARGV[0].to_sym
   puts "ERROR: Invalid command '#{ARGV[0]}'."
   display_usage(command_list)
   exit!
@@ -6489,7 +6521,7 @@ if ARGV[0].to_sym == :update_measures
   # Update measures XMLs
   command = "#{OpenStudio.getOpenStudioCLI} measure -t '#{File.dirname(__FILE__)}'"
   puts 'Updating measure.xmls...'
-  system(command, %i[out err] => File::NULL)
+  system(command, [:out, :err] => File::NULL)
 
   puts 'Done.'
 end
@@ -6515,7 +6547,9 @@ if ARGV[0].to_sym == :cache_weather
   end
 end
 
-download_epws if ARGV[0].to_sym == :download_weather
+if ARGV[0].to_sym == :download_weather
+  download_epws
+end
 
 if ARGV[0].to_sym == :create_release_zips
   # Generate documentation
@@ -6523,11 +6557,11 @@ if ARGV[0].to_sym == :create_release_zips
   command = 'sphinx-build -b singlehtml docs/source documentation'
   begin
     `#{command}`
-    unless File.exist? File.join(File.dirname(__FILE__), 'documentation', 'index.html')
+    if not File.exist? File.join(File.dirname(__FILE__), 'documentation', 'index.html')
       puts 'Documentation was not successfully generated. Aborting...'
       exit!
     end
-  rescue StandardError
+  rescue
     puts "Command failed: '#{command}'. Perhaps sphinx needs to be installed?"
     exit!
   end
@@ -6546,7 +6580,7 @@ if ARGV[0].to_sym == :create_release_zips
   command = 'git ls-files'
   begin
     git_files = `#{command}`
-  rescue StandardError
+  rescue
     puts "Command failed: '#{command}'. Perhaps git needs to be installed?"
     exit!
   end
@@ -6585,9 +6619,13 @@ if ARGV[0].to_sym == :create_release_zips
         if file.start_with? 'documentation'
           # always include
         elsif include_all_epws
-          next if (!git_files.include? file) && (!file.start_with? 'weather')
+          if (not git_files.include? file) && (not file.start_with? 'weather')
+            next
+          end
         else
-          next unless git_files.include? file
+          if not git_files.include? file
+            next
+          end
         end
 
         zip.addFile(file, File.join('OpenStudio-HPXML', file))
