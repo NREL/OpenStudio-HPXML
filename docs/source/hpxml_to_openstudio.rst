@@ -304,6 +304,20 @@ HPXML Rim Joists
 
 Rim joists, the perimeter of floor joists typically found between stories of a building or on top of a foundation wall, are specified as an ``Enclosure/RimJoists/RimJoist``.
 The ``InteriorAdjacentTo`` element should typically be "living space" for rim joists between stories of a building and "basement - conditioned", "basement - unconditioned", "crawlspace - vented", or "crawlspace - unvented" for rim joists on top of a foundation wall.
+The ``ExteriorAdjacentTo`` must be provided as one of the following locations:
+- "adiabatic"
+- "attic - vented"
+- "attic - unvented"
+- "basement - conditioned"
+- "basement - unconditioned"
+- "crawlspace - vented"
+- "crawlspace - unvented"
+- "garage"
+- "other heated space"
+- "other housing unit"
+- "other multifamily buffer space"
+- "other non-freezing space"
+- "outside"
 
 Rim joists are defined by their ``Area`` and ``Insulation/AssemblyEffectiveRValue``.
 
@@ -320,12 +334,37 @@ light       0.50
 reflective  0.30
 =========== ================
 
-Rim joists can have an optional element provided for ``Siding``; if not provided, it defaults to "wood siding".
+Rim joists can have an optional element provided for ``Siding``; if not provided, it defaults to "wood siding". If ``ExteriorAdjacentTo`` is adiabatic, ``Siding`` must not be provided.
 
 HPXML Walls
 ***********
 
-Any wall that has no contact with the ground and bounds a space type should be specified as an ``Enclosure/Walls/Wall``. 
+Any wall that has no contact with the ground and bounds a space type should be specified as an ``Enclosure/Walls/Wall``.
+The ``InteriorAdjacentTo`` must be provided as one of the following locations:
+- "attic - vented"
+- "attic - unvented"
+- "basement - conditioned"
+- "basement - unconditioned"
+- "crawlspace - vented"
+- "crawlspace - unvented"
+- "garage"
+- "living space"
+
+The ``ExteriorAdjacentTo`` must be provided as one of the following locations:
+- "adiabatic"
+- "attic - vented"
+- "attic - unvented"
+- "basement - conditioned"
+- "basement - unconditioned"
+- "crawlspace - vented"
+- "crawlspace - unvented"
+- "garage"
+- "other heated space"
+- "other housing unit"
+- "other multifamily buffer space"
+- "other non-freezing space"
+- "outside"
+
 Interior walls (for example, walls solely within the conditioned space of the building) are not required.
 
 Walls are defined by their ``Area`` and ``Insulation/AssemblyEffectiveRValue``.
@@ -344,7 +383,7 @@ light       0.50
 reflective  0.30
 =========== ================
 
-Walls can have an optional element provided for ``Siding``; if not provided, it defaults to "wood siding".
+Walls can have an optional element provided for ``Siding``; if not provided, it defaults to "wood siding". If ``ExteriorAdjacentTo`` is adiabatic, ``Siding`` must not be provided.
 
 HPXML Foundation Walls
 **********************
@@ -378,9 +417,34 @@ HPXML Frame Floors
 ******************
 
 Any horizontal floor/ceiling surface that is not in contact with the ground (Slab) nor adjacent to ambient conditions above (Roof) should be specified as an ``Enclosure/FrameFloors/FrameFloor``.
+The ``InteriorAdjacentTo`` must be provided as one of the following locations:
+- "attic - vented"
+- "attic - unvented"
+- "basement - conditioned"
+- "basement - unconditioned"
+- "crawlspace - vented"
+- "crawlspace - unvented"
+- "garage"
+- "living space"
+
+The ``ExteriorAdjacentTo`` must be provided as one of the following locations:
+- "adiabatic"
+- "attic - vented"
+- "attic - unvented"
+- "basement - conditioned"
+- "basement - unconditioned"
+- "crawlspace - vented"
+- "crawlspace - unvented"
+- "garage"
+- "other heated space"
+- "other housing unit"
+- "other multifamily buffer space"
+- "other non-freezing space"
+- "outside"
+
 Frame floors in an attached/multifamily building that are adjacent to "other housing unit", "other heated space", "other multifamily buffer space", or "other non-freezing space" must have the ``extension/OtherSpaceAboveOrBelow`` property set to signify whether the other space is "above" or "below".
 
-Frame floors are primarily defined by their ``Insulation/AssemblyEffectiveRValue``.
+Frame floors are primarily defined by their ``Area`` and ``Insulation/AssemblyEffectiveRValue``.
 
 HPXML Slabs
 ***********

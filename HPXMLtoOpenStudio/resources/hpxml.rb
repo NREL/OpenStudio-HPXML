@@ -142,6 +142,7 @@ class HPXML < Object
   LightingTypeCFL = 'CompactFluorescent'
   LightingTypeLED = 'LightEmittingDiode'
   LightingTypeLFL = 'FluorescentTube'
+  LocationAdiabatic = 'adiabatic'
   LocationAtticUnconditioned = 'attic - unconditioned'
   LocationAtticUnvented = 'attic - unvented'
   LocationAtticVented = 'attic - vented'
@@ -3181,6 +3182,7 @@ class HPXML < Object
       if [MechVentTypeSupply, MechVentTypeCFIS, MechVentTypeBalanced, MechVentTypeERV, MechVentTypeHRV].include? @fan_type
         return true
       end
+
       return false
     end
 
@@ -3188,6 +3190,7 @@ class HPXML < Object
       if [MechVentTypeExhaust, MechVentTypeBalanced, MechVentTypeERV, MechVentTypeHRV].include? @fan_type
         return true
       end
+
       return false
     end
 
@@ -3195,6 +3198,7 @@ class HPXML < Object
       if includes_supply_air? && includes_exhaust_air?
         return true
       end
+
       return false
     end
 

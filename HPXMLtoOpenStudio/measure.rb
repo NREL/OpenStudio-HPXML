@@ -3417,7 +3417,7 @@ class OSModel
       surface.setOutsideBoundaryCondition('Outdoors')
     elsif exterior_adjacent_to == HPXML::LocationGround
       surface.setOutsideBoundaryCondition('Foundation')
-    elsif exterior_adjacent_to == HPXML::LocationOtherHousingUnit
+    elsif [HPXML::LocationOtherHousingUnit, HPXML::LocationAdiabatic].include? exterior_adjacent_to
       surface.setOutsideBoundaryCondition('Adiabatic')
     elsif exterior_adjacent_to == HPXML::LocationBasementConditioned
       surface.createAdjacentSurface(create_or_get_space(model, spaces, HPXML::LocationLivingSpace))

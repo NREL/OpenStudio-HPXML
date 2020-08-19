@@ -204,6 +204,7 @@ def create_hpxmls
     'base-enclosure-windows-interior-shading.xml' => 'base.xml',
     'base-enclosure-windows-none.xml' => 'base.xml',
     'base-enclosure-attached-multifamily.xml' => 'base.xml',
+    'base-enclosure-adiabatic.xml' => 'base.xml',
     'base-foundation-multiple.xml' => 'base-foundation-unconditioned-basement.xml',
     'base-foundation-ambient.xml' => 'base.xml',
     'base-foundation-conditioned-basement-slab-insulation.xml' => 'base.xml',
@@ -1029,6 +1030,15 @@ def set_hpxml_rim_joists(hpxml_file, hpxml)
       rim_joist.solar_absorptance = nil
       rim_joist.color = HPXML::ColorMedium
     end
+  elsif ['base-enclosure-adiabatic.xml'].include? hpxml_file
+    hpxml.rim_joists[0].area = 58
+    hpxml.rim_joists.add(id: 'RimJoistAdiabatic',
+                         exterior_adjacent_to: HPXML::LocationAdiabatic,
+                         interior_adjacent_to: HPXML::LocationLivingSpace,
+                         area: 58,
+                         solar_absorptance: 0.7,
+                         emittance: 0.92,
+                         insulation_assembly_r_value: 1.37) # use minimum expected R-Value
   end
   hpxml.rim_joists.each do |rim_joist|
     next unless rim_joist.is_interior
@@ -1368,6 +1378,16 @@ def set_hpxml_walls(hpxml_file, hpxml)
       wall.solar_absorptance = nil
       wall.color = HPXML::ColorMedium
     end
+  elsif ['base-enclosure-adiabatic.xml'].include? hpxml_file
+    hpxml.walls[0].area = 480
+    hpxml.walls.add(id: 'WallAdiabatic',
+                    exterior_adjacent_to: HPXML::LocationAdiabatic,
+                    interior_adjacent_to: HPXML::LocationLivingSpace,
+                    wall_type: HPXML::WallTypeWoodStud,
+                    area: 480,
+                    solar_absorptance: 0.7,
+                    emittance: 0.92,
+                    insulation_assembly_r_value: 2.37) # use minimum expected R-Value
   end
   hpxml.walls.each do |wall|
     next unless wall.is_interior
@@ -1827,6 +1847,13 @@ def set_hpxml_frame_floors(hpxml_file, hpxml)
     hpxml.frame_floors << hpxml.frame_floors[-1].dup
     hpxml.frame_floors[-1].id = 'TinyFloor'
     hpxml.frame_floors[-1].area = 0.05
+  elsif ['base-enclosure-adiabatic.xml'].include? hpxml_file
+    hpxml.frame_floors[0].area = 769.5
+    hpxml.frame_floors.add(id: 'FloorAdiabatic',
+                           exterior_adjacent_to: HPXML::LocationAdiabatic,
+                           interior_adjacent_to: HPXML::LocationLivingSpace,
+                           area: 769.5,
+                           insulation_assembly_r_value: 1.85) # use minimum expected R-Value
   elsif ['invalid_files/base-enclosure-conditioned-basement-slab-insulation.xml'].include? hpxml_file
     hpxml.frame_floors.add(id: 'FloorAboveCondBasement',
                            exterior_adjacent_to: HPXML::LocationBasementConditioned,

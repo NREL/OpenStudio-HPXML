@@ -468,6 +468,7 @@ class HPXMLTest < MiniTest::Test
       next if err_line.include?('CheckUsedConstructions') && err_line.include?('nominally unused constructions')
       next if err_line.include?('WetBulb not converged after') && err_line.include?('iterations(PsyTwbFnTdbWPb)')
       next if err_line.include? 'Inside surface heat balance did not converge with Max Temp Difference'
+
       # HPWHs
       if hpxml.water_heating_systems.select { |wh| wh.water_heater_type == HPXML::WaterHeaterTypeHeatPump }.size > 0
         next if err_line.include? 'Recovery Efficiency and Energy Factor could not be calculated during the test for standard ratings'
@@ -490,6 +491,7 @@ class HPXMLTest < MiniTest::Test
         next if err_line.include? 'Full load outlet temperature indicates a possibility of frost/freeze error continues.'
       end
       next if err_line.include? 'Missing temperature setpoint for LeavingSetpointModulated mode' # These warnings are fine, simulation continues with assigning plant loop setpoint to boiler, which is the expected one
+
       if hpxml.cooling_systems.select { |c| c.cooling_system_type == HPXML::HVACTypeEvaporativeCooler }.size > 0
         # Evap cooler model is not really using Controller:MechanicalVentilation object, so these warnings of ignoring some features are fine.
         # OS requires a Controller:MechanicalVentilation to be attached to the oa controller, however it's not required by E+.
@@ -505,10 +507,12 @@ class HPXMLTest < MiniTest::Test
       next if err_line.include?('Glycol: Temperature') && err_line.include?('out of range (too low) for fluid')
       next if err_line.include?('Glycol: Temperature') && err_line.include?('out of range (too high) for fluid')
       next if err_line.include? 'Plant loop exceeding upper temperature limit'
+
       if hpxml.cooling_systems.select { |c| c.cooling_system_type == HPXML::HVACTypeRoomAirConditioner }.size > 0
         next if err_line.include? 'GetDXCoils: Coil:Cooling:DX:SingleSpeed="ROOM AC CLG COIL" curve values' # TODO: Double-check curves
       end
       next if err_line.include?('Foundation:Kiva') && err_line.include?('wall surfaces with more than four vertices') # TODO: Check alternative approach
+
       if hpxml_path.include?('base-simcontrol-timestep-10-mins.xml') || hpxml_path.include?('ASHRAE_Standard_140')
         next if err_line.include? 'Temperature out of range [-100. to 200.] (PsyPsatFnTemp)'
       end
@@ -717,6 +721,18 @@ class HPXMLTest < MiniTest::Test
       query = "SELECT AVG(Value) FROM TabularDataWithStrings WHERE ReportName='EnvelopeSummary' AND ReportForString='Entire Facility' AND TableName='Opaque Exterior' AND (RowName='#{wall_id}' OR RowName LIKE '#{wall_id}:%') AND ColumnName='Azimuth' AND Units='deg'"
       sql_value = sqlFile.execAndReturnFirstDouble(query).get
       assert_in_epsilon(hpxml_value, sql_value, 0.01)
+
+      # Adiabatic exterior boundary condition
+      next unless wall.exterior_adjacent_to == HPXML::LocationAdiabatic
+
+      hpxml_value = wall.exterior_adjacent_to
+      # Adiabatic surfaces seem to have their "BaseSurfaceIndex" as their "ExtBoundCond" in table "Surfaces" in SQL simulation results
+      query_base_surf_idx = "SELECT BaseSurfaceIndex FROM Surfaces WHERE SurfaceName='#{wall_id}'"
+      query_ext_bound = "SELECT ExtBoundCond FROM Surfaces WHERE SurfaceName='#{wall_id}'"
+      sql_value_base_surf_idx = sqlFile.execAndReturnFirstDouble(query_base_surf_idx).get
+      sql_value_ext_bound = sqlFile.execAndReturnFirstDouble(query_ext_bound).get
+      sql_value = sql_value_base_surf_idx == sql_value_ext_bound ? HPXML::LocationAdiabatic : nil
+      assert_in_epsilon(hpxml_value, sql_value, 0.01)
     end
 
     # Enclosure FrameFloors
@@ -759,6 +775,18 @@ class HPXMLTest < MiniTest::Test
       end
       query = "SELECT AVG(Value) FROM TabularDataWithStrings WHERE ReportName='EnvelopeSummary' AND ReportForString='Entire Facility' AND TableName='Opaque Exterior' AND RowName='#{frame_floor_id}' AND ColumnName='Tilt' AND Units='deg'"
       sql_value = sqlFile.execAndReturnFirstDouble(query).get
+      assert_in_epsilon(hpxml_value, sql_value, 0.01)
+
+      # Adiabatic exterior boundary condition
+      next unless frame_floor.exterior_adjacent_to == HPXML::LocationAdiabatic
+
+      hpxml_value = frame_floor.exterior_adjacent_to
+      # Adiabatic surfaces seem to have their "BaseSurfaceIndex" as their "ExtBoundCond" in table "Surfaces" in SQL simulation results
+      query_base_surf_idx = "SELECT BaseSurfaceIndex FROM Surfaces WHERE SurfaceName='#{frame_floor_id}'"
+      query_ext_bound = "SELECT ExtBoundCond FROM Surfaces WHERE SurfaceName='#{frame_floor_id}'"
+      sql_value_base_surf_idx = sqlFile.execAndReturnFirstDouble(query_base_surf_idx).get
+      sql_value_ext_bound = sqlFile.execAndReturnFirstDouble(query_ext_bound).get
+      sql_value = sql_value_base_surf_idx == sql_value_ext_bound ? HPXML::LocationAdiabatic : nil
       assert_in_epsilon(hpxml_value, sql_value, 0.01)
     end
 

@@ -903,6 +903,7 @@ class SimulationOutputReport < OpenStudio::Measure::ReportingMeasure
       elsif type.downcase.include? 'cooling'
         return cool_sys_ids
       end
+
       fail "Unhandled type: '#{type}'."
     end
 
@@ -1320,6 +1321,7 @@ class SimulationOutputReport < OpenStudio::Measure::ReportingMeasure
     if not sys.seed_id.nil?
       return sys.seed_id
     end
+
     return sys.id
   end
 
