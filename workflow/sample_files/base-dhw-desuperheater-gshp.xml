@@ -306,7 +306,6 @@
             <HeatPump>
               <SystemIdentifier id='HeatPump'/>
               <DistributionSystem idref='HVACDistribution'/>
-              <IsVentilationPreconditioningSystem>false</IsVentilationPreconditioningSystem>
               <HeatPumpType>ground-to-air</HeatPumpType>
               <HeatPumpFuel>electricity</HeatPumpFuel>
               <HeatingCapacity>42000.0</HeatingCapacity>

@@ -306,7 +306,6 @@
             <HeatingSystem>
               <SystemIdentifier id='HeatingSystem'/>
               <DistributionSystem idref='HVACDistribution'/>
-              <IsVentilationPreconditioningSystem>false</IsVentilationPreconditioningSystem>
               <HeatingSystemType>
                 <Boiler/>
               </HeatingSystemType>
@@ -322,7 +321,6 @@
             <CoolingSystem>
               <SystemIdentifier id='CoolingSystem'/>
               <DistributionSystem idref='HVACDistribution2'/>
-              <IsVentilationPreconditioningSystem>false</IsVentilationPreconditioningSystem>
               <CoolingSystemType>central air conditioner</CoolingSystemType>
               <CoolingSystemFuel>electricity</CoolingSystemFuel>
               <CoolingCapacity>48000.0</CoolingCapacity>

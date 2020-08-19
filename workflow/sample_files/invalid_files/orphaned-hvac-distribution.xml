@@ -305,7 +305,6 @@
           <HVACPlant>
             <CoolingSystem>
               <SystemIdentifier id='CoolingSystem'/>
-              <IsVentilationPreconditioningSystem>false</IsVentilationPreconditioningSystem>
               <CoolingSystemType>room air conditioner</CoolingSystemType>
               <CoolingSystemFuel>electricity</CoolingSystemFuel>
               <CoolingCapacity>48000.0</CoolingCapacity>

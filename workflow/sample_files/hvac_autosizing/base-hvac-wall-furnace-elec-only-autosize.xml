@@ -305,7 +305,6 @@
           <HVACPlant>
             <HeatingSystem>
               <SystemIdentifier id='HeatingSystem'/>
-              <IsVentilationPreconditioningSystem>false</IsVentilationPreconditioningSystem>
               <HeatingSystemType>
                 <WallFurnace/>
               </HeatingSystemType>

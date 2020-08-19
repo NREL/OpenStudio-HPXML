@@ -306,7 +306,6 @@
             <HeatingSystem>
               <SystemIdentifier id='HeatingSystem'/>
               <DistributionSystem idref='HVACDistribution'/>
-              <IsVentilationPreconditioningSystem>false</IsVentilationPreconditioningSystem>
               <HeatingSystemType>
                 <Furnace/>
               </HeatingSystemType>
@@ -321,7 +320,6 @@
             <HeatingSystem>
               <SystemIdentifier id='HeatingSystem2'/>
               <DistributionSystem idref='HVACDistribution2'/>
-              <IsVentilationPreconditioningSystem>false</IsVentilationPreconditioningSystem>
               <HeatingSystemType>
                 <Furnace/>
               </HeatingSystemType>
@@ -336,7 +334,6 @@
             <CoolingSystem>
               <SystemIdentifier id='CoolingSystem'/>
               <DistributionSystem idref='HVACDistribution'/>
-              <IsVentilationPreconditioningSystem>false</IsVentilationPreconditioningSystem>
               <CoolingSystemType>central air conditioner</CoolingSystemType>
               <CoolingSystemFuel>electricity</CoolingSystemFuel>
               <CoolingCapacity>24000.0</CoolingCapacity>
@@ -351,7 +348,6 @@
             <CoolingSystem>
               <SystemIdentifier id='CoolingSystem2'/>
               <DistributionSystem idref='HVACDistribution2'/>
-              <IsVentilationPreconditioningSystem>false</IsVentilationPreconditioningSystem>
               <CoolingSystemType>central air conditioner</CoolingSystemType>
               <CoolingSystemFuel>electricity</CoolingSystemFuel>
               <CoolingCapacity>24000.0</CoolingCapacity>

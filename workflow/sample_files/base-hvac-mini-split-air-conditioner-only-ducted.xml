@@ -306,7 +306,6 @@
             <CoolingSystem>
               <SystemIdentifier id='CoolingSystem'/>
               <DistributionSystem idref='HVACDistribution'/>
-              <IsVentilationPreconditioningSystem>false</IsVentilationPreconditioningSystem>
               <CoolingSystemType>mini-split</CoolingSystemType>
               <CoolingSystemFuel>electricity</CoolingSystemFuel>
               <CoolingCapacity>48000.0</CoolingCapacity>

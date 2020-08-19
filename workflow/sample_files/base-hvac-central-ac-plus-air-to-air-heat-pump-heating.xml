@@ -306,7 +306,6 @@
             <CoolingSystem>
               <SystemIdentifier id='CoolingSystem'/>
               <DistributionSystem idref='HVACDistribution'/>
-              <IsVentilationPreconditioningSystem>false</IsVentilationPreconditioningSystem>
               <CoolingSystemType>central air conditioner</CoolingSystemType>
               <CoolingSystemFuel>electricity</CoolingSystemFuel>
               <CoolingCapacity>48000.0</CoolingCapacity>
@@ -321,7 +320,6 @@
             <HeatPump>
               <SystemIdentifier id='HeatPump'/>
               <DistributionSystem idref='HVACDistribution'/>
-              <IsVentilationPreconditioningSystem>false</IsVentilationPreconditioningSystem>
               <HeatPumpType>air-to-air</HeatPumpType>
               <HeatPumpFuel>electricity</HeatPumpFuel>
               <HeatingCapacity>42000.0</HeatingCapacity>

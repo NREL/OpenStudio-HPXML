@@ -305,7 +305,6 @@
           <HVACPlant>
             <HeatPump>
               <SystemIdentifier id='HeatPump'/>
-              <IsVentilationPreconditioningSystem>false</IsVentilationPreconditioningSystem>
               <HeatPumpType>mini-split</HeatPumpType>
               <HeatPumpFuel>electricity</HeatPumpFuel>
               <HeatingCapacity>52000.0</HeatingCapacity>

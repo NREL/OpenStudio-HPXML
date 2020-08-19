@@ -305,7 +305,6 @@
           <HVACPlant>
             <HeatingSystem>
               <SystemIdentifier id='HeatingSystem'/>
-              <IsVentilationPreconditioningSystem>false</IsVentilationPreconditioningSystem>
               <HeatingSystemType>
                 <PortableHeater/>
               </HeatingSystemType>
@@ -320,7 +319,6 @@
             <CoolingSystem>
               <SystemIdentifier id='CoolingSystem'/>
               <DistributionSystem idref='HVACDistribution'/>
-              <IsVentilationPreconditioningSystem>false</IsVentilationPreconditioningSystem>
               <CoolingSystemType>central air conditioner</CoolingSystemType>
               <CoolingSystemFuel>electricity</CoolingSystemFuel>
               <CoolingCapacity>48000.0</CoolingCapacity>

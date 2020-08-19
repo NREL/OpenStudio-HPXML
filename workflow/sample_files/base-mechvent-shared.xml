@@ -306,7 +306,6 @@
             <HeatingSystem>
               <SystemIdentifier id='HeatingSystem'/>
               <DistributionSystem idref='HVACDistribution'/>
-              <IsVentilationPreconditioningSystem>false</IsVentilationPreconditioningSystem>
               <HeatingSystemType>
                 <Furnace/>
               </HeatingSystemType>
@@ -321,7 +320,6 @@
             <CoolingSystem>
               <SystemIdentifier id='CoolingSystem'/>
               <DistributionSystem idref='HVACDistribution'/>
-              <IsVentilationPreconditioningSystem>false</IsVentilationPreconditioningSystem>
               <CoolingSystemType>central air conditioner</CoolingSystemType>
               <CoolingSystemFuel>electricity</CoolingSystemFuel>
               <CoolingCapacity>48000.0</CoolingCapacity>
@@ -333,46 +331,6 @@
               </AnnualCoolingEfficiency>
               <SensibleHeatFraction>0.73</SensibleHeatFraction>
             </CoolingSystem>
-            <CoolingSystem>
-              <SystemIdentifier id='PreconditioningCooling'/>
-              <IsVentilationPreconditioningSystem>true</IsVentilationPreconditioningSystem>
-              <CoolingSystemType>central air conditioner</CoolingSystemType>
-              <CoolingSystemFuel>electricity</CoolingSystemFuel>
-              <CoolingCapacity scope='multiple units'>9600.0</CoolingCapacity>
-              <FractionCoolLoadServed>0.2</FractionCoolLoadServed>
-              <AnnualCoolingEfficiency>
-                <Units>SEER</Units>
-                <Value>13.0</Value>
-              </AnnualCoolingEfficiency>
-              <SensibleHeatFraction>0.65</SensibleHeatFraction>
-            </CoolingSystem>
-            <HeatPump>
-              <SystemIdentifier id='PreconditioningHeating'/>
-              <IsVentilationPreconditioningSystem>true</IsVentilationPreconditioningSystem>
-              <HeatPumpType>air-to-air</HeatPumpType>
-              <HeatPumpFuel>electricity</HeatPumpFuel>
-              <HeatingCapacity scope='multiple units'>42000.0</HeatingCapacity>
-              <HeatingCapacity17F scope='multiple units'>26460.0</HeatingCapacity17F>
-              <CoolingCapacity scope='multiple units'>48000.0</CoolingCapacity>
-              <CompressorType>single stage</CompressorType>
-              <CoolingSensibleHeatFraction>0.73</CoolingSensibleHeatFraction>
-              <BackupSystemFuel>electricity</BackupSystemFuel>
-              <BackupAnnualHeatingEfficiency>
-                <Units>Percent</Units>
-                <Value>1.0</Value>
-              </BackupAnnualHeatingEfficiency>
-              <BackupHeatingCapacity scope='multiple units'>34121.0</BackupHeatingCapacity>
-              <FractionHeatLoadServed>0.2</FractionHeatLoadServed>
-              <FractionCoolLoadServed>0.0</FractionCoolLoadServed>
-              <AnnualCoolingEfficiency>
-                <Units>SEER</Units>
-                <Value>13.0</Value>
-              </AnnualCoolingEfficiency>
-              <AnnualHeatingEfficiency>
-                <Units>HSPF</Units>
-                <Value>7.7</Value>
-              </AnnualHeatingEfficiency>
-            </HeatPump>
           </HVACPlant>
           <HVACControl>
             <SystemIdentifier id='HVACControl'/>
@@ -429,8 +387,18 @@
               <IsSharedSystem>true</IsSharedSystem>
               <FractionOutdoorAir>0.8</FractionOutdoorAir>
               <FanPower scope='multiple units'>300.0</FanPower>
-              <AttachedToPreconditioningHeatingSystem idref='PreconditioningHeating'/>
-              <AttachedToPreconditioningCoolingSystem idref='PreconditioningCooling'/>
+              <extension>
+                <PreconditioningHeating>
+                  <Fuel>natural gas</Fuel>
+                  <Efficiency>0.92</Efficiency>
+                  <Capacity scope='multiple units'>64000</Capacity>
+                </PreconditioningHeating>
+                <PreconditioningCooling>
+                  <Fuel>electricity</Fuel>
+                  <Efficiency>16.0</Efficiency>
+                  <Capacity scope='multiple units'>48000</Capacity>
+                </PreconditioningCooling>
+              </extension>
             </VentilationFan>
           </VentilationFans>
         </MechanicalVentilation>
