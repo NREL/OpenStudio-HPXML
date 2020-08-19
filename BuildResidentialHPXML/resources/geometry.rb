@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 class Geometry
   def self.get_abs_azimuth(azimuth_type, relative_azimuth, building_orientation, offset = 180.0)
     azimuth = nil
