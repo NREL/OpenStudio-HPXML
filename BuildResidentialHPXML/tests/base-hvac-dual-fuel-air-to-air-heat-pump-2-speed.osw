@@ -308,8 +308,6 @@
         "pv_system_array_azimuth_2": 180,
         "pv_system_array_tilt_1": "20",
         "pv_system_array_tilt_2": "20",
-        "pv_system_building_max_power_output_1": 4000,
-        "pv_system_building_max_power_output_2": 4000,
         "pv_system_inverter_efficiency_1": 0.96,
         "pv_system_inverter_efficiency_2": 0.96,
         "pv_system_is_shared_1": false,
