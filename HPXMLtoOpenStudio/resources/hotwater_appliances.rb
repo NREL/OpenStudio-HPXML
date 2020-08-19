@@ -1,4 +1,4 @@
-frozen_string_literal: true
+# frozen_string_literal: true
 
 class HotWaterAndAppliances
   def self.apply(model, runner, weather, living_space,

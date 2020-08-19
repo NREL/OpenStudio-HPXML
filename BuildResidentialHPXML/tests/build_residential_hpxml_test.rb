@@ -120,8 +120,8 @@ class BuildResidentialHPXMLTest < MiniTest::Test
       'single-family-attached-ambient.osw' => 'geometry_unit_type=single-family attached and geometry_foundation_type=Ambient',
       'multifamily-bottom-crawlspace-zero-foundation-height.osw' => 'geometry_unit_type=apartment unit and geometry_level=Bottom and geometry_foundation_type=UnventedCrawlspace and geometry_foundation_height=0.0',
       'ducts-location-and-areas-not-same-type.osw' => 'ducts_supply_location=auto and ducts_supply_surface_area=150.0 and ducts_return_location=attic - unvented and ducts_return_surface_area=50.0',
-      'single-family-attached-no-building-orientation.osw' => 'geometry_unit_type=single-family attached and geometry_num_units=false and geometry_horizontal_location=false',
-      'multifamily-no-building-orientation.osw' => 'geometry_unit_type=apartment unit and geometry_num_units=false and geometry_level=false and geometry_horizontal_location=false'
+      'single-family-attached-no-building-orientation.osw' => 'geometry_unit_type=single-family attached and geometry_building_num_units=false and geometry_horizontal_location=false',
+      'multifamily-no-building-orientation.osw' => 'geometry_unit_type=apartment unit and geometry_building_num_units=false and geometry_level=false and geometry_horizontal_location=false'
     }
 
     measures = {}
@@ -317,6 +317,8 @@ class BuildResidentialHPXMLTest < MiniTest::Test
         fuel_load.weekday_fractions = nil
         fuel_load.weekend_fractions = nil
         fuel_load.monthly_multipliers = nil
+      hpxml.pv_systems.each do |pv_system|
+        pv_system.year_modules_manufactured = nil
       end
       hpxml.collapse_enclosure_surfaces()
 
