@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 def create_osws
   require 'json'
   require_relative 'BuildResidentialHPXML/resources/constants'
@@ -2002,8 +2004,6 @@ def get_values(osw_file, step)
   end
   return step
 end
-
-# frozen_string_literal: true
 
 def create_hpxmls
   require 'oga'
