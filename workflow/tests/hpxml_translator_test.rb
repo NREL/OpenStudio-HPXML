@@ -202,6 +202,8 @@ class HPXMLTest < MiniTest::Test
                             'unattached-hvac-distribution.xml' => ["Attached HVAC distribution system 'foobar' not found for HVAC system 'HeatingSystem'."],
                             'unattached-skylight.xml' => ["Attached roof 'foobar' not found for skylight 'SkylightNorth'."],
                             'unattached-solar-thermal-system.xml' => ["Attached water heating system 'foobar' not found for solar thermal system 'SolarThermalSystem'."],
+                            'unattached-shared-clothes-washer-water-heater.xml' => ["Attached water heating system 'foobar' not found for clothes washer"],
+                            'unattached-shared-dishwasher-water-heater.xml' => ["Attached water heating system 'foobar' not found for dishwasher"],
                             'unattached-window.xml' => ["Attached wall 'foobar' not found for window 'WindowNorth'."],
                             'water-heater-location.xml' => ["WaterHeatingSystem location is 'crawlspace - vented' but building does not have this location specified."],
                             'water-heater-location-other.xml' => ['Expected [1] element(s) but found 0 element(s) for xpath: /HPXML/Building/BuildingDetails/Systems/WaterHeating/WaterHeatingSystem: [not(Location)] |'],
@@ -235,15 +237,15 @@ class HPXMLTest < MiniTest::Test
     # Add reporting measure to workflow
     measure_subdir = 'SimulationOutputReport'
     args = {}
-    args['timeseries_frequency'] = 'hourly'
+    args['timeseries_frequency'] = 'monthly'
     args['include_timeseries_fuel_consumptions'] = true
-    args['include_timeseries_end_use_consumptions'] = false
-    args['include_timeseries_hot_water_uses'] = false
-    args['include_timeseries_total_loads'] = false
-    args['include_timeseries_component_loads'] = false
-    args['include_timeseries_zone_temperatures'] = false
-    args['include_timeseries_airflows'] = false
-    args['include_timeseries_weather'] = false
+    args['include_timeseries_end_use_consumptions'] = true
+    args['include_timeseries_hot_water_uses'] = true
+    args['include_timeseries_total_loads'] = true
+    args['include_timeseries_component_loads'] = true
+    args['include_timeseries_zone_temperatures'] = true
+    args['include_timeseries_airflows'] = true
+    args['include_timeseries_weather'] = true
     update_args_hash(measures, measure_subdir, args)
 
     # Add output variables for combi system energy check and CFIS
@@ -258,10 +260,12 @@ class HPXMLTest < MiniTest::Test
     results = run_hpxml_workflow(rundir, xml, measures, measures_dir,
                                  debug: true, output_vars: output_vars,
                                  run_measures_only: expect_error)
-    workflow_time = Time.now - workflow_start
+    workflow_time = (Time.now - workflow_start).round(1)
     success = results[:success]
     runner = results[:runner]
     sim_time = results[:sim_time]
+    puts "Completed in #{workflow_time} seconds."
+    puts
 
     # Check results
     if expect_error
@@ -378,19 +382,6 @@ class HPXMLTest < MiniTest::Test
   end
 
   def _verify_outputs(runner, rundir, hpxml_path, results)
-    # Check run.log warnings
-    File.readlines(File.join(rundir, 'run.log')).each do |log_line|
-      next if log_line.strip.empty?
-      next if log_line.include? 'Warning: Could not load nokogiri, no HPXML validation performed.'
-      next if log_line.start_with? 'Info: '
-      next if log_line.start_with? 'Executing command'
-      next if (log_line.start_with?('Heat ') || log_line.start_with?('Cool ')) && log_line.include?('=')
-      next if log_line.include? "-cache.csv' could not be found; regenerating it."
-      next if log_line.include?('Warning: HVACDistribution') && log_line.include?('has ducts entirely within conditioned space but there is non-zero leakage to the outside.')
-
-      flunk "Unexpected warning found in run.log: #{log_line}"
-    end
-
     sql_path = File.join(rundir, 'eplusout.sql')
     assert(File.exist? sql_path)
 
@@ -403,6 +394,53 @@ class HPXMLTest < MiniTest::Test
       window.fraction_operable = nil
     end
     hpxml.collapse_enclosure_surfaces()
+
+    # Check run.log warnings
+    File.readlines(File.join(rundir, 'run.log')).each do |log_line|
+      next if log_line.strip.empty?
+      next if log_line.include? 'Warning: Could not load nokogiri, no HPXML validation performed.'
+      next if log_line.start_with? 'Info: '
+      next if log_line.start_with? 'Executing command'
+      next if (log_line.start_with?('Heat ') || log_line.start_with?('Cool ')) && log_line.include?('=')
+      next if log_line.include? "-cache.csv' could not be found; regenerating it."
+      next if log_line.include?('Warning: HVACDistribution') && log_line.include?('has ducts entirely within conditioned space but there is non-zero leakage to the outside.')
+
+      if hpxml.clothes_washers.empty?
+        next if log_line.include? 'No clothes washer specified, the model will not include clothes washer energy use.'
+      end
+      if hpxml.clothes_dryers.empty?
+        next if log_line.include? 'No clothes dryer specified, the model will not include clothes dryer energy use.'
+      end
+      if hpxml.dishwashers.empty?
+        next if log_line.include? 'No dishwasher specified, the model will not include dishwasher energy use.'
+      end
+      if hpxml.refrigerators.empty?
+        next if log_line.include? 'No refrigerator specified, the model will not include refrigerator energy use.'
+      end
+      if hpxml.cooking_ranges.empty?
+        next if log_line.include? 'No cooking range specified, the model will not include cooking range/oven energy use.'
+      end
+      if hpxml.water_heating_systems.empty?
+        next if log_line.include? 'No water heater specified, the model will not include water heating energy use.'
+      end
+      if (hpxml.heating_systems + hpxml.heat_pumps).select { |h| h.fraction_heat_load_served.to_f > 0 }.empty?
+        next if log_line.include? 'No heating system specified, the model will not include space heating energy use.'
+      end
+      if (hpxml.cooling_systems + hpxml.heat_pumps).select { |c| c.fraction_cool_load_served.to_f > 0 }.empty?
+        next if log_line.include? 'No cooling system specified, the model will not include space cooling energy use.'
+      end
+      if hpxml.plug_loads.select { |p| p.plug_load_type == HPXML::PlugLoadTypeOther }.empty?
+        next if log_line.include? "No '#{HPXML::PlugLoadTypeOther}' plug loads specified, the model will not include misc plug load energy use."
+      end
+      if hpxml.plug_loads.select { |p| p.plug_load_type == HPXML::PlugLoadTypeTelevision }.empty?
+        next if log_line.include? "No '#{HPXML::PlugLoadTypeTelevision}' plug loads specified, the model will not include television plug load energy use."
+      end
+      if hpxml.lighting_groups.empty?
+        next if log_line.include? 'No lighting specified, the model will not include lighting energy use.'
+      end
+
+      flunk "Unexpected warning found in run.log: #{log_line}"
+    end
 
     # Check for unexpected warnings
     File.readlines(File.join(rundir, 'eplusout.err')).each do |err_line|
@@ -569,8 +607,8 @@ class HPXMLTest < MiniTest::Test
                                     'base-enclosure-other-multifamily-buffer-space.xml' => 0, # no foundation in contact w/ ground
                                     'base-foundation-walkout-basement.xml' => 4, # 3 foundation walls plus a no-wall exposed perimeter
                                     'base-foundation-complex.xml' => 10,
-                                    'base-misc-large-uncommon-loads.xml' => 2,
-                                    'base-misc-large-uncommon-loads2.xml' => 2 }
+                                    'base-misc-loads-large-uncommon.xml' => 2,
+                                    'base-misc-loads-large-uncommon2.xml' => 2 }
 
     if hpxml_path.include? 'ASHRAE_Standard_140'
       # nop
