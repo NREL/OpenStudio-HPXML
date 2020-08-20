@@ -5,7 +5,6 @@ require 'fileutils'
 def run_hpxml_workflow(rundir, hpxml, measures, measures_dir, debug: false, output_vars: [],
                        output_meters: [], run_measures_only: false, print_prefix: '')
   rm_path(rundir)
-  rm_path(File.join(File.dirname(__FILE__), '..', '..', 'files'))
   FileUtils.mkdir_p(rundir)
 
   # Use print instead of puts in here in case running inside
@@ -81,6 +80,7 @@ def run_hpxml_workflow(rundir, hpxml, measures, measures_dir, debug: false, outp
   if File.exist? File.join(rundir, 'eplusout.err')
     sim_success = false
     File.readlines(File.join(rundir, 'eplusout.err')).map(&:strip).each do |stdout_line|
+print stdout_line
       next unless stdout_line.include? 'EnergyPlus Completed Successfully'
 
       sim_success = true
