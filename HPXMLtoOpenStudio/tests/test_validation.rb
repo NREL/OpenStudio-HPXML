@@ -28,7 +28,7 @@ class HPXMLtoOpenStudioValidationTest < MiniTest::Test
 
   def test_sample_files
     puts "Testing #{@hpxml_docs.size} HPXML files..."
-    @hpxml_docs.values.each do |hpxml_doc|
+    @hpxml_docs.each do |xml, hpxml_doc|
       print '.'
 
       # HPXML Schema validation
@@ -169,7 +169,7 @@ class HPXMLtoOpenStudioValidationTest < MiniTest::Test
     end
   end
 
-  def _test_schema_validation(hpxml_doc)
+  def _test_schema_validation(hpxml_doc, xml)
     # TODO: Remove this when schema validation is included with CLI calls
     schemas_dir = File.absolute_path(File.join(@root_path, 'HPXMLtoOpenStudio', 'resources'))
     errors = XMLHelper.validate(hpxml_doc.to_xml, File.join(schemas_dir, 'HPXML.xsd'), nil)
@@ -227,7 +227,7 @@ class HPXMLtoOpenStudioValidationTest < MiniTest::Test
         element_names << element_name_additional
       elsif assertion.partition(': ').last.include? 'HousePressure'
         # handle [(HousePressure and BuildingAirLeakage/UnitofMeasure[text()!="ACHnatural"]) or (not(HousePressure) and BuildingAirLeakage/UnitofMeasure[text()="ACHnatural"])]
-        element_names[0] = 'HousePressure' # replacing element name with 'HousePressure' for the test (i.e. the test by element deletion). 
+        element_names[0] = 'HousePressure' # replacing element name with 'HousePressure' for the test (i.e. the test by element deletion).
       end
     end
 
