@@ -209,7 +209,6 @@ class BuildResidentialHPXMLTest < MiniTest::Test
       end
       hpxml.foundation_walls.each do |foundation_wall|
         next if foundation_wall.insulation_assembly_r_value.nil?
-
         foundation_wall.insulation_assembly_r_value = foundation_wall.insulation_assembly_r_value.round(2)
       end
       hpxml.walls.each do |wall|
@@ -317,6 +316,7 @@ class BuildResidentialHPXMLTest < MiniTest::Test
         fuel_load.weekday_fractions = nil
         fuel_load.weekend_fractions = nil
         fuel_load.monthly_multipliers = nil
+      end
       hpxml.pv_systems.each do |pv_system|
         pv_system.year_modules_manufactured = nil
       end

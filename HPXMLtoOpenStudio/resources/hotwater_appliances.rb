@@ -275,16 +275,15 @@ class HotWaterAndAppliances
       elsif not dishwasher.is_shared_appliance
         gpd_frac = water_heating_system.fraction_dhw_load_served
       end
-      if not gpd_frac.nil?
-        if not schedules_file.nil?
-          dw_peak_flow = schedules_file.calc_peak_flow_from_daily_gpm(col_name: 'dishwasher', daily_water: dw_gpd)
-          water_dw_schedule = schedules_file.create_schedule_file(col_name: 'dishwasher')
-        else
-          dw_peak_flow = dw_schedule.calcPeakFlowFromDailygpm(dw_gpd)
-          water_dw_schedule = dw_schedule.schedule
-        end
-        add_water_use_equipment(model, Constants.ObjectNameDishwasher, dw_peak_flow * gpd_frac * non_solar_fraction, water_dw_schedule, setpoint_scheds[water_heating_system.id], water_use_connections[water_heating_system.id])
+      next unless not gpd_frac.nil?
+      if not schedules_file.nil?
+        dw_peak_flow = schedules_file.calc_peak_flow_from_daily_gpm(col_name: 'dishwasher', daily_water: dw_gpd)
+        water_dw_schedule = schedules_file.create_schedule_file(col_name: 'dishwasher')
+      else
+        dw_peak_flow = dw_schedule.calcPeakFlowFromDailygpm(dw_gpd)
+        water_dw_schedule = dw_schedule.schedule
       end
+      add_water_use_equipment(model, Constants.ObjectNameDishwasher, dw_peak_flow * gpd_frac * non_solar_fraction, water_dw_schedule, setpoint_scheds[water_heating_system.id], water_use_connections[water_heating_system.id])
     end
 
     if not hot_water_distribution.nil?

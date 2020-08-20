@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 def create_osws
   require 'json'
   require_relative 'BuildResidentialHPXML/resources/constants'
@@ -209,7 +211,6 @@ def create_osws
     'base-simcontrol-daylight-saving-disabled.osw' => 'base.osw',
     'base-simcontrol-runperiod-1-month.osw' => 'base.osw',
     'base-simcontrol-timestep-10-mins.osw' => 'base.osw',
-    'base-schedules-average.osw' => 'base.osw',
     'base-schedules-stochastic.osw' => 'base.osw',
     'base-schedules-user-specified.osw' => 'base.osw',
 
@@ -1774,8 +1775,6 @@ def get_values(osw_file, step)
     step.setArgument('simulation_control_daylight_saving_end_day_of_month', 6)
   elsif ['base-simcontrol-daylight-saving-disabled.osw'].include? osw_file
     step.setArgument('simulation_control_daylight_saving_enabled', false)
-  elsif ['base-schedules-average.osw'].include? osw_file
-    step.setArgument('schedules_type', 'average')
   elsif ['base-schedules-stochastic.osw'].include? osw_file
     step.setArgument('schedules_type', 'stochastic')
   elsif ['base-schedules-user-specified.osw'].include? osw_file
@@ -1899,8 +1898,6 @@ def get_values(osw_file, step)
   end
   return step
 end
-
-# frozen_string_literal: true
 
 def create_hpxmls
   require 'oga'
@@ -2214,7 +2211,6 @@ def create_hpxmls
     'base-simcontrol-daylight-saving-disabled.xml' => 'base.xml',
     'base-simcontrol-runperiod-1-month.xml' => 'base.xml',
     'base-simcontrol-timestep-10-mins.xml' => 'base.xml',
-    'base-schedules-average.xml' => 'base.xml',
     'base-schedules-stochastic.xml' => 'base.xml',
     'base-schedules-user-specified.xml' => 'base.xml',
 
