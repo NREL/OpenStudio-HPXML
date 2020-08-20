@@ -206,7 +206,8 @@ class HotWaterAndAppliances
       if not schedules_file.nil?
         water_schedule = schedules_file.create_schedule_file(col_name: 'fixtures')
       else
-        schedule = HotWaterSchedule.new(model, Constants.ObjectNameFixtures, nbeds)
+        schedule_obj = HotWaterSchedule.new(model, Constants.ObjectNameFixtures, nbeds)
+        water_schedule = schedule_obj.schedule
       end
     end
 
@@ -223,9 +224,8 @@ class HotWaterAndAppliances
           fx_peak_flow = schedules_file.calc_peak_flow_from_daily_gpm(col_name: 'fixtures', daily_water: fx_gpd)
           dist_water_peak_flow = schedules_file.calc_peak_flow_from_daily_gpm(col_name: 'fixtures', daily_water: w_gpd)
         else
-          fx_peak_flow = schedule.calcPeakFlowFromDailygpm(fx_gpd)
-          dist_water_peak_flow = schedule.calcPeakFlowFromDailygpm(w_gpd)
-          water_schedule = schedule.schedule
+          fx_peak_flow = schedule_obj.calcPeakFlowFromDailygpm(fx_gpd)
+          dist_water_peak_flow = schedule_obj.calcPeakFlowFromDailygpm(w_gpd)
         end
 
         # Fixtures (showers, sinks, baths)
@@ -293,8 +293,8 @@ class HotWaterAndAppliances
         water_design_level_sens = schedules_file.calc_design_level_from_daily_kwh(col_name: 'fixtures', daily_kwh: UnitConversions.convert(water_sens_btu, 'Btu', 'kWh') / 365.0)
         water_design_level_lat = schedules_file.calc_design_level_from_daily_kwh(col_name: 'fixtures', daily_kwh: UnitConversions.convert(water_lat_btu, 'Btu', 'kWh') / 365.0)
       else
-        water_design_level_sens = schedule.calcDesignLevelFromDailykWh(UnitConversions.convert(water_sens_btu, 'Btu', 'kWh') / 365.0)
-        water_design_level_lat = schedule.calcDesignLevelFromDailykWh(UnitConversions.convert(water_lat_btu, 'Btu', 'kWh') / 365.0)
+        water_design_level_sens = schedule_obj.calcDesignLevelFromDailykWh(UnitConversions.convert(water_sens_btu, 'Btu', 'kWh') / 365.0)
+        water_design_level_lat = schedule_obj.calcDesignLevelFromDailykWh(UnitConversions.convert(water_lat_btu, 'Btu', 'kWh') / 365.0)
       end
       add_other_equipment(model, Constants.ObjectNameWaterSensible, living_space, water_design_level_sens, 1.0, 0.0, water_schedule, nil)
       add_other_equipment(model, Constants.ObjectNameWaterLatent, living_space, water_design_level_lat, 0.0, 1.0, water_schedule, nil)

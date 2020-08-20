@@ -34,7 +34,6 @@ class HPXMLTest < MiniTest::Test
     xmls = []
     test_dirs.each do |test_dir|
       Dir["#{test_dir}/*.xml"].sort.each do |xml|
-        next if xml.include? 'base-schedules'
         xmls << File.absolute_path(xml)
       end
     end
