@@ -1199,87 +1199,95 @@ class Airflow
     return obj_sch_sensors
   end
 
-  def self.calc_hrv_erv_effectiveness(vent_mech)
-    vent_mech_cfm = vent_mech.average_flow_rate
-    if (vent_mech_cfm > 0)
-      # Must assume an operating condition (HVI seems to use CSA 439)
-      t_sup_in = 0.0
-      w_sup_in = 0.0028
-      t_exh_in = 22.0
-      w_exh_in = 0.0065
-      cp_a = 1006.0
-      p_fan = vent_mech.average_fan_power # Watts
+  def self.calc_hrv_erv_effectiveness(vent_mech_fans)
+    hrv_erv_effectiveness_map = {}
+    vent_mech_fans.each do |vent_mech|
+      hrv_erv_effectiveness_map[vent_mech] = {}
 
-      m_fan = UnitConversions.convert(vent_mech_cfm, 'cfm', 'm^3/s') * 16.02 * Psychrometrics.rhoD_fT_w_P(UnitConversions.convert(t_sup_in, 'C', 'F'), w_sup_in, 14.7) # kg/s
+      vent_mech_cfm = vent_mech.average_flow_rate
+      if (vent_mech_cfm > 0)
+        # Must assume an operating condition (HVI seems to use CSA 439)
+        t_sup_in = 0.0
+        w_sup_in = 0.0028
+        t_exh_in = 22.0
+        w_exh_in = 0.0065
+        cp_a = 1006.0
+        p_fan = vent_mech.average_fan_power # Watts
 
-      if not vent_mech.sensible_recovery_efficiency.nil?
-        # The following is derived from CSA 439, Clause 9.3.3.1, Eq. 12:
-        #    E_SHR = (m_sup,fan * Cp * (Tsup,out - Tsup,in) - P_sup,fan) / (m_exh,fan * Cp * (Texh,in - Tsup,in) + P_exh,fan)
-        t_sup_out = t_sup_in + (vent_mech.sensible_recovery_efficiency * (m_fan * cp_a * (t_exh_in - t_sup_in) + p_fan) + p_fan) / (m_fan * cp_a)
+        m_fan = UnitConversions.convert(vent_mech_cfm, 'cfm', 'm^3/s') * 16.02 * Psychrometrics.rhoD_fT_w_P(UnitConversions.convert(t_sup_in, 'C', 'F'), w_sup_in, 14.7) # kg/s
 
-        # Calculate the apparent sensible effectiveness
-        vent_mech_apparent_sens_eff = (t_sup_out - t_sup_in) / (t_exh_in - t_sup_in)
+        if not vent_mech.sensible_recovery_efficiency.nil?
+          # The following is derived from CSA 439, Clause 9.3.3.1, Eq. 12:
+          #    E_SHR = (m_sup,fan * Cp * (Tsup,out - Tsup,in) - P_sup,fan) / (m_exh,fan * Cp * (Texh,in - Tsup,in) + P_exh,fan)
+          t_sup_out = t_sup_in + (vent_mech.sensible_recovery_efficiency * (m_fan * cp_a * (t_exh_in - t_sup_in) + p_fan) + p_fan) / (m_fan * cp_a)
 
-      else
-        # The following is derived from (taken from CSA 439, Clause 9.2.1, Eq. 7):
-        t_sup_out = t_sup_in + (vent_mech.sensible_recovery_efficiency_adjusted * (t_exh_in - t_sup_in))
+          # Calculate the apparent sensible effectiveness
+          vent_mech_apparent_sens_eff = (t_sup_out - t_sup_in) / (t_exh_in - t_sup_in)
 
-        vent_mech_apparent_sens_eff = vent_mech.sensible_recovery_efficiency_adjusted
-
-      end
-
-      # Calculate the supply temperature before the fan
-      t_sup_out_gross = t_sup_out - p_fan / (m_fan * cp_a)
-
-      # Sensible effectiveness of the HX only
-      vent_mech_sens_eff = (t_sup_out_gross - t_sup_in) / (t_exh_in - t_sup_in)
-
-      if (vent_mech_sens_eff < 0.0) || (vent_mech_sens_eff > 1.0)
-        fail "The calculated ERV/HRV sensible effectiveness is #{vent_mech_sens_eff} but should be between 0 and 1. Please revise ERV/HRV efficiency values."
-      end
-
-      # Use summer test condition to determine the latent effectiveness since TRE is generally specified under the summer condition
-      if (not vent_mech.total_recovery_efficiency.nil?) || (not vent_mech.total_recovery_efficiency_adjusted.nil?)
-
-        t_sup_in = 35.0
-        w_sup_in = 0.0178
-        t_exh_in = 24.0
-        w_exh_in = 0.0092
-
-        m_fan = UnitConversions.convert(vent_mech_cfm, 'cfm', 'm^3/s') * UnitConversions.convert(Psychrometrics.rhoD_fT_w_P(UnitConversions.convert(t_sup_in, 'C', 'F'), w_sup_in, 14.7), 'lbm/ft^3', 'kg/m^3') # kg/s
-
-        t_sup_out_gross = t_sup_in - vent_mech_sens_eff * (t_sup_in - t_exh_in)
-        t_sup_out = t_sup_out_gross + p_fan / (m_fan * cp_a)
-
-        h_sup_in = Psychrometrics.h_fT_w_SI(t_sup_in, w_sup_in)
-        h_exh_in = Psychrometrics.h_fT_w_SI(t_exh_in, w_exh_in)
-
-        if not vent_mech.total_recovery_efficiency.nil?
-          # The following is derived from CSA 439, Clause 9.3.3.2, Eq. 13:
-          #    E_THR = (m_sup,fan * Cp * (h_sup,out - h_sup,in) - P_sup,fan) / (m_exh,fan * Cp * (h_exh,in - h_sup,in) + P_exh,fan)
-          h_sup_out = h_sup_in - (vent_mech.total_recovery_efficiency * (m_fan * (h_sup_in - h_exh_in) + p_fan) + p_fan) / m_fan
         else
           # The following is derived from (taken from CSA 439, Clause 9.2.1, Eq. 7):
-          h_sup_out = h_sup_in - (vent_mech.total_recovery_efficiency_adjusted * (h_sup_in - h_exh_in))
+          t_sup_out = t_sup_in + (vent_mech.sensible_recovery_efficiency_adjusted * (t_exh_in - t_sup_in))
+
+          vent_mech_apparent_sens_eff = vent_mech.sensible_recovery_efficiency_adjusted
+
         end
 
-        w_sup_out = Psychrometrics.w_fT_h_SI(t_sup_out, h_sup_out)
-        vent_mech_lat_eff = [0.0, (w_sup_out - w_sup_in) / (w_exh_in - w_sup_in)].max
+        # Calculate the supply temperature before the fan
+        t_sup_out_gross = t_sup_out - p_fan / (m_fan * cp_a)
 
-        if (vent_mech_lat_eff < 0.0) || (vent_mech_lat_eff > 1.0)
-          fail "The calculated ERV/HRV latent effectiveness is #{vent_mech_lat_eff} but should be between 0 and 1. Please revise ERV/HRV efficiency values."
+        # Sensible effectiveness of the HX only
+        vent_mech_sens_eff = (t_sup_out_gross - t_sup_in) / (t_exh_in - t_sup_in)
+
+        if (vent_mech_sens_eff < 0.0) || (vent_mech_sens_eff > 1.0)
+          fail "The calculated ERV/HRV sensible effectiveness is #{vent_mech_sens_eff} but should be between 0 and 1. Please revise ERV/HRV efficiency values."
         end
 
+        # Use summer test condition to determine the latent effectiveness since TRE is generally specified under the summer condition
+        if (not vent_mech.total_recovery_efficiency.nil?) || (not vent_mech.total_recovery_efficiency_adjusted.nil?)
+
+          t_sup_in = 35.0
+          w_sup_in = 0.0178
+          t_exh_in = 24.0
+          w_exh_in = 0.0092
+
+          m_fan = UnitConversions.convert(vent_mech_cfm, 'cfm', 'm^3/s') * UnitConversions.convert(Psychrometrics.rhoD_fT_w_P(UnitConversions.convert(t_sup_in, 'C', 'F'), w_sup_in, 14.7), 'lbm/ft^3', 'kg/m^3') # kg/s
+
+          t_sup_out_gross = t_sup_in - vent_mech_sens_eff * (t_sup_in - t_exh_in)
+          t_sup_out = t_sup_out_gross + p_fan / (m_fan * cp_a)
+
+          h_sup_in = Psychrometrics.h_fT_w_SI(t_sup_in, w_sup_in)
+          h_exh_in = Psychrometrics.h_fT_w_SI(t_exh_in, w_exh_in)
+
+          if not vent_mech.total_recovery_efficiency.nil?
+            # The following is derived from CSA 439, Clause 9.3.3.2, Eq. 13:
+            #    E_THR = (m_sup,fan * Cp * (h_sup,out - h_sup,in) - P_sup,fan) / (m_exh,fan * Cp * (h_exh,in - h_sup,in) + P_exh,fan)
+            h_sup_out = h_sup_in - (vent_mech.total_recovery_efficiency * (m_fan * (h_sup_in - h_exh_in) + p_fan) + p_fan) / m_fan
+          else
+            # The following is derived from (taken from CSA 439, Clause 9.2.1, Eq. 7):
+            h_sup_out = h_sup_in - (vent_mech.total_recovery_efficiency_adjusted * (h_sup_in - h_exh_in))
+          end
+
+          w_sup_out = Psychrometrics.w_fT_h_SI(t_sup_out, h_sup_out)
+          vent_mech_lat_eff = [0.0, (w_sup_out - w_sup_in) / (w_exh_in - w_sup_in)].max
+
+          if (vent_mech_lat_eff < 0.0) || (vent_mech_lat_eff > 1.0)
+            fail "The calculated ERV/HRV latent effectiveness is #{vent_mech_lat_eff} but should be between 0 and 1. Please revise ERV/HRV efficiency values."
+          end
+
+        else
+          vent_mech_lat_eff = 0.0
+        end
       else
+        vent_mech_apparent_sens_eff = 0.0
+        vent_mech_sens_eff = 0.0
         vent_mech_lat_eff = 0.0
       end
-    else
-      vent_mech_apparent_sens_eff = 0.0
-      vent_mech_sens_eff = 0.0
-      vent_mech_lat_eff = 0.0
-    end
 
-    return vent_mech_sens_eff, vent_mech_lat_eff, vent_mech_apparent_sens_eff
+      hrv_erv_effectiveness_map[vent_mech][:vent_mech_sens_eff] = vent_mech_sens_eff
+      hrv_erv_effectiveness_map[vent_mech][:vent_mech_lat_eff] = vent_mech_lat_eff
+      hrv_erv_effectiveness_map[vent_mech][:vent_mech_apparent_sens_eff] = vent_mech_apparent_sens_eff
+    end
+    return hrv_erv_effectiveness_map
   end
 
   def self.apply_cfis_to_infil_program(infil_program, vent_mech, cfis_fan_actuator)
@@ -1357,7 +1365,7 @@ class Airflow
     return vent_mech_fan_actuator
   end
 
-  def self.apply_erv_hrv_load_to_infil_program(model, infil_program, vent_mech_cfm, vent_mech_sens_eff, vent_mech_lat_eff, erv_sens_load_actuator, erv_lat_load_actuator)
+  def self.apply_erv_hrv_load_to_infil_program(model, infil_program, vent_mech_cfm, vent_mech_sens_eff, vent_mech_lat_eff, erv_sens_load_actuator, erv_lat_load_actuator, preconditioned = false)
     # Calculate mass flow rate based on outdoor air density
     infil_program.addLine("Set balanced_flow_rate = #{UnitConversions.convert(vent_mech_cfm, 'cfm', 'm^3/s')}")
     infil_program.addLine('Set ERV_MFR = balanced_flow_rate * ERVSupRho')
@@ -1377,11 +1385,129 @@ class Airflow
     infil_program.addLine('Set ERVLatToLv = ERVTotalToLv - ERVSensToLv')
 
     # Actuator
-    infil_program.addLine("Set #{erv_sens_load_actuator.name} = #{erv_sens_load_actuator.name} + ERVSensToLv")
-    infil_program.addLine("Set #{erv_lat_load_actuator.name} = #{erv_lat_load_actuator.name} + ERVLatToLv")
-    infil_program.addLine("Set QWHV_ervhrv = QWHV_ervhrv + #{UnitConversions.convert(vent_mech_cfm, 'cfm', 'm^3/s')}")
+    if not preconditioned
+      infil_program.addLine("Set #{erv_sens_load_actuator.name} = #{erv_sens_load_actuator.name} + ERVSensToLv")
+      infil_program.addLine("Set #{erv_lat_load_actuator.name} = #{erv_lat_load_actuator.name} + ERVLatToLv")
+      infil_program.addLine("Set QWHV_ervhrv = QWHV_ervhrv + #{UnitConversions.convert(vent_mech_cfm, 'cfm', 'm^3/s')}")
+    end
 
     return infil_program
+  end
+
+  def self.apply_erv_hrv(model, program, vent_mech_erv_hrv, hrv_erv_effectiveness_map, preconditioned = false)
+    program.addLine('Set QWHV_ervhrv = 0.0')
+    if not vent_mech_erv_hrv.empty?
+      if not preconditioned
+        # Actuators for ERV/HRV
+        sens_name = "#{Constants.ObjectNameERVHRV} sensible load"
+        erv_sens_load_actuator = create_sens_lat_load_actuator_and_equipment(model, sens_name, @living_space, 0.0, 0.0)
+        lat_name = "#{Constants.ObjectNameERVHRV} latent load"
+        erv_lat_load_actuator = create_sens_lat_load_actuator_and_equipment(model, lat_name, @living_space, 1.0, 0.0)
+
+        program.addLine("Set #{erv_sens_load_actuator.name} = 0.0")
+        program.addLine("Set #{erv_lat_load_actuator.name} = 0.0")
+      end
+
+      # ERV/HRV EMS load model
+      # E+ ERV model is using standard density for MFR calculation, caused discrepancy with other system types.
+      # Therefore ERV is modeled within EMS infiltration program
+
+      # Air property at inlet nodes in two sides of ERV
+      # Common part across multiple erv/hrv programs, create only once
+      program.addLine("Set ERVSupInPb = #{@pbar_sensor.name}") # oa barometric pressure
+      program.addLine("Set ERVSupInTemp = #{@tout_sensor.name}") # oa db temperature
+      program.addLine("Set ERVSupInW = #{@wout_sensor.name}")   # oa humidity ratio
+      program.addLine('Set ERVSupRho = (@RhoAirFnPbTdbW ERVSupInPb ERVSupInTemp ERVSupInW)')
+      program.addLine('Set ERVSupCp = (@CpAirFnW ERVSupInW)')
+      program.addLine('Set ERVSupInEnth = (@HFnTdbW ERVSupInTemp ERVSupInW)')
+
+      program.addLine("Set ERVSecInTemp = #{@tin_sensor.name}") # zone air temperature
+      program.addLine("Set ERVSecInW = #{@win_sensor.name}") # zone air humidity ratio
+      program.addLine('Set ERVSecCp = (@CpAirFnW ERVSecInW)')
+      program.addLine('Set ERVSecInEnth = (@HFnTdbW ERVSecInTemp ERVSecInW)')
+    end
+
+    # Apply ERV/HRV mechanical ventilation
+    vent_mech_erv_hrv.each do |vent_mech|
+      program = apply_erv_hrv_load_to_infil_program(model, program, vent_mech.average_flow_rate, hrv_erv_effectiveness_map[vent_mech][:vent_mech_sens_eff], hrv_erv_effectiveness_map[vent_mech][:vent_mech_lat_eff], erv_sens_load_actuator, erv_lat_load_actuator, preconditioned)
+    end
+    return program
+  end
+
+  def self.apply_preconditioning_equipment(model, vent_mech_precond)
+    # Load Actuators for shared system
+    sens_load_actuator = create_sens_lat_load_actuator_and_equipment(model, 'shared mech vent sensible load', @living_space, 0.0, 0.0)
+    lat_load_actuator = create_sens_lat_load_actuator_and_equipment(model, 'shared mech vent latent load', @living_space, 1.0, 0.0)
+
+    # TODO: ERV/HRV integration?
+    precond_program = OpenStudio::Model::EnergyManagementSystemProgram.new(model)
+    precond_program.setName('shared mech vent preconditioning program')
+    # Air property at inlet nodes in two sides of ERV
+    # Common part across multiple erv/hrv programs, create only once
+    precond_program.addLine("Set OAInPb = #{@pbar_sensor.name}") # oa barometric pressure
+    precond_program.addLine("Set OAInTemp = #{@tout_sensor.name}") # oa db temperature
+    precond_program.addLine("Set OAInW = #{@wout_sensor.name}") # oa humidity ratio
+    precond_program.addLine('Set OAInRho = (@RhoAirFnPbTdbW OAInPb OAInTemp OAInW)')
+
+    precond_program.addLine("Set IndoorTemp = #{@tin_sensor.name}") # zone air temperature
+    precond_program.addLine("Set IndoorW = #{@win_sensor.name}") # zone air humidity ratio
+    precond_program.addLine('Set IndoorCp = (@CpAirFnW IndoorW)')
+    precond_program.addLine('Set IndoorEnth = (@HFnTdbW IndoorTemp IndoorW)')
+    precond_program.addLine("Set #{sens_load_actuator.name} = 0.0") # Air temperature after preconditioning
+    precond_program.addLine("Set #{lat_load_actuator.name} = 0.0") # Air temperature after preconditioning
+
+    # Calculate mass flow rate based on outdoor air density
+    vent_mech_precond.each do |vent_mech|
+      if not [HPXML::MechVentTypeERV, HPXML::MechVentTypeHRV].include? vent_mech.fan_type
+        precond_program.addLine("Set shared_flow_rate = #{UnitConversions.convert(vent_mech.average_flow_rate, 'cfm', 'm^3/s')}")
+        precond_program.addLine('Set PreconditionedW = OAInW')
+        precond_program.addLine('Set OA_MFR = shared_flow_rate * OAInRho')
+
+        # Load calculation
+        precond_program.addLine('Set OALoadSensToLv = OA_MFR * IndoorCp * (OAInTemp - IndoorTemp)')
+      else
+        hrv_erv_effectiveness_map = calc_hrv_erv_effectiveness([vent_mech])
+        precond_program = apply_erv_hrv(model, precond_program, [vent_mech], hrv_erv_effectiveness_map, true)
+        precond_program.addLine('Set OALoadSensToLv = ERVSensToLv')
+        precond_program.addLine('Set PreconditionedW = ERVSupOutW')
+      end
+      precond_program.addLine('Set UnmetLoad = 0.0')
+      if not vent_mech.preconditioning_heating_capacity.nil?
+        precond_program.addLine("Set PreconditioningCapHeating = #{UnitConversions.convert(vent_mech.preconditioning_heating_capacity, 'Btu/hr', 'W')}")
+      else
+        precond_program.addLine('Set PreconditioningCapHeating = 0.0')
+      end
+      if not vent_mech.preconditioning_cooling_capacity.nil?
+        precond_program.addLine("Set PreconditioningCapCooling = #{UnitConversions.convert(vent_mech.preconditioning_cooling_capacity, 'Btu/hr', 'W')}")
+      else
+        precond_program.addLine('Set PreconditioningCapCooling = 0.0')
+      end
+      precond_program.addLine('If (OALoadSensToLv > 0.0) && (PreconditioningCapCooling < OALoadSensToLv)') # Cooling load not all resolved
+      precond_program.addLine('Set UnmetLoad = OALoadSensToLv - PreconditioningCapCooling') # Cooling load, heat gain
+      precond_program.addLine('Set PreconditionedAirTemp = IndoorTemp + (UnmetLoad / OA_MFR / IndoorCp)') # Air temperature after preconditioning
+      precond_program.addLine('ElseIf (OALoadSensToLv < 0.0) && (PreconditioningCapHeating < (-OALoadSensToLv))') # Heating load not all resolved
+      precond_program.addLine('Set UnmetLoad = PreconditioningCapHeating + OALoadSensToLv') # Heating load, heat loss
+      precond_program.addLine('Set PreconditionedAirTemp = IndoorTemp + (UnmetLoad / OA_MFR / IndoorCp)') # Air temperature after preconditioning
+      precond_program.addLine('Else') # No load introduced to zone
+      precond_program.addLine('Set PreconditionedAirTemp = IndoorTemp') # Sens load resolved by preconditioning equipment
+      precond_program.addLine('EndIf') # Sens load resolved by preconditioning equipment
+      precond_program.addLine("Set #{sens_load_actuator.name} = #{sens_load_actuator.name} + UnmetLoad") # Heating load
+      # Check if air is saturated after preconditioning, if so, calculate the latent heat gain/loss
+      precond_program.addLine('Set W_sat = (@WFnTdbRhPb PreconditionedAirTemp 1.0 OAInPb)')
+      precond_program.addLine('If PreconditionedW > W_sat')
+      precond_program.addLine('  Set PreconditionedW = W_sat')
+      precond_program.addLine('EndIf')
+      precond_program.addLine('Set PreconditionedEnth = (@HFnTdbW PreconditionedAirTemp PreconditionedW)')
+      precond_program.addLine('Set OALoadTotalToLv = OA_MFR * (PreconditionedEnth - IndoorEnth)')
+      precond_program.addLine('Set OALoadLatToLv = OALoadTotalToLv - UnmetLoad')
+      # Actuator
+      precond_program.addLine("Set #{lat_load_actuator.name} = #{lat_load_actuator.name} + OALoadLatToLv")
+    end
+
+    program_calling_manager = OpenStudio::Model::EnergyManagementSystemProgramCallingManager.new(model)
+    program_calling_manager.setName("#{precond_program.name} calling manager")
+    program_calling_manager.setCallingPoint('BeginTimestepBeforePredictor')
+    program_calling_manager.addProgram(precond_program)
   end
 
   def self.apply_infiltration_and_ventilation_fans(model, weather, vent_fans_mech, vent_fans_kitchen, vent_fans_bath, has_flue_chimney, air_infils, vented_attic, vented_crawl)
@@ -1418,11 +1544,13 @@ class Airflow
     bath_sch_sensors_map = apply_local_ventilation(model, vent_fans_bath, Constants.ObjectNameMechanicalVentilationBathFan)
 
     # Get mechanical ventilation
-    vent_mech_sup = vent_fans_mech.select { |vent_mech| vent_mech.fan_type == HPXML::MechVentTypeSupply }
-    vent_mech_exh = vent_fans_mech.select { |vent_mech| vent_mech.fan_type == HPXML::MechVentTypeExhaust }
-    vent_mech_cfis = vent_fans_mech.select { |vent_mech| vent_mech.fan_type == HPXML::MechVentTypeCFIS }
-    vent_mech_bal = vent_fans_mech.select { |vent_mech| vent_mech.fan_type == HPXML::MechVentTypeBalanced }
-    vent_mech_erv_hrv = vent_fans_mech.select { |vent_mech| [HPXML::MechVentTypeERV, HPXML::MechVentTypeHRV].include? vent_mech.fan_type }
+    vent_mech_precond = vent_fans_mech.select { |vent_mech| (not vent_mech.unit_preconditioning_heating_capacity.nil?) || (not vent_mech.unit_preconditioning_cooling_capacity.nil?) }
+    vent_mech_nonprecond = vent_fans_mech.select { |vent_mech| vent_mech.unit_preconditioning_heating_capacity.nil? && vent_mech.unit_preconditioning_cooling_capacity.nil? }
+    vent_mech_sup = vent_mech_nonprecond.select { |vent_mech| vent_mech.fan_type == HPXML::MechVentTypeSupply }
+    vent_mech_exh = vent_mech_nonprecond.select { |vent_mech| vent_mech.fan_type == HPXML::MechVentTypeExhaust }
+    vent_mech_cfis = vent_mech_nonprecond.select { |vent_mech| vent_mech.fan_type == HPXML::MechVentTypeCFIS }
+    vent_mech_bal = vent_mech_nonprecond.select { |vent_mech| vent_mech.fan_type == HPXML::MechVentTypeBalanced }
+    vent_mech_erv_hrv = vent_mech_nonprecond.select { |vent_mech| [HPXML::MechVentTypeERV, HPXML::MechVentTypeHRV].include? vent_mech.fan_type }
 
     sup_vent_mech_fan_w = vent_mech_sup.map { |vent_mech| vent_mech.average_fan_power }.sum(0.0)
     exh_vent_mech_fan_w = vent_mech_exh.map { |vent_mech| vent_mech.average_fan_power }.sum(0.0)
@@ -1451,9 +1579,10 @@ class Airflow
     tot_unbal_cfm = (tot_sup_cfm - tot_exh_cfm).abs
 
     # Store info for HVAC Sizing measure
+    # FIXME: Just consider non-preconditioned mech vent systems for hvac sizing load calculation?
     model.getBuilding.additionalProperties.setFeature(Constants.SizingInfoMechVentWholeHouseRateBalanced, tot_bal_cfm)
     model.getBuilding.additionalProperties.setFeature(Constants.SizingInfoMechVentWholeHouseRateUnbalanced, tot_unbal_cfm)
-    model.getBuilding.additionalProperties.setFeature(Constants.SizingInfoMechVentExist, (not vent_fans_mech.empty?))
+    model.getBuilding.additionalProperties.setFeature(Constants.SizingInfoMechVentExist, (not vent_mech_nonprecond.empty?))
 
     # Fan Actuators
     cfis_fan_actuator = add_ee_for_vent_fan_power(model, Constants.ObjectNameMechanicalVentilationHouseFanCFIS, 0.0, true)
@@ -1478,53 +1607,17 @@ class Airflow
 
     infil_program = apply_infiltration_to_living(living_ach50, living_const_ach, infil_program, weather, has_flue_chimney)
 
-    infil_program.addLine('Set QWHV_ervhrv = 0.0')
-    if not vent_mech_erv_hrv.empty?
-      # Actuators for ERV/HRV
-      sens_name = "#{Constants.ObjectNameERVHRV} sensible load"
-      erv_sens_load_var = OpenStudio::Model::EnergyManagementSystemGlobalVariable.new(model, sens_name.gsub(' ', '_'))
-      erv_sens_load_actuator = create_sens_lat_load_actuator_and_equipment(model, sens_name, @living_space, 0.0, 0.0)
-      lat_name = "#{Constants.ObjectNameERVHRV} latent load"
-      erv_lat_load_var = OpenStudio::Model::EnergyManagementSystemGlobalVariable.new(model, lat_name.gsub(' ', '_'))
-      erv_lat_load_actuator = create_sens_lat_load_actuator_and_equipment(model, lat_name, @living_space, 1.0, 0.0)
-
-      infil_program.addLine("Set #{erv_sens_load_actuator.name} = 0.0")
-      infil_program.addLine("Set #{erv_lat_load_actuator.name} = 0.0")
-
-      # ERV/HRV EMS load model
-      # E+ ERV model is using standard density for MFR calculation, caused discrepancy with other system types.
-      # Therefore ERV is modeled within EMS infiltration program
-
-      # Air property at inlet nodes in two sides of ERV
-      # Common part across multiple erv/hrv programs, create only once
-      infil_program.addLine("Set ERVSupInPb = #{@pbar_sensor.name}") # oa barometric pressure
-      infil_program.addLine("Set ERVSupInTemp = #{@tout_sensor.name}") # oa db temperature
-      infil_program.addLine("Set ERVSupInW = #{@wout_sensor.name}")   # oa humidity ratio
-      infil_program.addLine('Set ERVSupRho = (@RhoAirFnPbTdbW ERVSupInPb ERVSupInTemp ERVSupInW)')
-      infil_program.addLine('Set ERVSupCp = (@CpAirFnW ERVSupInW)')
-      infil_program.addLine('Set ERVSupInEnth = (@HFnTdbW ERVSupInTemp ERVSupInW)')
-
-      infil_program.addLine("Set ERVSecInTemp = #{@tin_sensor.name}") # zone air temperature
-      infil_program.addLine("Set ERVSecInW = #{@win_sensor.name}") # zone air humidity ratio
-      infil_program.addLine('Set ERVSecCp = (@CpAirFnW ERVSecInW)')
-      infil_program.addLine('Set ERVSecInEnth = (@HFnTdbW ERVSecInTemp ERVSecInW)')
-    end
-
+    # Apply ERV/HRV
+    hrv_erv_effectiveness_map = calc_hrv_erv_effectiveness(vent_mech_erv_hrv)
+    infil_program = apply_erv_hrv(model, infil_program, vent_mech_erv_hrv, hrv_erv_effectiveness_map)
     # Calculate cfm weighted average effectiveness for hvac sizing
-    # Please review this, and its integration with hvac_sizing
     weighted_vent_mech_lat_eff = 0.0
     weighted_vent_mech_apparent_sens_eff = 0.0
-
-    # Apply ERV/HRV mechanical ventilation
     vent_mech_erv_hrv.each do |vent_mech|
-      vent_mech_sens_eff, vent_mech_lat_eff, vent_mech_apparent_sens_eff = calc_hrv_erv_effectiveness(vent_mech)
       # No need to add balanced system here to average because their effectivenesses are all 0.0
-      weighted_vent_mech_lat_eff += vent_mech.average_flow_rate / tot_bal_cfm * vent_mech_lat_eff
-      weighted_vent_mech_apparent_sens_eff += vent_mech.average_flow_rate / tot_bal_cfm * vent_mech_apparent_sens_eff
-
-      infil_program = apply_erv_hrv_load_to_infil_program(model, infil_program, vent_mech.average_flow_rate, vent_mech_sens_eff, vent_mech_lat_eff, erv_sens_load_actuator, erv_lat_load_actuator)
+      weighted_vent_mech_lat_eff += vent_mech.average_flow_rate / tot_bal_cfm * hrv_erv_effectiveness_map[vent_mech][:vent_mech_lat_eff]
+      weighted_vent_mech_apparent_sens_eff += vent_mech.average_flow_rate / tot_bal_cfm * hrv_erv_effectiveness_map[vent_mech][:vent_mech_apparent_sens_eff]
     end
-
     model.getBuilding.additionalProperties.setFeature(Constants.SizingInfoMechVentLatentEffectiveness, weighted_vent_mech_lat_eff)
     model.getBuilding.additionalProperties.setFeature(Constants.SizingInfoMechVentApparentSensibleEffectiveness, weighted_vent_mech_apparent_sens_eff)
 
@@ -1584,6 +1677,10 @@ class Airflow
     program_calling_manager.setName("#{infil_program.name} calling manager")
     program_calling_manager.setCallingPoint('BeginTimestepBeforePredictor')
     program_calling_manager.addProgram(infil_program)
+
+    if not vent_mech_precond.empty?
+      apply_preconditioning_equipment(model, vent_mech_precond)
+    end
   end
 
   def self.apply_infiltration_to_living(living_ach50, living_const_ach, infil_program, weather, has_flue_chimney)

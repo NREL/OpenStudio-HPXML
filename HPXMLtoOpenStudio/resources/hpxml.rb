@@ -3180,6 +3180,26 @@ class HPXML < Object
       end
     end
 
+    def unit_preconditioning_heating_capacity
+      return unless @is_shared_system
+      if not @preconditioning_heating_capacity.nil?
+        return @preconditioning_heating_capacity
+      elsif not @preconditioning_heating_capacity_building.nil?
+        # only building level fan power is provided
+        return @preconditioning_heating_capacity_building * unit_flow_rate_ratio
+      end
+    end
+
+    def unit_preconditioning_cooling_capacity
+      return unless @is_shared_system
+      if not @preconditioning_cooling_capacity.nil?
+        return @preconditioning_cooling_capacity
+      elsif not @preconditioning_cooling_capacity_building.nil?
+        # only building level fan power is provided
+        return @preconditioning_cooling_capacity_building * unit_flow_rate_ratio
+      end
+    end
+
     def average_flow_rate
       if (not flow_rate.nil?) && (not @hours_in_operation.nil?)
         if @is_shared_system

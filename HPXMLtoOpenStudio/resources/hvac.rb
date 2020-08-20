@@ -124,17 +124,9 @@ class HVAC
     # Fan
 
     if not cooling_system.nil?
-      if not cooling_system.is_ventilation_preconditioning
-        fan_power_installed = get_fan_power_installed(cooling_system.cooling_efficiency_seer)
-      else
-        fan_power_installed = 0.0
-      end
+      fan_power_installed = get_fan_power_installed(cooling_system.cooling_efficiency_seer)
     else
-      if not heating_system.is_ventilation_preconditioning
-        fan_power_installed = 0.5 # W/cfm; For fuel furnaces, will be overridden by EAE later
-      else
-        fan_power_installed = 0.0
-      end
+      fan_power_installed = 0.5 # W/cfm; For fuel furnaces, will be overridden by EAE later
     end
     fan = create_supply_fan(model, obj_name, num_speeds, fan_power_installed)
     if not cooling_system.nil?
@@ -478,11 +470,7 @@ class HVAC
     hvac_map[heat_pump.id] << htg_supp_coil
 
     # Fan
-    if not heat_pump.is_ventilation_preconditioning
-      fan_power_installed = get_fan_power_installed(heat_pump.cooling_efficiency_seer)
-    else
-      fan_power_installed = 0.0
-    end
+    fan_power_installed = get_fan_power_installed(heat_pump.cooling_efficiency_seer)
     fan = create_supply_fan(model, obj_name, num_speeds, fan_power_installed)
     hvac_map[heat_pump.id] += disaggregate_fan_or_pump(model, fan, htg_coil, clg_coil, htg_supp_coil)
 
@@ -636,9 +624,6 @@ class HVAC
     hvac_map[heat_pump.id] << htg_supp_coil
 
     # Fan
-    if heat_pump.is_ventilation_preconditioning
-      fan_power_installed = 0.0
-    end
     fan_power_curve = create_curve_exponent(model, [0, 1, 3], obj_name + ' fan power curve', -100, 100)
     fan_eff_curve = create_curve_cubic(model, [0, 1, 0, 0], obj_name + ' fan eff curve', 0, 1, 0.01, 1)
     fan = OpenStudio::Model::FanOnOff.new(model, model.alwaysOnDiscreteSchedule, fan_power_curve, fan_eff_curve)
@@ -770,11 +755,7 @@ class HVAC
     frac_glycol = 0.3
     design_delta_t = 10.0
     pump_head = 50.0
-    if not heat_pump.is_ventilation_preconditioning
-      fan_power_installed = 0.5 # W/cfm
-    else
-      fan_power_installed = 0.0 # W/cfm
-    end
+    fan_power_installed = 0.5 # W/cfm
     chw_design = [85.0, weather.design.CoolingDrybulb - 15.0, weather.data.AnnualAvgDrybulb + 10.0].max # Temperature of water entering indoor coil,use 85F as lower bound
     if fluid_type == Constants.FluidWater
       hw_design = [45.0, weather.design.HeatingDrybulb + 35.0, weather.data.AnnualAvgDrybulb - 10.0].max # Temperature of fluid entering indoor coil, use 45F as lower bound for water
@@ -1174,11 +1155,7 @@ class HVAC
     hvac_map[heating_system.id] = []
     obj_name = Constants.ObjectNameUnitHeater
     sequential_heat_load_frac = calc_sequential_load_fraction(heating_system.fraction_heat_load_served, remaining_heat_load_frac)
-    if not heating_system.is_ventilation_preconditioning
-      fan_power_installed = 0.5 # W/cfm # For fuel equipment, will be overridden by EAE later
-    else
-      fan_power_installed = 0.0
-    end
+    fan_power_installed = 0.5 # W/cfm # For fuel equipment, will be overridden by EAE later
     airflow_rate = 125.0 # cfm/ton; doesn't affect energy consumption
 
     if (fan_power_installed > 0) && (airflow_rate == 0)
