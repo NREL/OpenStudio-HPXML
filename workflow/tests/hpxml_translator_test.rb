@@ -42,7 +42,7 @@ class HPXMLTest < MiniTest::Test
     puts "Running #{xmls.size} HPXML files..."
     all_results = {}
     all_sizing_results = {}
-    xmls.shuffle.each do |xml|
+    xmls.each do |xml|
       all_results[xml], all_sizing_results[xml] = _run_xml(xml, this_dir)
     end
 
