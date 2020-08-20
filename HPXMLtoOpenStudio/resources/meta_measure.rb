@@ -5,6 +5,15 @@ require 'fileutils'
 def run_hpxml_workflow(rundir, hpxml, measures, measures_dir, debug: false, output_vars: [],
                        output_meters: [], run_measures_only: false, print_prefix: '')
   rm_path(rundir)
+  filesdir = File.join(File.dirname(__FILE__), '..', '..', 'files')
+  gendir = File.join(rundir, '..', 'generated_files')
+  if Dir.exist?(filesdir)
+    print "HERE0 #{filesdir} HERE1"
+    rm_path(filesdir)
+  end
+  if Dir.exist?(gendir)
+    puts "HERE2 #{gendir} HERE3"
+  end
   FileUtils.mkdir_p(rundir)
 
   # Use print instead of puts in here in case running inside
