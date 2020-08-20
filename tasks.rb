@@ -1785,7 +1785,10 @@ def get_values(osw_file, step)
     step.setArgument('simulation_control_run_period_end_day_of_month', 31)
   elsif ['base-simcontrol-timestep-10-mins.osw'].include? osw_file
     step.setArgument('simulation_control_timestep', '10')
-  elsif ['extra-auto.osw'].include? osw_file
+  end
+
+  # Extras
+  if ['extra-auto.osw'].include? osw_file
     step.setArgument('geometry_num_occupants', Constants.Auto)
     step.setArgument('ducts_supply_location', Constants.Auto)
     step.setArgument('ducts_return_location', Constants.Auto)
@@ -1835,7 +1838,10 @@ def get_values(osw_file, step)
     step.setArgument('simulation_control_vacancy_begin_day_of_month', 1)
     step.setArgument('simulation_control_vacancy_end_month', 6)
     step.setArgument('simulation_control_vacancy_end_day_of_month', 30)
-  elsif ['invalid_files/non-electric-heat-pump-water-heater.osw'].include? osw_file
+  end
+
+  # Warnings/Errors
+  if ['invalid_files/non-electric-heat-pump-water-heater.osw'].include? osw_file
     step.setArgument('water_heater_type', HPXML::WaterHeaterTypeHeatPump)
     step.setArgument('water_heater_fuel_type', HPXML::FuelTypeNaturalGas)
   elsif ['invalid_files/multiple-heating-and-cooling-systems.osw'].include? osw_file
@@ -5990,10 +5996,9 @@ def set_hpxml_clothes_dryer(hpxml_file, hpxml)
   elsif ['base-dhw-shared-laundry-room.xml'].include? hpxml_file
     hpxml.clothes_dryers[0].id = 'SharedClothesDryer'
     hpxml.clothes_dryers[0].location = HPXML::LocationOtherHeatedSpace
+    hpxml.clothes_dryers[0].is_shared_appliance = true
   elsif ['base-misc-usage-multiplier.xml'].include? hpxml_file
     hpxml.clothes_dryers[0].usage_multiplier = 0.9
-  elsif ['base-dhw-shared-laundry-room.xml'].include? hpxml_file
-    hpxml.clothes_dryers[0].is_shared_appliance = true
   end
 end
 

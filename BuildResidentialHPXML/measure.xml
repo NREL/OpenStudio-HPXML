@@ -3,8 +3,8 @@
   <schema_version>3.0</schema_version>
   <name>build_residential_hpxml</name>
   <uid>a13a8983-2b01-4930-8af2-42030b6e4233</uid>
-  <version_id>ddea276b-347f-4f91-80e3-65c1e6e7aa02</version_id>
-  <version_modified>20200820T001552Z</version_modified>
+  <version_id>3b779e6a-0ac7-435d-a628-21f76edd0c6e</version_id>
+  <version_modified>20200820T165250Z</version_modified>
   <xml_checksum>2C38F48B</xml_checksum>
   <class_name>BuildResidentialHPXML</class_name>
   <display_name>HPXML Builder</display_name>
@@ -3548,6 +3548,7 @@
       <type>Boolean</type>
       <required>true</required>
       <model_dependent>false</model_dependent>
+      <default_value>false</default_value>
       <choices>
         <choice>
           <value>true</value>
@@ -3687,6 +3688,7 @@
       <type>Boolean</type>
       <required>true</required>
       <model_dependent>false</model_dependent>
+      <default_value>false</default_value>
       <choices>
         <choice>
           <value>true</value>
@@ -6456,10 +6458,39 @@
       <checksum>E4E2690B</checksum>
     </file>
     <file>
+      <filename>build_residential_hpxml_test.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>test</usage_type>
+      <checksum>E436386D</checksum>
+    </file>
+    <file>
       <filename>constants.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
       <checksum>EB32709E</checksum>
+    </file>
+    <file>
+      <version>
+        <software_program>OpenStudio</software_program>
+        <identifier>2.9.0</identifier>
+        <min_compatible>2.9.0</min_compatible>
+      </version>
+      <filename>measure.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>script</usage_type>
+      <checksum>2186B69A</checksum>
+    </file>
+    <file>
+      <filename>base-schedules-stochastic.osw</filename>
+      <filetype>osw</filetype>
+      <usage_type>test</usage_type>
+      <checksum>8AC16385</checksum>
+    </file>
+    <file>
+      <filename>base-schedules-user-specified.osw</filename>
+      <filetype>osw</filetype>
+      <usage_type>test</usage_type>
+      <checksum>45AA0522</checksum>
     </file>
     <file>
       <filename>extra-vacancy-6-months.osw</filename>
@@ -6472,35 +6503,6 @@
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
       <checksum>4905F269</checksum>
-    </file>
-    <file>
-      <version>
-        <software_program>OpenStudio</software_program>
-        <identifier>2.9.0</identifier>
-        <min_compatible>2.9.0</min_compatible>
-      </version>
-      <filename>measure.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>script</usage_type>
-      <checksum>D0A4A971</checksum>
-    </file>
-    <file>
-      <filename>base-schedules-stochastic.osw</filename>
-      <filetype>osw</filetype>
-      <usage_type>test</usage_type>
-      <checksum>8AC16385</checksum>
-    </file>
-    <file>
-      <filename>build_residential_hpxml_test.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>test</usage_type>
-      <checksum>E436386D</checksum>
-    </file>
-    <file>
-      <filename>base-schedules-user-specified.osw</filename>
-      <filetype>osw</filetype>
-      <usage_type>test</usage_type>
-      <checksum>45AA0522</checksum>
     </file>
   </files>
 </measure>
