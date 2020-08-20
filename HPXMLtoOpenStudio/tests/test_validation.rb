@@ -32,7 +32,7 @@ class HPXMLtoOpenStudioValidationTest < MiniTest::Test
       print '.'
 
       # HPXML Schema validation
-      _test_schema_validation(hpxml_doc)
+      _test_schema_validation(hpxml_doc, xml)
       # Ruby validator validation
       _test_ruby_validation(hpxml_doc)
       # Schematron validation
