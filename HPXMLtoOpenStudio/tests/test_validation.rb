@@ -99,12 +99,12 @@ class HPXMLtoOpenStudioValidationTest < MiniTest::Test
 
       child_elements.each do |child_element|
         # make sure parent elements of the last child element exist in HPXML
-        child_element_without_predicates = child_element.gsub(/\[.*?\]|\[|\]/, '') # gsub '[...]' or '[' or ']'
+        child_element_without_predicates = child_element.gsub(/\[.*?\]|\[|\]/, '') # remove brackets and text within brackets (e.g. [foo or ...])
         child_element_without_predicates_array = child_element_without_predicates.split('/')[0...-1].reject(&:empty?)
         XMLHelper.create_elements_as_needed(parent_element, child_element_without_predicates_array)
 
         # add child element
-        additional_parent_element = child_element.gsub(/\[text().*?\]/, '').split('/')[0...-1].reject(&:empty?).join('/').chomp('/') # gsub [text()=foo or ...] and select from 0th to the 2nd last element
+        additional_parent_element = child_element.gsub(/\[text().*?\]/, '').split('/')[0...-1].reject(&:empty?).join('/').chomp('/') # remove text that starts with 'text()' within brackets (e.g. [text()=foo or ...]) and select elements from the first to the second last
         mod_parent_element = additional_parent_element.empty? ? parent_element : XMLHelper.get_element(parent_element, additional_parent_element)
         mod_child_name = child_element_without_predicates.split('/')[-1]
         max_number_of_elements_allowed = expected_error_message.gsub(/\[.*?\]|\[|\]/, '').scan(/\d+/).max.to_i # scan numbers outside brackets and then find the maximum
@@ -219,11 +219,15 @@ class HPXMLtoOpenStudioValidationTest < MiniTest::Test
       end
       element_names << element_name
 
-      # exception: need to remove both AnnualHeatingDistributionSystemEfficiency and AnnualCoolingDistributionSystemEfficiency
+      # Exceptions
       # FIXME: Is there another way to handle this?
       if assertion.partition(': ').last.include? 'AnnualHeatingDistributionSystemEfficiency'
+        # Need to remove both AnnualHeatingDistributionSystemEfficiency and AnnualCoolingDistributionSystemEfficiency
         element_name_additional = assertion.partition(': ').last.partition(' | ').last
         element_names << element_name_additional
+      elsif assertion.partition(': ').last.include? 'HousePressure'
+        # handle [(HousePressure and BuildingAirLeakage/UnitofMeasure[text()!="ACHnatural"]) or (not(HousePressure) and BuildingAirLeakage/UnitofMeasure[text()="ACHnatural"])]
+        element_names[0] = 'HousePressure' # replacing element name with 'HousePressure' for the test (i.e. the test by element deletion). 
       end
     end
 
@@ -232,9 +236,9 @@ class HPXMLtoOpenStudioValidationTest < MiniTest::Test
 
   def _get_expected_error_message(parent_xpath, assertion)
     if parent_xpath == '' # root element
-      return [[assertion.partition(': ').first, parent_xpath].join(': '), assertion.partition(': ').last].join()
+      return [[assertion.partition(': ').first, parent_xpath].join(': '), assertion.partition(': ').last].join() # return "Expected x element(s) for xpath: foo"
     else
-      return [[assertion.partition(': ').first, parent_xpath].join(': '), assertion.partition(': ').last].join(': ')
+      return [[assertion.partition(': ').first, parent_xpath].join(': '), assertion.partition(': ').last].join(': ') # return "Expected x element(s) for xpath: foo: bar"
     end
   end
 
