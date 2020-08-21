@@ -1478,8 +1478,8 @@ class Airflow
     vent_mech_precond.each_with_index do |vent_mech, i|
       # Create energy use actuator per system because of different fuel type can be applied
       # FIXME: Preconditioning equipment energy end use: mech vent or hvac category?
-      clg_energy_actuator = create_sens_lat_load_actuator_and_equipment(model, "shared mech vent precond cooling energy #{i}", @living_space, 0.0, 1.0, vent_mech.preconditioning_cooling_fuel, Constants.ObjectNameMechanicalVentilation)
-      htg_energy_actuator = create_sens_lat_load_actuator_and_equipment(model, "shared mech vent precond heating energy #{i}", @living_space, 0.0, 1.0, vent_mech.preconditioning_heating_fuel, Constants.ObjectNameMechanicalVentilation)
+      clg_energy_actuator = create_sens_lat_load_actuator_and_equipment(model, "shared mech vent precond cooling energy #{i}", @living_space, 0.0, 1.0, vent_mech.preconditioning_cooling_fuel, Constants.ObjectNameMechanicalVentilationPreconditioning)
+      htg_energy_actuator = create_sens_lat_load_actuator_and_equipment(model, "shared mech vent precond heating energy #{i}", @living_space, 0.0, 1.0, vent_mech.preconditioning_heating_fuel, Constants.ObjectNameMechanicalVentilationPreconditioning)
       precond_program.addLine("Set #{clg_energy_actuator.name} = 0.0")
       precond_program.addLine("Set #{htg_energy_actuator.name} = 0.0")
 
@@ -1572,11 +1572,11 @@ class Airflow
     program_calling_manager.setName("#{precond_program.name} calling manager")
     program_calling_manager.setCallingPoint('BeginTimestepBeforePredictor')
     program_calling_manager.addProgram(precond_program)
-    
-    oems = model.getOutputEnergyManagementSystem
-    oems.setActuatorAvailabilityDictionaryReporting('Verbose')
-    oems.setInternalVariableAvailabilityDictionaryReporting('Verbose')
-    oems.setEMSRuntimeLanguageDebugOutputLevel('Verbose')
+
+    # oems = model.getOutputEnergyManagementSystem
+    # oems.setActuatorAvailabilityDictionaryReporting('Verbose')
+    # oems.setInternalVariableAvailabilityDictionaryReporting('Verbose')
+    # oems.setEMSRuntimeLanguageDebugOutputLevel('Verbose')
   end
 
   def self.apply_infiltration_and_ventilation_fans(model, weather, vent_fans_mech, vent_fans_kitchen, vent_fans_bath, has_flue_chimney, air_infils, vented_attic, vented_crawl)
@@ -1615,16 +1615,16 @@ class Airflow
     # Get mechanical ventilation
     vent_mech_precond = vent_fans_mech.select { |vent_mech| (not vent_mech.unit_preconditioning_heating_capacity.nil?) || (not vent_mech.unit_preconditioning_cooling_capacity.nil?) }
     vent_mech_nonprecond = vent_fans_mech.select { |vent_mech| vent_mech.unit_preconditioning_heating_capacity.nil? && vent_mech.unit_preconditioning_cooling_capacity.nil? }
-    vent_mech_sup = vent_mech_nonprecond.select { |vent_mech| vent_mech.fan_type == HPXML::MechVentTypeSupply }
-    vent_mech_exh = vent_mech_nonprecond.select { |vent_mech| vent_mech.fan_type == HPXML::MechVentTypeExhaust }
-    vent_mech_cfis = vent_mech_nonprecond.select { |vent_mech| vent_mech.fan_type == HPXML::MechVentTypeCFIS }
-    vent_mech_bal = vent_mech_nonprecond.select { |vent_mech| vent_mech.fan_type == HPXML::MechVentTypeBalanced }
-    vent_mech_erv_hrv = vent_mech_nonprecond.select { |vent_mech| [HPXML::MechVentTypeERV, HPXML::MechVentTypeHRV].include? vent_mech.fan_type }
+    vent_mech_sup_tot = vent_fans_mech.select { |vent_mech| vent_mech.fan_type == HPXML::MechVentTypeSupply }
+    vent_mech_exh_tot = vent_fans_mech.select { |vent_mech| vent_mech.fan_type == HPXML::MechVentTypeExhaust }
+    vent_mech_cfis_tot = vent_fans_mech.select { |vent_mech| vent_mech.fan_type == HPXML::MechVentTypeCFIS }
+    vent_mech_bal_tot = vent_fans_mech.select { |vent_mech| vent_mech.fan_type == HPXML::MechVentTypeBalanced }
+    vent_mech_erv_hrv_tot = vent_fans_mech.select { |vent_mech| [HPXML::MechVentTypeERV, HPXML::MechVentTypeHRV].include? vent_mech.fan_type }
 
-    sup_vent_mech_fan_w = vent_mech_sup.map { |vent_mech| vent_mech.average_fan_power }.sum(0.0)
-    exh_vent_mech_fan_w = vent_mech_exh.map { |vent_mech| vent_mech.average_fan_power }.sum(0.0)
+    sup_vent_mech_fan_w = vent_mech_sup_tot.map { |vent_mech| vent_mech.average_fan_power }.sum(0.0)
+    exh_vent_mech_fan_w = vent_mech_exh_tot.map { |vent_mech| vent_mech.average_fan_power }.sum(0.0)
     # ERV/HRV and balanced system fan power combined altogether
-    bal_vent_mech_fan_w = (vent_mech_bal + vent_mech_erv_hrv).map { |vent_mech| vent_mech.average_fan_power }.sum(0.0)
+    bal_vent_mech_fan_w = (vent_mech_bal_tot + vent_mech_erv_hrv_tot).map { |vent_mech| vent_mech.average_fan_power }.sum(0.0)
     total_sup_exh_bal_w = sup_vent_mech_fan_w + exh_vent_mech_fan_w + bal_vent_mech_fan_w
     # 1.0: Fan heat does not enter space, 0.0: Fan heat does enter space, 0.5: Supply fan heat enters space
     if total_sup_exh_bal_w > 0.0
@@ -1633,6 +1633,13 @@ class Airflow
       fan_heat_lost_fraction = 1.0
     end
     add_ee_for_vent_fan_power(model, Constants.ObjectNameMechanicalVentilationHouseFan, fan_heat_lost_fraction, false, total_sup_exh_bal_w)
+
+    # Following methods are only applicable to non-preconditioned systems
+    vent_mech_sup = vent_mech_sup_tot.select { |vent_mech| vent_mech.unit_preconditioning_heating_capacity.nil? && vent_mech.unit_preconditioning_cooling_capacity.nil? }
+    vent_mech_exh = vent_mech_exh_tot.select { |vent_mech| vent_mech.unit_preconditioning_heating_capacity.nil? && vent_mech.unit_preconditioning_cooling_capacity.nil? }
+    vent_mech_cfis = vent_mech_cfis_tot.select { |vent_mech| vent_mech.unit_preconditioning_heating_capacity.nil? && vent_mech.unit_preconditioning_cooling_capacity.nil? }
+    vent_mech_bal = vent_mech_bal_tot.select { |vent_mech| vent_mech.unit_preconditioning_heating_capacity.nil? && vent_mech.unit_preconditioning_cooling_capacity.nil? }
+    vent_mech_erv_hrv = vent_mech_erv_hrv_tot.select { |vent_mech| vent_mech.unit_preconditioning_heating_capacity.nil? && vent_mech.unit_preconditioning_cooling_capacity.nil? }
 
     # get cfms
     sup_cfm = vent_mech_sup.map { |vent_mech| vent_mech.average_flow_rate }.sum(0.0)

@@ -257,6 +257,10 @@ class Constants
     return 'mech vent'
   end
 
+  def self.ObjectNameMechanicalVentilationPreconditioning
+    return 'mech vent preconditioning'
+  end
+
   def self.ObjectNameMechanicalVentilationHouseFan
     return 'mech vent house fan'
   end
