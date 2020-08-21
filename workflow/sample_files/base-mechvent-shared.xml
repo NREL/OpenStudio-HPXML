@@ -390,12 +390,18 @@
               <extension>
                 <PreconditioningHeating>
                   <Fuel>natural gas</Fuel>
-                  <Efficiency>0.92</Efficiency>
+                  <AnnualHeatingEfficiency>
+                    <Value>0.92</Value>
+                    <Units>COP</Units>
+                  </AnnualHeatingEfficiency>
                   <Capacity scope='multiple units'>30000</Capacity>
                 </PreconditioningHeating>
                 <PreconditioningCooling>
                   <Fuel>electricity</Fuel>
-                  <Efficiency>16.0</Efficiency>
+                  <AnnualCoolingEfficiency>
+                    <Value>4.0</Value>
+                    <Units>COP</Units>
+                  </AnnualCoolingEfficiency>
                   <Capacity scope='multiple units'>20000</Capacity>
                 </PreconditioningCooling>
               </extension>
@@ -415,12 +421,18 @@
               <extension>
                 <PreconditioningHeating>
                   <Fuel>natural gas</Fuel>
-                  <Efficiency>0.87</Efficiency>
+                  <AnnualHeatingEfficiency>
+                    <Value>0.87</Value>
+                    <Units>COP</Units>
+                  </AnnualHeatingEfficiency>
                   <Capacity scope='multiple units'>64000</Capacity>
                 </PreconditioningHeating>
                 <PreconditioningCooling>
                   <Fuel>electricity</Fuel>
-                  <Efficiency>16.0</Efficiency>
+                  <AnnualCoolingEfficiency>
+                    <Value>3.5</Value>
+                    <Units>COP</Units>
+                  </AnnualCoolingEfficiency>
                   <Capacity scope='multiple units'>48000</Capacity>
                 </PreconditioningCooling>
               </extension>
@@ -438,13 +450,19 @@
               <FanPower scope='multiple units'>150.0</FanPower>
               <extension>
                 <PreconditioningHeating>
-                  <Fuel>natural gas</Fuel>
-                  <Efficiency>0.92</Efficiency>
+                  <Fuel>electricity</Fuel>
+                  <AnnualHeatingEfficiency>
+                    <Value>4.0</Value>
+                    <Units>COP</Units>
+                  </AnnualHeatingEfficiency>
                   <Capacity scope='multiple units'>64000</Capacity>
                 </PreconditioningHeating>
                 <PreconditioningCooling>
                   <Fuel>electricity</Fuel>
-                  <Efficiency>13.0</Efficiency>
+                  <AnnualCoolingEfficiency>
+                    <Value>4.5</Value>
+                    <Units>COP</Units>
+                  </AnnualCoolingEfficiency>
                   <Capacity scope='multiple units'>48000</Capacity>
                 </PreconditioningCooling>
               </extension>
@@ -461,13 +479,19 @@
               <FanPower scope='multiple units'>150.0</FanPower>
               <extension>
                 <PreconditioningHeating>
-                  <Fuel>natural gas</Fuel>
-                  <Efficiency>0.9</Efficiency>
+                  <Fuel>electricity</Fuel>
+                  <AnnualHeatingEfficiency>
+                    <Value>3.5</Value>
+                    <Units>COP</Units>
+                  </AnnualHeatingEfficiency>
                   <Capacity scope='multiple units'>64000</Capacity>
                 </PreconditioningHeating>
                 <PreconditioningCooling>
                   <Fuel>electricity</Fuel>
-                  <Efficiency>18.0</Efficiency>
+                  <AnnualCoolingEfficiency>
+                    <Value>4.0</Value>
+                    <Units>COP</Units>
+                  </AnnualCoolingEfficiency>
                   <Capacity scope='multiple units'>48000</Capacity>
                 </PreconditioningCooling>
               </extension>

@@ -3316,7 +3316,9 @@ class HPXML < Object
                                      only_allow_values: false)
           precond_htg_el = XMLHelper.get_element(ext, 'PreconditioningHeating')
           XMLHelper.add_element(precond_htg_el, 'Fuel', @preconditioning_heating_fuel) unless @preconditioning_heating_fuel.nil?
-          XMLHelper.add_element(precond_htg_el, 'Efficiency', to_float(@preconditioning_heating_efficiency)) unless @preconditioning_heating_efficiency.nil?
+          eff = XMLHelper.add_element(precond_htg_el, 'AnnualHeatingEfficiency') unless @preconditioning_heating_efficiency.nil?
+          XMLHelper.add_element(eff, 'Value', to_float(@preconditioning_heating_efficiency)) unless eff.nil?
+          XMLHelper.add_element(eff, 'Units', 'COP') unless eff.nil?
           cap = XMLHelper.add_element(precond_htg_el, 'Capacity', @preconditioning_heating_capacity) unless @preconditioning_heating_capacity.nil?
           XMLHelper.add_attribute(cap, 'scope', 'single unit') unless cap.nil?
           cap_bldg = XMLHelper.add_element(precond_htg_el, 'Capacity', @preconditioning_heating_capacity_building) unless @preconditioning_heating_capacity_building.nil?
@@ -3328,7 +3330,9 @@ class HPXML < Object
                                      only_allow_values: false)
           precond_clg_el = XMLHelper.get_element(ext, 'PreconditioningCooling')
           XMLHelper.add_element(precond_clg_el, 'Fuel', @preconditioning_cooling_fuel) unless @preconditioning_cooling_fuel.nil?
-          XMLHelper.add_element(precond_clg_el, 'Efficiency', to_float(@preconditioning_cooling_efficiency)) unless @preconditioning_cooling_efficiency.nil?
+          eff = XMLHelper.add_element(precond_clg_el, 'AnnualCoolingEfficiency') unless @preconditioning_cooling_efficiency.nil?
+          XMLHelper.add_element(eff, 'Value', to_float(@preconditioning_cooling_efficiency)) unless eff.nil?
+          XMLHelper.add_element(eff, 'Units', 'COP') unless eff.nil?
           cap = XMLHelper.add_element(precond_clg_el, 'Capacity', @preconditioning_cooling_capacity) unless @preconditioning_cooling_capacity.nil?
           XMLHelper.add_attribute(cap, 'scope', 'single unit') unless cap.nil?
           cap_bldg = XMLHelper.add_element(precond_clg_el, 'Capacity', @preconditioning_cooling_capacity_building) unless @preconditioning_cooling_capacity_building.nil?
@@ -3352,11 +3356,11 @@ class HPXML < Object
         @fan_power = to_float_or_nil(XMLHelper.get_value(ventilation_fan, 'FanPower[@scope="single unit"]'))
         @building_fan_power = to_float_or_nil(XMLHelper.get_value(ventilation_fan, 'FanPower[@scope="multiple units"]'))
         @preconditioning_heating_fuel = XMLHelper.get_value(ventilation_fan, 'extension/PreconditioningHeating/Fuel')
-        @preconditioning_heating_efficiency = to_float_or_nil(XMLHelper.get_value(ventilation_fan, 'extension/PreconditioningHeating/Efficiency'))
+        @preconditioning_heating_efficiency = to_float_or_nil(XMLHelper.get_value(ventilation_fan, 'extension/PreconditioningHeating/AnnualHeatingEfficiency/Value'))
         @preconditioning_heating_capacity = to_float_or_nil(XMLHelper.get_value(ventilation_fan, 'extension/PreconditioningHeating/Capacity[@scope="single unit"]'))
         @preconditioning_heating_capacity_building = to_float_or_nil(XMLHelper.get_value(ventilation_fan, 'extension/PreconditioningHeating/Capacity[@scope="multiple units"]'))
         @preconditioning_cooling_fuel = XMLHelper.get_value(ventilation_fan, 'extension/PreconditioningCooling/Fuel')
-        @preconditioning_cooling_efficiency = to_float_or_nil(XMLHelper.get_value(ventilation_fan, 'extension/PreconditioningCooling/Efficiency'))
+        @preconditioning_cooling_efficiency = to_float_or_nil(XMLHelper.get_value(ventilation_fan, 'extension/PreconditioningCooling/AnnualCoolingEfficiency/Value'))
         @preconditioning_cooling_capacity = to_float_or_nil(XMLHelper.get_value(ventilation_fan, 'extension/PreconditioningCooling/Capacity[@scope="single unit"]'))
         @preconditioning_cooling_capacity_building = to_float_or_nil(XMLHelper.get_value(ventilation_fan, 'extension/PreconditioningCooling/Capacity[@scope="multiple units"]'))
       else

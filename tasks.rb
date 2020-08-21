@@ -3465,7 +3465,7 @@ def set_hpxml_ventilation_fans(hpxml_file, hpxml)
                                preconditioning_heating_efficiency: 0.92,
                                preconditioning_heating_capacity_building: 30000,
                                preconditioning_cooling_fuel: HPXML::FuelTypeElectricity,
-                               preconditioning_cooling_efficiency: 16,
+                               preconditioning_cooling_efficiency: 4.0,
                                preconditioning_cooling_capacity_building: 20000)
     hpxml.ventilation_fans.add(id: 'SharedERVPreconditioned',
                                fan_type: HPXML::MechVentTypeERV,
@@ -3482,7 +3482,7 @@ def set_hpxml_ventilation_fans(hpxml_file, hpxml)
                                preconditioning_heating_efficiency: 0.87,
                                preconditioning_heating_capacity_building: 64000,
                                preconditioning_cooling_fuel: HPXML::FuelTypeElectricity,
-                               preconditioning_cooling_efficiency: 16,
+                               preconditioning_cooling_efficiency: 3.5,
                                preconditioning_cooling_capacity_building: 48000)
     hpxml.ventilation_fans.add(id: 'SharedHRVPreconditioned',
                                fan_type: HPXML::MechVentTypeHRV,
@@ -3494,11 +3494,11 @@ def set_hpxml_ventilation_fans(hpxml_file, hpxml)
                                building_fan_power: 150,
                                used_for_whole_building_ventilation: true,
                                fraction_oa: 0.7,
-                               preconditioning_heating_fuel: HPXML::FuelTypeNaturalGas,
-                               preconditioning_heating_efficiency: 0.92,
+                               preconditioning_heating_fuel: HPXML::FuelTypeElectricity,
+                               preconditioning_heating_efficiency: 4.0,
                                preconditioning_heating_capacity_building: 64000,
                                preconditioning_cooling_fuel: HPXML::FuelTypeElectricity,
-                               preconditioning_cooling_efficiency: 13,
+                               preconditioning_cooling_efficiency: 4.5,
                                preconditioning_cooling_capacity_building: 48000)
     hpxml.ventilation_fans.add(id: 'SharedBalancedPreconditioned',
                                fan_type: HPXML::MechVentTypeBalanced,
@@ -3509,11 +3509,11 @@ def set_hpxml_ventilation_fans(hpxml_file, hpxml)
                                building_fan_power: 150,
                                used_for_whole_building_ventilation: true,
                                fraction_oa: 0.7,
-                               preconditioning_heating_fuel: HPXML::FuelTypeNaturalGas,
-                               preconditioning_heating_efficiency: 0.90,
+                               preconditioning_heating_fuel: HPXML::FuelTypeElectricity,
+                               preconditioning_heating_efficiency: 3.5,
                                preconditioning_heating_capacity_building: 64000,
                                preconditioning_cooling_fuel: HPXML::FuelTypeElectricity,
-                               preconditioning_cooling_efficiency: 18,
+                               preconditioning_cooling_efficiency: 4.0,
                                preconditioning_cooling_capacity_building: 48000)
   elsif ['base-mechvent-multiple.xml'].include? hpxml_file
     hpxml.ventilation_fans.add(id: 'WholeHouseFan',
