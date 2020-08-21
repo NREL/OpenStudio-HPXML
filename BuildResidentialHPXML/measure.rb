@@ -73,25 +73,25 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
 
     arg = OpenStudio::Measure::OSArgument::makeIntegerArgument('simulation_control_run_period_begin_month', false)
     arg.setDisplayName('Simulation Control: Run Period Begin Month')
-    arg.setUnits('month')
+    arg.setUnits('#')
     arg.setDescription('This numeric field should contain the starting month number (1 = January, 2 = February, etc.) for the annual run period desired.')
     args << arg
 
     arg = OpenStudio::Measure::OSArgument::makeIntegerArgument('simulation_control_run_period_begin_day_of_month', false)
     arg.setDisplayName('Simulation Control: Run Period Begin Day of Month')
-    arg.setUnits('day')
+    arg.setUnits('#')
     arg.setDescription('This numeric field should contain the starting day of the starting month (must be valid for month) for the annual run period desired.')
     args << arg
 
     arg = OpenStudio::Measure::OSArgument::makeIntegerArgument('simulation_control_run_period_end_month', false)
     arg.setDisplayName('Simulation Control: Run Period End Month')
-    arg.setUnits('month')
+    arg.setUnits('#')
     arg.setDescription('This numeric field should contain the end month number (1 = January, 2 = February, etc.) for the annual run period desired.')
     args << arg
 
     arg = OpenStudio::Measure::OSArgument::makeIntegerArgument('simulation_control_run_period_end_day_of_month', false)
     arg.setDisplayName('Simulation Control: Run Period End Day of Month')
-    arg.setUnits('day')
+    arg.setUnits('#')
     arg.setDescription('This numeric field should contain the ending day of the ending month (must be valid for month) for the annual run period desired.')
     args << arg
 
@@ -102,49 +102,49 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
 
     arg = OpenStudio::Measure::OSArgument::makeIntegerArgument('simulation_control_daylight_saving_begin_month', false)
     arg.setDisplayName('Simulation Control: Daylight Saving Begin Month')
-    arg.setUnits('month')
+    arg.setUnits('#')
     arg.setDescription('This numeric field should contain the starting month number (1 = January, 2 = February, etc.) for the annual daylight saving period desired.')
     args << arg
 
     arg = OpenStudio::Measure::OSArgument::makeIntegerArgument('simulation_control_daylight_saving_begin_day_of_month', false)
     arg.setDisplayName('Simulation Control: Daylight Saving Begin Day of Month')
-    arg.setUnits('day')
+    arg.setUnits('#')
     arg.setDescription('This numeric field should contain the starting day of the starting month (must be valid for month) for the daylight saving period desired.')
     args << arg
 
     arg = OpenStudio::Measure::OSArgument::makeIntegerArgument('simulation_control_daylight_saving_end_month', false)
     arg.setDisplayName('Simulation Control: Daylight Saving End Month')
-    arg.setUnits('month')
+    arg.setUnits('#')
     arg.setDescription('This numeric field should contain the end month number (1 = January, 2 = February, etc.) for the daylight saving period desired.')
     args << arg
 
     arg = OpenStudio::Measure::OSArgument::makeIntegerArgument('simulation_control_daylight_saving_end_day_of_month', false)
     arg.setDisplayName('Simulation Control: Daylight Saving End Day of Month')
-    arg.setUnits('day')
+    arg.setUnits('#')
     arg.setDescription('This numeric field should contain the ending day of the ending month (must be valid for month) for the daylight saving period desired.')
     args << arg
 
     arg = OpenStudio::Measure::OSArgument.makeIntegerArgument('simulation_control_vacancy_begin_month', false)
     arg.setDisplayName('Simulation Control: Vacancy Start Begin Month')
-    arg.setUnits('month')
+    arg.setUnits('#')
     arg.setDescription('This numeric field should contain the starting month number (1 = January, 2 = February, etc.) for the vacancy period desired.')
     args << arg
 
     arg = OpenStudio::Measure::OSArgument.makeIntegerArgument('simulation_control_vacancy_begin_day_of_month', false)
     arg.setDisplayName('Simulation Control: Vacancy Begin Day of Month')
-    arg.setUnits('day')
+    arg.setUnits('#')
     arg.setDescription('This numeric field should contain the starting day of the starting month (must be valid for month) for the vacancy period desired.')
     args << arg
 
     arg = OpenStudio::Measure::OSArgument.makeIntegerArgument('simulation_control_vacancy_end_month', false)
     arg.setDisplayName('Simulation Control: Vacancy Start End Month')
-    arg.setUnits('month')
+    arg.setUnits('#')
     arg.setDescription('This numeric field should contain the end month number (1 = January, 2 = February, etc.) for the vacancy period desired.')
     args << arg
 
     arg = OpenStudio::Measure::OSArgument.makeIntegerArgument('simulation_control_vacancy_end_day_of_month', false)
     arg.setDisplayName('Simulation Control: Vacancy End Day of Month')
-    arg.setUnits('day')
+    arg.setUnits('#')
     arg.setDescription('This numeric field should contain the ending day of the ending month (must be valid for month) for the vacancy period desired.')
     args << arg
 
