@@ -310,21 +310,49 @@
                 <Furnace/>
               </HeatingSystemType>
               <HeatingSystemFuel>natural gas</HeatingSystemFuel>
-              <HeatingCapacity>64000.0</HeatingCapacity>
+              <HeatingCapacity>32000.0</HeatingCapacity>
               <AnnualHeatingEfficiency>
                 <Units>AFUE</Units>
                 <Value>0.92</Value>
               </AnnualHeatingEfficiency>
-              <FractionHeatLoadServed>1.0</FractionHeatLoadServed>
+              <FractionHeatLoadServed>0.5</FractionHeatLoadServed>
+            </HeatingSystem>
+            <HeatingSystem>
+              <SystemIdentifier id='HeatingSystem2'/>
+              <DistributionSystem idref='HVACDistribution2'/>
+              <HeatingSystemType>
+                <Furnace/>
+              </HeatingSystemType>
+              <HeatingSystemFuel>natural gas</HeatingSystemFuel>
+              <HeatingCapacity>32000.0</HeatingCapacity>
+              <AnnualHeatingEfficiency>
+                <Units>AFUE</Units>
+                <Value>0.92</Value>
+              </AnnualHeatingEfficiency>
+              <FractionHeatLoadServed>0.5</FractionHeatLoadServed>
             </HeatingSystem>
             <CoolingSystem>
               <SystemIdentifier id='CoolingSystem'/>
               <DistributionSystem idref='HVACDistribution'/>
               <CoolingSystemType>central air conditioner</CoolingSystemType>
               <CoolingSystemFuel>electricity</CoolingSystemFuel>
-              <CoolingCapacity>48000.0</CoolingCapacity>
+              <CoolingCapacity>24000.0</CoolingCapacity>
               <CompressorType>single stage</CompressorType>
-              <FractionCoolLoadServed>1.0</FractionCoolLoadServed>
+              <FractionCoolLoadServed>0.5</FractionCoolLoadServed>
+              <AnnualCoolingEfficiency>
+                <Units>SEER</Units>
+                <Value>13.0</Value>
+              </AnnualCoolingEfficiency>
+              <SensibleHeatFraction>0.73</SensibleHeatFraction>
+            </CoolingSystem>
+            <CoolingSystem>
+              <SystemIdentifier id='CoolingSystem2'/>
+              <DistributionSystem idref='HVACDistribution2'/>
+              <CoolingSystemType>central air conditioner</CoolingSystemType>
+              <CoolingSystemFuel>electricity</CoolingSystemFuel>
+              <CoolingCapacity>24000.0</CoolingCapacity>
+              <CompressorType>single stage</CompressorType>
+              <FractionCoolLoadServed>0.5</FractionCoolLoadServed>
               <AnnualCoolingEfficiency>
                 <Units>SEER</Units>
                 <Value>13.0</Value>
@@ -372,7 +400,43 @@
                 </Ducts>
               </AirDistribution>
             </DistributionSystemType>
-            <ConditionedFloorAreaServed>2700.0</ConditionedFloorAreaServed>
+            <ConditionedFloorAreaServed>1350.0</ConditionedFloorAreaServed>
+          </HVACDistribution>
+          <HVACDistribution>
+            <SystemIdentifier id='HVACDistribution2'/>
+            <DistributionSystemType>
+              <AirDistribution>
+                <DuctLeakageMeasurement>
+                  <DuctType>supply</DuctType>
+                  <DuctLeakage>
+                    <Units>CFM25</Units>
+                    <Value>75.0</Value>
+                    <TotalOrToOutside>to outside</TotalOrToOutside>
+                  </DuctLeakage>
+                </DuctLeakageMeasurement>
+                <DuctLeakageMeasurement>
+                  <DuctType>return</DuctType>
+                  <DuctLeakage>
+                    <Units>CFM25</Units>
+                    <Value>25.0</Value>
+                    <TotalOrToOutside>to outside</TotalOrToOutside>
+                  </DuctLeakage>
+                </DuctLeakageMeasurement>
+                <Ducts>
+                  <DuctType>supply</DuctType>
+                  <DuctInsulationRValue>4.0</DuctInsulationRValue>
+                  <DuctLocation>attic - unvented</DuctLocation>
+                  <DuctSurfaceArea>150.0</DuctSurfaceArea>
+                </Ducts>
+                <Ducts>
+                  <DuctType>return</DuctType>
+                  <DuctInsulationRValue>0.0</DuctInsulationRValue>
+                  <DuctLocation>attic - unvented</DuctLocation>
+                  <DuctSurfaceArea>50.0</DuctSurfaceArea>
+                </Ducts>
+              </AirDistribution>
+            </DistributionSystemType>
+            <ConditionedFloorAreaServed>1350.0</ConditionedFloorAreaServed>
           </HVACDistribution>
         </HVAC>
         <MechanicalVentilation>
@@ -495,6 +559,48 @@
                   <Capacity scope='multiple units'>48000</Capacity>
                 </PreconditioningCooling>
               </extension>
+            </VentilationFan>
+            <VentilationFan>
+              <SystemIdentifier id='SharedCFISPreconditioned'/>
+              <FanType>central fan integrated supply</FanType>
+              <RatedFlowRate scope='multiple units'>700.0</RatedFlowRate>
+              <TestedFlowRate scope='single unit'>70.0</TestedFlowRate>
+              <HoursInOperation>8.0</HoursInOperation>
+              <UsedForWholeBuildingVentilation>true</UsedForWholeBuildingVentilation>
+              <IsSharedSystem>true</IsSharedSystem>
+              <FractionOutdoorAir>0.7</FractionOutdoorAir>
+              <FanPower scope='multiple units'>300.0</FanPower>
+              <AttachedToHVACDistributionSystem idref='HVACDistribution'/>
+              <extension>
+                <PreconditioningHeating>
+                  <Fuel>electricity</Fuel>
+                  <AnnualHeatingEfficiency>
+                    <Value>3.5</Value>
+                    <Units>COP</Units>
+                  </AnnualHeatingEfficiency>
+                  <Capacity scope='multiple units'>64000</Capacity>
+                </PreconditioningHeating>
+                <PreconditioningCooling>
+                  <Fuel>electricity</Fuel>
+                  <AnnualCoolingEfficiency>
+                    <Value>4.0</Value>
+                    <Units>COP</Units>
+                  </AnnualCoolingEfficiency>
+                  <Capacity scope='multiple units'>48000</Capacity>
+                </PreconditioningCooling>
+              </extension>
+            </VentilationFan>
+            <VentilationFan>
+              <SystemIdentifier id='SharedCFIS'/>
+              <FanType>central fan integrated supply</FanType>
+              <RatedFlowRate scope='multiple units'>700.0</RatedFlowRate>
+              <TestedFlowRate scope='single unit'>70.0</TestedFlowRate>
+              <HoursInOperation>8.0</HoursInOperation>
+              <UsedForWholeBuildingVentilation>true</UsedForWholeBuildingVentilation>
+              <IsSharedSystem>true</IsSharedSystem>
+              <FractionOutdoorAir>0.7</FractionOutdoorAir>
+              <FanPower scope='multiple units'>300.0</FanPower>
+              <AttachedToHVACDistributionSystem idref='HVACDistribution2'/>
             </VentilationFan>
           </VentilationFans>
         </MechanicalVentilation>

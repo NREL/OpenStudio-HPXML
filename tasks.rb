@@ -2580,7 +2580,8 @@ def set_hpxml_heating_systems(hpxml_file, hpxml)
                               heating_capacity: 3200,
                               heating_efficiency_percent: 1,
                               fraction_heat_load_served: 0.1)
-  elsif ['base-mechvent-multiple.xml'].include? hpxml_file
+  elsif ['base-mechvent-multiple.xml',
+         'base-mechvent-shared.xml'].include? hpxml_file
     hpxml.heating_systems[0].heating_capacity /= 2.0
     hpxml.heating_systems[0].fraction_heat_load_served /= 2.0
     hpxml.heating_systems << hpxml.heating_systems[0].dup
@@ -2771,7 +2772,8 @@ def set_hpxml_cooling_systems(hpxml_file, hpxml)
                               fraction_cool_load_served: 0.25,
                               cooling_efficiency_seer: 13,
                               cooling_shr: 0.65)
-  elsif ['base-mechvent-multiple.xml'].include? hpxml_file
+  elsif ['base-mechvent-multiple.xml',
+         'base-mechvent-shared.xml'].include? hpxml_file
     hpxml.cooling_systems[0].fraction_cool_load_served /= 2.0
     hpxml.cooling_systems[0].cooling_capacity /= 2.0
     hpxml.cooling_systems << hpxml.cooling_systems[0].dup
@@ -3168,7 +3170,8 @@ def set_hpxml_hvac_distributions(hpxml_file, hpxml)
     hpxml.hvac_distributions[-1].id = 'HVACDistribution4'
     hpxml.hvac_distributions << hpxml.hvac_distributions[0].dup
     hpxml.hvac_distributions[-1].id = 'HVACDistribution5'
-  elsif ['base-mechvent-multiple.xml'].include? hpxml_file
+  elsif ['base-mechvent-multiple.xml',
+         'base-mechvent-shared.xml'].include? hpxml_file
     hpxml.hvac_distributions << hpxml.hvac_distributions[0].dup
     hpxml.hvac_distributions[1].id = 'HVACDistribution2'
   elsif ['base-hvac-dse.xml',
@@ -3515,6 +3518,32 @@ def set_hpxml_ventilation_fans(hpxml_file, hpxml)
                                preconditioning_cooling_fuel: HPXML::FuelTypeElectricity,
                                preconditioning_cooling_efficiency: 4.0,
                                preconditioning_cooling_capacity_building: 48000)
+    hpxml.ventilation_fans.add(id: 'SharedCFISPreconditioned',
+                               fan_type: HPXML::MechVentTypeCFIS,
+                               distribution_system_idref: 'HVACDistribution',
+                               is_shared_system: true,
+                               tested_flow_rate: 70,
+                               building_rated_flow_rate: 700,
+                               hours_in_operation: 8,
+                               building_fan_power: 300,
+                               used_for_whole_building_ventilation: true,
+                               fraction_oa: 0.7,
+                               preconditioning_heating_fuel: HPXML::FuelTypeElectricity,
+                               preconditioning_heating_efficiency: 3.5,
+                               preconditioning_heating_capacity_building: 64000,
+                               preconditioning_cooling_fuel: HPXML::FuelTypeElectricity,
+                               preconditioning_cooling_efficiency: 4.0,
+                               preconditioning_cooling_capacity_building: 48000)
+    hpxml.ventilation_fans.add(id: 'SharedCFIS',
+                               fan_type: HPXML::MechVentTypeCFIS,
+                               distribution_system_idref: 'HVACDistribution2',
+                               is_shared_system: true,
+                               tested_flow_rate: 70,
+                               building_rated_flow_rate: 700,
+                               hours_in_operation: 8,
+                               building_fan_power: 300,
+                               used_for_whole_building_ventilation: true,
+                               fraction_oa: 0.7)
   elsif ['base-mechvent-multiple.xml'].include? hpxml_file
     hpxml.ventilation_fans.add(id: 'WholeHouseFan',
                                rated_flow_rate: 2000,

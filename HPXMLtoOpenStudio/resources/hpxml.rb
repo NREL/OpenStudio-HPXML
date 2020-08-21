@@ -3161,6 +3161,17 @@ class HPXML < Object
       end
     end
 
+    def oa_flow_rate
+      return flow_rate if not @is_shared_system
+      if not @fraction_oa.nil?
+        return flow_rate * @fraction_oa
+      elsif not @fraction_recirculation.nil?
+        return flow_rate * (1 - @fraction_recirculation)
+      else
+        fail 'One of FractionOutdoorAir or FractionRecirculation is required for shared mech vent system.'
+      end
+    end
+
     def unit_flow_rate_ratio
       if not @building_tested_flow_rate.nil?
         return flow_rate / @building_tested_flow_rate
@@ -3203,11 +3214,7 @@ class HPXML < Object
     def average_flow_rate
       if (not flow_rate.nil?) && (not @hours_in_operation.nil?)
         if @is_shared_system
-          if not @fraction_oa.nil?
-            return flow_rate * (@hours_in_operation / 24.0) * @fraction_oa
-          elsif not @fraction_recirculation.nil?
-            return flow_rate * (@hours_in_operation / 24.0) * (1 - @fraction_recirculation)
-          end
+          return oa_flow_rate * (@hours_in_operation / 24.0)
         else
           return flow_rate * (@hours_in_operation / 24.0)
         end
@@ -3245,7 +3252,7 @@ class HPXML < Object
       return if @fraction_oa.nil?
       return if @fraction_recirculation.nil?
       if (@fraction_oa + @fraction_recirculation - 1.0).abs > 0.001
-        fail "Fraction of outdoor air and fraction of recirculation doesn't sum to one for ventilation fan '#{@id}'."
+        fail "Fraction of outdoor air and fraction of recirculation doesn't sum to 1.0 for ventilation fan '#{@id}'."
       end
     end
 
