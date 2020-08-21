@@ -259,7 +259,8 @@ class HPXMLTest < MiniTest::Test
                    ['Baseboard Total Heating Energy', 'runperiod', '*'],
                    ['Boiler Heating Energy', 'runperiod', '*'],
                    ['Fluid Heat Exchanger Heat Transfer Energy', 'runperiod', '*'],
-                   ['Electric Equipment Electric Energy', 'runperiod', Constants.ObjectNameMechanicalVentilationHouseFanCFIS]]
+                   ['Electric Equipment Electric Energy', 'runperiod', Constants.ObjectNameMechanicalVentilationHouseFanCFIS],
+                   ['Electric Equipment Electric Energy', 'runperiod', Constants.ObjectNameMechanicalVentilationHouseFanCFIS + ' preconditioned']]
 
     # Run workflow
     workflow_start = Time.now
@@ -993,9 +994,9 @@ class HPXMLTest < MiniTest::Test
       if not fan_cfis.empty?
         # CFIS, check for positive mech vent energy that is less than the energy if it had run 24/7
         # CFIS Fan energy
-        query = "SELECT SUM(ABS(VariableValue)/1000000000) FROM ReportVariableData WHERE ReportVariableDataDictionaryIndex IN (SELECT ReportVariableDataDictionaryIndex FROM ReportVariableDataDictionary WHERE VariableType='Sum' AND KeyValue='#{Constants.ObjectNameMechanicalVentilationHouseFanCFIS.upcase}' AND VariableName='Electric Equipment Electric Energy' AND ReportingFrequency='Run Period' AND VariableUnits='J')"
+        query = "SELECT SUM(ABS(VariableValue)/1000000000) FROM ReportVariableData WHERE ReportVariableDataDictionaryIndex IN (SELECT ReportVariableDataDictionaryIndex FROM ReportVariableDataDictionary WHERE VariableType='Sum' AND KeyValue LIKE '#{Constants.ObjectNameMechanicalVentilationHouseFanCFIS.upcase}%' AND VariableName='Electric Equipment Electric Energy' AND ReportingFrequency='Run Period' AND VariableUnits='J')"
         cfis_energy = sqlFile.execAndReturnFirstDouble(query).get
-        fan_gj = fan_cfis.map { |vent_mech| UnitConversions.convert(vent_mech.fan_power * vent_mech.hours_in_operation * 365.0, 'Wh', 'GJ') }.sum(0.0)
+        fan_gj = fan_cfis.map { |vent_mech| UnitConversions.convert(vent_mech.unit_fan_power * vent_mech.hours_in_operation * 365.0, 'Wh', 'GJ') }.sum(0.0)
         if fan_gj > 0
           assert_operator(cfis_energy, :>, 0)
           assert_operator(cfis_energy, :<, fan_gj)
