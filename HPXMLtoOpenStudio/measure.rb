@@ -2023,6 +2023,7 @@ class OSModel
       check_distribution_system(cooling_system.distribution_system, cooling_system.cooling_system_type)
 
       if cooling_system.cooling_system_type == HPXML::HVACTypeCentralAirConditioner
+
         heating_system = cooling_system.attached_heating_system
         if not is_central_air_conditioner_and_furnace(heating_system, cooling_system)
           heating_system = nil
@@ -2066,6 +2067,7 @@ class OSModel
       check_distribution_system(heating_system.distribution_system, heating_system.heating_system_type)
 
       if heating_system.heating_system_type == HPXML::HVACTypeFurnace
+
         cooling_system = heating_system.attached_cooling_system
         if is_central_air_conditioner_and_furnace(heating_system, cooling_system)
           next # Already processed combined AC+furnace
