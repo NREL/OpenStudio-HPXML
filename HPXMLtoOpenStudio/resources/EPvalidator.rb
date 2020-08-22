@@ -577,16 +577,16 @@ class EnergyPlusValidator
       '/HPXML/Building/BuildingDetails/Systems/MechanicalVentilation/VentilationFans/VentilationFan[UsedForWholeBuildingVentilation="true" and IsSharedSystem="true"]/extension/PreconditioningHeating' => {
         'Fuel[text()="natural gas" or text()="fuel oil" or text()="fuel oil 1" or text()="fuel oil 2" or text()="fuel oil 4" or text()="fuel oil 5/6" or text()="diesel" or text()="propane" or text()="kerosene" or text()="electricity" or text()="wood" or text()="wood pellets"]' => one,
         'AnnualHeatingEfficiency[Units="COP"]/Value' => one,
-        'Capacity' => one,
-        'Capacity[not(@scope)]' => zero,
+        'HeatingCapacity[@scope="multiple units"] | HeatingCapacity[@scope="single unit"]' => one,
+        'HeatingCapacity[not(@scope)]' => zero,
       },
 
       ## [SharedSystem=true and extension/PreconditioningHeating]
       '/HPXML/Building/BuildingDetails/Systems/MechanicalVentilation/VentilationFans/VentilationFan[UsedForWholeBuildingVentilation="true" and IsSharedSystem="true"]/extension/PreconditioningCooling' => {
         'Fuel[text()="electricity"]' => one,
         'AnnualCoolingEfficiency[Units="COP"]/Value' => one,
-        'Capacity' => one,
-        'Capacity[not(@scope)]' => zero,
+        'CoolingCapacity[@scope="multiple units"] | CoolingCapacity[@scope="single unit"]' => one,
+        'CoolingCapacity[not(@scope)]' => zero,
       },
 
       ## [SharedSystem=false]

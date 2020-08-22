@@ -633,14 +633,17 @@ HPXML Mechanical Ventilation
 ****************************
 
 This section describes elements specified in HPXML's ``Systems/MechanicalVentilation``.
-``Systems/MechanicalVentilation/VentilationFans/VentilationFan`` elements can be used to specify whole building ventilation, local ventilation, and/or cooling load reduction.
+``Systems/MechanicalVentilation/VentilationFans/VentilationFan`` elements can be used to specify whole building or multifamily unit ventilation, local ventilation, and/or cooling load reduction.
 
 Whole Building Ventilation
 ~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Mechanical ventilation systems that provide whole building ventilation may each be specified as a ``Systems/MechanicalVentilation/VentilationFans/VentilationFan`` with ``UsedForWholeBuildingVentilation='true'``.
-Inputs including ``FanType``, ``TestedFlowRate`` (or ``RatedFlowRate``), ``HoursInOperation``, and ``FanPower`` must be provided.
-For a CFIS system, the flow rate should equal the amount of outdoor air provided to the distribution system.
+Mechanical ventilation systems that provide whole building or whole multifamily unit ventilation may each be specified as a ``Systems/MechanicalVentilation/VentilationFans/VentilationFan`` with ``UsedForWholeBuildingVentilation='true'``.
+Inputs including ``FanType``, ``TestedFlowRate`` (or ``RatedFlowRate``), ``HoursInOperation``, and ``FanPower`` and ``IsSharedSystem`` must be provided.
+
+For an individual CFIS system, the flow rate should equal the amount of outdoor air provided to the distribution system. For a shared CFIS system, the flow rate should equal the sum of outdoor air and recirculated air provided to the distribution system.
+
+If the mechanical ventilation is a shared system (i.e., serving multiple dwelling units), it should be described using ``IsSharedSystem='true'``. In this case, ``TestedFlowRate`` or ``RatedFlowRate`` and ``FanPower`` must be specified with ``scope`` attributes in order to distinguish data provided at different levels ("multiple units" and "single unit"). Flow rates are required at both levels while fan power is required at either level as it can be scaled to the other one. One of the elements ``FractionOutdoorAir`` and ``FractionRecirculation`` are also needed for shared systems, where the values are the percentages of outdoor air and recirculation air in total supply air. In addition, it is also available to describe preconditioning heating/cooling systems for shared systems with ``extension/PreconditioningHeating`` and ``extension/PreconditioningCooling``. To describe a preconditioning system, eg. a preconditioning heating system, the ``extension/PreconditioningHeating/Fuel``, ``extension/PreconditioningHeating/AnnualHeatingEfficiency[Units="COP"]/Value``, and ``extension/PreconditioningHeating/HeatingCapacity[@scope="multiple units" or @scope="single unit"]`` are required. The same rule applies to preconditioning cooling system.
 
 Depending on the type of mechanical ventilation specified, additional elements are required:
 
