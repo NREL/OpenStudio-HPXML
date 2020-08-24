@@ -241,6 +241,7 @@ class OSModel
 
     weather, epw_file = Location.apply_weather_file(model, runner, epw_path, cache_path)
     check_for_errors()
+    HVAC.convert_shared_hvac_systems(hpxml)
     set_defaults_and_globals(runner, output_dir, epw_file)
     weather = Location.apply(model, runner, weather, epw_file, @hpxml)
     add_simulation_params(model)
@@ -307,6 +308,12 @@ class OSModel
       File.write(osm_output_path, model.to_s)
       runner.registerInfo("Wrote file: #{osm_output_path}")
     end
+
+    # Uncomment to debug EMS
+    # oems = model.getOutputEnergyManagementSystem
+    # oems.setActuatorAvailabilityDictionaryReporting('Verbose')
+    # oems.setInternalVariableAvailabilityDictionaryReporting('Verbose')
+    # oems.setEMSRuntimeLanguageDebugOutputLevel('Verbose')
   end
 
   private
@@ -2248,7 +2255,7 @@ class OSModel
     return if hvac_distribution.nil?
 
     hvac_distribution_type_map = { HPXML::HVACTypeFurnace => [HPXML::HVACDistributionTypeAir, HPXML::HVACDistributionTypeDSE],
-                                   HPXML::HVACTypeBoiler => [HPXML::HVACDistributionTypeHydronic, HPXML::HVACDistributionTypeDSE],
+                                   HPXML::HVACTypeBoiler => [HPXML::HVACDistributionTypeHydronic, HPXML::HVACDistributionTypeHydronicAndAir, HPXML::HVACDistributionTypeDSE],
                                    HPXML::HVACTypeCentralAirConditioner => [HPXML::HVACDistributionTypeAir, HPXML::HVACDistributionTypeDSE],
                                    HPXML::HVACTypeEvaporativeCooler => [HPXML::HVACDistributionTypeAir, HPXML::HVACDistributionTypeDSE],
                                    HPXML::HVACTypeMiniSplitAirConditioner => [HPXML::HVACDistributionTypeAir, HPXML::HVACDistributionTypeDSE],
@@ -2348,24 +2355,45 @@ class OSModel
     # Ducts
     duct_systems = {}
     @hpxml.hvac_distributions.each do |hvac_distribution|
-      next unless hvac_distribution.distribution_system_type == HPXML::HVACDistributionTypeAir
+      next unless [HPXML::HVACDistributionTypeAir, HPXML::HVACDistributionTypeHydronicAndAir].include? hvac_distribution.distribution_system_type
 
       air_ducts = create_ducts(runner, model, hvac_distribution, spaces)
+      next if air_ducts.empty?
 
       # Connect AirLoopHVACs to ducts
+      added_ducts = false
       hvac_distribution.hvac_systems.each do |hvac_system|
         @hvac_map[hvac_system.id].each do |loop|
           next unless loop.is_a? OpenStudio::Model::AirLoopHVAC
 
           if duct_systems[air_ducts].nil?
             duct_systems[air_ducts] = loop
+            added_ducts = true
           elsif duct_systems[air_ducts] != loop
             # Multiple air loops associated with this duct system, treat
             # as separate duct systems.
             air_ducts2 = create_ducts(runner, model, hvac_distribution, spaces)
             duct_systems[air_ducts2] = loop
+            added_ducts = true
           end
         end
+      end
+      if not added_ducts
+        # Check if ducted fan coil, which doesn't have an AirLoopHVAC;
+        # assign to PlantLoop instead.
+        if hvac_distribution.distribution_system_type && hvac_distribution.hydronic_and_air_type == HPXML::HydronicAndAirTypeFanCoil
+          hvac_distribution.hvac_systems.each do |hvac_system|
+            @hvac_map[hvac_system.id].each do |loop|
+              next unless loop.is_a? OpenStudio::Model::PlantLoop
+
+              duct_systems[air_ducts] = loop
+              added_ducts = true
+            end
+          end
+        end
+      end
+      if not added_ducts
+        fail 'Unexpected error adding ducts to model.'
       end
     end
 
@@ -2474,18 +2502,10 @@ class OSModel
 
     @hpxml.heating_systems.each do |heating_system|
       next unless heating_system.fraction_heat_load_served > 0
+      next unless [HPXML::HVACTypeFurnace, HPXML::HVACTypeWallFurnace, HPXML::HVACTypeFloorFurnace, HPXML::HVACTypeStove, HPXML::HVACTypeBoiler].include? heating_system.heating_system_type
+      next unless heating_system.heating_system_fuel != HPXML::FuelTypeElectricity
 
-      htg_type = heating_system.heating_system_type
-      next unless [HPXML::HVACTypeFurnace, HPXML::HVACTypeWallFurnace, HPXML::HVACTypeFloorFurnace, HPXML::HVACTypeStove, HPXML::HVACTypeBoiler].include? htg_type
-
-      fuel = heating_system.heating_system_fuel
-      next if fuel == HPXML::FuelTypeElectricity
-
-      fuel_eae = heating_system.electric_auxiliary_energy
-      load_frac = heating_system.fraction_heat_load_served
-      sys_id = heating_system.id
-
-      HVAC.apply_eae_to_heating_fan(runner, @hvac_map[sys_id], fuel_eae, fuel, load_frac, htg_type)
+      HVAC.apply_eae_to_heating_fan(runner, @hvac_map[heating_system.id], heating_system)
     end
   end
 

@@ -483,7 +483,6 @@ class Airflow
   end
 
   def self.initialize_air_loop_objects(model, air_loop)
-    @supply_fans = {} if @supply_fans.nil?
     @fan_rtf_var = {} if @fan_rtf_var.nil?
     @fan_mfr_max_var = {} if @fan_mfr_max_var.nil?
     @fan_rtf_sensor = {} if @fan_rtf_sensor.nil?
@@ -492,9 +491,9 @@ class Airflow
     # Get the supply fan
     system = HVAC.get_unitary_system_from_air_loop_hvac(air_loop)
     if system.nil? # Evaporative cooler supply fan directly on air loop
-      @supply_fans[air_loop] = air_loop.supplyFan.get
+      supply_fan = air_loop.supplyFan.get
     else
-      @supply_fans[air_loop] = system.supplyFan.get
+      supply_fan = system.supplyFan.get
     end
 
     @fan_rtf_var[air_loop] = OpenStudio::Model::EnergyManagementSystemGlobalVariable.new(model, "#{air_loop.name} Fan RTF".gsub(' ', '_'))
@@ -502,19 +501,19 @@ class Airflow
     # Supply fan maximum mass flow rate
     @fan_mfr_max_var[air_loop] = OpenStudio::Model::EnergyManagementSystemInternalVariable.new(model, 'Fan Maximum Mass Flow Rate')
     @fan_mfr_max_var[air_loop].setName("#{air_loop.name} max sup fan mfr")
-    @fan_mfr_max_var[air_loop].setInternalDataIndexKeyName(@supply_fans[air_loop].name.to_s)
+    @fan_mfr_max_var[air_loop].setInternalDataIndexKeyName(supply_fan.name.to_s)
 
-    if @supply_fans[air_loop].to_FanOnOff.is_initialized
+    if supply_fan.to_FanOnOff.is_initialized
       @fan_rtf_sensor[air_loop] = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Fan Runtime Fraction')
       @fan_rtf_sensor[air_loop].setName("#{@fan_rtf_var[air_loop].name} s")
-      @fan_rtf_sensor[air_loop].setKeyName(@supply_fans[air_loop].name.to_s)
-    elsif @supply_fans[air_loop].to_FanVariableVolume.is_initialized # Evaporative cooler
+      @fan_rtf_sensor[air_loop].setKeyName(supply_fan.name.to_s)
+    elsif supply_fan.to_FanVariableVolume.is_initialized # Evaporative cooler
       @fan_mfr_sensor[air_loop] = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Fan Air Mass Flow Rate')
-      @fan_mfr_sensor[air_loop].setName("#{@supply_fans[air_loop].name} air MFR")
-      @fan_mfr_sensor[air_loop].setKeyName("#{@supply_fans[air_loop].name}")
+      @fan_mfr_sensor[air_loop].setName("#{supply_fan.name} air MFR")
+      @fan_mfr_sensor[air_loop].setKeyName("#{supply_fan.name}")
       @fan_rtf_sensor[air_loop] = OpenStudio::Model::EnergyManagementSystemGlobalVariable.new(model, "#{@fan_rtf_var[air_loop].name}_s")
     else
-      fail "Unexpected fan: #{@supply_fans[air_loop].name}"
+      fail "Unexpected fan: #{supply_fan.name}"
     end
   end
 

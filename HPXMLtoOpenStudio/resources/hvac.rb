@@ -984,7 +984,7 @@ class HVAC
     hvac_map[heating_system.id] = []
     obj_name = Constants.ObjectNameBoiler
     sequential_heat_load_frac = calc_sequential_load_fraction(heating_system.fraction_heat_load_served, remaining_heat_load_frac)
-    is_condensing = false
+    is_condensing = false # FUTURE: Expose as input; default based on AFUE
     oat_reset_enabled = false
     oat_high = nil
     oat_low = nil
@@ -1431,21 +1431,23 @@ class HVAC
     living_zone.setThermostatSetpointDualSetpoint(thermostat_setpoint)
   end
 
-  def self.apply_eae_to_heating_fan(runner, eae_hvacs, eae, fuel, load_frac, htg_type)
-    # Applies Electric Auxiliary Energy (EAE) for fuel heating equipment to fan power.
+  def self.apply_eae_to_heating_fan(runner, hvac_objects, heating_system)
+    # Applies Electric Auxiliary Energy (EAE) for fuel heating equipment to fan/pump power.
 
-    if htg_type == HPXML::HVACTypeBoiler
+    eae = heating_system.electric_auxiliary_energy
+
+    if heating_system.heating_system_type == HPXML::HVACTypeBoiler
 
       if eae.nil?
-        eae = get_default_eae(htg_type, fuel, load_frac, nil)
+        eae = get_default_eae(heating_system, nil)
       end
 
       elec_power = (eae / 2.08) # W
 
-      eae_hvacs.each do |eae_hvac|
-        next unless eae_hvac.is_a? OpenStudio::Model::PlantLoop
+      hvac_objects.each do |hvac_object|
+        next unless hvac_object.is_a? OpenStudio::Model::PlantLoop
 
-        eae_hvac.components.each do |plc|
+        hvac_object.components.each do |plc|
           if plc.to_BoilerHotWater.is_initialized
             boiler = plc.to_BoilerHotWater.get
             boiler.setParasiticElectricLoad(0.0)
@@ -1464,11 +1466,11 @@ class HVAC
     else # Furnace/WallFurnace/FloorFurnace/Stove
 
       unitary_systems = []
-      eae_hvacs.each do |eae_hvac|
-        if eae_hvac.is_a? OpenStudio::Model::AirLoopHVAC # Furnace
-          unitary_systems << get_unitary_system_from_air_loop_hvac(eae_hvac)
-        elsif eae_hvac.is_a? OpenStudio::Model::AirLoopHVACUnitarySystem # WallFurnace/FloorFurnace/Stove
-          unitary_systems << eae_hvac
+      hvac_objects.each do |hvac_object|
+        if hvac_object.is_a? OpenStudio::Model::AirLoopHVAC # Furnace
+          unitary_systems << get_unitary_system_from_air_loop_hvac(hvac_object)
+        elsif hvac_object.is_a? OpenStudio::Model::AirLoopHVACUnitarySystem # WallFurnace/FloorFurnace/Stove
+          unitary_systems << hvac_object
         end
       end
 
@@ -1476,7 +1478,7 @@ class HVAC
         if eae.nil?
           htg_coil = unitary_system.heatingCoil.get.to_CoilHeatingGas.get
           htg_capacity = UnitConversions.convert(htg_coil.nominalCapacity.get, 'W', 'kBtu/hr')
-          eae = get_default_eae(htg_type, fuel, load_frac, htg_capacity)
+          eae = get_default_eae(heating_system, htg_capacity)
         end
         elec_power = eae / 2.08 # W
 
@@ -1923,22 +1925,74 @@ class HVAC
     return ef_input, water_removal_rate_input
   end
 
-  def self.get_default_eae(htg_type, fuel, load_frac, furnace_capacity_kbtuh)
-    # From ANSI/RESNET/ICC 301 Standard
-    if htg_type == HPXML::HVACTypeBoiler
-      if [HPXML::FuelTypeNaturalGas,
-          HPXML::FuelTypePropane].include? fuel
-        return 170.0 * load_frac # kWh/yr
-      elsif [HPXML::FuelTypeOil,
-             HPXML::FuelTypeOil1,
-             HPXML::FuelTypeOil2,
-             HPXML::FuelTypeOil4,
-             HPXML::FuelTypeOil5or6,
-             HPXML::FuelTypeDiesel,
-             HPXML::FuelTypeKerosene].include? fuel
-        return 330.0 * load_frac # kWh/yr
+  def self.get_default_eae(heating_system, furnace_capacity_kbtuh)
+    # From ANSI/RESNET/ICC 301-2019 Standard
+
+    load_frac = heating_system.fraction_heat_load_served
+    fuel = heating_system.heating_system_fuel
+
+    if heating_system.heating_system_type == HPXML::HVACTypeBoiler
+      if heating_system.is_shared_system
+        # FUTURE: Allow defaulting based on ANSI/RESNET/ICC 301-2019 Table 4.5.2(5)
+        distribution_system = heating_system.distribution_system
+        distribution_type = distribution_system.distribution_system_type
+
+        sp_kw = UnitConversions.convert(distribution_system.shared_loop_watts, 'W', 'kW')
+        n_dweq = heating_system.number_of_units_served.to_f
+
+        if distribution_type == HPXML::HVACDistributionTypeHydronic
+
+          # Shared boiler w/ baseboard/radiators/etc
+          aux_in = 0.0
+
+        elsif distribution_type == HPXML::HVACDistributionTypeHydronicAndAir
+
+          hydronic_and_air_type = distribution_system.hydronic_and_air_type
+
+          if hydronic_and_air_type == HPXML::HydronicAndAirTypeFanCoil
+
+            # Shared boiler w/ fan coil
+            aux_in = UnitConversions.convert(distribution_system.fan_coil_watts, 'W', 'kW')
+
+          elsif hydronic_and_air_type == HPXML::HydronicAndAirTypeWaterLoopHeatPump
+
+            # Shared boiler w/ WLHP
+            # ANSI/RESNET/ICC 301-2019 Section 4.4.7.2
+            aux_in = 0.0
+
+          else
+
+            fail "Unexpected distribution type '#{hydronic_and_air_type}' for shared boiler."
+          end
+
+        else
+
+          fail "Unexpected distribution type '#{distribution_type}' for shared boiler."
+        end
+
+        # ANSI/RESNET/ICC 301-2019 Equation 4.4-5
+        eae = ((sp_kw / n_dweq) + aux_in) * 2080.0
+        return eae * load_frac # kWh/yr
+
+      else # In-unit boilers
+
+        if [HPXML::FuelTypeNaturalGas,
+            HPXML::FuelTypePropane].include? fuel
+          return 170.0 * load_frac # kWh/yr
+        elsif [HPXML::FuelTypeOil,
+               HPXML::FuelTypeOil1,
+               HPXML::FuelTypeOil2,
+               HPXML::FuelTypeOil4,
+               HPXML::FuelTypeOil5or6,
+               HPXML::FuelTypeDiesel,
+               HPXML::FuelTypeKerosene].include? fuel
+          return 330.0 * load_frac # kWh/yr
+        end
+
       end
-    elsif htg_type == HPXML::HVACTypeFurnace
+    elsif heating_system.heating_system_type == HPXML::HVACTypeFurnace
+
+      # Furnaces
       if [HPXML::FuelTypeNaturalGas,
           HPXML::FuelTypePropane].include? fuel
         return (149.0 + 10.3 * furnace_capacity_kbtuh) * load_frac # kWh/yr
@@ -1951,6 +2005,7 @@ class HVAC
              HPXML::FuelTypeKerosene].include? fuel
         return (439.0 + 5.5 * furnace_capacity_kbtuh) * load_frac # kWh/yr
       end
+
     end
     return 0.0
   end
@@ -3918,5 +3973,133 @@ class HVAC
     secondary_duct_location = HPXML::LocationLivingSpace
 
     return primary_duct_location, secondary_duct_location
+  end
+
+  def self.convert_shared_hvac_systems(hpxml)
+    # Convert shared systems to individual systems per ANSI/RESNET/ICC 301-2019
+
+    # Convert shared cooling systems
+    hpxml.cooling_systems.each do |cooling_system|
+      next unless cooling_system.is_shared_system
+
+      HVAC.convert_shared_cooling_system(hpxml, cooling_system)
+    end
+
+    # Convert shared heating systems
+    hpxml.heating_systems.each do |heating_system|
+      next unless heating_system.is_shared_system
+
+      HVAC.convert_shared_heating_system(hpxml, heating_system)
+    end
+
+    # FIXME: Convert WLHP w/ shared boiler to HP w/ boiler
+
+    # Remove any water loop heat pumps; they have been converted to other systems.
+    hpxml.heat_pumps.each do |heat_pump|
+      next unless heat_pump.heat_pump_type == HPXML::HVACTypeHeatPumpWaterLoopToAir
+
+      heat_pump.delete
+    end
+
+    # Remove any orphaned HVAC distributions
+    hpxml.hvac_distributions.each do |hvac_distribution|
+      begin
+        hvac_systems = hvac_distribution.hvac_systems
+      rescue
+        hvac_systems = []
+      end
+      next unless hvac_systems.empty?
+
+      hvac_distribution.delete
+    end
+  end
+
+  def self.convert_shared_cooling_system(hpxml, cooling_system)
+    # Convert shared chiller/cooling tower to central AC equivalent
+
+    distribution_system = cooling_system.distribution_system
+    distribution_type = distribution_system.distribution_system_type
+    hydronic_and_air_type = distribution_system.hydronic_and_air_type
+
+    # Assign SEER equivalent
+    n_dweq = cooling_system.number_of_units_served.to_f
+    aux = distribution_system.shared_loop_watts
+    if cooling_system.cooling_system_type == HPXML::HVACTypeChiller
+      cap = cooling_system.cooling_capacity
+      chiller_input = UnitConversions.convert(cooling_system.cooling_efficiency_kw_per_ton * UnitConversions.convert(cap, 'Btu/hr', 'ton'), 'kW', 'W')
+      if distribution_type == HPXML::HVACDistributionTypeHydronic
+        aux_dweq = 0.0
+      elsif distribution_type == HPXML::HVACDistributionTypeHydronicAndAir
+        if hydronic_and_air_type == HPXML::HydronicAndAirTypeFanCoil
+          aux_dweq = distribution_system.fan_coil_watts
+        elsif hydronic_and_air_type == HPXML::HydronicAndAirTypeWaterLoopHeatPump
+
+          wlhp = hpxml.heat_pumps.select { |hp| hp.distribution_system_idref == distribution_system.id }[0]
+          aux_dweq = wlhp.cooling_capacity / wlhp.cooling_efficiency_eer
+        else
+          fail "Unexpected distribution type '#{hydronic_and_air_type}' for chiller."
+        end
+      else
+        fail "Unexpected distribution type '#{distribution_type}' for chiller."
+      end
+      # ANSI/RESNET/ICC 301-2019 Equation 4.4-2
+      seer_eq = (cap - 3.41 * aux - 3.41 * aux_dweq * n_dweq) / (chiller_input + aux + aux_dweq * n_dweq)
+
+    elsif cooling_system.cooling_system_type == HPXML::HVACTypeCoolingTower
+      if distribution_type == HPXML::HVACDistributionTypeHydronicAndAir
+        hydronic_and_air_type = distribution_system.hydronic_and_air_type
+        if hydronic_and_air_type == HPXML::HydronicAndAirTypeWaterLoopHeatPump
+          wlhp = hpxml.heat_pumps.select { |hp| hp.distribution_system_idref == distribution_system.id }[0]
+          wlhp_cap = wlhp.cooling_capacity
+          wlhp_input = wlhp_cap / wlhp.cooling_efficiency_eer
+        else
+          fail "Unexpected distribution type '#{hydronic_and_air_type}' for cooling tower."
+        end
+      else
+        fail "Unexpected hydronic distribution type '#{distribution_type}' for cooling tower."
+      end
+      # ANSI/RESNET/ICC 301-2019 Equation 4.4-3
+      seer_eq = (wlhp_cap - 3.41 * aux / n_dweq) / (wlhp_input + aux / n_dweq)
+
+    else
+      fail "Unexpected cooling system type '#{cooling_system.cooling_system_type}'."
+    end
+    cooling_system.cooling_system_type = HPXML::HVACTypeCentralAirConditioner
+    cooling_system.cooling_efficiency_seer = seer_eq
+
+    # Assign new distribution system to air conditioner
+    if distribution_type == HPXML::HVACDistributionTypeHydronic
+      # Assign DSE=1
+      hpxml.hvac_distributions.add(id: "#{cooling_system.id}AirDistributionSystem",
+                                   distribution_system_type: HPXML::HVACDistributionTypeDSE,
+                                   annual_cooling_dse: 1)
+      cooling_system.distribution_system_idref = hpxml.hvac_distributions[-1].id
+    elsif distribution_type == HPXML::HVACDistributionTypeHydronicAndAir
+      # Assign AirDistribution
+      hpxml.hvac_distributions << distribution_system.dup
+      hpxml.hvac_distributions[-1].id = "#{cooling_system.id}AirDistributionSystem"
+      hpxml.hvac_distributions[-1].distribution_system_type = HPXML::HVACDistributionTypeAir
+      cooling_system.distribution_system_idref = hpxml.hvac_distributions[-1].id
+    end
+  end
+
+  def self.convert_shared_heating_system(hpxml, heating_system)
+    distribution_system = heating_system.distribution_system
+    distribution_type = distribution_system.distribution_system_type
+    hydronic_and_air_type = distribution_system.hydronic_and_air_type
+
+    if heating_system.heating_system_type == HPXML::HVACTypeBoiler && hydronic_and_air_type.to_s == HPXML::HydronicAndAirTypeFanCoil
+      # Convert to furnace in order to include possible duct losses
+      # TODO: Can we approximate the boiler efficiency any better?
+      eae = get_default_eae(heating_system, nil)
+      heating_system.heating_system_type = HPXML::HVACTypeFurnace
+      heating_system.electric_auxiliary_energy = eae # Preserve boiler EAE for furnace
+
+      # Assign new distribution system to furnace
+      hpxml.hvac_distributions << distribution_system.dup
+      hpxml.hvac_distributions[-1].id = "#{heating_system.id}AirDistributionSystem"
+      hpxml.hvac_distributions[-1].distribution_system_type = HPXML::HVACDistributionTypeAir
+      heating_system.distribution_system_idref = hpxml.hvac_distributions[-1].id
+    end
   end
 end

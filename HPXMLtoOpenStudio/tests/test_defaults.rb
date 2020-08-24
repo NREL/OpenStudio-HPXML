@@ -981,7 +981,7 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
     supply_duct_idx = 0
     return_duct_idx = 0
     hpxml.hvac_distributions.each do |hvac_distribution|
-      next unless hvac_distribution.distribution_system_type == HPXML::HVACDistributionTypeAir
+      next unless [HPXML::HVACDistributionTypeAir, HPXML::HVACDistributionTypeHydronicAndAir].include? hvac_distribution.distribution_system_type
 
       assert_equal(n_return_registers, hvac_distribution.number_of_return_registers)
       hvac_distribution.ducts.each do |duct|
