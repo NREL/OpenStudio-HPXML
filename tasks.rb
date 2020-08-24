@@ -1834,10 +1834,11 @@ def get_values(osw_file, step)
     step.setArgument('pv_system_module_type_1', HPXML::PVModuleTypeStandard)
     step.setArgument('pv_system_is_shared_1', true)
   elsif ['extra-vacancy-6-months.osw'].include? osw_file
-    step.setArgument('simulation_control_vacancy_begin_month', 1)
-    step.setArgument('simulation_control_vacancy_begin_day_of_month', 1)
-    step.setArgument('simulation_control_vacancy_end_month', 6)
-    step.setArgument('simulation_control_vacancy_end_day_of_month', 30)
+    step.setArgument('schedules_type', 'stochastic')
+    step.setArgument('schedules_vacancy_begin_month', 1)
+    step.setArgument('schedules_vacancy_begin_day_of_month', 1)
+    step.setArgument('schedules_vacancy_end_month', 6)
+    step.setArgument('schedules_vacancy_end_day_of_month', 30)
   end
 
   # Warnings/Errors
