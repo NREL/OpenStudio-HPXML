@@ -865,8 +865,8 @@ class HVACSizing
       else
         adjacent_space = frame_floor.exterior_adjacent_to
         if adjacent_space == HPXML::LocationAdiabatic
-          zone_loads.Cool_Walls += 0
-          zone_loads.Heat_Walls += 0
+          zone_loads.Cool_Floors += 0
+          zone_loads.Heat_Floors += 0
         else
           zone_loads.Cool_Floors += (1.0 / frame_floor.insulation_assembly_r_value) * frame_floor.area * (@cool_design_temps[adjacent_space] - @cool_setpoint)
           zone_loads.Heat_Floors += (1.0 / frame_floor.insulation_assembly_r_value) * frame_floor.area * (@heat_setpoint - @heat_design_temps[adjacent_space])
