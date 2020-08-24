@@ -3,8 +3,8 @@
   <schema_version>3.0</schema_version>
   <name>build_residential_hpxml</name>
   <uid>a13a8983-2b01-4930-8af2-42030b6e4233</uid>
-  <version_id>3b779e6a-0ac7-435d-a628-21f76edd0c6e</version_id>
-  <version_modified>20200820T165250Z</version_modified>
+  <version_id>9b026e63-440d-4e3f-b9f8-f5503147caa8</version_id>
+  <version_modified>20200824T210757Z</version_modified>
   <xml_checksum>2C38F48B</xml_checksum>
   <class_name>BuildResidentialHPXML</class_name>
   <display_name>HPXML Builder</display_name>
@@ -58,7 +58,7 @@
       <display_name>Simulation Control: Run Period Begin Month</display_name>
       <description>This numeric field should contain the starting month number (1 = January, 2 = February, etc.) for the annual run period desired.</description>
       <type>Integer</type>
-      <units>month</units>
+      <units>#</units>
       <required>false</required>
       <model_dependent>false</model_dependent>
     </argument>
@@ -67,7 +67,7 @@
       <display_name>Simulation Control: Run Period Begin Day of Month</display_name>
       <description>This numeric field should contain the starting day of the starting month (must be valid for month) for the annual run period desired.</description>
       <type>Integer</type>
-      <units>day</units>
+      <units>#</units>
       <required>false</required>
       <model_dependent>false</model_dependent>
     </argument>
@@ -76,7 +76,7 @@
       <display_name>Simulation Control: Run Period End Month</display_name>
       <description>This numeric field should contain the end month number (1 = January, 2 = February, etc.) for the annual run period desired.</description>
       <type>Integer</type>
-      <units>month</units>
+      <units>#</units>
       <required>false</required>
       <model_dependent>false</model_dependent>
     </argument>
@@ -85,7 +85,7 @@
       <display_name>Simulation Control: Run Period End Day of Month</display_name>
       <description>This numeric field should contain the ending day of the ending month (must be valid for month) for the annual run period desired.</description>
       <type>Integer</type>
-      <units>day</units>
+      <units>#</units>
       <required>false</required>
       <model_dependent>false</model_dependent>
     </argument>
@@ -112,7 +112,7 @@
       <display_name>Simulation Control: Daylight Saving Begin Month</display_name>
       <description>This numeric field should contain the starting month number (1 = January, 2 = February, etc.) for the annual daylight saving period desired.</description>
       <type>Integer</type>
-      <units>month</units>
+      <units>#</units>
       <required>false</required>
       <model_dependent>false</model_dependent>
     </argument>
@@ -121,7 +121,7 @@
       <display_name>Simulation Control: Daylight Saving Begin Day of Month</display_name>
       <description>This numeric field should contain the starting day of the starting month (must be valid for month) for the daylight saving period desired.</description>
       <type>Integer</type>
-      <units>day</units>
+      <units>#</units>
       <required>false</required>
       <model_dependent>false</model_dependent>
     </argument>
@@ -130,7 +130,7 @@
       <display_name>Simulation Control: Daylight Saving End Month</display_name>
       <description>This numeric field should contain the end month number (1 = January, 2 = February, etc.) for the daylight saving period desired.</description>
       <type>Integer</type>
-      <units>month</units>
+      <units>#</units>
       <required>false</required>
       <model_dependent>false</model_dependent>
     </argument>
@@ -139,7 +139,7 @@
       <display_name>Simulation Control: Daylight Saving End Day of Month</display_name>
       <description>This numeric field should contain the ending day of the ending month (must be valid for month) for the daylight saving period desired.</description>
       <type>Integer</type>
-      <units>day</units>
+      <units>#</units>
       <required>false</required>
       <model_dependent>false</model_dependent>
     </argument>
@@ -148,7 +148,7 @@
       <display_name>Simulation Control: Vacancy Start Begin Month</display_name>
       <description>This numeric field should contain the starting month number (1 = January, 2 = February, etc.) for the vacancy period desired.</description>
       <type>Integer</type>
-      <units>month</units>
+      <units>#</units>
       <required>false</required>
       <model_dependent>false</model_dependent>
     </argument>
@@ -157,7 +157,7 @@
       <display_name>Simulation Control: Vacancy Begin Day of Month</display_name>
       <description>This numeric field should contain the starting day of the starting month (must be valid for month) for the vacancy period desired.</description>
       <type>Integer</type>
-      <units>day</units>
+      <units>#</units>
       <required>false</required>
       <model_dependent>false</model_dependent>
     </argument>
@@ -166,7 +166,7 @@
       <display_name>Simulation Control: Vacancy Start End Month</display_name>
       <description>This numeric field should contain the end month number (1 = January, 2 = February, etc.) for the vacancy period desired.</description>
       <type>Integer</type>
-      <units>month</units>
+      <units>#</units>
       <required>false</required>
       <model_dependent>false</model_dependent>
     </argument>
@@ -175,7 +175,7 @@
       <display_name>Simulation Control: Vacancy End Day of Month</display_name>
       <description>This numeric field should contain the ending day of the ending month (must be valid for month) for the vacancy period desired.</description>
       <type>Integer</type>
-      <units>day</units>
+      <units>#</units>
       <required>false</required>
       <model_dependent>false</model_dependent>
     </argument>
@@ -6470,17 +6470,6 @@
       <checksum>EB32709E</checksum>
     </file>
     <file>
-      <version>
-        <software_program>OpenStudio</software_program>
-        <identifier>2.9.0</identifier>
-        <min_compatible>2.9.0</min_compatible>
-      </version>
-      <filename>measure.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>script</usage_type>
-      <checksum>2186B69A</checksum>
-    </file>
-    <file>
       <filename>base-schedules-stochastic.osw</filename>
       <filetype>osw</filetype>
       <usage_type>test</usage_type>
@@ -6503,6 +6492,17 @@
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
       <checksum>4905F269</checksum>
+    </file>
+    <file>
+      <version>
+        <software_program>OpenStudio</software_program>
+        <identifier>2.9.0</identifier>
+        <min_compatible>2.9.0</min_compatible>
+      </version>
+      <filename>measure.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>script</usage_type>
+      <checksum>70774BAF</checksum>
     </file>
   </files>
 </measure>
