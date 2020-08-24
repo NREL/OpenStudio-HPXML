@@ -732,7 +732,7 @@ class HPXMLTest < MiniTest::Test
       sql_value_base_surf_idx = sqlFile.execAndReturnFirstDouble(query_base_surf_idx).get
       sql_value_ext_bound = sqlFile.execAndReturnFirstDouble(query_ext_bound).get
       sql_value = sql_value_base_surf_idx == sql_value_ext_bound ? HPXML::LocationAdiabatic : nil
-      assert_in_epsilon(hpxml_value, sql_value, 0.01)
+      assert_equal(hpxml_value, sql_value)
     end
 
     # Enclosure FrameFloors
@@ -787,7 +787,7 @@ class HPXMLTest < MiniTest::Test
       sql_value_base_surf_idx = sqlFile.execAndReturnFirstDouble(query_base_surf_idx).get
       sql_value_ext_bound = sqlFile.execAndReturnFirstDouble(query_ext_bound).get
       sql_value = sql_value_base_surf_idx == sql_value_ext_bound ? HPXML::LocationAdiabatic : nil
-      assert_in_epsilon(hpxml_value, sql_value, 0.01)
+      assert_equal(hpxml_value, sql_value)
     end
 
     # Enclosure Windows/Skylights
