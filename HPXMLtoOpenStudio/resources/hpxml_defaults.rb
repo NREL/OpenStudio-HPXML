@@ -937,7 +937,6 @@ class HPXMLDefaults
     if hpxml.lighting.exterior_usage_multiplier.nil?
       hpxml.lighting.exterior_usage_multiplier = 1.0
     end
-    # Schedules from T24 2016 Residential ACM Appendix C Table 8 Exterior Lighting Hourly Multiplier (Weekdays and weekends)
     default_exterior_lighting_weekday_fractions = Schedule.LightingExteriorWeekdayFractions
     default_exterior_lighting_weekend_fractions = Schedule.LightingExteriorWeekendFractions
     default_exterior_lighting_monthly_multipliers = Schedule.LightingExteriorMonthlyMultipliers
