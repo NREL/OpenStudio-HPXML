@@ -957,24 +957,26 @@ class HVAC
     air_loop_unitary = create_air_loop_unitary_system(model, obj_name, fan, htg_coil, clg_coil, htg_supp_coil, 40.0)
     hvac_map[heat_pump.id] << air_loop_unitary
 
-    # Shared pump power per ANSI/RESNET/ICC 301-2019 Section 4.4.5.1 (pump runs 8760)
-    # Ancillary fields do not correctly work so using ElectricEquipment object instead;
-    # Revert when https://github.com/NREL/EnergyPlus/issues/8230 is fixed.
-    shared_pump_w = heat_pump.shared_loop_watts / heat_pump.number_of_units_served.to_f
-    # air_loop_unitary.setAncilliaryOffCycleElectricPower(shared_pump_w)
-    # air_loop_unitary.setAncilliaryOnCycleElectricPower(shared_pump_w)
-    equip_def = OpenStudio::Model::ElectricEquipmentDefinition.new(model)
-    equip_def.setName(Constants.ObjectNameSharedPump(obj_name))
-    equip = OpenStudio::Model::ElectricEquipment.new(equip_def)
-    equip.setName(equip_def.name.to_s)
-    equip.setSpace(control_zone.spaces[0])
-    equip_def.setDesignLevel(shared_pump_w)
-    equip_def.setFractionRadiant(0)
-    equip_def.setFractionLatent(0)
-    equip_def.setFractionLost(1)
-    equip.setSchedule(model.alwaysOnDiscreteSchedule)
-    equip.setEndUseSubcategory(equip_def.name.to_s)
-    hvac_map[heat_pump.id] += disaggregate_fan_or_pump(model, equip, htg_coil, clg_coil, htg_supp_coil)
+    if heat_pump.is_shared_system
+      # Shared pump power per ANSI/RESNET/ICC 301-2019 Section 4.4.5.1 (pump runs 8760)
+      # Ancillary fields do not correctly work so using ElectricEquipment object instead;
+      # Revert when https://github.com/NREL/EnergyPlus/issues/8230 is fixed.
+      shared_pump_w = heat_pump.shared_loop_watts / heat_pump.number_of_units_served.to_f
+      # air_loop_unitary.setAncilliaryOffCycleElectricPower(shared_pump_w)
+      # air_loop_unitary.setAncilliaryOnCycleElectricPower(shared_pump_w)
+      equip_def = OpenStudio::Model::ElectricEquipmentDefinition.new(model)
+      equip_def.setName(Constants.ObjectNameSharedPump(obj_name))
+      equip = OpenStudio::Model::ElectricEquipment.new(equip_def)
+      equip.setName(equip_def.name.to_s)
+      equip.setSpace(control_zone.spaces[0])
+      equip_def.setDesignLevel(shared_pump_w)
+      equip_def.setFractionRadiant(0)
+      equip_def.setFractionLatent(0)
+      equip_def.setFractionLost(1)
+      equip.setSchedule(model.alwaysOnDiscreteSchedule)
+      equip.setEndUseSubcategory(equip_def.name.to_s)
+      hvac_map[heat_pump.id] += disaggregate_fan_or_pump(model, equip, htg_coil, clg_coil, htg_supp_coil)
+    end
 
     # Air Loop
 
@@ -4087,6 +4089,7 @@ class HVAC
     end
     cooling_system.cooling_system_type = HPXML::HVACTypeCentralAirConditioner
     cooling_system.cooling_efficiency_seer = seer_eq
+    cooling_system.cooling_capacity = nil # Autosize the equipment
 
     # Assign new distribution system to air conditioner
     if distribution_type == HPXML::HVACDistributionTypeHydronic
@@ -4122,5 +4125,7 @@ class HVAC
       hpxml.hvac_distributions[-1].distribution_system_type = HPXML::HVACDistributionTypeAir
       heating_system.distribution_system_idref = hpxml.hvac_distributions[-1].id
     end
+
+    heating_system.heating_capacity = nil # Autosize the equipment
   end
 end
