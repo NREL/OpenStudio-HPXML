@@ -134,38 +134,8 @@ If either ``DaylightSaving`` or ``DaylightSaving/Enabled`` is not provided, ``Da
 If daylight saving is enabled, the daylight saving period can be optionally specified with ``DaylightSaving/BeginMonth``, ``DaylightSaving/BeginDayOfMonth``, ``DaylightSaving/EndMonth``, and ``DaylightSaving/EndDayOfMonth``.
 If not specified, dates will be defined according to the EPW weather file header; if not available there, default values of March 12 and November 5 will be used.
 
-An absolute or relative path can be entered in ``/HPXML/SoftwareInfo/extension/SchedulesPath``.
-The file that this path points to must be a valid csv file containing column-wise (hourly or sub-hourly) schedules with headers matching strings from the following list:
-
-- occupants
-- lighting_interior
-- lighting_exterior
-- lighting_garage
-- lighting_exterior_holiday
-- cooking_range
-- refrigerator
-- freezer
-- dishwasher
-- dishwasher_power
-- clothes_washer
-- clothes_washer_power
-- clothes_dryer
-- clothes_dryer_exhaust
-- fixtures
-- ceiling_fan
-- plug_loads_other
-- plug_loads_tv
-- plug_loads_vehicle
-- plug_loads_well_pump
-- fuel_loads_grill
-- fuel_loads_lighting
-- fuel_loads_fireplace
-- pool_pump
-- pool_heater
-- hot_tub_pump
-- hot_tub_heater
-- vacancy
-
+An absolute or relative path can be entered in ``/HPXML/SoftwareInfo/extension/OccupancySchedulesCSVPath``.
+The file that this path points to must be a valid csv file containing column-wise (hourly or sub-hourly) schedules with headers matching column names from `this sample CSV file <https://github.com/NREL/OpenStudio-HPXML/tree/master/BuildResidentialHPXML/tests/schedules/user-specified.csv>`_.
 A valid csv file contains schedules:
 
 - that span the entire year (8760 or 8784 hours)
