@@ -838,6 +838,15 @@ class HPXMLDefaults
           default_values = HotWaterAndAppliances.get_extra_refrigerator_default_values
           refrigerator.rated_annual_kwh = default_values[:rated_annual_kwh]
         end
+        if refrigerator.weekday_fractions.nil?
+          refrigerator.weekday_fractions = Schedule.ExtraRefrigeratorWeekdayFractions
+        end
+        if refrigerator.weekend_fractions.nil?
+          refrigerator.weekend_fractions = Schedule.ExtraRefrigeratorWeekendFractions
+        end
+        if refrigerator.monthly_multipliers.nil?
+          refrigerator.monthly_multipliers = Schedule.ExtraRefrigeratorMonthlyMultipliers
+        end
       else # primary refrigerator
         if refrigerator.location.nil?
           refrigerator.location = HPXML::LocationLivingSpace
@@ -846,18 +855,18 @@ class HPXMLDefaults
           default_values = HotWaterAndAppliances.get_refrigerator_default_values(nbeds)
           refrigerator.rated_annual_kwh = default_values[:rated_annual_kwh]
         end
+        if refrigerator.weekday_fractions.nil?
+          refrigerator.weekday_fractions = Schedule.RefrigeratorWeekdayFractions
+        end
+        if refrigerator.weekend_fractions.nil?
+          refrigerator.weekend_fractions = Schedule.RefrigeratorWeekendFractions
+        end
+        if refrigerator.monthly_multipliers.nil?
+          refrigerator.monthly_multipliers = Schedule.RefrigeratorMonthlyMultipliers
+        end
       end
       if refrigerator.usage_multiplier.nil?
         refrigerator.usage_multiplier = 1.0
-      end
-      if refrigerator.weekday_fractions.nil?
-        refrigerator.weekday_fractions = Schedule.RefrigeratorWeekdayFractions
-      end
-      if refrigerator.weekend_fractions.nil?
-        refrigerator.weekend_fractions = Schedule.RefrigeratorWeekendFractions
-      end
-      if refrigerator.monthly_multipliers.nil?
-        refrigerator.monthly_multipliers = Schedule.RefrigeratorMonthlyMultipliers
       end
     end
 

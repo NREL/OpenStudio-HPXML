@@ -52,6 +52,7 @@ class ScheduleGenerator
       'lighting_exterior_holiday',
       'cooking_range',
       'refrigerator',
+      'extra_refrigerator',
       'freezer',
       'dishwasher',
       'dishwasher_power',
@@ -124,6 +125,7 @@ class ScheduleGenerator
     create_average_fixtures(args: args)
     create_average_ceiling_fan
     create_average_refrigerator
+    create_average_extra_refrigerator
     create_average_freezer
     create_average_fuel_loads_grill
     create_average_fuel_loads_lighting
@@ -161,6 +163,10 @@ class ScheduleGenerator
 
   def create_average_refrigerator
     create_timeseries_from_weekday_weekend_monthly(sch_name: 'refrigerator', weekday_sch: Schedule.RefrigeratorWeekdayFractions, weekend_sch: Schedule.RefrigeratorWeekendFractions, monthly_sch: Schedule.RefrigeratorMonthlyMultipliers)
+  end
+
+  def create_average_extra_refrigerator
+    create_timeseries_from_weekday_weekend_monthly(sch_name: 'extra_refrigerator', weekday_sch: Schedule.ExtraRefrigeratorWeekdayFractions, weekend_sch: Schedule.ExtraRefrigeratorWeekendFractions, monthly_sch: Schedule.ExtraRefrigeratorMonthlyMultipliers)
   end
 
   def create_average_freezer
@@ -973,7 +979,7 @@ class ScheduleGenerator
       csv << @schedules.keys
       rows = @schedules.values.transpose
       rows.each do |row|
-        csv << row
+        csv << row.map{|x| "%.3g" % x}
       end
     end
     return true
