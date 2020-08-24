@@ -551,6 +551,10 @@
                 <Value>0.92</Value>
               </AnnualHeatingEfficiency>
               <FractionHeatLoadServed>1.0</FractionHeatLoadServed>
+              <extension>
+                <SharedLoopWatts>500.0</SharedLoopWatts>
+                <FanCoilWatts>150.0</FanCoilWatts>
+              </extension>
             </HeatingSystem>
           </HVACPlant>
           <HVACControl>
@@ -592,15 +596,9 @@
                   <DuctLocation>other multifamily buffer space</DuctLocation>
                   <DuctSurfaceArea>20.0</DuctSurfaceArea>
                 </Ducts>
-                <extension>
-                  <FanCoilWatts>150.0</FanCoilWatts>
-                </extension>
               </HydronicAndAirDistribution>
             </DistributionSystemType>
             <ConditionedFloorAreaServed>2700.0</ConditionedFloorAreaServed>
-            <extension>
-              <SharedLoopWatts>500.0</SharedLoopWatts>
-            </extension>
           </HVACDistribution>
         </HVAC>
         <WaterHeating>

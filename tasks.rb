@@ -286,6 +286,7 @@ def create_hpxmls
     'base-hvac-shared-chiller-only-fan-coil-ducted.xml' => 'base-hvac-shared-chiller-only-fan-coil.xml',
     'base-hvac-shared-chiller-only-water-loop-heat-pump.xml' => 'base-hvac-shared-chiller-only-baseboard.xml',
     'base-hvac-shared-cooling-tower-only-water-loop-heat-pump.xml' => 'base-hvac-shared-chiller-only-water-loop-heat-pump.xml',
+    'base-hvac-shared-ground-loop-ground-to-air-heat-pump.xml' => 'base-enclosure-attached-multifamily.xml',
     'base-hvac-stove-oil-only.xml' => 'base.xml',
     'base-hvac-stove-wood-pellets-only.xml' => 'base.xml',
     'base-hvac-undersized.xml' => 'base.xml',
@@ -2471,6 +2472,7 @@ def set_hpxml_heating_systems(hpxml_file, hpxml)
          'base-hvac-none.xml',
          'base-hvac-room-ac-only.xml',
          'base-hvac-shared-chiller-only-baseboard.xml',
+         'base-hvac-shared-ground-loop-ground-to-air-heat-pump.xml',
          'invalid_files/orphaned-hvac-distribution.xml'].include? hpxml_file
     hpxml.heating_systems.clear
   elsif ['base-hvac-boiler-elec-only.xml'].include? hpxml_file
@@ -2681,6 +2683,11 @@ def set_hpxml_heating_systems(hpxml_file, hpxml)
     hpxml.heating_systems[0].is_shared_system = true
     hpxml.heating_systems[0].number_of_units_served = 5
     hpxml.heating_systems[0].heating_capacity = nil
+    hpxml.heating_systems[0].shared_loop_watts = 500
+    hpxml.heating_systems[0].fan_coil_watts = 0
+  elsif ['base-hvac-shared-boiler-only-fan-coil.xml',
+         'base-hvac-shared-boiler-chiller-fan-coil.xml'].include? hpxml_file
+    hpxml.heating_systems[0].fan_coil_watts = 150
   elsif hpxml_file.include?('hvac_autosizing') && (not hpxml.heating_systems.nil?) && (hpxml.heating_systems.size > 0)
     hpxml.heating_systems[0].heating_capacity = nil
   end
@@ -2721,7 +2728,8 @@ def set_hpxml_cooling_systems(hpxml_file, hpxml)
          'base-hvac-stove-oil-only.xml',
          'base-hvac-stove-wood-pellets-only.xml',
          'base-hvac-wall-furnace-elec-only.xml',
-         'base-hvac-shared-boiler-only-baseboard.xml'].include? hpxml_file
+         'base-hvac-shared-boiler-only-baseboard.xml',
+         'base-hvac-shared-ground-loop-ground-to-air-heat-pump.xml'].include? hpxml_file
     hpxml.cooling_systems.clear
   elsif ['base-hvac-boiler-gas-central-ac-1-speed.xml'].include? hpxml_file
     hpxml.cooling_systems[0].distribution_system_idref = 'HVACDistribution2'
@@ -2818,11 +2826,16 @@ def set_hpxml_cooling_systems(hpxml_file, hpxml)
     hpxml.cooling_systems[0].compressor_type = nil
     hpxml.cooling_systems[0].cooling_efficiency_kw_per_ton = 0.9
     hpxml.cooling_systems[0].cooling_shr = nil
+    hpxml.cooling_systems[0].shared_loop_watts = 500
+    hpxml.cooling_systems[0].fan_coil_watts = 0
   elsif ['base-hvac-shared-cooling-tower-only-water-loop-heat-pump.xml',
          'base-hvac-shared-boiler-cooling-tower-water-loop-heat-pump.xml'].include? hpxml_file
     hpxml.cooling_systems[0].cooling_system_type = HPXML::HVACTypeCoolingTower
     hpxml.cooling_systems[0].cooling_capacity = nil
     hpxml.cooling_systems[0].cooling_efficiency_kw_per_ton = nil
+  elsif ['base-hvac-shared-chiller-only-fan-coil.xml',
+         'base-hvac-shared-boiler-chiller-fan-coil.xml'].include? hpxml_file
+    hpxml.cooling_systems[0].fan_coil_watts = 150
   elsif hpxml_file.include?('hvac_autosizing') && (not hpxml.cooling_systems.nil?) && (hpxml.cooling_systems.size > 0)
     hpxml.cooling_systems[0].cooling_capacity = nil
   end
@@ -2884,7 +2897,8 @@ def set_hpxml_heat_pumps(hpxml_file, hpxml)
                          heating_capacity_17F: 42000 * 0.640, # Based on OAT slope of default curves
                          cooling_shr: 0.78,
                          compressor_type: HPXML::HVACCompressorTypeVariableSpeed)
-  elsif ['base-hvac-ground-to-air-heat-pump.xml'].include? hpxml_file
+  elsif ['base-hvac-ground-to-air-heat-pump.xml',
+         'base-hvac-shared-ground-loop-ground-to-air-heat-pump.xml'].include? hpxml_file
     hpxml.heat_pumps.add(id: 'HeatPump',
                          distribution_system_idref: 'HVACDistribution',
                          heat_pump_type: HPXML::HVACTypeHeatPumpGroundToAir,
@@ -2899,6 +2913,11 @@ def set_hpxml_heat_pumps(hpxml_file, hpxml)
                          heating_efficiency_cop: 3.6,
                          cooling_efficiency_eer: 16.6,
                          cooling_shr: 0.73)
+    if hpxml_file == 'base-hvac-shared-ground-loop-ground-to-air-heat-pump.xml'
+      hpxml.heat_pumps[-1].is_shared_system = true
+      hpxml.heat_pumps[-1].number_of_units_served = 5
+      hpxml.heat_pumps[-1].shared_loop_watts = 500
+    end
   elsif ['base-hvac-mini-split-heat-pump-ducted.xml'].include? hpxml_file
     f = 1.0 - (1.0 - 0.25) / (47.0 + 5.0) * (47.0 - 17.0)
     hpxml.heat_pumps.add(id: 'HeatPump',
@@ -3106,17 +3125,11 @@ def set_hpxml_hvac_distributions(hpxml_file, hpxml)
     hpxml.hvac_distributions[0].duct_leakage_measurements.clear
     hpxml.hvac_distributions[0].ducts.clear
     hpxml.hvac_distributions[0].hydronic_type = HPXML::HydronicTypeBaseboard
-    if ['base-hvac-shared-boiler-only-baseboard.xml',
-        'base-hvac-shared-chiller-only-baseboard.xml',
-        'base-hvac-shared-boiler-chiller-baseboard.xml'].include? hpxml_file
-      hpxml.hvac_distributions[0].shared_loop_watts = 500
-    end
   elsif ['base-hvac-shared-boiler-only-fan-coil.xml',
          'base-hvac-shared-chiller-only-fan-coil.xml',
          'base-hvac-shared-boiler-chiller-fan-coil.xml'].include? hpxml_file
     hpxml.hvac_distributions[0].distribution_system_type = HPXML::HVACDistributionTypeHydronicAndAir
     hpxml.hvac_distributions[0].hydronic_and_air_type = HPXML::HydronicAndAirTypeFanCoil
-    hpxml.hvac_distributions[0].fan_coil_watts = 150
   elsif ['base-hvac-boiler-gas-central-ac-1-speed.xml'].include? hpxml_file
     hpxml.hvac_distributions[0].distribution_system_type = HPXML::HVACDistributionTypeHydronic
     hpxml.hvac_distributions[0].duct_leakage_measurements.clear

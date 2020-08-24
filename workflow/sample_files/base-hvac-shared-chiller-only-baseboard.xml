@@ -550,6 +550,10 @@
                 <Units>kW/ton</Units>
                 <Value>0.9</Value>
               </AnnualCoolingEfficiency>
+              <extension>
+                <SharedLoopWatts>500.0</SharedLoopWatts>
+                <FanCoilWatts>0.0</FanCoilWatts>
+              </extension>
             </CoolingSystem>
           </HVACPlant>
           <HVACControl>
@@ -565,9 +569,6 @@
                 <HydronicDistributionType>baseboard</HydronicDistributionType>
               </HydronicDistribution>
             </DistributionSystemType>
-            <extension>
-              <SharedLoopWatts>500.0</SharedLoopWatts>
-            </extension>
           </HVACDistribution>
         </HVAC>
         <WaterHeating>

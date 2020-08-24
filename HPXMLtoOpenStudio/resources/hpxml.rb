@@ -2463,7 +2463,8 @@ class HPXML < Object
     ATTRS = [:id, :distribution_system_idref, :year_installed, :heating_system_type,
              :heating_system_fuel, :heating_capacity, :heating_efficiency_afue,
              :heating_efficiency_percent, :fraction_heat_load_served, :electric_auxiliary_energy,
-             :heating_cfm, :energy_star, :seed_id, :is_shared_system, :number_of_units_served]
+             :heating_cfm, :energy_star, :seed_id, :is_shared_system, :number_of_units_served,
+             :shared_loop_watts, :fan_coil_watts]
     attr_accessor(*ATTRS)
 
     def distribution_system
@@ -2542,7 +2543,9 @@ class HPXML < Object
       XMLHelper.add_element(heating_system, 'ElectricAuxiliaryEnergy', to_float(@electric_auxiliary_energy)) unless @electric_auxiliary_energy.nil?
       HPXML::add_extension(parent: heating_system,
                            extensions: { 'HeatingFlowRate' => to_float_or_nil(@heating_cfm),
-                                         'SeedId' => @seed_id })
+                                         'SeedId' => @seed_id,
+                                         'SharedLoopWatts' => to_float_or_nil(@shared_loop_watts),
+                                         'FanCoilWatts' => to_float_or_nil(@fan_coil_watts) })
     end
 
     def from_oga(heating_system)
@@ -2566,6 +2569,8 @@ class HPXML < Object
       @heating_cfm = to_float_or_nil(XMLHelper.get_value(heating_system, 'extension/HeatingFlowRate'))
       @energy_star = XMLHelper.get_values(heating_system, 'ThirdPartyCertification').include?('Energy Star')
       @seed_id = XMLHelper.get_value(heating_system, 'extension/SeedId')
+      @shared_loop_watts = to_float_or_nil(XMLHelper.get_value(heating_system, 'extension/SharedLoopWatts'))
+      @fan_coil_watts = to_float_or_nil(XMLHelper.get_value(heating_system, 'extension/FanCoilWatts'))
     end
   end
 
@@ -2592,7 +2597,7 @@ class HPXML < Object
              :cooling_system_fuel, :cooling_capacity, :compressor_type, :fraction_cool_load_served,
              :cooling_efficiency_seer, :cooling_efficiency_eer, :cooling_efficiency_kw_per_ton,
              :cooling_shr, :cooling_cfm, :energy_star, :seed_id, :is_shared_system,
-             :number_of_units_served]
+             :number_of_units_served, :shared_loop_watts, :fan_coil_watts]
     attr_accessor(*ATTRS)
 
     def distribution_system
@@ -2672,7 +2677,9 @@ class HPXML < Object
       XMLHelper.add_element(cooling_system, 'SensibleHeatFraction', to_float(@cooling_shr)) unless @cooling_shr.nil?
       HPXML::add_extension(parent: cooling_system,
                            extensions: { 'CoolingFlowRate' => to_float_or_nil(@cooling_cfm),
-                                         'SeedId' => @seed_id })
+                                         'SeedId' => @seed_id,
+                                         'SharedLoopWatts' => to_float_or_nil(@shared_loop_watts),
+                                         'FanCoilWatts' => to_float_or_nil(@fan_coil_watts) })
     end
 
     def from_oga(cooling_system)
@@ -2699,6 +2706,8 @@ class HPXML < Object
       @cooling_cfm = to_float_or_nil(XMLHelper.get_value(cooling_system, 'extension/CoolingFlowRate'))
       @energy_star = XMLHelper.get_values(cooling_system, 'ThirdPartyCertification').include?('Energy Star')
       @seed_id = XMLHelper.get_value(cooling_system, 'extension/SeedId')
+      @shared_loop_watts = to_float_or_nil(XMLHelper.get_value(cooling_system, 'extension/SharedLoopWatts'))
+      @fan_coil_watts = to_float_or_nil(XMLHelper.get_value(cooling_system, 'extension/FanCoilWatts'))
     end
   end
 
@@ -2731,7 +2740,8 @@ class HPXML < Object
              :backup_heating_efficiency_percent, :backup_heating_efficiency_afue,
              :backup_heating_switchover_temp, :fraction_heat_load_served, :fraction_cool_load_served,
              :cooling_efficiency_seer, :cooling_efficiency_eer, :heating_efficiency_hspf,
-             :heating_efficiency_cop, :energy_star, :seed_id]
+             :heating_efficiency_cop, :energy_star, :seed_id, :is_shared_system,
+             :number_of_units_served, :shared_loop_watts]
     attr_accessor(*ATTRS)
 
     def distribution_system
@@ -2771,6 +2781,8 @@ class HPXML < Object
         distribution_system = XMLHelper.add_element(heat_pump, 'DistributionSystem')
         XMLHelper.add_attribute(distribution_system, 'idref', @distribution_system_idref)
       end
+      XMLHelper.add_element(heat_pump, 'IsSharedSystem', to_boolean(@is_shared_system)) unless @is_shared_system.nil?
+      XMLHelper.add_element(heat_pump, 'NumberofUnitsServed', to_integer(@number_of_units_served)) unless @number_of_units_served.nil?
       XMLHelper.add_element(heat_pump, 'HeatPumpType', @heat_pump_type) unless @heat_pump_type.nil?
       XMLHelper.add_element(heat_pump, 'HeatPumpFuel', @heat_pump_fuel) unless @heat_pump_fuel.nil?
       XMLHelper.add_element(heat_pump, 'HeatingCapacity', to_float(@heating_capacity)) unless @heating_capacity.nil?
@@ -2822,7 +2834,8 @@ class HPXML < Object
       end
 
       HPXML::add_extension(parent: heat_pump,
-                           extensions: { 'SeedId' => @seed_id })
+                           extensions: { 'SeedId' => @seed_id,
+                                         'SharedLoopWatts' => to_float_or_nil(@shared_loop_watts) })
     end
 
     def from_oga(heat_pump)
@@ -2831,6 +2844,8 @@ class HPXML < Object
       @id = HPXML::get_id(heat_pump)
       @distribution_system_idref = HPXML::get_idref(XMLHelper.get_element(heat_pump, 'DistributionSystem'))
       @year_installed = to_integer_or_nil(XMLHelper.get_value(heat_pump, 'YearInstalled'))
+      @is_shared_system = to_boolean_or_nil(XMLHelper.get_value(heat_pump, 'IsSharedSystem'))
+      @number_of_units_served = to_integer_or_nil(XMLHelper.get_value(heat_pump, 'NumberofUnitsServed'))
       @heat_pump_type = XMLHelper.get_value(heat_pump, 'HeatPumpType')
       @heat_pump_fuel = XMLHelper.get_value(heat_pump, 'HeatPumpFuel')
       @heating_capacity = to_float_or_nil(XMLHelper.get_value(heat_pump, 'HeatingCapacity'))
@@ -2857,6 +2872,7 @@ class HPXML < Object
       end
       @energy_star = XMLHelper.get_values(heat_pump, 'ThirdPartyCertification').include?('Energy Star')
       @seed_id = XMLHelper.get_value(heat_pump, 'extension/SeedId')
+      @shared_loop_watts = to_float_or_nil(XMLHelper.get_value(heat_pump, 'extension/SharedLoopWatts'))
     end
   end
 
@@ -2949,8 +2965,7 @@ class HPXML < Object
     end
     ATTRS = [:id, :distribution_system_type, :annual_heating_dse, :annual_cooling_dse,
              :duct_system_sealed, :duct_leakage_testing_exemption, :conditioned_floor_area_served,
-             :number_of_return_registers, :hydronic_type, :hydronic_and_air_type, :shared_loop_watts,
-             :fan_coil_watts]
+             :number_of_return_registers, :hydronic_type, :hydronic_and_air_type]
     attr_accessor(*ATTRS)
     attr_reader(:duct_leakage_measurements, :ducts)
 
@@ -3050,13 +3065,6 @@ class HPXML < Object
         HPXML::add_extension(parent: distribution,
                              extensions: { 'DuctLeakageTestingExemption' => to_boolean_or_nil(@duct_leakage_testing_exemption) })
       end
-      if [HPXML::HVACDistributionTypeHydronicAndAir].include? @distribution_system_type
-        HPXML::add_extension(parent: distribution,
-                             extensions: { 'FanCoilWatts' => to_float_or_nil(@fan_coil_watts) })
-      end
-
-      HPXML::add_extension(parent: hvac_distribution,
-                           extensions: { 'SharedLoopWatts' => to_float_or_nil(@shared_loop_watts) })
     end
 
     def from_oga(hvac_distribution)
@@ -3089,10 +3097,7 @@ class HPXML < Object
         @duct_leakage_testing_exemption = to_boolean_or_nil(XMLHelper.get_value(distribution, 'extension/DuctLeakageTestingExemption'))
         @duct_leakage_measurements.from_oga(distribution)
         @ducts.from_oga(distribution)
-        @fan_coil_watts = to_float_or_nil(XMLHelper.get_value(distribution, 'extension/FanCoilWatts'))
       end
-
-      @shared_loop_watts = to_float_or_nil(XMLHelper.get_value(hvac_distribution, 'extension/SharedLoopWatts'))
     end
   end
 

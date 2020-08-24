@@ -357,6 +357,10 @@ class Constants
     return 'room ac'
   end
 
+  def self.ObjectNameSharedPump(hvac_name)
+    return "#{hvac_name} shared pump"
+  end
+
   def self.ObjectNameShower
     return 'showers'
   end

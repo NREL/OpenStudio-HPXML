@@ -550,6 +550,10 @@
                 <Units>kW/ton</Units>
                 <Value>0.9</Value>
               </AnnualCoolingEfficiency>
+              <extension>
+                <SharedLoopWatts>500.0</SharedLoopWatts>
+                <FanCoilWatts>150.0</FanCoilWatts>
+              </extension>
             </CoolingSystem>
           </HVACPlant>
           <HVACControl>
@@ -563,15 +567,9 @@
             <DistributionSystemType>
               <HydronicAndAirDistribution>
                 <HydronicAndAirDistributionType>fan coil</HydronicAndAirDistributionType>
-                <extension>
-                  <FanCoilWatts>150.0</FanCoilWatts>
-                </extension>
               </HydronicAndAirDistribution>
             </DistributionSystemType>
             <ConditionedFloorAreaServed>2700.0</ConditionedFloorAreaServed>
-            <extension>
-              <SharedLoopWatts>500.0</SharedLoopWatts>
-            </extension>
           </HVACDistribution>
         </HVAC>
         <WaterHeating>

@@ -957,6 +957,25 @@ class HVAC
     air_loop_unitary = create_air_loop_unitary_system(model, obj_name, fan, htg_coil, clg_coil, htg_supp_coil, 40.0)
     hvac_map[heat_pump.id] << air_loop_unitary
 
+    # Shared pump power per ANSI/RESNET/ICC 301-2019 Section 4.4.5.1 (pump runs 8760)
+    # Ancillary fields do not correctly work so using ElectricEquipment object instead;
+    # Revert when https://github.com/NREL/EnergyPlus/issues/8230 is fixed.
+    shared_pump_w = heat_pump.shared_loop_watts / heat_pump.number_of_units_served.to_f
+    # air_loop_unitary.setAncilliaryOffCycleElectricPower(shared_pump_w)
+    # air_loop_unitary.setAncilliaryOnCycleElectricPower(shared_pump_w)
+    equip_def = OpenStudio::Model::ElectricEquipmentDefinition.new(model)
+    equip_def.setName(Constants.ObjectNameSharedPump(obj_name))
+    equip = OpenStudio::Model::ElectricEquipment.new(equip_def)
+    equip.setName(equip_def.name.to_s)
+    equip.setSpace(control_zone.spaces[0])
+    equip_def.setDesignLevel(shared_pump_w)
+    equip_def.setFractionRadiant(0)
+    equip_def.setFractionLatent(0)
+    equip_def.setFractionLost(1)
+    equip.setSchedule(model.alwaysOnDiscreteSchedule)
+    equip.setEndUseSubcategory(equip_def.name.to_s)
+    hvac_map[heat_pump.id] += disaggregate_fan_or_pump(model, equip, htg_coil, clg_coil, htg_supp_coil)
+
     # Air Loop
 
     air_loop = create_air_loop(model, obj_name, air_loop_unitary, control_zone, sequential_heat_load_frac, sequential_cool_load_frac)
@@ -1637,6 +1656,8 @@ class HVAC
       fan_or_pump_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Fan Electric Energy')
     elsif fan_or_pump.is_a? OpenStudio::Model::PumpVariableSpeed
       fan_or_pump_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Pump Electric Energy')
+    elsif fan_or_pump.is_a? OpenStudio::Model::ElectricEquipment
+      fan_or_pump_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Electric Equipment Electric Energy')
     else
       fail "Unexpected fan/pump object '#{fan_or_pump.name}'."
     end
@@ -1934,11 +1955,11 @@ class HVAC
     if heating_system.heating_system_type == HPXML::HVACTypeBoiler
       if heating_system.is_shared_system
         # FUTURE: Allow defaulting based on ANSI/RESNET/ICC 301-2019 Table 4.5.2(5)
+        sp_kw = UnitConversions.convert(heating_system.shared_loop_watts, 'W', 'kW')
+        n_dweq = heating_system.number_of_units_served.to_f
+
         distribution_system = heating_system.distribution_system
         distribution_type = distribution_system.distribution_system_type
-
-        sp_kw = UnitConversions.convert(distribution_system.shared_loop_watts, 'W', 'kW')
-        n_dweq = heating_system.number_of_units_served.to_f
 
         if distribution_type == HPXML::HVACDistributionTypeHydronic
 
@@ -1952,7 +1973,7 @@ class HVAC
           if hydronic_and_air_type == HPXML::HydronicAndAirTypeFanCoil
 
             # Shared boiler w/ fan coil
-            aux_in = UnitConversions.convert(distribution_system.fan_coil_watts, 'W', 'kW')
+            aux_in = UnitConversions.convert(heating_system.fan_coil_watts, 'W', 'kW')
 
           elsif hydronic_and_air_type == HPXML::HydronicAndAirTypeWaterLoopHeatPump
 
@@ -4023,7 +4044,7 @@ class HVAC
 
     # Assign SEER equivalent
     n_dweq = cooling_system.number_of_units_served.to_f
-    aux = distribution_system.shared_loop_watts
+    aux = cooling_system.shared_loop_watts
     if cooling_system.cooling_system_type == HPXML::HVACTypeChiller
       cap = cooling_system.cooling_capacity
       chiller_input = UnitConversions.convert(cooling_system.cooling_efficiency_kw_per_ton * UnitConversions.convert(cap, 'Btu/hr', 'ton'), 'kW', 'W')
@@ -4031,7 +4052,7 @@ class HVAC
         aux_dweq = 0.0
       elsif distribution_type == HPXML::HVACDistributionTypeHydronicAndAir
         if hydronic_and_air_type == HPXML::HydronicAndAirTypeFanCoil
-          aux_dweq = distribution_system.fan_coil_watts
+          aux_dweq = cooling_system.fan_coil_watts
         elsif hydronic_and_air_type == HPXML::HydronicAndAirTypeWaterLoopHeatPump
 
           wlhp = hpxml.heat_pumps.select { |hp| hp.distribution_system_idref == distribution_system.id }[0]

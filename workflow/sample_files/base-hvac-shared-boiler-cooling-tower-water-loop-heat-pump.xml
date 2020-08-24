@@ -551,6 +551,10 @@
                 <Value>0.92</Value>
               </AnnualHeatingEfficiency>
               <FractionHeatLoadServed>1.0</FractionHeatLoadServed>
+              <extension>
+                <SharedLoopWatts>500.0</SharedLoopWatts>
+                <FanCoilWatts>0.0</FanCoilWatts>
+              </extension>
             </HeatingSystem>
             <CoolingSystem>
               <SystemIdentifier id='CoolingSystem'/>
@@ -560,6 +564,10 @@
               <CoolingSystemType>cooling tower</CoolingSystemType>
               <CoolingSystemFuel>electricity</CoolingSystemFuel>
               <FractionCoolLoadServed>1.0</FractionCoolLoadServed>
+              <extension>
+                <SharedLoopWatts>500.0</SharedLoopWatts>
+                <FanCoilWatts>0.0</FanCoilWatts>
+              </extension>
             </CoolingSystem>
             <HeatPump>
               <SystemIdentifier id='HeatPump'/>
@@ -619,9 +627,6 @@
               </HydronicAndAirDistribution>
             </DistributionSystemType>
             <ConditionedFloorAreaServed>2700.0</ConditionedFloorAreaServed>
-            <extension>
-              <SharedLoopWatts>500.0</SharedLoopWatts>
-            </extension>
           </HVACDistribution>
         </HVAC>
         <WaterHeating>
