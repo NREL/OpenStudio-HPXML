@@ -3166,7 +3166,9 @@ class HVAC
   end
 
   def self.apply_capacity_degradation_EMS(model, cap_fflow_spec, eir_fflow_spec, coil_name, is_cooling, cap_fff_curve, eir_fff_curve)
-    number_of_timestep_logged = 5
+    cap_time = 5 # Assumed minutes to take to ramp up to full capacity
+    power_time = 3 # Assumed minutes to take to ramp up to full power
+    number_of_timestep_logged = [cap_time, power_time].max
 
     # Sensors
     cap_curve_var_in = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Performance Curve Input Variable 1 Value')
@@ -3179,19 +3181,15 @@ class HVAC
 
     if is_cooling
       coil_energy = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Cooling Coil Electric Energy')
-      coil_energy.setName('coil electric energy')
-      coil_energy.setKeyName(coil_name)
-      # Trend variable
-      energy_trend = OpenStudio::Model::EnergyManagementSystemTrendVariable.new(model, coil_energy)
-      energy_trend.setNumberOfTimestepsToBeLogged(number_of_timestep_logged)
     else
       coil_energy = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Heating Coil Electric Energy')
-      coil_energy.setName('coil electric energy')
-      coil_energy.setKeyName(coil_name)
-      # Trend variable
-      energy_trend = OpenStudio::Model::EnergyManagementSystemTrendVariable.new(model, coil_energy)
-      energy_trend.setNumberOfTimestepsToBeLogged(number_of_timestep_logged)
     end
+    coil_energy.setName('coil electric energy')
+    coil_energy.setKeyName(coil_name)
+    # Trend variable
+    energy_trend = OpenStudio::Model::EnergyManagementSystemTrendVariable.new(model, coil_energy)
+    energy_trend.setName("#{coil_energy.name} Trend")
+    energy_trend.setNumberOfTimestepsToBeLogged(number_of_timestep_logged)
 
     # Actuators
     cc_actuator = OpenStudio::Model::EnergyManagementSystemActuator.new(cap_fff_curve, 'Curve', 'Curve Result')
@@ -3229,26 +3227,35 @@ class HVAC
     realistic_cycling_program.addLine("Set ec_out = #{ec_out_calc.join(' + ')}")
     (0...number_of_timestep_logged).each do |t_i|
       if t_i == 0
-        realistic_cycling_program.addLine("Set cc_now = #{coil_energy.name}")
+        realistic_cycling_program.addLine("Set cc_now = #{energy_trend.name}")
       else
-        realistic_cycling_program.addLine("Set cc_#{t_i}_ago = @TrendValue #{coil_energy.name} #{t_i}")
+        realistic_cycling_program.addLine("Set cc_#{t_i}_ago = @TrendValue #{energy_trend.name} #{t_i}")
       end
     end
-    (0...number_of_timestep_logged - 1).each do |t_i|
+    (0...cap_time - 1).each do |t_i|
       if t_i == 0
         realistic_cycling_program.addLine("If cc_#{t_i + 1}_ago == 0 && cc_now > 0") # Coil just turned on
       else
-        realistic_cycling_program.addLine("ElseIf cc_#{t_i + 1}_ago == 0 && cc_#{t_i}_ago > 0")
+        r_s_a = ['cc_now > 0']
+        (0...t_i).each do |i|
+          r_s_a << "cc_#{i + 1}_ago > 0"
+        end
+        r_s = r_s_a.join(' && ')
+        realistic_cycling_program.addLine("ElseIf cc_#{t_i + 1}_ago == 0 && #{r_s}")
       end
       realistic_cycling_program.addLine("  Set cc_mult = 0.4087*(@Ln(#{t_i + 1}))+0.3466") # Note 1 in @Ln(1) is 1 MINUTE, at larger timesteps we'll have to populate the natural log dynamically
-      realistic_cycling_program.addLine("  Set ec_mult = 0.273*(@Ln(#{t_i + 1})) + 0.7")
+      if t_i < power_time
+        realistic_cycling_program.addLine("  Set ec_mult = 0.273*(@Ln(#{t_i + 1})) + 0.7")
+      else
+        realistic_cycling_program.addLine('  Set ec_mult = 1.0')
+      end
     end
     realistic_cycling_program.addLine('Else')
     realistic_cycling_program.addLine('  Set cc_mult = 1.0')
     realistic_cycling_program.addLine('  Set ec_mult = 1.0')
     realistic_cycling_program.addLine('EndIf')
     realistic_cycling_program.addLine("Set #{cc_actuator.name} = cc_mult * cc_out")
-    realistic_cycling_program.addLine("Set #{ec_actuator.name} = ec_mult * ec_out")
+    realistic_cycling_program.addLine("Set #{ec_actuator.name} = ec_mult * ec_out / cc_mult")
 
     # ProgramCallingManagers
     program_calling_manager = OpenStudio::Model::EnergyManagementSystemProgramCallingManager.new(model)
@@ -3256,10 +3263,10 @@ class HVAC
     program_calling_manager.setCallingPoint('InsideHVACSystemIterationLoop')
     program_calling_manager.addProgram(realistic_cycling_program)
 
-    #oems = model.getOutputEnergyManagementSystem
-    #oems.setActuatorAvailabilityDictionaryReporting('Verbose')
-    #oems.setInternalVariableAvailabilityDictionaryReporting('Verbose')
-    #oems.setEMSRuntimeLanguageDebugOutputLevel('Verbose')
+    # oems = model.getOutputEnergyManagementSystem
+    # oems.setActuatorAvailabilityDictionaryReporting('Verbose')
+    # oems.setInternalVariableAvailabilityDictionaryReporting('Verbose')
+    # oems.setEMSRuntimeLanguageDebugOutputLevel('Verbose')
   end
 
   def self.calc_plr_coefficients(c_d)

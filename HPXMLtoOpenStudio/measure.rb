@@ -2201,23 +2201,26 @@ class OSModel
 
     living_zone = spaces[HPXML::LocationLivingSpace].thermalZone.get
     obj_name = Constants.ObjectNameIdealAirSystemResidual
+    hvac_control = @hpxml.hvac_controls[0]
+    # only enable residual ideal system when hvac's not on on/off thermostat control
+    if hvac_control.onoff_thermostat_deadband.nil? || (hvac_control.onoff_thermostat_deadband == 0.0)
+      if @remaining_cool_load_frac < 1.0
+        sequential_cool_load_frac = 1
+      else
+        sequential_cool_load_frac = 0 # no cooling system, don't add ideal air for cooling either
+        runner.registerWarning('No cooling system specified, the model will not include space cooling energy use.')
+      end
 
-    if @remaining_cool_load_frac < 1.0
-      sequential_cool_load_frac = 1
-    else
-      sequential_cool_load_frac = 0 # no cooling system, don't add ideal air for cooling either
-      runner.registerWarning('No cooling system specified, the model will not include space cooling energy use.')
-    end
-
-    if @remaining_heat_load_frac < 1.0
-      sequential_heat_load_frac = 1
-    else
-      sequential_heat_load_frac = 0 # no heating system, don't add ideal air for heating either
-      runner.registerWarning('No heating system specified, the model will not include space heating energy use.')
-    end
-    if (sequential_heat_load_frac > 0) || (sequential_cool_load_frac > 0)
-      HVAC.apply_ideal_air_loads(model, runner, obj_name, sequential_cool_load_frac, sequential_heat_load_frac,
-                                 living_zone)
+      if @remaining_heat_load_frac < 1.0
+        sequential_heat_load_frac = 1
+      else
+        sequential_heat_load_frac = 0 # no heating system, don't add ideal air for heating either
+        runner.registerWarning('No heating system specified, the model will not include space heating energy use.')
+      end
+      if (sequential_heat_load_frac > 0) || (sequential_cool_load_frac > 0)
+        HVAC.apply_ideal_air_loads(model, runner, obj_name, sequential_cool_load_frac, sequential_heat_load_frac,
+                                   living_zone)
+      end
     end
   end
 
