@@ -149,19 +149,19 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     args << arg
 
     schedules_type_choices = OpenStudio::StringVector.new
-    schedules_type_choices << 'average'
+    schedules_type_choices << 'default'
     schedules_type_choices << 'stochastic'
     schedules_type_choices << 'user-specified'
 
     arg = OpenStudio::Measure::OSArgument.makeChoiceArgument('schedules_type', schedules_type_choices, true)
     arg.setDisplayName('Schedules: Type')
-    arg.setDescription('The type of schedules to use.')
-    arg.setDefaultValue('average')
+    arg.setDescription("The type of occupant-related schedules to use. Schedules corresponding to 'default' are average (e.g., Building America). Schedules corresponding to 'stochastic' are generated using time-inhomogenous Markov chains derived from American Time Use Survey data, and supplemented with sampling duration and power level from NEEA RBSA data as well as DHW draw duration and flow rate from Aquacraft/AWWA data.")
+    arg.setDefaultValue('default')
     args << arg
 
     arg = OpenStudio::Measure::OSArgument.makeStringArgument('schedules_path', false)
     arg.setDisplayName('Schedules: Path')
-    arg.setDescription('Absolute (or relative) path of the user-specified schedules csv file.')
+    arg.setDescription('Absolute (or relative) path of the csv file containing user-specified occupancy schedules.')
     args << arg
 
     arg = OpenStudio::Measure::OSArgument.makeStringArgument('weather_station_epw_filepath', true)
@@ -3418,7 +3418,7 @@ class HPXMLFile
   end
 
   def self.create_schedules(runner, model, weather, args)
-    if ['average', 'user-specified'].include? args[:schedules_type]
+    if ['default', 'user-specified'].include? args[:schedules_type]
       if args[:schedules_type] == 'user-specified'
         args[:schedules_path] = args[:schedules_path].get
       end

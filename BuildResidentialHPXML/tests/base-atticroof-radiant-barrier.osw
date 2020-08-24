@@ -275,7 +275,7 @@
         "roof_radiant_barrier": true,
         "roof_radiant_barrier_grade": "2",
         "roof_solar_absorptance": "auto",
-        "schedules_type": "average",
+        "schedules_type": "default",
         "setpoint_cooling_setup_hours_per_week": 0,
         "setpoint_cooling_setup_start_hour": 0,
         "setpoint_cooling_setup_temp": 78,

@@ -979,7 +979,7 @@ class ScheduleGenerator
       csv << @schedules.keys
       rows = @schedules.values.transpose
       rows.each do |row|
-        csv << row.map{|x| "%.3g" % x}
+        csv << row.map { |x| '%.3g' % x }
       end
     end
     return true

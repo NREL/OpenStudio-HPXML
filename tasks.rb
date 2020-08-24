@@ -323,7 +323,7 @@ def get_values(osw_file, step)
   if ['base.osw'].include? osw_file
     step.setArgument('weather_dir', 'weather')
     step.setArgument('simulation_control_timestep', '60')
-    step.setArgument('schedules_type', 'average')
+    step.setArgument('schedules_type', 'default')
     step.setArgument('weather_station_epw_filepath', 'USA_CO_Denver.Intl.AP.725650_TMY3.epw')
     step.setArgument('site_type', HPXML::SiteTypeSuburban)
     step.setArgument('geometry_unit_type', HPXML::ResidentialTypeSFD)
