@@ -147,10 +147,10 @@ class HPXMLDefaults
     measurements = []
     infil_volume = nil
     hpxml.air_infiltration_measurements.each do |measurement|
-      is_ach50 = ((measurement.unit_of_measure == HPXML::UnitsACH) && (measurement.house_pressure == 50))
-      is_cfm50 = ((measurement.unit_of_measure == HPXML::UnitsCFM) && (measurement.house_pressure == 50))
+      is_ach = ((measurement.unit_of_measure == HPXML::UnitsACH) && !measurement.house_pressure.nil?)
+      is_cfm = ((measurement.unit_of_measure == HPXML::UnitsCFM) && !measurement.house_pressure.nil?)
       is_nach = (measurement.unit_of_measure == HPXML::UnitsACHNatural)
-      next unless (is_ach50 || is_cfm50 || is_nach)
+      next unless (is_ach || is_cfm || is_nach)
 
       measurements << measurement
       next if measurement.infiltration_volume.nil?
@@ -786,6 +786,9 @@ class HPXMLDefaults
     # Default clothes dryer
     if hpxml.clothes_dryers.size > 0
       clothes_dryer = hpxml.clothes_dryers[0]
+      if clothes_dryer.is_shared_appliance.nil?
+        clothes_dryer.is_shared_appliance = false
+      end
       if clothes_dryer.location.nil?
         clothes_dryer.location = HPXML::LocationLivingSpace
       end
