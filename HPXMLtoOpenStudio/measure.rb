@@ -2203,7 +2203,7 @@ class OSModel
     obj_name = Constants.ObjectNameIdealAirSystemResidual
     hvac_control = @hpxml.hvac_controls[0]
     # only enable residual ideal system when hvac's not on on/off thermostat control
-    if hvac_control.onoff_thermostat_deadband.nil? || (hvac_control.onoff_thermostat_deadband == 0.0)
+    if (hvac_control.nil?) || (hvac_control.onoff_thermostat_deadband.nil?) || (hvac_control.onoff_thermostat_deadband == 0.0)
       if @remaining_cool_load_frac < 1.0
         sequential_cool_load_frac = 1
       else
