@@ -1502,45 +1502,44 @@ class Airflow
         # Air conditions before preconditioning
         precond_program.addLine('Set BeforePrecondW = OAInW')
         precond_program.addLine('Set BeforePrecondTemp = OAInTemp')
-        # Calculate sensible loads of introducing OA
-        precond_program.addLine('Set OALoadSensToLv = OA_MFR * IndoorCp * (OAInTemp - IndoorTemp)') # Negative for heating, positive for cooling
       else
-        # Call HRV/ERV method to calculate ERV/HRV loads and air conditions
+        # Call HRV/ERV method to get ERV/HRV supply air conditions
         hrv_erv_effectiveness_map = calc_hrv_erv_effectiveness([vent_mech])
         precond_program = apply_erv_hrv(model, precond_program, [vent_mech], hrv_erv_effectiveness_map, true)
         # Air conditions before preconditioning
         precond_program.addLine('Set BeforePrecondW = ERVSupOutW')
         precond_program.addLine('Set BeforePrecondTemp = ERVSupOutTemp')
-        precond_program.addLine('Set OALoadSensToLv = ERVSensToLv')
       end
+      # Calculate sensible loads to living by ventilation
+      precond_program.addLine('Set OALoadSensToLv = OA_MFR * IndoorCp * (BeforePrecondTemp - IndoorTemp)') # Negative for heating, positive for cooling
       # get preconditioning heating/cooling capacities
       precond_program.addLine('Set PreconditioningCapHeating = 0.0')
       precond_program.addLine('Set PreconditioningCapCooling = 0.0')
       precond_program.addLine("Set PreconditioningCapHeating = #{UnitConversions.convert(vent_mech.unit_preconditioning_heating_capacity, 'Btu/hr', 'W')}") unless vent_mech.unit_preconditioning_heating_capacity.nil?
       precond_program.addLine("Set PreconditioningCapCooling = #{UnitConversions.convert(vent_mech.unit_preconditioning_cooling_capacity, 'Btu/hr', 'W')}") unless vent_mech.unit_preconditioning_cooling_capacity.nil?
       # Calculate heating/cooling loads to setpoints, assume preconditioning equipment tries to supply air at setpoints
-      precond_program.addLine('Set OALoadSensToLvHtg = OA_MFR * IndoorCp * (OAInTemp - HtgSptTemp)') # Heating load to setpoint
-      precond_program.addLine('Set OALoadSensToLvClg = OA_MFR * IndoorCp * (OAInTemp - ClgSptTemp)') # Cooling load to setpoint
+      precond_program.addLine('Set OALoadSensToLvHtg = OA_MFR * IndoorCp * (BeforePrecondTemp - HtgSptTemp)') # Heating load to setpoint
+      precond_program.addLine('Set OALoadSensToLvClg = OA_MFR * IndoorCp * (BeforePrecondTemp - ClgSptTemp)') # Cooling load to setpoint
       # Calculate preconditioned temperature, humidity ratio, sensible loads based on capacity
       precond_program.addLine('Set SensLoadToLv = 0.0')
       precond_program.addLine('If (OALoadSensToLvHtg > 0) && (OALoadSensToLvClg < 0)') # Within deadband, do not condition oa
-      precond_program.addLine('  Set SensLoadToLv = OALoadSensToLv') # Within deadband, do not condition oa
+      precond_program.addLine('  Set SensLoadToLv = OALoadSensToLv') # Within deadband, don't need preconditioning
       precond_program.addLine('  Set PreconditionedAirTemp = BeforePrecondTemp') # Doesn't change temperature
-      precond_program.addLine('ElseIf (OALoadSensToLvClg > 0.0)')
+      precond_program.addLine('ElseIf (OALoadSensToLvClg > 0.0)') # Cooling turns on
       precond_program.addLine('  If PreconditioningCapCooling < OALoadSensToLvClg') # Full cooling capacity is not able to resolve all the cooling loads, apply full capacity
       precond_program.addLine('    Set SensLoadToLv = OALoadSensToLv - PreconditioningCapCooling') # Sensible load, cooling, minus capacity
       precond_program.addLine('    Set PreconditionedAirTemp = IndoorTemp + (SensLoadToLv / OA_MFR / IndoorCp)') # Air temperature after preconditioning
       precond_program.addLine('  Else')
-      precond_program.addLine('    Set SensLoadToLv = OALoadSensToLv - OALoadSensToLvClg') # Cool to setpoint
+      precond_program.addLine('    Set SensLoadToLv = OALoadSensToLv - OALoadSensToLvClg') # Cooling load introduced to living by supplying air at cooling setpoint
       precond_program.addLine('    Set PreconditionedAirTemp = ClgSptTemp') # Cool to setpoint
       precond_program.addLine('  EndIf')
-      precond_program.addLine('ElseIf (OALoadSensToLvHtg < 0.0)')
+      precond_program.addLine('ElseIf (OALoadSensToLvHtg < 0.0)') # Heating turns on
       precond_program.addLine('  If PreconditioningCapHeating < (-OALoadSensToLvHtg)') # Full heating capacity is not able to resolve all the heating loads, apply full capacity
       precond_program.addLine('    Set SensLoadToLv = OALoadSensToLv + PreconditioningCapHeating') # Sensible load, heating, plus capacity
       precond_program.addLine('    Set PreconditionedAirTemp = IndoorTemp + (SensLoadToLv / OA_MFR / IndoorCp)') # Air temperature after preconditioning
       precond_program.addLine('  Else')
-      precond_program.addLine('    Set SensLoadToLv = OALoadSensToLv - OALoadSensToLvHtg') # Heat to setpoint
-      precond_program.addLine('    Set PreconditionedAirTemp = HtgSptTemp') # Cool to setpoint
+      precond_program.addLine('    Set SensLoadToLv = OALoadSensToLv - OALoadSensToLvHtg') # Heating load introduced to living by supplying air at heating setpoint
+      precond_program.addLine('    Set PreconditionedAirTemp = HtgSptTemp') # Heat to setpoint
       precond_program.addLine('  EndIf')
       precond_program.addLine('EndIf')
       # Check if air is saturated after preconditioning, if so, calculate the latent heat gain/loss
