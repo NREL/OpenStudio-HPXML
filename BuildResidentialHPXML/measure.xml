@@ -3,8 +3,8 @@
   <schema_version>3.0</schema_version>
   <name>build_residential_hpxml</name>
   <uid>a13a8983-2b01-4930-8af2-42030b6e4233</uid>
-  <version_id>481a6bd7-98f4-4d8e-9d3a-005fdf94267e</version_id>
-  <version_modified>20200824T233300Z</version_modified>
+  <version_id>2b5eeb73-07d0-4667-9af9-a581843570d5</version_id>
+  <version_modified>20200825T173915Z</version_modified>
   <xml_checksum>2C38F48B</xml_checksum>
   <class_name>BuildResidentialHPXML</class_name>
   <display_name>HPXML Builder</display_name>
@@ -5438,12 +5438,6 @@
       <checksum>0DA7A913</checksum>
     </file>
     <file>
-      <filename>constants.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>EB32709E</checksum>
-    </file>
-    <file>
       <filename>base-schedules-stochastic.osw</filename>
       <filetype>osw</filetype>
       <usage_type>test</usage_type>
@@ -6482,10 +6476,22 @@
       <checksum>E436386D</checksum>
     </file>
     <file>
+      <filename>extra-vacancy-6-months.osw</filename>
+      <filetype>osw</filetype>
+      <usage_type>test</usage_type>
+      <checksum>93E73AF5</checksum>
+    </file>
+    <file>
+      <filename>constants.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>BB48E8EE</checksum>
+    </file>
+    <file>
       <filename>schedules.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>7483A22C</checksum>
+      <checksum>036EA018</checksum>
     </file>
     <file>
       <version>
@@ -6496,13 +6502,7 @@
       <filename>measure.rb</filename>
       <filetype>rb</filetype>
       <usage_type>script</usage_type>
-      <checksum>63A13792</checksum>
-    </file>
-    <file>
-      <filename>extra-vacancy-6-months.osw</filename>
-      <filetype>osw</filetype>
-      <usage_type>test</usage_type>
-      <checksum>93E73AF5</checksum>
+      <checksum>7428C6F9</checksum>
     </file>
   </files>
 </measure>

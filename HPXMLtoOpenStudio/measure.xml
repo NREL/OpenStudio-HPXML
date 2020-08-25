@@ -3,8 +3,8 @@
   <schema_version>3.0</schema_version>
   <name>hpxm_lto_openstudio</name>
   <uid>b1543b30-9465-45ff-ba04-1d1f85e763bc</uid>
-  <version_id>263df401-29bf-4d71-91c7-d4bbbb58dfcc</version_id>
-  <version_modified>20200824T232927Z</version_modified>
+  <version_id>3557f140-5c13-4ab8-bd3a-0e4048d7786e</version_id>
+  <version_modified>20200825T173916Z</version_modified>
   <xml_checksum>D8922A73</xml_checksum>
   <class_name>HPXMLtoOpenStudio</class_name>
   <display_name>HPXML to OpenStudio Translator</display_name>
@@ -173,12 +173,6 @@
       <filetype>csv</filetype>
       <usage_type>resource</usage_type>
       <checksum>63C6A1E2</checksum>
-    </file>
-    <file>
-      <filename>constants.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>0D7BC590</checksum>
     </file>
     <file>
       <filename>constructions.rb</filename>
@@ -427,12 +421,6 @@
       <checksum>EACF059A</checksum>
     </file>
     <file>
-      <filename>lighting.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>C6609E12</checksum>
-    </file>
-    <file>
       <filename>location.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
@@ -485,12 +473,6 @@
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
       <checksum>DE524099</checksum>
-    </file>
-    <file>
-      <filename>weather.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>AB31F8EF</checksum>
     </file>
     <file>
       <filename>xmlhelper.rb</filename>
@@ -568,6 +550,24 @@
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
       <checksum>1778044C</checksum>
+    </file>
+    <file>
+      <filename>constants.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>99D777B1</checksum>
+    </file>
+    <file>
+      <filename>lighting.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>7C738BCC</checksum>
+    </file>
+    <file>
+      <filename>weather.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>5A78A3A4</checksum>
     </file>
   </files>
 </measure>
