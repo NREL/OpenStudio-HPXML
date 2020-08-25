@@ -136,7 +136,6 @@ If not specified, dates will be defined according to the EPW weather file header
 
 An absolute or relative path can be entered in ``/HPXML/SoftwareInfo/extension/OccupancySchedulesCSVPath``.
 The file that this path points to must be a valid csv file containing column-wise (hourly or sub-hourly) schedules with headers matching column names from `this sample CSV file <https://github.com/NREL/OpenStudio-HPXML/tree/master/BuildResidentialHPXML/tests/schedules/user-specified.csv>`_.
-The csv file may optionally contain a "vacancy" column which indicates timestamps for which the building unit is vacant. A value of 0 indicates no vacancy, whereas a value of 1 indicates vacancy. All schedules will be set to zero during the vacancy period.
 A valid csv file contains schedules:
 
 - that span the entire year (8760 or 8784 hours)
@@ -144,6 +143,19 @@ A valid csv file contains schedules:
 - with a minute per item evenly divisible into 60
 
 Note, then, that the shortest schedule may be hourly and the longest (sub-hourly) schedule may be minutely.
+The csv file may optionally contain a "vacancy" column which indicates timestamps for which the building unit is vacant. A value of 0 indicates no vacancy, whereas a value of 1 indicates vacancy. All schedules in the csv file will be set to zero during the vacancy period.
+The following end uses will be zero during the vacancy period:
+
+- occupants
+- lighting
+- appliances
+- fixtures
+- ceiling fan
+- plug loads
+- fuel loads
+- pools
+- hot tubs
+
 If a schedule path is provided, no other weekday/weekend fraction or monthly multipliers may be contained in the HPXML file.
 
 HPXML Building Details
