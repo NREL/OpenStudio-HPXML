@@ -142,7 +142,6 @@ class HPXML < Object
   LightingTypeCFL = 'CompactFluorescent'
   LightingTypeLED = 'LightEmittingDiode'
   LightingTypeLFL = 'FluorescentTube'
-  LocationAdiabatic = 'adiabatic'
   LocationAtticUnconditioned = 'attic - unconditioned'
   LocationAtticUnvented = 'attic - unvented'
   LocationAtticVented = 'attic - vented'
@@ -271,7 +270,6 @@ class HPXML < Object
     from_oga(hpxml)
 
     # Clean up
-    delete_partition_surfaces()
     delete_tiny_surfaces()
     delete_adiabatic_subsurfaces()
     if collapse_enclosure
@@ -4825,18 +4823,6 @@ class HPXML < Object
           # Remove old surface
           surfaces[j].delete
         end
-      end
-    end
-  end
-
-  def delete_partition_surfaces()
-    (@rim_joists + @walls + @foundation_walls + @frame_floors).reverse_each do |surface|
-      next if surface.interior_adjacent_to.nil? || surface.exterior_adjacent_to.nil?
-
-      if surface.interior_adjacent_to == surface.exterior_adjacent_to
-        surface.delete
-      elsif [surface.interior_adjacent_to, surface.exterior_adjacent_to].sort == [HPXML::LocationLivingSpace, HPXML::LocationBasementConditioned].sort
-        surface.delete
       end
     end
   end

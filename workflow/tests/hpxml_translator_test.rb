@@ -646,9 +646,21 @@ class HPXMLTest < MiniTest::Test
 
     # Enclosure Walls/RimJoists/FoundationWalls
     (hpxml.walls + hpxml.rim_joists + hpxml.foundation_walls).each do |wall|
-      next unless wall.is_exterior
-
       wall_id = wall.id.upcase
+      
+      # Common walls
+      next unless wall.exterior_adjacent_to == wall.interior_adjacent_to
+
+      # FIXME: Common walls will be converted into "adiabatic" walls 
+      # Adiabatic surfaces have their "BaseSurfaceIndex" as their "ExtBoundCond" in "Surfaces" table in SQL simulation results
+      query_base_surf_idx = "SELECT BaseSurfaceIndex FROM Surfaces WHERE SurfaceName='#{wall_id}'"
+      query_ext_bound = "SELECT ExtBoundCond FROM Surfaces WHERE SurfaceName='#{wall_id}'"
+      sql_value_base_surf_idx = sqlFile.execAndReturnFirstDouble(query_base_surf_idx).get
+      sql_value_ext_bound_cond = sqlFile.execAndReturnFirstDouble(query_ext_bound).get
+      assert_equal(sql_value_base_surf_idx, sql_value_ext_bound_cond)
+
+      # Exterior walls
+      next unless wall.is_exterior
 
       # R-value
       if (not wall.insulation_assembly_r_value.nil?) && (not hpxml_path.include? 'base-foundation-unconditioned-basement-assembly-r.xml') # This file uses Foundation:Kiva for insulation, so skip it
@@ -721,18 +733,6 @@ class HPXMLTest < MiniTest::Test
       query = "SELECT AVG(Value) FROM TabularDataWithStrings WHERE ReportName='EnvelopeSummary' AND ReportForString='Entire Facility' AND TableName='Opaque Exterior' AND (RowName='#{wall_id}' OR RowName LIKE '#{wall_id}:%') AND ColumnName='Azimuth' AND Units='deg'"
       sql_value = sqlFile.execAndReturnFirstDouble(query).get
       assert_in_epsilon(hpxml_value, sql_value, 0.01)
-
-      # Adiabatic exterior boundary condition
-      next unless wall.exterior_adjacent_to == HPXML::LocationAdiabatic
-
-      hpxml_value = wall.exterior_adjacent_to
-      # Adiabatic surfaces seem to have their "BaseSurfaceIndex" as their "ExtBoundCond" in table "Surfaces" in SQL simulation results
-      query_base_surf_idx = "SELECT BaseSurfaceIndex FROM Surfaces WHERE SurfaceName='#{wall_id}'"
-      query_ext_bound = "SELECT ExtBoundCond FROM Surfaces WHERE SurfaceName='#{wall_id}'"
-      sql_value_base_surf_idx = sqlFile.execAndReturnFirstDouble(query_base_surf_idx).get
-      sql_value_ext_bound = sqlFile.execAndReturnFirstDouble(query_ext_bound).get
-      sql_value = sql_value_base_surf_idx == sql_value_ext_bound ? HPXML::LocationAdiabatic : nil
-      assert_equal(hpxml_value, sql_value)
     end
 
     # Enclosure FrameFloors
@@ -776,18 +776,6 @@ class HPXMLTest < MiniTest::Test
       query = "SELECT AVG(Value) FROM TabularDataWithStrings WHERE ReportName='EnvelopeSummary' AND ReportForString='Entire Facility' AND TableName='Opaque Exterior' AND RowName='#{frame_floor_id}' AND ColumnName='Tilt' AND Units='deg'"
       sql_value = sqlFile.execAndReturnFirstDouble(query).get
       assert_in_epsilon(hpxml_value, sql_value, 0.01)
-
-      # Adiabatic exterior boundary condition
-      next unless frame_floor.exterior_adjacent_to == HPXML::LocationAdiabatic
-
-      hpxml_value = frame_floor.exterior_adjacent_to
-      # Adiabatic surfaces seem to have their "BaseSurfaceIndex" as their "ExtBoundCond" in table "Surfaces" in SQL simulation results
-      query_base_surf_idx = "SELECT BaseSurfaceIndex FROM Surfaces WHERE SurfaceName='#{frame_floor_id}'"
-      query_ext_bound = "SELECT ExtBoundCond FROM Surfaces WHERE SurfaceName='#{frame_floor_id}'"
-      sql_value_base_surf_idx = sqlFile.execAndReturnFirstDouble(query_base_surf_idx).get
-      sql_value_ext_bound = sqlFile.execAndReturnFirstDouble(query_ext_bound).get
-      sql_value = sql_value_base_surf_idx == sql_value_ext_bound ? HPXML::LocationAdiabatic : nil
-      assert_equal(hpxml_value, sql_value)
     end
 
     # Enclosure Windows/Skylights

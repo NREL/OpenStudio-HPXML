@@ -375,6 +375,15 @@ class OSModel
         fail "There must be at least one floor adjacent to #{location}."
       end
     end
+
+    # Interior partition surfaces
+    (@hpxml.rim_joists + @hpxml.walls + @hpxml.foundation_walls + @hpxml.frame_floors).reverse_each do |surface|
+      next if surface.interior_adjacent_to.nil? || surface.exterior_adjacent_to.nil?
+
+      if [surface.interior_adjacent_to, surface.exterior_adjacent_to].sort == [HPXML::LocationLivingSpace, HPXML::LocationBasementConditioned].sort
+        fail "Interior partition surfaces should not be described using #{surface}."
+      end
+    end
   end
 
   def self.set_defaults_and_globals(runner, output_dir, epw_file)
@@ -1092,7 +1101,7 @@ class OSModel
         end
         surface.setSurfaceType('Wall')
         set_surface_interior(model, spaces, surface, wall.interior_adjacent_to)
-        set_surface_exterior(model, spaces, surface, wall.exterior_adjacent_to)
+        set_surface_exterior(model, spaces, surface, wall.exterior_adjacent_to, wall.interior_adjacent_to)
         if wall.is_interior
           surface.setSunExposure('NoSun')
           surface.setWindExposure('NoWind')
@@ -1160,7 +1169,7 @@ class OSModel
         end
         surface.setSurfaceType('Wall')
         set_surface_interior(model, spaces, surface, rim_joist.interior_adjacent_to)
-        set_surface_exterior(model, spaces, surface, rim_joist.exterior_adjacent_to)
+        set_surface_exterior(model, spaces, surface, rim_joist.exterior_adjacent_to, rim_joist.interior_adjacent_to)
         if rim_joist.is_interior
           surface.setSunExposure('NoSun')
           surface.setWindExposure('NoWind')
@@ -1222,7 +1231,7 @@ class OSModel
         surface.additionalProperties.setFeature('SurfaceType', 'Floor')
       end
       set_surface_interior(model, spaces, surface, frame_floor.interior_adjacent_to)
-      set_surface_exterior(model, spaces, surface, frame_floor.exterior_adjacent_to)
+      set_surface_exterior(model, spaces, surface, frame_floor.exterior_adjacent_to, frame_floor.interior_adjacent_to)
       surface.setName(frame_floor.id)
       if frame_floor.is_interior
         surface.setSunExposure('NoSun')
@@ -1415,7 +1424,7 @@ class OSModel
         surface.setName(foundation_wall.id)
         surface.setSurfaceType('Wall')
         set_surface_interior(model, spaces, surface, foundation_wall.interior_adjacent_to)
-        set_surface_exterior(model, spaces, surface, foundation_wall.exterior_adjacent_to)
+        set_surface_exterior(model, spaces, surface, foundation_wall.exterior_adjacent_to, foundation_wall.interior_adjacent_to)
         surface.setSunExposure('NoSun')
         surface.setWindExposure('NoWind')
 
@@ -1480,7 +1489,7 @@ class OSModel
     surface.setName(foundation_wall.id)
     surface.setSurfaceType('Wall')
     set_surface_interior(model, spaces, surface, foundation_wall.interior_adjacent_to)
-    set_surface_exterior(model, spaces, surface, foundation_wall.exterior_adjacent_to)
+    set_surface_exterior(model, spaces, surface, foundation_wall.exterior_adjacent_to, foundation_wall.interior_adjacent_to)
 
     if foundation_wall.is_thermal_boundary
       drywall_thick_in = 0.5
@@ -3412,12 +3421,12 @@ class OSModel
     end
   end
 
-  def self.set_surface_exterior(model, spaces, surface, exterior_adjacent_to)
+  def self.set_surface_exterior(model, spaces, surface, exterior_adjacent_to, interior_adjacent_to = nil)
     if exterior_adjacent_to == HPXML::LocationOutside
       surface.setOutsideBoundaryCondition('Outdoors')
     elsif exterior_adjacent_to == HPXML::LocationGround
       surface.setOutsideBoundaryCondition('Foundation')
-    elsif [HPXML::LocationOtherHousingUnit, HPXML::LocationAdiabatic].include? exterior_adjacent_to
+    elsif [HPXML::LocationOtherHousingUnit, interior_adjacent_to].include? exterior_adjacent_to
       surface.setOutsideBoundaryCondition('Adiabatic')
     elsif exterior_adjacent_to == HPXML::LocationBasementConditioned
       surface.createAdjacentSurface(create_or_get_space(model, spaces, HPXML::LocationLivingSpace))
