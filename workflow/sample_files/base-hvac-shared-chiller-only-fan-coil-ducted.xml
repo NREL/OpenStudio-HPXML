@@ -541,17 +541,17 @@
               <SystemIdentifier id='CoolingSystem'/>
               <DistributionSystem idref='HVACDistribution'/>
               <IsSharedSystem>true</IsSharedSystem>
-              <NumberofUnitsServed>5</NumberofUnitsServed>
+              <NumberofUnitsServed>6</NumberofUnitsServed>
               <CoolingSystemType>chiller</CoolingSystemType>
               <CoolingSystemFuel>electricity</CoolingSystemFuel>
-              <CoolingCapacity>240000.0</CoolingCapacity>
+              <CoolingCapacity>144000.0</CoolingCapacity>
               <FractionCoolLoadServed>1.0</FractionCoolLoadServed>
               <AnnualCoolingEfficiency>
                 <Units>kW/ton</Units>
                 <Value>0.9</Value>
               </AnnualCoolingEfficiency>
               <extension>
-                <SharedLoopWatts>500.0</SharedLoopWatts>
+                <SharedLoopWatts>600.0</SharedLoopWatts>
                 <FanCoilWatts>150.0</FanCoilWatts>
               </extension>
             </CoolingSystem>

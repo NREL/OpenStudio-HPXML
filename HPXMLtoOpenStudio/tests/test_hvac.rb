@@ -403,7 +403,7 @@ class HPXMLtoOpenStudioHVACTest < MiniTest::Test
     # Check cooling coil
     assert_equal(1, model.getCoilCoolingDXSingleSpeeds.size)
     clg_coil = model.getCoilCoolingDXSingleSpeeds[0]
-    cop = 4.3 # Expected value
+    cop = 4.13 # Expected value
     assert_in_epsilon(cop, clg_coil.ratedCOP.get, 0.01)
     refute_in_epsilon(capacity, clg_coil.ratedTotalCoolingCapacity.get, 0.01) # Uses autosized capacity
   end
@@ -420,7 +420,7 @@ class HPXMLtoOpenStudioHVACTest < MiniTest::Test
     # Check cooling coil
     assert_equal(1, model.getCoilCoolingDXSingleSpeeds.size)
     clg_coil = model.getCoilCoolingDXSingleSpeeds[0]
-    cop = 4.05 # Expected value
+    cop = 3.67 # Expected value
     assert_in_epsilon(cop, clg_coil.ratedCOP.get, 0.01)
     refute_in_epsilon(capacity, clg_coil.ratedTotalCoolingCapacity.get, 0.01) # Uses autosized capacity
   end
@@ -437,7 +437,7 @@ class HPXMLtoOpenStudioHVACTest < MiniTest::Test
     # Check cooling coil
     assert_equal(1, model.getCoilCoolingDXSingleSpeeds.size)
     clg_coil = model.getCoilCoolingDXSingleSpeeds[0]
-    cop = 1.37 # Expected value
+    cop = 1.34 # Expected value
     assert_in_epsilon(cop, clg_coil.ratedCOP.get, 0.01)
     refute_in_epsilon(capacity, clg_coil.ratedTotalCoolingCapacity.get, 0.01) # Uses autosized capacity
   end
@@ -454,7 +454,7 @@ class HPXMLtoOpenStudioHVACTest < MiniTest::Test
     # Check cooling coil
     assert_equal(1, model.getCoilCoolingDXSingleSpeeds.size)
     clg_coil = model.getCoilCoolingDXSingleSpeeds[0]
-    cop = 4.1 # Expected value
+    cop = 3.94 # Expected value
     assert_in_epsilon(cop, clg_coil.ratedCOP.get, 0.01)
     refute_in_epsilon(capacity, clg_coil.ratedTotalCoolingCapacity.get, 0.01) # Uses autosized capacity
   end
@@ -507,6 +507,7 @@ class HPXMLtoOpenStudioHVACTest < MiniTest::Test
     afue = heating_system.heating_efficiency_afue
     capacity = UnitConversions.convert(heating_system.heating_capacity.to_f, 'Btu/hr', 'W')
     fuel = heating_system.heating_system_fuel
+    wlhp_cop = heating_system.wlhp_heating_efficiency_cop
 
     # Check boiler
     assert_equal(1, model.getBoilerHotWaters.size)
@@ -515,19 +516,14 @@ class HPXMLtoOpenStudioHVACTest < MiniTest::Test
     refute_in_epsilon(capacity, boiler.nominalCapacity.get, 0.01) # Uses autosized capacity
     assert_equal(EPlus.input_fuel_map(fuel), boiler.fuelType)
 
-    # Get HPXML values
-    heat_pump = hpxml.heat_pumps[0]
-    htg_capacity = UnitConversions.convert(heat_pump.heating_capacity.to_f, 'Btu/hr', 'W')
-    cop = heat_pump.heating_efficiency_cop
-
     # Check cooling coil
     assert_equal(0, model.getCoilCoolingDXSingleSpeeds.size)
 
     # Check heating coil
     assert_equal(1, model.getCoilHeatingDXSingleSpeeds.size)
     htg_coil = model.getCoilHeatingDXSingleSpeeds[0]
-    assert_in_epsilon(cop, htg_coil.ratedCOP, 0.01)
-    refute_in_epsilon(htg_capacity, htg_coil.ratedTotalHeatingCapacity.get, 0.01) # Uses autosized capacity
+    assert_in_epsilon(wlhp_cop, htg_coil.ratedCOP, 0.01)
+    refute_in_epsilon(capacity, htg_coil.ratedTotalHeatingCapacity.get, 0.01) # Uses autosized capacity
 
     # Check supp heating coil
     assert_equal(1, model.getCoilHeatingElectrics.size)

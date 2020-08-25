@@ -2681,13 +2681,15 @@ def set_hpxml_heating_systems(hpxml_file, hpxml)
          'base-hvac-shared-boiler-chiller-baseboard.xml'].include? hpxml_file
     hpxml.heating_systems[0].heating_system_type = HPXML::HVACTypeBoiler
     hpxml.heating_systems[0].is_shared_system = true
-    hpxml.heating_systems[0].number_of_units_served = 5
+    hpxml.heating_systems[0].number_of_units_served = 6
     hpxml.heating_systems[0].heating_capacity = nil
-    hpxml.heating_systems[0].shared_loop_watts = 500
-    hpxml.heating_systems[0].fan_coil_watts = 0
+    hpxml.heating_systems[0].shared_loop_watts = 600
   elsif ['base-hvac-shared-boiler-only-fan-coil.xml',
          'base-hvac-shared-boiler-chiller-fan-coil.xml'].include? hpxml_file
     hpxml.heating_systems[0].fan_coil_watts = 150
+  elsif ['base-hvac-shared-boiler-only-water-loop-heat-pump.xml',
+         'base-hvac-shared-boiler-chiller-water-loop-heat-pump.xml'].include? hpxml_file
+    hpxml.heating_systems[0].wlhp_heating_efficiency_cop = 4.4
   elsif hpxml_file.include?('hvac_autosizing') && (not hpxml.heating_systems.nil?) && (hpxml.heating_systems.size > 0)
     hpxml.heating_systems[0].heating_capacity = nil
   end
@@ -2818,16 +2820,21 @@ def set_hpxml_cooling_systems(hpxml_file, hpxml)
     hpxml.cooling_systems[0].cooling_shr = nil
     hpxml.cooling_systems[0].compressor_type = nil
   elsif ['base-hvac-shared-chiller-only-baseboard.xml',
-         'base-hvac-shared-boiler-chiller-baseboard.xml'].include? hpxml_file
+         'base-hvac-shared-boiler-chiller-baseboard.xml',
+         'base-hvac-shared-chiller-only-water-loop-heat-pump.xml',
+         'base-hvac-shared-boiler-chiller-water-loop-heat-pump.xml'].include? hpxml_file
     hpxml.cooling_systems[0].cooling_system_type = HPXML::HVACTypeChiller
     hpxml.cooling_systems[0].is_shared_system = true
-    hpxml.cooling_systems[0].number_of_units_served = 5
-    hpxml.cooling_systems[0].cooling_capacity *= hpxml.cooling_systems[0].number_of_units_served
+    hpxml.cooling_systems[0].number_of_units_served = 6
+    hpxml.cooling_systems[0].cooling_capacity = 24000 * 6
     hpxml.cooling_systems[0].compressor_type = nil
     hpxml.cooling_systems[0].cooling_efficiency_kw_per_ton = 0.9
     hpxml.cooling_systems[0].cooling_shr = nil
-    hpxml.cooling_systems[0].shared_loop_watts = 500
-    hpxml.cooling_systems[0].fan_coil_watts = 0
+    hpxml.cooling_systems[0].shared_loop_watts = 600
+    if hpxml_file.include? 'water-loop-heat-pump'
+      hpxml.cooling_systems[0].wlhp_cooling_capacity = 24000
+      hpxml.cooling_systems[0].wlhp_cooling_efficiency_eer = 12.8
+    end
   elsif ['base-hvac-shared-cooling-tower-only-water-loop-heat-pump.xml',
          'base-hvac-shared-boiler-cooling-tower-water-loop-heat-pump.xml'].include? hpxml_file
     hpxml.cooling_systems[0].cooling_system_type = HPXML::HVACTypeCoolingTower
@@ -2915,8 +2922,8 @@ def set_hpxml_heat_pumps(hpxml_file, hpxml)
                          cooling_shr: 0.73)
     if hpxml_file == 'base-hvac-shared-ground-loop-ground-to-air-heat-pump.xml'
       hpxml.heat_pumps[-1].is_shared_system = true
-      hpxml.heat_pumps[-1].number_of_units_served = 5
-      hpxml.heat_pumps[-1].shared_loop_watts = 500
+      hpxml.heat_pumps[-1].number_of_units_served = 6
+      hpxml.heat_pumps[-1].shared_loop_watts = 600
     end
   elsif ['base-hvac-mini-split-heat-pump-ducted.xml'].include? hpxml_file
     f = 1.0 - (1.0 - 0.25) / (47.0 + 5.0) * (47.0 - 17.0)
@@ -3045,16 +3052,6 @@ def set_hpxml_heat_pumps(hpxml_file, hpxml)
   elsif ['base-hvac-dual-fuel-air-to-air-heat-pump-1-speed-electric.xml'].include? hpxml_file
     hpxml.heat_pumps[0].backup_heating_fuel = HPXML::FuelTypeElectricity
     hpxml.heat_pumps[0].backup_heating_efficiency_afue = 1.0
-  elsif ['base-hvac-shared-boiler-only-water-loop-heat-pump.xml',
-         'base-hvac-shared-chiller-only-water-loop-heat-pump.xml',
-         'base-hvac-shared-boiler-chiller-water-loop-heat-pump.xml'].include? hpxml_file
-    hpxml.heat_pumps.add(id: 'HeatPump',
-                         distribution_system_idref: 'HVACDistribution',
-                         heat_pump_type: HPXML::HVACTypeHeatPumpWaterLoopToAir,
-                         heat_pump_fuel: HPXML::FuelTypeElectricity,
-                         cooling_capacity: 24000,
-                         heating_efficiency_cop: 4.4,
-                         cooling_efficiency_eer: 12.8)
   elsif hpxml_file.include?('hvac_autosizing') && (not hpxml.heat_pumps.nil?) && (hpxml.heat_pumps.size > 0)
     hpxml.heat_pumps[0].cooling_capacity = nil
     hpxml.heat_pumps[0].heating_capacity = nil

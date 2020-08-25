@@ -394,10 +394,19 @@ class EnergyPlusValidator
       ## [BoilerType=Shared]
       '/HPXML/Building/BuildingDetails/Systems/HVAC/HVACPlant/HeatingSystem[HeatingSystemType/Boiler and IsSharedSystem="true"]' => {
         '../../../../BuildingSummary/BuildingConstruction[ResidentialFacilityType[text()="single-family attached" or text()="apartment unit"]]' => one,
-        '../../HVACDistribution[DistributionSystemType/HydronicDistribution[HydronicDistributionType[text()="radiator" or text()="baseboard" or text()="radiant floor" or text()="radiant ceiling"]] | DistributionSystemType/HydronicAndAirDistribution[HydronicAndAirDistributionType[text()="fan coil" or text()="water loop heat pump"]]]' => one, # See [HVACDistribution]
+        '../../HVACDistribution[DistributionSystemType/HydronicDistribution[HydronicDistributionType[text()="radiator" or text()="baseboard" or text()="radiant floor" or text()="radiant ceiling"]] | DistributionSystemType/HydronicAndAirDistribution[HydronicAndAirDistributionType[text()="fan coil" or text()="water loop heat pump"]]]' => one, # See [HVACDistribution] or [SharedBoilerType=FanCoil] or [SharedBoilerType=WLHP]
         'NumberofUnitsServed' => one,
         'extension/SharedLoopWatts' => one,
+      },
+
+      ## [SharedBoilerType=FanCoil]
+      '/HPXML/Building/BuildingDetails/Systems/HVAC/HVACPlant/HeatingSystem[HeatingSystemType/Boiler and IsSharedSystem="true" and //HydronicAndAirDistributionType[text()="fan coil"]]' => {
         'extension/FanCoilWatts' => one,
+      },
+
+      ## [SharedBoilerType=WLHP]
+      '/HPXML/Building/BuildingDetails/Systems/HVAC/HVACPlant/HeatingSystem[HeatingSystemType/Boiler and IsSharedSystem="true" and //HydronicAndAirDistributionType[text()="water loop heat pump"]]' => {
+        'extension/WaterLoopHeatPump/AnnualHeatingEfficiency[Units="COP"]/Value' => one,
       },
 
       ## [HeatingType=Stove]
@@ -436,7 +445,7 @@ class EnergyPlusValidator
       '/HPXML/Building/BuildingDetails/Systems/HVAC/HVACPlant/CoolingSystem' => {
         'SystemIdentifier' => one, # Required by HPXML schema
         '../../HVACControl' => one, # See [HVACControl]
-        'CoolingSystemType[text()="central air conditioner" or text()="room air conditioner" or text()="evaporative cooler" or text()="mini-split" or text()="chiller" or text()="cooling tower"]' => one, # See [CoolingType=CentralAC] or [CoolingType=RoomAC] or [CoolingType=EvapCooler] or [CoolingType=MiniSplitAC] or [CoolingType=SharedChiller] or [CoolingType=SharedCoolingTower]
+        'CoolingSystemType[text()="central air conditioner" or text()="room air conditioner" or text()="evaporative cooler" or text()="mini-split" or text()="chiller" or text()="cooling tower"]' => one, # See [CoolingType=CentralAC] or [CoolingType=RoomAC] or [CoolingType=EvapCooler] or [CoolingType=MiniSplitAC] or [CoolingType=SharedChiller] or [CoolingType=SharedCoolingTowerWLHP]
         'CoolingSystemFuel[text()="electricity"]' => one,
         'FractionCoolLoadServed' => one,
       },
@@ -479,17 +488,27 @@ class EnergyPlusValidator
       ## [CoolingType=SharedChiller]
       '/HPXML/Building/BuildingDetails/Systems/HVAC/HVACPlant/CoolingSystem[CoolingSystemType="chiller"]' => {
         '../../../../BuildingSummary/BuildingConstruction[ResidentialFacilityType[text()="single-family attached" or text()="apartment unit"]]' => one,
-        '../../HVACDistribution[DistributionSystemType/HydronicDistribution[HydronicDistributionType[text()="radiator" or text()="baseboard" or text()="radiant floor" or text()="radiant ceiling"]] | DistributionSystemType/HydronicAndAirDistribution[HydronicAndAirDistributionType[text()="fan coil" or text()="water loop heat pump"]]]' => one, # See [HVACDistribution]
+        '../../HVACDistribution[DistributionSystemType/HydronicDistribution[HydronicDistributionType[text()="radiator" or text()="baseboard" or text()="radiant floor" or text()="radiant ceiling"]] | DistributionSystemType/HydronicAndAirDistribution[HydronicAndAirDistributionType[text()="fan coil" or text()="water loop heat pump"]]]' => one, # See [HVACDistribution] or [SharedChillerType=FanCoil] or [SharedChillerType=WLHP]
         'DistributionSystem' => one,
         'IsSharedSystem[text()="true"]' => one,
         'NumberofUnitsServed' => one,
         'CoolingCapacity' => one,
         'AnnualCoolingEfficiency[Units="kW/ton"]/Value' => one,
         'extension/SharedLoopWatts' => one,
+      },
+
+      ## [SharedChillerType=FanCoil]
+      '/HPXML/Building/BuildingDetails/Systems/HVAC/HVACPlant/CoolingSystem[CoolingSystemType="chiller" and //HydronicAndAirDistributionType[text()="fan coil"]]' => {
         'extension/FanCoilWatts' => one,
       },
 
-      ## [CoolingType=SharedCoolingTower]
+      ## [SharedChillerType=WLHP]
+      '/HPXML/Building/BuildingDetails/Systems/HVAC/HVACPlant/CoolingSystem[CoolingSystemType="chiller" and //HydronicAndAirDistributionType[text()="water loop heat pump"]]' => {
+        'extension/WaterLoopHeatPump/CoolingCapacity' => one,
+        'extension/WaterLoopHeatPump/AnnualCoolingEfficiency[Units="EER"]/Value' => one,
+      },
+
+      ## [CoolingType=SharedCoolingTowerWLHP]
       '/HPXML/Building/BuildingDetails/Systems/HVAC/HVACPlant/CoolingSystem[CoolingSystemType="cooling tower"]' => {
         '../../../../BuildingSummary/BuildingConstruction[ResidentialFacilityType[text()="single-family attached" or text()="apartment unit"]]' => one,
         '../../HVACDistribution[DistributionSystemType/HydronicAndAirDistribution[HydronicAndAirDistributionType[text()="water loop heat pump"]]]' => one, # See [HVACDistribution]
@@ -497,43 +516,41 @@ class EnergyPlusValidator
         'IsSharedSystem[text()="true"]' => one,
         'NumberofUnitsServed' => one,
         'extension/SharedLoopWatts' => one,
+        'extension/WaterLoopHeatPump/CoolingCapacity' => one,
+        'extension/WaterLoopHeatPump/AnnualCoolingEfficiency[Units="EER"]/Value' => one,
       },
 
       # [HeatPump]
       '/HPXML/Building/BuildingDetails/Systems/HVAC/HVACPlant/HeatPump' => {
         'SystemIdentifier' => one, # Required by HPXML schema
         '../../HVACControl' => one, # See [HVACControl]
-        'HeatPumpType[text()="air-to-air" or text()="mini-split" or text()="ground-to-air" or text()="water-loop-to-air"]' => one, # See [HeatPumpType=ASHP] or [HeatPumpType=MSHP] or [HeatPumpType=GSHP] or [HeatPumpType=WLHP]
+        'HeatPumpType[text()="air-to-air" or text()="mini-split" or text()="ground-to-air"]' => one, # See [HeatPumpType=ASHP] or [HeatPumpType=MSHP] or [HeatPumpType=GSHP]
         'HeatPumpFuel[text()="electricity"]' => one,
+        'HeatingCapacity' => zero_or_one,
+        'CoolingCapacity' => zero_or_one,
         'CoolingSensibleHeatFraction' => zero_or_one,
         '[not(BackupSystemFuel)] | BackupSystemFuel[text()="electricity" or text()="natural gas" or text()="fuel oil" or text()="fuel oil 1" or text()="fuel oil 2" or text()="fuel oil 4" or text()="fuel oil 5/6" or text()="diesel" or text()="propane" or text()="kerosene" or text()="wood" or text()="wood pellets"]' => one, # See [HeatPumpBackup]
+        'FractionHeatLoadServed' => one,
+        'FractionCoolLoadServed' => one,
       },
 
       ## [HeatPumpType=ASHP]
       '/HPXML/Building/BuildingDetails/Systems/HVAC/HVACPlant/HeatPump[HeatPumpType="air-to-air"]' => {
         '../../HVACDistribution[DistributionSystemType/AirDistribution | DistributionSystemType[Other="DSE"]]' => one_or_more, # See [HVACDistribution]
         'DistributionSystem' => one,
-        'HeatingCapacity' => zero_or_one,
         'HeatingCapacity17F' => zero_or_one,
-        'CoolingCapacity' => zero_or_one,
         '[not(CompressorType)] | CompressorType[text()="single stage" or text()="two stage" or text()="variable speed"]' => one,
         'AnnualCoolingEfficiency[Units="SEER"]/Value' => one,
         'AnnualHeatingEfficiency[Units="HSPF"]/Value' => one,
-        'FractionHeatLoadServed' => one,
-        'FractionCoolLoadServed' => one,
       },
 
       ## [HeatPumpType=MSHP]
       '/HPXML/Building/BuildingDetails/Systems/HVAC/HVACPlant/HeatPump[HeatPumpType="mini-split"]' => {
         '../../HVACDistribution[DistributionSystemType/AirDistribution | DistributionSystemType[Other="DSE"]]' => zero_or_more, # See [HVACDistribution]
         'DistributionSystem' => zero_or_one,
-        'HeatingCapacity' => zero_or_one,
         'HeatingCapacity17F' => zero_or_one,
-        'CoolingCapacity' => zero_or_one,
         'AnnualCoolingEfficiency[Units="SEER"]/Value' => one,
         'AnnualHeatingEfficiency[Units="HSPF"]/Value' => one,
-        'FractionHeatLoadServed' => one,
-        'FractionCoolLoadServed' => one,
       },
 
       ## [HeatPumpType=GSHP]
@@ -541,13 +558,9 @@ class EnergyPlusValidator
         '../../HVACDistribution[DistributionSystemType/AirDistribution | DistributionSystemType[Other="DSE"]]' => one_or_more, # See [HVACDistribution]
         'IsSharedSystem' => zero_or_one, # See [GSHPType=SharedLoop]
         'DistributionSystem' => one,
-        'HeatingCapacity' => zero_or_one,
-        'CoolingCapacity' => zero_or_one,
         'BackupHeatingSwitchoverTemperature' => zero,
         'AnnualCoolingEfficiency[Units="EER"]/Value' => one,
         'AnnualHeatingEfficiency[Units="COP"]/Value' => one,
-        'FractionHeatLoadServed' => one,
-        'FractionCoolLoadServed' => one,
       },
 
       ## [GSHPType=SharedLoop]
@@ -555,18 +568,6 @@ class EnergyPlusValidator
         '../../../../BuildingSummary/BuildingConstruction[ResidentialFacilityType[text()="single-family attached" or text()="apartment unit"]]' => one,
         'NumberofUnitsServed' => one,
         'extension/SharedLoopWatts' => one,
-      },
-
-      ## [HeatPumpType=WLHP]
-      '/HPXML/Building/BuildingDetails/Systems/HVAC/HVACPlant/HeatPump[HeatPumpType="water-loop-to-air"]' => {
-        '../HeatingSystem[IsSharedSystem="true"] | ../CoolingSystem[IsSharedSystem="true"]' => one_or_more,
-        '../../HVACDistribution[DistributionSystemType/HydronicAndAirDistribution[HydronicAndAirDistributionType[text()="water loop heat pump"]]]' => one, # See [HVACDistribution]
-        'DistributionSystem' => one,
-        'CoolingCapacity' => one,
-        'AnnualCoolingEfficiency[Units="EER"]/Value' => one,
-        'AnnualHeatingEfficiency[Units="COP"]/Value' => one,
-        'FractionHeatLoadServed' => zero, # Specified by shared boiler
-        'FractionCoolLoadServed' => zero, # Specified by shared chiller or cooling tower
       },
 
       ## [HeatPumpBackup]
@@ -627,18 +628,13 @@ class EnergyPlusValidator
 
       ## [HVACDistType=HydronicAndAir]
       '/HPXML/Building/BuildingDetails/Systems/HVAC/HVACDistribution/DistributionSystemType/HydronicAndAirDistribution' => {
-        'HydronicAndAirDistributionType[text()="fan coil" or text()="water loop heat pump"]' => one, # See [HydronicAndAirType=WLHP]
+        'HydronicAndAirDistributionType[text()="fan coil" or text()="water loop heat pump"]' => one,
         '../../ConditionedFloorAreaServed' => one,
         'DuctLeakageMeasurement[DuctType="supply"]/DuctLeakage[(Units="CFM25" or Units="Percent") and TotalOrToOutside="to outside"]/Value' => zero_or_one,
         'DuctLeakageMeasurement[DuctType="return"]/DuctLeakage[(Units="CFM25" or Units="Percent") and TotalOrToOutside="to outside"]/Value' => zero_or_one,
         'Ducts[DuctType="supply"]' => zero_or_more, # See [HydronicAndAirDuct]
         'Ducts[DuctType="return"]' => zero_or_more, # See [HydronicAndAirDuct]
         'NumberofReturnRegisters' => zero_or_one,
-      },
-
-      ## [HydronicAndAirType=WLHP]
-      '/HPXML/Building/BuildingDetails/Systems/HVAC/HVACDistribution/DistributionSystemType/HydronicAndAirDistribution[HydronicAndAirDistributionType[text()="water loop heat pump"]]' => {
-        '../../../HVACPlant/HeatPump[HeatPumpType[text()="water-loop-to-air"]]' => one,
       },
 
       ## [HydronicAndAirDuct]

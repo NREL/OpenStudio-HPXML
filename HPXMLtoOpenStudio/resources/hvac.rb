@@ -2021,32 +2021,21 @@ class HVAC
         distribution_type = distribution_system.distribution_system_type
 
         if distribution_type == HPXML::HVACDistributionTypeHydronic
-
           # Shared boiler w/ baseboard/radiators/etc
           aux_in = 0.0
-
         elsif distribution_type == HPXML::HVACDistributionTypeHydronicAndAir
-
           hydronic_and_air_type = distribution_system.hydronic_and_air_type
-
           if hydronic_and_air_type == HPXML::HydronicAndAirTypeFanCoil
-
             # Shared boiler w/ fan coil
             aux_in = UnitConversions.convert(heating_system.fan_coil_watts, 'W', 'kW')
-
           elsif hydronic_and_air_type == HPXML::HydronicAndAirTypeWaterLoopHeatPump
-
             # Shared boiler w/ WLHP
             # ANSI/RESNET/ICC 301-2019 Section 4.4.7.2
             aux_in = 0.0
-
           else
-
             fail "Unexpected distribution type '#{hydronic_and_air_type}' for shared boiler."
           end
-
         else
-
           fail "Unexpected distribution type '#{distribution_type}' for shared boiler."
         end
 
@@ -4071,16 +4060,6 @@ class HVAC
   def self.apply_shared_hvac_systems(hpxml)
     # Handle shared systems according to ANSI/RESNET/ICC 301-2019
 
-    # Remove any water loop heat pumps that are not connected to boilers; they
-    # will be converted to other systems.
-    wlhps_without_boiler = []
-    hpxml.heat_pumps.each do |heat_pump|
-      next unless heat_pump.heat_pump_type == HPXML::HVACTypeHeatPumpWaterLoopToAir
-      next unless hpxml.heating_systems.select { |h| h.distribution_system_idref == heat_pump.distribution_system_idref }.size == 0
-
-      wlhps_without_boiler << heat_pump
-    end
-
     # Apply logic for shared cooling systems
     hpxml.cooling_systems.each do |cooling_system|
       next unless cooling_system.is_shared_system
@@ -4093,11 +4072,6 @@ class HVAC
       next unless heating_system.is_shared_system
 
       HVAC.apply_shared_heating_system(hpxml, heating_system)
-    end
-
-    # Delete WLHPs
-    wlhps_without_boiler.each do |wlhp|
-      wlhp.delete
     end
 
     # Remove any orphaned HVAC distributions
@@ -4132,9 +4106,7 @@ class HVAC
         if hydronic_and_air_type == HPXML::HydronicAndAirTypeFanCoil
           aux_dweq = cooling_system.fan_coil_watts
         elsif hydronic_and_air_type == HPXML::HydronicAndAirTypeWaterLoopHeatPump
-
-          wlhp = hpxml.heat_pumps.select { |hp| hp.distribution_system_idref == distribution_system.id }[0]
-          aux_dweq = wlhp.cooling_capacity / wlhp.cooling_efficiency_eer
+          aux_dweq = cooling_system.wlhp_cooling_capacity / cooling_system.wlhp_cooling_efficiency_eer
         else
           fail "Unexpected distribution type '#{hydronic_and_air_type}' for chiller."
         end
@@ -4148,9 +4120,8 @@ class HVAC
       if distribution_type == HPXML::HVACDistributionTypeHydronicAndAir
         hydronic_and_air_type = distribution_system.hydronic_and_air_type
         if hydronic_and_air_type == HPXML::HydronicAndAirTypeWaterLoopHeatPump
-          wlhp = hpxml.heat_pumps.select { |hp| hp.distribution_system_idref == distribution_system.id }[0]
-          wlhp_cap = wlhp.cooling_capacity
-          wlhp_input = wlhp_cap / wlhp.cooling_efficiency_eer
+          wlhp_cap = cooling_system.wlhp_cooling_capacity
+          wlhp_input = wlhp_cap / cooling_system.wlhp_cooling_efficiency_eer
         else
           fail "Unexpected distribution type '#{hydronic_and_air_type}' for cooling tower."
         end
@@ -4201,21 +4172,23 @@ class HVAC
       heating_system.distribution_system_idref = hpxml.hvac_distributions[-1].id
     elsif heating_system.heating_system_type == HPXML::HVACTypeBoiler && hydronic_and_air_type.to_s == HPXML::HydronicAndAirTypeWaterLoopHeatPump
       # Per ANSI/RESNET/ICC 301-2019 Section 4.4.7.2, model as:
-      # A) boiler, fraction heat load served = 1-1/COP
-      # B) heat pump with constant efficiency and duct losses, fraction heat load served = 1/COP
-      wlhp = hpxml.heat_pumps.select { |hp| hp.distribution_system_idref == distribution_system.id }[0]
+      # A) heat pump with constant efficiency and duct losses, fraction heat load served = 1/COP
+      # B) boiler, fraction heat load served = 1-1/COP
       fraction_heat_load_served = heating_system.fraction_heat_load_served
+
+      # Heat pump
+      hpxml.heat_pumps.add(id: "#{heating_system.id}_WLHP",
+                           distribution_system_idref: heating_system.distribution_system_idref,
+                           heat_pump_type: HPXML::HVACTypeHeatPumpWaterLoopToAir,
+                           heat_pump_fuel: HPXML::FuelTypeElectricity,
+                           heating_efficiency_cop: heating_system.wlhp_heating_efficiency_cop,
+                           fraction_heat_load_served: fraction_heat_load_served * (1.0 / heating_system.wlhp_heating_efficiency_cop),
+                           fraction_cool_load_served: 0.0)
 
       # Boiler
       heating_system.electric_auxiliary_energy = get_default_eae(heating_system, nil)
-      heating_system.fraction_heat_load_served = fraction_heat_load_served * (1.0 - 1.0 / wlhp.heating_efficiency_cop)
+      heating_system.fraction_heat_load_served = fraction_heat_load_served * (1.0 - 1.0 / heating_system.wlhp_heating_efficiency_cop)
       heating_system.distribution_system_idref = nil
-
-      # Heat pump
-      wlhp.fraction_heat_load_served = fraction_heat_load_served * (1.0 / wlhp.heating_efficiency_cop)
-      wlhp.fraction_cool_load_served = 0.0
-      wlhp.heating_capacity = nil
-      wlhp.heating_capacity_17F = nil
     end
 
     heating_system.heating_capacity = nil # Autosize the equipment

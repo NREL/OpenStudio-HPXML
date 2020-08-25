@@ -541,7 +541,7 @@
               <SystemIdentifier id='HeatPump'/>
               <DistributionSystem idref='HVACDistribution'/>
               <IsSharedSystem>true</IsSharedSystem>
-              <NumberofUnitsServed>5</NumberofUnitsServed>
+              <NumberofUnitsServed>6</NumberofUnitsServed>
               <HeatPumpType>ground-to-air</HeatPumpType>
               <HeatPumpFuel>electricity</HeatPumpFuel>
               <HeatingCapacity>42000.0</HeatingCapacity>
@@ -564,7 +564,7 @@
                 <Value>3.6</Value>
               </AnnualHeatingEfficiency>
               <extension>
-                <SharedLoopWatts>500.0</SharedLoopWatts>
+                <SharedLoopWatts>600.0</SharedLoopWatts>
               </extension>
             </HeatPump>
           </HVACPlant>

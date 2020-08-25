@@ -2464,7 +2464,7 @@ class HPXML < Object
              :heating_system_fuel, :heating_capacity, :heating_efficiency_afue,
              :heating_efficiency_percent, :fraction_heat_load_served, :electric_auxiliary_energy,
              :heating_cfm, :energy_star, :seed_id, :is_shared_system, :number_of_units_served,
-             :shared_loop_watts, :fan_coil_watts]
+             :shared_loop_watts, :fan_coil_watts, :wlhp_heating_efficiency_cop]
     attr_accessor(*ATTRS)
 
     def distribution_system
@@ -2546,6 +2546,13 @@ class HPXML < Object
                                          'SeedId' => @seed_id,
                                          'SharedLoopWatts' => to_float_or_nil(@shared_loop_watts),
                                          'FanCoilWatts' => to_float_or_nil(@fan_coil_watts) })
+
+      if not @wlhp_heating_efficiency_cop.nil?
+        wlhp = XMLHelper.create_elements_as_needed(heating_system, ['extension', 'WaterLoopHeatPump'])
+        annual_efficiency = XMLHelper.add_element(wlhp, 'AnnualHeatingEfficiency')
+        XMLHelper.add_element(annual_efficiency, 'Units', UnitsCOP)
+        XMLHelper.add_element(annual_efficiency, 'Value', to_float(@wlhp_heating_efficiency_cop))
+      end
     end
 
     def from_oga(heating_system)
@@ -2571,6 +2578,7 @@ class HPXML < Object
       @seed_id = XMLHelper.get_value(heating_system, 'extension/SeedId')
       @shared_loop_watts = to_float_or_nil(XMLHelper.get_value(heating_system, 'extension/SharedLoopWatts'))
       @fan_coil_watts = to_float_or_nil(XMLHelper.get_value(heating_system, 'extension/FanCoilWatts'))
+      @wlhp_heating_efficiency_cop = to_float_or_nil(XMLHelper.get_value(heating_system, "extension/WaterLoopHeatPump/AnnualHeatingEfficiency[Units='#{UnitsCOP}']/Value"))
     end
   end
 
@@ -2597,7 +2605,8 @@ class HPXML < Object
              :cooling_system_fuel, :cooling_capacity, :compressor_type, :fraction_cool_load_served,
              :cooling_efficiency_seer, :cooling_efficiency_eer, :cooling_efficiency_kw_per_ton,
              :cooling_shr, :cooling_cfm, :energy_star, :seed_id, :is_shared_system,
-             :number_of_units_served, :shared_loop_watts, :fan_coil_watts]
+             :number_of_units_served, :shared_loop_watts, :fan_coil_watts, :wlhp_cooling_capacity,
+             :wlhp_cooling_efficiency_eer]
     attr_accessor(*ATTRS)
 
     def distribution_system
@@ -2680,6 +2689,16 @@ class HPXML < Object
                                          'SeedId' => @seed_id,
                                          'SharedLoopWatts' => to_float_or_nil(@shared_loop_watts),
                                          'FanCoilWatts' => to_float_or_nil(@fan_coil_watts) })
+
+      if (not @wlhp_cooling_capacity.nil?) || (not @wlhp_cooling_efficiency_eer.nil?)
+        wlhp = XMLHelper.create_elements_as_needed(cooling_system, ['extension', 'WaterLoopHeatPump'])
+        XMLHelper.add_element(wlhp, 'CoolingCapacity', to_float(@wlhp_cooling_capacity)) unless @wlhp_cooling_capacity.nil?
+        if not @wlhp_cooling_efficiency_eer.nil?
+          annual_efficiency = XMLHelper.add_element(wlhp, 'AnnualCoolingEfficiency')
+          XMLHelper.add_element(annual_efficiency, 'Units', UnitsEER)
+          XMLHelper.add_element(annual_efficiency, 'Value', to_float(@wlhp_cooling_efficiency_eer))
+        end
+      end
     end
 
     def from_oga(cooling_system)
@@ -2708,6 +2727,8 @@ class HPXML < Object
       @seed_id = XMLHelper.get_value(cooling_system, 'extension/SeedId')
       @shared_loop_watts = to_float_or_nil(XMLHelper.get_value(cooling_system, 'extension/SharedLoopWatts'))
       @fan_coil_watts = to_float_or_nil(XMLHelper.get_value(cooling_system, 'extension/FanCoilWatts'))
+      @wlhp_cooling_capacity = to_float_or_nil(XMLHelper.get_value(cooling_system, 'extension/WaterLoopHeatPump/CoolingCapacity'))
+      @wlhp_cooling_efficiency_eer = to_float_or_nil(XMLHelper.get_value(cooling_system, "extension/WaterLoopHeatPump/AnnualCoolingEfficiency[Units='#{UnitsEER}']/Value"))
     end
   end
 
@@ -2816,7 +2837,7 @@ class HPXML < Object
         clg_efficiency_value = @cooling_efficiency_seer
         htg_efficiency_units = UnitsHSPF
         htg_efficiency_value = @heating_efficiency_hspf
-      elsif [HVACTypeHeatPumpGroundToAir, HVACTypeHeatPumpWaterLoopToAir].include? @heat_pump_type
+      elsif [HVACTypeHeatPumpGroundToAir].include? @heat_pump_type
         clg_efficiency_units = UnitsEER
         clg_efficiency_value = @cooling_efficiency_eer
         htg_efficiency_units = UnitsCOP
@@ -2862,12 +2883,12 @@ class HPXML < Object
       @fraction_cool_load_served = to_float_or_nil(XMLHelper.get_value(heat_pump, 'FractionCoolLoadServed'))
       if [HVACTypeHeatPumpAirToAir, HVACTypeHeatPumpMiniSplit].include? @heat_pump_type
         @cooling_efficiency_seer = to_float_or_nil(XMLHelper.get_value(heat_pump, "AnnualCoolingEfficiency[Units='#{UnitsSEER}']/Value"))
-      elsif [HVACTypeHeatPumpGroundToAir, HVACTypeHeatPumpWaterLoopToAir].include? @heat_pump_type
+      elsif [HVACTypeHeatPumpGroundToAir].include? @heat_pump_type
         @cooling_efficiency_eer = to_float_or_nil(XMLHelper.get_value(heat_pump, "AnnualCoolingEfficiency[Units='#{UnitsEER}']/Value"))
       end
       if [HVACTypeHeatPumpAirToAir, HVACTypeHeatPumpMiniSplit].include? @heat_pump_type
         @heating_efficiency_hspf = to_float_or_nil(XMLHelper.get_value(heat_pump, "AnnualHeatingEfficiency[Units='#{UnitsHSPF}']/Value"))
-      elsif [HVACTypeHeatPumpGroundToAir, HVACTypeHeatPumpWaterLoopToAir].include? @heat_pump_type
+      elsif [HVACTypeHeatPumpGroundToAir].include? @heat_pump_type
         @heating_efficiency_cop = to_float_or_nil(XMLHelper.get_value(heat_pump, "AnnualHeatingEfficiency[Units='#{UnitsCOP}']/Value"))
       end
       @energy_star = XMLHelper.get_values(heat_pump, 'ThirdPartyCertification').include?('Energy Star')

@@ -541,7 +541,7 @@
               <SystemIdentifier id='HeatingSystem'/>
               <DistributionSystem idref='HVACDistribution'/>
               <IsSharedSystem>true</IsSharedSystem>
-              <NumberofUnitsServed>5</NumberofUnitsServed>
+              <NumberofUnitsServed>6</NumberofUnitsServed>
               <HeatingSystemType>
                 <Boiler/>
               </HeatingSystemType>
@@ -552,43 +552,39 @@
               </AnnualHeatingEfficiency>
               <FractionHeatLoadServed>1.0</FractionHeatLoadServed>
               <extension>
-                <SharedLoopWatts>500.0</SharedLoopWatts>
-                <FanCoilWatts>0.0</FanCoilWatts>
+                <SharedLoopWatts>600.0</SharedLoopWatts>
+                <WaterLoopHeatPump>
+                  <AnnualHeatingEfficiency>
+                    <Units>COP</Units>
+                    <Value>4.4</Value>
+                  </AnnualHeatingEfficiency>
+                </WaterLoopHeatPump>
               </extension>
             </HeatingSystem>
             <CoolingSystem>
               <SystemIdentifier id='CoolingSystem'/>
               <DistributionSystem idref='HVACDistribution'/>
               <IsSharedSystem>true</IsSharedSystem>
-              <NumberofUnitsServed>5</NumberofUnitsServed>
+              <NumberofUnitsServed>6</NumberofUnitsServed>
               <CoolingSystemType>chiller</CoolingSystemType>
               <CoolingSystemFuel>electricity</CoolingSystemFuel>
-              <CoolingCapacity>240000.0</CoolingCapacity>
+              <CoolingCapacity>144000.0</CoolingCapacity>
               <FractionCoolLoadServed>1.0</FractionCoolLoadServed>
               <AnnualCoolingEfficiency>
                 <Units>kW/ton</Units>
                 <Value>0.9</Value>
               </AnnualCoolingEfficiency>
               <extension>
-                <SharedLoopWatts>500.0</SharedLoopWatts>
-                <FanCoilWatts>0.0</FanCoilWatts>
+                <SharedLoopWatts>600.0</SharedLoopWatts>
+                <WaterLoopHeatPump>
+                  <CoolingCapacity>24000.0</CoolingCapacity>
+                  <AnnualCoolingEfficiency>
+                    <Units>EER</Units>
+                    <Value>12.8</Value>
+                  </AnnualCoolingEfficiency>
+                </WaterLoopHeatPump>
               </extension>
             </CoolingSystem>
-            <HeatPump>
-              <SystemIdentifier id='HeatPump'/>
-              <DistributionSystem idref='HVACDistribution'/>
-              <HeatPumpType>water-loop-to-air</HeatPumpType>
-              <HeatPumpFuel>electricity</HeatPumpFuel>
-              <CoolingCapacity>24000.0</CoolingCapacity>
-              <AnnualCoolingEfficiency>
-                <Units>EER</Units>
-                <Value>12.8</Value>
-              </AnnualCoolingEfficiency>
-              <AnnualHeatingEfficiency>
-                <Units>COP</Units>
-                <Value>4.4</Value>
-              </AnnualHeatingEfficiency>
-            </HeatPump>
           </HVACPlant>
           <HVACControl>
             <SystemIdentifier id='HVACControl'/>
