@@ -579,7 +579,7 @@
               <DistributionSystem idref='HVACDistribution'/>
               <HeatPumpType>water-loop-to-air</HeatPumpType>
               <HeatPumpFuel>electricity</HeatPumpFuel>
-              <CoolingCapacity>48000.0</CoolingCapacity>
+              <CoolingCapacity>24000.0</CoolingCapacity>
               <AnnualCoolingEfficiency>
                 <Units>EER</Units>
                 <Value>12.8</Value>

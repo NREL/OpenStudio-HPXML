@@ -3052,7 +3052,7 @@ def set_hpxml_heat_pumps(hpxml_file, hpxml)
                          distribution_system_idref: 'HVACDistribution',
                          heat_pump_type: HPXML::HVACTypeHeatPumpWaterLoopToAir,
                          heat_pump_fuel: HPXML::FuelTypeElectricity,
-                         cooling_capacity: 48000,
+                         cooling_capacity: 24000,
                          heating_efficiency_cop: 4.4,
                          cooling_efficiency_eer: 12.8)
   elsif hpxml_file.include?('hvac_autosizing') && (not hpxml.heat_pumps.nil?) && (hpxml.heat_pumps.size > 0)

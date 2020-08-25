@@ -241,7 +241,7 @@ class OSModel
 
     weather, epw_file = Location.apply_weather_file(model, runner, epw_path, cache_path)
     check_for_errors()
-    HVAC.convert_shared_hvac_systems(hpxml)
+    HVAC.apply_shared_hvac_systems(hpxml)
     set_defaults_and_globals(runner, output_dir, epw_file)
     weather = Location.apply(model, runner, weather, epw_file, @hpxml)
     add_simulation_params(model)
@@ -2129,7 +2129,14 @@ class OSModel
 
       check_distribution_system(heat_pump.distribution_system, heat_pump.heat_pump_type)
 
-      if heat_pump.heat_pump_type == HPXML::HVACTypeHeatPumpAirToAir
+      if heat_pump.heat_pump_type == HPXML::HVACTypeHeatPumpWaterLoopToAir
+
+        HVAC.apply_water_loop_to_air_heat_pump(model, runner, heat_pump,
+                                               @remaining_heat_load_frac,
+                                               @remaining_cool_load_frac,
+                                               living_zone, @hvac_map)
+
+      elsif heat_pump.heat_pump_type == HPXML::HVACTypeHeatPumpAirToAir
 
         HVAC.apply_central_air_to_air_heat_pump(model, runner, heat_pump,
                                                 @remaining_heat_load_frac,
@@ -2261,7 +2268,8 @@ class OSModel
                                    HPXML::HVACTypeMiniSplitAirConditioner => [HPXML::HVACDistributionTypeAir, HPXML::HVACDistributionTypeDSE],
                                    HPXML::HVACTypeHeatPumpAirToAir => [HPXML::HVACDistributionTypeAir, HPXML::HVACDistributionTypeDSE],
                                    HPXML::HVACTypeHeatPumpMiniSplit => [HPXML::HVACDistributionTypeAir, HPXML::HVACDistributionTypeDSE],
-                                   HPXML::HVACTypeHeatPumpGroundToAir => [HPXML::HVACDistributionTypeAir, HPXML::HVACDistributionTypeDSE] }
+                                   HPXML::HVACTypeHeatPumpGroundToAir => [HPXML::HVACDistributionTypeAir, HPXML::HVACDistributionTypeDSE],
+                                   HPXML::HVACTypeHeatPumpWaterLoopToAir => [HPXML::HVACDistributionTypeAir, HPXML::HVACDistributionTypeHydronicAndAir, HPXML::HVACDistributionTypeDSE] }
 
     if not hvac_distribution_type_map[system_type].include? hvac_distribution.distribution_system_type
       # EPvalidator.rb only checks that a HVAC distribution system of the correct type (for the given HVAC system) exists

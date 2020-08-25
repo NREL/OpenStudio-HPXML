@@ -1018,7 +1018,8 @@ class HVACSizing
 
     if hvac.has_type([Constants.ObjectNameAirSourceHeatPump,
                       Constants.ObjectNameMiniSplitHeatPump,
-                      Constants.ObjectNameGroundSourceHeatPump])
+                      Constants.ObjectNameGroundSourceHeatPump,
+                      Constants.ObjectNameWaterLoopHeatPump])
       if hp_use_max_load
         max_load = [hvac_init_loads.Heat, hvac_init_loads.Cool_Tot].max
         hvac_init_loads.Heat = max_load
@@ -1432,6 +1433,13 @@ class HVACSizing
         cfa = UnitConversions.convert(@spaces[HPXML::LocationLivingSpace].floorArea, 'm^2', 'ft^2')
         hvac_final_values.Cool_Airflow = cfa * 2.0 # Use industry rule of thumb sizing method adopted by HEScore
       end
+
+    elsif hvac.has_type(Constants.ObjectNameWaterLoopHeatPump)
+      # Model only currently used for heating
+      hvac_final_values.Cool_Capacity = 0.0
+      hvac_final_values.Cool_Capacity_Sens = 0.0
+      hvac_final_values.Cool_Airflow = 0.0
+
     else
       hvac_final_values.Cool_Capacity = 0.0
       hvac_final_values.Cool_Capacity_Sens = 0.0
@@ -1480,6 +1488,12 @@ class HVACSizing
                                  (1.0 + (1.0 - hvac.CoilBF * bypassFactor_CurveValue) *
                                  (80.0 - @cool_setpoint) / (@cool_setpoint - hvac.LeavingAirTemp)))
       hvac_final_values.Cool_Airflow = calc_airflow_rate(cool_Load_SensCap_Design, (@cool_setpoint - hvac.LeavingAirTemp))
+      hvac_final_values.Heat_Airflow = calc_airflow_rate(hvac_final_values.Heat_Capacity, (hvac.SupplyAirTemp - @heat_setpoint))
+
+    elsif hvac.has_type(Constants.ObjectNameWaterLoopHeatPump)
+      hvac_final_values.Heat_Capacity = hvac_final_values.Heat_Load
+      hvac_final_values.Heat_Capacity_Supp = hvac_final_values.Heat_Load
+
       hvac_final_values.Heat_Airflow = calc_airflow_rate(hvac_final_values.Heat_Capacity, (hvac.SupplyAirTemp - @heat_setpoint))
 
     elsif hvac.has_type(Constants.ObjectNameFurnace)
@@ -3255,7 +3269,11 @@ class HVACSizing
 
     elsif htg_coil.is_a? OpenStudio::Model::CoilHeatingDXSingleSpeed
       htg_coil.setRatedTotalHeatingCapacity(UnitConversions.convert(hvac_final_values.Heat_Capacity, 'Btu/hr', 'W'))
-      htg_coil.setRatedAirFlowRate(UnitConversions.convert(hvac_final_values.Heat_Capacity, 'Btu/hr', 'ton') * UnitConversions.convert(hvac.RatedCFMperTonHeating[0], 'cfm', 'm^3/s'))
+      if htg_coil.name.to_s.start_with? Constants.ObjectNameWaterLoopHeatPump
+        htg_coil.setRatedAirFlowRate(UnitConversions.convert(hvac_final_values.Heat_Airflow, 'cfm', 'm^3/s'))
+      else
+        htg_coil.setRatedAirFlowRate(UnitConversions.convert(hvac_final_values.Heat_Capacity, 'Btu/hr', 'ton') * UnitConversions.convert(hvac.RatedCFMperTonHeating[0], 'cfm', 'm^3/s'))
+      end
 
     elsif htg_coil.is_a? OpenStudio::Model::CoilHeatingDXMultiSpeed
       htg_coil.stages.each_with_index do |stage, speed|

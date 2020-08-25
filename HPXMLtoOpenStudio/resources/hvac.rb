@@ -345,7 +345,7 @@ class HVAC
     else
       crankcase_kw, crankcase_temp = get_crankcase_assumptions(heat_pump.fraction_cool_load_served)
     end
-    hp_min_temp, supp_max_temp = get_heatpump_temp_assumptions(heat_pump)
+    hp_min_temp, supp_max_temp = get_heat_pump_temp_assumptions(heat_pump)
 
     # Cooling Coil
 
@@ -544,7 +544,7 @@ class HVAC
     sequential_cool_load_frac = calc_sequential_load_fraction(heat_pump.fraction_cool_load_served, remaining_cool_load_frac)
     num_speeds = 10
     mshp_indices = [1, 3, 5, 9]
-    hp_min_temp, supp_max_temp = get_heatpump_temp_assumptions(heat_pump)
+    hp_min_temp, supp_max_temp = get_heat_pump_temp_assumptions(heat_pump)
     fan_power_installed = 0.07 # W/cfm
     pan_heater_power = 0.0 # W, disabled
 
@@ -996,6 +996,63 @@ class HVAC
     air_loop_unitary.additionalProperties.setFeature(Constants.SizingInfoGSHPUTubeSpacingType, u_tube_spacing_type)
     air_loop_unitary.additionalProperties.setFeature(Constants.SizingInfoHVACCoolType, Constants.ObjectNameGroundSourceHeatPump)
     air_loop_unitary.additionalProperties.setFeature(Constants.SizingInfoHVACHeatType, Constants.ObjectNameGroundSourceHeatPump)
+  end
+
+  def self.apply_water_loop_to_air_heat_pump(model, runner, heat_pump,
+                                             remaining_heat_load_frac, remaining_cool_load_frac,
+                                             control_zone, hvac_map)
+    if heat_pump.fraction_cool_load_served > 0
+      # WLHPs connected to chillers or cooling towers should have already been converted to
+      # central air conditioners
+      fail 'WLHP model should only be called for central boilers.'
+    end
+
+    hvac_map[heat_pump.id] = []
+    obj_name = Constants.ObjectNameWaterLoopHeatPump
+    sequential_heat_load_frac = calc_sequential_load_fraction(heat_pump.fraction_heat_load_served, remaining_heat_load_frac)
+    sequential_cool_load_frac = 0.0
+    hp_min_temp, supp_max_temp = get_heat_pump_temp_assumptions(heat_pump)
+
+    # Cooling Coil
+
+    clg_coil = nil
+
+    # Heating Coil (model w/ constant efficiency)
+    constant_biquadratic = create_curve_biquadratic_constant(model)
+    constant_quadratic = create_curve_quadratic_constant(model)
+    htg_coil = OpenStudio::Model::CoilHeatingDXSingleSpeed.new(model, model.alwaysOnDiscreteSchedule, constant_biquadratic, constant_quadratic, constant_biquadratic, constant_quadratic, constant_quadratic)
+    htg_coil.setName(obj_name + ' htg coil')
+    htg_coil.setRatedCOP(heat_pump.heating_efficiency_cop)
+    htg_coil.setDefrostTimePeriodFraction(0)
+    htg_coil.setMinimumOutdoorDryBulbTemperatureforCompressorOperation(UnitConversions.convert(hp_min_temp, 'F', 'C'))
+    hvac_map[heat_pump.id] << htg_coil
+
+    # Supplemental Heating Coil
+
+    htg_supp_coil = create_supp_heating_coil(model, obj_name, heat_pump)
+    hvac_map[heat_pump.id] << htg_supp_coil
+
+    # Fan
+
+    fan_power_installed = 0.5 # FIXME
+    fan = create_supply_fan(model, obj_name, 1, fan_power_installed)
+    hvac_map[heat_pump.id] += disaggregate_fan_or_pump(model, fan, htg_coil, clg_coil, htg_supp_coil)
+
+    # Unitary System
+
+    air_loop_unitary = create_air_loop_unitary_system(model, obj_name, fan, htg_coil, clg_coil, htg_supp_coil, supp_max_temp)
+    hvac_map[heat_pump.id] << air_loop_unitary
+
+    # Air Loop
+
+    air_loop = create_air_loop(model, obj_name, air_loop_unitary, control_zone, sequential_heat_load_frac, sequential_cool_load_frac)
+    hvac_map[heat_pump.id] << air_loop
+
+    # Store info for HVAC Sizing measure
+    air_loop_unitary.additionalProperties.setFeature(Constants.SizingInfoHVACFracHeatLoadServed, heat_pump.fraction_heat_load_served)
+    air_loop_unitary.additionalProperties.setFeature(Constants.SizingInfoHVACFracCoolLoadServed, heat_pump.fraction_cool_load_served)
+    air_loop_unitary.additionalProperties.setFeature(Constants.SizingInfoHVACCoolType, Constants.ObjectNameWaterLoopHeatPump)
+    air_loop_unitary.additionalProperties.setFeature(Constants.SizingInfoHVACHeatType, Constants.ObjectNameWaterLoopHeatPump)
   end
 
   def self.apply_boiler(model, runner, heating_system,
@@ -1932,11 +1989,11 @@ class HVAC
     ief_db = UnitConversions.convert(65.0, 'F', 'C') # degree C
     rh = 60.0 # for both EF and IEF test conditions, %
 
-    # Independent ariables applied to curve equations
+    # Independent variables applied to curve equations
     var_array_ief = [1, ief_db, ief_db * ief_db, rh, rh * rh, ief_db * rh]
 
     # Curved values under EF test conditions
-    curve_value_ef = 1 # Curves are nomalized to 1.0 under EF test conditions, 80F, 60%
+    curve_value_ef = 1 # Curves are normalized to 1.0 under EF test conditions, 80F, 60%
     # Curve values under IEF test conditions
     ef_curve_value_ief = var_array_ief.zip(ef_coeff).map { |var, coeff| var * coeff }.sum(0.0)
     water_removal_curve_value_ief = var_array_ief.zip(w_coeff).map { |var, coeff| var * coeff }.sum(0.0)
@@ -2889,9 +2946,22 @@ class HVAC
     return const_biquadratic
   end
 
+  def self.create_curve_quadratic_constant(model)
+    curve = OpenStudio::Model::CurveQuadratic.new(model)
+    curve.setName('ConstantQuadratic')
+    curve.setCoefficient1Constant(1)
+    curve.setCoefficient2x(0)
+    curve.setCoefficient3xPOW2(0)
+    curve.setMinimumValueofx(-100)
+    curve.setMaximumValueofx(100)
+    curve.setMinimumCurveOutput(-100)
+    curve.setMaximumCurveOutput(100)
+    return curve
+  end
+
   def self.create_curve_cubic_constant(model)
-    constant_cubic = OpenStudio::Model::CurveCubic.new('ConstantCubic')
-    constant_cubic.setName(name)
+    constant_cubic = OpenStudio::Model::CurveCubic.new(model)
+    constant_cubic.setName('ConstantCubic')
     constant_cubic.setCoefficient1Constant(1)
     constant_cubic.setCoefficient2x(0)
     constant_cubic.setCoefficient3xPOW2(0)
@@ -3942,7 +4012,7 @@ class HVAC
     return crankcase_kw, crankcase_temp
   end
 
-  def self.get_heatpump_temp_assumptions(heat_pump)
+  def self.get_heat_pump_temp_assumptions(heat_pump)
     # Calculates:
     # 1. Minimum temperature for HP compressor operation
     # 2. Maximum temperature for HP supplemental heating operation
@@ -3998,30 +4068,36 @@ class HVAC
     return primary_duct_location, secondary_duct_location
   end
 
-  def self.convert_shared_hvac_systems(hpxml)
-    # Convert shared systems to individual systems per ANSI/RESNET/ICC 301-2019
+  def self.apply_shared_hvac_systems(hpxml)
+    # Handle shared systems according to ANSI/RESNET/ICC 301-2019
 
-    # Convert shared cooling systems
+    # Remove any water loop heat pumps that are not connected to boilers; they
+    # will be converted to other systems.
+    wlhps_without_boiler = []
+    hpxml.heat_pumps.each do |heat_pump|
+      next unless heat_pump.heat_pump_type == HPXML::HVACTypeHeatPumpWaterLoopToAir
+      next unless hpxml.heating_systems.select { |h| h.distribution_system_idref == heat_pump.distribution_system_idref }.size == 0
+
+      wlhps_without_boiler << heat_pump
+    end
+
+    # Apply logic for shared cooling systems
     hpxml.cooling_systems.each do |cooling_system|
       next unless cooling_system.is_shared_system
 
-      HVAC.convert_shared_cooling_system(hpxml, cooling_system)
+      HVAC.apply_shared_cooling_system(hpxml, cooling_system)
     end
 
-    # Convert shared heating systems
+    # Apply logic for shared heating systems
     hpxml.heating_systems.each do |heating_system|
       next unless heating_system.is_shared_system
 
-      HVAC.convert_shared_heating_system(hpxml, heating_system)
+      HVAC.apply_shared_heating_system(hpxml, heating_system)
     end
 
-    # FIXME: Convert WLHP w/ shared boiler to HP w/ boiler
-
-    # Remove any water loop heat pumps; they have been converted to other systems.
-    hpxml.heat_pumps.each do |heat_pump|
-      next unless heat_pump.heat_pump_type == HPXML::HVACTypeHeatPumpWaterLoopToAir
-
-      heat_pump.delete
+    # Delete WLHPs
+    wlhps_without_boiler.each do |wlhp|
+      wlhp.delete
     end
 
     # Remove any orphaned HVAC distributions
@@ -4037,7 +4113,7 @@ class HVAC
     end
   end
 
-  def self.convert_shared_cooling_system(hpxml, cooling_system)
+  def self.apply_shared_cooling_system(hpxml, cooling_system)
     # Convert shared chiller/cooling tower to central AC equivalent
 
     distribution_system = cooling_system.distribution_system
@@ -4107,7 +4183,7 @@ class HVAC
     end
   end
 
-  def self.convert_shared_heating_system(hpxml, heating_system)
+  def self.apply_shared_heating_system(hpxml, heating_system)
     distribution_system = heating_system.distribution_system
     distribution_type = distribution_system.distribution_system_type
     hydronic_and_air_type = distribution_system.hydronic_and_air_type
@@ -4115,15 +4191,31 @@ class HVAC
     if heating_system.heating_system_type == HPXML::HVACTypeBoiler && hydronic_and_air_type.to_s == HPXML::HydronicAndAirTypeFanCoil
       # Convert to furnace in order to include possible duct losses
       # TODO: Can we approximate the boiler efficiency any better?
-      eae = get_default_eae(heating_system, nil)
+      heating_system.electric_auxiliary_energy = get_default_eae(heating_system, nil)
       heating_system.heating_system_type = HPXML::HVACTypeFurnace
-      heating_system.electric_auxiliary_energy = eae # Preserve boiler EAE for furnace
 
       # Assign new distribution system to furnace
       hpxml.hvac_distributions << distribution_system.dup
       hpxml.hvac_distributions[-1].id = "#{heating_system.id}AirDistributionSystem"
       hpxml.hvac_distributions[-1].distribution_system_type = HPXML::HVACDistributionTypeAir
       heating_system.distribution_system_idref = hpxml.hvac_distributions[-1].id
+    elsif heating_system.heating_system_type == HPXML::HVACTypeBoiler && hydronic_and_air_type.to_s == HPXML::HydronicAndAirTypeWaterLoopHeatPump
+      # Per ANSI/RESNET/ICC 301-2019 Section 4.4.7.2, model as:
+      # A) boiler, fraction heat load served = 1-1/COP
+      # B) heat pump with constant efficiency and duct losses, fraction heat load served = 1/COP
+      wlhp = hpxml.heat_pumps.select { |hp| hp.distribution_system_idref == distribution_system.id }[0]
+      fraction_heat_load_served = heating_system.fraction_heat_load_served
+
+      # Boiler
+      heating_system.electric_auxiliary_energy = get_default_eae(heating_system, nil)
+      heating_system.fraction_heat_load_served = fraction_heat_load_served * (1.0 - 1.0 / wlhp.heating_efficiency_cop)
+      heating_system.distribution_system_idref = nil
+
+      # Heat pump
+      wlhp.fraction_heat_load_served = fraction_heat_load_served * (1.0 / wlhp.heating_efficiency_cop)
+      wlhp.fraction_cool_load_served = 0.0
+      wlhp.heating_capacity = nil
+      wlhp.heating_capacity_17F = nil
     end
 
     heating_system.heating_capacity = nil # Autosize the equipment

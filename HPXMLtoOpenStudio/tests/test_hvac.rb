@@ -500,8 +500,40 @@ class HPXMLtoOpenStudioHVACTest < MiniTest::Test
   def test_shared_boiler_water_loop_heat_pump
     args_hash = {}
     args_hash['hpxml_path'] = File.absolute_path(File.join(sample_files_dir, 'base-hvac-shared-boiler-only-water-loop-heat-pump.xml'))
-    # FIXME: TODO
-    # model, hpxml = _test_measure(args_hash)
+    model, hpxml = _test_measure(args_hash)
+
+    # Get HPXML values
+    heating_system = hpxml.heating_systems[0]
+    afue = heating_system.heating_efficiency_afue
+    capacity = UnitConversions.convert(heating_system.heating_capacity.to_f, 'Btu/hr', 'W')
+    fuel = heating_system.heating_system_fuel
+
+    # Check boiler
+    assert_equal(1, model.getBoilerHotWaters.size)
+    boiler = model.getBoilerHotWaters[0]
+    assert_in_epsilon(afue, boiler.nominalThermalEfficiency, 0.01)
+    refute_in_epsilon(capacity, boiler.nominalCapacity.get, 0.01) # Uses autosized capacity
+    assert_equal(EPlus.input_fuel_map(fuel), boiler.fuelType)
+
+    # Get HPXML values
+    heat_pump = hpxml.heat_pumps[0]
+    htg_capacity = UnitConversions.convert(heat_pump.heating_capacity.to_f, 'Btu/hr', 'W')
+    cop = heat_pump.heating_efficiency_cop
+
+    # Check cooling coil
+    assert_equal(0, model.getCoilCoolingDXSingleSpeeds.size)
+
+    # Check heating coil
+    assert_equal(1, model.getCoilHeatingDXSingleSpeeds.size)
+    htg_coil = model.getCoilHeatingDXSingleSpeeds[0]
+    assert_in_epsilon(cop, htg_coil.ratedCOP, 0.01)
+    refute_in_epsilon(htg_capacity, htg_coil.ratedTotalHeatingCapacity.get, 0.01) # Uses autosized capacity
+
+    # Check supp heating coil
+    assert_equal(1, model.getCoilHeatingElectrics.size)
+    supp_htg_coil = model.getCoilHeatingElectrics[0]
+    assert_in_epsilon(1.0, supp_htg_coil.efficiency, 0.01)
+    assert_in_delta(0.0, supp_htg_coil.nominalCapacity.get, 0.01)
   end
 
   def test_shared_ground_loop_ground_to_air_heat_pump

@@ -397,6 +397,10 @@ class Constants
     return "#{water_heater_name} EC adjustment"
   end
 
+  def self.ObjectNameWaterLoopHeatPump
+    return 'wlhp'
+  end
+
   def self.ObjectNameWholeHouseFan
     return 'whole house fan'
   end
