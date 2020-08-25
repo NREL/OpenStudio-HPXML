@@ -647,11 +647,11 @@ class HPXMLTest < MiniTest::Test
     # Enclosure Walls/RimJoists/FoundationWalls
     (hpxml.walls + hpxml.rim_joists + hpxml.foundation_walls).each do |wall|
       wall_id = wall.id.upcase
-      
+
       # Common walls
       next unless wall.exterior_adjacent_to == wall.interior_adjacent_to
 
-      # FIXME: Common walls will be converted into "adiabatic" walls 
+      # FIXME: Common walls will be converted into "adiabatic" walls
       # Adiabatic surfaces have their "BaseSurfaceIndex" as their "ExtBoundCond" in "Surfaces" table in SQL simulation results
       query_base_surf_idx = "SELECT BaseSurfaceIndex FROM Surfaces WHERE SurfaceName='#{wall_id}'"
       query_ext_bound = "SELECT ExtBoundCond FROM Surfaces WHERE SurfaceName='#{wall_id}'"
