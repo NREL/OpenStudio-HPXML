@@ -4093,10 +4093,9 @@ def set_hpxml_clothes_dryer(hpxml_file, hpxml)
   elsif ['base-dhw-shared-laundry-room.xml'].include? hpxml_file
     hpxml.clothes_dryers[0].id = 'SharedClothesDryer'
     hpxml.clothes_dryers[0].location = HPXML::LocationOtherHeatedSpace
+    hpxml.clothes_dryers[0].is_shared_appliance = true
   elsif ['base-misc-usage-multiplier.xml'].include? hpxml_file
     hpxml.clothes_dryers[0].usage_multiplier = 0.9
-  elsif ['base-dhw-shared-laundry-room.xml'].include? hpxml_file
-    hpxml.clothes_dryers[0].is_shared_appliance = true
   end
 end
 
