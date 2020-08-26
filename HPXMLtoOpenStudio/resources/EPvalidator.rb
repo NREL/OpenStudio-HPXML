@@ -558,47 +558,37 @@ class EnergyPlusValidator
         'SystemIdentifier' => one, # Required by HPXML schema
         'FanType[text()="energy recovery ventilator" or text()="heat recovery ventilator" or text()="exhaust only" or text()="supply only" or text()="balanced" or text()="central fan integrated supply"]' => one, # See [MechVentType=HRV] or [MechVentType=ERV] or [MechVentType=CFIS]
         'HoursInOperation' => one,
+        'TestedFlowRate | RatedFlowRate' => one_or_more,
+        'FanPower' => one,
         'IsSharedSystem' => one, # See [SharedSystem]
       },
 
       ## [SharedSystem=true]
       '/HPXML/Building/BuildingDetails/Systems/MechanicalVentilation/VentilationFans/VentilationFan[UsedForWholeBuildingVentilation="true" and IsSharedSystem="true"]' => {
-        'TestedFlowRate[@scope="single unit"] | RatedFlowRate[@scope="single unit"]' => one_or_more, # Use scope attribute to describe at which level data is provided
-        'TestedFlowRate[@scope="multiple units"] | RatedFlowRate[@scope="multiple units"]' => one_or_more, # Use scope attribute to describe at which level data is provided
-        'FanPower[@scope="multiple units"] | FanPower[@scope="single unit"]' => one_or_more, # Use scope attribute to describe at which level data is provided
-        'FanPower[not(@scope)]' => zero, # Use scope attribute to describe at which level data is provided
-        'FractionOutdoorAir | FractionRecirculation' => one_or_more,
+        'FractionRecirculation' => one,
         '../../../../BuildingSummary/BuildingConstruction[ResidentialFacilityType[text()="single-family attached" or text()="apartment unit"]]' => one,
-        'extension/PreconditioningHeating' => zero_or_one,
-        'extension/PreconditioningCooling' => zero_or_one,
+        'extension/InUnitFlowRate' => one,
+        'extension/PreHeating' => zero_or_one,
+        'extension/PreCooling' => zero_or_one,
       },
 
-      ## [SharedSystem=true and extension/PreconditioningHeating]
-      '/HPXML/Building/BuildingDetails/Systems/MechanicalVentilation/VentilationFans/VentilationFan[UsedForWholeBuildingVentilation="true" and IsSharedSystem="true"]/extension/PreconditioningHeating' => {
+      ## [SharedSystem=true and extension/PreHeating]
+      '/HPXML/Building/BuildingDetails/Systems/MechanicalVentilation/VentilationFans/VentilationFan[UsedForWholeBuildingVentilation="true" and IsSharedSystem="true"]/extension/PreHeating' => {
         'Fuel[text()="natural gas" or text()="fuel oil" or text()="fuel oil 1" or text()="fuel oil 2" or text()="fuel oil 4" or text()="fuel oil 5/6" or text()="diesel" or text()="propane" or text()="kerosene" or text()="electricity" or text()="wood" or text()="wood pellets"]' => one,
         'AnnualHeatingEfficiency[Units="COP"]/Value' => one,
-        'HeatingCapacity[@scope="multiple units"] | HeatingCapacity[@scope="single unit"]' => one,
-        'HeatingCapacity[not(@scope)]' => zero,
+        'HeatingCapacity' => one,
       },
 
-      ## [SharedSystem=true and extension/PreconditioningHeating]
-      '/HPXML/Building/BuildingDetails/Systems/MechanicalVentilation/VentilationFans/VentilationFan[UsedForWholeBuildingVentilation="true" and IsSharedSystem="true"]/extension/PreconditioningCooling' => {
+      ## [SharedSystem=true and extension/PreCooling]
+      '/HPXML/Building/BuildingDetails/Systems/MechanicalVentilation/VentilationFans/VentilationFan[UsedForWholeBuildingVentilation="true" and IsSharedSystem="true"]/extension/PreCooling' => {
         'Fuel[text()="electricity"]' => one,
         'AnnualCoolingEfficiency[Units="COP"]/Value' => one,
-        'CoolingCapacity[@scope="multiple units"] | CoolingCapacity[@scope="single unit"]' => one,
-        'CoolingCapacity[not(@scope)]' => zero,
-      },
-
-      ## [SharedSystem=false]
-      '/HPXML/Building/BuildingDetails/Systems/MechanicalVentilation/VentilationFans/VentilationFan[UsedForWholeBuildingVentilation="true" and IsSharedSystem="false"]' => {
-        'TestedFlowRate | RatedFlowRate' => one_or_more,
-        'FanPower' => one,
+        'CoolingCapacity' => one,
       },
 
       ## [MechVentType=HRV]
       '/HPXML/Building/BuildingDetails/Systems/MechanicalVentilation/VentilationFans/VentilationFan[UsedForWholeBuildingVentilation="true" and FanType="heat recovery ventilator"]' => {
-        'FanPower' => one,
-        'TestedFlowRate | RatedFlowRate' => one_or_more,
+        'SensibleRecoveryEfficiency | AdjustedSensibleRecoveryEfficiency' => one,
       },
 
       ## [MechVentType=ERV]

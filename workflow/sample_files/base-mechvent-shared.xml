@@ -444,163 +444,165 @@
             <VentilationFan>
               <SystemIdentifier id='SharedSupplyPreconditioned'/>
               <FanType>supply only</FanType>
-              <RatedFlowRate scope='multiple units'>1000.0</RatedFlowRate>
-              <TestedFlowRate scope='single unit'>100.0</TestedFlowRate>
+              <RatedFlowRate>1000.0</RatedFlowRate>
               <HoursInOperation>24.0</HoursInOperation>
               <UsedForWholeBuildingVentilation>true</UsedForWholeBuildingVentilation>
               <IsSharedSystem>true</IsSharedSystem>
-              <FractionOutdoorAir>1.0</FractionOutdoorAir>
-              <FanPower scope='multiple units'>300.0</FanPower>
+              <FractionRecirculation>0.0</FractionRecirculation>
+              <FanPower>300.0</FanPower>
               <extension>
-                <PreconditioningHeating>
+                <InUnitFlowRate>100</InUnitFlowRate>
+                <PreHeating>
                   <Fuel>natural gas</Fuel>
                   <AnnualHeatingEfficiency>
                     <Value>0.92</Value>
                     <Units>COP</Units>
                   </AnnualHeatingEfficiency>
-                  <HeatingCapacity scope='multiple units'>30000</HeatingCapacity>
-                </PreconditioningHeating>
-                <PreconditioningCooling>
+                  <HeatingCapacity>30000</HeatingCapacity>
+                </PreHeating>
+                <PreCooling>
                   <Fuel>electricity</Fuel>
                   <AnnualCoolingEfficiency>
                     <Value>4.0</Value>
                     <Units>COP</Units>
                   </AnnualCoolingEfficiency>
-                  <CoolingCapacity scope='multiple units'>20000</CoolingCapacity>
-                </PreconditioningCooling>
+                  <CoolingCapacity>20000</CoolingCapacity>
+                </PreCooling>
               </extension>
             </VentilationFan>
             <VentilationFan>
               <SystemIdentifier id='SharedERVPreconditioned'/>
               <FanType>energy recovery ventilator</FanType>
-              <RatedFlowRate scope='multiple units'>500.0</RatedFlowRate>
-              <TestedFlowRate scope='single unit'>50.0</TestedFlowRate>
+              <RatedFlowRate>500.0</RatedFlowRate>
               <HoursInOperation>24.0</HoursInOperation>
               <UsedForWholeBuildingVentilation>true</UsedForWholeBuildingVentilation>
               <IsSharedSystem>true</IsSharedSystem>
-              <FractionOutdoorAir>0.6</FractionOutdoorAir>
+              <FractionRecirculation>0.4</FractionRecirculation>
               <TotalRecoveryEfficiency>0.48</TotalRecoveryEfficiency>
               <SensibleRecoveryEfficiency>0.72</SensibleRecoveryEfficiency>
-              <FanPower scope='multiple units'>150.0</FanPower>
+              <FanPower>150.0</FanPower>
               <extension>
-                <PreconditioningHeating>
+                <InUnitFlowRate>50</InUnitFlowRate>
+                <PreHeating>
                   <Fuel>natural gas</Fuel>
                   <AnnualHeatingEfficiency>
                     <Value>0.87</Value>
                     <Units>COP</Units>
                   </AnnualHeatingEfficiency>
-                  <HeatingCapacity scope='multiple units'>64000</HeatingCapacity>
-                </PreconditioningHeating>
-                <PreconditioningCooling>
+                  <HeatingCapacity>64000</HeatingCapacity>
+                </PreHeating>
+                <PreCooling>
                   <Fuel>electricity</Fuel>
                   <AnnualCoolingEfficiency>
                     <Value>3.5</Value>
                     <Units>COP</Units>
                   </AnnualCoolingEfficiency>
-                  <CoolingCapacity scope='multiple units'>48000</CoolingCapacity>
-                </PreconditioningCooling>
+                  <CoolingCapacity>48000</CoolingCapacity>
+                </PreCooling>
               </extension>
             </VentilationFan>
             <VentilationFan>
               <SystemIdentifier id='SharedHRVPreconditioned'/>
               <FanType>heat recovery ventilator</FanType>
-              <RatedFlowRate scope='multiple units'>500.0</RatedFlowRate>
-              <TestedFlowRate scope='single unit'>50.0</TestedFlowRate>
+              <RatedFlowRate>500.0</RatedFlowRate>
               <HoursInOperation>24.0</HoursInOperation>
               <UsedForWholeBuildingVentilation>true</UsedForWholeBuildingVentilation>
               <IsSharedSystem>true</IsSharedSystem>
-              <FractionOutdoorAir>0.7</FractionOutdoorAir>
+              <FractionRecirculation>0.3</FractionRecirculation>
               <SensibleRecoveryEfficiency>0.72</SensibleRecoveryEfficiency>
-              <FanPower scope='multiple units'>150.0</FanPower>
+              <FanPower>150.0</FanPower>
               <extension>
-                <PreconditioningHeating>
+                <InUnitFlowRate>50</InUnitFlowRate>
+                <PreHeating>
                   <Fuel>electricity</Fuel>
                   <AnnualHeatingEfficiency>
                     <Value>4.0</Value>
                     <Units>COP</Units>
                   </AnnualHeatingEfficiency>
-                  <HeatingCapacity scope='multiple units'>64000</HeatingCapacity>
-                </PreconditioningHeating>
-                <PreconditioningCooling>
+                  <HeatingCapacity>64000</HeatingCapacity>
+                </PreHeating>
+                <PreCooling>
                   <Fuel>electricity</Fuel>
                   <AnnualCoolingEfficiency>
                     <Value>4.5</Value>
                     <Units>COP</Units>
                   </AnnualCoolingEfficiency>
-                  <CoolingCapacity scope='multiple units'>48000</CoolingCapacity>
-                </PreconditioningCooling>
+                  <CoolingCapacity>48000</CoolingCapacity>
+                </PreCooling>
               </extension>
             </VentilationFan>
             <VentilationFan>
               <SystemIdentifier id='SharedBalancedPreconditioned'/>
               <FanType>balanced</FanType>
-              <RatedFlowRate scope='multiple units'>300.0</RatedFlowRate>
-              <TestedFlowRate scope='single unit'>30.0</TestedFlowRate>
+              <RatedFlowRate>300.0</RatedFlowRate>
               <HoursInOperation>24.0</HoursInOperation>
               <UsedForWholeBuildingVentilation>true</UsedForWholeBuildingVentilation>
               <IsSharedSystem>true</IsSharedSystem>
-              <FractionOutdoorAir>0.7</FractionOutdoorAir>
-              <FanPower scope='multiple units'>150.0</FanPower>
+              <FractionRecirculation>0.3</FractionRecirculation>
+              <FanPower>150.0</FanPower>
               <extension>
-                <PreconditioningHeating>
+                <InUnitFlowRate>30</InUnitFlowRate>
+                <PreHeating>
                   <Fuel>electricity</Fuel>
                   <AnnualHeatingEfficiency>
                     <Value>3.5</Value>
                     <Units>COP</Units>
                   </AnnualHeatingEfficiency>
-                  <HeatingCapacity scope='multiple units'>64000</HeatingCapacity>
-                </PreconditioningHeating>
-                <PreconditioningCooling>
+                  <HeatingCapacity>64000</HeatingCapacity>
+                </PreHeating>
+                <PreCooling>
                   <Fuel>electricity</Fuel>
                   <AnnualCoolingEfficiency>
                     <Value>4.0</Value>
                     <Units>COP</Units>
                   </AnnualCoolingEfficiency>
-                  <CoolingCapacity scope='multiple units'>48000</CoolingCapacity>
-                </PreconditioningCooling>
+                  <CoolingCapacity>48000</CoolingCapacity>
+                </PreCooling>
               </extension>
             </VentilationFan>
             <VentilationFan>
               <SystemIdentifier id='SharedCFISPreconditioned'/>
               <FanType>central fan integrated supply</FanType>
-              <RatedFlowRate scope='multiple units'>700.0</RatedFlowRate>
-              <TestedFlowRate scope='single unit'>70.0</TestedFlowRate>
+              <RatedFlowRate>700.0</RatedFlowRate>
               <HoursInOperation>8.0</HoursInOperation>
               <UsedForWholeBuildingVentilation>true</UsedForWholeBuildingVentilation>
               <IsSharedSystem>true</IsSharedSystem>
-              <FractionOutdoorAir>0.7</FractionOutdoorAir>
-              <FanPower scope='multiple units'>300.0</FanPower>
+              <FractionRecirculation>0.3</FractionRecirculation>
+              <FanPower>300.0</FanPower>
               <AttachedToHVACDistributionSystem idref='HVACDistribution'/>
               <extension>
-                <PreconditioningHeating>
+                <InUnitFlowRate>70</InUnitFlowRate>
+                <PreHeating>
                   <Fuel>electricity</Fuel>
                   <AnnualHeatingEfficiency>
                     <Value>3.5</Value>
                     <Units>COP</Units>
                   </AnnualHeatingEfficiency>
-                  <HeatingCapacity scope='multiple units'>64000</HeatingCapacity>
-                </PreconditioningHeating>
-                <PreconditioningCooling>
+                  <HeatingCapacity>64000</HeatingCapacity>
+                </PreHeating>
+                <PreCooling>
                   <Fuel>electricity</Fuel>
                   <AnnualCoolingEfficiency>
                     <Value>4.0</Value>
                     <Units>COP</Units>
                   </AnnualCoolingEfficiency>
-                  <CoolingCapacity scope='multiple units'>48000</CoolingCapacity>
-                </PreconditioningCooling>
+                  <CoolingCapacity>48000</CoolingCapacity>
+                </PreCooling>
               </extension>
             </VentilationFan>
             <VentilationFan>
               <SystemIdentifier id='SharedCFIS'/>
               <FanType>central fan integrated supply</FanType>
-              <RatedFlowRate scope='multiple units'>700.0</RatedFlowRate>
-              <TestedFlowRate scope='single unit'>70.0</TestedFlowRate>
+              <RatedFlowRate>700.0</RatedFlowRate>
               <HoursInOperation>8.0</HoursInOperation>
               <UsedForWholeBuildingVentilation>true</UsedForWholeBuildingVentilation>
               <IsSharedSystem>true</IsSharedSystem>
-              <FractionOutdoorAir>0.7</FractionOutdoorAir>
-              <FanPower scope='multiple units'>300.0</FanPower>
+              <FractionRecirculation>0.3</FractionRecirculation>
+              <FanPower>300.0</FanPower>
               <AttachedToHVACDistributionSystem idref='HVACDistribution2'/>
+              <extension>
+                <InUnitFlowRate>70</InUnitFlowRate>
+              </extension>
             </VentilationFan>
           </VentilationFans>
         </MechanicalVentilation>
