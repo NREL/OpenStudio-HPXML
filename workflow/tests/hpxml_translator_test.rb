@@ -510,7 +510,7 @@ class HPXMLTest < MiniTest::Test
         next if err_line.include? 'GetDXCoils: Coil:Cooling:DX:SingleSpeed="ROOM AC CLG COIL" curve values' # TODO: Double-check curves
       end
       next if err_line.include?('Foundation:Kiva') && err_line.include?('wall surfaces with more than four vertices') # TODO: Check alternative approach
-      if hpxml_path.include?('base-simcontrol-timestep-10-mins.xml') || hpxml_path.include?('ASHRAE_Standard_140')
+      if hpxml_path.include?('base-simcontrol-timestep-10-mins.xml') || hpxml_path.include?('ASHRAE_Standard_140') || hpxml_path.include?('base-hvac-onoff-thermostat-deadband.xml')
         next if err_line.include? 'Temperature out of range [-100. to 200.] (PsyPsatFnTemp)'
       end
 
