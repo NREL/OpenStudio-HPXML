@@ -805,7 +805,7 @@ class HVAC
     gshp_cool_power_fT_coeff = convert_curve_gshp(cool_power_ft_spec, false)
     gshp_cool_SH_fT_coeff = convert_curve_gshp(cool_SH_ft_spec, false)
 
-    # FUTURE: Reconcile pump_adjust_kw with ANSI/RESNET/ICC 301-2019 Section 4.4.5
+    # FUTURE: Reconcile these adjustments with ANSI/RESNET/ICC 301-2019 Section 4.4.5
     fan_adjust_kw = UnitConversions.convert(400.0, 'Btu/hr', 'ton') * UnitConversions.convert(1.0, 'cfm', 'm^3/s') * 1000.0 * 0.35 * 249.0 / 300.0 # Adjustment per ISO 13256-1 Internal pressure drop across heat pump assumed to be 0.5 in. w.g.
     pump_adjust_kw = UnitConversions.convert(3.0, 'Btu/hr', 'ton') * UnitConversions.convert(1.0, 'gal/min', 'm^3/s') * 1000.0 * 6.0 * 2990.0 / 3000.0 # Adjustment per ISO 13256-1 Internal Pressure drop across heat pump coil assumed to be 11ft w.g.
     cooling_eir = UnitConversions.convert((1.0 - heat_pump.cooling_efficiency_eer * (fan_adjust_kw + pump_adjust_kw)) / (heat_pump.cooling_efficiency_eer * (1.0 + UnitConversions.convert(fan_adjust_kw, 'Wh', 'Btu'))), 'Wh', 'Btu')
@@ -1955,7 +1955,9 @@ class HVAC
     if htg_type == HPXML::HVACTypeBoiler
       if [HPXML::FuelTypeNaturalGas,
           HPXML::FuelTypePropane,
-          HPXML::FuelTypeElectricity].include? fuel
+          HPXML::FuelTypeElectricity,
+          HPXML::FuelTypeWoodCord,
+          HPXML::FuelTypeWoodPellets].include? fuel
         return 170.0 * load_frac # kWh/yr
       elsif [HPXML::FuelTypeOil,
              HPXML::FuelTypeOil1,
@@ -1964,12 +1966,18 @@ class HVAC
              HPXML::FuelTypeOil5or6,
              HPXML::FuelTypeDiesel,
              HPXML::FuelTypeKerosene,
-             HPXML::FuelTypeCoal].include? fuel
+             HPXML::FuelTypeCoal,
+             HPXML::FuelTypeCoalAnthracite,
+             HPXML::FuelTypeCoalBituminous,
+             HPXML::FuelTypeCoke].include? fuel
         return 330.0 * load_frac # kWh/yr
       end
     elsif htg_type == HPXML::HVACTypeFurnace
       if [HPXML::FuelTypeNaturalGas,
-          HPXML::FuelTypePropane].include? fuel
+          HPXML::FuelTypePropane,
+          HPXML::FuelTypeElectricity,
+          HPXML::FuelTypeWoodCord,
+          HPXML::FuelTypeWoodPellets].include? fuel
         return (149.0 + 10.3 * furnace_capacity_kbtuh) * load_frac # kWh/yr
       elsif [HPXML::FuelTypeOil,
              HPXML::FuelTypeOil1,
@@ -1978,7 +1986,10 @@ class HVAC
              HPXML::FuelTypeOil5or6,
              HPXML::FuelTypeDiesel,
              HPXML::FuelTypeKerosene,
-             HPXML::FuelTypeCoal].include? fuel
+             HPXML::FuelTypeCoal,
+             HPXML::FuelTypeCoalAnthracite,
+             HPXML::FuelTypeCoalBituminous,
+             HPXML::FuelTypeCoke].include? fuel
         return (439.0 + 5.5 * furnace_capacity_kbtuh) * load_frac # kWh/yr
       end
     end
