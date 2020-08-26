@@ -4248,7 +4248,10 @@ class HVAC
       # Boiler
       heating_system.electric_auxiliary_energy = get_default_eae(heating_system, nil)
       heating_system.fraction_heat_load_served = fraction_heat_load_served * (1.0 - 1.0 / heating_system.wlhp_heating_efficiency_cop)
-      heating_system.distribution_system_idref = nil
+      heating_system.distribution_system_idref = "#{heating_system.id}_Baseboard"
+      hpxml.hvac_distributions.add(id: heating_system.distribution_system_idref,
+                                   distribution_system_type: HPXML::HVACDistributionTypeHydronic,
+                                   hydronic_type: HPXML::HydronicTypeBaseboard)
     end
 
     heating_system.heating_capacity = nil # Autosize the equipment

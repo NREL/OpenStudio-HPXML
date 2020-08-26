@@ -489,12 +489,12 @@ class HPXMLtoOpenStudioHVACTest < MiniTest::Test
     capacity = UnitConversions.convert(heating_system.heating_capacity.to_f, 'Btu/hr', 'W')
     fuel = heating_system.heating_system_fuel
 
-    # Check heating coil
-    assert_equal(1, model.getCoilHeatingGass.size) # Modeled as furnace to accommodate ducts
-    htg_coil = model.getCoilHeatingGass[0]
-    assert_in_epsilon(afue, htg_coil.gasBurnerEfficiency, 0.01)
-    refute_in_epsilon(capacity, htg_coil.nominalCapacity.get, 0.01) # Uses autosized capacity
-    assert_equal(EPlus.input_fuel_map(fuel), htg_coil.fuelType)
+    # Check boiler
+    assert_equal(1, model.getBoilerHotWaters.size)
+    boiler = model.getBoilerHotWaters[0]
+    assert_in_epsilon(afue, boiler.nominalThermalEfficiency, 0.01)
+    refute_in_epsilon(capacity, boiler.nominalCapacity.get, 0.01) # Uses autosized capacity
+    assert_equal(EPlus.input_fuel_map(fuel), boiler.fuelType)
   end
 
   def test_shared_boiler_water_loop_heat_pump
