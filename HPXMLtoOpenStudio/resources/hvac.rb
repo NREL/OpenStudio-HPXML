@@ -4115,29 +4115,19 @@ class HVAC
     return primary_duct_location, secondary_duct_location
   end
 
-  def self.apply_shared_hvac_systems(hpxml)
-    # Handle shared systems according to ANSI/RESNET/ICC 301-2019
-
-    # Apply logic for shared cooling systems
-    hpxml.cooling_systems.each do |cooling_system|
-      next unless cooling_system.is_shared_system
-
-      HVAC.apply_shared_cooling_system(hpxml, cooling_system)
-    end
-
-    # Apply logic for shared heating systems
-    hpxml.heating_systems.each do |heating_system|
-      next unless heating_system.is_shared_system
-
-      HVAC.apply_shared_heating_system(hpxml, heating_system)
-    end
+  def self.apply_shared_systems(hpxml)
+    apply_shared_cooling_systems(hpxml)
+    apply_shared_heating_systems(hpxml)
+    HPXMLDefaults.apply_hvac(hpxml)
 
     # Remove any orphaned HVAC distributions
     hpxml.hvac_distributions.each do |hvac_distribution|
-      begin
-        hvac_systems = hvac_distribution.hvac_systems
-      rescue
-        hvac_systems = []
+      hvac_systems = []
+      (hpxml.heating_systems + hpxml.cooling_systems + hpxml.heat_pumps).each do |hvac_system|
+        next if hvac_system.distribution_system_idref.nil?
+        next unless hvac_system.distribution_system_idref == hvac_distribution.id
+
+        hvac_systems << hvac_system
       end
       next unless hvac_systems.empty?
 
@@ -4145,115 +4135,116 @@ class HVAC
     end
   end
 
-  def self.apply_shared_cooling_system(hpxml, cooling_system)
-    # Convert shared chiller/cooling tower to central AC equivalent
+  def self.apply_shared_cooling_systems(hpxml)
+    hpxml.cooling_systems.each do |cooling_system|
+      next unless cooling_system.is_shared_system
 
-    distribution_system = cooling_system.distribution_system
-    distribution_type = distribution_system.distribution_system_type
-    hydronic_and_air_type = distribution_system.hydronic_and_air_type
+      distribution_system = cooling_system.distribution_system
+      distribution_type = distribution_system.distribution_system_type
+      hydronic_and_air_type = distribution_system.hydronic_and_air_type
 
-    # Assign SEER equivalent
-    n_dweq = cooling_system.number_of_units_served.to_f
-    aux = cooling_system.shared_loop_watts
+      # Calculate air conditioner SEER equivalent
+      n_dweq = cooling_system.number_of_units_served.to_f
+      aux = cooling_system.shared_loop_watts
 
-    if cooling_system.cooling_system_type == HPXML::HVACTypeChiller
+      if cooling_system.cooling_system_type == HPXML::HVACTypeChiller
 
-      # Chiller w/ baseboard or fan coil or water loop heat pump
-      cap = cooling_system.cooling_capacity
-      chiller_input = UnitConversions.convert(cooling_system.cooling_efficiency_kw_per_ton * UnitConversions.convert(cap, 'Btu/hr', 'ton'), 'kW', 'W')
+        # Chiller w/ baseboard or fan coil or water loop heat pump
+        cap = cooling_system.cooling_capacity
+        chiller_input = UnitConversions.convert(cooling_system.cooling_efficiency_kw_per_ton * UnitConversions.convert(cap, 'Btu/hr', 'ton'), 'kW', 'W')
+        if distribution_type == HPXML::HVACDistributionTypeHydronic
+          aux_dweq = 0.0
+        elsif distribution_type == HPXML::HVACDistributionTypeHydronicAndAir
+          if hydronic_and_air_type == HPXML::HydronicAndAirTypeFanCoil
+            aux_dweq = cooling_system.fan_coil_watts
+          elsif hydronic_and_air_type == HPXML::HydronicAndAirTypeWaterLoopHeatPump
+            aux_dweq = cooling_system.wlhp_cooling_capacity / cooling_system.wlhp_cooling_efficiency_eer
+          else
+            fail "Unexpected distribution type '#{hydronic_and_air_type}' for chiller."
+          end
+        else
+          fail "Unexpected distribution type '#{distribution_type}' for chiller."
+        end
+        # ANSI/RESNET/ICC 301-2019 Equation 4.4-2
+        seer_eq = (cap - 3.41 * aux - 3.41 * aux_dweq * n_dweq) / (chiller_input + aux + aux_dweq * n_dweq)
+
+      elsif cooling_system.cooling_system_type == HPXML::HVACTypeCoolingTower
+
+        # Cooling tower w/ water loop heat pump
+        if distribution_type == HPXML::HVACDistributionTypeHydronicAndAir
+          hydronic_and_air_type = distribution_system.hydronic_and_air_type
+          if hydronic_and_air_type == HPXML::HydronicAndAirTypeWaterLoopHeatPump
+            wlhp_cap = cooling_system.wlhp_cooling_capacity
+            wlhp_input = wlhp_cap / cooling_system.wlhp_cooling_efficiency_eer
+          else
+            fail "Unexpected distribution type '#{hydronic_and_air_type}' for cooling tower."
+          end
+        else
+          fail "Unexpected hydronic distribution type '#{distribution_type}' for cooling tower."
+        end
+        # ANSI/RESNET/ICC 301-2019 Equation 4.4-3
+        seer_eq = (wlhp_cap - 3.41 * aux / n_dweq) / (wlhp_input + aux / n_dweq)
+
+      else
+        fail "Unexpected cooling system type '#{cooling_system.cooling_system_type}'."
+      end
+
+      cooling_system.cooling_system_type = HPXML::HVACTypeCentralAirConditioner
+      cooling_system.cooling_efficiency_seer = seer_eq
+      cooling_system.cooling_capacity = nil # Autosize the equipment
+
+      # Assign new distribution system to air conditioner
       if distribution_type == HPXML::HVACDistributionTypeHydronic
-        aux_dweq = 0.0
+        # Assign DSE=1
+        hpxml.hvac_distributions.add(id: "#{cooling_system.id}AirDistributionSystem",
+                                     distribution_system_type: HPXML::HVACDistributionTypeDSE,
+                                     annual_cooling_dse: 1)
+        cooling_system.distribution_system_idref = hpxml.hvac_distributions[-1].id
       elsif distribution_type == HPXML::HVACDistributionTypeHydronicAndAir
-        if hydronic_and_air_type == HPXML::HydronicAndAirTypeFanCoil
-          aux_dweq = cooling_system.fan_coil_watts
-        elsif hydronic_and_air_type == HPXML::HydronicAndAirTypeWaterLoopHeatPump
-          aux_dweq = cooling_system.wlhp_cooling_capacity / cooling_system.wlhp_cooling_efficiency_eer
-        else
-          fail "Unexpected distribution type '#{hydronic_and_air_type}' for chiller."
-        end
-      else
-        fail "Unexpected distribution type '#{distribution_type}' for chiller."
+        # Assign AirDistribution
+        hpxml.hvac_distributions << distribution_system.dup
+        hpxml.hvac_distributions[-1].id = "#{cooling_system.id}AirDistributionSystem"
+        hpxml.hvac_distributions[-1].distribution_system_type = HPXML::HVACDistributionTypeAir
+        cooling_system.distribution_system_idref = hpxml.hvac_distributions[-1].id
       end
-      # ANSI/RESNET/ICC 301-2019 Equation 4.4-2
-      seer_eq = (cap - 3.41 * aux - 3.41 * aux_dweq * n_dweq) / (chiller_input + aux + aux_dweq * n_dweq)
-
-    elsif cooling_system.cooling_system_type == HPXML::HVACTypeCoolingTower
-
-      # Cooling tower w/ water loop heat pump
-      if distribution_type == HPXML::HVACDistributionTypeHydronicAndAir
-        hydronic_and_air_type = distribution_system.hydronic_and_air_type
-        if hydronic_and_air_type == HPXML::HydronicAndAirTypeWaterLoopHeatPump
-          wlhp_cap = cooling_system.wlhp_cooling_capacity
-          wlhp_input = wlhp_cap / cooling_system.wlhp_cooling_efficiency_eer
-        else
-          fail "Unexpected distribution type '#{hydronic_and_air_type}' for cooling tower."
-        end
-      else
-        fail "Unexpected hydronic distribution type '#{distribution_type}' for cooling tower."
-      end
-      # ANSI/RESNET/ICC 301-2019 Equation 4.4-3
-      seer_eq = (wlhp_cap - 3.41 * aux / n_dweq) / (wlhp_input + aux / n_dweq)
-
-    else
-      fail "Unexpected cooling system type '#{cooling_system.cooling_system_type}'."
-    end
-
-    cooling_system.cooling_system_type = HPXML::HVACTypeCentralAirConditioner
-    cooling_system.cooling_efficiency_seer = seer_eq
-    cooling_system.cooling_capacity = nil # Autosize the equipment
-
-    # Assign new distribution system to air conditioner
-    if distribution_type == HPXML::HVACDistributionTypeHydronic
-      # Assign DSE=1
-      hpxml.hvac_distributions.add(id: "#{cooling_system.id}AirDistributionSystem",
-                                   distribution_system_type: HPXML::HVACDistributionTypeDSE,
-                                   annual_cooling_dse: 1)
-      cooling_system.distribution_system_idref = hpxml.hvac_distributions[-1].id
-    elsif distribution_type == HPXML::HVACDistributionTypeHydronicAndAir
-      # Assign AirDistribution
-      hpxml.hvac_distributions << distribution_system.dup
-      hpxml.hvac_distributions[-1].id = "#{cooling_system.id}AirDistributionSystem"
-      hpxml.hvac_distributions[-1].distribution_system_type = HPXML::HVACDistributionTypeAir
-      cooling_system.distribution_system_idref = hpxml.hvac_distributions[-1].id
     end
   end
 
-  def self.apply_shared_heating_system(hpxml, heating_system)
-    distribution_system = heating_system.distribution_system
-    distribution_type = distribution_system.distribution_system_type
-    hydronic_and_air_type = distribution_system.hydronic_and_air_type
+  def self.apply_shared_heating_systems(hpxml)
+    hpxml.heating_systems.each do |heating_system|
+      next unless heating_system.is_shared_system
 
-    if heating_system.heating_system_type == HPXML::HVACTypeBoiler && hydronic_and_air_type.to_s == HPXML::HydronicAndAirTypeFanCoil
+      distribution_system = heating_system.distribution_system
+      distribution_type = distribution_system.distribution_system_type
+      hydronic_and_air_type = distribution_system.hydronic_and_air_type
 
-      # Shared boiler w/ fan coil (possibly ducted)
-      heating_system.electric_auxiliary_energy = get_default_eae(heating_system, nil)
+      if heating_system.heating_system_type == HPXML::HVACTypeBoiler && hydronic_and_air_type.to_s == HPXML::HydronicAndAirTypeWaterLoopHeatPump
 
-    elsif heating_system.heating_system_type == HPXML::HVACTypeBoiler && hydronic_and_air_type.to_s == HPXML::HydronicAndAirTypeWaterLoopHeatPump
+        # Shared boiler w/ water loop heat pump
+        # Per ANSI/RESNET/ICC 301-2019 Section 4.4.7.2, model as:
+        # A) heat pump with constant efficiency and duct losses, fraction heat load served = 1/COP
+        # B) boiler, fraction heat load served = 1-1/COP
+        fraction_heat_load_served = heating_system.fraction_heat_load_served
 
-      # Shared boiler w/ water loop heat pump
-      # Per ANSI/RESNET/ICC 301-2019 Section 4.4.7.2, model as:
-      # A) heat pump with constant efficiency and duct losses, fraction heat load served = 1/COP
-      # B) boiler, fraction heat load served = 1-1/COP
-      fraction_heat_load_served = heating_system.fraction_heat_load_served
+        # Heat pump
+        hpxml.heat_pumps.add(id: "#{heating_system.id}_WLHP",
+                             distribution_system_idref: heating_system.distribution_system_idref,
+                             heat_pump_type: HPXML::HVACTypeHeatPumpWaterLoopToAir,
+                             heat_pump_fuel: HPXML::FuelTypeElectricity,
+                             heating_efficiency_cop: heating_system.wlhp_heating_efficiency_cop,
+                             fraction_heat_load_served: fraction_heat_load_served * (1.0 / heating_system.wlhp_heating_efficiency_cop),
+                             fraction_cool_load_served: 0.0)
 
-      # Heat pump
-      hpxml.heat_pumps.add(id: "#{heating_system.id}_WLHP",
-                           distribution_system_idref: heating_system.distribution_system_idref,
-                           heat_pump_type: HPXML::HVACTypeHeatPumpWaterLoopToAir,
-                           heat_pump_fuel: HPXML::FuelTypeElectricity,
-                           heating_efficiency_cop: heating_system.wlhp_heating_efficiency_cop,
-                           fraction_heat_load_served: fraction_heat_load_served * (1.0 / heating_system.wlhp_heating_efficiency_cop),
-                           fraction_cool_load_served: 0.0)
+        # Boiler
+        heating_system.electric_auxiliary_energy = get_default_eae(heating_system, nil)
+        heating_system.fraction_heat_load_served = fraction_heat_load_served * (1.0 - 1.0 / heating_system.wlhp_heating_efficiency_cop)
+        heating_system.distribution_system_idref = "#{heating_system.id}_Baseboard"
+        hpxml.hvac_distributions.add(id: heating_system.distribution_system_idref,
+                                     distribution_system_type: HPXML::HVACDistributionTypeHydronic,
+                                     hydronic_type: HPXML::HydronicTypeBaseboard)
+      end
 
-      # Boiler
-      heating_system.electric_auxiliary_energy = get_default_eae(heating_system, nil)
-      heating_system.fraction_heat_load_served = fraction_heat_load_served * (1.0 - 1.0 / heating_system.wlhp_heating_efficiency_cop)
-      heating_system.distribution_system_idref = "#{heating_system.id}_Baseboard"
-      hpxml.hvac_distributions.add(id: heating_system.distribution_system_idref,
-                                   distribution_system_type: HPXML::HVACDistributionTypeHydronic,
-                                   hydronic_type: HPXML::HydronicTypeBaseboard)
+      heating_system.heating_capacity = nil # Autosize the equipment
     end
-
-    heating_system.heating_capacity = nil # Autosize the equipment
   end
 end

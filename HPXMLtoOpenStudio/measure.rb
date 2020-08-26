@@ -241,7 +241,6 @@ class OSModel
 
     weather, epw_file = Location.apply_weather_file(model, runner, epw_path, cache_path)
     check_for_errors()
-    HVAC.apply_shared_hvac_systems(hpxml)
     set_defaults_and_globals(runner, output_dir, epw_file)
     weather = Location.apply(model, runner, weather, epw_file, @hpxml)
     add_simulation_params(model)
@@ -265,14 +264,14 @@ class OSModel
     add_skylights(runner, model, spaces, weather)
     add_conditioned_floor_area(runner, model, spaces)
     add_thermal_mass(runner, model, spaces)
-    modify_cond_basement_surface_properties(runner, model)
-    assign_view_factor(runner, model, spaces)
+    update_conditioned_basement(runner, model, spaces)
     set_zone_volumes(runner, model, spaces)
     explode_surfaces(runner, model)
     add_num_occupants(model, runner, spaces)
 
     # HVAC
 
+    update_shared_hvac_systems()
     add_ideal_system(runner, model, spaces, epw_path)
     add_cooling_system(runner, model, spaces)
     add_heating_system(runner, model, spaces)
@@ -596,9 +595,16 @@ class OSModel
     end
   end
 
-  def self.modify_cond_basement_surface_properties(runner, model)
+  def self.update_conditioned_basement(runner, model, spaces)
+    return if @cond_bsmnt_surfaces.empty?
+
+    update_solar_absorptances(runner, model)
+    assign_view_factors(runner, model, spaces)
+  end
+
+  def self.update_solar_absorptances(runner, model)
     # modify conditioned basement surface properties
-    # - zero out interior solar absorptance in conditioned basement
+    # zero out interior solar absorptance in conditioned basement
     @cond_bsmnt_surfaces.each do |cond_bsmnt_surface|
       const = cond_bsmnt_surface.construction.get
       layered_const = const.to_LayeredConstruction.get
@@ -632,9 +638,7 @@ class OSModel
     end
   end
 
-  def self.assign_view_factor(runner, model, spaces)
-    return if @cond_bsmnt_surfaces.empty?
-
+  def self.assign_view_factors(runner, model, spaces)
     # zero out view factors between conditioned basement surfaces and living zone surfaces
     all_surfaces = [] # all surfaces in single conditioned space
     lv_surfaces = []  # surfaces in living
@@ -2023,6 +2027,10 @@ class OSModel
     return true
   end
 
+  def self.update_shared_hvac_systems()
+    HVAC.apply_shared_systems(@hpxml)
+  end
+
   def self.add_cooling_system(runner, model, spaces)
     living_zone = spaces[HPXML::LocationLivingSpace].thermalZone.get
 
@@ -2069,6 +2077,8 @@ class OSModel
 
   def self.add_heating_system(runner, model, spaces)
     living_zone = spaces[HPXML::LocationLivingSpace].thermalZone.get
+
+    HVAC.apply_shared_heating_systems(@hpxml)
 
     @hpxml.heating_systems.each do |heating_system|
       check_distribution_system(heating_system.distribution_system, heating_system.heating_system_type)
