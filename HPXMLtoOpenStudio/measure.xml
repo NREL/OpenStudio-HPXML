@@ -3,8 +3,8 @@
   <schema_version>3.0</schema_version>
   <name>hpxm_lto_openstudio</name>
   <uid>b1543b30-9465-45ff-ba04-1d1f85e763bc</uid>
-  <version_id>c0c7b63d-befc-4e8b-8b6a-452860ade277</version_id>
-  <version_modified>20200814T161817Z</version_modified>
+  <version_id>79655124-fad7-45b0-9d6b-9fd4a6b325f2</version_id>
+  <version_modified>20200826T161347Z</version_modified>
   <xml_checksum>D8922A73</xml_checksum>
   <class_name>HPXMLtoOpenStudio</class_name>
   <display_name>HPXML to OpenStudio Translator</display_name>
@@ -385,12 +385,6 @@
       <checksum>7DAA5F02</checksum>
     </file>
     <file>
-      <filename>schedules.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>830C5D1B</checksum>
-    </file>
-    <file>
       <filename>geometry.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
@@ -574,6 +568,12 @@
       <filetype>rb</filetype>
       <usage_type>test</usage_type>
       <checksum>4BB3F113</checksum>
+    </file>
+    <file>
+      <filename>schedules.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>A346F8E6</checksum>
     </file>
   </files>
 </measure>
