@@ -1023,7 +1023,7 @@ class HVAC
     htg_coil = OpenStudio::Model::CoilHeatingDXSingleSpeed.new(model, model.alwaysOnDiscreteSchedule, constant_biquadratic, constant_quadratic, constant_biquadratic, constant_quadratic, constant_quadratic)
     htg_coil.setName(obj_name + ' htg coil')
     htg_coil.setRatedCOP(heat_pump.heating_efficiency_cop)
-    htg_coil.setDefrostTimePeriodFraction(0)
+    htg_coil.setDefrostTimePeriodFraction(0.00001) # Disable defrost; avoid E+ warning w/ value of zero
     htg_coil.setMinimumOutdoorDryBulbTemperatureforCompressorOperation(UnitConversions.convert(hp_min_temp, 'F', 'C'))
     hvac_map[heat_pump.id] << htg_coil
 
@@ -1191,13 +1191,13 @@ class HVAC
       # Cooling Coil (always off)
       clg_coil = OpenStudio::Model::CoilCoolingWater.new(model, model.alwaysOffDiscreteSchedule)
       clg_coil.setName(obj_name + ' clg coil')
-      clg_coil.setDesignWaterFlowRate(1.0)
-      clg_coil.setDesignAirFlowRate(1.0)
-      clg_coil.setDesignInletWaterTemperature(1.0)
-      clg_coil.setDesignInletAirTemperature(1.0)
-      clg_coil.setDesignOutletAirTemperature(1.0)
-      clg_coil.setDesignInletAirHumidityRatio(1.0)
-      clg_coil.setDesignOutletAirHumidityRatio(1.0)
+      clg_coil.setDesignWaterFlowRate(0.0022)
+      clg_coil.setDesignAirFlowRate(1.45)
+      clg_coil.setDesignInletWaterTemperature(6.1)
+      clg_coil.setDesignInletAirTemperature(25.0)
+      clg_coil.setDesignOutletAirTemperature(10.0)
+      clg_coil.setDesignInletAirHumidityRatio(0.012)
+      clg_coil.setDesignOutletAirHumidityRatio(0.008)
       plant_loop.addDemandBranchForComponent(clg_coil)
 
       # Fan Coil
