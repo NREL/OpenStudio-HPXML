@@ -3263,7 +3263,6 @@ class OSModel
                                                  inside_film:, outside_film:)
 
     stud_depth_in = stud_size.split('x').last.to_f - 0.5
-    stud_width_in = stud_size.split('x').first.to_f - 0.5
 
     if wall_type == HPXML::WallTypeWoodStud
       if cavity_ins_thick_in < stud_depth_in

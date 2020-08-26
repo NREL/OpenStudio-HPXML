@@ -139,7 +139,6 @@
             </Insulation>
             <FloorJoists>
               <Size>2x6</Size>
-              <Spacing>16.0</Spacing>
               <FramingFactor>0.1988</FramingFactor>
             </FloorJoists>
             <extension>
@@ -291,7 +290,6 @@
             <Area>109.0</Area>
             <Studs>
               <Size>2x6</Size>
-              <Spacing>16.0</Spacing>
               <FramingFactor>0.1988</FramingFactor>
             </Studs>
             <Siding>fiber cement siding</Siding>
@@ -333,7 +331,6 @@
             <Area>109.0</Area>
             <Studs>
               <Size>2x6</Size>
-              <Spacing>16.0</Spacing>
               <FramingFactor>0.1988</FramingFactor>
             </Studs>
             <Siding>stucco</Siding>
@@ -476,7 +473,6 @@
             <Area>290.0</Area>
             <Studs>
               <Size>2x6</Size>
-              <Spacing>16.0</Spacing>
               <FramingFactor>0.1988</FramingFactor>
             </Studs>
             <Siding>wood siding</Siding>
