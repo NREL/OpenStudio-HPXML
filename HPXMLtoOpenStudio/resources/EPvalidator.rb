@@ -341,7 +341,6 @@ class EnergyPlusValidator
         '../../HVACControl' => one, # See [HVACControl]
         'HeatingSystemType[ElectricResistance | Furnace | WallFurnace | FloorFurnace | Boiler | Stove | PortableHeater | FixedHeater | Fireplace]' => one, # See [HeatingType=Resistance] or [HeatingType=Furnace] or [HeatingType=WallFurnace] or [HeatingType=FloorFurnace] or [HeatingType=Boiler] or [HeatingType=Stove] or [HeatingType=PortableHeater] or [HeatingType=FixedHeater] or [HeatingType=Fireplace]
         'FractionHeatLoadServed' => one,
-        'ElectricAuxiliaryEnergy' => zero_or_one, # If not provided, uses 301 defaults for fuel furnace/boiler and zero otherwise
       },
 
       ## [HeatingType=Resistance]
@@ -350,6 +349,7 @@ class EnergyPlusValidator
         'HeatingSystemFuel[text()="electricity"]' => one,
         'HeatingCapacity' => zero_or_one,
         'AnnualHeatingEfficiency[Units="Percent"]/Value' => one,
+        'ElectricAuxiliaryEnergy' => zero_or_one,
       },
 
       ## [HeatingType=Furnace]
@@ -359,6 +359,7 @@ class EnergyPlusValidator
         'HeatingSystemFuel[text()="natural gas" or text()="fuel oil" or text()="fuel oil 1" or text()="fuel oil 2" or text()="fuel oil 4" or text()="fuel oil 5/6" or text()="diesel" or text()="propane" or text()="kerosene" or text()="electricity" or text()="wood" or text()="wood pellets"]' => one,
         'HeatingCapacity' => zero_or_one,
         'AnnualHeatingEfficiency[Units="AFUE"]/Value' => one,
+        'ElectricAuxiliaryEnergy' => zero_or_one,
       },
 
       ## [HeatingType=WallFurnace]
@@ -367,6 +368,7 @@ class EnergyPlusValidator
         'HeatingSystemFuel[text()="natural gas" or text()="fuel oil" or text()="fuel oil 1" or text()="fuel oil 2" or text()="fuel oil 4" or text()="fuel oil 5/6" or text()="diesel" or text()="propane" or text()="kerosene" or text()="electricity" or text()="wood" or text()="wood pellets"]' => one,
         'HeatingCapacity' => zero_or_one,
         'AnnualHeatingEfficiency[Units="AFUE"]/Value' => one,
+        'ElectricAuxiliaryEnergy' => zero_or_one,
       },
 
       ## [HeatingType=FloorFurnace]
@@ -375,6 +377,7 @@ class EnergyPlusValidator
         'HeatingSystemFuel[text()="natural gas" or text()="fuel oil" or text()="fuel oil 1" or text()="fuel oil 2" or text()="fuel oil 4" or text()="fuel oil 5/6" or text()="diesel" or text()="propane" or text()="kerosene" or text()="electricity" or text()="wood" or text()="wood pellets"]' => one,
         'HeatingCapacity' => zero_or_one,
         'AnnualHeatingEfficiency[Units="AFUE"]/Value' => one,
+        'ElectricAuxiliaryEnergy' => zero_or_one,
       },
 
       ## [HeatingType=Boiler]
@@ -389,6 +392,7 @@ class EnergyPlusValidator
       '/HPXML/Building/BuildingDetails/Systems/HVAC/HVACPlant/HeatingSystem[HeatingSystemType/Boiler and (not(IsSharedSystem) or IsSharedSystem="false")]' => {
         '../../HVACDistribution[DistributionSystemType/HydronicDistribution[HydronicDistributionType[text()="radiator" or text()="baseboard" or text()="radiant floor" or text()="radiant ceiling"]] | DistributionSystemType[Other="DSE"]]' => one_or_more, # See [HVACDistribution]
         'HeatingCapacity' => zero_or_one,
+        'ElectricAuxiliaryEnergy' => zero_or_one,
       },
 
       ## [BoilerType=Shared]
@@ -415,6 +419,7 @@ class EnergyPlusValidator
         'HeatingSystemFuel[text()="natural gas" or text()="fuel oil" or text()="fuel oil 1" or text()="fuel oil 2" or text()="fuel oil 4" or text()="fuel oil 5/6" or text()="diesel" or text()="propane" or text()="kerosene" or text()="electricity" or text()="wood" or text()="wood pellets"]' => one,
         'HeatingCapacity' => zero_or_one,
         'AnnualHeatingEfficiency[Units="Percent"]/Value' => one,
+        'ElectricAuxiliaryEnergy' => zero_or_one,
       },
 
       ## [HeatingType=PortableHeater]
@@ -423,6 +428,7 @@ class EnergyPlusValidator
         'HeatingSystemFuel[text()="natural gas" or text()="fuel oil" or text()="fuel oil 1" or text()="fuel oil 2" or text()="fuel oil 4" or text()="fuel oil 5/6" or text()="diesel" or text()="propane" or text()="kerosene" or text()="electricity" or text()="wood" or text()="wood pellets"]' => one,
         'HeatingCapacity' => zero_or_one,
         'AnnualHeatingEfficiency[Units="Percent"]/Value' => one,
+        'ElectricAuxiliaryEnergy' => zero_or_one,
       },
 
       ## [HeatingType=FixedHeater]
@@ -431,6 +437,7 @@ class EnergyPlusValidator
         'HeatingSystemFuel[text()="natural gas" or text()="fuel oil" or text()="fuel oil 1" or text()="fuel oil 2" or text()="fuel oil 4" or text()="fuel oil 5/6" or text()="diesel" or text()="propane" or text()="kerosene" or text()="electricity" or text()="wood" or text()="wood pellets"]' => one,
         'HeatingCapacity' => zero_or_one,
         'AnnualHeatingEfficiency[Units="Percent"]/Value' => one,
+        'ElectricAuxiliaryEnergy' => zero_or_one,
       },
 
       ## [HeatingType=Fireplace]
@@ -439,6 +446,7 @@ class EnergyPlusValidator
         'HeatingSystemFuel[text()="natural gas" or text()="fuel oil" or text()="fuel oil 1" or text()="fuel oil 2" or text()="fuel oil 4" or text()="fuel oil 5/6" or text()="diesel" or text()="propane" or text()="kerosene" or text()="electricity" or text()="wood" or text()="wood pellets"]' => one,
         'HeatingCapacity' => zero_or_one,
         'AnnualHeatingEfficiency[Units="Percent"]/Value' => one,
+        'ElectricAuxiliaryEnergy' => zero_or_one,
       },
 
       # [CoolingSystem]
@@ -538,19 +546,19 @@ class EnergyPlusValidator
       '/HPXML/Building/BuildingDetails/Systems/HVAC/HVACPlant/HeatPump[HeatPumpType="air-to-air"]' => {
         '../../HVACDistribution[DistributionSystemType/AirDistribution | DistributionSystemType[Other="DSE"]]' => one_or_more, # See [HVACDistribution]
         'DistributionSystem' => one,
-        'HeatingCapacity17F' => zero_or_one,
         '[not(CompressorType)] | CompressorType[text()="single stage" or text()="two stage" or text()="variable speed"]' => one,
         'AnnualCoolingEfficiency[Units="SEER"]/Value' => one,
         'AnnualHeatingEfficiency[Units="HSPF"]/Value' => one,
+        'HeatingCapacity17F' => zero_or_one,
       },
 
       ## [HeatPumpType=MSHP]
       '/HPXML/Building/BuildingDetails/Systems/HVAC/HVACPlant/HeatPump[HeatPumpType="mini-split"]' => {
         '../../HVACDistribution[DistributionSystemType/AirDistribution | DistributionSystemType[Other="DSE"]]' => zero_or_more, # See [HVACDistribution]
         'DistributionSystem' => zero_or_one,
-        'HeatingCapacity17F' => zero_or_one,
         'AnnualCoolingEfficiency[Units="SEER"]/Value' => one,
         'AnnualHeatingEfficiency[Units="HSPF"]/Value' => one,
+        'HeatingCapacity17F' => zero_or_one,
       },
 
       ## [HeatPumpType=GSHP]
