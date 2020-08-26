@@ -1148,7 +1148,6 @@
 			<xs:documentation>NOTE: "other housing unit above" and "other housing unit below" will be deprecated in v4.0. Use "other housing unit" instead.</xs:documentation>
 		</xs:annotation>
 		<xs:restriction base="xs:string">
-			<xs:enumeration value="adiabatic"/>
 			<xs:enumeration value="attic"/>
 			<xs:enumeration value="attic - conditioned"/>
 			<xs:enumeration value="attic - unconditioned"/>
