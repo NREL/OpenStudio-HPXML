@@ -98,7 +98,7 @@ class Constants
   end
 
   def self.ObjectNameAirSourceHeatPump
-    return 'ashp'
+    return 'air source heat pump'
   end
 
   def self.ObjectNameBackupHeatingCoil
@@ -222,7 +222,7 @@ class Constants
   end
 
   def self.ObjectNameGroundSourceHeatPump
-    return 'gshp'
+    return 'ground source heat pump'
   end
 
   def self.ObjectNameHeatingSeason
@@ -278,7 +278,7 @@ class Constants
   end
 
   def self.ObjectNameMiniSplitHeatPump
-    return 'mshp'
+    return 'mini split heat pump'
   end
 
   def self.ObjectNameMiscGrill
@@ -402,7 +402,7 @@ class Constants
   end
 
   def self.ObjectNameWaterLoopHeatPump
-    return 'wlhp'
+    return 'water loop heat pump'
   end
 
   def self.ObjectNameWholeHouseFan
