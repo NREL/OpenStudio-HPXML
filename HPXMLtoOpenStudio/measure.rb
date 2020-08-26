@@ -2371,30 +2371,30 @@ class OSModel
       # Connect AirLoopHVACs to ducts
       added_ducts = false
       hvac_distribution.hvac_systems.each do |hvac_system|
-        @hvac_map[hvac_system.id].each do |loop|
-          next unless loop.is_a? OpenStudio::Model::AirLoopHVAC
+        @hvac_map[hvac_system.id].each do |object|
+          next unless object.is_a? OpenStudio::Model::AirLoopHVAC
 
           if duct_systems[air_ducts].nil?
-            duct_systems[air_ducts] = loop
+            duct_systems[air_ducts] = object
             added_ducts = true
-          elsif duct_systems[air_ducts] != loop
+          elsif duct_systems[air_ducts] != object
             # Multiple air loops associated with this duct system, treat
             # as separate duct systems.
             air_ducts2 = create_ducts(runner, model, hvac_distribution, spaces)
-            duct_systems[air_ducts2] = loop
+            duct_systems[air_ducts2] = object
             added_ducts = true
           end
         end
       end
       if not added_ducts
         # Check if ducted fan coil, which doesn't have an AirLoopHVAC;
-        # assign to PlantLoop instead.
+        # assign to FanCoil instead.
         if hvac_distribution.distribution_system_type && hvac_distribution.hydronic_and_air_type == HPXML::HydronicAndAirTypeFanCoil
           hvac_distribution.hvac_systems.each do |hvac_system|
-            @hvac_map[hvac_system.id].each do |loop|
-              next unless loop.is_a? OpenStudio::Model::PlantLoop
+            @hvac_map[hvac_system.id].each do |object|
+              next unless object.is_a? OpenStudio::Model::ZoneHVACFourPipeFanCoil
 
-              duct_systems[air_ducts] = loop
+              duct_systems[air_ducts] = object
               added_ducts = true
             end
           end
@@ -2736,73 +2736,66 @@ class OSModel
 
     # EMS Sensors: Ducts
 
-    plenum_zones = []
-    model.getThermalZones.each do |zone|
-      next unless zone.isPlenum
-
-      plenum_zones << zone
-    end
-
     ducts_sensors = []
     ducts_mix_gain_sensor = nil
     ducts_mix_loss_sensor = nil
 
-    if not plenum_zones.empty?
+    has_duct_zone_mixing = false
+    living_zone.airLoopHVACs.sort.each do |airloop|
+      living_zone.zoneMixing.each do |zone_mix|
+        next unless zone_mix.name.to_s.start_with? airloop.name.to_s.gsub(' ', '_')
 
-      has_duct_zone_mixing = false
-      living_zone.airLoopHVACs.sort.each do |airloop|
-        living_zone.zoneMixing.each do |zone_mix|
-          next unless zone_mix.name.to_s.start_with? airloop.name.to_s.gsub(' ', '_')
-
-          has_duct_zone_mixing = true
-        end
+        has_duct_zone_mixing = true
       end
+    end
 
-      if has_duct_zone_mixing
-        ducts_mix_gain_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Zone Mixing Sensible Heat Gain Energy')
-        ducts_mix_gain_sensor.setName('duct_mix_gain')
-        ducts_mix_gain_sensor.setKeyName(living_zone.name.to_s)
+    if has_duct_zone_mixing
+      ducts_mix_gain_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Zone Mixing Sensible Heat Gain Energy')
+      ducts_mix_gain_sensor.setName('duct_mix_gain')
+      ducts_mix_gain_sensor.setKeyName(living_zone.name.to_s)
 
-        ducts_mix_loss_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Zone Mixing Sensible Heat Loss Energy')
-        ducts_mix_loss_sensor.setName('duct_mix_loss')
-        ducts_mix_loss_sensor.setKeyName(living_zone.name.to_s)
+      ducts_mix_loss_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Zone Mixing Sensible Heat Loss Energy')
+      ducts_mix_loss_sensor.setName('duct_mix_loss')
+      ducts_mix_loss_sensor.setKeyName(living_zone.name.to_s)
+    end
+
+    # Return duct losses
+    model.getOtherEquipments.sort.each do |o|
+      next if objects_already_processed.include? o
+
+      is_duct_load = o.additionalProperties.getFeatureAsBoolean(Constants.IsDuctLoadForReport)
+      next unless is_duct_load.is_initialized
+
+      objects_already_processed << o
+      next unless is_duct_load.get
+
+      ducts_sensors << []
+      { 'Other Equipment Convective Heating Energy' => 'ducts_conv',
+        'Other Equipment Radiant Heating Energy' => 'ducts_rad' }.each do |var, name|
+        ducts_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, var)
+        ducts_sensor.setName(name)
+        ducts_sensor.setKeyName(o.name.to_s)
+        ducts_sensors[-1] << ducts_sensor
       end
+    end
 
-      # Return duct losses
-      plenum_zones.each do |plenum_zone|
-        model.getOtherEquipments.sort.each do |o|
-          next unless o.space.get.thermalZone.get.name.to_s == plenum_zone.name.to_s
-          next if objects_already_processed.include? o
+    # Supply duct losses
+    model.getOtherEquipments.sort.each do |o|
+      next if objects_already_processed.include? o
 
-          ducts_sensors << []
-          { 'Other Equipment Convective Heating Energy' => 'ducts_conv',
-            'Other Equipment Radiant Heating Energy' => 'ducts_rad' }.each do |var, name|
-            ducts_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, var)
-            ducts_sensor.setName(name)
-            ducts_sensor.setKeyName(o.name.to_s)
-            ducts_sensors[-1] << ducts_sensor
-            objects_already_processed << o
-          end
-        end
-      end
+      is_duct_load = o.additionalProperties.getFeatureAsBoolean(Constants.IsDuctLoadForReport)
+      next unless is_duct_load.is_initialized
 
-      # Supply duct losses
-      living_zone.airLoopHVACs.sort.each do |airloop|
-        model.getOtherEquipments.sort.each do |o|
-          next unless o.space.get.thermalZone.get.name.to_s == living_zone.name.to_s
-          next unless o.name.to_s.start_with? airloop.name.to_s.gsub(' ', '_')
-          next if objects_already_processed.include? o
+      objects_already_processed << o
+      next unless is_duct_load.get
 
-          ducts_sensors << []
-          { 'Other Equipment Convective Heating Energy' => 'ducts_conv',
-            'Other Equipment Radiant Heating Energy' => 'ducts_rad' }.each do |var, name|
-            ducts_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, var)
-            ducts_sensor.setName(name)
-            ducts_sensor.setKeyName(o.name.to_s)
-            ducts_sensors[-1] << ducts_sensor
-            objects_already_processed << o
-          end
-        end
+      ducts_sensors << []
+      { 'Other Equipment Convective Heating Energy' => 'ducts_conv',
+        'Other Equipment Radiant Heating Energy' => 'ducts_rad' }.each do |var, name|
+        ducts_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, var)
+        ducts_sensor.setName(name)
+        ducts_sensor.setKeyName(o.name.to_s)
+        ducts_sensors[-1] << ducts_sensor
       end
     end
 

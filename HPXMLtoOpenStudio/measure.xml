@@ -3,8 +3,8 @@
   <schema_version>3.0</schema_version>
   <name>hpxm_lto_openstudio</name>
   <uid>b1543b30-9465-45ff-ba04-1d1f85e763bc</uid>
-  <version_id>8cafa51a-33b0-4b41-9629-8a8e57afaceb</version_id>
-  <version_modified>20200825T191243Z</version_modified>
+  <version_id>856afeed-ff50-4f5a-a13e-0fb1ceebf582</version_id>
+  <version_modified>20200826T001205Z</version_modified>
   <xml_checksum>D8922A73</xml_checksum>
   <class_name>HPXMLtoOpenStudio</class_name>
   <display_name>HPXML to OpenStudio Translator</display_name>
@@ -517,35 +517,6 @@
       <checksum>F58F08B9</checksum>
     </file>
     <file>
-      <filename>airflow.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>FC697714</checksum>
-    </file>
-    <file>
-      <filename>hvac_sizing.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>F8BEE2B4</checksum>
-    </file>
-    <file>
-      <version>
-        <software_program>OpenStudio</software_program>
-        <identifier>2.1.1</identifier>
-        <min_compatible>2.1.1</min_compatible>
-      </version>
-      <filename>measure.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>script</usage_type>
-      <checksum>2B755592</checksum>
-    </file>
-    <file>
-      <filename>constants.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>63E8A919</checksum>
-    </file>
-    <file>
       <filename>hpxml.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
@@ -564,10 +535,45 @@
       <checksum>2D421327</checksum>
     </file>
     <file>
+      <filename>airflow.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>BC675290</checksum>
+    </file>
+    <file>
+      <filename>hvac_sizing.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>3AE712A9</checksum>
+    </file>
+    <file>
+      <version>
+        <software_program>OpenStudio</software_program>
+        <identifier>2.1.1</identifier>
+        <min_compatible>2.1.1</min_compatible>
+      </version>
+      <filename>measure.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>script</usage_type>
+      <checksum>76F0B440</checksum>
+    </file>
+    <file>
+      <filename>constants.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>B239249F</checksum>
+    </file>
+    <file>
       <filename>hvac.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>67C1A280</checksum>
+      <checksum>41E7A114</checksum>
+    </file>
+    <file>
+      <filename>hvac.rb.bak</filename>
+      <filetype>bak</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>94A52A06</checksum>
     </file>
   </files>
 </measure>

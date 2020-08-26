@@ -89,6 +89,10 @@ class Constants
     return 'ethylene-glycol'
   end
 
+  def self.IsDuctLoadForReport
+    return __method__.to_s
+  end
+
   def self.ObjectNameAirflow
     return 'airflow'
   end

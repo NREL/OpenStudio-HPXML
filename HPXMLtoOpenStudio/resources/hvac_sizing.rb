@@ -1872,16 +1872,21 @@ class HVACSizing
     return cool_Load_Lat, cool_Load_Sens
   end
 
-  def self.get_ducts_for_air_loop(air_loop)
+  def self.get_ducts_for_object(object)
     ducts = []
 
+    # Ducted?
+    is_ducted = get_feature(object, Constants.SizingInfoHVACSystemIsDucted, 'boolean', false)
+    is_ducted = true if is_ducted.nil?
+    return ducts if not is_ducted
+
     # Has ducts?
-    has_ducts = get_feature(air_loop, Constants.SizingInfoDuctExist, 'boolean', false)
+    has_ducts = get_feature(object, Constants.SizingInfoDuctExist, 'boolean', false)
     return ducts if ducts.nil?
 
     # Leakage values
-    leakage_fracs = get_feature(air_loop, Constants.SizingInfoDuctLeakageFracs, 'string', false)
-    leakage_cfm25s = get_feature(air_loop, Constants.SizingInfoDuctLeakageCFM25s, 'string', false)
+    leakage_fracs = get_feature(object, Constants.SizingInfoDuctLeakageFracs, 'string', false)
+    leakage_cfm25s = get_feature(object, Constants.SizingInfoDuctLeakageCFM25s, 'string', false)
     return ducts if leakage_fracs.nil? || leakage_cfm25s.nil?
 
     leakage_fracs = leakage_fracs.split(',').map(&:to_f)
@@ -1893,19 +1898,19 @@ class HVACSizing
     end
 
     # Areas
-    areas = get_feature(air_loop, Constants.SizingInfoDuctAreas, 'string')
+    areas = get_feature(object, Constants.SizingInfoDuctAreas, 'string')
     areas = areas.split(',').map(&:to_f)
 
     # R-values
-    rvalues = get_feature(air_loop, Constants.SizingInfoDuctRvalues, 'string')
+    rvalues = get_feature(object, Constants.SizingInfoDuctRvalues, 'string')
     rvalues = rvalues.split(',').map(&:to_f)
 
     # Locations
-    locations = get_feature(air_loop, Constants.SizingInfoDuctLocations, 'string')
+    locations = get_feature(object, Constants.SizingInfoDuctLocations, 'string')
     locations = locations.split(',')
 
     # Sides
-    sides = get_feature(air_loop, Constants.SizingInfoDuctSides, 'string')
+    sides = get_feature(object, Constants.SizingInfoDuctSides, 'string')
     sides = sides.split(',')
 
     locations.each_with_index do |location, index|
@@ -2026,28 +2031,15 @@ class HVACSizing
 
       # Retrieve ducts if they exist
       if equip.is_a? OpenStudio::Model::AirLoopHVACUnitarySystem
-        air_loop = nil
-        @cond_zone.airLoopHVACs.each do |loop|
-          loop.supplyComponents.each do |supply_component|
-            next unless supply_component.to_AirLoopHVACUnitarySystem.is_initialized
-            next unless supply_component.to_AirLoopHVACUnitarySystem.get.handle == equip.handle
-
-            air_loop = loop
-          end
+        if equip.airLoopHVAC.is_initialized
+          hvac.Ducts = get_ducts_for_object(equip.airLoopHVAC.get)
         end
-        if not air_loop.nil?
-          hvac.Ducts = get_ducts_for_air_loop(air_loop)
-        end
-      end
+      elsif equip.is_a? OpenStudio::Model::ZoneHVACFourPipeFanCoil
+        hvac.Ducts = get_ducts_for_object(equip)
+      elsif equip.is_a? OpenStudio::Model::EvaporativeCoolerDirectResearchSpecial
+        hvac.Ducts = get_ducts_for_object(equip.airLoopHVAC.get)
 
-      if equip.is_a? OpenStudio::Model::EvaporativeCoolerDirectResearchSpecial
         hvac.CoolingLoadFraction = get_feature(equip, Constants.SizingInfoHVACFracCoolLoadServed, 'double')
-
-        air_loop = equip.airLoopHVAC.get
-        if air_loop.additionalProperties.getFeatureAsBoolean(Constants.SizingInfoHVACSystemIsDucted).get
-          hvac.Ducts = get_ducts_for_air_loop(air_loop)
-        end
-
         hvac.EvapCoolerEffectiveness = equip.coolerEffectiveness
       end
 
@@ -2202,6 +2194,14 @@ class HVACSizing
         hvac.NumSpeedsHeating = 1
         if htg_coil.heatingDesignCapacity.is_initialized
           hvac.FixedHeatingCapacity = UnitConversions.convert(htg_coil.heatingDesignCapacity.get, 'W', 'ton')
+        end
+
+        hvac.BoilerDesignTemp = UnitConversions.convert(htg_coil.plantLoop.get.sizingPlant.designLoopExitTemperature, 'C', 'F')
+
+      elsif htg_coil.is_a? OpenStudio::Model::CoilHeatingWater
+        hvac.NumSpeedsHeating = 1
+        if htg_coil.ratedCapacity.is_initialized
+          hvac.FixedHeatingCapacity = UnitConversions.convert(htg_coil.ratedCapacity.get, 'W', 'ton')
         end
 
         hvac.BoilerDesignTemp = UnitConversions.convert(htg_coil.plantLoop.get.sizingPlant.designLoopExitTemperature, 'C', 'F')
@@ -3162,20 +3162,32 @@ class HVACSizing
           aterm.setMaximumAirFlowRate(vfr)
         end
 
-      elsif object.is_a? OpenStudio::Model::ZoneHVACBaseboardConvectiveWater
+      elsif object.is_a?(OpenStudio::Model::ZoneHVACBaseboardConvectiveWater) || object.is_a?(OpenStudio::Model::ZoneHVACFourPipeFanCoil)
 
         ## Hot Water Boiler ##
 
         plant_loop = object.heatingCoil.plantLoop.get
 
+        max_water_flow = UnitConversions.convert(hvac_final_values.Heat_Capacity, 'Btu/hr', 'W') / UnitConversions.convert(20.0, 'R', 'K') / 4.186 / 998.2 / 1000.0 * 2.0
         bb_UA = UnitConversions.convert(hvac_final_values.Heat_Capacity, 'Btu/hr', 'W') / UnitConversions.convert(hvac.BoilerDesignTemp - 10.0 - 95.0, 'R', 'K') * 3.0
-        bb_max_flow = UnitConversions.convert(hvac_final_values.Heat_Capacity, 'Btu/hr', 'W') / UnitConversions.convert(20.0, 'R', 'K') / 4.186 / 998.2 / 1000.0 * 2.0
+        if object.is_a? OpenStudio::Model::ZoneHVACBaseboardConvectiveWater
+          # Baseboard Coil
+          coil = object.heatingCoil.to_CoilHeatingWaterBaseboard.get
+          coil.setUFactorTimesAreaValue(bb_UA)
+          coil.setMaximumWaterFlowRate(max_water_flow)
+          coil.setHeatingDesignCapacityMethod('HeatingDesignCapacity')
+        elsif object.is_a? OpenStudio::Model::ZoneHVACFourPipeFanCoil
+          coil = object.heatingCoil.to_CoilHeatingWater.get
+          coil.setRatedCapacity(UnitConversions.convert(hvac_final_values.Heat_Capacity, 'Btu/hr', 'W'))
+          coil.setUFactorTimesAreaValue(bb_UA)
+          coil.setMaximumWaterFlowRate(max_water_flow)
+          coil.setPerformanceInputMethod('NominalCapacity')
 
-        # Baseboard Coil
-        coil = object.heatingCoil.to_CoilHeatingWaterBaseboard.get
-        coil.setUFactorTimesAreaValue(bb_UA)
-        coil.setMaximumWaterFlowRate(bb_max_flow)
-        coil.setHeatingDesignCapacityMethod('HeatingDesignCapacity')
+          max_air_flow = UnitConversions.convert(400.0 * UnitConversions.convert(hvac_final_values.Heat_Capacity, 'Btu/hr', 'ton'), 'cfm', 'm^3/s') # Assumes 400 cfm/ton
+          object.setMaximumSupplyAirFlowRate(max_air_flow)
+          object.setMaximumHotWaterFlowRate(max_water_flow)
+          object.supplyAirFan.to_FanOnOff.get.setMaximumFlowRate(max_air_flow)
+        end
 
         plant_loop.components.each do |component|
           # Boiler
