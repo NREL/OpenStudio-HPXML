@@ -345,7 +345,7 @@ class HVAC
     else
       crankcase_kw, crankcase_temp = get_crankcase_assumptions(heat_pump.fraction_cool_load_served)
     end
-    hp_min_temp, supp_max_temp = get_heatpump_temp_assumptions(heat_pump)
+    hp_min_temp, supp_max_temp = get_heat_pump_temp_assumptions(heat_pump)
 
     # Cooling Coil
 
@@ -544,7 +544,7 @@ class HVAC
     sequential_cool_load_frac = calc_sequential_load_fraction(heat_pump.fraction_cool_load_served, remaining_cool_load_frac)
     num_speeds = 10
     mshp_indices = [1, 3, 5, 9]
-    hp_min_temp, supp_max_temp = get_heatpump_temp_assumptions(heat_pump)
+    hp_min_temp, supp_max_temp = get_heat_pump_temp_assumptions(heat_pump)
     fan_power_installed = 0.07 # W/cfm
     pan_heater_power = 0.0 # W, disabled
 
@@ -957,6 +957,27 @@ class HVAC
     air_loop_unitary = create_air_loop_unitary_system(model, obj_name, fan, htg_coil, clg_coil, htg_supp_coil, 40.0)
     hvac_map[heat_pump.id] << air_loop_unitary
 
+    if heat_pump.is_shared_system
+      # Shared pump power per ANSI/RESNET/ICC 301-2019 Section 4.4.5.1 (pump runs 8760)
+      # Ancillary fields do not correctly work so using ElectricEquipment object instead;
+      # Revert when https://github.com/NREL/EnergyPlus/issues/8230 is fixed.
+      shared_pump_w = heat_pump.shared_loop_watts / heat_pump.number_of_units_served.to_f
+      # air_loop_unitary.setAncilliaryOffCycleElectricPower(shared_pump_w)
+      # air_loop_unitary.setAncilliaryOnCycleElectricPower(shared_pump_w)
+      equip_def = OpenStudio::Model::ElectricEquipmentDefinition.new(model)
+      equip_def.setName(Constants.ObjectNameSharedPump(obj_name))
+      equip = OpenStudio::Model::ElectricEquipment.new(equip_def)
+      equip.setName(equip_def.name.to_s)
+      equip.setSpace(control_zone.spaces[0])
+      equip_def.setDesignLevel(shared_pump_w)
+      equip_def.setFractionRadiant(0)
+      equip_def.setFractionLatent(0)
+      equip_def.setFractionLost(1)
+      equip.setSchedule(model.alwaysOnDiscreteSchedule)
+      equip.setEndUseSubcategory(equip_def.name.to_s)
+      hvac_map[heat_pump.id] += disaggregate_fan_or_pump(model, equip, htg_coil, clg_coil, htg_supp_coil)
+    end
+
     # Air Loop
 
     air_loop = create_air_loop(model, obj_name, air_loop_unitary, control_zone, sequential_heat_load_frac, sequential_cool_load_frac)
@@ -977,6 +998,63 @@ class HVAC
     air_loop_unitary.additionalProperties.setFeature(Constants.SizingInfoHVACHeatType, Constants.ObjectNameGroundSourceHeatPump)
   end
 
+  def self.apply_water_loop_to_air_heat_pump(model, runner, heat_pump,
+                                             remaining_heat_load_frac, remaining_cool_load_frac,
+                                             control_zone, hvac_map)
+    if heat_pump.fraction_cool_load_served > 0
+      # WLHPs connected to chillers or cooling towers should have already been converted to
+      # central air conditioners
+      fail 'WLHP model should only be called for central boilers.'
+    end
+
+    hvac_map[heat_pump.id] = []
+    obj_name = Constants.ObjectNameWaterLoopHeatPump
+    sequential_heat_load_frac = calc_sequential_load_fraction(heat_pump.fraction_heat_load_served, remaining_heat_load_frac)
+    sequential_cool_load_frac = 0.0
+    hp_min_temp, supp_max_temp = get_heat_pump_temp_assumptions(heat_pump)
+
+    # Cooling Coil
+
+    clg_coil = nil
+
+    # Heating Coil (model w/ constant efficiency)
+    constant_biquadratic = create_curve_biquadratic_constant(model)
+    constant_quadratic = create_curve_quadratic_constant(model)
+    htg_coil = OpenStudio::Model::CoilHeatingDXSingleSpeed.new(model, model.alwaysOnDiscreteSchedule, constant_biquadratic, constant_quadratic, constant_biquadratic, constant_quadratic, constant_quadratic)
+    htg_coil.setName(obj_name + ' htg coil')
+    htg_coil.setRatedCOP(heat_pump.heating_efficiency_cop)
+    htg_coil.setDefrostTimePeriodFraction(0.00001) # Disable defrost; avoid E+ warning w/ value of zero
+    htg_coil.setMinimumOutdoorDryBulbTemperatureforCompressorOperation(UnitConversions.convert(hp_min_temp, 'F', 'C'))
+    hvac_map[heat_pump.id] << htg_coil
+
+    # Supplemental Heating Coil
+
+    htg_supp_coil = create_supp_heating_coil(model, obj_name, heat_pump)
+    hvac_map[heat_pump.id] << htg_supp_coil
+
+    # Fan
+
+    fan_power_installed = 0.5 # FIXME
+    fan = create_supply_fan(model, obj_name, 1, fan_power_installed)
+    hvac_map[heat_pump.id] += disaggregate_fan_or_pump(model, fan, htg_coil, clg_coil, htg_supp_coil)
+
+    # Unitary System
+
+    air_loop_unitary = create_air_loop_unitary_system(model, obj_name, fan, htg_coil, clg_coil, htg_supp_coil, supp_max_temp)
+    hvac_map[heat_pump.id] << air_loop_unitary
+
+    # Air Loop
+
+    air_loop = create_air_loop(model, obj_name, air_loop_unitary, control_zone, sequential_heat_load_frac, sequential_cool_load_frac)
+    hvac_map[heat_pump.id] << air_loop
+
+    # Store info for HVAC Sizing measure
+    air_loop_unitary.additionalProperties.setFeature(Constants.SizingInfoHVACFracHeatLoadServed, heat_pump.fraction_heat_load_served)
+    air_loop_unitary.additionalProperties.setFeature(Constants.SizingInfoHVACFracCoolLoadServed, heat_pump.fraction_cool_load_served)
+    air_loop_unitary.additionalProperties.setFeature(Constants.SizingInfoHVACCoolType, Constants.ObjectNameWaterLoopHeatPump)
+    air_loop_unitary.additionalProperties.setFeature(Constants.SizingInfoHVACHeatType, Constants.ObjectNameWaterLoopHeatPump)
+  end
+
   def self.apply_boiler(model, runner, heating_system,
                         remaining_heat_load_frac, control_zone,
                         hvac_map)
@@ -984,7 +1062,7 @@ class HVAC
     hvac_map[heating_system.id] = []
     obj_name = Constants.ObjectNameBoiler
     sequential_heat_load_frac = calc_sequential_load_fraction(heating_system.fraction_heat_load_served, remaining_heat_load_frac)
-    is_condensing = false
+    is_condensing = false # FUTURE: Expose as input; default based on AFUE
     oat_reset_enabled = false
     oat_high = nil
     oat_low = nil
@@ -1065,6 +1143,7 @@ class HVAC
     boiler.setParasiticElectricLoad(0)
     plant_loop.addSupplyBranchForComponent(boiler)
     hvac_map[heating_system.id] << boiler
+    hvac_map[heating_system.id] += disaggregate_fan_or_pump(model, pump, boiler, nil, nil)
 
     if is_condensing && oat_reset_enabled
       setpoint_manager_oar = OpenStudio::Model::SetpointManagerOutdoorAirReset.new(model)
@@ -1097,31 +1176,65 @@ class HVAC
     pipe_demand_outlet = OpenStudio::Model::PipeAdiabatic.new(model)
     pipe_demand_outlet.addToNode(plant_loop.demandOutletNode)
 
-    # Baseboard Coil
+    if heating_system.distribution_system.hydronic_and_air_type.to_s == HPXML::HydronicAndAirTypeFanCoil
+      # Fan
+      fan = create_supply_fan(model, obj_name, 1, 0.0) # fan energy included in above pump via Electrix Auxiliar Energy (EAE)
 
-    baseboard_coil = OpenStudio::Model::CoilHeatingWaterBaseboard.new(model)
-    baseboard_coil.setName(obj_name + ' htg coil')
-    if not heating_system.heating_capacity.nil?
-      baseboard_coil.setHeatingDesignCapacity(UnitConversions.convert([heating_system.heating_capacity, Constants.small].max, 'Btu/hr', 'W')) # Used by HVACSizing measure
+      # Heating Coil
+      htg_coil = OpenStudio::Model::CoilHeatingWater.new(model, model.alwaysOnDiscreteSchedule)
+      htg_coil.setName(obj_name + ' htg coil')
+      if not heating_system.heating_capacity.nil?
+        htg_coil.setRatedCapacity(UnitConversions.convert([heating_system.heating_capacity, Constants.small].max, 'Btu/hr', 'W')) # Used by HVACSizing measure
+      end
+      plant_loop.addDemandBranchForComponent(htg_coil)
+
+      # Cooling Coil (always off)
+      clg_coil = OpenStudio::Model::CoilCoolingWater.new(model, model.alwaysOffDiscreteSchedule)
+      clg_coil.setName(obj_name + ' clg coil')
+      clg_coil.setDesignWaterFlowRate(0.0022)
+      clg_coil.setDesignAirFlowRate(1.45)
+      clg_coil.setDesignInletWaterTemperature(6.1)
+      clg_coil.setDesignInletAirTemperature(25.0)
+      clg_coil.setDesignOutletAirTemperature(10.0)
+      clg_coil.setDesignInletAirHumidityRatio(0.012)
+      clg_coil.setDesignOutletAirHumidityRatio(0.008)
+      plant_loop.addDemandBranchForComponent(clg_coil)
+
+      # Fan Coil
+      zone_hvac = OpenStudio::Model::ZoneHVACFourPipeFanCoil.new(model, model.alwaysOnDiscreteSchedule, fan, clg_coil, htg_coil)
+      zone_hvac.setName(obj_name + ' fan coil')
+      zone_hvac.setMaximumSupplyAirTemperatureInHeatingMode(UnitConversions.convert(120.0, 'F', 'C'))
+      zone_hvac.setHeatingConvergenceTolerance(0.001)
+      zone_hvac.setMinimumSupplyAirTemperatureInCoolingMode(UnitConversions.convert(55.0, 'F', 'C'))
+      zone_hvac.setMaximumColdWaterFlowRate(0.0)
+      zone_hvac.setCoolingConvergenceTolerance(0.001)
+      zone_hvac.setMaximumOutdoorAirFlowRate(0.0)
+      zone_hvac.addToThermalZone(control_zone)
+      hvac_map[heating_system.id] << zone_hvac
+    else
+      # Heating Coil
+      htg_coil = OpenStudio::Model::CoilHeatingWaterBaseboard.new(model)
+      htg_coil.setName(obj_name + ' htg coil')
+      if not heating_system.heating_capacity.nil?
+        htg_coil.setHeatingDesignCapacity(UnitConversions.convert([heating_system.heating_capacity, Constants.small].max, 'Btu/hr', 'W')) # Used by HVACSizing measure
+      end
+      htg_coil.setConvergenceTolerance(0.001)
+      plant_loop.addDemandBranchForComponent(htg_coil)
+      hvac_map[heating_system.id] << htg_coil
+
+      # Baseboard
+      zone_hvac = OpenStudio::Model::ZoneHVACBaseboardConvectiveWater.new(model, model.alwaysOnDiscreteSchedule, htg_coil)
+      zone_hvac.setName(obj_name + ' baseboard')
+      zone_hvac.addToThermalZone(control_zone)
+      hvac_map[heating_system.id] << zone_hvac
     end
-    baseboard_coil.setConvergenceTolerance(0.001)
-    plant_loop.addDemandBranchForComponent(baseboard_coil)
-    hvac_map[heating_system.id] << baseboard_coil
 
-    # Baseboard
-
-    baseboard_heater = OpenStudio::Model::ZoneHVACBaseboardConvectiveWater.new(model, model.alwaysOnDiscreteSchedule, baseboard_coil)
-    baseboard_heater.setName(obj_name)
-    baseboard_heater.addToThermalZone(control_zone)
-    hvac_map[heating_system.id] << baseboard_heater
-    hvac_map[heating_system.id] += disaggregate_fan_or_pump(model, pump, baseboard_heater, nil, nil)
-
-    control_zone.setSequentialHeatingFractionSchedule(baseboard_heater, get_sequential_load_schedule(model, sequential_heat_load_frac))
-    control_zone.setSequentialCoolingFractionSchedule(baseboard_heater, get_sequential_load_schedule(model, 0))
+    control_zone.setSequentialHeatingFractionSchedule(zone_hvac, get_sequential_load_schedule(model, sequential_heat_load_frac))
+    control_zone.setSequentialCoolingFractionSchedule(zone_hvac, get_sequential_load_schedule(model, 0))
 
     # Store info for HVAC Sizing measure
-    baseboard_heater.additionalProperties.setFeature(Constants.SizingInfoHVACFracHeatLoadServed, heating_system.fraction_heat_load_served)
-    baseboard_heater.additionalProperties.setFeature(Constants.SizingInfoHVACHeatType, Constants.ObjectNameBoiler)
+    zone_hvac.additionalProperties.setFeature(Constants.SizingInfoHVACFracHeatLoadServed, heating_system.fraction_heat_load_served)
+    zone_hvac.additionalProperties.setFeature(Constants.SizingInfoHVACHeatType, Constants.ObjectNameBoiler)
   end
 
   def self.apply_electric_baseboard(model, runner, heating_system,
@@ -1134,21 +1247,21 @@ class HVAC
 
     # Baseboard
 
-    baseboard_heater = OpenStudio::Model::ZoneHVACBaseboardConvectiveElectric.new(model)
-    baseboard_heater.setName(obj_name)
+    zone_hvac = OpenStudio::Model::ZoneHVACBaseboardConvectiveElectric.new(model)
+    zone_hvac.setName(obj_name)
     if not heating_system.heating_capacity.nil?
-      baseboard_heater.setNominalCapacity(UnitConversions.convert([heating_system.heating_capacity, Constants.small].max, 'Btu/hr', 'W')) # Used by HVACSizing measure
+      zone_hvac.setNominalCapacity(UnitConversions.convert([heating_system.heating_capacity, Constants.small].max, 'Btu/hr', 'W')) # Used by HVACSizing measure
     end
-    baseboard_heater.setEfficiency(heating_system.heating_efficiency_percent)
-    baseboard_heater.addToThermalZone(control_zone)
-    hvac_map[heating_system.id] << baseboard_heater
+    zone_hvac.setEfficiency(heating_system.heating_efficiency_percent)
+    zone_hvac.addToThermalZone(control_zone)
+    hvac_map[heating_system.id] << zone_hvac
 
-    control_zone.setSequentialHeatingFractionSchedule(baseboard_heater, get_sequential_load_schedule(model, sequential_heat_load_frac))
-    control_zone.setSequentialCoolingFractionSchedule(baseboard_heater, get_sequential_load_schedule(model, 0))
+    control_zone.setSequentialHeatingFractionSchedule(zone_hvac, get_sequential_load_schedule(model, sequential_heat_load_frac))
+    control_zone.setSequentialCoolingFractionSchedule(zone_hvac, get_sequential_load_schedule(model, 0))
 
     # Store info for HVAC Sizing measure
-    baseboard_heater.additionalProperties.setFeature(Constants.SizingInfoHVACFracHeatLoadServed, heating_system.fraction_heat_load_served)
-    baseboard_heater.additionalProperties.setFeature(Constants.SizingInfoHVACHeatType, Constants.ObjectNameElectricBaseboard)
+    zone_hvac.additionalProperties.setFeature(Constants.SizingInfoHVACFracHeatLoadServed, heating_system.fraction_heat_load_served)
+    zone_hvac.additionalProperties.setFeature(Constants.SizingInfoHVACHeatType, Constants.ObjectNameElectricBaseboard)
   end
 
   def self.apply_unit_heater(model, runner, heating_system,
@@ -1431,21 +1544,23 @@ class HVAC
     living_zone.setThermostatSetpointDualSetpoint(thermostat_setpoint)
   end
 
-  def self.apply_eae_to_heating_fan(runner, eae_hvacs, eae, fuel, load_frac, htg_type)
-    # Applies Electric Auxiliary Energy (EAE) for fuel heating equipment to fan power.
+  def self.apply_eae_to_heating_fan(runner, hvac_objects, heating_system)
+    # Applies Electric Auxiliary Energy (EAE) for fuel heating equipment to fan/pump power.
 
-    if htg_type == HPXML::HVACTypeBoiler
+    eae = heating_system.electric_auxiliary_energy
+
+    if heating_system.heating_system_type == HPXML::HVACTypeBoiler
 
       if eae.nil?
-        eae = get_default_eae(htg_type, fuel, load_frac, nil)
+        eae = get_default_eae(heating_system, nil)
       end
 
       elec_power = (eae / 2.08) # W
 
-      eae_hvacs.each do |eae_hvac|
-        next unless eae_hvac.is_a? OpenStudio::Model::PlantLoop
+      hvac_objects.each do |hvac_object|
+        next unless hvac_object.is_a? OpenStudio::Model::PlantLoop
 
-        eae_hvac.components.each do |plc|
+        hvac_object.components.each do |plc|
           if plc.to_BoilerHotWater.is_initialized
             boiler = plc.to_BoilerHotWater.get
             boiler.setParasiticElectricLoad(0.0)
@@ -1464,11 +1579,11 @@ class HVAC
     else # Furnace/WallFurnace/FloorFurnace/Stove
 
       unitary_systems = []
-      eae_hvacs.each do |eae_hvac|
-        if eae_hvac.is_a? OpenStudio::Model::AirLoopHVAC # Furnace
-          unitary_systems << get_unitary_system_from_air_loop_hvac(eae_hvac)
-        elsif eae_hvac.is_a? OpenStudio::Model::AirLoopHVACUnitarySystem # WallFurnace/FloorFurnace/Stove
-          unitary_systems << eae_hvac
+      hvac_objects.each do |hvac_object|
+        if hvac_object.is_a? OpenStudio::Model::AirLoopHVAC # Furnace
+          unitary_systems << get_unitary_system_from_air_loop_hvac(hvac_object)
+        elsif hvac_object.is_a? OpenStudio::Model::AirLoopHVACUnitarySystem # WallFurnace/FloorFurnace/Stove
+          unitary_systems << hvac_object
         end
       end
 
@@ -1476,7 +1591,7 @@ class HVAC
         if eae.nil?
           htg_coil = unitary_system.heatingCoil.get.to_CoilHeatingGas.get
           htg_capacity = UnitConversions.convert(htg_coil.nominalCapacity.get, 'W', 'kBtu/hr')
-          eae = get_default_eae(htg_type, fuel, load_frac, htg_capacity)
+          eae = get_default_eae(heating_system, htg_capacity)
         end
         elec_power = eae / 2.08 # W
 
@@ -1635,6 +1750,8 @@ class HVAC
       fan_or_pump_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Fan Electric Energy')
     elsif fan_or_pump.is_a? OpenStudio::Model::PumpVariableSpeed
       fan_or_pump_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Pump Electric Energy')
+    elsif fan_or_pump.is_a? OpenStudio::Model::ElectricEquipment
+      fan_or_pump_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Electric Equipment Electric Energy')
     else
       fail "Unexpected fan/pump object '#{fan_or_pump.name}'."
     end
@@ -1662,8 +1779,10 @@ class HVAC
       var = "Heating Coil #{EPlus.output_fuel_map(EPlus::FuelTypeElectricity)} Energy"
       if htg_object.is_a? OpenStudio::Model::CoilHeatingGas
         var = "Heating Coil #{EPlus.output_fuel_map(htg_object.fuelType)} Energy"
-      elsif htg_object.is_a? OpenStudio::Model::ZoneHVACBaseboardConvectiveWater
-        var = 'Baseboard Total Heating Energy'
+      elsif htg_object.is_a? OpenStudio::Model::BoilerHotWater
+        var = 'Boiler Heating Energy'
+      elsif htg_object.is_a? OpenStudio::Model::CoilHeatingWater
+        var = 'Heating Coil Heating Energy'
       end
 
       htg_object_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, var)
@@ -1907,11 +2026,11 @@ class HVAC
     ief_db = UnitConversions.convert(65.0, 'F', 'C') # degree C
     rh = 60.0 # for both EF and IEF test conditions, %
 
-    # Independent ariables applied to curve equations
+    # Independent variables applied to curve equations
     var_array_ief = [1, ief_db, ief_db * ief_db, rh, rh * rh, ief_db * rh]
 
     # Curved values under EF test conditions
-    curve_value_ef = 1 # Curves are nomalized to 1.0 under EF test conditions, 80F, 60%
+    curve_value_ef = 1 # Curves are normalized to 1.0 under EF test conditions, 80F, 60%
     # Curve values under IEF test conditions
     ef_curve_value_ief = var_array_ief.zip(ef_coeff).map { |var, coeff| var * coeff }.sum(0.0)
     water_removal_curve_value_ief = var_array_ief.zip(w_coeff).map { |var, coeff| var * coeff }.sum(0.0)
@@ -1923,22 +2042,63 @@ class HVAC
     return ef_input, water_removal_rate_input
   end
 
-  def self.get_default_eae(htg_type, fuel, load_frac, furnace_capacity_kbtuh)
-    # From ANSI/RESNET/ICC 301 Standard
-    if htg_type == HPXML::HVACTypeBoiler
-      if [HPXML::FuelTypeNaturalGas,
-          HPXML::FuelTypePropane].include? fuel
-        return 170.0 * load_frac # kWh/yr
-      elsif [HPXML::FuelTypeOil,
-             HPXML::FuelTypeOil1,
-             HPXML::FuelTypeOil2,
-             HPXML::FuelTypeOil4,
-             HPXML::FuelTypeOil5or6,
-             HPXML::FuelTypeDiesel,
-             HPXML::FuelTypeKerosene].include? fuel
-        return 330.0 * load_frac # kWh/yr
+  def self.get_default_eae(heating_system, furnace_capacity_kbtuh)
+    # From ANSI/RESNET/ICC 301-2019 Standard
+
+    load_frac = heating_system.fraction_heat_load_served
+    fuel = heating_system.heating_system_fuel
+
+    if heating_system.heating_system_type == HPXML::HVACTypeBoiler
+      if heating_system.is_shared_system
+        # FUTURE: Allow defaulting based on ANSI/RESNET/ICC 301-2019 Table 4.5.2(5)
+        sp_kw = UnitConversions.convert(heating_system.shared_loop_watts, 'W', 'kW')
+        n_dweq = heating_system.number_of_units_served.to_f
+
+        distribution_system = heating_system.distribution_system
+        distribution_type = distribution_system.distribution_system_type
+
+        if distribution_type == HPXML::HVACDistributionTypeHydronic
+          # Shared boiler w/ baseboard/radiators/etc
+          aux_in = 0.0
+        elsif distribution_type == HPXML::HVACDistributionTypeHydronicAndAir
+          hydronic_and_air_type = distribution_system.hydronic_and_air_type
+          if hydronic_and_air_type == HPXML::HydronicAndAirTypeFanCoil
+            # Shared boiler w/ fan coil
+            aux_in = UnitConversions.convert(heating_system.fan_coil_watts, 'W', 'kW')
+          elsif hydronic_and_air_type == HPXML::HydronicAndAirTypeWaterLoopHeatPump
+            # Shared boiler w/ WLHP
+            # ANSI/RESNET/ICC 301-2019 Section 4.4.7.2
+            aux_in = 0.0
+          else
+            fail "Unexpected distribution type '#{hydronic_and_air_type}' for shared boiler."
+          end
+        else
+          fail "Unexpected distribution type '#{distribution_type}' for shared boiler."
+        end
+
+        # ANSI/RESNET/ICC 301-2019 Equation 4.4-5
+        eae = ((sp_kw / n_dweq) + aux_in) * 2080.0
+        return eae * load_frac # kWh/yr
+
+      else # In-unit boilers
+
+        if [HPXML::FuelTypeNaturalGas,
+            HPXML::FuelTypePropane].include? fuel
+          return 170.0 * load_frac # kWh/yr
+        elsif [HPXML::FuelTypeOil,
+               HPXML::FuelTypeOil1,
+               HPXML::FuelTypeOil2,
+               HPXML::FuelTypeOil4,
+               HPXML::FuelTypeOil5or6,
+               HPXML::FuelTypeDiesel,
+               HPXML::FuelTypeKerosene].include? fuel
+          return 330.0 * load_frac # kWh/yr
+        end
+
       end
-    elsif htg_type == HPXML::HVACTypeFurnace
+    elsif heating_system.heating_system_type == HPXML::HVACTypeFurnace
+
+      # Furnaces
       if [HPXML::FuelTypeNaturalGas,
           HPXML::FuelTypePropane].include? fuel
         return (149.0 + 10.3 * furnace_capacity_kbtuh) * load_frac # kWh/yr
@@ -1951,6 +2111,7 @@ class HVAC
              HPXML::FuelTypeKerosene].include? fuel
         return (439.0 + 5.5 * furnace_capacity_kbtuh) * load_frac # kWh/yr
       end
+
     end
     return 0.0
   end
@@ -2811,9 +2972,22 @@ class HVAC
     return const_biquadratic
   end
 
+  def self.create_curve_quadratic_constant(model)
+    curve = OpenStudio::Model::CurveQuadratic.new(model)
+    curve.setName('ConstantQuadratic')
+    curve.setCoefficient1Constant(1)
+    curve.setCoefficient2x(0)
+    curve.setCoefficient3xPOW2(0)
+    curve.setMinimumValueofx(-100)
+    curve.setMaximumValueofx(100)
+    curve.setMinimumCurveOutput(-100)
+    curve.setMaximumCurveOutput(100)
+    return curve
+  end
+
   def self.create_curve_cubic_constant(model)
-    constant_cubic = OpenStudio::Model::CurveCubic.new('ConstantCubic')
-    constant_cubic.setName(name)
+    constant_cubic = OpenStudio::Model::CurveCubic.new(model)
+    constant_cubic.setName('ConstantCubic')
     constant_cubic.setCoefficient1Constant(1)
     constant_cubic.setCoefficient2x(0)
     constant_cubic.setCoefficient3xPOW2(0)
@@ -3228,6 +3402,12 @@ class HVAC
       hvac_types << baseboard.additionalProperties.getFeatureAsString(Constants.SizingInfoHVACHeatType).get
     end
 
+    fancoils = get_fan_coils(model, thermal_zone)
+    fancoils.each do |fancoil|
+      equipment << fancoil
+      hvac_types << fancoil.additionalProperties.getFeatureAsString(Constants.SizingInfoHVACHeatType).get
+    end
+
     baseboards = get_baseboard_electrics(model, thermal_zone)
     baseboards.each do |baseboard|
       equipment << baseboard
@@ -3262,6 +3442,8 @@ class HVAC
       clg_coil = get_coil_from_hvac_component(hvac_equip.coolingCoil)
       supp_htg_coil = get_coil_from_hvac_component(hvac_equip.supplementalHeatingCoil)
     elsif hvac_equip.is_a? OpenStudio::Model::ZoneHVACBaseboardConvectiveWater
+      htg_coil = get_coil_from_hvac_component(hvac_equip.heatingCoil)
+    elsif hvac_equip.is_a? OpenStudio::Model::ZoneHVACFourPipeFanCoil
       htg_coil = get_coil_from_hvac_component(hvac_equip.heatingCoil)
     elsif hvac_equip.is_a? OpenStudio::Model::ZoneHVACPackagedTerminalAirConditioner
       htg_coil = get_coil_from_hvac_component(hvac_equip.heatingCoil)
@@ -3302,6 +3484,8 @@ class HVAC
       return hvac_component.to_CoilHeatingElectric.get
     elsif hvac_component.to_CoilHeatingWaterBaseboard.is_initialized
       return hvac_component.to_CoilHeatingWaterBaseboard.get
+    elsif hvac_component.to_CoilHeatingWater.is_initialized
+      return hvac_component.to_CoilHeatingWater.get
     elsif hvac_component.to_CoilHeatingWaterToAirHeatPumpEquationFit.is_initialized
       return hvac_component.to_CoilHeatingWaterToAirHeatPumpEquationFit.get
     end
@@ -3401,6 +3585,17 @@ class HVAC
       baseboards << baseboard
     end
     return baseboards
+  end
+
+  def self.get_fan_coils(model, thermal_zone)
+    # Returns the fan coil if available
+    fancoils = []
+    model.getZoneHVACFourPipeFanCoils.each do |fancoil|
+      next unless thermal_zone.handle.to_s == fancoil.thermalZone.get.handle.to_s
+
+      fancoils << fancoil
+    end
+    return fancoils
   end
 
   def self.get_baseboard_electrics(model, thermal_zone)
@@ -3864,7 +4059,7 @@ class HVAC
     return crankcase_kw, crankcase_temp
   end
 
-  def self.get_heatpump_temp_assumptions(heat_pump)
+  def self.get_heat_pump_temp_assumptions(heat_pump)
     # Calculates:
     # 1. Minimum temperature for HP compressor operation
     # 2. Maximum temperature for HP supplemental heating operation
@@ -3918,5 +4113,138 @@ class HVAC
     secondary_duct_location = HPXML::LocationLivingSpace
 
     return primary_duct_location, secondary_duct_location
+  end
+
+  def self.apply_shared_systems(hpxml)
+    apply_shared_cooling_systems(hpxml)
+    apply_shared_heating_systems(hpxml)
+    HPXMLDefaults.apply_hvac(hpxml)
+
+    # Remove any orphaned HVAC distributions
+    hpxml.hvac_distributions.each do |hvac_distribution|
+      hvac_systems = []
+      (hpxml.heating_systems + hpxml.cooling_systems + hpxml.heat_pumps).each do |hvac_system|
+        next if hvac_system.distribution_system_idref.nil?
+        next unless hvac_system.distribution_system_idref == hvac_distribution.id
+
+        hvac_systems << hvac_system
+      end
+      next unless hvac_systems.empty?
+
+      hvac_distribution.delete
+    end
+  end
+
+  def self.apply_shared_cooling_systems(hpxml)
+    hpxml.cooling_systems.each do |cooling_system|
+      next unless cooling_system.is_shared_system
+
+      distribution_system = cooling_system.distribution_system
+      distribution_type = distribution_system.distribution_system_type
+      hydronic_and_air_type = distribution_system.hydronic_and_air_type
+
+      # Calculate air conditioner SEER equivalent
+      n_dweq = cooling_system.number_of_units_served.to_f
+      aux = cooling_system.shared_loop_watts
+
+      if cooling_system.cooling_system_type == HPXML::HVACTypeChiller
+
+        # Chiller w/ baseboard or fan coil or water loop heat pump
+        cap = cooling_system.cooling_capacity
+        chiller_input = UnitConversions.convert(cooling_system.cooling_efficiency_kw_per_ton * UnitConversions.convert(cap, 'Btu/hr', 'ton'), 'kW', 'W')
+        if distribution_type == HPXML::HVACDistributionTypeHydronic
+          aux_dweq = 0.0
+        elsif distribution_type == HPXML::HVACDistributionTypeHydronicAndAir
+          if hydronic_and_air_type == HPXML::HydronicAndAirTypeFanCoil
+            aux_dweq = cooling_system.fan_coil_watts
+          elsif hydronic_and_air_type == HPXML::HydronicAndAirTypeWaterLoopHeatPump
+            aux_dweq = cooling_system.wlhp_cooling_capacity / cooling_system.wlhp_cooling_efficiency_eer
+          else
+            fail "Unexpected distribution type '#{hydronic_and_air_type}' for chiller."
+          end
+        else
+          fail "Unexpected distribution type '#{distribution_type}' for chiller."
+        end
+        # ANSI/RESNET/ICC 301-2019 Equation 4.4-2
+        seer_eq = (cap - 3.41 * aux - 3.41 * aux_dweq * n_dweq) / (chiller_input + aux + aux_dweq * n_dweq)
+
+      elsif cooling_system.cooling_system_type == HPXML::HVACTypeCoolingTower
+
+        # Cooling tower w/ water loop heat pump
+        if distribution_type == HPXML::HVACDistributionTypeHydronicAndAir
+          hydronic_and_air_type = distribution_system.hydronic_and_air_type
+          if hydronic_and_air_type == HPXML::HydronicAndAirTypeWaterLoopHeatPump
+            wlhp_cap = cooling_system.wlhp_cooling_capacity
+            wlhp_input = wlhp_cap / cooling_system.wlhp_cooling_efficiency_eer
+          else
+            fail "Unexpected distribution type '#{hydronic_and_air_type}' for cooling tower."
+          end
+        else
+          fail "Unexpected hydronic distribution type '#{distribution_type}' for cooling tower."
+        end
+        # ANSI/RESNET/ICC 301-2019 Equation 4.4-3
+        seer_eq = (wlhp_cap - 3.41 * aux / n_dweq) / (wlhp_input + aux / n_dweq)
+
+      else
+        fail "Unexpected cooling system type '#{cooling_system.cooling_system_type}'."
+      end
+
+      cooling_system.cooling_system_type = HPXML::HVACTypeCentralAirConditioner
+      cooling_system.cooling_efficiency_seer = seer_eq
+      cooling_system.cooling_capacity = nil # Autosize the equipment
+
+      # Assign new distribution system to air conditioner
+      if distribution_type == HPXML::HVACDistributionTypeHydronic
+        # Assign DSE=1
+        hpxml.hvac_distributions.add(id: "#{cooling_system.id}AirDistributionSystem",
+                                     distribution_system_type: HPXML::HVACDistributionTypeDSE,
+                                     annual_cooling_dse: 1)
+        cooling_system.distribution_system_idref = hpxml.hvac_distributions[-1].id
+      elsif distribution_type == HPXML::HVACDistributionTypeHydronicAndAir
+        # Assign AirDistribution
+        hpxml.hvac_distributions << distribution_system.dup
+        hpxml.hvac_distributions[-1].id = "#{cooling_system.id}AirDistributionSystem"
+        hpxml.hvac_distributions[-1].distribution_system_type = HPXML::HVACDistributionTypeAir
+        cooling_system.distribution_system_idref = hpxml.hvac_distributions[-1].id
+      end
+    end
+  end
+
+  def self.apply_shared_heating_systems(hpxml)
+    hpxml.heating_systems.each do |heating_system|
+      next unless heating_system.is_shared_system
+
+      distribution_system = heating_system.distribution_system
+      distribution_type = distribution_system.distribution_system_type
+      hydronic_and_air_type = distribution_system.hydronic_and_air_type
+
+      if heating_system.heating_system_type == HPXML::HVACTypeBoiler && hydronic_and_air_type.to_s == HPXML::HydronicAndAirTypeWaterLoopHeatPump
+
+        # Shared boiler w/ water loop heat pump
+        # Per ANSI/RESNET/ICC 301-2019 Section 4.4.7.2, model as:
+        # A) heat pump with constant efficiency and duct losses, fraction heat load served = 1/COP
+        # B) boiler, fraction heat load served = 1-1/COP
+        fraction_heat_load_served = heating_system.fraction_heat_load_served
+
+        # Heat pump
+        hpxml.heat_pumps.add(id: "#{heating_system.id}_WLHP",
+                             distribution_system_idref: heating_system.distribution_system_idref,
+                             heat_pump_type: HPXML::HVACTypeHeatPumpWaterLoopToAir,
+                             heat_pump_fuel: HPXML::FuelTypeElectricity,
+                             heating_efficiency_cop: heating_system.wlhp_heating_efficiency_cop,
+                             fraction_heat_load_served: fraction_heat_load_served * (1.0 / heating_system.wlhp_heating_efficiency_cop),
+                             fraction_cool_load_served: 0.0)
+
+        # Boiler
+        heating_system.electric_auxiliary_energy = get_default_eae(heating_system, nil)
+        heating_system.fraction_heat_load_served = fraction_heat_load_served * (1.0 - 1.0 / heating_system.wlhp_heating_efficiency_cop)
+        heating_system.distribution_system_idref = "#{heating_system.id}_Baseboard"
+        hpxml.hvac_distributions.add(id: heating_system.distribution_system_idref,
+                                     distribution_system_type: HPXML::HVACDistributionTypeHydronic,
+                                     hydronic_type: HPXML::HydronicTypeBaseboard)
+      end
+
+      heating_system.heating_capacity = nil # Autosize the equipment
+    end
   end
 end
