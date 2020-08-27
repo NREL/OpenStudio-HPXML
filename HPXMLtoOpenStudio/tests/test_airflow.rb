@@ -50,6 +50,16 @@ class HPXMLtoOpenStudioAirflowTest < MiniTest::Test
     return eeds
   end
 
+  def get_oed_for_ventilation(model, oe_name)
+    oeds = []
+    model.getOtherEquipmentDefinitions.each do |oed|
+      next unless oed.name.to_s.include? oe_name
+
+      oeds << oed
+    end
+    return oeds
+  end
+
   def test_infiltration_ach50
     args_hash = {}
     args_hash['hpxml_path'] = File.absolute_path(File.join(sample_files_dir, 'base.xml'))
@@ -387,6 +397,54 @@ class HPXMLtoOpenStudioAirflowTest < MiniTest::Test
     assert_in_epsilon(1.0, bath_fan_eeds[1].fractionLost, 0.01)
     # CFIS minutes
     assert_in_epsilon(vent_fan_mins_cfis, program_values['CFIS_t_min_hr_open'].sum, 0.01)
+  end
+
+  def test_shared_mechvent
+    args_hash = {}
+    args_hash['hpxml_path'] = File.absolute_path(File.join(sample_files_dir, 'base-mechvent-shared.xml'))
+    model, hpxml = _test_measure(args_hash)
+
+    # Get HPXML values
+    vent_fans_precond = hpxml.ventilation_fans.select { |f| (not f.unit_preheating_capacity.nil?) || (not f.unit_precooling_capacity.nil?) }
+    vent_fans_nonprecond = hpxml.ventilation_fans.select { |f| f.unit_preheating_capacity.nil? && f.unit_precooling_capacity.nil? }
+    vent_fans_tot_pow_noncfis = hpxml.ventilation_fans.select { |f| f.fan_type != HPXML::MechVentTypeCFIS }.map { |f| f.average_fan_power }.sum(0.0)
+    vent_fans_clg_cap_precond = vent_fans_precond.map { |f| f.unit_precooling_capacity }.sum(0.0)
+    vent_fans_htg_cap_precond = vent_fans_precond.map { |f| f.unit_preheating_capacity }.sum(0.0)
+    vent_fans_cfm_precond = vent_fans_precond.map { |f| f.average_flow_rate }.sum(0.0)
+    # The preconditioned CFIS (cfm handled the same as other systems, only pow calculated in cfis program differently)
+    vent_fans_precond_pow_cfis = vent_fans_precond.select { |f| f.fan_type == HPXML::MechVentTypeCFIS }.map { |f| f.unit_fan_power }.sum(0.0)
+    vent_fans_precond_mins_cfis = vent_fans_precond.select { |f| f.fan_type == HPXML::MechVentTypeCFIS }.map { |f| f.hours_in_operation / 24.0 * 60.0 }.sum(0.0)
+    # The unpreconditioned CFIS
+    vent_fans_nonprecond_pow_cfis = vent_fans_nonprecond.map { |f| f.unit_fan_power }.sum(0.0)
+    vent_fans_nonprecond_cfm_cfis = vent_fans_nonprecond.map { |f| f.oa_flow_rate }.sum(0.0)
+    vent_fans_nonprecond_mins_cfis = vent_fans_nonprecond.map { |f| f.hours_in_operation / 24.0 * 60.0 }.sum(0.0)
+
+    # Load and energy eed
+    assert_in_epsilon(1, get_oed_for_ventilation(model, 'shared mech vent sensible load').size, 0.01)
+    assert_in_epsilon(vent_fans_precond.size, get_oed_for_ventilation(model, 'shared mech vent precooling energy').size, 0.01)
+    assert_in_epsilon(vent_fans_precond.size, get_oed_for_ventilation(model, 'shared mech vent preheating energy').size, 0.01)
+
+    # Fan power implementation
+    assert_in_epsilon(1, get_eed_for_ventilation(model, Constants.ObjectNameMechanicalVentilationHouseFan).size, 0.01)
+    assert_in_epsilon(vent_fans_tot_pow_noncfis, get_eed_for_ventilation(model, Constants.ObjectNameMechanicalVentilationHouseFan).map { |eed| eed.designLevel.get }.sum, 0.01)
+
+    # Check preconditioning program
+    program_values = get_ems_values(model.getEnergyManagementSystemPrograms, 'shared mech vent preconditioning program')
+    assert_in_epsilon(vent_fans_cfm_precond, UnitConversions.convert(program_values['SharedFlowRate'].sum, 'm^3/s', 'cfm'), 0.01)
+    assert_in_epsilon(vent_fans_clg_cap_precond, UnitConversions.convert(program_values['PreCoolingCap'].sum, 'W', 'Btu/hr'), 0.01)
+    assert_in_epsilon(vent_fans_htg_cap_precond, UnitConversions.convert(program_values['PreHeatingCap'].sum, 'W', 'Btu/hr'), 0.01)
+    assert_in_epsilon(vent_fans_precond_pow_cfis, program_values['CFIS_fan_w'].sum, 0.01)
+    assert_in_epsilon(vent_fans_precond_mins_cfis, program_values['CFIS_t_min_hr_open'].sum, 0.01)
+    program_values = get_ems_values(model.getEnergyManagementSystemPrograms, "#{Constants.ObjectNameInfiltration} program")
+    assert_in_epsilon(0, UnitConversions.convert(program_values['QWHV_bal'].sum, 'm^3/s', 'cfm'), 0.01)
+    assert_in_epsilon(0, UnitConversions.convert(program_values['QWHV_sup'].sum, 'm^3/s', 'cfm'), 0.01)
+    assert_in_epsilon(0, UnitConversions.convert(program_values['QWHV_exh'].sum, 'm^3/s', 'cfm'), 0.01)
+    assert_in_epsilon(0, UnitConversions.convert(program_values['QWHV_ervhrv'].sum, 'm^3/s', 'cfm'), 0.01)
+    assert_in_epsilon(0, UnitConversions.convert(program_values['Qrange'].sum, 'm^3/s', 'cfm'), 0.01)
+    assert_in_epsilon(0, UnitConversions.convert(program_values['Qbath'].sum, 'm^3/s', 'cfm'), 0.01)
+    assert_in_epsilon(vent_fans_nonprecond_cfm_cfis, UnitConversions.convert(program_values['CFIS_Q_duct'].sum, 'm^3/s', 'cfm'), 0.01)
+    assert_in_epsilon(vent_fans_nonprecond_pow_cfis, program_values['CFIS_fan_w'].sum, 0.01)
+    assert_in_epsilon(vent_fans_nonprecond_mins_cfis, program_values['CFIS_t_min_hr_open'].sum, 0.01)
   end
 
   def test_ducts_leakage_cfm25
