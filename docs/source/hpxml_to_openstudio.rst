@@ -613,7 +613,7 @@ Air Distribution
 
 - ``ConditionedFloorAreaServed``
 - Optional ``NumberofReturnRegisters``. If not provided, one return register per conditioned floor will be assumed.
-- Supply leakage to the outside in CFM25 or percent of airflow (``DuctLeakageMeasurement[DuctType='supply']/DuctLeakage/Value``)
+- Optional supply leakage to the outside in CFM25 or percent of airflow (``DuctLeakageMeasurement[DuctType='supply']/DuctLeakage/Value``)
 - Optional return leakage to the outside in CFM25 or percent of airflow (``DuctLeakageMeasurement[DuctType='return']/DuctLeakage/Value``)
 - Optional supply ducts (``Ducts[DuctType='supply']``)
 - Optional return ducts (``Ducts[DuctType='return']``)

@@ -616,17 +616,11 @@ class EnergyPlusValidator
       ## [HVACDistType=Air]
       '/HPXML/Building/BuildingDetails/Systems/HVAC/HVACDistribution/DistributionSystemType/AirDistribution' => {
         '../../ConditionedFloorAreaServed' => one,
-        'DuctLeakageMeasurement[DuctType="supply"]/DuctLeakage[(Units="CFM25" or Units="Percent") and TotalOrToOutside="to outside"]/Value' => one,
+        'DuctLeakageMeasurement[DuctType="supply"]/DuctLeakage[(Units="CFM25" or Units="Percent") and TotalOrToOutside="to outside"]/Value' => zero_or_one,
         'DuctLeakageMeasurement[DuctType="return"]/DuctLeakage[(Units="CFM25" or Units="Percent") and TotalOrToOutside="to outside"]/Value' => zero_or_one,
-        'Ducts[DuctType="supply"]' => zero_or_more, # See [AirDuct]
-        'Ducts[DuctType="return"]' => zero_or_more, # See [AirDuct]
+        'Ducts[DuctType="supply"]' => zero_or_more, # See [HVACDuct]
+        'Ducts[DuctType="return"]' => zero_or_more, # See [HVACDuct]
         'NumberofReturnRegisters' => zero_or_one,
-      },
-
-      ## [AirDuct]
-      '/HPXML/Building/BuildingDetails/Systems/HVAC/HVACDistribution/DistributionSystemType/AirDistribution/Ducts[DuctType="supply" or DuctType="return"]' => {
-        'DuctInsulationRValue' => one,
-        'DuctSurfaceArea | DuctLocation[text()="living space" or text()="basement - conditioned" or text()="basement - unconditioned" or text()="crawlspace - vented" or text()="crawlspace - unvented" or text()="attic - vented" or text()="attic - unvented" or text()="garage" or text()="exterior wall" or text()="under slab" or text()="roof deck" or text()="outside" or text()="other housing unit" or text()="other heated space" or text()="other multifamily buffer space" or text()="other non-freezing space"]' => zero_or_two,
       },
 
       ## [HVACDistType=Hydronic]
@@ -640,20 +634,20 @@ class EnergyPlusValidator
         '../../ConditionedFloorAreaServed' => one,
         'DuctLeakageMeasurement[DuctType="supply"]/DuctLeakage[(Units="CFM25" or Units="Percent") and TotalOrToOutside="to outside"]/Value' => zero_or_one,
         'DuctLeakageMeasurement[DuctType="return"]/DuctLeakage[(Units="CFM25" or Units="Percent") and TotalOrToOutside="to outside"]/Value' => zero_or_one,
-        'Ducts[DuctType="supply"]' => zero_or_more, # See [HydronicAndAirDuct]
-        'Ducts[DuctType="return"]' => zero_or_more, # See [HydronicAndAirDuct]
+        'Ducts[DuctType="supply"]' => zero_or_more, # See [HVACDuct]
+        'Ducts[DuctType="return"]' => zero_or_more, # See [HVACDuct]
         'NumberofReturnRegisters' => zero_or_one,
-      },
-
-      ## [HydronicAndAirDuct]
-      '/HPXML/Building/BuildingDetails/Systems/HVAC/HVACDistribution/DistributionSystemType/HydronicAndAirDistribution/Ducts[DuctType="supply" or DuctType="return"]' => {
-        'DuctInsulationRValue' => one,
-        'DuctSurfaceArea | DuctLocation[text()="living space" or text()="basement - conditioned" or text()="basement - unconditioned" or text()="crawlspace - vented" or text()="crawlspace - unvented" or text()="attic - vented" or text()="attic - unvented" or text()="garage" or text()="exterior wall" or text()="under slab" or text()="roof deck" or text()="outside" or text()="other housing unit" or text()="other heated space" or text()="other multifamily buffer space" or text()="other non-freezing space"]' => zero_or_two,
       },
 
       ## [HVACDistType=DSE]
       '/HPXML/Building/BuildingDetails/Systems/HVAC/HVACDistribution[DistributionSystemType[Other="DSE"]]' => {
         'AnnualHeatingDistributionSystemEfficiency | AnnualCoolingDistributionSystemEfficiency' => one_or_more,
+      },
+
+      ## [HVACDuct]
+      '/HPXML/Building/BuildingDetails/Systems/HVAC/HVACDistribution/DistributionSystemType/*/Ducts[DuctType="supply" or DuctType="return"]' => {
+        'DuctInsulationRValue' => one,
+        'DuctSurfaceArea | DuctLocation[text()="living space" or text()="basement - conditioned" or text()="basement - unconditioned" or text()="crawlspace - vented" or text()="crawlspace - unvented" or text()="attic - vented" or text()="attic - unvented" or text()="garage" or text()="exterior wall" or text()="under slab" or text()="roof deck" or text()="outside" or text()="other housing unit" or text()="other heated space" or text()="other multifamily buffer space" or text()="other non-freezing space"]' => zero_or_two,
       },
 
       # [MechanicalVentilation]

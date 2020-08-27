@@ -2078,8 +2078,6 @@ class OSModel
   def self.add_heating_system(runner, model, spaces)
     living_zone = spaces[HPXML::LocationLivingSpace].thermalZone.get
 
-    HVAC.apply_shared_heating_systems(@hpxml)
-
     @hpxml.heating_systems.each do |heating_system|
       check_distribution_system(heating_system.distribution_system, heating_system.heating_system_type)
 
