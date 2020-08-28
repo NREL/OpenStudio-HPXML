@@ -144,7 +144,7 @@ class HPXMLTest < MiniTest::Test
                             'dishwasher-location.xml' => ["Dishwasher location is 'garage' but building does not have this location specified."],
                             'dhw-frac-load-served.xml' => ['Expected FractionDHWLoadServed to sum to 1, but calculated sum is 1.15.'],
                             'duct-location.xml' => ["Duct location is 'garage' but building does not have this location specified."],
-                            'duct-location-unconditioned-space.xml' => ['Expected [0, 2] element(s) but found 1 element(s) for xpath: /HPXML/Building/BuildingDetails/Systems/HVAC/HVACDistribution/DistributionSystemType/AirDistribution/Ducts[DuctType="supply" or DuctType="return"]: DuctSurfaceArea | DuctLocation[text()='],
+                            'duct-location-unconditioned-space.xml' => ['Expected [0, 2] element(s) but found 1 element(s) for xpath: /HPXML/Building/BuildingDetails/Systems/HVAC/HVACDistribution/DistributionSystemType/*/Ducts[DuctType="supply" or DuctType="return"]: DuctSurfaceArea | DuctLocation[text()='],
                             'duplicate-id.xml' => ["Duplicate SystemIdentifier IDs detected for 'Wall'."],
                             'enclosure-attic-missing-roof.xml' => ['There must be at least one roof adjacent to attic - unvented.'],
                             'enclosure-basement-missing-exterior-foundation-wall.xml' => ['There must be at least one exterior foundation wall adjacent to basement - unconditioned.'],
@@ -187,7 +187,7 @@ class HPXMLTest < MiniTest::Test
                             'mismatched-slab-and-foundation-wall.xml' => ["Foundation wall 'FoundationWall' is adjacent to 'basement - conditioned' but no corresponding slab was found adjacent to"],
                             'missing-elements.xml' => ['Expected [1] element(s) but found 0 element(s) for xpath: /HPXML/Building/BuildingDetails/BuildingSummary/BuildingConstruction: NumberofConditionedFloors',
                                                        'Expected [1] element(s) but found 0 element(s) for xpath: /HPXML/Building/BuildingDetails/BuildingSummary/BuildingConstruction: ConditionedFloorArea'],
-                            'missing-duct-location.xml' => ['Expected [0, 2] element(s) but found 1 element(s) for xpath: /HPXML/Building/BuildingDetails/Systems/HVAC/HVACDistribution/DistributionSystemType/AirDistribution/Ducts[DuctType="supply" or DuctType="return"]: DuctSurfaceArea | DuctLocation[text()='],
+                            'missing-duct-location.xml' => ['Expected [0, 2] element(s) but found 1 element(s) for xpath: /HPXML/Building/BuildingDetails/Systems/HVAC/HVACDistribution/DistributionSystemType/*/Ducts[DuctType="supply" or DuctType="return"]: DuctSurfaceArea | DuctLocation[text()='],
                             'missing-duct-location-and-surface-area.xml' => ['Error: The location and surface area of all ducts must be provided or blank.'],
                             'multifamily-reference-appliance.xml' => ["The building is of type 'single-family detached' but"],
                             'multifamily-reference-duct.xml' => ["The building is of type 'single-family detached' but"],
@@ -395,6 +395,7 @@ class HPXMLTest < MiniTest::Test
     sqlFile = OpenStudio::SqlFile.new(sql_path, false)
     hpxml_defaults_path = File.join(rundir, 'in.xml')
     hpxml = HPXML.new(hpxml_path: hpxml_defaults_path)
+    HVAC.apply_shared_systems(hpxml)
 
     # Collapse windows further using same logic as measure.rb
     hpxml.windows.each do |window|
@@ -512,6 +513,9 @@ class HPXMLTest < MiniTest::Test
       next if err_line.include?('Foundation:Kiva') && err_line.include?('wall surfaces with more than four vertices') # TODO: Check alternative approach
       if hpxml_path.include?('base-simcontrol-timestep-10-mins.xml') || hpxml_path.include?('ASHRAE_Standard_140')
         next if err_line.include? 'Temperature out of range [-100. to 200.] (PsyPsatFnTemp)'
+      end
+      if hpxml_path.include? 'fan-coil' # Warning for unused coil
+        next if err_line.include? 'In calculating the design coil UA for Coil:Cooling:Water'
       end
 
       flunk "Unexpected warning found: #{err_line}"
@@ -843,9 +847,8 @@ class HPXMLTest < MiniTest::Test
     hpxml.heating_systems.each do |heating_system|
       htg_sys_type = heating_system.heating_system_type
       htg_sys_fuel = heating_system.heating_system_fuel
-      htg_load_frac = heating_system.fraction_heat_load_served
 
-      next unless htg_load_frac > 0
+      next unless heating_system.fraction_heat_load_served > 0
 
       # Electric Auxiliary Energy
       # For now, skip if multiple equipment
@@ -859,7 +862,7 @@ class HPXMLTest < MiniTest::Test
           query = "SELECT Value FROM TabularDataWithStrings WHERE ReportName='EquipmentSummary' AND ReportForString='Entire Facility' AND TableName='Heating Coils' AND RowName LIKE '%#{Constants.ObjectNameFurnace.upcase}%' AND ColumnName='Nominal Total Capacity' AND Units='W'"
           furnace_capacity_kbtuh = UnitConversions.convert(sqlFile.execAndReturnFirstDouble(query).get, 'W', 'kBtu/hr')
         end
-        hpxml_value = HVAC.get_default_eae(htg_sys_type, htg_sys_fuel, htg_load_frac, furnace_capacity_kbtuh) / 2.08
+        hpxml_value = HVAC.get_default_eae(heating_system, furnace_capacity_kbtuh) / 2.08
       end
 
       if htg_sys_type == HPXML::HVACTypeBoiler
