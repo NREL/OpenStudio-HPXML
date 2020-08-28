@@ -401,7 +401,7 @@ class HPXMLtoOpenStudioAirflowTest < MiniTest::Test
 
   def test_shared_mechvent
     args_hash = {}
-    args_hash['hpxml_path'] = File.absolute_path(File.join(sample_files_dir, 'base-mechvent-shared.xml'))
+    args_hash['hpxml_path'] = File.absolute_path(File.join(sample_files_dir, 'base-mechvent-shared-multiple.xml'))
     model, hpxml = _test_measure(args_hash)
 
     # Get HPXML values
