@@ -1035,7 +1035,7 @@ class SimulationOutputReportTest < MiniTest::Test
       assert_operator(avg_value, :!=, 0)
     end
   end
-  
+
   def _check_for_zero_baseload_timeseries_value(timeseries_csv, timeseries_cols)
     # check that every day has non zero values for baseload equipment (e.g., refrigerator)
     values = {}
