@@ -362,7 +362,7 @@ class HPXMLtoOpenStudioAirflowTest < MiniTest::Test
     vent_fan_cfm_ervhrv = vent_fan_ervhrv.map { |f| f.average_flow_rate }.sum(0.0)
     vent_fan_power_ervhrv = vent_fan_ervhrv.map { |f| f.average_fan_power }.sum(0.0)
     vent_fan_cfis = hpxml.ventilation_fans.select { |f| f.used_for_whole_building_ventilation && (f.fan_type == HPXML::MechVentTypeCFIS) }
-    vent_fan_cfm_cfis = vent_fan_cfis.map { |f| f.flow_rate }.sum(0.0)
+    vent_fan_cfm_cfis = vent_fan_cfis.map { |f| f.oa_flow_rate }.sum(0.0)
     vent_fan_power_cfis = vent_fan_cfis.map { |f| f.fan_power }.sum(0.0)
     vent_fan_mins_cfis = vent_fan_cfis.map { |f| f.hours_in_operation / 24.0 * 60.0 }.sum(0.0)
     # total mech vent fan power excluding cfis
