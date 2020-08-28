@@ -586,7 +586,7 @@
               </extension>
             </VentilationFan>
             <VentilationFan>
-              <SystemIdentifier id='CFIS1'/>
+              <SystemIdentifier id='CFIS'/>
               <FanType>central fan integrated supply</FanType>
               <TestedFlowRate>160.0</TestedFlowRate>
               <HoursInOperation>8.0</HoursInOperation>
@@ -595,7 +595,7 @@
               <AttachedToHVACDistributionSystem idref='HVACDistribution'/>
             </VentilationFan>
             <VentilationFan>
-              <SystemIdentifier id='CFIS2'/>
+              <SystemIdentifier id='CFIS_2'/>
               <FanType>central fan integrated supply</FanType>
               <TestedFlowRate>170.0</TestedFlowRate>
               <HoursInOperation>8.0</HoursInOperation>

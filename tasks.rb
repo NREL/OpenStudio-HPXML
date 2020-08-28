@@ -3688,14 +3688,14 @@ def set_hpxml_ventilation_fans(hpxml_file, hpxml)
       hpxml.ventilation_fans[-1].start_hour = vent_fan.start_hour - 1 unless vent_fan.start_hour.nil?
       hpxml.ventilation_fans[-1].hours_in_operation = vent_fan.hours_in_operation - 1 unless vent_fan.hours_in_operation.nil?
     end
-    hpxml.ventilation_fans.add(id: 'CFIS1',
+    hpxml.ventilation_fans.add(id: 'CFIS',
                                fan_type: HPXML::MechVentTypeCFIS,
                                tested_flow_rate: 160,
                                hours_in_operation: 8,
                                fan_power: 150,
                                used_for_whole_building_ventilation: true,
                                distribution_system_idref: 'HVACDistribution')
-    hpxml.ventilation_fans.add(id: 'CFIS2',
+    hpxml.ventilation_fans.add(id: 'CFIS_2',
                                fan_type: HPXML::MechVentTypeCFIS,
                                tested_flow_rate: 170,
                                hours_in_operation: 8,
