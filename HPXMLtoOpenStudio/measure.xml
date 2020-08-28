@@ -3,8 +3,8 @@
   <schema_version>3.0</schema_version>
   <name>hpxm_lto_openstudio</name>
   <uid>b1543b30-9465-45ff-ba04-1d1f85e763bc</uid>
-  <version_id>4d0ead0d-8423-4aea-af84-edbd1c037687</version_id>
-  <version_modified>20200820T210341Z</version_modified>
+  <version_id>10440b04-c2ad-421b-9132-6f395f056100</version_id>
+  <version_modified>20200828T180341Z</version_modified>
   <xml_checksum>D8922A73</xml_checksum>
   <class_name>HPXMLtoOpenStudio</class_name>
   <display_name>HPXML to OpenStudio Translator</display_name>
@@ -570,22 +570,34 @@
       <checksum>FE2813DC</checksum>
     </file>
     <file>
+      <filename>test_validation.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>test</usage_type>
+      <checksum>22BF3E63</checksum>
+    </file>
+    <file>
       <filename>EPvalidator.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>1873C5D6</checksum>
+      <checksum>DACC023A</checksum>
     </file>
     <file>
       <filename>EPvalidator.xml</filename>
       <filetype>xml</filetype>
       <usage_type>resource</usage_type>
-      <checksum>31EDC5B5</checksum>
+      <checksum>B16486A3</checksum>
     </file>
     <file>
-      <filename>test_validation.rb</filename>
+      <filename>test_validation_custom.rb</filename>
       <filetype>rb</filetype>
       <usage_type>test</usage_type>
-      <checksum>22BF3E63</checksum>
+      <checksum>BFE8F99A</checksum>
+    </file>
+    <file>
+      <filename>to_run_ruby.txt</filename>
+      <filetype>txt</filetype>
+      <usage_type>test</usage_type>
+      <checksum>4F64AAD4</checksum>
     </file>
   </files>
 </measure>
