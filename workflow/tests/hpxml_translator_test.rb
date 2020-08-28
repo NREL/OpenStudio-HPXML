@@ -649,15 +649,14 @@ class HPXMLTest < MiniTest::Test
       wall_id = wall.id.upcase
 
       # Common walls
-      next unless wall.exterior_adjacent_to == wall.interior_adjacent_to
-
-      # FIXME: Common walls will be converted into "adiabatic" walls
-      # Adiabatic surfaces have their "BaseSurfaceIndex" as their "ExtBoundCond" in "Surfaces" table in SQL simulation results
-      query_base_surf_idx = "SELECT BaseSurfaceIndex FROM Surfaces WHERE SurfaceName='#{wall_id}'"
-      query_ext_bound = "SELECT ExtBoundCond FROM Surfaces WHERE SurfaceName='#{wall_id}'"
-      sql_value_base_surf_idx = sqlFile.execAndReturnFirstDouble(query_base_surf_idx).get
-      sql_value_ext_bound_cond = sqlFile.execAndReturnFirstDouble(query_ext_bound).get
-      assert_equal(sql_value_base_surf_idx, sql_value_ext_bound_cond)
+      if wall.exterior_adjacent_to == wall.interior_adjacent_to
+        # Common walls are adiabatic surfaces and adiabatic surfaces have their "BaseSurfaceIndex" as their "ExtBoundCond" in "Surfaces" table in SQL simulation results
+        query_base_surf_idx = "SELECT BaseSurfaceIndex FROM Surfaces WHERE SurfaceName='#{wall_id}'"
+        query_ext_bound = "SELECT ExtBoundCond FROM Surfaces WHERE SurfaceName='#{wall_id}'"
+        sql_value_base_surf_idx = sqlFile.execAndReturnFirstDouble(query_base_surf_idx).get
+        sql_value_ext_bound_cond = sqlFile.execAndReturnFirstDouble(query_ext_bound).get
+        assert_equal(sql_value_base_surf_idx, sql_value_ext_bound_cond)
+      end
 
       # Exterior walls
       next unless wall.is_exterior
@@ -737,9 +736,20 @@ class HPXMLTest < MiniTest::Test
 
     # Enclosure FrameFloors
     hpxml.frame_floors.each do |frame_floor|
-      next unless frame_floor.is_exterior
-
       frame_floor_id = frame_floor.id.upcase
+
+      # Common frame floors
+      if frame_floor.exterior_adjacent_to == frame_floor.interior_adjacent_to
+        # Common frame floors are adiabatic surfaces and adiabatic surfaces have their "BaseSurfaceIndex" as their "ExtBoundCond" in "Surfaces" table in SQL simulation results
+        query_base_surf_idx = "SELECT BaseSurfaceIndex FROM Surfaces WHERE SurfaceName='#{frame_floor_id}'"
+        query_ext_bound = "SELECT ExtBoundCond FROM Surfaces WHERE SurfaceName='#{frame_floor_id}'"
+        sql_value_base_surf_idx = sqlFile.execAndReturnFirstDouble(query_base_surf_idx).get
+        sql_value_ext_bound_cond = sqlFile.execAndReturnFirstDouble(query_ext_bound).get
+        assert_equal(sql_value_base_surf_idx, sql_value_ext_bound_cond)
+      end
+
+      # Exterior frame floors
+      next unless frame_floor.is_exterior
 
       # R-value
       hpxml_value = frame_floor.insulation_assembly_r_value

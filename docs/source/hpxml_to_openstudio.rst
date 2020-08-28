@@ -238,6 +238,9 @@ other multifamily buffer space  E.g., enclosed unconditioned stairwell          
 other non-freezing space        E.g., shared parking garage ceiling               Floats with outside; minimum of 40F                       Attached/Multifamily only
 ==============================  ================================================  ========================================================  =========================
 
+Interior surfaces solely within the conditioned space should not be described using subsets of HPXML's ``Enclosure`` (i.e. ``Enclosure/Walls``, ``Enclosure/Floors``, ``Enclosure/FoundationWalls``, etc).
+Interior surfaces solely within the unconditioned space (e.g. unconditioned crawlspace (or attic) walls adjacent to the neighboring unit's crawlspace (or attic)) can be described using subsets of HPXML's ``Enclosure``. The interior adjacency of these surfaces will be the same as their exterior adjacency.
+
 .. warning::
 
   It is the software tool's responsibility to provide the appropriate building surfaces. 
@@ -326,8 +329,6 @@ HPXML Walls
 ***********
 
 Any wall that has no contact with the ground and bounds a space type should be specified as an ``Enclosure/Walls/Wall``.
-
-Interior walls (for example, walls solely within the conditioned space of the building) should not be described using ``Enclosure/Walls/Wall``.
 
 Walls are defined by their ``Area`` and ``Insulation/AssemblyEffectiveRValue``.
 The choice of ``WallType`` has a secondary effect on heat transfer in that it informs the assumption of wall thermal mass.

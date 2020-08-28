@@ -3,8 +3,8 @@
   <schema_version>3.0</schema_version>
   <name>hpxm_lto_openstudio</name>
   <uid>b1543b30-9465-45ff-ba04-1d1f85e763bc</uid>
-  <version_id>f39bbf43-c98e-4aa7-86b3-62425f16dfc2</version_id>
-  <version_modified>20200825T064941Z</version_modified>
+  <version_id>21e5ddc9-13bc-45cc-bb5b-32e6581f80a0</version_id>
+  <version_modified>20200828T021511Z</version_modified>
   <xml_checksum>D8922A73</xml_checksum>
   <class_name>HPXMLtoOpenStudio</class_name>
   <display_name>HPXML to OpenStudio Translator</display_name>
@@ -499,12 +499,6 @@
       <checksum>AE298605</checksum>
     </file>
     <file>
-      <filename>BaseElements.xsd</filename>
-      <filetype>xsd</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>A88DA4D7</checksum>
-    </file>
-    <file>
       <filename>test_defaults.rb</filename>
       <filetype>rb</filetype>
       <usage_type>test</usage_type>
@@ -541,12 +535,6 @@
       <checksum>BB8F37B8</checksum>
     </file>
     <file>
-      <filename>HPXMLDataTypes.xsd</filename>
-      <filetype>xsd</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>33B1F22B</checksum>
-    </file>
-    <file>
       <filename>EPvalidator.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
@@ -559,10 +547,22 @@
       <checksum>EACF059A</checksum>
     </file>
     <file>
+      <filename>BaseElements.xsd</filename>
+      <filetype>xsd</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>8D4F0123</checksum>
+    </file>
+    <file>
+      <filename>HPXMLDataTypes.xsd</filename>
+      <filetype>xsd</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>C83C2AAC</checksum>
+    </file>
+    <file>
       <filename>hpxml.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>07A477DA</checksum>
+      <checksum>DAFEE5A2</checksum>
     </file>
     <file>
       <version>
@@ -573,7 +573,7 @@
       <filename>measure.rb</filename>
       <filetype>rb</filetype>
       <usage_type>script</usage_type>
-      <checksum>18B2165C</checksum>
+      <checksum>F31BB8FB</checksum>
     </file>
   </files>
 </measure>

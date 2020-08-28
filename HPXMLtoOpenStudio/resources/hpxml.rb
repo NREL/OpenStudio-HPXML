@@ -1500,7 +1500,7 @@ class HPXML < Object
   class RimJoist < BaseElement
     ATTRS = [:id, :exterior_adjacent_to, :interior_adjacent_to, :area, :azimuth, :siding, :color,
              :solar_absorptance, :emittance, :insulation_id, :insulation_assembly_r_value,
-             :insulation_cavity_r_value, :insulation_continuous_r_value]
+             :insulation_cavity_r_value, :insulation_continuous_r_value, :is_adiabatic]
     attr_accessor(*ATTRS)
 
     def is_exterior
@@ -1513,6 +1513,12 @@ class HPXML < Object
 
     def is_interior
       return !is_exterior
+    end
+
+    def is_adiabatic
+      if @exterior_adjacent_to == @interior_adjacent_to
+        return true
+      end
     end
 
     def is_thermal_boundary
@@ -1596,7 +1602,8 @@ class HPXML < Object
   class Wall < BaseElement
     ATTRS = [:id, :exterior_adjacent_to, :interior_adjacent_to, :wall_type, :optimum_value_engineering,
              :area, :orientation, :azimuth, :siding, :color, :solar_absorptance, :emittance, :insulation_id,
-             :insulation_assembly_r_value, :insulation_cavity_r_value, :insulation_continuous_r_value]
+             :insulation_assembly_r_value, :insulation_cavity_r_value, :insulation_continuous_r_value,
+             :is_adiabatic]
     attr_accessor(*ATTRS)
 
     def windows
@@ -1629,6 +1636,12 @@ class HPXML < Object
 
     def is_interior
       return !is_exterior
+    end
+
+    def is_adiabatic
+      if @exterior_adjacent_to == @interior_adjacent_to
+        return true
+      end
     end
 
     def is_thermal_boundary
@@ -1729,7 +1742,7 @@ class HPXML < Object
              :insulation_interior_distance_to_top, :insulation_interior_distance_to_bottom,
              :insulation_exterior_r_value, :insulation_exterior_distance_to_top,
              :insulation_exterior_distance_to_bottom, :insulation_assembly_r_value,
-             :insulation_continuous_r_value]
+             :insulation_continuous_r_value, :is_adiabatic]
     attr_accessor(*ATTRS)
 
     def windows
@@ -1764,6 +1777,12 @@ class HPXML < Object
 
     def is_interior
       return !is_exterior
+    end
+
+    def is_adiabatic
+      if @exterior_adjacent_to == @interior_adjacent_to
+        return true
+      end
     end
 
     def is_thermal_boundary
@@ -1877,7 +1896,7 @@ class HPXML < Object
   class FrameFloor < BaseElement
     ATTRS = [:id, :exterior_adjacent_to, :interior_adjacent_to, :area, :insulation_id,
              :insulation_assembly_r_value, :insulation_cavity_r_value, :insulation_continuous_r_value,
-             :other_space_above_or_below]
+             :other_space_above_or_below, :is_adiabatic]
     attr_accessor(*ATTRS)
 
     def is_ceiling
@@ -1906,6 +1925,12 @@ class HPXML < Object
 
     def is_interior
       return !is_exterior
+    end
+
+    def is_adiabatic
+      if @exterior_adjacent_to == @interior_adjacent_to
+        return true
+      end
     end
 
     def is_thermal_boundary
