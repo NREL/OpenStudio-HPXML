@@ -957,20 +957,26 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
 
     arg = OpenStudio::Measure::OSArgument::makeBoolArgument('heating_system_is_shared_system', true)
     arg.setDisplayName('Heating System: Is Shared System')
-    arg.setDescription('Whether the heating system is a shared system. If true, assumed to serve all the units in the building. This is valid only for Boiler.')
+    arg.setDescription('Whether the heating system is a shared system. If true, assumed to serve all the units in the building. This is valid only for a boiler.')
     arg.setDefaultValue(false)
     args << arg
 
     arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('heating_system_shared_loop_watts', false)
     arg.setDisplayName('Heating System: Shared Loop Watts')
-    arg.setDescription('The shared pumping power serving the shared heating system. This is required for shared heating systems.')
+    arg.setDescription('The shared pumping power serving a shared boiler. This is required for a shared boiler.')
     arg.setUnits('W')
     args << arg
 
     arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('heating_system_fan_coil_watts', false)
     arg.setDisplayName('Heating System: Fan Coil Watts')
-    arg.setDescription('The in-unit fan coil power serving the shared heating system.')
+    arg.setDescription('The in-unit fan coil power serving a shared boiler.')
     arg.setUnits('W')
+    args << arg
+
+    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('heating_system_water_loop_heat_pump_heating_efficiency', false)
+    arg.setDisplayName('Heating System: Water Loop Heat Pump Efficiency')
+    arg.setDescription('The heating COP for water loop heat pumps that are connected to a shared boiler.')
+    arg.setUnits('COP')
     args << arg
 
     arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('cooling_system_type', cooling_system_type_choices, true)
@@ -1033,20 +1039,32 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
 
     arg = OpenStudio::Measure::OSArgument::makeBoolArgument('cooling_system_is_shared_system', true)
     arg.setDisplayName('Cooling System: Is Shared System')
-    arg.setDescription('Whether the cooling system is a shared system. If true, assumed to serve all the units in the building. This is valid only for chiller.')
+    arg.setDescription('Whether the cooling system is a shared system. If true, assumed to serve all the units in the building. This is valid only for a chiller.')
     arg.setDefaultValue(false)
     args << arg
 
     arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('cooling_system_shared_loop_watts', false)
     arg.setDisplayName('Cooling System: Shared Loop Watts')
-    arg.setDescription('The total of the pumping and fan power serving the shared cooling system. This is required for shared cooling systems.')
+    arg.setDescription('The total of the pumping and fan power serving a shared chiller. This is required for a shared chiller.')
     arg.setUnits('W')
     args << arg
 
     arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('cooling_system_fan_coil_watts', false)
     arg.setDisplayName('Cooling System: Fan Coil Watts')
-    arg.setDescription('The in-unit fan coil power serving the shared cooling system.')
+    arg.setDescription('The in-unit fan coil power serving a shared chiller.')
     arg.setUnits('W')
+    args << arg
+
+    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('cooling_system_water_loop_heat_pump_cooling_capacity', false)
+    arg.setDisplayName('Cooling System: Water Loop Heat Pump Cooling Capacity')
+    arg.setDescription('The output cooling capacity of water loop heat pumps that are connected to a shared chiller.')
+    arg.setUnits('tons')
+    args << arg
+
+    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('cooling_system_water_loop_heat_pump_cooling_efficiency', false)
+    arg.setDisplayName('Cooling System: Water Loop Heat Pump Efficiency')
+    arg.setDescription('The cooling EER for water loop heat pumps that are connected to a shared chiller.')
+    arg.setUnits('EER')
     args << arg
 
     heat_pump_type_choices = OpenStudio::StringVector.new
@@ -1178,13 +1196,13 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
 
     arg = OpenStudio::Measure::OSArgument::makeBoolArgument('heat_pump_is_shared_system', true)
     arg.setDisplayName('Heat Pump: Is Shared System')
-    arg.setDescription('Whether the heat pump is a shared system. If true, assumed to serve all the units in the building.')
+    arg.setDescription('Whether the heat pump is a shared system. If true, assumed to serve all the units in the building. This is valid only for a ground-to-air heat pump.')
     arg.setDefaultValue(false)
     args << arg
 
     arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('heat_pump_shared_loop_watts', false)
     arg.setDisplayName('Heat Pump: Shared Loop Watts')
-    arg.setDescription('The pumping power serving the shared heat pump system.')
+    arg.setDescription('The pumping power serving a shared ground-to-air heat pump.')
     arg.setUnits('W')
     args << arg
 
@@ -3324,6 +3342,7 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
              heating_system_is_shared_system: runner.getBoolArgumentValue('heating_system_is_shared_system', user_arguments),
              heating_system_shared_loop_watts: runner.getOptionalDoubleArgumentValue('heating_system_shared_loop_watts', user_arguments),
              heating_system_fan_coil_watts: runner.getOptionalDoubleArgumentValue('heating_system_fan_coil_watts', user_arguments),
+             heating_system_water_loop_heat_pump_heating_efficiency: runner.getOptionalDoubleArgumentValue('heating_system_water_loop_heat_pump_heating_efficiency', user_arguments),
              cooling_system_type: runner.getStringArgumentValue('cooling_system_type', user_arguments),
              cooling_system_cooling_efficiency_seer: runner.getDoubleArgumentValue('cooling_system_cooling_efficiency_seer', user_arguments),
              cooling_system_cooling_efficiency_eer: runner.getDoubleArgumentValue('cooling_system_cooling_efficiency_eer', user_arguments),
@@ -3336,6 +3355,8 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
              cooling_system_is_shared_system: runner.getBoolArgumentValue('cooling_system_is_shared_system', user_arguments),
              cooling_system_shared_loop_watts: runner.getOptionalDoubleArgumentValue('cooling_system_shared_loop_watts', user_arguments),
              cooling_system_fan_coil_watts: runner.getOptionalDoubleArgumentValue('cooling_system_fan_coil_watts', user_arguments),
+             cooling_system_water_loop_heat_pump_cooling_capacity: runner.getOptionalDoubleArgumentValue('cooling_system_water_loop_heat_pump_cooling_capacity', user_arguments),
+             cooling_system_water_loop_heat_pump_cooling_efficiency: runner.getOptionalDoubleArgumentValue('cooling_system_water_loop_heat_pump_cooling_efficiency', user_arguments),
              heat_pump_type: runner.getStringArgumentValue('heat_pump_type', user_arguments),
              heat_pump_heating_efficiency_hspf: runner.getDoubleArgumentValue('heat_pump_heating_efficiency_hspf', user_arguments),
              heat_pump_heating_efficiency_cop: runner.getDoubleArgumentValue('heat_pump_heating_efficiency_cop', user_arguments),
@@ -4439,6 +4460,9 @@ class HPXMLFile
       if args[:heating_system_fan_coil_watts].is_initialized
         fan_coil_watts = args[:heating_system_fan_coil_watts].get
       end
+      if args[:heating_system_water_loop_heat_pump_heating_efficiency].is_initialized
+        wlhp_heating_efficiency_cop = args[:heating_system_water_loop_heat_pump_heating_efficiency].get
+      end
     end
 
     hpxml.heating_systems.add(id: 'HeatingSystem',
@@ -4452,7 +4476,8 @@ class HPXMLFile
                               is_shared_system: is_shared_system,
                               number_of_units_served: number_of_units_served,
                               shared_loop_watts: shared_loop_watts,
-                              fan_coil_watts: fan_coil_watts)
+                              fan_coil_watts: fan_coil_watts,
+                              wlhp_heating_efficiency_cop: wlhp_heating_efficiency_cop)
 
     heating_system_type_2 = args[:heating_system_type_2]
 
@@ -4528,6 +4553,10 @@ class HPXMLFile
       if args[:cooling_system_fan_coil_watts].is_initialized
         fan_coil_watts = args[:cooling_system_fan_coil_watts].get
       end
+      if args[:cooling_system_water_loop_heat_pump_cooling_capacity].is_initialized && args[:cooling_system_water_loop_heat_pump_cooling_efficiency].is_initialized
+        wlhp_cooling_capacity = args[:cooling_system_water_loop_heat_pump_cooling_capacity].get
+        wlhp_cooling_efficiency_eer = args[:cooling_system_water_loop_heat_pump_cooling_efficiency].get
+      end
     end
 
     hpxml.cooling_systems.add(id: 'CoolingSystem',
@@ -4543,7 +4572,9 @@ class HPXMLFile
                               is_shared_system: is_shared_system,
                               number_of_units_served: number_of_units_served,
                               shared_loop_watts: shared_loop_watts,
-                              fan_coil_watts: fan_coil_watts)
+                              fan_coil_watts: fan_coil_watts,
+                              wlhp_cooling_capacity: wlhp_cooling_capacity,
+                              wlhp_cooling_efficiency_eer: wlhp_cooling_efficiency_eer)
   end
 
   def self.set_heat_pumps(hpxml, runner, args)
@@ -4646,21 +4677,26 @@ class HPXMLFile
     # HydronicAndAir?
     hydronic_and_air_distribution_systems = []
     hpxml.heating_systems.each do |heating_system|
-      next unless args[:heating_system_fan_coil_watts].is_initialized
-
-      hydronic_and_air_distribution_systems << heating_system
+      if args[:heating_system_fan_coil_watts].is_initialized || args[:heating_system_water_loop_heat_pump_heating_efficiency].is_initialized
+        hydronic_and_air_distribution_systems << heating_system
+      end
     end
     hpxml.cooling_systems.each do |cooling_system|
-      next unless args[:cooling_system_fan_coil_watts].is_initialized
-
-      hydronic_and_air_distribution_systems << cooling_system
+      if args[:cooling_system_fan_coil_watts].is_initialized || (args[:cooling_system_water_loop_heat_pump_cooling_capacity].is_initialized && args[:cooling_system_water_loop_heat_pump_cooling_efficiency].is_initialized)
+        hydronic_and_air_distribution_systems << cooling_system
+      end
     end
 
     if hydronic_and_air_distribution_systems.size > 0
+      hydronic_and_air_type = HPXML::HydronicAndAirTypeFanCoil
+      if args[:heating_system_water_loop_heat_pump_heating_efficiency].is_initialized || (args[:cooling_system_water_loop_heat_pump_cooling_capacity].is_initialized && args[:cooling_system_water_loop_heat_pump_cooling_efficiency].is_initialized)
+        hydronic_and_air_type = HPXML::HydronicAndAirTypeWaterLoopHeatPump
+      end
+
       hpxml.hvac_distributions.add(id: 'HydronicAndAirDistribution',
                                    distribution_system_type: HPXML::HVACDistributionTypeHydronicAndAir,
                                    conditioned_floor_area_served: conditioned_floor_area_served,
-                                   hydronic_and_air_type: HPXML::HydronicAndAirTypeFanCoil)
+                                   hydronic_and_air_type: hydronic_and_air_type)
 
       hydronic_and_air_distribution_systems.each do |hvac_system|
         hvac_system.distribution_system_idref = hpxml.hvac_distributions[-1].id
@@ -4695,15 +4731,11 @@ class HPXMLFile
     # Air?
     air_distribution_systems = []
     hpxml.heating_systems.each do |heating_system|
-      next if hydronic_and_air_distribution_systems.size > 0
-
       if [HPXML::HVACTypeFurnace].include? heating_system.heating_system_type
         air_distribution_systems << heating_system
       end
     end
     hpxml.cooling_systems.each do |cooling_system|
-      next if hydronic_and_air_distribution_systems.size > 0
-
       if [HPXML::HVACTypeCentralAirConditioner].include? cooling_system.cooling_system_type
         air_distribution_systems << cooling_system
       elsif [HPXML::HVACTypeEvaporativeCooler, HPXML::HVACTypeMiniSplitAirConditioner].include?(cooling_system.cooling_system_type) && args[:cooling_system_is_ducted]
@@ -4711,8 +4743,6 @@ class HPXMLFile
       end
     end
     hpxml.heat_pumps.each do |heat_pump|
-      next if hydronic_and_air_distribution_systems.size > 0
-
       if [HPXML::HVACTypeHeatPumpAirToAir, HPXML::HVACTypeHeatPumpGroundToAir].include? heat_pump.heat_pump_type
         air_distribution_systems << heat_pump
       elsif [HPXML::HVACTypeHeatPumpMiniSplit].include?(heat_pump.heat_pump_type) && args[:heat_pump_mini_split_is_ducted]
@@ -4731,49 +4761,51 @@ class HPXMLFile
       end
     end
 
-    return if hydronic_and_air_distribution_systems.size > 0 || air_distribution_systems.size == 0
+    hpxml.hvac_distributions.each do |hvac_distribution|
+      next if hvac_distribution.distribution_system_type == HPXML::HVACDistributionTypeHydronic
 
-    # Duct Leakage
-    hpxml.hvac_distributions[-1].duct_leakage_measurements.add(duct_type: HPXML::DuctTypeSupply,
-                                                               duct_leakage_units: args[:ducts_supply_leakage_units],
-                                                               duct_leakage_value: args[:ducts_supply_leakage_value],
-                                                               duct_leakage_total_or_to_outside: HPXML::DuctLeakageToOutside)
+      # Duct Leakage
+      hvac_distribution.duct_leakage_measurements.add(duct_type: HPXML::DuctTypeSupply,
+                                                      duct_leakage_units: args[:ducts_supply_leakage_units],
+                                                      duct_leakage_value: args[:ducts_supply_leakage_value],
+                                                      duct_leakage_total_or_to_outside: HPXML::DuctLeakageToOutside)
 
-    if not ([HPXML::HVACTypeEvaporativeCooler].include?(args[:cooling_system_type]) && args[:cooling_system_is_ducted])
+      if not ([HPXML::HVACTypeEvaporativeCooler].include?(args[:cooling_system_type]) && args[:cooling_system_is_ducted])
 
-      hpxml.hvac_distributions[-1].duct_leakage_measurements.add(duct_type: HPXML::DuctTypeReturn,
-                                                                 duct_leakage_units: args[:ducts_return_leakage_units],
-                                                                 duct_leakage_value: args[:ducts_return_leakage_value],
-                                                                 duct_leakage_total_or_to_outside: HPXML::DuctLeakageToOutside)
-    end
+        hvac_distribution.duct_leakage_measurements.add(duct_type: HPXML::DuctTypeReturn,
+                                                        duct_leakage_units: args[:ducts_return_leakage_units],
+                                                        duct_leakage_value: args[:ducts_return_leakage_value],
+                                                        duct_leakage_total_or_to_outside: HPXML::DuctLeakageToOutside)
+      end
 
-    # Ducts
-    if args[:ducts_supply_location] != Constants.Auto
-      ducts_supply_location = args[:ducts_supply_location]
-    end
+      # Ducts
+      if args[:ducts_supply_location] != Constants.Auto
+        ducts_supply_location = args[:ducts_supply_location]
+      end
 
-    if args[:ducts_return_location] != Constants.Auto
-      ducts_return_location = args[:ducts_return_location]
-    end
+      if args[:ducts_return_location] != Constants.Auto
+        ducts_return_location = args[:ducts_return_location]
+      end
 
-    if args[:ducts_supply_surface_area] != Constants.Auto
-      ducts_supply_surface_area = args[:ducts_supply_surface_area]
-    end
+      if args[:ducts_supply_surface_area] != Constants.Auto
+        ducts_supply_surface_area = args[:ducts_supply_surface_area]
+      end
 
-    if args[:ducts_return_surface_area] != Constants.Auto
-      ducts_return_surface_area = args[:ducts_return_surface_area]
-    end
+      if args[:ducts_return_surface_area] != Constants.Auto
+        ducts_return_surface_area = args[:ducts_return_surface_area]
+      end
 
-    hpxml.hvac_distributions[-1].ducts.add(duct_type: HPXML::DuctTypeSupply,
-                                           duct_insulation_r_value: args[:ducts_supply_insulation_r],
-                                           duct_location: ducts_supply_location,
-                                           duct_surface_area: ducts_supply_surface_area)
+      hvac_distribution.ducts.add(duct_type: HPXML::DuctTypeSupply,
+                                  duct_insulation_r_value: args[:ducts_supply_insulation_r],
+                                  duct_location: ducts_supply_location,
+                                  duct_surface_area: ducts_supply_surface_area)
 
-    if not ([HPXML::HVACTypeEvaporativeCooler].include?(args[:cooling_system_type]) && args[:cooling_system_is_ducted])
-      hpxml.hvac_distributions[-1].ducts.add(duct_type: HPXML::DuctTypeReturn,
-                                             duct_insulation_r_value: args[:ducts_return_insulation_r],
-                                             duct_location: ducts_return_location,
-                                             duct_surface_area: ducts_return_surface_area)
+      if not ([HPXML::HVACTypeEvaporativeCooler].include?(args[:cooling_system_type]) && args[:cooling_system_is_ducted])
+        hvac_distribution.ducts.add(duct_type: HPXML::DuctTypeReturn,
+                                    duct_insulation_r_value: args[:ducts_return_insulation_r],
+                                    duct_location: ducts_return_location,
+                                    duct_surface_area: ducts_return_surface_area)
+      end
     end
   end
 

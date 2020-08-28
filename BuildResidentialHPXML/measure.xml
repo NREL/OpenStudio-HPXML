@@ -3,8 +3,8 @@
   <schema_version>3.0</schema_version>
   <name>build_residential_hpxml</name>
   <uid>a13a8983-2b01-4930-8af2-42030b6e4233</uid>
-  <version_id>25dc470d-9f95-457d-b31c-89fa6a215ca0</version_id>
-  <version_modified>20200828T184851Z</version_modified>
+  <version_id>b03d7d58-0a23-41ff-951f-4e4fc1a91a49</version_id>
+  <version_modified>20200828T212642Z</version_modified>
   <xml_checksum>2C38F48B</xml_checksum>
   <class_name>BuildResidentialHPXML</class_name>
   <display_name>HPXML Builder</display_name>
@@ -1631,7 +1631,7 @@
     <argument>
       <name>heating_system_is_shared_system</name>
       <display_name>Heating System: Is Shared System</display_name>
-      <description>Whether the heating system is a shared system. If true, assumed to serve all the units in the building. This is valid only for Boiler.</description>
+      <description>Whether the heating system is a shared system. If true, assumed to serve all the units in the building. This is valid only for a boiler.</description>
       <type>Boolean</type>
       <required>true</required>
       <model_dependent>false</model_dependent>
@@ -1650,7 +1650,7 @@
     <argument>
       <name>heating_system_shared_loop_watts</name>
       <display_name>Heating System: Shared Loop Watts</display_name>
-      <description>The shared pumping power serving the shared heating system. This is required for shared heating systems.</description>
+      <description>The shared pumping power serving a shared boiler. This is required for a shared boiler.</description>
       <type>Double</type>
       <units>W</units>
       <required>false</required>
@@ -1659,9 +1659,18 @@
     <argument>
       <name>heating_system_fan_coil_watts</name>
       <display_name>Heating System: Fan Coil Watts</display_name>
-      <description>The in-unit fan coil power serving the shared heating system.</description>
+      <description>The in-unit fan coil power serving a shared boiler.</description>
       <type>Double</type>
       <units>W</units>
+      <required>false</required>
+      <model_dependent>false</model_dependent>
+    </argument>
+    <argument>
+      <name>heating_system_water_loop_heat_pump_heating_efficiency</name>
+      <display_name>Heating System: Water Loop Heat Pump Efficiency</display_name>
+      <description>The heating COP for water loop heat pumps that are connected to a shared boiler.</description>
+      <type>Double</type>
+      <units>COP</units>
       <required>false</required>
       <model_dependent>false</model_dependent>
     </argument>
@@ -1803,7 +1812,7 @@
     <argument>
       <name>cooling_system_is_shared_system</name>
       <display_name>Cooling System: Is Shared System</display_name>
-      <description>Whether the cooling system is a shared system. If true, assumed to serve all the units in the building. This is valid only for chiller.</description>
+      <description>Whether the cooling system is a shared system. If true, assumed to serve all the units in the building. This is valid only for a chiller.</description>
       <type>Boolean</type>
       <required>true</required>
       <model_dependent>false</model_dependent>
@@ -1822,7 +1831,7 @@
     <argument>
       <name>cooling_system_shared_loop_watts</name>
       <display_name>Cooling System: Shared Loop Watts</display_name>
-      <description>The total of the pumping and fan power serving the shared cooling system. This is required for shared cooling systems.</description>
+      <description>The total of the pumping and fan power serving a shared chiller. This is required for a shared chiller.</description>
       <type>Double</type>
       <units>W</units>
       <required>false</required>
@@ -1831,9 +1840,27 @@
     <argument>
       <name>cooling_system_fan_coil_watts</name>
       <display_name>Cooling System: Fan Coil Watts</display_name>
-      <description>The in-unit fan coil power serving the shared cooling system.</description>
+      <description>The in-unit fan coil power serving a shared chiller.</description>
       <type>Double</type>
       <units>W</units>
+      <required>false</required>
+      <model_dependent>false</model_dependent>
+    </argument>
+    <argument>
+      <name>cooling_system_water_loop_heat_pump_cooling_capacity</name>
+      <display_name>Cooling System: Water Loop Heat Pump Cooling Capacity</display_name>
+      <description>The output cooling capacity of water loop heat pumps that are connected to a shared chiller.</description>
+      <type>String</type>
+      <units>tons</units>
+      <required>false</required>
+      <model_dependent>false</model_dependent>
+    </argument>
+    <argument>
+      <name>cooling_system_water_loop_heat_pump_cooling_efficiency</name>
+      <display_name>Cooling System: Water Loop Heat Pump Efficiency</display_name>
+      <description>The cooling EER for water loop heat pumps that are connected to a shared chiller.</description>
+      <type>Double</type>
+      <units>EER</units>
       <required>false</required>
       <model_dependent>false</model_dependent>
     </argument>
@@ -2066,7 +2093,7 @@
     <argument>
       <name>heat_pump_is_shared_system</name>
       <display_name>Heat Pump: Is Shared System</display_name>
-      <description>Whether the heat pump is a shared system. If true, assumed to serve all the units in the building.</description>
+      <description>Whether the heat pump is a shared system. If true, assumed to serve all the units in the building. This is valid only for a ground-to-air heat pump.</description>
       <type>Boolean</type>
       <required>true</required>
       <model_dependent>false</model_dependent>
@@ -2085,7 +2112,7 @@
     <argument>
       <name>heat_pump_shared_loop_watts</name>
       <display_name>Heat Pump: Shared Loop Watts</display_name>
-      <description>The pumping power serving the shared heat pump system.</description>
+      <description>The pumping power serving a shared ground-to-air heat pump.</description>
       <type>Double</type>
       <units>W</units>
       <required>false</required>
@@ -7095,7 +7122,31 @@
       <filename>measure.rb</filename>
       <filetype>rb</filetype>
       <usage_type>script</usage_type>
-      <checksum>C2CAA27C</checksum>
+      <checksum>DCD1B9F5</checksum>
+    </file>
+    <file>
+      <filename>extra-hvac-shared-boiler-chiller-water-loop-heat-pump.osw</filename>
+      <filetype>osw</filetype>
+      <usage_type>test</usage_type>
+      <checksum>6CF5D8D0</checksum>
+    </file>
+    <file>
+      <filename>extra-hvac-shared-ground-loop-ground-to-air-heat-pump.osw</filename>
+      <filetype>osw</filetype>
+      <usage_type>test</usage_type>
+      <checksum>E8CF58EE</checksum>
+    </file>
+    <file>
+      <filename>extra-hvac-shared-boiler-only-baseboard.osw</filename>
+      <filetype>osw</filetype>
+      <usage_type>test</usage_type>
+      <checksum>F2E3CEBF</checksum>
+    </file>
+    <file>
+      <filename>extra-hvac-shared-chiller-only-fan-coil.osw</filename>
+      <filetype>osw</filetype>
+      <usage_type>test</usage_type>
+      <checksum>9E5F44D7</checksum>
     </file>
   </files>
 </measure>
