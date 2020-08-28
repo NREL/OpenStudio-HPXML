@@ -172,6 +172,20 @@ def create_osws
     'base-hvac-room-ac-only.osw' => 'base.osw',
     'base-hvac-room-ac-only-33percent.osw' => 'base.osw',
     'base-hvac-setpoints.osw' => 'base.osw',
+    # 'base-hvac-shared-boiler-chiller-fan-coil.osw' => 'base.osw',
+    # 'base-hvac-shared-boiler-chiller-fan-coil-ducted.osw' => 'base.osw',
+    # 'base-hvac-shared-boiler-chiller-water-loop-heat-pump.osw' => 'base.osw',
+    # 'base-hvac-shared-boiler-cooling-tower-water-loop-heat-pump.osw' => 'base.osw',
+    # 'base-hvac-shared-boiler-only-baseboard.osw' => 'base.osw',
+    # 'base-hvac-shared-boiler-only-fan-coil.osw' => 'base.osw',
+    # 'base-hvac-shared-boiler-only-fan-coil-ducted.osw' => 'base.osw',
+    # 'base-hvac-shared-boiler-only-water-loop-heat-pump.osw' => 'base.osw',
+    # 'base-hvac-shared-chiller-only-baseboard.osw' => 'base.osw',
+    # 'base-hvac-shared-chiller-only-fan-coil.osw' => 'base.osw',
+    # 'base-hvac-shared-chiller-only-fan-coil-ducted.osw' => 'base.osw',
+    # 'base-hvac-shared-chiller-only-water-loop-heat-pump.osw' => 'base.osw',
+    # 'base-hvac-shared-cooling-tower-only-water-loop-heat-pump.osw' => 'base.osw',
+    # 'base-hvac-shared-ground-loop-ground-to-air-heat-pump.osw' => 'base.osw',
     'base-hvac-stove-oil-only.osw' => 'base.osw',
     'base-hvac-stove-wood-pellets-only.osw' => 'base.osw',
     'base-hvac-undersized.osw' => 'base.osw',
@@ -221,6 +235,8 @@ def create_osws
     'extra-second-heating-system-portable-heater.osw' => 'base.osw',
     'extra-second-heating-system-fireplace.osw' => 'base.osw',
     'extra-pv-shared.osw' => 'base-single-family-attached.osw',
+    'extra-hvac-shared-boiler-chiller-baseboard.osw' => 'base-single-family-attached.osw',
+    'extra-hvac-shared-boiler-chiller-fan-coil.osw' => 'base-single-family-attached.osw',
 
     'invalid_files/non-electric-heat-pump-water-heater.osw' => 'base.osw',
     'invalid_files/multiple-heating-and-cooling-systems.osw' => 'base.osw',
@@ -422,14 +438,17 @@ def get_values(osw_file, step)
     step.setArgument('heating_system_fraction_heat_load_served', 1)
     step.setArgument('heating_system_electric_auxiliary_energy', 0)
     step.setArgument('heating_system_has_flue_or_chimney', false)
+    step.setArgument('heating_system_is_shared_system', false)
     step.setArgument('cooling_system_type', HPXML::HVACTypeCentralAirConditioner)
     step.setArgument('cooling_system_cooling_efficiency_seer', 13.0)
     step.setArgument('cooling_system_cooling_efficiency_eer', 8.5)
+    step.setArgument('cooling_system_cooling_efficiency_kw_per_ton', 0.9)
     step.setArgument('cooling_system_cooling_compressor_type', HPXML::HVACCompressorTypeSingleStage)
     step.setArgument('cooling_system_cooling_sensible_heat_fraction', 0.73)
     step.setArgument('cooling_system_cooling_capacity', '48000.0')
     step.setArgument('cooling_system_fraction_cool_load_served', 1)
     step.setArgument('cooling_system_is_ducted', false)
+    step.setArgument('cooling_system_is_shared_system', false)
     step.setArgument('heat_pump_type', 'none')
     step.setArgument('heat_pump_heating_efficiency_hspf', 7.7)
     step.setArgument('heat_pump_heating_efficiency_cop', 3.6)
@@ -446,6 +465,7 @@ def get_values(osw_file, step)
     step.setArgument('heat_pump_backup_heating_efficiency', 1)
     step.setArgument('heat_pump_backup_heating_capacity', '34121.0')
     step.setArgument('heat_pump_mini_split_is_ducted', false)
+    step.setArgument('heat_pump_is_shared_system', false)
     step.setArgument('setpoint_heating_temp', 68)
     step.setArgument('setpoint_heating_setback_temp', 68)
     step.setArgument('setpoint_heating_setback_hours_per_week', 0)
@@ -1322,7 +1342,6 @@ def get_values(osw_file, step)
   elsif ['base-hvac-boiler-gas-central-ac-1-speed.osw'].include? osw_file
     step.setArgument('heating_system_type', HPXML::HVACTypeBoiler)
     step.setArgument('heating_system_electric_auxiliary_energy', 200.0)
-    step.setArgument('ducts_cfa_served', 1350.0)
   elsif ['base-hvac-boiler-gas-only.osw'].include? osw_file
     step.setArgument('heating_system_type', HPXML::HVACTypeBoiler)
     step.setArgument('heating_system_electric_auxiliary_energy', 200.0)
@@ -1941,6 +1960,22 @@ def get_values(osw_file, step)
     step.setArgument('geometry_building_num_bedrooms', 9)
     step.setArgument('pv_system_module_type_1', HPXML::PVModuleTypeStandard)
     step.setArgument('pv_system_is_shared_1', true)
+  elsif ['extra-hvac-shared-boiler-chiller-baseboard.osw'].include? osw_file
+    step.setArgument('heating_system_type', HPXML::HVACTypeBoiler)
+    step.setArgument('heating_system_is_shared_system', true)
+    step.setArgument('heating_system_shared_loop_watts', 600.0)
+    step.setArgument('cooling_system_type', HPXML::HVACTypeChiller)
+    step.setArgument('cooling_system_is_shared_system', true)
+    step.setArgument('cooling_system_shared_loop_watts', 600.0)
+  elsif ['extra-hvac-shared-boiler-chiller-fan-coil.osw'].include? osw_file
+    step.setArgument('heating_system_type', HPXML::HVACTypeBoiler)
+    step.setArgument('heating_system_is_shared_system', true)
+    step.setArgument('heating_system_shared_loop_watts', 600.0)
+    step.setArgument('heating_system_fan_coil_watts', 150.0)
+    step.setArgument('cooling_system_type', HPXML::HVACTypeChiller)
+    step.setArgument('cooling_system_is_shared_system', true)
+    step.setArgument('cooling_system_shared_loop_watts', 600.0)
+    step.setArgument('cooling_system_fan_coil_watts', 150.0)
   elsif ['invalid_files/non-electric-heat-pump-water-heater.osw'].include? osw_file
     step.setArgument('water_heater_type', HPXML::WaterHeaterTypeHeatPump)
     step.setArgument('water_heater_fuel_type', HPXML::FuelTypeNaturalGas)
