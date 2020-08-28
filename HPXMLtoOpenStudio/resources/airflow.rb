@@ -419,7 +419,7 @@ class Airflow
     return ra_duct_zone
   end
 
-  def self.create_sens_lat_load_actuator_and_equipment(model, name, space, frac_lat, frac_lost, hpxml_fuel_type = nil, end_use = nil, is_duct_load_for_report = nil)
+  def self.create_sens_lat_load_actuator_and_equipment(model:, name:, space:, frac_lat:, frac_lost:, hpxml_fuel_type: nil, end_use: nil, is_duct_load_for_report: nil)
     other_equip_def = OpenStudio::Model::OtherEquipmentDefinition.new(model)
     other_equip_def.setName("#{name} equip")
     other_equip = OpenStudio::Model::OtherEquipment.new(other_equip_def)
@@ -825,7 +825,7 @@ class Airflow
           if not is_cfis
             duct_vars[var_name] = OpenStudio::Model::EnergyManagementSystemGlobalVariable.new(model, object_name)
           end
-          duct_actuators[var_name] = create_sens_lat_load_actuator_and_equipment(model, object_name, space, frac_lat, frac_lost, is_load_for_report)
+          duct_actuators[var_name] = create_sens_lat_load_actuator_and_equipment(model: model, name: object_name, space: space, frac_lat: frac_lat, frac_lost: frac_lost, is_duct_load_for_report: is_load_for_report)
         end
       end
 
@@ -1458,10 +1458,9 @@ class Airflow
       if not preconditioned
         # Actuators for ERV/HRV
         sens_name = "#{Constants.ObjectNameERVHRV} sensible load"
-        erv_sens_load_actuator = create_sens_lat_load_actuator_and_equipment(model, sens_name, @living_space, 0.0, 0.0)
+        erv_sens_load_actuator = create_sens_lat_load_actuator_and_equipment(model: model, name: sens_name, space: @living_space, frac_lat: 0.0, frac_lost: 0.0)
         lat_name = "#{Constants.ObjectNameERVHRV} latent load"
-        erv_lat_load_actuator = create_sens_lat_load_actuator_and_equipment(model, lat_name, @living_space, 1.0, 0.0)
-
+        erv_lat_load_actuator = create_sens_lat_load_actuator_and_equipment(model: model, name: lat_name, space: @living_space, frac_lat: 1.0, frac_lost: 0.0)
         program.addLine("Set #{erv_sens_load_actuator.name} = 0.0")
         program.addLine("Set #{erv_lat_load_actuator.name} = 0.0")
       end
@@ -1503,8 +1502,8 @@ class Airflow
     clg_spt.setKeyName(@living_zone.name.to_s)
 
     # Load Actuators for shared system
-    sens_load_actuator = create_sens_lat_load_actuator_and_equipment(model, 'shared mech vent sensible load', @living_space, 0.0, 0.0)
-    lat_load_actuator = create_sens_lat_load_actuator_and_equipment(model, 'shared mech vent latent load', @living_space, 1.0, 0.0)
+    sens_load_actuator = create_sens_lat_load_actuator_and_equipment(model: model, name: 'shared mech vent sensible load', space: @living_space, frac_lat: 0.0, frac_lost: 0.0)
+    lat_load_actuator = create_sens_lat_load_actuator_and_equipment(model: model, name: 'shared mech vent latent load', space: @living_space, frac_lat: 1.0, frac_lost: 0.0)
 
     precond_program = OpenStudio::Model::EnergyManagementSystemProgram.new(model)
     precond_program.setName('shared mech vent preconditioning program')
@@ -1526,8 +1525,8 @@ class Airflow
     vent_mech_precond.each_with_index do |vent_mech, i|
       # Create energy use actuator per system because of different fuel type can be applied
       # FIXME: Preconditioning equipment energy end use: mech vent or hvac category? Proceed with a new end use: mech vent preconditioning
-      clg_energy_actuator = create_sens_lat_load_actuator_and_equipment(model, "shared mech vent precooling energy #{i}", @living_space, 0.0, 1.0, vent_mech.precooling_fuel, Constants.ObjectNameMechanicalVentilationPreconditioning)
-      htg_energy_actuator = create_sens_lat_load_actuator_and_equipment(model, "shared mech vent preheating energy #{i}", @living_space, 0.0, 1.0, vent_mech.preheating_fuel, Constants.ObjectNameMechanicalVentilationPreconditioning)
+      clg_energy_actuator = create_sens_lat_load_actuator_and_equipment(model: model, name: "shared mech vent precooling energy #{i}", space: @living_space, frac_lat: 0.0, frac_lost: 1.0, hpxml_fuel_type: vent_mech.precooling_fuel, end_use: Constants.ObjectNameMechanicalVentilationPreconditioning)
+      htg_energy_actuator = create_sens_lat_load_actuator_and_equipment(model: model, name: "shared mech vent preheating energy #{i}", space: @living_space, frac_lat: 0.0, frac_lost: 1.0, hpxml_fuel_type: vent_mech.preheating_fuel, end_use: Constants.ObjectNameMechanicalVentilationPreconditioning)
       precond_program.addLine("Set #{clg_energy_actuator.name} = 0.0")
       precond_program.addLine("Set #{htg_energy_actuator.name} = 0.0")
       precond_program.addLine("Set SharedFlowRate = #{UnitConversions.convert(vent_mech.average_flow_rate, 'cfm', 'm^3/s')}")

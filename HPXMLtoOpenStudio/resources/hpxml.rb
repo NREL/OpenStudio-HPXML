@@ -3085,7 +3085,7 @@ class HPXML < Object
         XMLHelper.add_element(distribution, 'NumberofReturnRegisters', Integer(@number_of_return_registers)) unless @number_of_return_registers.nil?
         HPXML::add_extension(parent: distribution,
                              extensions: { 'DuctLeakageTestingExemption' => to_boolean_or_nil(@duct_leakage_testing_exemption) })
-    end
+      end
     end
 
     def from_oga(hvac_distribution)
@@ -3269,20 +3269,20 @@ class HPXML < Object
       fail "Attached HVAC distribution system '#{@distribution_system_idref}' not found for ventilation fan '#{@id}'."
     end
 
-    def flow_rate
-      if not @tested_flow_rate.nil?
-        return @tested_flow_rate
-      else
-        return @rated_flow_rate
-      end
-    end
-
     def oa_flow_rate
-      return flow_rate if not @is_shared_system
-      if not @fraction_recirculation.nil?
-        return @in_unit_flow_rate * (1 - @fraction_recirculation)
+      # Need this method for cfis
+      if not @is_shared_system
+        if not @tested_flow_rate.nil?
+          return @tested_flow_rate
+        else
+          return @rated_flow_rate
+        end
       else
-        fail 'FractionRecirculation is required for shared mech vent system.'
+        if not @fraction_recirculation.nil?
+          return @in_unit_flow_rate * (1 - @fraction_recirculation)
+        else
+          fail 'FractionRecirculation is required for shared mech vent system.'
+        end
       end
     end
 
@@ -3296,6 +3296,7 @@ class HPXML < Object
     end
 
     def unit_fan_power
+      # Need this method for cfis
       if @is_shared_system
         return @fan_power * unit_flow_rate_ratio
       else
@@ -3318,12 +3319,8 @@ class HPXML < Object
     end
 
     def average_flow_rate
-      if (not flow_rate.nil?) && (not @hours_in_operation.nil?)
-        if @is_shared_system
-          return oa_flow_rate * (@hours_in_operation / 24.0)
-        else
-          return flow_rate * (@hours_in_operation / 24.0)
-        end
+      if (not oa_flow_rate.nil?) && (not @hours_in_operation.nil?)
+        return oa_flow_rate * (@hours_in_operation / 24.0)
       end
     end
 

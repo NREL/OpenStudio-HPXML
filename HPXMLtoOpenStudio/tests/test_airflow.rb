@@ -408,8 +408,10 @@ class HPXMLtoOpenStudioAirflowTest < MiniTest::Test
     vent_fans_precond = hpxml.ventilation_fans.select { |f| (not f.unit_preheating_capacity.nil?) || (not f.unit_precooling_capacity.nil?) }
     vent_fans_nonprecond = hpxml.ventilation_fans.select { |f| f.unit_preheating_capacity.nil? && f.unit_precooling_capacity.nil? }
     vent_fans_tot_pow_noncfis = hpxml.ventilation_fans.select { |f| f.fan_type != HPXML::MechVentTypeCFIS }.map { |f| f.average_fan_power }.sum(0.0)
+    # preconditioning capacities
     vent_fans_clg_cap_precond = vent_fans_precond.map { |f| f.unit_precooling_capacity }.sum(0.0)
     vent_fans_htg_cap_precond = vent_fans_precond.map { |f| f.unit_preheating_capacity }.sum(0.0)
+    # preconditioned mech vent cfms
     vent_fans_cfm_precond = vent_fans_precond.map { |f| f.average_flow_rate }.sum(0.0)
     # The preconditioned CFIS (cfm handled the same as other systems, only pow calculated in cfis program differently)
     vent_fans_precond_pow_cfis = vent_fans_precond.select { |f| f.fan_type == HPXML::MechVentTypeCFIS }.map { |f| f.unit_fan_power }.sum(0.0)
