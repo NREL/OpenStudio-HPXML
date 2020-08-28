@@ -383,7 +383,6 @@
               <TestedFlowRate>330.0</TestedFlowRate>
               <HoursInOperation>8.0</HoursInOperation>
               <UsedForWholeBuildingVentilation>true</UsedForWholeBuildingVentilation>
-              <IsSharedSystem>false</IsSharedSystem>
               <FanPower>300.0</FanPower>
               <AttachedToHVACDistributionSystem idref='HVACDistribution'/>
             </VentilationFan>

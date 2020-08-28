@@ -476,7 +476,6 @@
               <TestedFlowRate>55.0</TestedFlowRate>
               <HoursInOperation>24.0</HoursInOperation>
               <UsedForWholeBuildingVentilation>true</UsedForWholeBuildingVentilation>
-              <IsSharedSystem>false</IsSharedSystem>
               <FanPower>15.0</FanPower>
             </VentilationFan>
             <VentilationFan>
@@ -485,7 +484,6 @@
               <RatedFlowRate>25.0</RatedFlowRate>
               <HoursInOperation>14.0</HoursInOperation>
               <UsedForWholeBuildingVentilation>true</UsedForWholeBuildingVentilation>
-              <IsSharedSystem>false</IsSharedSystem>
               <FanPower>5.0</FanPower>
             </VentilationFan>
             <VentilationFan>
@@ -494,7 +492,6 @@
               <TestedFlowRate>55.0</TestedFlowRate>
               <HoursInOperation>24.0</HoursInOperation>
               <UsedForWholeBuildingVentilation>true</UsedForWholeBuildingVentilation>
-              <IsSharedSystem>false</IsSharedSystem>
               <FanPower>30.0</FanPower>
             </VentilationFan>
             <VentilationFan>
@@ -503,7 +500,6 @@
               <TestedFlowRate>25.0</TestedFlowRate>
               <HoursInOperation>24.0</HoursInOperation>
               <UsedForWholeBuildingVentilation>true</UsedForWholeBuildingVentilation>
-              <IsSharedSystem>false</IsSharedSystem>
               <TotalRecoveryEfficiency>0.48</TotalRecoveryEfficiency>
               <SensibleRecoveryEfficiency>0.72</SensibleRecoveryEfficiency>
               <FanPower>15.0</FanPower>
@@ -514,7 +510,6 @@
               <TestedFlowRate>30.0</TestedFlowRate>
               <HoursInOperation>24.0</HoursInOperation>
               <UsedForWholeBuildingVentilation>true</UsedForWholeBuildingVentilation>
-              <IsSharedSystem>false</IsSharedSystem>
               <SensibleRecoveryEfficiency>0.72</SensibleRecoveryEfficiency>
               <FanPower>15.0</FanPower>
             </VentilationFan>
@@ -524,7 +519,6 @@
               <TestedFlowRate>30.0</TestedFlowRate>
               <HoursInOperation>23.0</HoursInOperation>
               <UsedForWholeBuildingVentilation>true</UsedForWholeBuildingVentilation>
-              <IsSharedSystem>false</IsSharedSystem>
               <SensibleRecoveryEfficiency>0.72</SensibleRecoveryEfficiency>
               <FanPower>15.0</FanPower>
             </VentilationFan>
@@ -534,7 +528,6 @@
               <TestedFlowRate>25.0</TestedFlowRate>
               <HoursInOperation>23.0</HoursInOperation>
               <UsedForWholeBuildingVentilation>true</UsedForWholeBuildingVentilation>
-              <IsSharedSystem>false</IsSharedSystem>
               <TotalRecoveryEfficiency>0.48</TotalRecoveryEfficiency>
               <SensibleRecoveryEfficiency>0.72</SensibleRecoveryEfficiency>
               <FanPower>15.0</FanPower>
@@ -545,7 +538,6 @@
               <TestedFlowRate>55.0</TestedFlowRate>
               <HoursInOperation>23.0</HoursInOperation>
               <UsedForWholeBuildingVentilation>true</UsedForWholeBuildingVentilation>
-              <IsSharedSystem>false</IsSharedSystem>
               <FanPower>30.0</FanPower>
             </VentilationFan>
             <VentilationFan>
@@ -554,7 +546,6 @@
               <RatedFlowRate>25.0</RatedFlowRate>
               <HoursInOperation>13.0</HoursInOperation>
               <UsedForWholeBuildingVentilation>true</UsedForWholeBuildingVentilation>
-              <IsSharedSystem>false</IsSharedSystem>
               <FanPower>5.0</FanPower>
             </VentilationFan>
             <VentilationFan>
@@ -563,7 +554,6 @@
               <TestedFlowRate>55.0</TestedFlowRate>
               <HoursInOperation>23.0</HoursInOperation>
               <UsedForWholeBuildingVentilation>true</UsedForWholeBuildingVentilation>
-              <IsSharedSystem>false</IsSharedSystem>
               <FanPower>15.0</FanPower>
             </VentilationFan>
             <VentilationFan>
@@ -601,7 +591,6 @@
               <TestedFlowRate>160.0</TestedFlowRate>
               <HoursInOperation>8.0</HoursInOperation>
               <UsedForWholeBuildingVentilation>true</UsedForWholeBuildingVentilation>
-              <IsSharedSystem>false</IsSharedSystem>
               <FanPower>150.0</FanPower>
               <AttachedToHVACDistributionSystem idref='HVACDistribution'/>
             </VentilationFan>
@@ -611,7 +600,6 @@
               <TestedFlowRate>170.0</TestedFlowRate>
               <HoursInOperation>8.0</HoursInOperation>
               <UsedForWholeBuildingVentilation>true</UsedForWholeBuildingVentilation>
-              <IsSharedSystem>false</IsSharedSystem>
               <FanPower>150.0</FanPower>
               <AttachedToHVACDistributionSystem idref='HVACDistribution2'/>
             </VentilationFan>
