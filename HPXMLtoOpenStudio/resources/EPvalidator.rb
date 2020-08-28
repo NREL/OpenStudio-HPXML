@@ -24,7 +24,7 @@ class EnergyPlusValidator
           assert_test = XMLHelper.get_attribute_value(assert_element, 'test').gsub('h:', '')
 
           hpxml_doc.xpath(parent_xpath).each do |context_element|
-            next unless not context_element.xpath(assert_test) # check if assert_test is false
+            next if context_element.xpath(assert_test) # check if assert_test is false
 
             assert_value = assert_element.children.text # the value of sch:assert
             if rule_context == '/*' # Root
