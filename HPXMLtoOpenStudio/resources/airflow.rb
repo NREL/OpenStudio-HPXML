@@ -618,9 +618,9 @@ class Airflow
     if object.is_a? OpenStudio::Model::AirLoopHVAC
       # Most system types
 
-    # Set the return plenum
+      # Set the return plenum
       ra_duct_zone = create_return_air_duct_zone(model, object.name.to_s)
-    ra_duct_space = ra_duct_zone.spaces[0]
+      ra_duct_space = ra_duct_zone.spaces[0]
       @living_zone.setReturnPlenum(ra_duct_zone, object)
 
       inlet_node = object.demandInletNode

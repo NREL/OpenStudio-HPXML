@@ -752,7 +752,7 @@ class HPXML < Object
       XMLHelper.add_element(software_info, 'SoftwareProgramVersion', software_program_version) unless software_program_version.nil?
       if not @apply_ashrae140_assumptions.nil?
         extension = XMLHelper.create_elements_as_needed(software_info, ['extension'])
-      XMLHelper.add_element(extension, 'ApplyASHRAE140Assumptions', to_boolean(@apply_ashrae140_assumptions)) unless @apply_ashrae140_assumptions.nil?
+        XMLHelper.add_element(extension, 'ApplyASHRAE140Assumptions', to_boolean(@apply_ashrae140_assumptions)) unless @apply_ashrae140_assumptions.nil?
       end
       if (not @eri_calculation_version.nil?) || (not @eri_design.nil?)
         extension = XMLHelper.create_elements_as_needed(software_info, ['extension'])
@@ -3084,7 +3084,7 @@ class HPXML < Object
         @ducts.to_oga(distribution)
         XMLHelper.add_element(distribution, 'NumberofReturnRegisters', Integer(@number_of_return_registers)) unless @number_of_return_registers.nil?
         HPXML::add_extension(parent: distribution,
-                           extensions: { 'DuctLeakageTestingExemption' => to_boolean_or_nil(@duct_leakage_testing_exemption) })
+                             extensions: { 'DuctLeakageTestingExemption' => to_boolean_or_nil(@duct_leakage_testing_exemption) })
     end
     end
 
@@ -3868,7 +3868,7 @@ class HPXML < Object
       XMLHelper.add_element(pv_system, 'Tracking', @tracking) unless @tracking.nil?
       XMLHelper.add_element(pv_system, 'ArrayAzimuth', to_integer(@array_azimuth)) unless @array_azimuth.nil?
       XMLHelper.add_element(pv_system, 'ArrayTilt', to_float(@array_tilt)) unless @array_tilt.nil?
-        XMLHelper.add_element(pv_system, 'MaxPowerOutput', to_float(@max_power_output)) unless @max_power_output.nil?
+      XMLHelper.add_element(pv_system, 'MaxPowerOutput', to_float(@max_power_output)) unless @max_power_output.nil?
       XMLHelper.add_element(pv_system, 'InverterEfficiency', to_float(@inverter_efficiency)) unless @inverter_efficiency.nil?
       XMLHelper.add_element(pv_system, 'SystemLossesFraction', to_float(@system_losses_fraction)) unless @system_losses_fraction.nil?
       XMLHelper.add_element(pv_system, 'YearModulesManufactured', to_integer(@year_modules_manufactured)) unless @year_modules_manufactured.nil?
@@ -3887,7 +3887,7 @@ class HPXML < Object
       @array_orientation = XMLHelper.get_value(pv_system, 'ArrayOrientation')
       @array_azimuth = to_integer_or_nil(XMLHelper.get_value(pv_system, 'ArrayAzimuth'))
       @array_tilt = to_float_or_nil(XMLHelper.get_value(pv_system, 'ArrayTilt'))
-        @max_power_output = to_float_or_nil(XMLHelper.get_value(pv_system, 'MaxPowerOutput'))
+      @max_power_output = to_float_or_nil(XMLHelper.get_value(pv_system, 'MaxPowerOutput'))
       @inverter_efficiency = to_float_or_nil(XMLHelper.get_value(pv_system, 'InverterEfficiency'))
       @system_losses_fraction = to_float_or_nil(XMLHelper.get_value(pv_system, 'SystemLossesFraction'))
       @number_of_panels = to_integer_or_nil(XMLHelper.get_value(pv_system, 'NumberOfPanels'))
@@ -5213,7 +5213,7 @@ class HPXML < Object
     if not extensions.empty?
       extensions.each do |name, value|
         next if name.nil?
-        next if value.nil? and only_allow_values
+        next if value.nil? && only_allow_values
         extension = XMLHelper.create_elements_as_needed(parent, ['extension'])
         XMLHelper.add_element(extension, "#{name}", value)
       end
