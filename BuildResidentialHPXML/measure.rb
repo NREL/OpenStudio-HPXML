@@ -4535,7 +4535,8 @@ class HPXMLFile
       next unless [HPXML::HVACTypeBoiler].include? heating_system.heating_system_type
 
       hpxml.hvac_distributions.add(id: 'HydronicDistribution',
-                                   distribution_system_type: HPXML::HVACDistributionTypeHydronic)
+                                   distribution_system_type: HPXML::HVACDistributionTypeHydronic,
+                                   hydronic_type: HPXML::HydronicTypeBaseboard)
       heating_system.distribution_system_idref = hpxml.hvac_distributions[-1].id
       break
     end
@@ -4994,7 +4995,6 @@ class HPXMLFile
       is_shared_system = false
       if [args[:pv_system_is_shared_1], args[:pv_system_is_shared_2]][i]
         is_shared_system = [args[:pv_system_is_shared_1], args[:pv_system_is_shared_2]][i]
-        building_max_power_output = max_power_output
         number_of_bedrooms_served = args[:geometry_building_num_bedrooms].get
       end
 
@@ -5008,7 +5008,6 @@ class HPXMLFile
                            inverter_efficiency: inverter_efficiency,
                            system_losses_fraction: system_losses_fraction,
                            is_shared_system: is_shared_system,
-                           building_max_power_output: building_max_power_output,
                            number_of_bedrooms_served: number_of_bedrooms_served)
     end
   end
