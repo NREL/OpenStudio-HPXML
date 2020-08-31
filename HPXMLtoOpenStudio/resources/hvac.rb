@@ -2080,53 +2080,45 @@ class HVAC
         distribution_system = heating_system.distribution_system
         distribution_type = distribution_system.distribution_system_type
 
-        if heating_system.shared_loop_watts.nil?
-
-          # Default EAE from ANSI/RESNET/ICC 301-2019 Table 4.5.2(5)
-          if distribution_type == HPXML::HVACDistributionTypeHydronic
-            return 220.0 # kWh/yr
-          elsif distribution_type == HPXML::HVACDistributionTypeHydronicAndAir
-            hydronic_and_air_type = distribution_system.hydronic_and_air_type
-            if hydronic_and_air_type == HPXML::HydronicAndAirTypeFanCoil
-              return 438.0 # kWh/yr
-            elsif hydronic_and_air_type == HPXML::HydronicAndAirTypeWaterLoopHeatPump
-              return 265.0 # kWh/yr
-            else
-              fail "Unexpected distribution type '#{hydronic_and_air_type}' for shared boiler."
-            end
+        if distribution_type == HPXML::HVACDistributionTypeHydronic
+          # Shared boiler w/ baseboard/radiators/etc
+          if heating_system.shared_loop_watts.nil?
+            return 220.0 # kWh/yr, per ANSI/RESNET/ICC 301-2019 Table 4.5.2(5)
           else
-            fail "Unexpected distribution type '#{distribution_type}' for shared boiler."
-          end
-
-        else
-
-          # Calculate EAE
-          sp_kw = UnitConversions.convert(heating_system.shared_loop_watts, 'W', 'kW')
-          n_dweq = heating_system.number_of_units_served.to_f
-
-          if distribution_type == HPXML::HVACDistributionTypeHydronic
-            # Shared boiler w/ baseboard/radiators/etc
+            sp_kw = UnitConversions.convert(heating_system.shared_loop_watts, 'W', 'kW')
+            n_dweq = heating_system.number_of_units_served.to_f
             aux_in = 0.0
-          elsif distribution_type == HPXML::HVACDistributionTypeHydronicAndAir
-            hydronic_and_air_type = distribution_system.hydronic_and_air_type
-            if hydronic_and_air_type == HPXML::HydronicAndAirTypeFanCoil
-              # Shared boiler w/ fan coil
-              aux_in = UnitConversions.convert(heating_system.fan_coil_watts, 'W', 'kW')
-            elsif hydronic_and_air_type == HPXML::HydronicAndAirTypeWaterLoopHeatPump
-              # Shared boiler w/ WLHP
-              # ANSI/RESNET/ICC 301-2019 Section 4.4.7.2
-              aux_in = 0.0
+          end
+        elsif distribution_type == HPXML::HVACDistributionTypeHydronicAndAir
+          hydronic_and_air_type = distribution_system.hydronic_and_air_type
+          if hydronic_and_air_type == HPXML::HydronicAndAirTypeFanCoil
+            # Shared boiler w/ fan coil
+            if heating_system.shared_loop_watts.nil? || heating_system.fan_coil_watts.nil?
+              return 438.0 # kWh/yr, per ANSI/RESNET/ICC 301-2019 Table 4.5.2(5)
             else
-              fail "Unexpected distribution type '#{hydronic_and_air_type}' for shared boiler."
+              sp_kw = UnitConversions.convert(heating_system.shared_loop_watts, 'W', 'kW')
+              n_dweq = heating_system.number_of_units_served.to_f
+              aux_in = UnitConversions.convert(heating_system.fan_coil_watts, 'W', 'kW')
+            end
+          elsif hydronic_and_air_type == HPXML::HydronicAndAirTypeWaterLoopHeatPump
+            # Shared boiler w/ WLHP
+            if heating_system.shared_loop_watts.nil?
+              return 265.0 # kWh/yr, per ANSI/RESNET/ICC 301-2019 Table 4.5.2(5)
+            else
+              sp_kw = UnitConversions.convert(heating_system.shared_loop_watts, 'W', 'kW')
+              n_dweq = heating_system.number_of_units_served.to_f
+              aux_in = 0.0 # ANSI/RESNET/ICC 301-2019 Section 4.4.7.2
             end
           else
-            fail "Unexpected distribution type '#{distribution_type}' for shared boiler."
+            fail "Unexpected distribution type '#{hydronic_and_air_type}' for shared boiler."
           end
-
-          # ANSI/RESNET/ICC 301-2019 Equation 4.4-5
-          eae = ((sp_kw / n_dweq) + aux_in) * 2080.0
-          return eae * load_frac # kWh/yr
+        else
+          fail "Unexpected distribution type '#{distribution_type}' for shared boiler."
         end
+
+        # ANSI/RESNET/ICC 301-2019 Equation 4.4-5
+        eae = ((sp_kw / n_dweq) + aux_in) * 2080.0
+        return eae * load_frac # kWh/yr
 
       else # In-unit boilers
 

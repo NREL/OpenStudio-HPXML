@@ -868,9 +868,8 @@ class HPXMLTest < MiniTest::Test
       end
 
       if htg_sys_type == HPXML::HVACTypeBoiler
-        if hpxml.water_heating_systems.select { |wh| [HPXML::WaterHeaterTypeCombiStorage, HPXML::WaterHeaterTypeCombiTankless].include? wh.water_heater_type }.size > 0
-          next # Skip combi systems
-        end
+        next if hpxml.water_heating_systems.select { |wh| [HPXML::WaterHeaterTypeCombiStorage, HPXML::WaterHeaterTypeCombiTankless].include? wh.water_heater_type }.size == 0 # Skip combi systems
+
         # Compare pump power from timeseries output
         query = "SELECT VariableValue FROM ReportVariableData WHERE ReportVariableDataDictionaryIndex IN (SELECT ReportVariableDataDictionaryIndex FROM ReportVariableDataDictionary WHERE VariableType='Avg' AND VariableName='Boiler Part Load Ratio' AND ReportingFrequency='Run Period')"
         avg_plr = sqlFile.execAndReturnFirstDouble(query).get
@@ -902,10 +901,9 @@ class HPXMLTest < MiniTest::Test
     num_hps = hpxml.heat_pumps.size
     hpxml.heat_pumps.each do |heat_pump|
       next unless heat_pump.fraction_heat_load_served > 0
-
       next unless (num_hps == 1) && heat_pump.heat_pump_type == HPXML::HVACTypeHeatPumpGroundToAir
-      # Compare pump power from timeseries output
 
+      # Compare pump power from timeseries output
       hpxml_value = heat_pump.pump_watts_per_ton * UnitConversions.convert(results['Capacity: Cooling (W)'], 'W', 'ton')
       query = "SELECT VariableValue FROM ReportVariableData WHERE ReportVariableDataDictionaryIndex IN (SELECT ReportVariableDataDictionaryIndex FROM ReportVariableDataDictionary WHERE VariableType='Avg' AND VariableName='Unitary System Part Load Ratio' AND ReportingFrequency='Run Period')"
       avg_plr = sqlFile.execAndReturnFirstDouble(query).get

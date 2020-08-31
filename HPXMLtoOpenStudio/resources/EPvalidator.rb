@@ -405,7 +405,7 @@ class EnergyPlusValidator
 
       ## [SharedBoilerType=FanCoil]
       '/HPXML/Building/BuildingDetails/Systems/HVAC/HVACPlant/HeatingSystem[HeatingSystemType/Boiler and IsSharedSystem="true" and //HydronicAndAirDistributionType[text()="fan coil"]]' => {
-        'extension/FanCoilWatts' => one,
+        'ElectricAuxiliaryEnergy | extension/FanCoilWatts' => zero_or_one,
       },
 
       ## [SharedBoilerType=WLHP]
