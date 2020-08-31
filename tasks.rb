@@ -3552,10 +3552,10 @@ def set_hpxml_ventilation_fans(hpxml_file, hpxml)
                                used_for_local_ventilation: true)
   elsif ['base-mechvent-shared.xml'].include? hpxml_file
     # Shared supply + in-unit exhaust (roughly balanced)
-    hpxml.ventilation_fans.add(id: 'SharedSupplyPreconditioned',
+    hpxml.ventilation_fans.add(id: 'SharedSupplyFan',
                                fan_type: HPXML::MechVentTypeSupply,
                                is_shared_system: true,
-                               in_unit_flow_rate: 100,
+                               in_unit_flow_rate: 110,
                                rated_flow_rate: 1000,
                                hours_in_operation: 24,
                                fan_power: 300,
@@ -3563,7 +3563,7 @@ def set_hpxml_ventilation_fans(hpxml_file, hpxml)
                                fraction_recirculation: 0.5)
     hpxml.ventilation_fans.add(id: 'ExhaustFan',
                                fan_type: HPXML::MechVentTypeExhaust,
-                               tested_flow_rate: 110,
+                               tested_flow_rate: 100,
                                hours_in_operation: 24,
                                fan_power: 30,
                                used_for_whole_building_ventilation: true)
