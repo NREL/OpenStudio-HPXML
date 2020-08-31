@@ -2072,7 +2072,6 @@ class HVAC
       return heating_system.electric_auxiliary_energy
     end
 
-    load_frac = heating_system.fraction_heat_load_served
     fuel = heating_system.heating_system_fuel
 
     if heating_system.heating_system_type == HPXML::HVACTypeBoiler
@@ -2117,8 +2116,7 @@ class HVAC
         end
 
         # ANSI/RESNET/ICC 301-2019 Equation 4.4-5
-        eae = ((sp_kw / n_dweq) + aux_in) * 2080.0
-        return eae * load_frac # kWh/yr
+        return ((sp_kw / n_dweq) + aux_in) * 2080.0 # kWh/yr
 
       else # In-unit boilers
 
@@ -2127,7 +2125,7 @@ class HVAC
             HPXML::FuelTypeElectricity,
             HPXML::FuelTypeWoodCord,
             HPXML::FuelTypeWoodPellets].include? fuel
-          return 170.0 * load_frac # kWh/yr
+          return 170.0 # kWh/yr
         elsif [HPXML::FuelTypeOil,
                HPXML::FuelTypeOil1,
                HPXML::FuelTypeOil2,
@@ -2139,7 +2137,7 @@ class HVAC
                HPXML::FuelTypeCoalAnthracite,
                HPXML::FuelTypeCoalBituminous,
                HPXML::FuelTypeCoke].include? fuel
-          return 330.0 * load_frac # kWh/yr
+          return 330.0 # kWh/yr
         end
 
       end
@@ -2151,7 +2149,7 @@ class HVAC
           HPXML::FuelTypeElectricity,
           HPXML::FuelTypeWoodCord,
           HPXML::FuelTypeWoodPellets].include? fuel
-        return (149.0 + 10.3 * furnace_capacity_kbtuh) * load_frac # kWh/yr
+        return 149.0 + 10.3 * furnace_capacity_kbtuh # kWh/yr
       elsif [HPXML::FuelTypeOil,
              HPXML::FuelTypeOil1,
              HPXML::FuelTypeOil2,
@@ -2163,7 +2161,7 @@ class HVAC
              HPXML::FuelTypeCoalAnthracite,
              HPXML::FuelTypeCoalBituminous,
              HPXML::FuelTypeCoke].include? fuel
-        return (439.0 + 5.5 * furnace_capacity_kbtuh) * load_frac # kWh/yr
+        return 439.0 + 5.5 * furnace_capacity_kbtuh # kWh/yr
       end
 
     end
