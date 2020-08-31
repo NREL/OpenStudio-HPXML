@@ -1096,11 +1096,7 @@ class HVAC
 
     # Pump
 
-    eae = heating_system.electric_auxiliary_energy
-    if eae.nil?
-      eae = get_default_eae(heating_system, nil)
-    end
-    pump_w = eae / 2.08
+    pump_w = heating_system.electric_auxiliary_energy / 2.08
     pump = OpenStudio::Model::PumpVariableSpeed.new(model)
     pump.setName(obj_name + ' hydronic pump')
     pump.setRatedPowerConsumption(pump_w)

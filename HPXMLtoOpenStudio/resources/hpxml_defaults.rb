@@ -249,6 +249,14 @@ class HPXMLDefaults
       heat_pump.compressor_type = HVAC.get_default_compressor_type(heat_pump.cooling_efficiency_seer)
     end
 
+    # Default boiler EAE
+    hpxml.heating_systems.each do |heating_system|
+      next unless heating_system.heating_system_type == HPXML::HVACTypeBoiler
+      next unless heating_system.electric_auxiliary_energy.nil?
+
+      heating_system.electric_auxiliary_energy = HVAC.get_default_eae(heating_system, nil)
+    end
+
     # Default AC/HP sensible heat ratio
     hpxml.cooling_systems.each do |cooling_system|
       next unless cooling_system.cooling_shr.nil?
