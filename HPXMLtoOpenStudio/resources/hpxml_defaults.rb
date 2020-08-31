@@ -346,7 +346,7 @@ class HPXMLDefaults
     end
 
     hpxml.hvac_distributions.each do |hvac_distribution|
-      next unless hvac_distribution.distribution_system_type == HPXML::HVACDistributionTypeAir
+      next unless [HPXML::HVACDistributionTypeAir, HPXML::HVACDistributionTypeHydronicAndAir].include? hvac_distribution.distribution_system_type
 
       # Default return registers
       if hvac_distribution.number_of_return_registers.nil?
