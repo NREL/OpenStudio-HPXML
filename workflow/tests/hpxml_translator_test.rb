@@ -33,7 +33,7 @@ class HPXMLTest < MiniTest::Test
 
     xmls = []
     test_dirs.each do |test_dir|
-      Dir["#{test_dir}/*boiler*.xml"].sort.each do |xml|
+      Dir["#{test_dir}/*.xml"].sort.each do |xml|
         xmls << File.absolute_path(xml)
       end
     end
