@@ -292,8 +292,8 @@ class HPXMLDefaults
       if heat_pump.fan_watts_per_cfm.nil?
         heat_pump.fan_watts_per_cfm = HVAC.get_default_gshp_fan_power()
       end
-      if heat_pump.pump_watts.nil?
-        heat_pump.pump_watts = HVAC.get_default_gshp_pump_power(heat_pump.cooling_capacity)
+      if heat_pump.pump_watts_per_ton.nil?
+        heat_pump.pump_watts_per_ton = HVAC.get_default_gshp_pump_power()
       end
     end
 

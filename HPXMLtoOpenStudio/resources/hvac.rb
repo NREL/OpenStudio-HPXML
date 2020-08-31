@@ -996,7 +996,7 @@ class HVAC
     air_loop_unitary.additionalProperties.setFeature(Constants.SizingInfoGSHPUTubeSpacingType, u_tube_spacing_type)
     air_loop_unitary.additionalProperties.setFeature(Constants.SizingInfoHVACCoolType, Constants.ObjectNameGroundSourceHeatPump)
     air_loop_unitary.additionalProperties.setFeature(Constants.SizingInfoHVACHeatType, Constants.ObjectNameGroundSourceHeatPump)
-    air_loop_unitary.additionalProperties.setFeature(Constants.SizingInfoHVACPumpPower, heat_pump.pump_watts.to_f)
+    air_loop_unitary.additionalProperties.setFeature(Constants.SizingInfoHVACPumpPower, heat_pump.pump_watts_per_ton)
   end
 
   def self.apply_water_loop_to_air_heat_pump(model, runner, heat_pump,
@@ -1560,11 +1560,11 @@ class HVAC
     eae = heating_system.electric_auxiliary_energy
 
     unitary_systems = []
-    eae_hvacs.each do |eae_hvac|
-      if eae_hvac.is_a? OpenStudio::Model::AirLoopHVAC # Furnace
-        unitary_systems << get_unitary_system_from_air_loop_hvac(eae_hvac)
-      elsif eae_hvac.is_a? OpenStudio::Model::AirLoopHVACUnitarySystem # WallFurnace/FloorFurnace/Stove
-        unitary_systems << eae_hvac
+    hvac_objects.each do |hvac_object|
+      if hvac_object.is_a? OpenStudio::Model::AirLoopHVAC # Furnace
+        unitary_systems << get_unitary_system_from_air_loop_hvac(hvac_object)
+      elsif hvac_object.is_a? OpenStudio::Model::AirLoopHVACUnitarySystem # WallFurnace/FloorFurnace/Stove
+        unitary_systems << hvac_object
       end
     end
 
@@ -4156,17 +4156,12 @@ class HVAC
     return primary_duct_location, secondary_duct_location
   end
 
-  def self.get_default_gshp_pump_power(cooling_capacity_btuh)
-    return if cooling_capacity_btuh.nil?
-    return if cooling_capacity_btuh.to_f < 0
-
-    pump_power = 25.0 # W/ton
-    cooling_capacity_tons = UnitConversions.convert(cooling_capacity_btuh, 'Btu/hr', 'ton')
-    return pump_power * cooling_capacity_tons
+  def self.get_default_gshp_pump_power()
+    return 25.0 # W/ton
   end
 
   def self.get_default_gshp_fan_power()
-    return 0.2 # W/cfm, per ANSI/RESNET/ICC 301-2019 Section 4.4.5
+    return 0.2 # W/cfm, per ANSI/RESNET/ICC 301-2019 Section 4.4.5 (or should this be interpreted as the additional fan power beyond that captured in the rating test? No one at RESNET appears to know)
   end
 
   def self.apply_shared_systems(hpxml)

@@ -3099,11 +3099,7 @@ class HVACSizing
             next unless plc.to_PumpVariableSpeed.is_initialized
 
             # Pump
-            pump_w = hvac.GSHP_PumpPower
-            if pump_w <= 0
-              cooling_capacity_btuh = UnitConversions.convert(clg_coil.ratedTotalCoolingCapacity.get, 'W', 'Btu/hr')
-              pump_w = HVAC.get_default_gshp_pump_power(cooling_capacity_btuh)
-            end
+            pump_w = hvac.GSHP_PumpPower * UnitConversions.convert(clg_coil.ratedTotalCoolingCapacity.get, 'W', 'ton')
             pump = plc.to_PumpVariableSpeed.get
             pump.setRatedPowerConsumption(pump_w)
             pump.setRatedFlowRate(HVAC.calc_pump_rated_flow_rate(0.75, pump_w, pump.ratedPumpHead))

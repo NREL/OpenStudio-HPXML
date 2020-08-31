@@ -33,7 +33,7 @@ class HPXMLTest < MiniTest::Test
 
     xmls = []
     test_dirs.each do |test_dir|
-      Dir["#{test_dir}/*boiler*.xml"].sort.each do |xml|
+      Dir["#{test_dir}/*.xml"].sort.each do |xml|
         xmls << File.absolute_path(xml)
       end
     end
@@ -862,8 +862,7 @@ class HPXMLTest < MiniTest::Test
       else
         furnace_capacity_kbtuh = nil
         if htg_sys_type == HPXML::HVACTypeFurnace
-          query = "SELECT Value FROM TabularDataWithStrings WHERE ReportName='EquipmentSummary' AND ReportForString='Entire Facility' AND TableName='Heating Coils' AND RowName LIKE '%#{Constants.ObjectNameFurnace.upcase}%' AND ColumnName='Nominal Total Capacity' AND Units='W'"
-          furnace_capacity_kbtuh = UnitConversions.convert(sqlFile.execAndReturnFirstDouble(query).get, 'W', 'kBtu/hr')
+          furnace_capacity_kbtuh = UnitConversions.convert(results['Capacity: Heating (W)'], 'W', 'kBtu/hr')
         end
         hpxml_value = HVAC.get_default_eae(heating_system, furnace_capacity_kbtuh) / 2.08
       end
@@ -906,7 +905,8 @@ class HPXMLTest < MiniTest::Test
 
       next unless (num_hps == 1) && heat_pump.heat_pump_type == HPXML::HVACTypeHeatPumpGroundToAir
       # Compare pump power from timeseries output
-      hpxml_value = 100.0 # FIXME
+
+      hpxml_value = heat_pump.pump_watts_per_ton * UnitConversions.convert(results['Capacity: Cooling (W)'], 'W', 'ton')
       query = "SELECT VariableValue FROM ReportVariableData WHERE ReportVariableDataDictionaryIndex IN (SELECT ReportVariableDataDictionaryIndex FROM ReportVariableDataDictionary WHERE VariableType='Avg' AND VariableName='Unitary System Part Load Ratio' AND ReportingFrequency='Run Period')"
       avg_plr = sqlFile.execAndReturnFirstDouble(query).get
       query = "SELECT VariableValue FROM ReportVariableData WHERE ReportVariableDataDictionaryIndex IN (SELECT ReportVariableDataDictionaryIndex FROM ReportVariableDataDictionary WHERE VariableType='Avg' AND VariableName='Pump Electric Power' AND ReportingFrequency='Run Period')"
