@@ -281,7 +281,7 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
   end
 
   def test_boilers
-    # Test inputs not overridden by defaults
+    # Test inputs not overridden by defaults (in-unit boiler)
     hpxml_name = 'base-hvac-boiler-gas-only.xml'
     hpxml = HPXML.new(hpxml_path: File.join(@root_path, 'workflow', 'sample_files', hpxml_name))
     hpxml.heating_systems[0].electric_auxiliary_energy = 99.9
@@ -289,11 +289,26 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
     hpxml_default = _test_measure()
     _test_default_boiler_values(hpxml_default, 99.9)
 
-    # Test defaults
-    hpxml = apply_hpxml_defaults('base-hvac-boiler-gas-only.xml')
+    # Test defaults w/ in-unit boiler
+    hpxml.heating_systems[0].electric_auxiliary_energy = nil
     XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
     hpxml_default = _test_measure()
     _test_default_boiler_values(hpxml_default, 170.0)
+
+    # Test inputs not overridden by defaults (shared boiler)
+    hpxml_name = 'base-hvac-shared-boiler-only-baseboard.xml'
+    hpxml = HPXML.new(hpxml_path: File.join(@root_path, 'workflow', 'sample_files', hpxml_name))
+    hpxml.heating_systems[0].shared_loop_watts = nil
+    hpxml.heating_systems[0].electric_auxiliary_energy = 99.9
+    XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
+    hpxml_default = _test_measure()
+    _test_default_boiler_values(hpxml_default, 99.9)
+
+    # Test defaults w/ shared boiler
+    hpxml.heating_systems[0].electric_auxiliary_energy = nil
+    XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
+    hpxml_default = _test_measure()
+    _test_default_boiler_values(hpxml_default, 220.0)
   end
 
   def test_hvac_distribution
@@ -1507,12 +1522,6 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
     hpxml.skylights.each do |skylight|
       skylight.interior_shading_factor_summer = nil
       skylight.interior_shading_factor_winter = nil
-    end
-
-    hpxml.heating_systems.each do |heating_system|
-      next unless heating_system.heating_system_type == HPXML::HVACTypeBoiler
-
-      heating_system.electric_auxiliary_energy = nil
     end
 
     hpxml.hvac_distributions.each do |hvac_distribution|

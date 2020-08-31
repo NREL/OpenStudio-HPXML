@@ -2068,41 +2068,65 @@ class HVAC
 
   def self.get_default_eae(heating_system, furnace_capacity_kbtuh)
     # From ANSI/RESNET/ICC 301-2019 Standard
+    if not heating_system.electric_auxiliary_energy.nil?
+      return heating_system.electric_auxiliary_energy
+    end
 
     load_frac = heating_system.fraction_heat_load_served
     fuel = heating_system.heating_system_fuel
 
     if heating_system.heating_system_type == HPXML::HVACTypeBoiler
       if heating_system.is_shared_system
-        # FUTURE: Allow defaulting based on ANSI/RESNET/ICC 301-2019 Table 4.5.2(5)
-        sp_kw = UnitConversions.convert(heating_system.shared_loop_watts, 'W', 'kW')
-        n_dweq = heating_system.number_of_units_served.to_f
-
         distribution_system = heating_system.distribution_system
         distribution_type = distribution_system.distribution_system_type
 
-        if distribution_type == HPXML::HVACDistributionTypeHydronic
-          # Shared boiler w/ baseboard/radiators/etc
-          aux_in = 0.0
-        elsif distribution_type == HPXML::HVACDistributionTypeHydronicAndAir
-          hydronic_and_air_type = distribution_system.hydronic_and_air_type
-          if hydronic_and_air_type == HPXML::HydronicAndAirTypeFanCoil
-            # Shared boiler w/ fan coil
-            aux_in = UnitConversions.convert(heating_system.fan_coil_watts, 'W', 'kW')
-          elsif hydronic_and_air_type == HPXML::HydronicAndAirTypeWaterLoopHeatPump
-            # Shared boiler w/ WLHP
-            # ANSI/RESNET/ICC 301-2019 Section 4.4.7.2
-            aux_in = 0.0
-          else
-            fail "Unexpected distribution type '#{hydronic_and_air_type}' for shared boiler."
-          end
-        else
-          fail "Unexpected distribution type '#{distribution_type}' for shared boiler."
-        end
+        if heating_system.shared_loop_watts.nil?
 
-        # ANSI/RESNET/ICC 301-2019 Equation 4.4-5
-        eae = ((sp_kw / n_dweq) + aux_in) * 2080.0
-        return eae * load_frac # kWh/yr
+          # Default EAE from ANSI/RESNET/ICC 301-2019 Table 4.5.2(5)
+          if distribution_type == HPXML::HVACDistributionTypeHydronic
+            return 220.0 # kWh/yr
+          elsif distribution_type == HPXML::HVACDistributionTypeHydronicAndAir
+            hydronic_and_air_type = distribution_system.hydronic_and_air_type
+            if hydronic_and_air_type == HPXML::HydronicAndAirTypeFanCoil
+              return 438.0 # kWh/yr
+            elsif hydronic_and_air_type == HPXML::HydronicAndAirTypeWaterLoopHeatPump
+              return 265.0 # kWh/yr
+            else
+              fail "Unexpected distribution type '#{hydronic_and_air_type}' for shared boiler."
+            end
+          else
+            fail "Unexpected distribution type '#{distribution_type}' for shared boiler."
+          end
+
+        else
+
+          # Calculate EAE
+          sp_kw = UnitConversions.convert(heating_system.shared_loop_watts, 'W', 'kW')
+          n_dweq = heating_system.number_of_units_served.to_f
+
+          if distribution_type == HPXML::HVACDistributionTypeHydronic
+            # Shared boiler w/ baseboard/radiators/etc
+            aux_in = 0.0
+          elsif distribution_type == HPXML::HVACDistributionTypeHydronicAndAir
+            hydronic_and_air_type = distribution_system.hydronic_and_air_type
+            if hydronic_and_air_type == HPXML::HydronicAndAirTypeFanCoil
+              # Shared boiler w/ fan coil
+              aux_in = UnitConversions.convert(heating_system.fan_coil_watts, 'W', 'kW')
+            elsif hydronic_and_air_type == HPXML::HydronicAndAirTypeWaterLoopHeatPump
+              # Shared boiler w/ WLHP
+              # ANSI/RESNET/ICC 301-2019 Section 4.4.7.2
+              aux_in = 0.0
+            else
+              fail "Unexpected distribution type '#{hydronic_and_air_type}' for shared boiler."
+            end
+          else
+            fail "Unexpected distribution type '#{distribution_type}' for shared boiler."
+          end
+
+          # ANSI/RESNET/ICC 301-2019 Equation 4.4-5
+          eae = ((sp_kw / n_dweq) + aux_in) * 2080.0
+          return eae * load_frac # kWh/yr
+        end
 
       else # In-unit boilers
 
@@ -4153,11 +4177,13 @@ class HVAC
   end
 
   def self.get_default_gshp_pump_power()
-    return 25.0 # W/ton
+    return 30.0 # W/ton, per ANSI/RESNET/ICC 301-2019 Section 4.4.5 (closed loop)
   end
 
   def self.get_default_gshp_fan_power()
-    return 0.2 # W/cfm, per ANSI/RESNET/ICC 301-2019 Section 4.4.5 (or should this be interpreted as the additional fan power beyond that captured in the rating test? No one at RESNET appears to know)
+    # Should this be 0.2 W/cfm per ANSI/RESNET/ICC 301-2019 Section 4.4.5? (or is 0.2 W/cfm
+    # interpreted as the _additional_ fan power beyond that captured in the rating test?)
+    return 0.5 # W/cfm
   end
 
   def self.apply_shared_systems(hpxml)

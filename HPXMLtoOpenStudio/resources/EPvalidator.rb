@@ -400,7 +400,7 @@ class EnergyPlusValidator
         '../../../../BuildingSummary/BuildingConstruction[ResidentialFacilityType[text()="single-family attached" or text()="apartment unit"]]' => one,
         '../../HVACDistribution[DistributionSystemType/HydronicDistribution[HydronicDistributionType[text()="radiator" or text()="baseboard" or text()="radiant floor" or text()="radiant ceiling"]] | DistributionSystemType/HydronicAndAirDistribution[HydronicAndAirDistributionType[text()="fan coil" or text()="water loop heat pump"]]]' => one, # See [HVACDistribution] or [SharedBoilerType=FanCoil] or [SharedBoilerType=WLHP]
         'NumberofUnitsServed' => one,
-        'extension/SharedLoopWatts' => one,
+        'ElectricAuxiliaryEnergy | extension/SharedLoopWatts' => zero_or_one,
       },
 
       ## [SharedBoilerType=FanCoil]
