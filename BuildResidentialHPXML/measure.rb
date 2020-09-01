@@ -1132,6 +1132,18 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     arg.setDefaultValue(false)
     args << arg
 
+    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('heat_pump_ground_to_air_pump_power', false)
+    arg.setDisplayName('Heat Pump: Ground-to-Air Pump Power')
+    arg.setDescription('Ground loop circulator pump power during operation of the heat pump.')
+    arg.setUnits('watt/ton')
+    args << arg
+
+    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('heat_pump_ground_to_air_fan_power', false)
+    arg.setDisplayName('Heat Pump: Ground-to-Air Fan Power')
+    arg.setDescription('Blower fan power.')
+    arg.setUnits('watt/CFM')
+    args << arg
+
     arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('setpoint_heating_temp', true)
     arg.setDisplayName('Setpoint: Heating Temperature')
     arg.setDescription('Specify the heating setpoint temperature.')
@@ -3290,6 +3302,8 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
              heat_pump_backup_heating_capacity: runner.getStringArgumentValue('heat_pump_backup_heating_capacity', user_arguments),
              heat_pump_backup_heating_switchover_temp: runner.getOptionalDoubleArgumentValue('heat_pump_backup_heating_switchover_temp', user_arguments),
              heat_pump_mini_split_is_ducted: runner.getBoolArgumentValue('heat_pump_mini_split_is_ducted', user_arguments),
+             heat_pump_ground_to_air_pump_power: runner.getOptionalDoubleArgumentValue('heat_pump_ground_to_air_pump_power', user_arguments),
+             heat_pump_ground_to_air_fan_power: runner.getOptionalDoubleArgumentValue('heat_pump_ground_to_air_fan_power', user_arguments),
              setpoint_heating_temp: runner.getDoubleArgumentValue('setpoint_heating_temp', user_arguments),
              setpoint_heating_setback_temp: runner.getDoubleArgumentValue('setpoint_heating_setback_temp', user_arguments),
              setpoint_heating_setback_hours_per_week: runner.getDoubleArgumentValue('setpoint_heating_setback_hours_per_week', user_arguments),
@@ -4506,6 +4520,14 @@ class HPXMLFile
     elsif [HPXML::HVACTypeHeatPumpGroundToAir].include? heat_pump_type
       heating_efficiency_cop = args[:heat_pump_heating_efficiency_cop]
       cooling_efficiency_eer = args[:heat_pump_cooling_efficiency_eer]
+
+      if args[:heat_pump_ground_to_air_pump_power].is_initialized
+        pump_watts_per_ton = args[:heat_pump_ground_to_air_pump_power].get
+      end
+
+      if args[:heat_pump_ground_to_air_fan_power].is_initialized
+        fan_watts_per_cfm = args[:heat_pump_ground_to_air_fan_power].get
+      end
     end
 
     hpxml.heat_pumps.add(id: 'HeatPump',
@@ -4526,7 +4548,9 @@ class HPXMLFile
                          heating_efficiency_hspf: heating_efficiency_hspf,
                          cooling_efficiency_seer: cooling_efficiency_seer,
                          heating_efficiency_cop: heating_efficiency_cop,
-                         cooling_efficiency_eer: cooling_efficiency_eer)
+                         cooling_efficiency_eer: cooling_efficiency_eer,
+                         pump_watts_per_ton: pump_watts_per_ton,
+                         fan_watts_per_cfm: fan_watts_per_cfm)
   end
 
   def self.set_hvac_distribution(hpxml, runner, args)
