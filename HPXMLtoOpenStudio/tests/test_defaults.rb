@@ -263,7 +263,7 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
     _test_default_skylight_values(hpxml_default, [1.0] * n_skylights, [1.0] * n_skylights)
   end
 
-  def test_hvac
+  def test_air_conditioners
     # Test inputs not overridden by defaults
     hpxml_name = 'base.xml'
     hpxml = HPXML.new(hpxml_path: File.join(@root_path, 'workflow', 'sample_files', hpxml_name))
@@ -271,14 +271,62 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
     hpxml.cooling_systems[0].compressor_type = HPXML::HVACCompressorTypeVariableSpeed
     XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
     hpxml_default = _test_measure()
-    _test_default_cooling_system_values(hpxml_default, 0.88, HPXML::HVACCompressorTypeVariableSpeed)
-    _test_default_heating_system_values(hpxml_default)
+    _test_default_air_conditioner_values(hpxml_default, 0.88, HPXML::HVACCompressorTypeVariableSpeed)
 
     # Test defaults
-    hpxml = apply_hpxml_defaults('base-misc-defaults.xml')
+    hpxml = apply_hpxml_defaults('base.xml')
     XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
     hpxml_default = _test_measure()
-    _test_default_cooling_system_values(hpxml_default, 0.73, HPXML::HVACCompressorTypeSingleStage)
+    _test_default_air_conditioner_values(hpxml_default, 0.73, HPXML::HVACCompressorTypeSingleStage)
+  end
+
+  def test_boilers
+    # Test inputs not overridden by defaults (in-unit boiler)
+    hpxml_name = 'base-hvac-boiler-gas-only.xml'
+    hpxml = HPXML.new(hpxml_path: File.join(@root_path, 'workflow', 'sample_files', hpxml_name))
+    hpxml.heating_systems[0].electric_auxiliary_energy = 99.9
+    XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
+    hpxml_default = _test_measure()
+    _test_default_boiler_values(hpxml_default, 99.9)
+
+    # Test defaults w/ in-unit boiler
+    hpxml.heating_systems[0].electric_auxiliary_energy = nil
+    XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
+    hpxml_default = _test_measure()
+    _test_default_boiler_values(hpxml_default, 170.0)
+
+    # Test inputs not overridden by defaults (shared boiler)
+    hpxml_name = 'base-hvac-shared-boiler-only-baseboard.xml'
+    hpxml = HPXML.new(hpxml_path: File.join(@root_path, 'workflow', 'sample_files', hpxml_name))
+    hpxml.heating_systems[0].shared_loop_watts = nil
+    hpxml.heating_systems[0].electric_auxiliary_energy = 99.9
+    XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
+    hpxml_default = _test_measure()
+    _test_default_boiler_values(hpxml_default, 99.9)
+
+    # Test defaults w/ shared boiler
+    hpxml.heating_systems[0].electric_auxiliary_energy = nil
+    XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
+    hpxml_default = _test_measure()
+    _test_default_boiler_values(hpxml_default, 220.0)
+  end
+
+  def test_ground_source_heat_pumps
+    # Test inputs not overridden by defaults
+    hpxml_name = 'base-hvac-ground-to-air-heat-pump.xml'
+    hpxml = HPXML.new(hpxml_path: File.join(@root_path, 'workflow', 'sample_files', hpxml_name))
+    hpxml.heat_pumps[0].pump_watts_per_ton = 9.9
+    hpxml.heat_pumps[0].fan_watts_per_cfm = 0.99
+    XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
+    hpxml_default = _test_measure()
+    _test_default_gshp_values(hpxml_default, 9.9, 0.99)
+
+    # Test defaults
+    hpxml.heat_pumps[0].pump_watts_per_ton = nil
+    hpxml.heat_pumps[0].fan_watts_per_cfm = nil
+    XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
+    hpxml_default = _test_measure()
+    _test_default_gshp_values(hpxml_default, 30.0, 0.5)
   end
 
   def test_hvac_distribution
@@ -968,16 +1016,21 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
     assert_equal(num_occupants, hpxml.building_occupancy.number_of_residents)
   end
 
-  def _test_default_cooling_system_values(hpxml, shr, compressor_type)
+  def _test_default_air_conditioner_values(hpxml, shr, compressor_type)
     cooling_system = hpxml.cooling_systems[0]
     assert_equal(shr, cooling_system.cooling_shr)
     assert_equal(compressor_type, cooling_system.compressor_type)
   end
 
-  def _test_default_heating_system_values(hpxml)
+  def _test_default_boiler_values(hpxml, eae)
+    heating_system = hpxml.heating_systems[0]
+    assert_equal(eae, heating_system.electric_auxiliary_energy)
   end
 
-  def _test_default_heat_pump_values(hpxml)
+  def _test_default_gshp_values(hpxml, pump_w_per_ton, fan_w_per_cfm)
+    heat_pump = hpxml.heat_pumps[0]
+    assert_equal(pump_w_per_ton, heat_pump.pump_watts_per_ton)
+    assert_equal(fan_w_per_cfm, heat_pump.fan_watts_per_cfm)
   end
 
   def _test_default_duct_values(hpxml, supply_locations, return_locations, supply_areas, return_areas, n_return_registers)
