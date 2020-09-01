@@ -549,7 +549,11 @@ class Constants
     return __method__.to_s
   end
 
-  def self.SizingInfoMechVentWholeHouseRateUnbalanced
+  def self.SizingInfoMechVentWholeHouseRateUnbalancedAirflow
+    return __method__.to_s
+  end
+
+  def self.SizingInfoMechVentWholeHouseRateUnbalancedLoad
     return __method__.to_s
   end
 

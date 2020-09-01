@@ -1256,7 +1256,7 @@ class Airflow
     vent_mech_fans.each do |vent_mech|
       hrv_erv_effectiveness_map[vent_mech] = {}
 
-      vent_mech_cfm = vent_mech.average_flow_rate
+      vent_mech_cfm = vent_mech.average_oa_flow_rate
       if (vent_mech_cfm > 0)
         # Must assume an operating condition (HVI seems to use CSA 439)
         t_sup_in = 0.0
@@ -1463,6 +1463,7 @@ class Airflow
         erv_lat_load_actuator = create_sens_lat_load_actuator_and_equipment(model: model, name: lat_name, space: @living_space, frac_lat: 1.0, frac_lost: 0.0)
         program.addLine("Set #{erv_sens_load_actuator.name} = 0.0")
         program.addLine("Set #{erv_lat_load_actuator.name} = 0.0")
+        
       end
 
       # ERV/HRV EMS load model
@@ -1482,16 +1483,23 @@ class Airflow
       program.addLine("Set ERVSecInW = #{@win_sensor.name}") # zone air humidity ratio
       program.addLine('Set ERVSecCp = (@CpAirFnW ERVSecInW)')
       program.addLine('Set ERVSecInEnth = (@HFnTdbW ERVSecInTemp ERVSecInW)')
-    end
 
-    # Apply ERV/HRV mechanical ventilation
-    vent_mech_erv_hrv.each do |vent_mech|
-      program = apply_erv_hrv_load_to_infil_program(model, program, vent_mech.average_flow_rate, hrv_erv_effectiveness_map[vent_mech][:vent_mech_sens_eff], hrv_erv_effectiveness_map[vent_mech][:vent_mech_lat_eff], erv_sens_load_actuator, erv_lat_load_actuator, preconditioned)
+      # combine ERV/HRV to a single system with weighted effectivenesses
+      vent_mech_sens_eff = 0.0
+      vent_mech_lat_eff = 0.0
+      airflow_sum = vent_mech_erv_hrv.map{|fan| fan.average_oa_flow_rate}.sum
+      vent_mech_erv_hrv.each do |vent_fan|
+        vent_mech_sens_eff += vent_fan.average_oa_flow_rate / airflow_sum * eff_map[vent_fan][:vent_mech_sens_eff]
+        vent_mech_lat_eff += vent_fan.average_oa_flow_rate / airflow_sum * eff_map[vent_fan][:vent_mech_lat_eff]
+      end
+
+      # Apply ERV/HRV mechanical ventilation
+      program = apply_erv_hrv_load_to_infil_program(model, program, airflow_sum, vent_mech_sens_eff, vent_mech_lat_eff, erv_sens_load_actuator, erv_lat_load_actuator, preconditioned)
     end
     return program
   end
 
-  def self.apply_preconditioning_equipment(model, vent_mech_precond)
+  def self.apply_preconditioning_equipment(model, vent_mech_precond, infil_program)
     # setpoint sensors
     htg_spt = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Zone Thermostat Heating Setpoint Temperature')
     htg_spt.setName("#{Constants.ObjectNameAirflow} t_htg_spt s")
@@ -1505,33 +1513,32 @@ class Airflow
     sens_load_actuator = create_sens_lat_load_actuator_and_equipment(model: model, name: 'shared mech vent sensible load', space: @living_space, frac_lat: 0.0, frac_lost: 0.0)
     lat_load_actuator = create_sens_lat_load_actuator_and_equipment(model: model, name: 'shared mech vent latent load', space: @living_space, frac_lat: 1.0, frac_lost: 0.0)
 
-    precond_program = OpenStudio::Model::EnergyManagementSystemProgram.new(model)
-    precond_program.setName('shared mech vent preconditioning program')
     # Air property at inlet nodes on two sides
-    precond_program.addLine("Set OAInPb = #{@pbar_sensor.name}") # oa barometric pressure
-    precond_program.addLine("Set OAInTemp = #{@tout_sensor.name}") # oa db temperature
-    precond_program.addLine("Set OAInW = #{@wout_sensor.name}") # oa humidity ratio
-    precond_program.addLine('Set OAInRho = (@RhoAirFnPbTdbW OAInPb OAInTemp OAInW)')
+    infil_program.addLine("Set OAInPb = #{@pbar_sensor.name}") # oa barometric pressure
+    infil_program.addLine("Set OAInTemp = #{@tout_sensor.name}") # oa db temperature
+    infil_program.addLine("Set OAInW = #{@wout_sensor.name}") # oa humidity ratio
+    infil_program.addLine('Set OAInRho = (@RhoAirFnPbTdbW OAInPb OAInTemp OAInW)')
 
-    precond_program.addLine("Set IndoorTemp = #{@tin_sensor.name}") # zone air temperature
-    precond_program.addLine("Set HtgSptTemp = #{htg_spt.name}") # zone air temperature
-    precond_program.addLine("Set ClgSptTemp = #{clg_spt.name}") # zone air temperature
-    precond_program.addLine("Set IndoorW = #{@win_sensor.name}") # zone air humidity ratio
-    precond_program.addLine('Set IndoorCp = (@CpAirFnW IndoorW)')
-    precond_program.addLine('Set IndoorEnth = (@HFnTdbW IndoorTemp IndoorW)')
-    precond_program.addLine("Set #{sens_load_actuator.name} = 0.0")
-    precond_program.addLine("Set #{lat_load_actuator.name} = 0.0")
+    infil_program.addLine("Set IndoorTemp = #{@tin_sensor.name}") # zone air temperature
+    infil_program.addLine("Set HtgSptTemp = #{htg_spt.name}") # zone air temperature
+    infil_program.addLine("Set ClgSptTemp = #{clg_spt.name}") # zone air temperature
+    infil_program.addLine("Set IndoorW = #{@win_sensor.name}") # zone air humidity ratio
+    infil_program.addLine('Set IndoorCp = (@CpAirFnW IndoorW)')
+    infil_program.addLine('Set IndoorEnth = (@HFnTdbW IndoorTemp IndoorW)')
+    infil_program.addLine("Set #{sens_load_actuator.name} = 0.0")
+    infil_program.addLine("Set #{lat_load_actuator.name} = 0.0")
 
     vent_mech_precond.each_with_index do |vent_mech, i|
       # Create energy use actuator per system because of different fuel type can be applied
       # FIXME: Preconditioning equipment energy end use: mech vent or hvac category? Proceed with a new end use: mech vent preconditioning
       clg_energy_actuator = create_sens_lat_load_actuator_and_equipment(model: model, name: "shared mech vent precooling energy #{i}", space: @living_space, frac_lat: 0.0, frac_lost: 1.0, hpxml_fuel_type: vent_mech.precooling_fuel, end_use: Constants.ObjectNameMechanicalVentilationPreconditioning)
       htg_energy_actuator = create_sens_lat_load_actuator_and_equipment(model: model, name: "shared mech vent preheating energy #{i}", space: @living_space, frac_lat: 0.0, frac_lost: 1.0, hpxml_fuel_type: vent_mech.preheating_fuel, end_use: Constants.ObjectNameMechanicalVentilationPreconditioning)
-      precond_program.addLine("Set #{clg_energy_actuator.name} = 0.0")
-      precond_program.addLine("Set #{htg_energy_actuator.name} = 0.0")
-      precond_program.addLine("Set SharedFlowRate = #{UnitConversions.convert(vent_mech.average_flow_rate, 'cfm', 'm^3/s')}")
+      infil_program.addLine("Set #{clg_energy_actuator.name} = 0.0")
+      infil_program.addLine("Set #{htg_energy_actuator.name} = 0.0")
+      infil_program.addLine("Set Q_tot = #{UnitConversions.convert(vent_mech.average_unit_flow_rate, 'cfm', 'm^3/s')}")
+      infil_program.addLine("Set SharedFlowRate = #{UnitConversions.convert(vent_mech.average_oa_flow_rate, 'cfm', 'm^3/s')}")
       # Calculate mass flow rate based on outdoor air density
-      precond_program.addLine('Set OA_MFR = SharedFlowRate * OAInRho')
+      infil_program.addLine('Set OA_MFR = SharedFlowRate * OAInRho')
 
       if not [HPXML::MechVentTypeERV, HPXML::MechVentTypeHRV].include? vent_mech.fan_type
         if vent_mech.fan_type == HPXML::MechVentTypeCFIS
@@ -1539,89 +1546,84 @@ class Airflow
           # Other system fan power is added in the method one level up
           # Airflow is handled the same as other preconditioned shared systems
           cfis_fan_actuator = add_ee_for_vent_fan_power(model, Constants.ObjectNameMechanicalVentilationHouseFanCFIS + ' preconditioned', 0.0, true)
-          apply_cfis(precond_program, [vent_mech], cfis_fan_actuator)
+          apply_cfis(infil_program, [vent_mech], cfis_fan_actuator)
         end
         # Air conditions before preconditioning
-        precond_program.addLine('Set BeforePrecondW = OAInW')
-        precond_program.addLine('Set BeforePrecondTemp = OAInTemp')
+        infil_program.addLine('Set BeforePrecondW = OAInW')
+        infil_program.addLine('Set BeforePrecondTemp = OAInTemp')
       else
         # Call HRV/ERV method to get ERV/HRV supply air conditions
         hrv_erv_effectiveness_map = calc_hrv_erv_effectiveness([vent_mech])
-        precond_program = apply_erv_hrv(model, precond_program, [vent_mech], hrv_erv_effectiveness_map, true)
+        infil_program = apply_erv_hrv(model, infil_program, [vent_mech], hrv_erv_effectiveness_map, true)
         # Air conditions before preconditioning
-        precond_program.addLine('Set BeforePrecondW = ERVSupOutW')
-        precond_program.addLine('Set BeforePrecondTemp = ERVSupOutTemp')
+        infil_program.addLine('Set BeforePrecondW = ERVSupOutW')
+        infil_program.addLine('Set BeforePrecondTemp = ERVSupOutTemp')
       end
       # Calculate sensible loads to living by ventilation
-      precond_program.addLine('Set OALoadSensToLv = OA_MFR * IndoorCp * (BeforePrecondTemp - IndoorTemp)') # Negative for heating, positive for cooling
+      infil_program.addLine('Set OALoadSensToLv = OA_MFR * IndoorCp * (BeforePrecondTemp - IndoorTemp)') # Negative for heating, positive for cooling
       # get preconditioning heating/cooling capacities
-      precond_program.addLine('Set PreHeatingCap = 0.0')
-      precond_program.addLine('Set PreCoolingCap = 0.0')
-      precond_program.addLine("Set PreHeatingCap = #{UnitConversions.convert(vent_mech.unit_preheating_capacity, 'Btu/hr', 'W')}") unless vent_mech.unit_preheating_capacity.nil?
-      precond_program.addLine("Set PreCoolingCap = #{UnitConversions.convert(vent_mech.unit_precooling_capacity, 'Btu/hr', 'W')}") unless vent_mech.unit_precooling_capacity.nil?
+      infil_program.addLine('Set PreHeatingCap = 0.0')
+      infil_program.addLine('Set PreCoolingCap = 0.0')
+      infil_program.addLine("Set PreHeatingCap = #{UnitConversions.convert(vent_mech.unit_preheating_capacity, 'Btu/hr', 'W')}") unless vent_mech.unit_preheating_capacity.nil?
+      infil_program.addLine("Set PreCoolingCap = #{UnitConversions.convert(vent_mech.unit_precooling_capacity, 'Btu/hr', 'W')}") unless vent_mech.unit_precooling_capacity.nil?
       # Calculate heating/cooling loads to setpoints, assume preconditioning equipment tries to supply air at setpoints
-      precond_program.addLine('Set OALoadSensToLvHtg = OA_MFR * IndoorCp * (BeforePrecondTemp - HtgSptTemp)') # Heating load to setpoint
-      precond_program.addLine('Set OALoadSensToLvClg = OA_MFR * IndoorCp * (BeforePrecondTemp - ClgSptTemp)') # Cooling load to setpoint
+      infil_program.addLine('Set OALoadSensToLvHtg = OA_MFR * IndoorCp * (BeforePrecondTemp - HtgSptTemp)') # Heating load to setpoint
+      infil_program.addLine('Set OALoadSensToLvClg = OA_MFR * IndoorCp * (BeforePrecondTemp - ClgSptTemp)') # Cooling load to setpoint
       # Calculate preconditioned temperature, humidity ratio, sensible loads based on capacity
-      precond_program.addLine('Set SensLoadToLv = 0.0')
-      precond_program.addLine('If (OALoadSensToLvHtg > 0) && (OALoadSensToLvClg < 0)') # Within deadband, do not condition oa
-      precond_program.addLine('  Set SensLoadToLv = OALoadSensToLv') # Within deadband, don't need preconditioning
-      precond_program.addLine('  Set PreconditionedAirTemp = BeforePrecondTemp') # Doesn't change temperature
-      precond_program.addLine('ElseIf (OALoadSensToLvClg > 0.0)') # Cooling turns on
-      precond_program.addLine('  If PreCoolingCap < OALoadSensToLvClg') # Full cooling capacity is not able to resolve all the cooling loads, apply full capacity
-      precond_program.addLine('    Set SensLoadToLv = OALoadSensToLv - PreCoolingCap') # Sensible load, cooling, minus capacity
-      precond_program.addLine('    Set PreconditionedAirTemp = IndoorTemp + (SensLoadToLv / OA_MFR / IndoorCp)') # Air temperature after preconditioning
-      precond_program.addLine('  Else')
-      precond_program.addLine('    Set SensLoadToLv = OALoadSensToLv - OALoadSensToLvClg') # Cooling load introduced to living by supplying air at cooling setpoint
-      precond_program.addLine('    Set PreconditionedAirTemp = ClgSptTemp') # Cool to setpoint
-      precond_program.addLine('  EndIf')
-      precond_program.addLine('ElseIf (OALoadSensToLvHtg < 0.0)') # Heating turns on
-      precond_program.addLine('  If PreHeatingCap < (-OALoadSensToLvHtg)') # Full heating capacity is not able to resolve all the heating loads, apply full capacity
-      precond_program.addLine('    Set SensLoadToLv = OALoadSensToLv + PreHeatingCap') # Sensible load, heating, plus capacity
-      precond_program.addLine('    Set PreconditionedAirTemp = IndoorTemp + (SensLoadToLv / OA_MFR / IndoorCp)') # Air temperature after preconditioning
-      precond_program.addLine('  Else')
-      precond_program.addLine('    Set SensLoadToLv = OALoadSensToLv - OALoadSensToLvHtg') # Heating load introduced to living by supplying air at heating setpoint
-      precond_program.addLine('    Set PreconditionedAirTemp = HtgSptTemp') # Heat to setpoint
-      precond_program.addLine('  EndIf')
-      precond_program.addLine('EndIf')
+      infil_program.addLine('Set SensLoadToLv = 0.0')
+      infil_program.addLine('If (OALoadSensToLvHtg > 0) && (OALoadSensToLvClg < 0)') # Within deadband, do not condition oa
+      infil_program.addLine('  Set SensLoadToLv = OALoadSensToLv') # Within deadband, don't need preconditioning
+      infil_program.addLine('  Set PreconditionedAirTemp = BeforePrecondTemp') # Doesn't change temperature
+      infil_program.addLine('ElseIf (OALoadSensToLvClg > 0.0)') # Cooling turns on
+      infil_program.addLine('  If PreCoolingCap < OALoadSensToLvClg') # Full cooling capacity is not able to resolve all the cooling loads, apply full capacity
+      infil_program.addLine('    Set SensLoadToLv = OALoadSensToLv - PreCoolingCap') # Sensible load, cooling, minus capacity
+      infil_program.addLine('    Set PreconditionedAirTemp = IndoorTemp + (SensLoadToLv / OA_MFR / IndoorCp)') # Air temperature after preconditioning
+      infil_program.addLine('  Else')
+      infil_program.addLine('    Set SensLoadToLv = OALoadSensToLv - OALoadSensToLvClg') # Cooling load introduced to living by supplying air at cooling setpoint
+      infil_program.addLine('    Set PreconditionedAirTemp = ClgSptTemp') # Cool to setpoint
+      infil_program.addLine('  EndIf')
+      infil_program.addLine('ElseIf (OALoadSensToLvHtg < 0.0)') # Heating turns on
+      infil_program.addLine('  If PreHeatingCap < (-OALoadSensToLvHtg)') # Full heating capacity is not able to resolve all the heating loads, apply full capacity
+      infil_program.addLine('    Set SensLoadToLv = OALoadSensToLv + PreHeatingCap') # Sensible load, heating, plus capacity
+      infil_program.addLine('    Set PreconditionedAirTemp = IndoorTemp + (SensLoadToLv / OA_MFR / IndoorCp)') # Air temperature after preconditioning
+      infil_program.addLine('  Else')
+      infil_program.addLine('    Set SensLoadToLv = OALoadSensToLv - OALoadSensToLvHtg') # Heating load introduced to living by supplying air at heating setpoint
+      infil_program.addLine('    Set PreconditionedAirTemp = HtgSptTemp') # Heat to setpoint
+      infil_program.addLine('  EndIf')
+      infil_program.addLine('EndIf')
       # Check if air is saturated after preconditioning, if so, calculate the latent heat gain/loss
-      precond_program.addLine('Set W_sat = (@WFnTdbRhPb PreconditionedAirTemp 1.0 OAInPb)')
-      precond_program.addLine('If BeforePrecondW > W_sat')
-      precond_program.addLine('  Set PreconditionedW = W_sat')
-      precond_program.addLine('Else')
-      precond_program.addLine('  Set PreconditionedW = BeforePrecondW')
-      precond_program.addLine('EndIf')
-      precond_program.addLine('Set BeforePrecondEnth = (@HFnTdbW BeforePrecondTemp BeforePrecondW)')
-      precond_program.addLine('Set PreconditionedEnth = (@HFnTdbW PreconditionedAirTemp PreconditionedW)')
+      infil_program.addLine('Set W_sat = (@WFnTdbRhPb PreconditionedAirTemp 1.0 OAInPb)')
+      infil_program.addLine('If BeforePrecondW > W_sat')
+      infil_program.addLine('  Set PreconditionedW = W_sat')
+      infil_program.addLine('Else')
+      infil_program.addLine('  Set PreconditionedW = BeforePrecondW')
+      infil_program.addLine('EndIf')
+      infil_program.addLine('Set BeforePrecondEnth = (@HFnTdbW BeforePrecondTemp BeforePrecondW)')
+      infil_program.addLine('Set PreconditionedEnth = (@HFnTdbW PreconditionedAirTemp PreconditionedW)')
       # Calculate energy use
-      precond_program.addLine('Set HeatingEnergy = 0.0')
-      precond_program.addLine('Set CoolingEnergy = 0.0')
-      precond_program.addLine('If (PreconditionedEnth - BeforePrecondEnth) > 0.0') # Heating applied
-      precond_program.addLine('  Set HeatingEnergy = (PreconditionedEnth - BeforePrecondEnth) * OA_MFR')
-      precond_program.addLine('ElseIf (PreconditionedEnth - BeforePrecondEnth) < 0.0') # Cooling applied
-      precond_program.addLine('  If (PreconditionedEnth - BeforePrecondEnth) * OA_MFR < -(PreCoolingCap)') # Over cooling capacity limit due to resolving latent load
-      precond_program.addLine('    Set CoolingEnergy = PreCoolingCap')
-      precond_program.addLine('    Set PreconditionedEnth = BeforePrecondEnth - PreCoolingCap / OA_MFR')
-      precond_program.addLine('    Set PreconditionedTemp = (@TsatFnHPb PreconditionedEnth OAInPb)') # Saturation temperature at target enthalpy
-      precond_program.addLine('    Set SensLoadToLv = OA_MFR * IndoorCp * (PreconditionedTemp - IndoorTemp)') # Adjust load unresolved by preocnditioning
-      precond_program.addLine('  Else') # Within cooling capacity limit
-      precond_program.addLine('    Set CoolingEnergy = -(PreconditionedEnth - BeforePrecondEnth) * OA_MFR')
-      precond_program.addLine('  EndIf')
-      precond_program.addLine('EndIf')
+      infil_program.addLine('Set HeatingEnergy = 0.0')
+      infil_program.addLine('Set CoolingEnergy = 0.0')
+      infil_program.addLine('If (PreconditionedEnth - BeforePrecondEnth) > 0.0') # Heating applied
+      infil_program.addLine('  Set HeatingEnergy = (PreconditionedEnth - BeforePrecondEnth) * OA_MFR')
+      infil_program.addLine('ElseIf (PreconditionedEnth - BeforePrecondEnth) < 0.0') # Cooling applied
+      infil_program.addLine('  If (PreconditionedEnth - BeforePrecondEnth) * OA_MFR < -(PreCoolingCap)') # Over cooling capacity limit due to resolving latent load
+      infil_program.addLine('    Set CoolingEnergy = PreCoolingCap')
+      infil_program.addLine('    Set PreconditionedEnth = BeforePrecondEnth - PreCoolingCap / OA_MFR')
+      infil_program.addLine('    Set PreconditionedTemp = (@TsatFnHPb PreconditionedEnth OAInPb)') # Saturation temperature at target enthalpy
+      infil_program.addLine('    Set SensLoadToLv = OA_MFR * IndoorCp * (PreconditionedTemp - IndoorTemp)') # Adjust load unresolved by preocnditioning
+      infil_program.addLine('  Else') # Within cooling capacity limit
+      infil_program.addLine('    Set CoolingEnergy = -(PreconditionedEnth - BeforePrecondEnth) * OA_MFR')
+      infil_program.addLine('  EndIf')
+      infil_program.addLine('EndIf')
       # Assign loads
-      precond_program.addLine('Set OALoadTotalToLv = OA_MFR * (PreconditionedEnth - IndoorEnth)')
-      precond_program.addLine('Set OALoadLatToLv = OALoadTotalToLv - SensLoadToLv')
-      precond_program.addLine("Set #{sens_load_actuator.name} = #{sens_load_actuator.name} + SensLoadToLv")
-      precond_program.addLine("Set #{lat_load_actuator.name} = #{lat_load_actuator.name} + OALoadLatToLv")
+      infil_program.addLine('Set OALoadTotalToLv = OA_MFR * (PreconditionedEnth - IndoorEnth)')
+      infil_program.addLine('Set OALoadLatToLv = OALoadTotalToLv - SensLoadToLv')
+      infil_program.addLine("Set #{sens_load_actuator.name} = #{sens_load_actuator.name} + SensLoadToLv")
+      infil_program.addLine("Set #{lat_load_actuator.name} = #{lat_load_actuator.name} + OALoadLatToLv")
       # Assign energy use
-      precond_program.addLine("Set #{clg_energy_actuator.name} = (CoolingEnergy / #{vent_mech.precooling_efficiency})")
-      precond_program.addLine("Set #{htg_energy_actuator.name} = (HeatingEnergy / #{vent_mech.preheating_efficiency})")
+      infil_program.addLine("Set #{clg_energy_actuator.name} = (CoolingEnergy / #{vent_mech.precooling_efficiency})")
+      infil_program.addLine("Set #{htg_energy_actuator.name} = (HeatingEnergy / #{vent_mech.preheating_efficiency})")
     end
-
-    program_calling_manager = OpenStudio::Model::EnergyManagementSystemProgramCallingManager.new(model)
-    program_calling_manager.setName("#{precond_program.name} calling manager")
-    program_calling_manager.setCallingPoint('BeginTimestepBeforePredictor')
-    program_calling_manager.addProgram(precond_program)
 
     # oems = model.getOutputEnergyManagementSystem
     # oems.setActuatorAvailabilityDictionaryReporting('Verbose')
@@ -1629,48 +1631,30 @@ class Airflow
     # oems.setEMSRuntimeLanguageDebugOutputLevel('Verbose')
   end
 
-  def self.apply_infiltration_and_ventilation_fans(model, weather, vent_fans_mech, vent_fans_kitchen, vent_fans_bath, has_flue_chimney, air_infils, vented_attic, vented_crawl)
-    # Get living space infiltration
-    living_ach50 = nil
-    living_const_ach = nil
-    air_infils.each do |air_infil|
-      if (air_infil.unit_of_measure == HPXML::UnitsACH) && !air_infil.house_pressure.nil?
-        living_ach = air_infil.air_leakage
-        living_ach50 = calc_air_leakage_at_diff_pressure(0.65, living_ach, air_infil.house_pressure, 50.0)
-      elsif (air_infil.unit_of_measure == HPXML::UnitsCFM) && !air_infil.house_pressure.nil?
-        living_ach = air_infil.air_leakage * 60.0 / @infil_volume # Convert CFM to ACH
-        living_ach50 = calc_air_leakage_at_diff_pressure(0.65, living_ach, air_infil.house_pressure, 50.0)
-      elsif air_infil.unit_of_measure == HPXML::UnitsACHNatural
-        if @apply_ashrae140_assumptions
-          living_const_ach = air_infil.air_leakage
-        else
-          sla = get_infiltration_SLA_from_ACH(air_infil.air_leakage, @infil_height, weather)
-          living_ach50 = get_infiltration_ACH50_from_SLA(sla, 0.65, @cfa, @infil_volume)
-        end
-      end
-    end
-
-    # Infiltration for unconditioned spaces
-    apply_infiltration_to_garage(model, weather, living_ach50)
-    apply_infiltration_to_unconditioned_basement(model, weather)
-    apply_infiltration_to_vented_crawlspace(model, weather, vented_crawl)
-    apply_infiltration_to_unvented_crawlspace(model, weather)
-    apply_infiltration_to_vented_attic(model, weather, vented_attic)
-    apply_infiltration_to_unvented_attic(model, weather)
-
-    # Local ventilation
-    range_sch_sensors_map = apply_local_ventilation(model, vent_fans_kitchen, Constants.ObjectNameMechanicalVentilationRangeFan)
-    bath_sch_sensors_map = apply_local_ventilation(model, vent_fans_bath, Constants.ObjectNameMechanicalVentilationBathFan)
-
-    # Get mechanical ventilation
+  def self.apply_mechanical_ventilation(model, vent_fans_mech)
+    # Categorize fans into different types
     vent_mech_precond = vent_fans_mech.select { |vent_mech| (not vent_mech.unit_preheating_capacity.nil?) || (not vent_mech.unit_precooling_capacity.nil?) }
-    vent_mech_nonprecond = vent_fans_mech.select { |vent_mech| vent_mech.unit_preheating_capacity.nil? && vent_mech.unit_precooling_capacity.nil? }
+    vent_mech_unprecond = vent_fans_mech.difference(vent_mech_precond)
+
     vent_mech_sup_tot = vent_fans_mech.select { |vent_mech| vent_mech.fan_type == HPXML::MechVentTypeSupply }
     vent_mech_exh_tot = vent_fans_mech.select { |vent_mech| vent_mech.fan_type == HPXML::MechVentTypeExhaust }
     vent_mech_cfis_tot = vent_fans_mech.select { |vent_mech| vent_mech.fan_type == HPXML::MechVentTypeCFIS }
     vent_mech_bal_tot = vent_fans_mech.select { |vent_mech| vent_mech.fan_type == HPXML::MechVentTypeBalanced }
     vent_mech_erv_hrv_tot = vent_fans_mech.select { |vent_mech| [HPXML::MechVentTypeERV, HPXML::MechVentTypeHRV].include? vent_mech.fan_type }
 
+    vent_mech_sup_unprecond = vent_mech_sup_tot.intersection(vent_mech_unprecond)
+    vent_mech_exh_unprecond = vent_mech_exh_tot.intersection(vent_mech_unprecond)
+    vent_mech_cfis_unprecond = vent_mech_cfis_tot.intersection(vent_mech_unprecond)
+    vent_mech_bal_unprecond = vent_mech_bal_tot.intersection(vent_mech_unprecond)
+    vent_mech_erv_hrv_unprecond = vent_mech_erv_hrv_tot.intersection(vent_mech_unprecond)
+
+    vent_mech_sup_precond = vent_mech_sup_tot.intersection(vent_mech_precond)
+    vent_mech_exh_precond = vent_mech_exh_tot.intersection(vent_mech_precond)
+    vent_mech_cfis_precond = vent_mech_cfis_tot.intersection(vent_mech_precond)
+    vent_mech_bal_precond = vent_mech_bal_tot.intersection(vent_mech_precond)
+    vent_mech_erv_hrv_precond = vent_mech_erv_hrv_tot.intersection(vent_mech_precond)
+
+    # Fan power
     sup_vent_mech_fan_w = vent_mech_sup_tot.map { |vent_mech| vent_mech.average_fan_power }.sum(0.0)
     exh_vent_mech_fan_w = vent_mech_exh_tot.map { |vent_mech| vent_mech.average_fan_power }.sum(0.0)
     # ERV/HRV and balanced system fan power combined altogether
@@ -1682,35 +1666,51 @@ class Airflow
     else
       fan_heat_lost_fraction = 1.0
     end
-    # Fan Actuators
     add_ee_for_vent_fan_power(model, Constants.ObjectNameMechanicalVentilationHouseFan, fan_heat_lost_fraction, false, total_sup_exh_bal_w)
+    # CFIS Fan Actuators
     cfis_fan_actuator = add_ee_for_vent_fan_power(model, Constants.ObjectNameMechanicalVentilationHouseFanCFIS, 0.0, true)
 
-    # Following airflow methods are only applicable to non-preconditioned systems
-    vent_mech_sup = vent_mech_sup_tot.select { |vent_mech| vent_mech.unit_preheating_capacity.nil? && vent_mech.unit_precooling_capacity.nil? }
-    vent_mech_exh = vent_mech_exh_tot.select { |vent_mech| vent_mech.unit_preheating_capacity.nil? && vent_mech.unit_precooling_capacity.nil? }
-    vent_mech_cfis = vent_mech_cfis_tot.select { |vent_mech| vent_mech.unit_preheating_capacity.nil? && vent_mech.unit_precooling_capacity.nil? }
-    vent_mech_bal = vent_mech_bal_tot.select { |vent_mech| vent_mech.unit_preheating_capacity.nil? && vent_mech.unit_precooling_capacity.nil? }
-    vent_mech_erv_hrv = vent_mech_erv_hrv_tot.select { |vent_mech| vent_mech.unit_preheating_capacity.nil? && vent_mech.unit_precooling_capacity.nil? }
+    # Average outdoor air cfms (exclude recirculation from in unit cfms for shared systems)
+    sup_cfm_oa = vent_mech_sup_tot.map { |vent_mech| vent_mech.average_oa_flow_rate }.sum(0.0)
+    exh_cfm_oa = vent_mech_exh_tot.map { |vent_mech| vent_mech.average_oa_flow_rate }.sum(0.0)
+    bal_cfm_oa = vent_mech_bal_tot.map { |vent_mech| vent_mech.average_oa_flow_rate }.sum(0.0)
+    erv_hrv_cfm_oa = vent_mech_erv_hrv_tot.map { |vent_mech| vent_mech.average_oa_flow_rate }.sum(0.0)
+    cfis_cfm_oa = vent_mech_cfis_tot.map { |vent_mech| vent_mech.average_oa_flow_rate }.sum(0.0)
 
-    # get cfms
-    sup_cfm = vent_mech_sup.map { |vent_mech| vent_mech.average_flow_rate }.sum(0.0)
-    exh_cfm = vent_mech_exh.map { |vent_mech| vent_mech.average_flow_rate }.sum(0.0)
-    bal_cfm = vent_mech_bal.map { |vent_mech| vent_mech.average_flow_rate }.sum(0.0)
-    erv_hrv_cfm = vent_mech_erv_hrv.map { |vent_mech| vent_mech.average_flow_rate }.sum(0.0)
-    cfis_cfm = vent_mech_cfis.map { |vent_mech| vent_mech.average_flow_rate }.sum(0.0)
+    # Average outdoor air cfms - exclude preconditioned
+    sup_cfm_oa_unprecond = vent_mech_sup_unprecond.map { |vent_mech| vent_mech.average_oa_flow_rate }.sum(0.0)
+    exh_cfm_oa_unprecond = vent_mech_exh_unprecond.map { |vent_mech| vent_mech.average_oa_flow_rate }.sum(0.0)
+    bal_cfm_oa_unprecond = vent_mech_bal_unprecond.map { |vent_mech| vent_mech.average_oa_flow_rate }.sum(0.0)
+    erv_hrv_cfm_oa_unprecond = vent_mech_erv_hrv_unprecond.map { |vent_mech| vent_mech.average_oa_flow_rate }.sum(0.0)
+    cfis_cfm_oa_unprecond = vent_mech_cfis_unprecond.map { |vent_mech| vent_mech.average_oa_flow_rate }.sum(0.0)
+
+    # Average outdoor air cfms - preconditioned
+    sup_cfm_oa_precond = vent_mech_sup_precond.map { |vent_mech| vent_mech.average_oa_flow_rate }.sum(0.0)
+    # FIXME: Does exhaust preconditioned exist?? Should we allow it?
+    exh_cfm_oa_precond = vent_mech_exh_precond.map { |vent_mech| vent_mech.average_oa_flow_rate }.sum(0.0)
+    bal_cfm_oa_precond = vent_mech_bal_precond.map { |vent_mech| vent_mech.average_oa_flow_rate }.sum(0.0)
+    erv_hrv_cfm_oa_precond = vent_mech_erv_hrv_precond.map { |vent_mech| vent_mech.average_oa_flow_rate }.sum(0.0)
+    cfis_cfm_oa_precond = vent_mech_cfis_precond.map { |vent_mech| vent_mech.average_oa_flow_rate }.sum(0.0)
 
     # Balanced and unbalanced airflow calculated for hvac sizing
-    tot_sup_cfm = sup_cfm + bal_cfm + erv_hrv_cfm + cfis_cfm
-    tot_exh_cfm = exh_cfm + bal_cfm + erv_hrv_cfm
-    tot_bal_cfm = [tot_sup_cfm, tot_exh_cfm].min
+    # Fixme: using oa cfms to calculate airflows, which assumes recirculation air extracted from space
+    tot_sup_cfm_unprecond = sup_cfm_oa_unprecond + bal_cfm_oa_unprecond + erv_hrv_cfm_oa_unprecond + cfis_cfm_oa_unprecond
+    tot_sup_cfm_precond = sup_cfm_oa_precond + bal_cfm_oa_precond + erv_hrv_cfm_oa_precond + cfis_cfm_oa_precond
+    tot_sup_cfm = tot_sup_cfm_unprecond + tot_sup_cfm_precond
+    tot_exh_cfm = (exh_cfm_oa_unprecond + exh_cfm_oa_precond) + (bal_cfm_oa_unprecond + bal_cfm_oa_precond) + (erv_hrv_cfm_oa_unprecond + erv_hrv_cfm_oa_precond)
     tot_unbal_cfm = (tot_sup_cfm - tot_exh_cfm).abs
+    if tot_sup_cfm > tot_exh_cfm
+      tot_unbal_load = (tot_sup_cfm - tot_exh_cfm) * (tot_sup_cfm_unprecond / tot_sup_cfm)
+    else
+      tot_unbal_load = (tot_exh_cfm - tot_sup_cfm)
+    end
+    tot_bal_cfm = [tot_exh_cfm, tot_sup_cfm].min * (tot_sup_cfm_unprecond / tot_sup_cfm)
 
     # Store info for HVAC Sizing measure
-    # FIXME: Just consider non-preconditioned mech vent systems for hvac sizing load calculation?
     model.getBuilding.additionalProperties.setFeature(Constants.SizingInfoMechVentWholeHouseRateBalanced, tot_bal_cfm)
-    model.getBuilding.additionalProperties.setFeature(Constants.SizingInfoMechVentWholeHouseRateUnbalanced, tot_unbal_cfm)
-    model.getBuilding.additionalProperties.setFeature(Constants.SizingInfoMechVentExist, (not vent_mech_nonprecond.empty?))
+    model.getBuilding.additionalProperties.setFeature(Constants.SizingInfoMechVentWholeHouseRateUnbalancedAirflow, tot_unbal_cfm)
+    model.getBuilding.additionalProperties.setFeature(Constants.SizingInfoMechVentWholeHouseRateUnbalancedLoad, tot_unbal_load)
+    model.getBuilding.additionalProperties.setFeature(Constants.SizingInfoMechVentExist, (not vent_fans_mech.empty?))
 
     infil_flow = OpenStudio::Model::SpaceInfiltrationDesignFlowRate.new(model)
     infil_flow.setName(Constants.ObjectNameInfiltration + ' flow')
@@ -1719,13 +1719,6 @@ class Airflow
     infil_flow_actuator = OpenStudio::Model::EnergyManagementSystemActuator.new(infil_flow, 'Zone Infiltration', 'Air Exchange Flow Rate')
     infil_flow_actuator.setName("#{infil_flow.name} act")
 
-    mechvent_flow = OpenStudio::Model::SpaceInfiltrationDesignFlowRate.new(model)
-    mechvent_flow.setName(Constants.ObjectNameMechanicalVentilation + ' flow')
-    mechvent_flow.setSchedule(model.alwaysOnDiscreteSchedule)
-    mechvent_flow.setSpace(@living_space)
-    mechvent_flow_actuator = OpenStudio::Model::EnergyManagementSystemActuator.new(mechvent_flow, 'Zone Infiltration', 'Air Exchange Flow Rate')
-    mechvent_flow_actuator.setName("#{mechvent_flow.name} act")
-
     # Living Space Infiltration Calculation/Program
     infil_program = OpenStudio::Model::EnergyManagementSystemProgram.new(model)
     infil_program.setName(Constants.ObjectNameInfiltration + ' program')
@@ -1733,22 +1726,25 @@ class Airflow
     infil_program = apply_infiltration_to_living(living_ach50, living_const_ach, infil_program, weather, has_flue_chimney)
 
     # Apply ERV/HRV
-    hrv_erv_effectiveness_map = calc_hrv_erv_effectiveness(vent_mech_erv_hrv)
-    infil_program = apply_erv_hrv(model, infil_program, vent_mech_erv_hrv, hrv_erv_effectiveness_map)
+    hrv_erv_effectiveness_map = calc_hrv_erv_effectiveness(vent_mech_erv_hrv_tot)
+    infil_program = apply_erv_hrv(model, infil_program, vent_mech_erv_hrv_unprecond, hrv_erv_effectiveness_map)
 
     # Calculate cfm weighted average effectiveness for hvac sizing
     weighted_vent_mech_lat_eff = 0.0
     weighted_vent_mech_apparent_sens_eff = 0.0
-    vent_mech_erv_hrv.each do |vent_mech|
+    vent_mech_erv_hrv_unprecond.each do |vent_mech|
       # No need to add balanced system here to average because their effectivenesses are all 0.0
-      weighted_vent_mech_lat_eff += vent_mech.average_flow_rate / tot_bal_cfm * hrv_erv_effectiveness_map[vent_mech][:vent_mech_lat_eff]
-      weighted_vent_mech_apparent_sens_eff += vent_mech.average_flow_rate / tot_bal_cfm * hrv_erv_effectiveness_map[vent_mech][:vent_mech_apparent_sens_eff]
+      weighted_vent_mech_lat_eff += vent_mech.average_oa_flow_rate / tot_sup_cfm_unprecond * hrv_erv_effectiveness_map[vent_mech][:vent_mech_lat_eff]
+      weighted_vent_mech_apparent_sens_eff += vent_mech.average_oa_flow_rate / tot_sup_cfm_unprecond * hrv_erv_effectiveness_map[vent_mech][:vent_mech_apparent_sens_eff]
     end
     model.getBuilding.additionalProperties.setFeature(Constants.SizingInfoMechVentLatentEffectiveness, weighted_vent_mech_lat_eff)
     model.getBuilding.additionalProperties.setFeature(Constants.SizingInfoMechVentApparentSensibleEffectiveness, weighted_vent_mech_apparent_sens_eff)
 
     # Apply CFIS
     infil_program = apply_cfis(infil_program, vent_mech_cfis, cfis_fan_actuator)
+    if not vent_mech_precond.empty?
+      apply_preconditioning_equipment(model, vent_mech_precond, infil_program)
+    end
 
     infil_program.addLine('Set Qrange = 0')
     vent_fans_kitchen.each do |vent_kitchen|
@@ -1799,9 +1795,43 @@ class Airflow
     program_calling_manager.setCallingPoint('BeginTimestepBeforePredictor')
     program_calling_manager.addProgram(infil_program)
 
-    if not vent_mech_precond.empty?
-      apply_preconditioning_equipment(model, vent_mech_precond)
+  end
+
+  def self.apply_infiltration_and_ventilation_fans(model, weather, vent_fans_mech, vent_fans_kitchen, vent_fans_bath, has_flue_chimney, air_infils, vented_attic, vented_crawl)
+    # Get living space infiltration
+    living_ach50 = nil
+    living_const_ach = nil
+    air_infils.each do |air_infil|
+      if (air_infil.unit_of_measure == HPXML::UnitsACH) && !air_infil.house_pressure.nil?
+        living_ach = air_infil.air_leakage
+        living_ach50 = calc_air_leakage_at_diff_pressure(0.65, living_ach, air_infil.house_pressure, 50.0)
+      elsif (air_infil.unit_of_measure == HPXML::UnitsCFM) && !air_infil.house_pressure.nil?
+        living_ach = air_infil.air_leakage * 60.0 / @infil_volume # Convert CFM to ACH
+        living_ach50 = calc_air_leakage_at_diff_pressure(0.65, living_ach, air_infil.house_pressure, 50.0)
+      elsif air_infil.unit_of_measure == HPXML::UnitsACHNatural
+        if @apply_ashrae140_assumptions
+          living_const_ach = air_infil.air_leakage
+        else
+          sla = get_infiltration_SLA_from_ACH(air_infil.air_leakage, @infil_height, weather)
+          living_ach50 = get_infiltration_ACH50_from_SLA(sla, 0.65, @cfa, @infil_volume)
+        end
+      end
     end
+
+    # Infiltration for unconditioned spaces
+    apply_infiltration_to_garage(model, weather, living_ach50)
+    apply_infiltration_to_unconditioned_basement(model, weather)
+    apply_infiltration_to_vented_crawlspace(model, weather, vented_crawl)
+    apply_infiltration_to_unvented_crawlspace(model, weather)
+    apply_infiltration_to_vented_attic(model, weather, vented_attic)
+    apply_infiltration_to_unvented_attic(model, weather)
+
+    # Local ventilation
+    range_sch_sensors_map = apply_local_ventilation(model, vent_fans_kitchen, Constants.ObjectNameMechanicalVentilationRangeFan)
+    bath_sch_sensors_map = apply_local_ventilation(model, vent_fans_bath, Constants.ObjectNameMechanicalVentilationBathFan)
+
+    # Get mechanical ventilation
+    apply_mechanical_ventilation(model, vent_fans_mech)
   end
 
   def self.apply_infiltration_to_living(living_ach50, living_const_ach, infil_program, weather, has_flue_chimney)
