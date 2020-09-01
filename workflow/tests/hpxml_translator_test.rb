@@ -864,7 +864,7 @@ class HPXMLTest < MiniTest::Test
         if htg_sys_type == HPXML::HVACTypeFurnace
           furnace_capacity_kbtuh = UnitConversions.convert(results['Capacity: Heating (W)'], 'W', 'kBtu/hr')
         end
-        hpxml_value = HVAC.get_default_eae(heating_system, furnace_capacity_kbtuh) / 2.08
+        hpxml_value = HVAC.get_electric_auxiliary_energy(heating_system, furnace_capacity_kbtuh) / 2.08
       end
 
       if htg_sys_type == HPXML::HVACTypeBoiler

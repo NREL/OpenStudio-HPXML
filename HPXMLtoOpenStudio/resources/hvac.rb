@@ -1568,7 +1568,7 @@ class HVAC
       if eae.nil?
         htg_coil = unitary_system.heatingCoil.get.to_CoilHeatingGas.get
         htg_capacity = UnitConversions.convert(htg_coil.nominalCapacity.get, 'W', 'kBtu/hr')
-        eae = get_default_eae(heating_system, htg_capacity)
+        eae = get_electric_auxiliary_energy(heating_system, htg_capacity)
       end
       elec_power = eae / 2.08 # W
 
@@ -2066,12 +2066,14 @@ class HVAC
     return ef_input, water_removal_rate_input
   end
 
-  def self.get_default_eae(heating_system, furnace_capacity_kbtuh)
-    # From ANSI/RESNET/ICC 301-2019 Standard
+  def self.get_electric_auxiliary_energy(heating_system, furnace_capacity_kbtuh = nil)
+    # Get boiler/furnace EAE
+
     if not heating_system.electric_auxiliary_energy.nil?
       return heating_system.electric_auxiliary_energy
     end
 
+    # From ANSI/RESNET/ICC 301-2019 Standard
     fuel = heating_system.heating_system_fuel
 
     if heating_system.heating_system_type == HPXML::HVACTypeBoiler
@@ -4297,7 +4299,7 @@ class HVAC
                              fraction_cool_load_served: 0.0)
 
         # Boiler
-        heating_system.electric_auxiliary_energy = get_default_eae(heating_system, nil)
+        heating_system.electric_auxiliary_energy = get_electric_auxiliary_energy(heating_system)
         heating_system.fraction_heat_load_served = fraction_heat_load_served * (1.0 - 1.0 / heating_system.wlhp_heating_efficiency_cop)
         heating_system.distribution_system_idref = "#{heating_system.id}_Baseboard"
         hpxml.hvac_distributions.add(id: heating_system.distribution_system_idref,

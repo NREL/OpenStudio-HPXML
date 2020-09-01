@@ -254,7 +254,7 @@ class HPXMLDefaults
       next unless heating_system.heating_system_type == HPXML::HVACTypeBoiler
       next unless heating_system.electric_auxiliary_energy.nil?
 
-      heating_system.electric_auxiliary_energy = HVAC.get_default_eae(heating_system, nil)
+      heating_system.electric_auxiliary_energy = HVAC.get_electric_auxiliary_energy(heating_system)
     end
 
     # Default AC/HP sensible heat ratio
