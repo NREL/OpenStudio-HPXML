@@ -2761,8 +2761,8 @@ class HPXML < Object
              :backup_heating_efficiency_percent, :backup_heating_efficiency_afue,
              :backup_heating_switchover_temp, :fraction_heat_load_served, :fraction_cool_load_served,
              :cooling_efficiency_seer, :cooling_efficiency_eer, :heating_efficiency_hspf,
-             :heating_efficiency_cop, :energy_star, :seed_id, :is_shared_system,
-             :number_of_units_served, :shared_loop_watts]
+             :heating_efficiency_cop, :energy_star, :seed_id, :pump_watts_per_ton, :fan_watts_per_cfm,
+             :is_shared_system, :number_of_units_served, :shared_loop_watts]
     attr_accessor(*ATTRS)
 
     def distribution_system
@@ -2855,8 +2855,10 @@ class HPXML < Object
       end
 
       HPXML::add_extension(parent: heat_pump,
-                           extensions: { 'SeedId' => @seed_id,
-                                         'SharedLoopWatts' => to_float_or_nil(@shared_loop_watts) })
+                           extensions: { 'PumpPowerWattsPerTon' => to_float_or_nil(@pump_watts_per_ton),
+                                         'FanPowerWattsPerCFM' => to_float_or_nil(@fan_watts_per_cfm),
+                                         'SharedLoopWatts' => to_float_or_nil(@shared_loop_watts),
+                                         'SeedId' => @seed_id })
     end
 
     def from_oga(heat_pump)
@@ -2892,6 +2894,8 @@ class HPXML < Object
         @heating_efficiency_cop = to_float_or_nil(XMLHelper.get_value(heat_pump, "AnnualHeatingEfficiency[Units='#{UnitsCOP}']/Value"))
       end
       @energy_star = XMLHelper.get_values(heat_pump, 'ThirdPartyCertification').include?('Energy Star')
+      @pump_watts_per_ton = to_float_or_nil(XMLHelper.get_value(heat_pump, 'extension/PumpPowerWattsPerTon'))
+      @fan_watts_per_cfm = to_float_or_nil(XMLHelper.get_value(heat_pump, 'extension/FanPowerWattsPerCFM'))
       @seed_id = XMLHelper.get_value(heat_pump, 'extension/SeedId')
       @shared_loop_watts = to_float_or_nil(XMLHelper.get_value(heat_pump, 'extension/SharedLoopWatts'))
     end
