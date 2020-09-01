@@ -311,6 +311,24 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
     _test_default_boiler_values(hpxml_default, 220.0)
   end
 
+  def test_ground_source_heat_pumps
+    # Test inputs not overridden by defaults
+    hpxml_name = 'base-hvac-ground-to-air-heat-pump.xml'
+    hpxml = HPXML.new(hpxml_path: File.join(@root_path, 'workflow', 'sample_files', hpxml_name))
+    hpxml.heat_pumps[0].pump_watts_per_ton = 9.9
+    hpxml.heat_pumps[0].fan_watts_per_cfm = 0.99
+    XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
+    hpxml_default = _test_measure()
+    _test_default_gshp_values(hpxml_default, 9.9, 0.99)
+
+    # Test defaults
+    hpxml.heat_pumps[0].pump_watts_per_ton = nil
+    hpxml.heat_pumps[0].fan_watts_per_cfm = nil
+    XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
+    hpxml_default = _test_measure()
+    _test_default_gshp_values(hpxml_default, 30.0, 0.5)
+  end
+
   def test_hvac_distribution
     # Test inputs not overridden by defaults
     hpxml_name = 'base.xml'
@@ -1007,6 +1025,12 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
   def _test_default_boiler_values(hpxml, eae)
     heating_system = hpxml.heating_systems[0]
     assert_equal(eae, heating_system.electric_auxiliary_energy)
+  end
+
+  def _test_default_gshp_values(hpxml, pump_w_per_ton, fan_w_per_cfm)
+    heat_pump = hpxml.heat_pumps[0]
+    assert_equal(pump_w_per_ton, heat_pump.pump_watts_per_ton)
+    assert_equal(fan_w_per_cfm, heat_pump.fan_watts_per_cfm)
   end
 
   def _test_default_duct_values(hpxml, supply_locations, return_locations, supply_areas, return_areas, n_return_registers)
