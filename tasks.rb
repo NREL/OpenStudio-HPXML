@@ -313,6 +313,7 @@ def create_hpxmls
     'base-mechvent-hrv-asre.xml' => 'base.xml',
     'base-mechvent-multiple.xml' => 'base-mechvent-bath-kitchen-fans.xml',
     'base-mechvent-shared.xml' => 'base-enclosure-attached-multifamily.xml',
+    'base-mechvent-shared-preconditioning.xml' => 'base-mechvent-shared.xml',
     'base-mechvent-shared-multiple.xml' => 'base-enclosure-attached-multifamily.xml',
     'base-mechvent-supply.xml' => 'base.xml',
     'base-mechvent-whole-house-fan.xml' => 'base.xml',
@@ -3567,6 +3568,13 @@ def set_hpxml_ventilation_fans(hpxml_file, hpxml)
                                hours_in_operation: 24,
                                fan_power: 30,
                                used_for_whole_building_ventilation: true)
+  elsif ['base-mechvent-shared-preconditioning.xml'].include? hpxml_file
+    hpxml.ventilation_fans[0].preheating_fuel = HPXML::FuelTypeNaturalGas
+    hpxml.ventilation_fans[0].preheating_efficiency_cop = 0.92
+    hpxml.ventilation_fans[0].preheating_capacity = 30000
+    hpxml.ventilation_fans[0].precooling_fuel = HPXML::FuelTypeElectricity
+    hpxml.ventilation_fans[0].precooling_efficiency_cop = 4.0
+    hpxml.ventilation_fans[0].precooling_capacity = 20000
   elsif ['base-mechvent-shared-multiple.xml'].include? hpxml_file
     hpxml.ventilation_fans.add(id: 'SharedSupplyPreconditioned',
                                fan_type: HPXML::MechVentTypeSupply,
