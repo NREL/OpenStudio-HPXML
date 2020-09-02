@@ -457,12 +457,6 @@
       <checksum>0C1B7A80</checksum>
     </file>
     <file>
-      <filename>xmlhelper.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>AE298605</checksum>
-    </file>
-    <file>
       <filename>test_hvac.rb</filename>
       <filetype>rb</filetype>
       <usage_type>test</usage_type>
@@ -493,14 +487,20 @@
       <checksum>3AE712A9</checksum>
     </file>
     <file>
-      <filename>hpxml_defaults.rb</filename>
+      <filename>airflow.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>F58F08B9</checksum>
+      <checksum>BC675290</checksum>
     </file>
     <file>
       <filename>hvac.rb</filename>
       <filetype>rb</filetype>
+      <usage_type>test</usage_type>
+      <checksum>AA4E8BA5</checksum>
+    </file>
+    <file>
+      <filename>HPXMLDataTypes.xsd</filename>
+      <filetype>xsd</filetype>
       <usage_type>resource</usage_type>
       <checksum>6454A307</checksum>
     </file>
@@ -514,7 +514,7 @@
       <filename>airflow.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>BC675290</checksum>
+      <checksum>DB4F58D2</checksum>
     </file>
     <file>
       <filename>hpxml.rb</filename>
@@ -556,7 +556,7 @@
       <filename>constants.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>971F57E5</checksum>
+      <checksum>BEFA5E91</checksum>
     </file>
     <file>
       <filename>HPXML.xsd</filename>
@@ -572,11 +572,11 @@
       </version>
       <filename>measure.rb</filename>
       <filetype>rb</filetype>
-      <usage_type>script</usage_type>
-      <checksum>F4CB408B</checksum>
+      <usage_type>resource</usage_type>
+      <checksum>6CB36D58</checksum>
     </file>
     <file>
-      <filename>EPvalidator.rb</filename>
+      <filename>hpxml.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
       <checksum>85109F6D</checksum>
