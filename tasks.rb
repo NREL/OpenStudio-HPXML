@@ -74,6 +74,7 @@ def create_hpxmls
     'invalid_files/hvac-frac-load-served.xml' => 'base-hvac-multiple.xml',
     'invalid_files/invalid-daylight-saving.xml' => 'base.xml',
     'invalid_files/invalid-epw-filepath.xml' => 'base-location-epw-filepath.xml',
+    'invalid_files/invalid-facility-type.xml' => 'base-dhw-shared-laundry-room.xml',
     'invalid_files/invalid-neighbor-shading-azimuth.xml' => 'base-misc-neighbor-shading.xml',
     'invalid_files/invalid-relatedhvac-dhw-indirect.xml' => 'base-dhw-indirect.xml',
     'invalid_files/invalid-relatedhvac-desuperheater.xml' => 'base-hvac-central-ac-only-1-speed.xml',
@@ -190,6 +191,8 @@ def create_hpxmls
     'base-enclosure-beds-4.xml' => 'base.xml',
     'base-enclosure-beds-5.xml' => 'base.xml',
     'base-enclosure-garage.xml' => 'base.xml',
+    'base-enclosure-infil-ach-house-pressure.xml' => 'base.xml',
+    'base-enclosure-infil-cfm-house-pressure.xml' => 'base-enclosure-infil-cfm50.xml',
     'base-enclosure-infil-cfm50.xml' => 'base.xml',
     'base-enclosure-infil-flue.xml' => 'base.xml',
     'base-enclosure-infil-natural-ach.xml' => 'base.xml',
@@ -269,6 +272,21 @@ def create_hpxmls
     'base-hvac-room-ac-only.xml' => 'base.xml',
     'base-hvac-room-ac-only-33percent.xml' => 'base-hvac-room-ac-only.xml',
     'base-hvac-setpoints.xml' => 'base.xml',
+    'base-hvac-shared-boiler-chiller-baseboard.xml' => 'base-enclosure-attached-multifamily.xml',
+    'base-hvac-shared-boiler-chiller-fan-coil.xml' => 'base-hvac-shared-boiler-chiller-baseboard.xml',
+    'base-hvac-shared-boiler-chiller-fan-coil-ducted.xml' => 'base-hvac-shared-boiler-chiller-fan-coil.xml',
+    'base-hvac-shared-boiler-chiller-water-loop-heat-pump.xml' => 'base-hvac-shared-boiler-chiller-baseboard.xml',
+    'base-hvac-shared-boiler-cooling-tower-water-loop-heat-pump.xml' => 'base-hvac-shared-boiler-chiller-water-loop-heat-pump.xml',
+    'base-hvac-shared-boiler-only-baseboard.xml' => 'base-enclosure-attached-multifamily.xml',
+    'base-hvac-shared-boiler-only-fan-coil.xml' => 'base-hvac-shared-boiler-only-baseboard.xml',
+    'base-hvac-shared-boiler-only-fan-coil-ducted.xml' => 'base-hvac-shared-boiler-only-fan-coil.xml',
+    'base-hvac-shared-boiler-only-water-loop-heat-pump.xml' => 'base-hvac-shared-boiler-only-baseboard.xml',
+    'base-hvac-shared-chiller-only-baseboard.xml' => 'base-enclosure-attached-multifamily.xml',
+    'base-hvac-shared-chiller-only-fan-coil.xml' => 'base-hvac-shared-chiller-only-baseboard.xml',
+    'base-hvac-shared-chiller-only-fan-coil-ducted.xml' => 'base-hvac-shared-chiller-only-fan-coil.xml',
+    'base-hvac-shared-chiller-only-water-loop-heat-pump.xml' => 'base-hvac-shared-chiller-only-baseboard.xml',
+    'base-hvac-shared-cooling-tower-only-water-loop-heat-pump.xml' => 'base-hvac-shared-chiller-only-water-loop-heat-pump.xml',
+    'base-hvac-shared-ground-loop-ground-to-air-heat-pump.xml' => 'base-enclosure-attached-multifamily.xml',
     'base-hvac-stove-oil-only.xml' => 'base.xml',
     'base-hvac-stove-wood-pellets-only.xml' => 'base.xml',
     'base-hvac-undersized.xml' => 'base.xml',
@@ -591,6 +609,8 @@ def set_hpxml_building_construction(hpxml_file, hpxml)
     hpxml.building_construction.residential_facility_type = HPXML::ResidentialTypeApartment
   elsif ['base-foundation-walkout-basement.xml'].include? hpxml_file
     hpxml.building_construction.number_of_conditioned_floors_above_grade += 1
+  elsif ['invalid_files/invalid-facility-type.xml'].include? hpxml_file
+    hpxml.building_construction.residential_facility_type = HPXML::ResidentialTypeSFD
   end
 end
 
@@ -679,6 +699,12 @@ def set_hpxml_air_infiltration_measurements(hpxml_file, hpxml)
                                             house_pressure: 50,
                                             unit_of_measure: HPXML::UnitsCFM,
                                             air_leakage: 3.0 / 60.0 * infil_volume)
+  elsif ['base-enclosure-infil-ach-house-pressure.xml'].include? hpxml_file
+    hpxml.air_infiltration_measurements[0].house_pressure = 45
+    hpxml.air_infiltration_measurements[0].air_leakage *= 0.9338
+  elsif ['base-enclosure-infil-cfm-house-pressure.xml'].include? hpxml_file
+    hpxml.air_infiltration_measurements[0].house_pressure = 45
+    hpxml.air_infiltration_measurements[0].air_leakage *= 0.9338
   elsif ['base-enclosure-infil-flue.xml'].include? hpxml_file
     hpxml.building_construction.has_flue_or_chimney = true
   end
@@ -2445,6 +2471,8 @@ def set_hpxml_heating_systems(hpxml_file, hpxml)
          'base-hvac-ideal-air.xml',
          'base-hvac-none.xml',
          'base-hvac-room-ac-only.xml',
+         'base-hvac-shared-chiller-only-baseboard.xml',
+         'base-hvac-shared-ground-loop-ground-to-air-heat-pump.xml',
          'invalid_files/orphaned-hvac-distribution.xml'].include? hpxml_file
     hpxml.heating_systems.clear
   elsif ['base-hvac-boiler-elec-only.xml'].include? hpxml_file
@@ -2649,6 +2677,19 @@ def set_hpxml_heating_systems(hpxml_file, hpxml)
     hpxml.heating_systems[0].heating_capacity /= 10.0
   elsif ['base-hvac-flowrate.xml'].include? hpxml_file
     hpxml.heating_systems[0].heating_cfm = hpxml.heating_systems[0].heating_capacity * 360.0 / 12000.0
+  elsif ['base-hvac-shared-boiler-only-baseboard.xml',
+         'base-hvac-shared-boiler-chiller-baseboard.xml'].include? hpxml_file
+    hpxml.heating_systems[0].heating_system_type = HPXML::HVACTypeBoiler
+    hpxml.heating_systems[0].is_shared_system = true
+    hpxml.heating_systems[0].number_of_units_served = 6
+    hpxml.heating_systems[0].heating_capacity = nil
+    hpxml.heating_systems[0].shared_loop_watts = 600
+  elsif ['base-hvac-shared-boiler-only-fan-coil.xml',
+         'base-hvac-shared-boiler-chiller-fan-coil.xml'].include? hpxml_file
+    hpxml.heating_systems[0].fan_coil_watts = 150
+  elsif ['base-hvac-shared-boiler-only-water-loop-heat-pump.xml',
+         'base-hvac-shared-boiler-chiller-water-loop-heat-pump.xml'].include? hpxml_file
+    hpxml.heating_systems[0].wlhp_heating_efficiency_cop = 4.4
   elsif hpxml_file.include?('hvac_autosizing') && (not hpxml.heating_systems.nil?) && (hpxml.heating_systems.size > 0)
     hpxml.heating_systems[0].heating_capacity = nil
   end
@@ -2688,7 +2729,9 @@ def set_hpxml_cooling_systems(hpxml_file, hpxml)
          'base-hvac-none.xml',
          'base-hvac-stove-oil-only.xml',
          'base-hvac-stove-wood-pellets-only.xml',
-         'base-hvac-wall-furnace-elec-only.xml'].include? hpxml_file
+         'base-hvac-wall-furnace-elec-only.xml',
+         'base-hvac-shared-boiler-only-baseboard.xml',
+         'base-hvac-shared-ground-loop-ground-to-air-heat-pump.xml'].include? hpxml_file
     hpxml.cooling_systems.clear
   elsif ['base-hvac-boiler-gas-central-ac-1-speed.xml'].include? hpxml_file
     hpxml.cooling_systems[0].distribution_system_idref = 'HVACDistribution2'
@@ -2776,6 +2819,30 @@ def set_hpxml_cooling_systems(hpxml_file, hpxml)
   elsif ['base-misc-defaults.xml'].include? hpxml_file
     hpxml.cooling_systems[0].cooling_shr = nil
     hpxml.cooling_systems[0].compressor_type = nil
+  elsif ['base-hvac-shared-chiller-only-baseboard.xml',
+         'base-hvac-shared-boiler-chiller-baseboard.xml',
+         'base-hvac-shared-chiller-only-water-loop-heat-pump.xml',
+         'base-hvac-shared-boiler-chiller-water-loop-heat-pump.xml'].include? hpxml_file
+    hpxml.cooling_systems[0].cooling_system_type = HPXML::HVACTypeChiller
+    hpxml.cooling_systems[0].is_shared_system = true
+    hpxml.cooling_systems[0].number_of_units_served = 6
+    hpxml.cooling_systems[0].cooling_capacity = 24000 * 6
+    hpxml.cooling_systems[0].compressor_type = nil
+    hpxml.cooling_systems[0].cooling_efficiency_kw_per_ton = 0.9
+    hpxml.cooling_systems[0].cooling_shr = nil
+    hpxml.cooling_systems[0].shared_loop_watts = 600
+    if hpxml_file.include? 'water-loop-heat-pump'
+      hpxml.cooling_systems[0].wlhp_cooling_capacity = 24000
+      hpxml.cooling_systems[0].wlhp_cooling_efficiency_eer = 12.8
+    end
+  elsif ['base-hvac-shared-cooling-tower-only-water-loop-heat-pump.xml',
+         'base-hvac-shared-boiler-cooling-tower-water-loop-heat-pump.xml'].include? hpxml_file
+    hpxml.cooling_systems[0].cooling_system_type = HPXML::HVACTypeCoolingTower
+    hpxml.cooling_systems[0].cooling_capacity = nil
+    hpxml.cooling_systems[0].cooling_efficiency_kw_per_ton = nil
+  elsif ['base-hvac-shared-chiller-only-fan-coil.xml',
+         'base-hvac-shared-boiler-chiller-fan-coil.xml'].include? hpxml_file
+    hpxml.cooling_systems[0].fan_coil_watts = 150
   elsif hpxml_file.include?('hvac_autosizing') && (not hpxml.cooling_systems.nil?) && (hpxml.cooling_systems.size > 0)
     hpxml.cooling_systems[0].cooling_capacity = nil
   end
@@ -2837,7 +2904,8 @@ def set_hpxml_heat_pumps(hpxml_file, hpxml)
                          heating_capacity_17F: 42000 * 0.640, # Based on OAT slope of default curves
                          cooling_shr: 0.78,
                          compressor_type: HPXML::HVACCompressorTypeVariableSpeed)
-  elsif ['base-hvac-ground-to-air-heat-pump.xml'].include? hpxml_file
+  elsif ['base-hvac-ground-to-air-heat-pump.xml',
+         'base-hvac-shared-ground-loop-ground-to-air-heat-pump.xml'].include? hpxml_file
     hpxml.heat_pumps.add(id: 'HeatPump',
                          distribution_system_idref: 'HVACDistribution',
                          heat_pump_type: HPXML::HVACTypeHeatPumpGroundToAir,
@@ -2851,7 +2919,13 @@ def set_hpxml_heat_pumps(hpxml_file, hpxml)
                          fraction_cool_load_served: 1,
                          heating_efficiency_cop: 3.6,
                          cooling_efficiency_eer: 16.6,
-                         cooling_shr: 0.73)
+                         cooling_shr: 0.73,
+                         pump_watts_per_ton: 30.0)
+    if hpxml_file == 'base-hvac-shared-ground-loop-ground-to-air-heat-pump.xml'
+      hpxml.heat_pumps[-1].is_shared_system = true
+      hpxml.heat_pumps[-1].number_of_units_served = 6
+      hpxml.heat_pumps[-1].shared_loop_watts = 600
+    end
   elsif ['base-hvac-mini-split-heat-pump-ducted.xml'].include? hpxml_file
     f = 1.0 - (1.0 - 0.25) / (47.0 + 5.0) * (47.0 - 17.0)
     hpxml.heat_pumps.add(id: 'HeatPump',
@@ -2916,7 +2990,8 @@ def set_hpxml_heat_pumps(hpxml_file, hpxml)
                          fraction_cool_load_served: 0.2,
                          heating_efficiency_cop: 3.6,
                          cooling_efficiency_eer: 16.6,
-                         cooling_shr: 0.73)
+                         cooling_shr: 0.73,
+                         pump_watts_per_ton: 30.0)
     f = 1.0 - (1.0 - 0.25) / (47.0 + 5.0) * (47.0 - 17.0)
     hpxml.heat_pumps.add(id: 'HeatPump3',
                          heat_pump_type: HPXML::HVACTypeHeatPumpMiniSplit,
@@ -2962,7 +3037,8 @@ def set_hpxml_heat_pumps(hpxml_file, hpxml)
                          fraction_cool_load_served: 0.2,
                          heating_efficiency_cop: 3.6,
                          cooling_efficiency_eer: 16.6,
-                         cooling_shr: 0.73)
+                         cooling_shr: 0.73,
+                         pump_watts_per_ton: 30.0)
   elsif ['invalid_files/hvac-distribution-multiple-attached-heating.xml'].include? hpxml_file
     hpxml.heat_pumps[0].distribution_system_idref = 'HVACDistribution'
   elsif ['invalid_files/hvac-distribution-multiple-attached-cooling.xml'].include? hpxml_file
@@ -3041,12 +3117,22 @@ def set_hpxml_hvac_distributions(hpxml_file, hpxml)
          'base-hvac-boiler-gas-only.xml',
          'base-hvac-boiler-oil-only.xml',
          'base-hvac-boiler-propane-only.xml',
-         'base-hvac-boiler-wood-only.xml'].include? hpxml_file
+         'base-hvac-boiler-wood-only.xml',
+         'base-hvac-shared-boiler-only-baseboard.xml',
+         'base-hvac-shared-chiller-only-baseboard.xml',
+         'base-hvac-shared-boiler-chiller-baseboard.xml'].include? hpxml_file
     hpxml.hvac_distributions[0].distribution_system_type = HPXML::HVACDistributionTypeHydronic
     hpxml.hvac_distributions[0].duct_leakage_measurements.clear
     hpxml.hvac_distributions[0].ducts.clear
+    hpxml.hvac_distributions[0].hydronic_type = HPXML::HydronicTypeBaseboard
+  elsif ['base-hvac-shared-boiler-only-fan-coil.xml',
+         'base-hvac-shared-chiller-only-fan-coil.xml',
+         'base-hvac-shared-boiler-chiller-fan-coil.xml'].include? hpxml_file
+    hpxml.hvac_distributions[0].distribution_system_type = HPXML::HVACDistributionTypeHydronicAndAir
+    hpxml.hvac_distributions[0].hydronic_and_air_type = HPXML::HydronicAndAirTypeFanCoil
   elsif ['base-hvac-boiler-gas-central-ac-1-speed.xml'].include? hpxml_file
     hpxml.hvac_distributions[0].distribution_system_type = HPXML::HVACDistributionTypeHydronic
+    hpxml.hvac_distributions[0].hydronic_type = HPXML::HydronicTypeBaseboard
     hpxml.hvac_distributions[0].duct_leakage_measurements.clear
     hpxml.hvac_distributions[0].ducts.clear
     hpxml.hvac_distributions.add(id: 'HVACDistribution2',
@@ -3111,9 +3197,11 @@ def set_hpxml_hvac_distributions(hpxml_file, hpxml)
     hpxml.hvac_distributions << hpxml.hvac_distributions[0].dup
     hpxml.hvac_distributions[-1].id = 'HVACDistribution2'
     hpxml.hvac_distributions.add(id: 'HVACDistribution3',
-                                 distribution_system_type: HPXML::HVACDistributionTypeHydronic)
+                                 distribution_system_type: HPXML::HVACDistributionTypeHydronic,
+                                 hydronic_type: HPXML::HydronicTypeBaseboard)
     hpxml.hvac_distributions.add(id: 'HVACDistribution4',
-                                 distribution_system_type: HPXML::HVACDistributionTypeHydronic)
+                                 distribution_system_type: HPXML::HVACDistributionTypeHydronic,
+                                 hydronic_type: HPXML::HydronicTypeBaseboard)
     hpxml.hvac_distributions << hpxml.hvac_distributions[0].dup
     hpxml.hvac_distributions[-1].id = 'HVACDistribution5'
     hpxml.hvac_distributions << hpxml.hvac_distributions[0].dup
@@ -3149,7 +3237,8 @@ def set_hpxml_hvac_distributions(hpxml_file, hpxml)
     hpxml.hvac_distributions << hpxml.hvac_distributions[0].dup
     hpxml.hvac_distributions[-1].id = 'HVACDistribution2'
     hpxml.hvac_distributions.add(id: 'HVACDistribution3',
-                                 distribution_system_type: HPXML::HVACDistributionTypeHydronic)
+                                 distribution_system_type: HPXML::HVACDistributionTypeHydronic,
+                                 hydronic_type: HPXML::HydronicTypeBaseboard)
     hpxml.hvac_distributions << hpxml.hvac_distributions[0].dup
     hpxml.hvac_distributions[-1].id = 'HVACDistribution4'
     hpxml.hvac_distributions << hpxml.hvac_distributions[0].dup
@@ -3276,9 +3365,38 @@ def set_hpxml_hvac_distributions(hpxml_file, hpxml)
       hpxml.hvac_distributions[0].ducts[0].duct_location = HPXML::LocationOtherHousingUnit
       hpxml.hvac_distributions[0].ducts[1].duct_location = HPXML::LocationOtherHousingUnit
     end
+  elsif ['base-hvac-shared-boiler-only-water-loop-heat-pump.xml',
+         'base-hvac-shared-chiller-only-water-loop-heat-pump.xml',
+         'base-hvac-shared-boiler-chiller-water-loop-heat-pump.xml',
+         'base-hvac-shared-boiler-chiller-fan-coil-ducted.xml',
+         'base-hvac-shared-boiler-only-fan-coil-ducted.xml',
+         'base-hvac-shared-chiller-only-fan-coil-ducted.xml'].include? hpxml_file
+    hpxml.hvac_distributions[0].distribution_system_type = HPXML::HVACDistributionTypeHydronicAndAir
+    if hpxml_file.include? 'fan-coil'
+      hpxml.hvac_distributions[0].hydronic_and_air_type = HPXML::HydronicAndAirTypeFanCoil
+    elsif hpxml_file.include? 'water-loop-heat-pump'
+      hpxml.hvac_distributions[0].hydronic_and_air_type = HPXML::HydronicAndAirTypeWaterLoopHeatPump
+    end
+    hpxml.hvac_distributions[0].duct_leakage_measurements.add(duct_type: HPXML::DuctTypeSupply,
+                                                              duct_leakage_units: HPXML::UnitsCFM25,
+                                                              duct_leakage_value: 15,
+                                                              duct_leakage_total_or_to_outside: HPXML::DuctLeakageToOutside)
+    hpxml.hvac_distributions[0].duct_leakage_measurements.add(duct_type: HPXML::DuctTypeReturn,
+                                                              duct_leakage_units: HPXML::UnitsCFM25,
+                                                              duct_leakage_value: 10,
+                                                              duct_leakage_total_or_to_outside: HPXML::DuctLeakageToOutside)
+    hpxml.hvac_distributions[0].ducts.add(duct_type: HPXML::DuctTypeSupply,
+                                          duct_insulation_r_value: 0,
+                                          duct_location: HPXML::LocationOtherMultifamilyBufferSpace,
+                                          duct_surface_area: 50)
+    hpxml.hvac_distributions[0].ducts.add(duct_type: HPXML::DuctTypeReturn,
+                                          duct_insulation_r_value: 0,
+                                          duct_location: HPXML::LocationOtherMultifamilyBufferSpace,
+                                          duct_surface_area: 20)
   elsif ['invalid_files/hvac-invalid-distribution-system-type.xml'].include? hpxml_file
     hpxml.hvac_distributions.add(id: 'HVACDistribution2',
-                                 distribution_system_type: HPXML::HVACDistributionTypeHydronic)
+                                 distribution_system_type: HPXML::HVACDistributionTypeHydronic,
+                                 hydronic_type: HPXML::HydronicTypeBaseboard)
   elsif ['invalid_files/hvac-distribution-return-duct-leakage-missing.xml'].include? hpxml_file
     hpxml.hvac_distributions[0].ducts.add(duct_type: HPXML::DuctTypeReturn,
                                           duct_insulation_r_value: 0,
@@ -3311,9 +3429,11 @@ def set_hpxml_hvac_distributions(hpxml_file, hpxml)
   end
 
   # Set ConditionedFloorAreaServed
+  n_air_dists = hpxml.hvac_distributions.select { |d| [HPXML::HVACDistributionTypeAir, HPXML::HVACDistributionTypeHydronicAndAir].include? d.distribution_system_type }.size
   hpxml.hvac_distributions.each do |hvac_distribution|
-    if hvac_distribution.distribution_system_type == HPXML::HVACDistributionTypeAir
-      hvac_distribution.conditioned_floor_area_served = hpxml.building_construction.conditioned_floor_area / hpxml.hvac_distributions.size
+    if [HPXML::HVACDistributionTypeAir, HPXML::HVACDistributionTypeHydronicAndAir].include? hvac_distribution.distribution_system_type
+
+      hvac_distribution.conditioned_floor_area_served = hpxml.building_construction.conditioned_floor_area / n_air_dists
     else
       hvac_distribution.conditioned_floor_area_served = nil
     end
@@ -3924,7 +4044,7 @@ def set_hpxml_pv_systems(hpxml_file, hpxml)
                          tracking: HPXML::PVTrackingTypeFixed,
                          array_azimuth: 225,
                          array_tilt: 30,
-                         building_max_power_output: 30000,
+                         max_power_output: 30000,
                          inverter_efficiency: 0.96,
                          system_losses_fraction: 0.14,
                          number_of_bedrooms_served: 20)
@@ -4072,6 +4192,7 @@ def set_hpxml_clothes_dryer(hpxml_file, hpxml)
   elsif ['base-dhw-shared-laundry-room.xml'].include? hpxml_file
     hpxml.clothes_dryers[0].id = 'SharedClothesDryer'
     hpxml.clothes_dryers[0].location = HPXML::LocationOtherHeatedSpace
+    hpxml.clothes_dryers[0].is_shared_appliance = true
   elsif ['base-misc-usage-multiplier.xml'].include? hpxml_file
     hpxml.clothes_dryers[0].usage_multiplier = 0.9
   end

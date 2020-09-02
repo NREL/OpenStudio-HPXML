@@ -263,7 +263,7 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
     _test_default_skylight_values(hpxml_default, [1.0] * n_skylights, [1.0] * n_skylights)
   end
 
-  def test_hvac
+  def test_air_conditioners
     # Test inputs not overridden by defaults
     hpxml_name = 'base.xml'
     hpxml = HPXML.new(hpxml_path: File.join(@root_path, 'workflow', 'sample_files', hpxml_name))
@@ -271,14 +271,62 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
     hpxml.cooling_systems[0].compressor_type = HPXML::HVACCompressorTypeVariableSpeed
     XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
     hpxml_default = _test_measure()
-    _test_default_cooling_system_values(hpxml_default, 0.88, HPXML::HVACCompressorTypeVariableSpeed)
-    _test_default_heating_system_values(hpxml_default)
+    _test_default_air_conditioner_values(hpxml_default, 0.88, HPXML::HVACCompressorTypeVariableSpeed)
 
     # Test defaults
-    hpxml = apply_hpxml_defaults('base-misc-defaults.xml')
+    hpxml = apply_hpxml_defaults('base.xml')
     XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
     hpxml_default = _test_measure()
-    _test_default_cooling_system_values(hpxml_default, 0.73, HPXML::HVACCompressorTypeSingleStage)
+    _test_default_air_conditioner_values(hpxml_default, 0.73, HPXML::HVACCompressorTypeSingleStage)
+  end
+
+  def test_boilers
+    # Test inputs not overridden by defaults (in-unit boiler)
+    hpxml_name = 'base-hvac-boiler-gas-only.xml'
+    hpxml = HPXML.new(hpxml_path: File.join(@root_path, 'workflow', 'sample_files', hpxml_name))
+    hpxml.heating_systems[0].electric_auxiliary_energy = 99.9
+    XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
+    hpxml_default = _test_measure()
+    _test_default_boiler_values(hpxml_default, 99.9)
+
+    # Test defaults w/ in-unit boiler
+    hpxml.heating_systems[0].electric_auxiliary_energy = nil
+    XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
+    hpxml_default = _test_measure()
+    _test_default_boiler_values(hpxml_default, 170.0)
+
+    # Test inputs not overridden by defaults (shared boiler)
+    hpxml_name = 'base-hvac-shared-boiler-only-baseboard.xml'
+    hpxml = HPXML.new(hpxml_path: File.join(@root_path, 'workflow', 'sample_files', hpxml_name))
+    hpxml.heating_systems[0].shared_loop_watts = nil
+    hpxml.heating_systems[0].electric_auxiliary_energy = 99.9
+    XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
+    hpxml_default = _test_measure()
+    _test_default_boiler_values(hpxml_default, 99.9)
+
+    # Test defaults w/ shared boiler
+    hpxml.heating_systems[0].electric_auxiliary_energy = nil
+    XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
+    hpxml_default = _test_measure()
+    _test_default_boiler_values(hpxml_default, 220.0)
+  end
+
+  def test_ground_source_heat_pumps
+    # Test inputs not overridden by defaults
+    hpxml_name = 'base-hvac-ground-to-air-heat-pump.xml'
+    hpxml = HPXML.new(hpxml_path: File.join(@root_path, 'workflow', 'sample_files', hpxml_name))
+    hpxml.heat_pumps[0].pump_watts_per_ton = 9.9
+    hpxml.heat_pumps[0].fan_watts_per_cfm = 0.99
+    XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
+    hpxml_default = _test_measure()
+    _test_default_gshp_values(hpxml_default, 9.9, 0.99)
+
+    # Test defaults
+    hpxml.heat_pumps[0].pump_watts_per_ton = nil
+    hpxml.heat_pumps[0].fan_watts_per_cfm = nil
+    XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
+    hpxml_default = _test_measure()
+    _test_default_gshp_values(hpxml_default, 30.0, 0.5)
   end
 
   def test_hvac_distribution
@@ -355,8 +403,8 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
     hpxml_default = _test_measure()
     expected_supply_locations = ['basement - conditioned', 'basement - conditioned'] * hpxml_default.hvac_distributions.size
     expected_return_locations = ['basement - conditioned', 'basement - conditioned'] * hpxml_default.hvac_distributions.size
-    expected_supply_areas = [60.75, 60.75] * hpxml_default.hvac_distributions.size
-    expected_return_areas = [22.5, 22.5] * hpxml_default.hvac_distributions.size
+    expected_supply_areas = [91.125, 91.125] * hpxml_default.hvac_distributions.size
+    expected_return_areas = [33.75, 33.75] * hpxml_default.hvac_distributions.size
     expected_n_return_registers = hpxml_default.building_construction.number_of_conditioned_floors
     _test_default_duct_values(hpxml_default, expected_supply_locations, expected_return_locations, expected_supply_areas, expected_return_areas, expected_n_return_registers)
 
@@ -367,8 +415,8 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
     hpxml_default = _test_measure()
     expected_supply_locations = ['basement - conditioned', 'basement - conditioned', 'living space', 'living space'] * hpxml_default.hvac_distributions.size
     expected_return_locations = ['basement - conditioned', 'basement - conditioned', 'living space', 'living space'] * hpxml_default.hvac_distributions.size
-    expected_supply_areas = [45.56, 45.56, 15.19, 15.19] * hpxml_default.hvac_distributions.size
-    expected_return_areas = [16.88, 16.88, 5.63, 5.63] * hpxml_default.hvac_distributions.size
+    expected_supply_areas = [68.34, 68.34, 22.78, 22.78] * hpxml_default.hvac_distributions.size
+    expected_return_areas = [25.31, 25.31, 8.44, 8.44] * hpxml_default.hvac_distributions.size
     expected_n_return_registers = hpxml_default.building_construction.number_of_conditioned_floors
     _test_default_duct_values(hpxml_default, expected_supply_locations, expected_return_locations, expected_supply_areas, expected_return_areas, expected_n_return_registers)
   end
@@ -377,6 +425,7 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
     # Test inputs not overridden by defaults
     hpxml_name = 'base.xml'
     hpxml = HPXML.new(hpxml_path: File.join(@root_path, 'workflow', 'sample_files', hpxml_name))
+    hpxml.building_construction.residential_facility_type = HPXML::ResidentialTypeSFA
     hpxml.water_heating_systems.each do |wh|
       wh.is_shared_system = true
       wh.number_of_units_served = 2
@@ -738,12 +787,14 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
     # Test inputs not overridden by defaults
     hpxml_name = 'base.xml'
     hpxml = HPXML.new(hpxml_path: File.join(@root_path, 'workflow', 'sample_files', hpxml_name))
+    hpxml.building_construction.residential_facility_type = HPXML::ResidentialTypeSFA
     hpxml.water_heating_systems[0].is_shared_system = true
     hpxml.water_heating_systems[0].number_of_units_served = 6
     hpxml.water_heating_systems[0].fraction_dhw_load_served = 0
     hpxml.clothes_washers[0].is_shared_appliance = true
     hpxml.clothes_washers[0].usage_multiplier = 1.5
     hpxml.clothes_washers[0].water_heating_system_idref = hpxml.water_heating_systems[0].id
+    hpxml.clothes_dryers[0].is_shared_appliance = true
     hpxml.clothes_dryers[0].usage_multiplier = 1.4
     hpxml.dishwashers[0].is_shared_appliance = true
     hpxml.dishwashers[0].usage_multiplier = 1.3
@@ -755,7 +806,7 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
     XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
     hpxml_default = _test_measure()
     _test_default_clothes_washer_values(hpxml_default, true, HPXML::LocationLivingSpace, 1.21, 380.0, 0.12, 1.09, 27.0, 3.2, 6.0, 1.5)
-    _test_default_clothes_dryer_values(hpxml_default, HPXML::LocationLivingSpace, HPXML::ClothesDryerControlTypeTimer, 3.73, 1.4)
+    _test_default_clothes_dryer_values(hpxml_default, true, HPXML::LocationLivingSpace, HPXML::ClothesDryerControlTypeTimer, 3.73, 1.4)
     _test_default_dishwasher_values(hpxml_default, true, HPXML::LocationLivingSpace, 307.0, 0.12, 1.09, 22.32, 4.0, 12, 1.3)
     _test_default_refrigerator_values(hpxml_default, HPXML::LocationLivingSpace, 650.0, 1.2, '0.040, 0.039, 0.038, 0.037, 0.036, 0.036, 0.038, 0.040, 0.041, 0.041, 0.040, 0.040, 0.042, 0.042, 0.042, 0.041, 0.044, 0.048, 0.050, 0.048, 0.047, 0.046, 0.044, 0.041', '0.040, 0.039, 0.038, 0.037, 0.036, 0.036, 0.038, 0.040, 0.041, 0.041, 0.040, 0.040, 0.042, 0.042, 0.042, 0.041, 0.044, 0.048, 0.050, 0.048, 0.047, 0.046, 0.044, 0.041', '0.837, 0.835, 1.084, 1.084, 1.084, 1.096, 1.096, 1.096, 1.096, 0.931, 0.925, 0.837')
     _test_default_cooking_range_values(hpxml_default, HPXML::LocationLivingSpace, true, 1.1, '0.007, 0.007, 0.004, 0.004, 0.007, 0.011, 0.025, 0.042, 0.046, 0.048, 0.042, 0.050, 0.057, 0.046, 0.057, 0.044, 0.092, 0.150, 0.117, 0.060, 0.035, 0.025, 0.016, 0.011', '0.007, 0.007, 0.004, 0.004, 0.007, 0.011, 0.025, 0.042, 0.046, 0.048, 0.042, 0.050, 0.057, 0.046, 0.057, 0.044, 0.092, 0.150, 0.117, 0.060, 0.035, 0.025, 0.016, 0.011', '1.097, 1.097, 0.991, 0.987, 0.991, 0.890, 0.896, 0.896, 0.890, 1.085, 1.085, 1.097')
@@ -766,7 +817,7 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
     XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
     hpxml_default = _test_measure()
     _test_default_clothes_washer_values(hpxml_default, false, HPXML::LocationLivingSpace, 1.0, 400.0, 0.12, 1.09, 27.0, 3.0, 6.0, 1.0)
-    _test_default_clothes_dryer_values(hpxml_default, HPXML::LocationLivingSpace, HPXML::ClothesDryerControlTypeTimer, 3.01, 1.0)
+    _test_default_clothes_dryer_values(hpxml_default, false, HPXML::LocationLivingSpace, HPXML::ClothesDryerControlTypeTimer, 3.01, 1.0)
     _test_default_dishwasher_values(hpxml_default, false, HPXML::LocationLivingSpace, 467.0, 0.12, 1.09, 33.12, 4.0, 12, 1.0)
     _test_default_refrigerator_values(hpxml_default, HPXML::LocationLivingSpace, 691.0, 1.0, '0.040, 0.039, 0.038, 0.037, 0.036, 0.036, 0.038, 0.040, 0.041, 0.041, 0.040, 0.040, 0.042, 0.042, 0.042, 0.041, 0.044, 0.048, 0.050, 0.048, 0.047, 0.046, 0.044, 0.041', '0.040, 0.039, 0.038, 0.037, 0.036, 0.036, 0.038, 0.040, 0.041, 0.041, 0.040, 0.040, 0.042, 0.042, 0.042, 0.041, 0.044, 0.048, 0.050, 0.048, 0.047, 0.046, 0.044, 0.041', '0.837, 0.835, 1.084, 1.084, 1.084, 1.096, 1.096, 1.096, 1.096, 0.931, 0.925, 0.837')
     _test_default_extra_refrigerators_values(hpxml_default, HPXML::LocationGarage, 244.0, 1.0, '0.040, 0.039, 0.038, 0.037, 0.036, 0.036, 0.038, 0.040, 0.041, 0.041, 0.040, 0.040, 0.042, 0.042, 0.042, 0.041, 0.044, 0.048, 0.050, 0.048, 0.047, 0.046, 0.044, 0.041', '0.040, 0.039, 0.038, 0.037, 0.036, 0.036, 0.038, 0.040, 0.041, 0.041, 0.040, 0.040, 0.042, 0.042, 0.042, 0.041, 0.044, 0.048, 0.050, 0.048, 0.047, 0.046, 0.044, 0.041', '0.837, 0.835, 1.084, 1.084, 1.084, 1.096, 1.096, 1.096, 1.096, 0.931, 0.925, 0.837')
@@ -779,7 +830,7 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
     hpxml.clothes_dryers[0].fuel_type = HPXML::FuelTypeNaturalGas
     XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
     hpxml_default = _test_measure()
-    _test_default_clothes_dryer_values(hpxml_default, HPXML::LocationLivingSpace, HPXML::ClothesDryerControlTypeTimer, 3.01, 1.0)
+    _test_default_clothes_dryer_values(hpxml_default, false, HPXML::LocationLivingSpace, HPXML::ClothesDryerControlTypeTimer, 3.01, 1.0)
 
     # Test defaults w/ refrigerator in 5-bedroom house
     hpxml = apply_hpxml_defaults('base-enclosure-beds-5.xml')
@@ -793,7 +844,7 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
     XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
     hpxml_default = _test_measure()
     _test_default_clothes_washer_values(hpxml_default, false, HPXML::LocationLivingSpace, 0.331, 704.0, 0.08, 0.58, 23.0, 2.874, 6.0, 1.0)
-    _test_default_clothes_dryer_values(hpxml_default, HPXML::LocationLivingSpace, HPXML::ClothesDryerControlTypeTimer, 2.62, 1.0)
+    _test_default_clothes_dryer_values(hpxml_default, false, HPXML::LocationLivingSpace, HPXML::ClothesDryerControlTypeTimer, 2.62, 1.0)
     _test_default_dishwasher_values(hpxml_default, false, HPXML::LocationLivingSpace, 467.0, 0.12, 1.09, 33.12, 4.0, 12, 1.0)
     _test_default_refrigerator_values(hpxml_default, HPXML::LocationLivingSpace, 691.0, 1.0, '0.040, 0.039, 0.038, 0.037, 0.036, 0.036, 0.038, 0.040, 0.041, 0.041, 0.040, 0.040, 0.042, 0.042, 0.042, 0.041, 0.044, 0.048, 0.050, 0.048, 0.047, 0.046, 0.044, 0.041', '0.040, 0.039, 0.038, 0.037, 0.036, 0.036, 0.038, 0.040, 0.041, 0.041, 0.040, 0.040, 0.042, 0.042, 0.042, 0.041, 0.044, 0.048, 0.050, 0.048, 0.047, 0.046, 0.044, 0.041', '0.837, 0.835, 1.084, 1.084, 1.084, 1.096, 1.096, 1.096, 1.096, 0.931, 0.925, 0.837')
     _test_default_cooking_range_values(hpxml_default, HPXML::LocationLivingSpace, false, 1.0, '0.007, 0.007, 0.004, 0.004, 0.007, 0.011, 0.025, 0.042, 0.046, 0.048, 0.042, 0.050, 0.057, 0.046, 0.057, 0.044, 0.092, 0.150, 0.117, 0.060, 0.035, 0.025, 0.016, 0.011', '0.007, 0.007, 0.004, 0.004, 0.007, 0.011, 0.025, 0.042, 0.046, 0.048, 0.042, 0.050, 0.057, 0.046, 0.057, 0.044, 0.092, 0.150, 0.117, 0.060, 0.035, 0.025, 0.016, 0.011', '1.097, 1.097, 0.991, 0.987, 0.991, 0.890, 0.896, 0.896, 0.890, 1.085, 1.085, 1.097')
@@ -805,7 +856,7 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
     hpxml.clothes_dryers[0].fuel_type = HPXML::FuelTypeNaturalGas
     XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
     hpxml_default = _test_measure()
-    _test_default_clothes_dryer_values(hpxml_default, HPXML::LocationLivingSpace, HPXML::ClothesDryerControlTypeTimer, 2.32, 1.0)
+    _test_default_clothes_dryer_values(hpxml_default, false, HPXML::LocationLivingSpace, HPXML::ClothesDryerControlTypeTimer, 2.32, 1.0)
   end
 
   def test_lighting
@@ -965,23 +1016,28 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
     assert_equal(num_occupants, hpxml.building_occupancy.number_of_residents)
   end
 
-  def _test_default_cooling_system_values(hpxml, shr, compressor_type)
+  def _test_default_air_conditioner_values(hpxml, shr, compressor_type)
     cooling_system = hpxml.cooling_systems[0]
     assert_equal(shr, cooling_system.cooling_shr)
     assert_equal(compressor_type, cooling_system.compressor_type)
   end
 
-  def _test_default_heating_system_values(hpxml)
+  def _test_default_boiler_values(hpxml, eae)
+    heating_system = hpxml.heating_systems[0]
+    assert_equal(eae, heating_system.electric_auxiliary_energy)
   end
 
-  def _test_default_heat_pump_values(hpxml)
+  def _test_default_gshp_values(hpxml, pump_w_per_ton, fan_w_per_cfm)
+    heat_pump = hpxml.heat_pumps[0]
+    assert_equal(pump_w_per_ton, heat_pump.pump_watts_per_ton)
+    assert_equal(fan_w_per_cfm, heat_pump.fan_watts_per_cfm)
   end
 
   def _test_default_duct_values(hpxml, supply_locations, return_locations, supply_areas, return_areas, n_return_registers)
     supply_duct_idx = 0
     return_duct_idx = 0
     hpxml.hvac_distributions.each do |hvac_distribution|
-      next unless hvac_distribution.distribution_system_type == HPXML::HVACDistributionTypeAir
+      next unless [HPXML::HVACDistributionTypeAir, HPXML::HVACDistributionTypeHydronicAndAir].include? hvac_distribution.distribution_system_type
 
       assert_equal(n_return_registers, hvac_distribution.number_of_return_registers)
       hvac_distribution.ducts.each do |duct|
@@ -1078,8 +1134,9 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
     assert_equal(usage_multiplier, clothes_washer.usage_multiplier)
   end
 
-  def _test_default_clothes_dryer_values(hpxml, location, control_type, cef, usage_multiplier)
+  def _test_default_clothes_dryer_values(hpxml, is_shared, location, control_type, cef, usage_multiplier)
     clothes_dryer = hpxml.clothes_dryers[0]
+    assert_equal(is_shared, clothes_dryer.is_shared_appliance)
     assert_equal(location, clothes_dryer.location)
     assert_equal(control_type, clothes_dryer.control_type)
     assert_equal(cef, clothes_dryer.combined_energy_factor)

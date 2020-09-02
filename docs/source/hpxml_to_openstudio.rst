@@ -25,8 +25,8 @@ The following building features/technologies are available for modeling via the 
 - HVAC
 
   - Heating Systems (Electric Resistance, Central/Wall/Floor Furnaces, Stoves, Boilers, Portable/Fixed Heaters, Fireplaces)
-  - Cooling Systems (Central Air Conditioners, Room Air Conditioners, Evaporative Coolers, Mini Split Air Conditioners)
-  - Heat Pumps (Air Source, Mini Split, Ground Source, Dual-Fuel)
+  - Cooling Systems (Central Air Conditioners, Room Air Conditioners, Evaporative Coolers, Mini Split Air Conditioners, Chillers, Cooling Towers)
+  - Heat Pumps (Air Source, Mini Split, Ground Source, Dual-Fuel, Water Loop)
   - Setpoints
   - Ducts
   
@@ -143,17 +143,14 @@ HPXML Building Summary
 ----------------------
 
 This section describes elements specified in HPXML's ``BuildingSummary``. 
-It is used for high-level building information including conditioned floor area, number of bedrooms, number of residents, number of conditioned floors, presence of flue or chimney, etc.
-Most occupancy assumptions are based on the number of bedrooms, while the number of residents is solely used to determine heat gains from the occupants themselves.
-Note that a walkout basement should be included in ``NumberofConditionedFloorsAboveGrade``.
+These elements include ``Site``, ``BuildingOccupancy``, and ``BuildingConstruction``.
 
-If ``NumberofBathrooms`` is not provided, it is calculated using the following equation based on the `Building America House Simulation Protocols <https://www1.eere.energy.gov/buildings/publications/pdfs/building_america/house_simulation.pdf>`_.
+HPXML Site
+**********
 
-.. math:: NumberofBathrooms = \frac{NumberofBedrooms}{2} + 0.5
+The ``Site`` element is used to describe the terrain and local shelter conditions as well as the presence of neighbors.
 
-Shading due to neighboring buildings can be defined inside an ``Site/extension/Neighbors`` element.
-Each ``Neighbors/NeighborBuilding`` element is required to have an ``Azimuth`` and ``Distance`` from the house.
-A ``Height`` is also optionally allowed; if not provided, the neighbor is assumed to be the same height as the house.
+The terrain surrounding the building can be optionally entered as ``Site/SiteType``; if not provided, it is assumed to be "suburban".
 
 The local shelter coefficient can be entered as ``Site/extension/ShelterCoefficient``.
 The shelter coefficient is defined by the AIM-2 infiltration model to account for nearby buildings, trees and obstructions.
@@ -169,14 +166,39 @@ Shelter Coefficient  Description
 0.3                  Complete shielding with large buildings immediately adjacent
 ===================  =========================================================================
 
-The terrain surrounding the building can be entered as ``Site/SiteType``; if not provided, it is assumed to be suburban.
+Shading due to neighboring buildings can be defined inside an ``extension/Neighbors`` element.
+Each ``Neighbors/NeighborBuilding`` element is required to have an ``Azimuth`` and ``Distance`` from the house.
+A ``Height`` is also optionally allowed; if not provided, the neighboring building is assumed to have the same height as the house.
 
-Whether there is a flue or chimney (associated with the heating system or water heater) can be optionally specified with ``extension/HasFlueOrChimney``.
-If not provided, it is assumed that there is a flue or chimney if any of the following conditions are met:
+HPXML Building Occupancy
+************************
 
-- heating system type is non-electric ``Furnace``, ``Boiler``, ``WallFurnace``, ``FloorFurnace``, ``Stove``, or ``FixedHeater`` and AFUE/Percent is less than 89%
-- heating system type is non-electric ``Fireplace`` 
-- water heater is non-electric with energy factor (or equivalent uniform energy factor) less than 0.63
+The ``BuildingOccupancy`` element is used to describe the occupants.
+
+The number of occupants can be optionally provided as ``NumberofResidents``; if not provided, it is assumed that the number of occupants equal the number of bedrooms.
+
+.. note::
+
+  Most occupancy assumptions (e.g., plug loads, appliance usage, hot water usage, etc.) are based on the number of bedrooms. The number of residents is solely used to determine heat gains from the occupants themselves.
+
+HPXML Building Construction
+***************************
+
+The ``BuildingConstruction`` element is used to describe high-level building information.
+Fields include:
+
+- ``ResidentialFacilityType``: "single-family detached", "single-family attached", "apartment unit", or "manufactured home"
+- ``NumberofConditionedFloors``
+- ``NumberofConditionedFloorsAboveGrade``: Note that this should include a walkout basement if present.
+- ``NumberofBedrooms``
+- ``NumberofBathrooms``: Optional. If not provided, it is calculated as :math:`\frac{NumberofBedrooms}{2} + 0.5` based on the `Building America House Simulation Protocols <https://www1.eere.energy.gov/buildings/publications/pdfs/building_america/house_simulation.pdf>`_.
+- ``ConditionedFloorArea``
+- ``ConditionedBuildingVolume`` or ``AverageCeilingHeight``
+- ``extension/HasFlueOrChimney``: Optional. Specifies whether there is a flue (associated with heating system or water heater) or chimney. if not provided, it is assumed to be true if any of the following conditions are met: 
+
+  - heating system is non-electric ``Furnace``, ``Boiler``, ``WallFurnace``, ``FloorFurnace``, ``Stove``, or ``FixedHeater`` and AFUE/Percent is less than 0.89
+  - heating system is non-electric ``Fireplace`` 
+  - water heater is non-electric with energy factor (or equivalent calculated from uniform energy factor) less than 0.63
 
 HPXML Weather Station
 ---------------------
@@ -199,22 +221,22 @@ For software tools that do not collect sufficient inputs for every required surf
 
 The space types used in the HPXML building description are:
 
-==============================  =============================================  ========================================================  =========================
-Space Type                      Description                                    Temperature                                               Building Type
-==============================  =============================================  ========================================================  =========================
-living space                    Above-grade conditioned floor area             EnergyPlus calculation                                    Any
-attic - vented                                                                 EnergyPlus calculation                                    Any
-attic - unvented                                                               EnergyPlus calculation                                    Any
-basement - conditioned          Below-grade conditioned floor area             EnergyPlus calculation                                    Any
-basement - unconditioned                                                       EnergyPlus calculation                                    Any
-crawlspace - vented                                                            EnergyPlus calculation                                    Any
-crawlspace - unvented                                                          EnergyPlus calculation                                    Any
-garage                                                                         EnergyPlus calculation                                    Any
-other housing unit              E.g., adjacent unit or conditioned corridor    Same as conditioned space                                 Attached/Multifamily only
-other heated space              E.g., shared laundry/equipment space           Average of conditioned space and outside; minimum of 68F  Attached/Multifamily only
-other multifamily buffer space  E.g., enclosed unconditioned stairwell         Average of conditioned space and outside; minimum of 50F  Attached/Multifamily only
-other non-freezing space        E.g., parking garage ceiling                   Floats with outside; minimum of 40F                       Attached/Multifamily only
-==============================  =============================================  ========================================================  =========================
+==============================  ================================================  ========================================================  =========================
+Space Type                      Description                                       Temperature                                               Building Type
+==============================  ================================================  ========================================================  =========================
+living space                    Above-grade conditioned floor area                EnergyPlus calculation                                    Any
+attic - vented                                                                    EnergyPlus calculation                                    Any
+attic - unvented                                                                  EnergyPlus calculation                                    Any
+basement - conditioned          Below-grade conditioned floor area                EnergyPlus calculation                                    Any
+basement - unconditioned                                                          EnergyPlus calculation                                    Any
+crawlspace - vented                                                               EnergyPlus calculation                                    Any
+crawlspace - unvented                                                             EnergyPlus calculation                                    Any
+garage                          Single-family garage (not shared parking garage)  EnergyPlus calculation                                    Any
+other housing unit              E.g., adjacent unit or conditioned corridor       Same as conditioned space                                 Attached/Multifamily only
+other heated space              E.g., shared laundry/equipment space              Average of conditioned space and outside; minimum of 68F  Attached/Multifamily only
+other multifamily buffer space  E.g., enclosed unconditioned stairwell            Average of conditioned space and outside; minimum of 50F  Attached/Multifamily only
+other non-freezing space        E.g., shared parking garage ceiling               Floats with outside; minimum of 40F                       Attached/Multifamily only
+==============================  ================================================  ========================================================  =========================
 
 .. warning::
 
@@ -231,9 +253,9 @@ HPXML Air Infiltration
 Building air leakage is entered using ``Enclosure/AirInfiltration/AirInfiltrationMeasurement``.
 Air leakage can be provided in one of three ways:
 
-#. nACH (natural air changes per hour): Use ``BuildingAirLeakage/UnitofMeasure='ACHnatural'``
-#. ACH50 (air changes per hour at 50Pa): Use ``BuildingAirLeakage/UnitofMeasure='ACH'`` and ``HousePressure='50'``
-#. CFM50 (cubic feet per minute at 50Pa): Use ``BuildingAirLeakage/UnitofMeasure='CFM'`` and ``HousePressure='50'``
+#. nACH (natural air changes per hour): Use ``BuildingAirLeakage/UnitofMeasure='ACHnatural'``.
+#. ACH (air changes per hour at user-specified pressure): Use ``BuildingAirLeakage/UnitofMeasure='ACH'`` and ``HousePressure``. Pressure is typically 50 Pa.
+#. CFM (cubic feet per minute at user-specified pressure): Use ``BuildingAirLeakage/UnitofMeasure='CFM'`` and ``HousePressure``. Pressure is typically 50 Pa.
 
 In addition, the building's volume associated with the air leakage measurement can be provided in HPXML's ``AirInfiltrationMeasurement/InfiltrationVolume``.
 If not provided, the infiltration volume is assumed to be equal to the conditioned building volume.
@@ -441,48 +463,97 @@ HPXML Heating Systems
 
 Each heating system (other than heat pumps) should be entered as a ``Systems/HVAC/HVACPlant/HeatingSystem``.
 Inputs including ``HeatingSystemType``, and ``FractionHeatLoadServed`` must be provided.
-``HeatingCapacity`` may be provided; if not, the system will be auto-sized via ACCA Manual J/S.
 
 Depending on the type of heating system specified, additional elements are used:
 
-==================  ===========================  =================  =======================
-HeatingSystemType   DistributionSystem           HeatingSystemFuel  AnnualHeatingEfficiency 
-==================  ===========================  =================  =======================
-ElectricResistance                               electricity        Percent
-Furnace             AirDistribution or DSE       <any>              AFUE
-WallFurnace                                      <any>              AFUE
-FloorFurnace                                     <any>              AFUE
-Boiler              HydronicDistribution or DSE  <any>              AFUE
-Stove                                            <any>              Percent
-PortableHeater                                   <any>              Percent
-Fireplace                                        <any>              Percent
-==================  ===========================  =================  =======================
+==================  ==============  ==================================================  =================  =======================  ===============
+HeatingSystemType   IsSharedSystem  DistributionSystem                                  HeatingSystemFuel  AnnualHeatingEfficiency  HeatingCapacity
+==================  ==============  ==================================================  =================  =======================  ===============
+ElectricResistance                                                                      electricity        Percent                  (optional)
+Furnace                             AirDistribution or DSE                              <any>              AFUE                     (optional)
+WallFurnace                                                                             <any>              AFUE                     (optional)
+FloorFurnace                                                                            <any>              AFUE                     (optional)
+Boiler              false           HydronicDistribution or DSE                         <any>              AFUE                     (optional)
+Boiler              true            HydronicDistribution or HydronicAndAirDistribution  <any>              AFUE
+Stove                                                                                   <any>              Percent                  (optional)
+PortableHeater                                                                          <any>              Percent                  (optional)
+Fireplace                                                                               <any>              Percent                  (optional)
+==================  ==============  ==================================================  =================  =======================  ===============
 
-If a non-electric heating system is specified, the ``ElectricAuxiliaryEnergy`` element may be provided if available. 
+For all non-shared systems, ``HeatingCapacity`` may be provided; if not, the system will be auto-sized via ACCA Manual J/S.
+
+For all systems, the ``ElectricAuxiliaryEnergy`` element may be provided if available.
+For shared boilers (i.e., serving multiple dwelling units), the electric auxiliary energy can alternatively be calculated as follows per `ANSI/RESNET/ICC 301-2019 <https://codes.iccsafe.org/content/RESNETICC3012019>`_:
+
+  | :math:`EAE = (\frac{SP}{N_{dweq}} + aux_{in}) \cdot HLH`
+  | where, 
+  |   :math:`SP` = Shared pump power [W], provided as ``extension/SharedLoopWatts``
+  |   :math:`N_{dweq}` = Number of units served by the shared system, provided as ``NumberofUnitsServed``
+  |   :math:`aux_{in}` = In-unit fan coil power [W], provided as ``extension/FanCoilWatts``
+  |   :math:`HLH` = Annual heating load hours
+
+If electric auxiliary energy is not provided (nor calculated for shared boilers), it is defaulted per `ANSI/RESNET/ICC 301-2019 <https://codes.iccsafe.org/content/RESNETICC3012019>`_ as follows:
+
+============================================  ==============================
+System Type                                   Electric Auxiliary Energy
+============================================  ==============================
+Oil boiler                                    330
+Gas boiler (in-unit)                          170
+Gas boiler (shared, w/ baseboard)             220
+Gas boiler (shared, w/ water loop heat pump)  265
+Gas boiler (shared, w/ fan coil)              438
+Oil furnace                                   439 + 5.5 * Capacity (kBtu/h)
+Gas furnace                                   149 + 10.3 * Capacity (kBtu/h)
+Other                                         0
+============================================  ==============================
+
+For shared boilers connected to a water loop heat pump, the heat pump's heating COP must be provided as ``extension/WaterLoopHeatPump/AnnualHeatingEfficiency[Units="COP"]/Value``.
 
 HPXML Cooling Systems
 *********************
 
 Each cooling system (other than heat pumps) should be entered as a ``Systems/HVAC/HVACPlant/CoolingSystem``.
 Inputs including ``CoolingSystemType`` and ``FractionCoolLoadServed`` must be provided.
-For all systems other than evaporative coolers, ``CoolingCapacity`` may be provided; if not, the system will be auto-sized via ACCA Manual J/S.
 
 Depending on the type of cooling system specified, additional elements are used:
 
-=======================  =================================  =================  =======================  ====================
-CoolingSystemType        DistributionSystem                 CoolingSystemFuel  AnnualCoolingEfficiency  SensibleHeatFraction
-=======================  =================================  =================  =======================  ====================
-central air conditioner  AirDistribution or DSE             electricity        SEER                     (optional)
-room air conditioner                                        electricity        EER                      (optional)
-evaporative cooler       AirDistribution or DSE (optional)  electricity
-mini-split               AirDistribution or DSE (optional)  electricity        SEER                     (optional)
-=======================  =================================  =================  =======================  ====================
+=======================  ==============  ==================================================  =================  =======================  ====================  ===============
+CoolingSystemType        IsSharedSystem  DistributionSystem                                  CoolingSystemFuel  AnnualCoolingEfficiency  SensibleHeatFraction  CoolingCapacity
+=======================  ==============  ==================================================  =================  =======================  ====================  ===============
+central air conditioner                  AirDistribution or DSE                              electricity        SEER                     (optional)            (optional)
+room air conditioner                                                                         electricity        EER                      (optional)            (optional)
+evaporative cooler                       AirDistribution or DSE (optional)                   electricity
+mini-split                               AirDistribution or DSE (optional)                   electricity        SEER                     (optional)            (optional)
+chiller                  true            HydronicDistribution or HydronicAndAirDistribution  electricity        kW/ton                                         (required)
+cooling tower            true            HydronicAndAirDistribution                          electricity
+=======================  ==============  ==================================================  =================  =======================  ====================  ===============
 
 Central air conditioners can also have the ``CompressorType`` specified; if not provided, it is assumed as follows:
 
 - "single stage": SEER <= 15
 - "two stage": 15 < SEER <= 21
 - "variable speed": SEER > 21
+
+For all non-shared systems other than evaporative coolers, ``CoolingCapacity`` may be provided; if not, the system will be auto-sized via ACCA Manual J/S.
+
+Shared chillers (i.e., serving multiple dwelling units) are modeled with a SEER equivalent using the following equation from `ANSI/RESNET/ICC 301-2019 <https://codes.iccsafe.org/content/RESNETICC3012019>`_:
+
+  | :math:`SEER_{eq} = \frac{(Cap - (aux \cdot 3.41)) - (aux_{dweq} \cdot 3.41 \cdot N_{dweq})}{(Input \cdot aux) + (aux_{dweq} \cdot N_{dweq})}`
+  | where, 
+  |   :math:`Cap` = Chiller system output [Btu/hour], provided as ``CoolingCapacity``
+  |   :math:`aux` = Total of the pumping and fan power serving the system [W], provided as ``extension/SharedLoopWatts``
+  |   :math:`aux_{dweq}` = Total of the in-unit cooling equipment power serving the unit; for example, includes all power to run a Water Loop Heat Pump within the unit, not just air handler power [W], provided as ``extension/FanCoilWatts`` for fan coils, or calculated as ``extension/WaterLoopHeatPump/CoolingCapacity`` divided by ``extension/WaterLoopHeatPump/AnnualCoolingEfficiency[Units="EER"]/Value`` for cooling towers, or zero for baseboard/radiators
+  |   :math:`Input` = Chiller system power [W], calculated using ``AnnualCoolingEfficiency[Units="kW/ton"]/Value``
+  |   :math:`N_{dweq}` = Number of units served by the shared system, provided as ``NumberofUnitsServed``
+
+Shared cooling towers with water loop heat pumps are modeled with a SEER equivalent using the following equation from `ANSI/RESNET/ICC 301-2019 <https://codes.iccsafe.org/content/RESNETICC3012019>`_:
+
+  | :math:`SEER_{eq} = \frac{WLHP_{cap} - \frac{aux \cdot 3.41}{N_{dweq}}}{Input + \frac{aux}{N_{dweq}}}`
+  | where, 
+  |   :math:`WLHP_{cap}` = WLHP cooling capacity [Btu/hr], provided as ``extension/WaterLoopHeatPump/CoolingCapacity``
+  |   :math:`aux` = Total of the pumping and fan power serving the system [W], provided as ``extension/SharedLoopWatts``
+  |   :math:`N_{dweq}` = Number of units served by the shared system, provided as ``NumberofUnitsServed``
+  |   :math:`Input` = WLHP system power [W], calculated as ``extension/WaterLoopHeatPump/CoolingCapacity`` divided by ``extension/WaterLoopHeatPump/AnnualCoolingEfficiency[Units="EER"]/Value``
 
 HPXML Heat Pumps
 ****************
@@ -494,13 +565,19 @@ Note that heat pumps are allowed to provide only heating (``FractionCoolLoadServ
 
 Depending on the type of heat pump specified, additional elements are used:
 
-=============  =================================  ============  =======================  =======================  ===========================  ==================
-HeatPumpType   DistributionSystem                 HeatPumpFuel  AnnualCoolingEfficiency  AnnualHeatingEfficiency  CoolingSensibleHeatFraction  HeatingCapacity17F
-=============  =================================  ============  =======================  =======================  ===========================  ==================
-air-to-air     AirDistribution or DSE             electricity   SEER                     HSPF                     (optional)                   (optional)
-mini-split     AirDistribution or DSE (optional)  electricity   SEER                     HSPF                     (optional)                   (optional)
-ground-to-air  AirDistribution or DSE             electricity   EER                      COP                      (optional)
-=============  =================================  ============  =======================  =======================  ===========================  ==================
+=============  ==============  =================================  ============  =======================  =======================  ===========================  ==================
+HeatPumpType   IsSharedSystem  DistributionSystem                 HeatPumpFuel  AnnualCoolingEfficiency  AnnualHeatingEfficiency  CoolingSensibleHeatFraction  HeatingCapacity17F
+=============  ==============  =================================  ============  =======================  =======================  ===========================  ==================
+air-to-air                     AirDistribution or DSE             electricity   SEER                     HSPF                     (optional)                   (optional)
+mini-split                     AirDistribution or DSE (optional)  electricity   SEER                     HSPF                     (optional)                   (optional)
+ground-to-air  false           AirDistribution or DSE             electricity   EER                      COP                      (optional)
+ground-to-air  true            AirDistribution or DSE             electricity   EER                      COP                      (optional)
+=============  ==============  =================================  ============  =======================  =======================  ===========================  ==================
+
+Ground-to-air heat pumps also have a few other inputs:
+
+- ``extension/PumpPowerWattsPerTon``: Optional. Ground loop circulator pump power during operation of the heat pump in Watts/ton of cooling capacity. Defaults to 30 Watts per ton of cooling capacity per `ANSI/RESNET/ICC 301-2019 <https://codes.iccsafe.org/content/RESNETICC3012019>`_ for a closed loop system.
+- ``extension/FanPowerWattsPerCFM``: Optional. Blower fan power in Watts/cfm. Defaults to 0.5 W/cfm.
 
 Air-to-air heat pumps can also have the ``CompressorType`` specified; if not provided, it is assumed as follows:
 
@@ -511,6 +588,13 @@ Air-to-air heat pumps can also have the ``CompressorType`` specified; if not pro
 If the heat pump has backup heating, it can be specified with ``BackupSystemFuel``, ``BackupAnnualHeatingEfficiency``, and (optionally) ``BackupHeatingCapacity``.
 If the heat pump has a switchover temperature (e.g., dual-fuel heat pump) where the heat pump stops operating and the backup heating system starts running, it can be specified with ``BackupHeatingSwitchoverTemperature``.
 If the ``BackupHeatingSwitchoverTemperature`` is not provided, the backup heating system will operate as needed when the heat pump has insufficient capacity.
+
+For multiple ground source heat pumps on a shared hydronic circulation loop (``IsSharedSystem="true"``), the loop's annual electric consumption is calculated using the following equation from `ANSI/RESNET/ICC 301-2019 <https://codes.iccsafe.org/content/RESNETICC3012019>`_:
+
+  | :math:`Eae = \frac{SP}{N_{dweq}} \cdot 8.760`
+  | where, 
+  |   :math:`SP` = Shared pump power [W], provided as ``extension/SharedLoopWatts``
+  |   :math:`N_{dweq}` = Number of units served by the shared system, provided as ``NumberofUnitsServed``
 
 HPXML HVAC Control
 ******************
@@ -536,6 +620,7 @@ HPXML HVAC Distribution
 ***********************
 
 Each separate HVAC distribution system should be specified as a ``Systems/HVAC/HVACDistribution``.
+The four types of HVAC distribution systems allowed are ``AirDistribution``, ``HydronicDistribution``, ``HydronicAndAirDistribution``, and ``DSE``.
 There should be at most one heating system and one cooling system attached to a distribution system.
 See the sections on Heating Systems, Cooling Systems, and Heat Pumps for information on which ``DistributionSystemType`` is allowed for which HVAC system.
 Also note that some HVAC systems (e.g., room air conditioners) are not allowed to be attached to a distribution system.
@@ -547,7 +632,7 @@ Air Distribution
 
 - ``ConditionedFloorAreaServed``
 - Optional ``NumberofReturnRegisters``. If not provided, one return register per conditioned floor will be assumed.
-- Supply leakage to the outside in CFM25 or percent of airflow (``DuctLeakageMeasurement[DuctType='supply']/DuctLeakage/Value``)
+- Optional supply leakage to the outside in CFM25 or percent of airflow (``DuctLeakageMeasurement[DuctType='supply']/DuctLeakage/Value``)
 - Optional return leakage to the outside in CFM25 or percent of airflow (``DuctLeakageMeasurement[DuctType='return']/DuctLeakage/Value``)
 - Optional supply ducts (``Ducts[DuctType='supply']``)
 - Optional return ducts (``Ducts[DuctType='return']``)
@@ -556,26 +641,26 @@ For each duct, ``DuctInsulationRValue`` must be provided.
 ``DuctLocation`` and ``DuctSurfaceArea`` can be optionally provided.
 The provided ``DuctLocation`` can be one of the following:
 
-==============================  =============================================  =========================================================  =========================  ================
-Location                        Description                                    Temperature                                                Building Type              Default Priority
-==============================  =============================================  =========================================================  =========================  ================
-living space                    Above-grade conditioned floor area             EnergyPlus calculation                                     Any                        8
-basement - conditioned          Below-grade conditioned floor area             EnergyPlus calculation                                     Any                        1
-basement - unconditioned                                                       EnergyPlus calculation                                     Any                        2
-crawlspace - unvented                                                          EnergyPlus calculation                                     Any                        4
-crawlspace - vented                                                            EnergyPlus calculation                                     Any                        3
-attic - unvented                                                               EnergyPlus calculation                                     Any                        6
-attic - vented                                                                 EnergyPlus calculation                                     Any                        5
-garage                                                                         EnergyPlus calculation                                     Any                        7
-outside                                                                        Outside                                                    Any
-exterior wall                                                                  Average of conditioned space and outside                   Any
-under slab                                                                     Ground                                                     Any
-roof deck                                                                      Outside                                                    Any
-other housing unit              E.g., adjacent unit or conditioned corridor    Same as conditioned space                                  Attached/Multifamily only
-other heated space              E.g., shared laundry/equipment space           Average of conditioned space and outside; minimum of 68F   Attached/Multifamily only
-other multifamily buffer space  E.g., enclosed unconditioned stairwell         Average of conditioned space and outside; minimum of 50F   Attached/Multifamily only
-other non-freezing space        E.g., parking garage ceiling                   Floats with outside; minimum of 40F                        Attached/Multifamily only
-==============================  =============================================  =========================================================  =========================  ================
+==============================  ================================================  =========================================================  =========================  ================
+Location                        Description                                       Temperature                                                Building Type              Default Priority
+==============================  ================================================  =========================================================  =========================  ================
+living space                    Above-grade conditioned floor area                EnergyPlus calculation                                     Any                        8
+basement - conditioned          Below-grade conditioned floor area                EnergyPlus calculation                                     Any                        1
+basement - unconditioned                                                          EnergyPlus calculation                                     Any                        2
+crawlspace - unvented                                                             EnergyPlus calculation                                     Any                        4
+crawlspace - vented                                                               EnergyPlus calculation                                     Any                        3
+attic - unvented                                                                  EnergyPlus calculation                                     Any                        6
+attic - vented                                                                    EnergyPlus calculation                                     Any                        5
+garage                          Single-family garage (not shared parking garage)  EnergyPlus calculation                                     Any                        7
+outside                                                                           Outside                                                    Any
+exterior wall                                                                     Average of conditioned space and outside                   Any
+under slab                                                                        Ground                                                     Any
+roof deck                                                                         Outside                                                    Any
+other housing unit              E.g., adjacent unit or conditioned corridor       Same as conditioned space                                  Attached/Multifamily only
+other heated space              E.g., shared laundry/equipment space              Average of conditioned space and outside; minimum of 68F   Attached/Multifamily only
+other multifamily buffer space  E.g., enclosed unconditioned stairwell            Average of conditioned space and outside; minimum of 50F   Attached/Multifamily only
+other non-freezing space        E.g., shared parking garage ceiling               Floats with outside; minimum of 40F                        Attached/Multifamily only
+==============================  ================================================  =========================================================  =========================  ================
 
 If ``DuctLocation`` is not provided, the primary duct location will be chosen based on the presence of spaces and the "Default Priority" indicated above.
 For a 2+ story home, secondary ducts will also be located in the living space.
@@ -596,7 +681,18 @@ where F\ :sub:`out` is 1.0 for 1-story homes and 0.75 for 2+ story homes and b\ 
 Hydronic Distribution
 ~~~~~~~~~~~~~~~~~~~~~
 
-``HydronicDistribution`` systems do not require any additional inputs.
+``HydronicDistribution`` systems are defined by:
+
+- ``HydronicDistributionType``: "radiator" or "baseboard" or "radiant floor" or "radiant ceiling"
+
+Hydronic And Air Distribution
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+``HydronicAndAirDistribution`` systems are defined by:
+
+- ``HydronicAndAirDistributionType``: "fan coil" or "water loop heat pump"
+
+as well as all of the elements described above for an ``AirDistribution`` system.
 
 Distribution System Efficiency
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -689,10 +785,10 @@ Depending on the type of water heater specified, additional elements are require
 ========================================  ===================================  ===========  ==========  ===============  ==================  ===================== =================  =========================================  ==============================
 WaterHeaterType                           UniformEnergyFactor or EnergyFactor  FuelType     TankVolume  HeatingCapacity  RecoveryEfficiency  PerformanceAdjustment UsesDesuperheater  WaterHeaterInsulation/Jacket/JacketRValue  RelatedHVACSystem
 ========================================  ===================================  ===========  ==========  ===============  ==================  ===================== =================  =========================================  ==============================
-storage water heater                      required                             <any>        <optional>  <optional>       <optional>                                <optional>         <optional>                                 required if uses desuperheater
-instantaneous water heater                required                             <any>                                                         <optional>            <optional>                                                    required if uses desuperheater
-heat pump water heater                    required                             electricity  required                                                               <optional>         <optional>                                 required if uses desuperheater
-space-heating boiler with storage tank                                                      required                                                                                  <optional>                                 required
+storage water heater                      required                             <any>        (optional)  (optional)       (optional)                                (optional)         (optional)                                 required if uses desuperheater
+instantaneous water heater                required                             <any>                                                         (optional)            (optional)                                                    required if uses desuperheater
+heat pump water heater                    required                             electricity  required                                                               (optional)         (optional)                                 required if uses desuperheater
+space-heating boiler with storage tank                                                      required                                                                                  (optional)                                 required
 space-heating boiler with tankless coil                                                                                                                                                                                          required
 ========================================  ===================================  ===========  ==========  ===============  ==================  ===================== =================  =========================================  ==============================
 
@@ -717,23 +813,23 @@ For water heaters that are connected to a desuperheater, the ``RelatedHVACSystem
 
 The water heater ``Location`` can be optionally entered as one of the following:
 
-==============================  =============================================  =========================================================  =========================
-Location                        Description                                    Temperature                                                Building Type
-==============================  =============================================  =========================================================  =========================
-living space                    Above-grade conditioned floor area             EnergyPlus calculation                                     Any
-basement - conditioned          Below-grade conditioned floor area             EnergyPlus calculation                                     Any
-basement - unconditioned                                                       EnergyPlus calculation                                     Any
-attic - unvented                                                               EnergyPlus calculation                                     Any
-attic - vented                                                                 EnergyPlus calculation                                     Any
-garage                                                                         EnergyPlus calculation                                     Any
-crawlspace - unvented                                                          EnergyPlus calculation                                     Any
-crawlspace - vented                                                            EnergyPlus calculation                                     Any
-other exterior                  Outside                                        EnergyPlus calculation                                     Any
-other housing unit              E.g., adjacent unit or conditioned corridor    Same as conditioned space                                  Attached/Multifamily only
-other heated space              E.g., shared laundry/equipment space           Average of conditioned space and outside; minimum of 68F   Attached/Multifamily only
-other multifamily buffer space  E.g., enclosed unconditioned stairwell         Average of conditioned space and outside; minimum of 50F   Attached/Multifamily only
-other non-freezing space        E.g., parking garage ceiling                   Floats with outside; minimum of 40F                        Attached/Multifamily only
-==============================  =============================================  =========================================================  =========================
+==============================  ================================================  =========================================================  =========================
+Location                        Description                                       Temperature                                                Building Type
+==============================  ================================================  =========================================================  =========================
+living space                    Above-grade conditioned floor area                EnergyPlus calculation                                     Any
+basement - conditioned          Below-grade conditioned floor area                EnergyPlus calculation                                     Any
+basement - unconditioned                                                          EnergyPlus calculation                                     Any
+attic - unvented                                                                  EnergyPlus calculation                                     Any
+attic - vented                                                                    EnergyPlus calculation                                     Any
+garage                          Single-family garage (not shared parking garage)  EnergyPlus calculation                                     Any
+crawlspace - unvented                                                             EnergyPlus calculation                                     Any
+crawlspace - vented                                                               EnergyPlus calculation                                     Any
+other exterior                  Outside                                           EnergyPlus calculation                                     Any
+other housing unit              E.g., adjacent unit or conditioned corridor       Same as conditioned space                                  Attached/Multifamily only
+other heated space              E.g., shared laundry/equipment space              Average of conditioned space and outside; minimum of 68F   Attached/Multifamily only
+other multifamily buffer space  E.g., enclosed unconditioned stairwell            Average of conditioned space and outside; minimum of 50F   Attached/Multifamily only
+other non-freezing space        E.g., shared parking garage ceiling               Floats with outside; minimum of 40F                        Attached/Multifamily only
+==============================  ================================================  =========================================================  =========================
 
 If the location is not provided, a default water heater location will be assumed based on IECC climate zone:
 
@@ -881,8 +977,8 @@ If ``SystemLossesFraction`` is not provided but ``YearModulesManufactured`` is p
 .. math:: System Losses Fraction = 1.0 - (1.0 - 0.14) \cdot (1.0 - (1.0 - 0.995^{(CurrentYear - YearModulesManufactured)}))
 
 If the PV system is a shared system (i.e., serving multiple dwelling units), it should be described using ``IsSharedSystem='true'``.
-In addition, the total output power of the system must be entered as ``MaxPowerOutput[@scope='multiple units']`` and the total number of bedrooms across all dwelling units must be entered as ``extension/NumberofBedroomsServed``.
-The PV generation will be apportioned to the dwelling unit using its number of bedrooms divided by the total number of bedrooms in the building.
+In addition, the total number of bedrooms across all dwelling units served by the system must be entered as ``extension/NumberofBedroomsServed``.
+PV generation will be apportioned to the dwelling unit using its number of bedrooms divided by the total number of bedrooms in the building.
 
 HPXML Appliances
 ----------------
@@ -891,18 +987,18 @@ This section describes elements specified in HPXML's ``Appliances``.
 
 The ``Location`` for each appliance can be optionally provided as one of the following:
 
-==============================  ===========================================  =========================
-Location                        Description                                  Building Type
-==============================  ===========================================  =========================
-living space                    Above-grade conditioned floor area           Any
-basement - conditioned          Below-grade conditioned floor area           Any
-basement - unconditioned                                                     Any
-garage                                                                       Any
-other housing unit              E.g., adjacent unit or conditioned corridor  Attached/Multifamily only
-other heated space              E.g., shared laundry/equipment space         Attached/Multifamily only
-other multifamily buffer space  E.g., enclosed unconditioned stairwell       Attached/Multifamily only
-other non-freezing space        E.g., parking garage ceiling                 Attached/Multifamily only
-==============================  ===========================================  =========================
+==============================  ================================================  =========================
+Location                        Description                                       Building Type
+==============================  ================================================  =========================
+living space                    Above-grade conditioned floor area                Any
+basement - conditioned          Below-grade conditioned floor area                Any
+basement - unconditioned                                                          Any
+garage                          Single-family garage (not shared parking garage)  Any
+other housing unit              E.g., adjacent unit or conditioned corridor       Attached/Multifamily only
+other heated space              E.g., shared laundry/equipment space              Attached/Multifamily only
+other multifamily buffer space  E.g., enclosed unconditioned stairwell            Attached/Multifamily only
+other non-freezing space        E.g., shared parking garage ceiling               Attached/Multifamily only
+==============================  ================================================  =========================
 
 If the location is not specified, the appliance is assumed to be in the living space.
 
@@ -957,6 +1053,9 @@ If ``EnergyFactor`` is provided instead of ``CombinedEnergyFactor``, it will be 
 .. math:: CombinedEnergyFactor = \frac{EnergyFactor}{1.15}
 
 An ``extension/UsageMultiplier`` can also be optionally provided that scales energy usage; if not provided, it is assumed to be 1.0.
+
+The clothes dryer may be optionally described as a shared appliance (i.e., in a shared laundry room) using ``IsSharedAppliance``.
+If not provided, it is assumed to be false.
 
 HPXML Dishwasher
 ****************
