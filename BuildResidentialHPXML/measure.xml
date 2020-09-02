@@ -3,8 +3,8 @@
   <schema_version>3.0</schema_version>
   <name>build_residential_hpxml</name>
   <uid>a13a8983-2b01-4930-8af2-42030b6e4233</uid>
-  <version_id>f6c48afa-7209-4fef-8d8e-70bb08af699e</version_id>
-  <version_modified>20200902T152902Z</version_modified>
+  <version_id>800a7b8a-5866-4bd1-82cb-f6d798f59f10</version_id>
+  <version_modified>20200902T165126Z</version_modified>
   <xml_checksum>2C38F48B</xml_checksum>
   <class_name>BuildResidentialHPXML</class_name>
   <display_name>HPXML Builder</display_name>
@@ -1648,33 +1648,6 @@
       </choices>
     </argument>
     <argument>
-      <name>heating_system_shared_loop_watts</name>
-      <display_name>Heating System: Shared Loop Watts</display_name>
-      <description>The shared pumping power serving a shared boiler. This is required for a shared boiler.</description>
-      <type>Double</type>
-      <units>W</units>
-      <required>false</required>
-      <model_dependent>false</model_dependent>
-    </argument>
-    <argument>
-      <name>heating_system_fan_coil_watts</name>
-      <display_name>Heating System: Fan Coil Watts</display_name>
-      <description>The in-unit fan coil power serving a shared boiler.</description>
-      <type>Double</type>
-      <units>W</units>
-      <required>false</required>
-      <model_dependent>false</model_dependent>
-    </argument>
-    <argument>
-      <name>heating_system_water_loop_heat_pump_heating_efficiency</name>
-      <display_name>Heating System: Water Loop Heat Pump Efficiency</display_name>
-      <description>The heating COP for water loop heat pumps that are connected to a shared boiler.</description>
-      <type>Double</type>
-      <units>COP</units>
-      <required>false</required>
-      <model_dependent>false</model_dependent>
-    </argument>
-    <argument>
       <name>cooling_system_type</name>
       <display_name>Cooling System: Type</display_name>
       <description>The type of cooling system. Use 'none' if there is no cooling system.</description>
@@ -1827,42 +1800,6 @@
           <display_name>false</display_name>
         </choice>
       </choices>
-    </argument>
-    <argument>
-      <name>cooling_system_shared_loop_watts</name>
-      <display_name>Cooling System: Shared Loop Watts</display_name>
-      <description>The total of the pumping and fan power serving a shared chiller. This is required for a shared chiller.</description>
-      <type>Double</type>
-      <units>W</units>
-      <required>false</required>
-      <model_dependent>false</model_dependent>
-    </argument>
-    <argument>
-      <name>cooling_system_fan_coil_watts</name>
-      <display_name>Cooling System: Fan Coil Watts</display_name>
-      <description>The in-unit fan coil power serving a shared chiller.</description>
-      <type>Double</type>
-      <units>W</units>
-      <required>false</required>
-      <model_dependent>false</model_dependent>
-    </argument>
-    <argument>
-      <name>cooling_system_water_loop_heat_pump_cooling_capacity</name>
-      <display_name>Cooling System: Water Loop Heat Pump Cooling Capacity</display_name>
-      <description>The output cooling capacity of water loop heat pumps that are connected to a shared chiller.</description>
-      <type>Double</type>
-      <units>tons</units>
-      <required>false</required>
-      <model_dependent>false</model_dependent>
-    </argument>
-    <argument>
-      <name>cooling_system_water_loop_heat_pump_cooling_efficiency</name>
-      <display_name>Cooling System: Water Loop Heat Pump Efficiency</display_name>
-      <description>The cooling EER for water loop heat pumps that are connected to a shared chiller.</description>
-      <type>Double</type>
-      <units>EER</units>
-      <required>false</required>
-      <model_dependent>false</model_dependent>
     </argument>
     <argument>
       <name>heat_pump_type</name>
@@ -2094,7 +2031,7 @@
       <display_name>Heat Pump: Ground-to-Air Pump Power</display_name>
       <description>Ground loop circulator pump power during operation of the heat pump.</description>
       <type>Double</type>
-      <units>watt/ton</units>
+      <units>W/ton</units>
       <required>false</required>
       <model_dependent>false</model_dependent>
     </argument>
@@ -2103,7 +2040,7 @@
       <display_name>Heat Pump: Ground-to-Air Fan Power</display_name>
       <description>Blower fan power.</description>
       <type>Double</type>
-      <units>watt/CFM</units>
+      <units>W/CFM</units>
       <required>false</required>
       <model_dependent>false</model_dependent>
     </argument>
@@ -2127,8 +2064,89 @@
       </choices>
     </argument>
     <argument>
-      <name>heat_pump_shared_loop_watts</name>
-      <display_name>Heat Pump: Shared Loop Watts</display_name>
+      <name>shared_hvac_heating_loop_power</name>
+      <display_name>Shared HVAC: Heating Loop Power</display_name>
+      <description>The shared pumping power serving a shared boiler. This is required for a shared boiler.</description>
+      <type>Double</type>
+      <units>W</units>
+      <required>false</required>
+      <model_dependent>false</model_dependent>
+    </argument>
+    <argument>
+      <name>shared_hvac_heating_fan_coil_power</name>
+      <display_name>Shared HVAC: Heating Fan Coil Power</display_name>
+      <description>The in-unit fan coil power serving a shared boiler.</description>
+      <type>Double</type>
+      <units>W</units>
+      <required>false</required>
+      <model_dependent>false</model_dependent>
+    </argument>
+    <argument>
+      <name>shared_hvac_heating_water_loop_heat_pump_heating_efficiency</name>
+      <display_name>Shared HVAC: Heating Water Loop Heat Pump Efficiency</display_name>
+      <description>The heating COP for water loop heat pumps that are connected to a shared boiler.</description>
+      <type>Double</type>
+      <units>COP</units>
+      <required>false</required>
+      <model_dependent>false</model_dependent>
+    </argument>
+    <argument>
+      <name>shared_hvac_cooling_loop_power</name>
+      <display_name>Shared HVAC: Cooling Loop Power</display_name>
+      <description>The total of the pumping and fan power serving a shared chiller. This is required for a shared chiller.</description>
+      <type>Double</type>
+      <units>W</units>
+      <required>false</required>
+      <model_dependent>false</model_dependent>
+    </argument>
+    <argument>
+      <name>shared_hvac_cooling_fan_coil_power</name>
+      <display_name>Shared HVAC: Cooling Fan Coil Power</display_name>
+      <description>The in-unit fan coil power serving a shared chiller.</description>
+      <type>Double</type>
+      <units>W</units>
+      <required>false</required>
+      <model_dependent>false</model_dependent>
+    </argument>
+    <argument>
+      <name>shared_hvac_cooling_water_loop_heat_pump_cooling_capacity</name>
+      <display_name>Shared HVAC: Cooling Water Loop Heat Pump Cooling Capacity</display_name>
+      <description>The output cooling capacity of water loop heat pumps that are connected to a shared chiller.</description>
+      <type>Double</type>
+      <units>tons</units>
+      <required>false</required>
+      <model_dependent>false</model_dependent>
+    </argument>
+    <argument>
+      <name>shared_hvac_cooling_water_loop_heat_pump_cooling_efficiency</name>
+      <display_name>Shared HVAC: Cooling Water Loop Heat Pump Efficiency</display_name>
+      <description>The cooling EER for water loop heat pumps that are connected to a shared chiller.</description>
+      <type>Double</type>
+      <units>EER</units>
+      <required>false</required>
+      <model_dependent>false</model_dependent>
+    </argument>
+    <argument>
+      <name>shared_hvac_fan_coil_is_ducted</name>
+      <display_name>Shared HVAC: Fan Coil Is Ducted</display_name>
+      <description>Whether the in-unit fan coil is ducted or not.</description>
+      <type>Boolean</type>
+      <required>false</required>
+      <model_dependent>false</model_dependent>
+      <choices>
+        <choice>
+          <value>true</value>
+          <display_name>true</display_name>
+        </choice>
+        <choice>
+          <value>false</value>
+          <display_name>false</display_name>
+        </choice>
+      </choices>
+    </argument>
+    <argument>
+      <name>shared_hvac_heat_pump_shared_loop_power</name>
+      <display_name>Shared HVAC: Heat Pump Loop Power</display_name>
       <description>The pumping power serving a shared ground-to-air heat pump.</description>
       <type>Double</type>
       <units>W</units>
@@ -5188,7 +5206,7 @@
       <display_name>Ceiling Fan: Efficiency</display_name>
       <description>The efficiency rating of the ceiling fan(s) at medium speed.</description>
       <type>String</type>
-      <units>CFM/watt</units>
+      <units>CFM/W</units>
       <required>true</required>
       <model_dependent>false</model_dependent>
       <default_value>auto</default_value>
@@ -7113,13 +7131,43 @@
       <filename>extra-hvac-shared-boiler-chiller-baseboard.osw</filename>
       <filetype>osw</filetype>
       <usage_type>test</usage_type>
-      <checksum>AE1725BD</checksum>
+      <checksum>999D1D48</checksum>
     </file>
     <file>
       <filename>extra-hvac-shared-boiler-chiller-fan-coil.osw</filename>
       <filetype>osw</filetype>
       <usage_type>test</usage_type>
-      <checksum>4326B5B2</checksum>
+      <checksum>CF6669AA</checksum>
+    </file>
+    <file>
+      <filename>extra-hvac-shared-ground-loop-ground-to-air-heat-pump.osw</filename>
+      <filetype>osw</filetype>
+      <usage_type>test</usage_type>
+      <checksum>AC44478E</checksum>
+    </file>
+    <file>
+      <filename>extra-hvac-shared-boiler-only-baseboard.osw</filename>
+      <filetype>osw</filetype>
+      <usage_type>test</usage_type>
+      <checksum>BC11B297</checksum>
+    </file>
+    <file>
+      <filename>extra-hvac-shared-chiller-only-fan-coil.osw</filename>
+      <filetype>osw</filetype>
+      <usage_type>test</usage_type>
+      <checksum>785770E7</checksum>
+    </file>
+    <file>
+      <filename>extra-hvac-shared-boiler-chiller-fan-coil-ducted.osw</filename>
+      <filetype>osw</filetype>
+      <usage_type>test</usage_type>
+      <checksum>7CA37C30</checksum>
+    </file>
+    <file>
+      <filename>extra-hvac-shared-chiller-only-fan-coil-ducted.osw</filename>
+      <filetype>osw</filetype>
+      <usage_type>test</usage_type>
+      <checksum>31BCB9B6</checksum>
     </file>
     <file>
       <version>
@@ -7130,31 +7178,43 @@
       <filename>measure.rb</filename>
       <filetype>rb</filetype>
       <usage_type>script</usage_type>
-      <checksum>8A97D95F</checksum>
+      <checksum>14418A1B</checksum>
     </file>
     <file>
       <filename>extra-hvac-shared-boiler-chiller-water-loop-heat-pump.osw</filename>
       <filetype>osw</filetype>
       <usage_type>test</usage_type>
-      <checksum>BBE03DA9</checksum>
+      <checksum>539EF345</checksum>
     </file>
     <file>
-      <filename>extra-hvac-shared-ground-loop-ground-to-air-heat-pump.osw</filename>
+      <filename>extra-hvac-shared-boiler-only-fan-coil-ducted.osw</filename>
       <filetype>osw</filetype>
       <usage_type>test</usage_type>
-      <checksum>8635F4C2</checksum>
+      <checksum>5C6FE31B</checksum>
     </file>
     <file>
-      <filename>extra-hvac-shared-boiler-only-baseboard.osw</filename>
+      <filename>extra-hvac-shared-boiler-only-fan-coil.osw</filename>
       <filetype>osw</filetype>
       <usage_type>test</usage_type>
-      <checksum>83639873</checksum>
+      <checksum>CAC361D9</checksum>
     </file>
     <file>
-      <filename>extra-hvac-shared-chiller-only-fan-coil.osw</filename>
+      <filename>extra-hvac-shared-boiler-only-water-loop-heat-pump.osw</filename>
       <filetype>osw</filetype>
       <usage_type>test</usage_type>
-      <checksum>8BBBDAAD</checksum>
+      <checksum>047C425E</checksum>
+    </file>
+    <file>
+      <filename>extra-hvac-shared-chiller-only-baseboard.osw</filename>
+      <filetype>osw</filetype>
+      <usage_type>test</usage_type>
+      <checksum>92B3B49D</checksum>
+    </file>
+    <file>
+      <filename>extra-hvac-shared-chiller-only-water-loop-heat-pump.osw</filename>
+      <filetype>osw</filetype>
+      <usage_type>test</usage_type>
+      <checksum>F3CBAD84</checksum>
     </file>
   </files>
 </measure>

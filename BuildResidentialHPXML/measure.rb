@@ -961,24 +961,6 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     arg.setDefaultValue(false)
     args << arg
 
-    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('heating_system_shared_loop_watts', false)
-    arg.setDisplayName('Heating System: Shared Loop Watts')
-    arg.setDescription('The shared pumping power serving a shared boiler. This is required for a shared boiler.')
-    arg.setUnits('W')
-    args << arg
-
-    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('heating_system_fan_coil_watts', false)
-    arg.setDisplayName('Heating System: Fan Coil Watts')
-    arg.setDescription('The in-unit fan coil power serving a shared boiler.')
-    arg.setUnits('W')
-    args << arg
-
-    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('heating_system_water_loop_heat_pump_heating_efficiency', false)
-    arg.setDisplayName('Heating System: Water Loop Heat Pump Efficiency')
-    arg.setDescription('The heating COP for water loop heat pumps that are connected to a shared boiler.')
-    arg.setUnits('COP')
-    args << arg
-
     arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('cooling_system_type', cooling_system_type_choices, true)
     arg.setDisplayName('Cooling System: Type')
     arg.setDescription("The type of cooling system. Use 'none' if there is no cooling system.")
@@ -1041,30 +1023,6 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     arg.setDisplayName('Cooling System: Is Shared System')
     arg.setDescription('Whether the cooling system is a shared system. If true, assumed to serve all the units in the building. This is valid only for a chiller.')
     arg.setDefaultValue(false)
-    args << arg
-
-    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('cooling_system_shared_loop_watts', false)
-    arg.setDisplayName('Cooling System: Shared Loop Watts')
-    arg.setDescription('The total of the pumping and fan power serving a shared chiller. This is required for a shared chiller.')
-    arg.setUnits('W')
-    args << arg
-
-    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('cooling_system_fan_coil_watts', false)
-    arg.setDisplayName('Cooling System: Fan Coil Watts')
-    arg.setDescription('The in-unit fan coil power serving a shared chiller.')
-    arg.setUnits('W')
-    args << arg
-
-    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('cooling_system_water_loop_heat_pump_cooling_capacity', false)
-    arg.setDisplayName('Cooling System: Water Loop Heat Pump Cooling Capacity')
-    arg.setDescription('The output cooling capacity of water loop heat pumps that are connected to a shared chiller.')
-    arg.setUnits('tons')
-    args << arg
-
-    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('cooling_system_water_loop_heat_pump_cooling_efficiency', false)
-    arg.setDisplayName('Cooling System: Water Loop Heat Pump Efficiency')
-    arg.setDescription('The cooling EER for water loop heat pumps that are connected to a shared chiller.')
-    arg.setUnits('EER')
     args << arg
 
     heat_pump_type_choices = OpenStudio::StringVector.new
@@ -1196,13 +1154,13 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('heat_pump_ground_to_air_pump_power', false)
     arg.setDisplayName('Heat Pump: Ground-to-Air Pump Power')
     arg.setDescription('Ground loop circulator pump power during operation of the heat pump.')
-    arg.setUnits('watt/ton')
+    arg.setUnits('W/ton')
     args << arg
 
     arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('heat_pump_ground_to_air_fan_power', false)
     arg.setDisplayName('Heat Pump: Ground-to-Air Fan Power')
     arg.setDescription('Blower fan power.')
-    arg.setUnits('watt/CFM')
+    arg.setUnits('W/CFM')
     args << arg
 
     arg = OpenStudio::Measure::OSArgument::makeBoolArgument('heat_pump_is_shared_system', true)
@@ -1211,8 +1169,55 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     arg.setDefaultValue(false)
     args << arg
 
-    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('heat_pump_shared_loop_watts', false)
-    arg.setDisplayName('Heat Pump: Shared Loop Watts')
+    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('shared_hvac_heating_loop_power', false)
+    arg.setDisplayName('Shared HVAC: Heating Loop Power')
+    arg.setDescription('The shared pumping power serving a shared boiler. This is required for a shared boiler.')
+    arg.setUnits('W')
+    args << arg
+
+    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('shared_hvac_heating_fan_coil_power', false)
+    arg.setDisplayName('Shared HVAC: Heating Fan Coil Power')
+    arg.setDescription('The in-unit fan coil power serving a shared boiler.')
+    arg.setUnits('W')
+    args << arg
+
+    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('shared_hvac_heating_water_loop_heat_pump_heating_efficiency', false)
+    arg.setDisplayName('Shared HVAC: Heating Water Loop Heat Pump Efficiency')
+    arg.setDescription('The heating COP for water loop heat pumps that are connected to a shared boiler.')
+    arg.setUnits('COP')
+    args << arg
+
+    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('shared_hvac_cooling_loop_power', false)
+    arg.setDisplayName('Shared HVAC: Cooling Loop Power')
+    arg.setDescription('The total of the pumping and fan power serving a shared chiller. This is required for a shared chiller.')
+    arg.setUnits('W')
+    args << arg
+
+    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('shared_hvac_cooling_fan_coil_power', false)
+    arg.setDisplayName('Shared HVAC: Cooling Fan Coil Power')
+    arg.setDescription('The in-unit fan coil power serving a shared chiller.')
+    arg.setUnits('W')
+    args << arg
+
+    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('shared_hvac_cooling_water_loop_heat_pump_cooling_capacity', false)
+    arg.setDisplayName('Shared HVAC: Cooling Water Loop Heat Pump Cooling Capacity')
+    arg.setDescription('The output cooling capacity of water loop heat pumps that are connected to a shared chiller.')
+    arg.setUnits('tons')
+    args << arg
+
+    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('shared_hvac_cooling_water_loop_heat_pump_cooling_efficiency', false)
+    arg.setDisplayName('Shared HVAC: Cooling Water Loop Heat Pump Efficiency')
+    arg.setDescription('The cooling EER for water loop heat pumps that are connected to a shared chiller.')
+    arg.setUnits('EER')
+    args << arg
+
+    arg = OpenStudio::Measure::OSArgument::makeBoolArgument('shared_hvac_fan_coil_is_ducted', false)
+    arg.setDisplayName('Shared HVAC: Fan Coil Is Ducted')
+    arg.setDescription('Whether the in-unit fan coil is ducted or not.')
+    args << arg
+
+    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('shared_hvac_heat_pump_shared_loop_power', false)
+    arg.setDisplayName('Shared HVAC: Heat Pump Loop Power')
     arg.setDescription('The pumping power serving a shared ground-to-air heat pump.')
     arg.setUnits('W')
     args << arg
@@ -2668,7 +2673,7 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
 
     arg = OpenStudio::Measure::OSArgument::makeStringArgument('ceiling_fan_efficiency', true)
     arg.setDisplayName('Ceiling Fan: Efficiency')
-    arg.setUnits('CFM/watt')
+    arg.setUnits('CFM/W')
     arg.setDescription('The efficiency rating of the ceiling fan(s) at medium speed.')
     arg.setDefaultValue(Constants.Auto)
     args << arg
@@ -3345,9 +3350,6 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
              heating_system_electric_auxiliary_energy: runner.getOptionalDoubleArgumentValue('heating_system_electric_auxiliary_energy', user_arguments),
              heating_system_has_flue_or_chimney: runner.getBoolArgumentValue('heating_system_has_flue_or_chimney', user_arguments),
              heating_system_is_shared_system: runner.getBoolArgumentValue('heating_system_is_shared_system', user_arguments),
-             heating_system_shared_loop_watts: runner.getOptionalDoubleArgumentValue('heating_system_shared_loop_watts', user_arguments),
-             heating_system_fan_coil_watts: runner.getOptionalDoubleArgumentValue('heating_system_fan_coil_watts', user_arguments),
-             heating_system_water_loop_heat_pump_heating_efficiency: runner.getOptionalDoubleArgumentValue('heating_system_water_loop_heat_pump_heating_efficiency', user_arguments),
              cooling_system_type: runner.getStringArgumentValue('cooling_system_type', user_arguments),
              cooling_system_cooling_efficiency_seer: runner.getDoubleArgumentValue('cooling_system_cooling_efficiency_seer', user_arguments),
              cooling_system_cooling_efficiency_eer: runner.getDoubleArgumentValue('cooling_system_cooling_efficiency_eer', user_arguments),
@@ -3358,10 +3360,6 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
              cooling_system_fraction_cool_load_served: runner.getDoubleArgumentValue('cooling_system_fraction_cool_load_served', user_arguments),
              cooling_system_is_ducted: runner.getBoolArgumentValue('cooling_system_is_ducted', user_arguments),
              cooling_system_is_shared_system: runner.getBoolArgumentValue('cooling_system_is_shared_system', user_arguments),
-             cooling_system_shared_loop_watts: runner.getOptionalDoubleArgumentValue('cooling_system_shared_loop_watts', user_arguments),
-             cooling_system_fan_coil_watts: runner.getOptionalDoubleArgumentValue('cooling_system_fan_coil_watts', user_arguments),
-             cooling_system_water_loop_heat_pump_cooling_capacity: runner.getOptionalDoubleArgumentValue('cooling_system_water_loop_heat_pump_cooling_capacity', user_arguments),
-             cooling_system_water_loop_heat_pump_cooling_efficiency: runner.getOptionalDoubleArgumentValue('cooling_system_water_loop_heat_pump_cooling_efficiency', user_arguments),
              heat_pump_type: runner.getStringArgumentValue('heat_pump_type', user_arguments),
              heat_pump_heating_efficiency_hspf: runner.getDoubleArgumentValue('heat_pump_heating_efficiency_hspf', user_arguments),
              heat_pump_heating_efficiency_cop: runner.getDoubleArgumentValue('heat_pump_heating_efficiency_cop', user_arguments),
@@ -3382,7 +3380,15 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
              heat_pump_ground_to_air_pump_power: runner.getOptionalDoubleArgumentValue('heat_pump_ground_to_air_pump_power', user_arguments),
              heat_pump_ground_to_air_fan_power: runner.getOptionalDoubleArgumentValue('heat_pump_ground_to_air_fan_power', user_arguments),
              heat_pump_is_shared_system: runner.getBoolArgumentValue('heat_pump_is_shared_system', user_arguments),
-             heat_pump_shared_loop_watts: runner.getOptionalDoubleArgumentValue('heat_pump_shared_loop_watts', user_arguments),
+             shared_hvac_heating_loop_power: runner.getOptionalDoubleArgumentValue('shared_hvac_heating_loop_power', user_arguments),
+             shared_hvac_heating_fan_coil_power: runner.getOptionalDoubleArgumentValue('shared_hvac_heating_fan_coil_power', user_arguments),
+             shared_hvac_heating_water_loop_heat_pump_heating_efficiency: runner.getOptionalDoubleArgumentValue('shared_hvac_heating_water_loop_heat_pump_heating_efficiency', user_arguments),
+             shared_hvac_cooling_loop_power: runner.getOptionalDoubleArgumentValue('shared_hvac_cooling_loop_power', user_arguments),
+             shared_hvac_cooling_fan_coil_power: runner.getOptionalDoubleArgumentValue('shared_hvac_cooling_fan_coil_power', user_arguments),
+             shared_hvac_cooling_water_loop_heat_pump_cooling_capacity: runner.getOptionalDoubleArgumentValue('shared_hvac_cooling_water_loop_heat_pump_cooling_capacity', user_arguments),
+             shared_hvac_cooling_water_loop_heat_pump_cooling_efficiency: runner.getOptionalDoubleArgumentValue('shared_hvac_cooling_water_loop_heat_pump_cooling_efficiency', user_arguments),
+             shared_hvac_fan_coil_is_ducted: runner.getOptionalStringArgumentValue('shared_hvac_fan_coil_is_ducted', user_arguments),
+             shared_hvac_heat_pump_shared_loop_power: runner.getOptionalDoubleArgumentValue('shared_hvac_heat_pump_shared_loop_power', user_arguments),
              setpoint_heating_temp: runner.getDoubleArgumentValue('setpoint_heating_temp', user_arguments),
              setpoint_heating_setback_temp: runner.getDoubleArgumentValue('setpoint_heating_setback_temp', user_arguments),
              setpoint_heating_setback_hours_per_week: runner.getDoubleArgumentValue('setpoint_heating_setback_hours_per_week', user_arguments),
@@ -4462,12 +4468,12 @@ class HPXMLFile
     if args[:heating_system_is_shared_system]
       is_shared_system = args[:heating_system_is_shared_system]
       number_of_units_served = args[:geometry_building_num_units].get
-      shared_loop_watts = args[:heating_system_shared_loop_watts].get
-      if args[:heating_system_fan_coil_watts].is_initialized
-        fan_coil_watts = args[:heating_system_fan_coil_watts].get
+      shared_loop_watts = args[:shared_hvac_heating_loop_power].get
+      if args[:shared_hvac_heating_fan_coil_power].is_initialized
+        fan_coil_watts = args[:shared_hvac_heating_fan_coil_power].get
       end
-      if args[:heating_system_water_loop_heat_pump_heating_efficiency].is_initialized
-        wlhp_heating_efficiency_cop = args[:heating_system_water_loop_heat_pump_heating_efficiency].get
+      if args[:shared_hvac_heating_water_loop_heat_pump_heating_efficiency].is_initialized
+        wlhp_heating_efficiency_cop = args[:shared_hvac_heating_water_loop_heat_pump_heating_efficiency].get
       end
     end
 
@@ -4555,13 +4561,13 @@ class HPXMLFile
     if args[:cooling_system_is_shared_system]
       is_shared_system = args[:cooling_system_is_shared_system]
       number_of_units_served = args[:geometry_building_num_units].get
-      shared_loop_watts = args[:cooling_system_shared_loop_watts].get
-      if args[:cooling_system_fan_coil_watts].is_initialized
-        fan_coil_watts = args[:cooling_system_fan_coil_watts].get
+      shared_loop_watts = args[:shared_hvac_cooling_loop_power].get
+      if args[:shared_hvac_cooling_fan_coil_power].is_initialized
+        fan_coil_watts = args[:shared_hvac_cooling_fan_coil_power].get
       end
-      if args[:cooling_system_water_loop_heat_pump_cooling_capacity].is_initialized && args[:cooling_system_water_loop_heat_pump_cooling_efficiency].is_initialized
-        wlhp_cooling_capacity = args[:cooling_system_water_loop_heat_pump_cooling_capacity].get
-        wlhp_cooling_efficiency_eer = args[:cooling_system_water_loop_heat_pump_cooling_efficiency].get
+      if args[:shared_hvac_cooling_water_loop_heat_pump_cooling_capacity].is_initialized && args[:shared_hvac_cooling_water_loop_heat_pump_cooling_efficiency].is_initialized
+        wlhp_cooling_capacity = args[:shared_hvac_cooling_water_loop_heat_pump_cooling_capacity].get
+        wlhp_cooling_efficiency_eer = args[:shared_hvac_cooling_water_loop_heat_pump_cooling_efficiency].get
       end
     end
 
@@ -4650,7 +4656,7 @@ class HPXMLFile
     if args[:heat_pump_is_shared_system]
       is_shared_system = args[:heat_pump_is_shared_system]
       number_of_units_served = args[:geometry_building_num_units].get
-      shared_loop_watts = args[:heat_pump_shared_loop_watts].get
+      shared_loop_watts = args[:shared_hvac_heat_pump_shared_loop_power].get
     end
 
     hpxml.heat_pumps.add(id: 'HeatPump',
@@ -4687,19 +4693,19 @@ class HPXMLFile
     # HydronicAndAir?
     hydronic_and_air_distribution_systems = []
     hpxml.heating_systems.each do |heating_system|
-      if args[:heating_system_fan_coil_watts].is_initialized || args[:heating_system_water_loop_heat_pump_heating_efficiency].is_initialized
+      if args[:shared_hvac_heating_fan_coil_power].is_initialized || args[:shared_hvac_heating_water_loop_heat_pump_heating_efficiency].is_initialized
         hydronic_and_air_distribution_systems << heating_system
       end
     end
     hpxml.cooling_systems.each do |cooling_system|
-      if args[:cooling_system_fan_coil_watts].is_initialized || (args[:cooling_system_water_loop_heat_pump_cooling_capacity].is_initialized && args[:cooling_system_water_loop_heat_pump_cooling_efficiency].is_initialized)
+      if args[:shared_hvac_cooling_fan_coil_power].is_initialized || (args[:shared_hvac_cooling_water_loop_heat_pump_cooling_capacity].is_initialized && args[:shared_hvac_cooling_water_loop_heat_pump_cooling_efficiency].is_initialized)
         hydronic_and_air_distribution_systems << cooling_system
       end
     end
 
     if hydronic_and_air_distribution_systems.size > 0
       hydronic_and_air_type = HPXML::HydronicAndAirTypeFanCoil
-      if args[:heating_system_water_loop_heat_pump_heating_efficiency].is_initialized || (args[:cooling_system_water_loop_heat_pump_cooling_capacity].is_initialized && args[:cooling_system_water_loop_heat_pump_cooling_efficiency].is_initialized)
+      if args[:shared_hvac_heating_water_loop_heat_pump_heating_efficiency].is_initialized || (args[:shared_hvac_cooling_water_loop_heat_pump_cooling_capacity].is_initialized && args[:shared_hvac_cooling_water_loop_heat_pump_cooling_efficiency].is_initialized)
         hydronic_and_air_type = HPXML::HydronicAndAirTypeWaterLoopHeatPump
       end
 
@@ -4775,6 +4781,11 @@ class HPXMLFile
 
     hpxml.hvac_distributions.each do |hvac_distribution|
       next if hvac_distribution.distribution_system_type == HPXML::HVACDistributionTypeHydronic
+
+      if hvac_distribution.hydronic_and_air_type == HPXML::HydronicAndAirTypeFanCoil
+        next unless args[:shared_hvac_fan_coil_is_ducted].is_initialized
+        next unless to_boolean(args[:shared_hvac_fan_coil_is_ducted].get)
+      end
 
       # Duct Leakage
       hvac_distribution.duct_leakage_measurements.add(duct_type: HPXML::DuctTypeSupply,
