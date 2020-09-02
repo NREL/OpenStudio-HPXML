@@ -196,15 +196,16 @@ def create_osws
     # 'base-mechvent-exhaust-rated-flow-rate.osw' => 'base.osw', # No difference
     'base-mechvent-hrv.osw' => 'base.osw',
     'base-mechvent-hrv-asre.osw' => 'base.osw',
+    # 'base-mechvent-multiple.osw' => 'base.osw',
     'base-mechvent-supply.osw' => 'base.osw',
     'base-mechvent-whole-house-fan.osw' => 'base.osw',
     'base-misc-defaults.osw' => 'base.osw',
     'base-misc-defaults2.osw' => 'base.osw',
     'base-misc-loads-large-uncommon.osw' => 'base-enclosure-garage.osw',
     'base-misc-loads-large-uncommon2.osw' => 'base-misc-loads-large-uncommon.osw',
-    'base-misc-usage-multiplier.osw' => 'base.osw',
     # 'base-misc-loads-none.osw' => 'base.osw',
     'base-misc-neighbor-shading.osw' => 'base.osw',
+    'base-misc-usage-multiplier.osw' => 'base.osw',
     'base-pv.osw' => 'base.osw',
     # 'base-pv-shared.osw' => 'base.osw',
     'base-simcontrol-daylight-saving-custom.osw' => 'base.osw',
@@ -449,7 +450,6 @@ def get_values(osw_file, step)
     step.setArgument('heat_pump_backup_fuel', 'none')
     step.setArgument('heat_pump_backup_heating_efficiency', 1)
     step.setArgument('heat_pump_backup_heating_capacity', '34121.0')
-    step.setArgument('heat_pump_mini_split_is_ducted', false)
     step.setArgument('setpoint_heating_temp', 68)
     step.setArgument('setpoint_heating_setback_temp', 68)
     step.setArgument('setpoint_heating_setback_hours_per_week', 0)
@@ -1461,6 +1461,7 @@ def get_values(osw_file, step)
     step.removeArgument('heat_pump_cooling_compressor_type')
     step.setArgument('heat_pump_heating_capacity', '42000.0')
     step.setArgument('heat_pump_backup_fuel', HPXML::FuelTypeElectricity)
+    step.setArgument('heat_pump_ground_to_air_pump_power', 30.0)
   elsif ['base-hvac-mini-split-heat-pump-ducted.osw'].include? osw_file
     step.setArgument('heating_system_type', 'none')
     step.setArgument('cooling_system_type', 'none')
@@ -4832,7 +4833,8 @@ def set_hpxml_heat_pumps(hpxml_file, hpxml)
                          fraction_cool_load_served: 1,
                          heating_efficiency_cop: 3.6,
                          cooling_efficiency_eer: 16.6,
-                         cooling_shr: 0.73)
+                         cooling_shr: 0.73,
+                         pump_watts_per_ton: 30.0)
     if hpxml_file == 'base-hvac-shared-ground-loop-ground-to-air-heat-pump.xml'
       hpxml.heat_pumps[-1].is_shared_system = true
       hpxml.heat_pumps[-1].number_of_units_served = 6
@@ -4902,7 +4904,8 @@ def set_hpxml_heat_pumps(hpxml_file, hpxml)
                          fraction_cool_load_served: 0.2,
                          heating_efficiency_cop: 3.6,
                          cooling_efficiency_eer: 16.6,
-                         cooling_shr: 0.73)
+                         cooling_shr: 0.73,
+                         pump_watts_per_ton: 30.0)
     f = 1.0 - (1.0 - 0.25) / (47.0 + 5.0) * (47.0 - 17.0)
     hpxml.heat_pumps.add(id: 'HeatPump3',
                          heat_pump_type: HPXML::HVACTypeHeatPumpMiniSplit,
@@ -4948,7 +4951,8 @@ def set_hpxml_heat_pumps(hpxml_file, hpxml)
                          fraction_cool_load_served: 0.2,
                          heating_efficiency_cop: 3.6,
                          cooling_efficiency_eer: 16.6,
-                         cooling_shr: 0.73)
+                         cooling_shr: 0.73,
+                         pump_watts_per_ton: 30.0)
   elsif ['invalid_files/hvac-distribution-multiple-attached-heating.xml'].include? hpxml_file
     hpxml.heat_pumps[0].distribution_system_idref = 'HVACDistribution'
   elsif ['invalid_files/hvac-distribution-multiple-attached-cooling.xml'].include? hpxml_file

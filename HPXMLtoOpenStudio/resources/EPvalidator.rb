@@ -401,12 +401,12 @@ class EnergyPlusValidator
         '../../../../BuildingSummary/BuildingConstruction[ResidentialFacilityType[text()="single-family attached" or text()="apartment unit"]]' => one,
         '../../HVACDistribution[DistributionSystemType/HydronicDistribution[HydronicDistributionType[text()="radiator" or text()="baseboard" or text()="radiant floor" or text()="radiant ceiling"]] | DistributionSystemType/HydronicAndAirDistribution[HydronicAndAirDistributionType[text()="fan coil" or text()="water loop heat pump"]]]' => one, # See [HVACDistribution] or [SharedBoilerType=FanCoil] or [SharedBoilerType=WLHP]
         'NumberofUnitsServed' => one,
-        'extension/SharedLoopWatts' => one,
+        'ElectricAuxiliaryEnergy | extension/SharedLoopWatts' => zero_or_one,
       },
 
       ## [SharedBoilerType=FanCoil]
       '/HPXML/Building/BuildingDetails/Systems/HVAC/HVACPlant/HeatingSystem[HeatingSystemType/Boiler and IsSharedSystem="true" and //HydronicAndAirDistributionType[text()="fan coil"]]' => {
-        'extension/FanCoilWatts' => one,
+        'ElectricAuxiliaryEnergy | extension/FanCoilWatts' => zero_or_one,
       },
 
       ## [SharedBoilerType=WLHP]
@@ -570,6 +570,8 @@ class EnergyPlusValidator
         'BackupHeatingSwitchoverTemperature' => zero,
         'AnnualCoolingEfficiency[Units="EER"]/Value' => one,
         'AnnualHeatingEfficiency[Units="COP"]/Value' => one,
+        'extension/PumpPowerWattsPerTon' => zero_or_one,
+        'extension/FanPowerWattsPerCFM' => zero_or_one,
       },
 
       ## [GSHPType=SharedLoop]
