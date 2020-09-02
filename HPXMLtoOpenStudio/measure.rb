@@ -297,7 +297,7 @@ class OSModel
 
     add_airflow(runner, model, weather, spaces)
     add_hvac_sizing(runner, model, weather, spaces)
-    add_fuel_heating_eae(runner, model)
+    add_furnace_eae(runner, model)
     add_photovoltaics(runner, model)
     add_additional_properties(runner, model, hpxml_path)
     add_component_loads_output(runner, model, spaces)
@@ -2512,13 +2512,13 @@ class OSModel
     HVACSizing.apply(model, runner, weather, spaces, @hpxml, @infil_volume, @nbeds, @min_neighbor_distance, @debug)
   end
 
-  def self.add_fuel_heating_eae(runner, model)
+  def self.add_furnace_eae(runner, model)
     # Needs to come after HVAC sizing (needs heating capacity and airflow rate)
     # FUTURE: Could remove this method and simplify everything if we could autosize via the HPXML file
 
     @hpxml.heating_systems.each do |heating_system|
       next unless heating_system.fraction_heat_load_served > 0
-      next unless [HPXML::HVACTypeFurnace, HPXML::HVACTypeWallFurnace, HPXML::HVACTypeFloorFurnace, HPXML::HVACTypeStove, HPXML::HVACTypeBoiler].include? heating_system.heating_system_type
+      next unless [HPXML::HVACTypeFurnace, HPXML::HVACTypeWallFurnace, HPXML::HVACTypeFloorFurnace, HPXML::HVACTypeStove].include? heating_system.heating_system_type
       next unless heating_system.heating_system_fuel != HPXML::FuelTypeElectricity
 
       HVAC.apply_eae_to_heating_fan(runner, @hvac_map[heating_system.id], heating_system)
