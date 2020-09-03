@@ -904,12 +904,13 @@ class HVACSizing
     icfm_Cooling = ach_Cooling / UnitConversions.convert(1.0, 'hr', 'min') * infilvolume
     icfm_Heating = ach_Heating / UnitConversions.convert(1.0, 'hr', 'min') * infilvolume
 
-    q_unb_cfm, q_unb_ld, q_bal_Sens, q_bal_Lat = get_ventilation_rates(model)
+    q_unb_cfm, q_preheat, q_precool, q_recirc, q_bal_Sens, q_bal_Lat = get_ventilation_rates(model)
 
-    cfm_Heating = q_bal_Sens + (icfm_Heating**2.0 + q_unb_cfm**2.0)**0.5 - q_unb_cfm + q_unb_ld
+    cfm_Heating = q_bal_Sens + (icfm_Heating**2.0 + q_unb_cfm**2.0)**0.5 - q_preheat - q_recirc
 
-    cfm_Cool_Load_Sens = q_bal_Sens + (icfm_Cooling**2.0 + q_unb_cfm**2.0)**0.5 - q_unb_cfm + q_unb_ld
-    cfm_Cool_Load_Lat = q_bal_Lat + (icfm_Cooling**2.0 + q_unb_cfm**2.0)**0.5 - q_unb_cfm + q_unb_ld
+    # FIXME: Assume preconditioning doesn't introduce/handle latent loads?
+    cfm_Cool_Load_Sens = q_bal_Sens + (icfm_Cooling**2.0 + q_unb_cfm**2.0)**0.5 - q_precool - q_recirc
+    cfm_Cool_Load_Lat = q_bal_Lat + (icfm_Cooling**2.0 + q_unb_cfm**2.0)**0.5 - q_recirc
 
     zone_loads.Heat_Infil = 1.1 * @acf * cfm_Heating * @htd
 
@@ -1773,16 +1774,18 @@ class HVACSizing
     mechVentExist = get_feature(model.getBuilding, Constants.SizingInfoMechVentExist, 'boolean')
     return [0.0, 0.0, 0.0] unless mechVentExist
 
-    q_unb_cfm = get_feature(model.getBuilding, Constants.SizingInfoMechVentWholeHouseRateUnbalancedAirflow, 'double')
-    q_unb_ld = get_feature(model.getBuilding, Constants.SizingInfoMechVentWholeHouseRateUnbalancedLoad, 'double')
+    q_unb_cfm = get_feature(model.getBuilding, Constants.SizingInfoMechVentWholeHouseRateUnbalanced, 'double')
     q_b = get_feature(model.getBuilding, Constants.SizingInfoMechVentWholeHouseRateBalanced, 'double')
+    q_preheat = get_feature(model.getBuilding, Constants.SizingInfoMechVentWholeHouseRatePreHeated, 'double')
+    q_precool = get_feature(model.getBuilding, Constants.SizingInfoMechVentWholeHouseRatePreCooled, 'double')
+    q_recirc = get_feature(model.getBuilding, Constants.SizingInfoMechVentWholeHouseRateRecirculated, 'double')
     apparentSensibleEffectiveness = get_feature(model.getBuilding, Constants.SizingInfoMechVentApparentSensibleEffectiveness, 'double')
     latentEffectiveness = get_feature(model.getBuilding, Constants.SizingInfoMechVentLatentEffectiveness, 'double')
 
     q_bal_sens = q_b * (1.0 - apparentSensibleEffectiveness)
     q_bal_lat = q_b * (1.0 - latentEffectiveness)
 
-    return [q_unb_cfm, q_unb_ld, q_bal_sens, q_bal_lat]
+    return [q_unb_cfm, q_preheat, q_precool, q_recirc, q_bal_sens, q_bal_lat]
   end
 
   def self.calc_airflow_rate(load_or_capacity, deltaT)
