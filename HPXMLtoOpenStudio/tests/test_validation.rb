@@ -47,25 +47,23 @@ class HPXMLtoOpenStudioValidationTest < MiniTest::Test
     doc = XMLHelper.parse_file(@stron_path)
     expected_error_msgs_by_element_addition = {}
     expected_error_msgs_by_element_deletion = {}
-    XMLHelper.get_elements(doc, '/sch:schema/sch:pattern').each do |pattern|
-      XMLHelper.get_elements(pattern, 'sch:rule').each do |rule|
-        rule_context = XMLHelper.get_attribute_value(rule, 'context')
+    XMLHelper.get_elements(doc, '/sch:schema/sch:pattern/sch:rule').each do |rule|
+      rule_context = XMLHelper.get_attribute_value(rule, 'context')
 
-        XMLHelper.get_values(rule, 'sch:assert').each do |assertion|
-          parent_xpath = rule_context.gsub('h:', '').gsub('/*', '')
-          element_name = _get_element_name(assertion)
-          target_xpath = [parent_xpath, element_name]
-          expected_error_message = _get_expected_error_message(parent_xpath, assertion)
+      XMLHelper.get_values(rule, 'sch:assert').each do |assertion|
+        context_xpath = rule_context.gsub('h:', '').gsub('/*', '')
+        element_names_for_assertion_test = _get_element_names_for_assertion_test(assertion)
+        target_xpath = [context_xpath, element_names_for_assertion_test]
+        expected_error_message = _get_expected_error_message(context_xpath, assertion)
 
-          if assertion.start_with?('Expected 0') || assertion.partition(': ').last.start_with?('[not') # FIXME: Is there another way to do this?
-            next if assertion.start_with?('Expected 0 or more') # no tests needed
+        if assertion.start_with?('Expected 0') || assertion.partition(': ').last.start_with?('[not') # FIXME: Is there another way to do this?
+          next if assertion.start_with?('Expected 0 or more') # no tests needed
 
-            expected_error_msgs_by_element_addition[target_xpath] = expected_error_message
-          elsif assertion.start_with?('Expected 1') || assertion.start_with?('Expected 9')
-            expected_error_msgs_by_element_deletion[target_xpath] = expected_error_message
-          else
-            fail 'Invalid expected error message.'
-          end
+          expected_error_msgs_by_element_addition[target_xpath] = expected_error_message
+        elsif assertion.start_with?('Expected 1') || assertion.start_with?('Expected 9')
+          expected_error_msgs_by_element_deletion[target_xpath] = expected_error_message
+        else
+          fail 'Invalid expected error message.'
         end
       end
     end
@@ -111,12 +109,12 @@ class HPXMLtoOpenStudioValidationTest < MiniTest::Test
         (max_number_of_elements_allowed + 1).times { XMLHelper.add_element(mod_parent_element, mod_child_name) }
 
         # add a value to child elements as needed
-        child_element_with_value = _get_child_element_with_value(target_xpath, max_number_of_elements_allowed)
-        next if child_element_with_value.nil?
+        element_names_and_values_for_assertion_test = _get_element_names_and_values_for_assertion_test(target_xpath, max_number_of_elements_allowed)
+        next if element_names_and_values_for_assertion_test.nil?
 
-        child_element_with_value.each do |element_with_value|
-          this_child_name = element_with_value[:name]
-          this_child_value = element_with_value[:value]
+        element_names_and_values_for_assertion_test.each do |element_name_and_value_for_assertion_test|
+          this_child_name = element_name_and_value_for_assertion_test[:name]
+          this_child_value = element_name_and_value_for_assertion_test[:value]
 
           this_parents = []
           if child_element_without_predicates == this_child_name # in case where child_element_without_predicates is foo[text()=bar or ...]
@@ -142,30 +140,30 @@ class HPXMLtoOpenStudioValidationTest < MiniTest::Test
 
   private
 
-  def _test_schematron_validation(stron_doc, hpxml, expected_error_msgs = nil)
+  def _test_schematron_validation(stron_doc, hpxml, expected_error_msg = nil)
     # load the xml document you wish to validate
     xml_doc = Nokogiri::XML hpxml
     # validate it
     results = stron_doc.validate xml_doc
     # assertions
-    if expected_error_msgs.nil?
+    if expected_error_msg.nil?
       assert_empty(results)
     else
-      idx_of_interest = results.index { |i| i[:message].gsub(': ', [': ', i[:context_path].gsub('h:', '').concat(': ').gsub('/*: ', '')].join('')) == expected_error_msgs }
+      idx_of_interest = results.index { |i| i[:message].gsub(': ', [': ', i[:context_path].gsub('h:', '').concat(': ').gsub('/*: ', '')].join('')) == expected_error_msg }
       error_msg_of_interest = results[idx_of_interest][:message].gsub(': ', [': ', results[idx_of_interest][:context_path].gsub('h:', '').concat(': ').gsub('/*: ', '')].join(''))
-      assert_equal(expected_error_msgs, error_msg_of_interest)
+      assert_equal(expected_error_msg, error_msg_of_interest)
     end
   end
 
-  def _test_ruby_validation(hpxml_doc, expected_error_msgs = nil)
+  def _test_ruby_validation(hpxml_doc, expected_error_msg = nil)
     # Validate input HPXML against EnergyPlus Use Case
-    results = EnergyPlusValidator.run_validator(hpxml_doc)
-    if expected_error_msgs.nil?
+    results = Validator.run_validator(hpxml_doc)
+    if expected_error_msg.nil?
       assert_empty(results)
     else
-      idx_of_interest = results.index { |i| i == expected_error_msgs }
+      idx_of_interest = results.index { |i| i == expected_error_msg }
       error_msg_of_interest = results[idx_of_interest]
-      assert_equal(expected_error_msgs, error_msg_of_interest)
+      assert_equal(expected_error_msg, error_msg_of_interest)
     end
   end
 
@@ -207,7 +205,16 @@ class HPXMLtoOpenStudioValidationTest < MiniTest::Test
     fail "Could not find HPXML file for target_xpath: #{target_xpath}."
   end
 
-  def _get_element_name(assertion)
+  def _get_expected_error_message(parent_xpath, assertion)
+    if parent_xpath == '' # root element
+      return [[assertion.partition(': ').first, parent_xpath].join(': '), assertion.partition(': ').last].join() # return "Expected x element(s) for xpath: foo"
+    else
+      return [[assertion.partition(': ').first, parent_xpath].join(': '), assertion.partition(': ').last].join(': ') # return "Expected x element(s) for xpath: foo: bar"
+    end
+  end
+
+  def _get_element_names_for_assertion_test(assertion)
+    # From the assertion, get the element name(s) to be added or deleted for the assertion test.
     element_names = []
     if assertion.partition(': ').last.start_with?('[not')
       element_names << assertion.partition(': ').last.partition(' | ').last
@@ -234,16 +241,9 @@ class HPXMLtoOpenStudioValidationTest < MiniTest::Test
     return element_names
   end
 
-  def _get_expected_error_message(parent_xpath, assertion)
-    if parent_xpath == '' # root element
-      return [[assertion.partition(': ').first, parent_xpath].join(': '), assertion.partition(': ').last].join() # return "Expected x element(s) for xpath: foo"
-    else
-      return [[assertion.partition(': ').first, parent_xpath].join(': '), assertion.partition(': ').last].join(': ') # return "Expected x element(s) for xpath: foo: bar"
-    end
-  end
-
-  def _get_child_element_with_value(target_xpath, max_number_of_elements_allowed)
-    element_with_value = []
+  def _get_element_names_and_values_for_assertion_test(target_xpath, max_number_of_elements_allowed)
+    # From the target_xpath, get the element name(s) and value(s) to be added or deleted for the assertion test.
+    elements_with_value = []
 
     child_elements = target_xpath[1]
     child_elements.each do |child_element|
@@ -252,10 +252,10 @@ class HPXMLtoOpenStudioValidationTest < MiniTest::Test
 
       element_name = child_element.split('text()=')[0].gsub(/\[|\]/, '/').chomp('/').split('/')[-1] # pull 'bar' from foo/bar[text()=baz or text()=fum or ...]
       element_value = child_element.split('text()=')[1].gsub(/\[|\]/, '').gsub('" or ', '"').gsub!(/\A"|"\Z/, '') # pull 'baz' from foo/bar[text()=baz or text()=fum or ...]; FIXME: Is there another way to handle this?
-      (max_number_of_elements_allowed + 1).times { element_with_value << { name: element_name, value: element_value } }
+      (max_number_of_elements_allowed + 1).times { elements_with_value << { name: element_name, value: element_value } }
     end
 
-    return element_with_value
+    return elements_with_value
   end
 
   def _deep_copy_object(obj)

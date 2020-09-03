@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-class EnergyPlusValidator
+class Validator
   def self.run_validator(hpxml_doc)
     # load the Schematron xml
     stron_path = File.join(File.dirname(__FILE__), 'EPvalidator.xml')
