@@ -163,7 +163,7 @@ class HPXMLtoOpenStudioValidationTest < MiniTest::Test
 
   def _test_ruby_validation(hpxml_doc, expected_error_msg = nil)
     # Validate input HPXML against EnergyPlus Use Case
-    results = Validator.run_validator(hpxml_doc)
+    results = Validator.run_validator(hpxml_doc, @stron_path)
     if expected_error_msg.nil?
       assert_empty(results)
     else
