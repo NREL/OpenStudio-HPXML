@@ -56,12 +56,17 @@ class HPXMLtoOpenStudioValidationTest < MiniTest::Test
         target_xpath = [context_xpath, element_names_for_assertion_test]
         expected_error_message = _get_expected_error_message(context_xpath, assertion)
 
-        if assertion.start_with?('Expected 0') || assertion.partition(': ').last.start_with?('[not') # FIXME: Is there another way to do this?
+        if not expected_error_message.nil?
           next if assertion.start_with?('Expected 0 or more') # no tests needed
 
-          expected_error_msgs_by_element_addition[target_xpath] = expected_error_message
-        elsif assertion.start_with?('Expected 1') || assertion.start_with?('Expected 9')
-          expected_error_msgs_by_element_deletion[target_xpath] = expected_error_message
+          if assertion.start_with?('Expected 0') || assertion.partition(': ').last.start_with?('[not') # FIXME: Is there another way to do this?
+            expected_error_msgs_by_element_addition[target_xpath] = expected_error_message
+          else
+            expected_error_msgs_by_element_deletion[target_xpath] = expected_error_message
+
+            next if assertion.start_with?('Expected 1 or more') # no need for element addition test
+            expected_error_msgs_by_element_addition[target_xpath] = expected_error_message
+          end
         else
           fail 'Invalid expected error message.'
         end
@@ -75,7 +80,7 @@ class HPXMLtoOpenStudioValidationTest < MiniTest::Test
     # Tests by element deletion
     expected_error_msgs_by_element_deletion.each do |target_xpath, expected_error_message|
       print '.'
-      hpxml_doc = _get_hpxml_doc(target_xpath, 'deletion')
+      hpxml_doc = _get_hpxml_doc(target_xpath)
       parent_element = target_xpath[0] == '' ? hpxml_doc : XMLHelper.get_element(hpxml_doc, target_xpath[0])
       child_elements = target_xpath[1]
       child_elements.each do |child_element|
@@ -91,41 +96,42 @@ class HPXMLtoOpenStudioValidationTest < MiniTest::Test
     # Tests by element addition (i.e. zero_or_one, zero_or_two, etc.)
     expected_error_msgs_by_element_addition.each do |target_xpath, expected_error_message|
       print '.'
-      hpxml_doc = _get_hpxml_doc(target_xpath, 'addition')
+      hpxml_doc = _get_hpxml_doc(target_xpath)
       parent_element = target_xpath[0] == '' ? hpxml_doc : XMLHelper.get_element(hpxml_doc, target_xpath[0])
-      child_elements = target_xpath[1]
+      child_element_names = target_xpath[1]
 
-      child_elements.each do |child_element|
+      child_element_names.each do |child_element_name|
         # make sure parent elements of the last child element exist in HPXML
-        child_element_without_predicates = child_element.gsub(/\[.*?\]|\[|\]/, '') # remove brackets and text within brackets (e.g. [foo or ...])
+        child_element_without_predicates = child_element_name.gsub(/\[.*?\]|\[|\]/, '') # remove brackets and text within brackets (e.g. [foo or ...])
         child_element_without_predicates_array = child_element_without_predicates.split('/')[0...-1].reject(&:empty?)
         XMLHelper.create_elements_as_needed(parent_element, child_element_without_predicates_array)
 
-        # add child element
-        additional_parent_element = child_element.gsub(/\[text().*?\]/, '').split('/')[0...-1].reject(&:empty?).join('/').chomp('/') # remove text that starts with 'text()' within brackets (e.g. [text()=foo or ...]) and select elements from the first to the second last
-        mod_parent_element = additional_parent_element.empty? ? parent_element : XMLHelper.get_element(parent_element, additional_parent_element)
-        mod_child_name = child_element_without_predicates.split('/')[-1]
-        max_number_of_elements_allowed = expected_error_message.gsub(/\[.*?\]|\[|\]/, '').scan(/\d+/).max.to_i # scan numbers outside brackets and then find the maximum
-        (max_number_of_elements_allowed + 1).times { XMLHelper.add_element(mod_parent_element, mod_child_name) }
+        # modify parent element and child_element_name
+        additional_parent_element_name = child_element_name.gsub(/\[text().*?\]/, '').split('/')[0...-1].reject(&:empty?).join('/').chomp('/') # remove text that starts with 'text()' within brackets (e.g. [text()=foo or ...]) and select elements from the first to the second last
+        _balance_brackets(additional_parent_element_name)
+        mod_child_element_name = child_element_name.gsub(/\[.*?\]|\[|\]/, '').split('/')[-1]
+        # Exceptions
+        if additional_parent_element_name.include? 'HPXML/Building/BuildingDetails/Enclosure/AirInfiltration/AirInfiltrationMeasurement'
+          additional_parent_element_name = 'HPXML/Building/BuildingDetails/Enclosure/AirInfiltration'
+        elsif additional_parent_element_name.include? '../../HVACDistribution[DistributionSystemType'
+          additional_parent_element_name = '../..'
+        end
+        mod_parent_element = additional_parent_element_name.empty? ? parent_element : XMLHelper.get_element(parent_element, additional_parent_element_name)
 
-        # add a value to child elements as needed
-        element_names_and_values_for_assertion_test = _get_element_names_and_values_for_assertion_test(target_xpath, max_number_of_elements_allowed)
-        next if element_names_and_values_for_assertion_test.nil?
-
-        element_names_and_values_for_assertion_test.each do |element_name_and_value_for_assertion_test|
-          this_child_name = element_name_and_value_for_assertion_test[:name]
-          this_child_value = element_name_and_value_for_assertion_test[:value]
-
-          this_parents = []
-          if child_element_without_predicates == this_child_name # in case where child_element_without_predicates is foo[text()=bar or ...]
-            this_parents << parent_element
-          else # in case where child_element_without_predicates is foo/bar[text()=baz or ...]
-            this_parents = XMLHelper.get_elements(parent_element, child_element_without_predicates)
+        # scan numbers outside brackets and then find the maximum number of elements allowed
+        max_number_of_elements_allowed = expected_error_message.gsub(/\[.*?\]|\[|\]/, '').scan(/\d+/).max.to_i 
+        
+        # If child_element does not exist, add child_element by the maximum allowed number. If child_element exists, copy the child_element by the maximum allowed number.
+        if XMLHelper.get_element(parent_element, child_element_name).nil?
+          if child_element_name.split('/')[-1].include?  'text()='
+            mod_child_element_value = child_element_name.split('text()=')[1].gsub(/\[|\]/, '').gsub('" or ', '"').gsub!(/\A"|"\Z/, '') # pull 'baz' from foo/bar[text()=baz or text()=fum or ...]; FIXME: Is there another way to handle this?
+          else
+            mod_child_element_value = nil
           end
-
-          this_parents.each do |e|
-            XMLHelper.add_element(e, this_child_name, this_child_value)
-          end
+          (max_number_of_elements_allowed + 1).times { XMLHelper.add_element(mod_parent_element, mod_child_element_name, mod_child_element_value) }
+        else
+          duplicated = _deep_copy_object(XMLHelper.get_element(parent_element, child_element_name))
+          (max_number_of_elements_allowed + 1).times { mod_parent_element.children << duplicated }
         end
       end
 
@@ -177,21 +183,15 @@ class HPXMLtoOpenStudioValidationTest < MiniTest::Test
     assert_equal(0, errors.size)
   end
 
-  def _get_hpxml_doc(target_xpath, mode)
+  def _get_hpxml_doc(target_xpath)
     @hpxml_docs.values.each do |hpxml_doc|
       parent_element = target_xpath[0] == '' ? hpxml_doc : XMLHelper.get_element(hpxml_doc, target_xpath[0])
       next if parent_element.nil?
 
       child_elements = target_xpath[1]
 
-      if mode == 'deletion'
-        end_index = -1
-      elsif mode == 'addition'
-        end_index = -2
-      end
-
       found_children = true
-      child_elements[0..end_index].each do |child_element|
+      child_elements[0..-1].each do |child_element|
         next if XMLHelper.has_element(parent_element, child_element)
 
         found_children = false
@@ -200,6 +200,27 @@ class HPXMLtoOpenStudioValidationTest < MiniTest::Test
       next unless found_children
 
       return _deep_copy_object(hpxml_doc)
+    end
+
+    # If found_children is false, then find an hpxml_doc that has the parent element and return the hpxml_doc
+    # FIXME: Don't want to loop through @hpxml_docs.values twice. Need to change it. 
+    @hpxml_docs.values.each do |hpxml_doc|
+      parent_element = target_xpath[0] == '' ? hpxml_doc : XMLHelper.get_element(hpxml_doc, target_xpath[0])
+      next if parent_element.nil?
+
+      # Exceptions
+      if target_xpath[0] == '/HPXML/Building/BuildingDetails/Systems/HVAC/HVACPlant/HeatingSystem[HeatingSystemType/Boiler and IsSharedSystem="true" and //HydronicAndAirDistributionType[text()="water loop heat pump"]]'
+        return _deep_copy_object(@hpxml_docs['base-hvac-shared-boiler-chiller-water-loop-heat-pump.xml'])
+      elsif target_xpath[0] == '/HPXML/Building/BuildingDetails/Systems/HVAC/HVACPlant/HeatingSystem[HeatingSystemType/Boiler and IsSharedSystem="true" and //HydronicAndAirDistributionType[text()="fan coil"]]'
+        return _deep_copy_object(@hpxml_docs['base-hvac-shared-boiler-chiller-fan-coil.xml'])
+      end
+      
+      mod_parent_element_name = target_xpath[0].split('/')[0...-1].reject(&:empty?).join('/').gsub(/\[|\]/, '/').chomp('/')
+      mod_parent_element = XMLHelper.get_element(hpxml_doc, mod_parent_element_name)
+      mod_child_element_name = target_xpath[0].split('/')[-1].gsub(/\[|\]/, '')
+      if XMLHelper.has_element(mod_parent_element, mod_child_element_name)
+        return _deep_copy_object(hpxml_doc)
+      end
     end
 
     fail "Could not find HPXML file for target_xpath: #{target_xpath}."
@@ -220,10 +241,7 @@ class HPXMLtoOpenStudioValidationTest < MiniTest::Test
       element_names << assertion.partition(': ').last.partition(' | ').last
     else
       element_name = assertion.partition(': ').last.partition(' | ').first
-      if element_name.count('[') != element_name.count(']')
-        diff = element_name.count('[') - element_name.count(']')
-        diff.times { element_name.concat(']') }
-      end
+      _balance_brackets(element_name)
       element_names << element_name
 
       # Exceptions
@@ -241,21 +259,13 @@ class HPXMLtoOpenStudioValidationTest < MiniTest::Test
     return element_names
   end
 
-  def _get_element_names_and_values_for_assertion_test(target_xpath, max_number_of_elements_allowed)
-    # From the target_xpath, get the element name(s) and value(s) to be added or deleted for the assertion test.
-    elements_with_value = []
-
-    child_elements = target_xpath[1]
-    child_elements.each do |child_element|
-      child_element_last = child_element.split('/')[-1]
-      next unless child_element_last.include? 'text()='
-
-      element_name = child_element.split('text()=')[0].gsub(/\[|\]/, '/').chomp('/').split('/')[-1] # pull 'bar' from foo/bar[text()=baz or text()=fum or ...]
-      element_value = child_element.split('text()=')[1].gsub(/\[|\]/, '').gsub('" or ', '"').gsub!(/\A"|"\Z/, '') # pull 'baz' from foo/bar[text()=baz or text()=fum or ...]; FIXME: Is there another way to handle this?
-      (max_number_of_elements_allowed + 1).times { elements_with_value << { name: element_name, value: element_value } }
+  def _balance_brackets(element_name)
+    if element_name.count('[') != element_name.count(']')
+      diff = element_name.count('[') - element_name.count(']')
+      diff.times { element_name.concat(']') }
     end
 
-    return elements_with_value
+    return element_name
   end
 
   def _deep_copy_object(obj)

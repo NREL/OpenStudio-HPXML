@@ -21,7 +21,7 @@
       <sch:assert test='count(h:Building/h:BuildingDetails/h:ClimateandRiskZones/h:ClimateZoneIECC) &lt;= 1'>Expected 0 or 1 element(s) for xpath: /HPXML/Building/BuildingDetails/ClimateandRiskZones/ClimateZoneIECC</sch:assert> <!-- See [ClimateZone] -->
       <sch:assert test='count(h:Building/h:BuildingDetails/h:ClimateandRiskZones/h:WeatherStation) = 1'>Expected 1 element(s) for xpath: /HPXML/Building/BuildingDetails/ClimateandRiskZones/WeatherStation</sch:assert> <!-- See [WeatherStation] -->
     
-      <!-- <sch:assert test='count(h:Building/h:BuildingDetails/h:Enclosure/h:AirInfiltration/h:AirInfiltrationMeasurement[h:BuildingAirLeakage/h:UnitofMeasure[text()="ACH" or text()="CFM" or text()="ACHnatural"]]) = 1'>Expected 1 element(s) for xpath: /HPXML/Building/BuildingDetails/Enclosure/AirInfiltration/AirInfiltrationMeasurement[BuildingAirLeakage/UnitofMeasure[text()="ACH" or text()="CFM" or text()="ACHnatural"]]</sch:assert> see [AirInfiltration] -->
+      <sch:assert test='count(h:Building/h:BuildingDetails/h:Enclosure/h:AirInfiltration/h:AirInfiltrationMeasurement[h:BuildingAirLeakage/h:UnitofMeasure[text()="ACH" or text()="CFM" or text()="ACHnatural"]]) = 1'>Expected 1 element(s) for xpath: /HPXML/Building/BuildingDetails/Enclosure/AirInfiltration/AirInfiltrationMeasurement[BuildingAirLeakage/UnitofMeasure[text()="ACH" or text()="CFM" or text()="ACHnatural"]]</sch:assert> <!-- see [AirInfiltration] -->
     
       <sch:assert test='count(h:Building/h:BuildingDetails/h:Enclosure/h:Roofs/h:Roof) &gt;= 0'>Expected 0 or more element(s) for xpath: /HPXML/Building/BuildingDetails/Enclosure/Roofs/Roof</sch:assert> <!-- see [Roof] -->
       <sch:assert test='count(h:Building/h:BuildingDetails/h:Enclosure/h:Walls/h:Wall) &gt;= 1'>Expected 1 or more element(s) for xpath: /HPXML/Building/BuildingDetails/Enclosure/Walls/Wall</sch:assert> <!-- see [Wall] -->
@@ -33,9 +33,9 @@
       <sch:assert test='count(h:Building/h:BuildingDetails/h:Enclosure/h:Skylights/h:Skylight) &gt;= 0'>Expected 0 or more element(s) for xpath: /HPXML/Building/BuildingDetails/Enclosure/Skylights/Skylight</sch:assert> <!-- see [Skylight] -->
       <sch:assert test='count(h:Building/h:BuildingDetails/h:Enclosure/h:Doors/h:Door) &gt;= 0'>Expected 0 or more element(s) for xpath: /HPXML/Building/BuildingDetails/Enclosure/Doors/Door</sch:assert> <!-- see [Door] -->
     
-      <sch:assert test='count(h:Building/h:BuildingDetails/h:Systems/h:HVAC/h:HVACPlant/h:HeatingSystem) &gt;= 0'>Expected 0 or more element(s) for xpath: /HPXML/Building/BuildingDetails/Systems/HVACPlant/HeatingSystem</sch:assert> <!-- see [HeatingSystem] -->
-      <sch:assert test='count(h:Building/h:BuildingDetails/h:Systems/h:HVAC/h:HVACPlant/h:CoolingSystem) &gt;= 0'>Expected 0 or more element(s) for xpath: /HPXML/Building/BuildingDetails/Systems/HVACPlant/CoolingSystem</sch:assert> <!-- see [CoolingSystem] -->
-      <sch:assert test='count(h:Building/h:BuildingDetails/h:Systems/h:HVAC/h:HVACPlant/h:HeatPump) &gt;= 0'>Expected 0 or more element(s) for xpath: /HPXML/Building/BuildingDetails/Systems/HVACPlant/HeatPump</sch:assert> <!-- see [HeatPump] -->
+      <sch:assert test='count(h:Building/h:BuildingDetails/h:Systems/h:HVAC/h:HVACPlant/h:HeatingSystem) &gt;= 0'>Expected 0 or more element(s) for xpath: /HPXML/Building/BuildingDetails/Systems/HVAC/HVACPlant/HeatingSystem</sch:assert> <!-- see [HeatingSystem] -->
+      <sch:assert test='count(h:Building/h:BuildingDetails/h:Systems/h:HVAC/h:HVACPlant/h:CoolingSystem) &gt;= 0'>Expected 0 or more element(s) for xpath: /HPXML/Building/BuildingDetails/Systems/HVAC/HVACPlant/CoolingSystem</sch:assert> <!-- see [CoolingSystem] -->
+      <sch:assert test='count(h:Building/h:BuildingDetails/h:Systems/h:HVAC/h:HVACPlant/h:HeatPump) &gt;= 0'>Expected 0 or more element(s) for xpath: /HPXML/Building/BuildingDetails/Systems/HVAC/HVACPlant/HeatPump</sch:assert> <!-- see [HeatPump] -->
       <sch:assert test='count(h:Building/h:BuildingDetails/h:Systems/h:HVAC/h:HVACControl) &lt;= 1'>Expected 0 or 1 element(s) for xpath: /HPXML/Building/BuildingDetails/Systems/HVAC/HVACControl</sch:assert> <!-- see [HVACControl] -->
       <sch:assert test='count(h:Building/h:BuildingDetails/h:Systems/h:HVAC/h:HVACDistribution) &gt;= 0'>Expected 0 or more element(s) for xpath: /HPXML/Building/BuildingDetails/Systems/HVAC/HVACDistribution</sch:assert> <!-- see [HVACDistribution] -->
     
@@ -189,8 +189,8 @@
       <sch:assert test='count(h:DepthBelowGrade) = 1'>Expected 1 element(s) for xpath: DepthBelowGrade</sch:assert>
       <sch:assert test='count(h:Insulation/h:SystemIdentifier) = 1'>Expected 1 element(s) for xpath: Insulation/SystemIdentifier</sch:assert> <!-- Required by HPXML schema -->
       <!-- Insulation: either specify interior and exterior layers OR assembly R-value: -->
-      <sch:assert test='count(h:Insulation/h:Layer[h:InstallationType="continuous - interior"]) + count(h:Insulation/h:AssemblyEffectiveRValue) = 1'>Expected 1 element(s) for xpath: Insulation/Layer[InstallationType="continuous - interior"] | Insulation/AssemblyEffectiveRValue</sch:assert> <!-- See [FoundationWallInsLayer] -->
-      <sch:assert test='count(h:Insulation/h:Layer[h:InstallationType="continuous - exterior"]) + count(h:Insulation/h:AssemblyEffectiveRValue) = 1'>Expected 1 element(s) for xpath: Insulation/Layer[InstallationType="continuous - exterior"] | Insulation/AssemblyEffectiveRValue</sch:assert> <!-- See [FoundationWallInsLayer] -->
+      <sch:assert test='count(h:Insulation/h:Layer[h:InstallationType[text()="continuous - interior"]]) + count(h:Insulation/h:AssemblyEffectiveRValue) = 1'>Expected 1 element(s) for xpath: Insulation/Layer[InstallationType[text()="continuous - interior"]] | Insulation/AssemblyEffectiveRValue</sch:assert> <!-- See [FoundationWallInsLayer] -->
+      <sch:assert test='count(h:Insulation/h:Layer[h:InstallationType[text()="continuous - exterior"]]) + count(h:Insulation/h:AssemblyEffectiveRValue) = 1'>Expected 1 element(s) for xpath: Insulation/Layer[InstallationType[text()="continuous - exterior"]] | Insulation/AssemblyEffectiveRValue</sch:assert> <!-- See [FoundationWallInsLayer] -->
     </sch:rule>
 
     <!-- [FrameFloor] -->
