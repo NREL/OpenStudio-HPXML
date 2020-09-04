@@ -1361,7 +1361,7 @@ class Airflow
       if vent_mech.is_shared_system
         infil_program.addLine("Set CFIS_Q_duct_tot = #{UnitConversions.convert(vent_mech.in_unit_flow_rate, 'cfm', 'm^3/s')}")
       else
-        infil_program.addLine("Set CFIS_Q_duct_tot = CFIS_Q_duct_oa")
+        infil_program.addLine('Set CFIS_Q_duct_tot = CFIS_Q_duct_oa')
       end
       infil_program.addLine('Set cfis_f_damper_open = 0') # fraction of the timestep the CFIS damper is open
       infil_program.addLine("Set #{@cfis_f_damper_extra_open_var[vent_mech.id].name} = 0") # additional runtime fraction to meet min/hr
@@ -1542,10 +1542,10 @@ class Airflow
           # Other system fan power is added in the method one level up
           # Airflow is handled the same as other preconditioned shared systems
           infil_program = apply_cfis(infil_program, [vent_mech], cfis_fan_actuator)
-          infil_program.addLine('Set Q_preconditioned_OA = QWHV_cfis_oa')
+          infil_program.addLine('Set Q_precond_oa = QWHV_cfis_oa')
           infil_program.addLine('Set Q_precond_tot = QWHV_cfis_tot')
         else
-          infil_program.addLine("Set Q_preconditioned_OA = #{UnitConversions.convert(vent_mech.average_oa_flow_rate, 'cfm', 'm^3/s')}")
+          infil_program.addLine("Set Q_precond_oa = #{UnitConversions.convert(vent_mech.average_oa_flow_rate, 'cfm', 'm^3/s')}")
           infil_program.addLine("Set Q_precond_tot = #{UnitConversions.convert(vent_mech.average_unit_flow_rate, 'cfm', 'm^3/s')}")
         end
         # Air conditions before preconditioning
@@ -1555,14 +1555,14 @@ class Airflow
         # Call HRV/ERV method to get ERV/HRV supply air conditions
         infil_program = apply_erv_hrv_fans(model: model, program: infil_program, vent_mech_erv_hrv: [vent_mech], hrv_erv_effectiveness_map: hrv_erv_effectiveness_map)
         # Air conditions before preconditioning
-        infil_program.addLine('Set Q_preconditioned_OA = Q_oa')
+        infil_program.addLine('Set Q_precond_oa = Q_oa')
         infil_program.addLine('Set Q_precond_tot = Q_tot')
         infil_program.addLine('Set BeforePrecondW = ERVSupOutW')
         infil_program.addLine('Set BeforePrecondTemp = ERVSupOutTemp')
       end
       infil_program.addLine('Set QWHV = QWHV + Q_precond_tot')
       # Calculate mass flow rate based on outdoor air density
-      infil_program.addLine('Set OA_MFR = Q_preconditioned_OA * OASupRho')
+      infil_program.addLine('Set OA_MFR = Q_precond_oa * OASupRho')
       # Calculate sensible loads to living by ventilation
       infil_program.addLine('Set OALoadSensToLv = OA_MFR * ZoneCp * (BeforePrecondTemp - ZoneTemp)') # Negative for heating, positive for cooling
       # get preconditioning heating/cooling capacities
@@ -1725,15 +1725,26 @@ class Airflow
     # Common variale and load actuators across multiple mech vent calculations, create only once
     infil_program, fan_sens_load_actuator, fan_lat_load_actuator = setup_mech_vent_vars_actuators(model: model, program: infil_program)
 
-    # Apply ERV/HRV fans
+    # Apply unpreconditioned ERV/HRV fans
     # Set up some variables for use of mech vent EMS program
     infil_program = apply_erv_hrv_fans(model: model, program: infil_program, vent_mech_erv_hrv: vent_mech_erv_hrv_unprecond, hrv_erv_effectiveness_map: hrv_erv_effectiveness_map, fan_sens_load_actuator: fan_sens_load_actuator, fan_lat_load_actuator: fan_lat_load_actuator, preconditioned: false)
 
-    # Apply CFIS
+    # Apply unpreconditioned CFIS
     infil_program.addLine("Set #{cfis_fan_actuator.name} = 0.0")
     infil_program = apply_cfis(infil_program, vent_mech_cfis_unprecond, cfis_fan_actuator)
+
+    # FIXME: Is shared exhaust system existing?
+    # Apply other unpreconditioned mech vent (supply + balanced) to address recirculation
+    # Exhaust system cannot have recirculation, it is handled later in Qfan-QWHV
+    if not (vent_mech_sup_unprecond + vent_mech_bal_unprecond).empty?
+      oa_flow_rate_str = "#{UnitConversions.convert((vent_mech_sup_unprecond + vent_mech_bal_unprecond).map { |fan| fan.average_oa_flow_rate }.sum, 'cfm', 'm^3/s')}"
+      tot_flow_rate_str = "#{UnitConversions.convert((vent_mech_sup_unprecond + vent_mech_bal_unprecond).map { |fan| fan.average_unit_flow_rate }.sum, 'cfm', 'm^3/s')}"
+      infil_program = apply_fan_load_to_infil_program(model: model, infil_program: infil_program, oa_flow_rate_var_name: oa_flow_rate_str, tot_flow_rate_var_name: tot_flow_rate_str, vent_mech_sens_eff: 0.0, vent_mech_lat_eff: 0.0, fan_sens_load_actuator: fan_sens_load_actuator, fan_lat_load_actuator: fan_lat_load_actuator, preconditioned: false)
+    end
+
+    # Apply preconditioned mech vent
     if not (vent_mech_preheat + vent_mech_precool).empty?
-      apply_preconditioning_equipment(model, vent_mech_preheat + vent_mech_precool, infil_program, fan_sens_load_actuator, fan_lat_load_actuator, cfis_fan_actuator, hrv_erv_effectiveness_map)
+      apply_preconditioning_equipment(model, (vent_mech_preheat + vent_mech_precool).uniq, infil_program, fan_sens_load_actuator, fan_lat_load_actuator, cfis_fan_actuator, hrv_erv_effectiveness_map)
     end
 
     infil_program.addLine('Set Qrange = 0')
