@@ -28,6 +28,7 @@ require_relative 'resources/schedules'
 require_relative 'resources/simcontrols'
 require_relative 'resources/unit_conversions'
 require_relative 'resources/util'
+require_relative 'resources/validator'
 require_relative 'resources/version'
 require_relative 'resources/waterheater'
 require_relative 'resources/weather'
@@ -160,7 +161,8 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
     end
 
     # Validate input HPXML against EnergyPlus Use Case
-    errors = EnergyPlusValidator.run_validator(hpxml.doc)
+    stron_path = File.join(File.dirname(__FILE__), 'resources', 'EPvalidator.xml')
+    errors = Validator.run_validator(hpxml.doc, stron_path)
     errors.each do |error|
       runner.registerError("#{hpxml_path}: #{error}")
       is_valid = false
