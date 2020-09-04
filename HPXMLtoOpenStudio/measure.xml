@@ -3,8 +3,8 @@
   <schema_version>3.0</schema_version>
   <name>hpxm_lto_openstudio</name>
   <uid>b1543b30-9465-45ff-ba04-1d1f85e763bc</uid>
-  <version_id>ccb49927-7114-4d44-82de-e655a5f2bbdb</version_id>
-  <version_modified>20200902T171428Z</version_modified>
+  <version_id>f42a62f7-78e6-419f-bc8e-93847aa79c73</version_id>
+  <version_modified>20200902T211851Z</version_modified>
   <xml_checksum>D8922A73</xml_checksum>
   <class_name>HPXMLtoOpenStudio</class_name>
   <display_name>HPXML to OpenStudio Translator</display_name>
@@ -457,12 +457,6 @@
       <checksum>0C1B7A80</checksum>
     </file>
     <file>
-      <filename>xmlhelper.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>AE298605</checksum>
-    </file>
-    <file>
       <filename>test_hvac.rb</filename>
       <filetype>rb</filetype>
       <usage_type>test</usage_type>
@@ -487,42 +481,6 @@
       <checksum>A346F8E6</checksum>
     </file>
     <file>
-      <filename>hvac_sizing.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>3AE712A9</checksum>
-    </file>
-    <file>
-      <filename>hpxml_defaults.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>F58F08B9</checksum>
-    </file>
-    <file>
-      <filename>hvac.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>6454A307</checksum>
-    </file>
-    <file>
-      <filename>HPXMLDataTypes.xsd</filename>
-      <filetype>xsd</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>8CE65B50</checksum>
-    </file>
-    <file>
-      <filename>airflow.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>BC675290</checksum>
-    </file>
-    <file>
-      <filename>hpxml.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>8B53A916</checksum>
-    </file>
-    <file>
       <filename>BaseElements.xsd</filename>
       <filetype>xsd</filetype>
       <usage_type>resource</usage_type>
@@ -541,45 +499,98 @@
       <checksum>5C352E25</checksum>
     </file>
     <file>
-      <filename>EPvalidator.xml</filename>
-      <filetype>xml</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>41848404</checksum>
-    </file>
-    <file>
-      <filename>test_defaults.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>test</usage_type>
-      <checksum>6C302852</checksum>
-    </file>
-    <file>
-      <filename>constants.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>971F57E5</checksum>
-    </file>
-    <file>
       <filename>HPXML.xsd</filename>
       <filetype>xsd</filetype>
       <usage_type>resource</usage_type>
       <checksum>BB8F37B8</checksum>
     </file>
     <file>
-      <version>
-        <software_program>OpenStudio</software_program>
-        <identifier>3.0.0</identifier>
-        <min_compatible>3.0.0</min_compatible>
-      </version>
-      <filename>measure.rb</filename>
+      <filename>hvac_sizing.rb</filename>
       <filetype>rb</filetype>
-      <usage_type>script</usage_type>
-      <checksum>F4CB408B</checksum>
+      <usage_type>resource</usage_type>
+      <checksum>4117D5F0</checksum>
+    </file>
+    <file>
+      <filename>HPXMLDataTypes.xsd</filename>
+      <filetype>xsd</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>8CE65B50</checksum>
+    </file>
+    <file>
+      <filename>airflow.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>BC675290</checksum>
+    </file>
+    <file>
+      <filename>EPvalidator.xml</filename>
+      <filetype>xml</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>674B26BA</checksum>
+    </file>
+    <file>
+      <filename>test_defaults.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>test</usage_type>
+      <checksum>AA065D80</checksum>
+    </file>
+    <file>
+      <filename>constants.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>CF39E025</checksum>
+    </file>
+    <file>
+      <filename>hpxml.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>99E13599</checksum>
+    </file>
+    <file>
+      <filename>test_validation_custom.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>test</usage_type>
+      <checksum>BFE8F99A</checksum>
+    </file>
+    <file>
+      <filename>to_run_ruby.txt</filename>
+      <filetype>txt</filetype>
+      <usage_type>test</usage_type>
+      <checksum>4F64AAD4</checksum>
     </file>
     <file>
       <filename>EPvalidator.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
       <checksum>85109F6D</checksum>
+    </file>
+    <file>
+      <filename>hpxml_defaults.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>5F8FAC88</checksum>
+    </file>
+    <file>
+      <filename>hvac.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>2B46B197</checksum>
+    </file>
+    <file>
+      <filename>xmlhelper.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>6CB36D58</checksum>
+    </file>
+    <file>
+      <version>
+        <software_program>OpenStudio</software_program>
+        <identifier>3.0.0</identifier>
+      </version>
+      <filename>measure.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>script</usage_type>
+      <checksum>4B59EB8A</checksum>
     </file>
   </files>
 </measure>

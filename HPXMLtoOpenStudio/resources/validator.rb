@@ -1,10 +1,7 @@
 # frozen_string_literal: true
 
-class EnergyPlusValidator
-  def self.run_validator(hpxml_doc)
-    # load the Schematron xml
-    stron_path = File.join(File.dirname(__FILE__), 'EPvalidator.xml')
-
+class Validator
+  def self.run_validator(hpxml_doc, stron_path)
     errors = []
     doc = XMLHelper.parse_file(stron_path)
     XMLHelper.get_elements(doc, '/sch:schema/sch:pattern/sch:rule').each do |rule|
