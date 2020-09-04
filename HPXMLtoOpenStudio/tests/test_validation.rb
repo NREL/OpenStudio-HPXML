@@ -113,7 +113,7 @@ class HPXMLtoOpenStudioValidationTest < MiniTest::Test
         # scan numbers outside brackets and then find the maximum number of elements allowed
         if not expected_error_message.nil?
           max_number_of_elements_allowed = expected_error_message.gsub(/\[.*?\]|\[|\]/, '').scan(/\d+/).max.to_i
-        else # handles cases where expected error message starts with "Expected 0 or more" or "Expected 1 or more". In these cases, expected error messages are nil.
+        else # handles cases where expected error message starts with "Expected 0 or more" or "Expected 1 or more". In these cases, 2 elements will be added for the element addition test.
           max_number_of_elements_allowed = 2 # arbitrary number
         end
         
