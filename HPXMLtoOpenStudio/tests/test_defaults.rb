@@ -529,7 +529,27 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
     _test_default_solar_thermal_values(hpxml_default, 150.0)
   end
 
-  def test_ventilation_fans
+  def test_mech_ventilation_fans
+    # Test inputs not overridden by defaults
+    hpxml_name = 'base-mechvent-exhaust.xml'
+    hpxml = HPXML.new(hpxml_path: File.join(@root_path, 'workflow', 'sample_files', hpxml_name))
+    hpxml.building_construction.residential_facility_type = HPXML::ResidentialTypeSFA
+    vent_fan = hpxml.ventilation_fans.select { |f| f.used_for_whole_building_ventilation }[0]
+    vent_fan.is_shared_system = true
+    vent_fan.fraction_recirculation = 0.0
+    vent_fan.in_unit_flow_rate = 10.0
+    XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
+    hpxml_default = _test_measure()
+    _test_default_mech_vent_values(hpxml_default, true)
+
+    # Test defaults
+    hpxml = apply_hpxml_defaults('base-mechvent-exhaust.xml')
+    XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
+    hpxml_default = _test_measure()
+    _test_default_mech_vent_values(hpxml_default, false)
+  end
+
+  def test_local_ventilation_fans
     # Test inputs not overridden by defaults
     hpxml_name = 'base-mechvent-bath-kitchen-fans.xml'
     hpxml = HPXML.new(hpxml_path: File.join(@root_path, 'workflow', 'sample_files', hpxml_name))
@@ -1299,6 +1319,11 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
     assert_in_epsilon(storage_volume, hpxml.solar_thermal_systems[0].storage_volume)
   end
 
+  def _test_default_mech_vent_values(hpxml, is_shared_system)
+    vent_fan = hpxml.ventilation_fans.select { |f| f.used_for_whole_building_ventilation }[0]
+    assert_equal(is_shared_system, vent_fan.is_shared_system)
+  end
+
   def _test_default_kitchen_fan_values(hpxml, quantity, rated_flow_rate, hours_in_operation, fan_power, start_hour)
     kitchen_fan = hpxml.ventilation_fans.select { |f| f.used_for_local_ventilation && f.fan_location == HPXML::LocationKitchen }[0]
     assert_equal(quantity, kitchen_fan.quantity)
@@ -1522,6 +1547,12 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
 
     hpxml.solar_thermal_systems.each do |solar_thermal_system|
       solar_thermal_system.storage_volume = nil
+    end
+
+    hpxml.ventilation_fans.each do |vent_fan|
+      next unless vent_fan.used_for_whole_building_ventilation
+
+      vent_fan.is_shared_system = false
     end
 
     hpxml.ventilation_fans.each do |vent_fan|

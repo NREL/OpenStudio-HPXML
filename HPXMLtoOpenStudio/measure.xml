@@ -3,8 +3,8 @@
   <schema_version>3.0</schema_version>
   <name>hpxm_lto_openstudio</name>
   <uid>b1543b30-9465-45ff-ba04-1d1f85e763bc</uid>
-  <version_id>adfcf73d-652f-4926-aea9-123b93f9ceb5</version_id>
-  <version_modified>20200827T201958Z</version_modified>
+  <version_id>5e01973a-5ece-4eb6-b513-0beb8bb5ca55</version_id>
+  <version_modified>20200831T152945Z</version_modified>
   <xml_checksum>D8922A73</xml_checksum>
   <class_name>HPXMLtoOpenStudio</class_name>
   <display_name>HPXML to OpenStudio Translator</display_name>
@@ -469,12 +469,6 @@
       <checksum>AE298605</checksum>
     </file>
     <file>
-      <filename>test_airflow.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>test</usage_type>
-      <checksum>4BB3F113</checksum>
-    </file>
-    <file>
       <filename>HPXML.xsd</filename>
       <filetype>xsd</filetype>
       <usage_type>resource</usage_type>
@@ -493,34 +487,10 @@
       <checksum>5C352E25</checksum>
     </file>
     <file>
-      <filename>hpxml_defaults.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>F58F08B9</checksum>
-    </file>
-    <file>
-      <filename>hpxml.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>248BBC2E</checksum>
-    </file>
-    <file>
-      <filename>airflow.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>BC675290</checksum>
-    </file>
-    <file>
       <filename>hvac_sizing.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
       <checksum>3AE712A9</checksum>
-    </file>
-    <file>
-      <filename>test_defaults.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>test</usage_type>
-      <checksum>6C302852</checksum>
     </file>
     <file>
       <filename>test_hvac.rb</filename>
@@ -529,28 +499,10 @@
       <checksum>AA4E8BA5</checksum>
     </file>
     <file>
-      <filename>hvac.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>6454A307</checksum>
-    </file>
-    <file>
-      <filename>constants.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>971F57E5</checksum>
-    </file>
-    <file>
       <filename>HPXMLDataTypes.xsd</filename>
       <filetype>xsd</filetype>
       <usage_type>resource</usage_type>
       <checksum>8CE65B50</checksum>
-    </file>
-    <file>
-      <filename>BaseElements.xsd</filename>
-      <filetype>xsd</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>DB4F58D2</checksum>
     </file>
     <file>
       <version>
@@ -564,10 +516,58 @@
       <checksum>F4CB408B</checksum>
     </file>
     <file>
+      <filename>hpxml_defaults.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>C3DE6482</checksum>
+    </file>
+    <file>
+      <filename>hvac.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>AAA82158</checksum>
+    </file>
+    <file>
+      <filename>constants.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>B4113218</checksum>
+    </file>
+    <file>
+      <filename>BaseElements.xsd</filename>
+      <filetype>xsd</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>860B66F7</checksum>
+    </file>
+    <file>
+      <filename>test_defaults.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>test</usage_type>
+      <checksum>6171853E</checksum>
+    </file>
+    <file>
+      <filename>airflow.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>8728B1C0</checksum>
+    </file>
+    <file>
+      <filename>hpxml.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>AC4541E7</checksum>
+    </file>
+    <file>
+      <filename>test_airflow.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>test</usage_type>
+      <checksum>19412B73</checksum>
+    </file>
+    <file>
       <filename>EPvalidator.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>4B1D214B</checksum>
+      <checksum>F00BB0EE</checksum>
     </file>
   </files>
 </measure>

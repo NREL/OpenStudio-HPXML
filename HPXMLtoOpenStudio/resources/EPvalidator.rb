@@ -72,10 +72,7 @@ class EnergyPlusValidator
         '/HPXML/Building/BuildingDetails/Systems/HVAC/HVACControl' => zero_or_one, # See [HVACControl]
         '/HPXML/Building/BuildingDetails/Systems/HVAC/HVACDistribution' => zero_or_more, # See [HVACDistribution]
 
-        '/HPXML/Building/BuildingDetails/Systems/MechanicalVentilation/VentilationFans/VentilationFan[UsedForWholeBuildingVentilation="true"]' => zero_or_more, # See [MechanicalVentilation]
-        '/HPXML/Building/BuildingDetails/Systems/MechanicalVentilation/VentilationFans/VentilationFan[UsedForLocalVentilation="true" and FanLocation="kitchen"]' => zero_or_more, # See [KitchenRangeFan]
-        '/HPXML/Building/BuildingDetails/Systems/MechanicalVentilation/VentilationFans/VentilationFan[UsedForLocalVentilation="true" and FanLocation="bath"]' => zero_or_more, # See [BathFan]
-        '/HPXML/Building/BuildingDetails/Systems/MechanicalVentilation/VentilationFans/VentilationFan[UsedForSeasonalCoolingLoadReduction="true"]' => zero_or_more, # See [WholeHouseFan]
+        '/HPXML/Building/BuildingDetails/Systems/MechanicalVentilation/VentilationFans/VentilationFan' => zero_or_more, # See [VentilationFan]
         '/HPXML/Building/BuildingDetails/Systems/WaterHeating/WaterHeatingSystem' => zero_or_more, # See [WaterHeatingSystem]
         '/HPXML/Building/BuildingDetails/Systems/WaterHeating/HotWaterDistribution' => zero_or_one, # See [HotWaterDistribution]
         '/HPXML/Building/BuildingDetails/Systems/WaterHeating/WaterFixture' => zero_or_more, # See [WaterFixture]
@@ -650,37 +647,19 @@ class EnergyPlusValidator
         'DuctSurfaceArea | DuctLocation[text()="living space" or text()="basement - conditioned" or text()="basement - unconditioned" or text()="crawlspace - vented" or text()="crawlspace - unvented" or text()="attic - vented" or text()="attic - unvented" or text()="garage" or text()="exterior wall" or text()="under slab" or text()="roof deck" or text()="outside" or text()="other housing unit" or text()="other heated space" or text()="other multifamily buffer space" or text()="other non-freezing space"]' => zero_or_two,
       },
 
-      # [MechanicalVentilation]
+      # [VentilationFan]
+      '/HPXML/Building/BuildingDetails/Systems/MechanicalVentilation/VentilationFans/VentilationFan' => {
+        'UsedForWholeBuildingVentilation[text()="true"] | UsedForLocalVentilation[text()="true"] | UsedForSeasonalCoolingLoadReduction[text()="true"]' => one, # See [MechanicalVentilation] or [LocalVentilation] or [WholeHouseFan]
+      },
+
+      ## [MechanicalVentilation]
       '/HPXML/Building/BuildingDetails/Systems/MechanicalVentilation/VentilationFans/VentilationFan[UsedForWholeBuildingVentilation="true"]' => {
         'SystemIdentifier' => one, # Required by HPXML schema
         'FanType[text()="energy recovery ventilator" or text()="heat recovery ventilator" or text()="exhaust only" or text()="supply only" or text()="balanced" or text()="central fan integrated supply"]' => one, # See [MechVentType=HRV] or [MechVentType=ERV] or [MechVentType=CFIS]
-        'HoursInOperation' => one,
         'TestedFlowRate | RatedFlowRate' => one_or_more,
+        'HoursInOperation' => one,
         'FanPower' => one,
-        'IsSharedSystem' => one, # See [SharedSystem]
-      },
-
-      ## [SharedSystem=true]
-      '/HPXML/Building/BuildingDetails/Systems/MechanicalVentilation/VentilationFans/VentilationFan[UsedForWholeBuildingVentilation="true" and IsSharedSystem="true"]' => {
-        'FractionRecirculation' => one,
-        '../../../../BuildingSummary/BuildingConstruction[ResidentialFacilityType[text()="single-family attached" or text()="apartment unit"]]' => one,
-        'extension/InUnitFlowRate' => one,
-        'extension/PreHeating' => zero_or_one,
-        'extension/PreCooling' => zero_or_one,
-      },
-
-      ## [SharedSystem=true and extension/PreHeating]
-      '/HPXML/Building/BuildingDetails/Systems/MechanicalVentilation/VentilationFans/VentilationFan[UsedForWholeBuildingVentilation="true" and IsSharedSystem="true"]/extension/PreHeating' => {
-        'Fuel[text()="natural gas" or text()="fuel oil" or text()="fuel oil 1" or text()="fuel oil 2" or text()="fuel oil 4" or text()="fuel oil 5/6" or text()="diesel" or text()="propane" or text()="kerosene" or text()="electricity" or text()="wood" or text()="wood pellets"]' => one,
-        'AnnualHeatingEfficiency[Units="COP"]/Value' => one,
-        'HeatingCapacity' => one,
-      },
-
-      ## [SharedSystem=true and extension/PreCooling]
-      '/HPXML/Building/BuildingDetails/Systems/MechanicalVentilation/VentilationFans/VentilationFan[UsedForWholeBuildingVentilation="true" and IsSharedSystem="true"]/extension/PreCooling' => {
-        'Fuel[text()="electricity"]' => one,
-        'AnnualCoolingEfficiency[Units="COP"]/Value' => one,
-        'CoolingCapacity' => one,
+        'IsSharedSystem' => zero_or_one, # See [MechVentType=Shared]
       },
 
       ## [MechVentType=HRV]
@@ -699,27 +678,41 @@ class EnergyPlusValidator
         'AttachedToHVACDistributionSystem' => one,
       },
 
-      # [KitchenRangeFan]
-      '/HPXML/Building/BuildingDetails/Systems/MechanicalVentilation/VentilationFans/VentilationFan[UsedForLocalVentilation="true" and FanLocation="kitchen"]' => {
+      ## [MechVentType=Shared]
+      '/HPXML/Building/BuildingDetails/Systems/MechanicalVentilation/VentilationFans/VentilationFan[UsedForWholeBuildingVentilation="true" and IsSharedSystem="true"]' => {
+        '../../../../BuildingSummary/BuildingConstruction[ResidentialFacilityType[text()="single-family attached" or text()="apartment unit"]]' => one,
+        'FractionRecirculation' => one,
+        'extension/InUnitFlowRate' => one,
+        'extension/PreHeating' => zero_or_one, # See [SharedMechVent=WithPreHeating]
+        'extension/PreCooling' => zero_or_one, # See [SharedMechVent=WithPreCooling]
+      },
+
+      ## [SharedMechVent=WithPreHeating]
+      '/HPXML/Building/BuildingDetails/Systems/MechanicalVentilation/VentilationFans/VentilationFan[UsedForWholeBuildingVentilation="true" and IsSharedSystem="true"]/extension/PreHeating' => {
+        'Fuel[text()="natural gas" or text()="fuel oil" or text()="fuel oil 1" or text()="fuel oil 2" or text()="fuel oil 4" or text()="fuel oil 5/6" or text()="diesel" or text()="propane" or text()="kerosene" or text()="electricity" or text()="wood" or text()="wood pellets"]' => one,
+        'AnnualHeatingEfficiency[Units="COP"]/Value' => one,
+        'HeatingCapacity' => one,
+      },
+
+      ## [SharedMechVent=WithPreCooling]
+      '/HPXML/Building/BuildingDetails/Systems/MechanicalVentilation/VentilationFans/VentilationFan[UsedForWholeBuildingVentilation="true" and IsSharedSystem="true"]/extension/PreCooling' => {
+        'Fuel[text()="electricity"]' => one,
+        'AnnualCoolingEfficiency[Units="COP"]/Value' => one,
+        'CoolingCapacity' => one,
+      },
+
+      ## [LocalVentilation]
+      '/HPXML/Building/BuildingDetails/Systems/MechanicalVentilation/VentilationFans/VentilationFan[UsedForLocalVentilation="true"]' => {
         'SystemIdentifier' => one, # Required by HPXML schema
         'Quantity' => zero_or_one,
         'RatedFlowRate' => zero_or_one,
         'HoursInOperation' => zero_or_one,
+        'FanLocation[text()="kitchen" or text()="bath"]' => one,
         'FanPower' => zero_or_one,
         'extension/StartHour' => zero_or_one, # 0 = midnight. 12 = noon
       },
 
-      # [BathFan]
-      '/HPXML/Building/BuildingDetails/Systems/MechanicalVentilation/VentilationFans/VentilationFan[UsedForLocalVentilation="true" and FanLocation="bath"]' => {
-        'SystemIdentifier' => one, # Required by HPXML schema
-        'Quantity' => zero_or_one,
-        'RatedFlowRate' => zero_or_one,
-        'HoursInOperation' => zero_or_one,
-        'FanPower' => zero_or_one,
-        'extension/StartHour' => zero_or_one, # 0 = midnight. 12 = noon
-      },
-
-      # [WholeHouseFan]
+      ## [WholeHouseFan]
       '/HPXML/Building/BuildingDetails/Systems/MechanicalVentilation/VentilationFans/VentilationFan[UsedForSeasonalCoolingLoadReduction="true"]' => {
         'SystemIdentifier' => one, # Required by HPXML schema
         'RatedFlowRate' => one,

@@ -1448,7 +1448,7 @@ class Airflow
     else
       # Load calculation
       infil_program.addLine('Set FanTotalToLv = Fan_MFR * (OASupInEnth - ZoneAirEnth)')
-      infil_program.addLine('Set FanSensToLv = Fan_MFR * ZoneCp * (ERVSupOutTemp - ZoneTemp)')
+      infil_program.addLine('Set FanSensToLv = Fan_MFR * ZoneCp * (OASupInTemp - ZoneTemp)')
       infil_program.addLine('Set FanLatToLv = FanTotalToLv - FanSensToLv')
     end
 
@@ -1625,8 +1625,8 @@ class Airflow
       infil_program.addLine("Set #{sens_load_actuator.name} = #{sens_load_actuator.name} + SensLoadToLv")
       infil_program.addLine("Set #{lat_load_actuator.name} = #{lat_load_actuator.name} + OALoadLatToLv")
       # Assign energy use
-      infil_program.addLine("Set #{clg_energy_actuator.name} = (CoolingEnergy / #{vent_mech.precooling_efficiency})")
-      infil_program.addLine("Set #{htg_energy_actuator.name} = (HeatingEnergy / #{vent_mech.preheating_efficiency})")
+      infil_program.addLine("Set #{clg_energy_actuator.name} = (CoolingEnergy / #{vent_mech.precooling_efficiency_cop})")
+      infil_program.addLine("Set #{htg_energy_actuator.name} = (HeatingEnergy / #{vent_mech.preheating_efficiency_cop})")
     end
 
     # oems = model.getOutputEnergyManagementSystem
