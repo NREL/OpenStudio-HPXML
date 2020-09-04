@@ -1772,7 +1772,7 @@ class HVACSizing
 
   def self.get_ventilation_rates(model)
     mechVentExist = get_feature(model.getBuilding, Constants.SizingInfoMechVentExist, 'boolean')
-    return [0.0, 0.0, 0.0] unless mechVentExist
+    return [0.0, 0.0, 0.0, 0.0, 0.0, 0.0] unless mechVentExist
 
     q_unb_cfm = get_feature(model.getBuilding, Constants.SizingInfoMechVentWholeHouseRateUnbalanced, 'double')
     q_b = get_feature(model.getBuilding, Constants.SizingInfoMechVentWholeHouseRateBalanced, 'double')
