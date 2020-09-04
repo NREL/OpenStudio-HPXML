@@ -1350,7 +1350,7 @@ def set_hpxml_walls(hpxml_file, hpxml)
     elsif ['base-enclosure-other-heated-space.xml'].include? hpxml_file
       hpxml.walls[-1].id = 'WallOtherHeatedSpace'
       hpxml.walls[-1].exterior_adjacent_to = HPXML::LocationOtherHeatedSpace
-      hpxml.walls[-1].insulation_assembly_r_value = 4
+      hpxml.walls[-1].insulation_assembly_r_value = 23
     elsif ['base-enclosure-other-non-freezing-space.xml'].include? hpxml_file
       hpxml.walls[-1].id = 'WallOtherNonFreezingSpace'
       hpxml.walls[-1].exterior_adjacent_to = HPXML::LocationOtherNonFreezingSpace
@@ -1799,7 +1799,7 @@ def set_hpxml_frame_floors(hpxml_file, hpxml)
     elsif ['base-enclosure-other-heated-space.xml'].include? hpxml_file
       hpxml.frame_floors[0].exterior_adjacent_to = HPXML::LocationOtherHeatedSpace
       hpxml.frame_floors[0].id = 'FloorBelowOtherHeatedSpace'
-      hpxml.frame_floors[0].insulation_assembly_r_value = 2.1
+      hpxml.frame_floors[0].insulation_assembly_r_value = 18.7
     elsif ['base-enclosure-other-non-freezing-space.xml'].include? hpxml_file
       hpxml.frame_floors[0].exterior_adjacent_to = HPXML::LocationOtherNonFreezingSpace
       hpxml.frame_floors[0].id = 'FloorBelowOtherNonFreezingSpace'
