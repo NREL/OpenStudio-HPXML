@@ -54,22 +54,14 @@ class HPXMLtoOpenStudioValidationTest < MiniTest::Test
         context_xpath = rule_context.gsub('h:', '').gsub('/*', '')
         element_names_for_assertion_test = _get_element_names_for_assertion_test(assertion)
         target_xpath = [context_xpath, element_names_for_assertion_test]
-        expected_error_message = _get_expected_error_message(context_xpath, assertion)
-
-        if not expected_error_message.nil?
-          next if assertion.start_with?('Expected 0 or more') # no tests needed
-
-          if assertion.start_with?('Expected 0') || assertion.partition(': ').last.start_with?('[not') # FIXME: Is there another way to do this?
-            expected_error_msgs_by_element_addition[target_xpath] = expected_error_message
-          else
-            expected_error_msgs_by_element_deletion[target_xpath] = expected_error_message
-
-            next if assertion.start_with?('Expected 1 or more') # no need for element addition test
-            expected_error_msgs_by_element_addition[target_xpath] = expected_error_message
-          end
+        
+        if assertion.start_with?('Expected 0') || assertion.partition(': ').last.start_with?('[not') # FIXME: Is there another way to do this?
+          expected_error_msgs_by_element_addition[target_xpath] = _get_expected_error_message(context_xpath, assertion, 'addition')
         else
-          fail 'Invalid expected error message.'
+          expected_error_msgs_by_element_deletion[target_xpath] = _get_expected_error_message(context_xpath, assertion, 'deletion')
+          expected_error_msgs_by_element_addition[target_xpath] = _get_expected_error_message(context_xpath, assertion, 'addition')
         end
+        # FIXME: Not sure where to add fail 'Invalid expected error message.'
       end
     end
 
@@ -119,7 +111,11 @@ class HPXMLtoOpenStudioValidationTest < MiniTest::Test
         mod_parent_element = additional_parent_element_name.empty? ? parent_element : XMLHelper.get_element(parent_element, additional_parent_element_name)
 
         # scan numbers outside brackets and then find the maximum number of elements allowed
-        max_number_of_elements_allowed = expected_error_message.gsub(/\[.*?\]|\[|\]/, '').scan(/\d+/).max.to_i 
+        if not expected_error_message.nil?
+          max_number_of_elements_allowed = expected_error_message.gsub(/\[.*?\]|\[|\]/, '').scan(/\d+/).max.to_i
+        else # handles cases where expected error message starts with "Expected 0 or more" or "Expected 1 or more". In these cases, expected error messages are nil.
+          max_number_of_elements_allowed = 2 # arbitrary number
+        end
         
         # If child_element does not exist, add child_element by the maximum allowed number. If child_element exists, copy the child_element by the maximum allowed number.
         if XMLHelper.get_element(parent_element, child_element_name).nil?
@@ -226,11 +222,25 @@ class HPXMLtoOpenStudioValidationTest < MiniTest::Test
     fail "Could not find HPXML file for target_xpath: #{target_xpath}."
   end
 
-  def _get_expected_error_message(parent_xpath, assertion)
-    if parent_xpath == '' # root element
-      return [[assertion.partition(': ').first, parent_xpath].join(': '), assertion.partition(': ').last].join() # return "Expected x element(s) for xpath: foo"
+  def _get_expected_error_message(parent_xpath, assertion, mode)
+    if assertion.start_with?('Expected 0 or more')
+      return nil
+    elsif assertion.start_with?('Expected 1 or more')
+      if mode == 'addition'
+        return nil
+      elsif mode == 'deletion'
+        if parent_xpath == '' # root element
+          return [[assertion.partition(': ').first, parent_xpath].join(': '), assertion.partition(': ').last].join() # return "Expected x element(s) for xpath: foo"
+        else
+          return [[assertion.partition(': ').first, parent_xpath].join(': '), assertion.partition(': ').last].join(': ') # return "Expected x element(s) for xpath: foo: bar"
+        end
+      end
     else
-      return [[assertion.partition(': ').first, parent_xpath].join(': '), assertion.partition(': ').last].join(': ') # return "Expected x element(s) for xpath: foo: bar"
+      if parent_xpath == '' # root element
+        return [[assertion.partition(': ').first, parent_xpath].join(': '), assertion.partition(': ').last].join() # return "Expected x element(s) for xpath: foo"
+      else
+        return [[assertion.partition(': ').first, parent_xpath].join(': '), assertion.partition(': ').last].join(': ') # return "Expected x element(s) for xpath: foo: bar"
+      end
     end
   end
 
