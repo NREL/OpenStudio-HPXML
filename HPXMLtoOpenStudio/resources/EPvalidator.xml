@@ -3,6 +3,7 @@
   <sch:title>HPXML Schematron Validator</sch:title>
   <sch:ns uri='http://hpxmlonline.com/2019/10' prefix='h'/>
   <sch:pattern>
+    <sch:title>EnergyPlus Simulation</sch:title>
     <sch:rule context='/*'> <!-- using context='/' throws an error, Nokogiri::XML::XPath::SyntaxError: ERROR: Invalid expression: // -->
       <sch:assert test='count(h:XMLTransactionHeaderInformation/h:XMLType) = 1'>Expected 1 element(s) for xpath: /HPXML/XMLTransactionHeaderInformation/XMLType</sch:assert> <!-- Required by HPXML schema -->
       <sch:assert test='count(h:XMLTransactionHeaderInformation/h:XMLGeneratedBy) = 1'>Expected 1 element(s) for xpath: /HPXML/XMLTransactionHeaderInformation/XMLGeneratedBy</sch:assert> <!-- Required by HPXML schema -->
