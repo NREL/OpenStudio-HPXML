@@ -7,7 +7,11 @@ require 'minitest/autorun'
 require 'fileutils'
 require_relative '../measure.rb'
 require_relative '../resources/util.rb'
-require 'schematron-nokogiri'
+begin
+  require 'schematron-nokogiri'
+rescue
+  fail 'Could not load schematron-nokogiri gem. Try running with "bundle exec ruby ...".'
+end
 
 class HPXMLtoOpenStudioValidationTest < MiniTest::Test
   def before_setup
@@ -19,10 +23,38 @@ class HPXMLtoOpenStudioValidationTest < MiniTest::Test
     @stron_doc = SchematronNokogiri::Schema.new Nokogiri::XML File.open(@stron_path)
 
     # Load all HPXMLs
+    hpxml_file_dirs = [File.absolute_path(File.join(@root_path, 'workflow', 'sample_files')),
+                       File.absolute_path(File.join(@root_path, 'workflow', 'tests', 'ASHRAE_Standard_140'))]
     @hpxml_docs = {}
-    sample_files_dir = File.absolute_path(File.join(@root_path, 'workflow', 'sample_files'))
-    Dir["#{sample_files_dir}/*.xml"].sort.each do |xml|
-      @hpxml_docs[File.basename(xml)] = HPXML.new(hpxml_path: File.join(sample_files_dir, File.basename(xml))).to_oga()
+    hpxml_file_dirs.each do |hpxml_file_dir|
+      Dir["#{hpxml_file_dir}/*.xml"].sort.each do |xml|
+        @hpxml_docs[File.basename(xml)] = HPXML.new(hpxml_path: File.join(hpxml_file_dir, File.basename(xml))).to_oga()
+      end
+    end
+
+    # Build up expected error messages hashes by parsing EPvalidator.xml
+    doc = XMLHelper.parse_file(@stron_path)
+    @expected_assertions_by_addition = {}
+    @expected_assertions_by_deletion = {}
+    XMLHelper.get_elements(doc, '/sch:schema/sch:pattern/sch:rule').each do |rule|
+      rule_context = XMLHelper.get_attribute_value(rule, 'context')
+      context_xpath = rule_context.gsub('h:', '').gsub('/*', '')
+
+      XMLHelper.get_values(rule, 'sch:assert').each do |assertion|
+        element_name = _get_element_name_for_assertion_test(assertion)
+        key = [context_xpath, element_name]
+
+        if assertion.start_with?('Expected 0 element')
+          # Skipping for now
+        elsif assertion.start_with?('Expected 0 or ') || assertion.partition(': ').last.start_with?('[not') # FIXME: Is there another way to do this?
+          @expected_assertions_by_addition[key] = _get_expected_error_msg(context_xpath, assertion, 'addition')
+        elsif assertion.start_with?('Expected 1 ')
+          @expected_assertions_by_deletion[key] = _get_expected_error_msg(context_xpath, assertion, 'deletion')
+          @expected_assertions_by_addition[key] = _get_expected_error_msg(context_xpath, assertion, 'addition')
+        else
+          fail "Unexpected assertion: '#{assertion}'."
+        end
+      end
     end
   end
 
@@ -31,112 +63,71 @@ class HPXMLtoOpenStudioValidationTest < MiniTest::Test
     @hpxml_docs.each do |xml, hpxml_doc|
       print '.'
 
-      # HPXML Schema validation
+      # Test validation
       _test_schema_validation(hpxml_doc, xml)
-      # Ruby validator validation
-      _test_ruby_validation(hpxml_doc)
-      # Schematron validation
       _test_schematron_validation(@stron_doc, hpxml_doc.to_xml)
+      _test_ruby_validation(hpxml_doc)
     end
-
     puts
   end
 
-  def test_schematron_asserts
-    # build up expected error messages hashes by parsing EPvalidator.xml
-    doc = XMLHelper.parse_file(@stron_path)
-    expected_error_msgs_by_element_addition = {}
-    expected_error_msgs_by_element_deletion = {}
-    XMLHelper.get_elements(doc, '/sch:schema/sch:pattern/sch:rule').each do |rule|
-      rule_context = XMLHelper.get_attribute_value(rule, 'context')
-
-      XMLHelper.get_values(rule, 'sch:assert').each do |assertion|
-        context_xpath = rule_context.gsub('h:', '').gsub('/*', '')
-        element_names_for_assertion_test = _get_element_names_for_assertion_test(assertion)
-        target_xpath = [context_xpath, element_names_for_assertion_test]
-        
-        if assertion.start_with?('Expected 0') || assertion.partition(': ').last.start_with?('[not') # FIXME: Is there another way to do this?
-          expected_error_msgs_by_element_addition[target_xpath] = _get_expected_error_message(context_xpath, assertion, 'addition')
-        else
-          expected_error_msgs_by_element_deletion[target_xpath] = _get_expected_error_message(context_xpath, assertion, 'deletion')
-          expected_error_msgs_by_element_addition[target_xpath] = _get_expected_error_message(context_xpath, assertion, 'addition')
-        end
-        # FIXME: Not sure where to add fail 'Invalid expected error message.'
-      end
-    end
-
-    n_asserts = expected_error_msgs_by_element_deletion.size
-    n_asserts += expected_error_msgs_by_element_addition.size
-    puts "Testing #{n_asserts} Schematron asserts..."
+  def test_schematron_asserts_by_deletion
+    puts "Testing #{@expected_assertions_by_deletion.size} Schematron asserts by deletion..."
 
     # Tests by element deletion
-    expected_error_msgs_by_element_deletion.each do |target_xpath, expected_error_message|
+    @expected_assertions_by_deletion.each do |key, expected_error_msg|
       print '.'
-      hpxml_doc = _get_hpxml_doc(target_xpath)
-      parent_element = target_xpath[0] == '' ? hpxml_doc : XMLHelper.get_element(hpxml_doc, target_xpath[0])
-      child_elements = target_xpath[1]
-      child_elements.each do |child_element|
-        XMLHelper.delete_element(parent_element, child_element)
-      end
+      hpxml_doc, parent_element = _get_hpxml_doc_and_parent_element(key)
+      child_element_name = key[1]
+      XMLHelper.delete_element(parent_element, child_element_name)
 
-      # Ruby validator validation
-      _test_ruby_validation(hpxml_doc, expected_error_message)
-      # Schematron validation
-      _test_schematron_validation(@stron_doc, hpxml_doc.to_xml, expected_error_message)
+      # Test validation
+      _test_ruby_validation(hpxml_doc, expected_error_msg)
+      _test_schematron_validation(@stron_doc, hpxml_doc.to_xml, expected_error_msg)
     end
+    puts
+  end
+
+  def test_schematron_asserts_by_addition
+    puts "Testing #{@expected_assertions_by_addition.size} Schematron asserts by addition..."
 
     # Tests by element addition (i.e. zero_or_one, zero_or_two, etc.)
-    expected_error_msgs_by_element_addition.each do |target_xpath, expected_error_message|
+    @expected_assertions_by_addition.each do |key, expected_error_msg|
       print '.'
-      hpxml_doc = _get_hpxml_doc(target_xpath)
-      parent_element = target_xpath[0] == '' ? hpxml_doc : XMLHelper.get_element(hpxml_doc, target_xpath[0])
-      child_element_names = target_xpath[1]
+      hpxml_doc, parent_element = _get_hpxml_doc_and_parent_element(key)
+      child_element_name = key[1]
 
-      child_element_names.each do |child_element_name|
-        # make sure parent elements of the last child element exist in HPXML
-        child_element_without_predicates = child_element_name.gsub(/\[.*?\]|\[|\]/, '') # remove brackets and text within brackets (e.g. [foo or ...])
-        child_element_without_predicates_array = child_element_without_predicates.split('/')[0...-1].reject(&:empty?)
-        XMLHelper.create_elements_as_needed(parent_element, child_element_without_predicates_array)
+      # make sure parent elements of the last child element exist in HPXML
+      child_element_without_predicates = child_element_name.gsub(/\[.*?\]|\[|\]/, '') # remove brackets and text within brackets (e.g. [foo or ...])
+      child_element_without_predicates_array = child_element_without_predicates.split('/')[0...-1].reject(&:empty?)
+      XMLHelper.create_elements_as_needed(parent_element, child_element_without_predicates_array)
 
-        # modify parent element and child_element_name
-        additional_parent_element_name = child_element_name.gsub(/\[text().*?\]/, '').split('/')[0...-1].reject(&:empty?).join('/').chomp('/') # remove text that starts with 'text()' within brackets (e.g. [text()=foo or ...]) and select elements from the first to the second last
-        _balance_brackets(additional_parent_element_name)
-        mod_child_element_name = child_element_name.gsub(/\[.*?\]|\[|\]/, '').split('/')[-1]
-        # Exceptions
-        if additional_parent_element_name.include? 'HPXML/Building/BuildingDetails/Enclosure/AirInfiltration/AirInfiltrationMeasurement'
-          additional_parent_element_name = 'HPXML/Building/BuildingDetails/Enclosure/AirInfiltration'
-        elsif additional_parent_element_name.include? '../../HVACDistribution[DistributionSystemType'
-          additional_parent_element_name = '../..'
-        end
-        mod_parent_element = additional_parent_element_name.empty? ? parent_element : XMLHelper.get_element(parent_element, additional_parent_element_name)
+      # modify parent element and child_element_name
+      additional_parent_element_name = child_element_name.gsub(/\[text().*?\]/, '').split('/')[0...-1].reject(&:empty?).join('/').chomp('/') # remove text that starts with 'text()' within brackets (e.g. [text()=foo or ...]) and select elements from the first to the second last
+      _balance_brackets(additional_parent_element_name)
 
-        # scan numbers outside brackets and then find the maximum number of elements allowed
-        if not expected_error_message.nil?
-          max_number_of_elements_allowed = expected_error_message.gsub(/\[.*?\]|\[|\]/, '').scan(/\d+/).max.to_i
-        else # handles cases where expected error message starts with "Expected 0 or more" or "Expected 1 or more". In these cases, 2 elements will be added for the element addition test.
-          max_number_of_elements_allowed = 2 # arbitrary number
-        end
-        
-        # If child_element does not exist, add child_element by the maximum allowed number. If child_element exists, copy the child_element by the maximum allowed number.
-        if XMLHelper.get_element(parent_element, child_element_name).nil?
-          if child_element_name.split('/')[-1].include?  'text()='
-            mod_child_element_value = child_element_name.split('text()=')[1].gsub(/\[|\]/, '').gsub('" or ', '"').gsub!(/\A"|"\Z/, '') # pull 'baz' from foo/bar[text()=baz or text()=fum or ...]; FIXME: Is there another way to handle this?
-          else
-            mod_child_element_value = nil
-          end
-          (max_number_of_elements_allowed + 1).times { XMLHelper.add_element(mod_parent_element, mod_child_element_name, mod_child_element_value) }
-        else
-          duplicated = _deep_copy_object(XMLHelper.get_element(parent_element, child_element_name))
-          (max_number_of_elements_allowed + 1).times { mod_parent_element.children << duplicated }
-        end
+      # Exceptions
+      if additional_parent_element_name.include? 'HPXML/Building/BuildingDetails/Enclosure/AirInfiltration/AirInfiltrationMeasurement'
+        additional_parent_element_name = 'HPXML/Building/BuildingDetails/Enclosure/AirInfiltration'
+      elsif additional_parent_element_name.include? '../../HVACDistribution[DistributionSystemType'
+        additional_parent_element_name = '../..'
+      end
+      mod_parent_element = additional_parent_element_name.empty? ? parent_element : XMLHelper.get_element(parent_element, additional_parent_element_name)
+
+      if not expected_error_msg.nil?
+        max_number_of_elements_allowed = 1
+      else # handles cases where expected error message starts with "Expected 0 or more" or "Expected 1 or more". In these cases, 2 elements will be added for the element addition test.
+        max_number_of_elements_allowed = 2 # arbitrary number
       end
 
-      # Ruby validator validation
-      _test_ruby_validation(hpxml_doc, expected_error_message)
-      # Schematron validation
-      _test_schematron_validation(@stron_doc, hpxml_doc.to_xml, expected_error_message)
-    end
+      # Copy the child_element by the maximum allowed number.
+      duplicated = _deep_copy_object(XMLHelper.get_element(parent_element, child_element_name))
+      (max_number_of_elements_allowed + 1).times { mod_parent_element.children << duplicated }
 
+      # Test validation
+      _test_schematron_validation(@stron_doc, hpxml_doc.to_xml, expected_error_msg)
+      _test_ruby_validation(hpxml_doc, expected_error_msg)
+    end
     puts
   end
 
@@ -151,9 +142,12 @@ class HPXMLtoOpenStudioValidationTest < MiniTest::Test
     if expected_error_msg.nil?
       assert_empty(results)
     else
-      idx_of_interest = results.index { |i| i[:message].gsub(': ', [': ', i[:context_path].gsub('h:', '').concat(': ').gsub('/*: ', '')].join('')) == expected_error_msg }
-      error_msg_of_interest = results[idx_of_interest][:message].gsub(': ', [': ', results[idx_of_interest][:context_path].gsub('h:', '').concat(': ').gsub('/*: ', '')].join(''))
-      assert_equal(expected_error_msg, error_msg_of_interest)
+      results_msgs = results.map { |i| i[:message].gsub(': ', [': ', i[:context_path].gsub('h:', '').concat(': ').gsub('/*: ', '')].join('')) }
+      idx_of_msg = results_msgs.index { |m| m == expected_error_msg }
+      if idx_of_msg.nil?
+        puts "Did not find expected error message '#{expected_error_msg}' in #{results_msgs}."
+      end
+      refute_nil(idx_of_msg)
     end
   end
 
@@ -163,9 +157,11 @@ class HPXMLtoOpenStudioValidationTest < MiniTest::Test
     if expected_error_msg.nil?
       assert_empty(results)
     else
-      idx_of_interest = results.index { |i| i == expected_error_msg }
-      error_msg_of_interest = results[idx_of_interest]
-      assert_equal(expected_error_msg, error_msg_of_interest)
+      idx_of_msg = results.index { |i| i == expected_error_msg }
+      if idx_of_msg.nil?
+        puts "Did not find expected error message '#{expected_error_msg}' in #{results}."
+      end
+      refute_nil(idx_of_msg)
     end
   end
 
@@ -179,62 +175,36 @@ class HPXMLtoOpenStudioValidationTest < MiniTest::Test
     assert_equal(0, errors.size)
   end
 
-  def _get_hpxml_doc(target_xpath)
-    @hpxml_docs.values.each do |hpxml_doc|
-      parent_element = target_xpath[0] == '' ? hpxml_doc : XMLHelper.get_element(hpxml_doc, target_xpath[0])
-      next if parent_element.nil?
+  def _get_hpxml_doc_and_parent_element(key)
+    context_xpath, element_name = key
 
-      child_elements = target_xpath[1]
+    # Find a HPXML file that contains the specified elements.
+    @hpxml_docs.each do |xml, hpxml_doc|
+      parent_elements = context_xpath == '' ? [hpxml_doc] : XMLHelper.get_elements(hpxml_doc, context_xpath)
+      next if parent_elements.nil?
 
-      found_children = true
-      child_elements[0..-1].each do |child_element|
-        next if XMLHelper.has_element(parent_element, child_element)
+      parent_elements.each do |parent_element|
+        next unless XMLHelper.has_element(parent_element, element_name)
 
-        found_children = false
-        break
-      end
-      next unless found_children
-
-      return _deep_copy_object(hpxml_doc)
-    end
-
-    # If found_children is false, then find an hpxml_doc that has the parent element and return the hpxml_doc
-    # FIXME: Don't want to loop through @hpxml_docs.values twice. Need to change it. 
-    @hpxml_docs.values.each do |hpxml_doc|
-      parent_element = target_xpath[0] == '' ? hpxml_doc : XMLHelper.get_element(hpxml_doc, target_xpath[0])
-      next if parent_element.nil?
-
-      # Exceptions
-      if target_xpath[0] == '/HPXML/Building/BuildingDetails/Systems/HVAC/HVACPlant/HeatingSystem[HeatingSystemType/Boiler and IsSharedSystem="true" and //HydronicAndAirDistributionType[text()="water loop heat pump"]]'
-        return _deep_copy_object(@hpxml_docs['base-hvac-shared-boiler-chiller-water-loop-heat-pump.xml'])
-      elsif target_xpath[0] == '/HPXML/Building/BuildingDetails/Systems/HVAC/HVACPlant/HeatingSystem[HeatingSystemType/Boiler and IsSharedSystem="true" and //HydronicAndAirDistributionType[text()="fan coil"]]'
-        return _deep_copy_object(@hpxml_docs['base-hvac-shared-boiler-chiller-fan-coil.xml'])
-      end
-      
-      mod_parent_element_name = target_xpath[0].split('/')[0...-1].reject(&:empty?).join('/').gsub(/\[|\]/, '/').chomp('/')
-      mod_parent_element = XMLHelper.get_element(hpxml_doc, mod_parent_element_name)
-      mod_child_element_name = target_xpath[0].split('/')[-1].gsub(/\[|\]/, '')
-      if XMLHelper.has_element(mod_parent_element, mod_child_element_name)
-        return _deep_copy_object(hpxml_doc)
+        # Return copies so we don't modify the original object and affect subsequent tests.
+        hpxml_doc = _deep_copy_object(hpxml_doc)
+        if context_xpath == ''
+          parent_element = hpxml_doc
+        else
+          parent_element = XMLHelper.get_elements(hpxml_doc, context_xpath).select { |el| el.text == parent_element.text }[0]
+        end
+        return hpxml_doc, parent_element
       end
     end
 
-    fail "Could not find HPXML file for target_xpath: #{target_xpath}."
+    fail "Could not find an HPXML file with #{element_name} in #{context_xpath}. Add this to a HPXML file so that it's tested."
   end
 
-  def _get_expected_error_message(parent_xpath, assertion, mode)
+  def _get_expected_error_msg(parent_xpath, assertion, mode)
     if assertion.start_with?('Expected 0 or more')
-      return nil
-    elsif assertion.start_with?('Expected 1 or more')
-      if mode == 'addition'
-        return nil
-      elsif mode == 'deletion'
-        if parent_xpath == '' # root element
-          return [[assertion.partition(': ').first, parent_xpath].join(': '), assertion.partition(': ').last].join() # return "Expected x element(s) for xpath: foo"
-        else
-          return [[assertion.partition(': ').first, parent_xpath].join(': '), assertion.partition(': ').last].join(': ') # return "Expected x element(s) for xpath: foo: bar"
-        end
-      end
+      return
+    elsif assertion.start_with?('Expected 1 or more') && (mode == 'addition')
+      return
     else
       if parent_xpath == '' # root element
         return [[assertion.partition(': ').first, parent_xpath].join(': '), assertion.partition(': ').last].join() # return "Expected x element(s) for xpath: foo"
@@ -244,29 +214,16 @@ class HPXMLtoOpenStudioValidationTest < MiniTest::Test
     end
   end
 
-  def _get_element_names_for_assertion_test(assertion)
-    # From the assertion, get the element name(s) to be added or deleted for the assertion test.
-    element_names = []
+  def _get_element_name_for_assertion_test(assertion)
+    # From the assertion, get the element name to be added or deleted for the assertion test.
     if assertion.partition(': ').last.start_with?('[not')
-      element_names << assertion.partition(': ').last.partition(' | ').last
+      element_name = assertion.partition(': ').last.partition(' | ').last
     else
       element_name = assertion.partition(': ').last.partition(' | ').first
       _balance_brackets(element_name)
-      element_names << element_name
-
-      # Exceptions
-      # FIXME: Is there another way to handle this?
-      if assertion.partition(': ').last.include? 'AnnualHeatingDistributionSystemEfficiency'
-        # Need to remove both AnnualHeatingDistributionSystemEfficiency and AnnualCoolingDistributionSystemEfficiency
-        element_name_additional = assertion.partition(': ').last.partition(' | ').last
-        element_names << element_name_additional
-      elsif assertion.partition(': ').last.include? 'HousePressure'
-        # handle [(HousePressure and BuildingAirLeakage/UnitofMeasure[text()!="ACHnatural"]) or (not(HousePressure) and BuildingAirLeakage/UnitofMeasure[text()="ACHnatural"])]
-        element_names[0] = 'HousePressure' # replacing element name with 'HousePressure' for the test (i.e. the test by element deletion).
-      end
     end
 
-    return element_names
+    return element_name
   end
 
   def _balance_brackets(element_name)
