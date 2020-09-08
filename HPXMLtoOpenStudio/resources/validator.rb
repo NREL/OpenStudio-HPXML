@@ -5,17 +5,12 @@ class Validator
     errors = []
     doc = XMLHelper.parse_file(stron_path)
     XMLHelper.get_elements(doc, '/sch:schema/sch:pattern/sch:rule').each do |rule|
-      rule_context = XMLHelper.get_attribute_value(rule, 'context')
-      if rule_context == '/*' # Root
-        parent_xpath = '/HPXML'
-      else
-        parent_xpath = rule_context.gsub('h:', '')
-      end
+      context_xpath = XMLHelper.get_attribute_value(rule, 'context').gsub('h:', '')
 
       begin
-        context_elements = hpxml_doc.xpath(parent_xpath)
+        context_elements = hpxml_doc.xpath(context_xpath)
       rescue
-        fail "Invalid xpath: #{parent_xpath}"
+        fail "Invalid xpath: #{context_xpath}"
       end
       next if context_elements.empty? # Skip if context element doesn't exist
 
@@ -31,11 +26,7 @@ class Validator
           next if xpath_result # check if assert_test is false
 
           assert_value = assert_element.children.text # the value of sch:assert
-          if rule_context == '/*' # Root
-            error_message = assert_value
-          else
-            error_message = assert_value.gsub(': ', ": #{parent_xpath}: ") # insert parent xpath into the error message
-          end
+          error_message = assert_value.gsub(': ', ": #{context_xpath}: ") # insert context xpath into the error message
           errors << error_message
         end
       end
