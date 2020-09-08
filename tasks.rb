@@ -4584,6 +4584,12 @@ def set_hpxml_plug_loads(hpxml_file, hpxml)
       end
     elsif ['base-misc-loads-none.xml'].include? hpxml_file
       hpxml.plug_loads.clear
+      hpxml.plug_loads.add(id: 'PlugLoadMisc',
+                           plug_load_type: HPXML::PlugLoadTypeOther,
+                           kWh_per_year: 0)
+      hpxml.plug_loads.add(id: 'PlugLoadMisc2',
+                           plug_load_type: HPXML::PlugLoadTypeTelevision,
+                           kWh_per_year: 0)
     elsif ['base-misc-loads-large-uncommon.xml'].include? hpxml_file
       hpxml.plug_loads[0].weekday_fractions = '0.035, 0.033, 0.032, 0.031, 0.032, 0.033, 0.037, 0.042, 0.043, 0.043, 0.043, 0.044, 0.045, 0.045, 0.044, 0.046, 0.048, 0.052, 0.053, 0.05, 0.047, 0.045, 0.04, 0.036'
       hpxml.plug_loads[0].weekend_fractions = '0.035, 0.033, 0.032, 0.031, 0.032, 0.033, 0.037, 0.042, 0.043, 0.043, 0.043, 0.044, 0.045, 0.045, 0.044, 0.046, 0.048, 0.052, 0.053, 0.05, 0.047, 0.045, 0.04, 0.036'
