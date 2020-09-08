@@ -9,7 +9,7 @@ HPXML is an open data standard for collecting and transferring home energy data.
 Using HPXML files reduces the complexity and effort for software developers to leverage the EnergyPlus simulation engine.
 
 HPXML Inputs
-************
+------------
 
 HPXML is an flexible and extensible format, where nearly all elements in the schema are optional and custom elements can be included.
 Because of this, a stricter set of requirements for the HPXML file have been developed for purposes of running EnergyPlus simulations.
