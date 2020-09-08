@@ -96,7 +96,7 @@ class HPXMLtoOpenStudioValidationTest < MiniTest::Test
       hpxml_doc, parent_element = _get_hpxml_doc_and_parent_element(key)
       child_element_name = key[1]
 
-      # modify parent element and child_element_name
+      # modify parent element
       additional_parent_element_name = child_element_name.gsub(/\[text().*?\]/, '').split('/')[0...-1].reject(&:empty?).join('/').chomp('/') # remove text that starts with 'text()' within brackets (e.g. [text()=foo or ...]) and select elements from the first to the second last
       _balance_brackets(additional_parent_element_name)
       mod_parent_element = additional_parent_element_name.empty? ? parent_element : XMLHelper.get_element(parent_element, additional_parent_element_name)
@@ -173,11 +173,7 @@ class HPXMLtoOpenStudioValidationTest < MiniTest::Test
 
         # Return copies so we don't modify the original object and affect subsequent tests.
         hpxml_doc = _deep_copy_object(hpxml_doc)
-        if context_xpath == ''
-          parent_element = hpxml_doc
-        else
-          parent_element = XMLHelper.get_elements(hpxml_doc, context_xpath).select { |el| el.text == parent_element.text }[0]
-        end
+        parent_element = XMLHelper.get_elements(hpxml_doc, context_xpath).select { |el| el.text == parent_element.text }[0]
         return hpxml_doc, parent_element
       end
     end
