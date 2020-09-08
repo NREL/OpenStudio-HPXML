@@ -5059,8 +5059,7 @@ class HPXML < Object
     def self.is_adjacent_to_conditioned(adjacent_to)
       if [HPXML::LocationLivingSpace,
           HPXML::LocationBasementConditioned,
-          HPXML::LocationOtherHousingUnit,
-          HPXML::LocationOtherHeatedSpace].include? adjacent_to
+          HPXML::LocationOtherHousingUnit].include? adjacent_to
         return true
       else
         return false
