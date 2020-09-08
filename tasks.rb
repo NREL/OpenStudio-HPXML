@@ -4559,6 +4559,9 @@ def set_hpxml_plug_loads(hpxml_file, hpxml)
                          kWh_per_year: 7302,
                          frac_sensible: 0.82,
                          frac_latent: 0.18)
+    hpxml.plug_loads.add(id: 'PlugLoadMisc2',
+                         plug_load_type: HPXML::PlugLoadTypeTelevision,
+                         kWh_per_year: 0)
   elsif ['ASHRAE_Standard_140/L170AC.xml',
          'ASHRAE_Standard_140/L170AL.xml'].include? hpxml_file
     hpxml.plug_loads[0].kWh_per_year = 0
