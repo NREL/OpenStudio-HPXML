@@ -3,8 +3,8 @@
   <schema_version>3.0</schema_version>
   <name>hpxm_lto_openstudio</name>
   <uid>b1543b30-9465-45ff-ba04-1d1f85e763bc</uid>
-  <version_id>0e682e34-e285-4d6b-97eb-eb6cbd06fc74</version_id>
-  <version_modified>20200905T004221Z</version_modified>
+  <version_id>ef689ba9-43ff-42d2-bc07-23d518a61f0b</version_id>
+  <version_modified>20200908T151908Z</version_modified>
   <xml_checksum>D8922A73</xml_checksum>
   <class_name>HPXMLtoOpenStudio</class_name>
   <display_name>HPXML to OpenStudio Translator</display_name>
@@ -541,17 +541,6 @@
       <checksum>2BF2CEB0</checksum>
     </file>
     <file>
-      <version>
-        <software_program>OpenStudio</software_program>
-        <identifier>2.1.1</identifier>
-        <min_compatible>2.1.1</min_compatible>
-      </version>
-      <filename>measure.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>script</usage_type>
-      <checksum>3CF15507</checksum>
-    </file>
-    <file>
       <filename>hvac_sizing.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
@@ -564,22 +553,33 @@
       <checksum>9485FE74</checksum>
     </file>
     <file>
+      <filename>validator.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>D3D4BD5C</checksum>
+    </file>
+    <file>
+      <version>
+        <software_program>OpenStudio</software_program>
+        <identifier>2.1.1</identifier>
+        <min_compatible>2.1.1</min_compatible>
+      </version>
+      <filename>measure.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>script</usage_type>
+      <checksum>ED34BA25</checksum>
+    </file>
+    <file>
       <filename>test_validation.rb</filename>
       <filetype>rb</filetype>
       <usage_type>test</usage_type>
-      <checksum>739C819A</checksum>
+      <checksum>082FE3B7</checksum>
     </file>
     <file>
       <filename>EPvalidator.xml</filename>
       <filetype>xml</filetype>
       <usage_type>resource</usage_type>
-      <checksum>C78549D7</checksum>
-    </file>
-    <file>
-      <filename>validator.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>D3D4BD5C</checksum>
+      <checksum>75B22035</checksum>
     </file>
   </files>
 </measure>
