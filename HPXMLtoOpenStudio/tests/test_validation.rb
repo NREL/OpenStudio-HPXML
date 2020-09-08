@@ -96,21 +96,9 @@ class HPXMLtoOpenStudioValidationTest < MiniTest::Test
       hpxml_doc, parent_element = _get_hpxml_doc_and_parent_element(key)
       child_element_name = key[1]
 
-      # make sure parent elements of the last child element exist in HPXML
-      child_element_without_predicates = child_element_name.gsub(/\[.*?\]|\[|\]/, '') # remove brackets and text within brackets (e.g. [foo or ...])
-      child_element_without_predicates_array = child_element_without_predicates.split('/')[0...-1].reject(&:empty?)
-      XMLHelper.create_elements_as_needed(parent_element, child_element_without_predicates_array)
-
       # modify parent element and child_element_name
       additional_parent_element_name = child_element_name.gsub(/\[text().*?\]/, '').split('/')[0...-1].reject(&:empty?).join('/').chomp('/') # remove text that starts with 'text()' within brackets (e.g. [text()=foo or ...]) and select elements from the first to the second last
       _balance_brackets(additional_parent_element_name)
-
-      # Exceptions
-      if additional_parent_element_name.include? 'HPXML/Building/BuildingDetails/Enclosure/AirInfiltration/AirInfiltrationMeasurement'
-        additional_parent_element_name = 'HPXML/Building/BuildingDetails/Enclosure/AirInfiltration'
-      elsif additional_parent_element_name.include? '../../HVACDistribution[DistributionSystemType'
-        additional_parent_element_name = '../..'
-      end
       mod_parent_element = additional_parent_element_name.empty? ? parent_element : XMLHelper.get_element(parent_element, additional_parent_element_name)
 
       if not expected_error_msg.nil?
