@@ -3385,7 +3385,7 @@ class HPXML < Object
       end
       XMLHelper.add_extension(ventilation_fan, 'StartHour', to_integer(@start_hour)) unless @start_hour.nil?
       if @is_shared_system
-        HPXML::add_extension(ventilation_fan, 'InUnitFlowRate', to_integer(@in_unit_flow_rate) }) unless @in_unit_flow_rate.nil?
+        XMLHelper.add_extension(ventilation_fan, 'InUnitFlowRate', to_integer(@in_unit_flow_rate)) unless @in_unit_flow_rate.nil?
         if (not @preheating_fuel.nil?) && (not @preheating_capacity.nil?) && (not @preheating_efficiency_cop.nil?)
           precond_htg = XMLHelper.create_elements_as_needed(ventilation_fan, ['extension', 'PreHeating'])
           XMLHelper.add_element(precond_htg, 'Fuel', @preheating_fuel) unless @preheating_fuel.nil?

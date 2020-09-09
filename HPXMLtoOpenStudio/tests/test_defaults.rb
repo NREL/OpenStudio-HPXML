@@ -671,10 +671,8 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
 
     # Test defaults
     vent_fan.rated_flow_rate = nil
-    vent_fan.fan_power = nil
     vent_fan.start_hour = nil
     vent_fan.quantity = nil
-    vent_fan.hours_in_operation = nil
     vent_fan.is_shared_system = nil
     vent_fan.fraction_recirculation = nil
     vent_fan.in_unit_flow_rate = nil
