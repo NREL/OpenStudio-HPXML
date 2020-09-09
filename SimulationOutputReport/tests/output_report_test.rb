@@ -716,6 +716,7 @@ class SimulationOutputReportTest < MiniTest::Test
     actual_timeseries_cols = File.readlines(timeseries_csv)[0].strip.split(',')
     assert_equal(expected_timeseries_cols.sort, actual_timeseries_cols.sort)
     assert_equal(8760, File.readlines(timeseries_csv).size - 2)
+    _check_for_zero_baseload_timeseries_value(timeseries_csv, ['Electricity: Refrigerator'])
   end
 
   def test_timeseries_daily_ALL
@@ -736,6 +737,7 @@ class SimulationOutputReportTest < MiniTest::Test
     actual_timeseries_cols = File.readlines(timeseries_csv)[0].strip.split(',')
     assert_equal(expected_timeseries_cols.sort, actual_timeseries_cols.sort)
     assert_equal(365, File.readlines(timeseries_csv).size - 2)
+    _check_for_zero_baseload_timeseries_value(timeseries_csv, ['Electricity: Refrigerator'])
   end
 
   def test_timeseries_monthly_ALL
@@ -756,6 +758,7 @@ class SimulationOutputReportTest < MiniTest::Test
     actual_timeseries_cols = File.readlines(timeseries_csv)[0].strip.split(',')
     assert_equal(expected_timeseries_cols.sort, actual_timeseries_cols.sort)
     assert_equal(12, File.readlines(timeseries_csv).size - 2)
+    _check_for_zero_baseload_timeseries_value(timeseries_csv, ['Electricity: Refrigerator'])
   end
 
   def test_timeseries_timestep_ALL_60min
@@ -776,6 +779,7 @@ class SimulationOutputReportTest < MiniTest::Test
     actual_timeseries_cols = File.readlines(timeseries_csv)[0].strip.split(',')
     assert_equal(expected_timeseries_cols.sort, actual_timeseries_cols.sort)
     assert_equal(8760, File.readlines(timeseries_csv).size - 2)
+    _check_for_zero_baseload_timeseries_value(timeseries_csv, ['Electricity: Refrigerator'])
   end
 
   def test_timeseries_timestep_ALL_10min
@@ -796,6 +800,7 @@ class SimulationOutputReportTest < MiniTest::Test
     actual_timeseries_cols = File.readlines(timeseries_csv)[0].strip.split(',')
     assert_equal(expected_timeseries_cols.sort, actual_timeseries_cols.sort)
     assert_equal(52560, File.readlines(timeseries_csv).size - 2)
+    _check_for_zero_baseload_timeseries_value(timeseries_csv, ['Electricity: Refrigerator'])
   end
 
   def test_timeseries_hourly_ALL_runperiod_Jan
@@ -816,6 +821,7 @@ class SimulationOutputReportTest < MiniTest::Test
     actual_timeseries_cols = File.readlines(timeseries_csv)[0].strip.split(',')
     assert_equal(expected_timeseries_cols.sort, actual_timeseries_cols.sort)
     assert_equal(31 * 24, File.readlines(timeseries_csv).size - 2)
+    _check_for_zero_baseload_timeseries_value(timeseries_csv, ['Electricity: Refrigerator'])
   end
 
   def test_timeseries_daily_ALL_runperiod_Jan
@@ -836,6 +842,7 @@ class SimulationOutputReportTest < MiniTest::Test
     actual_timeseries_cols = File.readlines(timeseries_csv)[0].strip.split(',')
     assert_equal(expected_timeseries_cols.sort, actual_timeseries_cols.sort)
     assert_equal(31, File.readlines(timeseries_csv).size - 2)
+    _check_for_zero_baseload_timeseries_value(timeseries_csv, ['Electricity: Refrigerator'])
   end
 
   def test_timeseries_monthly_ALL_runperiod_Jan
@@ -856,6 +863,7 @@ class SimulationOutputReportTest < MiniTest::Test
     actual_timeseries_cols = File.readlines(timeseries_csv)[0].strip.split(',')
     assert_equal(expected_timeseries_cols.sort, actual_timeseries_cols.sort)
     assert_equal(1, File.readlines(timeseries_csv).size - 2)
+    _check_for_zero_baseload_timeseries_value(timeseries_csv, ['Electricity: Refrigerator'])
   end
 
   def test_timeseries_timestep_ALL_60min_runperiod_Jan
@@ -876,6 +884,7 @@ class SimulationOutputReportTest < MiniTest::Test
     actual_timeseries_cols = File.readlines(timeseries_csv)[0].strip.split(',')
     assert_equal(expected_timeseries_cols.sort, actual_timeseries_cols.sort)
     assert_equal(31 * 24, File.readlines(timeseries_csv).size - 2)
+    _check_for_zero_baseload_timeseries_value(timeseries_csv, ['Electricity: Refrigerator'])
   end
 
   def test_timeseries_hourly_ALL_AMY_2012
@@ -896,6 +905,7 @@ class SimulationOutputReportTest < MiniTest::Test
     actual_timeseries_cols = File.readlines(timeseries_csv)[0].strip.split(',')
     assert_equal(expected_timeseries_cols.sort, actual_timeseries_cols.sort)
     assert_equal(8784, File.readlines(timeseries_csv).size - 2)
+    _check_for_zero_baseload_timeseries_value(timeseries_csv, ['Electricity: Refrigerator'])
   end
 
   def test_timeseries_daily_ALL_AMY_2012
@@ -916,6 +926,7 @@ class SimulationOutputReportTest < MiniTest::Test
     actual_timeseries_cols = File.readlines(timeseries_csv)[0].strip.split(',')
     assert_equal(expected_timeseries_cols.sort, actual_timeseries_cols.sort)
     assert_equal(366, File.readlines(timeseries_csv).size - 2)
+    _check_for_zero_baseload_timeseries_value(timeseries_csv, ['Electricity: Refrigerator'])
   end
 
   def test_timeseries_timestep_ALL_60min_AMY_2012
@@ -936,6 +947,7 @@ class SimulationOutputReportTest < MiniTest::Test
     actual_timeseries_cols = File.readlines(timeseries_csv)[0].strip.split(',')
     assert_equal(expected_timeseries_cols.sort, actual_timeseries_cols.sort)
     assert_equal(8784, File.readlines(timeseries_csv).size - 2)
+    _check_for_zero_baseload_timeseries_value(timeseries_csv, ['Electricity: Refrigerator'])
   end
 
   def test_eri_designs
@@ -1042,6 +1054,28 @@ class SimulationOutputReportTest < MiniTest::Test
     timeseries_cols.each do |col|
       avg_value = values[col].sum(0.0) / values[col].size
       assert_operator(avg_value, :!=, 0)
+    end
+  end
+
+  def _check_for_zero_baseload_timeseries_value(timeseries_csv, timeseries_cols)
+    # check that every day has non zero values for baseload equipment (e.g., refrigerator)
+    values = {}
+    timeseries_cols.each do |col|
+      values[col] = []
+    end
+    CSV.foreach(timeseries_csv, headers: true) do |row|
+      next if row['Time'].nil?
+
+      timeseries_cols.each do |col|
+        fail "Unexpected column: #{col}." if row[col].nil?
+
+        values[col] << Float(row[col])
+      end
+    end
+
+    timeseries_cols.each do |col|
+      has_no_zero_timeseries_value = !values[col].include?(0.0)
+      assert(has_no_zero_timeseries_value)
     end
   end
 end

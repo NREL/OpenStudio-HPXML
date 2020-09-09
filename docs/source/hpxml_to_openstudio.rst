@@ -8,8 +8,8 @@ The HPXMLtoOpenStudio measure requires a building description in an `HPXML file 
 HPXML is an open data standard for collecting and transferring home energy data. 
 Using HPXML files reduces the complexity and effort for software developers to leverage the EnergyPlus simulation engine.
 
-Capabilities
-************
+HPXML Inputs
+------------
 
 The following building features/technologies are available for modeling via the HPXMLtoOpenStudio measure:
 
@@ -61,13 +61,12 @@ EnergyPlus Use Case for HPXML
 HPXML is an flexible and extensible format, where nearly all elements in the schema are optional and custom elements can be included.
 Because of this, an EnergyPlus Use Case for HPXML has been developed that specifies the HPXML elements or enumeration choices required to run the measure.
 
-Software developers should use the EnergyPlus Use Case (found at ``HPXMLtoOpenStudio/resources/EPvalidator.rb``, which defines sets of conditional XPath expressions) as well as the HPXML schema (HPXML.xsd) to construct valid HPXML files for EnergyPlus simulations.
+.. important::
 
-The `HPXML Toolbox website <https://hpxml.nrel.gov/>`_ also provides several resources for software developers, including:
+  Usage of both validation approaches (XSD and Schematron) is recommended for developers actively working on creating HPXML files for EnergyPlus simulations:
 
-#. An interactive schema validator
-#. A data dictionary
-#. An implementation guide
+  - Validation against XSD for general correctness and usage of HPXML
+  - Validation against Schematron for understanding XML document requirements specific to running EnergyPlus
 
 Input Defaults
 **************
@@ -484,9 +483,8 @@ For boilers, ``IsSharedSystem`` will default to false if not provided.
 
 For all non-shared systems, ``HeatingCapacity`` may be provided; if not, the system will be auto-sized via ACCA Manual J/S.
 
-For non-shared systems, the ``ElectricAuxiliaryEnergy`` element may be provided if available.
-
-For shared boilers (i.e., serving multiple dwelling units), the electric auxiliary energy is calculated using the following equation from `ANSI/RESNET/ICC 301-2019 <https://codes.iccsafe.org/content/RESNETICC3012019>`_:
+For all systems, the ``ElectricAuxiliaryEnergy`` element may be provided if available.
+For shared boilers (i.e., serving multiple dwelling units), the electric auxiliary energy can alternatively be calculated as follows per `ANSI/RESNET/ICC 301-2019 <https://codes.iccsafe.org/content/RESNETICC3012019>`_:
 
   | :math:`EAE = (\frac{SP}{N_{dweq}} + aux_{in}) \cdot HLH`
   | where, 
@@ -494,6 +492,21 @@ For shared boilers (i.e., serving multiple dwelling units), the electric auxilia
   |   :math:`N_{dweq}` = Number of units served by the shared system, provided as ``NumberofUnitsServed``
   |   :math:`aux_{in}` = In-unit fan coil power [W], provided as ``extension/FanCoilWatts``
   |   :math:`HLH` = Annual heating load hours
+
+If electric auxiliary energy is not provided (nor calculated for shared boilers), it is defaulted per `ANSI/RESNET/ICC 301-2019 <https://codes.iccsafe.org/content/RESNETICC3012019>`_ as follows:
+
+============================================  ==============================
+System Type                                   Electric Auxiliary Energy
+============================================  ==============================
+Oil boiler                                    330
+Gas boiler (in-unit)                          170
+Gas boiler (shared, w/ baseboard)             220
+Gas boiler (shared, w/ water loop heat pump)  265
+Gas boiler (shared, w/ fan coil)              438
+Oil furnace                                   439 + 5.5 * Capacity (kBtu/h)
+Gas furnace                                   149 + 10.3 * Capacity (kBtu/h)
+Other                                         0
+============================================  ==============================
 
 For shared boilers connected to a water loop heat pump, the heat pump's heating COP must be provided as ``extension/WaterLoopHeatPump/AnnualHeatingEfficiency[Units="COP"]/Value``.
 
@@ -562,7 +575,10 @@ ground-to-air  false           AirDistribution or DSE             electricity   
 ground-to-air  true            AirDistribution or DSE             electricity   EER                      COP                      (optional)
 =============  ==============  =================================  ============  =======================  =======================  ===========================  ==================
 
-For ground-to-air heat pumps, ``IsSharedSystem`` will default to false if not provided.
+Ground-to-air heat pumps also have a few other inputs:
+
+- ``extension/PumpPowerWattsPerTon``: Optional. Ground loop circulator pump power during operation of the heat pump in Watts/ton of cooling capacity. Defaults to 30 Watts per ton of cooling capacity per `ANSI/RESNET/ICC 301-2019 <https://codes.iccsafe.org/content/RESNETICC3012019>`_ for a closed loop system.
+- ``extension/FanPowerWattsPerCFM``: Optional. Blower fan power in Watts/cfm. Defaults to 0.5 W/cfm.
 
 Air-to-air heat pumps can also have the ``CompressorType`` specified; if not provided, it is assumed as follows:
 
@@ -1255,9 +1271,9 @@ This section describes elements specified in HPXML's ``MiscLoads``.
 HPXML Plug Loads
 ****************
 
-Misc electric plug loads can be provided by entering ``PlugLoad`` elements; if not provided, plug loads will not be modeled.
+Misc electric plug loads can be provided by entering ``PlugLoad`` elements.
 Currently only plug loads specified with ``PlugLoadType='other'``, ``PlugLoadType='TV other'``, ``PlugLoadType='electric vehicle charging'``, or ``PlugLoadType='well pump'`` are recognized.
-It is generally recommended to at least include the 'other' (miscellaneous) and 'TV other' plug load types for the typical home.
+The 'other' and 'TV other' plug loads are required to represent the typical home; the other less common plug loads will only be modeled if provided.
 
 The annual energy consumption (``Load[Units='kWh/year']/Value``), ``Location``, ``extension/FracSensible``, and ``extension/FracLatent`` elements are optional.
 If not provided, they will be defaulted as follows.
@@ -1287,8 +1303,9 @@ If not provided, values from Figures 23 & 24 of the `Building America House Simu
 HPXML Fuel Loads
 ****************
 
-Misc fuel loads can be provided by entering ``FuelLoad`` elements; if not provided, fuel loads will not be modeled.
+Misc fuel loads can be provided by entering ``FuelLoad`` elements.
 Currently only fuel loads specified with ``FuelLoadType='grill'``, ``FuelLoadType='lighting'``, or ``FuelLoadType='fireplace'`` are recognized.
+These less common fuel loads will only be modeled if provided.
 
 The annual energy consumption (``Load[Units='therm/year']/Value``), ``Location``, ``extension/FracSensible``, and ``extension/FracLatent`` elements are also optional.
 If not provided, they will be defaulted as follows.
