@@ -953,6 +953,11 @@
       <sch:assert test='(count(h:EnergyFactor) + count(h:CombinedEnergyFactor) + count(h:ControlType) = 0) or (count(h:EnergyFactor) + count(h:CombinedEnergyFactor) + count(h:ControlType) = 2)'>Expected 0 or 2 element(s) for xpath: EnergyFactor | CombinedEnergyFactor | ControlType</sch:assert>
       <sch:assert test='count(h:extension/h:UsageMultiplier) &lt;= 1'>Expected 0 or 1 element(s) for xpath: extension/UsageMultiplier</sch:assert>
       <sch:assert test='count(h:extension/h:IsVented) &lt;= 1'>Expected 0 or 1 element(s) for xpath: extension/IsVented</sch:assert>
+    </sch:rule>
+  </sch:pattern>
+
+  <sch:pattern name='[VentedClothesDryer]'>
+    <sch:rule context='/h:HPXML/h:Building/h:BuildingDetails/h:Appliances/h:ClothesDryer[h:extension/h:IsVented="true"]'>
       <sch:assert test='count(h:extension/h:VentedFlowRate) &lt;= 1'>Expected 0 or 1 element(s) for xpath: extension/VentedFlowRate</sch:assert>
     </sch:rule>
   </sch:pattern>

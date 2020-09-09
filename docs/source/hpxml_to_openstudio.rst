@@ -1026,7 +1026,7 @@ If ``EnergyFactor`` is provided instead of ``CombinedEnergyFactor``, it will be 
 An ``extension/UsageMultiplier`` can also be optionally provided that scales energy usage; if not provided, it is assumed to be 1.0.
 
 An optional ``extension/IsVented`` element can be used to indicate whether the clothes dryer is vented. If not provided, it is assumed that the clothes dryer is vented.
-If the clothes dryer is vented, an optional ``extension/VentedFlowRate`` element can be used to specify the exhaust cfm.
+If the clothes dryer is vented, an optional ``extension/VentedFlowRate`` element can be used to specify the exhaust cfm. If not provided, it is assumed that the clothes dryer vented flow rate is 100 cfm.
 
 The clothes dryer may be optionally described as a shared appliance (i.e., in a shared laundry room) using ``IsSharedAppliance``.
 If not provided, it is assumed to be false.

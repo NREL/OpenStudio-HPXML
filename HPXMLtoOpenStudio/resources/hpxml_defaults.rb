@@ -824,15 +824,7 @@ class HPXMLDefaults
         clothes_dryer.is_vented = true
       end
       if clothes_dryer.is_vented && clothes_dryer.vented_flow_rate.nil?
-        if not clothes_dryer.combined_energy_factor.nil?
-          if clothes_dryer.combined_energy_factor < 4.5
-            clothes_dryer.vented_flow_rate = 100.0
-          end
-        elsif not clothes_dryer.energy_factor.nil?
-          if clothes_dryer.energy_factor < HotWaterAndAppliances.calc_clothes_dryer_ef_from_cef(4.5)
-            clothes_dryer.vented_flow_rate = 100.0
-          end
-        end
+        clothes_dryer.vented_flow_rate = 100.0
       end
     end
 

@@ -700,10 +700,15 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
     hpxml = HPXML.new(hpxml_path: File.join(@root_path, 'workflow', 'sample_files', hpxml_name))
     clothes_dryer = hpxml.clothes_dryers[0]
     clothes_dryer.is_vented = true
+    clothes_dryer.vented_flow_rate = 200
+    XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
+    hpxml_default = _test_measure()
+    _test_default_clothes_dryer_exhaust_values(hpxml_default, true, 200)
+    clothes_dryer.is_vented = false
     clothes_dryer.vented_flow_rate = 300
     XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
     hpxml_default = _test_measure()
-    _test_default_clothes_dryer_exhaust_values(hpxml_default, true, 300)
+    _test_default_clothes_dryer_exhaust_values(hpxml_default, false, 300)
 
     # Test defaults
     clothes_dryer.is_vented = nil
