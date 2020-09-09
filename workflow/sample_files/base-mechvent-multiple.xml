@@ -577,12 +577,8 @@
               </extension>
             </VentilationFan>
             <VentilationFan>
-<<<<<<< HEAD
               <SystemIdentifier id='KitchenRangeFan_2'/>
-=======
-              <SystemIdentifier id='KitchenRangeFan2'/>
               <Quantity>1</Quantity>
->>>>>>> 246f976dcb980ee093a81515dc9d60914c3c8f72
               <RatedFlowRate>50.0</RatedFlowRate>
               <HoursInOperation>0.5</HoursInOperation>
               <FanLocation>kitchen</FanLocation>
