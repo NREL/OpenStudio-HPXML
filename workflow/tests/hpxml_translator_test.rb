@@ -259,10 +259,6 @@ class HPXMLTest < MiniTest::Test
                    ['Baseboard Total Heating Energy', 'runperiod', '*'],
                    ['Boiler Heating Energy', 'runperiod', '*'],
                    ['Fluid Heat Exchanger Heat Transfer Energy', 'runperiod', '*'],
-<<<<<<< HEAD
-                   ['Electric Equipment Electric Energy', 'runperiod', Constants.ObjectNameMechanicalVentilationHouseFanCFIS],
-                   ['Electric Equipment Electric Energy', 'runperiod', Constants.ObjectNameMechanicalVentilationHouseFanCFIS + ' preconditioned']]
-=======
                    ['Fan Electric Power', 'runperiod', '*'],
                    ['Fan Runtime Fraction', 'runperiod', '*'],
                    ['Electric Equipment Electric Energy', 'runperiod', Constants.ObjectNameMechanicalVentilationHouseFanCFIS],
@@ -270,10 +266,8 @@ class HPXMLTest < MiniTest::Test
                    ['Pump Electric Power', 'runperiod', Constants.ObjectNameBoiler + ' hydronic pump'],
                    ['Unitary System Part Load Ratio', 'runperiod', Constants.ObjectNameGroundSourceHeatPump + ' unitary system'],
                    ['Pump Electric Power', 'runperiod', Constants.ObjectNameGroundSourceHeatPump + ' pump']]
->>>>>>> 246f976dcb980ee093a81515dc9d60914c3c8f72
-
-    # Run workflow
-    workflow_start = Time.now
+                  # Run workflow
+                  workflow_start = Time.now
     results = run_hpxml_workflow(rundir, xml, measures, measures_dir,
                                  debug: true, output_vars: output_vars,
                                  run_measures_only: expect_error)
