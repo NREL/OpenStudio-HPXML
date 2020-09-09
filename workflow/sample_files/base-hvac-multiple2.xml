@@ -41,6 +41,7 @@
           <NumberofConditionedFloors>2</NumberofConditionedFloors>
           <NumberofConditionedFloorsAboveGrade>1</NumberofConditionedFloorsAboveGrade>
           <NumberofBedrooms>3</NumberofBedrooms>
+          <NumberofBathrooms>2</NumberofBathrooms>
           <ConditionedFloorArea>2700.0</ConditionedFloorArea>
           <ConditionedBuildingVolume>21600.0</ConditionedBuildingVolume>
         </BuildingConstruction>
@@ -331,7 +332,7 @@
               </AnnualHeatingEfficiency>
               <FractionHeatLoadServed>0.2</FractionHeatLoadServed>
               <extension>
-                <BlowerWattPerCFM>0.2</BlowerWattPerCFM>
+                <FanPowerWattsPerCFM>0.2</FanPowerWattsPerCFM>
               </extension>
             </HeatingSystem>
             <HeatingSystem>
@@ -439,6 +440,9 @@
                 <Units>COP</Units>
                 <Value>3.6</Value>
               </AnnualHeatingEfficiency>
+              <extension>
+                <PumpPowerWattsPerTon>30.0</PumpPowerWattsPerTon>
+              </extension>
             </HeatPump>
           </HVACPlant>
           <HVACControl>
@@ -493,7 +497,7 @@
                 </Ducts>
               </AirDistribution>
             </DistributionSystemType>
-            <ConditionedFloorAreaServed>540.0</ConditionedFloorAreaServed>
+            <ConditionedFloorAreaServed>675.0</ConditionedFloorAreaServed>
           </HVACDistribution>
           <HVACDistribution>
             <SystemIdentifier id='HVACDistribution2'/>
@@ -541,12 +545,14 @@
                 </Ducts>
               </AirDistribution>
             </DistributionSystemType>
-            <ConditionedFloorAreaServed>540.0</ConditionedFloorAreaServed>
+            <ConditionedFloorAreaServed>675.0</ConditionedFloorAreaServed>
           </HVACDistribution>
           <HVACDistribution>
             <SystemIdentifier id='HVACDistribution3'/>
             <DistributionSystemType>
-              <HydronicDistribution/>
+              <HydronicDistribution>
+                <HydronicDistributionType>baseboard</HydronicDistributionType>
+              </HydronicDistribution>
             </DistributionSystemType>
           </HVACDistribution>
           <HVACDistribution>
@@ -595,7 +601,7 @@
                 </Ducts>
               </AirDistribution>
             </DistributionSystemType>
-            <ConditionedFloorAreaServed>540.0</ConditionedFloorAreaServed>
+            <ConditionedFloorAreaServed>675.0</ConditionedFloorAreaServed>
           </HVACDistribution>
           <HVACDistribution>
             <SystemIdentifier id='HVACDistribution5'/>
@@ -643,7 +649,7 @@
                 </Ducts>
               </AirDistribution>
             </DistributionSystemType>
-            <ConditionedFloorAreaServed>540.0</ConditionedFloorAreaServed>
+            <ConditionedFloorAreaServed>675.0</ConditionedFloorAreaServed>
           </HVACDistribution>
         </HVAC>
         <WaterHeating>
@@ -659,7 +665,7 @@
             <HotWaterTemperature>125.0</HotWaterTemperature>
           </WaterHeatingSystem>
           <HotWaterDistribution>
-            <SystemIdentifier id='HotWaterDstribution'/>
+            <SystemIdentifier id='HotWaterDistribution'/>
             <SystemType>
               <Standard>
                 <PipingLength>50.0</PipingLength>
@@ -821,10 +827,6 @@
             <Units>kWh/year</Units>
             <Value>620.0</Value>
           </Load>
-          <extension>
-            <FracSensible>1.0</FracSensible>
-            <FracLatent>0.0</FracLatent>
-          </extension>
         </PlugLoad>
       </MiscLoads>
     </BuildingDetails>

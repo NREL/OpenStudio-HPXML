@@ -76,6 +76,33 @@ class HPXMLDefaults
       hpxml.building_construction.conditioned_building_volume = cfa * hpxml.building_construction.average_ceiling_height
     end
     hpxml.building_construction.number_of_bathrooms = Float(Waterheater.get_default_num_bathrooms(nbeds)).to_i if hpxml.building_construction.number_of_bathrooms.nil?
+    if hpxml.building_construction.has_flue_or_chimney.nil?
+      hpxml.building_construction.has_flue_or_chimney = false
+      hpxml.heating_systems.each do |heating_system|
+        if [HPXML::HVACTypeFurnace, HPXML::HVACTypeBoiler, HPXML::HVACTypeWallFurnace, HPXML::HVACTypeFloorFurnace, HPXML::HVACTypeStove, HPXML::HVACTypeFixedHeater].include? heating_system.heating_system_type
+          if not heating_system.heating_efficiency_afue.nil?
+            next if heating_system.heating_efficiency_afue >= 0.89
+          elsif not heating_system.heating_efficiency_percent.nil?
+            next if heating_system.heating_efficiency_percent >= 0.89
+          end
+
+          hpxml.building_construction.has_flue_or_chimney = true
+        elsif [HPXML::HVACTypeFireplace].include? heating_system.heating_system_type
+          next if heating_system.heating_system_fuel == HPXML::FuelTypeElectricity
+
+          hpxml.building_construction.has_flue_or_chimney = true
+        end
+      end
+      hpxml.water_heating_systems.each do |water_heating_system|
+        if not water_heating_system.energy_factor.nil?
+          next if water_heating_system.energy_factor >= 0.63
+        elsif not water_heating_system.uniform_energy_factor.nil?
+          next if Waterheater.calc_ef_from_uef(water_heating_system) >= 0.63
+        end
+
+        hpxml.building_construction.has_flue_or_chimney = true
+      end
+    end
   end
 
   def self.apply_attics(hpxml)
@@ -120,10 +147,10 @@ class HPXMLDefaults
     measurements = []
     infil_volume = nil
     hpxml.air_infiltration_measurements.each do |measurement|
-      is_ach50 = ((measurement.unit_of_measure == HPXML::UnitsACH) && (measurement.house_pressure == 50))
-      is_cfm50 = ((measurement.unit_of_measure == HPXML::UnitsCFM) && (measurement.house_pressure == 50))
+      is_ach = ((measurement.unit_of_measure == HPXML::UnitsACH) && !measurement.house_pressure.nil?)
+      is_cfm = ((measurement.unit_of_measure == HPXML::UnitsCFM) && !measurement.house_pressure.nil?)
       is_nach = (measurement.unit_of_measure == HPXML::UnitsACHNatural)
-      next unless (is_ach50 || is_cfm50 || is_nach)
+      next unless (is_ach || is_cfm || is_nach)
 
       measurements << measurement
       next if measurement.infiltration_volume.nil?
@@ -222,6 +249,14 @@ class HPXMLDefaults
       heat_pump.compressor_type = HVAC.get_default_compressor_type(heat_pump.cooling_efficiency_seer)
     end
 
+    # Default boiler EAE
+    hpxml.heating_systems.each do |heating_system|
+      next unless heating_system.heating_system_type == HPXML::HVACTypeBoiler
+      next unless heating_system.electric_auxiliary_energy.nil?
+
+      heating_system.electric_auxiliary_energy = HVAC.get_default_boiler_eae(heating_system)
+    end
+
     # Default AC/HP sensible heat ratio
     hpxml.cooling_systems.each do |cooling_system|
       next unless cooling_system.cooling_shr.nil?
@@ -236,6 +271,8 @@ class HPXMLDefaults
         end
       elsif cooling_system.cooling_system_type == HPXML::HVACTypeRoomAirConditioner
         cooling_system.cooling_shr = 0.65
+      elsif cooling_system.cooling_system_type == HPXML::HVACTypeMiniSplitAirConditioner
+        cooling_system.cooling_shr = 0.73
       end
     end
     hpxml.heat_pumps.each do |heat_pump|
@@ -274,43 +311,45 @@ class HPXMLDefaults
 
     # Fan power
     hpxml.cooling_systems.each do |cooling_system|
-      next unless cooling_system.blower_watt_cfm.nil?
+      next unless cooling_system.fan_watts_per_cfm.nil?
 
       if cooling_system.cooling_system_type == HPXML::HVACTypeCentralAirConditioner
         if cooling_system.cooling_efficiency_seer <= 15
-          cooling_system.blower_watt_cfm = 0.5 # W/cfm
+          cooling_system.fan_watts_per_cfm = 0.5 # W/cfm
         else
-          cooling_system.blower_watt_cfm = 0.3 # W/cfm
+          cooling_system.fan_watts_per_cfm = 0.3 # W/cfm
         end
       end
     end
     hpxml.heating_systems.each do |heating_system|
-      next unless heating_system.blower_watt_cfm.nil?
+      next unless heating_system.fan_watts_per_cfm.nil?
 
       if heating_system.heating_system_type == HPXML::HVACTypeFurnace
         # TODO: Only set if not attached to an AC?
-        heating_system.blower_watt_cfm = 0.5 # W/cfm
+        heating_system.fan_watts_per_cfm = 0.5 # W/cfm
       else
         # TODO: What value to use for stoves, wall/floor furnaces, space heaters, etc?
-        heating_system.blower_watt_cfm = 0.5 # W/cfm
+        heating_system.fan_watts_per_cfm = 0.5 # W/cfm
       end
     end
     hpxml.heat_pumps.each do |heat_pump|
-      next unless heat_pump.blower_watt_cfm.nil?
+      next unless heat_pump.fan_watts_per_cfm.nil?
 
       if heat_pump.heat_pump_type == HPXML::HVACTypeHeatPumpAirToAir
         if heat_pump.cooling_efficiency_seer <= 15
-          heat_pump.blower_watt_cfm = 0.5 # W/cfm
+          heat_pump.fan_watts_per_cfm = 0.5 # W/cfm
         else
-          heat_pump.blower_watt_cfm = 0.3 # W/cfm
+          heat_pump.fan_watts_per_cfm = 0.3 # W/cfm
         end
       elsif heat_pump.heat_pump_type == HPXML::HVACTypeHeatPumpGroundToAir
-        heat_pump.blower_watt_cfm = 0.5 # W/cfm
+        # Should this be 0.2 W/cfm per ANSI/RESNET/ICC 301-2019 Section 4.4.5? (or is 0.2 W/cfm
+        # interpreted as the _additional_ fan power beyond that captured in the rating test?)
+        heat_pump.fan_watts_per_cfm = 0.5 # W/cfm
       elsif heat_pump.heat_pump_type == HPXML::HVACTypeHeatPumpMiniSplit
         if not heat_pump.distribution_system.nil?
-          heat_pump.blower_watt_cfm = 0.18 # W/cfm, ducted
+          heat_pump.fan_watts_per_cfm = 0.18 # W/cfm, ducted
         else
-          heat_pump.blower_watt_cfm = 0.07 # W/cfm, ductless
+          heat_pump.fan_watts_per_cfm = 0.07 # W/cfm, ductless
         end
       end
     end
@@ -320,10 +359,19 @@ class HPXMLDefaults
       next unless heating_system.heating_system_type == HPXML::HVACTypeBoiler
       next unless heating_system.electric_auxiliary_energy.nil?
 
-      heating_system.electric_auxiliary_energy = HVAC.get_default_boiler_eae(heating_system.heating_system_fuel, heating_system.fraction_heat_load_served)
+      heating_system.electric_auxiliary_energy = HVAC.get_default_boiler_eae(heating_system.heating_system_fuel)
+    end
+
+    # Default GSHP pump
+    hpxml.heat_pumps.each do |heat_pump|
+      next unless heat_pump.heat_pump_type == HPXML::HVACTypeHeatPumpGroundToAir
+      next unless heat_pump.pump_watts_per_ton.nil?
+
+      heat_pump.pump_watts_per_ton = HVAC.get_default_gshp_pump_power()
     end
 
     # HVAC capacities
+    # Transition capacity elements from -1 to nil
     hpxml.heating_systems.each do |heating_system|
       if (not heating_system.heating_capacity.nil?) && (heating_system.heating_capacity < 0)
         heating_system.heating_capacity = nil
@@ -370,7 +418,7 @@ class HPXMLDefaults
     end
 
     hpxml.hvac_distributions.each do |hvac_distribution|
-      next unless hvac_distribution.distribution_system_type == HPXML::HVACDistributionTypeAir
+      next unless [HPXML::HVACDistributionTypeAir, HPXML::HVACDistributionTypeHydronicAndAir].include? hvac_distribution.distribution_system_type
 
       # Default return registers
       if hvac_distribution.number_of_return_registers.nil?
@@ -409,6 +457,9 @@ class HPXMLDefaults
 
   def self.apply_water_heaters(hpxml, nbeds, eri_version)
     hpxml.water_heating_systems.each do |water_heating_system|
+      if water_heating_system.is_shared_system.nil?
+        water_heating_system.is_shared_system = false
+      end
       if water_heating_system.temperature.nil?
         water_heating_system.temperature = Waterheater.get_default_hot_water_temperature(eri_version)
       end
@@ -459,6 +510,12 @@ class HPXMLDefaults
         hot_water_distribution.recirculation_pump_power = HotWaterAndAppliances.get_default_recirc_pump_power()
       end
     end
+
+    if hot_water_distribution.has_shared_recirculation
+      if hot_water_distribution.shared_recirculation_pump_power.nil?
+        hot_water_distribution.shared_recirculation_pump_power = HotWaterAndAppliances.get_default_shared_recirc_pump_power()
+      end
+    end
   end
 
   def self.apply_water_fixtures(hpxml)
@@ -485,6 +542,9 @@ class HPXMLDefaults
     hpxml.ventilation_fans.each do |vent_fan|
       next unless (vent_fan.used_for_local_ventilation && (vent_fan.fan_location == HPXML::LocationKitchen))
 
+      if vent_fan.quantity.nil?
+        vent_fan.quantity = 1
+      end
       if vent_fan.rated_flow_rate.nil?
         vent_fan.rated_flow_rate = 100.0 # cfm, per BA HSP
       end
@@ -786,6 +846,9 @@ class HPXMLDefaults
     # Default clothes washer
     if hpxml.clothes_washers.size > 0
       clothes_washer = hpxml.clothes_washers[0]
+      if clothes_washer.is_shared_appliance.nil?
+        clothes_washer.is_shared_appliance = false
+      end
       if clothes_washer.location.nil?
         clothes_washer.location = HPXML::LocationLivingSpace
       end
@@ -807,6 +870,9 @@ class HPXMLDefaults
     # Default clothes dryer
     if hpxml.clothes_dryers.size > 0
       clothes_dryer = hpxml.clothes_dryers[0]
+      if clothes_dryer.is_shared_appliance.nil?
+        clothes_dryer.is_shared_appliance = false
+      end
       if clothes_dryer.location.nil?
         clothes_dryer.location = HPXML::LocationLivingSpace
       end
@@ -823,6 +889,9 @@ class HPXMLDefaults
     # Default dishwasher
     if hpxml.dishwashers.size > 0
       dishwasher = hpxml.dishwashers[0]
+      if dishwasher.is_shared_appliance.nil?
+        dishwasher.is_shared_appliance = false
+      end
       if dishwasher.location.nil?
         dishwasher.location = HPXML::LocationLivingSpace
       end
@@ -934,8 +1003,62 @@ class HPXMLDefaults
   end
 
   def self.apply_lighting(hpxml)
-    if hpxml.lighting.usage_multiplier.nil?
-      hpxml.lighting.usage_multiplier = 1.0
+    if hpxml.lighting.interior_usage_multiplier.nil?
+      hpxml.lighting.interior_usage_multiplier = 1.0
+    end
+    if hpxml.lighting.garage_usage_multiplier.nil?
+      hpxml.lighting.garage_usage_multiplier = 1.0
+    end
+    if hpxml.lighting.exterior_usage_multiplier.nil?
+      hpxml.lighting.exterior_usage_multiplier = 1.0
+    end
+    # Schedules from T24 2016 Residential ACM Appendix C Table 8 Exterior Lighting Hourly Multiplier (Weekdays and weekends)
+    default_exterior_lighting_weekday_fractions = '0.046, 0.046, 0.046, 0.046, 0.046, 0.037, 0.035, 0.034, 0.033, 0.028, 0.022, 0.015, 0.012, 0.011, 0.011, 0.012, 0.019, 0.037, 0.049, 0.065, 0.091, 0.105, 0.091, 0.063'
+    default_exterior_lighting_weekend_fractions = '0.046, 0.046, 0.045, 0.045, 0.046, 0.045, 0.044, 0.041, 0.036, 0.03, 0.024, 0.016, 0.012, 0.011, 0.011, 0.012, 0.019, 0.038, 0.048, 0.06, 0.083, 0.098, 0.085, 0.059'
+    default_exterior_lighting_monthly_multipliers = '1.248, 1.257, 0.993, 0.989, 0.993, 0.827, 0.821, 0.821, 0.827, 0.99, 0.987, 1.248'
+    if hpxml.has_space_type(HPXML::LocationGarage)
+      if hpxml.lighting.garage_weekday_fractions.nil?
+        hpxml.lighting.garage_weekday_fractions = default_exterior_lighting_weekday_fractions
+      end
+      if hpxml.lighting.garage_weekend_fractions.nil?
+        hpxml.lighting.garage_weekend_fractions = default_exterior_lighting_weekend_fractions
+      end
+      if hpxml.lighting.garage_monthly_multipliers.nil?
+        hpxml.lighting.garage_monthly_multipliers = default_exterior_lighting_monthly_multipliers
+      end
+    end
+    if hpxml.lighting.exterior_weekday_fractions.nil?
+      hpxml.lighting.exterior_weekday_fractions = default_exterior_lighting_weekday_fractions
+    end
+    if hpxml.lighting.exterior_weekend_fractions.nil?
+      hpxml.lighting.exterior_weekend_fractions = default_exterior_lighting_weekend_fractions
+    end
+    if hpxml.lighting.exterior_monthly_multipliers.nil?
+      hpxml.lighting.exterior_monthly_multipliers = default_exterior_lighting_monthly_multipliers
+    end
+    if hpxml.lighting.holiday_exists
+      if hpxml.lighting.holiday_kwh_per_day.nil?
+        # From LA100 repo (2017)
+        if hpxml.building_construction.residential_facility_type == HPXML::ResidentialTypeSFD
+          hpxml.lighting.holiday_kwh_per_day = 1.1
+        else # Multifamily and others
+          hpxml.lighting.holiday_kwh_per_day = 0.55
+        end
+      end
+      if hpxml.lighting.holiday_period_begin_month.nil?
+        hpxml.lighting.holiday_period_begin_month = 11
+        hpxml.lighting.holiday_period_begin_day_of_month = 24
+      end
+      if hpxml.lighting.holiday_period_end_day_of_month.nil?
+        hpxml.lighting.holiday_period_end_month = 1
+        hpxml.lighting.holiday_period_end_day_of_month = 6
+      end
+      if hpxml.lighting.holiday_weekday_fractions.nil?
+        hpxml.lighting.holiday_weekday_fractions = '0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.008, 0.098, 0.168, 0.194, 0.284, 0.192, 0.037, 0.019'
+      end
+      if hpxml.lighting.holiday_weekend_fractions.nil?
+        hpxml.lighting.holiday_weekend_fractions = '0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.008, 0.098, 0.168, 0.194, 0.284, 0.192, 0.037, 0.019'
+      end
     end
   end
 

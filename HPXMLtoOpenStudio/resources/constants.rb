@@ -89,12 +89,16 @@ class Constants
     return 'ethylene-glycol'
   end
 
+  def self.IsDuctLoadForReport
+    return __method__.to_s
+  end
+
   def self.ObjectNameAirflow
     return 'airflow'
   end
 
   def self.ObjectNameAirSourceHeatPump
-    return 'ashp'
+    return 'air source heat pump'
   end
 
   def self.ObjectNameBackupHeatingCoil
@@ -218,7 +222,7 @@ class Constants
   end
 
   def self.ObjectNameGroundSourceHeatPump
-    return 'gshp'
+    return 'ground source heat pump'
   end
 
   def self.ObjectNameHeatingSeason
@@ -249,12 +253,20 @@ class Constants
     return 'interior lighting'
   end
 
+  def self.ObjectNameLightingExteriorHoliday
+    return 'exterior holiday lighting'
+  end
+
   def self.ObjectNameMechanicalVentilation
     return 'mech vent'
   end
 
   def self.ObjectNameMechanicalVentilationHouseFan
     return 'mech vent house fan'
+  end
+
+  def self.ObjectNameMechanicalVentilationHouseFanCFIS
+    return 'mech vent house fan cfis'
   end
 
   def self.ObjectNameMechanicalVentilationBathFan
@@ -266,7 +278,7 @@ class Constants
   end
 
   def self.ObjectNameMiniSplitHeatPump
-    return 'mshp'
+    return 'mini split heat pump'
   end
 
   def self.ObjectNameMiscGrill
@@ -349,6 +361,10 @@ class Constants
     return 'room ac'
   end
 
+  def self.ObjectNameSharedPump(hvac_name)
+    return "#{hvac_name} shared pump"
+  end
+
   def self.ObjectNameShower
     return 'showers'
   end
@@ -369,16 +385,24 @@ class Constants
     return 'unit heater'
   end
 
-  def self.ObjectNameWater
-    return 'water'
-  end
-
   def self.ObjectNameWaterHeater
     return 'water heater'
   end
 
+  def self.ObjectNameWaterLatent
+    return 'water latent'
+  end
+
+  def self.ObjectNameWaterSensible
+    return 'water sensible'
+  end
+
   def self.ObjectNameWaterHeaterAdjustment(water_heater_name)
     return "#{water_heater_name} EC adjustment"
+  end
+
+  def self.ObjectNameWaterLoopHeatPump
+    return 'water loop heat pump'
   end
 
   def self.ObjectNameWholeHouseFan
@@ -438,6 +462,10 @@ class Constants
   end
 
   def self.SizingInfoHVACHeatType
+    return __method__.to_s
+  end
+
+  def self.SizingInfoHVACPumpPower
     return __method__.to_s
   end
 
@@ -513,7 +541,7 @@ class Constants
     return __method__.to_s
   end
 
-  def self.SizingInfoMechVentType
+  def self.SizingInfoMechVentExist
     return __method__.to_s
   end
 
@@ -525,11 +553,11 @@ class Constants
     return __method__.to_s
   end
 
-  def self.SizingInfoMechVentTotalEfficiency
+  def self.SizingInfoMechVentWholeHouseRateBalanced
     return __method__.to_s
   end
 
-  def self.SizingInfoMechVentWholeHouseRate
+  def self.SizingInfoMechVentWholeHouseRateUnbalanced
     return __method__.to_s
   end
 
