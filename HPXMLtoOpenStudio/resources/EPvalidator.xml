@@ -82,8 +82,8 @@
       <sch:assert test='count(h:Lighting/h:CeilingFan) &lt;= 1'>Expected 0 or 1 element(s) for xpath: Lighting/CeilingFan</sch:assert> <!-- See [CeilingFan] -->
       <sch:assert test='count(h:Pools/h:Pool) &lt;= 1'>Expected 0 or 1 element(s) for xpath: Pools/Pool</sch:assert> <!-- See [Pool] -->
       <sch:assert test='count(h:HotTubs/h:HotTub) &lt;= 1'>Expected 0 or 1 element(s) for xpath: HotTubs/HotTub</sch:assert> <!-- See [HotTub] -->
-      <sch:assert test='count(h:MiscLoads/h:PlugLoad[h:PlugLoadType[text()="other"]]) &lt;= 1'>Expected 0 or 1 element(s) for xpath: MiscLoads/PlugLoad[PlugLoadType[text()="other"]]</sch:assert> <!-- See [PlugLoad] -->
-      <sch:assert test='count(h:MiscLoads/h:PlugLoad[h:PlugLoadType[text()="TV other"]]) &lt;= 1'>Expected 0 or 1 element(s) for xpath: MiscLoads/PlugLoad[PlugLoadType[text()="TV other"]]</sch:assert> <!-- See [PlugLoad] -->
+      <sch:assert test='count(h:MiscLoads/h:PlugLoad[h:PlugLoadType[text()="other"]]) = 1'>Expected 1 element(s) for xpath: MiscLoads/PlugLoad[PlugLoadType[text()="other"]]</sch:assert> <!-- See [PlugLoad] -->
+      <sch:assert test='count(h:MiscLoads/h:PlugLoad[h:PlugLoadType[text()="TV other"]]) = 1'>Expected 1 element(s) for xpath: MiscLoads/PlugLoad[PlugLoadType[text()="TV other"]]</sch:assert> <!-- See [PlugLoad] -->
       <sch:assert test='count(h:MiscLoads/h:PlugLoad[h:PlugLoadType[text()="electric vehicle charging"]]) &lt;= 1'>Expected 0 or 1 element(s) for xpath: MiscLoads/PlugLoad[PlugLoadType[text()="electric vehicle charging"]]</sch:assert> <!-- See [PlugLoad] -->
       <sch:assert test='count(h:MiscLoads/h:PlugLoad[h:PlugLoadType[text()="well pump"]]) &lt;= 1'>Expected 0 or 1 element(s) for xpath: MiscLoads/PlugLoad[PlugLoadType[text()="well pump"]]</sch:assert> <!-- See [PlugLoad] -->
       <sch:assert test='count(h:MiscLoads/h:FuelLoad[h:FuelLoadType[text()="grill"]]) &lt;= 1'>Expected 0 or 1 element(s) for xpath: MiscLoads/FuelLoad[FuelLoadType[text()="grill"]]</sch:assert> <!-- See [FuelLoad] -->
