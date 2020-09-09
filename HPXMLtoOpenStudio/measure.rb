@@ -11,7 +11,7 @@ require_relative 'resources/airflow'
 require_relative 'resources/constants'
 require_relative 'resources/constructions'
 require_relative 'resources/energyplus'
-require_relative 'resources/EPvalidator'
+require_relative 'resources/validator'
 require_relative 'resources/geometry'
 require_relative 'resources/hotwater_appliances'
 require_relative 'resources/hpxml'
@@ -28,6 +28,7 @@ require_relative 'resources/schedules'
 require_relative 'resources/simcontrols'
 require_relative 'resources/unit_conversions'
 require_relative 'resources/util'
+require_relative 'resources/validator'
 require_relative 'resources/version'
 require_relative 'resources/waterheater'
 require_relative 'resources/weather'
@@ -160,7 +161,8 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
     end
 
     # Validate input HPXML against EnergyPlus Use Case
-    errors = EnergyPlusValidator.run_validator(hpxml.doc)
+    stron_path = File.join(File.dirname(__FILE__), 'resources', 'EPvalidator.xml')
+    errors = Validator.run_validator(hpxml.doc, stron_path)
     errors.each do |error|
       runner.registerError("#{hpxml_path}: #{error}")
       is_valid = false
@@ -297,7 +299,7 @@ class OSModel
 
     add_airflow(runner, model, weather, spaces)
     add_hvac_sizing(runner, model, weather, spaces)
-    add_fuel_heating_eae(runner, model)
+    add_furnace_eae(runner, model)
     add_photovoltaics(runner, model)
     add_additional_properties(runner, model, hpxml_path)
     add_component_loads_output(runner, model, spaces)
@@ -2291,7 +2293,7 @@ class OSModel
                                    HPXML::HVACTypeHeatPumpWaterLoopToAir => [HPXML::HVACDistributionTypeAir, HPXML::HVACDistributionTypeHydronicAndAir, HPXML::HVACDistributionTypeDSE] }
 
     if not hvac_distribution_type_map[system_type].include? hvac_distribution.distribution_system_type
-      # EPvalidator.rb only checks that a HVAC distribution system of the correct type (for the given HVAC system) exists
+      # validator.rb only checks that a HVAC distribution system of the correct type (for the given HVAC system) exists
       # in the HPXML file, not that it is attached to this HVAC system. So here we perform the more rigorous check.
       fail "Incorrect HVAC distribution system type for HVAC type: '#{system_type}'. Should be one of: #{hvac_distribution_type_map[system_type]}"
     end
@@ -2523,13 +2525,13 @@ class OSModel
     HVACSizing.apply(model, runner, weather, spaces, @hpxml, @infil_volume, @nbeds, @min_neighbor_distance, @debug)
   end
 
-  def self.add_fuel_heating_eae(runner, model)
+  def self.add_furnace_eae(runner, model)
     # Needs to come after HVAC sizing (needs heating capacity and airflow rate)
     # FUTURE: Could remove this method and simplify everything if we could autosize via the HPXML file
 
     @hpxml.heating_systems.each do |heating_system|
       next unless heating_system.fraction_heat_load_served > 0
-      next unless [HPXML::HVACTypeFurnace, HPXML::HVACTypeWallFurnace, HPXML::HVACTypeFloorFurnace, HPXML::HVACTypeStove, HPXML::HVACTypeBoiler].include? heating_system.heating_system_type
+      next unless [HPXML::HVACTypeFurnace, HPXML::HVACTypeWallFurnace, HPXML::HVACTypeFloorFurnace, HPXML::HVACTypeStove].include? heating_system.heating_system_type
       next unless heating_system.heating_system_fuel != HPXML::FuelTypeElectricity
 
       HVAC.apply_eae_to_heating_fan(runner, @hvac_map[heating_system.id], heating_system)

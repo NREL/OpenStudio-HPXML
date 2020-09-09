@@ -465,6 +465,10 @@ class Constants
     return __method__.to_s
   end
 
+  def self.SizingInfoHVACPumpPower
+    return __method__.to_s
+  end
+
   def self.SizingInfoHVACSystemIsDucted # Only needed for optionally ducted systems
     return __method__.to_s
   end

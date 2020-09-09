@@ -367,12 +367,6 @@
       <checksum>7DAA5F02</checksum>
     </file>
     <file>
-      <filename>schedules.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>830C5D1B</checksum>
-    </file>
-    <file>
       <filename>geometry.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
@@ -495,6 +489,12 @@
     <file>
       <filename>hotwater_appliances.rb</filename>
       <filetype>rb</filetype>
+      <usage_type>test</usage_type>
+      <checksum>AA4E8BA5</checksum>
+    </file>
+    <file>
+      <filename>HPXMLDataTypes.xsd</filename>
+      <filetype>xsd</filetype>
       <usage_type>resource</usage_type>
       <checksum>2BF2CEB0</checksum>
     </file>
@@ -505,10 +505,10 @@
       <checksum>BB8F37B8</checksum>
     </file>
     <file>
-      <filename>test_defaults.rb</filename>
+      <filename>constants.rb</filename>
       <filetype>rb</filetype>
-      <usage_type>test</usage_type>
-      <checksum>6C302852</checksum>
+      <usage_type>resource</usage_type>
+      <checksum>CF39E025</checksum>
     </file>
     <file>
       <filename>hpxml_defaults.rb</filename>
@@ -523,7 +523,7 @@
       <checksum>BC675290</checksum>
     </file>
     <file>
-      <filename>EPvalidator.rb</filename>
+      <filename>xmlhelper.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
       <checksum>4B1D214B</checksum>
@@ -544,13 +544,19 @@
       <filename>HPXMLDataTypes.xsd</filename>
       <filetype>xsd</filetype>
       <usage_type>resource</usage_type>
-      <checksum>8CE65B50</checksum>
+      <checksum>2BF2CEB0</checksum>
     </file>
     <file>
       <filename>hpxml.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
       <checksum>76E353BA</checksum>
+    </file>
+    <file>
+      <filename>hpxml.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>9485FE74</checksum>
     </file>
     <file>
       <version>

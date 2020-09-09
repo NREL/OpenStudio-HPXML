@@ -41,6 +41,7 @@
           <NumberofConditionedFloors>2</NumberofConditionedFloors>
           <NumberofConditionedFloorsAboveGrade>1</NumberofConditionedFloorsAboveGrade>
           <NumberofBedrooms>3</NumberofBedrooms>
+          <NumberofBathrooms>2</NumberofBathrooms>
           <ConditionedFloorArea>2700.0</ConditionedFloorArea>
           <ConditionedBuildingVolume>21600.0</ConditionedBuildingVolume>
         </BuildingConstruction>
@@ -437,6 +438,9 @@
                 <Units>COP</Units>
                 <Value>3.6</Value>
               </AnnualHeatingEfficiency>
+              <extension>
+                <PumpPowerWattsPerTon>30.0</PumpPowerWattsPerTon>
+              </extension>
             </HeatPump>
           </HVACPlant>
           <HVACControl>
