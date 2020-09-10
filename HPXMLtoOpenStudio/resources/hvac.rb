@@ -4100,8 +4100,8 @@ class HVAC
 
     # TEMP: For testing without
     # return
-    
-    return if airflow_rated_defect_ratio_cool.nil? and airflow_rated_defect_ratio_heat.nil?
+
+    return if airflow_rated_defect_ratio_cool.nil? && airflow_rated_defect_ratio_heat.nil?
 
     obj_name = "#{unitary_system.name} install quality"
 
@@ -4112,7 +4112,7 @@ class HVAC
     tout_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Zone Outdoor Air Drybulb Temperature')
     tout_sensor.setName("#{obj_name} tt s")
     tout_sensor.setKeyName(control_zone.name.to_s)
-    
+
     fault_program = OpenStudio::Model::EnergyManagementSystemProgram.new(model)
     fault_program.setName("#{obj_name} program")
 
@@ -4120,7 +4120,7 @@ class HVAC
     fault_program.addLine("Set F_CH = #{f_chg.round(3)}")
 
     if not airflow_rated_defect_ratio_cool.nil?
-    
+
       cool_cap_fff_curve = clg_coil.totalCoolingCapacityFunctionOfFlowFractionCurve.to_CurveQuadratic.get
       cool_cap_fff_act = OpenStudio::Model::EnergyManagementSystemActuator.new(cool_cap_fff_curve, 'Curve', 'Curve Result')
       cool_cap_fff_act.setName("#{obj_name} cap clg act")
@@ -4201,11 +4201,11 @@ class HVAC
       program_calling_manager.setName("#{obj_name} program manager")
       program_calling_manager.setCallingPoint('InsideHVACSystemIterationLoop')
       program_calling_manager.addProgram(fault_program)
-    
+
     end
-    
+
     if not airflow_rated_defect_ratio_heat.nil?
-    
+
       heat_cap_fff_curve = htg_coil.totalHeatingCapacityFunctionofFlowFractionCurve.to_CurveQuadratic.get
       heat_cap_fff_act = OpenStudio::Model::EnergyManagementSystemActuator.new(heat_cap_fff_curve, 'Curve', 'Curve Result')
       heat_cap_fff_act.setName("#{obj_name} cap htg act")
@@ -4232,7 +4232,7 @@ class HVAC
       fault_program.addLine("Set a1_CH_Qgr_h = #{qgr_values[0]}")
       fault_program.addLine("Set a2_CH_Qgr_h = #{qgr_values[1]}")
       fault_program.addLine("Set a3_CH_Qgr_h = #{qgr_values[2]}")
-      
+
       fault_program.addLine("Set a1_CH_P_h = #{p_values[0]}")
       fault_program.addLine("Set a2_CH_P_h = #{p_values[1]}")
       fault_program.addLine("Set a3_CH_P_h = #{p_values[2]}")
@@ -4276,7 +4276,7 @@ class HVAC
 
       fault_program.addLine("Set #{heat_cap_fff_act.name} = (p_CH_Q_h * p_AF_Q_h)")
       fault_program.addLine("Set #{heat_eir_fff_act.name} = 1.0 / (p_CH_COP_h * p_AF_COP_h)")
-    
+
     end
   end
 

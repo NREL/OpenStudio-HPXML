@@ -3276,7 +3276,6 @@ class HVACSizing
       end
 
       HVAC.apply_installation_quality_EMS(model, object, clg_coil, htg_coil, @cond_zone, hvac.ChargeDefectRatio, airflow_rated_defect_ratio_cool, airflow_rated_defect_ratio_heat)
-
     end
   end
 
