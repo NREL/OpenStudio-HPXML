@@ -1232,9 +1232,9 @@ This section describes elements specified in HPXML's ``MiscLoads``.
 HPXML Plug Loads
 ****************
 
-Misc electric plug loads can be provided by entering ``PlugLoad`` elements; if not provided, plug loads will not be modeled.
+Misc electric plug loads can be provided by entering ``PlugLoad`` elements.
 Currently only plug loads specified with ``PlugLoadType='other'``, ``PlugLoadType='TV other'``, ``PlugLoadType='electric vehicle charging'``, or ``PlugLoadType='well pump'`` are recognized.
-It is generally recommended to at least include the 'other' (miscellaneous) and 'TV other' plug load types for the typical home.
+The 'other' and 'TV other' plug loads are required to represent the typical home; the other less common plug loads will only be modeled if provided.
 
 The annual energy consumption (``Load[Units='kWh/year']/Value``), ``Location``, ``extension/FracSensible``, and ``extension/FracLatent`` elements are optional.
 If not provided, they will be defaulted as follows.
@@ -1264,8 +1264,9 @@ If not provided, values from Figures 23 & 24 of the `Building America House Simu
 HPXML Fuel Loads
 ****************
 
-Misc fuel loads can be provided by entering ``FuelLoad`` elements; if not provided, fuel loads will not be modeled.
+Misc fuel loads can be provided by entering ``FuelLoad`` elements.
 Currently only fuel loads specified with ``FuelLoadType='grill'``, ``FuelLoadType='lighting'``, or ``FuelLoadType='fireplace'`` are recognized.
+These less common fuel loads will only be modeled if provided.
 
 The annual energy consumption (``Load[Units='therm/year']/Value``), ``Location``, ``extension/FracSensible``, and ``extension/FracLatent`` elements are also optional.
 If not provided, they will be defaulted as follows.

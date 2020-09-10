@@ -621,7 +621,7 @@ class HPXMLTest < MiniTest::Test
                                     'base-enclosure-other-heated-space.xml' => 0,     # no foundation in contact w/ ground
                                     'base-enclosure-other-non-freezing-space.xml' => 0, # no foundation in contact w/ ground
                                     'base-enclosure-other-multifamily-buffer-space.xml' => 0, # no foundation in contact w/ ground
-                                    'base-enclosure-common-surfaces.xml' => 2,        # additional instance for vented crawlspace
+                                    'base-enclosure-common-surfaces.xml' => 2, # additional instance for vented crawlspace
                                     'base-foundation-walkout-basement.xml' => 4, # 3 foundation walls plus a no-wall exposed perimeter
                                     'base-foundation-complex.xml' => 10,
                                     'base-misc-loads-large-uncommon.xml' => 2,
