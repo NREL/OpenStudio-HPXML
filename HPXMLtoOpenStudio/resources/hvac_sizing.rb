@@ -3257,32 +3257,27 @@ class HVACSizing
 
       clg_coil, htg_coil, supp_htg_coil = HVAC.get_coils_from_hvac_equip(model, object)
 
+      airflow_rated_defect_ratio_cool = nil
       if not clg_coil.nil?
-        unless clg_coil.to_CoilCoolingDXSingleSpeed.is_initialized
-          return
+        if clg_coil.to_CoilCoolingDXSingleSpeed.is_initialized
+          airflow_rated_defect_ratio_cool = UnitConversions.convert(hvac_final_values.Cool_Airflow, 'cfm', 'm^3/s') / clg_coil.ratedAirFlowRate.get - 1.0
+        else
+          # TODO
         end
-      else
-        return
       end
 
-      airflow_defect_cool = UnitConversions.convert(hvac_final_values.Cool_Airflow, 'cfm', 'm^3/s') / clg_coil.ratedAirFlowRate.get - 1.0
-
-      airflow_defect_heat = 0.0
+      airflow_rated_defect_ratio_heat = nil
       if not htg_coil.nil?
-        if htg_coil.to_CoilHeatingDXMultiSpeed.is_initialized
-          return
-        end
         if htg_coil.to_CoilHeatingDXSingleSpeed.is_initialized
-          # Re-calculate the rated heating airflow rate since OS doesn't have a get method for this object
-          rated_airflow_heat = UnitConversions.convert(hvac_final_values.Heat_Capacity, 'Btu/hr', 'ton') * UnitConversions.convert(hvac.RatedCFMperTonHeating[0], 'cfm', 'm^3/s')
-          airflow_defect_heat = UnitConversions.convert(hvac_final_values.Heat_Airflow, 'cfm', 'm^3/s') / rated_airflow_heat - 1.0
+          airflow_rated_defect_ratio_heat = UnitConversions.convert(hvac_final_values.Heat_Airflow, 'cfm', 'm^3/s') / htg_coil.ratedAirFlowRate.get - 1.0
+        else
+          # TODO
         end
       end
 
-      HVAC.apply_installation_quality_EMS(model, object, @cond_zone, hvac.ChargeDefectRatio, airflow_defect_cool, airflow_defect_heat)
+      HVAC.apply_installation_quality_EMS(model, object, clg_coil, htg_coil, @cond_zone, hvac.ChargeDefectRatio, airflow_rated_defect_ratio_cool, airflow_rated_defect_ratio_heat)
 
-      # object type
-    end # hvac Object
+    end
   end
 
   def self.setCoilsObjectValues(model, hvac, equip, hvac_final_values)
