@@ -962,6 +962,12 @@
     </sch:rule>
   </sch:pattern>
 
+  <sch:pattern name='[UnventedClothesDryer]'>
+    <sch:rule context='/h:HPXML/h:Building/h:BuildingDetails/h:Appliances/h:ClothesDryer[h:extension/h:IsVented="false"]'>
+      <sch:assert test='count(h:extension/h:VentedFlowRate) = 0'>Expected 0 element(s) for xpath: extension/VentedFlowRate</sch:assert>
+    </sch:rule>
+  </sch:pattern>
+
   <sch:pattern name='[ClothesDryer=Shared]'>
     <sch:rule context='/h:HPXML/h:Building/h:BuildingDetails/h:Appliances/h:ClothesDryer[h:IsSharedAppliance="true"]'>
       <sch:assert test='count(../../h:BuildingSummary/h:BuildingConstruction[h:ResidentialFacilityType[text()="single-family attached" or text()="apartment unit"]]) = 1'>Expected 1 element(s) for xpath: ../../BuildingSummary/BuildingConstruction[ResidentialFacilityType[text()="single-family attached" or text()="apartment unit"]]</sch:assert>
