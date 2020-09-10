@@ -321,7 +321,8 @@ class HPXMLDefaults
     hpxml.cooling_systems.each do |cooling_system|
       next unless cooling_system.fan_watts_per_cfm.nil?
 
-      if cooling_system.cooling_system_type == HPXML::HVACTypeCentralAirConditioner
+      if [HPXML::HVACTypeCentralAirConditioner,
+          HPXML::HVACTypeMiniSplitAirConditioner].include? cooling_system.cooling_system_type
         if cooling_system.cooling_efficiency_seer <= 15
           cooling_system.fan_watts_per_cfm = 0.5 # W/cfm
         else
@@ -333,11 +334,9 @@ class HPXMLDefaults
       next unless heating_system.fan_watts_per_cfm.nil?
 
       if heating_system.heating_system_type == HPXML::HVACTypeFurnace
-        # TODO: Only set if not attached to an AC?
-        heating_system.fan_watts_per_cfm = 0.5 # W/cfm
+        heating_system.fan_watts_per_cfm = 0.5 # W/cfm # TODO: Only set if not attached to an AC?
       else
-        # TODO: What value to use for stoves, wall/floor furnaces, space heaters, etc?
-        heating_system.fan_watts_per_cfm = 0.5 # W/cfm
+        heating_system.fan_watts_per_cfm = 0.5 # W/cfm # TODO: What value to use for stoves, wall/floor furnaces, space heaters, etc?
       end
     end
     hpxml.heat_pumps.each do |heat_pump|

@@ -530,6 +530,9 @@ class HVAC
     heat_pump.cooling_efficiency_seer = cooling_system.cooling_efficiency_seer
     heat_pump.heating_efficiency_hspf = 7.7 # Arbitrary; shouldn't affect energy use  TODO: Allow nil
     heat_pump.distribution_system_idref = cooling_system.distribution_system_idref
+    heat_pump.fan_watts_per_cfm = cooling_system.fan_watts_per_cfm
+    heat_pump.airflow_defect_ratio = cooling_system.airflow_defect_ratio
+    heat_pump.charge_defect_ratio = cooling_system.charge_defect_ratio
 
     apply_mini_split_heat_pump(model, runner, heat_pump, 0,
                                remaining_cool_load_frac,
