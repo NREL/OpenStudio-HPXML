@@ -293,6 +293,14 @@ class HPXMLDefaults
       end
     end
 
+    # GSHP pump power
+    hpxml.heat_pumps.each do |heat_pump|
+      next unless heat_pump.heat_pump_type == HPXML::HVACTypeHeatPumpGroundToAir
+      next unless heat_pump.pump_watts_per_ton.nil?
+
+      heat_pump.pump_watts_per_ton = HVAC.get_default_gshp_pump_power()
+    end
+
     # Charge defect ratio
     (hpxml.cooling_systems + hpxml.heat_pumps).each do |hvac|
       next unless hvac.charge_defect_ratio.nil?
@@ -352,22 +360,6 @@ class HPXMLDefaults
           heat_pump.fan_watts_per_cfm = 0.07 # W/cfm, ductless
         end
       end
-    end
-
-    # Electric auxiliary energy (for boilers)
-    hpxml.heating_systems.each do |heating_system|
-      next unless heating_system.heating_system_type == HPXML::HVACTypeBoiler
-      next unless heating_system.electric_auxiliary_energy.nil?
-
-      heating_system.electric_auxiliary_energy = HVAC.get_default_boiler_eae(heating_system.heating_system_fuel)
-    end
-
-    # Default GSHP pump
-    hpxml.heat_pumps.each do |heat_pump|
-      next unless heat_pump.heat_pump_type == HPXML::HVACTypeHeatPumpGroundToAir
-      next unless heat_pump.pump_watts_per_ton.nil?
-
-      heat_pump.pump_watts_per_ton = HVAC.get_default_gshp_pump_power()
     end
 
     # HVAC capacities

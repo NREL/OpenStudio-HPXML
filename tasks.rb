@@ -2507,7 +2507,7 @@ def set_hpxml_heating_systems(hpxml_file, hpxml)
   elsif ['base-hvac-boiler-gas-central-ac-1-speed.xml',
          'base-hvac-boiler-gas-only.xml'].include? hpxml_file
     hpxml.heating_systems[0].heating_system_type = HPXML::HVACTypeBoiler
-    hpxml.heating_systems[0].fan_watts_per_cfm = 0.2
+    hpxml.heating_systems[0].electric_auxiliary_energy = 200
   elsif ['base-hvac-boiler-oil-only.xml'].include? hpxml_file
     hpxml.heating_systems[0].heating_system_type = HPXML::HVACTypeBoiler
     hpxml.heating_systems[0].heating_system_fuel = HPXML::FuelTypeOil
@@ -2568,7 +2568,7 @@ def set_hpxml_heating_systems(hpxml_file, hpxml)
                               heating_capacity: 6400,
                               heating_efficiency_afue: 0.92,
                               fraction_heat_load_served: 0.1,
-                              fan_watts_per_cfm: 0.2)
+                              electric_auxiliary_energy: 200)
     hpxml.heating_systems.add(id: 'HeatingSystem5',
                               heating_system_type: HPXML::HVACTypeElectricResistance,
                               heating_system_fuel: HPXML::FuelTypeElectricity,
