@@ -3391,7 +3391,7 @@ class HPXML < Object
           XMLHelper.add_element(precond_htg, 'Fuel', @preheating_fuel) unless @preheating_fuel.nil?
           eff = XMLHelper.add_element(precond_htg, 'AnnualHeatingEfficiency') unless @preheating_efficiency_cop.nil?
           XMLHelper.add_element(eff, 'Value', to_float(@preheating_efficiency_cop)) unless eff.nil?
-          XMLHelper.add_element(eff, 'Units', 'COP') unless eff.nil?
+          XMLHelper.add_element(eff, 'Units', UnitsCOP) unless eff.nil?
           XMLHelper.add_element(precond_htg, 'HeatingCapacity', @preheating_capacity) unless @preheating_capacity.nil?
         end
         if (not @precooling_fuel.nil?) && (not @precooling_capacity.nil?) && (not @precooling_efficiency_cop.nil?)
@@ -3399,7 +3399,7 @@ class HPXML < Object
           XMLHelper.add_element(precond_clg, 'Fuel', @precooling_fuel) unless @precooling_fuel.nil?
           eff = XMLHelper.add_element(precond_clg, 'AnnualCoolingEfficiency') unless @precooling_efficiency_cop.nil?
           XMLHelper.add_element(eff, 'Value', to_float(@precooling_efficiency_cop)) unless eff.nil?
-          XMLHelper.add_element(eff, 'Units', 'COP') unless eff.nil?
+          XMLHelper.add_element(eff, 'Units', UnitsCOP) unless eff.nil?
           XMLHelper.add_element(precond_clg, 'CoolingCapacity', @precooling_capacity) unless @precooling_capacity.nil?
         end
       end
