@@ -531,10 +531,12 @@ class HotWaterSchedule
     end
 
     if exhaust_min > 0
-      items.each_with_index do |val, i|
-        next if val == 0
-
-        items[i...(i + exhaust_min)] = 1.0
+      items.reverse.each_with_index do |val, i|
+        if val > 0
+          place = (items.length - 1) - i
+          last = place + exhaust_min
+          items.fill(1, place...last)
+        end
       end
     end
 
