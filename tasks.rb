@@ -4178,9 +4178,7 @@ def set_hpxml_clothes_dryer(hpxml_file, hpxml)
     hpxml.clothes_dryers.add(id: 'ClothesDryer',
                              location: HPXML::LocationLivingSpace,
                              combined_energy_factor: 3.30,
-                             control_type: HPXML::ClothesDryerControlTypeMoisture,
-                             is_vented: true,
-                             vented_flow_rate: 100)
+                             control_type: HPXML::ClothesDryerControlTypeMoisture)
     if hpxml_file == 'base-appliances-coal.xml'
       hpxml.clothes_dryers[0].fuel_type = HPXML::FuelTypeCoal
     elsif hpxml_file == 'base-appliances-gas.xml'

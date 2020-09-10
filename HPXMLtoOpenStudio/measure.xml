@@ -3,8 +3,8 @@
   <schema_version>3.0</schema_version>
   <name>hpxm_lto_openstudio</name>
   <uid>b1543b30-9465-45ff-ba04-1d1f85e763bc</uid>
-  <version_id>d9260ac3-9bf1-4ccf-8a8c-2cd782be3546</version_id>
-  <version_modified>20200909T223757Z</version_modified>
+  <version_id>2f79a0fc-2f49-47cc-a89e-1fcb3caf4914</version_id>
+  <version_modified>20200910T172531Z</version_modified>
   <xml_checksum>D8922A73</xml_checksum>
   <class_name>HPXMLtoOpenStudio</class_name>
   <display_name>HPXML to OpenStudio Translator</display_name>
@@ -125,36 +125,6 @@
       <filetype>csv</filetype>
       <usage_type>resource</usage_type>
       <checksum>61E873CD</checksum>
-    </file>
-    <file>
-      <filename>HotWaterClothesDryerExhaustSchedule_1bed.csv</filename>
-      <filetype>csv</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>85CDD535</checksum>
-    </file>
-    <file>
-      <filename>HotWaterClothesDryerExhaustSchedule_2bed.csv</filename>
-      <filetype>csv</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>1D475929</checksum>
-    </file>
-    <file>
-      <filename>HotWaterClothesDryerExhaustSchedule_3bed.csv</filename>
-      <filetype>csv</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>A0F57E5A</checksum>
-    </file>
-    <file>
-      <filename>HotWaterClothesDryerExhaustSchedule_4bed.csv</filename>
-      <filetype>csv</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>A893C107</checksum>
-    </file>
-    <file>
-      <filename>HotWaterClothesDryerExhaustSchedule_5bed.csv</filename>
-      <filetype>csv</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>CDC5BFE0</checksum>
     </file>
     <file>
       <filename>HotWaterClothesWasherSchedule_1bed.csv</filename>
@@ -523,40 +493,16 @@
       <checksum>53FF19AE</checksum>
     </file>
     <file>
-      <filename>airflow.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>D62F1B5D</checksum>
-    </file>
-    <file>
-      <filename>schedules.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>6F393A9E</checksum>
-    </file>
-    <file>
       <filename>constants.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
       <checksum>424ABD44</checksum>
     </file>
     <file>
-      <filename>hotwater_appliances.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>9FEA0942</checksum>
-    </file>
-    <file>
       <filename>hpxml.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
       <checksum>81103871</checksum>
-    </file>
-    <file>
-      <filename>EPvalidator.xml</filename>
-      <filetype>xml</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>4EF2CE27</checksum>
     </file>
     <file>
       <version>
@@ -580,6 +526,30 @@
       <filetype>rb</filetype>
       <usage_type>test</usage_type>
       <checksum>F6664D91</checksum>
+    </file>
+    <file>
+      <filename>airflow.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>266B51F9</checksum>
+    </file>
+    <file>
+      <filename>schedules.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>D0F6DA87</checksum>
+    </file>
+    <file>
+      <filename>hotwater_appliances.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>4F776F95</checksum>
+    </file>
+    <file>
+      <filename>EPvalidator.xml</filename>
+      <filetype>xml</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>8821F267</checksum>
     </file>
   </files>
 </measure>
