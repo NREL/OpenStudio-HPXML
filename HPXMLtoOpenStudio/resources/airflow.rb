@@ -1248,7 +1248,8 @@ class Airflow
     obj_sch_sensors = {}
     dryer_object_array.each_with_index do |dryer_object, index|
       obj_name = "#{obj_type_name} #{index}"
-      obj_sch = HotWaterSchedule.new(model, obj_type_name, @nbeds)
+      hr_shift = -1.0 / 24.0
+      obj_sch = HotWaterSchedule.new(model, obj_type_name, @nbeds, hr_shift, true, 24)
       Schedule.set_schedule_type_limits(model, obj_sch.schedule, Constants.ScheduleTypeLimitsTemperature)
       obj_sch_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Schedule Value')
       obj_sch_sensor.setName("#{obj_name} sch s")

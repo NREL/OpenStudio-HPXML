@@ -434,7 +434,7 @@ class MonthWeekdayWeekendSchedule
 end
 
 class HotWaterSchedule
-  def initialize(model, obj_name, nbeds, days_shift = 0, create_sch_object = true)
+  def initialize(model, obj_name, nbeds, days_shift = 0, create_sch_object = true, exhaust_min = 0)
     @model = model
     @sch_name = "#{obj_name} schedule"
     @schedule = nil
@@ -448,7 +448,7 @@ class HotWaterSchedule
     end
     file_prefixes = { Constants.ObjectNameClothesWasher => 'ClothesWasher',
                       Constants.ObjectNameClothesDryer => 'ClothesWasher',
-                      Constants.ObjectNameClothesDryerExhaust => 'ClothesDryerExhaust',
+                      Constants.ObjectNameClothesDryerExhaust => 'ClothesWasher',
                       Constants.ObjectNameDishwasher => 'Dishwasher',
                       Constants.ObjectNameShower => 'Shower',
                       Constants.ObjectNameSink => 'Sink',
@@ -459,7 +459,7 @@ class HotWaterSchedule
     timestep_minutes = (60 / @model.getTimestep.numberOfTimestepsPerHour).to_i
     weeks = 1 # use a single week that repeats
 
-    data = loadMinuteDrawProfileFromFile(timestep_minutes, days_shift, weeks)
+    data = loadMinuteDrawProfileFromFile(timestep_minutes, days_shift, weeks, exhaust_min)
     @totflow, @maxflow, @ontime = loadDrawProfileStatsFromFile()
     if create_sch_object
       @schedule = createSchedule(data, timestep_minutes, weeks)
@@ -492,7 +492,7 @@ class HotWaterSchedule
 
   private
 
-  def loadMinuteDrawProfileFromFile(timestep_minutes, days_shift, weeks)
+  def loadMinuteDrawProfileFromFile(timestep_minutes, days_shift, weeks, exhaust_min)
     data = []
     if @file_prefix.nil?
       return data
@@ -527,6 +527,14 @@ class HotWaterSchedule
       items[stored_minute.to_i] = value
       if shifted_minute >= weeks_in_minutes
         break # no need to process more data
+      end
+    end
+
+    if exhaust_min > 0
+      items.each_with_index do |val, i|
+        next if val == 0
+
+        items[i...(i + exhaust_min)] = 1.0
       end
     end
 
