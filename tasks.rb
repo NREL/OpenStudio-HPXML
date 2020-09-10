@@ -4183,6 +4183,8 @@ def set_hpxml_clothes_dryer(hpxml_file, hpxml)
       hpxml.clothes_dryers[0].fuel_type = HPXML::FuelTypeCoal
     elsif hpxml_file == 'base-appliances-gas.xml'
       hpxml.clothes_dryers[0].fuel_type = HPXML::FuelTypeNaturalGas
+      hpxml.clothes_dryers[0].is_vented = true
+      hpxml.clothes_dryers[0].vented_flow_rate = 150
     elsif hpxml_file == 'base-appliances-propane.xml'
       hpxml.clothes_dryers[0].fuel_type = HPXML::FuelTypePropane
     elsif hpxml_file == 'base-appliances-oil.xml'
