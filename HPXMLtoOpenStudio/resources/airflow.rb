@@ -1467,9 +1467,9 @@ class Airflow
 
     vent_mech_precond.each_with_index do |vent_mech, i|
       # Create energy use actuator per system because of different fuel type can be applied
-      # FIXME: Preconditioning equipment energy end use: mech vent or hvac category? Proceed with a new end use: mech vent preconditioning
       clg_energy_actuator = create_other_equipment_object_and_actuator(model: model, name: "shared mech vent precooling energy #{i}", space: @living_space, frac_lat: 0.0, frac_lost: 1.0, hpxml_fuel_type: vent_mech.precooling_fuel, end_use: Constants.ObjectNameMechanicalVentilationPreconditioning)
       htg_energy_actuator = create_other_equipment_object_and_actuator(model: model, name: "shared mech vent preheating energy #{i}", space: @living_space, frac_lat: 0.0, frac_lost: 1.0, hpxml_fuel_type: vent_mech.preheating_fuel, end_use: Constants.ObjectNameMechanicalVentilationPreconditioning)
+
       infil_program.addLine("Set #{clg_energy_actuator.name} = 0.0")
       infil_program.addLine("Set #{htg_energy_actuator.name} = 0.0")
 
@@ -1512,8 +1512,8 @@ class Airflow
       infil_program.addLine('Set OALoadSensToLvClg = OA_MFR * ZoneCp * (BeforePrecondTemp - ClgSptTemp)') # Cooling load to setpoint
       # Calculate preconditioned temperature, humidity ratio, sensible loads based on capacity
       infil_program.addLine('Set SensLoadToLv = 0.0')
-      infil_program.addLine('If (OALoadSensToLvHtg > 0) && (OALoadSensToLvClg < 0)') # Within deadband, do not condition oa
-      infil_program.addLine('  Set SensLoadToLv = OALoadSensToLv') # Within deadband, don't need preconditioning
+      infil_program.addLine('If (OALoadSensToLvHtg > 0) && (OALoadSensToLvClg < 0)') # Within dead-band, do not condition oa
+      infil_program.addLine('  Set SensLoadToLv = OALoadSensToLv') # Within dead-band, don't need preconditioning
       infil_program.addLine('  Set PreconditionedAirTemp = BeforePrecondTemp') # Doesn't change temperature
       infil_program.addLine('ElseIf (OALoadSensToLvClg > 0.0)') # Cooling turns on
       infil_program.addLine('  If PreCoolingCap < OALoadSensToLvClg') # Full cooling capacity is not able to resolve all the cooling loads, apply full capacity
@@ -1551,7 +1551,7 @@ class Airflow
       infil_program.addLine('    Set CoolingEnergy = PreCoolingCap')
       infil_program.addLine('    Set PreconditionedEnth = BeforePrecondEnth - PreCoolingCap / OA_MFR')
       infil_program.addLine('    Set PreconditionedTemp = (@TsatFnHPb PreconditionedEnth OASupInPb)') # Saturation temperature at target enthalpy
-      infil_program.addLine('    Set SensLoadToLv = OA_MFR * ZoneCp * (PreconditionedTemp - ZoneTemp)') # Adjust load unresolved by preocnditioning
+      infil_program.addLine('    Set SensLoadToLv = OA_MFR * ZoneCp * (PreconditionedTemp - ZoneTemp)') # Adjust load unresolved by preconditioning
       infil_program.addLine('  Else') # Within cooling capacity limit
       infil_program.addLine('    Set CoolingEnergy = -(PreconditionedEnth - BeforePrecondEnth) * OA_MFR')
       infil_program.addLine('  EndIf')
@@ -1565,11 +1565,6 @@ class Airflow
       infil_program.addLine("Set #{clg_energy_actuator.name} = (CoolingEnergy / #{vent_mech.precooling_efficiency_cop})")
       infil_program.addLine("Set #{htg_energy_actuator.name} = (HeatingEnergy / #{vent_mech.preheating_efficiency_cop})")
     end
-
-    # oems = model.getOutputEnergyManagementSystem
-    # oems.setActuatorAvailabilityDictionaryReporting('Verbose')
-    # oems.setInternalVariableAvailabilityDictionaryReporting('Verbose')
-    # oems.setEMSRuntimeLanguageDebugOutputLevel('Verbose')
   end
 
   def self.apply_infiltration_adjustment(infil_program, vent_fans_kitchen, vent_fans_bath, sup_cfm_tot, exh_cfm_tot, bal_cfm_tot, erv_hrv_cfm_tot, infil_flow_actuator)
@@ -1583,16 +1578,12 @@ class Airflow
       infil_program.addLine("Set Qbath = Qbath + #{UnitConversions.convert(vent_bath.rated_flow_rate * vent_bath.quantity, 'cfm', 'm^3/s').round(4)} * #{bath_sch_sensors_map[vent_bath.id].name}")
     end
 
-    infil_program.addLine('Set Qexhaust = Qrange+Qbath')
-    infil_program.addLine('Set Qsupply = 0')
     infil_program.addLine("Set QWHV_sup = #{UnitConversions.convert(sup_cfm_tot, 'cfm', 'm^3/s').round(4)}")
     infil_program.addLine("Set QWHV_exh = #{UnitConversions.convert(exh_cfm_tot, 'cfm', 'm^3/s').round(4)}")
     infil_program.addLine("Set QWHV_bal_erv_hrv = #{UnitConversions.convert(bal_cfm_tot + erv_hrv_cfm_tot, 'cfm', 'm^3/s').round(4)}")
 
-    infil_program.addLine('Set Qexhaust = Qexhaust + QWHV_exh + QWHV_bal_erv_hrv')
-    infil_program.addLine('Set Qsupply = Qsupply + QWHV_sup + QWHV_bal_erv_hrv + QWHV_cfis_tot')
-
-    # Calculate adjusted infiltration based on mechanical ventilation system
+    infil_program.addLine('Set Qexhaust = Qrange + Qbath + QWHV_exh + QWHV_bal_erv_hrv')
+    infil_program.addLine('Set Qsupply = QWHV_sup + QWHV_bal_erv_hrv + QWHV_cfis_tot')
     infil_program.addLine('Set Qfan = (@Max Qexhaust Qsupply)')
     if Constants.ERIVersions.index(@eri_version) >= Constants.ERIVersions.index('2019')
       # Follow ASHRAE 62.2-2016, Normative Appendix C equations for time-varying total airflow
@@ -1719,7 +1710,7 @@ class Airflow
     vent_mech_bal_tot = vent_fans_mech.select { |vent_mech| vent_mech.fan_type == HPXML::MechVentTypeBalanced }
     vent_mech_erv_hrv_tot = vent_fans_mech.select { |vent_mech| [HPXML::MechVentTypeERV, HPXML::MechVentTypeHRV].include? vent_mech.fan_type }
 
-    # Fan power
+    # Non-CFIS fan power
     sup_vent_mech_fan_w = vent_mech_sup_tot.map { |vent_mech| vent_mech.average_fan_power }.sum(0.0)
     exh_vent_mech_fan_w = vent_mech_exh_tot.map { |vent_mech| vent_mech.average_fan_power }.sum(0.0)
     # ERV/HRV and balanced system fan power combined altogether
@@ -1732,7 +1723,8 @@ class Airflow
       fan_heat_lost_fraction = 1.0
     end
     add_ee_for_vent_fan_power(model, Constants.ObjectNameMechanicalVentilationHouseFan, fan_heat_lost_fraction, false, total_sup_exh_bal_w)
-    # CFIS Fan Actuators
+
+    # CFIS fan power
     cfis_fan_actuator = add_ee_for_vent_fan_power(model, Constants.ObjectNameMechanicalVentilationHouseFanCFIS, 0.0, true)
 
     # Average in-unit cfms (include recirculation from in unit cfms for shared systems)
@@ -1742,7 +1734,7 @@ class Airflow
     erv_hrv_cfm_tot = vent_mech_erv_hrv_tot.map { |vent_mech| vent_mech.average_unit_flow_rate }.sum(0.0)
     cfis_cfm_tot = vent_mech_cfis_tot.map { |vent_mech| vent_mech.average_unit_flow_rate }.sum(0.0)
 
-    # Average preconditioned oa air cfms(only oa, recirculation will be addressed below for all shared systems)
+    # Average preconditioned oa air cfms (only oa, recirculation will be addressed below for all shared systems)
     oa_cfm_preheat = vent_mech_preheat.map { |vent_mech| vent_mech.average_oa_flow_rate }.sum(0.0)
     oa_cfm_precool = vent_mech_precool.map { |vent_mech| vent_mech.average_oa_flow_rate }.sum(0.0)
     recirc_cfm_shared = vent_mech_shared.map { |vent_mech| vent_mech.average_unit_flow_rate - vent_mech.average_oa_flow_rate }.sum(0.0)
@@ -1788,7 +1780,7 @@ class Airflow
     # Calculate infiltration without adjustment by ventilation
     infil_program = apply_infiltration_to_living(living_ach50, living_const_ach, infil_program, weather, has_flue_chimney)
 
-    # Common variale and load actuators across multiple mech vent calculations, create only once
+    # Common variable and load actuators across multiple mech vent calculations, create only once
     infil_program, fan_sens_load_actuator, fan_lat_load_actuator = setup_mech_vent_vars_actuators(model: model, program: infil_program)
 
     # Apply CFIS
@@ -1796,6 +1788,7 @@ class Airflow
     infil_program = apply_cfis(infil_program, vent_mech_cfis_tot, cfis_fan_actuator)
 
     # Calculate Qfan, Qinf_adj
+    # Calculate adjusted infiltration based on mechanical ventilation system
     infil_program = apply_infiltration_adjustment(infil_program, vent_fans_kitchen, vent_fans_bath, sup_cfm_tot, exh_cfm_tot, bal_cfm_tot, erv_hrv_cfm_tot, infil_flow_actuator)
 
     # Address load of Qfan (Qload)
