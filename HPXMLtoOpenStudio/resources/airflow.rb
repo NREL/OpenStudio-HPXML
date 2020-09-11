@@ -1567,7 +1567,7 @@ class Airflow
     end
   end
 
-  def self.apply_infiltration_adjustment(infil_program, vent_fans_kitchen, vent_fans_bath, sup_cfm_tot, exh_cfm_tot, bal_cfm_tot, erv_hrv_cfm_tot, infil_flow_actuator)
+  def self.apply_infiltration_adjustment(infil_program, vent_fans_kitchen, vent_fans_bath, sup_cfm_tot, exh_cfm_tot, bal_cfm_tot, erv_hrv_cfm_tot, infil_flow_actuator, range_sch_sensors_map, bath_sch_sensors_map)
     infil_program.addLine('Set Qrange = 0')
     vent_fans_kitchen.each do |vent_kitchen|
       infil_program.addLine("Set Qrange = Qrange + #{UnitConversions.convert(vent_kitchen.rated_flow_rate * vent_kitchen.quantity, 'cfm', 'm^3/s').round(4)} * #{range_sch_sensors_map[vent_kitchen.id].name}")
@@ -1789,7 +1789,7 @@ class Airflow
 
     # Calculate Qfan, Qinf_adj
     # Calculate adjusted infiltration based on mechanical ventilation system
-    infil_program = apply_infiltration_adjustment(infil_program, vent_fans_kitchen, vent_fans_bath, sup_cfm_tot, exh_cfm_tot, bal_cfm_tot, erv_hrv_cfm_tot, infil_flow_actuator)
+    infil_program = apply_infiltration_adjustment(infil_program, vent_fans_kitchen, vent_fans_bath, sup_cfm_tot, exh_cfm_tot, bal_cfm_tot, erv_hrv_cfm_tot, infil_flow_actuator, range_sch_sensors_map, bath_sch_sensors_map)
 
     # Address load of Qfan (Qload)
     # Qload as variable for tracking outdoor air flow rate, excluding recirculation
