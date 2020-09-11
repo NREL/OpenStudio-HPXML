@@ -2705,7 +2705,7 @@ class OSModel
       end
     end
     model.getOtherEquipments.sort.each do |o|
-      next unless o.name.to_s.start_with? Constants.ObjectNameMechanicalVentilationHouseFan + ' sensible load'
+      next unless o.name.to_s.start_with? Constants.ObjectNameMechanicalVentilationHouseFan
 
       { 'Other Equipment Convective Heating Energy' => 'mv_conv',
         'Other Equipment Radiant Heating Energy' => 'mv_rad' }.each do |var, name|
@@ -2970,8 +2970,7 @@ class OSModel
     program.addLine('EndIf')
     program.addLine('Set hr_mechvent = 0')
     mechvent_sensors.each do |sensor|
-      s = "Set hr_mechvent = hr_mechvent - #{sensor.name}"
-      program.addLine(s)
+      program.addLine("Set hr_mechvent = hr_mechvent - #{sensor.name}")
     end
     program.addLine('Set hr_ducts = 0')
     ducts_sensors.each do |duct_sensors|

@@ -908,7 +908,6 @@ class HVACSizing
 
     cfm_Heating = q_bal_Sens + (icfm_Heating**2.0 + q_unb_cfm**2.0)**0.5 - q_preheat - q_recirc
 
-    # FIXME: Assume preconditioning doesn't introduce/handle latent loads?
     cfm_Cool_Load_Sens = q_bal_Sens + (icfm_Cooling**2.0 + q_unb_cfm**2.0)**0.5 - q_precool - q_recirc
     cfm_Cool_Load_Lat = q_bal_Lat + (icfm_Cooling**2.0 + q_unb_cfm**2.0)**0.5 - q_recirc
 
