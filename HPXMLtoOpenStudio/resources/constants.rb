@@ -281,6 +281,10 @@ class Constants
     return 'mech vent range fan'
   end
 
+  def self.ObjectNameMechanicalVentilationAirflow
+    return 'Qfan'
+  end
+
   def self.ObjectNameMiniSplitHeatPump
     return 'mini split heat pump'
   end
