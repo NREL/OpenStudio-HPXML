@@ -11,55 +11,27 @@ Using HPXML files reduces the complexity and effort for software developers to l
 HPXML Inputs
 ------------
 
-The following building features/technologies are available for modeling via the HPXMLtoOpenStudio measure:
-
-- Enclosure
-
-  - Attics (Vented, Unvented, Conditioned)
-  - Foundations (Slab, Unconditioned Basement, Conditioned Basement, Vented Crawlspace, Unvented Crawlspace, Ambient)
-  - Garages
-  - Windows & Overhangs
-  - Skylights
-  - Doors
-  
-- HVAC
-
-  - Heating Systems (Electric Resistance, Central/Wall/Floor Furnaces, Stoves, Boilers, Portable/Fixed Heaters, Fireplaces)
-  - Cooling Systems (Central Air Conditioners, Room Air Conditioners, Evaporative Coolers, Mini Split Air Conditioners, Chillers, Cooling Towers)
-  - Heat Pumps (Air Source, Mini Split, Ground Source, Dual-Fuel, Water Loop)
-  - Setpoints
-  - Ducts
-  
-- Water Heating
-
-  - Water Heaters (Storage, Tankless, Heat Pump, Indirect, Tankless Coil)
-  - Solar Hot Water
-  - Desuperheater
-  - Hot Water Distribution (Standard, Recirculation)
-  - Drain Water Heat Recovery
-  - Hot Water Fixtures
-  
-- Ventilation
-
-  - Mechanical Ventilation (Exhaust, Supply, Balanced, ERV, HRV, CFIS)
-  - Kitchen/Bathroom Fans
-  - Whole House Fan
-
-- Photovoltaics
-- Appliances (Clothes Washer/Dryer, Dishwasher, Refrigerators, Freezers, Cooking Range/Oven)
-- Dehumidifier
-- Lighting
-- Ceiling Fans
-- Pool
-- Hot Tub
-- Plug Loads
-- Fuel Loads
-
-EnergyPlus Use Case for HPXML
-*****************************
-
 HPXML is an flexible and extensible format, where nearly all elements in the schema are optional and custom elements can be included.
-Because of this, an EnergyPlus Use Case for HPXML has been developed that specifies the HPXML elements or enumeration choices required to run the measure.
+Because of this, a stricter set of requirements for the HPXML file have been developed for purposes of running EnergyPlus simulations.
+
+HPXML files submitted to OpenStudio-HPXML should undergo a two step validation process:
+
+1. Validation against the HPXML Schema
+
+  The HPXML XSD Schema can be found at ``HPXMLtoOpenStudio/resources/HPXML.xsd``.
+  It should be used by the software developer to validate their HPXML file prior to running the simulation.
+  XSD Schemas are used to validate what elements/attributes/enumerations are available, data types for elements/attributes, the number/order of children elements, etc.
+
+  OpenStudio-HPXML **does not** validate the HPXML file against the XSD Schema and assumes the file submitted is valid.
+
+2. Validation using `Schematron <http://schematron.com/>`_
+
+  The Schematron document for the EnergyPlus use case can be found at ``HPXMLtoOpenStudio/resources/EPvalidator.xml``.
+  Schematron is a rule-based validation language, expressed in XML using XPath expressions, for validating the presence or absence of inputs in XML files. 
+  As opposed to an XSD Schema, a Schematron document validates constraints and requirements based on conditionals and other logical statements.
+  For example, if an element is specified with a particular value, the applicable enumerations of another element may change.
+  
+  OpenStudio-HPXML **automatically validates** the HPXML file against the Schematron document and reports any validation errors, but software developers may find it beneficial to also integrate Schematron validation into their software.
 
 .. important::
 
@@ -479,8 +451,6 @@ PortableHeater                                                                  
 Fireplace                                                                               <any>              Percent                  (optional)
 ==================  ==============  ==================================================  =================  =======================  ===============
 
-For boilers, ``IsSharedSystem`` will default to false if not provided.
-
 For all non-shared systems, ``HeatingCapacity`` may be provided; if not, the system will be auto-sized via ACCA Manual J/S.
 
 For all systems, the ``ElectricAuxiliaryEnergy`` element may be provided if available.
@@ -736,11 +706,11 @@ For an individual CFIS system, the flow rate should equal the amount of outdoor 
 ``IsSharedSystem`` will default to false if not provided.
 
 If the mechanical ventilation is a shared system (i.e., serving multiple dwelling units), it should be described using ``IsSharedSystem='true'``.
-In this case, ``TestedFlowRate`` or ``RatedFlowRate`` and ``FanPower`` must be specified with ``scope`` attributes in order to distinguish data provided at different levels ("multiple units" and "single unit").
-Flow rates are required at both levels while fan power is required at either level as it can be scaled to the other one.
-One of the elements ``FractionOutdoorAir`` and ``FractionRecirculation`` are also needed for shared systems, where the values are the percentages of outdoor air and recirculation air in total supply air.
+In this case, ``TestedFlowRate`` or ``RatedFlowRate`` and ``FanPower`` specified are assumed to be information at system level.
+Flow rates are required at both system level and in-unit level, in order to specify the in-unit flow rate, please use ``extension/InUnitFlowRate``.
+``FractionRecirculation`` is also needed for shared systems, where the values are the percentages of recirculation air in total supply air.
 In addition, it is also available to describe preconditioning heating/cooling systems for shared systems with ``extension/PreconditioningHeating`` and ``extension/PreconditioningCooling``.
-To describe a preconditioning system, eg. a preconditioning heating system, the ``extension/PreconditioningHeating/Fuel``, ``extension/PreconditioningHeating/AnnualHeatingEfficiency[Units="COP"]/Value``, and ``extension/PreconditioningHeating/HeatingCapacity[@scope="multiple units" or @scope="single unit"]`` are required.
+To describe a preconditioning system, eg. a preconditioning heating system, the ``extension/PreconditioningHeating/Fuel`` and ``extension/PreconditioningHeating/AnnualHeatingEfficiency[Units="COP"]/Value`` are required, assuming capacity is large enough to precondition the ventilation air.
 The same rule applies to preconditioning cooling system.
 
 
