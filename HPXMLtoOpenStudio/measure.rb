@@ -2044,8 +2044,6 @@ class OSModel
           heating_system = nil
         end
 
-        # TODO: Handle cooling_cfm input (by setting airflow defect to 0?)
-
         HVAC.apply_central_air_conditioner_furnace(model, runner, cooling_system, heating_system,
                                                    @remaining_cool_load_frac, @remaining_heat_load_frac,
                                                    living_zone, @hvac_map)

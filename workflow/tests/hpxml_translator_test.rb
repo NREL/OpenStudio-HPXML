@@ -493,7 +493,7 @@ class HPXMLTest < MiniTest::Test
       if (hpxml.solar_thermal_systems.size > 0) || (hpxml.water_heating_systems.select { |wh| wh.water_heater_type == HPXML::WaterHeaterTypeHeatPump }.size > 0)
         next if err_line.include? 'More Additional Loss Coefficients were entered than the number of nodes; extra coefficients will not be used'
       end
-      if hpxml_path.include?('base-dhw-tank-heat-pump-outside.xml') || hpxml_path.include?('base-hvac-flowrate.xml')
+      if hpxml_path.include?('base-dhw-tank-heat-pump-outside.xml')
         next if err_line.include? 'Full load outlet air dry-bulb temperature < 2C. This indicates the possibility of coil frost/freeze.'
         next if err_line.include? 'Full load outlet temperature indicates a possibility of frost/freeze error continues.'
       end

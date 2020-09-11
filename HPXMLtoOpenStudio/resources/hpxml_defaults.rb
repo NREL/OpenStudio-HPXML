@@ -302,22 +302,64 @@ class HPXMLDefaults
     end
 
     # Charge defect ratio
-    (hpxml.cooling_systems + hpxml.heat_pumps).each do |hvac|
-      next unless hvac.charge_defect_ratio.nil?
+    hpxml.cooling_systems.each do |cooling_system|
+      next unless [HPXML::HVACTypeCentralAirConditioner,
+                   HPXML::HVACTypeRoomAirConditioner,
+                   HPXML::HVACTypeMiniSplitAirConditioner].include? cooling_system.cooling_system_type
+      next unless cooling_system.charge_defect_ratio.nil?
 
-      # TODO: Only apply to certain types
-      hvac.charge_defect_ratio = 0.0
+      cooling_system.charge_defect_ratio = 0.0
+    end
+    hpxml.heat_pumps.each do |heat_pump|
+      next unless [HPXML::HVACTypeHeatPumpAirToAir,
+                   HPXML::HVACTypeHeatPumpGroundToAir,
+                   HPXML::HVACTypeHeatPumpMiniSplit].include? heat_pump.heat_pump_type
+      next unless heat_pump.charge_defect_ratio.nil?
+
+      heat_pump.charge_defect_ratio = 0.0
     end
 
     # Airflow defect ratio
-    (hpxml.cooling_systems + hpxml.heat_pumps).each do |hvac|
-      next unless hvac.airflow_defect_ratio.nil?
+    hpxml.heating_systems.each do |heating_system|
+      next unless [HPXML::HVACTypeFurnace,
+                   HPXML::HVACTypeWallFurnace,
+                   HPXML::HVACTypeFloorFurnace].include? heating_system.heating_system_type
+      next unless heating_system.airflow_defect_ratio.nil? && heating_system.airflow_cfm_per_ton.nil?
 
-      # TODO: Only apply to certain types
-      hvac.airflow_defect_ratio = 0.0
+      heating_system.airflow_defect_ratio = 0.0
+    end
+    hpxml.cooling_systems.each do |cooling_system|
+      next unless [HPXML::HVACTypeCentralAirConditioner,
+                   HPXML::HVACTypeRoomAirConditioner,
+                   HPXML::HVACTypeMiniSplitAirConditioner].include? cooling_system.cooling_system_type
+      next unless cooling_system.airflow_defect_ratio.nil? && cooling_system.airflow_cfm_per_ton.nil?
+
+      cooling_system.airflow_defect_ratio = 0.0
+    end
+    hpxml.heat_pumps.each do |heat_pump|
+      next unless [HPXML::HVACTypeHeatPumpAirToAir,
+                   HPXML::HVACTypeHeatPumpGroundToAir,
+                   HPXML::HVACTypeHeatPumpMiniSplit].include? heat_pump.heat_pump_type
+      next unless heat_pump.airflow_defect_ratio.nil? && heat_pump.airflow_cfm_per_ton.nil?
+
+      heat_pump.airflow_defect_ratio = 0.0
     end
 
     # Fan power
+    hpxml.heating_systems.each do |heating_system|
+      next unless heating_system.fan_watts_per_cfm.nil?
+
+      if [HPXML::HVACTypeFurnace].include? heating_system.heating_system_type
+        heating_system.fan_watts_per_cfm = 0.5 # W/cfm # TODO: Only set if not attached to an AC?
+      elsif [HPXML::HVACTypeWallFurnace,
+             HPXML::HVACTypeFloorFurnace,
+             HPXML::HVACTypeStove,
+             HPXML::HVACTypePortableHeater,
+             HPXML::HVACTypeFixedHeater,
+             HPXML::HVACTypeFireplace].include? heating_system.heating_system_type
+        heating_system.fan_watts_per_cfm = 0.5 # W/cfm # TODO: What value to use for stoves, wall/floor furnaces, space heaters, etc?
+      end
+    end
     hpxml.cooling_systems.each do |cooling_system|
       next unless cooling_system.fan_watts_per_cfm.nil?
 
@@ -328,31 +370,24 @@ class HPXMLDefaults
         else
           cooling_system.fan_watts_per_cfm = 0.3 # W/cfm
         end
-      end
-    end
-    hpxml.heating_systems.each do |heating_system|
-      next unless heating_system.fan_watts_per_cfm.nil?
-
-      if heating_system.heating_system_type == HPXML::HVACTypeFurnace
-        heating_system.fan_watts_per_cfm = 0.5 # W/cfm # TODO: Only set if not attached to an AC?
-      else
-        heating_system.fan_watts_per_cfm = 0.5 # W/cfm # TODO: What value to use for stoves, wall/floor furnaces, space heaters, etc?
+      elsif [HPXML::HVACTypeRoomAirConditioner].include? cooling_system.cooling_system_type
+        cooling_system.fan_watts_per_cfm = 0.3 # W/cfm # TODO: What value to use for room AC?
       end
     end
     hpxml.heat_pumps.each do |heat_pump|
       next unless heat_pump.fan_watts_per_cfm.nil?
 
-      if heat_pump.heat_pump_type == HPXML::HVACTypeHeatPumpAirToAir
+      if [HPXML::HVACTypeHeatPumpAirToAir].include? heat_pump.heat_pump_type
         if heat_pump.cooling_efficiency_seer <= 15
           heat_pump.fan_watts_per_cfm = 0.5 # W/cfm
         else
           heat_pump.fan_watts_per_cfm = 0.3 # W/cfm
         end
-      elsif heat_pump.heat_pump_type == HPXML::HVACTypeHeatPumpGroundToAir
+      elsif [HPXML::HVACTypeHeatPumpGroundToAir].include? heat_pump.heat_pump_type
         # Should this be 0.2 W/cfm per ANSI/RESNET/ICC 301-2019 Section 4.4.5? (or is 0.2 W/cfm
         # interpreted as the _additional_ fan power beyond that captured in the rating test?)
         heat_pump.fan_watts_per_cfm = 0.5 # W/cfm
-      elsif heat_pump.heat_pump_type == HPXML::HVACTypeHeatPumpMiniSplit
+      elsif [HPXML::HVACTypeHeatPumpMiniSplit].include? heat_pump.heat_pump_type
         if not heat_pump.distribution_system.nil?
           heat_pump.fan_watts_per_cfm = 0.18 # W/cfm, ducted
         else

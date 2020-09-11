@@ -449,6 +449,10 @@ class Constants
     return __method__.to_s
   end
 
+  def self.SizingInfoHVACActualCFMperTon
+    return __method__.to_s
+  end
+
   def self.SizingInfoHVACFracHeatLoadServed
     return __method__.to_s
   end
@@ -509,10 +513,6 @@ class Constants
     return __method__.to_s
   end
 
-  def self.SizingInfoHVACCoolingCFMs
-    return __method__.to_s
-  end
-
   def self.SizingInfoHVACAirflowDefectRatio
     return __method__.to_s
   end
@@ -522,10 +522,6 @@ class Constants
   end
 
   def self.SizingInfoHVACHeatingCapacityOffset
-    return __method__.to_s
-  end
-
-  def self.SizingInfoHVACHeatingCFMs
     return __method__.to_s
   end
 
