@@ -641,7 +641,6 @@
                     <Value>0.92</Value>
                     <Units>COP</Units>
                   </AnnualHeatingEfficiency>
-                  <HeatingCapacity>30000</HeatingCapacity>
                 </PreHeating>
                 <PreCooling>
                   <Fuel>electricity</Fuel>
@@ -649,7 +648,6 @@
                     <Value>4.0</Value>
                     <Units>COP</Units>
                   </AnnualCoolingEfficiency>
-                  <CoolingCapacity>20000</CoolingCapacity>
                 </PreCooling>
               </extension>
             </VentilationFan>

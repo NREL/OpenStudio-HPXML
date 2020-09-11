@@ -266,8 +266,8 @@ class HPXMLTest < MiniTest::Test
                    ['Pump Electric Power', 'runperiod', Constants.ObjectNameBoiler + ' hydronic pump'],
                    ['Unitary System Part Load Ratio', 'runperiod', Constants.ObjectNameGroundSourceHeatPump + ' unitary system'],
                    ['Pump Electric Power', 'runperiod', Constants.ObjectNameGroundSourceHeatPump + ' pump']]
-                  # Run workflow
-                  workflow_start = Time.now
+    # Run workflow
+    workflow_start = Time.now
     results = run_hpxml_workflow(rundir, xml, measures, measures_dir,
                                  debug: true, output_vars: output_vars,
                                  run_measures_only: expect_error)

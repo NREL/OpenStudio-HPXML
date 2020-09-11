@@ -717,7 +717,6 @@
                     <Value>0.92</Value>
                     <Units>COP</Units>
                   </AnnualHeatingEfficiency>
-                  <HeatingCapacity>30000</HeatingCapacity>
                 </PreHeating>
                 <PreCooling>
                   <Fuel>electricity</Fuel>
@@ -725,7 +724,6 @@
                     <Value>4.0</Value>
                     <Units>COP</Units>
                   </AnnualCoolingEfficiency>
-                  <CoolingCapacity>20000</CoolingCapacity>
                 </PreCooling>
               </extension>
             </VentilationFan>
@@ -748,7 +746,6 @@
                     <Value>0.87</Value>
                     <Units>COP</Units>
                   </AnnualHeatingEfficiency>
-                  <HeatingCapacity>64000</HeatingCapacity>
                 </PreHeating>
                 <PreCooling>
                   <Fuel>electricity</Fuel>
@@ -756,7 +753,6 @@
                     <Value>3.5</Value>
                     <Units>COP</Units>
                   </AnnualCoolingEfficiency>
-                  <CoolingCapacity>48000</CoolingCapacity>
                 </PreCooling>
               </extension>
             </VentilationFan>
@@ -778,7 +774,6 @@
                     <Value>4.0</Value>
                     <Units>COP</Units>
                   </AnnualHeatingEfficiency>
-                  <HeatingCapacity>64000</HeatingCapacity>
                 </PreHeating>
                 <PreCooling>
                   <Fuel>electricity</Fuel>
@@ -786,7 +781,6 @@
                     <Value>4.5</Value>
                     <Units>COP</Units>
                   </AnnualCoolingEfficiency>
-                  <CoolingCapacity>48000</CoolingCapacity>
                 </PreCooling>
               </extension>
             </VentilationFan>
@@ -807,7 +801,6 @@
                     <Value>3.5</Value>
                     <Units>COP</Units>
                   </AnnualHeatingEfficiency>
-                  <HeatingCapacity>64000</HeatingCapacity>
                 </PreHeating>
                 <PreCooling>
                   <Fuel>electricity</Fuel>
@@ -815,7 +808,6 @@
                     <Value>4.0</Value>
                     <Units>COP</Units>
                   </AnnualCoolingEfficiency>
-                  <CoolingCapacity>48000</CoolingCapacity>
                 </PreCooling>
               </extension>
             </VentilationFan>
@@ -837,7 +829,6 @@
                     <Value>3.5</Value>
                     <Units>COP</Units>
                   </AnnualHeatingEfficiency>
-                  <HeatingCapacity>64000</HeatingCapacity>
                 </PreHeating>
                 <PreCooling>
                   <Fuel>electricity</Fuel>
@@ -845,7 +836,6 @@
                     <Value>4.0</Value>
                     <Units>COP</Units>
                   </AnnualCoolingEfficiency>
-                  <CoolingCapacity>48000</CoolingCapacity>
                 </PreCooling>
               </extension>
             </VentilationFan>

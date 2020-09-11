@@ -419,7 +419,7 @@ class Airflow
     return ra_duct_zone
   end
 
-  def self.create_sens_lat_load_actuator_and_equipment(model:, name:, space:, frac_lat:, frac_lost:, hpxml_fuel_type: nil, end_use: nil, is_duct_load_for_report: nil)
+  def self.create_other_equipment_object_and_actuator(model:, name:, space:, frac_lat:, frac_lost:, hpxml_fuel_type: nil, end_use: nil, is_duct_load_for_report: nil)
     other_equip_def = OpenStudio::Model::OtherEquipmentDefinition.new(model)
     other_equip_def.setName("#{name} equip")
     other_equip = OpenStudio::Model::OtherEquipment.new(other_equip_def)
@@ -825,7 +825,7 @@ class Airflow
           if not is_cfis
             duct_vars[var_name] = OpenStudio::Model::EnergyManagementSystemGlobalVariable.new(model, object_name)
           end
-          duct_actuators[var_name] = create_sens_lat_load_actuator_and_equipment(model: model, name: object_name, space: space, frac_lat: frac_lat, frac_lost: frac_lost, is_duct_load_for_report: is_load_for_report)
+          duct_actuators[var_name] = create_other_equipment_object_and_actuator(model: model, name: object_name, space: space, frac_lat: frac_lat, frac_lost: frac_lost, is_duct_load_for_report: is_load_for_report)
         end
       end
 
@@ -1425,53 +1425,14 @@ class Airflow
     return vent_mech_fan_actuator
   end
 
-  def self.apply_fan_load_to_infil_program(model:, infil_program:, oa_flow_rate_var_name:, tot_flow_rate_var_name:, vent_mech_sens_eff:, vent_mech_lat_eff:, fan_sens_load_actuator:, fan_lat_load_actuator:, preconditioned: true)
-    # Calculate mass flow rate based on outdoor air density
-    infil_program.addLine("Set Q_oa = #{oa_flow_rate_var_name}")
-    infil_program.addLine("Set Q_tot = #{tot_flow_rate_var_name}")
-    infil_program.addLine('Set Fan_MFR = Q_oa * OASupRho')
-
-    if (vent_mech_sens_eff > 0.0) || (vent_mech_lat_eff > 0.0)
-      # ERV Heat exchanger calculation
-      infil_program.addLine('Set ERVCpMin = (@Min OASupCp ZoneCp)')
-      infil_program.addLine("Set ERVSupOutTemp = OASupInTemp + ERVCpMin/OASupCp * #{vent_mech_sens_eff} * (ZoneTemp - OASupInTemp)")
-      infil_program.addLine("Set ERVSupOutW = OASupInW + ERVCpMin/OASupCp * #{vent_mech_lat_eff} * (ZoneW - OASupInW)")
-      infil_program.addLine('Set ERVSupOutEnth = (@HFnTdbW ERVSupOutTemp ERVSupOutW)')
-      infil_program.addLine('Set ERVSensHeatTrans = Fan_MFR * OASupCp * (ERVSupOutTemp - OASupInTemp)')
-      infil_program.addLine('Set ERVTotalHeatTrans = Fan_MFR * (ERVSupOutEnth - OASupInEnth)')
-      infil_program.addLine('Set ERVLatHeatTrans = ERVTotalHeatTrans - ERVSensHeatTrans')
-
-      # Load calculation
-      infil_program.addLine('Set FanTotalToLv = Fan_MFR * (ERVSupOutEnth - ZoneAirEnth)')
-      infil_program.addLine('Set FanSensToLv = Fan_MFR * ZoneCp * (ERVSupOutTemp - ZoneTemp)')
-      infil_program.addLine('Set FanLatToLv = FanTotalToLv - FanSensToLv')
-    else
-      # Load calculation
-      infil_program.addLine('Set FanTotalToLv = Fan_MFR * (OASupInEnth - ZoneAirEnth)')
-      infil_program.addLine('Set FanSensToLv = Fan_MFR * ZoneCp * (OASupInTemp - ZoneTemp)')
-      infil_program.addLine('Set FanLatToLv = FanTotalToLv - FanSensToLv')
-    end
-
-    # Actuator
-    if not preconditioned
-      infil_program.addLine("Set #{fan_sens_load_actuator.name} = #{fan_sens_load_actuator.name} + FanSensToLv")
-      infil_program.addLine("Set #{fan_lat_load_actuator.name} = #{fan_lat_load_actuator.name} + FanLatToLv")
-      infil_program.addLine('Set QWHV = QWHV + Q_tot')
-    end
-
-    return infil_program
-  end
-
   def self.setup_mech_vent_vars_actuators(model:, program:)
     # Actuators for mech vent fan
     sens_name = "#{Constants.ObjectNameMechanicalVentilationHouseFan} sensible load"
-    fan_sens_load_actuator = create_sens_lat_load_actuator_and_equipment(model: model, name: sens_name, space: @living_space, frac_lat: 0.0, frac_lost: 0.0)
+    fan_sens_load_actuator = create_other_equipment_object_and_actuator(model: model, name: sens_name, space: @living_space, frac_lat: 0.0, frac_lost: 0.0)
     lat_name = "#{Constants.ObjectNameMechanicalVentilationHouseFan} latent load"
-    fan_lat_load_actuator = create_sens_lat_load_actuator_and_equipment(model: model, name: lat_name, space: @living_space, frac_lat: 1.0, frac_lost: 0.0)
+    fan_lat_load_actuator = create_other_equipment_object_and_actuator(model: model, name: lat_name, space: @living_space, frac_lat: 1.0, frac_lost: 0.0)
     program.addLine("Set #{fan_sens_load_actuator.name} = 0.0")
     program.addLine("Set #{fan_lat_load_actuator.name} = 0.0")
-    # QWHV to track implemented whole house ventilation rate
-    program.addLine('Set QWHV = 0.0')
     # Air property at inlet nodes on both sides
     program.addLine("Set OASupInPb = #{@pbar_sensor.name}") # oa barometric pressure
     program.addLine("Set OASupInTemp = #{@tout_sensor.name}") # oa db temperature
@@ -1488,31 +1449,7 @@ class Airflow
     return program, fan_sens_load_actuator, fan_lat_load_actuator
   end
 
-  def self.apply_erv_hrv_fans(model:, program:, vent_mech_erv_hrv:, hrv_erv_effectiveness_map:, fan_sens_load_actuator: nil, fan_lat_load_actuator: nil, preconditioned: true)
-    # Apply ERV HRV calculations for both infiltration program and shared system preconditioning program
-    # Use preconditioned label to specify if it's called by preconditioning program, if so, disable the load actuators.
-    if not vent_mech_erv_hrv.empty?
-      # ERV/HRV EMS load model
-      # E+ ERV model is using standard density for MFR calculation, caused discrepancy with other system types.
-      # Therefore ERV is modeled within EMS infiltration program
-      # combine ERV/HRV to a single system with weighted effectivenesses
-      vent_mech_sens_eff = 0.0
-      vent_mech_lat_eff = 0.0
-      oa_flow_rate_sum = vent_mech_erv_hrv.map { |fan| fan.average_oa_flow_rate }.sum
-      tot_flow_rate_sum = vent_mech_erv_hrv.map { |fan| fan.average_unit_flow_rate }.sum
-      vent_mech_erv_hrv.each do |vent_fan|
-        vent_mech_sens_eff += vent_fan.average_oa_flow_rate / oa_flow_rate_sum * hrv_erv_effectiveness_map[vent_fan][:vent_mech_sens_eff]
-        vent_mech_lat_eff += vent_fan.average_oa_flow_rate / oa_flow_rate_sum * hrv_erv_effectiveness_map[vent_fan][:vent_mech_lat_eff]
-      end
-
-      # Apply ERV/HRV mechanical ventilation
-      oa_flow_rate_str = "#{UnitConversions.convert(oa_flow_rate_sum, 'cfm', 'm^3/s')}"
-      tot_flow_rate_str = "#{UnitConversions.convert(tot_flow_rate_sum, 'cfm', 'm^3/s')}"
-      program = apply_fan_load_to_infil_program(model: model, infil_program: program, oa_flow_rate_var_name: oa_flow_rate_str, tot_flow_rate_var_name: tot_flow_rate_str, vent_mech_sens_eff: vent_mech_sens_eff, vent_mech_lat_eff: vent_mech_lat_eff, fan_sens_load_actuator: fan_sens_load_actuator, fan_lat_load_actuator: fan_lat_load_actuator, preconditioned: preconditioned)
-    end
-    return program
-  end
-
+  # Discard? Or save for future?
   def self.apply_preconditioning_equipment(model, vent_mech_precond, infil_program, sens_load_actuator, lat_load_actuator, cfis_fan_actuator, hrv_erv_effectiveness_map)
     # setpoint sensors
     htg_spt = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Zone Thermostat Heating Setpoint Temperature')
@@ -1531,8 +1468,8 @@ class Airflow
     vent_mech_precond.each_with_index do |vent_mech, i|
       # Create energy use actuator per system because of different fuel type can be applied
       # FIXME: Preconditioning equipment energy end use: mech vent or hvac category? Proceed with a new end use: mech vent preconditioning
-      clg_energy_actuator = create_sens_lat_load_actuator_and_equipment(model: model, name: "shared mech vent precooling energy #{i}", space: @living_space, frac_lat: 0.0, frac_lost: 1.0, hpxml_fuel_type: vent_mech.precooling_fuel, end_use: Constants.ObjectNameMechanicalVentilationPreconditioning)
-      htg_energy_actuator = create_sens_lat_load_actuator_and_equipment(model: model, name: "shared mech vent preheating energy #{i}", space: @living_space, frac_lat: 0.0, frac_lost: 1.0, hpxml_fuel_type: vent_mech.preheating_fuel, end_use: Constants.ObjectNameMechanicalVentilationPreconditioning)
+      clg_energy_actuator = create_other_equipment_object_and_actuator(model: model, name: "shared mech vent precooling energy #{i}", space: @living_space, frac_lat: 0.0, frac_lost: 1.0, hpxml_fuel_type: vent_mech.precooling_fuel, end_use: Constants.ObjectNameMechanicalVentilationPreconditioning)
+      htg_energy_actuator = create_other_equipment_object_and_actuator(model: model, name: "shared mech vent preheating energy #{i}", space: @living_space, frac_lat: 0.0, frac_lost: 1.0, hpxml_fuel_type: vent_mech.preheating_fuel, end_use: Constants.ObjectNameMechanicalVentilationPreconditioning)
       infil_program.addLine("Set #{clg_energy_actuator.name} = 0.0")
       infil_program.addLine("Set #{htg_energy_actuator.name} = 0.0")
 
@@ -1635,118 +1572,7 @@ class Airflow
     # oems.setEMSRuntimeLanguageDebugOutputLevel('Verbose')
   end
 
-  def self.apply_mechanical_ventilation(model, vent_fans_mech, living_ach50, living_const_ach, weather, vent_fans_kitchen, vent_fans_bath, range_sch_sensors_map, bath_sch_sensors_map, has_flue_chimney)
-    # Categorize fans into different types
-    vent_mech_preheat = vent_fans_mech.select { |vent_mech| (not vent_mech.unit_preheating_capacity.nil?) }
-    vent_mech_precool = vent_fans_mech.select { |vent_mech| (not vent_mech.unit_precooling_capacity.nil?) }
-    vent_mech_unprecond = vent_fans_mech - (vent_mech_preheat + vent_mech_precool).uniq
-    vent_mech_shared = vent_fans_mech.select { |vent_mech| vent_mech.is_shared_system }
-    vent_mech_nonshared = vent_fans_mech - vent_mech_shared
-
-    vent_mech_sup_tot = vent_fans_mech.select { |vent_mech| vent_mech.fan_type == HPXML::MechVentTypeSupply }
-    vent_mech_exh_tot = vent_fans_mech.select { |vent_mech| vent_mech.fan_type == HPXML::MechVentTypeExhaust }
-    vent_mech_cfis_tot = vent_fans_mech.select { |vent_mech| vent_mech.fan_type == HPXML::MechVentTypeCFIS }
-    vent_mech_bal_tot = vent_fans_mech.select { |vent_mech| vent_mech.fan_type == HPXML::MechVentTypeBalanced }
-    vent_mech_erv_hrv_tot = vent_fans_mech.select { |vent_mech| [HPXML::MechVentTypeERV, HPXML::MechVentTypeHRV].include? vent_mech.fan_type }
-
-    vent_mech_sup_unprecond = vent_mech_sup_tot & vent_mech_unprecond
-    vent_mech_exh_unprecond = vent_mech_exh_tot & vent_mech_unprecond
-    vent_mech_cfis_unprecond = vent_mech_cfis_tot & vent_mech_unprecond
-    vent_mech_bal_unprecond = vent_mech_bal_tot & vent_mech_unprecond
-    vent_mech_erv_hrv_unprecond = vent_mech_erv_hrv_tot & vent_mech_unprecond
-
-    # Fan power
-    sup_vent_mech_fan_w = vent_mech_sup_tot.map { |vent_mech| vent_mech.average_fan_power }.sum(0.0)
-    exh_vent_mech_fan_w = vent_mech_exh_tot.map { |vent_mech| vent_mech.average_fan_power }.sum(0.0)
-    # ERV/HRV and balanced system fan power combined altogether
-    bal_vent_mech_fan_w = (vent_mech_bal_tot + vent_mech_erv_hrv_tot).map { |vent_mech| vent_mech.average_fan_power }.sum(0.0)
-    total_sup_exh_bal_w = sup_vent_mech_fan_w + exh_vent_mech_fan_w + bal_vent_mech_fan_w
-    # 1.0: Fan heat does not enter space, 0.0: Fan heat does enter space, 0.5: Supply fan heat enters space
-    if total_sup_exh_bal_w > 0.0
-      fan_heat_lost_fraction = (1.0 * exh_vent_mech_fan_w + 0.0 * sup_vent_mech_fan_w + 0.5 * bal_vent_mech_fan_w) / total_sup_exh_bal_w
-    else
-      fan_heat_lost_fraction = 1.0
-    end
-    add_ee_for_vent_fan_power(model, Constants.ObjectNameMechanicalVentilationHouseFan, fan_heat_lost_fraction, false, total_sup_exh_bal_w)
-    # CFIS Fan Actuators
-    cfis_fan_actuator = add_ee_for_vent_fan_power(model, Constants.ObjectNameMechanicalVentilationHouseFanCFIS, 0.0, true)
-
-    # Average in-unit cfms (include recirculation from in unit cfms for shared systems)
-    sup_cfm_tot = vent_mech_sup_tot.map { |vent_mech| vent_mech.average_unit_flow_rate }.sum(0.0)
-    exh_cfm_tot = vent_mech_exh_tot.map { |vent_mech| vent_mech.average_unit_flow_rate }.sum(0.0)
-    bal_cfm_tot = vent_mech_bal_tot.map { |vent_mech| vent_mech.average_unit_flow_rate }.sum(0.0)
-    erv_hrv_cfm_tot = vent_mech_erv_hrv_tot.map { |vent_mech| vent_mech.average_unit_flow_rate }.sum(0.0)
-    cfis_cfm_tot = vent_mech_cfis_tot.map { |vent_mech| vent_mech.average_unit_flow_rate }.sum(0.0)
-
-    # Average preconditioned oa air cfms(only oa, recirculation will be addressed below for all shared systems)
-    oa_cfm_preheat = vent_mech_preheat.map { |vent_mech| vent_mech.average_oa_flow_rate }.sum(0.0)
-    oa_cfm_precool = vent_mech_precool.map { |vent_mech| vent_mech.average_oa_flow_rate }.sum(0.0)
-    recirc_cfm_shared = vent_mech_shared.map { |vent_mech| vent_mech.average_unit_flow_rate - vent_mech.average_oa_flow_rate }.sum(0.0)
-
-    # HVAC Sizing data
-    tot_sup_cfm = sup_cfm_tot + bal_cfm_tot + erv_hrv_cfm_tot + cfis_cfm_tot
-    tot_exh_cfm = exh_cfm_tot + bal_cfm_tot + erv_hrv_cfm_tot
-    tot_unbal_cfm = (tot_sup_cfm - tot_exh_cfm).abs
-    tot_bal_cfm = [tot_exh_cfm, tot_sup_cfm].min
-
-    # Calculate effectivenesses for all ERV/HRV and store results in a hash
-    hrv_erv_effectiveness_map = calc_hrv_erv_effectiveness(vent_mech_erv_hrv_tot)
-
-    # Calculate cfm weighted average effectivenesses for the combined balanced airflow
-    weighted_vent_mech_lat_eff = 0.0
-    weighted_vent_mech_apparent_sens_eff = 0.0
-    vent_mech_erv_hrv_unprecond.each do |vent_mech|
-      weighted_vent_mech_lat_eff += vent_mech.average_oa_flow_rate / tot_bal_cfm * hrv_erv_effectiveness_map[vent_mech][:vent_mech_lat_eff]
-      weighted_vent_mech_apparent_sens_eff += vent_mech.average_oa_flow_rate / tot_bal_cfm * hrv_erv_effectiveness_map[vent_mech][:vent_mech_apparent_sens_eff]
-    end
-    # Store info for HVAC Sizing measure
-    model.getBuilding.additionalProperties.setFeature(Constants.SizingInfoMechVentLatentEffectiveness, weighted_vent_mech_lat_eff)
-    model.getBuilding.additionalProperties.setFeature(Constants.SizingInfoMechVentApparentSensibleEffectiveness, weighted_vent_mech_apparent_sens_eff)
-    model.getBuilding.additionalProperties.setFeature(Constants.SizingInfoMechVentWholeHouseRateBalanced, tot_bal_cfm)
-    model.getBuilding.additionalProperties.setFeature(Constants.SizingInfoMechVentWholeHouseRateUnbalanced, tot_unbal_cfm)
-    model.getBuilding.additionalProperties.setFeature(Constants.SizingInfoMechVentWholeHouseRatePreHeated, oa_cfm_preheat)
-    model.getBuilding.additionalProperties.setFeature(Constants.SizingInfoMechVentWholeHouseRatePreCooled, oa_cfm_precool)
-    model.getBuilding.additionalProperties.setFeature(Constants.SizingInfoMechVentWholeHouseRateRecirculated, recirc_cfm_shared)
-    model.getBuilding.additionalProperties.setFeature(Constants.SizingInfoMechVentExist, (not vent_fans_mech.empty?))
-
-    infil_flow = OpenStudio::Model::SpaceInfiltrationDesignFlowRate.new(model)
-    infil_flow.setName(Constants.ObjectNameInfiltration + ' flow')
-    infil_flow.setSchedule(model.alwaysOnDiscreteSchedule)
-    infil_flow.setSpace(@living_space)
-    infil_flow_actuator = OpenStudio::Model::EnergyManagementSystemActuator.new(infil_flow, 'Zone Infiltration', 'Air Exchange Flow Rate')
-    infil_flow_actuator.setName("#{infil_flow.name} act")
-
-    # Living Space Infiltration Calculation/Program
-    infil_program = OpenStudio::Model::EnergyManagementSystemProgram.new(model)
-    infil_program.setName(Constants.ObjectNameInfiltration + ' program')
-
-    infil_program = apply_infiltration_to_living(living_ach50, living_const_ach, infil_program, weather, has_flue_chimney)
-
-    # Common variale and load actuators across multiple mech vent calculations, create only once
-    infil_program, fan_sens_load_actuator, fan_lat_load_actuator = setup_mech_vent_vars_actuators(model: model, program: infil_program)
-
-    # Apply unpreconditioned ERV/HRV fans
-    # Set up some variables for use of mech vent EMS program
-    infil_program = apply_erv_hrv_fans(model: model, program: infil_program, vent_mech_erv_hrv: vent_mech_erv_hrv_unprecond, hrv_erv_effectiveness_map: hrv_erv_effectiveness_map, fan_sens_load_actuator: fan_sens_load_actuator, fan_lat_load_actuator: fan_lat_load_actuator, preconditioned: false)
-
-    # Apply unpreconditioned CFIS
-    infil_program.addLine("Set #{cfis_fan_actuator.name} = 0.0")
-    infil_program = apply_cfis(infil_program, vent_mech_cfis_unprecond, cfis_fan_actuator)
-
-    # FIXME: Is shared exhaust system existing?
-    # Apply other unpreconditioned mech vent (supply + balanced) to address recirculation
-    # Exhaust system cannot have recirculation, it is handled later in Qfan-QWHV
-    if not (vent_mech_sup_unprecond + vent_mech_bal_unprecond).empty?
-      oa_flow_rate_str = "#{UnitConversions.convert((vent_mech_sup_unprecond + vent_mech_bal_unprecond).map { |fan| fan.average_oa_flow_rate }.sum, 'cfm', 'm^3/s')}"
-      tot_flow_rate_str = "#{UnitConversions.convert((vent_mech_sup_unprecond + vent_mech_bal_unprecond).map { |fan| fan.average_unit_flow_rate }.sum, 'cfm', 'm^3/s')}"
-      infil_program = apply_fan_load_to_infil_program(model: model, infil_program: infil_program, oa_flow_rate_var_name: oa_flow_rate_str, tot_flow_rate_var_name: tot_flow_rate_str, vent_mech_sens_eff: 0.0, vent_mech_lat_eff: 0.0, fan_sens_load_actuator: fan_sens_load_actuator, fan_lat_load_actuator: fan_lat_load_actuator, preconditioned: false)
-    end
-
-    # Apply preconditioned mech vent
-    if not (vent_mech_preheat + vent_mech_precool).empty?
-      apply_preconditioning_equipment(model, (vent_mech_preheat + vent_mech_precool).uniq, infil_program, fan_sens_load_actuator, fan_lat_load_actuator, cfis_fan_actuator, hrv_erv_effectiveness_map)
-    end
-
+  def self.apply_infiltration_adjustment(infil_program, vent_fans_kitchen, vent_fans_bath, sup_cfm_tot, exh_cfm_tot, bal_cfm_tot, erv_hrv_cfm_tot, infil_flow_actuator)
     infil_program.addLine('Set Qrange = 0')
     vent_fans_kitchen.each do |vent_kitchen|
       infil_program.addLine("Set Qrange = Qrange + #{UnitConversions.convert(vent_kitchen.rated_flow_rate * vent_kitchen.quantity, 'cfm', 'm^3/s').round(4)} * #{range_sch_sensors_map[vent_kitchen.id].name}")
@@ -1789,9 +1615,200 @@ class Airflow
       infil_program.addLine('Set Qinf_adj = Qtot - Qu - Qb')
     end
     infil_program.addLine("Set #{infil_flow_actuator.name} = Qinf_adj")
-    remaining_oa_name = 'Qoa_remain'
-    infil_program.addLine("Set #{remaining_oa_name} = Qfan - QWHV") # The remaining oa air loads need to be addressed
-    infil_program = apply_fan_load_to_infil_program(model: model, infil_program: infil_program, oa_flow_rate_var_name: remaining_oa_name, tot_flow_rate_var_name: remaining_oa_name, vent_mech_sens_eff: 0.0, vent_mech_lat_eff: 0.0, fan_sens_load_actuator: fan_sens_load_actuator, fan_lat_load_actuator: fan_lat_load_actuator, preconditioned: false)
+
+    return infil_program
+  end
+
+  def self.calculate_fan_loads(model, infil_program, vent_mech_erv_hrv_tot, hrv_erv_effectiveness_map, fan_sens_load_actuator, fan_lat_load_actuator, q_var, preconditioned = false)
+    # Variables for combined effectivenesses
+    infil_program.addLine('Set Effectiveness_Sens = 0.0')
+    infil_program.addLine('Set Effectiveness_Lat = 0.0')
+
+    # Calculate mass flow rate based on outdoor air density
+    # Address load with flow-weighted combined effectiveness
+    infil_program.addLine("Set Fan_MFR = #{q_var} * OASupRho")
+    if not vent_mech_erv_hrv_tot.empty?
+      # ERV/HRV EMS load model
+      # E+ ERV model is using standard density for MFR calculation, caused discrepancy with other system types.
+      # Therefore ERV is modeled within EMS infiltration program
+      vent_mech_erv_hrv_tot.each do |vent_fan|
+        infil_program.addLine("Set Effectiveness_Sens = Effectiveness_Sens + #{UnitConversions.convert(vent_fan.average_oa_flow_rate, 'cfm', 'm^3/s').round(4)} / #{q_var} * #{hrv_erv_effectiveness_map[vent_fan][:vent_mech_sens_eff]}")
+        infil_program.addLine("Set Effectiveness_Lat = Effectiveness_Lat + #{UnitConversions.convert(vent_fan.average_oa_flow_rate, 'cfm', 'm^3/s').round(4)} / #{q_var} * #{hrv_erv_effectiveness_map[vent_fan][:vent_mech_lat_eff]}")
+      end
+      infil_program.addLine('Set ERVCpMin = (@Min OASupCp ZoneCp)')
+      infil_program.addLine('Set ERVSupOutTemp = OASupInTemp + ERVCpMin/OASupCp * Effectiveness_Sens * (ZoneTemp - OASupInTemp)')
+      infil_program.addLine('Set ERVSupOutW = OASupInW + ERVCpMin/OASupCp * Effectiveness_Lat * (ZoneW - OASupInW)')
+      infil_program.addLine('Set ERVSupOutEnth = (@HFnTdbW ERVSupOutTemp ERVSupOutW)')
+      infil_program.addLine('Set ERVSensHeatTrans = Fan_MFR * OASupCp * (ERVSupOutTemp - OASupInTemp)')
+      infil_program.addLine('Set ERVTotalHeatTrans = Fan_MFR * (ERVSupOutEnth - OASupInEnth)')
+      infil_program.addLine('Set ERVLatHeatTrans = ERVTotalHeatTrans - ERVSensHeatTrans')
+      # ERV/HRV Load calculation
+      infil_program.addLine('Set FanTotalToLv = Fan_MFR * (ERVSupOutEnth - ZoneAirEnth)')
+      infil_program.addLine('Set FanSensToLv = Fan_MFR * ZoneCp * (ERVSupOutTemp - ZoneTemp)')
+      infil_program.addLine('Set FanLatToLv = FanTotalToLv - FanSensToLv')
+    else
+      infil_program.addLine('Set FanTotalToLv = Fan_MFR * (OASupInEnth - ZoneAirEnth)')
+      infil_program.addLine('Set FanSensToLv = Fan_MFR * ZoneCp * (OASupInTemp - ZoneTemp)')
+      infil_program.addLine('Set FanLatToLv = FanTotalToLv - FanSensToLv')
+    end
+
+    # Actuator
+    if not preconditioned
+      infil_program.addLine("Set #{fan_sens_load_actuator.name} = #{fan_sens_load_actuator.name} + FanSensToLv")
+      infil_program.addLine("Set #{fan_lat_load_actuator.name} = #{fan_lat_load_actuator.name} + FanLatToLv")
+    else
+      # FIXME: Should latent be subtracted if heating, or if latent load is negative?
+      # FIXME: Should energy calculation later in the program uses FanTotalToLv or FanSensToLv in above situations?
+      infil_program.addLine("Set #{fan_sens_load_actuator.name} = #{fan_sens_load_actuator.name} - FanSensToLv")
+      infil_program.addLine("Set #{fan_lat_load_actuator.name} = #{fan_lat_load_actuator.name} - FanLatToLv")
+    end
+
+    return infil_program
+  end
+
+  def self.calculate_precond_loads(model, infil_program, vent_mech_preheat, vent_mech_precool, hrv_erv_effectiveness_map, fan_sens_load_actuator, fan_lat_load_actuator)
+    # Preconditioning
+    # Assume introducing no sensible loads to zone if preconditioned
+    if not vent_mech_preheat.empty?
+      infil_program.addLine('If OASupInTemp < ZoneTemp')
+      vent_mech_preheat.each_with_index do |f_preheat, i|
+        htg_energy_actuator = create_other_equipment_object_and_actuator(model: model, name: "shared mech vent preheating energy #{i}", space: @living_space, frac_lat: 0.0, frac_lost: 1.0, hpxml_fuel_type: f_preheat.preheating_fuel, end_use: Constants.ObjectNameMechanicalVentilationPreconditioning)
+        infil_program.addLine("  Set #{htg_energy_actuator.name} = 0.0")
+        infil_program.addLine("  Set Qpreheat = #{UnitConversions.convert(f_preheat.average_oa_flow_rate, 'cfm', 'm^3/s').round(4)}")
+        if [HPXML::MechVentTypeERV, HPXML::MechVentTypeHRV].include? f_preheat.fan_type
+          vent_mech_erv_hrv_tot = [f_preheat]
+        else
+          vent_mech_erv_hrv_tot = []
+        end
+        infil_program = calculate_fan_loads(model, infil_program, vent_mech_erv_hrv_tot, hrv_erv_effectiveness_map, fan_sens_load_actuator, fan_lat_load_actuator, 'Qpreheat', true)
+
+        infil_program.addLine("  Set #{htg_energy_actuator.name} = (-FanSensToLv) / #{f_preheat.preheating_efficiency_cop}")
+      end
+      infil_program.addLine('EndIf')
+    end
+    if not vent_mech_precool.empty?
+      infil_program.addLine('If OASupInTemp > ZoneTemp')
+      vent_mech_precool.each_with_index do |f_precool, i|
+        clg_energy_actuator = create_other_equipment_object_and_actuator(model: model, name: "shared mech vent precooling energy #{i}", space: @living_space, frac_lat: 0.0, frac_lost: 1.0, hpxml_fuel_type: f_precool.precooling_fuel, end_use: Constants.ObjectNameMechanicalVentilationPreconditioning)
+        infil_program.addLine("  Set #{clg_energy_actuator.name} = 0.0")
+        infil_program.addLine("  Set Qprecool = #{UnitConversions.convert(f_precool.average_oa_flow_rate, 'cfm', 'm^3/s').round(4)}")
+        if [HPXML::MechVentTypeERV, HPXML::MechVentTypeHRV].include? f_precool.fan_type
+          vent_mech_erv_hrv_tot = [f_precool]
+        else
+          vent_mech_erv_hrv_tot = []
+        end
+        infil_program = calculate_fan_loads(model, infil_program, vent_mech_erv_hrv_tot, hrv_erv_effectiveness_map, fan_sens_load_actuator, fan_lat_load_actuator, 'Qprecool', true)
+
+        infil_program.addLine("  Set #{clg_energy_actuator.name} = (@Max FanTotalToLv FanSensToLv) / #{f_precool.precooling_efficiency_cop}")
+      end
+      infil_program.addLine('EndIf')
+    end
+
+    return infil_program
+  end
+
+  def self.apply_mechanical_ventilation(model, vent_fans_mech, living_ach50, living_const_ach, weather, vent_fans_kitchen, vent_fans_bath, range_sch_sensors_map, bath_sch_sensors_map, has_flue_chimney)
+    # Categorize fans into different types
+    vent_mech_preheat = vent_fans_mech.select { |vent_mech| (not vent_mech.preheating_efficiency_cop.nil?) }
+    vent_mech_precool = vent_fans_mech.select { |vent_mech| (not vent_mech.precooling_efficiency_cop.nil?) }
+    vent_mech_shared = vent_fans_mech.select { |vent_mech| vent_mech.is_shared_system }
+
+    vent_mech_sup_tot = vent_fans_mech.select { |vent_mech| vent_mech.fan_type == HPXML::MechVentTypeSupply }
+    vent_mech_exh_tot = vent_fans_mech.select { |vent_mech| vent_mech.fan_type == HPXML::MechVentTypeExhaust }
+    vent_mech_cfis_tot = vent_fans_mech.select { |vent_mech| vent_mech.fan_type == HPXML::MechVentTypeCFIS }
+    vent_mech_bal_tot = vent_fans_mech.select { |vent_mech| vent_mech.fan_type == HPXML::MechVentTypeBalanced }
+    vent_mech_erv_hrv_tot = vent_fans_mech.select { |vent_mech| [HPXML::MechVentTypeERV, HPXML::MechVentTypeHRV].include? vent_mech.fan_type }
+
+    # Fan power
+    sup_vent_mech_fan_w = vent_mech_sup_tot.map { |vent_mech| vent_mech.average_fan_power }.sum(0.0)
+    exh_vent_mech_fan_w = vent_mech_exh_tot.map { |vent_mech| vent_mech.average_fan_power }.sum(0.0)
+    # ERV/HRV and balanced system fan power combined altogether
+    bal_vent_mech_fan_w = (vent_mech_bal_tot + vent_mech_erv_hrv_tot).map { |vent_mech| vent_mech.average_fan_power }.sum(0.0)
+    total_sup_exh_bal_w = sup_vent_mech_fan_w + exh_vent_mech_fan_w + bal_vent_mech_fan_w
+    # 1.0: Fan heat does not enter space, 0.0: Fan heat does enter space, 0.5: Supply fan heat enters space
+    if total_sup_exh_bal_w > 0.0
+      fan_heat_lost_fraction = (1.0 * exh_vent_mech_fan_w + 0.0 * sup_vent_mech_fan_w + 0.5 * bal_vent_mech_fan_w) / total_sup_exh_bal_w
+    else
+      fan_heat_lost_fraction = 1.0
+    end
+    add_ee_for_vent_fan_power(model, Constants.ObjectNameMechanicalVentilationHouseFan, fan_heat_lost_fraction, false, total_sup_exh_bal_w)
+    # CFIS Fan Actuators
+    cfis_fan_actuator = add_ee_for_vent_fan_power(model, Constants.ObjectNameMechanicalVentilationHouseFanCFIS, 0.0, true)
+
+    # Average in-unit cfms (include recirculation from in unit cfms for shared systems)
+    sup_cfm_tot = vent_mech_sup_tot.map { |vent_mech| vent_mech.average_unit_flow_rate }.sum(0.0)
+    exh_cfm_tot = vent_mech_exh_tot.map { |vent_mech| vent_mech.average_unit_flow_rate }.sum(0.0)
+    bal_cfm_tot = vent_mech_bal_tot.map { |vent_mech| vent_mech.average_unit_flow_rate }.sum(0.0)
+    erv_hrv_cfm_tot = vent_mech_erv_hrv_tot.map { |vent_mech| vent_mech.average_unit_flow_rate }.sum(0.0)
+    cfis_cfm_tot = vent_mech_cfis_tot.map { |vent_mech| vent_mech.average_unit_flow_rate }.sum(0.0)
+
+    # Average preconditioned oa air cfms(only oa, recirculation will be addressed below for all shared systems)
+    oa_cfm_preheat = vent_mech_preheat.map { |vent_mech| vent_mech.average_oa_flow_rate }.sum(0.0)
+    oa_cfm_precool = vent_mech_precool.map { |vent_mech| vent_mech.average_oa_flow_rate }.sum(0.0)
+    recirc_cfm_shared = vent_mech_shared.map { |vent_mech| vent_mech.average_unit_flow_rate - vent_mech.average_oa_flow_rate }.sum(0.0)
+
+    # HVAC Sizing data
+    tot_sup_cfm = sup_cfm_tot + bal_cfm_tot + erv_hrv_cfm_tot + cfis_cfm_tot
+    tot_exh_cfm = exh_cfm_tot + bal_cfm_tot + erv_hrv_cfm_tot
+    tot_unbal_cfm = (tot_sup_cfm - tot_exh_cfm).abs
+    tot_bal_cfm = [tot_exh_cfm, tot_sup_cfm].min
+
+    # Calculate effectivenesses for all ERV/HRV and store results in a hash
+    hrv_erv_effectiveness_map = calc_hrv_erv_effectiveness(vent_mech_erv_hrv_tot)
+
+    # Calculate cfm weighted average effectivenesses for the combined balanced airflow
+    weighted_vent_mech_lat_eff = 0.0
+    weighted_vent_mech_apparent_sens_eff = 0.0
+    vent_mech_erv_hrv_unprecond = vent_mech_erv_hrv_tot.select { |vent_mech| vent_mech.preheating_efficiency_cop.nil? && vent_mech.precooling_efficiency_cop.nil? }
+    vent_mech_erv_hrv_unprecond.each do |vent_mech|
+      weighted_vent_mech_lat_eff += vent_mech.average_oa_flow_rate / tot_bal_cfm * hrv_erv_effectiveness_map[vent_mech][:vent_mech_lat_eff]
+      weighted_vent_mech_apparent_sens_eff += vent_mech.average_oa_flow_rate / tot_bal_cfm * hrv_erv_effectiveness_map[vent_mech][:vent_mech_apparent_sens_eff]
+    end
+    # Store info for HVAC Sizing measure
+    model.getBuilding.additionalProperties.setFeature(Constants.SizingInfoMechVentLatentEffectiveness, weighted_vent_mech_lat_eff)
+    model.getBuilding.additionalProperties.setFeature(Constants.SizingInfoMechVentApparentSensibleEffectiveness, weighted_vent_mech_apparent_sens_eff)
+    model.getBuilding.additionalProperties.setFeature(Constants.SizingInfoMechVentWholeHouseRateBalanced, tot_bal_cfm)
+    model.getBuilding.additionalProperties.setFeature(Constants.SizingInfoMechVentWholeHouseRateUnbalanced, tot_unbal_cfm)
+    model.getBuilding.additionalProperties.setFeature(Constants.SizingInfoMechVentWholeHouseRatePreHeated, oa_cfm_preheat)
+    model.getBuilding.additionalProperties.setFeature(Constants.SizingInfoMechVentWholeHouseRatePreCooled, oa_cfm_precool)
+    model.getBuilding.additionalProperties.setFeature(Constants.SizingInfoMechVentWholeHouseRateRecirculated, recirc_cfm_shared)
+    model.getBuilding.additionalProperties.setFeature(Constants.SizingInfoMechVentExist, (not vent_fans_mech.empty?))
+
+    infil_flow = OpenStudio::Model::SpaceInfiltrationDesignFlowRate.new(model)
+    infil_flow.setName(Constants.ObjectNameInfiltration + ' flow')
+    infil_flow.setSchedule(model.alwaysOnDiscreteSchedule)
+    infil_flow.setSpace(@living_space)
+    infil_flow_actuator = OpenStudio::Model::EnergyManagementSystemActuator.new(infil_flow, 'Zone Infiltration', 'Air Exchange Flow Rate')
+    infil_flow_actuator.setName("#{infil_flow.name} act")
+
+    # Living Space Infiltration Calculation/Program
+    infil_program = OpenStudio::Model::EnergyManagementSystemProgram.new(model)
+    infil_program.setName(Constants.ObjectNameInfiltration + ' program')
+
+    # Calculate infiltration without adjustment by ventilation
+    infil_program = apply_infiltration_to_living(living_ach50, living_const_ach, infil_program, weather, has_flue_chimney)
+
+    # Common variale and load actuators across multiple mech vent calculations, create only once
+    infil_program, fan_sens_load_actuator, fan_lat_load_actuator = setup_mech_vent_vars_actuators(model: model, program: infil_program)
+
+    # Apply CFIS
+    infil_program.addLine("Set #{cfis_fan_actuator.name} = 0.0")
+    infil_program = apply_cfis(infil_program, vent_mech_cfis_tot, cfis_fan_actuator)
+
+    # Calculate Qfan, Qinf_adj
+    infil_program = apply_infiltration_adjustment(infil_program, vent_fans_kitchen, vent_fans_bath, sup_cfm_tot, exh_cfm_tot, bal_cfm_tot, erv_hrv_cfm_tot, infil_flow_actuator)
+
+    # Address load of Qfan (Qload)
+    # Qload as variable for tracking outdoor air flow rate, excluding recirculation
+    infil_program.addLine('Set Qload = Qfan')
+    (vent_mech_sup_tot + vent_mech_bal_tot + vent_mech_erv_hrv_tot + vent_mech_cfis_tot).each do |vent_mech_supply_side|
+      # Subtract recirculation air flow rate from Qfan, can only come from supply side
+      infil_program.addLine("Set Qload = Qload - #{UnitConversions.convert(vent_mech_supply_side.average_unit_flow_rate - vent_mech_supply_side.average_oa_flow_rate, 'cfm', 'm^3/s').round(4)}")
+    end
+    infil_program = calculate_fan_loads(model, infil_program, vent_mech_erv_hrv_tot, hrv_erv_effectiveness_map, fan_sens_load_actuator, fan_lat_load_actuator, 'Qload')
+
+    # Address preconditioning
+    infil_program = calculate_precond_loads(model, infil_program, vent_mech_preheat, vent_mech_precool, hrv_erv_effectiveness_map, fan_sens_load_actuator, fan_lat_load_actuator)
 
     program_calling_manager = OpenStudio::Model::EnergyManagementSystemProgramCallingManager.new(model)
     program_calling_manager.setName("#{infil_program.name} calling manager")
