@@ -21,7 +21,7 @@ class Validator
           begin
             xpath_result = context_element.xpath(assert_test)
           rescue
-            fail "Invalid xpath: #{assert_test}"
+            fail "Invalid xpath: #{context_element.name}: #{assert_test}"
           end
           next if xpath_result # check if assert_test is false
 
