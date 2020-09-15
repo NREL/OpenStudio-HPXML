@@ -203,7 +203,7 @@ basement - unconditioned                                                        
 crawlspace - vented                                                               EnergyPlus calculation                                    Any
 crawlspace - unvented                                                             EnergyPlus calculation                                    Any
 garage                          Single-family garage (not shared parking garage)  EnergyPlus calculation                                    Any
-other housing unit              E.g., adjacent unit or conditioned corridor       Same as conditioned space                                 Attached/Multifamily only
+other housing unit              E.g., conditioned adjacent unit or corridor       Same as conditioned space                                 Attached/Multifamily only
 other heated space              E.g., shared laundry/equipment space              Average of conditioned space and outside; minimum of 68F  Attached/Multifamily only
 other multifamily buffer space  E.g., enclosed unconditioned stairwell            Average of conditioned space and outside; minimum of 50F  Attached/Multifamily only
 other non-freezing space        E.g., shared parking garage ceiling               Floats with outside; minimum of 40F                       Attached/Multifamily only
@@ -627,7 +627,7 @@ outside                                                                         
 exterior wall                                                                     Average of conditioned space and outside                   Any
 under slab                                                                        Ground                                                     Any
 roof deck                                                                         Outside                                                    Any
-other housing unit              E.g., adjacent unit or conditioned corridor       Same as conditioned space                                  Attached/Multifamily only
+other housing unit              E.g., conditioned adjacent unit or corridor       Same as conditioned space                                  Attached/Multifamily only
 other heated space              E.g., shared laundry/equipment space              Average of conditioned space and outside; minimum of 68F   Attached/Multifamily only
 other multifamily buffer space  E.g., enclosed unconditioned stairwell            Average of conditioned space and outside; minimum of 50F   Attached/Multifamily only
 other non-freezing space        E.g., shared parking garage ceiling               Floats with outside; minimum of 40F                        Attached/Multifamily only
@@ -796,7 +796,7 @@ garage                          Single-family garage (not shared parking garage)
 crawlspace - unvented                                                             EnergyPlus calculation                                     Any
 crawlspace - vented                                                               EnergyPlus calculation                                     Any
 other exterior                  Outside                                           EnergyPlus calculation                                     Any
-other housing unit              E.g., adjacent unit or conditioned corridor       Same as conditioned space                                  Attached/Multifamily only
+other housing unit              E.g., conditioned adjacent unit or corridor       Same as conditioned space                                  Attached/Multifamily only
 other heated space              E.g., shared laundry/equipment space              Average of conditioned space and outside; minimum of 68F   Attached/Multifamily only
 other multifamily buffer space  E.g., enclosed unconditioned stairwell            Average of conditioned space and outside; minimum of 50F   Attached/Multifamily only
 other non-freezing space        E.g., shared parking garage ceiling               Floats with outside; minimum of 40F                        Attached/Multifamily only
@@ -965,7 +965,7 @@ living space                    Above-grade conditioned floor area              
 basement - conditioned          Below-grade conditioned floor area                Any
 basement - unconditioned                                                          Any
 garage                          Single-family garage (not shared parking garage)  Any
-other housing unit              E.g., adjacent unit or conditioned corridor       Attached/Multifamily only
+other housing unit              E.g., conditioned adjacent unit or corridor       Attached/Multifamily only
 other heated space              E.g., shared laundry/equipment space              Attached/Multifamily only
 other multifamily buffer space  E.g., enclosed unconditioned stairwell            Attached/Multifamily only
 other non-freezing space        E.g., shared parking garage ceiling               Attached/Multifamily only
