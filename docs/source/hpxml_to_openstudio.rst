@@ -91,7 +91,13 @@ In the ``in.xml`` file, the window would have additional elements like so:
 HPXML Software Info
 -------------------
 
-EnergyPlus simulation controls can be entered in ``/HPXML/SoftwareInfo/extension/SimulationControl``.
+High-level simulation inputs are entered in HPXML's ``/HPXML/SoftwareInfo``.
+Current inputs include simulation controls and HVAC sizing controls.
+
+HPXML Simulation Control
+************************
+
+EnergyPlus simulation controls can be entered in ``extension/SimulationControl``.
 
 The simulation timestep can be optionally provided as ``Timestep``, where the value is in minutes and must be a divisor of 60.
 If not provided, the default value of 60 (i.e., 1 hour) is used.
@@ -104,6 +110,21 @@ Whether to apply daylight saving time can be optionally denoted with ``DaylightS
 If either ``DaylightSaving`` or ``DaylightSaving/Enabled`` is not provided, ``DaylightSaving/Enabled`` will default to true.
 If daylight saving is enabled, the daylight saving period can be optionally specified with ``DaylightSaving/BeginMonth``, ``DaylightSaving/BeginDayOfMonth``, ``DaylightSaving/EndMonth``, and ``DaylightSaving/EndDayOfMonth``.
 If not specified, dates will be defined according to the EPW weather file header; if not available there, default values of March 12 and November 5 will be used.
+
+HPXML HVAC Sizing Control
+*************************
+
+HVAC equipment sizing controls can be entered in ``extension/HVACSizingControl``.
+
+An optional ``AllowIncreasedFixedCapacities`` element can be provided to describe how HVAC equipment with fixed capacities are handled.
+If false, the user-specified fixed capacity will be used.
+If true, the maximum of the user-specified fixed capacity and the heating/cooling design load will be used to reduce potential for unmet loads.
+If not provided, the default value of false is used.
+
+An optional ``UseMaxLoadForHeatPumps`` element can be provided to describe how autosized heat pumps are handled.
+If true, heat pumps are sized based on the maximum of heating and cooling design loads.
+If false, heat pumps are sized per ACCA Manual J/S based on cooling design loads with some oversizing allowances for heating design loads.
+If not provided, the default value of true is used.
 
 HPXML Building Details
 ----------------------

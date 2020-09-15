@@ -32,6 +32,7 @@ class HPXMLtoOpenStudioValidationTest < MiniTest::Test
 
     # Load all HPXMLs
     hpxml_file_dirs = [File.absolute_path(File.join(@root_path, 'workflow', 'sample_files')),
+                       File.absolute_path(File.join(@root_path, 'workflow', 'sample_files', 'hvac_autosizing')),
                        File.absolute_path(File.join(@root_path, 'workflow', 'tests', 'ASHRAE_Standard_140'))]
     @hpxml_docs = {}
     hpxml_file_dirs.each do |hpxml_file_dir|
