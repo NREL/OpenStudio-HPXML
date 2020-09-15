@@ -132,7 +132,7 @@ class HPXMLtoOpenStudioValidationTest < MiniTest::Test
       child_element_name = key[1]
       element_to_be_altered = XMLHelper.get_element(parent_element, child_element_name)
       element_to_be_altered.inner_text = element_to_be_altered.inner_text + 'foo' # add arbitrary string to make the value invalid
-      
+
       # Test validation
       _test_ruby_validation(hpxml_doc, expected_error_msg)
       _test_schematron_validation(@stron_doc, hpxml_doc.to_xml, expected_error_msg)
