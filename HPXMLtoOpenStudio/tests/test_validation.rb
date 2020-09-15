@@ -35,6 +35,7 @@ class HPXMLtoOpenStudioValidationTest < MiniTest::Test
     doc = XMLHelper.parse_file(@stron_path)
     @expected_assertions_by_addition = {}
     @expected_assertions_by_deletion = {}
+    @expected_assertions_by_alteration = {}
     XMLHelper.get_elements(doc, '/sch:schema/sch:pattern/sch:rule').each do |rule|
       rule_context = XMLHelper.get_attribute_value(rule, 'context')
       context_xpath = rule_context.gsub('h:', '')
@@ -45,11 +46,14 @@ class HPXMLtoOpenStudioValidationTest < MiniTest::Test
 
         if assertion.start_with?('Expected 0 element')
           # Skipping for now
-        elsif assertion.start_with?('Expected 0 or ') || assertion.partition(': ').last.start_with?('[not') # FIXME: Is there another way to do this?
+        elsif assertion.start_with?('Expected 0 or ')
           @expected_assertions_by_addition[key] = _get_expected_error_msg(context_xpath, assertion, 'addition')
         elsif assertion.start_with?('Expected 1 ')
           @expected_assertions_by_deletion[key] = _get_expected_error_msg(context_xpath, assertion, 'deletion')
           @expected_assertions_by_addition[key] = _get_expected_error_msg(context_xpath, assertion, 'addition')
+        elsif assertion.start_with?('Expected "text()"')
+          key = [context_xpath.split('/')[0...-1].reject(&:empty?).join('/').chomp('/'), context_xpath.split('/')[-1]] # override the key
+          @expected_assertions_by_alteration[key] = _get_expected_error_msg(context_xpath, assertion, 'alteration')
         else
           fail "Unexpected assertion: '#{assertion}'."
         end
@@ -114,6 +118,24 @@ class HPXMLtoOpenStudioValidationTest < MiniTest::Test
       # Test validation
       _test_schematron_validation(@stron_doc, hpxml_doc.to_xml, expected_error_msg)
       _test_ruby_validation(hpxml_doc, expected_error_msg)
+    end
+    puts
+  end
+
+  def test_schematron_asserts_by_alteration
+    puts "Testing #{@expected_assertions_by_alteration.size} Schematron asserts by alteration..."
+
+    # Tests by element alteration
+    @expected_assertions_by_alteration.each do |key, expected_error_msg|
+      print '.'
+      hpxml_doc, parent_element = _get_hpxml_doc_and_parent_element(key)
+      child_element_name = key[1]
+      element_to_be_altered = XMLHelper.get_element(parent_element, child_element_name)
+      element_to_be_altered.inner_text = element_to_be_altered.inner_text + 'foo' # add arbitrary string to make the value invalid
+      
+      # Test validation
+      _test_ruby_validation(hpxml_doc, expected_error_msg)
+      _test_schematron_validation(@stron_doc, hpxml_doc.to_xml, expected_error_msg)
     end
     puts
   end
@@ -193,14 +215,14 @@ class HPXMLtoOpenStudioValidationTest < MiniTest::Test
 
   def _get_element_name_for_assertion_test(assertion)
     # From the assertion, get the element name to be added or deleted for the assertion test.
-    if assertion.partition(': ').last.start_with?('[not')
-      element_name = assertion.partition(': ').last.partition(' | ').last
+    if assertion.start_with?('Expected "text()"')
+      return # the last element in the context_xpath will be used as element_name
     else
       element_name = assertion.partition(': ').last.partition(' | ').first
       _balance_brackets(element_name)
-    end
 
-    return element_name
+      return element_name
+    end
   end
 
   def _balance_brackets(element_name)
