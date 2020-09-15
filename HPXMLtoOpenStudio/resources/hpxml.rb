@@ -669,6 +669,7 @@ class HPXML < Object
              :eri_design, :timestep, :building_id, :event_type, :state_code,
              :sim_begin_month, :sim_begin_day_of_month, :sim_end_month, :sim_end_day_of_month,
              :dst_enabled, :dst_begin_month, :dst_begin_day_of_month, :dst_end_month, :dst_end_day_of_month,
+             :use_max_load_for_heat_pumps, :allow_increased_fixed_capacities,
              :apply_ashrae140_assumptions]
     attr_accessor(*ATTRS)
 
@@ -777,6 +778,12 @@ class HPXML < Object
           XMLHelper.add_element(daylight_saving, 'EndDayOfMonth', to_integer(@dst_end_day_of_month)) unless @dst_end_day_of_month.nil?
         end
       end
+      if (not @use_max_load_for_heat_pumps.nil?) || (not @allow_increased_fixed_capacities.nil?)
+        extension = XMLHelper.create_elements_as_needed(software_info, ['extension'])
+        hvac_sizing_control = XMLHelper.add_element(extension, 'HVACSizingControl')
+        XMLHelper.add_element(hvac_sizing_control, 'UseMaxLoadForHeatPumps', to_boolean(@use_max_load_for_heat_pumps)) unless @use_max_load_for_heat_pumps.nil?
+        XMLHelper.add_element(hvac_sizing_control, 'AllowIncreasedFixedCapacities', to_boolean(@allow_increased_fixed_capacities)) unless @allow_increased_fixed_capacities.nil?
+      end
 
       building = XMLHelper.add_element(hpxml, 'Building')
       building_building_id = XMLHelper.add_element(building, 'BuildingID')
@@ -814,6 +821,8 @@ class HPXML < Object
       @dst_end_month = to_integer_or_nil(XMLHelper.get_value(hpxml, 'SoftwareInfo/extension/SimulationControl/DaylightSaving/EndMonth'))
       @dst_end_day_of_month = to_integer_or_nil(XMLHelper.get_value(hpxml, 'SoftwareInfo/extension/SimulationControl/DaylightSaving/EndDayOfMonth'))
       @apply_ashrae140_assumptions = to_boolean_or_nil(XMLHelper.get_value(hpxml, 'SoftwareInfo/extension/ApplyASHRAE140Assumptions'))
+      @use_max_load_for_heat_pumps = to_boolean_or_nil(XMLHelper.get_value(hpxml, 'SoftwareInfo/extension/HVACSizingControl/UseMaxLoadForHeatPumps'))
+      @allow_increased_fixed_capacities = to_boolean_or_nil(XMLHelper.get_value(hpxml, 'SoftwareInfo/extension/HVACSizingControl/AllowIncreasedFixedCapacities'))
       @building_id = HPXML::get_id(hpxml, 'Building/BuildingID')
       @event_type = XMLHelper.get_value(hpxml, 'Building/ProjectStatus/EventType')
       @state_code = XMLHelper.get_value(hpxml, 'Building/Site/Address/StateCode')
