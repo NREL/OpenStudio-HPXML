@@ -1533,41 +1533,41 @@ class Airflow
   def self.calculate_precond_loads(model, infil_program, vent_mech_preheat, vent_mech_precool, hrv_erv_effectiveness_map, fan_sens_load_actuator, fan_lat_load_actuator)
     # Preconditioning
     # Assume introducing no sensible loads to zone if preconditioned
-    if not vent_mech_preheat.empty?
+    vent_mech_preheat.each_with_index do |f_preheat, i|
       infil_program.addLine('If OASupInTemp < ZoneTemp')
-      vent_mech_preheat.each_with_index do |f_preheat, i|
-        htg_energy_actuator = create_other_equipment_object_and_actuator(model: model, name: "shared mech vent preheating energy #{i}", space: @living_space, frac_lat: 0.0, frac_lost: 1.0, hpxml_fuel_type: f_preheat.preheating_fuel, end_use: Constants.ObjectNameMechanicalVentilationPreconditioning)
-        infil_program.addLine("  Set #{htg_energy_actuator.name} = 0.0")
-        infil_program.addLine("  Set Qpreheat = #{UnitConversions.convert(f_preheat.average_oa_flow_rate, 'cfm', 'm^3/s').round(4)}")
-        if [HPXML::MechVentTypeERV, HPXML::MechVentTypeHRV].include? f_preheat.fan_type
-          vent_mech_erv_hrv_tot = [f_preheat]
-        else
-          vent_mech_erv_hrv_tot = []
-        end
-        calculate_fan_loads(model, infil_program, vent_mech_erv_hrv_tot, hrv_erv_effectiveness_map, fan_sens_load_actuator, fan_lat_load_actuator, 'Qpreheat', true)
-
-        infil_program.addLine("  Set #{htg_energy_actuator.name} = (-FanSensToLv) / #{f_preheat.preheating_efficiency_cop}")
+      htg_energy_actuator = create_other_equipment_object_and_actuator(model: model, name: "shared mech vent preheating energy #{i}", space: @living_space, frac_lat: 0.0, frac_lost: 1.0, hpxml_fuel_type: f_preheat.preheating_fuel, end_use: Constants.ObjectNameMechanicalVentilationPreconditioning)
+      infil_program.addLine("  Set #{htg_energy_actuator.name} = 0.0")
+      infil_program.addLine("  Set Qpreheat = #{UnitConversions.convert(f_preheat.average_oa_flow_rate, 'cfm', 'm^3/s').round(4)}")
+      if [HPXML::MechVentTypeERV, HPXML::MechVentTypeHRV].include? f_preheat.fan_type
+        vent_mech_erv_hrv_tot = [f_preheat]
+      else
+        vent_mech_erv_hrv_tot = []
       end
+      calculate_fan_loads(model, infil_program, vent_mech_erv_hrv_tot, hrv_erv_effectiveness_map, fan_sens_load_actuator, fan_lat_load_actuator, 'Qpreheat', true)
+
+      infil_program.addLine("  Set #{htg_energy_actuator.name} = (-FanSensToLv) / #{f_preheat.preheating_efficiency_cop}")
+      infil_program.addLine('Else')
+      infil_program.addLine("  Set #{htg_energy_actuator.name} = 0.0")
       infil_program.addLine('EndIf')
     end
-    if not vent_mech_precool.empty?
+    vent_mech_precool.each_with_index do |f_precool, i|
       infil_program.addLine('If OASupInTemp > ZoneTemp')
-      vent_mech_precool.each_with_index do |f_precool, i|
-        clg_energy_actuator = create_other_equipment_object_and_actuator(model: model, name: "shared mech vent precooling energy #{i}", space: @living_space, frac_lat: 0.0, frac_lost: 1.0, hpxml_fuel_type: f_precool.precooling_fuel, end_use: Constants.ObjectNameMechanicalVentilationPreconditioning)
-        infil_program.addLine("  Set #{clg_energy_actuator.name} = 0.0")
-        infil_program.addLine("  Set Qprecool = #{UnitConversions.convert(f_precool.average_oa_flow_rate, 'cfm', 'm^3/s').round(4)}")
-        if [HPXML::MechVentTypeERV, HPXML::MechVentTypeHRV].include? f_precool.fan_type
-          vent_mech_erv_hrv_tot = [f_precool]
-        else
-          vent_mech_erv_hrv_tot = []
-        end
-        calculate_fan_loads(model, infil_program, vent_mech_erv_hrv_tot, hrv_erv_effectiveness_map, fan_sens_load_actuator, fan_lat_load_actuator, 'Qprecool', true)
-
-        infil_program.addLine("  Set #{clg_energy_actuator.name} = FanSensToLv / #{f_precool.precooling_efficiency_cop}")
+      clg_energy_actuator = create_other_equipment_object_and_actuator(model: model, name: "shared mech vent precooling energy #{i}", space: @living_space, frac_lat: 0.0, frac_lost: 1.0, hpxml_fuel_type: f_precool.precooling_fuel, end_use: Constants.ObjectNameMechanicalVentilationPreconditioning)
+      infil_program.addLine("  Set #{clg_energy_actuator.name} = 0.0")
+      infil_program.addLine("  Set Qprecool = #{UnitConversions.convert(f_precool.average_oa_flow_rate, 'cfm', 'm^3/s').round(4)}")
+      if [HPXML::MechVentTypeERV, HPXML::MechVentTypeHRV].include? f_precool.fan_type
+        vent_mech_erv_hrv_tot = [f_precool]
+      else
+        vent_mech_erv_hrv_tot = []
       end
+      calculate_fan_loads(model, infil_program, vent_mech_erv_hrv_tot, hrv_erv_effectiveness_map, fan_sens_load_actuator, fan_lat_load_actuator, 'Qprecool', true)
+
+      infil_program.addLine("  Set #{clg_energy_actuator.name} = FanSensToLv / #{f_precool.precooling_efficiency_cop}")
+      infil_program.addLine('Else')
+      infil_program.addLine("  Set #{clg_energy_actuator.name} = 0.0")
       infil_program.addLine('EndIf')
     end
-  end
+    end
 
   def self.apply_mechanical_ventilation(model, vent_fans_mech, living_ach50, living_const_ach, weather, vent_fans_kitchen, vent_fans_bath, range_sch_sensors_map, bath_sch_sensors_map, has_flue_chimney)
     # Categorize fans into different types
