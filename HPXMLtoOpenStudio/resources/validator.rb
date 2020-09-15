@@ -3,6 +3,7 @@
 class Validator
   def self.run_validator(hpxml_doc, stron_path)
     errors = []
+    warnings = []
     doc = XMLHelper.parse_file(stron_path)
     XMLHelper.get_elements(doc, '/sch:schema/sch:pattern/sch:rule').each do |rule|
       context_xpath = XMLHelper.get_attribute_value(rule, 'context').gsub('h:', '')
@@ -30,8 +31,24 @@ class Validator
           errors << error_message
         end
       end
+
+      XMLHelper.get_elements(rule, 'sch:report').each do |report_element|
+        report_test = XMLHelper.get_attribute_value(report_element, 'test').gsub('h:', '')
+
+        context_elements.each do |context_element|
+          begin
+            xpath_result = context_element.xpath(report_test)
+          rescue
+            fail "Invalid xpath: #{report_test}"
+          end
+          next unless xpath_result # check if report_test is true
+
+          warning_message = report_element.children.text # the value of sch:report
+          warnings << warning_message
+        end
+      end
     end
 
-    return errors
+    return errors, warnings
   end
 end

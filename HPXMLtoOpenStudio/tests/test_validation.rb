@@ -145,14 +145,14 @@ class HPXMLtoOpenStudioValidationTest < MiniTest::Test
   def _test_schematron_validation(stron_doc, hpxml, expected_error_msg = nil)
     # Validate via schematron-nokogiri gem
     xml_doc = Nokogiri::XML hpxml
-    results = stron_doc.validate xml_doc
-    results_msgs = results.map { |i| i[:message].gsub(': ', [': ', i[:context_path].gsub('h:', '').concat(': ')].join('')) }
-    idx_of_msg = results_msgs.index { |m| m == expected_error_msg }
+    errors = stron_doc.validate xml_doc
+    errors_msgs = errors.map { |i| i[:message].gsub(': ', [': ', i[:context_path].gsub('h:', '').concat(': ')].join('')) }
+    idx_of_msg = errors_msgs.index { |m| m == expected_error_msg }
     if expected_error_msg.nil?
       assert_nil(idx_of_msg)
     else
       if idx_of_msg.nil?
-        puts "Did not find expected error message '#{expected_error_msg}' in #{results_msgs}."
+        puts "Did not find expected error message '#{expected_error_msg}' in #{errors_msgs}."
       end
       refute_nil(idx_of_msg)
     end
@@ -160,13 +160,13 @@ class HPXMLtoOpenStudioValidationTest < MiniTest::Test
 
   def _test_ruby_validation(hpxml_doc, expected_error_msg = nil)
     # Validate via validator.rb
-    results = Validator.run_validator(hpxml_doc, @stron_path)
-    idx_of_msg = results.index { |i| i == expected_error_msg }
+    errors, warnings = Validator.run_validator(hpxml_doc, @stron_path)
+    idx_of_msg = errors.index { |i| i == expected_error_msg }
     if expected_error_msg.nil?
       assert_nil(idx_of_msg)
     else
       if idx_of_msg.nil?
-        puts "Did not find expected error message '#{expected_error_msg}' in #{results}."
+        puts "Did not find expected error message '#{expected_error_msg}' in #{errors}."
       end
       refute_nil(idx_of_msg)
     end
