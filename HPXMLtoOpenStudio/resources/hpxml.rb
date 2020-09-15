@@ -2981,7 +2981,7 @@ class HPXML < Object
       super(hpxml_object, *args)
     end
     ATTRS = [:id, :distribution_system_type, :annual_heating_dse, :annual_cooling_dse,
-             :duct_system_sealed, :duct_leakage_testing_exemption, :conditioned_floor_area_served,
+             :duct_system_sealed, :duct_leakage_to_outside_testing_exemption, :conditioned_floor_area_served,
              :number_of_return_registers, :hydronic_type, :hydronic_and_air_type]
     attr_accessor(*ATTRS)
     attr_reader(:duct_leakage_measurements, :ducts)
@@ -3079,7 +3079,7 @@ class HPXML < Object
         @duct_leakage_measurements.to_oga(distribution)
         @ducts.to_oga(distribution)
         XMLHelper.add_element(distribution, 'NumberofReturnRegisters', Integer(@number_of_return_registers)) unless @number_of_return_registers.nil?
-        XMLHelper.add_extension(distribution, 'DuctLeakageTestingExemption', to_boolean(@duct_leakage_testing_exemption)) unless @duct_leakage_testing_exemption.nil?
+        XMLHelper.add_extension(distribution, 'DuctLeakageToOutsideTestingExemption', to_boolean(@duct_leakage_to_outside_testing_exemption)) unless @duct_leakage_to_outside_testing_exemption.nil?
       end
     end
 
@@ -3110,7 +3110,7 @@ class HPXML < Object
         distribution = air_distribution
         distribution = hydronic_and_air_distribution if distribution.nil?
         @number_of_return_registers = to_integer_or_nil(XMLHelper.get_value(distribution, 'NumberofReturnRegisters'))
-        @duct_leakage_testing_exemption = to_boolean_or_nil(XMLHelper.get_value(distribution, 'extension/DuctLeakageTestingExemption'))
+        @duct_leakage_to_outside_testing_exemption = to_boolean_or_nil(XMLHelper.get_value(distribution, 'extension/DuctLeakageToOutsideTestingExemption'))
         @duct_leakage_measurements.from_oga(distribution)
         @ducts.from_oga(distribution)
       end
