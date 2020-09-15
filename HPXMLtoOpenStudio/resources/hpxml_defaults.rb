@@ -60,6 +60,9 @@ class HPXMLDefaults
         end
       end
     end
+
+    hpxml.header.allow_increased_fixed_capacities = false if hpxml.header.allow_increased_fixed_capacities.nil?
+    hpxml.header.use_max_load_for_heat_pumps = true if hpxml.header.use_max_load_for_heat_pumps.nil?
   end
 
   def self.apply_site(hpxml)
