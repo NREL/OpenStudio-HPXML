@@ -3,7 +3,7 @@
 class Constructions
   # Container class for walls, floors/ceilings, roofs, etc.
 
-  def self.apply_wood_stud_wall(model, surfaces, constr_name,
+  def self.apply_wood_stud_wall(runner, model, surfaces, wall, constr_name,
                                 cavity_r, install_grade, cavity_depth_in, cavity_filled,
                                 framing_factor, drywall_thick_in, osb_thick_in,
                                 rigid_r, mat_ext_finish, otherside_drywall_thick_in,
@@ -62,17 +62,16 @@ class Constructions
     constr.add_layer(inside_film)
 
     # Create and assign construction to surfaces
-    constr.create_and_assign_constructions(surfaces, model)
+    constr.create_and_assign_constructions(runner, surfaces, model)
 
     # Store info for HVAC Sizing measure
-    surfaces.each do |surface|
-      surface.additionalProperties.setFeature(Constants.SizingInfoWallType, HPXML::WallTypeWoodStud)
-      surface.additionalProperties.setFeature(Constants.SizingInfoStudWallCavityRvalue, Float(cavity_r))
-      surface.additionalProperties.setFeature(Constants.SizingInfoWallRigidInsRvalue, Float(rigid_r))
+    if not wall.nil?
+      wall.insulation_cavity_r_value = cavity_r
+      wall.insulation_continuous_r_value = rigid_r
     end
   end
 
-  def self.apply_double_stud_wall(model, surfaces, constr_name,
+  def self.apply_double_stud_wall(runner, model, surfaces, wall, constr_name,
                                   cavity_r, install_grade, stud_depth_in, gap_depth_in,
                                   framing_factor, framing_spacing, is_staggered,
                                   drywall_thick_in, osb_thick_in, rigid_r,
@@ -137,16 +136,13 @@ class Constructions
     constr.add_layer(inside_film)
 
     # Create and assign construction to surfaces
-    constr.create_and_assign_constructions(surfaces, model)
+    constr.create_and_assign_constructions(runner, surfaces, model)
 
     # Store info for HVAC Sizing measure
-    surfaces.each do |surface|
-      surface.additionalProperties.setFeature(Constants.SizingInfoWallType, HPXML::WallTypeDoubleWoodStud)
-      surface.additionalProperties.setFeature(Constants.SizingInfoWallRigidInsRvalue, Float(rigid_r))
-    end
+    wall.insulation_continuous_r_value = rigid_r
   end
 
-  def self.apply_cmu_wall(model, surfaces, constr_name,
+  def self.apply_cmu_wall(runner, model, surfaces, wall, constr_name,
                           thick_in, conductivity, density, framing_factor,
                           furring_r, furring_cavity_depth, furring_spacing,
                           drywall_thick_in, osb_thick_in, rigid_r,
@@ -210,17 +206,14 @@ class Constructions
     constr.add_layer(inside_film)
 
     # Create and assign construction to surfaces
-    constr.create_and_assign_constructions(surfaces, model)
+    constr.create_and_assign_constructions(runner, surfaces, model)
 
     # Store info for HVAC Sizing measure
-    surfaces.each do |surface|
-      surface.additionalProperties.setFeature(Constants.SizingInfoWallType, HPXML::WallTypeCMU)
-      surface.additionalProperties.setFeature(Constants.SizingInfoCMUWallFurringInsRvalue, Float(furring_r))
-      surface.additionalProperties.setFeature(Constants.SizingInfoWallRigidInsRvalue, Float(rigid_r))
-    end
+    wall.insulation_cavity_r_value = furring_r
+    wall.insulation_continuous_r_value = rigid_r
   end
 
-  def self.apply_icf_wall(model, surfaces, constr_name,
+  def self.apply_icf_wall(runner, model, surfaces, wall, constr_name,
                           icf_r, ins_thick_in, concrete_thick_in, framing_factor,
                           drywall_thick_in, osb_thick_in, rigid_r,
                           mat_ext_finish, inside_film, outside_film)
@@ -266,18 +259,14 @@ class Constructions
     constr.add_layer(inside_film)
 
     # Create and assign construction to surfaces
-    constr.create_and_assign_constructions(surfaces, model)
+    constr.create_and_assign_constructions(runner, surfaces, model)
 
     # Store info for HVAC Sizing measure
-    surfaces.each do |surface|
-      surface.additionalProperties.setFeature(Constants.SizingInfoWallType, HPXML::WallTypeICF)
-      surface.additionalProperties.setFeature(Constants.SizingInfoWallRigidInsRvalue, Float(rigid_r))
-    end
+    wall.insulation_continuous_r_value = rigid_r
   end
 
-  def self.apply_sip_wall(model, surfaces, constr_name,
-                          sip_r, sip_thick_in, framing_factor,
-                          sheathing_type, sheathing_thick_in,
+  def self.apply_sip_wall(runner, model, surfaces, wall, constr_name, sip_r,
+                          sip_thick_in, framing_factor, sheathing_thick_in,
                           drywall_thick_in, osb_thick_in, rigid_r,
                           mat_ext_finish, inside_film, outside_film)
 
@@ -286,13 +275,7 @@ class Constructions
     # Define materials
     spline_thick_in = 0.5
     ins_thick_in = sip_thick_in - (2.0 * spline_thick_in) # in
-    if sheathing_type == Constants.MaterialOSB
-      mat_int_sheath = Material.new(name = 'WallIntSheathing', thick_in = sheathing_thick_in, mat_base = BaseMaterial.Wood)
-    elsif sheathing_type == Constants.MaterialGypsum
-      mat_int_sheath = Material.new(name = 'WallIntSheathing', thick_in = sheathing_thick_in, mat_base = BaseMaterial.Gypsum)
-    elsif sheathing_type == Constants.MaterialGypcrete
-      mat_int_sheath = Material.new(name = 'WallIntSheathing', thick_in = sheathing_thick_in, mat_base = BaseMaterial.Gypcrete)
-    end
+    mat_int_sheath = Material.new(name = 'WallIntSheathing', thick_in = sheathing_thick_in, mat_base = BaseMaterial.Wood)
     mat_framing_inner_outer = Material.new(name = nil, thick_in = spline_thick_in, mat_base = BaseMaterial.Wood)
     mat_framing_middle = Material.new(name = nil, thick_in = ins_thick_in, mat_base = BaseMaterial.Wood)
     mat_spline = Material.new(name = nil, thick_in = spline_thick_in, mat_base = BaseMaterial.Wood)
@@ -335,18 +318,10 @@ class Constructions
     constr.add_layer(inside_film)
 
     # Create and assign construction to surfaces
-    constr.create_and_assign_constructions(surfaces, model)
-
-    # Store info for HVAC Sizing measure
-    surfaces.each do |surface|
-      surface.additionalProperties.setFeature(Constants.SizingInfoWallType, HPXML::WallTypeSIP)
-      surface.additionalProperties.setFeature(Constants.SizingInfoSIPWallInsThickness, Float(sip_thick_in))
-      surface.additionalProperties.setFeature(Constants.SizingInfoWallRigidInsRvalue, Float(rigid_r))
-      surface.additionalProperties.setFeature(Constants.SizingInfoWallRigidInsThickness, Float(sheathing_thick_in))
-    end
+    constr.create_and_assign_constructions(runner, surfaces, model)
   end
 
-  def self.apply_steel_stud_wall(model, surfaces, constr_name,
+  def self.apply_steel_stud_wall(runner, model, surfaces, wall, constr_name,
                                  cavity_r, install_grade, cavity_depth,
                                  cavity_filled, framing_factor, correction_factor,
                                  drywall_thick_in, osb_thick_in, rigid_r,
@@ -402,17 +377,14 @@ class Constructions
     constr.add_layer(inside_film)
 
     # Create and assign construction to surfaces
-    constr.create_and_assign_constructions(surfaces, model)
+    constr.create_and_assign_constructions(runner, surfaces, model)
 
     # Store info for HVAC Sizing measure
-    surfaces.each do |surface|
-      surface.additionalProperties.setFeature(Constants.SizingInfoWallType, HPXML::WallTypeSteelStud)
-      surface.additionalProperties.setFeature(Constants.SizingInfoStudWallCavityRvalue, Float(cavity_r))
-      surface.additionalProperties.setFeature(Constants.SizingInfoWallRigidInsRvalue, Float(rigid_r))
-    end
+    wall.insulation_cavity_r_value = cavity_r
+    wall.insulation_continuous_r_value = rigid_r
   end
 
-  def self.apply_generic_layered_wall(model, surfaces, constr_name,
+  def self.apply_generic_layered_wall(runner, model, surfaces, wall, constr_name,
                                       thick_ins, conds, denss, specheats,
                                       drywall_thick_in, osb_thick_in, rigid_r,
                                       mat_ext_finish, inside_film, outside_film)
@@ -475,16 +447,13 @@ class Constructions
     constr.add_layer(inside_film)
 
     # Create and assign construction to surfaces
-    constr.create_and_assign_constructions(surfaces, model)
+    constr.create_and_assign_constructions(runner, surfaces, model)
 
     # Store info for HVAC Sizing measure
-    surfaces.each do |surface|
-      surface.additionalProperties.setFeature(Constants.SizingInfoWallType, 'Generic')
-      surface.additionalProperties.setFeature(Constants.SizingInfoWallRigidInsRvalue, Float(rigid_r))
-    end
+    wall.insulation_continuous_r_value = rigid_r
   end
 
-  def self.apply_rim_joist(model, surfaces, constr_name,
+  def self.apply_rim_joist(runner, model, surfaces, rim_joist, constr_name,
                            cavity_r, install_grade, framing_factor,
                            drywall_thick_in, osb_thick_in,
                            rigid_r, mat_ext_finish, inside_film,
@@ -538,21 +507,19 @@ class Constructions
     constr.add_layer(inside_film)
 
     # Create and assign construction to surfaces
-    constr.create_and_assign_constructions(surfaces, model)
+    constr.create_and_assign_constructions(runner, surfaces, model)
 
     # Store info for HVAC Sizing measure
-    surfaces.each do |surface|
-      surface.additionalProperties.setFeature(Constants.SizingInfoWallType, HPXML::WallTypeWoodStud)
-      surface.additionalProperties.setFeature(Constants.SizingInfoStudWallCavityRvalue, Float(cavity_r))
-      surface.additionalProperties.setFeature(Constants.SizingInfoWallRigidInsRvalue, Float(rigid_r))
-    end
+    rim_joist.insulation_continuous_r_value = rigid_r
+    rim_joist.insulation_cavity_r_value = cavity_r
   end
 
-  def self.apply_open_cavity_roof(model, surfaces, constr_name,
+  def self.apply_open_cavity_roof(runner, model, surfaces, constr_name,
                                   cavity_r, install_grade, cavity_ins_thick_in,
                                   framing_factor, framing_thick_in,
                                   osb_thick_in, rigid_r,
-                                  mat_roofing, has_radiant_barrier)
+                                  mat_roofing, has_radiant_barrier,
+                                  inside_film, outside_film, radiant_barrier_grade)
 
     return if surfaces.empty?
 
@@ -585,7 +552,7 @@ class Constructions
     end
     mat_rb = nil
     if has_radiant_barrier
-      mat_rb = Material.RadiantBarrier
+      mat_rb = Material.RadiantBarrier(radiant_barrier_grade)
     end
 
     # Set paths
@@ -594,7 +561,7 @@ class Constructions
 
     # Define construction
     constr = Construction.new(constr_name, path_fracs)
-    constr.add_layer(Material.AirFilmOutside)
+    constr.add_layer(outside_film)
     if not mat_roofing.nil?
       constr.add_layer(mat_roofing)
     end
@@ -605,33 +572,22 @@ class Constructions
       constr.add_layer(mat_osb)
     end
     if framing_thick_in > 0
-      constr.add_layer([mat_framing, mat_cavity, mat_gap], 'RoofUARoofIns')
+      constr.add_layer([mat_framing, mat_cavity, mat_gap], 'RoofStudAndCavity')
     end
     if not mat_rb.nil?
       constr.add_layer(mat_rb)
-      constr.add_layer(Material.AirFilmRoofRadiantBarrier(Geometry.get_roof_pitch(surfaces)))
-    else
-      constr.add_layer(Material.AirFilmRoof(Geometry.get_roof_pitch(surfaces)))
     end
+    constr.add_layer(inside_film)
 
     # Create and assign construction to roof surfaces
-    constr.create_and_assign_constructions(surfaces, model)
-
-    # Store info for HVAC Sizing measure
-    surfaces.each do |surface|
-      surface.additionalProperties.setFeature(Constants.SizingInfoRoofColor, get_roofing_material_manual_j_color(mat_roofing.name))
-      surface.additionalProperties.setFeature(Constants.SizingInfoRoofMaterial, get_roofing_material_manual_j_material(mat_roofing.name))
-      surface.additionalProperties.setFeature(Constants.SizingInfoRoofRigidInsRvalue, Float(rigid_r))
-      surface.additionalProperties.setFeature(Constants.SizingInfoRoofHasRadiantBarrier, has_radiant_barrier)
-      surface.additionalProperties.setFeature(Constants.SizingInfoRoofCavityRvalue, Float(cavity_r))
-    end
+    constr.create_and_assign_constructions(runner, surfaces, model)
   end
 
-  def self.apply_closed_cavity_roof(model, surfaces, constr_name,
+  def self.apply_closed_cavity_roof(runner, model, surfaces, constr_name,
                                     cavity_r, install_grade, cavity_depth,
                                     filled_cavity, framing_factor, drywall_thick_in,
                                     osb_thick_in, rigid_r, mat_roofing, has_radiant_barrier,
-                                    inside_film, outside_film)
+                                    inside_film, outside_film, radiant_barrier_grade)
 
     return if surfaces.empty?
 
@@ -661,7 +617,7 @@ class Constructions
     end
     mat_rb = nil
     if has_radiant_barrier
-      mat_rb = Material.RadiantBarrier
+      mat_rb = Material.RadiantBarrier(radiant_barrier_grade)
     end
 
     # Set paths
@@ -680,7 +636,7 @@ class Constructions
     if not mat_osb.nil?
       constr.add_layer(mat_osb)
     end
-    constr.add_layer([mat_framing, mat_cavity, mat_gap], 'RoofIns')
+    constr.add_layer([mat_framing, mat_cavity, mat_gap], 'RoofStudAndCavity')
     if drywall_thick_in > 0
       constr.add_layer(Material.GypsumWall(drywall_thick_in))
     end
@@ -690,22 +646,13 @@ class Constructions
     constr.add_layer(inside_film)
 
     # Create and assign construction to surfaces
-    constr.create_and_assign_constructions(surfaces, model)
-
-    # Store info for HVAC Sizing measure
-    surfaces.each do |surface|
-      surface.additionalProperties.setFeature(Constants.SizingInfoRoofColor, get_roofing_material_manual_j_color(mat_roofing.name))
-      surface.additionalProperties.setFeature(Constants.SizingInfoRoofMaterial, get_roofing_material_manual_j_material(mat_roofing.name))
-      surface.additionalProperties.setFeature(Constants.SizingInfoRoofRigidInsRvalue, Float(rigid_r))
-      surface.additionalProperties.setFeature(Constants.SizingInfoRoofHasRadiantBarrier, has_radiant_barrier)
-      surface.additionalProperties.setFeature(Constants.SizingInfoRoofCavityRvalue, Float(cavity_r))
-    end
+    constr.create_and_assign_constructions(runner, surfaces, model)
   end
 
-  def self.apply_ceiling(model, surfaces, constr_name,
+  def self.apply_ceiling(runner, model, surfaces, constr_name,
                          cavity_r, install_grade, ins_thick_in,
                          framing_factor, joist_height_in,
-                         drywall_thick_in)
+                         drywall_thick_in, inside_film, outside_film)
 
     # Drywall below, open cavity above (e.g., attic floor)
 
@@ -719,7 +666,7 @@ class Constructions
       if ins_thick_in > joist_height_in
         # If there is additional insulation beyond the rafter height,
         # these inputs are used for defining an additional layer
-        mat_addtl_ins = Material.new(name = 'FloorUAAdditionalCeilingIns', thick_in = (ins_thick_in - joist_height_in), mat_base = BaseMaterial.InsulationGenericLoosefill, k_in = cavity_k)
+        mat_addtl_ins = Material.new(name = 'CeilingAdditionalIns', thick_in = (ins_thick_in - joist_height_in), mat_base = BaseMaterial.InsulationGenericLoosefill, k_in = cavity_k)
       end
       mat_cavity = Material.new(name = nil, thick_in = joist_height_in, mat_base = BaseMaterial.InsulationGenericLoosefill, k_in = cavity_k)
     else
@@ -739,25 +686,25 @@ class Constructions
 
     # Define construction
     constr = Construction.new(constr_name, path_fracs)
-    constr.add_layer(Material.AirFilmFloorAverage)
+    constr.add_layer(outside_film)
     if not mat_addtl_ins.nil?
       constr.add_layer(mat_addtl_ins)
     end
-    constr.add_layer([mat_framing, mat_cavity, mat_gap], 'FloorUATrussandIns')
+    constr.add_layer([mat_framing, mat_cavity, mat_gap], 'CeilingStudAndCavity')
     if drywall_thick_in > 0
       constr.add_layer(Material.GypsumWall(drywall_thick_in))
     end
-    constr.add_layer(Material.AirFilmFloorAverage)
+    constr.add_layer(inside_film)
 
     # Create and assign construction to ceiling surfaces
-    constr.create_and_assign_constructions(surfaces, model)
+    constr.create_and_assign_constructions(runner, surfaces, model)
   end
 
-  def self.apply_floor(model, surfaces, constr_name,
+  def self.apply_floor(runner, model, surfaces, constr_name,
                        cavity_r, install_grade,
                        framing_factor, joist_height_in,
                        plywood_thick_in, rigid_r, mat_floor_covering,
-                       mat_carpet, inside_film, outside_film)
+                       inside_film, outside_film)
 
     # Open cavity below, floor covering above (e.g., crawlspace ceiling)
 
@@ -775,7 +722,7 @@ class Constructions
     mat_rigid = nil
     if rigid_r > 0
       rigid_thick_in = rigid_r * BaseMaterial.InsulationRigid.k_in
-      mat_rigid = Material.new(name = 'WallRigidIns', thick_in = rigid_thick_in, mat_base = BaseMaterial.InsulationRigid, k_in = rigid_thick_in / rigid_r)
+      mat_rigid = Material.new(name = 'FloorRigidIns', thick_in = rigid_thick_in, mat_base = BaseMaterial.InsulationRigid, k_in = rigid_thick_in / rigid_r)
     end
 
     # Set paths
@@ -785,7 +732,7 @@ class Constructions
     # Define construction
     constr = Construction.new(constr_name, path_fracs)
     constr.add_layer(outside_film)
-    constr.add_layer([mat_framing, mat_cavity, mat_gap], 'FloorIns')
+    constr.add_layer([mat_framing, mat_cavity, mat_gap], 'FloorStudAndCavity')
     if not mat_rigid.nil?
       constr.add_layer(mat_rigid)
     end
@@ -795,16 +742,13 @@ class Constructions
     if not mat_floor_covering.nil?
       constr.add_layer(mat_floor_covering)
     end
-    if not mat_carpet.nil?
-      constr.add_layer(mat_carpet)
-    end
     constr.add_layer(inside_film)
 
     # Create and assign construction to surfaces
-    constr.create_and_assign_constructions(surfaces, model)
+    constr.create_and_assign_constructions(runner, surfaces, model)
   end
 
-  def self.apply_foundation_wall(model, wall_surfaces, wall_constr_name,
+  def self.apply_foundation_wall(runner, model, wall_surfaces, wall_constr_name,
                                  ext_rigid_ins_offset, int_rigid_ins_offset, ext_rigid_ins_height,
                                  int_rigid_ins_height, ext_rigid_r, int_rigid_r, wall_drywall_thick_in, wall_concrete_thick_in, wall_height_above_grade)
 
@@ -825,7 +769,7 @@ class Constructions
     end
 
     # Create and assign construction to surfaces
-    constr.create_and_assign_constructions(wall_surfaces, model)
+    constr.create_and_assign_constructions(runner, wall_surfaces, model)
 
     # Assign surfaces to Kiva foundation
     wall_surfaces.each do |wall_surface|
@@ -833,7 +777,7 @@ class Constructions
     end
   end
 
-  def self.apply_foundation_slab(model, surface, constr_name,
+  def self.apply_foundation_slab(runner, model, surface, constr_name,
                                  under_r, under_width, gap_r,
                                  perimeter_r, perimeter_depth,
                                  whole_r, concrete_thick_in, exposed_perimeter,
@@ -888,14 +832,14 @@ class Constructions
     end
 
     # Create and assign construction to surfaces
-    constr.create_and_assign_constructions([surface], model)
+    constr.create_and_assign_constructions(runner, [surface], model)
 
     # Assign surface to Kiva foundation
     surface.setAdjacentFoundation(foundation)
     surface.createSurfacePropertyExposedFoundationPerimeter('TotalExposedPerimeter', UnitConversions.convert(exposed_perimeter, 'ft', 'm'))
   end
 
-  def self.apply_door(model, subsurfaces, constr_name, ufactor)
+  def self.apply_door(runner, model, subsurfaces, constr_name, ufactor)
     return if subsurfaces.empty?
 
     # Define materials
@@ -911,24 +855,24 @@ class Constructions
     constr.add_layer(fin_door_mat)
 
     # Create and assign construction to subsurfaces
-    constr.create_and_assign_constructions(subsurfaces, model)
+    constr.create_and_assign_constructions(runner, subsurfaces, model)
   end
 
-  def self.apply_window(model, subsurfaces, constr_name, weather,
+  def self.apply_window(runner, model, subsurfaces, constr_name, weather,
                         is_sch, ufactor, shgc, heat_shade_mult, cool_shade_mult)
 
-    apply_window_skylight(model, 'Window', subsurfaces, constr_name, weather,
+    apply_window_skylight(runner, model, 'Window', subsurfaces, constr_name, weather,
                           is_sch, ufactor, shgc, heat_shade_mult, cool_shade_mult)
   end
 
-  def self.apply_skylight(model, subsurfaces, constr_name, weather,
+  def self.apply_skylight(runner, model, subsurfaces, constr_name, weather,
                           is_sch, ufactor, shgc, heat_shade_mult, cool_shade_mult)
 
-    apply_window_skylight(model, 'Skylight', subsurfaces, constr_name, weather,
+    apply_window_skylight(runner, model, 'Skylight', subsurfaces, constr_name, weather,
                           is_sch, ufactor, shgc, heat_shade_mult, cool_shade_mult)
   end
 
-  def self.apply_partition_walls(model, constr_name, drywall_thick_in, frac_of_ffa,
+  def self.apply_partition_walls(runner, model, constr_name, drywall_thick_in, frac_of_ffa,
                                  basement_frac_of_cfa, cond_base_surfaces, living_space)
 
     imdefs = []
@@ -954,14 +898,14 @@ class Constructions
       imdefs << imdef
     end
 
-    Constructions.apply_wood_stud_wall(model, imdefs, constr_name,
-                                       0, 1, 3.5, false, 0.16,
-                                       drywall_thick_in, 0, 0, nil, drywall_thick_in,
-                                       Material.AirFilmVertical,
-                                       Material.AirFilmVertical)
+    apply_wood_stud_wall(runner, model, imdefs, nil, constr_name,
+                         0, 1, 3.5, false, 0.16,
+                         drywall_thick_in, 0, 0, nil, drywall_thick_in,
+                         Material.AirFilmVertical,
+                         Material.AirFilmVertical)
   end
 
-  def self.apply_furniture(model, mass_lb_per_sqft, density_lb_per_cuft,
+  def self.apply_furniture(runner, model, mass_lb_per_sqft, density_lb_per_cuft,
                            mat, basement_frac_of_cfa, cond_base_surfaces, living_space)
 
     # Add user-specified furniture mass
@@ -1023,7 +967,7 @@ class Constructions
         imdefs << imdef
       end
       # Create and assign construction to surfaces
-      constr.create_and_assign_constructions(imdefs, model)
+      constr.create_and_assign_constructions(runner, imdefs, model)
     end
   end
 
@@ -1040,129 +984,72 @@ class Constructions
     return imdef
   end
 
-  def self.get_exterior_finish_materials
-    mats = []
-    mats << Material.ExtFinishStuccoMedDark
-    mats << Material.ExtFinishBrickLight
-    mats << Material.ExtFinishBrickMedDark
-    mats << Material.ExtFinishWoodLight
-    mats << Material.ExtFinishWoodMedDark
-    mats << Material.ExtFinishAluminumLight
-    mats << Material.ExtFinishAluminumMedDark
-    mats << Material.ExtFinishVinylLight
-    mats << Material.ExtFinishVinylMedDark
-    mats << Material.ExtFinishFiberCementLight
-    mats << Material.ExtFinishFiberCementMedDark
-    return mats
-  end
-
-  def self.get_exterior_finish_material(name)
-    get_exterior_finish_materials.each do |mat|
-      next if mat.name != name
-
-      return mat
-    end
-    return
-  end
-
-  def self.get_roofing_materials
-    mats = []
-    mats << Material.RoofingAsphaltShinglesDark
-    mats << Material.RoofingAsphaltShinglesMed
-    mats << Material.RoofingAsphaltShinglesLight
-    mats << Material.RoofingAsphaltShinglesWhiteCool
-    mats << Material.RoofingTileDark
-    mats << Material.RoofingTileMed
-    mats << Material.RoofingTileLight
-    mats << Material.RoofingTileWhite
-    mats << Material.RoofingMetalDark
-    mats << Material.RoofingMetalMed
-    mats << Material.RoofingMetalLight
-    mats << Material.RoofingMetalWhite
-    mats << Material.RoofingGalvanizedSteel
-    return mats
-  end
-
-  def self.get_roofing_material(name)
-    get_roofing_materials.each do |mat|
-      next if mat.name != name
-
-      return mat
-    end
-    return
-  end
-
-  def self.get_roofing_material_manual_j_color(name)
-    if name == Material.RoofingAsphaltShinglesDark.name
-      return Constants.ColorDark
-    elsif name == Material.RoofingAsphaltShinglesMed.name
-      return Constants.ColorMedium
-    elsif name == Material.RoofingAsphaltShinglesLight.name
-      return Constants.ColorLight
-    elsif name == Material.RoofingAsphaltShinglesWhiteCool.name
-      return Constants.ColorWhite
-    elsif name == Material.RoofingTileDark.name
-      return Constants.ColorDark
-    elsif name == Material.RoofingTileMed.name
-      return Constants.ColorMedium
-    elsif name == Material.RoofingTileLight.name
-      return Constants.ColorLight
-    elsif name == Material.RoofingTileWhite.name
-      return Constants.ColorWhite
-    elsif name == Material.RoofingMetalDark.name
-      return Constants.ColorDark
-    elsif name == Material.RoofingMetalMed.name
-      return Constants.ColorMedium
-    elsif name == Material.RoofingMetalLight.name
-      return Constants.ColorLight
-    elsif name == Material.RoofingMetalWhite.name
-      return Constants.ColorWhite
-    elsif name == Material.RoofingGalvanizedSteel.name
-      return Constants.ColorLight
-    end
-
-    return
-  end
-
-  def self.get_roofing_material_manual_j_material(name)
-    if name == Material.RoofingAsphaltShinglesDark.name
-      return Constants.RoofMaterialAsphaltShingles
-    elsif name == Material.RoofingAsphaltShinglesMed.name
-      return Constants.RoofMaterialAsphaltShingles
-    elsif name == Material.RoofingAsphaltShinglesLight.name
-      return Constants.RoofMaterialAsphaltShingles
-    elsif name == Material.RoofingAsphaltShinglesWhiteCool.name
-      return Constants.RoofMaterialAsphaltShingles
-    elsif name == Material.RoofingTileDark.name
-      return Constants.RoofMaterialTile
-    elsif name == Material.RoofingTileMed.name
-      return Constants.RoofMaterialTile
-    elsif name == Material.RoofingTileLight.name
-      return Constants.RoofMaterialTile
-    elsif name == Material.RoofingTileWhite.name
-      return Constants.RoofMaterialTile
-    elsif name == Material.RoofingMetalDark.name
-      return Constants.RoofMaterialMetal
-    elsif name == Material.RoofingMetalMed.name
-      return Constants.RoofMaterialMetal
-    elsif name == Material.RoofingMetalLight.name
-      return Constants.RoofMaterialMetal
-    elsif name == Material.RoofingMetalWhite.name
-      return Constants.RoofMaterialMetal
-    elsif name == Material.RoofingGalvanizedSteel.name
-      return Constants.RoofMaterialMetal
-    end
-
-    return
-  end
-
   def self.get_default_interior_shading_factors()
     summer = 0.70
     winter = 0.85
     return summer, winter
   end
 
+  def self.get_default_roof_color(roof_type, solar_absorptance)
+    map = get_roof_color_and_solar_absorptance_map
+    color_map = {}
+    map.each do |key, value|
+      next unless key[1] == roof_type
+
+      color_map[key[0]] = value
+    end
+    color = color_map.min_by { |k, v| (v - solar_absorptance).abs }[0]
+    return color
+  end
+
+  def self.get_default_roof_solar_absorptance(roof_type, color)
+    map = get_roof_color_and_solar_absorptance_map
+    return map[[color, roof_type]]
+  end
+
+  def self.get_default_wall_color(solar_absorptance)
+    map = get_wall_color_and_solar_absorptance_map
+    color = map.min_by { |k, v| (v - solar_absorptance).abs }[0]
+    return color
+  end
+
+  def self.get_default_wall_solar_absorptance(color)
+    map = get_wall_color_and_solar_absorptance_map
+    return map[color]
+  end
+
   private
+
+  def self.get_roof_color_and_solar_absorptance_map
+    return { [HPXML::ColorDark, HPXML::RoofTypeAsphaltShingles] => 0.92,
+             [HPXML::ColorMediumDark, HPXML::RoofTypeAsphaltShingles] => 0.89,
+             [HPXML::ColorMedium, HPXML::RoofTypeAsphaltShingles] => 0.85,
+             [HPXML::ColorLight, HPXML::RoofTypeAsphaltShingles] => 0.75,
+             [HPXML::ColorReflective, HPXML::RoofTypeAsphaltShingles] => 0.50,
+             [HPXML::ColorDark, HPXML::RoofTypeWoodShingles] => 0.92,
+             [HPXML::ColorMediumDark, HPXML::RoofTypeWoodShingles] => 0.89,
+             [HPXML::ColorMedium, HPXML::RoofTypeWoodShingles] => 0.85,
+             [HPXML::ColorLight, HPXML::RoofTypeWoodShingles] => 0.75,
+             [HPXML::ColorReflective, HPXML::RoofTypeWoodShingles] => 0.50,
+             [HPXML::ColorDark, HPXML::RoofTypeClayTile] => 0.90,
+             [HPXML::ColorMediumDark, HPXML::RoofTypeClayTile] => 0.83,
+             [HPXML::ColorMedium, HPXML::RoofTypeClayTile] => 0.75,
+             [HPXML::ColorLight, HPXML::RoofTypeClayTile] => 0.60,
+             [HPXML::ColorReflective, HPXML::RoofTypeClayTile] => 0.30,
+             [HPXML::ColorDark, HPXML::RoofTypeMetal] => 0.90,
+             [HPXML::ColorMediumDark, HPXML::RoofTypeMetal] => 0.83,
+             [HPXML::ColorMedium, HPXML::RoofTypeMetal] => 0.75,
+             [HPXML::ColorLight, HPXML::RoofTypeMetal] => 0.60,
+             [HPXML::ColorReflective, HPXML::RoofTypeMetal] => 0.30 }
+  end
+
+  def self.get_wall_color_and_solar_absorptance_map
+    return { HPXML::ColorDark => 0.95,
+             HPXML::ColorMediumDark => 0.85,
+             HPXML::ColorMedium => 0.70,
+             HPXML::ColorLight => 0.50,
+             HPXML::ColorReflective => 0.30 }
+  end
 
   def self.get_gap_factor(install_grade, framing_factor, cavity_r)
     if cavity_r <= 0
@@ -1291,7 +1178,7 @@ class Constructions
     return mat
   end
 
-  def self.apply_window_skylight(model, type, subsurfaces, constr_name, weather,
+  def self.apply_window_skylight(runner, model, type, subsurfaces, constr_name, weather,
                                  is_sch, ufactor, shgc, heat_shade_mult, cool_shade_mult)
 
     return if subsurfaces.empty?
@@ -1343,7 +1230,15 @@ class Constructions
     end
 
     # Define materials
-    glaz_mat = GlazingMaterial.new(name = "#{type}Material", ufactor = ufactor, shgc *= heat_shade_mult)
+    if type == 'Skylight'
+      # As of 2004, NFRC skylights are rated at a 20-degree slope (instead of vertical), but
+      # the E+ SimpleGlazingSystem model accepts a U-factor that "is assumed to be for
+      # vertically mounted products". According to NFRC, "Ratings ... shall be converted to
+      # the 20-deg slope from the vertical position by multiplying the tested value at vertical
+      # by 1.20." Thus we divide by 1.2 to get the vertical position value.
+      ufactor /= 1.2
+    end
+    glaz_mat = GlazingMaterial.new("#{type}Material", ufactor, shgc * heat_shade_mult)
 
     # Set paths
     path_fracs = [1]
@@ -1353,7 +1248,7 @@ class Constructions
     constr.add_layer(glaz_mat)
 
     # Create and assign construction to subsurfaces
-    constr.create_and_assign_constructions(subsurfaces, model)
+    constr.create_and_assign_constructions(runner, subsurfaces, model)
   end
 end
 
@@ -1365,9 +1260,9 @@ class Construction
     @name = name
     @path_widths = path_widths
     @path_fracs = []
-    @sum_path_fracs = @path_widths.inject(:+)
+    @sum_path_fracs = @path_widths.sum(0.0)
     path_widths.each do |path_width|
-      @path_fracs << path_width / path_widths.inject { |sum, n| sum + n }
+      @path_fracs << path_width / path_widths.sum(0.0)
     end
     @layers_names = []
     @layers_materials = []
@@ -1422,11 +1317,11 @@ class Construction
 
   # Creates constructions as needed and assigns to surfaces.
   # Leave name as nil if the materials (e.g., exterior finish) apply to multiple constructions.
-  def create_and_assign_constructions(surfaces, model)
+  def create_and_assign_constructions(runner, surfaces, model)
     validate
 
     # Create list of OpenStudio materials
-    materials = construct_materials(model)
+    materials = construct_materials(runner, model)
 
     # Create OpenStudio construction and assign to surface
     constr = OpenStudio::Model::Construction.new(model)
@@ -1506,17 +1401,17 @@ class Construction
     return mat
   end
 
-  def construct_materials(model)
+  def construct_materials(runner, model)
     # Create materials
     materials = []
     @layers_materials.each_with_index do |layer_materials, layer_num|
       if layer_materials.size == 1
         next if layer_materials[0].name == Constants.AirFilm # Do not include air films in construction
 
-        mat = Construction.create_os_material(model, layer_materials[0])
+        mat = Construction.create_os_material(runner, model, layer_materials[0])
       else
         parallel_path_mat = get_parallel_material(layer_num, @layers_names[layer_num])
-        mat = Construction.create_os_material(model, parallel_path_mat)
+        mat = Construction.create_os_material(runner, model, parallel_path_mat)
       end
       materials << mat
     end
@@ -1601,7 +1496,7 @@ class Construction
   end
 
   # Creates (or returns an existing) OpenStudio Material from our own Material object
-  def self.create_os_material(model, material)
+  def self.create_os_material(runner, model, material)
     name = material.name
     tolerance = 0.0001
     if material.is_a? SimpleMaterial
@@ -1618,6 +1513,12 @@ class Construction
       mat.setRoughness('Rough')
       mat.setThermalResistance(UnitConversions.convert(material.rvalue, 'hr*ft^2*F/Btu', 'm^2*K/W'))
     elsif material.is_a? GlazingMaterial
+      max_ufactor = UnitConversions.convert(7.0, 'W/(m^2*K)', 'Btu/(hr*ft^2*F)') # Max value EnergyPlus allows
+      if material.ufactor > max_ufactor
+        runner.registerWarning("Glazing U-factor (#{material.ufactor}) for '#{material.name}' above maximum expected value. U-factor decreased to #{max_ufactor.round(2)}.")
+        material.ufactor = max_ufactor.round(2)
+      end
+
       # Material already exists?
       model.getSimpleGlazings.each do |mat|
         next if (mat.uFactor - UnitConversions.convert(material.ufactor, 'Btu/(hr*ft^2*F)', 'W/(m^2*K)')).abs > tolerance

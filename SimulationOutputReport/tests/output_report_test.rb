@@ -17,6 +17,7 @@ class SimulationOutputReportTest < MiniTest::Test
     'Propane: Total (MBtu)',
     'Wood Cord: Total (MBtu)',
     'Wood Pellets: Total (MBtu)',
+    'Coal: Total (MBtu)',
     'Electricity: Heating (MBtu)',
     'Electricity: Heating Fans/Pumps (MBtu)',
     'Electricity: Cooling (MBtu)',
@@ -30,6 +31,7 @@ class SimulationOutputReportTest < MiniTest::Test
     'Electricity: Mech Vent (MBtu)',
     'Electricity: Whole House Fan (MBtu)',
     'Electricity: Refrigerator (MBtu)',
+    'Electricity: Freezer (MBtu)',
     'Electricity: Dehumidifier (MBtu)',
     'Electricity: Dishwasher (MBtu)',
     'Electricity: Clothes Washer (MBtu)',
@@ -38,24 +40,57 @@ class SimulationOutputReportTest < MiniTest::Test
     'Electricity: Ceiling Fan (MBtu)',
     'Electricity: Television (MBtu)',
     'Electricity: Plug Loads (MBtu)',
+    'Electricity: Electric Vehicle Charging (MBtu)',
+    'Electricity: Well Pump (MBtu)',
+    'Electricity: Pool Heater (MBtu)',
+    'Electricity: Pool Pump (MBtu)',
+    'Electricity: Hot Tub Heater (MBtu)',
+    'Electricity: Hot Tub Pump (MBtu)',
     'Electricity: PV (MBtu)',
     'Natural Gas: Heating (MBtu)',
     'Natural Gas: Hot Water (MBtu)',
     'Natural Gas: Clothes Dryer (MBtu)',
     'Natural Gas: Range/Oven (MBtu)',
+    'Natural Gas: Pool Heater (MBtu)',
+    'Natural Gas: Hot Tub Heater (MBtu)',
+    'Natural Gas: Grill (MBtu)',
+    'Natural Gas: Lighting (MBtu)',
+    'Natural Gas: Fireplace (MBtu)',
     'Fuel Oil: Heating (MBtu)',
     'Fuel Oil: Hot Water (MBtu)',
     'Fuel Oil: Clothes Dryer (MBtu)',
     'Fuel Oil: Range/Oven (MBtu)',
+    'Fuel Oil: Grill (MBtu)',
+    'Fuel Oil: Lighting (MBtu)',
+    'Fuel Oil: Fireplace (MBtu)',
     'Propane: Heating (MBtu)',
     'Propane: Hot Water (MBtu)',
     'Propane: Clothes Dryer (MBtu)',
     'Propane: Range/Oven (MBtu)',
+    'Propane: Grill (MBtu)',
+    'Propane: Lighting (MBtu)',
+    'Propane: Fireplace (MBtu)',
     'Wood Cord: Heating (MBtu)',
     'Wood Cord: Hot Water (MBtu)',
     'Wood Cord: Clothes Dryer (MBtu)',
     'Wood Cord: Range/Oven (MBtu)',
+    'Wood Cord: Grill (MBtu)',
+    'Wood Cord: Lighting (MBtu)',
+    'Wood Cord: Fireplace (MBtu)',
     'Wood Pellets: Heating (MBtu)',
+    'Wood Pellets: Hot Water (MBtu)',
+    'Wood Pellets: Clothes Dryer (MBtu)',
+    'Wood Pellets: Range/Oven (MBtu)',
+    'Wood Pellets: Grill (MBtu)',
+    'Wood Pellets: Lighting (MBtu)',
+    'Wood Pellets: Fireplace (MBtu)',
+    'Coal: Heating (MBtu)',
+    'Coal: Hot Water (MBtu)',
+    'Coal: Clothes Dryer (MBtu)',
+    'Coal: Range/Oven (MBtu)',
+    'Coal: Grill (MBtu)',
+    'Coal: Lighting (MBtu)',
+    'Coal: Fireplace (MBtu)',
     'Load: Heating (MBtu)',
     'Load: Cooling (MBtu)',
     'Load: Hot Water: Delivered (MBtu)',
@@ -115,6 +150,7 @@ class SimulationOutputReportTest < MiniTest::Test
     'Propane: Total',
     'Wood Cord: Total',
     'Wood Pellets: Total',
+    'Coal: Total',
   ]
 
   TimeseriesColsEndUses = [
@@ -131,6 +167,7 @@ class SimulationOutputReportTest < MiniTest::Test
     'Electricity: Mech Vent',
     'Electricity: Whole House Fan',
     'Electricity: Refrigerator',
+    'Electricity: Freezer',
     'Electricity: Dehumidifier',
     'Electricity: Dishwasher',
     'Electricity: Clothes Washer',
@@ -139,24 +176,57 @@ class SimulationOutputReportTest < MiniTest::Test
     'Electricity: Ceiling Fan',
     'Electricity: Television',
     'Electricity: Plug Loads',
+    'Electricity: Electric Vehicle Charging',
+    'Electricity: Well Pump',
+    'Electricity: Pool Heater',
+    'Electricity: Pool Pump',
+    'Electricity: Hot Tub Heater',
+    'Electricity: Hot Tub Pump',
     'Electricity: PV',
     'Natural Gas: Heating',
     'Natural Gas: Hot Water',
     'Natural Gas: Clothes Dryer',
     'Natural Gas: Range/Oven',
+    'Natural Gas: Pool Heater',
+    'Natural Gas: Hot Tub Heater',
+    'Natural Gas: Grill',
+    'Natural Gas: Lighting',
+    'Natural Gas: Fireplace',
     'Fuel Oil: Heating',
     'Fuel Oil: Hot Water',
     'Fuel Oil: Clothes Dryer',
     'Fuel Oil: Range/Oven',
+    'Fuel Oil: Grill',
+    'Fuel Oil: Lighting',
+    'Fuel Oil: Fireplace',
     'Propane: Heating',
     'Propane: Hot Water',
     'Propane: Clothes Dryer',
     'Propane: Range/Oven',
+    'Propane: Grill',
+    'Propane: Lighting',
+    'Propane: Fireplace',
     'Wood Cord: Heating',
     'Wood Cord: Hot Water',
     'Wood Cord: Clothes Dryer',
     'Wood Cord: Range/Oven',
+    'Wood Cord: Grill',
+    'Wood Cord: Lighting',
+    'Wood Cord: Fireplace',
     'Wood Pellets: Heating',
+    'Wood Pellets: Hot Water',
+    'Wood Pellets: Clothes Dryer',
+    'Wood Pellets: Range/Oven',
+    'Wood Pellets: Grill',
+    'Wood Pellets: Lighting',
+    'Wood Pellets: Fireplace',
+    'Coal: Heating',
+    'Coal: Hot Water',
+    'Coal: Clothes Dryer',
+    'Coal: Range/Oven',
+    'Coal: Grill',
+    'Coal: Lighting',
+    'Coal: Fireplace',
   ]
 
   TimeseriesColsWaterUses = [
@@ -237,6 +307,9 @@ class SimulationOutputReportTest < MiniTest::Test
   ]
 
   ERIRows = [
+    'hpxml_heat_sys_ids',
+    'hpxml_cool_sys_ids',
+    'hpxml_dhw_sys_ids',
     'hpxml_eec_heats',
     'hpxml_eec_cools',
     'hpxml_eec_dhws',
@@ -248,6 +321,7 @@ class SimulationOutputReportTest < MiniTest::Test
     'fuelPropane',
     'fuelWoodCord',
     'fuelWoodPellets',
+    'fuelCoal',
     'enduseElectricityHeating',
     'enduseElectricityHeatingFansPumps',
     'enduseElectricityCooling',
@@ -287,6 +361,13 @@ class SimulationOutputReportTest < MiniTest::Test
     'enduseWoodCordClothesDryer',
     'enduseWoodCordRangeOven',
     'enduseWoodPelletsHeating',
+    'enduseWoodPelletsHotWater',
+    'enduseWoodPelletsClothesDryer',
+    'enduseWoodPelletsRangeOven',
+    'enduseCoalHeating',
+    'enduseCoalHotWater',
+    'enduseCoalClothesDryer',
+    'enduseCoalRangeOven',
     'loadHeating',
     'loadCooling',
     'loadHotWaterDelivered',
@@ -513,7 +594,7 @@ class SimulationOutputReportTest < MiniTest::Test
   end
 
   def test_timeseries_hourly_airflows_with_whf
-    args_hash = { 'hpxml_path' => '../workflow/sample_files/base-misc-whole-house-fan.xml',
+    args_hash = { 'hpxml_path' => '../workflow/sample_files/base-mechvent-whole-house-fan.xml',
                   'timeseries_frequency' => 'hourly',
                   'include_timeseries_fuel_consumptions' => false,
                   'include_timeseries_end_use_consumptions' => false,
@@ -614,6 +695,7 @@ class SimulationOutputReportTest < MiniTest::Test
     actual_timeseries_cols = File.readlines(timeseries_csv)[0].strip.split(',')
     assert_equal(expected_timeseries_cols.sort, actual_timeseries_cols.sort)
     assert_equal(8760, File.readlines(timeseries_csv).size - 2)
+    _check_for_zero_baseload_timeseries_value(timeseries_csv, ['Electricity: Refrigerator'])
   end
 
   def test_timeseries_daily_ALL
@@ -634,6 +716,7 @@ class SimulationOutputReportTest < MiniTest::Test
     actual_timeseries_cols = File.readlines(timeseries_csv)[0].strip.split(',')
     assert_equal(expected_timeseries_cols.sort, actual_timeseries_cols.sort)
     assert_equal(365, File.readlines(timeseries_csv).size - 2)
+    _check_for_zero_baseload_timeseries_value(timeseries_csv, ['Electricity: Refrigerator'])
   end
 
   def test_timeseries_monthly_ALL
@@ -654,6 +737,7 @@ class SimulationOutputReportTest < MiniTest::Test
     actual_timeseries_cols = File.readlines(timeseries_csv)[0].strip.split(',')
     assert_equal(expected_timeseries_cols.sort, actual_timeseries_cols.sort)
     assert_equal(12, File.readlines(timeseries_csv).size - 2)
+    _check_for_zero_baseload_timeseries_value(timeseries_csv, ['Electricity: Refrigerator'])
   end
 
   def test_timeseries_timestep_ALL_60min
@@ -674,10 +758,11 @@ class SimulationOutputReportTest < MiniTest::Test
     actual_timeseries_cols = File.readlines(timeseries_csv)[0].strip.split(',')
     assert_equal(expected_timeseries_cols.sort, actual_timeseries_cols.sort)
     assert_equal(8760, File.readlines(timeseries_csv).size - 2)
+    _check_for_zero_baseload_timeseries_value(timeseries_csv, ['Electricity: Refrigerator'])
   end
 
   def test_timeseries_timestep_ALL_10min
-    args_hash = { 'hpxml_path' => '../workflow/sample_files/base-misc-timestep-10-mins.xml',
+    args_hash = { 'hpxml_path' => '../workflow/sample_files/base-simcontrol-timestep-10-mins.xml',
                   'timeseries_frequency' => 'timestep',
                   'include_timeseries_fuel_consumptions' => true,
                   'include_timeseries_end_use_consumptions' => true,
@@ -694,10 +779,11 @@ class SimulationOutputReportTest < MiniTest::Test
     actual_timeseries_cols = File.readlines(timeseries_csv)[0].strip.split(',')
     assert_equal(expected_timeseries_cols.sort, actual_timeseries_cols.sort)
     assert_equal(52560, File.readlines(timeseries_csv).size - 2)
+    _check_for_zero_baseload_timeseries_value(timeseries_csv, ['Electricity: Refrigerator'])
   end
 
   def test_timeseries_hourly_ALL_runperiod_Jan
-    args_hash = { 'hpxml_path' => '../workflow/sample_files/base-misc-runperiod-1-month.xml',
+    args_hash = { 'hpxml_path' => '../workflow/sample_files/base-simcontrol-runperiod-1-month.xml',
                   'timeseries_frequency' => 'hourly',
                   'include_timeseries_fuel_consumptions' => true,
                   'include_timeseries_end_use_consumptions' => true,
@@ -714,10 +800,11 @@ class SimulationOutputReportTest < MiniTest::Test
     actual_timeseries_cols = File.readlines(timeseries_csv)[0].strip.split(',')
     assert_equal(expected_timeseries_cols.sort, actual_timeseries_cols.sort)
     assert_equal(31 * 24, File.readlines(timeseries_csv).size - 2)
+    _check_for_zero_baseload_timeseries_value(timeseries_csv, ['Electricity: Refrigerator'])
   end
 
   def test_timeseries_daily_ALL_runperiod_Jan
-    args_hash = { 'hpxml_path' => '../workflow/sample_files/base-misc-runperiod-1-month.xml',
+    args_hash = { 'hpxml_path' => '../workflow/sample_files/base-simcontrol-runperiod-1-month.xml',
                   'timeseries_frequency' => 'daily',
                   'include_timeseries_fuel_consumptions' => true,
                   'include_timeseries_end_use_consumptions' => true,
@@ -734,10 +821,11 @@ class SimulationOutputReportTest < MiniTest::Test
     actual_timeseries_cols = File.readlines(timeseries_csv)[0].strip.split(',')
     assert_equal(expected_timeseries_cols.sort, actual_timeseries_cols.sort)
     assert_equal(31, File.readlines(timeseries_csv).size - 2)
+    _check_for_zero_baseload_timeseries_value(timeseries_csv, ['Electricity: Refrigerator'])
   end
 
   def test_timeseries_monthly_ALL_runperiod_Jan
-    args_hash = { 'hpxml_path' => '../workflow/sample_files/base-misc-runperiod-1-month.xml',
+    args_hash = { 'hpxml_path' => '../workflow/sample_files/base-simcontrol-runperiod-1-month.xml',
                   'timeseries_frequency' => 'monthly',
                   'include_timeseries_fuel_consumptions' => true,
                   'include_timeseries_end_use_consumptions' => true,
@@ -754,10 +842,11 @@ class SimulationOutputReportTest < MiniTest::Test
     actual_timeseries_cols = File.readlines(timeseries_csv)[0].strip.split(',')
     assert_equal(expected_timeseries_cols.sort, actual_timeseries_cols.sort)
     assert_equal(1, File.readlines(timeseries_csv).size - 2)
+    _check_for_zero_baseload_timeseries_value(timeseries_csv, ['Electricity: Refrigerator'])
   end
 
   def test_timeseries_timestep_ALL_60min_runperiod_Jan
-    args_hash = { 'hpxml_path' => '../workflow/sample_files/base-misc-runperiod-1-month.xml',
+    args_hash = { 'hpxml_path' => '../workflow/sample_files/base-simcontrol-runperiod-1-month.xml',
                   'timeseries_frequency' => 'timestep',
                   'include_timeseries_fuel_consumptions' => true,
                   'include_timeseries_end_use_consumptions' => true,
@@ -774,6 +863,7 @@ class SimulationOutputReportTest < MiniTest::Test
     actual_timeseries_cols = File.readlines(timeseries_csv)[0].strip.split(',')
     assert_equal(expected_timeseries_cols.sort, actual_timeseries_cols.sort)
     assert_equal(31 * 24, File.readlines(timeseries_csv).size - 2)
+    _check_for_zero_baseload_timeseries_value(timeseries_csv, ['Electricity: Refrigerator'])
   end
 
   def test_timeseries_hourly_ALL_AMY_2012
@@ -794,6 +884,7 @@ class SimulationOutputReportTest < MiniTest::Test
     actual_timeseries_cols = File.readlines(timeseries_csv)[0].strip.split(',')
     assert_equal(expected_timeseries_cols.sort, actual_timeseries_cols.sort)
     assert_equal(8784, File.readlines(timeseries_csv).size - 2)
+    _check_for_zero_baseload_timeseries_value(timeseries_csv, ['Electricity: Refrigerator'])
   end
 
   def test_timeseries_daily_ALL_AMY_2012
@@ -814,6 +905,7 @@ class SimulationOutputReportTest < MiniTest::Test
     actual_timeseries_cols = File.readlines(timeseries_csv)[0].strip.split(',')
     assert_equal(expected_timeseries_cols.sort, actual_timeseries_cols.sort)
     assert_equal(366, File.readlines(timeseries_csv).size - 2)
+    _check_for_zero_baseload_timeseries_value(timeseries_csv, ['Electricity: Refrigerator'])
   end
 
   def test_timeseries_timestep_ALL_60min_AMY_2012
@@ -834,6 +926,7 @@ class SimulationOutputReportTest < MiniTest::Test
     actual_timeseries_cols = File.readlines(timeseries_csv)[0].strip.split(',')
     assert_equal(expected_timeseries_cols.sort, actual_timeseries_cols.sort)
     assert_equal(8784, File.readlines(timeseries_csv).size - 2)
+    _check_for_zero_baseload_timeseries_value(timeseries_csv, ['Electricity: Refrigerator'])
   end
 
   def test_eri_designs
@@ -841,6 +934,7 @@ class SimulationOutputReportTest < MiniTest::Test
     require 'fileutils'
     require_relative '../../HPXMLtoOpenStudio/resources/xmlhelper.rb'
     require_relative '../../HPXMLtoOpenStudio/resources/constants.rb'
+    require 'oga'
     old_hpxml_path = File.join(File.dirname(__FILE__), '../../workflow/sample_files/base.xml')
     [Constants.CalcTypeERIReferenceHome, Constants.CalcTypeERIReferenceHome].each do |eri_design|
       new_hpxml_path = File.join(File.dirname(__FILE__), '../../workflow/sample_files/base-eri.xml')
@@ -937,8 +1031,30 @@ class SimulationOutputReportTest < MiniTest::Test
       end
     end
     timeseries_cols.each do |col|
-      avg_value = values[col].inject(:+) / values[col].size
+      avg_value = values[col].sum(0.0) / values[col].size
       assert_operator(avg_value, :!=, 0)
+    end
+  end
+
+  def _check_for_zero_baseload_timeseries_value(timeseries_csv, timeseries_cols)
+    # check that every day has non zero values for baseload equipment (e.g., refrigerator)
+    values = {}
+    timeseries_cols.each do |col|
+      values[col] = []
+    end
+    CSV.foreach(timeseries_csv, headers: true) do |row|
+      next if row['Time'].nil?
+
+      timeseries_cols.each do |col|
+        fail "Unexpected column: #{col}." if row[col].nil?
+
+        values[col] << Float(row[col])
+      end
+    end
+
+    timeseries_cols.each do |col|
+      has_no_zero_timeseries_value = !values[col].include?(0.0)
+      assert(has_no_zero_timeseries_value)
     end
   end
 end

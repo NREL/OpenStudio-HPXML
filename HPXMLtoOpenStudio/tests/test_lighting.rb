@@ -52,7 +52,7 @@ class HPXMLtoOpenStudioLightingTest < MiniTest::Test
 
     # Check interior lighting
     int_kwh_yr = get_kwh_per_year(model, Constants.ObjectNameInteriorLighting)
-    assert_in_delta(1867, int_kwh_yr, 1.0)
+    assert_in_delta(1544, int_kwh_yr, 1.0)
 
     # Check garage lighting
     grg_kwh_yr = get_kwh_per_year(model, Constants.ObjectNameGarageLighting)
@@ -60,7 +60,25 @@ class HPXMLtoOpenStudioLightingTest < MiniTest::Test
 
     # Check exterior lighting
     ext_kwh_yr = get_kwh_per_year(model, Constants.ObjectNameExteriorLighting)
-    assert_in_delta(126, ext_kwh_yr, 1.0)
+    assert_in_delta(109, ext_kwh_yr, 1.0)
+  end
+
+  def test_exterior_holiday_lighting
+    ['base.xml',
+     'base-misc-defaults.xml',
+     'base-lighting-detailed.xml'].each do |hpxml_name|
+      args_hash = {}
+      args_hash['hpxml_path'] = File.absolute_path(File.join(sample_files_dir, hpxml_name))
+      model, hpxml = _test_measure(args_hash)
+
+      if hpxml_name == 'base-lighting-detailed.xml'
+        # Check exterior holiday lighting
+        ext_holiday_kwh_yr = get_kwh_per_year(model, Constants.ObjectNameLightingExteriorHoliday)
+        assert_in_delta(58.3, ext_holiday_kwh_yr, 1.0)
+      else
+        assert_equal(false, hpxml.lighting.holiday_exists)
+      end
+    end
   end
 
   def _test_measure(args_hash)

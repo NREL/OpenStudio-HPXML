@@ -15,13 +15,13 @@ class HPXMLTest < MiniTest::Test
   @@simulation_runtime_key = 'Simulation Runtime'
   @@workflow_runtime_key = 'Workflow Runtime'
 
-  def test_simulations
-    OpenStudio::Logger.instance.standardOutLogger.setLogLevel(OpenStudio::Error)
-    # OpenStudio::Logger.instance.standardOutLogger.setLogLevel(OpenStudio::Fatal)
+  @@os_log = OpenStudio::StringStreamLogSink.new
+  @@os_log.setLogLevel(OpenStudio::Warn)
 
+  def test_simulations
     this_dir = File.dirname(__FILE__)
     results_dir = File.join(this_dir, 'results')
-    _rm_path(results_dir)
+    rm_path(results_dir)
 
     sample_files_dir = File.absolute_path(File.join(this_dir, '..', 'sample_files'))
     autosize_dir = File.absolute_path(File.join(this_dir, '..', 'sample_files', 'hvac_autosizing'))
@@ -49,7 +49,7 @@ class HPXMLTest < MiniTest::Test
     Dir.mkdir(results_dir)
     _write_summary_results(results_dir, all_results)
     _write_hvac_sizing_results(results_dir, all_sizing_results)
-    _write_ashrae_140_results(results_dir, all_results, ashrae_140_dir)
+    _write_and_check_ashrae_140_results(results_dir, all_results, ashrae_140_dir)
   end
 
   def test_run_simulation_rb
@@ -57,13 +57,15 @@ class HPXMLTest < MiniTest::Test
     os_cli = OpenStudio.getOpenStudioCLI
     rb_path = File.join(File.dirname(__FILE__), '..', 'run_simulation.rb')
     xml = File.join(File.dirname(__FILE__), '..', 'sample_files', 'base.xml')
-    command = "#{os_cli} #{rb_path} -x #{xml} --debug"
+    command = "#{os_cli} #{rb_path} -x #{xml} --debug --hourly ALL"
     system(command, err: File::NULL)
 
     # Check for output files
     sql_path = File.join(File.dirname(xml), 'run', 'eplusout.sql')
     assert(File.exist? sql_path)
     csv_output_path = File.join(File.dirname(xml), 'run', 'results_annual.csv')
+    assert(File.exist? csv_output_path)
+    csv_output_path = File.join(File.dirname(xml), 'run', 'results_timeseries.csv')
     assert(File.exist? csv_output_path)
 
     # Check for debug files
@@ -129,20 +131,20 @@ class HPXMLTest < MiniTest::Test
     this_dir = File.dirname(__FILE__)
     sample_files_dir = File.join(this_dir, '..', 'sample_files')
 
-    expected_error_msgs = { 'appliances-location-unconditioned-space.xml' => ['Expected [1] element(s) but found 0 element(s) for xpath: /HPXML/Building/BuildingDetails/Appliances/ClothesWasher: [not(Location)] |',
-                                                                              'Expected [1] element(s) but found 0 element(s) for xpath: /HPXML/Building/BuildingDetails/Appliances/ClothesDryer: [not(Location)] |',
-                                                                              'Expected [1] element(s) but found 0 element(s) for xpath: /HPXML/Building/BuildingDetails/Appliances/Dishwasher: [not(Location)] |',
-                                                                              'Expected [1] element(s) but found 0 element(s) for xpath: /HPXML/Building/BuildingDetails/Appliances/Refrigerator: [not(Location)] |',
-                                                                              'Expected [1] element(s) but found 0 element(s) for xpath: /HPXML/Building/BuildingDetails/Appliances/CookingRange: [not(Location)] |'],
-                            'attached-multifamily-window-outside-condition.xml' => ["Window 'WindowNorth' cannot be adjacent to 'other multifamily buffer space'. Check parent wall:"],
+    expected_error_msgs = { 'appliances-location-unconditioned-space.xml' => ['Expected 1 element(s) for xpath: /HPXML/Building/BuildingDetails/Appliances/ClothesWasher: [not(Location)] |',
+                                                                              'Expected 1 element(s) for xpath: /HPXML/Building/BuildingDetails/Appliances/ClothesDryer: [not(Location)] |',
+                                                                              'Expected 1 element(s) for xpath: /HPXML/Building/BuildingDetails/Appliances/Dishwasher: [not(Location)] |',
+                                                                              'Expected 1 element(s) for xpath: /HPXML/Building/BuildingDetails/Appliances/Refrigerator: [not(Location)] |',
+                                                                              'Expected 1 element(s) for xpath: /HPXML/Building/BuildingDetails/Appliances/CookingRange: [not(Location)] |'],
                             'cfis-with-hydronic-distribution.xml' => ["Attached HVAC distribution system 'HVACDistribution' cannot be hydronic for ventilation fan 'MechanicalVentilation'."],
                             'clothes-dryer-location.xml' => ["ClothesDryer location is 'garage' but building does not have this location specified."],
                             'clothes-washer-location.xml' => ["ClothesWasher location is 'garage' but building does not have this location specified."],
+                            'coal-for-non-boiler-heating.xml' => ['Expected 1 element(s) for xpath: /HPXML/Building/BuildingDetails/Systems/HVAC/HVACPlant/HeatingSystem[HeatingSystemType/Stove]: HeatingSystemFuel[text()='], # FIXME: Allow this when E+/OS is updated
                             'cooking-range-location.xml' => ["CookingRange location is 'garage' but building does not have this location specified."],
                             'dishwasher-location.xml' => ["Dishwasher location is 'garage' but building does not have this location specified."],
                             'dhw-frac-load-served.xml' => ['Expected FractionDHWLoadServed to sum to 1, but calculated sum is 1.15.'],
                             'duct-location.xml' => ["Duct location is 'garage' but building does not have this location specified."],
-                            'duct-location-unconditioned-space.xml' => ['Expected [0, 2] element(s) but found 1 element(s) for xpath: /HPXML/Building/BuildingDetails/Systems/HVAC/HVACDistribution/DistributionSystemType/AirDistribution/Ducts[DuctType="supply" or DuctType="return"]: DuctSurfaceArea | DuctLocation[text()="living space" or text()="basement - conditioned" or text()="basement - unconditioned" or text()="crawlspace - vented" or text()="crawlspace - unvented" or text()="attic - vented" or text()="attic - unvented" or text()="garage" or text()="outside" or text()="other housing unit" or text()="other heated space" or text()="other multifamily buffer space" or text()="other non-freezing space"]'],
+                            'duct-location-unconditioned-space.xml' => ['Expected 0 or 2 element(s) for xpath: /HPXML/Building/BuildingDetails/Systems/HVAC/HVACDistribution/DistributionSystemType/AirDistribution/Ducts[DuctType="supply" or DuctType="return"]: DuctSurfaceArea | DuctLocation[text()='],
                             'duplicate-id.xml' => ["Duplicate SystemIdentifier IDs detected for 'Wall'."],
                             'enclosure-attic-missing-roof.xml' => ['There must be at least one roof adjacent to attic - unvented.'],
                             'enclosure-basement-missing-exterior-foundation-wall.xml' => ['There must be at least one exterior foundation wall adjacent to basement - unconditioned.'],
@@ -166,20 +168,32 @@ class HPXMLTest < MiniTest::Test
                             'invalid-distribution-cfa-served.xml' => ['The total conditioned floor area served by the HVAC distribution system(s) for heating is larger than the conditioned floor area of the building.',
                                                                       'The total conditioned floor area served by the HVAC distribution system(s) for cooling is larger than the conditioned floor area of the building.'],
                             'invalid-epw-filepath.xml' => ["foo.epw' could not be found."],
+                            'invalid-facility-type.xml' => ['Expected 1 element(s) for xpath: /HPXML/Building/BuildingDetails/Systems/WaterHeating/WaterHeatingSystem[IsSharedSystem="true"]: ../../../BuildingSummary/BuildingConstruction[ResidentialFacilityType[text()="single-family attached" or text()="apartment unit"]]',
+                                                            'Expected 1 element(s) for xpath: /HPXML/Building/BuildingDetails/Appliances/ClothesWasher[IsSharedAppliance="true"]: ../../BuildingSummary/BuildingConstruction[ResidentialFacilityType[text()="single-family attached" or text()="apartment unit"]]',
+                                                            'Expected 1 element(s) for xpath: /HPXML/Building/BuildingDetails/Appliances/ClothesDryer[IsSharedAppliance="true"]: ../../BuildingSummary/BuildingConstruction[ResidentialFacilityType[text()="single-family attached" or text()="apartment unit"]]',
+                                                            'Expected 1 element(s) for xpath: /HPXML/Building/BuildingDetails/Appliances/Dishwasher[IsSharedAppliance="true"]: ../../BuildingSummary/BuildingConstruction[ResidentialFacilityType[text()="single-family attached" or text()="apartment unit"]]',
+                                                            "The building is of type 'single-family detached' but the surface",
+                                                            "The building is of type 'single-family detached' but the object",
+                                                            "The building is of type 'single-family detached' but the HVAC distribution"],
                             'invalid-neighbor-shading-azimuth.xml' => ['A neighbor building has an azimuth (145) not equal to the azimuth of any wall.'],
                             'invalid-relatedhvac-dhw-indirect.xml' => ["RelatedHVACSystem 'HeatingSystem_bad' not found for water heating system 'WaterHeater'"],
                             'invalid-relatedhvac-desuperheater.xml' => ["RelatedHVACSystem 'CoolingSystem_bad' not found for water heating system 'WaterHeater'."],
                             'invalid-timestep.xml' => ['Timestep (45) must be one of: 60, 30, 20, 15, 12, 10, 6, 5, 4, 3, 2, 1.'],
-                            'invalid-runperiod.xml' => ['End Day of Month (31) must be one of: 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30.'],
+                            'invalid-runperiod.xml' => ['Run Period End Day of Month (31) must be one of: 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30.'],
                             'invalid-window-height.xml' => ["For Window 'WindowEast', overhangs distance to bottom (2.0) must be greater than distance to top (2.0)."],
                             'invalid-window-interior-shading.xml' => ["SummerShadingCoefficient (0.85) must be less than or equal to WinterShadingCoefficient (0.7) for window 'WindowNorth'."],
                             'invalid-wmo.xml' => ["Weather station WMO '999999' could not be found in"],
+                            'invalid-daylight-saving.xml' => ['Daylight Saving End Day of Month (31) must be one of: 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30.'],
                             'lighting-fractions.xml' => ['Sum of fractions of interior lighting (1.15) is greater than 1.'],
                             'mismatched-slab-and-foundation-wall.xml' => ["Foundation wall 'FoundationWall' is adjacent to 'basement - conditioned' but no corresponding slab was found adjacent to"],
-                            'missing-elements.xml' => ['Expected [1] element(s) but found 0 element(s) for xpath: /HPXML/Building/BuildingDetails/BuildingSummary/BuildingConstruction: NumberofConditionedFloors',
-                                                       'Expected [1] element(s) but found 0 element(s) for xpath: /HPXML/Building/BuildingDetails/BuildingSummary/BuildingConstruction: ConditionedFloorArea'],
-                            'missing-duct-location.xml' => ['Expected [0, 2] element(s) but found 1 element(s) for xpath: /HPXML/Building/BuildingDetails/Systems/HVAC/HVACDistribution/DistributionSystemType/AirDistribution/Ducts[DuctType="supply" or DuctType="return"]: DuctSurfaceArea | DuctLocation[text()="living space" or text()="basement - conditioned" or text()="basement - unconditioned" or text()="crawlspace - vented" or text()="crawlspace - unvented" or text()="attic - vented" or text()="attic - unvented" or text()="garage" or text()="outside" or text()="other housing unit" or text()="other heated space" or text()="other multifamily buffer space" or text()="other non-freezing space"]'],
+                            'missing-elements.xml' => ['Expected 1 element(s) for xpath: /HPXML/Building/BuildingDetails/BuildingSummary/BuildingConstruction: NumberofConditionedFloors',
+                                                       'Expected 1 element(s) for xpath: /HPXML/Building/BuildingDetails/BuildingSummary/BuildingConstruction: ConditionedFloorArea'],
+                            'missing-duct-location.xml' => ['Expected 0 or 2 element(s) for xpath: /HPXML/Building/BuildingDetails/Systems/HVAC/HVACDistribution/DistributionSystemType/AirDistribution/Ducts[DuctType="supply" or DuctType="return"]: DuctSurfaceArea | DuctLocation[text()='],
                             'missing-duct-location-and-surface-area.xml' => ['Error: The location and surface area of all ducts must be provided or blank.'],
+                            'multifamily-reference-appliance.xml' => ["The building is of type 'single-family detached' but"],
+                            'multifamily-reference-duct.xml' => ["The building is of type 'single-family detached' but"],
+                            'multifamily-reference-surface.xml' => ["The building is of type 'single-family detached' but"],
+                            'multifamily-reference-water-heater.xml' => ["The building is of type 'single-family detached' but"],
                             'net-area-negative-wall.xml' => ["Calculated a negative net surface area for surface 'Wall'."],
                             'net-area-negative-roof.xml' => ["Calculated a negative net surface area for surface 'Roof'."],
                             'orphaned-hvac-distribution.xml' => ["Distribution system 'HVACDistribution' found but no HVAC system attached to it."],
@@ -195,9 +209,13 @@ class HPXMLTest < MiniTest::Test
                             'unattached-hvac-distribution.xml' => ["Attached HVAC distribution system 'foobar' not found for HVAC system 'HeatingSystem'."],
                             'unattached-skylight.xml' => ["Attached roof 'foobar' not found for skylight 'SkylightNorth'."],
                             'unattached-solar-thermal-system.xml' => ["Attached water heating system 'foobar' not found for solar thermal system 'SolarThermalSystem'."],
+                            'unattached-shared-clothes-washer-water-heater.xml' => ["Attached water heating system 'foobar' not found for clothes washer"],
+                            'unattached-shared-dishwasher-water-heater.xml' => ["Attached water heating system 'foobar' not found for dishwasher"],
                             'unattached-window.xml' => ["Attached wall 'foobar' not found for window 'WindowNorth'."],
                             'water-heater-location.xml' => ["WaterHeatingSystem location is 'crawlspace - vented' but building does not have this location specified."],
-                            'water-heater-location-other.xml' => ['Expected [1] element(s) but found 0 element(s) for xpath: /HPXML/Building/BuildingDetails/Systems/WaterHeating/WaterHeatingSystem: [not(Location)] |'] }
+                            'water-heater-location-other.xml' => ['Expected 1 element(s) for xpath: /HPXML/Building/BuildingDetails/Systems/WaterHeating/WaterHeatingSystem: [not(Location)] |'],
+                            'refrigerators-multiple-primary.xml' => ['More than one refrigerator designated as the primary.'],
+                            'refrigerators-no-primary.xml' => ['Could not find a primary refrigerator.'] }
 
     # Test simulations
     Dir["#{sample_files_dir}/invalid_files/*.xml"].sort.each do |xml|
@@ -208,8 +226,98 @@ class HPXMLTest < MiniTest::Test
   def _run_xml(xml, this_dir, expect_error = false, expect_error_msgs = nil)
     print "Testing #{File.basename(xml)}...\n"
     rundir = File.join(this_dir, 'run')
-    _test_schema_validation(this_dir, xml) unless expect_error
-    results, sizing_results = _test_simulation(this_dir, xml, rundir, expect_error, expect_error_msgs)
+
+    measures_dir = File.join(this_dir, '..', '..')
+
+    measures = {}
+
+    # Add HPXML translator measure to workflow
+    measure_subdir = 'HPXMLtoOpenStudio'
+    args = {}
+    args['hpxml_path'] = xml
+    args['weather_dir'] = 'weather'
+    args['output_dir'] = File.absolute_path(rundir)
+    args['debug'] = true
+    update_args_hash(measures, measure_subdir, args)
+
+    # Add reporting measure to workflow
+    measure_subdir = 'SimulationOutputReport'
+    args = {}
+    args['timeseries_frequency'] = 'monthly'
+    args['include_timeseries_fuel_consumptions'] = true
+    args['include_timeseries_end_use_consumptions'] = true
+    args['include_timeseries_hot_water_uses'] = true
+    args['include_timeseries_total_loads'] = true
+    args['include_timeseries_component_loads'] = true
+    args['include_timeseries_zone_temperatures'] = true
+    args['include_timeseries_airflows'] = true
+    args['include_timeseries_weather'] = true
+    update_args_hash(measures, measure_subdir, args)
+
+    # Add output variables for combi system energy check and CFIS
+    output_vars = [['Water Heater Source Side Heat Transfer Energy', 'runperiod', '*'],
+                   ['Baseboard Total Heating Energy', 'runperiod', '*'],
+                   ['Boiler Heating Energy', 'runperiod', '*'],
+                   ['Fluid Heat Exchanger Heat Transfer Energy', 'runperiod', '*'],
+                   ['Fan Electric Power', 'runperiod', '*'],
+                   ['Fan Runtime Fraction', 'runperiod', '*'],
+                   ['Electric Equipment Electric Energy', 'runperiod', Constants.ObjectNameMechanicalVentilationHouseFanCFIS],
+                   ['Boiler Part Load Ratio', 'runperiod', Constants.ObjectNameBoiler],
+                   ['Pump Electric Power', 'runperiod', Constants.ObjectNameBoiler + ' hydronic pump'],
+                   ['Unitary System Part Load Ratio', 'runperiod', Constants.ObjectNameGroundSourceHeatPump + ' unitary system'],
+                   ['Pump Electric Power', 'runperiod', Constants.ObjectNameGroundSourceHeatPump + ' pump']]
+
+    # Run workflow
+    workflow_start = Time.now
+    results = run_hpxml_workflow(rundir, xml, measures, measures_dir,
+                                 debug: true, output_vars: output_vars,
+                                 run_measures_only: expect_error)
+    workflow_time = (Time.now - workflow_start).round(1)
+    success = results[:success]
+    runner = results[:runner]
+    sim_time = results[:sim_time]
+    puts "Completed in #{workflow_time} seconds."
+    puts
+
+    # Check results
+    if expect_error
+      assert_equal(false, success)
+
+      if expect_error_msgs.nil?
+        flunk "No error message defined for #{File.basename(xml)}."
+      else
+        run_log = File.readlines(File.join(rundir, 'run.log')).map(&:strip)
+        expect_error_msgs.each do |error_msg|
+          found_error_msg = false
+          run_log.each do |run_line|
+            next unless run_line.include? error_msg
+
+            found_error_msg = true
+            break
+          end
+          assert(found_error_msg)
+        end
+      end
+
+      return
+    end
+
+    show_output(runner.result) unless success
+    assert_equal(true, success)
+
+    # Check for output files
+    annual_csv_path = File.join(rundir, 'results_annual.csv')
+    timeseries_csv_path = File.join(rundir, 'results_timeseries.csv')
+    assert(File.exist? annual_csv_path)
+    assert(File.exist? timeseries_csv_path)
+
+    # Get results
+    results = _get_results(rundir, sim_time, workflow_time, annual_csv_path, xml)
+    sizing_results = _get_sizing_results(rundir)
+
+    # Check outputs
+    _verify_outputs(runner, rundir, xml, results)
+
     return results, sizing_results
   end
 
@@ -224,11 +332,6 @@ class HPXMLTest < MiniTest::Test
 
     sql_path = File.join(rundir, 'eplusout.sql')
     sqlFile = OpenStudio::SqlFile.new(sql_path, false)
-
-    # Obtain hot water use
-    # TODO: Add to reporting measure?
-    query = "SELECT SUM(VariableValue) FROM ReportVariableData WHERE ReportVariableDataDictionaryIndex IN (SELECT ReportVariableDataDictionaryIndex FROM ReportVariableDataDictionary WHERE VariableName='Water Use Equipment Hot Water Volume' AND VariableUnits='m3' AND ReportingFrequency='Run Period')"
-    results['Volume: Hot Water (gal)'] = UnitConversions.convert(sqlFile.execAndReturnFirstDouble(query).get, 'm^3', 'gal').round(2)
 
     # Obtain HVAC capacities
     # TODO: Add to reporting measure?
@@ -258,8 +361,8 @@ class HPXMLTest < MiniTest::Test
 
     # Check discrepancy between total load and sum of component loads
     if not xml.include? 'ASHRAE_Standard_140'
-      sum_component_htg_loads = results.select { |k, v| k.start_with? 'Component Load: Heating:' }.map { |k, v| v }.inject(0, :+)
-      sum_component_clg_loads = results.select { |k, v| k.start_with? 'Component Load: Cooling:' }.map { |k, v| v }.inject(0, :+)
+      sum_component_htg_loads = results.select { |k, v| k.start_with? 'Component Load: Heating:' }.map { |k, v| v }.sum(0.0)
+      sum_component_clg_loads = results.select { |k, v| k.start_with? 'Component Load: Cooling:' }.map { |k, v| v }.sum(0.0)
       residual_htg_load = results['Load: Heating (MBtu)'] - sum_component_htg_loads
       residual_clg_load = results['Load: Cooling (MBtu)'] - sum_component_clg_loads
       assert_operator(residual_htg_load.abs, :<, 0.5)
@@ -272,247 +375,160 @@ class HPXMLTest < MiniTest::Test
     return results
   end
 
-  def _test_simulation(this_dir, xml, rundir, expect_error, expect_error_msgs)
-    # Uses meta_measure workflow for faster simulations
-    # TODO: Merge code with workflow/run_simulation.rb
-
-    # Setup
-    _rm_path(rundir)
-    Dir.mkdir(rundir)
-
-    workflow_start = Time.now
-    model = OpenStudio::Model::Model.new
-    runner = OpenStudio::Measure::OSRunner.new(OpenStudio::WorkflowJSON.new)
-    measures_dir = File.join(this_dir, '..', '..')
-
-    measures = {}
-
-    # Add HPXML translator measure to workflow
-    measure_subdir = 'HPXMLtoOpenStudio'
-    args = {}
-    args['hpxml_path'] = xml
-    if xml.include? 'ASHRAE_Standard_140'
-      args['weather_dir'] = File.join(File.dirname(xml), 'weather')
-    else
-      args['weather_dir'] = 'weather'
-    end
-    args['output_dir'] = File.absolute_path(rundir)
-    args['debug'] = true
-    update_args_hash(measures, measure_subdir, args)
-
-    # Add reporting measure to workflow
-    measure_subdir = 'SimulationOutputReport'
-    args = {}
-    args['timeseries_frequency'] = 'hourly'
-    args['include_timeseries_fuel_consumptions'] = true
-    args['include_timeseries_end_use_consumptions'] = false
-    args['include_timeseries_hot_water_uses'] = false
-    args['include_timeseries_total_loads'] = false
-    args['include_timeseries_component_loads'] = false
-    args['include_timeseries_zone_temperatures'] = false
-    args['include_timeseries_airflows'] = false
-    args['include_timeseries_weather'] = false
-    update_args_hash(measures, measure_subdir, args)
-
-    # Apply measure
-    success = apply_measures(measures_dir, measures, runner, model)
-
-    # Report warnings/errors
-    File.open(File.join(rundir, 'run.log'), 'w') do |f|
-      runner.result.stepWarnings.each do |s|
-        f << "Warning: #{s}\n"
-      end
-      runner.result.stepErrors.each do |s|
-        f << "Error: #{s}\n"
-      end
-    end
-
-    if expect_error
-      assert_equal(false, success)
-
-      if expect_error_msgs.nil?
-        flunk "No error message defined for #{File.basename(xml)}."
-      else
-        run_log = File.readlines(File.join(rundir, 'run.log')).map(&:strip)
-        expect_error_msgs.each do |error_msg|
-          found_error_msg = false
-          run_log.each do |run_line|
-            next unless run_line.include? error_msg
-
-            found_error_msg = true
-            break
-          end
-          assert(found_error_msg)
-        end
-      end
-
-      return
-    else
-      show_output(runner.result) unless success
-      assert_equal(true, success)
-    end
-
-    # Add output variables for crankcase and defrost energy
-    vars = ['Cooling Coil Crankcase Heater Electric Energy',
-            'Heating Coil Crankcase Heater Electric Energy',
-            'Heating Coil Defrost Electric Energy']
-    vars.each do |var|
-      output_var = OpenStudio::Model::OutputVariable.new(var, model)
-      output_var.setReportingFrequency('runperiod')
-      output_var.setKeyValue('*')
-    end
-
-    # Add output variables for CFIS tests
-    if xml.include? 'cfis'
-      infil_program = nil
-      model.getEnergyManagementSystemPrograms.each do |ems_program|
-        next unless ems_program.name.to_s.start_with? Constants.ObjectNameInfiltration
-
-        infil_program = ems_program
-      end
-
-      ems_output_var = OpenStudio::Model::EnergyManagementSystemOutputVariable.new(model, 'CFIS_fan_w')
-      ems_output_var.setName("#{Constants.ObjectNameMechanicalVentilation} cfis fan power".gsub(' ', '_'))
-      ems_output_var.setTypeOfDataInVariable('Averaged')
-      ems_output_var.setUpdateFrequency('ZoneTimestep')
-      ems_output_var.setEMSProgramOrSubroutineName(infil_program)
-      ems_output_var.setUnits('W')
-
-      @cfis_fan_power_output_var = OpenStudio::Model::OutputVariable.new(ems_output_var.name.to_s, model)
-      @cfis_fan_power_output_var.setReportingFrequency('runperiod')
-      @cfis_fan_power_output_var.setKeyValue('EMS')
-
-      ems_output_var = OpenStudio::Model::EnergyManagementSystemOutputVariable.new(model, 'QWHV')
-      ems_output_var.setName("#{Constants.ObjectNameMechanicalVentilation} cfis flow rate".gsub(' ', '_'))
-      ems_output_var.setTypeOfDataInVariable('Averaged')
-      ems_output_var.setUpdateFrequency('ZoneTimestep')
-      ems_output_var.setEMSProgramOrSubroutineName(infil_program)
-      ems_output_var.setUnits('m3/s')
-
-      @cfis_flow_rate_output_var = OpenStudio::Model::OutputVariable.new(ems_output_var.name.to_s, model)
-      @cfis_flow_rate_output_var.setReportingFrequency('runperiod')
-      @cfis_flow_rate_output_var.setKeyValue('EMS')
-    end
-
-    # Add output variables for hot water volume
-    output_var = OpenStudio::Model::OutputVariable.new('Water Use Equipment Hot Water Volume', model)
-    output_var.setReportingFrequency('runperiod')
-    output_var.setKeyValue('*')
-
-    # Add output variables for combi system energy check
-    output_var = OpenStudio::Model::OutputVariable.new('Water Heater Source Side Heat Transfer Energy', model)
-    output_var.setReportingFrequency('runperiod')
-    output_var.setKeyValue('*')
-    output_var = OpenStudio::Model::OutputVariable.new('Baseboard Total Heating Energy', model)
-    output_var.setReportingFrequency('runperiod')
-    output_var.setKeyValue('*')
-    output_var = OpenStudio::Model::OutputVariable.new('Boiler Heating Energy', model) # This is needed for energy checking if there's boiler not connected to combi systems.
-    output_var.setReportingFrequency('runperiod')
-    output_var.setKeyValue('*')
-    model.getHeatExchangerFluidToFluids.each do |hx|
-      output_var = OpenStudio::Model::OutputVariable.new('Fluid Heat Exchanger Heat Transfer Energy', model)
-      output_var.setReportingFrequency('runperiod')
-      output_var.setKeyValue(hx.name.to_s)
-    end
-
-    # Translate model to IDF
-    forward_translator = OpenStudio::EnergyPlus::ForwardTranslator.new
-    forward_translator.setExcludeLCCObjects(true)
-    model_idf = forward_translator.translateModel(model)
-
-    # Apply reporting measure output requests
-    apply_energyplus_output_requests(measures_dir, measures, runner, model, model_idf)
-
-    # Write IDF to file
-    File.open(File.join(rundir, 'in.idf'), 'w') { |f| f << model_idf.to_s }
-
-    # Run EnergyPlus
-    # getEnergyPlusDirectory can be unreliable, using getOpenStudioCLI instead
-    ep_path = File.absolute_path(File.join(OpenStudio.getOpenStudioCLI.to_s, '..', '..', 'EnergyPlus', 'energyplus'))
-    command = "cd #{rundir} && #{ep_path} -w in.epw in.idf > stdout-energyplus"
-    simulation_start = Time.now
-    system(command, err: File::NULL)
-    sim_time = (Time.now - simulation_start).round(1)
-    workflow_time = (Time.now - workflow_start).round(1)
-    puts "Completed #{File.basename(xml)} simulation in #{sim_time}, workflow in #{workflow_time}s."
-
-    # Apply reporting measures
-    runner.setLastEnergyPlusSqlFilePath(File.join(rundir, 'eplusout.sql'))
-    success = apply_measures(measures_dir, measures, runner, model, true, 'OpenStudio::Measure::ReportingMeasure')
-    runner.resetLastEnergyPlusSqlFilePath
-
-    # Report warnings/errors
-    File.open(File.join(rundir, 'run.log'), 'a') do |f|
-      runner.result.stepWarnings.each do |s|
-        f << "Warning: #{s}\n"
-      end
-      runner.result.stepErrors.each do |s|
-        f << "Error: #{s}\n"
-      end
-    end
-
-    show_output(runner.result) unless success
-    assert_equal(true, success)
-
-    annual_csv_path = File.join(rundir, 'results_annual.csv')
-    timeseries_csv_path = File.join(rundir, 'results_timeseries.csv')
-    assert(File.exist? annual_csv_path)
-    assert(File.exist? timeseries_csv_path)
-
-    results = _get_results(rundir, sim_time, workflow_time, annual_csv_path, xml)
-
-    # Verify simulation outputs
-    _verify_simulation_outputs(runner, rundir, xml, results)
-
-    # Get HVAC sizing outputs
-    sizing_results = _get_sizing_results(runner)
-
-    return results, sizing_results
-  end
-
-  def _get_sizing_results(runner)
+  def _get_sizing_results(rundir)
     results = {}
-    runner.result.stepInfo.each do |s_info|
-      s_info.split("\n").each do |s|
-        next unless s.start_with?('Heat ') || s.start_with?('Cool ')
-        next unless s.include? '='
+    File.readlines(File.join(rundir, 'run.log')).each do |s|
+      next unless s.start_with?('Heat ') || s.start_with?('Cool ')
+      next unless s.include? '='
 
-        vals = s.split('=')
-        prop = vals[0].strip
-        vals = vals[1].split(' ')
-        value = Float(vals[0].strip)
-        prop += " [#{vals[1].strip}]" # add units
-        results[prop] = 0.0 if results[prop].nil?
-        results[prop] += value
-      end
+      vals = s.split('=')
+      prop = vals[0].strip
+      vals = vals[1].split(' ')
+      value = Float(vals[0].strip)
+      prop += " [#{vals[1].strip}]" # add units
+      results[prop] = 0.0 if results[prop].nil?
+      results[prop] += value
     end
     assert(!results.empty?)
     return results
   end
 
-  def _verify_simulation_outputs(runner, rundir, hpxml_path, results)
-    # Check that eplusout.err has no lines that include "Blank Schedule Type Limits Name input"
-    # Check that eplusout.err has no lines that include "FixViewFactors: View factors not complete"
-    File.readlines(File.join(rundir, 'eplusout.err')).each do |err_line|
-      next if err_line.include? 'Schedule:Constant="ALWAYS ON CONTINUOUS", Blank Schedule Type Limits Name input'
-      next if err_line.include? 'Schedule:Constant="ALWAYS OFF DISCRETE", Blank Schedule Type Limits Name input'
-
-      assert_equal(err_line.include?('Blank Schedule Type Limits Name input'), false)
-      assert_equal(err_line.include?('FixViewFactors: View factors not complete'), false)
-    end
-
+  def _verify_outputs(runner, rundir, hpxml_path, results)
     sql_path = File.join(rundir, 'eplusout.sql')
     assert(File.exist? sql_path)
 
     sqlFile = OpenStudio::SqlFile.new(sql_path, false)
     hpxml_defaults_path = File.join(rundir, 'in.xml')
     hpxml = HPXML.new(hpxml_path: hpxml_defaults_path)
+    HVAC.apply_shared_systems(hpxml)
 
     # Collapse windows further using same logic as measure.rb
     hpxml.windows.each do |window|
       window.fraction_operable = nil
     end
     hpxml.collapse_enclosure_surfaces()
+
+    # Check run.log warnings
+    File.readlines(File.join(rundir, 'run.log')).each do |log_line|
+      next if log_line.strip.empty?
+      next if log_line.include? 'Warning: Could not load nokogiri, no HPXML validation performed.'
+      next if log_line.start_with? 'Info: '
+      next if log_line.start_with? 'Executing command'
+      next if (log_line.start_with?('Heat ') || log_line.start_with?('Cool ')) && log_line.include?('=')
+      next if log_line.include? "-cache.csv' could not be found; regenerating it."
+      next if log_line.include?('Warning: HVACDistribution') && log_line.include?('has ducts entirely within conditioned space but there is non-zero leakage to the outside.')
+
+      if hpxml.clothes_washers.empty?
+        next if log_line.include? 'No clothes washer specified, the model will not include clothes washer energy use.'
+      end
+      if hpxml.clothes_dryers.empty?
+        next if log_line.include? 'No clothes dryer specified, the model will not include clothes dryer energy use.'
+      end
+      if hpxml.dishwashers.empty?
+        next if log_line.include? 'No dishwasher specified, the model will not include dishwasher energy use.'
+      end
+      if hpxml.refrigerators.empty?
+        next if log_line.include? 'No refrigerator specified, the model will not include refrigerator energy use.'
+      end
+      if hpxml.cooking_ranges.empty?
+        next if log_line.include? 'No cooking range specified, the model will not include cooking range/oven energy use.'
+      end
+      if hpxml.water_heating_systems.empty?
+        next if log_line.include? 'No water heater specified, the model will not include water heating energy use.'
+      end
+      if (hpxml.heating_systems + hpxml.heat_pumps).select { |h| h.fraction_heat_load_served.to_f > 0 }.empty?
+        next if log_line.include? 'No heating system specified, the model will not include space heating energy use.'
+      end
+      if (hpxml.cooling_systems + hpxml.heat_pumps).select { |c| c.fraction_cool_load_served.to_f > 0 }.empty?
+        next if log_line.include? 'No cooling system specified, the model will not include space cooling energy use.'
+      end
+      if hpxml.plug_loads.select { |p| p.plug_load_type == HPXML::PlugLoadTypeOther }.empty?
+        next if log_line.include? "No '#{HPXML::PlugLoadTypeOther}' plug loads specified, the model will not include misc plug load energy use."
+      end
+      if hpxml.plug_loads.select { |p| p.plug_load_type == HPXML::PlugLoadTypeTelevision }.empty?
+        next if log_line.include? "No '#{HPXML::PlugLoadTypeTelevision}' plug loads specified, the model will not include television plug load energy use."
+      end
+      if hpxml.lighting_groups.empty?
+        next if log_line.include? 'No lighting specified, the model will not include lighting energy use.'
+      end
+
+      flunk "Unexpected warning found in run.log: #{log_line}"
+    end
+
+    # Check for unexpected warnings
+    File.readlines(File.join(rundir, 'eplusout.err')).each do |err_line|
+      next unless err_line.include? '** Warning **'
+
+      # General
+      next if err_line.include? 'Schedule:Constant="ALWAYS ON CONTINUOUS", Blank Schedule Type Limits Name input'
+      next if err_line.include? 'Schedule:Constant="ALWAYS OFF DISCRETE", Blank Schedule Type Limits Name input'
+      next if err_line.include? 'Output:Meter: invalid Key Name'
+      next if err_line.include? 'Entered Zone Volumes differ from calculated zone volume'
+      next if err_line.include?('CalculateZoneVolume') && err_line.include?('not fully enclosed')
+      next if err_line.include?('GetInputViewFactors') && err_line.include?('not enough values')
+      next if err_line.include? 'Pump nominal power or motor efficiency is set to 0'
+      next if err_line.include? 'volume flow rate per watt of rated total cooling capacity is out of range'
+      next if err_line.include? 'volume flow rate per watt of rated total heating capacity is out of range'
+      next if err_line.include? 'The following Report Variables were requested but not generated'
+      next if err_line.include? 'Timestep: Requested number'
+      next if err_line.include? 'The Standard Ratings is calculated for'
+      next if err_line.include?('CheckUsedConstructions') && err_line.include?('nominally unused constructions')
+      next if err_line.include?('WetBulb not converged after') && err_line.include?('iterations(PsyTwbFnTdbWPb)')
+      next if err_line.include? 'Inside surface heat balance did not converge with Max Temp Difference'
+
+      # HPWHs
+      if hpxml.water_heating_systems.select { |wh| wh.water_heater_type == HPXML::WaterHeaterTypeHeatPump }.size > 0
+        next if err_line.include? 'Recovery Efficiency and Energy Factor could not be calculated during the test for standard ratings'
+        next if err_line.include? 'SimHVAC: Maximum iterations (20) exceeded for all HVAC loops'
+      end
+      # HP defrost curves
+      if hpxml.heat_pumps.select { |hp| [HPXML::HVACTypeHeatPumpAirToAir, HPXML::HVACTypeHeatPumpMiniSplit].include? hp.heat_pump_type }.size > 0
+        next if err_line.include?('GetDXCoils: Coil:Heating:DX') && err_line.include?('curve values')
+      end
+      # FUTURE: Remove when https://github.com/NREL/EnergyPlus/pull/8073 is available
+      if hpxml_path.include? 'ASHRAE_Standard_140'
+        next if err_line.include?('SurfaceProperty:ExposedFoundationPerimeter') && err_line.include?('Total Exposed Perimeter is greater than the perimeter')
+      end
+      # FUTURE: Remove when https://github.com/NREL/EnergyPlus/issues/8163 is addressed
+      if (hpxml.solar_thermal_systems.size > 0) || (hpxml.water_heating_systems.select { |wh| wh.water_heater_type == HPXML::WaterHeaterTypeHeatPump }.size > 0)
+        next if err_line.include? 'More Additional Loss Coefficients were entered than the number of nodes; extra coefficients will not be used'
+      end
+      if hpxml_path.include?('base-dhw-tank-heat-pump-outside.xml') || hpxml_path.include?('base-hvac-flowrate.xml')
+        next if err_line.include? 'Full load outlet air dry-bulb temperature < 2C. This indicates the possibility of coil frost/freeze.'
+        next if err_line.include? 'Full load outlet temperature indicates a possibility of frost/freeze error continues.'
+      end
+      next if err_line.include? 'Missing temperature setpoint for LeavingSetpointModulated mode' # These warnings are fine, simulation continues with assigning plant loop setpoint to boiler, which is the expected one
+
+      if hpxml.cooling_systems.select { |c| c.cooling_system_type == HPXML::HVACTypeEvaporativeCooler }.size > 0
+        # Evap cooler model is not really using Controller:MechanicalVentilation object, so these warnings of ignoring some features are fine.
+        # OS requires a Controller:MechanicalVentilation to be attached to the oa controller, however it's not required by E+.
+        # Manually removing Controller:MechanicalVentilation from idf eliminates these two warnings.
+        # FUTURE: Can we update OS to allow removing it?
+        next if err_line.include?('Zone') && err_line.include?('is not accounted for by Controller:MechanicalVentilation object')
+        next if err_line.include?('PEOPLE object for zone') && err_line.include?('is not accounted for by Controller:MechanicalVentilation object')
+        # "The only valid controller type for an AirLoopHVAC is Controller:WaterCoil.", evap cooler doesn't need one.
+        next if err_line.include?('GetAirPathData: AirLoopHVAC') && err_line.include?('has no Controllers')
+        # input "Autosize" for Fixed Minimum Air Flow Rate is added by OS translation, now set it to 0 to skip potential sizing process, though no way to prevent this warning.
+        next if err_line.include? 'Since Zone Minimum Air Flow Input Method = CONSTANT, input for Fixed Minimum Air Flow Rate will be ignored'
+      end
+      next if err_line.include?('Glycol: Temperature') && err_line.include?('out of range (too low) for fluid')
+      next if err_line.include?('Glycol: Temperature') && err_line.include?('out of range (too high) for fluid')
+      next if err_line.include? 'Plant loop exceeding upper temperature limit'
+
+      if hpxml.cooling_systems.select { |c| c.cooling_system_type == HPXML::HVACTypeRoomAirConditioner }.size > 0
+        next if err_line.include? 'GetDXCoils: Coil:Cooling:DX:SingleSpeed="ROOM AC CLG COIL" curve values' # TODO: Double-check curves
+      end
+      next if err_line.include?('Foundation:Kiva') && err_line.include?('wall surfaces with more than four vertices') # TODO: Check alternative approach
+
+      if hpxml_path.include?('base-simcontrol-timestep-10-mins.xml') || hpxml_path.include?('ASHRAE_Standard_140')
+        next if err_line.include? 'Temperature out of range [-100. to 200.] (PsyPsatFnTemp)'
+      end
+      if hpxml_path.include? 'fan-coil' # Warning for unused coil
+        next if err_line.include? 'In calculating the design coil UA for Coil:Cooling:Water'
+      end
+
+      flunk "Unexpected warning found: #{err_line}"
+    end
 
     # Timestep
     timestep = hpxml.header.timestep
@@ -524,14 +540,7 @@ class HPXMLTest < MiniTest::Test
     assert_equal(60 / timestep, sql_value)
 
     # Conditioned Floor Area
-    sum_hvac_load_frac = 0.0
-    (hpxml.heating_systems + hpxml.heat_pumps).each do |heating_system|
-      sum_hvac_load_frac += heating_system.fraction_heat_load_served.to_f
-    end
-    (hpxml.cooling_systems + hpxml.heat_pumps).each do |cooling_system|
-      sum_hvac_load_frac += cooling_system.fraction_cool_load_served.to_f
-    end
-    if sum_hvac_load_frac > 0 # EnergyPlus will only report conditioned floor area if there is an HVAC system
+    if (hpxml.total_fraction_cool_load_served > 0) || (hpxml.total_fraction_heat_load_served > 0) # EnergyPlus will only report conditioned floor area if there is an HVAC system
       hpxml_value = hpxml.building_construction.conditioned_floor_area
       query = "SELECT Value FROM TabularDataWithStrings WHERE ReportName='InputVerificationandResultsSummary' AND ReportForString='Entire Facility' AND TableName='Zone Summary' AND RowName='Conditioned Total' AND ColumnName='Area' AND Units='m2'"
       sql_value = UnitConversions.convert(sqlFile.execAndReturnFirstDouble(query).get, 'm^2', 'ft^2')
@@ -547,7 +556,15 @@ class HPXMLTest < MiniTest::Test
 
       # R-value
       hpxml_value = roof.insulation_assembly_r_value
-      query = "SELECT AVG(Value) FROM TabularDataWithStrings WHERE ReportName='EnvelopeSummary' AND ReportForString='Entire Facility' AND TableName='Opaque Exterior' AND (RowName='#{roof_id}' OR RowName LIKE '#{roof_id}:%') AND ColumnName='U-Factor with Film' AND Units='W/m2-K'"
+      if hpxml_path.include? 'ASHRAE_Standard_140'
+        # Compare R-value w/o film
+        hpxml_value -= Material.AirFilmRoofASHRAE140.rvalue
+        hpxml_value -= Material.AirFilmOutsideASHRAE140.rvalue
+        query = "SELECT AVG(Value) FROM TabularDataWithStrings WHERE ReportName='EnvelopeSummary' AND ReportForString='Entire Facility' AND TableName='Opaque Exterior' AND (RowName='#{roof_id}' OR RowName LIKE '#{roof_id}:%') AND ColumnName='U-Factor no Film' AND Units='W/m2-K'"
+      else
+        # Compare R-value w/ film
+        query = "SELECT AVG(Value) FROM TabularDataWithStrings WHERE ReportName='EnvelopeSummary' AND ReportForString='Entire Facility' AND TableName='Opaque Exterior' AND (RowName='#{roof_id}' OR RowName LIKE '#{roof_id}:%') AND ColumnName='U-Factor with Film' AND Units='W/m2-K'"
+      end
       sql_value = 1.0 / UnitConversions.convert(sqlFile.execAndReturnFirstDouble(query).get, 'W/(m^2*K)', 'Btu/(hr*ft^2*F)')
       assert_in_epsilon(hpxml_value, sql_value, 0.1) # TODO: Higher due to outside air film?
 
@@ -605,7 +622,9 @@ class HPXMLTest < MiniTest::Test
                                     'base-enclosure-other-non-freezing-space.xml' => 0, # no foundation in contact w/ ground
                                     'base-enclosure-other-multifamily-buffer-space.xml' => 0, # no foundation in contact w/ ground
                                     'base-foundation-walkout-basement.xml' => 4, # 3 foundation walls plus a no-wall exposed perimeter
-                                    'base-foundation-complex.xml' => 10 }
+                                    'base-foundation-complex.xml' => 10,
+                                    'base-misc-loads-large-uncommon.xml' => 2,
+                                    'base-misc-loads-large-uncommon2.xml' => 2 }
 
     if hpxml_path.include? 'ASHRAE_Standard_140'
       # nop
@@ -644,7 +663,15 @@ class HPXMLTest < MiniTest::Test
       # R-value
       if (not wall.insulation_assembly_r_value.nil?) && (not hpxml_path.include? 'base-foundation-unconditioned-basement-assembly-r.xml') # This file uses Foundation:Kiva for insulation, so skip it
         hpxml_value = wall.insulation_assembly_r_value
-        query = "SELECT AVG(Value) FROM TabularDataWithStrings WHERE ReportName='EnvelopeSummary' AND ReportForString='Entire Facility' AND TableName='Opaque Exterior' AND (RowName='#{wall_id}' OR RowName LIKE '#{wall_id}:%') AND ColumnName='U-Factor with Film' AND Units='W/m2-K'"
+        if hpxml_path.include? 'ASHRAE_Standard_140'
+          # Compare R-value w/o film
+          hpxml_value -= Material.AirFilmVerticalASHRAE140.rvalue
+          hpxml_value -= Material.AirFilmOutsideASHRAE140.rvalue
+          query = "SELECT AVG(Value) FROM TabularDataWithStrings WHERE ReportName='EnvelopeSummary' AND ReportForString='Entire Facility' AND TableName='Opaque Exterior' AND (RowName='#{wall_id}' OR RowName LIKE '#{wall_id}:%') AND ColumnName='U-Factor no Film' AND Units='W/m2-K'"
+        else
+          # Compare R-value w/ film
+          query = "SELECT AVG(Value) FROM TabularDataWithStrings WHERE ReportName='EnvelopeSummary' AND ReportForString='Entire Facility' AND TableName='Opaque Exterior' AND (RowName='#{wall_id}' OR RowName LIKE '#{wall_id}:%') AND ColumnName='U-Factor with Film' AND Units='W/m2-K'"
+        end
         sql_value = 1.0 / UnitConversions.convert(sqlFile.execAndReturnFirstDouble(query).get, 'W/(m^2*K)', 'Btu/(hr*ft^2*F)')
         assert_in_epsilon(hpxml_value, sql_value, 0.03)
       end
@@ -714,7 +741,20 @@ class HPXMLTest < MiniTest::Test
 
       # R-value
       hpxml_value = frame_floor.insulation_assembly_r_value
-      query = "SELECT AVG(Value) FROM TabularDataWithStrings WHERE ReportName='EnvelopeSummary' AND ReportForString='Entire Facility' AND TableName='Opaque Exterior' AND RowName='#{frame_floor_id}' AND ColumnName='U-Factor with Film' AND Units='W/m2-K'"
+      if hpxml_path.include? 'ASHRAE_Standard_140'
+        # Compare R-value w/o film
+        if frame_floor.is_exterior # Raised floor
+          hpxml_value -= Material.AirFilmFloorASHRAE140.rvalue
+          hpxml_value -= Material.AirFilmFloorZeroWindASHRAE140.rvalue
+        elsif frame_floor.is_ceiling # Attic floor
+          hpxml_value -= Material.AirFilmFloorASHRAE140.rvalue
+          hpxml_value -= Material.AirFilmFloorASHRAE140.rvalue
+        end
+        query = "SELECT AVG(Value) FROM TabularDataWithStrings WHERE ReportName='EnvelopeSummary' AND ReportForString='Entire Facility' AND TableName='Opaque Exterior' AND RowName='#{frame_floor_id}' AND ColumnName='U-Factor no Film' AND Units='W/m2-K'"
+      else
+        # Compare R-value w/ film
+        query = "SELECT AVG(Value) FROM TabularDataWithStrings WHERE ReportName='EnvelopeSummary' AND ReportForString='Entire Facility' AND TableName='Opaque Exterior' AND RowName='#{frame_floor_id}' AND ColumnName='U-Factor with Film' AND Units='W/m2-K'"
+      end
       sql_value = 1.0 / UnitConversions.convert(sqlFile.execAndReturnFirstDouble(query).get, 'W/(m^2*K)', 'Btu/(hr*ft^2*F)')
       assert_in_epsilon(hpxml_value, sql_value, 0.03)
 
@@ -738,6 +778,8 @@ class HPXMLTest < MiniTest::Test
 
     # Enclosure Windows/Skylights
     (hpxml.windows + hpxml.skylights).each do |subsurface|
+      next unless subsurface.is_exterior
+
       subsurface_id = subsurface.id.upcase
 
       # Area
@@ -751,6 +793,9 @@ class HPXMLTest < MiniTest::Test
       hpxml_value = subsurface.ufactor
       query = "SELECT Value FROM TabularDataWithStrings WHERE ReportName='EnvelopeSummary' AND ReportForString='Entire Facility' AND TableName='Exterior Fenestration' AND RowName='#{subsurface_id}' AND ColumnName='Glass U-Factor' AND Units='W/m2-K'"
       sql_value = UnitConversions.convert(sqlFile.execAndReturnFirstDouble(query).get, 'W/(m^2*K)', 'Btu/(hr*ft^2*F)')
+      if subsurface.is_a? HPXML::Skylight
+        sql_value *= 1.2 # Convert back from vertical position to NFRC 20-degree slope
+      end
       assert_in_epsilon(hpxml_value, sql_value, 0.02)
 
       # SHGC
@@ -784,10 +829,9 @@ class HPXMLTest < MiniTest::Test
 
     # Enclosure Doors
     hpxml.doors.each do |door|
-      door_id = door.id.upcase
-
-      # only outdoor doors will appear on the exterior door table
       next unless door.wall.is_exterior
+
+      door_id = door.id.upcase
 
       # Area
       if not door.area.nil?
@@ -812,9 +856,8 @@ class HPXMLTest < MiniTest::Test
     hpxml.heating_systems.each do |heating_system|
       htg_sys_type = heating_system.heating_system_type
       htg_sys_fuel = heating_system.heating_system_fuel
-      htg_load_frac = heating_system.fraction_heat_load_served
 
-      next unless htg_load_frac > 0
+      next unless heating_system.fraction_heat_load_served > 0
 
       # Electric Auxiliary Energy
       # For now, skip if multiple equipment
@@ -825,32 +868,48 @@ class HPXMLTest < MiniTest::Test
       else
         furnace_capacity_kbtuh = nil
         if htg_sys_type == HPXML::HVACTypeFurnace
-          query = "SELECT Value FROM TabularDataWithStrings WHERE ReportName='EquipmentSummary' AND ReportForString='Entire Facility' AND TableName='Heating Coils' AND RowName LIKE '%#{Constants.ObjectNameFurnace.upcase}%' AND ColumnName='Nominal Total Capacity' AND Units='W'"
-          furnace_capacity_kbtuh = UnitConversions.convert(sqlFile.execAndReturnFirstDouble(query).get, 'W', 'kBtu/hr')
+          furnace_capacity_kbtuh = UnitConversions.convert(results['Capacity: Heating (W)'], 'W', 'kBtu/hr')
         end
-        hpxml_value = HVAC.get_default_eae(htg_sys_type, htg_sys_fuel, htg_load_frac, furnace_capacity_kbtuh) / 2.08
+        hpxml_value = HVAC.get_electric_auxiliary_energy(heating_system, furnace_capacity_kbtuh) / 2.08
       end
 
       if htg_sys_type == HPXML::HVACTypeBoiler
-        query = "SELECT Value FROM TabularDataWithStrings WHERE ReportName='EquipmentSummary' AND ReportForString='Entire Facility' AND TableName='Pumps' AND RowName LIKE '%#{Constants.ObjectNameBoiler.upcase}%' AND ColumnName='Electric Power' AND Units='W'"
-        sql_value = sqlFile.execAndReturnFirstDouble(query).get
-      elsif htg_sys_type == HPXML::HVACTypeFurnace
-        # Ratio fan power based on heating airflow rate divided by fan airflow rate since the
-        # fan is sized based on cooling.
-        query = "SELECT Value FROM TabularDataWithStrings WHERE ReportName='EquipmentSummary' AND ReportForString='Entire Facility' AND TableName='Fans' AND RowName LIKE '%#{Constants.ObjectNameFurnace.upcase}%' AND ColumnName='Rated Electric Power' AND Units='W'"
-        query_fan_airflow = "SELECT Value FROM TabularDataWithStrings WHERE ReportName='ComponentSizingSummary' AND ReportForString='Entire Facility' AND TableName='Fan:OnOff' AND RowName LIKE '%#{Constants.ObjectNameFurnace.upcase}%' AND ColumnName='User-Specified Maximum Flow Rate' AND Units='m3/s'"
-        query_htg_airflow = "SELECT Value FROM TabularDataWithStrings WHERE ReportName='ComponentSizingSummary' AND ReportForString='Entire Facility' AND TableName='AirLoopHVAC:UnitarySystem' AND RowName LIKE '%#{Constants.ObjectNameFurnace.upcase}%' AND ColumnName='User-Specified Heating Supply Air Flow Rate' AND Units='m3/s'"
-        sql_value = sqlFile.execAndReturnFirstDouble(query).get
-        sql_value_fan_airflow = sqlFile.execAndReturnFirstDouble(query_fan_airflow).get
-        sql_value_htg_airflow = sqlFile.execAndReturnFirstDouble(query_htg_airflow).get
-        sql_value *= sql_value_htg_airflow / sql_value_fan_airflow
-      elsif (htg_sys_type == HPXML::HVACTypeStove) || (htg_sys_type == HPXML::HVACTypeWallFurnace) || (htg_sys_type == HPXML::HVACTypeFloorFurnace)
-        query = "SELECT AVG(Value) FROM TabularDataWithStrings WHERE ReportName='EquipmentSummary' AND ReportForString='Entire Facility' AND TableName='Fans' AND RowName LIKE '%#{Constants.ObjectNameUnitHeater.upcase}%' AND ColumnName='Rated Electric Power' AND Units='W'"
-        sql_value = sqlFile.execAndReturnFirstDouble(query).get
+        next if hpxml.water_heating_systems.select { |wh| [HPXML::WaterHeaterTypeCombiStorage, HPXML::WaterHeaterTypeCombiTankless].include? wh.water_heater_type }.size > 0 # Skip combi systems
+
+        # Compare pump power from timeseries output
+        query = "SELECT VariableValue FROM ReportVariableData WHERE ReportVariableDataDictionaryIndex IN (SELECT ReportVariableDataDictionaryIndex FROM ReportVariableDataDictionary WHERE VariableType='Avg' AND VariableName='Boiler Part Load Ratio' AND ReportingFrequency='Run Period')"
+        avg_plr = sqlFile.execAndReturnFirstDouble(query).get
+        query = "SELECT VariableValue FROM ReportVariableData WHERE ReportVariableDataDictionaryIndex IN (SELECT ReportVariableDataDictionaryIndex FROM ReportVariableDataDictionary WHERE VariableType='Avg' AND VariableName='Pump Electric Power' AND ReportingFrequency='Run Period')"
+        avg_w = sqlFile.execAndReturnFirstDouble(query).get
+        sql_value = avg_w / avg_plr
+        assert_in_epsilon(sql_value, hpxml_value, 0.02)
       else
-        flunk "Unexpected heating system type '#{htg_sys_type}'."
+        next if hpxml.cooling_systems.size + hpxml.heat_pumps.size > 0 # Skip if other system types (which could result in A) multiple supply fans or B) different supply fan power consumption in the cooling season)
+
+        # Compare fan power from timeseries output
+        query = "SELECT VariableValue FROM ReportVariableData WHERE ReportVariableDataDictionaryIndex IN (SELECT ReportVariableDataDictionaryIndex FROM ReportVariableDataDictionary WHERE VariableType='Avg' AND VariableName='Fan Runtime Fraction' and KeyValue LIKE '% SUPPLY FAN' AND ReportingFrequency='Run Period')"
+        avg_rtf = sqlFile.execAndReturnFirstDouble(query).get
+        query = "SELECT VariableValue FROM ReportVariableData WHERE ReportVariableDataDictionaryIndex IN (SELECT ReportVariableDataDictionaryIndex FROM ReportVariableDataDictionary WHERE VariableType='Avg' AND VariableName='Fan Electric Power' and KeyValue LIKE '% SUPPLY FAN' AND ReportingFrequency='Run Period')"
+        avg_w = sqlFile.execAndReturnFirstDouble(query).get
+        sql_value = avg_w / avg_rtf
+        assert_in_epsilon(sql_value, hpxml_value, 0.02)
       end
-      assert_in_epsilon(hpxml_value, sql_value, 0.01)
+    end
+
+    # HVAC Heat Pumps
+    num_hps = hpxml.heat_pumps.size
+    hpxml.heat_pumps.each do |heat_pump|
+      next unless heat_pump.fraction_heat_load_served > 0
+      next unless (num_hps == 1) && heat_pump.heat_pump_type == HPXML::HVACTypeHeatPumpGroundToAir
+
+      # Compare pump power from timeseries output
+      hpxml_value = heat_pump.pump_watts_per_ton * UnitConversions.convert(results['Capacity: Cooling (W)'], 'W', 'ton')
+      query = "SELECT VariableValue FROM ReportVariableData WHERE ReportVariableDataDictionaryIndex IN (SELECT ReportVariableDataDictionaryIndex FROM ReportVariableDataDictionary WHERE VariableType='Avg' AND VariableName='Unitary System Part Load Ratio' AND ReportingFrequency='Run Period')"
+      avg_plr = sqlFile.execAndReturnFirstDouble(query).get
+      query = "SELECT VariableValue FROM ReportVariableData WHERE ReportVariableDataDictionaryIndex IN (SELECT ReportVariableDataDictionaryIndex FROM ReportVariableDataDictionary WHERE VariableType='Avg' AND VariableName='Pump Electric Power' AND ReportingFrequency='Run Period')"
+      avg_w = sqlFile.execAndReturnFirstDouble(query).get
+      sql_value = avg_w / avg_plr
+      assert_in_epsilon(sql_value, hpxml_value, 0.02)
     end
 
     # HVAC Capacities
@@ -865,22 +924,26 @@ class HPXMLTest < MiniTest::Test
     end
     hpxml.cooling_systems.each do |cooling_system|
       clg_sys_cap = cooling_system.cooling_capacity.to_f
+      clg_cap_mult = 1.0
+      if cooling_system.cooling_system_type == HPXML::HVACTypeMiniSplitAirConditioner
+        # TODO: Generalize this
+        clg_cap_mult = 1.20
+      end
       if clg_sys_cap > 0
         clg_cap = 0 if clg_cap.nil?
-        clg_cap += Float(clg_sys_cap)
+        clg_cap += (clg_sys_cap * clg_cap_mult)
       end
     end
     hpxml.heat_pumps.each do |heat_pump|
-      hp_type = heat_pump.heat_pump_type
       hp_cap_clg = heat_pump.cooling_capacity.to_f
       hp_cap_htg = heat_pump.heating_capacity.to_f
       clg_cap_mult = 1.0
       htg_cap_mult = 1.0
-      if hp_type == HPXML::HVACTypeHeatPumpMiniSplit
+      if heat_pump.heat_pump_type == HPXML::HVACTypeHeatPumpMiniSplit
         # TODO: Generalize this
         clg_cap_mult = 1.20
         htg_cap_mult = 1.20
-      elsif (hp_type == HPXML::HVACTypeHeatPumpAirToAir) && (heat_pump.cooling_efficiency_seer > 21)
+      elsif (heat_pump.heat_pump_type == HPXML::HVACTypeHeatPumpAirToAir) && (heat_pump.cooling_efficiency_seer > 21)
         # TODO: Generalize this
         htg_cap_mult = 1.17
       end
@@ -920,107 +983,84 @@ class HPXMLTest < MiniTest::Test
     end
 
     # HVAC Load Fractions
-    htg_load_frac = 0.0
-    clg_load_frac = 0.0
-    (hpxml.heating_systems + hpxml.heat_pumps).each do |heating_system|
-      htg_load_frac += heating_system.fraction_heat_load_served.to_f
-    end
-    (hpxml.cooling_systems + hpxml.heat_pumps).each do |cooling_system|
-      clg_load_frac += cooling_system.fraction_cool_load_served.to_f
-    end
     if not hpxml_path.include? 'location-miami'
-      htg_energy = results.select { |k, v| (k.include?(': Heating (MBtu)') || k.include?(': Heating Fans/Pumps (MBtu)')) && !k.include?('Load') }.map { |k, v| v }.inject(0, :+)
-      assert_equal(htg_load_frac > 0, htg_energy > 0)
+      htg_energy = results.select { |k, v| (k.include?(': Heating (MBtu)') || k.include?(': Heating Fans/Pumps (MBtu)')) && !k.include?('Load') }.map { |k, v| v }.sum(0.0)
+      assert_equal(hpxml.total_fraction_heat_load_served > 0, htg_energy > 0)
     end
-    clg_energy = results.select { |k, v| (k.include?(': Cooling (MBtu)') || k.include?(': Cooling Fans/Pumps (MBtu)')) && !k.include?('Load') }.map { |k, v| v }.inject(0, :+)
-    assert_equal(clg_load_frac > 0, clg_energy > 0)
-
-    # Unmet Load
-    if (htg_load_frac == 0.0) && (clg_load_frac == 0.0)
-      assert_in_epsilon(results['Unmet Load: Heating (MBtu)'], results['Load: Heating (MBtu)'], 0.005)
-      assert_in_epsilon(results['Unmet Load: Cooling (MBtu)'], results['Load: Cooling (MBtu)'], 0.005)
-    end
+    clg_energy = results.select { |k, v| (k.include?(': Cooling (MBtu)') || k.include?(': Cooling Fans/Pumps (MBtu)')) && !k.include?('Load') }.map { |k, v| v }.sum(0.0)
+    assert_equal(hpxml.total_fraction_cool_load_served > 0, clg_energy > 0)
 
     # Water Heater
-    if hpxml.water_heating_systems.size > 0
+    if hpxml.water_heating_systems.select { |wh| [HPXML::WaterHeaterTypeCombiStorage, HPXML::WaterHeaterTypeCombiTankless].include? wh.water_heater_type }.size > 0
       query = "SELECT SUM(ABS(VariableValue)/1000000000) FROM ReportVariableData WHERE ReportVariableDataDictionaryIndex IN (SELECT ReportVariableDataDictionaryIndex FROM ReportVariableDataDictionary WHERE VariableType='Sum' AND VariableName='Fluid Heat Exchanger Heat Transfer Energy' AND ReportingFrequency='Run Period' AND VariableUnits='J')"
       combi_hx_load = sqlFile.execAndReturnFirstDouble(query).get.round(2)
       query = "SELECT SUM(ABS(VariableValue)/1000000000) FROM ReportVariableData WHERE ReportVariableDataDictionaryIndex IN (SELECT ReportVariableDataDictionaryIndex FROM ReportVariableDataDictionary WHERE VariableType='Sum' AND VariableName='Boiler Heating Energy' AND ReportingFrequency='Run Period' AND VariableUnits='J')"
       combi_htg_load = sqlFile.execAndReturnFirstDouble(query).get.round(2)
 
-      if (combi_htg_load > 0) && (combi_hx_load > 0)
-        # Check combi system energy balance
-        query = "SELECT SUM(ABS(VariableValue)/1000000000) FROM ReportVariableData WHERE ReportVariableDataDictionaryIndex IN (SELECT ReportVariableDataDictionaryIndex FROM ReportVariableDataDictionary WHERE VariableType='Sum' AND VariableName='Water Heater Source Side Heat Transfer Energy' AND VariableUnits='J')"
-        combi_tank_source_load = sqlFile.execAndReturnFirstDouble(query).get.round(2)
-        assert_in_epsilon(combi_hx_load, combi_tank_source_load, 0.02)
+      # Check combi system energy balance
+      query = "SELECT SUM(ABS(VariableValue)/1000000000) FROM ReportVariableData WHERE ReportVariableDataDictionaryIndex IN (SELECT ReportVariableDataDictionaryIndex FROM ReportVariableDataDictionary WHERE VariableType='Sum' AND VariableName='Water Heater Source Side Heat Transfer Energy' AND VariableUnits='J')"
+      combi_tank_source_load = sqlFile.execAndReturnFirstDouble(query).get.round(2)
+      assert_in_epsilon(combi_hx_load, combi_tank_source_load, 0.02)
 
-        # Check boiler, hx, pump, heating coil energy balance
-        query = "SELECT SUM(ABS(VariableValue)/1000000000) FROM ReportVariableData WHERE ReportVariableDataDictionaryIndex IN (SELECT ReportVariableDataDictionaryIndex FROM ReportVariableDataDictionary WHERE VariableType='Sum' AND VariableName='Baseboard Total Heating Energy' AND VariableUnits='J')"
-        boiler_space_heating_load = sqlFile.execAndReturnFirstDouble(query).get.round(2)
-        assert_in_epsilon(combi_hx_load + boiler_space_heating_load, combi_htg_load, 0.02)
-      end
+      # Check boiler, hx, pump, heating coil energy balance
+      query = "SELECT SUM(ABS(VariableValue)/1000000000) FROM ReportVariableData WHERE ReportVariableDataDictionaryIndex IN (SELECT ReportVariableDataDictionaryIndex FROM ReportVariableDataDictionary WHERE VariableType='Sum' AND VariableName='Baseboard Total Heating Energy' AND VariableUnits='J')"
+      boiler_space_heating_load = sqlFile.execAndReturnFirstDouble(query).get.round(2)
+      assert_in_epsilon(combi_hx_load + boiler_space_heating_load, combi_htg_load, 0.02)
     end
 
     # Mechanical Ventilation
-    vent_fan_whole_house = nil
-    vent_fan_kitchen = nil
-    vent_fan_bath = nil
-    hpxml.ventilation_fans.each do |ventilation_fan|
-      if ventilation_fan.used_for_local_ventilation
-        if ventilation_fan.fan_location == HPXML::VentilationFanLocationKitchen
-          vent_fan_kitchen = ventilation_fan
-        elsif ventilation_fan.fan_location == HPXML::VentilationFanLocationBath
-          vent_fan_bath = ventilation_fan
-        end
-      elsif ventilation_fan.used_for_whole_building_ventilation
-        vent_fan_whole_house = ventilation_fan
-      end
-    end
-    if (not vent_fan_whole_house.nil?) || (not vent_fan_kitchen.nil?) || (not vent_fan_bath.nil?)
-      mv_energy = results['Electricity: Mech Vent (MBtu)']
+    fan_cfis = hpxml.ventilation_fans.select { |vent_mech| vent_mech.used_for_whole_building_ventilation && (vent_mech.fan_type == HPXML::MechVentTypeCFIS) }
+    fan_sup = hpxml.ventilation_fans.select { |vent_mech| vent_mech.used_for_whole_building_ventilation && (vent_mech.fan_type == HPXML::MechVentTypeSupply) }
+    fan_exh = hpxml.ventilation_fans.select { |vent_mech| vent_mech.used_for_whole_building_ventilation && (vent_mech.fan_type == HPXML::MechVentTypeExhaust) }
+    fan_bal = hpxml.ventilation_fans.select { |vent_mech| vent_mech.used_for_whole_building_ventilation && [HPXML::MechVentTypeBalanced, HPXML::MechVentTypeERV, HPXML::MechVentTypeHRV].include?(vent_mech.fan_type) }
+    vent_fan_kitchen = hpxml.ventilation_fans.select { |vent_mech| vent_mech.used_for_local_ventilation && (vent_mech.fan_location == HPXML::LocationKitchen) }
+    vent_fan_bath = hpxml.ventilation_fans.select { |vent_mech| vent_mech.used_for_local_ventilation && (vent_mech.fan_location == HPXML::LocationBath) }
 
-      if (not vent_fan_whole_house.nil?) && (vent_fan_whole_house.fan_type == HPXML::MechVentTypeCFIS)
+    if not (fan_cfis + fan_sup + fan_exh + fan_bal + vent_fan_kitchen + vent_fan_bath).empty?
+      mv_energy = UnitConversions.convert(results['Electricity: Mech Vent (MBtu)'], 'MBtu', 'GJ')
+
+      if not fan_cfis.empty?
         # CFIS, check for positive mech vent energy that is less than the energy if it had run 24/7
-        fan_gj = UnitConversions.convert(vent_fan_whole_house.fan_power * vent_fan_whole_house.hours_in_operation * 365.0, 'Wh', 'GJ')
+        # CFIS Fan energy
+        query = "SELECT SUM(ABS(VariableValue)/1000000000) FROM ReportVariableData WHERE ReportVariableDataDictionaryIndex IN (SELECT ReportVariableDataDictionaryIndex FROM ReportVariableDataDictionary WHERE VariableType='Sum' AND KeyValue='#{Constants.ObjectNameMechanicalVentilationHouseFanCFIS.upcase}' AND VariableName='Electric Equipment Electric Energy' AND ReportingFrequency='Run Period' AND VariableUnits='J')"
+        cfis_energy = sqlFile.execAndReturnFirstDouble(query).get
+        fan_gj = fan_cfis.map { |vent_mech| UnitConversions.convert(vent_mech.fan_power * vent_mech.hours_in_operation * 365.0, 'Wh', 'GJ') }.sum(0.0)
         if fan_gj > 0
-          assert_operator(mv_energy, :>, 0)
-          assert_operator(mv_energy, :<, fan_gj)
+          assert_operator(cfis_energy, :>, 0)
+          assert_operator(cfis_energy, :<, fan_gj)
         else
-          assert_equal(mv_energy, 0.0)
+          assert_equal(cfis_energy, 0.0)
         end
 
-        # CFIS Fan power
-        hpxml_value = vent_fan_whole_house.fan_power
-        query = "SELECT Value FROM ReportData WHERE ReportDataDictionaryIndex IN (SELECT ReportDataDictionaryIndex FROM ReportDataDictionary WHERE Name='#{@cfis_fan_power_output_var.variableName}' AND ReportingFrequency='Run Period')"
-        sql_value = sqlFile.execAndReturnFirstDouble(query).get
-        assert_in_delta(hpxml_value, sql_value, 0.01)
-
-        # CFIS Flow rate
-        hpxml_value = vent_fan_whole_house.tested_flow_rate * vent_fan_whole_house.hours_in_operation / 24.0
-        query = "SELECT Value FROM ReportData WHERE ReportDataDictionaryIndex IN (SELECT ReportDataDictionaryIndex FROM ReportDataDictionary WHERE Name='#{@cfis_flow_rate_output_var.variableName}' AND ReportingFrequency='Run Period')"
-        sql_value = UnitConversions.convert(sqlFile.execAndReturnFirstDouble(query).get, 'm^3/s', 'cfm')
-        assert_in_delta(hpxml_value, sql_value, 0.01)
-      else
-        # Supply, exhaust, ERV, HRV, etc., check for appropriate mech vent energy
-        fan_gj = 0
-        if not vent_fan_whole_house.nil?
-          fan_gj += UnitConversions.convert(vent_fan_whole_house.fan_power * vent_fan_whole_house.hours_in_operation * 365.0, 'Wh', 'GJ')
-        end
-        if not vent_fan_kitchen.nil?
-          fan_gj += UnitConversions.convert(vent_fan_kitchen.fan_power * vent_fan_kitchen.hours_in_operation * 365.0, 'Wh', 'GJ')
-        end
-        if not vent_fan_bath.nil?
-          fan_gj += UnitConversions.convert(vent_fan_bath.fan_power * vent_fan_bath.hours_in_operation * vent_fan_bath.quantity * 365.0, 'Wh', 'GJ')
-        end
-        assert_in_delta(mv_energy, fan_gj, 0.11)
+        mv_energy -= cfis_energy
       end
+
+      # Supply, exhaust, ERV, HRV, etc., check for appropriate mech vent energy
+      fan_gj = 0
+      if not fan_sup.empty?
+        fan_gj += fan_sup.map { |vent_mech| UnitConversions.convert(vent_mech.fan_power * vent_mech.hours_in_operation * 365.0, 'Wh', 'GJ') }.sum(0.0)
+      end
+      if not fan_exh.empty?
+        fan_gj += fan_exh.map { |vent_mech| UnitConversions.convert(vent_mech.fan_power * vent_mech.hours_in_operation * 365.0, 'Wh', 'GJ') }.sum(0.0)
+      end
+      if not fan_bal.empty?
+        fan_gj += fan_bal.map { |vent_mech| UnitConversions.convert(vent_mech.fan_power * vent_mech.hours_in_operation * 365.0, 'Wh', 'GJ') }.sum(0.0)
+      end
+      if not vent_fan_kitchen.empty?
+        fan_gj += vent_fan_kitchen.map { |vent_kitchen| UnitConversions.convert(vent_kitchen.fan_power * vent_kitchen.hours_in_operation * vent_kitchen.quantity * 365.0, 'Wh', 'GJ') }.sum(0.0)
+      end
+      if not vent_fan_bath.empty?
+        fan_gj += vent_fan_bath.map { |vent_bath| UnitConversions.convert(vent_bath.fan_power * vent_bath.hours_in_operation * vent_bath.quantity * 365.0, 'Wh', 'GJ') }.sum(0.0)
+      end
+      # Maximum error that can be caused by rounding
+      assert_in_delta(mv_energy, fan_gj, 0.006)
     end
 
     # Clothes Washer
     if (hpxml.clothes_washers.size > 0) && (hpxml.water_heating_systems.size > 0)
       # Location
       hpxml_value = hpxml.clothes_washers[0].location
-      if hpxml_value.nil? || (hpxml_value == HPXML::LocationBasementConditioned) || (hpxml_value == HPXML::LocationOther)
+      if hpxml_value.nil? || [HPXML::LocationBasementConditioned, HPXML::LocationOtherHousingUnit, HPXML::LocationOtherHeatedSpace, HPXML::LocationOtherMultifamilyBufferSpace, HPXML::LocationOtherNonFreezingSpace].include?(hpxml_value)
         hpxml_value = HPXML::LocationLivingSpace
       end
       query = "SELECT Value FROM TabularDataWithStrings WHERE TableName='ElectricEquipment Internal Gains Nominal' AND ColumnName='Zone Name' AND RowName=(SELECT RowName FROM TabularDataWithStrings WHERE TableName='ElectricEquipment Internal Gains Nominal' AND ColumnName='Name' AND Value='#{Constants.ObjectNameClothesWasher.upcase}')"
@@ -1032,7 +1072,7 @@ class HPXMLTest < MiniTest::Test
     if (hpxml.clothes_dryers.size > 0) && (hpxml.water_heating_systems.size > 0)
       # Location
       hpxml_value = hpxml.clothes_dryers[0].location
-      if hpxml_value.nil? || (hpxml_value == HPXML::LocationBasementConditioned) || (hpxml_value == HPXML::LocationOther)
+      if hpxml_value.nil? || [HPXML::LocationBasementConditioned, HPXML::LocationOtherHousingUnit, HPXML::LocationOtherHeatedSpace, HPXML::LocationOtherMultifamilyBufferSpace, HPXML::LocationOtherNonFreezingSpace].include?(hpxml_value)
         hpxml_value = HPXML::LocationLivingSpace
       end
       query = "SELECT Value FROM TabularDataWithStrings WHERE TableName='ElectricEquipment Internal Gains Nominal' AND ColumnName='Zone Name' AND RowName=(SELECT RowName FROM TabularDataWithStrings WHERE TableName='ElectricEquipment Internal Gains Nominal' AND ColumnName='Name' AND Value='#{Constants.ObjectNameClothesDryer.upcase}')"
@@ -1044,7 +1084,7 @@ class HPXMLTest < MiniTest::Test
     if hpxml.refrigerators.size > 0
       # Location
       hpxml_value = hpxml.refrigerators[0].location
-      if hpxml_value.nil? || (hpxml_value == HPXML::LocationBasementConditioned) || (hpxml_value == HPXML::LocationOther)
+      if hpxml_value.nil? || [HPXML::LocationBasementConditioned, HPXML::LocationOtherHousingUnit, HPXML::LocationOtherHeatedSpace, HPXML::LocationOtherMultifamilyBufferSpace, HPXML::LocationOtherNonFreezingSpace].include?(hpxml_value)
         hpxml_value = HPXML::LocationLivingSpace
       end
       query = "SELECT Value FROM TabularDataWithStrings WHERE TableName='ElectricEquipment Internal Gains Nominal' AND ColumnName='Zone Name' AND RowName=(SELECT RowName FROM TabularDataWithStrings WHERE TableName='ElectricEquipment Internal Gains Nominal' AND ColumnName='Name' AND Value='#{Constants.ObjectNameRefrigerator.upcase}')"
@@ -1056,7 +1096,7 @@ class HPXMLTest < MiniTest::Test
     if (hpxml.dishwashers.size > 0) && (hpxml.water_heating_systems.size > 0)
       # Location
       hpxml_value = hpxml.dishwashers[0].location
-      if hpxml_value.nil? || (hpxml_value == HPXML::LocationBasementConditioned) || (hpxml_value == HPXML::LocationOther)
+      if hpxml_value.nil? || [HPXML::LocationBasementConditioned, HPXML::LocationOtherHousingUnit, HPXML::LocationOtherHeatedSpace, HPXML::LocationOtherMultifamilyBufferSpace, HPXML::LocationOtherNonFreezingSpace].include?(hpxml_value)
         hpxml_value = HPXML::LocationLivingSpace
       end
       query = "SELECT Value FROM TabularDataWithStrings WHERE TableName='ElectricEquipment Internal Gains Nominal' AND ColumnName='Zone Name' AND RowName=(SELECT RowName FROM TabularDataWithStrings WHERE TableName='ElectricEquipment Internal Gains Nominal' AND ColumnName='Name' AND Value='#{Constants.ObjectNameDishwasher.upcase}')"
@@ -1068,7 +1108,7 @@ class HPXMLTest < MiniTest::Test
     if hpxml.cooking_ranges.size > 0
       # Location
       hpxml_value = hpxml.cooking_ranges[0].location
-      if hpxml_value.nil? || (hpxml_value == HPXML::LocationBasementConditioned) || (hpxml_value == HPXML::LocationOther)
+      if hpxml_value.nil? || [HPXML::LocationBasementConditioned, HPXML::LocationOtherHousingUnit, HPXML::LocationOtherHeatedSpace, HPXML::LocationOtherMultifamilyBufferSpace, HPXML::LocationOtherNonFreezingSpace].include?(hpxml_value)
         hpxml_value = HPXML::LocationLivingSpace
       end
       query = "SELECT Value FROM TabularDataWithStrings WHERE TableName='ElectricEquipment Internal Gains Nominal' AND ColumnName='Zone Name' AND RowName=(SELECT RowName FROM TabularDataWithStrings WHERE TableName='ElectricEquipment Internal Gains Nominal' AND ColumnName='Name' AND Value='#{Constants.ObjectNameCookingRange.upcase}')"
@@ -1077,7 +1117,7 @@ class HPXMLTest < MiniTest::Test
     end
 
     # Lighting
-    ltg_energy = results.select { |k, v| k.include? 'Electricity: Lighting' }.map { |k, v| v }.inject(0, :+)
+    ltg_energy = results.select { |k, v| k.include? 'Electricity: Lighting' }.map { |k, v| v }.sum(0.0)
     assert_equal(hpxml.lighting_groups.size > 0, ltg_energy > 0)
 
     # Get fuels
@@ -1101,9 +1141,11 @@ class HPXMLTest < MiniTest::Test
     # Fuel consumption checks
     [HPXML::FuelTypeNaturalGas,
      HPXML::FuelTypeOil,
+     HPXML::FuelTypeKerosene,
      HPXML::FuelTypePropane,
-     HPXML::FuelTypeWood,
-     HPXML::FuelTypeWoodPellets].each do |fuel|
+     HPXML::FuelTypeWoodCord,
+     HPXML::FuelTypeWoodPellets,
+     HPXML::FuelTypeCoal].each do |fuel|
       fuel_name = fuel.split.map(&:capitalize).join(' ')
       fuel_name += ' Cord' if fuel_name == 'Wood'
       energy_htg = results.fetch("#{fuel_name}: Heating (MBtu)", 0)
@@ -1193,38 +1235,40 @@ class HPXMLTest < MiniTest::Test
     puts "Wrote HVAC sizing results to #{csv_out}."
   end
 
-  def _write_ashrae_140_results(results_dir, all_results, ashrae_140_dir)
+  def _write_and_check_ashrae_140_results(results_dir, all_results, ashrae_140_dir)
     require 'csv'
     csv_out = File.join(results_dir, 'results_ashrae_140.csv')
 
+    htg_loads = {}
+    clg_loads = {}
     CSV.open(csv_out, 'w') do |csv|
       csv << ['Test Case', 'Annual Heating Load [MMBtu]', 'Annual Cooling Load [MMBtu]']
       all_results.sort.each do |xml, xml_results|
         next unless xml.include? ashrae_140_dir
         next unless xml.include? 'C.xml'
 
-        csv << [File.basename(xml), xml_results['Load: Heating (MBtu)'].round(2), 'N/A']
+        htg_load = xml_results['Load: Heating (MBtu)'].round(2)
+        csv << [File.basename(xml), htg_load, 'N/A']
+        test_name = File.basename(xml, File.extname(xml))
+        htg_loads[test_name] = htg_load
       end
       all_results.sort.each do |xml, xml_results|
         next unless xml.include? ashrae_140_dir
         next unless xml.include? 'L.xml'
 
-        csv << [File.basename(xml), 'N/A', xml_results['Load: Cooling (MBtu)'].round(2)]
+        clg_load = xml_results['Load: Cooling (MBtu)'].round(2)
+        csv << [File.basename(xml), 'N/A', clg_load]
+        test_name = File.basename(xml, File.extname(xml))
+        clg_loads[test_name] = clg_load
       end
     end
 
     puts "Wrote ASHRAE 140 results to #{csv_out}."
-  end
 
-  def _test_schema_validation(this_dir, xml)
-    # TODO: Remove this when schema validation is included with CLI calls
-    schemas_dir = File.absolute_path(File.join(this_dir, '..', '..', 'HPXMLtoOpenStudio', 'resources'))
-    hpxml_doc = Oga.parse_xml(File.read(xml))
-    errors = XMLHelper.validate(hpxml_doc.to_xml, File.join(schemas_dir, 'HPXML.xsd'), nil)
-    if errors.size > 0
-      puts "#{xml}: #{errors}"
-    end
-    assert_equal(0, errors.size)
+    # TODO: Add updated HERS acceptance criteria once the E+ simple
+    # window model bugfix is available.
+    # FUTURE: Switch to stringent HERS acceptance criteria once it's based on
+    # TMY3.
   end
 
   def _display_result_epsilon(xml, result1, result2, key)
@@ -1235,17 +1279,6 @@ class HPXMLTest < MiniTest::Test
   def _display_result_delta(xml, result1, result2, key)
     delta = (result1 - result2).abs
     puts "#{xml}: delta=#{delta.round(5)} [#{key}]"
-  end
-
-  def _rm_path(path)
-    if Dir.exist?(path)
-      FileUtils.rm_r(path)
-    end
-    while true
-      break if not Dir.exist?(path)
-
-      sleep(0.01)
-    end
   end
 end
 

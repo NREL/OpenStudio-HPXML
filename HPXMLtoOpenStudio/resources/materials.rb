@@ -79,9 +79,17 @@ class Material
     return self.AirFilm(rvalue)
   end
 
+  def self.AirFilmOutsideASHRAE140
+    return self.AirFilm(0.174)
+  end
+
   def self.AirFilmVertical
     rvalue = 0.68 # hr-ft-F/Btu (ASHRAE 2005, F25.2, Table 1)
     return self.AirFilm(rvalue)
+  end
+
+  def self.AirFilmVerticalASHRAE140
+    return self.AirFilm(0.685)
   end
 
   def self.AirFilmFlatEnhanced
@@ -106,6 +114,14 @@ class Material
     # always flow down through the floor.
     rvalue = self.AirFilmFlatReduced.rvalue # hr-ft-F/Btu
     return self.AirFilm(rvalue)
+  end
+
+  def self.AirFilmFloorASHRAE140
+    return self.AirFilm(0.765)
+  end
+
+  def self.AirFilmFloorZeroWindASHRAE140
+    return self.AirFilm(0.455)
   end
 
   def self.AirFilmSlopeEnhanced(roof_pitch)
@@ -164,58 +180,40 @@ class Material
     return self.AirFilm(rvalue)
   end
 
+  def self.AirFilmRoofASHRAE140
+    return self.AirFilm(0.752)
+  end
+
   def self.CoveringBare(floorFraction = 0.8, rvalue = 2.08)
     # Combined layer of, e.g., carpet and bare floor
     thickness = 0.5 # in
-    return new(name = 'Floor Covering', thick_in = thickness, mat_base = nil, k_in = thickness / (rvalue * floorFraction), rho = 3.4, cp = 0.32, tAbs = 0.9, sAbs = 0.9)
+    return new(name = 'Floor Covering', thick_in = thickness, mat_base = nil, k_in = thickness / (rvalue * floorFraction), rho = 3.4, cp = 0.32, tAbs = 0.9, sAbs = 0.9, vAbs = 0.9)
   end
 
   def self.Concrete(thick_in)
     return new(name = "Concrete #{thick_in} in.", thick_in = thick_in, mat_base = BaseMaterial.Concrete, k_in = nil, rho = nil, cp = nil, tAbs = 0.9)
   end
 
-  def self.ExtFinishStuccoMedDark
-    return new(name = 'Stucco, Medium/Dark', thick_in = 1.0, mat_base = BaseMaterial.Stucco, k_in = nil, rho = nil, cp = nil, tAbs = 0.9, sAbs = 0.75, vAbs = 0.75)
-  end
-
-  def self.ExtFinishBrickLight
-    return new(name = 'Brick, Light', thick_in = 4.0, mat_base = BaseMaterial.Brick, k_in = nil, rho = nil, cp = nil, tAbs = 0.93, sAbs = 0.55, vAbs = 0.55)
-  end
-
-  def self.ExtFinishBrickMedDark
-    return new(name = 'Brick, Medium/Dark', thick_in = 4.0, mat_base = BaseMaterial.Brick, k_in = nil, rho = nil, cp = nil, tAbs = 0.96, sAbs = 0.88, vAbs = 0.88)
-  end
-
-  def self.ExtFinishWoodLight(thick_in = 1.0)
-    return new(name = 'Wood, Light', thick_in, mat_base = nil, k_in = 0.71, rho = 34.0, cp = 0.28, tAbs = 0.82, sAbs = 0.3, vAbs = 0.3)
-  end
-
-  def self.ExtFinishWoodMedDark
-    return new(name = 'Wood, Medium/Dark', thick_in = 1.0, mat_base = nil, k_in = 0.71, rho = 34.0, cp = 0.28, tAbs = 0.92, sAbs = 0.75, vAbs = 0.75)
-  end
-
-  def self.ExtFinishAluminumLight
-    return new(name = 'Aluminum, Light', thick_in = 0.375, mat_base = BaseMaterial.Aluminum, k_in = nil, rho = nil, cp = nil, tAbs = 0.9, sAbs = 0.3, vAbs = 0.3)
-  end
-
-  def self.ExtFinishAluminumMedDark
-    return new(name = 'Aluminum, Medium/Dark', thick_in = 0.375, mat_base = BaseMaterial.Aluminum, k_in = nil, rho = nil, cp = nil, tAbs = 0.94, sAbs = 0.75, vAbs = 0.75)
-  end
-
-  def self.ExtFinishVinylLight
-    return new(name = 'Vinyl, Light', thick_in = 0.375, mat_base = BaseMaterial.Vinyl, k_in = nil, rho = nil, cp = nil, tAbs = 0.9, sAbs = 0.3, vAbs = 0.3)
-  end
-
-  def self.ExtFinishVinylMedDark
-    return new(name = 'Vinyl, Medium/Dark', thick_in = 0.375, mat_base = BaseMaterial.Vinyl, k_in = nil, rho = nil, cp = nil, tAbs = 0.9, sAbs = 0.75, vAbs = 0.75)
-  end
-
-  def self.ExtFinishFiberCementLight
-    return new(name = 'Fiber-Cement, Light', thick_in = 0.375, mat_base = nil, k_in = 1.79, rho = 21.7, cp = 0.24, tAbs = 0.9, sAbs = 0.3, vAbs = 0.3)
-  end
-
-  def self.ExtFinishFiberCementMedDark
-    return new(name = 'Fiber-Cement, Medium/Dark', thick_in = 0.375, mat_base = nil, k_in = 1.79, rho = 21.7, cp = 0.24, tAbs = 0.9, sAbs = 0.75, vAbs = 0.75)
+  def self.ExteriorFinishMaterial(siding, emittance, solar_absorptance, thick_in = nil)
+    if siding == HPXML::SidingTypeWood
+      thick_in = 1.0 if thick_in.nil?
+      return new(siding, thick_in, nil, 0.71, 34.0, 0.28, emittance, solar_absorptance, solar_absorptance)
+    elsif siding == HPXML::SidingTypeVinyl
+      thick_in = 0.375 if thick_in.nil?
+      return new(siding, thick_in, BaseMaterial.Vinyl, nil, nil, nil, emittance, solar_absorptance, solar_absorptance)
+    elsif siding == HPXML::SidingTypeStucco
+      thick_in = 1.0 if thick_in.nil?
+      return new(siding, thick_in, BaseMaterial.Stucco, nil, nil, nil, emittance, solar_absorptance, solar_absorptance)
+    elsif siding == HPXML::SidingTypeFiberCement
+      thick_in = 0.375 if thick_in.nil?
+      return new(siding, thick_in, nil, 1.79, 21.7, 0.24, emittance, solar_absorptance, solar_absorptance)
+    elsif siding == HPXML::SidingTypeBrick
+      thick_in = 4.0 if thick_in.nil?
+      return new(siding, thick_in, BaseMaterial.Brick, nil, nil, nil, emittance, solar_absorptance, solar_absorptance)
+    elsif siding == HPXML::SidingTypeAluminum
+      thick_in = 0.375 if thick_in.nil?
+      return new(siding, thick_in, BaseMaterial.Aluminum, nil, nil, nil, emittance, solar_absorptance, solar_absorptance)
+    end
   end
 
   def self.FloorWood
@@ -228,58 +226,6 @@ class Material
 
   def self.GypsumCeiling(thick_in)
     return new(name = "Drywall #{thick_in} in.", thick_in = thick_in, mat_base = BaseMaterial.Gypsum, k_in = nil, rho = nil, cp = nil, tAbs = 0.9, sAbs = 0.3, vAbs = 0.1)
-  end
-
-  def self.RoofingAsphaltShinglesDark(emissivity = 0.91, absorptivity = 0.92)
-    return self.RoofMaterial('Asphalt Shingles, Dark', emissivity, absorptivity)
-  end
-
-  def self.RoofingAsphaltShinglesMed(emissivity = 0.91, absorptivity = 0.85)
-    return self.RoofMaterial('Asphalt Shingles, Medium', emissivity, absorptivity)
-  end
-
-  def self.RoofingAsphaltShinglesLight(emissivity = 0.91, absorptivity = 0.8)
-    return self.RoofMaterial('Asphalt Shingles, Light', emissivity, absorptivity)
-  end
-
-  def self.RoofingAsphaltShinglesWhiteCool(emissivity = 0.91, absorptivity = 0.75)
-    return self.RoofMaterial('Asphalt Shingles, White or Cool Colors', emissivity, absorptivity)
-  end
-
-  def self.RoofingTileDark
-    return self.RoofMaterial('Tile, Dark', 0.94, 0.9)
-  end
-
-  def self.RoofingTileMed
-    return self.RoofMaterial('Tile, Medium', 0.94, 0.75)
-  end
-
-  def self.RoofingTileLight
-    return self.RoofMaterial('Tile, Light', 0.93, 0.6)
-  end
-
-  def self.RoofingTileWhite
-    return self.RoofMaterial('Tile, White', 0.93, 0.3)
-  end
-
-  def self.RoofingMetalDark
-    return self.RoofMaterial('Metal, Dark', 0.9, 0.9)
-  end
-
-  def self.RoofingMetalMed
-    return self.RoofMaterial('Metal, Medium', 0.9, 0.75)
-  end
-
-  def self.RoofingMetalLight
-    return self.RoofMaterial('Metal, Light', 0.88, 0.6)
-  end
-
-  def self.RoofingMetalWhite
-    return self.RoofMaterial('Metal, White', 0.88, 0.3)
-  end
-
-  def self.RoofingGalvanizedSteel
-    return self.RoofMaterial('Galvanized Steel', 0.88, 0.7)
   end
 
   def self.Soil(thick_in)
@@ -306,8 +252,19 @@ class Material
     return new(name = "Plywood #{thick_in} in.", thick_in = thick_in, mat_base = BaseMaterial.Wood)
   end
 
-  def self.RadiantBarrier
-    return new(name = 'Radiant Barrier', thick_in = 0.0084, mat_base = nil, k_in = 1629.6, rho = 168.6, cp = 0.22, tAbs = 0.05, sAbs = 0.05, vAbs = 0.05)
+  def self.RadiantBarrier(grade)
+    # Merge w/ Constructions.get_gap_factor
+    if grade == 1
+      gap_frac = 0.0
+    elsif grade == 2
+      gap_frac = 0.02
+    elsif grade == 3
+      gap_frac = 0.05
+    end
+    rb_emittance = 0.05
+    non_rb_emittance = 0.90
+    emittance = rb_emittance * (1.0 - gap_frac) + non_rb_emittance * gap_frac
+    return new(name = 'Radiant Barrier', thick_in = 0.0084, mat_base = nil, k_in = 1629.6, rho = 168.6, cp = 0.22, tAbs = emittance, sAbs = 0.05, vAbs = 0.05)
   end
 
   def self.RoofMaterial(name, emissivity, absorptivity)

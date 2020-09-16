@@ -1,10 +1,17 @@
 # frozen_string_literal: true
 
 class PV
-  def self.apply(model, pv_system)
+  def self.apply(model, nbeds, pv_system)
     obj_name = pv_system.id
 
-    generator = OpenStudio::Model::GeneratorPVWatts.new(model, pv_system.max_power_output)
+    if not pv_system.is_shared_system
+      max_power = pv_system.max_power_output
+    else
+      # Apportion to single dwelling unit by # bedrooms
+      max_power = pv_system.max_power_output * nbeds.to_f / pv_system.number_of_bedrooms_served.to_f
+    end
+
+    generator = OpenStudio::Model::GeneratorPVWatts.new(model, max_power)
     generator.setName("#{obj_name} generator")
     generator.setSystemLosses(pv_system.system_losses_fraction)
     generator.setTiltAngle(pv_system.array_tilt)
@@ -44,11 +51,11 @@ class PV
     return 13.3 * year_modules_manufactured - 26494.0 # W/panel
   end
 
-  def self.calc_losses_fraction_from_year(year_modules_manufactured)
+  def self.calc_losses_fraction_from_year(year_modules_manufactured, default_loss_fraction)
     # Calculation from HEScore
     age = Time.new.year - year_modules_manufactured
     age_losses = 1.0 - 0.995**Float(age)
-    losses_fraction = 1.0 - (1.0 - 0.14) * (1.0 - age_losses)
+    losses_fraction = 1.0 - (1.0 - default_loss_fraction) * (1.0 - age_losses)
     return losses_fraction
   end
 
@@ -57,10 +64,11 @@ class PV
   end
 
   def self.get_default_system_losses(year_modules_manufactured = nil)
+    default_loss_fraction = 0.14 # PVWatts default system losses
     if not year_modules_manufactured.nil?
-      return calc_losses_fraction_from_year(year_modules_manufactured)
+      return calc_losses_fraction_from_year(year_modules_manufactured, default_loss_fraction)
     else
-      return 0.14 # PVWatts default system losses
+      return default_loss_fraction
     end
   end
 end

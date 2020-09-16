@@ -9,6 +9,12 @@
   <SoftwareInfo/>
   <Building>
     <BuildingID id='MyBuilding'/>
+    <Site>
+      <SiteID id='SiteID'/>
+      <Address>
+        <StateCode>CO</StateCode>
+      </Address>
+    </Site>
     <ProjectStatus>
       <EventType>proposed workscope</EventType>
     </ProjectStatus>
@@ -56,7 +62,7 @@
             <SystemIdentifier id='Roof'/>
             <InteriorAdjacentTo>attic - unvented</InteriorAdjacentTo>
             <Area>1510.0</Area>
-            <SolarAbsorptance>0.7</SolarAbsorptance>
+            <RoofColor>light</RoofColor>
             <Emittance>0.92</Emittance>
             <Pitch>6.0</Pitch>
             <RadiantBarrier>false</RadiantBarrier>
@@ -72,7 +78,7 @@
             <ExteriorAdjacentTo>outside</ExteriorAdjacentTo>
             <InteriorAdjacentTo>basement - conditioned</InteriorAdjacentTo>
             <Area>116.0</Area>
-            <SolarAbsorptance>0.7</SolarAbsorptance>
+            <Color>medium</Color>
             <Emittance>0.92</Emittance>
             <Insulation>
               <SystemIdentifier id='RimJoistFoundationInsulation'/>
@@ -89,7 +95,7 @@
               <WoodStud/>
             </WallType>
             <Area>1200.0</Area>
-            <SolarAbsorptance>0.7</SolarAbsorptance>
+            <Color>medium</Color>
             <Emittance>0.92</Emittance>
             <Insulation>
               <SystemIdentifier id='WallInsulation'/>
@@ -104,7 +110,7 @@
               <WoodStud/>
             </WallType>
             <Area>290.0</Area>
-            <SolarAbsorptance>0.7</SolarAbsorptance>
+            <Color>medium</Color>
             <Emittance>0.92</Emittance>
             <Insulation>
               <SystemIdentifier id='WallAtticGableInsulation'/>
@@ -326,7 +332,7 @@
             <EnergyFactor>0.95</EnergyFactor>
           </WaterHeatingSystem>
           <HotWaterDistribution>
-            <SystemIdentifier id='HotWaterDstribution'/>
+            <SystemIdentifier id='HotWaterDistribution'/>
             <SystemType>
               <Standard/>
             </SystemType>
@@ -362,6 +368,7 @@
         <Photovoltaics>
           <PVSystem>
             <SystemIdentifier id='PVSystem'/>
+            <IsSharedSystem>false</IsSharedSystem>
             <Location>roof</Location>
             <ModuleType>standard</ModuleType>
             <Tracking>fixed</Tracking>
