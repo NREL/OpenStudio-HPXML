@@ -21,7 +21,7 @@ HPXML files submitted to OpenStudio-HPXML should undergo a two step validation p
   The HPXML XSD Schema can be found at ``HPXMLtoOpenStudio/resources/HPXML.xsd``.
   It should be used by the software developer to validate their HPXML file prior to running the simulation.
   XSD Schemas are used to validate what elements/attributes/enumerations are available, data types for elements/attributes, the number/order of children elements, etc.
-  
+
   OpenStudio-HPXML **does not** validate the HPXML file against the XSD Schema and assumes the file submitted is valid.
 
 2. Validation using `Schematron <http://schematron.com/>`_
@@ -32,11 +32,11 @@ HPXML files submitted to OpenStudio-HPXML should undergo a two step validation p
   For example, if an element is specified with a particular value, the applicable enumerations of another element may change.
   
   OpenStudio-HPXML **automatically validates** the HPXML file against the Schematron document and reports any validation errors, but software developers may find it beneficial to also integrate Schematron validation into their software.
- 
+
 .. important::
 
   Usage of both validation approaches (XSD and Schematron) is recommended for developers actively working on creating HPXML files for EnergyPlus simulations:
-  
+
   - Validation against XSD for general correctness and usage of HPXML
   - Validation against Schematron for understanding XML document requirements specific to running EnergyPlus
 
@@ -224,7 +224,7 @@ basement - unconditioned                                                        
 crawlspace - vented                                                               EnergyPlus calculation                                    Any
 crawlspace - unvented                                                             EnergyPlus calculation                                    Any
 garage                          Single-family garage (not shared parking garage)  EnergyPlus calculation                                    Any
-other housing unit              E.g., adjacent unit or conditioned corridor       Same as conditioned space                                 Attached/Multifamily only
+other housing unit              E.g., conditioned adjacent unit or corridor       Same as conditioned space                                 Attached/Multifamily only
 other heated space              E.g., shared laundry/equipment space              Average of conditioned space and outside; minimum of 68F  Attached/Multifamily only
 other multifamily buffer space  E.g., enclosed unconditioned stairwell            Average of conditioned space and outside; minimum of 50F  Attached/Multifamily only
 other non-freezing space        E.g., shared parking garage ceiling               Floats with outside; minimum of 40F                       Attached/Multifamily only
@@ -648,7 +648,7 @@ outside                                                                         
 exterior wall                                                                     Average of conditioned space and outside                   Any
 under slab                                                                        Ground                                                     Any
 roof deck                                                                         Outside                                                    Any
-other housing unit              E.g., adjacent unit or conditioned corridor       Same as conditioned space                                  Attached/Multifamily only
+other housing unit              E.g., conditioned adjacent unit or corridor       Same as conditioned space                                  Attached/Multifamily only
 other heated space              E.g., shared laundry/equipment space              Average of conditioned space and outside; minimum of 68F   Attached/Multifamily only
 other multifamily buffer space  E.g., enclosed unconditioned stairwell            Average of conditioned space and outside; minimum of 50F   Attached/Multifamily only
 other non-freezing space        E.g., shared parking garage ceiling               Floats with outside; minimum of 40F                        Attached/Multifamily only
@@ -699,14 +699,13 @@ HPXML Mechanical Ventilation
 ****************************
 
 This section describes elements specified in HPXML's ``Systems/MechanicalVentilation``.
-``Systems/MechanicalVentilation/VentilationFans/VentilationFan`` elements can be used to specify whole building ventilation, local ventilation, and/or cooling load reduction.
+``Systems/MechanicalVentilation/VentilationFans/VentilationFan`` elements can be used to specify whole building or multifamily unit ventilation, local ventilation, and/or cooling load reduction.
 
 Whole Building Ventilation
 ~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Mechanical ventilation systems that provide whole building ventilation may each be specified as a ``Systems/MechanicalVentilation/VentilationFans/VentilationFan`` with ``UsedForWholeBuildingVentilation='true'``.
+Mechanical ventilation systems that provide whole building or whole multifamily unit ventilation may each be specified as a ``Systems/MechanicalVentilation/VentilationFans/VentilationFan`` with ``UsedForWholeBuildingVentilation='true'``.
 Inputs including ``FanType``, ``TestedFlowRate`` (or ``RatedFlowRate``), ``HoursInOperation``, and ``FanPower`` must be provided.
-For a CFIS system, the flow rate should equal the amount of outdoor air provided to the distribution system.
 
 Depending on the type of mechanical ventilation specified, additional elements are required:
 
@@ -722,6 +721,19 @@ central fan integrated supply (CFIS)                                            
 ====================================  ==========================  =======================  ================================
 
 Note that ``AdjustedSensibleRecoveryEfficiency`` and ``AdjustedTotalRecoveryEfficiency`` can be provided instead of ``SensibleRecoveryEfficiency`` and ``TotalRecoveryEfficiency``.
+
+For an individual CFIS system, the flow rate should equal the amount of outdoor air provided to the distribution system. For a shared CFIS system, the flow rate should equal the sum of outdoor air and recirculated air provided to the distribution system.
+
+``IsSharedSystem`` will default to false if not provided.
+
+If the mechanical ventilation is a shared system (i.e., serving multiple dwelling units), it should be described using ``IsSharedSystem='true'``.
+In this case, ``TestedFlowRate`` or ``RatedFlowRate`` and ``FanPower`` specified are assumed to be information at system level.
+Flow rates are required at both system level and in-unit level, in order to specify the in-unit flow rate, please use ``extension/InUnitFlowRate``.
+``FractionRecirculation`` is also needed for shared systems, where the values are the percentages of recirculation air in total supply air.
+In addition, it is also available to describe preconditioning heating/cooling systems for shared systems with ``extension/PreconditioningHeating`` and ``extension/PreconditioningCooling``.
+To describe a preconditioning system, eg. a preconditioning heating system, the ``extension/PreconditioningHeating/Fuel`` and ``extension/PreconditioningHeating/AnnualHeatingEfficiency[Units="COP"]/Value`` are required, assuming capacity is large enough to precondition the ventilation air.
+The same rule applies to preconditioning cooling system.
+
 
 Local Ventilation
 ~~~~~~~~~~~~~~~~~
@@ -817,7 +829,7 @@ garage                          Single-family garage (not shared parking garage)
 crawlspace - unvented                                                             EnergyPlus calculation                                     Any
 crawlspace - vented                                                               EnergyPlus calculation                                     Any
 other exterior                  Outside                                           EnergyPlus calculation                                     Any
-other housing unit              E.g., adjacent unit or conditioned corridor       Same as conditioned space                                  Attached/Multifamily only
+other housing unit              E.g., conditioned adjacent unit or corridor       Same as conditioned space                                  Attached/Multifamily only
 other heated space              E.g., shared laundry/equipment space              Average of conditioned space and outside; minimum of 68F   Attached/Multifamily only
 other multifamily buffer space  E.g., enclosed unconditioned stairwell            Average of conditioned space and outside; minimum of 50F   Attached/Multifamily only
 other non-freezing space        E.g., shared parking garage ceiling               Floats with outside; minimum of 40F                        Attached/Multifamily only
@@ -986,7 +998,7 @@ living space                    Above-grade conditioned floor area              
 basement - conditioned          Below-grade conditioned floor area                Any
 basement - unconditioned                                                          Any
 garage                          Single-family garage (not shared parking garage)  Any
-other housing unit              E.g., adjacent unit or conditioned corridor       Attached/Multifamily only
+other housing unit              E.g., conditioned adjacent unit or corridor       Attached/Multifamily only
 other heated space              E.g., shared laundry/equipment space              Attached/Multifamily only
 other multifamily buffer space  E.g., enclosed unconditioned stairwell            Attached/Multifamily only
 other non-freezing space        E.g., shared parking garage ceiling               Attached/Multifamily only
