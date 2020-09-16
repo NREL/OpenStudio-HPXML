@@ -3289,13 +3289,13 @@ class HPXML < Object
       end
     end
 
-    def average_oa_flow_rate
+    def average_oa_unit_flow_rate
       if (not oa_flow_rate.nil?) && (not @hours_in_operation.nil?)
         return oa_flow_rate * (@hours_in_operation / 24.0)
       end
     end
 
-    def average_unit_flow_rate
+    def average_total_unit_flow_rate
       if @is_shared_system && (not @hours_in_operation.nil?)
         return @in_unit_flow_rate * (@hours_in_operation / 24.0)
       elsif not @hours_in_operation.nil?
