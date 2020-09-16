@@ -7,6 +7,7 @@
     <sch:rule context='/h:HPXML'>
       <sch:assert test='count(h:XMLTransactionHeaderInformation) = 1'>Expected 1 element(s) for xpath: XMLTransactionHeaderInformation</sch:assert> <!-- See [XMLTransactionHeaderInformation] -->
       <sch:assert test='count(h:SoftwareInfo/h:extension/h:SimulationControl) &lt;= 1'>Expected 0 or 1 element(s) for xpath: SoftwareInfo/extension/SimulationControl</sch:assert> <!-- See [SimulationControl] -->
+      <sch:assert test='count(h:SoftwareInfo/h:extension/h:HVACSizingControl) &lt;= 1'>Expected 0 or 1 element(s) for xpath: SoftwareInfo/extension/HVACSizingControl</sch:assert> <!-- See [HVACSizingControl] -->
       <sch:assert test='count(h:Building) = 1'>Expected 1 element(s) for xpath: Building</sch:assert>
       <sch:assert test='count(h:Building/h:BuildingID) = 1'>Expected 1 element(s) for xpath: Building/BuildingID</sch:assert>
       <sch:assert test='count(h:Building/h:ProjectStatus/h:EventType) = 1'>Expected 1 element(s) for xpath: Building/ProjectStatus/EventType</sch:assert>
@@ -29,6 +30,13 @@
       <sch:assert test='(count(h:BeginMonth) + count(h:BeginDayOfMonth) = 0) or (count(h:BeginMonth) + count(h:BeginDayOfMonth) = 2)'>Expected 0 or 2 element(s) for xpath: BeginMonth | BeginDayOfMonth</sch:assert> <!-- integer -->
       <sch:assert test='(count(h:EndMonth) + count(h:EndDayOfMonth) = 0) or (count(h:EndMonth) + count(h:EndDayOfMonth) = 2)'>Expected 0 or 2 element(s) for xpath: EndMonth | EndDayOfMonth</sch:assert> <!-- integer -->
       <sch:assert test='count(h:DaylightSaving) &lt;= 1'>Expected 0 or 1 element(s) for xpath: DaylightSaving</sch:assert> <!-- See [DaylightSaving] -->
+    </sch:rule>
+  </sch:pattern>
+
+  <sch:pattern name='[HVACSizingControl]'>
+    <sch:rule context='/h:HPXML/h:SoftwareInfo/h:extension/h:HVACSizingControl'>
+      <sch:assert test='count(h:AllowIncreasedFixedCapacities) &lt;= 1'>Expected 0 or 1 element(s) for xpath: AllowIncreasedFixedCapacities</sch:assert> <!-- boolean -->
+      <sch:assert test='count(h:UseMaxLoadForHeatPumps) &lt;= 1'>Expected 0 or 1 element(s) for xpath: UseMaxLoadForHeatPumps</sch:assert> <!-- boolean -->
     </sch:rule>
   </sch:pattern>
 
