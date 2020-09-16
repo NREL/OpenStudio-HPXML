@@ -41,6 +41,7 @@
           <NumberofConditionedFloors>3</NumberofConditionedFloors>
           <NumberofConditionedFloorsAboveGrade>2</NumberofConditionedFloorsAboveGrade>
           <NumberofBedrooms>3</NumberofBedrooms>
+          <NumberofBathrooms>2</NumberofBathrooms>
           <ConditionedFloorArea>3600.0</ConditionedFloorArea>
           <ConditionedBuildingVolume>23850.0</ConditionedBuildingVolume>
         </BuildingConstruction>
@@ -459,7 +460,7 @@
             <HotWaterTemperature>125.0</HotWaterTemperature>
           </WaterHeatingSystem>
           <HotWaterDistribution>
-            <SystemIdentifier id='HotWaterDstribution'/>
+            <SystemIdentifier id='HotWaterDistribution'/>
             <SystemType>
               <Standard>
                 <PipingLength>50.0</PipingLength>

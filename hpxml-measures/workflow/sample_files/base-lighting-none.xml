@@ -41,6 +41,7 @@
           <NumberofConditionedFloors>2</NumberofConditionedFloors>
           <NumberofConditionedFloorsAboveGrade>1</NumberofConditionedFloorsAboveGrade>
           <NumberofBedrooms>3</NumberofBedrooms>
+          <NumberofBathrooms>2</NumberofBathrooms>
           <ConditionedFloorArea>2700.0</ConditionedFloorArea>
           <ConditionedBuildingVolume>21600.0</ConditionedBuildingVolume>
         </BuildingConstruction>
@@ -380,18 +381,22 @@
             <SystemIdentifier id='WaterHeater'/>
             <FuelType>electricity</FuelType>
             <WaterHeaterType>storage water heater</WaterHeaterType>
+            <Location>living space</Location>
+            <TankVolume>40.0</TankVolume>
             <FractionDHWLoadServed>1.0</FractionDHWLoadServed>
-            <UniformEnergyFactor>0.93</UniformEnergyFactor>
+            <HeatingCapacity>18767.0</HeatingCapacity>
+            <EnergyFactor>0.95</EnergyFactor>
+            <HotWaterTemperature>125.0</HotWaterTemperature>
           </WaterHeatingSystem>
           <HotWaterDistribution>
-            <SystemIdentifier id='HotWaterDstribution'/>
+            <SystemIdentifier id='HotWaterDistribution'/>
             <SystemType>
-              <Recirculation>
-                <ControlType>presence sensor demand control</ControlType>
-              </Recirculation>
+              <Standard>
+                <PipingLength>50.0</PipingLength>
+              </Standard>
             </SystemType>
             <PipeInsulation>
-              <PipeRValue>3.0</PipeRValue>
+              <PipeRValue>0.0</PipeRValue>
             </PipeInsulation>
           </HotWaterDistribution>
           <WaterFixture>
@@ -452,80 +457,6 @@
           <IsConvection>false</IsConvection>
         </Oven>
       </Appliances>
-      <Lighting>
-        <LightingGroup>
-          <SystemIdentifier id='Lighting_CFL_Interior'/>
-          <Location>interior</Location>
-          <FractionofUnitsInLocation>0.4</FractionofUnitsInLocation>
-          <LightingType>
-            <CompactFluorescent/>
-          </LightingType>
-        </LightingGroup>
-        <LightingGroup>
-          <SystemIdentifier id='Lighting_CFL_Exterior'/>
-          <Location>exterior</Location>
-          <FractionofUnitsInLocation>0.4</FractionofUnitsInLocation>
-          <LightingType>
-            <CompactFluorescent/>
-          </LightingType>
-        </LightingGroup>
-        <LightingGroup>
-          <SystemIdentifier id='Lighting_CFL_Garage'/>
-          <Location>garage</Location>
-          <FractionofUnitsInLocation>0.4</FractionofUnitsInLocation>
-          <LightingType>
-            <CompactFluorescent/>
-          </LightingType>
-        </LightingGroup>
-        <LightingGroup>
-          <SystemIdentifier id='Lighting_LFL_Interior'/>
-          <Location>interior</Location>
-          <FractionofUnitsInLocation>0.1</FractionofUnitsInLocation>
-          <LightingType>
-            <FluorescentTube/>
-          </LightingType>
-        </LightingGroup>
-        <LightingGroup>
-          <SystemIdentifier id='Lighting_LFL_Exterior'/>
-          <Location>exterior</Location>
-          <FractionofUnitsInLocation>0.1</FractionofUnitsInLocation>
-          <LightingType>
-            <FluorescentTube/>
-          </LightingType>
-        </LightingGroup>
-        <LightingGroup>
-          <SystemIdentifier id='Lighting_LFL_Garage'/>
-          <Location>garage</Location>
-          <FractionofUnitsInLocation>0.1</FractionofUnitsInLocation>
-          <LightingType>
-            <FluorescentTube/>
-          </LightingType>
-        </LightingGroup>
-        <LightingGroup>
-          <SystemIdentifier id='Lighting_LED_Interior'/>
-          <Location>interior</Location>
-          <FractionofUnitsInLocation>0.25</FractionofUnitsInLocation>
-          <LightingType>
-            <LightEmittingDiode/>
-          </LightingType>
-        </LightingGroup>
-        <LightingGroup>
-          <SystemIdentifier id='Lighting_LED_Exterior'/>
-          <Location>exterior</Location>
-          <FractionofUnitsInLocation>0.25</FractionofUnitsInLocation>
-          <LightingType>
-            <LightEmittingDiode/>
-          </LightingType>
-        </LightingGroup>
-        <LightingGroup>
-          <SystemIdentifier id='Lighting_LED_Garage'/>
-          <Location>garage</Location>
-          <FractionofUnitsInLocation>0.25</FractionofUnitsInLocation>
-          <LightingType>
-            <LightEmittingDiode/>
-          </LightingType>
-        </LightingGroup>
-      </Lighting>
       <MiscLoads>
         <PlugLoad>
           <SystemIdentifier id='PlugLoadMisc'/>

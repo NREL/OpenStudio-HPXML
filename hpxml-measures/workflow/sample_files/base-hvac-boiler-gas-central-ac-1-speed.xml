@@ -41,6 +41,7 @@
           <NumberofConditionedFloors>2</NumberofConditionedFloors>
           <NumberofConditionedFloorsAboveGrade>1</NumberofConditionedFloorsAboveGrade>
           <NumberofBedrooms>3</NumberofBedrooms>
+          <NumberofBathrooms>2</NumberofBathrooms>
           <ConditionedFloorArea>2700.0</ConditionedFloorArea>
           <ConditionedBuildingVolume>21600.0</ConditionedBuildingVolume>
         </BuildingConstruction>
@@ -342,7 +343,9 @@
           <HVACDistribution>
             <SystemIdentifier id='HVACDistribution'/>
             <DistributionSystemType>
-              <HydronicDistribution/>
+              <HydronicDistribution>
+                <HydronicDistributionType>baseboard</HydronicDistributionType>
+              </HydronicDistribution>
             </DistributionSystemType>
           </HVACDistribution>
           <HVACDistribution>
@@ -377,9 +380,10 @@
                   <DuctLocation>attic - unvented</DuctLocation>
                   <DuctSurfaceArea>50.0</DuctSurfaceArea>
                 </Ducts>
+                <NumberofReturnRegisters>3</NumberofReturnRegisters>
               </AirDistribution>
             </DistributionSystemType>
-            <ConditionedFloorAreaServed>1350.0</ConditionedFloorAreaServed>
+            <ConditionedFloorAreaServed>2700.0</ConditionedFloorAreaServed>
           </HVACDistribution>
         </HVAC>
         <WaterHeating>
@@ -395,7 +399,7 @@
             <HotWaterTemperature>125.0</HotWaterTemperature>
           </WaterHeatingSystem>
           <HotWaterDistribution>
-            <SystemIdentifier id='HotWaterDstribution'/>
+            <SystemIdentifier id='HotWaterDistribution'/>
             <SystemType>
               <Standard>
                 <PipingLength>50.0</PipingLength>
