@@ -3668,30 +3668,28 @@ def set_hpxml_ventilation_fans(hpxml_file, hpxml)
                                preheating_efficiency_cop: 3.5,
                                precooling_fuel: HPXML::FuelTypeElectricity,
                                precooling_efficiency_cop: 4.0)
-    hpxml.ventilation_fans.add(id: 'SharedCFISPreconditioned',
-                               fan_type: HPXML::MechVentTypeCFIS,
-                               distribution_system_idref: 'HVACDistribution',
+    hpxml.ventilation_fans.add(id: 'SharedExhaust',
+                               fan_type: HPXML::MechVentTypeExhaust,
                                is_shared_system: true,
                                in_unit_flow_rate: 70,
                                rated_flow_rate: 700,
                                hours_in_operation: 8,
                                fan_power: 300,
                                used_for_whole_building_ventilation: true,
-                               fraction_recirculation: 0.3,
-                               preheating_fuel: HPXML::FuelTypeElectricity,
-                               preheating_efficiency_cop: 3.5,
-                               precooling_fuel: HPXML::FuelTypeElectricity,
-                               precooling_efficiency_cop: 4.0)
-    hpxml.ventilation_fans.add(id: 'SharedCFIS',
+                               fraction_recirculation: 0.0)
+    hpxml.ventilation_fans.add(id: 'Exhaust',
+                               fan_type: HPXML::MechVentTypeExhaust,
+                               rated_flow_rate: 50,
+                               hours_in_operation: 14,
+                               fan_power: 10,
+                               used_for_whole_building_ventilation: true)
+    hpxml.ventilation_fans.add(id: 'CFIS',
                                fan_type: HPXML::MechVentTypeCFIS,
-                               distribution_system_idref: 'HVACDistribution2',
-                               is_shared_system: true,
-                               in_unit_flow_rate: 70,
-                               rated_flow_rate: 700,
+                               tested_flow_rate: 160,
                                hours_in_operation: 8,
-                               fan_power: 300,
+                               fan_power: 150,
                                used_for_whole_building_ventilation: true,
-                               fraction_recirculation: 0.3)
+                               distribution_system_idref: 'HVACDistribution')
   elsif ['base-mechvent-multiple.xml'].include? hpxml_file
     hpxml.ventilation_fans.add(id: 'WholeHouseFan',
                                rated_flow_rate: 2000,

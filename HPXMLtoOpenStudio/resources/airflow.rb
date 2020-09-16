@@ -1344,7 +1344,6 @@ class Airflow
 
   def self.apply_cfis(infil_program, vent_mech_fans, cfis_fan_actuator)
     infil_program.addLine('Set QWHV_cfis_oa = 0.0')
-    infil_program.addLine('Set QWHV_cfis_tot = 0.0')
 
     vent_mech_fans.each do |vent_mech|
       infil_program.addLine("Set fan_rtf_hvac = #{@fan_rtf_sensor[@cfis_airloop[vent_mech.id]].name}")
@@ -1357,11 +1356,6 @@ class Airflow
       cfis_open_time = [vent_mech.hours_in_operation / 24.0 * 60.0, 59.999].min # Minimum open time in minutes
       infil_program.addLine("Set CFIS_t_min_hr_open = #{cfis_open_time}") # minutes per hour the CFIS damper is open
       infil_program.addLine("Set CFIS_Q_duct_oa = #{UnitConversions.convert(vent_mech.oa_flow_rate, 'cfm', 'm^3/s')}")
-      if vent_mech.is_shared_system
-        infil_program.addLine("Set CFIS_Q_duct_tot = #{UnitConversions.convert(vent_mech.in_unit_flow_rate, 'cfm', 'm^3/s')}")
-      else
-        infil_program.addLine('Set CFIS_Q_duct_tot = CFIS_Q_duct_oa')
-      end
       infil_program.addLine('Set cfis_f_damper_open = 0') # fraction of the timestep the CFIS damper is open
       infil_program.addLine("Set #{@cfis_f_damper_extra_open_var[vent_mech.id].name} = 0") # additional runtime fraction to meet min/hr
 
@@ -1394,7 +1388,6 @@ class Airflow
       # Fan power is metered under fan cooling and heating meters
       infil_program.addLine('  EndIf')
       infil_program.addLine('  Set QWHV_cfis_oa = QWHV_cfis_oa + cfis_f_damper_open * CFIS_Q_duct_oa')
-      infil_program.addLine('  Set QWHV_cfis_tot = QWHV_cfis_tot + cfis_f_damper_open * CFIS_Q_duct_tot')
       infil_program.addLine('EndIf')
     end
   end
@@ -1462,7 +1455,7 @@ class Airflow
     infil_program.addLine("Set QWHV_bal_erv_hrv = #{UnitConversions.convert(bal_cfm_tot + erv_hrv_cfm_tot, 'cfm', 'm^3/s').round(4)}")
 
     infil_program.addLine('Set Qexhaust = Qrange + Qbath + QWHV_exh + QWHV_bal_erv_hrv')
-    infil_program.addLine('Set Qsupply = QWHV_sup + QWHV_bal_erv_hrv + QWHV_cfis_tot')
+    infil_program.addLine('Set Qsupply = QWHV_sup + QWHV_bal_erv_hrv + QWHV_cfis_oa')
     infil_program.addLine('Set Qfan = (@Max Qexhaust Qsupply)')
     if Constants.ERIVersions.index(@eri_version) >= Constants.ERIVersions.index('2019')
       # Follow ASHRAE 62.2-2016, Normative Appendix C equations for time-varying total airflow
