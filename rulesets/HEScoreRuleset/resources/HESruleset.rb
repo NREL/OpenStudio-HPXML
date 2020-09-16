@@ -708,7 +708,8 @@ class HEScoreRuleset
 
     additional_hydronic_ids.each do |hydronic_id|
       new_hpxml.hvac_distributions.add(id: hydronic_id,
-                                       distribution_system_type: HPXML::HVACDistributionTypeHydronic)
+                                       distribution_system_type: HPXML::HVACDistributionTypeHydronic,
+                                       hydronic_type: HPXML::HydronicTypeBaseboard)
     end
   end
 
