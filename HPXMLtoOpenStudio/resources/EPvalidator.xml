@@ -726,7 +726,7 @@
   <sch:pattern name='[MechanicalVentilationType=CFIS]'>
     <sch:rule context='/h:HPXML/h:Building/h:BuildingDetails/h:Systems/h:MechanicalVentilation/h:VentilationFans/h:VentilationFan[h:UsedForWholeBuildingVentilation="true" and h:FanType="central fan integrated supply"]'>
       <sch:assert test='count(h:AttachedToHVACDistributionSystem) = 1'>Expected 1 element(s) for xpath: AttachedToHVACDistributionSystem</sch:assert>
-      <sch:assert test='count(h:IsSharedSystem) = 0'>Expected 0 element(s) for xpath: IsSharedSystem</sch:assert>
+      <sch:assert test='count(h:IsSharedSystem[text()="true"]) = 0'>Expected 0 element(s) for xpath: IsSharedSystem[text()="true"]</sch:assert>
     </sch:rule>
   </sch:pattern>
 
