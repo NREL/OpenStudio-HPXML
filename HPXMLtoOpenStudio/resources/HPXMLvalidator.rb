@@ -68,7 +68,7 @@ class HPXMLValidator
           enums << ['_', enum.get('value'), '_'].join() # in "_foo_" format
         end
 
-        next unless not enums.empty?
+        next if enums.empty?
 
         assertion = XMLHelper.add_element(rule, 'sch:assert')
         XMLHelper.add_attribute(assertion, 'role', 'ERROR')
