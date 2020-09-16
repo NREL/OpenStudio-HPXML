@@ -1291,7 +1291,10 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
   def test_pv_systems
     # Test inputs not overridden by defaults
     hpxml = _create_hpxml('base-pv.xml')
+    hpxml.building_construction.residential_facility_type = HPXML::ResidentialTypeSFA
     hpxml.pv_systems.each do |pv|
+      pv.is_shared_system = true
+      pv.number_of_bedrooms_served = 20
       pv.inverter_efficiency = 0.90
       pv.system_losses_fraction = 0.20
     end
@@ -1299,10 +1302,11 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
     hpxml_default = _test_measure()
     expected_interver_efficiency = [0.90, 0.90]
     expected_system_loss_frac = [0.20, 0.20]
-    _test_default_pv_system_values(hpxml_default, expected_interver_efficiency, expected_system_loss_frac)
+    _test_default_pv_system_values(hpxml_default, expected_interver_efficiency, expected_system_loss_frac, true)
 
     # Test defaults w/o year modules manufactured
     hpxml.pv_systems.each do |pv|
+      pv.is_shared_system = nil
       pv.inverter_efficiency = nil
       pv.system_losses_fraction = nil
     end
@@ -1310,7 +1314,7 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
     hpxml_default = _test_measure()
     expected_interver_efficiency = [0.96, 0.96]
     expected_system_loss_frac = [0.14, 0.14]
-    _test_default_pv_system_values(hpxml_default, expected_interver_efficiency, expected_system_loss_frac)
+    _test_default_pv_system_values(hpxml_default, expected_interver_efficiency, expected_system_loss_frac, false)
 
     # Test defaults w/ year modules manufactured
     hpxml.pv_systems.each do |pv|
@@ -1320,7 +1324,7 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
     hpxml_default = _test_measure()
     expected_interver_efficiency = [0.96, 0.96]
     expected_system_loss_frac = [0.182, 0.182]
-    _test_default_pv_system_values(hpxml_default, expected_interver_efficiency, expected_system_loss_frac)
+    _test_default_pv_system_values(hpxml_default, expected_interver_efficiency, expected_system_loss_frac, false)
   end
 
   def _test_measure()
@@ -1422,9 +1426,10 @@ class HPXMLtoOpenStudioDefaultsTest < MiniTest::Test
     end
   end
 
-  def _test_default_pv_system_values(hpxml, interver_efficiency, system_loss_frac)
+  def _test_default_pv_system_values(hpxml, interver_efficiency, system_loss_frac, is_shared_system)
     assert_equal(interver_efficiency.size, hpxml.pv_systems.size)
     hpxml.pv_systems.each_with_index do |pv, idx|
+      assert_equal(is_shared_system, pv.is_shared_system)
       assert_equal(interver_efficiency[idx], pv.inverter_efficiency)
       assert_in_epsilon(system_loss_frac[idx], pv.system_losses_fraction, 0.01)
     end
