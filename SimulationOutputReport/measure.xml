@@ -3,8 +3,8 @@
   <schema_version>3.0</schema_version>
   <name>simulation_output_report</name>
   <uid>df9d170c-c21a-4130-866d-0d46b06073fd</uid>
-  <version_id>66a82088-71a3-4ca1-abd0-ecdb8338f71f</version_id>
-  <version_modified>20200911T142037Z</version_modified>
+  <version_id>cdd1f23e-2991-4cb3-876a-59a7b18f1742</version_id>
+  <version_modified>20200916T225334Z</version_modified>
   <xml_checksum>9BF1E6AC</xml_checksum>
   <class_name>SimulationOutputReport</class_name>
   <display_name>HPXML Simulation Output Report</display_name>
@@ -323,9 +323,16 @@
       <model_dependent>false</model_dependent>
     </output>
     <output>
-      <name>Electricity: Mech Vent Preconditioning MBtu</name>
-      <display_name>Electricity: Mech Vent Preconditioning MBtu</display_name>
-      <short_name>Electricity: Mech Vent Preconditioning MBtu</short_name>
+      <name>Electricity: Mech Vent Preheating MBtu</name>
+      <display_name>Electricity: Mech Vent Preheating MBtu</display_name>
+      <short_name>Electricity: Mech Vent Preheating MBtu</short_name>
+      <type>Double</type>
+      <model_dependent>false</model_dependent>
+    </output>
+    <output>
+      <name>Electricity: Mech Vent Precooling MBtu</name>
+      <display_name>Electricity: Mech Vent Precooling MBtu</display_name>
+      <short_name>Electricity: Mech Vent Precooling MBtu</short_name>
       <type>Double</type>
       <model_dependent>false</model_dependent>
     </output>
@@ -484,9 +491,9 @@
       <model_dependent>false</model_dependent>
     </output>
     <output>
-      <name>Natural Gas: Mech Vent Preconditioning MBtu</name>
-      <display_name>Natural Gas: Mech Vent Preconditioning MBtu</display_name>
-      <short_name>Natural Gas: Mech Vent Preconditioning MBtu</short_name>
+      <name>Natural Gas: Mech Vent Preheating MBtu</name>
+      <display_name>Natural Gas: Mech Vent Preheating MBtu</display_name>
+      <short_name>Natural Gas: Mech Vent Preheating MBtu</short_name>
       <type>Double</type>
       <model_dependent>false</model_dependent>
     </output>
@@ -554,9 +561,9 @@
       <model_dependent>false</model_dependent>
     </output>
     <output>
-      <name>Fuel Oil: Mech Vent Preconditioning MBtu</name>
-      <display_name>Fuel Oil: Mech Vent Preconditioning MBtu</display_name>
-      <short_name>Fuel Oil: Mech Vent Preconditioning MBtu</short_name>
+      <name>Fuel Oil: Mech Vent Preheating MBtu</name>
+      <display_name>Fuel Oil: Mech Vent Preheating MBtu</display_name>
+      <short_name>Fuel Oil: Mech Vent Preheating MBtu</short_name>
       <type>Double</type>
       <model_dependent>false</model_dependent>
     </output>
@@ -610,9 +617,9 @@
       <model_dependent>false</model_dependent>
     </output>
     <output>
-      <name>Propane: Mech Vent Preconditioning MBtu</name>
-      <display_name>Propane: Mech Vent Preconditioning MBtu</display_name>
-      <short_name>Propane: Mech Vent Preconditioning MBtu</short_name>
+      <name>Propane: Mech Vent Preheating MBtu</name>
+      <display_name>Propane: Mech Vent Preheating MBtu</display_name>
+      <short_name>Propane: Mech Vent Preheating MBtu</short_name>
       <type>Double</type>
       <model_dependent>false</model_dependent>
     </output>
@@ -666,9 +673,9 @@
       <model_dependent>false</model_dependent>
     </output>
     <output>
-      <name>Wood Cord: Mech Vent Preconditioning MBtu</name>
-      <display_name>Wood Cord: Mech Vent Preconditioning MBtu</display_name>
-      <short_name>Wood Cord: Mech Vent Preconditioning MBtu</short_name>
+      <name>Wood Cord: Mech Vent Preheating MBtu</name>
+      <display_name>Wood Cord: Mech Vent Preheating MBtu</display_name>
+      <short_name>Wood Cord: Mech Vent Preheating MBtu</short_name>
       <type>Double</type>
       <model_dependent>false</model_dependent>
     </output>
@@ -722,9 +729,9 @@
       <model_dependent>false</model_dependent>
     </output>
     <output>
-      <name>Wood Pellets: Mech Vent Preconditioning MBtu</name>
-      <display_name>Wood Pellets: Mech Vent Preconditioning MBtu</display_name>
-      <short_name>Wood Pellets: Mech Vent Preconditioning MBtu</short_name>
+      <name>Wood Pellets: Mech Vent Preheating MBtu</name>
+      <display_name>Wood Pellets: Mech Vent Preheating MBtu</display_name>
+      <short_name>Wood Pellets: Mech Vent Preheating MBtu</short_name>
       <type>Double</type>
       <model_dependent>false</model_dependent>
     </output>
@@ -778,9 +785,9 @@
       <model_dependent>false</model_dependent>
     </output>
     <output>
-      <name>Coal: Mech Vent Preconditioning MBtu</name>
-      <display_name>Coal: Mech Vent Preconditioning MBtu</display_name>
-      <short_name>Coal: Mech Vent Preconditioning MBtu</short_name>
+      <name>Coal: Mech Vent Preheating MBtu</name>
+      <display_name>Coal: Mech Vent Preheating MBtu</display_name>
+      <short_name>Coal: Mech Vent Preheating MBtu</short_name>
       <type>Double</type>
       <model_dependent>false</model_dependent>
     </output>
@@ -832,13 +839,13 @@
       <filename>constants.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>DCE45691</checksum>
+      <checksum>BA4D8683</checksum>
     </file>
     <file>
       <filename>output_report_test.rb</filename>
       <filetype>rb</filetype>
       <usage_type>test</usage_type>
-      <checksum>3972E651</checksum>
+      <checksum>4388150F</checksum>
     </file>
     <file>
       <version>
@@ -849,7 +856,7 @@
       <filename>measure.rb</filename>
       <filetype>rb</filetype>
       <usage_type>script</usage_type>
-      <checksum>822AAA52</checksum>
+      <checksum>B0F905A8</checksum>
     </file>
   </files>
 </measure>

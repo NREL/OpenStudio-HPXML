@@ -710,7 +710,7 @@
               <FractionRecirculation>0.0</FractionRecirculation>
               <FanPower>300.0</FanPower>
               <extension>
-                <InUnitFlowRate>100</InUnitFlowRate>
+                <InUnitFlowRate>100.0</InUnitFlowRate>
                 <PreHeating>
                   <Fuel>natural gas</Fuel>
                   <AnnualHeatingEfficiency>
@@ -739,7 +739,7 @@
               <SensibleRecoveryEfficiency>0.72</SensibleRecoveryEfficiency>
               <FanPower>150.0</FanPower>
               <extension>
-                <InUnitFlowRate>50</InUnitFlowRate>
+                <InUnitFlowRate>50.0</InUnitFlowRate>
                 <PreHeating>
                   <Fuel>natural gas</Fuel>
                   <AnnualHeatingEfficiency>
@@ -767,7 +767,7 @@
               <SensibleRecoveryEfficiency>0.72</SensibleRecoveryEfficiency>
               <FanPower>150.0</FanPower>
               <extension>
-                <InUnitFlowRate>50</InUnitFlowRate>
+                <InUnitFlowRate>50.0</InUnitFlowRate>
                 <PreHeating>
                   <Fuel>electricity</Fuel>
                   <AnnualHeatingEfficiency>
@@ -794,7 +794,7 @@
               <FractionRecirculation>0.3</FractionRecirculation>
               <FanPower>150.0</FanPower>
               <extension>
-                <InUnitFlowRate>30</InUnitFlowRate>
+                <InUnitFlowRate>30.0</InUnitFlowRate>
                 <PreHeating>
                   <Fuel>electricity</Fuel>
                   <AnnualHeatingEfficiency>
@@ -822,7 +822,7 @@
               <FanPower>300.0</FanPower>
               <AttachedToHVACDistributionSystem idref='HVACDistribution'/>
               <extension>
-                <InUnitFlowRate>70</InUnitFlowRate>
+                <InUnitFlowRate>70.0</InUnitFlowRate>
                 <PreHeating>
                   <Fuel>electricity</Fuel>
                   <AnnualHeatingEfficiency>
@@ -850,7 +850,7 @@
               <FanPower>300.0</FanPower>
               <AttachedToHVACDistributionSystem idref='HVACDistribution2'/>
               <extension>
-                <InUnitFlowRate>70</InUnitFlowRate>
+                <InUnitFlowRate>70.0</InUnitFlowRate>
               </extension>
             </VentilationFan>
           </VentilationFans>

@@ -634,7 +634,7 @@
               <FractionRecirculation>0.5</FractionRecirculation>
               <FanPower>300.0</FanPower>
               <extension>
-                <InUnitFlowRate>110</InUnitFlowRate>
+                <InUnitFlowRate>110.0</InUnitFlowRate>
               </extension>
             </VentilationFan>
             <VentilationFan>

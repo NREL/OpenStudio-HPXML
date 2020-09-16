@@ -766,6 +766,14 @@
     </sch:rule>
   </sch:pattern>
 
+  <sch:pattern name='[WholeHouseFan]'>
+    <sch:rule context='/h:HPXML/h:Building/h:BuildingDetails/h:Systems/h:MechanicalVentilation/h:VentilationFans/h:VentilationFan[h:UsedForSeasonalCoolingLoadReduction="true"]'>
+      <sch:assert test='count(h:SystemIdentifier) = 1'>Expected 1 element(s) for xpath: SystemIdentifier</sch:assert>
+      <sch:assert test='count(h:RatedFlowRate) = 1'>Expected 1 element(s) for xpath: RatedFlowRate</sch:assert>
+      <sch:assert test='count(h:FanPower) = 1'>Expected 1 element(s) for xpath: FanPower</sch:assert>
+    </sch:rule>
+  </sch:pattern>
+
   <sch:pattern name='[WaterHeatingSystem]'>
     <sch:rule context='/h:HPXML/h:Building/h:BuildingDetails/h:Systems/h:WaterHeating/h:WaterHeatingSystem'>
       <sch:assert test='count(../h:HotWaterDistribution) = 1'>Expected 1 element(s) for xpath: ../HotWaterDistribution</sch:assert> <!-- See [HotWaterDistribution] -->
@@ -948,7 +956,7 @@
     </sch:rule>
   </sch:pattern>
 
-  <sch:pattern name='[ClothesWasherType=Shared]'>
+  <sch:pattern name='[ClothesWasherType=Detailed]'>
     <sch:rule context='/h:HPXML/h:Building/h:BuildingDetails/h:Appliances/h:ClothesWasher[h:ModifiedEnergyFactor | h:IntegratedModifiedEnergyFactor]'>
       <sch:assert test='count(h:RatedAnnualkWh) = 1'>Expected 1 element(s) for xpath: RatedAnnualkWh</sch:assert>
       <sch:assert test='count(h:LabelElectricRate) = 1'>Expected 1 element(s) for xpath: LabelElectricRate</sch:assert>

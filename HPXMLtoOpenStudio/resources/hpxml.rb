@@ -3263,8 +3263,7 @@ class HPXML < Object
       fail "Attached HVAC distribution system '#{@distribution_system_idref}' not found for ventilation fan '#{@id}'."
     end
 
-    def oa_flow_rate
-      # Need this method for cfis
+    def total_unit_flow_rate
       if not @is_shared_system
         if not @tested_flow_rate.nil?
           return @tested_flow_rate
@@ -3272,10 +3271,36 @@ class HPXML < Object
           return @rated_flow_rate
         end
       else
+        return @in_unit_flow_rate
+      end
+    end
+
+    def oa_unit_flow_rate
+      if not @is_shared_system
+        return total_unit_flow_rate
+      else
         if @fan_type == HPXML::MechVentTypeExhaust && @fraction_recirculation > 0.0
           fail "Exhaust fan #{@id} can not have recirculation."
         else
-          return @in_unit_flow_rate * (1 - @fraction_recirculation)
+          return total_unit_flow_rate * (1 - @fraction_recirculation)
+        end
+      end
+    end
+
+    def average_oa_unit_flow_rate
+      # Daily-average outdoor air (cfm) associated with the unit
+      if not @hours_in_operation.nil?
+        if not oa_unit_flow_rate.nil?
+          return oa_unit_flow_rate * (@hours_in_operation / 24.0)
+        end
+      end
+    end
+
+    def average_total_unit_flow_rate
+      # Daily-average total air (cfm) associated with the unit
+      if not @hours_in_operation.nil?
+        if not total_unit_flow_rate.nil?
+          return total_unit_flow_rate * (@hours_in_operation / 24.0)
         end
       end
     end
@@ -3290,7 +3315,6 @@ class HPXML < Object
     end
 
     def unit_fan_power
-      # Need this method for cfis
       if @is_shared_system
         return @fan_power * unit_flow_rate_ratio
       else
@@ -3298,21 +3322,7 @@ class HPXML < Object
       end
     end
 
-    def average_oa_flow_rate
-      if (not oa_flow_rate.nil?) && (not @hours_in_operation.nil?)
-        return oa_flow_rate * (@hours_in_operation / 24.0)
-      end
-    end
-
-    def average_unit_flow_rate
-      if @is_shared_system && (not @hours_in_operation.nil?)
-        return @in_unit_flow_rate * (@hours_in_operation / 24.0)
-      elsif not @hours_in_operation.nil?
-        return oa_flow_rate * (@hours_in_operation / 24.0)
-      end
-    end
-
-    def average_fan_power
+    def average_unit_fan_power
       if not @hours_in_operation.nil?
         return unit_fan_power * (@hours_in_operation / 24.0)
       end
@@ -3349,7 +3359,7 @@ class HPXML < Object
     def check_for_errors
       errors = []
       begin; distribution_system; rescue StandardError => e; errors << e.message; end
-      begin; oa_flow_rate; rescue StandardError => e; errors << e.message; end
+      begin; oa_unit_flow_rate; rescue StandardError => e; errors << e.message; end
       return errors
     end
 
@@ -3384,7 +3394,7 @@ class HPXML < Object
       end
       XMLHelper.add_extension(ventilation_fan, 'StartHour', to_integer(@start_hour)) unless @start_hour.nil?
       if @is_shared_system
-        XMLHelper.add_extension(ventilation_fan, 'InUnitFlowRate', to_integer(@in_unit_flow_rate)) unless @in_unit_flow_rate.nil?
+        XMLHelper.add_extension(ventilation_fan, 'InUnitFlowRate', to_float(@in_unit_flow_rate)) unless @in_unit_flow_rate.nil?
         if (not @preheating_fuel.nil?) && (not @preheating_efficiency_cop.nil?)
           precond_htg = XMLHelper.create_elements_as_needed(ventilation_fan, ['extension', 'PreHeating'])
           XMLHelper.add_element(precond_htg, 'Fuel', @preheating_fuel) unless @preheating_fuel.nil?
