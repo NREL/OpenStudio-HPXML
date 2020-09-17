@@ -3610,8 +3610,10 @@ def set_hpxml_ventilation_fans(hpxml_file, hpxml)
   elsif ['base-mechvent-shared-preconditioning.xml'].include? hpxml_file
     hpxml.ventilation_fans[0].preheating_fuel = HPXML::FuelTypeNaturalGas
     hpxml.ventilation_fans[0].preheating_efficiency_cop = 0.92
+    hpxml.ventilation_fans[0].preheating_fraction_load_served = 0.7
     hpxml.ventilation_fans[0].precooling_fuel = HPXML::FuelTypeElectricity
     hpxml.ventilation_fans[0].precooling_efficiency_cop = 4.0
+    hpxml.ventilation_fans[0].precooling_fraction_load_served = 0.8
   elsif ['base-mechvent-shared-multiple.xml'].include? hpxml_file
     hpxml.ventilation_fans.add(id: 'SharedSupplyPreconditioned',
                                fan_type: HPXML::MechVentTypeSupply,
@@ -3625,7 +3627,8 @@ def set_hpxml_ventilation_fans(hpxml_file, hpxml)
                                preheating_fuel: HPXML::FuelTypeNaturalGas,
                                preheating_efficiency_cop: 0.92,
                                precooling_fuel: HPXML::FuelTypeElectricity,
-                               precooling_efficiency_cop: 4.0)
+                               precooling_efficiency_cop: 4.0,
+                               precooling_fraction_load_served: 0.8)
     hpxml.ventilation_fans.add(id: 'SharedERVPreconditioned',
                                fan_type: HPXML::MechVentTypeERV,
                                is_shared_system: true,

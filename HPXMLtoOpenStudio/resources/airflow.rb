@@ -1515,13 +1515,11 @@ class Airflow
       infil_program.addLine('Set FanLatToLv = FanTotalToLv - FanSensToLv')
     end
 
-    # Actuator
+    # Actuator, 
+    # If preconditioned, handle actuators later in calculate_precond_loads
     if not preconditioned
       infil_program.addLine("Set #{fan_sens_load_actuator.name} = #{fan_sens_load_actuator.name} + FanSensToLv")
       infil_program.addLine("Set #{fan_lat_load_actuator.name} = #{fan_lat_load_actuator.name} + FanLatToLv")
-    else
-      infil_program.addLine("Set #{fan_sens_load_actuator.name} = #{fan_sens_load_actuator.name} - FanSensToLv")
-      infil_program.addLine("Set #{fan_lat_load_actuator.name} = #{fan_lat_load_actuator.name} - FanLatToLv")
     end
   end
 
@@ -1540,7 +1538,10 @@ class Airflow
       end
       calculate_fan_loads(model, infil_program, vent_mech_erv_hrv_tot, hrv_erv_effectiveness_map, fan_sens_load_actuator, fan_lat_load_actuator, 'Qpreheat', true)
 
-      infil_program.addLine("  Set #{htg_energy_actuator.name} = (-FanSensToLv) / #{f_preheat.preheating_efficiency_cop}")
+      infil_program.addLine("  Set PreHeatingEnergy = (-FanSensToLv) * #{f_preheat.preheating_fraction_load_served}")
+      infil_program.addLine("  Set #{fan_sens_load_actuator.name} = #{fan_sens_load_actuator.name}  + PreHeatingEnergy")
+      infil_program.addLine("  Set #{fan_lat_load_actuator.name} = #{fan_lat_load_actuator.name} - FanLatToLv")
+      infil_program.addLine("  Set #{htg_energy_actuator.name} = PreHeatingEnergy / #{f_preheat.preheating_efficiency_cop}")
       infil_program.addLine('Else')
       infil_program.addLine("  Set #{htg_energy_actuator.name} = 0.0")
       infil_program.addLine('EndIf')
@@ -1557,7 +1558,10 @@ class Airflow
       end
       calculate_fan_loads(model, infil_program, vent_mech_erv_hrv_tot, hrv_erv_effectiveness_map, fan_sens_load_actuator, fan_lat_load_actuator, 'Qprecool', true)
 
-      infil_program.addLine("  Set #{clg_energy_actuator.name} = FanSensToLv / #{f_precool.precooling_efficiency_cop}")
+      infil_program.addLine("  Set PreCoolingEnergy = FanSensToLv * #{f_precool.precooling_fraction_load_served}")
+      infil_program.addLine("  Set #{fan_sens_load_actuator.name} = #{fan_sens_load_actuator.name}  - PreCoolingEnergy")
+      infil_program.addLine("  Set #{fan_lat_load_actuator.name} = #{fan_lat_load_actuator.name} - FanLatToLv")
+      infil_program.addLine("  Set #{clg_energy_actuator.name} = PreCoolingEnergy / #{f_precool.precooling_efficiency_cop}")
       infil_program.addLine('Else')
       infil_program.addLine("  Set #{clg_energy_actuator.name} = 0.0")
       infil_program.addLine('EndIf')
