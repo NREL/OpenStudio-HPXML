@@ -790,10 +790,7 @@ def set_hpxml_foundations(hpxml_file, hpxml)
     hpxml.foundations.clear
     hpxml.foundations.add(id: 'UnconditionedBasement',
                           foundation_type: HPXML::FoundationTypeBasementUnconditioned,
-                          unconditioned_basement_thermal_boundary: HPXML::FoundationThermalBoundaryFloor,
                           within_infiltration_volume: false)
-  elsif ['base-foundation-unconditioned-basement-wall-insulation.xml'].include? hpxml_file
-    hpxml.foundations[0].unconditioned_basement_thermal_boundary = HPXML::FoundationThermalBoundaryWall
   elsif ['base-foundation-multiple.xml'].include? hpxml_file
     hpxml.foundations.add(id: 'UnventedCrawlspace',
                           foundation_type: HPXML::FoundationTypeCrawlspaceUnvented,
