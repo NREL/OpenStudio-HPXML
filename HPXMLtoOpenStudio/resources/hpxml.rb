@@ -3407,7 +3407,7 @@ class HPXML < Object
           eff = XMLHelper.add_element(precond_htg, 'AnnualHeatingEfficiency') unless @preheating_efficiency_cop.nil?
           XMLHelper.add_element(eff, 'Value', to_float(@preheating_efficiency_cop)) unless eff.nil?
           XMLHelper.add_element(eff, 'Units', UnitsCOP) unless eff.nil?
-          XMLHelper.add_element(precond_htg, 'FractionVentilationLoadServed', to_float(@preheating_fraction_load_served)) unless @preheating_fraction_load_served.nil?
+          XMLHelper.add_element(precond_htg, 'FractionVentilationHeatLoadServed', to_float(@preheating_fraction_load_served)) unless @preheating_fraction_load_served.nil?
         end
         if (not @precooling_fuel.nil?) && (not @precooling_efficiency_cop.nil?)
           precond_clg = XMLHelper.create_elements_as_needed(ventilation_fan, ['extension', 'PreCooling'])
@@ -3415,7 +3415,7 @@ class HPXML < Object
           eff = XMLHelper.add_element(precond_clg, 'AnnualCoolingEfficiency') unless @precooling_efficiency_cop.nil?
           XMLHelper.add_element(eff, 'Value', to_float(@precooling_efficiency_cop)) unless eff.nil?
           XMLHelper.add_element(eff, 'Units', UnitsCOP) unless eff.nil?
-          XMLHelper.add_element(precond_clg, 'FractionVentilationLoadServed', to_float(@precooling_fraction_load_served)) unless @precooling_fraction_load_served.nil?
+          XMLHelper.add_element(precond_clg, 'FractionVentilationCoolLoadServed', to_float(@precooling_fraction_load_served)) unless @precooling_fraction_load_served.nil?
         end
       end
     end
@@ -3435,10 +3435,10 @@ class HPXML < Object
         @in_unit_flow_rate = to_float_or_nil(XMLHelper.get_value(ventilation_fan, 'extension/InUnitFlowRate'))
         @preheating_fuel = XMLHelper.get_value(ventilation_fan, 'extension/PreHeating/Fuel')
         @preheating_efficiency_cop = to_float_or_nil(XMLHelper.get_value(ventilation_fan, "extension/PreHeating/AnnualHeatingEfficiency[Units='#{UnitsCOP}']/Value"))
-        @preheating_fraction_load_served = to_float_or_nil(XMLHelper.get_value(ventilation_fan, 'extension/PreHeating/FractionVentilationLoadServed'))
+        @preheating_fraction_load_served = to_float_or_nil(XMLHelper.get_value(ventilation_fan, 'extension/PreHeating/FractionVentilationHeatLoadServed'))
         @precooling_fuel = XMLHelper.get_value(ventilation_fan, 'extension/PreCooling/Fuel')
         @precooling_efficiency_cop = to_float_or_nil(XMLHelper.get_value(ventilation_fan, "extension/PreCooling/AnnualCoolingEfficiency[Units='#{UnitsCOP}']/Value"))
-        @precooling_fraction_load_served = to_float_or_nil(XMLHelper.get_value(ventilation_fan, 'extension/PreCooling/FractionVentilationLoadServed'))
+        @precooling_fraction_load_served = to_float_or_nil(XMLHelper.get_value(ventilation_fan, 'extension/PreCooling/FractionVentilationCoolLoadServed'))
       end
       @hours_in_operation = to_float_or_nil(XMLHelper.get_value(ventilation_fan, 'HoursInOperation'))
       @fan_location = XMLHelper.get_value(ventilation_fan, 'FanLocation')
