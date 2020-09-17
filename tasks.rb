@@ -291,6 +291,7 @@ def create_hpxmls
     'base-hvac-stove-oil-only.xml' => 'base.xml',
     'base-hvac-stove-wood-pellets-only.xml' => 'base.xml',
     'base-hvac-undersized.xml' => 'base.xml',
+    'base-hvac-undersized-allow-increased-fixed-capacities.xml' => 'base-hvac-undersized.xml',
     'base-hvac-wall-furnace-elec-only.xml' => 'base.xml',
     'base-lighting-ceiling-fans.xml' => 'base.xml',
     'base-lighting-detailed.xml' => 'base.xml',
@@ -331,8 +332,11 @@ def create_hpxmls
 
     'hvac_autosizing/base-autosize.xml' => 'base.xml',
     'hvac_autosizing/base-hvac-air-to-air-heat-pump-1-speed-autosize.xml' => 'base-hvac-air-to-air-heat-pump-1-speed.xml',
+    'hvac_autosizing/base-hvac-air-to-air-heat-pump-1-speed-autosize-manual-s-oversize-allowances.xml' => 'hvac_autosizing/base-hvac-air-to-air-heat-pump-1-speed-autosize.xml',
     'hvac_autosizing/base-hvac-air-to-air-heat-pump-2-speed-autosize.xml' => 'base-hvac-air-to-air-heat-pump-2-speed.xml',
+    'hvac_autosizing/base-hvac-air-to-air-heat-pump-2-speed-autosize-manual-s-oversize-allowances.xml' => 'hvac_autosizing/base-hvac-air-to-air-heat-pump-2-speed-autosize.xml',
     'hvac_autosizing/base-hvac-air-to-air-heat-pump-var-speed-autosize.xml' => 'base-hvac-air-to-air-heat-pump-var-speed.xml',
+    'hvac_autosizing/base-hvac-air-to-air-heat-pump-var-speed-autosize-manual-s-oversize-allowances.xml' => 'hvac_autosizing/base-hvac-air-to-air-heat-pump-var-speed-autosize.xml',
     'hvac_autosizing/base-hvac-boiler-elec-only-autosize.xml' => 'base-hvac-boiler-elec-only.xml',
     'hvac_autosizing/base-hvac-boiler-gas-central-ac-1-speed-autosize.xml' => 'base-hvac-boiler-gas-central-ac-1-speed.xml',
     'hvac_autosizing/base-hvac-boiler-gas-only-autosize.xml' => 'base-hvac-boiler-gas-only.xml',
@@ -351,7 +355,9 @@ def create_hpxmls
     'hvac_autosizing/base-hvac-furnace-gas-only-autosize.xml' => 'base-hvac-furnace-gas-only.xml',
     'hvac_autosizing/base-hvac-furnace-gas-room-ac-autosize.xml' => 'base-hvac-furnace-gas-room-ac.xml',
     'hvac_autosizing/base-hvac-ground-to-air-heat-pump-autosize.xml' => 'base-hvac-ground-to-air-heat-pump.xml',
+    'hvac_autosizing/base-hvac-ground-to-air-heat-pump-autosize-manual-s-oversize-allowances.xml' => 'hvac_autosizing/base-hvac-ground-to-air-heat-pump-autosize.xml',
     'hvac_autosizing/base-hvac-mini-split-heat-pump-ducted-autosize.xml' => 'base-hvac-mini-split-heat-pump-ducted.xml',
+    'hvac_autosizing/base-hvac-mini-split-heat-pump-ducted-autosize-manual-s-oversize-allowances.xml' => 'hvac_autosizing/base-hvac-mini-split-heat-pump-ducted-autosize.xml',
     'hvac_autosizing/base-hvac-mini-split-heat-pump-ducted-heating-only-autosize.xml' => 'base-hvac-mini-split-heat-pump-ducted-heating-only.xml',
     'hvac_autosizing/base-hvac-mini-split-heat-pump-ducted-cooling-only-autosize.xml' => 'base-hvac-mini-split-heat-pump-ducted-cooling-only.xml',
     'hvac_autosizing/base-hvac-mini-split-air-conditioner-only-ducted-autosize.xml' => 'base-hvac-mini-split-air-conditioner-only-ducted.xml',
@@ -513,6 +519,10 @@ def set_hpxml_header(hpxml_file, hpxml)
     hpxml.header.sim_begin_day_of_month = 1
     hpxml.header.sim_end_month = 1
     hpxml.header.sim_end_day_of_month = 31
+  elsif ['base-hvac-undersized-allow-increased-fixed-capacities.xml'].include? hpxml_file
+    hpxml.header.allow_increased_fixed_capacities = true
+  elsif hpxml_file.include? 'manual-s-oversize-allowances.xml'
+    hpxml.header.use_max_load_for_heat_pumps = false
   elsif ['invalid_files/invalid-timestep.xml'].include? hpxml_file
     hpxml.header.timestep = 45
   elsif ['invalid_files/invalid-runperiod.xml'].include? hpxml_file
@@ -4044,15 +4054,12 @@ def set_hpxml_pv_systems(hpxml_file, hpxml)
                          system_losses_fraction: 0.14)
   elsif ['base-misc-defaults.xml'].include? hpxml_file
     hpxml.pv_systems.add(id: 'PVSystem',
-                         is_shared_system: false,
                          module_type: HPXML::PVModuleTypeStandard,
                          location: HPXML::LocationRoof,
                          tracking: HPXML::PVTrackingTypeFixed,
                          array_azimuth: 180,
                          array_tilt: 20,
                          max_power_output: 4000,
-                         inverter_efficiency: nil,
-                         system_losses_fraction: nil,
                          year_modules_manufactured: 2015)
   elsif ['base-pv-shared.xml'].include? hpxml_file
     hpxml.pv_systems.add(id: 'PVSystem',
